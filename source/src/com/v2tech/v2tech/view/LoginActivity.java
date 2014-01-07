@@ -221,6 +221,7 @@ public class LoginActivity extends Activity {
 				}
 			}
 
+			login("sdfsdf", "sdfsdf", 2, 3);
 			// TODO: register the new account here.
 			return true;
 		}
@@ -245,4 +246,15 @@ public class LoginActivity extends Activity {
 			showProgress(false);
 		}
 	}
+	
+	
+	
+	
+	
+	public native void login(String szName, String szPassword, int status, int type);
+	
+	static {
+		System.loadLibrary("v2client");
+	}
+
 }
