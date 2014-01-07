@@ -1,4 +1,4 @@
-package com.v2tech.v2tech.view;
+package com.v2tech.view;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -7,8 +7,8 @@ import android.os.Handler;
 import android.os.Message;
 import android.view.Menu;
 
-import com.v2tech.v2tech.R;
-import com.v2tech.v2tech.util.V2Log;
+import com.v2tech.R;
+import com.v2tech.util.V2Log;
 
 public class LogoActivity extends Activity {
 
@@ -37,7 +37,7 @@ public class LogoActivity extends Activity {
 	}
 
 	private void start_log_on_activity() {
-		this.startActivity(new Intent(this, com.v2tech.v2tech.view.LoginActivity.class));
+		this.startActivity(new Intent(this, com.v2tech.view.LoginActivity.class));
 		finish();
 	}
 

@@ -1,10 +1,4 @@
-package com.v2tech.v2tech.view;
-
-import com.v2tech.v2tech.R;
-import com.v2tech.v2tech.R.id;
-import com.v2tech.v2tech.R.layout;
-import com.v2tech.v2tech.R.menu;
-import com.v2tech.v2tech.R.string;
+package com.v2tech.view;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -20,6 +14,10 @@ import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.TextView;
+
+import com.V2.jni.ImRequest;
+import com.v2tech.R;
+import com.v2tech.util.V2Log;
 
 /**
  * Activity which displays a login screen to the user, offering registration as
@@ -53,11 +51,13 @@ public class LoginActivity extends Activity {
 	private View mLoginFormView;
 	private View mLoginStatusView;
 	private TextView mLoginStatusMessageView;
+	
+	private Activity mContext;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
+		mContext = this;
 		setContentView(R.layout.activity_login);
 
 		// Set up the login form.
@@ -221,7 +221,7 @@ public class LoginActivity extends Activity {
 				}
 			}
 
-			login("sdfsdf", "sdfsdf", 2, 3);
+			ImRequest.getInstance(mContext).login("sdfsdf", "sdfsdf", 2, 3);
 			// TODO: register the new account here.
 			return true;
 		}
@@ -253,8 +253,16 @@ public class LoginActivity extends Activity {
 	
 	public native void login(String szName, String szPassword, int status, int type);
 	
-	static {
-		System.loadLibrary("v2client");
+	
+	private void OnLogin(long nUserID, int nStatus, int nResult) {
+		V2Log.i(nUserID+"  ============ " +nStatus +"  " +nResult );
 	}
 
+	static {
+		System.loadLibrary("v2vi");
+		System.loadLibrary("v2ve");
+		System.loadLibrary("udt");
+		System.loadLibrary("event");
+		System.loadLibrary("v2client");
+	}
 }
