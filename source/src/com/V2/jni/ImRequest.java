@@ -1,11 +1,11 @@
 package com.V2.jni;
 
-import java.io.ByteArrayInputStream;
-import java.util.List;
-
 import android.app.Activity;
-import android.content.Intent;
 import android.util.Log;
+
+import com.v2tech.logic.GlobalHolder;
+import com.v2tech.logic.User;
+import com.v2tech.util.V2Log;
 
 //import com.xinlan.im.adapter.XiuLiuApplication;
 //import com.xinlan.im.bean.msgtype.LoginMsgType;
@@ -27,6 +27,8 @@ public class ImRequest {
 //	private XiuLiuApplication application;
 //	private DbHelper dbHelper;
 //	private LoginMsgType loginMsgType;
+	
+	private User mLoginLock = new User();
 
 	private ImRequest(Activity context) {
 		this.context = context;
@@ -37,9 +39,30 @@ public class ImRequest {
 	public static synchronized ImRequest getInstance(Activity context) {
 		if (mImRequest == null) {
 			mImRequest = new ImRequest(context);
+			if (!mImRequest.initialize(mImRequest)) {
+				V2Log.e(" can't  initialize imrequest ");
+				throw new RuntimeException("can't initilaize imrequest");
+			}
 		}
 
 		return mImRequest;
+	}
+	
+	
+	public boolean loginSync(String szName, String szPassword) {
+		this.login(szName, szPassword, 1, 2);
+		synchronized(mLoginLock) {
+			try {
+				mLoginLock.wait();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+				return false;
+			}
+		}
+		
+		GlobalHolder.getInstance().setUser(mLoginLock);
+		
+		return mLoginLock.getmResult() == 0;
 	}
 
 	public native boolean initialize(ImRequest request);
@@ -106,6 +129,12 @@ public class ImRequest {
 //			intent.putExtra("MSG", loginMsgType);
 //			context.sendOrderedBroadcast(intent,null);
 //		}
+		
+		synchronized (mLoginLock) {
+			mLoginLock.setmUserId(nUserID);
+			mLoginLock.setmResult(nResult);
+			mLoginLock.notifyAll();
+		}
 	}
 
 	// 娉ㄩ攢鐨勬柟娉�

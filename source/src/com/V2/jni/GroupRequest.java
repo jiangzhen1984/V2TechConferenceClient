@@ -44,6 +44,9 @@ public class GroupRequest {
 	public static synchronized GroupRequest getInstance(Activity context) {
 		if (mGroupRequest == null) {
 			mGroupRequest = new GroupRequest(context);
+			if (!mGroupRequest.initialize(mGroupRequest)) {
+				throw new RuntimeException(" can't not inintialize group request");
+			}
 		}
 		return mGroupRequest;
 	}
@@ -52,31 +55,31 @@ public class GroupRequest {
 
 	public native void unInitialize();
 
-	// É¾³ýÒ»¸öºÃÓÑ·Ö×é
+	// É¾ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½Ñ·ï¿½ï¿½ï¿½
 	public native void delGroup(int groupType, long nGroupID);
 
-	// Àë¿ªÒ»¸öºÃÓÑ·Ö×é
+	// ï¿½ë¿ªÒ»ï¿½ï¿½ï¿½ï¿½ï¿½Ñ·ï¿½ï¿½ï¿½
 	public native void leaveGroup(int groupType, long nGroupID);
 
-	// É¾³ýÒ»¸öºÃÓÑ·Ö×é
+	// É¾ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½Ñ·ï¿½ï¿½ï¿½
 	public native void delGroupUser(int groupType, long nGroupID,
 			long nUserID);
 
-	// ÐÞ¸ÄºÃÓÑ·Ö×é
+	// ï¿½Þ¸Äºï¿½ï¿½Ñ·ï¿½ï¿½ï¿½
 	public native void modifyGroupInfo(int groupType, long nGroupID,
 			String sXml);
 
-	// ´´½¨Ò»¸ö·Ö×é
+	// ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	public native void createGroup(int groupType, String groupInfo,
 			String userInfo);
 
-	// ÑûÇë±ðÈË¼ÓÈë×é
+	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ë¼ï¿½ï¿½ï¿½ï¿½ï¿½
 	/*
 	 */
 	public native void inviteJoinGroup(int groupType, String groupInfo,
 			String userInfo, String additInfo);
 
-	// ÒÆ¶¯ºÃÓÑµ½±ðµÄ×é
+	// ï¿½Æ¶ï¿½ï¿½ï¿½ï¿½Ñµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	public native void moveUserToGroup(int groupType, long srcGroupID,
 			long dstGroupID, long nUserID);
 	
@@ -84,27 +87,27 @@ public class GroupRequest {
 	
 	/**********************************************/
 
-	// ¾Ü¾øºÃÓÑÑûÇë¼ÓÈçÈº
+	// ï¿½Ü¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Èº
 	public native void refuseInviteJoinGroup(int groupType, long nGroupID,
 			long nUserID, String reason);
 
-	// ÉêÇë¼ÓÈëÈº
+	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Èº
 	public native void applyJoinGroup(int groupType, String sGroupInfo,
 			String sAdditInfo);
 
-	// ½ÓÊÜ¼ÓÈëÈº
+	// ï¿½ï¿½ï¿½Ü¼ï¿½ï¿½ï¿½Èº
 	public native void acceptApplyJoinGroup(int groupType,
 			String sGroupInfo, long nUserID);
 
-	// ¾Ü¾ø¼ÓÈëÈº
+	// ï¿½Ü¾ï¿½ï¿½ï¿½ï¿½Èº
 	public native void refuseApplyJoinGroup(int groupType,
 			String sGroupInfo, long nUserID, String sReason);
 
 	private void OnGetGroupInfo(int groupType, String sXml) {
-		Log.e("ImRequest UI", "OnGetGroupInfo:: µÃµ½ºÃÓÑ×éÐÅÏ¢" + groupType + ":"
+		Log.e("ImRequest UI", "OnGetGroupInfo:: ï¿½Ãµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢" + groupType + ":"
 				+ sXml);
-		System.out.println("µÃµ½ºÃÓÑ×é");
-		// Æ´×°ÐÅÏ¢
+		System.out.println(sXml);
+		// Æ´×°ï¿½ï¿½Ï¢
 //		GroupMsgType friendMsgType = new GroupMsgType();
 //		friendMsgType.setGroupxml(sXml);
 //
@@ -115,11 +118,11 @@ public class GroupRequest {
 	}
 
 	private void OnGetGroupUserInfo(int groupType, long nGroupID, String sXml) {
-		Log.e("ImRequest UI", "OnGetGroupUserInfo:: µÃµ½×éºÃÓÑµÄÏêÏ¸ÐÅÏ¢" + groupType
+		Log.e("ImRequest UI", "OnGetGroupUserInfo:: ï¿½Ãµï¿½ï¿½ï¿½ï¿½ï¿½Ñµï¿½ï¿½ï¿½Ï¸ï¿½ï¿½Ï¢" + groupType
 				+ ":" + nGroupID + ":" + sXml);
-		System.out.println("µÃµ½ºÃÓÑÐÅÏ¢");
+		System.out.println("ï¿½Ãµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢");
 
-		// Æ´×°ÐÅÏ¢
+		// Æ´×°ï¿½ï¿½Ï¢
 //		FriendMsgType friendMsgType = new FriendMsgType();
 //		friendMsgType.setFriendxml(sXml);
 //		friendMsgType.setGroupid(nGroupID);
@@ -132,13 +135,13 @@ public class GroupRequest {
 	}
 
 	private void OnAddGroupUserInfo(int groupType, long nGroupID, String sXml) {
-		Log.e("ImRequest UI", "OnAddGroupUserInfo::Ìí¼ÓºÃÓÑµ½×éµÄÐÅÏ¢" + groupType + ":"
+		Log.e("ImRequest UI", "OnAddGroupUserInfo::ï¿½ï¿½Óºï¿½ï¿½Ñµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢" + groupType + ":"
 				+ nGroupID + ":" + sXml);
 		
 //		List<NYXUser> addUsers = XmlParserUtils
 //				.parserNYXUser(new ByteArrayInputStream(sXml.getBytes()),application.getLocalUser().getId());
 //
-//		// Æ´×°ÐÅÏ¢
+//		// Æ´×°ï¿½ï¿½Ï¢
 //		AddFriMsgType addFriMsgType = new AddFriMsgType();
 //
 //		addFriMsgType.setAddUsers(addUsers);
@@ -151,13 +154,13 @@ public class GroupRequest {
 	}
 
 	private void OnDelGroupUser(int groupType, long nGroupID, long nUserID) {
-		Log.e("ImRequest UI", "OnDelGroupUser:: ´Ó×éÖÐÉ¾³ýºÃÓÑ" + groupType + ":"
+		Log.e("ImRequest UI", "OnDelGroupUser:: ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½É¾ï¿½ï¿½ï¿½ï¿½ï¿½" + groupType + ":"
 				+ nGroupID + ":" + nUserID);
-		// Æ´×°ÏûÏ¢
+		// Æ´×°ï¿½ï¿½Ï¢
 //		DelFriMsgType delFri = new DelFriMsgType();
 //		delFri.setUserid(nUserID);
 //
-//		// Í¨¹ý¹ã²¥·¢ËÍÏûÏ¢À´Í¨Öª,¸üÐÂ×î½üÁ¬ÐøÈË»­Ãæ
+//		// Í¨ï¿½ï¿½ã²¥ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢ï¿½ï¿½Í¨Öª,ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ë»ï¿½ï¿½ï¿½
 //		Intent delIntent = new Intent(SplashActivity.IM);
 //		delIntent.putExtra("MsgType", MsgType.DELFRI);
 //		delIntent.putExtra("MSG", delFri);
@@ -166,14 +169,14 @@ public class GroupRequest {
 
 	private void OnAddGroupInfo(int groupType, long nParentID, long nGroupID,
 			String sXml) {
-		Log.e("ImRequest UI", "OnAddGroupInfo:: Ôö¼ÓÒ»¸ö×é" + groupType + ":"
+		Log.e("ImRequest UI", "OnAddGroupInfo:: ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½" + groupType + ":"
 				+ nParentID + ":" + nGroupID + ":" + sXml);
 		
 		// <friendgroup id='312' name='byhy'/>
 //		InputStream in=new ByteArrayInputStream(sXml.getBytes());
 //		Group group=XmlParserUtils.parserAddGroup(in);
 //		
-//		// Æ´×°ÐÅÏ¢
+//		// Æ´×°ï¿½ï¿½Ï¢
 //		CreateGroupMsgType createMsgType = new CreateGroupMsgType();
 //		createMsgType.setmGroup(group);
 //
@@ -184,13 +187,13 @@ public class GroupRequest {
 	}
 
 	private void OnModifyGroupInfo(int groupType, long nGroupID, String sXml) {
-		Log.e("ImRequest UI", "OnModifyGroupInfo::ÐÞ¸ÄÒ»¸ö×éÐÅÏ¢" + groupType + ":"
+		Log.e("ImRequest UI", "OnModifyGroupInfo::ï¿½Þ¸ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢" + groupType + ":"
 				+ nGroupID + ":" + sXml);
 
 //		InputStream in=new ByteArrayInputStream(sXml.getBytes());
 //		Group group=XmlParserUtils.parserAddGroup(in);
 //		
-//		// Æ´×°ÐÅÏ¢
+//		// Æ´×°ï¿½ï¿½Ï¢
 //		ModifyGroupMsgType modifyMsgType = new ModifyGroupMsgType();
 //		modifyMsgType.setMgGroup(group);
 //		
@@ -201,10 +204,10 @@ public class GroupRequest {
 	}
 
 	private void OnDelGroup(int groupType, long nGroupID, boolean bMovetoRoot) {
-		Log.e("ImRequest UI", "OnDelGroup::É¾³ýÒ»¸ö×é" + groupType + ":" + nGroupID
+		Log.e("ImRequest UI", "OnDelGroup::É¾ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½" + groupType + ":" + nGroupID
 				+ ":" + bMovetoRoot);
 
-		// Æ´×°ÐÅÏ¢
+		// Æ´×°ï¿½ï¿½Ï¢
 //		DestoryGroupMsgType destoryMsgType = new DestoryGroupMsgType();
 //		destoryMsgType.setnGroupID(nGroupID);
 //
@@ -216,21 +219,21 @@ public class GroupRequest {
 
 	private void OnInviteJoinGroup(int groupType, String groupInfo,
 			String userInfo, String additInfo) {
-		Log.e("ImRequest UI", "OnInviteJoinGroup::ÑûÇëºÃÓÑ¼ÓÈë×é" + groupType + ":"
+		Log.e("ImRequest UI", "OnInviteJoinGroup::ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ñ¼ï¿½ï¿½ï¿½ï¿½ï¿½" + groupType + ":"
 				+ groupInfo + ":" + userInfo + ":" + additInfo);
 	}
 
 	private void OnMoveUserToGroup(int groupType, long srcGroupID,
 			long dstGroupID, long nUserID) {
-		Log.e("ImRequest UI", "OnMoveUserToGroup:: ÒÆ¶¯ºÃÓÑµ½Ê²Ã´×é" + groupType + ":"
+		Log.e("ImRequest UI", "OnMoveUserToGroup:: ï¿½Æ¶ï¿½ï¿½ï¿½ï¿½Ñµï¿½Ê²Ã´ï¿½ï¿½" + groupType + ":"
 				+ srcGroupID + ":" + dstGroupID + ":" + nUserID);
 
-		// Æ´×°ÏûÏ¢
+		// Æ´×°ï¿½ï¿½Ï¢
 //		MoveGroupMsgType moveMsgtype = new MoveGroupMsgType();
 //		moveMsgtype.setnDstGroupID(dstGroupID);
 //		moveMsgtype.setnDstUserID(dstGroupID);
 //
-//		// Í¨¹ý¹ã²¥·¢ËÍÏûÏ¢À´Í¨Öª,¸üÐÂ×î½üÁ¬ÐøÈË»­Ãæ
+//		// Í¨ï¿½ï¿½ã²¥ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢ï¿½ï¿½Í¨Öª,ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ë»ï¿½ï¿½ï¿½
 //		Intent moveIntent = new Intent(SplashActivity.IM);
 //		moveIntent.putExtra("MsgType", MsgType.MOVE_GROUP);
 //		moveIntent.putExtra("MSG", moveMsgtype);
@@ -239,10 +242,10 @@ public class GroupRequest {
 
 	private void OnRefuseInviteJoinGroup(int groupType, long nGroupID,
 			long nUserID, String sxml) {
-		Log.e("ImRequest UI", "OnRefuseInviteJoinGroup:: ¾Ü¾ø±ðÈËµÄÑûÇë¼ÓÈëÊ²Ã´×é"
+		Log.e("ImRequest UI", "OnRefuseInviteJoinGroup:: ï¿½Ü¾ï¿½ï¿½ï¿½Ëµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê²Ã´ï¿½ï¿½"
 				+ groupType + ":" + nGroupID + ":" + nUserID + ":" + sxml);
 		
-//		// Æ´×°¸öÈËÐÅÏ¢
+//		// Æ´×°ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢
 //				RefuseMsgType refuseMsgType = new RefuseMsgType();
 //				refuseMsgType.setReason(sxml);
 //				refuseMsgType.setUserBaseInfo(sxml);
@@ -255,18 +258,18 @@ public class GroupRequest {
 
 	private void OnApplyJoinGroup(int groupType, long nGroupID,
 			String userInfo, String reason) {
-		Log.e("ImRequest UI", "OnApplyJoinGroup:: ÉêÇë¼ÓÈë×é" + groupType + ":"
+		Log.e("ImRequest UI", "OnApplyJoinGroup:: ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½" + groupType + ":"
 				+ nGroupID + ":" + userInfo + ":" + reason);
 	}
 
 	private void OnAcceptApplyJoinGroup(int groupType, String sXml) {
-		Log.e("ImRequest UI", "OnAcceptApplyJoinGroup:: ½ÓÊÜÉêÇë¼ÓÈë×é" + groupType
+		Log.e("ImRequest UI", "OnAcceptApplyJoinGroup:: ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½" + groupType
 				+ ":" + sXml);
 	}
 
 	private void OnRefuseApplyJoinGroup(int groupType, String sGroupInfo,
 			String reason) {
-		Log.e("ImRequest UI", "OnRefuseApplyJoinGroup:: ¾Ü¾øÉêÇë¼ÓÈë×é" + groupType
+		Log.e("ImRequest UI", "OnRefuseApplyJoinGroup:: ï¿½Ü¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½" + groupType
 				+ ":" + sGroupInfo + ":" + reason);
 	}
 

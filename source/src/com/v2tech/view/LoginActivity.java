@@ -7,6 +7,7 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.AsyncTask;
@@ -26,7 +27,6 @@ import android.widget.Toast;
 import com.V2.jni.ConfigRequest;
 import com.V2.jni.ImRequest;
 import com.v2tech.R;
-import com.v2tech.util.V2Log;
 
 /**
  * Activity which displays a login screen to the user, offering registration as
@@ -101,6 +101,14 @@ public class LoginActivity extends Activity {
 	}
 
 	private void init() {
+		
+		SharedPreferences sf = mContext.getSharedPreferences("config",
+				Context.MODE_PRIVATE);
+		mEmailView.setText(sf.getString("user", ""));
+		mPasswordView.setText(sf.getString("passwd", ""));
+		if(!sf.getString("user", "").equals("") && !sf.getString("passwd", "").equals("")) {
+			mRemPwdCkbx.setChecked(true);
+		}
 	}
 
 	private OnClickListener showIpSetting = new OnClickListener() {
@@ -222,7 +230,12 @@ public class LoginActivity extends Activity {
 				Context.MODE_PRIVATE);
 		String ip = sf.getString("ip", null);
 		String port = sf.getString("port", null);
-
+		
+		if (ip == null || ip.isEmpty() || port == null || port.isEmpty()) {
+			Toast.makeText(mContext, R.string.error_no_host_configuration, Toast.LENGTH_SHORT).show();
+			mShowIpSettingButton.performClick();
+			return;
+		}
 		mCR.setServerAddress(ip, Integer.parseInt(port));
 		
 		// Reset errors.
@@ -320,39 +333,17 @@ public class LoginActivity extends Activity {
 	public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
 		@Override
 		protected Boolean doInBackground(Void... params) {
-			// TODO: attempt authentication against a network service.
-
-			try {
-				// Simulate network access.
-				Thread.sleep(2000);
-			} catch (InterruptedException e) {
+			if (!mIM.loginSync(mEmail, mPassword)) {
 				return false;
 			}
-
-			for (String credential : DUMMY_CREDENTIALS) {
-				String[] pieces = credential.split(":");
-				if (pieces[0].equals(mEmail)) {
-					// Account exists, return true if the password matches.
-					return pieces[1].equals(mPassword);
-				}
-			}
-
-			if (!mIM.initialize(mIM)) {
-				V2Log.e(" can't  initialize imrequest ");
-				Toast.makeText(mContext, R.string.error_init_im_request,
-						Toast.LENGTH_LONG).show();
-				return false;
-			}
-
-			mIM.login(mEmail, mPassword, 1, 2);
 			// TODO: register the new account here.
 
 			// Save user info
-			if (mRemPwdCkbx.isChecked()) {
-				mEmailView = (EditText) findViewById(R.id.email);
-				mEmailView.setText(mEmail);
+			if (mRemPwdCkbx.isChecked()) {				
 				saveUserConfig(mEmailView.getText().toString(), mPasswordView
 						.getText().toString());
+			} else {
+				saveUserConfig("", "");
 			}
 			return true;
 		}
@@ -364,6 +355,8 @@ public class LoginActivity extends Activity {
 
 			if (success) {
 				finish();
+				// TODO start activiy
+				mContext.startActivity(new Intent(mContext, ConfsActivity.class));
 			} else {
 				mPasswordView
 						.setError(getString(R.string.error_incorrect_password));

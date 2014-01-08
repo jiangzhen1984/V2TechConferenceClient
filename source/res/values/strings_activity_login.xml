@@ -13,6 +13,7 @@
     <string name="error_invalid_password">This password is too short</string>
     <string name="error_incorrect_password">This password is incorrect</string>
     <string name="error_field_required">This field is required</string>
+    <string name="error_no_host_configuration">Please config host first!</string>
     <string name="ip_host_setting">设   置</string>
     <string name="error_save_host_config">保存服务器信息错误!</string>
      <string name="error_init_im_request">初始化ImRequest对象失败</string>
