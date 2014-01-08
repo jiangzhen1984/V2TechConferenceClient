@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="logo_background" >#e6f3fa</color>
+    <color name="setting_outer_bg">#b8c9d4</color>
+     <color name="setting_inner_bg">#ffffff</color>
+     <color name="setting_separation">#f2f2f2</color>
+     <color name="common_black">#000000</color>
 </resources>

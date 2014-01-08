@@ -99,12 +99,43 @@
                         android:minHeight="30dp"
                         android:paddingLeft="15dp"
                         android:singleLine="true" />
+                    
+                     <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="15dp"
+                        android:layout_marginTop="20dp" >
 
+                        <CheckBox
+                            android:id="@+id/login_rem_pwd"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/login_chk"
+                            android:textColor="@color/common_black" />
+
+                        <Button
+                            android:id="@+id/show_setting"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignBaseline="@+id/login_rem_pwd"
+                            android:layout_alignBottom="@+id/login_rem_pwd"
+                            android:layout_alignParentRight="true"
+                            android:layout_marginRight="40dp"
+                                                        android:paddingBottom="5dp"
+                            android:paddingLeft="32dp"
+                            android:paddingRight="32dp"
+                            android:paddingTop="5dp"
+                            android:background="@drawable/rounded_corners_show_ip_setting_button"
+                            android:text="@string/ip_host_setting" />
+
+                    </RelativeLayout>
+                    
                     <Button
                         android:id="@+id/sign_in_button"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
+                        android:layout_marginBottom="20dp"
                         android:layout_marginTop="16dp"
                         android:background="@drawable/rounded_corners_login_button"
                         android:minHeight="30dp"

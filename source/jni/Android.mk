@@ -41,7 +41,7 @@ include $(PREBUILT_SHARED_LIBRARY)
 include $(CLEAR_VARS)
  
 LOCAL_MODULE    := v2techclient
-LOCAL_SRC_FILES := v2techclient.cpp
+#LOCAL_SRC_FILES := v2techclient.cpp
 LOCAL_SHARED_LIBRARIES += event
 LOCAL_SHARED_LIBRARIES += udt
 LOCAL_SHARED_LIBRARIES += v2client

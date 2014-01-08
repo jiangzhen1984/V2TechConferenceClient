@@ -1,0 +1,7 @@
+<resources>
+
+   <color name="confs_title_bg">#1699cc</color>
+   <string name="confs_title">我 的 信 息</string>
+   <color name="confs_panel_bg">#363636</color>
+   <color name="confs_search_bar_bg">#f0f0f0</color>
+</resources>

@@ -4,6 +4,11 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.app.Dialog;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -11,10 +16,14 @@ import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.View;
-import android.view.inputmethod.EditorInfo;
+import android.view.View.OnClickListener;
+import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.V2.jni.ConfigRequest;
 import com.V2.jni.ImRequest;
 import com.v2tech.R;
 import com.v2tech.util.V2Log;
@@ -48,11 +57,16 @@ public class LoginActivity extends Activity {
 	// UI references.
 	private EditText mEmailView;
 	private EditText mPasswordView;
+	private CheckBox mRemPwdCkbx;
 	private View mLoginFormView;
 	private View mLoginStatusView;
 	private TextView mLoginStatusMessageView;
-	
+	private View mShowIpSettingButton;
+
 	private Activity mContext;
+
+	private ImRequest mIM = ImRequest.getInstance(this);
+	private ConfigRequest mCR = new ConfigRequest();
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -66,18 +80,6 @@ public class LoginActivity extends Activity {
 		mEmailView.setText(mEmail);
 
 		mPasswordView = (EditText) findViewById(R.id.password);
-		mPasswordView
-				.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-					@Override
-					public boolean onEditorAction(TextView textView, int id,
-							KeyEvent keyEvent) {
-						if (id == R.id.login || id == EditorInfo.IME_NULL) {
-							attemptLogin();
-							return true;
-						}
-						return false;
-					}
-				});
 
 		mLoginFormView = findViewById(R.id.login_form);
 		mLoginStatusView = findViewById(R.id.login_status);
@@ -90,7 +92,97 @@ public class LoginActivity extends Activity {
 						attemptLogin();
 					}
 				});
+		mShowIpSettingButton = findViewById(R.id.show_setting);
+		mShowIpSettingButton.setOnClickListener(showIpSetting);
+
+		mRemPwdCkbx = (CheckBox) findViewById(R.id.login_rem_pwd);
+
+		init();
 	}
+
+	private void init() {
+	}
+
+	private OnClickListener showIpSetting = new OnClickListener() {
+
+		@Override
+		public void onClick(final View vButton) {
+			vButton.setEnabled(false);
+
+			final Dialog dialog = new Dialog(mContext, R.style.IpSettingDialog);
+			dialog.setContentView(R.layout.ip_setting);
+
+			Button cancelButton = (Button) dialog
+					.findViewById(R.id.ip_setting_cancel);
+			Button saveButton = (Button) dialog
+					.findViewById(R.id.ip_setting_save);
+
+			final EditText et1 = (EditText) dialog.findViewById(R.id.ip1);
+			final EditText et2 = (EditText) dialog.findViewById(R.id.ip2);
+			final EditText et3 = (EditText) dialog.findViewById(R.id.ip3);
+			final EditText et4 = (EditText) dialog.findViewById(R.id.ip4);
+			final EditText port = (EditText) dialog.findViewById(R.id.port);
+
+			SharedPreferences sf = mContext.getSharedPreferences("config",
+					Context.MODE_PRIVATE);
+			String cacheIp = sf.getString("ip", null);
+			if (cacheIp != null && cacheIp.length() <= 15) {
+				String[] ips = cacheIp.split("\\.");
+				et1.setText(ips[0]);
+				et2.setText(ips[1]);
+				et3.setText(ips[2]);
+				et4.setText(ips[3]);
+			}
+
+			port.setText(sf.getString("port", ""));
+
+			saveButton.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					final String ip = et1.getText().toString() + "."
+							+ et2.getText().toString() + "."
+							+ et3.getText().toString() + "."
+							+ et4.getText().toString();
+					if (!saveHostConfig(ip,
+							Integer.parseInt(port.getText().toString()))) {
+						Toast.makeText(mContext,
+								R.string.error_save_host_config,
+								Toast.LENGTH_LONG).show();
+					} else {
+						Toast.makeText(mContext,
+								R.string.succeed_save_host_config,
+								Toast.LENGTH_LONG).show();
+					}
+					dialog.dismiss();
+					vButton.setEnabled(true);
+				}
+			});
+
+			cancelButton.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					dialog.dismiss();
+					vButton.setEnabled(true);
+				}
+			});
+
+			dialog.setOnKeyListener(new Dialog.OnKeyListener() {
+
+				@Override
+				public boolean onKey(DialogInterface arg0, int keyCode,
+						KeyEvent event) {
+					if (keyCode == KeyEvent.KEYCODE_BACK) {
+						dialog.dismiss();
+					}
+					vButton.setEnabled(true);
+					return false;
+				}
+			});
+
+			dialog.show();
+		}
+
+	};
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -99,16 +191,40 @@ public class LoginActivity extends Activity {
 		return true;
 	}
 
+	private boolean saveHostConfig(String ip, int port) {
+		SharedPreferences sf = mContext.getSharedPreferences("config",
+				Context.MODE_PRIVATE);
+		Editor e = sf.edit();
+		e.putString("ip", ip);
+		e.putString("port", port + "");
+		return e.commit();
+	}
+
+	private boolean saveUserConfig(String user, String passwd) {
+		SharedPreferences sf = mContext.getSharedPreferences("config",
+				Context.MODE_PRIVATE);
+		Editor e = sf.edit();
+		e.putString("user", user);
+		e.putString("passwd", passwd);
+		return e.commit();
+	}
+
 	/**
 	 * Attempts to sign in or register the account specified by the login form.
 	 * If there are form errors (invalid email, missing fields, etc.), the
 	 * errors are presented and no actual login attempt is made.
 	 */
-	public void attemptLogin() {
+	public void attemptLogin() {		
 		if (mAuthTask != null) {
 			return;
 		}
+		SharedPreferences sf = mContext.getSharedPreferences("config",
+				Context.MODE_PRIVATE);
+		String ip = sf.getString("ip", null);
+		String port = sf.getString("port", null);
 
+		mCR.setServerAddress(ip, Integer.parseInt(port));
+		
 		// Reset errors.
 		mEmailView.setError(null);
 		mPasswordView.setError(null);
@@ -221,8 +337,23 @@ public class LoginActivity extends Activity {
 				}
 			}
 
-			ImRequest.getInstance(mContext).login("sdfsdf", "sdfsdf", 2, 3);
+			if (!mIM.initialize(mIM)) {
+				V2Log.e(" can't  initialize imrequest ");
+				Toast.makeText(mContext, R.string.error_init_im_request,
+						Toast.LENGTH_LONG).show();
+				return false;
+			}
+
+			mIM.login(mEmail, mPassword, 1, 2);
 			// TODO: register the new account here.
+
+			// Save user info
+			if (mRemPwdCkbx.isChecked()) {
+				mEmailView = (EditText) findViewById(R.id.email);
+				mEmailView.setText(mEmail);
+				saveUserConfig(mEmailView.getText().toString(), mPasswordView
+						.getText().toString());
+			}
 			return true;
 		}
 
@@ -246,17 +377,6 @@ public class LoginActivity extends Activity {
 			showProgress(false);
 		}
 	}
-	
-	
-	
-	
-	
-	public native void login(String szName, String szPassword, int status, int type);
-	
-	
-	private void OnLogin(long nUserID, int nStatus, int nResult) {
-		V2Log.i(nUserID+"  ============ " +nStatus +"  " +nResult );
-	}
 
 	static {
 		System.loadLibrary("v2vi");
@@ -265,4 +385,5 @@ public class LoginActivity extends Activity {
 		System.loadLibrary("event");
 		System.loadLibrary("v2client");
 	}
+
 }
