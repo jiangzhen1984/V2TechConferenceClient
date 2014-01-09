@@ -3,9 +3,6 @@ package com.V2.jni;
 import android.app.Activity;
 import android.util.Log;
 
-import com.v2tech.logic.Group;
-import com.v2tech.view.ConfsActivity;
-
 //import com.xinlan.im.adapter.XiuLiuApplication;
 //import com.xinlan.im.bean.msgtype.AddFriMsgType;
 //import com.xinlan.im.bean.msgtype.CreateGroupMsgType;
@@ -42,9 +39,6 @@ public class GroupRequest {
 	public static synchronized GroupRequest getInstance(Activity context) {
 		if (mGroupRequest == null) {
 			mGroupRequest = new GroupRequest(context);
-			if (!mGroupRequest.initialize(mGroupRequest)) {
-				throw new RuntimeException(" can't not inintialize group request");
-			}
 		}
 		return mGroupRequest;
 	}
@@ -100,15 +94,11 @@ public class GroupRequest {
 	// �ܾ����Ⱥ
 	public native void refuseApplyJoinGroup(int groupType,
 			String sGroupInfo, long nUserID, String sReason);
-	/**
-	 *  This is unsolicited callback. This function will be call after log in
-	 * @param groupType 4 : conference
-	 * @param sXml
-	 */
+
 	private void OnGetGroupInfo(int groupType, String sXml) {
 		Log.e("ImRequest UI", "OnGetGroupInfo:: �õ���������Ϣ" + groupType + ":"
 				+ sXml);
-		System.out.println(sXml);
+		System.out.println("�õ�������");
 		// ƴװ��Ϣ
 //		GroupMsgType friendMsgType = new GroupMsgType();
 //		friendMsgType.setGroupxml(sXml);
@@ -117,10 +107,6 @@ public class GroupRequest {
 //		addIntent.putExtra("MsgType", MsgType.FRIENDGROUP);
 //		addIntent.putExtra("MSG", friendMsgType);
 //		context.sendOrderedBroadcast(addIntent,null);
-		
-		if (context instanceof ConfsActivity) {
-			((ConfsActivity)context).nodifyGroupListChange(Group.parserFromXml(groupType, sXml));
-		}
 	}
 
 	private void OnGetGroupUserInfo(int groupType, long nGroupID, String sXml) {

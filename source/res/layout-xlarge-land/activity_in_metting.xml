@@ -9,6 +9,7 @@
         android:layout_height="wrap_content" >
 
         <RelativeLayout
+            android:id="@+id/in_meeting_tools_bar"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
@@ -54,8 +55,10 @@
         </RelativeLayout>
 
         <RelativeLayout
+            android:id="@+id/in_metting_video_main"
             android:layout_width="fill_parent"
-            android:layout_height="wrap_content" >
+            android:layout_height="fill_parent"
+            android:layout_below="@+id/in_meeting_tools_bar" >
         </RelativeLayout>
 
     </RelativeLayout>

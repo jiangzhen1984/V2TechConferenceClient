@@ -5,4 +5,5 @@
      <color name="setting_inner_bg">#ffffff</color>
      <color name="setting_separation">#f2f2f2</color>
      <color name="common_black">#000000</color>
+     <color name="in_meeting_setting_bg">#ffffff</color>
 </resources>

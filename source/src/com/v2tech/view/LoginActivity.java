@@ -372,10 +372,10 @@ public class LoginActivity extends Activity {
 	}
 
 	static {
-		System.loadLibrary("v2vi");
-		System.loadLibrary("v2ve");
-		System.loadLibrary("udt");
 		System.loadLibrary("event");
+		System.loadLibrary("udt");
+		System.loadLibrary("v2vi");
+		System.loadLibrary("v2ve");	
 		System.loadLibrary("v2client");
 	}
 
