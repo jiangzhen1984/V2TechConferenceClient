@@ -10,7 +10,7 @@
     tools:context=".LogoActivity" >
 
     <ImageView
-        android:id="@+id/imageView1"
+        android:id="@+id/group_list_conf_list"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
@@ -21,7 +21,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/imageView1"
+        android:layout_below="@+id/group_list_conf_list"
         android:layout_centerHorizontal="true"
         android:text="@string/banner_desc"
         android:ems="10" >

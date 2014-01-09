@@ -19,7 +19,7 @@
             android:layout_marginTop="40dp" >
 
             <TextView
-                android:id="@+id/textView1"
+                android:id="@+id/group_list_conference_title_tv"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="20dp"
