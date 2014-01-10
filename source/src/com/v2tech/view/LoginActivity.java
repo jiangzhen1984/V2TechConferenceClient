@@ -31,6 +31,7 @@ import com.V2.jni.ImRequest;
 import com.V2.jni.VideoRequest;
 import com.V2.jni.WBRequest;
 import com.v2tech.R;
+import com.v2tech.logic.GlobalHolder;
 
 /**
  * Activity which displays a login screen to the user, offering registration as
@@ -292,6 +293,8 @@ public class LoginActivity extends Activity {
 			mAuthTask.execute((Void) null);
 		}
 	}
+	
+	
 
 	/**
 	 * Shows the progress UI and hides the login form.
@@ -366,9 +369,13 @@ public class LoginActivity extends Activity {
 				// TODO start activiy
 				mContext.startActivity(new Intent(mContext, ConfsActivity.class));
 			} else {
-				mPasswordView
+				if (GlobalHolder.getInstance().getUser().getmResult() == 301) {
+					Toast.makeText(mContext, R.string.error_connect_to_server, Toast.LENGTH_LONG).show();
+				} else {
+					mPasswordView
 						.setError(getString(R.string.error_incorrect_password));
-				mPasswordView.requestFocus();
+					mPasswordView.requestFocus();
+				}
 			}
 		}
 

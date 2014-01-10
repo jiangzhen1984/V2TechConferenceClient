@@ -53,7 +53,7 @@ public class ImRequest {
 		this.login(szName, szPassword, 1, 2);
 		synchronized(mLoginLock) {
 			try {
-				mLoginLock.wait();
+				mLoginLock.wait(5000);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 				return false;
@@ -244,6 +244,12 @@ public class ImRequest {
 
 	private void OnConnectResponse(int nResult) {
 		Log.e("ImRequest UI", "OnConnectResponse::" + nResult);
+		
+		synchronized (mLoginLock) {
+			mLoginLock.setmResult(nResult);
+			mLoginLock.notifyAll();
+		}
+		
 		//杩炴帴鏈嶅姟鍣ㄥけ璐�
 //		if(nResult==301){
 //			Intent intent = new Intent(SplashActivity.IM);

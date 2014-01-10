@@ -27,6 +27,7 @@ import android.widget.RelativeLayout;
 
 import com.V2.jni.VideoRequest;
 import com.v2tech.R;
+import com.v2tech.logic.GlobalHolder;
 
 public class VideoActivity extends Activity {
 
@@ -54,6 +55,7 @@ public class VideoActivity extends Activity {
 		this.mSettingIV = (ImageView) findViewById(R.id.in_meeting_setting_iv);
 		this.mSettingIV.setOnClickListener(mShowSettingListener);
 		init();
+		
 	}
 
 	private OnClickListener mShowSettingListener = new OnClickListener() {

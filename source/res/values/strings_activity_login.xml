@@ -17,6 +17,7 @@
     <string name="ip_host_setting">设   置</string>
     <string name="error_save_host_config">保存服务器信息错误!</string>
      <string name="error_init_im_request">初始化ImRequest对象失败</string>
+      <string name="error_connect_to_server">无法链接到服务器，请确认网络链接</string>
     <string name="succeed_save_host_config">保存服务器信息成功!</string>
 
 </resources>

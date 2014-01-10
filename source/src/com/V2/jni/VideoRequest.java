@@ -184,6 +184,7 @@ public class VideoRequest
 	{
 		Log.e("ImRequest UI", "OnVideoPlayerClosed " + szDeviceID );
 	}
+	public native void getVideoDevice(long l);
 	
 	private void OnGetVideoDevice(String xml, long l) {
 		Log.e("VideoRequest UI", "OnGetVideoDevice " + xml );
