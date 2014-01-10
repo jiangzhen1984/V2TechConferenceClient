@@ -32,6 +32,7 @@ public class VideoRequest
 	public static synchronized VideoRequest getInstance(Activity context){
 		if(mVideoRequest==null){
 			mVideoRequest=new VideoRequest(context);
+			mVideoRequest.initialize(mVideoRequest);
 		}
 		
 		return mVideoRequest;
@@ -182,5 +183,9 @@ public class VideoRequest
 	private void OnVideoPlayerClosed(String szDeviceID)
 	{
 		Log.e("ImRequest UI", "OnVideoPlayerClosed " + szDeviceID );
+	}
+	
+	private void OnGetVideoDevice(String xml, long l) {
+		Log.e("VideoRequest UI", "OnGetVideoDevice " + xml );
 	}
 }

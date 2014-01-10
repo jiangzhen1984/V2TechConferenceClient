@@ -3,10 +3,14 @@ package com.v2tech.view;
 import java.util.List;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.LinearLayout;
 
 import com.V2.jni.GroupRequest;
@@ -47,7 +51,14 @@ public class ConfsActivity extends Activity {
 	
 	
 	
-	
+	private BroadcastReceiver mGroupReceiver = new BroadcastReceiver() {
+
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			
+		}
+		
+	};
 
 
 	@Override
@@ -68,10 +79,31 @@ public class ConfsActivity extends Activity {
 			return;
 		}
 		for (Group g : list) {
-			mGroupContainer.addView(new GroupLayout(mContext, g));
+			final GroupLayout gp = new GroupLayout(mContext, g);
+			gp.setOnClickListener(new OnClickListener() {
+
+				@Override
+				public void onClick(View v) {
+					Intent i = new  Intent(mContext, VideoActivity.class);
+					i.putExtra("gId", gp.getGroupId());
+					startActivityForResult(i, 0);
+				}
+				
+			});
+			mGroupContainer.addView(gp);
 		}
+		
 	}
 	
+	
+	
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+	}
+
+
+
 	class ConfsHandler extends Handler {
 
 		@Override

@@ -24,8 +24,12 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.V2.jni.AudioRequest;
+import com.V2.jni.ConfRequest;
 import com.V2.jni.ConfigRequest;
 import com.V2.jni.ImRequest;
+import com.V2.jni.VideoRequest;
+import com.V2.jni.WBRequest;
 import com.v2tech.R;
 
 /**
@@ -66,7 +70,11 @@ public class LoginActivity extends Activity {
 	private Activity mContext;
 
 	private ImRequest mIM = ImRequest.getInstance(this);
+	private VideoRequest mVR = VideoRequest.getInstance(this);
+	private ConfRequest mConR = ConfRequest.getInstance(this);
 	private ConfigRequest mCR = new ConfigRequest();
+	private AudioRequest mAR = AudioRequest.getInstance(this);
+	private WBRequest mWR = WBRequest.getInstance(this);
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {

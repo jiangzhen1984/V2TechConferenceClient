@@ -23,6 +23,7 @@ public class AudioRequest
 		if(mAudioRequest==null)
 		{
 			mAudioRequest=new AudioRequest(context);
+			mAudioRequest.initialize(mAudioRequest);
 		}
 		return mAudioRequest;
 	}
@@ -31,13 +32,13 @@ public class AudioRequest
 	public native void unInitialize();
 	
 	
-	//ÑûÇë¶Ô·½¿ªÊ¼ÒôÆµÍ¨»°
+	//ï¿½ï¿½ï¿½ï¿½Ô·ï¿½ï¿½ï¿½Ê¼ï¿½ï¿½ÆµÍ¨ï¿½ï¿½
 	public native void InviteAudioChat(long  nGroupID, long  nToUserID,int businesstype);
-	//½ÓÊÜ¶Ô·½µÄÒôÆµÍ¨»°ÑûÇë
+	//ï¿½ï¿½ï¿½Ü¶Ô·ï¿½ï¿½ï¿½ï¿½ï¿½ÆµÍ¨ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	public native void AcceptAudioChat(long  nGroupID, long  nToUserID,int businesstype);
-	//¾Ü¾ø¶Ô·½µÄÒôÆµÍ¨»°ÑûÇë
+	//ï¿½Ü¾ï¿½Ô·ï¿½ï¿½ï¿½ï¿½ï¿½ÆµÍ¨ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	public native void RefuseAudioChat(long  nGroupID, long  nToUserID,int businesstype);
-	//È¡ÏûÒôÆµÍ¨»°
+	//È¡ï¿½ï¿½ï¿½ï¿½ÆµÍ¨ï¿½ï¿½
 	public native void CloseAudioChat(long nGroupID, long nToUserID,int businesstype);
 	
 	public native void MuteMic(long nGroupID, long nUserID, boolean bMute,int businesstype);
@@ -50,11 +51,11 @@ public class AudioRequest
 	
 	
 	
-	//ÊÕµ½ÒôÆµÍ¨»°µÄÑûÇëµÄ»Øµ÷
+	//ï¿½Õµï¿½ï¿½ï¿½ÆµÍ¨ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä»Øµï¿½
 	private void OnAudioChatInvite(long  nGroupID, long nBusinessType, long  nFromUserID)
 	{
 		Log.e("ImRequest UI", "OnAudioChaInvite " + nGroupID + ":" + nBusinessType+":"+nFromUserID);
-		//ÊÕµ½¶Ô·½µÄÒôÆµÑûÇë
+		//ï¿½Õµï¿½ï¿½Ô·ï¿½ï¿½ï¿½ï¿½ï¿½Æµï¿½ï¿½ï¿½ï¿½
 //		Intent intent=new Intent(VideoChatActivity.VIDEOCHAT);
 //		intent.putExtra("videochat", Constant.AUDIOCHATINVITE);
 //		context.sendBroadcast(intent);
@@ -62,12 +63,12 @@ public class AudioRequest
 		AcceptAudioChat(nGroupID, nFromUserID, 2);
 	}
 
-	//ÒôÆµÍ¨»°ÑûÇë±»¶Ô·½½ÓÊÜµÄ»Øµ÷
+	//ï¿½ï¿½ÆµÍ¨ï¿½ï¿½ï¿½ï¿½ï¿½ë±»ï¿½Ô·ï¿½ï¿½ï¿½ï¿½ÜµÄ»Øµï¿½
 	private void OnAudioChatAccepted(long  nGroupID, long nBusinessType, long  nFromUserID)
 	{
 		Log.e("ImRequest UI", "OnAudioChatAccepted " + nGroupID + ":" + nBusinessType+":"+nFromUserID);
 		
-		//Æ´×°ÐÅÏ¢
+		//Æ´×°ï¿½ï¿½Ï¢
 //		AudioAcceptMsgType videoMsgType=new AudioAcceptMsgType();
 //		videoMsgType.setnFromuserID(nFromUserID);
 //		
@@ -77,12 +78,12 @@ public class AudioRequest
 //		context.sendBroadcast(intent);
 	}
 
-	//ÒôÆµÍ¨»°ÑûÇë±»¶Ô·½¾Ü¾øµÄ»Øµ÷
+	//ï¿½ï¿½ÆµÍ¨ï¿½ï¿½ï¿½ï¿½ï¿½ë±»ï¿½Ô·ï¿½ï¿½Ü¾ï¿½Ä»Øµï¿½
 	private void OnAudioChatRefused(long  nGroupID, long nBusinessType, long  nFromUserID)
 	{
 		Log.e("ImRequest UI", "OnAudioChatRefused " + nGroupID + ":" + nBusinessType+":"+nFromUserID);
 		
-		//Æ´×°ÐÅÏ¢
+		//Æ´×°ï¿½ï¿½Ï¢
 //		AudioRefuseMsgType videoMsgType=new AudioRefuseMsgType();
 //		videoMsgType.setnFromuserID(nFromUserID);
 //		
@@ -92,13 +93,13 @@ public class AudioRequest
 //		context.sendBroadcast(intent);
 	}
 
-	//ÒôÆµÍ¨»°±»¹Ø±ÕÎï»Øµ÷
+	//ï¿½ï¿½ÆµÍ¨ï¿½ï¿½ï¿½ï¿½ï¿½Ø±ï¿½ï¿½ï¿½Øµï¿½
 	private void OnAudioChatClosed(long  nGroupID, long nBusinessType, long  nFromUserID)
 	{
 		Log.e("ImRequest UI", "OnAudioChatClosed " + nGroupID + ":" + nBusinessType+":"+nFromUserID);
 	}
 
-	//ÒôÆµÍ¨»°½øÐÐÖÐ
+	//ï¿½ï¿½ÆµÍ¨ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	private void OnAudioChating(long  nGroupID, long nBusinessType, long  nFromUserID)
 	{
 		Log.e("ImRequest UI", "OnAudioChating " + nGroupID + ":" + nBusinessType+":"+nFromUserID);

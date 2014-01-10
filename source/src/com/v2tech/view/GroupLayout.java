@@ -49,6 +49,11 @@ public class GroupLayout extends LinearLayout {
 		mGroupOwnerTV.setText(this.mGroup.getOwner());
 		mGroupDateTV.setText(this.mGroup.getCreateDate());
 	}
+	
+	
+	public long getGroupId() {
+		return this.mGroup.getmGId();
+	}
 
 	
 }

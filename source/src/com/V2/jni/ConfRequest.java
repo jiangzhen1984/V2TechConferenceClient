@@ -23,6 +23,7 @@ public class ConfRequest
 	public static synchronized ConfRequest getInstance(Activity context){
 		if(mConfRequest==null){
 			mConfRequest=new ConfRequest(context);
+			mConfRequest.initialize(mConfRequest);
 		}
 		
 		return mConfRequest;

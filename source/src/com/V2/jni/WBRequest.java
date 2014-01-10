@@ -17,6 +17,7 @@ public class WBRequest {
 		
 		if(mWBRequest==null){
 			mWBRequest=new WBRequest(context);
+			mWBRequest.initialize(mWBRequest);
 		}
 		return mWBRequest;
 	}
@@ -34,7 +35,7 @@ public class WBRequest {
 	private void OnWBoardChatInvite(long nGroupID, int nBusinessType, long  nFromUserID, String szWBoardID, 
 			int nWhiteIndex,String szFileName, int type) {
 		Log.e("ImRequest UI", "OnWBoardChatInvite " + nGroupID + " "
-				+ nBusinessType + " " + nFromUserID + " " + szWBoardID+"ÐòÁÐºÅÊÇ:"+nWhiteIndex+"ÎÄ¼þÃû:"+szFileName);
+				+ nBusinessType + " " + nFromUserID + " " + szWBoardID+"ï¿½ï¿½ï¿½Ðºï¿½ï¿½ï¿½:"+nWhiteIndex+"ï¿½Ä¼ï¿½ï¿½ï¿½:"+szFileName);
 
 		
 	}
@@ -61,22 +62,22 @@ public class WBRequest {
 		Log.e("ImRequest UI",
 				"OnRecvAddWBoardData " + szWBoardID + " " + nPageID + " "
 						+ szDataID + " " + szData + " " + szData.length());
-		//Ìí¼ÓÊý¾Ý
+		//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 		
 	}
 
-	// ÊÕµ½×·¼Ó°×°åÊý¾ÝµÄ»Øµ÷
+	// ï¿½Õµï¿½×·ï¿½Ó°×°ï¿½ï¿½ï¿½ÝµÄ»Øµï¿½
 	private void OnRecvAppendWBoardData(String szWBoardID, int nPageID,
 			String szDataID, String szData) 
 	{
 		Log.e("ImRequest UI",
 				"OnRecvAppendWBoardData " + szWBoardID + " " + nPageID + " "
 						+ szDataID + " " + szData + " " + szData.length());
-		//ÅÐ¶ÏÊÇ·ñÎªÎÄµµ¹²ÏíµÄÊý¾Ý
+		//ï¿½Ð¶ï¿½ï¿½Ç·ï¿½Îªï¿½Äµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
 	}
 	
-	/// ÊÕµ½¶Ô·½ÊÚÊÜÁËÎÒµÄ°×°å»á»°ÑûÇëµÄ»Øµ÷
+	/// ï¿½Õµï¿½ï¿½Ô·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ÒµÄ°×°ï¿½á»°ï¿½ï¿½ï¿½ï¿½Ä»Øµï¿½
 	private void OnWBoardChatAccepted(long  nGroupID, int nBusinessType, long  nFromUserID, String szWBoardID, 
 			int nWhiteIndex,String szFileName, int type) {
 		Log.e("ImRequest UI", "OnWBoardChatAccepted " + nGroupID + " "
@@ -112,7 +113,7 @@ public class WBRequest {
 		
 	}
 
-	// ÊÕµ½ÎÄµµÔö¼ÓµÄ»Øµ÷
+	// ï¿½Õµï¿½ï¿½Äµï¿½ï¿½ï¿½ï¿½ÓµÄ»Øµï¿½
 	private void OnWBoardAddPage(String szWBoardID, int nPageID) {
 		Log.e("ImRequest UI", "OnWBoardAddPage " + szWBoardID + " " + nPageID);
 		
@@ -127,12 +128,12 @@ public class WBRequest {
 
 
 	
-	//ÎÄµµ¹²Ïí   Ó¦¸ÃÊÇÏÂÔØÍêÒ»Ò³ÏÔÊ¾Ò»Ò³   
+	//ï¿½Äµï¿½ï¿½ï¿½ï¿½ï¿½   Ó¦ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò»Ò³ï¿½ï¿½Ê¾Ò»Ò³   
 	private void OnWBoardDocDisplay(String szWBoardID, int nPageID,
 			String szFileName,int result) {
 		
 //		return ;
-		Log.e("ImRequest UI", "ÎÄµµÏÔÊ¾---->OnWBoardDocDisplay " + szWBoardID + " "
+		Log.e("ImRequest UI", "ï¿½Äµï¿½ï¿½ï¿½Ê¾---->OnWBoardDocDisplay " + szWBoardID + " "
 				+ nPageID + " " + szFileName);
 		
 		
