@@ -7,19 +7,18 @@ package com.V2.jni;
 //import com.xinlan.im.ui.chat.VideoChatActivity;
 //import com.xinlan.im.utils.Constant;
 
-import android.app.Activity;
-import android.content.Intent;
+import android.content.Context;
 import android.util.Log;
 
 public class AudioRequest
 {
-	private Activity context;
+	private Context context;
 	private static AudioRequest mAudioRequest;
-	private AudioRequest(Activity context){
+	private AudioRequest(Context context){
 		this.context=context;
 	};
 	
-	public static synchronized AudioRequest getInstance(Activity context){
+	public static synchronized AudioRequest getInstance(Context context){
 		if(mAudioRequest==null)
 		{
 			mAudioRequest=new AudioRequest(context);

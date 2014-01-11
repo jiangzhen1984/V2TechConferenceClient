@@ -1,10 +1,8 @@
 package com.V2.jni;
 
-import java.io.ByteArrayInputStream;
-
 import v2av.VideoPlayer;
 import android.app.Activity;
-import android.content.Intent;
+import android.content.Context;
 import android.util.Log;
 
 //import com.xinlan.im.adapter.XiuLiuApplication;
@@ -23,13 +21,13 @@ public class VideoRequest
 {
 	private static VideoRequest mVideoRequest;
 //	private XiuLiuApplication app;
-	private Activity context;
-	private VideoRequest(Activity context){
+	private Context context;
+	private VideoRequest(Context context){
 		this.context=context;
 //		app=(XiuLiuApplication) context.getApplication();
 	};
 	
-	public static synchronized VideoRequest getInstance(Activity context){
+	public static synchronized VideoRequest getInstance(Context context){
 		if(mVideoRequest==null){
 			mVideoRequest=new VideoRequest(context);
 			mVideoRequest.initialize(mVideoRequest);

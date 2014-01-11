@@ -1,21 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">V2ConferenceClient</string>
-    <string name="action_settings">设置</string>
-    <string name="banner_desc">全球网络会议领导者</string>
-    <string name="ip_setting_address">地 址：</string>
-    <string name="ip_setting_port">端 口：</string>
-     <string name="ip_setting_address_dot">.</string>
-     <string name="ip_setting_button_save">保  存</string>
-    <string name="ip_setting_button_cancel">取  消</string>
-    <string name="login_chk">记住密码</string>
-    <string name="in_meeting_setting_video_qulity">视频质量</string>
-    <string name="in_meeting_setting_video_qulity_high">高</string>
-    <string name="in_meeting_setting_video_qulity_middle">中</string>
-    <string name="in_meeting_setting_video_qulity_low">低</string>
-    <string name="in_meeting_setting_reverse">翻转</string>
+  
    
+    
     
 
 </resources>

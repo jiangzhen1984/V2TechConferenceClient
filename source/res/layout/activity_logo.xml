@@ -24,7 +24,7 @@
         android:layout_below="@+id/group_list_conf_list"
         android:layout_centerHorizontal="true"
         android:text="@string/banner_desc"
-        android:ems="10" >
+         >
 
     </TextView>
 

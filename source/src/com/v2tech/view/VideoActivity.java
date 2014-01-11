@@ -3,15 +3,17 @@ package com.v2tech.view;
 import v2av.VideoRecorder;
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
-import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.view.Display;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -20,20 +22,22 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.PopupWindow;
 import android.widget.PopupWindow.OnDismissListener;
 import android.widget.RelativeLayout;
 
+import com.V2.jni.ConfRequest;
 import com.V2.jni.VideoRequest;
 import com.v2tech.R;
-import com.v2tech.logic.GlobalHolder;
 
 public class VideoActivity extends Activity {
 
 	private static final int ONLY_SHOW_LOCAL_VIDEO = 1;
 
 	private VideoRequest mVideo = VideoRequest.getInstance(this);
+	private ConfRequest mCR = ConfRequest.getInstance(this);
 
 	private Handler mVideoHandler = new VideoHandler();
 
@@ -42,6 +46,7 @@ public class VideoActivity extends Activity {
 	private RelativeLayout mVideoLayout;
 
 	private ImageView mSettingIV;
+	private ImageView mQuitIV;
 	private PopupWindow mSettingWindow;
 	private static int Measuredwidth = 0;
 	private static int Measuredheight = 0;
@@ -54,10 +59,23 @@ public class VideoActivity extends Activity {
 		this.mVideoLayout = (RelativeLayout) findViewById(R.id.in_metting_video_main);
 		this.mSettingIV = (ImageView) findViewById(R.id.in_meeting_setting_iv);
 		this.mSettingIV.setOnClickListener(mShowSettingListener);
+		this.mQuitIV = (ImageView) findViewById(R.id.in_meeting_log_out_iv);
+		this.mQuitIV.setOnClickListener(mShowQuitWindowListener);
 		init();
-		
 	}
 
+	private OnClickListener mShowQuitWindowListener = new OnClickListener() {
+
+		@Override
+		public void onClick(View view) {
+			showQuitDialog();			
+		}
+		
+	};
+	
+	
+	
+	
 	private OnClickListener mShowSettingListener = new OnClickListener() {
 
 		@Override
@@ -128,6 +146,57 @@ public class VideoActivity extends Activity {
 		mLocalSurView.getHolder().setFormat(PixelFormat.TRANSPARENT);
 		VideoRecorder.VideoPreviewSurfaceHolder = mLocalSurView.getHolder();
 	}
+
+	
+	private void showQuitDialog() {
+		final Dialog d = new Dialog(mContext, R.style.InMeetingQuitDialog);
+		
+		d.setContentView(R.layout.in_meeting_quit_window);
+		final Button cancelB = (Button)d.findViewById(R.id.IMWCancelButton);
+		cancelB.setOnClickListener(new OnClickListener(){
+			@Override
+			public void onClick(View v) {
+				d.dismiss();
+			}
+			
+		});
+		final Button quitB = (Button)d.findViewById(R.id.IMWQuitButton);
+		quitB.setOnClickListener(new OnClickListener(){
+			@Override
+			public void onClick(View v) {
+				d.dismiss();
+				quit();
+			}
+			
+		});
+		d.show();
+	}
+	
+	
+	private void quit() {
+		//mVideo.closeVideoChat(nGroupID, nToUserID, szDeviceID, businessType);
+		//mVideo.closeVideoDevice(nGroupID, nUserID, szDeviceID, vp, businessType);
+	//	mCR.leaveConf(nConfID)
+		Intent i = new Intent();
+		i.putExtra("error_msg", "退出失败");
+		this.setResult(1, i);
+		finish();
+	}
+	
+	
+	
+	
+	@Override
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+		if (keyCode == KeyEvent.KEYCODE_BACK) {
+			showQuitDialog();
+			return true;
+		}
+		return super.onKeyDown(keyCode, event);
+	}
+
+
+
 
 	class VideoHandler extends Handler {
 

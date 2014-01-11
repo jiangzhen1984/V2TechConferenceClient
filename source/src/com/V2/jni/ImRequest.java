@@ -1,6 +1,7 @@
 package com.V2.jni;
 
 import android.app.Activity;
+import android.content.Context;
 import android.util.Log;
 
 import com.v2tech.logic.GlobalHolder;
@@ -21,7 +22,7 @@ import com.v2tech.util.V2Log;
 //import com.xinlan.im.utils.XmlParserUtils;
 
 public class ImRequest {
-	private Activity context;
+	private Context context;
 	public boolean loginResult;
 	private static ImRequest mImRequest;
 //	private XiuLiuApplication application;
@@ -30,13 +31,13 @@ public class ImRequest {
 	
 	private User mLoginLock = new User();
 
-	private ImRequest(Activity context) {
+	private ImRequest(Context context) {
 		this.context = context;
 //		application = (XiuLiuApplication) context.getApplication();
 //		dbHelper = DbHelper.getInstance(context);
 	};
 
-	public static synchronized ImRequest getInstance(Activity context) {
+	public static synchronized ImRequest getInstance(Context context) {
 		if (mImRequest == null) {
 			mImRequest = new ImRequest(context);
 			if (!mImRequest.initialize(mImRequest)) {
@@ -48,6 +49,14 @@ public class ImRequest {
 		return mImRequest;
 	}
 	
+	
+	public static synchronized ImRequest getInstance() {
+		if (mImRequest == null) {
+			throw new RuntimeException("doesn't initliaze ImRequest yet, please getInstance(Context) first");
+		}
+
+		return mImRequest;
+	}
 	
 	public boolean loginSync(String szName, String szPassword) {
 		this.login(szName, szPassword, 1, 2);

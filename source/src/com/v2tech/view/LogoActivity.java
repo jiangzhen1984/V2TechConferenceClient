@@ -7,6 +7,13 @@ import android.os.Handler;
 import android.os.Message;
 import android.view.Menu;
 
+import com.V2.jni.AudioRequest;
+import com.V2.jni.ConfRequest;
+import com.V2.jni.ConfigRequest;
+import com.V2.jni.GroupRequest;
+import com.V2.jni.ImRequest;
+import com.V2.jni.VideoRequest;
+import com.V2.jni.WBRequest;
 import com.v2tech.R;
 import com.v2tech.util.V2Log;
 
@@ -27,7 +34,7 @@ public class LogoActivity extends Activity {
 	protected void onResume() {
 		super.onResume();
 		Message m = Message.obtain(mHandler, START_LOG_ON);
-		mHandler.sendMessageDelayed(m, 3000);
+		mHandler.sendMessageDelayed(m, 500);
 	}
 
 	@Override
@@ -55,4 +62,23 @@ public class LogoActivity extends Activity {
 		}
 
 	}
+	
+	
+	
+	private ImRequest mIM = ImRequest.getInstance(this);
+	private GroupRequest mGR = GroupRequest.getInstance(this);
+	private VideoRequest mVR = VideoRequest.getInstance(this);
+	private ConfRequest mConR = ConfRequest.getInstance(this);
+	private ConfigRequest mCR = new ConfigRequest();
+	private AudioRequest mAR = AudioRequest.getInstance(this);
+	private WBRequest mWR = WBRequest.getInstance(this);
+
+	static {
+		System.loadLibrary("event");
+		System.loadLibrary("udt");
+		System.loadLibrary("v2vi");
+		System.loadLibrary("v2ve");	
+		System.loadLibrary("v2client");
+	}
+	
 }

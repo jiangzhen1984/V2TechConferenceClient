@@ -1,10 +1,11 @@
 package com.V2.jni;
 
-import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
 import android.util.Log;
 
+import com.v2tech.logic.GlobalHolder;
 import com.v2tech.logic.Group;
-import com.v2tech.view.ConfsActivity;
 
 //import com.xinlan.im.adapter.XiuLiuApplication;
 //import com.xinlan.im.bean.msgtype.AddFriMsgType;
@@ -26,20 +27,20 @@ import com.v2tech.view.ConfsActivity;
 
 public class GroupRequest {
 
-	private Activity context;
+	private Context context;
 	public boolean loginResult;
 	private static GroupRequest mGroupRequest;
 //	private XiuLiuApplication application;
 //	private DbHelper dbHelper;
 //	private LoginMsgType loginMsgType;
 
-	private GroupRequest(Activity context) {
+	private GroupRequest(Context context) {
 		this.context = context;
 //		application = (XiuLiuApplication) context.getApplication();
 //		dbHelper = DbHelper.getInstance(context);
 	};
 
-	public static synchronized GroupRequest getInstance(Activity context) {
+	public static synchronized GroupRequest getInstance(Context context) {
 		if (mGroupRequest == null) {
 			mGroupRequest = new GroupRequest(context);
 			if (!mGroupRequest.initialize(mGroupRequest)) {
@@ -106,7 +107,7 @@ public class GroupRequest {
 	 * @param sXml
 	 */
 	private void OnGetGroupInfo(int groupType, String sXml) {
-		Log.e("ImRequest UI", "OnGetGroupInfo:: �õ���������Ϣ" + groupType + ":"
+		Log.e("GroupRequest UI", "OnGetGroupInfo:: �õ���������Ϣ" + groupType + ":"
 				+ sXml);
 		System.out.println(sXml);
 		// ƴװ��Ϣ
@@ -117,10 +118,11 @@ public class GroupRequest {
 //		addIntent.putExtra("MsgType", MsgType.FRIENDGROUP);
 //		addIntent.putExtra("MSG", friendMsgType);
 //		context.sendOrderedBroadcast(addIntent,null);
-		
-		if (context instanceof ConfsActivity) {
-			((ConfsActivity)context).nodifyGroupListChange(Group.parserFromXml(groupType, sXml));
-		}
+		GlobalHolder.getInstance().setList(Group.parserFromXml(groupType, sXml));
+		Intent i = new Intent();
+		i.setAction("com.v2tech.group_changed");
+		i.addCategory("com.v2tech");
+		context.sendBroadcast(i);
 	}
 
 	private void OnGetGroupUserInfo(int groupType, long nGroupID, String sXml) {

@@ -6,15 +6,17 @@ import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
-import com.V2.jni.GroupRequest;
 import com.v2tech.R;
+import com.v2tech.logic.GlobalHolder;
 import com.v2tech.logic.Group;
 import com.v2tech.util.V2Log;
 
@@ -25,13 +27,13 @@ public class ConfsActivity extends Activity {
 	
 	private LinearLayout mGroupContainer;
 	
-	private GroupRequest mGR = GroupRequest.getInstance(this);
-	
 	private Handler mHandler = new ConfsHandler();
 	
 	private static final int NOTIFY_CONFS_LIST = 1;
 	
 	private List<Group> mList;
+	
+	 
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -40,32 +42,28 @@ public class ConfsActivity extends Activity {
 		setContentView(R.layout.activity_confs);
 		mGroupContainer = (LinearLayout)findViewById(R.id.group_list_container);
 		
-		Object obj = getLastNonConfigurationInstance();
-		if (obj != null) {
-			mList = (List<Group>) obj;
-			addGroupList(mList);
-		}
+		mList = GlobalHolder.getInstance().getList();
+		addGroupList(mList);
+		
+		IntentFilter filter = new IntentFilter();
+		filter.addAction("com.v2tech.group_changed");
+		filter.addCategory("com.v2tech");
+		this.registerReceiver(mGroupChnageListener, filter);
 		
 	}
 	
 	
 	
 	
-	private BroadcastReceiver mGroupReceiver = new BroadcastReceiver() {
+	
+	private BroadcastReceiver mGroupChnageListener = new BroadcastReceiver() {
 
 		@Override
 		public void onReceive(Context context, Intent intent) {
-			
+			nodifyGroupListChange(GlobalHolder.getInstance().getList());
 		}
 		
 	};
-
-
-	@Override
-	public Object onRetainNonConfigurationInstance() {
-	    return mList;
-	}
-
 
 
 	public void nodifyGroupListChange(List<Group> list) {		
@@ -74,10 +72,11 @@ public class ConfsActivity extends Activity {
 	
 	
 	private void addGroupList(List<Group> list) {
-		if (list == null) {
+		if (list == null || list.size()<=0) {
 			V2Log.w(" group list is null");
 			return;
 		}
+		mGroupContainer.removeAllViews();
 		for (Group g : list) {
 			final GroupLayout gp = new GroupLayout(mContext, g);
 			gp.setOnClickListener(new OnClickListener() {
@@ -100,6 +99,9 @@ public class ConfsActivity extends Activity {
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
+		if (resultCode != 0) {
+			Toast.makeText(mContext, data.getExtras().getString("error_msg"), Toast.LENGTH_LONG).show();
+		}
 	}
 
 

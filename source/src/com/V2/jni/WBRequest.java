@@ -1,19 +1,19 @@
 package com.V2.jni;
 
 
-import android.app.Activity;
+import android.content.Context;
 import android.util.Log;
 
 
 public class WBRequest {
-	private Activity context;
+	private Context context;
 	private static WBRequest mWBRequest;
 	
-	private WBRequest(Activity context){
+	private WBRequest(Context context){
 		this.context=context;
 	}
 
-	public static  synchronized  WBRequest getInstance(Activity context){
+	public static  synchronized  WBRequest getInstance(Context context){
 		
 		if(mWBRequest==null){
 			mWBRequest=new WBRequest(context);

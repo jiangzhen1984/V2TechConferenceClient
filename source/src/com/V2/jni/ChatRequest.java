@@ -53,7 +53,7 @@ public class ChatRequest
 
 	
 	@SuppressWarnings("static-access")
-	private ChatRequest(Activity context){
+	private ChatRequest(Context context){
 //		this.context = context;
 //		dbHelper=new DbHelper(context);
 //		app=(XiuLiuApplication) context.getApplication();
@@ -61,7 +61,7 @@ public class ChatRequest
 		
 	};
 
-	public static synchronized ChatRequest getInstance(Activity context) {
+	public static synchronized ChatRequest getInstance(Context context) {
 		if (mChatRequest == null) {
 			mChatRequest = new ChatRequest(context);
 		}
@@ -73,17 +73,17 @@ public class ChatRequest
 	public native boolean initialize(ChatRequest request);
 	public native void unInitialize();
 	
-	//·¢ËÍÁÄÌìµÄÎÄ×ÖÊý¾Ý    nGroupIDÌî0
+	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½    nGroupIDï¿½ï¿½0
 	public native void sendChatText(long  nGroupID, long  nToUserID, String szText,int bussinessType);
-	//·¢ËÍÁÄÌìµÄÒôÆµÊý¾Ý    nGroupIDÌî0
+	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æµï¿½ï¿½ï¿½    nGroupIDï¿½ï¿½0
 		public native void sendChatAudio(long  nGroupID, long  nToUserID, String szText,String filename,int bussinessType);
-	//·¢ËÍÁÄÌìµÄÍ¼Æ¬Êý¾Ý
+	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í¼Æ¬ï¿½ï¿½ï¿½
 	public native void sendChatPicture(long  nGroupID, long  nToUserID, byte[] pPicData, int nLength,int bussinessType);
 	
-	//ÊÕµ½ËûÈË·¢À´µÄÎÄ×ÖÁÄÌìÐÅÏ¢µÄ»Øµ÷
+	//ï¿½Õµï¿½ï¿½ï¿½ï¿½Ë·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢ï¿½Ä»Øµï¿½
 	public void OnRecvChatText(long nGroupID, int nBusinessType, long  nFromUserID, long  nTime, String szXmlText)
 	{
-		Log.e("ImRequest UI", "OnRecvChatText ÁÄÌì" + nGroupID + " " + nBusinessType + " " + nFromUserID + " " + nTime + " " + szXmlText);
+		Log.e("ImRequest UI", "OnRecvChatText ï¿½ï¿½ï¿½ï¿½" + nGroupID + " " + nBusinessType + " " + nFromUserID + " " + nTime + " " + szXmlText);
 		
 //		islinsheng=preferences.getBoolean("islinsheng", true);
 //		isviber=preferences.getBoolean("isviber", true);
@@ -107,7 +107,7 @@ public class ChatRequest
 //		msg.setnTime(nTime);
 //		msg.getItems().addAll(msgText);
 //		
-//		//Æ´×°¸öÈËÐÅÏ¢
+//		//Æ´×°ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢
 //		HasMsgType hasMsgType=new HasMsgType();
 //		hasMsgType.setChatmsg(msg);
 //		
@@ -118,21 +118,21 @@ public class ChatRequest
 	}
 	
 
-	//ÊÕµ½ËûÈË·¢À´µÄÍ¼Æ¬ÁÄÌìÐÅÏ¢µÄ»Øµ÷
+	//ï¿½Õµï¿½ï¿½ï¿½ï¿½Ë·ï¿½ï¿½ï¿½ï¿½ï¿½Í¼Æ¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢ï¿½Ä»Øµï¿½
 	public void OnRecvChatPicture(long  nGroupID, int nBusinessType, long  nFromUserID, long  nTime, byte[] pPicData)
 	{
-		    //À´Ò»ÕÅÍ¼Æ¬£¬¿ªÊ¼ÏÔÊ¾Ò»ÕÅÍ¼Æ¬£¬Í¨ÖªÒ³ÃæË¢ÐÂ
+		    //ï¿½ï¿½Ò»ï¿½ï¿½Í¼Æ¬ï¿½ï¿½ï¿½ï¿½Ê¼ï¿½ï¿½Ê¾Ò»ï¿½ï¿½Í¼Æ¬ï¿½ï¿½Í¨ÖªÒ³ï¿½ï¿½Ë¢ï¿½ï¿½
 		
-			Log.e("ImRequest UI", "OnRecvChatPicture ÁÄÌì " + nGroupID + " " + nBusinessType + " " + nFromUserID + " " + nTime + " ");
+			Log.e("ImRequest UI", "OnRecvChatPicture ï¿½ï¿½ï¿½ï¿½ " + nGroupID + " " + nBusinessType + " " + nFromUserID + " " + nTime + " ");
 			Log.e("ImRequest UI", "OnRecvChatPicture ****maximum heap size***"+ Runtime.getRuntime().maxMemory()+"*nLength=====**"+"****pPicData.length===***"+pPicData.length );
 			
 //			String localpath=SaveImage2SD(nGroupID, nFromUserID, nTime,pPicData);
 //			
-//			Logger.i(null, "Í¼Æ¬´æ×¼Â·¾¶:"+localpath);
+//			Logger.i(null, "Í¼Æ¬ï¿½ï¿½×¼Â·ï¿½ï¿½:"+localpath);
 //			
 //			
 //			
-//			//Æ´×°¸öÈËÐÅÏ¢
+//			//Æ´×°ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢
 //			Intent addIntent=new Intent(SplashActivity.IM);
 //			addIntent.putExtra("MsgType", MsgType.REFRESH_IMG);
 //			context.sendOrderedBroadcast(addIntent,null);
@@ -170,10 +170,10 @@ public class ChatRequest
 		}
 		String guid = new String(guidArr);  
 		
-		String ext = new String(extArr);  //À©Õ¹Ãû
+		String ext = new String(extArr);  //ï¿½ï¿½Õ¹ï¿½ï¿½
 		sb.append(guid.trim()).append(ext.trim());
 		
-//		Logger.i(null, "Í¼Æ¬Ãû³ÉÊÇ:"+sb.toString());
+//		Logger.i(null, "Í¼Æ¬ï¿½ï¿½ï¿½ï¿½ï¿½:"+sb.toString());
 //		String target = picNvoiceUtil.saveImage(picDataArr, sb.toString(),nFromUserID,context);
 		
 //		return target;
@@ -183,7 +183,7 @@ public class ChatRequest
 	
 
 	/*
-	 * ext  Í¼Æ¬µÄÀ©Õ¹Ãû
+	 * ext  Í¼Æ¬ï¿½ï¿½ï¿½ï¿½Õ¹ï¿½ï¿½
 	 */
 	@SuppressWarnings("resource")
 	public byte[] getSendPicData(String imgpath){
@@ -233,7 +233,7 @@ public class ChatRequest
 		}
 		
 	}
-	//¸ù¾ÝÍ¼Æ¬Â·¾¶µÃµ½Í¼Æ¬µÄ×Ö½Ú
+	//ï¿½ï¿½ï¿½Í¼Æ¬Â·ï¿½ï¿½ï¿½Ãµï¿½Í¼Æ¬ï¿½ï¿½ï¿½Ö½ï¿½
 	public static byte[] readStream(InputStream inStream) throws Exception {
         ByteArrayOutputStream outStream;
 		byte[] data;

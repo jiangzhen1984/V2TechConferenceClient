@@ -27,6 +27,7 @@ import android.widget.Toast;
 import com.V2.jni.AudioRequest;
 import com.V2.jni.ConfRequest;
 import com.V2.jni.ConfigRequest;
+import com.V2.jni.GroupRequest;
 import com.V2.jni.ImRequest;
 import com.V2.jni.VideoRequest;
 import com.V2.jni.WBRequest;
@@ -38,6 +39,8 @@ import com.v2tech.logic.GlobalHolder;
  * well.
  */
 public class LoginActivity extends Activity {
+	
+	
 	/**
 	 * A dummy authentication store containing known user names and passwords.
 	 * TODO: remove after connecting to a real authentication system.
@@ -54,6 +57,8 @@ public class LoginActivity extends Activity {
 	 * Keep track of the login task to ensure we can cancel it if requested.
 	 */
 	private UserLoginTask mAuthTask = null;
+	
+	private ConfigRequest mCR = new ConfigRequest();
 
 	// Values for email and password at the time of the login attempt.
 	private String mEmail;
@@ -70,13 +75,7 @@ public class LoginActivity extends Activity {
 
 	private Activity mContext;
 
-	private ImRequest mIM = ImRequest.getInstance(this);
-	private VideoRequest mVR = VideoRequest.getInstance(this);
-	private ConfRequest mConR = ConfRequest.getInstance(this);
-	private ConfigRequest mCR = new ConfigRequest();
-	private AudioRequest mAR = AudioRequest.getInstance(this);
-	private WBRequest mWR = WBRequest.getInstance(this);
-
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -245,6 +244,7 @@ public class LoginActivity extends Activity {
 			mShowIpSettingButton.performClick();
 			return;
 		}
+		
 		mCR.setServerAddress(ip, Integer.parseInt(port));
 		
 		// Reset errors.
@@ -344,7 +344,7 @@ public class LoginActivity extends Activity {
 	public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
 		@Override
 		protected Boolean doInBackground(Void... params) {
-			if (!mIM.loginSync(mEmail, mPassword)) {
+			if (!ImRequest.getInstance().loginSync(mEmail, mPassword)) {
 				return false;
 			}
 			// TODO: register the new account here.
@@ -366,7 +366,6 @@ public class LoginActivity extends Activity {
 
 			if (success) {
 				finish();
-				// TODO start activiy
 				mContext.startActivity(new Intent(mContext, ConfsActivity.class));
 			} else {
 				if (GlobalHolder.getInstance().getUser().getmResult() == 301) {
@@ -386,12 +385,6 @@ public class LoginActivity extends Activity {
 		}
 	}
 
-	static {
-		System.loadLibrary("event");
-		System.loadLibrary("udt");
-		System.loadLibrary("v2vi");
-		System.loadLibrary("v2ve");	
-		System.loadLibrary("v2client");
-	}
+
 
 }

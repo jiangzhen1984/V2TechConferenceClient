@@ -1,11 +1,7 @@
 package com.V2.jni;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.util.List;
-
 import android.app.Activity;
-import android.content.Intent;
+import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -14,18 +10,27 @@ public class ConfRequest
 {
 	
 	private static ConfRequest mConfRequest;
-	private Activity context;
+	private Context context;
 	
-	private ConfRequest(Activity context){
+	private ConfRequest(Context context){
 		this.context = context;
 	};
 	
-	public static synchronized ConfRequest getInstance(Activity context){
+	public static synchronized ConfRequest getInstance(Context context){
 		if(mConfRequest==null){
 			mConfRequest=new ConfRequest(context);
 			mConfRequest.initialize(mConfRequest);
 		}
 		
+		return mConfRequest;
+	}
+	
+	
+	public static synchronized ConfRequest getInstance() {
+		if (mConfRequest == null) {
+			throw new RuntimeException("doesn't initliaze ConfRequest yet, please getInstance(Context) first");
+		}
+
 		return mConfRequest;
 	}
 	

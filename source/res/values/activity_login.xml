@@ -19,5 +19,17 @@
      <string name="error_init_im_request">初始化ImRequest对象失败</string>
       <string name="error_connect_to_server">无法链接到服务器，请确认网络链接</string>
     <string name="succeed_save_host_config">保存服务器信息成功!</string>
+     <string name="ip_setting_address">地 址：</string>
+    <string name="ip_setting_port">端 口：</string>
+     <string name="ip_setting_address_dot">.</string>
+     <string name="ip_setting_button_save">保  存</string>
+    <string name="ip_setting_button_cancel">取  消</string>
+    <string name="login_chk">记住密码</string>
+    
+    
+    <color name="logo_background" >#e6f3fa</color>
+    <color name="setting_outer_bg">#b8c9d4</color>
+     <color name="setting_inner_bg">#ffffff</color>
+     <color name="setting_separation">#f2f2f2</color>
 
 </resources>

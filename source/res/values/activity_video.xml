@@ -1,0 +1,25 @@
+<resources>
+
+    <color name="in_meeting_title_bar_bg">#229dd6</color>
+    <color name="in_meeting_group_list_bg">#ffffff</color>
+    <color name="in_meeting_widget_separation_line">#f2f2f2</color>
+
+    <string name="in_meeting_quit_notification">提  示</string>
+    <string name="in_meeting_quit_quit_button">退出</string>
+    <string name="in_meeting_quit_cancel_button">取消</string>
+    <string name="in_meeting_quit_text">此操作将退出会议，是否继续?</string>
+    <string name="in_meeting_quit_rem">记住此操作</string>
+    <string name="in_meeting_setting_video_qulity">视频质量</string>
+    <string name="in_meeting_setting_video_qulity_high">高</string>
+    <string name="in_meeting_setting_video_qulity_middle">中</string>
+    <string name="in_meeting_setting_video_qulity_low">低</string>
+    <string name="in_meeting_setting_reverse">翻转</string>
+    
+    
+
+    <color name="in_meeting_setting_bg">#ffffff</color>
+    <color name="in_meeting_quit_window_inner_bg">#ffffff</color>
+    <color name="in_meeting_quit_window_separation">#cad2d9</color>
+    <color name="in_meeting_quit_window_title_bg">#ebf3f7</color>
+
+</resources>
