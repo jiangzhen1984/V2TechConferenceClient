@@ -30,7 +30,9 @@ public class VideoRequest
 	public static synchronized VideoRequest getInstance(Context context){
 		if(mVideoRequest==null){
 			mVideoRequest=new VideoRequest(context);
-			mVideoRequest.initialize(mVideoRequest);
+			if (!mVideoRequest.initialize(mVideoRequest)) {
+				Log.e("mVideoRequest", "can't initialize mVideoRequest ");
+			}
 		}
 		
 		return mVideoRequest;
@@ -182,9 +184,12 @@ public class VideoRequest
 	{
 		Log.e("ImRequest UI", "OnVideoPlayerClosed " + szDeviceID );
 	}
-	public native void getVideoDevice(long l);
 	
 	private void OnGetVideoDevice(String xml, long l) {
+		Log.e("VideoRequest UI", "OnGetVideoDevice " + xml );
+	}
+	
+	private void OnGetVideoDevice(long l, String xml) {
 		Log.e("VideoRequest UI", "OnGetVideoDevice " + xml );
 	}
 }

@@ -46,12 +46,15 @@
             android:label="@string/title_activity_login" >
         </activity>
         <activity
-            android:name="com.v2tech.view.ConfsActivity" >
+            android:name="com.v2tech.view.ConfsActivity"
+            android:windowSoftInputMode="stateHidden" >
         </activity>
         
         <activity
             android:name="com.v2tech.view.VideoActivity" >  
-                     
+        </activity>
+         <activity
+            android:name="com.v2tech.view.SettingActivity" >  
         </activity>
     </application>
 

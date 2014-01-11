@@ -64,6 +64,9 @@ public class ChatRequest
 	public static synchronized ChatRequest getInstance(Context context) {
 		if (mChatRequest == null) {
 			mChatRequest = new ChatRequest(context);
+			if (!mChatRequest.initialize(mChatRequest)) {
+				Log.e("mChatRequest", "can't initialize mChatRequest ");
+			}
 		}
 
 		return mChatRequest;

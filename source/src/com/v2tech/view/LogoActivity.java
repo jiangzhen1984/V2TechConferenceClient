@@ -64,21 +64,4 @@ public class LogoActivity extends Activity {
 	}
 	
 	
-	
-	private ImRequest mIM = ImRequest.getInstance(this);
-	private GroupRequest mGR = GroupRequest.getInstance(this);
-	private VideoRequest mVR = VideoRequest.getInstance(this);
-	private ConfRequest mConR = ConfRequest.getInstance(this);
-	private ConfigRequest mCR = new ConfigRequest();
-	private AudioRequest mAR = AudioRequest.getInstance(this);
-	private WBRequest mWR = WBRequest.getInstance(this);
-
-	static {
-		System.loadLibrary("event");
-		System.loadLibrary("udt");
-		System.loadLibrary("v2vi");
-		System.loadLibrary("v2ve");	
-		System.loadLibrary("v2client");
-	}
-	
 }

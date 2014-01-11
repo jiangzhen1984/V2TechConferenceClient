@@ -12,6 +12,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
@@ -34,6 +35,7 @@ public class ConfsActivity extends Activity {
 	private List<Group> mList;
 	
 	 
+	private ImageView mSettingButtonIV;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -41,19 +43,28 @@ public class ConfsActivity extends Activity {
 		mContext = this;
 		setContentView(R.layout.activity_confs);
 		mGroupContainer = (LinearLayout)findViewById(R.id.group_list_container);
-		
+		mSettingButtonIV =(ImageView)findViewById(R.id.group_list_setting);
+		mSettingButtonIV.setOnClickListener(mSettingButtonListener);
 		mList = GlobalHolder.getInstance().getList();
 		addGroupList(mList);
 		
 		IntentFilter filter = new IntentFilter();
 		filter.addAction("com.v2tech.group_changed");
 		filter.addCategory("com.v2tech");
-		this.registerReceiver(mGroupChnageListener, filter);
-		
+		this.registerReceiver(mGroupChnageListener, filter);		
 	}
 	
 	
-	
+	private OnClickListener mSettingButtonListener = new OnClickListener() {
+
+		@Override
+		public void onClick(View arg0) {
+			mContext.startActivity(new Intent(mContext, SettingActivity.class));
+			overridePendingTransition(R.animator.down_in,R.animator.down_out);
+			finish();
+		}
+		
+	};
 	
 	
 	private BroadcastReceiver mGroupChnageListener = new BroadcastReceiver() {
@@ -103,6 +114,9 @@ public class ConfsActivity extends Activity {
 			Toast.makeText(mContext, data.getExtras().getString("error_msg"), Toast.LENGTH_LONG).show();
 		}
 	}
+	
+	
+	
 
 
 
@@ -123,6 +137,9 @@ public class ConfsActivity extends Activity {
 		}
 		
 	}
+	
+	
+	
 
 	
 	

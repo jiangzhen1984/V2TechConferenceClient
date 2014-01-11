@@ -22,7 +22,9 @@ public class AudioRequest
 		if(mAudioRequest==null)
 		{
 			mAudioRequest=new AudioRequest(context);
-			mAudioRequest.initialize(mAudioRequest);
+			if (!mAudioRequest.initialize(mAudioRequest)){
+				Log.e("AudioRequest", "can't initialize AudioRequest ");
+			}
 		}
 		return mAudioRequest;
 	}
