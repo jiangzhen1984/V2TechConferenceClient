@@ -35,13 +35,7 @@ import com.v2tech.logic.GlobalHolder;
  */
 public class LoginActivity extends Activity {
 
-	/**
-	 * A dummy authentication store containing known user names and passwords.
-	 * TODO: remove after connecting to a real authentication system.
-	 */
-	private static final String[] DUMMY_CREDENTIALS = new String[] {
-			"foo@example.com:hello", "bar@example.com:world" };
-
+	
 	/**
 	 * The default email to populate the email field with.
 	 */
@@ -354,7 +348,6 @@ public class LoginActivity extends Activity {
 			if (!ImRequest.getInstance().loginSync(mEmail, mPassword)) {
 				return false;
 			}
-			// TODO: register the new account here.
 
 			// Save user info
 			if (mRemPwdCkbx.isChecked()) {

@@ -1,6 +1,5 @@
 package com.V2.jni;
 
-import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;

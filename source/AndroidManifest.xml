@@ -47,14 +47,16 @@
         </activity>
         <activity
             android:name="com.v2tech.view.ConfsActivity"
-            android:windowSoftInputMode="stateHidden" >
+            android:windowSoftInputMode="stateHidden"
+            android:launchMode="singleTop" >
         </activity>
         
         <activity
             android:name="com.v2tech.view.VideoActivity" >  
         </activity>
          <activity
-            android:name="com.v2tech.view.SettingActivity" >  
+            android:name="com.v2tech.view.SettingActivity"
+            android:launchMode="singleTop" >  
         </activity>
     </application>
 

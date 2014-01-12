@@ -95,7 +95,8 @@ public class ConfsActivity extends Activity {
 				@Override
 				public void onClick(View v) {
 					Intent i = new  Intent(mContext, VideoActivity.class);
-					i.putExtra("gId", gp.getGroupId());
+					i.putExtra("gid", gp.getGroupId());
+					i.putExtra("did", "1124:Camera");
 					startActivityForResult(i, 0);
 				}
 				
@@ -117,6 +118,17 @@ public class ConfsActivity extends Activity {
 	
 	
 	
+
+
+
+	@Override
+	protected void onDestroy() {
+		this.mContext.unregisterReceiver(mGroupChnageListener);
+		super.onDestroy();
+	}
+
+
+
 
 
 

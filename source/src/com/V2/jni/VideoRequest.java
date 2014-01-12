@@ -1,7 +1,6 @@
 package com.V2.jni;
 
 import v2av.VideoPlayer;
-import android.app.Activity;
 import android.content.Context;
 import android.util.Log;
 

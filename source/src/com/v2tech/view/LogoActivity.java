@@ -7,13 +7,6 @@ import android.os.Handler;
 import android.os.Message;
 import android.view.Menu;
 
-import com.V2.jni.AudioRequest;
-import com.V2.jni.ConfRequest;
-import com.V2.jni.ConfigRequest;
-import com.V2.jni.GroupRequest;
-import com.V2.jni.ImRequest;
-import com.V2.jni.VideoRequest;
-import com.V2.jni.WBRequest;
 import com.v2tech.R;
 import com.v2tech.util.V2Log;
 

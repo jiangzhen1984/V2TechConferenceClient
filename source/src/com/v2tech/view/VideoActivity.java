@@ -1,14 +1,18 @@
 package com.v2tech.view;
 
-import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import v2av.VideoPlayer;
-
+import v2av.VideoRecorder;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.Dialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.hardware.Camera;
 import android.os.Build;
@@ -35,10 +39,13 @@ import android.widget.Toast;
 import com.V2.jni.ConfRequest;
 import com.V2.jni.VideoRequest;
 import com.v2tech.R;
+import com.v2tech.logic.GlobalHolder;
 
 public class VideoActivity extends Activity {
 
 	private static final int ONLY_SHOW_LOCAL_VIDEO = 1;
+	
+	private static final int GET_CONF_USER_LIST =10;
 
 	private VideoRequest mVideo = VideoRequest.getInstance(this);
 	private ConfRequest mCR = ConfRequest.getInstance(this);
@@ -50,10 +57,17 @@ public class VideoActivity extends Activity {
 	private RelativeLayout mVideoLayout;
 
 	private ImageView mSettingIV;
+	private ImageView mListUserIV;
 	private ImageView mQuitIV;
 	private PopupWindow mSettingWindow;
+	private PopupWindow mUserListWindow;
 	private static int Measuredwidth = 0;
 	private static int Measuredheight = 0;
+	
+	private Long mGroupId;
+	private String mDeviceId;
+	private Map<Long, VideoPlayer> mVPHolder = new HashMap<Long, VideoPlayer>();
+	
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -63,22 +77,59 @@ public class VideoActivity extends Activity {
 		this.mVideoLayout = (RelativeLayout) findViewById(R.id.in_metting_video_main);
 		this.mSettingIV = (ImageView) findViewById(R.id.in_meeting_setting_iv);
 		this.mSettingIV.setOnClickListener(mShowSettingListener);
+		this.mListUserIV = (ImageView) findViewById(R.id.in_meeting_show_attendee_iv);
+		this.mListUserIV.setOnClickListener(mShowConfUsersListener);
 		this.mQuitIV = (ImageView) findViewById(R.id.in_meeting_log_out_iv);
 		this.mQuitIV.setOnClickListener(mShowQuitWindowListener);
+		initConfsListener();
 		init();
 	}
 
+	
 	private OnClickListener mShowQuitWindowListener = new OnClickListener() {
-
 		@Override
 		public void onClick(View view) {
-			showQuitDialog();			
+			showQuitDialog();
 		}
 		
 	};
 	
 	
-	
+	private OnClickListener mShowConfUsersListener = new OnClickListener() {
+
+		@Override
+		public void onClick(View anchor) {
+			if (mUserListWindow == null) {
+				LayoutInflater inflater = (LayoutInflater) mContext
+						.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+				View view = inflater.inflate(
+						R.layout.in_meeting_user_list_pop_up_window, null);
+				mUserListWindow = new PopupWindow(view,
+						LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+				mUserListWindow
+						.setBackgroundDrawable(mContext
+								.getResources()
+								.getDrawable(
+										R.drawable.rounded_corners_of_in_metting_setting_pop_up_window));
+				mUserListWindow.setFocusable(true);
+				mUserListWindow.setTouchable(true);
+				mUserListWindow.setOutsideTouchable(true);
+				mUserListWindow.setOnDismissListener(new OnDismissListener() {
+
+					@Override
+					public void onDismiss() {
+						mUserListWindow.dismiss();
+					}
+
+				});
+			}
+			
+			if (!mUserListWindow.isShowing()) {
+				mUserListWindow.showAsDropDown(anchor);
+			}
+		}
+		
+	};
 	
 	private OnClickListener mShowSettingListener = new OnClickListener() {
 
@@ -117,8 +168,40 @@ public class VideoActivity extends Activity {
 
 	};
 
+	
+	private BroadcastReceiver mConfUserChangeReceiver = new BroadcastReceiver() {
+
+		@Override
+		public void onReceive(Context arg0, Intent arg1) {
+			
+		}
+		
+	};
+	
+	
+	private void initConfsListener() {
+		IntentFilter filter = new IntentFilter();
+		filter.addCategory("com.v2tech.conf_user_event");
+		filter.addAction("com.v2tech.conf_user_event.get_user_list");
+		filter.addAction("com.v2tech.conf_user_event.new_user_entered");
+		mContext.registerReceiver(mConfUserChangeReceiver, filter);
+	}
+	
+	
 	@TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
 	private void init() {
+		mGroupId = this.getIntent().getLongExtra("gid", 0);
+		if (mGroupId <= 0) {
+			Toast.makeText(this, R.string.error_in_meeting_invalid_gid, Toast.LENGTH_LONG).show();
+			return;
+		}
+		
+		mDeviceId  = this.getIntent().getExtras().getString("did");
+		if (mDeviceId == null || mDeviceId.equals("")) {
+			Toast.makeText(this, R.string.error_in_meeting_invalid_gid, Toast.LENGTH_LONG).show();
+			return;
+		}
+		
 		Message.obtain(mVideoHandler, ONLY_SHOW_LOCAL_VIDEO).sendToTarget();
 
 		Point size = new Point();
@@ -134,10 +217,12 @@ public class VideoActivity extends Activity {
 			Measuredwidth = d.getWidth();
 			Measuredheight = d.getHeight();
 		}
-		
-		VideoRequest.getInstance(this).setDefaultVideoDev("1124:Camera");
+
+
 	}
 
+	
+	
 	private void showLocalSurViewOnly() {
 		camera = Camera.open();
 		if (camera == null) {
@@ -146,18 +231,18 @@ public class VideoActivity extends Activity {
 		}
 		
 		if (mLocalSurView == null) {
-			mLocalSurView = new CameraPreview(this, camera);
-			//mLocalSurView = new SurfaceView(this);
+			//mLocalSurView = new CameraPreview(this, camera);
+			mLocalSurView = new SurfaceView(this);
 		}
 		mVideoLayout.removeAllViews();
 		mVideoLayout.addView(mLocalSurView, new ViewGroup.LayoutParams(
 				ViewGroup.LayoutParams.MATCH_PARENT,
 				ViewGroup.LayoutParams.MATCH_PARENT));
 
-	//	mLocalSurView.getHolder().setType(
-	//			SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
-	//	mLocalSurView.getHolder().setFormat(PixelFormat.TRANSPARENT);
-	//	VideoRecorder.VideoPreviewSurfaceHolder = mLocalSurView.getHolder();
+		mLocalSurView.getHolder().setType(
+				SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
+		mLocalSurView.getHolder().setFormat(PixelFormat.TRANSPARENT);
+		VideoRecorder.VideoPreviewSurfaceHolder = mLocalSurView.getHolder();
 		
 //		
 //		try {
@@ -171,17 +256,46 @@ public class VideoActivity extends Activity {
 //		}
 		
 		VideoPlayer vp = new VideoPlayer();
-
+		mVPHolder.put(GlobalHolder.getLoggedUserId(), vp);
 		vp.SetSurface(mLocalSurView.getHolder());
-		vp.SetViewSize(176, 144);
+		vp.SetViewSize(Measuredwidth, Measuredheight);
 		
-		VideoRequest.getInstance(this).openVideoDevice(51362535243L, 1124L, "1124:Camera", vp, 1);
+		mVideo.setDefaultVideoDev(mDeviceId);
+		mCR.enterConf(mGroupId);
+		mVideo.openVideoDevice(51362535243L, GlobalHolder.getLoggedUserId() , mDeviceId, vp, 1);
+		
 	}
 	
 	
 	
 	
-	 public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback {
+	
+	
+	
+	 @Override
+	protected void onStart() {
+		super.onStart();
+	}
+
+	@Override
+	protected void onStop() {
+		super.onStop();
+	}
+
+	@Override
+	protected void onDestroy() {
+		mContext.unregisterReceiver(mConfUserChangeReceiver);
+		super.onDestroy();
+		mVPHolder.clear();
+	}
+
+
+
+
+
+
+
+	public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback {
 	        private SurfaceHolder mHolder;
 	        private Camera mCamera;
 
@@ -269,8 +383,11 @@ public class VideoActivity extends Activity {
 	
 	private void quit() {
 		//mVideo.closeVideoChat(nGroupID, nToUserID, szDeviceID, businessType);
-		//mVideo.closeVideoDevice(nGroupID, nUserID, szDeviceID, vp, businessType);
-	//	mCR.leaveConf(nConfID)
+		for(Map.Entry<Long, VideoPlayer> entry:this.mVPHolder.entrySet()) {
+			mVideo.closeVideoDevice(mGroupId, entry.getKey(), mDeviceId, entry.getValue(), 1);
+		}
+		//mCR.leaveConf(this.mGroupId);
+		
 		if (camera != null) {
 			camera.stopPreview();
 			camera.release();
@@ -282,6 +399,10 @@ public class VideoActivity extends Activity {
 	}
 	
 	
+	
+	private void getConfsUserList() {
+		mCR.getConfUserList(this.mGroupId);
+	}
 	
 	
 	@Override
@@ -304,6 +425,9 @@ public class VideoActivity extends Activity {
 			switch (msg.what) {
 			case ONLY_SHOW_LOCAL_VIDEO:
 				showLocalSurViewOnly();
+				break;
+			case GET_CONF_USER_LIST:
+				getConfsUserList();
 				break;
 			}
 		}

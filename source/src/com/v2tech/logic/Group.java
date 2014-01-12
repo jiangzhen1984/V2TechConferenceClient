@@ -8,6 +8,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -17,8 +18,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
-
-import com.v2tech.util.V2Log;
 
 public class Group {
 
@@ -43,7 +42,7 @@ public class Group {
 		this.mOwner = mOwner;
 		this.mCreateDate = createDate;
 		Date d = new Date(Long.parseLong(createDate));
-		DateFormat sd = new  SimpleDateFormat("yyyy-MM-dd HH:mm");
+		DateFormat sd = new  SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.US);
 		this.mCreateDate = sd.format(d);
 	}
 
@@ -86,6 +85,16 @@ public class Group {
 	public void setCreateDate(String mCreateDate) {
 		this.mCreateDate = mCreateDate;
 	}
+	
+	
+
+	public User getOwnerUser() {
+		return mOwnerUser;
+	}
+
+	public void setOwnerUser(User mOwnerUser) {
+		this.mOwnerUser = mOwnerUser;
+	}
 
 	/**
 	 * <xml><conf createuserid='1124' id='513891897880' start time='1389189927'
@@ -114,10 +123,7 @@ public class Group {
 
 			for (int i = 0; i < conferenceList.getLength(); i++) {
 				conferenceElement = (Element) conferenceList.item(i);
-				V2Log.i(conferenceElement.getAttribute("subject"));
-				V2Log.i(conferenceElement.getAttribute("createuserid"));
-				V2Log.i(conferenceElement.getAttribute("id"));
-				list.add(new Group(0, 4, conferenceElement
+				list.add(new Group(Long.parseLong(conferenceElement.getAttribute("id")), 4, conferenceElement
 						.getAttribute("subject"), conferenceElement
 						.getAttribute("createuserid"), conferenceElement
 						.getAttribute("starttime")));
