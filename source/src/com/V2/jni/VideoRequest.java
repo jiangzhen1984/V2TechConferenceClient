@@ -2,7 +2,10 @@ package com.V2.jni;
 
 import v2av.VideoPlayer;
 import android.content.Context;
+import android.content.Intent;
 import android.util.Log;
+
+import com.v2tech.view.VideoActivity;
 
 //import com.xinlan.im.adapter.XiuLiuApplication;
 //import com.xinlan.im.bean.msgtype.MsgType;
@@ -177,6 +180,11 @@ public class VideoRequest
 	private void OnVideoCaptureError(String szDevID, int nErr)
 	{
 		Log.e("ImRequest UI", "OnVideoCaptureError " + szDevID +" "+nErr);
+		Intent i = new Intent(VideoActivity.JNI_EVENT_VIDEO_CATEGORY_OPEN_VIDEO_EVENT_ACTION);
+		i.putExtra("result", nErr);
+		i.putExtra("did", szDevID);
+		i.addCategory(VideoActivity.JNI_EVENT_VIDEO_CATEGORY);
+		this.context.sendBroadcast(i);
 	}
 	
 	private void OnVideoPlayerClosed(String szDeviceID)

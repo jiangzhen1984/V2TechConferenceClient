@@ -10,6 +10,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -60,6 +62,7 @@ public class LoginActivity extends Activity {
 	private View mLoginStatusView;
 	private TextView mLoginStatusMessageView;
 	private View mShowIpSettingButton;
+	private Dialog mSettingDialog;
 
 	private Activity mContext;
 
@@ -112,7 +115,9 @@ public class LoginActivity extends Activity {
 		@Override
 		public void onClick(final View vButton) {
 			vButton.setEnabled(false);
-
+			if (mSettingDialog != null) {
+				mSettingDialog.show();
+			}
 			final Dialog dialog = new Dialog(mContext, R.style.IpSettingDialog);
 			dialog.setContentView(R.layout.ip_setting);
 
@@ -172,7 +177,6 @@ public class LoginActivity extends Activity {
 								Toast.LENGTH_LONG).show();
 					}
 					dialog.dismiss();
-					vButton.setEnabled(true);
 				}
 			});
 
@@ -180,7 +184,6 @@ public class LoginActivity extends Activity {
 				@Override
 				public void onClick(View v) {
 					dialog.dismiss();
-					vButton.setEnabled(true);
 				}
 			});
 
@@ -192,15 +195,28 @@ public class LoginActivity extends Activity {
 					if (keyCode == KeyEvent.KEYCODE_BACK) {
 						dialog.dismiss();
 					}
-					vButton.setEnabled(true);
 					return false;
 				}
 			});
-
+			
+			mSettingDialog = dialog;
 			dialog.show();
 		}
 
 	};
+	
+	
+	
+
+
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		super.onSaveInstanceState(outState);
+		if (mSettingDialog != null && mSettingDialog.isShowing()) {
+			mSettingDialog.dismiss();
+		}
+	}
+
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {

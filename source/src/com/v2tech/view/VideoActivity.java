@@ -1,5 +1,6 @@
 package com.v2tech.view;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -17,6 +18,7 @@ import android.graphics.Point;
 import android.hardware.Camera;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.view.Display;
@@ -36,10 +38,13 @@ import android.widget.PopupWindow.OnDismissListener;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
+import com.V2.jni.ChatRequest;
 import com.V2.jni.ConfRequest;
+import com.V2.jni.ConfigRequest;
 import com.V2.jni.VideoRequest;
 import com.v2tech.R;
 import com.v2tech.logic.GlobalHolder;
+import com.v2tech.util.V2Log;
 
 public class VideoActivity extends Activity {
 
@@ -47,8 +52,22 @@ public class VideoActivity extends Activity {
 	
 	private static final int GET_CONF_USER_LIST =10;
 
+	
+	
+	
+	public static final String JNI_EVENT_VIDEO_CATEGORY = "com.v2tech.conf_video_event";
+	public static final String JNI_EVENT_VIDEO_CATEGORY_OPEN_VIDEO_EVENT_ACTION = "com.v2tech.conf_video_event.open_video_event";
+
+	
+	
+	public static final String JNI_EVENT_CONF_USER_CATEGORY = "com.v2tech.conf_user_event";
+	public static final String JNI_EVENT_CONF_USER_CATEGORY_GET_USER_LIST_ACTION = "com.v2tech.conf_user_event.get_user_list";
+	public static final String JNI_EVENT_CONF_USER_CATEGORY_NEW_USER_ENTERED_ACTION = "com.v2tech.conf_user_event.new_user_entered";
+		
 	private VideoRequest mVideo = VideoRequest.getInstance(this);
+	private ChatRequest mChat = ChatRequest.getInstance(this);
 	private ConfRequest mCR = ConfRequest.getInstance(this);
+	private ConfigRequest mConfig = new ConfigRequest();
 
 	private Handler mVideoHandler = new VideoHandler();
 
@@ -61,6 +80,7 @@ public class VideoActivity extends Activity {
 	private ImageView mQuitIV;
 	private PopupWindow mSettingWindow;
 	private PopupWindow mUserListWindow;
+	private Dialog mQuitDialog;
 	private static int Measuredwidth = 0;
 	private static int Measuredheight = 0;
 	
@@ -172,18 +192,27 @@ public class VideoActivity extends Activity {
 	private BroadcastReceiver mConfUserChangeReceiver = new BroadcastReceiver() {
 
 		@Override
-		public void onReceive(Context arg0, Intent arg1) {
-			
+		public void onReceive(Context context, Intent intent) {
+			if (intent.getAction().equals(JNI_EVENT_VIDEO_CATEGORY_OPEN_VIDEO_EVENT_ACTION)) {
+				if (intent.getIntExtra("result", 1) != 0 ) {
+					//TODO handle open video falied;
+					Toast.makeText(context, R.string.error_in_meeting_open_video_falied, Toast.LENGTH_LONG).show();;				}
+			}
 		}
 		
 	};
 	
 	
+	
+	
 	private void initConfsListener() {
 		IntentFilter filter = new IntentFilter();
-		filter.addCategory("com.v2tech.conf_user_event");
-		filter.addAction("com.v2tech.conf_user_event.get_user_list");
-		filter.addAction("com.v2tech.conf_user_event.new_user_entered");
+		filter.addCategory(JNI_EVENT_VIDEO_CATEGORY);
+		filter.addAction(JNI_EVENT_VIDEO_CATEGORY_OPEN_VIDEO_EVENT_ACTION);
+		
+		filter.addCategory(JNI_EVENT_CONF_USER_CATEGORY);
+		filter.addAction(JNI_EVENT_CONF_USER_CATEGORY_GET_USER_LIST_ACTION);
+		filter.addAction(JNI_EVENT_CONF_USER_CATEGORY_NEW_USER_ENTERED_ACTION);
 		mContext.registerReceiver(mConfUserChangeReceiver, filter);
 	}
 	
@@ -224,11 +253,18 @@ public class VideoActivity extends Activity {
 	
 	
 	private void showLocalSurViewOnly() {
-		camera = Camera.open();
-		if (camera == null) {
-			Toast.makeText(mContext, "can't open camera", Toast.LENGTH_LONG).show();
-			return;
-		}
+		
+		File path = Environment.getExternalStorageDirectory();
+		String szPath = path.getPath();
+		mConfig.setExtStoragePath(szPath);
+		V2Log.e(mChat.initialize(mChat)+"");
+		
+		
+	//	camera = Camera.open();
+		//if (camera == null) {
+	//		Toast.makeText(mContext, "can't open camera", Toast.LENGTH_LONG).show();
+	//		return;
+	//	}
 		
 		if (mLocalSurView == null) {
 			//mLocalSurView = new CameraPreview(this, camera);
@@ -262,7 +298,7 @@ public class VideoActivity extends Activity {
 		
 		mVideo.setDefaultVideoDev(mDeviceId);
 		mCR.enterConf(mGroupId);
-		mVideo.openVideoDevice(51362535243L, GlobalHolder.getLoggedUserId() , "", vp, 1);
+		mVideo.openVideoDevice(mGroupId, GlobalHolder.getLoggedUserId() , "", vp, 1);
 		
 	}
 	
@@ -287,6 +323,27 @@ public class VideoActivity extends Activity {
 		mContext.unregisterReceiver(mConfUserChangeReceiver);
 		super.onDestroy();
 		mVPHolder.clear();
+	}
+
+
+
+
+
+
+
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		super.onSaveInstanceState(outState);
+		if (mQuitDialog != null && mQuitDialog.isShowing()) {
+			mQuitDialog.dismiss();
+		}
+		
+		if(mSettingWindow != null && mSettingWindow.isShowing()) {
+			mSettingWindow.dismiss();
+		}
+		if (this.mUserListWindow != null && mUserListWindow.isShowing()) {
+			mUserListWindow.dismiss();
+		}
 	}
 
 
@@ -357,27 +414,32 @@ public class VideoActivity extends Activity {
 
 	
 	private void showQuitDialog() {
-		final Dialog d = new Dialog(mContext, R.style.InMeetingQuitDialog);
+		if (mQuitDialog == null) {
+			
+			final Dialog d = new Dialog(mContext, R.style.InMeetingQuitDialog);
+			
+			d.setContentView(R.layout.in_meeting_quit_window);
+			final Button cancelB = (Button)d.findViewById(R.id.IMWCancelButton);
+			cancelB.setOnClickListener(new OnClickListener(){
+				@Override
+				public void onClick(View v) {
+					d.dismiss();
+				}
+				
+			});
+			final Button quitB = (Button)d.findViewById(R.id.IMWQuitButton);
+			quitB.setOnClickListener(new OnClickListener(){
+				@Override
+				public void onClick(View v) {
+					d.dismiss();
+					quit();
+				}
+				
+			});
+			mQuitDialog = d;
+		}
 		
-		d.setContentView(R.layout.in_meeting_quit_window);
-		final Button cancelB = (Button)d.findViewById(R.id.IMWCancelButton);
-		cancelB.setOnClickListener(new OnClickListener(){
-			@Override
-			public void onClick(View v) {
-				d.dismiss();
-			}
-			
-		});
-		final Button quitB = (Button)d.findViewById(R.id.IMWQuitButton);
-		quitB.setOnClickListener(new OnClickListener(){
-			@Override
-			public void onClick(View v) {
-				d.dismiss();
-				quit();
-			}
-			
-		});
-		d.show();
+		mQuitDialog.show();
 	}
 	
 	
