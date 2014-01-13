@@ -40,5 +40,5 @@ public class V2Log {
 		Log.d(TAG, msg);
 	}
 
-	
+	//TODO record log to disk
 }

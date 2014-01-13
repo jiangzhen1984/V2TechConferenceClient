@@ -120,10 +120,14 @@ public class ConfsActivity extends Activity {
 	
 
 
+	private void quit() {
+		this.mContext.unregisterReceiver(mGroupChnageListener);
+		this.mContext.sendBroadcast(new Intent(LogoutReceiver.LOG_OUT));
+	}
 
 	@Override
 	protected void onDestroy() {
-		this.mContext.unregisterReceiver(mGroupChnageListener);
+		quit();
 		super.onDestroy();
 	}
 

@@ -15,7 +15,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
-import android.hardware.Camera;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -195,7 +194,7 @@ public class VideoActivity extends Activity {
 		public void onReceive(Context context, Intent intent) {
 			if (intent.getAction().equals(JNI_EVENT_VIDEO_CATEGORY_OPEN_VIDEO_EVENT_ACTION)) {
 				if (intent.getIntExtra("result", 1) != 0 ) {
-					//TODO handle open video falied;
+					//TODO handle open video failed;
 					Toast.makeText(context, R.string.error_in_meeting_open_video_falied, Toast.LENGTH_LONG).show();;				}
 			}
 		}
@@ -259,15 +258,7 @@ public class VideoActivity extends Activity {
 		mConfig.setExtStoragePath(szPath);
 		V2Log.e(mChat.initialize(mChat)+"");
 		
-		
-	//	camera = Camera.open();
-		//if (camera == null) {
-	//		Toast.makeText(mContext, "can't open camera", Toast.LENGTH_LONG).show();
-	//		return;
-	//	}
-		
 		if (mLocalSurView == null) {
-			//mLocalSurView = new CameraPreview(this, camera);
 			mLocalSurView = new SurfaceView(this);
 		}
 		mVideoLayout.removeAllViews();
@@ -280,17 +271,6 @@ public class VideoActivity extends Activity {
 		mLocalSurView.getHolder().setFormat(PixelFormat.TRANSPARENT);
 		VideoRecorder.VideoPreviewSurfaceHolder = mLocalSurView.getHolder();
 		
-//		
-//		try {
-//			camera.stopPreview();
-//			mLocalSurView.getHolder().setType(
-//								SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
-//			camera.setPreviewDisplay(mLocalSurView.getHolder());
-//			camera.startPreview();
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//		}
-		
 		VideoPlayer vp = new VideoPlayer();
 		mVPHolder.put(GlobalHolder.getLoggedUserId(), vp);
 		vp.SetSurface(mLocalSurView.getHolder());
@@ -299,7 +279,6 @@ public class VideoActivity extends Activity {
 		mVideo.setDefaultVideoDev(mDeviceId);
 		mCR.enterConf(mGroupId);
 		mVideo.openVideoDevice(mGroupId, GlobalHolder.getLoggedUserId() , "", vp, 1);
-		
 	}
 	
 	
@@ -349,69 +328,6 @@ public class VideoActivity extends Activity {
 
 
 
-
-
-
-	public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback {
-	        private SurfaceHolder mHolder;
-	        private Camera mCamera;
-
-	        public CameraPreview(Context context, Camera camera) {
-	            super(context);
-	            mCamera = camera;
-
-	            // Install a SurfaceHolder.Callback so we get notified when the
-	            // underlying surface is created and destroyed.
-	            mHolder = getHolder();
-	            mHolder.addCallback(this);
-	            // deprecated setting, but required on Android versions prior to 3.0
-	            mHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
-	        }
-
-	        public void surfaceCreated(SurfaceHolder holder) {
-	            // The Surface has been created, now tell the camera where to draw the preview.
-	            //try {
-	               // mCamera.setPreviewDisplay(holder);
-	                mCamera.startPreview();
-	           // } catch (IOException e) {
-	           // }
-	        }
-
-	        public void surfaceDestroyed(SurfaceHolder holder) {
-	            // empty. Take care of releasing the Camera preview in your activity.
-	        }
-
-	        public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
-	            // If your preview can change or rotate, take care of those events here.
-	            // Make sure to stop the preview before resizing or reformatting it.
-
-	            if (mHolder.getSurface() == null){
-	              // preview surface does not exist
-	              return;
-	            }
-
-	            // stop preview before making changes
-	            try {
-	                mCamera.stopPreview();
-	            } catch (Exception e){
-	              // ignore: tried to stop a non-existent preview
-	            }
-
-	            // set preview size and make any resize, rotate or
-	            // reformatting changes here
-
-	            // start preview with new settings
-	            try {
-	                mCamera.setPreviewDisplay(mHolder);
-	                mCamera.startPreview();
-
-	            } catch (Exception e){
-	            }
-	        }
-	    }
-	
-	
-
 	
 	private void showQuitDialog() {
 		if (mQuitDialog == null) {
@@ -448,12 +364,8 @@ public class VideoActivity extends Activity {
 		for(Map.Entry<Long, VideoPlayer> entry:this.mVPHolder.entrySet()) {
 			mVideo.closeVideoDevice(mGroupId, entry.getKey(), mDeviceId, entry.getValue(), 1);
 		}
-		//mCR.leaveConf(this.mGroupId);
+		mCR.exitConf(this.mGroupId);
 		
-		if (camera != null) {
-			camera.stopPreview();
-			camera.release();
-		}
 		Intent i = new Intent();
 		i.putExtra("error_msg", "退出失败");
 		this.setResult(1, i);
@@ -475,11 +387,11 @@ public class VideoActivity extends Activity {
 		}
 		return super.onKeyDown(keyCode, event);
 	}
-
-
-
-	private Camera camera;
 	
+	//TODO do log out
+
+
+
 	class VideoHandler extends Handler {
 
 		@Override

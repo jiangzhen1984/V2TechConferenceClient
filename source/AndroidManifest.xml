@@ -61,6 +61,13 @@
             android:name="com.v2tech.view.SettingActivity"
             android:launchMode="singleTop" >  
         </activity>
+        
+         <receiver
+             android:name="com.v2tech.view.LogoutReceiver">
+             <intent-filter>
+                 <action android:name="com.v2tech.log_out" ></action>
+             </intent-filter>
+         </receiver>
     </application>
 
 </manifest>
