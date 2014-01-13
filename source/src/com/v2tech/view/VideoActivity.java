@@ -262,7 +262,7 @@ public class VideoActivity extends Activity {
 		
 		mVideo.setDefaultVideoDev(mDeviceId);
 		mCR.enterConf(mGroupId);
-		mVideo.openVideoDevice(51362535243L, GlobalHolder.getLoggedUserId() , mDeviceId, vp, 1);
+		mVideo.openVideoDevice(51362535243L, GlobalHolder.getLoggedUserId() , "", vp, 1);
 		
 	}
 	

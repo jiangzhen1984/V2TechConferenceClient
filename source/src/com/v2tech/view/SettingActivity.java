@@ -21,7 +21,7 @@ public class SettingActivity extends Activity {
 		mContext = this;
 		setContentView(R.layout.activity_setting);
 		
-		mSettingButtonIV =(ImageView)findViewById(R.id.setting_confs_button);
+		mSettingButtonIV =(ImageView)findViewById(R.id.setting_conf_button);
 		mSettingButtonIV.setOnClickListener(mConfsButtonListener);
 	}
 

@@ -37,55 +37,33 @@
 
             <RelativeLayout
                 android:layout_width="fill_parent"
-                android:layout_height="match_parent"
-                android:gravity="center_horizontal" >
+                android:layout_height="match_parent" >
 
                 <ImageView
-                    android:id="@+id/group_list_conf_list"
+                    android:id="@+id/confs_center_separation"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentLeft="true"
-                    android:layout_centerInParent="true"
-                    android:layout_marginLeft="20dp"
-                    android:src="@drawable/confs" />
-
-                <ImageView
-                    android:id="@+id/group_list_conference_image_view"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignRight="@+id/group_list_conf_list"
+                    android:layout_centerHorizontal="true"
                     android:layout_centerVertical="true"
-                    android:src="@drawable/group_list_separation" />
-
-                <ImageView
-                    android:id="@+id/group_list_group"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerVertical="true"
-                    android:layout_toRightOf="@+id/group_list_conf_list"
-                    android:src="@drawable/group_list_group_button" />
-
-                <ImageView
-                    android:id="@+id/setting_contacts"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerVertical="true"
-                    android:layout_toRightOf="@+id/group_list_group"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="10dp"
                     android:src="@drawable/group_list_separation" />
 
                 <ImageView
                     android:id="@+id/group_list_contacts"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignTop="@+id/group_list_conf_list"
-                    android:layout_toRightOf="@+id/setting_contacts"
-                    android:src="@drawable/group_list_contacts" />
+                    android:layout_centerVertical="true"
+                    android:layout_toRightOf="@+id/confs_center_separation"
+                    android:src="@drawable/address" />
 
                 <ImageView
-                    android:id="@+id/setting_address"
+                    android:id="@+id/confs_sepa1"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_centerVertical="true"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="10dp"
                     android:layout_toRightOf="@+id/group_list_contacts"
                     android:src="@drawable/group_list_separation" />
 
@@ -95,8 +73,34 @@
                     android:layout_height="wrap_content"
                     android:layout_centerVertical="true"
                     android:layout_marginRight="20dp"
-                    android:layout_toRightOf="@+id/setting_address"
-                    android:src="@drawable/group_list_setting" />
+                    android:layout_toRightOf="@+id/confs_sepa1"
+                    android:src="@drawable/setting" />
+
+                <ImageView
+                    android:id="@+id/group_list_group"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_toLeftOf="@+id/confs_center_separation"
+                    android:src="@drawable/group" />
+
+                <ImageView
+                    android:id="@+id/group_list_sep2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentTop="true"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="10dp"
+                    android:layout_toLeftOf="@+id/group_list_group"
+                    android:src="@drawable/group_list_separation" />
+
+                <ImageView
+                    android:id="@+id/group_list_conf_list"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_toLeftOf="@+id/group_list_sep2"
+                    android:src="@drawable/message" />
             </RelativeLayout>
         </LinearLayout>
 

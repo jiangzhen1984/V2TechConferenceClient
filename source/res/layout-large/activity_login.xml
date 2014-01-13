@@ -49,7 +49,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:contentDescription="@string/banner_desc"
-                android:src="@drawable/logo_200_168" />
+                android:src="@drawable/logo" />
 
             <LinearLayout
                 android:layout_width="match_parent"
