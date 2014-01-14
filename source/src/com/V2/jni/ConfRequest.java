@@ -1,8 +1,11 @@
 package com.V2.jni;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+
+import com.v2tech.view.VideoActivity;
 
 
 public class ConfRequest
@@ -155,13 +158,32 @@ public class ConfRequest
 
 		private void OnConfMemberEnter(long nConfID, long  nTime, String szUserInfos)
 		{
-			Log.e("ImRequest UI", "浼氳鏈変汉杩涘叆-->OnConfMemberEnter " + nConfID + " " + nTime + " " + szUserInfos);
+			Log.e("ConfRequest UI", "-->OnConfMemberEnter " + nConfID + " " + nTime + " " + szUserInfos);
+			//<user id='146' uetype='1'/>
+			//TODO query user name
+			Intent i = new Intent(VideoActivity.JNI_EVENT_CONF_USER_CATEGORY_NEW_USER_ENTERED_ACTION);
+			i.addCategory(VideoActivity.JNI_EVENT_CONF_USER_CATEGORY);
+			//TODO parse uid
+			int pos = szUserInfos.indexOf("'");
+			int end = szUserInfos.indexOf("'", pos + 1);
+			if (pos > 0 && end > 0) { 
+				i.putExtra("uid", Long.parseLong(szUserInfos.subSequence(pos+1, end).toString()));
+			}
+			i.putExtra("name", szUserInfos);
+			this.context.sendBroadcast(i);
 		}
 		
 		private void OnConfMemberExit(long nConfID, long nTime, long nUserID)
 		{
 			Log.e("ImRequest UI", "浼氳鏈変汉閫�嚭-->OnConfMemberExit " + nConfID + " " + nTime + " " + nUserID);
 //			Logger.i(null, "浼氳鏈変汉閫�嚭-->OnConfMemberExit " + nConfID + " " + nTime + " " + nUserID);
+			//TODO query user name
+			Intent i = new Intent(VideoActivity.JNI_EVENT_CONF_USER_CATEGORY_USER_EXITED_ACTION);
+			i.addCategory(VideoActivity.JNI_EVENT_CONF_USER_CATEGORY);
+			i.putExtra("uid", nUserID);
+			i.putExtra("name", nUserID);
+			this.context.sendBroadcast(i);
+			
 		}
 
 		//浼氳鏈夌敤鎴风寮�殑鍥炶皟

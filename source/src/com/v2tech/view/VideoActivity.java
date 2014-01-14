@@ -1,8 +1,9 @@
 package com.v2tech.view;
 
-import java.io.File;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import v2av.VideoPlayer;
 import v2av.VideoRecorder;
@@ -17,7 +18,6 @@ import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.view.Display;
@@ -27,72 +27,83 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.PopupWindow.OnDismissListener;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
-import com.V2.jni.ChatRequest;
 import com.V2.jni.ConfRequest;
-import com.V2.jni.ConfigRequest;
 import com.V2.jni.VideoRequest;
 import com.v2tech.R;
+import com.v2tech.logic.ConfUserDeviceInfo;
 import com.v2tech.logic.GlobalHolder;
-import com.v2tech.util.V2Log;
+import com.v2tech.logic.User;
 
 public class VideoActivity extends Activity {
 
 	private static final int ONLY_SHOW_LOCAL_VIDEO = 1;
-	
-	private static final int GET_CONF_USER_LIST =10;
+	private static final int FILL_USER_LIST = 2;
+	private static final int APPLY_SPEAK = 3;
+	private static final int FINISH_BY_USER = 9;
 
-	
-	
-	
+	private static final int SEND_ENTER_CONF_EVENT = 10;
+	private static final int SEND_EXIT_CONF_EVENT = 11;
+
+	private static final int GET_CONF_USER_LIST = 20;
+	private static final int USER_ENTERED_CONF = 21;
+	private static final int USER_EXITED_CONF = 22;
+	private static final int CONF_USER_DEVICE_EVENT = 23;
+
 	public static final String JNI_EVENT_VIDEO_CATEGORY = "com.v2tech.conf_video_event";
 	public static final String JNI_EVENT_VIDEO_CATEGORY_OPEN_VIDEO_EVENT_ACTION = "com.v2tech.conf_video_event.open_video_event";
 
-	
-	
 	public static final String JNI_EVENT_CONF_USER_CATEGORY = "com.v2tech.conf_user_event";
 	public static final String JNI_EVENT_CONF_USER_CATEGORY_GET_USER_LIST_ACTION = "com.v2tech.conf_user_event.get_user_list";
 	public static final String JNI_EVENT_CONF_USER_CATEGORY_NEW_USER_ENTERED_ACTION = "com.v2tech.conf_user_event.new_user_entered";
-		
+	public static final String JNI_EVENT_CONF_USER_CATEGORY_USER_EXITED_ACTION = "com.v2tech.conf_user_event.user_exited";
+	public static final String JNI_EVENT_CONF_USER_CATEGORY_USER_DEVICE_NOTIFICATION = "com.v2tech.conf_user_event.user_device_notificaiton";
+
 	private VideoRequest mVideo = VideoRequest.getInstance(this);
-	private ChatRequest mChat = ChatRequest.getInstance(this);
 	private ConfRequest mCR = ConfRequest.getInstance(this);
-	private ConfigRequest mConfig = new ConfigRequest();
 
 	private Handler mVideoHandler = new VideoHandler();
 
 	private Context mContext;
-	private SurfaceView mLocalSurView;
+	private SurfaceView[] mSurfaceViewArr;
+	private int[] mSurfaceUsedFlag;
 	private RelativeLayout mVideoLayout;
 
 	private ImageView mSettingIV;
 	private ImageView mListUserIV;
 	private ImageView mQuitIV;
+	private ImageView mSpeakerIV;
 	private PopupWindow mSettingWindow;
 	private PopupWindow mUserListWindow;
+	private LinearLayout mUserListContainer;
 	private Dialog mQuitDialog;
 	private static int Measuredwidth = 0;
 	private static int Measuredheight = 0;
-	
+
 	private Long mGroupId;
 	private String mDeviceId;
-	private Map<Long, VideoPlayer> mVPHolder = new HashMap<Long, VideoPlayer>();
-	
+	private Map<Long, UserDeviceHolder> mVPHolder = new HashMap<Long, UserDeviceHolder>();
+	private Set<User> mCurrentUserList = new HashSet<User>();
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_in_metting);
 		mContext = this;
+		mSurfaceViewArr = new SurfaceView[] { new SurfaceView(this),
+				new SurfaceView(this), new SurfaceView(this),
+				new SurfaceView(this) };
+		mSurfaceUsedFlag = new int[] { 0, 0, 0, 0 };
 		this.mVideoLayout = (RelativeLayout) findViewById(R.id.in_metting_video_main);
 		this.mSettingIV = (ImageView) findViewById(R.id.in_meeting_setting_iv);
 		this.mSettingIV.setOnClickListener(mShowSettingListener);
@@ -100,20 +111,26 @@ public class VideoActivity extends Activity {
 		this.mListUserIV.setOnClickListener(mShowConfUsersListener);
 		this.mQuitIV = (ImageView) findViewById(R.id.in_meeting_log_out_iv);
 		this.mQuitIV.setOnClickListener(mShowQuitWindowListener);
+		this.mSpeakerIV = (ImageView) findViewById(R.id.speaker_iv);
+		this.mSpeakerIV.setOnClickListener(mApplySpeakerListener);
 		initConfsListener();
 		init();
 	}
 
-	
+	private OnClickListener mApplySpeakerListener = new OnClickListener() {
+		@Override
+		public void onClick(View view) {
+			Message.obtain(mVideoHandler, APPLY_SPEAK).sendToTarget();
+		}
+	};
+
 	private OnClickListener mShowQuitWindowListener = new OnClickListener() {
 		@Override
 		public void onClick(View view) {
 			showQuitDialog();
 		}
-		
 	};
-	
-	
+
 	private OnClickListener mShowConfUsersListener = new OnClickListener() {
 
 		@Override
@@ -123,6 +140,9 @@ public class VideoActivity extends Activity {
 						.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 				View view = inflater.inflate(
 						R.layout.in_meeting_user_list_pop_up_window, null);
+				mUserListContainer = (LinearLayout) view
+						.findViewById(R.id.in_meeting_user_list_layout);
+
 				mUserListWindow = new PopupWindow(view,
 						LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 				mUserListWindow
@@ -141,15 +161,16 @@ public class VideoActivity extends Activity {
 					}
 
 				});
+				fillUserList();
 			}
-			
+
 			if (!mUserListWindow.isShowing()) {
 				mUserListWindow.showAsDropDown(anchor);
 			}
 		}
-		
+
 	};
-	
+
 	private OnClickListener mShowSettingListener = new OnClickListener() {
 
 		@Override
@@ -178,7 +199,7 @@ public class VideoActivity extends Activity {
 
 				});
 			}
-			
+
 			if (!mSettingWindow.isShowing()) {
 				mSettingWindow.showAsDropDown(v);
 			}
@@ -187,50 +208,76 @@ public class VideoActivity extends Activity {
 
 	};
 
-	
 	private BroadcastReceiver mConfUserChangeReceiver = new BroadcastReceiver() {
 
 		@Override
 		public void onReceive(Context context, Intent intent) {
-			if (intent.getAction().equals(JNI_EVENT_VIDEO_CATEGORY_OPEN_VIDEO_EVENT_ACTION)) {
-				if (intent.getIntExtra("result", 1) != 0 ) {
-					//TODO handle open video failed;
-					Toast.makeText(context, R.string.error_in_meeting_open_video_falied, Toast.LENGTH_LONG).show();;				}
+			if (intent.getAction().equals(
+					JNI_EVENT_VIDEO_CATEGORY_OPEN_VIDEO_EVENT_ACTION)) {
+				if (intent.getIntExtra("result", 1) != 0) {
+					// TODO handle open video failed;
+					Toast.makeText(context,
+							R.string.error_in_meeting_open_video_falied,
+							Toast.LENGTH_LONG).show();
+					;
+				}
+			} else if (intent.getAction().equals(
+					JNI_EVENT_CONF_USER_CATEGORY_NEW_USER_ENTERED_ACTION)
+					|| intent.getAction().equals(
+							JNI_EVENT_CONF_USER_CATEGORY_USER_EXITED_ACTION)) {
+				long uid = intent.getLongExtra("uid", -1);
+				String name = intent.getExtras().getString("name");
+				if (uid < 0) {
+					Toast.makeText(mContext, "Invalid user id",
+							Toast.LENGTH_SHORT).show();
+					return;
+				}
+				Message.obtain(
+						mVideoHandler,
+						intent.getAction()
+								.equals(JNI_EVENT_CONF_USER_CATEGORY_NEW_USER_ENTERED_ACTION) ? USER_ENTERED_CONF
+								: USER_EXITED_CONF, new User(uid, name))
+						.sendToTarget();
+
+			} else if (intent.getAction().equals(
+					JNI_EVENT_CONF_USER_CATEGORY_USER_DEVICE_NOTIFICATION)) {
+				ConfUserDeviceInfo cud = (ConfUserDeviceInfo) intent
+						.getExtras().get("ud");
+				Message.obtain(mVideoHandler, CONF_USER_DEVICE_EVENT, cud)
+						.sendToTarget();
 			}
 		}
-		
+
 	};
-	
-	
-	
-	
+
 	private void initConfsListener() {
 		IntentFilter filter = new IntentFilter();
 		filter.addCategory(JNI_EVENT_VIDEO_CATEGORY);
 		filter.addAction(JNI_EVENT_VIDEO_CATEGORY_OPEN_VIDEO_EVENT_ACTION);
-		
+
 		filter.addCategory(JNI_EVENT_CONF_USER_CATEGORY);
 		filter.addAction(JNI_EVENT_CONF_USER_CATEGORY_GET_USER_LIST_ACTION);
 		filter.addAction(JNI_EVENT_CONF_USER_CATEGORY_NEW_USER_ENTERED_ACTION);
+		filter.addAction(JNI_EVENT_CONF_USER_CATEGORY_USER_EXITED_ACTION);
+		filter.addAction(JNI_EVENT_CONF_USER_CATEGORY_USER_DEVICE_NOTIFICATION);
 		mContext.registerReceiver(mConfUserChangeReceiver, filter);
 	}
-	
-	
+
 	@TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
 	private void init() {
 		mGroupId = this.getIntent().getLongExtra("gid", 0);
 		if (mGroupId <= 0) {
-			Toast.makeText(this, R.string.error_in_meeting_invalid_gid, Toast.LENGTH_LONG).show();
+			Toast.makeText(this, R.string.error_in_meeting_invalid_gid,
+					Toast.LENGTH_LONG).show();
 			return;
 		}
-		
-		mDeviceId  = this.getIntent().getExtras().getString("did");
+
+		mDeviceId = this.getIntent().getExtras().getString("did");
 		if (mDeviceId == null || mDeviceId.equals("")) {
-			Toast.makeText(this, R.string.error_in_meeting_invalid_gid, Toast.LENGTH_LONG).show();
+			Toast.makeText(this, R.string.error_in_meeting_invalid_gid,
+					Toast.LENGTH_LONG).show();
 			return;
 		}
-		
-		Message.obtain(mVideoHandler, ONLY_SHOW_LOCAL_VIDEO).sendToTarget();
 
 		Point size = new Point();
 		WindowManager w = getWindowManager();
@@ -246,55 +293,54 @@ public class VideoActivity extends Activity {
 			Measuredheight = d.getHeight();
 		}
 
-
 	}
 
-	
-	
 	private void showLocalSurViewOnly() {
-		
-		File path = Environment.getExternalStorageDirectory();
-		String szPath = path.getPath();
-		mConfig.setExtStoragePath(szPath);
-		V2Log.e(mChat.initialize(mChat)+"");
-		
-		if (mLocalSurView == null) {
-			mLocalSurView = new SurfaceView(this);
-		}
-		mVideoLayout.removeAllViews();
-		mVideoLayout.addView(mLocalSurView, new ViewGroup.LayoutParams(
-				ViewGroup.LayoutParams.MATCH_PARENT,
-				ViewGroup.LayoutParams.MATCH_PARENT));
-
-		mLocalSurView.getHolder().setType(
+		mSurfaceViewArr[0].getHolder().setType(
 				SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
-		mLocalSurView.getHolder().setFormat(PixelFormat.TRANSPARENT);
-		VideoRecorder.VideoPreviewSurfaceHolder = mLocalSurView.getHolder();
-		
-		VideoPlayer vp = new VideoPlayer();
-		mVPHolder.put(GlobalHolder.getLoggedUserId(), vp);
-		vp.SetSurface(mLocalSurView.getHolder());
-		vp.SetViewSize(Measuredwidth, Measuredheight);
-		
-		mVideo.setDefaultVideoDev(mDeviceId);
-		mCR.enterConf(mGroupId);
-		mVideo.openVideoDevice(mGroupId, GlobalHolder.getLoggedUserId() , "", vp, 1);
+		mSurfaceViewArr[0].getHolder().setFormat(PixelFormat.TRANSPARENT);
+		VideoRecorder.VideoPreviewSurfaceHolder = mSurfaceViewArr[0]
+				.getHolder();
+		mVideo.openVideoDevice(mGroupId, GlobalHolder.getLoggedUserId(), "",
+				null, 1);
 	}
-	
-	
-	
-	
-	
-	
-	
-	 @Override
+
+	@Override
 	protected void onStart() {
 		super.onStart();
+		Message.obtain(mVideoHandler, SEND_ENTER_CONF_EVENT).sendToTarget();
+		adjustLayout();
+		Message.obtain(mVideoHandler, ONLY_SHOW_LOCAL_VIDEO).sendToTarget();
+	}
+
+	private void adjustLayout() {
+		mVideoLayout.removeAllViews();
+		int t = mSurfaceViewArr.length / 2;
+		int iWid = Measuredwidth / t;
+		int iHei = Measuredheight / 2;
+		for (int i = 0; i < mSurfaceViewArr.length; i++) {
+			mSurfaceViewArr[i].setId(i + 1000);
+			RelativeLayout.LayoutParams rl = new RelativeLayout.LayoutParams(
+					iWid, iHei);
+			int r = i % t;
+			if (r == 0) {
+				rl.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+			} else {
+				rl.addRule(RelativeLayout.RIGHT_OF,
+						mSurfaceViewArr[i - 1].getId());
+			}
+			if (i >= t) {
+				rl.addRule(RelativeLayout.BELOW, mSurfaceViewArr[i - t].getId());
+			}
+			mVideoLayout.addView(mSurfaceViewArr[i], rl);
+		}
 	}
 
 	@Override
 	protected void onStop() {
 		super.onStop();
+		Message.obtain(mVideoHandler, SEND_EXIT_CONF_EVENT).sendToTarget();
+		mVideoLayout.removeAllViews();
 	}
 
 	@Override
@@ -304,20 +350,14 @@ public class VideoActivity extends Activity {
 		mVPHolder.clear();
 	}
 
-
-
-
-
-
-
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
 		if (mQuitDialog != null && mQuitDialog.isShowing()) {
 			mQuitDialog.dismiss();
 		}
-		
-		if(mSettingWindow != null && mSettingWindow.isShowing()) {
+
+		if (mSettingWindow != null && mSettingWindow.isShowing()) {
 			mSettingWindow.dismiss();
 		}
 		if (this.mUserListWindow != null && mUserListWindow.isShowing()) {
@@ -325,60 +365,63 @@ public class VideoActivity extends Activity {
 		}
 	}
 
-
-
-
-	
 	private void showQuitDialog() {
 		if (mQuitDialog == null) {
-			
+
 			final Dialog d = new Dialog(mContext, R.style.InMeetingQuitDialog);
-			
+
 			d.setContentView(R.layout.in_meeting_quit_window);
-			final Button cancelB = (Button)d.findViewById(R.id.IMWCancelButton);
-			cancelB.setOnClickListener(new OnClickListener(){
+			final Button cancelB = (Button) d
+					.findViewById(R.id.IMWCancelButton);
+			cancelB.setOnClickListener(new OnClickListener() {
 				@Override
 				public void onClick(View v) {
 					d.dismiss();
 				}
-				
+
 			});
-			final Button quitB = (Button)d.findViewById(R.id.IMWQuitButton);
-			quitB.setOnClickListener(new OnClickListener(){
+			final Button quitB = (Button) d.findViewById(R.id.IMWQuitButton);
+			quitB.setOnClickListener(new OnClickListener() {
 				@Override
 				public void onClick(View v) {
 					d.dismiss();
-					quit();
+					// TODO need to be optimze
+					finish();
 				}
-				
+
 			});
 			mQuitDialog = d;
 		}
-		
+
 		mQuitDialog.show();
 	}
-	
-	
+
+	/**
+	 * user quit conference, however positive or negative
+	 */
 	private void quit() {
-		//mVideo.closeVideoChat(nGroupID, nToUserID, szDeviceID, businessType);
-		for(Map.Entry<Long, VideoPlayer> entry:this.mVPHolder.entrySet()) {
-			mVideo.closeVideoDevice(mGroupId, entry.getKey(), mDeviceId, entry.getValue(), 1);
+		for (Map.Entry<Long, UserDeviceHolder> entry : this.mVPHolder
+				.entrySet()) {
+			UserDeviceHolder holder = entry.getValue();
+			mVideo.closeVideoDevice(mGroupId, holder.getUserId(),
+					holder.getDeviceId(), holder.getVp(), 1);
 		}
-		mCR.exitConf(this.mGroupId);
-		
+		mVideo.closeVideoDevice(mGroupId, GlobalHolder.getLoggedUserId(), "",
+				null, 1);
+		mVPHolder.clear();
+
+		mCR.exitConf(mGroupId);
+
 		Intent i = new Intent();
 		i.putExtra("error_msg", "退出失败");
-		this.setResult(1, i);
+		setResult(0, i);
 		finish();
 	}
-	
-	
-	
+
 	private void getConfsUserList() {
 		mCR.getConfUserList(this.mGroupId);
 	}
-	
-	
+
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		if (keyCode == KeyEvent.KEYCODE_BACK) {
@@ -387,10 +430,116 @@ public class VideoActivity extends Activity {
 		}
 		return super.onKeyDown(keyCode, event);
 	}
-	
-	//TODO do log out
 
+	// TODO do log out
 
+	private void fillUserList() {
+		for (User u : mCurrentUserList) {
+			TextView tv = new TextView(mUserListContainer.getContext());
+			tv.setText(u.getName());
+			mUserListContainer.addView(tv);
+		}
+	}
+
+	private void doApplySpeak() {
+		// 3 means apply speak
+		mCR.applyForControlPermission(3);
+	}
+
+	/**
+	 * Handle event which new user entered conference
+	 * 
+	 * @param user
+	 */
+	private void doHandleNewUserEntered(User user) {
+		mCurrentUserList.add(user);
+
+		if (mUserListContainer != null) {
+			TextView tv = new TextView(mContext);
+			tv.setText(user.getmUserId() + "");
+			mUserListContainer.addView(tv);
+		}
+		Toast.makeText(mContext, user.getmUserId() + "进入会议室! ",
+				Toast.LENGTH_SHORT).show();
+	}
+
+	/**
+	 * Handle event which user exited conference
+	 * 
+	 * @param user
+	 */
+	private void doHandleUserExited(User user) {
+		Toast.makeText(mContext, user.getmUserId() + "退出会议室! ",
+				Toast.LENGTH_SHORT).show();
+
+		UserDeviceHolder h = mVPHolder.get(user.getmUserId());
+		mVideo.closeVideoDevice(mGroupId, h.getUserId(), h.getDeviceId(),
+				h.getVp(), 1);
+		mVPHolder.remove(user.getmUserId());
+
+		mCurrentUserList.remove(user);
+		if (mUserListContainer == null) {
+			return;
+		}
+		int count = mUserListContainer.getChildCount();
+		for (int i = 0; i < count; i++) {
+			View v = mUserListContainer.getChildAt(i);
+			if (v instanceof TextView) {
+				String uid = ((TextView) v).getText().toString();
+				if (uid != null && uid.trim().equals(user.getmUserId() + "")) {
+					mUserListContainer.removeView(v);
+					// TODO close
+					return;
+				}
+			}
+		}
+	}
+
+	private void showAttendeeVideo(ConfUserDeviceInfo d) {
+		if (mVPHolder.get(d.getUserID()) != null) {
+			return;
+		}
+		// index 0 always as local
+		for (int i = 1; i < mSurfaceUsedFlag.length; i++) {
+			if (mSurfaceUsedFlag[i] == 0) {
+				VideoPlayer vp = new VideoPlayer();
+				vp.SetSurface(this.mSurfaceViewArr[i].getHolder());
+				mVideo.openVideoDevice(mGroupId, d.getUserID(),
+						d.getDefaultDeviceId(), vp, 1);
+				this.mVPHolder.put(
+						d.getUserID(),
+						new UserDeviceHolder(d.getUserID(), d
+								.getDefaultDeviceId(), vp));
+			}
+		}
+		// TODO max support video
+	}
+
+	class UserDeviceHolder {
+		private VideoPlayer vp;
+		private long userId;
+		private String deviceId;
+
+		public UserDeviceHolder(long userId, String deviceId, VideoPlayer vp) {
+			super();
+			this.vp = vp;
+			this.userId = userId;
+			this.deviceId = deviceId;
+		}
+
+		public VideoPlayer getVp() {
+			return vp;
+		}
+
+		public long getUserId() {
+			return userId;
+		}
+
+		public String getDeviceId() {
+			return deviceId;
+		}
+
+	}
 
 	class VideoHandler extends Handler {
 
@@ -400,8 +549,30 @@ public class VideoActivity extends Activity {
 			case ONLY_SHOW_LOCAL_VIDEO:
 				showLocalSurViewOnly();
 				break;
+			case FILL_USER_LIST:
+				fillUserList();
+				break;
+			case APPLY_SPEAK:
+				doApplySpeak();
+				break;
+			case CONF_USER_DEVICE_EVENT:
+				showAttendeeVideo((ConfUserDeviceInfo) msg.obj);
+				break;
+			case SEND_ENTER_CONF_EVENT:
+				mCR.enterConf(mGroupId);
+				break;
 			case GET_CONF_USER_LIST:
 				getConfsUserList();
+				break;
+			case USER_ENTERED_CONF:
+				doHandleNewUserEntered((User) msg.obj);
+				break;
+			case USER_EXITED_CONF:
+				doHandleUserExited((User) msg.obj);
+				break;
+			case SEND_EXIT_CONF_EVENT:
+			case FINISH_BY_USER:
+				quit();
 				break;
 			}
 		}

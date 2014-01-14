@@ -45,6 +45,7 @@
             android:name="com.v2tech.view.LoginActivity"
             android:label="@string/title_activity_login"
             android:configChanges="orientation"
+            android:windowSoftInputMode="stateHidden"
             >
         </activity>
         <activity
@@ -55,7 +56,8 @@
         
         <activity
             android:name="com.v2tech.view.VideoActivity"
-              android:configChanges="orientation" >  
+              android:configChanges="orientation"
+              android:screenOrientation="landscape" >  
         </activity>
          <activity
             android:name="com.v2tech.view.SettingActivity"

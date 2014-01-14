@@ -31,7 +31,7 @@ public class SettingActivity extends Activity {
 		@Override
 		public void onClick(View arg0) {
 			mContext.startActivity(new Intent(mContext, ConfsActivity.class));
-			overridePendingTransition(R.animator.down_in,R.animator.down_out);
+			//overridePendingTransition(R.animator.down_in,R.animator.down_out);
 			finish();
 		}
 		

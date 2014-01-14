@@ -6,7 +6,8 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" >
+        android:layout_height="wrap_content"
+        android:background="#f2f2f2" >
 
         <RelativeLayout
             android:id="@+id/in_meeting_tools_bar"
@@ -58,7 +59,9 @@
             android:id="@+id/in_metting_video_main"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
-            android:layout_below="@+id/in_meeting_tools_bar" >
+            android:layout_below="@+id/in_meeting_tools_bar"
+            android:layout_marginLeft="80dp"
+            android:layout_marginRight="80dp" >
         </RelativeLayout>
 
     </RelativeLayout>

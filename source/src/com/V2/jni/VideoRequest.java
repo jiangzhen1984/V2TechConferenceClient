@@ -1,32 +1,22 @@
 package com.V2.jni;
 
+import java.util.List;
+
 import v2av.VideoPlayer;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
+import com.v2tech.logic.ConfUserDeviceInfo;
 import com.v2tech.view.VideoActivity;
-
-//import com.xinlan.im.adapter.XiuLiuApplication;
-//import com.xinlan.im.bean.msgtype.MsgType;
-//import com.xinlan.im.bean.msgtype.VideoAcceptMsgType;
-//import com.xinlan.im.bean.msgtype.VideoInviteMsgType;
-//import com.xinlan.im.bean.msgtype.VideoRefuseMsgType;
-//import com.xinlan.im.ui.SplashActivity;
-//import com.xinlan.im.ui.chat.HandleVideoInviteActivity;
-//import com.xinlan.im.ui.chat.VideoChatActivity;
-//import com.xinlan.im.utils.Constant;
-//import com.xinlan.im.utils.XmlParserUtils;
 
 
 public class VideoRequest
 {
 	private static VideoRequest mVideoRequest;
-//	private XiuLiuApplication app;
 	private Context context;
 	private VideoRequest(Context context){
 		this.context=context;
-//		app=(XiuLiuApplication) context.getApplication();
 	};
 	
 	public static synchronized VideoRequest getInstance(Context context){
@@ -68,13 +58,18 @@ public class VideoRequest
 	// 璁剧疆閲囬泦鍙傛暟
 	public native void setCapParam(String szDevID, int nSizeIndex, int nFrameRate, int nBitRate);
 	
-	
+	/**
+	 * <xml><user id='136'><videolist defaultid='136:CyberLink Webcam Sharing Manager____2056417056'><video bps='256' camtype='0' comm='0' desc='CyberLink Webcam Sharing Manager____2056417056' fps='15' id='136:CyberLink Webcam Sharing Manager____2056417056' selectedindex='0' videotype='vid'><sizelist><size h='240' w='320'/><size h='360' w='640'/><size h='480' w='640'/><size h='600' w='800'/><size h='720' w='1280'/><size h='960' w='1280'/><size h='900' w='1600'/><size h='1200' w='1600'/></sizelist></video><video bps='256' camtype='0' comm='0' desc='HP HD Webcam [Fixed]____1388682949' fps='15' id='136:HP HD Webcam [Fixed]____1388682949' selectedindex='3' videotype='vid'><sizelist><size h='480' w='640'/><size h='400' w='640'/><size h='288' w='352'/><size h='240' w='320'/><size h='720' w='1280'/></sizelist></video></videolist></user></xml>
+	 * @param szXmlData
+	 */
 	private void OnRemoteUserVideoDevice(String szXmlData)
 	{
-		Log.e("ImRequest UI", "OnRemoteUserVideoDevice:---"+szXmlData);
-		
-		//瑙ｆ瀽涓�釜鐢ㄦ埛鐨勮澶囷紝鏀惧叆鍒板鍣ㄤ腑
-//		XmlParserUtils.parserVideodevice(app.getVideodevices_map(),new ByteArrayInputStream(szXmlData.getBytes()));
+		Log.e("VideoRequest UI", "OnRemoteUserVideoDevice:---"+szXmlData);
+		List<ConfUserDeviceInfo> l = ConfUserDeviceInfo.parseFromXml(szXmlData);
+		Intent i = new Intent(VideoActivity.JNI_EVENT_CONF_USER_CATEGORY_USER_DEVICE_NOTIFICATION);
+		i.addCategory(VideoActivity.JNI_EVENT_CONF_USER_CATEGORY);
+		i.putExtra("ud", l.get(0));
+		this.context.sendBroadcast(i);
 			
 	}
 	

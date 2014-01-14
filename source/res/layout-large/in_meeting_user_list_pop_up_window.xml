@@ -44,6 +44,7 @@
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/in_meeting_user_list_layout"
             android:layout_width="match_parent"
             android:layout_height="fill_parent"
             android:orientation="vertical" >
