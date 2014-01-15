@@ -25,7 +25,7 @@ public class User {
 		this.mName = mName;
 	}
 
-	public User(long mUserId, NetworkStateCode mResult, String mName) {
+	public User(long mUserId, String mName, NetworkStateCode mResult) {
 		super();
 		this.mUserId = mUserId;
 		this.mResult = mResult;

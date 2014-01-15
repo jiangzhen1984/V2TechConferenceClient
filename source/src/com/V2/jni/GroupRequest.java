@@ -7,37 +7,17 @@ import android.util.Log;
 import com.v2tech.logic.GlobalHolder;
 import com.v2tech.logic.Group;
 
-//import com.xinlan.im.adapter.XiuLiuApplication;
-//import com.xinlan.im.bean.msgtype.AddFriMsgType;
-//import com.xinlan.im.bean.msgtype.CreateGroupMsgType;
-//import com.xinlan.im.bean.msgtype.DelFriMsgType;
-//import com.xinlan.im.bean.msgtype.DestoryGroupMsgType;
-//import com.xinlan.im.bean.msgtype.FriendMsgType;
-//import com.xinlan.im.bean.msgtype.GroupMsgType;
-//import com.xinlan.im.bean.msgtype.LoginMsgType;
-//import com.xinlan.im.bean.msgtype.ModifyGroupMsgType;
-//import com.xinlan.im.bean.msgtype.MoveGroupMsgType;
-//import com.xinlan.im.bean.msgtype.MsgType;
-//import com.xinlan.im.bean.msgtype.RefuseMsgType;
-//import com.xinlan.im.ui.SplashActivity;
-//import com.xinlan.im.ui.chat.bean.Group;
-//import com.xinlan.im.ui.chat.bean.NYXUser;
-//import com.xinlan.im.ui.chat.db.DbHelper;
-//import com.xinlan.im.utils.XmlParserUtils;
+
 
 public class GroupRequest {
 
 	private Context context;
 	public boolean loginResult;
 	private static GroupRequest mGroupRequest;
-//	private XiuLiuApplication application;
-//	private DbHelper dbHelper;
-//	private LoginMsgType loginMsgType;
 
 	private GroupRequest(Context context) {
 		this.context = context;
-//		application = (XiuLiuApplication) context.getApplication();
-//		dbHelper = DbHelper.getInstance(context);
+
 	};
 
 	public static synchronized GroupRequest getInstance(Context context) {

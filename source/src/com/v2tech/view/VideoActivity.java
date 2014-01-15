@@ -399,8 +399,7 @@ public class VideoActivity extends Activity {
 				@Override
 				public void onClick(View v) {
 					d.dismiss();
-					// TODO need to be optimze
-					finish();
+					Message.obtain(mVideoHandler, FINISH_BY_USER).sendToTarget();
 				}
 
 			});
@@ -438,6 +437,7 @@ public class VideoActivity extends Activity {
 		}
 		mVideo.closeVideoDevice(mGroupId, GlobalHolder.getLoggedUserId(), "",
 				null, 1);
+		VideoRecorder.VideoPreviewSurfaceHolder = null;
 		mVPHolder.clear();
 
 		mCR.exitConf(mGroupId);
@@ -465,9 +465,7 @@ public class VideoActivity extends Activity {
 
 	private void fillUserList() {
 		for (User u : mCurrentUserList) {
-			TextView tv = new TextView(mUserListContainer.getContext());
-			tv.setText(u.getName());
-			mUserListContainer.addView(tv);
+			mUserListContainer.addView(getUserTextView(u.getmUserId() + ""));
 		}
 	}
 
@@ -485,12 +483,27 @@ public class VideoActivity extends Activity {
 		mCurrentUserList.add(user);
 
 		if (mUserListContainer != null) {
-			TextView tv = new TextView(mContext);
-			tv.setText(user.getmUserId() + "");
-			mUserListContainer.addView(tv);
+			
+			mUserListContainer.addView(getUserTextView(user.getmUserId()+""));
 		}
 		Toast.makeText(mContext, user.getmUserId() + "进入会议室! ",
 				Toast.LENGTH_SHORT).show();
+	}
+	
+	
+	private TextView getUserTextView(final String id) {
+		TextView tv = new TextView(mContext);
+		tv.setText(id);
+		tv.setTextSize(20);
+		tv.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View arg0) {
+				showAttendeeVideo(mD.get(Long.parseLong(id)));
+			}
+			
+		});
+		return tv;
 	}
 
 	/**
@@ -503,11 +516,13 @@ public class VideoActivity extends Activity {
 				Toast.LENGTH_SHORT).show();
 
 		UserDeviceHolder h = mVPHolder.get(user.getmUserId());
-		mVideo.closeVideoDevice(mGroupId, h.getUserId(), h.getDeviceId(),
-				h.getVp(), 1);
-		mVPHolder.remove(user.getmUserId());
-		mSurfaceUsedFlag[h.getSurIndex()] = 0;
-		h.clearReference();
+		if (h !=null && h.getDeviceId() != null) {
+			mVideo.closeVideoDevice(mGroupId, h.getUserId(), h.getDeviceId(),
+					h.getVp(), 1);
+			mVPHolder.remove(user.getmUserId());
+			mSurfaceUsedFlag[h.getSurIndex()] = 0;
+			h.clearReference();
+		}
 
 		mCurrentUserList.remove(user);
 		if (mUserListContainer == null) {
@@ -525,6 +540,11 @@ public class VideoActivity extends Activity {
 				}
 			}
 		}
+	}
+	
+	private Map<Long, ConfUserDeviceInfo> mD = new HashMap<Long, ConfUserDeviceInfo>();
+	private void recordUserDevice(ConfUserDeviceInfo d) {
+		mD.put(d.getUserID(), d);
 	}
 
 	private void showAttendeeVideo(ConfUserDeviceInfo d) {
@@ -613,7 +633,8 @@ public class VideoActivity extends Activity {
 				doApplySpeak();
 				break;
 			case CONF_USER_DEVICE_EVENT:
-				showAttendeeVideo((ConfUserDeviceInfo) msg.obj);
+				//showAttendeeVideo((ConfUserDeviceInfo) msg.obj);
+				recordUserDevice((ConfUserDeviceInfo) msg.obj);
 				break;
 			case SEND_ENTER_CONF_EVENT:
 				mCR.enterConf(mGroupId);
