@@ -50,8 +50,26 @@ public class VideoRequest
 	//鍏抽棴瑙嗛浼氳瘽
 	public native void closeVideoChat(long nGroupID, long nToUserID, String szDeviceID, int businessType);
 	
-	//璁剧疆杩滅瑙嗛鏄剧ず绐楀彛
+	/**
+	 * Open video device
+	 * @param nGroupID  conference id
+	 * @param nUserID   user id
+	 * @param szDeviceID  remote device id {@link OnRemoteUserVideoDevice}, if open local device use "".
+	 * @param vp if open local device, input null. Otherwise {@link VideoPlayer}
+	 * @param businessType  as now only input 1
+	 */
 	public native void openVideoDevice(long nGroupID, long nUserID, String szDeviceID, VideoPlayer vp, int businessType);
+	
+
+	/**
+	 * close video device.<br>
+	 * @see openVideoDevice
+	 * @param nGroupID  conference id
+	 * @param nUserID   user id
+	 * @param szDeviceID  remote device id {@link OnRemoteUserVideoDevice}, if open local device use "".
+	 * @param vp if open local device, input null. Otherwise {@link VideoPlayer}
+	 * @param businessType  as now only input 1
+	 */
 	public native void closeVideoDevice(long nGroupID, long nUserID, String szDeviceID, VideoPlayer vp, int businessType);
 	
 	

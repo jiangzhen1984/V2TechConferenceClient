@@ -9,6 +9,11 @@ import android.util.Log;
 
 public class VideoCaptureDevInfo
 {
+	
+	public static final String CAMERA_FACE_FRONT ="Camera Facing front";
+	
+	public static final String CAMERA_FACE_BACK ="Camera Facing back";
+	
 	private final static String TAG = "VideoCaptureDevInfo";
 	
 	private String mDefaultDevName = "";
@@ -117,6 +122,20 @@ public class VideoCaptureDevInfo
         deviceList = new ArrayList<VideoCaptureDevice>();
     }
     
+    /**
+     * Before do this option, please do close local device first. After call this function, 
+     * then open local device again.
+     */
+    public void reverseCamera() {
+    	if (CAMERA_FACE_FRONT.equals(mDefaultDevName)) {
+    		mDefaultDevName = CAMERA_FACE_BACK;
+    	} else if (CAMERA_FACE_BACK.equals(mDefaultDevName)) {
+    		mDefaultDevName = CAMERA_FACE_FRONT;
+    	} else {
+    		Log.e("VideoCaptureDevInfo", " Unknow camera default name:" + mDefaultDevName);
+    	}
+    }
+    
     private int Init()
     {
         // Populate the deviceList with available cameras and their capabilities.
@@ -134,14 +153,14 @@ public class VideoCaptureDevInfo
                 newDevice.orientation = info.orientation;
                 if(info.facing == Camera.CameraInfo.CAMERA_FACING_BACK)
                 {
-                    newDevice.deviceUniqueName = "Camera Facing back";
+                    newDevice.deviceUniqueName = CAMERA_FACE_BACK;
                     newDevice.frontCameraType = FrontFacingCameraType.None;
                     Log.d(TAG, "Camera " + i +", Facing back, Orientation "+ info.orientation);
                    
                 }
                 else
                 {
-                    newDevice.deviceUniqueName = "Camera Facing front";
+                    newDevice.deviceUniqueName = CAMERA_FACE_FRONT;
                     newDevice.frontCameraType = FrontFacingCameraType.Android23;
                     Log.d(TAG, "Camera " + i +", Facing front, Orientation "+ info.orientation);
                     this.mDefaultDevName = newDevice.deviceUniqueName;

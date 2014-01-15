@@ -41,7 +41,7 @@ public class Group {
 		this.mName = mName;
 		this.mOwner = mOwner;
 		this.mCreateDate = createDate;
-		Date d = new Date(Long.parseLong(createDate));
+		Date d = new Date(Long.parseLong(createDate)*1000);
 		DateFormat sd = new  SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.US);
 		this.mCreateDate = sd.format(d);
 	}

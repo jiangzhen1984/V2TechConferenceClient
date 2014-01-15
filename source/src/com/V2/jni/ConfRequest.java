@@ -56,13 +56,17 @@ public class ConfRequest
 	public native void createConf(String sXmlConfData, String sXmlInviteUsers);
 	//鍒犻櫎浼氳
 	public native void destroyConf(long nConfID);
-	//鍔犲叆涓�釜浼氳
-//	public native void enterConf(long nConfID, String szPassword);
+	
+	/**
+	 * Let user enter conference.<br>
+	 * Callback is {@link OnEnterConf}
+	 * @param nConfID  conference ID
+	 */
 	public native void enterConf(long nConfID);
-	//閫�嚭涓�釜浼氳
+	
+	//
 	public native void exitConf(long nConfID);
-	//绂诲紑涓�釜浼氳
-	public native void leaveConf(long nConfID);
+	
 	//灏嗘煇浜鸿鍑轰細璁�
 	public native void kickConf(long nUserID);
 	//閭�鍔犲叆浼氳

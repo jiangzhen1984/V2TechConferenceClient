@@ -26,6 +26,7 @@ import android.widget.Toast;
 
 import com.V2.jni.ConfigRequest;
 import com.V2.jni.ImRequest;
+import com.V2.jni.ImRequest.NetworkStateCode;
 import com.v2tech.R;
 import com.v2tech.logic.GlobalHolder;
 
@@ -382,7 +383,7 @@ public class LoginActivity extends Activity {
 				finish();
 				mContext.startActivity(new Intent(mContext, ConfsActivity.class));
 			} else {
-				if (GlobalHolder.getInstance().getUser().getmResult() == 301) {
+				if (GlobalHolder.getInstance().getUser().getmResult() == NetworkStateCode.CONNECTED_ERROR || GlobalHolder.getInstance().getUser().getmResult() == NetworkStateCode.TIME_OUT) {
 					Toast.makeText(mContext, R.string.error_connect_to_server,
 							Toast.LENGTH_LONG).show();
 				} else {
@@ -399,5 +400,7 @@ public class LoginActivity extends Activity {
 			showProgress(false);
 		}
 	}
+	
+	
 
 }

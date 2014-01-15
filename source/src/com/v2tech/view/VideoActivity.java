@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import v2av.VideoCaptureDevInfo;
 import v2av.VideoPlayer;
 import v2av.VideoRecorder;
 import android.annotation.TargetApi;
@@ -161,6 +162,8 @@ public class VideoActivity extends Activity {
 					}
 
 				});
+				
+				
 				fillUserList();
 			}
 
@@ -197,6 +200,17 @@ public class VideoActivity extends Activity {
 						mSettingWindow.dismiss();
 					}
 
+				});
+				
+				LinearLayout ll = (LinearLayout)view.findViewById(R.id.in_meeting_setting_reverse_camera);
+				ll.setOnClickListener(new OnClickListener() {
+
+					@Override
+					public void onClick(View v) {
+						doReverseCamera();
+						mSettingWindow.dismiss();
+					}
+					
 				});
 			}
 
@@ -396,6 +410,22 @@ public class VideoActivity extends Activity {
 		mQuitDialog.show();
 	}
 
+	
+	
+	
+	
+	/**
+	 * reverse local camera from back to front or from front to back
+	 */
+	private void doReverseCamera() {
+		mVideo.closeVideoDevice(mGroupId, GlobalHolder.getLoggedUserId(), "",
+				null, 1);
+		VideoCaptureDevInfo.CreateVideoCaptureDevInfo().reverseCamera();
+		mVideo.openVideoDevice(mGroupId, GlobalHolder.getLoggedUserId(), "",
+				null, 1);
+	}
+	
+	
 	/**
 	 * user quit conference, however positive or negative
 	 */
@@ -476,6 +506,8 @@ public class VideoActivity extends Activity {
 		mVideo.closeVideoDevice(mGroupId, h.getUserId(), h.getDeviceId(),
 				h.getVp(), 1);
 		mVPHolder.remove(user.getmUserId());
+		mSurfaceUsedFlag[h.getSurIndex()] = 0;
+		h.clearReference();
 
 		mCurrentUserList.remove(user);
 		if (mUserListContainer == null) {
@@ -509,7 +541,9 @@ public class VideoActivity extends Activity {
 				this.mVPHolder.put(
 						d.getUserID(),
 						new UserDeviceHolder(d.getUserID(), d
-								.getDefaultDeviceId(), vp));
+								.getDefaultDeviceId(), vp, mSurfaceViewArr[i], i));
+				mSurfaceUsedFlag[i] = 1;
+				return;
 			}
 		}
 		// TODO max support video
@@ -519,13 +553,23 @@ public class VideoActivity extends Activity {
 		private VideoPlayer vp;
 		private long userId;
 		private String deviceId;
+		private SurfaceView sv;
+		private int surIndex;
 
-		public UserDeviceHolder(long userId, String deviceId, VideoPlayer vp) {
+		public UserDeviceHolder(long userId, String deviceId, VideoPlayer vp, SurfaceView sv, int surIndex) {
 			super();
 			this.vp = vp;
 			this.userId = userId;
 			this.deviceId = deviceId;
+			this.sv = sv;
+			this.surIndex = surIndex;
 		}
+		
+
+		public SurfaceView getSv() {
+			return sv;
+		}
+
 
 		public VideoPlayer getVp() {
 			return vp;
@@ -537,6 +581,19 @@ public class VideoActivity extends Activity {
 
 		public String getDeviceId() {
 			return deviceId;
+		}
+		
+		
+		public int getSurIndex() {
+			return surIndex;
+		}
+
+
+		public void clearReference() {
+			this.vp = null;
+			this.userId = -1;
+			this.deviceId = null;
+			this.sv = null;
 		}
 
 	}

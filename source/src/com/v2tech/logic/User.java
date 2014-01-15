@@ -1,10 +1,12 @@
 package com.v2tech.logic;
 
+import com.V2.jni.ImRequest.NetworkStateCode;
+
 public class User {
 	
 	private long mUserId;
 	
-	private int mResult;
+	private NetworkStateCode mResult;
 	
 	private String mName;
 	
@@ -23,7 +25,7 @@ public class User {
 		this.mName = mName;
 	}
 
-	public User(long mUserId, int mResult, String mName) {
+	public User(long mUserId, NetworkStateCode mResult, String mName) {
 		super();
 		this.mUserId = mUserId;
 		this.mResult = mResult;
@@ -38,11 +40,11 @@ public class User {
 		this.mUserId = mUserId;
 	}
 
-	public int getmResult() {
+	public NetworkStateCode getmResult() {
 		return mResult;
 	}
 
-	public void setmResult(int mResult) {
+	public void setmResult(NetworkStateCode mResult) {
 		this.mResult = mResult;
 	}
 
