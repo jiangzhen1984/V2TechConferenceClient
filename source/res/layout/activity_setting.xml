@@ -56,7 +56,8 @@
                     android:layout_height="wrap_content"
                     android:layout_centerVertical="true"
                     android:layout_toRightOf="@+id/confs_center_separation"
-                    android:src="@drawable/address" />
+                    android:src="@drawable/address"
+                    android:visibility="gone" />
 
                 <ImageView
                     android:id="@+id/confs_sepa1"
@@ -66,7 +67,8 @@
                     android:layout_marginLeft="10dp"
                     android:layout_marginRight="10dp"
                     android:layout_toRightOf="@+id/setting_contacts"
-                    android:src="@drawable/group_list_separation" />
+                    android:src="@drawable/group_list_separation"
+                    android:visibility="gone" />
 
                 <ImageView
                     android:id="@+id/setting_setting"
@@ -82,7 +84,8 @@
                     android:layout_height="wrap_content"
                     android:layout_centerVertical="true"
                     android:layout_toLeftOf="@+id/confs_center_separation"
-                    android:src="@drawable/group" />
+                    android:src="@drawable/group"
+                    android:visibility="gone" />
 
                 <ImageView
                     android:id="@+id/group_list_sep2"
@@ -92,7 +95,8 @@
                     android:layout_marginLeft="10dp"
                     android:layout_marginRight="10dp"
                     android:layout_toLeftOf="@+id/setting_group"
-                    android:src="@drawable/group_list_separation" />
+                    android:src="@drawable/group_list_separation"
+                    android:visibility="gone" />
 
                 <ImageView
                     android:id="@+id/setting_conf_button"
@@ -277,12 +281,13 @@
                         android:layout_height="wrap_content" >
 
                         <TextView
+                            android:id="@+id/setting_quit_button"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_alignParentLeft="true"
                             android:layout_marginLeft="30dp"
                             android:textSize="20sp"
-                            android:text="@string/setting_notification_confs_msg" />
+                            android:text="@string/setting_quit_application" />
 
                     </RelativeLayout>
 

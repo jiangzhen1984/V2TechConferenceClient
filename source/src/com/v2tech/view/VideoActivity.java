@@ -60,6 +60,8 @@ public class VideoActivity extends Activity {
 	private static final int USER_ENTERED_CONF = 21;
 	private static final int USER_EXITED_CONF = 22;
 	private static final int CONF_USER_DEVICE_EVENT = 23;
+	
+	private static final int UPDATE_ATTENDEE_INFO = 40;
 
 	public static final String JNI_EVENT_VIDEO_CATEGORY = "com.v2tech.conf_video_event";
 	public static final String JNI_EVENT_VIDEO_CATEGORY_OPEN_VIDEO_EVENT_ACTION = "com.v2tech.conf_video_event.open_video_event";
@@ -69,6 +71,7 @@ public class VideoActivity extends Activity {
 	public static final String JNI_EVENT_CONF_USER_CATEGORY_NEW_USER_ENTERED_ACTION = "com.v2tech.conf_user_event.new_user_entered";
 	public static final String JNI_EVENT_CONF_USER_CATEGORY_USER_EXITED_ACTION = "com.v2tech.conf_user_event.user_exited";
 	public static final String JNI_EVENT_CONF_USER_CATEGORY_USER_DEVICE_NOTIFICATION = "com.v2tech.conf_user_event.user_device_notificaiton";
+	public static final String JNI_EVENT_CONF_USER_CATEGORY_UPDATE_ATTENDEE_INFO = "com.v2tech.conf_user_event.update_attendee_info";
 
 	private VideoRequest mVideo = VideoRequest.getInstance(this);
 	private ConfRequest mCR = ConfRequest.getInstance(this);
@@ -259,6 +262,13 @@ public class VideoActivity extends Activity {
 						.getExtras().get("ud");
 				Message.obtain(mVideoHandler, CONF_USER_DEVICE_EVENT, cud)
 						.sendToTarget();
+			} else if(intent.getAction().equals(JNI_EVENT_CONF_USER_CATEGORY_UPDATE_ATTENDEE_INFO)) {
+				User u = new User();
+				u.setmUserId(intent.getExtras().getLong("uid"));
+				u.setName(intent.getExtras().getString("name"));
+				Message.obtain(mVideoHandler, UPDATE_ATTENDEE_INFO, u)
+				.sendToTarget();
+				
 			}
 		}
 
@@ -330,8 +340,9 @@ public class VideoActivity extends Activity {
 	private void adjustLayout() {
 		mVideoLayout.removeAllViews();
 		int t = mSurfaceViewArr.length / 2;
-		int iWid = Measuredwidth / t;
-		int iHei = Measuredheight / 2;
+		RelativeLayout.LayoutParams par = (RelativeLayout.LayoutParams)mVideoLayout.getLayoutParams();
+		int iWid = (Measuredwidth - par.leftMargin - par.rightMargin) / t;
+		int iHei = (Measuredheight -100) / 2;
 		for (int i = 0; i < mSurfaceViewArr.length; i++) {
 			mSurfaceViewArr[i].setId(i + 1000);
 			RelativeLayout.LayoutParams rl = new RelativeLayout.LayoutParams(
@@ -505,6 +516,18 @@ public class VideoActivity extends Activity {
 		});
 		return tv;
 	}
+	
+	
+	private void closeUserDevice(User user) {
+		UserDeviceHolder h = mVPHolder.get(user.getmUserId());
+		if (h !=null && h.getDeviceId() != null) {
+			mVideo.closeVideoDevice(mGroupId, h.getUserId(), h.getDeviceId(),
+					h.getVp(), 1);
+			mVPHolder.remove(user.getmUserId());
+			mSurfaceUsedFlag[h.getSurIndex()] = 0;
+			h.clearReference();
+		}
+	}
 
 	/**
 	 * Handle event which user exited conference
@@ -548,9 +571,21 @@ public class VideoActivity extends Activity {
 	}
 
 	private void showAttendeeVideo(ConfUserDeviceInfo d) {
+		// close Device
 		if (mVPHolder.get(d.getUserID()) != null) {
+			
+			UserDeviceHolder h = mVPHolder.get(d.getUserID());
+			if (h !=null && h.getDeviceId() != null) {
+				mVideo.closeVideoDevice(mGroupId, h.getUserId(), h.getDeviceId(),
+						h.getVp(), 1);
+				mVPHolder.remove(d.getUserID());
+				mSurfaceUsedFlag[h.getSurIndex()] = 0;
+				h.clearReference();
+			}
 			return;
 		}
+		
+		//open device
 		// index 0 always as local
 		for (int i = 1; i < mSurfaceUsedFlag.length; i++) {
 			if (mSurfaceUsedFlag[i] == 0) {
@@ -643,11 +678,15 @@ public class VideoActivity extends Activity {
 				getConfsUserList();
 				break;
 			case USER_ENTERED_CONF:
-				doHandleNewUserEntered((User) msg.obj);
+				doHandleNewUserEntered((User)msg.obj);
+				//User u = (User) msg.obj;
+				//ImRequest.getInstance().getUserBaseInfo(u.getmUserId());				
 				break;
 			case USER_EXITED_CONF:
 				doHandleUserExited((User) msg.obj);
 				break;
+			case UPDATE_ATTENDEE_INFO:
+				doHandleNewUserEntered((User)msg.obj);
 			case SEND_EXIT_CONF_EVENT:
 			case FINISH_BY_USER:
 				quit();

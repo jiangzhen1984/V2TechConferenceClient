@@ -17,6 +17,7 @@ import com.V2.jni.GroupRequestCallback;
 import com.V2.jni.ImRequest;
 import com.V2.jni.ImRequestCallback;
 import com.v2tech.R;
+import com.v2tech.logic.NetworkStateCode;
 import com.v2tech.logic.User;
 import com.v2tech.util.V2Log;
 
@@ -69,16 +70,20 @@ public class JNIService extends Service {
 		mContext = this;
 		// start handler thread
 		HandlerThread hd = new HandlerThread("queue");
-		mHander = new LocalHander(hd.getLooper());
 		hd.start();
+		mHander = new LocalHander(hd.getLooper());
 
 		HandlerThread callback = new HandlerThread("callback");
-		mCallbackHandler = new JNICallbackHandler(callback.getLooper());
 		callback.start();
+		mCallbackHandler = new JNICallbackHandler(callback.getLooper());
 
 		mImCB = new ImRequestCB(mCallbackHandler);
-
+		ImRequest.getInstance().setCallback(mImCB);
 	}
+	
+	
+	
+	
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
@@ -145,6 +150,13 @@ public class JNIService extends Service {
 		return m;
 	}
 
+	/**
+	 * Asynchronous login function.
+	 * After login, will call message.sendToTarget to caller
+	 * @param mail  user mail
+	 * @param passwd  password
+	 * @param message  callback message Message.obj is {@link User} object
+	 */
 	public void login(String mail, String passwd, Message message) {
 		MetaData m = getAndQueued(JNI_LOG_IN, message);
 		if (m != null) {
@@ -173,6 +185,7 @@ public class JNIService extends Service {
 		}
 
 		InnerUser(MetaData m, long idCallback, int status, int nResult) {
+			this.m = m;
 			this.idCallback = idCallback;
 			this.status = status;
 			this.nResult = nResult;
@@ -217,14 +230,18 @@ public class JNIService extends Service {
 			case JNI_LOG_IN:
 				InnerUser iu = ((InnerUser) msg.obj);
 				User u = new User(iu.idCallback, "",
-						ImRequest.NetworkStateCode.fromInt(iu.nResult));
+						NetworkStateCode.fromInt(iu.nResult));
+				if (iu.m == null || iu.m.caller == null) {
+					V2Log.w("No available caller, ignore this call back");
+					return;
+				}
 				iu.m.caller.obj = u;
 				iu.m.caller.sendToTarget();
 				break;
 			case JNI_LOG_OUT:
 				break;
 			case JNI_CONNECT_RESPONSE:
-				if (msg.arg1 == ImRequest.NetworkStateCode.CONNECTED_ERROR
+				if (msg.arg1 == NetworkStateCode.CONNECTED_ERROR
 						.intValue()) {
 					Toast.makeText(mContext, R.string.error_connect_to_server,
 							Toast.LENGTH_SHORT).show();

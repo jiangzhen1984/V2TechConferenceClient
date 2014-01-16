@@ -5,14 +5,19 @@ import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.Dialog;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.IBinder;
+import android.os.Message;
 import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -26,9 +31,11 @@ import android.widget.Toast;
 
 import com.V2.jni.ConfigRequest;
 import com.V2.jni.ImRequest;
-import com.V2.jni.ImRequest.NetworkStateCode;
 import com.v2tech.R;
 import com.v2tech.logic.GlobalHolder;
+import com.v2tech.logic.NetworkStateCode;
+import com.v2tech.logic.User;
+import com.v2tech.view.JNIService.LocalBinder;
 
 /**
  * Activity which displays a login screen to the user, offering registration as
@@ -214,6 +221,7 @@ public class LoginActivity extends Activity {
 		if (mSettingDialog != null && mSettingDialog.isShowing()) {
 			mSettingDialog.dismiss();
 		}
+	
 	}
 
 
@@ -309,6 +317,8 @@ public class LoginActivity extends Activity {
 			showProgress(true);
 			mAuthTask = new UserLoginTask();
 			mAuthTask.execute((Void) null);
+		//	mService.login(mEmailView.getText().toString(), mPasswordView
+		//				.getText().toString(), Message.obtain(mHandler, LOG_IN_CALL_BACK));
 		}
 	}
 
@@ -380,8 +390,9 @@ public class LoginActivity extends Activity {
 			showProgress(false);
 
 			if (success) {
-				finish();
 				mContext.startActivity(new Intent(mContext, ConfsActivity.class));
+				finish();
+				overridePendingTransition(R.animator.right_in, R.animator.right_out);
 			} else {
 				if (GlobalHolder.getInstance().getUser().getmResult() == NetworkStateCode.CONNECTED_ERROR || GlobalHolder.getInstance().getUser().getmResult() == NetworkStateCode.TIME_OUT) {
 					Toast.makeText(mContext, R.string.error_connect_to_server,
@@ -400,6 +411,72 @@ public class LoginActivity extends Activity {
 			showProgress(false);
 		}
 	}
+	
+	
+	private static final int LOG_IN_CALL_BACK = 1;
+	private Handler mHandler = new Handler() {
+
+		@Override
+		public void handleMessage(Message msg) {
+			switch (msg.what) {
+			case LOG_IN_CALL_BACK:
+				showProgress(false);
+				User u = (User) msg.obj;
+				GlobalHolder.getInstance().setUser(u);
+				if (u.getmResult() == NetworkStateCode.CONNECTED_ERROR || u.getmResult() == NetworkStateCode.TIME_OUT) {
+					Toast.makeText(mContext, R.string.error_connect_to_server,
+							Toast.LENGTH_LONG).show();
+				} else if (u.getmResult() == NetworkStateCode.INCORRECT_INFO){
+					mPasswordView
+							.setError(getString(R.string.error_incorrect_password));
+					mPasswordView.requestFocus();
+				} else {
+					mContext.startActivity(new Intent(mContext, ConfsActivity.class));
+					finish();
+				}
+				break;
+			}
+		}
+		
+	};
+
+	private boolean isBound;
+	@Override
+	protected void onStart() {
+		super.onStart();
+		isBound = bindService(new Intent(this.getApplicationContext(), JNIService.class), mConnection, Context.BIND_AUTO_CREATE);
+	}
+
+	@Override
+	protected void onStop() {
+		super.onStop();
+		if (isBound) {
+			this.unbindService(mConnection);
+		}
+	}
+	
+	private JNIService mService;
+	
+	
+	  /** Defines callbacks for service binding, passed to bindService() */
+    private ServiceConnection mConnection = new ServiceConnection() {
+
+        @Override
+        public void onServiceConnected(ComponentName className,
+                IBinder service) {
+            LocalBinder binder = (LocalBinder) service;
+            mService = binder.getService();
+            isBound = true;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName arg0) {
+        	isBound = false;
+        }
+    };
+	
+	
+	
 	
 	
 

@@ -1,6 +1,7 @@
 package com.v2tech.view;
 
 import android.app.Application;
+import android.content.Intent;
 
 import com.V2.jni.AudioRequest;
 import com.V2.jni.ConfRequest;
@@ -34,6 +35,7 @@ public class MainApplication extends Application {
 		ConfRequest.getInstance(this);
 		AudioRequest.getInstance(this);
 		WBRequest.getInstance(this);
+		this.getApplicationContext().startService(new Intent(this.getApplicationContext(), JNIService.class));
 	}
 
 	@Override

@@ -1,6 +1,8 @@
 package com.v2tech.logic;
 
-import com.V2.jni.ImRequest.NetworkStateCode;
+
+
+
 
 public class User {
 	

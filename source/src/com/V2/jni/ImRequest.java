@@ -4,6 +4,7 @@ import android.content.Context;
 import android.util.Log;
 
 import com.v2tech.logic.GlobalHolder;
+import com.v2tech.logic.NetworkStateCode;
 import com.v2tech.logic.User;
 import com.v2tech.util.V2Log;
 
@@ -13,33 +14,10 @@ public class ImRequest {
 	private Context context;
 	public boolean loginResult;
 	private static ImRequest mImRequest;
+	
+	private ImRequestCallback callback;
 
-	public enum NetworkStateCode {
-		SUCCESS(0), INCORRECT_INFO(1), TIME_OUT(-1), CONNECTED_ERROR(301), UNKNOW_CODE(-3);
 
-		private int code;
-
-		private NetworkStateCode(int code) {
-			this.code = code;
-		}
-		
-		public int intValue() {
-			return code;
-		}
-
-		public static NetworkStateCode fromInt(int code) {
-			switch (code) {
-			case 0:
-				return SUCCESS;
-			case -1:
-				return TIME_OUT;
-			case 301:
-				return CONNECTED_ERROR;
-			default:
-				return UNKNOW_CODE;
-			}
-		}
-	}
 
 	private User mLoginLock = new User();
 
@@ -69,6 +47,10 @@ public class ImRequest {
 
 		return mImRequest;
 	}
+	
+	public void setCallback(ImRequestCallback callback) {
+		this.callback = callback;
+	}
 
 	public boolean loginSync(String szName, String szPassword) {
 		this.login(szName, szPassword, 1, 2);
@@ -90,6 +72,8 @@ public class ImRequest {
 	public native boolean initialize(ImRequest request);
 
 	public native void unInitialize();
+	
+	public native void logout(long nUserID);
 
 	public native void login(String szName, String szPassword, int status,
 			int type);
@@ -152,7 +136,9 @@ public class ImRequest {
 		// intent.putExtra("MSG", loginMsgType);
 		// context.sendOrderedBroadcast(intent,null);
 		// }
-
+		if (this.callback != null) {
+			this.callback.OnLoginCallback(nUserID, nStatus, nResult);
+		}
 		synchronized (mLoginLock) {
 			mLoginLock.setmUserId(nUserID);
 			mLoginLock.setmResult(NetworkStateCode.fromInt(nResult));
@@ -258,7 +244,9 @@ public class ImRequest {
 
 	private void OnConnectResponse(int nResult) {
 		Log.e("ImRequest UI", "OnConnectResponse::" + nResult);
-
+		if (this.callback != null) {
+			this.callback.OnConnectResponseCallback(nResult);
+		}
 		synchronized (mLoginLock) {
 			mLoginLock.setmResult(NetworkStateCode.fromInt(nResult));
 			mLoginLock.notifyAll();

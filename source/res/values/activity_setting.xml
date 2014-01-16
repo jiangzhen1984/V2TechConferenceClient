@@ -6,4 +6,5 @@
     <string name="setting_notification_account">帐号信息</string>
     <string name="setting_notification_session_msg">会话消息</string>
     <string name="setting_notification_confs_msg">会议消息</string>
+    <string name="setting_quit_application">退 出</string>
 </resources>

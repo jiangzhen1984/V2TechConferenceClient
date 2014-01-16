@@ -57,7 +57,8 @@
                     android:layout_height="wrap_content"
                     android:layout_centerVertical="true"
                     android:layout_toRightOf="@+id/confs_center_separation"
-                    android:src="@drawable/address" />
+                    android:src="@drawable/address"
+                    android:visibility="gone" />
 
                 <ImageView
                     android:id="@+id/confs_sepa1"
@@ -67,7 +68,8 @@
                     android:layout_marginLeft="25dp"
                     android:layout_marginRight="25dp"
                     android:layout_toRightOf="@+id/group_list_contacts"
-                    android:src="@drawable/group_list_separation" />
+                    android:src="@drawable/group_list_separation"
+                    android:visibility="gone" />
 
                 <ImageView
                     android:id="@+id/group_list_setting"
@@ -84,7 +86,8 @@
                     android:layout_height="wrap_content"
                     android:layout_centerVertical="true"
                     android:layout_toLeftOf="@+id/confs_center_separation"
-                    android:src="@drawable/group" />
+                    android:src="@drawable/group"
+                    android:visibility="gone" />
 
                 <ImageView
                     android:id="@+id/group_list_sep2"
@@ -94,7 +97,8 @@
                     android:layout_marginLeft="25dp"
                     android:layout_marginRight="25dp"
                     android:layout_toLeftOf="@+id/group_list_group"
-                    android:src="@drawable/group_list_separation" />
+                    android:src="@drawable/group_list_separation"
+                    android:visibility="gone" />
 
                 <ImageView
                     android:id="@+id/group_list_conf_list"

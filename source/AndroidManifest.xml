@@ -32,6 +32,8 @@
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@android:style/Theme.NoTitleBar" >
+        
+        <service android:name="com.v2tech.view.JNIService"></service>
         <activity
             android:name="com.v2tech.view.LogoActivity"
             android:label="@string/app_name" >
