@@ -16,4 +16,7 @@ public interface ImRequestCallback {
 	
 	
 	public void OnConnectResponseCallback(int nResult);
+	
+	
+	public void OnUpdateBaseInfoCallback(long nUserID, String updatexml);
 }

@@ -146,7 +146,7 @@ public class Group {
 			for (int i = 0; i < conferenceList.getLength(); i++) {
 				conferenceElement = (Element) conferenceList.item(i);
 				list.add(new Group(Long.parseLong(conferenceElement
-						.getAttribute("id")), GroupType.fromInt(4), conferenceElement
+						.getAttribute("id")), GroupType.fromInt(type), conferenceElement
 						.getAttribute("subject"), conferenceElement
 						.getAttribute("createuserid"), conferenceElement
 						.getAttribute("starttime")));

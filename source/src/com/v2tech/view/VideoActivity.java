@@ -17,6 +17,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
+import android.graphics.Typeface;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -40,6 +41,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.V2.jni.ConfRequest;
+import com.V2.jni.ImRequest;
 import com.V2.jni.VideoRequest;
 import com.v2tech.R;
 import com.v2tech.logic.ConfUserDeviceInfo;
@@ -205,7 +207,7 @@ public class VideoActivity extends Activity {
 
 				});
 				
-				LinearLayout ll = (LinearLayout)view.findViewById(R.id.in_meeting_setting_reverse_camera);
+				RelativeLayout ll = (RelativeLayout)view.findViewById(R.id.in_meeting_setting_reverse_camera);
 				ll.setOnClickListener(new OnClickListener() {
 
 					@Override
@@ -266,6 +268,9 @@ public class VideoActivity extends Activity {
 				User u = new User();
 				u.setmUserId(intent.getExtras().getLong("uid"));
 				u.setName(intent.getExtras().getString("name"));
+				if (u.getmUserId() ==  GlobalHolder.getLoggedUserId()) {
+					return;
+				}
 				Message.obtain(mVideoHandler, UPDATE_ATTENDEE_INFO, u)
 				.sendToTarget();
 				
@@ -284,6 +289,7 @@ public class VideoActivity extends Activity {
 		filter.addAction(JNI_EVENT_CONF_USER_CATEGORY_NEW_USER_ENTERED_ACTION);
 		filter.addAction(JNI_EVENT_CONF_USER_CATEGORY_USER_EXITED_ACTION);
 		filter.addAction(JNI_EVENT_CONF_USER_CATEGORY_USER_DEVICE_NOTIFICATION);
+		filter.addAction(JNI_EVENT_CONF_USER_CATEGORY_UPDATE_ATTENDEE_INFO);
 		mContext.registerReceiver(mConfUserChangeReceiver, filter);
 	}
 
@@ -475,8 +481,9 @@ public class VideoActivity extends Activity {
 	// TODO do log out
 
 	private void fillUserList() {
+		mUserListContainer.addView(getUserTextView(GlobalHolder.getLoggedUserId(), GlobalHolder.getInstance().getUser().getName(), true));
 		for (User u : mCurrentUserList) {
-			mUserListContainer.addView(getUserTextView(u.getmUserId() + ""));
+			mUserListContainer.addView(getUserTextView(u.getmUserId(), u.getName(), false));
 		}
 	}
 
@@ -495,25 +502,33 @@ public class VideoActivity extends Activity {
 
 		if (mUserListContainer != null) {
 			
-			mUserListContainer.addView(getUserTextView(user.getmUserId()+""));
+			mUserListContainer.addView(getUserTextView(user.getmUserId(), user.getName(), false));
 		}
-		Toast.makeText(mContext, user.getmUserId() + "进入会议室! ",
+		Toast.makeText(mContext, user.getName() + "进入会议室! ",
 				Toast.LENGTH_SHORT).show();
 	}
 	
 	
-	private TextView getUserTextView(final String id) {
+	private TextView getUserTextView(final long id, final String name, boolean local) {
 		TextView tv = new TextView(mContext);
-		tv.setText(id);
-		tv.setTextSize(20);
-		tv.setOnClickListener(new OnClickListener() {
-
-			@Override
-			public void onClick(View arg0) {
-				showAttendeeVideo(mD.get(Long.parseLong(id)));
-			}
-			
-		});
+		tv.setId((int)id);
+		tv.setText(name);
+		
+		tv.setPadding(15, 5, 5, 5);
+		if (local ==  false) {
+			tv.setOnClickListener(new OnClickListener() {
+	
+				@Override
+				public void onClick(View arg0) {
+					showAttendeeVideo(mD.get(id));
+				}
+				
+			});
+			tv.setTextSize(20);
+		} else {
+			tv.setTextSize(22);
+			tv.setTypeface(null, Typeface.BOLD);
+		}
 		return tv;
 	}
 	
@@ -555,8 +570,8 @@ public class VideoActivity extends Activity {
 		for (int i = 0; i < count; i++) {
 			View v = mUserListContainer.getChildAt(i);
 			if (v instanceof TextView) {
-				String uid = ((TextView) v).getText().toString();
-				if (uid != null && uid.trim().equals(user.getmUserId() + "")) {
+				long uid = ((TextView) v).getId();
+				if (uid ==user.getmUserId()) {
 					mUserListContainer.removeView(v);
 					// TODO close
 					return;
@@ -678,15 +693,16 @@ public class VideoActivity extends Activity {
 				getConfsUserList();
 				break;
 			case USER_ENTERED_CONF:
-				doHandleNewUserEntered((User)msg.obj);
-				//User u = (User) msg.obj;
-				//ImRequest.getInstance().getUserBaseInfo(u.getmUserId());				
+				//doHandleNewUserEntered((User)msg.obj);
+				User u = (User) msg.obj;
+				ImRequest.getInstance().getUserBaseInfo(u.getmUserId());				
 				break;
 			case USER_EXITED_CONF:
 				doHandleUserExited((User) msg.obj);
 				break;
 			case UPDATE_ATTENDEE_INFO:
 				doHandleNewUserEntered((User)msg.obj);
+				break;
 			case SEND_EXIT_CONF_EVENT:
 			case FINISH_BY_USER:
 				quit();

@@ -22,7 +22,7 @@ public class GlobalHolder {
 	}
 	
 	public static long getLoggedUserId() {
-		return getInstance().getUser().getmUserId();
+		return getInstance().getUser() == null ? 0 : getInstance().getUser().getmUserId();
 	}
 	
 	

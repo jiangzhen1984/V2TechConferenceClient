@@ -14,6 +14,8 @@ public class ConfRequest
 	private static ConfRequest mConfRequest;
 	private Context context;
 	
+	private ConfRequestCallback callback;
+	
 	private ConfRequest(Context context){
 		this.context = context;
 	};
@@ -37,6 +39,15 @@ public class ConfRequest
 	}
 	
 	
+	
+	
+	public void setCallback(ConfRequestCallback callback) {
+		this.callback = callback;
+	}
+
+
+
+
 	private boolean isInConf = false;
 	
 	public native boolean initialize(ConfRequest request);
@@ -110,7 +121,9 @@ public class ConfRequest
 	//鎴戝姞鍏ヤ細璁殑鍥炶皟
 	private void OnEnterConf(long nConfID, long nTime, String szConfData, int nJoinResult)
 	{
-			
+			if (callback != null) {
+				callback.OnEnterConfCallback(nConfID, nTime, szConfData, nJoinResult);
+			}
 	}
 	
 	private void OnAddUser(long userid,String xml){
@@ -162,6 +175,9 @@ public class ConfRequest
 
 		private void OnConfMemberEnter(long nConfID, long  nTime, String szUserInfos)
 		{
+			if (this.callback != null) {
+				this.callback.OnConfMemberEnterCallback(nConfID, nTime, szUserInfos);
+			}
 			Log.e("ConfRequest UI", "-->OnConfMemberEnter " + nConfID + " " + nTime + " " + szUserInfos);
 			//<user id='146' uetype='1'/>
 			//TODO query user name

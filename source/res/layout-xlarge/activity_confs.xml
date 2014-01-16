@@ -106,7 +106,7 @@
                     android:layout_height="wrap_content"
                     android:layout_centerVertical="true"
                     android:layout_toLeftOf="@+id/group_list_sep2"
-                    android:src="@drawable/message" />
+                    android:src="@drawable/message_selected" />
             </RelativeLayout>
         </LinearLayout>
 

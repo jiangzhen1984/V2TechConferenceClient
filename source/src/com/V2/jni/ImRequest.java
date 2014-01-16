@@ -1,12 +1,14 @@
 package com.V2.jni;
 
 import android.content.Context;
+import android.content.Intent;
 import android.util.Log;
 
 import com.v2tech.logic.GlobalHolder;
 import com.v2tech.logic.NetworkStateCode;
 import com.v2tech.logic.User;
 import com.v2tech.util.V2Log;
+import com.v2tech.view.VideoActivity;
 
 
 
@@ -152,8 +154,31 @@ public class ImRequest {
 	}
 
 	// 濂藉弸鐨勪釜浜轰俊鎭慨鏀瑰悗杩斿洖锛屼慨鏀逛粈涔堬紝杩斿洖閭ｄ釜瀛楁
-	private void OnUpdateBaseInfo(long nUserID, String udatexml) {
-		Log.e("ImRequest UI", "OnUpdateBaseInfo::" + nUserID + "  " + udatexml);
+	private void OnUpdateBaseInfo(long nUserID, String updatexml) {
+		if (this.callback != null) {
+			this.callback.OnUpdateBaseInfoCallback(nUserID, updatexml);
+		}
+		Log.e("ImRequest UI", "OnUpdateBaseInfo::" + nUserID + "  " + updatexml);
+		String nickName = null;
+		int pos = updatexml.indexOf("nickname='");
+		if (pos == -1 ) {
+			Log.e("ImRequest UI", " no nickname");
+		}
+		
+		int end = updatexml.indexOf("'", pos+10);
+		
+		nickName = updatexml.subSequence(pos+10, end).toString();
+		
+		if (GlobalHolder.getLoggedUserId() == nUserID) {
+			GlobalHolder.getInstance().getUser().setName(nickName);
+		}
+		
+		Intent i = new Intent(VideoActivity.JNI_EVENT_CONF_USER_CATEGORY_UPDATE_ATTENDEE_INFO);
+		i.addCategory(VideoActivity.JNI_EVENT_CONF_USER_CATEGORY);
+		i.putExtra("name", nickName);
+		i.putExtra("uid", nUserID);
+		
+		context.sendBroadcast(i);
 		// 鎷艰涓汉淇℃伅
 		// UpdateMsgType updateMsgType = new UpdateMsgType();
 		// updateMsgType.setUpdatexml(udatexml);

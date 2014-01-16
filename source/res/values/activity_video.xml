@@ -13,7 +13,7 @@
     <string name="in_meeting_setting_video_qulity_high">高</string>
     <string name="in_meeting_setting_video_qulity_middle">中</string>
     <string name="in_meeting_setting_video_qulity_low">低</string>
-    <string name="in_meeting_setting_reverse">翻转</string>
+    <string name="in_meeting_setting_reverse">翻转摄像头</string>
     <string name="error_in_meeting_invalid_gid">错误的会议ID</string>
     <string name="error_in_meeting_open_video_falied">打开视频设备失败!</string>
     
