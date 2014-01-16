@@ -4,14 +4,13 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Process;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.V2.jni.ImRequest;
 import com.v2tech.R;
-import com.v2tech.logic.GlobalHolder;
 
 public class SettingActivity extends Activity {
 
@@ -47,10 +46,8 @@ public class SettingActivity extends Activity {
 
 		@Override
 		public void onClick(View arg0) {
-		//	ImRequest.getInstance().logout(GlobalHolder.getLoggedUserId());
-			//overridePendingTransition(R.animator.down_in,R.animator.down_out);
 			finish();
-			System.exit(0);
+			Process.killProcess(Process.myPid());
 		}
 		
 	}; 

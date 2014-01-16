@@ -23,7 +23,7 @@ public class Group {
 
 	private long mGId;
 
-	private int mGroupType;
+	private GroupType mGroupType;
 
 	private String mName;
 
@@ -33,7 +33,31 @@ public class Group {
 
 	private String mCreateDate;
 
-	public Group(long mGId, int mGroupType, String mName, String mOwner,
+	public enum GroupType {
+		CONFERENCE(4), UNKNOWN(-1);
+
+		private int type;
+
+		private GroupType(int type) {
+			this.type = type;
+		}
+
+		public static GroupType fromInt(int code) {
+			switch (code) {
+			case 4:
+				return CONFERENCE;
+			default:
+				return UNKNOWN;
+
+			}
+		}
+		
+		public int intValue() {
+			return type;
+		}
+	}
+
+	public Group(long mGId, GroupType mGroupType, String mName, String mOwner,
 			String createDate) {
 		super();
 		this.mGId = mGId;
@@ -41,8 +65,8 @@ public class Group {
 		this.mName = mName;
 		this.mOwner = mOwner;
 		this.mCreateDate = createDate;
-		Date d = new Date(Long.parseLong(createDate)*1000);
-		DateFormat sd = new  SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.US);
+		Date d = new Date(Long.parseLong(createDate) * 1000);
+		DateFormat sd = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.US);
 		this.mCreateDate = sd.format(d);
 	}
 
@@ -54,11 +78,11 @@ public class Group {
 		this.mGId = mGId;
 	}
 
-	public int getGroupType() {
+	public GroupType getGroupType() {
 		return mGroupType;
 	}
 
-	public void setGroupType(int mGroupType) {
+	public void setGroupType(GroupType mGroupType) {
 		this.mGroupType = mGroupType;
 	}
 
@@ -85,8 +109,6 @@ public class Group {
 	public void setCreateDate(String mCreateDate) {
 		this.mCreateDate = mCreateDate;
 	}
-	
-	
 
 	public User getOwnerUser() {
 		return mOwnerUser;
@@ -123,7 +145,8 @@ public class Group {
 
 			for (int i = 0; i < conferenceList.getLength(); i++) {
 				conferenceElement = (Element) conferenceList.item(i);
-				list.add(new Group(Long.parseLong(conferenceElement.getAttribute("id")), 4, conferenceElement
+				list.add(new Group(Long.parseLong(conferenceElement
+						.getAttribute("id")), GroupType.fromInt(4), conferenceElement
 						.getAttribute("subject"), conferenceElement
 						.getAttribute("createuserid"), conferenceElement
 						.getAttribute("starttime")));

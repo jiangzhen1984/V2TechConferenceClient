@@ -32,6 +32,7 @@ import android.widget.Toast;
 import com.V2.jni.ConfigRequest;
 import com.V2.jni.ImRequest;
 import com.v2tech.R;
+import com.v2tech.logic.AsynResult;
 import com.v2tech.logic.GlobalHolder;
 import com.v2tech.logic.NetworkStateCode;
 import com.v2tech.logic.User;
@@ -315,10 +316,10 @@ public class LoginActivity extends Activity {
 			// perform the user login attempt.
 			mLoginStatusMessageView.setText(R.string.login_progress_signing_in);
 			showProgress(true);
-			mAuthTask = new UserLoginTask();
-			mAuthTask.execute((Void) null);
-		//	mService.login(mEmailView.getText().toString(), mPasswordView
-		//				.getText().toString(), Message.obtain(mHandler, LOG_IN_CALL_BACK));
+		//	mAuthTask = new UserLoginTask();
+		//	mAuthTask.execute((Void) null);
+			mService.login(mEmailView.getText().toString(), mPasswordView
+						.getText().toString(), Message.obtain(mHandler, LOG_IN_CALL_BACK));
 		}
 	}
 
@@ -421,8 +422,14 @@ public class LoginActivity extends Activity {
 			switch (msg.what) {
 			case LOG_IN_CALL_BACK:
 				showProgress(false);
-				User u = (User) msg.obj;
-				GlobalHolder.getInstance().setUser(u);
+				AsynResult ar = (AsynResult) msg.obj;
+				if (ar.getState() == AsynResult.AsynState.TIME_OUT) {
+					Toast.makeText(mContext, R.string.error_time_out,
+							Toast.LENGTH_LONG).show();
+					return;
+				}
+				User u = (User)ar.getObject();
+				
 				if (u.getmResult() == NetworkStateCode.CONNECTED_ERROR || u.getmResult() == NetworkStateCode.TIME_OUT) {
 					Toast.makeText(mContext, R.string.error_connect_to_server,
 							Toast.LENGTH_LONG).show();
@@ -431,6 +438,7 @@ public class LoginActivity extends Activity {
 							.setError(getString(R.string.error_incorrect_password));
 					mPasswordView.requestFocus();
 				} else {
+					GlobalHolder.getInstance().setUser(u);
 					mContext.startActivity(new Intent(mContext, ConfsActivity.class));
 					finish();
 				}

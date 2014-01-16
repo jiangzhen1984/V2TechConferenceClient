@@ -1,6 +1,8 @@
 package com.v2tech.view;
 
+import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.List;
 
 import android.app.Service;
 import android.content.Context;
@@ -17,6 +19,9 @@ import com.V2.jni.GroupRequestCallback;
 import com.V2.jni.ImRequest;
 import com.V2.jni.ImRequestCallback;
 import com.v2tech.R;
+import com.v2tech.logic.AsynResult;
+import com.v2tech.logic.AsynResult.AsynState;
+import com.v2tech.logic.Group;
 import com.v2tech.logic.NetworkStateCode;
 import com.v2tech.logic.User;
 import com.v2tech.util.V2Log;
@@ -42,8 +47,12 @@ class MetaData {
 }
 
 /**
- * This service is used to wrap jni call.<br>
- * JNI calls are asynchronization, we don't expect activity involve JNI.
+ * This service is used to wrap JNI call.<br>
+ * JNI calls are asynchronous, we don't expect activity involve JNI.<br>
+ * <p>
+ *     This service will hold all data which from server.
+ * </p>
+ * TODO add permission check to make sure do let others stop this service.
  * 
  * @author 28851274
  * 
@@ -63,6 +72,15 @@ public class JNIService extends Service {
 	private ImRequestCallback mImCB;
 
 	private Context mContext;
+	
+	
+	
+	/////////////////////////////////////////
+	// only refer group data which group is GroupType.CONFERENCE
+	private List<Group> mConfGroup = null;
+	
+	
+	//////////////////////////////////////////
 
 	@Override
 	public void onCreate() {
@@ -79,11 +97,8 @@ public class JNIService extends Service {
 
 		mImCB = new ImRequestCB(mCallbackHandler);
 		ImRequest.getInstance().setCallback(mImCB);
+		
 	}
-	
-	
-	
-	
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
@@ -129,13 +144,15 @@ public class JNIService extends Service {
 	 * @return
 	 */
 	private MetaData getAndQueued(Integer msgId, Message m) {
-		if (map.containsKey(msgId)) {
-			V2Log.e(" MSG ID:" + msgId + " in the queque!");
-			return null;
-		} else {
-			MetaData meta = MetaData.obtain(m);
-			map.put(msgId, meta);
-			return meta;
+		synchronized (map) {
+			if (map.containsKey(msgId)) {
+				V2Log.e(" MSG ID:" + msgId + " in the queque!");
+				return null;
+			} else {
+				MetaData meta = MetaData.obtain(m);
+				map.put(msgId, meta);
+				return meta;
+			}
 		}
 	}
 
@@ -145,17 +162,27 @@ public class JNIService extends Service {
 	 * @return
 	 */
 	private MetaData getMeta(Integer msgId) {
-		MetaData m = map.get(msgId);
-		map.remove(msgId);
-		return m;
+		synchronized (map) {
+			MetaData m = map.get(msgId);
+			map.remove(msgId);
+			return m;
+		}
+	}
+
+	private synchronized boolean existMessage(Integer msgId) {
+		return map.containsKey(msgId);
 	}
 
 	/**
-	 * Asynchronous login function.
-	 * After login, will call message.sendToTarget to caller
-	 * @param mail  user mail
-	 * @param passwd  password
-	 * @param message  callback message Message.obj is {@link User} object
+	 * Asynchronous login function. After login, will call message.sendToTarget
+	 * to caller
+	 * 
+	 * @param mail
+	 *            user mail
+	 * @param passwd
+	 *            password
+	 * @param message
+	 *            callback message Message.obj is {@link AsynResult} object
 	 */
 	public void login(String mail, String passwd, Message message) {
 		MetaData m = getAndQueued(JNI_LOG_IN, message);
@@ -165,6 +192,36 @@ public class JNIService extends Service {
 		} else {
 			V2Log.e(" can't get metadata for login");
 		}
+	}
+	
+	
+	/**
+	 *  Get group information. Service will send message to target, once service get group from JNI.
+	 * @param gType
+	 * @param msg 
+	 *  	callback message Message.obj is {@link AsynResult} object. AsynResult.object is List<Group>
+	 */
+	public void getGroupAsyn(Group.GroupType gType, Message msg) {
+		if (gType == Group.GroupType.CONFERENCE && this.mConfGroup != null) {
+			msg.obj = new AsynResult(AsynState.SUCCESS, this.mConfGroup);
+		}
+	}
+	
+	
+	/**
+	 * Group information is server active call, we can't get from server directly.<br>
+	 * Only way to get group information is waiting for server call.<br>
+	 * So if this function return null, means service doesn't receive any call from server.
+	 * otherwise server already sent group information to service.<br>
+	 * If you want to know indication, please use {@link getGroupAsyn}
+	 * @param gType
+	 * @return return null means server doesn't send group information to service.  AsynResult.object {@link User}
+	 */
+	public List<Group> getGroup(Group.GroupType gType) {
+		if (gType == Group.GroupType.CONFERENCE) {
+			return this.mConfGroup;
+		}
+		throw new RuntimeException(" Unknown group type :"+gType);
 	}
 
 	class InnerUser {
@@ -191,13 +248,22 @@ public class JNIService extends Service {
 			this.nResult = nResult;
 		}
 	}
+	
+	
+	
+	
+	////////////////////////////////////////////////////////////
+	// Internal Handler definition                            //
+	////////////////////////////////////////////////////////////
 
-	private static final int JNI_LOG_IN = 1;
-	private static final int JNI_LOG_OUT = 2;
-	private static final int JNI_CONNECT_RESPONSE = 3;
-	private static final int JNI_GROUP_NOTIFY = 25;
+	private static final int CANCEL_REQUEST = 0x1000;
+	private static final int REQUEST_TIME_OUT = 0x2000;
+	private static final int JNI_LOG_IN = 21;
+	private static final int JNI_LOG_OUT = 22;
+	private static final int JNI_CONNECT_RESPONSE = 23;
+	private static final int JNI_GROUP_NOTIFY = 35;
 
-	static class LocalHander extends Handler {
+	class LocalHander extends Handler {
 
 		public LocalHander(Looper looper) {
 			super(looper);
@@ -208,7 +274,10 @@ public class JNIService extends Service {
 			switch (msg.what) {
 			case JNI_LOG_IN:
 				InnerUser iu = (InnerUser) msg.obj;
-				ImRequest.getInstance().login(iu.mail, iu.mail, 1, 2);
+				ImRequest.getInstance().login(iu.mail, iu.passwd, 1, 2);
+				Message m = Message.obtain(mCallbackHandler, REQUEST_TIME_OUT,
+						JNI_LOG_IN, 0);
+				mCallbackHandler.sendMessageDelayed(m, 10000);
 				break;
 			case JNI_LOG_OUT:
 
@@ -227,37 +296,75 @@ public class JNIService extends Service {
 		@Override
 		public void handleMessage(Message msg) {
 			switch (msg.what) {
-			case JNI_LOG_IN:
+			case REQUEST_TIME_OUT: {
+				// TODO need to be remove when request finish normally
+				int msgId = msg.arg1;
+				MetaData d = getMeta(msgId);
+				if (d == null) {
+					V2Log.w(" REQUEST_TIME_OUT : empty ");
+				} else {
+					d.caller.obj = new AsynResult(
+							AsynResult.AsynState.TIME_OUT, new Exception(msgId
+									+ " time out"));
+					d.caller.sendToTarget();
+				}
+			}
+				break;
+
+			case CANCEL_REQUEST: {
+				// cancel request
+				int msgId = msg.arg1;
+				MetaData d = getMeta(msgId);
+				if (d != null) {
+					V2Log.i(" MSG :" + msgId + " removed");
+				}
+			}
+				break;
+			case JNI_LOG_IN: {
 				InnerUser iu = ((InnerUser) msg.obj);
 				User u = new User(iu.idCallback, "",
 						NetworkStateCode.fromInt(iu.nResult));
 				if (iu.m == null || iu.m.caller == null) {
 					V2Log.w("No available caller, ignore this call back");
-					return;
+					break;
 				}
-				iu.m.caller.obj = u;
+				iu.m.caller.obj = new AsynResult(AsynResult.AsynState.SUCCESS,
+						u);
 				iu.m.caller.sendToTarget();
+			}
 				break;
 			case JNI_LOG_OUT:
 				break;
 			case JNI_CONNECT_RESPONSE:
-				if (msg.arg1 == NetworkStateCode.CONNECTED_ERROR
-						.intValue()) {
+				// Can't not connect to server
+				if (msg.arg1 == NetworkStateCode.CONNECTED_ERROR.intValue()) {
+					// Logging event in progress, need to send error message to
+					// Login caller
+					if (existMessage(JNI_LOG_IN)) {
+						MetaData m = getMeta(JNI_LOG_IN);
+						User u = new User(0, "",
+								NetworkStateCode.CONNECTED_ERROR);
+						m.caller.obj = u;
+						m.caller.sendToTarget();
+					}
+					// after login or before log in send broadcast
 					Toast.makeText(mContext, R.string.error_connect_to_server,
 							Toast.LENGTH_SHORT).show();
+
 				}
 				break;
 			case JNI_GROUP_NOTIFY:
 				break;
 			}
 		}
-
 	}
+
 	
 	
-	/////////////////////////////////////////////////
-	// TODO Need to be optimize code structure    //
-	////////////////////////////////////////////////
+	// ///////////////////////////////////////////////
+	//  JNI call back implements                    //
+	// TODO Need to be optimize code structure      //
+	// ///////////////////////////////////////////////
 
 	class ImRequestCB implements ImRequestCallback {
 
@@ -298,10 +405,10 @@ public class JNIService extends Service {
 
 		@Override
 		public void OnGetGroupInfoCallback(int groupType, String sXml) {
-			Message.obtain(mCallbackHandler, JNI_GROUP_NOTIFY, sXml)
-			.sendToTarget();
+			Message.obtain(mCallbackHandler, JNI_GROUP_NOTIFY, groupType, 0, sXml)
+					.sendToTarget();
 		}
-		
+
 	}
 
 }

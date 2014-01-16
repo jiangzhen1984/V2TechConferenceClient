@@ -2,6 +2,11 @@ package com.v2tech.util;
 
 import android.util.Log;
 
+/**
+ * TODO add file log outputer
+ * @author 28851274
+ *
+ */
 public class V2Log {
 	
 	public static final String TAG = "V2TECH";

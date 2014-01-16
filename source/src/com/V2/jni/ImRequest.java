@@ -343,12 +343,5 @@ public class ImRequest {
 		// }
 	}
 
-	private void OnGetVideoDevice(long l, String xml) {
-		Log.e("VideoRequest UI", "OnGetVideoDevice " + xml);
-	}
-
-	private void OnGetVideoDevice(String xml, long l) {
-		Log.e("VideoRequest UI", "OnGetVideoDevice " + xml);
-	}
 
 }
