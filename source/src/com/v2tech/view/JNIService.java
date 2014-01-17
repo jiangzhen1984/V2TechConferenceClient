@@ -255,12 +255,12 @@ public class JNIService extends Service {
 	/**
 	 * User request to enter conference.<br>
 	 * @param confID
-	 * @param msg   Message.object  is {@link AsynResult} 
+	 * @param msg   Message.object  is {@link AsynResult} AsynResult.obj is Integer  0: success  1: failed
 	 */
 	public void enterConference(long confID, Message msg) {
 		if (msg != null) {
 			MetaData m = getAndQueued(JNI_REQUEST_ENTER_CONF, msg);
-			if (m != null) {
+			if (m != null && confID > 0) {
 				Message.obtain(mHander, JNI_REQUEST_ENTER_CONF, Long.valueOf(confID))
 				.sendToTarget();
 			} else {
@@ -432,6 +432,15 @@ public class JNIService extends Service {
 				}
 			}
 				break;
+			case JNI_REQUEST_ENTER_CONF: {
+				MetaData d = getMeta(JNI_REQUEST_ENTER_CONF);
+				if (d != null) {
+					d.caller.arg1 = msg.arg1;
+					d.caller.obj = new AsynResult(AsynResult.AsynState.SUCCESS, msg.arg1);
+					d.caller.sendToTarget();
+				}
+			}
+				break;
 			}
 		}
 	}
@@ -504,7 +513,7 @@ public class JNIService extends Service {
 		@Override
 		public void OnEnterConfCallback(long nConfID, long nTime,
 				String szConfData, int nJoinResult) {
-			
+			Message.obtain(mCallbackHandler, JNI_REQUEST_ENTER_CONF, nJoinResult, 0, szConfData).sendToTarget();
 		}
 
 		@Override
