@@ -23,6 +23,8 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -72,6 +74,8 @@ public class LoginActivity extends Activity {
 	private Dialog mSettingDialog;
 
 	private Activity mContext;
+	
+	private View loginView;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -102,6 +106,8 @@ public class LoginActivity extends Activity {
 
 		mRemPwdCkbx = (CheckBox) findViewById(R.id.login_rem_pwd);
 
+		loginView = findViewById(R.id.login_layout);
+		loginView.setVisibility(View.GONE);
 		init();
 	}
 
@@ -115,6 +121,17 @@ public class LoginActivity extends Activity {
 				&& !sf.getString("passwd", "").equals("")) {
 			mRemPwdCkbx.setChecked(true);
 		}
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		
+		
+		loginView.setVisibility(View.VISIBLE);
+	    final Animation tabBlockHolderAnimation = AnimationUtils.loadAnimation(this, R.animator.login_container_down_in);
+	    tabBlockHolderAnimation.setDuration(700);
+	    loginView.startAnimation(tabBlockHolderAnimation);
 	}
 
 	private OnClickListener showIpSetting = new OnClickListener() {
@@ -439,7 +456,14 @@ public class LoginActivity extends Activity {
 					mPasswordView.requestFocus();
 				} else {
 					GlobalHolder.getInstance().setUser(u);
-					mContext.startActivity(new Intent(mContext, ConfsActivity.class));
+					// Save user info
+					if (mRemPwdCkbx.isChecked()) {
+						saveUserConfig(mEmailView.getText().toString(), mPasswordView
+								.getText().toString());
+					} else {
+						saveUserConfig("", "");
+					}
+					mContext.startActivity(new Intent(mContext, MainActivity.class));
 					finish();
 				}
 				break;

@@ -14,6 +14,7 @@ import com.v2tech.view.VideoActivity;
 public class VideoRequest
 {
 	private static VideoRequest mVideoRequest;
+	private VideoRequestCallback callback;
 	private Context context;
 	private VideoRequest(Context context){
 		this.context=context;
@@ -30,8 +31,15 @@ public class VideoRequest
 		return mVideoRequest;
 	}
 	
+	public static synchronized VideoRequest getInstance(){
+		return mVideoRequest;
+	}
 	
 	
+	public void setCallback(VideoRequestCallback callback) {
+		this.callback = callback;
+	}
+
 	public native boolean initialize(VideoRequest request);
 	public native void unInitialize();
 	  
@@ -83,6 +91,9 @@ public class VideoRequest
 	private void OnRemoteUserVideoDevice(String szXmlData)
 	{
 		Log.e("VideoRequest UI", "OnRemoteUserVideoDevice:---"+szXmlData);
+		if (callback != null) {
+			callback.OnRemoteUserVideoDevice(szXmlData);
+		}
 		List<ConfUserDeviceInfo> l = ConfUserDeviceInfo.parseFromXml(szXmlData);
 		Intent i = new Intent(VideoActivity.JNI_EVENT_CONF_USER_CATEGORY_USER_DEVICE_NOTIFICATION);
 		i.addCategory(VideoActivity.JNI_EVENT_CONF_USER_CATEGORY);

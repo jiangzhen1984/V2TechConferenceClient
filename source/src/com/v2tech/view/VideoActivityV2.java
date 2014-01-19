@@ -12,15 +12,18 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.Typeface;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Message;
 import android.view.Display;
 import android.view.KeyEvent;
@@ -40,49 +43,45 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.V2.jni.ConfRequest;
-import com.V2.jni.ImRequest;
-import com.V2.jni.VideoRequest;
 import com.v2tech.R;
 import com.v2tech.logic.ConfUserDeviceInfo;
 import com.v2tech.logic.GlobalHolder;
 import com.v2tech.logic.User;
+import com.v2tech.logic.UserDeviceConfig;
+import com.v2tech.view.JNIService.LocalBinder;
 
-public class VideoActivity extends Activity {
+public class VideoActivityV2 extends Activity {
 
+	private static final int SERVICE_BUNDED = 0;
 	private static final int ONLY_SHOW_LOCAL_VIDEO = 1;
 	private static final int FILL_USER_LIST = 2;
 	private static final int APPLY_SPEAK = 3;
-	private static final int FINISH_BY_USER = 9;
+	private static final int REQUEST_OPEN_DEVICE_RESPONSE = 4;
+	private static final int REQUEST_CLOSE_DEVICE_RESPONSE = 5;
 
-	private static final int SEND_ENTER_CONF_EVENT = 10;
-	private static final int SEND_EXIT_CONF_EVENT = 11;
-
-	private static final int GET_CONF_USER_LIST = 20;
 	private static final int USER_ENTERED_CONF = 21;
 	private static final int USER_EXITED_CONF = 22;
 	private static final int CONF_USER_DEVICE_EVENT = 23;
 	
-	private static final int UPDATE_ATTENDEE_INFO = 40;
-
 	public static final String JNI_EVENT_VIDEO_CATEGORY = "com.v2tech.conf_video_event";
 	public static final String JNI_EVENT_VIDEO_CATEGORY_OPEN_VIDEO_EVENT_ACTION = "com.v2tech.conf_video_event.open_video_event";
 
 	public static final String JNI_EVENT_CONF_USER_CATEGORY = "com.v2tech.conf_user_event";
-	public static final String JNI_EVENT_CONF_USER_CATEGORY_GET_USER_LIST_ACTION = "com.v2tech.conf_user_event.get_user_list";
 	public static final String JNI_EVENT_CONF_USER_CATEGORY_NEW_USER_ENTERED_ACTION = "com.v2tech.conf_user_event.new_user_entered";
 	public static final String JNI_EVENT_CONF_USER_CATEGORY_USER_EXITED_ACTION = "com.v2tech.conf_user_event.user_exited";
 	public static final String JNI_EVENT_CONF_USER_CATEGORY_USER_DEVICE_NOTIFICATION = "com.v2tech.conf_user_event.user_device_notificaiton";
-	public static final String JNI_EVENT_CONF_USER_CATEGORY_UPDATE_ATTENDEE_INFO = "com.v2tech.conf_user_event.update_attendee_info";
 
-	private VideoRequest mVideo = VideoRequest.getInstance(this);
-	private ConfRequest mCR = ConfRequest.getInstance(this);
 
+	
+	
+	private JNIService mService;
+	private boolean isBound;
+	
+	
 	private Handler mVideoHandler = new VideoHandler();
 
 	private Context mContext;
 	private SurfaceView[] mSurfaceViewArr;
-	private int[] mSurfaceUsedFlag;
 	private RelativeLayout mVideoLayout;
 
 	private ImageView mSettingIV;
@@ -97,9 +96,7 @@ public class VideoActivity extends Activity {
 	private static int Measuredheight = 0;
 
 	private Long mGroupId;
-	private String mDeviceId;
-	private Map<Long, UserDeviceHolder> mVPHolder = new HashMap<Long, UserDeviceHolder>();
-	private Set<User> mCurrentUserList = new HashSet<User>();
+	private Set<Attendee> mAttendeeList = new HashSet<Attendee>();
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -109,7 +106,6 @@ public class VideoActivity extends Activity {
 		mSurfaceViewArr = new SurfaceView[] { new SurfaceView(this),
 				new SurfaceView(this), new SurfaceView(this),
 				new SurfaceView(this) };
-		mSurfaceUsedFlag = new int[] { 0, 0, 0, 0 };
 		this.mVideoLayout = (RelativeLayout) findViewById(R.id.in_metting_video_main);
 		this.mSettingIV = (ImageView) findViewById(R.id.in_meeting_setting_iv);
 		this.mSettingIV.setOnClickListener(mShowSettingListener);
@@ -121,6 +117,7 @@ public class VideoActivity extends Activity {
 		this.mSpeakerIV.setOnClickListener(mApplySpeakerListener);
 		initConfsListener();
 		init();
+		adjustLayout();
 	}
 
 	private OnClickListener mApplySpeakerListener = new OnClickListener() {
@@ -234,7 +231,6 @@ public class VideoActivity extends Activity {
 			if (intent.getAction().equals(
 					JNI_EVENT_VIDEO_CATEGORY_OPEN_VIDEO_EVENT_ACTION)) {
 				if (intent.getIntExtra("result", 1) != 0) {
-					// TODO handle open video failed;
 					Toast.makeText(context,
 							R.string.error_in_meeting_open_video_falied,
 							Toast.LENGTH_LONG).show();
@@ -264,35 +260,57 @@ public class VideoActivity extends Activity {
 						.getExtras().get("ud");
 				Message.obtain(mVideoHandler, CONF_USER_DEVICE_EVENT, cud)
 						.sendToTarget();
-			} else if(intent.getAction().equals(JNI_EVENT_CONF_USER_CATEGORY_UPDATE_ATTENDEE_INFO)) {
-				User u = new User();
-				u.setmUserId(intent.getExtras().getLong("uid"));
-				u.setName(intent.getExtras().getString("name"));
-				if (u.getmUserId() ==  GlobalHolder.getLoggedUserId()) {
-					return;
-				}
-				Message.obtain(mVideoHandler, UPDATE_ATTENDEE_INFO, u)
-				.sendToTarget();
-				
 			}
 		}
 
 	};
 
+	
+	
+	
+	
+	/** Defines callbacks for service binding, passed to bindService() */
+	private ServiceConnection mConnection = new ServiceConnection() {
+
+		@Override
+		public void onServiceConnected(ComponentName className, IBinder service) {
+			LocalBinder binder = (LocalBinder) service;
+			mService = binder.getService();
+			isBound = true;
+			// Send server bounded message
+			Message.obtain(mVideoHandler, SERVICE_BUNDED).sendToTarget();
+		}
+
+		@Override
+		public void onServiceDisconnected(ComponentName arg0) {
+			isBound = false;
+		}
+	};
+	
+	
+	
+	@Override
+	protected void onStart() {
+		super.onStart();
+		isBound = bindService(new Intent(this.getApplicationContext(),
+				JNIService.class), mConnection, Context.BIND_AUTO_CREATE);
+	}
+	
+	
 	private void initConfsListener() {
 		IntentFilter filter = new IntentFilter();
 		filter.addCategory(JNI_EVENT_VIDEO_CATEGORY);
 		filter.addAction(JNI_EVENT_VIDEO_CATEGORY_OPEN_VIDEO_EVENT_ACTION);
 
 		filter.addCategory(JNI_EVENT_CONF_USER_CATEGORY);
-		filter.addAction(JNI_EVENT_CONF_USER_CATEGORY_GET_USER_LIST_ACTION);
 		filter.addAction(JNI_EVENT_CONF_USER_CATEGORY_NEW_USER_ENTERED_ACTION);
 		filter.addAction(JNI_EVENT_CONF_USER_CATEGORY_USER_EXITED_ACTION);
 		filter.addAction(JNI_EVENT_CONF_USER_CATEGORY_USER_DEVICE_NOTIFICATION);
-		filter.addAction(JNI_EVENT_CONF_USER_CATEGORY_UPDATE_ATTENDEE_INFO);
 		mContext.registerReceiver(mConfUserChangeReceiver, filter);
 	}
 
+	
+	
 	@TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
 	private void init() {
 		mGroupId = this.getIntent().getLongExtra("gid", 0);
@@ -318,23 +336,20 @@ public class VideoActivity extends Activity {
 
 	}
 
+	
+	
 	private void showLocalSurViewOnly() {
 		mSurfaceViewArr[0].getHolder().setType(
 				SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
 		mSurfaceViewArr[0].getHolder().setFormat(PixelFormat.TRANSPARENT);
 		VideoRecorder.VideoPreviewSurfaceHolder = mSurfaceViewArr[0]
 				.getHolder();
-		mVideo.openVideoDevice(mGroupId, GlobalHolder.getLoggedUserId(), "",
-				null, 1);
+		mService.requestOpenVideoDevice(mGroupId,
+				new UserDeviceConfig(mService.getLoggedUserId(), "", null),
+				Message.obtain(mVideoHandler, REQUEST_OPEN_DEVICE_RESPONSE));
 	}
 
-	@Override
-	protected void onStart() {
-		super.onStart();
-		Message.obtain(mVideoHandler, SEND_ENTER_CONF_EVENT).sendToTarget();
-		adjustLayout();
-		Message.obtain(mVideoHandler, ONLY_SHOW_LOCAL_VIDEO).sendToTarget();
-	}
+	
 
 	private void adjustLayout() {
 		mVideoLayout.removeAllViews();
@@ -363,15 +378,18 @@ public class VideoActivity extends Activity {
 	@Override
 	protected void onStop() {
 		super.onStop();
-		Message.obtain(mVideoHandler, SEND_EXIT_CONF_EVENT).sendToTarget();
 		mVideoLayout.removeAllViews();
+		if (isBound) {
+			this.unbindService(mConnection);
+		}
+		quit();
 	}
 
 	@Override
 	protected void onDestroy() {
 		mContext.unregisterReceiver(mConfUserChangeReceiver);
 		super.onDestroy();
-		mVPHolder.clear();
+		mAttendeeList.clear();
 	}
 
 	@Override
@@ -409,7 +427,7 @@ public class VideoActivity extends Activity {
 				@Override
 				public void onClick(View v) {
 					d.dismiss();
-					Message.obtain(mVideoHandler, FINISH_BY_USER).sendToTarget();
+					quit();
 				}
 
 			});
@@ -427,11 +445,14 @@ public class VideoActivity extends Activity {
 	 * reverse local camera from back to front or from front to back
 	 */
 	private void doReverseCamera() {
-		mVideo.closeVideoDevice(mGroupId, GlobalHolder.getLoggedUserId(), "",
-				null, 1);
+		//FIXME fix sequence bug
+		mService.requestCloseVideoDevice(mGroupId, new UserDeviceConfig(
+				mService.getLoggedUserId(), "", null), Message.obtain(
+				mVideoHandler, REQUEST_CLOSE_DEVICE_RESPONSE));
 		VideoCaptureDevInfo.CreateVideoCaptureDevInfo().reverseCamera();
-		mVideo.openVideoDevice(mGroupId, GlobalHolder.getLoggedUserId(), "",
-				null, 1);
+		mService.requestOpenVideoDevice(mGroupId,
+				new UserDeviceConfig(mService.getLoggedUserId(), "", null),
+				Message.obtain(mVideoHandler, REQUEST_OPEN_DEVICE_RESPONSE));
 	}
 	
 	
@@ -439,28 +460,20 @@ public class VideoActivity extends Activity {
 	 * user quit conference, however positive or negative
 	 */
 	private void quit() {
-		for (Map.Entry<Long, UserDeviceHolder> entry : this.mVPHolder
-				.entrySet()) {
-			UserDeviceHolder holder = entry.getValue();
-			mVideo.closeVideoDevice(mGroupId, holder.getUserId(),
-					holder.getDeviceId(), holder.getVp(), 1);
+		for (Attendee at : this.mAttendeeList) {
+			mService.requestCloseVideoDevice(mGroupId, new UserDeviceConfig(
+					at.u.getmUserId(), at.config.getDeviceID(), at.config.getVp()), Message.obtain(
+					mVideoHandler, REQUEST_CLOSE_DEVICE_RESPONSE));
 		}
-		mVideo.closeVideoDevice(mGroupId, GlobalHolder.getLoggedUserId(), "",
-				null, 1);
+		
+		mService.requestCloseVideoDevice(mGroupId, new UserDeviceConfig(
+				mService.getLoggedUserId(), "", null), Message.obtain(
+				mVideoHandler, REQUEST_CLOSE_DEVICE_RESPONSE));
+		
 		VideoRecorder.VideoPreviewSurfaceHolder = null;
-		mVPHolder.clear();
-
-		mCR.exitConf(mGroupId);
-
-		Intent i = new Intent();
-		i.putExtra("error_msg", "退出失败");
-		setResult(0, i);
-		finish();
+		mAttendeeList.clear();
 	}
 
-	private void getConfsUserList() {
-		mCR.getConfUserList(this.mGroupId);
-	}
 
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
@@ -471,18 +484,17 @@ public class VideoActivity extends Activity {
 		return super.onKeyDown(keyCode, event);
 	}
 
-	// TODO do log out
 
 	private void fillUserList() {
 		mUserListContainer.addView(getUserTextView(GlobalHolder.getLoggedUserId(), GlobalHolder.getInstance().getUser().getName(), true));
-		for (User u : mCurrentUserList) {
-			mUserListContainer.addView(getUserTextView(u.getmUserId(), u.getName(), false));
+		for (Attendee at : mAttendeeList) {
+			mUserListContainer.addView(getUserTextView(at.u.getmUserId(), at.u.getName(), false));
 		}
 	}
 
 	private void doApplySpeak() {
 		// 3 means apply speak
-		mCR.applyForControlPermission(3);
+		mService.applyForControlPermission(3);
 	}
 
 	/**
@@ -491,10 +503,9 @@ public class VideoActivity extends Activity {
 	 * @param user
 	 */
 	private void doHandleNewUserEntered(User user) {
-		mCurrentUserList.add(user);
+		this.mAttendeeList.add(new Attendee(user));
 
 		if (mUserListContainer != null) {
-			
 			mUserListContainer.addView(getUserTextView(user.getmUserId(), user.getName(), false));
 		}
 		Toast.makeText(mContext, user.getName() + "进入会议室! ",
@@ -513,7 +524,7 @@ public class VideoActivity extends Activity {
 	
 				@Override
 				public void onClick(View arg0) {
-					showAttendeeVideo(mD.get(id));
+					showAttendeeVideo(id);
 				}
 				
 			});
@@ -527,13 +538,11 @@ public class VideoActivity extends Activity {
 	
 	
 	private void closeUserDevice(User user) {
-		UserDeviceHolder h = mVPHolder.get(user.getmUserId());
-		if (h !=null && h.getDeviceId() != null) {
-			mVideo.closeVideoDevice(mGroupId, h.getUserId(), h.getDeviceId(),
-					h.getVp(), 1);
-			mVPHolder.remove(user.getmUserId());
-			mSurfaceUsedFlag[h.getSurIndex()] = 0;
-			h.clearReference();
+		Attendee a = getAttendee(user.getmUserId());
+		if (a != null) {
+			mService.requestCloseVideoDevice(mGroupId, new UserDeviceConfig(
+					a.u.getmUserId(), a.config.getDeviceID(), a.config.getVp()), Message.obtain(
+					mVideoHandler, REQUEST_CLOSE_DEVICE_RESPONSE));
 		}
 	}
 
@@ -545,17 +554,14 @@ public class VideoActivity extends Activity {
 	private void doHandleUserExited(User user) {
 		Toast.makeText(mContext, user.getmUserId() + "退出会议室! ",
 				Toast.LENGTH_SHORT).show();
-
-		UserDeviceHolder h = mVPHolder.get(user.getmUserId());
-		if (h !=null && h.getDeviceId() != null) {
-			mVideo.closeVideoDevice(mGroupId, h.getUserId(), h.getDeviceId(),
-					h.getVp(), 1);
-			mVPHolder.remove(user.getmUserId());
-			mSurfaceUsedFlag[h.getSurIndex()] = 0;
-			h.clearReference();
+		Attendee a = getAttendee(user.getmUserId());
+		if (a != null) {
+			mService.requestCloseVideoDevice(mGroupId, new UserDeviceConfig(
+					a.u.getmUserId(), a.config.getDeviceID(), a.config.getVp()), Message.obtain(
+					mVideoHandler, REQUEST_CLOSE_DEVICE_RESPONSE));
 		}
-
-		mCurrentUserList.remove(user);
+		this.mAttendeeList.remove(a);
+		
 		if (mUserListContainer == null) {
 			return;
 		}
@@ -566,106 +572,112 @@ public class VideoActivity extends Activity {
 				long uid = ((TextView) v).getId();
 				if (uid ==user.getmUserId()) {
 					mUserListContainer.removeView(v);
-					// TODO close
 					return;
 				}
 			}
 		}
 	}
 	
-	private Map<Long, ConfUserDeviceInfo> mD = new HashMap<Long, ConfUserDeviceInfo>();
-	private void recordUserDevice(ConfUserDeviceInfo d) {
-		mD.put(d.getUserID(), d);
-	}
 
-	private void showAttendeeVideo(ConfUserDeviceInfo d) {
-		// close Device
-		if (mVPHolder.get(d.getUserID()) != null) {
-			
-			UserDeviceHolder h = mVPHolder.get(d.getUserID());
-			if (h !=null && h.getDeviceId() != null) {
-				mVideo.closeVideoDevice(mGroupId, h.getUserId(), h.getDeviceId(),
-						h.getVp(), 1);
-				mVPHolder.remove(d.getUserID());
-				mSurfaceUsedFlag[h.getSurIndex()] = 0;
-				h.clearReference();
+	private void showAttendeeVideo(long id) {
+		Attendee a = getAttendee(id);
+		
+		SurfaceView avaiSV = null;
+		for (SurfaceView sv: this.mSurfaceViewArr) {
+			boolean used = false;
+			for(Attendee at : this.mAttendeeList) {
+				if (at.sv == sv) {
+					used = true;
+					break;
+				}
 			}
+			if (used) {
+				continue;
+			} else {
+				avaiSV =  sv;
+			}
+		}
+		
+		if (avaiSV == null) {
+			//TODO do up limit max surface view
 			return;
 		}
 		
-		//open device
-		// index 0 always as local
-		for (int i = 1; i < mSurfaceUsedFlag.length; i++) {
-			if (mSurfaceUsedFlag[i] == 0) {
-				VideoPlayer vp = new VideoPlayer();
-				vp.SetSurface(this.mSurfaceViewArr[i].getHolder());
-				mVideo.openVideoDevice(mGroupId, d.getUserID(),
-						d.getDefaultDeviceId(), vp, 1);
-				this.mVPHolder.put(
-						d.getUserID(),
-						new UserDeviceHolder(d.getUserID(), d
-								.getDefaultDeviceId(), vp, mSurfaceViewArr[i], i));
-				mSurfaceUsedFlag[i] = 1;
-				return;
+		
+		if (a.config == null) {
+			a.config = new UserDeviceConfig(a.config.getUserID(), a.config.getDeviceID(), null);
+		}
+		
+		VideoPlayer vp = new VideoPlayer();
+		vp.SetSurface(avaiSV.getHolder());
+		mService.requestOpenVideoDevice(mGroupId,
+				a.config,
+				Message.obtain(mVideoHandler, REQUEST_OPEN_DEVICE_RESPONSE));
+		a.sv = avaiSV;
+		a.config.setVp(vp);
+	}
+	
+	
+	
+	private Attendee getAttendee(long uid) {
+		Attendee at = null;
+		for (Attendee a : this.mAttendeeList) {
+			if (uid == a.u.getmUserId()) {
+				at = a;
+				break;
 			}
 		}
-		// TODO max support video
+		return at;
 	}
+	
 
-	class UserDeviceHolder {
-		private VideoPlayer vp;
-		private long userId;
-		private String deviceId;
-		private SurfaceView sv;
-		private int surIndex;
-
-		public UserDeviceHolder(long userId, String deviceId, VideoPlayer vp, SurfaceView sv, int surIndex) {
+	class Attendee {
+		User u;
+		UserDeviceConfig config;
+		UserDeviceConfig config1;
+		SurfaceView sv;
+		
+		
+		public Attendee(User u) {
 			super();
-			this.vp = vp;
-			this.userId = userId;
-			this.deviceId = deviceId;
+			this.u = u;
+		}
+		
+		public Attendee(User u, UserDeviceConfig config) {
+			super();
+			this.u = u;
+			this.config = config;
+		}
+		
+
+		public Attendee(User u, UserDeviceConfig config, SurfaceView sv) {
+			super();
+			this.u = u;
+			this.config = config;
 			this.sv = sv;
-			this.surIndex = surIndex;
-		}
-		
-
-		public SurfaceView getSv() {
-			return sv;
 		}
 
-
-		public VideoPlayer getVp() {
-			return vp;
+		@Override
+		public boolean equals(Object o) {
+			return (o == u || u.getmUserId() == ((User)o).getmUserId());
 		}
-
-		public long getUserId() {
-			return userId;
-		}
-
-		public String getDeviceId() {
-			return deviceId;
+		@Override
+		public int hashCode() {
+			return (int)u.getmUserId();
 		}
 		
 		
-		public int getSurIndex() {
-			return surIndex;
-		}
-
-
-		public void clearReference() {
-			this.vp = null;
-			this.userId = -1;
-			this.deviceId = null;
-			this.sv = null;
-		}
-
 	}
+	
+	
+
 
 	class VideoHandler extends Handler {
 
 		@Override
 		public void handleMessage(Message msg) {
 			switch (msg.what) {
+			case SERVICE_BUNDED:
 			case ONLY_SHOW_LOCAL_VIDEO:
 				showLocalSurViewOnly();
 				break;
@@ -675,30 +687,18 @@ public class VideoActivity extends Activity {
 			case APPLY_SPEAK:
 				doApplySpeak();
 				break;
+			case REQUEST_OPEN_DEVICE_RESPONSE:
+			case REQUEST_CLOSE_DEVICE_RESPONSE:
+				//TODO open device result
+				break;
 			case CONF_USER_DEVICE_EVENT:
-				//showAttendeeVideo((ConfUserDeviceInfo) msg.obj);
-				recordUserDevice((ConfUserDeviceInfo) msg.obj);
-				break;
-			case SEND_ENTER_CONF_EVENT:
-				mCR.enterConf(mGroupId);
-				break;
-			case GET_CONF_USER_LIST:
-				getConfsUserList();
+				//recordUserDevice((ConfUserDeviceInfo) msg.obj);
 				break;
 			case USER_ENTERED_CONF:
-				//doHandleNewUserEntered((User)msg.obj);
-				User u = (User) msg.obj;
-				ImRequest.getInstance().getUserBaseInfo(u.getmUserId());				
+				doHandleNewUserEntered((User)msg.obj);		
 				break;
 			case USER_EXITED_CONF:
 				doHandleUserExited((User) msg.obj);
-				break;
-			case UPDATE_ATTENDEE_INFO:
-				doHandleNewUserEntered((User)msg.obj);
-				break;
-			case SEND_EXIT_CONF_EVENT:
-			case FINISH_BY_USER:
-				quit();
 				break;
 			}
 		}

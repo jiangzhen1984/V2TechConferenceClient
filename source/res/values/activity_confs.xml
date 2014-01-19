@@ -6,4 +6,7 @@
    <color name="confs_search_bar_bg">#f0f0f0</color>
    <color name="confs_group_list_bg">#ffffff</color>
    <color name="confs_group_widget_separation_line">#f2f2f2</color>
+   <string name="error_request_enter_conference_time_out">登入超时</string>
+   <string name="error_request_enter_conference">登入会议出错!</string>
+   <string name="requesting_enter_conference">正在登入.....</string>
 </resources>

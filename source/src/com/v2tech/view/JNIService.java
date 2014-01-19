@@ -18,9 +18,11 @@ import android.widget.Toast;
 
 import com.V2.jni.ConfRequest;
 import com.V2.jni.ConfRequestCallback;
+import com.V2.jni.GroupRequest;
 import com.V2.jni.GroupRequestCallback;
 import com.V2.jni.ImRequest;
 import com.V2.jni.ImRequestCallback;
+import com.V2.jni.VideoRequest;
 import com.V2.jni.VideoRequestCallback;
 import com.v2tech.R;
 import com.v2tech.logic.AsynResult;
@@ -28,6 +30,7 @@ import com.v2tech.logic.AsynResult.AsynState;
 import com.v2tech.logic.Group;
 import com.v2tech.logic.NetworkStateCode;
 import com.v2tech.logic.User;
+import com.v2tech.logic.UserDeviceConfig;
 import com.v2tech.util.V2Log;
 
 class MetaData {
@@ -36,6 +39,8 @@ class MetaData {
 	static Object lock = new Object();
 	Long id;
 	Message caller;
+	Message timeOutMessage;
+	Runnable timeoutCallback;
 
 	private MetaData() {
 		synchronized (lock) {
@@ -69,13 +74,17 @@ public class JNIService extends Service {
 
 	private Integer mBinderRef = 0;
 
-	private LocalHander mHander;
+	private LocalHander mHandler;
 
 	private JNICallbackHandler mCallbackHandler;
 
 	private ImRequestCallback mImCB;
-	
-	private ConfRequestCallback mConfRequestCB;
+
+	private ConfRequestCallback mCRCB;
+
+	private GroupRequestCB mGRCB;
+
+	private VideoRequestCB mVRCB;
 
 	private Context mContext;
 
@@ -84,6 +93,8 @@ public class JNIService extends Service {
 	private List<Group> mConfGroup = null;
 
 	private Map<Long, User> mUserHolder = new HashMap<Long, User>();
+	
+	private long mloggedInUserId;
 
 	// ////////////////////////////////////////
 
@@ -94,7 +105,7 @@ public class JNIService extends Service {
 		// start handler thread
 		HandlerThread hd = new HandlerThread("queue");
 		hd.start();
-		mHander = new LocalHander(hd.getLooper());
+		mHandler = new LocalHander(hd.getLooper());
 
 		HandlerThread callback = new HandlerThread("callback");
 		callback.start();
@@ -102,9 +113,15 @@ public class JNIService extends Service {
 
 		mImCB = new ImRequestCB(mCallbackHandler);
 		ImRequest.getInstance().setCallback(mImCB);
-		
-		mConfRequestCB = new ConfRequestCB(mCallbackHandler);
-		ConfRequest.getInstance().setCallback(mConfRequestCB);
+
+		mCRCB = new ConfRequestCB(mCallbackHandler);
+		ConfRequest.getInstance().setCallback(mCRCB);
+
+		mGRCB = new GroupRequestCB(mCallbackHandler);
+		GroupRequest.getInstance().setCallback(mGRCB);
+
+		mVRCB = new VideoRequestCB(mCallbackHandler);
+		VideoRequest.getInstance().setCallback(mVRCB);
 	}
 
 	@Override
@@ -150,13 +167,35 @@ public class JNIService extends Service {
 	 * @param m
 	 * @return
 	 */
-	private MetaData getAndQueued(Integer msgId, Message m) {
+	private MetaData getAndQueued(Integer msgId, Message caller) {
+		Integer key = Integer.valueOf(msgId);
+		synchronized (map) {
+			if (map.containsKey(key)) {
+				V2Log.e(" MSG ID:" + msgId + " in the queque!");
+				return null;
+			} else {
+				MetaData meta = MetaData.obtain(caller);
+				map.put(key, meta);
+				return meta;
+			}
+		}
+	}
+
+	/**
+	 * 
+	 * @param msgId
+	 * @param m
+	 * @return
+	 */
+	private MetaData getAndQueued(Integer msgId, Message timeoutMsg,
+			Message caller) {
 		synchronized (map) {
 			if (map.containsKey(msgId)) {
 				V2Log.e(" MSG ID:" + msgId + " in the queque!");
 				return null;
 			} else {
-				MetaData meta = MetaData.obtain(m);
+				MetaData meta = MetaData.obtain(caller);
+				meta.timeOutMessage = timeoutMsg;
 				map.put(msgId, meta);
 				return meta;
 			}
@@ -169,15 +208,36 @@ public class JNIService extends Service {
 	 * @return
 	 */
 	private MetaData getMeta(Integer msgId) {
+		// To regenerate key for make sure hash code is same with integer value.
+		// otherwise maybe we query incorrect answer
+		Integer key = Integer.valueOf(msgId);
 		synchronized (map) {
-			MetaData m = map.get(msgId);
-			map.remove(msgId);
+			MetaData m = map.get(key);
+			map.remove(key);
+			return m;
+		}
+	}
+
+	/**
+	 * 
+	 * @param msgId
+	 * @return
+	 */
+	private MetaData getMetaWithoutRemvoe(Integer msgId) {
+		// To regenerate key for make sure hash code is same with integer value.
+		// otherwise maybe we query incorrect answer
+		Integer key = Integer.valueOf(msgId);
+		synchronized (map) {
+			MetaData m = map.get(key);
 			return m;
 		}
 	}
 
 	private synchronized boolean existMessage(Integer msgId) {
-		return map.containsKey(msgId);
+		// To regenerate key for make sure hash code is same with integer value.
+		// otherwise maybe we query incorrect answer
+		Integer key = Integer.valueOf(msgId);
+		return map.containsKey(key);
 	}
 
 	/**
@@ -194,11 +254,20 @@ public class JNIService extends Service {
 	public void login(String mail, String passwd, Message message) {
 		MetaData m = getAndQueued(JNI_LOG_IN, message);
 		if (m != null) {
-			Message.obtain(mHander, JNI_LOG_IN, new InnerUser(m, mail, passwd))
+			Message.obtain(mHandler, JNI_LOG_IN, new InnerUser(m, mail, passwd))
 					.sendToTarget();
 		} else {
 			V2Log.e(" can't get metadata for login");
 		}
+	}
+	
+	
+	public long getLoggedUserId() {
+		return this.mloggedInUserId;
+	}
+	
+	public User getloggedUser() {
+		return this.mUserHolder.get(Long.valueOf(this.mloggedInUserId));
 	}
 
 	/**
@@ -217,8 +286,10 @@ public class JNIService extends Service {
 		if (gType == Group.GroupType.CONFERENCE && this.mConfGroup != null) {
 			msg.obj = new AsynResult(AsynState.SUCCESS, this.mConfGroup);
 			msg.sendToTarget();
+			return;
 		}
-		//TODO call get group information from server
+		// Just put message to the queue and waiting for notify
+		getAndQueued(JNI_GROUP_NOTIFY, msg);
 	}
 
 	/**
@@ -246,30 +317,81 @@ public class JNIService extends Service {
 	public List<Group> getGroup(Group.GroupType gType) {
 		if (gType == Group.GroupType.CONFERENCE) {
 			return this.mConfGroup;
+		} else {
+			throw new RuntimeException(" Unknown group type :" + gType);
 		}
-		throw new RuntimeException(" Unknown group type :" + gType);
 	}
-	
-	
-	
+
 	/**
 	 * User request to enter conference.<br>
+	 * 
 	 * @param confID
-	 * @param msg   Message.object  is {@link AsynResult} AsynResult.obj is Integer  0: success  1: failed
+	 * @param msg
+	 *            if input is null, ignore response Message.object is
+	 *            {@link AsynResult} AsynResult.obj is Integer 0: success 1:
+	 *            failed
 	 */
-	public void enterConference(long confID, Message msg) {
-		if (msg != null) {
-			MetaData m = getAndQueued(JNI_REQUEST_ENTER_CONF, msg);
-			if (m != null && confID > 0) {
-				Message.obtain(mHander, JNI_REQUEST_ENTER_CONF, Long.valueOf(confID))
-				.sendToTarget();
-			} else {
+	public void requestEnterConference(long confID, Message msg) {
+		MetaData m = getAndQueued(JNI_REQUEST_ENTER_CONF, msg);
+		if (m != null) {
+			Message.obtain(mHandler, JNI_REQUEST_ENTER_CONF,
+					Long.valueOf(confID)).sendToTarget();
+		} else {
+			if (msg != null) {
 				V2Log.e(" Enter conf request already in queue");
-				msg.obj =  new AsynResult(AsynState.FAIL, new Exception("Request already in the queue"));
+				msg.obj = new AsynResult(AsynState.FAIL, new Exception(
+						"Request already in the queue"));
 				msg.sendToTarget();
 			}
 		}
-		
+	}
+
+	/**
+	 * User request exit conference
+	 * 
+	 * @param confID
+	 * @param msg
+	 *            if input is null, ignore response Message.object is
+	 *            {@link AsynResult} AsynResult.obj is Object[] Object[0]
+	 *            Integer 0: success 1: failed Object[1] Long conf id
+	 */
+	public void requestExitConference(long confID, Message msg) {
+		MetaData m = getAndQueued(JNI_REQUEST_EXIT_CONF, msg);
+		if (m != null) {
+			Message.obtain(mHandler, JNI_REQUEST_EXIT_CONF,
+					Long.valueOf(confID)).sendToTarget();
+		} else {
+			if (msg != null) {
+				V2Log.e(" exit conf request already in queue");
+				msg.obj = new AsynResult(AsynState.FAIL, new Exception(
+						"Request already in the queue"));
+				msg.sendToTarget();
+			}
+		}
+	}
+
+	
+	/**
+	 * Request open video device.
+	 * @param nGroupID
+	 * @param userDevice 
+	 * @param caller
+	 */
+	public void requestOpenVideoDevice(long nGroupID,
+			UserDeviceConfig userDevice, Message caller) {
+		if (nGroupID < 0 || userDevice == null || userDevice.getUserID() <= 0) {
+			V2Log.e("Invalid device parameters");
+			if (caller != null) {
+				caller.obj = new AsynResult(AsynState.FAIL, new Exception(
+						"Invalid device parameters"));
+				caller.sendToTarget();
+				return;
+			}
+		}
+		//put to queue
+		getAndQueued(JNI_REQUEST_OPEN_VIDEO, caller);
+		Message.obtain(mHandler, JNI_REQUEST_OPEN_VIDEO,
+				new OpenVideoRequest(nGroupID, userDevice)).sendToTarget();
 	}
 
 	class InnerUser {
@@ -296,6 +418,65 @@ public class JNIService extends Service {
 			this.nResult = nResult;
 		}
 	}
+	
+	
+	/**
+	 * Request close video device.
+	 * @param nGroupID
+	 * @param userDevice 
+	 * @param caller
+	 */
+	public void requestCloseVideoDevice(long nGroupID,
+			UserDeviceConfig userDevice, Message caller) {
+		if (nGroupID < 0 || userDevice == null || userDevice.getUserID() <= 0) {
+			V2Log.e("Invalid device parameters");
+			if (caller != null) {
+				caller.obj = new AsynResult(AsynState.FAIL, new Exception(
+						"Invalid device parameters"));
+				caller.sendToTarget();
+				return;
+			}
+		}
+		//put to queue
+		getAndQueued(JNI_REQUEST_CLOSE_VIDEO, caller);
+		Message.obtain(mHandler, JNI_REQUEST_CLOSE_VIDEO,
+				new OpenVideoRequest(nGroupID, userDevice)).sendToTarget();
+	}
+	
+	
+	
+	public void applyForControlPermission(int type) {
+		Message.obtain(mHandler, JNI_REQUEST_SPEAK, type, 0).sendToTarget();
+	}
+
+	class OpenVideoRequest {
+		long group;
+		UserDeviceConfig userDevice;
+
+		public OpenVideoRequest(long group, UserDeviceConfig userDevice) {
+			super();
+			this.group = group;
+			this.userDevice = userDevice;
+		}
+
+	}
+
+	class RequestEnterConfResponse {
+		long nConfID;
+		long nTime;
+		String szConfData;
+		int nJoinResult;
+
+		public RequestEnterConfResponse(long nConfID, long nTime,
+				String szConfData, int nJoinResult) {
+			super();
+			this.nConfID = nConfID;
+			this.nTime = nTime;
+			this.szConfData = szConfData;
+			this.nJoinResult = nJoinResult;
+		}
+
+	}
 
 	// //////////////////////////////////////////////////////////
 	// Internal Handler definition //
@@ -309,6 +490,12 @@ public class JNIService extends Service {
 	private static final int JNI_UPDATE_USER_INFO = 24;
 	private static final int JNI_GROUP_NOTIFY = 35;
 	private static final int JNI_REQUEST_ENTER_CONF = 55;
+	private static final int JNI_REQUEST_EXIT_CONF = 56;
+	private static final int JNI_ATTENDEE_ENTERED_NOTIFICATION = 57;
+	private static final int JNI_GET_ATTENDEE_INFO_DONE = 58;
+	private static final int JNI_REQUEST_OPEN_VIDEO = 70;
+	private static final int JNI_REQUEST_CLOSE_VIDEO = 71;
+	private static final int JNI_REQUEST_SPEAK = 72;
 
 	class LocalHander extends Handler {
 
@@ -322,19 +509,62 @@ public class JNIService extends Service {
 			case JNI_LOG_IN:
 				InnerUser iu = (InnerUser) msg.obj;
 				ImRequest.getInstance().login(iu.mail, iu.passwd, 1, 2);
-				Message m = Message.obtain(mCallbackHandler, REQUEST_TIME_OUT,
-						JNI_LOG_IN, 0);
-				mCallbackHandler.sendMessageDelayed(m, 10000);
+				// Message m = Message.obtain(mCallbackHandler,
+				// REQUEST_TIME_OUT,
+				// JNI_LOG_IN, 0);
+				// iu.m.timeOutMessage = m;
+				// mCallbackHandler.sendMessageDelayed(m, 10000);
+
+				iu.m.timeoutCallback = new TimeoutCallback(JNI_LOG_IN, 0, null);
+				mCallbackHandler.postDelayed(iu.m.timeoutCallback, 10000);
 				break;
 
 			case JNI_LOG_OUT:
 				break;
 			case JNI_UPDATE_USER_INFO:
+				ImRequest.getInstance().getUserBaseInfo((Long) msg.obj);
 				break;
 			case JNI_GROUP_NOTIFY:
 				break;
 			case JNI_REQUEST_ENTER_CONF:
-				ConfRequest.getInstance().enterConf((Long)msg.obj);
+				ConfRequest.getInstance().enterConf((Long) msg.obj);
+				break;
+			case JNI_REQUEST_EXIT_CONF:
+				ConfRequest.getInstance().exitConf((Long) msg.obj);
+				break;
+			case JNI_REQUEST_OPEN_VIDEO:
+				OpenVideoRequest requestObj = (OpenVideoRequest) msg.obj;
+				VideoRequest.getInstance().openVideoDevice(requestObj.group,
+						requestObj.userDevice.getUserID(),
+						requestObj.userDevice.getDeviceID(),
+						requestObj.userDevice.getVp(),
+						requestObj.userDevice.getBusinessType());
+				// As now open video device no call back.
+				// So send successful message to caller
+				MetaData d = getMeta(JNI_REQUEST_OPEN_VIDEO);
+				if (d != null && d.caller != null) {
+					d.caller.obj = new AsynResult(AsynState.SUCCESS, null);
+					d.caller.sendToTarget();
+				}
+				break;
+			case JNI_REQUEST_CLOSE_VIDEO:
+				OpenVideoRequest requestCloseObj = (OpenVideoRequest) msg.obj;
+				VideoRequest.getInstance().closeVideoDevice(requestCloseObj.group,
+						requestCloseObj.userDevice.getUserID(),
+						requestCloseObj.userDevice.getDeviceID(),
+						requestCloseObj.userDevice.getVp(),
+						requestCloseObj.userDevice.getBusinessType());
+				// As now open video device no call back.
+				// So send successful message to caller
+				MetaData response = getMeta(JNI_REQUEST_CLOSE_VIDEO);
+				if (response != null && response.caller != null) {
+					response.caller.obj = new AsynResult(AsynState.SUCCESS, null);
+					response.caller.sendToTarget();
+				}
+				break;
+			case JNI_REQUEST_SPEAK:
+				// 3 means apply speak
+				ConfRequest.getInstance().applyForControlPermission(msg.arg1);
 				break;
 			}
 		}
@@ -348,44 +578,33 @@ public class JNIService extends Service {
 		}
 
 		@Override
-		public void handleMessage(Message msg) {
+		public synchronized void handleMessage(Message msg) {
+			MetaData d = getMeta(msg.what);
+			AsynResult ar = null;
+			int arg1 = 0;
+			int arg2 = 0;
 			switch (msg.what) {
-			case REQUEST_TIME_OUT: {
-				// TODO need to be remove when request finish normally
-				int msgId = msg.arg1;
-				MetaData d = getMeta(msgId);
-				if (d == null) {
-					V2Log.w(" REQUEST_TIME_OUT : empty ");
+			case REQUEST_TIME_OUT:
+
+				MetaData origin = getMeta(msg.arg1);
+				if (origin == null) {
+					V2Log.w(msg.arg1 + " REQUEST_TIME_OUT : empty ");
 				} else {
-					d.caller.obj = new AsynResult(
-							AsynResult.AsynState.TIME_OUT, new Exception(msgId
-									+ " time out"));
-					d.caller.sendToTarget();
+					origin.caller.obj = new AsynResult(
+							AsynResult.AsynState.TIME_OUT, new Exception(
+									msg.arg1 + " time out"));
+					origin.caller.sendToTarget();
 				}
-			}
 				break;
 
-			case CANCEL_REQUEST: {
-				// cancel request
-				int msgId = msg.arg1;
-				MetaData d = getMeta(msgId);
-				if (d != null) {
-					V2Log.i(" MSG :" + msgId + " removed");
-				}
-			}
+			case CANCEL_REQUEST:
 				break;
-			case JNI_LOG_IN: {
+			case JNI_LOG_IN:
 				InnerUser iu = ((InnerUser) msg.obj);
-				User u = new User(iu.idCallback, "",
-						NetworkStateCode.fromInt(iu.nResult));
-				if (iu.m == null || iu.m.caller == null) {
-					V2Log.w("No available caller, ignore this call back");
-					break;
-				}
-				iu.m.caller.obj = new AsynResult(AsynResult.AsynState.SUCCESS,
-						u);
-				iu.m.caller.sendToTarget();
-			}
+				ar = new AsynResult(AsynResult.AsynState.SUCCESS,
+						new User(iu.idCallback, "",
+								NetworkStateCode.fromInt(iu.nResult)));
+				mloggedInUserId = iu.idCallback;
 				break;
 			case JNI_LOG_OUT:
 				break;
@@ -396,9 +615,9 @@ public class JNIService extends Service {
 					// Login caller
 					if (existMessage(JNI_LOG_IN)) {
 						MetaData m = getMeta(JNI_LOG_IN);
-						User u = new User(0, "",
-								NetworkStateCode.CONNECTED_ERROR);
-						m.caller.obj = u;
+						m.caller.obj = new AsynResult(
+								AsynResult.AsynState.SUCCESS, new User(0, "",
+										NetworkStateCode.CONNECTED_ERROR));
 						m.caller.sendToTarget();
 					}
 					// after login or before log in send broadcast
@@ -407,42 +626,88 @@ public class JNIService extends Service {
 
 				}
 				break;
-			case JNI_UPDATE_USER_INFO: {
+			case JNI_UPDATE_USER_INFO:
 				User u = User.fromXml(msg.arg1, (String) msg.obj);
-				mUserHolder.put(u.getmUserId(), u);
+				mUserHolder.put(Long.valueOf(u.getmUserId()), u);
 				// If someone waiting for this event
-				MetaData d = getMeta(JNI_UPDATE_USER_INFO);
-				if (d != null) {
-					d.caller.obj = new AsynResult(AsynResult.AsynState.SUCCESS,
-							u);
-					d.caller.sendToTarget();
-				}
-			}
+				ar = new AsynResult(AsynResult.AsynState.SUCCESS, u);
 				break;
-			case JNI_GROUP_NOTIFY: {
+			case JNI_GROUP_NOTIFY:
 				if (msg.arg1 == Group.GroupType.CONFERENCE.intValue()) {
 					mConfGroup = Group
 							.parserFromXml(msg.arg1, (String) msg.obj);
 				}
-				MetaData d = getMeta(JNI_GROUP_NOTIFY);
-				if (d != null) {
-					d.caller.obj = new AsynResult(AsynResult.AsynState.SUCCESS,
-							mConfGroup);
-					d.caller.sendToTarget();
-				}
-			}
+
+				ar = new AsynResult(AsynResult.AsynState.SUCCESS, mConfGroup);
+
 				break;
-			case JNI_REQUEST_ENTER_CONF: {
-				MetaData d = getMeta(JNI_REQUEST_ENTER_CONF);
-				if (d != null) {
-					d.caller.arg1 = msg.arg1;
-					d.caller.obj = new AsynResult(AsynResult.AsynState.SUCCESS, msg.arg1);
-					d.caller.sendToTarget();
-				}
-			}
+			case JNI_REQUEST_ENTER_CONF:
+				RequestEnterConfResponse recr = (RequestEnterConfResponse) msg.obj;
+				ar = new AsynResult(AsynResult.AsynState.SUCCESS, new Object[] {
+						recr.nJoinResult, recr.nConfID });
 				break;
+			case JNI_REQUEST_EXIT_CONF:
+				break;
+			case JNI_ATTENDEE_ENTERED_NOTIFICATION:
+				Long uid = Long.valueOf(Long.parseLong(msg.obj.toString()));
+				User attendeeUser = mUserHolder.get(uid);
+				// check cache, if exist doesn't query again, send successful
+				// message directly.
+				if (attendeeUser != null && attendeeUser.getName() != null
+						&& !attendeeUser.getName().equals("")) {
+					Message.obtain(
+							this,
+							JNI_GET_ATTENDEE_INFO_DONE,
+							new AsynResult(AsynResult.AsynState.SUCCESS,
+									attendeeUser)).sendToTarget();
+				} else {
+					// put caller message to queue
+					getAndQueued(JNI_UPDATE_USER_INFO,
+							Message.obtain(this, JNI_GET_ATTENDEE_INFO_DONE));
+					Message.obtain(mHandler, JNI_UPDATE_USER_INFO, uid)
+							.sendToTarget();
+				}
+				break;
+			case JNI_GET_ATTENDEE_INFO_DONE:
+				AsynResult arUser = (AsynResult) msg.obj;
+				V2Log.e(((User) arUser.getObject()).getName());
+				break;
+			}
+
+			if (d != null && d.caller != null) {
+				d.caller.obj = ar;
+				d.caller.arg1 = arg1;
+				d.caller.arg2 = arg2;
+				d.caller.sendToTarget();
+				if (d.timeoutCallback != null) {
+					// FIXME need to remove when finish requesting normally
+					// but this solution doesn't work
+					this.removeMessages(REQUEST_TIME_OUT, d.timeoutCallback);
+				}
+			} else {
+				V2Log.w("MSG: " + msg.what
+						+ " Metadata object or call is null ");
 			}
 		}
+	}
+
+	class TimeoutCallback implements Runnable {
+		int arg1;
+		int arg2;
+		Object obj;
+
+		TimeoutCallback(int arg1, int arg2, Object obj) {
+			this.arg1 = arg1;
+			this.arg2 = arg2;
+			this.obj = obj;
+		}
+
+		@Override
+		public void run() {
+			Message.obtain(mCallbackHandler, REQUEST_TIME_OUT, arg1, arg2)
+					.sendToTarget();
+		}
+
 	}
 
 	// ///////////////////////////////////////////////
@@ -463,8 +728,8 @@ public class JNIService extends Service {
 			Message.obtain(
 					mCallbackHandler,
 					JNI_LOG_IN,
-					new InnerUser(getMeta(JNI_LOG_IN), nUserID, nStatus,
-							nResult)).sendToTarget();
+					new InnerUser(getMetaWithoutRemvoe(JNI_LOG_IN), nUserID,
+							nStatus, nResult)).sendToTarget();
 		}
 
 		@Override
@@ -480,8 +745,8 @@ public class JNIService extends Service {
 
 		@Override
 		public void OnUpdateBaseInfoCallback(long nUserID, String updatexml) {
-			Message.obtain(mCallbackHandler, JNI_GROUP_NOTIFY, (int) nUserID,
-					0, updatexml).sendToTarget();
+			Message.obtain(mCallbackHandler, JNI_UPDATE_USER_INFO,
+					(int) nUserID, 0, updatexml).sendToTarget();
 		}
 
 	}
@@ -500,45 +765,59 @@ public class JNIService extends Service {
 		}
 
 	}
-	
-	
+
 	class ConfRequestCB implements ConfRequestCallback {
 
-		
 		private JNICallbackHandler mCallbackHandler;
+
 		public ConfRequestCB(JNICallbackHandler mCallbackHandler) {
 			this.mCallbackHandler = mCallbackHandler;
 		}
-		
+
 		@Override
 		public void OnEnterConfCallback(long nConfID, long nTime,
 				String szConfData, int nJoinResult) {
-			Message.obtain(mCallbackHandler, JNI_REQUEST_ENTER_CONF, nJoinResult, 0, szConfData).sendToTarget();
+			Message.obtain(
+					mCallbackHandler,
+					JNI_REQUEST_ENTER_CONF,
+					new RequestEnterConfResponse(nConfID, nTime, szConfData,
+							nJoinResult)).sendToTarget();
 		}
 
 		@Override
 		public void OnConfMemberEnterCallback(long nConfID, long nTime,
 				String szUserInfos) {
-			
+			int start = szUserInfos.indexOf("id='");
+			if (start != -1) {
+				int end = szUserInfos.indexOf("'", start + 4);
+				if (end != -1) {
+					String id = szUserInfos.substring(start + 4, end);
+					Message.obtain(mCallbackHandler,
+							JNI_ATTENDEE_ENTERED_NOTIFICATION, id)
+							.sendToTarget();
+				} else {
+					V2Log.e("Invalid attendee user id ignore callback message");
+				}
+			} else {
+				V2Log.e("Invalid attendee user id ignore callback message");
+			}
 		}
-		
-		
-		
+
 	}
-	
-	
+
 	class VideoRequestCB implements VideoRequestCallback {
 
 		private JNICallbackHandler mCallbackHandler;
+
 		public VideoRequestCB(JNICallbackHandler mCallbackHandler) {
 			this.mCallbackHandler = mCallbackHandler;
 		}
-		
+
 		@Override
 		public void OnRemoteUserVideoDevice(String szXmlData) {
-			
+
 		}
-		
+
 	}
 
 }

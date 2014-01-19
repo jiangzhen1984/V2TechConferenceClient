@@ -173,6 +173,12 @@ public class ConfRequest
 			Log.e("ImRequest UI", "浼氳鍐呭ソ鍙嬪垪琛�->OnConfUserListReport " + strUserList);
 		}
 
+		/**
+		 * 
+		 * @param nConfID
+		 * @param nTime
+		 * @param szUserInfos
+		 */
 		private void OnConfMemberEnter(long nConfID, long  nTime, String szUserInfos)
 		{
 			if (this.callback != null) {

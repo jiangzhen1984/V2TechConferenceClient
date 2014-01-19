@@ -14,6 +14,8 @@ public class GroupRequest {
 	private Context context;
 	public boolean loginResult;
 	private static GroupRequest mGroupRequest;
+	
+	private GroupRequestCallback callback;
 
 	private GroupRequest(Context context) {
 		this.context = context;
@@ -27,6 +29,10 @@ public class GroupRequest {
 				throw new RuntimeException(" can't not inintialize group request");
 			}
 		}
+		return mGroupRequest;
+	}
+	
+	public static synchronized GroupRequest getInstance() {
 		return mGroupRequest;
 	}
 
@@ -87,6 +93,9 @@ public class GroupRequest {
 	 * @param sXml
 	 */
 	private void OnGetGroupInfo(int groupType, String sXml) {
+		if (callback != null) {
+			callback.OnGetGroupInfoCallback(groupType, sXml);
+		}
 		Log.e("GroupRequest UI", "OnGetGroupInfo:: �õ���������Ϣ" + groupType + ":"
 				+ sXml);
 		System.out.println(sXml);
@@ -103,6 +112,10 @@ public class GroupRequest {
 		i.setAction("com.v2tech.group_changed");
 		i.addCategory("com.v2tech");
 		context.sendBroadcast(i);
+	}
+
+	public void setCallback(GroupRequestCallback callback) {
+		this.callback = callback;
 	}
 
 	private void OnGetGroupUserInfo(int groupType, long nGroupID, String sXml) {

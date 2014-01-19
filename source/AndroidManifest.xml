@@ -36,8 +36,9 @@
         <service android:name="com.v2tech.view.JNIService"></service>
         <activity
             android:name="com.v2tech.view.LogoActivity"
-            android:label="@string/app_name" >
-            <intent-filter>
+            android:label="@string/app_name"
+             >
+         <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -61,9 +62,21 @@
               android:configChanges="orientation"
               android:screenOrientation="landscape" >  
         </activity>
+        <activity
+            android:name="com.v2tech.view.VideoActivityV2"
+              android:configChanges="orientation"
+              android:screenOrientation="landscape" >  
+        </activity>
          <activity
             android:name="com.v2tech.view.SettingActivity"
             android:launchMode="singleTop" >  
+        </activity>
+        
+          <activity
+            android:name="com.v2tech.view.MainActivity"
+            android:windowSoftInputMode="stateHidden"
+             >  
+                
         </activity>
         
          <receiver
