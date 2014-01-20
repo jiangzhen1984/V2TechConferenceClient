@@ -4,11 +4,14 @@ import java.util.List;
 
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -22,6 +25,7 @@ import com.v2tech.R;
 import com.v2tech.logic.AsynResult;
 import com.v2tech.logic.Group;
 import com.v2tech.util.V2Log;
+import com.v2tech.view.JNIService.LocalBinder;
 
 public class ConferenceTabFragment extends Fragment {
 
@@ -29,12 +33,14 @@ public class ConferenceTabFragment extends Fragment {
 	private static final int FILL_CONFS_LIST = 2;
 	private static final int REQUEST_ENTER_CONF = 3;
 	private static final int REQUEST_ENTER_CONF_RESPONSE = 4;
+	private static final int REQUEST_EXIT_CONF = 5;
 
 	private Tab1BroadcastReceiver receiver;
 	private IntentFilter intentFilter;
 
 	private JNIService mService;
-
+	private boolean isBound;
+	
 	private List<Group> mConferenceList;
 
 	private LinearLayout mGroupContainer;
@@ -42,7 +48,10 @@ public class ConferenceTabFragment extends Fragment {
 	private ConfsHandler mHandler = new ConfsHandler();
 
 	private ProgressDialog mWaitingDialog;
-
+	
+	
+	
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -65,6 +74,7 @@ public class ConferenceTabFragment extends Fragment {
 		getActivity().unregisterReceiver(receiver);
 	}
 
+	
 	@Override
 	public void onResume() {
 		super.onResume();
@@ -79,7 +89,6 @@ public class ConferenceTabFragment extends Fragment {
 		if (intentFilter == null) {
 			intentFilter = new IntentFilter();
 			intentFilter.addAction("TAB1_ACTION");
-			intentFilter.addAction(MainActivity.JNI_SERVICE_BOUNDED);
 		}
 		return intentFilter;
 	}
@@ -87,11 +96,25 @@ public class ConferenceTabFragment extends Fragment {
 	@Override
 	public void onStart() {
 		super.onStart();
+		isBound = getActivity().bindService(new Intent(getActivity(),
+				JNIService.class), mConnection, Context.BIND_AUTO_CREATE);
+		//Message.obtain(mHandler, FILL_CONFS_LIST).sendToTarget();
 	}
 
 	@Override
 	public void onStop() {
+		if (isBound) {
+			getActivity().unbindService(mConnection);
+		}
 		super.onStop();
+	}
+	
+	
+	
+
+	@Override
+	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+		Message.obtain(mHandler, REQUEST_EXIT_CONF, data.getExtras().getLong("gid")).sendToTarget();
 	}
 
 	private void addGroupList(List<Group> list) {
@@ -134,13 +157,29 @@ public class ConferenceTabFragment extends Fragment {
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			if (intent.getAction().equals("TAB1_ACTION")) {
-			} else if (intent.getAction().equals(
-					MainActivity.JNI_SERVICE_BOUNDED)) {
-				Message.obtain(mHandler, SERVER_BOUNDED).sendToTarget();
 			}
 		}
 
 	}
+	
+	
+	/** Defines callbacks for service binding, passed to bindService() */
+	private ServiceConnection mConnection = new ServiceConnection() {
+
+		@Override
+		public void onServiceConnected(ComponentName className, IBinder service) {
+			LocalBinder binder = (LocalBinder) service;
+			mService = binder.getService();
+			isBound = true;
+			Message.obtain(mHandler, SERVER_BOUNDED).sendToTarget();
+		}
+
+		@Override
+		public void onServiceDisconnected(ComponentName arg0) {
+			isBound = false;
+		}
+	};
+
 
 	class ConfsHandler extends Handler {
 
@@ -148,9 +187,6 @@ public class ConferenceTabFragment extends Fragment {
 		public void handleMessage(Message msg) {
 			switch (msg.what) {
 			case SERVER_BOUNDED:
-				mService = ((MainActivity) getActivity()).getService();
-				Message.obtain(this, FILL_CONFS_LIST).sendToTarget();
-				break;
 			case FILL_CONFS_LIST:
 				mConferenceList = mService.getGroup(Group.GroupType.CONFERENCE);
 				// No server return send asynchronous message and waiting for
@@ -170,11 +206,11 @@ public class ConferenceTabFragment extends Fragment {
 				AsynResult ar = (AsynResult) msg.obj;
 				if (ar.getState() == AsynResult.AsynState.SUCCESS) {
 					Object[] re = (Object[]) ar.getObject();
-					if ((Integer)re[0] == 0) {
-	 					 Intent i = new Intent(getActivity(),
-									 VideoActivityV2.class);
-									 i.putExtra("gid", (Long)re[1]);
-								 startActivityForResult(i, 0);
+					if ((Integer) re[0] == 0) {
+						Intent i = new Intent(getActivity(),
+								VideoActivityV2.class);
+						i.putExtra("gid", (Long) re[1]);
+						startActivityForResult(i, 0);
 					} else {
 						Toast.makeText(getActivity(),
 								R.string.error_request_enter_conference,
@@ -196,6 +232,9 @@ public class ConferenceTabFragment extends Fragment {
 					mWaitingDialog.dismiss();
 				}
 
+				break;
+			case REQUEST_EXIT_CONF:
+				mService.requestExitConference((Long)msg.obj, null);
 				break;
 			}
 		}

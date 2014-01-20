@@ -19,4 +19,12 @@ public interface ConfRequestCallback {
 	 */
 	public void OnConfMemberEnterCallback(long nConfID, long  nTime, String szUserInfos);
 	
+	/**
+	 * 
+	 * @param nConfID
+	 * @param nTime
+	 * @param nUserID
+	 */
+	public void OnConfMemberExitCallback(long nConfID, long nTime, long nUserID);
+	
 }

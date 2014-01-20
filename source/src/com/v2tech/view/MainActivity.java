@@ -2,21 +2,18 @@ package com.v2tech.view;
 
 import java.util.HashMap;
 
-import android.content.ComponentName;
 import android.content.Context;
-import android.content.Intent;
-import android.content.ServiceConnection;
 import android.content.res.Resources;
 import android.os.Bundle;
-import android.os.IBinder;
+import android.os.Process;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.TabHost;
 
 import com.v2tech.R;
-import com.v2tech.view.JNIService.LocalBinder;
 
 public class MainActivity extends FragmentActivity {
 	
@@ -26,11 +23,6 @@ public class MainActivity extends FragmentActivity {
 
 	TabManager mTabManager;
 
-	public static final String JNI_SERVICE_BOUNDED = "com.v2tech.jni_service_bounded";
-	private JNIService mService;
-	private boolean isBound;
-
-	
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -75,43 +67,30 @@ public class MainActivity extends FragmentActivity {
 	}
 
 	@Override
-	protected void onStart() {
-		isBound = bindService(new Intent(this.getApplicationContext(),
-				JNIService.class), mConnection, Context.BIND_AUTO_CREATE);
+	protected void onStart() {		
 		super.onStart();
 	}
 
+	
+	
 	@Override
-	protected void onStop() {
-		super.onStop();
-		if (isBound) {
-			this.unbindService(mConnection);
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+		if (keyCode == KeyEvent.KEYCODE_BACK) {
+			Process.killProcess(Process.myPid());
+			return true;
 		}
+		return super.onKeyDown(keyCode, event);
 	}
 
-	/** Defines callbacks for service binding, passed to bindService() */
-	private ServiceConnection mConnection = new ServiceConnection() {
-
-		@Override
-		public void onServiceConnected(ComponentName className, IBinder service) {
-			LocalBinder binder = (LocalBinder) service;
-			mService = binder.getService();
-			isBound = true;
-			mContext.sendBroadcast(new Intent(JNI_SERVICE_BOUNDED));
-		}
-
-		@Override
-		public void onServiceDisconnected(ComponentName arg0) {
-			isBound = false;
-		}
-	};
-
-	
-	
-	
-	public JNIService getService() {
-		return this.mService;
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();		
 	}
+
+
+
+	
+
 	/**
 	 * This is a helper class that implements a generic mechanism for
 	 * associating fragments with the tabs in a tab host. It relies on a trick.

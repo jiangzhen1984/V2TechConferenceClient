@@ -9,8 +9,8 @@ import android.os.Process;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.v2tech.R;
@@ -69,7 +69,6 @@ public class SettingTabFragment extends Fragment {
 		}
 		
 	}; 
-	
 	
 	
 	class Tab1BroadcastReceiver extends BroadcastReceiver {

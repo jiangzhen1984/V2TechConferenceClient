@@ -43,8 +43,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.v2tech.R;
-import com.v2tech.logic.ConfUserDeviceInfo;
-import com.v2tech.logic.GlobalHolder;
 import com.v2tech.logic.User;
 import com.v2tech.logic.UserDeviceConfig;
 import com.v2tech.view.JNIService.LocalBinder;
@@ -64,12 +62,6 @@ public class VideoActivityV2 extends Activity {
 	
 	public static final String JNI_EVENT_VIDEO_CATEGORY = "com.v2tech.conf_video_event";
 	public static final String JNI_EVENT_VIDEO_CATEGORY_OPEN_VIDEO_EVENT_ACTION = "com.v2tech.conf_video_event.open_video_event";
-
-	public static final String JNI_EVENT_CONF_USER_CATEGORY = "com.v2tech.conf_user_event";
-	public static final String JNI_EVENT_CONF_USER_CATEGORY_NEW_USER_ENTERED_ACTION = "com.v2tech.conf_user_event.new_user_entered";
-	public static final String JNI_EVENT_CONF_USER_CATEGORY_USER_EXITED_ACTION = "com.v2tech.conf_user_event.user_exited";
-	public static final String JNI_EVENT_CONF_USER_CATEGORY_USER_DEVICE_NOTIFICATION = "com.v2tech.conf_user_event.user_device_notificaiton";
-
 
 	
 	
@@ -97,6 +89,7 @@ public class VideoActivityV2 extends Activity {
 
 	private Long mGroupId;
 	private Set<Attendee> mAttendeeList = new HashSet<Attendee>();
+	private SurfaceView mLocalSurface;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -117,16 +110,15 @@ public class VideoActivityV2 extends Activity {
 		this.mSpeakerIV.setOnClickListener(mApplySpeakerListener);
 		initConfsListener();
 		init();
-		adjustLayout();
 	}
 
 	private OnClickListener mApplySpeakerListener = new OnClickListener() {
 		@Override
 		public void onClick(View view) {
 			if (isSpeaking) {
-					// TODO change icon to normal icon
+				mSpeakerIV.setImageResource(R.drawable.speaker);
 			} else {
-				//TODO change icon to speaking-icon
+				mSpeakerIV.setImageResource(R.drawable.speaking);
 			}
 			Message.obtain(mVideoHandler, APPLY_OR_RELEASE_SPEAK).sendToTarget();
 		}
@@ -242,9 +234,9 @@ public class VideoActivityV2 extends Activity {
 					;
 				}
 			} else if (intent.getAction().equals(
-					JNI_EVENT_CONF_USER_CATEGORY_NEW_USER_ENTERED_ACTION)
+					JNIService.JNI_BROADCAST_ATTENDEE_EXITED_NOTIFICATION)
 					|| intent.getAction().equals(
-							JNI_EVENT_CONF_USER_CATEGORY_USER_EXITED_ACTION)) {
+							JNIService.JNI_BROADCAST_ATTENDEE_ENTERED_NOTIFICATION)) {
 				long uid = intent.getLongExtra("uid", -1);
 				String name = intent.getExtras().getString("name");
 				if (uid < 0) {
@@ -255,16 +247,10 @@ public class VideoActivityV2 extends Activity {
 				Message.obtain(
 						mVideoHandler,
 						intent.getAction()
-								.equals(JNI_EVENT_CONF_USER_CATEGORY_NEW_USER_ENTERED_ACTION) ? USER_ENTERED_CONF
+								.equals(JNIService.JNI_BROADCAST_ATTENDEE_ENTERED_NOTIFICATION) ? USER_ENTERED_CONF
 								: USER_EXITED_CONF, new User(uid, name))
 						.sendToTarget();
 
-			} else if (intent.getAction().equals(
-					JNI_EVENT_CONF_USER_CATEGORY_USER_DEVICE_NOTIFICATION)) {
-				ConfUserDeviceInfo cud = (ConfUserDeviceInfo) intent
-						.getExtras().get("ud");
-				Message.obtain(mVideoHandler, CONF_USER_DEVICE_EVENT, cud)
-						.sendToTarget();
 			}
 		}
 
@@ -297,6 +283,7 @@ public class VideoActivityV2 extends Activity {
 	@Override
 	protected void onStart() {
 		super.onStart();
+		adjustLayout();
 		isBound = bindService(new Intent(this.getApplicationContext(),
 				JNIService.class), mConnection, Context.BIND_AUTO_CREATE);
 	}
@@ -307,10 +294,9 @@ public class VideoActivityV2 extends Activity {
 		filter.addCategory(JNI_EVENT_VIDEO_CATEGORY);
 		filter.addAction(JNI_EVENT_VIDEO_CATEGORY_OPEN_VIDEO_EVENT_ACTION);
 
-		filter.addCategory(JNI_EVENT_CONF_USER_CATEGORY);
-		filter.addAction(JNI_EVENT_CONF_USER_CATEGORY_NEW_USER_ENTERED_ACTION);
-		filter.addAction(JNI_EVENT_CONF_USER_CATEGORY_USER_EXITED_ACTION);
-		filter.addAction(JNI_EVENT_CONF_USER_CATEGORY_USER_DEVICE_NOTIFICATION);
+		filter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
+		filter.addAction(JNIService.JNI_BROADCAST_ATTENDEE_EXITED_NOTIFICATION);
+		filter.addAction(JNIService.JNI_BROADCAST_ATTENDEE_ENTERED_NOTIFICATION);
 		mContext.registerReceiver(mConfUserChangeReceiver, filter);
 	}
 
@@ -342,7 +328,9 @@ public class VideoActivityV2 extends Activity {
 	}
 
 	
-	
+	/**
+	 * FIXME should use attendee list instead of this 
+	 */
 	private void showLocalSurViewOnly() {
 		mSurfaceViewArr[0].getHolder().setType(
 				SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
@@ -352,6 +340,7 @@ public class VideoActivityV2 extends Activity {
 		mService.requestOpenVideoDevice(mGroupId,
 				new UserDeviceConfig(mService.getLoggedUserId(), "", null),
 				Message.obtain(mVideoHandler, REQUEST_OPEN_DEVICE_RESPONSE));
+		mLocalSurface = mSurfaceViewArr[0];
 	}
 
 	
@@ -432,6 +421,9 @@ public class VideoActivityV2 extends Activity {
 				@Override
 				public void onClick(View v) {
 					d.dismiss();
+					Intent i = new Intent();
+					i.putExtra("gid", mGroupId);
+					setResult(0, i);
 					finish();
 				}
 
@@ -467,8 +459,7 @@ public class VideoActivityV2 extends Activity {
 	private void quit() {
 		for (Attendee at : this.mAttendeeList) {
 			if (at.isShowing) {
-			mService.requestCloseVideoDevice(mGroupId, new UserDeviceConfig(
-					at.u.getmUserId(), at.config.getDeviceID(), at.config.getVp()), Message.obtain(
+			mService.requestCloseVideoDevice(mGroupId, at.config, Message.obtain(
 					mVideoHandler, REQUEST_CLOSE_DEVICE_RESPONSE));
 			}
 		}
@@ -478,7 +469,7 @@ public class VideoActivityV2 extends Activity {
 				mVideoHandler, REQUEST_CLOSE_DEVICE_RESPONSE));
 		
 		VideoRecorder.VideoPreviewSurfaceHolder = null;
-		mAttendeeList.clear();
+		mAttendeeList.clear();		
 	}
 
 
@@ -493,7 +484,7 @@ public class VideoActivityV2 extends Activity {
 
 
 	private void fillUserList() {
-		mUserListContainer.addView(getUserTextView(GlobalHolder.getLoggedUserId(), GlobalHolder.getInstance().getUser().getName(), true));
+		mUserListContainer.addView(getUserTextView(mService.getloggedUser().getmUserId(), mService.getloggedUser().getName(), true));
 		for (Attendee at : mAttendeeList) {
 			mUserListContainer.addView(getUserTextView(at.u.getmUserId(), at.u.getName(), false));
 		}
@@ -540,6 +531,9 @@ public class VideoActivityV2 extends Activity {
 				@Override
 				public void onClick(View arg0) {
 					showOrCloseAttendeeVideo(id);
+					if (mUserListWindow != null) {
+						mUserListWindow.dismiss();
+					}
 				}
 				
 			});
@@ -559,13 +553,13 @@ public class VideoActivityV2 extends Activity {
 	 * @param user
 	 */
 	private void doHandleUserExited(User user) {
-		Toast.makeText(mContext, user.getmUserId() + "退出会议室! ",
+		Toast.makeText(mContext, user.getName() + "退出会议室! ",
 				Toast.LENGTH_SHORT).show();
 		Attendee a = getAttendee(user.getmUserId());
-		if (a != null) {
-			mService.requestCloseVideoDevice(mGroupId, new UserDeviceConfig(
-					a.u.getmUserId(), a.config.getDeviceID(), a.config.getVp()), Message.obtain(
+		if (a != null && a.isShowing) {
+			mService.requestCloseVideoDevice(mGroupId, a.config, Message.obtain(
 					mVideoHandler, REQUEST_CLOSE_DEVICE_RESPONSE));
+			a.isShowing = false;
 			a.sv = null;
 			if (a.config != null) {
 				a.config.setVp(null);
@@ -617,11 +611,11 @@ public class VideoActivityV2 extends Activity {
 					break;
 				}
 			}
-			if (used) {
+			if (used || sv == mLocalSurface) {
 				continue;
 			} else {
 				avaiSV =  sv;
-				break;
+				//break;
 			}
 		}
 		
@@ -644,11 +638,11 @@ public class VideoActivityV2 extends Activity {
 		
 		VideoPlayer vp = new VideoPlayer();
 		vp.SetSurface(avaiSV.getHolder());
+		a.sv = avaiSV;
+		a.config.setVp(vp);
 		mService.requestOpenVideoDevice(mGroupId,
 				a.config,
 				Message.obtain(mVideoHandler, REQUEST_OPEN_DEVICE_RESPONSE));
-		a.sv = avaiSV;
-		a.config.setVp(vp);
 		a.isShowing = true;
 	}
 	
@@ -673,22 +667,23 @@ public class VideoActivityV2 extends Activity {
 		SurfaceView sv;
 		boolean isShowing;
 		boolean isShowing1;
+		boolean isChairMan;
+		boolean isSelf;
 		
 		
 		public Attendee(User u) {
-			super();
-			this.u = u;
+			this(u, null, null);
 		}
 		
 		public Attendee(User u, UserDeviceConfig config) {
-			super();
-			this.u = u;
-			this.config = config;
+			this(u, config, null);
 		}
 		
 
 		public Attendee(User u, UserDeviceConfig config, SurfaceView sv) {
-			super();
+			if (u == null) {
+				throw new RuntimeException(" Incorrect parameter user can't be null");
+			}
 			this.u = u;
 			this.config = config;
 			this.sv = sv;
@@ -696,7 +691,7 @@ public class VideoActivityV2 extends Activity {
 
 		@Override
 		public boolean equals(Object o) {
-			return (o == u || u.getmUserId() == ((User)o).getmUserId());
+			return (o == this || u.getmUserId() == ((Attendee)o).u.getmUserId());
 		}
 		@Override
 		public int hashCode() {

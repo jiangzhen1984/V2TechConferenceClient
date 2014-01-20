@@ -68,6 +68,10 @@ class MetaData {
  * 
  */
 public class JNIService extends Service {
+	
+	public static final String JNI_BROADCAST_CATEGROY = "com.v2tech.jni.broadcast";
+	public static final String JNI_BROADCAST_ATTENDEE_ENTERED_NOTIFICATION = "com.v2tech.jni.broadcast.attendee.entered.notification";
+	public static final String JNI_BROADCAST_ATTENDEE_EXITED_NOTIFICATION = "com.v2tech.jni.broadcast.attendee.exited.notification";
 
 	private static Hashtable<Integer, MetaData> map = new Hashtable<Integer, MetaData>();
 
@@ -517,7 +521,8 @@ public class JNIService extends Service {
 	private static final int JNI_REQUEST_ENTER_CONF = 55;
 	private static final int JNI_REQUEST_EXIT_CONF = 56;
 	private static final int JNI_ATTENDEE_ENTERED_NOTIFICATION = 57;
-	private static final int JNI_GET_ATTENDEE_INFO_DONE = 58;
+	private static final int JNI_ATTENDEE_EXITED_NOTIFICATION = 58;
+	private static final int JNI_GET_ATTENDEE_INFO_DONE = 59;
 	private static final int JNI_REQUEST_OPEN_VIDEO = 70;
 	private static final int JNI_REQUEST_CLOSE_VIDEO = 71;
 	private static final int JNI_REQUEST_SPEAK = 72;
@@ -559,6 +564,13 @@ public class JNIService extends Service {
 				break;
 			case JNI_REQUEST_EXIT_CONF:
 				ConfRequest.getInstance().exitConf((Long) msg.obj);
+				// As now exit conference request no call back.
+				// So send successful message to caller
+				MetaData exitD = getMeta(JNI_REQUEST_EXIT_CONF);
+				if (exitD != null && exitD.caller != null) {
+					exitD.caller.obj = new AsynResult(AsynState.SUCCESS, null);
+					exitD.caller.sendToTarget();
+				}
 				break;
 			case JNI_REQUEST_OPEN_VIDEO:
 				OpenVideoRequest requestObj = (OpenVideoRequest) msg.obj;
@@ -677,8 +689,6 @@ public class JNIService extends Service {
 				ar = new AsynResult(AsynResult.AsynState.SUCCESS, new Object[] {
 						recr.nJoinResult, recr.nConfID });
 				break;
-			case JNI_REQUEST_EXIT_CONF:
-				break;
 			case JNI_ATTENDEE_ENTERED_NOTIFICATION:
 				Long uid = Long.valueOf(Long.parseLong(msg.obj.toString()));
 				User attendeeUser = mUserHolder.get(uid);
@@ -699,9 +709,20 @@ public class JNIService extends Service {
 							.sendToTarget();
 				}
 				break;
+			case JNI_ATTENDEE_EXITED_NOTIFICATION:
+				Intent ei = new Intent(JNI_BROADCAST_ATTENDEE_EXITED_NOTIFICATION);
+				ei.addCategory(JNI_BROADCAST_CATEGROY);
+				ei.putExtra("uid", (Long)msg.obj);
+				ei.putExtra("name", mUserHolder.get(Long.valueOf((Long)msg.obj)).getName());
+				mContext.sendBroadcast(ei);
+				break;
 			case JNI_GET_ATTENDEE_INFO_DONE:
-				AsynResult arUser = (AsynResult) msg.obj;
-				V2Log.e(((User) arUser.getObject()).getName());
+				User attendee = (User)((AsynResult) msg.obj).getObject();
+				Intent i = new Intent(JNI_BROADCAST_ATTENDEE_ENTERED_NOTIFICATION);
+				i.addCategory(JNI_BROADCAST_CATEGROY);
+				i.putExtra("uid", attendee.getmUserId());
+				i.putExtra("name", attendee.getName());
+				mContext.sendBroadcast(i);
 				break;
 			case JNI_REMOTE_USER_DEVICE_INFO_NOTIFICATION:
 				mUserDeviceList.addAll(UserDeviceConfig.parseFromXml((String)msg.obj));
@@ -836,6 +857,15 @@ public class JNIService extends Service {
 				V2Log.e("Invalid attendee user id ignore callback message");
 			}
 		}
+
+		@Override
+		public void OnConfMemberExitCallback(long nConfID, long nTime,
+				long nUserID) {
+			Message.obtain(mCallbackHandler, JNI_ATTENDEE_EXITED_NOTIFICATION, 0, 0, nUserID).sendToTarget();
+		}
+		
+		
+		
 
 	}
 

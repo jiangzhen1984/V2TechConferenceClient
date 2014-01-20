@@ -12,6 +12,11 @@ import android.widget.TextView;
 
 import com.v2tech.R;
 
+/**
+ * @deprecated
+ * @author jiangzhen
+ *
+ */
 public class SettingActivity extends Activity {
 
 	private Context mContext;

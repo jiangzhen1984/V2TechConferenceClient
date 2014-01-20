@@ -2,6 +2,11 @@ package com.v2tech.logic;
 
 import java.util.List;
 
+/**
+ * @deprecated
+ * @author jiangzhen
+ *
+ */
 public class GlobalHolder {
 
 	private static GlobalHolder gh = new GlobalHolder();

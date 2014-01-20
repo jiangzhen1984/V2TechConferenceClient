@@ -15,7 +15,11 @@ import com.V2.jni.VideoRequest;
 import com.V2.jni.WBRequest;
 import com.v2tech.R;
 import com.v2tech.util.V2Log;
-
+/**
+ * @deprecated
+ * @author jiangzhen
+ *
+ */
 public class LogoActivity extends Activity {
 
 	private final static int START_LOG_ON = 1;

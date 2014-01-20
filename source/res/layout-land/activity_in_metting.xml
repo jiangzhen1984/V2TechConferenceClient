@@ -20,9 +20,10 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentLeft="true"
-                android:layout_alignParentTop="false"
                 android:layout_centerVertical="true"
                 android:layout_marginLeft="20dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="10dp"
                 android:src="@drawable/video_setting" />
 
             <ImageView
@@ -31,6 +32,8 @@
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
                 android:layout_marginLeft="20dp"
+                                android:layout_marginTop="10dp"
+                android:layout_marginBottom="10dp"
                 android:layout_toRightOf="@+id/in_meeting_setting_iv"
                 android:src="@drawable/attendee" />
 
@@ -41,6 +44,8 @@
                 android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"
                 android:layout_marginRight="20dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="10dp"
                 android:src="@drawable/logout" />
 
             <ImageView
@@ -49,6 +54,8 @@
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
                 android:layout_marginRight="41dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="10dp"
                 android:layout_toLeftOf="@+id/in_meeting_log_out_iv"
                 android:src="@drawable/speaker" />
 

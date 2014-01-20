@@ -19,7 +19,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
- * 
+ * @deprecated
  * Wrap user's camera information which user entered conference <br>
  * 
  * @author jiangzhen

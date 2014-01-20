@@ -48,6 +48,12 @@ import com.v2tech.logic.ConfUserDeviceInfo;
 import com.v2tech.logic.GlobalHolder;
 import com.v2tech.logic.User;
 
+
+/**
+ * @deprecated
+ * @author jiangzhen
+ *
+ */
 public class VideoActivity extends Activity {
 
 	private static final int ONLY_SHOW_LOCAL_VIDEO = 1;

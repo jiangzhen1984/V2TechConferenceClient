@@ -201,6 +201,9 @@ public class ConfRequest
 		
 		private void OnConfMemberExit(long nConfID, long nTime, long nUserID)
 		{
+			if (this.callback != null) {
+				this.callback.OnConfMemberExitCallback(nConfID, nTime, nUserID);
+			}
 			Log.e("ImRequest UI", "浼氳鏈変汉閫�嚭-->OnConfMemberExit " + nConfID + " " + nTime + " " + nUserID);
 //			Logger.i(null, "浼氳鏈変汉閫�嚭-->OnConfMemberExit " + nConfID + " " + nTime + " " + nUserID);
 			//TODO query user name
