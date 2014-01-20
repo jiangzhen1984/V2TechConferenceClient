@@ -28,6 +28,10 @@ public class AsynResult {
 		private AsynState(int i) {
 			code = i;
 		}
+		
+		public int intValue() {
+			return code;
+		}
 	}
 
 	private AsynState mState;

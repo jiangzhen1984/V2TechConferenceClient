@@ -38,11 +38,7 @@
             android:name="com.v2tech.view.LogoActivity"
             android:label="@string/app_name"
              >
-         <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter> 
+       
         </activity>
         <activity
             android:name="com.v2tech.view.LoginActivity"
@@ -50,6 +46,11 @@
             android:configChanges="orientation"
             android:windowSoftInputMode="stateHidden"
             >
+              <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter> 
         </activity>
         <activity
             android:name="com.v2tech.view.ConfsActivity"
@@ -79,12 +80,6 @@
                 
         </activity>
         
-         <receiver
-             android:name="com.v2tech.view.LogoutReceiver">
-             <intent-filter>
-                 <action android:name="com.v2tech.log_out" ></action>
-             </intent-filter>
-         </receiver>
     </application>
 
 </manifest>

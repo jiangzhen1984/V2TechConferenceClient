@@ -172,7 +172,7 @@ public class ConferenceTabFragment extends Fragment {
 					Object[] re = (Object[]) ar.getObject();
 					if ((Integer)re[0] == 0) {
 	 					 Intent i = new Intent(getActivity(),
-									 VideoActivity.class);
+									 VideoActivityV2.class);
 									 i.putExtra("gid", (Long)re[1]);
 								 startActivityForResult(i, 0);
 					} else {

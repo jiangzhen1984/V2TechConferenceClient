@@ -1,8 +1,7 @@
 package com.v2tech.view;
 
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
+import java.util.List;
 import java.util.Set;
 
 import v2av.VideoCaptureDevInfo;
@@ -55,7 +54,7 @@ public class VideoActivityV2 extends Activity {
 	private static final int SERVICE_BUNDED = 0;
 	private static final int ONLY_SHOW_LOCAL_VIDEO = 1;
 	private static final int FILL_USER_LIST = 2;
-	private static final int APPLY_SPEAK = 3;
+	private static final int APPLY_OR_RELEASE_SPEAK = 3;
 	private static final int REQUEST_OPEN_DEVICE_RESPONSE = 4;
 	private static final int REQUEST_CLOSE_DEVICE_RESPONSE = 5;
 
@@ -76,6 +75,7 @@ public class VideoActivityV2 extends Activity {
 	
 	private JNIService mService;
 	private boolean isBound;
+	private boolean isSpeaking;
 	
 	
 	private Handler mVideoHandler = new VideoHandler();
@@ -123,7 +123,12 @@ public class VideoActivityV2 extends Activity {
 	private OnClickListener mApplySpeakerListener = new OnClickListener() {
 		@Override
 		public void onClick(View view) {
-			Message.obtain(mVideoHandler, APPLY_SPEAK).sendToTarget();
+			if (isSpeaking) {
+					// TODO change icon to normal icon
+			} else {
+				//TODO change icon to speaking-icon
+			}
+			Message.obtain(mVideoHandler, APPLY_OR_RELEASE_SPEAK).sendToTarget();
 		}
 	};
 
@@ -427,7 +432,7 @@ public class VideoActivityV2 extends Activity {
 				@Override
 				public void onClick(View v) {
 					d.dismiss();
-					quit();
+					finish();
 				}
 
 			});
@@ -461,9 +466,11 @@ public class VideoActivityV2 extends Activity {
 	 */
 	private void quit() {
 		for (Attendee at : this.mAttendeeList) {
+			if (at.isShowing) {
 			mService.requestCloseVideoDevice(mGroupId, new UserDeviceConfig(
 					at.u.getmUserId(), at.config.getDeviceID(), at.config.getVp()), Message.obtain(
 					mVideoHandler, REQUEST_CLOSE_DEVICE_RESPONSE));
+			}
 		}
 		
 		mService.requestCloseVideoDevice(mGroupId, new UserDeviceConfig(
@@ -492,10 +499,18 @@ public class VideoActivityV2 extends Activity {
 		}
 	}
 
-	private void doApplySpeak() {
-		// 3 means apply speak
-		mService.applyForControlPermission(3);
+	private void doApplyOrReleaseSpeak() {
+		if (isSpeaking) {
+			mService.applyForReleasePermission(3);
+			isSpeaking = false;
+		} else {
+			// 3 means apply speak
+			mService.applyForControlPermission(3);
+			isSpeaking = true;
+		}
 	}
+	
+	
 
 	/**
 	 * Handle event which new user entered conference
@@ -524,7 +539,7 @@ public class VideoActivityV2 extends Activity {
 	
 				@Override
 				public void onClick(View arg0) {
-					showAttendeeVideo(id);
+					showOrCloseAttendeeVideo(id);
 				}
 				
 			});
@@ -537,14 +552,6 @@ public class VideoActivityV2 extends Activity {
 	}
 	
 	
-	private void closeUserDevice(User user) {
-		Attendee a = getAttendee(user.getmUserId());
-		if (a != null) {
-			mService.requestCloseVideoDevice(mGroupId, new UserDeviceConfig(
-					a.u.getmUserId(), a.config.getDeviceID(), a.config.getVp()), Message.obtain(
-					mVideoHandler, REQUEST_CLOSE_DEVICE_RESPONSE));
-		}
-	}
 
 	/**
 	 * Handle event which user exited conference
@@ -559,6 +566,15 @@ public class VideoActivityV2 extends Activity {
 			mService.requestCloseVideoDevice(mGroupId, new UserDeviceConfig(
 					a.u.getmUserId(), a.config.getDeviceID(), a.config.getVp()), Message.obtain(
 					mVideoHandler, REQUEST_CLOSE_DEVICE_RESPONSE));
+			a.sv = null;
+			if (a.config != null) {
+				a.config.setVp(null);
+				a.config = null;
+			}
+			if (a.config1 != null) {
+				a.config1.setVp(null);
+				a.config1 = null;
+			}
 		}
 		this.mAttendeeList.remove(a);
 		
@@ -579,9 +595,19 @@ public class VideoActivityV2 extends Activity {
 	}
 	
 
-	private void showAttendeeVideo(long id) {
+	private void showOrCloseAttendeeVideo(long id) {
 		Attendee a = getAttendee(id);
+		// if already opened attendee's video, switch action to close
+		if (a.isShowing) {
+			mService.requestCloseVideoDevice(mGroupId, a.config, Message.obtain(
+					mVideoHandler, REQUEST_CLOSE_DEVICE_RESPONSE));
+			a.config.setVp(null);
+			a.sv = null;
+			a.isShowing = false;
+			return;
+		}
 		
+		//open video device
 		SurfaceView avaiSV = null;
 		for (SurfaceView sv: this.mSurfaceViewArr) {
 			boolean used = false;
@@ -595,6 +621,7 @@ public class VideoActivityV2 extends Activity {
 				continue;
 			} else {
 				avaiSV =  sv;
+				break;
 			}
 		}
 		
@@ -605,7 +632,14 @@ public class VideoActivityV2 extends Activity {
 		
 		
 		if (a.config == null) {
-			a.config = new UserDeviceConfig(a.config.getUserID(), a.config.getDeviceID(), null);
+			List<UserDeviceConfig>  udl = mService.getAttendeeDevice(id);
+			if(udl.size() <= 0) {
+				Toast.makeText(mContext, "No Device", Toast.LENGTH_LONG).show();
+				return;
+			} else {
+				a.config = udl.get(0);
+			}
+			//a.config = new UserDeviceConfig(a.config.getUserID(), a.config.getDeviceID(), null);
 		}
 		
 		VideoPlayer vp = new VideoPlayer();
@@ -615,6 +649,7 @@ public class VideoActivityV2 extends Activity {
 				Message.obtain(mVideoHandler, REQUEST_OPEN_DEVICE_RESPONSE));
 		a.sv = avaiSV;
 		a.config.setVp(vp);
+		a.isShowing = true;
 	}
 	
 	
@@ -636,6 +671,8 @@ public class VideoActivityV2 extends Activity {
 		UserDeviceConfig config;
 		UserDeviceConfig config1;
 		SurfaceView sv;
+		boolean isShowing;
+		boolean isShowing1;
 		
 		
 		public Attendee(User u) {
@@ -666,7 +703,6 @@ public class VideoActivityV2 extends Activity {
 			return (int)u.getmUserId();
 		}
 		
-		
 	}
 	
 	
@@ -684,8 +720,8 @@ public class VideoActivityV2 extends Activity {
 			case FILL_USER_LIST:
 				fillUserList();
 				break;
-			case APPLY_SPEAK:
-				doApplySpeak();
+			case APPLY_OR_RELEASE_SPEAK:
+				doApplyOrReleaseSpeak();
 				break;
 			case REQUEST_OPEN_DEVICE_RESPONSE:
 			case REQUEST_CLOSE_DEVICE_RESPONSE:

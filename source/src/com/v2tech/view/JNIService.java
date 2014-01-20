@@ -1,5 +1,6 @@
 package com.v2tech.view;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
@@ -93,6 +94,8 @@ public class JNIService extends Service {
 	private List<Group> mConfGroup = null;
 
 	private Map<Long, User> mUserHolder = new HashMap<Long, User>();
+	
+	private List<UserDeviceConfig> mUserDeviceList = new ArrayList<UserDeviceConfig>();
 	
 	private long mloggedInUserId;
 
@@ -393,32 +396,6 @@ public class JNIService extends Service {
 		Message.obtain(mHandler, JNI_REQUEST_OPEN_VIDEO,
 				new OpenVideoRequest(nGroupID, userDevice)).sendToTarget();
 	}
-
-	class InnerUser {
-		// call parameter
-		MetaData m;
-		String mail;
-		String passwd;
-
-		// call back parameter
-		long idCallback;
-		int status;
-		int nResult;
-
-		InnerUser(MetaData m, String mail, String passwd) {
-			this.m = m;
-			this.mail = mail;
-			this.passwd = passwd;
-		}
-
-		InnerUser(MetaData m, long idCallback, int status, int nResult) {
-			this.m = m;
-			this.idCallback = idCallback;
-			this.status = status;
-			this.nResult = nResult;
-		}
-	}
-	
 	
 	/**
 	 * Request close video device.
@@ -448,6 +425,54 @@ public class JNIService extends Service {
 	public void applyForControlPermission(int type) {
 		Message.obtain(mHandler, JNI_REQUEST_SPEAK, type, 0).sendToTarget();
 	}
+	
+	public void applyForReleasePermission(int type) {
+		Message.obtain(mHandler, JNI_REQUEST_RELEASE_SPEAK, type, 0).sendToTarget();
+	}
+	
+	
+	/**
+	 * 
+	 * @param uid
+	 * @return
+	 */
+	public List<UserDeviceConfig> getAttendeeDevice(long uid) {
+		List<UserDeviceConfig> l = new ArrayList<UserDeviceConfig>();
+		for(UserDeviceConfig udl : mUserDeviceList) {
+			if(udl.getUserID() == uid) {
+				l.add(udl);
+			}
+		}
+		return l;
+	}
+
+	class InnerUser {
+		// call parameter
+		MetaData m;
+		String mail;
+		String passwd;
+
+		// call back parameter
+		long idCallback;
+		int status;
+		int nResult;
+
+		InnerUser(MetaData m, String mail, String passwd) {
+			this.m = m;
+			this.mail = mail;
+			this.passwd = passwd;
+		}
+
+		InnerUser(MetaData m, long idCallback, int status, int nResult) {
+			this.m = m;
+			this.idCallback = idCallback;
+			this.status = status;
+			this.nResult = nResult;
+		}
+	}
+	
+	
+	
 
 	class OpenVideoRequest {
 		long group;
@@ -496,6 +521,9 @@ public class JNIService extends Service {
 	private static final int JNI_REQUEST_OPEN_VIDEO = 70;
 	private static final int JNI_REQUEST_CLOSE_VIDEO = 71;
 	private static final int JNI_REQUEST_SPEAK = 72;
+	private static final int JNI_REQUEST_RELEASE_SPEAK = 73;
+	private static final int JNI_REMOTE_USER_DEVICE_INFO_NOTIFICATION = 80;
+	
 
 	class LocalHander extends Handler {
 
@@ -565,6 +593,9 @@ public class JNIService extends Service {
 			case JNI_REQUEST_SPEAK:
 				// 3 means apply speak
 				ConfRequest.getInstance().applyForControlPermission(msg.arg1);
+				break;
+			case JNI_REQUEST_RELEASE_SPEAK:
+				ConfRequest.getInstance().releaseControlPermission(msg.arg1);
 				break;
 			}
 		}
@@ -671,6 +702,9 @@ public class JNIService extends Service {
 			case JNI_GET_ATTENDEE_INFO_DONE:
 				AsynResult arUser = (AsynResult) msg.obj;
 				V2Log.e(((User) arUser.getObject()).getName());
+				break;
+			case JNI_REMOTE_USER_DEVICE_INFO_NOTIFICATION:
+				mUserDeviceList.addAll(UserDeviceConfig.parseFromXml((String)msg.obj));
 				break;
 			}
 
@@ -815,7 +849,11 @@ public class JNIService extends Service {
 
 		@Override
 		public void OnRemoteUserVideoDevice(String szXmlData) {
-
+			if (szXmlData == null) {
+				V2Log.e(" No avaiable user device configuration");
+				return;
+			}
+			Message.obtain(mCallbackHandler, JNI_REMOTE_USER_DEVICE_INFO_NOTIFICATION, szXmlData).sendToTarget();
 		}
 
 	}
