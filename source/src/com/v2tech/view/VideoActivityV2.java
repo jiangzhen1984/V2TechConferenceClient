@@ -1,5 +1,6 @@
 package com.v2tech.view;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -45,6 +46,7 @@ import android.widget.Toast;
 import com.v2tech.R;
 import com.v2tech.logic.User;
 import com.v2tech.logic.UserDeviceConfig;
+import com.v2tech.util.V2Log;
 import com.v2tech.view.JNIService.LocalBinder;
 
 public class VideoActivityV2 extends Activity {
@@ -73,7 +75,7 @@ public class VideoActivityV2 extends Activity {
 	private Handler mVideoHandler = new VideoHandler();
 
 	private Context mContext;
-	private SurfaceView[] mSurfaceViewArr;
+	private List<SurfaceViewW> mCurrentShowedSV;
 	private RelativeLayout mVideoLayout;
 
 	private ImageView mSettingIV;
@@ -89,16 +91,13 @@ public class VideoActivityV2 extends Activity {
 
 	private Long mGroupId;
 	private Set<Attendee> mAttendeeList = new HashSet<Attendee>();
-	private SurfaceView mLocalSurface;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_in_metting);
 		mContext = this;
-		mSurfaceViewArr = new SurfaceView[] { new SurfaceView(this),
-				new SurfaceView(this), new SurfaceView(this),
-				new SurfaceView(this) };
+		this.mCurrentShowedSV = new ArrayList<SurfaceViewW>();
 		this.mVideoLayout = (RelativeLayout) findViewById(R.id.in_metting_video_main);
 		this.mSettingIV = (ImageView) findViewById(R.id.in_meeting_setting_iv);
 		this.mSettingIV.setOnClickListener(mShowSettingListener);
@@ -332,40 +331,71 @@ public class VideoActivityV2 extends Activity {
 	 * FIXME should use attendee list instead of this 
 	 */
 	private void showLocalSurViewOnly() {
-		mSurfaceViewArr[0].getHolder().setType(
+		
+		SurfaceViewW lo = new SurfaceViewW();
+		Attendee selfAtt = new Attendee(mService.getloggedUser(), new UserDeviceConfig(mService.getLoggedUserId(), "", null));
+		selfAtt.isSelf = true;
+		selfAtt.isShowing = true;
+		mAttendeeList.add(selfAtt);
+		lo.sv = new SurfaceView(this);
+		lo.at = selfAtt;
+		mCurrentShowedSV.add(lo);
+		adjustLayout();
+		
+		lo.sv.getHolder().setType(
 				SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
-		mSurfaceViewArr[0].getHolder().setFormat(PixelFormat.TRANSPARENT);
-		VideoRecorder.VideoPreviewSurfaceHolder = mSurfaceViewArr[0]
+		lo.sv.getHolder().setFormat(PixelFormat.TRANSPARENT);
+		VideoRecorder.VideoPreviewSurfaceHolder = lo.sv
 				.getHolder();
 		mService.requestOpenVideoDevice(mGroupId,
-				new UserDeviceConfig(mService.getLoggedUserId(), "", null),
+				selfAtt.config,
 				Message.obtain(mVideoHandler, REQUEST_OPEN_DEVICE_RESPONSE));
-		mLocalSurface = mSurfaceViewArr[0];
+		
 	}
 
 	
 
 	private void adjustLayout() {
-		mVideoLayout.removeAllViews();
-		int t = mSurfaceViewArr.length / 2;
+		int maxWidth = 2;
+		int size = mCurrentShowedSV.size();
+		if (size == 0) {
+			V2Log.e(" No surface to show");
+		}
 		RelativeLayout.LayoutParams par = (RelativeLayout.LayoutParams)mVideoLayout.getLayoutParams();
-		int iWid = (Measuredwidth - par.leftMargin - par.rightMargin) / t;
-		int iHei = (Measuredheight -100) / 2;
-		for (int i = 0; i < mSurfaceViewArr.length; i++) {
-			mSurfaceViewArr[i].setId(i + 1000);
-			RelativeLayout.LayoutParams rl = new RelativeLayout.LayoutParams(
-					iWid, iHei);
-			int r = i % t;
-			if (r == 0) {
-				rl.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+		int fixedWidth = (Measuredwidth - par.leftMargin - par.rightMargin ) / (size > 1 ? maxWidth:1);
+		int fixedHeight = (Measuredheight - 100)/ (size > maxWidth ? maxWidth:1);
+		
+		int index = 0;
+		for (SurfaceViewW sw: mCurrentShowedSV) {
+			View v = mVideoLayout.findViewById(sw.getView().getId());
+			RelativeLayout.LayoutParams p = new RelativeLayout.LayoutParams(fixedWidth, fixedHeight);
+			int row = index / maxWidth;
+			int column = index % maxWidth;
+			if (column == 0 && row == 0) {
+				p.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+				p.addRule(RelativeLayout.ALIGN_PARENT_TOP);
 			} else {
-				rl.addRule(RelativeLayout.RIGHT_OF,
-						mSurfaceViewArr[i - 1].getId());
+				
+				if (column > 0) {
+					p.addRule(RelativeLayout.RIGHT_OF, mCurrentShowedSV.get(column - 1).getView().getId());
+				} else {
+					p.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+				}
+				if (row > 0) {
+					p.addRule(RelativeLayout.BELOW, mCurrentShowedSV.get((row - 1) * maxWidth + column).getView().getId()); 
+				} else {
+					p.addRule(RelativeLayout.ALIGN_PARENT_TOP);
+				}
+				
 			}
-			if (i >= t) {
-				rl.addRule(RelativeLayout.BELOW, mSurfaceViewArr[i - t].getId());
+			
+			
+			if (v != null) {
+				mVideoLayout.updateViewLayout(v, p);
+			} else {
+				mVideoLayout.addView(sw.getView(), p);
 			}
-			mVideoLayout.addView(mSurfaceViewArr[i], rl);
+			index ++;
 		}
 	}
 
@@ -377,6 +407,7 @@ public class VideoActivityV2 extends Activity {
 			this.unbindService(mConnection);
 		}
 		quit();
+		finish();
 	}
 
 	@Override
@@ -384,6 +415,9 @@ public class VideoActivityV2 extends Activity {
 		mContext.unregisterReceiver(mConfUserChangeReceiver);
 		super.onDestroy();
 		mAttendeeList.clear();
+		if (mCurrentShowedSV != null) {
+			mCurrentShowedSV.clear();
+		}
 	}
 
 	@Override
@@ -442,14 +476,19 @@ public class VideoActivityV2 extends Activity {
 	 * reverse local camera from back to front or from front to back
 	 */
 	private void doReverseCamera() {
-		//FIXME fix sequence bug
-		mService.requestCloseVideoDevice(mGroupId, new UserDeviceConfig(
-				mService.getLoggedUserId(), "", null), Message.obtain(
-				mVideoHandler, REQUEST_CLOSE_DEVICE_RESPONSE));
-		VideoCaptureDevInfo.CreateVideoCaptureDevInfo().reverseCamera();
-		mService.requestOpenVideoDevice(mGroupId,
-				new UserDeviceConfig(mService.getLoggedUserId(), "", null),
-				Message.obtain(mVideoHandler, REQUEST_OPEN_DEVICE_RESPONSE));
+		
+		for (SurfaceViewW sw : this.mCurrentShowedSV) {
+			if (sw.at.isSelf) {
+				//FIXME fix sequence bug
+				mService.requestCloseVideoDevice(mGroupId, sw.at.config, Message.obtain(
+						mVideoHandler, REQUEST_CLOSE_DEVICE_RESPONSE));
+				VideoCaptureDevInfo.CreateVideoCaptureDevInfo().reverseCamera();
+				mService.requestOpenVideoDevice(mGroupId,
+						sw.at.config,
+						Message.obtain(mVideoHandler, REQUEST_OPEN_DEVICE_RESPONSE));
+			}
+		}
+		
 	}
 	
 	
@@ -457,19 +496,20 @@ public class VideoActivityV2 extends Activity {
 	 * user quit conference, however positive or negative
 	 */
 	private void quit() {
-		for (Attendee at : this.mAttendeeList) {
-			if (at.isShowing) {
-			mService.requestCloseVideoDevice(mGroupId, at.config, Message.obtain(
+		for (SurfaceViewW sw : this.mCurrentShowedSV) {
+			if (sw.at.isShowing) {
+			mService.requestCloseVideoDevice(mGroupId, sw.at.config, Message.obtain(
 					mVideoHandler, REQUEST_CLOSE_DEVICE_RESPONSE));
 			}
 		}
-		
-		mService.requestCloseVideoDevice(mGroupId, new UserDeviceConfig(
-				mService.getLoggedUserId(), "", null), Message.obtain(
-				mVideoHandler, REQUEST_CLOSE_DEVICE_RESPONSE));
+//		
+//		mService.requestCloseVideoDevice(mGroupId, new UserDeviceConfig(
+//				mService.getLoggedUserId(), "", null), Message.obtain(
+//				mVideoHandler, REQUEST_CLOSE_DEVICE_RESPONSE));
 		
 		VideoRecorder.VideoPreviewSurfaceHolder = null;
-		mAttendeeList.clear();		
+		mAttendeeList.clear();
+		mCurrentShowedSV.clear();
 	}
 
 
@@ -484,9 +524,9 @@ public class VideoActivityV2 extends Activity {
 
 
 	private void fillUserList() {
-		mUserListContainer.addView(getUserTextView(mService.getloggedUser().getmUserId(), mService.getloggedUser().getName(), true));
+		//mUserListContainer.addView(getUserTextView(mService.getloggedUser().getmUserId(), mService.getloggedUser().getName(), true));
 		for (Attendee at : mAttendeeList) {
-			mUserListContainer.addView(getUserTextView(at.u.getmUserId(), at.u.getName(), false));
+			mUserListContainer.addView(getUserTextView(at.u.getmUserId(), at.u.getName(), at.isSelf));
 		}
 	}
 
@@ -557,18 +597,7 @@ public class VideoActivityV2 extends Activity {
 				Toast.LENGTH_SHORT).show();
 		Attendee a = getAttendee(user.getmUserId());
 		if (a != null && a.isShowing) {
-			mService.requestCloseVideoDevice(mGroupId, a.config, Message.obtain(
-					mVideoHandler, REQUEST_CLOSE_DEVICE_RESPONSE));
-			a.isShowing = false;
-			a.sv = null;
-			if (a.config != null) {
-				a.config.setVp(null);
-				a.config = null;
-			}
-			if (a.config1 != null) {
-				a.config1.setVp(null);
-				a.config1 = null;
-			}
+			showOrCloseAttendeeVideo(a.u.getmUserId());
 		}
 		this.mAttendeeList.remove(a);
 		
@@ -598,29 +627,19 @@ public class VideoActivityV2 extends Activity {
 			a.config.setVp(null);
 			a.sv = null;
 			a.isShowing = false;
-			return;
-		}
-		
-		//open video device
-		SurfaceView avaiSV = null;
-		for (SurfaceView sv: this.mSurfaceViewArr) {
-			boolean used = false;
-			for(Attendee at : this.mAttendeeList) {
-				if (at.sv == sv) {
-					used = true;
+			
+			for (SurfaceViewW sw :mCurrentShowedSV) {
+				if(sw.at == a) {
+					sw.at = null;
+					sw.sv = null;
+					sw.rl.removeAllViews();
+					mCurrentShowedSV.remove(sw);
+					mVideoLayout.removeView(sw.getView());
 					break;
 				}
+				
 			}
-			if (used || sv == mLocalSurface) {
-				continue;
-			} else {
-				avaiSV =  sv;
-				//break;
-			}
-		}
-		
-		if (avaiSV == null) {
-			//TODO do up limit max surface view
+			adjustLayout();
 			return;
 		}
 		
@@ -636,14 +655,24 @@ public class VideoActivityV2 extends Activity {
 			//a.config = new UserDeviceConfig(a.config.getUserID(), a.config.getDeviceID(), null);
 		}
 		
+		SurfaceViewW st = new SurfaceViewW();
+		st.at = a;
+		st.sv = new SurfaceView(this);
+		
+		mCurrentShowedSV.add(st);
+		adjustLayout();
+		
+		
 		VideoPlayer vp = new VideoPlayer();
-		vp.SetSurface(avaiSV.getHolder());
-		a.sv = avaiSV;
+		vp.SetSurface(st.sv.getHolder());
+		a.sv = st.sv;
 		a.config.setVp(vp);
 		mService.requestOpenVideoDevice(mGroupId,
 				a.config,
 				Message.obtain(mVideoHandler, REQUEST_OPEN_DEVICE_RESPONSE));
 		a.isShowing = true;
+		
+		
 	}
 	
 	
@@ -657,6 +686,31 @@ public class VideoActivityV2 extends Activity {
 			}
 		}
 		return at;
+	}
+	
+	
+	class SurfaceViewW {
+		SurfaceView sv;
+		Attendee at;
+		boolean isInLayout;
+		int layId;
+		RelativeLayout rl;
+		
+		public View getView() {
+			if (rl == null) {
+				rl = new RelativeLayout(mContext);
+				layId = (int)at.u.getmUserId();
+				rl.addView(sv, new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT));
+				TextView tv = new TextView(mContext);
+				tv.setText(at.u.getName());
+				RelativeLayout.LayoutParams tvrl = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+				tvrl.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+				tvrl.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+				rl.addView(tv, tvrl);
+				rl.setId(layId);
+			}
+			return rl;
+		}
 	}
 	
 

@@ -49,7 +49,7 @@ public class ConferenceTabFragment extends Fragment {
 
 	private ProgressDialog mWaitingDialog;
 	
-	
+	private long currentConfId;
 	
 	
 	@Override
@@ -114,7 +114,7 @@ public class ConferenceTabFragment extends Fragment {
 
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
-		Message.obtain(mHandler, REQUEST_EXIT_CONF, data.getExtras().getLong("gid")).sendToTarget();
+		Message.obtain(mHandler, REQUEST_EXIT_CONF, currentConfId).sendToTarget();
 	}
 
 	private void addGroupList(List<Group> list) {
@@ -142,6 +142,7 @@ public class ConferenceTabFragment extends Fragment {
 											.getString(
 													R.string.requesting_enter_conference),
 									true);
+					currentConfId = g.getmGId();
 					Message.obtain(mHandler, REQUEST_ENTER_CONF,
 							Long.valueOf(g.getmGId())).sendToTarget();
 				}
