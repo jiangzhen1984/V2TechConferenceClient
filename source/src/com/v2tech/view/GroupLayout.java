@@ -46,7 +46,7 @@ public class GroupLayout extends LinearLayout {
 		
 		addView(view);
 		mGroupNameTV.setText(this.mGroup.getName());
-		mGroupOwnerTV.setText(this.mGroup.getOwner());
+		mGroupOwnerTV.setText(this.mGroup.getOwnerUser() != null ? this.mGroup.getOwnerUser().getName() : (this.mGroup.getOwner() +""));
 		mGroupDateTV.setText(this.mGroup.getCreateDate());
 	}
 	

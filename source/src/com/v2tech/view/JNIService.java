@@ -102,6 +102,8 @@ public class JNIService extends Service {
 	private List<UserDeviceConfig> mUserDeviceList = new ArrayList<UserDeviceConfig>();
 	
 	private long mloggedInUserId;
+	
+	private int mLoadGroupOwnerCount = 0;
 
 	// ////////////////////////////////////////
 
@@ -518,6 +520,7 @@ public class JNIService extends Service {
 	private static final int JNI_CONNECT_RESPONSE = 23;
 	private static final int JNI_UPDATE_USER_INFO = 24;
 	private static final int JNI_GROUP_NOTIFY = 35;
+	private static final int JNI_LOAD_GROUP_OWNER_INFO = 36;
 	private static final int JNI_REQUEST_ENTER_CONF = 55;
 	private static final int JNI_REQUEST_EXIT_CONF = 56;
 	private static final int JNI_ATTENDEE_ENTERED_NOTIFICATION = 57;
@@ -558,6 +561,8 @@ public class JNIService extends Service {
 				ImRequest.getInstance().getUserBaseInfo((Long) msg.obj);
 				break;
 			case JNI_GROUP_NOTIFY:
+				break;
+			case JNI_LOAD_GROUP_OWNER_INFO:
 				break;
 			case JNI_REQUEST_ENTER_CONF:
 				ConfRequest.getInstance().enterConf((Long) msg.obj);
@@ -679,10 +684,28 @@ public class JNIService extends Service {
 				if (msg.arg1 == Group.GroupType.CONFERENCE.intValue()) {
 					mConfGroup = Group
 							.parserFromXml(msg.arg1, (String) msg.obj);
+					mLoadGroupOwnerCount = mConfGroup.size();
+					for (Group g : mConfGroup) {
+						// put caller message to queue
+						getAndQueued(JNI_UPDATE_USER_INFO,
+								Message.obtain(this, JNI_LOAD_GROUP_OWNER_INFO));
+						Message.obtain(mHandler, JNI_UPDATE_USER_INFO, g.getOwner())
+								.sendToTarget();
+					}
 				}
 
 				ar = new AsynResult(AsynResult.AsynState.SUCCESS, mConfGroup);
 
+				break;
+			case JNI_LOAD_GROUP_OWNER_INFO:
+				mLoadGroupOwnerCount--;
+				User gu = (User)((AsynResult) msg.obj).getObject();
+				for (Group g : mConfGroup) {
+					if (g.getOwner() == gu.getmUserId()) {
+						g.setOwnerUser(gu);
+					}
+				}
+				
 				break;
 			case JNI_REQUEST_ENTER_CONF:
 				RequestEnterConfResponse recr = (RequestEnterConfResponse) msg.obj;

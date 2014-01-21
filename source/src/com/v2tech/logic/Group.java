@@ -27,7 +27,7 @@ public class Group {
 
 	private String mName;
 
-	private String mOwner;
+	private long mOwner;
 
 	private User mOwnerUser;
 
@@ -63,7 +63,7 @@ public class Group {
 		this.mGId = mGId;
 		this.mGroupType = mGroupType;
 		this.mName = mName;
-		this.mOwner = mOwner;
+		this.mOwner = Long.parseLong(mOwner);
 		this.mCreateDate = createDate;
 		Date d = new Date(Long.parseLong(createDate) * 1000);
 		DateFormat sd = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.US);
@@ -94,11 +94,11 @@ public class Group {
 		this.mName = mName;
 	}
 
-	public String getOwner() {
+	public long getOwner() {
 		return mOwner;
 	}
 
-	public void setOwner(String mOwner) {
+	public void setOwner(long mOwner) {
 		this.mOwner = mOwner;
 	}
 
