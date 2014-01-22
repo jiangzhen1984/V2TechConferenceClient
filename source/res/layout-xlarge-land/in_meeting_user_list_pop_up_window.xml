@@ -16,12 +16,12 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content" >
 
-             <ImageView
+            <ImageView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:src="@drawable/group_list_search_button"
-                android:contentDescription="search" />
+                android:contentDescription="search"
+                android:src="@drawable/group_list_search_button" />
 
             <EditText
                 android:id="@+id/in_meeting_user_search"
@@ -32,7 +32,6 @@
                 android:background="@drawable/rounded_corners"
                 android:ems="10"
                 android:inputType="text" >
-
             </EditText>
         </LinearLayout>
 
@@ -43,13 +42,18 @@
             android:orientation="vertical" >
         </LinearLayout>
 
-        <LinearLayout
-            android:id="@+id/in_meeting_user_list_layout"
+        <ScrollView
+            android:id="@+id/scrollView1"
             android:layout_width="match_parent"
-            android:layout_height="fill_parent"
-            android:orientation="vertical" >
+            android:layout_height="wrap_content" >
 
-                 </LinearLayout>
+            <LinearLayout
+                android:id="@+id/in_meeting_user_list_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" >
+            </LinearLayout>
+        </ScrollView>
 
         <LinearLayout
             android:layout_width="match_parent"

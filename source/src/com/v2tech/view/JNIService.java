@@ -2,9 +2,11 @@ package com.v2tech.view;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import android.app.Service;
 import android.content.Context;
@@ -100,7 +102,7 @@ public class JNIService extends Service {
 
 	private Map<Long, User> mUserHolder = new HashMap<Long, User>();
 	
-	private List<UserDeviceConfig> mUserDeviceList = new ArrayList<UserDeviceConfig>();
+	private Set<UserDeviceConfig> mUserDeviceList = new HashSet<UserDeviceConfig>();
 	
 	private long mloggedInUserId;
 	
@@ -304,9 +306,9 @@ public class JNIService extends Service {
 	 *         service. AsynResult.object {@link User}
 	 */
 	public List<Group> getGroup(Group.GroupType gType) {
-		if (mLoadGroupOwnerCount > 0) {
-			return null;
-		}
+//		if (mLoadGroupOwnerCount > 0) {
+//			return null;
+//		}
 		if (gType == Group.GroupType.CONFERENCE) {
 			return this.mConfGroup;
 		} else {

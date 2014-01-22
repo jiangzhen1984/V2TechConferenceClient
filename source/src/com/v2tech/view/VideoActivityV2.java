@@ -360,7 +360,7 @@ public class VideoActivityV2 extends Activity {
 		int marginLeft = 0;
 		int marginRight = 0;
 		int size = mCurrentShowedSV.size();
-		int rows = size / maxWidth + (size % maxWidth == 0? 0:1);
+		int rows = size / maxWidth + (size % maxWidth == 0 ? 0 : 1);
 		if (size == 0) {
 			V2Log.e(" No surface to show");
 		}
@@ -374,8 +374,11 @@ public class VideoActivityV2 extends Activity {
 
 			fixedHeight = fixedWidth = fixedWidth > fixedHeight ? fixedHeight
 					: fixedWidth;
-			marginTop = marginBottom = Math.abs((Measuredheight - 100) - fixedHeight * rows ) / 2;
-			marginLeft = marginRight = Math.abs((Measuredwidth  - par.leftMargin - par.rightMargin) - fixedWidth * maxWidth ) / 2;
+			marginTop = marginBottom = Math.abs((Measuredheight - 100)
+					- fixedHeight * rows) / 2;
+			marginLeft = marginRight = Math
+					.abs((Measuredwidth - par.leftMargin - par.rightMargin)
+							- fixedWidth * maxWidth) / 2;
 		}
 		int index = 0;
 		for (SurfaceViewW sw : mCurrentShowedSV) {
@@ -404,14 +407,27 @@ public class VideoActivityV2 extends Activity {
 				}
 
 			}
-			p.topMargin = marginTop;
-			p.bottomMargin = marginBottom;
-			p.leftMargin =marginLeft;
-			p.rightMargin = marginRight;
+			if (column == 0) {
+				p.leftMargin = marginLeft;
+			}
+			if (row == 0) {
+
+				p.topMargin = marginTop;
+			}
+			if (column - 1 == maxWidth) {
+				p.rightMargin = marginRight;
+			}
+			if (row == rows) {
+				p.bottomMargin = marginBottom;
+			}
+
 			if (v != null) {
 				mVideoLayout.updateViewLayout(v, p);
 			} else {
 				mVideoLayout.addView(sw.getView(), p);
+			}
+			if (sw.udc.getVp() != null) {
+				sw.udc.getVp().SetViewSize(fixedWidth, fixedHeight);
 			}
 			index++;
 		}
@@ -519,9 +535,11 @@ public class VideoActivityV2 extends Activity {
 	 */
 	private void quit() {
 		for (SurfaceViewW sw : this.mCurrentShowedSV) {
-			Message.obtain(mVideoHandler, REQUEST_OPEN_OR_CLOSE_DEVICE, 0, 0, sw.udc).sendToTarget();
-//			mService.requestCloseVideoDevice(mGroupId, sw.udc, Message.obtain(
-//					mVideoHandler, REQUEST_CLOSE_DEVICE_RESPONSE));
+			Message.obtain(mVideoHandler, REQUEST_OPEN_OR_CLOSE_DEVICE, 0, 0,
+					sw.udc).sendToTarget();
+			// mService.requestCloseVideoDevice(mGroupId, sw.udc,
+			// Message.obtain(
+			// mVideoHandler, REQUEST_CLOSE_DEVICE_RESPONSE));
 		}
 
 		VideoRecorder.VideoPreviewSurfaceHolder = null;
@@ -582,19 +600,24 @@ public class VideoActivityV2 extends Activity {
 
 	/**
 	 * FIXME use stand alone view object
+	 * 
 	 * @param a
 	 * @return
 	 */
 	private View getAttendeeView(final Attendee a) {
+		LinearLayout root = new LinearLayout(mContext);
+		root.setOrientation(LinearLayout.VERTICAL);
+		root.setId((int) a.getUser().getmUserId());
+
 		RelativeLayout rl = new RelativeLayout(mContext);
-		rl.setId((int)a.getUser().getmUserId());
+		rl.setBackgroundColor(Color.WHITE);
+		
 		TextView tv = new TextView(mContext);
 		final ImageView iv = new ImageView(mContext);
-		
+
 		tv.setText(a.getUser().getName());
-		tv.setId((int)a.getUser().getmUserId() | 0x1200);
-		tv.setPadding(15, 5, 5, 5);
 		if (a.isSelf() == false) {
+			
 			tv.setTextSize(20);
 			iv.setImageResource(R.drawable.camera);
 			iv.setTag("camera");
@@ -610,51 +633,71 @@ public class VideoActivityV2 extends Activity {
 				RelativeLayout.LayoutParams.WRAP_CONTENT,
 				RelativeLayout.LayoutParams.WRAP_CONTENT);
 		rp.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+		rp.addRule(RelativeLayout.CENTER_VERTICAL);
+		rp.leftMargin = 20;
 		rl.addView(tv, rp);
 
-		
-		
 		RelativeLayout.LayoutParams rpIv = new RelativeLayout.LayoutParams(
 				RelativeLayout.LayoutParams.WRAP_CONTENT,
 				RelativeLayout.LayoutParams.WRAP_CONTENT);
 		rpIv.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+		rpIv.addRule(RelativeLayout.CENTER_VERTICAL);
 		rpIv.rightMargin = 20;
 		rl.addView(iv, rpIv);
+		
+		
+		root.addView(rl, new LinearLayout.LayoutParams(
+				LinearLayout.LayoutParams.MATCH_PARENT,
+				LinearLayout.LayoutParams.WRAP_CONTENT));
+		
 		if (a.getmDevices() != null && a.getmDevices().size() > 1) {
-			LinearLayout ll = new LinearLayout(mContext);
-			ll.setOrientation(LinearLayout.VERTICAL);
-			RelativeLayout.LayoutParams rlp = new RelativeLayout.LayoutParams(
-					RelativeLayout.LayoutParams.MATCH_PARENT,
-					RelativeLayout.LayoutParams.MATCH_PARENT);
-			rlp.addRule(RelativeLayout.BELOW, tv.getId());
+			LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+					LinearLayout.LayoutParams.MATCH_PARENT,
+					LinearLayout.LayoutParams.WRAP_CONTENT);
 			
-			for (int i =0;i< a.getmDevices().size(); i++) {
+			
+			for (int i = 0; i < a.getmDevices().size(); i++) {
+				RelativeLayout rlm = new RelativeLayout(mContext);
+				
 				final UserDeviceConfig udc = a.getmDevices().get(i);
 				TextView tt = new TextView(mContext);
-				tt.setText(a.getUser().getName()+"_视频"+i);
-				tt.setOnClickListener(new OnClickListener() {
-				@Override
-				public void onClick(View arg0) {
-					if (iv.getTag().toString().equals("camera_showing")) {
-						iv.setImageResource(R.drawable.camera);
-						iv.setTag("camera");
-					} else {
-						iv.setImageResource(R.drawable.camera_showing);
-						iv.setTag("camera_showing");
-					}
-					showOrCloseAttendeeVideo(udc);
-					if (mUserListWindow != null) {
-						mUserListWindow.dismiss();
-					}
-				}
-			});
+				tt.setText(a.getUser().getName() + "_视频" + i);
+				tt.setTextSize(20);
 				
-				ll.addView(tt);
+				RelativeLayout.LayoutParams rp1 = new RelativeLayout.LayoutParams(
+						RelativeLayout.LayoutParams.WRAP_CONTENT,
+						RelativeLayout.LayoutParams.WRAP_CONTENT);
+				
+				rp1.leftMargin = 45;
+				rlm.addView(tt, rp1);
+				
+				
+				final ImageView ivm = new ImageView(mContext);
+				ivm.setImageResource(R.drawable.camera);
+				ivm.setTag("camera");
+				rlm.setOnClickListener(new OnClickListener() {
+					@Override
+					public void onClick(View arg0) {
+						if (ivm.getTag().toString().equals("camera_showing")) {
+							ivm.setImageResource(R.drawable.camera);
+							ivm.setTag("camera");
+						} else {
+							ivm.setImageResource(R.drawable.camera_showing);
+							ivm.setTag("camera_showing");
+						}
+						showOrCloseAttendeeVideo(udc);
+						if (mUserListWindow != null) {
+							mUserListWindow.dismiss();
+						}
+					}
+				});
+				
+				rlm.addView(ivm, rpIv);
+				
+				root.addView(rlm, lp);
 			}
-			
-			rl.addView(ll, rlp);
-			
-			
+
+
 		} else {
 			rl.setOnClickListener(new OnClickListener() {
 				@Override
@@ -673,8 +716,10 @@ public class VideoActivityV2 extends Activity {
 				}
 			});
 		}
+		
+	
 
-		return rl;
+		return root;
 	}
 
 	/**
@@ -686,7 +731,7 @@ public class VideoActivityV2 extends Activity {
 		Toast.makeText(mContext, user.getName() + "退出会议室! ", Toast.LENGTH_SHORT)
 				.show();
 		Attendee a = getAttendee(user.getmUserId());
-		if (a != null ) {
+		if (a != null) {
 			for (UserDeviceConfig udc : a.getmDevices()) {
 				if (udc.isShowing()) {
 					showOrCloseAttendeeVideo(udc);
@@ -694,7 +739,6 @@ public class VideoActivityV2 extends Activity {
 			}
 			this.mAttendeeList.remove(a);
 		}
-		
 
 		if (mUserListContainer == null) {
 			return;
@@ -702,7 +746,7 @@ public class VideoActivityV2 extends Activity {
 		int count = mUserListContainer.getChildCount();
 		for (int i = 0; i < count; i++) {
 			View v = mUserListContainer.getChildAt(i);
-			if (v.getId() == (int)user.getmUserId()) {
+			if (v.getId() == (int) user.getmUserId()) {
 				mUserListContainer.removeView(v);
 				break;
 			}
@@ -727,10 +771,10 @@ public class VideoActivityV2 extends Activity {
 					break;
 				}
 			}
-			
-//			if (udc.getBelongsAttendee().isSelf()) {
-//				VideoRecorder.VideoPreviewSurfaceHolder = null;
-//			}
+
+			// if (udc.getBelongsAttendee().isSelf()) {
+			// VideoRecorder.VideoPreviewSurfaceHolder = null;
+			// }
 			udc.doClose();
 			adjustLayout();
 		} else {
@@ -741,7 +785,8 @@ public class VideoActivityV2 extends Activity {
 				udc.setVp(vp);
 			} else {
 				udc.setSVHolder(new SurfaceView(this));
-				VideoRecorder.VideoPreviewSurfaceHolder = udc.getSVHolder().getHolder();
+				VideoRecorder.VideoPreviewSurfaceHolder = udc.getSVHolder()
+						.getHolder();
 				VideoRecorder.VideoPreviewSurfaceHolder
 						.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
 				VideoRecorder.VideoPreviewSurfaceHolder
@@ -753,7 +798,8 @@ public class VideoActivityV2 extends Activity {
 			// otherwise can't show video
 			adjustLayout();
 
-			Message m = Message.obtain(mVideoHandler, REQUEST_OPEN_OR_CLOSE_DEVICE, 1, 0, udc);
+			Message m = Message.obtain(mVideoHandler,
+					REQUEST_OPEN_OR_CLOSE_DEVICE, 1, 0, udc);
 			mVideoHandler.sendMessageDelayed(m, 300);
 			udc.setShowing(true);
 		}
@@ -841,11 +887,15 @@ public class VideoActivityV2 extends Activity {
 				break;
 			case REQUEST_OPEN_OR_CLOSE_DEVICE:
 				if (msg.arg1 == 0) {
-					mService.requestCloseVideoDevice(mGroupId, (UserDeviceConfig)msg.obj, Message.obtain(
-							mVideoHandler, REQUEST_CLOSE_DEVICE_RESPONSE));
+					mService.requestCloseVideoDevice(mGroupId,
+							(UserDeviceConfig) msg.obj, Message.obtain(
+									mVideoHandler,
+									REQUEST_CLOSE_DEVICE_RESPONSE));
 				} else if (msg.arg1 == 1) {
-					mService.requestOpenVideoDevice(mGroupId, (UserDeviceConfig)msg.obj,
-							Message.obtain(mVideoHandler, REQUEST_OPEN_DEVICE_RESPONSE));
+					mService.requestOpenVideoDevice(mGroupId,
+							(UserDeviceConfig) msg.obj, Message
+									.obtain(mVideoHandler,
+											REQUEST_OPEN_DEVICE_RESPONSE));
 				}
 				break;
 			}
