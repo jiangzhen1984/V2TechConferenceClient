@@ -15,6 +15,9 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import com.v2tech.view.JNIService;
+
+import android.view.SurfaceView;
 import v2av.VideoPlayer;
 
 /**
@@ -23,6 +26,7 @@ import v2av.VideoPlayer;
  * If we want to open remote user's video, we need VidePlayer and device id information.
  * To get remote user's device id, we can listen {@link com.V2.jni.VideoRequestCallback#OnRemoteUserVideoDevice(String)}. 
  * <br>
+ * If object as local device, mVP is null and deviceID is "".
  * @see v2av.VideoPlayer com.V2.jni.VideoRequestCallback
  * @author jiangzhen
  *
@@ -33,6 +37,10 @@ public class UserDeviceConfig {
 	private String mDeviceID;
 	private VideoPlayer mVP;
 	private int mBusinessType;
+	private SurfaceView mSVHolder;
+	private boolean isShowing;
+	
+	private Attendee mBelongsAttendee;
 	
 	
 
@@ -51,6 +59,18 @@ public class UserDeviceConfig {
 		this.mBusinessType = mBusinessType;
 	}
 
+
+	/**
+	 * Just clear all resources which this object holded.
+	 * Notice: Before call this function, you must call {@link JNIService#requestCloseVideoDevice(long, UserDeviceConfig, android.os.Message)} first
+	 */
+	public void doClose() {
+		this.isShowing = false;
+		this.mSVHolder = null;
+		this.mVP = null;
+	}
+	
+	
 	public long getUserID() {
 		return mUerID;
 	}
@@ -85,6 +105,63 @@ public class UserDeviceConfig {
 	
 	
 	
+	
+	public SurfaceView getSVHolder() {
+		return mSVHolder;
+	}
+
+	public void setSVHolder(SurfaceView sVHolder) {
+		this.mSVHolder = sVHolder;
+	}
+
+	public boolean isShowing() {
+		return isShowing;
+	}
+
+	public void setShowing(boolean isShowing) {
+		this.isShowing = isShowing;
+	}
+	
+	
+
+	public Attendee getBelongsAttendee() {
+		return mBelongsAttendee;
+	}
+
+	public void setBelongsAttendee(Attendee BelongsAttendee) {
+		this.mBelongsAttendee = BelongsAttendee;
+	}
+		
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result
+				+ ((mDeviceID == null) ? 0 : mDeviceID.hashCode());
+		result = prime * result + (int) (mUerID ^ (mUerID >>> 32));
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		UserDeviceConfig other = (UserDeviceConfig) obj;
+		if (mDeviceID == null) {
+			if (other.mDeviceID != null)
+				return false;
+		} else if (!mDeviceID.equals(other.mDeviceID))
+			return false;
+		if (mUerID != other.mUerID)
+			return false;
+		return true;
+	}
+
 	/**
 	 * <xml><user id='136'><videolist defaultid='136:CyberLink Webcam Sharing
 	 * Manager____2056417056'><video bps='256' camtype='0' comm='0'

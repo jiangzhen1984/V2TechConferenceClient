@@ -89,6 +89,8 @@ public class ConferenceTabFragment extends Fragment {
 		if (intentFilter == null) {
 			intentFilter = new IntentFilter();
 			intentFilter.addAction("TAB1_ACTION");
+			intentFilter.addAction(JNIService.JNI_BROADCAST_GROUP_NOTIFICATION);
+			intentFilter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
 		}
 		return intentFilter;
 	}
@@ -98,7 +100,6 @@ public class ConferenceTabFragment extends Fragment {
 		super.onStart();
 		isBound = getActivity().bindService(new Intent(getActivity(),
 				JNIService.class), mConnection, Context.BIND_AUTO_CREATE);
-		//Message.obtain(mHandler, FILL_CONFS_LIST).sendToTarget();
 	}
 
 	@Override
@@ -130,10 +131,6 @@ public class ConferenceTabFragment extends Fragment {
 
 				@Override
 				public void onClick(View v) {
-					// Intent i = new Intent(getActivity(),
-					// VideoActivity.class);
-					// i.putExtra("gid", gp.getGroupId());
-					// startActivityForResult(i, 0);
 					mWaitingDialog = ProgressDialog
 							.show(getActivity(),
 									"",
@@ -158,6 +155,8 @@ public class ConferenceTabFragment extends Fragment {
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			if (intent.getAction().equals("TAB1_ACTION")) {
+			} else if (intent.getAction().equals(JNIService.JNI_BROADCAST_GROUP_NOTIFICATION)) {
+				Message.obtain(mHandler, FILL_CONFS_LIST).sendToTarget();
 			}
 		}
 
@@ -192,10 +191,7 @@ public class ConferenceTabFragment extends Fragment {
 				mConferenceList = mService.getGroup(Group.GroupType.CONFERENCE);
 				// No server return send asynchronous message and waiting for
 				// response
-				if (mConferenceList == null) {
-					mService.getGroupAsyn(Group.GroupType.CONFERENCE,
-							Message.obtain(this, FILL_CONFS_LIST));
-				} else {
+				if (mConferenceList != null) {
 					addGroupList(mConferenceList);
 				}
 				break;

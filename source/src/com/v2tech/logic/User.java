@@ -57,17 +57,25 @@ public class User {
 	}
 
 	@Override
-	public boolean equals(Object o) {
-		if (o == this) {
+	public boolean equals(Object obj) {
+		if (this == obj)
 			return true;
-		} else {
-			return this.mUserId == ((User) o).mUserId;
-		}
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		User other = (User) obj;
+		if (mUserId != other.mUserId)
+			return false;
+		return true;
 	}
 
 	@Override
 	public int hashCode() {
-		return (int) mUserId;
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + (int) (mUserId ^ (mUserId >>> 32));
+		return result;
 	}
 
 	public static User fromXml(int uID, String xml) {

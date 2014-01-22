@@ -70,6 +70,7 @@ class MetaData {
 public class JNIService extends Service {
 	
 	public static final String JNI_BROADCAST_CATEGROY = "com.v2tech.jni.broadcast";
+	public static final String JNI_BROADCAST_GROUP_NOTIFICATION = "com.v2tech.jni.broadcast.group_geted";
 	public static final String JNI_BROADCAST_ATTENDEE_ENTERED_NOTIFICATION = "com.v2tech.jni.broadcast.attendee.entered.notification";
 	public static final String JNI_BROADCAST_ATTENDEE_EXITED_NOTIFICATION = "com.v2tech.jni.broadcast.attendee.exited.notification";
 
@@ -279,27 +280,6 @@ public class JNIService extends Service {
 		return this.mUserHolder.get(Long.valueOf(this.mloggedInUserId));
 	}
 
-	/**
-	 * Get group information. Service will send message to target, once service
-	 * get group from JNI.
-	 * 
-	 * @param gType
-	 * @param msg
-	 *            callback message Message.obj is {@link AsynResult} object.
-	 *            AsynResult.object is List<Group>
-	 */
-	public void getGroupAsyn(Group.GroupType gType, Message msg) {
-		if (msg == null) {
-			return;
-		}
-		if (gType == Group.GroupType.CONFERENCE && this.mConfGroup != null) {
-			msg.obj = new AsynResult(AsynState.SUCCESS, this.mConfGroup);
-			msg.sendToTarget();
-			return;
-		}
-		// Just put message to the queue and waiting for notify
-		getAndQueued(JNI_GROUP_NOTIFY, msg);
-	}
 
 	/**
 	 * get user object according to user id.
@@ -324,6 +304,9 @@ public class JNIService extends Service {
 	 *         service. AsynResult.object {@link User}
 	 */
 	public List<Group> getGroup(Group.GroupType gType) {
+		if (mLoadGroupOwnerCount > 0) {
+			return null;
+		}
 		if (gType == Group.GroupType.CONFERENCE) {
 			return this.mConfGroup;
 		} else {
@@ -705,7 +688,12 @@ public class JNIService extends Service {
 						g.setOwnerUser(gu);
 					}
 				}
-				
+				if (mLoadGroupOwnerCount == 0) {
+					Intent ei = new Intent(JNI_BROADCAST_GROUP_NOTIFICATION);
+					ei.addCategory(JNI_BROADCAST_CATEGROY);
+					ei.putExtra("gtype", Group.GroupType.CONFERENCE.intValue());
+					mContext.sendBroadcast(ei);
+				}
 				break;
 			case JNI_REQUEST_ENTER_CONF:
 				RequestEnterConfResponse recr = (RequestEnterConfResponse) msg.obj;
