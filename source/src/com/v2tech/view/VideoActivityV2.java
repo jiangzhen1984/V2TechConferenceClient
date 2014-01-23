@@ -611,20 +611,19 @@ public class VideoActivityV2 extends Activity {
 
 		RelativeLayout rl = new RelativeLayout(mContext);
 		rl.setBackgroundColor(Color.WHITE);
-		
+
 		TextView tv = new TextView(mContext);
 		final ImageView iv = new ImageView(mContext);
-
+		tv.setTextColor(Color.BLACK);
 		tv.setText(a.getUser().getName());
+		
 		if (a.isSelf() == false) {
-			
 			tv.setTextSize(20);
 			iv.setImageResource(R.drawable.camera);
 			iv.setTag("camera");
 		} else {
 			tv.setTextSize(22);
 			tv.setTypeface(null, Typeface.BOLD);
-			tv.setTextColor(Color.BLACK);
 			iv.setImageResource(R.drawable.camera_showing);
 			iv.setTag("camera_showing");
 		}
@@ -636,7 +635,29 @@ public class VideoActivityV2 extends Activity {
 		rp.addRule(RelativeLayout.CENTER_VERTICAL);
 		rp.leftMargin = 20;
 		rl.addView(tv, rp);
-
+		
+		
+		
+		rl.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View arg0) {
+				if (iv.getTag().toString().equals("camera_showing")) {
+					iv.setImageResource(R.drawable.camera);
+					iv.setTag("camera");
+				} else {
+					iv.setImageResource(R.drawable.camera_showing);
+					iv.setTag("camera_showing");
+				}
+				showOrCloseAttendeeVideo(a.getDefaultDevice());
+				if (mUserListWindow != null) {
+					mUserListWindow.dismiss();
+				}
+			}
+		});
+		
+		
+		
+		// add secondary video
 		RelativeLayout.LayoutParams rpIv = new RelativeLayout.LayoutParams(
 				RelativeLayout.LayoutParams.WRAP_CONTENT,
 				RelativeLayout.LayoutParams.WRAP_CONTENT);
@@ -644,80 +665,55 @@ public class VideoActivityV2 extends Activity {
 		rpIv.addRule(RelativeLayout.CENTER_VERTICAL);
 		rpIv.rightMargin = 20;
 		rl.addView(iv, rpIv);
-		
-		
+
 		root.addView(rl, new LinearLayout.LayoutParams(
 				LinearLayout.LayoutParams.MATCH_PARENT,
 				LinearLayout.LayoutParams.WRAP_CONTENT));
-		
-		if (a.getmDevices() != null && a.getmDevices().size() > 1) {
-			LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
-					LinearLayout.LayoutParams.MATCH_PARENT,
-					LinearLayout.LayoutParams.WRAP_CONTENT);
-			
-			
-			for (int i = 0; i < a.getmDevices().size(); i++) {
-				RelativeLayout rlm = new RelativeLayout(mContext);
-				
-				final UserDeviceConfig udc = a.getmDevices().get(i);
-				TextView tt = new TextView(mContext);
-				tt.setText(a.getUser().getName() + "_视频" + i);
-				tt.setTextSize(20);
-				
-				RelativeLayout.LayoutParams rp1 = new RelativeLayout.LayoutParams(
-						RelativeLayout.LayoutParams.WRAP_CONTENT,
-						RelativeLayout.LayoutParams.WRAP_CONTENT);
-				
-				rp1.leftMargin = 45;
-				rlm.addView(tt, rp1);
-				
-				
-				final ImageView ivm = new ImageView(mContext);
-				ivm.setImageResource(R.drawable.camera);
-				ivm.setTag("camera");
-				rlm.setOnClickListener(new OnClickListener() {
-					@Override
-					public void onClick(View arg0) {
-						if (ivm.getTag().toString().equals("camera_showing")) {
-							ivm.setImageResource(R.drawable.camera);
-							ivm.setTag("camera");
-						} else {
-							ivm.setImageResource(R.drawable.camera_showing);
-							ivm.setTag("camera_showing");
-						}
-						showOrCloseAttendeeVideo(udc);
-						if (mUserListWindow != null) {
-							mUserListWindow.dismiss();
-						}
-					}
-				});
-				
-				rlm.addView(ivm, rpIv);
-				
-				root.addView(rlm, lp);
-			}
 
+		LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+				LinearLayout.LayoutParams.MATCH_PARENT,
+				LinearLayout.LayoutParams.WRAP_CONTENT);
 
-		} else {
-			rl.setOnClickListener(new OnClickListener() {
+		for (int i = 1; i < a.getmDevices().size(); i++) {
+			RelativeLayout rlm = new RelativeLayout(mContext);
+
+			final UserDeviceConfig udc = a.getmDevices().get(i);
+			TextView tt = new TextView(mContext);
+			tt.setText(a.getUser().getName() + (i > 0 ? ("_视频" + i) : ""));
+			tt.setTextSize(20);
+			tv.setTextColor(Color.BLACK);
+
+			RelativeLayout.LayoutParams rp1 = new RelativeLayout.LayoutParams(
+					RelativeLayout.LayoutParams.WRAP_CONTENT,
+					RelativeLayout.LayoutParams.WRAP_CONTENT);
+
+			rp1.leftMargin = 20;
+			rlm.addView(tt, rp1);
+
+			final ImageView ivm = new ImageView(mContext);
+			ivm.setImageResource(R.drawable.camera);
+			ivm.setTag("camera");
+			rlm.setOnClickListener(new OnClickListener() {
 				@Override
 				public void onClick(View arg0) {
-					if (iv.getTag().toString().equals("camera_showing")) {
-						iv.setImageResource(R.drawable.camera);
-						iv.setTag("camera");
+					if (ivm.getTag().toString().equals("camera_showing")) {
+						ivm.setImageResource(R.drawable.camera);
+						ivm.setTag("camera");
 					} else {
-						iv.setImageResource(R.drawable.camera_showing);
-						iv.setTag("camera_showing");
+						ivm.setImageResource(R.drawable.camera_showing);
+						ivm.setTag("camera_showing");
 					}
-					showOrCloseAttendeeVideo(a.getDefaultDevice());
+					showOrCloseAttendeeVideo(udc);
 					if (mUserListWindow != null) {
 						mUserListWindow.dismiss();
 					}
 				}
 			});
+
+			rlm.addView(ivm, rpIv);
+
+			root.addView(rlm, lp);
 		}
-		
-	
 
 		return root;
 	}

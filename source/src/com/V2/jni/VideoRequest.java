@@ -1,14 +1,8 @@
 package com.V2.jni;
 
-import java.util.List;
-
 import v2av.VideoPlayer;
 import android.content.Context;
-import android.content.Intent;
 import android.util.Log;
-
-import com.v2tech.logic.ConfUserDeviceInfo;
-import com.v2tech.view.VideoActivity;
 
 public class VideoRequest {
 	private static VideoRequest mVideoRequest;
@@ -133,16 +127,6 @@ public class VideoRequest {
 			this.callback.OnRemoteUserVideoDevice(szXmlData);
 		}
 		Log.e("VideoRequest UI", "OnRemoteUserVideoDevice:---" + szXmlData);
-		if (callback != null) {
-			callback.OnRemoteUserVideoDevice(szXmlData);
-		}
-		List<ConfUserDeviceInfo> l = ConfUserDeviceInfo.parseFromXml(szXmlData);
-		Intent i = new Intent(
-				VideoActivity.JNI_EVENT_CONF_USER_CATEGORY_USER_DEVICE_NOTIFICATION);
-		i.addCategory(VideoActivity.JNI_EVENT_CONF_USER_CATEGORY);
-		i.putExtra("ud", l.get(0));
-		this.context.sendBroadcast(i);
-
 	}
 
 	// 鏀跺埌瀵规柟鐨勮棰戦�璇濊姹� 鍙傛暟锛�锛�锛�112628锛�1112628锛欼ntegrated
@@ -249,13 +233,7 @@ public class VideoRequest {
 
 	// 鎽勫儚澶撮噰闆嗗嚭閿�
 	private void OnVideoCaptureError(String szDevID, int nErr) {
-		Log.e("ImRequest UI", "OnVideoCaptureError " + szDevID + " " + nErr);
-		Intent i = new Intent(
-				VideoActivity.JNI_EVENT_VIDEO_CATEGORY_OPEN_VIDEO_EVENT_ACTION);
-		i.putExtra("result", nErr);
-		i.putExtra("did", szDevID);
-		i.addCategory(VideoActivity.JNI_EVENT_VIDEO_CATEGORY);
-		this.context.sendBroadcast(i);
+
 	}
 
 	private void OnVideoPlayerClosed(String szDeviceID) {

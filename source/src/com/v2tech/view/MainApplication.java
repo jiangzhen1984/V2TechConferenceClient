@@ -47,6 +47,7 @@ public class MainApplication extends Application {
 		ConfRequest.getInstance(this).unInitialize();
 		AudioRequest.getInstance(this).unInitialize();
 		WBRequest.getInstance(this).unInitialize();
+		this.getApplicationContext().stopService(new Intent(this.getApplicationContext(), JNIService.class));
 	}
 
 	

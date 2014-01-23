@@ -1,11 +1,7 @@
 package com.V2.jni;
 
 import android.content.Context;
-import android.content.Intent;
 import android.util.Log;
-
-import com.v2tech.logic.GlobalHolder;
-import com.v2tech.logic.Group;
 
 
 
@@ -96,22 +92,9 @@ public class GroupRequest {
 		if (callback != null) {
 			callback.OnGetGroupInfoCallback(groupType, sXml);
 		}
-		Log.e("GroupRequest UI", "OnGetGroupInfo:: �õ���������Ϣ" + groupType + ":"
+		Log.e("GroupRequest UI", "OnGetGroupInfo::" + groupType + ":"
 				+ sXml);
-		System.out.println(sXml);
-		// ƴװ��Ϣ
-//		GroupMsgType friendMsgType = new GroupMsgType();
-//		friendMsgType.setGroupxml(sXml);
-//
-//		Intent addIntent = new Intent(SplashActivity.IM);
-//		addIntent.putExtra("MsgType", MsgType.FRIENDGROUP);
-//		addIntent.putExtra("MSG", friendMsgType);
-//		context.sendOrderedBroadcast(addIntent,null);
-		GlobalHolder.getInstance().setList(Group.parserFromXml(groupType, sXml));
-		Intent i = new Intent();
-		i.setAction("com.v2tech.group_changed");
-		i.addCategory("com.v2tech");
-		context.sendBroadcast(i);
+
 	}
 
 	public void setCallback(GroupRequestCallback callback) {

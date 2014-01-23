@@ -5,6 +5,12 @@ import java.util.List;
 
 import com.v2tech.util.V2Log;
 
+/**
+ * As conference's attendee object. <br>
+ * 
+ * @author 28851274
+ *
+ */
 public class Attendee {
 
 	private User user;
@@ -33,12 +39,6 @@ public class Attendee {
 		this.isChairMan = isChairMan;
 	}
 
-	
-	
-	
-	
-	
-	
 	
 	@Override
 	public int hashCode() {

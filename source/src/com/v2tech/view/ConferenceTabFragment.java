@@ -82,9 +82,9 @@ public class ConferenceTabFragment extends Fragment {
 		super.onResume();
 		receiver = new Tab1BroadcastReceiver();
 		getActivity().registerReceiver(receiver, getIntentFilter());
-		if (mConferenceList != null) {
-			this.addGroupList(mConferenceList);
-		}
+//		if (mConferenceList != null) {
+//			this.addGroupList(mConferenceList);
+//		}
 	}
 
 	private IntentFilter getIntentFilter() {
@@ -173,7 +173,7 @@ public class ConferenceTabFragment extends Fragment {
 			LocalBinder binder = (LocalBinder) service;
 			mService = binder.getService();
 			isBound = true;
-			Message.obtain(mHandler, SERVER_BOUNDED).sendToTarget();
+			mHandler.sendMessageDelayed(Message.obtain(mHandler, SERVER_BOUNDED), 500);
 		}
 
 		@Override
@@ -199,7 +199,7 @@ public class ConferenceTabFragment extends Fragment {
 					if ( msg.arg1 < RETRY_COUNT) {
 						// 
 						Message m = Message.obtain(this, FILL_CONFS_LIST, msg.arg1 + 1, 0);
-						this.sendMessageDelayed(m, 1000);
+						//this.sendMessageDelayed(m, 1000);
 					} else {
 						Toast.makeText(getActivity(), "无法获取组信息", Toast.LENGTH_LONG).show();
 					}

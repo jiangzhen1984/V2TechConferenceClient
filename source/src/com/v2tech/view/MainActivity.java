@@ -1,6 +1,8 @@
 package com.v2tech.view;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -9,21 +11,31 @@ import android.os.Process;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
+import android.view.GestureDetector;
+import android.view.GestureDetector.OnGestureListener;
 import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnTouchListener;
 import android.widget.TabHost;
 
 import com.v2tech.R;
 
-public class MainActivity extends FragmentActivity {
-	
+public class MainActivity extends FragmentActivity implements OnTouchListener {
+
 	private Context mContext;
-	
+
 	TabHost mTabHost;
 
 	TabManager mTabManager;
 
-	
+	private GestureDetector mGestureDetector;
+
+	private static final String TAG_CONF = "conference";
+	private static final String TAG_SETTING = "setting";
+
+
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -38,11 +50,11 @@ public class MainActivity extends FragmentActivity {
 		mTabManager = new TabManager(this, mTabHost, R.id.realtabcontent);
 
 		mTabManager.addTab(
-				mTabHost.newTabSpec("conference").setIndicator(null,
+				mTabHost.newTabSpec(TAG_CONF).setIndicator(null,
 						res.getDrawable(R.drawable.selector_conf)),
 				ConferenceTabFragment.class, null);
 		mTabManager.addTab(
-				mTabHost.newTabSpec("setting").setIndicator(null,
+				mTabHost.newTabSpec(TAG_SETTING).setIndicator(null,
 						res.getDrawable(R.drawable.selector_setting)),
 				SettingTabFragment.class, null);
 
@@ -56,8 +68,10 @@ public class MainActivity extends FragmentActivity {
 			mTabHost.getTabWidget().getChildAt(i)
 					.setBackgroundResource(R.color.confs_panel_bg);
 		}
-		
+
 		this.mContext = this;
+
+		mGestureDetector = new GestureDetector(this, mGestrueListener);
 	}
 
 	@Override
@@ -67,12 +81,10 @@ public class MainActivity extends FragmentActivity {
 	}
 
 	@Override
-	protected void onStart() {		
+	protected void onStart() {
 		super.onStart();
 	}
 
-	
-	
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		if (keyCode == KeyEvent.KEYCODE_BACK) {
@@ -84,12 +96,64 @@ public class MainActivity extends FragmentActivity {
 
 	@Override
 	protected void onDestroy() {
-		super.onDestroy();		
+		super.onDestroy();
 	}
 
+	private OnGestureListener mGestrueListener = new OnGestureListener() {
+		@Override
+		public boolean onDown(MotionEvent e) {
+			return false;
+		}
+
+		@Override
+		public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,
+				float velocityY) {
+
+			if (e1.getX() - e2.getX() > 100 && Math.abs(velocityX) > 100) {
+				mTabManager.turnToRightTab();
+			} else if (e2.getX() - e1.getX() > 100 && Math.abs(velocityX) > 100) {
+				mTabManager.turnToLeftTab();
+			}
+
+			return false;
+		}
+
+		@Override
+		public void onLongPress(MotionEvent e) {
+
+		}
+
+		@Override
+		public boolean onScroll(MotionEvent e1, MotionEvent e2,
+				float distanceX, float distanceY) {
+			return false;
+		}
+
+		@Override
+		public void onShowPress(MotionEvent e) {
+
+		}
+
+		@Override
+		public boolean onSingleTapUp(MotionEvent e) {
+			return false;
+		}
 
 
+	};
 	
+	
+
+	@Override
+	public boolean onTouch(View v, MotionEvent event) {
+		return false;
+	}
+
+	@Override
+	public boolean dispatchTouchEvent(MotionEvent ev) {
+		mGestureDetector.onTouchEvent(ev);
+		return super.dispatchTouchEvent(ev);
+	}
 
 	/**
 	 * This is a helper class that implements a generic mechanism for
@@ -109,16 +173,21 @@ public class MainActivity extends FragmentActivity {
 		private final HashMap<String, TabInfo> mTabs = new HashMap<String, TabInfo>();
 		TabInfo mLastTab;
 
+		private List<String> tabs = new ArrayList<String>();
+		
 		static final class TabInfo {
 			private final String tag;
 			private final Class<?> clss;
 			private final Bundle args;
 			private Fragment fragment;
+			private int index ;
+			static int CONSTANT_INDEX = 0;
 
 			TabInfo(String _tag, Class<?> _class, Bundle _args) {
 				tag = _tag;
 				clss = _class;
 				args = _args;
+				index = CONSTANT_INDEX++;
 			}
 		}
 
@@ -146,7 +215,9 @@ public class MainActivity extends FragmentActivity {
 			mTabHost.setOnTabChangedListener(this);
 		}
 
-		public void addTab(TabHost.TabSpec tabSpec, Class<?> clss, Bundle args) {
+		public void addTab(TabHost.TabSpec tabSpec, Class<?> clss, Bundle args
+				) {
+			tabs.add(tabSpec.getTag());
 			tabSpec.setContent(new DummyTabFactory(mActivity));
 			String tag = tabSpec.getTag();
 
@@ -166,6 +237,21 @@ public class MainActivity extends FragmentActivity {
 			mTabs.put(tag, info);
 			mTabHost.addTab(tabSpec);
 		}
+		
+		public void turnToRightTab() {
+			if (mLastTab.index < (tabs.size() -1)) {
+				String key = tabs.get(mLastTab.index + 1);
+				mTabHost.setCurrentTabByTag(key);
+			}
+		}
+		
+		public void turnToLeftTab() {
+			if (mLastTab.index > 0) {			
+				String key = tabs.get(mLastTab.index -1 );
+				mTabHost.setCurrentTabByTag(key);
+			}
+		}
+		
 
 		@Override
 		public void onTabChanged(String tabId) {
@@ -173,22 +259,41 @@ public class MainActivity extends FragmentActivity {
 			if (mLastTab != newTab) {
 				FragmentTransaction ft = mActivity.getSupportFragmentManager()
 						.beginTransaction();
-				if (mLastTab != null) {
-					if (mLastTab.fragment != null) {
-						ft.detach(mLastTab.fragment);
+
+				//first time
+				if (mLastTab == null) {
+					ft.setCustomAnimations(R.animator.left_in,
+							R.animator.left_out);
+				} else {
+					if (newTab == null) {
+						ft.setCustomAnimations(R.animator.right_in,
+								R.animator.right_out);
 					}
 				}
+				
+				
+				if (newTab != null && mLastTab != null) {
+					if (newTab.index > mLastTab.index) {
+						ft.setCustomAnimations(R.animator.left_in,
+								R.animator.left_out);
+					} else {
+						ft.setCustomAnimations(R.animator.right_in,
+								R.animator.right_out);
+					}
+				}
+
 				if (newTab != null) {
 					if (newTab.fragment == null) {
 						newTab.fragment = Fragment.instantiate(mActivity,
 								newTab.clss.getName(), newTab.args);
-						ft.add(mContainerId, newTab.fragment, newTab.tag);
-					} else {
-						ft.attach(newTab.fragment);
-					}
+						//ft.add(mContainerId, newTab.fragment, newTab.tag);
+					} 
+						ft.replace(mContainerId, newTab.fragment, newTab.tag);
+					
 				}
 
 				mLastTab = newTab;
+
 				ft.commit();
 				mActivity.getSupportFragmentManager()
 						.executePendingTransactions();

@@ -12,7 +12,6 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -32,10 +31,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.V2.jni.ConfigRequest;
-import com.V2.jni.ImRequest;
 import com.v2tech.R;
 import com.v2tech.logic.AsynResult;
-import com.v2tech.logic.GlobalHolder;
 import com.v2tech.logic.NetworkStateCode;
 import com.v2tech.logic.User;
 import com.v2tech.view.JNIService.LocalBinder;
@@ -55,7 +52,6 @@ public class LoginActivity extends Activity {
 	/**
 	 * Keep track of the login task to ensure we can cancel it if requested.
 	 */
-	private UserLoginTask mAuthTask = null;
 
 	private ConfigRequest mCR = new ConfigRequest();
 
@@ -138,9 +134,9 @@ public class LoginActivity extends Activity {
 
 		@Override
 		public void onClick(final View vButton) {
-			vButton.setEnabled(false);
 			if (mSettingDialog != null) {
 				mSettingDialog.show();
+				return;
 			}
 			final Dialog dialog = new Dialog(mContext, R.style.IpSettingDialog);
 			dialog.setContentView(R.layout.ip_setting);
@@ -274,9 +270,6 @@ public class LoginActivity extends Activity {
 	 * errors are presented and no actual login attempt is made.
 	 */
 	public void attemptLogin() {
-		if (mAuthTask != null) {
-			return;
-		}
 		SharedPreferences sf = mContext.getSharedPreferences("config",
 				Context.MODE_PRIVATE);
 		String ip = sf.getString("ip", null);
@@ -381,56 +374,7 @@ public class LoginActivity extends Activity {
 		}
 	}
 
-	/**
-	 * Represents an asynchronous login/registration task used to authenticate
-	 * the user.
-	 */
-	public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
-		@Override
-		protected Boolean doInBackground(Void... params) {
-			if (!ImRequest.getInstance().loginSync(mEmail, mPassword)) {
-				return false;
-			}
 
-			// Save user info
-			if (mRemPwdCkbx.isChecked()) {
-				saveUserConfig(mEmailView.getText().toString(), mPasswordView
-						.getText().toString());
-			} else {
-				saveUserConfig("", "");
-			}
-			return true;
-		}
-
-		@Override
-		protected void onPostExecute(final Boolean success) {
-			mAuthTask = null;
-			showProgress(false);
-
-			if (success) {
-				mContext.startActivity(new Intent(mContext, ConfsActivity.class));
-				finish();
-				overridePendingTransition(R.animator.right_in, R.animator.right_out);
-			} else {
-				if (GlobalHolder.getInstance().getUser().getmResult() == NetworkStateCode.CONNECTED_ERROR || GlobalHolder.getInstance().getUser().getmResult() == NetworkStateCode.TIME_OUT) {
-					Toast.makeText(mContext, R.string.error_connect_to_server,
-							Toast.LENGTH_LONG).show();
-				} else {
-					mPasswordView
-							.setError(getString(R.string.error_incorrect_password));
-					mPasswordView.requestFocus();
-				}
-			}
-		}
-
-		@Override
-		protected void onCancelled() {
-			mAuthTask = null;
-			showProgress(false);
-		}
-	}
-	
-	
 	private static final int LOG_IN_CALL_BACK = 1;
 	private Handler mHandler = new Handler() {
 
@@ -455,7 +399,6 @@ public class LoginActivity extends Activity {
 							.setError(getString(R.string.error_incorrect_password));
 					mPasswordView.requestFocus();
 				} else {
-					GlobalHolder.getInstance().setUser(u);
 					// Save user info
 					if (mRemPwdCkbx.isChecked()) {
 						saveUserConfig(mEmailView.getText().toString(), mPasswordView

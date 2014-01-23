@@ -70,7 +70,7 @@ class MetaData {
  * 
  */
 public class JNIService extends Service {
-	
+
 	public static final String JNI_BROADCAST_CATEGROY = "com.v2tech.jni.broadcast";
 	public static final String JNI_BROADCAST_GROUP_NOTIFICATION = "com.v2tech.jni.broadcast.group_geted";
 	public static final String JNI_BROADCAST_ATTENDEE_ENTERED_NOTIFICATION = "com.v2tech.jni.broadcast.attendee.entered.notification";
@@ -101,11 +101,11 @@ public class JNIService extends Service {
 	private List<Group> mConfGroup = null;
 
 	private Map<Long, User> mUserHolder = new HashMap<Long, User>();
-	
+
 	private Set<UserDeviceConfig> mUserDeviceList = new HashSet<UserDeviceConfig>();
-	
+
 	private long mloggedInUserId;
-	
+
 	private int mLoadGroupOwnerCount = 0;
 
 	// ////////////////////////////////////////
@@ -272,16 +272,14 @@ public class JNIService extends Service {
 			V2Log.e(" can't get metadata for login");
 		}
 	}
-	
-	
+
 	public long getLoggedUserId() {
 		return this.mloggedInUserId;
 	}
-	
+
 	public User getloggedUser() {
 		return this.mUserHolder.get(Long.valueOf(this.mloggedInUserId));
 	}
-
 
 	/**
 	 * get user object according to user id.
@@ -306,9 +304,9 @@ public class JNIService extends Service {
 	 *         service. AsynResult.object {@link User}
 	 */
 	public List<Group> getGroup(Group.GroupType gType) {
-//		if (mLoadGroupOwnerCount > 0) {
-//			return null;
-//		}
+		// if (mLoadGroupOwnerCount > 0) {
+		// return null;
+		// }
 		if (gType == Group.GroupType.CONFERENCE) {
 			return this.mConfGroup;
 		} else {
@@ -328,8 +326,10 @@ public class JNIService extends Service {
 	public void requestEnterConference(long confID, Message msg) {
 		MetaData m = getAndQueued(JNI_REQUEST_ENTER_CONF, msg);
 		if (m != null) {
+			m.timeOutMessage = Message.obtain(mCallbackHandler, REQUEST_TIME_OUT);
 			Message.obtain(mHandler, JNI_REQUEST_ENTER_CONF,
 					Long.valueOf(confID)).sendToTarget();
+			mCallbackHandler.sendMessageDelayed(m.timeOutMessage, 10000);
 		} else {
 			if (msg != null) {
 				V2Log.e(" Enter conf request already in queue");
@@ -364,11 +364,11 @@ public class JNIService extends Service {
 		}
 	}
 
-	
 	/**
 	 * Request open video device.
+	 * 
 	 * @param nGroupID
-	 * @param userDevice 
+	 * @param userDevice
 	 * @param caller
 	 */
 	public void requestOpenVideoDevice(long nGroupID,
@@ -382,16 +382,17 @@ public class JNIService extends Service {
 				return;
 			}
 		}
-		//put to queue
+		// put to queue
 		getAndQueued(JNI_REQUEST_OPEN_VIDEO, caller);
 		Message.obtain(mHandler, JNI_REQUEST_OPEN_VIDEO,
 				new OpenVideoRequest(nGroupID, userDevice)).sendToTarget();
 	}
-	
+
 	/**
 	 * Request close video device.
+	 * 
 	 * @param nGroupID
-	 * @param userDevice 
+	 * @param userDevice
 	 * @param caller
 	 */
 	public void requestCloseVideoDevice(long nGroupID,
@@ -405,23 +406,21 @@ public class JNIService extends Service {
 				return;
 			}
 		}
-		//put to queue
+		// put to queue
 		getAndQueued(JNI_REQUEST_CLOSE_VIDEO, caller);
 		Message.obtain(mHandler, JNI_REQUEST_CLOSE_VIDEO,
 				new OpenVideoRequest(nGroupID, userDevice)).sendToTarget();
 	}
-	
-	
-	
+
 	public void applyForControlPermission(int type) {
 		Message.obtain(mHandler, JNI_REQUEST_SPEAK, type, 0).sendToTarget();
 	}
-	
+
 	public void applyForReleasePermission(int type) {
-		Message.obtain(mHandler, JNI_REQUEST_RELEASE_SPEAK, type, 0).sendToTarget();
+		Message.obtain(mHandler, JNI_REQUEST_RELEASE_SPEAK, type, 0)
+				.sendToTarget();
 	}
-	
-	
+
 	/**
 	 * 
 	 * @param uid
@@ -429,8 +428,8 @@ public class JNIService extends Service {
 	 */
 	public List<UserDeviceConfig> getAttendeeDevice(long uid) {
 		List<UserDeviceConfig> l = new ArrayList<UserDeviceConfig>();
-		for(UserDeviceConfig udl : mUserDeviceList) {
-			if(udl.getUserID() == uid) {
+		for (UserDeviceConfig udl : mUserDeviceList) {
+			if (udl.getUserID() == uid) {
 				l.add(udl);
 			}
 		}
@@ -461,9 +460,6 @@ public class JNIService extends Service {
 			this.nResult = nResult;
 		}
 	}
-	
-	
-	
 
 	class OpenVideoRequest {
 		long group;
@@ -516,7 +512,6 @@ public class JNIService extends Service {
 	private static final int JNI_REQUEST_SPEAK = 72;
 	private static final int JNI_REQUEST_RELEASE_SPEAK = 73;
 	private static final int JNI_REMOTE_USER_DEVICE_INFO_NOTIFICATION = 80;
-	
 
 	class LocalHander extends Handler {
 
@@ -530,14 +525,10 @@ public class JNIService extends Service {
 			case JNI_LOG_IN:
 				InnerUser iu = (InnerUser) msg.obj;
 				ImRequest.getInstance().login(iu.mail, iu.passwd, 1, 2);
-				// Message m = Message.obtain(mCallbackHandler,
-				// REQUEST_TIME_OUT,
-				// JNI_LOG_IN, 0);
-				// iu.m.timeOutMessage = m;
-				// mCallbackHandler.sendMessageDelayed(m, 10000);
-
-				iu.m.timeoutCallback = new TimeoutCallback(JNI_LOG_IN, 0, null);
-				mCallbackHandler.postDelayed(iu.m.timeoutCallback, 10000);
+				Message m = Message.obtain(mCallbackHandler, REQUEST_TIME_OUT,
+						JNI_LOG_IN, 0);
+				iu.m.timeOutMessage = m;
+				mCallbackHandler.sendMessageDelayed(m, 10000);
 				break;
 
 			case JNI_LOG_OUT:
@@ -548,6 +539,16 @@ public class JNIService extends Service {
 			case JNI_GROUP_NOTIFY:
 				break;
 			case JNI_LOAD_GROUP_OWNER_INFO:
+				MetaData gmd = getAndQueued(JNI_UPDATE_USER_INFO,
+						Message.obtain(mCallbackHandler, JNI_LOAD_GROUP_OWNER_INFO,
+								msg.arg1, 0));
+				if (gmd == null) {
+					// TODO
+				} else {
+					Message.obtain(mHandler, JNI_UPDATE_USER_INFO,
+							mConfGroup.get(msg.arg1).getOwner()).sendToTarget();
+				}
+
 				break;
 			case JNI_REQUEST_ENTER_CONF:
 				ConfRequest.getInstance().enterConf((Long) msg.obj);
@@ -579,7 +580,8 @@ public class JNIService extends Service {
 				break;
 			case JNI_REQUEST_CLOSE_VIDEO:
 				OpenVideoRequest requestCloseObj = (OpenVideoRequest) msg.obj;
-				VideoRequest.getInstance().closeVideoDevice(requestCloseObj.group,
+				VideoRequest.getInstance().closeVideoDevice(
+						requestCloseObj.group,
 						requestCloseObj.userDevice.getUserID(),
 						requestCloseObj.userDevice.getDeviceID(),
 						requestCloseObj.userDevice.getVp(),
@@ -588,7 +590,8 @@ public class JNIService extends Service {
 				// So send successful message to caller
 				MetaData response = getMeta(JNI_REQUEST_CLOSE_VIDEO);
 				if (response != null && response.caller != null) {
-					response.caller.obj = new AsynResult(AsynState.SUCCESS, null);
+					response.caller.obj = new AsynResult(AsynState.SUCCESS,
+							null);
 					response.caller.sendToTarget();
 				}
 				break;
@@ -631,6 +634,7 @@ public class JNIService extends Service {
 				break;
 
 			case CANCEL_REQUEST:
+				// TODO need to be implement
 				break;
 			case JNI_LOG_IN:
 				InnerUser iu = ((InnerUser) msg.obj);
@@ -652,6 +656,12 @@ public class JNIService extends Service {
 								AsynResult.AsynState.SUCCESS, new User(0, "",
 										NetworkStateCode.CONNECTED_ERROR));
 						m.caller.sendToTarget();
+						if (m.timeOutMessage != null) {
+							// You can't use this because mCallbackHandler is different
+							// object.
+							// we use handler thread
+							mCallbackHandler.removeMessages(REQUEST_TIME_OUT);
+						}
 					}
 					// after login or before log in send broadcast
 					Toast.makeText(mContext, R.string.error_connect_to_server,
@@ -670,11 +680,9 @@ public class JNIService extends Service {
 					mConfGroup = Group
 							.parserFromXml(msg.arg1, (String) msg.obj);
 					mLoadGroupOwnerCount = mConfGroup.size();
-					for (Group g : mConfGroup) {
-						// put caller message to queue
-						getAndQueued(JNI_UPDATE_USER_INFO,
-								Message.obtain(this, JNI_LOAD_GROUP_OWNER_INFO));
-						Message.obtain(mHandler, JNI_UPDATE_USER_INFO, g.getOwner())
+
+					if (mConfGroup != null && mConfGroup.size() > 0) {
+						Message.obtain(mHandler, JNI_LOAD_GROUP_OWNER_INFO, 0, 0)
 								.sendToTarget();
 					}
 				}
@@ -684,17 +692,22 @@ public class JNIService extends Service {
 				break;
 			case JNI_LOAD_GROUP_OWNER_INFO:
 				mLoadGroupOwnerCount--;
-				User gu = (User)((AsynResult) msg.obj).getObject();
-				for (Group g : mConfGroup) {
-					if (g.getOwner() == gu.getmUserId()) {
-						g.setOwnerUser(gu);
-					}
+				User gu = (User) ((AsynResult) msg.obj).getObject();
+
+				Group g = mConfGroup.get(msg.arg1);
+				if (g != null && g.getOwner() == gu.getmUserId()) {
+					g.setOwnerUser(gu);
 				}
+
 				if (mLoadGroupOwnerCount == 0) {
 					Intent ei = new Intent(JNI_BROADCAST_GROUP_NOTIFICATION);
 					ei.addCategory(JNI_BROADCAST_CATEGROY);
 					ei.putExtra("gtype", Group.GroupType.CONFERENCE.intValue());
 					mContext.sendBroadcast(ei);
+				} else {
+					arg1 = msg.arg1 + 1;
+					Message.obtain(mHandler, JNI_LOAD_GROUP_OWNER_INFO,
+							msg.arg1 + 1, 0).sendToTarget();
 				}
 				break;
 			case JNI_REQUEST_ENTER_CONF:
@@ -723,22 +736,26 @@ public class JNIService extends Service {
 				}
 				break;
 			case JNI_ATTENDEE_EXITED_NOTIFICATION:
-				Intent ei = new Intent(JNI_BROADCAST_ATTENDEE_EXITED_NOTIFICATION);
+				Intent ei = new Intent(
+						JNI_BROADCAST_ATTENDEE_EXITED_NOTIFICATION);
 				ei.addCategory(JNI_BROADCAST_CATEGROY);
-				ei.putExtra("uid", (Long)msg.obj);
-				ei.putExtra("name", mUserHolder.get(Long.valueOf((Long)msg.obj)).getName());
+				ei.putExtra("uid", (Long) msg.obj);
+				ei.putExtra("name",
+						mUserHolder.get(Long.valueOf((Long) msg.obj)).getName());
 				mContext.sendBroadcast(ei);
 				break;
 			case JNI_GET_ATTENDEE_INFO_DONE:
-				User attendee = (User)((AsynResult) msg.obj).getObject();
-				Intent i = new Intent(JNI_BROADCAST_ATTENDEE_ENTERED_NOTIFICATION);
+				User attendee = (User) ((AsynResult) msg.obj).getObject();
+				Intent i = new Intent(
+						JNI_BROADCAST_ATTENDEE_ENTERED_NOTIFICATION);
 				i.addCategory(JNI_BROADCAST_CATEGROY);
 				i.putExtra("uid", attendee.getmUserId());
 				i.putExtra("name", attendee.getName());
 				mContext.sendBroadcast(i);
 				break;
 			case JNI_REMOTE_USER_DEVICE_INFO_NOTIFICATION:
-				mUserDeviceList.addAll(UserDeviceConfig.parseFromXml((String)msg.obj));
+				mUserDeviceList.addAll(UserDeviceConfig
+						.parseFromXml((String) msg.obj));
 				break;
 			}
 
@@ -747,35 +764,17 @@ public class JNIService extends Service {
 				d.caller.arg1 = arg1;
 				d.caller.arg2 = arg2;
 				d.caller.sendToTarget();
-				if (d.timeoutCallback != null) {
-					// FIXME need to remove when finish requesting normally
-					// but this solution doesn't work
-					this.removeMessages(REQUEST_TIME_OUT, d.timeoutCallback);
+				if (d.timeOutMessage != null) {
+					// You can't use this because mCallbackHandler is different
+					// object.
+					// we use handler thread
+					mCallbackHandler.removeMessages(REQUEST_TIME_OUT);
 				}
 			} else {
 				V2Log.w("MSG: " + msg.what
 						+ " Metadata object or call is null ");
 			}
 		}
-	}
-
-	class TimeoutCallback implements Runnable {
-		int arg1;
-		int arg2;
-		Object obj;
-
-		TimeoutCallback(int arg1, int arg2, Object obj) {
-			this.arg1 = arg1;
-			this.arg2 = arg2;
-			this.obj = obj;
-		}
-
-		@Override
-		public void run() {
-			Message.obtain(mCallbackHandler, REQUEST_TIME_OUT, arg1, arg2)
-					.sendToTarget();
-		}
-
 	}
 
 	// ///////////////////////////////////////////////
@@ -874,11 +873,9 @@ public class JNIService extends Service {
 		@Override
 		public void OnConfMemberExitCallback(long nConfID, long nTime,
 				long nUserID) {
-			Message.obtain(mCallbackHandler, JNI_ATTENDEE_EXITED_NOTIFICATION, 0, 0, nUserID).sendToTarget();
+			Message.obtain(mCallbackHandler, JNI_ATTENDEE_EXITED_NOTIFICATION,
+					0, 0, nUserID).sendToTarget();
 		}
-		
-		
-		
 
 	}
 
@@ -896,7 +893,9 @@ public class JNIService extends Service {
 				V2Log.e(" No avaiable user device configuration");
 				return;
 			}
-			Message.obtain(mCallbackHandler, JNI_REMOTE_USER_DEVICE_INFO_NOTIFICATION, szXmlData).sendToTarget();
+			Message.obtain(mCallbackHandler,
+					JNI_REMOTE_USER_DEVICE_INFO_NOTIFICATION, szXmlData)
+					.sendToTarget();
 		}
 
 	}

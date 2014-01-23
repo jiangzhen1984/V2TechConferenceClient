@@ -1,14 +1,9 @@
 package com.V2.jni;
 
 import android.content.Context;
-import android.content.Intent;
 import android.util.Log;
 
-import com.v2tech.logic.GlobalHolder;
-import com.v2tech.logic.NetworkStateCode;
-import com.v2tech.logic.User;
 import com.v2tech.util.V2Log;
-import com.v2tech.view.VideoActivity;
 
 
 
@@ -21,7 +16,6 @@ public class ImRequest {
 
 
 
-	private User mLoginLock = new User();
 
 	private ImRequest(Context context) {
 		this.context = context;
@@ -54,22 +48,6 @@ public class ImRequest {
 		this.callback = callback;
 	}
 
-	public boolean loginSync(String szName, String szPassword) {
-		this.login(szName, szPassword, 1, 2);
-		synchronized (mLoginLock) {
-			try {
-				mLoginLock.setmResult(NetworkStateCode.TIME_OUT);
-				mLoginLock.wait(5000);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-				return false;
-			}
-		}
-
-		GlobalHolder.getInstance().setUser(mLoginLock);
-
-		return mLoginLock.getmResult() == NetworkStateCode.SUCCESS;
-	}
 
 	public native boolean initialize(ImRequest request);
 
@@ -141,11 +119,7 @@ public class ImRequest {
 		if (this.callback != null) {
 			this.callback.OnLoginCallback(nUserID, nStatus, nResult);
 		}
-		synchronized (mLoginLock) {
-			mLoginLock.setmUserId(nUserID);
-			mLoginLock.setmResult(NetworkStateCode.fromInt(nResult));
-			mLoginLock.notifyAll();
-		}
+
 	}
 
 	// 娉ㄩ攢鐨勬柟娉�
@@ -158,36 +132,6 @@ public class ImRequest {
 		if (this.callback != null) {
 			this.callback.OnUpdateBaseInfoCallback(nUserID, updatexml);
 		}
-		Log.e("ImRequest UI", "OnUpdateBaseInfo::" + nUserID + "  " + updatexml);
-		String nickName = null;
-		int pos = updatexml.indexOf("nickname='");
-		if (pos == -1 ) {
-			Log.e("ImRequest UI", " no nickname");
-		}
-		
-		int end = updatexml.indexOf("'", pos+10);
-		
-		nickName = updatexml.subSequence(pos+10, end).toString();
-		
-		if (GlobalHolder.getLoggedUserId() == nUserID) {
-			GlobalHolder.getInstance().getUser().setName(nickName);
-		}
-		
-		Intent i = new Intent(VideoActivity.JNI_EVENT_CONF_USER_CATEGORY_UPDATE_ATTENDEE_INFO);
-		i.addCategory(VideoActivity.JNI_EVENT_CONF_USER_CATEGORY);
-		i.putExtra("name", nickName);
-		i.putExtra("uid", nUserID);
-		
-		context.sendBroadcast(i);
-		// 鎷艰涓汉淇℃伅
-		// UpdateMsgType updateMsgType = new UpdateMsgType();
-		// updateMsgType.setUpdatexml(udatexml);
-		// updateMsgType.setUserid(nUserID);
-		//
-		// Intent addIntent = new Intent(SplashActivity.IM);
-		// addIntent.putExtra("MsgType", MsgType.UPDATEPERSON);
-		// addIntent.putExtra("MSG", updateMsgType);
-		// context.sendOrderedBroadcast(addIntent,null);
 	}
 
 	// 杈撳叆鍏抽敭璇嶈繘琛屾悳绱�
@@ -272,17 +216,6 @@ public class ImRequest {
 		if (this.callback != null) {
 			this.callback.OnConnectResponseCallback(nResult);
 		}
-		synchronized (mLoginLock) {
-			mLoginLock.setmResult(NetworkStateCode.fromInt(nResult));
-			mLoginLock.notifyAll();
-		}
-
-		// 杩炴帴鏈嶅姟鍣ㄥけ璐�
-		// if(nResult==301){
-		// Intent intent = new Intent(SplashActivity.IM);
-		// intent.putExtra("MsgType", MsgType.SERVER);
-		// context.sendOrderedBroadcast(intent,null);
-		// }
 
 	}
 

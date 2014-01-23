@@ -3,7 +3,7 @@ package com.v2tech.util;
 import android.util.Log;
 
 /**
- * TODO add file log outputer
+ * TODO add file log output
  * @author 28851274
  *
  */
