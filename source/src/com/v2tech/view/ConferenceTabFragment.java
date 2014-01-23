@@ -4,14 +4,11 @@ import java.util.List;
 
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -25,7 +22,6 @@ import com.v2tech.R;
 import com.v2tech.logic.AsynResult;
 import com.v2tech.logic.Group;
 import com.v2tech.util.V2Log;
-import com.v2tech.view.JNIService.LocalBinder;
 
 public class ConferenceTabFragment extends Fragment {
 
@@ -34,15 +30,14 @@ public class ConferenceTabFragment extends Fragment {
 	private static final int REQUEST_ENTER_CONF = 3;
 	private static final int REQUEST_ENTER_CONF_RESPONSE = 4;
 	private static final int REQUEST_EXIT_CONF = 5;
-	
+
 	private static final int RETRY_COUNT = 10;
 
-	private Tab1BroadcastReceiver receiver;
+	private Tab1BroadcastReceiver receiver = new Tab1BroadcastReceiver();
 	private IntentFilter intentFilter;
 
 	private JNIService mService;
-	private boolean isBound;
-	
+
 	private List<Group> mConferenceList;
 
 	private LinearLayout mGroupContainer;
@@ -50,14 +45,13 @@ public class ConferenceTabFragment extends Fragment {
 	private ConfsHandler mHandler = new ConfsHandler();
 
 	private ProgressDialog mWaitingDialog;
-	
+
 	private long currentConfId;
-	
-	
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
+		getActivity().registerReceiver(receiver, getIntentFilter());
 	}
 
 	@Override
@@ -73,18 +67,17 @@ public class ConferenceTabFragment extends Fragment {
 	@Override
 	public void onPause() {
 		super.onPause();
+	}
+
+	@Override
+	public void onDestroy() {
+		super.onDestroy();
 		getActivity().unregisterReceiver(receiver);
 	}
 
-	
 	@Override
 	public void onResume() {
 		super.onResume();
-		receiver = new Tab1BroadcastReceiver();
-		getActivity().registerReceiver(receiver, getIntentFilter());
-//		if (mConferenceList != null) {
-//			this.addGroupList(mConferenceList);
-//		}
 	}
 
 	private IntentFilter getIntentFilter() {
@@ -93,6 +86,7 @@ public class ConferenceTabFragment extends Fragment {
 			intentFilter.addAction("TAB1_ACTION");
 			intentFilter.addAction(JNIService.JNI_BROADCAST_GROUP_NOTIFICATION);
 			intentFilter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
+			intentFilter.addAction(MainActivity.SERVICE_BOUNDED_EVENT);
 		}
 		return intentFilter;
 	}
@@ -100,24 +94,17 @@ public class ConferenceTabFragment extends Fragment {
 	@Override
 	public void onStart() {
 		super.onStart();
-		isBound = getActivity().bindService(new Intent(getActivity(),
-				JNIService.class), mConnection, Context.BIND_AUTO_CREATE);
 	}
 
 	@Override
 	public void onStop() {
-		if (isBound) {
-			getActivity().unbindService(mConnection);
-		}
 		super.onStop();
 	}
-	
-	
-	
 
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
-		Message.obtain(mHandler, REQUEST_EXIT_CONF, currentConfId).sendToTarget();
+		Message.obtain(mHandler, REQUEST_EXIT_CONF, currentConfId)
+				.sendToTarget();
 	}
 
 	private void addGroupList(List<Group> list) {
@@ -157,31 +144,17 @@ public class ConferenceTabFragment extends Fragment {
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			if (intent.getAction().equals("TAB1_ACTION")) {
-			} else if (intent.getAction().equals(JNIService.JNI_BROADCAST_GROUP_NOTIFICATION)) {
+			} else if (intent.getAction().equals(
+					JNIService.JNI_BROADCAST_GROUP_NOTIFICATION)) {
+				Message.obtain(mHandler, FILL_CONFS_LIST).sendToTarget();
+			} else if (intent.getAction().equals(
+					MainActivity.SERVICE_BOUNDED_EVENT)) {
+				mService = ((MainActivity) getActivity()).getService();
 				Message.obtain(mHandler, FILL_CONFS_LIST).sendToTarget();
 			}
 		}
 
 	}
-	
-	
-	/** Defines callbacks for service binding, passed to bindService() */
-	private ServiceConnection mConnection = new ServiceConnection() {
-
-		@Override
-		public void onServiceConnected(ComponentName className, IBinder service) {
-			LocalBinder binder = (LocalBinder) service;
-			mService = binder.getService();
-			isBound = true;
-			mHandler.sendMessageDelayed(Message.obtain(mHandler, SERVER_BOUNDED), 500);
-		}
-
-		@Override
-		public void onServiceDisconnected(ComponentName arg0) {
-			isBound = false;
-		}
-	};
-
 
 	class ConfsHandler extends Handler {
 
@@ -189,6 +162,14 @@ public class ConferenceTabFragment extends Fragment {
 		public void handleMessage(Message msg) {
 			switch (msg.what) {
 			case SERVER_BOUNDED:
+				mService = ((MainActivity) getActivity()).getService();
+				if (mService != null) {
+					Message.obtain(this, FILL_CONFS_LIST).sendToTarget();
+				} else {
+					this.sendMessageDelayed(
+							Message.obtain(this, SERVER_BOUNDED), 500);
+				}
+				break;
 			case FILL_CONFS_LIST:
 				mConferenceList = mService.getGroup(Group.GroupType.CONFERENCE);
 				// No server return send asynchronous message and waiting for
@@ -196,11 +177,13 @@ public class ConferenceTabFragment extends Fragment {
 				if (mConferenceList != null) {
 					addGroupList(mConferenceList);
 				} else {
-					if ( msg.arg1 < RETRY_COUNT) {
-						Message m = Message.obtain(this, FILL_CONFS_LIST, msg.arg1 + 1, 0);
+					if (msg.arg1 < RETRY_COUNT) {
+						Message m = Message.obtain(this, FILL_CONFS_LIST,
+								msg.arg1 + 1, 0);
 						this.sendMessageDelayed(m, 1000);
 					} else {
-						Toast.makeText(getActivity(), "无法获取组信息", Toast.LENGTH_LONG).show();
+						Toast.makeText(getActivity(), "无法获取组信息",
+								Toast.LENGTH_LONG).show();
 					}
 				}
 				break;
@@ -240,7 +223,7 @@ public class ConferenceTabFragment extends Fragment {
 
 				break;
 			case REQUEST_EXIT_CONF:
-				mService.requestExitConference((Long)msg.obj, null);
+				mService.requestExitConference((Long) msg.obj, null);
 				break;
 			}
 		}

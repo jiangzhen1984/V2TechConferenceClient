@@ -432,6 +432,8 @@ public class JNIService extends Service {
 		for (UserDeviceConfig udl : mUserDeviceList) {
 			if (udl.getUserID() == uid) {
 				l.add(udl);
+				UserDeviceConfig d = new UserDeviceConfig(udl.getUserID(), udl.getDeviceID()+"_aa", null);
+				l.add(d);
 			}
 		}
 		return l;

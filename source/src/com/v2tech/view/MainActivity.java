@@ -4,9 +4,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.res.Resources;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.os.Process;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -20,6 +24,7 @@ import android.view.View.OnTouchListener;
 import android.widget.TabHost;
 
 import com.v2tech.R;
+import com.v2tech.view.JNIService.LocalBinder;
 
 public class MainActivity extends FragmentActivity implements OnTouchListener {
 
@@ -31,10 +36,14 @@ public class MainActivity extends FragmentActivity implements OnTouchListener {
 
 	private GestureDetector mGestureDetector;
 
+	private JNIService mService;
+	private boolean isBound;
+
 	private static final String TAG_CONF = "conference";
 	private static final String TAG_SETTING = "setting";
-
-
+	
+	public static final String SERVICE_BOUNDED_EVENT ="com.v2tech.SERVICE_BOUNDED_EVENT";
+	public static final String SERVICE_UNBOUNDED_EVENT ="com.v2tech.SERVICE_UNBOUNDED_EVENT";
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -83,6 +92,21 @@ public class MainActivity extends FragmentActivity implements OnTouchListener {
 	@Override
 	protected void onStart() {
 		super.onStart();
+		isBound = bindService(new Intent(this, JNIService.class), mConnection,
+				Context.BIND_AUTO_CREATE);
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+	}
+
+	@Override
+	protected void onStop() {
+		super.onStop();
+		if (isBound) {
+			unbindService(mConnection);
+		}
 	}
 
 	@Override
@@ -139,10 +163,7 @@ public class MainActivity extends FragmentActivity implements OnTouchListener {
 			return false;
 		}
 
-
 	};
-	
-	
 
 	@Override
 	public boolean onTouch(View v, MotionEvent event) {
@@ -154,6 +175,35 @@ public class MainActivity extends FragmentActivity implements OnTouchListener {
 		mGestureDetector.onTouchEvent(ev);
 		return super.dispatchTouchEvent(ev);
 	}
+	
+	
+	
+	public JNIService getService() {
+		return this.mService;
+	}
+	
+	public void doBind() {
+		isBound = bindService(new Intent(this, JNIService.class), mConnection,
+				Context.BIND_AUTO_CREATE);
+	}
+
+	/** Defines callbacks for service binding, passed to bindService() */
+	private ServiceConnection mConnection = new ServiceConnection() {
+
+		@Override
+		public void onServiceConnected(ComponentName className, IBinder service) {
+			LocalBinder binder = (LocalBinder) service;
+			mService = binder.getService();
+			isBound = true;
+			mContext.sendBroadcast(new Intent(SERVICE_BOUNDED_EVENT));
+		}
+
+		@Override
+		public void onServiceDisconnected(ComponentName arg0) {
+			isBound = false;
+			mContext.sendBroadcast(new Intent(SERVICE_UNBOUNDED_EVENT));
+		}
+	};
 
 	/**
 	 * This is a helper class that implements a generic mechanism for
@@ -174,13 +224,13 @@ public class MainActivity extends FragmentActivity implements OnTouchListener {
 		TabInfo mLastTab;
 
 		private List<String> tabs = new ArrayList<String>();
-		
+
 		static final class TabInfo {
 			private final String tag;
 			private final Class<?> clss;
 			private final Bundle args;
 			private Fragment fragment;
-			private int index ;
+			private int index;
 			static int CONSTANT_INDEX = 0;
 
 			TabInfo(String _tag, Class<?> _class, Bundle _args) {
@@ -215,8 +265,7 @@ public class MainActivity extends FragmentActivity implements OnTouchListener {
 			mTabHost.setOnTabChangedListener(this);
 		}
 
-		public void addTab(TabHost.TabSpec tabSpec, Class<?> clss, Bundle args
-				) {
+		public void addTab(TabHost.TabSpec tabSpec, Class<?> clss, Bundle args) {
 			tabs.add(tabSpec.getTag());
 			tabSpec.setContent(new DummyTabFactory(mActivity));
 			String tag = tabSpec.getTag();
@@ -237,21 +286,20 @@ public class MainActivity extends FragmentActivity implements OnTouchListener {
 			mTabs.put(tag, info);
 			mTabHost.addTab(tabSpec);
 		}
-		
+
 		public void turnToRightTab() {
-			if (mLastTab.index < (tabs.size() -1)) {
+			if (mLastTab.index < (tabs.size() - 1)) {
 				String key = tabs.get(mLastTab.index + 1);
 				mTabHost.setCurrentTabByTag(key);
 			}
 		}
-		
+
 		public void turnToLeftTab() {
-			if (mLastTab.index > 0) {			
-				String key = tabs.get(mLastTab.index -1 );
+			if (mLastTab.index > 0) {
+				String key = tabs.get(mLastTab.index - 1);
 				mTabHost.setCurrentTabByTag(key);
 			}
 		}
-		
 
 		@Override
 		public void onTabChanged(String tabId) {
@@ -260,7 +308,7 @@ public class MainActivity extends FragmentActivity implements OnTouchListener {
 				FragmentTransaction ft = mActivity.getSupportFragmentManager()
 						.beginTransaction();
 
-				//first time
+				// first time
 				if (mLastTab == null) {
 					ft.setCustomAnimations(R.animator.left_in,
 							R.animator.left_out);
@@ -270,8 +318,7 @@ public class MainActivity extends FragmentActivity implements OnTouchListener {
 								R.animator.right_out);
 					}
 				}
-				
-				
+
 				if (newTab != null && mLastTab != null) {
 					if (newTab.index > mLastTab.index) {
 						ft.setCustomAnimations(R.animator.left_in,
@@ -286,10 +333,10 @@ public class MainActivity extends FragmentActivity implements OnTouchListener {
 					if (newTab.fragment == null) {
 						newTab.fragment = Fragment.instantiate(mActivity,
 								newTab.clss.getName(), newTab.args);
-						//ft.add(mContainerId, newTab.fragment, newTab.tag);
-					} 
-						ft.replace(mContainerId, newTab.fragment, newTab.tag);
-					
+						// ft.add(mContainerId, newTab.fragment, newTab.tag);
+					}
+					ft.replace(mContainerId, newTab.fragment, newTab.tag);
+
 				}
 
 				mLastTab = newTab;

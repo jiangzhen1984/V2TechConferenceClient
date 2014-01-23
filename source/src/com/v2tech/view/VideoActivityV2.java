@@ -681,7 +681,7 @@ public class VideoActivityV2 extends Activity {
 			TextView tt = new TextView(mContext);
 			tt.setText(a.getUser().getName() + (i > 0 ? ("_视频" + i) : ""));
 			tt.setTextSize(20);
-			tv.setTextColor(Color.BLACK);
+			tt.setTextColor(Color.BLACK);
 
 			RelativeLayout.LayoutParams rp1 = new RelativeLayout.LayoutParams(
 					RelativeLayout.LayoutParams.WRAP_CONTENT,
@@ -828,7 +828,8 @@ public class VideoActivityV2 extends Activity {
 		public View getView() {
 			if (rl == null) {
 				rl = new RelativeLayout(mContext);
-				layId = (int) at.getUser().getmUserId();
+				//FIXME make sure hashcode is unique.
+				layId = (int) udc.hashCode();
 
 				if (udc.getSVHolder() == null) {
 					udc.setSVHolder(new SurfaceView(mContext));
