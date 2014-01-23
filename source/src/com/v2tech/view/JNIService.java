@@ -304,9 +304,9 @@ public class JNIService extends Service {
 	 *         service. AsynResult.object {@link User}
 	 */
 	public List<Group> getGroup(Group.GroupType gType) {
-		// if (mLoadGroupOwnerCount > 0) {
-		// return null;
-		// }
+		if (mLoadGroupOwnerCount > 0) {
+			return null;
+		}
 		if (gType == Group.GroupType.CONFERENCE) {
 			return this.mConfGroup;
 		} else {
@@ -326,7 +326,8 @@ public class JNIService extends Service {
 	public void requestEnterConference(long confID, Message msg) {
 		MetaData m = getAndQueued(JNI_REQUEST_ENTER_CONF, msg);
 		if (m != null) {
-			m.timeOutMessage = Message.obtain(mCallbackHandler, REQUEST_TIME_OUT);
+			m.timeOutMessage = Message.obtain(mCallbackHandler,
+					REQUEST_TIME_OUT);
 			Message.obtain(mHandler, JNI_REQUEST_ENTER_CONF,
 					Long.valueOf(confID)).sendToTarget();
 			mCallbackHandler.sendMessageDelayed(m.timeOutMessage, 10000);
@@ -540,8 +541,8 @@ public class JNIService extends Service {
 				break;
 			case JNI_LOAD_GROUP_OWNER_INFO:
 				MetaData gmd = getAndQueued(JNI_UPDATE_USER_INFO,
-						Message.obtain(mCallbackHandler, JNI_LOAD_GROUP_OWNER_INFO,
-								msg.arg1, 0));
+						Message.obtain(mCallbackHandler,
+								JNI_LOAD_GROUP_OWNER_INFO, msg.arg1, 0));
 				if (gmd == null) {
 					// TODO
 				} else {
@@ -657,7 +658,8 @@ public class JNIService extends Service {
 										NetworkStateCode.CONNECTED_ERROR));
 						m.caller.sendToTarget();
 						if (m.timeOutMessage != null) {
-							// You can't use this because mCallbackHandler is different
+							// You can't use this because mCallbackHandler is
+							// different
 							// object.
 							// we use handler thread
 							mCallbackHandler.removeMessages(REQUEST_TIME_OUT);
@@ -674,6 +676,10 @@ public class JNIService extends Service {
 				mUserHolder.put(Long.valueOf(u.getmUserId()), u);
 				// If someone waiting for this event
 				ar = new AsynResult(AsynResult.AsynState.SUCCESS, u);
+				if (d != null && d.caller != null
+						&& d.caller.what == JNI_LOAD_GROUP_OWNER_INFO) {
+					arg1 = d.caller.arg1;
+				}
 				break;
 			case JNI_GROUP_NOTIFY:
 				if (msg.arg1 == Group.GroupType.CONFERENCE.intValue()) {
@@ -682,8 +688,8 @@ public class JNIService extends Service {
 					mLoadGroupOwnerCount = mConfGroup.size();
 
 					if (mConfGroup != null && mConfGroup.size() > 0) {
-						Message.obtain(mHandler, JNI_LOAD_GROUP_OWNER_INFO, 0, 0)
-								.sendToTarget();
+						Message.obtain(mHandler, JNI_LOAD_GROUP_OWNER_INFO, 0,
+								0).sendToTarget();
 					}
 				}
 

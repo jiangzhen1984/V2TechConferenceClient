@@ -35,7 +35,7 @@ public class ConferenceTabFragment extends Fragment {
 	private static final int REQUEST_ENTER_CONF_RESPONSE = 4;
 	private static final int REQUEST_EXIT_CONF = 5;
 	
-	private static final int RETRY_COUNT = 3;
+	private static final int RETRY_COUNT = 10;
 
 	private Tab1BroadcastReceiver receiver;
 	private IntentFilter intentFilter;
@@ -197,9 +197,8 @@ public class ConferenceTabFragment extends Fragment {
 					addGroupList(mConferenceList);
 				} else {
 					if ( msg.arg1 < RETRY_COUNT) {
-						// 
 						Message m = Message.obtain(this, FILL_CONFS_LIST, msg.arg1 + 1, 0);
-						//this.sendMessageDelayed(m, 1000);
+						this.sendMessageDelayed(m, 1000);
 					} else {
 						Toast.makeText(getActivity(), "无法获取组信息", Toast.LENGTH_LONG).show();
 					}
