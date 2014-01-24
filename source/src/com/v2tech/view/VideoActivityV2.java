@@ -21,6 +21,7 @@ import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.Typeface;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -144,16 +145,13 @@ public class VideoActivityV2 extends Activity {
 						R.layout.in_meeting_user_list_pop_up_window, null);
 				mUserListContainer = (LinearLayout) view
 						.findViewById(R.id.in_meeting_user_list_layout);
+				view.findViewById(R.id.arrow).bringToFront();
 
 				mUserListWindow = new PopupWindow(view,
 						ViewGroup.LayoutParams.WRAP_CONTENT,
 						ViewGroup.LayoutParams.WRAP_CONTENT, true);
-				mUserListWindow
-						.setBackgroundDrawable(mContext
-								.getResources()
-								.getDrawable(
-										R.drawable.rounded_corners_of_in_metting_setting_pop_up_window));
-				mUserListWindow.setWidth(400);
+				mUserListWindow.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+				
 				mUserListWindow.setFocusable(true);
 				mUserListWindow.setTouchable(true);
 				mUserListWindow.setOutsideTouchable(true);
@@ -170,7 +168,7 @@ public class VideoActivityV2 extends Activity {
 			}
 
 			if (!mUserListWindow.isShowing()) {
-				mUserListWindow.showAsDropDown(anchor);
+				mUserListWindow.showAsDropDown(anchor, -50, 0);
 			}
 		}
 
@@ -188,10 +186,7 @@ public class VideoActivityV2 extends Activity {
 				mSettingWindow = new PopupWindow(view,
 						LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 				mSettingWindow
-						.setBackgroundDrawable(mContext
-								.getResources()
-								.getDrawable(
-										R.drawable.rounded_corners_of_in_metting_setting_pop_up_window));
+						.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
 				mSettingWindow.setFocusable(true);
 				mSettingWindow.setTouchable(true);
 				mSettingWindow.setOutsideTouchable(true);
@@ -218,7 +213,7 @@ public class VideoActivityV2 extends Activity {
 			}
 
 			if (!mSettingWindow.isShowing()) {
-				mSettingWindow.showAsDropDown(v);
+				mSettingWindow.showAsDropDown(v, -50, 0);
 			}
 
 		}
@@ -338,6 +333,10 @@ public class VideoActivityV2 extends Activity {
 			}
 		}
 
+		if (mService.getloggedUser() == null) {
+			//TODO no user
+			return;
+		}
 		if (selfInAttendeeList == false) {
 			atd = new Attendee(mService.getloggedUser(), true, false);
 			mAttendeeList.add(atd);
