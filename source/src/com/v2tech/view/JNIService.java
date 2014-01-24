@@ -30,6 +30,7 @@ import com.V2.jni.VideoRequestCallback;
 import com.v2tech.R;
 import com.v2tech.logic.AsynResult;
 import com.v2tech.logic.AsynResult.AsynState;
+import com.v2tech.logic.ConferencePermission;
 import com.v2tech.logic.Group;
 import com.v2tech.logic.NetworkStateCode;
 import com.v2tech.logic.User;
@@ -85,7 +86,10 @@ public class JNIService extends Service {
 	private LocalHander mHandler;
 
 	private JNICallbackHandler mCallbackHandler;
-
+	
+	
+	//////////////////////////////////////////
+	// JNI call back definitions
 	private ImRequestCallback mImCB;
 
 	private ConfRequestCallback mCRCB;
@@ -93,6 +97,7 @@ public class JNIService extends Service {
 	private GroupRequestCB mGRCB;
 
 	private VideoRequestCB mVRCB;
+	//////////////////////////////////////////
 
 	private Context mContext;
 
@@ -193,27 +198,7 @@ public class JNIService extends Service {
 		}
 	}
 
-	/**
-	 * 
-	 * @param msgId
-	 * @param m
-	 * @return
-	 */
-	private MetaData getAndQueued(Integer msgId, Message timeoutMsg,
-			Message caller) {
-		synchronized (map) {
-			if (map.containsKey(msgId)) {
-				V2Log.e(" MSG ID:" + msgId + " in the queque!");
-				return null;
-			} else {
-				MetaData meta = MetaData.obtain(caller);
-				meta.timeOutMessage = timeoutMsg;
-				map.put(msgId, meta);
-				return meta;
-			}
-		}
-	}
-
+	
 	/**
 	 * 
 	 * @param msgId
@@ -261,7 +246,7 @@ public class JNIService extends Service {
 	 * @param passwd
 	 *            password
 	 * @param message
-	 *            callback message Message.obj is {@link AsynResult} object
+	 *            callback message Message.obj is {@link AsynResult} 
 	 */
 	public void login(String mail, String passwd, Message message) {
 		MetaData m = getAndQueued(JNI_LOG_IN, message);
@@ -273,10 +258,20 @@ public class JNIService extends Service {
 		}
 	}
 
+	/**
+	 * Get current logged user id
+	 * @return
+	 */
 	public long getLoggedUserId() {
 		return this.mloggedInUserId;
 	}
 
+	/**
+	 * Get current logged user's object
+	 * @return {@link com.v2tech.logic.User}
+	 * 
+	 * @see com.v2tech.logic.User
+	 */
 	public User getloggedUser() {
 		return this.mUserHolder.get(Long.valueOf(this.mloggedInUserId));
 	}
@@ -285,23 +280,28 @@ public class JNIService extends Service {
 	 * get user object according to user id.
 	 * 
 	 * @param nUserID
-	 * @return
+	 * @return  {@link com.v2tech.logic.User}
+	 * 
+	 * @see com.v2tech.logic.User
 	 */
 	public User getUserBaseInfo(long nUserID) {
 		return this.mUserHolder.get(nUserID);
 	}
 
 	/**
-	 * Group information is server active call, we can't get from server
+	 * Group information is server active call, we can't request from server
 	 * directly.<br>
 	 * Only way to get group information is waiting for server call.<br>
 	 * So if this function return null, means service doesn't receive any call
 	 * from server. otherwise server already sent group information to service.<br>
-	 * If you want to know indication, please use {@link getGroupAsyn}
+	 * If you want to know indication, please register receiver:<br>
+     *                  category: {@link #JNI_BROADCAST_CATEGROY} <br>
+     *                  action  : {@link #JNI_BROADCAST_GROUP_NOTIFICATION}<br>
+     * Notice: maybe you didn't receive broadcast forever, because this broadcast is sent before you register                  
 	 * 
 	 * @param gType
-	 * @return return null means server doesn't send group information to
-	 *         service. AsynResult.object {@link User}
+	 * @return return null means server didn't send group information to
+	 *         service. 
 	 */
 	public List<Group> getGroup(Group.GroupType gType) {
 		if (mLoadGroupOwnerCount > 0) {
@@ -342,13 +342,13 @@ public class JNIService extends Service {
 	}
 
 	/**
-	 * User request exit conference
+	 * User request quit conference
 	 * 
 	 * @param confID
 	 * @param msg
 	 *            if input is null, ignore response Message.object is
 	 *            {@link AsynResult} AsynResult.obj is Object[] Object[0]
-	 *            Integer 0: success 1: failed Object[1] Long conf id
+	 *            Integer 0: success 1: failed Object[1] Long conference id
 	 */
 	public void requestExitConference(long confID, Message msg) {
 		MetaData m = getAndQueued(JNI_REQUEST_EXIT_CONF, msg);
@@ -368,9 +368,11 @@ public class JNIService extends Service {
 	/**
 	 * Request open video device.
 	 * 
-	 * @param nGroupID
-	 * @param userDevice
-	 * @param caller
+	 * @param nGroupID  conference id
+	 * @param userDevice  {@link UserDeviceConfig}  if want to open local video, {@link UserDeviceConfig#getVp()} should be null and {@link UserDeviceConfig#getDeviceID()} should be ""
+	 * @param caller  message object for response
+	 * 
+	 * @see UserDeviceConfig
 	 */
 	public void requestOpenVideoDevice(long nGroupID,
 			UserDeviceConfig userDevice, Message caller) {
@@ -393,8 +395,10 @@ public class JNIService extends Service {
 	 * Request close video device.
 	 * 
 	 * @param nGroupID
-	 * @param userDevice
-	 * @param caller
+	 * @param userDevice   {@link UserDeviceConfig}  if want to open local video, {@link UserDeviceConfig#getVp()} should be null and {@link UserDeviceConfig#getDeviceID()} should be ""
+	 * @param caller   message object for response
+	 * 
+	 *  @see UserDeviceConfig
 	 */
 	public void requestCloseVideoDevice(long nGroupID,
 			UserDeviceConfig userDevice, Message caller) {
@@ -413,27 +417,42 @@ public class JNIService extends Service {
 				new OpenVideoRequest(nGroupID, userDevice)).sendToTarget();
 	}
 
-	public void applyForControlPermission(int type) {
-		Message.obtain(mHandler, JNI_REQUEST_SPEAK, type, 0).sendToTarget();
+	
+	/**
+	 * Request speak permission on the conference.
+	 * @param type  speak type should be {@link ConferencePermission#SPEAKING}
+	 * @param caller  message for response, as now no response to send
+	 * 
+	 * @see ConferencePermission
+	 */
+	public void applyForControlPermission(ConferencePermission type, Message caller) {
+		Message.obtain(mHandler, JNI_REQUEST_SPEAK, type.intValue(), 0).sendToTarget();
 	}
 
-	public void applyForReleasePermission(int type) {
-		Message.obtain(mHandler, JNI_REQUEST_RELEASE_SPEAK, type, 0)
+	
+	/**
+	 * Request release permission on the conference.
+	 * @param type  speak type should be {@link ConferencePermission#SPEAKING}
+	 *  @param caller  message for response, as now no response to send
+	 *  
+	 * @see ConferencePermission
+	 */
+	public void applyForReleasePermission(ConferencePermission type, Message caller) {
+		Message.obtain(mHandler, JNI_REQUEST_RELEASE_SPEAK, type.intValue(), 0)
 				.sendToTarget();
 	}
 
 	/**
-	 * 
-	 * @param uid
-	 * @return
+	 * Get user's video device according to user id.<br>
+	 * This function never return null, even through we don't receive video device data from server. 
+	 * @param uid user's id
+	 * @return list of user device
 	 */
 	public List<UserDeviceConfig> getAttendeeDevice(long uid) {
 		List<UserDeviceConfig> l = new ArrayList<UserDeviceConfig>();
 		for (UserDeviceConfig udl : mUserDeviceList) {
 			if (udl.getUserID() == uid) {
 				l.add(udl);
-				UserDeviceConfig d = new UserDeviceConfig(udl.getUserID(), udl.getDeviceID()+"_aa", null);
-				l.add(d);
 			}
 		}
 		return l;
@@ -637,7 +656,8 @@ public class JNIService extends Service {
 				break;
 
 			case CANCEL_REQUEST:
-				// TODO need to be implement
+				//just remove message from queue
+				getMeta(msg.arg1);
 				break;
 			case JNI_LOG_IN:
 				InnerUser iu = ((InnerUser) msg.obj);
@@ -787,7 +807,7 @@ public class JNIService extends Service {
 
 	// ///////////////////////////////////////////////
 	// JNI call back implements //
-	// TODO Need to be optimize code structure //
+	// FIXME Need to be optimize code structure //
 	// ///////////////////////////////////////////////
 
 	class ImRequestCB implements ImRequestCallback {

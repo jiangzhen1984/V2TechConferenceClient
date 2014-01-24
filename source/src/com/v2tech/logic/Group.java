@@ -19,6 +19,12 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+
+/**
+ * Group information
+ * @author 28851274
+ *
+ */
 public class Group {
 
 	private long mGId;

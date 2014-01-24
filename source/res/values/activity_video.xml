@@ -16,7 +16,7 @@
     <string name="in_meeting_setting_reverse">翻转摄像头</string>
     <string name="error_in_meeting_invalid_gid">错误的会议ID</string>
     <string name="error_in_meeting_open_video_falied">打开视频设备失败!</string>
-    
+    <string name="error_does_not_open_local_video_yet">本地视频还没有开启!</string>
     
 
     <color name="in_meeting_setting_bg">#ffffff</color>

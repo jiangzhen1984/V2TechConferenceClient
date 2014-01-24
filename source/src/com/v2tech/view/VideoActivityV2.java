@@ -47,6 +47,7 @@ import android.widget.Toast;
 
 import com.v2tech.R;
 import com.v2tech.logic.Attendee;
+import com.v2tech.logic.ConferencePermission;
 import com.v2tech.logic.User;
 import com.v2tech.logic.UserDeviceConfig;
 import com.v2tech.util.V2Log;
@@ -260,7 +261,7 @@ public class VideoActivityV2 extends Activity {
 
 	};
 
-	/** Defines callbacks for service binding, passed to bindService() */
+	/** Defines callback for service binding, passed to bindService() */
 	private ServiceConnection mConnection = new ServiceConnection() {
 
 		@Override
@@ -323,7 +324,7 @@ public class VideoActivityV2 extends Activity {
 	}
 
 	/**
-	 * FIXME should use attendee list instead of this
+	 * 
 	 */
 	private void showOrCloseLocalSurViewOnly() {
 		boolean selfInAttendeeList = false;
@@ -524,8 +525,7 @@ public class VideoActivityV2 extends Activity {
 			}
 		}
 
-		// FIXME use resoult instead of hard code
-		Toast.makeText(mContext, "Local camera dosn't open yet",
+		Toast.makeText(mContext, R.string.error_does_not_open_local_video_yet,
 				Toast.LENGTH_SHORT).show();
 
 	}
@@ -564,11 +564,11 @@ public class VideoActivityV2 extends Activity {
 
 	private void doApplyOrReleaseSpeak() {
 		if (isSpeaking) {
-			mService.applyForReleasePermission(3);
+			mService.applyForReleasePermission(ConferencePermission.SPEAKING, null);
 			isSpeaking = false;
 		} else {
 			// 3 means apply speak
-			mService.applyForControlPermission(3);
+			mService.applyForControlPermission(ConferencePermission.SPEAKING, null);
 			isSpeaking = true;
 		}
 	}
@@ -828,7 +828,7 @@ public class VideoActivityV2 extends Activity {
 		public View getView() {
 			if (rl == null) {
 				rl = new RelativeLayout(mContext);
-				//FIXME make sure hashcode is unique.
+				//FIXME make sure hash code is unique.
 				layId = (int) udc.hashCode();
 
 				if (udc.getSVHolder() == null) {

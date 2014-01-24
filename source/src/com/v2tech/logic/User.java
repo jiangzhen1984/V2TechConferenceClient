@@ -2,6 +2,11 @@ package com.v2tech.logic;
 
 import android.util.Log;
 
+/**
+ * User information
+ * @author 28851274
+ *
+ */
 public class User {
 
 	private long mUserId;
