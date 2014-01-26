@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-  
-   
-    <string  name="error_time_out">操作超时!</string>
-    
+    <string name="error_time_out">操作超时!</string>
+    <string name="app_name">Bizcom</string>
+     <string name="banner_desc">全球网络会议领导者</string>
 
 </resources>

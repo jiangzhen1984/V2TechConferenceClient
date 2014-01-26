@@ -182,10 +182,10 @@ public class MainActivity extends FragmentActivity implements OnTouchListener {
 		return this.mService;
 	}
 	
-	public void doBind() {
-		isBound = bindService(new Intent(this, JNIService.class), mConnection,
-				Context.BIND_AUTO_CREATE);
-	}
+//	public void doBind() {
+//		isBound = bindService(new Intent(this, JNIService.class), mConnection,
+//				Context.BIND_AUTO_CREATE);
+//	}
 
 	/** Defines callbacks for service binding, passed to bindService() */
 	private ServiceConnection mConnection = new ServiceConnection() {

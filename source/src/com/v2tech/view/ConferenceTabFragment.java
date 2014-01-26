@@ -94,6 +94,7 @@ public class ConferenceTabFragment extends Fragment {
 	@Override
 	public void onStart() {
 		super.onStart();
+		Message.obtain(mHandler, FILL_CONFS_LIST).sendToTarget();
 	}
 
 	@Override
@@ -174,6 +175,10 @@ public class ConferenceTabFragment extends Fragment {
 				}
 				break;
 			case FILL_CONFS_LIST:
+				if (mService == null) {
+					V2Log.w(" Doesn't bound service yet");
+					return;
+				}
 				mConferenceList = mService.getGroup(Group.GroupType.CONFERENCE);
 				// No server return send asynchronous message and waiting for
 				// response

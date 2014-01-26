@@ -161,7 +161,7 @@ public class JNIService extends Service {
 		}
 		// if mBinderRef equals 0 means no activity
 		if (mBinderRef == 0) {
-			// TODO Do Logout
+			// FIXME Do Logout
 		}
 		return super.onUnbind(intent);
 	}
