@@ -30,6 +30,7 @@ import com.V2.jni.VideoRequestCallback;
 import com.v2tech.R;
 import com.v2tech.logic.AsynResult;
 import com.v2tech.logic.AsynResult.AsynState;
+import com.v2tech.logic.CameraConfiguration;
 import com.v2tech.logic.ConferencePermission;
 import com.v2tech.logic.Group;
 import com.v2tech.logic.NetworkStateCode;
@@ -86,9 +87,8 @@ public class JNIService extends Service {
 	private LocalHander mHandler;
 
 	private JNICallbackHandler mCallbackHandler;
-	
-	
-	//////////////////////////////////////////
+
+	// ////////////////////////////////////////
 	// JNI call back definitions
 	private ImRequestCallback mImCB;
 
@@ -97,7 +97,7 @@ public class JNIService extends Service {
 	private GroupRequestCB mGRCB;
 
 	private VideoRequestCB mVRCB;
-	//////////////////////////////////////////
+	// ////////////////////////////////////////
 
 	private Context mContext;
 
@@ -198,7 +198,6 @@ public class JNIService extends Service {
 		}
 	}
 
-	
 	/**
 	 * 
 	 * @param msgId
@@ -246,7 +245,7 @@ public class JNIService extends Service {
 	 * @param passwd
 	 *            password
 	 * @param message
-	 *            callback message Message.obj is {@link AsynResult} 
+	 *            callback message Message.obj is {@link AsynResult}
 	 */
 	public void login(String mail, String passwd, Message message) {
 		MetaData m = getAndQueued(JNI_LOG_IN, message);
@@ -260,6 +259,7 @@ public class JNIService extends Service {
 
 	/**
 	 * Get current logged user id
+	 * 
 	 * @return
 	 */
 	public long getLoggedUserId() {
@@ -268,6 +268,7 @@ public class JNIService extends Service {
 
 	/**
 	 * Get current logged user's object
+	 * 
 	 * @return {@link com.v2tech.logic.User}
 	 * 
 	 * @see com.v2tech.logic.User
@@ -280,7 +281,7 @@ public class JNIService extends Service {
 	 * get user object according to user id.
 	 * 
 	 * @param nUserID
-	 * @return  {@link com.v2tech.logic.User}
+	 * @return {@link com.v2tech.logic.User}
 	 * 
 	 * @see com.v2tech.logic.User
 	 */
@@ -295,13 +296,14 @@ public class JNIService extends Service {
 	 * So if this function return null, means service doesn't receive any call
 	 * from server. otherwise server already sent group information to service.<br>
 	 * If you want to know indication, please register receiver:<br>
-     *                  category: {@link #JNI_BROADCAST_CATEGROY} <br>
-     *                  action  : {@link #JNI_BROADCAST_GROUP_NOTIFICATION}<br>
-     * Notice: maybe you didn't receive broadcast forever, because this broadcast is sent before you register                  
+	 * category: {@link #JNI_BROADCAST_CATEGROY} <br>
+	 * action : {@link #JNI_BROADCAST_GROUP_NOTIFICATION}<br>
+	 * Notice: maybe you didn't receive broadcast forever, because this
+	 * broadcast is sent before you register
 	 * 
 	 * @param gType
 	 * @return return null means server didn't send group information to
-	 *         service. 
+	 *         service.
 	 */
 	public List<Group> getGroup(Group.GroupType gType) {
 		if (mLoadGroupOwnerCount > 0) {
@@ -327,7 +329,7 @@ public class JNIService extends Service {
 		MetaData m = getAndQueued(JNI_REQUEST_ENTER_CONF, msg);
 		if (m != null) {
 			m.timeOutMessage = Message.obtain(mCallbackHandler,
-					REQUEST_TIME_OUT);
+					REQUEST_TIME_OUT, JNI_REQUEST_ENTER_CONF, 0);
 			Message.obtain(mHandler, JNI_REQUEST_ENTER_CONF,
 					Long.valueOf(confID)).sendToTarget();
 			mCallbackHandler.sendMessageDelayed(m.timeOutMessage, 10000);
@@ -368,9 +370,14 @@ public class JNIService extends Service {
 	/**
 	 * Request open video device.
 	 * 
-	 * @param nGroupID  conference id
-	 * @param userDevice  {@link UserDeviceConfig}  if want to open local video, {@link UserDeviceConfig#getVp()} should be null and {@link UserDeviceConfig#getDeviceID()} should be ""
-	 * @param caller  message object for response
+	 * @param nGroupID
+	 *            conference id
+	 * @param userDevice
+	 *            {@link UserDeviceConfig} if want to open local video,
+	 *            {@link UserDeviceConfig#getVp()} should be null and
+	 *            {@link UserDeviceConfig#getDeviceID()} should be ""
+	 * @param caller
+	 *            message object for response
 	 * 
 	 * @see UserDeviceConfig
 	 */
@@ -395,10 +402,14 @@ public class JNIService extends Service {
 	 * Request close video device.
 	 * 
 	 * @param nGroupID
-	 * @param userDevice   {@link UserDeviceConfig}  if want to open local video, {@link UserDeviceConfig#getVp()} should be null and {@link UserDeviceConfig#getDeviceID()} should be ""
-	 * @param caller   message object for response
+	 * @param userDevice
+	 *            {@link UserDeviceConfig} if want to open local video,
+	 *            {@link UserDeviceConfig#getVp()} should be null and
+	 *            {@link UserDeviceConfig#getDeviceID()} should be ""
+	 * @param caller
+	 *            message object for response
 	 * 
-	 *  @see UserDeviceConfig
+	 * @see UserDeviceConfig
 	 */
 	public void requestCloseVideoDevice(long nGroupID,
 			UserDeviceConfig userDevice, Message caller) {
@@ -417,35 +428,53 @@ public class JNIService extends Service {
 				new OpenVideoRequest(nGroupID, userDevice)).sendToTarget();
 	}
 
-	
 	/**
 	 * Request speak permission on the conference.
-	 * @param type  speak type should be {@link ConferencePermission#SPEAKING}
-	 * @param caller  message for response, as now no response to send
+	 * 
+	 * @param type
+	 *            speak type should be {@link ConferencePermission#SPEAKING}
+	 * @param caller
+	 *            message for response, as now no response to send
 	 * 
 	 * @see ConferencePermission
 	 */
-	public void applyForControlPermission(ConferencePermission type, Message caller) {
-		Message.obtain(mHandler, JNI_REQUEST_SPEAK, type.intValue(), 0).sendToTarget();
-	}
-
-	
-	/**
-	 * Request release permission on the conference.
-	 * @param type  speak type should be {@link ConferencePermission#SPEAKING}
-	 *  @param caller  message for response, as now no response to send
-	 *  
-	 * @see ConferencePermission
-	 */
-	public void applyForReleasePermission(ConferencePermission type, Message caller) {
-		Message.obtain(mHandler, JNI_REQUEST_RELEASE_SPEAK, type.intValue(), 0)
+	public void applyForControlPermission(ConferencePermission type,
+			Message caller) {
+		Message.obtain(mHandler, JNI_REQUEST_SPEAK, type.intValue(), 0)
 				.sendToTarget();
 	}
 
 	/**
+	 * Request release permission on the conference.
+	 * 
+	 * @param type
+	 *            speak type should be {@link ConferencePermission#SPEAKING}
+	 * @param caller
+	 *            message for response, as now no response to send
+	 * 
+	 * @see ConferencePermission
+	 */
+	public void applyForReleasePermission(ConferencePermission type,
+			Message caller) {
+		Message.obtain(mHandler, JNI_REQUEST_RELEASE_SPEAK, type.intValue(), 0)
+				.sendToTarget();
+	}
+
+	public void updateCameraParameters(CameraConfiguration cc, Message caller) {
+		if (caller != null) {
+			// put caller message to the queue
+			getAndQueued(JNI_UPDATE_CAMERA_PAR, caller);
+		}
+		Message.obtain(mHandler, JNI_UPDATE_CAMERA_PAR, cc).sendToTarget();
+	}
+
+	/**
 	 * Get user's video device according to user id.<br>
-	 * This function never return null, even through we don't receive video device data from server. 
-	 * @param uid user's id
+	 * This function never return null, even through we don't receive video
+	 * device data from server.
+	 * 
+	 * @param uid
+	 *            user's id
 	 * @return list of user device
 	 */
 	public List<UserDeviceConfig> getAttendeeDevice(long uid) {
@@ -533,6 +562,7 @@ public class JNIService extends Service {
 	private static final int JNI_REQUEST_CLOSE_VIDEO = 71;
 	private static final int JNI_REQUEST_SPEAK = 72;
 	private static final int JNI_REQUEST_RELEASE_SPEAK = 73;
+	private static final int JNI_UPDATE_CAMERA_PAR = 75;
 	private static final int JNI_REMOTE_USER_DEVICE_INFO_NOTIFICATION = 80;
 
 	class LocalHander extends Handler {
@@ -624,6 +654,16 @@ public class JNIService extends Service {
 			case JNI_REQUEST_RELEASE_SPEAK:
 				ConfRequest.getInstance().releaseControlPermission(msg.arg1);
 				break;
+			case JNI_UPDATE_CAMERA_PAR:
+				if (msg.obj == null) {
+					// FIXME send error result
+				} else {
+					CameraConfiguration cc = (CameraConfiguration) msg.obj;
+					VideoRequest.getInstance().setCapParam(cc.getDeviceId(),
+							cc.getCameraIndex(), cc.getFrameRate(),
+							cc.getBitRate());
+				}
+				break;
 			}
 		}
 
@@ -656,7 +696,7 @@ public class JNIService extends Service {
 				break;
 
 			case CANCEL_REQUEST:
-				//just remove message from queue
+				// just remove message from queue
 				getMeta(msg.arg1);
 				break;
 			case JNI_LOG_IN:
@@ -773,18 +813,24 @@ public class JNIService extends Service {
 				mContext.sendBroadcast(ei);
 				break;
 			case JNI_GET_ATTENDEE_INFO_DONE:
+
 				User attendee = (User) ((AsynResult) msg.obj).getObject();
 				Intent i = new Intent(
 						JNI_BROADCAST_ATTENDEE_ENTERED_NOTIFICATION);
 				i.addCategory(JNI_BROADCAST_CATEGROY);
 				i.putExtra("uid", attendee.getmUserId());
 				i.putExtra("name", attendee.getName());
-				mContext.sendBroadcast(i);
+				mContext.sendStickyBroadcast(i);
+				V2Log.i("send broad cast for attendee enter :"
+						+ attendee.getName());
+				break;
+			case JNI_UPDATE_CAMERA_PAR:
 				break;
 			case JNI_REMOTE_USER_DEVICE_INFO_NOTIFICATION:
 				mUserDeviceList.addAll(UserDeviceConfig
 						.parseFromXml((String) msg.obj));
 				break;
+
 			}
 
 			if (d != null && d.caller != null) {
@@ -925,6 +971,14 @@ public class JNIService extends Service {
 					JNI_REMOTE_USER_DEVICE_INFO_NOTIFICATION, szXmlData)
 					.sendToTarget();
 		}
+
+		@Override
+		public void OnSetCapParamDone(String szDevID, int nSizeIndex,
+				int nFrameRate, int nBitRate) {
+			
+		}
+		
+		
 
 	}
 

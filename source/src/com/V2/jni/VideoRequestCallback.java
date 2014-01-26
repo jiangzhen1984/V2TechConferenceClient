@@ -1,5 +1,7 @@
 package com.V2.jni;
 
+import android.util.Log;
+
 public interface VideoRequestCallback {
 
 	/**
@@ -21,4 +23,16 @@ public interface VideoRequestCallback {
 	 * @param szXmlData
 	 */
 	public void OnRemoteUserVideoDevice(String szXmlData);
+	
+	
+	
+	/**
+	 * 
+	 * @param szDevID
+	 * @param nSizeIndex
+	 * @param nFrameRate
+	 * @param nBitRate
+	 */
+	public void OnSetCapParamDone(String szDevID, int nSizeIndex,
+			int nFrameRate, int nBitRate);
 }

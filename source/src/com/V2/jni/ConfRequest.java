@@ -178,10 +178,10 @@ public class ConfRequest
 		 */
 		private void OnConfMemberEnter(long nConfID, long  nTime, String szUserInfos)
 		{
+			Log.e("ConfRequest UI", "-->OnConfMemberEnter " + nConfID + " " + nTime + " " + szUserInfos);
 			if (this.callback != null) {
 				this.callback.OnConfMemberEnterCallback(nConfID, nTime, szUserInfos);
 			}
-			Log.e("ConfRequest UI", "-->OnConfMemberEnter " + nConfID + " " + nTime + " " + szUserInfos);
 		}
 		
 		private void OnConfMemberExit(long nConfID, long nTime, long nUserID)

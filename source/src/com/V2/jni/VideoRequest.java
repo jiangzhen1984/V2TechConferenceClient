@@ -101,7 +101,13 @@ public class VideoRequest {
 	public native void closeVideoDevice(long nGroupID, long nUserID,
 			String szDeviceID, VideoPlayer vp, int businessType);
 
-	// 璁剧疆閲囬泦鍙傛暟
+	/**
+	 * 
+	 * @param szDevID ""
+	 * @param nSizeIndex it's camera index 
+	 * @param nFrameRate 15
+	 * @param nBitRate 256000
+	 */
 	public native void setCapParam(String szDevID, int nSizeIndex,
 			int nFrameRate, int nBitRate);
 
@@ -224,6 +230,9 @@ public class VideoRequest {
 			int nFrameRate, int nBitRate) {
 		Log.e("ImRequest UI", "OnSetCapParamDone " + szDevID + " " + nSizeIndex
 				+ " " + nFrameRate + " " + nBitRate);
+		if (this.callback != null) {
+			this.callback.OnSetCapParamDone(szDevID, nSizeIndex, nFrameRate, nBitRate);
+		}
 	}
 
 	// // 閫氱煡绐楀彛瑙嗛姣旂壒鐜囷紝鍗曚綅Kbps

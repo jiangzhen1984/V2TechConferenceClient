@@ -112,7 +112,10 @@ public class ConferenceTabFragment extends Fragment {
 			V2Log.w(" group list is null");
 			return;
 		}
-
+		if (mGroupContainer == null) {
+			V2Log.e(" NO aviable layout");
+			return;
+		}
 		mGroupContainer.removeAllViews();
 		for (final Group g : list) {
 			final GroupLayout gp = new GroupLayout(this.getActivity(), g);

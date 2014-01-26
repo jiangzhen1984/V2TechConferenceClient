@@ -48,6 +48,7 @@ import android.widget.Toast;
 
 import com.v2tech.R;
 import com.v2tech.logic.Attendee;
+import com.v2tech.logic.CameraConfiguration;
 import com.v2tech.logic.ConferencePermission;
 import com.v2tech.logic.User;
 import com.v2tech.logic.UserDeviceConfig;
@@ -244,12 +245,7 @@ public class VideoActivityV2 extends Activity {
 							Toast.LENGTH_SHORT).show();
 					return;
 				}
-				Message.obtain(
-						mVideoHandler,
-						intent.getAction()
-								.equals(JNIService.JNI_BROADCAST_ATTENDEE_ENTERED_NOTIFICATION) ? USER_ENTERED_CONF
-								: USER_EXITED_CONF, new User(uid, name))
-						.sendToTarget();
+				sendAttendActionMessage(intent.getAction(), new User(uid, name));
 
 			}
 		}
@@ -290,7 +286,19 @@ public class VideoActivityV2 extends Activity {
 		filter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
 		filter.addAction(JNIService.JNI_BROADCAST_ATTENDEE_EXITED_NOTIFICATION);
 		filter.addAction(JNIService.JNI_BROADCAST_ATTENDEE_ENTERED_NOTIFICATION);
-		mContext.registerReceiver(mConfUserChangeReceiver, filter);
+		Intent i = mContext.registerReceiver(mConfUserChangeReceiver, filter);
+		if (i != null && i.getAction().equals(JNIService.JNI_BROADCAST_ATTENDEE_ENTERED_NOTIFICATION) ) {
+			V2Log.i(" get stickly intent");
+			long uid = i.getLongExtra("uid", -1);
+			String name = i.getExtras().getString("name");
+			if (uid < 0) {
+				Toast.makeText(mContext, "Invalid user id",
+						Toast.LENGTH_SHORT).show();
+				return;
+			}
+			sendAttendActionMessage(i.getAction(), new User(uid, name));
+		}
+		
 	}
 
 	@TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
@@ -318,6 +326,23 @@ public class VideoActivityV2 extends Activity {
 
 	}
 
+	
+	/**
+	 * 
+	 * @param action
+	 * @param u
+	 */
+	private void sendAttendActionMessage(String action, User u) {
+		V2Log.i(" send attendee action "+ action);
+		Message.obtain(
+				mVideoHandler,
+				action
+						.equals(JNIService.JNI_BROADCAST_ATTENDEE_ENTERED_NOTIFICATION) ? USER_ENTERED_CONF
+						: USER_EXITED_CONF, u)
+				.sendToTarget();
+	}
+	
+	
 	/**
 	 * 
 	 */
@@ -424,6 +449,9 @@ public class VideoActivityV2 extends Activity {
 			if (v != null) {
 				mVideoLayout.updateViewLayout(v, p);
 			} else {
+				if (sw.getView().getParent() != null) {
+					((ViewGroup)sw.getView().getParent()).removeView(sw.getView());
+				}
 				mVideoLayout.addView(sw.getView(), p);
 			}
 			if (sw.udc.getVp() != null) {
@@ -510,16 +538,17 @@ public class VideoActivityV2 extends Activity {
 
 		for (SurfaceViewW sw : this.mCurrentShowedSV) {
 			if (sw.udc.getBelongsAttendee().isSelf()) {
-				mService.requestCloseVideoDevice(mGroupId, sw.udc, Message
-						.obtain(mVideoHandler, REQUEST_CLOSE_DEVICE_RESPONSE));
-				try {
-					Thread.currentThread().sleep(200);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
+//				mService.requestCloseVideoDevice(mGroupId, sw.udc, Message
+//						.obtain(mVideoHandler, REQUEST_CLOSE_DEVICE_RESPONSE));
+//				try {
+//					Thread.currentThread().sleep(200);
+//				} catch (InterruptedException e) {
+//					e.printStackTrace();
+//				}
 				VideoCaptureDevInfo.CreateVideoCaptureDevInfo().reverseCamera();
-				mService.requestOpenVideoDevice(mGroupId, sw.udc, Message
-						.obtain(mVideoHandler, REQUEST_OPEN_DEVICE_RESPONSE));
+//				mService.requestOpenVideoDevice(mGroupId, sw.udc, Message
+//						.obtain(mVideoHandler, REQUEST_OPEN_DEVICE_RESPONSE));
+				mService.updateCameraParameters(new CameraConfiguration(""), null);
 				return;
 			}
 		}
@@ -760,9 +789,9 @@ public class VideoActivityV2 extends Activity {
 
 			for (SurfaceViewW sw : mCurrentShowedSV) {
 				if (sw.udc == udc) {
-					sw.rl.removeAllViews();
 					mCurrentShowedSV.remove(sw);
 					mVideoLayout.removeView(sw.getView());
+					sw.rl.removeAllViews();
 					break;
 				}
 			}
@@ -845,7 +874,7 @@ public class VideoActivityV2 extends Activity {
 						RelativeLayout.LayoutParams.WRAP_CONTENT,
 						RelativeLayout.LayoutParams.WRAP_CONTENT);
 				tvrl.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
-				tvrl.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+				tvrl.addRule(RelativeLayout.ALIGN_PARENT_TOP);
 				rl.addView(tv, tvrl);
 				rl.setId(layId);
 			}
@@ -857,6 +886,12 @@ public class VideoActivityV2 extends Activity {
 
 		@Override
 		public void handleMessage(Message msg) {
+			if (isBound == false || mService == null) {
+				V2Log.w(" service not bound yet");
+				Message m = Message.obtain(msg);
+				this.sendMessageDelayed(m, 400);
+				return;
+			}
 			switch (msg.what) {
 			case SERVICE_BUNDED:
 			case ONLY_SHOW_LOCAL_VIDEO:
