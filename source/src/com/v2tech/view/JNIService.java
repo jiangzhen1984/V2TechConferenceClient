@@ -721,8 +721,7 @@ public class JNIService extends Service {
 						m.caller.sendToTarget();
 						if (m.timeOutMessage != null) {
 							// You can't use this because mCallbackHandler is
-							// different
-							// object.
+							// different object.
 							// we use handler thread
 							mCallbackHandler.removeMessages(REQUEST_TIME_OUT);
 						}
@@ -786,7 +785,7 @@ public class JNIService extends Service {
 			case JNI_ATTENDEE_ENTERED_NOTIFICATION:
 				Long uid = Long.valueOf(Long.parseLong(msg.obj.toString()));
 				User attendeeUser = mUserHolder.get(uid);
-				// check cache, if exist doesn't query again, send successful
+				// check cache, if exist, send successful event
 				// message directly.
 				if (attendeeUser != null && attendeeUser.getName() != null
 						&& !attendeeUser.getName().equals("")) {
