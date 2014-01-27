@@ -94,7 +94,8 @@ public class ConferenceTabFragment extends Fragment {
 	@Override
 	public void onStart() {
 		super.onStart();
-		Message.obtain(mHandler, FILL_CONFS_LIST).sendToTarget();
+		Message m = Message.obtain(mHandler, FILL_CONFS_LIST);
+		mHandler.sendMessageDelayed(m, 500);
 	}
 
 	@Override

@@ -1,6 +1,5 @@
 package com.V2.jni;
 
-import android.util.Log;
 
 public interface VideoRequestCallback {
 

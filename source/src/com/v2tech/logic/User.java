@@ -1,6 +1,23 @@
 package com.v2tech.logic;
 
-import android.util.Log;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
+
+import com.v2tech.util.V2Log;
 
 /**
  * User information
@@ -14,28 +31,44 @@ public class User {
 	private NetworkStateCode mResult;
 
 	private String mName;
+	
+	private String mEmail;
+	
+	private String mSignature;
+	
+	private Set<Group> mBelongsGroup;
 
 	public User() {
 
 	}
 
 	public User(long mUserId) {
-		super();
-		this.mUserId = mUserId;
+		this(mUserId, null, null, null);
 	}
 
-	public User(long mUserId, String mName) {
-		super();
-		this.mUserId = mUserId;
-		this.mName = mName;
+	public User(long mUserId, String name) {
+		this(mUserId, name, null, null);
 	}
+	
+	
 
-	public User(long mUserId, String mName, NetworkStateCode mResult) {
-		super();
-		this.mUserId = mUserId;
+	public User(long mUserId, String name, NetworkStateCode mResult) {
+		this(mUserId, name, null, null);
 		this.mResult = mResult;
-		this.mName = mName;
 	}
+
+	public User(long mUserId, String name,String email, String signature) {
+		this.mUserId = mUserId;
+		this.mName = name;
+		this.mEmail = email;
+		this.mSignature = signature;
+		mBelongsGroup = new HashSet<Group>();
+	}
+	
+	
+	
+	
+	
 
 	public long getmUserId() {
 		return mUserId;
@@ -61,6 +94,46 @@ public class User {
 		this.mName = mName;
 	}
 
+	
+	
+	
+	
+	
+	
+	public String getmEmail() {
+		return mEmail;
+	}
+
+	public void setEmail(String mail) {
+		this.mEmail = mail;
+	}
+
+	public String getSignature() {
+		return mSignature;
+	}
+
+	public void setSignature(String signature) {
+		this.mSignature = signature;
+	}
+
+	public Set<Group> getBelongsGroup() {
+		return mBelongsGroup;
+	}
+
+	public void setmBelongsGroup(Set<Group> belongsGroup) {
+		this.mBelongsGroup = belongsGroup;
+	}
+
+	
+	public void addUserToGroup(Group g) {
+		if (g == null) {
+			V2Log.e(" group is null can't add user to this group");
+			return;
+		}
+		this.mBelongsGroup.add(g);
+	}
+	
+	
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -83,11 +156,67 @@ public class User {
 		return result;
 	}
 
+	
+	
+	/**
+	 * 
+	 * @param xml
+	 * @return
+	 */
+	public static List<User> fromXml(String xml) {
+		List<User> l = new ArrayList<User>();
+		
+		InputStream is = null;
+
+		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+		DocumentBuilder dBuilder;
+		try {
+			dBuilder = dbFactory.newDocumentBuilder();
+			is = new ByteArrayInputStream(xml.getBytes("UTF-8"));
+			Document doc = dBuilder.parse(is);
+
+			doc.getDocumentElement().normalize();
+
+				NodeList gList = doc.getElementsByTagName("user");
+				Element element;
+				for (int i = 0; i < gList.getLength(); i++) {
+					element = (Element) gList.item(i);
+					l.add(new User(Long.parseLong(element
+							.getAttribute("id")), element.getAttribute("nickname"),
+							element.getAttribute("email"),
+							element.getAttribute("sign")));
+				}
+			
+		} catch (ParserConfigurationException e) {
+			e.printStackTrace();
+		} catch (SAXException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			if (is != null) {
+				try {
+					is.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		
+		
+		return l;
+	}
+	/**
+	 * 
+	 * @param uID
+	 * @param xml
+	 * @return
+	 */
 	public static User fromXml(int uID, String xml) {
 		String nickName = null;
 		int pos = xml.indexOf("nickname='");
 		if (pos == -1) {
-			Log.w("ImRequest UI", " no nickname");
+			V2Log.w(" no nickname");
 		} else {
 			int end = xml.indexOf("'", pos + 10);
 			if (end != -1) {

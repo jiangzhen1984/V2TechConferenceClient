@@ -61,6 +61,13 @@ public class ChatRequest
 
 		return mChatRequest;
 	}
+	
+	public  static synchronized ChatRequest getInstance() {
+		if (mChatRequest == null) {
+			throw new RuntimeException(" mChatRequest is null do getInstance(Context context) first ");
+		}
+		return mChatRequest;
+	}
 
 	
 	public native boolean initialize(ChatRequest request);

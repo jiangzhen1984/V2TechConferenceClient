@@ -104,6 +104,9 @@ public class GroupRequest {
 	private void OnGetGroupUserInfo(int groupType, long nGroupID, String sXml) {
 		Log.e("ImRequest UI", "OnGetGroupUserInfo:: �õ�����ѵ���ϸ��Ϣ" + groupType
 				+ ":" + nGroupID + ":" + sXml);
+		if (this.callback != null) {
+			this.callback.OnGetGroupUserInfoCallback(groupType, nGroupID, sXml);
+		}
 		System.out.println("�õ�������Ϣ");
 
 		// ƴװ��Ϣ

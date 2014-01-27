@@ -75,6 +75,7 @@ public class JNIService extends Service {
 
 	public static final String JNI_BROADCAST_CATEGROY = "com.v2tech.jni.broadcast";
 	public static final String JNI_BROADCAST_GROUP_NOTIFICATION = "com.v2tech.jni.broadcast.group_geted";
+	public static final String JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION = "com.v2tech.jni.broadcast.group_user_updated";
 	public static final String JNI_BROADCAST_ATTENDEE_ENTERED_NOTIFICATION = "com.v2tech.jni.broadcast.attendee.entered.notification";
 	public static final String JNI_BROADCAST_ATTENDEE_EXITED_NOTIFICATION = "com.v2tech.jni.broadcast.attendee.exited.notification";
 
@@ -104,6 +105,8 @@ public class JNIService extends Service {
 	// ///////////////////////////////////////
 	// only refer group data which group is GroupType.CONFERENCE
 	private List<Group> mConfGroup = null;
+
+	private List<Group> mContactsGroup = null;
 
 	private Map<Long, User> mUserHolder = new HashMap<Long, User>();
 
@@ -161,7 +164,6 @@ public class JNIService extends Service {
 		}
 		// if mBinderRef equals 0 means no activity
 		if (mBinderRef == 0) {
-			// FIXME Do Logout
 		}
 		return super.onUnbind(intent);
 	}
@@ -314,6 +316,21 @@ public class JNIService extends Service {
 		} else {
 			throw new RuntimeException(" Unknown group type :" + gType);
 		}
+	}
+	
+	
+	/**
+	 * If return null, means service doesn't receive group data or user data.<br>
+	 * @param gId
+	 * @return
+	 */
+	public List<User> getGroupUser(long gId) {
+		for (Group g : this.mContactsGroup) {
+			if (g.getmGId() == gId) {
+				return g.getUsers();
+			}
+		}
+		return null;
 	}
 
 	/**
@@ -541,6 +558,20 @@ public class JNIService extends Service {
 
 	}
 
+	class GroupUserInfoOrig {
+		int gType;
+		long gId;
+		String xml;
+
+		public GroupUserInfoOrig(int gType, long gId, String xml) {
+			super();
+			this.gType = gType;
+			this.gId = gId;
+			this.xml = xml;
+		}
+
+	}
+
 	// //////////////////////////////////////////////////////////
 	// Internal Handler definition //
 	// //////////////////////////////////////////////////////////
@@ -558,6 +589,7 @@ public class JNIService extends Service {
 	private static final int JNI_ATTENDEE_ENTERED_NOTIFICATION = 57;
 	private static final int JNI_ATTENDEE_EXITED_NOTIFICATION = 58;
 	private static final int JNI_GET_ATTENDEE_INFO_DONE = 59;
+	private static final int JNI_GROUP_USER_INFO_NOTIFICATION = 60;
 	private static final int JNI_REQUEST_OPEN_VIDEO = 70;
 	private static final int JNI_REQUEST_CLOSE_VIDEO = 71;
 	private static final int JNI_REQUEST_SPEAK = 72;
@@ -752,6 +784,10 @@ public class JNIService extends Service {
 						Message.obtain(mHandler, JNI_LOAD_GROUP_OWNER_INFO, 0,
 								0).sendToTarget();
 					}
+				} else if (msg.arg1 == Group.GroupType.CONTACT.intValue()) {
+					mContactsGroup = Group.parserFromXml(msg.arg1,
+							(String) msg.obj);
+					// TODO send broadcast to tell UI contacts group update
 				}
 
 				ar = new AsynResult(AsynResult.AsynState.SUCCESS, mConfGroup);
@@ -775,6 +811,28 @@ public class JNIService extends Service {
 					arg1 = msg.arg1 + 1;
 					Message.obtain(mHandler, JNI_LOAD_GROUP_OWNER_INFO,
 							msg.arg1 + 1, 0).sendToTarget();
+				}
+				break;
+			case JNI_GROUP_USER_INFO_NOTIFICATION:
+				GroupUserInfoOrig go = (GroupUserInfoOrig)msg.obj;
+				if (go != null && go.xml != null) { 
+					List<User> lu = User.fromXml(go.xml);
+					//FIXME if group data doesn't receive, still record
+					for (Group g1 : mContactsGroup) {
+						if (g1.getmGId() == go.gId) {
+							g1.addUserToGroup(lu);
+							break;
+						}
+					}
+					Intent i = new Intent(
+							JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION);
+					i.addCategory(JNI_BROADCAST_CATEGROY);
+					i.putExtra("gid", go.gId);
+					i.putExtra("gtype", go.gType);
+					mContext.sendStickyBroadcast(i);
+					
+				} else {
+					V2Log.e("Invalid group user data");
 				}
 				break;
 			case JNI_REQUEST_ENTER_CONF:
@@ -904,6 +962,14 @@ public class JNIService extends Service {
 					sXml).sendToTarget();
 		}
 
+		@Override
+		public void OnGetGroupUserInfoCallback(int groupType, long nGroupID,
+				String sXml) {
+			Message.obtain(mCallbackHandler, JNI_GROUP_USER_INFO_NOTIFICATION,
+					new GroupUserInfoOrig(groupType, nGroupID, sXml))
+					.sendToTarget();
+		}
+
 	}
 
 	class ConfRequestCB implements ConfRequestCallback {
@@ -974,10 +1040,8 @@ public class JNIService extends Service {
 		@Override
 		public void OnSetCapParamDone(String szDevID, int nSizeIndex,
 				int nFrameRate, int nBitRate) {
-			
+
 		}
-		
-		
 
 	}
 

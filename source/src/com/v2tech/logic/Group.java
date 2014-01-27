@@ -19,11 +19,13 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import com.v2tech.util.V2Log;
 
 /**
  * Group information
+ * 
  * @author 28851274
- *
+ * 
  */
 public class Group {
 
@@ -39,8 +41,12 @@ public class Group {
 
 	private String mCreateDate;
 
+	private Group mParent;
+	
+	private List<User> users;
+
 	public enum GroupType {
-		CONFERENCE(4), UNKNOWN(-1);
+		CONTACT(1), CONFERENCE(4), UNKNOWN(-1);
 
 		private int type;
 
@@ -50,6 +56,8 @@ public class Group {
 
 		public static GroupType fromInt(int code) {
 			switch (code) {
+			case 1:
+				return CONTACT;
 			case 4:
 				return CONFERENCE;
 			default:
@@ -57,7 +65,7 @@ public class Group {
 
 			}
 		}
-		
+
 		public int intValue() {
 			return type;
 		}
@@ -69,11 +77,17 @@ public class Group {
 		this.mGId = mGId;
 		this.mGroupType = mGroupType;
 		this.mName = mName;
-		this.mOwner = Long.parseLong(mOwner);
+		if (mOwner != null) {
+			this.mOwner = Long.parseLong(mOwner);
+		}
 		this.mCreateDate = createDate;
-		Date d = new Date(Long.parseLong(createDate) * 1000);
-		DateFormat sd = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.US);
-		this.mCreateDate = sd.format(d);
+		if (createDate != null) {
+			Date d = new Date(Long.parseLong(createDate) * 1000);
+			DateFormat sd = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.US);
+			this.mCreateDate = sd.format(d);
+		}
+		
+		users = new ArrayList<User>();
 	}
 
 	public long getmGId() {
@@ -124,10 +138,67 @@ public class Group {
 		this.mOwnerUser = mOwnerUser;
 	}
 
+	public Group getParent() {
+		return mParent;
+	}
+
+	public void setmParent(Group parent) {
+		this.mParent = parent;
+	}
+	
+	
+	public void addUserToGroup(User u) {
+		if (u == null) {
+			V2Log.e(" Invalid user data");
+			return;
+		}
+		this.users.add(u);
+	}
+	
+	public List<User> getUsers() {
+		return this.users;
+	}
+	
+	
+	public void addUserToGroup(List<User> l) {
+		for (User u : l) {
+			this.users.add(u);
+			u.addUserToGroup(this);
+		}
+	}
+	
+	
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + (int) (mGId ^ (mGId >>> 32));
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Group other = (Group) obj;
+		if (mGId != other.mGId)
+			return false;
+		return true;
+	}
+
 	/**
-	 * <xml><conf createuserid='1124' id='513891897880' start time='1389189927'
-	 * subject='est'/><conf createuserid='1124' id='513891899176'
-	 * starttime='1389190062' subject='eee'/></xml>
+	 * 
+	 * type contact(1): <xml><pubgroup id='61' name='ronghuo的组织'><pubgroup
+	 * id='21' name='1'/></pubgroup></xml>
+	 * 
+	 * type conference(4): <xml><conf createuserid='1124' id='513891897880'
+	 * start time='1389189927' subject='est'/><conf createuserid='1124'
+	 * id='513891899176' starttime='1389190062' subject='eee'/></xml>
 	 * 
 	 * @param xml
 	 * @return
@@ -146,16 +217,30 @@ public class Group {
 
 			doc.getDocumentElement().normalize();
 
-			NodeList conferenceList = doc.getElementsByTagName("conf");
-			Element conferenceElement;
+			if (type == GroupType.CONTACT.intValue()) {
+				NodeList gList = doc.getElementsByTagName("pubgroup");
+				Element element;
+				for (int i = 0; i < gList.getLength(); i++) {
+					element = (Element) gList.item(i);
+					list.add(new Group(Long.parseLong(element
+							.getAttribute("id")), GroupType.fromInt(type),
+							element.getAttribute("name"),
+							null,
+							null));
+				}
 
-			for (int i = 0; i < conferenceList.getLength(); i++) {
-				conferenceElement = (Element) conferenceList.item(i);
-				list.add(new Group(Long.parseLong(conferenceElement
-						.getAttribute("id")), GroupType.fromInt(type), conferenceElement
-						.getAttribute("subject"), conferenceElement
-						.getAttribute("createuserid"), conferenceElement
-						.getAttribute("starttime")));
+			} else if (type == GroupType.CONFERENCE.intValue()) {
+				NodeList conferenceList = doc.getElementsByTagName("conf");
+				Element conferenceElement;
+
+				for (int i = 0; i < conferenceList.getLength(); i++) {
+					conferenceElement = (Element) conferenceList.item(i);
+					list.add(new Group(Long.parseLong(conferenceElement
+							.getAttribute("id")), GroupType.fromInt(type),
+							conferenceElement.getAttribute("subject"),
+							conferenceElement.getAttribute("createuserid"),
+							conferenceElement.getAttribute("starttime")));
+				}
 			}
 		} catch (ParserConfigurationException e) {
 			e.printStackTrace();
