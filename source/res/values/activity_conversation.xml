@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="conversation_waiting">等待对方接受.....</string>
+   <string name="conversation_notification">邀请您进入聊天.....</string>
+   <string name="conversation_accept">接  受</string>
+   <string name="conversation_reject">拒  绝</string>
+   <string name="conversation_cancel">挂  断</string>
+    
+    
+</resources>

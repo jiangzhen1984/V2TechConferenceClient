@@ -3,9 +3,13 @@ package com.v2tech.logic;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -36,11 +40,26 @@ public class User {
 	
 	private String mSignature;
 	
+	private String mAddress;
+	
+	private String mCellPhone;
+	
+	private String mCompany;
+	
+	private String mDepartment;
+	
+	private String mGender;
+	
+	private Date mBirthday;
+	
+	private String mTelephone;
+	
+	private String mTitle;
+	
 	private Set<Group> mBelongsGroup;
+	
+	private boolean isCurrentLoggedInUser;
 
-	public User() {
-
-	}
 
 	public User(long mUserId) {
 		this(mUserId, null, null, null);
@@ -63,12 +82,21 @@ public class User {
 		this.mEmail = email;
 		this.mSignature = signature;
 		mBelongsGroup = new HashSet<Group>();
+		isCurrentLoggedInUser = false;
 	}
 	
 	
 	
 	
 	
+
+	public boolean isCurrentLoggedInUser() {
+		return isCurrentLoggedInUser;
+	}
+
+	public void setCurrentLoggedInUser(boolean isCurrentLoggedInUser) {
+		this.isCurrentLoggedInUser = isCurrentLoggedInUser;
+	}
 
 	public long getmUserId() {
 		return mUserId;
@@ -125,6 +153,80 @@ public class User {
 	}
 
 	
+	
+	public String getAddress() {
+		return mAddress;
+	}
+
+	public void setAddress(String mAddress) {
+		this.mAddress = mAddress;
+	}
+
+	public String getCellPhone() {
+		return mCellPhone;
+	}
+
+	public void setCellPhone(String mCellPhone) {
+		this.mCellPhone = mCellPhone;
+	}
+
+	public String getCompany() {
+		return mCompany;
+	}
+
+	public void setCompany(String mCompany) {
+		this.mCompany = mCompany;
+	}
+
+	public String getDepartment() {
+		return mDepartment;
+	}
+
+	public void setDepartment(String mDepartment) {
+		this.mDepartment = mDepartment;
+	}
+
+	public String getGender() {
+		return mGender;
+	}
+
+	public void setGender(String mGender) {
+		this.mGender = mGender;
+	}
+
+	public Date getBirthday() {
+		return mBirthday;
+	}
+	
+	public String getBirthdayStr() {
+		if (mBirthday != null) {
+			DateFormat sd = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.US);
+			return sd.format(mBirthday);
+		} else {
+			return "";
+		}
+	}
+
+	public void setBirthday(Date mBirthday) {
+		this.mBirthday = mBirthday;
+	}
+
+	public String getTelephone() {
+		return mTelephone;
+	}
+
+	public void setTelephone(String mTelephone) {
+		this.mTelephone = mTelephone;
+	}
+
+	public String getTitle() {
+		return mTitle;
+	}
+
+	public void setTitle(String mTitle) {
+		this.mTitle = mTitle;
+	}
+
 	public void addUserToGroup(Group g) {
 		if (g == null) {
 			V2Log.e(" group is null can't add user to this group");
@@ -223,10 +325,7 @@ public class User {
 				nickName = xml.subSequence(pos + 10, end).toString();
 			}
 		}
-		User u = new User();
-		u.setmUserId(uID);
-		u.setName(nickName);
-		return u;
+		return  new User(uID, nickName);
 	}
 
 }

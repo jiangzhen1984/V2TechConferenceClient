@@ -83,7 +83,6 @@ public class ConferenceTabFragment extends Fragment {
 	private IntentFilter getIntentFilter() {
 		if (intentFilter == null) {
 			intentFilter = new IntentFilter();
-			intentFilter.addAction("TAB1_ACTION");
 			intentFilter.addAction(JNIService.JNI_BROADCAST_GROUP_NOTIFICATION);
 			intentFilter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
 			intentFilter.addAction(MainActivity.SERVICE_BOUNDED_EVENT);
@@ -101,6 +100,7 @@ public class ConferenceTabFragment extends Fragment {
 	@Override
 	public void onStop() {
 		super.onStop();
+		mHandler.removeMessages(FILL_CONFS_LIST);
 	}
 
 	@Override

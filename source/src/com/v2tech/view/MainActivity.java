@@ -40,6 +40,7 @@ public class MainActivity extends FragmentActivity implements OnTouchListener {
 	private boolean isBound;
 
 	private static final String TAG_CONF = "conference";
+	private static final String TAG_CONTACT = "contacts";
 	private static final String TAG_SETTING = "setting";
 	
 	public static final String SERVICE_BOUNDED_EVENT ="com.v2tech.SERVICE_BOUNDED_EVENT";
@@ -62,6 +63,12 @@ public class MainActivity extends FragmentActivity implements OnTouchListener {
 				mTabHost.newTabSpec(TAG_CONF).setIndicator(null,
 						res.getDrawable(R.drawable.selector_conf)),
 				ConferenceTabFragment.class, null);
+		
+		mTabManager.addTab(
+				mTabHost.newTabSpec(TAG_CONTACT).setIndicator(null,
+						res.getDrawable(R.drawable.selector_group)),
+						ContactsTabFragment.class, null);
+		
 		mTabManager.addTab(
 				mTabHost.newTabSpec(TAG_SETTING).setIndicator(null,
 						res.getDrawable(R.drawable.selector_setting)),

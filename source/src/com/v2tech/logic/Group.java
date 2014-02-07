@@ -43,6 +43,8 @@ public class Group {
 
 	private Group mParent;
 	
+	private List<Group> mChild;
+	
 	private List<User> users;
 
 	public enum GroupType {
@@ -88,6 +90,7 @@ public class Group {
 		}
 		
 		users = new ArrayList<User>();
+		mChild = new ArrayList<Group>();
 	}
 
 	public long getmGId() {
@@ -157,6 +160,19 @@ public class Group {
 	
 	public List<User> getUsers() {
 		return this.users;
+	}
+	
+	public List<Group> getChildGroup() {
+		return this.mChild;
+	}
+	
+	public void addGroupToGroup(Group g) {
+		if (g == null) {
+			V2Log.e(" Invalid group data");
+			return;
+		}
+		this.mChild.add(g);
+		g.setmParent(this);
 	}
 	
 	

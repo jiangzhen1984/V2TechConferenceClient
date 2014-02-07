@@ -22,5 +22,10 @@
     <style name="tabTheme" parent="android:style/Theme">
         <item name="android:tabStripEnabled">false</item>
     </style>
+    
+    <style name="ContactUserActionDialog" parent="@android:style/Theme.Translucent.NoTitleBar">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowIsFloating">true</item>
+    </style>
 
 </resources>

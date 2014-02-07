@@ -1,6 +1,7 @@
 package com.v2tech.view;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -174,8 +175,8 @@ public class JNIService extends Service {
 	 * @author 28851274
 	 * 
 	 */
-	class LocalBinder extends Binder {
-		JNIService getService() {
+	public class LocalBinder extends Binder {
+		public JNIService getService() {
 			return JNIService.this;
 		}
 	}
@@ -278,6 +279,25 @@ public class JNIService extends Service {
 	public User getloggedUser() {
 		return this.mUserHolder.get(Long.valueOf(this.mloggedInUserId));
 	}
+	
+	/**
+	 * Get user data according to user id
+	 * @param id
+	 * @return
+	 */
+	public User getUser(long id) {
+		return this.mUserHolder.get(Long.valueOf(id));
+	}
+	
+	
+	/**
+	 * Update user data according to user object
+	 * @param u  user data
+	 * @param caller After update, send message to caller
+	 */
+	public void updateUserData(User u, Message caller) {
+		//TODO need to implement
+	}
 
 	/**
 	 * get user object according to user id.
@@ -308,11 +328,43 @@ public class JNIService extends Service {
 	 *         service.
 	 */
 	public List<Group> getGroup(Group.GroupType gType) {
-		if (mLoadGroupOwnerCount > 0) {
-			return null;
-		}
 		if (gType == Group.GroupType.CONFERENCE) {
+			if (mLoadGroupOwnerCount > 0) {
+				return null;
+			}
 			return this.mConfGroup;
+		} else if (gType == Group.GroupType.CONTACT) {
+			this.mContactsGroup = new ArrayList<Group>();
+			for (int i = 1; i < 10; i++) {
+				Group g = new Group(i, Group.GroupType.CONTACT, "味素科技"+ i, null, null);
+				this.mContactsGroup.add(g);
+				for (int j =1; j< 5; j++) {
+					Group g1 = new Group(i<< 3 | j, Group.GroupType.CONTACT, "味素科技_sub"+ j, null, null);
+					g.addGroupToGroup(g1);
+				}
+				
+				for (int k =1; k< 25; k++) {
+					User u = new User((i << 5 |  k), "测试"+k, "sdfsdf", "wwww'");
+					if (mloggedInUserId <= 0) {
+						mloggedInUserId =u.getmUserId();
+						u.setCurrentLoggedInUser(true);
+						
+					}
+					
+					u.setAddress("测试地址");
+					u.setBirthday(new Date());
+					u.setCellPhone("13811962467");
+					u.setTelephone("1388123123");
+					u.setDepartment("测试部门");
+					u.setGender("男");
+					u.setSignature("sdfdsfdsf");
+					u.setTitle("职位");
+					
+					this.mUserHolder.put(u.getmUserId(), u);
+					g.addUserToGroup(u);
+				}
+			}
+			return this.mContactsGroup;
 		} else {
 			throw new RuntimeException(" Unknown group type :" + gType);
 		}
@@ -766,6 +818,9 @@ public class JNIService extends Service {
 				break;
 			case JNI_UPDATE_USER_INFO:
 				User u = User.fromXml(msg.arg1, (String) msg.obj);
+				if (u.getmUserId() == mloggedInUserId) {
+					u.setCurrentLoggedInUser(true);
+				}
 				mUserHolder.put(Long.valueOf(u.getmUserId()), u);
 				// If someone waiting for this event
 				ar = new AsynResult(AsynResult.AsynState.SUCCESS, u);
