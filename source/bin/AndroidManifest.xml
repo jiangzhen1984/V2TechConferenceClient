@@ -5,7 +5,7 @@
     android:versionName="1.0" >
 
     <uses-sdk
-        android:minSdkVersion="9"
+        android:minSdkVersion="11"
         android:targetSdkVersion="16" />
 
     <uses-permission android:name="android.permission.READ_CONTACTS" />
@@ -25,31 +25,67 @@
     <uses-permission android:name="android.permission.RESTART_PACKAGES" />
     <uses-permission android:name="android.permission.DISABLE_KEYGUARD" />
     <uses-permission android:name="android.permission.CHANGE_CONFIGURATION" />
+    <uses-permission android:name="android.permission.BROADCAST_STICKY" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
+        android:name="com.v2tech.view.MainApplication"
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
-        android:label="@string/app_name"
         android:theme="@android:style/Theme.NoTitleBar" >
+        <service android:name="com.v2tech.view.JNIService" >
+        </service>
+        
+        <provider android:name="com.v2tech.db.V2techContentProvider"
+			android:authorities="com.v2tech.bizcom" />
+
         <activity
-            android:name="com.v2tech.view.LogoActivity"
-            android:label="@string/app_name" >
+            android:name="com.v2tech.view.LoginActivity"
+            android:configChanges="orientation"
+            android:label="@string/title_activity_login"
+            android:windowSoftInputMode="stateHidden" >
+           
+        </activity>
+        <activity
+            android:name="com.v2tech.view.VideoActivityV2"
+            android:configChanges="orientation"
+            android:screenOrientation="landscape" >
+        </activity>
+        <activity
+            android:name="com.v2tech.view.contacts.ContactDetail"
+            android:windowSoftInputMode="stateHidden" >
+        </activity>
+        <activity
+            android:name="com.v2tech.view.conversation.Conversation"
+            android:windowSoftInputMode="stateHidden" >
+            <intent-filter>
+                <action android:name="com.v2tech.start_conversation_activity" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="com.v2tech" />
+            </intent-filter>
+        </activity>
+            
+              <activity
+            android:name="com.v2tech.view.conversation.VideoConversation"
+             >
+            <intent-filter>
+                <action android:name="com.v2tech.start_video_conversation_activity" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="com.v2tech" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="com.v2tech.view.MainActivity"
+            android:configChanges="screenSize|orientation"
+            android:windowSoftInputMode="stateHidden" >
              <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
-        <activity
-            android:name="com.v2tech.view.LoginActivity"
-            android:label="@string/title_activity_login" >
-        </activity>
-        <activity
-            android:name="com.v2tech.view.ConfsActivity" >
-        </activity>
-        
-        <activity
-            android:name="com.v2tech.view.VideoActivity" >           
+            
         </activity>
     </application>
 

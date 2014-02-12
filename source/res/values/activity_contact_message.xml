@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="contact_message_send_button">发  送</string>
+    <string name="contact_message_pop_up_item_copy">复制</string>
+    <string name="error_contact_messag_invalid_user_id">错误的用户id</string>
     <color name="message_panel_bg">#363636</color>
 </resources>

@@ -26,6 +26,7 @@
     <uses-permission android:name="android.permission.DISABLE_KEYGUARD" />
     <uses-permission android:name="android.permission.CHANGE_CONFIGURATION" />
     <uses-permission android:name="android.permission.BROADCAST_STICKY" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
         android:name="com.v2tech.view.MainApplication"
@@ -34,12 +35,16 @@
         android:theme="@android:style/Theme.NoTitleBar" >
         <service android:name="com.v2tech.view.JNIService" >
         </service>
+        
+        <provider android:name="com.v2tech.db.V2techContentProvider"
+			android:authorities="com.v2tech.bizcom" />
 
         <activity
             android:name="com.v2tech.view.LoginActivity"
             android:configChanges="orientation"
             android:label="@string/title_activity_login"
             android:windowSoftInputMode="stateHidden" >
+           
         </activity>
         <activity
             android:name="com.v2tech.view.VideoActivityV2"
@@ -75,11 +80,12 @@
             android:name="com.v2tech.view.MainActivity"
             android:configChanges="screenSize|orientation"
             android:windowSoftInputMode="stateHidden" >
-            <intent-filter>
+             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            
         </activity>
     </application>
 

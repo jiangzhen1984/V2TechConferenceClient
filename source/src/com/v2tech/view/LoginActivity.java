@@ -33,6 +33,7 @@ import android.widget.Toast;
 import com.V2.jni.ConfigRequest;
 import com.v2tech.R;
 import com.v2tech.logic.AsynResult;
+import com.v2tech.logic.GlobalHolder;
 import com.v2tech.logic.NetworkStateCode;
 import com.v2tech.logic.User;
 import com.v2tech.view.JNIService.LocalBinder;
@@ -406,6 +407,8 @@ public class LoginActivity extends Activity {
 					} else {
 						saveUserConfig("", "");
 					}
+					// record current logged in user to global holder
+					GlobalHolder.getInstance().setCurrentUser(u);
 					mContext.startActivity(new Intent(mContext, MainActivity.class));
 					finish();
 				}

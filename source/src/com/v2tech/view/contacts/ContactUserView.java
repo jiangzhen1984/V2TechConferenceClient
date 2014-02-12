@@ -10,6 +10,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.v2tech.R;
+import com.v2tech.logic.GlobalHolder;
 import com.v2tech.logic.User;
 import com.v2tech.util.V2Log;
 import com.v2tech.view.PublicIntent;
@@ -36,7 +37,6 @@ public class ContactUserView extends LinearLayout {
 	}
 
 	public void initData(User u) {
-		long l1 = System.currentTimeMillis();
 		if (u == null || u.getmUserId() <= 0) {
 			throw new RuntimeException("Invalid user data");
 		}
@@ -75,7 +75,6 @@ public class ContactUserView extends LinearLayout {
 		this.addView(view, new LinearLayout.LayoutParams(
 				LinearLayout.LayoutParams.MATCH_PARENT,
 				LinearLayout.LayoutParams.WRAP_CONTENT));
-		V2Log.e(System.currentTimeMillis() - l1 + "");
 	}
 
 	private Dialog getActionDialog() {
@@ -135,6 +134,8 @@ public class ContactUserView extends LinearLayout {
 		case ACTION_TYPE_START_CONVERSATION:
 			i.setAction(PublicIntent.START_CONVERSACTION_ACTIVITY);
 			i.addCategory(PublicIntent.DEFAULT_CATEGORY);
+			i.putExtra("user1id", GlobalHolder.getInstance().getCurrentUserId());
+			i.putExtra("user2id", this.mUser.getmUserId());
 			break;
 		case ACTION_TYPE_VIEW_DETAIL:
 			i.setClass(this.getContext(), ContactDetail.class);

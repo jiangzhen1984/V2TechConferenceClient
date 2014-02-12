@@ -27,6 +27,16 @@
             android:layout_height="0dp"
             android:layout_below="@+id/conversation_user_title"
             android:text="" />
+
+        <TextView
+            android:id="@+id/video_conversation_time_counter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="30dp"
+            android:text="TextView" />
+
     </RelativeLayout>
 
     <LinearLayout
@@ -51,6 +61,30 @@
             android:layout_height="match_parent"
             android:layout_weight=".5"
             android:orientation="horizontal" >
+
+             <RelativeLayout
+                 android:layout_width="match_parent"
+                 android:layout_height="match_parent" >
+
+                 <SurfaceView
+                     android:id="@+id/video_conversation_local_surface_view"
+                     android:layout_width="match_parent"
+                     android:layout_height="match_parent"
+                     android:layout_centerHorizontal="true"
+                     android:layout_centerVertical="true" />
+
+                 <ImageView
+                     android:id="@+id/video_conversation_camera_reverse"
+                     android:layout_width="wrap_content"
+                     android:layout_height="wrap_content"
+                     android:layout_alignParentRight="true"
+                     android:layout_alignParentTop="true"
+                     android:layout_marginRight="20dp"
+                     android:layout_marginTop="20dp"
+                     android:src="@drawable/reverse_camera" />
+
+             </RelativeLayout>
+
         </LinearLayout>
     </LinearLayout>
 

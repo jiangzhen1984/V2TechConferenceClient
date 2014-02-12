@@ -8,156 +8,368 @@
 package com.v2tech;
 
 public final class R {
+    public static final class animator {
+        public static final int down_in=0x7f040000;
+        public static final int down_out=0x7f040001;
+        public static final int left_in=0x7f040002;
+        public static final int left_out=0x7f040003;
+        public static final int login_container_down_in=0x7f040004;
+        public static final int right_in=0x7f040005;
+        public static final int right_out=0x7f040006;
+    }
     public static final class attr {
     }
     public static final class color {
-        public static final int common_black=0x7f040004;
-        public static final int confs_group_list_bg=0x7f040009;
-        public static final int confs_group_widget_separation_line=0x7f04000a;
-        public static final int confs_panel_bg=0x7f040007;
-        public static final int confs_search_bar_bg=0x7f040008;
-        public static final int confs_title_bg=0x7f040006;
-        public static final int in_meeting_group_list_bg=0x7f04000c;
-        public static final int in_meeting_setting_bg=0x7f040005;
-        public static final int in_meeting_title_bar_bg=0x7f04000b;
-        public static final int in_meeting_widget_separation_line=0x7f04000d;
-        public static final int logo_background=0x7f040000;
-        public static final int setting_inner_bg=0x7f040002;
-        public static final int setting_outer_bg=0x7f040001;
-        public static final int setting_separation=0x7f040003;
+        public static final int common_black=0x7f050016;
+        public static final int confs_group_list_bg=0x7f050003;
+        public static final int confs_group_widget_separation_line=0x7f050004;
+        public static final int confs_panel_bg=0x7f050001;
+        public static final int confs_search_bar_bg=0x7f050002;
+        public static final int confs_title_bg=0x7f050000;
+        public static final int contacts_user_detail_item_bg=0x7f050009;
+        public static final int contacts_user_detail_text_color=0x7f05000a;
+        public static final int contacts_user_group_bg=0x7f050008;
+        public static final int contacts_user_view_bg=0x7f050007;
+        public static final int contacts_user_view_under_line=0x7f050006;
+        public static final int in_meeting_group_list_bg=0x7f050010;
+        public static final int in_meeting_quit_window_inner_bg=0x7f050013;
+        public static final int in_meeting_quit_window_separation=0x7f050014;
+        public static final int in_meeting_quit_window_title_bg=0x7f050015;
+        public static final int in_meeting_setting_bg=0x7f050012;
+        public static final int in_meeting_title_bar_bg=0x7f05000f;
+        public static final int in_meeting_widget_separation_line=0x7f050011;
+        public static final int logo_background=0x7f05000b;
+        public static final int message_panel_bg=0x7f050005;
+        public static final int setting_inner_bg=0x7f05000d;
+        public static final int setting_outer_bg=0x7f05000c;
+        public static final int setting_separation=0x7f05000e;
     }
     public static final class dimen {
         /**  Default screen margins, per the Android Design guidelines. 
-
-         Customize dimensions originally defined in res/values/dimens.xml (such as
-         screen margins) for sw720dp devices (e.g. 10" tablets) in landscape here.
-    
          */
-        public static final int activity_horizontal_margin=0x7f050000;
-        public static final int activity_vertical_margin=0x7f050001;
+        public static final int activity_horizontal_margin=0x7f070000;
+        public static final int activity_vertical_margin=0x7f070001;
     }
     public static final class drawable {
-        public static final int confs=0x7f020000;
-        public static final int group_list_conference_banner=0x7f020001;
-        public static final int group_list_contacts=0x7f020002;
-        public static final int group_list_group_button=0x7f020003;
-        public static final int group_list_search_button=0x7f020004;
-        public static final int group_list_separation=0x7f020005;
-        public static final int group_list_setting=0x7f020006;
-        public static final int ic_launcher=0x7f020007;
-        public static final int in_meeting_log_out_button=0x7f020008;
-        public static final int in_meeting_setting_button=0x7f020009;
-        public static final int in_meeting_show_attendee_button=0x7f02000a;
-        public static final int in_meeting_speaker=0x7f02000b;
-        public static final int logo_200_168=0x7f02000c;
-        public static final int rounded_corners=0x7f02000d;
-        public static final int rounded_corners_login_button=0x7f02000e;
-        public static final int rounded_corners_of_in_metting_setting_pop_up_window=0x7f02000f;
-        public static final int rounded_corners_of_ip_setting_outer_box=0x7f020010;
-        public static final int rounded_corners_of_login_inner_box=0x7f020011;
-        public static final int rounded_corners_of_login_outer_box=0x7f020012;
-        public static final int rounded_corners_show_ip_setting_button=0x7f020013;
+        public static final int address=0x7f020000;
+        public static final int arrow=0x7f020001;
+        public static final int arrow_down_gray=0x7f020002;
+        public static final int arrow_right_gray=0x7f020003;
+        public static final int attendee=0x7f020004;
+        public static final int camera=0x7f020005;
+        public static final int camera_showing=0x7f020006;
+        public static final int contact_default=0x7f020007;
+        public static final int contact_user_action_dialog_bg=0x7f020008;
+        public static final int contact_user_detail_bg=0x7f020009;
+        public static final int contact_user_detail_button=0x7f02000a;
+        public static final int contact_user_detail_return=0x7f02000b;
+        public static final int conversation_accept=0x7f02000c;
+        public static final int conversation_reject=0x7f02000d;
+        public static final int group=0x7f02000e;
+        public static final int group_list_conference_banner=0x7f02000f;
+        public static final int group_list_search_button=0x7f020010;
+        public static final int group_list_separation=0x7f020011;
+        public static final int group_selected=0x7f020012;
+        public static final int ic_launcher=0x7f020013;
+        public static final int input_bg=0x7f020014;
+        public static final int loading=0x7f020015;
+        public static final int logo=0x7f020016;
+        public static final int logo_200_168=0x7f020017;
+        public static final int logout=0x7f020018;
+        public static final int message=0x7f020019;
+        public static final int message_body_arrow_left=0x7f02001a;
+        public static final int message_body_arrow_left_selected=0x7f02001b;
+        public static final int message_body_arrow_right=0x7f02001c;
+        public static final int message_body_bg=0x7f02001d;
+        public static final int message_body_bg_remote=0x7f02001e;
+        public static final int message_body_bg_selected=0x7f02001f;
+        public static final int message_body_time_bg=0x7f020020;
+        public static final int message_panel_sep=0x7f020021;
+        public static final int message_plus=0x7f020022;
+        public static final int message_selected=0x7f020023;
+        public static final int message_selected_pop_up_arrow=0x7f020024;
+        public static final int message_selected_pop_up_bg=0x7f020025;
+        public static final int message_send=0x7f020026;
+        public static final int message_speaker=0x7f020027;
+        public static final int open_local_camera=0x7f020028;
+        public static final int reverse_camera=0x7f020029;
+        public static final int rounded_corners=0x7f02002a;
+        public static final int rounded_corners_login_button=0x7f02002b;
+        public static final int rounded_corners_of_contact_user_detail_inner=0x7f02002c;
+        public static final int rounded_corners_of_contact_user_detail_outer=0x7f02002d;
+        public static final int rounded_corners_of_in_meeting_quit_window_outer_box=0x7f02002e;
+        public static final int rounded_corners_of_in_metting_setting_pop_up_window=0x7f02002f;
+        public static final int rounded_corners_of_ip_setting_outer_box=0x7f020030;
+        public static final int rounded_corners_of_login_inner_box=0x7f020031;
+        public static final int rounded_corners_of_login_outer_box=0x7f020032;
+        public static final int rounded_corners_of_setting_block=0x7f020033;
+        public static final int rounded_corners_show_ip_setting_button=0x7f020034;
+        public static final int search=0x7f020035;
+        public static final int search_48=0x7f020036;
+        public static final int selector_conf=0x7f020037;
+        public static final int selector_group=0x7f020038;
+        public static final int selector_setting=0x7f020039;
+        public static final int setting=0x7f02003a;
+        public static final int setting_selected=0x7f02003b;
+        public static final int speaker=0x7f02003c;
+        public static final int speaking=0x7f02003d;
+        public static final int spinner_black_16=0x7f02003e;
+        public static final int spinner_black_48=0x7f02003f;
+        public static final int transparent=0x7f020040;
+        public static final int video_conversation_bottom_panel_bg=0x7f020041;
+        public static final int video_conversation_panel_sep=0x7f020042;
+        public static final int video_setting=0x7f020043;
     }
     public static final class id {
-        public static final int action_forgot_password=0x7f090030;
-        public static final int action_settings=0x7f090031;
-        public static final int confs_search=0x7f09000c;
-        public static final int email=0x7f090018;
-        public static final int gourp_list_conference_create_time_tv=0x7f09001f;
-        public static final int group_list_conf_list=0x7f090003;
-        public static final int group_list_conference_image_view=0x7f090004;
-        public static final int group_list_conference_owner_tv=0x7f09001e;
-        public static final int group_list_conference_title_tv=0x7f090001;
-        public static final int group_list_contacts=0x7f090007;
-        public static final int group_list_container=0x7f09000e;
-        public static final int group_list_group=0x7f090005;
-        public static final int group_list_pannel_lv=0x7f090002;
-        public static final int group_list_setting=0x7f090009;
-        public static final int imageView2=0x7f090006;
-        public static final int imageView3=0x7f090008;
-        public static final int imageView8=0x7f09000b;
-        public static final int in_meeting_log_out_iv=0x7f090012;
-        public static final int in_meeting_setting_iv=0x7f090010;
-        public static final int in_meeting_show_attendee_iv=0x7f090011;
-        public static final int in_meeting_show_speaker_iv=0x7f090013;
-        public static final int in_meeting_tools_bar=0x7f09000f;
-        public static final int in_metting_video_main=0x7f090014;
-        public static final int ip1=0x7f090026;
-        public static final int ip2=0x7f090028;
-        public static final int ip3=0x7f09002a;
-        public static final int ip4=0x7f09002c;
-        public static final int ip_setting_cancel=0x7f09002f;
-        public static final int ip_setting_save=0x7f09002e;
-        public static final int linearLayout1=0x7f090000;
-        public static final int linearLayout2=0x7f09000a;
-        public static final int login=0x7f09001a;
-        public static final int login_form=0x7f090017;
-        public static final int login_rem_pwd=0x7f09001b;
-        public static final int login_status=0x7f090015;
-        public static final int login_status_message=0x7f090016;
-        public static final int password=0x7f090019;
-        public static final int port=0x7f09002d;
-        public static final int radio0=0x7f090022;
-        public static final int radio1=0x7f090023;
-        public static final int radio2=0x7f090024;
-        public static final int radioGroup1=0x7f090021;
-        public static final int scrollView1=0x7f09000d;
-        public static final int show_setting=0x7f09001c;
-        public static final int sign_in_button=0x7f09001d;
-        public static final int textView1=0x7f090020;
-        public static final int textView2=0x7f090025;
-        public static final int textView3=0x7f090027;
-        public static final int textView4=0x7f090029;
-        public static final int textView5=0x7f09002b;
+        public static final int IMWCancelButton=0x7f0a005b;
+        public static final int IMWQuitButton=0x7f0a005a;
+        public static final int LinearLayout1=0x7f0a0078;
+        public static final int LinearLayout2=0x7f0a0083;
+        public static final int LinearLayout3=0x7f0a0084;
+        public static final int RelativeLayout1=0x7f0a001a;
+        public static final int action_forgot_password=0x7f0a008b;
+        public static final int arrow=0x7f0a0062;
+        public static final int checkBox1=0x7f0a0057;
+        public static final int child_container=0x7f0a0045;
+        public static final int confs_search=0x7f0a007c;
+        public static final int contact_detail_return_button=0x7f0a0002;
+        public static final int contact_group_arrow=0x7f0a0041;
+        public static final int contact_group_name=0x7f0a0042;
+        public static final int contact_group_online_statist=0x7f0a0043;
+        public static final int contact_group_view_line=0x7f0a0044;
+        public static final int contact_group_view_root=0x7f0a0040;
+        public static final int contact_message_plus=0x7f0a0022;
+        public static final int contact_message_pop_up_item_copy=0x7f0a0079;
+        public static final int contact_message_speaker=0x7f0a0020;
+        public static final int contact_show_user_menu=0x7f0a0049;
+        public static final int contact_user_detail_account_tv=0x7f0a0009;
+        public static final int contact_user_detail_address_et=0x7f0a0019;
+        public static final int contact_user_detail_address_tv=0x7f0a0018;
+        public static final int contact_user_detail_birthday_et=0x7f0a000d;
+        public static final int contact_user_detail_birthday_tv=0x7f0a000c;
+        public static final int contact_user_detail_cell_phone_et=0x7f0a000f;
+        public static final int contact_user_detail_cell_phone_tv=0x7f0a000e;
+        public static final int contact_user_detail_company_et=0x7f0a0013;
+        public static final int contact_user_detail_company_tv=0x7f0a0012;
+        public static final int contact_user_detail_department_et=0x7f0a0015;
+        public static final int contact_user_detail_department_tv=0x7f0a0014;
+        public static final int contact_user_detail_gender_et=0x7f0a000b;
+        public static final int contact_user_detail_gender_tv=0x7f0a000a;
+        public static final int contact_user_detail_head_icon=0x7f0a0003;
+        public static final int contact_user_detail_invite_video=0x7f0a0006;
+        public static final int contact_user_detail_nick_name_et=0x7f0a0008;
+        public static final int contact_user_detail_send_msg=0x7f0a0005;
+        public static final int contact_user_detail_telephone_et=0x7f0a0011;
+        public static final int contact_user_detail_telephone_tv=0x7f0a0010;
+        public static final int contact_user_detail_title=0x7f0a0001;
+        public static final int contact_user_detail_title_et=0x7f0a0017;
+        public static final int contact_user_detail_title_tv=0x7f0a0016;
+        public static final int contact_user_detail_user_signature_tv=0x7f0a0004;
+        public static final int contact_user_img=0x7f0a0046;
+        public static final int contact_user_name=0x7f0a0047;
+        public static final int contact_user_signature=0x7f0a0048;
+        public static final int contacts_container=0x7f0a007e;
+        public static final int contacts_user_action_call=0x7f0a004d;
+        public static final int contacts_user_action_call_ly=0x7f0a004c;
+        public static final int contacts_user_action_invite_chat=0x7f0a004b;
+        public static final int contacts_user_action_invite_video=0x7f0a004a;
+        public static final int contacts_user_action_view_detail=0x7f0a004e;
+        public static final int conversation_accept_button=0x7f0a002c;
+        public static final int conversation_cancel_button=0x7f0a002d;
+        public static final int conversation_message_body_icon_local=0x7f0a0071;
+        public static final int conversation_message_body_icon_remote=0x7f0a0075;
+        public static final int conversation_message_list=0x7f0a001f;
+        public static final int conversation_message_list_scroll_view=0x7f0a001e;
+        public static final int conversation_reject_button=0x7f0a002b;
+        public static final int conversation_text=0x7f0a002a;
+        public static final int conversation_user_icon=0x7f0a0029;
+        public static final int conversation_user_title=0x7f0a0027;
+        public static final int email=0x7f0a0039;
+        public static final int flipper=0x7f0a003f;
+        public static final int gourp_list_conference_create_time_tv=0x7f0a0052;
+        public static final int group_list_conf_list=0x7f0a0037;
+        public static final int group_list_conference_image_view=0x7f0a004f;
+        public static final int group_list_conference_owner_tv=0x7f0a0051;
+        public static final int group_list_conference_title_tv=0x7f0a0050;
+        public static final int group_list_container=0x7f0a007d;
+        public static final int group_list_pannel_lv=0x7f0a007f;
+        public static final int imageView1=0x7f0a0061;
+        public static final int imageView2=0x7f0a0088;
+        public static final int imageView3=0x7f0a0023;
+        public static final int imageView4=0x7f0a0087;
+        public static final int imageView8=0x7f0a007b;
+        public static final int imq_l1=0x7f0a0053;
+        public static final int imq_l2=0x7f0a0054;
+        public static final int imq_l3=0x7f0a0055;
+        public static final int imq_l4=0x7f0a0058;
+        public static final int imq_l5=0x7f0a0059;
+        public static final int in_meeting_log_out_iv=0x7f0a0031;
+        public static final int in_meeting_setting_iv=0x7f0a002f;
+        public static final int in_meeting_setting_reverse_camera=0x7f0a0060;
+        public static final int in_meeting_show_attendee_iv=0x7f0a0030;
+        public static final int in_meeting_tools_bar=0x7f0a002e;
+        public static final int in_meeting_user_list_layout=0x7f0a0064;
+        public static final int in_meeting_user_search=0x7f0a0063;
+        public static final int in_metting_video_main=0x7f0a0033;
+        public static final int ip1=0x7f0a0065;
+        public static final int ip2=0x7f0a0067;
+        public static final int ip3=0x7f0a0069;
+        public static final int ip4=0x7f0a006b;
+        public static final int ip_setting_cancel=0x7f0a006e;
+        public static final int ip_setting_save=0x7f0a006d;
+        public static final int linearLayout1=0x7f0a0000;
+        public static final int linearLayout2=0x7f0a001c;
+        public static final int login=0x7f0a003b;
+        public static final int login_form=0x7f0a0036;
+        public static final int login_layout=0x7f0a0038;
+        public static final int login_rem_pwd=0x7f0a003c;
+        public static final int login_status=0x7f0a0034;
+        public static final int login_status_message=0x7f0a0035;
+        public static final int messag_body_content_ly_local=0x7f0a0073;
+        public static final int messag_body_content_ly_remote=0x7f0a0077;
+        public static final int message_body_arrow_left=0x7f0a0072;
+        public static final int message_body_arrow_right=0x7f0a0076;
+        public static final int message_body_local_user_ly=0x7f0a0070;
+        public static final int message_body_remote_ly=0x7f0a0074;
+        public static final int message_body_time_text=0x7f0a006f;
+        public static final int message_panel_ly=0x7f0a001d;
+        public static final int message_selected_pop_up_arrow=0x7f0a007a;
+        public static final int message_send=0x7f0a0024;
+        public static final int message_text=0x7f0a0025;
+        public static final int message_user_title=0x7f0a001b;
+        public static final int password=0x7f0a003a;
+        public static final int port=0x7f0a006c;
+        public static final int radio0=0x7f0a005d;
+        public static final int radio1=0x7f0a005e;
+        public static final int radio2=0x7f0a005f;
+        public static final int radioGroup1=0x7f0a005c;
+        public static final int realtabcontent=0x01010000;
+        public static final int scrollView1=0x7f0a0007;
+        public static final int setting_container=0x7f0a0080;
+        public static final int setting_quit_button=0x7f0a0081;
+        public static final int show_setting=0x7f0a003d;
+        public static final int sign_in_button=0x7f0a003e;
+        public static final int speaker_iv=0x7f0a0032;
+        public static final int textView1=0x7f0a0021;
+        public static final int textView2=0x7f0a0056;
+        public static final int textView3=0x7f0a0066;
+        public static final int textView4=0x7f0a0068;
+        public static final int textView5=0x7f0a006a;
+        public static final int ui_ly=0x7f0a0028;
+        public static final int video_conversation_camera_reverse=0x7f0a008a;
+        public static final int video_conversation_local_surface_view=0x7f0a0089;
+        public static final int video_conversation_local_video=0x7f0a0086;
+        public static final int video_conversation_main=0x7f0a0026;
+        public static final int video_conversation_remote_video=0x7f0a0085;
+        public static final int video_conversation_time_counter=0x7f0a0082;
     }
     public static final class layout {
-        public static final int activity_confs=0x7f030000;
-        public static final int activity_in_metting=0x7f030001;
-        public static final int activity_login=0x7f030002;
-        public static final int activity_logo=0x7f030003;
-        public static final int group_list_conference_view=0x7f030004;
-        public static final int in_meeting_setting_pop_up_window=0x7f030005;
-        public static final int ip_setting=0x7f030006;
+        public static final int activity_contact_detail=0x7f030000;
+        public static final int activity_contact_message=0x7f030001;
+        public static final int activity_conversation=0x7f030002;
+        public static final int activity_conversation_waiting=0x7f030003;
+        public static final int activity_in_metting=0x7f030004;
+        public static final int activity_login=0x7f030005;
+        public static final int activity_main=0x7f030006;
+        public static final int contacts_group_view=0x7f030007;
+        public static final int contacts_user_view=0x7f030008;
+        public static final int contacts_user_view_action_dialog=0x7f030009;
+        public static final int group_list_conference_view=0x7f03000a;
+        public static final int in_meeting_quit_window=0x7f03000b;
+        public static final int in_meeting_setting_pop_up_window=0x7f03000c;
+        public static final int in_meeting_user_list_pop_up_window=0x7f03000d;
+        public static final int ip_setting=0x7f03000e;
+        public static final int message_body=0x7f03000f;
+        public static final int message_selected_pop_up_window=0x7f030010;
+        public static final int tab_fragment_conference=0x7f030011;
+        public static final int tab_fragment_contacts=0x7f030012;
+        public static final int tab_fragment_setting=0x7f030013;
+        public static final int video_conversation_main=0x7f030014;
     }
     public static final class menu {
-        public static final int login=0x7f080000;
-        public static final int logo=0x7f080001;
+        public static final int login=0x7f090000;
     }
     public static final class string {
-        public static final int action_forgot_password=0x7f060014;
-        public static final int action_settings=0x7f060001;
-        public static final int action_sign_in_register=0x7f060012;
-        public static final int action_sign_in_short=0x7f060013;
-        public static final int app_name=0x7f060000;
-        public static final int banner_desc=0x7f060002;
-        public static final int confs_title=0x7f06000e;
-        public static final int error_connect_to_server=0x7f06001e;
-        public static final int error_field_required=0x7f060019;
-        public static final int error_incorrect_password=0x7f060018;
-        public static final int error_init_im_request=0x7f06001d;
-        public static final int error_invalid_email=0x7f060016;
-        public static final int error_invalid_password=0x7f060017;
-        public static final int error_no_host_configuration=0x7f06001a;
-        public static final int error_save_host_config=0x7f06001c;
-        public static final int in_meeting_setting_reverse=0x7f06000d;
-        public static final int in_meeting_setting_video_qulity=0x7f060009;
-        public static final int in_meeting_setting_video_qulity_high=0x7f06000a;
-        public static final int in_meeting_setting_video_qulity_low=0x7f06000c;
-        public static final int in_meeting_setting_video_qulity_middle=0x7f06000b;
-        public static final int ip_host_setting=0x7f06001b;
-        public static final int ip_setting_address=0x7f060003;
-        public static final int ip_setting_address_dot=0x7f060005;
-        public static final int ip_setting_button_cancel=0x7f060007;
-        public static final int ip_setting_button_save=0x7f060006;
-        public static final int ip_setting_port=0x7f060004;
-        public static final int login_chk=0x7f060008;
-        public static final int login_progress_signing_in=0x7f060015;
+        public static final int action_forgot_password=0x7f060024;
+        public static final int action_sign_in_register=0x7f060022;
+        public static final int action_sign_in_short=0x7f060023;
+        public static final int app_name=0x7f06004c;
+        public static final int banner_desc=0x7f06004d;
+        public static final int confs_title=0x7f060000;
+        public static final int contact_message_pop_up_item_copy=0x7f060005;
+        public static final int contact_message_send_button=0x7f060004;
+        public static final int contacts_title=0x7f060007;
+        public static final int contacts_user_action_call=0x7f06000a;
+        public static final int contacts_user_action_invite_chat=0x7f060008;
+        public static final int contacts_user_action_invite_video=0x7f060009;
+        public static final int contacts_user_action_view_detail=0x7f06000b;
+        public static final int contacts_user_detail_invite_video=0x7f06000e;
+        public static final int contacts_user_detail_item_account=0x7f060010;
+        public static final int contacts_user_detail_item_address=0x7f060018;
+        public static final int contacts_user_detail_item_birdthday=0x7f060012;
+        public static final int contacts_user_detail_item_cell_phone=0x7f060013;
+        public static final int contacts_user_detail_item_company=0x7f060015;
+        public static final int contacts_user_detail_item_department=0x7f060016;
+        public static final int contacts_user_detail_item_gender=0x7f060011;
+        public static final int contacts_user_detail_item_nick_name=0x7f06000f;
+        public static final int contacts_user_detail_item_telephone=0x7f060014;
+        public static final int contacts_user_detail_item_title=0x7f060017;
+        public static final int contacts_user_detail_return_button=0x7f06000c;
+        public static final int contacts_user_detail_send_msg=0x7f06000d;
+        public static final int conversation_accept=0x7f06001c;
+        public static final int conversation_cancel=0x7f06001e;
+        public static final int conversation_notification=0x7f06001b;
+        public static final int conversation_reject=0x7f06001d;
+        public static final int conversation_waiting=0x7f06001a;
+        public static final int error_connect_to_server=0x7f06002e;
+        public static final int error_contact_messag_invalid_user_id=0x7f060006;
+        public static final int error_contacts_user_detail_no_avai_user=0x7f060019;
+        public static final int error_does_not_open_local_video_yet=0x7f06004a;
+        public static final int error_field_required=0x7f060029;
+        public static final int error_host_required=0x7f06002f;
+        public static final int error_in_meeting_invalid_gid=0x7f060048;
+        public static final int error_in_meeting_open_video_falied=0x7f060049;
+        public static final int error_incorrect_password=0x7f060028;
+        public static final int error_init_im_request=0x7f06002d;
+        public static final int error_invalid_email=0x7f060026;
+        public static final int error_invalid_password=0x7f060027;
+        public static final int error_no_host_configuration=0x7f06002a;
+        public static final int error_request_enter_conference=0x7f060002;
+        public static final int error_request_enter_conference_time_out=0x7f060001;
+        public static final int error_save_host_config=0x7f06002c;
+        public static final int error_time_out=0x7f06004b;
+        public static final int in_meeting_quit_cancel_button=0x7f060040;
+        public static final int in_meeting_quit_notification=0x7f06003e;
+        public static final int in_meeting_quit_quit_button=0x7f06003f;
+        public static final int in_meeting_quit_rem=0x7f060042;
+        public static final int in_meeting_quit_text=0x7f060041;
+        public static final int in_meeting_setting_reverse=0x7f060047;
+        public static final int in_meeting_setting_video_qulity=0x7f060043;
+        public static final int in_meeting_setting_video_qulity_high=0x7f060044;
+        public static final int in_meeting_setting_video_qulity_low=0x7f060046;
+        public static final int in_meeting_setting_video_qulity_middle=0x7f060045;
+        public static final int ip_host_setting=0x7f06002b;
+        public static final int ip_setting_address=0x7f060031;
+        public static final int ip_setting_address_dot=0x7f060033;
+        public static final int ip_setting_button_cancel=0x7f060035;
+        public static final int ip_setting_button_save=0x7f060034;
+        public static final int ip_setting_port=0x7f060032;
+        public static final int login_chk=0x7f060036;
+        public static final int login_progress_signing_in=0x7f060025;
         /**  Strings related to login 
          */
-        public static final int prompt_email=0x7f060010;
-        public static final int prompt_password=0x7f060011;
-        public static final int succeed_save_host_config=0x7f06001f;
-        public static final int title_activity_login=0x7f06000f;
+        public static final int prompt_email=0x7f060020;
+        public static final int prompt_password=0x7f060021;
+        public static final int requesting_enter_conference=0x7f060003;
+        public static final int setting_notification_account=0x7f06003a;
+        public static final int setting_notification_confs_msg=0x7f06003c;
+        public static final int setting_notification_personal_information=0x7f060039;
+        public static final int setting_notification_session_msg=0x7f06003b;
+        public static final int setting_notification_voice=0x7f060038;
+        public static final int setting_quit_application=0x7f06003d;
+        public static final int setting_title=0x7f060037;
+        public static final int succeed_save_host_config=0x7f060030;
+        public static final int title_activity_login=0x7f06001f;
     }
     public static final class style {
         /** 
@@ -170,23 +382,37 @@ public final class R {
             backward-compatibility can go here.
         
 
-        Base application theme for API 11+. This theme completely replaces
-        AppBaseTheme from res/values/styles.xml on API 11+ devices.
+        Base application theme, dependent on API level. This theme is replaced
+        by AppBaseTheme from res/values-vXX/styles.xml on newer devices.
     
- API 11 theme customizations can go here. 
 
-        Base application theme for API 14+. This theme completely replaces
-        AppBaseTheme from BOTH res/values/styles.xml and
-        res/values-v11/styles.xml on API 14+ devices.
+            Theme customizations available in newer API levels can go in
+            res/values-vXX/styles.xml, while customizations related to
+            backward-compatibility can go here.
+        
+
+        Base application theme, dependent on API level. This theme is replaced
+        by AppBaseTheme from res/values-vXX/styles.xml on newer devices.
     
- API 14 theme customizations can go here. 
+
+            Theme customizations available in newer API levels can go in
+            res/values-vXX/styles.xml, while customizations related to
+            backward-compatibility can go here.
+        
          */
-        public static final int AppBaseTheme=0x7f070000;
+        public static final int AppBaseTheme=0x7f080005;
         /**  Application theme. 
  All customizations that are NOT specific to a particular API-level can go here. 
+ Application theme. 
+ All customizations that are NOT specific to a particular API-level can go here. 
+ Application theme. 
+ All customizations that are NOT specific to a particular API-level can go here. 
          */
-        public static final int AppTheme=0x7f070001;
-        public static final int IpSettingDialog=0x7f070003;
-        public static final int LoginFormContainer=0x7f070002;
+        public static final int AppTheme=0x7f080006;
+        public static final int ContactUserActionDialog=0x7f080003;
+        public static final int InMeetingQuitDialog=0x7f080002;
+        public static final int IpSettingDialog=0x7f080001;
+        public static final int LoginFormContainer=0x7f080000;
+        public static final int tabTheme=0x7f080004;
     }
 }

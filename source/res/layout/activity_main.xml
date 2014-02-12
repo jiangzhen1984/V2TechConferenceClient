@@ -31,12 +31,12 @@
                 android:id="@android:id/tabs"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="100dp"
-                android:layout_marginRight="100dp"
                 android:divider="@drawable/group_list_separation"
+                android:gravity="center"
                 android:orientation="horizontal"
-                 android:showDividers="middle"
+                android:showDividers="middle"
                 android:tabStripEnabled="false" />
+
         </LinearLayout>
     </LinearLayout>
 

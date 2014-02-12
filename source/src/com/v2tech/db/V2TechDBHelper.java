@@ -1,0 +1,53 @@
+package com.v2tech.db;
+
+import android.content.Context;
+import android.database.DatabaseErrorHandler;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteDatabase.CursorFactory;
+import android.database.sqlite.SQLiteOpenHelper;
+
+public class V2TechDBHelper extends SQLiteOpenHelper {
+	
+	private static final String DB_NAME = "v2tech.db";
+
+	private static final int DATABASE_VERSION = 1;
+
+	private static final String MESSAGES_TABLE_CREATE_SQL = " create table  "
+			+ ContentDescriptor.Messages.NAME + " ( "
+			+ ContentDescriptor.Messages.Cols.ID
+			+ "  integer primary key AUTOINCREMENT,"
+			+ ContentDescriptor.Messages.Cols.FROM_USER_ID + " numeric,"
+			+ ContentDescriptor.Messages.Cols.FROM_USER_NAME + " text,"
+			+ ContentDescriptor.Messages.Cols.TO_USER_ID + " numeric,"
+			+ ContentDescriptor.Messages.Cols.TO_USER_NAME + " text,"
+			+ ContentDescriptor.Messages.Cols.MSG_CONTENT + " text,"
+			+ ContentDescriptor.Messages.Cols.MSG_TYPE + " numeric,"
+			+ ContentDescriptor.Messages.Cols.SEND_TIME
+			+ "  TIMESTAMP  DEFAULT CURRENT_TIMESTAMP, "
+			+ ContentDescriptor.Messages.Cols.STATE + " integer) ";
+
+	public V2TechDBHelper(Context context, String name, CursorFactory factory,
+			int version, DatabaseErrorHandler errorHandler) {
+		super(context, name, factory, version, errorHandler);
+	}
+
+	public V2TechDBHelper(Context context, String name, CursorFactory factory,
+			int version) {
+		super(context, name, factory, version);
+	}
+
+	public V2TechDBHelper(Context context) {
+		super(context, DB_NAME, null, DATABASE_VERSION);
+	}
+
+	@Override
+	public void onCreate(SQLiteDatabase db) {
+		db.execSQL(MESSAGES_TABLE_CREATE_SQL);
+	}
+
+	@Override
+	public void onUpgrade(SQLiteDatabase arg0, int arg1, int arg2) {
+
+	}
+
+}

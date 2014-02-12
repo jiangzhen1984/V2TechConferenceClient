@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    >
+    android:layout_height="match_parent" >
 
     <RelativeLayout
         android:id="@+id/RelativeLayout1"
@@ -42,7 +41,6 @@
             android:text="@string/contacts_user_detail_return_button"
             android:textColor="#ffffff" />
     </RelativeLayout>
-
     <LinearLayout
         android:id="@+id/linearLayout2"
         android:layout_width="match_parent"
@@ -52,17 +50,18 @@
         android:layout_below="@+id/RelativeLayout1"
         android:orientation="vertical" >
 
-        <ScrollView
-            android:id="@+id/scrollView1"
+        <com.v2tech.view.cus.ItemScrollView
+            android:id="@+id/conversation_message_list_scroll_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" >
 
             <LinearLayout
+                android:id="@+id/conversation_message_list"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical" >
             </LinearLayout>
-        </ScrollView>
+        </com.v2tech.view.cus.ItemScrollView>
     </LinearLayout>
 
     <RelativeLayout
@@ -123,13 +122,11 @@
             android:layout_centerVertical="true"
             android:layout_marginLeft="20dp"
             android:layout_marginRight="20dp"
-            android:layout_toRightOf="@+id/imageView3"
             android:layout_toLeftOf="@+id/message_send"
+            android:layout_toRightOf="@+id/imageView3"
             android:background="@drawable/input_bg"
             android:ems="10" >
-
         </EditText>
-
     </RelativeLayout>
 
 </RelativeLayout>
