@@ -1,6 +1,9 @@
 package com.v2tech.view;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -12,14 +15,17 @@ import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
+import android.widget.BaseAdapter;
+import android.widget.ListView;
 
 import com.v2tech.R;
 import com.v2tech.logic.Group;
 import com.v2tech.logic.Group.GroupType;
-import com.v2tech.util.V2Log;
+import com.v2tech.logic.User;
 import com.v2tech.view.contacts.ContactGroupView;
+import com.v2tech.view.contacts.ContactUserView;
 
 public class ContactsTabFragment extends Fragment {
 
@@ -31,9 +37,11 @@ public class ContactsTabFragment extends Fragment {
 
 	private JNIService mService;
 
-	private LinearLayout mContactsContainer;
+	private ListView mContactsContainer;
 
 	private ContactsHandler mHandler = new ContactsHandler();
+
+	private Map<Long, ListItem> mItemHolder = new HashMap<Long, ListItem>();
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -47,14 +55,16 @@ public class ContactsTabFragment extends Fragment {
 			Bundle savedInstanceState) {
 		View v = inflater.inflate(R.layout.tab_fragment_contacts, container,
 				false);
-		mContactsContainer = (LinearLayout) v
-				.findViewById(R.id.contacts_container);
+		mContactsContainer = (ListView) v.findViewById(R.id.contacts_container);
+		mContactsContainer.setAdapter(adapter);
+		mContactsContainer.setDivider(null);
 		return v;
 	}
 
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
+		mItemList.clear();
 	}
 
 	@Override
@@ -79,11 +89,10 @@ public class ContactsTabFragment extends Fragment {
 
 	private void fillContactsGroup() {
 		List<Group> l = mService.getGroup(GroupType.CONTACT);
-		long l1 = System.currentTimeMillis();
 		for (Group g : l) {
-			mContactsContainer.addView(new ContactGroupView(getActivity(), g));
+			mItemList.add(new ListItem(g));
 		}
-		V2Log.e(System.currentTimeMillis() - l1 +"");
+		adapter.notifyDataSetChanged();
 	}
 
 	class Tab1BroadcastReceiver extends BroadcastReceiver {
@@ -97,6 +106,129 @@ public class ContactsTabFragment extends Fragment {
 				mService = ((MainActivity) getActivity()).getService();
 				Message.obtain(mHandler, FILL_CONTACTS_GROUP).sendToTarget();
 			}
+		}
+
+	}
+
+	List<ListItem> mItemList = new ArrayList<ListItem>();
+	private ContactsAdapter adapter = new ContactsAdapter();
+
+	class ListItem {
+		private Group g;
+		private User u;
+		private int type;
+		private View v;
+
+		public ListItem(Group g) {
+			super();
+			this.g = g;
+			type = 1;
+			v = new ContactGroupView(getActivity(), g, groupClickListener);
+		}
+
+		public ListItem(User u) {
+			super();
+			this.u = u;
+			type = 2;
+			v = new ContactUserView(getActivity(), u);
+		}
+
+	}
+
+	private OnClickListener groupClickListener = new OnClickListener() {
+
+		@Override
+		public void onClick(View v) {
+			ContactGroupView gv = (ContactGroupView) v;
+			Group g = gv.getGroup();
+			int index = 0;
+			for (ListItem i : mItemList) {
+				index++;
+				if (i.type == 1 && i.g == g) {
+					break;
+				}
+
+			}
+			// remove already showed child
+			if (gv.isShowedChild()) {
+				Long l = System.currentTimeMillis();
+				for (int i = 0; i < mItemList.size(); i++) {
+					ListItem item = mItemList.get(i);
+					List<Group> lg = g.getChildGroup();
+					for (Group gg : lg) {
+						if (item.type == 1 && item.g.getmGId() == gg.getmGId()) {
+							mItemList.remove(item);
+							i--;
+						}
+					}
+					List<User> lu = g.getUsers();
+					for (User u : lu) {
+						if (item.type == 2
+								&& item.u.getmUserId() == u.getmUserId()) {
+							mItemList.remove(item);
+							i--;
+						}
+					}
+				}
+				System.out.println(System.currentTimeMillis() - l + " ");
+				// add child to show list
+			} else {
+				List<Group> lg = g.getChildGroup();
+				for (Group gg : lg) {
+					mItemList.add(index++, getListItem(gg));
+				}
+				List<User> lu = g.getUsers();
+				for (User u : lu) {
+					mItemList.add(index++, getListItem(u));
+				}
+			}
+
+			adapter.notifyDataSetChanged();
+		}
+
+		private ListItem getListItem(Group g) {
+			Long key = Long.valueOf(g.getmGId());
+			ListItem it = mItemHolder.get(key);
+			if (it == null) {
+				it = new ListItem(g);
+				mItemHolder.put(key, it);
+			}
+			return it;
+		}
+
+		private ListItem getListItem(User u) {
+			Long key = Long.valueOf(u.getmUserId());
+			ListItem it = mItemHolder.get(key);
+			if (it == null) {
+				it = new ListItem(u);
+				mItemHolder.put(key, it);
+			}
+			return it;
+		}
+
+	};
+
+	class ContactsAdapter extends BaseAdapter {
+
+		@Override
+		public int getCount() {
+			return mItemList.size();
+		}
+
+		@Override
+		public Object getItem(int pos) {
+			ListItem item = mItemList.get(pos);
+			return item.type == 1 ? item.g : item.u;
+		}
+
+		@Override
+		public long getItemId(int arg0) {
+			return 0;
+		}
+
+		@Override
+		public View getView(int position, View convertView, ViewGroup parent) {
+			return mItemList.get(position).v;
 		}
 
 	}

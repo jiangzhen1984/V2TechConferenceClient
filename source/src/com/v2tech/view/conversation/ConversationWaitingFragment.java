@@ -21,6 +21,16 @@ public class ConversationWaitingFragment extends Fragment {
 	private TextView mCancelButtonTV;
 
 	private boolean mIsInComingCall;
+	
+	
+
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		//TODO to be implement send invitation request
+	}
+
+
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,

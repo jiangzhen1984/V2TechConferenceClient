@@ -41,7 +41,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
-            android:layout_marginTop="250dp"
+            android:layout_marginTop="50dp"
             android:orientation="vertical" >
 
             <ImageView
@@ -77,11 +77,13 @@
                 android:layout_marginRight="35dp"
                 android:background="@drawable/conversation_reject"
                 android:gravity="center"
-                android:paddingLeft="50dp"
-                android:paddingRight="50dp"
+                android:paddingBottom="5dp"
+                android:paddingLeft="15dp"
+                android:paddingRight="15dp"
+                android:paddingTop="5dp"
                 android:text="@string/conversation_reject"
                 android:textColor="#ffffff"
-                android:textSize="22sp" />
+                android:textSize="20sp" />
 
             <TextView
                 android:id="@+id/conversation_accept_button"
@@ -90,11 +92,13 @@
                 android:layout_marginLeft="20dp"
                 android:background="@drawable/conversation_accept"
                 android:gravity="center"
-                android:paddingLeft="50dp"
-                android:paddingRight="50dp"
+                android:paddingBottom="5dp"
+                android:paddingLeft="15dp"
+                android:paddingRight="15dp"
+                android:paddingTop="5dp"
                 android:text="@string/conversation_accept"
                 android:textColor="#ffffff"
-                android:textSize="22sp" />
+                android:textSize="20sp" />
 
             <TextView
                 android:id="@+id/conversation_cancel_button"
@@ -103,12 +107,14 @@
                 android:layout_gravity="center"
                 android:background="@drawable/conversation_reject"
                 android:gravity="center"
-                android:paddingLeft="50dp"
-                android:paddingRight="50dp"
+                 android:paddingBottom="5dp"
+                android:paddingLeft="15dp"
+                android:paddingRight="15dp"
+                android:paddingTop="5dp"
                 android:text="@string/conversation_cancel"
                 android:textColor="#ffffff"
-                android:textSize="22sp"
-                />
+                android:textSize="20sp"
+                android:visibility="gone" />
         </LinearLayout>
     </RelativeLayout>
 

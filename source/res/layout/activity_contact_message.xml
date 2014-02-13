@@ -17,10 +17,10 @@
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
             android:layout_gravity="center"
-            android:layout_marginBottom="15dp"
-            android:layout_marginTop="15dp"
+            android:layout_marginBottom="10dp"
+            android:layout_marginTop="10dp"
             android:text=""
-            android:textSize="25sp" />
+            android:textSize="20sp" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -34,7 +34,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_centerVertical="true"
-            android:layout_marginLeft="56dp"
+            android:layout_marginLeft="15dp"
             android:background="@drawable/contact_user_detail_return"
             android:gravity="center"
             android:paddingLeft="8dp"
@@ -71,13 +71,6 @@
         android:layout_alignParentBottom="true"
         android:background="@color/message_panel_bg" >
 
-        <ImageView
-            android:id="@+id/contact_message_speaker"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="5dp"
-            android:src="@drawable/message_speaker" />
-
         <TextView
             android:id="@+id/textView1"
             android:layout_width="wrap_content"
@@ -96,7 +89,7 @@
         <ImageView
             android:id="@+id/imageView3"
             android:layout_width="wrap_content"
-            android:layout_height="110dp"
+            android:layout_height="wrap_content"
             android:layout_centerVertical="true"
             android:layout_marginLeft="15dp"
             android:layout_toRightOf="@+id/contact_message_plus"
@@ -113,7 +106,7 @@
             android:gravity="center"
             android:text="@string/contact_message_send_button"
             android:textColor="#ffffff"
-            android:textSize="18sp" />
+            android:textSize="15sp" />
 
         <EditText
             android:id="@+id/message_text"
@@ -127,6 +120,17 @@
             android:background="@drawable/input_bg"
             android:ems="10" >
         </EditText>
+
+        <ImageView
+            android:id="@+id/contact_message_speaker"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
+            android:layout_margin="5dp"
+            android:layout_marginLeft="15dp"
+            android:src="@drawable/message_speaker" />
+
     </RelativeLayout>
 
 </RelativeLayout>

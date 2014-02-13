@@ -140,9 +140,9 @@ public class MainActivity extends FragmentActivity implements OnTouchListener {
 		public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,
 				float velocityY) {
 
-			if (e1.getX() - e2.getX() > 100 && Math.abs(velocityX) > 100) {
+			if (e1.getX() - e2.getX() > 100 && Math.abs(velocityX) > 200) {
 				mTabManager.turnToRightTab();
-			} else if (e2.getX() - e1.getX() > 100 && Math.abs(velocityX) > 100) {
+			} else if (e2.getX() - e1.getX() > 200 && Math.abs(velocityX) > 200) {
 				mTabManager.turnToLeftTab();
 			}
 

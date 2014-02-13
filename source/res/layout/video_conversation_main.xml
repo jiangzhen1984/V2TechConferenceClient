@@ -38,8 +38,8 @@
             android:text="TextView" />
     </RelativeLayout>
 
-    <LinearLayout
-        android:id="@+id/LinearLayout2"
+    <RelativeLayout
+        android:id="@+id/RelativeLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@+id/RelativeLayout1"
@@ -49,19 +49,29 @@
 
         <LinearLayout
             android:id="@+id/video_conversation_remote_video"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_weight=".5"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
             android:orientation="horizontal" >
+
         </LinearLayout>
-         <LinearLayout
-              android:id="@+id/video_conversation_local_video"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight=".5"
-            android:orientation="horizontal" >
+
+        <LinearLayout
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentRight="true"
+            android:orientation="vertical" >
+
+            <SurfaceView
+                android:id="@+id/video_conversation_local_surface_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
         </LinearLayout>
-    </LinearLayout>
+
+    </RelativeLayout>
 
     <LinearLayout
         android:id="@+id/LinearLayout3"
@@ -81,9 +91,10 @@
                 android:id="@+id/imageView1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                  android:layout_centerHorizontal="true"
+                android:layout_centerHorizontal="true"
                 android:layout_centerVertical="true"
                 android:src="@drawable/video_conversation_camera_button" />
+
         </RelativeLayout>
 
         <RelativeLayout
@@ -120,7 +131,6 @@
 
         </RelativeLayout>
 
-        
         <RelativeLayout
             android:id="@+id/video_conversation_hang_off_button"
             android:layout_width="0dp"

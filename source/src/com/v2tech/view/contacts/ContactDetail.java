@@ -186,7 +186,13 @@ public class ContactDetail extends Activity {
 
 				@Override
 				public void onClick(View arg0) {
-					//TODO start video
+					Intent i = new Intent();
+					i.setAction(PublicIntent.START_VIDEO_CONVERSACTION_ACTIVITY);
+					i.addCategory(PublicIntent.DEFAULT_CATEGORY);
+					i.putExtra("is_coming_call", false);
+					i.putExtra("name", u.getName());
+					i.putExtra("uid", u.getmUserId());
+					mContext.startActivity(i);
 				}
 
 			});

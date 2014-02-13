@@ -1,12 +1,15 @@
 package com.v2tech.view.conversation;
 
+import v2av.VideoRecorder;
+import android.app.Activity;
 import android.app.Fragment;
+import android.graphics.PixelFormat;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
 import android.view.LayoutInflater;
+import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,6 +27,15 @@ public class VideoConversationFragment extends Fragment {
 	private long mTimeLine = 0;
 
 	private LocalHandler mLocalHandler;
+	
+	private VideoConversationListener call;
+	
+
+	@Override
+	public void onAttach(Activity activity) {
+		super.onAttach(activity);
+		call = (VideoConversationListener) activity;
+	}
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -44,12 +56,22 @@ public class VideoConversationFragment extends Fragment {
 	@Override
 	public void onStart() {
 		super.onStart();
-		// VideoRecorder.VideoPreviewSurfaceHolder = mLocalSurface.getHolder();
-		// VideoRecorder.VideoPreviewSurfaceHolder
-		// .setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
-		// VideoRecorder.VideoPreviewSurfaceHolder
-		// .setFormat(PixelFormat.TRANSPARENT);
+		 VideoRecorder.VideoPreviewSurfaceHolder = mLocalSurface.getHolder();
+		 VideoRecorder.VideoPreviewSurfaceHolder
+		 .setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
+		 VideoRecorder.VideoPreviewSurfaceHolder
+		 .setFormat(PixelFormat.TRANSPARENT);
+		 call.openLocalCamera();
 	}
+	
+	
+	@Override
+	public void onStop() {
+		super.onStop();
+		call.closeLocalCamera();
+	}
+
+	
 
 	private void updateTimer() {
 		int hour = (int) mTimeLine / 3600;
@@ -62,11 +84,6 @@ public class VideoConversationFragment extends Fragment {
 				+ (second < 10 ? "0" + second : second));
 	}
 
-	@Override
-	public void onStop() {
-		// TODO Auto-generated method stub
-		super.onStop();
-	}
 
 	class LocalHandler extends Handler {
 

@@ -108,7 +108,7 @@
                 android:layout_height="wrap_content"
                   android:layout_centerHorizontal="true"
                 android:layout_centerVertical="true"
-                android:src="@drawable/open_local_camera" />
+                android:src="@drawable/video_conversation_camera_button" />
         </RelativeLayout>
 
         <RelativeLayout
@@ -145,12 +145,24 @@
 
         </RelativeLayout>
 
-        <LinearLayout
+       
+        <RelativeLayout
+            android:id="@+id/video_conversation_hang_off_button"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight=".33"
-            android:orientation="horizontal" >
-        </LinearLayout>
+            android:background="#bd1e02"
+            >
+
+            <ImageView
+                android:id="@+id/imageView5"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_centerVertical="true"
+                android:src="@drawable/video_conversaion_hang_off_button" />
+
+        </RelativeLayout>
     </LinearLayout>
 
 </RelativeLayout>

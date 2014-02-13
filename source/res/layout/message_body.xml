@@ -50,7 +50,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
-                android:layout_marginLeft="-4dp"
+                android:layout_marginLeft="-1dp"
                 android:layout_marginRight="30dp"
                 android:layout_toRightOf="@+id/message_body_arrow_left"
                 android:background="@drawable/message_body_bg"
@@ -110,7 +110,7 @@
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
                 android:layout_marginLeft="30dp"
-                android:layout_marginRight="-2dp"
+                android:layout_marginRight="-1dp"
                 android:layout_toLeftOf="@+id/message_body_arrow_right"
                 android:background="@drawable/message_body_bg_remote"
                 android:orientation="horizontal" >

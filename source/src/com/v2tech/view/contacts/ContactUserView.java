@@ -12,7 +12,6 @@ import android.widget.TextView;
 import com.v2tech.R;
 import com.v2tech.logic.GlobalHolder;
 import com.v2tech.logic.User;
-import com.v2tech.util.V2Log;
 import com.v2tech.view.PublicIntent;
 
 public class ContactUserView extends LinearLayout {
@@ -143,6 +142,10 @@ public class ContactUserView extends LinearLayout {
 			break;
 		}
 		this.getContext().startActivity(i);
+	}
+	
+	public User getUser() {
+		return this.mUser;
 	}
 
 }
