@@ -5,11 +5,16 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
 import android.app.Activity;
+import android.content.ComponentName;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
+import android.os.Message;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.inputmethod.InputMethodManager;
@@ -21,8 +26,10 @@ import android.widget.Toast;
 
 import com.v2tech.R;
 import com.v2tech.db.ContentDescriptor;
-import com.v2tech.logic.Message;
 import com.v2tech.logic.User;
+import com.v2tech.logic.VMessage;
+import com.v2tech.view.JNIService;
+import com.v2tech.view.JNIService.LocalBinder;
 import com.v2tech.view.cus.ItemScrollView;
 import com.v2tech.view.cus.ScrollViewListener;
 
@@ -31,6 +38,8 @@ public class Conversation extends Activity {
 	private final int START_LOAD_MESSAGE = 1;
 	private final int LOAD_MESSAGE = 2;
 	private final int END_LOAD_MESSAGE = 3;
+	private final int SEND_MESSAGE = 4;
+	private final int SEND_MESSAGE_DONE = 5;
 
 	private final int BATCH_COUNT = 10;
 
@@ -46,20 +55,21 @@ public class Conversation extends Activity {
 
 	private LocalHandler lh;
 
+	private JNIService mService;
 	private boolean isBound;
 
 	private boolean isLoading;
-	
+
 	private boolean mLoadedAllMessages;
 
 	private Context mContext;
 
 	private TextView mSendButtonTV;
-	
+
 	private TextView mReturnButtonTV;
 
 	private EditText mMessageET;
-	
+
 	private ImageView mLoadingImg;
 
 	@Override
@@ -82,9 +92,8 @@ public class Conversation extends Activity {
 			public void onClick(View arg0) {
 				finish();
 			}
-			
+
 		});
-		
 
 		user1Id = this.getIntent().getLongExtra("user1id", 0);
 		user1Id = this.getIntent().getLongExtra("user2id", 0);
@@ -102,33 +111,33 @@ public class Conversation extends Activity {
 	@Override
 	protected void onStart() {
 		super.onStart();
+		isBound = bindService(new Intent(this.getApplicationContext(),
+				JNIService.class), mConnection, Context.BIND_AUTO_CREATE);
 		android.os.Message m = android.os.Message
 				.obtain(lh, START_LOAD_MESSAGE);
 		lh.sendMessageDelayed(m, 500);
 	}
 
-	private boolean test = true;
+	@Override
+	protected void onStop() {
+		super.onStop();
+		if (isBound) {
+			this.unbindService(mConnection);
+		}
+	}
+
 	private OnClickListener sendMessageListener = new OnClickListener() {
 
 		@Override
 		public void onClick(View view) {
 			String content = mMessageET.getEditableText().toString();
 			ContentValues cv = new ContentValues();
-			//FIXME test code
-			User u ;
-			if (test) {
-				cv.put(ContentDescriptor.Messages.Cols.FROM_USER_ID, user1Id);
-				cv.put(ContentDescriptor.Messages.Cols.TO_USER_ID, user2Id);
-				u = new User(user2Id);
-			} else {
-				cv.put(ContentDescriptor.Messages.Cols.FROM_USER_ID, user2Id);
-				cv.put(ContentDescriptor.Messages.Cols.TO_USER_ID, user1Id);
-				u = new User(user1Id);
-			}
-			test = !test;
+			User local = new User(user1Id);
+			User remote = new User(user2Id);
+
 			cv.put(ContentDescriptor.Messages.Cols.MSG_CONTENT, content);
 			cv.put(ContentDescriptor.Messages.Cols.MSG_TYPE,
-					Message.MessageType.TEXT.getIntValue());
+					VMessage.MessageType.TEXT.getIntValue());
 			getContentResolver().insert(ContentDescriptor.Messages.CONTENT_URI,
 					cv);
 
@@ -136,12 +145,14 @@ public class Conversation extends Activity {
 
 			InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 			imm.hideSoftInputFromWindow(mMessageET.getWindowToken(), 0);
-			
-			Message m = new Message(u, content);
-			//Add message to container
+
+			VMessage m = new VMessage(local, remote, content);
+			Message.obtain(lh, SEND_MESSAGE, m).sendToTarget();
+			// Add message to container
 			MessageBodyView mv = new MessageBodyView(mContext, m, true);
 			mMessagesContainer.addView(mv);
-			mScrollView.scrollTo(mScrollView.getLeft(), mScrollView.getBottom());
+			mScrollView
+					.scrollTo(mScrollView.getLeft(), mScrollView.getBottom());
 			mScrollView.post(new Runnable() {
 				@Override
 				public void run() {
@@ -201,19 +212,17 @@ public class Conversation extends Activity {
 			return;
 		}
 		int count = 0;
-		Message lastM = null;
+		VMessage lastM = null;
 		while (mCur.moveToNext()) {
 			int id = mCur.getInt(0);
 			// msg_content column
 			String content = mCur.getString(5);
-			// from_user_Id column
-			long localUserId = mCur.getLong(1);
 			// to_user_id column
 			long remoteUserId = mCur.getLong(3);
 			// date time
 			String dateString = mCur.getString(7);
-			Message m = new Message(localUserId == user1Id ? localUser
-					: remoteUser, content, remoteUserId == user2Id);
+			VMessage m = new VMessage(localUser, remoteUser, content,
+					remoteUserId == user2Id);
 			try {
 				m.setDate(dp.parse(dateString));
 			} catch (ParseException e) {
@@ -224,8 +233,8 @@ public class Conversation extends Activity {
 			if (lastM == null) {
 				showTime = true;
 			}
-			if (lastM != null && lastM.getDate() !=null && m.getDate() != null) {
-				if (lastM.getDate().getTime()/60000 == m.getDate().getTime()/60000) {
+			if (lastM != null && lastM.getDate() != null && m.getDate() != null) {
+				if (lastM.getDate().getTime() / 60000 == m.getDate().getTime() / 60000) {
 					showTime = false;
 				} else {
 					showTime = true;
@@ -239,8 +248,7 @@ public class Conversation extends Activity {
 					mMessagesContainer.addView(mv, 0);
 				}
 			});
-			
-			
+
 			lastM = m;
 			count++;
 			offset++;
@@ -250,7 +258,22 @@ public class Conversation extends Activity {
 		}
 		mCur.close();
 	}
-	
+
+	/** Defines callback for service binding, passed to bindService() */
+	private ServiceConnection mConnection = new ServiceConnection() {
+
+		@Override
+		public void onServiceConnected(ComponentName className, IBinder service) {
+			LocalBinder binder = (LocalBinder) service;
+			mService = binder.getService();
+			isBound = true;
+		}
+
+		@Override
+		public void onServiceDisconnected(ComponentName arg0) {
+			isBound = false;
+		}
+	};
 
 	class LocalHandler extends Handler {
 
@@ -276,6 +299,9 @@ public class Conversation extends Activity {
 			case END_LOAD_MESSAGE:
 				mMessagesContainer.removeView(mLoadingImg);
 				isLoading = false;
+				break;
+			case SEND_MESSAGE:
+				mService.sendMessage((VMessage)msg.obj, Message.obtain(this, SEND_MESSAGE_DONE));
 				break;
 			}
 		}

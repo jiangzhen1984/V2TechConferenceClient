@@ -12,40 +12,20 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.util.Log;
 
-//import com.xinlan.im.R;
-//import com.xinlan.im.adapter.XiuLiuApplication;
-//import com.xinlan.im.bean.msgtype.ChatRecImgType;
-//import com.xinlan.im.bean.msgtype.HasMsgType;
-//import com.xinlan.im.bean.msgtype.MsgType;
-//import com.xinlan.im.ui.SplashActivity;
-//import com.xinlan.im.ui.chat.bean.ChatItem;
-//import com.xinlan.im.ui.chat.bean.ChatMSG;
-//import com.xinlan.im.ui.chat.bean.ChatMsgEntity;
-//import com.xinlan.im.ui.chat.bean.TGifChatItem;
-//import com.xinlan.im.ui.chat.bean.TPicChatItem;
-//import com.xinlan.im.ui.chat.bean.TTextChatItem;
-//import com.xinlan.im.ui.chat.db.DbHelper;
-//import com.xinlan.im.utils.Logger;
-//import com.xinlan.im.utils.XmlParserUtils;
-//import com.xinlan.im.utils.picNvoiceUtil;
+
 
 public class ChatRequest {
-	// private Activity context;
+	
+	public static final int BT_CONF = 1;
+	public static final int BT_IM = 2;
+	
 	private static ChatRequest mChatRequest;
-	// private DbHelper dbHelper;
-	// private XiuLiuApplication app;
-	// private SharedPreferences preferences;
+
 
 	private boolean islinsheng, isviber;
 
-	// private ChatMSG msg;
 
-	@SuppressWarnings("static-access")
 	private ChatRequest(Context context) {
-		// this.context = context;
-		// dbHelper=new DbHelper(context);
-		// app=(XiuLiuApplication) context.getApplication();
-		// preferences=context.getSharedPreferences("config",context.MODE_APPEND);
 
 	};
 
@@ -110,11 +90,30 @@ public class ChatRequest {
 	public native void sendChatAudio(long nGroupID, long nToUserID,
 			String szText, String filename, int bussinessType);
 
-	// ���������ͼƬ���
+	/**
+	 * <p>Send image data to user.</p>
+	 * <p>If input 0 as nGroupId, means P2P send data. Before call this API, call {@link #sendChatText(long, long, String, int)} first </p>
+	 * @param nGroupID
+	 * @param nToUserID
+	 * @param pPicData <br>
+	 *   |----image  header    52 bytes|----------------image data-------------|  <br>
+	 *   |{UUID} extension bytes       |----------------image data-------------|  <br>
+	 * @param nLength  52+image size
+	 * @param bussinessType  1 as Conference type,  2 as other type
+	 * 
+	 * @see {@link #sendChatText(long, long, String, int)}
+	 */
 	public native void sendChatPicture(long nGroupID, long nToUserID,
 			byte[] pPicData, int nLength, int bussinessType);
 
-	// �յ����˷���������������Ϣ�Ļص�
+	/**
+	 * 
+	 * @param nGroupID
+	 * @param nBusinessType
+	 * @param nFromUserID
+	 * @param nTime
+	 * @param szXmlText
+	 */
 	public void OnRecvChatText(long nGroupID, int nBusinessType,
 			long nFromUserID, long nTime, String szXmlText) {
 		Log.e("ImRequest UI", "OnRecvChatText ����" + nGroupID + " "

@@ -4,7 +4,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class Message {
+public class VMessage {
 
 	public enum MessageType {
 		TEXT(1), IMAGE(2);
@@ -26,6 +26,8 @@ public class Message {
 
 	private User mUser;
 
+	private User mToUser;
+
 	MessageType mType;
 
 	private String mText;
@@ -36,20 +38,21 @@ public class Message {
 
 	private String mStrDateTime;
 
-	public Message(User u) {
-		this(u, null, false);
+	public VMessage(User u, User toUser) {
+		this(u, toUser, null, false);
 	}
 
-	public Message(User u, String text) {
-		this(u, text, false);
+	public VMessage(User u, User toUser, String text) {
+		this(u, toUser, text, false);
 	}
 
-	public Message(User u, boolean isRemote) {
-		this(u, null, isRemote);
+	public VMessage(User u, User toUser, boolean isRemote) {
+		this(u, toUser, null, isRemote);
 	}
 
-	public Message(User u, String text, boolean isRemote) {
+	public VMessage(User u, User toUser, String text, boolean isRemote) {
 		this.mUser = u;
+		this.mToUser = toUser;
 		this.mText = text;
 		this.mDate = new Date();
 		this.mType = MessageType.TEXT;
@@ -117,4 +120,21 @@ public class Message {
 		return this.mStrDateTime;
 	}
 
+	public User getToUser() {
+		return this.mToUser;
+	}
+
+	public String toXml() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n")
+				.append("<TChatData IsAutoReply=\"False\">\n")
+				.append("<FontList>\n")
+				.append("<TChatFont Color=\"255\" Name=\"Segoe UI\" Size=\"18\" Style=\"\"/>")
+				.append("</FontList>\n")
+				.append("<ItemList>\n")
+				.append("<TTextChatItem NewLine=\"True\" FontIndex=\"0\" Text=\""
+						+ this.mText + "\"/>").append("    </ItemList>")
+				.append("</TChatData>");
+		return sb.toString();
+	}
 }

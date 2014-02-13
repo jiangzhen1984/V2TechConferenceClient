@@ -20,6 +20,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.widget.Toast;
 
+import com.V2.jni.ChatRequest;
 import com.V2.jni.ConfRequest;
 import com.V2.jni.ConfRequestCallback;
 import com.V2.jni.GroupRequest;
@@ -37,6 +38,7 @@ import com.v2tech.logic.Group;
 import com.v2tech.logic.NetworkStateCode;
 import com.v2tech.logic.User;
 import com.v2tech.logic.UserDeviceConfig;
+import com.v2tech.logic.VMessage;
 import com.v2tech.util.V2Log;
 
 class MetaData {
@@ -90,6 +92,8 @@ public class JNIService extends Service {
 
 	private JNICallbackHandler mCallbackHandler;
 
+	private Handler thread;
+
 	// ////////////////////////////////////////
 	// JNI call back definitions
 	private ImRequestCallback mImCB;
@@ -99,6 +103,7 @@ public class JNIService extends Service {
 	private GroupRequestCB mGRCB;
 
 	private VideoRequestCB mVRCB;
+
 	// ////////////////////////////////////////
 
 	private Context mContext;
@@ -131,6 +136,10 @@ public class JNIService extends Service {
 		HandlerThread callback = new HandlerThread("callback");
 		callback.start();
 		mCallbackHandler = new JNICallbackHandler(callback.getLooper());
+
+		HandlerThread backEnd = new HandlerThread("back-end");
+		backEnd.start();
+		thread = new Handler(backEnd.getLooper());
 
 		mImCB = new ImRequestCB(mCallbackHandler);
 		ImRequest.getInstance().setCallback(mImCB);
@@ -279,24 +288,27 @@ public class JNIService extends Service {
 	public User getloggedUser() {
 		return this.mUserHolder.get(Long.valueOf(this.mloggedInUserId));
 	}
-	
+
 	/**
 	 * Get user data according to user id
+	 * 
 	 * @param id
 	 * @return
 	 */
 	public User getUser(long id) {
 		return this.mUserHolder.get(Long.valueOf(id));
 	}
-	
-	
+
 	/**
 	 * Update user data according to user object
-	 * @param u  user data
-	 * @param caller After update, send message to caller
+	 * 
+	 * @param u
+	 *            user data
+	 * @param caller
+	 *            After update, send message to caller
 	 */
 	public void updateUserData(User u, Message caller) {
-		//TODO need to implement
+		// TODO need to implement
 	}
 
 	/**
@@ -336,21 +348,23 @@ public class JNIService extends Service {
 		} else if (gType == Group.GroupType.CONTACT) {
 			this.mContactsGroup = new ArrayList<Group>();
 			for (int i = 1; i < 10; i++) {
-				Group g = new Group(i, Group.GroupType.CONTACT, "味素科技"+ i, null, null);
+				Group g = new Group(i, Group.GroupType.CONTACT, "味素科技" + i,
+						null, null);
 				this.mContactsGroup.add(g);
-				for (int j =1; j< 5; j++) {
-					Group g1 = new Group(i<< 3 | j, Group.GroupType.CONTACT, "味素科技_sub"+ j, null, null);
+				for (int j = 1; j < 5; j++) {
+					Group g1 = new Group(i << 3 | j, Group.GroupType.CONTACT,
+							"味素科技_sub" + j, null, null);
 					g.addGroupToGroup(g1);
 				}
-				
-				for (int k =1; k< 25; k++) {
-					User u = new User((i << 5 |  k), "测试"+k, "sdfsdf", "wwww'");
+
+				for (int k = 1; k < 25; k++) {
+					User u = new User((i << 5 | k), "测试" + k, "sdfsdf", "wwww'");
 					if (mloggedInUserId <= 0) {
-						mloggedInUserId =u.getmUserId();
+						mloggedInUserId = u.getmUserId();
 						u.setCurrentLoggedInUser(true);
-						
+
 					}
-					
+
 					u.setAddress("测试地址");
 					u.setBirthday(new Date());
 					u.setCellPhone("13811962467");
@@ -359,7 +373,7 @@ public class JNIService extends Service {
 					u.setGender("男");
 					u.setSignature("sdfdsfdsf");
 					u.setTitle("职位");
-					
+
 					this.mUserHolder.put(u.getmUserId(), u);
 					g.addUserToGroup(u);
 				}
@@ -369,10 +383,10 @@ public class JNIService extends Service {
 			throw new RuntimeException(" Unknown group type :" + gType);
 		}
 	}
-	
-	
+
 	/**
 	 * If return null, means service doesn't receive group data or user data.<br>
+	 * 
 	 * @param gId
 	 * @return
 	 */
@@ -529,12 +543,21 @@ public class JNIService extends Service {
 				.sendToTarget();
 	}
 
+	/**
+	 * 
+	 * @param cc
+	 * @param caller
+	 */
 	public void updateCameraParameters(CameraConfiguration cc, Message caller) {
 		if (caller != null) {
 			// put caller message to the queue
 			getAndQueued(JNI_UPDATE_CAMERA_PAR, caller);
 		}
 		Message.obtain(mHandler, JNI_UPDATE_CAMERA_PAR, cc).sendToTarget();
+	}
+
+	public void sendMessage(VMessage msg, Message caller) {
+
 	}
 
 	/**
@@ -625,7 +648,7 @@ public class JNIService extends Service {
 	}
 
 	// //////////////////////////////////////////////////////////
-	// Internal Handler definition //
+	// Internal message definition //
 	// //////////////////////////////////////////////////////////
 
 	private static final int CANCEL_REQUEST = 0x1000;
@@ -648,6 +671,7 @@ public class JNIService extends Service {
 	private static final int JNI_REQUEST_RELEASE_SPEAK = 73;
 	private static final int JNI_UPDATE_CAMERA_PAR = 75;
 	private static final int JNI_REMOTE_USER_DEVICE_INFO_NOTIFICATION = 80;
+	private static final int JNI_SEND_MESSAGE = 90;
 
 	class LocalHander extends Handler {
 
@@ -746,6 +770,23 @@ public class JNIService extends Service {
 					VideoRequest.getInstance().setCapParam(cc.getDeviceId(),
 							cc.getCameraIndex(), cc.getFrameRate(),
 							cc.getBitRate());
+				}
+				break;
+			case JNI_SEND_MESSAGE:
+				final VMessage vm = (VMessage) msg.obj;
+				ChatRequest.getInstance().sendChatText(0,
+						vm.getToUser().getmUserId(), vm.toXml(),
+						ChatRequest.BT_IM);
+				if (vm.getType() == VMessage.MessageType.IMAGE) {
+					thread.post(new Runnable() {
+						@Override
+						public void run() {
+							ChatRequest.getInstance().sendChatPicture(0,
+									vm.getToUser().getmUserId(), null, 0,
+									ChatRequest.BT_IM);
+						}
+
+					});
 				}
 				break;
 			}
@@ -869,10 +910,10 @@ public class JNIService extends Service {
 				}
 				break;
 			case JNI_GROUP_USER_INFO_NOTIFICATION:
-				GroupUserInfoOrig go = (GroupUserInfoOrig)msg.obj;
-				if (go != null && go.xml != null) { 
+				GroupUserInfoOrig go = (GroupUserInfoOrig) msg.obj;
+				if (go != null && go.xml != null) {
 					List<User> lu = User.fromXml(go.xml);
-					//FIXME if group data doesn't receive, still record
+					// FIXME if group data doesn't receive, still record
 					for (Group g1 : mContactsGroup) {
 						if (g1.getmGId() == go.gId) {
 							g1.addUserToGroup(lu);
@@ -885,7 +926,7 @@ public class JNIService extends Service {
 					i.putExtra("gid", go.gId);
 					i.putExtra("gtype", go.gType);
 					mContext.sendStickyBroadcast(i);
-					
+
 				} else {
 					V2Log.e("Invalid group user data");
 				}

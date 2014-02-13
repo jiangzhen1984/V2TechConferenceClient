@@ -6,7 +6,6 @@ import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Handler;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -17,11 +16,11 @@ import android.widget.PopupWindow;
 import android.widget.TextView;
 
 import com.v2tech.R;
-import com.v2tech.logic.Message;
+import com.v2tech.logic.VMessage;
 
 public class MessageBodyView extends LinearLayout {
 
-	private Message mMsg;
+	private VMessage mMsg;
 
 	private ImageView mHeadIcon;
 	private LinearLayout mContentContainer;
@@ -41,11 +40,11 @@ public class MessageBodyView extends LinearLayout {
 	private Handler localHandler;
 	private Runnable popupWindowListener = null;
 
-	public MessageBodyView(Context context, Message m) {
+	public MessageBodyView(Context context, VMessage m) {
 		this(context, m, false);
 	}
 
-	public MessageBodyView(Context context, Message m, boolean isShowTime) {
+	public MessageBodyView(Context context, VMessage m, boolean isShowTime) {
 		super(context);
 		this.mMsg = m;
 
@@ -92,7 +91,7 @@ public class MessageBodyView extends LinearLayout {
 			mRemoteMessageContainter.setVisibility(View.VISIBLE);
 		}
 
-		if (mMsg.getType() == Message.MessageType.TEXT) {
+		if (mMsg.getType() == VMessage.MessageType.TEXT) {
 			contextTV = new TextView(this.getContext());
 			contextTV.setText(mMsg.getText());
 			mContentContainer.addView(contextTV, new LinearLayout.LayoutParams(
@@ -194,11 +193,11 @@ public class MessageBodyView extends LinearLayout {
 		}
 	}
 
-	public Message getItem() {
+	public VMessage getItem() {
 		return this.mMsg;
 	}
 
-	public void updateMessage(Message msg) {
+	public void updateMessage(VMessage msg) {
 		this.mMsg = msg;
 		mContentContainer.removeAllViews();
 		if (mMsg.isLocal()) {
@@ -215,7 +214,7 @@ public class MessageBodyView extends LinearLayout {
 			mRemoteMessageContainter.setVisibility(View.VISIBLE);
 		}
 
-		if (mMsg.getType() == Message.MessageType.TEXT) {
+		if (mMsg.getType() == VMessage.MessageType.TEXT) {
 			contextTV.setText(mMsg.getText());
 			mContentContainer.addView(contextTV, new LinearLayout.LayoutParams(
 					LinearLayout.LayoutParams.MATCH_PARENT,
