@@ -108,6 +108,7 @@ public class VMessage {
 		}
 	}
 
+
 	public boolean isLocal() {
 		return isLocal;
 	}

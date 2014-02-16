@@ -35,10 +35,11 @@ public class MessageBodyView extends LinearLayout {
 
 	private LinearLayout mRemoteMessageContainter;
 
-	private TextView contextTV;
+	private TextView contentTV;
 
 	private Handler localHandler;
 	private Runnable popupWindowListener = null;
+	private PopupWindow pw;
 
 	public MessageBodyView(Context context, VMessage m) {
 		this(context, m, false);
@@ -92,9 +93,11 @@ public class MessageBodyView extends LinearLayout {
 		}
 
 		if (mMsg.getType() == VMessage.MessageType.TEXT) {
-			contextTV = new TextView(this.getContext());
-			contextTV.setText(mMsg.getText());
-			mContentContainer.addView(contextTV, new LinearLayout.LayoutParams(
+			contentTV = new TextView(this.getContext());
+			contentTV.setText(mMsg.getText());
+			contentTV.setTextColor(Color.GRAY);
+			contentTV.setHighlightColor(Color.GRAY);
+			mContentContainer.addView(contentTV, new LinearLayout.LayoutParams(
 					LinearLayout.LayoutParams.MATCH_PARENT,
 					LinearLayout.LayoutParams.WRAP_CONTENT));
 		}
@@ -104,22 +107,34 @@ public class MessageBodyView extends LinearLayout {
 				LinearLayout.LayoutParams.WRAP_CONTENT);
 		this.addView(rootView, ll);
 
-		mContentContainer.setOnTouchListener(new OnTouchListener() {
+		mContentContainer.setOnLongClickListener(new OnLongClickListener() {
 
 			@Override
-			public boolean onTouch(final View anchor, MotionEvent mv) {
-
-				if (mv.getAction() == MotionEvent.ACTION_DOWN) {
-					updateSelectedBg(true);
-					showPopupWindow(anchor);
-				} else if (mv.getAction() == MotionEvent.ACTION_UP) {
-					updateSelectedBg(false);
-					cancelShowPopUpWindow();
-				}
-				return true;
+			public boolean onLongClick(View anchor) {
+				updateSelectedBg(true);
+				showPopupWindow(anchor);
+				return false;
 			}
 
 		});
+		// mContentContainer.setOnTouchListener(new OnTouchListener() {
+		//
+		// @Override
+		// public boolean onTouch(final View anchor, MotionEvent mv) {
+		// int action = mv.getAction();
+		// if (action == MotionEvent.ACTION_DOWN) {
+		// updateSelectedBg(true);
+		// showPopupWindow(anchor);
+		// } else if (action == MotionEvent.ACTION_UP || action ==
+		// MotionEvent.ACTION_POINTER_UP || action ==
+		// MotionEvent.ACTION_OUTSIDE) {
+		// updateSelectedBg(false);
+		// cancelShowPopUpWindow();
+		// }
+		// return false;
+		// }
+		//
+		// });
 	}
 
 	private void updateSelectedBg(boolean selected) {
@@ -144,46 +159,51 @@ public class MessageBodyView extends LinearLayout {
 
 			@Override
 			public void run() {
-				LayoutInflater inflater = (LayoutInflater) getContext()
-						.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-				View view = inflater.inflate(
-						R.layout.message_selected_pop_up_window, null);
-				
-				final PopupWindow pw = new PopupWindow(view,
-						ViewGroup.LayoutParams.WRAP_CONTENT,
-						ViewGroup.LayoutParams.WRAP_CONTENT, true);
-				pw.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-				pw.setFocusable(true);
-				pw.setTouchable(true);
-				pw.setOutsideTouchable(true);
+				if (!anchor.isShown()) {
+					return;
+				}
+				if (pw == null) {
+					LayoutInflater inflater = (LayoutInflater) getContext()
+							.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+					View view = inflater.inflate(
+							R.layout.message_selected_pop_up_window, null);
 
-				
-				TextView tv = (TextView) view
-						.findViewById(R.id.contact_message_pop_up_item_copy);
-				tv.setOnClickListener(new OnClickListener() {
-					@Override
-					public void onClick(View arg0) {
-						ClipboardManager clipboard = (ClipboardManager) getContext()
-								.getSystemService(Context.CLIPBOARD_SERVICE);
-						ClipData clip = ClipData.newPlainText("label",
-								mMsg.getText());
-						clipboard.setPrimaryClip(clip);
-						pw.dismiss();
-					}
+					pw = new PopupWindow(view,
+							ViewGroup.LayoutParams.WRAP_CONTENT,
+							ViewGroup.LayoutParams.WRAP_CONTENT, true);
+					pw.setBackgroundDrawable(new ColorDrawable(
+							Color.TRANSPARENT));
+					pw.setFocusable(true);
+					pw.setTouchable(true);
+					pw.setOutsideTouchable(true);
 
-				});
-				
-				
+					TextView tv = (TextView) view
+							.findViewById(R.id.contact_message_pop_up_item_copy);
+					tv.setOnClickListener(new OnClickListener() {
+						@Override
+						public void onClick(View arg0) {
+							ClipboardManager clipboard = (ClipboardManager) getContext()
+									.getSystemService(Context.CLIPBOARD_SERVICE);
+							ClipData clip = ClipData.newPlainText("label",
+									mMsg.getText());
+							clipboard.setPrimaryClip(clip);
+							pw.dismiss();
+						}
+
+					});
+
+				}
 				int offsetX = (anchor.getMeasuredWidth() - 50) / 2;
-				int offsetY = -(anchor.getMeasuredHeight() + 60) ;
-				pw.showAsDropDown(anchor, offsetX,  offsetY);
-				popupWindowListener = null;
+				int offsetY = -(anchor.getMeasuredHeight() + 60);
+				pw.showAsDropDown(anchor, offsetX, offsetY);
 				updateSelectedBg(false);
+				popupWindowListener = null;
+
 			}
 
 		};
 
-		localHandler.postDelayed(popupWindowListener, 800);
+		localHandler.postDelayed(popupWindowListener, 200);
 
 	}
 
@@ -215,8 +235,8 @@ public class MessageBodyView extends LinearLayout {
 		}
 
 		if (mMsg.getType() == VMessage.MessageType.TEXT) {
-			contextTV.setText(mMsg.getText());
-			mContentContainer.addView(contextTV, new LinearLayout.LayoutParams(
+			contentTV.setText(mMsg.getText());
+			mContentContainer.addView(contentTV, new LinearLayout.LayoutParams(
 					LinearLayout.LayoutParams.MATCH_PARENT,
 					LinearLayout.LayoutParams.WRAP_CONTENT));
 		}

@@ -51,7 +51,7 @@
             <EditText
                 android:id="@+id/confs_search"
                 android:layout_width="match_parent"
-                android:layout_height="50dp"
+                android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
                 android:layout_alignParentLeft="true"
                 android:layout_marginRight="30dp"

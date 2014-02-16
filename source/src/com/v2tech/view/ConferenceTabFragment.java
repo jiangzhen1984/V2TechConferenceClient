@@ -2,6 +2,7 @@ package com.v2tech.view;
 
 import java.util.List;
 
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -62,6 +63,16 @@ public class ConferenceTabFragment extends Fragment {
 		mGroupContainer = (LinearLayout) v
 				.findViewById(R.id.group_list_container);
 		return v;
+	}
+
+	@Override
+	public void onAttach(Activity activity) {
+		super.onAttach(activity);
+	}
+
+	@Override
+	public void onDetach() {
+		super.onDetach();
 	}
 
 	@Override

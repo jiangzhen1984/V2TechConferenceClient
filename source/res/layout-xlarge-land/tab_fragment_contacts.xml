@@ -73,22 +73,15 @@
          
         </RelativeLayout>
 
-        <ScrollView
-            android:id="@+id/scrollView1"
-            android:layout_width="fill_parent"
+        <ListView 
+              android:id="@+id/contacts_container"
+             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
-            android:layout_below="@+id/linearLayout2"
+             android:layout_below="@+id/linearLayout2"
             android:layout_centerHorizontal="true"
             android:background="@color/confs_group_list_bg" >
-
-            <LinearLayout
-                android:id="@+id/contacts_container"
-                android:layout_width="match_parent"
-                android:layout_height="fill_parent"
-                android:orientation="vertical" >
-
-            </LinearLayout>
-        </ScrollView>
+            
+        </ListView>
     </RelativeLayout>
 
 </LinearLayout>

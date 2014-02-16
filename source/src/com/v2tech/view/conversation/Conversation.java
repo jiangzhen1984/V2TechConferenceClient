@@ -3,6 +3,8 @@ package com.v2tech.view.conversation;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.List;
 
 import android.app.Activity;
 import android.content.ComponentName;
@@ -13,10 +15,14 @@ import android.content.ServiceConnection;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.Message;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnTouchListener;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -55,6 +61,8 @@ public class Conversation extends Activity {
 
 	private LocalHandler lh;
 
+	private BackendHandler backEndHandler;
+
 	private JNIService mService;
 	private boolean isBound;
 
@@ -83,7 +91,9 @@ public class Conversation extends Activity {
 		mScrollView.setScrollListener(scrollListener);
 
 		mSendButtonTV = (TextView) findViewById(R.id.message_send);
-		mSendButtonTV.setOnClickListener(sendMessageListener);
+		//mSendButtonTV.setOnClickListener(sendMessageListener);
+		mSendButtonTV.setOnTouchListener(sendMessageButtonListener);
+		
 
 		mMessageET = (EditText) findViewById(R.id.message_text);
 		mReturnButtonTV = (TextView) findViewById(R.id.contact_detail_return_button);
@@ -106,6 +116,10 @@ public class Conversation extends Activity {
 		}
 
 		lh = new LocalHandler();
+
+		HandlerThread thread = new HandlerThread("back-end");
+		thread.start();
+		backEndHandler = new BackendHandler(thread.getLooper());
 	}
 
 	@Override
@@ -126,43 +140,59 @@ public class Conversation extends Activity {
 		}
 	}
 
-	private OnClickListener sendMessageListener = new OnClickListener() {
+	
+	private OnTouchListener sendMessageButtonListener = new OnTouchListener () {
 
 		@Override
-		public void onClick(View view) {
-			String content = mMessageET.getEditableText().toString();
-			ContentValues cv = new ContentValues();
-			User local = new User(user1Id);
-			User remote = new User(user2Id);
-
-			cv.put(ContentDescriptor.Messages.Cols.MSG_CONTENT, content);
-			cv.put(ContentDescriptor.Messages.Cols.MSG_TYPE,
-					VMessage.MessageType.TEXT.getIntValue());
-			getContentResolver().insert(ContentDescriptor.Messages.CONTENT_URI,
-					cv);
-
-			mMessageET.setText("");
-
-			InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-			imm.hideSoftInputFromWindow(mMessageET.getWindowToken(), 0);
-
-			VMessage m = new VMessage(local, remote, content);
-			Message.obtain(lh, SEND_MESSAGE, m).sendToTarget();
-			// Add message to container
-			MessageBodyView mv = new MessageBodyView(mContext, m, true);
-			mMessagesContainer.addView(mv);
-			mScrollView
-					.scrollTo(mScrollView.getLeft(), mScrollView.getBottom());
-			mScrollView.post(new Runnable() {
-				@Override
-				public void run() {
-					mScrollView.fullScroll(View.FOCUS_DOWN);
-				}
-			});
-
+		public boolean onTouch(View anchor, MotionEvent mv) {
+			int action = mv.getAction();
+			if (action == MotionEvent.ACTION_DOWN || action == MotionEvent.ACTION_HOVER_ENTER) {
+				anchor.setBackgroundResource(R.drawable.message_send_button_pressed_bg);
+			} else if (action == MotionEvent.ACTION_UP) {
+				anchor.setBackgroundResource(R.drawable.message_send_button_bg);
+				doSendMessage();
+			} 
+			return true;
 		}
-
+		
 	};
+	
+	private void doSendMessage() {
+		String content = mMessageET.getEditableText().toString();
+		ContentValues cv = new ContentValues();
+		User local = new User(user1Id);
+		User remote = new User(user2Id);
+
+		VMessage m = new VMessage(local, remote, content);
+		cv.put(ContentDescriptor.Messages.Cols.FROM_USER_ID, user1Id);
+		cv.put(ContentDescriptor.Messages.Cols.TO_USER_ID, user2Id);
+		cv.put(ContentDescriptor.Messages.Cols.MSG_CONTENT, content);
+		cv.put(ContentDescriptor.Messages.Cols.MSG_TYPE,
+				VMessage.MessageType.TEXT.getIntValue());
+		cv.put(ContentDescriptor.Messages.Cols.SEND_TIME, m.getDateTimeStr());
+		getContentResolver().insert(ContentDescriptor.Messages.CONTENT_URI,
+				cv);
+
+		mMessageET.setText("");
+
+		InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+		imm.hideSoftInputFromWindow(mMessageET.getWindowToken(), 0);
+
+		
+		Message.obtain(lh, SEND_MESSAGE, m).sendToTarget();
+		// Add message to container
+		MessageBodyView mv = new MessageBodyView(mContext, m, true);
+		mMessagesContainer.addView(mv);
+		mScrollView
+				.scrollTo(mScrollView.getLeft(), mScrollView.getBottom());
+		mScrollView.post(new Runnable() {
+			@Override
+			public void run() {
+				mScrollView.fullScroll(View.FOCUS_DOWN);
+			}
+		});
+
+	}
 
 	private ScrollViewListener scrollListener = new ScrollViewListener() {
 
@@ -186,10 +216,10 @@ public class Conversation extends Activity {
 
 	};
 
-	private void loadMessages() {
+	private List<VMessage> loadMessages() {
 		User localUser = new User(user1Id);
 		User remoteUser = new User(user2Id);
-		DateFormat dp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		DateFormat dp = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 
 		String selection = "(" + ContentDescriptor.Messages.Cols.FROM_USER_ID
 				+ "=? and " + ContentDescriptor.Messages.Cols.TO_USER_ID
@@ -209,8 +239,9 @@ public class Conversation extends Activity {
 
 		if (mCur.getCount() == 0) {
 			mLoadedAllMessages = true;
-			return;
+			return null;
 		}
+		List<VMessage> array = new ArrayList<VMessage>();
 		int count = 0;
 		VMessage lastM = null;
 		while (mCur.moveToNext()) {
@@ -240,15 +271,10 @@ public class Conversation extends Activity {
 					showTime = true;
 				}
 			}
-			final MessageBodyView mv = new MessageBodyView(this, m, showTime);
-			mv.setId(id);
-			mScrollView.post(new Runnable() {
-				@Override
-				public void run() {
-					mMessagesContainer.addView(mv, 0);
-				}
-			});
+//			final MessageBodyView mv = new MessageBodyView(this, m, showTime);
+//			mv.setId(id);
 
+			array.add(m);
 			lastM = m;
 			count++;
 			offset++;
@@ -257,6 +283,8 @@ public class Conversation extends Activity {
 			}
 		}
 		mCur.close();
+
+		return array;
 	}
 
 	/** Defines callback for service binding, passed to bindService() */
@@ -275,6 +303,25 @@ public class Conversation extends Activity {
 		}
 	};
 
+	class BackendHandler extends Handler {
+
+		public BackendHandler(Looper looper) {
+			super(looper);
+		}
+
+		@Override
+		public void handleMessage(Message msg) {
+			switch (msg.what) {
+			case LOAD_MESSAGE:
+				List<VMessage> array = loadMessages();
+				android.os.Message.obtain(lh, END_LOAD_MESSAGE, array)
+						.sendToTarget();
+				break;
+			}
+		}
+
+	}
+
 	class LocalHandler extends Handler {
 
 		@Override
@@ -287,9 +334,8 @@ public class Conversation extends Activity {
 				}
 				mMessagesContainer.addView(mLoadingImg, 0);
 
-				android.os.Message m = android.os.Message.obtain(lh,
-						LOAD_MESSAGE);
-				lh.sendMessageDelayed(m, 500);
+				android.os.Message.obtain(backEndHandler, LOAD_MESSAGE)
+						.sendToTarget();
 				break;
 			case LOAD_MESSAGE:
 				loadMessages();
@@ -298,10 +344,23 @@ public class Conversation extends Activity {
 				break;
 			case END_LOAD_MESSAGE:
 				mMessagesContainer.removeView(mLoadingImg);
+				List<VMessage> array = (List<VMessage>) msg.obj;
+				MessageBodyView fir =  null;
+				for (int i = 0; array != null && i < array.size(); i++) {
+					MessageBodyView mv = new MessageBodyView(mContext, array.get(i), true);
+					if (fir == null) {
+						fir = mv;
+					}
+					mMessagesContainer.addView(mv, 0);
+				}
+				if (fir != null) {
+					fir.requestFocus();
+				}
 				isLoading = false;
 				break;
 			case SEND_MESSAGE:
-				mService.sendMessage((VMessage)msg.obj, Message.obtain(this, SEND_MESSAGE_DONE));
+				mService.sendMessage((VMessage) msg.obj,
+						Message.obtain(this, SEND_MESSAGE_DONE));
 				break;
 			}
 		}

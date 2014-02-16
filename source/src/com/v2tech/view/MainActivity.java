@@ -1,8 +1,7 @@
 package com.v2tech.view;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Vector;
 
 import android.content.ComponentName;
 import android.content.Context;
@@ -11,89 +10,145 @@ import android.content.ServiceConnection;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.os.Process;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentTransaction;
-import android.view.GestureDetector;
-import android.view.GestureDetector.OnGestureListener;
-import android.view.KeyEvent;
-import android.view.MotionEvent;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.view.ViewPager;
 import android.view.View;
-import android.view.View.OnTouchListener;
 import android.widget.TabHost;
+import android.widget.TabHost.TabContentFactory;
 
 import com.v2tech.R;
 import com.v2tech.view.JNIService.LocalBinder;
 
-public class MainActivity extends FragmentActivity implements OnTouchListener {
+public class MainActivity extends FragmentActivity implements
+		TabHost.OnTabChangeListener, ViewPager.OnPageChangeListener{
 
 	private Context mContext;
-
-	TabHost mTabHost;
-
-	TabManager mTabManager;
-
-	private GestureDetector mGestureDetector;
-
 	private JNIService mService;
-	private boolean isBound;
+	private boolean isBound = false;
+
+	private TabHost mTabHost;
+	private ViewPager mViewPager;
+	private PagerAdapter mPagerAdapter;
+
+	public static final String SERVICE_BOUNDED_EVENT = "com.v2tech.SERVICE_BOUNDED_EVENT";
+	public static final String SERVICE_UNBOUNDED_EVENT = "com.v2tech.SERVICE_UNBOUNDED_EVENT";
 
 	private static final String TAG_CONF = "conference";
 	private static final String TAG_CONTACT = "contacts";
 	private static final String TAG_SETTING = "setting";
-	
-	public static final String SERVICE_BOUNDED_EVENT ="com.v2tech.SERVICE_BOUNDED_EVENT";
-	public static final String SERVICE_UNBOUNDED_EVENT ="com.v2tech.SERVICE_UNBOUNDED_EVENT";
 
-	@Override
+	public JNIService getService() {
+		return mService;
+	}
+
+	/**
+	 * A simple factory that returns dummy views to the Tabhost
+	 * 
+	 * @author mwho
+	 */
+	class TabFactory implements TabContentFactory {
+
+		private final Context mContext;
+
+		/**
+		 * @param context
+		 */
+		public TabFactory(Context context) {
+			mContext = context;
+		}
+
+		/**
+		 * (non-Javadoc)
+		 * 
+		 * @see android.widget.TabHost.TabContentFactory#createTabContent(java.lang.String)
+		 */
+		public View createTabContent(String tag) {
+			View v = new View(mContext);
+			v.setMinimumWidth(0);
+			v.setMinimumHeight(0);
+			return v;
+		}
+
+	}
+
+	/**
+	 * (non-Javadoc)
+	 * 
+	 * @see android.support.v4.app.FragmentActivity#onCreate(android.os.Bundle)
+	 */
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
+		// Inflate the layout
 		setContentView(R.layout.activity_main);
-
-		Resources res = getResources();
-
-		mTabHost = (TabHost) findViewById(android.R.id.tabhost);
-		mTabHost.setup();
-
-		mTabManager = new TabManager(this, mTabHost, R.id.realtabcontent);
-
-		mTabManager.addTab(
-				mTabHost.newTabSpec(TAG_CONF).setIndicator(null,
-						res.getDrawable(R.drawable.selector_conf)),
-				ConferenceTabFragment.class, null);
-		
-		mTabManager.addTab(
-				mTabHost.newTabSpec(TAG_CONTACT).setIndicator(null,
-						res.getDrawable(R.drawable.selector_group)),
-						ContactsTabFragment.class, null);
-		
-		mTabManager.addTab(
-				mTabHost.newTabSpec(TAG_SETTING).setIndicator(null,
-						res.getDrawable(R.drawable.selector_setting)),
-				SettingTabFragment.class, null);
-
+		// Initialise the TabHost
+		mContext = this;
+		this.initialiseTabHost(savedInstanceState);
 		if (savedInstanceState != null) {
 			mTabHost.setCurrentTabByTag(savedInstanceState.getString("tab"));
 		}
-		mTabHost.getTabWidget().setDividerDrawable(
-				R.drawable.group_list_separation);
-		int count = mTabHost.getTabWidget().getChildCount();
-		for (int i = 0; i < count; i++) {
-			mTabHost.getTabWidget().getChildAt(i)
-					.setBackgroundResource(R.color.confs_panel_bg);
-		}
-
-		this.mContext = this;
-
-		mGestureDetector = new GestureDetector(this, mGestrueListener);
+		// Intialise ViewPager
+		this.intialiseViewPager();
 	}
 
-	@Override
+	/**
+	 * (non-Javadoc)
+	 * 
+	 * @see android.support.v4.app.FragmentActivity#onSaveInstanceState(android.os.Bundle)
+	 */
 	protected void onSaveInstanceState(Bundle outState) {
-		super.onSaveInstanceState(outState);
 		outState.putString("tab", mTabHost.getCurrentTabTag());
+		super.onSaveInstanceState(outState);
+	}
+
+	/**
+	 * Initialise ViewPager
+	 */
+	private void intialiseViewPager() {
+
+		List<Fragment> fragments = new Vector<Fragment>();
+		fragments.add(Fragment.instantiate(this,
+				ConferenceTabFragment.class.getName()));
+		fragments.add(Fragment.instantiate(this,
+				ContactsTabFragment.class.getName()));
+		fragments.add(Fragment.instantiate(this,
+				SettingTabFragment.class.getName()));
+		this.mPagerAdapter = new PagerAdapter(
+				super.getSupportFragmentManager(), fragments);
+		//
+		this.mViewPager = (ViewPager) super.findViewById(R.id.viewpager);
+		this.mViewPager.setAdapter(this.mPagerAdapter);
+		this.mViewPager.setOnPageChangeListener(this);
+	}
+
+	/**
+	 * Initialise the Tab Host
+	 */
+	private void initialiseTabHost(Bundle args) {
+		mTabHost = (TabHost) findViewById(android.R.id.tabhost);
+		mTabHost.setup();
+
+		Resources res = getResources();
+
+		TabHost.TabSpec confTabSpec = this.mTabHost.newTabSpec(TAG_CONF)
+				.setIndicator(null, res.getDrawable(R.drawable.selector_conf));
+		confTabSpec.setContent(new TabFactory(this));
+		mTabHost.addTab(confTabSpec);
+
+		TabHost.TabSpec contactTabSpec = this.mTabHost.newTabSpec(TAG_CONTACT)
+				.setIndicator(null, res.getDrawable(R.drawable.selector_group));
+		contactTabSpec.setContent(new TabFactory(this));
+		mTabHost.addTab(contactTabSpec);
+
+		TabHost.TabSpec settingTabSpec = this.mTabHost.newTabSpec(TAG_SETTING)
+				.setIndicator(null,
+						res.getDrawable(R.drawable.selector_setting));
+		settingTabSpec.setContent(new TabFactory(this));
+		mTabHost.addTab(settingTabSpec);
+
+		mTabHost.setOnTabChangedListener(this);
 	}
 
 	@Override
@@ -104,11 +159,6 @@ public class MainActivity extends FragmentActivity implements OnTouchListener {
 	}
 
 	@Override
-	protected void onResume() {
-		super.onResume();
-	}
-
-	@Override
 	protected void onStop() {
 		super.onStop();
 		if (isBound) {
@@ -116,85 +166,69 @@ public class MainActivity extends FragmentActivity implements OnTouchListener {
 		}
 	}
 
-	@Override
-	public boolean onKeyDown(int keyCode, KeyEvent event) {
-		if (keyCode == KeyEvent.KEYCODE_BACK) {
-			Process.killProcess(Process.myPid());
-			return true;
-		}
-		return super.onKeyDown(keyCode, event);
-	}
-
-	@Override
-	protected void onDestroy() {
-		super.onDestroy();
-	}
-
-	private OnGestureListener mGestrueListener = new OnGestureListener() {
-		@Override
-		public boolean onDown(MotionEvent e) {
-			return false;
-		}
-
-		@Override
-		public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,
-				float velocityY) {
-
-			if (e1.getX() - e2.getX() > 100 && Math.abs(velocityX) > 200) {
-				mTabManager.turnToRightTab();
-			} else if (e2.getX() - e1.getX() > 200 && Math.abs(velocityX) > 200) {
-				mTabManager.turnToLeftTab();
-			}
-
-			return false;
-		}
-
-		@Override
-		public void onLongPress(MotionEvent e) {
-
-		}
-
-		@Override
-		public boolean onScroll(MotionEvent e1, MotionEvent e2,
-				float distanceX, float distanceY) {
-			return false;
-		}
-
-		@Override
-		public void onShowPress(MotionEvent e) {
-
-		}
-
-		@Override
-		public boolean onSingleTapUp(MotionEvent e) {
-			return false;
-		}
-
-	};
-
-	@Override
-	public boolean onTouch(View v, MotionEvent event) {
-		return false;
-	}
-
-	@Override
-	public boolean dispatchTouchEvent(MotionEvent ev) {
-		mGestureDetector.onTouchEvent(ev);
-		return super.dispatchTouchEvent(ev);
+	/**
+	 * (non-Javadoc)
+	 * 
+	 * @see android.widget.TabHost.OnTabChangeListener#onTabChanged(java.lang.String)
+	 */
+	public void onTabChanged(String tag) {
+		// TabInfo newTab = this.mapTabInfo.get(tag);
+		int pos = this.mTabHost.getCurrentTab();
+		this.mViewPager.setCurrentItem(pos);
 	}
 	
 	
 	
-	public JNIService getService() {
-		return this.mService;
-	}
-	
-//	public void doBind() {
-//		isBound = bindService(new Intent(this, JNIService.class), mConnection,
-//				Context.BIND_AUTO_CREATE);
-//	}
 
-	/** Defines callbacks for service binding, passed to bindService() */
+	@Override
+	public void onPageScrollStateChanged(int pos) {
+		
+	}
+
+	@Override
+	public void onPageScrolled(int arg0, float arg1, int arg2) {
+		
+	}
+
+	@Override
+	public void onPageSelected(int pos) {
+		 this.mTabHost.setCurrentTab(pos);
+	}
+
+	public class PagerAdapter extends FragmentPagerAdapter {
+
+		private List<Fragment> fragments;
+
+		/**
+		 * @param fm
+		 * @param fragments
+		 */
+		public PagerAdapter(FragmentManager fm, List<Fragment> fragments) {
+			super(fm);
+			this.fragments = fragments;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see android.support.v4.app.FragmentPagerAdapter#getItem(int)
+		 */
+		@Override
+		public Fragment getItem(int position) {
+			return this.fragments.get(position);
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see android.support.v4.view.PagerAdapter#getCount()
+		 */
+		@Override
+		public int getCount() {
+			return this.fragments.size();
+		}
+	}
+
 	private ServiceConnection mConnection = new ServiceConnection() {
 
 		@Override
@@ -212,146 +246,4 @@ public class MainActivity extends FragmentActivity implements OnTouchListener {
 		}
 	};
 
-	/**
-	 * This is a helper class that implements a generic mechanism for
-	 * associating fragments with the tabs in a tab host. It relies on a trick.
-	 * Normally a tab host has a simple API for supplying a View or Intent that
-	 * each tab will show. This is not sufficient for switching between
-	 * fragments. So instead we make the content part of the tab host 0dp high
-	 * (it is not shown) and the TabManager supplies its own dummy view to show
-	 * as the tab content. It listens to changes in tabs, and takes care of
-	 * switch to the correct fragment shown in a separate content area whenever
-	 * the selected tab changes.
-	 */
-	public static class TabManager implements TabHost.OnTabChangeListener {
-		private final FragmentActivity mActivity;
-		private final TabHost mTabHost;
-		private final int mContainerId;
-		private final HashMap<String, TabInfo> mTabs = new HashMap<String, TabInfo>();
-		TabInfo mLastTab;
-
-		private List<String> tabs = new ArrayList<String>();
-
-		static final class TabInfo {
-			private final String tag;
-			private final Class<?> clss;
-			private final Bundle args;
-			private Fragment fragment;
-			private int index;
-			static int CONSTANT_INDEX = 0;
-
-			TabInfo(String _tag, Class<?> _class, Bundle _args) {
-				tag = _tag;
-				clss = _class;
-				args = _args;
-				index = CONSTANT_INDEX++;
-			}
-		}
-
-		static class DummyTabFactory implements TabHost.TabContentFactory {
-			private final Context mContext;
-
-			public DummyTabFactory(Context context) {
-				mContext = context;
-			}
-
-			@Override
-			public View createTabContent(String tag) {
-				View v = new View(mContext);
-				v.setMinimumWidth(0);
-				v.setMinimumHeight(0);
-				return v;
-			}
-		}
-
-		public TabManager(FragmentActivity activity, TabHost tabHost,
-				int containerId) {
-			mActivity = activity;
-			mTabHost = tabHost;
-			mContainerId = containerId;
-			mTabHost.setOnTabChangedListener(this);
-		}
-
-		public void addTab(TabHost.TabSpec tabSpec, Class<?> clss, Bundle args) {
-			tabs.add(tabSpec.getTag());
-			tabSpec.setContent(new DummyTabFactory(mActivity));
-			String tag = tabSpec.getTag();
-
-			TabInfo info = new TabInfo(tag, clss, args);
-
-			// Check to see if we already have a fragment for this tab, probably
-			// from a previously saved state. If so, deactivate it, because our
-			// initial state is that a tab isn't shown.
-			info.fragment = mActivity.getSupportFragmentManager()
-					.findFragmentByTag(tag);
-			if (info.fragment != null && !info.fragment.isDetached()) {
-				FragmentTransaction ft = mActivity.getSupportFragmentManager()
-						.beginTransaction();
-				ft.detach(info.fragment);
-				ft.commit();
-			}
-			mTabs.put(tag, info);
-			mTabHost.addTab(tabSpec);
-		}
-
-		public void turnToRightTab() {
-			if (mLastTab.index < (tabs.size() - 1)) {
-				String key = tabs.get(mLastTab.index + 1);
-				mTabHost.setCurrentTabByTag(key);
-			}
-		}
-
-		public void turnToLeftTab() {
-			if (mLastTab.index > 0) {
-				String key = tabs.get(mLastTab.index - 1);
-				mTabHost.setCurrentTabByTag(key);
-			}
-		}
-
-		@Override
-		public void onTabChanged(String tabId) {
-			TabInfo newTab = mTabs.get(tabId);
-			if (mLastTab != newTab) {
-				FragmentTransaction ft = mActivity.getSupportFragmentManager()
-						.beginTransaction();
-
-				// first time
-				if (mLastTab == null) {
-					ft.setCustomAnimations(R.animator.left_in,
-							R.animator.left_out);
-				} else {
-					if (newTab == null) {
-						ft.setCustomAnimations(R.animator.right_in,
-								R.animator.right_out);
-					}
-				}
-
-				if (newTab != null && mLastTab != null) {
-					if (newTab.index > mLastTab.index) {
-						ft.setCustomAnimations(R.animator.left_in,
-								R.animator.left_out);
-					} else {
-						ft.setCustomAnimations(R.animator.right_in,
-								R.animator.right_out);
-					}
-				}
-
-				if (newTab != null) {
-					if (newTab.fragment == null) {
-						newTab.fragment = Fragment.instantiate(mActivity,
-								newTab.clss.getName(), newTab.args);
-						// ft.add(mContainerId, newTab.fragment, newTab.tag);
-					}
-					ft.replace(mContainerId, newTab.fragment, newTab.tag);
-
-				}
-
-				mLastTab = newTab;
-
-				ft.commit();
-				mActivity.getSupportFragmentManager()
-						.executePendingTransactions();
-			}
-		}
-	}
 }

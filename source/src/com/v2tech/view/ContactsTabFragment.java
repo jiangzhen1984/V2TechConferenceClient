@@ -38,6 +38,8 @@ public class ContactsTabFragment extends Fragment {
 	private JNIService mService;
 
 	private ListView mContactsContainer;
+	
+	private boolean mLoaded;
 
 	private ContactsHandler mHandler = new ContactsHandler();
 
@@ -65,11 +67,16 @@ public class ContactsTabFragment extends Fragment {
 	public void onDestroy() {
 		super.onDestroy();
 		mItemList.clear();
+		mLoaded = false;
+		getActivity().unregisterReceiver(receiver);
 	}
 
 	@Override
 	public void onStart() {
 		super.onStart();
+		if (!mLoaded) {
+			Message.obtain(mHandler, FILL_CONTACTS_GROUP).sendToTarget();
+		}
 	}
 
 	@Override
@@ -88,6 +95,7 @@ public class ContactsTabFragment extends Fragment {
 	}
 
 	private void fillContactsGroup() {
+		mLoaded = true;
 		List<Group> l = mService.getGroup(GroupType.CONTACT);
 		for (Group g : l) {
 			mItemList.add(new ListItem(g));
@@ -104,7 +112,7 @@ public class ContactsTabFragment extends Fragment {
 			} else if (intent.getAction().equals(
 					MainActivity.SERVICE_BOUNDED_EVENT)) {
 				mService = ((MainActivity) getActivity()).getService();
-				Message.obtain(mHandler, FILL_CONTACTS_GROUP).sendToTarget();
+				
 			}
 		}
 
@@ -245,6 +253,7 @@ public class ContactsTabFragment extends Fragment {
 							Message.obtain(this, REQUEST_SERVICE_BOUND), 500);
 					break;
 				}
+				break;
 			case FILL_CONTACTS_GROUP:
 				fillContactsGroup();
 				break;

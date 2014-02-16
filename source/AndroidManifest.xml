@@ -57,7 +57,7 @@
         </activity>
         <activity
             android:name="com.v2tech.view.conversation.Conversation"
-            android:windowSoftInputMode="stateHidden" >
+            android:windowSoftInputMode="stateHidden|adjustUnspecified" >
             <intent-filter>
                 <action android:name="com.v2tech.start_conversation_activity" />
 

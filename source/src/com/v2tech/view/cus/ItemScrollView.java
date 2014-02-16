@@ -1,7 +1,5 @@
 package com.v2tech.view.cus;
 
-import com.v2tech.util.V2Log;
-
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.View;

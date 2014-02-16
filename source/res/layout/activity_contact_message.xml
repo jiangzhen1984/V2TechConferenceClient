@@ -102,7 +102,7 @@
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
             android:layout_marginRight="5dp"
-            android:background="@drawable/message_send"
+            android:background="@drawable/message_send_button_bg"
             android:gravity="center"
             android:text="@string/contact_message_send_button"
             android:textColor="#ffffff"
