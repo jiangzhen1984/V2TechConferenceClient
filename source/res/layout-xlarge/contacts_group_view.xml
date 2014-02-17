@@ -7,7 +7,9 @@
     <RelativeLayout
         android:id="@+id/contact_group_view_root"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" >
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:layout_marginTop="10dp" >
 
         <ImageView
             android:id="@+id/contact_group_arrow"
@@ -46,14 +48,6 @@
         android:background="#f2f2f2"
         android:orientation="horizontal" >
 
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/child_container"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@+id/contact_group_view_line"
-        android:orientation="vertical" >
     </LinearLayout>
 
 </RelativeLayout>

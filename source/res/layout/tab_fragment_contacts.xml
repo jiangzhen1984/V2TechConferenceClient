@@ -27,9 +27,8 @@
                 android:text="@string/contacts_title" />
             
         </LinearLayout>
-
-        <RelativeLayout
-            android:id="@+id/linearLayout2"
+  <RelativeLayout
+            android:id="@+id/RelativeLayout2"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_below="@+id/linearLayout1"
@@ -51,7 +50,7 @@
             <EditText
                 android:id="@+id/confs_search"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="50dp"
                 android:layout_gravity="center_vertical"
                 android:layout_alignParentLeft="true"
                 android:layout_marginRight="30dp"
@@ -72,33 +71,19 @@
                 android:layout_below="@+id/confs_search"/>
          
         </RelativeLayout>
-        <ListView 
-              android:id="@+id/contacts_container"
-             android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-             android:layout_below="@+id/linearLayout2"
-            android:layout_centerHorizontal="true"
-            android:background="@color/confs_group_list_bg" >
-            
-        </ListView>
-<!-- 
-        <ScrollView
-            android:id="@+id/scrollView1"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:layout_below="@+id/linearLayout2"
-            android:layout_centerHorizontal="true"
-            android:background="@color/confs_group_list_bg" >
 
-            <LinearLayout
-                android:id="@+id/contacts_container"
-                android:layout_width="match_parent"
-                android:layout_height="fill_parent"
-                android:orientation="vertical" >
 
-            </LinearLayout>
-        </ScrollView>
-         -->
+  <ExpandableListView
+      android:id="@+id/contacts_container"
+      android:layout_width="match_parent"
+      android:layout_height="fill_parent"
+      android:layout_below="@+id/RelativeLayout2"
+      android:layout_centerHorizontal="true"
+      android:background="@color/confs_group_list_bg"
+      android:groupIndicator="@drawable/selector_contact_group_arrow" >
+
+  </ExpandableListView>
+
     </RelativeLayout>
 
 </LinearLayout>

@@ -29,7 +29,7 @@
         </LinearLayout>
 
         <RelativeLayout
-            android:id="@+id/linearLayout2"
+            android:id="@+id/RelativeLayout2"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_below="@+id/linearLayout1"
@@ -73,15 +73,16 @@
          
         </RelativeLayout>
 
-        <ListView 
-              android:id="@+id/contacts_container"
-             android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-             android:layout_below="@+id/linearLayout2"
-            android:layout_centerHorizontal="true"
-            android:background="@color/confs_group_list_bg" >
-            
-        </ListView>
+          <ExpandableListView
+      android:id="@+id/contacts_container"
+      android:layout_width="match_parent"
+      android:layout_height="fill_parent"
+      android:layout_below="@+id/RelativeLayout2"
+      android:layout_centerHorizontal="true"
+      android:background="@color/confs_group_list_bg"
+      android:groupIndicator="@drawable/selector_contact_group_arrow" >
+
+  </ExpandableListView>
     </RelativeLayout>
 
 </LinearLayout>
