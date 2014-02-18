@@ -57,6 +57,11 @@ public class V2techContentProvider extends ContentProvider {
 		case ContentDescriptor.Messages.TOKEN:
 			qb.setTables(ContentDescriptor.Messages.NAME);
 			break;
+		case ContentDescriptor.Messages.TOKEN_WITH_ID:
+			qb.setTables(ContentDescriptor.Messages.NAME);
+			selection = ContentDescriptor.Messages.Cols.ID + "=?  ";
+			selectionArgs = new String[]{uri.getLastPathSegment()};
+			break;
 		default:
 			break;
 		}

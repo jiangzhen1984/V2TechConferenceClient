@@ -135,6 +135,7 @@ public class ContactUserView extends LinearLayout {
 			i.addCategory(PublicIntent.DEFAULT_CATEGORY);
 			i.putExtra("user1id", GlobalHolder.getInstance().getCurrentUserId());
 			i.putExtra("user2id", this.mUser.getmUserId());
+			i.putExtra("user2Name",  this.mUser.getName());
 			break;
 		case ACTION_TYPE_VIEW_DETAIL:
 			i.setClass(this.getContext(), ContactDetail.class);

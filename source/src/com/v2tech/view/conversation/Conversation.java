@@ -7,12 +7,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -46,6 +50,7 @@ public class Conversation extends Activity {
 	private final int END_LOAD_MESSAGE = 3;
 	private final int SEND_MESSAGE = 4;
 	private final int SEND_MESSAGE_DONE = 5;
+	private final int QUERY_NEW_MESSAGE = 6;
 
 	private final int BATCH_COUNT = 10;
 
@@ -58,6 +63,8 @@ public class Conversation extends Activity {
 	private long user1Id;
 
 	private long user2Id;
+	
+	private String user2Name;
 
 	private LocalHandler lh;
 
@@ -79,6 +86,11 @@ public class Conversation extends Activity {
 	private EditText mMessageET;
 
 	private ImageView mLoadingImg;
+	
+	private TextView mUserTitleTV;
+	
+
+	private MessageReceiver receiver =  new MessageReceiver();
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -104,22 +116,35 @@ public class Conversation extends Activity {
 			}
 
 		});
+		
+		mUserTitleTV = (TextView)findViewById(R.id.message_user_title);
 
 		user1Id = this.getIntent().getLongExtra("user1id", 0);
-		user1Id = this.getIntent().getLongExtra("user2id", 0);
-		user1Id = 1;
-		user2Id = 2;
-		if (user1Id == 0 || user2Id == 0) {
-			Toast.makeText(this, R.string.error_contact_messag_invalid_user_id,
-					Toast.LENGTH_SHORT).show();
-			return;
-		}
+		user2Id = this.getIntent().getLongExtra("user2id", 0);
+		user2Name = this.getIntent().getStringExtra("user2Name");
+
 
 		lh = new LocalHandler();
 
 		HandlerThread thread = new HandlerThread("back-end");
 		thread.start();
-		backEndHandler = new BackendHandler(thread.getLooper());
+		synchronized (thread) {
+			while (!thread.isAlive()) {
+				try {
+					Thread.sleep(100);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+			backEndHandler = new BackendHandler(thread.getLooper());
+		}
+		
+		IntentFilter filter = new IntentFilter();
+		filter.addAction(JNIService.JNI_BROADCAST_NEW_MESSAGE);
+		filter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
+		registerReceiver(receiver, filter);
+		
+		
 	}
 
 	@Override
@@ -127,9 +152,17 @@ public class Conversation extends Activity {
 		super.onStart();
 		isBound = bindService(new Intent(this.getApplicationContext(),
 				JNIService.class), mConnection, Context.BIND_AUTO_CREATE);
-		android.os.Message m = android.os.Message
-				.obtain(lh, START_LOAD_MESSAGE);
-		lh.sendMessageDelayed(m, 500);
+		if (!mLoadedAllMessages) { 
+			android.os.Message m = android.os.Message
+					.obtain(lh, START_LOAD_MESSAGE);
+			lh.sendMessageDelayed(m, 500);
+		}
+
+		if (user1Id == 0 || user2Id == 0) {
+			Toast.makeText(this, R.string.error_contact_messag_invalid_user_id,
+					Toast.LENGTH_SHORT).show();
+		}
+		mUserTitleTV.setText(user2Name);
 	}
 
 	@Override
@@ -141,6 +174,17 @@ public class Conversation extends Activity {
 	}
 
 	
+	
+	
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		this.unregisterReceiver(receiver);
+	}
+
+
+
+
 	private OnTouchListener sendMessageButtonListener = new OnTouchListener () {
 
 		@Override
@@ -183,8 +227,6 @@ public class Conversation extends Activity {
 		// Add message to container
 		MessageBodyView mv = new MessageBodyView(mContext, m, true);
 		mMessagesContainer.addView(mv);
-		mScrollView
-				.scrollTo(mScrollView.getLeft(), mScrollView.getBottom());
 		mScrollView.post(new Runnable() {
 			@Override
 			public void run() {
@@ -208,10 +250,10 @@ public class Conversation extends Activity {
 			if (isLoading || mLoadedAllMessages) {
 				return;
 			}
-			isLoading = true;
-			android.os.Message m = android.os.Message.obtain(lh,
-					START_LOAD_MESSAGE);
-			lh.sendMessageDelayed(m, 500);
+				isLoading = true;
+				android.os.Message m = android.os.Message.obtain(lh,
+						START_LOAD_MESSAGE);
+				lh.sendMessageDelayed(m, 500);
 		}
 
 	};
@@ -249,11 +291,11 @@ public class Conversation extends Activity {
 			// msg_content column
 			String content = mCur.getString(5);
 			// to_user_id column
-			long remoteUserId = mCur.getLong(3);
+			long localUserId = mCur.getLong(1);
 			// date time
 			String dateString = mCur.getString(7);
 			VMessage m = new VMessage(localUser, remoteUser, content,
-					remoteUserId == user2Id);
+					localUserId == user2Id);
 			try {
 				m.setDate(dp.parse(dateString));
 			} catch (ParseException e) {
@@ -286,6 +328,47 @@ public class Conversation extends Activity {
 
 		return array;
 	}
+	
+	private void queryAndAddMessage(int mid) {
+		User localUser = new User(user1Id);
+		User remoteUser = new User(user2Id);
+		
+		Uri uri = ContentUris.withAppendedId(ContentDescriptor.Messages.CONTENT_URI, mid);
+		
+		Cursor mCur = this.getContentResolver().query(
+				uri,
+				ContentDescriptor.Messages.Cols.ALL_CLOS,
+				null,
+				null,
+				null);
+		DateFormat dp = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+		while (mCur.moveToNext()) {
+			int id = mCur.getInt(0);
+			// msg_content column
+			String content = mCur.getString(5);
+			// date time
+			String dateString = mCur.getString(7);
+			VMessage m = new VMessage(remoteUser, localUser, content,
+					true);
+			
+			try {
+				m.setDate(dp.parse(dateString));
+			} catch (ParseException e) {
+				e.printStackTrace();
+			}
+			
+			 MessageBodyView mv = new MessageBodyView(this, m, true);
+			 mMessagesContainer.addView(mv);
+		}
+		
+		mScrollView.post(new Runnable() {
+			@Override
+			public void run() {
+				mScrollView.fullScroll(View.FOCUS_DOWN);
+			}
+		});
+		
+	}
 
 	/** Defines callback for service binding, passed to bindService() */
 	private ServiceConnection mConnection = new ServiceConnection() {
@@ -302,6 +385,19 @@ public class Conversation extends Activity {
 			isBound = false;
 		}
 	};
+	
+	
+	class MessageReceiver  extends BroadcastReceiver {
+
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			if (JNIService.JNI_BROADCAST_NEW_MESSAGE.equals(intent.getAction())) {
+				Message.obtain(lh, QUERY_NEW_MESSAGE, intent.getExtras().get("mid"))
+				.sendToTarget();
+			}
+		}
+		
+	}
 
 	class BackendHandler extends Handler {
 
@@ -361,6 +457,12 @@ public class Conversation extends Activity {
 			case SEND_MESSAGE:
 				mService.sendMessage((VMessage) msg.obj,
 						Message.obtain(this, SEND_MESSAGE_DONE));
+				break;
+			case QUERY_NEW_MESSAGE:
+				if (msg.obj ==null || "".equals(msg.obj.toString())) {
+					break;
+				}
+				queryAndAddMessage(Integer.parseInt(msg.obj.toString()));
 				break;
 			}
 		}

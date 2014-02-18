@@ -19,6 +19,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.v2tech.R;
+import com.v2tech.logic.GlobalHolder;
 import com.v2tech.logic.User;
 import com.v2tech.view.JNIService;
 import com.v2tech.view.JNIService.LocalBinder;
@@ -202,6 +203,9 @@ public class ContactDetail extends Activity {
 				@Override
 				public void onClick(View arg0) {
 					Intent i = new Intent(PublicIntent.START_CONVERSACTION_ACTIVITY);
+					i.putExtra("user1id", GlobalHolder.getInstance().getCurrentUserId());
+					i.putExtra("user2id", u.getmUserId());
+					i.putExtra("user2Name", u.getName());
 					i.addCategory(PublicIntent.DEFAULT_CATEGORY);
 					mContext.startActivity(i);
 				}

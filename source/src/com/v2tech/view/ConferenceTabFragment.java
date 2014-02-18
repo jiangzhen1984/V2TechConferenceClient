@@ -49,6 +49,10 @@ public class ConferenceTabFragment extends Fragment {
 
 	private long currentConfId;
 
+	private boolean isLoaded = false;
+
+	private View rootView;
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -58,11 +62,15 @@ public class ConferenceTabFragment extends Fragment {
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
-		View v = inflater.inflate(R.layout.tab_fragment_conference, container,
-				false);
-		mGroupContainer = (LinearLayout) v
-				.findViewById(R.id.group_list_container);
-		return v;
+		if (rootView == null) {
+			rootView = inflater.inflate(R.layout.tab_fragment_conference,
+					container, false);
+			mGroupContainer = (LinearLayout) rootView
+					.findViewById(R.id.group_list_container);
+		} else {
+			((ViewGroup)rootView.getParent()).removeView(rootView);
+		}
+		return rootView;
 	}
 
 	@Override
@@ -84,6 +92,7 @@ public class ConferenceTabFragment extends Fragment {
 	public void onDestroy() {
 		super.onDestroy();
 		getActivity().unregisterReceiver(receiver);
+		isLoaded = false;
 	}
 
 	@Override
@@ -104,14 +113,14 @@ public class ConferenceTabFragment extends Fragment {
 	@Override
 	public void onStart() {
 		super.onStart();
-		Message m = Message.obtain(mHandler, FILL_CONFS_LIST);
-		mHandler.sendMessageDelayed(m, 500);
+		if (!isLoaded) {
+			Message.obtain(mHandler, FILL_CONFS_LIST).sendToTarget();
+		}
 	}
 
 	@Override
 	public void onStop() {
 		super.onStop();
-		mHandler.removeMessages(FILL_CONFS_LIST);
 	}
 
 	@Override
@@ -196,6 +205,7 @@ public class ConferenceTabFragment extends Fragment {
 				// response
 				if (mConferenceList != null) {
 					addGroupList(mConferenceList);
+					isLoaded = true;
 				} else {
 					if (msg.arg1 < RETRY_COUNT) {
 						Message m = Message.obtain(this, FILL_CONFS_LIST,

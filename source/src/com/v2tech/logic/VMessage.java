@@ -37,6 +37,10 @@ public class VMessage {
 	private boolean isLocal;
 
 	private String mStrDateTime;
+	
+	private VMessage() {
+		
+	}
 
 	public VMessage(User u, User toUser) {
 		this(u, toUser, null, false);
@@ -74,6 +78,10 @@ public class VMessage {
 	public void setUser(User mUser) {
 		this.mUser = mUser;
 	}
+	
+	public void setToUser(User toUser) {
+		this.mToUser = toUser;
+	}
 
 	public MessageType getType() {
 		return mType;
@@ -107,6 +115,14 @@ public class VMessage {
 			mStrDateTime = sfT.format(this.mDate);
 		}
 	}
+	
+	public String getNormalDateStr() {
+		if (this.mDate != null) {
+			return  sfL.format(this.mDate);
+		} else {
+			return null;
+		}
+	}
 
 
 	public boolean isLocal() {
@@ -123,6 +139,28 @@ public class VMessage {
 
 	public User getToUser() {
 		return this.mToUser;
+	}
+	
+	
+	/**
+	 * return null if parse failed
+	 * @param xml
+	 * @return
+	 */
+	public static VMessage fromXml(String xml) {
+		int posS = -1;
+		int posE = -1;
+		posS = xml.indexOf("Text=\"");
+		if (posS != -1) {
+			posE = xml.indexOf("\"", posS + 6);
+			if (posE != -1) {
+				String content = xml.substring(posS + 6, posE);
+				VMessage vm = new VMessage();
+				vm.setText(content);
+				return vm;
+			}
+		}
+		return null;
 	}
 
 	public String toXml() {

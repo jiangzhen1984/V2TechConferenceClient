@@ -4,6 +4,7 @@ import android.app.Application;
 import android.content.Intent;
 
 import com.V2.jni.AudioRequest;
+import com.V2.jni.ChatRequest;
 import com.V2.jni.ConfRequest;
 import com.V2.jni.GroupRequest;
 import com.V2.jni.ImRequest;
@@ -35,6 +36,7 @@ public class MainApplication extends Application {
 		ConfRequest.getInstance(this);
 		AudioRequest.getInstance(this);
 		WBRequest.getInstance(this);
+		ChatRequest.getInstance(this);
 		this.getApplicationContext().startService(new Intent(this.getApplicationContext(), JNIService.class));
 	}
 
@@ -47,6 +49,7 @@ public class MainApplication extends Application {
 		ConfRequest.getInstance(this).unInitialize();
 		AudioRequest.getInstance(this).unInitialize();
 		WBRequest.getInstance(this).unInitialize();
+		ChatRequest.getInstance(this).unInitialize();
 		this.getApplicationContext().stopService(new Intent(this.getApplicationContext(), JNIService.class));
 	}
 

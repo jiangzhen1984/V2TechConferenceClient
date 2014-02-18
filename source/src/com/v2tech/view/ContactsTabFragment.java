@@ -1,6 +1,8 @@
 package com.v2tech.view;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -37,6 +39,8 @@ public class ContactsTabFragment extends Fragment {
 	private boolean mLoaded;
 
 	private ContactsHandler mHandler = new ContactsHandler();
+	
+	private Map<Long, View> adapterView = new HashMap<Long, View>();
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -89,8 +93,13 @@ public class ContactsTabFragment extends Fragment {
 	private void fillContactsGroup() {
 		mLoaded = true;
 		l = mService.getGroup(GroupType.CONTACT);
-		mContactsContainer.setAdapter(adapter);
-		adapter.notifyDataSetChanged();
+		//TODO
+		if (l == null) {
+			
+		} else {
+			mContactsContainer.setAdapter(adapter);
+			adapter.notifyDataSetChanged();
+		}
 	}
 
 	class Tab1BroadcastReceiver extends BroadcastReceiver {
@@ -99,6 +108,7 @@ public class ContactsTabFragment extends Fragment {
 		public void onReceive(Context context, Intent intent) {
 			if (intent.getAction().equals(
 					JNIService.JNI_BROADCAST_GROUP_NOTIFICATION)) {
+				Message.obtain(mHandler, FILL_CONTACTS_GROUP).sendToTarget();
 			} else if (intent.getAction().equals(
 					MainActivity.SERVICE_BOUNDED_EVENT)) {
 				mService = ((MainActivity) getActivity()).getService();
@@ -123,16 +133,19 @@ public class ContactsTabFragment extends Fragment {
 
 		@Override
 		public long getChildId(int groupPosition, int childPosition) {
-			return 0;
+			return l.get(groupPosition).getUsers().get(childPosition).getmUserId();
 		}
 
 		@Override
 		public View getChildView(int groupPosition, int childPosition,
 				boolean isLastChild, View convertView, ViewGroup parent) {
-			if(convertView == null) {
-				convertView = new ContactUserView(getActivity(), l.get(groupPosition).getUsers().get(childPosition));
+			Long key = Long.valueOf(l.get(groupPosition).getUsers().get(childPosition).getmUserId());
+			View v = adapterView.get(key);
+			if (v == null) {
+				v = new ContactUserView(getActivity(), l.get(groupPosition).getUsers().get(childPosition));
+				adapterView.put(key, v);
 			}
-			return convertView;
+			return v;
 		}
 
 		@Override
@@ -152,16 +165,20 @@ public class ContactsTabFragment extends Fragment {
 
 		@Override
 		public long getGroupId(int groupPosition) {
-			return 0;
+			return l.get(groupPosition).getmGId();
 		}
 
 		@Override
 		public View getGroupView(int groupPosition, boolean isExpanded,
 				View convertView, ViewGroup parent) {
-			if (convertView == null) {
-				convertView = new ContactGroupView(getActivity(), l.get(groupPosition), null);
+			Long key = Long.valueOf(l.get(groupPosition).getmGId());
+			View v = adapterView.get(key);
+			if (v == null) {
+				v = new ContactGroupView(getActivity(), l.get(groupPosition), null);
+				adapterView.put(key, v);
 			}
-			return convertView;
+			
+			return v;
 		}
 
 		@Override

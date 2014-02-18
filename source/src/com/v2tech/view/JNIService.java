@@ -2,16 +2,18 @@ package com.v2tech.view;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import android.app.Service;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -21,6 +23,7 @@ import android.os.Message;
 import android.widget.Toast;
 
 import com.V2.jni.ChatRequest;
+import com.V2.jni.ChatRequestCallback;
 import com.V2.jni.ConfRequest;
 import com.V2.jni.ConfRequestCallback;
 import com.V2.jni.GroupRequest;
@@ -30,15 +33,18 @@ import com.V2.jni.ImRequestCallback;
 import com.V2.jni.VideoRequest;
 import com.V2.jni.VideoRequestCallback;
 import com.v2tech.R;
+import com.v2tech.db.ContentDescriptor;
 import com.v2tech.logic.AsynResult;
 import com.v2tech.logic.AsynResult.AsynState;
 import com.v2tech.logic.CameraConfiguration;
 import com.v2tech.logic.ConferencePermission;
+import com.v2tech.logic.GlobalHolder;
 import com.v2tech.logic.Group;
 import com.v2tech.logic.NetworkStateCode;
 import com.v2tech.logic.User;
 import com.v2tech.logic.UserDeviceConfig;
 import com.v2tech.logic.VMessage;
+import com.v2tech.logic.VMessage.MessageType;
 import com.v2tech.util.V2Log;
 
 class MetaData {
@@ -81,6 +87,9 @@ public class JNIService extends Service {
 	public static final String JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION = "com.v2tech.jni.broadcast.group_user_updated";
 	public static final String JNI_BROADCAST_ATTENDEE_ENTERED_NOTIFICATION = "com.v2tech.jni.broadcast.attendee.entered.notification";
 	public static final String JNI_BROADCAST_ATTENDEE_EXITED_NOTIFICATION = "com.v2tech.jni.broadcast.attendee.exited.notification";
+	public static final String JNI_BROADCAST_NEW_MESSAGE = "com.v2tech.jni.broadcast.new.message";
+	
+	private boolean isDebug = true;
 
 	private static Hashtable<Integer, MetaData> map = new Hashtable<Integer, MetaData>();
 
@@ -103,6 +112,8 @@ public class JNIService extends Service {
 	private GroupRequestCB mGRCB;
 
 	private VideoRequestCB mVRCB;
+	
+	private ChatRequestCB mChRCB;
 
 	// ////////////////////////////////////////
 
@@ -113,8 +124,6 @@ public class JNIService extends Service {
 	private List<Group> mConfGroup = null;
 
 	private List<Group> mContactsGroup = null;
-
-	private Map<Long, User> mUserHolder = new HashMap<Long, User>();
 
 	private Set<UserDeviceConfig> mUserDeviceList = new HashSet<UserDeviceConfig>();
 
@@ -152,6 +161,9 @@ public class JNIService extends Service {
 
 		mVRCB = new VideoRequestCB(mCallbackHandler);
 		VideoRequest.getInstance().setCallback(mVRCB);
+		
+		mChRCB = new ChatRequestCB(mCallbackHandler);
+		ChatRequest.getInstance().setChatRequestCallback(mChRCB);
 	}
 
 	@Override
@@ -286,7 +298,7 @@ public class JNIService extends Service {
 	 * @see com.v2tech.logic.User
 	 */
 	public User getloggedUser() {
-		return this.mUserHolder.get(Long.valueOf(this.mloggedInUserId));
+		return GlobalHolder.getInstance().getUser(Long.valueOf(this.mloggedInUserId));
 	}
 
 	/**
@@ -296,7 +308,7 @@ public class JNIService extends Service {
 	 * @return
 	 */
 	public User getUser(long id) {
-		return this.mUserHolder.get(Long.valueOf(id));
+		return GlobalHolder.getInstance().getUser(Long.valueOf(id));
 	}
 
 	/**
@@ -320,7 +332,7 @@ public class JNIService extends Service {
 	 * @see com.v2tech.logic.User
 	 */
 	public User getUserBaseInfo(long nUserID) {
-		return this.mUserHolder.get(nUserID);
+		return GlobalHolder.getInstance().getUser(nUserID);
 	}
 
 	/**
@@ -346,38 +358,6 @@ public class JNIService extends Service {
 			}
 			return this.mConfGroup;
 		} else if (gType == Group.GroupType.CONTACT) {
-			this.mContactsGroup = new ArrayList<Group>();
-			for (int i = 1; i < 10; i++) {
-				Group g = new Group(i, Group.GroupType.CONTACT, "味素科技" + i,
-						null, null);
-				this.mContactsGroup.add(g);
-				for (int j = 1; j < 5; j++) {
-					Group g1 = new Group(i << 3 | j, Group.GroupType.CONTACT,
-							"味素科技_sub" + j, null, null);
-					g.addGroupToGroup(g1);
-				}
-
-				for (int k = 1; k < 25; k++) {
-					User u = new User((i << 5 | k), "测试" + k, "sdfsdf", "wwww'");
-					if (mloggedInUserId <= 0) {
-						mloggedInUserId = u.getmUserId();
-						u.setCurrentLoggedInUser(true);
-
-					}
-
-					u.setAddress("测试地址");
-					u.setBirthday(new Date());
-					u.setCellPhone("13811962467");
-					u.setTelephone("1388123123");
-					u.setDepartment("测试部门");
-					u.setGender("男");
-					u.setSignature("sdfdsfdsf");
-					u.setTitle("职位");
-
-					this.mUserHolder.put(u.getmUserId(), u);
-					g.addUserToGroup(u);
-				}
-			}
 			return this.mContactsGroup;
 		} else {
 			throw new RuntimeException(" Unknown group type :" + gType);
@@ -557,7 +537,10 @@ public class JNIService extends Service {
 	}
 
 	public void sendMessage(VMessage msg, Message caller) {
-
+		if (caller != null) {
+			getAndQueued(JNI_SEND_MESSAGE, caller);
+		}
+		Message.obtain(mHandler, JNI_SEND_MESSAGE, msg).sendToTarget();
 	}
 
 	/**
@@ -672,6 +655,7 @@ public class JNIService extends Service {
 	private static final int JNI_UPDATE_CAMERA_PAR = 75;
 	private static final int JNI_REMOTE_USER_DEVICE_INFO_NOTIFICATION = 80;
 	private static final int JNI_SEND_MESSAGE = 90;
+	private static final int JNI_RECEIVED_MESSAGE = 91;
 
 	class LocalHander extends Handler {
 
@@ -788,6 +772,13 @@ public class JNIService extends Service {
 
 					});
 				}
+				//TODO as now send message no callback, just send response to message caller
+				MetaData responseSendMsg = getMeta(JNI_SEND_MESSAGE);
+				if (responseSendMsg != null && responseSendMsg.caller != null) {
+					responseSendMsg.caller.obj = new AsynResult(AsynState.SUCCESS,
+							null);
+					responseSendMsg.caller.sendToTarget();
+				}
 				break;
 			}
 		}
@@ -862,7 +853,7 @@ public class JNIService extends Service {
 				if (u.getmUserId() == mloggedInUserId) {
 					u.setCurrentLoggedInUser(true);
 				}
-				mUserHolder.put(Long.valueOf(u.getmUserId()), u);
+				GlobalHolder.getInstance().putUser(u.getmUserId(), u);
 				// If someone waiting for this event
 				ar = new AsynResult(AsynResult.AsynState.SUCCESS, u);
 				if (d != null && d.caller != null
@@ -920,6 +911,9 @@ public class JNIService extends Service {
 							break;
 						}
 					}
+					for (User tu : lu) {
+						GlobalHolder.getInstance().putUser(tu.getmUserId(), tu);
+					}
 					Intent i = new Intent(
 							JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION);
 					i.addCategory(JNI_BROADCAST_CATEGROY);
@@ -938,7 +932,7 @@ public class JNIService extends Service {
 				break;
 			case JNI_ATTENDEE_ENTERED_NOTIFICATION:
 				Long uid = Long.valueOf(Long.parseLong(msg.obj.toString()));
-				User attendeeUser = mUserHolder.get(uid);
+				User attendeeUser = GlobalHolder.getInstance().getUser(uid);
 				// check cache, if exist, send successful event
 				// message directly.
 				if (attendeeUser != null && attendeeUser.getName() != null
@@ -962,7 +956,7 @@ public class JNIService extends Service {
 				ei.addCategory(JNI_BROADCAST_CATEGROY);
 				ei.putExtra("uid", (Long) msg.obj);
 				ei.putExtra("name",
-						mUserHolder.get(Long.valueOf((Long) msg.obj)).getName());
+						GlobalHolder.getInstance().getUser(Long.valueOf((Long) msg.obj)).getName());
 				mContext.sendBroadcast(ei);
 				break;
 			case JNI_GET_ATTENDEE_INFO_DONE:
@@ -983,6 +977,19 @@ public class JNIService extends Service {
 				mUserDeviceList.addAll(UserDeviceConfig
 						.parseFromXml((String) msg.obj));
 				break;
+				
+			case JNI_RECEIVED_MESSAGE:
+				VMessage vm = (VMessage)msg.obj;
+				if (vm.getType() == MessageType.TEXT) {
+					Uri uri = saveMessageToDB(vm);
+					Intent ii = new Intent(
+							JNI_BROADCAST_NEW_MESSAGE);
+					ii.addCategory(JNI_BROADCAST_CATEGROY);
+					ii.putExtra("mid", uri.getLastPathSegment());
+					mContext.sendBroadcast(ii);
+					sendNotification();
+				}
+				break;
 
 			}
 
@@ -1001,6 +1008,28 @@ public class JNIService extends Service {
 				V2Log.w("MSG: " + msg.what
 						+ " Metadata object or call is null ");
 			}
+		}
+		
+		
+		
+		
+		
+		private Uri saveMessageToDB(VMessage vm) {
+			ContentValues cv = new ContentValues();
+			cv.put(ContentDescriptor.Messages.Cols.FROM_USER_ID, vm.getUser().getmUserId());
+			cv.put(ContentDescriptor.Messages.Cols.TO_USER_ID, vm.getToUser().getmUserId());
+			cv.put(ContentDescriptor.Messages.Cols.MSG_CONTENT, vm.getText());
+			cv.put(ContentDescriptor.Messages.Cols.MSG_TYPE,
+					VMessage.MessageType.TEXT.getIntValue());
+			cv.put(ContentDescriptor.Messages.Cols.SEND_TIME, vm.getNormalDateStr());
+			return getContentResolver().insert(ContentDescriptor.Messages.CONTENT_URI,
+					cv);
+		}
+		
+		private void sendNotification() {
+			Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+            Ringtone r = RingtoneManager.getRingtone(getApplicationContext(), notification);
+            r.play();
 		}
 	}
 
@@ -1054,6 +1083,9 @@ public class JNIService extends Service {
 
 		@Override
 		public void OnGetGroupInfoCallback(int groupType, String sXml) {
+			if (isDebug) {
+				V2Log.d("group type:"+groupType +" " + sXml);
+			}
 			Message.obtain(mCallbackHandler, JNI_GROUP_NOTIFY, groupType, 0,
 					sXml).sendToTarget();
 		}
@@ -1061,6 +1093,9 @@ public class JNIService extends Service {
 		@Override
 		public void OnGetGroupUserInfoCallback(int groupType, long nGroupID,
 				String sXml) {
+			if (isDebug) {
+				V2Log.d("group type:"+groupType +" "+ nGroupID +" " + sXml);
+			}
 			Message.obtain(mCallbackHandler, JNI_GROUP_USER_INFO_NOTIFICATION,
 					new GroupUserInfoOrig(groupType, nGroupID, sXml))
 					.sendToTarget();
@@ -1139,6 +1174,47 @@ public class JNIService extends Service {
 
 		}
 
+	}
+	
+	
+	class ChatRequestCB implements ChatRequestCallback {
+		
+		private JNICallbackHandler mCallbackHandler;
+
+		public ChatRequestCB(JNICallbackHandler mCallbackHandler) {
+			this.mCallbackHandler = mCallbackHandler;
+		}
+		
+		@Override
+		public void OnRecvChatTextCallback(long nGroupID, int nBusinessType,
+				long nFromUserID, long nTime, String szXmlText) {
+			User toUser = GlobalHolder.getInstance().getCurrentUser();
+			User fromUser =  GlobalHolder.getInstance().getUser(nFromUserID);
+			if (toUser == null || fromUser == null) {
+				V2Log.e("No valid user object "+ toUser  +"  "+ fromUser);
+				return;
+			}
+			VMessage vm = VMessage.fromXml(szXmlText);
+			if (vm == null) {
+				V2Log.e(" xml parsed failed : "+ szXmlText);
+				return;
+			}
+			vm.setToUser(toUser);
+			vm.setUser(fromUser);
+			vm.setLocal(false);
+			vm.setDate(new Date(nTime * 1000));
+			vm.setType(MessageType.TEXT);
+			Message.obtain(mCallbackHandler,
+					JNI_RECEIVED_MESSAGE, vm)
+					.sendToTarget();
+		}
+
+		@Override
+		public void OnRecvChatPictureCallback(long nGroupID, int nBusinessType,
+				long nFromUserID, long nTime, byte[] pPicData) {
+			
+		}
+		
 	}
 
 }

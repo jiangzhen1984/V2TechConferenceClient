@@ -38,7 +38,10 @@
             android:layout_marginLeft="56dp"
             android:background="@drawable/contact_user_detail_return"
             android:gravity="center"
-            android:paddingLeft="8dp"
+             android:paddingBottom="5dp"
+            android:paddingLeft="10dp"
+            android:paddingRight="7dp"
+            android:paddingTop="5dp"
             android:text="@string/contacts_user_detail_return_button"
             android:textColor="#ffffff" />
     </RelativeLayout>

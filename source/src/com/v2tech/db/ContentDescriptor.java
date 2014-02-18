@@ -22,6 +22,7 @@ public final class ContentDescriptor {
 		final String augura = AUTHORITY;
 
 		matcher.addURI(augura, Messages.PATH, Messages.TOKEN);
+		matcher.addURI(augura, Messages.PATH+"/#", Messages.TOKEN_WITH_ID);
 
 		return matcher;
 
@@ -34,6 +35,8 @@ public final class ContentDescriptor {
 		public static final String NAME = PATH;
 
 		public static final int TOKEN = 1;
+		
+		public static final int TOKEN_WITH_ID = 2;
 
 		public static final Uri CONTENT_URI = BASE_URI.buildUpon()
 				.appendPath(PATH).build();

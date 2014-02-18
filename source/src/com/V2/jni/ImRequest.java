@@ -53,8 +53,13 @@ public class ImRequest {
 
 	public native void unInitialize();
 	
-	public native void logout(long nUserID);
-
+	/**
+	 * 
+	 * @param szName
+	 * @param szPassword
+	 * @param status
+	 * @param type
+	 */
 	public native void login(String szName, String szPassword, int status,
 			int type);
 
@@ -64,7 +69,10 @@ public class ImRequest {
 	// 淇敼濂藉弸澶囨敞鍚�
 	public native void modifyCommentName(long nUserId, String sCommentName);
 
-	// 鑾峰緱涓汉淇℃伅
+	/**
+	 * 
+	 * @param nUserID
+	 */
 	public native void getUserBaseInfo(long nUserID);
 
 	// 淇敼涓汉淇℃伅
@@ -102,20 +110,9 @@ public class ImRequest {
 	/*
 	 */
 	private void OnLogin(long nUserID, int nStatus, int nResult) {
-		Log.e("ImRequest UI", "鐧诲綍绗竴娆″洖璋�" + nUserID + ":锛氾細" + "锛涳紱锛�-:"
+		Log.e("ImRequest UI", "" + nUserID + ": " + "-:"
 				+ nStatus + ":" + nResult);
-		// loginMsgType = new LoginMsgType();
-		// loginMsgType.setResult(nResult);
-		// loginMsgType.setStatus(nStatus);
-		// loginMsgType.setUserid(nUserID);
-		//
-		// //璇存槑鐧婚檰澶辫触
-		// if(nResult==1){
-		// Intent intent = new Intent(SplashActivity.IM);
-		// intent.putExtra("MsgType", MsgType.LOGIN);
-		// intent.putExtra("MSG", loginMsgType);
-		// context.sendOrderedBroadcast(intent,null);
-		// }
+
 		if (this.callback != null) {
 			this.callback.OnLoginCallback(nUserID, nStatus, nResult);
 		}

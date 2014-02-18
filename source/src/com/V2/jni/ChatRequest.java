@@ -21,9 +21,7 @@ public class ChatRequest {
 	
 	private static ChatRequest mChatRequest;
 
-
-	private boolean islinsheng, isviber;
-
+	private ChatRequestCallback callback;
 
 	private ChatRequest(Context context) {
 
@@ -38,6 +36,10 @@ public class ChatRequest {
 		}
 
 		return mChatRequest;
+	}
+	
+	public void setChatRequestCallback(ChatRequestCallback callback) {
+		this.callback = callback;
 	}
 
 	public static synchronized ChatRequest getInstance() {
@@ -116,66 +118,27 @@ public class ChatRequest {
 	 */
 	public void OnRecvChatText(long nGroupID, int nBusinessType,
 			long nFromUserID, long nTime, String szXmlText) {
-		Log.e("ImRequest UI", "OnRecvChatText ����" + nGroupID + " "
+		Log.e("ImRequest UI", "OnRecvChatText " + nGroupID + " "
 				+ nBusinessType + " " + nFromUserID + " " + nTime + " "
 				+ szXmlText);
+		if (callback != null) {
+			callback.OnRecvChatTextCallback(nGroupID, nBusinessType, nFromUserID, nTime, szXmlText);
+		}
 
-		// islinsheng=preferences.getBoolean("islinsheng", true);
-		// isviber=preferences.getBoolean("isviber", true);
-		//
-		// if(islinsheng){
-		// MediaPlayer mediaPlayer = MediaPlayer.create(context, R.raw.office);
-		// mediaPlayer.start();
-		// }
-		//
-		// if(isviber){
-		// Vibrator mVibrator = (Vibrator)
-		// context.getSystemService(Context.VIBRATOR_SERVICE);
-		// mVibrator.vibrate(200);
-		// }
-		//
-		// List<ChatItem> msgText = XmlParserUtils.parserChatInfo(new
-		// ByteArrayInputStream(szXmlText.getBytes()),nFromUserID,context);
-		//
-		// msg = new ChatMSG();
-		// msg.setnBusinessType(nBusinessType);
-		// msg.setnFromUserID(nFromUserID);
-		// msg.setnGroupID(nGroupID);
-		// msg.setnTime(nTime);
-		// msg.getItems().addAll(msgText);
-		//
-		// //ƴװ������Ϣ
-		// HasMsgType hasMsgType=new HasMsgType();
-		// hasMsgType.setChatmsg(msg);
-		//
-		// Intent addIntent=new Intent(SplashActivity.IM);
-		// addIntent.putExtra("MsgType", MsgType.HAS_MSG_COME);
-		// addIntent.putExtra("MSG", hasMsgType);
-		// context.sendOrderedBroadcast(addIntent,null);
 	}
 
 	// �յ����˷�����ͼƬ������Ϣ�Ļص�
 	public void OnRecvChatPicture(long nGroupID, int nBusinessType,
 			long nFromUserID, long nTime, byte[] pPicData) {
-		// ��һ��ͼƬ����ʼ��ʾһ��ͼƬ��֪ͨҳ��ˢ��
 
 		Log.e("ImRequest UI", "OnRecvChatPicture ���� " + nGroupID + " "
 				+ nBusinessType + " " + nFromUserID + " " + nTime + " ");
 		Log.e("ImRequest UI", "OnRecvChatPicture ****maximum heap size***"
 				+ Runtime.getRuntime().maxMemory() + "*nLength=====**"
 				+ "****pPicData.length===***" + pPicData.length);
-
-		// String localpath=SaveImage2SD(nGroupID, nFromUserID, nTime,pPicData);
-		//
-		// Logger.i(null, "ͼƬ��׼·��:"+localpath);
-		//
-		//
-		//
-		// //ƴװ������Ϣ
-		// Intent addIntent=new Intent(SplashActivity.IM);
-		// addIntent.putExtra("MsgType", MsgType.REFRESH_IMG);
-		// context.sendOrderedBroadcast(addIntent,null);
-
+		if (callback != null) {
+			callback.OnRecvChatPictureCallback(nGroupID, nBusinessType, nFromUserID, nTime, pPicData);
+		}
 	}
 
 	private String SaveImage2SD(long nGroupID, long nFromUserID, long nTime,
