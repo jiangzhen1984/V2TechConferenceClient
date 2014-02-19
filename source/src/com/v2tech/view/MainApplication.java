@@ -2,10 +2,12 @@ package com.v2tech.view;
 
 import android.app.Application;
 import android.content.Intent;
+import android.os.Environment;
 
 import com.V2.jni.AudioRequest;
 import com.V2.jni.ChatRequest;
 import com.V2.jni.ConfRequest;
+import com.V2.jni.ConfigRequest;
 import com.V2.jni.GroupRequest;
 import com.V2.jni.ImRequest;
 import com.V2.jni.VideoRequest;
@@ -37,6 +39,7 @@ public class MainApplication extends Application {
 		AudioRequest.getInstance(this);
 		WBRequest.getInstance(this);
 		ChatRequest.getInstance(this);
+		new ConfigRequest().setExtStoragePath( Environment.getExternalStorageDirectory().getAbsolutePath());
 		this.getApplicationContext().startService(new Intent(this.getApplicationContext(), JNIService.class));
 	}
 

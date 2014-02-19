@@ -57,6 +57,21 @@ public class FileRequest
 	public native void resumeGroupFile(String szFileID,int type,int businesstype);
 	//缇ょ粍鏂囦欢鏆傚仠浼犺緭
 	public native void pauseGroupFile(String szFileID,int type,int businesstype);
+	
+	
+	private native void cancelSendFile(String patch, int i);
+	private native void  cancelP2PRecvFile(String patch, int i);
+	private native void  cancelHttpRecvFile(String patch, int i);
+	private native void  resumeSendFile(String patch, int i);
+	private native void  pauseSendFile(String patch, int i);
+	private native void  resumeHttpRecvFile(String patch, int i);
+	private native void  pauseHttpRecvFile(String patch, int i);
+	
+	private native void  httpDownloadFile(String patch, String patch1, String patch2, int i, int i1);
+
+
+	
+
 
 	//鏀跺埌浠栦汉鐨勬枃浠朵紶杈撻個璇风殑鍥炶皟
 	/*
@@ -170,5 +185,7 @@ public class FileRequest
 //			FileDownloadActivity.mFileActivity.SendMessage(Constant.FILE_DOWN_FAILD, bundle);
 //		}
 	}
+	
+
 	
 }

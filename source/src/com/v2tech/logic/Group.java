@@ -234,15 +234,40 @@ public class Group {
 			doc.getDocumentElement().normalize();
 
 			if (type == GroupType.CONTACT.intValue()) {
-				NodeList gList = doc.getElementsByTagName("pubgroup");
+				NodeList gList = doc.getChildNodes().item(0).getChildNodes();
 				Element element;
 				for (int i = 0; i < gList.getLength(); i++) {
 					element = (Element) gList.item(i);
-					list.add(new Group(Long.parseLong(element
+					Group g  = new Group(Long.parseLong(element
 							.getAttribute("id")), GroupType.fromInt(type),
 							element.getAttribute("name"),
 							null,
-							null));
+							null);
+					list.add(g);
+					
+					//TODO add sub Group
+					NodeList subGroupNodeList = element.getChildNodes();
+					for (int j = 0; j < subGroupNodeList.getLength(); j++) {
+						Element subGroupEl = (Element)subGroupNodeList.item(j);
+						Group subGroup = new Group(Long.parseLong(subGroupEl
+								.getAttribute("id")), GroupType.fromInt(type),
+								subGroupEl.getAttribute("name"),
+								null,
+								null);
+						g.addGroupToGroup(subGroup);
+						
+						NodeList subSubGroupNodeList = subGroupEl.getChildNodes();
+						
+						for (int k = 0; k < subSubGroupNodeList.getLength(); k++) {
+							Element subSubGroupEl = (Element)subSubGroupNodeList.item(j);
+							subGroup.addGroupToGroup( new Group(Long.parseLong(subSubGroupEl
+									.getAttribute("id")), GroupType.fromInt(type),
+									subSubGroupEl.getAttribute("name"),
+									null,
+									null));
+						}
+						
+					}
 				}
 
 			} else if (type == GroupType.CONFERENCE.intValue()) {

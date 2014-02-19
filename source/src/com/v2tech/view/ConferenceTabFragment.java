@@ -1,5 +1,6 @@
 package com.v2tech.view;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import android.app.Activity;
@@ -12,11 +13,16 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.Fragment;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.Toast;
 
 import com.v2tech.R;
@@ -43,9 +49,15 @@ public class ConferenceTabFragment extends Fragment {
 
 	private LinearLayout mGroupContainer;
 
+	private EditText mSearchTextET;
+
+	private ScrollView mScrollView;
+
 	private ConfsHandler mHandler = new ConfsHandler();
 
 	private ProgressDialog mWaitingDialog;
+	
+	private ImageView mLoadingImageIV;
 
 	private long currentConfId;
 
@@ -53,10 +65,13 @@ public class ConferenceTabFragment extends Fragment {
 
 	private View rootView;
 
+	private List<ScrollItem> mItemList;
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		getActivity().registerReceiver(receiver, getIntentFilter());
+		mItemList = new ArrayList<ScrollItem>();
 	}
 
 	@Override
@@ -67,8 +82,34 @@ public class ConferenceTabFragment extends Fragment {
 					container, false);
 			mGroupContainer = (LinearLayout) rootView
 					.findViewById(R.id.group_list_container);
+			mScrollView = (ScrollView) rootView
+					.findViewById(R.id.conference_scroll_view);
+			
+			mLoadingImageIV = (ImageView)rootView.findViewById(R.id.conference_loading_icon);
+
+			mSearchTextET = (EditText) rootView.findViewById(R.id.confs_search);
+
+			mSearchTextET.addTextChangedListener(new TextWatcher() {
+
+				@Override
+				public void afterTextChanged(Editable s) {
+				}
+
+				@Override
+				public void beforeTextChanged(CharSequence s, int start,
+						int count, int after) {
+
+				}
+
+				@Override
+				public void onTextChanged(CharSequence s, int start,
+						int before, int count) {
+					scrollToView(s.toString());
+				}
+
+			});
 		} else {
-			((ViewGroup)rootView.getParent()).removeView(rootView);
+			((ViewGroup) rootView.getParent()).removeView(rootView);
 		}
 		return rootView;
 	}
@@ -93,6 +134,7 @@ public class ConferenceTabFragment extends Fragment {
 		super.onDestroy();
 		getActivity().unregisterReceiver(receiver);
 		isLoaded = false;
+		mItemList.clear();
 	}
 
 	@Override
@@ -159,7 +201,36 @@ public class ConferenceTabFragment extends Fragment {
 				}
 
 			});
+			mItemList.add(new ScrollItem(g, gp));
 			mGroupContainer.addView(gp);
+		}
+
+	}
+
+	private void scrollToView(String str) {
+		for (final ScrollItem item : mItemList) {
+			if (item.g.getName().contains(str)) {
+				mScrollView.post(new Runnable() {
+
+					@Override
+					public void run() {
+						mScrollView.scrollTo(0, item.gp.getTop());
+					}
+					
+				});
+				break;
+			}
+		}
+	}
+
+	class ScrollItem {
+		Group g;
+		View gp;
+
+		public ScrollItem(Group g, View gp) {
+			super();
+			this.g = g;
+			this.gp = gp;
 		}
 
 	}
@@ -204,6 +275,9 @@ public class ConferenceTabFragment extends Fragment {
 				// No server return send asynchronous message and waiting for
 				// response
 				if (mConferenceList != null) {
+					if (!isLoaded) {
+						((ViewGroup)mLoadingImageIV.getParent()).removeView(mLoadingImageIV);
+					}
 					addGroupList(mConferenceList);
 					isLoaded = true;
 				} else {

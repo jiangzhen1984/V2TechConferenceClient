@@ -297,6 +297,11 @@ public class ImRequest {
 		// haslogin=true;
 		// }
 	}
+	
+
+	public void OnUserStatusUpdated(long l, int i, int ii, String str) {
+		
+	}
 
 
 }

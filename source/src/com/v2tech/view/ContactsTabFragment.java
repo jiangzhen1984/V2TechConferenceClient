@@ -17,10 +17,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.ExpandableListView;
+import android.widget.ExpandableListView.OnGroupClickListener;
 
 import com.v2tech.R;
 import com.v2tech.logic.Group;
 import com.v2tech.logic.Group.GroupType;
+import com.v2tech.logic.User;
 import com.v2tech.view.contacts.ContactGroupView;
 import com.v2tech.view.contacts.ContactUserView;
 
@@ -40,8 +42,6 @@ public class ContactsTabFragment extends Fragment {
 
 	private ContactsHandler mHandler = new ContactsHandler();
 	
-	private Map<Long, View> adapterView = new HashMap<Long, View>();
-
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -97,8 +97,7 @@ public class ContactsTabFragment extends Fragment {
 		if (l == null) {
 			
 		} else {
-			mContactsContainer.setAdapter(adapter);
-			adapter.notifyDataSetChanged();
+			mContactsContainer.setAdapter(new ContactsAdapter(l));
 		}
 	}
 
@@ -118,64 +117,95 @@ public class ContactsTabFragment extends Fragment {
 
 	}
 
-	private ContactsAdapter adapter = new ContactsAdapter();
-
-
-
-	
 	
 	class ContactsAdapter extends BaseExpandableListAdapter {
+		
+		private List<Group> mDatas;
+		
+		private Map<Long, View> adapterView;
+		
+		private Map<Long, View> adapterGroupView;
+		
+
+		public ContactsAdapter(List<Group> mDatas) {
+			super();
+			this.mDatas = mDatas;
+			this.adapterView = new HashMap<Long, View>();
+			adapterGroupView = new HashMap<Long, View>();
+		}
 
 		@Override
 		public Object getChild(int groupPosition, int childPosition) {
-			return l.get(groupPosition).getUsers().get(childPosition);
+			//return mDatas.get(groupPosition).getUsers().get(childPosition);
+			return null;
 		}
 
 		@Override
 		public long getChildId(int groupPosition, int childPosition) {
-			return l.get(groupPosition).getUsers().get(childPosition).getmUserId();
+			//return mDatas.get(groupPosition).getUsers().get(childPosition).getmUserId();
+			return 0;
 		}
 
 		@Override
 		public View getChildView(int groupPosition, int childPosition,
 				boolean isLastChild, View convertView, ViewGroup parent) {
-			Long key = Long.valueOf(l.get(groupPosition).getUsers().get(childPosition).getmUserId());
-			View v = adapterView.get(key);
-			if (v == null) {
-				v = new ContactUserView(getActivity(), l.get(groupPosition).getUsers().get(childPosition));
-				adapterView.put(key, v);
+			Group g = mDatas.get(groupPosition);
+			if (childPosition >=g.getChildGroup().size()) {
+				int rPos =  childPosition - g.getChildGroup().size();
+				User u = g.getUsers().get(rPos);
+				Long key = Long.valueOf(u.getmUserId());
+				View v = adapterView.get(key);
+				if (v == null) {
+					v = new ContactUserView(getActivity(), u);
+					adapterView.put(key, v);
+				}
+				return v;
+			} else {
+				Group subGroup = g.getChildGroup().get(childPosition);
+				Long key = Long.valueOf(subGroup.getmGId());
+				View v = adapterGroupView.get(key);
+				if (v == null) {
+					ExpandableListView lv = new ExpandableListView(getActivity());
+					lv.setId(childPosition);
+					lv.setAdapter(new ContactsAdapter(subGroup.getChildGroup()));
+					adapterGroupView.put(key, lv);
+					v = lv;
+					convertView = v;
+				}
+				return convertView;
 			}
-			return v;
 		}
 
 		@Override
 		public int getChildrenCount(int groupPosition) {
-			return l.get(groupPosition).getUsers().size();
+			Group g = mDatas.get(groupPosition);
+			
+			return g.getChildGroup().size()+ g.getUsers().size();
 		}
 
 		@Override
 		public Object getGroup(int groupPosition) {
-			return l.get(groupPosition);
+			return mDatas.get(groupPosition);
 		}
 
 		@Override
 		public int getGroupCount() {
-			return l.size();
+			return mDatas.size();
 		}
 
 		@Override
 		public long getGroupId(int groupPosition) {
-			return l.get(groupPosition).getmGId();
+			return mDatas.get(groupPosition).getmGId();
 		}
 
 		@Override
 		public View getGroupView(int groupPosition, boolean isExpanded,
 				View convertView, ViewGroup parent) {
-			Long key = Long.valueOf(l.get(groupPosition).getmGId());
-			View v = adapterView.get(key);
+			Long key = Long.valueOf(mDatas.get(groupPosition).getmGId());
+			View v = adapterGroupView.get(key);
 			if (v == null) {
-				v = new ContactGroupView(getActivity(), l.get(groupPosition), null);
-				adapterView.put(key, v);
+				v = new ContactGroupView(getActivity(), mDatas.get(groupPosition), null);
+				adapterGroupView.put(key, v);
 			}
 			
 			return v;

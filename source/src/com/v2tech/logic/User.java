@@ -25,41 +25,68 @@ import com.v2tech.util.V2Log;
 
 /**
  * User information
+ * 
  * @author 28851274
- *
+ * 
  */
 public class User {
+
+	public enum Status {
+		ONLINE(1), OFFLINE(0), UNKNOWN(-1);
+		private int code;
+
+		private Status(int code) {
+			this.code = code;
+		}
+		
+		public int toIntValue() {
+			return code;
+		}
+
+		public static Status fromInt(int status) {
+			switch (status) {
+			case 0:
+				return OFFLINE;
+			case 1:
+				return ONLINE;
+			default:
+				return UNKNOWN;
+			}
+		}
+	}
 
 	private long mUserId;
 
 	private NetworkStateCode mResult;
+	
+	private Status mStatus;
+
 
 	private String mName;
-	
-	private String mEmail;
-	
-	private String mSignature;
-	
-	private String mAddress;
-	
-	private String mCellPhone;
-	
-	private String mCompany;
-	
-	private String mDepartment;
-	
-	private String mGender;
-	
-	private Date mBirthday;
-	
-	private String mTelephone;
-	
-	private String mTitle;
-	
-	private Set<Group> mBelongsGroup;
-	
-	private boolean isCurrentLoggedInUser;
 
+	private String mEmail;
+
+	private String mSignature;
+
+	private String mAddress;
+
+	private String mCellPhone;
+
+	private String mCompany;
+
+	private String mDepartment;
+
+	private String mGender;
+
+	private Date mBirthday;
+
+	private String mTelephone;
+
+	private String mTitle;
+
+	private Set<Group> mBelongsGroup;
+
+	private boolean isCurrentLoggedInUser;
 
 	public User(long mUserId) {
 		this(mUserId, null, null, null);
@@ -68,15 +95,13 @@ public class User {
 	public User(long mUserId, String name) {
 		this(mUserId, name, null, null);
 	}
-	
-	
 
 	public User(long mUserId, String name, NetworkStateCode mResult) {
 		this(mUserId, name, null, null);
 		this.mResult = mResult;
 	}
 
-	public User(long mUserId, String name,String email, String signature) {
+	public User(long mUserId, String name, String email, String signature) {
 		this.mUserId = mUserId;
 		this.mName = name;
 		this.mEmail = email;
@@ -84,11 +109,6 @@ public class User {
 		mBelongsGroup = new HashSet<Group>();
 		isCurrentLoggedInUser = false;
 	}
-	
-	
-	
-	
-	
 
 	public boolean isCurrentLoggedInUser() {
 		return isCurrentLoggedInUser;
@@ -122,12 +142,6 @@ public class User {
 		this.mName = mName;
 	}
 
-	
-	
-	
-	
-	
-	
 	public String getmEmail() {
 		return mEmail;
 	}
@@ -152,8 +166,6 @@ public class User {
 		this.mBelongsGroup = belongsGroup;
 	}
 
-	
-	
 	public String getAddress() {
 		return mAddress;
 	}
@@ -197,7 +209,7 @@ public class User {
 	public Date getBirthday() {
 		return mBirthday;
 	}
-	
+
 	public String getBirthdayStr() {
 		if (mBirthday != null) {
 			DateFormat sd = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.US);
@@ -226,6 +238,15 @@ public class User {
 	public void setTitle(String mTitle) {
 		this.mTitle = mTitle;
 	}
+	
+
+	public Status getmStatus() {
+		return mStatus;
+	}
+
+	public void setmStatus(Status mStatus) {
+		this.mStatus = mStatus;
+	}
 
 	public void addUserToGroup(Group g) {
 		if (g == null) {
@@ -234,8 +255,7 @@ public class User {
 		}
 		this.mBelongsGroup.add(g);
 	}
-	
-	
+
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -258,8 +278,6 @@ public class User {
 		return result;
 	}
 
-	
-	
 	/**
 	 * 
 	 * @param xml
@@ -267,7 +285,7 @@ public class User {
 	 */
 	public static List<User> fromXml(String xml) {
 		List<User> l = new ArrayList<User>();
-		
+
 		InputStream is = null;
 
 		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
@@ -279,16 +297,16 @@ public class User {
 
 			doc.getDocumentElement().normalize();
 
-				NodeList gList = doc.getElementsByTagName("user");
-				Element element;
-				for (int i = 0; i < gList.getLength(); i++) {
-					element = (Element) gList.item(i);
-					l.add(new User(Long.parseLong(element
-							.getAttribute("id")), element.getAttribute("nickname"),
-							element.getAttribute("email"),
-							element.getAttribute("sign")));
-				}
-			
+			NodeList gList = doc.getElementsByTagName("user");
+			Element element;
+			for (int i = 0; i < gList.getLength(); i++) {
+				element = (Element) gList.item(i);
+				l.add(new User(Long.parseLong(element.getAttribute("id")),
+						element.getAttribute("nickname"), element
+								.getAttribute("email"), element
+								.getAttribute("sign")));
+			}
+
 		} catch (ParserConfigurationException e) {
 			e.printStackTrace();
 		} catch (SAXException e) {
@@ -304,10 +322,10 @@ public class User {
 				}
 			}
 		}
-		
-		
+
 		return l;
 	}
+
 	/**
 	 * 
 	 * @param uID
@@ -325,7 +343,7 @@ public class User {
 				nickName = xml.subSequence(pos + 10, end).toString();
 			}
 		}
-		return  new User(uID, nickName);
+		return new User(uID, nickName);
 	}
 
 }

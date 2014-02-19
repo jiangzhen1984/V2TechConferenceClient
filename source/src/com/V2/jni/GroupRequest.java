@@ -80,6 +80,19 @@ public class GroupRequest {
 	public native void acceptApplyJoinGroup(int groupType,
 			String sGroupInfo, long nUserID);
 
+	public native void acceptInviteJoinGroup(int groupType,
+			long t, long nUserID);
+	
+	public void OnAcceptInviteJoinGroup(int groupType,
+			long t, long nUserID){
+		
+	}
+	
+	public void OnConfSyncOpenVideo(String str){
+		
+	}
+	
+	
 	// �ܾ����Ⱥ
 	public native void refuseApplyJoinGroup(int groupType,
 			String sGroupInfo, long nUserID, String sReason);

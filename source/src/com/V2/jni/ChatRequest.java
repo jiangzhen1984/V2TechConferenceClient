@@ -126,6 +126,17 @@ public class ChatRequest {
 		}
 
 	}
+	
+	
+	public void OnRecvChatAudio(long gid, int i, long j, long j1, String str,
+			String str1) {
+
+	}
+	
+	public void OnSendChatAudio(String str, int i) {
+
+	}
+	
 
 	// �յ����˷�����ͼƬ������Ϣ�Ļص�
 	public void OnRecvChatPicture(long nGroupID, int nBusinessType,
