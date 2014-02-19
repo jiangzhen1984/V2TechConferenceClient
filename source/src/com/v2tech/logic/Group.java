@@ -259,7 +259,7 @@ public class Group {
 						NodeList subSubGroupNodeList = subGroupEl.getChildNodes();
 						
 						for (int k = 0; k < subSubGroupNodeList.getLength(); k++) {
-							Element subSubGroupEl = (Element)subSubGroupNodeList.item(j);
+							Element subSubGroupEl = (Element)subSubGroupNodeList.item(k);
 							subGroup.addGroupToGroup( new Group(Long.parseLong(subSubGroupEl
 									.getAttribute("id")), GroupType.fromInt(type),
 									subSubGroupEl.getAttribute("name"),

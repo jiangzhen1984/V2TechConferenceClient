@@ -1,5 +1,6 @@
 package com.v2tech.view;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,9 +16,12 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.ExpandableListView;
-import android.widget.ExpandableListView.OnGroupClickListener;
+import android.widget.ExpandableListView.OnChildClickListener;
+import android.widget.ExpandableListView.OnGroupCollapseListener;
+import android.widget.ExpandableListView.OnGroupExpandListener;
 
 import com.v2tech.R;
 import com.v2tech.logic.Group;
@@ -37,11 +41,11 @@ public class ContactsTabFragment extends Fragment {
 	private JNIService mService;
 
 	private ExpandableListView mContactsContainer;
-	
+
 	private boolean mLoaded;
 
 	private ContactsHandler mHandler = new ContactsHandler();
-	
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -54,7 +58,20 @@ public class ContactsTabFragment extends Fragment {
 			Bundle savedInstanceState) {
 		View v = inflater.inflate(R.layout.tab_fragment_contacts, container,
 				false);
-		mContactsContainer = (ExpandableListView) v.findViewById(R.id.contacts_container);
+		mContactsContainer = (ExpandableListView) v
+				.findViewById(R.id.contacts_container);
+		mContactsContainer.setOnChildClickListener(new OnChildClickListener() {
+
+			@Override
+			public boolean onChildClick(ExpandableListView parent, View v,
+					int groupPosition, int childPosition, long id) {
+				if (v instanceof ExpandableListView) {
+					((ExpandableListView) v).expandGroup(0);
+				}
+				return true;
+			}
+
+		});
 		mContactsContainer.setDivider(null);
 		return v;
 	}
@@ -90,12 +107,13 @@ public class ContactsTabFragment extends Fragment {
 	}
 
 	List<Group> l;
+
 	private void fillContactsGroup() {
 		mLoaded = true;
 		l = mService.getGroup(GroupType.CONTACT);
-		//TODO
+		// TODO
 		if (l == null) {
-			
+
 		} else {
 			mContactsContainer.setAdapter(new ContactsAdapter(l));
 		}
@@ -111,21 +129,19 @@ public class ContactsTabFragment extends Fragment {
 			} else if (intent.getAction().equals(
 					MainActivity.SERVICE_BOUNDED_EVENT)) {
 				mService = ((MainActivity) getActivity()).getService();
-				
+
 			}
 		}
 
 	}
 
-	
 	class ContactsAdapter extends BaseExpandableListAdapter {
-		
+
 		private List<Group> mDatas;
-		
+
 		private Map<Long, View> adapterView;
-		
+
 		private Map<Long, View> adapterGroupView;
-		
 
 		public ContactsAdapter(List<Group> mDatas) {
 			super();
@@ -134,24 +150,38 @@ public class ContactsTabFragment extends Fragment {
 			adapterGroupView = new HashMap<Long, View>();
 		}
 
+		public ContactsAdapter(Group g) {
+			super();
+			this.mDatas = new ArrayList<Group>();
+			this.mDatas.add(g);
+			this.adapterView = new HashMap<Long, View>();
+			adapterGroupView = new HashMap<Long, View>();
+		}
+
 		@Override
 		public Object getChild(int groupPosition, int childPosition) {
-			//return mDatas.get(groupPosition).getUsers().get(childPosition);
+			// return mDatas.get(groupPosition).getUsers().get(childPosition);
 			return null;
 		}
 
 		@Override
 		public long getChildId(int groupPosition, int childPosition) {
-			//return mDatas.get(groupPosition).getUsers().get(childPosition).getmUserId();
-			return 0;
+			Group g = mDatas.get(groupPosition);
+			if (childPosition >= g.getChildGroup().size()) {
+				return g.getUsers()
+						.get(childPosition - g.getChildGroup().size())
+						.getmUserId();
+			} else {
+				return g.getChildGroup().get(childPosition).getmGId();
+			}
 		}
 
 		@Override
 		public View getChildView(int groupPosition, int childPosition,
 				boolean isLastChild, View convertView, ViewGroup parent) {
 			Group g = mDatas.get(groupPosition);
-			if (childPosition >=g.getChildGroup().size()) {
-				int rPos =  childPosition - g.getChildGroup().size();
+			if (childPosition >= g.getChildGroup().size()) {
+				int rPos = childPosition - g.getChildGroup().size();
 				User u = g.getUsers().get(rPos);
 				Long key = Long.valueOf(u.getmUserId());
 				View v = adapterView.get(key);
@@ -165,22 +195,51 @@ public class ContactsTabFragment extends Fragment {
 				Long key = Long.valueOf(subGroup.getmGId());
 				View v = adapterGroupView.get(key);
 				if (v == null) {
-					ExpandableListView lv = new ExpandableListView(getActivity());
-					lv.setId(childPosition);
-					lv.setAdapter(new ContactsAdapter(subGroup.getChildGroup()));
+					final ExpandableListView lv = new ExpandableListView(
+							getActivity());
+					lv.setDivider(null);
+					final ContactsAdapter ca = new ContactsAdapter(subGroup);
+					lv.setAdapter(ca);
+					lv.setGroupIndicator(getActivity().getResources()
+							.getDrawable(
+									R.drawable.selector_contact_group_arrow));
+					lv.setPadding(50, 0, 0, 0);
+					lv.setOnGroupExpandListener(new OnGroupExpandListener() {
+						@Override
+						public void onGroupExpand(int groupPosition) {
+
+							AbsListView.LayoutParams lp = new AbsListView.LayoutParams(
+									ViewGroup.LayoutParams.MATCH_PARENT, (ca
+											.getChildrenCount(0) + 1)
+											* adapterGroupView.values()
+													.iterator().next()
+													.getMeasuredHeight());
+							lv.setLayoutParams(lp);
+						}
+					});
+					lv.setOnGroupCollapseListener(new OnGroupCollapseListener() {
+
+						@Override
+						public void onGroupCollapse(int arg0) {
+							AbsListView.LayoutParams lp = new AbsListView.LayoutParams(
+									ViewGroup.LayoutParams.MATCH_PARENT,
+									ViewGroup.LayoutParams.WRAP_CONTENT);
+							lv.setLayoutParams(lp);
+						}
+
+					});
 					adapterGroupView.put(key, lv);
 					v = lv;
-					convertView = v;
+
 				}
-				return convertView;
+				return v;
 			}
 		}
 
 		@Override
 		public int getChildrenCount(int groupPosition) {
 			Group g = mDatas.get(groupPosition);
-			
-			return g.getChildGroup().size()+ g.getUsers().size();
+			return g.getChildGroup().size() + g.getUsers().size();
 		}
 
 		@Override
@@ -201,14 +260,17 @@ public class ContactsTabFragment extends Fragment {
 		@Override
 		public View getGroupView(int groupPosition, boolean isExpanded,
 				View convertView, ViewGroup parent) {
-			Long key = Long.valueOf(mDatas.get(groupPosition).getmGId());
+			Long key = null;
+
+			key = Long.valueOf(mDatas.get(groupPosition).getmGId());
 			View v = adapterGroupView.get(key);
 			if (v == null) {
-				v = new ContactGroupView(getActivity(), mDatas.get(groupPosition), null);
+				v = new ContactGroupView(getActivity(),
+						mDatas.get(groupPosition), null);
 				adapterGroupView.put(key, v);
 			}
-			
 			return v;
+
 		}
 
 		@Override
@@ -220,9 +282,8 @@ public class ContactsTabFragment extends Fragment {
 		public boolean isChildSelectable(int groupPosition, int childPosition) {
 			return false;
 		}
-		
-	}
 
+	}
 
 	class ContactsHandler extends Handler {
 
