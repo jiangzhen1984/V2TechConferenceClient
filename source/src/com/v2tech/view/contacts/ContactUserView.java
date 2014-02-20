@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.v2tech.R;
@@ -44,6 +45,9 @@ public class ContactUserView extends LinearLayout {
 		View view = LayoutInflater.from(getContext()).inflate(
 				R.layout.contacts_user_view, null, false);
 
+		RelativeLayout contentContainer = (RelativeLayout) view
+				.findViewById(R.id.contact_user_view_root);
+
 		mPhotoIV = (ImageView) view.findViewById(R.id.contact_user_img);
 		mUserNameTV = (TextView) view.findViewById(R.id.contact_user_name);
 		mUserSignatureTV = (TextView) view
@@ -71,9 +75,20 @@ public class ContactUserView extends LinearLayout {
 			}
 
 		});
+		this.setPadding((u.getFirstBelongsGroup() == null ? 2 : u
+				.getFirstBelongsGroup().getLevel() + 1) * 5, this
+				.getPaddingTop(), this.getPaddingRight(), this
+				.getPaddingRight());
+
+		contentContainer.setPadding((u.getFirstBelongsGroup() == null ? 2 : u
+				.getFirstBelongsGroup().getLevel() + 1) * 35, contentContainer
+				.getPaddingTop(), contentContainer.getPaddingRight(),
+				contentContainer.getPaddingRight());
+
 		this.addView(view, new LinearLayout.LayoutParams(
 				LinearLayout.LayoutParams.MATCH_PARENT,
 				LinearLayout.LayoutParams.WRAP_CONTENT));
+
 	}
 
 	private Dialog getActionDialog() {
@@ -135,7 +150,7 @@ public class ContactUserView extends LinearLayout {
 			i.addCategory(PublicIntent.DEFAULT_CATEGORY);
 			i.putExtra("user1id", GlobalHolder.getInstance().getCurrentUserId());
 			i.putExtra("user2id", this.mUser.getmUserId());
-			i.putExtra("user2Name",  this.mUser.getName());
+			i.putExtra("user2Name", this.mUser.getName());
 			break;
 		case ACTION_TYPE_VIEW_DETAIL:
 			i.setClass(this.getContext(), ContactDetail.class);
@@ -144,7 +159,7 @@ public class ContactUserView extends LinearLayout {
 		}
 		this.getContext().startActivity(i);
 	}
-	
+
 	public User getUser() {
 		return this.mUser;
 	}

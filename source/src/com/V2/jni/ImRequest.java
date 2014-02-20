@@ -146,21 +146,8 @@ public class ImRequest {
 		// context.sendOrderedBroadcast(addIntent,null);
 	}
 
-	// nStatus鍙涓嶆槸0 灏卞湪绾�
-	private void OnUserStatusUpdated(long nUserID, int nStatus,
-			String szStatusDesc) {
-		Log.e("ImRequest UI", "鐢ㄦ埛鐘舵�鏇存柊" + nUserID + ":" + nStatus + ":"
-				+ szStatusDesc);
 
-		// 鎷艰娑堟伅
-		// UserStatusMsgType statusMsgType = new UserStatusMsgType();
-		// statusMsgType.setUserid(nUserID);
-		// statusMsgType.setOnline(nStatus != 0 ? true : false);
-		// Intent addIntent = new Intent(SplashActivity.IM);
-		// addIntent.putExtra("MsgType", MsgType.USER_STATUS);
-		// addIntent.putExtra("MSG", statusMsgType);
-		// context.sendOrderedBroadcast(addIntent, null);
-	}
+	
 
 	private void OnUserPrivacyUpdated(long nUserID, int nPrivacy) {
 		Log.e("ImRequest UI", "OnUserPrivacyUpdated");
@@ -298,9 +285,10 @@ public class ImRequest {
 		// }
 	}
 	
-
-	public void OnUserStatusUpdated(long l, int i, int ii, String str) {
-		
+	private void OnUserStatusUpdated(long nUserID, int eUEType,  int nStatus, String szStatusDesc) {
+		if (callback != null) {
+			callback.OnUserStatusUpdatedCallback(nUserID, eUEType, nStatus, szStatusDesc);
+		}
 	}
 
 

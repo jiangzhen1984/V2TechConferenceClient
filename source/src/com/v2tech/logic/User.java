@@ -244,7 +244,7 @@ public class User {
 		return mStatus;
 	}
 
-	public void setmStatus(Status mStatus) {
+	public void updateStatus(Status mStatus) {
 		this.mStatus = mStatus;
 	}
 
@@ -254,6 +254,14 @@ public class User {
 			return;
 		}
 		this.mBelongsGroup.add(g);
+	}
+	
+	public Group getFirstBelongsGroup() {
+		if (this.mBelongsGroup.size() > 0) {
+			return this.mBelongsGroup.iterator().next();
+		} else {
+			return null;
+		}
 	}
 
 	@Override

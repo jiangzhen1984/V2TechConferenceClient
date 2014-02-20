@@ -46,6 +46,8 @@ public class Group {
 	private List<Group> mChild;
 	
 	private List<User> users;
+	
+	int level;
 
 	public enum GroupType {
 		CONTACT(1), CONFERENCE(4), UNKNOWN(-1);
@@ -91,6 +93,7 @@ public class Group {
 		
 		users = new ArrayList<User>();
 		mChild = new ArrayList<Group>();
+		level = 1;
 	}
 
 	public long getmGId() {
@@ -147,6 +150,7 @@ public class Group {
 
 	public void setmParent(Group parent) {
 		this.mParent = parent;
+		level = this.getParent().getLevel() + 1;
 	}
 	
 	
@@ -176,12 +180,33 @@ public class Group {
 	}
 	
 	
+	public boolean findUser(User u, Group g) {
+		for(User tu :g.getUsers()) {
+			if (tu.getmUserId() == u.getmUserId()) {
+				return true;
+			}
+		}
+		for(Group subG : g.getChildGroup()) {
+			boolean flag = findUser(u, subG);
+			if (flag == true) {
+				return flag;
+			}
+		}
+		return false;
+	}
+	
 	public void addUserToGroup(List<User> l) {
 		for (User u : l) {
 			this.users.add(u);
 			u.addUserToGroup(this);
 		}
 	}
+	
+	
+	public int getLevel() {
+		return level;
+	}
+	
 	
 	
 

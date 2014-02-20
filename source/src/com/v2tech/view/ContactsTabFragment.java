@@ -1,9 +1,7 @@
 package com.v2tech.view;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -16,17 +14,17 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AbsListView;
-import android.widget.BaseExpandableListAdapter;
-import android.widget.ExpandableListView;
-import android.widget.ExpandableListView.OnChildClickListener;
-import android.widget.ExpandableListView.OnGroupCollapseListener;
-import android.widget.ExpandableListView.OnGroupExpandListener;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.BaseAdapter;
+import android.widget.ListView;
 
 import com.v2tech.R;
+import com.v2tech.logic.GlobalHolder;
 import com.v2tech.logic.Group;
 import com.v2tech.logic.Group.GroupType;
 import com.v2tech.logic.User;
+import com.v2tech.util.V2Log;
 import com.v2tech.view.contacts.ContactGroupView;
 import com.v2tech.view.contacts.ContactUserView;
 
@@ -34,13 +32,17 @@ public class ContactsTabFragment extends Fragment {
 
 	private static final int REQUEST_SERVICE_BOUND = 1;
 	private static final int FILL_CONTACTS_GROUP = 2;
+	private static final int UPDATE_LIST_VIEW = 3;
+	private static final int UPDATE_USER_STATUS = 4;
 
 	private Tab1BroadcastReceiver receiver = new Tab1BroadcastReceiver();
 	private IntentFilter intentFilter;
 
 	private JNIService mService;
 
-	private ExpandableListView mContactsContainer;
+	private ListView mContactsContainer;
+
+	private ContactsAdapter adapter = new ContactsAdapter();
 
 	private boolean mLoaded;
 
@@ -58,17 +60,17 @@ public class ContactsTabFragment extends Fragment {
 			Bundle savedInstanceState) {
 		View v = inflater.inflate(R.layout.tab_fragment_contacts, container,
 				false);
-		mContactsContainer = (ExpandableListView) v
-				.findViewById(R.id.contacts_container);
-		mContactsContainer.setOnChildClickListener(new OnChildClickListener() {
+		mContactsContainer = (ListView) v.findViewById(R.id.contacts_container);
+		mContactsContainer.setOnItemClickListener(new OnItemClickListener() {
 
 			@Override
-			public boolean onChildClick(ExpandableListView parent, View v,
-					int groupPosition, int childPosition, long id) {
-				if (v instanceof ExpandableListView) {
-					((ExpandableListView) v).expandGroup(0);
+			public void onItemClick(AdapterView<?> arg0, View view, int pos,
+					long id) {
+				if (mItemList.get(pos).g != null) {
+					((ContactGroupView)mItemList.get(pos).v).doExpandedOrCollapse();
+					Message.obtain(mHandler, UPDATE_LIST_VIEW, pos, 0)
+							.sendToTarget();
 				}
-				return true;
 			}
 
 		});
@@ -102,6 +104,7 @@ public class ContactsTabFragment extends Fragment {
 			intentFilter.addAction(JNIService.JNI_BROADCAST_GROUP_NOTIFICATION);
 			intentFilter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
 			intentFilter.addAction(MainActivity.SERVICE_BOUNDED_EVENT);
+			intentFilter.addAction(JNIService.JNI_BROADCAST_USER_STATUS_NOTIFICATION);
 		}
 		return intentFilter;
 	}
@@ -109,13 +112,17 @@ public class ContactsTabFragment extends Fragment {
 	List<Group> l;
 
 	private void fillContactsGroup() {
-		mLoaded = true;
+		
 		l = mService.getGroup(GroupType.CONTACT);
 		// TODO
 		if (l == null) {
-
+			V2Log.e("  no group list ============================");
 		} else {
-			mContactsContainer.setAdapter(new ContactsAdapter(l));
+			mLoaded = true;
+			for (Group g : l) {
+				mItemList.add(new ListItem(g));
+			}
+			mContactsContainer.setAdapter(adapter);
 		}
 	}
 
@@ -129,158 +136,133 @@ public class ContactsTabFragment extends Fragment {
 			} else if (intent.getAction().equals(
 					MainActivity.SERVICE_BOUNDED_EVENT)) {
 				mService = ((MainActivity) getActivity()).getService();
+				if (!mLoaded) {
+					Message.obtain(mHandler, FILL_CONTACTS_GROUP).sendToTarget();
+				}
 
+			} else if (JNIService.JNI_BROADCAST_USER_STATUS_NOTIFICATION.equals(intent.getAction())) {
+				Message.obtain(mHandler, UPDATE_USER_STATUS, GlobalHolder.getInstance().getUser(intent.getExtras().getLong("uid"))).sendToTarget();
 			}
 		}
 
 	}
 
-	class ContactsAdapter extends BaseExpandableListAdapter {
-
-		private List<Group> mDatas;
-
-		private Map<Long, View> adapterView;
-
-		private Map<Long, View> adapterGroupView;
-
-		public ContactsAdapter(List<Group> mDatas) {
-			super();
-			this.mDatas = mDatas;
-			this.adapterView = new HashMap<Long, View>();
-			adapterGroupView = new HashMap<Long, View>();
+	private void updateView(int pos) {
+		ListItem item = mItemList.get(pos);
+		if (item.g == null) {
+			return;
 		}
-
-		public ContactsAdapter(Group g) {
-			super();
-			this.mDatas = new ArrayList<Group>();
-			this.mDatas.add(g);
-			this.adapterView = new HashMap<Long, View>();
-			adapterGroupView = new HashMap<Long, View>();
-		}
-
-		@Override
-		public Object getChild(int groupPosition, int childPosition) {
-			// return mDatas.get(groupPosition).getUsers().get(childPosition);
-			return null;
-		}
-
-		@Override
-		public long getChildId(int groupPosition, int childPosition) {
-			Group g = mDatas.get(groupPosition);
-			if (childPosition >= g.getChildGroup().size()) {
-				return g.getUsers()
-						.get(childPosition - g.getChildGroup().size())
-						.getmUserId();
-			} else {
-				return g.getChildGroup().get(childPosition).getmGId();
+		if (item.isExpanded == false) {
+			for (Group g : item.g.getChildGroup()) {
+				mItemList.add(++pos, new ListItem(g));
 			}
-		}
-
-		@Override
-		public View getChildView(int groupPosition, int childPosition,
-				boolean isLastChild, View convertView, ViewGroup parent) {
-			Group g = mDatas.get(groupPosition);
-			if (childPosition >= g.getChildGroup().size()) {
-				int rPos = childPosition - g.getChildGroup().size();
-				User u = g.getUsers().get(rPos);
-				Long key = Long.valueOf(u.getmUserId());
-				View v = adapterView.get(key);
-				if (v == null) {
-					v = new ContactUserView(getActivity(), u);
-					adapterView.put(key, v);
+			for (User u : item.g.getUsers()) {
+				mItemList.add(++pos, new ListItem(u));
+			}
+			
+		} else {
+			int startRemovePos = -1;
+			int endRemovePos = -1;
+			Group parent = item.g.getParent();
+			Group nextGroup = null;
+			int nextGrougPos = -1;
+			
+			List<Group> lg = parent != null ? parent.getChildGroup() : l;
+			for (int i = 0; i < lg.size(); i++) {
+				if (lg.get(i) == item.g) {
+					nextGrougPos = i + 1;
+					break;
 				}
-				return v;
-			} else {
-				Group subGroup = g.getChildGroup().get(childPosition);
-				Long key = Long.valueOf(subGroup.getmGId());
-				View v = adapterGroupView.get(key);
-				if (v == null) {
-					final ExpandableListView lv = new ExpandableListView(
-							getActivity());
-					lv.setDivider(null);
-					final ContactsAdapter ca = new ContactsAdapter(subGroup);
-					lv.setAdapter(ca);
-					lv.setGroupIndicator(getActivity().getResources()
-							.getDrawable(
-									R.drawable.selector_contact_group_arrow));
-					lv.setPadding(50, 0, 0, 0);
-					lv.setOnGroupExpandListener(new OnGroupExpandListener() {
-						@Override
-						public void onGroupExpand(int groupPosition) {
-
-							AbsListView.LayoutParams lp = new AbsListView.LayoutParams(
-									ViewGroup.LayoutParams.MATCH_PARENT, (ca
-											.getChildrenCount(0) + 1)
-											* adapterGroupView.values()
-													.iterator().next()
-													.getMeasuredHeight());
-							lv.setLayoutParams(lp);
+			}
+			//found self
+			if (nextGrougPos > -1) {
+				startRemovePos = pos +1;
+				//clicked group is last group
+				if (nextGrougPos >= lg.size() ) {
+					if (item.g.getParent() == null) {
+						endRemovePos = mItemList.size();
+					} else {
+						endRemovePos = startRemovePos+1;
+						while (true && endRemovePos <mItemList.size() ) {
+							if (mItemList.get(endRemovePos).g != null) {
+								break;
+							}
+							endRemovePos++;
+							
 						}
-					});
-					lv.setOnGroupCollapseListener(new OnGroupCollapseListener() {
-
-						@Override
-						public void onGroupCollapse(int arg0) {
-							AbsListView.LayoutParams lp = new AbsListView.LayoutParams(
-									ViewGroup.LayoutParams.MATCH_PARENT,
-									ViewGroup.LayoutParams.WRAP_CONTENT);
-							lv.setLayoutParams(lp);
+					}
+				} else {
+					nextGroup = parent.getChildGroup().get(nextGrougPos);
+					for(int i=pos + 1; i < mItemList.size(); i++) {
+						if (mItemList.get(i).g == nextGroup) {
+							endRemovePos = i;
+							break;
 						}
-
-					});
-					adapterGroupView.put(key, lv);
-					v = lv;
-
+					}
 				}
-				return v;
+				
+				while (startRemovePos < endRemovePos) {
+					mItemList.remove(startRemovePos);
+					endRemovePos--;
+				}
+				
+			} else {
+				
 			}
 		}
 
+		item.isExpanded = !item.isExpanded;
+		adapter.notifyDataSetChanged();
+	}
+
+	List<ListItem> mItemList = new ArrayList<ListItem>();
+
+	class ListItem {
+		long id;
+		Group g;
+		User u;
+		View v;
+		boolean isExpanded;
+
+		public ListItem(Group g) {
+			super();
+			this.g = g;
+			this.id = 0x02000000 | g.getmGId();
+			this.v = new ContactGroupView(getActivity(), g, null);
+			isExpanded = false;
+		}
+
+		public ListItem(User u) {
+			super();
+			this.u = u;
+			this.id = 0x03000000 | u.getmUserId();
+			this.v = new ContactUserView(getActivity(), u);
+			isExpanded = false;
+		}
+
+	}
+
+	class ContactsAdapter extends BaseAdapter {
+
 		@Override
-		public int getChildrenCount(int groupPosition) {
-			Group g = mDatas.get(groupPosition);
-			return g.getChildGroup().size() + g.getUsers().size();
+		public int getCount() {
+			return mItemList.size();
 		}
 
 		@Override
-		public Object getGroup(int groupPosition) {
-			return mDatas.get(groupPosition);
+		public Object getItem(int position) {
+			ListItem item = mItemList.get(position);
+			return item.g == null ? item.u : item.g;
 		}
 
 		@Override
-		public int getGroupCount() {
-			return mDatas.size();
+		public long getItemId(int position) {
+			return mItemList.get(position).id;
 		}
 
 		@Override
-		public long getGroupId(int groupPosition) {
-			return mDatas.get(groupPosition).getmGId();
-		}
-
-		@Override
-		public View getGroupView(int groupPosition, boolean isExpanded,
-				View convertView, ViewGroup parent) {
-			Long key = null;
-
-			key = Long.valueOf(mDatas.get(groupPosition).getmGId());
-			View v = adapterGroupView.get(key);
-			if (v == null) {
-				v = new ContactGroupView(getActivity(),
-						mDatas.get(groupPosition), null);
-				adapterGroupView.put(key, v);
-			}
-			return v;
-
-		}
-
-		@Override
-		public boolean hasStableIds() {
-			return false;
-		}
-
-		@Override
-		public boolean isChildSelectable(int groupPosition, int childPosition) {
-			return false;
+		public View getView(int position, View convertView, ViewGroup parent) {
+			return mItemList.get(position).v;
 		}
 
 	}
@@ -300,6 +282,16 @@ public class ContactsTabFragment extends Fragment {
 				break;
 			case FILL_CONTACTS_GROUP:
 				fillContactsGroup();
+				break;
+			case UPDATE_LIST_VIEW:
+				updateView(msg.arg1);
+				break;
+			case UPDATE_USER_STATUS:
+				for (ListItem li : mItemList) {
+					if (li.g != null) {
+						((ContactGroupView)li.v).updateUserStatus((User)msg.obj);
+					}
+				}
 				break;
 			}
 		}

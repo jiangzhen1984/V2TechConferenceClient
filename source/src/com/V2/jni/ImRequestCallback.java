@@ -40,4 +40,18 @@ public interface ImRequestCallback {
 	 * @param updatexml TODO add xml example
 	 */
 	public void OnUpdateBaseInfoCallback(long nUserID, String updatexml);
+	
+	
+	
+	/**
+	 * <ul>User status update API.</ul>
+	 * 
+	 * @param nUserID
+	 * @param eUEType
+	 * @param nStatus  1 is online, 0 is offline
+	 * @param szStatusDesc
+	 * 
+	 * @see com.v2tech.logic.User.Status
+	 */
+	public void OnUserStatusUpdatedCallback(long nUserID, int eUEType,  int nStatus, String szStatusDesc);
 }

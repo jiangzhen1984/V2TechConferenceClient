@@ -83,6 +83,7 @@ class MetaData {
 public class JNIService extends Service {
 
 	public static final String JNI_BROADCAST_CATEGROY = "com.v2tech.jni.broadcast";
+	public static final String JNI_BROADCAST_USER_STATUS_NOTIFICATION = "com.v2tech.jni.broadcast.user_stauts_notification";
 	public static final String JNI_BROADCAST_GROUP_NOTIFICATION = "com.v2tech.jni.broadcast.group_geted";
 	public static final String JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION = "com.v2tech.jni.broadcast.group_user_updated";
 	public static final String JNI_BROADCAST_ATTENDEE_ENTERED_NOTIFICATION = "com.v2tech.jni.broadcast.attendee.entered.notification";
@@ -640,6 +641,7 @@ public class JNIService extends Service {
 	private static final int JNI_LOG_OUT = 22;
 	private static final int JNI_CONNECT_RESPONSE = 23;
 	private static final int JNI_UPDATE_USER_INFO = 24;
+	private static final int JNI_UPDATE_USER_STATUS = 25;
 	private static final int JNI_GROUP_NOTIFY = 35;
 	private static final int JNI_LOAD_GROUP_OWNER_INFO = 36;
 	private static final int JNI_REQUEST_ENTER_CONF = 55;
@@ -861,6 +863,15 @@ public class JNIService extends Service {
 					arg1 = d.caller.arg1;
 				}
 				break;
+			case JNI_UPDATE_USER_STATUS:
+				Intent iun = new Intent(
+						JNI_BROADCAST_USER_STATUS_NOTIFICATION);
+				iun.addCategory(JNI_BROADCAST_CATEGROY);
+				iun.putExtra("uid", Long.valueOf(msg.arg1));
+				iun.putExtra("status", msg.arg2);
+				mContext.sendStickyBroadcast(iun);
+				
+				break;
 			case JNI_GROUP_NOTIFY:
 				if (msg.arg1 == Group.GroupType.CONFERENCE.intValue()) {
 					mConfGroup = Group
@@ -904,13 +915,7 @@ public class JNIService extends Service {
 				GroupUserInfoOrig go = (GroupUserInfoOrig) msg.obj;
 				if (go != null && go.xml != null) {
 					List<User> lu = User.fromXml(go.xml);
-					// FIXME if group data doesn't receive, still record
-					for (Group g1 : mContactsGroup) {
-						if (g1.getmGId() == go.gId) {
-							g1.addUserToGroup(lu);
-							break;
-						}
-					}
+					addUserToGroup(mContactsGroup, lu, go.gId);
 					for (User tu : lu) {
 						GlobalHolder.getInstance().putUser(tu.getmUserId(), tu);
 					}
@@ -1011,6 +1016,21 @@ public class JNIService extends Service {
 		}
 		
 		
+		/**
+		 * Add user list to Group
+		 * @param gList
+		 * @param uList
+		 * @param belongGID
+		 */
+		private void addUserToGroup(List<Group> gList, List<User> uList, long belongGID) {
+			for (Group g : gList) {
+				if(belongGID == g.getmGId()) {
+					g.addUserToGroup(uList);
+					return;
+				}
+				addUserToGroup(g.getChildGroup(), uList, belongGID);
+			}
+		}
 		
 		
 		
@@ -1071,6 +1091,20 @@ public class JNIService extends Service {
 			Message.obtain(mCallbackHandler, JNI_UPDATE_USER_INFO,
 					(int) nUserID, 0, updatexml).sendToTarget();
 		}
+
+		@Override
+		public void OnUserStatusUpdatedCallback(long nUserID, int eUEType,
+				int nStatus, String szStatusDesc) {
+			User u = GlobalHolder.getInstance().getUser(nUserID);
+			if (u == null) {
+				V2Log.e("Can't update user status, user "+ nUserID+"  isn't exist");
+				return;
+			}
+			u.updateStatus(User.Status.fromInt(nStatus));
+			Message.obtain(mCallbackHandler, JNI_UPDATE_USER_STATUS, (int)nUserID, nStatus).sendToTarget();
+		}
+		
+		
 
 	}
 

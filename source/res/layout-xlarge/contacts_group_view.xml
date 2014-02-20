@@ -12,13 +12,11 @@
         android:layout_marginTop="10dp" >
 
         <ImageView
-            android:id="@+id/contact_group_arrow"
+            android:id="@+id/contacts_group_arrow_right"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_centerVertical="true"
-            android:layout_marginLeft="54dp"
-            android:layout_marginTop="10dp"
             android:src="@drawable/arrow_right_gray" />
 
         <TextView
@@ -47,7 +45,6 @@
         android:layout_below="@+id/contact_group_view_root"
         android:background="#f2f2f2"
         android:orientation="horizontal" >
-
     </LinearLayout>
 
 </RelativeLayout>
