@@ -60,7 +60,7 @@ public class ContactGroupView extends LinearLayout {
 			this.setOnClickListener(this.callback);
 		}
 
-		startCalculUsers();
+		updateUserStatus();
 
 		contentContainer.setPadding(g.getLevel() * 35,
 				contentContainer.getPaddingTop(),
@@ -118,22 +118,17 @@ public class ContactGroupView extends LinearLayout {
 
 	}
 
-	public void updateUserStatus(User u) {
-		if (u == null) {
-			return;
-		}
-		mGroupStsTV.setVisibility(View.VISIBLE);
-		if (this.mGroup.findUser(u, this.mGroup)) {
-			if (u.getmStatus() == User.Status.OFFLINE) {
-				mOnLineCounts--;
-			} else {
-				mOnLineCounts++;
+	public void updateUserStatus() {
+		innerHandler.post(new Runnable() {
+
+			@Override
+			public void run() {
+				mGroupStsTV.setText(mGroup.getOnlineUserCount() + " / "
+						+ mGroup.getUserCount());
+
 			}
-			if (!isCalAllUserCounts) {
-				startCalculUsers();
-			} else {
-				mGroupStsTV.setText(mOnLineCounts + " / " + AllCounts);
-			}
-		}
+
+		});
+
 	}
 }

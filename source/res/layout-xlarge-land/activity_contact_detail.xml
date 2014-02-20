@@ -38,7 +38,11 @@
             android:layout_marginLeft="56dp"
             android:background="@drawable/contact_user_detail_return"
             android:gravity="center"
-            android:paddingLeft="8dp"
+             android:textSize="20sp" 
+                        android:paddingTop="10dp"
+                android:paddingBottom="10dp"
+                android:paddingLeft="15dp"
+                android:paddingRight="8dp"
             android:text="@string/contacts_user_detail_return_button"
             android:textColor="#ffffff" />
     </RelativeLayout>
@@ -83,6 +87,10 @@
                 android:layout_marginRight="15dp"
                 android:background="@drawable/contact_user_detail_button"
                 android:gravity="center"
+                android:paddingBottom="5dp"
+                android:paddingLeft="26dp"
+                android:paddingRight="26dp"
+                android:paddingTop="5dp"
                 android:text="@string/contacts_user_detail_send_msg"
                 android:textColor="#ffffff"
                 android:textSize="25sp" />
@@ -96,6 +104,10 @@
                 android:layout_toLeftOf="@+id/contact_user_detail_send_msg"
                 android:background="@drawable/contact_user_detail_button"
                 android:gravity="center"
+                android:paddingBottom="5dp"
+                android:paddingLeft="15dp"
+                android:paddingRight="15dp"
+                android:paddingTop="5dp"
                 android:text="@string/contacts_user_detail_invite_video"
                 android:textColor="#ffffff"
                 android:textSize="25sp" />
@@ -547,11 +559,11 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:padding="10dp"
-                                 android:layout_marginBottom="15dp"
+                                android:layout_marginBottom="15dp"
                                 android:layout_marginLeft="30dp"
                                 android:layout_marginRight="30dp"
                                 android:layout_marginTop="15dp"
+                                android:padding="10dp"
                                 android:text="@string/contacts_user_detail_item_address"
                                 android:textSize="18sp" />
 

@@ -289,7 +289,7 @@ public class ContactsTabFragment extends Fragment {
 			case UPDATE_USER_STATUS:
 				for (ListItem li : mItemList) {
 					if (li.g != null) {
-						((ContactGroupView)li.v).updateUserStatus((User)msg.obj);
+						((ContactGroupView)li.v).updateUserStatus();
 					}
 				}
 				break;

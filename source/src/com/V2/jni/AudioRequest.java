@@ -2,17 +2,41 @@ package com.V2.jni;
 
 
 
+import java.util.ArrayList;
+import java.util.List;
+
 import android.content.Context;
 import android.util.Log;
 
 public class AudioRequest {
+	
+	
+	public static final int BT_CONF = 1;
+	public static final int BT_IM = 2;
+	
 	private Context context;
 	private static AudioRequest mAudioRequest;
+	
+	private List<AudioRequestCallback> callbacks;
 
 	private AudioRequest(Context context) {
 		this.context = context;
+		callbacks = new ArrayList<AudioRequestCallback>();
 	};
 
+	public void registerCallback(AudioRequestCallback callback) {
+		callbacks.add(callback);
+	}
+	
+	public void unRegisterCallback(AudioRequestCallback callback) {
+		for(AudioRequestCallback ck: callbacks) {
+			if (ck == callback) {
+				callbacks.remove(ck);
+				return;
+			}
+		}
+	}
+	
 	public static synchronized AudioRequest getInstance(Context context) {
 		if (mAudioRequest == null) {
 			mAudioRequest = new AudioRequest(context);
@@ -67,20 +91,14 @@ public class AudioRequest {
 		AcceptAudioChat(nGroupID, nFromUserID, 2);
 	}
 
-	// ��Ƶͨ�����뱻�Է����ܵĻص�
 	private void OnAudioChatAccepted(long nGroupID, long nBusinessType,
 			long nFromUserID) {
 		Log.e("ImRequest UI", "OnAudioChatAccepted " + nGroupID + ":"
 				+ nBusinessType + ":" + nFromUserID);
 
-		// ƴװ��Ϣ
-		// AudioAcceptMsgType videoMsgType=new AudioAcceptMsgType();
-		// videoMsgType.setnFromuserID(nFromUserID);
-		//
-		// Intent intent=new Intent(SplashActivity.IM);
-		// intent.putExtra("MsgType", MsgType.AUIDOACCEPT_CHAT);
-		// intent.putExtra("MSG", videoMsgType);
-		// context.sendBroadcast(intent);
+		for (AudioRequestCallback cb : callbacks) {
+			cb.OnAudioChatAccepted(nGroupID, nBusinessType, nFromUserID);
+		}
 	}
 
 	// ��Ƶͨ�����뱻�Է��ܾ�Ļص�

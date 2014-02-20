@@ -70,8 +70,11 @@ public class VideoConversationFragment extends Fragment {
 		super.onStop();
 		call.closeLocalCamera();
 	}
-
 	
+	
+	public void quit() {
+		//TODO close audio
+	}
 
 	private void updateTimer() {
 		int hour = (int) mTimeLine / 3600;

@@ -38,6 +38,13 @@ public class GlobalHolder {
 	
 	public void setCurrentUser(User u) {
 		this.mCurrentUser = u;
+		this.mCurrentUser.updateStatus(User.Status.ONLINE);
+		User mU = getUser(u.getmUserId());
+		if (mU != null) {
+			mU.updateStatus(User.Status.ONLINE);
+		} else {
+			putUser(u.getmUserId(), u);
+		}
 	}
 	
 	

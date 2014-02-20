@@ -195,6 +195,38 @@ public class Group {
 		return false;
 	}
 	
+	
+	//FIXME need to be optimize
+	public int getOnlineUserCount() {
+		return getUserOnlineCount(this);
+	}
+	
+	private int getUserOnlineCount(Group g) {
+		int c = 0;
+		for(User u:g.getUsers()) {
+			if (u.getmStatus() == User.Status.ONLINE) {
+				c ++;
+			}
+		}
+		
+		for(Group subG : g.getChildGroup()) {
+			c += getUserOnlineCount(subG);
+		}
+		return c;
+	}
+	
+	public int getUserCount() {
+		return getUserCount(this);
+	}
+	
+	private int getUserCount(Group g) {
+		int c = g.getUsers().size();
+		for(Group subG : g.getChildGroup()) {
+			c += getUserCount(subG);
+		}
+		return c;
+	}
+	
 	public void addUserToGroup(List<User> l) {
 		for (User u : l) {
 			this.users.add(u);

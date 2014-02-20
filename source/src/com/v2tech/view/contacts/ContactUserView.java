@@ -144,6 +144,7 @@ public class ContactUserView extends LinearLayout {
 			i.addCategory(PublicIntent.DEFAULT_CATEGORY);
 			i.putExtra("is_coming_call", false);
 			i.putExtra("name", this.mUser.getName());
+			i.putExtra("uid", this.mUser.getmUserId());
 			break;
 		case ACTION_TYPE_START_CONVERSATION:
 			i.setAction(PublicIntent.START_CONVERSACTION_ACTIVITY);

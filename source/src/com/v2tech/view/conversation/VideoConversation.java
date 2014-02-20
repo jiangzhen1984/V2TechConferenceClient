@@ -29,7 +29,7 @@ public class VideoConversation extends Activity implements TurnListener, VideoCo
 		         
      	Fragment fragment1 = new ConversationWaitingFragment();  
 		FragmentTransaction transaction = getFragmentManager().beginTransaction();
-		transaction.replace(R.id.video_conversation_main, fragment1);
+		transaction.replace(R.id.video_conversation_main, fragment1,"waiting");
         transaction.addToBackStack(null);
 		transaction.commit();  
 
@@ -37,9 +37,9 @@ public class VideoConversation extends Activity implements TurnListener, VideoCo
 
 	@Override
 	public void turnToVideoUI() {
-		Fragment fragment1 = new VideoConversationFragment();  
+		Fragment fragment1 = new VideoConversationFragment();
 		FragmentTransaction transaction = getFragmentManager().beginTransaction();
-		transaction.replace(R.id.video_conversation_main, fragment1);
+		transaction.replace(R.id.video_conversation_main, fragment1, "video");
         transaction.addToBackStack(null);
 		transaction.commit();  
 	}

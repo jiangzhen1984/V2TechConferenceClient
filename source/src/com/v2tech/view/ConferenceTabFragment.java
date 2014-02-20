@@ -286,8 +286,8 @@ public class ConferenceTabFragment extends Fragment {
 								msg.arg1 + 1, 0);
 						this.sendMessageDelayed(m, 1000);
 					} else {
-						Toast.makeText(getActivity(), "无法获取组信息",
-								Toast.LENGTH_LONG).show();
+//						Toast.makeText(getActivity(), "无法获取组信息",
+//								Toast.LENGTH_LONG).show();
 					}
 				}
 				break;

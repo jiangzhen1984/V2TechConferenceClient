@@ -1,5 +1,6 @@
 package com.v2tech.view.conversation;
 
+import android.app.Activity;
 import android.app.Fragment;
 import android.os.Bundle;
 import android.os.Handler;
@@ -11,8 +12,15 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.v2tech.R;
+import com.v2tech.logic.ChatRequest;
+import com.v2tech.logic.GlobalHolder;
+import com.v2tech.logic.User;
+import com.v2tech.logic.UserAudioDevice;
+import com.v2tech.util.V2Log;
 
 public class ConversationWaitingFragment extends Fragment {
+
+	private static final int CALL_RESPONSE = 1;
 
 	private TextView mUserNameTV;
 	private TextView mTextTV;
@@ -21,16 +29,25 @@ public class ConversationWaitingFragment extends Fragment {
 	private TextView mCancelButtonTV;
 
 	private boolean mIsInComingCall;
+
+	private ChatRequest chat = new ChatRequest();
 	
+	private Handler mLocalHandler = new LocalHandler();
 	
+	private TurnListener mIndicator;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		//TODO to be implement send invitation request
+		long uid = getActivity().getIntent().getExtras().getLong("uid");
+		User u = GlobalHolder.getInstance().getUser(uid);
+		if (u == null) {
+
+		} else {
+			UserAudioDevice uad = new UserAudioDevice(u);
+			chat.inviteUserAudioChat(uad, Message.obtain(mLocalHandler, CALL_RESPONSE));
+		}
 	}
-
-
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -47,7 +64,8 @@ public class ConversationWaitingFragment extends Fragment {
 				.findViewById(R.id.conversation_accept_button);
 		this.mCancelButtonTV = (TextView) v
 				.findViewById(R.id.conversation_cancel_button);
-		mIsInComingCall = getActivity().getIntent().getBooleanExtra("is_coming_call", false);
+		mIsInComingCall = getActivity().getIntent().getBooleanExtra(
+				"is_coming_call", false);
 		if (mIsInComingCall) {
 			mCancelButtonTV.setVisibility(View.GONE);
 			mRejectButtonTV.setVisibility(View.VISIBLE);
@@ -59,61 +77,76 @@ public class ConversationWaitingFragment extends Fragment {
 			mCancelButtonTV.setVisibility(View.VISIBLE);
 			mTextTV.setText(R.string.conversation_waiting);
 		}
-		
-		mUserNameTV.setText( getActivity().getIntent().getStringExtra("name"));
+
+		mUserNameTV.setText(getActivity().getIntent().getStringExtra("name"));
 		mRejectButtonTV.setOnClickListener(rejectListener);
 		mAcceptButtonTV.setOnClickListener(acceptListener);
 		mCancelButtonTV.setOnClickListener(cancelListener);
-		LocalHandler lh = new LocalHandler();
-		Message m = Message.obtain();
-		lh.sendMessageDelayed(m, 2000);
 		return v;
-		
+
 	}
 	
 	
+
+	@Override
+	public void onAttach(Activity activity) {
+		super.onAttach(activity);
+		mIndicator = (TurnListener) activity;
+	}
+
+	@Override
+	public void onDetach() {
+		super.onDetach();
+		mIndicator = null;
+	}
+
+
+
 	private OnClickListener rejectListener = new OnClickListener() {
 
 		@Override
 		public void onClick(View arg0) {
-			//TODO reject call
+			// TODO reject call
 			getActivity().finish();
 		}
-		
-	};
-	
 
-	
+	};
+
 	private OnClickListener cancelListener = new OnClickListener() {
 
 		@Override
 		public void onClick(View arg0) {
-			//TODO cancel call
+			// TODO cancel call
 			getActivity().finish();
 		}
-		
+
 	};
-	
+
 	private OnClickListener acceptListener = new OnClickListener() {
 
 		@Override
 		public void onClick(View arg0) {
-			//TODO accept call
-			((TurnListener)getActivity()).turnToVideoUI();
+			// TODO accept call
+			((TurnListener) getActivity()).turnToVideoUI();
 		}
-		
+
 	};
-	
-	
-	
-	//FIXME test code
+
 	class LocalHandler extends Handler {
 
 		@Override
 		public void handleMessage(Message msg) {
-			((TurnListener)getActivity()).turnToVideoUI();
+			switch (msg.what) {
+				case CALL_RESPONSE: {
+					if (mIndicator != null) {
+						mIndicator.turnToVideoUI();
+					} else {
+						V2Log.e(" indicator is null can not open audio UI ");
+					}
+				}
+				break;
+			}
 		}
-		
-	}
 
+	}
 }

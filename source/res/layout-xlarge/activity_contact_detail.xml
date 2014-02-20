@@ -86,6 +86,10 @@
                 android:layout_marginRight="15dp"
                 android:background="@drawable/contact_user_detail_button"
                 android:gravity="center"
+                   android:paddingBottom="10dp"
+                android:paddingLeft="25dp"
+                android:paddingRight="25dp"
+                android:paddingTop="10dp"
                 android:text="@string/contacts_user_detail_send_msg"
                 android:textColor="#ffffff"
                 android:textSize="25sp" />
@@ -99,6 +103,10 @@
                 android:layout_toLeftOf="@+id/contact_user_detail_send_msg"
                 android:background="@drawable/contact_user_detail_button"
                 android:gravity="center"
+                   android:paddingBottom="10dp"
+                android:paddingLeft="15dp"
+                android:paddingRight="15dp"
+                android:paddingTop="10dp"
                 android:text="@string/contacts_user_detail_invite_video"
                 android:textColor="#ffffff"
                 android:textSize="25sp" />
