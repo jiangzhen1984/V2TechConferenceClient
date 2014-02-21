@@ -207,18 +207,9 @@ public class LoginActivity extends Activity {
 					dialog.dismiss();
 				}
 			});
-
-			dialog.setOnKeyListener(new Dialog.OnKeyListener() {
-
-				@Override
-				public boolean onKey(DialogInterface arg0, int keyCode,
-						KeyEvent event) {
-					if (keyCode == KeyEvent.KEYCODE_BACK) {
-						dialog.dismiss();
-					}
-					return false;
-				}
-			});
+			
+			dialog.setCancelable(true);
+			dialog.setCanceledOnTouchOutside(true);
 			
 			mSettingDialog = dialog;
 			dialog.show();

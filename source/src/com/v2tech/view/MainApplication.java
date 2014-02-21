@@ -1,5 +1,7 @@
 package com.v2tech.view;
 
+import java.io.File;
+
 import android.app.Application;
 import android.content.Intent;
 import android.os.Environment;
@@ -12,6 +14,7 @@ import com.V2.jni.GroupRequest;
 import com.V2.jni.ImRequest;
 import com.V2.jni.VideoRequest;
 import com.V2.jni.WBRequest;
+import com.v2tech.util.V2Log;
 
 public class MainApplication extends Application {
 
@@ -39,7 +42,13 @@ public class MainApplication extends Application {
 		AudioRequest.getInstance(this);
 		WBRequest.getInstance(this);
 		ChatRequest.getInstance(this);
-		new ConfigRequest().setExtStoragePath( Environment.getExternalStorageDirectory().getAbsolutePath());
+		String path =  Environment.getExternalStorageDirectory().getAbsolutePath();
+		new ConfigRequest().setExtStoragePath(path);
+		File pa = new File(path +"/Users");
+		if (!pa.exists()) {
+			boolean res = pa.mkdirs();
+			V2Log.i(" create avatar dir " +pa.getAbsolutePath() +"  "+ res);
+		}
 		this.getApplicationContext().startService(new Intent(this.getApplicationContext(), JNIService.class));
 	}
 
