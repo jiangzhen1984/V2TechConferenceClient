@@ -86,7 +86,7 @@
         <activity
             android:name="com.v2tech.view.MainActivity"
             android:configChanges="screenSize|orientation"
-            android:windowSoftInputMode="adjustPan" >
+            android:windowSoftInputMode="stateHidden|adjustPan" >
             
         </activity>
     </application>

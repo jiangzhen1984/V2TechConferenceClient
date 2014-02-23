@@ -9,6 +9,8 @@ public class GlobalHolder {
 	
 	private User mCurrentUser;
 	
+	private Map<Long, User.Status> onlineUsers = new HashMap<Long, User.Status>();
+	
 	
 
 	private Map<Long, User> mUserHolder = new HashMap<Long, User>();
@@ -59,5 +61,29 @@ public class GlobalHolder {
 	public User getUser(long id) {
 		Long key = Long.valueOf(id);
 		return mUserHolder.get(key);
+	}
+	
+	public void updateUserStatus(User u) {
+		Long key = Long.valueOf(u.getmUserId());
+		if (u.getmStatus() == User.Status.OFFLINE) {
+			onlineUsers.remove(key);
+		} else {
+			onlineUsers.put(key, u.getmStatus());
+		}
+		
+	}
+	
+	public void updateUserStatus(long uid, User.Status us) {
+		Long key = Long.valueOf(uid);
+		if (us == User.Status.OFFLINE) {
+			onlineUsers.remove(key);
+		} else {
+			onlineUsers.put(key, us);
+		}
+	}
+	
+	public User.Status getOnlineUserStatus(long uid) {
+		Long key = Long.valueOf(uid);
+		return  onlineUsers.get(key);
 	}
 }

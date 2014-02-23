@@ -155,7 +155,13 @@ public class ContactDetail extends Activity {
 				et.addTextChangedListener(tw);
 			}
 
-			mGenderET.setText(u.getGender());
+			if (u.getGender() != null && u.getGender().equals("1")) {
+				mGenderET.setText(mContext.getResources().getText(R.string.contacts_user_detail_gender_male));
+			} else if (u.getGender()!= null && u.getGender().equals("0")) {
+				mGenderET.setText(mContext.getResources().getText(R.string.contacts_user_detail_gender_female));
+			} else {
+				mGenderET.setText("");
+			}
 			mNickNameET.addTextChangedListener(tw);
 			mBirthdayET.setText(u.getBirthdayStr());
 			mCellphoneET.setText(u.getCellPhone());
@@ -174,7 +180,13 @@ public class ContactDetail extends Activity {
 			}
 
 			mUserSignatureTV.setText(u.getSignature());
-			mGenderTV.setText(u.getGender());
+			if (u.getGender() != null && u.getGender().equals("1")) {
+				mGenderTV.setText(mContext.getResources().getText(R.string.contacts_user_detail_gender_male));
+			} else if (u.getGender()!= null && u.getGender().equals("0")) {
+				mGenderTV.setText(mContext.getResources().getText(R.string.contacts_user_detail_gender_female));
+			} else {
+				mGenderTV.setText("");
+			}
 			mBirthdayTV.setText(u.getBirthdayStr());
 			mCellphoneTV.setText(u.getCellPhone());
 			mTelephoneTV.setText(u.getTelephone());

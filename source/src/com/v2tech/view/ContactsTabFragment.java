@@ -105,6 +105,7 @@ public class ContactsTabFragment extends Fragment {
 			intentFilter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
 			intentFilter.addAction(MainActivity.SERVICE_BOUNDED_EVENT);
 			intentFilter.addAction(JNIService.JNI_BROADCAST_USER_STATUS_NOTIFICATION);
+			intentFilter.addAction(JNIService.JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION);
 		}
 		return intentFilter;
 	}
@@ -142,6 +143,8 @@ public class ContactsTabFragment extends Fragment {
 
 			} else if (JNIService.JNI_BROADCAST_USER_STATUS_NOTIFICATION.equals(intent.getAction())) {
 				Message.obtain(mHandler, UPDATE_USER_STATUS, GlobalHolder.getInstance().getUser(intent.getExtras().getLong("uid"))).sendToTarget();
+			} else if (JNIService.JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION.equals(intent.getAction())) {
+				Message.obtain(mHandler, UPDATE_USER_STATUS).sendToTarget();
 			}
 		}
 

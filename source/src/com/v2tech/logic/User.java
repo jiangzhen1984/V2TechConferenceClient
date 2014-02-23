@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -212,7 +213,7 @@ public class User {
 
 	public String getBirthdayStr() {
 		if (mBirthday != null) {
-			DateFormat sd = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.US);
+			DateFormat sd = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
 			return sd.format(mBirthday);
 		} else {
 			return "";
@@ -296,6 +297,7 @@ public class User {
 
 		InputStream is = null;
 
+		DateFormat dp = new SimpleDateFormat("yyyy-MM-dd");
 		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder dBuilder;
 		try {
@@ -309,10 +311,21 @@ public class User {
 			Element element;
 			for (int i = 0; i < gList.getLength(); i++) {
 				element = (Element) gList.item(i);
-				l.add(new User(Long.parseLong(element.getAttribute("id")),
+				User u = new User(Long.parseLong(element.getAttribute("id")),
 						element.getAttribute("nickname"), element
 								.getAttribute("email"), element
-								.getAttribute("sign")));
+								.getAttribute("sign"));
+				u.setTelephone(element.getAttribute("telephone"));
+				u.setGender(element.getAttribute("sex"));
+				try {
+					String bir = element.getAttribute("birthday");
+					if (bir != null && !bir.equals("")) { 
+						u.setBirthday(dp.parse(bir));
+					}
+				} catch (ParseException e) {
+					e.printStackTrace();
+				}
+				l.add(u);
 			}
 
 		} catch (ParserConfigurationException e) {

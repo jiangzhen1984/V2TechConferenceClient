@@ -917,6 +917,10 @@ public class JNIService extends Service {
 					List<User> lu = User.fromXml(go.xml);
 					addUserToGroup(mContactsGroup, lu, go.gId);
 					for (User tu : lu) {
+						User.Status us = GlobalHolder.getInstance().getOnlineUserStatus(tu.getmUserId());
+						if (us != null) {
+							tu.updateStatus(us);
+						}
 						GlobalHolder.getInstance().putUser(tu.getmUserId(), tu);
 					}
 					Intent i = new Intent(
@@ -1095,12 +1099,13 @@ public class JNIService extends Service {
 		@Override
 		public void OnUserStatusUpdatedCallback(long nUserID, int eUEType,
 				int nStatus, String szStatusDesc) {
+			GlobalHolder.getInstance().updateUserStatus(nUserID, User.Status.fromInt(nStatus));
 			User u = GlobalHolder.getInstance().getUser(nUserID);
 			if (u == null) {
 				V2Log.e("Can't update user status, user "+ nUserID+"  isn't exist");
-				return;
+			} else {
+				u.updateStatus(User.Status.fromInt(nStatus));
 			}
-			u.updateStatus(User.Status.fromInt(nStatus));
 			Message.obtain(mCallbackHandler, JNI_UPDATE_USER_STATUS, (int)nUserID, nStatus).sendToTarget();
 		}
 		
