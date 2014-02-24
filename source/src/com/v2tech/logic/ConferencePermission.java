@@ -2,7 +2,7 @@ package com.v2tech.logic;
 
 
 /**
- * It's enum definition. Used to delegate permission of conference.
+ * It's enumration definition. Used to delegate permission of conference.
  * @author 28851274
  *
  */

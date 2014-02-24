@@ -43,6 +43,7 @@ import com.v2tech.logic.Group;
 import com.v2tech.logic.NetworkStateCode;
 import com.v2tech.logic.User;
 import com.v2tech.logic.UserDeviceConfig;
+import com.v2tech.logic.VImageMessage;
 import com.v2tech.logic.VMessage;
 import com.v2tech.logic.VMessage.MessageType;
 import com.v2tech.util.V2Log;
@@ -767,8 +768,9 @@ public class JNIService extends Service {
 					thread.post(new Runnable() {
 						@Override
 						public void run() {
+							byte[] data= ((VImageMessage)vm).getWrapperData();
 							ChatRequest.getInstance().sendChatPicture(0,
-									vm.getToUser().getmUserId(), null, 0,
+									vm.getToUser().getmUserId(), data, data.length,
 									ChatRequest.BT_IM);
 						}
 

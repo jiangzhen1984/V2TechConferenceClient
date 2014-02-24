@@ -72,7 +72,7 @@
         android:id="@+id/message_panel_ly"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
+        android:layout_above="@+id/contact_message_sub_feature_ly"
         android:background="@color/message_panel_bg" >
 
         <ImageView
@@ -136,6 +136,44 @@
             android:background="@drawable/input_bg"
             android:ems="10" >
         </EditText>
+    </RelativeLayout>
+    
+    
+      <RelativeLayout
+        android:id="@+id/contact_message_sub_feature_ly"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:background="#ffffff" >
+
+        <RelativeLayout
+            android:id="@+id/contact_message_sub_feature_ly_inner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#ffffff"
+            android:visibility="gone" >
+
+            <ImageView
+                android:id="@+id/message_smile_icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_centerVertical="true"
+                android:layout_margin="5dp"
+                android:layout_marginLeft="15dp"
+                android:src="@drawable/message_smile_icon" />
+
+            <ImageView
+                android:id="@+id/contact_message_send_image_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginTop="15dp"
+                android:layout_marginBottom="15dp"
+                android:layout_marginLeft="15dp"
+                android:layout_toRightOf="@+id/message_smile_icon"
+                android:src="@drawable/message_send_image_button" />
+        </RelativeLayout>
     </RelativeLayout>
 
 </RelativeLayout>
