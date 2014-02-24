@@ -37,7 +37,7 @@ public class ChatRequest {
 
 		return mChatRequest;
 	}
-	
+
 	public void setChatRequestCallback(ChatRequestCallback callback) {
 		this.callback = callback;
 	}

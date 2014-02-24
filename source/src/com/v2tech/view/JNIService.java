@@ -1253,7 +1253,14 @@ public class JNIService extends Service {
 		@Override
 		public void OnRecvChatPictureCallback(long nGroupID, int nBusinessType,
 				long nFromUserID, long nTime, byte[] pPicData) {
-			
+			User toUser = GlobalHolder.getInstance().getCurrentUser();
+			User fromUser =  GlobalHolder.getInstance().getUser(nFromUserID);
+			VMessage vm = new VImageMessage(fromUser, toUser, pPicData);
+			vm.setLocal(false);
+			vm.setDate(new Date(nTime * 1000));
+			Message.obtain(mCallbackHandler,
+					JNI_RECEIVED_MESSAGE, vm)
+					.sendToTarget();
 		}
 		
 	}

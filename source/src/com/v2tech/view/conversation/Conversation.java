@@ -266,6 +266,7 @@ public class Conversation extends Activity {
 						false);
 				saveMessageToDB(vim);
 				Message.obtain(lh, SEND_MESSAGE, vim).sendToTarget();
+				addMessageToContainer(vim);
 			}
 		}
 	}
@@ -296,8 +297,13 @@ public class Conversation extends Activity {
 		imm.hideSoftInputFromWindow(mMessageET.getWindowToken(), 0);
 
 		Message.obtain(lh, SEND_MESSAGE, m).sendToTarget();
+		addMessageToContainer(m);
+
+	}
+
+	private void addMessageToContainer(VMessage msg) {
 		// Add message to container
-		MessageBodyView mv = new MessageBodyView(mContext, m, true);
+		MessageBodyView mv = new MessageBodyView(mContext, msg, true);
 		mMessagesContainer.addView(mv);
 		mScrollView.post(new Runnable() {
 			@Override
@@ -305,7 +311,6 @@ public class Conversation extends Activity {
 				mScrollView.fullScroll(View.FOCUS_DOWN);
 			}
 		});
-
 	}
 
 	private ScrollViewListener scrollListener = new ScrollViewListener() {
@@ -366,8 +371,18 @@ public class Conversation extends Activity {
 			long localUserId = mCur.getLong(1);
 			// date time
 			String dateString = mCur.getString(7);
-			VMessage m = new VMessage(localUser, remoteUser, content,
-					localUserId == user2Id);
+			int type = mCur.getInt(6);
+			
+			VMessage m = null;
+			
+			if (type == VMessage.MessageType.TEXT.getIntValue()) {
+				m = new VMessage(localUser, remoteUser, content,
+						localUserId == user2Id);
+			} else {
+				m = new VImageMessage(localUser, remoteUser, content.split("\\|")[4],
+						localUserId == user2Id);
+			}
+			
 			try {
 				m.setDate(dp.parse(dateString));
 			} catch (ParseException e) {

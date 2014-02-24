@@ -52,6 +52,15 @@ public class MainApplication extends Application {
 		}
 		pa.setWritable(true);
 		pa.setReadable(true);
+		
+		
+		File image = new File(path +"/v2tech/pics");
+		if (!image.exists()) {
+			boolean res = image.mkdirs();
+			V2Log.i(" create avatar dir " +image.getAbsolutePath() +"  "+ res);
+		}
+		
+		
 		this.getApplicationContext().startService(new Intent(this.getApplicationContext(), JNIService.class));
 	}
 

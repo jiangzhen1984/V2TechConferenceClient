@@ -11,6 +11,7 @@ import java.util.UUID;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
+import com.v2tech.util.StorageUtil;
 import com.v2tech.util.V2Log;
 
 public class VImageMessage extends VMessage {
@@ -35,11 +36,20 @@ public class VImageMessage extends VMessage {
 	public VImageMessage(User u, User toUser, byte[] data) {
 		super(u, toUser, null, true);
 		this.mType = VMessage.MessageType.IMAGE;
+		this.originImageData = data;
+	}
+	
+	public VImageMessage(User u, User toUser, String uuid, String ext) {
+		super(u, toUser, null, true);
+		this.mType = VMessage.MessageType.IMAGE;
+		this.mUUID = uuid;
+		this.mExtension = ext;
+		mImagePath = StorageUtil.getAbsoluteSdcardPath() +"/v2tech/pics/"+uuid+ext;
 	}
 
 	@Override
 	public String getText() {
-		return mUUID+"|" + mExtension +"|" +mHeight+"|"+mWidth;
+		return mUUID+"|" + mExtension +"|" +mHeight+"|"+mWidth+"|"+mImagePath;
 	}
 
 	private void init() {
@@ -56,7 +66,8 @@ public class VImageMessage extends VMessage {
 			return null;
 		}
 		byte[] d = new byte[52 + originImageData.length];
-		System.arraycopy(mUUID.getBytes(), 0, d, 0, 41);
+		byte[] uud = mUUID.getBytes();
+		System.arraycopy(uud, 0, d, 0, uud.length);
 		byte[] et = mExtension.getBytes();
 		System.arraycopy(et, 0, d, 41, et.length);
 		System.arraycopy(originImageData, 0, d, 52, originImageData.length);
@@ -77,6 +88,10 @@ public class VImageMessage extends VMessage {
 		return mWidth;
 	}
 	
+	
+	public String getImagePath() {
+		return this.mImagePath;
+	}
 	
 	private boolean loadImageData() {
 		if (originImageData == null ) {

@@ -3,11 +3,11 @@ package com.v2tech.view.conversation;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Handler;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -16,6 +16,7 @@ import android.widget.PopupWindow;
 import android.widget.TextView;
 
 import com.v2tech.R;
+import com.v2tech.logic.VImageMessage;
 import com.v2tech.logic.VMessage;
 
 public class MessageBodyView extends LinearLayout {
@@ -36,6 +37,7 @@ public class MessageBodyView extends LinearLayout {
 	private LinearLayout mRemoteMessageContainter;
 
 	private TextView contentTV;
+	private ImageView mImageIV;
 
 	private Handler localHandler;
 	private Runnable popupWindowListener = null;
@@ -100,6 +102,15 @@ public class MessageBodyView extends LinearLayout {
 			mContentContainer.addView(contentTV, new LinearLayout.LayoutParams(
 					LinearLayout.LayoutParams.MATCH_PARENT,
 					LinearLayout.LayoutParams.WRAP_CONTENT));
+		} else if (mMsg.getType() ==VMessage.MessageType.IMAGE) {
+			mImageIV = new ImageView(this.getContext());
+			BitmapFactory.Options options = new BitmapFactory.Options();
+			options.inScaled = true;
+			options.inSampleSize = 4;
+			mImageIV.setImageBitmap(BitmapFactory.decodeFile(((VImageMessage)mMsg).getImagePath(), options));
+			mContentContainer.addView(mImageIV,new LinearLayout.LayoutParams(
+					LinearLayout.LayoutParams.WRAP_CONTENT,
+					LinearLayout.LayoutParams.WRAP_CONTENT));
 		}
 
 		LinearLayout.LayoutParams ll = new LinearLayout.LayoutParams(
@@ -112,7 +123,11 @@ public class MessageBodyView extends LinearLayout {
 			@Override
 			public boolean onLongClick(View anchor) {
 				updateSelectedBg(true);
-				showPopupWindow(anchor);
+				if (mMsg.getType() == VMessage.MessageType.TEXT) {
+					showPopupWindow(anchor);
+				} else {
+					//TODO open image
+				}
 				return false;
 			}
 
@@ -217,29 +232,5 @@ public class MessageBodyView extends LinearLayout {
 		return this.mMsg;
 	}
 
-	public void updateMessage(VMessage msg) {
-		this.mMsg = msg;
-		mContentContainer.removeAllViews();
-		if (mMsg.isLocal()) {
-			mArrowIV.bringToFront();
-			mLocalMessageContainter.setVisibility(View.VISIBLE);
-			mRemoteMessageContainter.setVisibility(View.GONE);
-			mContentContainer = (LinearLayout) rootView
-					.findViewById(R.id.messag_body_content_ly_local);
-		} else {
-			mArrowIV.bringToFront();
-			mContentContainer = (LinearLayout) rootView
-					.findViewById(R.id.messag_body_content_ly_remote);
-			mLocalMessageContainter.setVisibility(View.GONE);
-			mRemoteMessageContainter.setVisibility(View.VISIBLE);
-		}
-
-		if (mMsg.getType() == VMessage.MessageType.TEXT) {
-			contentTV.setText(mMsg.getText());
-			mContentContainer.addView(contentTV, new LinearLayout.LayoutParams(
-					LinearLayout.LayoutParams.MATCH_PARENT,
-					LinearLayout.LayoutParams.WRAP_CONTENT));
-		}
-	}
 
 }

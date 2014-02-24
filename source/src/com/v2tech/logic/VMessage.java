@@ -3,11 +3,12 @@ package com.v2tech.logic;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
 public class VMessage {
 
 	public enum MessageType {
-		TEXT(1), IMAGE(2);
+		TEXT(1), IMAGE(2), IMAGE_AND_TEXT(3);
 
 		private int code;
 
@@ -160,6 +161,12 @@ public class VMessage {
 				return vm;
 			}
 		}
+		return null;
+	}
+	
+	
+	public static List<VMessage> fromXml(User from, User to, Date date, String xml) {
+		
 		return null;
 	}
 
