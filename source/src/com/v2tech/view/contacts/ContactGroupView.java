@@ -11,7 +11,6 @@ import android.widget.TextView;
 
 import com.v2tech.R;
 import com.v2tech.logic.Group;
-import com.v2tech.logic.User;
 
 public class ContactGroupView extends LinearLayout {
 
@@ -21,10 +20,6 @@ public class ContactGroupView extends LinearLayout {
 	private TextView mGroupNameTV;
 	private TextView mGroupStsTV;
 	private OnClickListener callback;
-
-	private int mOnLineCounts;
-	private int AllCounts;
-	private Boolean isCalAllUserCounts = false;
 
 	private Handler innerHandler = new Handler();
 
@@ -40,7 +35,6 @@ public class ContactGroupView extends LinearLayout {
 			throw new RuntimeException("Invalid Group data");
 		}
 		this.mGroup = g;
-		mOnLineCounts = 0;
 
 		View view = LayoutInflater.from(getContext()).inflate(
 				R.layout.contacts_group_view, null, false);
@@ -72,38 +66,9 @@ public class ContactGroupView extends LinearLayout {
 				LinearLayout.LayoutParams.WRAP_CONTENT));
 	}
 
-	private void calAllCounts(Group g) {
-		for (User u : g.getUsers()) {
-			if (u.getmStatus() == User.Status.ONLINE) {
-				mOnLineCounts++;
-			}
-		}
-		AllCounts += g.getUsers().size();
-		for (Group subG : g.getChildGroup()) {
-			calAllCounts(subG);
-		}
-
-	}
 
 	public Group getGroup() {
 		return this.mGroup;
-	}
-
-	private void startCalculUsers() {
-		innerHandler.post(new Runnable() {
-
-			@Override
-			public void run() {
-				synchronized (isCalAllUserCounts) {
-					if (!isCalAllUserCounts) {
-						calAllCounts(mGroup);
-						isCalAllUserCounts = true;
-					}
-				}
-				mGroupStsTV.setText(mOnLineCounts + " / " + AllCounts);
-			}
-
-		});
 	}
 
 	public void doExpandedOrCollapse() {
@@ -125,10 +90,7 @@ public class ContactGroupView extends LinearLayout {
 			public void run() {
 				mGroupStsTV.setText(mGroup.getOnlineUserCount() + " / "
 						+ mGroup.getUserCount());
-
 			}
-
 		});
-
 	}
 }

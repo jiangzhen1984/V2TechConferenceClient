@@ -1,6 +1,7 @@
 package com.v2tech.logic;
 
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
 
@@ -14,6 +15,8 @@ public class Chat extends Handler {
 	private AudioRequestCallback callback;
 
 	private Message mCaller;
+
+	private Handler thread;
 
 	public Chat() {
 		super();
@@ -38,20 +41,38 @@ public class Chat extends Handler {
 	private void init() {
 		callback = new AudioRequestCallbackImpl();
 		AudioRequest.getInstance().registerCallback(callback);
+
+		HandlerThread backEnd = new HandlerThread("back-end");
+		backEnd.start();
+		thread = new Handler(backEnd.getLooper());
 	}
 
 	/**
-	 * send message 
+	 * send message
+	 * 
 	 * @param msg
 	 * @param caller
 	 */
-	public void sendVMessage(VMessage msg, Message caller) {
-		ChatRequest.getInstance().sendChatText(0, msg.getToUser().getmUserId(),
-				msg.toXml(), ChatRequest.BT_IM);
-		if (msg.mType == VMessage.MessageType.IMAGE
-				|| msg.mType == VMessage.MessageType.IMAGE_AND_TEXT) {
-			// TODO send image
-		} 
+	public void sendVMessage(final VMessage msg, final Message caller) {
+		thread.post(new Runnable() {
+
+			@Override
+			public void run() {
+				ChatRequest.getInstance().sendChatText(0,
+						msg.getToUser().getmUserId(), msg.toXml(),
+						ChatRequest.BT_IM);
+				if (msg.mType == VMessage.MessageType.IMAGE
+						|| msg.mType == VMessage.MessageType.IMAGE_AND_TEXT) {
+					byte[] data = ((VImageMessage) msg).getWrapperData();
+					ChatRequest.getInstance().sendChatPicture(0,
+							msg.getToUser().getmUserId(), data, data.length,
+							ChatRequest.BT_IM);
+				}
+				caller.sendToTarget();
+			}
+
+		});
+
 	}
 
 	public void inviteUserAudioChat(UserAudioDevice ud, Message caller) {

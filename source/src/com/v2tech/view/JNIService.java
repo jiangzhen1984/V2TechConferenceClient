@@ -871,7 +871,7 @@ public class JNIService extends Service {
 				iun.addCategory(JNI_BROADCAST_CATEGROY);
 				iun.putExtra("uid", Long.valueOf(msg.arg1));
 				iun.putExtra("status", msg.arg2);
-				mContext.sendStickyBroadcast(iun);
+				mContext.sendBroadcast(iun);
 				
 				break;
 			case JNI_GROUP_NOTIFY:

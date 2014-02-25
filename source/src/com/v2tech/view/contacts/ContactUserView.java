@@ -28,6 +28,7 @@ public class ContactUserView extends LinearLayout {
 	private TextView mUserNameTV;
 	private TextView mUserSignatureTV;
 	private ImageView mButtonIV;
+	private RelativeLayout mHeaderIconContainer;
 
 	private Dialog mUserActionDialog;
 
@@ -57,6 +58,9 @@ public class ContactUserView extends LinearLayout {
 		mUserNameTV.setText(mUser.getName());
 		mUserSignatureTV.setText(mUser.getSignature() == null ? "" : mUser
 				.getSignature());
+
+		mHeaderIconContainer = (RelativeLayout) view
+				.findViewById(R.id.contact_user_img_container);
 
 		mButtonIV.setOnClickListener(new OnClickListener() {
 
@@ -163,6 +167,17 @@ public class ContactUserView extends LinearLayout {
 
 	public User getUser() {
 		return this.mUser;
+	}
+
+	public void updateStatus(User.Status st) {
+		switch (st) {
+		case ONLINE:
+			break;
+		case OFFLINE:
+			break;
+		default:
+			break;
+		}
 	}
 
 }

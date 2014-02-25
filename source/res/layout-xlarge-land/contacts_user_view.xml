@@ -8,16 +8,23 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content" >
 
-        <ImageView
-            android:id="@+id/contact_user_img"
+        <RelativeLayout
+            android:id="@+id/contact_user_img_container"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_centerVertical="true"
             android:layout_marginBottom="15dp"
             android:layout_marginLeft="10dp"
-            android:layout_marginTop="15dp"
-            android:src="@drawable/contact_default" />
+            android:layout_marginTop="15dp" >
+
+            <ImageView
+                android:id="@+id/contact_user_img"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:src="@drawable/contact_default" />
+        </RelativeLayout>
 
         <TextView
             android:id="@+id/contact_user_name"
@@ -25,7 +32,7 @@
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
             android:layout_marginLeft="50dp"
-            android:layout_toRightOf="@+id/contact_user_img"
+            android:layout_toRightOf="@+id/contact_user_img_container"
             android:text="TextView" />
 
         <TextView

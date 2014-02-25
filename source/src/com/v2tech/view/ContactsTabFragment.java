@@ -33,7 +33,8 @@ public class ContactsTabFragment extends Fragment {
 	private static final int REQUEST_SERVICE_BOUND = 1;
 	private static final int FILL_CONTACTS_GROUP = 2;
 	private static final int UPDATE_LIST_VIEW = 3;
-	private static final int UPDATE_USER_STATUS = 4;
+	private static final int UPDATE_GROUP_STATUS = 4;
+	private static final int UPDATE_USER_STATUS = 5;
 
 	private Tab1BroadcastReceiver receiver = new Tab1BroadcastReceiver();
 	private IntentFilter intentFilter;
@@ -145,9 +146,12 @@ public class ContactsTabFragment extends Fragment {
 				}
 
 			} else if (JNIService.JNI_BROADCAST_USER_STATUS_NOTIFICATION.equals(intent.getAction())) {
-				Message.obtain(mHandler, UPDATE_USER_STATUS, GlobalHolder.getInstance().getUser(intent.getExtras().getLong("uid"))).sendToTarget();
+				Message.obtain(mHandler, UPDATE_GROUP_STATUS, GlobalHolder.getInstance().getUser(intent.getExtras().getLong("uid"))).sendToTarget();
+				long uid = intent.getExtras().getLong("uid");
+				int status = intent.getExtras().getInt("status");
+				Message.obtain(mHandler, UPDATE_USER_STATUS, (int)uid, status).sendToTarget();
 			} else if (JNIService.JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION.equals(intent.getAction())) {
-				Message.obtain(mHandler, UPDATE_USER_STATUS).sendToTarget();
+				Message.obtain(mHandler, UPDATE_GROUP_STATUS).sendToTarget();
 			}
 		}
 
@@ -292,10 +296,18 @@ public class ContactsTabFragment extends Fragment {
 			case UPDATE_LIST_VIEW:
 				updateView(msg.arg1);
 				break;
-			case UPDATE_USER_STATUS:
+			case UPDATE_GROUP_STATUS:
 				for (ListItem li : mItemList) {
 					if (li.g != null) {
 						((ContactGroupView)li.v).updateUserStatus();
+					} 
+				}
+				break;
+			case UPDATE_USER_STATUS:
+				for (ListItem li : mItemList) {
+					if (li.u != null && li.u.getmUserId() == msg.arg1) {
+						((ContactUserView)li.v).updateStatus(User.Status.fromInt(msg.arg2));
+						break;
 					}
 				}
 				break;
