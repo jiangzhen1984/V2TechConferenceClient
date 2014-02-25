@@ -113,11 +113,14 @@ public class ContactsTabFragment extends Fragment {
 	List<Group> l;
 
 	private void fillContactsGroup() {
-		
+		if (mLoaded) {
+			return;
+		}
 		l = mService.getGroup(GroupType.CONTACT);
-		// TODO
 		if (l == null) {
-			V2Log.e("  no group list ============================");
+			Message m = Message.obtain(mHandler, FILL_CONTACTS_GROUP);
+			mHandler.sendMessageDelayed(m, 300);
+			V2Log.i(" try to re-get group list");
 		} else {
 			mLoaded = true;
 			for (Group g : l) {

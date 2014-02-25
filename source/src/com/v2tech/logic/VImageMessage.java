@@ -4,8 +4,10 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.UUID;
 
 import android.graphics.Bitmap;
@@ -37,19 +39,52 @@ public class VImageMessage extends VMessage {
 		super(u, toUser, null, true);
 		this.mType = VMessage.MessageType.IMAGE;
 		this.originImageData = data;
+		if (this.originImageData != null) {
+			if (this.originImageData.length < 52) {
+				throw new RuntimeException("Illegal image data");
+			}
+			byte[] uuidBytes = new byte[38];
+			System.arraycopy(originImageData, 0, uuidBytes, 0, 38);
+			mUUID = new String(uuidBytes);
+			byte[] extensionBytes = new byte[4];
+			System.arraycopy(originImageData, 41, extensionBytes, 0, 4);
+			mExtension = new String(extensionBytes);
+			mImagePath = StorageUtil.getAbsoluteSdcardPath() + "/v2tech/pics/"
+					+ mUUID + mExtension;
+			File f = new File(mImagePath);
+			OutputStream os = null;
+			try {
+				os = new FileOutputStream(f);
+				os.write(data, 52, data.length-52);
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			} finally {
+				if (os != null) {
+					try {
+						os.close();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		}
 	}
-	
+
 	public VImageMessage(User u, User toUser, String uuid, String ext) {
 		super(u, toUser, null, true);
 		this.mType = VMessage.MessageType.IMAGE;
 		this.mUUID = uuid;
 		this.mExtension = ext;
-		mImagePath = StorageUtil.getAbsoluteSdcardPath() +"/v2tech/pics/"+uuid+ext;
+		mImagePath = StorageUtil.getAbsoluteSdcardPath() + "/v2tech/pics/"
+				+ uuid + ext;
 	}
 
 	@Override
 	public String getText() {
-		return mUUID+"|" + mExtension +"|" +mHeight+"|"+mWidth+"|"+mImagePath;
+		return mUUID + "|" + mExtension + "|" + mHeight + "|" + mWidth + "|"
+				+ mImagePath;
 	}
 
 	private void init() {
@@ -87,20 +122,19 @@ public class VImageMessage extends VMessage {
 		}
 		return mWidth;
 	}
-	
-	
+
 	public String getImagePath() {
 		return this.mImagePath;
 	}
-	
+
 	private boolean loadImageData() {
-		if (originImageData == null ) {
+		if (originImageData == null) {
 			File f = new File(mImagePath);
 			if (!f.exists()) {
 				V2Log.e(" file doesn't exist " + mImagePath);
 				return false;
 			}
-			originImageData = new byte[(int)f.length()];
+			originImageData = new byte[(int) f.length()];
 			InputStream is = null;
 			try {
 				is = new FileInputStream(f);
@@ -121,8 +155,7 @@ public class VImageMessage extends VMessage {
 				}
 			}
 		}
-		
-		
+
 		InputStream is = null;
 		is = new ByteArrayInputStream(originImageData);
 		Bitmap bm = BitmapFactory.decodeStream(is);
@@ -153,7 +186,7 @@ public class VImageMessage extends VMessage {
 						+ "\" GUID=\""
 						+ mUUID
 						+ "\" Height=\""
-						+ mHeight + "\" Width=\"" + mWidth + "\"/>")
+						+ getHeight() + "\" Width=\"" + getWidth() + "\"/>")
 				.append("</ItemList>").append("</TChatData>");
 		return sb.toString();
 	}

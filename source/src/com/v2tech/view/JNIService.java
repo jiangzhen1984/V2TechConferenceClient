@@ -991,7 +991,7 @@ public class JNIService extends Service {
 				
 			case JNI_RECEIVED_MESSAGE:
 				VMessage vm = (VMessage)msg.obj;
-				if (vm.getType() == MessageType.TEXT) {
+				if (vm != null) {
 					Uri uri = saveMessageToDB(vm);
 					Intent ii = new Intent(
 							JNI_BROADCAST_NEW_MESSAGE);
@@ -1045,8 +1045,7 @@ public class JNIService extends Service {
 			cv.put(ContentDescriptor.Messages.Cols.FROM_USER_ID, vm.getUser().getmUserId());
 			cv.put(ContentDescriptor.Messages.Cols.TO_USER_ID, vm.getToUser().getmUserId());
 			cv.put(ContentDescriptor.Messages.Cols.MSG_CONTENT, vm.getText());
-			cv.put(ContentDescriptor.Messages.Cols.MSG_TYPE,
-					VMessage.MessageType.TEXT.getIntValue());
+			cv.put(ContentDescriptor.Messages.Cols.MSG_TYPE,vm.getType().getIntValue());
 			cv.put(ContentDescriptor.Messages.Cols.SEND_TIME, vm.getNormalDateStr());
 			return getContentResolver().insert(ContentDescriptor.Messages.CONTENT_URI,
 					cv);

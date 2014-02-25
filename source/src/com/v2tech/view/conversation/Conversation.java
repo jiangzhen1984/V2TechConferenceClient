@@ -336,10 +336,6 @@ public class Conversation extends Activity {
 	};
 
 	private List<VMessage> loadMessages() {
-		User localUser = new User(user1Id);
-		User remoteUser = new User(user2Id);
-		DateFormat dp = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-
 		String selection = "(" + ContentDescriptor.Messages.Cols.FROM_USER_ID
 				+ "=? and " + ContentDescriptor.Messages.Cols.TO_USER_ID
 				+ "=? ) or " + "("
@@ -362,50 +358,9 @@ public class Conversation extends Activity {
 		}
 		List<VMessage> array = new ArrayList<VMessage>();
 		int count = 0;
-		VMessage lastM = null;
 		while (mCur.moveToNext()) {
-			int id = mCur.getInt(0);
-			// msg_content column
-			String content = mCur.getString(5);
-			// to_user_id column
-			long localUserId = mCur.getLong(1);
-			// date time
-			String dateString = mCur.getString(7);
-			int type = mCur.getInt(6);
-			
-			VMessage m = null;
-			
-			if (type == VMessage.MessageType.TEXT.getIntValue()) {
-				m = new VMessage(localUser, remoteUser, content,
-						localUserId == user2Id);
-			} else {
-				m = new VImageMessage(localUser, remoteUser, content.split("\\|")[4],
-						localUserId == user2Id);
-			}
-			
-			try {
-				m.setDate(dp.parse(dateString));
-			} catch (ParseException e) {
-				e.printStackTrace();
-			}
-
-			boolean showTime = false;
-			if (lastM == null) {
-				showTime = true;
-			}
-			if (lastM != null && lastM.getDate() != null && m.getDate() != null) {
-				if (lastM.getDate().getTime() / 60000 == m.getDate().getTime() / 60000) {
-					showTime = false;
-				} else {
-					showTime = true;
-				}
-			}
-			// final MessageBodyView mv = new MessageBodyView(this, m,
-			// showTime);
-			// mv.setId(id);
-
+			VMessage m = extractMsg(mCur);
 			array.add(m);
-			lastM = m;
 			count++;
 			offset++;
 			if (count > BATCH_COUNT) {
@@ -418,33 +373,18 @@ public class Conversation extends Activity {
 	}
 
 	private void queryAndAddMessage(int mid) {
-		User localUser = new User(user1Id);
-		User remoteUser = new User(user2Id);
-
 		Uri uri = ContentUris.withAppendedId(
 				ContentDescriptor.Messages.CONTENT_URI, mid);
 
 		Cursor mCur = this.getContentResolver().query(uri,
 				ContentDescriptor.Messages.Cols.ALL_CLOS, null, null, null);
-		DateFormat dp = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+	
 		while (mCur.moveToNext()) {
-			int id = mCur.getInt(0);
-			// msg_content column
-			String content = mCur.getString(5);
-			// date time
-			String dateString = mCur.getString(7);
-			VMessage m = new VMessage(remoteUser, localUser, content, true);
-
-			try {
-				m.setDate(dp.parse(dateString));
-			} catch (ParseException e) {
-				e.printStackTrace();
-			}
-
+			VMessage m = extractMsg(mCur);
 			MessageBodyView mv = new MessageBodyView(this, m, true);
 			mMessagesContainer.addView(mv);
 		}
-
+		mCur.close();
 		mScrollView.post(new Runnable() {
 			@Override
 			public void run() {
@@ -452,6 +392,43 @@ public class Conversation extends Activity {
 			}
 		});
 
+	}
+	
+	
+	private VMessage extractMsg(Cursor cur) {
+		if (cur.isClosed()) {
+			throw new RuntimeException(" cursor is closed");
+		}
+		DateFormat dp = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+		User localUser = new User(user1Id);
+		User remoteUser = new User(user2Id);
+
+		
+		int id = cur.getInt(0);
+		long localUserId = cur.getLong(1);
+		// msg_content column
+		String content = cur.getString(5);
+		//message type
+		int type = cur.getInt(6);
+		// date time
+		String dateString = cur.getString(7);
+		
+		VMessage vm = null;
+		if (type == VMessage.MessageType.TEXT.getIntValue()) {
+			vm = new VMessage(localUser, remoteUser, content,
+					localUserId == user2Id);
+		} else {
+			vm = new VImageMessage(localUser, remoteUser, content.split("\\|")[4],
+					localUserId == user2Id);
+		}
+		try {
+			vm.setDate(dp.parse(dateString));
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+
+		return vm;
+		
 	}
 
 	/** Defines callback for service binding, passed to bindService() */

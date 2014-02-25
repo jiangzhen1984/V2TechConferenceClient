@@ -105,7 +105,6 @@ public class MessageBodyView extends LinearLayout {
 		} else if (mMsg.getType() ==VMessage.MessageType.IMAGE) {
 			mImageIV = new ImageView(this.getContext());
 			BitmapFactory.Options options = new BitmapFactory.Options();
-			options.inScaled = true;
 			options.inSampleSize = 4;
 			mImageIV.setImageBitmap(BitmapFactory.decodeFile(((VImageMessage)mMsg).getImagePath(), options));
 			mContentContainer.addView(mImageIV,new LinearLayout.LayoutParams(
@@ -114,7 +113,7 @@ public class MessageBodyView extends LinearLayout {
 		}
 
 		LinearLayout.LayoutParams ll = new LinearLayout.LayoutParams(
-				LinearLayout.LayoutParams.MATCH_PARENT,
+				LinearLayout.LayoutParams.WRAP_CONTENT,
 				LinearLayout.LayoutParams.WRAP_CONTENT);
 		this.addView(rootView, ll);
 
@@ -126,30 +125,13 @@ public class MessageBodyView extends LinearLayout {
 				if (mMsg.getType() == VMessage.MessageType.TEXT) {
 					showPopupWindow(anchor);
 				} else {
-					//TODO open image
+					updateSelectedBg(false);
 				}
 				return false;
 			}
 
 		});
-		// mContentContainer.setOnTouchListener(new OnTouchListener() {
-		//
-		// @Override
-		// public boolean onTouch(final View anchor, MotionEvent mv) {
-		// int action = mv.getAction();
-		// if (action == MotionEvent.ACTION_DOWN) {
-		// updateSelectedBg(true);
-		// showPopupWindow(anchor);
-		// } else if (action == MotionEvent.ACTION_UP || action ==
-		// MotionEvent.ACTION_POINTER_UP || action ==
-		// MotionEvent.ACTION_OUTSIDE) {
-		// updateSelectedBg(false);
-		// cancelShowPopUpWindow();
-		// }
-		// return false;
-		// }
-		//
-		// });
+
 	}
 
 	private void updateSelectedBg(boolean selected) {
@@ -220,12 +202,6 @@ public class MessageBodyView extends LinearLayout {
 
 		localHandler.postDelayed(popupWindowListener, 200);
 
-	}
-
-	private void cancelShowPopUpWindow() {
-		if (popupWindowListener != null) {
-			localHandler.removeCallbacks(popupWindowListener);
-		}
 	}
 
 	public VMessage getItem() {
