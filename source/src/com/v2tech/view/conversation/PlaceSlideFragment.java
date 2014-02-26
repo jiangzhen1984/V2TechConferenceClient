@@ -1,6 +1,9 @@
 package com.v2tech.view.conversation;
 
-import android.graphics.Bitmap;
+import java.io.File;
+
+import android.app.Activity;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -10,10 +13,15 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
 import com.v2tech.R;
+import com.v2tech.logic.VImageMessage;
+import com.v2tech.util.V2Log;
 
 public class PlaceSlideFragment extends Fragment {
 
-	private Bitmap bmp;
+	private VImageMessage vim;
+
+	
+	private RelativeLayout rlContainer;
 
 	public PlaceSlideFragment() {
 
@@ -24,33 +32,71 @@ public class PlaceSlideFragment extends Fragment {
 		super.onCreate(savedInstanceState);
 
 	}
-	
-	
-	
-	
+
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
+			View v = inflater.inflate(R.layout.image_view, container, false);
+			rlContainer = (RelativeLayout) v
+					.findViewById(R.id.image_view_root);
 		
-		View v = inflater.inflate(R.layout.image_view, container, false);
-		RelativeLayout rlContainer = (RelativeLayout)v.findViewById(R.id.image_view_root);
-		ImageView iv = new ImageView(this.getActivity());
-		iv.setImageBitmap(bmp);
-		RelativeLayout.LayoutParams rl = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+		final ImageView iv = new ImageView(this.getActivity());
+
+		new AsyncTask<Void, Void, Void>() {
+
+			@Override
+			protected Void doInBackground(Void... params) {
+				File f = new File(vim.getImagePath());
+				vim.getFullQuantityBitmap();
+				return null;
+			}
+
+			@Override
+			protected void onPostExecute(Void result) {
+				iv.setImageBitmap(vim.getFullQuantityBitmap());
+			}
+
+			
+		}.execute();
+		
+		RelativeLayout.LayoutParams rl = new RelativeLayout.LayoutParams(
+				RelativeLayout.LayoutParams.WRAP_CONTENT,
+				RelativeLayout.LayoutParams.WRAP_CONTENT);
 		rl.addRule(RelativeLayout.CENTER_IN_PARENT);
 		rlContainer.addView(iv, rl);
 		return v;
 	}
 
-	public void setBitmap(Bitmap bmp) {
-		this.bmp = bmp;
+	@Override
+	public void onAttach(Activity activity) {
+		super.onAttach(activity);
+	}
+
+	@Override
+	public void onDestroyView() {
+		super.onDestroyView();
+		if (vim != null) {
+			vim.recycle();
+		}
+		rlContainer.removeAllViews();
+	}
+
+	@Override
+	public void onDetach() {
+		super.onDetach();
+	}
+
+	public void setMessage(VImageMessage vim) {
+		this.vim = vim;
 	}
 
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
-		bmp.recycle();
+		if (vim != null) {
+			vim.recycle();
+		}
+		rlContainer.removeAllViews();
 	}
-	
-	
+
 }

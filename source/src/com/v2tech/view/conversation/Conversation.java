@@ -190,6 +190,18 @@ public class Conversation extends Activity {
 	protected void onDestroy() {
 		super.onDestroy();
 		this.unregisterReceiver(receiver);
+		cleanCache();
+		
+	}
+	
+	
+	private void cleanCache() {
+		for (int i=0; i< mMessagesContainer.getChildCount(); i++) {
+			View v =mMessagesContainer.getChildAt(i);
+			if(v instanceof MessageBodyView) {
+				((MessageBodyView)v).recycle();
+			}
+		}
 	}
 
 	private OnTouchListener sendMessageButtonListener = new OnTouchListener() {
@@ -375,6 +387,7 @@ public class Conversation extends Activity {
 						+ " limit " + BATCH_COUNT + " offset " + offset);
 
 		if (mCur.getCount() == 0) {
+			mCur.close();
 			mLoadedAllMessages = true;
 			return null;
 		}

@@ -33,7 +33,7 @@ import com.v2tech.util.V2Log;
 public class User {
 
 	public enum Status {
-		ONLINE(1), OFFLINE(0), UNKNOWN(-1);
+		LEAVE(2), BUSY(3), DO_NOT_DISTURB(4), HIDDEN(5), ONLINE(1), OFFLINE(0), UNKNOWN(-1);
 		private int code;
 
 		private Status(int code) {
@@ -50,6 +50,14 @@ public class User {
 				return OFFLINE;
 			case 1:
 				return ONLINE;
+			case 2:
+				return LEAVE;
+			case 3:
+				return BUSY;
+			case 4:
+				return DO_NOT_DISTURB;
+			case 5:
+				return HIDDEN;
 			default:
 				return UNKNOWN;
 			}
@@ -109,6 +117,7 @@ public class User {
 		this.mSignature = signature;
 		mBelongsGroup = new HashSet<Group>();
 		isCurrentLoggedInUser = false;
+		this.mStatus = Status.OFFLINE;
 	}
 
 	public boolean isCurrentLoggedInUser() {

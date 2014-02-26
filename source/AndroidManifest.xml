@@ -79,7 +79,7 @@
                 <category android:name="com.v2tech" />
             </intent-filter>
         </activity>
-        <activity android:name="com.v2tech.view.conversation.ImageViewGallery">
+        <activity android:name="com.v2tech.view.conversation.ImageViewGallery" >
             <intent-filter>
                 <action android:name="com.v2tech.image_gallery" />
 

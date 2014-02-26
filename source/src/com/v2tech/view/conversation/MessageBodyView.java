@@ -113,10 +113,8 @@ public class MessageBodyView extends LinearLayout {
 					LinearLayout.LayoutParams.WRAP_CONTENT));
 		} else if (mMsg.getType() ==VMessage.MessageType.IMAGE) {
 			mImageIV = new ImageView(this.getContext());
-			BitmapFactory.Options options = new BitmapFactory.Options();
-			options.inSampleSize = 4;
-			//FIXME need to be recycle
-			mImageIV.setImageBitmap(BitmapFactory.decodeFile(((VImageMessage)mMsg).getImagePath(), options));
+			
+			mImageIV.setImageBitmap(((VImageMessage)mMsg).getCompressedBitmap());
 			mContentContainer.addView(mImageIV,new LinearLayout.LayoutParams(
 					LinearLayout.LayoutParams.WRAP_CONTENT,
 					LinearLayout.LayoutParams.WRAP_CONTENT));
@@ -224,6 +222,12 @@ public class MessageBodyView extends LinearLayout {
 	
 	public void setCallback(ClickListener cl) {
 		this.callback = cl;
+	}
+	
+	public void recycle() {
+		if (this.mMsg.getType() == VMessage.MessageType.IMAGE) {
+			((VImageMessage)this.mMsg).recycle();
+		}
 	}
 
 }

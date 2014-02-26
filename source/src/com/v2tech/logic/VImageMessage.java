@@ -181,7 +181,7 @@ public class VImageMessage extends VMessage {
 				.append("<TChatFont Color=\"255\" Name=\"Segoe UI\" Size=\"18\" Style=\"\"/>")
 				.append("</FontList>\n")
 				.append("<ItemList>\n")
-				.append("< TPictureChatItem NewLine=\"False\" AutoResize=\"True\" FileExt=\""
+				.append("<TPictureChatItem NewLine=\"False\" AutoResize=\"True\" FileExt=\""
 						+ mExtension
 						+ "\" GUID=\""
 						+ mUUID
@@ -190,5 +190,41 @@ public class VImageMessage extends VMessage {
 				.append("</ItemList>").append("</TChatData>");
 		return sb.toString();
 	}
-
+	
+	
+	Bitmap mFullQualityBitmap = null;
+	Bitmap mCompressedBitmap = null;
+	public Bitmap getFullQuantityBitmap() {
+		if (mFullQualityBitmap == null || mFullQualityBitmap.isRecycled()) {
+			mFullQualityBitmap = BitmapFactory.decodeFile(this.mImagePath);
+			if (mFullQualityBitmap.getWidth() > 1024 || mFullQualityBitmap.getHeight() > 768) {
+				Bitmap tmp = Bitmap.createScaledBitmap(mFullQualityBitmap, 1024, 768, true);
+				mFullQualityBitmap.recycle();
+				mFullQualityBitmap = tmp;
+			}
+		}
+		return mFullQualityBitmap;
+	}
+	
+	public Bitmap getCompressedBitmap() {
+		if (mCompressedBitmap == null || mFullQualityBitmap.isRecycled()) {
+			BitmapFactory.Options options = new BitmapFactory.Options();
+			options.inSampleSize = 4;
+			options.outHeight = 200;
+			options.outWidth = 200;
+			mCompressedBitmap = BitmapFactory.decodeFile(this.mImagePath, options);
+		}
+		return mCompressedBitmap;
+	}
+	
+	public void recycle() {
+		if (mFullQualityBitmap != null) {
+			mFullQualityBitmap.recycle();
+			mFullQualityBitmap = null;
+		}
+		if (mCompressedBitmap != null) {
+			mCompressedBitmap.recycle();
+			mCompressedBitmap = null;
+		}
+	}
 }

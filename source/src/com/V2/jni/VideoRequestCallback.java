@@ -25,6 +25,10 @@ public interface VideoRequestCallback {
 	
 	
 	
+	
+	public void OnVideoChatInviteCallback(long nGroupID, int nBusinessType,
+			long nFromUserID, String szDeviceID);
+	
 	/**
 	 * 
 	 * @param szDevID

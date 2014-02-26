@@ -90,7 +90,7 @@ public class JNIService extends Service {
 	public static final String JNI_BROADCAST_ATTENDEE_ENTERED_NOTIFICATION = "com.v2tech.jni.broadcast.attendee.entered.notification";
 	public static final String JNI_BROADCAST_ATTENDEE_EXITED_NOTIFICATION = "com.v2tech.jni.broadcast.attendee.exited.notification";
 	public static final String JNI_BROADCAST_NEW_MESSAGE = "com.v2tech.jni.broadcast.new.message";
-	
+
 	private boolean isDebug = true;
 
 	private static Hashtable<Integer, MetaData> map = new Hashtable<Integer, MetaData>();
@@ -114,7 +114,7 @@ public class JNIService extends Service {
 	private GroupRequestCB mGRCB;
 
 	private VideoRequestCB mVRCB;
-	
+
 	private ChatRequestCB mChRCB;
 
 	// ////////////////////////////////////////
@@ -163,7 +163,7 @@ public class JNIService extends Service {
 
 		mVRCB = new VideoRequestCB(mCallbackHandler);
 		VideoRequest.getInstance().setCallback(mVRCB);
-		
+
 		mChRCB = new ChatRequestCB(mCallbackHandler);
 		ChatRequest.getInstance().setChatRequestCallback(mChRCB);
 	}
@@ -300,7 +300,8 @@ public class JNIService extends Service {
 	 * @see com.v2tech.logic.User
 	 */
 	public User getloggedUser() {
-		return GlobalHolder.getInstance().getUser(Long.valueOf(this.mloggedInUserId));
+		return GlobalHolder.getInstance().getUser(
+				Long.valueOf(this.mloggedInUserId));
 	}
 
 	/**
@@ -632,6 +633,23 @@ public class JNIService extends Service {
 
 	}
 
+	class VideoInvitionWrapper {
+		long nGroupID;
+		int nBusinessType;
+		long nFromUserID;
+		String szDeviceID;
+
+		public VideoInvitionWrapper(long nGroupID, int nBusinessType,
+				long nFromUserID, String szDeviceID) {
+			super();
+			this.nGroupID = nGroupID;
+			this.nBusinessType = nBusinessType;
+			this.nFromUserID = nFromUserID;
+			this.szDeviceID = szDeviceID;
+		}
+
+	}
+
 	// //////////////////////////////////////////////////////////
 	// Internal message definition //
 	// //////////////////////////////////////////////////////////
@@ -659,6 +677,7 @@ public class JNIService extends Service {
 	private static final int JNI_REMOTE_USER_DEVICE_INFO_NOTIFICATION = 80;
 	private static final int JNI_SEND_MESSAGE = 90;
 	private static final int JNI_RECEIVED_MESSAGE = 91;
+	private static final int JNI_RECEIVED_VIDEO_INVITION = 92;
 
 	class LocalHander extends Handler {
 
@@ -768,19 +787,20 @@ public class JNIService extends Service {
 					thread.post(new Runnable() {
 						@Override
 						public void run() {
-							byte[] data= ((VImageMessage)vm).getWrapperData();
+							byte[] data = ((VImageMessage) vm).getWrapperData();
 							ChatRequest.getInstance().sendChatPicture(0,
-									vm.getToUser().getmUserId(), data, data.length,
-									ChatRequest.BT_IM);
+									vm.getToUser().getmUserId(), data,
+									data.length, ChatRequest.BT_IM);
 						}
 
 					});
 				}
-				//TODO as now send message no callback, just send response to message caller
+				// TODO as now send message no callback, just send response to
+				// message caller
 				MetaData responseSendMsg = getMeta(JNI_SEND_MESSAGE);
 				if (responseSendMsg != null && responseSendMsg.caller != null) {
-					responseSendMsg.caller.obj = new AsynResult(AsynState.SUCCESS,
-							null);
+					responseSendMsg.caller.obj = new AsynResult(
+							AsynState.SUCCESS, null);
 					responseSendMsg.caller.sendToTarget();
 				}
 				break;
@@ -866,13 +886,12 @@ public class JNIService extends Service {
 				}
 				break;
 			case JNI_UPDATE_USER_STATUS:
-				Intent iun = new Intent(
-						JNI_BROADCAST_USER_STATUS_NOTIFICATION);
+				Intent iun = new Intent(JNI_BROADCAST_USER_STATUS_NOTIFICATION);
 				iun.addCategory(JNI_BROADCAST_CATEGROY);
 				iun.putExtra("uid", Long.valueOf(msg.arg1));
 				iun.putExtra("status", msg.arg2);
 				mContext.sendBroadcast(iun);
-				
+
 				break;
 			case JNI_GROUP_NOTIFY:
 				if (msg.arg1 == Group.GroupType.CONFERENCE.intValue()) {
@@ -919,7 +938,8 @@ public class JNIService extends Service {
 					List<User> lu = User.fromXml(go.xml);
 					addUserToGroup(mContactsGroup, lu, go.gId);
 					for (User tu : lu) {
-						User.Status us = GlobalHolder.getInstance().getOnlineUserStatus(tu.getmUserId());
+						User.Status us = GlobalHolder.getInstance()
+								.getOnlineUserStatus(tu.getmUserId());
 						if (us != null) {
 							tu.updateStatus(us);
 						}
@@ -966,8 +986,11 @@ public class JNIService extends Service {
 						JNI_BROADCAST_ATTENDEE_EXITED_NOTIFICATION);
 				ei.addCategory(JNI_BROADCAST_CATEGROY);
 				ei.putExtra("uid", (Long) msg.obj);
-				ei.putExtra("name",
-						GlobalHolder.getInstance().getUser(Long.valueOf((Long) msg.obj)).getName());
+				ei.putExtra(
+						"name",
+						GlobalHolder.getInstance()
+								.getUser(Long.valueOf((Long) msg.obj))
+								.getName());
 				mContext.sendBroadcast(ei);
 				break;
 			case JNI_GET_ATTENDEE_INFO_DONE:
@@ -988,18 +1011,26 @@ public class JNIService extends Service {
 				mUserDeviceList.addAll(UserDeviceConfig
 						.parseFromXml((String) msg.obj));
 				break;
-				
+
 			case JNI_RECEIVED_MESSAGE:
-				VMessage vm = (VMessage)msg.obj;
+				VMessage vm = (VMessage) msg.obj;
 				if (vm != null) {
 					Uri uri = saveMessageToDB(vm);
-					Intent ii = new Intent(
-							JNI_BROADCAST_NEW_MESSAGE);
+					Intent ii = new Intent(JNI_BROADCAST_NEW_MESSAGE);
 					ii.addCategory(JNI_BROADCAST_CATEGROY);
 					ii.putExtra("mid", uri.getLastPathSegment());
 					mContext.sendBroadcast(ii);
 					sendNotification();
 				}
+				break;
+			case JNI_RECEIVED_VIDEO_INVITION:
+				Intent iv = new Intent();
+				iv.addCategory(PublicIntent.DEFAULT_CATEGORY);
+				iv.setAction(PublicIntent.START_VIDEO_CONVERSACTION_ACTIVITY);
+				iv.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+				iv.putExtra("uid", ((VideoInvitionWrapper)msg.obj).nFromUserID);
+				iv.putExtra("is_coming_call", true);
+				mContext.startActivity(iv);
 				break;
 
 			}
@@ -1020,41 +1051,46 @@ public class JNIService extends Service {
 						+ " Metadata object or call is null ");
 			}
 		}
-		
-		
+
 		/**
 		 * Add user list to Group
+		 * 
 		 * @param gList
 		 * @param uList
 		 * @param belongGID
 		 */
-		private void addUserToGroup(List<Group> gList, List<User> uList, long belongGID) {
+		private void addUserToGroup(List<Group> gList, List<User> uList,
+				long belongGID) {
 			for (Group g : gList) {
-				if(belongGID == g.getmGId()) {
+				if (belongGID == g.getmGId()) {
 					g.addUserToGroup(uList);
 					return;
 				}
 				addUserToGroup(g.getChildGroup(), uList, belongGID);
 			}
 		}
-		
-		
-		
+
 		private Uri saveMessageToDB(VMessage vm) {
 			ContentValues cv = new ContentValues();
-			cv.put(ContentDescriptor.Messages.Cols.FROM_USER_ID, vm.getUser().getmUserId());
-			cv.put(ContentDescriptor.Messages.Cols.TO_USER_ID, vm.getToUser().getmUserId());
+			cv.put(ContentDescriptor.Messages.Cols.FROM_USER_ID, vm.getUser()
+					.getmUserId());
+			cv.put(ContentDescriptor.Messages.Cols.TO_USER_ID, vm.getToUser()
+					.getmUserId());
 			cv.put(ContentDescriptor.Messages.Cols.MSG_CONTENT, vm.getText());
-			cv.put(ContentDescriptor.Messages.Cols.MSG_TYPE,vm.getType().getIntValue());
-			cv.put(ContentDescriptor.Messages.Cols.SEND_TIME, vm.getNormalDateStr());
-			return getContentResolver().insert(ContentDescriptor.Messages.CONTENT_URI,
-					cv);
+			cv.put(ContentDescriptor.Messages.Cols.MSG_TYPE, vm.getType()
+					.getIntValue());
+			cv.put(ContentDescriptor.Messages.Cols.SEND_TIME,
+					vm.getNormalDateStr());
+			return getContentResolver().insert(
+					ContentDescriptor.Messages.CONTENT_URI, cv);
 		}
-		
+
 		private void sendNotification() {
-			Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-            Ringtone r = RingtoneManager.getRingtone(getApplicationContext(), notification);
-            r.play();
+			Uri notification = RingtoneManager
+					.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+			Ringtone r = RingtoneManager.getRingtone(getApplicationContext(),
+					notification);
+			r.play();
 		}
 	}
 
@@ -1100,18 +1136,20 @@ public class JNIService extends Service {
 		@Override
 		public void OnUserStatusUpdatedCallback(long nUserID, int eUEType,
 				int nStatus, String szStatusDesc) {
-			V2Log.i(nUserID +"  "+ eUEType+"  "+ nStatus+"  "+szStatusDesc);
-			GlobalHolder.getInstance().updateUserStatus(nUserID, User.Status.fromInt(nStatus));
+			V2Log.i(nUserID + "  " + eUEType + "  " + nStatus + "  "
+					+ szStatusDesc);
+			GlobalHolder.getInstance().updateUserStatus(nUserID,
+					User.Status.fromInt(nStatus));
 			User u = GlobalHolder.getInstance().getUser(nUserID);
 			if (u == null) {
-				V2Log.e("Can't update user status, user "+ nUserID+"  isn't exist");
+				V2Log.e("Can't update user status, user " + nUserID
+						+ "  isn't exist");
 			} else {
 				u.updateStatus(User.Status.fromInt(nStatus));
 			}
-			Message.obtain(mCallbackHandler, JNI_UPDATE_USER_STATUS, (int)nUserID, nStatus).sendToTarget();
+			Message.obtain(mCallbackHandler, JNI_UPDATE_USER_STATUS,
+					(int) nUserID, nStatus).sendToTarget();
 		}
-		
-		
 
 	}
 
@@ -1125,7 +1163,7 @@ public class JNIService extends Service {
 		@Override
 		public void OnGetGroupInfoCallback(int groupType, String sXml) {
 			if (isDebug) {
-				V2Log.d("group type:"+groupType +" " + sXml);
+				V2Log.d("group type:" + groupType + " " + sXml);
 			}
 			Message.obtain(mCallbackHandler, JNI_GROUP_NOTIFY, groupType, 0,
 					sXml).sendToTarget();
@@ -1135,7 +1173,7 @@ public class JNIService extends Service {
 		public void OnGetGroupUserInfoCallback(int groupType, long nGroupID,
 				String sXml) {
 			if (isDebug) {
-				V2Log.d("group type:"+groupType +" "+ nGroupID +" " + sXml);
+				V2Log.d("group type:" + groupType + " " + nGroupID + " " + sXml);
 			}
 			Message.obtain(mCallbackHandler, JNI_GROUP_USER_INFO_NOTIFICATION,
 					new GroupUserInfoOrig(groupType, nGroupID, sXml))
@@ -1210,34 +1248,44 @@ public class JNIService extends Service {
 		}
 
 		@Override
+		public void OnVideoChatInviteCallback(long nGroupID, int nBusinessType,
+				long nFromUserID, String szDeviceID) {
+
+			Message.obtain(
+					mCallbackHandler,
+					JNI_RECEIVED_VIDEO_INVITION,
+					new VideoInvitionWrapper(nGroupID, nBusinessType,
+							nFromUserID, szDeviceID)).sendToTarget();
+		}
+
+		@Override
 		public void OnSetCapParamDone(String szDevID, int nSizeIndex,
 				int nFrameRate, int nBitRate) {
 
 		}
 
 	}
-	
-	
+
 	class ChatRequestCB implements ChatRequestCallback {
-		
+
 		private JNICallbackHandler mCallbackHandler;
 
 		public ChatRequestCB(JNICallbackHandler mCallbackHandler) {
 			this.mCallbackHandler = mCallbackHandler;
 		}
-		
+
 		@Override
 		public void OnRecvChatTextCallback(long nGroupID, int nBusinessType,
 				long nFromUserID, long nTime, String szXmlText) {
 			User toUser = GlobalHolder.getInstance().getCurrentUser();
-			User fromUser =  GlobalHolder.getInstance().getUser(nFromUserID);
+			User fromUser = GlobalHolder.getInstance().getUser(nFromUserID);
 			if (toUser == null || fromUser == null) {
-				V2Log.e("No valid user object "+ toUser  +"  "+ fromUser);
+				V2Log.e("No valid user object " + toUser + "  " + fromUser);
 				return;
 			}
 			VMessage vm = VMessage.fromXml(szXmlText);
 			if (vm == null) {
-				V2Log.e(" xml parsed failed : "+ szXmlText);
+				V2Log.e(" xml parsed failed : " + szXmlText);
 				return;
 			}
 			vm.setToUser(toUser);
@@ -1245,8 +1293,7 @@ public class JNIService extends Service {
 			vm.setLocal(false);
 			vm.setDate(new Date(nTime * 1000));
 			vm.setType(MessageType.TEXT);
-			Message.obtain(mCallbackHandler,
-					JNI_RECEIVED_MESSAGE, vm)
+			Message.obtain(mCallbackHandler, JNI_RECEIVED_MESSAGE, vm)
 					.sendToTarget();
 		}
 
@@ -1254,15 +1301,14 @@ public class JNIService extends Service {
 		public void OnRecvChatPictureCallback(long nGroupID, int nBusinessType,
 				long nFromUserID, long nTime, byte[] pPicData) {
 			User toUser = GlobalHolder.getInstance().getCurrentUser();
-			User fromUser =  GlobalHolder.getInstance().getUser(nFromUserID);
+			User fromUser = GlobalHolder.getInstance().getUser(nFromUserID);
 			VMessage vm = new VImageMessage(fromUser, toUser, pPicData);
 			vm.setLocal(false);
 			vm.setDate(new Date(nTime * 1000));
-			Message.obtain(mCallbackHandler,
-					JNI_RECEIVED_MESSAGE, vm)
+			Message.obtain(mCallbackHandler, JNI_RECEIVED_MESSAGE, vm)
 					.sendToTarget();
 		}
-		
+
 	}
 
 }

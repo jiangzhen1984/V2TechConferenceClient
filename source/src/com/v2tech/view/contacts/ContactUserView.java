@@ -29,6 +29,7 @@ public class ContactUserView extends LinearLayout {
 	private TextView mUserSignatureTV;
 	private ImageView mButtonIV;
 	private RelativeLayout mHeaderIconContainer;
+	private ImageView mStatusIV;
 
 	private Dialog mUserActionDialog;
 
@@ -61,6 +62,8 @@ public class ContactUserView extends LinearLayout {
 
 		mHeaderIconContainer = (RelativeLayout) view
 				.findViewById(R.id.contact_user_img_container);
+		mStatusIV = (ImageView) view.findViewById(R.id.contact_user_status_iv);
+		updateStatus(u.getmStatus());
 
 		mButtonIV.setOnClickListener(new OnClickListener() {
 
@@ -172,11 +175,24 @@ public class ContactUserView extends LinearLayout {
 	public void updateStatus(User.Status st) {
 		switch (st) {
 		case ONLINE:
+			mStatusIV.setImageResource(R.drawable.online);
 			break;
-		case OFFLINE:
+		case LEAVE:
+			mStatusIV.setImageResource(R.drawable.leave);
+			break;
+		case BUSY:
+			mStatusIV.setImageResource(R.drawable.busy);
+			break;
+		case DO_NOT_DISTURB:
+			mStatusIV.setImageResource(R.drawable.do_not_distrub);
 			break;
 		default:
 			break;
+		}
+		if (st == User.Status.OFFLINE || st == User.Status.HIDDEN ) {
+			mStatusIV.setVisibility(View.GONE);
+		} else {
+			mStatusIV.setVisibility(View.VISIBLE);
 		}
 	}
 

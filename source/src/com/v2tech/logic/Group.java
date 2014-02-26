@@ -203,14 +203,20 @@ public class Group {
 	
 	private int getUserOnlineCount(Group g) {
 		int c = 0;
-		for(User u:g.getUsers()) {
-			if (u.getmStatus() == User.Status.ONLINE) {
-				c ++;
-			}
+		if (g == null) {
+			return 0;
 		}
-		
-		for(Group subG : g.getChildGroup()) {
-			c += getUserOnlineCount(subG);
+		synchronized(g) {
+			for(User u:g.getUsers()) {
+				if (u.getmStatus() == User.Status.ONLINE) {
+					c ++;
+				}
+			}
+			
+			
+			for(Group subG : g.getChildGroup()) {
+				c += getUserOnlineCount(subG);
+			}
 		}
 		return c;
 	}

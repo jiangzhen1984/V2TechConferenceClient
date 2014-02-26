@@ -150,6 +150,9 @@ public class VideoRequest {
 		// videoinvite_intent.putExtra("MsgType", MsgType.VIDEO_INVITE);
 		// videoinvite_intent.putExtra("MSG", videoinviteMsgType);
 		// context.sendBroadcast(videoinvite_intent);
+		if (this.callback != null) {
+			this.callback.OnVideoChatInviteCallback(nGroupID, nBusinessType, nFromUserID, szDeviceID);
+		}
 	}
 
 	// 閭�鍒汉鍚庡緱鍒板簲绛� OnVideoChatAccepted 0 2 1112627 1112627:Integrated

@@ -67,6 +67,7 @@ public class ImageViewGallery extends FragmentActivity {
 						args, null);
 
 		if (mCur.getCount() == 0) {
+			mCur.close();
 			return;
 		}
 		int index =0;
@@ -143,7 +144,8 @@ public class ImageViewGallery extends FragmentActivity {
 			super();
 			this.vm = vm;
 			frg = new PlaceSlideFragment();
-			frg.setBitmap(BitmapFactory.decodeFile(vm.getImagePath()));
+			frg.setMessage(vm);
+			//frg.setBitmap(vm.getFullQuantityBitmap());
 		}
 
 	}
