@@ -36,9 +36,11 @@
         android:id="@+id/login_form"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:clickable="true"
         android:background="@color/logo_background" >
 
         <LinearLayout
+             android:id="@+id/login_form_ll"
             style="@style/LoginFormContainer"
             android:background="@color/logo_background"
             android:orientation="vertical" >

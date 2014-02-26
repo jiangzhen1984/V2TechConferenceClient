@@ -39,6 +39,9 @@ public class VMessage {
 
 	private static DateFormat sfT = new SimpleDateFormat("HH:mm");
 
+	
+	private long id;
+	
 	private User mUser;
 
 	private User mToUser;
@@ -84,6 +87,15 @@ public class VMessage {
 			mStrDateTime = sfT.format(this.mDate);
 		}
 
+	}
+
+	
+	public long getId() {
+		return id;
+	}
+
+	public void setId(long id) {
+		this.id = id;
 	}
 
 	public User getUser() {

@@ -44,16 +44,16 @@ public class MainApplication extends Application {
 		WBRequest.getInstance(this);
 		ChatRequest.getInstance(this);
 		String path = StorageUtil.getAbsoluteSdcardPath();
-		new ConfigRequest().setExtStoragePath(path);
-		File pa = new File(path +"/Users");
-		if (!pa.exists()) {
-			boolean res = pa.mkdirs();
-			V2Log.i(" create avatar dir " +pa.getAbsolutePath() +"  "+ res);
-		}
-		pa.setWritable(true);
-		pa.setReadable(true);
-		
-		
+//		new ConfigRequest().setExtStoragePath(path);
+//		File pa = new File(path +"/Users");
+//		if (!pa.exists()) {
+//			boolean res = pa.mkdirs();
+//			V2Log.i(" create avatar dir " +pa.getAbsolutePath() +"  "+ res);
+//		}
+//		pa.setWritable(true);
+//		pa.setReadable(true);
+//		
+//		
 		File image = new File(path +"/v2tech/pics");
 		if (!image.exists()) {
 			boolean res = image.mkdirs();

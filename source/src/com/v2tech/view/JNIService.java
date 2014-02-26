@@ -1100,6 +1100,7 @@ public class JNIService extends Service {
 		@Override
 		public void OnUserStatusUpdatedCallback(long nUserID, int eUEType,
 				int nStatus, String szStatusDesc) {
+			V2Log.i(nUserID +"  "+ eUEType+"  "+ nStatus+"  "+szStatusDesc);
 			GlobalHolder.getInstance().updateUserStatus(nUserID, User.Status.fromInt(nStatus));
 			User u = GlobalHolder.getInstance().getUser(nUserID);
 			if (u == null) {

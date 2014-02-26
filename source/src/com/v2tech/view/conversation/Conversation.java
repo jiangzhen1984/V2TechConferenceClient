@@ -42,6 +42,7 @@ import com.v2tech.logic.VImageMessage;
 import com.v2tech.logic.VMessage;
 import com.v2tech.view.JNIService;
 import com.v2tech.view.JNIService.LocalBinder;
+import com.v2tech.view.PublicIntent;
 import com.v2tech.view.cus.ItemScrollView;
 import com.v2tech.view.cus.ScrollViewListener;
 
@@ -258,7 +259,10 @@ public class Conversation extends Activity {
 				int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
 				String filePath = cursor.getString(columnIndex);
 				cursor.close();
-
+				if (filePath == null) {
+					Toast.makeText(mContext, R.string.error_contact_messag_invalid_image_path, Toast.LENGTH_SHORT).show();
+					return;
+				}
 				User local = new User(user1Id);
 				User remote = new User(user2Id);
 				// TODO should send message
@@ -304,6 +308,7 @@ public class Conversation extends Activity {
 	private void addMessageToContainer(VMessage msg) {
 		// Add message to container
 		MessageBodyView mv = new MessageBodyView(mContext, msg, true);
+		mv.setCallback(listener);
 		mMessagesContainer.addView(mv);
 		mScrollView.post(new Runnable() {
 			@Override
@@ -333,6 +338,23 @@ public class Conversation extends Activity {
 			lh.sendMessageDelayed(m, 500);
 		}
 
+	};
+	
+	private MessageBodyView.ClickListener listener = new MessageBodyView.ClickListener(){
+
+		@Override
+		public void onMessageClicked(VMessage v) {
+			if (v.getType() == VMessage.MessageType.IMAGE) {
+				Intent i = new Intent();
+				i.addCategory(PublicIntent.DEFAULT_CATEGORY);
+				i.setAction(PublicIntent.START_VIDEO_IMAGE_GALLERY);
+				i.putExtra("uid1", user1Id);
+				i.putExtra("uid2", user2Id);
+				i.putExtra("cid", v.getId());
+				mContext.startActivity(i);
+			}
+		}
+		
 	};
 
 	private List<VMessage> loadMessages() {
@@ -382,6 +404,7 @@ public class Conversation extends Activity {
 		while (mCur.moveToNext()) {
 			VMessage m = extractMsg(mCur);
 			MessageBodyView mv = new MessageBodyView(this, m, true);
+			mv.setCallback(listener);
 			mMessagesContainer.addView(mv);
 		}
 		mCur.close();
@@ -421,6 +444,7 @@ public class Conversation extends Activity {
 			vm = new VImageMessage(localUser, remoteUser, content.split("\\|")[4],
 					localUserId == user2Id);
 		}
+		vm.setId(id);
 		try {
 			vm.setDate(dp.parse(dateString));
 		} catch (ParseException e) {
@@ -430,6 +454,9 @@ public class Conversation extends Activity {
 		return vm;
 		
 	}
+	
+	
+	
 
 	/** Defines callback for service binding, passed to bindService() */
 	private ServiceConnection mConnection = new ServiceConnection() {
@@ -505,6 +532,7 @@ public class Conversation extends Activity {
 				for (int i = 0; array != null && i < array.size(); i++) {
 					MessageBodyView mv = new MessageBodyView(mContext,
 							array.get(i), true);
+					mv.setCallback(listener);
 					if (fir == null) {
 						fir = mv;
 					}

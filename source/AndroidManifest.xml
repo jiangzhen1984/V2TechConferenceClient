@@ -2,8 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.v2tech"
     android:versionCode="1"
-    android:versionName="1.0"
-     >
+    android:versionName="1.0" >
 
     <uses-sdk
         android:minSdkVersion="11"
@@ -32,26 +31,26 @@
     <application
         android:name="com.v2tech.view.MainApplication"
         android:allowBackup="true"
+        android:debuggable="true"
         android:icon="@drawable/ic_launcher"
-        android:theme="@android:style/Theme.NoTitleBar"
-        android:debuggable="true" >
+        android:theme="@android:style/Theme.NoTitleBar" >
         <service android:name="com.v2tech.view.JNIService" >
         </service>
-        
-        <provider android:name="com.v2tech.db.V2techContentProvider"
-			android:authorities="com.v2tech.bizcom" />
+
+        <provider
+            android:name="com.v2tech.db.V2techContentProvider"
+            android:authorities="com.v2tech.bizcom" />
 
         <activity
             android:name="com.v2tech.view.LoginActivity"
             android:configChanges="orientation"
             android:label="@string/title_activity_login"
-            android:windowSoftInputMode="stateHidden" >
-             <intent-filter>
+            android:windowSoftInputMode="stateHidden|adjustUnspecified" >
+            <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-           
         </activity>
         <activity
             android:name="com.v2tech.view.VideoActivityV2"
@@ -72,12 +71,17 @@
                 <category android:name="com.v2tech" />
             </intent-filter>
         </activity>
-            
-              <activity
-            android:name="com.v2tech.view.conversation.VideoConversation"
-             >
+        <activity android:name="com.v2tech.view.conversation.VideoConversation" >
             <intent-filter>
                 <action android:name="com.v2tech.start_video_conversation_activity" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="com.v2tech" />
+            </intent-filter>
+        </activity>
+        <activity android:name="com.v2tech.view.conversation.ImageViewGallery">
+            <intent-filter>
+                <action android:name="com.v2tech.image_gallery" />
 
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="com.v2tech" />
@@ -87,7 +91,6 @@
             android:name="com.v2tech.view.MainActivity"
             android:configChanges="screenSize|orientation"
             android:windowSoftInputMode="stateHidden|adjustPan" >
-            
         </activity>
     </application>
 

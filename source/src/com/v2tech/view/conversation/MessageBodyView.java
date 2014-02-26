@@ -3,6 +3,7 @@ package com.v2tech.view.conversation;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -18,6 +19,7 @@ import android.widget.TextView;
 import com.v2tech.R;
 import com.v2tech.logic.VImageMessage;
 import com.v2tech.logic.VMessage;
+import com.v2tech.view.PublicIntent;
 
 public class MessageBodyView extends LinearLayout {
 
@@ -42,6 +44,13 @@ public class MessageBodyView extends LinearLayout {
 	private Handler localHandler;
 	private Runnable popupWindowListener = null;
 	private PopupWindow pw;
+	
+	private ClickListener callback;
+	
+	
+	public interface ClickListener {
+		public void onMessageClicked(VMessage v);
+	}
 
 	public MessageBodyView(Context context, VMessage m) {
 		this(context, m, false);
@@ -106,6 +115,7 @@ public class MessageBodyView extends LinearLayout {
 			mImageIV = new ImageView(this.getContext());
 			BitmapFactory.Options options = new BitmapFactory.Options();
 			options.inSampleSize = 4;
+			//FIXME need to be recycle
 			mImageIV.setImageBitmap(BitmapFactory.decodeFile(((VImageMessage)mMsg).getImagePath(), options));
 			mContentContainer.addView(mImageIV,new LinearLayout.LayoutParams(
 					LinearLayout.LayoutParams.WRAP_CONTENT,
@@ -126,6 +136,9 @@ public class MessageBodyView extends LinearLayout {
 					showPopupWindow(anchor);
 				} else {
 					updateSelectedBg(false);
+				}
+				if (callback !=null) {
+					callback.onMessageClicked(mMsg);
 				}
 				return false;
 			}
@@ -208,5 +221,9 @@ public class MessageBodyView extends LinearLayout {
 		return this.mMsg;
 	}
 
+	
+	public void setCallback(ClickListener cl) {
+		this.callback = cl;
+	}
 
 }

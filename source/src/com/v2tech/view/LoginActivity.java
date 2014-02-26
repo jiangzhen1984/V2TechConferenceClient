@@ -7,7 +7,6 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
@@ -18,15 +17,16 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.text.TextUtils;
-import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -69,6 +69,7 @@ public class LoginActivity extends Activity {
 	private TextView mLoginStatusMessageView;
 	private View mShowIpSettingButton;
 	private Dialog mSettingDialog;
+	private LinearLayout rootBgLL;
 
 	private Activity mContext;
 	
@@ -90,6 +91,17 @@ public class LoginActivity extends Activity {
 		mLoginFormView = findViewById(R.id.login_form);
 		mLoginStatusView = findViewById(R.id.login_status);
 		mLoginStatusMessageView = (TextView) findViewById(R.id.login_status_message);
+		
+		findViewById(R.id.login_form).setOnClickListener(
+				new View.OnClickListener() {
+					@Override
+					public void onClick(View view) {
+						InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+						imm.hideSoftInputFromWindow(mEmailView.getWindowToken(), 0);
+						imm.hideSoftInputFromWindow(mPasswordView.getWindowToken(), 0);
+					}
+				});
+		
 
 		findViewById(R.id.sign_in_button).setOnClickListener(
 				new View.OnClickListener() {
