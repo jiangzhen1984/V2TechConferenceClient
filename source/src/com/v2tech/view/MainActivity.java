@@ -10,6 +10,7 @@ import android.content.ServiceConnection;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.Process;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
@@ -164,6 +165,17 @@ public class MainActivity extends FragmentActivity implements
 		if (isBound) {
 			unbindService(mConnection);
 		}
+	}
+
+	
+	
+	
+	
+	
+	
+	@Override
+	public void onBackPressed() {
+		Process.killProcess(Process.myPid());
 	}
 
 	/**

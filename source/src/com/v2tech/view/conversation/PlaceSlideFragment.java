@@ -9,12 +9,11 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
 import com.v2tech.R;
 import com.v2tech.logic.VImageMessage;
-import com.v2tech.util.V2Log;
+import com.v2tech.view.cus.TouchImageView;
 
 public class PlaceSlideFragment extends Fragment {
 
@@ -22,6 +21,8 @@ public class PlaceSlideFragment extends Fragment {
 
 	
 	private RelativeLayout rlContainer;
+	
+	private Object mLock = new Object();
 
 	public PlaceSlideFragment() {
 
@@ -40,14 +41,16 @@ public class PlaceSlideFragment extends Fragment {
 			rlContainer = (RelativeLayout) v
 					.findViewById(R.id.image_view_root);
 		
-		final ImageView iv = new ImageView(this.getActivity());
+		final TouchImageView iv = new TouchImageView(this.getActivity());
 
 		new AsyncTask<Void, Void, Void>() {
 
 			@Override
 			protected Void doInBackground(Void... params) {
-				File f = new File(vim.getImagePath());
-				vim.getFullQuantityBitmap();
+				synchronized(mLock) {
+					File f = new File(vim.getImagePath());
+					vim.getFullQuantityBitmap();
+				}
 				return null;
 			}
 
