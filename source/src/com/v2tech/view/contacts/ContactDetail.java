@@ -1,13 +1,10 @@
 package com.v2tech.view.contacts;
 
 import android.app.Activity;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.Message;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -21,8 +18,6 @@ import android.widget.Toast;
 import com.v2tech.R;
 import com.v2tech.logic.GlobalHolder;
 import com.v2tech.logic.User;
-import com.v2tech.view.JNIService;
-import com.v2tech.view.JNIService.LocalBinder;
 import com.v2tech.view.PublicIntent;
 
 public class ContactDetail extends Activity {
@@ -33,8 +28,6 @@ public class ContactDetail extends Activity {
 
 	private Context mContext;
 
-	private JNIService mService;
-	private boolean isBound;
 	private long mUid;
 	private User u;
 	private LocalHandler lh = new LocalHandler();
@@ -87,16 +80,12 @@ public class ContactDetail extends Activity {
 	@Override
 	protected void onStart() {
 		super.onStart();
-		isBound = bindService(new Intent(this, JNIService.class), mConnection,
-				Context.BIND_AUTO_CREATE);
+		Message.obtain(lh, SHOW_USER_INFO).sendToTarget();
 	}
 
 	@Override
 	protected void onStop() {
 		super.onStop();
-		if (isBound) {
-			unbindService(mConnection);
-		}
 	}
 
 	private void initView() {
@@ -146,7 +135,7 @@ public class ContactDetail extends Activity {
 
 	private void showUserInfo() {
 		
-		if (u.isCurrentLoggedInUser()) {
+		if (u.getmUserId() == GlobalHolder.getInstance().getCurrentUserId()) {
 			for (TextView tv : mTVArr) {
 				tv.setVisibility(View.GONE);
 			}
@@ -277,22 +266,7 @@ public class ContactDetail extends Activity {
 		}
 	}
 	
-	private ServiceConnection mConnection = new ServiceConnection() {
-
-		@Override
-		public void onServiceConnected(ComponentName className, IBinder service) {
-			LocalBinder binder = (LocalBinder) service;
-			mService = binder.getService();
-			isBound = true;
-			Message.obtain(lh, SHOW_USER_INFO).sendToTarget();
-			
-		}
-
-		@Override
-		public void onServiceDisconnected(ComponentName arg0) {
-			isBound = false;
-		}
-	};
+	
 
 	class LocalHandler extends Handler {
 
@@ -300,7 +274,7 @@ public class ContactDetail extends Activity {
 		public void handleMessage(Message msg) {
 			switch (msg.what) {
 			case SHOW_USER_INFO:
-				u = mService.getUser(mUid);
+				u = GlobalHolder.getInstance().getUser(mUid);
 				if (u == null) {
 					Toast.makeText(mContext,
 							R.string.error_contacts_user_detail_no_avai_user,
@@ -311,7 +285,6 @@ public class ContactDetail extends Activity {
 				break;
 			case UPDATE_USER_INFO:
 				gatherUserData();
-				mService.updateUserData(u, Message.obtain(this, UPDATE_USER_INFO_DONE));
 				isUpdating = false;
 				break;
 			case UPDATE_USER_INFO_DONE:

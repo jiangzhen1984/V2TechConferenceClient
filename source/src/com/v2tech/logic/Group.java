@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -42,11 +43,11 @@ public class Group {
 	private String mCreateDate;
 
 	private Group mParent;
-	
+
 	private List<Group> mChild;
-	
+
 	private List<User> users;
-	
+
 	int level;
 
 	public enum GroupType {
@@ -90,7 +91,7 @@ public class Group {
 			DateFormat sd = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.US);
 			this.mCreateDate = sd.format(d);
 		}
-		
+
 		users = new ArrayList<User>();
 		mChild = new ArrayList<Group>();
 		level = 1;
@@ -152,24 +153,28 @@ public class Group {
 		this.mParent = parent;
 		level = this.getParent().getLevel() + 1;
 	}
-	
-	
+
 	public void addUserToGroup(User u) {
 		if (u == null) {
 			V2Log.e(" Invalid user data");
 			return;
 		}
-		this.users.add(u);
+		synchronized (users) {
+			this.users.add(u);
+			Collections.sort(users);
+		}
 	}
-	
+
 	public List<User> getUsers() {
+		//FIXME need to be optimize
+		Collections.sort(users);
 		return this.users;
 	}
-	
+
 	public List<Group> getChildGroup() {
 		return this.mChild;
 	}
-	
+
 	public void addGroupToGroup(Group g) {
 		if (g == null) {
 			V2Log.e(" Invalid group data");
@@ -178,15 +183,14 @@ public class Group {
 		this.mChild.add(g);
 		g.setmParent(this);
 	}
-	
-	
+
 	public boolean findUser(User u, Group g) {
-		for(User tu :g.getUsers()) {
+		for (User tu : g.getUsers()) {
 			if (tu.getmUserId() == u.getmUserId()) {
 				return true;
 			}
 		}
-		for(Group subG : g.getChildGroup()) {
+		for (Group subG : g.getChildGroup()) {
 			boolean flag = findUser(u, subG);
 			if (flag == true) {
 				return flag;
@@ -194,59 +198,58 @@ public class Group {
 		}
 		return false;
 	}
-	
-	
-	//FIXME need to be optimize
+
+	// FIXME need to be optimize
 	public int getOnlineUserCount() {
 		return getUserOnlineCount(this);
 	}
-	
+
 	private int getUserOnlineCount(Group g) {
 		int c = 0;
 		if (g == null) {
 			return 0;
 		}
-		synchronized(g) {
-			for(User u:g.getUsers()) {
+		synchronized (g) {
+			for (User u : g.getUsers()) {
 				if (u.getmStatus() == User.Status.ONLINE) {
-					c ++;
+					c++;
 				}
 			}
-			
-			
-			for(Group subG : g.getChildGroup()) {
+
+			for (Group subG : g.getChildGroup()) {
 				c += getUserOnlineCount(subG);
 			}
 		}
 		return c;
 	}
-	
+
 	public int getUserCount() {
 		return getUserCount(this);
 	}
-	
+
 	private int getUserCount(Group g) {
 		int c = g.getUsers().size();
-		for(Group subG : g.getChildGroup()) {
+		for (Group subG : g.getChildGroup()) {
 			c += getUserCount(subG);
 		}
 		return c;
 	}
-	
+
 	public void addUserToGroup(List<User> l) {
 		for (User u : l) {
 			this.users.add(u);
 			u.addUserToGroup(this);
 		}
+		Collections.sort(users);
 	}
-	
-	
+
 	public int getLevel() {
 		return level;
 	}
 	
-	
-	
+	public void updatePosition() {
+		Collections.sort(users);
+	}
 
 	@Override
 	public int hashCode() {
@@ -301,35 +304,33 @@ public class Group {
 				Element element;
 				for (int i = 0; i < gList.getLength(); i++) {
 					element = (Element) gList.item(i);
-					Group g  = new Group(Long.parseLong(element
+					Group g = new Group(Long.parseLong(element
 							.getAttribute("id")), GroupType.fromInt(type),
-							element.getAttribute("name"),
-							null,
-							null);
+							element.getAttribute("name"), null, null);
 					list.add(g);
-					
-					//TODO add sub Group
+
+					// TODO add sub Group
 					NodeList subGroupNodeList = element.getChildNodes();
 					for (int j = 0; j < subGroupNodeList.getLength(); j++) {
-						Element subGroupEl = (Element)subGroupNodeList.item(j);
+						Element subGroupEl = (Element) subGroupNodeList.item(j);
 						Group subGroup = new Group(Long.parseLong(subGroupEl
 								.getAttribute("id")), GroupType.fromInt(type),
-								subGroupEl.getAttribute("name"),
-								null,
-								null);
+								subGroupEl.getAttribute("name"), null, null);
 						g.addGroupToGroup(subGroup);
-						
-						NodeList subSubGroupNodeList = subGroupEl.getChildNodes();
-						
+
+						NodeList subSubGroupNodeList = subGroupEl
+								.getChildNodes();
+
 						for (int k = 0; k < subSubGroupNodeList.getLength(); k++) {
-							Element subSubGroupEl = (Element)subSubGroupNodeList.item(k);
-							subGroup.addGroupToGroup( new Group(Long.parseLong(subSubGroupEl
-									.getAttribute("id")), GroupType.fromInt(type),
-									subSubGroupEl.getAttribute("name"),
-									null,
-									null));
+							Element subSubGroupEl = (Element) subSubGroupNodeList
+									.item(k);
+							subGroup.addGroupToGroup(new Group(
+									Long.parseLong(subSubGroupEl
+											.getAttribute("id")), GroupType
+											.fromInt(type), subSubGroupEl
+											.getAttribute("name"), null, null));
 						}
-						
+
 					}
 				}
 

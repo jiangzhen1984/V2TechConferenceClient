@@ -68,7 +68,8 @@ public class ContactsTabFragment extends Fragment {
 			public void onItemClick(AdapterView<?> arg0, View view, int pos,
 					long id) {
 				if (mItemList.get(pos).g != null) {
-					((ContactGroupView)mItemList.get(pos).v).doExpandedOrCollapse();
+					((ContactGroupView) mItemList.get(pos).v)
+							.doExpandedOrCollapse();
 					Message.obtain(mHandler, UPDATE_LIST_VIEW, pos, 0)
 							.sendToTarget();
 				}
@@ -105,8 +106,10 @@ public class ContactsTabFragment extends Fragment {
 			intentFilter.addAction(JNIService.JNI_BROADCAST_GROUP_NOTIFICATION);
 			intentFilter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
 			intentFilter.addAction(MainActivity.SERVICE_BOUNDED_EVENT);
-			intentFilter.addAction(JNIService.JNI_BROADCAST_USER_STATUS_NOTIFICATION);
-			intentFilter.addAction(JNIService.JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION);
+			intentFilter
+					.addAction(JNIService.JNI_BROADCAST_USER_STATUS_NOTIFICATION);
+			intentFilter
+					.addAction(JNIService.JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION);
 		}
 		return intentFilter;
 	}
@@ -142,15 +145,24 @@ public class ContactsTabFragment extends Fragment {
 					MainActivity.SERVICE_BOUNDED_EVENT)) {
 				mService = ((MainActivity) getActivity()).getService();
 				if (!mLoaded) {
-					Message.obtain(mHandler, FILL_CONTACTS_GROUP).sendToTarget();
+					Message.obtain(mHandler, FILL_CONTACTS_GROUP)
+							.sendToTarget();
 				}
 
-			} else if (JNIService.JNI_BROADCAST_USER_STATUS_NOTIFICATION.equals(intent.getAction())) {
-				Message.obtain(mHandler, UPDATE_GROUP_STATUS, GlobalHolder.getInstance().getUser(intent.getExtras().getLong("uid"))).sendToTarget();
+			} else if (JNIService.JNI_BROADCAST_USER_STATUS_NOTIFICATION
+					.equals(intent.getAction())) {
+				Message.obtain(
+						mHandler,
+						UPDATE_GROUP_STATUS,
+						GlobalHolder.getInstance().getUser(
+								intent.getExtras().getLong("uid")))
+						.sendToTarget();
 				long uid = intent.getExtras().getLong("uid");
 				int status = intent.getExtras().getInt("status");
-				Message.obtain(mHandler, UPDATE_USER_STATUS, (int)uid, status).sendToTarget();
-			} else if (JNIService.JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION.equals(intent.getAction())) {
+				Message.obtain(mHandler, UPDATE_USER_STATUS, (int) uid, status)
+						.sendToTarget();
+			} else if (JNIService.JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION
+					.equals(intent.getAction())) {
 				Message.obtain(mHandler, UPDATE_GROUP_STATUS).sendToTarget();
 			}
 		}
@@ -169,14 +181,14 @@ public class ContactsTabFragment extends Fragment {
 			for (User u : item.g.getUsers()) {
 				mItemList.add(++pos, new ListItem(u));
 			}
-			
+
 		} else {
 			int startRemovePos = -1;
 			int endRemovePos = -1;
 			Group parent = item.g.getParent();
 			Group nextGroup = null;
 			int nextGrougPos = -1;
-			
+
 			List<Group> lg = parent != null ? parent.getChildGroup() : l;
 			for (int i = 0; i < lg.size(); i++) {
 				if (lg.get(i) == item.g) {
@@ -184,45 +196,83 @@ public class ContactsTabFragment extends Fragment {
 					break;
 				}
 			}
-			//found self
+			// found self
 			if (nextGrougPos > -1) {
-				startRemovePos = pos +1;
-				//clicked group is last group
-				if (nextGrougPos >= lg.size() ) {
+				startRemovePos = pos + 1;
+				// clicked group is last group
+				if (nextGrougPos >= lg.size()) {
 					if (item.g.getParent() == null) {
 						endRemovePos = mItemList.size();
 					} else {
-						endRemovePos = startRemovePos+1;
-						while (true && endRemovePos <mItemList.size() ) {
+						endRemovePos = startRemovePos + 1;
+						while (true && endRemovePos < mItemList.size()) {
 							if (mItemList.get(endRemovePos).g != null) {
 								break;
 							}
 							endRemovePos++;
-							
+
 						}
 					}
 				} else {
 					nextGroup = parent.getChildGroup().get(nextGrougPos);
-					for(int i=pos + 1; i < mItemList.size(); i++) {
+					for (int i = pos + 1; i < mItemList.size(); i++) {
 						if (mItemList.get(i).g == nextGroup) {
 							endRemovePos = i;
 							break;
 						}
 					}
 				}
-				
+
 				while (startRemovePos < endRemovePos) {
 					mItemList.remove(startRemovePos);
 					endRemovePos--;
 				}
-				
+
 			} else {
-				
+
 			}
 		}
 
 		item.isExpanded = !item.isExpanded;
 		adapter.notifyDataSetChanged();
+	}
+
+	private synchronized void updateUserViewPostion(int userId, int status) {
+		User.Status st = User.Status.fromInt(status);
+		int index = 0;
+		ListItem it = null;
+		for (ListItem li : mItemList) {
+			if (li.u != null && li.u.getmUserId() == userId) {
+				it = li;
+				((ContactUserView) li.v).updateStatus(st);
+				break;
+			}
+			index++;
+		}
+		if (it != null && index != mItemList.size() -1) {
+			// TODO update position;
+			while (true) {
+				ListItem pre = mItemList.get(index);
+				if (pre.u != null
+						&& (pre.u.getmStatus() != User.Status.OFFLINE && pre.u
+								.getmStatus() != User.Status.HIDDEN) && pre.u != it.u) {
+					break;
+				} else if (pre.g != null) {
+					index +=1;
+					break;
+				}
+				
+				if (st == User.Status.OFFLINE || st == User.Status.HIDDEN) {
+					index++;
+				} else {
+					index--;
+				}
+			}
+			mItemList.remove(it);
+			mItemList.add(index, it);
+		}
+		adapter.notifyDataSetChanged();
+
 	}
 
 	List<ListItem> mItemList = new ArrayList<ListItem>();
@@ -299,17 +349,12 @@ public class ContactsTabFragment extends Fragment {
 			case UPDATE_GROUP_STATUS:
 				for (ListItem li : mItemList) {
 					if (li.g != null) {
-						((ContactGroupView)li.v).updateUserStatus();
-					} 
+						((ContactGroupView) li.v).updateUserStatus();
+					}
 				}
 				break;
 			case UPDATE_USER_STATUS:
-				for (ListItem li : mItemList) {
-					if (li.u != null && li.u.getmUserId() == msg.arg1) {
-						((ContactUserView)li.v).updateStatus(User.Status.fromInt(msg.arg2));
-						break;
-					}
-				}
+				updateUserViewPostion(msg.arg1, msg.arg2);
 				break;
 			}
 		}

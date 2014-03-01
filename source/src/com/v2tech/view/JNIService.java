@@ -841,10 +841,12 @@ public class JNIService extends Service {
 				break;
 			case JNI_LOG_IN:
 				InnerUser iu = ((InnerUser) msg.obj);
+				User loggedUser = new User(iu.idCallback, "",
+						NetworkStateCode.fromInt(iu.nResult));
 				ar = new AsynResult(AsynResult.AsynState.SUCCESS,
-						new User(iu.idCallback, "",
-								NetworkStateCode.fromInt(iu.nResult)));
+						loggedUser);
 				mloggedInUserId = iu.idCallback;
+				GlobalHolder.getInstance().setCurrentUser(loggedUser);
 				break;
 			case JNI_LOG_OUT:
 				break;
@@ -1146,6 +1148,9 @@ public class JNIService extends Service {
 						+ "  isn't exist");
 			} else {
 				u.updateStatus(User.Status.fromInt(nStatus));
+				if (u.getFirstBelongsGroup() != null) {
+					u.getFirstBelongsGroup().updatePosition();
+				}
 			}
 			Message.obtain(mCallbackHandler, JNI_UPDATE_USER_STATUS,
 					(int) nUserID, nStatus).sendToTarget();

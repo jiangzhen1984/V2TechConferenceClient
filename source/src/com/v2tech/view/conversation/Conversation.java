@@ -8,19 +8,16 @@ import java.util.List;
 
 import android.app.Activity;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.ServiceConnection;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.provider.MediaStore;
@@ -37,11 +34,11 @@ import android.widget.Toast;
 
 import com.v2tech.R;
 import com.v2tech.db.ContentDescriptor;
+import com.v2tech.logic.Chat;
 import com.v2tech.logic.User;
 import com.v2tech.logic.VImageMessage;
 import com.v2tech.logic.VMessage;
 import com.v2tech.view.JNIService;
-import com.v2tech.view.JNIService.LocalBinder;
 import com.v2tech.view.PublicIntent;
 import com.v2tech.view.cus.ItemScrollView;
 import com.v2tech.view.cus.ScrollViewListener;
@@ -73,9 +70,6 @@ public class Conversation extends Activity {
 
 	private BackendHandler backEndHandler;
 
-	private JNIService mService;
-	private boolean isBound;
-
 	private boolean isLoading;
 
 	private boolean mLoadedAllMessages;
@@ -99,6 +93,8 @@ public class Conversation extends Activity {
 	private ImageView mSelectImageButtonIV;
 
 	private MessageReceiver receiver = new MessageReceiver();
+	
+	private Chat mChat = new Chat();
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -163,8 +159,6 @@ public class Conversation extends Activity {
 	@Override
 	protected void onStart() {
 		super.onStart();
-		isBound = bindService(new Intent(this.getApplicationContext(),
-				JNIService.class), mConnection, Context.BIND_AUTO_CREATE);
 		if (!mLoadedAllMessages) {
 			android.os.Message m = android.os.Message.obtain(lh,
 					START_LOAD_MESSAGE);
@@ -181,9 +175,6 @@ public class Conversation extends Activity {
 	@Override
 	protected void onStop() {
 		super.onStop();
-		if (isBound) {
-			this.unbindService(mConnection);
-		}
 	}
 
 	@Override
@@ -277,7 +268,6 @@ public class Conversation extends Activity {
 				}
 				User local = new User(user1Id);
 				User remote = new User(user2Id);
-				// TODO should send message
 				VImageMessage vim = new VImageMessage(local, remote, filePath,
 						false);
 				saveMessageToDB(vim);
@@ -471,21 +461,6 @@ public class Conversation extends Activity {
 	
 	
 
-	/** Defines callback for service binding, passed to bindService() */
-	private ServiceConnection mConnection = new ServiceConnection() {
-
-		@Override
-		public void onServiceConnected(ComponentName className, IBinder service) {
-			LocalBinder binder = (LocalBinder) service;
-			mService = binder.getService();
-			isBound = true;
-		}
-
-		@Override
-		public void onServiceDisconnected(ComponentName arg0) {
-			isBound = false;
-		}
-	};
 
 	class MessageReceiver extends BroadcastReceiver {
 
@@ -557,8 +532,9 @@ public class Conversation extends Activity {
 				isLoading = false;
 				break;
 			case SEND_MESSAGE:
-				mService.sendMessage((VMessage) msg.obj,
-						Message.obtain(this, SEND_MESSAGE_DONE));
+				mChat.sendVMessage((VMessage) msg.obj, Message.obtain(this, SEND_MESSAGE_DONE));
+				//mService.sendMessage((VMessage) msg.obj,
+					//	Message.obtain(this, SEND_MESSAGE_DONE));
 				break;
 			case QUERY_NEW_MESSAGE:
 				if (msg.obj == null || "".equals(msg.obj.toString())) {

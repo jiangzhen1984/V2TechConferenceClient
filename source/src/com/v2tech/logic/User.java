@@ -313,7 +313,7 @@ public class User implements Comparable {
 					return 1;
 				}
 			} else {
-				return 1;
+				return -1;
 			}
 		}
 		return 0;
