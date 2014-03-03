@@ -3,7 +3,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    xmlns:app="http://schemas.android.com/apk/res/de.ankri.switchtest"  >
+    xmlns:app="http://schemas.android.com/apk/res/de.ankri.switchtest" 
+     >
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -87,14 +88,14 @@
                             android:text="@string/setting_notification_session_msg"
                             android:textSize="20sp" />
 
-                        <de.ankri.views.Switch
+                        <com.v2tech.view.cus.switcher.Switch
+                           style="SwitchStyle"
                             android:id="@+id/switch1"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_alignParentRight="true"
                             android:layout_centerVertical="true"
-                            android:layout_marginRight="18dp"
-                            android:text="Switch" />
+                            android:text="" />
      
                     </RelativeLayout>
 
@@ -109,6 +110,15 @@
                             android:layout_marginLeft="30dp"
                             android:text="@string/setting_notification_confs_msg"
                             android:textSize="20sp" />
+                        
+                          <com.v2tech.view.cus.switcher.Switch
+                            android:id="@+id/switch1"
+                            style="SwitchStyle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentRight="true"
+                            android:layout_centerVertical="true"
+                            android:text="" />
                     </RelativeLayout>
                 </LinearLayout>
 
