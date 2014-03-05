@@ -42,6 +42,139 @@ public class VideoRequest {
 
 	public native void unInitialize();
 
+	/**
+	 * Request to open video device include remote user and self.
+	 * 
+	 * @param nGroupID
+	 *            conference id. If open P2P user device, this parameter should
+	 *            be 0
+	 * @param nUserID
+	 *            user id
+	 * @param szDeviceID
+	 *            user device ID. If open local user camera device, user ""
+	 * 
+	 * @param vp
+	 *            if open local device, input null. Otherwise
+	 *            {@link VideoPlayer}
+	 * @param businessType
+	 *            1 : conference 2: IM type
+	 * 
+	 * 
+	 * @see {@link #OnRemoteUserVideoDevice(String)}
+	 * @see VideoPlayer
+	 * @see V2ClientType#CONF
+	 * @see V2ClientType#IM
+	 */
+	public native void openVideoDevice(long nGroupID, long nUserID,
+			String szDeviceID, VideoPlayer vp, int businessType);
+
+	/**
+	 * Request to close video device. This function no callback call<br>
+	 * 
+	 * @param nGroupID
+	 *            conference id. If open P2P user device, this parameter should
+	 *            be 0
+	 * @param nUserID
+	 *            user id
+	 * @param szDeviceID
+	 *            user device ID. If open local user camera device, user ""
+	 * 
+	 * @param vp
+	 *            if open local device, input null. Otherwise input
+	 *            {@link VideoPlayer}
+	 * @param businessType
+	 *            1: conference 2: IM type
+	 * 
+	 * @see {@link #OnRemoteUserVideoDevice(String)}
+	 * @see VideoPlayer
+	 * @see V2ClientType#CONF
+	 * @see V2ClientType#IM
+	 */
+	public native void closeVideoDevice(long nGroupID, long nUserID,
+			String szDeviceID, VideoPlayer vp, int businessType);
+
+	/**
+	 * <ul>Update local camera configuration. JNI call {@link #OnSetCapParamDone(String, int, int, int)} to indicate response.</ul>
+	 * @param szDevID
+	 *            ""
+	 * @param nSizeIndex
+	 *            it's camera index
+	 * @param nFrameRate
+	 *            15
+	 * @param nBitRate
+	 *            256000
+	 */
+	public native void setCapParam(String szDevID, int nSizeIndex,
+			int nFrameRate, int nBitRate);
+	
+	
+	/**
+	 * <ul>Indicate response that update camera configuration.</ul>
+	 * @param szDevID
+	 * @param nSizeIndex
+	 * @param nFrameRate
+	 * @param nBitRate
+	 */
+	private void OnSetCapParamDone(String szDevID, int nSizeIndex,
+			int nFrameRate, int nBitRate) {
+		V2Log.d("OnSetCapParamDone " + szDevID + " " + nSizeIndex + " "
+				+ nFrameRate + " " + nBitRate);
+		for (VideoRequestCallback cb : this.callback) {
+			cb.OnSetCapParamDone(szDevID, nSizeIndex, nFrameRate, nBitRate);
+		}
+	}
+
+	/**
+	 * <ul>
+	 * Indicate user device list. This function only called by JNI. and xml
+	 * formate as below:
+	 * </ul>
+	 * <ul>
+	 * {@code 
+	 * <xml><user id='136'><videolist defaultid='136:CyberLink Webcam Sharing
+	 * Manager____2056417056'><video bps='256' camtype='0' comm='0'
+	 * desc='CyberLink Webcam Sharing Manager____2056417056' fps='15'
+	 * id='136:CyberLink Webcam Sharing Manager____2056417056' selectedindex='0'
+	 * videotype='vid'><sizelist><size h='240' w='320'/><size h='360'
+	 * w='640'/><size h='480' w='640'/><size h='600' w='800'/><size h='720'
+	 * w='1280'/><size h='960' w='1280'/><size h='900' w='1600'/><size h='1200'
+	 * w='1600'/></sizelist></video><video bps='256' camtype='0' comm='0'
+	 * desc='HP HD Webcam [Fixed]____1388682949' fps='15' id='136:HP HD Webcam
+	 * [Fixed]____1388682949' selectedindex='3' videotype='vid'><sizelist><size
+	 * h='480' w='640'/><size h='400' w='640'/><size h='288' w='352'/><size
+	 * h='240' w='320'/><size h='720'
+	 * w='1280'/></sizelist></video></videolist></user></xml>
+	 * }<br>
+	 * </ul>
+	 * 
+	 * @param szXmlData
+	 *            user devices list as XML format
+	 */
+	private void OnRemoteUserVideoDevice(String szXmlData) {
+		for (VideoRequestCallback cb : this.callback) {
+			cb.OnRemoteUserVideoDevice(szXmlData);
+		}
+		V2Log.d("OnRemoteUserVideoDevice:---" + szXmlData);
+	}
+
+	/**
+	 * 
+	 * @param nGroupID
+	 * @param nBusinessType
+	 * @param nFromUserID
+	 * @param szDeviceID
+	 */
+	private void OnVideoChatInvite(long nGroupID, int nBusinessType,
+			long nFromUserID, String szDeviceID) {
+		for (VideoRequestCallback cb : this.callback) {
+			cb.OnVideoChatInviteCallback(nGroupID, nBusinessType, nFromUserID,
+					szDeviceID);
+		}
+		V2Log.d("OnVideoChatInvite: nGroupID:" + nGroupID + "  nBusinessType:"
+				+ nBusinessType + " nFromUserID:" + nFromUserID
+				+ "  szDeviceID:" + szDeviceID);
+	}
+
 	// 鏋氫妇鎽勫儚澶�
 	public native void enumMyVideos(int p);
 
@@ -67,94 +200,6 @@ public class VideoRequest {
 	// 鍏抽棴瑙嗛浼氳瘽
 	public native void closeVideoChat(long nGroupID, long nToUserID,
 			String szDeviceID, int businessType);
-
-	/**
-	 * Open video device
-	 * 
-	 * @param nGroupID
-	 *            conference id
-	 * @param nUserID
-	 *            user id
-	 * @param szDeviceID
-	 *            remote device id {@link OnRemoteUserVideoDevice}, if open
-	 *            local device use "".
-	 * @param vp
-	 *            if open local device, input null. Otherwise
-	 *            {@link VideoPlayer}
-	 * @param businessType
-	 *            as now only input 1
-	 */
-	public native void openVideoDevice(long nGroupID, long nUserID,
-			String szDeviceID, VideoPlayer vp, int businessType);
-
-	/**
-	 * close video device.<br>
-	 * 
-	 * @see openVideoDevice
-	 * @param nGroupID
-	 *            conference id
-	 * @param nUserID
-	 *            user id
-	 * @param szDeviceID
-	 *            remote device id {@link OnRemoteUserVideoDevice}, if open
-	 *            local device use "".
-	 * @param vp
-	 *            if open local device, input null. Otherwise
-	 *            {@link VideoPlayer}
-	 * @param businessType
-	 *            as now only input 1
-	 */
-	public native void closeVideoDevice(long nGroupID, long nUserID,
-			String szDeviceID, VideoPlayer vp, int businessType);
-
-	/**
-	 * 
-	 * @param szDevID ""
-	 * @param nSizeIndex it's camera index 
-	 * @param nFrameRate 15
-	 * @param nBitRate 256000
-	 */
-	public native void setCapParam(String szDevID, int nSizeIndex,
-			int nFrameRate, int nBitRate);
-
-	/**
-	 * <xml><user id='136'><videolist defaultid='136:CyberLink Webcam Sharing
-	 * Manager____2056417056'><video bps='256' camtype='0' comm='0'
-	 * desc='CyberLink Webcam Sharing Manager____2056417056' fps='15'
-	 * id='136:CyberLink Webcam Sharing Manager____2056417056' selectedindex='0'
-	 * videotype='vid'><sizelist><size h='240' w='320'/><size h='360'
-	 * w='640'/><size h='480' w='640'/><size h='600' w='800'/><size h='720'
-	 * w='1280'/><size h='960' w='1280'/><size h='900' w='1600'/><size h='1200'
-	 * w='1600'/></sizelist></video><video bps='256' camtype='0' comm='0'
-	 * desc='HP HD Webcam [Fixed]____1388682949' fps='15' id='136:HP HD Webcam
-	 * [Fixed]____1388682949' selectedindex='3' videotype='vid'><sizelist><size
-	 * h='480' w='640'/><size h='400' w='640'/><size h='288' w='352'/><size
-	 * h='240' w='320'/><size h='720'
-	 * w='1280'/></sizelist></video></videolist></user></xml>
-	 * TODO update comments
-	 * @param szXmlData
-	 */
-	private void OnRemoteUserVideoDevice(String szXmlData) {
-		for (VideoRequestCallback cb  : this.callback) {
-			cb.OnRemoteUserVideoDevice(szXmlData);
-		}
-		V2Log.d("OnRemoteUserVideoDevice:---" + szXmlData);
-	}
-
-	/**
-	 * 
-	 * @param nGroupID
-	 * @param nBusinessType
-	 * @param nFromUserID
-	 * @param szDeviceID
-	 */
-	private void OnVideoChatInvite(long nGroupID, int nBusinessType,
-			long nFromUserID, String szDeviceID) {
-		for (VideoRequestCallback cb  : this.callback) {
-			cb.OnVideoChatInviteCallback(nGroupID, nBusinessType, nFromUserID, szDeviceID);
-		}
-		V2Log.d("OnVideoChatInvite: nGroupID:" + nGroupID+"  nBusinessType:"+nBusinessType+" nFromUserID:"+nFromUserID+"  szDeviceID:"+szDeviceID);
-	}
 
 	// 閭�鍒汉鍚庡緱鍒板簲绛� OnVideoChatAccepted 0 2 1112627 1112627:Integrated
 	// Camera____2889200338
@@ -230,14 +275,7 @@ public class VideoRequest {
 
 	// private void OnGetDevSizeFormats(String szXml);
 
-	private void OnSetCapParamDone(String szDevID, int nSizeIndex,
-			int nFrameRate, int nBitRate) {
-		V2Log.d("OnSetCapParamDone " + szDevID + " " + nSizeIndex
-				+ " " + nFrameRate + " " + nBitRate);
-		for (VideoRequestCallback cb  : this.callback) {
-			cb.OnSetCapParamDone(szDevID, nSizeIndex, nFrameRate, nBitRate);
-		}
-	}
+
 
 	// // 閫氱煡绐楀彛瑙嗛姣旂壒鐜囷紝鍗曚綅Kbps
 	private void OnVideoBitRate(Object hwnd, int bps) {

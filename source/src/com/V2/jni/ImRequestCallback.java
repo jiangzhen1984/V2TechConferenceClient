@@ -37,7 +37,7 @@ public interface ImRequestCallback {
 	 *    another case is when you call {@link ImRequest#getUserBaseInfo(long)}, this function will be called by JNI.
 	 * </p>
 	 * @param nUserID  user id
-	 * @param updatexml TODO add xml example
+	 * @param updatexml TODO add XML example
 	 */
 	public void OnUpdateBaseInfoCallback(long nUserID, String updatexml);
 	

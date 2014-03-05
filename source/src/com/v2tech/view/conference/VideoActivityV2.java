@@ -1,4 +1,4 @@
-package com.v2tech.view;
+package com.v2tech.view.conference;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -53,6 +53,7 @@ import com.v2tech.logic.ConferencePermission;
 import com.v2tech.logic.User;
 import com.v2tech.logic.UserDeviceConfig;
 import com.v2tech.util.V2Log;
+import com.v2tech.view.JNIService;
 import com.v2tech.view.JNIService.LocalBinder;
 
 public class VideoActivityV2 extends Activity {

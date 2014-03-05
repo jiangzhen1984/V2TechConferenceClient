@@ -68,16 +68,84 @@ public class ConfRequest {
 	public native void destroyConf(long nConfID);
 
 	/**
-	 * Let user enter conference.<br>
-	 * Callback is {@link OnEnterConf}
+	 * <ul>
+	 * User request to enter conference. will call {@link OnEnterConf} function
+	 * to indicate response.
+	 * </ul>
 	 * 
 	 * @param nConfID
-	 *            conference ID
+	 *            conference ID which user request to enter
+	 * 
+	 * @see #OnEnterConf(long, long, String, int)
+	 * @see ConfRequestCallback
 	 */
 	public native void enterConf(long nConfID);
 
-	//
+	/**
+	 * <ul>
+	 * Callback of {@link #enterConf(long)}, Indicate response of result.
+	 * </ul>
+	 * 
+	 * @param nConfID
+	 *            conference ID which user request to enter
+	 * @param nTime
+	 *            entered time
+	 * @param szConfData
+	 * @param nJoinResult
+	 *            result of join. 0 success 1:falied
+	 */
+	private void OnEnterConf(long nConfID, long nTime, String szConfData,
+			int nJoinResult) {
+		for (ConfRequestCallback cb : this.callbacks) {
+			cb.OnEnterConfCallback(nConfID, nTime, szConfData, nJoinResult);
+		}
+		V2Log.d("OnEnterConf called  nConfID:" + nConfID + "  nTime:" + nTime
+				+ " szConfData:" + szConfData + " nJoinResult:" + nJoinResult);
+	}
+
+	/**
+	 * <ul>
+	 * User request exit conference, this request no callback call.
+	 * </ul>
+	 * 
+	 * @param nConfID
+	 *            conference ID which user request to exit
+	 * 
+	 * @see ConfRequestCallback
+	 */
 	public native void exitConf(long nConfID);
+
+	/**
+	 * 
+	 * 
+	 * @param nConfID
+	 * @param nTime
+	 * @param szUserInfos
+	 * 
+	 * @see ConfRequestCallback
+	 */
+	private void OnConfMemberEnter(long nConfID, long nTime, String szUserInfos) {
+		V2Log.d("-->OnConfMemberEnter " + nConfID + " " + nTime + " "
+				+ szUserInfos);
+		for (ConfRequestCallback cb : this.callbacks) {
+			cb.OnConfMemberEnterCallback(nConfID, nTime, szUserInfos);
+		}
+	}
+
+	/**
+	 * 
+	 * @param nConfID
+	 * @param nTime
+	 * @param nUserID
+	 */
+	private void OnConfMemberExit(long nConfID, long nTime, long nUserID) {
+		V2Log.d("-->OnConfMemberExit " + nConfID + " " + nTime + " " + nUserID);
+
+		for (ConfRequestCallback cb : this.callbacks) {
+			cb.OnConfMemberExitCallback(nConfID, nTime, nUserID);
+		}
+
+	}
 
 	// 灏嗘煇浜鸿鍑轰細璁�
 	public native void kickConf(long nUserID);
@@ -135,23 +203,6 @@ public class ConfRequest {
 
 	public boolean enterConf = false;
 
-	
-	/**
-	 * 
-	 * @param nConfID
-	 * @param nTime
-	 * @param szConfData
-	 * @param nJoinResult
-	 */
-	private void OnEnterConf(long nConfID, long nTime, String szConfData,
-			int nJoinResult) {
-		for (ConfRequestCallback cb  : this.callbacks) {
-			cb.OnEnterConfCallback(nConfID, nTime, szConfData,
-					nJoinResult);
-		}
-		V2Log.d("OnEnterConf called  nConfID:"+nConfID +"  nTime:"+nTime+" szConfData:"+szConfData +" nJoinResult:"+nJoinResult);
-	}
-
 	private void OnAddUser(long userid, String xml) {
 		Log.e("ImRequest UI", "OnAddUser " + userid + "  " + xml);
 	}
@@ -199,37 +250,6 @@ public class ConfRequest {
 				+ strUserList);
 	}
 
-	/**
-	 * <user id='146' uetype='1'/>
-	 * 
-	 * @param nConfID
-	 * @param nTime
-	 * @param szUserInfos
-	 */
-	private void OnConfMemberEnter(long nConfID, long nTime, String szUserInfos) {
-		V2Log.e("-->OnConfMemberEnter " + nConfID + " " + nTime
-				+ " " + szUserInfos);
-		for (ConfRequestCallback cb  : this.callbacks) {
-			cb.OnConfMemberEnterCallback(nConfID, nTime, szUserInfos);
-		}
-	}
-
-	/**
-	 * 
-	 * @param nConfID
-	 * @param nTime
-	 * @param nUserID
-	 */
-	private void OnConfMemberExit(long nConfID, long nTime, long nUserID) {
-		V2Log.e("-->OnConfMemberEnter " + nConfID + " " + nTime
-				+ " " + nUserID);
-		
-		for (ConfRequestCallback cb  : this.callbacks) {
-			cb.OnConfMemberExitCallback(nConfID, nTime, nUserID);
-		}
-		
-	}
-
 	// 浼氳鏈夌敤鎴风寮�殑鍥炶皟
 	private void OnConfMemberLeave(long nConfID, long nUserID) {
 		Log.e("ImRequest UI", "浼氳鏈変汉閫�嚭-->OnConfMemberLeave " + nConfID + " "
@@ -251,8 +271,6 @@ public class ConfRequest {
 	public void OnConfSyncCloseVideo(long gid, String str) {
 
 	}
-
-
 
 	// 鎴戣璇峰嚭浼氳鐨勫洖璋�
 	private void OnKickConf(int nReason) {

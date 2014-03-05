@@ -30,6 +30,8 @@ import com.v2tech.logic.AsynResult;
 import com.v2tech.logic.GlobalHolder;
 import com.v2tech.logic.Group;
 import com.v2tech.util.V2Log;
+import com.v2tech.view.conference.GroupLayout;
+import com.v2tech.view.conference.VideoActivityV2;
 
 public class ConferenceTabFragment extends Fragment {
 

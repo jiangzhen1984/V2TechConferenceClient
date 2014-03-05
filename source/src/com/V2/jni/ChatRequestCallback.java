@@ -5,6 +5,7 @@ public interface ChatRequestCallback {
 
 	
 	/**
+	 * <ul>Use to receive message from server side.</ul>
 	 * 
 	 * @param nGroupID
 	 * @param nBusinessType
@@ -17,7 +18,7 @@ public interface ChatRequestCallback {
 
 	
 	/**
-	 * 
+	 * <ul>Receive image data from server side.</ul>
 	 * @param nGroupID
 	 * @param nBusinessType
 	 * @param nFromUserID

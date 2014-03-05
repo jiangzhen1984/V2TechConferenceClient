@@ -1,4 +1,4 @@
-package com.v2tech.view;
+package com.v2tech.view.conference;
 
 import android.content.Context;
 import android.util.AttributeSet;

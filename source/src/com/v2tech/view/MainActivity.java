@@ -48,7 +48,6 @@ public class MainActivity extends FragmentActivity implements
 	/**
 	 * A simple factory that returns dummy views to the Tabhost
 	 * 
-	 * @author mwho
 	 */
 	class TabFactory implements TabContentFactory {
 
@@ -125,7 +124,7 @@ public class MainActivity extends FragmentActivity implements
 	}
 
 	/**
-	 * Initialise the Tab Host
+	 * Initialize the Tab Host
 	 */
 	private void initialiseTabHost(Bundle args) {
 		mTabHost = (TabHost) findViewById(android.R.id.tabhost);
@@ -167,9 +166,6 @@ public class MainActivity extends FragmentActivity implements
 		}
 	}
 
-	
-	
-	
 	
 	
 	

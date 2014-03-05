@@ -19,8 +19,6 @@ public class ImRequest {
 
 	private ImRequest(Context context) {
 		this.context = context;
-		// application = (XiuLiuApplication) context.getApplication();
-		// dbHelper = DbHelper.getInstance(context);
 	};
 
 	public static synchronized ImRequest getInstance(Context context) {
@@ -54,26 +52,88 @@ public class ImRequest {
 	public native void unInitialize();
 	
 	/**
+	 * <ul> Log in to server. server will call {@link #OnLogin(long, int, int)} to indicate response</ul>
+	 * @param szName   user name 
+	 * @param szPassword  password
+	 * @param status  TODO add comment
+	 * @param type  TODO add  comment
 	 * 
-	 * @param szName
-	 * @param szPassword
-	 * @param status
-	 * @param type
+	 * @see #OnLogin(long, int, int)
 	 */
 	public native void login(String szName, String szPassword, int status,
 			int type);
-
-	// 鏇存柊鐨勬垜鐨勫湪绾跨姸鎬�
-	public native void updateMyStatus(int nStatus, String szStatusDesc);
-
-	// 淇敼濂藉弸澶囨敞鍚�
-	public native void modifyCommentName(long nUserId, String sCommentName);
+	
+	/**
+	 * <ul> Log in call back function. This function only is called by JNI.</ul>
+	 * @param nUserID logged in user ID
+	 * @param nStatus 
+	 * @param nResult  0: logged in successfully
+	 * 
+	 * @see #login(String, String, int, int)
+	 */
+	private void OnLogin(long nUserID, int nStatus, int nResult) {
+		V2Log.d( "OnLogin --> " + nUserID + ": " + "-:"
+				+ nStatus + ":" + nResult);
+		if (this.callback != null) {
+			this.callback.OnLoginCallback(nUserID, nStatus, nResult);
+		}
+	}
+	
 
 	/**
+	 * <ul>Get user information from server.<br>
+	 * when call this API, JNI will call {@link #OnUpdateBaseInfo(long, String)} to indicate response.<br>
+	 * </ul>
 	 * 
-	 * @param nUserID
+	 * @param nUserID user ID which want to get user information
 	 */
 	public native void getUserBaseInfo(long nUserID);
+	
+	/**
+	 * <ul> call back function. This function only is called by JNI.</ul>
+	 * <ul>
+	 * {@link #getUserBaseInfo(long)} callback.
+	 * </ul>
+	 * @param nUserID
+	 * @param updatexml
+	 * 
+	 */
+	private void OnUpdateBaseInfo(long nUserID, String updatexml) {
+		if (this.callback != null) {
+			this.callback.OnUpdateBaseInfoCallback(nUserID, updatexml);
+		}
+	}
+	
+	
+	/**
+	 * <ul>Indicate user's status changed.</ul>
+	 * @param nUserID user ID
+	 * @param eUEType device type of user logged in
+	 * @param nStatus <ul> new status of user</ul>
+	 * <ul>
+	 * <li>0 : off line</li>
+	 * <li>1 : on line</li>
+	 * <li>2 : leave</li>
+	 * <li>3 : busy</li>
+	 * <li>4 : do not disturb</li>
+	 * <li>5 : hidden</li>
+	 * </ul> 
+	 * @param szStatusDesc
+	 * 
+	 * @see com.v2tech.logic.User.Status
+	 */
+	private void OnUserStatusUpdated(long nUserID, int eUEType,  int nStatus, String szStatusDesc) {
+		if (callback != null) {
+			callback.OnUserStatusUpdatedCallback(nUserID, eUEType, nStatus, szStatusDesc);
+		}
+	}
+	
+	
+
+	public native void updateMyStatus(int nStatus, String szStatusDesc);
+
+	public native void modifyCommentName(long nUserId, String sCommentName);
+
 
 	// 淇敼涓汉淇℃伅
 	/*
@@ -107,29 +167,14 @@ public class ImRequest {
 
 	public native void getCrowdFileInfo(long nCrowdId);
 
-	/*
-	 */
-	private void OnLogin(long nUserID, int nStatus, int nResult) {
-		Log.e("ImRequest UI", "" + nUserID + ": " + "-:"
-				+ nStatus + ":" + nResult);
-
-		if (this.callback != null) {
-			this.callback.OnLoginCallback(nUserID, nStatus, nResult);
-		}
-
-	}
+	
 
 	// 娉ㄩ攢鐨勬柟娉�
 	private void OnLogout(int nUserID) {
 		Log.e("ImRequest UI", "OnLogout::" + nUserID);
 	}
 
-	// 濂藉弸鐨勪釜浜轰俊鎭慨鏀瑰悗杩斿洖锛屼慨鏀逛粈涔堬紝杩斿洖閭ｄ釜瀛楁
-	private void OnUpdateBaseInfo(long nUserID, String updatexml) {
-		if (this.callback != null) {
-			this.callback.OnUpdateBaseInfoCallback(nUserID, updatexml);
-		}
-	}
+
 
 	// 杈撳叆鍏抽敭璇嶈繘琛屾悳绱�
 	private void OnGetSearchMember(String xmlinfo) {
@@ -285,11 +330,7 @@ public class ImRequest {
 		// }
 	}
 	
-	private void OnUserStatusUpdated(long nUserID, int eUEType,  int nStatus, String szStatusDesc) {
-		if (callback != null) {
-			callback.OnUserStatusUpdatedCallback(nUserID, eUEType, nStatus, szStatusDesc);
-		}
-	}
+
 
 
 }

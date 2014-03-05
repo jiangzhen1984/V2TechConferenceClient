@@ -1,6 +1,10 @@
 package com.v2tech.logic.jni;
 
-
+/**
+ * Used to wrap response data from JNI when receive call from JNI
+ * @author 28851274
+ *
+ */
 public class RequestEnterConfResponse extends JNIResponse {
 
 	
