@@ -1,35 +1,41 @@
 package com.v2tech.logic;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+
+import com.v2tech.util.V2Log;
 
 public class GlobalHolder {
 
 	private static GlobalHolder holder;
-	
+
 	private User mCurrentUser;
-	
+
 	private Map<Long, User.Status> onlineUsers = new HashMap<Long, User.Status>();
-	
-	
+
+	private List<Group> mContactsGroup = null;
+
+	private List<Group> mConfGroup = null;
 
 	private Map<Long, User> mUserHolder = new HashMap<Long, User>();
-	
+	private Map<Long, Group> mGroupHolder = new HashMap<Long, Group>();
+
 	public static synchronized GlobalHolder getInstance() {
 		if (holder == null) {
 			holder = new GlobalHolder();
 		}
 		return holder;
 	}
+
 	private GlobalHolder() {
-		
+
 	}
-	
-	
+
 	public User getCurrentUser() {
 		return mCurrentUser;
 	}
-	
+
 	public long getCurrentUserId() {
 		if (mCurrentUser == null) {
 			return 0;
@@ -37,7 +43,7 @@ public class GlobalHolder {
 			return mCurrentUser.getmUserId();
 		}
 	}
-	
+
 	public void setCurrentUser(User u) {
 		this.mCurrentUser = u;
 		this.mCurrentUser.setCurrentLoggedInUser(true);
@@ -49,8 +55,7 @@ public class GlobalHolder {
 			putUser(u.getmUserId(), u);
 		}
 	}
-	
-	
+
 	public void putUser(long id, User u) {
 		if (u == null) {
 			return;
@@ -58,12 +63,12 @@ public class GlobalHolder {
 		Long key = Long.valueOf(id);
 		mUserHolder.put(key, u);
 	}
-	
+
 	public User getUser(long id) {
 		Long key = Long.valueOf(id);
 		return mUserHolder.get(key);
 	}
-	
+
 	public void updateUserStatus(User u) {
 		Long key = Long.valueOf(u.getmUserId());
 		if (u.getmStatus() == User.Status.OFFLINE) {
@@ -71,9 +76,9 @@ public class GlobalHolder {
 		} else {
 			onlineUsers.put(key, u.getmStatus());
 		}
-		
+
 	}
-	
+
 	public void updateUserStatus(long uid, User.Status us) {
 		Long key = Long.valueOf(uid);
 		if (us == User.Status.OFFLINE) {
@@ -82,9 +87,107 @@ public class GlobalHolder {
 			onlineUsers.put(key, us);
 		}
 	}
-	
+
 	public User.Status getOnlineUserStatus(long uid) {
 		Long key = Long.valueOf(uid);
-		return  onlineUsers.get(key);
+		return onlineUsers.get(key);
+	}
+
+	/**
+	 * Update group information according server's side push data
+	 * 
+	 * @param gType
+	 * @param list
+	 */
+	public void updateGroupList(Group.GroupType gType, List<Group> list) {
+		if (gType == Group.GroupType.CONTACT) {
+			mContactsGroup = list;
+		} else if (gType == Group.GroupType.CONFERENCE) {
+			mConfGroup = list;
+		}
+		for (Group g : list) {
+			populateGroup(g);
+		}
+	}
+
+	private void populateGroup(Group g) {
+		mGroupHolder.put(Long.valueOf(g.getmGId()), g);
+		for (Group subG : g.getChildGroup()) {
+			populateGroup(subG);
+		}
+	}
+
+	/**
+	 * Group information is server active call, we can't request from server
+	 * directly.<br>
+	 * Only way to get group information is waiting for server call.<br>
+	 * So if this function return null, means service doesn't receive any call
+	 * from server. otherwise server already sent group information to service.<br>
+	 * If you want to know indication, please register receiver:<br>
+	 * category: {@link #JNI_BROADCAST_CATEGROY} <br>
+	 * action : {@link #JNI_BROADCAST_GROUP_NOTIFICATION}<br>
+	 * Notice: maybe you didn't receive broadcast forever, because this
+	 * broadcast is sent before you register
+	 * 
+	 * @param gType
+	 * @return return null means server didn't send group information to
+	 *         service.
+	 */
+	public List<Group> getGroup(Group.GroupType gType) {
+		switch (gType) {
+		case CONTACT:
+			return this.mContactsGroup;
+		case CONFERENCE:
+			return mConfGroup;
+		default:
+			throw new RuntimeException("Unkonw type");
+		}
+
+	}
+
+	/**
+	 * Find all types of group information according to group ID
+	 * 
+	 * @param gid
+	 * @return null if doesn't find group, otherwise return Group information
+	 * 
+	 * @see Group
+	 */
+	public Group findGroupById(long gid) {
+		return mGroupHolder.get(Long.valueOf(gid));
+	}
+
+	/**
+	 * Add user collections to group collections
+	 * 
+	 * @param gList
+	 * @param uList
+	 * @param belongGID
+	 */
+	public void addUserToGroup(List<Group> gList, List<User> uList,
+			long belongGID) {
+		for (Group g : gList) {
+			if (belongGID == g.getmGId()) {
+				g.addUserToGroup(uList);
+				return;
+			}
+			addUserToGroup(g.getChildGroup(), uList, belongGID);
+		}
+	}
+
+	/**
+	 * Add user collections to group collections
+	 * 
+	 * @param gList
+	 * @param uList
+	 * @param belongGID
+	 */
+	public void addUserToGroup(List<User> uList, long belongGID) {
+		Group g = findGroupById(belongGID);
+		if (g == null) {
+			V2Log.e("Doesn't receive group<" + belongGID + "> information yet!");
+			return;
+		}
+		g.addUserToGroup(uList);
 	}
 }

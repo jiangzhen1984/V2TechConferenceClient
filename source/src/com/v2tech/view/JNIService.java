@@ -123,9 +123,7 @@ public class JNIService extends Service {
 
 	// ///////////////////////////////////////
 	// only refer group data which group is GroupType.CONFERENCE
-	private List<Group> mConfGroup = null;
-
-	private List<Group> mContactsGroup = null;
+	// private List<Group> mConfGroup = null;
 
 	private Set<UserDeviceConfig> mUserDeviceList = new HashSet<UserDeviceConfig>();
 
@@ -156,13 +154,13 @@ public class JNIService extends Service {
 		ImRequest.getInstance().setCallback(mImCB);
 
 		mCRCB = new ConfRequestCB(mCallbackHandler);
-		ConfRequest.getInstance().setCallback(mCRCB);
+		ConfRequest.getInstance().addCallback(mCRCB);
 
 		mGRCB = new GroupRequestCB(mCallbackHandler);
 		GroupRequest.getInstance().setCallback(mGRCB);
 
 		mVRCB = new VideoRequestCB(mCallbackHandler);
-		VideoRequest.getInstance().setCallback(mVRCB);
+		VideoRequest.getInstance().addCallback(mVRCB);
 
 		mChRCB = new ChatRequestCB(mCallbackHandler);
 		ChatRequest.getInstance().setChatRequestCallback(mChRCB);
@@ -339,50 +337,6 @@ public class JNIService extends Service {
 	}
 
 	/**
-	 * Group information is server active call, we can't request from server
-	 * directly.<br>
-	 * Only way to get group information is waiting for server call.<br>
-	 * So if this function return null, means service doesn't receive any call
-	 * from server. otherwise server already sent group information to service.<br>
-	 * If you want to know indication, please register receiver:<br>
-	 * category: {@link #JNI_BROADCAST_CATEGROY} <br>
-	 * action : {@link #JNI_BROADCAST_GROUP_NOTIFICATION}<br>
-	 * Notice: maybe you didn't receive broadcast forever, because this
-	 * broadcast is sent before you register
-	 * 
-	 * @param gType
-	 * @return return null means server didn't send group information to
-	 *         service.
-	 */
-	public List<Group> getGroup(Group.GroupType gType) {
-		if (gType == Group.GroupType.CONFERENCE) {
-			if (mLoadGroupOwnerCount > 0) {
-				return null;
-			}
-			return this.mConfGroup;
-		} else if (gType == Group.GroupType.CONTACT) {
-			return this.mContactsGroup;
-		} else {
-			throw new RuntimeException(" Unknown group type :" + gType);
-		}
-	}
-
-	/**
-	 * If return null, means service doesn't receive group data or user data.<br>
-	 * 
-	 * @param gId
-	 * @return
-	 */
-	public List<User> getGroupUser(long gId) {
-		for (Group g : this.mContactsGroup) {
-			if (g.getmGId() == gId) {
-				return g.getUsers();
-			}
-		}
-		return null;
-	}
-
-	/**
 	 * User request to enter conference.<br>
 	 * 
 	 * @param confID
@@ -539,12 +493,6 @@ public class JNIService extends Service {
 		Message.obtain(mHandler, JNI_UPDATE_CAMERA_PAR, cc).sendToTarget();
 	}
 
-	public void sendMessage(VMessage msg, Message caller) {
-		if (caller != null) {
-			getAndQueued(JNI_SEND_MESSAGE, caller);
-		}
-		Message.obtain(mHandler, JNI_SEND_MESSAGE, msg).sendToTarget();
-	}
 
 	/**
 	 * Get user's video device according to user id.<br>
@@ -675,7 +623,6 @@ public class JNIService extends Service {
 	private static final int JNI_REQUEST_RELEASE_SPEAK = 73;
 	private static final int JNI_UPDATE_CAMERA_PAR = 75;
 	private static final int JNI_REMOTE_USER_DEVICE_INFO_NOTIFICATION = 80;
-	private static final int JNI_SEND_MESSAGE = 90;
 	private static final int JNI_RECEIVED_MESSAGE = 91;
 	private static final int JNI_RECEIVED_VIDEO_INVITION = 92;
 
@@ -711,8 +658,9 @@ public class JNIService extends Service {
 				if (gmd == null) {
 					// TODO
 				} else {
+					//FIXME optimize code
 					Message.obtain(mHandler, JNI_UPDATE_USER_INFO,
-							mConfGroup.get(msg.arg1).getOwner()).sendToTarget();
+							GlobalHolder.getInstance().getGroup(Group.GroupType.CONFERENCE).get(msg.arg1).getOwner()).sendToTarget();
 				}
 
 				break;
@@ -778,32 +726,6 @@ public class JNIService extends Service {
 							cc.getBitRate());
 				}
 				break;
-			case JNI_SEND_MESSAGE:
-				final VMessage vm = (VMessage) msg.obj;
-				ChatRequest.getInstance().sendChatText(0,
-						vm.getToUser().getmUserId(), vm.toXml(),
-						ChatRequest.BT_IM);
-				if (vm.getType() == VMessage.MessageType.IMAGE) {
-					thread.post(new Runnable() {
-						@Override
-						public void run() {
-							byte[] data = ((VImageMessage) vm).getWrapperData();
-							ChatRequest.getInstance().sendChatPicture(0,
-									vm.getToUser().getmUserId(), data,
-									data.length, ChatRequest.BT_IM);
-						}
-
-					});
-				}
-				// TODO as now send message no callback, just send response to
-				// message caller
-				MetaData responseSendMsg = getMeta(JNI_SEND_MESSAGE);
-				if (responseSendMsg != null && responseSendMsg.caller != null) {
-					responseSendMsg.caller.obj = new AsynResult(
-							AsynState.SUCCESS, null);
-					responseSendMsg.caller.sendToTarget();
-				}
-				break;
 			}
 		}
 
@@ -843,8 +765,7 @@ public class JNIService extends Service {
 				InnerUser iu = ((InnerUser) msg.obj);
 				User loggedUser = new User(iu.idCallback, "",
 						NetworkStateCode.fromInt(iu.nResult));
-				ar = new AsynResult(AsynResult.AsynState.SUCCESS,
-						loggedUser);
+				ar = new AsynResult(AsynResult.AsynState.SUCCESS, loggedUser);
 				mloggedInUserId = iu.idCallback;
 				GlobalHolder.getInstance().setCurrentUser(loggedUser);
 				break;
@@ -896,29 +817,26 @@ public class JNIService extends Service {
 
 				break;
 			case JNI_GROUP_NOTIFY:
-				if (msg.arg1 == Group.GroupType.CONFERENCE.intValue()) {
-					mConfGroup = Group
-							.parserFromXml(msg.arg1, (String) msg.obj);
-					mLoadGroupOwnerCount = mConfGroup.size();
 
-					if (mConfGroup != null && mConfGroup.size() > 0) {
+				List<Group> gl = Group
+						.parserFromXml(msg.arg1, (String) msg.obj);
+				GlobalHolder.getInstance().updateGroupList(
+						Group.GroupType.fromInt(msg.arg1), gl);
+				if (msg.arg1 == Group.GroupType.CONFERENCE.intValue()) {
+
+					mLoadGroupOwnerCount = gl.size();
+					if (gl != null && gl.size() > 0) {
 						Message.obtain(mHandler, JNI_LOAD_GROUP_OWNER_INFO, 0,
 								0).sendToTarget();
 					}
-				} else if (msg.arg1 == Group.GroupType.CONTACT.intValue()) {
-					mContactsGroup = Group.parserFromXml(msg.arg1,
-							(String) msg.obj);
-					// TODO send broadcast to tell UI contacts group update
 				}
-
-				ar = new AsynResult(AsynResult.AsynState.SUCCESS, mConfGroup);
 
 				break;
 			case JNI_LOAD_GROUP_OWNER_INFO:
 				mLoadGroupOwnerCount--;
 				User gu = (User) ((AsynResult) msg.obj).getObject();
-
-				Group g = mConfGroup.get(msg.arg1);
+				//TODO optimize code
+				Group g = GlobalHolder.getInstance().getGroup(Group.GroupType.CONFERENCE).get(msg.arg1);
 				if (g != null && g.getOwner() == gu.getmUserId()) {
 					g.setOwnerUser(gu);
 				}
@@ -938,7 +856,7 @@ public class JNIService extends Service {
 				GroupUserInfoOrig go = (GroupUserInfoOrig) msg.obj;
 				if (go != null && go.xml != null) {
 					List<User> lu = User.fromXml(go.xml);
-					addUserToGroup(mContactsGroup, lu, go.gId);
+					GlobalHolder.getInstance().addUserToGroup(lu, go.gId);
 					for (User tu : lu) {
 						User.Status us = GlobalHolder.getInstance()
 								.getOnlineUserStatus(tu.getmUserId());
@@ -1030,7 +948,7 @@ public class JNIService extends Service {
 				iv.addCategory(PublicIntent.DEFAULT_CATEGORY);
 				iv.setAction(PublicIntent.START_VIDEO_CONVERSACTION_ACTIVITY);
 				iv.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-				iv.putExtra("uid", ((VideoInvitionWrapper)msg.obj).nFromUserID);
+				iv.putExtra("uid", ((VideoInvitionWrapper) msg.obj).nFromUserID);
 				iv.putExtra("is_coming_call", true);
 				mContext.startActivity(iv);
 				break;
@@ -1051,24 +969,6 @@ public class JNIService extends Service {
 			} else {
 				V2Log.w("MSG: " + msg.what
 						+ " Metadata object or call is null ");
-			}
-		}
-
-		/**
-		 * Add user list to Group
-		 * 
-		 * @param gList
-		 * @param uList
-		 * @param belongGID
-		 */
-		private void addUserToGroup(List<Group> gList, List<User> uList,
-				long belongGID) {
-			for (Group g : gList) {
-				if (belongGID == g.getmGId()) {
-					g.addUserToGroup(uList);
-					return;
-				}
-				addUserToGroup(g.getChildGroup(), uList, belongGID);
 			}
 		}
 

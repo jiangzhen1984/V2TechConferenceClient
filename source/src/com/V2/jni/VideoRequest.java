@@ -1,16 +1,22 @@
 package com.V2.jni;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import v2av.VideoPlayer;
 import android.content.Context;
 import android.util.Log;
 
+import com.v2tech.util.V2Log;
+
 public class VideoRequest {
 	private static VideoRequest mVideoRequest;
-	private VideoRequestCallback callback;
+	private List<VideoRequestCallback> callback;
 	private Context context;
 
 	private VideoRequest(Context context) {
 		this.context = context;
+		callback = new ArrayList<VideoRequestCallback>();
 	};
 
 	public static synchronized VideoRequest getInstance(Context context) {
@@ -28,8 +34,8 @@ public class VideoRequest {
 		return mVideoRequest;
 	}
 
-	public void setCallback(VideoRequestCallback callback) {
-		this.callback = callback;
+	public void addCallback(VideoRequestCallback callback) {
+		this.callback.add(callback);
 	}
 
 	public native boolean initialize(VideoRequest request);
@@ -125,34 +131,29 @@ public class VideoRequest {
 	 * h='480' w='640'/><size h='400' w='640'/><size h='288' w='352'/><size
 	 * h='240' w='320'/><size h='720'
 	 * w='1280'/></sizelist></video></videolist></user></xml>
-	 * 
+	 * TODO update comments
 	 * @param szXmlData
 	 */
 	private void OnRemoteUserVideoDevice(String szXmlData) {
-		if (this.callback != null) {
-			this.callback.OnRemoteUserVideoDevice(szXmlData);
+		for (VideoRequestCallback cb  : this.callback) {
+			cb.OnRemoteUserVideoDevice(szXmlData);
 		}
-		Log.e("VideoRequest UI", "OnRemoteUserVideoDevice:---" + szXmlData);
+		V2Log.d("OnRemoteUserVideoDevice:---" + szXmlData);
 	}
 
-	// 鏀跺埌瀵规柟鐨勮棰戦�璇濊姹� 鍙傛暟锛�锛�锛�112628锛�1112628锛欼ntegrated
-	// Camera__2889200338锛�
+	/**
+	 * 
+	 * @param nGroupID
+	 * @param nBusinessType
+	 * @param nFromUserID
+	 * @param szDeviceID
+	 */
 	private void OnVideoChatInvite(long nGroupID, int nBusinessType,
 			long nFromUserID, String szDeviceID) {
-		Log.e("ImRequest UI", "OnVideoChatInvite " + nGroupID + " "
-				+ nBusinessType + " " + nFromUserID + " " + szDeviceID);
-		// 鎷艰淇℃伅
-		// VideoInviteMsgType videoinviteMsgType=new VideoInviteMsgType();
-		// videoinviteMsgType.setnFromuserID(nFromUserID);
-		// videoinviteMsgType.setSzDeviceID(szDeviceID);
-		//
-		// Intent videoinvite_intent=new Intent(SplashActivity.IM);
-		// videoinvite_intent.putExtra("MsgType", MsgType.VIDEO_INVITE);
-		// videoinvite_intent.putExtra("MSG", videoinviteMsgType);
-		// context.sendBroadcast(videoinvite_intent);
-		if (this.callback != null) {
-			this.callback.OnVideoChatInviteCallback(nGroupID, nBusinessType, nFromUserID, szDeviceID);
+		for (VideoRequestCallback cb  : this.callback) {
+			cb.OnVideoChatInviteCallback(nGroupID, nBusinessType, nFromUserID, szDeviceID);
 		}
+		V2Log.d("OnVideoChatInvite: nGroupID:" + nGroupID+"  nBusinessType:"+nBusinessType+" nFromUserID:"+nFromUserID+"  szDeviceID:"+szDeviceID);
 	}
 
 	// 閭�鍒汉鍚庡緱鍒板簲绛� OnVideoChatAccepted 0 2 1112627 1112627:Integrated
@@ -231,10 +232,10 @@ public class VideoRequest {
 
 	private void OnSetCapParamDone(String szDevID, int nSizeIndex,
 			int nFrameRate, int nBitRate) {
-		Log.e("ImRequest UI", "OnSetCapParamDone " + szDevID + " " + nSizeIndex
+		V2Log.d("OnSetCapParamDone " + szDevID + " " + nSizeIndex
 				+ " " + nFrameRate + " " + nBitRate);
-		if (this.callback != null) {
-			this.callback.OnSetCapParamDone(szDevID, nSizeIndex, nFrameRate, nBitRate);
+		for (VideoRequestCallback cb  : this.callback) {
+			cb.OnSetCapParamDone(szDevID, nSizeIndex, nFrameRate, nBitRate);
 		}
 	}
 

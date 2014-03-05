@@ -1,5 +1,10 @@
 package com.V2.jni;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import com.v2tech.util.V2Log;
+
 import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
@@ -9,10 +14,11 @@ public class ConfRequest {
 	private static ConfRequest mConfRequest;
 	private Context context;
 
-	private ConfRequestCallback callback;
+	private List<ConfRequestCallback> callbacks;
 
 	private ConfRequest(Context context) {
 		this.context = context;
+		this.callbacks = new ArrayList<ConfRequestCallback>();
 	};
 
 	public static synchronized ConfRequest getInstance(Context context) {
@@ -33,8 +39,8 @@ public class ConfRequest {
 		return mConfRequest;
 	}
 
-	public void setCallback(ConfRequestCallback callback) {
-		this.callback = callback;
+	public void addCallback(ConfRequestCallback callback) {
+		this.callbacks.add(callback);
 	}
 
 	private boolean isInConf = false;
@@ -129,13 +135,21 @@ public class ConfRequest {
 
 	public boolean enterConf = false;
 
-	// 鎴戝姞鍏ヤ細璁殑鍥炶皟
+	
+	/**
+	 * 
+	 * @param nConfID
+	 * @param nTime
+	 * @param szConfData
+	 * @param nJoinResult
+	 */
 	private void OnEnterConf(long nConfID, long nTime, String szConfData,
 			int nJoinResult) {
-		if (callback != null) {
-			callback.OnEnterConfCallback(nConfID, nTime, szConfData,
+		for (ConfRequestCallback cb  : this.callbacks) {
+			cb.OnEnterConfCallback(nConfID, nTime, szConfData,
 					nJoinResult);
 		}
+		V2Log.d("OnEnterConf called  nConfID:"+nConfID +"  nTime:"+nTime+" szConfData:"+szConfData +" nJoinResult:"+nJoinResult);
 	}
 
 	private void OnAddUser(long userid, String xml) {
@@ -193,18 +207,27 @@ public class ConfRequest {
 	 * @param szUserInfos
 	 */
 	private void OnConfMemberEnter(long nConfID, long nTime, String szUserInfos) {
-		Log.e("ConfRequest UI", "-->OnConfMemberEnter " + nConfID + " " + nTime
+		V2Log.e("-->OnConfMemberEnter " + nConfID + " " + nTime
 				+ " " + szUserInfos);
-		if (this.callback != null) {
-			this.callback
-					.OnConfMemberEnterCallback(nConfID, nTime, szUserInfos);
+		for (ConfRequestCallback cb  : this.callbacks) {
+			cb.OnConfMemberEnterCallback(nConfID, nTime, szUserInfos);
 		}
 	}
 
+	/**
+	 * 
+	 * @param nConfID
+	 * @param nTime
+	 * @param nUserID
+	 */
 	private void OnConfMemberExit(long nConfID, long nTime, long nUserID) {
-		if (this.callback != null) {
-			this.callback.OnConfMemberExitCallback(nConfID, nTime, nUserID);
+		V2Log.e("-->OnConfMemberEnter " + nConfID + " " + nTime
+				+ " " + nUserID);
+		
+		for (ConfRequestCallback cb  : this.callbacks) {
+			cb.OnConfMemberExitCallback(nConfID, nTime, nUserID);
 		}
+		
 	}
 
 	// 浼氳鏈夌敤鎴风寮�殑鍥炶皟

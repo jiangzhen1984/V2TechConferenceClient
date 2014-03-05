@@ -51,6 +51,13 @@ public class UserDeviceConfig {
 		this.mVP = mVP;
 	}
 
+	/**
+	 * TODO add comment 
+	 * @param mUerID
+	 * @param mDeviceID
+	 * @param mVP
+	 * @param mBusinessType
+	 */
 	public UserDeviceConfig(long mUerID, String mDeviceID, VideoPlayer mVP,
 			int mBusinessType) {
 		this.mUerID = mUerID;

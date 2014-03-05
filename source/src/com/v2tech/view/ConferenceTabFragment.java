@@ -27,6 +27,7 @@ import android.widget.Toast;
 
 import com.v2tech.R;
 import com.v2tech.logic.AsynResult;
+import com.v2tech.logic.GlobalHolder;
 import com.v2tech.logic.Group;
 import com.v2tech.util.V2Log;
 
@@ -271,7 +272,7 @@ public class ConferenceTabFragment extends Fragment {
 					V2Log.w(" Doesn't bound service yet");
 					return;
 				}
-				mConferenceList = mService.getGroup(Group.GroupType.CONFERENCE);
+				mConferenceList = GlobalHolder.getInstance().getGroup(Group.GroupType.CONFERENCE);
 				// No server return send asynchronous message and waiting for
 				// response
 				if (mConferenceList != null) {

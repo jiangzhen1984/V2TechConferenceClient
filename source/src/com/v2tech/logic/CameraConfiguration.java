@@ -2,6 +2,7 @@ package com.v2tech.logic;
 
 /**
  * Use to wrap camera parameters
+ * 
  * @author jiangzhen
  * 
  */
@@ -22,9 +23,13 @@ public class CameraConfiguration {
 	private int mBitRate;
 
 	/**
-	 * Use default mCameraIndex(1) mFrameRate(15) mBitRate(256000) to construct this object
+	 * Use default mCameraIndex({@value #DEFAULT_CAMERA_INDEX}) mFrameRate(
+	 * {@value #DEFAULT_FRAME_RATE}) mBitRate({@value #DEFAULT_BIT_RATE}) to construct this object
+	 * 
 	 * @param mDeviceId
-	 * @see DEFAULT_CAMERA_INDEX  {@value #DEFAULT_FRAME_RATE}  {@value #DEFAULT_BIT_RATE}
+	 * @see DEFAULT_CAMERA_INDEX
+	 * @see DEFAULT_FRAME_RATE
+	 * @see DEFAULT_BIT_RATE
 	 */
 	public CameraConfiguration(String mDeviceId) {
 		this(mDeviceId, DEFAULT_CAMERA_INDEX, DEFAULT_FRAME_RATE,

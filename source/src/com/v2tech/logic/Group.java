@@ -159,14 +159,12 @@ public class Group {
 			V2Log.e(" Invalid user data");
 			return;
 		}
-		synchronized (users) {
-			this.users.add(u);
-			Collections.sort(users);
-		}
+		this.users.add(u);
+		Collections.sort(users);
 	}
 
 	public List<User> getUsers() {
-		//FIXME need to be optimize
+		// FIXME need to be optimize
 		Collections.sort(users);
 		return this.users;
 	}
@@ -197,6 +195,26 @@ public class Group {
 			}
 		}
 		return false;
+	}
+
+	public List<User> searchUser(String text) {
+		List<User> l = new ArrayList<User>();
+		Group.searchUser(text, l, this);
+		return l;
+	}
+
+	public static void searchUser(String text, List<User> l, Group g) {
+		if (l == null || g == null) {
+			return;
+		}
+		for (User u : g.getUsers()) {
+			if (u.getName().contains(text)) {
+				l.add(u);
+			}
+		}
+		for (Group subG : g.getChildGroup()) {
+			searchUser(text, l, subG);
+		}
 	}
 
 	// FIXME need to be optimize
@@ -246,7 +264,7 @@ public class Group {
 	public int getLevel() {
 		return level;
 	}
-	
+
 	public void updatePosition() {
 		Collections.sort(users);
 	}

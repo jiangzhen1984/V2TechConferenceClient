@@ -7,7 +7,7 @@ public interface ConfRequestCallback {
 	 * @param nConfID
 	 * @param nTime
 	 * @param szConfData
-	 * @param nJoinResult
+	 * @param nJoinResult 0 means successfully
 	 */
 	public void OnEnterConfCallback(long nConfID, long nTime, String szConfData, int nJoinResult);
 	

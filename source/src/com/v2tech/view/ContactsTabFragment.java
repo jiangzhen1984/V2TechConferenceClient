@@ -11,12 +11,15 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.Fragment;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
+import android.widget.EditText;
 import android.widget.ListView;
 
 import com.v2tech.R;
@@ -30,30 +33,34 @@ import com.v2tech.view.contacts.ContactUserView;
 
 public class ContactsTabFragment extends Fragment {
 
-	private static final int REQUEST_SERVICE_BOUND = 1;
 	private static final int FILL_CONTACTS_GROUP = 2;
 	private static final int UPDATE_LIST_VIEW = 3;
 	private static final int UPDATE_GROUP_STATUS = 4;
 	private static final int UPDATE_USER_STATUS = 5;
+	private static final int UPDATE_SEARCHED_USER_LIST = 6;
 
 	private Tab1BroadcastReceiver receiver = new Tab1BroadcastReceiver();
 	private IntentFilter intentFilter;
 
-	private JNIService mService;
-
 	private ListView mContactsContainer;
-
+	
 	private ContactsAdapter adapter = new ContactsAdapter();
 
 	private boolean mLoaded;
 
 	private ContactsHandler mHandler = new ContactsHandler();
+	
+	private EditText searchedTextET;
+	
+	private boolean mIsStartedSearch = false;
+	
+	private List<ListItem> mItemList = new ArrayList<ListItem>();
+	private List<ListItem> mCacheItemList;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		getActivity().registerReceiver(receiver, getIntentFilter());
-		Message.obtain(mHandler, REQUEST_SERVICE_BOUND).sendToTarget();
 	}
 
 	@Override
@@ -77,6 +84,9 @@ public class ContactsTabFragment extends Fragment {
 
 		});
 		mContactsContainer.setDivider(null);
+		
+		searchedTextET = (EditText)v.findViewById(R.id.contacts_search);
+		searchedTextET.addTextChangedListener(textChangedListener);
 		return v;
 	}
 
@@ -105,7 +115,6 @@ public class ContactsTabFragment extends Fragment {
 			intentFilter = new IntentFilter();
 			intentFilter.addAction(JNIService.JNI_BROADCAST_GROUP_NOTIFICATION);
 			intentFilter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
-			intentFilter.addAction(MainActivity.SERVICE_BOUNDED_EVENT);
 			intentFilter
 					.addAction(JNIService.JNI_BROADCAST_USER_STATUS_NOTIFICATION);
 			intentFilter
@@ -120,7 +129,7 @@ public class ContactsTabFragment extends Fragment {
 		if (mLoaded) {
 			return;
 		}
-		l = mService.getGroup(GroupType.CONTACT);
+		l = GlobalHolder.getInstance().getGroup(GroupType.CONTACT);
 		if (l == null) {
 			Message m = Message.obtain(mHandler, FILL_CONTACTS_GROUP);
 			mHandler.sendMessageDelayed(m, 300);
@@ -141,14 +150,6 @@ public class ContactsTabFragment extends Fragment {
 			if (intent.getAction().equals(
 					JNIService.JNI_BROADCAST_GROUP_NOTIFICATION)) {
 				Message.obtain(mHandler, FILL_CONTACTS_GROUP).sendToTarget();
-			} else if (intent.getAction().equals(
-					MainActivity.SERVICE_BOUNDED_EVENT)) {
-				mService = ((MainActivity) getActivity()).getService();
-				if (!mLoaded) {
-					Message.obtain(mHandler, FILL_CONTACTS_GROUP)
-							.sendToTarget();
-				}
-
 			} else if (JNIService.JNI_BROADCAST_USER_STATUS_NOTIFICATION
 					.equals(intent.getAction())) {
 				Message.obtain(
@@ -168,6 +169,43 @@ public class ContactsTabFragment extends Fragment {
 		}
 
 	}
+	
+	
+	private TextWatcher textChangedListener = new TextWatcher() {
+
+		@Override
+		public void afterTextChanged(Editable s) {
+			
+		}
+
+		@Override
+		public void beforeTextChanged(CharSequence s, int start, int count,
+				int after) {
+			
+		}
+
+		@Override
+		public void onTextChanged(CharSequence s, int start, int before,
+				int count) {
+			if (s.length() > 0) {
+				if (!mIsStartedSearch) {
+					mCacheItemList = mItemList;
+					mIsStartedSearch = true;
+				}
+			} else {
+				mItemList = mCacheItemList;
+				adapter.notifyDataSetChanged();
+				mIsStartedSearch = false;
+				return;
+			}
+			List<User> searchedUserList = new ArrayList<User>();
+			for(Group g:l) {
+				Group.searchUser(s.toString(), searchedUserList, g);
+			}
+			Message.obtain(mHandler, UPDATE_SEARCHED_USER_LIST, searchedUserList).sendToTarget();
+		}
+		
+	};
 
 	private void updateView(int pos) {
 		ListItem item = mItemList.get(pos);
@@ -250,7 +288,6 @@ public class ContactsTabFragment extends Fragment {
 			index++;
 		}
 		if (it != null && index != mItemList.size() -1) {
-			// TODO update position;
 			while (true) {
 				ListItem pre = mItemList.get(index);
 				if (pre.u != null
@@ -274,8 +311,18 @@ public class ContactsTabFragment extends Fragment {
 		adapter.notifyDataSetChanged();
 
 	}
+	
+	
+	
+	private void updateSearchedUserList(List<User> lu) {
+		mItemList = new ArrayList<ListItem>();
+		for(User u: lu) {
+				mItemList.add(new ListItem(u));
+		}
+		adapter.notifyDataSetChanged();
+	}
 
-	List<ListItem> mItemList = new ArrayList<ListItem>();
+	
 
 	class ListItem {
 		long id;
@@ -332,14 +379,6 @@ public class ContactsTabFragment extends Fragment {
 		@Override
 		public void handleMessage(Message msg) {
 			switch (msg.what) {
-			case REQUEST_SERVICE_BOUND:
-				mService = ((MainActivity) getActivity()).getService();
-				if (mService == null) {
-					this.sendMessageDelayed(
-							Message.obtain(this, REQUEST_SERVICE_BOUND), 500);
-					break;
-				}
-				break;
 			case FILL_CONTACTS_GROUP:
 				fillContactsGroup();
 				break;
@@ -355,6 +394,9 @@ public class ContactsTabFragment extends Fragment {
 				break;
 			case UPDATE_USER_STATUS:
 				updateUserViewPostion(msg.arg1, msg.arg2);
+				break;
+			case UPDATE_SEARCHED_USER_LIST:
+				updateSearchedUserList((List<User>)msg.obj);
 				break;
 			}
 		}

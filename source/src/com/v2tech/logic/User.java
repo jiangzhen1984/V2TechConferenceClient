@@ -30,7 +30,7 @@ import com.v2tech.util.V2Log;
  * @author 28851274
  * 
  */
-public class User implements Comparable {
+public class User implements Comparable<User> {
 
 	public enum Status {
 		LEAVE(2), BUSY(3), DO_NOT_DISTURB(4), HIDDEN(5), ONLINE(1), OFFLINE(0), UNKNOWN(-1);
@@ -303,21 +303,20 @@ public class User implements Comparable {
 	
 	
 	@Override
-	public int compareTo(Object another) {
-		if (another instanceof User) {
-			User an = (User) another;
-			if (an.getmStatus() != Status.OFFLINE && an.getmStatus() != Status.HIDDEN) {
-				if (this.getmStatus()  != Status.OFFLINE && this.getmStatus() != Status.HIDDEN) {
-					return 0;
-				} else {
-					return 1;
-				}
+	public int compareTo(User another) {
+		User an = (User) another;
+		if (an.getmStatus() != Status.OFFLINE && an.getmStatus() != Status.HIDDEN) {
+			if (this.getmStatus()  != Status.OFFLINE && this.getmStatus() != Status.HIDDEN) {
+				return 0;
 			} else {
-				return -1;
+				return 1;
 			}
+		} else {
+			return -1;
 		}
-		return 0;
 	}
+
+	
 
 	/**
 	 * 

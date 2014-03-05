@@ -4,12 +4,11 @@ import java.io.File;
 
 import android.app.Application;
 import android.content.Intent;
-import android.os.Environment;
+import android.content.pm.ApplicationInfo;
 
 import com.V2.jni.AudioRequest;
 import com.V2.jni.ChatRequest;
 import com.V2.jni.ConfRequest;
-import com.V2.jni.ConfigRequest;
 import com.V2.jni.GroupRequest;
 import com.V2.jni.ImRequest;
 import com.V2.jni.VideoRequest;
@@ -62,6 +61,8 @@ public class MainApplication extends Application {
 		
 		
 		this.getApplicationContext().startService(new Intent(this.getApplicationContext(), JNIService.class));
+		
+		V2Log.isDebuggable =  (0 != (getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE));
 	}
 
 	@Override

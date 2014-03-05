@@ -55,7 +55,6 @@ public class Chat extends Handler {
 	 */
 	public void sendVMessage(final VMessage msg, final Message caller) {
 		thread.post(new Runnable() {
-
 			@Override
 			public void run() {
 				ChatRequest.getInstance().sendChatText(0,
@@ -72,9 +71,13 @@ public class Chat extends Handler {
 			}
 
 		});
-
 	}
 
+	/**
+	 * Invite contact for chat
+	 * @param ud
+	 * @param caller
+	 */
 	public void inviteUserAudioChat(UserAudioDevice ud, Message caller) {
 		if (mCaller != null) {
 			V2Log.e(" audio call is on going");
@@ -86,6 +89,11 @@ public class Chat extends Handler {
 				ud.getUser().getmUserId(), AudioRequest.BT_IM);
 	}
 
+	/**
+	 * 
+	 * @param ud
+	 * @param caller
+	 */
 	public void cancelAudioCall(UserAudioDevice ud, Message caller) {
 		this.mCaller = null;
 		AudioRequest.getInstance().CloseAudioChat(0, ud.getUser().getmUserId(),

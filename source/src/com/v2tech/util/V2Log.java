@@ -11,6 +11,8 @@ public class V2Log {
 	
 	public static final String TAG = "V2TECH";
 	
+	public static boolean isDebuggable = false;
+	
 	public static void i(String tag, String msg) {
 		Log.i(tag, msg);
 	}
@@ -24,7 +26,9 @@ public class V2Log {
 	}
 	
 	public static void d(String tag, String msg) {
-		Log.d(tag, msg);
+		if (isDebuggable) {
+			Log.d(tag, msg);
+		}
 	}
 
 	
