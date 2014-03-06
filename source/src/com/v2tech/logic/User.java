@@ -1,6 +1,7 @@
 package com.v2tech.logic;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.DateFormat;
@@ -21,6 +22,9 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
+
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 
 import com.v2tech.util.V2Log;
 
@@ -96,6 +100,8 @@ public class User implements Comparable<User> {
 	private Set<Group> mBelongsGroup;
 
 	private boolean isCurrentLoggedInUser;
+	
+	private String mAvatarPath;
 
 	public User(long mUserId) {
 		this(mUserId, null, null, null);
@@ -272,6 +278,34 @@ public class User implements Comparable<User> {
 		} else {
 			return null;
 		}
+	}
+	
+
+	public String getAvatarPath() {
+		return mAvatarPath;
+	}
+
+	public void setAvatarPath(String avatarPath) {
+		this.mAvatarPath = avatarPath;
+	}
+	
+	private Bitmap avatar;
+	public Bitmap getAvatarBitmap() {
+		if (mAvatarPath == null) {
+			String path = GlobalHolder.getInstance().getAvatarPath(this.mUserId);
+			if (path == null) {
+				return null;
+			}
+			mAvatarPath = path;
+		}
+		File f = new File(mAvatarPath);
+		if (!f.exists()) {
+			return null;
+		}
+		if (avatar == null || avatar.isRecycled()) {
+			avatar = BitmapFactory.decodeFile(mAvatarPath);
+		}
+		return avatar;
 	}
 
 	@Override

@@ -84,6 +84,9 @@ public class MessageBodyView extends LinearLayout {
 		if (mMsg.isLocal()) {
 			mHeadIcon = (ImageView) rootView
 					.findViewById(R.id.conversation_message_body_icon_local);
+			if (mMsg.getUser().getAvatarBitmap() != null) {
+				mHeadIcon.setImageBitmap(mMsg.getUser().getAvatarBitmap());
+			}
 			mContentContainer = (LinearLayout) rootView
 					.findViewById(R.id.messag_body_content_ly_local);
 			mArrowIV = (ImageView) rootView
@@ -101,6 +104,9 @@ public class MessageBodyView extends LinearLayout {
 			mArrowIV.bringToFront();
 			mLocalMessageContainter.setVisibility(View.GONE);
 			mRemoteMessageContainter.setVisibility(View.VISIBLE);
+			if (mMsg.getToUser().getAvatarBitmap() != null) {
+				mHeadIcon.setImageBitmap(mMsg.getToUser().getAvatarBitmap());
+			}
 		}
 
 		if (mMsg.getType() == VMessage.MessageType.TEXT) {

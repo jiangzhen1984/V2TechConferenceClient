@@ -20,6 +20,7 @@ public class GlobalHolder {
 
 	private Map<Long, User> mUserHolder = new HashMap<Long, User>();
 	private Map<Long, Group> mGroupHolder = new HashMap<Long, Group>();
+	private Map<Long, String> mAvatarHolder = new HashMap<Long, String>();
 
 	public static synchronized GlobalHolder getInstance() {
 		if (holder == null) {
@@ -189,5 +190,16 @@ public class GlobalHolder {
 			return;
 		}
 		g.addUserToGroup(uList);
+	}
+	
+	
+	public String getAvatarPath(long uid) {
+		Long key = Long.valueOf(uid);
+		return this.mAvatarHolder.get(key);
+	}
+	
+	public void putAvatar(long uid, String path) {
+		Long key = Long.valueOf(uid);
+		this.mAvatarHolder.put(key, path);
 	}
 }

@@ -1,5 +1,6 @@
 package com.v2tech.view;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -85,6 +86,7 @@ public class JNIService extends Service {
 
 	public static final String JNI_BROADCAST_CATEGROY = "com.v2tech.jni.broadcast";
 	public static final String JNI_BROADCAST_USER_STATUS_NOTIFICATION = "com.v2tech.jni.broadcast.user_stauts_notification";
+	public static final String JNI_BROADCAST_USER_AVATAR_CHANGED_NOTIFICATION = "com.v2tech.jni.broadcast.user_avatar_notification";
 	public static final String JNI_BROADCAST_GROUP_NOTIFICATION = "com.v2tech.jni.broadcast.group_geted";
 	public static final String JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION = "com.v2tech.jni.broadcast.group_user_updated";
 	public static final String JNI_BROADCAST_ATTENDEE_ENTERED_NOTIFICATION = "com.v2tech.jni.broadcast.attendee.entered.notification";
@@ -344,6 +346,7 @@ public class JNIService extends Service {
 	 *            if input is null, ignore response Message.object is
 	 *            {@link AsynResult} AsynResult.obj is Integer 0: success 1:
 	 *            failed
+	 * @deprecated
 	 */
 	public void requestEnterConference(long confID, Message msg) {
 		MetaData m = getAndQueued(JNI_REQUEST_ENTER_CONF, msg);
@@ -371,6 +374,7 @@ public class JNIService extends Service {
 	 *            if input is null, ignore response Message.object is
 	 *            {@link AsynResult} AsynResult.obj is Object[] Object[0]
 	 *            Integer 0: success 1: failed Object[1] Long conference id
+	 *@deprecated
 	 */
 	public void requestExitConference(long confID, Message msg) {
 		MetaData m = getAndQueued(JNI_REQUEST_EXIT_CONF, msg);
@@ -400,6 +404,7 @@ public class JNIService extends Service {
 	 *            message object for response
 	 * 
 	 * @see UserDeviceConfig
+	 * @deprecated
 	 */
 	public void requestOpenVideoDevice(long nGroupID,
 			UserDeviceConfig userDevice, Message caller) {
@@ -430,6 +435,7 @@ public class JNIService extends Service {
 	 *            message object for response
 	 * 
 	 * @see UserDeviceConfig
+	 * @deprecated
 	 */
 	public void requestCloseVideoDevice(long nGroupID,
 			UserDeviceConfig userDevice, Message caller) {
@@ -457,6 +463,8 @@ public class JNIService extends Service {
 	 *            message for response, as now no response to send
 	 * 
 	 * @see ConferencePermission
+	 * 
+	 * @deprecated
 	 */
 	public void applyForControlPermission(ConferencePermission type,
 			Message caller) {
@@ -473,6 +481,7 @@ public class JNIService extends Service {
 	 *            message for response, as now no response to send
 	 * 
 	 * @see ConferencePermission
+	 * @deprecated
 	 */
 	public void applyForReleasePermission(ConferencePermission type,
 			Message caller) {
@@ -484,6 +493,7 @@ public class JNIService extends Service {
 	 * 
 	 * @param cc
 	 * @param caller
+	 * @deprecated
 	 */
 	public void updateCameraParameters(CameraConfiguration cc, Message caller) {
 		if (caller != null) {
@@ -511,6 +521,11 @@ public class JNIService extends Service {
 			}
 		}
 		return l;
+	}
+	
+	
+	private void setBroadcast(Intent i) {
+		this.sendBroadcast(i);
 	}
 
 	class InnerUser {
@@ -1055,6 +1070,31 @@ public class JNIService extends Service {
 			Message.obtain(mCallbackHandler, JNI_UPDATE_USER_STATUS,
 					(int) nUserID, nStatus).sendToTarget();
 		}
+
+		@Override
+		public void OnChangeAvatarCallback(int nAvatarType, long nUserID,
+				String AvatarName) {
+			File f = new File(AvatarName);
+			if (f.isDirectory()) {
+				// Do not notify if is not file;
+				return;
+			}
+			User u = GlobalHolder.getInstance().getUser(nUserID);
+			if (u != null) {
+				u.setAvatarPath(AvatarName);
+			}
+			GlobalHolder.getInstance().putAvatar(nUserID, AvatarName);
+			
+			Intent i = new Intent();
+			i.addCategory(JNI_BROADCAST_CATEGROY);
+			i.setAction(JNI_BROADCAST_USER_AVATAR_CHANGED_NOTIFICATION);
+			i.putExtra("uid", nUserID);
+			i.putExtra("avatar", AvatarName);
+			sendBroadcast(i);
+		}
+		
+		
+		
 
 	}
 

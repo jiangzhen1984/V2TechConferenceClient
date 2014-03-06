@@ -35,6 +35,7 @@ import android.widget.Toast;
 import com.v2tech.R;
 import com.v2tech.db.ContentDescriptor;
 import com.v2tech.logic.Chat;
+import com.v2tech.logic.GlobalHolder;
 import com.v2tech.logic.User;
 import com.v2tech.logic.VImageMessage;
 import com.v2tech.logic.VMessage;
@@ -95,6 +96,9 @@ public class Conversation extends Activity {
 	private MessageReceiver receiver = new MessageReceiver();
 	
 	private Chat mChat = new Chat();
+	
+	private User local;
+	private User remote;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -134,6 +138,9 @@ public class Conversation extends Activity {
 		user2Id = this.getIntent().getLongExtra("user2id", 0);
 		user2Name = this.getIntent().getStringExtra("user2Name");
 
+		local = GlobalHolder.getInstance().getUser(user1Id);
+		remote = GlobalHolder.getInstance().getUser(user2Id);
+		
 		lh = new LocalHandler();
 
 		HandlerThread thread = new HandlerThread("back-end");
@@ -266,8 +273,6 @@ public class Conversation extends Activity {
 					Toast.makeText(mContext, R.string.error_contact_messag_invalid_image_path, Toast.LENGTH_SHORT).show();
 					return;
 				}
-				User local = new User(user1Id);
-				User remote = new User(user2Id);
 				VImageMessage vim = new VImageMessage(local, remote, filePath,
 						false);
 				saveMessageToDB(vim);
@@ -290,9 +295,6 @@ public class Conversation extends Activity {
 
 	private void doSendMessage() {
 		String content = mMessageET.getEditableText().toString();
-
-		User local = new User(user1Id);
-		User remote = new User(user2Id);
 
 		VMessage m = new VMessage(local, remote, content);
 		saveMessageToDB(m);
@@ -426,9 +428,6 @@ public class Conversation extends Activity {
 			throw new RuntimeException(" cursor is closed");
 		}
 		DateFormat dp = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-		User localUser = new User(user1Id);
-		User remoteUser = new User(user2Id);
-
 		
 		int id = cur.getInt(0);
 		long localUserId = cur.getLong(1);
@@ -441,10 +440,10 @@ public class Conversation extends Activity {
 		
 		VMessage vm = null;
 		if (type == VMessage.MessageType.TEXT.getIntValue()) {
-			vm = new VMessage(localUser, remoteUser, content,
+			vm = new VMessage(local, remote, content,
 					localUserId == user2Id);
 		} else {
-			vm = new VImageMessage(localUser, remoteUser, content.split("\\|")[4],
+			vm = new VImageMessage(local, remote, content.split("\\|")[4],
 					localUserId == user2Id);
 		}
 		vm.setId(id);

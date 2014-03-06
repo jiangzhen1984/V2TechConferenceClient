@@ -121,6 +121,7 @@ public class ImRequest {
 	 * @param szStatusDesc
 	 * 
 	 * @see com.v2tech.logic.User.Status
+	 * @see ImRequestCallback#OnUserStatusUpdatedCallback(long, int, int, String)
 	 */
 	private void OnUserStatusUpdated(long nUserID, int eUEType,  int nStatus, String szStatusDesc) {
 		if (callback != null) {
@@ -128,6 +129,20 @@ public class ImRequest {
 		}
 	}
 	
+	/**
+	 *  <ul>Indicate user avatar changed.</ul>
+	 * @param nAvatarType
+	 * @param nUserID  User ID which user's changed avatar
+	 * @param AvatarName  patch of avatar
+	 * 
+	 * @see ImRequestCallback#OnChangeAvatarCallback(int, long, String)
+	 */
+	private void OnChangeAvatar(int nAvatarType, long nUserID, String AvatarName) {
+		V2Log.d("OnChangeAvatar--> nAvatarType:"+nAvatarType+"    nUserID:"+nUserID+" AvatarName:"+ AvatarName);
+		if (callback != null) {
+			callback.OnChangeAvatarCallback(nAvatarType, nUserID, AvatarName);
+		}
+	}
 	
 
 	public native void updateMyStatus(int nStatus, String szStatusDesc);
@@ -228,9 +243,7 @@ public class ImRequest {
 		// context.sendOrderedBroadcast(moveIntent,null);
 	}
 
-	private void OnChangeAvatar(int nAvatarType, long nUserID, String AvatarName) {
-		Log.e("ImRequest UI", "OnChangeAvatar");
-	}
+	
 
 	private void OnHaveUpdateNotify(String updatefilepath, String updatetext) {
 		Log.e("ImRequest UI", "OnHaveUpdateNotify");

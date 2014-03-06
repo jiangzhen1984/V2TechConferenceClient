@@ -3,6 +3,7 @@ package com.v2tech.view.contacts;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
@@ -13,6 +14,7 @@ import android.widget.TextView;
 import com.v2tech.R;
 import com.v2tech.logic.GlobalHolder;
 import com.v2tech.logic.User;
+import com.v2tech.util.V2Log;
 import com.v2tech.view.PublicIntent;
 
 public class ContactUserView extends LinearLayout {
@@ -51,6 +53,9 @@ public class ContactUserView extends LinearLayout {
 				.findViewById(R.id.contact_user_view_root);
 
 		mPhotoIV = (ImageView) view.findViewById(R.id.contact_user_img);
+		if (u.getAvatarBitmap() != null) {
+			mPhotoIV.setImageBitmap(u.getAvatarBitmap());
+		}
 		mUserNameTV = (TextView) view.findViewById(R.id.contact_user_name);
 		mUserSignatureTV = (TextView) view
 				.findViewById(R.id.contact_user_signature);
@@ -194,6 +199,15 @@ public class ContactUserView extends LinearLayout {
 		} else {
 			mStatusIV.setVisibility(View.VISIBLE);
 		}
+	}
+	
+	
+	public void updateAvatar(Bitmap bt) {
+		if (bt == null) {
+			V2Log.w(" Invalid bitmap");
+			return;
+		}
+		mPhotoIV.setImageBitmap(bt);
 	}
 
 }

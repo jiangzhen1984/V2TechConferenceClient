@@ -9,6 +9,7 @@ import android.content.pm.ApplicationInfo;
 import com.V2.jni.AudioRequest;
 import com.V2.jni.ChatRequest;
 import com.V2.jni.ConfRequest;
+import com.V2.jni.ConfigRequest;
 import com.V2.jni.GroupRequest;
 import com.V2.jni.ImRequest;
 import com.V2.jni.VideoRequest;
@@ -43,14 +44,14 @@ public class MainApplication extends Application {
 		WBRequest.getInstance(this);
 		ChatRequest.getInstance(this);
 		String path = StorageUtil.getAbsoluteSdcardPath();
-//		new ConfigRequest().setExtStoragePath(path);
-//		File pa = new File(path +"/Users");
-//		if (!pa.exists()) {
-//			boolean res = pa.mkdirs();
-//			V2Log.i(" create avatar dir " +pa.getAbsolutePath() +"  "+ res);
-//		}
-//		pa.setWritable(true);
-//		pa.setReadable(true);
+		new ConfigRequest().setExtStoragePath(path);
+		File pa = new File(path +"/Users");
+		if (!pa.exists()) {
+			boolean res = pa.mkdirs();
+			V2Log.i(" create avatar dir " +pa.getAbsolutePath() +"  "+ res);
+		}
+		pa.setWritable(true);
+		pa.setReadable(true);
 //		
 //		
 		File image = new File(path +"/v2tech/pics");

@@ -38,6 +38,7 @@ public class ContactsTabFragment extends Fragment {
 	private static final int UPDATE_GROUP_STATUS = 4;
 	private static final int UPDATE_USER_STATUS = 5;
 	private static final int UPDATE_SEARCHED_USER_LIST = 6;
+	private static final int UPDATE_USER_AVATAR = 7;
 
 	private Tab1BroadcastReceiver receiver = new Tab1BroadcastReceiver();
 	private IntentFilter intentFilter;
@@ -119,6 +120,7 @@ public class ContactsTabFragment extends Fragment {
 					.addAction(JNIService.JNI_BROADCAST_USER_STATUS_NOTIFICATION);
 			intentFilter
 					.addAction(JNIService.JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION);
+			intentFilter.addAction(JNIService.JNI_BROADCAST_USER_AVATAR_CHANGED_NOTIFICATION);
 		}
 		return intentFilter;
 	}
@@ -165,11 +167,15 @@ public class ContactsTabFragment extends Fragment {
 			} else if (JNIService.JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION
 					.equals(intent.getAction())) {
 				Message.obtain(mHandler, UPDATE_GROUP_STATUS).sendToTarget();
+			} else if (JNIService.JNI_BROADCAST_USER_AVATAR_CHANGED_NOTIFICATION.equals(intent.getAction())) {
+				Object[] ar = new Object[]{intent.getExtras().get("uid"), intent.getExtras().get("avatar")};
+				Message.obtain(mHandler, UPDATE_USER_AVATAR, ar).sendToTarget();
 			}
 		}
 
 	}
 	
+
 	
 	private TextWatcher textChangedListener = new TextWatcher() {
 
@@ -288,7 +294,7 @@ public class ContactsTabFragment extends Fragment {
 			index++;
 		}
 		if (it != null && index != mItemList.size() -1) {
-			while (true) {
+			while (index>=0 && index < mItemList.size()) {
 				ListItem pre = mItemList.get(index);
 				if (pre.u != null
 						&& (pre.u.getmStatus() != User.Status.OFFLINE && pre.u
@@ -397,6 +403,17 @@ public class ContactsTabFragment extends Fragment {
 				break;
 			case UPDATE_SEARCHED_USER_LIST:
 				updateSearchedUserList((List<User>)msg.obj);
+				break;
+			case UPDATE_USER_AVATAR:
+				Object[] ar = (Object[])msg.obj;
+				for (ListItem li : mItemList) {
+					if (li.u != null && li.u.getmUserId() == (Long)ar[0]) {
+						if (li.u.getAvatarPath() == null) {
+							li.u.setAvatarPath(ar[1].toString());
+						}
+						((ContactUserView) li.v).updateAvatar(li.u.getAvatarBitmap());
+					}
+				}
 				break;
 			}
 		}

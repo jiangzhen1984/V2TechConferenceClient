@@ -134,7 +134,9 @@ public class ContactDetail extends Activity {
 	}
 
 	private void showUserInfo() {
-		
+		if (u.getAvatarBitmap() != null) {
+			mHeadIconIV.setImageBitmap(u.getAvatarBitmap());
+		}
 		if (u.getmUserId() == GlobalHolder.getInstance().getCurrentUserId()) {
 			for (TextView tv : mTVArr) {
 				tv.setVisibility(View.GONE);

@@ -54,4 +54,14 @@ public interface ImRequestCallback {
 	 * @see com.v2tech.logic.User.Status
 	 */
 	public void OnUserStatusUpdatedCallback(long nUserID, int eUEType,  int nStatus, String szStatusDesc);
+	
+	
+	
+	/**
+	 *  <ul>Indicate user avatar changed.</ul>
+	 * @param nAvatarType
+	 * @param nUserID  User ID which user's changed avatar
+	 * @param AvatarName  patch of avatar
+	 */
+	public void OnChangeAvatarCallback(int nAvatarType, long nUserID, String AvatarName);
 }
