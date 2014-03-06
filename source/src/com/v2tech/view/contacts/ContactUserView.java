@@ -69,15 +69,17 @@ public class ContactUserView extends LinearLayout {
 				.findViewById(R.id.contact_user_img_container);
 		mStatusIV = (ImageView) view.findViewById(R.id.contact_user_status_iv);
 		updateStatus(u.getmStatus());
-
-		mButtonIV.setOnClickListener(new OnClickListener() {
-
-			@Override
-			public void onClick(View view) {
-				getActionDialog().show();
-			}
-
-		});
+		
+		if (this.mUser.getmUserId() != GlobalHolder.getInstance().getCurrentUserId()) {
+			mButtonIV.setOnClickListener(new OnClickListener() {
+	
+				@Override
+				public void onClick(View view) {
+					getActionDialog().show();
+				}
+	
+			});
+		}
 
 		this.setOnClickListener(new OnClickListener() {
 

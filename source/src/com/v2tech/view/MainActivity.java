@@ -7,6 +7,8 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -21,6 +23,7 @@ import android.widget.TabHost;
 import android.widget.TabHost.TabContentFactory;
 
 import com.v2tech.R;
+import com.v2tech.logic.GlobalHolder;
 import com.v2tech.view.JNIService.LocalBinder;
 
 public class MainActivity extends FragmentActivity implements
@@ -171,6 +174,7 @@ public class MainActivity extends FragmentActivity implements
 	
 	@Override
 	public void onBackPressed() {
+		updateLoggedInFlag();
 		Process.killProcess(Process.myPid());
 	}
 
@@ -186,6 +190,12 @@ public class MainActivity extends FragmentActivity implements
 	}
 	
 	
+	private void updateLoggedInFlag() {
+		SharedPreferences sf = mContext.getSharedPreferences("config", Context.MODE_PRIVATE);
+		Editor ed = sf.edit();
+		ed.putInt("LoggedIn", 0);
+		ed.commit();
+	}
 	
 
 	@Override

@@ -411,7 +411,13 @@ public class LoginActivity extends Activity {
 						saveUserConfig("", "");
 					}
 					// record current logged in user to global holder
+					//FIXME optimze code
 					GlobalHolder.getInstance().setCurrentUser(u);
+					SharedPreferences sf = mContext.getSharedPreferences("config", Context.MODE_PRIVATE);
+					Editor ed = sf.edit();
+					ed.putInt("LoggedIn", 1);
+					ed.commit();
+					
 					mContext.startActivity(new Intent(mContext, MainActivity.class));
 					finish();
 				}
