@@ -39,6 +39,7 @@
         </service>
 
         <provider
+            android:exported="false"
             android:name="com.v2tech.db.V2techContentProvider"
             android:authorities="com.v2tech.bizcom" />
 
