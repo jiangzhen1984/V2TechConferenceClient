@@ -46,7 +46,10 @@ public class V2Log {
 	}
 	
 	public static void d(String msg) {
-		Log.d(TAG, msg);
+		if (isDebuggable) {
+			Log.d(TAG, msg);
+		}
+		
 	}
 
 	//TODO record log to disk
