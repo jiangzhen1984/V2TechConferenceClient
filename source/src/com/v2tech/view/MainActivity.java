@@ -23,7 +23,6 @@ import android.widget.TabHost;
 import android.widget.TabHost.TabContentFactory;
 
 import com.v2tech.R;
-import com.v2tech.logic.GlobalHolder;
 import com.v2tech.view.JNIService.LocalBinder;
 
 public class MainActivity extends FragmentActivity implements

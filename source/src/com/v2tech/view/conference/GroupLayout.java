@@ -1,6 +1,7 @@
 package com.v2tech.view.conference;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,28 +10,30 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.v2tech.R;
-import com.v2tech.logic.Group;
+import com.v2tech.logic.ContactConversation;
+import com.v2tech.logic.Conversation;
 
 public class GroupLayout extends LinearLayout {
 
 
-	private Group mGroup;
+	private Conversation mConv;
 	
 	private ImageView mGroupIV;
 	private TextView mGroupNameTV;
 	private TextView mGroupOwnerTV;
 	private TextView mGroupDateTV;
+	private ImageView mNotificatorIV;
 	
 	
-	public GroupLayout(Context context, AttributeSet attrs, Group group) {
+	public GroupLayout(Context context, AttributeSet attrs, Conversation group) {
 		super(context, attrs);
-		this.mGroup = group;
+		this.mConv = group;
 		init();
 	}
 
-	public GroupLayout(Context context, Group group) {
+	public GroupLayout(Context context, Conversation group) {
 		super(context);
-		this.mGroup = group;
+		this.mConv = group;
 		init();
 	}
 	
@@ -43,16 +46,28 @@ public class GroupLayout extends LinearLayout {
 		mGroupNameTV = (TextView) view.findViewById(R.id.group_list_conference_title_tv);
 		mGroupOwnerTV = (TextView) view.findViewById(R.id.group_list_conference_owner_tv);
 		mGroupDateTV = (TextView) view.findViewById(R.id.gourp_list_conference_create_time_tv);
+		mNotificatorIV = (ImageView) view.findViewById(R.id.group_list_conference_notificator);
 		
+		if (this.mConv instanceof ContactConversation) {
+			Bitmap bm = ((ContactConversation)this.mConv).getAvatar();
+			if (bm != null) {
+				mGroupIV.setImageBitmap(bm);
+			} else {
+				mGroupIV.setImageResource(R.drawable.avatar);
+			}
+		}
+		if (this.mConv.getNotiFlag() == Conversation.NOTIFICATION) {
+			mNotificatorIV.setVisibility(View.VISIBLE);
+		}
+		mGroupNameTV.setText(this.mConv.getName());
+		mGroupOwnerTV.setText(mConv.getMsg());
+		mGroupDateTV.setText(mConv.getDate());
 		addView(view);
-		mGroupNameTV.setText(this.mGroup.getName());
-		mGroupOwnerTV.setText(this.mGroup.getOwnerUser() != null ? this.mGroup.getOwnerUser().getName() : (this.mGroup.getOwner() +""));
-		mGroupDateTV.setText(this.mGroup.getCreateDate());
 	}
 	
 	
 	public long getGroupId() {
-		return this.mGroup.getmGId();
+		return mConv.getExtId();
 	}
 
 	

@@ -22,6 +22,8 @@ public class GlobalHolder {
 	private Map<Long, Group> mGroupHolder = new HashMap<Long, Group>();
 	private Map<Long, String> mAvatarHolder = new HashMap<Long, String>();
 
+	private List<Conversation> mConversationHolder;
+
 	public static synchronized GlobalHolder getInstance() {
 		if (holder == null) {
 			holder = new GlobalHolder();
@@ -191,15 +193,31 @@ public class GlobalHolder {
 		}
 		g.addUserToGroup(uList);
 	}
-	
-	
+
 	public String getAvatarPath(long uid) {
 		Long key = Long.valueOf(uid);
 		return this.mAvatarHolder.get(key);
 	}
-	
+
 	public void putAvatar(long uid, String path) {
 		Long key = Long.valueOf(uid);
 		this.mAvatarHolder.put(key, path);
+	}
+
+	public void updateConversation(List<Conversation> cache) {
+		this.mConversationHolder.addAll(cache);
+	}
+
+	public void addConversation(Conversation con) {
+		this.mConversationHolder.add(con);
+	}
+
+	public boolean findConversation(Conversation cov) {
+		for (Conversation c : this.mConversationHolder) {
+			if (cov.equals(c)) {
+				return true;
+			}
+		}
+		return false;
 	}
 }

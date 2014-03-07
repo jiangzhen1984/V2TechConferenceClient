@@ -38,6 +38,11 @@ public class V2techContentProvider extends ContentProvider {
 			getContext().getContentResolver().notifyChange(uri, null);
 			return ContentDescriptor.Messages.CONTENT_URI.buildUpon()
 					.appendPath(String.valueOf(id)).build();
+		case ContentDescriptor.Conversation.TOKEN:
+			id = db.insert(ContentDescriptor.Conversation.NAME, null, values);
+			getContext().getContentResolver().notifyChange(uri, null);
+			return ContentDescriptor.Conversation.CONTENT_URI.buildUpon()
+					.appendPath(String.valueOf(id)).build();
 		}
 		return null;
 	}
@@ -60,8 +65,10 @@ public class V2techContentProvider extends ContentProvider {
 		case ContentDescriptor.Messages.TOKEN_WITH_ID:
 			qb.setTables(ContentDescriptor.Messages.NAME);
 			selection = ContentDescriptor.Messages.Cols.ID + "=?  ";
-			selectionArgs = new String[]{uri.getLastPathSegment()};
+			selectionArgs = new String[] { uri.getLastPathSegment() };
 			break;
+		case ContentDescriptor.Conversation.TOKEN:
+			qb.setTables(ContentDescriptor.Conversation.NAME);
 		default:
 			break;
 		}
@@ -73,7 +80,23 @@ public class V2techContentProvider extends ContentProvider {
 	}
 
 	@Override
-	public int update(Uri arg0, ContentValues arg1, String arg2, String[] arg3) {
+	public int update(Uri uri, ContentValues values, String selection,
+			String[] args) {
+		SQLiteDatabase db = mOpenHelper.getWritableDatabase();
+		int token = ContentDescriptor.URI_MATCHER.match(uri);
+		String table = null;
+		switch (token) {
+		case ContentDescriptor.Messages.TOKEN:
+			table = ContentDescriptor.Messages.NAME;
+			break;
+		case ContentDescriptor.Conversation.TOKEN:
+			table = ContentDescriptor.Conversation.NAME;
+			break;
+		}
+		if (table != null) {
+			db.update(table, values, selection, args);
+			getContext().getContentResolver().notifyChange(uri, null);
+		}
 		return 0;
 	}
 

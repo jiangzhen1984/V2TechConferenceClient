@@ -382,6 +382,7 @@ public class User implements Comparable<User> {
 								.getAttribute("sign"));
 				u.setTelephone(element.getAttribute("telephone"));
 				u.setGender(element.getAttribute("sex"));
+				u.setAddress(element.getAttribute("address"));
 				try {
 					String bir = element.getAttribute("birthday");
 					if (bir != null && !bir.equals("")) { 

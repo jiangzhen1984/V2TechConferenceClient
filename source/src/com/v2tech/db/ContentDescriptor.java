@@ -23,6 +23,7 @@ public final class ContentDescriptor {
 
 		matcher.addURI(augura, Messages.PATH, Messages.TOKEN);
 		matcher.addURI(augura, Messages.PATH+"/#", Messages.TOKEN_WITH_ID);
+		matcher.addURI(augura, Conversation.PATH, Conversation.TOKEN);
 
 		return matcher;
 
@@ -57,6 +58,34 @@ public final class ContentDescriptor {
 			public static final String[] ALL_CLOS = { ID, FROM_USER_ID,
 					FROM_USER_NAME, TO_USER_ID, TO_USER_NAME, MSG_CONTENT,
 					MSG_TYPE, SEND_TIME, STATE };
+		}
+	}
+	
+	
+	
+	public static class Conversation {
+		
+		public static final String PATH = "conversation";
+
+		public static final String NAME = PATH;
+
+		public static final int TOKEN = 7;
+		
+		public static final int TOKEN_WITH_ID = 8;
+
+		public static final Uri CONTENT_URI = BASE_URI.buildUpon()
+				.appendPath(PATH).build();
+
+		public static class Cols {
+
+			public static final String ID = BaseColumns._ID;
+
+			public static final String TYPE = "cov_type";
+			public static final String EXT_ID = "ext_id";
+			public static final String NOTI_FLAG = "noti_flag";
+
+			public static final String[] ALL_CLOS = { ID, TYPE,
+				EXT_ID,NOTI_FLAG };
 		}
 	}
 }

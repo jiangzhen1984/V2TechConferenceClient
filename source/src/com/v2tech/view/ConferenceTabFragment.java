@@ -9,6 +9,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -26,9 +27,14 @@ import android.widget.ScrollView;
 import android.widget.Toast;
 
 import com.v2tech.R;
+import com.v2tech.db.ContentDescriptor;
 import com.v2tech.logic.AsynResult;
+import com.v2tech.logic.ConferenceConversation;
+import com.v2tech.logic.ContactConversation;
+import com.v2tech.logic.Conversation;
 import com.v2tech.logic.GlobalHolder;
 import com.v2tech.logic.Group;
+import com.v2tech.logic.User;
 import com.v2tech.util.V2Log;
 import com.v2tech.view.conference.GroupLayout;
 import com.v2tech.view.conference.VideoActivityV2;
@@ -185,7 +191,8 @@ public class ConferenceTabFragment extends Fragment {
 		}
 		mGroupContainer.removeAllViews();
 		for (final Group g : list) {
-			final GroupLayout gp = new GroupLayout(this.getActivity(), g);
+			Conversation cov = new ConferenceConversation(g);
+			final GroupLayout gp = new GroupLayout(this.getActivity(), cov);
 			gp.setOnClickListener(new OnClickListener() {
 
 				@Override
@@ -204,15 +211,47 @@ public class ConferenceTabFragment extends Fragment {
 				}
 
 			});
-			mItemList.add(new ScrollItem(g, gp));
+			mItemList.add(new ScrollItem(cov, gp));
 			mGroupContainer.addView(gp);
 		}
 
 	}
+	
+	
+	private void loadConversation() {
+		
+		Cursor mCur = getActivity().getContentResolver().query(
+				ContentDescriptor.Conversation.CONTENT_URI,
+				ContentDescriptor.Conversation.Cols.ALL_CLOS,
+				ContentDescriptor.Conversation.Cols.TYPE+"=?",
+				new String[]{Conversation.TYPE_CONTACT},
+				null);
+
+		List<Conversation> array = new ArrayList<Conversation>();
+		while (mCur.moveToNext()) {
+			Conversation cov = extractConversation(mCur);
+			final GroupLayout gp = new GroupLayout(this.getActivity(), cov);
+			array.add(cov);
+			mItemList.add(new ScrollItem(cov, gp));
+		}
+		GlobalHolder.getInstance().updateConversation(array);
+		mCur.close();
+	}
+	
+	private Conversation extractConversation(Cursor cur) {
+		long extId = cur.getLong(3);
+		User u = GlobalHolder.getInstance().getUser(extId);
+		if (u == null) {
+			u = new User(extId);
+		}
+		Conversation cov = new ContactConversation(u);
+		return cov;
+	}
+	
 
 	private void scrollToView(String str) {
 		for (final ScrollItem item : mItemList) {
-			if (item.g.getName().contains(str)) {
+			if (item.cov.getName().contains(str)) {
 				mScrollView.post(new Runnable() {
 
 					@Override
@@ -227,12 +266,12 @@ public class ConferenceTabFragment extends Fragment {
 	}
 
 	class ScrollItem {
-		Group g;
+		Conversation cov;
 		View gp;
 
-		public ScrollItem(Group g, View gp) {
+		public ScrollItem(Conversation g, View gp) {
 			super();
-			this.g = g;
+			this.cov = g;
 			this.gp = gp;
 		}
 
@@ -289,9 +328,13 @@ public class ConferenceTabFragment extends Fragment {
 								msg.arg1 + 1, 0);
 						this.sendMessageDelayed(m, 1000);
 					} else {
+						isLoaded = true;
 //						Toast.makeText(getActivity(), "无法获取组信息",
 //								Toast.LENGTH_LONG).show();
 					}
+				}
+				if (isLoaded) {
+					loadConversation();
 				}
 				break;
 			case REQUEST_ENTER_CONF:

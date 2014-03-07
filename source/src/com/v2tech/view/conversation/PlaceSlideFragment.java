@@ -1,7 +1,5 @@
 package com.v2tech.view.conversation;
 
-import java.io.File;
-
 import android.app.Activity;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -48,7 +46,6 @@ public class PlaceSlideFragment extends Fragment {
 			@Override
 			protected Void doInBackground(Void... params) {
 				synchronized(mLock) {
-					File f = new File(vim.getImagePath());
 					vim.getFullQuantityBitmap();
 				}
 				return null;

@@ -7,7 +7,7 @@ import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.database.sqlite.SQLiteOpenHelper;
 
 public class V2TechDBHelper extends SQLiteOpenHelper {
-	
+
 	private static final String DB_NAME = "v2tech.db";
 
 	private static final int DATABASE_VERSION = 1;
@@ -26,6 +26,18 @@ public class V2TechDBHelper extends SQLiteOpenHelper {
 			+ "  TIMESTAMP  DEFAULT CURRENT_TIMESTAMP, "
 			+ ContentDescriptor.Messages.Cols.STATE + " integer) ";
 
+	private static final String CONVERSATION_TABLE_CREATE_SQL = " create table "
+			+ ContentDescriptor.Conversation.NAME
+			+ " ( "
+			+ ContentDescriptor.Conversation.Cols.ID
+			+ "  integer primary key AUTOINCREMENT,"
+			+ ContentDescriptor.Conversation.Cols.TYPE
+			+ " text not null,"
+			+ ContentDescriptor.Conversation.Cols.EXT_ID
+			+ " numeric not null,"
+			+ ContentDescriptor.Conversation.Cols.NOTI_FLAG
+			+ " integer not null" + ")";
+
 	public V2TechDBHelper(Context context, String name, CursorFactory factory,
 			int version, DatabaseErrorHandler errorHandler) {
 		super(context, name, factory, version, errorHandler);
@@ -43,6 +55,7 @@ public class V2TechDBHelper extends SQLiteOpenHelper {
 	@Override
 	public void onCreate(SQLiteDatabase db) {
 		db.execSQL(MESSAGES_TABLE_CREATE_SQL);
+		db.execSQL(CONVERSATION_TABLE_CREATE_SQL);
 	}
 
 	@Override

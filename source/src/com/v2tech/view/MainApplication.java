@@ -3,7 +3,10 @@ package com.v2tech.view;
 import java.io.File;
 
 import android.app.Application;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.content.pm.ApplicationInfo;
 
 import com.V2.jni.AudioRequest;
@@ -64,6 +67,12 @@ public class MainApplication extends Application {
 		this.getApplicationContext().startService(new Intent(this.getApplicationContext(), JNIService.class));
 		
 		V2Log.isDebuggable =  (0 != (getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE));
+		
+		
+		SharedPreferences sf = getSharedPreferences("config", Context.MODE_PRIVATE);
+		Editor ed = sf.edit();
+		ed.putInt("LoggedIn", 0);
+		ed.commit();
 	}
 
 	@Override
@@ -77,6 +86,7 @@ public class MainApplication extends Application {
 		WBRequest.getInstance(this).unInitialize();
 		ChatRequest.getInstance(this).unInitialize();
 		this.getApplicationContext().stopService(new Intent(this.getApplicationContext(), JNIService.class));
+
 	}
 
 	

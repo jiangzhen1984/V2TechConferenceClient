@@ -4,6 +4,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
@@ -30,10 +31,23 @@ public class ContactUserView extends LinearLayout {
 	private TextView mUserNameTV;
 	private TextView mUserSignatureTV;
 	private ImageView mButtonIV;
-	private RelativeLayout mHeaderIconContainer;
 	private ImageView mStatusIV;
 
 	private Dialog mUserActionDialog;
+	
+	
+
+	public ContactUserView(Context context, AttributeSet attrs, int defStyle) {
+		super(context, attrs, defStyle);
+	}
+
+	public ContactUserView(Context context, AttributeSet attrs) {
+		super(context, attrs);
+	}
+
+	public ContactUserView(Context context) {
+		super(context);
+	}
 
 	public ContactUserView(Context context, User u) {
 		super(context);
@@ -65,8 +79,7 @@ public class ContactUserView extends LinearLayout {
 		mUserSignatureTV.setText(mUser.getSignature() == null ? "" : mUser
 				.getSignature());
 
-		mHeaderIconContainer = (RelativeLayout) view
-				.findViewById(R.id.contact_user_img_container);
+
 		mStatusIV = (ImageView) view.findViewById(R.id.contact_user_status_iv);
 		updateStatus(u.getmStatus());
 		

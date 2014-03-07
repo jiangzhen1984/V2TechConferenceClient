@@ -524,10 +524,6 @@ public class JNIService extends Service {
 	}
 	
 	
-	private void setBroadcast(Intent i) {
-		this.sendBroadcast(i);
-	}
-
 	class InnerUser {
 		// call parameter
 		MetaData m;
@@ -1053,8 +1049,6 @@ public class JNIService extends Service {
 		@Override
 		public void OnUserStatusUpdatedCallback(long nUserID, int eUEType,
 				int nStatus, String szStatusDesc) {
-			V2Log.i(nUserID + "  " + eUEType + "  " + nStatus + "  "
-					+ szStatusDesc);
 			GlobalHolder.getInstance().updateUserStatus(nUserID,
 					User.Status.fromInt(nStatus));
 			User u = GlobalHolder.getInstance().getUser(nUserID);
@@ -1107,9 +1101,6 @@ public class JNIService extends Service {
 
 		@Override
 		public void OnGetGroupInfoCallback(int groupType, String sXml) {
-			if (isDebug) {
-				V2Log.d("group type:" + groupType + " " + sXml);
-			}
 			Message.obtain(mCallbackHandler, JNI_GROUP_NOTIFY, groupType, 0,
 					sXml).sendToTarget();
 		}

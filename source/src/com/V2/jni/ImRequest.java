@@ -1,5 +1,7 @@
 package com.V2.jni;
 
+import java.util.Date;
+
 import android.content.Context;
 import android.util.Log;
 
@@ -124,6 +126,7 @@ public class ImRequest {
 	 * @see ImRequestCallback#OnUserStatusUpdatedCallback(long, int, int, String)
 	 */
 	private void OnUserStatusUpdated(long nUserID, int eUEType,  int nStatus, String szStatusDesc) {
+		V2Log.d(" OnUserStatusUpdated--> nUserID:"+nUserID+" eUEType: "+ eUEType+"  nStatus:"+nStatus+"  szStatusDesc:"+szStatusDesc+"  "+new Date());
 		if (callback != null) {
 			callback.OnUserStatusUpdatedCallback(nUserID, eUEType, nStatus, szStatusDesc);
 		}

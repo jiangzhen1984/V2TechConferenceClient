@@ -3,8 +3,6 @@ package com.v2tech.view.conversation;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
-import android.content.Intent;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Handler;
@@ -19,7 +17,6 @@ import android.widget.TextView;
 import com.v2tech.R;
 import com.v2tech.logic.VImageMessage;
 import com.v2tech.logic.VMessage;
-import com.v2tech.view.PublicIntent;
 
 public class MessageBodyView extends LinearLayout {
 

@@ -160,12 +160,15 @@ public class Group {
 			return;
 		}
 		this.users.add(u);
-		Collections.sort(users);
+		synchronized (users) {
+			Collections.sort(users);
+		}
 	}
 
 	public List<User> getUsers() {
-		// FIXME need to be optimize
-		Collections.sort(users);
+		synchronized (users) {
+			Collections.sort(users);
+		}
 		return this.users;
 	}
 
@@ -258,7 +261,9 @@ public class Group {
 			this.users.add(u);
 			u.addUserToGroup(this);
 		}
-		Collections.sort(users);
+		synchronized (users) {
+			Collections.sort(users);
+		}
 	}
 
 	public int getLevel() {

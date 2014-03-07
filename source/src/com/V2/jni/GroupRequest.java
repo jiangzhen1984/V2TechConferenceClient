@@ -1,5 +1,7 @@
 package com.V2.jni;
 
+import com.v2tech.util.V2Log;
+
 import android.content.Context;
 import android.util.Log;
 
@@ -114,23 +116,14 @@ public class GroupRequest {
 		this.callback = callback;
 	}
 
+	
 	private void OnGetGroupUserInfo(int groupType, long nGroupID, String sXml) {
-		Log.e("ImRequest UI", "OnGetGroupUserInfo:: �õ�����ѵ���ϸ��Ϣ" + groupType
+		V2Log.d("OnGetGroupUserInfo -> " + groupType
 				+ ":" + nGroupID + ":" + sXml);
 		if (this.callback != null) {
 			this.callback.OnGetGroupUserInfoCallback(groupType, nGroupID, sXml);
 		}
-		System.out.println("�õ�������Ϣ");
 
-		// ƴװ��Ϣ
-//		FriendMsgType friendMsgType = new FriendMsgType();
-//		friendMsgType.setFriendxml(sXml);
-//		friendMsgType.setGroupid(nGroupID);
-//
-//		Intent addIntent = new Intent(SplashActivity.IM);
-//		addIntent.putExtra("MsgType", MsgType.FRIENDLIST);
-//		addIntent.putExtra("MSG", friendMsgType);
-//		context.sendOrderedBroadcast(addIntent,null);
 
 	}
 

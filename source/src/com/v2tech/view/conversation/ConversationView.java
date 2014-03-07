@@ -35,6 +35,7 @@ import android.widget.Toast;
 import com.v2tech.R;
 import com.v2tech.db.ContentDescriptor;
 import com.v2tech.logic.Chat;
+import com.v2tech.logic.Conversation;
 import com.v2tech.logic.GlobalHolder;
 import com.v2tech.logic.User;
 import com.v2tech.logic.VImageMessage;
@@ -44,7 +45,7 @@ import com.v2tech.view.PublicIntent;
 import com.v2tech.view.cus.ItemScrollView;
 import com.v2tech.view.cus.ScrollViewListener;
 
-public class Conversation extends Activity {
+public class ConversationView extends Activity {
 
 	private final int START_LOAD_MESSAGE = 1;
 	private final int LOAD_MESSAGE = 2;
@@ -306,7 +307,26 @@ public class Conversation extends Activity {
 
 		Message.obtain(lh, SEND_MESSAGE, m).sendToTarget();
 		addMessageToContainer(m);
-
+		updateConversationList();
+	}
+	
+	private boolean saveConversation;
+	private void updateConversationList() {
+		if (saveConversation) {
+			return;
+		}
+		Conversation cov = new Conversation(Conversation.TYPE_CONTACT, user2Id);
+		saveConversation = GlobalHolder.getInstance().findConversation(cov);
+		if (!saveConversation) {
+			GlobalHolder.getInstance().addConversation(cov);
+			//save to daabase
+			saveConversation = true;
+			ContentValues cv = new ContentValues();
+			cv.put(ContentDescriptor.Conversation.Cols.EXT_ID, user2Id);
+			cv.put(ContentDescriptor.Conversation.Cols.TYPE, Conversation.TYPE_CONTACT);
+			cv.put(ContentDescriptor.Conversation.Cols.NOTI_FLAG, Conversation.NONE);
+			getContentResolver().insert(ContentDescriptor.Conversation.CONTENT_URI, cv);
+		}
 	}
 
 	private void addMessageToContainer(VMessage msg) {
