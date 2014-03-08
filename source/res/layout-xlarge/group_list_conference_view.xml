@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:background="@color/confs_group_list_bg" >
 
     <RelativeLayout
@@ -10,6 +10,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_centerVertical="true"
+        android:padding="5dp"
         android:layout_marginLeft="15dp" >
 
         <ImageView
@@ -27,7 +28,8 @@
             android:layout_marginRight="3dp"
             android:layout_marginTop="3dp"
             android:src="@drawable/red_nofificator"
-            android:visibility="gone" />
+            android:visibility="invisible"
+            />
 
     </RelativeLayout>
 
@@ -35,20 +37,18 @@
         android:id="@+id/group_list_conference_title_tv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignTop="@+id/group_list_conference_image_view_rl"
         android:layout_marginLeft="30dp"
-        android:layout_marginTop="10dp"
         android:layout_toRightOf="@+id/group_list_conference_image_view_rl"
+        android:layout_alignTop="@+id/group_list_conference_image_view_rl"
         android:text="TextView" />
 
     <TextView
         android:id="@+id/group_list_conference_owner_tv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/group_list_conference_title_tv"
         android:layout_marginLeft="30dp"
-        android:layout_marginTop="20dp"
         android:layout_toRightOf="@+id/group_list_conference_image_view_rl"
+        android:layout_alignBottom="@+id/group_list_conference_image_view_rl"
         android:text="TextView" />
 
     <TextView
@@ -58,7 +58,7 @@
         android:layout_alignBaseline="@+id/group_list_conference_owner_tv"
         android:layout_alignBottom="@+id/group_list_conference_owner_tv"
         android:layout_alignParentRight="true"
-        android:layout_marginRight="20dp"
+        android:layout_marginRight="15dp"
         android:paddingRight="15dp"
         android:text="TextView" />
 
@@ -70,7 +70,6 @@
         android:layout_marginTop="3dp"
         android:background="@color/confs_group_widget_separation_line"
         android:orientation="vertical" >
-
     </LinearLayout>
 
 </RelativeLayout>

@@ -28,8 +28,8 @@
                 android:text="@string/confs_title" />
         </LinearLayout>
 
-        <LinearLayout
-            android:id="@+id/linearLayout2"
+        <RelativeLayout
+            android:id="@+id/RelativeLayout2"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_below="@+id/linearLayout1"
@@ -41,27 +41,43 @@
                 android:id="@+id/imageView8"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
+                android:layout_alignParentLeft="true"
+                android:layout_gravity="center_vertical"
+                android:layout_marginLeft="30dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="10dp"
                 android:src="@drawable/group_list_search_button" />
 
             <EditText
                 android:id="@+id/confs_search"
                 android:layout_width="match_parent"
-                android:layout_height="40dp"
+                android:layout_height="50dp"
                 android:layout_gravity="center_vertical"
+                android:layout_alignParentLeft="true"
                 android:layout_marginRight="30dp"
-                android:background="@drawable/rounded_corners"
-                android:ems="10"
+                android:background="@drawable/input_bg"
+                android:layout_marginLeft="30dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="10dp"
+                android:paddingLeft="100dp"
+                android:textColor="#000000"
+                android:textSize="18sp"
                 android:inputType="text" >
 
             </EditText>
-        </LinearLayout>
+            
+               <TextView 
+                 android:layout_width="wrap_content"
+                android:layout_height="1dp"
+                android:layout_below="@+id/confs_search"/>
+         
+        </RelativeLayout>
 
         <ScrollView
-            android:id="@+id/scrollView1"
+            android:id="@+id/conference_scroll_view"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
-            android:layout_below="@+id/linearLayout2"
+            android:layout_below="@+id/RelativeLayout2"
             android:layout_centerHorizontal="true"
             android:background="@color/confs_group_list_bg" >
 
@@ -73,6 +89,13 @@
 
             </LinearLayout>
         </ScrollView>
+        
+          <ImageView
+            android:id="@+id/conference_loading_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:src="@drawable/loading" />
     </RelativeLayout>
 
 </LinearLayout>

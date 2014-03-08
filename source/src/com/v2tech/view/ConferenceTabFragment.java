@@ -46,6 +46,7 @@ public class ConferenceTabFragment extends Fragment {
 	private static final int REQUEST_ENTER_CONF = 3;
 	private static final int REQUEST_ENTER_CONF_RESPONSE = 4;
 	private static final int REQUEST_EXIT_CONF = 5;
+	private static final int UPDATE_NEW_MESSAGE_NOTIFICATION = 6;
 
 	private static final int RETRY_COUNT = 10;
 
@@ -65,7 +66,7 @@ public class ConferenceTabFragment extends Fragment {
 	private ConfsHandler mHandler = new ConfsHandler();
 
 	private ProgressDialog mWaitingDialog;
-	
+
 	private ImageView mLoadingImageIV;
 
 	private long currentConfId;
@@ -75,12 +76,15 @@ public class ConferenceTabFragment extends Fragment {
 	private View rootView;
 
 	private List<ScrollItem> mItemList;
+	
+	private Context mContext;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		getActivity().registerReceiver(receiver, getIntentFilter());
 		mItemList = new ArrayList<ScrollItem>();
+		mContext = getActivity();
 	}
 
 	@Override
@@ -93,8 +97,9 @@ public class ConferenceTabFragment extends Fragment {
 					.findViewById(R.id.group_list_container);
 			mScrollView = (ScrollView) rootView
 					.findViewById(R.id.conference_scroll_view);
-			
-			mLoadingImageIV = (ImageView)rootView.findViewById(R.id.conference_loading_icon);
+
+			mLoadingImageIV = (ImageView) rootView
+					.findViewById(R.id.conference_loading_icon);
 
 			mSearchTextET = (EditText) rootView.findViewById(R.id.confs_search);
 
@@ -157,6 +162,7 @@ public class ConferenceTabFragment extends Fragment {
 			intentFilter.addAction(JNIService.JNI_BROADCAST_GROUP_NOTIFICATION);
 			intentFilter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
 			intentFilter.addAction(MainActivity.SERVICE_BOUNDED_EVENT);
+			intentFilter.addAction(JNIService.JNI_BROADCAST_NEW_MESSAGE);
 		}
 		return intentFilter;
 	}
@@ -197,17 +203,18 @@ public class ConferenceTabFragment extends Fragment {
 
 				@Override
 				public void onClick(View v) {
-					mWaitingDialog = ProgressDialog
-							.show(getActivity(),
-									"",
-									getActivity()
-											.getResources()
-											.getString(
-													R.string.requesting_enter_conference),
-									true);
-					currentConfId = g.getmGId();
-					Message.obtain(mHandler, REQUEST_ENTER_CONF,
-							Long.valueOf(g.getmGId())).sendToTarget();
+					// TODO hidden request to enter conference feature
+//					mWaitingDialog = ProgressDialog
+//							.show(getActivity(),
+//									"",
+//									getActivity()
+//											.getResources()
+//											.getString(
+//													R.string.requesting_enter_conference),
+//									true);
+//					currentConfId = g.getmGId();
+//					Message.obtain(mHandler, REQUEST_ENTER_CONF,
+//							Long.valueOf(g.getmGId())).sendToTarget();
 				}
 
 			});
@@ -216,38 +223,39 @@ public class ConferenceTabFragment extends Fragment {
 		}
 
 	}
-	
-	
+
 	private void loadConversation() {
-		
+
 		Cursor mCur = getActivity().getContentResolver().query(
 				ContentDescriptor.Conversation.CONTENT_URI,
 				ContentDescriptor.Conversation.Cols.ALL_CLOS,
-				ContentDescriptor.Conversation.Cols.TYPE+"=?",
-				new String[]{Conversation.TYPE_CONTACT},
-				null);
+				ContentDescriptor.Conversation.Cols.TYPE + "=?",
+				new String[] { Conversation.TYPE_CONTACT }, null);
 
-		List<Conversation> array = new ArrayList<Conversation>();
 		while (mCur.moveToNext()) {
 			Conversation cov = extractConversation(mCur);
 			final GroupLayout gp = new GroupLayout(this.getActivity(), cov);
-			array.add(cov);
 			mItemList.add(new ScrollItem(cov, gp));
+			mGroupContainer.addView(gp);
+			if (!GlobalHolder.getInstance().findConversation(cov)) {
+				GlobalHolder.getInstance().addConversation(cov);
+			}
 		}
-		GlobalHolder.getInstance().updateConversation(array);
 		mCur.close();
 	}
-	
+
 	private Conversation extractConversation(Cursor cur) {
-		long extId = cur.getLong(3);
+		long extId = cur.getLong(2);
+		String name = cur.getString(3);
+		int flag = cur.getInt(4);
 		User u = GlobalHolder.getInstance().getUser(extId);
 		if (u == null) {
 			u = new User(extId);
+			u.setName(name);
 		}
-		Conversation cov = new ContactConversation(u);
+		Conversation cov = new ContactConversation(u, flag);
 		return cov;
 	}
-	
 
 	private void scrollToView(String str) {
 		for (final ScrollItem item : mItemList) {
@@ -258,7 +266,7 @@ public class ConferenceTabFragment extends Fragment {
 					public void run() {
 						mScrollView.scrollTo(0, item.gp.getTop());
 					}
-					
+
 				});
 				break;
 			}
@@ -289,6 +297,10 @@ public class ConferenceTabFragment extends Fragment {
 					MainActivity.SERVICE_BOUNDED_EVENT)) {
 				mService = ((MainActivity) getActivity()).getService();
 				Message.obtain(mHandler, FILL_CONFS_LIST).sendToTarget();
+			} else if (JNIService.JNI_BROADCAST_NEW_MESSAGE.equals(intent
+					.getAction())) {
+				Message.obtain(mHandler, UPDATE_NEW_MESSAGE_NOTIFICATION,
+						intent.getExtras().getLong("fromuid")).sendToTarget();
 			}
 		}
 
@@ -309,33 +321,38 @@ public class ConferenceTabFragment extends Fragment {
 				}
 				break;
 			case FILL_CONFS_LIST:
+				// FIXME optimze code
 				if (mService == null) {
 					V2Log.w(" Doesn't bound service yet");
 					return;
 				}
-				mConferenceList = GlobalHolder.getInstance().getGroup(Group.GroupType.CONFERENCE);
+				mConferenceList = GlobalHolder.getInstance().getGroup(
+						Group.GroupType.CONFERENCE);
 				// No server return send asynchronous message and waiting for
 				// response
 				if (mConferenceList != null) {
 					if (!isLoaded) {
-						((ViewGroup)mLoadingImageIV.getParent()).removeView(mLoadingImageIV);
+						((ViewGroup) mLoadingImageIV.getParent())
+								.removeView(mLoadingImageIV);
+						addGroupList(mConferenceList);
+						isLoaded = true;
+						loadConversation();
 					}
-					addGroupList(mConferenceList);
-					isLoaded = true;
 				} else {
 					if (msg.arg1 < RETRY_COUNT) {
 						Message m = Message.obtain(this, FILL_CONFS_LIST,
 								msg.arg1 + 1, 0);
 						this.sendMessageDelayed(m, 1000);
 					} else {
-						isLoaded = true;
-//						Toast.makeText(getActivity(), "无法获取组信息",
-//								Toast.LENGTH_LONG).show();
+						if (!isLoaded) {
+							isLoaded = true;
+							((ViewGroup) mLoadingImageIV.getParent())
+							.removeView(mLoadingImageIV);
+							loadConversation();
+						}
 					}
 				}
-				if (isLoaded) {
-					loadConversation();
-				}
+
 				break;
 			case REQUEST_ENTER_CONF:
 				mService.requestEnterConference((Long) msg.obj,
@@ -374,6 +391,29 @@ public class ConferenceTabFragment extends Fragment {
 				break;
 			case REQUEST_EXIT_CONF:
 				mService.requestExitConference((Long) msg.obj, null);
+				break;
+			case UPDATE_NEW_MESSAGE_NOTIFICATION:
+				long fromuid = (Long) msg.obj;
+				boolean b = false;
+				for (ScrollItem item : mItemList) {
+					if (item.cov.getExtId() == fromuid
+							&& Conversation.TYPE_CONTACT.equals(item.cov
+									.getType())) {
+						item.cov.setNotiFlag(Conversation.NOTIFICATION);
+						((GroupLayout) item.gp).updateNotificator(true);
+						b = true;
+						break;
+					}
+				}
+				if (!b) {
+					Conversation cov = (ContactConversation) GlobalHolder
+							.getInstance().findConversationByType(
+									Conversation.TYPE_CONTACT, fromuid);
+					
+					GroupLayout gp = new GroupLayout(mContext, cov);
+					mItemList.add(new ScrollItem(cov, gp));
+					mGroupContainer.addView(gp);
+				}
 				break;
 			}
 		}

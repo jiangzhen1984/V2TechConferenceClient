@@ -50,6 +50,16 @@ public class Conversation {
 		this.mType = mType;
 		this.mExtId = mExtId;
 	}
+	
+	
+
+
+	public Conversation(String mType, long mExtId, int mNotiFlag) {
+		super();
+		this.mType = mType;
+		this.mExtId = mExtId;
+		this.mNotiFlag = mNotiFlag;
+	}
 
 
 	public String getName() {

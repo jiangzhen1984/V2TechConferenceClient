@@ -42,6 +42,7 @@
             android:paddingLeft="10dp"
             android:paddingRight="7dp"
             android:paddingTop="5dp"
+            android:textSize="18sp"
             android:text="@string/contacts_user_detail_return_button"
             android:textColor="#ffffff" />
     </RelativeLayout>
@@ -63,7 +64,7 @@
                 android:layout_alignParentLeft="true"
                 android:layout_centerVertical="true"
                 android:layout_marginBottom="20dp"
-                android:layout_marginLeft="40dp"
+                android:layout_marginLeft="20dp"
                 android:layout_marginTop="20dp"
                  android:src="@drawable/avatar" />
 

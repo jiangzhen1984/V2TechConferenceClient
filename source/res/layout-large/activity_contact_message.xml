@@ -37,7 +37,10 @@
             android:layout_marginLeft="56dp"
             android:background="@drawable/contact_user_detail_return"
             android:gravity="center"
-            android:paddingLeft="8dp"
+            android:paddingBottom="5dp"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:paddingTop="5dp"
             android:text="@string/contacts_user_detail_return_button"
             android:textColor="#ffffff" />
     </RelativeLayout>
@@ -69,13 +72,14 @@
         android:id="@+id/message_panel_ly"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
+        android:layout_above="@+id/contact_message_sub_feature_ly"
         android:background="@color/message_panel_bg" >
 
         <ImageView
             android:id="@+id/contact_message_speaker"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
             android:layout_margin="15dp"
             android:src="@drawable/message_speaker" />
 
@@ -112,6 +116,10 @@
             android:layout_marginRight="44dp"
             android:background="@drawable/message_send_button_bg"
             android:gravity="center"
+            android:paddingBottom="5dp"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:paddingTop="5dp"
             android:text="@string/contact_message_send_button"
             android:textColor="#ffffff"
             android:textSize="18sp" />
@@ -128,6 +136,44 @@
             android:background="@drawable/input_bg"
             android:ems="10" >
         </EditText>
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/contact_message_sub_feature_ly"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:background="#ffffff" >
+
+        <RelativeLayout
+            android:id="@+id/contact_message_sub_feature_ly_inner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#ffffff"
+            android:visibility="gone" >
+
+            <ImageView
+                android:id="@+id/message_smile_icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_centerVertical="true"
+                android:layout_margin="5dp"
+                android:layout_marginLeft="15dp"
+                android:src="@drawable/message_smile_icon"
+                android:visibility="gone" />
+
+            <ImageView
+                android:id="@+id/contact_message_send_image_button"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:layout_centerVertical="true"
+                android:layout_marginBottom="15dp"
+                android:layout_marginLeft="15dp"
+                android:layout_marginTop="15dp"
+                android:layout_toRightOf="@+id/message_smile_icon"
+                android:src="@drawable/message_send_image_button" />
+        </RelativeLayout>
     </RelativeLayout>
 
 </RelativeLayout>

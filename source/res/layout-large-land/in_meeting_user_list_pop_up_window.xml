@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
+    android:layout_width="700dp"
     android:layout_height="wrap_content"
     android:orientation="vertical" >
 
@@ -27,7 +27,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_margin="3dp"
-            android:background="@color/in_meeting_setting_bg"
+            android:background="#e8f3fa"
             android:orientation="vertical" >
 
             <LinearLayout
@@ -38,8 +38,9 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
+                    android:layout_marginLeft="25dp"
                     android:contentDescription="search"
-                    android:src="@drawable/group_list_search_button" />
+                    android:src="@drawable/search" />
 
                 <EditText
                     android:id="@+id/in_meeting_user_search"
@@ -60,12 +61,18 @@
                 android:orientation="vertical" >
             </LinearLayout>
 
-            <LinearLayout
-                android:id="@+id/in_meeting_user_list_layout"
+            <ScrollView
+                android:id="@+id/scrollView1"
                 android:layout_width="match_parent"
-                android:layout_height="fill_parent"
-                android:orientation="vertical" >
-            </LinearLayout>
+                android:layout_height="wrap_content" >
+
+                <LinearLayout
+                    android:id="@+id/in_meeting_user_list_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical" >
+                </LinearLayout>
+            </ScrollView>
 
             <LinearLayout
                 android:layout_width="match_parent"

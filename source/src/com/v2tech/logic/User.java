@@ -199,7 +199,21 @@ public class User implements Comparable<User> {
 	}
 
 	public String getCompany() {
+		if (mCompany == null) {
+			mCompany = loadCompany(this.getFirstBelongsGroup());
+		}
 		return mCompany;
+	}
+	
+	private String loadCompany(Group g) {
+		if (g == null) {
+			return "";
+		}
+		if (g.getParent() != null) {
+			return loadCompany(g.getParent());
+		} else {
+			return g.getName();
+		}
 	}
 
 	public void setCompany(String mCompany) {
@@ -207,6 +221,9 @@ public class User implements Comparable<User> {
 	}
 
 	public String getDepartment() {
+		if (this.getFirstBelongsGroup() != null) {
+			mDepartment = this.getFirstBelongsGroup().getName();
+		}
 		return mDepartment;
 	}
 
@@ -338,6 +355,12 @@ public class User implements Comparable<User> {
 	
 	@Override
 	public int compareTo(User another) {
+		if (this.mUserId == GlobalHolder.getInstance().getCurrentUserId()) {
+			return -1;
+		} 
+		if (another.getmUserId() == GlobalHolder.getInstance().getCurrentUserId()) {
+			return 1;
+		}
 		User an = (User) another;
 		if (an.getmStatus() != Status.OFFLINE && an.getmStatus() != Status.HIDDEN) {
 			if (this.getmStatus()  != Status.OFFLINE && this.getmStatus() != Status.HIDDEN) {
@@ -383,6 +406,8 @@ public class User implements Comparable<User> {
 				u.setTelephone(element.getAttribute("telephone"));
 				u.setGender(element.getAttribute("sex"));
 				u.setAddress(element.getAttribute("address"));
+				u.setCellPhone(element.getAttribute("mobile"));
+				u.setTitle(element.getAttribute("job"));
 				try {
 					String bir = element.getAttribute("birthday");
 					if (bir != null && !bir.equals("")) { 

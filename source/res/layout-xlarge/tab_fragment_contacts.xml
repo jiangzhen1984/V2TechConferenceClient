@@ -49,7 +49,7 @@
                 android:src="@drawable/group_list_search_button" />
 
             <EditText
-                android:id="@+id/confs_search"
+                android:id="@+id/contacts_search"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
                 android:layout_gravity="center_vertical"
@@ -69,7 +69,7 @@
                <TextView 
                  android:layout_width="wrap_content"
                 android:layout_height="1dp"
-                android:layout_below="@+id/confs_search"/>
+                android:layout_below="@+id/contacts_search"/>
          
         </RelativeLayout>
   <ListView

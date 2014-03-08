@@ -13,12 +13,12 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="-4dp"
-            android:layout_marginLeft="18dp"
+            android:layout_marginLeft="30dp"
             android:src="@drawable/arrow" />
     </LinearLayout>
 
     <LinearLayout
-        android:layout_width="match_parent"
+        android:layout_width="400dp"
         android:layout_height="100dp"
         android:background="@drawable/rounded_corners_of_in_metting_setting_pop_up_window"
         android:orientation="vertical" >
@@ -47,7 +47,7 @@
                     android:id="@+id/radioGroup1"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="40dp"
+                    android:layout_marginLeft="80dp"
                     android:orientation="horizontal" >
 
                     <RadioButton

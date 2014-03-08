@@ -151,6 +151,10 @@ public class MainActivity extends FragmentActivity implements
 		mTabHost.addTab(settingTabSpec);
 
 		mTabHost.setOnTabChangedListener(this);
+		
+		for(int i=0;i<mTabHost.getTabWidget().getChildCount();i++) {
+			mTabHost.getTabWidget().getChildAt(i).setBackgroundResource(R.drawable.tab_panel_bg);
+	    }
 	}
 
 	@Override

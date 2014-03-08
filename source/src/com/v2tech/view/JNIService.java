@@ -39,6 +39,8 @@ import com.v2tech.logic.AsynResult;
 import com.v2tech.logic.AsynResult.AsynState;
 import com.v2tech.logic.CameraConfiguration;
 import com.v2tech.logic.ConferencePermission;
+import com.v2tech.logic.ContactConversation;
+import com.v2tech.logic.Conversation;
 import com.v2tech.logic.GlobalHolder;
 import com.v2tech.logic.Group;
 import com.v2tech.logic.NetworkStateCode;
@@ -950,6 +952,7 @@ public class JNIService extends Service {
 					Intent ii = new Intent(JNI_BROADCAST_NEW_MESSAGE);
 					ii.addCategory(JNI_BROADCAST_CATEGROY);
 					ii.putExtra("mid", uri.getLastPathSegment());
+					ii.putExtra("fromuid", vm.getUser().getmUserId());
 					mContext.sendBroadcast(ii);
 					sendNotification();
 				}
@@ -994,8 +997,35 @@ public class JNIService extends Service {
 					.getIntValue());
 			cv.put(ContentDescriptor.Messages.Cols.SEND_TIME,
 					vm.getNormalDateStr());
-			return getContentResolver().insert(
+			Uri uri= getContentResolver().insert(
 					ContentDescriptor.Messages.CONTENT_URI, cv);
+			
+			//TODO add notification
+			 Conversation cov = GlobalHolder.getInstance().findConversationByType(Conversation.TYPE_CONTACT, vm.getUser().getmUserId());
+			if (cov == null) {
+				cov = new ContactConversation(vm.getUser(), Conversation.NOTIFICATION);
+				GlobalHolder.getInstance().addConversation(cov);
+				ContentValues conCv = new ContentValues();
+				conCv.put(ContentDescriptor.Conversation.Cols.EXT_ID, vm.getUser().getmUserId());
+				conCv.put(ContentDescriptor.Conversation.Cols.TYPE, Conversation.TYPE_CONTACT);
+				conCv.put(ContentDescriptor.Conversation.Cols.EXT_NAME, vm.getUser().getName());
+				conCv.put(ContentDescriptor.Conversation.Cols.NOTI_FLAG, Conversation.NOTIFICATION);
+				getContentResolver().insert(ContentDescriptor.Conversation.CONTENT_URI, conCv);
+				 GlobalHolder.getInstance().addConversation(cov);
+			} else {
+				cov.setNotiFlag(Conversation.NOTIFICATION);
+				
+				ContentValues ct = new ContentValues();
+				ct.put(ContentDescriptor.Conversation.Cols.NOTI_FLAG, Conversation.NOTIFICATION);
+				getContentResolver().update(
+						ContentDescriptor.Conversation.CONTENT_URI,
+						ct,
+						ContentDescriptor.Conversation.Cols.EXT_ID + "=? and "
+								+ ContentDescriptor.Conversation.Cols.TYPE + "=?",
+						new String[] { vm.getUser().getmUserId() + "", Conversation.TYPE_CONTACT });
+			}
+			
+			return uri;
 		}
 
 		private void sendNotification() {
@@ -1005,6 +1035,9 @@ public class JNIService extends Service {
 					notification);
 			r.play();
 		}
+		
+		
+		
 	}
 
 	// ///////////////////////////////////////////////

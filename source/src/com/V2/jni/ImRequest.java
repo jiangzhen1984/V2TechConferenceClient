@@ -257,7 +257,7 @@ public class ImRequest {
 	}
 
 	private void OnConnectResponse(int nResult) {
-		Log.e("ImRequest UI", "OnConnectResponse::" + nResult);
+		V2Log.d("OnConnectResponse::" + nResult);
 		if (this.callback != null) {
 			this.callback.OnConnectResponseCallback(nResult);
 		}
@@ -325,7 +325,6 @@ public class ImRequest {
 
 	// 鏍囧織鐫�幏鍙栫敤鎴峰紑濮�
 	private void OnGetGroupsInfoBegin() {
-		Log.e("ImRequest UI", "寮�鑾峰彇缁凮nGetGroupsInfoBegin");
 	}
 
 	// 鏍囧織鐫�幏鍙栫敤鎴风粨鏉�
@@ -333,17 +332,7 @@ public class ImRequest {
 	private boolean haslogin = false; // 鏍囧織宸茬粡鍙戦�浜嗙櫥闄嗙姸鎬�
 
 	private void OnGetGroupsInfoEnd() {
-		Log.e("ImRequest UI", "OnGetGroupsInfoEnd");
 
-		// 鐧婚檰瀹屾垚锛屽苟涓旇幏寰楃敤鎴峰垪琛ㄥ悗鍐嶅紑濮嬭繘鍏ヤ富鐣岄潰
-		// Intent intent = new Intent(SplashActivity.IM);
-		// intent.putExtra("MsgType", MsgType.LOGIN);
-		// intent.putExtra("MSG", loginMsgType);
-		//
-		// if(!haslogin){
-		// context.sendOrderedBroadcast(intent,null);
-		// haslogin=true;
-		// }
 	}
 	
 

@@ -93,11 +93,13 @@ public class ConversationView extends Activity {
 	private View mAdditionFeatureContainer;
 
 	private ImageView mSelectImageButtonIV;
+	
+	private ImageView mAudioSpeakerIV;
 
 	private MessageReceiver receiver = new MessageReceiver();
-	
+
 	private Chat mChat = new Chat();
-	
+
 	private User local;
 	private User remote;
 
@@ -114,6 +116,8 @@ public class ConversationView extends Activity {
 		mSendButtonTV = (TextView) findViewById(R.id.message_send);
 		// mSendButtonTV.setOnClickListener(sendMessageListener);
 		mSendButtonTV.setOnTouchListener(sendMessageButtonListener);
+		
+		
 
 		mMessageET = (EditText) findViewById(R.id.message_text);
 		mReturnButtonTV = (TextView) findViewById(R.id.contact_detail_return_button);
@@ -130,6 +134,10 @@ public class ConversationView extends Activity {
 
 		mSelectImageButtonIV = (ImageView) findViewById(R.id.contact_message_send_image_button);
 		mSelectImageButtonIV.setOnClickListener(selectImageButtonListener);
+		
+		mAudioSpeakerIV = (ImageView) findViewById(R.id.contact_message_speaker);
+		//TODO hidden button of send audio message
+		mAudioSpeakerIV.setVisibility(View.GONE);
 
 		mAdditionFeatureContainer = findViewById(R.id.contact_message_sub_feature_ly_inner);
 
@@ -141,7 +149,7 @@ public class ConversationView extends Activity {
 
 		local = GlobalHolder.getInstance().getUser(user1Id);
 		remote = GlobalHolder.getInstance().getUser(user2Id);
-		
+
 		lh = new LocalHandler();
 
 		HandlerThread thread = new HandlerThread("back-end");
@@ -162,6 +170,7 @@ public class ConversationView extends Activity {
 		filter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
 		registerReceiver(receiver, filter);
 
+		saveReaded();
 	}
 
 	@Override
@@ -190,15 +199,14 @@ public class ConversationView extends Activity {
 		super.onDestroy();
 		this.unregisterReceiver(receiver);
 		cleanCache();
-		
+
 	}
-	
-	
+
 	private void cleanCache() {
-		for (int i=0; i< mMessagesContainer.getChildCount(); i++) {
-			View v =mMessagesContainer.getChildAt(i);
-			if(v instanceof MessageBodyView) {
-				((MessageBodyView)v).recycle();
+		for (int i = 0; i < mMessagesContainer.getChildCount(); i++) {
+			View v = mMessagesContainer.getChildAt(i);
+			if (v instanceof MessageBodyView) {
+				((MessageBodyView) v).recycle();
 			}
 		}
 	}
@@ -271,7 +279,9 @@ public class ConversationView extends Activity {
 				String filePath = cursor.getString(columnIndex);
 				cursor.close();
 				if (filePath == null) {
-					Toast.makeText(mContext, R.string.error_contact_messag_invalid_image_path, Toast.LENGTH_SHORT).show();
+					Toast.makeText(mContext,
+							R.string.error_contact_messag_invalid_image_path,
+							Toast.LENGTH_SHORT).show();
 					return;
 				}
 				VImageMessage vim = new VImageMessage(local, remote, filePath,
@@ -307,11 +317,12 @@ public class ConversationView extends Activity {
 
 		Message.obtain(lh, SEND_MESSAGE, m).sendToTarget();
 		addMessageToContainer(m);
-		updateConversationList();
+		updateConversationList(false);
 	}
-	
+
 	private boolean saveConversation;
-	private void updateConversationList() {
+
+	private void updateConversationList(boolean flag) {
 		if (saveConversation) {
 			return;
 		}
@@ -319,13 +330,40 @@ public class ConversationView extends Activity {
 		saveConversation = GlobalHolder.getInstance().findConversation(cov);
 		if (!saveConversation) {
 			GlobalHolder.getInstance().addConversation(cov);
-			//save to daabase
+			// save to daabase
 			saveConversation = true;
 			ContentValues cv = new ContentValues();
 			cv.put(ContentDescriptor.Conversation.Cols.EXT_ID, user2Id);
-			cv.put(ContentDescriptor.Conversation.Cols.TYPE, Conversation.TYPE_CONTACT);
-			cv.put(ContentDescriptor.Conversation.Cols.NOTI_FLAG, Conversation.NONE);
-			getContentResolver().insert(ContentDescriptor.Conversation.CONTENT_URI, cv);
+			cv.put(ContentDescriptor.Conversation.Cols.TYPE,
+					Conversation.TYPE_CONTACT);
+			cv.put(ContentDescriptor.Conversation.Cols.EXT_NAME,
+					remote.getName());
+			if (flag) {
+				cv.put(ContentDescriptor.Conversation.Cols.NOTI_FLAG,
+						Conversation.NOTIFICATION);
+			} else {
+				cv.put(ContentDescriptor.Conversation.Cols.NOTI_FLAG,
+						Conversation.NONE);
+			}
+			getContentResolver().insert(
+					ContentDescriptor.Conversation.CONTENT_URI, cv);
+		}
+	}
+
+	private void saveReaded() {
+		ContentValues cv = new ContentValues();
+		cv.put(ContentDescriptor.Conversation.Cols.NOTI_FLAG, Conversation.NONE);
+		getContentResolver().update(
+				ContentDescriptor.Conversation.CONTENT_URI,
+				cv,
+				ContentDescriptor.Conversation.Cols.EXT_ID + "=? and "
+						+ ContentDescriptor.Conversation.Cols.TYPE + "=?",
+				new String[] { user2Id + "", Conversation.TYPE_CONTACT });
+
+		Conversation cov = GlobalHolder.getInstance().findConversationByType(
+				Conversation.TYPE_CONTACT, user2Id);
+		if (cov != null) {
+			cov.setNotiFlag(Conversation.NONE);
 		}
 	}
 
@@ -363,8 +401,8 @@ public class ConversationView extends Activity {
 		}
 
 	};
-	
-	private MessageBodyView.ClickListener listener = new MessageBodyView.ClickListener(){
+
+	private MessageBodyView.ClickListener listener = new MessageBodyView.ClickListener() {
 
 		@Override
 		public void onMessageClicked(VMessage v) {
@@ -378,7 +416,7 @@ public class ConversationView extends Activity {
 				mContext.startActivity(i);
 			}
 		}
-		
+
 	};
 
 	private List<VMessage> loadMessages() {
@@ -425,7 +463,7 @@ public class ConversationView extends Activity {
 
 		Cursor mCur = this.getContentResolver().query(uri,
 				ContentDescriptor.Messages.Cols.ALL_CLOS, null, null, null);
-	
+
 		while (mCur.moveToNext()) {
 			VMessage m = extractMsg(mCur);
 			MessageBodyView mv = new MessageBodyView(this, m, true);
@@ -440,28 +478,27 @@ public class ConversationView extends Activity {
 			}
 		});
 
+		updateConversationList(true);
 	}
-	
-	
+
 	private VMessage extractMsg(Cursor cur) {
 		if (cur.isClosed()) {
 			throw new RuntimeException(" cursor is closed");
 		}
 		DateFormat dp = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-		
+
 		int id = cur.getInt(0);
 		long localUserId = cur.getLong(1);
 		// msg_content column
 		String content = cur.getString(5);
-		//message type
+		// message type
 		int type = cur.getInt(6);
 		// date time
 		String dateString = cur.getString(7);
-		
+
 		VMessage vm = null;
 		if (type == VMessage.MessageType.TEXT.getIntValue()) {
-			vm = new VMessage(local, remote, content,
-					localUserId == user2Id);
+			vm = new VMessage(local, remote, content, localUserId == user2Id);
 		} else {
 			vm = new VImageMessage(local, remote, content.split("\\|")[4],
 					localUserId == user2Id);
@@ -474,12 +511,8 @@ public class ConversationView extends Activity {
 		}
 
 		return vm;
-		
-	}
-	
-	
-	
 
+	}
 
 	class MessageReceiver extends BroadcastReceiver {
 
@@ -551,9 +584,10 @@ public class ConversationView extends Activity {
 				isLoading = false;
 				break;
 			case SEND_MESSAGE:
-				mChat.sendVMessage((VMessage) msg.obj, Message.obtain(this, SEND_MESSAGE_DONE));
-				//mService.sendMessage((VMessage) msg.obj,
-					//	Message.obtain(this, SEND_MESSAGE_DONE));
+				mChat.sendVMessage((VMessage) msg.obj,
+						Message.obtain(this, SEND_MESSAGE_DONE));
+				// mService.sendMessage((VMessage) msg.obj,
+				// Message.obtain(this, SEND_MESSAGE_DONE));
 				break;
 			case QUERY_NEW_MESSAGE:
 				if (msg.obj == null || "".equals(msg.obj.toString())) {

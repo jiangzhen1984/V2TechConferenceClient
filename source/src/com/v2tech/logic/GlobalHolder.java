@@ -1,5 +1,6 @@
 package com.v2tech.logic;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,7 +23,7 @@ public class GlobalHolder {
 	private Map<Long, Group> mGroupHolder = new HashMap<Long, Group>();
 	private Map<Long, String> mAvatarHolder = new HashMap<Long, String>();
 
-	private List<Conversation> mConversationHolder;
+	private List<Conversation> mConversationHolder = new ArrayList<Conversation>();
 
 	public static synchronized GlobalHolder getInstance() {
 		if (holder == null) {
@@ -59,17 +60,27 @@ public class GlobalHolder {
 		}
 	}
 
+	private Object mUserLock = new Object();
 	public void putUser(long id, User u) {
 		if (u == null) {
 			return;
 		}
-		Long key = Long.valueOf(id);
-		mUserHolder.put(key, u);
+		synchronized(mUserLock) {
+			Long key = Long.valueOf(id);
+			User cu = mUserHolder.get(key);
+			if (cu != null) {
+				V2Log.e(" merge user information ");
+				return;
+			}
+			mUserHolder.put(key, u);
+		}
 	}
 
 	public User getUser(long id) {
-		Long key = Long.valueOf(id);
-		return mUserHolder.get(key);
+		synchronized(mUserLock) {
+			Long key = Long.valueOf(id);
+			return mUserHolder.get(key);
+		}
 	}
 
 	public void updateUserStatus(User u) {
@@ -219,5 +230,16 @@ public class GlobalHolder {
 			}
 		}
 		return false;
+	}
+
+	public Conversation findConversationByType(String type, long extId) {
+		for (Conversation c : this.mConversationHolder) {
+			if (c.getExtId() == extId
+					&& ((type == null && c.getType() == type) || (type != null && type
+							.equals(c.getType())))) {
+				return c;
+			}
+		}
+		return null;
 	}
 }

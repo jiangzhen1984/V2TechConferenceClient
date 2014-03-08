@@ -35,6 +35,8 @@ public class V2TechDBHelper extends SQLiteOpenHelper {
 			+ " text not null,"
 			+ ContentDescriptor.Conversation.Cols.EXT_ID
 			+ " numeric not null,"
+			+ContentDescriptor.Conversation.Cols.EXT_NAME
+			+" text not null,"
 			+ ContentDescriptor.Conversation.Cols.NOTI_FLAG
 			+ " integer not null" + ")";
 

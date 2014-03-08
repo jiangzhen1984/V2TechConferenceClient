@@ -45,7 +45,8 @@
         
          <activity
             android:name="com.v2tech.view.StartupActivity"
-            android:label="@string/title_activity_login" >
+            android:label="@string/title_activity_login"
+            >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -57,7 +58,8 @@
             android:name="com.v2tech.view.LoginActivity"
             android:configChanges="orientation"
             android:label="@string/title_activity_login"
-            android:windowSoftInputMode="stateHidden|adjustUnspecified" >
+            android:windowSoftInputMode="stateHidden|adjustUnspecified"
+             >
         </activity>
         <activity
             android:name="com.v2tech.view.conference.VideoActivityV2"

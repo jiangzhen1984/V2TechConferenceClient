@@ -107,7 +107,7 @@ public class GroupRequest {
 		if (callback != null) {
 			callback.OnGetGroupInfoCallback(groupType, sXml);
 		}
-		Log.e("GroupRequest UI", "OnGetGroupInfo::" + groupType + ":"
+		V2Log.d("OnGetGroupInfo::" + groupType + ":"
 				+ sXml);
 
 	}

@@ -36,9 +36,11 @@
         android:id="@+id/login_form"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:clickable="false"
         android:background="@color/logo_background" >
 
         <LinearLayout
+             android:id="@+id/login_form_ll"
             style="@style/LoginFormContainer"
             android:background="@color/logo_background"
             android:orientation="vertical" >
@@ -49,20 +51,21 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:contentDescription="@string/banner_desc"
-                android:src="@drawable/logo_200_168" />
+                android:src="@drawable/logo" />
 
             <LinearLayout
                 android:id="@+id/login_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="5dp"
                 android:background="@drawable/rounded_corners_of_login_outer_box"
                 android:orientation="vertical" >
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_margin="10dp"
+                    android:layout_margin="5dp"
                     android:background="@drawable/rounded_corners_of_login_inner_box"
                     android:orientation="vertical" >
 
@@ -100,12 +103,12 @@
                         android:minHeight="30dp"
                         android:paddingLeft="15dp"
                         android:singleLine="true" />
-                    
-                     <RelativeLayout
-                         android:layout_width="match_parent"
-                         android:layout_height="wrap_content"
-                         android:layout_marginLeft="15dp"
-                         android:layout_marginTop="10dp" >
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="15dp"
+                        android:layout_marginTop="20dp" >
 
                         <CheckBox
                             android:id="@+id/login_rem_pwd"
@@ -122,11 +125,11 @@
                             android:layout_alignBottom="@+id/login_rem_pwd"
                             android:layout_alignParentRight="true"
                             android:layout_marginRight="40dp"
-                            android:background="@drawable/rounded_corners_show_ip_setting_button"
-                            android:paddingBottom="5dp"
+                                                        android:paddingBottom="5dp"
                             android:paddingLeft="32dp"
                             android:paddingRight="32dp"
                             android:paddingTop="5dp"
+                            android:background="@drawable/rounded_corners_show_ip_setting_button"
                             android:text="@string/ip_host_setting" />
 
                     </RelativeLayout>
@@ -136,7 +139,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
-                        android:layout_marginBottom="10dp"
+                        android:layout_marginBottom="20dp"
                         android:layout_marginTop="16dp"
                         android:background="@drawable/rounded_corners_login_button"
                         android:minHeight="30dp"
