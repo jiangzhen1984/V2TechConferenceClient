@@ -672,7 +672,7 @@ public class JNIService extends Service {
 					// TODO
 				} else {
 					List<Group>  lg = GlobalHolder.getInstance().getGroup(Group.GroupType.CONFERENCE);
-					if (lg == null || lg.size()>= msg.arg1) {
+					if (lg == null || msg.arg1 >= lg.size() ) {
 						break;
 					}
 					//FIXME optimize code
