@@ -671,9 +671,13 @@ public class JNIService extends Service {
 				if (gmd == null) {
 					// TODO
 				} else {
+					List<Group>  lg = GlobalHolder.getInstance().getGroup(Group.GroupType.CONFERENCE);
+					if (lg == null || lg.size()>= msg.arg1) {
+						break;
+					}
 					//FIXME optimize code
 					Message.obtain(mHandler, JNI_UPDATE_USER_INFO,
-							GlobalHolder.getInstance().getGroup(Group.GroupType.CONFERENCE).get(msg.arg1).getOwner()).sendToTarget();
+							lg.get(msg.arg1).getOwner()).sendToTarget();
 				}
 
 				break;
