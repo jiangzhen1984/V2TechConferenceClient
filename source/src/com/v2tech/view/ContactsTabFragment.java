@@ -1,6 +1,7 @@
 package com.v2tech.view;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import android.content.BroadcastReceiver;
@@ -44,17 +45,17 @@ public class ContactsTabFragment extends Fragment {
 	private IntentFilter intentFilter;
 
 	private ListView mContactsContainer;
-	
+
 	private ContactsAdapter adapter = new ContactsAdapter();
 
 	private boolean mLoaded;
 
 	private ContactsHandler mHandler = new ContactsHandler();
-	
+
 	private EditText searchedTextET;
-	
+
 	private boolean mIsStartedSearch = false;
-	
+
 	private List<ListItem> mItemList = new ArrayList<ListItem>();
 	private List<ListItem> mCacheItemList;
 
@@ -85,8 +86,8 @@ public class ContactsTabFragment extends Fragment {
 
 		});
 		mContactsContainer.setDivider(null);
-		
-		searchedTextET = (EditText)v.findViewById(R.id.contacts_search);
+
+		searchedTextET = (EditText) v.findViewById(R.id.contacts_search);
 		searchedTextET.addTextChangedListener(textChangedListener);
 		return v;
 	}
@@ -120,7 +121,8 @@ public class ContactsTabFragment extends Fragment {
 					.addAction(JNIService.JNI_BROADCAST_USER_STATUS_NOTIFICATION);
 			intentFilter
 					.addAction(JNIService.JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION);
-			intentFilter.addAction(JNIService.JNI_BROADCAST_USER_AVATAR_CHANGED_NOTIFICATION);
+			intentFilter
+					.addAction(JNIService.JNI_BROADCAST_USER_AVATAR_CHANGED_NOTIFICATION);
 		}
 		return intentFilter;
 	}
@@ -167,27 +169,27 @@ public class ContactsTabFragment extends Fragment {
 			} else if (JNIService.JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION
 					.equals(intent.getAction())) {
 				Message.obtain(mHandler, UPDATE_GROUP_STATUS).sendToTarget();
-			} else if (JNIService.JNI_BROADCAST_USER_AVATAR_CHANGED_NOTIFICATION.equals(intent.getAction())) {
-				Object[] ar = new Object[]{intent.getExtras().get("uid"), intent.getExtras().get("avatar")};
+			} else if (JNIService.JNI_BROADCAST_USER_AVATAR_CHANGED_NOTIFICATION
+					.equals(intent.getAction())) {
+				Object[] ar = new Object[] { intent.getExtras().get("uid"),
+						intent.getExtras().get("avatar") };
 				Message.obtain(mHandler, UPDATE_USER_AVATAR, ar).sendToTarget();
 			}
 		}
 
 	}
-	
 
-	
 	private TextWatcher textChangedListener = new TextWatcher() {
 
 		@Override
 		public void afterTextChanged(Editable s) {
-			
+
 		}
 
 		@Override
 		public void beforeTextChanged(CharSequence s, int start, int count,
 				int after) {
-			
+
 		}
 
 		@Override
@@ -205,12 +207,13 @@ public class ContactsTabFragment extends Fragment {
 				return;
 			}
 			List<User> searchedUserList = new ArrayList<User>();
-			for(Group g:l) {
+			for (Group g : l) {
 				Group.searchUser(s.toString(), searchedUserList, g);
 			}
-			Message.obtain(mHandler, UPDATE_SEARCHED_USER_LIST, searchedUserList).sendToTarget();
+			Message.obtain(mHandler, UPDATE_SEARCHED_USER_LIST,
+					searchedUserList).sendToTarget();
 		}
-		
+
 	};
 
 	private void updateView(int pos) {
@@ -222,7 +225,10 @@ public class ContactsTabFragment extends Fragment {
 			for (Group g : item.g.getChildGroup()) {
 				mItemList.add(++pos, new ListItem(g));
 			}
-			for (User u : item.g.getUsers()) {
+			List<User> sortList = new ArrayList<User>();
+			sortList.addAll(item.g.getUsers());
+			Collections.sort(sortList);
+			for (User u : sortList) {
 				mItemList.add(++pos, new ListItem(u));
 			}
 
@@ -285,50 +291,57 @@ public class ContactsTabFragment extends Fragment {
 		User.Status st = User.Status.fromInt(status);
 		int index = 0;
 		ListItem it = null;
+		boolean foundUserView = false;
 		for (ListItem li : mItemList) {
 			if (li.u != null && li.u.getmUserId() == userId) {
 				it = li;
 				((ContactUserView) li.v).updateStatus(st);
+				foundUserView = true;
 				break;
 			}
 			index++;
 		}
-		if (it != null && index != mItemList.size() -1) {
-			while (index>=0 && index < mItemList.size()) {
-				ListItem pre = mItemList.get(index);
-				if (pre.u != null
-						&& (pre.u.getmStatus() != User.Status.OFFLINE && pre.u
-								.getmStatus() != User.Status.HIDDEN) && pre.u != it.u) {
-					break;
-				} else if (pre.g != null) {
-					index +=1;
-					break;
-				}
-				
-				if (st == User.Status.OFFLINE || st == User.Status.HIDDEN) {
-					index++;
-				} else {
-					index--;
-				}
+		if (!foundUserView) {
+			return;
+		}
+
+		boolean updatePosFlag = false;
+		do {
+			if (st == User.Status.HIDDEN || st == User.Status.OFFLINE) {
+				++index;
+			} else {
+				--index;
 			}
+			if (index < 0 || index >= mItemList.size()) {
+				break;
+			}
+
+			ListItem item = mItemList.get(index);
+			if (item.u != null && item.u.getmStatus() == st) {
+				updatePosFlag = true;
+				break;
+			} else if (item.g != null) {
+				updatePosFlag = true;
+				break;
+			}
+		} while (index >= 0 && index < mItemList.size());
+
+		if (updatePosFlag) {
 			mItemList.remove(it);
 			mItemList.add(index, it);
+			adapter.notifyDataSetChanged();
 		}
-		adapter.notifyDataSetChanged();
+		
 
 	}
-	
-	
-	
+
 	private void updateSearchedUserList(List<User> lu) {
 		mItemList = new ArrayList<ListItem>();
-		for(User u: lu) {
-				mItemList.add(new ListItem(u));
+		for (User u : lu) {
+			mItemList.add(new ListItem(u));
 		}
 		adapter.notifyDataSetChanged();
 	}
-
-	
 
 	class ListItem {
 		long id;
@@ -402,16 +415,17 @@ public class ContactsTabFragment extends Fragment {
 				updateUserViewPostion(msg.arg1, msg.arg2);
 				break;
 			case UPDATE_SEARCHED_USER_LIST:
-				updateSearchedUserList((List<User>)msg.obj);
+				updateSearchedUserList((List<User>) msg.obj);
 				break;
 			case UPDATE_USER_AVATAR:
-				Object[] ar = (Object[])msg.obj;
+				Object[] ar = (Object[]) msg.obj;
 				for (ListItem li : mItemList) {
-					if (li.u != null && li.u.getmUserId() == (Long)ar[0]) {
+					if (li.u != null && li.u.getmUserId() == (Long) ar[0]) {
 						if (li.u.getAvatarPath() == null) {
 							li.u.setAvatarPath(ar[1].toString());
 						}
-						((ContactUserView) li.v).updateAvatar(li.u.getAvatarBitmap());
+						((ContactUserView) li.v).updateAvatar(li.u
+								.getAvatarBitmap());
 					}
 				}
 				break;

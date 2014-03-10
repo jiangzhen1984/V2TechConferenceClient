@@ -89,11 +89,13 @@ public class JNIService extends Service {
 	public static final String JNI_BROADCAST_CATEGROY = "com.v2tech.jni.broadcast";
 	public static final String JNI_BROADCAST_USER_STATUS_NOTIFICATION = "com.v2tech.jni.broadcast.user_stauts_notification";
 	public static final String JNI_BROADCAST_USER_AVATAR_CHANGED_NOTIFICATION = "com.v2tech.jni.broadcast.user_avatar_notification";
+	public static final String JNI_BROADCAST_USER_UPDATE_SIGNATURE = "com.v2tech.jni.broadcast.user_update_sigature";
 	public static final String JNI_BROADCAST_GROUP_NOTIFICATION = "com.v2tech.jni.broadcast.group_geted";
 	public static final String JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION = "com.v2tech.jni.broadcast.group_user_updated";
 	public static final String JNI_BROADCAST_ATTENDEE_ENTERED_NOTIFICATION = "com.v2tech.jni.broadcast.attendee.entered.notification";
 	public static final String JNI_BROADCAST_ATTENDEE_EXITED_NOTIFICATION = "com.v2tech.jni.broadcast.attendee.exited.notification";
 	public static final String JNI_BROADCAST_NEW_MESSAGE = "com.v2tech.jni.broadcast.new.message";
+
 
 	private boolean isDebug = true;
 
@@ -1094,9 +1096,6 @@ public class JNIService extends Service {
 						+ "  isn't exist");
 			} else {
 				u.updateStatus(User.Status.fromInt(nStatus));
-				if (u.getFirstBelongsGroup() != null) {
-					u.getFirstBelongsGroup().updatePosition();
-				}
 			}
 			Message.obtain(mCallbackHandler, JNI_UPDATE_USER_STATUS,
 					(int) nUserID, nStatus).sendToTarget();

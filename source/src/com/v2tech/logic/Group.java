@@ -6,7 +6,6 @@ import java.io.InputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -160,15 +159,9 @@ public class Group {
 			return;
 		}
 		this.users.add(u);
-		synchronized (users) {
-			Collections.sort(users);
-		}
 	}
 
 	public List<User> getUsers() {
-		synchronized (users) {
-			Collections.sort(users);
-		}
 		return this.users;
 	}
 
@@ -230,7 +223,6 @@ public class Group {
 		if (g == null) {
 			return 0;
 		}
-		synchronized (g) {
 			for (User u : g.getUsers()) {
 				if (u.getmStatus() == User.Status.ONLINE) {
 					c++;
@@ -240,7 +232,6 @@ public class Group {
 			for (Group subG : g.getChildGroup()) {
 				c += getUserOnlineCount(subG);
 			}
-		}
 		return c;
 	}
 
@@ -261,18 +252,12 @@ public class Group {
 			this.users.add(u);
 			u.addUserToGroup(this);
 		}
-		synchronized (users) {
-			Collections.sort(users);
-		}
 	}
 
 	public int getLevel() {
 		return level;
 	}
 
-	public void updatePosition() {
-		Collections.sort(users);
-	}
 
 	@Override
 	public int hashCode() {

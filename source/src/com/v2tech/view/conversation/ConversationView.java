@@ -35,6 +35,7 @@ import android.widget.Toast;
 import com.v2tech.R;
 import com.v2tech.db.ContentDescriptor;
 import com.v2tech.logic.Chat;
+import com.v2tech.logic.ContactConversation;
 import com.v2tech.logic.Conversation;
 import com.v2tech.logic.GlobalHolder;
 import com.v2tech.logic.User;
@@ -318,6 +319,8 @@ public class ConversationView extends Activity {
 		Message.obtain(lh, SEND_MESSAGE, m).sendToTarget();
 		addMessageToContainer(m);
 		updateConversationList(false);
+		//make offset
+		offset++;
 	}
 
 	private boolean saveConversation;
@@ -326,11 +329,11 @@ public class ConversationView extends Activity {
 		if (saveConversation) {
 			return;
 		}
-		Conversation cov = new Conversation(Conversation.TYPE_CONTACT, user2Id);
+		Conversation cov = new ContactConversation(remote, Conversation.NONE);
 		saveConversation = GlobalHolder.getInstance().findConversation(cov);
 		if (!saveConversation) {
 			GlobalHolder.getInstance().addConversation(cov);
-			// save to daabase
+			// save to database
 			saveConversation = true;
 			ContentValues cv = new ContentValues();
 			cv.put(ContentDescriptor.Conversation.Cols.EXT_ID, user2Id);
@@ -347,6 +350,13 @@ public class ConversationView extends Activity {
 			}
 			getContentResolver().insert(
 					ContentDescriptor.Conversation.CONTENT_URI, cv);
+			GlobalHolder.getInstance().addConversation(cov);
+			
+			Intent i = new Intent();
+			i.addCategory(PublicIntent.DEFAULT_CATEGORY);
+			i.setAction(PublicIntent.NEW_CONVERSATION);
+			i.putExtra("fromuid", user2Id);
+			sendBroadcast(i);
 		}
 	}
 
@@ -365,6 +375,12 @@ public class ConversationView extends Activity {
 		if (cov != null) {
 			cov.setNotiFlag(Conversation.NONE);
 		}
+		
+		Intent i = new Intent();
+		i.addCategory(PublicIntent.DEFAULT_CATEGORY);
+		i.setAction(PublicIntent.MESSAGE_READED_NOTIFICATION);
+		i.putExtra("fromuid", user2Id);
+		sendBroadcast(i);
 	}
 
 	private void addMessageToContainer(VMessage msg) {
@@ -578,9 +594,18 @@ public class ConversationView extends Activity {
 					}
 					mMessagesContainer.addView(mv, 0);
 				}
+				
 				if (fir != null) {
-					fir.requestFocus();
+					final MessageBodyView firt = fir;
+					mScrollView.post(new Runnable() {
+						@Override
+						public void run() {
+							mScrollView.scrollTo(0, firt.getBottom());
+						}
+					});
 				}
+				
+				
 				isLoading = false;
 				break;
 			case SEND_MESSAGE:
@@ -594,6 +619,7 @@ public class ConversationView extends Activity {
 					break;
 				}
 				queryAndAddMessage(Integer.parseInt(msg.obj.toString()));
+				saveReaded();
 				break;
 			}
 		}

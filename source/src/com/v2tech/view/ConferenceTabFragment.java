@@ -47,6 +47,7 @@ public class ConferenceTabFragment extends Fragment {
 	private static final int REQUEST_ENTER_CONF_RESPONSE = 4;
 	private static final int REQUEST_EXIT_CONF = 5;
 	private static final int UPDATE_NEW_MESSAGE_NOTIFICATION = 6;
+	private static final int NEW_MESSAGE_READED_NOTIFICATION = 7;
 
 	private static final int RETRY_COUNT = 10;
 
@@ -163,6 +164,9 @@ public class ConferenceTabFragment extends Fragment {
 			intentFilter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
 			intentFilter.addAction(MainActivity.SERVICE_BOUNDED_EVENT);
 			intentFilter.addAction(JNIService.JNI_BROADCAST_NEW_MESSAGE);
+			intentFilter.addAction(PublicIntent.MESSAGE_READED_NOTIFICATION);
+			intentFilter.addCategory(PublicIntent.DEFAULT_CATEGORY);
+			intentFilter.addAction(PublicIntent.NEW_CONVERSATION);
 		}
 		return intentFilter;
 	}
@@ -298,8 +302,11 @@ public class ConferenceTabFragment extends Fragment {
 				mService = ((MainActivity) getActivity()).getService();
 				Message.obtain(mHandler, FILL_CONFS_LIST).sendToTarget();
 			} else if (JNIService.JNI_BROADCAST_NEW_MESSAGE.equals(intent
-					.getAction())) {
+					.getAction()) || PublicIntent.NEW_CONVERSATION.equals(intent.getAction())) {
 				Message.obtain(mHandler, UPDATE_NEW_MESSAGE_NOTIFICATION,
+						intent.getExtras().getLong("fromuid")).sendToTarget();
+			} else if (PublicIntent.MESSAGE_READED_NOTIFICATION.equals(intent.getAction())) {
+				Message.obtain(mHandler, NEW_MESSAGE_READED_NOTIFICATION,
 						intent.getExtras().getLong("fromuid")).sendToTarget();
 			}
 		}
@@ -413,6 +420,19 @@ public class ConferenceTabFragment extends Fragment {
 					GroupLayout gp = new GroupLayout(mContext, cov);
 					mItemList.add(new ScrollItem(cov, gp));
 					mGroupContainer.addView(gp);
+				}
+				break;
+				
+			case NEW_MESSAGE_READED_NOTIFICATION:
+				long fromuidT = (Long) msg.obj;
+				for (ScrollItem item : mItemList) {
+					if (item.cov.getExtId() == fromuidT
+							&& Conversation.TYPE_CONTACT.equals(item.cov
+									.getType())) {
+						item.cov.setNotiFlag(Conversation.NOTIFICATION);
+						((GroupLayout) item.gp).updateNotificator(false);
+						break;
+					}
 				}
 				break;
 			}
