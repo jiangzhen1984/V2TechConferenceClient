@@ -149,5 +149,10 @@ public class GroupLayout extends LinearLayout {
 		}
 
 	};
+	
+	
+	public void updateGroupOwner(String name) {
+		mGroupOwnerTV.setText(name);
+	}
 
 }

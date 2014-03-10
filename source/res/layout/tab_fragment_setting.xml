@@ -87,7 +87,7 @@
                             android:paddingLeft="30dp"
                             android:text="@string/setting_notification_session_msg"
                             android:textSize="20sp" />
-
+<!--  
                         <com.v2tech.view.cus.switcher.Switch
                            style="SwitchStyle"
                             android:id="@+id/switch1"
@@ -96,7 +96,7 @@
                             android:layout_alignParentRight="true"
                             android:layout_centerVertical="true"
                             android:text="" />
-     
+     -->
                     </RelativeLayout>
 
                     <RelativeLayout
@@ -110,7 +110,7 @@
                             android:layout_marginLeft="30dp"
                             android:text="@string/setting_notification_confs_msg"
                             android:textSize="20sp" />
-                        
+                  <!--      
                           <com.v2tech.view.cus.switcher.Switch
                             android:id="@+id/switch1"
                             style="SwitchStyle"
@@ -119,6 +119,7 @@
                             android:layout_alignParentRight="true"
                             android:layout_centerVertical="true"
                             android:text="" />
+                          -->
                     </RelativeLayout>
                 </LinearLayout>
 
