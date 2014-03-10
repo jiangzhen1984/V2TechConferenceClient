@@ -446,6 +446,7 @@ public class User implements Comparable<User> {
 	 */
 	public static User fromXml(int uID, String xml) {
 		String nickName = null;
+		String signature = null;
 		int pos = xml.indexOf("nickname='");
 		if (pos == -1) {
 			V2Log.w(" no nickname");
@@ -455,7 +456,16 @@ public class User implements Comparable<User> {
 				nickName = xml.subSequence(pos + 10, end).toString();
 			}
 		}
-		return new User(uID, nickName);
+		pos = xml.indexOf("sign='");
+		if (pos != -1) {
+			int end = xml.indexOf("'", pos + 6);
+			if (end != -1) {
+				signature = xml.subSequence(pos  + 6, end).toString();
+			}
+		}
+		 User u = new User(uID, nickName);
+		 u.setSignature(signature);
+		return u;
 	}
 
 }

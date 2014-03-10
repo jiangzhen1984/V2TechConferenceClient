@@ -224,5 +224,9 @@ public class ContactUserView extends LinearLayout {
 		}
 		mPhotoIV.setImageBitmap(bt);
 	}
+	
+	public void updateSign() {
+		mUserSignatureTV.setText(this.mUser.getSignature());
+	}
 
 }

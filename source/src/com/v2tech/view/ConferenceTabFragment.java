@@ -48,6 +48,7 @@ public class ConferenceTabFragment extends Fragment {
 	private static final int REQUEST_EXIT_CONF = 5;
 	private static final int UPDATE_NEW_MESSAGE_NOTIFICATION = 6;
 	private static final int NEW_MESSAGE_READED_NOTIFICATION = 7;
+	private static final int UPDATE_USER_SIGN = 8;
 
 	private static final int RETRY_COUNT = 10;
 
@@ -167,6 +168,7 @@ public class ConferenceTabFragment extends Fragment {
 			intentFilter.addAction(PublicIntent.MESSAGE_READED_NOTIFICATION);
 			intentFilter.addCategory(PublicIntent.DEFAULT_CATEGORY);
 			intentFilter.addAction(PublicIntent.NEW_CONVERSATION);
+			intentFilter.addAction(JNIService.JNI_BROADCAST_USER_UPDATE_SIGNATURE);
 		}
 		return intentFilter;
 	}
@@ -308,6 +310,8 @@ public class ConferenceTabFragment extends Fragment {
 			} else if (PublicIntent.MESSAGE_READED_NOTIFICATION.equals(intent.getAction())) {
 				Message.obtain(mHandler, NEW_MESSAGE_READED_NOTIFICATION,
 						intent.getExtras().getLong("fromuid")).sendToTarget();
+			} else if (JNIService.JNI_BROADCAST_USER_UPDATE_SIGNATURE.equals(intent.getAction())) {
+				Message.obtain(mHandler, UPDATE_USER_SIGN, intent.getExtras().get("uid")).sendToTarget();
 			}
 		}
 
@@ -431,6 +435,19 @@ public class ConferenceTabFragment extends Fragment {
 									.getType())) {
 						item.cov.setNotiFlag(Conversation.NOTIFICATION);
 						((GroupLayout) item.gp).updateNotificator(false);
+						break;
+					}
+				}
+				break;
+				
+			case UPDATE_USER_SIGN:
+				long fromuidS = (Long) msg.obj;
+				for (ScrollItem item : mItemList) {
+					if (item.cov.getExtId() == fromuidS
+							&& Conversation.TYPE_CONFERNECE.equals(item.cov
+									.getType())) {
+						User u = GlobalHolder.getInstance().getUser(fromuidS);
+						((GroupLayout) item.gp).updateGroupOwner(u==null?"": u.getName());
 						break;
 					}
 				}

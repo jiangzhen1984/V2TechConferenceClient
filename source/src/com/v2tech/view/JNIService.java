@@ -826,6 +826,12 @@ public class JNIService extends Service {
 						&& d.caller.what == JNI_LOAD_GROUP_OWNER_INFO) {
 					arg1 = d.caller.arg1;
 				}
+				
+				Intent sigatureIntent = new Intent();
+				sigatureIntent.setAction(JNI_BROADCAST_USER_UPDATE_SIGNATURE);
+				sigatureIntent.addCategory(JNI_BROADCAST_CATEGROY);
+				sigatureIntent.putExtra("uid", u.getmUserId());
+				sendBroadcast(sigatureIntent);
 				break;
 			case JNI_UPDATE_USER_STATUS:
 				Intent iun = new Intent(JNI_BROADCAST_USER_STATUS_NOTIFICATION);

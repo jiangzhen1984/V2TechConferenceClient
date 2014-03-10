@@ -69,6 +69,7 @@ public class GlobalHolder {
 			Long key = Long.valueOf(id);
 			User cu = mUserHolder.get(key);
 			if (cu != null) {
+				cu.setSignature(u.getSignature());
 				V2Log.e(" merge user information ");
 				return;
 			}
