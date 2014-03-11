@@ -241,7 +241,7 @@ public class VMessage {
 		sb.append("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n")
 				.append("<TChatData IsAutoReply=\"False\">\n")
 				.append("<FontList>\n")
-				.append("<TChatFont Color=\"255\" Name=\"Segoe UI\" Size=\"18\" Style=\"\"/>")
+				.append("<TChatFont Color=\"255\" Name=\"SimSun\" Size=\"9\" Style=\"\"/>")
 				.append("</FontList>\n")
 				.append("<ItemList>\n")
 				.append("<TTextChatItem NewLine=\"True\" FontIndex=\"0\" Text=\""

@@ -44,7 +44,6 @@ import com.v2tech.logic.VMessage;
 import com.v2tech.logic.VMessage.MessageType;
 import com.v2tech.util.V2Log;
 
-
 /**
  * This service is used to wrap JNI call.<br>
  * JNI calls are asynchronous, we don't expect activity involve JNI.<br>
@@ -68,9 +67,7 @@ public class JNIService extends Service {
 	public static final String JNI_BROADCAST_ATTENDEE_EXITED_NOTIFICATION = "com.v2tech.jni.broadcast.attendee.exited.notification";
 	public static final String JNI_BROADCAST_NEW_MESSAGE = "com.v2tech.jni.broadcast.new.message";
 
-
 	private boolean isDebug = true;
-
 
 	private final LocalBinder mBinder = new LocalBinder();
 
@@ -94,14 +91,12 @@ public class JNIService extends Service {
 
 	private Context mContext;
 
-	
 	// ////////////////////////////////////////
 
 	@Override
 	public void onCreate() {
 		super.onCreate();
 		mContext = this;
-
 
 		HandlerThread callback = new HandlerThread("callback");
 		callback.start();
@@ -159,9 +154,6 @@ public class JNIService extends Service {
 		}
 	}
 
-
-	
-
 	class GroupUserInfoOrig {
 		int gType;
 		long gId;
@@ -209,7 +201,6 @@ public class JNIService extends Service {
 	private static final int JNI_RECEIVED_MESSAGE = 91;
 	private static final int JNI_RECEIVED_VIDEO_INVITION = 92;
 
-
 	class JNICallbackHandler extends Handler {
 
 		public JNICallbackHandler(Looper looper) {
@@ -230,11 +221,12 @@ public class JNIService extends Service {
 				break;
 			case JNI_UPDATE_USER_INFO:
 				User u = User.fromXml(msg.arg1, (String) msg.obj);
-			
+
 				GlobalHolder.getInstance().putUser(u.getmUserId(), u);
 
 				Intent sigatureIntent = new Intent();
-				sigatureIntent.setAction(JNI_BROADCAST_USER_UPDATE_NAME_OR_SIGNATURE);
+				sigatureIntent
+						.setAction(JNI_BROADCAST_USER_UPDATE_NAME_OR_SIGNATURE);
 				sigatureIntent.addCategory(JNI_BROADCAST_CATEGROY);
 				sigatureIntent.putExtra("uid", u.getmUserId());
 				sendBroadcast(sigatureIntent);
@@ -291,7 +283,7 @@ public class JNIService extends Service {
 							new AsynResult(AsynResult.AsynState.SUCCESS,
 									attendeeUser)).sendToTarget();
 				} else {
-					
+
 				}
 				break;
 			case JNI_ATTENDEE_EXITED_NOTIFICATION:
@@ -319,8 +311,8 @@ public class JNIService extends Service {
 						+ attendee.getName());
 				break;
 			case JNI_REMOTE_USER_DEVICE_INFO_NOTIFICATION:
-				GlobalHolder.getInstance().addAttendeeDevice(UserDeviceConfig
-						.parseFromXml((String) msg.obj));
+				GlobalHolder.getInstance().addAttendeeDevice(
+						UserDeviceConfig.parseFromXml((String) msg.obj));
 				break;
 
 			case JNI_RECEIVED_MESSAGE:
@@ -358,36 +350,51 @@ public class JNIService extends Service {
 			cv.put(ContentDescriptor.Messages.Cols.MSG_CONTENT, vm.getText());
 			cv.put(ContentDescriptor.Messages.Cols.MSG_TYPE, vm.getType()
 					.getIntValue());
+			cv.put(ContentDescriptor.Conversation.Cols.OWNER, GlobalHolder
+					.getInstance().getCurrentUserId());
 			cv.put(ContentDescriptor.Messages.Cols.SEND_TIME,
 					vm.getNormalDateStr());
-			Uri uri= getContentResolver().insert(
+			Uri uri = getContentResolver().insert(
 					ContentDescriptor.Messages.CONTENT_URI, cv);
-			
-			//TODO add notification
-			 Conversation cov = GlobalHolder.getInstance().findConversationByType(Conversation.TYPE_CONTACT, vm.getUser().getmUserId());
+
+			// TODO add notification
+			Conversation cov = GlobalHolder.getInstance()
+					.findConversationByType(Conversation.TYPE_CONTACT,
+							vm.getUser().getmUserId());
 			if (cov == null) {
-				cov = new ContactConversation(vm.getUser(), Conversation.NOTIFICATION);
+				cov = new ContactConversation(vm.getUser(),
+						Conversation.NOTIFICATION);
 				GlobalHolder.getInstance().addConversation(cov);
 				ContentValues conCv = new ContentValues();
-				conCv.put(ContentDescriptor.Conversation.Cols.EXT_ID, vm.getUser().getmUserId());
-				conCv.put(ContentDescriptor.Conversation.Cols.TYPE, Conversation.TYPE_CONTACT);
-				conCv.put(ContentDescriptor.Conversation.Cols.EXT_NAME, vm.getUser().getName());
-				conCv.put(ContentDescriptor.Conversation.Cols.NOTI_FLAG, Conversation.NOTIFICATION);
-				getContentResolver().insert(ContentDescriptor.Conversation.CONTENT_URI, conCv);
-				 GlobalHolder.getInstance().addConversation(cov);
+				conCv.put(ContentDescriptor.Conversation.Cols.EXT_ID, vm
+						.getUser().getmUserId());
+				conCv.put(ContentDescriptor.Conversation.Cols.TYPE,
+						Conversation.TYPE_CONTACT);
+				conCv.put(ContentDescriptor.Conversation.Cols.EXT_NAME, vm
+						.getUser().getName());
+				conCv.put(ContentDescriptor.Conversation.Cols.NOTI_FLAG,
+						Conversation.NOTIFICATION);
+				conCv.put(ContentDescriptor.Conversation.Cols.OWNER,
+						GlobalHolder.getInstance().getCurrentUserId());
+				getContentResolver().insert(
+						ContentDescriptor.Conversation.CONTENT_URI, conCv);
+				GlobalHolder.getInstance().addConversation(cov);
 			} else {
 				cov.setNotiFlag(Conversation.NOTIFICATION);
-				
+
 				ContentValues ct = new ContentValues();
-				ct.put(ContentDescriptor.Conversation.Cols.NOTI_FLAG, Conversation.NOTIFICATION);
+				ct.put(ContentDescriptor.Conversation.Cols.NOTI_FLAG,
+						Conversation.NOTIFICATION);
 				getContentResolver().update(
 						ContentDescriptor.Conversation.CONTENT_URI,
 						ct,
 						ContentDescriptor.Conversation.Cols.EXT_ID + "=? and "
-								+ ContentDescriptor.Conversation.Cols.TYPE + "=?",
-						new String[] { vm.getUser().getmUserId() + "", Conversation.TYPE_CONTACT });
+								+ ContentDescriptor.Conversation.Cols.TYPE
+								+ "=?",
+						new String[] { vm.getUser().getmUserId() + "",
+								Conversation.TYPE_CONTACT });
 			}
-			
+
 			return uri;
 		}
 
@@ -398,9 +405,7 @@ public class JNIService extends Service {
 					notification);
 			r.play();
 		}
-		
-		
-		
+
 	}
 
 	// ///////////////////////////////////////////////
@@ -466,7 +471,7 @@ public class JNIService extends Service {
 				u.setAvatarPath(AvatarName);
 			}
 			GlobalHolder.getInstance().putAvatar(nUserID, AvatarName);
-			
+
 			Intent i = new Intent();
 			i.addCategory(JNI_BROADCAST_CATEGROY);
 			i.setAction(JNI_BROADCAST_USER_AVATAR_CHANGED_NOTIFICATION);
@@ -474,10 +479,8 @@ public class JNIService extends Service {
 			i.putExtra("avatar", AvatarName);
 			sendBroadcast(i);
 		}
-		
 
 	}
-	
 
 	class GroupRequestCB implements GroupRequestCallback {
 		private JNICallbackHandler mCallbackHandler;
@@ -521,7 +524,7 @@ public class JNIService extends Service {
 		@Override
 		public void OnConfMemberEnterCallback(long nConfID, long nTime,
 				String szUserInfos) {
-			//FIXME should send information at here?
+			// FIXME should send information at here?
 			int start = szUserInfos.indexOf("id='");
 			if (start != -1) {
 				int end = szUserInfos.indexOf("'", start + 4);

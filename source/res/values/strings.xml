@@ -3,8 +3,9 @@
 
     <string name="error_time_out">操作超时!</string>
     <string name="app_name">Bizcom</string>
-     <string name="banner_desc">全球网络会议领导者</string>
-         <string name="textOn">ON</string>
+    <string name="banner_desc">全球网络会议领导者</string>
+    <string name="textOn">ON</string>
     <string name="textOff">OFF</string>
+    <string name="quit_promption">请再按一次退出</string>
 
 </resources>

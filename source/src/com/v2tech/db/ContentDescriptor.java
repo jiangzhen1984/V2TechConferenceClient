@@ -78,15 +78,15 @@ public final class ContentDescriptor {
 
 		public static class Cols {
 
-			public static final String ID = BaseColumns._ID;
-
+			public static final String ID = BaseColumns._ID;			
 			public static final String TYPE = "cov_type";
 			public static final String EXT_ID = "ext_id";
 			public static final String EXT_NAME = "ext_name";
 			public static final String NOTI_FLAG = "noti_flag";
+			public static final String OWNER ="owner";
 
 			public static final String[] ALL_CLOS = { ID, TYPE,
-				EXT_ID,EXT_NAME,NOTI_FLAG };
+				EXT_ID,EXT_NAME,NOTI_FLAG,OWNER };
 		}
 	}
 }

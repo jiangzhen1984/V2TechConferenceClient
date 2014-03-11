@@ -166,6 +166,7 @@ public class VideoRequest {
 	 */
 	private void OnVideoChatInvite(long nGroupID, int nBusinessType,
 			long nFromUserID, String szDeviceID) {
+	//	acceptVideoChat(nGroupID, nFromUserID, szDeviceID, nBusinessType);
 		for (VideoRequestCallback cb : this.callback) {
 			cb.OnVideoChatInviteCallback(nGroupID, nBusinessType, nFromUserID,
 					szDeviceID);
@@ -173,6 +174,7 @@ public class VideoRequest {
 		V2Log.d("OnVideoChatInvite: nGroupID:" + nGroupID + "  nBusinessType:"
 				+ nBusinessType + " nFromUserID:" + nFromUserID
 				+ "  szDeviceID:" + szDeviceID);
+		
 	}
 
 	// 鏋氫妇鎽勫儚澶�

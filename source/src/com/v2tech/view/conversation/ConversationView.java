@@ -343,6 +343,7 @@ public class ConversationView extends Activity {
 					Conversation.TYPE_CONTACT);
 			cv.put(ContentDescriptor.Conversation.Cols.EXT_NAME,
 					remote.getName());
+			cv.put(ContentDescriptor.Conversation.Cols.OWNER, GlobalHolder.getInstance().getCurrentUserId());
 			if (flag) {
 				cv.put(ContentDescriptor.Conversation.Cols.NOTI_FLAG,
 						Conversation.NOTIFICATION);

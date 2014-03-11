@@ -34,8 +34,10 @@ public class ContactUserView extends LinearLayout {
 	private ImageView mStatusIV;
 
 	private Dialog mUserActionDialog;
-	
-	
+
+	private RelativeLayout contentContainer;
+
+	private int padding = 0;
 
 	public ContactUserView(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
@@ -63,7 +65,7 @@ public class ContactUserView extends LinearLayout {
 		View view = LayoutInflater.from(getContext()).inflate(
 				R.layout.contacts_user_view, null, false);
 
-		RelativeLayout contentContainer = (RelativeLayout) view
+		contentContainer = (RelativeLayout) view
 				.findViewById(R.id.contact_user_view_root);
 
 		mPhotoIV = (ImageView) view.findViewById(R.id.contact_user_img);
@@ -79,19 +81,21 @@ public class ContactUserView extends LinearLayout {
 		mUserSignatureTV.setText(mUser.getSignature() == null ? "" : mUser
 				.getSignature());
 
-
 		mStatusIV = (ImageView) view.findViewById(R.id.contact_user_status_iv);
 		updateStatus(u.getmStatus());
-		
-		if (this.mUser.getmUserId() != GlobalHolder.getInstance().getCurrentUserId()) {
+
+		if (this.mUser.getmUserId() != GlobalHolder.getInstance()
+				.getCurrentUserId()) {
 			mButtonIV.setOnClickListener(new OnClickListener() {
-	
+
 				@Override
 				public void onClick(View view) {
 					getActionDialog().show();
 				}
-	
+
 			});
+		} else {
+			mButtonIV.setVisibility(View.GONE);
 		}
 
 		this.setOnClickListener(new OnClickListener() {
@@ -107,9 +111,11 @@ public class ContactUserView extends LinearLayout {
 				.getPaddingTop(), this.getPaddingRight(), this
 				.getPaddingRight());
 
-		contentContainer.setPadding((u.getFirstBelongsGroup() == null ? 2 : u
-				.getFirstBelongsGroup().getLevel() + 1) * 35, contentContainer
-				.getPaddingTop(), contentContainer.getPaddingRight(),
+		padding = (u.getFirstBelongsGroup() == null ? 2 : u
+				.getFirstBelongsGroup().getLevel() + 1) * 35;
+
+		contentContainer.setPadding(padding, contentContainer.getPaddingTop(),
+				contentContainer.getPaddingRight(),
 				contentContainer.getPaddingRight());
 
 		this.addView(view, new LinearLayout.LayoutParams(
@@ -209,14 +215,13 @@ public class ContactUserView extends LinearLayout {
 		default:
 			break;
 		}
-		if (st == User.Status.OFFLINE || st == User.Status.HIDDEN ) {
+		if (st == User.Status.OFFLINE || st == User.Status.HIDDEN) {
 			mStatusIV.setVisibility(View.GONE);
 		} else {
 			mStatusIV.setVisibility(View.VISIBLE);
 		}
 	}
-	
-	
+
 	public void updateAvatar(Bitmap bt) {
 		if (bt == null) {
 			V2Log.w(" Invalid bitmap");
@@ -224,9 +229,23 @@ public class ContactUserView extends LinearLayout {
 		}
 		mPhotoIV.setImageBitmap(bt);
 	}
-	
+
 	public void updateSign() {
 		mUserSignatureTV.setText(this.mUser.getSignature());
+	}
+
+	public void removePadding() {
+		contentContainer.setPadding(0, contentContainer.getPaddingTop(),
+				contentContainer.getPaddingRight(),
+				contentContainer.getPaddingRight());
+		this.setPadding(0, this.getPaddingTop(), this.getPaddingRight(),
+				this.getPaddingRight());
+	}
+
+	public void setPadding() {
+		contentContainer.setPadding(padding, contentContainer.getPaddingTop(),
+				contentContainer.getPaddingRight(),
+				contentContainer.getPaddingRight());
 	}
 
 }

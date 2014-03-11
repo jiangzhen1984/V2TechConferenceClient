@@ -14,6 +14,7 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import com.v2tech.service.*;
 
 import com.v2tech.R;
 
@@ -29,6 +30,8 @@ public class VideoConversationFragment extends Fragment {
 	private LocalHandler mLocalHandler;
 	
 	private VideoConversationListener call;
+	
+	private ConferenceService cs = new ConferenceService();
 	
 
 	@Override

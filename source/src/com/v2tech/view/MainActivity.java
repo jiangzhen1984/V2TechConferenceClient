@@ -11,6 +11,7 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.res.Resources;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.Process;
 import android.support.v4.app.Fragment;
@@ -21,6 +22,7 @@ import android.support.v4.view.ViewPager;
 import android.view.View;
 import android.widget.TabHost;
 import android.widget.TabHost.TabContentFactory;
+import android.widget.Toast;
 
 import com.v2tech.R;
 import com.v2tech.view.JNIService.LocalBinder;
@@ -31,6 +33,7 @@ public class MainActivity extends FragmentActivity implements
 	private Context mContext;
 	private JNIService mService;
 	private boolean isBound = false;
+	private boolean exitedFlag = false;
 
 	private TabHost mTabHost;
 	private ViewPager mViewPager;
@@ -177,8 +180,22 @@ public class MainActivity extends FragmentActivity implements
 	
 	@Override
 	public void onBackPressed() {
-		updateLoggedInFlag();
-		Process.killProcess(Process.myPid());
+		if (exitedFlag) {
+			updateLoggedInFlag();
+			Process.killProcess(Process.myPid());
+		} else {
+			exitedFlag = true;
+			Toast.makeText(this, R.string.quit_promption, Toast.LENGTH_SHORT).show();
+			Handler handler = new Handler();
+			handler.postDelayed(new Runnable() {
+
+				@Override
+				public void run() {
+					exitedFlag = false;
+				}
+				
+			}, 1000);
+		}
 	}
 
 	/**

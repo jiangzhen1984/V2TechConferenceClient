@@ -328,11 +328,20 @@ public class ContactsTabFragment extends Fragment {
 				updatePosFlag = true;
 				break;
 			}
+			if (index ==  mItemList.size() -1) {
+				updatePosFlag = true;
+				break;
+			}
 		} while (index >= 0 && index < mItemList.size());
 
 		if (updatePosFlag) {
-			mItemList.remove(it);
-			mItemList.add(index, it);
+			if (index == mItemList.size() -1) {
+				mItemList.remove(it);
+				mItemList.add(it);
+			} else {
+				mItemList.remove(it);
+				mItemList.add(index+1, it);
+			}
 			adapter.notifyDataSetChanged();
 		}
 		
@@ -342,7 +351,9 @@ public class ContactsTabFragment extends Fragment {
 	private void updateSearchedUserList(List<User> lu) {
 		mItemList = new ArrayList<ListItem>();
 		for (User u : lu) {
-			mItemList.add(new ListItem(u));
+			ListItem item = new ListItem(u);
+			((ContactUserView)item.v).removePadding();
+			mItemList.add(item);
 		}
 		adapter.notifyDataSetChanged();
 	}
