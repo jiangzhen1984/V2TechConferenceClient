@@ -49,6 +49,7 @@
         android:layout_marginLeft="30dp"
         android:layout_toRightOf="@+id/group_list_conference_image_view_rl"
         android:layout_alignBottom="@+id/group_list_conference_image_view_rl"
+        android:ellipsize="none"
         android:text="TextView" />
 
     <TextView

@@ -307,7 +307,9 @@ public class ConversationView extends Activity {
 
 	private void doSendMessage() {
 		String content = mMessageET.getEditableText().toString();
-
+		if (content == null || content.equals("")) {
+			return;
+		}
 		VMessage m = new VMessage(local, remote, content);
 		saveMessageToDB(m);
 

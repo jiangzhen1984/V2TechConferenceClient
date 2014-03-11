@@ -116,6 +116,7 @@
                 android:layout_weight="1"
                 android:background="@drawable/rounded_corners"
                 android:inputType="number"
+                 android:maxLength="5"
                 android:paddingLeft="8dp" >
 
                 <requestFocus />

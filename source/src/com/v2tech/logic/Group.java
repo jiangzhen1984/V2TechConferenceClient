@@ -223,15 +223,18 @@ public class Group {
 		if (g == null) {
 			return 0;
 		}
-			for (User u : g.getUsers()) {
-				if (u.getmStatus() == User.Status.ONLINE) {
-					c++;
-				}
+		for (User u : g.getUsers()) {
+			if (u.getmStatus() == User.Status.ONLINE
+					|| u.getmStatus() == User.Status.BUSY
+					|| u.getmStatus() == User.Status.DO_NOT_DISTURB
+					|| u.getmStatus() == User.Status.LEAVE) {
+				c++;
 			}
+		}
 
-			for (Group subG : g.getChildGroup()) {
-				c += getUserOnlineCount(subG);
-			}
+		for (Group subG : g.getChildGroup()) {
+			c += getUserOnlineCount(subG);
+		}
 		return c;
 	}
 
@@ -257,7 +260,6 @@ public class Group {
 	public int getLevel() {
 		return level;
 	}
-
 
 	@Override
 	public int hashCode() {
