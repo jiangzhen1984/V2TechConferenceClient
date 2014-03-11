@@ -5,24 +5,7 @@ import com.v2tech.logic.CameraConfiguration;
 
 public class RequestUpdateCameraParametersResponse extends JNIResponse {
 
-	
-	public enum Result {
-		SUCCESS(0), FAILED(1);
-
-		private int val;
-		private Result(int i) {
-			this.val = i;
-		}
-		
-		public int value() {
-			return val;
-		}
-		
-	}
-	
-	
 	CameraConfiguration config;
-	Result er;
 
 	/**
 	 * This class is wrapper that wrap response of request to update camera
@@ -31,9 +14,8 @@ public class RequestUpdateCameraParametersResponse extends JNIResponse {
 	 */
 	public RequestUpdateCameraParametersResponse(CameraConfiguration config,
 			Result result) {
-		super();
+		super(result);
 		this.config = config;
-		er = result;
 	}
 
 }

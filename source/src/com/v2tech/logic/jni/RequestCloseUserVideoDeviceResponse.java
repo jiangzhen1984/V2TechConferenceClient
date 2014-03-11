@@ -8,19 +8,7 @@ package com.v2tech.logic.jni;
 public class RequestCloseUserVideoDeviceResponse extends JNIResponse {
 
 	
-	public enum Result {
-		SUCCESS(0), FAILED(1);
-
-		private int val;
-		private Result(int i) {
-			this.val = i;
-		}
-		
-		public int value() {
-			return val;
-		}
-		
-	}
+	
 	
 	
 	
@@ -36,7 +24,7 @@ public class RequestCloseUserVideoDeviceResponse extends JNIResponse {
 	 */
 	public RequestCloseUserVideoDeviceResponse(long nConfID, long nTime,
 			Result result) {
-		super();
+		super(result);
 		this.nConfID = nConfID;
 		this.nTime = nTime;
 		er = result;

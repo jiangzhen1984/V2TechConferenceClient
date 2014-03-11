@@ -2,8 +2,10 @@ package com.v2tech.logic;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.v2tech.util.V2Log;
 
@@ -24,6 +26,9 @@ public class GlobalHolder {
 	private Map<Long, String> mAvatarHolder = new HashMap<Long, String>();
 
 	private List<Conversation> mConversationHolder = new ArrayList<Conversation>();
+	
+
+	private Set<UserDeviceConfig> mUserDeviceList = new HashSet<UserDeviceConfig>();
 
 	public static synchronized GlobalHolder getInstance() {
 		if (holder == null) {
@@ -70,6 +75,7 @@ public class GlobalHolder {
 			User cu = mUserHolder.get(key);
 			if (cu != null) {
 				cu.setSignature(u.getSignature());
+				cu.setName(u.getName());
 				V2Log.e(" merge user information ");
 				return;
 			}
@@ -78,10 +84,8 @@ public class GlobalHolder {
 	}
 
 	public User getUser(long id) {
-		synchronized(mUserLock) {
 			Long key = Long.valueOf(id);
 			return mUserHolder.get(key);
-		}
 	}
 
 	public void updateUserStatus(User u) {
@@ -121,6 +125,7 @@ public class GlobalHolder {
 			mConfGroup = list;
 		}
 		for (Group g : list) {
+			g.setOwnerUser(this.getUser(g.getOwner()));
 			populateGroup(g);
 		}
 	}
@@ -242,5 +247,34 @@ public class GlobalHolder {
 			}
 		}
 		return null;
+	}
+	
+	
+
+	/**
+	 * Get user's video device according to user id.<br>
+	 * This function never return null, even through we don't receive video
+	 * device data from server.
+	 * 
+	 * @param uid
+	 *            user's id
+	 * @return list of user device
+	 */
+	public List<UserDeviceConfig> getAttendeeDevice(long uid) {
+		List<UserDeviceConfig> l = new ArrayList<UserDeviceConfig>();
+		for (UserDeviceConfig udl : mUserDeviceList) {
+			if (udl.getUserID() == uid) {
+				l.add(udl);
+			}
+		}
+		return l;
+	}
+	
+	public void addAttendeeDevice(UserDeviceConfig udc) {
+		mUserDeviceList.add(udc);
+	}
+	
+	public void addAttendeeDevice(List<UserDeviceConfig> udcList) {
+		mUserDeviceList.addAll(udcList);
 	}
 }

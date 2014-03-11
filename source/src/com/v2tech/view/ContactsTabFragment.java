@@ -124,7 +124,7 @@ public class ContactsTabFragment extends Fragment {
 					.addAction(JNIService.JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION);
 			intentFilter
 					.addAction(JNIService.JNI_BROADCAST_USER_AVATAR_CHANGED_NOTIFICATION);
-			intentFilter.addAction(JNIService.JNI_BROADCAST_USER_UPDATE_SIGNATURE);
+			intentFilter.addAction(JNIService.JNI_BROADCAST_USER_UPDATE_NAME_OR_SIGNATURE);
 		}
 		return intentFilter;
 	}
@@ -176,7 +176,7 @@ public class ContactsTabFragment extends Fragment {
 				Object[] ar = new Object[] { intent.getExtras().get("uid"),
 						intent.getExtras().get("avatar") };
 				Message.obtain(mHandler, UPDATE_USER_AVATAR, ar).sendToTarget();
-			} else if (JNIService.JNI_BROADCAST_USER_UPDATE_SIGNATURE.equals(intent.getAction())) {
+			} else if (JNIService.JNI_BROADCAST_USER_UPDATE_NAME_OR_SIGNATURE.equals(intent.getAction())) {
 				Message.obtain(mHandler, UPDATE_USER_SIGN, intent.getExtras().get("uid")).sendToTarget();
 			}
 		}

@@ -8,25 +8,11 @@ package com.v2tech.logic.jni;
 public class RequestEnterConfResponse extends JNIResponse {
 
 	
-	enum EnteredResult {
-		SUCCESS(0), FAILED(1);
-		
-		private int val;
-		private EnteredResult(int i) {
-			this.val = i;
-		}
-		
-		public int value() {
-			return val;
-		}
-	}
-	
 	
 	
 	long nConfID;
 	long nTime;
 	String szConfData;
-	EnteredResult er;
 
 	/**
 	 * This class is wrapper that wrap{@link com.V2.jni.ConfRequestCallback#OnEnterConfCallback(long, long,
@@ -39,13 +25,15 @@ public class RequestEnterConfResponse extends JNIResponse {
 	 *      String, int)
 	 */
 	public RequestEnterConfResponse(long nConfID, long nTime,
-			String szConfData, int nJoinResult) {
-		super();
+			String szConfData, Result res) {
+		super(res);
 		this.nConfID = nConfID;
 		this.nTime = nTime;
 		this.szConfData = szConfData;
-		er = nJoinResult == EnteredResult.SUCCESS.value() ? EnteredResult.SUCCESS
-				: EnteredResult.FAILED;
 	}
-
+	
+	
+	public long getConferenceID() {
+		return nConfID;
+	}
 }

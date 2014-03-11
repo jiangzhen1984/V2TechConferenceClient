@@ -1,12 +1,14 @@
-package com.v2tech.logic;
+package com.v2tech.service;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import com.v2tech.util.V2Log;
-
 import android.os.Handler;
 import android.os.Message;
+
+import com.v2tech.logic.AsynResult;
+import com.v2tech.logic.jni.JNIResponse;
+import com.v2tech.util.V2Log;
 
 public abstract class AbstractHandler extends Handler {
 
@@ -17,6 +19,9 @@ public abstract class AbstractHandler extends Handler {
 	protected static final int MONITOR_TYPE_DEVICE = 0X02000000;
 
 	protected static final int MONITOR_TYPE_CONTACT = 0X03000000;
+	
+	
+	protected static final int DEFAULT_TIME_OUT_SECS = 10;
 
 	private Map<Integer, Meta> metaHolder = new HashMap<Integer, Meta>();
 
@@ -62,7 +67,13 @@ public abstract class AbstractHandler extends Handler {
 		case REQUEST_TIME_OUT:
 			Meta meta = metaHolder.get(Integer.valueOf(msg.arg1));
 			if (meta != null && meta.caller != null) {
+				Object origObject =meta.caller.obj ;
 				meta.caller.obj = new AsynResult(AsynResult.AsynState.TIME_OUT, null);
+				JNIResponse jniRes = (JNIResponse)msg.obj;
+				if (jniRes == null) {
+					jniRes = new JNIResponse(JNIResponse.Result.FAILED);
+				}
+				jniRes.callerObject = origObject;
 				meta.caller.sendToTarget();
 			} else {
 				V2Log.w("Doesn't find time message in the queue :"+ msg.arg1);

@@ -46,7 +46,7 @@ public class VMessage {
 
 	private User mToUser;
 
-	MessageType mType;
+	protected MessageType mType;
 
 	private String mText;
 

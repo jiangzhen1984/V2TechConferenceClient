@@ -1,4 +1,4 @@
-package com.v2tech.logic;
+package com.v2tech.service;
 
 import android.os.Handler;
 import android.os.Message;
@@ -7,6 +7,12 @@ import com.V2.jni.ConfRequest;
 import com.V2.jni.ConfRequestCallback;
 import com.V2.jni.VideoRequest;
 import com.V2.jni.VideoRequestCallback;
+import com.v2tech.logic.AsynResult;
+import com.v2tech.logic.CameraConfiguration;
+import com.v2tech.logic.Conference;
+import com.v2tech.logic.ConferencePermission;
+import com.v2tech.logic.UserDeviceConfig;
+import com.v2tech.logic.AsynResult.AsynState;
 import com.v2tech.logic.jni.JNIResponse;
 import com.v2tech.logic.jni.RequestCloseUserVideoDeviceResponse;
 import com.v2tech.logic.jni.RequestEnterConfResponse;
@@ -21,22 +27,30 @@ import com.v2tech.util.V2Log;
  * This class is use to conference business.
  * </ul>
  * <ul>
- * 	When user entered conference room, user can use {@link #requestOpenVideoDevice(Conference, UserDeviceConfig, Message)} and
- * {@link #requestCloseVideoDevice(Conference, UserDeviceConfig, Message)} to open or close video include self.
+ * When user entered conference room, user can use
+ * {@link #requestOpenVideoDevice(Conference, UserDeviceConfig, Message)} and
+ * {@link #requestCloseVideoDevice(Conference, UserDeviceConfig, Message)} to
+ * open or close video include self.
  * </ul>
  * <ul>
- * <li>User request to enter conference : {@link #requestEnterConference(Conference, Message)} </li>
- * <li>User request to exit conference : {@link #requestExitConference(Conference, Message)}</li>
- * <li>User request to open video device : {@link #requestOpenVideoDevice(Conference, UserDeviceConfig, Message)}</li>
- * <li>User request to close video device: {@link #requestCloseVideoDevice(Conference, UserDeviceConfig, Message)}</li>
- * <li>User request to request speak in conference {@link #applyForControlPermission(ConferencePermission, Message)}</li>
- * <li>User request to release speaker in conference {@link #applyForReleasePermission(ConferencePermission, Message)}</li>
+ * <li>User request to enter conference :
+ * {@link #requestEnterConference(Conference, Message)}</li>
+ * <li>User request to exit conference :
+ * {@link #requestExitConference(Conference, Message)}</li>
+ * <li>User request to open video device :
+ * {@link #requestOpenVideoDevice(Conference, UserDeviceConfig, Message)}</li>
+ * <li>User request to close video device:
+ * {@link #requestCloseVideoDevice(Conference, UserDeviceConfig, Message)}</li>
+ * <li>User request to request speak in conference
+ * {@link #applyForControlPermission(ConferencePermission, Message)}</li>
+ * <li>User request to release speaker in conference
+ * {@link #applyForReleasePermission(ConferencePermission, Message)}</li>
  * </ul>
  * 
  * @author 28851274
  * 
  */
-public class ConferenceBusiness extends AbstractHandler {
+public class ConferenceService extends AbstractHandler {
 
 	private static final int JNI_REQUEST_ENTER_CONF = 1;
 	private static final int JNI_REQUEST_EXIT_CONF = 2;
@@ -49,12 +63,10 @@ public class ConferenceBusiness extends AbstractHandler {
 	private static final int JNI_ATTENDEE_EXITED_NOTIFICATION = 58;
 	private static final int JNI_UPDATE_CAMERA_PAR = 75;
 
-	private static final int DEFAULT_TIME_OUT = 10;
-
 	private VideoRequestCB videoCallback;
 	private ConfRequestCB confCallback;
 
-	public ConferenceBusiness() {
+	public ConferenceService() {
 		super();
 		videoCallback = new VideoRequestCB(this);
 		VideoRequest.getInstance().addCallback(videoCallback);
@@ -75,7 +87,7 @@ public class ConferenceBusiness extends AbstractHandler {
 	 * @see com.v2tech.logic.jni.RequestEnterConfResponse
 	 */
 	public void requestEnterConference(Conference conf, Message caller) {
-		initTimeoutMessage(JNI_REQUEST_ENTER_CONF, null, DEFAULT_TIME_OUT,
+		initTimeoutMessage(JNI_REQUEST_ENTER_CONF, null, DEFAULT_TIME_OUT_SECS,
 				caller);
 		ConfRequest.getInstance().enterConf(conf.getID());
 	}
@@ -91,13 +103,12 @@ public class ConferenceBusiness extends AbstractHandler {
 	 *            {@link com.v2tech.logic.jni.RequestExitedConfResponse}
 	 */
 	public void requestExitConference(Conference conf, Message caller) {
-		initTimeoutMessage(JNI_REQUEST_EXIT_CONF, null, DEFAULT_TIME_OUT,
+		initTimeoutMessage(JNI_REQUEST_EXIT_CONF, null, DEFAULT_TIME_OUT_SECS,
 				caller);
 		ConfRequest.getInstance().exitConf(conf.getID());
 		// send response to caller because exitConf no call back from JNI
 		JNIResponse jniRes = new RequestExitedConfResponse(conf.getID(),
-				System.currentTimeMillis() / 1000,
-				RequestExitedConfResponse.ExitedResult.SUCCESS);
+				System.currentTimeMillis() / 1000, JNIResponse.Result.SUCCESS);
 		Message res = Message.obtain(this, JNI_REQUEST_EXIT_CONF, jniRes);
 		// send delayed message for that make sure send response after JNI
 		// request
@@ -122,7 +133,7 @@ public class ConferenceBusiness extends AbstractHandler {
 	 */
 	public void requestOpenVideoDevice(Conference conf,
 			UserDeviceConfig userDevice, Message caller) {
-		initTimeoutMessage(JNI_REQUEST_OPEN_VIDEO, null, DEFAULT_TIME_OUT,
+		initTimeoutMessage(JNI_REQUEST_OPEN_VIDEO, null, DEFAULT_TIME_OUT_SECS,
 				caller);
 
 		VideoRequest.getInstance().openVideoDevice(conf.getID(),
@@ -156,8 +167,8 @@ public class ConferenceBusiness extends AbstractHandler {
 	public void requestCloseVideoDevice(Conference conf,
 			UserDeviceConfig userDevice, Message caller) {
 
-		initTimeoutMessage(JNI_REQUEST_CLOSE_VIDEO, null, DEFAULT_TIME_OUT,
-				caller);
+		initTimeoutMessage(JNI_REQUEST_CLOSE_VIDEO, null,
+				DEFAULT_TIME_OUT_SECS, caller);
 
 		VideoRequest.getInstance().closeVideoDevice(conf.getID(),
 				userDevice.getUserID(), userDevice.getDeviceID(),
@@ -185,7 +196,8 @@ public class ConferenceBusiness extends AbstractHandler {
 	 */
 	public void applyForControlPermission(ConferencePermission type,
 			Message caller) {
-		initTimeoutMessage(JNI_REQUEST_SPEAK, null, DEFAULT_TIME_OUT, caller);
+		initTimeoutMessage(JNI_REQUEST_SPEAK, null, DEFAULT_TIME_OUT_SECS,
+				caller);
 
 		ConfRequest.getInstance().applyForControlPermission(type.intValue());
 
@@ -197,8 +209,6 @@ public class ConferenceBusiness extends AbstractHandler {
 		this.sendMessageDelayed(res, 300);
 	}
 
-	
-	
 	/**
 	 * Request release permission on the conference.
 	 * 
@@ -214,8 +224,8 @@ public class ConferenceBusiness extends AbstractHandler {
 	public void applyForReleasePermission(ConferencePermission type,
 			Message caller) {
 
-		initTimeoutMessage(JNI_REQUEST_RELEASE_SPEAK, null, DEFAULT_TIME_OUT,
-				caller);
+		initTimeoutMessage(JNI_REQUEST_RELEASE_SPEAK, null,
+				DEFAULT_TIME_OUT_SECS, caller);
 
 		ConfRequest.getInstance().releaseControlPermission(type.intValue());
 
@@ -226,24 +236,24 @@ public class ConferenceBusiness extends AbstractHandler {
 		Message res = Message.obtain(this, JNI_REQUEST_RELEASE_SPEAK, jniRes);
 		this.sendMessageDelayed(res, 300);
 	}
-	
-	
+
 	/**
 	 * Update current user's camera. Including front-side or back-side camera
 	 * switch.
-	 * @param cc {@link CameraConfiguration}
-	 * @param caller  if input is null, ignore response Message.object is
+	 * 
+	 * @param cc
+	 *            {@link CameraConfiguration}
+	 * @param caller
+	 *            if input is null, ignore response Message.object is
 	 *            {@link AsynResult} AsynResult.obj is
 	 *            {@link com.v2tech.logic.jni.RequestUpdateCameraParametersResponse}
 	 */
 	public void updateCameraParameters(CameraConfiguration cc, Message caller) {
-		initTimeoutMessage(JNI_UPDATE_CAMERA_PAR, null, DEFAULT_TIME_OUT,
+		initTimeoutMessage(JNI_UPDATE_CAMERA_PAR, null, DEFAULT_TIME_OUT_SECS,
 				caller);
 		VideoRequest.getInstance().setCapParam(cc.getDeviceId(),
 				cc.getCameraIndex(), cc.getFrameRate(), cc.getBitRate());
 	}
-	
-	
 
 	@Override
 	public void handleMessage(Message msg) {
@@ -262,7 +272,10 @@ public class ConferenceBusiness extends AbstractHandler {
 		case JNI_REQUEST_SPEAK:
 		case JNI_REQUEST_RELEASE_SPEAK:
 		case JNI_UPDATE_CAMERA_PAR:
+			Object origObject = caller.obj;
 			caller.obj = new AsynResult(AsynResult.AsynState.SUCCESS, msg.obj);
+			JNIResponse jniRes = (JNIResponse) msg.obj;
+			jniRes.callerObject = origObject;
 			break;
 		default:
 			break;
@@ -282,8 +295,12 @@ public class ConferenceBusiness extends AbstractHandler {
 		@Override
 		public void OnEnterConfCallback(long nConfID, long nTime,
 				String szConfData, int nJoinResult) {
-			JNIResponse jniRes = new RequestEnterConfResponse(nConfID, nTime,
-					szConfData, nJoinResult);
+			JNIResponse jniRes = new RequestEnterConfResponse(
+					nConfID,
+					nTime,
+					szConfData,
+					nJoinResult == JNIResponse.Result.SUCCESS.value() ? JNIResponse.Result.SUCCESS
+							: JNIResponse.Result.FAILED);
 			Message.obtain(mCallbackHandler, JNI_REQUEST_ENTER_CONF, jniRes)
 					.sendToTarget();
 		}

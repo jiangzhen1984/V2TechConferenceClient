@@ -29,19 +29,22 @@ import android.widget.Toast;
 import com.v2tech.R;
 import com.v2tech.db.ContentDescriptor;
 import com.v2tech.logic.AsynResult;
+import com.v2tech.logic.Conference;
 import com.v2tech.logic.ConferenceConversation;
 import com.v2tech.logic.ContactConversation;
 import com.v2tech.logic.Conversation;
 import com.v2tech.logic.GlobalHolder;
 import com.v2tech.logic.Group;
 import com.v2tech.logic.User;
+import com.v2tech.logic.jni.JNIResponse;
+import com.v2tech.logic.jni.RequestEnterConfResponse;
+import com.v2tech.service.ConferenceService;
 import com.v2tech.util.V2Log;
 import com.v2tech.view.conference.GroupLayout;
 import com.v2tech.view.conference.VideoActivityV2;
 
 public class ConferenceTabFragment extends Fragment {
 
-	private static final int SERVER_BOUNDED = 1;
 	private static final int FILL_CONFS_LIST = 2;
 	private static final int REQUEST_ENTER_CONF = 3;
 	private static final int REQUEST_ENTER_CONF_RESPONSE = 4;
@@ -54,8 +57,6 @@ public class ConferenceTabFragment extends Fragment {
 
 	private Tab1BroadcastReceiver receiver = new Tab1BroadcastReceiver();
 	private IntentFilter intentFilter;
-
-	private JNIService mService;
 
 	private List<Group> mConferenceList;
 
@@ -78,8 +79,10 @@ public class ConferenceTabFragment extends Fragment {
 	private View rootView;
 
 	private List<ScrollItem> mItemList;
-	
+
 	private Context mContext;
+
+	private ConferenceService cb = new ConferenceService();;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -168,7 +171,8 @@ public class ConferenceTabFragment extends Fragment {
 			intentFilter.addAction(PublicIntent.MESSAGE_READED_NOTIFICATION);
 			intentFilter.addCategory(PublicIntent.DEFAULT_CATEGORY);
 			intentFilter.addAction(PublicIntent.NEW_CONVERSATION);
-			intentFilter.addAction(JNIService.JNI_BROADCAST_USER_UPDATE_SIGNATURE);
+			intentFilter
+					.addAction(JNIService.JNI_BROADCAST_USER_UPDATE_NAME_OR_SIGNATURE);
 		}
 		return intentFilter;
 	}
@@ -210,17 +214,17 @@ public class ConferenceTabFragment extends Fragment {
 				@Override
 				public void onClick(View v) {
 					// TODO hidden request to enter conference feature
-//					mWaitingDialog = ProgressDialog
-//							.show(getActivity(),
-//									"",
-//									getActivity()
-//											.getResources()
-//											.getString(
-//													R.string.requesting_enter_conference),
-//									true);
-//					currentConfId = g.getmGId();
-//					Message.obtain(mHandler, REQUEST_ENTER_CONF,
-//							Long.valueOf(g.getmGId())).sendToTarget();
+					mWaitingDialog = ProgressDialog
+							.show(getActivity(),
+									"",
+									getActivity()
+											.getResources()
+											.getString(
+													R.string.requesting_enter_conference),
+									true);
+					currentConfId = g.getmGId();
+					Message.obtain(mHandler, REQUEST_ENTER_CONF,
+							Long.valueOf(g.getmGId())).sendToTarget();
 				}
 
 			});
@@ -295,23 +299,22 @@ public class ConferenceTabFragment extends Fragment {
 
 		@Override
 		public void onReceive(Context context, Intent intent) {
-			if (intent.getAction().equals("TAB1_ACTION")) {
-			} else if (intent.getAction().equals(
+			if (intent.getAction().equals(
 					JNIService.JNI_BROADCAST_GROUP_NOTIFICATION)) {
 				Message.obtain(mHandler, FILL_CONFS_LIST).sendToTarget();
-			} else if (intent.getAction().equals(
-					MainActivity.SERVICE_BOUNDED_EVENT)) {
-				mService = ((MainActivity) getActivity()).getService();
-				Message.obtain(mHandler, FILL_CONFS_LIST).sendToTarget();
 			} else if (JNIService.JNI_BROADCAST_NEW_MESSAGE.equals(intent
-					.getAction()) || PublicIntent.NEW_CONVERSATION.equals(intent.getAction())) {
+					.getAction())
+					|| PublicIntent.NEW_CONVERSATION.equals(intent.getAction())) {
 				Message.obtain(mHandler, UPDATE_NEW_MESSAGE_NOTIFICATION,
 						intent.getExtras().getLong("fromuid")).sendToTarget();
-			} else if (PublicIntent.MESSAGE_READED_NOTIFICATION.equals(intent.getAction())) {
+			} else if (PublicIntent.MESSAGE_READED_NOTIFICATION.equals(intent
+					.getAction())) {
 				Message.obtain(mHandler, NEW_MESSAGE_READED_NOTIFICATION,
 						intent.getExtras().getLong("fromuid")).sendToTarget();
-			} else if (JNIService.JNI_BROADCAST_USER_UPDATE_SIGNATURE.equals(intent.getAction())) {
-				Message.obtain(mHandler, UPDATE_USER_SIGN, intent.getExtras().get("uid")).sendToTarget();
+			} else if (JNIService.JNI_BROADCAST_USER_UPDATE_NAME_OR_SIGNATURE
+					.equals(intent.getAction())) {
+				Message.obtain(mHandler, UPDATE_USER_SIGN,
+						intent.getExtras().get("uid")).sendToTarget();
 			}
 		}
 
@@ -322,21 +325,7 @@ public class ConferenceTabFragment extends Fragment {
 		@Override
 		public void handleMessage(Message msg) {
 			switch (msg.what) {
-			case SERVER_BOUNDED:
-				mService = ((MainActivity) getActivity()).getService();
-				if (mService != null) {
-					Message.obtain(this, FILL_CONFS_LIST).sendToTarget();
-				} else {
-					this.sendMessageDelayed(
-							Message.obtain(this, SERVER_BOUNDED), 500);
-				}
-				break;
 			case FILL_CONFS_LIST:
-				// FIXME optimze code
-				if (mService == null) {
-					V2Log.w(" Doesn't bound service yet");
-					return;
-				}
 				mConferenceList = GlobalHolder.getInstance().getGroup(
 						Group.GroupType.CONFERENCE);
 				// No server return send asynchronous message and waiting for
@@ -358,7 +347,7 @@ public class ConferenceTabFragment extends Fragment {
 						if (!isLoaded) {
 							isLoaded = true;
 							((ViewGroup) mLoadingImageIV.getParent())
-							.removeView(mLoadingImageIV);
+									.removeView(mLoadingImageIV);
 							loadConversation();
 						}
 					}
@@ -366,17 +355,18 @@ public class ConferenceTabFragment extends Fragment {
 
 				break;
 			case REQUEST_ENTER_CONF:
-				mService.requestEnterConference((Long) msg.obj,
+				cb.requestEnterConference(new Conference((Long) msg.obj),
 						Message.obtain(this, REQUEST_ENTER_CONF_RESPONSE));
 				break;
 			case REQUEST_ENTER_CONF_RESPONSE:
 				AsynResult ar = (AsynResult) msg.obj;
 				if (ar.getState() == AsynResult.AsynState.SUCCESS) {
-					Object[] re = (Object[]) ar.getObject();
-					if ((Integer) re[0] == 0) {
+					RequestEnterConfResponse recr = (RequestEnterConfResponse) ar
+							.getObject();
+					if (recr.getResult() == JNIResponse.Result.SUCCESS) {
 						Intent i = new Intent(getActivity(),
 								VideoActivityV2.class);
-						i.putExtra("gid", (Long) re[1]);
+						i.putExtra("gid", recr.getConferenceID());
 						startActivityForResult(i, 0);
 					} else {
 						Toast.makeText(getActivity(),
@@ -388,8 +378,6 @@ public class ConferenceTabFragment extends Fragment {
 					Toast.makeText(getActivity(),
 							R.string.error_request_enter_conference_time_out,
 							Toast.LENGTH_SHORT).show();
-					// TODO should send exit request
-					// mService.requestEnterConference(confID, msg)
 				} else {
 					Toast.makeText(getActivity(),
 							R.string.error_request_enter_conference,
@@ -401,7 +389,7 @@ public class ConferenceTabFragment extends Fragment {
 
 				break;
 			case REQUEST_EXIT_CONF:
-				mService.requestExitConference((Long) msg.obj, null);
+				cb.requestExitConference(new Conference((Long) msg.obj), null);
 				break;
 			case UPDATE_NEW_MESSAGE_NOTIFICATION:
 				long fromuid = (Long) msg.obj;
@@ -420,13 +408,13 @@ public class ConferenceTabFragment extends Fragment {
 					Conversation cov = (ContactConversation) GlobalHolder
 							.getInstance().findConversationByType(
 									Conversation.TYPE_CONTACT, fromuid);
-					
+
 					GroupLayout gp = new GroupLayout(mContext, cov);
 					mItemList.add(new ScrollItem(cov, gp));
 					mGroupContainer.addView(gp);
 				}
 				break;
-				
+
 			case NEW_MESSAGE_READED_NOTIFICATION:
 				long fromuidT = (Long) msg.obj;
 				for (ScrollItem item : mItemList) {
@@ -439,15 +427,19 @@ public class ConferenceTabFragment extends Fragment {
 					}
 				}
 				break;
-				
+
 			case UPDATE_USER_SIGN:
 				long fromuidS = (Long) msg.obj;
 				for (ScrollItem item : mItemList) {
-					if (item.cov.getExtId() == fromuidS
-							&& Conversation.TYPE_CONFERNECE.equals(item.cov
-									.getType())) {
-						User u = GlobalHolder.getInstance().getUser(fromuidS);
-						((GroupLayout) item.gp).updateGroupOwner(u==null?"": u.getName());
+					if (item.cov.getExtId() == fromuidS) {
+						if (Conversation.TYPE_CONFERNECE.equals(item.cov
+								.getType())) {
+							User u = GlobalHolder.getInstance().getUser(
+									fromuidS);
+							((GroupLayout) item.gp)
+									.updateGroupOwner(u == null ? "" : u
+											.getName());
+						}
 						break;
 					}
 				}

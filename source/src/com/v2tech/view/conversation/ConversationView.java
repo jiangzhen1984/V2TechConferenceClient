@@ -34,13 +34,13 @@ import android.widget.Toast;
 
 import com.v2tech.R;
 import com.v2tech.db.ContentDescriptor;
-import com.v2tech.logic.Chat;
 import com.v2tech.logic.ContactConversation;
 import com.v2tech.logic.Conversation;
 import com.v2tech.logic.GlobalHolder;
 import com.v2tech.logic.User;
 import com.v2tech.logic.VImageMessage;
 import com.v2tech.logic.VMessage;
+import com.v2tech.service.ChatService;
 import com.v2tech.view.JNIService;
 import com.v2tech.view.PublicIntent;
 import com.v2tech.view.cus.ItemScrollView;
@@ -99,7 +99,7 @@ public class ConversationView extends Activity {
 
 	private MessageReceiver receiver = new MessageReceiver();
 
-	private Chat mChat = new Chat();
+	private ChatService mChat = new ChatService();
 
 	private User local;
 	private User remote;

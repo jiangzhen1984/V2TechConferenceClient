@@ -1,4 +1,4 @@
-package com.v2tech.logic;
+package com.v2tech.service;
 
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -8,9 +8,12 @@ import android.os.Message;
 import com.V2.jni.AudioRequest;
 import com.V2.jni.AudioRequestCallback;
 import com.V2.jni.ChatRequest;
+import com.v2tech.logic.UserAudioDevice;
+import com.v2tech.logic.VImageMessage;
+import com.v2tech.logic.VMessage;
 import com.v2tech.util.V2Log;
 
-public class Chat extends Handler {
+public class ChatService extends Handler {
 
 	private AudioRequestCallback callback;
 
@@ -18,22 +21,22 @@ public class Chat extends Handler {
 
 	private Handler thread;
 
-	public Chat() {
+	public ChatService() {
 		super();
 		init();
 	}
 
-	public Chat(Callback callback) {
+	public ChatService(Callback callback) {
 		super(callback);
 		init();
 	}
 
-	public Chat(Looper looper, Callback callback) {
+	public ChatService(Looper looper, Callback callback) {
 		super(looper, callback);
 		init();
 	}
 
-	public Chat(Looper looper) {
+	public ChatService(Looper looper) {
 		super(looper);
 		init();
 	}
@@ -60,8 +63,8 @@ public class Chat extends Handler {
 				ChatRequest.getInstance().sendChatText(0,
 						msg.getToUser().getmUserId(), msg.toXml(),
 						ChatRequest.BT_IM);
-				if (msg.mType == VMessage.MessageType.IMAGE
-						|| msg.mType == VMessage.MessageType.IMAGE_AND_TEXT) {
+				if (msg.getType() == VMessage.MessageType.IMAGE
+						|| msg.getType() == VMessage.MessageType.IMAGE_AND_TEXT) {
 					byte[] data = ((VImageMessage) msg).getWrapperData();
 					ChatRequest.getInstance().sendChatPicture(0,
 							msg.getToUser().getmUserId(), data, data.length,

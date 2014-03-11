@@ -1,6 +1,8 @@
 package com.V2.jni;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import android.content.Context;
 import android.util.Log;
@@ -14,13 +16,14 @@ public class ImRequest {
 	public boolean loginResult;
 	private static ImRequest mImRequest;
 	
-	private ImRequestCallback callback;
+	private List<ImRequestCallback> callbacks;
 
 
 
 
 	private ImRequest(Context context) {
 		this.context = context;
+		callbacks = new ArrayList<ImRequestCallback>();
 	};
 
 	public static synchronized ImRequest getInstance(Context context) {
@@ -45,7 +48,7 @@ public class ImRequest {
 	}
 	
 	public void setCallback(ImRequestCallback callback) {
-		this.callback = callback;
+		this.callbacks.add(callback);
 	}
 
 
@@ -76,8 +79,8 @@ public class ImRequest {
 	private void OnLogin(long nUserID, int nStatus, int nResult) {
 		V2Log.d( "OnLogin --> " + nUserID + ": " + "-:"
 				+ nStatus + ":" + nResult);
-		if (this.callback != null) {
-			this.callback.OnLoginCallback(nUserID, nStatus, nResult);
+		for (ImRequestCallback callback : this.callbacks) {
+			callback.OnLoginCallback(nUserID, nStatus, nResult);
 		}
 	}
 	
@@ -101,8 +104,8 @@ public class ImRequest {
 	 * 
 	 */
 	private void OnUpdateBaseInfo(long nUserID, String updatexml) {
-		if (this.callback != null) {
-			this.callback.OnUpdateBaseInfoCallback(nUserID, updatexml);
+		for (ImRequestCallback callback : this.callbacks) {
+			callback.OnUpdateBaseInfoCallback(nUserID, updatexml);
 		}
 	}
 	
@@ -127,7 +130,7 @@ public class ImRequest {
 	 */
 	private void OnUserStatusUpdated(long nUserID, int eUEType,  int nStatus, String szStatusDesc) {
 		V2Log.d(" OnUserStatusUpdated--> nUserID:"+nUserID+" eUEType: "+ eUEType+"  nStatus:"+nStatus+"  szStatusDesc:"+szStatusDesc+"  "+new Date());
-		if (callback != null) {
+		for (ImRequestCallback callback : this.callbacks) {
 			callback.OnUserStatusUpdatedCallback(nUserID, eUEType, nStatus, szStatusDesc);
 		}
 	}
@@ -142,7 +145,7 @@ public class ImRequest {
 	 */
 	private void OnChangeAvatar(int nAvatarType, long nUserID, String AvatarName) {
 		V2Log.d("OnChangeAvatar--> nAvatarType:"+nAvatarType+"    nUserID:"+nUserID+" AvatarName:"+ AvatarName);
-		if (callback != null) {
+		for (ImRequestCallback callback : this.callbacks) {
 			callback.OnChangeAvatarCallback(nAvatarType, nUserID, AvatarName);
 		}
 	}
@@ -258,8 +261,8 @@ public class ImRequest {
 
 	private void OnConnectResponse(int nResult) {
 		V2Log.d("OnConnectResponse::" + nResult);
-		if (this.callback != null) {
-			this.callback.OnConnectResponseCallback(nResult);
+		for (ImRequestCallback callback : this.callbacks) {
+			callback.OnConnectResponseCallback(nResult);
 		}
 
 	}

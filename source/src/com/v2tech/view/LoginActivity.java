@@ -33,8 +33,8 @@ import com.V2.jni.ConfigRequest;
 import com.v2tech.R;
 import com.v2tech.logic.AsynResult;
 import com.v2tech.logic.GlobalHolder;
-import com.v2tech.logic.NetworkStateCode;
-import com.v2tech.logic.User;
+import com.v2tech.logic.jni.RequestLogInResponse;
+import com.v2tech.service.UserService;
 import com.v2tech.view.JNIService.LocalBinder;
 
 /**
@@ -43,7 +43,6 @@ import com.v2tech.view.JNIService.LocalBinder;
  */
 public class LoginActivity extends Activity {
 
-	
 	/**
 	 * The default email to populate the email field with.
 	 */
@@ -54,6 +53,8 @@ public class LoginActivity extends Activity {
 	 */
 
 	private ConfigRequest mCR = new ConfigRequest();
+
+	private UserService us = new UserService();
 
 	// Values for email and password at the time of the login attempt.
 	private String mEmail;
@@ -70,7 +71,7 @@ public class LoginActivity extends Activity {
 	private Dialog mSettingDialog;
 
 	private Activity mContext;
-	
+
 	private View loginView;
 
 	@Override
@@ -89,17 +90,18 @@ public class LoginActivity extends Activity {
 		mLoginFormView = findViewById(R.id.login_form);
 		mLoginStatusView = findViewById(R.id.login_status);
 		mLoginStatusMessageView = (TextView) findViewById(R.id.login_status_message);
-		
+
 		findViewById(R.id.login_form).setOnClickListener(
 				new View.OnClickListener() {
 					@Override
 					public void onClick(View view) {
 						InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-						imm.hideSoftInputFromWindow(mEmailView.getWindowToken(), 0);
-						imm.hideSoftInputFromWindow(mPasswordView.getWindowToken(), 0);
+						imm.hideSoftInputFromWindow(
+								mEmailView.getWindowToken(), 0);
+						imm.hideSoftInputFromWindow(
+								mPasswordView.getWindowToken(), 0);
 					}
 				});
-		
 
 		findViewById(R.id.sign_in_button).setOnClickListener(
 				new View.OnClickListener() {
@@ -133,12 +135,12 @@ public class LoginActivity extends Activity {
 	@Override
 	protected void onResume() {
 		super.onResume();
-		
-		
+
 		loginView.setVisibility(View.VISIBLE);
-	    final Animation tabBlockHolderAnimation = AnimationUtils.loadAnimation(this, R.animator.login_container_down_in);
-	    tabBlockHolderAnimation.setDuration(700);
-	    loginView.startAnimation(tabBlockHolderAnimation);
+		final Animation tabBlockHolderAnimation = AnimationUtils.loadAnimation(
+				this, R.animator.login_container_down_in);
+		tabBlockHolderAnimation.setDuration(700);
+		loginView.startAnimation(tabBlockHolderAnimation);
 	}
 
 	private OnClickListener showIpSetting = new OnClickListener() {
@@ -186,19 +188,17 @@ public class LoginActivity extends Activity {
 					String portStr5 = port.getText().toString();
 
 					if (ets1 == null || "".equals(ets1) || ets2 == null
-							|| "".equals(ets2) || ets3 == null || "".equals(ets3)
-							|| ets4 == null || "".equals(ets4) || portStr5 == null
+							|| "".equals(ets2) || ets3 == null
+							|| "".equals(ets3) || ets4 == null
+							|| "".equals(ets4) || portStr5 == null
 							|| "".equals(portStr5)) {
 						Toast.makeText(mContext, R.string.error_host_required,
 								Toast.LENGTH_SHORT).show();
 						return;
 					}
-					final String ip = ets1 + "."
-							+ ets2 + "."
-							+ ets3 + "."
+					final String ip = ets1 + "." + ets2 + "." + ets3 + "."
 							+ ets4;
-					if (!saveHostConfig(ip,
-							Integer.parseInt(portStr5))) {
+					if (!saveHostConfig(ip, Integer.parseInt(portStr5))) {
 						Toast.makeText(mContext,
 								R.string.error_save_host_config,
 								Toast.LENGTH_LONG).show();
@@ -217,19 +217,15 @@ public class LoginActivity extends Activity {
 					dialog.dismiss();
 				}
 			});
-			
+
 			dialog.setCancelable(true);
 			dialog.setCanceledOnTouchOutside(true);
-			
+
 			mSettingDialog = dialog;
 			dialog.show();
 		}
 
 	};
-	
-	
-	
-
 
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
@@ -237,9 +233,8 @@ public class LoginActivity extends Activity {
 		if (mSettingDialog != null && mSettingDialog.isShowing()) {
 			mSettingDialog.dismiss();
 		}
-	
-	}
 
+	}
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -328,10 +323,8 @@ public class LoginActivity extends Activity {
 			// perform the user login attempt.
 			mLoginStatusMessageView.setText(R.string.login_progress_signing_in);
 			showProgress(true);
-		//	mAuthTask = new UserLoginTask();
-		//	mAuthTask.execute((Void) null);
-			mService.login(mEmailView.getText().toString(), mPasswordView
-						.getText().toString(), Message.obtain(mHandler, LOG_IN_CALL_BACK));
+			us.login(mEmailView.getText().toString(), mPasswordView.getText()
+					.toString(), Message.obtain(mHandler, LOG_IN_CALL_BACK));
 		}
 	}
 
@@ -376,7 +369,6 @@ public class LoginActivity extends Activity {
 		}
 	}
 
-
 	private static final int LOG_IN_CALL_BACK = 1;
 	private Handler mHandler = new Handler() {
 
@@ -385,51 +377,53 @@ public class LoginActivity extends Activity {
 			switch (msg.what) {
 			case LOG_IN_CALL_BACK:
 				showProgress(false);
+
 				AsynResult ar = (AsynResult) msg.obj;
 				if (ar.getState() == AsynResult.AsynState.TIME_OUT) {
 					Toast.makeText(mContext, R.string.error_time_out,
 							Toast.LENGTH_LONG).show();
 					return;
 				}
-				User u = (User)ar.getObject();
-				
-				if (u.getmResult() == NetworkStateCode.CONNECTED_ERROR || u.getmResult() == NetworkStateCode.TIME_OUT) {
-					Toast.makeText(mContext, R.string.error_connect_to_server,
-							Toast.LENGTH_LONG).show();
-				} else if (u.getmResult() == NetworkStateCode.INCORRECT_INFO){
+				RequestLogInResponse rlr = (RequestLogInResponse) ar
+						.getObject();
+
+				if (rlr.getResult() == RequestLogInResponse.Result.FAILED) {
+
 					mPasswordView
 							.setError(getString(R.string.error_incorrect_password));
 					mPasswordView.requestFocus();
 				} else {
 					// Save user info
 					if (mRemPwdCkbx.isChecked()) {
-						saveUserConfig(mEmailView.getText().toString(), mPasswordView
-								.getText().toString());
+						saveUserConfig(mEmailView.getText().toString(),
+								mPasswordView.getText().toString());
 					} else {
 						saveUserConfig("", "");
 					}
-					// record current logged in user to global holder
-					//FIXME optimze code
-					GlobalHolder.getInstance().setCurrentUser(u);
-					SharedPreferences sf = mContext.getSharedPreferences("config", Context.MODE_PRIVATE);
+					GlobalHolder.getInstance().setCurrentUser(rlr.getUser());
+					SharedPreferences sf = mContext.getSharedPreferences(
+							"config", Context.MODE_PRIVATE);
 					Editor ed = sf.edit();
 					ed.putInt("LoggedIn", 1);
 					ed.commit();
-					
-					mContext.startActivity(new Intent(mContext, MainActivity.class));
+
+					mContext.startActivity(new Intent(mContext,
+							MainActivity.class));
 					finish();
 				}
 				break;
 			}
 		}
-		
+
 	};
 
 	private boolean isBound;
+
 	@Override
 	protected void onStart() {
 		super.onStart();
-		isBound = bindService(new Intent(this.getApplicationContext(), JNIService.class), mConnection, Context.BIND_AUTO_CREATE);
+		isBound = bindService(new Intent(this.getApplicationContext(),
+				JNIService.class), mConnection, Context.BIND_AUTO_CREATE);
 	}
 
 	@Override
@@ -439,30 +433,23 @@ public class LoginActivity extends Activity {
 			this.unbindService(mConnection);
 		}
 	}
-	
+
 	private JNIService mService;
-	
-	
-	  /** Defines callbacks for service binding, passed to bindService() */
-    private ServiceConnection mConnection = new ServiceConnection() {
 
-        @Override
-        public void onServiceConnected(ComponentName className,
-                IBinder service) {
-            LocalBinder binder = (LocalBinder) service;
-            mService = binder.getService();
-            isBound = true;
-        }
+	/** Defines callbacks for service binding, passed to bindService() */
+	private ServiceConnection mConnection = new ServiceConnection() {
 
-        @Override
-        public void onServiceDisconnected(ComponentName arg0) {
-        	isBound = false;
-        }
-    };
-	
-	
-	
-	
-	
+		@Override
+		public void onServiceConnected(ComponentName className, IBinder service) {
+			LocalBinder binder = (LocalBinder) service;
+			mService = binder.getService();
+			isBound = true;
+		}
+
+		@Override
+		public void onServiceDisconnected(ComponentName arg0) {
+			isBound = false;
+		}
+	};
 
 }

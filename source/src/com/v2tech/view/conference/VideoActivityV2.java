@@ -12,11 +12,9 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.ServiceConnection;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
@@ -25,7 +23,6 @@ import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.Message;
 import android.view.Display;
 import android.view.KeyEvent;
@@ -49,16 +46,17 @@ import android.widget.Toast;
 import com.v2tech.R;
 import com.v2tech.logic.Attendee;
 import com.v2tech.logic.CameraConfiguration;
+import com.v2tech.logic.Conference;
 import com.v2tech.logic.ConferencePermission;
+import com.v2tech.logic.GlobalHolder;
 import com.v2tech.logic.User;
 import com.v2tech.logic.UserDeviceConfig;
+import com.v2tech.service.ConferenceService;
 import com.v2tech.util.V2Log;
 import com.v2tech.view.JNIService;
-import com.v2tech.view.JNIService.LocalBinder;
 
 public class VideoActivityV2 extends Activity {
 
-	private static final int SERVICE_BUNDED = 0;
 	private static final int ONLY_SHOW_LOCAL_VIDEO = 1;
 	private static final int FILL_USER_LIST = 2;
 	private static final int APPLY_OR_RELEASE_SPEAK = 3;
@@ -73,8 +71,6 @@ public class VideoActivityV2 extends Activity {
 	public static final String JNI_EVENT_VIDEO_CATEGORY = "com.v2tech.conf_video_event";
 	public static final String JNI_EVENT_VIDEO_CATEGORY_OPEN_VIDEO_EVENT_ACTION = "com.v2tech.conf_video_event.open_video_event";
 
-	private JNIService mService;
-	private boolean isBound;
 	private boolean isSpeaking;
 
 	private Handler mVideoHandler = new VideoHandler();
@@ -93,6 +89,10 @@ public class VideoActivityV2 extends Activity {
 	private Dialog mQuitDialog;
 	private static int Measuredwidth = 0;
 	private static int Measuredheight = 0;
+
+	private Conference conf;
+
+	private ConferenceService cb = new ConferenceService();
 
 	private Long mGroupId;
 	private Set<Attendee> mAttendeeList = new HashSet<Attendee>();
@@ -152,8 +152,9 @@ public class VideoActivityV2 extends Activity {
 				mUserListWindow = new PopupWindow(view,
 						ViewGroup.LayoutParams.WRAP_CONTENT,
 						ViewGroup.LayoutParams.WRAP_CONTENT, true);
-				mUserListWindow.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-				
+				mUserListWindow.setBackgroundDrawable(new ColorDrawable(
+						Color.TRANSPARENT));
+
 				mUserListWindow.setFocusable(true);
 				mUserListWindow.setTouchable(true);
 				mUserListWindow.setOutsideTouchable(true);
@@ -187,8 +188,8 @@ public class VideoActivityV2 extends Activity {
 						R.layout.in_meeting_setting_pop_up_window, null);
 				mSettingWindow = new PopupWindow(view,
 						LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-				mSettingWindow
-						.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+				mSettingWindow.setBackgroundDrawable(new ColorDrawable(
+						Color.TRANSPARENT));
 				mSettingWindow.setFocusable(true);
 				mSettingWindow.setTouchable(true);
 				mSettingWindow.setOutsideTouchable(true);
@@ -253,30 +254,11 @@ public class VideoActivityV2 extends Activity {
 
 	};
 
-	/** Defines callback for service binding, passed to bindService() */
-	private ServiceConnection mConnection = new ServiceConnection() {
-
-		@Override
-		public void onServiceConnected(ComponentName className, IBinder service) {
-			LocalBinder binder = (LocalBinder) service;
-			mService = binder.getService();
-			isBound = true;
-			// Send server bounded message
-			Message.obtain(mVideoHandler, SERVICE_BUNDED).sendToTarget();
-		}
-
-		@Override
-		public void onServiceDisconnected(ComponentName arg0) {
-			isBound = false;
-		}
-	};
-
 	@Override
 	protected void onStart() {
 		super.onStart();
 		adjustLayout();
-		isBound = bindService(new Intent(this.getApplicationContext(),
-				JNIService.class), mConnection, Context.BIND_AUTO_CREATE);
+		Message.obtain(mVideoHandler, ONLY_SHOW_LOCAL_VIDEO).sendToTarget();
 	}
 
 	private void initConfsListener() {
@@ -288,18 +270,20 @@ public class VideoActivityV2 extends Activity {
 		filter.addAction(JNIService.JNI_BROADCAST_ATTENDEE_EXITED_NOTIFICATION);
 		filter.addAction(JNIService.JNI_BROADCAST_ATTENDEE_ENTERED_NOTIFICATION);
 		Intent i = mContext.registerReceiver(mConfUserChangeReceiver, filter);
-		if (i != null && i.getAction().equals(JNIService.JNI_BROADCAST_ATTENDEE_ENTERED_NOTIFICATION) ) {
+		if (i != null
+				&& i.getAction().equals(
+						JNIService.JNI_BROADCAST_ATTENDEE_ENTERED_NOTIFICATION)) {
 			V2Log.i(" get stickly intent");
 			long uid = i.getLongExtra("uid", -1);
 			String name = i.getExtras().getString("name");
 			if (uid < 0) {
-				Toast.makeText(mContext, "Invalid user id",
-						Toast.LENGTH_SHORT).show();
+				Toast.makeText(mContext, "Invalid user id", Toast.LENGTH_SHORT)
+						.show();
 				return;
 			}
 			sendAttendActionMessage(i.getAction(), new User(uid, name));
 		}
-		
+
 	}
 
 	@TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
@@ -325,25 +309,22 @@ public class VideoActivityV2 extends Activity {
 			Measuredheight = d.getHeight();
 		}
 
+		conf = new Conference(mGroupId);
 	}
 
-	
 	/**
 	 * 
 	 * @param action
 	 * @param u
 	 */
 	private void sendAttendActionMessage(String action, User u) {
-		V2Log.i(" send attendee action "+ action);
+		V2Log.i(" send attendee action " + action);
 		Message.obtain(
 				mVideoHandler,
-				action
-						.equals(JNIService.JNI_BROADCAST_ATTENDEE_ENTERED_NOTIFICATION) ? USER_ENTERED_CONF
-						: USER_EXITED_CONF, u)
-				.sendToTarget();
+				action.equals(JNIService.JNI_BROADCAST_ATTENDEE_ENTERED_NOTIFICATION) ? USER_ENTERED_CONF
+						: USER_EXITED_CONF, u).sendToTarget();
 	}
-	
-	
+
 	/**
 	 * 
 	 */
@@ -359,12 +340,9 @@ public class VideoActivityV2 extends Activity {
 			}
 		}
 
-		if (mService.getloggedUser() == null) {
-			//TODO no user
-			return;
-		}
 		if (selfInAttendeeList == false) {
-			atd = new Attendee(mService.getloggedUser(), true, false);
+			atd = new Attendee(GlobalHolder.getInstance().getCurrentUser(),
+					true, false);
 			mAttendeeList.add(atd);
 		}
 
@@ -451,7 +429,8 @@ public class VideoActivityV2 extends Activity {
 				mVideoLayout.updateViewLayout(v, p);
 			} else {
 				if (sw.getView().getParent() != null) {
-					((ViewGroup)sw.getView().getParent()).removeView(sw.getView());
+					((ViewGroup) sw.getView().getParent()).removeView(sw
+							.getView());
 				}
 				mVideoLayout.addView(sw.getView(), p);
 			}
@@ -466,9 +445,6 @@ public class VideoActivityV2 extends Activity {
 	protected void onStop() {
 		super.onStop();
 		mVideoLayout.removeAllViews();
-		if (isBound) {
-			this.unbindService(mConnection);
-		}
 		quit();
 		finish();
 	}
@@ -539,17 +515,10 @@ public class VideoActivityV2 extends Activity {
 
 		for (SurfaceViewW sw : this.mCurrentShowedSV) {
 			if (sw.udc.getBelongsAttendee().isSelf()) {
-//				mService.requestCloseVideoDevice(mGroupId, sw.udc, Message
-//						.obtain(mVideoHandler, REQUEST_CLOSE_DEVICE_RESPONSE));
-//				try {
-//					Thread.currentThread().sleep(200);
-//				} catch (InterruptedException e) {
-//					e.printStackTrace();
-//				}
+
 				VideoCaptureDevInfo.CreateVideoCaptureDevInfo().reverseCamera();
-//				mService.requestOpenVideoDevice(mGroupId, sw.udc, Message
-//						.obtain(mVideoHandler, REQUEST_OPEN_DEVICE_RESPONSE));
-				mService.updateCameraParameters(new CameraConfiguration(""), null);
+
+				cb.updateCameraParameters(new CameraConfiguration(""), null);
 				return;
 			}
 		}
@@ -593,11 +562,10 @@ public class VideoActivityV2 extends Activity {
 
 	private void doApplyOrReleaseSpeak() {
 		if (isSpeaking) {
-			mService.applyForReleasePermission(ConferencePermission.SPEAKING, null);
+			cb.applyForReleasePermission(ConferencePermission.SPEAKING, null);
 			isSpeaking = false;
 		} else {
-			// 3 means apply speak
-			mService.applyForControlPermission(ConferencePermission.SPEAKING, null);
+			cb.applyForControlPermission(ConferencePermission.SPEAKING, null);
 			isSpeaking = true;
 		}
 	}
@@ -610,7 +578,7 @@ public class VideoActivityV2 extends Activity {
 	private void doHandleNewUserEntered(User user) {
 		Attendee a = new Attendee(user);
 		this.mAttendeeList.add(a);
-		List<UserDeviceConfig> ld = mService.getAttendeeDevice(a.getUser()
+		List<UserDeviceConfig> ld = GlobalHolder.getInstance().getAttendeeDevice(a.getUser()
 				.getmUserId());
 		if (ld == null || ld.size() <= 0) {
 			V2Log.w(" No available device config for user:" + user.getmUserId()
@@ -645,7 +613,7 @@ public class VideoActivityV2 extends Activity {
 		final ImageView iv = new ImageView(mContext);
 		tv.setTextColor(Color.BLACK);
 		tv.setText(a.getUser().getName());
-		
+
 		if (a.isSelf() == false) {
 			tv.setTextSize(20);
 			iv.setImageResource(R.drawable.camera);
@@ -664,9 +632,7 @@ public class VideoActivityV2 extends Activity {
 		rp.addRule(RelativeLayout.CENTER_VERTICAL);
 		rp.leftMargin = 20;
 		rl.addView(tv, rp);
-		
-		
-		
+
 		rl.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View arg0) {
@@ -683,9 +649,7 @@ public class VideoActivityV2 extends Activity {
 				}
 			}
 		});
-		
-		
-		
+
 		// add secondary video
 		RelativeLayout.LayoutParams rpIv = new RelativeLayout.LayoutParams(
 				RelativeLayout.LayoutParams.WRAP_CONTENT,
@@ -785,8 +749,8 @@ public class VideoActivityV2 extends Activity {
 		}
 		// if already opened attendee's video, switch action to close
 		if (udc.isShowing()) {
-			mService.requestCloseVideoDevice(mGroupId, udc, Message.obtain(
-					mVideoHandler, REQUEST_CLOSE_DEVICE_RESPONSE));
+			cb.requestCloseVideoDevice(conf, udc, Message.obtain(mVideoHandler,
+					REQUEST_CLOSE_DEVICE_RESPONSE));
 
 			for (SurfaceViewW sw : mCurrentShowedSV) {
 				if (sw.udc == udc) {
@@ -857,7 +821,7 @@ public class VideoActivityV2 extends Activity {
 		public View getView() {
 			if (rl == null) {
 				rl = new RelativeLayout(mContext);
-				//FIXME make sure hash code is unique.
+				// FIXME make sure hash code is unique.
 				layId = (int) udc.hashCode();
 
 				if (udc.getSVHolder() == null) {
@@ -887,14 +851,8 @@ public class VideoActivityV2 extends Activity {
 
 		@Override
 		public void handleMessage(Message msg) {
-			if (isBound == false || mService == null) {
-				V2Log.w(" service not bound yet");
-				Message m = Message.obtain(msg);
-				this.sendMessageDelayed(m, 400);
-				return;
-			}
+
 			switch (msg.what) {
-			case SERVICE_BUNDED:
 			case ONLY_SHOW_LOCAL_VIDEO:
 				showOrCloseLocalSurViewOnly();
 				break;
@@ -906,7 +864,6 @@ public class VideoActivityV2 extends Activity {
 				break;
 			case REQUEST_OPEN_DEVICE_RESPONSE:
 			case REQUEST_CLOSE_DEVICE_RESPONSE:
-				// TODO open device result
 				break;
 			case CONF_USER_DEVICE_EVENT:
 				// recordUserDevice((ConfUserDeviceInfo) msg.obj);
@@ -919,15 +876,14 @@ public class VideoActivityV2 extends Activity {
 				break;
 			case REQUEST_OPEN_OR_CLOSE_DEVICE:
 				if (msg.arg1 == 0) {
-					mService.requestCloseVideoDevice(mGroupId,
+					cb.requestCloseVideoDevice(conf,
 							(UserDeviceConfig) msg.obj, Message.obtain(
 									mVideoHandler,
 									REQUEST_CLOSE_DEVICE_RESPONSE));
 				} else if (msg.arg1 == 1) {
-					mService.requestOpenVideoDevice(mGroupId,
-							(UserDeviceConfig) msg.obj, Message
-									.obtain(mVideoHandler,
-											REQUEST_OPEN_DEVICE_RESPONSE));
+					cb.requestOpenVideoDevice(conf, (UserDeviceConfig) msg.obj,
+							Message.obtain(mVideoHandler,
+									REQUEST_OPEN_DEVICE_RESPONSE));
 				}
 				break;
 			}

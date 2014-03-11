@@ -12,10 +12,10 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.v2tech.R;
-import com.v2tech.logic.Chat;
 import com.v2tech.logic.GlobalHolder;
 import com.v2tech.logic.User;
 import com.v2tech.logic.UserAudioDevice;
+import com.v2tech.service.ChatService;
 import com.v2tech.util.V2Log;
 
 public class ConversationWaitingFragment extends Fragment {
@@ -30,7 +30,7 @@ public class ConversationWaitingFragment extends Fragment {
 
 	private boolean mIsInComingCall;
 
-	private Chat chat = new Chat();
+	private ChatService chat = new ChatService();
 	
 	private Handler mLocalHandler = new LocalHandler();
 	
