@@ -83,7 +83,7 @@ public final class ContentDescriptor {
 			public static final String EXT_ID = "ext_id";
 			public static final String EXT_NAME = "ext_name";
 			public static final String NOTI_FLAG = "noti_flag";
-			public static final String OWNER ="owner";
+			public static final String OWNER ="t_owner";
 
 			public static final String[] ALL_CLOS = { ID, TYPE,
 				EXT_ID,EXT_NAME,NOTI_FLAG,OWNER };

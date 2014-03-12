@@ -268,7 +268,7 @@ public class ContactsTabFragment extends Fragment {
 						}
 					}
 				} else {
-					nextGroup = parent.getChildGroup().get(nextGrougPos);
+					nextGroup = lg.get(nextGrougPos);
 					for (int i = pos + 1; i < mItemList.size(); i++) {
 						if (mItemList.get(i).g == nextGroup) {
 							endRemovePos = i;
@@ -290,6 +290,16 @@ public class ContactsTabFragment extends Fragment {
 		item.isExpanded = !item.isExpanded;
 		adapter.notifyDataSetChanged();
 	}
+	
+	
+	private void updateUserStatus(int userId, int status) {
+		User.Status st = User.Status.fromInt(status);
+		for (ListItem li : mItemList) {
+			if (li.u != null && li.u.getmUserId() == userId) {
+				((ContactUserView) li.v).updateStatus(st);
+			}
+		}
+	}
 
 	private synchronized void updateUserViewPostion(int userId, int status) {
 		User.Status st = User.Status.fromInt(status);
@@ -299,7 +309,7 @@ public class ContactsTabFragment extends Fragment {
 		for (ListItem li : mItemList) {
 			if (li.u != null && li.u.getmUserId() == userId) {
 				it = li;
-				((ContactUserView) li.v).updateStatus(st);
+				//((ContactUserView) li.v).updateStatus(st);
 				foundUserView = true;
 				break;
 			}
@@ -427,6 +437,7 @@ public class ContactsTabFragment extends Fragment {
 				}
 				break;
 			case UPDATE_USER_STATUS:
+				updateUserStatus(msg.arg1, msg.arg2);
 				updateUserViewPostion(msg.arg1, msg.arg2);
 				break;
 			case UPDATE_SEARCHED_USER_LIST:

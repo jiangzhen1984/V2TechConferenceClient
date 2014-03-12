@@ -191,9 +191,9 @@ public class VMessage {
 	}
 	
 	
-	public static List<VMessage> fromXml(User from, User to, Date date, String xml) {
-		List<VMessage> msgList = new ArrayList<VMessage>();
-		
+	public static VMessage fromXml(User from, User to, Date date, String xml) {
+		//List<VMessage> msgList = new ArrayList<VMessage>();
+		VMessage vm = new VMessage(from, to,"", true);
 		InputStream is = null;
 
 		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
@@ -205,23 +205,24 @@ public class VMessage {
 
 				doc.getDocumentElement().normalize();
 				NodeList textMsgItemNL = doc.getElementsByTagName("TTextChatItem");
+				
+				vm.setDate(date);
+				vm.setType(MessageType.TEXT);
+				//msgList.add(vm);
 				for (int i=0;i<textMsgItemNL.getLength(); i++) {
 					Element msgEl = (Element)textMsgItemNL.item(i);
-					VMessage vm = new VMessage(from, to, msgEl.getAttribute("Text"), true);
-					vm.setDate(date);
-					vm.setType(MessageType.TEXT);
-					msgList.add(vm);
+					 vm.setText(vm.getText()+msgEl.getAttribute("Text")+"\n");
 				}
 				
 				
-				NodeList imgMsgItemNL = doc.getElementsByTagName("TPictureChatItem");
-				for (int i=0;i<imgMsgItemNL.getLength(); i++) {
-					Element msgEl = (Element)imgMsgItemNL.item(i);
-					VMessage vm = new VImageMessage(from, to, msgEl.getAttribute("GUID"), msgEl.getAttribute("FileExt"));
-					vm.setDate(date);
-					vm.setType(MessageType.IMAGE);
-					msgList.add(vm);
-				}
+//				NodeList imgMsgItemNL = doc.getElementsByTagName("TPictureChatItem");
+//				for (int i=0;i<imgMsgItemNL.getLength(); i++) {
+//					Element msgEl = (Element)imgMsgItemNL.item(i);
+//					VMessage vmImage = new VImageMessage(from, to, msgEl.getAttribute("GUID"), msgEl.getAttribute("FileExt"));
+//					vmImage.setDate(date);
+//					vmImage.setType(MessageType.IMAGE);
+//					msgList.add(vmImage);
+//				}
 				
 			} catch (ParserConfigurationException e) {
 				e.printStackTrace();
@@ -233,7 +234,7 @@ public class VMessage {
 				e.printStackTrace();
 			}
 		
-			return msgList;
+			return vm;
 	}
 
 	public String toXml() {

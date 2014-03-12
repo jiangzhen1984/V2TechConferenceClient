@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
     android:background="@drawable/rounded_corners_of_in_meeting_quit_window_outer_box"
     android:orientation="vertical" >
 
     <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_margin="10dp"
         android:background="@color/in_meeting_quit_window_inner_bg"
         android:orientation="vertical" >
@@ -15,7 +15,7 @@
         <LinearLayout
             android:id="@+id/imq_l1"
             android:layout_width="match_parent"
-            android:layout_height="60dp"
+            android:layout_height="40dp"
             android:background="@color/in_meeting_quit_window_title_bg"
             android:orientation="vertical" >
 
@@ -27,7 +27,7 @@
                 android:gravity="center"
                 android:text="@string/in_meeting_quit_notification"
                 android:textColor="#000000"
-                android:textSize="30sp" />
+                android:textSize="22sp" />
         </LinearLayout>
 
         <LinearLayout
@@ -49,10 +49,10 @@
                 android:id="@+id/textView2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="60dp"
-                android:layout_marginTop="20dp"
+                android:layout_marginLeft="40dp"
+                android:layout_marginTop="15dp"
                 android:text="@string/in_meeting_quit_text"
-                android:textSize="22sp"
+                android:textSize="16sp"
                 android:textColor="#000000" />
 
             <CheckBox
@@ -60,11 +60,11 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/textView2"
-                android:layout_marginBottom="60dp"
-                android:layout_marginLeft="60dp"
+                android:layout_marginBottom="20dp"
+                android:layout_marginLeft="40dp"
                 android:text="@string/in_meeting_quit_rem"
                 android:textColor="#000000"
-                android:textSize="22sp" />
+                android:textSize="16sp" />
 
         </RelativeLayout>
 
@@ -85,22 +85,22 @@
 
             <Button
                 android:id="@+id/IMWQuitButton"
-                android:layout_width="150dp"
-                android:layout_height="50dp"
+                android:layout_width="90dp"
+                android:layout_height="35dp"
                 android:layout_alignParentLeft="true"
                 android:layout_centerVertical="true"
-                android:layout_marginLeft="100dp"
+                android:layout_marginLeft="40dp"
                 android:background="@drawable/rounded_corners_login_button"
                 android:text="@string/in_meeting_quit_quit_button"
                 android:textColor="#ffffff" />
 
             <Button
                 android:id="@+id/IMWCancelButton"
-                android:layout_width="150dp"
-                android:layout_height="50dp"
+                android:layout_width="90dp"
+                android:layout_height="35dp"
                 android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"
-                android:layout_marginRight="100dp"
+                android:layout_marginRight="40dp"
                 android:background="@drawable/rounded_corners_login_button"
                 android:text="@string/in_meeting_quit_cancel_button"
                 android:textColor="#ffffff" />

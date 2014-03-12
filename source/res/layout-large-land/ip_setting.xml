@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="10dp"
     android:background="@drawable/rounded_corners_of_ip_setting_outer_box"
     android:orientation="vertical" >
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:layout_margin="10dp"
         android:background="@color/setting_inner_bg"
         android:orientation="vertical" >
@@ -30,6 +31,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:background="@drawable/rounded_corners"
+                android:ems="10"
                 android:enabled="true"
                 android:gravity="center_vertical|center_horizontal"
                 android:inputType="number"
@@ -48,6 +50,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:background="@drawable/rounded_corners"
+                android:ems="10"
                 android:enabled="true"
                 android:gravity="center_vertical|center_horizontal"
                 android:inputType="number"
@@ -66,6 +69,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:background="@drawable/rounded_corners"
+                android:ems="10"
                 android:enabled="true"
                 android:gravity="center_vertical|center_horizontal"
                 android:inputType="number"
@@ -85,6 +89,7 @@
                 android:layout_marginRight="20dp"
                 android:layout_weight="1"
                 android:background="@drawable/rounded_corners"
+                android:ems="10"
                 android:enabled="true"
                 android:gravity="center_vertical|center_horizontal"
                 android:inputType="number"
@@ -115,8 +120,9 @@
                 android:layout_marginRight="20dp"
                 android:layout_weight="1"
                 android:background="@drawable/rounded_corners"
+                android:ems="10"
                 android:inputType="number"
-                 android:maxLength="5"
+                android:maxLength="5"
                 android:paddingLeft="8dp" >
 
                 <requestFocus />
@@ -135,26 +141,24 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="20dp"
-            android:layout_marginTop="30dp" >
+            android:layout_marginBottom="15dp"
+            android:layout_marginTop="15dp" >
 
             <Button
                 android:id="@+id/ip_setting_save"
-                  android:layout_width="150dp"
-                android:layout_height="50dp"
+                android:layout_width="90dp"
+                android:layout_height="wrap_content"
                 android:layout_alignParentLeft="true"
                 android:layout_marginLeft="40dp"
-                android:textColor="#ffffff"
                 android:background="@drawable/rounded_corners_login_button"
                 android:text="@string/ip_setting_button_save" />
 
             <Button
                 android:id="@+id/ip_setting_cancel"
-                 android:layout_width="150dp"
-                android:layout_height="50dp"
+                android:layout_width="90dp"
+                android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
                 android:layout_marginRight="40dp"
-                android:textColor="#ffffff"
                 android:background="@drawable/rounded_corners_login_button"
                 android:text="@string/ip_setting_button_cancel" />
 

@@ -41,7 +41,6 @@ import com.v2tech.logic.User;
 import com.v2tech.logic.UserDeviceConfig;
 import com.v2tech.logic.VImageMessage;
 import com.v2tech.logic.VMessage;
-import com.v2tech.logic.VMessage.MessageType;
 import com.v2tech.util.V2Log;
 
 /**
@@ -605,16 +604,11 @@ public class JNIService extends Service {
 				V2Log.e("No valid user object " + toUser + "  " + fromUser);
 				return;
 			}
-			VMessage vm = VMessage.fromXml(szXmlText);
+			VMessage vm = VMessage.fromXml(fromUser, toUser, new Date(nTime * 1000), szXmlText);
 			if (vm == null) {
 				V2Log.e(" xml parsed failed : " + szXmlText);
 				return;
 			}
-			vm.setToUser(toUser);
-			vm.setUser(fromUser);
-			vm.setLocal(false);
-			vm.setDate(new Date(nTime * 1000));
-			vm.setType(MessageType.TEXT);
 			Message.obtain(mCallbackHandler, JNI_RECEIVED_MESSAGE, vm)
 					.sendToTarget();
 		}

@@ -57,7 +57,8 @@
             android:layout_marginLeft="30dp"
             android:layout_toRightOf="@+id/contact_user_name"
             android:layout_toLeftOf="@+id/contact_show_user_menu"
-            android:ellipsize="middle"
+            android:ellipsize="end"
+            android:singleLine="true"
             android:text="TextView" />
 
         <ImageView
