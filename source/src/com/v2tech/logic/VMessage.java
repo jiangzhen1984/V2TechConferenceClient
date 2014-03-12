@@ -211,7 +211,11 @@ public class VMessage {
 				//msgList.add(vm);
 				for (int i=0;i<textMsgItemNL.getLength(); i++) {
 					Element msgEl = (Element)textMsgItemNL.item(i);
-					 vm.setText(vm.getText()+msgEl.getAttribute("Text")+"\n");
+					if (i == textMsgItemNL.getLength() - 1) {
+						vm.setText(vm.getText()+msgEl.getAttribute("Text"));
+					} else {
+						vm.setText(vm.getText()+msgEl.getAttribute("Text")+"\n");
+					}
 				}
 				
 				

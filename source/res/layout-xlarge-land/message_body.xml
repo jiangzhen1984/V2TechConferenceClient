@@ -34,7 +34,7 @@
                 android:layout_alignParentLeft="true"
                 android:layout_centerVertical="true"
                 android:layout_marginLeft="50dp"
-                android:src="@drawable/contact_default" />
+                android:src="@drawable/avatar" />
 
             <ImageView
                 android:id="@+id/message_body_arrow_left"
@@ -93,7 +93,7 @@
                 android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"
                 android:layout_marginRight="50dp"
-                android:src="@drawable/contact_default" />
+                android:src="@drawable/avatar" />
 
             <ImageView
                 android:id="@+id/message_body_arrow_right"

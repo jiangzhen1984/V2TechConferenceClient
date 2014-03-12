@@ -6,6 +6,7 @@ import java.util.List;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -52,6 +53,7 @@ public class ConferenceTabFragment extends Fragment {
 	private static final int UPDATE_NEW_MESSAGE_NOTIFICATION = 6;
 	private static final int NEW_MESSAGE_READED_NOTIFICATION = 7;
 	private static final int UPDATE_USER_SIGN = 8;
+	private static final int UPDATE_USER_AVATAR = 9;
 
 	private static final int RETRY_COUNT = 10;
 
@@ -173,6 +175,9 @@ public class ConferenceTabFragment extends Fragment {
 			intentFilter.addAction(PublicIntent.NEW_CONVERSATION);
 			intentFilter
 					.addAction(JNIService.JNI_BROADCAST_USER_UPDATE_NAME_OR_SIGNATURE);
+			intentFilter
+					.addAction(JNIService.JNI_BROADCAST_USER_AVATAR_CHANGED_NOTIFICATION);
+
 		}
 		return intentFilter;
 	}
@@ -242,7 +247,8 @@ public class ConferenceTabFragment extends Fragment {
 				ContentDescriptor.Conversation.Cols.TYPE + "=? and "
 						+ ContentDescriptor.Conversation.Cols.OWNER + "=?",
 				new String[] { Conversation.TYPE_CONTACT,
-						GlobalHolder.getInstance().getCurrentUserId()+"" }, null);
+						GlobalHolder.getInstance().getCurrentUserId() + "" },
+				null);
 
 		while (mCur.moveToNext()) {
 			Conversation cov = extractConversation(mCur);
@@ -267,6 +273,20 @@ public class ConferenceTabFragment extends Fragment {
 		}
 		Conversation cov = new ContactConversation(u, flag);
 		return cov;
+	}
+	
+	private void updateConversation(long extId, String name) {
+		ContentValues ct = new ContentValues();
+		ct.put(ContentDescriptor.Conversation.Cols.EXT_NAME,
+				name);
+		getActivity().getContentResolver().update(
+				ContentDescriptor.Conversation.CONTENT_URI,
+				ct,
+				ContentDescriptor.Conversation.Cols.EXT_ID + "=? and "
+						+ ContentDescriptor.Conversation.Cols.TYPE
+						+ "=?",
+				new String[] { extId + "",
+						Conversation.TYPE_CONTACT });
 	}
 
 	private void scrollToView(String str) {
@@ -317,6 +337,11 @@ public class ConferenceTabFragment extends Fragment {
 					.equals(intent.getAction())) {
 				Message.obtain(mHandler, UPDATE_USER_SIGN,
 						intent.getExtras().get("uid")).sendToTarget();
+			} else if (JNIService.JNI_BROADCAST_USER_AVATAR_CHANGED_NOTIFICATION
+					.equals(intent.getAction())) {
+				Object[] ar = new Object[] { intent.getExtras().get("uid"),
+						intent.getExtras().get("avatar") };
+				Message.obtain(mHandler, UPDATE_USER_AVATAR, ar).sendToTarget();
 			}
 		}
 
@@ -433,16 +458,26 @@ public class ConferenceTabFragment extends Fragment {
 			case UPDATE_USER_SIGN:
 				long fromuidS = (Long) msg.obj;
 				for (ScrollItem item : mItemList) {
-					if (item.cov.getExtId() == fromuidS) {
-						if (Conversation.TYPE_CONFERNECE.equals(item.cov
-								.getType())) {
-							User u = GlobalHolder.getInstance().getUser(
-									fromuidS);
-							((GroupLayout) item.gp)
-									.updateGroupOwner(u == null ? "" : u
-											.getName());
-						}
+					if (item.cov.getExtId() == fromuidS
+							&& Conversation.TYPE_CONTACT.equals(item.cov
+									.getType())) {
+						User u = GlobalHolder.getInstance().getUser(fromuidS);
+						((GroupLayout) item.gp).updateGroupOwner(u == null ? ""
+								: u.getName());
+						updateConversation(fromuidS, u == null ? ""
+								: u.getName());
 						break;
+					}
+				}
+				break;
+			case UPDATE_USER_AVATAR:
+				Object[] arObj = (Object[]) msg.obj;
+				for (ScrollItem item : mItemList) {
+					if (Conversation.TYPE_CONTACT.equals(item.cov.getType())
+							&& item.cov.getExtId() == (Long) arObj[0]) {
+						User u = GlobalHolder.getInstance().getUser(
+								item.cov.getExtId());
+						((GroupLayout) item.gp).updateIcon(u.getAvatarBitmap());
 					}
 				}
 				break;

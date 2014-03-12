@@ -74,8 +74,13 @@ public class GlobalHolder {
 			Long key = Long.valueOf(id);
 			User cu = mUserHolder.get(key);
 			if (cu != null) {
-				cu.setSignature(u.getSignature());
-				cu.setName(u.getName());
+				if (u.getSignature() != null) {
+					cu.setSignature(u.getSignature());
+				}
+				if (u.getName() != null) {
+					cu.setName(u.getName());
+				}
+				//FIXME update new data
 				V2Log.e(" merge user information ");
 				return;
 			}

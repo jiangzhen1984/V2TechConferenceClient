@@ -349,8 +349,6 @@ public class JNIService extends Service {
 			cv.put(ContentDescriptor.Messages.Cols.MSG_CONTENT, vm.getText());
 			cv.put(ContentDescriptor.Messages.Cols.MSG_TYPE, vm.getType()
 					.getIntValue());
-			cv.put(ContentDescriptor.Conversation.Cols.OWNER, GlobalHolder
-					.getInstance().getCurrentUserId());
 			cv.put(ContentDescriptor.Messages.Cols.SEND_TIME,
 					vm.getNormalDateStr());
 			Uri uri = getContentResolver().insert(

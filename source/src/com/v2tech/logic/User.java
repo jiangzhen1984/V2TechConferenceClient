@@ -304,6 +304,10 @@ public class User implements Comparable<User> {
 
 	public void setAvatarPath(String avatarPath) {
 		this.mAvatarPath = avatarPath;
+		if (avatar != null) {
+			avatar.recycle();
+			avatar = null;
+		}
 	}
 	
 	private Bitmap avatar;
@@ -320,7 +324,9 @@ public class User implements Comparable<User> {
 			return null;
 		}
 		if (avatar == null || avatar.isRecycled()) {
-			avatar = BitmapFactory.decodeFile(mAvatarPath);
+			BitmapFactory.Options opt = new BitmapFactory.Options();
+			opt.inSampleSize = 2;
+			avatar = BitmapFactory.decodeFile(mAvatarPath, opt);
 		}
 		return avatar;
 	}

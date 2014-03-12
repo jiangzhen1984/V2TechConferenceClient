@@ -232,6 +232,7 @@ public class ContactUserView extends LinearLayout {
 
 	public void updateSign() {
 		mUserSignatureTV.setText(this.mUser.getSignature());
+		mUserNameTV.setText(mUser.getName());
 	}
 
 	public void removePadding() {
