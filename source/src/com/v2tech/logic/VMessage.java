@@ -205,7 +205,9 @@ public class VMessage {
 
 				doc.getDocumentElement().normalize();
 				NodeList textMsgItemNL = doc.getElementsByTagName("TTextChatItem");
-				
+				if (textMsgItemNL.getLength() <=0) {
+					return null;
+				}
 				vm.setDate(date);
 				vm.setType(MessageType.TEXT);
 				//msgList.add(vm);
@@ -241,12 +243,16 @@ public class VMessage {
 			return vm;
 	}
 
+	/**
+	 *Color user  BGR 
+	 * @return
+	 */
 	public String toXml() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n")
 				.append("<TChatData IsAutoReply=\"False\">\n")
 				.append("<FontList>\n")
-				.append("<TChatFont Color=\"255\" Name=\"SimSun\" Size=\"9\" Style=\"\"/>")
+				.append("<TChatFont Color=\"0\" Name=\"Tahoma\" Size=\"9\" Style=\"\"/>")
 				.append("</FontList>\n")
 				.append("<ItemList>\n")
 				.append("<TTextChatItem NewLine=\"True\" FontIndex=\"0\" Text=\""

@@ -20,8 +20,8 @@
 
             <ImageView
                 android:id="@+id/contact_user_img"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
                 android:layout_centerInParent="true"
                 android:src="@drawable/avatar" />
 
@@ -49,6 +49,7 @@
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
             android:layout_marginLeft="85dp"
+            android:layout_marginRight="15dp"
             android:layout_toLeftOf="@+id/contact_show_user_menu"
             android:layout_toRightOf="@+id/contact_user_name"
             android:ellipsize="middle"

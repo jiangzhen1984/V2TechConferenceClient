@@ -218,18 +218,18 @@ public class ConferenceTabFragment extends Fragment {
 
 				@Override
 				public void onClick(View v) {
-					// TODO hidden request to enter conference feature
-					mWaitingDialog = ProgressDialog
-							.show(getActivity(),
-									"",
-									getActivity()
-											.getResources()
-											.getString(
-													R.string.requesting_enter_conference),
-									true);
-					currentConfId = g.getmGId();
-					Message.obtain(mHandler, REQUEST_ENTER_CONF,
-							Long.valueOf(g.getmGId())).sendToTarget();
+//					// TODO hidden request to enter conference feature
+//					mWaitingDialog = ProgressDialog
+//							.show(getActivity(),
+//									"",
+//									getActivity()
+//											.getResources()
+//											.getString(
+//													R.string.requesting_enter_conference),
+//									true);
+//					currentConfId = g.getmGId();
+//					Message.obtain(mHandler, REQUEST_ENTER_CONF,
+//							Long.valueOf(g.getmGId())).sendToTarget();
 				}
 
 			});

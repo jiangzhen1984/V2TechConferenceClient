@@ -19,12 +19,15 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.util.DisplayMetrics;
 import android.view.View;
 import android.widget.TabHost;
 import android.widget.TabHost.TabContentFactory;
 import android.widget.Toast;
 
 import com.v2tech.R;
+import com.v2tech.util.GlobalConfig;
+import com.v2tech.util.V2Log;
 import com.v2tech.view.JNIService.LocalBinder;
 
 public class MainActivity extends FragmentActivity implements
@@ -96,6 +99,7 @@ public class MainActivity extends FragmentActivity implements
 		}
 		// Intialise ViewPager
 		this.intialiseViewPager();
+		initDPI();
 	}
 
 	/**
@@ -106,6 +110,13 @@ public class MainActivity extends FragmentActivity implements
 	protected void onSaveInstanceState(Bundle outState) {
 		outState.putString("tab", mTabHost.getCurrentTabTag());
 		super.onSaveInstanceState(outState);
+	}
+	
+	private void initDPI() {
+		DisplayMetrics metrics = new DisplayMetrics();
+
+		getWindowManager().getDefaultDisplay().getMetrics(metrics);
+		GlobalConfig.GLOBAL_DPI = metrics.densityDpi;
 	}
 
 	/**

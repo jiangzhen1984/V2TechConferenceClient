@@ -16,7 +16,9 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -84,6 +86,7 @@ public class LoginActivity extends Activity {
 		mEmail = getIntent().getStringExtra(EXTRA_EMAIL);
 		mEmailView = (EditText) findViewById(R.id.email);
 		mEmailView.setText(mEmail);
+		mEmailView.addTextChangedListener(userNameTextWAtcher);
 
 		mPasswordView = (EditText) findViewById(R.id.password);
 
@@ -119,16 +122,23 @@ public class LoginActivity extends Activity {
 		loginView.setVisibility(View.GONE);
 		init();
 	}
+	
+	private String[] local;
 
 	private void init() {
 
 		SharedPreferences sf = mContext.getSharedPreferences("config",
 				Context.MODE_PRIVATE);
-		mEmailView.setText(sf.getString("user", ""));
-		mPasswordView.setText(sf.getString("passwd", ""));
+		String user = sf.getString("user", "");
+		String password = sf.getString("passwd", "");
+		mEmailView.setText(user);
+		mPasswordView.setText(password);
 		if (!sf.getString("user", "").equals("")
 				&& !sf.getString("passwd", "").equals("")) {
 			mRemPwdCkbx.setChecked(true);
+		}
+		if (!"".equals(user)) {
+			local = new String[]{user, password};
 		}
 	}
 
@@ -142,6 +152,34 @@ public class LoginActivity extends Activity {
 		tabBlockHolderAnimation.setDuration(700);
 		loginView.startAnimation(tabBlockHolderAnimation);
 	}
+	
+	private TextWatcher userNameTextWAtcher = new TextWatcher() {
+
+		@Override
+		public void afterTextChanged(Editable arg0) {
+			
+		}
+
+		@Override
+		public void beforeTextChanged(CharSequence arg0, int arg1, int arg2,
+				int arg3) {
+			
+		}
+
+		@Override
+		public void onTextChanged(CharSequence str, int arg1, int arg2,
+				int arg3) {
+			if (local == null || local.length < 2) {
+				return;
+			}
+			if (str.toString().equals(local[0])) {
+				mPasswordView.setText(local[1]);
+			} else {
+				mPasswordView.setText("");
+			}
+		}
+		
+	};
 
 	private OnClickListener showIpSetting = new OnClickListener() {
 

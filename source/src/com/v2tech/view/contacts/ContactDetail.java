@@ -225,7 +225,7 @@ public class ContactDetail extends Activity {
 		mNickNameET.addTextChangedListener(tw);
 		
 		//TODO hidden button of invite video conversation
-				mButtonInviteVideoTV.setVisibility(View.GONE);
+		mButtonInviteVideoTV.setVisibility(View.INVISIBLE);
 
 	}
 

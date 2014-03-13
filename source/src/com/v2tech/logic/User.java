@@ -25,7 +25,9 @@ import org.xml.sax.SAXException;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.util.DisplayMetrics;
 
+import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.V2Log;
 
 /**
@@ -324,8 +326,11 @@ public class User implements Comparable<User> {
 			return null;
 		}
 		if (avatar == null || avatar.isRecycled()) {
-			BitmapFactory.Options opt = new BitmapFactory.Options();
-			opt.inSampleSize = 2;
+			BitmapFactory.Options opt = null;
+			if (GlobalConfig.GLOBAL_DPI <DisplayMetrics.DENSITY_XHIGH) {
+				opt = new BitmapFactory.Options();
+				opt.inSampleSize = 2;
+			} 
 			avatar = BitmapFactory.decodeFile(mAvatarPath, opt);
 		}
 		return avatar;

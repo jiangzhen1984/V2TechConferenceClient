@@ -237,53 +237,24 @@ public class ContactsTabFragment extends Fragment {
 			}
 
 		} else {
-			int startRemovePos = -1;
-			int endRemovePos = -1;
-			Group parent = item.g.getParent();
-			Group nextGroup = null;
-			int nextGrougPos = -1;
-
-			List<Group> lg = parent != null ? parent.getChildGroup() : l;
-			for (int i = 0; i < lg.size(); i++) {
-				if (lg.get(i) == item.g) {
-					nextGrougPos = i + 1;
+			if (item.g.getChildGroup().size() <= 0 && item.g.getUsers().size() <= 0) {
+				return;
+			}
+			
+			int startRemovePos = pos + 1;
+			int endRemovePos = pos;
+			for (int index = pos + 1; index < mItemList.size(); index ++) {
+				ListItem li = mItemList.get(index);
+				if (li.g != null && li.g.getLevel() <= item.g.getLevel()) {
 					break;
 				}
+				//FIXME if find user how to check?
+				endRemovePos++;
 			}
-			// found self
-			if (nextGrougPos > -1) {
-				startRemovePos = pos + 1;
-				// clicked group is last group
-				if (nextGrougPos >= lg.size()) {
-					if (item.g.getParent() == null) {
-						endRemovePos = mItemList.size();
-					} else {
-						endRemovePos = startRemovePos + 1;
-						while (true && endRemovePos < mItemList.size()) {
-							if (mItemList.get(endRemovePos).g != null) {
-								break;
-							}
-							endRemovePos++;
-
-						}
-					}
-				} else {
-					nextGroup = lg.get(nextGrougPos);
-					for (int i = pos + 1; i < mItemList.size(); i++) {
-						if (mItemList.get(i).g == nextGroup) {
-							endRemovePos = i;
-							break;
-						}
-					}
-				}
-
-				while (startRemovePos < endRemovePos) {
-					mItemList.remove(startRemovePos);
-					endRemovePos--;
-				}
-
-			} else {
-
+			
+			while (startRemovePos <= endRemovePos && endRemovePos < mItemList.size()) {
+				mItemList.remove(startRemovePos);
+				endRemovePos--;
 			}
 		}
 
