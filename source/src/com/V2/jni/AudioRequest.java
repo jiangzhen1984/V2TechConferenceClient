@@ -88,7 +88,7 @@ public class AudioRequest {
 		// intent.putExtra("videochat", Constant.AUDIOCHATINVITE);
 		// context.sendBroadcast(intent);
 
-		AcceptAudioChat(nGroupID, nFromUserID, 2);
+	//	AcceptAudioChat(nGroupID, nFromUserID, 2);
 	}
 
 	private void OnAudioChatAccepted(long nGroupID, long nBusinessType,

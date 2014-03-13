@@ -236,7 +236,7 @@ public class LoginActivity extends Activity {
 					}
 					final String ip = ets1 + "." + ets2 + "." + ets3 + "."
 							+ ets4;
-					if (!saveHostConfig(ip, Integer.parseInt(portStr5))) {
+					if (!saveHostConfig(ip, portStr5)) {
 						Toast.makeText(mContext,
 								R.string.error_save_host_config,
 								Toast.LENGTH_LONG).show();
@@ -252,6 +252,7 @@ public class LoginActivity extends Activity {
 			cancelButton.setOnClickListener(new OnClickListener() {
 				@Override
 				public void onClick(View v) {
+					saveHostConfig("", "");
 					dialog.dismiss();
 				}
 			});
@@ -281,12 +282,12 @@ public class LoginActivity extends Activity {
 		return true;
 	}
 
-	private boolean saveHostConfig(String ip, int port) {
+	private boolean saveHostConfig(String ip, String port) {
 		SharedPreferences sf = mContext.getSharedPreferences("config",
 				Context.MODE_PRIVATE);
 		Editor e = sf.edit();
 		e.putString("ip", ip);
-		e.putString("port", port + "");
+		e.putString("port", port);
 		return e.commit();
 	}
 

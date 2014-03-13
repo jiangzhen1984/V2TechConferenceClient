@@ -409,6 +409,7 @@ public class ContactsTabFragment extends Fragment {
 				break;
 			case UPDATE_USER_STATUS:
 				updateUserStatus(msg.arg1, msg.arg2);
+				//FIXME update all users in all groups
 				updateUserViewPostion(msg.arg1, msg.arg2);
 				break;
 			case UPDATE_SEARCHED_USER_LIST:

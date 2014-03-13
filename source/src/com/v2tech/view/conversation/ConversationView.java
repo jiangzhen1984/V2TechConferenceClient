@@ -485,9 +485,11 @@ public class ConversationView extends Activity {
 
 		while (mCur.moveToNext()) {
 			VMessage m = extractMsg(mCur);
-			MessageBodyView mv = new MessageBodyView(this, m, true);
-			mv.setCallback(listener);
-			mMessagesContainer.addView(mv);
+			if (m.getUser().getmUserId() == user2Id) {
+				MessageBodyView mv = new MessageBodyView(this, m, true);
+				mv.setCallback(listener);
+				mMessagesContainer.addView(mv);
+			}
 		}
 		mCur.close();
 		mScrollView.post(new Runnable() {

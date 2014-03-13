@@ -41,6 +41,9 @@
             android:layout_centerVertical="true"
             android:layout_marginLeft="50dp"
             android:layout_toRightOf="@+id/contact_user_img_container"
+             android:layout_marginRight="30dp"
+            android:ellipsize="end"
+            android:singleLine="true"
             android:text="TextView" />
 
         <TextView
