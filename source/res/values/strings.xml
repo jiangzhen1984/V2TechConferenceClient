@@ -7,5 +7,6 @@
     <string name="textOn">ON</string>
     <string name="textOff">OFF</string>
     <string name="quit_promption">请再按一次退出</string>
+    <string name="user_logged_with_other_device">用户在其他地方登录， 程序2秒后自动退出</string>
 
 </resources>

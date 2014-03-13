@@ -21,7 +21,8 @@ public class AsynResult {
 
 		SUCCESS(0),
 		FAIL(-1),
-		TIME_OUT(-2);
+		TIME_OUT(-2),
+		INCORRECT_PAR(-3);
 
 		private int code;
 

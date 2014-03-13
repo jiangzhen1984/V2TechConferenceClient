@@ -16,6 +16,7 @@ import com.v2tech.util.V2Log;
 public class UserService extends AbstractHandler {
 
 	private static final int JNI_REQUEST_LOG_IN = 1;
+	private static final int JNI_REQUEST_UPDAE_USER = 2;
 
 	private ImRequestCB imCB = null;
 
@@ -37,11 +38,29 @@ public class UserService extends AbstractHandler {
 	 *            callback message Message.obj is {@link AsynResult}
 	 */
 	public void login(String mail, String passwd, Message caller) {
-
 		initTimeoutMessage(JNI_REQUEST_LOG_IN, null, DEFAULT_TIME_OUT_SECS,
 				caller);
 		ImRequest.getInstance().login(mail, passwd,
 				V2GlobalEnum.USER_STATUS_ONLINE, V2ClientType.IM);
+	}
+	
+	
+	/**
+	 * TODO update comment
+	 * @param user
+	 * @param caller
+	 */
+	public void updateUser(User user, Message caller) {
+		if (user == null) {
+			if (caller != null) {
+				caller.obj = new AsynResult(AsynResult.AsynState.INCORRECT_PAR, null); 
+				caller.sendToTarget();
+			}
+			return;
+		}
+		initTimeoutMessage(JNI_REQUEST_UPDAE_USER, null, DEFAULT_TIME_OUT_SECS,
+				caller);
+		ImRequest.getInstance().modifyBaseInfo(user.toXml());
 	}
 
 	@Override
@@ -62,6 +81,9 @@ public class UserService extends AbstractHandler {
 			caller.obj = new AsynResult(AsynResult.AsynState.SUCCESS, msg.obj);
 			JNIResponse jniRes = (JNIResponse) msg.obj;
 			jniRes.callerObject = origObject;
+			break;
+		case JNI_REQUEST_UPDAE_USER:
+			caller.obj = new AsynResult(AsynResult.AsynState.SUCCESS, msg.obj);
 			break;
 		}
 		caller.sendToTarget();
@@ -97,7 +119,7 @@ public class UserService extends AbstractHandler {
 
 		@Override
 		public void OnUpdateBaseInfoCallback(long nUserID, String updatexml) {
-
+			Message.obtain(handler, JNI_REQUEST_UPDAE_USER, updatexml).sendToTarget();
 		}
 
 		@Override

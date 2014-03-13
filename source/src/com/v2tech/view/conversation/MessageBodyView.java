@@ -3,6 +3,7 @@ package com.v2tech.view.conversation;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Handler;
@@ -116,11 +117,11 @@ public class MessageBodyView extends LinearLayout {
 					LinearLayout.LayoutParams.WRAP_CONTENT));
 		} else if (mMsg.getType() ==VMessage.MessageType.IMAGE) {
 			mImageIV = new ImageView(this.getContext());
-			
-			mImageIV.setImageBitmap(((VImageMessage)mMsg).getCompressedBitmap());
+			Bitmap bm = ((VImageMessage)mMsg).getCompressedBitmap();
+			mImageIV.setImageBitmap(bm);
 			mContentContainer.addView(mImageIV,new LinearLayout.LayoutParams(
-					LinearLayout.LayoutParams.WRAP_CONTENT,
-					LinearLayout.LayoutParams.WRAP_CONTENT));
+					150,
+					150));
 		}
 
 		LinearLayout.LayoutParams ll = new LinearLayout.LayoutParams(
@@ -128,23 +129,38 @@ public class MessageBodyView extends LinearLayout {
 				LinearLayout.LayoutParams.WRAP_CONTENT);
 		this.addView(rootView, ll);
 
-		mContentContainer.setOnLongClickListener(new OnLongClickListener() {
+		if (mMsg.getType() == VMessage.MessageType.IMAGE) {
+			mContentContainer.setOnClickListener(new OnClickListener() {
 
-			@Override
-			public boolean onLongClick(View anchor) {
-				updateSelectedBg(true);
-				if (mMsg.getType() == VMessage.MessageType.TEXT) {
-					showPopupWindow(anchor);
-				} else {
-					updateSelectedBg(false);
+				@Override
+				public void onClick(View arg0) {
+					if (callback !=null) {
+						callback.onMessageClicked(mMsg);
+					}
 				}
-				if (callback !=null) {
-					callback.onMessageClicked(mMsg);
-				}
-				return false;
-			}
+				
+			}) ;
+			
+		} else {
+			mContentContainer.setOnLongClickListener(new OnLongClickListener() {
 
-		});
+				@Override
+				public boolean onLongClick(View anchor) {
+					updateSelectedBg(true);
+					if (mMsg.getType() == VMessage.MessageType.TEXT) {
+						showPopupWindow(anchor);
+					} else {
+						updateSelectedBg(false);
+					}
+					if (callback !=null) {
+						callback.onMessageClicked(mMsg);
+					}
+					return false;
+				}
+
+			});
+		}
+		
 
 	}
 

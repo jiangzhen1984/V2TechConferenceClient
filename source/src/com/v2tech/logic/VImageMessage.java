@@ -11,6 +11,7 @@ import java.io.OutputStream;
 import java.util.UUID;
 
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
 
 import com.v2tech.util.StorageUtil;
@@ -196,12 +197,19 @@ public class VImageMessage extends VMessage {
 	Bitmap mCompressedBitmap = null;
 	public Bitmap getFullQuantityBitmap() {
 		if (mFullQualityBitmap == null || mFullQualityBitmap.isRecycled()) {
-			mFullQualityBitmap = BitmapFactory.decodeFile(this.mImagePath);
-			if (mFullQualityBitmap.getWidth() > 1024 || mFullQualityBitmap.getHeight() > 768) {
-				Bitmap tmp = Bitmap.createScaledBitmap(mFullQualityBitmap, 1024, 768, true);
-				mFullQualityBitmap.recycle();
-				mFullQualityBitmap = tmp;
+			 BitmapFactory.Options options= new  BitmapFactory.Options();
+			 options.inJustDecodeBounds = true;
+//			 options.inPreferredConfig = Config.ALPHA_8;
+//			 options.inDither = true;
+			BitmapFactory.decodeFile(this.mImagePath, options);
+			if (options.outWidth > 1920 || options.outHeight > 1080) {
+				options.inJustDecodeBounds = false;
+				options.inSampleSize = 4;
+			} else {
+				options.inJustDecodeBounds = false;
+				options.inSampleSize = 3;
 			}
+			mFullQualityBitmap = BitmapFactory.decodeFile(this.mImagePath, options);
 		}
 		return mFullQualityBitmap;
 	}
@@ -209,9 +217,16 @@ public class VImageMessage extends VMessage {
 	public Bitmap getCompressedBitmap() {
 		if (mCompressedBitmap == null || mFullQualityBitmap.isRecycled()) {
 			BitmapFactory.Options options = new BitmapFactory.Options();
-			options.inSampleSize = 4;
-			options.outHeight = 200;
-			options.outWidth = 200;
+			options.inJustDecodeBounds = true;
+			BitmapFactory.decodeFile(this.mImagePath, options);
+			if (options.outHeight > 1080 || options.outHeight > 1080) {
+				options.inSampleSize = 4;
+			} else if (options.outHeight > 500 || options.outHeight > 500) {
+				options.inSampleSize = 2;
+			} else {
+				options.inSampleSize = 1;
+			}
+			options.inJustDecodeBounds = false;
 			mCompressedBitmap = BitmapFactory.decodeFile(this.mImagePath, options);
 		}
 		return mCompressedBitmap;

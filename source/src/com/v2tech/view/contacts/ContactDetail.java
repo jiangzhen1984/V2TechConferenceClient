@@ -18,6 +18,7 @@ import android.widget.Toast;
 import com.v2tech.R;
 import com.v2tech.logic.GlobalHolder;
 import com.v2tech.logic.User;
+import com.v2tech.service.UserService;
 import com.v2tech.view.PublicIntent;
 
 public class ContactDetail extends Activity {
@@ -31,8 +32,8 @@ public class ContactDetail extends Activity {
 	private long mUid;
 	private User u;
 	private LocalHandler lh = new LocalHandler();
-	
-	
+	private UserService us = new UserService();
+
 	private TextView mReturnButtonTV;
 	private TextView mNameTitleIV;
 	private ImageView mHeadIconIV;
@@ -59,13 +60,11 @@ public class ContactDetail extends Activity {
 	private EditText mBirthdayET;
 	private EditText mCellphoneET;
 	private EditText mTelephoneET;
-	private EditText mComapnyET;
-	private EditText mDepartmentET;
 	private EditText mTitleET;
 	private EditText mAddressET;
 
 	private EditText[] mETArr;
-	
+
 	private boolean isUpdating;
 
 	@Override
@@ -101,7 +100,7 @@ public class ContactDetail extends Activity {
 			public void onClick(View arg0) {
 				finish();
 			}
-			
+
 		});
 		// view definition for non-self
 		mUserSignatureTV = (TextView) findViewById(R.id.contact_user_detail_user_signature_tv);
@@ -117,20 +116,18 @@ public class ContactDetail extends Activity {
 		mAddressTV = (TextView) findViewById(R.id.contact_user_detail_address_tv);
 		mTVArr = new TextView[] { mUserSignatureTV, mButtonInviteVideoTV,
 				mButtonSendMsgTV, mGenderTV, mBirthdayTV, mCellphoneTV,
-				mTelephoneTV, mComapnyTV, mDepartmentTV, mTitleTV, mAddressTV };
+				mTelephoneTV, mTitleTV, mAddressTV };
 
 		// view for self
 		mGenderET = (EditText) findViewById(R.id.contact_user_detail_gender_et);
 		mBirthdayET = (EditText) findViewById(R.id.contact_user_detail_birthday_et);
 		mCellphoneET = (EditText) findViewById(R.id.contact_user_detail_cell_phone_et);
 		mTelephoneET = (EditText) findViewById(R.id.contact_user_detail_telephone_et);
-		mComapnyET = (EditText) findViewById(R.id.contact_user_detail_company_et);
-		mDepartmentET = (EditText) findViewById(R.id.contact_user_detail_department_et);
 		mTitleET = (EditText) findViewById(R.id.contact_user_detail_title_et);
 		mAddressET = (EditText) findViewById(R.id.contact_user_detail_address_et);
 
 		mETArr = new EditText[] { mGenderET, mBirthdayET, mCellphoneET,
-				mTelephoneET, mComapnyET, mDepartmentET, mTitleET, mAddressET };
+				mTelephoneET, mTitleET, mAddressET };
 	}
 
 	private void showUserInfo() {
@@ -147,9 +144,11 @@ public class ContactDetail extends Activity {
 			}
 
 			if (u.getGender() != null && u.getGender().equals("1")) {
-				mGenderET.setText(mContext.getResources().getText(R.string.contacts_user_detail_gender_male));
-			} else if (u.getGender()!= null && u.getGender().equals("0")) {
-				mGenderET.setText(mContext.getResources().getText(R.string.contacts_user_detail_gender_female));
+				mGenderET.setText(mContext.getResources().getText(
+						R.string.contacts_user_detail_gender_male));
+			} else if (u.getGender() != null && u.getGender().equals("0")) {
+				mGenderET.setText(mContext.getResources().getText(
+						R.string.contacts_user_detail_gender_female));
 			} else {
 				mGenderET.setText("");
 			}
@@ -157,8 +156,6 @@ public class ContactDetail extends Activity {
 			mBirthdayET.setText(u.getBirthdayStr());
 			mCellphoneET.setText(u.getCellPhone());
 			mTelephoneET.setText(u.getTelephone());
-			mComapnyET.setText(u.getCompany());
-			mDepartmentET.setText(u.getDepartment());
 			mTitleET.setText(u.getTitle());
 			mAddressET.setText(u.getAddress());
 
@@ -172,17 +169,17 @@ public class ContactDetail extends Activity {
 
 			mUserSignatureTV.setText(u.getSignature());
 			if (u.getGender() != null && u.getGender().equals("1")) {
-				mGenderTV.setText(mContext.getResources().getText(R.string.contacts_user_detail_gender_male));
-			} else if (u.getGender()!= null && u.getGender().equals("0")) {
-				mGenderTV.setText(mContext.getResources().getText(R.string.contacts_user_detail_gender_female));
+				mGenderTV.setText(mContext.getResources().getText(
+						R.string.contacts_user_detail_gender_male));
+			} else if (u.getGender() != null && u.getGender().equals("0")) {
+				mGenderTV.setText(mContext.getResources().getText(
+						R.string.contacts_user_detail_gender_female));
 			} else {
 				mGenderTV.setText("");
 			}
 			mBirthdayTV.setText(u.getBirthdayStr());
 			mCellphoneTV.setText(u.getCellPhone());
 			mTelephoneTV.setText(u.getTelephone());
-			mComapnyTV.setText(u.getCompany());
-			mDepartmentTV.setText(u.getDepartment());
 			mTitleTV.setText(u.getTitle());
 			mAddressTV.setText(u.getAddress());
 
@@ -200,13 +197,15 @@ public class ContactDetail extends Activity {
 				}
 
 			});
-			
+
 			mButtonSendMsgTV.setOnClickListener(new OnClickListener() {
 
 				@Override
 				public void onClick(View arg0) {
-					Intent i = new Intent(PublicIntent.START_CONVERSACTION_ACTIVITY);
-					i.putExtra("user1id", GlobalHolder.getInstance().getCurrentUserId());
+					Intent i = new Intent(
+							PublicIntent.START_CONVERSACTION_ACTIVITY);
+					i.putExtra("user1id", GlobalHolder.getInstance()
+							.getCurrentUserId());
 					i.putExtra("user2id", u.getmUserId());
 					i.putExtra("user2Name", u.getName());
 					i.addCategory(PublicIntent.DEFAULT_CATEGORY);
@@ -216,15 +215,14 @@ public class ContactDetail extends Activity {
 			});
 
 		}
-		
+
 		mNameTitleIV.setText(u.getName());
 		mNickNameET.setText(u.getName());
 		mAccountTV.setText(u.getmEmail());
-		
-		
-		mNickNameET.addTextChangedListener(tw);
-		
-		//TODO hidden button of invite video conversation
+		mComapnyTV.setText(u.getCompany());
+		mDepartmentTV.setText(u.getDepartment());
+
+		// TODO hidden button of invite video conversation
 		mButtonInviteVideoTV.setVisibility(View.INVISIBLE);
 
 	}
@@ -238,40 +236,36 @@ public class ContactDetail extends Activity {
 			}
 			isUpdating = true;
 			Message m = Message.obtain(lh, UPDATE_USER_INFO);
-			lh.sendMessageDelayed(m, 800);
+			lh.sendMessageDelayed(m, 2000);
 		}
 
 		@Override
 		public void beforeTextChanged(CharSequence arg0, int arg1, int arg2,
 				int arg3) {
-			
+
 		}
 
 		@Override
 		public void onTextChanged(CharSequence arg0, int arg1, int arg2,
 				int arg3) {
-			
+
 		}
-		
+
 	};
-	
-	
+
 	private void gatherUserData() {
-		if (u.isCurrentLoggedInUser()) {
+		if (u.getmUserId() == GlobalHolder.getInstance().getCurrentUserId()) {
+			u.setName(mNickNameET.getText().toString());
 			u.setGender(mGenderET.getText().toString());
-			//mBirthdayET.setText(u.getBirthdayStr());
+			// mBirthdayET.setText(u.getBirthdayStr());
 			u.setCellPhone(mCellphoneET.getText().toString());
 			u.setTelephone(mTelephoneET.getText().toString());
-			u.setCompany(mComapnyET.getText().toString());
-			u.setDepartment(mDepartmentET.getText().toString());
 			u.setTitle(mTitleET.getText().toString());
 			u.setAddress(mAddressET.getText().toString());
 		} else {
 			u.setName(mNickNameET.getText().toString());
 		}
 	}
-	
-	
 
 	class LocalHandler extends Handler {
 
@@ -290,6 +284,12 @@ public class ContactDetail extends Activity {
 				break;
 			case UPDATE_USER_INFO:
 				gatherUserData();
+				if (u.getmUserId() == GlobalHolder.getInstance()
+						.getCurrentUserId()) {
+					// TODO if current user is not logged , do not update now
+					us.updateUser(u,
+							Message.obtain(this, UPDATE_USER_INFO_DONE));
+				}
 				isUpdating = false;
 				break;
 			case UPDATE_USER_INFO_DONE:

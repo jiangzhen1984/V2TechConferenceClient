@@ -40,6 +40,7 @@ import com.v2tech.logic.GlobalHolder;
 import com.v2tech.logic.User;
 import com.v2tech.logic.VImageMessage;
 import com.v2tech.logic.VMessage;
+import com.v2tech.logic.VMessage.MessageType;
 import com.v2tech.service.ChatService;
 import com.v2tech.view.JNIService;
 import com.v2tech.view.PublicIntent;
@@ -54,6 +55,7 @@ public class ConversationView extends Activity {
 	private final int SEND_MESSAGE = 4;
 	private final int SEND_MESSAGE_DONE = 5;
 	private final int QUERY_NEW_MESSAGE = 6;
+	private final int RELEASE_MESSAGE = 7;
 
 	private final int BATCH_COUNT = 10;
 
@@ -510,6 +512,7 @@ public class ConversationView extends Activity {
 
 		int id = cur.getInt(0);
 		long localUserId = cur.getLong(1);
+		long remoteUserId = cur.getLong(3);
 		// msg_content column
 		String content = cur.getString(5);
 		// message type
@@ -517,11 +520,13 @@ public class ConversationView extends Activity {
 		// date time
 		String dateString = cur.getString(7);
 
+		User lo = GlobalHolder.getInstance().getUser(localUserId);
+		User ro = GlobalHolder.getInstance().getUser(remoteUserId);
 		VMessage vm = null;
 		if (type == VMessage.MessageType.TEXT.getIntValue()) {
-			vm = new VMessage(local, remote, content, localUserId == user2Id);
+			vm = new VMessage(lo, ro, content, localUserId == user2Id);
 		} else {
-			vm = new VImageMessage(local, remote, content.split("\\|")[4],
+			vm = new VImageMessage(lo, ro, content.split("\\|")[4],
 					localUserId == user2Id);
 		}
 		vm.setId(id);
@@ -588,7 +593,7 @@ public class ConversationView extends Activity {
 				break;
 			case END_LOAD_MESSAGE:
 				mMessagesContainer.removeView(mLoadingImg);
-				List<VMessage> array = (List<VMessage>) msg.obj;
+				final List<VMessage> array = (List<VMessage>) msg.obj;
 				MessageBodyView fir = null;
 				for (int i = 0; array != null && i < array.size(); i++) {
 					MessageBodyView mv = new MessageBodyView(mContext,
@@ -612,6 +617,19 @@ public class ConversationView extends Activity {
 				
 				
 				isLoading = false;
+//				this.postDelayed(new Runnable() {
+//
+//					@Override
+//					public void run() {
+//						for (int i = 0; array != null && i < array.size(); i++) {
+//							VMessage vt = array.get(i);
+//							if (vt.getType() == MessageType.IMAGE) {
+//								((VImageMessage)vt).recycle();
+//							}
+//						}
+//					}
+//					
+//				}, 700);
 				break;
 			case SEND_MESSAGE:
 				mChat.sendVMessage((VMessage) msg.obj,

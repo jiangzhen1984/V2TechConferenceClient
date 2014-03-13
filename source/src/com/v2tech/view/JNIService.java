@@ -17,6 +17,7 @@ import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.os.Process;
 import android.widget.Toast;
 
 import com.V2.jni.ChatRequest;
@@ -191,6 +192,7 @@ public class JNIService extends Service {
 	private static final int JNI_CONNECT_RESPONSE = 23;
 	private static final int JNI_UPDATE_USER_INFO = 24;
 	private static final int JNI_UPDATE_USER_STATUS = 25;
+	private static final int JNI_LOG_OUT = 26;
 	private static final int JNI_GROUP_NOTIFY = 35;
 	private static final int JNI_ATTENDEE_ENTERED_NOTIFICATION = 57;
 	private static final int JNI_ATTENDEE_EXITED_NOTIFICATION = 58;
@@ -238,6 +240,9 @@ public class JNIService extends Service {
 				mContext.sendBroadcast(iun);
 
 				break;
+			case JNI_LOG_OUT:
+				Toast.makeText(mContext, R.string.user_logged_with_other_device, Toast.LENGTH_LONG).show();
+				break;
 			case JNI_GROUP_NOTIFY:
 				List<Group> gl = Group
 						.parserFromXml(msg.arg1, (String) msg.obj);
@@ -249,14 +254,15 @@ public class JNIService extends Service {
 				GroupUserInfoOrig go = (GroupUserInfoOrig) msg.obj;
 				if (go != null && go.xml != null) {
 					List<User> lu = User.fromXml(go.xml);
-					GlobalHolder.getInstance().addUserToGroup(lu, go.gId);
 					for (User tu : lu) {
 						User.Status us = GlobalHolder.getInstance()
 								.getOnlineUserStatus(tu.getmUserId());
 						if (us != null) {
 							tu.updateStatus(us);
 						}
-						GlobalHolder.getInstance().putUser(tu.getmUserId(), tu);
+						User existU = GlobalHolder.getInstance().putUser(tu.getmUserId(), tu);
+						
+						GlobalHolder.getInstance().addUserToGroup(existU, go.gId);
 					}
 					Intent i = new Intent(
 							JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION);
@@ -424,7 +430,14 @@ public class JNIService extends Service {
 
 		@Override
 		public void OnLogoutCallback(int nUserID) {
-
+			Message.obtain(mCallbackHandler, JNI_LOG_OUT).sendToTarget();
+			mCallbackHandler.postDelayed(new Runnable () {
+				@Override
+				public void run() {
+					Process.killProcess(Process.myPid());
+				}
+				
+			}, 2000);
 		}
 
 		@Override

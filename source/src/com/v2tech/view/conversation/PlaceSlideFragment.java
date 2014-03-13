@@ -46,14 +46,18 @@ public class PlaceSlideFragment extends Fragment {
 			@Override
 			protected Void doInBackground(Void... params) {
 				synchronized(mLock) {
-					vim.getFullQuantityBitmap();
+					if (vim != null) {
+						vim.getFullQuantityBitmap();
+					}
 				}
 				return null;
 			}
 
 			@Override
 			protected void onPostExecute(Void result) {
-				iv.setImageBitmap(vim.getFullQuantityBitmap());
+				if (vim != null) {
+					iv.setImageBitmap(vim.getFullQuantityBitmap());
+				}
 			}
 
 			

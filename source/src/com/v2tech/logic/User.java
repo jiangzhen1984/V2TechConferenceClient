@@ -385,6 +385,20 @@ public class User implements Comparable<User> {
 	}
 
 	
+	
+	public String toXml() {
+		String xml ="<user "+
+				" address=\""+(this.getAddress()==null?"" : this.getAddress())+"\" "+
+				"birthday=\"\" "+
+				"job=\""+(this.getTitle() == null?"":this.getTitle())+"\" "+
+				"mobile=\""+(this.getCellPhone() == null?"":this.getCellPhone())+"\" "+
+				"nickname=\""+(this.getName() == null?"":this.getName())+"\"  " +
+				"sex=\""+(this.getGender()== null?"":this.getGender())+"\"  " +
+				"sign=\""+(this.getSignature() == null?"":this.getSignature())+"\" "+
+				"telephone=\""+(this.getTelephone() == null?"":this.getTelephone())+"\"> "+
+				"<videolist/> </user> ";
+		return xml;
+	}
 
 	/**
 	 * 

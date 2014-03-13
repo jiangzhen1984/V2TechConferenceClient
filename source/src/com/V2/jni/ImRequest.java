@@ -86,6 +86,18 @@ public class ImRequest {
 	
 
 	/**
+	 * <ul>When Same user log in with other device, then this function will be called</ul>
+	 * @param nType device type of logged
+	 */
+	private void OnLogout(int nType) {
+		V2Log.d("OnLogout::" + nType);
+		for (ImRequestCallback cb :this.callbacks) {
+			cb.OnLogoutCallback(nType);
+		}
+		
+	}
+
+	/**
 	 * <ul>Get user information from server.<br>
 	 * when call this API, JNI will call {@link #OnUpdateBaseInfo(long, String)} to indicate response.<br>
 	 * </ul>
@@ -150,6 +162,13 @@ public class ImRequest {
 		}
 	}
 	
+	/**
+	 * <ul>Update user information</ul>
+	 * @param InfoXml content as below:<br>
+	 * {@code <user address="" birthday="" fax="" homepage="" job="" mobile="" nickname="" sex="1" sign="" telephone=""><videolist/> </user> }
+	 */
+	public native void modifyBaseInfo(String InfoXml);
+	
 
 	public native void updateMyStatus(int nStatus, String szStatusDesc);
 
@@ -160,7 +179,6 @@ public class ImRequest {
 	/*
  * 
  */
-	public native void modifyBaseInfo(String InfoXml);
 
 	// 鏇存敼绯荤粺澶村儚
 	public native void changeSystemAvatar(String szAvatarName);
@@ -190,10 +208,6 @@ public class ImRequest {
 
 	
 
-	// 娉ㄩ攢鐨勬柟娉�
-	private void OnLogout(int nUserID) {
-		Log.e("ImRequest UI", "OnLogout::" + nUserID);
-	}
 
 
 

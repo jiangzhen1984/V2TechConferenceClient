@@ -205,7 +205,7 @@ public class LoginActivity extends Activity {
 
 			SharedPreferences sf = mContext.getSharedPreferences("config",
 					Context.MODE_PRIVATE);
-			String cacheIp = sf.getString("ip", null);
+			final String cacheIp = sf.getString("ip", null);
 			if (cacheIp != null && cacheIp.length() <= 15) {
 				String[] ips = cacheIp.split("\\.");
 				et1.setText(ips[0]);
@@ -252,7 +252,14 @@ public class LoginActivity extends Activity {
 			cancelButton.setOnClickListener(new OnClickListener() {
 				@Override
 				public void onClick(View v) {
-					saveHostConfig("", "");
+					//saveHostConfig("", "");
+					if (cacheIp != null && cacheIp.length() <= 15) {
+						String[] ips = cacheIp.split("\\.");
+						et1.setText(ips[0]);
+						et2.setText(ips[1]);
+						et3.setText(ips[2]);
+						et4.setText(ips[3]);
+					}
 					dialog.dismiss();
 				}
 			});

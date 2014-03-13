@@ -66,9 +66,9 @@ public class GlobalHolder {
 	}
 
 	private Object mUserLock = new Object();
-	public void putUser(long id, User u) {
+	public User putUser(long id, User u) {
 		if (u == null) {
-			return;
+			return null;
 		}
 		synchronized(mUserLock) {
 			Long key = Long.valueOf(id);
@@ -82,10 +82,11 @@ public class GlobalHolder {
 				}
 				//FIXME update new data
 				V2Log.e(" merge user information ");
-				return;
+				return cu;
 			}
 			mUserHolder.put(key, u);
 		}
+		return u;
 	}
 
 	public User getUser(long id) {
@@ -214,6 +215,15 @@ public class GlobalHolder {
 			return;
 		}
 		g.addUserToGroup(uList);
+	}
+	
+	public void addUserToGroup(User u, long belongGID) {
+		Group g = findGroupById(belongGID);
+		if (g == null) {
+			V2Log.e("Doesn't receive group<" + belongGID + "> information yet!");
+			return;
+		}
+		g.addUserToGroup(u);
 	}
 
 	public String getAvatarPath(long uid) {

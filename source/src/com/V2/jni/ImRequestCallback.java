@@ -19,7 +19,11 @@ public interface ImRequestCallback {
 	public void OnLoginCallback(long nUserID, int nStatus, int nResult);
 	
 	
-	public void OnLogoutCallback(int nUserID);
+	/**
+	 * <ul>When Same user log in with other device, then this function will be called</ul>
+	 * @param nType device type of logged
+	 */
+	public void OnLogoutCallback(int nType);
 	
 	/**
 	 * When network connection state changed, this function will be called.<br>

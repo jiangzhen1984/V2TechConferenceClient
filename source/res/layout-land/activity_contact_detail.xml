@@ -437,7 +437,7 @@
                                 android:text="TextView"
                                 android:textColor="@color/contacts_user_detail_text_color"
                                 android:textSize="18sp"
-                                android:visibility="gone" />
+                                 />
 
                             <EditText
                                 android:id="@+id/contact_user_detail_company_et"
@@ -486,7 +486,7 @@
                                 android:text="TextView"
                                 android:textColor="@color/contacts_user_detail_text_color"
                                 android:textSize="18sp"
-                                android:visibility="gone" />
+                                 />
 
                             <EditText
                                 android:id="@+id/contact_user_detail_department_et"
