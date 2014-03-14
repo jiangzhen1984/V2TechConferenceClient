@@ -134,7 +134,12 @@
             android:layout_toLeftOf="@+id/message_send"
             android:layout_toRightOf="@+id/imageView3"
             android:background="@drawable/input_bg"
-            android:ems="10" >
+            android:ems="10"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="5dp"
+            android:inputType="textCapSentences|textMultiLine"
+            android:minLines="1"
+            android:maxLines ="3" >
         </EditText>
     </RelativeLayout>
     
