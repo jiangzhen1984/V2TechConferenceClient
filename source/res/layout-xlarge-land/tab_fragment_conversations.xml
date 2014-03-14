@@ -26,9 +26,28 @@
                 android:layout_marginTop="8dp"
                   android:textSize="25sp"
                 android:text="@string/confs_title" />
+            
+            <LinearLayout
+                android:id="@+id/recent_conversation_network_nt"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="#FFDEAD"
+                android:visibility="gone" >
+
+                <TextView
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal|center"
+                    android:layout_marginBottom="4dp"
+                    android:layout_marginTop="4dp"
+                    android:gravity="center_horizontal"
+                    android:text="@string/error_can_not_connect_server"
+                    android:textSize="12sp" />
+
+            </LinearLayout>
         </LinearLayout>
 
-        <RelativeLayout
+       <RelativeLayout
             android:id="@+id/RelativeLayout2"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
@@ -73,22 +92,16 @@
          
         </RelativeLayout>
 
-        <ScrollView
-            android:id="@+id/conference_scroll_view"
+      <ListView
+            android:id="@+id/conversations_list_container"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:layout_below="@+id/RelativeLayout2"
             android:layout_centerHorizontal="true"
+            android:divider="@null"
             android:background="@color/confs_group_list_bg" >
 
-            <LinearLayout
-                android:id="@+id/group_list_container"
-                android:layout_width="match_parent"
-                android:layout_height="fill_parent"
-                android:orientation="vertical" >
-
-            </LinearLayout>
-        </ScrollView>
+        </ListView>
         
           <ImageView
             android:id="@+id/conference_loading_icon"

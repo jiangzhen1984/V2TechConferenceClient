@@ -46,7 +46,7 @@ public class GroupLayout extends LinearLayout {
 
 	private void init() {
 		View view = LayoutInflater.from(super.getContext()).inflate(
-				R.layout.group_list_conference_view, null, false);
+				R.layout.conversation_view, null, false);
 
 		mGroupIV = (ImageView) view
 				.findViewById(R.id.group_list_conference_image_view);
@@ -105,7 +105,7 @@ public class GroupLayout extends LinearLayout {
 			hand.post(queryMessageRunnable);
 		} else {
 			mNotificatorIV.setVisibility(View.GONE);
-		}
+		}		
 	}
 
 	private Runnable queryMessageRunnable = new Runnable() {

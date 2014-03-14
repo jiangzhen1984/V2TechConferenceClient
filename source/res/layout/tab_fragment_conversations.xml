@@ -24,11 +24,30 @@
                 android:layout_gravity="center"
                 android:layout_marginBottom="8dp"
                 android:layout_marginTop="8dp"
-                  android:textSize="25sp"
-                android:text="@string/confs_title" />
+                android:text="@string/confs_title"
+                android:textSize="25sp" />
+
+            <LinearLayout
+                android:id="@+id/recent_conversation_network_nt"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="#FFDEAD"
+                android:visibility="gone" >
+
+                <TextView
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal|center"
+                    android:layout_marginBottom="4dp"
+                    android:layout_marginTop="4dp"
+                    android:gravity="center_horizontal"
+                    android:text="@string/error_can_not_connect_server"
+                    android:textSize="12sp" />
+
+            </LinearLayout>
         </LinearLayout>
 
-       <RelativeLayout
+        <RelativeLayout
             android:id="@+id/RelativeLayout2"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
@@ -43,54 +62,46 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentLeft="true"
                 android:layout_gravity="center_vertical"
+                android:layout_marginBottom="10dp"
                 android:layout_marginLeft="30dp"
                 android:layout_marginTop="10dp"
-                android:layout_marginBottom="10dp"
                 android:src="@drawable/group_list_search_button" />
 
             <EditText
                 android:id="@+id/confs_search"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
-                android:layout_gravity="center_vertical"
                 android:layout_alignParentLeft="true"
-                android:layout_marginRight="30dp"
-                android:background="@drawable/input_bg"
-                android:layout_marginLeft="30dp"
-                android:layout_marginTop="10dp"
+                android:layout_gravity="center_vertical"
                 android:layout_marginBottom="10dp"
+                android:layout_marginLeft="30dp"
+                android:layout_marginRight="30dp"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/input_bg"
+                android:inputType="text"
                 android:paddingLeft="100dp"
                 android:textColor="#000000"
-                android:textSize="18sp"
-                android:inputType="text" >
-
+                android:textSize="18sp" >
             </EditText>
-            
-               <TextView 
-                 android:layout_width="wrap_content"
+
+            <TextView
+                android:layout_width="wrap_content"
                 android:layout_height="1dp"
-                android:layout_below="@+id/confs_search"/>
-         
+                android:layout_below="@+id/confs_search" />
         </RelativeLayout>
 
-        <ScrollView
-            android:id="@+id/conference_scroll_view"
+        <ListView
+            android:id="@+id/conversations_list_container"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:layout_below="@+id/RelativeLayout2"
             android:layout_centerHorizontal="true"
+            android:divider="@null"
             android:background="@color/confs_group_list_bg" >
 
-            <LinearLayout
-                android:id="@+id/group_list_container"
-                android:layout_width="match_parent"
-                android:layout_height="fill_parent"
-                android:orientation="vertical" >
+        </ListView>
 
-            </LinearLayout>
-        </ScrollView>
-        
-          <ImageView
+        <ImageView
             android:id="@+id/conference_loading_icon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

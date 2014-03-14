@@ -126,7 +126,7 @@ public class MainActivity extends FragmentActivity implements
 
 		List<Fragment> fragments = new Vector<Fragment>();
 		fragments.add(Fragment.instantiate(this,
-				ConferenceTabFragment.class.getName()));
+				ConversationsTabFragment.class.getName()));
 		fragments.add(Fragment.instantiate(this,
 				ContactsTabFragment.class.getName()));
 		fragments.add(Fragment.instantiate(this,

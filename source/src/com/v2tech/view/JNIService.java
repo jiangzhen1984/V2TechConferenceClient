@@ -17,6 +17,7 @@ import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.os.Parcelable;
 import android.os.Process;
 import android.widget.Toast;
 
@@ -58,6 +59,7 @@ import com.v2tech.util.V2Log;
 public class JNIService extends Service {
 
 	public static final String JNI_BROADCAST_CATEGROY = "com.v2tech.jni.broadcast";
+	public static final String JNI_BROADCAST_CONNECT_STATE_NOTIFICATION = "com.v2tech.jni.broadcast.connect_state_notification";
 	public static final String JNI_BROADCAST_USER_STATUS_NOTIFICATION = "com.v2tech.jni.broadcast.user_stauts_notification";
 	public static final String JNI_BROADCAST_USER_AVATAR_CHANGED_NOTIFICATION = "com.v2tech.jni.broadcast.user_avatar_notification";
 	public static final String JNI_BROADCAST_USER_UPDATE_NAME_OR_SIGNATURE = "com.v2tech.jni.broadcast.user_update_sigature";
@@ -184,6 +186,15 @@ public class JNIService extends Service {
 		}
 
 	}
+	
+	
+	private void broadcastNetworkState(NetworkStateCode code) {
+		Intent i = new Intent();
+		i.setAction(JNI_BROADCAST_CONNECT_STATE_NOTIFICATION);
+		i.addCategory(JNI_BROADCAST_CATEGROY);
+		i.putExtra("state", (Parcelable)code);
+		sendBroadcast(i);
+	}
 
 	// //////////////////////////////////////////////////////////
 	// Internal message definition //
@@ -213,12 +224,7 @@ public class JNIService extends Service {
 			switch (msg.what) {
 
 			case JNI_CONNECT_RESPONSE:
-				// Can't not connect to server
-				if (msg.arg1 == NetworkStateCode.CONNECTED_ERROR.intValue()) {
-					Toast.makeText(mContext, R.string.error_connect_to_server,
-							Toast.LENGTH_SHORT).show();
-
-				}
+				broadcastNetworkState(NetworkStateCode.fromInt(msg.arg1));
 				break;
 			case JNI_UPDATE_USER_INFO:
 				User u = User.fromXml(msg.arg1, (String) msg.obj);

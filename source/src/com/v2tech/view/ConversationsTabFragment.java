@@ -21,9 +21,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.BaseAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.ScrollView;
 import android.widget.Toast;
 
@@ -36,15 +38,18 @@ import com.v2tech.logic.ContactConversation;
 import com.v2tech.logic.Conversation;
 import com.v2tech.logic.GlobalHolder;
 import com.v2tech.logic.Group;
+import com.v2tech.logic.NetworkStateCode;
 import com.v2tech.logic.User;
 import com.v2tech.logic.jni.JNIResponse;
 import com.v2tech.logic.jni.RequestEnterConfResponse;
 import com.v2tech.service.ConferenceService;
 import com.v2tech.util.V2Log;
+import com.v2tech.view.ContactsTabFragment.ContactsAdapter;
+import com.v2tech.view.ContactsTabFragment.ListItem;
 import com.v2tech.view.conference.GroupLayout;
 import com.v2tech.view.conference.VideoActivityV2;
 
-public class ConferenceTabFragment extends Fragment {
+public class ConversationsTabFragment extends Fragment {
 
 	private static final int FILL_CONFS_LIST = 2;
 	private static final int REQUEST_ENTER_CONF = 3;
@@ -62,11 +67,7 @@ public class ConferenceTabFragment extends Fragment {
 
 	private List<Group> mConferenceList;
 
-	private LinearLayout mGroupContainer;
-
 	private EditText mSearchTextET;
-
-	private ScrollView mScrollView;
 
 	private ConfsHandler mHandler = new ConfsHandler();
 
@@ -83,6 +84,12 @@ public class ConferenceTabFragment extends Fragment {
 	private List<ScrollItem> mItemList;
 
 	private Context mContext;
+	
+	private LinearLayout networkNotificationContainer;
+	
+	private ListView mConversationsListView;
+	
+	private ConversationsAdapter adapter = new ConversationsAdapter();
 
 	private ConferenceService cb = new ConferenceService();;
 
@@ -98,17 +105,17 @@ public class ConferenceTabFragment extends Fragment {
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
 		if (rootView == null) {
-			rootView = inflater.inflate(R.layout.tab_fragment_conference,
+			rootView = inflater.inflate(R.layout.tab_fragment_conversations,
 					container, false);
-			mGroupContainer = (LinearLayout) rootView
-					.findViewById(R.id.group_list_container);
-			mScrollView = (ScrollView) rootView
-					.findViewById(R.id.conference_scroll_view);
-
+			mConversationsListView = (ListView) rootView
+					.findViewById(R.id.conversations_list_container);
+			mConversationsListView.setAdapter(adapter);
 			mLoadingImageIV = (ImageView) rootView
 					.findViewById(R.id.conference_loading_icon);
 
 			mSearchTextET = (EditText) rootView.findViewById(R.id.confs_search);
+			networkNotificationContainer = (LinearLayout) rootView
+					.findViewById(R.id.recent_conversation_network_nt);
 
 			mSearchTextET.addTextChangedListener(new TextWatcher() {
 
@@ -125,7 +132,6 @@ public class ConferenceTabFragment extends Fragment {
 				@Override
 				public void onTextChanged(CharSequence s, int start,
 						int before, int count) {
-					scrollToView(s.toString());
 				}
 
 			});
@@ -177,6 +183,7 @@ public class ConferenceTabFragment extends Fragment {
 					.addAction(JNIService.JNI_BROADCAST_USER_UPDATE_NAME_OR_SIGNATURE);
 			intentFilter
 					.addAction(JNIService.JNI_BROADCAST_USER_AVATAR_CHANGED_NOTIFICATION);
+			intentFilter.addAction(JNIService.JNI_BROADCAST_CONNECT_STATE_NOTIFICATION);
 
 		}
 		return intentFilter;
@@ -201,16 +208,12 @@ public class ConferenceTabFragment extends Fragment {
 				.sendToTarget();
 	}
 
-	private void addGroupList(List<Group> list) {
+	private void populateConversation(List<Group> list) {
 		if (list == null || list.size() <= 0) {
 			V2Log.w(" group list is null");
 			return;
 		}
-		if (mGroupContainer == null) {
-			V2Log.e(" NO aviable layout");
-			return;
-		}
-		mGroupContainer.removeAllViews();
+
 		for (final Group g : list) {
 			Conversation cov = new ConferenceConversation(g);
 			final GroupLayout gp = new GroupLayout(this.getActivity(), cov);
@@ -233,9 +236,9 @@ public class ConferenceTabFragment extends Fragment {
 				}
 
 			});
-			mItemList.add(new ScrollItem(cov, gp));
-			mGroupContainer.addView(gp);
+			mItemList.add(0, new ScrollItem(cov, gp));
 		}
+		adapter.notifyDataSetChanged();
 
 	}
 
@@ -254,7 +257,6 @@ public class ConferenceTabFragment extends Fragment {
 			Conversation cov = extractConversation(mCur);
 			final GroupLayout gp = new GroupLayout(this.getActivity(), cov);
 			mItemList.add(new ScrollItem(cov, gp));
-			mGroupContainer.addView(gp);
 			if (!GlobalHolder.getInstance().findConversation(cov)) {
 				GlobalHolder.getInstance().addConversation(cov);
 			}
@@ -289,21 +291,6 @@ public class ConferenceTabFragment extends Fragment {
 						Conversation.TYPE_CONTACT });
 	}
 
-	private void scrollToView(String str) {
-		for (final ScrollItem item : mItemList) {
-			if (item.cov.getName().contains(str)) {
-				mScrollView.post(new Runnable() {
-
-					@Override
-					public void run() {
-						mScrollView.scrollTo(0, item.gp.getTop());
-					}
-
-				});
-				break;
-			}
-		}
-	}
 
 	class ScrollItem {
 		Conversation cov;
@@ -316,6 +303,35 @@ public class ConferenceTabFragment extends Fragment {
 		}
 
 	}
+	
+	
+	
+	class ConversationsAdapter extends BaseAdapter {
+
+		@Override
+		public int getCount() {
+			return mItemList.size();
+		}
+
+		@Override
+		public Object getItem(int position) {
+			ScrollItem item = mItemList.get(position);
+			return item.cov;
+		}
+
+		@Override
+		public long getItemId(int position) {
+			return mItemList.get(position).cov.getExtId();
+		}
+
+		@Override
+		public View getView(int position, View convertView, ViewGroup parent) {
+			return mItemList.get(position).gp;
+		}
+
+	}
+	
+	
 
 	class Tab1BroadcastReceiver extends BroadcastReceiver {
 
@@ -342,6 +358,13 @@ public class ConferenceTabFragment extends Fragment {
 				Object[] ar = new Object[] { intent.getExtras().get("uid"),
 						intent.getExtras().get("avatar") };
 				Message.obtain(mHandler, UPDATE_USER_AVATAR, ar).sendToTarget();
+			} else if (JNIService.JNI_BROADCAST_CONNECT_STATE_NOTIFICATION.equals(intent.getAction())) {
+				NetworkStateCode code = (NetworkStateCode)intent.getExtras().get("state");
+				if (code != NetworkStateCode.CONNECTED) {
+					networkNotificationContainer.setVisibility(View.VISIBLE);
+				} else {
+					networkNotificationContainer.setVisibility(View.GONE);
+				}
 			}
 		}
 
@@ -361,7 +384,7 @@ public class ConferenceTabFragment extends Fragment {
 					if (!isLoaded) {
 						((ViewGroup) mLoadingImageIV.getParent())
 								.removeView(mLoadingImageIV);
-						addGroupList(mConferenceList);
+						populateConversation(mConferenceList);
 						isLoaded = true;
 						loadConversation();
 					}
@@ -438,7 +461,6 @@ public class ConferenceTabFragment extends Fragment {
 
 					GroupLayout gp = new GroupLayout(mContext, cov);
 					mItemList.add(new ScrollItem(cov, gp));
-					mGroupContainer.addView(gp);
 				}
 				break;
 
@@ -448,7 +470,7 @@ public class ConferenceTabFragment extends Fragment {
 					if (item.cov.getExtId() == fromuidT
 							&& Conversation.TYPE_CONTACT.equals(item.cov
 									.getType())) {
-						item.cov.setNotiFlag(Conversation.NOTIFICATION);
+						item.cov.setNotiFlag(Conversation.NONE);
 						((GroupLayout) item.gp).updateNotificator(false);
 						break;
 					}

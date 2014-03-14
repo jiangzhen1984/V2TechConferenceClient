@@ -18,6 +18,11 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import net.sourceforge.pinyin4j.PinyinHelper;
+import net.sourceforge.pinyin4j.format.HanyuPinyinOutputFormat;
+import net.sourceforge.pinyin4j.format.HanyuPinyinToneType;
+import net.sourceforge.pinyin4j.format.exception.BadHanyuPinyinOutputFormatCombination;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -39,13 +44,14 @@ import com.v2tech.util.V2Log;
 public class User implements Comparable<User> {
 
 	public enum Status {
-		LEAVE(2), BUSY(3), DO_NOT_DISTURB(4), HIDDEN(5), ONLINE(1), OFFLINE(0), UNKNOWN(-1);
+		LEAVE(2), BUSY(3), DO_NOT_DISTURB(4), HIDDEN(5), ONLINE(1), OFFLINE(0), UNKNOWN(
+				-1);
 		private int code;
 
 		private Status(int code) {
 			this.code = code;
 		}
-		
+
 		public int toIntValue() {
 			return code;
 		}
@@ -73,9 +79,8 @@ public class User implements Comparable<User> {
 	private long mUserId;
 
 	private NetworkStateCode mResult;
-	
-	private Status mStatus;
 
+	private Status mStatus;
 
 	private String mName;
 
@@ -102,8 +107,12 @@ public class User implements Comparable<User> {
 	private Set<Group> mBelongsGroup;
 
 	private boolean isCurrentLoggedInUser;
-	
+
 	private String mAvatarPath;
+	
+	private String abbra;
+	
+	private static HanyuPinyinOutputFormat format= new HanyuPinyinOutputFormat();
 
 	public User(long mUserId) {
 		this(mUserId, null, null, null);
@@ -126,6 +135,25 @@ public class User implements Comparable<User> {
 		mBelongsGroup = new HashSet<Group>();
 		isCurrentLoggedInUser = false;
 		this.mStatus = Status.OFFLINE;
+		initAbbr();
+	}
+	
+	private void initAbbr() {
+		abbra ="";
+		if (this.mName != null) {
+			format.setToneType(HanyuPinyinToneType.WITHOUT_TONE);
+			char[] cs = this.mName.toCharArray();
+			for (char c: cs) {
+				try {
+					String[]  ars =PinyinHelper.toHanyuPinyinStringArray(c,format) ;
+					if (ars != null && ars.length > 0) {
+						abbra += ars[0];
+					}
+				} catch (BadHanyuPinyinOutputFormatCombination e) {
+					e.printStackTrace();
+				}
+			}
+		}
 	}
 
 	public boolean isCurrentLoggedInUser() {
@@ -206,7 +234,7 @@ public class User implements Comparable<User> {
 		}
 		return mCompany;
 	}
-	
+
 	private String loadCompany(Group g) {
 		if (g == null) {
 			return "";
@@ -273,7 +301,6 @@ public class User implements Comparable<User> {
 	public void setTitle(String mTitle) {
 		this.mTitle = mTitle;
 	}
-	
 
 	public Status getmStatus() {
 		return mStatus;
@@ -290,7 +317,7 @@ public class User implements Comparable<User> {
 		}
 		this.mBelongsGroup.add(g);
 	}
-	
+
 	public Group getFirstBelongsGroup() {
 		if (this.mBelongsGroup.size() > 0) {
 			return this.mBelongsGroup.iterator().next();
@@ -298,7 +325,6 @@ public class User implements Comparable<User> {
 			return null;
 		}
 	}
-	
 
 	public String getAvatarPath() {
 		return mAvatarPath;
@@ -311,11 +337,13 @@ public class User implements Comparable<User> {
 			avatar = null;
 		}
 	}
-	
+
 	private Bitmap avatar;
+
 	public Bitmap getAvatarBitmap() {
 		if (mAvatarPath == null) {
-			String path = GlobalHolder.getInstance().getAvatarPath(this.mUserId);
+			String path = GlobalHolder.getInstance()
+					.getAvatarPath(this.mUserId);
 			if (path == null) {
 				return null;
 			}
@@ -327,10 +355,10 @@ public class User implements Comparable<User> {
 		}
 		if (avatar == null || avatar.isRecycled()) {
 			BitmapFactory.Options opt = null;
-			if (GlobalConfig.GLOBAL_DPI <DisplayMetrics.DENSITY_XHIGH) {
+			if (GlobalConfig.GLOBAL_DPI < DisplayMetrics.DENSITY_XHIGH) {
 				opt = new BitmapFactory.Options();
 				opt.inSampleSize = 2;
-			} 
+			}
 			avatar = BitmapFactory.decodeFile(mAvatarPath, opt);
 		}
 		return avatar;
@@ -358,45 +386,43 @@ public class User implements Comparable<User> {
 		return result;
 	}
 
-	
-	
-	
-	
-	
-	
 	@Override
 	public int compareTo(User another) {
+		// make sure current user align first position
 		if (this.mUserId == GlobalHolder.getInstance().getCurrentUserId()) {
 			return -1;
-		} 
-		if (another.getmUserId() == GlobalHolder.getInstance().getCurrentUserId()) {
+		}
+		if (another.getmUserId() == GlobalHolder.getInstance()
+				.getCurrentUserId()) {
 			return 1;
 		}
-		User an = (User) another;
-		if (an.getmStatus() != Status.OFFLINE && an.getmStatus() != Status.HIDDEN) {
-			if (this.getmStatus()  != Status.OFFLINE && this.getmStatus() != Status.HIDDEN) {
-				return 0;
-			} else {
-				return 1;
-			}
-		} else {
-			return -1;
+		if (another.getmStatus() == this.mStatus) {
+			return this.abbra.compareTo(another.abbra);
 		}
+		if (this.mStatus == Status.ONLINE) {
+			return -1;
+		} else if (another.getmStatus() == Status.ONLINE) {
+			return 1;
+		}
+
+		return this.abbra.compareTo(another.abbra);
 	}
 
-	
-	
 	public String toXml() {
-		String xml ="<user "+
-				" address=\""+(this.getAddress()==null?"" : this.getAddress())+"\" "+
-				"birthday=\"\" "+
-				"job=\""+(this.getTitle() == null?"":this.getTitle())+"\" "+
-				"mobile=\""+(this.getCellPhone() == null?"":this.getCellPhone())+"\" "+
-				"nickname=\""+(this.getName() == null?"":this.getName())+"\"  " +
-				"sex=\""+(this.getGender()== null?"":this.getGender())+"\"  " +
-				"sign=\""+(this.getSignature() == null?"":this.getSignature())+"\" "+
-				"telephone=\""+(this.getTelephone() == null?"":this.getTelephone())+"\"> "+
-				"<videolist/> </user> ";
+		String xml = "<user " + " address=\""
+				+ (this.getAddress() == null ? "" : this.getAddress()) + "\" "
+				+ "birthday=\"\" " + "job=\""
+				+ (this.getTitle() == null ? "" : this.getTitle()) + "\" "
+				+ "mobile=\""
+				+ (this.getCellPhone() == null ? "" : this.getCellPhone())
+				+ "\" " + "nickname=\""
+				+ (this.getName() == null ? "" : this.getName()) + "\"  "
+				+ "sex=\"" + (this.getGender() == null ? "" : this.getGender())
+				+ "\"  " + "sign=\""
+				+ (this.getSignature() == null ? "" : this.getSignature())
+				+ "\" " + "telephone=\""
+				+ (this.getTelephone() == null ? "" : this.getTelephone())
+				+ "\"> " + "<videolist/> </user> ";
 		return xml;
 	}
 
@@ -425,9 +451,9 @@ public class User implements Comparable<User> {
 			for (int i = 0; i < gList.getLength(); i++) {
 				element = (Element) gList.item(i);
 				User u = new User(Long.parseLong(element.getAttribute("id")),
-						element.getAttribute("nickname"), element
-								.getAttribute("email"), element
-								.getAttribute("sign"));
+						element.getAttribute("nickname"),
+						element.getAttribute("email"),
+						element.getAttribute("sign"));
 				u.setTelephone(element.getAttribute("telephone"));
 				u.setGender(element.getAttribute("sex"));
 				u.setAddress(element.getAttribute("address"));
@@ -435,7 +461,7 @@ public class User implements Comparable<User> {
 				u.setTitle(element.getAttribute("job"));
 				try {
 					String bir = element.getAttribute("birthday");
-					if (bir != null && !bir.equals("")) { 
+					if (bir != null && !bir.equals("")) {
 						u.setBirthday(dp.parse(bir));
 					}
 				} catch (ParseException e) {
@@ -485,11 +511,11 @@ public class User implements Comparable<User> {
 		if (pos != -1) {
 			int end = xml.indexOf("'", pos + 6);
 			if (end != -1) {
-				signature = xml.subSequence(pos  + 6, end).toString();
+				signature = xml.subSequence(pos + 6, end).toString();
 			}
 		}
-		 User u = new User(uID, nickName);
-		 u.setSignature(signature);
+		User u = new User(uID, nickName);
+		u.setSignature(signature);
 		return u;
 	}
 
