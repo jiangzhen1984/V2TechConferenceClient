@@ -12,7 +12,9 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.text.Editable;
 import android.text.TextUtils.TruncateAt;
+import android.text.TextWatcher;
 import android.view.Gravity;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -40,6 +42,7 @@ public class ConferenceCreateActivity extends Activity {
 
 	private static final int UPDATE_LIST_VIEW = 1;
 	private static final int UPDATE_ATTENDEES = 2;
+	private static final int UPDATE_SEARCHED_USER_LIST = 3;
 
 	private Context mContext;
 	private LocalHandler mLocalHandler = new LocalHandler();
@@ -53,6 +56,8 @@ public class ConferenceCreateActivity extends Activity {
 	private EditText mConfEndTimeET;
 
 	private TableLayout mAttendeeContainer;
+	
+	private boolean mIsStartedSearch;
 
 	private List<ListItem> mItemList = new ArrayList<ListItem>();
 	private List<ListItem> mCacheItemList;
@@ -80,8 +85,11 @@ public class ConferenceCreateActivity extends Activity {
 		mConfTitleET = (EditText) findViewById(R.id.conference_create_conf_name);
 		mConfStartTimeET = (EditText) findViewById(R.id.conference_create_conf_start_time);
 		mConfEndTimeET = (EditText) findViewById(R.id.conference_create_conf_end_time);
-
+		
 		new LoadContactsAT().execute();
+		
+		searchedTextET = (EditText) findViewById(R.id.contacts_search);
+		searchedTextET.addTextChangedListener(textChangedListener);
 	}
 
 	@Override
@@ -231,6 +239,64 @@ public class ConferenceCreateActivity extends Activity {
 				60,
 				LinearLayout.LayoutParams.WRAP_CONTENT));
 	}
+	
+	
+	private void updateSearchedUserList(List<User> lu) {
+		mItemList = new ArrayList<ListItem>();
+		for (User u : lu) {
+			ListItem item = new ListItem(u);
+			((ContactUserView)item.v).removePadding();
+			mItemList.add(item);
+		}
+		adapter.notifyDataSetChanged();
+	}
+	
+	
+	
+	
+	
+	private TextWatcher textChangedListener = new TextWatcher() {
+
+		@Override
+		public void afterTextChanged(Editable s) {
+			if (s.length() > 0) {
+				if (!mIsStartedSearch) {
+					mCacheItemList = mItemList;
+					mIsStartedSearch = true;
+				}
+			} else {
+				mItemList = mCacheItemList;
+				adapter.notifyDataSetChanged();
+				mIsStartedSearch = false;
+				return;
+			}
+			List<User> searchedUserList = new ArrayList<User>();
+			for (Group g : mGroupList) {
+				Group.searchUser(s.toString(), searchedUserList, g);
+			}
+			Message.obtain(mLocalHandler, UPDATE_SEARCHED_USER_LIST,
+					searchedUserList).sendToTarget();
+		}
+
+		@Override
+		public void beforeTextChanged(CharSequence s, int start, int count,
+				int after) {
+
+		}
+
+		@Override
+		public void onTextChanged(CharSequence s, int start, int before,
+				int count) {
+			
+		}
+
+	};
+	
+	
+	
+	
+	
+	
 
 	private OnItemClickListener itemListener = new OnItemClickListener() {
 
@@ -363,6 +429,9 @@ public class ConferenceCreateActivity extends Activity {
 				break;
 			case UPDATE_ATTENDEES:
 				updateUserToAttendList((User) msg.obj);
+				break;
+			case UPDATE_SEARCHED_USER_LIST:
+				updateSearchedUserList((List<User>) msg.obj);
 				break;
 			}
 		}
