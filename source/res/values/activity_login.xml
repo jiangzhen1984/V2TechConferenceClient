@@ -10,7 +10,7 @@
     <string name="error_invalid_email">邮箱地址不可用</string>
     <string name="error_invalid_password">This password is too short</string>
     <string name="error_incorrect_password">用户名或者密码错误</string>
-    <string name="error_field_required">This field is required</string>
+    <string name="error_field_required">此项不能未空!</string>
     <string name="error_no_host_configuration">请先配置服务器地址!</string>
     <string name="ip_host_setting">设   置</string>
     <string name="error_save_host_config">保存服务器信息错误!</string>

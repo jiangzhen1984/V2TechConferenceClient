@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import android.graphics.Bitmap;
+
 import com.v2tech.util.V2Log;
 
 public class GlobalHolder {
@@ -29,6 +31,11 @@ public class GlobalHolder {
 	
 
 	private Set<UserDeviceConfig> mUserDeviceList = new HashSet<UserDeviceConfig>();
+	
+	private Map<Long, Bitmap> mAvatarBmHolder = new HashMap<Long, Bitmap>();
+	
+	public long CURRENT_CONVERSATION_USER = 0;
+	
 
 	public static synchronized GlobalHolder getInstance() {
 		if (holder == null) {
@@ -61,7 +68,7 @@ public class GlobalHolder {
 		if (mU != null) {
 			mU.updateStatus(User.Status.ONLINE);
 		} else {
-			putUser(u.getmUserId(), u);
+			//putUser(u.getmUserId(), u);
 		}
 	}
 
@@ -81,7 +88,7 @@ public class GlobalHolder {
 					cu.setName(u.getName());
 				}
 				//FIXME update new data
-				V2Log.e(" merge user information ");
+				V2Log.e(" merge user information " + id);
 				return cu;
 			}
 			mUserHolder.put(key, u);
@@ -292,4 +299,19 @@ public class GlobalHolder {
 	public void addAttendeeDevice(List<UserDeviceConfig> udcList) {
 		mUserDeviceList.addAll(udcList);
 	}
+	
+	public Bitmap getAvatarBm(long uid) {
+		Long key = Long.valueOf(uid);
+		return mAvatarBmHolder.get(key);
+	}
+
+	public void saveAvatar(long uid, Bitmap bm) {
+		Bitmap cache = getAvatarBm(uid);
+		if (cache != null) {
+			cache.recycle();
+		}
+		Long key = Long.valueOf(uid);
+		mAvatarBmHolder.put(key, bm);
+	}
+	
 }

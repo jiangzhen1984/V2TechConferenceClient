@@ -19,7 +19,7 @@
             android:layout_gravity="center"
             android:layout_marginBottom="15dp"
             android:layout_marginTop="15dp"
-             android:layout_marginLeft="40dp"
+             android:layout_marginLeft="45dp"
             android:layout_marginRight="40dp"
             android:ellipsize="end"
             android:singleLine="true"
@@ -163,7 +163,9 @@
                                 android:layout_weight="1"
                                 android:ems="3"
                                 android:inputType="text"
+                                android:maxLength="30"
                                 android:textColor="@color/contacts_user_detail_text_color" >
+
                             </EditText>
                         </LinearLayout>
 
@@ -238,18 +240,32 @@
                                 android:textSize="18sp"
                                 android:visibility="gone" />
 
-                            <EditText
-                                android:id="@+id/contact_user_detail_gender_et"
-                                android:layout_width="0dp"
+                            <RadioGroup
+                                android:id="@+id/contact_user_detail_gender_rg"
+                                android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_gravity="center_vertical"
-                                android:layout_marginRight="20dp"
-                                android:layout_weight="1"
-                                android:ems="10"
-                                android:inputType="text"
+                                android:orientation="horizontal"
                                 android:textColor="@color/contacts_user_detail_text_color"
                                 android:visibility="gone" >
-                            </EditText>
+
+                                <RadioButton
+                                    android:id="@+id/radio0"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                     android:textColor="@color/contacts_user_detail_text_color"
+                                    android:text="@string/contacts_user_detail_gender_male"
+                                    android:tag="1" />
+
+                                <RadioButton
+                                    android:id="@+id/radio1"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                     android:textColor="@color/contacts_user_detail_text_color"
+                                    android:text="@string/contacts_user_detail_gender_female"
+                                    android:tag="0" />
+                                
+                            </RadioGroup>
+
                         </LinearLayout>
 
                         <LinearLayout
@@ -296,9 +312,9 @@
                                 android:layout_marginRight="20dp"
                                 android:layout_weight="1"
                                 android:ems="10"
-                                android:inputType="date"
+                                android:inputType="none"
                                 android:textColor="@color/contacts_user_detail_text_color"
-                                android:visibility="gone" >
+                                 >
                             </EditText>
                         </LinearLayout>
 
@@ -347,6 +363,7 @@
                                 android:ems="10"
                                 android:inputType="phone"
                                 android:textColor="@color/contacts_user_detail_text_color"
+                                android:maxLength="11"
                                 android:visibility="gone" >
                             </EditText>
                         </LinearLayout>
@@ -397,6 +414,7 @@
                                 android:ems="10"
                                 android:inputType="text"
                                 android:textColor="@color/contacts_user_detail_text_color"
+                                android:maxLength="30"
                                 android:visibility="gone" />
                         </LinearLayout>
 
@@ -542,6 +560,7 @@
                                 android:ems="10"
                                 android:inputType="text"
                                 android:textColor="@color/contacts_user_detail_text_color"
+                                android:maxLength="50"
                                 android:visibility="gone" />
                         </LinearLayout>
 
@@ -591,6 +610,7 @@
                                 android:ems="10"
                                 android:inputType="text"
                                 android:textColor="@color/contacts_user_detail_text_color"
+                                android:maxLength="100"
                                 android:visibility="gone" />
                         </LinearLayout>
                     </LinearLayout>

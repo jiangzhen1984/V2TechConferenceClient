@@ -109,10 +109,10 @@ public class User implements Comparable<User> {
 	private boolean isCurrentLoggedInUser;
 
 	private String mAvatarPath;
-	
+
 	private String abbra;
-	
-	private static HanyuPinyinOutputFormat format= new HanyuPinyinOutputFormat();
+
+	private static HanyuPinyinOutputFormat format = new HanyuPinyinOutputFormat();
 
 	public User(long mUserId) {
 		this(mUserId, null, null, null);
@@ -137,15 +137,16 @@ public class User implements Comparable<User> {
 		this.mStatus = Status.OFFLINE;
 		initAbbr();
 	}
-	
+
 	private void initAbbr() {
-		abbra ="";
+		abbra = "";
 		if (this.mName != null) {
 			format.setToneType(HanyuPinyinToneType.WITHOUT_TONE);
 			char[] cs = this.mName.toCharArray();
-			for (char c: cs) {
+			for (char c : cs) {
 				try {
-					String[]  ars =PinyinHelper.toHanyuPinyinStringArray(c,format) ;
+					String[] ars = PinyinHelper.toHanyuPinyinStringArray(c,
+							format);
 					if (ars != null && ars.length > 0) {
 						abbra += ars[0];
 					}
@@ -353,6 +354,8 @@ public class User implements Comparable<User> {
 		if (!f.exists()) {
 			return null;
 		}
+
+		avatar = GlobalHolder.getInstance().getAvatarBm(this.mUserId);
 		if (avatar == null || avatar.isRecycled()) {
 			BitmapFactory.Options opt = null;
 			if (GlobalConfig.GLOBAL_DPI < DisplayMetrics.DENSITY_XHIGH) {
@@ -409,20 +412,30 @@ public class User implements Comparable<User> {
 	}
 
 	public String toXml() {
-		String xml = "<user " + " address=\""
-				+ (this.getAddress() == null ? "" : this.getAddress()) + "\" "
-				+ "birthday=\"\" " + "job=\""
-				+ (this.getTitle() == null ? "" : this.getTitle()) + "\" "
-				+ "mobile=\""
+		DateFormat dp = new SimpleDateFormat("yyyy-MM-dd");
+		String xml = "<user " + " address='"
+				+ (this.getAddress() == null ? "" : this.getAddress()) + "' "
+				+ "birthday='" + (this.mBirthday == null ? "" : dp
+				.format(this.mBirthday))
+				+ "' "
+				+ "job='"
+				+ (this.getTitle() == null ? "" : this.getTitle())
+				+ "' "
+				+ "mobile='"
 				+ (this.getCellPhone() == null ? "" : this.getCellPhone())
-				+ "\" " + "nickname=\""
-				+ (this.getName() == null ? "" : this.getName()) + "\"  "
-				+ "sex=\"" + (this.getGender() == null ? "" : this.getGender())
-				+ "\"  " + "sign=\""
+				+ "' "
+				+ "nickname='"
+				+ (this.getName() == null ? "" : this.getName())
+				+ "'  "
+				+ "sex='"
+				+ (this.getGender() == null ? "" : this.getGender())
+				+ "'  "
+				+ "sign='"
 				+ (this.getSignature() == null ? "" : this.getSignature())
-				+ "\" " + "telephone=\""
+				+ "' "
+				+ "telephone='"
 				+ (this.getTelephone() == null ? "" : this.getTelephone())
-				+ "\"> " + "<videolist/> </user> ";
+				+ "'> " + "<videolist/> </user> ";
 		return xml;
 	}
 
@@ -496,27 +509,46 @@ public class User implements Comparable<User> {
 	 * @return
 	 */
 	public static User fromXml(int uID, String xml) {
-		String nickName = null;
-		String signature = null;
-		int pos = xml.indexOf("nickname='");
-		if (pos == -1) {
-			V2Log.w(" no nickname");
-		} else {
-			int end = xml.indexOf("'", pos + 10);
-			if (end != -1) {
-				nickName = xml.subSequence(pos + 10, end).toString();
-			}
-		}
-		pos = xml.indexOf("sign='");
-		if (pos != -1) {
-			int end = xml.indexOf("'", pos + 6);
-			if (end != -1) {
-				signature = xml.subSequence(pos + 6, end).toString();
-			}
-		}
+		String nickName = extraAttri("nickname='", "'", xml);
+		String signature = extraAttri("sign='", "'", xml);
+		String job = extraAttri("job='", "'", xml);
+		String telephone = extraAttri("telephone='", "'", xml);
+		String mobile = extraAttri("mobile='", "'", xml);
+		String address = extraAttri("address='", "'", xml);
+		String gender = extraAttri("sex='", "'", xml);
+		String email = extraAttri("email='", "'", xml);
+		String bir = extraAttri("birthday='", "'", xml);
+
+		DateFormat dp = new SimpleDateFormat("yyyy-MM-dd");
+		
 		User u = new User(uID, nickName);
 		u.setSignature(signature);
+		u.setTitle(job);
+		u.setTelephone(telephone);
+		u.setCellPhone(mobile);
+		u.setAddress(address);
+		u.setGender(gender);
+		u.setEmail(email);
+		if (bir != null && bir.length() > 0) {
+			try {
+				u.setBirthday(dp.parse(bir));
+			} catch (ParseException e) {
+				e.printStackTrace();
+			}
+		}
 		return u;
+	}
+
+	private static String extraAttri(String startStr, String endStr, String xml) {
+		int pos = xml.indexOf(startStr);
+		if (pos == -1) {
+			return null;
+		}
+		int end = xml.indexOf(endStr, pos + startStr.length());
+		if (end == -1) {
+			return null;
+		}
+		return xml.substring(pos + startStr.length(), end);
 	}
 
 }

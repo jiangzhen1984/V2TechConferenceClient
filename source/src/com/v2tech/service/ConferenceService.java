@@ -12,7 +12,6 @@ import com.v2tech.logic.CameraConfiguration;
 import com.v2tech.logic.Conference;
 import com.v2tech.logic.ConferencePermission;
 import com.v2tech.logic.UserDeviceConfig;
-import com.v2tech.logic.AsynResult.AsynState;
 import com.v2tech.logic.jni.JNIResponse;
 import com.v2tech.logic.jni.RequestCloseUserVideoDeviceResponse;
 import com.v2tech.logic.jni.RequestEnterConfResponse;
@@ -58,6 +57,7 @@ public class ConferenceService extends AbstractHandler {
 	private static final int JNI_REQUEST_CLOSE_VIDEO = 4;
 	private static final int JNI_REQUEST_SPEAK = 5;
 	private static final int JNI_REQUEST_RELEASE_SPEAK = 6;
+	private static final int JNI_REQUEST_CREATE_CONFERENCE = 7;
 
 	private static final int JNI_ATTENDEE_ENTERED_NOTIFICATION = 57;
 	private static final int JNI_ATTENDEE_EXITED_NOTIFICATION = 58;
@@ -113,6 +113,21 @@ public class ConferenceService extends AbstractHandler {
 		// send delayed message for that make sure send response after JNI
 		// request
 		this.sendMessageDelayed(res, 300);
+	}
+
+	/**
+	 * TODO add comment
+	 * 
+	 * @param conf
+	 * @param caller
+	 */
+	public void createConference(Conference conf, Message caller) {
+		if (conf == null) {
+			// TODO
+			return;
+		}
+		ConfRequest.getInstance().createConf(conf.getConferenceConfigXml(),
+				conf.getInvitedAttendeesXml());
 	}
 
 	/**

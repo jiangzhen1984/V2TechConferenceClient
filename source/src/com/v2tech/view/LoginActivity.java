@@ -463,39 +463,17 @@ public class LoginActivity extends Activity {
 
 	};
 
-	private boolean isBound;
 
 	@Override
 	protected void onStart() {
 		super.onStart();
-		isBound = bindService(new Intent(this.getApplicationContext(),
-				JNIService.class), mConnection, Context.BIND_AUTO_CREATE);
+	
 	}
 
 	@Override
 	protected void onStop() {
 		super.onStop();
-		if (isBound) {
-			this.unbindService(mConnection);
-		}
+		
 	}
-
-	private JNIService mService;
-
-	/** Defines callbacks for service binding, passed to bindService() */
-	private ServiceConnection mConnection = new ServiceConnection() {
-
-		@Override
-		public void onServiceConnected(ComponentName className, IBinder service) {
-			LocalBinder binder = (LocalBinder) service;
-			mService = binder.getService();
-			isBound = true;
-		}
-
-		@Override
-		public void onServiceDisconnected(ComponentName arg0) {
-			isBound = false;
-		}
-	};
 
 }

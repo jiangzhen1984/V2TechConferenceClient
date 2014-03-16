@@ -1,0 +1,11 @@
+<resources>
+
+   <string name="conference_create_title">会议创建</string>
+   <string name="conference_create_conf_name">会议名称</string>
+   <string name="conference_create_conf_start_time">开始时间</string>
+   <string name="conference_create_conf_end_time">结束时间</string>
+   <string name="conference_create_confirm">确定</string>
+   <string name="error_conf_title_required">会议名称不能为空!</string>
+   <string name="error_conf_start_time_required">会议开始时间不能为空!</string>
+   <string name="error_conf_end_time_required">会议结束时间不能为空!</string>
+</resources>

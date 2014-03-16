@@ -36,7 +36,9 @@
                 android:gravity="center_vertical|center_horizontal"
                 android:inputType="number"
                 android:maxLength="3"
-                android:paddingLeft="8dp" />
+                android:paddingLeft="8dp"
+                android:nextFocusDown="@+id/ip2"
+                 />
 
             <TextView
                 android:id="@+id/textView3"
@@ -55,6 +57,7 @@
                 android:gravity="center_vertical|center_horizontal"
                 android:inputType="number"
                 android:maxLength="3"
+                android:nextFocusDown="@+id/ip3"
                 android:paddingLeft="8dp" />
 
             <TextView
@@ -74,7 +77,8 @@
                 android:gravity="center_vertical|center_horizontal"
                 android:inputType="number"
                 android:maxLength="3"
-                android:paddingLeft="8dp" />
+                android:paddingLeft="8dp"
+                android:nextFocusDown="@+id/ip4" />
 
             <TextView
                 android:id="@+id/textView5"
@@ -94,7 +98,8 @@
                 android:gravity="center_vertical|center_horizontal"
                 android:inputType="number"
                 android:maxLength="3"
-                android:paddingLeft="8dp" />
+                android:paddingLeft="8dp"
+                android:nextFocusDown="@+id/port" />
 
         </LinearLayout>
 
@@ -125,7 +130,6 @@
                 android:maxLength="5"
                 android:paddingLeft="8dp" >
 
-                <requestFocus />
             </EditText>
 
         </LinearLayout>

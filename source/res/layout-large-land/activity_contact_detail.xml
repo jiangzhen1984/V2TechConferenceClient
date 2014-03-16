@@ -18,9 +18,9 @@
             android:layout_centerHorizontal="true"
             android:layout_gravity="center"
             android:layout_marginBottom="15dp"
-            android:layout_marginTop="15dp"
-             android:layout_marginLeft="40dp"
+            android:layout_marginLeft="40dp"
             android:layout_marginRight="40dp"
+            android:layout_marginTop="15dp"
             android:ellipsize="end"
             android:singleLine="true"
             android:text=""
@@ -39,7 +39,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_centerVertical="true"
-            android:layout_marginLeft="56dp"
+            android:layout_marginLeft="35dp"
             android:background="@drawable/contact_user_detail_return"
             android:gravity="center"
             android:paddingBottom="10dp"
@@ -80,8 +80,8 @@
                 android:layout_marginBottom="20dp"
                 android:layout_marginLeft="20dp"
                 android:layout_marginRight="25dp"
+                android:layout_toLeftOf="@+id/contact_user_detail_invite_video"
                 android:layout_toRightOf="@+id/contact_user_detail_head_icon"
-                 android:layout_toLeftOf="@+id/contact_user_detail_invite_video"
                 android:text="TextView" />
 
             <TextView
@@ -168,6 +168,7 @@
                                 android:layout_weight="1"
                                 android:ems="10"
                                 android:inputType="text"
+                                android:maxLength="30"
                                 android:textColor="@color/contacts_user_detail_text_color" >
                             </EditText>
                         </LinearLayout>
@@ -243,17 +244,32 @@
                                 android:textSize="18sp"
                                 android:visibility="gone" />
 
-                            <EditText
-                                android:id="@+id/contact_user_detail_gender_et"
-                                android:layout_width="0dp"
+                            <RadioGroup
+                                android:id="@+id/contact_user_detail_gender_rg"
+                                android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_gravity="center_vertical"
-                                android:layout_marginRight="850dp"
-                                android:layout_weight="1"
-                                android:ems="10"
-                                android:inputType="text"
+                                android:orientation="horizontal"
                                 android:textColor="@color/contacts_user_detail_text_color"
                                 android:visibility="gone" >
+
+                                <RadioButton
+                                    android:id="@+id/radio0"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:tag="1"
+                                    android:text="@string/contacts_user_detail_gender_male"
+                                    android:textColor="@color/contacts_user_detail_text_color" />
+
+                                <RadioButton
+                                    android:id="@+id/radio1"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:tag="0"
+                                    android:text="@string/contacts_user_detail_gender_female"
+                                    android:textColor="@color/contacts_user_detail_text_color" />
+                            </RadioGroup>
+
+                            <EditText>
                             </EditText>
                         </LinearLayout>
 
@@ -351,6 +367,7 @@
                                 android:layout_weight="1"
                                 android:ems="10"
                                 android:inputType="phone"
+                                android:maxLength="11"
                                 android:textColor="@color/contacts_user_detail_text_color"
                                 android:visibility="gone" >
                             </EditText>
@@ -401,6 +418,7 @@
                                 android:layout_weight="1"
                                 android:ems="10"
                                 android:inputType="text"
+                                android:maxLength="30"
                                 android:textColor="@color/contacts_user_detail_text_color"
                                 android:visibility="gone" />
                         </LinearLayout>
@@ -437,8 +455,7 @@
                                 android:layout_marginTop="15dp"
                                 android:text="TextView"
                                 android:textColor="@color/contacts_user_detail_text_color"
-                                android:textSize="18sp"
-                                 />
+                                android:textSize="18sp" />
 
                             <EditText
                                 android:id="@+id/contact_user_detail_company_et"
@@ -486,8 +503,7 @@
                                 android:layout_marginTop="15dp"
                                 android:text="TextView"
                                 android:textColor="@color/contacts_user_detail_text_color"
-                                android:textSize="18sp"
-                                />
+                                android:textSize="18sp" />
 
                             <EditText
                                 android:id="@+id/contact_user_detail_department_et"
@@ -546,6 +562,7 @@
                                 android:layout_weight="1"
                                 android:ems="10"
                                 android:inputType="text"
+                                android:maxLength="50"
                                 android:textColor="@color/contacts_user_detail_text_color"
                                 android:visibility="gone" />
                         </LinearLayout>
@@ -595,6 +612,7 @@
                                 android:layout_weight="1"
                                 android:ems="10"
                                 android:inputType="text"
+                                android:maxLength="100"
                                 android:textColor="@color/contacts_user_detail_text_color"
                                 android:visibility="gone" />
                         </LinearLayout>

@@ -35,6 +35,8 @@ public class VMessage {
 		}
 	}
 
+	private static DateFormat sfF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	
 	private static DateFormat sfL = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 
 	private static DateFormat sfT = new SimpleDateFormat("HH:mm");
@@ -80,11 +82,11 @@ public class VMessage {
 		this.mType = MessageType.TEXT;
 		this.isLocal = !isRemote;
 
-		if (System.currentTimeMillis() / (24 * 36000) == this.mDate.getTime()
-				/ (24 * 36000)) {
-			mStrDateTime = sfL.format(this.mDate);
-		} else {
+		if (System.currentTimeMillis() / (24 * 3600000) == this.mDate.getTime()
+				/ (24 * 3600000)) {
 			mStrDateTime = sfT.format(this.mDate);
+		} else {
+			mStrDateTime = sfL.format(this.mDate);
 		}
 
 	}
@@ -135,17 +137,25 @@ public class VMessage {
 			return;
 		}
 		this.mDate = mDate;
-		if (System.currentTimeMillis() / (24 * 36000) == this.mDate.getTime()
-				/ (24 * 36000)) {
-			mStrDateTime = sfL.format(this.mDate);
-		} else {
+		if (System.currentTimeMillis() / (24 * 3600000) == this.mDate.getTime()
+				/ (24 * 3600000)) {
 			mStrDateTime = sfT.format(this.mDate);
+		} else {
+			mStrDateTime = sfL.format(this.mDate);
 		}
 	}
 	
 	public String getNormalDateStr() {
 		if (this.mDate != null) {
 			return  sfL.format(this.mDate);
+		} else {
+			return null;
+		}
+	}
+	
+	public String getFullDateStr() {
+		if (this.mDate != null) {
+			return  sfF.format(this.mDate);
 		} else {
 			return null;
 		}

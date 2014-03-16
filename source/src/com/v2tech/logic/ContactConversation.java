@@ -48,6 +48,9 @@ public class ContactConversation extends Conversation {
 		return date;
 	}
 	
+	public void setMsg(String msg) {
+		this.msg = msg;
+	}
 	
 	public Bitmap getAvatar() {
 		if (u != null) {

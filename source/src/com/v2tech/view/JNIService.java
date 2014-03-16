@@ -4,6 +4,10 @@ import java.io.File;
 import java.util.Date;
 import java.util.List;
 
+import android.app.Activity;
+import android.app.ActivityManager;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.ContentValues;
 import android.content.Context;
@@ -19,6 +23,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.Parcelable;
 import android.os.Process;
+import android.support.v4.app.NotificationCompat;
 import android.widget.Toast;
 
 import com.V2.jni.ChatRequest;
@@ -44,6 +49,7 @@ import com.v2tech.logic.UserDeviceConfig;
 import com.v2tech.logic.VImageMessage;
 import com.v2tech.logic.VMessage;
 import com.v2tech.util.V2Log;
+import com.v2tech.view.conversation.ConversationView;
 
 /**
  * This service is used to wrap JNI call.<br>
@@ -102,6 +108,15 @@ public class JNIService extends Service {
 
 		HandlerThread callback = new HandlerThread("callback");
 		callback.start();
+		synchronized(callback) {
+			while (!callback.isAlive()) {
+				try {
+					Thread.currentThread().sleep(200);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+		}
 		mCallbackHandler = new JNICallbackHandler(callback.getLooper());
 
 		mImCB = new ImRequestCB(mCallbackHandler);
@@ -186,13 +201,12 @@ public class JNIService extends Service {
 		}
 
 	}
-	
-	
+
 	private void broadcastNetworkState(NetworkStateCode code) {
 		Intent i = new Intent();
 		i.setAction(JNI_BROADCAST_CONNECT_STATE_NOTIFICATION);
 		i.addCategory(JNI_BROADCAST_CATEGROY);
-		i.putExtra("state", (Parcelable)code);
+		i.putExtra("state", (Parcelable) code);
 		sendBroadcast(i);
 	}
 
@@ -247,13 +261,18 @@ public class JNIService extends Service {
 
 				break;
 			case JNI_LOG_OUT:
-				Toast.makeText(mContext, R.string.user_logged_with_other_device, Toast.LENGTH_LONG).show();
+				Toast.makeText(mContext,
+						R.string.user_logged_with_other_device,
+						Toast.LENGTH_LONG).show();
 				break;
 			case JNI_GROUP_NOTIFY:
 				List<Group> gl = Group
 						.parserFromXml(msg.arg1, (String) msg.obj);
 				GlobalHolder.getInstance().updateGroupList(
 						Group.GroupType.fromInt(msg.arg1), gl);
+				Intent gi = new Intent(JNI_BROADCAST_GROUP_NOTIFICATION);
+				gi.addCategory(JNI_BROADCAST_CATEGROY);
+				mContext.sendBroadcast(gi);
 				break;
 
 			case JNI_GROUP_USER_INFO_NOTIFICATION:
@@ -266,16 +285,21 @@ public class JNIService extends Service {
 						if (us != null) {
 							tu.updateStatus(us);
 						}
-						User existU = GlobalHolder.getInstance().putUser(tu.getmUserId(), tu);
-						
-						GlobalHolder.getInstance().addUserToGroup(existU, go.gId);
+						User existU = GlobalHolder.getInstance().putUser(
+								tu.getmUserId(), tu);
+						if (existU.getmUserId() == GlobalHolder.getInstance().getCurrentUserId()) {
+							//Update logged user object.
+							GlobalHolder.getInstance().setCurrentUser(existU);
+						}
+						GlobalHolder.getInstance().addUserToGroup(existU,
+								go.gId);
 					}
 					Intent i = new Intent(
 							JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION);
 					i.addCategory(JNI_BROADCAST_CATEGROY);
 					i.putExtra("gid", go.gId);
 					i.putExtra("gtype", go.gType);
-					mContext.sendStickyBroadcast(i);
+					mContext.sendBroadcast(i);
 
 				} else {
 					V2Log.e("Invalid group user data");
@@ -336,6 +360,7 @@ public class JNIService extends Service {
 					ii.putExtra("fromuid", vm.getUser().getmUserId());
 					mContext.sendBroadcast(ii);
 					sendNotification();
+					updateStatusBar(vm);
 				}
 				break;
 			case JNI_RECEIVED_VIDEO_INVITION:
@@ -362,7 +387,7 @@ public class JNIService extends Service {
 			cv.put(ContentDescriptor.Messages.Cols.MSG_TYPE, vm.getType()
 					.getIntValue());
 			cv.put(ContentDescriptor.Messages.Cols.SEND_TIME,
-					vm.getNormalDateStr());
+					vm.getFullDateStr());
 			Uri uri = getContentResolver().insert(
 					ContentDescriptor.Messages.CONTENT_URI, cv);
 
@@ -415,6 +440,41 @@ public class JNIService extends Service {
 			r.play();
 		}
 
+		private void updateStatusBar(VMessage vm) {
+			if (vm.getUser().getmUserId() == GlobalHolder.getInstance().CURRENT_CONVERSATION_USER) {
+				return;
+			}
+			NotificationCompat.Builder builder = new NotificationCompat.Builder(
+					mContext).setSmallIcon(R.drawable.ic_launcher)
+					.setContentTitle(vm.getUser().getName())
+					.setContentText(vm.getText());
+
+			Intent resultIntent = new Intent(
+					PublicIntent.START_CONVERSACTION_ACTIVITY);
+			resultIntent.putExtra("user1id", GlobalHolder.getInstance()
+					.getCurrentUserId());
+			resultIntent.putExtra("user2id", vm.getUser().getmUserId());
+			resultIntent.putExtra("user2Name", vm.getUser().getName());
+			resultIntent.addCategory(PublicIntent.DEFAULT_CATEGORY);
+			
+			
+			Intent startupActivity = new Intent(mContext, StartupActivity.class);
+
+			// Creates the PendingIntent
+			PendingIntent notifyPendingIntent = PendingIntent.getActivities(
+					mContext, 0, new Intent[] {startupActivity, resultIntent},
+					PendingIntent.FLAG_ONE_SHOT);
+
+			// Puts the PendingIntent into the notification builder
+			builder.setContentIntent(notifyPendingIntent);
+
+			NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+			// mId allows you to update the notification later on.
+			mNotificationManager.notify(PublicIntent.MESSAGE_NOTIFICATION_ID,
+					builder.build());
+
+		}
+
 	}
 
 	// ///////////////////////////////////////////////
@@ -437,12 +497,12 @@ public class JNIService extends Service {
 		@Override
 		public void OnLogoutCallback(int nUserID) {
 			Message.obtain(mCallbackHandler, JNI_LOG_OUT).sendToTarget();
-			mCallbackHandler.postDelayed(new Runnable () {
+			mCallbackHandler.postDelayed(new Runnable() {
 				@Override
 				public void run() {
 					Process.killProcess(Process.myPid());
 				}
-				
+
 			}, 2000);
 		}
 
@@ -621,7 +681,8 @@ public class JNIService extends Service {
 				V2Log.e("No valid user object " + toUser + "  " + fromUser);
 				return;
 			}
-			VMessage vm = VMessage.fromXml(fromUser, toUser, new Date(nTime * 1000), szXmlText);
+			VMessage vm = VMessage.fromXml(fromUser, toUser, new Date(
+					nTime * 1000), szXmlText);
 			if (vm == null) {
 				V2Log.e(" xml parsed failed : " + szXmlText);
 				return;

@@ -107,6 +107,14 @@ public class GroupLayout extends LinearLayout {
 			mNotificatorIV.setVisibility(View.GONE);
 		}		
 	}
+	
+	public void update(String content, String date) {
+		mGroupOwnerTV.setText(content);
+		if (this.mConv instanceof ContactConversation) {
+			((ContactConversation)mConv).setMsg(content);
+		}
+		mGroupDateTV.setText(date);
+	}
 
 	private Runnable queryMessageRunnable = new Runnable() {
 
@@ -144,6 +152,7 @@ public class GroupLayout extends LinearLayout {
 				String dateString = cur.getString(7);
 				mGroupOwnerTV.setText(content);
 				mGroupDateTV.setText(dateString);
+				((ContactConversation)mConv).setMsg(content);
 			}
 			cur.close();
 		}

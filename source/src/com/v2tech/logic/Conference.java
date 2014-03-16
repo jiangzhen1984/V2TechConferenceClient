@@ -1,20 +1,32 @@
 package com.v2tech.logic;
 
+import java.util.List;
+
 public class Conference {
 
 	private long id;
 
-	
+	private String name;
+	private String startTime;
+	private String endTime;
+	private List<User> invitedList;
+
 	public Conference(long id) {
 		this.id = id;
 	}
-	
-	
-	
+
+	public Conference(String name, String startTime, String endTime,
+			List<User> invitedList) {
+		this.name = name;
+		this.startTime = startTime;
+		this.endTime = endTime;
+		this.invitedList = invitedList;
+	}
+
 	public long getID() {
 		return this.id;
 	}
-	
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -37,7 +49,40 @@ public class Conference {
 		return true;
 	}
 
+	/**
+	 * <conf canaudio="1" candataop="1" canvideo="1" conftype="0" haskey="0" //
+	 * id="0" key="" // layout="1" lockchat="0" lockconf="0" lockfiletrans="0"
+	 * mode="2" // pollingvideo="0" // subject="ss" // chairuserid='0'
+	 * chairnickname=''> // </conf>
+	 * 
+	 * @return
+	 */
+	public String getConferenceConfigXml() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(
+				"<conf canaudio=\"1\" candataop=\"1\" canvideo=\"1\" conftype=\"0\" haskey=\"0\" ")
+				.append(" id=\"0\" key=\"\" layout=\"1\" lockchat=\"0\" lockconf=\"0\" lockfiletrans=\"0\" mode=\"2\" pollingvideo=\"0\" ")
+				.append(" syncdesktop=\"0\" syncdocument=\"1\" syncvideo=\"0\" ")
+				.append("subject=\" ").append(this.name).append("\" ")
+				.append("chairuserid=\"")
+				.append(GlobalHolder.getInstance().getCurrentUserId())
+				.append("\" ").append("chairnickname=\"")
+				.append(GlobalHolder.getInstance().getCurrentUser().getName())
+				.append("\" ").append("</conf>");
+		return sb.toString();
 
-	
-	
+	}
+
+	public String getInvitedAttendeesXml() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("<xml>");
+		for (User u : this.invitedList) {
+			sb.append("<user id=\"").append(u.getmUserId()).append("\" ")
+					.append("nickname=\"").append(u.getName()).append("\"/>");
+		}
+
+		sb.append("</xml>");
+		return sb.toString();
+	}
+
 }

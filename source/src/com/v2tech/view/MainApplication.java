@@ -2,6 +2,8 @@ package com.v2tech.view;
 
 import java.io.File;
 
+import net.sourceforge.pinyin4j.PinyinHelper;
+
 import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
@@ -78,6 +80,14 @@ public class MainApplication extends Application {
 		} catch (NameNotFoundException e) {
 			e.printStackTrace();
 		}
+		new Thread() {
+
+			@Override
+			public void run() {
+				PinyinHelper.toHanyuPinyinStringArray('c');
+			}
+			
+		}.start();
 	}
 
 	@Override

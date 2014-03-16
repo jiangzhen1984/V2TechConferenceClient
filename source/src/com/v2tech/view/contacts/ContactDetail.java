@@ -1,6 +1,10 @@
 package com.v2tech.view.contacts;
 
+import java.util.Calendar;
+import java.util.Date;
+
 import android.app.Activity;
+import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -10,8 +14,12 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
+import android.widget.RadioGroup.OnCheckedChangeListener;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -56,7 +64,7 @@ public class ContactDetail extends Activity {
 
 	// view for self
 
-	private EditText mGenderET;
+	private RadioGroup mGenderRG;
 	private EditText mBirthdayET;
 	private EditText mCellphoneET;
 	private EditText mTelephoneET;
@@ -66,6 +74,10 @@ public class ContactDetail extends Activity {
 	private EditText[] mETArr;
 
 	private boolean isUpdating;
+
+	private boolean isChanged;
+
+	private Date bir;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -79,7 +91,8 @@ public class ContactDetail extends Activity {
 	@Override
 	protected void onStart() {
 		super.onStart();
-		Message.obtain(lh, SHOW_USER_INFO).sendToTarget();
+		u = GlobalHolder.getInstance().getUser(mUid);
+		showUserInfo();
 	}
 
 	@Override
@@ -119,45 +132,50 @@ public class ContactDetail extends Activity {
 				mTelephoneTV, mTitleTV, mAddressTV };
 
 		// view for self
-		mGenderET = (EditText) findViewById(R.id.contact_user_detail_gender_et);
+		mGenderRG = (RadioGroup) findViewById(R.id.contact_user_detail_gender_rg);
 		mBirthdayET = (EditText) findViewById(R.id.contact_user_detail_birthday_et);
 		mCellphoneET = (EditText) findViewById(R.id.contact_user_detail_cell_phone_et);
 		mTelephoneET = (EditText) findViewById(R.id.contact_user_detail_telephone_et);
 		mTitleET = (EditText) findViewById(R.id.contact_user_detail_title_et);
 		mAddressET = (EditText) findViewById(R.id.contact_user_detail_address_et);
 
-		mETArr = new EditText[] { mGenderET, mBirthdayET, mCellphoneET,
-				mTelephoneET, mTitleET, mAddressET };
+		mETArr = new EditText[] { mCellphoneET, mTelephoneET,
+				mTitleET, mAddressET };
 	}
 
 	private void showUserInfo() {
 		if (u.getAvatarBitmap() != null) {
 			mHeadIconIV.setImageBitmap(u.getAvatarBitmap());
 		}
+
 		if (u.getmUserId() == GlobalHolder.getInstance().getCurrentUserId()) {
 			for (TextView tv : mTVArr) {
 				tv.setVisibility(View.GONE);
 			}
-			for (EditText et : mETArr) {
-				et.setVisibility(View.VISIBLE);
-				et.addTextChangedListener(tw);
-			}
 
-			if (u.getGender() != null && u.getGender().equals("1")) {
-				mGenderET.setText(mContext.getResources().getText(
-						R.string.contacts_user_detail_gender_male));
-			} else if (u.getGender() != null && u.getGender().equals("0")) {
-				mGenderET.setText(mContext.getResources().getText(
-						R.string.contacts_user_detail_gender_female));
-			} else {
-				mGenderET.setText("");
-			}
-			mNickNameET.addTextChangedListener(tw);
+			mGenderRG.setVisibility(View.VISIBLE);
+			mGenderRG.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+				@Override
+				public void onCheckedChanged(RadioGroup rg, int id) {
+					isUpdating = true;
+					Message m = Message.obtain(lh, UPDATE_USER_INFO);
+					lh.sendMessageDelayed(m, 2000);
+				}
+
+			});
+
+			selectedRG(u.getGender());
 			mBirthdayET.setText(u.getBirthdayStr());
 			mCellphoneET.setText(u.getCellPhone());
 			mTelephoneET.setText(u.getTelephone());
 			mTitleET.setText(u.getTitle());
 			mAddressET.setText(u.getAddress());
+
+			for (EditText et : mETArr) {
+				et.setVisibility(View.VISIBLE);
+				et.addTextChangedListener(tw);
+			}
+			mBirthdayET.setVisibility(View.VISIBLE);
 
 		} else {
 			for (EditText et : mETArr) {
@@ -166,6 +184,7 @@ public class ContactDetail extends Activity {
 			for (TextView tv : mTVArr) {
 				tv.setVisibility(View.VISIBLE);
 			}
+			mGenderRG.setVisibility(View.GONE);
 
 			mUserSignatureTV.setText(u.getSignature());
 			if (u.getGender() != null && u.getGender().equals("1")) {
@@ -225,12 +244,16 @@ public class ContactDetail extends Activity {
 		// TODO hidden button of invite video conversation
 		mButtonInviteVideoTV.setVisibility(View.INVISIBLE);
 
+		mNickNameET.addTextChangedListener(tw);
+		mBirthdayET.setOnFocusChangeListener(datePickerListener);
+		bir = u.getBirthday();
+
 	}
 
 	private TextWatcher tw = new TextWatcher() {
 
 		@Override
-		public void afterTextChanged(Editable arg0) {
+		public void afterTextChanged(Editable ed) {
 			if (isUpdating) {
 				return;
 			}
@@ -253,17 +276,69 @@ public class ContactDetail extends Activity {
 
 	};
 
+	private View.OnFocusChangeListener datePickerListener = new View.OnFocusChangeListener() {
+
+		@Override
+		public void onFocusChange(final View view, boolean focus) {
+			if (focus) {
+				Calendar c = Calendar.getInstance();
+
+				new DatePickerDialog(mContext,
+						new DatePickerDialog.OnDateSetListener() {
+							@Override
+							public void onDateSet(DatePicker dp, int year,
+									int monthOfYear, int dayOfMonth) {
+								((EditText) view).setText(year + "/"
+										+ (monthOfYear + 1) + "/" + dayOfMonth);
+								Calendar cl = Calendar.getInstance();
+								cl.set(Calendar.YEAR, year);
+								cl.set(Calendar.MONTH, monthOfYear);
+								cl.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+								
+								Message m = Message.obtain(lh, UPDATE_USER_INFO);
+								lh.sendMessageDelayed(m, 2000);
+								isUpdating = true;
+								bir = cl.getTime();
+								
+							}
+						}, c.get(Calendar.YEAR), c.get(Calendar.MONTH), c
+								.get(Calendar.DAY_OF_MONTH)).show();
+			}
+
+		}
+
+	};
+
 	private void gatherUserData() {
 		if (u.getmUserId() == GlobalHolder.getInstance().getCurrentUserId()) {
 			u.setName(mNickNameET.getText().toString());
-			u.setGender(mGenderET.getText().toString());
-			// mBirthdayET.setText(u.getBirthdayStr());
+			u.setGender(getRadioValue());
+			u.setBirthday(bir);
 			u.setCellPhone(mCellphoneET.getText().toString());
 			u.setTelephone(mTelephoneET.getText().toString());
 			u.setTitle(mTitleET.getText().toString());
 			u.setAddress(mAddressET.getText().toString());
 		} else {
 			u.setName(mNickNameET.getText().toString());
+		}
+	}
+
+	private String getRadioValue() {
+		for (int i = 0; i < mGenderRG.getChildCount(); i++) {
+			RadioButton rg = (RadioButton) mGenderRG.getChildAt(i);
+			if (rg.isChecked()) {
+				return rg.getTag().toString();
+			}
+		}
+		return "1";
+	}
+
+	private void selectedRG(String genderVal) {
+		for (int i = 0; i < mGenderRG.getChildCount(); i++) {
+			RadioButton rg = (RadioButton) mGenderRG.getChildAt(i);
+			if (rg.getTag().equals(genderVal)) {
+				rg.setChecked(true);
+			}
 		}
 	}
 

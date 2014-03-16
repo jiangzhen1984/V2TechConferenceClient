@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.app.Activity;
+import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.ContentUris;
 import android.content.ContentValues;
@@ -79,6 +80,8 @@ public class ConversationView extends Activity {
 
 	private boolean mLoadedAllMessages;
 
+	private boolean mIsInited;
+
 	private Context mContext;
 
 	private TextView mSendButtonTV;
@@ -96,7 +99,7 @@ public class ConversationView extends Activity {
 	private View mAdditionFeatureContainer;
 
 	private ImageView mSelectImageButtonIV;
-	
+
 	private ImageView mAudioSpeakerIV;
 
 	private MessageReceiver receiver = new MessageReceiver();
@@ -119,8 +122,6 @@ public class ConversationView extends Activity {
 		mSendButtonTV = (TextView) findViewById(R.id.message_send);
 		// mSendButtonTV.setOnClickListener(sendMessageListener);
 		mSendButtonTV.setOnTouchListener(sendMessageButtonListener);
-		
-		
 
 		mMessageET = (EditText) findViewById(R.id.message_text);
 		mReturnButtonTV = (TextView) findViewById(R.id.contact_detail_return_button);
@@ -137,9 +138,9 @@ public class ConversationView extends Activity {
 
 		mSelectImageButtonIV = (ImageView) findViewById(R.id.contact_message_send_image_button);
 		mSelectImageButtonIV.setOnClickListener(selectImageButtonListener);
-		
+
 		mAudioSpeakerIV = (ImageView) findViewById(R.id.contact_message_speaker);
-		//TODO hidden button of send audio message
+		// TODO hidden button of send audio message
 		mAudioSpeakerIV.setVisibility(View.GONE);
 
 		mAdditionFeatureContainer = findViewById(R.id.contact_message_sub_feature_ly_inner);
@@ -179,7 +180,7 @@ public class ConversationView extends Activity {
 	@Override
 	protected void onStart() {
 		super.onStart();
-		if (!mLoadedAllMessages) {
+		if (!mIsInited && !mLoadedAllMessages) {
 			android.os.Message m = android.os.Message.obtain(lh,
 					START_LOAD_MESSAGE);
 			lh.sendMessageDelayed(m, 500);
@@ -190,11 +191,19 @@ public class ConversationView extends Activity {
 					Toast.LENGTH_SHORT).show();
 		}
 		mUserTitleTV.setText(user2Name);
+
+		NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+		// mId allows you to update the notification later on.
+		mNotificationManager.cancel(PublicIntent.MESSAGE_NOTIFICATION_ID);
+		GlobalHolder.getInstance().CURRENT_CONVERSATION_USER = user2Id;
 	}
 
+	
+	
 	@Override
 	protected void onStop() {
 		super.onStop();
+		GlobalHolder.getInstance().CURRENT_CONVERSATION_USER  = 0;
 	}
 
 	@Override
@@ -303,7 +312,7 @@ public class ConversationView extends Activity {
 		cv.put(ContentDescriptor.Messages.Cols.MSG_CONTENT, vm.getText());
 		cv.put(ContentDescriptor.Messages.Cols.MSG_TYPE, vm.getType()
 				.getIntValue());
-		cv.put(ContentDescriptor.Messages.Cols.SEND_TIME, vm.getDateTimeStr());
+		cv.put(ContentDescriptor.Messages.Cols.SEND_TIME, vm.getFullDateStr());
 		getContentResolver().insert(ContentDescriptor.Messages.CONTENT_URI, cv);
 	}
 
@@ -323,8 +332,17 @@ public class ConversationView extends Activity {
 		Message.obtain(lh, SEND_MESSAGE, m).sendToTarget();
 		addMessageToContainer(m);
 		updateConversationList(false);
-		//make offset
+		// make offset
 		offset++;
+
+		// FIXME optime code
+		Intent i = new Intent();
+		i.addCategory(PublicIntent.DEFAULT_CATEGORY);
+		i.setAction(PublicIntent.UPDATE_CONVERSATION);
+		i.putExtra("content", m.getText());
+		i.putExtra("date", m.getDateTimeStr());
+		i.putExtra("extid", user2Id);
+		sendBroadcast(i);
 	}
 
 	private boolean saveConversation;
@@ -344,8 +362,9 @@ public class ConversationView extends Activity {
 			cv.put(ContentDescriptor.Conversation.Cols.TYPE,
 					Conversation.TYPE_CONTACT);
 			cv.put(ContentDescriptor.Conversation.Cols.EXT_NAME,
-					remote.getName());
-			cv.put(ContentDescriptor.Conversation.Cols.OWNER, GlobalHolder.getInstance().getCurrentUserId());
+					remote == null ? "" : remote.getName());
+			cv.put(ContentDescriptor.Conversation.Cols.OWNER, GlobalHolder
+					.getInstance().getCurrentUserId());
 			if (flag) {
 				cv.put(ContentDescriptor.Conversation.Cols.NOTI_FLAG,
 						Conversation.NOTIFICATION);
@@ -356,7 +375,7 @@ public class ConversationView extends Activity {
 			getContentResolver().insert(
 					ContentDescriptor.Conversation.CONTENT_URI, cv);
 			GlobalHolder.getInstance().addConversation(cov);
-			
+
 			Intent i = new Intent();
 			i.addCategory(PublicIntent.DEFAULT_CATEGORY);
 			i.setAction(PublicIntent.NEW_CONVERSATION);
@@ -380,7 +399,7 @@ public class ConversationView extends Activity {
 		if (cov != null) {
 			cov.setNotiFlag(Conversation.NONE);
 		}
-		
+
 		Intent i = new Intent();
 		i.addCategory(PublicIntent.DEFAULT_CATEGORY);
 		i.setAction(PublicIntent.MESSAGE_READED_NOTIFICATION);
@@ -441,6 +460,7 @@ public class ConversationView extends Activity {
 	};
 
 	private List<VMessage> loadMessages() {
+
 		String selection = "(" + ContentDescriptor.Messages.Cols.FROM_USER_ID
 				+ "=? and " + ContentDescriptor.Messages.Cols.TO_USER_ID
 				+ "=? ) or " + "("
@@ -475,6 +495,7 @@ public class ConversationView extends Activity {
 		}
 		mCur.close();
 
+		mIsInited = true;
 		return array;
 	}
 
@@ -508,7 +529,7 @@ public class ConversationView extends Activity {
 		if (cur.isClosed()) {
 			throw new RuntimeException(" cursor is closed");
 		}
-		DateFormat dp = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+		DateFormat dp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
 		int id = cur.getInt(0);
 		long localUserId = cur.getLong(1);
@@ -604,7 +625,7 @@ public class ConversationView extends Activity {
 					}
 					mMessagesContainer.addView(mv, 0);
 				}
-				
+
 				if (fir != null) {
 					final MessageBodyView firt = fir;
 					mScrollView.post(new Runnable() {
@@ -614,22 +635,21 @@ public class ConversationView extends Activity {
 						}
 					});
 				}
-				
-				
+
 				isLoading = false;
-//				this.postDelayed(new Runnable() {
-//
-//					@Override
-//					public void run() {
-//						for (int i = 0; array != null && i < array.size(); i++) {
-//							VMessage vt = array.get(i);
-//							if (vt.getType() == MessageType.IMAGE) {
-//								((VImageMessage)vt).recycle();
-//							}
-//						}
-//					}
-//					
-//				}, 700);
+				// this.postDelayed(new Runnable() {
+				//
+				// @Override
+				// public void run() {
+				// for (int i = 0; array != null && i < array.size(); i++) {
+				// VMessage vt = array.get(i);
+				// if (vt.getType() == MessageType.IMAGE) {
+				// ((VImageMessage)vt).recycle();
+				// }
+				// }
+				// }
+				//
+				// }, 700);
 				break;
 			case SEND_MESSAGE:
 				mChat.sendVMessage((VMessage) msg.obj,

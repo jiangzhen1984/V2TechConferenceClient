@@ -11,6 +11,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -26,7 +27,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.ScrollView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.v2tech.R;
@@ -43,9 +44,8 @@ import com.v2tech.logic.User;
 import com.v2tech.logic.jni.JNIResponse;
 import com.v2tech.logic.jni.RequestEnterConfResponse;
 import com.v2tech.service.ConferenceService;
+import com.v2tech.util.BitmapUtil;
 import com.v2tech.util.V2Log;
-import com.v2tech.view.ContactsTabFragment.ContactsAdapter;
-import com.v2tech.view.ContactsTabFragment.ListItem;
 import com.v2tech.view.conference.GroupLayout;
 import com.v2tech.view.conference.VideoActivityV2;
 
@@ -59,11 +59,14 @@ public class ConversationsTabFragment extends Fragment {
 	private static final int NEW_MESSAGE_READED_NOTIFICATION = 7;
 	private static final int UPDATE_USER_SIGN = 8;
 	private static final int UPDATE_USER_AVATAR = 9;
+	private static final int UPDATE_CONVERSATION = 10;
+	private static final int UPDATE_SEARCHED_LIST = 11;
 
 	private static final int RETRY_COUNT = 10;
 
 	private Tab1BroadcastReceiver receiver = new Tab1BroadcastReceiver();
 	private IntentFilter intentFilter;
+	private boolean mIsStartedSearch;
 
 	private List<Group> mConferenceList;
 
@@ -78,17 +81,21 @@ public class ConversationsTabFragment extends Fragment {
 	private long currentConfId;
 
 	private boolean isLoaded = false;
+	private boolean isLoadedCov = false;
 
 	private View rootView;
 
-	private List<ScrollItem> mItemList;
+	private List<ScrollItem> mItemList = new ArrayList<ScrollItem>();
+	private List<ScrollItem> mCacheItemList;
 
 	private Context mContext;
-	
+
 	private LinearLayout networkNotificationContainer;
-	
+
 	private ListView mConversationsListView;
-	
+
+	private TextView mCreateConferenceButtonTV;
+
 	private ConversationsAdapter adapter = new ConversationsAdapter();
 
 	private ConferenceService cb = new ConferenceService();;
@@ -97,7 +104,7 @@ public class ConversationsTabFragment extends Fragment {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		getActivity().registerReceiver(receiver, getIntentFilter());
-		mItemList = new ArrayList<ScrollItem>();
+
 		mContext = getActivity();
 	}
 
@@ -116,25 +123,11 @@ public class ConversationsTabFragment extends Fragment {
 			mSearchTextET = (EditText) rootView.findViewById(R.id.confs_search);
 			networkNotificationContainer = (LinearLayout) rootView
 					.findViewById(R.id.recent_conversation_network_nt);
+			mCreateConferenceButtonTV = (TextView) rootView
+					.findViewById(R.id.conference_create_button);
+			mCreateConferenceButtonTV
+					.setOnClickListener(mConferenceCreateButtonListener);
 
-			mSearchTextET.addTextChangedListener(new TextWatcher() {
-
-				@Override
-				public void afterTextChanged(Editable s) {
-				}
-
-				@Override
-				public void beforeTextChanged(CharSequence s, int start,
-						int count, int after) {
-
-				}
-
-				@Override
-				public void onTextChanged(CharSequence s, int start,
-						int before, int count) {
-				}
-
-			});
 		} else {
 			((ViewGroup) rootView.getParent()).removeView(rootView);
 		}
@@ -149,6 +142,8 @@ public class ConversationsTabFragment extends Fragment {
 	@Override
 	public void onDetach() {
 		super.onDetach();
+		isLoaded = false;
+		mItemList.clear();
 	}
 
 	@Override
@@ -183,7 +178,10 @@ public class ConversationsTabFragment extends Fragment {
 					.addAction(JNIService.JNI_BROADCAST_USER_UPDATE_NAME_OR_SIGNATURE);
 			intentFilter
 					.addAction(JNIService.JNI_BROADCAST_USER_AVATAR_CHANGED_NOTIFICATION);
-			intentFilter.addAction(JNIService.JNI_BROADCAST_CONNECT_STATE_NOTIFICATION);
+			intentFilter
+					.addAction(JNIService.JNI_BROADCAST_CONNECT_STATE_NOTIFICATION);
+			intentFilter.addCategory(PublicIntent.DEFAULT_CATEGORY);
+			intentFilter.addAction(PublicIntent.UPDATE_CONVERSATION);
 
 		}
 		return intentFilter;
@@ -195,17 +193,21 @@ public class ConversationsTabFragment extends Fragment {
 		if (!isLoaded) {
 			Message.obtain(mHandler, FILL_CONFS_LIST).sendToTarget();
 		}
+		mSearchTextET.addTextChangedListener(searchListener);
 	}
 
 	@Override
 	public void onStop() {
 		super.onStop();
+		mSearchTextET.removeTextChangedListener(searchListener);
 	}
 
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
-		Message.obtain(mHandler, REQUEST_EXIT_CONF, currentConfId)
-				.sendToTarget();
+		if (requestCode == 0) {
+			Message.obtain(mHandler, REQUEST_EXIT_CONF, currentConfId)
+					.sendToTarget();
+		}
 	}
 
 	private void populateConversation(List<Group> list) {
@@ -221,18 +223,18 @@ public class ConversationsTabFragment extends Fragment {
 
 				@Override
 				public void onClick(View v) {
-//					// TODO hidden request to enter conference feature
-//					mWaitingDialog = ProgressDialog
-//							.show(getActivity(),
-//									"",
-//									getActivity()
-//											.getResources()
-//											.getString(
-//													R.string.requesting_enter_conference),
-//									true);
-//					currentConfId = g.getmGId();
-//					Message.obtain(mHandler, REQUEST_ENTER_CONF,
-//							Long.valueOf(g.getmGId())).sendToTarget();
+					// // TODO hidden request to enter conference feature
+					mWaitingDialog = ProgressDialog
+							.show(getActivity(),
+									"",
+									getActivity()
+											.getResources()
+											.getString(
+													R.string.requesting_enter_conference),
+									true);
+					currentConfId = g.getmGId();
+					Message.obtain(mHandler, REQUEST_ENTER_CONF,
+							Long.valueOf(g.getmGId())).sendToTarget();
 				}
 
 			});
@@ -242,8 +244,63 @@ public class ConversationsTabFragment extends Fragment {
 
 	}
 
-	private void loadConversation() {
+	private OnClickListener mConferenceCreateButtonListener = new OnClickListener() {
 
+		@Override
+		public void onClick(View arg0) {
+			Intent i = new Intent(PublicIntent.START_CONFERENCE_CREATE_ACTIVITY);
+			i.addCategory(PublicIntent.DEFAULT_CATEGORY);
+			startActivityForResult(i, 1);
+		}
+
+	};
+
+	private TextWatcher searchListener = new TextWatcher() {
+
+		@Override
+		public void afterTextChanged(Editable s) {
+		}
+
+		@Override
+		public void beforeTextChanged(CharSequence s, int start, int count,
+				int after) {
+
+		}
+
+		@Override
+		public void onTextChanged(CharSequence s, int start, int before,
+				int count) {
+
+			if (s.length() > 0) {
+				if (!mIsStartedSearch) {
+					mCacheItemList = mItemList;
+					mIsStartedSearch = true;
+				}
+			} else {
+				mItemList = mCacheItemList;
+				adapter.notifyDataSetChanged();
+				mIsStartedSearch = false;
+				return;
+			}
+			List<ScrollItem> newItemList = new ArrayList<ScrollItem>();
+			String searchKey = s.toString();
+			for (ScrollItem item : mItemList) {
+				if (item.cov.getName() != null
+						&& item.cov.getName().contains(searchKey)) {
+					newItemList.add(item);
+				} else if (item.cov.getMsg() != null
+						&& item.cov.getMsg().contains(searchKey)) {
+					newItemList.add(item);
+				}
+			}
+			mItemList = newItemList;
+			adapter.notifyDataSetChanged();
+		}
+
+	};
+
+	private void loadConversation() {
+		isLoadedCov = true;
 		Cursor mCur = getActivity().getContentResolver().query(
 				ContentDescriptor.Conversation.CONTENT_URI,
 				ContentDescriptor.Conversation.Cols.ALL_CLOS,
@@ -276,21 +333,17 @@ public class ConversationsTabFragment extends Fragment {
 		Conversation cov = new ContactConversation(u, flag);
 		return cov;
 	}
-	
+
 	private void updateConversation(long extId, String name) {
 		ContentValues ct = new ContentValues();
-		ct.put(ContentDescriptor.Conversation.Cols.EXT_NAME,
-				name);
+		ct.put(ContentDescriptor.Conversation.Cols.EXT_NAME, name);
 		getActivity().getContentResolver().update(
 				ContentDescriptor.Conversation.CONTENT_URI,
 				ct,
 				ContentDescriptor.Conversation.Cols.EXT_ID + "=? and "
-						+ ContentDescriptor.Conversation.Cols.TYPE
-						+ "=?",
-				new String[] { extId + "",
-						Conversation.TYPE_CONTACT });
+						+ ContentDescriptor.Conversation.Cols.TYPE + "=?",
+				new String[] { extId + "", Conversation.TYPE_CONTACT });
 	}
-
 
 	class ScrollItem {
 		Conversation cov;
@@ -303,14 +356,12 @@ public class ConversationsTabFragment extends Fragment {
 		}
 
 	}
-	
-	
-	
+
 	class ConversationsAdapter extends BaseAdapter {
 
 		@Override
 		public int getCount() {
-			return mItemList.size();
+			return mItemList == null ? 0 : mItemList.size();
 		}
 
 		@Override
@@ -330,8 +381,6 @@ public class ConversationsTabFragment extends Fragment {
 		}
 
 	}
-	
-	
 
 	class Tab1BroadcastReceiver extends BroadcastReceiver {
 
@@ -351,20 +400,32 @@ public class ConversationsTabFragment extends Fragment {
 						intent.getExtras().getLong("fromuid")).sendToTarget();
 			} else if (JNIService.JNI_BROADCAST_USER_UPDATE_NAME_OR_SIGNATURE
 					.equals(intent.getAction())) {
-				Message.obtain(mHandler, UPDATE_USER_SIGN,
-						intent.getExtras().get("uid")).sendToTarget();
+				if (mItemList != null && mItemList.size() > 0) {
+					Message.obtain(mHandler, UPDATE_USER_SIGN,
+							intent.getExtras().get("uid")).sendToTarget();
+				}
 			} else if (JNIService.JNI_BROADCAST_USER_AVATAR_CHANGED_NOTIFICATION
 					.equals(intent.getAction())) {
 				Object[] ar = new Object[] { intent.getExtras().get("uid"),
 						intent.getExtras().get("avatar") };
 				Message.obtain(mHandler, UPDATE_USER_AVATAR, ar).sendToTarget();
-			} else if (JNIService.JNI_BROADCAST_CONNECT_STATE_NOTIFICATION.equals(intent.getAction())) {
-				NetworkStateCode code = (NetworkStateCode)intent.getExtras().get("state");
+			} else if (JNIService.JNI_BROADCAST_CONNECT_STATE_NOTIFICATION
+					.equals(intent.getAction())) {
+				NetworkStateCode code = (NetworkStateCode) intent.getExtras()
+						.get("state");
 				if (code != NetworkStateCode.CONNECTED) {
 					networkNotificationContainer.setVisibility(View.VISIBLE);
 				} else {
 					networkNotificationContainer.setVisibility(View.GONE);
 				}
+			} else if (PublicIntent.UPDATE_CONVERSATION.equals(intent
+					.getAction())) {
+				Object[] ar = new Object[] {
+						intent.getExtras().getString("content"),
+						intent.getExtras().getString("date"),
+						intent.getLongExtra("extid", 0) };
+				Message.obtain(mHandler, UPDATE_CONVERSATION, ar)
+						.sendToTarget();
 			}
 		}
 
@@ -378,29 +439,19 @@ public class ConversationsTabFragment extends Fragment {
 			case FILL_CONFS_LIST:
 				mConferenceList = GlobalHolder.getInstance().getGroup(
 						Group.GroupType.CONFERENCE);
-				// No server return send asynchronous message and waiting for
-				// response
 				if (mConferenceList != null) {
 					if (!isLoaded) {
-						((ViewGroup) mLoadingImageIV.getParent())
-								.removeView(mLoadingImageIV);
 						populateConversation(mConferenceList);
 						isLoaded = true;
-						loadConversation();
 					}
-				} else {
-					if (msg.arg1 < RETRY_COUNT) {
-						Message m = Message.obtain(this, FILL_CONFS_LIST,
-								msg.arg1 + 1, 0);
-						this.sendMessageDelayed(m, 1000);
-					} else {
-						if (!isLoaded) {
-							isLoaded = true;
-							((ViewGroup) mLoadingImageIV.getParent())
-									.removeView(mLoadingImageIV);
-							loadConversation();
-						}
-					}
+				}
+
+				if (!isLoadedCov) {
+					loadConversation();
+				}
+				if (mLoadingImageIV.getParent() != null) {
+					((ViewGroup) mLoadingImageIV.getParent())
+							.removeView(mLoadingImageIV);
 				}
 
 				break;
@@ -486,8 +537,8 @@ public class ConversationsTabFragment extends Fragment {
 						User u = GlobalHolder.getInstance().getUser(fromuidS);
 						((GroupLayout) item.gp).updateGroupOwner(u == null ? ""
 								: u.getName());
-						updateConversation(fromuidS, u == null ? ""
-								: u.getName());
+						updateConversation(fromuidS,
+								u == null ? "" : u.getName());
 						break;
 					}
 				}
@@ -499,9 +550,40 @@ public class ConversationsTabFragment extends Fragment {
 							&& item.cov.getExtId() == (Long) arObj[0]) {
 						User u = GlobalHolder.getInstance().getUser(
 								item.cov.getExtId());
-						((GroupLayout) item.gp).updateIcon(u.getAvatarBitmap());
+						if (u != null) {
+							((GroupLayout) item.gp).updateIcon(u
+									.getAvatarBitmap());
+						} else {
+							// FIXME handle concurrency
+							Bitmap bm = BitmapUtil
+									.loadAvatarFromPath(GlobalHolder
+											.getInstance().getAvatarPath(
+													item.cov.getExtId()));
+							if (bm != null) {
+								GlobalHolder.getInstance().saveAvatar(
+										item.cov.getExtId(), bm);
+								((GroupLayout) item.gp).updateIcon(bm);
+							}
+						}
 					}
 				}
+				break;
+
+			case UPDATE_CONVERSATION:
+				Object[] oar = (Object[]) msg.obj;
+				for (ScrollItem item : mItemList) {
+					if (item.cov.getExtId() == (Long) oar[2]
+							&& Conversation.TYPE_CONTACT.equals(item.cov
+									.getType())) {
+						item.cov.setNotiFlag(Conversation.NOTIFICATION);
+						((GroupLayout) item.gp).update(oar[0].toString(),
+								oar[1].toString());
+						b = true;
+						break;
+					}
+				}
+				break;
+			case UPDATE_SEARCHED_LIST:
 				break;
 			}
 		}

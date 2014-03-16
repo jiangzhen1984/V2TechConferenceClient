@@ -136,11 +136,7 @@ public class ContactsTabFragment extends Fragment {
 			return;
 		}
 		l = GlobalHolder.getInstance().getGroup(GroupType.CONTACT);
-		if (l == null) {
-			Message m = Message.obtain(mHandler, FILL_CONTACTS_GROUP);
-			mHandler.sendMessageDelayed(m, 300);
-			V2Log.i(" try to re-get group list");
-		} else {
+		if (l != null) {
 			mLoaded = true;
 			for (Group g : l) {
 				mItemList.add(new ListItem(g));
