@@ -35,12 +35,37 @@ public class ConversationConvertReceiver extends BroadcastReceiver {
 				int mid = Integer.parseInt(msgId);
 				updateContactsConversation(fromUid, mid);
 			}
+		} else if (PublicIntent.REQUEST_UPDATE_CONVERSATION.equals(action)) {
+			long extId = intent.getLongExtra("extId", 0);
+			String type = intent.getExtras().getString("type");
+			boolean noti = intent.getBooleanExtra("noti", false);
+			saveCOnversationStatusToDB(extId, type, noti);
+
+			Intent i = new Intent(PublicIntent.UPDATE_CONVERSATION);
+			i.addCategory(PublicIntent.DEFAULT_CATEGORY);
+			i.putExtras(intent.getExtras());
+			mContext.sendBroadcast(i);
+
 		}
 	}
 
-	
+	private void saveCOnversationStatusToDB(long extId, String type,
+			boolean noti) {
+
+		ContentValues ct = new ContentValues();
+		ct.put(ContentDescriptor.Conversation.Cols.NOTI_FLAG,
+				noti ? Conversation.NOTIFICATION : Conversation.NONE);
+		mContext.getContentResolver().update(
+				ContentDescriptor.Conversation.CONTENT_URI,
+				ct,
+				ContentDescriptor.Conversation.Cols.EXT_ID + "=? and "
+						+ ContentDescriptor.Conversation.Cols.TYPE + "=?",
+				new String[] { extId + "", type });
+	}
+
 	/**
 	 * Convert new message to update conversation broadcast
+	 * 
 	 * @param fromUid
 	 * @param msgId
 	 */
@@ -61,21 +86,44 @@ public class ConversationConvertReceiver extends BroadcastReceiver {
 			type = cur.getInt(6);
 			// date time
 			dateString = cur.getString(7);
-			
+
 		}
 		cur.close();
-		
+
 		if (type == VMessage.MessageType.IMAGE.getIntValue()) {
 			return;
 		}
-		
-		
-		
-		notif= (fromUid == GlobalHolder.getInstance().CURRENT_CONVERSATION_USER ? true: false);
-		
-		
-		Conversation c = GlobalHolder.getInstance().findConversationByType(
-				Conversation.TYPE_CONTACT, fromUid);
+
+		notif = (fromUid == GlobalHolder.getInstance().CURRENT_CONVERSATION_USER ? false
+				: true);
+
+		cur = mContext.getContentResolver().query(
+				ContentDescriptor.Conversation.CONTENT_URI,
+				ContentDescriptor.Conversation.Cols.ALL_CLOS,
+				ContentDescriptor.Conversation.Cols.TYPE + "=? and "
+						+ ContentDescriptor.Conversation.Cols.OWNER + "=? and "
+						+ ContentDescriptor.Conversation.Cols.EXT_ID + " =?",
+				new String[] { Conversation.TYPE_CONTACT,
+						GlobalHolder.getInstance().getCurrentUserId() + "",
+						fromUid + "" }, null);
+
+		Conversation c = null;
+		if (cur.moveToNext()) {
+			long extId = cur.getLong(2);
+			String name = cur.getString(3);
+			int flag = cur.getInt(4);
+			User u = GlobalHolder.getInstance().getUser(extId);
+			if (u == null) {
+				u = new User(extId);
+				u.setName(name);
+			}
+			c = new ContactConversation(u, flag);
+		}
+		cur.close();
+
+		// FIXME query from database
+		// = GlobalHolder.getInstance().findConversationByType(
+		// Conversation.TYPE_CONTACT, fromUid);
 		if (c == null) {
 			User fromUser = GlobalHolder.getInstance().getUser(fromUid);
 			c = new ContactConversation(fromUser, Conversation.NOTIFICATION);
@@ -87,8 +135,8 @@ public class ConversationConvertReceiver extends BroadcastReceiver {
 					Conversation.TYPE_CONTACT);
 			conCv.put(ContentDescriptor.Conversation.Cols.EXT_NAME,
 					fromUser.getName());
-			conCv.put(ContentDescriptor.Conversation.Cols.NOTI_FLAG, notif? 
-					Conversation.NOTIFICATION:Conversation.NONE);
+			conCv.put(ContentDescriptor.Conversation.Cols.NOTI_FLAG,
+					notif ? Conversation.NOTIFICATION : Conversation.NONE);
 			conCv.put(ContentDescriptor.Conversation.Cols.OWNER, GlobalHolder
 					.getInstance().getCurrentUserId());
 			mContext.getContentResolver().insert(
@@ -96,21 +144,19 @@ public class ConversationConvertReceiver extends BroadcastReceiver {
 
 		} else {
 
-			c.setNotiFlag(notif? 
-					Conversation.NOTIFICATION:Conversation.NONE);
+			c.setNotiFlag(notif ? Conversation.NOTIFICATION : Conversation.NONE);
 
 			ContentValues ct = new ContentValues();
-			ct.put(ContentDescriptor.Conversation.Cols.NOTI_FLAG,notif? 
-					Conversation.NOTIFICATION:Conversation.NONE);
+			ct.put(ContentDescriptor.Conversation.Cols.NOTI_FLAG,
+					notif ? Conversation.NOTIFICATION : Conversation.NONE);
 			mContext.getContentResolver().update(
 					ContentDescriptor.Conversation.CONTENT_URI,
 					ct,
 					ContentDescriptor.Conversation.Cols.EXT_ID + "=? and "
 							+ ContentDescriptor.Conversation.Cols.TYPE + "=?",
 					new String[] { fromUid + "", Conversation.TYPE_CONTACT });
-		} 
-		
-		
+		}
+
 		Intent i = new Intent(PublicIntent.UPDATE_CONVERSATION);
 		i.addCategory(PublicIntent.DEFAULT_CATEGORY);
 		i.putExtra("extId", fromUid);
@@ -120,7 +166,5 @@ public class ConversationConvertReceiver extends BroadcastReceiver {
 		i.putExtra("noti", notif);
 		mContext.sendBroadcast(i);
 	}
-	
-	
-	
+
 }

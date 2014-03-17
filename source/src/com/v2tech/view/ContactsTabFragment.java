@@ -28,7 +28,6 @@ import com.v2tech.logic.GlobalHolder;
 import com.v2tech.logic.Group;
 import com.v2tech.logic.Group.GroupType;
 import com.v2tech.logic.User;
-import com.v2tech.util.V2Log;
 import com.v2tech.view.contacts.ContactGroupView;
 import com.v2tech.view.contacts.ContactUserView;
 
@@ -397,6 +396,9 @@ public class ContactsTabFragment extends Fragment {
 				updateView(msg.arg1);
 				break;
 			case UPDATE_GROUP_STATUS:
+				if (mItemList == null) {
+					break;
+				}
 				for (ListItem li : mItemList) {
 					if (li.g != null) {
 						((ContactGroupView) li.v).updateUserStatus();
@@ -416,7 +418,7 @@ public class ContactsTabFragment extends Fragment {
 				for (ListItem li : mItemList) {
 					if (li.u != null && li.u.getmUserId() == (Long) ar[0]) {
 						if (li.u.getAvatarPath() == null) {
-							li.u.setAvatarPath(ar[1].toString());
+							li.u.setAvatarPath(ar[1] == null? null:ar[1].toString());
 						}
 						((ContactUserView) li.v).updateAvatar(li.u
 								.getAvatarBitmap());

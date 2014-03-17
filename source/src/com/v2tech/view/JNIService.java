@@ -37,8 +37,6 @@ import com.V2.jni.VideoRequestCallback;
 import com.v2tech.R;
 import com.v2tech.db.ContentDescriptor;
 import com.v2tech.logic.AsynResult;
-import com.v2tech.logic.ContactConversation;
-import com.v2tech.logic.Conversation;
 import com.v2tech.logic.GlobalHolder;
 import com.v2tech.logic.Group;
 import com.v2tech.logic.NetworkStateCode;
@@ -500,9 +498,16 @@ public class JNIService extends Service {
 				// Do not notify if is not file;
 				return;
 			}
+			//System default icon
+			if (AvatarName.equals("Default.png")) {
+				AvatarName = null;
+			}
+			
 			User u = GlobalHolder.getInstance().getUser(nUserID);
 			if (u != null) {
 				u.setAvatarPath(AvatarName);
+			} else {
+				V2Log.e(" Doesn't receive user data :"+ nUserID);
 			}
 			GlobalHolder.getInstance().putAvatar(nUserID, AvatarName);
 
@@ -635,9 +640,12 @@ public class JNIService extends Service {
 				long nFromUserID, long nTime, String szXmlText) {
 			User toUser = GlobalHolder.getInstance().getCurrentUser();
 			User fromUser = GlobalHolder.getInstance().getUser(nFromUserID);
-			if (toUser == null || fromUser == null) {
-				V2Log.e("No valid user object " + toUser + "  " + fromUser);
-				return;
+			if (toUser == null) {
+				V2Log.w("No valid user object for receive message " + toUser + "  " + fromUser);
+				toUser = new User(GlobalHolder.getInstance().getCurrentUserId());
+			}
+			if (fromUser == null) {
+				fromUser = new User(nFromUserID);
 			}
 			VMessage vm = VMessage.fromXml(fromUser, toUser, new Date(
 					nTime * 1000), szXmlText);

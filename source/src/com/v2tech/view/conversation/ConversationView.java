@@ -340,7 +340,7 @@ public class ConversationView extends Activity {
 	
 	
 	private void notificateConversationUpdate(String content, String date) {
-		Intent i = new Intent(PublicIntent.UPDATE_CONVERSATION);
+		Intent i = new Intent(PublicIntent.REQUEST_UPDATE_CONVERSATION);
 		i.addCategory(PublicIntent.DEFAULT_CATEGORY);
 		i.putExtra("extId", user2Id);
 		i.putExtra("type", Conversation.TYPE_CONTACT);

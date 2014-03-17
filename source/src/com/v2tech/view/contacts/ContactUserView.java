@@ -15,7 +15,6 @@ import android.widget.TextView;
 import com.v2tech.R;
 import com.v2tech.logic.GlobalHolder;
 import com.v2tech.logic.User;
-import com.v2tech.util.V2Log;
 import com.v2tech.view.PublicIntent;
 
 public class ContactUserView extends LinearLayout {
@@ -224,10 +223,10 @@ public class ContactUserView extends LinearLayout {
 
 	public void updateAvatar(Bitmap bt) {
 		if (bt == null) {
-			V2Log.w(" Invalid bitmap");
-			return;
+			mPhotoIV.setImageResource(R.drawable.avatar);
+		} else {
+			mPhotoIV.setImageBitmap(bt);
 		}
-		mPhotoIV.setImageBitmap(bt);
 	}
 
 	public void updateSign() {

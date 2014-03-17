@@ -47,7 +47,7 @@
 
             <LinearLayout
                 android:id="@+id/messag_body_content_ly_local"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
                 android:layout_marginLeft="-4dp"
@@ -106,7 +106,7 @@
 
             <LinearLayout
                 android:id="@+id/messag_body_content_ly_remote"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
                 android:layout_marginLeft="30dp"

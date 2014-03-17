@@ -173,6 +173,8 @@ public class GroupLayout extends LinearLayout {
 	public void updateIcon(Bitmap bitmap) {
 		if (bitmap != null && !bitmap.isRecycled()) {
 			mGroupIV.setImageBitmap(bitmap);
+		} else {
+			mGroupIV.setImageResource(R.drawable.avatar);
 		}
 	}
 

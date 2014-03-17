@@ -221,18 +221,18 @@ public class ConversationsTabFragment extends Fragment {
 
 				@Override
 				public void onClick(View v) {
-					// // TODO hidden request to enter conference feature
-					mWaitingDialog = ProgressDialog
-							.show(getActivity(),
-									"",
-									getActivity()
-											.getResources()
-											.getString(
-													R.string.requesting_enter_conference),
-									true);
-					currentConfId = g.getmGId();
-					Message.obtain(mHandler, REQUEST_ENTER_CONF,
-							Long.valueOf(g.getmGId())).sendToTarget();
+//					// // TODO hidden request to enter conference feature
+//					mWaitingDialog = ProgressDialog
+//							.show(getActivity(),
+//									"",
+//									getActivity()
+//											.getResources()
+//											.getString(
+//													R.string.requesting_enter_conference),
+//									true);
+//					currentConfId = g.getmGId();
+//					Message.obtain(mHandler, REQUEST_ENTER_CONF,
+//							Long.valueOf(g.getmGId())).sendToTarget();
 				}
 
 			});
@@ -573,11 +573,9 @@ public class ConversationsTabFragment extends Fragment {
 									.loadAvatarFromPath(GlobalHolder
 											.getInstance().getAvatarPath(
 													item.cov.getExtId()));
-							if (bm != null) {
-								GlobalHolder.getInstance().saveAvatar(
-										item.cov.getExtId(), bm);
-								((GroupLayout) item.gp).updateIcon(bm);
-							}
+							GlobalHolder.getInstance().saveAvatar(
+									item.cov.getExtId(), bm);
+							((GroupLayout) item.gp).updateIcon(bm);
 						}
 					}
 				}

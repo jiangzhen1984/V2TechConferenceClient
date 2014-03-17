@@ -3,7 +3,7 @@
     package="com.v2tech"
     android:sharedUserLabel="@string/app_name"
     android:versionCode="1"
-    android:versionName="1.3.0.3" >
+    android:versionName="1.3.0.4" >
 
     <uses-sdk
         android:minSdkVersion="11"
@@ -52,12 +52,13 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        
-        <activity android:name="com.v2tech.view.conference.ConferenceCreateActivity"
-             android:windowSoftInputMode="stateHidden|adjustUnspecified">
-            <intent-filter >
-                <action android:name="com.v2tech.start_conference_create_activity"/>
-                 <category android:name="android.intent.category.DEFAULT" />
+        <activity
+            android:name="com.v2tech.view.conference.ConferenceCreateActivity"
+            android:windowSoftInputMode="stateHidden|adjustUnspecified" >
+            <intent-filter>
+                <action android:name="com.v2tech.start_conference_create_activity" />
+
+                <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="com.v2tech" />
             </intent-filter>
         </activity>
@@ -111,11 +112,15 @@
             android:configChanges="screenSize|orientation"
             android:windowSoftInputMode="stateHidden|adjustPan" >
         </activity>
-        
-        
+
         <receiver android:name="com.v2tech.view.receiver.ConversationConvertReceiver" >
             <intent-filter>
-                <action android:name="com.v2tech.update_conversation" />
+                <action android:name="com.v2tech.jni.broadcast.new.message" />
+
+                <category android:name="com.v2tech.jni.broadcast" />
+
+                <action android:name="com.v2tech.request_update_conversation" />
+
                 <category android:name="com.v2tech" />
             </intent-filter>
         </receiver>

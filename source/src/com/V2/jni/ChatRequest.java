@@ -118,7 +118,7 @@ public class ChatRequest {
 	 */
 	public void OnRecvChatText(long nGroupID, int nBusinessType,
 			long nFromUserID, long nTime, String szXmlText) {
-		Log.e("ImRequest UI", "OnRecvChatText " + nGroupID + " "
+		Log.e("ChatRequest UI", "OnRecvChatText " + nGroupID + " "
 				+ nBusinessType + " " + nFromUserID + " " + nTime + " "
 				+ szXmlText);
 		if (callback != null) {
