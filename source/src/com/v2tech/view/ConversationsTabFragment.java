@@ -366,13 +366,37 @@ public class ConversationsTabFragment extends Fragment {
 						.getUser(extId),
 						showNotification ? Conversation.NOTIFICATION
 								: Conversation.NONE);
+				GlobalHolder.getInstance().addConversation(cov);
+				//TODO insert to database
+				
+				User fromUser = GlobalHolder.getInstance().getUser(extId);
+				ContentValues conCv = new ContentValues();
+				conCv.put(ContentDescriptor.Conversation.Cols.EXT_ID, extId);
+				conCv.put(ContentDescriptor.Conversation.Cols.TYPE,
+						Conversation.TYPE_CONTACT);
+				conCv.put(ContentDescriptor.Conversation.Cols.EXT_NAME,
+						fromUser.getName());
+				conCv.put(ContentDescriptor.Conversation.Cols.NOTI_FLAG, showNotification? 
+						Conversation.NOTIFICATION:Conversation.NONE);
+				conCv.put(ContentDescriptor.Conversation.Cols.OWNER, GlobalHolder
+						.getInstance().getCurrentUserId());
+				mContext.getContentResolver().insert(
+						ContentDescriptor.Conversation.CONTENT_URI, conCv);
+				
 			}
 			gl = new GroupLayout(mContext, cov);
 			mItemList.add(new ScrollItem(cov, gl));
+			adapter.notifyDataSetChanged();
 		}
 
 		gl.update(content, date, showNotification);
 	}
+	
+	
+	
+	
+	
+	
 
 	class ScrollItem {
 		Conversation cov;

@@ -113,7 +113,7 @@
         </activity>
         
         
-        <receiver android:name="com.v2tech.view.receiver.ConversationConvertReceiver">
+        <receiver android:name="com.v2tech.view.receiver.ConversationConvertReceiver" >
             <intent-filter>
                 <action android:name="com.v2tech.update_conversation" />
                 <category android:name="com.v2tech" />
