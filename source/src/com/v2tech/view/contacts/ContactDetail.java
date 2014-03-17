@@ -295,9 +295,8 @@ public class ContactDetail extends Activity {
 								cl.set(Calendar.MONTH, monthOfYear);
 								cl.set(Calendar.DAY_OF_MONTH, dayOfMonth);
 								
-								Message m = Message.obtain(lh, UPDATE_USER_INFO);
-								lh.sendMessageDelayed(m, 2000);
 								isUpdating = true;
+								Message.obtain(lh, UPDATE_USER_INFO).sendToTarget();;
 								bir = cl.getTime();
 								
 							}

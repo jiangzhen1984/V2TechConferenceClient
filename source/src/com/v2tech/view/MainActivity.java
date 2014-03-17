@@ -217,7 +217,9 @@ public class MainActivity extends FragmentActivity implements
 	public void onTabChanged(String tag) {
 		// TabInfo newTab = this.mapTabInfo.get(tag);
 		int pos = this.mTabHost.getCurrentTab();
-		this.mViewPager.setCurrentItem(pos);
+		if (this.mViewPager != null) {
+			this.mViewPager.setCurrentItem(pos);
+		}
 	}
 	
 	

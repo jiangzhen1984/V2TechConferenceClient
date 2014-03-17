@@ -16,9 +16,6 @@ public class PublicIntent {
 	
 	public static final String START_CONFERENCE_CREATE_ACTIVITY = "com.v2tech.start_conference_create_activity";
 	
-	public static final String MESSAGE_READED_NOTIFICATION = "com.v2tech.message_readed";
-	
-	public static final String NEW_CONVERSATION = "com.v2tech.new_conversation";
 	
 	public static final String UPDATE_CONVERSATION = "com.v2tech.update_conversation";
 }

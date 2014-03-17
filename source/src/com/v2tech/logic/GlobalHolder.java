@@ -222,6 +222,14 @@ public class GlobalHolder {
 			return;
 		}
 		g.addUserToGroup(uList);
+		
+		//update reference for conference group
+		for (Group confG : mConfGroup) {
+			User u = getUser(confG.getOwner());
+			if (u != null) {
+				confG.setOwnerUser(u);
+			}
+		}
 	}
 	
 	public void addUserToGroup(User u, long belongGID) {

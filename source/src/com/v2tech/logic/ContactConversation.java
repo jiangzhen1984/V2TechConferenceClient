@@ -52,6 +52,10 @@ public class ContactConversation extends Conversation {
 		this.msg = msg;
 	}
 	
+	public void setDate(String date) {
+		this.date = date;
+	}
+	
 	public Bitmap getAvatar() {
 		if (u != null) {
 			return u.getAvatarBitmap();

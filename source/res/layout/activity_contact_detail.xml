@@ -314,6 +314,7 @@
                                 android:ems="10"
                                 android:inputType="none"
                                 android:textColor="@color/contacts_user_detail_text_color"
+                                 android:visibility="gone" 
                                  >
                             </EditText>
                         </LinearLayout>

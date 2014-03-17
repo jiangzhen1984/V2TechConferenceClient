@@ -4,8 +4,6 @@ import java.io.File;
 import java.util.Date;
 import java.util.List;
 
-import android.app.Activity;
-import android.app.ActivityManager;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -49,7 +47,6 @@ import com.v2tech.logic.UserDeviceConfig;
 import com.v2tech.logic.VImageMessage;
 import com.v2tech.logic.VMessage;
 import com.v2tech.util.V2Log;
-import com.v2tech.view.conversation.ConversationView;
 
 /**
  * This service is used to wrap JNI call.<br>
@@ -390,45 +387,6 @@ public class JNIService extends Service {
 					vm.getFullDateStr());
 			Uri uri = getContentResolver().insert(
 					ContentDescriptor.Messages.CONTENT_URI, cv);
-
-			// TODO add notification
-			Conversation cov = GlobalHolder.getInstance()
-					.findConversationByType(Conversation.TYPE_CONTACT,
-							vm.getUser().getmUserId());
-			if (cov == null) {
-				cov = new ContactConversation(vm.getUser(),
-						Conversation.NOTIFICATION);
-				GlobalHolder.getInstance().addConversation(cov);
-				ContentValues conCv = new ContentValues();
-				conCv.put(ContentDescriptor.Conversation.Cols.EXT_ID, vm
-						.getUser().getmUserId());
-				conCv.put(ContentDescriptor.Conversation.Cols.TYPE,
-						Conversation.TYPE_CONTACT);
-				conCv.put(ContentDescriptor.Conversation.Cols.EXT_NAME, vm
-						.getUser().getName());
-				conCv.put(ContentDescriptor.Conversation.Cols.NOTI_FLAG,
-						Conversation.NOTIFICATION);
-				conCv.put(ContentDescriptor.Conversation.Cols.OWNER,
-						GlobalHolder.getInstance().getCurrentUserId());
-				getContentResolver().insert(
-						ContentDescriptor.Conversation.CONTENT_URI, conCv);
-				GlobalHolder.getInstance().addConversation(cov);
-			} else {
-				cov.setNotiFlag(Conversation.NOTIFICATION);
-
-				ContentValues ct = new ContentValues();
-				ct.put(ContentDescriptor.Conversation.Cols.NOTI_FLAG,
-						Conversation.NOTIFICATION);
-				getContentResolver().update(
-						ContentDescriptor.Conversation.CONTENT_URI,
-						ct,
-						ContentDescriptor.Conversation.Cols.EXT_ID + "=? and "
-								+ ContentDescriptor.Conversation.Cols.TYPE
-								+ "=?",
-						new String[] { vm.getUser().getmUserId() + "",
-								Conversation.TYPE_CONTACT });
-			}
-
 			return uri;
 		}
 

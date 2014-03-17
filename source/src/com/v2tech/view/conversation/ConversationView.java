@@ -26,7 +26,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -41,7 +40,6 @@ import com.v2tech.logic.GlobalHolder;
 import com.v2tech.logic.User;
 import com.v2tech.logic.VImageMessage;
 import com.v2tech.logic.VMessage;
-import com.v2tech.logic.VMessage.MessageType;
 import com.v2tech.service.ChatService;
 import com.v2tech.view.JNIService;
 import com.v2tech.view.PublicIntent;
@@ -56,7 +54,6 @@ public class ConversationView extends Activity {
 	private final int SEND_MESSAGE = 4;
 	private final int SEND_MESSAGE_DONE = 5;
 	private final int QUERY_NEW_MESSAGE = 6;
-	private final int RELEASE_MESSAGE = 7;
 
 	private final int BATCH_COUNT = 10;
 
@@ -174,7 +171,11 @@ public class ConversationView extends Activity {
 		filter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
 		registerReceiver(receiver, filter);
 
-		saveReaded();
+		if ( GlobalHolder
+					.getInstance().findConversationByType(
+							Conversation.TYPE_CONTACT, user2Id) != null) {
+			notificateConversationUpdate(null, null);
+		}
 	}
 
 	@Override
@@ -326,85 +327,27 @@ public class ConversationView extends Activity {
 
 		mMessageET.setText("");
 
-		InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-		imm.hideSoftInputFromWindow(mMessageET.getWindowToken(), 0);
-
+		
 		Message.obtain(lh, SEND_MESSAGE, m).sendToTarget();
 		addMessageToContainer(m);
-		updateConversationList(false);
 		// make offset
 		offset++;
+		
+		notificateConversationUpdate(m.getText(), m.getDateTimeStr());
 
-		// FIXME optime code
-		Intent i = new Intent();
-		i.addCategory(PublicIntent.DEFAULT_CATEGORY);
-		i.setAction(PublicIntent.UPDATE_CONVERSATION);
-		i.putExtra("content", m.getText());
-		i.putExtra("date", m.getDateTimeStr());
-		i.putExtra("extid", user2Id);
-		sendBroadcast(i);
 	}
-
-	private boolean saveConversation;
-
-	private void updateConversationList(boolean flag) {
-		if (saveConversation) {
-			return;
-		}
-		Conversation cov = new ContactConversation(remote, Conversation.NONE);
-		saveConversation = GlobalHolder.getInstance().findConversation(cov);
-		if (!saveConversation) {
-			GlobalHolder.getInstance().addConversation(cov);
-			// save to database
-			saveConversation = true;
-			ContentValues cv = new ContentValues();
-			cv.put(ContentDescriptor.Conversation.Cols.EXT_ID, user2Id);
-			cv.put(ContentDescriptor.Conversation.Cols.TYPE,
-					Conversation.TYPE_CONTACT);
-			cv.put(ContentDescriptor.Conversation.Cols.EXT_NAME,
-					remote == null ? "" : remote.getName());
-			cv.put(ContentDescriptor.Conversation.Cols.OWNER, GlobalHolder
-					.getInstance().getCurrentUserId());
-			if (flag) {
-				cv.put(ContentDescriptor.Conversation.Cols.NOTI_FLAG,
-						Conversation.NOTIFICATION);
-			} else {
-				cv.put(ContentDescriptor.Conversation.Cols.NOTI_FLAG,
-						Conversation.NONE);
-			}
-			getContentResolver().insert(
-					ContentDescriptor.Conversation.CONTENT_URI, cv);
-			GlobalHolder.getInstance().addConversation(cov);
-
-			Intent i = new Intent();
-			i.addCategory(PublicIntent.DEFAULT_CATEGORY);
-			i.setAction(PublicIntent.NEW_CONVERSATION);
-			i.putExtra("fromuid", user2Id);
-			sendBroadcast(i);
-		}
-	}
-
-	private void saveReaded() {
-		ContentValues cv = new ContentValues();
-		cv.put(ContentDescriptor.Conversation.Cols.NOTI_FLAG, Conversation.NONE);
-		getContentResolver().update(
-				ContentDescriptor.Conversation.CONTENT_URI,
-				cv,
-				ContentDescriptor.Conversation.Cols.EXT_ID + "=? and "
-						+ ContentDescriptor.Conversation.Cols.TYPE + "=?",
-				new String[] { user2Id + "", Conversation.TYPE_CONTACT });
-
-		Conversation cov = GlobalHolder.getInstance().findConversationByType(
-				Conversation.TYPE_CONTACT, user2Id);
-		if (cov != null) {
-			cov.setNotiFlag(Conversation.NONE);
-		}
-
-		Intent i = new Intent();
+	
+	
+	
+	private void notificateConversationUpdate(String content, String date) {
+		Intent i = new Intent(PublicIntent.UPDATE_CONVERSATION);
 		i.addCategory(PublicIntent.DEFAULT_CATEGORY);
-		i.setAction(PublicIntent.MESSAGE_READED_NOTIFICATION);
-		i.putExtra("fromuid", user2Id);
-		sendBroadcast(i);
+		i.putExtra("extId", user2Id);
+		i.putExtra("type", Conversation.TYPE_CONTACT);
+		i.putExtra("date", date);
+		i.putExtra("content", content);
+		i.putExtra("noti", false);
+		mContext.sendBroadcast(i);
 	}
 
 	private void addMessageToContainer(VMessage msg) {
@@ -522,7 +465,6 @@ public class ConversationView extends Activity {
 			}
 		});
 
-		updateConversationList(true);
 	}
 
 	private VMessage extractMsg(Cursor cur) {
@@ -637,19 +579,6 @@ public class ConversationView extends Activity {
 				}
 
 				isLoading = false;
-				// this.postDelayed(new Runnable() {
-				//
-				// @Override
-				// public void run() {
-				// for (int i = 0; array != null && i < array.size(); i++) {
-				// VMessage vt = array.get(i);
-				// if (vt.getType() == MessageType.IMAGE) {
-				// ((VImageMessage)vt).recycle();
-				// }
-				// }
-				// }
-				//
-				// }, 700);
 				break;
 			case SEND_MESSAGE:
 				mChat.sendVMessage((VMessage) msg.obj,
@@ -662,7 +591,6 @@ public class ConversationView extends Activity {
 					break;
 				}
 				queryAndAddMessage(Integer.parseInt(msg.obj.toString()));
-				saveReaded();
 				break;
 			}
 		}

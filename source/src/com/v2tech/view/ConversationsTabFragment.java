@@ -55,14 +55,10 @@ public class ConversationsTabFragment extends Fragment {
 	private static final int REQUEST_ENTER_CONF = 3;
 	private static final int REQUEST_ENTER_CONF_RESPONSE = 4;
 	private static final int REQUEST_EXIT_CONF = 5;
-	private static final int UPDATE_NEW_MESSAGE_NOTIFICATION = 6;
-	private static final int NEW_MESSAGE_READED_NOTIFICATION = 7;
 	private static final int UPDATE_USER_SIGN = 8;
 	private static final int UPDATE_USER_AVATAR = 9;
 	private static final int UPDATE_CONVERSATION = 10;
 	private static final int UPDATE_SEARCHED_LIST = 11;
-
-	private static final int RETRY_COUNT = 10;
 
 	private Tab1BroadcastReceiver receiver = new Tab1BroadcastReceiver();
 	private IntentFilter intentFilter;
@@ -125,8 +121,10 @@ public class ConversationsTabFragment extends Fragment {
 					.findViewById(R.id.recent_conversation_network_nt);
 			mCreateConferenceButtonTV = (TextView) rootView
 					.findViewById(R.id.conference_create_button);
-			mCreateConferenceButtonTV
-					.setOnClickListener(mConferenceCreateButtonListener);
+			if (mCreateConferenceButtonTV != null) {
+				mCreateConferenceButtonTV
+						.setOnClickListener(mConferenceCreateButtonListener);
+			}
 
 		} else {
 			((ViewGroup) rootView.getParent()).removeView(rootView);
@@ -171,9 +169,7 @@ public class ConversationsTabFragment extends Fragment {
 			intentFilter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
 			intentFilter.addAction(MainActivity.SERVICE_BOUNDED_EVENT);
 			intentFilter.addAction(JNIService.JNI_BROADCAST_NEW_MESSAGE);
-			intentFilter.addAction(PublicIntent.MESSAGE_READED_NOTIFICATION);
 			intentFilter.addCategory(PublicIntent.DEFAULT_CATEGORY);
-			intentFilter.addAction(PublicIntent.NEW_CONVERSATION);
 			intentFilter
 					.addAction(JNIService.JNI_BROADCAST_USER_UPDATE_NAME_OR_SIGNATURE);
 			intentFilter
@@ -182,6 +178,8 @@ public class ConversationsTabFragment extends Fragment {
 					.addAction(JNIService.JNI_BROADCAST_CONNECT_STATE_NOTIFICATION);
 			intentFilter.addCategory(PublicIntent.DEFAULT_CATEGORY);
 			intentFilter.addAction(PublicIntent.UPDATE_CONVERSATION);
+			intentFilter
+					.addAction(JNIService.JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION);
 
 		}
 		return intentFilter;
@@ -334,7 +332,7 @@ public class ConversationsTabFragment extends Fragment {
 		return cov;
 	}
 
-	private void updateConversation(long extId, String name) {
+	private void updateConversationToDB(long extId, String name) {
 		ContentValues ct = new ContentValues();
 		ct.put(ContentDescriptor.Conversation.Cols.EXT_NAME, name);
 		getActivity().getContentResolver().update(
@@ -343,6 +341,37 @@ public class ConversationsTabFragment extends Fragment {
 				ContentDescriptor.Conversation.Cols.EXT_ID + "=? and "
 						+ ContentDescriptor.Conversation.Cols.TYPE + "=?",
 				new String[] { extId + "", Conversation.TYPE_CONTACT });
+	}
+
+	private void updateConversation(long extId, String mType, String content,
+			String date, boolean showNotification) {
+		boolean foundFlag = false;
+		GroupLayout gl = null;
+		for (ScrollItem item : mItemList) {
+			if (item.cov.getExtId() == extId
+					&& Conversation.TYPE_CONTACT.equals(item.cov.getType())) {
+				item.cov.setNotiFlag(showNotification ? Conversation.NOTIFICATION
+						: Conversation.NONE);
+				gl = (GroupLayout) item.gp;
+				foundFlag = true;
+				break;
+			}
+		}
+
+		if (!foundFlag) {
+			Conversation cov = (ContactConversation) GlobalHolder.getInstance()
+					.findConversationByType(Conversation.TYPE_CONTACT, extId);
+			if (cov == null) {
+				cov = new ContactConversation(GlobalHolder.getInstance()
+						.getUser(extId),
+						showNotification ? Conversation.NOTIFICATION
+								: Conversation.NONE);
+			}
+			gl = new GroupLayout(mContext, cov);
+			mItemList.add(new ScrollItem(cov, gl));
+		}
+
+		gl.update(content, date, showNotification);
 	}
 
 	class ScrollItem {
@@ -386,18 +415,10 @@ public class ConversationsTabFragment extends Fragment {
 
 		@Override
 		public void onReceive(Context context, Intent intent) {
+			// TODO optimze code
 			if (intent.getAction().equals(
 					JNIService.JNI_BROADCAST_GROUP_NOTIFICATION)) {
 				Message.obtain(mHandler, FILL_CONFS_LIST).sendToTarget();
-			} else if (JNIService.JNI_BROADCAST_NEW_MESSAGE.equals(intent
-					.getAction())
-					|| PublicIntent.NEW_CONVERSATION.equals(intent.getAction())) {
-				Message.obtain(mHandler, UPDATE_NEW_MESSAGE_NOTIFICATION,
-						intent.getExtras().getLong("fromuid")).sendToTarget();
-			} else if (PublicIntent.MESSAGE_READED_NOTIFICATION.equals(intent
-					.getAction())) {
-				Message.obtain(mHandler, NEW_MESSAGE_READED_NOTIFICATION,
-						intent.getExtras().getLong("fromuid")).sendToTarget();
 			} else if (JNIService.JNI_BROADCAST_USER_UPDATE_NAME_OR_SIGNATURE
 					.equals(intent.getAction())) {
 				if (mItemList != null && mItemList.size() > 0) {
@@ -420,12 +441,16 @@ public class ConversationsTabFragment extends Fragment {
 				}
 			} else if (PublicIntent.UPDATE_CONVERSATION.equals(intent
 					.getAction())) {
-				Object[] ar = new Object[] {
+				Object[] ar = new Object[] { intent.getLongExtra("extId", 0),
+						intent.getExtras().getString("type"),
 						intent.getExtras().getString("content"),
 						intent.getExtras().getString("date"),
-						intent.getLongExtra("extid", 0) };
+						intent.getExtras().getBoolean("noti") };
 				Message.obtain(mHandler, UPDATE_CONVERSATION, ar)
 						.sendToTarget();
+			} else if (JNIService.JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION
+					.equals(intent.getAction())) {
+				// TODO
 			}
 		}
 
@@ -492,41 +517,6 @@ public class ConversationsTabFragment extends Fragment {
 			case REQUEST_EXIT_CONF:
 				cb.requestExitConference(new Conference((Long) msg.obj), null);
 				break;
-			case UPDATE_NEW_MESSAGE_NOTIFICATION:
-				long fromuid = (Long) msg.obj;
-				boolean b = false;
-				for (ScrollItem item : mItemList) {
-					if (item.cov.getExtId() == fromuid
-							&& Conversation.TYPE_CONTACT.equals(item.cov
-									.getType())) {
-						item.cov.setNotiFlag(Conversation.NOTIFICATION);
-						((GroupLayout) item.gp).updateNotificator(true);
-						b = true;
-						break;
-					}
-				}
-				if (!b) {
-					Conversation cov = (ContactConversation) GlobalHolder
-							.getInstance().findConversationByType(
-									Conversation.TYPE_CONTACT, fromuid);
-
-					GroupLayout gp = new GroupLayout(mContext, cov);
-					mItemList.add(new ScrollItem(cov, gp));
-				}
-				break;
-
-			case NEW_MESSAGE_READED_NOTIFICATION:
-				long fromuidT = (Long) msg.obj;
-				for (ScrollItem item : mItemList) {
-					if (item.cov.getExtId() == fromuidT
-							&& Conversation.TYPE_CONTACT.equals(item.cov
-									.getType())) {
-						item.cov.setNotiFlag(Conversation.NONE);
-						((GroupLayout) item.gp).updateNotificator(false);
-						break;
-					}
-				}
-				break;
 
 			case UPDATE_USER_SIGN:
 				long fromuidS = (Long) msg.obj;
@@ -537,7 +527,7 @@ public class ConversationsTabFragment extends Fragment {
 						User u = GlobalHolder.getInstance().getUser(fromuidS);
 						((GroupLayout) item.gp).updateGroupOwner(u == null ? ""
 								: u.getName());
-						updateConversation(fromuidS,
+						updateConversationToDB(fromuidS,
 								u == null ? "" : u.getName());
 						break;
 					}
@@ -571,17 +561,9 @@ public class ConversationsTabFragment extends Fragment {
 
 			case UPDATE_CONVERSATION:
 				Object[] oar = (Object[]) msg.obj;
-				for (ScrollItem item : mItemList) {
-					if (item.cov.getExtId() == (Long) oar[2]
-							&& Conversation.TYPE_CONTACT.equals(item.cov
-									.getType())) {
-						item.cov.setNotiFlag(Conversation.NOTIFICATION);
-						((GroupLayout) item.gp).update(oar[0].toString(),
-								oar[1].toString());
-						b = true;
-						break;
-					}
-				}
+				updateConversation((Long) oar[0], (String) oar[1],
+						(String) oar[2], (String) oar[3], (Boolean) oar[4]);
+
 				break;
 			case UPDATE_SEARCHED_LIST:
 				break;

@@ -99,21 +99,28 @@ public class GroupLayout extends LinearLayout {
 		return mConv.getExtId();
 	}
 
-	public void updateNotificator(boolean flag) {
+	
+	public void update(String content, String date, boolean flag) {
 		if (flag) {
 			mNotificatorIV.setVisibility(View.VISIBLE);
-			hand.post(queryMessageRunnable);
 		} else {
 			mNotificatorIV.setVisibility(View.GONE);
-		}		
-	}
-	
-	public void update(String content, String date) {
-		mGroupOwnerTV.setText(content);
-		if (this.mConv instanceof ContactConversation) {
-			((ContactConversation)mConv).setMsg(content);
 		}
-		mGroupDateTV.setText(date);
+
+		if (this.mConv instanceof ContactConversation) {
+			if (content != null) {
+				((ContactConversation) mConv).setMsg(content);
+			}
+			if (date != null) {
+				((ContactConversation) mConv).setDate(date);
+			}
+		}
+		if (content != null) {
+			mGroupOwnerTV.setText(content);
+		}
+		if (date != null) {
+			mGroupDateTV.setText(date);
+		}
 	}
 
 	private Runnable queryMessageRunnable = new Runnable() {
@@ -152,7 +159,7 @@ public class GroupLayout extends LinearLayout {
 				String dateString = cur.getString(7);
 				mGroupOwnerTV.setText(content);
 				mGroupDateTV.setText(dateString);
-				((ContactConversation)mConv).setMsg(content);
+				((ContactConversation) mConv).setMsg(content);
 			}
 			cur.close();
 		}
