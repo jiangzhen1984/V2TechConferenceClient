@@ -34,7 +34,6 @@ import android.widget.Toast;
 
 import com.v2tech.R;
 import com.v2tech.db.ContentDescriptor;
-import com.v2tech.logic.ContactConversation;
 import com.v2tech.logic.Conversation;
 import com.v2tech.logic.GlobalHolder;
 import com.v2tech.logic.User;
@@ -125,6 +124,7 @@ public class ConversationView extends Activity {
 		mReturnButtonTV.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View arg0) {
+				mReturnButtonTV.setEnabled(false);
 				finish();
 			}
 
@@ -302,6 +302,8 @@ public class ConversationView extends Activity {
 				saveMessageToDB(vim);
 				Message.obtain(lh, SEND_MESSAGE, vim).sendToTarget();
 				addMessageToContainer(vim);
+				
+				notificateConversationUpdate(null, null);
 			}
 		}
 	}

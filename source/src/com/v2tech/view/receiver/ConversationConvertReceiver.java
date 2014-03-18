@@ -41,6 +41,13 @@ public class ConversationConvertReceiver extends BroadcastReceiver {
 			boolean noti = intent.getBooleanExtra("noti", false);
 			saveCOnversationStatusToDB(extId, type, noti);
 
+			Conversation cv = GlobalHolder.getInstance()
+					.findConversationByType(Conversation.TYPE_CONTACT, extId);
+			if (cv != null) {
+				cv.setNotiFlag(noti ? Conversation.NOTIFICATION
+						: Conversation.NONE);
+			}
+
 			Intent i = new Intent(PublicIntent.UPDATE_CONVERSATION);
 			i.addCategory(PublicIntent.DEFAULT_CATEGORY);
 			i.putExtras(intent.getExtras());
@@ -90,9 +97,7 @@ public class ConversationConvertReceiver extends BroadcastReceiver {
 		}
 		cur.close();
 
-		if (type == VMessage.MessageType.IMAGE.getIntValue()) {
-			return;
-		}
+		
 
 		notif = (fromUid == GlobalHolder.getInstance().CURRENT_CONVERSATION_USER ? false
 				: true);
@@ -155,14 +160,24 @@ public class ConversationConvertReceiver extends BroadcastReceiver {
 					ContentDescriptor.Conversation.Cols.EXT_ID + "=? and "
 							+ ContentDescriptor.Conversation.Cols.TYPE + "=?",
 					new String[] { fromUid + "", Conversation.TYPE_CONTACT });
+
+			Conversation cv = GlobalHolder.getInstance()
+					.findConversationByType(Conversation.TYPE_CONTACT, fromUid);
+			if (cv != null) {
+				cv.setNotiFlag(notif ? Conversation.NOTIFICATION
+						: Conversation.NONE);
+			}
+
 		}
 
 		Intent i = new Intent(PublicIntent.UPDATE_CONVERSATION);
 		i.addCategory(PublicIntent.DEFAULT_CATEGORY);
 		i.putExtra("extId", fromUid);
 		i.putExtra("type", Conversation.TYPE_CONTACT);
-		i.putExtra("date", dateString);
-		i.putExtra("content", content);
+		if (type != VMessage.MessageType.IMAGE.getIntValue()) {
+			i.putExtra("date", dateString);
+			i.putExtra("content", content);
+		}
 		i.putExtra("noti", notif);
 		mContext.sendBroadcast(i);
 	}

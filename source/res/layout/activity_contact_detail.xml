@@ -20,10 +20,9 @@
             android:layout_marginBottom="15dp"
             android:layout_marginTop="15dp"
             android:ellipsize="end"
-            android:text=""
             android:gravity="center"
+            android:text=""
             android:textSize="17sp" />
-
 
         <TextView
             android:id="@+id/contact_detail_return_button"
@@ -38,9 +37,10 @@
             android:paddingLeft="10dp"
             android:paddingRight="7dp"
             android:paddingTop="5dp"
-            android:textSize="18sp"
             android:text="@string/contacts_user_detail_return_button"
-            android:textColor="#ffffff" />
+            android:textColor="#ffffff"
+            android:textSize="18sp" />
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="0dp"
@@ -67,19 +67,24 @@
                 android:layout_marginBottom="20dp"
                 android:layout_marginLeft="20dp"
                 android:layout_marginTop="20dp"
-                 android:src="@drawable/avatar" />
+                android:src="@drawable/avatar" />
 
-            <TextView
-                android:id="@+id/contact_user_detail_user_signature_tv"
+            <ScrollView
+                android:id="@+id/scrollView2"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignBottom="@+id/contact_user_detail_head_icon"
-                android:layout_marginBottom="10dp"
-                android:layout_marginLeft="20dp"
-                android:layout_marginRight="25dp"
-                android:layout_toRightOf="@+id/contact_user_detail_head_icon"
+                android:layout_height="30dp"
+                 android:layout_centerVertical="true"
+                android:layout_marginLeft="16dp"
+                        android:layout_marginRight="25dp"
                 android:layout_toLeftOf="@+id/contact_user_detail_invite_video"
-                android:text="TextView" />
+                android:layout_toRightOf="@+id/contact_user_detail_head_icon" >
+
+                    <TextView
+                        android:id="@+id/contact_user_detail_user_signature_tv"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="TextView" />
+            </ScrollView>
 
             <TextView
                 android:id="@+id/contact_user_detail_send_msg"
@@ -89,11 +94,10 @@
                 android:layout_centerVertical="true"
                 android:layout_marginRight="10dp"
                 android:background="@drawable/button_selector"
+                android:clickable="true"
                 android:gravity="center"
                 android:text="@string/contacts_user_detail_send_msg"
-                android:textColor="#ffffff"
-                android:clickable="true"
-                />
+                android:textColor="#ffffff" />
 
             <TextView
                 android:id="@+id/contact_user_detail_invite_video"
@@ -108,7 +112,6 @@
                 android:paddingRight="3dp"
                 android:text="@string/contacts_user_detail_invite_video"
                 android:textColor="#ffffff" />
-
         </RelativeLayout>
 
         <ScrollView
@@ -162,7 +165,6 @@
                                 android:inputType="text"
                                 android:maxLength="30"
                                 android:textColor="@color/contacts_user_detail_text_color" >
-
                             </EditText>
                         </LinearLayout>
 
@@ -249,20 +251,18 @@
                                     android:id="@+id/radio0"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                     android:textColor="@color/contacts_user_detail_text_color"
+                                    android:tag="1"
                                     android:text="@string/contacts_user_detail_gender_male"
-                                    android:tag="1" />
+                                    android:textColor="@color/contacts_user_detail_text_color" />
 
                                 <RadioButton
                                     android:id="@+id/radio1"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                     android:textColor="@color/contacts_user_detail_text_color"
+                                    android:tag="0"
                                     android:text="@string/contacts_user_detail_gender_female"
-                                    android:tag="0" />
-                                
+                                    android:textColor="@color/contacts_user_detail_text_color" />
                             </RadioGroup>
-
                         </LinearLayout>
 
                         <LinearLayout
@@ -293,7 +293,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginBottom="5dp"
-                               android:layout_marginLeft="10dp"
+                                android:layout_marginLeft="10dp"
                                 android:layout_marginRight="10dp"
                                 android:layout_marginTop="5dp"
                                 android:text="birthday"
@@ -311,8 +311,7 @@
                                 android:ems="10"
                                 android:inputType="none"
                                 android:textColor="@color/contacts_user_detail_text_color"
-                                 android:visibility="gone" 
-                                 >
+                                android:visibility="gone" >
                             </EditText>
                         </LinearLayout>
 
@@ -360,8 +359,8 @@
                                 android:layout_weight="1"
                                 android:ems="10"
                                 android:inputType="phone"
-                                android:textColor="@color/contacts_user_detail_text_color"
                                 android:maxLength="11"
+                                android:textColor="@color/contacts_user_detail_text_color"
                                 android:visibility="gone" >
                             </EditText>
                         </LinearLayout>
@@ -411,8 +410,8 @@
                                 android:layout_weight="1"
                                 android:ems="10"
                                 android:inputType="text"
-                                android:textColor="@color/contacts_user_detail_text_color"
                                 android:maxLength="30"
+                                android:textColor="@color/contacts_user_detail_text_color"
                                 android:visibility="gone" />
                         </LinearLayout>
 
@@ -448,8 +447,7 @@
                                 android:layout_marginTop="5dp"
                                 android:text="TextView"
                                 android:textColor="@color/contacts_user_detail_text_color"
-                                android:textSize="18sp"
-                                 />
+                                android:textSize="18sp" />
 
                             <EditText
                                 android:id="@+id/contact_user_detail_company_et"
@@ -497,8 +495,7 @@
                                 android:layout_marginTop="5dp"
                                 android:text="TextView"
                                 android:textColor="@color/contacts_user_detail_text_color"
-                                android:textSize="18sp"
-                                />
+                                android:textSize="18sp" />
 
                             <EditText
                                 android:id="@+id/contact_user_detail_department_et"
@@ -557,8 +554,8 @@
                                 android:layout_weight="1"
                                 android:ems="10"
                                 android:inputType="text"
-                                android:textColor="@color/contacts_user_detail_text_color"
                                 android:maxLength="50"
+                                android:textColor="@color/contacts_user_detail_text_color"
                                 android:visibility="gone" />
                         </LinearLayout>
 
@@ -577,11 +574,11 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:padding="10dp"
-                                 android:layout_marginBottom="5dp"
+                                android:layout_marginBottom="5dp"
                                 android:layout_marginLeft="30dp"
                                 android:layout_marginRight="10dp"
                                 android:layout_marginTop="5dp"
+                                android:padding="10dp"
                                 android:text="@string/contacts_user_detail_item_address"
                                 android:textSize="18sp" />
 
@@ -607,8 +604,8 @@
                                 android:layout_weight="1"
                                 android:ems="10"
                                 android:inputType="text"
-                                android:textColor="@color/contacts_user_detail_text_color"
                                 android:maxLength="100"
+                                android:textColor="@color/contacts_user_detail_text_color"
                                 android:visibility="gone" />
                         </LinearLayout>
                     </LinearLayout>

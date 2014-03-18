@@ -3,9 +3,11 @@ package com.v2tech.view;
 import java.util.List;
 import java.util.Vector;
 
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
@@ -21,13 +23,15 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.DisplayMetrics;
 import android.view.View;
+import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TabHost;
 import android.widget.TabHost.TabContentFactory;
 import android.widget.Toast;
 
 import com.v2tech.R;
+import com.v2tech.logic.GlobalHolder;
 import com.v2tech.util.GlobalConfig;
-import com.v2tech.util.V2Log;
 import com.v2tech.view.JNIService.LocalBinder;
 
 public class MainActivity extends FragmentActivity implements
@@ -48,6 +52,10 @@ public class MainActivity extends FragmentActivity implements
 	private static final String TAG_CONF = "conference";
 	private static final String TAG_CONTACT = "contacts";
 	private static final String TAG_SETTING = "setting";
+	
+	private LocalReceiver receiver = new LocalReceiver();
+	
+	private ImageView mTabNoticator;
 
 	public JNIService getService() {
 		return mService;
@@ -100,6 +108,7 @@ public class MainActivity extends FragmentActivity implements
 		// Intialise ViewPager
 		this.intialiseViewPager();
 		initDPI();
+		initReceiver();
 	}
 
 	/**
@@ -149,7 +158,7 @@ public class MainActivity extends FragmentActivity implements
 		Resources res = getResources();
 
 		TabHost.TabSpec confTabSpec = this.mTabHost.newTabSpec(TAG_CONF)
-				.setIndicator(null, res.getDrawable(R.drawable.selector_conf));
+				.setIndicator(getConversationView());
 		confTabSpec.setContent(new TabFactory(this));
 		mTabHost.addTab(confTabSpec);
 
@@ -169,6 +178,36 @@ public class MainActivity extends FragmentActivity implements
 		for(int i=0;i<mTabHost.getTabWidget().getChildCount();i++) {
 			mTabHost.getTabWidget().getChildAt(i).setBackgroundResource(R.drawable.tab_panel_bg);
 	    }
+	}
+	
+	
+	private View getConversationView() {
+		RelativeLayout rl = new RelativeLayout(mContext);
+		RelativeLayout.LayoutParams rll = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+		rll.addRule(RelativeLayout.CENTER_IN_PARENT);
+		ImageView iv = new ImageView(mContext);
+		iv.setId(0x900000);
+		iv.setImageDrawable(mContext.getResources().getDrawable(R.drawable.selector_conf));
+		rl.addView(iv, rll);
+		
+		ImageView ivNoticator = new ImageView(mContext);
+		ivNoticator.setVisibility(View.INVISIBLE);
+		ivNoticator.setImageResource(R.drawable.tab_notificator);
+		rll = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+		rll.addRule(RelativeLayout.RIGHT_OF , iv.getId());
+		rl.addView(ivNoticator, rll);
+		
+		mTabNoticator = ivNoticator;
+		return rl;
+	}
+	
+	
+	
+	private void initReceiver() {
+		IntentFilter filter = new IntentFilter();
+		filter.addAction(PublicIntent.UPDATE_CONVERSATION);
+		filter.addCategory(PublicIntent.DEFAULT_CATEGORY);
+		mContext.registerReceiver(receiver, filter);
 	}
 
 	@Override
@@ -296,5 +335,22 @@ public class MainActivity extends FragmentActivity implements
 			mContext.sendBroadcast(new Intent(SERVICE_UNBOUNDED_EVENT));
 		}
 	};
+	
+	
+	
+	class LocalReceiver extends BroadcastReceiver {
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			String action = intent.getAction();
+			if (PublicIntent.UPDATE_CONVERSATION.equals(action)) {
+				if (GlobalHolder.getInstance().getNoticatorCount() > 0 ) {
+					mTabNoticator.setVisibility(View.VISIBLE);
+				} else {
+					mTabNoticator.setVisibility(View.GONE);
+				}
+			}
+		}
+		
+	}
 
 }

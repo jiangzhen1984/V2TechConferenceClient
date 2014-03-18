@@ -14,6 +14,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.v2tech.R;
 import com.v2tech.logic.VImageMessage;
@@ -166,13 +167,13 @@ public class MessageBodyView extends LinearLayout {
 
 	private void updateSelectedBg(boolean selected) {
 		if (selected) {
-			if (mMsg.isLocal()) {
+			if (!mMsg.isLocal()) {
 				mContentContainer
 						.setBackgroundResource(R.drawable.message_body_bg_selected);
 				mArrowIV.setImageResource(R.drawable.message_body_arrow_left_selected);
 			}
 		} else {
-			if (mMsg.isLocal()) {
+			if (!mMsg.isLocal()) {
 				mContentContainer
 						.setBackgroundResource(R.drawable.message_body_bg);
 				mArrowIV.setImageResource(R.drawable.message_body_arrow_left);
@@ -215,6 +216,9 @@ public class MessageBodyView extends LinearLayout {
 									mMsg.getText());
 							clipboard.setPrimaryClip(clip);
 							pw.dismiss();
+							Toast.makeText(getContext(),
+									R.string.contact_message_copy_message,
+									Toast.LENGTH_SHORT).show();
 						}
 
 					});

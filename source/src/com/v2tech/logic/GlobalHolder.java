@@ -280,6 +280,16 @@ public class GlobalHolder {
 	}
 	
 	
+	public int getNoticatorCount() {
+		int c = 0;
+		for (Conversation cov : this.mConversationHolder) {
+			if (cov.getNotiFlag() == Conversation.NOTIFICATION) {
+				c ++;
+			}
+		}
+		return c;
+	}
+	
 
 	/**
 	 * Get user's video device according to user id.<br>
