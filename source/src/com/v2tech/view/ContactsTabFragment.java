@@ -28,6 +28,7 @@ import com.v2tech.logic.GlobalHolder;
 import com.v2tech.logic.Group;
 import com.v2tech.logic.Group.GroupType;
 import com.v2tech.logic.User;
+import com.v2tech.util.V2Log;
 import com.v2tech.view.contacts.ContactGroupView;
 import com.v2tech.view.contacts.ContactUserView;
 
@@ -97,6 +98,7 @@ public class ContactsTabFragment extends Fragment {
 		super.onDestroy();
 		mLoaded = false;
 		getActivity().unregisterReceiver(receiver);
+		V2Log.d("====destroy contact tab fragment");
 	}
 
 	@Override
@@ -153,6 +155,7 @@ public class ContactsTabFragment extends Fragment {
 				Message.obtain(mHandler, FILL_CONTACTS_GROUP).sendToTarget();
 			} else if (JNIService.JNI_BROADCAST_USER_STATUS_NOTIFICATION
 					.equals(intent.getAction())) {
+				V2Log.d(" update  status  JNI_BROADCAST_USER_STATUS_NOTIFICATION");
 				Message.obtain(
 						mHandler,
 						UPDATE_GROUP_STATUS,
@@ -165,6 +168,7 @@ public class ContactsTabFragment extends Fragment {
 						.sendToTarget();
 			} else if (JNIService.JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION
 					.equals(intent.getAction())) {
+				V2Log.d(" update  status  JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION");
 				Message.obtain(mHandler, UPDATE_GROUP_STATUS).sendToTarget();
 			} else if (JNIService.JNI_BROADCAST_USER_AVATAR_CHANGED_NOTIFICATION
 					.equals(intent.getAction())) {
@@ -397,7 +401,7 @@ public class ContactsTabFragment extends Fragment {
 				break;
 			case UPDATE_GROUP_STATUS:
 				if (mItemList == null) {
-					break;
+					V2Log.d(" handle message UPDATE_GROUP_STATUS");
 				}
 				for (ListItem li : mItemList) {
 					if (li.g != null) {

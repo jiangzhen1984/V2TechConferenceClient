@@ -32,6 +32,7 @@ import android.widget.Toast;
 import com.v2tech.R;
 import com.v2tech.logic.GlobalHolder;
 import com.v2tech.util.GlobalConfig;
+import com.v2tech.util.V2Log;
 import com.v2tech.view.JNIService.LocalBinder;
 
 public class MainActivity extends FragmentActivity implements
@@ -207,6 +208,7 @@ public class MainActivity extends FragmentActivity implements
 		IntentFilter filter = new IntentFilter();
 		filter.addAction(PublicIntent.UPDATE_CONVERSATION);
 		filter.addCategory(PublicIntent.DEFAULT_CATEGORY);
+		filter.addAction(PublicIntent.FINISH_APPLICATION);
 		mContext.registerReceiver(receiver, filter);
 	}
 
@@ -256,9 +258,9 @@ public class MainActivity extends FragmentActivity implements
 	public void onTabChanged(String tag) {
 		// TabInfo newTab = this.mapTabInfo.get(tag);
 		int pos = this.mTabHost.getCurrentTab();
-		if (this.mViewPager != null) {
+		//if (this.mViewPager != null) {
 			this.mViewPager.setCurrentItem(pos);
-		}
+		//}
 	}
 	
 	
@@ -273,6 +275,14 @@ public class MainActivity extends FragmentActivity implements
 	@Override
 	public void onPageScrollStateChanged(int pos) {
 		
+	}
+
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		mContext.unregisterReceiver(receiver);
+		mContext.stopService(new Intent(this.getApplicationContext(), JNIService.class));
+		V2Log.d("system destroyed v2tech");
 	}
 
 	@Override
@@ -348,6 +358,8 @@ public class MainActivity extends FragmentActivity implements
 				} else {
 					mTabNoticator.setVisibility(View.GONE);
 				}
+			} else if (PublicIntent.FINISH_APPLICATION.equals(action)) {
+				finish();
 			}
 		}
 		

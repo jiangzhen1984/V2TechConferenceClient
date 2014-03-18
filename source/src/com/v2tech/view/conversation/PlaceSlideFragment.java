@@ -64,8 +64,8 @@ public class PlaceSlideFragment extends Fragment {
 		}.execute();
 		
 		RelativeLayout.LayoutParams rl = new RelativeLayout.LayoutParams(
-				RelativeLayout.LayoutParams.WRAP_CONTENT,
-				RelativeLayout.LayoutParams.WRAP_CONTENT);
+				RelativeLayout.LayoutParams.MATCH_PARENT,
+				RelativeLayout.LayoutParams.MATCH_PARENT);
 		rl.addRule(RelativeLayout.CENTER_IN_PARENT);
 		rlContainer.addView(iv, rl);
 		return v;

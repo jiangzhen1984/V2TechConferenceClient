@@ -27,6 +27,7 @@ import com.v2tech.util.V2Log;
 public class MainApplication extends Application {
 
 	static {
+		V2Log.d("=====load=====");
 		System.loadLibrary("event");
 		System.loadLibrary("udt");
 		System.loadLibrary("v2vi");
@@ -37,6 +38,7 @@ public class MainApplication extends Application {
 	@Override
 	public void onCreate() {
 		super.onCreate();
+		V2Log.d("=====create=====");
 		ImRequest.getInstance(this);
 		GroupRequest.getInstance(this);
 		VideoRequest.getInstance(this);

@@ -13,6 +13,7 @@ public class StartupActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		SharedPreferences sf = this.getSharedPreferences("config", Context.MODE_PRIVATE);
 		int flag = sf.getInt("LoggedIn", 0);
+		System.out.println(flag +"=========================");
 		if (flag == 1) {
 			startActivity(new Intent(this, MainActivity.class));
 		} else {

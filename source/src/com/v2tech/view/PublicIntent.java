@@ -18,6 +18,9 @@ public class PublicIntent {
 	
 	
 	public static final String UPDATE_CONVERSATION = "com.v2tech.update_conversation";
+	
 	public static final String REQUEST_UPDATE_CONVERSATION = "com.v2tech.request_update_conversation";
+	
+	public static final String FINISH_APPLICATION ="com.v2tech.finish_application";
 	
 }

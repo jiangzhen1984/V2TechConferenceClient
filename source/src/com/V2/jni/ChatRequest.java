@@ -6,6 +6,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import android.content.Context;
@@ -40,6 +42,15 @@ public class ChatRequest {
 
 	public void setChatRequestCallback(ChatRequestCallback callback) {
 		this.callback = callback;
+		for (ChatText ct : ctL) {
+			this.callback.OnRecvChatTextCallback(ct.nGroupID, ct.nBusinessType, ct.nFromUserID, ct.nTime, ct.szXmlText);
+		}
+		
+		for(ChatPicture cp : cpL) {
+			this.callback.OnRecvChatPictureCallback(cp.nGroupID, cp.nBusinessType, cp.nFromUserID, cp.nTime, cp.pPicData);
+		}
+		ctL.clear();
+		cpL.clear();
 	}
 
 	public static synchronized ChatRequest getInstance() {
@@ -108,6 +119,8 @@ public class ChatRequest {
 	public native void sendChatPicture(long nGroupID, long nToUserID,
 			byte[] pPicData, int nLength, int bussinessType);
 
+	List<ChatPicture> cpL = new ArrayList<ChatPicture>();
+	List<ChatText> ctL = new ArrayList<ChatText>();
 	/**
 	 * 
 	 * @param nGroupID
@@ -123,10 +136,50 @@ public class ChatRequest {
 				+ szXmlText);
 		if (callback != null) {
 			callback.OnRecvChatTextCallback(nGroupID, nBusinessType, nFromUserID, nTime, szXmlText);
+		} else {
+			ctL.add(new ChatText(nGroupID,  nBusinessType,
+					 nFromUserID,  nTime,  szXmlText));
 		}
 
 	}
 	
+	
+	class ChatText {
+		long nGroupID;
+		int nBusinessType;
+		long nFromUserID;
+		long nTime;
+		String szXmlText;
+		
+		public ChatText(long nGroupID, int nBusinessType, long nFromUserID,
+				long nTime, String szXmlText) {
+			super();
+			this.nGroupID = nGroupID;
+			this.nBusinessType = nBusinessType;
+			this.nFromUserID = nFromUserID;
+			this.nTime = nTime;
+			this.szXmlText = szXmlText;
+		}
+		
+	}
+	
+	class ChatPicture {
+		long nGroupID;
+		int nBusinessType;
+		long nFromUserID;
+		long nTime;
+		byte[] pPicData;
+		public ChatPicture(long nGroupID, int nBusinessType, long nFromUserID,
+				long nTime, byte[] pPicData) {
+			super();
+			this.nGroupID = nGroupID;
+			this.nBusinessType = nBusinessType;
+			this.nFromUserID = nFromUserID;
+			this.nTime = nTime;
+			this.pPicData = pPicData;
+		}
+		
+	}
 	
 	public void OnRecvChatAudio(long gid, int i, long j, long j1, String str,
 			String str1) {
@@ -149,6 +202,9 @@ public class ChatRequest {
 				+ "****pPicData.length===***" + pPicData.length);
 		if (callback != null) {
 			callback.OnRecvChatPictureCallback(nGroupID, nBusinessType, nFromUserID, nTime, pPicData);
+		} else {
+			cpL.add(new ChatPicture(nGroupID,  nBusinessType,
+					 nFromUserID,  nTime,  pPicData));
 		}
 	}
 

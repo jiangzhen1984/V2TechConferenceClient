@@ -10,6 +10,8 @@ import android.app.Service;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -456,6 +458,21 @@ public class JNIService extends Service {
 			mCallbackHandler.postDelayed(new Runnable() {
 				@Override
 				public void run() {
+					SharedPreferences sf = mContext.getSharedPreferences("config", Context.MODE_PRIVATE);
+					Editor ed = sf.edit();
+					ed.putInt("LoggedIn", 0);
+					ed.commit();
+					
+					Intent i = new Intent();
+					i.setAction(PublicIntent.FINISH_APPLICATION);
+					i.addCategory(PublicIntent.DEFAULT_CATEGORY);
+					mContext.sendBroadcast(i);
+					//TODO optimze code
+					try {
+						Thread.currentThread().sleep(500);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
 					Process.killProcess(Process.myPid());
 				}
 

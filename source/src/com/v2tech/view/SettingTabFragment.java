@@ -4,6 +4,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
 import android.os.Process;
 import android.support.v4.app.Fragment;
@@ -68,8 +70,13 @@ public class SettingTabFragment extends Fragment {
 
 		@Override
 		public void onClick(View arg0) {
+			//FIXME optimze code
+			SharedPreferences sf = getActivity().getSharedPreferences("config", Context.MODE_PRIVATE);
+			Editor ed = sf.edit();
+			ed.putInt("LoggedIn", 0);
+			ed.commit();
 			getActivity().finish();
-			Process.killProcess(Process.myPid());
+			System.exit(0);
 		}
 		
 	}; 

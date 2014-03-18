@@ -57,6 +57,10 @@ public class ChatService extends Handler {
 	 * @param caller
 	 */
 	public void sendVMessage(final VMessage msg, final Message caller) {
+		if (msg == null || msg.getToUser() == null) {
+			V2Log.w(" ToUser is null can not send message");
+			return;
+		}
 		thread.post(new Runnable() {
 			@Override
 			public void run() {

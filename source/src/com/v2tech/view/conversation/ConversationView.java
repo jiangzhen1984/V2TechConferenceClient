@@ -40,6 +40,7 @@ import com.v2tech.logic.User;
 import com.v2tech.logic.VImageMessage;
 import com.v2tech.logic.VMessage;
 import com.v2tech.service.ChatService;
+import com.v2tech.util.V2Log;
 import com.v2tech.view.JNIService;
 import com.v2tech.view.PublicIntent;
 import com.v2tech.view.cus.ItemScrollView;
@@ -104,6 +105,8 @@ public class ConversationView extends Activity {
 
 	private User local;
 	private User remote;
+	
+	private boolean isStopped;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -197,6 +200,7 @@ public class ConversationView extends Activity {
 		// mId allows you to update the notification later on.
 		mNotificationManager.cancel(PublicIntent.MESSAGE_NOTIFICATION_ID);
 		GlobalHolder.getInstance().CURRENT_CONVERSATION_USER = user2Id;
+		isStopped = false;
 	}
 
 	
@@ -205,6 +209,7 @@ public class ConversationView extends Activity {
 	protected void onStop() {
 		super.onStop();
 		GlobalHolder.getInstance().CURRENT_CONVERSATION_USER  = 0;
+		isStopped = true;
 	}
 
 	@Override
@@ -324,6 +329,10 @@ public class ConversationView extends Activity {
 		if (content == null || content.equals("")) {
 			return;
 		}
+		if (remote == null) {
+			remote = new User(user2Id);
+		}
+		V2Log.d(" send text msg: "+ content);
 		VMessage m = new VMessage(local, remote, content);
 		saveMessageToDB(m);
 
@@ -444,7 +453,8 @@ public class ConversationView extends Activity {
 		return array;
 	}
 
-	private void queryAndAddMessage(int mid) {
+	private void queryAndAddMessage(final int mid) {
+		V2Log.d("=====start  "+mid);
 		Uri uri = ContentUris.withAppendedId(
 				ContentDescriptor.Messages.CONTENT_URI, mid);
 
@@ -460,13 +470,17 @@ public class ConversationView extends Activity {
 			}
 		}
 		mCur.close();
+		if (!isStopped) {
 		mScrollView.post(new Runnable() {
 			@Override
 			public void run() {
+				V2Log.d("=====start scroll  "+mid);
 				mScrollView.fullScroll(View.FOCUS_DOWN);
+				V2Log.d("=====end scroll  "+mid);
 			}
 		});
-
+		V2Log.d("=====end  "+mid);
+		}
 	}
 
 	private VMessage extractMsg(Cursor cur) {
