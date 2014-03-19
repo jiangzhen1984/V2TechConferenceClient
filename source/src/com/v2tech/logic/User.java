@@ -154,6 +154,9 @@ public class User implements Comparable<User> {
 					e.printStackTrace();
 				}
 			}
+			if (abbra.equals("")) {
+				abbra = this.mName;
+			}
 		}
 	}
 

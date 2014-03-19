@@ -15,7 +15,6 @@ import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.Process;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
@@ -32,6 +31,7 @@ import android.widget.Toast;
 import com.v2tech.R;
 import com.v2tech.logic.GlobalHolder;
 import com.v2tech.util.GlobalConfig;
+import com.v2tech.util.Notificator;
 import com.v2tech.util.V2Log;
 import com.v2tech.view.JNIService.LocalBinder;
 
@@ -234,7 +234,14 @@ public class MainActivity extends FragmentActivity implements
 	public void onBackPressed() {
 		if (exitedFlag) {
 			updateLoggedInFlag();
-			Process.killProcess(Process.myPid());
+			Notificator.cancelSystemNotification(this);
+			finish();
+			try {
+				Thread.sleep(500);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			System.exit(0);
 		} else {
 			exitedFlag = true;
 			Toast.makeText(this, R.string.quit_promption, Toast.LENGTH_SHORT).show();

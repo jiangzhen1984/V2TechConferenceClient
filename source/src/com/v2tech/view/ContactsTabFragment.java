@@ -296,19 +296,29 @@ public class ContactsTabFragment extends Fragment {
 			} else {
 				--index;
 			}
-			if (index < 0 || index >= mItemList.size()) {
+			if (index < 0) {
+				index = 0;
+				updatePosFlag = true;
+				break;
+			} else if (index >= mItemList.size()) {
+				index = mItemList.size() -1;
+				updatePosFlag = true;
 				break;
 			}
 
 			ListItem item = mItemList.get(index);
 			if (item.u != null && item.u.getmStatus() == st) {
-				updatePosFlag = true;
-				break;
+				if (item.u.compareTo(it.u) >= 0) {
+					updatePosFlag = true;
+					index -=1;
+					break;
+				} else {
+					continue;
+				}
 			} else if (item.g != null) {
 				updatePosFlag = true;
 				break;
-			}
-			if (index ==  mItemList.size() -1) {
+			} else if (index ==  mItemList.size() -1) {
 				updatePosFlag = true;
 				break;
 			}
@@ -320,7 +330,7 @@ public class ContactsTabFragment extends Fragment {
 				mItemList.add(it);
 			} else {
 				mItemList.remove(it);
-				mItemList.add(index+1, it);
+				mItemList.add(index, it);
 			}
 			adapter.notifyDataSetChanged();
 		}
@@ -344,6 +354,7 @@ public class ContactsTabFragment extends Fragment {
 		User u;
 		View v;
 		boolean isExpanded;
+		int level;
 
 		public ListItem(Group g) {
 			super();

@@ -5,16 +5,13 @@ import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.Dialog;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.Message;
 import android.text.Editable;
 import android.text.TextUtils;
@@ -37,7 +34,6 @@ import com.v2tech.logic.AsynResult;
 import com.v2tech.logic.GlobalHolder;
 import com.v2tech.logic.jni.RequestLogInResponse;
 import com.v2tech.service.UserService;
-import com.v2tech.view.JNIService.LocalBinder;
 
 /**
  * Activity which displays a login screen to the user, offering registration as

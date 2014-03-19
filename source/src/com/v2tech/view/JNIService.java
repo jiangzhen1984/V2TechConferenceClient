@@ -46,6 +46,8 @@ import com.v2tech.logic.User;
 import com.v2tech.logic.UserDeviceConfig;
 import com.v2tech.logic.VImageMessage;
 import com.v2tech.logic.VMessage;
+import com.v2tech.logic.VMessage.MessageType;
+import com.v2tech.util.Notificator;
 import com.v2tech.util.V2Log;
 
 /**
@@ -108,7 +110,7 @@ public class JNIService extends Service {
 		synchronized(callback) {
 			while (!callback.isAlive()) {
 				try {
-					Thread.currentThread().sleep(200);
+					Thread.sleep(200);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
@@ -404,8 +406,13 @@ public class JNIService extends Service {
 			}
 			NotificationCompat.Builder builder = new NotificationCompat.Builder(
 					mContext).setSmallIcon(R.drawable.ic_launcher)
-					.setContentTitle(vm.getUser().getName())
-					.setContentText(vm.getText());
+					.setContentTitle(vm.getUser().getName());
+					if (vm.getType() == MessageType.IMAGE) {
+						builder.setContentText(mContext.getResources().getString(R.string.receive_image_notification));
+					} else {
+						builder.setContentText(vm.getText());
+						
+					}
 
 			Intent resultIntent = new Intent(
 					PublicIntent.START_CONVERSACTION_ACTIVITY);
@@ -455,6 +462,7 @@ public class JNIService extends Service {
 		@Override
 		public void OnLogoutCallback(int nUserID) {
 			Message.obtain(mCallbackHandler, JNI_LOG_OUT).sendToTarget();
+			Notificator.cancelSystemNotification(mContext);
 			mCallbackHandler.postDelayed(new Runnable() {
 				@Override
 				public void run() {
@@ -469,7 +477,7 @@ public class JNIService extends Service {
 					mContext.sendBroadcast(i);
 					//TODO optimze code
 					try {
-						Thread.currentThread().sleep(500);
+						Thread.sleep(500);
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
