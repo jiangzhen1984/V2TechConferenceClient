@@ -442,10 +442,6 @@ public class JNIService extends Service {
 
 	}
 
-	// ///////////////////////////////////////////////
-	// JNI call back implements //
-	// FIXME Need to be optimize code structure //
-	// ///////////////////////////////////////////////
 
 	class ImRequestCB implements ImRequestCallback {
 
@@ -475,7 +471,6 @@ public class JNIService extends Service {
 					i.setAction(PublicIntent.FINISH_APPLICATION);
 					i.addCategory(PublicIntent.DEFAULT_CATEGORY);
 					mContext.sendBroadcast(i);
-					//TODO optimze code
 					try {
 						Thread.sleep(500);
 					} catch (InterruptedException e) {
@@ -588,7 +583,6 @@ public class JNIService extends Service {
 		@Override
 		public void OnConfMemberEnterCallback(long nConfID, long nTime,
 				String szUserInfos) {
-			// FIXME should send information at here?
 			int start = szUserInfos.indexOf("id='");
 			if (start != -1) {
 				int end = szUserInfos.indexOf("'", start + 4);

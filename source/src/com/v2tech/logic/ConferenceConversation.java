@@ -38,5 +38,10 @@ public class ConferenceConversation extends Conversation {
 		}
 		return super.getDate();
 	}
+	
+	
+	public Group getGroup() {
+		return g;
+	}
 
 }

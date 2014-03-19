@@ -169,6 +169,10 @@ public class GroupLayout extends LinearLayout {
 	public void updateGroupOwner(String name) {
 		mGroupNameTV.setText(name);
 	}
+	
+	public void updateContent(String content) {
+		mGroupOwnerTV.setText(content);
+	}
 
 	public void updateIcon(Bitmap bitmap) {
 		if (bitmap != null && !bitmap.isRecycled()) {

@@ -308,13 +308,15 @@ public class ContactsTabFragment extends Fragment {
 
 			ListItem item = mItemList.get(index);
 			if (item.u != null && item.u.getmStatus() == st) {
-				if (item.u.compareTo(it.u) >= 0) {
-					updatePosFlag = true;
-					index -=1;
-					break;
-				} else {
-					continue;
-				}
+				 updatePosFlag = true;
+                 break;
+//				if (item.u.compareTo(it.u) >= 0) {
+//					updatePosFlag = true;
+//					index -=1;
+//					break;
+//				} else {
+//					continue;
+//				}
 			} else if (item.g != null) {
 				updatePosFlag = true;
 				break;

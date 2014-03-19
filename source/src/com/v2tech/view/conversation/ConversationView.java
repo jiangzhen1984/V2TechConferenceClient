@@ -26,6 +26,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -124,13 +125,28 @@ public class ConversationView extends Activity {
 
 		mMessageET = (EditText) findViewById(R.id.message_text);
 		mReturnButtonTV = (TextView) findViewById(R.id.contact_detail_return_button);
-		mReturnButtonTV.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View arg0) {
-				mReturnButtonTV.setEnabled(false);
-				finish();
-			}
+//		mReturnButtonTV.setOnClickListener(new OnClickListener() {
+//			@Override
+//			public void onClick(View arg0) {
+//				mReturnButtonTV.setEnabled(false);
+//				InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+//				imm.hideSoftInputFromWindow(mMessageET.getWindowToken(), 0);
+//				finish();
+//			}
+//
+//		});
+		mReturnButtonTV.setOnTouchListener(new OnTouchListener() {
 
+			@Override
+			public boolean onTouch(View view, MotionEvent mv) {
+				if (mv.getAction() == MotionEvent.ACTION_UP) {
+					InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+					imm.hideSoftInputFromWindow(mMessageET.getWindowToken(), 0);
+					finish();
+				}
+				return true;
+			}
+			
 		});
 
 		mMoreFeatureIV = (ImageView) findViewById(R.id.contact_message_plus);
@@ -474,9 +490,7 @@ public class ConversationView extends Activity {
 		mScrollView.post(new Runnable() {
 			@Override
 			public void run() {
-				V2Log.d("=====start scroll  "+mid);
 				mScrollView.fullScroll(View.FOCUS_DOWN);
-				V2Log.d("=====end scroll  "+mid);
 			}
 		});
 		V2Log.d("=====end  "+mid);

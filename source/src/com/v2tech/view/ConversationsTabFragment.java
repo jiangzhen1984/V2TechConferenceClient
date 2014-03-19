@@ -221,18 +221,18 @@ public class ConversationsTabFragment extends Fragment {
 
 				@Override
 				public void onClick(View v) {
-//					// // TODO hidden request to enter conference feature
-//					mWaitingDialog = ProgressDialog
-//							.show(getActivity(),
-//									"",
-//									getActivity()
-//											.getResources()
-//											.getString(
-//													R.string.requesting_enter_conference),
-//									true);
-//					currentConfId = g.getmGId();
-//					Message.obtain(mHandler, REQUEST_ENTER_CONF,
-//							Long.valueOf(g.getmGId())).sendToTarget();
+					// // TODO hidden request to enter conference feature
+					mWaitingDialog = ProgressDialog
+							.show(getActivity(),
+									"",
+									getActivity()
+											.getResources()
+											.getString(
+													R.string.requesting_enter_conference),
+									true);
+					currentConfId = g.getmGId();
+					Message.obtain(mHandler, REQUEST_ENTER_CONF,
+							Long.valueOf(g.getmGId())).sendToTarget();
 				}
 
 			});
@@ -474,7 +474,16 @@ public class ConversationsTabFragment extends Fragment {
 						.sendToTarget();
 			} else if (JNIService.JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION
 					.equals(intent.getAction())) {
-				// TODO
+				for (ScrollItem item : mItemList) {
+					if (item.cov.getType().equals(Conversation.TYPE_CONFERNECE)) {
+						Group g = ((ConferenceConversation)item.cov).getGroup();
+						User u = GlobalHolder.getInstance().getUser(g.getOwner());
+						if (u != null) {
+							((GroupLayout)item.gp).updateContent(u.getName());
+							g.setOwnerUser(u);
+						}
+					}
+				}
 			}
 		}
 

@@ -11,7 +11,6 @@ import java.io.OutputStream;
 import java.util.UUID;
 
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
 
 import com.v2tech.util.StorageUtil;
@@ -205,9 +204,12 @@ public class VImageMessage extends VMessage {
 			if (options.outWidth > 1920 || options.outHeight > 1080) {
 				options.inJustDecodeBounds = false;
 				options.inSampleSize = 4;
-			} else {
+			} else if (options.outWidth > 800 || options.outHeight > 600){
 				options.inJustDecodeBounds = false;
-				options.inSampleSize = 3;
+				options.inSampleSize = 2;
+			}else {
+				options.inJustDecodeBounds = false;
+				options.inSampleSize = 1;
 			}
 			mFullQualityBitmap = BitmapFactory.decodeFile(this.mImagePath, options);
 		}
