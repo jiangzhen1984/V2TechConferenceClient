@@ -100,7 +100,9 @@ public class PlaceSlideFragment extends Fragment {
 		if (vim != null) {
 			vim.recycle();
 		}
-		rlContainer.removeAllViews();
+		if (rlContainer != null) {
+			rlContainer.removeAllViews();
+		}
 	}
 
 }

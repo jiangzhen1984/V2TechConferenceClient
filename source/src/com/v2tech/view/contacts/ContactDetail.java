@@ -14,6 +14,9 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnFocusChangeListener;
+import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -86,6 +89,7 @@ public class ContactDetail extends Activity {
 		mUid = this.getIntent().getExtras().getLong("uid");
 		initView();
 		mContext = this;
+		getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
 	}
 
 	@Override
@@ -174,6 +178,7 @@ public class ContactDetail extends Activity {
 			for (EditText et : mETArr) {
 				et.setVisibility(View.VISIBLE);
 				et.addTextChangedListener(tw);
+				et.setOnFocusChangeListener(hidenKeyboardListener);
 			}
 			mBirthdayET.setVisibility(View.VISIBLE);
 
@@ -306,6 +311,18 @@ public class ContactDetail extends Activity {
 
 		}
 
+	};
+	
+	private OnFocusChangeListener hidenKeyboardListener = new OnFocusChangeListener() {
+
+		@Override
+		public void onFocusChange(View v, boolean hasFocus) {
+			if (!hasFocus) {
+				InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+				imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+			}
+		}
+		
 	};
 
 	private void gatherUserData() {

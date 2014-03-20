@@ -345,6 +345,7 @@ public class ConversationView extends Activity {
 		if (content == null || content.equals("")) {
 			return;
 		}
+		content = removeEmoji(content);
 		if (remote == null) {
 			remote = new User(user2Id);
 		}
@@ -362,6 +363,23 @@ public class ConversationView extends Activity {
 		
 		notificateConversationUpdate(m.getText(), m.getDateTimeStr());
 
+	}
+	
+	private String removeEmoji(String content) {
+		byte[] bys = new byte[]{-16, -97};
+		StringBuilder sb = new StringBuilder();
+		byte[] bc = content.getBytes();
+		byte[] copy = new byte[bc.length];
+		int j = 0;
+		for (int i =0; i< bc.length; i++) {
+			if (i < bc.length -2 && bys[0] == bc[i] && bys[1] == bc[i+1]) {
+				i+=3;
+				continue;
+			}
+			copy[j] =  bc[i];
+			j++;
+		}
+		return new String(copy, 0, j);
 	}
 	
 	

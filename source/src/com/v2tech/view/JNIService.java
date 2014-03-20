@@ -397,7 +397,9 @@ public class JNIService extends Service {
 					.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
 			Ringtone r = RingtoneManager.getRingtone(getApplicationContext(),
 					notification);
-			r.play();
+			if (r != null) {
+				r.play();
+			}
 		}
 
 		private void updateStatusBar(VMessage vm) {

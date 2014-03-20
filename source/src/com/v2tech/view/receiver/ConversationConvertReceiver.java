@@ -139,7 +139,7 @@ public class ConversationConvertReceiver extends BroadcastReceiver {
 			conCv.put(ContentDescriptor.Conversation.Cols.TYPE,
 					Conversation.TYPE_CONTACT);
 			conCv.put(ContentDescriptor.Conversation.Cols.EXT_NAME,
-					fromUser.getName());
+					fromUser == null? "":fromUser.getName());
 			conCv.put(ContentDescriptor.Conversation.Cols.NOTI_FLAG,
 					notif ? Conversation.NOTIFICATION : Conversation.NONE);
 			conCv.put(ContentDescriptor.Conversation.Cols.OWNER, GlobalHolder
