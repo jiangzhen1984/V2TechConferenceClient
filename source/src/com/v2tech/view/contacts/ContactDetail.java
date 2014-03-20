@@ -12,10 +12,11 @@ import android.os.Handler;
 import android.os.Message;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnFocusChangeListener;
-import android.view.WindowManager;
+import android.view.View.OnTouchListener;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.DatePicker;
 import android.widget.EditText;
@@ -32,7 +33,7 @@ import com.v2tech.logic.User;
 import com.v2tech.service.UserService;
 import com.v2tech.view.PublicIntent;
 
-public class ContactDetail extends Activity {
+public class ContactDetail extends Activity implements OnTouchListener {
 
 	private static final int SHOW_USER_INFO = 1;
 	private static final int UPDATE_USER_INFO = 2;
@@ -89,7 +90,12 @@ public class ContactDetail extends Activity {
 		mUid = this.getIntent().getExtras().getLong("uid");
 		initView();
 		mContext = this;
-		getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
+	    View v = findViewById(R.id.contact_detail_main_layout);
+	    v.setOnTouchListener(this);
+	    v = findViewById(R.id.contact_detail_scroll_view);
+	    if (v != null) {
+	    	 v.setOnTouchListener(this);
+	    }
 	}
 
 	@Override
@@ -102,6 +108,23 @@ public class ContactDetail extends Activity {
 	@Override
 	protected void onStop() {
 		super.onStop();
+	}
+	
+	
+	
+	
+
+	@Override
+	public boolean onTouch(View view, MotionEvent mv) {
+		//contact_detail_main_layout
+		for (View v : mETArr) {
+			if (v == null) {
+				continue;
+			}
+			InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+			imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+		}
+		return super.onTouchEvent(mv);
 	}
 
 	private void initView() {

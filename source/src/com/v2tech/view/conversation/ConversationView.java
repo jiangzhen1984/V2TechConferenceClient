@@ -224,7 +224,6 @@ public class ConversationView extends Activity {
 	@Override
 	protected void onStop() {
 		super.onStop();
-		GlobalHolder.getInstance().CURRENT_CONVERSATION_USER  = 0;
 		isStopped = true;
 	}
 
@@ -233,7 +232,7 @@ public class ConversationView extends Activity {
 		super.onDestroy();
 		this.unregisterReceiver(receiver);
 		cleanCache();
-
+		GlobalHolder.getInstance().CURRENT_CONVERSATION_USER  = 0;
 	}
 
 	private void cleanCache() {

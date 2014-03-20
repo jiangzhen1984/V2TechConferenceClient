@@ -1,7 +1,7 @@
 package com.v2tech.view.contacts;
 
 import android.content.Context;
-import android.os.Handler;
+import android.os.AsyncTask;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
@@ -20,8 +20,6 @@ public class ContactGroupView extends LinearLayout {
 	private TextView mGroupNameTV;
 	private TextView mGroupStsTV;
 	private OnClickListener callback;
-
-	private Handler innerHandler = new Handler();
 
 	public ContactGroupView(Context context, Group g,
 			OnClickListener callbackListener) {
@@ -66,7 +64,6 @@ public class ContactGroupView extends LinearLayout {
 				LinearLayout.LayoutParams.WRAP_CONTENT));
 	}
 
-
 	public Group getGroup() {
 		return this.mGroup;
 	}
@@ -84,13 +81,23 @@ public class ContactGroupView extends LinearLayout {
 	}
 
 	public void updateUserStatus() {
-		innerHandler.post(new Runnable() {
+
+		new AsyncTask<Void, Void, Void>() {
+			String content = "";
 
 			@Override
-			public void run() {
-				mGroupStsTV.setText(mGroup.getOnlineUserCount() + " / "
-						+ mGroup.getUserCount());
+			protected Void doInBackground(Void... params) {
+				content = mGroup.getOnlineUserCount() + " / "
+						+ mGroup.getUserCount();
+				return null;
 			}
-		});
+
+			@Override
+			protected void onPostExecute(Void result) {
+				mGroupStsTV.setText(content);
+			}
+
+		}.execute();
+
 	}
 }

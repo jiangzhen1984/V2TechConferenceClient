@@ -19,6 +19,7 @@ import android.widget.Toast;
 import com.v2tech.R;
 import com.v2tech.logic.VImageMessage;
 import com.v2tech.logic.VMessage;
+import com.v2tech.util.V2Log;
 
 public class MessageBodyView extends LinearLayout {
 
@@ -67,6 +68,10 @@ public class MessageBodyView extends LinearLayout {
 	}
 
 	private void initData() {
+		if (rootView == null) {
+			V2Log.e(" root view is Null can not initialize");
+			return;
+		}
 		timeTV = (TextView) rootView.findViewById(R.id.message_body_time_text);
 		if (isShowTime && mMsg.getDate() != null) {
 			timeTV.setText(mMsg.getDateTimeStr());

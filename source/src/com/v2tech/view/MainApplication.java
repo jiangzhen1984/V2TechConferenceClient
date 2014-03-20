@@ -3,7 +3,6 @@ package com.v2tech.view;
 import java.io.File;
 
 import net.sourceforge.pinyin4j.PinyinHelper;
-
 import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
@@ -20,6 +19,7 @@ import com.V2.jni.GroupRequest;
 import com.V2.jni.ImRequest;
 import com.V2.jni.VideoRequest;
 import com.V2.jni.WBRequest;
+import com.v2tech.util.CrashHandler;
 import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.StorageUtil;
 import com.v2tech.util.V2Log;
@@ -38,6 +38,8 @@ public class MainApplication extends Application {
 	@Override
 	public void onCreate() {
 		super.onCreate();
+		CrashHandler crashHandler = CrashHandler.getInstance();  
+        crashHandler.init(getApplicationContext()); 
 		V2Log.d("=====create=====");
 		ImRequest.getInstance(this);
 		GroupRequest.getInstance(this);

@@ -107,7 +107,7 @@ public class JNIService extends Service {
 
 		HandlerThread callback = new HandlerThread("callback");
 		callback.start();
-		synchronized(callback) {
+		synchronized (callback) {
 			while (!callback.isAlive()) {
 				try {
 					Thread.sleep(200);
@@ -209,6 +209,8 @@ public class JNIService extends Service {
 		sendBroadcast(i);
 	}
 
+	static long lastNotificatorTime = 0;
+
 	// //////////////////////////////////////////////////////////
 	// Internal message definition //
 	// //////////////////////////////////////////////////////////
@@ -286,8 +288,9 @@ public class JNIService extends Service {
 						}
 						User existU = GlobalHolder.getInstance().putUser(
 								tu.getmUserId(), tu);
-						if (existU.getmUserId() == GlobalHolder.getInstance().getCurrentUserId()) {
-							//Update logged user object.
+						if (existU.getmUserId() == GlobalHolder.getInstance()
+								.getCurrentUserId()) {
+							// Update logged user object.
 							GlobalHolder.getInstance().setCurrentUser(existU);
 						}
 						GlobalHolder.getInstance().addUserToGroup(existU,
@@ -393,12 +396,15 @@ public class JNIService extends Service {
 		}
 
 		private void sendNotification() {
-			Uri notification = RingtoneManager
-					.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-			Ringtone r = RingtoneManager.getRingtone(getApplicationContext(),
-					notification);
-			if (r != null) {
-				r.play();
+			if ((System.currentTimeMillis() / 1000) - lastNotificatorTime > 2) {
+				Uri notification = RingtoneManager
+						.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+				Ringtone r = RingtoneManager.getRingtone(
+						getApplicationContext(), notification);
+				if (r != null) {
+					r.play();
+				}
+				lastNotificatorTime = System.currentTimeMillis() / 1000;
 			}
 		}
 
@@ -409,12 +415,13 @@ public class JNIService extends Service {
 			NotificationCompat.Builder builder = new NotificationCompat.Builder(
 					mContext).setSmallIcon(R.drawable.ic_launcher)
 					.setContentTitle(vm.getUser().getName());
-					if (vm.getType() == MessageType.IMAGE) {
-						builder.setContentText(mContext.getResources().getString(R.string.receive_image_notification));
-					} else {
-						builder.setContentText(vm.getText());
-						
-					}
+			if (vm.getType() == MessageType.IMAGE) {
+				builder.setContentText(mContext.getResources().getString(
+						R.string.receive_image_notification));
+			} else {
+				builder.setContentText(vm.getText());
+
+			}
 
 			Intent resultIntent = new Intent(
 					PublicIntent.START_CONVERSACTION_ACTIVITY);
@@ -423,13 +430,13 @@ public class JNIService extends Service {
 			resultIntent.putExtra("user2id", vm.getUser().getmUserId());
 			resultIntent.putExtra("user2Name", vm.getUser().getName());
 			resultIntent.addCategory(PublicIntent.DEFAULT_CATEGORY);
-			
-			
+
 			Intent startupActivity = new Intent(mContext, StartupActivity.class);
 
 			// Creates the PendingIntent
 			PendingIntent notifyPendingIntent = PendingIntent.getActivities(
-					mContext, 0, new Intent[] {startupActivity, resultIntent},
+					mContext, 0,
+					new Intent[] { startupActivity, resultIntent },
 					PendingIntent.FLAG_ONE_SHOT);
 
 			// Puts the PendingIntent into the notification builder
@@ -443,7 +450,6 @@ public class JNIService extends Service {
 		}
 
 	}
-
 
 	class ImRequestCB implements ImRequestCallback {
 
@@ -464,11 +470,12 @@ public class JNIService extends Service {
 			mCallbackHandler.postDelayed(new Runnable() {
 				@Override
 				public void run() {
-					SharedPreferences sf = mContext.getSharedPreferences("config", Context.MODE_PRIVATE);
+					SharedPreferences sf = mContext.getSharedPreferences(
+							"config", Context.MODE_PRIVATE);
 					Editor ed = sf.edit();
 					ed.putInt("LoggedIn", 0);
 					ed.commit();
-					
+
 					Intent i = new Intent();
 					i.setAction(PublicIntent.FINISH_APPLICATION);
 					i.addCategory(PublicIntent.DEFAULT_CATEGORY);
@@ -520,16 +527,16 @@ public class JNIService extends Service {
 				// Do not notify if is not file;
 				return;
 			}
-			//System default icon
+			// System default icon
 			if (AvatarName.equals("Default.png")) {
 				AvatarName = null;
 			}
-			
+
 			User u = GlobalHolder.getInstance().getUser(nUserID);
 			if (u != null) {
 				u.setAvatarPath(AvatarName);
 			} else {
-				V2Log.e(" Doesn't receive user data :"+ nUserID);
+				V2Log.e(" Doesn't receive user data :" + nUserID);
 			}
 			GlobalHolder.getInstance().putAvatar(nUserID, AvatarName);
 
@@ -662,14 +669,17 @@ public class JNIService extends Service {
 			User toUser = GlobalHolder.getInstance().getCurrentUser();
 			User fromUser = GlobalHolder.getInstance().getUser(nFromUserID);
 			if (toUser == null) {
-				V2Log.w("No valid user object for receive message " + toUser + "  " + fromUser);
+				V2Log.w("No valid user object for receive message " + toUser
+						+ "  " + fromUser);
 				toUser = new User(GlobalHolder.getInstance().getCurrentUserId());
 			}
 			if (fromUser == null) {
-				V2Log.w("No valid user object for receive message " + toUser + "  " + fromUser);
+				V2Log.w("No valid user object for receive message " + toUser
+						+ "  " + fromUser);
 				fromUser = new User(nFromUserID);
 			}
-			VMessage vm = VMessage.fromXml(fromUser, toUser, new Date(), szXmlText);
+			VMessage vm = VMessage.fromXml(fromUser, toUser, new Date(),
+					szXmlText);
 			if (vm == null) {
 				V2Log.e(" xml parsed failed : " + szXmlText);
 				return;
@@ -684,11 +694,13 @@ public class JNIService extends Service {
 			User toUser = GlobalHolder.getInstance().getCurrentUser();
 			User fromUser = GlobalHolder.getInstance().getUser(nFromUserID);
 			if (toUser == null) {
-				V2Log.w("No valid user object for receive message " + toUser + "  " + fromUser);
+				V2Log.w("No valid user object for receive message " + toUser
+						+ "  " + fromUser);
 				toUser = new User(GlobalHolder.getInstance().getCurrentUserId());
 			}
 			if (fromUser == null) {
-				V2Log.w("No valid user object for receive message " + toUser + "  " + fromUser);
+				V2Log.w("No valid user object for receive message " + toUser
+						+ "  " + fromUser);
 				fromUser = new User(nFromUserID);
 			}
 			VMessage vm = new VImageMessage(fromUser, toUser, pPicData);

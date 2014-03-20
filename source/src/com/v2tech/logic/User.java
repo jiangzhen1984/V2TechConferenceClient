@@ -144,15 +144,15 @@ public class User implements Comparable<User> {
 			format.setToneType(HanyuPinyinToneType.WITHOUT_TONE);
 			char[] cs = this.mName.toCharArray();
 			for (char c : cs) {
-				try {
-					String[] ars = PinyinHelper.toHanyuPinyinStringArray(c,
-							format);
-					if (ars != null && ars.length > 0) {
-						abbra += ars[0];
-					}
-				} catch (BadHanyuPinyinOutputFormatCombination e) {
-					e.printStackTrace();
-				}
+//				try {
+//					String[] ars = PinyinHelper.toHanyuPinyinStringArray(c,
+//							format);
+//					if (ars != null && ars.length > 0) {
+//						abbra += ars[0];
+//					}
+//				} catch (BadHanyuPinyinOutputFormatCombination e) {
+//					e.printStackTrace();
+//				}
 			}
 			if (abbra.equals("")) {
 				abbra = this.mName;

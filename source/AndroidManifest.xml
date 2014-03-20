@@ -74,12 +74,14 @@
         </activity>
         <activity
             android:name="com.v2tech.view.contacts.ContactDetail"
-            android:windowSoftInputMode="stateHidden" >
+            android:windowSoftInputMode="stateHidden"
+            android:screenOrientation="nosensor" >
         </activity>
         <activity
             android:name="com.v2tech.view.conversation.ConversationView"
             android:parentActivityName="com.v2tech.view.StartupActivity"
-            android:windowSoftInputMode="stateHidden|adjustUnspecified" >
+            android:windowSoftInputMode="stateHidden|adjustUnspecified"
+            android:screenOrientation="nosensor" >
             <intent-filter>
                 <action android:name="com.v2tech.start_conversation_activity" />
 
@@ -99,7 +101,7 @@
                 <category android:name="com.v2tech" />
             </intent-filter>
         </activity>
-        <activity android:name="com.v2tech.view.conversation.ImageViewGallery" >
+        <activity android:name="com.v2tech.view.conversation.ImageViewGallery" android:screenOrientation="nosensor" >
             <intent-filter>
                 <action android:name="com.v2tech.image_gallery" />
 
@@ -110,7 +112,8 @@
         <activity
             android:name="com.v2tech.view.MainActivity"
             android:configChanges="screenSize|orientation"
-            android:windowSoftInputMode="stateHidden|adjustPan" >
+            android:windowSoftInputMode="stateHidden|adjustPan"
+             android:screenOrientation="nosensor" >
         </activity>
 
         <receiver android:name="com.v2tech.view.receiver.ConversationConvertReceiver" >

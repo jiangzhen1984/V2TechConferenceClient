@@ -8,6 +8,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -125,25 +126,47 @@ public class ContactsTabFragment extends Fragment {
 					.addAction(JNIService.JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION);
 			intentFilter
 					.addAction(JNIService.JNI_BROADCAST_USER_AVATAR_CHANGED_NOTIFICATION);
-			intentFilter.addAction(JNIService.JNI_BROADCAST_USER_UPDATE_NAME_OR_SIGNATURE);
+			intentFilter
+					.addAction(JNIService.JNI_BROADCAST_USER_UPDATE_NAME_OR_SIGNATURE);
 		}
 		return intentFilter;
 	}
 
 	List<Group> l;
 
-	private void fillContactsGroup() {
+	private synchronized void  fillContactsGroup() {
 		if (mLoaded) {
 			return;
 		}
 		l = GlobalHolder.getInstance().getGroup(GroupType.CONTACT);
 		if (l != null) {
-			mLoaded = true;
-			for (Group g : l) {
-				mItemList.add(new ListItem(g));
-			}
-			mContactsContainer.setAdapter(adapter);
+			loader.execute();
 		}
+	}
+	
+	private AsyncTaskLoader loader = new AsyncTaskLoader();
+	private Object mLock = new Object();
+	class AsyncTaskLoader extends AsyncTask<Void, Void, Void> {
+
+			@Override
+			protected Void doInBackground(Void... params) {
+				synchronized (mLock) {
+					if (mLoaded == true) {
+						return null;
+					}
+					mLoaded = true;
+					for (Group g : l) {
+						mItemList.add(new ListItem(g));
+					}
+				}
+				return null;
+			}
+
+			@Override
+			protected void onPostExecute(Void result) {
+				mContactsContainer.setAdapter(adapter);
+			}
+
 	}
 
 	class Tab1BroadcastReceiver extends BroadcastReceiver {
@@ -175,8 +198,10 @@ public class ContactsTabFragment extends Fragment {
 				Object[] ar = new Object[] { intent.getExtras().get("uid"),
 						intent.getExtras().get("avatar") };
 				Message.obtain(mHandler, UPDATE_USER_AVATAR, ar).sendToTarget();
-			} else if (JNIService.JNI_BROADCAST_USER_UPDATE_NAME_OR_SIGNATURE.equals(intent.getAction())) {
-				Message.obtain(mHandler, UPDATE_USER_SIGN, intent.getExtras().get("uid")).sendToTarget();
+			} else if (JNIService.JNI_BROADCAST_USER_UPDATE_NAME_OR_SIGNATURE
+					.equals(intent.getAction())) {
+				Message.obtain(mHandler, UPDATE_USER_SIGN,
+						intent.getExtras().get("uid")).sendToTarget();
 			}
 		}
 
@@ -219,6 +244,7 @@ public class ContactsTabFragment extends Fragment {
 
 	};
 
+	//FIXME optimze code should not always new ListItem
 	private void updateView(int pos) {
 		ListItem item = mItemList.get(pos);
 		if (item.g == null) {
@@ -236,22 +262,24 @@ public class ContactsTabFragment extends Fragment {
 			}
 
 		} else {
-			if (item.g.getChildGroup().size() <= 0 && item.g.getUsers().size() <= 0) {
+			if (item.g.getChildGroup().size() <= 0
+					&& item.g.getUsers().size() <= 0) {
 				return;
 			}
-			
+
 			int startRemovePos = pos + 1;
 			int endRemovePos = pos;
-			for (int index = pos + 1; index < mItemList.size(); index ++) {
+			for (int index = pos + 1; index < mItemList.size(); index++) {
 				ListItem li = mItemList.get(index);
 				if (li.g != null && li.g.getLevel() <= item.g.getLevel()) {
 					break;
 				}
-				//FIXME if find user how to check?
+				// FIXME if find user how to check?
 				endRemovePos++;
 			}
-			
-			while (startRemovePos <= endRemovePos && endRemovePos < mItemList.size()) {
+
+			while (startRemovePos <= endRemovePos
+					&& endRemovePos < mItemList.size()) {
 				mItemList.remove(startRemovePos);
 				endRemovePos--;
 			}
@@ -260,8 +288,7 @@ public class ContactsTabFragment extends Fragment {
 		item.isExpanded = !item.isExpanded;
 		adapter.notifyDataSetChanged();
 	}
-	
-	
+
 	private void updateUserStatus(int userId, int status) {
 		User.Status st = User.Status.fromInt(status);
 		for (ListItem li : mItemList) {
@@ -279,7 +306,7 @@ public class ContactsTabFragment extends Fragment {
 		for (ListItem li : mItemList) {
 			if (li.u != null && li.u.getmUserId() == userId) {
 				it = li;
-				//((ContactUserView) li.v).updateStatus(st);
+				// ((ContactUserView) li.v).updateStatus(st);
 				foundUserView = true;
 				break;
 			}
@@ -301,33 +328,33 @@ public class ContactsTabFragment extends Fragment {
 				updatePosFlag = true;
 				break;
 			} else if (index >= mItemList.size()) {
-				index = mItemList.size() -1;
+				index = mItemList.size() - 1;
 				updatePosFlag = true;
 				break;
 			}
 
 			ListItem item = mItemList.get(index);
 			if (item.u != null && item.u.getmStatus() == st) {
-				 updatePosFlag = true;
-                 break;
-//				if (item.u.compareTo(it.u) >= 0) {
-//					updatePosFlag = true;
-//					index -=1;
-//					break;
-//				} else {
-//					continue;
-//				}
+				updatePosFlag = true;
+				break;
+				// if (item.u.compareTo(it.u) >= 0) {
+				// updatePosFlag = true;
+				// index -=1;
+				// break;
+				// } else {
+				// continue;
+				// }
 			} else if (item.g != null) {
 				updatePosFlag = true;
 				break;
-			} else if (index ==  mItemList.size() -1) {
+			} else if (index == mItemList.size() - 1) {
 				updatePosFlag = true;
 				break;
 			}
 		} while (index >= 0 && index < mItemList.size());
 
 		if (updatePosFlag) {
-			if (index == mItemList.size() -1) {
+			if (index == mItemList.size() - 1) {
 				mItemList.remove(it);
 				mItemList.add(it);
 			} else {
@@ -336,7 +363,6 @@ public class ContactsTabFragment extends Fragment {
 			}
 			adapter.notifyDataSetChanged();
 		}
-		
 
 	}
 
@@ -344,7 +370,7 @@ public class ContactsTabFragment extends Fragment {
 		mItemList = new ArrayList<ListItem>();
 		for (User u : lu) {
 			ListItem item = new ListItem(u);
-			((ContactUserView)item.v).removePadding();
+			((ContactUserView) item.v).removePadding();
 			mItemList.add(item);
 		}
 		adapter.notifyDataSetChanged();
@@ -424,7 +450,7 @@ public class ContactsTabFragment extends Fragment {
 				break;
 			case UPDATE_USER_STATUS:
 				updateUserStatus(msg.arg1, msg.arg2);
-				//FIXME update all users in all groups
+				// FIXME update all users in all groups
 				updateUserViewPostion(msg.arg1, msg.arg2);
 				break;
 			case UPDATE_SEARCHED_USER_LIST:
@@ -435,7 +461,8 @@ public class ContactsTabFragment extends Fragment {
 				for (ListItem li : mItemList) {
 					if (li.u != null && li.u.getmUserId() == (Long) ar[0]) {
 						if (li.u.getAvatarPath() == null) {
-							li.u.setAvatarPath(ar[1] == null? null:ar[1].toString());
+							li.u.setAvatarPath(ar[1] == null ? null : ar[1]
+									.toString());
 						}
 						((ContactUserView) li.v).updateAvatar(li.u
 								.getAvatarBitmap());
@@ -443,13 +470,13 @@ public class ContactsTabFragment extends Fragment {
 				}
 				break;
 			case UPDATE_USER_SIGN:
-				Long uid = (Long)msg.obj;
+				Long uid = (Long) msg.obj;
 				for (ListItem li : mItemList) {
 					if (li.u != null && li.u.getmUserId() == uid) {
 						((ContactUserView) li.v).updateSign();
 					}
 				}
-				
+
 			}
 		}
 

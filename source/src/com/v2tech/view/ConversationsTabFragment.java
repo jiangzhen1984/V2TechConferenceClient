@@ -367,8 +367,8 @@ public class ConversationsTabFragment extends Fragment {
 						showNotification ? Conversation.NOTIFICATION
 								: Conversation.NONE);
 				GlobalHolder.getInstance().addConversation(cov);
-				//TODO insert to database
-				
+				// TODO insert to database
+
 				User fromUser = GlobalHolder.getInstance().getUser(extId);
 				ContentValues conCv = new ContentValues();
 				conCv.put(ContentDescriptor.Conversation.Cols.EXT_ID, extId);
@@ -376,13 +376,14 @@ public class ConversationsTabFragment extends Fragment {
 						Conversation.TYPE_CONTACT);
 				conCv.put(ContentDescriptor.Conversation.Cols.EXT_NAME,
 						fromUser.getName());
-				conCv.put(ContentDescriptor.Conversation.Cols.NOTI_FLAG, showNotification? 
-						Conversation.NOTIFICATION:Conversation.NONE);
-				conCv.put(ContentDescriptor.Conversation.Cols.OWNER, GlobalHolder
-						.getInstance().getCurrentUserId());
+				conCv.put(ContentDescriptor.Conversation.Cols.NOTI_FLAG,
+						showNotification ? Conversation.NOTIFICATION
+								: Conversation.NONE);
+				conCv.put(ContentDescriptor.Conversation.Cols.OWNER,
+						GlobalHolder.getInstance().getCurrentUserId());
 				mContext.getContentResolver().insert(
 						ContentDescriptor.Conversation.CONTENT_URI, conCv);
-				
+
 			}
 			gl = new GroupLayout(mContext, cov);
 			mItemList.add(new ScrollItem(cov, gl));
@@ -391,12 +392,6 @@ public class ConversationsTabFragment extends Fragment {
 
 		gl.update(content, date, showNotification);
 	}
-	
-	
-	
-	
-	
-	
 
 	class ScrollItem {
 		Conversation cov;
@@ -476,10 +471,12 @@ public class ConversationsTabFragment extends Fragment {
 					.equals(intent.getAction())) {
 				for (ScrollItem item : mItemList) {
 					if (item.cov.getType().equals(Conversation.TYPE_CONFERNECE)) {
-						Group g = ((ConferenceConversation)item.cov).getGroup();
-						User u = GlobalHolder.getInstance().getUser(g.getOwner());
+						Group g = ((ConferenceConversation) item.cov)
+								.getGroup();
+						User u = GlobalHolder.getInstance().getUser(
+								g.getOwner());
 						if (u != null) {
-							((GroupLayout)item.gp).updateContent(u.getName());
+							((GroupLayout) item.gp).updateContent(u.getName());
 							g.setOwnerUser(u);
 						}
 					}
