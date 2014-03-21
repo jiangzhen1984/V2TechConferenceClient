@@ -156,7 +156,7 @@ public class ContactsTabFragment extends Fragment {
 					}
 					mLoaded = true;
 					for (Group g : l) {
-						mItemList.add(new ListItem(g));
+						mItemList.add(new ListItem(g, g.getLevel()));
 					}
 				}
 				return null;
@@ -252,13 +252,13 @@ public class ContactsTabFragment extends Fragment {
 		}
 		if (item.isExpanded == false) {
 			for (Group g : item.g.getChildGroup()) {
-				mItemList.add(++pos, new ListItem(g));
+				mItemList.add(++pos, new ListItem(g, g.getLevel()));
 			}
 			List<User> sortList = new ArrayList<User>();
 			sortList.addAll(item.g.getUsers());
 			Collections.sort(sortList);
 			for (User u : sortList) {
-				mItemList.add(++pos, new ListItem(u));
+				mItemList.add(++pos, new ListItem(u, item.g.getLevel()));
 			}
 
 		} else {
@@ -296,6 +296,87 @@ public class ContactsTabFragment extends Fragment {
 				((ContactUserView) li.v).updateStatus(st);
 			}
 		}
+	}
+	
+	
+	
+	private synchronized void updateUserViewPostionV2(int userId, int status) {
+		User.Status newSt = User.Status.fromInt(status);
+		int startSortIndex = 0;
+		boolean foundUserView = false;
+		ListItem self = null;
+		for (ListItem li : mItemList) {
+			if (li.u != null && li.u.getmUserId() == userId) {
+				self = li;
+				foundUserView = true;
+				break;
+			}
+			startSortIndex++;
+		}
+		if (!foundUserView) {
+			return;
+		}
+		
+		//Try to looking for position which start sort index.
+		// 
+		while(startSortIndex >= 0) {
+			ListItem item = mItemList.get(startSortIndex);
+			if (item.g != null) {
+				break;
+			} else if (item.u != null && item.level != self.level) {
+				break;
+			}
+			if (startSortIndex == 0) {
+				V2Log.e(" Didn't find compatable position for sort");
+				return;
+			}
+			--startSortIndex;
+		}
+		
+		int pos = startSortIndex+1;
+		for (startSortIndex +=1; startSortIndex < mItemList.size(); startSortIndex++,pos++) {
+			ListItem item = mItemList.get(startSortIndex);
+			//if item is current user, always sort after current user
+			if (item.u.getmUserId() == GlobalHolder.getInstance().getCurrentUserId()) {
+				continue;
+			}
+			if (newSt == User.Status.ONLINE) {
+				if (item.u.getmStatus() == User.Status.ONLINE && item.u.compareTo(self.u) < 0) {
+						continue;
+				} else {
+					break;
+				}
+			} else if (newSt == User.Status.OFFLINE || newSt == User.Status.HIDDEN) {
+				if ((item.u.getmStatus() == User.Status.OFFLINE || item.u
+						.getmStatus() == User.Status.HIDDEN)
+						&& item.u.compareTo(self.u) > 0) {
+					continue;
+				} else {
+					break;
+				}
+			} else {
+				if (item.u.getmStatus() == User.Status.ONLINE) {
+					continue;
+				} else if (item.u.getmStatus() == User.Status.OFFLINE || item.u
+						.getmStatus() == User.Status.HIDDEN) {
+					break;
+				} else if (item.u.compareTo(self.u) < 0){
+					continue;
+				} else {
+					break;
+				}
+			}
+		}
+		
+		
+		if (pos == mItemList.size() - 1) {
+			mItemList.remove(self);
+			mItemList.add(self);
+		} else {
+			mItemList.remove(self);
+			mItemList.add(pos, self);
+		}
+		
 	}
 
 	private synchronized void updateUserViewPostion(int userId, int status) {
@@ -369,7 +450,7 @@ public class ContactsTabFragment extends Fragment {
 	private void updateSearchedUserList(List<User> lu) {
 		mItemList = new ArrayList<ListItem>();
 		for (User u : lu) {
-			ListItem item = new ListItem(u);
+			ListItem item = new ListItem(u, -1);
 			((ContactUserView) item.v).removePadding();
 			mItemList.add(item);
 		}
@@ -384,20 +465,22 @@ public class ContactsTabFragment extends Fragment {
 		boolean isExpanded;
 		int level;
 
-		public ListItem(Group g) {
+		public ListItem(Group g, int level) {
 			super();
 			this.g = g;
 			this.id = 0x02000000 | g.getmGId();
 			this.v = new ContactGroupView(getActivity(), g, null);
 			isExpanded = false;
+			this.level = level;
 		}
 
-		public ListItem(User u) {
+		public ListItem(User u, int level) {
 			super();
 			this.u = u;
 			this.id = 0x03000000 | u.getmUserId();
 			this.v = new ContactUserView(getActivity(), u);
 			isExpanded = false;
+			this.level = level;
 		}
 
 	}

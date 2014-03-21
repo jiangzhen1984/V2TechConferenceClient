@@ -122,6 +122,7 @@ public class ConversationsTabFragment extends Fragment {
 			mCreateConferenceButtonTV = (TextView) rootView
 					.findViewById(R.id.conference_create_button);
 			if (mCreateConferenceButtonTV != null) {
+				mCreateConferenceButtonTV.setVisibility(View.GONE);
 				mCreateConferenceButtonTV
 						.setOnClickListener(mConferenceCreateButtonListener);
 			}
@@ -222,17 +223,17 @@ public class ConversationsTabFragment extends Fragment {
 				@Override
 				public void onClick(View v) {
 					// // TODO hidden request to enter conference feature
-					mWaitingDialog = ProgressDialog
-							.show(getActivity(),
-									"",
-									getActivity()
-											.getResources()
-											.getString(
-													R.string.requesting_enter_conference),
-									true);
-					currentConfId = g.getmGId();
-					Message.obtain(mHandler, REQUEST_ENTER_CONF,
-							Long.valueOf(g.getmGId())).sendToTarget();
+//					mWaitingDialog = ProgressDialog
+//							.show(getActivity(),
+//									"",
+//									getActivity()
+//											.getResources()
+//											.getString(
+//													R.string.requesting_enter_conference),
+//									true);
+//					currentConfId = g.getmGId();
+//					Message.obtain(mHandler, REQUEST_ENTER_CONF,
+//							Long.valueOf(g.getmGId())).sendToTarget();
 				}
 
 			});

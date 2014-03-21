@@ -336,7 +336,8 @@ public class ConversationView extends Activity {
 		cv.put(ContentDescriptor.Messages.Cols.MSG_TYPE, vm.getType()
 				.getIntValue());
 		cv.put(ContentDescriptor.Messages.Cols.SEND_TIME, vm.getFullDateStr());
-		getContentResolver().insert(ContentDescriptor.Messages.CONTENT_URI, cv);
+		Uri uri =getContentResolver().insert(ContentDescriptor.Messages.CONTENT_URI, cv);
+		vm.setId(Long.parseLong(uri.getLastPathSegment()));
 	}
 
 	private void doSendMessage() {

@@ -65,7 +65,8 @@
         <activity
             android:name="com.v2tech.view.LoginActivity"
             android:configChanges="orientation"
-            android:windowSoftInputMode="stateHidden|adjustUnspecified" >
+            android:windowSoftInputMode="stateHidden|adjustUnspecified" 
+             android:screenOrientation="portrait">
         </activity>
         <activity
             android:name="com.v2tech.view.conference.VideoActivityV2"
@@ -75,13 +76,13 @@
         <activity
             android:name="com.v2tech.view.contacts.ContactDetail"
             android:windowSoftInputMode="stateHidden"
-            android:screenOrientation="nosensor" >
+            android:screenOrientation="portrait" >
         </activity>
         <activity
             android:name="com.v2tech.view.conversation.ConversationView"
             android:parentActivityName="com.v2tech.view.StartupActivity"
             android:windowSoftInputMode="stateHidden|adjustUnspecified"
-            android:screenOrientation="nosensor" >
+            android:screenOrientation="portrait" >
             <intent-filter>
                 <action android:name="com.v2tech.start_conversation_activity" />
 
@@ -113,7 +114,7 @@
             android:name="com.v2tech.view.MainActivity"
             android:configChanges="screenSize|orientation"
             android:windowSoftInputMode="stateHidden|adjustPan"
-             android:screenOrientation="nosensor" >
+             android:screenOrientation="portrait" >
         </activity>
 
         <receiver android:name="com.v2tech.view.receiver.ConversationConvertReceiver" >
