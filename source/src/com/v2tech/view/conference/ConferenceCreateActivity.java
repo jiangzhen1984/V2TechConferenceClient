@@ -8,6 +8,9 @@ import java.util.Set;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
+import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -23,19 +26,23 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
 import android.widget.EditText;
+import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.ScrollView;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
 import com.v2tech.R;
+import com.v2tech.logic.AsynResult;
 import com.v2tech.logic.Conference;
 import com.v2tech.logic.GlobalHolder;
 import com.v2tech.logic.Group;
 import com.v2tech.logic.Group.GroupType;
 import com.v2tech.logic.User;
+import com.v2tech.logic.jni.RequestConfCreateResponse;
 import com.v2tech.service.ConferenceService;
 
 public class ConferenceCreateActivity extends Activity {
@@ -43,6 +50,10 @@ public class ConferenceCreateActivity extends Activity {
 	private static final int UPDATE_LIST_VIEW = 1;
 	private static final int UPDATE_ATTENDEES = 2;
 	private static final int UPDATE_SEARCHED_USER_LIST = 3;
+	private static final int CREATE_CONFERENC_RESP = 4;
+
+	private static final int PAD_LAYOUT = 1;
+	private static final int PHONE_LAYOUT = 0;
 
 	private Context mContext;
 	private LocalHandler mLocalHandler = new LocalHandler();
@@ -53,10 +64,13 @@ public class ConferenceCreateActivity extends Activity {
 	private TextView mConfirmButton;
 	private EditText mConfTitleET;
 	private EditText mConfStartTimeET;
-	private EditText mConfEndTimeET;
+
+	private LinearLayout mErrorNotificationLayout;
 
 	private TableLayout mAttendeeContainer;
-	
+
+	private View mScroller;
+
 	private boolean mIsStartedSearch;
 
 	private List<ListItem> mItemList = new ArrayList<ListItem>();
@@ -67,9 +81,19 @@ public class ConferenceCreateActivity extends Activity {
 
 	private ConferenceService cs = new ConferenceService();
 
+	private Conference conf;
+
+	private int landLayout = PAD_LAYOUT;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		if (isScreenLarge()) {
+			setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+		} else {
+			setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+		}
+
 		setContentView(R.layout.activity_conference_create);
 		mContext = this;
 		mContactsContainer = (ListView) findViewById(R.id.conf_create_contacts_list);
@@ -78,18 +102,22 @@ public class ConferenceCreateActivity extends Activity {
 
 		mAttendeeContainer = (TableLayout) findViewById(R.id.conference_attendee_container);
 		mAttendeeContainer.setGravity(Gravity.CENTER);
+		landLayout = mAttendeeContainer.getTag().equals("vertical") ? PAD_LAYOUT
+				: PHONE_LAYOUT;
 
 		mConfirmButton = (TextView) findViewById(R.id.conference_create_confirm_button);
 		mConfirmButton.setOnClickListener(confirmButtonListener);
 
 		mConfTitleET = (EditText) findViewById(R.id.conference_create_conf_name);
 		mConfStartTimeET = (EditText) findViewById(R.id.conference_create_conf_start_time);
-		mConfEndTimeET = (EditText) findViewById(R.id.conference_create_conf_end_time);
-		
+
 		new LoadContactsAT().execute();
-		
+
 		searchedTextET = (EditText) findViewById(R.id.contacts_search);
 		searchedTextET.addTextChangedListener(textChangedListener);
+
+		mErrorNotificationLayout = (LinearLayout) findViewById(R.id.conference_create_error_notification);
+		mScroller = findViewById(R.id.conf_create_scroll_view);
 	}
 
 	@Override
@@ -107,6 +135,20 @@ public class ConferenceCreateActivity extends Activity {
 		super.onStop();
 	}
 
+	public boolean isScreenLarge() {
+		final int screenSize = getResources().getConfiguration().screenLayout
+				& Configuration.SCREENLAYOUT_SIZE_MASK;
+		return screenSize == Configuration.SCREENLAYOUT_SIZE_LARGE
+				|| screenSize == Configuration.SCREENLAYOUT_SIZE_XLARGE;
+	}
+
+	@Override
+	public void onBackPressed() {
+		super.onBackPressed();
+		setResult(Activity.RESULT_CANCELED, null);
+		// finish();
+	}
+
 	private void updateView(int pos) {
 		ListItem item = mItemList.get(pos);
 		if (item.g == null) {
@@ -120,9 +162,13 @@ public class ConferenceCreateActivity extends Activity {
 			sortList.addAll(item.g.getUsers());
 			Collections.sort(sortList);
 			for (User u : sortList) {
+				if (u.getmUserId() == GlobalHolder.getInstance()
+						.getCurrentUserId()) {
+					continue;
+				}
 				ListItem li = new ListItem(u);
 				mItemList.add(++pos, li);
-				
+
 				boolean found = false;
 				for (User invitedUser : mAttendeeList) {
 					if (invitedUser.getmUserId() == u.getmUserId()) {
@@ -131,7 +177,7 @@ public class ConferenceCreateActivity extends Activity {
 					}
 				}
 				if (found) {
-					((ContactUserView)li.v).updateChecked();
+					((ContactUserView) li.v).updateChecked();
 				}
 			}
 
@@ -163,7 +209,7 @@ public class ConferenceCreateActivity extends Activity {
 		adapter.notifyDataSetChanged();
 	}
 
-	private void updateUserToAttendList(User u) {
+	private void updateUserToAttendList(final User u) {
 		if (u == null) {
 			return;
 		}
@@ -186,6 +232,9 @@ public class ConferenceCreateActivity extends Activity {
 					if (u.getmUserId() == Long
 							.parseLong(ll.getTag().toString())) {
 						tr.removeView(ll);
+						if (tr.getChildCount() == 0) {
+							mAttendeeContainer.removeView(tr);
+						}
 						return;
 					}
 				}
@@ -194,7 +243,6 @@ public class ConferenceCreateActivity extends Activity {
 		}
 
 		mAttendeeList.add(u);
-
 
 		int cot = mAttendeeContainer.getChildCount();
 		TableRow tr = null;
@@ -207,18 +255,19 @@ public class ConferenceCreateActivity extends Activity {
 			mAttendeeContainer.addView(tr, tbl);
 		} else {
 			tr = (TableRow) mAttendeeContainer.getChildAt(cot - 1);
-			if (tr.getChildCount() == 4) {
-				tr = new TableRow(mContext);
-				mAttendeeContainer.addView(tr, tbl);
+			if (landLayout == PAD_LAYOUT) {
+				if (tr.getChildCount() == 4) {
+					tr = new TableRow(mContext);
+					mAttendeeContainer.addView(tr, tbl);
+				}
 			}
 		}
-		LinearLayout ll = new LinearLayout(mContext);
+		final LinearLayout ll = new LinearLayout(mContext);
 		ll.setOrientation(LinearLayout.VERTICAL);
 		ll.setGravity(Gravity.CENTER);
 		TableRow.LayoutParams tl = new TableRow.LayoutParams();
-		tl.column = tr.getChildCount() ;
+		tl.column = tr.getChildCount();
 		tr.addView(ll, tl);
-		
 
 		ImageView iv = new ImageView(mContext);
 		if (u.getAvatarBitmap() != null) {
@@ -226,35 +275,70 @@ public class ConferenceCreateActivity extends Activity {
 		} else {
 			iv.setImageResource(R.drawable.avatar);
 		}
-		ll.addView(iv, new LinearLayout.LayoutParams(
-				LinearLayout.LayoutParams.WRAP_CONTENT,
-				LinearLayout.LayoutParams.WRAP_CONTENT));
+		ll.addView(iv, new LinearLayout.LayoutParams(45, 45));
 
 		TextView tv = new TextView(mContext);
 		tv.setText(u.getName());
 		tv.setEllipsize(TruncateAt.END);
 		tv.setSingleLine(true);
 		ll.setTag(u.getmUserId() + "");
-		ll.addView(tv, new LinearLayout.LayoutParams(
-				60,
+		ll.addView(tv, new LinearLayout.LayoutParams(60,
 				LinearLayout.LayoutParams.WRAP_CONTENT));
+		ll.setPadding(5, 5, 5, 5);
+		ll.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View view) {
+				Message.obtain(mLocalHandler, UPDATE_ATTENDEES, u)
+						.sendToTarget();
+				for (int index = 0; index < mItemList.size(); index++) {
+					ListItem li = mItemList.get(index);
+					if (li.u != null && u.getmUserId() == li.u.getmUserId()) {
+						((ContactUserView) li.v).updateChecked();
+					}
+				}
+			}
+
+		});
+
+		if (mAttendeeContainer.getChildCount() > 0) {
+			if (this.landLayout == PAD_LAYOUT) {
+				((ScrollView) mScroller).postDelayed(new Runnable(){
+					@Override
+					public void run() {
+						((ScrollView) mScroller).scrollTo(0, ll
+								.getBottom());
+					}
+					
+				}, 100L);
+			} else {
+				((HorizontalScrollView) mScroller).postDelayed(new Runnable(){
+					@Override
+					public void run() {
+						((HorizontalScrollView) mScroller).scrollTo(ll
+								.getLeft(), 0);
+					}
+					
+				}, 100L);
+			}
+		}
+
 	}
-	
-	
+
 	private void updateSearchedUserList(List<User> lu) {
 		mItemList = new ArrayList<ListItem>();
 		for (User u : lu) {
 			ListItem item = new ListItem(u);
-			((ContactUserView)item.v).removePadding();
+			((ContactUserView) item.v).removePadding();
 			mItemList.add(item);
 		}
 		adapter.notifyDataSetChanged();
 	}
-	
-	
-	
-	
-	
+
+	private void doFinish(Intent i) {
+		setResult(Activity.RESULT_OK, i);
+	}
+
 	private TextWatcher textChangedListener = new TextWatcher() {
 
 		@Override
@@ -287,16 +371,10 @@ public class ConferenceCreateActivity extends Activity {
 		@Override
 		public void onTextChanged(CharSequence s, int start, int before,
 				int count) {
-			
+
 		}
 
 	};
-	
-	
-	
-	
-	
-	
 
 	private OnItemClickListener itemListener = new OnItemClickListener() {
 
@@ -337,17 +415,11 @@ public class ConferenceCreateActivity extends Activity {
 				mConfStartTimeET.requestFocus();
 				return;
 			}
-			String endTimeStr = mConfEndTimeET.getText().toString();
-			if (endTimeStr == null || endTimeStr.length() == 0) {
-				mConfEndTimeET
-						.setError(getString(R.string.error_conf_end_time_required));
-				mConfEndTimeET.requestFocus();
-				return;
-			}
 
 			List<User> l = new ArrayList<User>(mAttendeeList);
-			Conference conf = new Conference(title, startTimeStr, endTimeStr, l);
-			cs.createConference(conf, null);
+			conf = new Conference(title, startTimeStr, null, l);
+			cs.createConference(conf,
+					Message.obtain(mLocalHandler, CREATE_CONFERENC_RESP));
 
 		}
 
@@ -432,6 +504,25 @@ public class ConferenceCreateActivity extends Activity {
 				break;
 			case UPDATE_SEARCHED_USER_LIST:
 				updateSearchedUserList((List<User>) msg.obj);
+				break;
+			case CREATE_CONFERENC_RESP:
+				AsynResult ar = (AsynResult) msg.obj;
+				if (ar.getState() != AsynResult.AsynState.SUCCESS) {
+					mErrorNotificationLayout.setVisibility(View.VISIBLE);
+					break;
+				}
+				RequestConfCreateResponse rccr = (RequestConfCreateResponse) ar
+						.getObject();
+				User currU = GlobalHolder.getInstance().getCurrentUser();
+				Group g = new Group(rccr.getConfId(), GroupType.CONFERENCE,
+						conf.getName(), currU.getmUserId() + "", "");
+				g.setOwnerUser(currU);
+				GlobalHolder.getInstance().addGroupToList(GroupType.CONFERENCE,
+						g);
+				Intent i = new Intent();
+				i.putExtra("newGid", g.getmGId());
+				setResult(Activity.RESULT_OK, i);
+				finish();
 				break;
 			}
 		}

@@ -4,8 +4,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -16,7 +14,6 @@ import android.widget.TextView;
 
 import com.v2tech.R;
 import com.v2tech.util.GlobalConfig;
-import com.v2tech.util.Notificator;
 
 public class SettingTabFragment extends Fragment {
 	
@@ -69,18 +66,11 @@ public class SettingTabFragment extends Fragment {
 	private OnClickListener mQuitButtonListener = new OnClickListener() {
 
 		@Override
-		public void onClick(View arg0) {
-			//FIXME optimze code
-			SharedPreferences sf = getActivity().getSharedPreferences("config", Context.MODE_PRIVATE);
-			Editor ed = sf.edit();
-			ed.putInt("LoggedIn", 0);
-			ed.commit();
-			Notificator.cancelSystemNotification(getActivity());
-			getActivity().finish();
-			System.exit(0);
+		public void onClick(View view) {
+			((MainActivity)getActivity()).requestQuit();
 		}
 		
-	}; 
+	};
 	
 	
 	class Tab1BroadcastReceiver extends BroadcastReceiver {

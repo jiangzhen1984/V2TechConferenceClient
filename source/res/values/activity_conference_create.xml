@@ -8,4 +8,5 @@
    <string name="error_conf_title_required">会议名称不能为空!</string>
    <string name="error_conf_start_time_required">会议开始时间不能为空!</string>
    <string name="error_conf_end_time_required">会议结束时间不能为空!</string>
+   <string name="error_create_conference_failed_from_server_side">创建会议失败</string>
 </resources>

@@ -12,12 +12,14 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -27,6 +29,8 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.PopupWindow;
+import android.widget.PopupWindow.OnDismissListener;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -39,6 +43,7 @@ import com.v2tech.logic.ContactConversation;
 import com.v2tech.logic.Conversation;
 import com.v2tech.logic.GlobalHolder;
 import com.v2tech.logic.Group;
+import com.v2tech.logic.Group.GroupType;
 import com.v2tech.logic.NetworkStateCode;
 import com.v2tech.logic.User;
 import com.v2tech.logic.jni.JNIResponse;
@@ -59,6 +64,8 @@ public class ConversationsTabFragment extends Fragment {
 	private static final int UPDATE_USER_AVATAR = 9;
 	private static final int UPDATE_CONVERSATION = 10;
 	private static final int UPDATE_SEARCHED_LIST = 11;
+	
+	private static final int SUB_ACTIVITY_CODE_CREATE_CONF = 100;
 
 	private Tab1BroadcastReceiver receiver = new Tab1BroadcastReceiver();
 	private IntentFilter intentFilter;
@@ -90,7 +97,7 @@ public class ConversationsTabFragment extends Fragment {
 
 	private ListView mConversationsListView;
 
-	private TextView mCreateConferenceButtonTV;
+	private ImageView mFeatureIV;
 
 	private ConversationsAdapter adapter = new ConversationsAdapter();
 
@@ -119,13 +126,10 @@ public class ConversationsTabFragment extends Fragment {
 			mSearchTextET = (EditText) rootView.findViewById(R.id.confs_search);
 			networkNotificationContainer = (LinearLayout) rootView
 					.findViewById(R.id.recent_conversation_network_nt);
-			mCreateConferenceButtonTV = (TextView) rootView
-					.findViewById(R.id.conference_create_button);
-			if (mCreateConferenceButtonTV != null) {
-				mCreateConferenceButtonTV.setVisibility(View.GONE);
-				mCreateConferenceButtonTV
-						.setOnClickListener(mConferenceCreateButtonListener);
-			}
+			mFeatureIV = (ImageView) rootView
+					.findViewById(R.id.conversation_features);
+			mFeatureIV.setOnClickListener(mFeatureButtonListener);
+
 
 		} else {
 			((ViewGroup) rootView.getParent()).removeView(rootView);
@@ -206,6 +210,24 @@ public class ConversationsTabFragment extends Fragment {
 		if (requestCode == 0) {
 			Message.obtain(mHandler, REQUEST_EXIT_CONF, currentConfId)
 					.sendToTarget();
+		} else if (requestCode == SUB_ACTIVITY_CODE_CREATE_CONF) {
+			if (resultCode ==  Activity.RESULT_CANCELED) {
+				return;	
+			}
+			
+			if (resultCode == Activity.RESULT_OK) {
+				long gid = data.getLongExtra("newGid", 0);
+				Group g = GlobalHolder.getInstance().getGroupById(GroupType.CONFERENCE, gid);
+				if (g != null) {
+					Conversation cov = new ConferenceConversation(g);
+					final GroupLayout gp = new GroupLayout(this.getActivity(), cov);
+					
+					mItemList.add(0, new ScrollItem(cov, gp));
+					adapter.notifyDataSetChanged();
+				} else {
+					V2Log.e(" Can not find created group id :" + gid);
+				}
+			}
 		}
 	}
 
@@ -223,17 +245,17 @@ public class ConversationsTabFragment extends Fragment {
 				@Override
 				public void onClick(View v) {
 					// // TODO hidden request to enter conference feature
-//					mWaitingDialog = ProgressDialog
-//							.show(getActivity(),
-//									"",
-//									getActivity()
-//											.getResources()
-//											.getString(
-//													R.string.requesting_enter_conference),
-//									true);
-//					currentConfId = g.getmGId();
-//					Message.obtain(mHandler, REQUEST_ENTER_CONF,
-//							Long.valueOf(g.getmGId())).sendToTarget();
+					mWaitingDialog = ProgressDialog
+							.show(getActivity(),
+									"",
+									getActivity()
+											.getResources()
+											.getString(
+													R.string.requesting_enter_conference),
+									true);
+					currentConfId = g.getmGId();
+					Message.obtain(mHandler, REQUEST_ENTER_CONF,
+							Long.valueOf(g.getmGId())).sendToTarget();
 				}
 
 			});
@@ -249,7 +271,10 @@ public class ConversationsTabFragment extends Fragment {
 		public void onClick(View arg0) {
 			Intent i = new Intent(PublicIntent.START_CONFERENCE_CREATE_ACTIVITY);
 			i.addCategory(PublicIntent.DEFAULT_CATEGORY);
-			startActivityForResult(i, 1);
+			startActivityForResult(i, SUB_ACTIVITY_CODE_CREATE_CONF);
+			if (pw != null) {
+				pw.dismiss();
+			}
 		}
 
 	};
@@ -294,6 +319,53 @@ public class ConversationsTabFragment extends Fragment {
 			}
 			mItemList = newItemList;
 			adapter.notifyDataSetChanged();
+		}
+
+	};
+
+	
+	private  PopupWindow pw;
+	private OnClickListener mFeatureButtonListener = new OnClickListener() {
+
+		@Override
+		public void onClick(View view) {
+			
+			if (pw != null) {
+				pw.showAsDropDown(view);
+				return;
+			}
+			LinearLayout root = new LinearLayout(mContext);
+			root.setOrientation(LinearLayout.VERTICAL);
+			root.setBackgroundColor(mContext.getResources().getColor(R.color.confs_title_bg));
+			TextView createConferenceTV = new TextView(mContext);
+			createConferenceTV.setTextSize(18);
+			createConferenceTV.setGravity(Gravity.CENTER);
+			createConferenceTV.setText(R.string.conference_create_title);
+			createConferenceTV.setOnClickListener(mConferenceCreateButtonListener);
+			
+			LinearLayout.LayoutParams ll = new LinearLayout.LayoutParams(
+						LinearLayout.LayoutParams.MATCH_PARENT,
+						LinearLayout.LayoutParams.WRAP_CONTENT);
+			ll.setMargins(5, 20, 5, 20);
+			ll.gravity = Gravity.CENTER;
+			root.addView(createConferenceTV,ll);
+			pw = new PopupWindow(root, 200, 200, true);
+			pw.setBackgroundDrawable(new ColorDrawable(R.color.confs_title_bg));
+			pw.setOnDismissListener(new OnDismissListener() {
+
+				@Override
+				public void onDismiss() {
+					pw.dismiss();
+				}
+
+			});
+			
+			pw.setFocusable(true);
+			pw.setTouchable(true);
+			pw.setOutsideTouchable(true);
+			pw.showAsDropDown(view);
+			
+			
 		}
 
 	};

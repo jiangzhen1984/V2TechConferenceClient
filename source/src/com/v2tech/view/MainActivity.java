@@ -9,8 +9,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
-import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.Handler;
@@ -36,7 +34,7 @@ import com.v2tech.util.V2Log;
 import com.v2tech.view.JNIService.LocalBinder;
 
 public class MainActivity extends FragmentActivity implements
-		TabHost.OnTabChangeListener, ViewPager.OnPageChangeListener{
+		TabHost.OnTabChangeListener, ViewPager.OnPageChangeListener {
 
 	private Context mContext;
 	private JNIService mService;
@@ -53,9 +51,9 @@ public class MainActivity extends FragmentActivity implements
 	private static final String TAG_CONF = "conference";
 	private static final String TAG_CONTACT = "contacts";
 	private static final String TAG_SETTING = "setting";
-	
+
 	private LocalReceiver receiver = new LocalReceiver();
-	
+
 	private ImageView mTabNoticator;
 
 	public JNIService getService() {
@@ -121,12 +119,18 @@ public class MainActivity extends FragmentActivity implements
 		outState.putString("tab", mTabHost.getCurrentTabTag());
 		super.onSaveInstanceState(outState);
 	}
-	
+
 	private void initDPI() {
 		DisplayMetrics metrics = new DisplayMetrics();
 
 		getWindowManager().getDefaultDisplay().getMetrics(metrics);
 		GlobalConfig.GLOBAL_DPI = metrics.densityDpi;
+
+		DisplayMetrics dm = new DisplayMetrics();
+		getWindowManager().getDefaultDisplay().getMetrics(dm);
+		double x = Math.pow(dm.widthPixels / dm.xdpi, 2);
+		double y = Math.pow(dm.heightPixels / dm.ydpi, 2);
+		GlobalConfig.SCREEN_INCHES = Math.sqrt(x + y);
 	}
 
 	/**
@@ -175,35 +179,38 @@ public class MainActivity extends FragmentActivity implements
 		mTabHost.addTab(settingTabSpec);
 
 		mTabHost.setOnTabChangedListener(this);
-		
-		for(int i=0;i<mTabHost.getTabWidget().getChildCount();i++) {
-			mTabHost.getTabWidget().getChildAt(i).setBackgroundResource(R.drawable.tab_panel_bg);
-	    }
+
+		for (int i = 0; i < mTabHost.getTabWidget().getChildCount(); i++) {
+			mTabHost.getTabWidget().getChildAt(i)
+					.setBackgroundResource(R.drawable.tab_panel_bg);
+		}
 	}
-	
-	
+
 	private View getConversationView() {
 		RelativeLayout rl = new RelativeLayout(mContext);
-		RelativeLayout.LayoutParams rll = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+		RelativeLayout.LayoutParams rll = new RelativeLayout.LayoutParams(
+				RelativeLayout.LayoutParams.WRAP_CONTENT,
+				RelativeLayout.LayoutParams.WRAP_CONTENT);
 		rll.addRule(RelativeLayout.CENTER_IN_PARENT);
 		ImageView iv = new ImageView(mContext);
 		iv.setId(0x900000);
-		iv.setImageDrawable(mContext.getResources().getDrawable(R.drawable.selector_conf));
+		iv.setImageDrawable(mContext.getResources().getDrawable(
+				R.drawable.selector_conf));
 		rl.addView(iv, rll);
-		
+
 		ImageView ivNoticator = new ImageView(mContext);
 		ivNoticator.setVisibility(View.INVISIBLE);
 		ivNoticator.setImageResource(R.drawable.tab_notificator);
-		rll = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
-		rll.addRule(RelativeLayout.RIGHT_OF , iv.getId());
+		rll = new RelativeLayout.LayoutParams(
+				RelativeLayout.LayoutParams.WRAP_CONTENT,
+				RelativeLayout.LayoutParams.WRAP_CONTENT);
+		rll.addRule(RelativeLayout.RIGHT_OF, iv.getId());
 		rl.addView(ivNoticator, rll);
-		
+
 		mTabNoticator = ivNoticator;
 		return rl;
 	}
-	
-	
-	
+
 	private void initReceiver() {
 		IntentFilter filter = new IntentFilter();
 		filter.addAction(PublicIntent.UPDATE_CONVERSATION);
@@ -227,13 +234,14 @@ public class MainActivity extends FragmentActivity implements
 		}
 	}
 
-	
-	
-	
 	@Override
 	public void onBackPressed() {
+		requestQuit();
+	}
+
+	public void requestQuit() {
 		if (exitedFlag) {
-			updateLoggedInFlag();
+			GlobalConfig.saveLogoutFlag(this);
 			Notificator.cancelSystemNotification(this);
 			finish();
 			try {
@@ -244,7 +252,8 @@ public class MainActivity extends FragmentActivity implements
 			System.exit(0);
 		} else {
 			exitedFlag = true;
-			Toast.makeText(this, R.string.quit_promption, Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, R.string.quit_promption, Toast.LENGTH_SHORT)
+					.show();
 			Handler handler = new Handler();
 			handler.postDelayed(new Runnable() {
 
@@ -252,7 +261,7 @@ public class MainActivity extends FragmentActivity implements
 				public void run() {
 					exitedFlag = false;
 				}
-				
+
 			}, 1000);
 		}
 	}
@@ -265,41 +274,33 @@ public class MainActivity extends FragmentActivity implements
 	public void onTabChanged(String tag) {
 		// TabInfo newTab = this.mapTabInfo.get(tag);
 		int pos = this.mTabHost.getCurrentTab();
-		//if (this.mViewPager != null) {
-			this.mViewPager.setCurrentItem(pos);
-		//}
+		// if (this.mViewPager != null) {
+		this.mViewPager.setCurrentItem(pos);
+		// }
 	}
-	
-	
-	private void updateLoggedInFlag() {
-		SharedPreferences sf = mContext.getSharedPreferences("config", Context.MODE_PRIVATE);
-		Editor ed = sf.edit();
-		ed.putInt("LoggedIn", 0);
-		ed.commit();
-	}
-	
 
 	@Override
 	public void onPageScrollStateChanged(int pos) {
-		
+
 	}
 
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
 		mContext.unregisterReceiver(receiver);
-		mContext.stopService(new Intent(this.getApplicationContext(), JNIService.class));
+		mContext.stopService(new Intent(this.getApplicationContext(),
+				JNIService.class));
 		V2Log.d("system destroyed v2tech");
 	}
 
 	@Override
 	public void onPageScrolled(int arg0, float arg1, int arg2) {
-		
+
 	}
 
 	@Override
 	public void onPageSelected(int pos) {
-		 this.mTabHost.setCurrentTab(pos);
+		this.mTabHost.setCurrentTab(pos);
 	}
 
 	public class PagerAdapter extends FragmentPagerAdapter {
@@ -352,15 +353,13 @@ public class MainActivity extends FragmentActivity implements
 			mContext.sendBroadcast(new Intent(SERVICE_UNBOUNDED_EVENT));
 		}
 	};
-	
-	
-	
+
 	class LocalReceiver extends BroadcastReceiver {
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			String action = intent.getAction();
 			if (PublicIntent.UPDATE_CONVERSATION.equals(action)) {
-				if (GlobalHolder.getInstance().getNoticatorCount() > 0 ) {
+				if (GlobalHolder.getInstance().getNoticatorCount() > 0) {
 					mTabNoticator.setVisibility(View.VISIBLE);
 				} else {
 					mTabNoticator.setVisibility(View.GONE);
@@ -369,7 +368,7 @@ public class MainActivity extends FragmentActivity implements
 				finish();
 			}
 		}
-		
+
 	}
 
 }

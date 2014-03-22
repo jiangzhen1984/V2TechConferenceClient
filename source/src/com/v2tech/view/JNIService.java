@@ -47,6 +47,7 @@ import com.v2tech.logic.UserDeviceConfig;
 import com.v2tech.logic.VImageMessage;
 import com.v2tech.logic.VMessage;
 import com.v2tech.logic.VMessage.MessageType;
+import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.Notificator;
 import com.v2tech.util.V2Log;
 
@@ -125,7 +126,7 @@ public class JNIService extends Service {
 		ConfRequest.getInstance().addCallback(mCRCB);
 
 		mGRCB = new GroupRequestCB(mCallbackHandler);
-		GroupRequest.getInstance().setCallback(mGRCB);
+		GroupRequest.getInstance().addCallback(mGRCB);
 
 		mVRCB = new VideoRequestCB(mCallbackHandler);
 		VideoRequest.getInstance().addCallback(mVRCB);
@@ -470,11 +471,7 @@ public class JNIService extends Service {
 			mCallbackHandler.postDelayed(new Runnable() {
 				@Override
 				public void run() {
-					SharedPreferences sf = mContext.getSharedPreferences(
-							"config", Context.MODE_PRIVATE);
-					Editor ed = sf.edit();
-					ed.putInt("LoggedIn", 0);
-					ed.commit();
+					GlobalConfig.saveLogoutFlag(mContext);
 
 					Intent i = new Intent();
 					i.setAction(PublicIntent.FINISH_APPLICATION);
@@ -573,6 +570,14 @@ public class JNIService extends Service {
 					new GroupUserInfoOrig(groupType, nGroupID, sXml))
 					.sendToTarget();
 		}
+
+		@Override
+		public void OnModifyGroupInfoCallback(int groupType, long nGroupID,
+				String sXml) {
+			
+		}
+		
+		
 
 	}
 

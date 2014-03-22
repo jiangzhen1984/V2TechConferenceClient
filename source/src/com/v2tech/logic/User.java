@@ -23,6 +23,7 @@ import net.sourceforge.pinyin4j.format.HanyuPinyinOutputFormat;
 import net.sourceforge.pinyin4j.format.HanyuPinyinToneType;
 import net.sourceforge.pinyin4j.format.exception.BadHanyuPinyinOutputFormatCombination;
 
+import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -144,18 +145,18 @@ public class User implements Comparable<User> {
 			format.setToneType(HanyuPinyinToneType.WITHOUT_TONE);
 			char[] cs = this.mName.toCharArray();
 			for (char c : cs) {
-//				try {
-//					String[] ars = PinyinHelper.toHanyuPinyinStringArray(c,
-//							format);
-//					if (ars != null && ars.length > 0) {
-//						abbra += ars[0];
-//					}
-//				} catch (BadHanyuPinyinOutputFormatCombination e) {
-//					e.printStackTrace();
-//				}
+				try {
+					String[] ars = PinyinHelper.toHanyuPinyinStringArray(c,
+							format);
+					if (ars != null && ars.length > 0) {
+						abbra += ars[0];
+					}
+				} catch (BadHanyuPinyinOutputFormatCombination e) {
+					e.printStackTrace();
+				}
 			}
 			if (abbra.equals("")) {
-				abbra = this.mName;
+				abbra = this.mName.toLowerCase();
 			}
 		}
 	}
@@ -467,14 +468,14 @@ public class User implements Comparable<User> {
 			for (int i = 0; i < gList.getLength(); i++) {
 				element = (Element) gList.item(i);
 				User u = new User(Long.parseLong(element.getAttribute("id")),
-						element.getAttribute("nickname"),
-						element.getAttribute("email"),
-						element.getAttribute("sign"));
-				u.setTelephone(element.getAttribute("telephone"));
-				u.setGender(element.getAttribute("sex"));
-				u.setAddress(element.getAttribute("address"));
-				u.setCellPhone(element.getAttribute("mobile"));
-				u.setTitle(element.getAttribute("job"));
+						getAttribute(element, "nickname"),
+						getAttribute(element, "email"),
+						getAttribute(element, "sign"));
+				u.setTelephone(getAttribute(element, "telephone"));
+				u.setGender(getAttribute(element, "sex"));
+				u.setAddress(getAttribute(element, "address"));
+				u.setCellPhone(getAttribute(element, "mobile"));
+				u.setTitle(getAttribute(element, "job"));
 				try {
 					String bir = element.getAttribute("birthday");
 					if (bir != null && !bir.equals("")) {
@@ -503,6 +504,14 @@ public class User implements Comparable<User> {
 		}
 
 		return l;
+	}
+	
+	private static String getAttribute(Element el, String name) {
+		Attr  atr = el.getAttributeNode(name);
+		if (atr != null) {
+			return atr.getValue();
+		}
+		return null;
 	}
 
 	/**

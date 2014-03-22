@@ -140,11 +140,10 @@ public class ContactsTabFragment extends Fragment {
 		}
 		l = GlobalHolder.getInstance().getGroup(GroupType.CONTACT);
 		if (l != null) {
-			loader.execute();
+			 new AsyncTaskLoader().execute();
 		}
 	}
 	
-	private AsyncTaskLoader loader = new AsyncTaskLoader();
 	private Object mLock = new Object();
 	class AsyncTaskLoader extends AsyncTask<Void, Void, Void> {
 
@@ -305,7 +304,8 @@ public class ContactsTabFragment extends Fragment {
 		int startSortIndex = 0;
 		boolean foundUserView = false;
 		ListItem self = null;
-		for (ListItem li : mItemList) {
+		for (int i =0; i < mItemList.size(); i++) {
+			ListItem li = mItemList.get(i);
 			if (li.u != null && li.u.getmUserId() == userId) {
 				self = li;
 				foundUserView = true;
@@ -332,10 +332,14 @@ public class ContactsTabFragment extends Fragment {
 			}
 			--startSortIndex;
 		}
+		mItemList.remove(self);
 		
 		int pos = startSortIndex+1;
 		for (startSortIndex +=1; startSortIndex < mItemList.size(); startSortIndex++,pos++) {
 			ListItem item = mItemList.get(startSortIndex);
+			if (item.g != null) {
+				break;
+			}
 			//if item is current user, always sort after current user
 			if (item.u.getmUserId() == GlobalHolder.getInstance().getCurrentUserId()) {
 				continue;
@@ -349,7 +353,7 @@ public class ContactsTabFragment extends Fragment {
 			} else if (newSt == User.Status.OFFLINE || newSt == User.Status.HIDDEN) {
 				if ((item.u.getmStatus() == User.Status.OFFLINE || item.u
 						.getmStatus() == User.Status.HIDDEN)
-						&& item.u.compareTo(self.u) > 0) {
+						&& self.u.compareTo(item.u) > 0) {
 					continue;
 				} else {
 					break;
@@ -369,14 +373,14 @@ public class ContactsTabFragment extends Fragment {
 		}
 		
 		
-		if (pos == mItemList.size() - 1) {
-			mItemList.remove(self);
+		if (pos == mItemList.size()) {
 			mItemList.add(self);
 		} else {
-			mItemList.remove(self);
 			mItemList.add(pos, self);
 		}
 		
+
+		adapter.notifyDataSetChanged();
 	}
 
 	private synchronized void updateUserViewPostion(int userId, int status) {
@@ -534,7 +538,7 @@ public class ContactsTabFragment extends Fragment {
 			case UPDATE_USER_STATUS:
 				updateUserStatus(msg.arg1, msg.arg2);
 				// FIXME update all users in all groups
-				updateUserViewPostion(msg.arg1, msg.arg2);
+				updateUserViewPostionV2(msg.arg1, msg.arg2);
 				break;
 			case UPDATE_SEARCHED_USER_LIST:
 				updateSearchedUserList((List<User>) msg.obj);

@@ -106,7 +106,7 @@ public class ConversationView extends Activity {
 
 	private User local;
 	private User remote;
-	
+
 	private boolean isStopped;
 
 	@Override
@@ -125,16 +125,17 @@ public class ConversationView extends Activity {
 
 		mMessageET = (EditText) findViewById(R.id.message_text);
 		mReturnButtonTV = (TextView) findViewById(R.id.contact_detail_return_button);
-//		mReturnButtonTV.setOnClickListener(new OnClickListener() {
-//			@Override
-//			public void onClick(View arg0) {
-//				mReturnButtonTV.setEnabled(false);
-//				InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-//				imm.hideSoftInputFromWindow(mMessageET.getWindowToken(), 0);
-//				finish();
-//			}
-//
-//		});
+		// mReturnButtonTV.setOnClickListener(new OnClickListener() {
+		// @Override
+		// public void onClick(View arg0) {
+		// mReturnButtonTV.setEnabled(false);
+		// InputMethodManager imm = (InputMethodManager)
+		// getSystemService(Context.INPUT_METHOD_SERVICE);
+		// imm.hideSoftInputFromWindow(mMessageET.getWindowToken(), 0);
+		// finish();
+		// }
+		//
+		// });
 		mReturnButtonTV.setOnTouchListener(new OnTouchListener() {
 
 			@Override
@@ -146,7 +147,7 @@ public class ConversationView extends Activity {
 				}
 				return true;
 			}
-			
+
 		});
 
 		mMoreFeatureIV = (ImageView) findViewById(R.id.contact_message_plus);
@@ -169,6 +170,9 @@ public class ConversationView extends Activity {
 
 		local = GlobalHolder.getInstance().getUser(user1Id);
 		remote = GlobalHolder.getInstance().getUser(user2Id);
+		if (remote != null && remote.getName() != null) {
+			user2Name =  remote.getName();
+		}
 
 		lh = new LocalHandler();
 
@@ -190,9 +194,8 @@ public class ConversationView extends Activity {
 		filter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
 		registerReceiver(receiver, filter);
 
-		if ( GlobalHolder
-					.getInstance().findConversationByType(
-							Conversation.TYPE_CONTACT, user2Id) != null) {
+		if (GlobalHolder.getInstance().findConversationByType(
+				Conversation.TYPE_CONTACT, user2Id) != null) {
 			notificateConversationUpdate(null, null);
 		}
 	}
@@ -222,6 +225,20 @@ public class ConversationView extends Activity {
 	
 	
 	@Override
+	protected void onResume() {
+		super.onResume();
+		if (pending) {
+			pending = false;
+			mScrollView.post(new Runnable() {
+				@Override
+				public void run() {
+					mScrollView.scrollTo(0, mMessagesContainer.getChildAt(mMessagesContainer.getChildCount() - 1).getBottom());
+				}
+			});
+		}
+	}
+
+	@Override
 	protected void onStop() {
 		super.onStop();
 		isStopped = true;
@@ -232,7 +249,7 @@ public class ConversationView extends Activity {
 		super.onDestroy();
 		this.unregisterReceiver(receiver);
 		cleanCache();
-		GlobalHolder.getInstance().CURRENT_CONVERSATION_USER  = 0;
+		GlobalHolder.getInstance().CURRENT_CONVERSATION_USER = 0;
 	}
 
 	private void cleanCache() {
@@ -322,7 +339,7 @@ public class ConversationView extends Activity {
 				saveMessageToDB(vim);
 				Message.obtain(lh, SEND_MESSAGE, vim).sendToTarget();
 				addMessageToContainer(vim);
-				
+
 				notificateConversationUpdate(null, null);
 			}
 		}
@@ -336,7 +353,8 @@ public class ConversationView extends Activity {
 		cv.put(ContentDescriptor.Messages.Cols.MSG_TYPE, vm.getType()
 				.getIntValue());
 		cv.put(ContentDescriptor.Messages.Cols.SEND_TIME, vm.getFullDateStr());
-		Uri uri =getContentResolver().insert(ContentDescriptor.Messages.CONTENT_URI, cv);
+		Uri uri = getContentResolver().insert(
+				ContentDescriptor.Messages.CONTENT_URI, cv);
 		vm.setId(Long.parseLong(uri.getLastPathSegment()));
 	}
 
@@ -349,41 +367,38 @@ public class ConversationView extends Activity {
 		if (remote == null) {
 			remote = new User(user2Id);
 		}
-		V2Log.d(" send text msg: "+ content);
+		V2Log.d(" send text msg: " + content);
 		VMessage m = new VMessage(local, remote, content);
 		saveMessageToDB(m);
 
 		mMessageET.setText("");
 
-		
 		Message.obtain(lh, SEND_MESSAGE, m).sendToTarget();
 		addMessageToContainer(m);
 		// make offset
 		offset++;
-		
+
 		notificateConversationUpdate(m.getText(), m.getDateTimeStr());
 
 	}
-	
+
+	//FIXME optimize code
 	private String removeEmoji(String content) {
-		byte[] bys = new byte[]{-16, -97};
-		StringBuilder sb = new StringBuilder();
+		byte[] bys = new byte[] { -16, -97 };
 		byte[] bc = content.getBytes();
 		byte[] copy = new byte[bc.length];
 		int j = 0;
-		for (int i =0; i< bc.length; i++) {
-			if (i < bc.length -2 && bys[0] == bc[i] && bys[1] == bc[i+1]) {
-				i+=3;
+		for (int i = 0; i < bc.length; i++) {
+			if (i < bc.length - 2 && bys[0] == bc[i] && bys[1] == bc[i + 1]) {
+				i += 3;
 				continue;
 			}
-			copy[j] =  bc[i];
+			copy[j] = bc[i];
 			j++;
 		}
 		return new String(copy, 0, j);
 	}
-	
-	
-	
+
 	private void notificateConversationUpdate(String content, String date) {
 		Intent i = new Intent(PublicIntent.REQUEST_UPDATE_CONVERSATION);
 		i.addCategory(PublicIntent.DEFAULT_CATEGORY);
@@ -487,31 +502,37 @@ public class ConversationView extends Activity {
 		return array;
 	}
 
+	
+	private boolean pending = false;
 	private void queryAndAddMessage(final int mid) {
-		V2Log.d("=====start  "+mid);
+		V2Log.d("=====start  " + mid);
 		Uri uri = ContentUris.withAppendedId(
 				ContentDescriptor.Messages.CONTENT_URI, mid);
 
 		Cursor mCur = this.getContentResolver().query(uri,
 				ContentDescriptor.Messages.Cols.ALL_CLOS, null, null, null);
-
+		MessageBodyView mv = null;
 		while (mCur.moveToNext()) {
 			VMessage m = extractMsg(mCur);
 			if (m.getUser().getmUserId() == user2Id) {
-				MessageBodyView mv = new MessageBodyView(this, m, true);
+				mv = new MessageBodyView(this, m, true);
 				mv.setCallback(listener);
 				mMessagesContainer.addView(mv);
 			}
 		}
 		mCur.close();
-		if (!isStopped) {
-		mScrollView.post(new Runnable() {
-			@Override
-			public void run() {
-				mScrollView.fullScroll(View.FOCUS_DOWN);
+		if (mv != null) {
+			final MessageBodyView fmv = mv;
+			if (!isStopped) {
+				mScrollView.post(new Runnable() {
+					@Override
+					public void run() {
+						mScrollView.scrollTo(0, fmv.getBottom());
+					}
+				});
+			} else {
+				pending = true;
 			}
-		});
-		V2Log.d("=====end  "+mid);
 		}
 	}
 

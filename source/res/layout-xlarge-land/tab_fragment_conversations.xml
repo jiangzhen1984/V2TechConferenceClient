@@ -11,8 +11,8 @@
         <RelativeLayout
             android:id="@+id/RelativeLayout1"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" 
-              android:background="@color/confs_title_bg">
+            android:layout_height="wrap_content"
+            android:background="@color/confs_title_bg" >
 
             <LinearLayout
                 android:id="@+id/linearLayout1"
@@ -50,15 +50,15 @@
                         android:textSize="12sp" />
                 </LinearLayout>
             </LinearLayout>
-            
-                            <TextView
-                    android:id="@+id/conference_create_button"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentRight="true"
-                    android:layout_centerVertical="true"
-                    android:layout_marginRight="30dp"
-                    android:text="创建会议" />
+
+            <ImageView
+                android:id="@+id/conversation_features"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:layout_marginRight="30dp"
+                android:src="@drawable/white_plus" />
         </RelativeLayout>
 
         <RelativeLayout

@@ -1,9 +1,12 @@
 package com.V2.jni;
 
-import com.v2tech.util.V2Log;
+import java.util.ArrayList;
+import java.util.List;
 
 import android.content.Context;
 import android.util.Log;
+
+import com.v2tech.util.V2Log;
 
 
 
@@ -13,11 +16,11 @@ public class GroupRequest {
 	public boolean loginResult;
 	private static GroupRequest mGroupRequest;
 	
-	private GroupRequestCallback callback;
+	private List<GroupRequestCallback> callbacks;
 
 	private GroupRequest(Context context) {
 		this.context = context;
-
+		callbacks = new ArrayList<GroupRequestCallback>();
 	};
 
 	public static synchronized GroupRequest getInstance(Context context) {
@@ -52,7 +55,24 @@ public class GroupRequest {
 	public native void modifyGroupInfo(int groupType, long nGroupID,
 			String sXml);
 
-	// ����һ������
+	/**
+	 * 	// sXmlConfData :
+	// <conf canaudio="1" candataop="1" canvideo="1" conftype="0" haskey="0"
+	// id="0" key=""
+	// layout="1" lockchat="0" lockconf="0" lockfiletrans="0" mode="2"
+	// pollingvideo="0"
+	// subject="ss" syncdesktop="0" syncdocument="1" syncvideo="0"
+	// chairuserid='0' chairnickname=''>
+	// </conf>
+	// szInviteUsers :
+	// <xml>
+	// <user id="11760" nickname=""/>
+	// <user id="11762" nickname=""/>
+	// </xml>
+	 * @param groupType
+	 * @param groupInfo
+	 * @param userInfo
+	 */
 	public native void createGroup(int groupType, String groupInfo,
 			String userInfo);
 
@@ -104,7 +124,7 @@ public class GroupRequest {
 	 * @param sXml
 	 */
 	private void OnGetGroupInfo(int groupType, String sXml) {
-		if (callback != null) {
+		for (GroupRequestCallback callback : callbacks) {
 			callback.OnGetGroupInfoCallback(groupType, sXml);
 		}
 		V2Log.d("OnGetGroupInfo::" + groupType + ":"
@@ -112,16 +132,16 @@ public class GroupRequest {
 
 	}
 
-	public void setCallback(GroupRequestCallback callback) {
-		this.callback = callback;
+	public void addCallback(GroupRequestCallback callback) {
+		this.callbacks.add(callback);
 	}
 
 	
 	private void OnGetGroupUserInfo(int groupType, long nGroupID, String sXml) {
 		V2Log.d("OnGetGroupUserInfo -> " + groupType
 				+ ":" + nGroupID + ":" + sXml);
-		if (this.callback != null) {
-			this.callback.OnGetGroupUserInfoCallback(groupType, nGroupID, sXml);
+		for (GroupRequestCallback callback : callbacks) {
+			callback.OnGetGroupUserInfoCallback(groupType, nGroupID, sXml);
 		}
 
 
@@ -179,21 +199,19 @@ public class GroupRequest {
 //		context.sendOrderedBroadcast(createIntent,null);
 	}
 
+	/**
+	 * TODO to be implement comment
+	 * @param groupType
+	 * @param nGroupID
+	 * @param sXml
+	 */
 	private void OnModifyGroupInfo(int groupType, long nGroupID, String sXml) {
-		Log.e("ImRequest UI", "OnModifyGroupInfo::�޸�һ������Ϣ" + groupType + ":"
+		V2Log.d("OnModifyGroupInfo::-->" + groupType + ":"
 				+ nGroupID + ":" + sXml);
+		for (GroupRequestCallback callback : callbacks) {
+			callback.OnModifyGroupInfoCallback(groupType, nGroupID, sXml);
+		}
 
-//		InputStream in=new ByteArrayInputStream(sXml.getBytes());
-//		Group group=XmlParserUtils.parserAddGroup(in);
-//		
-//		// ƴװ��Ϣ
-//		ModifyGroupMsgType modifyMsgType = new ModifyGroupMsgType();
-//		modifyMsgType.setMgGroup(group);
-//		
-//		Intent modifyIntent = new Intent(SplashActivity.IM);
-//		modifyIntent.putExtra("MsgType", MsgType.MODIFY_GROUP);
-//		modifyIntent.putExtra("MSG", modifyMsgType);
-//		context.sendOrderedBroadcast(modifyIntent,null);
 	}
 
 	private void OnDelGroup(int groupType, long nGroupID, boolean bMovetoRoot) {

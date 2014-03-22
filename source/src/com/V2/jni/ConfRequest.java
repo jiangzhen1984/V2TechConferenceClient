@@ -49,21 +49,6 @@ public class ConfRequest {
 
 	public native void unInitialize();
 
-	// sXmlConfData :
-	// <conf canaudio="1" candataop="1" canvideo="1" conftype="0" haskey="0"
-	// id="0" key=""
-	// layout="1" lockchat="0" lockconf="0" lockfiletrans="0" mode="2"
-	// pollingvideo="0"
-	// subject="ss" syncdesktop="0" syncdocument="1" syncvideo="0"
-	// chairuserid='0' chairnickname=''>
-	// </conf>
-	// szInviteUsers :
-	// <xml>
-	// <user id="11760" nickname=""/>
-	// <user id="11762" nickname=""/>
-	// </xml>
-	public native void createConf(String sXmlConfData, String sXmlInviteUsers);
-
 	// 鍒犻櫎浼氳
 	public native void destroyConf(long nConfID);
 

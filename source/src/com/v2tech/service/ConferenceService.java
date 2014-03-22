@@ -1,19 +1,26 @@
 package com.v2tech.service;
 
+import java.util.List;
+
 import android.os.Handler;
 import android.os.Message;
 
 import com.V2.jni.ConfRequest;
 import com.V2.jni.ConfRequestCallback;
+import com.V2.jni.GroupRequest;
+import com.V2.jni.GroupRequestCallback;
 import com.V2.jni.VideoRequest;
 import com.V2.jni.VideoRequestCallback;
 import com.v2tech.logic.AsynResult;
 import com.v2tech.logic.CameraConfiguration;
 import com.v2tech.logic.Conference;
 import com.v2tech.logic.ConferencePermission;
+import com.v2tech.logic.GlobalHolder;
+import com.v2tech.logic.Group;
 import com.v2tech.logic.UserDeviceConfig;
 import com.v2tech.logic.jni.JNIResponse;
 import com.v2tech.logic.jni.RequestCloseUserVideoDeviceResponse;
+import com.v2tech.logic.jni.RequestConfCreateResponse;
 import com.v2tech.logic.jni.RequestEnterConfResponse;
 import com.v2tech.logic.jni.RequestExitedConfResponse;
 import com.v2tech.logic.jni.RequestOpenUserVideoDeviceResponse;
@@ -65,6 +72,7 @@ public class ConferenceService extends AbstractHandler {
 
 	private VideoRequestCB videoCallback;
 	private ConfRequestCB confCallback;
+	private GroupRequestCB groupCallback;
 
 	public ConferenceService() {
 		super();
@@ -72,6 +80,9 @@ public class ConferenceService extends AbstractHandler {
 		VideoRequest.getInstance().addCallback(videoCallback);
 		confCallback = new ConfRequestCB(this);
 		ConfRequest.getInstance().addCallback(confCallback);
+		groupCallback = new GroupRequestCB(this);
+		GroupRequest.getInstance().addCallback(groupCallback);
+
 	}
 
 	/**
@@ -126,8 +137,11 @@ public class ConferenceService extends AbstractHandler {
 			// TODO
 			return;
 		}
-		ConfRequest.getInstance().createConf(conf.getConferenceConfigXml(),
-				conf.getInvitedAttendeesXml());
+		initTimeoutMessage(JNI_REQUEST_CREATE_CONFERENCE, null, DEFAULT_TIME_OUT_SECS,
+				caller);
+		GroupRequest.getInstance().createGroup(
+				Group.GroupType.CONFERENCE.intValue(),
+				conf.getConferenceConfigXml(), conf.getInvitedAttendeesXml());
 	}
 
 	/**
@@ -287,6 +301,7 @@ public class ConferenceService extends AbstractHandler {
 		case JNI_REQUEST_SPEAK:
 		case JNI_REQUEST_RELEASE_SPEAK:
 		case JNI_UPDATE_CAMERA_PAR:
+		case JNI_REQUEST_CREATE_CONFERENCE:
 			Object origObject = caller.obj;
 			caller.obj = new AsynResult(AsynResult.AsynState.SUCCESS, msg.obj);
 			JNIResponse jniRes = (JNIResponse) msg.obj;
@@ -378,6 +393,50 @@ public class ConferenceService extends AbstractHandler {
 
 		}
 
+	}
+
+	class GroupRequestCB implements GroupRequestCallback {
+
+		private Handler mCallbackHandler;
+
+		public GroupRequestCB(Handler mCallbackHandler) {
+			this.mCallbackHandler = mCallbackHandler;
+		}
+
+		@Override
+		public void OnGetGroupInfoCallback(int groupType, String sXml) {
+
+		}
+
+		@Override
+		public void OnGetGroupUserInfoCallback(int groupType, long nGroupID,
+				String sXml) {
+
+		}
+
+		@Override
+		public void OnModifyGroupInfoCallback(int groupType, long nGroupID,
+				String sXml) {
+			if (groupType == Group.GroupType.CONFERENCE.intValue()) {
+				List<Group> confList = GlobalHolder.getInstance().getGroup(
+						Group.GroupType.CONFERENCE);
+				boolean newGroupIdFlag = false;
+				for (Group g : confList) {
+					if (g.getmGId() == nGroupID) {
+						newGroupIdFlag = true;
+					}
+				}
+				// if doesn't find matched group, mean this is new group
+				if (!newGroupIdFlag) {
+					JNIResponse jniRes = new RequestConfCreateResponse(
+							nGroupID, 0,
+							RequestConfCreateResponse.Result.SUCCESS);
+					Message.obtain(mCallbackHandler,
+							JNI_REQUEST_CREATE_CONFERENCE, jniRes)
+							.sendToTarget();
+				}
+			}
+		}
 	}
 
 }

@@ -48,6 +48,19 @@ public class Conference {
 			return false;
 		return true;
 	}
+	
+	
+	public String getName() {
+		return this.name;
+	}
+	
+	public String getStartTimeStr() {
+		return this.startTime;
+	}
+	
+	public long getId() {
+		return this.id;
+	}
 
 	/**
 	 * <conf canaudio="1" candataop="1" canvideo="1" conftype="0" haskey="0" //
@@ -68,7 +81,7 @@ public class Conference {
 				.append(GlobalHolder.getInstance().getCurrentUserId())
 				.append("\" ").append("chairnickname=\"")
 				.append(GlobalHolder.getInstance().getCurrentUser().getName())
-				.append("\" ").append("</conf>");
+				.append("\"  starttime=\""+this.startTime+"\" >").append("</conf>");
 		return sb.toString();
 
 	}

@@ -85,7 +85,7 @@ public class Group {
 			this.mOwner = Long.parseLong(mOwner);
 		}
 		this.mCreateDate = createDate;
-		if (createDate != null) {
+		if (createDate != null && createDate.trim().length() > 0) {
 			Date d = new Date(Long.parseLong(createDate) * 1000);
 			DateFormat sd = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.US);
 			this.mCreateDate = sd.format(d);

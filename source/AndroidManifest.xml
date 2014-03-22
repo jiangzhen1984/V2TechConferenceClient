@@ -3,7 +3,7 @@
     package="com.v2tech"
     android:sharedUserLabel="@string/app_name"
     android:versionCode="1"
-    android:versionName="1.3.0.7" >
+    android:versionName="1.3.0.8" >
 
     <uses-sdk
         android:minSdkVersion="11"
@@ -54,7 +54,8 @@
         </activity>
         <activity
             android:name="com.v2tech.view.conference.ConferenceCreateActivity"
-            android:windowSoftInputMode="stateHidden|adjustUnspecified" >
+            android:windowSoftInputMode="stateHidden|adjustUnspecified"
+            >
             <intent-filter>
                 <action android:name="com.v2tech.start_conference_create_activity" />
 

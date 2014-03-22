@@ -142,6 +142,25 @@ public class GlobalHolder {
 			populateGroup(g);
 		}
 	}
+	
+	
+	public void addGroupToList(Group.GroupType gType, Group g) {
+		if (gType == Group.GroupType.CONTACT) {
+		} else if (gType == Group.GroupType.CONFERENCE) {
+			mConfGroup.add(g);
+		}
+	}
+	
+	public Group getGroupById(Group.GroupType gType, long gId) {
+		if (gType == Group.GroupType.CONFERENCE) {
+			for (Group g : mConfGroup) {
+				if (g.getmGId() == gId) {
+					return g;
+				}
+			}
+		}
+		return null;
+	}
 
 	private void populateGroup(Group g) {
 		mGroupHolder.put(Long.valueOf(g.getmGId()), g);
