@@ -55,6 +55,7 @@
         <activity
             android:name="com.v2tech.view.conference.ConferenceCreateActivity"
             android:windowSoftInputMode="stateHidden|adjustUnspecified"
+            android:screenOrientation="nosensor"
             >
             <intent-filter>
                 <action android:name="com.v2tech.start_conference_create_activity" />

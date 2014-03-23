@@ -420,14 +420,15 @@ public class ConferenceService extends AbstractHandler {
 			if (groupType == Group.GroupType.CONFERENCE.intValue()) {
 				List<Group> confList = GlobalHolder.getInstance().getGroup(
 						Group.GroupType.CONFERENCE);
-				boolean newGroupIdFlag = false;
+				boolean newGroupIdFlag = true;
 				for (Group g : confList) {
 					if (g.getmGId() == nGroupID) {
-						newGroupIdFlag = true;
+						newGroupIdFlag = false;
+						break;
 					}
 				}
 				// if doesn't find matched group, mean this is new group
-				if (!newGroupIdFlag) {
+				if (newGroupIdFlag) {
 					JNIResponse jniRes = new RequestConfCreateResponse(
 							nGroupID, 0,
 							RequestConfCreateResponse.Result.SUCCESS);

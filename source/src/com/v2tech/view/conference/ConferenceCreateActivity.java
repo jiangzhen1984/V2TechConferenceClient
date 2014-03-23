@@ -1,9 +1,13 @@
 package com.v2tech.view.conference;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 import android.app.Activity;
@@ -16,12 +20,15 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.text.Editable;
+import android.text.InputType;
 import android.text.TextUtils.TruncateAt;
 import android.text.TextWatcher;
 import android.view.Gravity;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnFocusChangeListener;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
@@ -31,8 +38,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ScrollView;
-import android.widget.TableLayout;
-import android.widget.TableRow;
 import android.widget.TextView;
 
 import com.v2tech.R;
@@ -44,6 +49,7 @@ import com.v2tech.logic.Group.GroupType;
 import com.v2tech.logic.User;
 import com.v2tech.logic.jni.RequestConfCreateResponse;
 import com.v2tech.service.ConferenceService;
+import com.v2tech.view.cus.DateTimePicker;
 
 public class ConferenceCreateActivity extends Activity {
 
@@ -67,7 +73,7 @@ public class ConferenceCreateActivity extends Activity {
 
 	private LinearLayout mErrorNotificationLayout;
 
-	private TableLayout mAttendeeContainer;
+	private LinearLayout mAttendeeContainer;
 
 	private View mScroller;
 
@@ -100,7 +106,7 @@ public class ConferenceCreateActivity extends Activity {
 		mContactsContainer.setOnItemClickListener(itemListener);
 		mContactsContainer.setAdapter(adapter);
 
-		mAttendeeContainer = (TableLayout) findViewById(R.id.conference_attendee_container);
+		mAttendeeContainer = (LinearLayout) findViewById(R.id.conference_attendee_container);
 		mAttendeeContainer.setGravity(Gravity.CENTER);
 		landLayout = mAttendeeContainer.getTag().equals("vertical") ? PAD_LAYOUT
 				: PHONE_LAYOUT;
@@ -110,11 +116,12 @@ public class ConferenceCreateActivity extends Activity {
 
 		mConfTitleET = (EditText) findViewById(R.id.conference_create_conf_name);
 		mConfStartTimeET = (EditText) findViewById(R.id.conference_create_conf_start_time);
-
+		//mConfStartTimeET.setOnFocusChangeListener(mDateTimePickerListener);
+		//mConfStartTimeET.setInputType(InputType.TYPE_NULL);
+		
 		new LoadContactsAT().execute();
 
 		searchedTextET = (EditText) findViewById(R.id.contacts_search);
-		searchedTextET.addTextChangedListener(textChangedListener);
 
 		mErrorNotificationLayout = (LinearLayout) findViewById(R.id.conference_create_error_notification);
 		mScroller = findViewById(R.id.conf_create_scroll_view);
@@ -128,11 +135,13 @@ public class ConferenceCreateActivity extends Activity {
 	@Override
 	protected void onStart() {
 		super.onStart();
+		searchedTextET.addTextChangedListener(textChangedListener);
 	}
 
 	@Override
 	protected void onStop() {
 		super.onStop();
+		searchedTextET.removeTextChangedListener(textChangedListener);
 	}
 
 	public boolean isScreenLarge() {
@@ -150,35 +159,20 @@ public class ConferenceCreateActivity extends Activity {
 	}
 
 	private void updateView(int pos) {
+
 		ListItem item = mItemList.get(pos);
 		if (item.g == null) {
 			return;
 		}
 		if (item.isExpanded == false) {
 			for (Group g : item.g.getChildGroup()) {
-				mItemList.add(++pos, new ListItem(g));
+				mItemList.add(++pos, new ListItem(g, g.getLevel()));
 			}
 			List<User> sortList = new ArrayList<User>();
 			sortList.addAll(item.g.getUsers());
 			Collections.sort(sortList);
 			for (User u : sortList) {
-				if (u.getmUserId() == GlobalHolder.getInstance()
-						.getCurrentUserId()) {
-					continue;
-				}
-				ListItem li = new ListItem(u);
-				mItemList.add(++pos, li);
-
-				boolean found = false;
-				for (User invitedUser : mAttendeeList) {
-					if (invitedUser.getmUserId() == u.getmUserId()) {
-						found = true;
-						break;
-					}
-				}
-				if (found) {
-					((ContactUserView) li.v).updateChecked();
-				}
+				mItemList.add(++pos, new ListItem(u, item.g.getLevel()));
 			}
 
 		} else {
@@ -207,6 +201,7 @@ public class ConferenceCreateActivity extends Activity {
 
 		item.isExpanded = !item.isExpanded;
 		adapter.notifyDataSetChanged();
+	
 	}
 
 	private void updateUserToAttendList(final User u) {
@@ -223,51 +218,84 @@ public class ConferenceCreateActivity extends Activity {
 		}
 
 		if (remove) {
-			int cot = mAttendeeContainer.getChildCount();
-			for (int i = 0; i < cot; i++) {
-				TableRow tr = (TableRow) mAttendeeContainer.getChildAt(i);
-				int jcot = tr.getChildCount();
-				for (int j = 0; j < jcot; j++) {
-					LinearLayout ll = (LinearLayout) tr.getChildAt(j);
-					if (u.getmUserId() == Long
-							.parseLong(ll.getTag().toString())) {
-						tr.removeView(ll);
-						if (tr.getChildCount() == 0) {
-							mAttendeeContainer.removeView(tr);
-						}
-						return;
-					}
-				}
-			}
-			return;
+			removeAttendee(u);
+		} else {
+			addAttendee(u);
 		}
 
+	}
+
+	private void removeAttendee(User u) {
+		mAttendeeContainer.removeAllViews();
+		for (User tmpU : mAttendeeList) {
+			addAttendee(tmpU);
+		}
+	}
+
+	private void addAttendee(User u) {
 		mAttendeeList.add(u);
 
 		int cot = mAttendeeContainer.getChildCount();
-		TableRow tr = null;
-		TableLayout.LayoutParams tbl = new TableLayout.LayoutParams(
-				TableLayout.LayoutParams.MATCH_PARENT,
-				TableLayout.LayoutParams.WRAP_CONTENT);
-		tbl.topMargin = 10;
+		LinearLayout lineLayout = null;
 		if (cot <= 0) {
-			tr = new TableRow(mContext);
-			mAttendeeContainer.addView(tr, tbl);
+			lineLayout = new LinearLayout(mContext);
+			mAttendeeContainer.addView(lineLayout,
+					new LinearLayout.LayoutParams(
+							LinearLayout.LayoutParams.MATCH_PARENT,
+							LinearLayout.LayoutParams.WRAP_CONTENT));
 		} else {
-			tr = (TableRow) mAttendeeContainer.getChildAt(cot - 1);
-			if (landLayout == PAD_LAYOUT) {
-				if (tr.getChildCount() == 4) {
-					tr = new TableRow(mContext);
-					mAttendeeContainer.addView(tr, tbl);
-				}
+			lineLayout = (LinearLayout) mAttendeeContainer.getChildAt(cot - 1);
+			if (landLayout == PAD_LAYOUT && lineLayout.getChildCount() == 4) {
+				lineLayout = new LinearLayout(mContext);
+				mAttendeeContainer.addView(lineLayout,
+						new LinearLayout.LayoutParams(
+								LinearLayout.LayoutParams.MATCH_PARENT,
+								LinearLayout.LayoutParams.WRAP_CONTENT));
 			}
 		}
+
+		final View v = getAttendeeView(u);
+		if (landLayout == PAD_LAYOUT) {
+			LinearLayout.LayoutParams par = new LinearLayout.LayoutParams(0,
+					LinearLayout.LayoutParams.WRAP_CONTENT);
+			par.weight = 0.25F;
+			lineLayout.addView(v, par);
+		} else {
+			lineLayout.addView(v);
+		}
+
+		if (mAttendeeContainer.getChildCount() > 0) {
+			if (this.landLayout == PAD_LAYOUT) {
+				((ScrollView) mScroller).postDelayed(new Runnable() {
+					@Override
+					public void run() {
+						((ScrollView) mScroller).scrollTo(0, v.getBottom());
+					}
+
+				}, 100L);
+			} else {
+				((HorizontalScrollView) mScroller).postDelayed(new Runnable() {
+					@Override
+					public void run() {
+						((HorizontalScrollView) mScroller).scrollTo(
+								v.getLeft(), 0);
+					}
+
+				}, 100L);
+			}
+		}
+	}
+
+	/**
+	 * Use to add scroll view
+	 * 
+	 * @param u
+	 * @return
+	 */
+	private View getAttendeeView(final User u) {
 		final LinearLayout ll = new LinearLayout(mContext);
 		ll.setOrientation(LinearLayout.VERTICAL);
 		ll.setGravity(Gravity.CENTER);
-		TableRow.LayoutParams tl = new TableRow.LayoutParams();
-		tl.column = tr.getChildCount();
-		tr.addView(ll, tl);
 
 		ImageView iv = new ImageView(mContext);
 		if (u.getAvatarBitmap() != null) {
@@ -301,42 +329,17 @@ public class ConferenceCreateActivity extends Activity {
 
 		});
 
-		if (mAttendeeContainer.getChildCount() > 0) {
-			if (this.landLayout == PAD_LAYOUT) {
-				((ScrollView) mScroller).postDelayed(new Runnable(){
-					@Override
-					public void run() {
-						((ScrollView) mScroller).scrollTo(0, ll
-								.getBottom());
-					}
-					
-				}, 100L);
-			} else {
-				((HorizontalScrollView) mScroller).postDelayed(new Runnable(){
-					@Override
-					public void run() {
-						((HorizontalScrollView) mScroller).scrollTo(ll
-								.getLeft(), 0);
-					}
-					
-				}, 100L);
-			}
-		}
-
+		return ll;
 	}
 
 	private void updateSearchedUserList(List<User> lu) {
 		mItemList = new ArrayList<ListItem>();
 		for (User u : lu) {
-			ListItem item = new ListItem(u);
+			ListItem item = new ListItem(u, -1);
 			((ContactUserView) item.v).removePadding();
 			mItemList.add(item);
 		}
 		adapter.notifyDataSetChanged();
-	}
-
-	private void doFinish(Intent i) {
-		setResult(Activity.RESULT_OK, i);
 	}
 
 	private TextWatcher textChangedListener = new TextWatcher() {
@@ -349,9 +352,11 @@ public class ConferenceCreateActivity extends Activity {
 					mIsStartedSearch = true;
 				}
 			} else {
-				mItemList = mCacheItemList;
-				adapter.notifyDataSetChanged();
-				mIsStartedSearch = false;
+				if (mIsStartedSearch) {
+					mItemList = mCacheItemList;
+					adapter.notifyDataSetChanged();
+					mIsStartedSearch = false;
+				}
 				return;
 			}
 			List<User> searchedUserList = new ArrayList<User>();
@@ -416,6 +421,19 @@ public class ConferenceCreateActivity extends Activity {
 				return;
 			}
 
+			DateFormat sd = new SimpleDateFormat("yyyy-MM-dd HH:mm",
+					Locale.CHINESE);
+			
+			try {
+				sd.parse(startTimeStr);
+			} catch (ParseException e) {
+				e.printStackTrace();
+				mConfStartTimeET
+						.setError(getString(R.string.error_conf_start_time_format_failed));
+				mConfStartTimeET.requestFocus();
+				return;
+			}
+
 			List<User> l = new ArrayList<User>(mAttendeeList);
 			conf = new Conference(title, startTimeStr, null, l);
 			cs.createConference(conf,
@@ -424,7 +442,21 @@ public class ConferenceCreateActivity extends Activity {
 		}
 
 	};
+	
+	
+	private OnFocusChangeListener mDateTimePickerListener = new OnFocusChangeListener() {
 
+		@Override
+		public void onFocusChange(View view, boolean focus) {
+			if (focus) {
+				DateTimePicker dtp = new DateTimePicker(mContext, 300, 150);
+				dtp.showAsDropDown(view);
+			}
+			
+		}
+		
+	};
+	
 	class LoadContactsAT extends AsyncTask<Void, Void, Void> {
 
 		@Override
@@ -432,7 +464,7 @@ public class ConferenceCreateActivity extends Activity {
 			mGroupList = GlobalHolder.getInstance().getGroup(GroupType.CONTACT);
 			if (mGroupList != null) {
 				for (Group g : mGroupList) {
-					mItemList.add(new ListItem(g));
+					mItemList.add(new ListItem(g, g.getLevel()));
 				}
 				adapter.notifyDataSetChanged();
 			}
@@ -447,21 +479,24 @@ public class ConferenceCreateActivity extends Activity {
 		User u;
 		View v;
 		boolean isExpanded;
+		int level;
 
-		public ListItem(Group g) {
+		public ListItem(Group g, int level) {
 			super();
 			this.g = g;
 			this.id = 0x02000000 | g.getmGId();
 			this.v = new ContactGroupView(mContext, g, null);
 			isExpanded = false;
+			this.level = level;
 		}
 
-		public ListItem(User u) {
+		public ListItem(User u, int level) {
 			super();
 			this.u = u;
 			this.id = 0x03000000 | u.getmUserId();
 			this.v = new ContactUserView(mContext, u);
 			isExpanded = false;
+			this.level = level;
 		}
 
 	}
@@ -515,7 +550,7 @@ public class ConferenceCreateActivity extends Activity {
 						.getObject();
 				User currU = GlobalHolder.getInstance().getCurrentUser();
 				Group g = new Group(rccr.getConfId(), GroupType.CONFERENCE,
-						conf.getName(), currU.getmUserId() + "", "");
+						conf.getName(), currU.getmUserId() + "", conf.getDate().getTime()/1000+"");
 				g.setOwnerUser(currU);
 				GlobalHolder.getInstance().addGroupToList(GroupType.CONFERENCE,
 						g);

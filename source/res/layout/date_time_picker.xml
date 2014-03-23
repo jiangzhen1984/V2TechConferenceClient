@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="#ffffff"
+    android:orientation="vertical" >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="1dp"
+        android:orientation="vertical" >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" >
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight=".2"
+                android:background="#949494"
+                android:gravity="center"
+                android:paddingLeft="5dp"
+                android:paddingRight="5dp"
+                android:text="@string/date_time_picker_year" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="1dp"
+                android:layout_weight=".2"
+                android:background="#949494"
+                android:gravity="center"
+                android:text="@string/date_time_picker_month_of_year" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="1dp"
+                android:layout_weight=".2"
+                android:background="#949494"
+                android:gravity="center"
+                android:text="@string/date_time_picker_day_of_month" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="1dp"
+                android:layout_weight=".2"
+                android:background="#949494"
+                android:gravity="center"
+                android:text="@string/date_time_picker_hour" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="1dp"
+                android:layout_weight=".2"
+                android:background="#949494"
+                android:gravity="center"
+                android:text="@string/date_time_picker_minute" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" >
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight=".2"
+                android:background="#f0f0f0"
+                android:gravity="center"
+                android:text="@string/date_time_picker_plus" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="1dp"
+                android:layout_weight=".2"
+                android:background="#f0f0f0"
+                android:gravity="center"
+                android:text="@string/date_time_picker_plus" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="1dp"
+                android:layout_weight=".2"
+                android:background="#f0f0f0"
+                android:gravity="center"
+                android:text="@string/date_time_picker_plus" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="1dp"
+                android:layout_weight=".2"
+                android:background="#f0f0f0"
+                android:gravity="center"
+                android:text="@string/date_time_picker_plus" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="1dp"
+                android:layout_weight=".2"
+                android:background="#f0f0f0"
+                android:gravity="center"
+                android:text="@string/date_time_picker_plus" />
+        </LinearLayout>
+        
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" >
+
+            <EditText
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight=".2"
+                android:background="#f0f0f0"
+                android:gravity="center"
+                android:inputType="number"
+                android:text="2006" />
+
+            <EditText
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="1dp"
+                android:layout_weight=".2"
+                android:background="#f0f0f0"
+                android:gravity="center"
+                android:inputType="number"
+                android:text="@string/date_time_picker_minus" />
+
+            <EditText
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="1dp"
+                android:layout_weight=".2"
+                android:background="#f0f0f0"
+                android:gravity="center"
+                android:inputType="number"
+                android:text="@string/date_time_picker_minus" />
+
+            <EditText
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="1dp"
+                android:layout_weight=".2"
+                android:background="#f0f0f0"
+                android:gravity="center"
+                android:inputType="number"
+                android:text="@string/date_time_picker_minus" />
+
+            <EditText
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="1dp"
+                android:layout_weight=".2"
+                android:gravity="center"
+                android:background="#f0f0f0"
+                android:inputType="number"
+                android:text="" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" >
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight=".2"
+                android:background="#f0f0f0"
+                android:gravity="center"
+                android:text="@string/date_time_picker_minus" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="1dp"
+                android:layout_weight=".2"
+                android:background="#f0f0f0"
+                android:gravity="center"
+                android:text="@string/date_time_picker_minus" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="1dp"
+                android:layout_weight=".2"
+                android:background="#f0f0f0"
+                android:gravity="center"
+                android:text="@string/date_time_picker_minus" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="1dp"
+                android:layout_weight=".2"
+                android:background="#f0f0f0"
+                android:gravity="center"
+                android:text="@string/date_time_picker_minus" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="1dp"
+                android:layout_weight=".2"
+                android:gravity="center"
+                android:background="#f0f0f0"
+                android:text="@string/date_time_picker_minus" />
+        </LinearLayout>
+    </LinearLayout>
+
+</LinearLayout>

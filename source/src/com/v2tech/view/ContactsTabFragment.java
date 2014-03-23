@@ -383,73 +383,7 @@ public class ContactsTabFragment extends Fragment {
 		adapter.notifyDataSetChanged();
 	}
 
-	private synchronized void updateUserViewPostion(int userId, int status) {
-		User.Status st = User.Status.fromInt(status);
-		int index = 0;
-		ListItem it = null;
-		boolean foundUserView = false;
-		for (ListItem li : mItemList) {
-			if (li.u != null && li.u.getmUserId() == userId) {
-				it = li;
-				// ((ContactUserView) li.v).updateStatus(st);
-				foundUserView = true;
-				break;
-			}
-			index++;
-		}
-		if (!foundUserView) {
-			return;
-		}
-
-		boolean updatePosFlag = false;
-		do {
-			if (st == User.Status.HIDDEN || st == User.Status.OFFLINE) {
-				++index;
-			} else {
-				--index;
-			}
-			if (index < 0) {
-				index = 0;
-				updatePosFlag = true;
-				break;
-			} else if (index >= mItemList.size()) {
-				index = mItemList.size() - 1;
-				updatePosFlag = true;
-				break;
-			}
-
-			ListItem item = mItemList.get(index);
-			if (item.u != null && item.u.getmStatus() == st) {
-				updatePosFlag = true;
-				break;
-				// if (item.u.compareTo(it.u) >= 0) {
-				// updatePosFlag = true;
-				// index -=1;
-				// break;
-				// } else {
-				// continue;
-				// }
-			} else if (item.g != null) {
-				updatePosFlag = true;
-				break;
-			} else if (index == mItemList.size() - 1) {
-				updatePosFlag = true;
-				break;
-			}
-		} while (index >= 0 && index < mItemList.size());
-
-		if (updatePosFlag) {
-			if (index == mItemList.size() - 1) {
-				mItemList.remove(it);
-				mItemList.add(it);
-			} else {
-				mItemList.remove(it);
-				mItemList.add(index, it);
-			}
-			adapter.notifyDataSetChanged();
-		}
-
-	}
+	
 
 	private void updateSearchedUserList(List<User> lu) {
 		mItemList = new ArrayList<ListItem>();

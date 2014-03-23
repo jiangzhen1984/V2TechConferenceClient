@@ -1,6 +1,11 @@
 package com.v2tech.logic;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class Conference {
 
@@ -10,6 +15,7 @@ public class Conference {
 	private String startTime;
 	private String endTime;
 	private List<User> invitedList;
+	private Date d;
 
 	public Conference(long id) {
 		this.id = id;
@@ -56,6 +62,19 @@ public class Conference {
 	
 	public String getStartTimeStr() {
 		return this.startTime;
+	}
+	
+	public Date getDate() {
+		if (d == null && this.startTime != null && this.startTime.trim().length() == 16) {
+			DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.CHINA);
+			try {
+				d = df.parse(this.startTime);
+			} catch (ParseException e) {
+				e.printStackTrace();
+			}
+			return d;
+		}
+		return null;
 	}
 	
 	public long getId() {

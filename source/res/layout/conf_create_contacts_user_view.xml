@@ -56,7 +56,8 @@
             android:layout_marginRight="15dp"
             android:layout_toLeftOf="@+id/conf_create_contact_view_ck"
             android:layout_toRightOf="@+id/contact_user_name"
-            android:ellipsize="middle"
+             android:ellipsize="end"
+            android:singleLine="true"
             android:text="TextView" />
 
         <CheckBox

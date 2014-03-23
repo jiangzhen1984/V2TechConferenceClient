@@ -166,7 +166,7 @@
                 android:layout_alignLeft="@+id/conference_create_conf_name"
                 android:background="@drawable/conference_create_et_bg"
                 android:ems="10"
-                android:inputType="datetime" >
+                android:inputType="none" >
             </EditText>
 
         
@@ -181,13 +181,14 @@
                 android:background="#f2f2f2"
                  >
 
-                <TableLayout
+                  <LinearLayout
                     android:id="@+id/conference_attendee_container"
-                    android:layout_width="wrap_content"
+                   android:layout_width="wrap_content"
                     android:layout_height="match_parent"
-                    android:tag="horizontal"
-                    android:stretchColumns="*" >
-                </TableLayout>
+                      android:tag="horizontal"
+                    android:orientation="horizontal" >
+
+                </LinearLayout>
             </HorizontalScrollView>
         </RelativeLayout>
     </RelativeLayout>
