@@ -29,9 +29,6 @@ public class Conference {
 		this.invitedList = invitedList;
 	}
 
-	public long getID() {
-		return this.id;
-	}
 
 	@Override
 	public int hashCode() {

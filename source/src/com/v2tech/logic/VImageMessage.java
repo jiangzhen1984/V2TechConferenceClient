@@ -181,7 +181,7 @@ public class VImageMessage extends VMessage {
 				.append("<TChatFont Color=\"255\" Name=\"Segoe UI\" Size=\"18\" Style=\"\"/>")
 				.append("</FontList>\n")
 				.append("<ItemList>\n")
-				.append("<TPictureChatItem NewLine=\"False\" AutoResize=\"True\" FileExt=\""
+				.append("<TPictureChatItem NewLine=\"True\" AutoResize=\"True\" FileExt=\""
 						+ mExtension
 						+ "\" GUID=\""
 						+ mUUID

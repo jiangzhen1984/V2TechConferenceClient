@@ -21,8 +21,8 @@
 
             <ImageView
                 android:id="@+id/contact_user_img"
-                android:layout_width="60dp"
-                android:layout_height="60dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
                 android:src="@drawable/avatar" />
 
@@ -37,11 +37,11 @@
 
         <TextView
             android:id="@+id/contact_user_name"
-            android:layout_width="100dp"
+            android:layout_width="80dp"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
-            android:layout_marginLeft="50dp"
-            android:layout_marginRight="30dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="15dp"
             android:layout_toRightOf="@+id/contact_user_img_container"
             android:ellipsize="end"
             android:singleLine="true"
@@ -52,7 +52,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
-            android:layout_marginLeft="85dp"
+            android:layout_marginLeft="10dp"
             android:layout_marginRight="15dp"
             android:layout_toLeftOf="@+id/conf_create_contact_view_ck"
             android:layout_toRightOf="@+id/contact_user_name"

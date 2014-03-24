@@ -303,7 +303,7 @@ public class ConferenceCreateActivity extends Activity {
 		} else {
 			iv.setImageResource(R.drawable.avatar);
 		}
-		ll.addView(iv, new LinearLayout.LayoutParams(45, 45));
+		ll.addView(iv, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
 
 		TextView tv = new TextView(mContext);
 		tv.setText(u.getName());

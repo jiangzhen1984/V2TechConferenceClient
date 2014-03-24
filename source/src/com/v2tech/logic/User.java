@@ -361,12 +361,11 @@ public class User implements Comparable<User> {
 
 		avatar = GlobalHolder.getInstance().getAvatarBm(this.mUserId);
 		if (avatar == null || avatar.isRecycled()) {
-			BitmapFactory.Options opt = null;
-			if (GlobalConfig.GLOBAL_DPI < DisplayMetrics.DENSITY_XHIGH) {
-				opt = new BitmapFactory.Options();
-				opt.inSampleSize = 2;
-			}
-			avatar = BitmapFactory.decodeFile(mAvatarPath, opt);
+			BitmapFactory.Options opt = new BitmapFactory.Options();
+			Bitmap tmep = BitmapFactory.decodeFile(mAvatarPath, opt);
+			avatar = Bitmap .createScaledBitmap(tmep, 100, 100, true);
+			tmep.recycle();
+			V2Log.d("decode result: width "+avatar.getWidth() +"  height:"+avatar.getHeight());
 		}
 		return avatar;
 	}

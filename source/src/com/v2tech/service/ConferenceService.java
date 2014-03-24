@@ -65,6 +65,7 @@ public class ConferenceService extends AbstractHandler {
 	private static final int JNI_REQUEST_SPEAK = 5;
 	private static final int JNI_REQUEST_RELEASE_SPEAK = 6;
 	private static final int JNI_REQUEST_CREATE_CONFERENCE = 7;
+	private static final int JNI_REQUEST_QUIT_CONFERENCE = 8;
 
 	private static final int JNI_ATTENDEE_ENTERED_NOTIFICATION = 57;
 	private static final int JNI_ATTENDEE_EXITED_NOTIFICATION = 58;
@@ -100,11 +101,12 @@ public class ConferenceService extends AbstractHandler {
 	public void requestEnterConference(Conference conf, Message caller) {
 		initTimeoutMessage(JNI_REQUEST_ENTER_CONF, null, DEFAULT_TIME_OUT_SECS,
 				caller);
-		ConfRequest.getInstance().enterConf(conf.getID());
+		ConfRequest.getInstance().enterConf(conf.getId());
 	}
 
 	/**
-	 * User request to quit conference
+	 * User request to quit conference. This API just use to for quit conference this time.<br>
+	 * User will receive this conference when log in next time.
 	 * 
 	 * @param conf
 	 *            {@link Conference} object which user wants to enter
@@ -116,9 +118,9 @@ public class ConferenceService extends AbstractHandler {
 	public void requestExitConference(Conference conf, Message caller) {
 		initTimeoutMessage(JNI_REQUEST_EXIT_CONF, null, DEFAULT_TIME_OUT_SECS,
 				caller);
-		ConfRequest.getInstance().exitConf(conf.getID());
+		ConfRequest.getInstance().exitConf(conf.getId());
 		// send response to caller because exitConf no call back from JNI
-		JNIResponse jniRes = new RequestExitedConfResponse(conf.getID(),
+		JNIResponse jniRes = new RequestExitedConfResponse(conf.getId(),
 				System.currentTimeMillis() / 1000, JNIResponse.Result.SUCCESS);
 		Message res = Message.obtain(this, JNI_REQUEST_EXIT_CONF, jniRes);
 		// send delayed message for that make sure send response after JNI
@@ -134,7 +136,13 @@ public class ConferenceService extends AbstractHandler {
 	 */
 	public void createConference(Conference conf, Message caller) {
 		if (conf == null) {
-			// TODO
+			if (caller != null) {
+				JNIResponse jniRes = new RequestConfCreateResponse(
+						0, 0,
+						RequestConfCreateResponse.Result.FAILED);
+				caller.obj = jniRes; 
+				caller.sendToTarget();
+			}
 			return;
 		}
 		initTimeoutMessage(JNI_REQUEST_CREATE_CONFERENCE, null, DEFAULT_TIME_OUT_SECS,
@@ -142,6 +150,29 @@ public class ConferenceService extends AbstractHandler {
 		GroupRequest.getInstance().createGroup(
 				Group.GroupType.CONFERENCE.intValue(),
 				conf.getConferenceConfigXml(), conf.getInvitedAttendeesXml());
+	}
+	
+	
+	/**
+	 * User request to quit this conference for ever.<br>
+	 * User never receive this conference information any more.
+	 * @param conf
+	 * @param caller
+	 */
+	public void quitConference(Conference conf, Message caller) {
+		if (conf == null) {
+			if (caller != null) {
+				JNIResponse jniRes = new RequestConfCreateResponse(
+						0, 0,
+						RequestConfCreateResponse.Result.FAILED);
+				caller.obj = jniRes; 
+				caller.sendToTarget();
+			}
+			return;
+		}
+		initTimeoutMessage(JNI_REQUEST_QUIT_CONFERENCE, null, DEFAULT_TIME_OUT_SECS,
+				caller);
+		GroupRequest.getInstance().leaveGroup(Group.GroupType.CONFERENCE.intValue(), conf.getId());
 	}
 
 	/**
@@ -165,11 +196,11 @@ public class ConferenceService extends AbstractHandler {
 		initTimeoutMessage(JNI_REQUEST_OPEN_VIDEO, null, DEFAULT_TIME_OUT_SECS,
 				caller);
 
-		VideoRequest.getInstance().openVideoDevice(conf.getID(),
+		VideoRequest.getInstance().openVideoDevice(conf.getId(),
 				userDevice.getUserID(), userDevice.getDeviceID(),
 				userDevice.getVp(), userDevice.getBusinessType());
 		JNIResponse jniRes = new RequestOpenUserVideoDeviceResponse(
-				conf.getID(), System.currentTimeMillis() / 1000,
+				conf.getId(), System.currentTimeMillis() / 1000,
 				RequestOpenUserVideoDeviceResponse.Result.SUCCESS);
 
 		// send delayed message for that make sure send response after JNI
@@ -199,11 +230,11 @@ public class ConferenceService extends AbstractHandler {
 		initTimeoutMessage(JNI_REQUEST_CLOSE_VIDEO, null,
 				DEFAULT_TIME_OUT_SECS, caller);
 
-		VideoRequest.getInstance().closeVideoDevice(conf.getID(),
+		VideoRequest.getInstance().closeVideoDevice(conf.getId(),
 				userDevice.getUserID(), userDevice.getDeviceID(),
 				userDevice.getVp(), userDevice.getBusinessType());
 		JNIResponse jniRes = new RequestCloseUserVideoDeviceResponse(
-				conf.getID(), System.currentTimeMillis() / 1000,
+				conf.getId(), System.currentTimeMillis() / 1000,
 				RequestCloseUserVideoDeviceResponse.Result.SUCCESS);
 
 		// send delayed message for that make sure send response after JNI

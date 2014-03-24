@@ -4,10 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
@@ -23,6 +25,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.EditText;
@@ -64,7 +67,8 @@ public class ConversationsTabFragment extends Fragment {
 	private static final int UPDATE_USER_AVATAR = 9;
 	private static final int UPDATE_CONVERSATION = 10;
 	private static final int UPDATE_SEARCHED_LIST = 11;
-	
+	private static final int REMOVE_CONVERSATION = 12;
+
 	private static final int SUB_ACTIVITY_CODE_CREATE_CONF = 100;
 
 	private Tab1BroadcastReceiver receiver = new Tab1BroadcastReceiver();
@@ -129,7 +133,6 @@ public class ConversationsTabFragment extends Fragment {
 			mFeatureIV = (ImageView) rootView
 					.findViewById(R.id.conversation_features);
 			mFeatureIV.setOnClickListener(mFeatureButtonListener);
-
 
 		} else {
 			((ViewGroup) rootView.getParent()).removeView(rootView);
@@ -211,17 +214,19 @@ public class ConversationsTabFragment extends Fragment {
 			Message.obtain(mHandler, REQUEST_EXIT_CONF, currentConfId)
 					.sendToTarget();
 		} else if (requestCode == SUB_ACTIVITY_CODE_CREATE_CONF) {
-			if (resultCode ==  Activity.RESULT_CANCELED) {
-				return;	
+			if (resultCode == Activity.RESULT_CANCELED) {
+				return;
 			}
-			
+
 			if (resultCode == Activity.RESULT_OK) {
 				long gid = data.getLongExtra("newGid", 0);
-				Group g = GlobalHolder.getInstance().getGroupById(GroupType.CONFERENCE, gid);
+				Group g = GlobalHolder.getInstance().getGroupById(
+						GroupType.CONFERENCE, gid);
 				if (g != null) {
 					Conversation cov = new ConferenceConversation(g);
-					final GroupLayout gp = new GroupLayout(this.getActivity(), cov);
-					
+					final GroupLayout gp = new GroupLayout(this.getActivity(),
+							cov);
+
 					mItemList.add(0, new ScrollItem(cov, gp));
 					adapter.notifyDataSetChanged();
 				} else {
@@ -323,32 +328,33 @@ public class ConversationsTabFragment extends Fragment {
 
 	};
 
-	
-	private  PopupWindow pw;
+	private PopupWindow pw;
 	private OnClickListener mFeatureButtonListener = new OnClickListener() {
 
 		@Override
 		public void onClick(View view) {
-			
+
 			if (pw != null) {
 				pw.showAsDropDown(view);
 				return;
 			}
 			LinearLayout root = new LinearLayout(mContext);
 			root.setOrientation(LinearLayout.VERTICAL);
-			root.setBackgroundColor(mContext.getResources().getColor(R.color.confs_title_bg));
+			root.setBackgroundColor(mContext.getResources().getColor(
+					R.color.confs_title_bg));
 			TextView createConferenceTV = new TextView(mContext);
 			createConferenceTV.setTextSize(18);
 			createConferenceTV.setGravity(Gravity.CENTER);
 			createConferenceTV.setText(R.string.conference_create_title);
-			createConferenceTV.setOnClickListener(mConferenceCreateButtonListener);
-			
+			createConferenceTV
+					.setOnClickListener(mConferenceCreateButtonListener);
+
 			LinearLayout.LayoutParams ll = new LinearLayout.LayoutParams(
-						LinearLayout.LayoutParams.MATCH_PARENT,
-						LinearLayout.LayoutParams.WRAP_CONTENT);
+					LinearLayout.LayoutParams.MATCH_PARENT,
+					LinearLayout.LayoutParams.WRAP_CONTENT);
 			ll.setMargins(5, 20, 5, 20);
 			ll.gravity = Gravity.CENTER;
-			root.addView(createConferenceTV,ll);
+			root.addView(createConferenceTV, ll);
 			pw = new PopupWindow(root, 200, 200, true);
 			pw.setBackgroundDrawable(new ColorDrawable(R.color.confs_title_bg));
 			pw.setOnDismissListener(new OnDismissListener() {
@@ -359,13 +365,12 @@ public class ConversationsTabFragment extends Fragment {
 				}
 
 			});
-			
+
 			pw.setFocusable(true);
 			pw.setTouchable(true);
 			pw.setOutsideTouchable(true);
 			pw.showAsDropDown(view);
-			
-			
+
 		}
 
 	};
@@ -464,6 +469,35 @@ public class ConversationsTabFragment extends Fragment {
 		}
 
 		gl.update(content, date, showNotification);
+
+	}
+
+	private void removeConversation(long id, String type) {
+		
+		if (Conversation.TYPE_CONTACT.equals(type)) {
+			
+			mContext.getContentResolver().delete(
+					ContentDescriptor.Conversation.CONTENT_URI,
+					ContentDescriptor.Conversation.Cols.EXT_ID + "=? and "
+							+ ContentDescriptor.Conversation.Cols.TYPE + "=?",
+					new String[] { id + "", type });
+			GlobalHolder.getInstance().removeConversation(type, id);
+			//FIXME remove notification?
+		} else if (Conversation.TYPE_CONFERNECE.equals(type)) {
+			this.cb.quitConference(new Conference(id), null);
+		} else {
+			V2Log.e(" Unkonw type:"+type);
+		}
+		
+		for (ScrollItem li : mItemList) {
+			if (li.cov.getExtId() == id) {
+				mItemList.remove(li);
+				break;
+			}
+		}
+		
+		adapter.notifyDataSetChanged();
+
 	}
 
 	class ScrollItem {
@@ -474,6 +508,42 @@ public class ConversationsTabFragment extends Fragment {
 			super();
 			this.cov = g;
 			this.gp = gp;
+			this.gp.setOnLongClickListener(mLongClickListener);
+			this.gp.setTag(new String[]{cov.getName(), cov.getExtId()+"", cov.getType()});
+		}
+
+	}
+
+	private OnLongClickListener mLongClickListener = new OnLongClickListener() {
+
+		@Override
+		public boolean onLongClick(final View v) {
+
+			final String[] tags = (String[])v.getTag();
+			AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+			builder.setTitle(tags[0].toString()).setItems(
+					new String[] { mContext.getResources().getString(
+							R.string.conversations_delete_conversaion) },
+					new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog, int which) {
+							removeConversation(Long.parseLong(tags[1]), tags[2]);
+						}
+					});
+			AlertDialog ad = builder.create();
+			ad.show();
+			return true;
+		}
+
+	};
+
+	class RemoveConversationRequest {
+		long id;
+		String type;
+
+		public RemoveConversationRequest(long id, String type) {
+			super();
+			this.id = id;
+			this.type = type;
 		}
 
 	}
@@ -667,6 +737,8 @@ public class ConversationsTabFragment extends Fragment {
 
 				break;
 			case UPDATE_SEARCHED_LIST:
+				break;
+			case REMOVE_CONVERSATION:
 				break;
 			}
 		}

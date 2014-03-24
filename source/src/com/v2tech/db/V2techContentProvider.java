@@ -18,9 +18,26 @@ public class V2techContentProvider extends ContentProvider {
 	private V2TechDBHelper mOpenHelper;
 
 	@Override
-	public int delete(Uri arg0, String arg1, String[] arg2) {
-		return 0;
+	public int delete(Uri uri, String selection, String[] selectionsArgs) {
+		int ret = 0 ;
+		SQLiteDatabase db = mOpenHelper.getWritableDatabase();
+		int token = ContentDescriptor.URI_MATCHER.match(uri);
+		String table = null;
+		switch (token) {
+		case ContentDescriptor.Messages.TOKEN:
+			table = ContentDescriptor.Messages.NAME;
+			break;
+		case ContentDescriptor.Conversation.TOKEN:
+			table = ContentDescriptor.Conversation.NAME;
+			break;
+		}
+		if (table != null) {
+			ret = db.delete(table, selection, selectionsArgs);
+			getContext().getContentResolver().notifyChange(uri, null);
+		}
+		return ret;
 	}
+	
 
 	@Override
 	public String getType(Uri arg0) {
@@ -82,6 +99,7 @@ public class V2techContentProvider extends ContentProvider {
 	@Override
 	public int update(Uri uri, ContentValues values, String selection,
 			String[] args) {
+		int ret = 0 ;
 		SQLiteDatabase db = mOpenHelper.getWritableDatabase();
 		int token = ContentDescriptor.URI_MATCHER.match(uri);
 		String table = null;
@@ -94,10 +112,10 @@ public class V2techContentProvider extends ContentProvider {
 			break;
 		}
 		if (table != null) {
-			db.update(table, values, selection, args);
+			ret = db.update(table, values, selection, args);
 			getContext().getContentResolver().notifyChange(uri, null);
 		}
-		return 0;
+		return ret;
 	}
 
 }

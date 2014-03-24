@@ -10,4 +10,5 @@
    <string name="error_request_enter_conference">登入会议出错!</string>
    <string name="requesting_enter_conference">正在登入.....</string>
    <string name="error_can_not_connect_server">无法链接到服务器</string>
+   <string name="conversations_delete_conversaion">删除该会话</string>
 </resources>

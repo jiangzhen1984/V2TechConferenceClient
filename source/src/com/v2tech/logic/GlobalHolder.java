@@ -298,6 +298,16 @@ public class GlobalHolder {
 		return null;
 	}
 	
+	public void removeConversation(String type, long extId) {
+		for (Conversation c : this.mConversationHolder) {
+			if (c.getExtId() == extId
+					&& ((type == null && c.getType() == type) || (type != null && type
+							.equals(c.getType())))) {
+				mConversationHolder.remove(c);
+			}
+		}
+	}
+	
 	
 	public int getNoticatorCount() {
 		int c = 0;
