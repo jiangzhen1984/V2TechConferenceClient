@@ -188,6 +188,7 @@ public class ConversationsTabFragment extends Fragment {
 			intentFilter.addAction(PublicIntent.UPDATE_CONVERSATION);
 			intentFilter
 					.addAction(JNIService.JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION);
+			intentFilter.addAction(JNIService.JNI_BROADCAST_CONFERENCE_INVATITION);
 
 		}
 		return intentFilter;
@@ -236,6 +237,36 @@ public class ConversationsTabFragment extends Fragment {
 		}
 	}
 
+	
+	
+	private void populateConversation(final Group g, boolean flag) {
+		Conversation cov = new ConferenceConversation(g);
+		final GroupLayout gp = new GroupLayout(this.getActivity(), cov);
+		gp.updateNotificator(flag);
+		gp.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				// // TODO hidden request to enter conference feature
+				mWaitingDialog = ProgressDialog
+						.show(getActivity(),
+								"",
+								getActivity()
+										.getResources()
+										.getString(
+												R.string.requesting_enter_conference),
+								true);
+				currentConfId = g.getmGId();
+				Message.obtain(mHandler, REQUEST_ENTER_CONF,
+						Long.valueOf(g.getmGId())).sendToTarget();
+				gp.updateNotificator(false);
+			}
+
+		});
+		mItemList.add(0, new ScrollItem(cov, gp));
+	}
+	
+	
 	private void populateConversation(List<Group> list) {
 		if (list == null || list.size() <= 0) {
 			V2Log.w(" group list is null");
@@ -243,28 +274,7 @@ public class ConversationsTabFragment extends Fragment {
 		}
 
 		for (final Group g : list) {
-			Conversation cov = new ConferenceConversation(g);
-			final GroupLayout gp = new GroupLayout(this.getActivity(), cov);
-			gp.setOnClickListener(new OnClickListener() {
-
-				@Override
-				public void onClick(View v) {
-					// // TODO hidden request to enter conference feature
-					mWaitingDialog = ProgressDialog
-							.show(getActivity(),
-									"",
-									getActivity()
-											.getResources()
-											.getString(
-													R.string.requesting_enter_conference),
-									true);
-					currentConfId = g.getmGId();
-					Message.obtain(mHandler, REQUEST_ENTER_CONF,
-							Long.valueOf(g.getmGId())).sendToTarget();
-				}
-
-			});
-			mItemList.add(0, new ScrollItem(cov, gp));
+			populateConversation(g, false);
 		}
 		adapter.notifyDataSetChanged();
 
@@ -623,6 +633,16 @@ public class ConversationsTabFragment extends Fragment {
 							g.setOwnerUser(u);
 						}
 					}
+				}
+			} else if (JNIService.JNI_BROADCAST_CONFERENCE_INVATITION.equals(intent.getAction())) {
+				long gid = intent.getLongExtra("gid", 0);
+				Group g = GlobalHolder.getInstance().getGroupById(GroupType.CONFERENCE, gid);
+				if (g != null) {
+					g.setOwnerUser(GlobalHolder.getInstance().getUser(g.getOwner()));
+					populateConversation(g, true);
+					adapter.notifyDataSetChanged();
+				} else {
+					V2Log.e("Can not get group information of invatition :"+ gid);
 				}
 			}
 		}

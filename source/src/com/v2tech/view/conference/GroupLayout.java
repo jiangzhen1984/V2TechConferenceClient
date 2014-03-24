@@ -165,6 +165,14 @@ public class GroupLayout extends LinearLayout {
 		}
 
 	};
+	
+	public void updateNotificator(boolean flag) {
+		if (flag) {
+			mNotificatorIV.setVisibility(View.VISIBLE);
+		} else {
+			mNotificatorIV.setVisibility(View.GONE);
+		}
+	}
 
 	public void updateGroupOwner(String name) {
 		mGroupNameTV.setText(name);

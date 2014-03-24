@@ -469,6 +469,17 @@ public class ConferenceService extends AbstractHandler {
 				}
 			}
 		}
+
+		@Override
+		public void OnInviteJoinGroupCallback(int groupType, String groupInfo,
+				String userInfo, String additInfo) {
+			
+		}
+		
+		
+		
+		
+		
 	}
 
 }

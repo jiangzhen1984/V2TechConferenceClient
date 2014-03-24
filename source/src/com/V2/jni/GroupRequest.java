@@ -230,8 +230,12 @@ public class GroupRequest {
 
 	private void OnInviteJoinGroup(int groupType, String groupInfo,
 			String userInfo, String additInfo) {
-		Log.e("ImRequest UI", "OnInviteJoinGroup::������Ѽ�����" + groupType + ":"
+		V2Log.d("OnInviteJoinGroup::==>" + groupType + ":"
 				+ groupInfo + ":" + userInfo + ":" + additInfo);
+		for (GroupRequestCallback callback : callbacks) {
+			callback.OnInviteJoinGroupCallback(groupType, groupInfo, userInfo,  additInfo);
+		}
+
 	}
 
 	private void OnMoveUserToGroup(int groupType, long srcGroupID,

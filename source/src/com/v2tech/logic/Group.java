@@ -282,6 +282,52 @@ public class Group {
 			return false;
 		return true;
 	}
+	
+	
+	/**
+	 * <conf createuserid='1138' id='513956640327' starttime='2012' subject=' 啊'/>
+		<user id='1138' uetype='2'/>
+	 * @param type
+	 * @param xml
+	 * @return
+	 */
+	public static Group parseConferenceGroupFromXML(int type, String xml) {
+		if (type == Group.GroupType.CONFERENCE.intValue()) {
+			String strId = null;
+			String name = null;
+			String owner = null;
+			String startTimeStr = null;
+			int start, end = -1;
+			start = xml.indexOf("createuserid='");
+			if (start != -1) {
+				end = xml.indexOf("'", start + 14);
+				if (end != -1) {
+					owner = xml.substring(start+14, end);
+				}
+			}
+			
+			start = xml.indexOf(" id='");
+			if (start != -1) {
+				end = xml.indexOf("'", start + 5);
+				if (end != -1) {
+					strId = xml.substring(start+5, end);
+				}
+			}
+			
+			start = xml.indexOf("subject='");
+			if (start != -1) {
+				end = xml.indexOf("'", start + 9);
+				if (end != -1) {
+					name = xml.substring(start+9, end);
+				}
+			}
+			
+			Group g = new Group (Long.parseLong(strId), GroupType.CONFERENCE, name, owner, null);
+			return g;
+		} else {
+			return null;
+		}
+	}
 
 	/**
 	 * 

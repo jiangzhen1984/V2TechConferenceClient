@@ -1,5 +1,7 @@
 package com.V2.jni;
 
+import android.util.Log;
+
 /**
  * 
  * @author 28851274
@@ -53,14 +55,32 @@ public interface GroupRequestCallback {
 	 */
 	public void OnGetGroupUserInfoCallback(int groupType, long nGroupID,
 			String sXml);
-	
-	
+
 	/**
-	 * <ul>Group information update callback</ul>
-	 * <ul>TODO: as now only support conference create call back</ul>
-	 * @param groupType 4: conference
-	 * @param nGroupID new conference ID
+	 * <ul>
+	 * Group information update callback
+	 * </ul>
+	 * <ul>
+	 * TODO: as now only support conference create call back
+	 * </ul>
+	 * 
+	 * @param groupType
+	 *            4: conference
+	 * @param nGroupID
+	 *            new conference ID
 	 * @param sXml
 	 */
-	public void OnModifyGroupInfoCallback(int groupType, long nGroupID, String sXml);
+	public void OnModifyGroupInfoCallback(int groupType, long nGroupID,
+			String sXml);
+	
+	/**
+	 * <ul>Invitation call back.</ul>
+	 * <ul>If other users invite this user to join conference, then this call back will be called. </ul>
+	 * @param groupType  4 means conference invitation.
+	 * @param groupInfo if it's conference invitation, {@code <conf createuserid='1138' id='513956640327' starttime='2012' subject=' 啊'/>}
+	 * @param userInfo if it's conference invitation {@code <user id='1138' uetype='2'/>}
+	 * @param additInfo
+	 */
+	public void OnInviteJoinGroupCallback(int groupType, String groupInfo,
+			String userInfo, String additInfo);
 }

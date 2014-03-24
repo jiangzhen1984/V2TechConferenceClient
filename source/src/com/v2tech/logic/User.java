@@ -363,7 +363,13 @@ public class User implements Comparable<User> {
 		if (avatar == null || avatar.isRecycled()) {
 			BitmapFactory.Options opt = new BitmapFactory.Options();
 			Bitmap tmep = BitmapFactory.decodeFile(mAvatarPath, opt);
-			avatar = Bitmap .createScaledBitmap(tmep, 100, 100, true);
+			if (GlobalConfig.GLOBAL_DPI == DisplayMetrics.DENSITY_HIGH) {
+				avatar = Bitmap .createScaledBitmap(tmep, 60, 60, true);
+			} else if (GlobalConfig.GLOBAL_DPI >= DisplayMetrics.DENSITY_XHIGH) {
+				avatar = Bitmap .createScaledBitmap(tmep, 100, 100, true);
+			} else {
+				avatar = Bitmap .createScaledBitmap(tmep, 100, 100, true);
+			}
 			tmep.recycle();
 			V2Log.d("decode result: width "+avatar.getWidth() +"  height:"+avatar.getHeight());
 		}

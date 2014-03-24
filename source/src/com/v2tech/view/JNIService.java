@@ -10,8 +10,6 @@ import android.app.Service;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -41,6 +39,7 @@ import com.v2tech.db.ContentDescriptor;
 import com.v2tech.logic.AsynResult;
 import com.v2tech.logic.GlobalHolder;
 import com.v2tech.logic.Group;
+import com.v2tech.logic.Group.GroupType;
 import com.v2tech.logic.NetworkStateCode;
 import com.v2tech.logic.User;
 import com.v2tech.logic.UserDeviceConfig;
@@ -74,6 +73,7 @@ public class JNIService extends Service {
 	public static final String JNI_BROADCAST_ATTENDEE_ENTERED_NOTIFICATION = "com.v2tech.jni.broadcast.attendee.entered.notification";
 	public static final String JNI_BROADCAST_ATTENDEE_EXITED_NOTIFICATION = "com.v2tech.jni.broadcast.attendee.exited.notification";
 	public static final String JNI_BROADCAST_NEW_MESSAGE = "com.v2tech.jni.broadcast.new.message";
+	public static final String JNI_BROADCAST_CONFERENCE_INVATITION = "com.v2tech.jni.broadcast.conference_invatition";
 
 	private boolean isDebug = true;
 
@@ -576,6 +576,26 @@ public class JNIService extends Service {
 				String sXml) {
 			
 		}
+
+		@Override
+		public void OnInviteJoinGroupCallback(int groupType, String groupInfo,
+				String userInfo, String additInfo) {
+			GroupType gType = GroupType.fromInt(groupType);
+			Group g = Group.parseConferenceGroupFromXML(groupType, groupInfo);
+			if (g != null) {
+				GlobalHolder.getInstance().addGroupToList(gType, g);
+				if (gType == GroupType.CONFERENCE) {
+					Intent i = new Intent();
+					i.setAction(JNIService.JNI_BROADCAST_CONFERENCE_INVATITION);
+					i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
+					i.putExtra("gid", g.getmGId());
+					sendBroadcast(i);
+				}
+				
+			}
+		}
+		
+		
 		
 		
 
