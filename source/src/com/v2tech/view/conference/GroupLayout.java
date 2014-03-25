@@ -14,6 +14,7 @@ import android.widget.TextView;
 
 import com.v2tech.R;
 import com.v2tech.db.ContentDescriptor;
+import com.v2tech.logic.ConferenceConversation;
 import com.v2tech.logic.ContactConversation;
 import com.v2tech.logic.Conversation;
 import com.v2tech.logic.GlobalHolder;
@@ -85,6 +86,11 @@ public class GroupLayout extends LinearLayout {
 				}
 
 			});
+		} else if (mConv.getType().equals(Conversation.TYPE_CONFERNECE)
+				) {
+			if ( ((ConferenceConversation) mConv).getGroup().getOwner() != GlobalHolder
+						.getInstance().getCurrentUserId())
+			mGroupIV.setImageResource(R.drawable.conference_icon_o);
 		}
 		if (this.mConv.getNotiFlag() == Conversation.NOTIFICATION) {
 			mNotificatorIV.setVisibility(View.VISIBLE);
@@ -99,7 +105,6 @@ public class GroupLayout extends LinearLayout {
 		return mConv.getExtId();
 	}
 
-	
 	public void update(String content, String date, boolean flag) {
 		if (flag) {
 			mNotificatorIV.setVisibility(View.VISIBLE);
@@ -165,7 +170,7 @@ public class GroupLayout extends LinearLayout {
 		}
 
 	};
-	
+
 	public void updateNotificator(boolean flag) {
 		if (flag) {
 			mNotificatorIV.setVisibility(View.VISIBLE);
@@ -177,7 +182,7 @@ public class GroupLayout extends LinearLayout {
 	public void updateGroupOwner(String name) {
 		mGroupNameTV.setText(name);
 	}
-	
+
 	public void updateContent(String content) {
 		mGroupOwnerTV.setText(content);
 	}

@@ -11,6 +11,7 @@ import v2av.VideoRecorder;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -45,6 +46,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.v2tech.R;
+import com.v2tech.logic.AsynResult;
 import com.v2tech.logic.Attendee;
 import com.v2tech.logic.CameraConfiguration;
 import com.v2tech.logic.Conference;
@@ -52,6 +54,8 @@ import com.v2tech.logic.ConferencePermission;
 import com.v2tech.logic.GlobalHolder;
 import com.v2tech.logic.User;
 import com.v2tech.logic.UserDeviceConfig;
+import com.v2tech.logic.jni.JNIResponse;
+import com.v2tech.logic.jni.RequestEnterConfResponse;
 import com.v2tech.service.ConferenceService;
 import com.v2tech.util.V2Log;
 import com.v2tech.view.JNIService;
@@ -65,9 +69,11 @@ public class VideoActivityV2 extends Activity {
 	private static final int REQUEST_CLOSE_DEVICE_RESPONSE = 5;
 	private static final int REQUEST_OPEN_OR_CLOSE_DEVICE = 6;
 	private static final int NOTIFICATION_KICKED = 7;
+	private static final int REQUEST_ENTER_CONF = 8;
+	private static final int REQUEST_ENTER_CONF_RESPONSE = 9;
+	private static final int REQUEST_EXIT_CONF = 10;
 
-	private static final int USER_ENTERED_CONF = 21;
-	private static final int USER_EXITED_CONF = 22;
+	private static final int ATTENDEE_LISTENER = 21;
 	private static final int CONF_USER_DEVICE_EVENT = 23;
 
 	public static final String JNI_EVENT_VIDEO_CATEGORY = "com.v2tech.conf_video_event";
@@ -91,6 +97,7 @@ public class VideoActivityV2 extends Activity {
 	private Dialog mQuitDialog;
 	private static int Measuredwidth = 0;
 	private static int Measuredheight = 0;
+	private ProgressDialog mWaitingDialog;
 
 	private Conference conf;
 
@@ -239,21 +246,7 @@ public class VideoActivityV2 extends Activity {
 							Toast.LENGTH_LONG).show();
 					;
 				}
-			} else if (intent.getAction().equals(
-					JNIService.JNI_BROADCAST_ATTENDEE_EXITED_NOTIFICATION)
-					|| intent
-							.getAction()
-							.equals(JNIService.JNI_BROADCAST_ATTENDEE_ENTERED_NOTIFICATION)) {
-				long uid = intent.getLongExtra("uid", -1);
-				String name = intent.getExtras().getString("name");
-				if (uid < 0) {
-					Toast.makeText(mContext, "Invalid user id",
-							Toast.LENGTH_SHORT).show();
-					return;
-				}
-				sendAttendActionMessage(intent.getAction(), new User(uid, name));
-
-			}
+			} 
 		}
 
 	};
@@ -261,6 +254,7 @@ public class VideoActivityV2 extends Activity {
 	@Override
 	protected void onStart() {
 		super.onStart();
+		requestEnterConf();
 		adjustLayout();
 		Message.obtain(mVideoHandler, ONLY_SHOW_LOCAL_VIDEO).sendToTarget();
 	}
@@ -271,23 +265,9 @@ public class VideoActivityV2 extends Activity {
 		filter.addAction(JNI_EVENT_VIDEO_CATEGORY_OPEN_VIDEO_EVENT_ACTION);
 
 		filter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
-		filter.addAction(JNIService.JNI_BROADCAST_ATTENDEE_EXITED_NOTIFICATION);
-		filter.addAction(JNIService.JNI_BROADCAST_ATTENDEE_ENTERED_NOTIFICATION);
-		Intent i = mContext.registerReceiver(mConfUserChangeReceiver, filter);
-		if (i != null
-				&& i.getAction().equals(
-						JNIService.JNI_BROADCAST_ATTENDEE_ENTERED_NOTIFICATION)) {
-			V2Log.i(" get stickly intent");
-			long uid = i.getLongExtra("uid", -1);
-			String name = i.getExtras().getString("name");
-			if (uid < 0) {
-				Toast.makeText(mContext, "Invalid user id", Toast.LENGTH_SHORT)
-						.show();
-				return;
-			}
-			sendAttendActionMessage(i.getAction(), new User(uid, name));
-		}
-
+		mContext.registerReceiver(mConfUserChangeReceiver, filter);
+		
+		cb.registerAttendeeListener(this.mVideoHandler, ATTENDEE_LISTENER, null);
 	}
 	
 	private void registerOrRemoveListener(boolean flag) {
@@ -322,19 +302,6 @@ public class VideoActivityV2 extends Activity {
 		}
 
 		conf = new Conference(mGroupId);
-	}
-
-	/**
-	 * 
-	 * @param action
-	 * @param u
-	 */
-	private void sendAttendActionMessage(String action, User u) {
-		V2Log.i(" send attendee action " + action);
-		Message.obtain(
-				mVideoHandler,
-				action.equals(JNIService.JNI_BROADCAST_ATTENDEE_ENTERED_NOTIFICATION) ? USER_ENTERED_CONF
-						: USER_EXITED_CONF, u).sendToTarget();
 	}
 
 	/**
@@ -471,6 +438,7 @@ public class VideoActivityV2 extends Activity {
 		}
 		mVideoLayout.removeAllViews();
 		registerOrRemoveListener(false);
+		cb.removeAttendeeListener(this.mVideoHandler, ATTENDEE_LISTENER, null);
 	}
 
 	@Override
@@ -556,6 +524,8 @@ public class VideoActivityV2 extends Activity {
 		VideoRecorder.VideoPreviewSurfaceHolder = null;
 		mAttendeeList.clear();
 		mCurrentShowedSV.clear();
+		Message.obtain(this.mVideoHandler, REQUEST_EXIT_CONF, this.mGroupId)
+		.sendToTarget();
 	}
 
 	@Override
@@ -680,7 +650,7 @@ public class VideoActivityV2 extends Activity {
 				LinearLayout.LayoutParams.MATCH_PARENT,
 				LinearLayout.LayoutParams.WRAP_CONTENT);
 
-		for (int i = 1; i < a.getmDevices().size(); i++) {
+		for (int i = 1; a.getmDevices() != null && i < a.getmDevices().size(); i++) {
 			RelativeLayout rlm = new RelativeLayout(mContext);
 
 			final UserDeviceConfig udc = a.getmDevices().get(i);
@@ -724,6 +694,20 @@ public class VideoActivityV2 extends Activity {
 		return root;
 	}
 
+	
+	
+	private void requestEnterConf() {
+		mWaitingDialog = ProgressDialog
+				.show(mContext,
+						"",
+						mContext
+								.getResources()
+								.getString(
+										R.string.requesting_enter_conference),
+						true);
+		Message.obtain(mVideoHandler, REQUEST_ENTER_CONF,
+				Long.valueOf(mGroupId)).sendToTarget();
+	}
 	/**
 	 * Handle event which user exited conference
 	 * 
@@ -882,11 +866,12 @@ public class VideoActivityV2 extends Activity {
 			case CONF_USER_DEVICE_EVENT:
 				// recordUserDevice((ConfUserDeviceInfo) msg.obj);
 				break;
-			case USER_ENTERED_CONF:
-				doHandleNewUserEntered((User) msg.obj);
-				break;
-			case USER_EXITED_CONF:
-				doHandleUserExited((User) msg.obj);
+			case ATTENDEE_LISTENER:
+				if (msg.arg1 == 1) {
+					doHandleNewUserEntered((User) msg.obj);
+				} else {
+					doHandleUserExited((User) msg.obj);
+				}
 				break;
 			case REQUEST_OPEN_OR_CLOSE_DEVICE:
 				if (msg.arg1 == 0) {
@@ -905,6 +890,40 @@ public class VideoActivityV2 extends Activity {
 				quit();
 				finish();
 				break;
+			case REQUEST_ENTER_CONF:
+				cb.requestEnterConference(new Conference((Long) msg.obj),
+						Message.obtain(this, REQUEST_ENTER_CONF_RESPONSE));
+				break;
+			case REQUEST_ENTER_CONF_RESPONSE:
+				AsynResult ar = (AsynResult) msg.obj;
+				if (ar.getState() == AsynResult.AsynState.SUCCESS) {
+					RequestEnterConfResponse recr = (RequestEnterConfResponse) ar
+							.getObject();
+					if (recr.getResult() == JNIResponse.Result.SUCCESS) {
+						
+					} else {
+						Toast.makeText(mContext,
+								R.string.error_request_enter_conference,
+								Toast.LENGTH_SHORT).show();
+					}
+
+				} else if (ar.getState() == AsynResult.AsynState.TIME_OUT) {
+					Toast.makeText(mContext,
+							R.string.error_request_enter_conference_time_out,
+							Toast.LENGTH_SHORT).show();
+				} else {
+					Toast.makeText(mContext,
+							R.string.error_request_enter_conference,
+							Toast.LENGTH_SHORT).show();
+				}
+				if (mWaitingDialog != null) {
+					mWaitingDialog.dismiss();
+				}
+				break;
+			case REQUEST_EXIT_CONF:
+				cb.requestExitConference(new Conference((Long) msg.obj), null);
+				break;
+				
 			}
 		}
 

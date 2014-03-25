@@ -19,6 +19,7 @@ import com.v2tech.logic.ConferencePermission;
 import com.v2tech.logic.GlobalHolder;
 import com.v2tech.logic.Group;
 import com.v2tech.logic.Registrant;
+import com.v2tech.logic.User;
 import com.v2tech.logic.UserDeviceConfig;
 import com.v2tech.logic.jni.JNIResponse;
 import com.v2tech.logic.jni.RequestCloseUserVideoDeviceResponse;
@@ -69,8 +70,6 @@ public class ConferenceService extends AbstractHandler {
 	private static final int JNI_REQUEST_CREATE_CONFERENCE = 7;
 	private static final int JNI_REQUEST_QUIT_CONFERENCE = 8;
 
-	private static final int JNI_ATTENDEE_ENTERED_NOTIFICATION = 57;
-	private static final int JNI_ATTENDEE_EXITED_NOTIFICATION = 58;
 	private static final int JNI_UPDATE_CAMERA_PAR = 75;
 
 	private VideoRequestCB videoCallback;
@@ -339,6 +338,25 @@ public class ConferenceService extends AbstractHandler {
 			}
 		}
 	}
+	
+	
+	
+	private List<Registrant> registerAttendeeStatusListenersList = new ArrayList<Registrant>();
+	/**
+	 * Register listener for out conference by kick.
+	 * @param msg
+	 */
+	public void registerAttendeeListener(Handler h, int what, Object obj) {
+		registerAttendeeStatusListenersList.add(new Registrant(h, what, obj));
+	}
+	
+	public void removeAttendeeListener(Handler h, int what, Object obj) {
+		for (Registrant re : registerAttendeeStatusListenersList) {
+			if (re.getHandler() == h && what == re.getWhat()) {
+				registerAttendeeStatusListenersList.remove(re);
+			}
+		}
+	}
 
 	@Override
 	public void handleMessage(Message msg) {
@@ -347,7 +365,7 @@ public class ConferenceService extends AbstractHandler {
 		// remove time out message
 		Message caller = super.removeTimeoutMessage(msg.what);
 		if (caller == null) {
-			V2Log.w("Igore message client don't expect callback");
+			V2Log.w("Igore message client don't expect callback :"+msg.what);
 			return;
 		}
 		switch (msg.what) {
@@ -399,9 +417,14 @@ public class ConferenceService extends AbstractHandler {
 				int end = szUserInfos.indexOf("'", start + 4);
 				if (end != -1) {
 					String id = szUserInfos.substring(start + 4, end);
-					Message.obtain(mCallbackHandler,
-							JNI_ATTENDEE_ENTERED_NOTIFICATION, id)
-							.sendToTarget();
+					User u = GlobalHolder.getInstance().getUser(Long.parseLong(id));
+					for (Registrant re : registerAttendeeStatusListenersList) {
+						Handler h = re.getHandler();
+						if (h != null) {
+							Message.obtain(h, re.getWhat(), 1, 0, u).sendToTarget();
+						}
+					}
+					
 				} else {
 					V2Log.e("Invalid attendee user id ignore callback message");
 				}
@@ -413,8 +436,16 @@ public class ConferenceService extends AbstractHandler {
 		@Override
 		public void OnConfMemberExitCallback(long nConfID, long nTime,
 				long nUserID) {
-			Message.obtain(mCallbackHandler, JNI_ATTENDEE_EXITED_NOTIFICATION,
-					0, 0, nUserID).sendToTarget();
+			
+			User u = GlobalHolder.getInstance().getUser(nUserID);
+			
+			for (Registrant re : registerAttendeeStatusListenersList) {
+				Handler h = re.getHandler();
+				if (h != null) {
+					Message.obtain(h, re.getWhat(),0, 0, u).sendToTarget();
+				}
+			}
+
 		}
 
 		@Override

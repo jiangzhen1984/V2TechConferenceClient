@@ -218,12 +218,15 @@ public class Group {
 		return getUserOnlineCount(this);
 	}
 
+	//FIXME handle concurrency
 	private int getUserOnlineCount(Group g) {
 		int c = 0;
 		if (g == null) {
 			return 0;
 		}
-		for (User u : g.getUsers()) {
+		List<User> l = g.getUsers();
+		for (int i = 0; i < l.size(); i ++) {
+			User u = l.get(i);
 			if (u.getmStatus() == User.Status.ONLINE
 					|| u.getmStatus() == User.Status.BUSY
 					|| u.getmStatus() == User.Status.DO_NOT_DISTURB

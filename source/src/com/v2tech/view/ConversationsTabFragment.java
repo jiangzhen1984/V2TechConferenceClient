@@ -63,9 +63,9 @@ import com.v2tech.view.conference.VideoActivityV2;
 public class ConversationsTabFragment extends Fragment {
 
 	private static final int FILL_CONFS_LIST = 2;
-	private static final int REQUEST_ENTER_CONF = 3;
-	private static final int REQUEST_ENTER_CONF_RESPONSE = 4;
-	private static final int REQUEST_EXIT_CONF = 5;
+//	private static final int REQUEST_ENTER_CONF = 3;
+	//private static final int REQUEST_ENTER_CONF_RESPONSE = 4;
+	//private static final int REQUEST_EXIT_CONF = 5;
 	private static final int UPDATE_USER_SIGN = 8;
 	private static final int UPDATE_USER_AVATAR = 9;
 	private static final int UPDATE_CONVERSATION = 10;
@@ -221,8 +221,8 @@ public class ConversationsTabFragment extends Fragment {
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if (requestCode == SUB_ACTIVITY_CODE_VIDEO_ACTIVITY) {
-			Message.obtain(mHandler, REQUEST_EXIT_CONF, currentConfId)
-					.sendToTarget();
+//			Message.obtain(mHandler, REQUEST_EXIT_CONF, currentConfId)
+//					.sendToTarget();
 		} else if (requestCode == SUB_ACTIVITY_CODE_CREATE_CONF) {
 			if (resultCode == Activity.RESULT_CANCELED) {
 				return;
@@ -273,6 +273,9 @@ public class ConversationsTabFragment extends Fragment {
 		}
 
 		for (final Group g : list) {
+			if (g.getOwnerUser() == null) {
+				g.setOwnerUser(GlobalHolder.getInstance().getUser(g.getOwner()));
+			}
 			populateConversation(g, false);
 		}
 		adapter.notifyDataSetChanged();
@@ -312,17 +315,23 @@ public class ConversationsTabFragment extends Fragment {
 		@Override
 		public void onClick(View v) {
 			GroupLayout gp = (GroupLayout) v;
-			mWaitingDialog = ProgressDialog
-					.show(getActivity(),
-							"",
-							getActivity()
-									.getResources()
-									.getString(
-											R.string.requesting_enter_conference),
-							true);
-			currentConfId = gp.getGroupId();
-			Message.obtain(mHandler, REQUEST_ENTER_CONF,
-					Long.valueOf(currentConfId)).sendToTarget();
+//			mWaitingDialog = ProgressDialog
+//					.show(getActivity(),
+//							"",
+//							getActivity()
+//									.getResources()
+//									.getString(
+//											R.string.requesting_enter_conference),
+//							true);
+//			currentConfId = gp.getGroupId();
+//			Message.obtain(mHandler, REQUEST_ENTER_CONF,
+//					Long.valueOf(currentConfId)).sendToTarget();
+			
+			Intent i = new Intent(getActivity(),
+					VideoActivityV2.class);
+			i.putExtra("gid", gp.getGroupId());
+			startActivityForResult(i, SUB_ACTIVITY_CODE_VIDEO_ACTIVITY);
+			
 			gp.updateNotificator(false);
 			
 		}
@@ -709,7 +718,7 @@ public class ConversationsTabFragment extends Fragment {
 			case FILL_CONFS_LIST:
 				mConferenceList = GlobalHolder.getInstance().getGroup(
 						Group.GroupType.CONFERENCE);
-				if (mConferenceList != null) {
+				if (mConferenceList != null && mConferenceList.size() > 0) {
 					if (!isLoaded) {
 						populateConversation(mConferenceList);
 						isLoaded = true;
@@ -725,43 +734,43 @@ public class ConversationsTabFragment extends Fragment {
 				}
 
 				break;
-			case REQUEST_ENTER_CONF:
-				cb.requestEnterConference(new Conference((Long) msg.obj),
-						Message.obtain(this, REQUEST_ENTER_CONF_RESPONSE));
-				break;
-			case REQUEST_ENTER_CONF_RESPONSE:
-				AsynResult ar = (AsynResult) msg.obj;
-				if (ar.getState() == AsynResult.AsynState.SUCCESS) {
-					RequestEnterConfResponse recr = (RequestEnterConfResponse) ar
-							.getObject();
-					if (recr.getResult() == JNIResponse.Result.SUCCESS) {
-						Intent i = new Intent(getActivity(),
-								VideoActivityV2.class);
-						i.putExtra("gid", recr.getConferenceID());
-						startActivityForResult(i, SUB_ACTIVITY_CODE_VIDEO_ACTIVITY);
-					} else {
-						Toast.makeText(getActivity(),
-								R.string.error_request_enter_conference,
-								Toast.LENGTH_SHORT).show();
-					}
-
-				} else if (ar.getState() == AsynResult.AsynState.TIME_OUT) {
-					Toast.makeText(getActivity(),
-							R.string.error_request_enter_conference_time_out,
-							Toast.LENGTH_SHORT).show();
-				} else {
-					Toast.makeText(getActivity(),
-							R.string.error_request_enter_conference,
-							Toast.LENGTH_SHORT).show();
-				}
-				if (mWaitingDialog != null) {
-					mWaitingDialog.dismiss();
-				}
-
-				break;
-			case REQUEST_EXIT_CONF:
-				cb.requestExitConference(new Conference((Long) msg.obj), null);
-				break;
+//			case REQUEST_ENTER_CONF:
+//				cb.requestEnterConference(new Conference((Long) msg.obj),
+//						Message.obtain(this, REQUEST_ENTER_CONF_RESPONSE));
+//				break;
+//			case REQUEST_ENTER_CONF_RESPONSE:
+//				AsynResult ar = (AsynResult) msg.obj;
+//				if (ar.getState() == AsynResult.AsynState.SUCCESS) {
+//					RequestEnterConfResponse recr = (RequestEnterConfResponse) ar
+//							.getObject();
+//					if (recr.getResult() == JNIResponse.Result.SUCCESS) {
+//						Intent i = new Intent(getActivity(),
+//								VideoActivityV2.class);
+//						i.putExtra("gid", recr.getConferenceID());
+//						startActivityForResult(i, SUB_ACTIVITY_CODE_VIDEO_ACTIVITY);
+//					} else {
+//						Toast.makeText(getActivity(),
+//								R.string.error_request_enter_conference,
+//								Toast.LENGTH_SHORT).show();
+//					}
+//
+//				} else if (ar.getState() == AsynResult.AsynState.TIME_OUT) {
+//					Toast.makeText(getActivity(),
+//							R.string.error_request_enter_conference_time_out,
+//							Toast.LENGTH_SHORT).show();
+//				} else {
+//					Toast.makeText(getActivity(),
+//							R.string.error_request_enter_conference,
+//							Toast.LENGTH_SHORT).show();
+//				}
+//				if (mWaitingDialog != null) {
+//					mWaitingDialog.dismiss();
+//				}
+//
+//				break;
+//			case REQUEST_EXIT_CONF:
+//				cb.requestExitConference(new Conference((Long) msg.obj), null);
+//				break;
 
 			case UPDATE_USER_SIGN:
 				long fromuidS = (Long) msg.obj;

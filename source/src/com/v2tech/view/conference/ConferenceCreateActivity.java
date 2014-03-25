@@ -233,6 +233,9 @@ public class ConferenceCreateActivity extends Activity {
 	}
 
 	private void addAttendee(User u) {
+		if (u.isCurrentLoggedInUser()) {
+			return;
+		}
 		mAttendeeList.add(u);
 
 		int cot = mAttendeeContainer.getChildCount();
@@ -313,6 +316,9 @@ public class ConferenceCreateActivity extends Activity {
 		ll.addView(tv, new LinearLayout.LayoutParams(60,
 				LinearLayout.LayoutParams.WRAP_CONTENT));
 		ll.setPadding(5, 5, 5, 5);
+		if (u.isCurrentLoggedInUser()) {
+			return ll;
+		}
 		ll.setOnClickListener(new OnClickListener() {
 
 			@Override

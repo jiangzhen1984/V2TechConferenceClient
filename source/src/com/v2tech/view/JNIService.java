@@ -70,8 +70,6 @@ public class JNIService extends Service {
 	public static final String JNI_BROADCAST_USER_UPDATE_NAME_OR_SIGNATURE = "com.v2tech.jni.broadcast.user_update_sigature";
 	public static final String JNI_BROADCAST_GROUP_NOTIFICATION = "com.v2tech.jni.broadcast.group_geted";
 	public static final String JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION = "com.v2tech.jni.broadcast.group_user_updated";
-	public static final String JNI_BROADCAST_ATTENDEE_ENTERED_NOTIFICATION = "com.v2tech.jni.broadcast.attendee.entered.notification";
-	public static final String JNI_BROADCAST_ATTENDEE_EXITED_NOTIFICATION = "com.v2tech.jni.broadcast.attendee.exited.notification";
 	public static final String JNI_BROADCAST_NEW_MESSAGE = "com.v2tech.jni.broadcast.new.message";
 	public static final String JNI_BROADCAST_CONFERENCE_INVATITION = "com.v2tech.jni.broadcast.conference_invatition";
 	public static final String JNI_BROADCAST_CONFERENCE_REMOVED = "com.v2tech.jni.broadcast.conference_removed";
@@ -222,9 +220,6 @@ public class JNIService extends Service {
 	private static final int JNI_UPDATE_USER_STATUS = 25;
 	private static final int JNI_LOG_OUT = 26;
 	private static final int JNI_GROUP_NOTIFY = 35;
-	private static final int JNI_ATTENDEE_ENTERED_NOTIFICATION = 57;
-	private static final int JNI_ATTENDEE_EXITED_NOTIFICATION = 58;
-	private static final int JNI_GET_ATTENDEE_INFO_DONE = 59;
 	private static final int JNI_GROUP_USER_INFO_NOTIFICATION = 60;
 	private static final int JNI_REMOTE_USER_DEVICE_INFO_NOTIFICATION = 80;
 	private static final int JNI_RECEIVED_MESSAGE = 91;
@@ -308,46 +303,6 @@ public class JNIService extends Service {
 				} else {
 					V2Log.e("Invalid group user data");
 				}
-				break;
-			case JNI_ATTENDEE_ENTERED_NOTIFICATION:
-				Long uid = Long.valueOf(Long.parseLong(msg.obj.toString()));
-				User attendeeUser = GlobalHolder.getInstance().getUser(uid);
-				// check cache, if exist, send successful event
-				// message directly.
-				if (attendeeUser != null && attendeeUser.getName() != null
-						&& !attendeeUser.getName().equals("")) {
-					Message.obtain(
-							this,
-							JNI_GET_ATTENDEE_INFO_DONE,
-							new AsynResult(AsynResult.AsynState.SUCCESS,
-									attendeeUser)).sendToTarget();
-				} else {
-
-				}
-				break;
-			case JNI_ATTENDEE_EXITED_NOTIFICATION:
-				Intent ei = new Intent(
-						JNI_BROADCAST_ATTENDEE_EXITED_NOTIFICATION);
-				ei.addCategory(JNI_BROADCAST_CATEGROY);
-				ei.putExtra("uid", (Long) msg.obj);
-				ei.putExtra(
-						"name",
-						GlobalHolder.getInstance()
-								.getUser(Long.valueOf((Long) msg.obj))
-								.getName());
-				mContext.sendBroadcast(ei);
-				break;
-			case JNI_GET_ATTENDEE_INFO_DONE:
-
-				User attendee = (User) ((AsynResult) msg.obj).getObject();
-				Intent i = new Intent(
-						JNI_BROADCAST_ATTENDEE_ENTERED_NOTIFICATION);
-				i.addCategory(JNI_BROADCAST_CATEGROY);
-				i.putExtra("uid", attendee.getmUserId());
-				i.putExtra("name", attendee.getName());
-				mContext.sendStickyBroadcast(i);
-				V2Log.i("send broad cast for attendee enter :"
-						+ attendee.getName());
 				break;
 			case JNI_REMOTE_USER_DEVICE_INFO_NOTIFICATION:
 				GlobalHolder.getInstance().addAttendeeDevice(
@@ -633,27 +588,12 @@ public class JNIService extends Service {
 		@Override
 		public void OnConfMemberEnterCallback(long nConfID, long nTime,
 				String szUserInfos) {
-			int start = szUserInfos.indexOf("id='");
-			if (start != -1) {
-				int end = szUserInfos.indexOf("'", start + 4);
-				if (end != -1) {
-					String id = szUserInfos.substring(start + 4, end);
-					Message.obtain(mCallbackHandler,
-							JNI_ATTENDEE_ENTERED_NOTIFICATION, id)
-							.sendToTarget();
-				} else {
-					V2Log.e("Invalid attendee user id ignore callback message");
-				}
-			} else {
-				V2Log.e("Invalid attendee user id ignore callback message");
-			}
 		}
 
 		@Override
 		public void OnConfMemberExitCallback(long nConfID, long nTime,
 				long nUserID) {
-			Message.obtain(mCallbackHandler, JNI_ATTENDEE_EXITED_NOTIFICATION,
-					0, 0, nUserID).sendToTarget();
+			
 		}
 
 		@Override

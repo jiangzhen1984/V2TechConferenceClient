@@ -71,6 +71,9 @@ public class ContactUserView extends LinearLayout {
 				.getSignature());
 
 		mCheckbox = (CheckBox) view.findViewById(R.id.conf_create_contact_view_ck);
+		if (u.isCurrentLoggedInUser()) {
+			mCheckbox.setVisibility(View.INVISIBLE);
+		}
 		mStatusIV = (ImageView) view.findViewById(R.id.contact_user_status_iv);
 		updateStatus(u.getmStatus());
 

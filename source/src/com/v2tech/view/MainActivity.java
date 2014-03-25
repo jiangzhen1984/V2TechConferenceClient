@@ -262,7 +262,7 @@ public class MainActivity extends FragmentActivity implements
 					exitedFlag = false;
 				}
 
-			}, 1000);
+			}, 2500);
 		}
 	}
 
