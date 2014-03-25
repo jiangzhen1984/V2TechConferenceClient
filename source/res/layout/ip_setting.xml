@@ -26,80 +26,19 @@
                 android:text="@string/ip_setting_address" />
 
             <EditText
-                android:id="@+id/ip1"
-                android:layout_width="wrap_content"
+                android:id="@+id/ip"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:background="@drawable/rounded_corners"
                 android:ems="10"
                 android:enabled="true"
                 android:gravity="center_vertical|center_horizontal"
-                android:inputType="number"
-                android:maxLength="3"
+                android:inputType="text"
+                 android:layout_marginRight="20dp"
                 android:paddingLeft="8dp"
-                android:nextFocusDown="@+id/ip2"
+                android:nextFocusDown="@+id/port"
                  />
-
-            <TextView
-                android:id="@+id/textView3"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/ip_setting_address_dot" />
-
-            <EditText
-                android:id="@+id/ip2"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:background="@drawable/rounded_corners"
-                android:ems="10"
-                android:enabled="true"
-                android:gravity="center_vertical|center_horizontal"
-                android:inputType="number"
-                android:maxLength="3"
-                android:nextFocusDown="@+id/ip3"
-                android:paddingLeft="8dp" />
-
-            <TextView
-                android:id="@+id/textView4"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/ip_setting_address_dot" />
-
-            <EditText
-                android:id="@+id/ip3"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:background="@drawable/rounded_corners"
-                android:ems="10"
-                android:enabled="true"
-                android:gravity="center_vertical|center_horizontal"
-                android:inputType="number"
-                android:maxLength="3"
-                android:paddingLeft="8dp"
-                android:nextFocusDown="@+id/ip4" />
-
-            <TextView
-                android:id="@+id/textView5"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/ip_setting_address_dot" />
-
-            <EditText
-                android:id="@+id/ip4"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginRight="20dp"
-                android:layout_weight="1"
-                android:background="@drawable/rounded_corners"
-                android:ems="10"
-                android:enabled="true"
-                android:gravity="center_vertical|center_horizontal"
-                android:inputType="number"
-                android:maxLength="3"
-                android:paddingLeft="8dp"
-                android:nextFocusDown="@+id/port" />
 
         </LinearLayout>
 

@@ -193,46 +193,26 @@ public class LoginActivity extends Activity {
 			Button saveButton = (Button) dialog
 					.findViewById(R.id.ip_setting_save);
 
-			final EditText et1 = (EditText) dialog.findViewById(R.id.ip1);
-			final EditText et2 = (EditText) dialog.findViewById(R.id.ip2);
-			final EditText et3 = (EditText) dialog.findViewById(R.id.ip3);
-			final EditText et4 = (EditText) dialog.findViewById(R.id.ip4);
+			final EditText et = (EditText) dialog.findViewById(R.id.ip);
 			final EditText port = (EditText) dialog.findViewById(R.id.port);
 
 			SharedPreferences sf = mContext.getSharedPreferences("config",
 					Context.MODE_PRIVATE);
 			final String cacheIp = sf.getString("ip", null);
-			if (cacheIp != null && cacheIp.length() <= 15) {
-				String[] ips = cacheIp.split("\\.");
-				et1.setText(ips[0]);
-				et2.setText(ips[1]);
-				et3.setText(ips[2]);
-				et4.setText(ips[3]);
-			}
+			et.setText(cacheIp);
 
 			port.setText(sf.getString("port", ""));
 
 			saveButton.setOnClickListener(new OnClickListener() {
 				@Override
 				public void onClick(View v) {
-					String ets1 = et1.getText().toString();
-					String ets2 = et2.getText().toString();
-					String ets3 = et3.getText().toString();
-					String ets4 = et4.getText().toString();
+					String ets = et.getText().toString();
 					String portStr5 = port.getText().toString();
-
-					if (ets1 == null || "".equals(ets1) || ets2 == null
-							|| "".equals(ets2) || ets3 == null
-							|| "".equals(ets3) || ets4 == null
-							|| "".equals(ets4) || portStr5 == null
-							|| "".equals(portStr5)) {
-						Toast.makeText(mContext, R.string.error_host_required,
-								Toast.LENGTH_SHORT).show();
+					if (!checkIPorDNS(ets)) {
+						et.setError(mContext.getText(R.string.error_host_invalid));
 						return;
 					}
-					final String ip = ets1 + "." + ets2 + "." + ets3 + "."
-							+ ets4;
-					if (!saveHostConfig(ip, portStr5)) {
+					if (!saveHostConfig(ets, portStr5)) {
 						Toast.makeText(mContext,
 								R.string.error_save_host_config,
 								Toast.LENGTH_LONG).show();
@@ -248,14 +228,7 @@ public class LoginActivity extends Activity {
 			cancelButton.setOnClickListener(new OnClickListener() {
 				@Override
 				public void onClick(View v) {
-					//saveHostConfig("", "");
-					if (cacheIp != null && cacheIp.length() <= 15) {
-						String[] ips = cacheIp.split("\\.");
-						et1.setText(ips[0]);
-						et2.setText(ips[1]);
-						et3.setText(ips[2]);
-						et4.setText(ips[3]);
-					}
+					et.setText(cacheIp);
 					dialog.dismiss();
 				}
 			});
@@ -268,6 +241,16 @@ public class LoginActivity extends Activity {
 		}
 
 	};
+	
+	
+	private boolean checkIPorDNS(String str) {
+		
+		String ValidIpAddressRegex = "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$";
+
+		String ValidHostnameRegex = "^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.){1,}([A-Za-z][A-Za-z][A-Za-z]*)$";
+		
+		return str.matches(ValidIpAddressRegex) || str.matches(ValidHostnameRegex);
+	}
 
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {

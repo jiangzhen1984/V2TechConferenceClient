@@ -74,6 +74,7 @@ public class JNIService extends Service {
 	public static final String JNI_BROADCAST_ATTENDEE_EXITED_NOTIFICATION = "com.v2tech.jni.broadcast.attendee.exited.notification";
 	public static final String JNI_BROADCAST_NEW_MESSAGE = "com.v2tech.jni.broadcast.new.message";
 	public static final String JNI_BROADCAST_CONFERENCE_INVATITION = "com.v2tech.jni.broadcast.conference_invatition";
+	public static final String JNI_BROADCAST_CONFERENCE_REMOVED = "com.v2tech.jni.broadcast.conference_removed";
 
 	private boolean isDebug = true;
 
@@ -594,6 +595,21 @@ public class JNIService extends Service {
 				
 			}
 		}
+
+		@Override
+		public void OnDelGroupCallback(int groupType, long nGroupID,
+				boolean bMovetoRoot) {
+			//TODO just support conference
+			if (groupType == Group.GroupType.CONFERENCE.intValue()) {
+				GlobalHolder.getInstance().removeConferenceGroup(nGroupID);
+				Intent i = new Intent();
+				i.setAction(JNIService.JNI_BROADCAST_CONFERENCE_REMOVED);
+				i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
+				i.putExtra("gid", nGroupID);
+				sendBroadcast(i);
+
+			}
+		}
 		
 		
 		
@@ -639,6 +655,13 @@ public class JNIService extends Service {
 			Message.obtain(mCallbackHandler, JNI_ATTENDEE_EXITED_NOTIFICATION,
 					0, 0, nUserID).sendToTarget();
 		}
+
+		@Override
+		public void OnKickConfCallback(int nReason) {
+			
+		}
+		
+		
 
 	}
 

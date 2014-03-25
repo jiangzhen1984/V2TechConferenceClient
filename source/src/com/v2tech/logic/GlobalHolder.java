@@ -21,7 +21,7 @@ public class GlobalHolder {
 
 	private List<Group> mContactsGroup = null;
 
-	private List<Group> mConfGroup = null;
+	private List<Group> mConfGroup = new ArrayList<Group>();
 
 	private Map<Long, User> mUserHolder = new HashMap<Long, User>();
 	private Map<Long, Group> mGroupHolder = new HashMap<Long, Group>();
@@ -130,12 +130,14 @@ public class GlobalHolder {
 	 * 
 	 * @param gType
 	 * @param list
+	 * 
+	 * FIXME need to optimize code
 	 */
 	public void updateGroupList(Group.GroupType gType, List<Group> list) {
 		if (gType == Group.GroupType.CONTACT) {
 			mContactsGroup = list;
 		} else if (gType == Group.GroupType.CONFERENCE) {
-			mConfGroup = list;
+			mConfGroup.addAll(list);
 		}
 		for (Group g : list) {
 			g.setOwnerUser(this.getUser(g.getOwner()));
@@ -258,6 +260,16 @@ public class GlobalHolder {
 			return;
 		}
 		g.addUserToGroup(u);
+	}
+	
+	
+	public void removeConferenceGroup(long gid) {
+		for (Group g: mConfGroup) {
+			if (g.getmGId() == gid) {
+				mConfGroup.remove(g);
+				break;
+			}
+		}
 	}
 
 	public String getAvatarPath(long uid) {

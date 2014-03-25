@@ -137,7 +137,14 @@ public class ContactDetail extends Activity implements OnTouchListener {
 		mReturnButtonTV.setOnClickListener(new OnClickListener() {
 
 			@Override
-			public void onClick(View arg0) {
+			public void onClick(View view) {
+				for (View v : mETArr) {
+					if (v == null) {
+						continue;
+					}
+					InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+					imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+				}
 				finish();
 			}
 
@@ -398,12 +405,8 @@ public class ContactDetail extends Activity implements OnTouchListener {
 				break;
 			case UPDATE_USER_INFO:
 				gatherUserData();
-				if (u.getmUserId() == GlobalHolder.getInstance()
-						.getCurrentUserId()) {
-					// TODO if current user is not logged , do not update now
 					us.updateUser(u,
 							Message.obtain(this, UPDATE_USER_INFO_DONE));
-				}
 				isUpdating = false;
 				break;
 			case UPDATE_USER_INFO_DONE:

@@ -21,9 +21,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentLeft="true"
-                android:layout_marginTop="20dp"
                 android:layout_marginBottom="17dp"
                 android:layout_marginLeft="102dp"
+                android:layout_marginTop="20dp"
                 android:src="@drawable/video_setting" />
 
             <View
@@ -35,9 +35,9 @@
                 android:id="@+id/in_meeting_show_attendee_iv"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                 android:layout_marginTop="20dp"
                 android:layout_marginBottom="17dp"
                 android:layout_marginLeft="20dp"
+                android:layout_marginTop="20dp"
                 android:layout_toRightOf="@+id/in_meeting_setting_iv"
                 android:src="@drawable/attendee" />
 
@@ -46,18 +46,18 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
-                 android:layout_marginTop="20dp"
-            android:layout_marginBottom="17dp"
+                android:layout_marginBottom="17dp"
                 android:layout_marginRight="119dp"
+                android:layout_marginTop="20dp"
                 android:src="@drawable/logout" />
 
             <ImageView
                 android:id="@+id/speaker_iv"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                 android:layout_marginTop="20dp"
-               android:layout_marginBottom="17dp"
+                android:layout_marginBottom="17dp"
                 android:layout_marginRight="41dp"
+                android:layout_marginTop="20dp"
                 android:layout_toLeftOf="@+id/in_meeting_log_out_iv"
                 android:src="@drawable/speaker" />
         </RelativeLayout>

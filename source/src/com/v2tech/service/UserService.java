@@ -8,6 +8,7 @@ import com.V2.jni.ImRequestCallback;
 import com.V2.jni.V2ClientType;
 import com.V2.jni.V2GlobalEnum;
 import com.v2tech.logic.AsynResult;
+import com.v2tech.logic.GlobalHolder;
 import com.v2tech.logic.User;
 import com.v2tech.logic.jni.JNIResponse;
 import com.v2tech.logic.jni.RequestLogInResponse;
@@ -60,7 +61,11 @@ public class UserService extends AbstractHandler {
 		}
 		initTimeoutMessage(JNI_REQUEST_UPDAE_USER, null, DEFAULT_TIME_OUT_SECS,
 				caller);
-		ImRequest.getInstance().modifyBaseInfo(user.toXml());
+		if (user.getmUserId() == GlobalHolder.getInstance().getCurrentUserId()) {
+			ImRequest.getInstance().modifyBaseInfo(user.toXml());
+		} else {
+			ImRequest.getInstance().modifyCommentName(user.getmUserId(), user.getName());
+		}
 	}
 
 	@Override

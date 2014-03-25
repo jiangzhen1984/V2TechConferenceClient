@@ -32,4 +32,14 @@ public interface ConfRequestCallback {
 	 */
 	public void OnConfMemberExitCallback(long nConfID, long nTime, long nUserID);
 	
+	
+	/**
+	 * <ul>Indicate user has been requested to get out of conference.</ul>
+	 * <ul>Two reason will affect this function will be called :<br>
+	 *    1. Chair man of conference requested.<br>
+	 *    2. Chair man removed conference.</ul>
+	 * @param nReason TODO add comments of reason
+	 */
+	public void OnKickConfCallback(int nReason);
+	
 }

@@ -1,5 +1,6 @@
 package com.v2tech.service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import android.os.Handler;
@@ -17,6 +18,7 @@ import com.v2tech.logic.Conference;
 import com.v2tech.logic.ConferencePermission;
 import com.v2tech.logic.GlobalHolder;
 import com.v2tech.logic.Group;
+import com.v2tech.logic.Registrant;
 import com.v2tech.logic.UserDeviceConfig;
 import com.v2tech.logic.jni.JNIResponse;
 import com.v2tech.logic.jni.RequestCloseUserVideoDeviceResponse;
@@ -172,7 +174,11 @@ public class ConferenceService extends AbstractHandler {
 		}
 		initTimeoutMessage(JNI_REQUEST_QUIT_CONFERENCE, null, DEFAULT_TIME_OUT_SECS,
 				caller);
-		GroupRequest.getInstance().leaveGroup(Group.GroupType.CONFERENCE.intValue(), conf.getId());
+		if (conf.getCreator() == GlobalHolder.getInstance().getCurrentUserId()) {
+			GroupRequest.getInstance().delGroup(Group.GroupType.CONFERENCE.intValue(), conf.getId());
+		} else {
+			GroupRequest.getInstance().leaveGroup(Group.GroupType.CONFERENCE.intValue(), conf.getId());
+		}
 	}
 
 	/**
@@ -314,6 +320,25 @@ public class ConferenceService extends AbstractHandler {
 		VideoRequest.getInstance().setCapParam(cc.getDeviceId(),
 				cc.getCameraIndex(), cc.getFrameRate(), cc.getBitRate());
 	}
+	
+	
+	
+	private List<Registrant> registerList = new ArrayList<Registrant>();
+	/**
+	 * Register listener for out conference by kick.
+	 * @param msg
+	 */
+	public void registerKickedConfListener(Handler h, int what, Object obj) {
+		registerList.add(new Registrant(h, what, obj));
+	}
+	
+	public void removeRegisterOfKickedConfListener(Handler h, int what, Object obj) {
+		for (Registrant re : registerList) {
+			if (re.getHandler() == h && what == re.getWhat()) {
+				registerList.remove(re);
+			}
+		}
+	}
 
 	@Override
 	public void handleMessage(Message msg) {
@@ -391,6 +416,18 @@ public class ConferenceService extends AbstractHandler {
 			Message.obtain(mCallbackHandler, JNI_ATTENDEE_EXITED_NOTIFICATION,
 					0, 0, nUserID).sendToTarget();
 		}
+
+		@Override
+		public void OnKickConfCallback(int nReason) {
+			for (Registrant re : registerList) {
+				Handler h = re.getHandler();
+				if (h != null) {
+					Message.obtain(h, re.getWhat(), nReason, 0, re.getObject()).sendToTarget();
+				}
+			}
+		}
+		
+		
 
 	}
 
@@ -473,6 +510,12 @@ public class ConferenceService extends AbstractHandler {
 		@Override
 		public void OnInviteJoinGroupCallback(int groupType, String groupInfo,
 				String userInfo, String additInfo) {
+			
+		}
+
+		@Override
+		public void OnDelGroupCallback(int groupType, long nGroupID,
+				boolean bMovetoRoot) {
 			
 		}
 		

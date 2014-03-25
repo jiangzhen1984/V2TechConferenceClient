@@ -16,8 +16,11 @@ import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
@@ -72,7 +75,9 @@ public class ContactsTabFragment extends Fragment {
 			Bundle savedInstanceState) {
 		View v = inflater.inflate(R.layout.tab_fragment_contacts, container,
 				false);
+		v.setOnTouchListener(mTouchListener);
 		mContactsContainer = (ListView) v.findViewById(R.id.contacts_container);
+		mContactsContainer.setOnTouchListener(mTouchListener);
 		mContactsContainer.setOnItemClickListener(new OnItemClickListener() {
 
 			@Override
@@ -131,6 +136,20 @@ public class ContactsTabFragment extends Fragment {
 		}
 		return intentFilter;
 	}
+	
+	
+	private OnTouchListener mTouchListener = new OnTouchListener() {
+
+		@Override
+		public boolean onTouch(View v, MotionEvent event) {
+			if (searchedTextET != null) {
+				InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+				imm.hideSoftInputFromWindow(searchedTextET.getWindowToken(), 0);
+			}
+			return false;
+		}
+		
+	};
 
 	List<Group> l;
 
@@ -167,6 +186,8 @@ public class ContactsTabFragment extends Fragment {
 			}
 
 	}
+	
+	
 
 	class Tab1BroadcastReceiver extends BroadcastReceiver {
 

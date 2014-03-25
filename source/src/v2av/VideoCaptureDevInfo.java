@@ -136,6 +136,15 @@ public class VideoCaptureDevInfo
     	}
     }
     
+    
+    public void updateCameraOrientation(int orientation) {
+    	for (VideoCaptureDevice dev:deviceList)
+    	{
+    		dev.orientation = orientation;
+    		
+    	}
+    }
+    
     private int Init()
     {
         // Populate the deviceList with available cameras and their capabilities.

@@ -214,18 +214,18 @@ public class GroupRequest {
 
 	}
 
+	/**
+	 * TODO add implement comment
+	 * @param groupType
+	 * @param nGroupID
+	 * @param bMovetoRoot
+	 */
 	private void OnDelGroup(int groupType, long nGroupID, boolean bMovetoRoot) {
-		Log.e("ImRequest UI", "OnDelGroup::ɾ��һ����" + groupType + ":" + nGroupID
+		V2Log.d( "OnDelGroup::==>" + groupType + ":" + nGroupID
 				+ ":" + bMovetoRoot);
-
-		// ƴװ��Ϣ
-//		DestoryGroupMsgType destoryMsgType = new DestoryGroupMsgType();
-//		destoryMsgType.setnGroupID(nGroupID);
-//
-//		Intent destoryIntent = new Intent(SplashActivity.IM);
-//		destoryIntent.putExtra("MsgType", MsgType.DESTORY_GROUP);
-//		destoryIntent.putExtra("MSG", destoryMsgType);
-//		context.sendOrderedBroadcast(destoryIntent,null);
+		for (GroupRequestCallback callback : callbacks) {
+			callback.OnDelGroupCallback(groupType, nGroupID, bMovetoRoot);
+		}
 	}
 
 	private void OnInviteJoinGroup(int groupType, String groupInfo,

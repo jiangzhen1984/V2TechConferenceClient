@@ -27,6 +27,7 @@ import android.os.Message;
 import android.view.Display;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
@@ -63,6 +64,7 @@ public class VideoActivityV2 extends Activity {
 	private static final int REQUEST_OPEN_DEVICE_RESPONSE = 4;
 	private static final int REQUEST_CLOSE_DEVICE_RESPONSE = 5;
 	private static final int REQUEST_OPEN_OR_CLOSE_DEVICE = 6;
+	private static final int NOTIFICATION_KICKED = 7;
 
 	private static final int USER_ENTERED_CONF = 21;
 	private static final int USER_EXITED_CONF = 22;
@@ -114,6 +116,8 @@ public class VideoActivityV2 extends Activity {
 		this.mSpeakerIV.setOnClickListener(mApplySpeakerListener);
 		initConfsListener();
 		init();
+		registerOrRemoveListener(true);
+		
 	}
 
 	private OnClickListener mApplySpeakerListener = new OnClickListener() {
@@ -284,6 +288,14 @@ public class VideoActivityV2 extends Activity {
 			sendAttendActionMessage(i.getAction(), new User(uid, name));
 		}
 
+	}
+	
+	private void registerOrRemoveListener(boolean flag) {
+		if (flag) {
+			cb.registerKickedConfListener(mVideoHandler, NOTIFICATION_KICKED, null);
+		} else {
+			cb.removeRegisterOfKickedConfListener(mVideoHandler, NOTIFICATION_KICKED, null);
+		}
 	}
 
 	@TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
@@ -458,6 +470,7 @@ public class VideoActivityV2 extends Activity {
 			mCurrentShowedSV.clear();
 		}
 		mVideoLayout.removeAllViews();
+		registerOrRemoveListener(false);
 	}
 
 	@Override
@@ -780,6 +793,7 @@ public class VideoActivityV2 extends Activity {
 						.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
 				VideoRecorder.VideoPreviewSurfaceHolder
 						.setFormat(PixelFormat.TRANSPARENT);
+				VideoCaptureDevInfo.CreateVideoCaptureDevInfo().updateCameraOrientation(Surface.ROTATION_0);
 			}
 			mCurrentShowedSV
 					.add(new SurfaceViewW(udc.getBelongsAttendee(), udc));
@@ -885,6 +899,11 @@ public class VideoActivityV2 extends Activity {
 							Message.obtain(mVideoHandler,
 									REQUEST_OPEN_DEVICE_RESPONSE));
 				}
+				break;
+			case NOTIFICATION_KICKED:
+				Toast.makeText(mContext, R.string.conversations_kick_notification, Toast.LENGTH_LONG).show();
+				quit();
+				finish();
 				break;
 			}
 		}

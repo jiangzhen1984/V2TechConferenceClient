@@ -131,6 +131,16 @@ public class ConfRequest {
 		}
 
 	}
+	
+	private void OnKickConf(int nReason) {
+		V2Log.d("-->OnKickConf " + nReason);
+		for (ConfRequestCallback cb : this.callbacks) {
+			cb.OnKickConfCallback(nReason);
+		}
+		
+	}
+
+	
 
 	// 灏嗘煇浜鸿鍑轰細璁�
 	public native void kickConf(long nUserID);
@@ -257,11 +267,6 @@ public class ConfRequest {
 
 	}
 
-	// 鎴戣璇峰嚭浼氳鐨勫洖璋�
-	private void OnKickConf(int nReason) {
-		// TODO
-		Log.e("ImRequest UI", "浼氳鏈変汉閫�嚭--->OnKickConf " + nReason);
-	}
 
 	private void OnConfNotify(long nSrcUserID, String srcNickName,
 			long nConfID, String subject, long nTime) {

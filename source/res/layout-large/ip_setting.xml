@@ -26,76 +26,18 @@
                 android:text="@string/ip_setting_address" />
 
             <EditText
-                android:id="@+id/ip1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:background="@drawable/rounded_corners"
-                android:enabled="true"
-                android:gravity="center_vertical|center_horizontal"
-                android:inputType="number"
-                android:maxLength="3"
-                android:nextFocusDown="@+id/ip2"
-                android:paddingLeft="8dp" />
-
-            <TextView
-                android:id="@+id/textView3"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/ip_setting_address_dot" />
-
-            <EditText
-                android:id="@+id/ip2"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:background="@drawable/rounded_corners"
-                android:enabled="true"
-                android:gravity="center_vertical|center_horizontal"
-                android:inputType="number"
-                android:maxLength="3"
-                android:nextFocusDown="@+id/ip3"
-                android:paddingLeft="8dp" />
-
-            <TextView
-                android:id="@+id/textView4"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/ip_setting_address_dot" />
-
-            <EditText
-                android:id="@+id/ip3"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:background="@drawable/rounded_corners"
-                android:enabled="true"
-                android:gravity="center_vertical|center_horizontal"
-                android:inputType="number"
-                android:maxLength="3"
-                android:nextFocusDown="@+id/ip4"
-                android:paddingLeft="8dp" />
-
-            <TextView
-                android:id="@+id/textView5"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/ip_setting_address_dot" />
-
-            <EditText
-                android:id="@+id/ip4"
-                android:layout_width="wrap_content"
+                android:id="@+id/ip"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginRight="20dp"
                 android:layout_weight="1"
                 android:background="@drawable/rounded_corners"
+                android:ems="10"
                 android:enabled="true"
                 android:gravity="center_vertical|center_horizontal"
-                android:inputType="number"
-                android:maxLength="3"
+                android:inputType="text"
                 android:nextFocusDown="@+id/port"
                 android:paddingLeft="8dp" />
-
         </LinearLayout>
 
         <LinearLayout
@@ -122,11 +64,9 @@
                 android:background="@drawable/rounded_corners"
                 android:ems="10"
                 android:inputType="number"
-                 android:maxLength="5"
+                android:maxLength="5"
                 android:paddingLeft="8dp" >
-
             </EditText>
-
         </LinearLayout>
 
         <LinearLayout
@@ -134,7 +74,6 @@
             android:layout_height="2dp"
             android:layout_marginTop="30dp"
             android:background="@color/setting_separation" >
-
         </LinearLayout>
 
         <RelativeLayout
@@ -143,28 +82,26 @@
             android:layout_marginBottom="20dp"
             android:layout_marginTop="30dp" >
 
-             <Button
+            <Button
                 android:id="@+id/ip_setting_save"
-                  android:layout_width="150dp"
+                android:layout_width="150dp"
                 android:layout_height="50dp"
                 android:layout_alignParentLeft="true"
                 android:layout_marginLeft="40dp"
-                android:textColor="#ffffff"
                 android:background="@drawable/rounded_corners_login_button"
-                android:text="@string/ip_setting_button_save" />
+                android:text="@string/ip_setting_button_save"
+                android:textColor="#ffffff" />
 
             <Button
                 android:id="@+id/ip_setting_cancel"
-                 android:layout_width="150dp"
+                android:layout_width="150dp"
                 android:layout_height="50dp"
                 android:layout_alignParentRight="true"
                 android:layout_marginRight="40dp"
-                android:textColor="#ffffff"
                 android:background="@drawable/rounded_corners_login_button"
-                android:text="@string/ip_setting_button_cancel" />
-
+                android:text="@string/ip_setting_button_cancel"
+                android:textColor="#ffffff" />
         </RelativeLayout>
-
     </LinearLayout>
 
 </LinearLayout>

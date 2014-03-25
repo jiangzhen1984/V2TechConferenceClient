@@ -83,4 +83,13 @@ public interface GroupRequestCallback {
 	 */
 	public void OnInviteJoinGroupCallback(int groupType, String groupInfo,
 			String userInfo, String additInfo);
+	
+	
+	/**
+	 * 
+	 * @param groupType
+	 * @param nGroupID
+	 * @param bMovetoRoot
+	 */
+	public void OnDelGroupCallback(int groupType, long nGroupID, boolean bMovetoRoot);
 }

@@ -414,25 +414,25 @@ public class ConferenceCreateActivity extends Activity {
 				return;
 			}
 			String startTimeStr = mConfStartTimeET.getText().toString();
-			if (startTimeStr == null || startTimeStr.length() == 0) {
-				mConfStartTimeET
-						.setError(getString(R.string.error_conf_start_time_required));
-				mConfStartTimeET.requestFocus();
-				return;
-			}
-
-			DateFormat sd = new SimpleDateFormat("yyyy-MM-dd HH:mm",
-					Locale.CHINESE);
-			
-			try {
-				sd.parse(startTimeStr);
-			} catch (ParseException e) {
-				e.printStackTrace();
-				mConfStartTimeET
-						.setError(getString(R.string.error_conf_start_time_format_failed));
-				mConfStartTimeET.requestFocus();
-				return;
-			}
+//			if (startTimeStr == null || startTimeStr.length() == 0) {
+//				mConfStartTimeET
+//						.setError(getString(R.string.error_conf_start_time_required));
+//				mConfStartTimeET.requestFocus();
+//				return;
+//			}
+//
+//			DateFormat sd = new SimpleDateFormat("yyyy-MM-dd HH:mm",
+//					Locale.CHINESE);
+//			
+//			try {
+//				sd.parse(startTimeStr);
+//			} catch (ParseException e) {
+//				e.printStackTrace();
+//				mConfStartTimeET
+//						.setError(getString(R.string.error_conf_start_time_format_failed));
+//				mConfStartTimeET.requestFocus();
+//				return;
+//			}
 
 			List<User> l = new ArrayList<User>(mAttendeeList);
 			conf = new Conference(title, startTimeStr, null, l);

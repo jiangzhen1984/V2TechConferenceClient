@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="400dp"
-    android:layout_height="100dp"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
     android:orientation="vertical" >
 
     <LinearLayout
@@ -18,20 +18,20 @@
     </LinearLayout>
 
     <LinearLayout
-        android:layout_width="400dp"
-        android:layout_height="100dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:background="@drawable/rounded_corners_of_in_metting_setting_pop_up_window"
         android:orientation="vertical" >
 
         <LinearLayout
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_margin="3dp"
             android:background="@color/in_meeting_setting_bg"
             android:orientation="vertical" >
 
             <LinearLayout
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content" >
 
                 <TextView
@@ -45,9 +45,10 @@
 
                 <RadioGroup
                     android:id="@+id/radioGroup1"
-                    android:layout_width="fill_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="80dp"
+                    android:layout_marginLeft="30dp"
+                    android:layout_marginRight="30dp"
                     android:orientation="horizontal" >
 
                     <RadioButton
@@ -92,7 +93,7 @@
 
             <RelativeLayout
                 android:id="@+id/in_meeting_setting_reverse_camera"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="fill_parent" >
 
                 <TextView
@@ -108,7 +109,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_centerVertical="true"
-                    android:layout_marginLeft="150dp"
+                    android:layout_marginLeft="80dp"
                     android:layout_toRightOf="@+id/textView2"
                     android:src="@drawable/reverse_camera" />
             </RelativeLayout>

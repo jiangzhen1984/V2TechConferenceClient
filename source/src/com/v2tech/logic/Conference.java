@@ -16,9 +16,15 @@ public class Conference {
 	private String endTime;
 	private List<User> invitedList;
 	private Date d;
+	private long creator;
 
 	public Conference(long id) {
 		this.id = id;
+	}
+	
+	public Conference(long id, long creator) {
+		this.id = id;
+		this.creator = creator;
 	}
 
 	public Conference(String name, String startTime, String endTime,
@@ -61,6 +67,16 @@ public class Conference {
 		return this.startTime;
 	}
 	
+	
+	
+	public long getCreator() {
+		return creator;
+	}
+
+	public void setCreator(long creator) {
+		this.creator = creator;
+	}
+
 	public Date getDate() {
 		if (d == null && this.startTime != null && this.startTime.trim().length() == 16) {
 			DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.CHINA);
@@ -69,9 +85,12 @@ public class Conference {
 			} catch (ParseException e) {
 				e.printStackTrace();
 			}
+		}
+		if (d == null) {
+			return  new Date();
+		} else {
 			return d;
 		}
-		return null;
 	}
 	
 	public long getId() {

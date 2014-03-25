@@ -11,4 +11,5 @@
    <string name="requesting_enter_conference">正在登入.....</string>
    <string name="error_can_not_connect_server">无法链接到服务器</string>
    <string name="conversations_delete_conversaion">删除该会话</string>
+   <string name="conversations_kick_notification">你被踢出会议室</string>
 </resources>
