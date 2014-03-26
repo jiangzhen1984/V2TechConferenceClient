@@ -69,14 +69,14 @@ public class UserService extends AbstractHandler {
 	}
 
 	@Override
-	public synchronized void handleMessage(Message msg) {
+	public void handleMessage(Message msg) {
 		// handle time out
 		super.handleMessage(msg);
 
 		// remove time out message
 		Message caller = super.removeTimeoutMessage(msg.what);
-		if (caller == null) {
-			V2Log.w("Igore message client don't expect callback");
+		if (caller == null || caller.getTarget() == null) {
+			V2Log.w(this.getClass().getName()+ " Igore message client don't expect callback :"+msg.what);
 			return;
 		}
 

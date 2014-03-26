@@ -416,6 +416,15 @@ public class User implements Comparable<User> {
 		} else if (another.getmStatus() == Status.ONLINE) {
 			return 1;
 		}
+		if (this.mStatus == Status.LEAVE || this.mStatus == Status.DO_NOT_DISTURB || this.mStatus == Status.BUSY) {
+			if (another.getmStatus() == Status.LEAVE && another.getmStatus() == Status.DO_NOT_DISTURB && another.getmStatus() == Status.BUSY) {
+				return this.abbra.compareTo(another.abbra);
+			} else {
+				return -1;
+			}
+		} else if (another.getmStatus() == Status.LEAVE && another.getmStatus() == Status.DO_NOT_DISTURB && another.getmStatus() == Status.BUSY) {
+			return 1;
+		}
 
 		return this.abbra.compareTo(another.abbra);
 	}

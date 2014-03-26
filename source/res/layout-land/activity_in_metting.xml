@@ -26,39 +26,50 @@
                 android:layout_marginTop="10dp"
                 android:src="@drawable/video_setting" />
 
-            <View
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:layout_below="@+id/in_meeting_setting_iv" />
+              <ImageView
+                android:id="@+id/in_meeting_setting_arrow"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/in_meeting_setting_iv"
+                android:layout_marginLeft="10dp"
+                android:src="@drawable/arrow"
+                />
 
             <ImageView
                 android:id="@+id/in_meeting_show_attendee_iv"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="10dp"
                 android:layout_marginLeft="20dp"
-                android:layout_marginTop="10dp"
                 android:layout_toRightOf="@+id/in_meeting_setting_iv"
+                android:layout_alignBottom="@+id/in_meeting_setting_iv"
                 android:src="@drawable/attendee" />
+            
+            
+            <ImageView
+                android:id="@+id/in_meeting_attendee_arrow"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="20dp"
+                android:layout_toRightOf="@+id/in_meeting_setting_iv"
+                 android:layout_alignBottom="@+id/in_meeting_setting_arrow"
+                android:src="@drawable/arrow" />
 
             <ImageView
                 android:id="@+id/in_meeting_log_out_iv"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
-                android:layout_marginBottom="10dp"
+                android:layout_alignBottom="@+id/in_meeting_setting_iv"
                 android:layout_marginRight="30dp"
-                android:layout_marginTop="10dp"
                 android:src="@drawable/logout" />
 
             <ImageView
                 android:id="@+id/speaker_iv"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="10dp"
                 android:layout_marginRight="20dp"
-                android:layout_marginTop="10dp"
                 android:layout_toLeftOf="@+id/in_meeting_log_out_iv"
+                android:layout_alignBottom="@+id/in_meeting_setting_iv"
                 android:src="@drawable/speaker" />
         </RelativeLayout>
 

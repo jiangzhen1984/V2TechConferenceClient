@@ -136,58 +136,57 @@ public class ContactsTabFragment extends Fragment {
 		}
 		return intentFilter;
 	}
-	
-	
+
 	private OnTouchListener mTouchListener = new OnTouchListener() {
 
 		@Override
 		public boolean onTouch(View v, MotionEvent event) {
 			if (searchedTextET != null) {
-				InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+				InputMethodManager imm = (InputMethodManager) getActivity()
+						.getSystemService(Context.INPUT_METHOD_SERVICE);
 				imm.hideSoftInputFromWindow(searchedTextET.getWindowToken(), 0);
 			}
 			return false;
 		}
-		
+
 	};
 
 	List<Group> l;
 
-	private synchronized void  fillContactsGroup() {
+	private synchronized void fillContactsGroup() {
 		if (mLoaded) {
 			return;
 		}
 		l = GlobalHolder.getInstance().getGroup(GroupType.CONTACT);
 		if (l != null) {
-			 new AsyncTaskLoader().execute();
+			new AsyncTaskLoader().execute();
 		}
 	}
-	
+
 	private Object mLock = new Object();
+
 	class AsyncTaskLoader extends AsyncTask<Void, Void, Void> {
 
-			@Override
-			protected Void doInBackground(Void... params) {
-				synchronized (mLock) {
-					if (mLoaded == true) {
-						return null;
-					}
-					mLoaded = true;
-					for (Group g : l) {
-						mItemList.add(new ListItem(g, g.getLevel()));
-					}
+		@Override
+		protected Void doInBackground(Void... params) {
+			synchronized (mLock) {
+				if (mLoaded == true) {
+					return null;
 				}
-				return null;
+				mLoaded = true;
+				for (Group g : l) {
+					mItemList.add(new ListItem(g, g.getLevel()));
+				}
 			}
+			return null;
+		}
 
-			@Override
-			protected void onPostExecute(Void result) {
-				mContactsContainer.setAdapter(adapter);
-			}
+		@Override
+		protected void onPostExecute(Void result) {
+			mContactsContainer.setAdapter(adapter);
+		}
 
 	}
-	
-	
 
 	class Tab1BroadcastReceiver extends BroadcastReceiver {
 
@@ -263,7 +262,7 @@ public class ContactsTabFragment extends Fragment {
 
 	};
 
-	//FIXME optimze code should not always new ListItem
+	// FIXME optimze code should not always new ListItem
 	private void updateView(int pos) {
 		ListItem item = mItemList.get(pos);
 		if (item.g == null) {
@@ -316,15 +315,13 @@ public class ContactsTabFragment extends Fragment {
 			}
 		}
 	}
-	
-	
-	
+
 	private synchronized void updateUserViewPostionV2(int userId, int status) {
 		User.Status newSt = User.Status.fromInt(status);
 		int startSortIndex = 0;
 		boolean foundUserView = false;
 		ListItem self = null;
-		for (int i =0; i < mItemList.size(); i++) {
+		for (int i = 0; i < mItemList.size(); i++) {
 			ListItem li = mItemList.get(i);
 			if (li.u != null && li.u.getmUserId() == userId) {
 				self = li;
@@ -336,10 +333,10 @@ public class ContactsTabFragment extends Fragment {
 		if (!foundUserView) {
 			return;
 		}
-		
-		//Try to looking for position which start sort index.
-		// 
-		while(startSortIndex >= 0) {
+
+		// Try to looking for position which start sort index.
+		//
+		while (startSortIndex >= 0) {
 			ListItem item = mItemList.get(startSortIndex);
 			if (item.g != null) {
 				break;
@@ -353,27 +350,33 @@ public class ContactsTabFragment extends Fragment {
 			--startSortIndex;
 		}
 		mItemList.remove(self);
-		
-		int pos = startSortIndex+1;
-		for (startSortIndex +=1; startSortIndex < mItemList.size(); startSortIndex++,pos++) {
+
+		int pos = startSortIndex + 1;
+		for (startSortIndex += 1; startSortIndex < mItemList.size(); startSortIndex++, pos++) {
 			ListItem item = mItemList.get(startSortIndex);
 			if (item.g != null) {
 				break;
 			}
-			//if item is current user, always sort after current user
-			if (item.u.getmUserId() == GlobalHolder.getInstance().getCurrentUserId()) {
+			// if item is current user, always sort after current user
+			if (item.u.getmUserId() == GlobalHolder.getInstance()
+					.getCurrentUserId()) {
 				continue;
 			}
 			if (newSt == User.Status.ONLINE) {
-				if (item.u.getmStatus() == User.Status.ONLINE && item.u.compareTo(self.u) < 0) {
-						continue;
+				if (item.u.getmStatus() == User.Status.ONLINE
+						&& item.u.compareTo(self.u) < 0) {
+					continue;
 				} else {
 					break;
 				}
-			} else if (newSt == User.Status.OFFLINE || newSt == User.Status.HIDDEN) {
+			} else if (newSt == User.Status.OFFLINE
+					|| newSt == User.Status.HIDDEN) {
 				if ((item.u.getmStatus() == User.Status.OFFLINE || item.u
 						.getmStatus() == User.Status.HIDDEN)
 						&& self.u.compareTo(item.u) > 0) {
+					continue;
+				} else if (item.u.getmStatus() != User.Status.OFFLINE
+						&& item.u.getmStatus() != User.Status.HIDDEN) {
 					continue;
 				} else {
 					break;
@@ -381,29 +384,25 @@ public class ContactsTabFragment extends Fragment {
 			} else {
 				if (item.u.getmStatus() == User.Status.ONLINE) {
 					continue;
-				} else if (item.u.getmStatus() == User.Status.OFFLINE || item.u
-						.getmStatus() == User.Status.HIDDEN) {
+				} else if (item.u.getmStatus() == User.Status.OFFLINE
+						|| item.u.getmStatus() == User.Status.HIDDEN) {
 					break;
-				} else if (item.u.compareTo(self.u) < 0){
+				} else if (item.u.compareTo(self.u) < 0) {
 					continue;
 				} else {
 					break;
 				}
 			}
 		}
-		
-		
+
 		if (pos == mItemList.size()) {
 			mItemList.add(self);
 		} else {
 			mItemList.add(pos, self);
 		}
-		
 
 		adapter.notifyDataSetChanged();
 	}
-
-	
 
 	private void updateSearchedUserList(List<User> lu) {
 		mItemList = new ArrayList<ListItem>();
