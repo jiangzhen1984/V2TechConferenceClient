@@ -38,11 +38,9 @@ import android.widget.ListView;
 import android.widget.PopupWindow;
 import android.widget.PopupWindow.OnDismissListener;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.v2tech.R;
 import com.v2tech.db.ContentDescriptor;
-import com.v2tech.logic.AsynResult;
 import com.v2tech.logic.Conference;
 import com.v2tech.logic.ConferenceConversation;
 import com.v2tech.logic.ContactConversation;
@@ -52,8 +50,6 @@ import com.v2tech.logic.Group;
 import com.v2tech.logic.Group.GroupType;
 import com.v2tech.logic.NetworkStateCode;
 import com.v2tech.logic.User;
-import com.v2tech.logic.jni.JNIResponse;
-import com.v2tech.logic.jni.RequestEnterConfResponse;
 import com.v2tech.service.ConferenceService;
 import com.v2tech.util.BitmapUtil;
 import com.v2tech.util.V2Log;
@@ -63,9 +59,6 @@ import com.v2tech.view.conference.VideoActivityV2;
 public class ConversationsTabFragment extends Fragment {
 
 	private static final int FILL_CONFS_LIST = 2;
-//	private static final int REQUEST_ENTER_CONF = 3;
-	//private static final int REQUEST_ENTER_CONF_RESPONSE = 4;
-	//private static final int REQUEST_EXIT_CONF = 5;
 	private static final int UPDATE_USER_SIGN = 8;
 	private static final int UPDATE_USER_AVATAR = 9;
 	private static final int UPDATE_CONVERSATION = 10;
@@ -409,7 +402,7 @@ public class ConversationsTabFragment extends Fragment {
 			ll.setMargins(5, 20, 5, 20);
 			ll.gravity = Gravity.CENTER;
 			root.addView(createConferenceTV, ll);
-			pw = new PopupWindow(root, 200, 200, true);
+			pw = new PopupWindow(root,  ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT , true);
 			pw.setBackgroundDrawable(new ColorDrawable(R.color.confs_title_bg));
 			pw.setOnDismissListener(new OnDismissListener() {
 
@@ -563,12 +556,7 @@ public class ConversationsTabFragment extends Fragment {
 			this.cov = g;
 			this.gp = gp;
 			this.gp.setOnLongClickListener(mLongClickListener);
-			if (g.getType().equals(Conversation.TYPE_CONFERNECE)) {
-				ConferenceConversation cc = (ConferenceConversation)g;
-				this.gp.setTag(new String[]{cov.getName(), cov.getExtId()+"", cov.getType(), cc.getGroup().getOwner()+""});
-			} else {
-				this.gp.setTag(new String[]{cov.getName(), cov.getExtId()+"", cov.getType(), "0"});
-			}
+			this.gp.setTag(cov);
 		}
 
 	}
@@ -578,14 +566,18 @@ public class ConversationsTabFragment extends Fragment {
 		@Override
 		public boolean onLongClick(final View v) {
 
-			final String[] tags = (String[])v.getTag();
+			final Conversation cov = (Conversation)v.getTag();
 			AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-			builder.setTitle(tags[0].toString()).setItems(
+			builder.setTitle(cov.getName()).setItems(
 					new String[] { mContext.getResources().getString(
 							R.string.conversations_delete_conversaion) },
 					new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog, int which) {
-							removeConversation(Long.parseLong(tags[1]), tags[2], Long.parseLong(tags[3]));
+							long ownID = 0;
+							if (cov.getType().equals(Conversation.TYPE_CONFERNECE)) {
+								ownID = ((ConferenceConversation)cov).getGroup().getOwner();
+							}
+							removeConversation(cov.getExtId(), cov.getType(), ownID);
 						}
 					});
 			AlertDialog ad = builder.create();
@@ -677,10 +669,18 @@ public class ConversationsTabFragment extends Fragment {
 								.getGroup();
 						User u = GlobalHolder.getInstance().getUser(
 								g.getOwner());
-						if (u != null) {
-							((GroupLayout) item.gp).updateContent(u.getName());
-							g.setOwnerUser(u);
+						if (u == null) {
+							continue;
 						}
+						((GroupLayout) item.gp).updateContent(u.getName());
+						g.setOwnerUser(u);
+					} else if (item.cov.getType().equals(Conversation.TYPE_CONTACT)) {
+						User u = GlobalHolder.getInstance().getUser(
+								((ContactConversation)item.cov).getExtId());
+						if (u == null) {
+							continue;
+						}
+						((ContactConversation)item.cov).updateUser(u);
 					}
 				}
 			} else if (JNIService.JNI_BROADCAST_CONFERENCE_INVATITION.equals(intent.getAction())) {
@@ -734,53 +734,15 @@ public class ConversationsTabFragment extends Fragment {
 				}
 
 				break;
-//			case REQUEST_ENTER_CONF:
-//				cb.requestEnterConference(new Conference((Long) msg.obj),
-//						Message.obtain(this, REQUEST_ENTER_CONF_RESPONSE));
-//				break;
-//			case REQUEST_ENTER_CONF_RESPONSE:
-//				AsynResult ar = (AsynResult) msg.obj;
-//				if (ar.getState() == AsynResult.AsynState.SUCCESS) {
-//					RequestEnterConfResponse recr = (RequestEnterConfResponse) ar
-//							.getObject();
-//					if (recr.getResult() == JNIResponse.Result.SUCCESS) {
-//						Intent i = new Intent(getActivity(),
-//								VideoActivityV2.class);
-//						i.putExtra("gid", recr.getConferenceID());
-//						startActivityForResult(i, SUB_ACTIVITY_CODE_VIDEO_ACTIVITY);
-//					} else {
-//						Toast.makeText(getActivity(),
-//								R.string.error_request_enter_conference,
-//								Toast.LENGTH_SHORT).show();
-//					}
-//
-//				} else if (ar.getState() == AsynResult.AsynState.TIME_OUT) {
-//					Toast.makeText(getActivity(),
-//							R.string.error_request_enter_conference_time_out,
-//							Toast.LENGTH_SHORT).show();
-//				} else {
-//					Toast.makeText(getActivity(),
-//							R.string.error_request_enter_conference,
-//							Toast.LENGTH_SHORT).show();
-//				}
-//				if (mWaitingDialog != null) {
-//					mWaitingDialog.dismiss();
-//				}
-//
-//				break;
-//			case REQUEST_EXIT_CONF:
-//				cb.requestExitConference(new Conference((Long) msg.obj), null);
-//				break;
 
 			case UPDATE_USER_SIGN:
 				long fromuidS = (Long) msg.obj;
 				for (ScrollItem item : mItemList) {
+					((GroupLayout) item.gp).update();
 					if (item.cov.getExtId() == fromuidS
 							&& Conversation.TYPE_CONTACT.equals(item.cov
 									.getType())) {
 						User u = GlobalHolder.getInstance().getUser(fromuidS);
-						((GroupLayout) item.gp).updateGroupOwner(u == null ? ""
-								: u.getName());
 						updateConversationToDB(fromuidS,
 								u == null ? "" : u.getName());
 						break;

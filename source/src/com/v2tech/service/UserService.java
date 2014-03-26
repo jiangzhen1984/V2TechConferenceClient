@@ -69,7 +69,7 @@ public class UserService extends AbstractHandler {
 	}
 
 	@Override
-	public void handleMessage(Message msg) {
+	public synchronized void handleMessage(Message msg) {
 		// handle time out
 		super.handleMessage(msg);
 

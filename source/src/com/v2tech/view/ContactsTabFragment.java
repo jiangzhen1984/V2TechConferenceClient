@@ -198,7 +198,6 @@ public class ContactsTabFragment extends Fragment {
 				Message.obtain(mHandler, FILL_CONTACTS_GROUP).sendToTarget();
 			} else if (JNIService.JNI_BROADCAST_USER_STATUS_NOTIFICATION
 					.equals(intent.getAction())) {
-				V2Log.d(" update  status  JNI_BROADCAST_USER_STATUS_NOTIFICATION");
 				Message.obtain(
 						mHandler,
 						UPDATE_GROUP_STATUS,

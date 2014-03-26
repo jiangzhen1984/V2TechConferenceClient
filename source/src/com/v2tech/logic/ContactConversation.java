@@ -64,6 +64,10 @@ public class ContactConversation extends Conversation {
 		}
 	}
 	
+	public void updateUser(User u) {
+		this.u = u;
+	}
+	
 	
 	
 }

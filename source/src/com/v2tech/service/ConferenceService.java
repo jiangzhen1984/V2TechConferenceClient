@@ -359,7 +359,7 @@ public class ConferenceService extends AbstractHandler {
 	}
 
 	@Override
-	public void handleMessage(Message msg) {
+	public synchronized void handleMessage(Message msg) {
 		// Do time out handle
 		super.handleMessage(msg);
 		// remove time out message

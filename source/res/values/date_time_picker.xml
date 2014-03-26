@@ -7,4 +7,6 @@
     <string name="date_time_picker_minute">分</string>
     <string name="date_time_picker_plus">+</string>
     <string name="date_time_picker_minus">-</string>
+    <string name="date_time_picker_set">设置</string>
+    <string name="date_time_picker_cancel">取消</string>
 </resources>

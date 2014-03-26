@@ -654,6 +654,10 @@ public class JNIService extends Service {
 		@Override
 		public void OnRecvChatTextCallback(long nGroupID, int nBusinessType,
 				long nFromUserID, long nTime, String szXmlText) {
+			if (nGroupID > 0) {
+				V2Log.w("igonre group message:" +nGroupID+"  "+ szXmlText);
+				return;
+			}
 			User toUser = GlobalHolder.getInstance().getCurrentUser();
 			User fromUser = GlobalHolder.getInstance().getUser(nFromUserID);
 			if (toUser == null) {
@@ -679,6 +683,10 @@ public class JNIService extends Service {
 		@Override
 		public void OnRecvChatPictureCallback(long nGroupID, int nBusinessType,
 				long nFromUserID, long nTime, byte[] pPicData) {
+			if (nGroupID > 0) {
+				V2Log.w("igonre group image message:" +nGroupID);
+				return;
+			}
 			User toUser = GlobalHolder.getInstance().getCurrentUser();
 			User fromUser = GlobalHolder.getInstance().getUser(nFromUserID);
 			if (toUser == null) {

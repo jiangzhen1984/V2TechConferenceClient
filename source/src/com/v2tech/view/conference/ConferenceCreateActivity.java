@@ -20,13 +20,13 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.text.Editable;
-import android.text.InputType;
 import android.text.TextUtils.TruncateAt;
 import android.text.TextWatcher;
 import android.view.Gravity;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.View.OnFocusChangeListener;
+import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
@@ -50,6 +50,7 @@ import com.v2tech.logic.User;
 import com.v2tech.logic.jni.RequestConfCreateResponse;
 import com.v2tech.service.ConferenceService;
 import com.v2tech.view.cus.DateTimePicker;
+import com.v2tech.view.cus.DateTimePicker.OnDateSetListener;
 
 public class ConferenceCreateActivity extends Activity {
 
@@ -116,9 +117,10 @@ public class ConferenceCreateActivity extends Activity {
 
 		mConfTitleET = (EditText) findViewById(R.id.conference_create_conf_name);
 		mConfStartTimeET = (EditText) findViewById(R.id.conference_create_conf_start_time);
-		//mConfStartTimeET.setOnFocusChangeListener(mDateTimePickerListener);
-		//mConfStartTimeET.setInputType(InputType.TYPE_NULL);
-		
+		mConfStartTimeET.setOnTouchListener(mDateTimePickerListener);
+		// mConfStartTimeET.setOnClickListener(mDateTimePickerListener);
+		// mConfStartTimeET.setInputType(InputType.TYPE_NULL);
+
 		new LoadContactsAT().execute();
 
 		searchedTextET = (EditText) findViewById(R.id.contacts_search);
@@ -201,7 +203,7 @@ public class ConferenceCreateActivity extends Activity {
 
 		item.isExpanded = !item.isExpanded;
 		adapter.notifyDataSetChanged();
-	
+
 	}
 
 	private void updateUserToAttendList(final User u) {
@@ -306,7 +308,9 @@ public class ConferenceCreateActivity extends Activity {
 		} else {
 			iv.setImageResource(R.drawable.avatar);
 		}
-		ll.addView(iv, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+		ll.addView(iv, new LinearLayout.LayoutParams(
+				LinearLayout.LayoutParams.WRAP_CONTENT,
+				LinearLayout.LayoutParams.WRAP_CONTENT));
 
 		TextView tv = new TextView(mContext);
 		tv.setText(u.getName());
@@ -420,25 +424,25 @@ public class ConferenceCreateActivity extends Activity {
 				return;
 			}
 			String startTimeStr = mConfStartTimeET.getText().toString();
-//			if (startTimeStr == null || startTimeStr.length() == 0) {
-//				mConfStartTimeET
-//						.setError(getString(R.string.error_conf_start_time_required));
-//				mConfStartTimeET.requestFocus();
-//				return;
-//			}
-//
-//			DateFormat sd = new SimpleDateFormat("yyyy-MM-dd HH:mm",
-//					Locale.CHINESE);
-//			
-//			try {
-//				sd.parse(startTimeStr);
-//			} catch (ParseException e) {
-//				e.printStackTrace();
-//				mConfStartTimeET
-//						.setError(getString(R.string.error_conf_start_time_format_failed));
-//				mConfStartTimeET.requestFocus();
-//				return;
-//			}
+			if (startTimeStr == null || startTimeStr.length() == 0) {
+				mConfStartTimeET
+						.setError(getString(R.string.error_conf_start_time_required));
+				mConfStartTimeET.requestFocus();
+				return;
+			}
+
+			DateFormat sd = new SimpleDateFormat("yyyy-MM-dd HH:mm",
+					Locale.CHINESE);
+
+			try {
+				sd.parse(startTimeStr);
+			} catch (ParseException e) {
+				e.printStackTrace();
+				mConfStartTimeET
+						.setError(getString(R.string.error_conf_start_time_format_failed));
+				mConfStartTimeET.requestFocus();
+				return;
+			}
 
 			List<User> l = new ArrayList<User>(mAttendeeList);
 			conf = new Conference(title, startTimeStr, null, l);
@@ -448,21 +452,48 @@ public class ConferenceCreateActivity extends Activity {
 		}
 
 	};
-	
-	
-	private OnFocusChangeListener mDateTimePickerListener = new OnFocusChangeListener() {
+
+	private DateTimePicker dtp;
+	private OnTouchListener mDateTimePickerListener = new OnTouchListener() {
 
 		@Override
-		public void onFocusChange(View view, boolean focus) {
-			if (focus) {
-				DateTimePicker dtp = new DateTimePicker(mContext, 300, 150);
+		public boolean onTouch(final View view, MotionEvent event) {
+			if (event.getAction() == MotionEvent.ACTION_UP) {
+
+				if (dtp == null) {
+					dtp = new DateTimePicker(mContext,
+							ViewGroup.LayoutParams.WRAP_CONTENT,
+							ViewGroup.LayoutParams.WRAP_CONTENT);
+					dtp.setOnDateSetListener(new OnDateSetListener() {
+
+						@Override
+						public void onDateTimeSet(int year, int monthOfYear,
+								int dayOfMonth, int hour, int minute) {
+							((EditText) view).setText(year
+									+ "-"
+									+ monthOfYear
+									+ "-"
+									+ dayOfMonth
+									+ " "
+									+ (hour < 10 ? ("0" + hour) : (hour + ""))
+									+ ":"
+									+ (minute < 10 ? ("0" + minute)
+											: (minute + "")));
+						}
+
+					});
+				}
+
 				dtp.showAsDropDown(view);
+				InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+				imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+
 			}
-			
+			return true;
 		}
-		
+
 	};
-	
+
 	class LoadContactsAT extends AsyncTask<Void, Void, Void> {
 
 		@Override
@@ -472,9 +503,14 @@ public class ConferenceCreateActivity extends Activity {
 				for (Group g : mGroupList) {
 					mItemList.add(new ListItem(g, g.getLevel()));
 				}
-				adapter.notifyDataSetChanged();
+
 			}
 			return null;
+		}
+
+		@Override
+		protected void onPostExecute(Void result) {
+			adapter.notifyDataSetChanged();
 		}
 
 	};
@@ -556,7 +592,8 @@ public class ConferenceCreateActivity extends Activity {
 						.getObject();
 				User currU = GlobalHolder.getInstance().getCurrentUser();
 				Group g = new Group(rccr.getConfId(), GroupType.CONFERENCE,
-						conf.getName(), currU.getmUserId() + "", conf.getDate().getTime()/1000+"");
+						conf.getName(), currU.getmUserId() + "", conf.getDate()
+								.getTime() / 1000 + "");
 				g.setOwnerUser(currU);
 				GlobalHolder.getInstance().addGroupToList(GroupType.CONFERENCE,
 						g);

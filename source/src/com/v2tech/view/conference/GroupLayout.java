@@ -186,6 +186,13 @@ public class GroupLayout extends LinearLayout {
 	public void updateContent(String content) {
 		mGroupOwnerTV.setText(content);
 	}
+	
+	
+	public void update() {
+		mGroupNameTV.setText(this.mConv.getName());
+		mGroupOwnerTV.setText(mConv.getMsg());
+		mGroupDateTV.setText(mConv.getDate());
+	}
 
 	public void updateIcon(Bitmap bitmap) {
 		if (bitmap != null && !bitmap.isRecycled()) {
