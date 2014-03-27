@@ -66,7 +66,7 @@ public abstract class AbstractHandler extends Handler {
 		switch (msg.what) {
 		case REQUEST_TIME_OUT:
 			Meta meta = metaHolder.get(Integer.valueOf(msg.arg1));
-			if (meta != null && meta.caller != null) {
+			if (meta != null && meta.caller != null && meta.caller.getTarget() != null) {
 				Object origObject =meta.caller.obj ;
 				meta.caller.obj = new AsynResult(AsynResult.AsynState.TIME_OUT, null);
 				JNIResponse jniRes = (JNIResponse)msg.obj;

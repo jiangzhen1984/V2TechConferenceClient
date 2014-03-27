@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.res.Resources;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -163,18 +164,23 @@ public class MainActivity extends FragmentActivity implements
 		Resources res = getResources();
 
 		TabHost.TabSpec confTabSpec = this.mTabHost.newTabSpec(TAG_CONF)
-				.setIndicator(getConversationView());
+				.setIndicator(
+						getConversationView(true, mContext.getResources()
+								.getDrawable(R.drawable.selector_conf)));
 		confTabSpec.setContent(new TabFactory(this));
 		mTabHost.addTab(confTabSpec);
 
 		TabHost.TabSpec contactTabSpec = this.mTabHost.newTabSpec(TAG_CONTACT)
-				.setIndicator(null, res.getDrawable(R.drawable.selector_group));
+				.setIndicator(
+						getConversationView(false,
+								res.getDrawable(R.drawable.selector_group)));
 		contactTabSpec.setContent(new TabFactory(this));
 		mTabHost.addTab(contactTabSpec);
 
 		TabHost.TabSpec settingTabSpec = this.mTabHost.newTabSpec(TAG_SETTING)
-				.setIndicator(null,
-						res.getDrawable(R.drawable.selector_setting));
+				.setIndicator(
+						getConversationView(false,
+								res.getDrawable(R.drawable.selector_setting)));
 		settingTabSpec.setContent(new TabFactory(this));
 		mTabHost.addTab(settingTabSpec);
 
@@ -186,28 +192,29 @@ public class MainActivity extends FragmentActivity implements
 		}
 	}
 
-	private View getConversationView() {
+	private View getConversationView(boolean flag, Drawable drw) {
 		RelativeLayout rl = new RelativeLayout(mContext);
 		RelativeLayout.LayoutParams rll = new RelativeLayout.LayoutParams(
 				RelativeLayout.LayoutParams.WRAP_CONTENT,
 				RelativeLayout.LayoutParams.WRAP_CONTENT);
 		rll.addRule(RelativeLayout.CENTER_IN_PARENT);
 		ImageView iv = new ImageView(mContext);
-		iv.setId(0x900000);
-		iv.setImageDrawable(mContext.getResources().getDrawable(
-				R.drawable.selector_conf));
+		iv.setId(0x900000 | drw.hashCode());
+
+		iv.setImageDrawable(drw);
 		rl.addView(iv, rll);
+		if (flag) {
+			ImageView ivNoticator = new ImageView(mContext);
+			ivNoticator.setVisibility(View.INVISIBLE);
+			ivNoticator.setImageResource(R.drawable.tab_notificator);
+			rll = new RelativeLayout.LayoutParams(
+					RelativeLayout.LayoutParams.WRAP_CONTENT,
+					RelativeLayout.LayoutParams.WRAP_CONTENT);
+			rll.addRule(RelativeLayout.RIGHT_OF, iv.getId());
+			rl.addView(ivNoticator, rll);
 
-		ImageView ivNoticator = new ImageView(mContext);
-		ivNoticator.setVisibility(View.INVISIBLE);
-		ivNoticator.setImageResource(R.drawable.tab_notificator);
-		rll = new RelativeLayout.LayoutParams(
-				RelativeLayout.LayoutParams.WRAP_CONTENT,
-				RelativeLayout.LayoutParams.WRAP_CONTENT);
-		rll.addRule(RelativeLayout.RIGHT_OF, iv.getId());
-		rl.addView(ivNoticator, rll);
-
-		mTabNoticator = ivNoticator;
+			mTabNoticator = ivNoticator;
+		}
 		return rl;
 	}
 

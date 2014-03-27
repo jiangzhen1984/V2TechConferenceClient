@@ -8,7 +8,6 @@ import java.util.Set;
 import v2av.VideoCaptureDevInfo;
 import v2av.VideoPlayer;
 import v2av.VideoRecorder;
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.ProgressDialog;
@@ -18,15 +17,12 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
-import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.view.Display;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Surface;
@@ -36,7 +32,6 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -621,6 +616,10 @@ public class VideoActivityV2 extends Activity {
 		rl.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View arg0) {
+				if (a.getDefaultDevice() == null) {
+					V2Log.e("Invalid vidoe device ");
+					return;
+				}
 				if (iv.getTag().toString().equals("camera_showing")) {
 					iv.setImageResource(R.drawable.camera);
 					iv.setTag("camera");
@@ -717,7 +716,7 @@ public class VideoActivityV2 extends Activity {
 		Attendee a = getAttendee(user.getmUserId());
 		if (a != null) {
 			for (UserDeviceConfig udc : a.getmDevices()) {
-				if (udc.isShowing()) {
+				if (udc != null && udc.isShowing()) {
 					showOrCloseAttendeeVideo(udc);
 				}
 			}
@@ -756,9 +755,8 @@ public class VideoActivityV2 extends Activity {
 				}
 			}
 
-			// if (udc.getBelongsAttendee().isSelf()) {
-			// VideoRecorder.VideoPreviewSurfaceHolder = null;
-			// }
+		
+			udc.setShowing(false);
 			udc.doClose();
 			adjustLayout();
 		} else {

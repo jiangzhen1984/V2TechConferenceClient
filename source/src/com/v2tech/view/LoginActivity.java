@@ -129,8 +129,7 @@ public class LoginActivity extends Activity {
 		String password = sf.getString("passwd", "");
 		mEmailView.setText(user);
 		mPasswordView.setText(password);
-		if (!sf.getString("user", "").equals("")
-				&& !sf.getString("passwd", "").equals("")) {
+		if (!sf.getString("passwd", "").equals("")) {
 			mRemPwdCkbx.setChecked(true);
 		}
 		if (!"".equals(user)) {
@@ -423,7 +422,7 @@ public class LoginActivity extends Activity {
 						saveUserConfig(mEmailView.getText().toString(),
 								mPasswordView.getText().toString());
 					} else {
-						saveUserConfig("", "");
+						saveUserConfig(mEmailView.getText().toString(), "");
 					}
 					GlobalHolder.getInstance().setCurrentUser(rlr.getUser());
 					SharedPreferences sf = mContext.getSharedPreferences(
