@@ -241,7 +241,7 @@ public class ContactsTabFragment extends Fragment {
 		@Override
 		public void onTextChanged(CharSequence s, int start, int before,
 				int count) {
-			if (s.length() > 0) {
+			if (s != null && s.length() > 0) {
 				if (!mIsStartedSearch) {
 					mCacheItemList = mItemList;
 					mIsStartedSearch = true;
@@ -252,9 +252,10 @@ public class ContactsTabFragment extends Fragment {
 				mIsStartedSearch = false;
 				return;
 			}
+			String str = s == null?"":s.toString();
 			List<User> searchedUserList = new ArrayList<User>();
 			for (Group g : l) {
-				Group.searchUser(s.toString(), searchedUserList, g);
+				Group.searchUser(str, searchedUserList, g);
 			}
 			Message.obtain(mHandler, UPDATE_SEARCHED_USER_LIST,
 					searchedUserList).sendToTarget();

@@ -144,6 +144,7 @@
                 android:layout_toRightOf="@+id/textView1"
                 android:background="@drawable/conference_create_et_bg"
                 android:ems="10"
+                android:maxLength="50"
                 android:inputType="text" >
             </EditText>
 

@@ -5,6 +5,7 @@ import java.util.Calendar;
 import android.content.Context;
 import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -103,11 +104,31 @@ public class DateTimePicker extends PopupWindow {
 		public void onClick(View v) {
 			if (listener != null) {
 				int year = 0, monthOfYear = 0, dayOfMonth = 0, hour = 0, minute = 0;
-				year = Integer.parseInt(mYearET.getText().toString());
-				monthOfYear = Integer.parseInt(mMonthET.getText().toString());
-				dayOfMonth = Integer.parseInt(mDayET.getText().toString());
-				hour = Integer.parseInt(mHourET.getText().toString());
-				minute = Integer.parseInt(mMinuteET.getText().toString());
+				String yearStr = mYearET.getText().toString();
+				if (yearStr != null && !yearStr.equals("")
+						&& TextUtils.isDigitsOnly(yearStr)) {
+					year = Integer.parseInt(yearStr);
+				}
+				String monthStr = mMonthET.getText().toString();
+				if (monthStr != null && !monthStr.equals("")
+						&& TextUtils.isDigitsOnly(monthStr)) {
+					monthOfYear = Integer.parseInt(monthStr);
+				}
+				String dayStr = mDayET.getText().toString();
+				if (dayStr != null && !dayStr.equals("")
+						&& TextUtils.isDigitsOnly(dayStr)) {
+					dayOfMonth = Integer.parseInt(dayStr);
+				}
+				String hourStr = mHourET.getText().toString();
+				if (hourStr != null && !hourStr.equals("")
+						&& TextUtils.isDigitsOnly(hourStr)) {
+					hour = Integer.parseInt(hourStr);
+				}
+				String minuteStr = mMinuteET.getText().toString();
+				if (minuteStr != null && !minuteStr.equals("")
+						&& TextUtils.isDigitsOnly(minuteStr)) {
+					minute = Integer.parseInt(minuteStr);
+				}
 
 				listener.onDateTimeSet(year, monthOfYear, dayOfMonth, hour,
 						minute);

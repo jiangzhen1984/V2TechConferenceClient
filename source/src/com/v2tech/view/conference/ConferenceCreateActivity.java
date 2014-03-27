@@ -5,6 +5,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -174,7 +175,9 @@ public class ConferenceCreateActivity extends Activity {
 			sortList.addAll(item.g.getUsers());
 			Collections.sort(sortList);
 			for (User u : sortList) {
-				mItemList.add(++pos, new ListItem(u, item.g.getLevel()));
+				ListItem li = new ListItem(u, item.g.getLevel());
+				mItemList.add(++pos, li);
+				updateItem(li);
 			}
 
 		} else {
@@ -231,6 +234,18 @@ public class ConferenceCreateActivity extends Activity {
 		mAttendeeContainer.removeAllViews();
 		for (User tmpU : mAttendeeList) {
 			addAttendee(tmpU);
+		}
+	}
+
+	private void updateItem(ListItem it) {
+		if (it == null || it.u == null) {
+			return;
+		}
+
+		for (User u : mAttendeeList) {
+			if (it.u.getmUserId() == u.getmUserId()) {
+				((ContactUserView) it.v).updateChecked();
+			}
 		}
 	}
 
@@ -348,6 +363,7 @@ public class ConferenceCreateActivity extends Activity {
 			ListItem item = new ListItem(u, -1);
 			((ContactUserView) item.v).removePadding();
 			mItemList.add(item);
+			updateItem(item);
 		}
 		adapter.notifyDataSetChanged();
 	}
@@ -356,7 +372,7 @@ public class ConferenceCreateActivity extends Activity {
 
 		@Override
 		public void afterTextChanged(Editable s) {
-			if (s.length() > 0) {
+			if (s != null && s.length() > 0) {
 				if (!mIsStartedSearch) {
 					mCacheItemList = mItemList;
 					mIsStartedSearch = true;
@@ -369,9 +385,10 @@ public class ConferenceCreateActivity extends Activity {
 				}
 				return;
 			}
+			String str = s == null?"":s.toString();
 			List<User> searchedUserList = new ArrayList<User>();
 			for (Group g : mGroupList) {
-				Group.searchUser(s.toString(), searchedUserList, g);
+				Group.searchUser(str, searchedUserList, g);
 			}
 			Message.obtain(mLocalHandler, UPDATE_SEARCHED_USER_LIST,
 					searchedUserList).sendToTarget();
@@ -404,7 +421,12 @@ public class ConferenceCreateActivity extends Activity {
 						.sendToTarget();
 			} else {
 				ContactUserView cuv = (ContactUserView) view;
-				cuv.updateChecked();
+				for (ListItem li : mItemList) {
+					if (li.u != null
+							&& li.u.getmUserId() == cuv.getUser().getmUserId()) {
+						((ContactUserView) li.v).updateChecked();
+					}
+				}
 				Message.obtain(mLocalHandler, UPDATE_ATTENDEES, item.u)
 						.sendToTarget();
 			}
@@ -434,12 +456,19 @@ public class ConferenceCreateActivity extends Activity {
 			DateFormat sd = new SimpleDateFormat("yyyy-MM-dd HH:mm",
 					Locale.CHINESE);
 
+			Date st = null;
 			try {
-				sd.parse(startTimeStr);
+				st = sd.parse(startTimeStr);
 			} catch (ParseException e) {
 				e.printStackTrace();
 				mConfStartTimeET
 						.setError(getString(R.string.error_conf_start_time_format_failed));
+				mConfStartTimeET.requestFocus();
+				return;
+			}
+			if ((new Date().getTime() / 60000) - (st.getTime() / 60000) > 10) {
+				mConfStartTimeET
+						.setError(getString(R.string.error_conf_do_not_permit_create_piror_conf));
 				mConfStartTimeET.requestFocus();
 				return;
 			}
@@ -448,7 +477,7 @@ public class ConferenceCreateActivity extends Activity {
 			conf = new Conference(title, startTimeStr, null, l);
 			cs.createConference(conf,
 					Message.obtain(mLocalHandler, CREATE_CONFERENC_RESP));
-
+			view.setEnabled(false);
 		}
 
 	};
@@ -487,6 +516,7 @@ public class ConferenceCreateActivity extends Activity {
 				dtp.showAsDropDown(view);
 				InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 				imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+				mConfStartTimeET.setError(null);
 
 			}
 			return true;
@@ -503,7 +533,7 @@ public class ConferenceCreateActivity extends Activity {
 				for (Group g : mGroupList) {
 					mItemList.add(new ListItem(g, g.getLevel()));
 				}
-
+				adapter.notifyDataSetChanged();
 			}
 			return null;
 		}

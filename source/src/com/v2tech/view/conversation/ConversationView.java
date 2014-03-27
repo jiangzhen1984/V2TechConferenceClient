@@ -124,6 +124,15 @@ public class ConversationView extends Activity {
 		mSendButtonTV.setOnTouchListener(sendMessageButtonListener);
 
 		mMessageET = (EditText) findViewById(R.id.message_text);
+		mMessageET.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View arg0) {
+				scrollToBottom();
+				
+			}
+			
+		});
 		mReturnButtonTV = (TextView) findViewById(R.id.contact_detail_return_button);
 		// mReturnButtonTV.setOnClickListener(new OnClickListener() {
 		// @Override
@@ -229,12 +238,7 @@ public class ConversationView extends Activity {
 		super.onResume();
 		if (pending) {
 			pending = false;
-			mScrollView.post(new Runnable() {
-				@Override
-				public void run() {
-					mScrollView.scrollTo(0, mMessagesContainer.getChildAt(mMessagesContainer.getChildCount() - 1).getBottom());
-				}
-			});
+			scrollToBottom();
 		}
 	}
 
@@ -250,6 +254,18 @@ public class ConversationView extends Activity {
 		this.unregisterReceiver(receiver);
 		cleanCache();
 		GlobalHolder.getInstance().CURRENT_CONVERSATION_USER = 0;
+	}
+	
+	
+	private void scrollToBottom() {
+		if (mMessagesContainer != null && mMessagesContainer.getChildCount() > 0) {
+			mScrollView.postDelayed(new Runnable() {
+				@Override
+				public void run() {
+					mScrollView.scrollTo(0, mMessagesContainer.getChildAt(mMessagesContainer.getChildCount() - 1).getBottom());
+				}
+			}, 500);
+		}
 	}
 
 	private void cleanCache() {

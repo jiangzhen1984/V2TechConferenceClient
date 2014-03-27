@@ -5,7 +5,6 @@ import java.util.List;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.ContentValues;
 import android.content.Context;
@@ -78,14 +77,11 @@ public class ConversationsTabFragment extends Fragment {
 
 	private ConfsHandler mHandler = new ConfsHandler();
 
-	private ProgressDialog mWaitingDialog;
-
 	private ImageView mLoadingImageIV;
-
-	private long currentConfId;
 
 	private boolean isLoaded = false;
 	private boolean isLoadedCov = false;
+	private boolean isInMeeting = false;
 
 	private View rootView;
 
@@ -102,7 +98,9 @@ public class ConversationsTabFragment extends Fragment {
 
 	private ConversationsAdapter adapter = new ConversationsAdapter();
 
-	private ConferenceService cb = new ConferenceService();;
+	private ConferenceService cb = new ConferenceService();
+	
+	
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -214,6 +212,7 @@ public class ConversationsTabFragment extends Fragment {
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if (requestCode == SUB_ACTIVITY_CODE_VIDEO_ACTIVITY) {
+			isInMeeting = false;
 //			Message.obtain(mHandler, REQUEST_EXIT_CONF, currentConfId)
 //					.sendToTarget();
 		} else if (requestCode == SUB_ACTIVITY_CODE_CREATE_CONF) {
@@ -307,18 +306,11 @@ public class ConversationsTabFragment extends Fragment {
 
 		@Override
 		public void onClick(View v) {
+			if (isInMeeting) {
+				return;
+			}
+			isInMeeting = true;
 			GroupLayout gp = (GroupLayout) v;
-//			mWaitingDialog = ProgressDialog
-//					.show(getActivity(),
-//							"",
-//							getActivity()
-//									.getResources()
-//									.getString(
-//											R.string.requesting_enter_conference),
-//							true);
-//			currentConfId = gp.getGroupId();
-//			Message.obtain(mHandler, REQUEST_ENTER_CONF,
-//					Long.valueOf(currentConfId)).sendToTarget();
 			
 			Intent i = new Intent(getActivity(),
 					VideoActivityV2.class);
@@ -347,7 +339,7 @@ public class ConversationsTabFragment extends Fragment {
 		public void onTextChanged(CharSequence s, int start, int before,
 				int count) {
 
-			if (s.length() > 0) {
+			if (s != null && s.length() > 0) {
 				if (!mIsStartedSearch) {
 					mCacheItemList = mItemList;
 					mIsStartedSearch = true;
@@ -359,7 +351,7 @@ public class ConversationsTabFragment extends Fragment {
 				return;
 			}
 			List<ScrollItem> newItemList = new ArrayList<ScrollItem>();
-			String searchKey = s.toString();
+			String searchKey = s == null? "" : s.toString();
 			for (ScrollItem item : mItemList) {
 				if (item.cov.getName() != null
 						&& item.cov.getName().contains(searchKey)) {

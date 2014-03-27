@@ -29,17 +29,15 @@
                 android:id="@+id/ip"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_marginRight="20dp"
                 android:layout_weight="1"
                 android:background="@drawable/rounded_corners"
                 android:ems="10"
                 android:enabled="true"
-                android:gravity="center_vertical|center_horizontal"
+                android:gravity="center_vertical|left"
                 android:inputType="text"
-                 android:layout_marginRight="20dp"
-                android:paddingLeft="8dp"
                 android:nextFocusDown="@+id/port"
-                 />
-
+                android:paddingLeft="8dp" />
         </LinearLayout>
 
         <LinearLayout
@@ -68,9 +66,7 @@
                 android:inputType="number"
                 android:maxLength="5"
                 android:paddingLeft="8dp" >
-
             </EditText>
-
         </LinearLayout>
 
         <LinearLayout
@@ -78,7 +74,6 @@
             android:layout_height="2dp"
             android:layout_marginTop="30dp"
             android:background="@color/setting_separation" >
-
         </LinearLayout>
 
         <RelativeLayout
@@ -104,9 +99,7 @@
                 android:layout_marginRight="40dp"
                 android:background="@drawable/rounded_corners_login_button"
                 android:text="@string/ip_setting_button_cancel" />
-
         </RelativeLayout>
-
     </LinearLayout>
 
 </LinearLayout>
