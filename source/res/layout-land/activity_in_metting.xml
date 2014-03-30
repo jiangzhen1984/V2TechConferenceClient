@@ -33,6 +33,7 @@
                 android:layout_below="@+id/in_meeting_setting_iv"
                 android:layout_marginLeft="10dp"
                 android:src="@drawable/arrow"
+                android:visibility="invisible"
                 />
 
             <ImageView
@@ -52,7 +53,8 @@
                 android:layout_marginLeft="20dp"
                 android:layout_toRightOf="@+id/in_meeting_setting_iv"
                  android:layout_alignBottom="@+id/in_meeting_setting_arrow"
-                android:src="@drawable/arrow" />
+                android:src="@drawable/arrow"
+                android:visibility="invisible" />
 
             <ImageView
                 android:id="@+id/in_meeting_log_out_iv"

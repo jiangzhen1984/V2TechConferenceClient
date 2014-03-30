@@ -118,9 +118,9 @@ public class VideoActivityV2 extends Activity {
 		this.mSpeakerIV = (ImageView) findViewById(R.id.speaker_iv);
 		this.mSpeakerIV.setOnClickListener(mApplySpeakerListener);
 		this.mSettingArrowIV = (ImageView) findViewById(R.id.in_meeting_setting_arrow);
-		mSettingArrowIV.setVisibility(View.INVISIBLE);
+		//mSettingArrowIV.setVisibility(View.INVISIBLE);
 		this.mAttendeeArrowIV = (ImageView) findViewById(R.id.in_meeting_attendee_arrow);
-		mAttendeeArrowIV.setVisibility(View.INVISIBLE);
+		//mAttendeeArrowIV.setVisibility(View.INVISIBLE);
 		initConfsListener();
 		init();
 		registerOrRemoveListener(true);
@@ -510,6 +510,9 @@ public class VideoActivityV2 extends Activity {
 	 * user quit conference, however positive or negative
 	 */
 	private void quit() {
+		if (mWaitingDialog != null) {
+			mWaitingDialog.dismiss();
+		}
 		for (SurfaceViewW sw : this.mCurrentShowedSV) {
 			Message.obtain(mVideoHandler, REQUEST_OPEN_OR_CLOSE_DEVICE, 0, 0,
 					sw.udc).sendToTarget();
@@ -915,8 +918,9 @@ public class VideoActivityV2 extends Activity {
 							R.string.error_request_enter_conference,
 							Toast.LENGTH_SHORT).show();
 				}
-				if (mWaitingDialog != null) {
+				if (mWaitingDialog != null && mWaitingDialog.isShowing()) {
 					mWaitingDialog.dismiss();
+					
 				}
 				break;
 			case REQUEST_EXIT_CONF:

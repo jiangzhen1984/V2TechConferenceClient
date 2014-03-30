@@ -50,7 +50,7 @@ public class Group {
 	int level;
 
 	public enum GroupType {
-		CONTACT(1), CONFERENCE(4), UNKNOWN(-1);
+		CONTACT(1), FRIEND(2), DOCUMENT(3), CONFERENCE(4), UNKNOWN(-1);
 
 		private int type;
 
