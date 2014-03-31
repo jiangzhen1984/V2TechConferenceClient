@@ -533,7 +533,6 @@ public class ConferenceCreateActivity extends Activity {
 				for (Group g : mGroupList) {
 					mItemList.add(new ListItem(g, g.getLevel()));
 				}
-				adapter.notifyDataSetChanged();
 			}
 			return null;
 		}

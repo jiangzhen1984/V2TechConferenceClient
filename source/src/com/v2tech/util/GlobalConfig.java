@@ -1,11 +1,11 @@
 package com.v2tech.util;
 
 import android.content.Context;
-import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
 import android.util.DisplayMetrics;
 
 public class GlobalConfig {
+	
+	public static final String KEY_LOGGED_IN = "LoggedIn";
 
 	public static int GLOBAL_DPI = DisplayMetrics.DENSITY_XHIGH;
 	
@@ -16,10 +16,10 @@ public class GlobalConfig {
 	public static double SCREEN_INCHES = 0;
 	
 	
+	
+	
+	
 	public static void saveLogoutFlag(Context context) {
-		SharedPreferences sf = context.getSharedPreferences("config", Context.MODE_PRIVATE);
-		Editor ed = sf.edit();
-		ed.putInt("LoggedIn", 0);
-		ed.commit();
+		SPUtil.putConfigIntValue(context, KEY_LOGGED_IN, 0);
 	}
 }

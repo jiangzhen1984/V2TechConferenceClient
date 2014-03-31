@@ -29,11 +29,11 @@ import com.v2tech.util.V2Log;
  */
 public class Group {
 
-	private long mGId;
+	protected long mGId;
 
-	private GroupType mGroupType;
+	protected GroupType mGroupType;
 
-	private String mName;
+	protected String mName;
 
 	private long mOwner;
 
@@ -41,13 +41,23 @@ public class Group {
 
 	private String mCreateDate;
 
-	private Group mParent;
+	protected Group mParent;
 
-	private List<Group> mChild;
+	protected List<Group> mChild;
 
 	private List<User> users;
 
-	int level;
+	protected int level;
+	
+	
+	
+
+	public Group(long mGId, GroupType mGroupType, String mName) {
+		super();
+		this.mGId = mGId;
+		this.mGroupType = mGroupType;
+		this.mName = mName;
+	}
 
 	public enum GroupType {
 		CONTACT(1), FRIEND(2), DOCUMENT(3), CONFERENCE(4), UNKNOWN(-1);
@@ -62,6 +72,10 @@ public class Group {
 			switch (code) {
 			case 1:
 				return CONTACT;
+			case 2:
+				return FRIEND;
+			case 3:
+				return DOCUMENT;
 			case 4:
 				return CONFERENCE;
 			default:

@@ -7,8 +7,6 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -23,7 +21,6 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -34,6 +31,8 @@ import com.v2tech.logic.AsynResult;
 import com.v2tech.logic.GlobalHolder;
 import com.v2tech.logic.jni.RequestLogInResponse;
 import com.v2tech.service.UserService;
+import com.v2tech.util.GlobalConfig;
+import com.v2tech.util.SPUtil;
 
 /**
  * Activity which displays a login screen to the user, offering registration as
@@ -61,7 +60,6 @@ public class LoginActivity extends Activity {
 	// UI references.
 	private EditText mEmailView;
 	private EditText mPasswordView;
-	private CheckBox mRemPwdCkbx;
 	private View mLoginFormView;
 	private View mLoginStatusView;
 	private TextView mLoginStatusMessageView;
@@ -86,11 +84,11 @@ public class LoginActivity extends Activity {
 
 		mPasswordView = (EditText) findViewById(R.id.password);
 
-		mLoginFormView = findViewById(R.id.login_form);
+		mLoginFormView = findViewById(R.id.login_form_ll);
 		mLoginStatusView = findViewById(R.id.login_status);
 		mLoginStatusMessageView = (TextView) findViewById(R.id.login_status_message);
 
-		findViewById(R.id.login_form).setOnClickListener(
+		findViewById(R.id.login_form_ll).setOnClickListener(
 				new View.OnClickListener() {
 					@Override
 					public void onClick(View view) {
@@ -112,8 +110,6 @@ public class LoginActivity extends Activity {
 		mShowIpSettingButton = findViewById(R.id.show_setting);
 		mShowIpSettingButton.setOnClickListener(showIpSetting);
 
-		mRemPwdCkbx = (CheckBox) findViewById(R.id.login_rem_pwd);
-
 		loginView = findViewById(R.id.login_layout);
 		loginView.setVisibility(View.GONE);
 		init();
@@ -122,19 +118,10 @@ public class LoginActivity extends Activity {
 	private String[] local;
 
 	private void init() {
-
-		SharedPreferences sf = mContext.getSharedPreferences("config",
-				Context.MODE_PRIVATE);
-		String user = sf.getString("user", "");
-		String password = sf.getString("passwd", "");
+		String user = SPUtil.getConfigStrValue(this,"user");
+		String password = SPUtil.getConfigStrValue(this,"passwd");
 		mEmailView.setText(user);
 		mPasswordView.setText(password);
-		if (!sf.getString("passwd", "").equals("")) {
-			mRemPwdCkbx.setChecked(true);
-		}
-		if (!"".equals(user)) {
-			local = new String[]{user, password};
-		}
 	}
 
 	@Override
@@ -195,12 +182,10 @@ public class LoginActivity extends Activity {
 			final EditText et = (EditText) dialog.findViewById(R.id.ip);
 			final EditText port = (EditText) dialog.findViewById(R.id.port);
 
-			SharedPreferences sf = mContext.getSharedPreferences("config",
-					Context.MODE_PRIVATE);
-			final String cacheIp = sf.getString("ip", null);
+			final String cacheIp = SPUtil.getConfigStrValue(mContext, "ip");
 			et.setText(cacheIp);
 
-			port.setText(sf.getString("port", ""));
+			port.setText( SPUtil.getConfigStrValue(mContext, "port"));
 
 			saveButton.setOnClickListener(new OnClickListener() {
 				@Override
@@ -268,21 +253,11 @@ public class LoginActivity extends Activity {
 	}
 
 	private boolean saveHostConfig(String ip, String port) {
-		SharedPreferences sf = mContext.getSharedPreferences("config",
-				Context.MODE_PRIVATE);
-		Editor e = sf.edit();
-		e.putString("ip", ip);
-		e.putString("port", port);
-		return e.commit();
+		return SPUtil.putConfigStrValue(this, new String[]{"ip","port"}, new String[]{ip, port});
 	}
 
 	private boolean saveUserConfig(String user, String passwd) {
-		SharedPreferences sf = mContext.getSharedPreferences("config",
-				Context.MODE_PRIVATE);
-		Editor e = sf.edit();
-		e.putString("user", user);
-		e.putString("passwd", passwd);
-		return e.commit();
+		return SPUtil.putConfigStrValue(this, new String[]{"user","passwd"}, new String[]{user, passwd});
 	}
 
 	/**
@@ -291,10 +266,8 @@ public class LoginActivity extends Activity {
 	 * errors are presented and no actual login attempt is made.
 	 */
 	public void attemptLogin() {
-		SharedPreferences sf = mContext.getSharedPreferences("config",
-				Context.MODE_PRIVATE);
-		String ip = sf.getString("ip", null);
-		String port = sf.getString("port", null);
+		String ip = SPUtil.getConfigStrValue(this, "ip");
+		String port =  SPUtil.getConfigStrValue(this, "port");
 
 		if (ip == null || ip.isEmpty() || port == null || port.isEmpty()) {
 			Toast.makeText(mContext, R.string.error_no_host_configuration,
@@ -418,19 +391,9 @@ public class LoginActivity extends Activity {
 					mPasswordView.requestFocus();
 				} else {
 					// Save user info
-					if (mRemPwdCkbx.isChecked()) {
-						saveUserConfig(mEmailView.getText().toString(),
-								mPasswordView.getText().toString());
-					} else {
-						saveUserConfig(mEmailView.getText().toString(), "");
-					}
+					saveUserConfig(mEmailView.getText().toString(), "");
 					GlobalHolder.getInstance().setCurrentUser(rlr.getUser());
-					SharedPreferences sf = mContext.getSharedPreferences(
-							"config", Context.MODE_PRIVATE);
-					Editor ed = sf.edit();
-					ed.putInt("LoggedIn", 1);
-					ed.commit();
-
+					SPUtil.putConfigIntValue(mContext, GlobalConfig.KEY_LOGGED_IN, 1);
 					mContext.startActivity(new Intent(mContext,
 							MainActivity.class));
 					finish();

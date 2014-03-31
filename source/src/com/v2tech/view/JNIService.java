@@ -36,7 +36,6 @@ import com.V2.jni.VideoRequest;
 import com.V2.jni.VideoRequestCallback;
 import com.v2tech.R;
 import com.v2tech.db.ContentDescriptor;
-import com.v2tech.logic.AsynResult;
 import com.v2tech.logic.GlobalHolder;
 import com.v2tech.logic.Group;
 import com.v2tech.logic.Group.GroupType;
@@ -86,8 +85,6 @@ public class JNIService extends Service {
 	// JNI call back definitions
 	private ImRequestCallback mImCB;
 
-	private ConfRequestCallback mCRCB;
-
 	private GroupRequestCB mGRCB;
 
 	private VideoRequestCB mVRCB;
@@ -120,9 +117,6 @@ public class JNIService extends Service {
 
 		mImCB = new ImRequestCB(mCallbackHandler);
 		ImRequest.getInstance().setCallback(mImCB);
-
-		mCRCB = new ConfRequestCB(mCallbackHandler);
-		ConfRequest.getInstance().addCallback(mCRCB);
 
 		mGRCB = new GroupRequestCB(mCallbackHandler);
 		GroupRequest.getInstance().addCallback(mGRCB);
@@ -567,43 +561,9 @@ public class JNIService extends Service {
 		}
 		
 		
-		
-		
 
 	}
 
-	class ConfRequestCB implements ConfRequestCallback {
-
-		private JNICallbackHandler mCallbackHandler;
-
-		public ConfRequestCB(JNICallbackHandler mCallbackHandler) {
-			this.mCallbackHandler = mCallbackHandler;
-		}
-
-		@Override
-		public void OnEnterConfCallback(long nConfID, long nTime,
-				String szConfData, int nJoinResult) {
-		}
-
-		@Override
-		public void OnConfMemberEnterCallback(long nConfID, long nTime,
-				String szUserInfos) {
-		}
-
-		@Override
-		public void OnConfMemberExitCallback(long nConfID, long nTime,
-				long nUserID) {
-			
-		}
-
-		@Override
-		public void OnKickConfCallback(int nReason) {
-			
-		}
-		
-		
-
-	}
 
 	class VideoRequestCB implements VideoRequestCallback {
 
