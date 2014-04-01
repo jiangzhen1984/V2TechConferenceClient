@@ -3,6 +3,6 @@
     
      <color name="common_black">#000000</color>
       <color name="text_tab_selected">#ffffff</color>
-    <color name="text_tab_unselected">#f2f2f2</color>
+    <color name="text_tab_unselected">#bababa</color>
      
 </resources>

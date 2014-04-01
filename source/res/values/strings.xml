@@ -10,11 +10,11 @@
     <string name="user_logged_with_other_device">用户在其他地方登录， 程序2秒后自动退出</string>
     <string name="receive_image_notification">发送图片!</string>
     
+    <string name="tab_contact_name">好友</string>
+    <string name="tab_org_name">组织</string>
+    <string name="tab_group_name">群组</string>
     <string name="tab_conference_name">会议</string>
     <string name="tab_conversation_name">会话</string>
-    <string name="tab_conversation_group">群组</string>
-    <string name="tab_conversation_org">组织</string>
-    <string name="tab_conversation_contact">好友</string>
     
 
 </resources>

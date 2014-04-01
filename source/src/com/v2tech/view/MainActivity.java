@@ -9,9 +9,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
-import android.content.res.Resources;
 import android.graphics.Color;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -24,7 +22,6 @@ import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
 import android.widget.TabHost;
 import android.widget.TabHost.TabContentFactory;
 import android.widget.TextView;
@@ -52,9 +49,27 @@ public class MainActivity extends FragmentActivity implements
 	public static final String SERVICE_BOUNDED_EVENT = "com.v2tech.SERVICE_BOUNDED_EVENT";
 	public static final String SERVICE_UNBOUNDED_EVENT = "com.v2tech.SERVICE_UNBOUNDED_EVENT";
 
-	private static final String TAG_CONF = "conference";
 	private static final String TAG_CONTACT = "contacts";
-	private static final String TAG_SETTING = "setting";
+	private static final String TAG_ORG = "org";
+	private static final String TAG_GROUP = "group";
+	private static final String TAG_CONF = "conference";
+	private static final String TAG_COV = "conversation";
+
+	private TabClass[] mTabClasses = new TabClass[] {
+			new TabClass(TAG_CONTACT, R.drawable.tab_contact_button,
+					R.string.tab_contact_name,
+					ContactsTabFragment.class.getName()),
+			new TabClass(TAG_ORG, R.drawable.tab_org_button,
+					R.string.tab_org_name, ContactsTabFragment.class.getName()),
+			new TabClass(TAG_GROUP, R.drawable.tab_group_button,
+					R.string.tab_group_name,
+					ContactsTabFragment.class.getName()),
+			new TabClass(TAG_CONF, R.drawable.tab_conference_button,
+					R.string.tab_conference_name,
+					ConversationsTabFragment.class.getName()),
+			new TabClass(TAG_COV, R.drawable.tab_msg_cov_button,
+					R.string.tab_conversation_name,
+					ConversationsTabFragment.class.getName()) };
 
 	private LocalReceiver receiver = new LocalReceiver();
 
@@ -143,15 +158,17 @@ public class MainActivity extends FragmentActivity implements
 	private void intialiseViewPager() {
 
 		List<Fragment> fragments = new Vector<Fragment>();
-		fragments.add(Fragment.instantiate(this,
-				ConversationsTabFragment.class.getName()));
-		fragments.add(Fragment.instantiate(this,
-				ContactsTabFragment.class.getName()));
-		fragments.add(Fragment.instantiate(this,
-				SettingTabFragment.class.getName()));
+
+		for (TabClass tc : mTabClasses) {
+			Bundle bundle = new Bundle();
+			bundle.putString("tag", tc.mTabName);
+			Fragment frg = Fragment.instantiate(this, tc.clsName, bundle);
+			fragments.add(frg);
+
+		}
+
 		this.mPagerAdapter = new PagerAdapter(
 				super.getSupportFragmentManager(), fragments);
-		//
 		this.mViewPager = (ViewPager) super.findViewById(R.id.viewpager);
 		this.mViewPager.setAdapter(this.mPagerAdapter);
 		this.mViewPager.setOnPageChangeListener(this);
@@ -164,50 +181,36 @@ public class MainActivity extends FragmentActivity implements
 		mTabHost = (TabHost) findViewById(android.R.id.tabhost);
 		mTabHost.setup();
 
+		for (TabClass tc : mTabClasses) {
+			TabHost.TabSpec confTabSpec = this.mTabHost.newTabSpec(tc.mTabName)
+					.setIndicator(
+							getTabView(tc));
+			confTabSpec.setContent(new TabFactory(this));
+			mTabHost.addTab(confTabSpec);
 
-		TabHost.TabSpec confTabSpec = this.mTabHost.newTabSpec(TAG_CONF)
-				.setIndicator(
-						getTabView( mContext.getResources()
-								.getDrawable(R.drawable.selector_conference), mContext.getResources().getString(R.string.tab_conference_name)));
-		confTabSpec.setContent(new TabFactory(this));
-		mTabHost.addTab(confTabSpec);
-
-		TabHost.TabSpec contactTabSpec = this.mTabHost.newTabSpec(TAG_CONTACT)
-				.setIndicator(getTabView( mContext.getResources()
-						.getDrawable(R.drawable.selector_conf), mContext.getResources().getString(R.string.tab_conversation_org)));
-		contactTabSpec.setContent(new TabFactory(this));
-		mTabHost.addTab(contactTabSpec);
-
-		TabHost.TabSpec settingTabSpec = this.mTabHost.newTabSpec(TAG_SETTING)
-				.setIndicator(getTabView( mContext.getResources()
-						.getDrawable(R.drawable.selector_conf), mContext.getResources().getString(R.string.tab_conversation_org)));
-		settingTabSpec.setContent(new TabFactory(this));
-		mTabHost.addTab(settingTabSpec);
+		}
 
 		mTabHost.setOnTabChangedListener(this);
-//
 		for (int i = 0; i < mTabHost.getTabWidget().getChildCount(); i++) {
 			mTabHost.getTabWidget().getChildAt(i)
 					.setBackgroundColor(Color.rgb(247, 247, 247));
 		}
 	}
 
-	
-	
-	private View getTabView(Drawable drw, String title) {
+	private View getTabView(TabClass tcl) {
+		
 		LayoutInflater inflater = LayoutInflater.from(this);
 		View v = inflater.inflate(R.layout.tab_widget_view, null, false);
 		ImageView iv = (ImageView) v.findViewById(R.id.tab_image);
 		if (iv != null) {
-			iv.setImageDrawable(drw);
+			iv.setImageDrawable(this.getResources().getDrawable(tcl.mDraId));
 			iv.bringToFront();
 		}
-		
+
 		TextView tv = (TextView) v.findViewById(R.id.tab_name);
 		if (tv != null) {
-			tv.setText(title);
+			tv.setText(this.getResources().getText(tcl.mTabNameId));
 			tv.bringToFront();
-		//	tv.setTextColor(this.getResources().getColorStateList(R.color.selector_tab_text_color));
 		}
 		return v;
 	}
@@ -273,11 +276,8 @@ public class MainActivity extends FragmentActivity implements
 	 * @see android.widget.TabHost.OnTabChangeListener#onTabChanged(java.lang.String)
 	 */
 	public void onTabChanged(String tag) {
-		// TabInfo newTab = this.mapTabInfo.get(tag);
 		int pos = this.mTabHost.getCurrentTab();
-		// if (this.mViewPager != null) {
 		this.mViewPager.setCurrentItem(pos);
-		// }
 	}
 
 	@Override
@@ -368,6 +368,23 @@ public class MainActivity extends FragmentActivity implements
 			} else if (PublicIntent.FINISH_APPLICATION.equals(action)) {
 				finish();
 			}
+		}
+
+	}
+
+	class TabClass {
+		String mTabName;
+		int mDraId;
+		int mTabNameId;
+		String clsName;
+
+		public TabClass(String mTabName, int mDraId, int mTabTitle,
+				String clsName) {
+			super();
+			this.mTabName = mTabName;
+			this.mDraId = mDraId;
+			this.mTabNameId = mTabTitle;
+			this.clsName = clsName;
 		}
 
 	}
