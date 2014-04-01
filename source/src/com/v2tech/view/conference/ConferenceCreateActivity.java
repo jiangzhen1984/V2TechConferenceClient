@@ -528,7 +528,7 @@ public class ConferenceCreateActivity extends Activity {
 
 		@Override
 		protected Void doInBackground(Void... params) {
-			mGroupList = GlobalHolder.getInstance().getGroup(GroupType.CONTACT);
+			mGroupList = GlobalHolder.getInstance().getGroup(GroupType.ORG);
 			if (mGroupList != null) {
 				for (Group g : mGroupList) {
 					mItemList.add(new ListItem(g, g.getLevel()));

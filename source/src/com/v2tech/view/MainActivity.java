@@ -28,7 +28,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.v2tech.R;
-import com.v2tech.logic.GlobalHolder;
 import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.Notificator;
 import com.v2tech.util.V2Log;
@@ -49,25 +48,20 @@ public class MainActivity extends FragmentActivity implements
 	public static final String SERVICE_BOUNDED_EVENT = "com.v2tech.SERVICE_BOUNDED_EVENT";
 	public static final String SERVICE_UNBOUNDED_EVENT = "com.v2tech.SERVICE_UNBOUNDED_EVENT";
 
-	private static final String TAG_CONTACT = "contacts";
-	private static final String TAG_ORG = "org";
-	private static final String TAG_GROUP = "group";
-	private static final String TAG_CONF = "conference";
-	private static final String TAG_COV = "conversation";
 
 	private TabClass[] mTabClasses = new TabClass[] {
-			new TabClass(TAG_CONTACT, R.drawable.tab_contact_button,
+			new TabClass(PublicIntent.TAG_CONTACT, R.drawable.tab_contact_button,
 					R.string.tab_contact_name,
 					ContactsTabFragment.class.getName()),
-			new TabClass(TAG_ORG, R.drawable.tab_org_button,
+			new TabClass(PublicIntent.TAG_ORG, R.drawable.tab_org_button,
 					R.string.tab_org_name, ContactsTabFragment.class.getName()),
-			new TabClass(TAG_GROUP, R.drawable.tab_group_button,
+			new TabClass(PublicIntent.TAG_GROUP, R.drawable.tab_group_button,
 					R.string.tab_group_name,
-					ContactsTabFragment.class.getName()),
-			new TabClass(TAG_CONF, R.drawable.tab_conference_button,
+					ConversationsTabFragment.class.getName()),
+			new TabClass(PublicIntent.TAG_CONF, R.drawable.tab_conference_button,
 					R.string.tab_conference_name,
 					ConversationsTabFragment.class.getName()),
-			new TabClass(TAG_COV, R.drawable.tab_msg_cov_button,
+			new TabClass(PublicIntent.TAG_COV, R.drawable.tab_msg_cov_button,
 					R.string.tab_conversation_name,
 					ConversationsTabFragment.class.getName()) };
 
@@ -360,11 +354,11 @@ public class MainActivity extends FragmentActivity implements
 		public void onReceive(Context context, Intent intent) {
 			String action = intent.getAction();
 			if (PublicIntent.UPDATE_CONVERSATION.equals(action)) {
-				if (GlobalHolder.getInstance().getNoticatorCount() > 0) {
-					mTabNoticator.setVisibility(View.VISIBLE);
-				} else {
-					mTabNoticator.setVisibility(View.GONE);
-				}
+//				if (GlobalHolder.getInstance().getNoticatorCount() > 0) {
+//					mTabNoticator.setVisibility(View.VISIBLE);
+//				} else {
+//					mTabNoticator.setVisibility(View.GONE);
+//				}
 			} else if (PublicIntent.FINISH_APPLICATION.equals(action)) {
 				finish();
 			}

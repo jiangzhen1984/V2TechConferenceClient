@@ -1,6 +1,14 @@
 package com.v2tech.view;
 
 public class PublicIntent {
+	
+	public static final String TAG_CONTACT = "contacts";
+	public static final String TAG_ORG = "org";
+	public static final String TAG_GROUP = "group";
+	public static final String TAG_CONF = "conference";
+	public static final String TAG_COV = "conversation";
+	
+	
 
 	public static final int MESSAGE_NOTIFICATION_ID = 1;
 	

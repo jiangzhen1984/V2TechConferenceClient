@@ -19,6 +19,7 @@
         android:layout_below="@+id/tab_image"
         android:gravity="center"
         android:textColor="@color/selector_tab_text_color"
+        android:paddingBottom="5dp"
         android:text="@string/tab_conference_name" />
 
     <ImageView

@@ -18,6 +18,7 @@ import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnFocusChangeListener;
 import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
@@ -63,20 +64,36 @@ public class ContactsTabFragment extends Fragment {
 
 	private List<ListItem> mItemList = new ArrayList<ListItem>();
 	private List<ListItem> mCacheItemList;
+	
+	private View rootView;
+	
+	private static final int TAG_ORG = 1;
+	private static final int TAG_CONTACT = 2;
+	
+	private int flag;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		getActivity().registerReceiver(receiver, getIntentFilter());
+		String tag = this.getArguments().getString("tag");
+		if (PublicIntent.TAG_ORG.equals(tag)) {
+			flag = TAG_ORG;
+		} else if (PublicIntent.TAG_CONTACT.equals(tag)) {
+			flag = TAG_CONTACT;
+		}
 	}
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
-		View v = inflater.inflate(R.layout.tab_fragment_contacts, container,
+		if (rootView != null) {
+			return rootView;
+		}
+		rootView = inflater.inflate(R.layout.tab_fragment_contacts, container,
 				false);
-		v.setOnTouchListener(mTouchListener);
-		mContactsContainer = (ListView) v.findViewById(R.id.contacts_container);
+		rootView.setOnTouchListener(mTouchListener);
+		mContactsContainer = (ListView) rootView.findViewById(R.id.contacts_container);
 		mContactsContainer.setOnTouchListener(mTouchListener);
 		mContactsContainer.setOnItemClickListener(new OnItemClickListener() {
 
@@ -94,9 +111,15 @@ public class ContactsTabFragment extends Fragment {
 		});
 		mContactsContainer.setDivider(null);
 
-		searchedTextET = (EditText) v.findViewById(R.id.contacts_search);
-		searchedTextET.addTextChangedListener(textChangedListener);
-		return v;
+		searchedTextET = (EditText) rootView.findViewById(R.id.contacts_search);
+		searchedTextET.setOnFocusChangeListener(focusListener);
+		return rootView;
+	}
+
+	@Override
+	public void onDestroyView() {
+		super.onDestroyView();
+		((ViewGroup)rootView.getParent()).removeView(rootView);
 	}
 
 	@Override
@@ -157,7 +180,11 @@ public class ContactsTabFragment extends Fragment {
 		if (mLoaded) {
 			return;
 		}
-		l = GlobalHolder.getInstance().getGroup(GroupType.CONTACT);
+		if (flag == TAG_CONTACT) {
+			l = GlobalHolder.getInstance().getGroup(GroupType.CONTACT);
+		} else if (flag == TAG_ORG) {
+			l = GlobalHolder.getInstance().getGroup(GroupType.ORG);
+		}
 		if (l != null) {
 			new AsyncTaskLoader().execute();
 		}
@@ -225,6 +252,20 @@ public class ContactsTabFragment extends Fragment {
 
 	}
 
+	
+	private OnFocusChangeListener focusListener = new OnFocusChangeListener() {
+
+		@Override
+		public void onFocusChange(View arg0, boolean flag) {
+			if (flag) {
+				searchedTextET.addTextChangedListener(textChangedListener);
+			} else {
+				searchedTextET.removeTextChangedListener(textChangedListener);
+			}
+		}
+		
+	};
+	
 	private TextWatcher textChangedListener = new TextWatcher() {
 
 		@Override

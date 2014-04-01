@@ -99,20 +99,30 @@ public class ConversationsTabFragment extends Fragment {
 	private ConversationsAdapter adapter = new ConversationsAdapter();
 
 	private ConferenceService cb = new ConferenceService();
-	
-	
+
+	private static final int TAG_CONF = 1;
+
+	private static final int TAG_MSG_COV = 2;
+
+	private int flag;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		getActivity().registerReceiver(receiver, getIntentFilter());
-
+		String tag = this.getArguments().getString("tag");
+		if (PublicIntent.TAG_CONF.equals(tag)) {
+			flag = TAG_CONF;
+		} else if (PublicIntent.TAG_COV.equals(tag)) {
+			flag = TAG_MSG_COV;
+		}
 		mContext = getActivity();
 	}
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
+
 		if (rootView == null) {
 			rootView = inflater.inflate(R.layout.tab_fragment_conversations,
 					container, false);
@@ -128,13 +138,11 @@ public class ConversationsTabFragment extends Fragment {
 			mFeatureIV = (ImageView) rootView
 					.findViewById(R.id.conversation_features);
 			mFeatureIV.setOnClickListener(mFeatureButtonListener);
-			
+
 			mSearchTextET.setOnTouchListener(mTouchListener);
 			rootView.setOnTouchListener(mTouchListener);
 			mConversationsListView.setOnTouchListener(mTouchListener);
 
-		} else {
-			((ViewGroup) rootView.getParent()).removeView(rootView);
 		}
 		return rootView;
 	}
@@ -165,6 +173,12 @@ public class ConversationsTabFragment extends Fragment {
 	}
 
 	@Override
+	public void onDestroyView() {
+		super.onDestroyView();
+		((ViewGroup) rootView.getParent()).removeView(rootView);
+	}
+
+	@Override
 	public void onResume() {
 		super.onResume();
 	}
@@ -187,7 +201,8 @@ public class ConversationsTabFragment extends Fragment {
 			intentFilter.addAction(PublicIntent.UPDATE_CONVERSATION);
 			intentFilter
 					.addAction(JNIService.JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION);
-			intentFilter.addAction(JNIService.JNI_BROADCAST_CONFERENCE_INVATITION);
+			intentFilter
+					.addAction(JNIService.JNI_BROADCAST_CONFERENCE_INVATITION);
 			intentFilter.addAction(JNIService.JNI_BROADCAST_CONFERENCE_REMOVED);
 
 		}
@@ -213,8 +228,8 @@ public class ConversationsTabFragment extends Fragment {
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if (requestCode == SUB_ACTIVITY_CODE_VIDEO_ACTIVITY) {
 			isInMeeting = false;
-//			Message.obtain(mHandler, REQUEST_EXIT_CONF, currentConfId)
-//					.sendToTarget();
+			// Message.obtain(mHandler, REQUEST_EXIT_CONF, currentConfId)
+			// .sendToTarget();
 		} else if (requestCode == SUB_ACTIVITY_CODE_CREATE_CONF) {
 			if (resultCode == Activity.RESULT_CANCELED) {
 				return;
@@ -232,14 +247,11 @@ public class ConversationsTabFragment extends Fragment {
 
 					mItemList.add(0, new ScrollItem(cov, gp));
 					adapter.notifyDataSetChanged();
-					
-					Intent i = new Intent(getActivity(),
-							VideoActivityV2.class);
+
+					Intent i = new Intent(getActivity(), VideoActivityV2.class);
 					i.putExtra("gid", g.getmGId());
 					startActivityForResult(i, SUB_ACTIVITY_CODE_VIDEO_ACTIVITY);
-					
-					
-					
+
 				} else {
 					V2Log.e(" Can not find created group id :" + gid);
 				}
@@ -247,8 +259,6 @@ public class ConversationsTabFragment extends Fragment {
 		}
 	}
 
-	
-	
 	private void populateConversation(final Group g, boolean flag) {
 		Conversation cov = new ConferenceConversation(g);
 		final GroupLayout gp = new GroupLayout(this.getActivity(), cov);
@@ -256,8 +266,7 @@ public class ConversationsTabFragment extends Fragment {
 		gp.setOnClickListener(mEnterConfListener);
 		mItemList.add(0, new ScrollItem(cov, gp));
 	}
-	
-	
+
 	private void populateConversation(List<Group> list) {
 		if (list == null || list.size() <= 0) {
 			V2Log.w(" group list is null");
@@ -287,21 +296,21 @@ public class ConversationsTabFragment extends Fragment {
 		}
 
 	};
-	
-	
+
 	private OnTouchListener mTouchListener = new OnTouchListener() {
 
 		@Override
 		public boolean onTouch(View v, MotionEvent event) {
 			if (mSearchTextET != null) {
-				InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+				InputMethodManager imm = (InputMethodManager) getActivity()
+						.getSystemService(Context.INPUT_METHOD_SERVICE);
 				imm.hideSoftInputFromWindow(mSearchTextET.getWindowToken(), 0);
 			}
 			return false;
 		}
-		
+
 	};
-	
+
 	private OnClickListener mEnterConfListener = new OnClickListener() {
 
 		@Override
@@ -311,16 +320,15 @@ public class ConversationsTabFragment extends Fragment {
 			}
 			isInMeeting = true;
 			GroupLayout gp = (GroupLayout) v;
-			
-			Intent i = new Intent(getActivity(),
-					VideoActivityV2.class);
+
+			Intent i = new Intent(getActivity(), VideoActivityV2.class);
 			i.putExtra("gid", gp.getGroupId());
 			startActivityForResult(i, SUB_ACTIVITY_CODE_VIDEO_ACTIVITY);
-			
+
 			gp.updateNotificator(false);
-			
+
 		}
-		
+
 	};
 
 	private TextWatcher searchListener = new TextWatcher() {
@@ -351,7 +359,7 @@ public class ConversationsTabFragment extends Fragment {
 				return;
 			}
 			List<ScrollItem> newItemList = new ArrayList<ScrollItem>();
-			String searchKey = s == null? "" : s.toString();
+			String searchKey = s == null ? "" : s.toString();
 			for (ScrollItem item : mItemList) {
 				if (item.cov.getName() != null
 						&& item.cov.getName().contains(searchKey)) {
@@ -394,7 +402,8 @@ public class ConversationsTabFragment extends Fragment {
 			ll.setMargins(5, 20, 5, 20);
 			ll.gravity = Gravity.CENTER;
 			root.addView(createConferenceTV, ll);
-			pw = new PopupWindow(root,  ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT , true);
+			pw = new PopupWindow(root, ViewGroup.LayoutParams.WRAP_CONTENT,
+					ViewGroup.LayoutParams.WRAP_CONTENT, true);
 			pw.setBackgroundDrawable(new ColorDrawable(R.color.confs_title_bg));
 			pw.setOnDismissListener(new OnDismissListener() {
 
@@ -512,29 +521,29 @@ public class ConversationsTabFragment extends Fragment {
 	}
 
 	private void removeConversation(long id, String type, long owner) {
-		
+
 		if (Conversation.TYPE_CONTACT.equals(type)) {
-			
+
 			mContext.getContentResolver().delete(
 					ContentDescriptor.Conversation.CONTENT_URI,
 					ContentDescriptor.Conversation.Cols.EXT_ID + "=? and "
 							+ ContentDescriptor.Conversation.Cols.TYPE + "=?",
 					new String[] { id + "", type });
 			GlobalHolder.getInstance().removeConversation(type, id);
-			//FIXME remove notification?
+			// FIXME remove notification?
 		} else if (Conversation.TYPE_CONFERNECE.equals(type)) {
 			this.cb.quitConference(new Conference(id, owner), null);
 		} else {
-			V2Log.e(" Unkonw type:"+type);
+			V2Log.e(" Unkonw type:" + type);
 		}
-		
+
 		for (ScrollItem li : mItemList) {
 			if (li.cov.getExtId() == id) {
 				mItemList.remove(li);
 				break;
 			}
 		}
-		
+
 		adapter.notifyDataSetChanged();
 
 	}
@@ -558,7 +567,7 @@ public class ConversationsTabFragment extends Fragment {
 		@Override
 		public boolean onLongClick(final View v) {
 
-			final Conversation cov = (Conversation)v.getTag();
+			final Conversation cov = (Conversation) v.getTag();
 			AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
 			builder.setTitle(cov.getName()).setItems(
 					new String[] { mContext.getResources().getString(
@@ -566,10 +575,13 @@ public class ConversationsTabFragment extends Fragment {
 					new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog, int which) {
 							long ownID = 0;
-							if (cov.getType().equals(Conversation.TYPE_CONFERNECE)) {
-								ownID = ((ConferenceConversation)cov).getGroup().getOwner();
+							if (cov.getType().equals(
+									Conversation.TYPE_CONFERNECE)) {
+								ownID = ((ConferenceConversation) cov)
+										.getGroup().getOwner();
 							}
-							removeConversation(cov.getExtId(), cov.getType(), ownID);
+							removeConversation(cov.getExtId(), cov.getType(),
+									ownID);
 						}
 					});
 			AlertDialog ad = builder.create();
@@ -651,8 +663,13 @@ public class ConversationsTabFragment extends Fragment {
 						intent.getExtras().getString("content"),
 						intent.getExtras().getString("date"),
 						intent.getExtras().getBoolean("noti") };
-				Message.obtain(mHandler, UPDATE_CONVERSATION, ar)
-						.sendToTarget();
+				if ((flag == TAG_MSG_COV && Conversation.TYPE_CONTACT
+						.equals(ar[1]))
+						|| (flag == TAG_CONF && Conversation.TYPE_CONFERNECE
+								.equals(ar[1]))) {
+					Message.obtain(mHandler, UPDATE_CONVERSATION, ar)
+							.sendToTarget();
+				}
 			} else if (JNIService.JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION
 					.equals(intent.getAction())) {
 				for (ScrollItem item : mItemList) {
@@ -666,26 +683,32 @@ public class ConversationsTabFragment extends Fragment {
 						}
 						((GroupLayout) item.gp).updateContent(u.getName());
 						g.setOwnerUser(u);
-					} else if (item.cov.getType().equals(Conversation.TYPE_CONTACT)) {
+					} else if (item.cov.getType().equals(
+							Conversation.TYPE_CONTACT)) {
 						User u = GlobalHolder.getInstance().getUser(
-								((ContactConversation)item.cov).getExtId());
+								((ContactConversation) item.cov).getExtId());
 						if (u == null) {
 							continue;
 						}
-						((ContactConversation)item.cov).updateUser(u);
+						((ContactConversation) item.cov).updateUser(u);
 					}
 				}
-			} else if (JNIService.JNI_BROADCAST_CONFERENCE_INVATITION.equals(intent.getAction())) {
+			} else if (JNIService.JNI_BROADCAST_CONFERENCE_INVATITION
+					.equals(intent.getAction())) {
 				long gid = intent.getLongExtra("gid", 0);
-				Group g = GlobalHolder.getInstance().getGroupById(GroupType.CONFERENCE, gid);
+				Group g = GlobalHolder.getInstance().getGroupById(
+						GroupType.CONFERENCE, gid);
 				if (g != null) {
-					g.setOwnerUser(GlobalHolder.getInstance().getUser(g.getOwner()));
+					g.setOwnerUser(GlobalHolder.getInstance().getUser(
+							g.getOwner()));
 					populateConversation(g, true);
 					adapter.notifyDataSetChanged();
 				} else {
-					V2Log.e("Can not get group information of invatition :"+ gid);
+					V2Log.e("Can not get group information of invatition :"
+							+ gid);
 				}
-			} else if (JNIService.JNI_BROADCAST_CONFERENCE_REMOVED.equals(intent.getAction())) {
+			} else if (JNIService.JNI_BROADCAST_CONFERENCE_REMOVED
+					.equals(intent.getAction())) {
 				for (ScrollItem item : mItemList) {
 					if (item.cov.getType().equals(Conversation.TYPE_CONFERNECE)) {
 						Group g = ((ConferenceConversation) item.cov)
@@ -708,17 +731,20 @@ public class ConversationsTabFragment extends Fragment {
 		public void handleMessage(Message msg) {
 			switch (msg.what) {
 			case FILL_CONFS_LIST:
-				mConferenceList = GlobalHolder.getInstance().getGroup(
-						Group.GroupType.CONFERENCE);
-				if (mConferenceList != null && mConferenceList.size() > 0) {
-					if (!isLoaded) {
-						populateConversation(mConferenceList);
-						isLoaded = true;
+				if (flag == TAG_CONF) {
+					mConferenceList = GlobalHolder.getInstance().getGroup(
+							Group.GroupType.CONFERENCE);
+					if (mConferenceList != null && mConferenceList.size() > 0) {
+						if (!isLoaded) {
+							populateConversation(mConferenceList);
+							isLoaded = true;
+						}
 					}
 				}
-
-				if (!isLoadedCov) {
-					loadConversation();
+				if (flag == TAG_MSG_COV) {
+					if (!isLoadedCov) {
+						loadConversation();
+					}
 				}
 				if (mLoadingImageIV.getParent() != null) {
 					((ViewGroup) mLoadingImageIV.getParent())

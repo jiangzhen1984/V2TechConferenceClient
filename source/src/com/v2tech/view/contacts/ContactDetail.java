@@ -102,7 +102,9 @@ public class ContactDetail extends Activity implements OnTouchListener {
 	protected void onStart() {
 		super.onStart();
 		u = GlobalHolder.getInstance().getUser(mUid);
-		showUserInfo();
+		if (u != null) {
+			showUserInfo();
+		}
 	}
 
 	@Override

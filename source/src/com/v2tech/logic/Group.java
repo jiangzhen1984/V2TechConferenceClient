@@ -60,7 +60,7 @@ public class Group {
 	}
 
 	public enum GroupType {
-		CONTACT(1), FRIEND(2), DOCUMENT(3), CONFERENCE(4), UNKNOWN(-1);
+		ORG(1), CONTACT(2), DOCUMENT(3), CONFERENCE(4), UNKNOWN(-1);
 
 		private int type;
 
@@ -71,9 +71,9 @@ public class Group {
 		public static GroupType fromInt(int code) {
 			switch (code) {
 			case 1:
-				return CONTACT;
+				return ORG;
 			case 2:
-				return FRIEND;
+				return CONTACT;
 			case 3:
 				return DOCUMENT;
 			case 4:

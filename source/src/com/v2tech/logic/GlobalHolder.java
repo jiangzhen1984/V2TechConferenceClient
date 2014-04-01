@@ -19,9 +19,11 @@ public class GlobalHolder {
 
 	private Map<Long, User.Status> onlineUsers = new HashMap<Long, User.Status>();
 
-	private List<Group> mContactsGroup = null;
+	private List<Group> mOrgGroup = null;
 
 	private List<Group> mConfGroup = new ArrayList<Group>();
+	
+	private Set<Group> mContactsGroup = new HashSet<Group>();
 
 	private Map<Long, User> mUserHolder = new HashMap<Long, User>();
 	private Map<Long, Group> mGroupHolder = new HashMap<Long, Group>();
@@ -134,10 +136,12 @@ public class GlobalHolder {
 	 * FIXME need to optimize code
 	 */
 	public void updateGroupList(Group.GroupType gType, List<Group> list) {
-		if (gType == Group.GroupType.CONTACT) {
-			mContactsGroup = list;
+		if (gType == Group.GroupType.ORG) {
+			mOrgGroup = list;
 		} else if (gType == Group.GroupType.CONFERENCE) {
 			mConfGroup.addAll(list);
+		} else if (gType == Group.GroupType.CONTACT) {
+			this.mContactsGroup.addAll(list);
 		}
 		for (Group g : list) {
 			g.setOwnerUser(this.getUser(g.getOwner()));
@@ -147,7 +151,7 @@ public class GlobalHolder {
 	
 	
 	public void addGroupToList(Group.GroupType gType, Group g) {
-		if (gType == Group.GroupType.CONTACT) {
+		if (gType == Group.GroupType.ORG) {
 		} else if (gType == Group.GroupType.CONFERENCE) {
 			mConfGroup.add(g);
 		}
@@ -189,8 +193,12 @@ public class GlobalHolder {
 	 */
 	public List<Group> getGroup(Group.GroupType gType) {
 		switch (gType) {
+		case ORG:
+			return this.mOrgGroup;
 		case CONTACT:
-			return this.mContactsGroup;
+			List<Group> cl = new ArrayList<Group>();
+			cl.addAll(this.mContactsGroup);
+			return cl;
 		case CONFERENCE:
 			return mConfGroup;
 		default:
