@@ -30,10 +30,10 @@
                 android:id="@android:id/tabs"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:divider="@drawable/group_list_separation"
                 android:gravity="center"
                 android:orientation="horizontal"
                 android:showDividers="none"
+                android:background="@null"
                 android:tabStripEnabled="false" />
 
         </LinearLayout>

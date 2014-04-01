@@ -19,7 +19,7 @@ public class VideoConversation extends Activity implements TurnListener,
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_conversation);
+		setContentView(R.layout.activity_video_conversation);
 
 		Fragment fragment1 = new ConversationWaitingFragment();
 		FragmentTransaction transaction = getFragmentManager()

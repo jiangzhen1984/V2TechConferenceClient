@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
@@ -20,11 +21,13 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.DisplayMetrics;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TabHost;
 import android.widget.TabHost.TabContentFactory;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.v2tech.R;
@@ -161,61 +164,52 @@ public class MainActivity extends FragmentActivity implements
 		mTabHost = (TabHost) findViewById(android.R.id.tabhost);
 		mTabHost.setup();
 
-		Resources res = getResources();
 
 		TabHost.TabSpec confTabSpec = this.mTabHost.newTabSpec(TAG_CONF)
 				.setIndicator(
-						getConversationView(true, mContext.getResources()
-								.getDrawable(R.drawable.selector_conf)));
+						getTabView( mContext.getResources()
+								.getDrawable(R.drawable.selector_conference), mContext.getResources().getString(R.string.tab_conference_name)));
 		confTabSpec.setContent(new TabFactory(this));
 		mTabHost.addTab(confTabSpec);
 
 		TabHost.TabSpec contactTabSpec = this.mTabHost.newTabSpec(TAG_CONTACT)
-				.setIndicator(
-						getConversationView(false,
-								res.getDrawable(R.drawable.selector_group)));
+				.setIndicator(getTabView( mContext.getResources()
+						.getDrawable(R.drawable.selector_conf), mContext.getResources().getString(R.string.tab_conversation_org)));
 		contactTabSpec.setContent(new TabFactory(this));
 		mTabHost.addTab(contactTabSpec);
 
 		TabHost.TabSpec settingTabSpec = this.mTabHost.newTabSpec(TAG_SETTING)
-				.setIndicator(
-						getConversationView(false,
-								res.getDrawable(R.drawable.selector_setting)));
+				.setIndicator(getTabView( mContext.getResources()
+						.getDrawable(R.drawable.selector_conf), mContext.getResources().getString(R.string.tab_conversation_org)));
 		settingTabSpec.setContent(new TabFactory(this));
 		mTabHost.addTab(settingTabSpec);
 
 		mTabHost.setOnTabChangedListener(this);
-
+//
 		for (int i = 0; i < mTabHost.getTabWidget().getChildCount(); i++) {
 			mTabHost.getTabWidget().getChildAt(i)
-					.setBackgroundResource(R.drawable.tab_panel_bg);
+					.setBackgroundColor(Color.rgb(247, 247, 247));
 		}
 	}
 
-	private View getConversationView(boolean flag, Drawable drw) {
-		RelativeLayout rl = new RelativeLayout(mContext);
-		RelativeLayout.LayoutParams rll = new RelativeLayout.LayoutParams(
-				RelativeLayout.LayoutParams.WRAP_CONTENT,
-				RelativeLayout.LayoutParams.WRAP_CONTENT);
-		rll.addRule(RelativeLayout.CENTER_IN_PARENT);
-		ImageView iv = new ImageView(mContext);
-		iv.setId(0x900000 | drw.hashCode());
-
-		iv.setImageDrawable(drw);
-		rl.addView(iv, rll);
-		if (flag) {
-			ImageView ivNoticator = new ImageView(mContext);
-			ivNoticator.setVisibility(View.INVISIBLE);
-			ivNoticator.setImageResource(R.drawable.tab_notificator);
-			rll = new RelativeLayout.LayoutParams(
-					RelativeLayout.LayoutParams.WRAP_CONTENT,
-					RelativeLayout.LayoutParams.WRAP_CONTENT);
-			rll.addRule(RelativeLayout.RIGHT_OF, iv.getId());
-			rl.addView(ivNoticator, rll);
-
-			mTabNoticator = ivNoticator;
+	
+	
+	private View getTabView(Drawable drw, String title) {
+		LayoutInflater inflater = LayoutInflater.from(this);
+		View v = inflater.inflate(R.layout.tab_widget_view, null, false);
+		ImageView iv = (ImageView) v.findViewById(R.id.tab_image);
+		if (iv != null) {
+			iv.setImageDrawable(drw);
+			iv.bringToFront();
 		}
-		return rl;
+		
+		TextView tv = (TextView) v.findViewById(R.id.tab_name);
+		if (tv != null) {
+			tv.setText(title);
+			tv.bringToFront();
+		//	tv.setTextColor(this.getResources().getColorStateList(R.color.selector_tab_text_color));
+		}
+		return v;
 	}
 
 	private void initReceiver() {
