@@ -78,6 +78,8 @@ public class ChatRequest {
 	 *            conference ID
 	 * @param nToUserID
 	 *            user ID
+	 *            
+	 * @param  nSeqId TODO need to be commemorate 
 	 * @param szText
 	 * <br>
 	 *            < ?xml version="1.0" encoding="utf-8"?><br>
@@ -86,7 +88,7 @@ public class ChatRequest {
 	 *            &nbsp;&nbsp;&nbsp;&nbsp;< TChatFont Color="255" Name="Segoe UI" Size="18" Style=""/><br>
 	 *            &nbsp;&nbsp;&nbsp;&nbsp;< /FontList><br>
 	 *            &nbsp;&nbsp;&nbsp;&nbsp;< ItemList><br>
-	 *            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;< TTextChatItem NewLine="True" FontIndex="0" Text="这是一个测试"/><br>
+	 *            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;< TTextChatItem NewLine="True" FontIndex="0" Text="杩����涓�涓�娴�璇�"/><br>
 	 *            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;< TPictureChatItem NewLine="False" AutoResize="True"
 	 *            FileExt=".png" GUID="{F3870296-746D-4E11-B69B-050B2168C624}"
 	 *            Height="109" Width="111"/><br>
@@ -96,10 +98,10 @@ public class ChatRequest {
 	 * 
 	 * @see {@link #sendChatPicture(long, long, byte[], int, int)}
 	 */
-	public native void sendChatText(long nGroupID, long nToUserID,
+	public native void sendChatText(long nGroupID, long nToUserID, String nSeqId, 
 			String szText, int bussinessType);
 
-	// �����������Ƶ��� nGroupID��0
+	// 锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷锟狡碉拷锟斤拷 nGroupID锟斤拷0
 	public native void sendChatAudio(long nGroupID, long nToUserID,
 			String szText, String filename, int bussinessType);
 
@@ -108,6 +110,7 @@ public class ChatRequest {
 	 * <p>If input 0 as nGroupId, means P2P send data. Before call this API, call {@link #sendChatText(long, long, String, int)} first </p>
 	 * @param nGroupID
 	 * @param nToUserID
+	 * @param  nSeqId TODO need to be commemorate 
 	 * @param pPicData <br>
 	 *   |----image  header    52 bytes|----------------image data-------------|  <br>
 	 *   |{UUID} extension bytes       |----------------image data-------------|  <br>
@@ -116,8 +119,10 @@ public class ChatRequest {
 	 * 
 	 * @see {@link #sendChatText(long, long, String, int)}
 	 */
-	public native void sendChatPicture(long nGroupID, long nToUserID,
+	public native void sendChatPicture(long nGroupID, long nToUserID, String nSeqId,
 			byte[] pPicData, int nLength, int bussinessType);
+	
+	
 
 	List<ChatPicture> cpL = new ArrayList<ChatPicture>();
 	List<ChatText> ctL = new ArrayList<ChatText>();
@@ -127,12 +132,14 @@ public class ChatRequest {
 	 * @param nBusinessType
 	 * @param nFromUserID
 	 * @param nTime
+	 * @param szSeqID
 	 * @param szXmlText
 	 */
 	public void OnRecvChatText(long nGroupID, int nBusinessType,
-			long nFromUserID, long nTime, String szXmlText) {
+			long nFromUserID, long nTime, String szSeqID, String szXmlText) {
 		Log.e("ChatRequest UI", "OnRecvChatText " + nGroupID + " "
 				+ nBusinessType + " " + nFromUserID + " " + nTime + " "
+				+ szSeqID + " "
 				+ szXmlText);
 		if (callback != null) {
 			callback.OnRecvChatTextCallback(nGroupID, nBusinessType, nFromUserID, nTime, szXmlText);
@@ -186,16 +193,16 @@ public class ChatRequest {
 
 	}
 	
-	public void OnSendChatAudio(String str, int i) {
+	public void OnSendChatResult(String str, int i, int j) {
 
 	}
 	
 
-	// �յ����˷�����ͼƬ������Ϣ�Ļص�
+	// 锟秸碉拷锟斤拷锟剿凤拷锟斤拷锟斤拷图片锟斤拷锟斤拷锟斤拷息锟侥回碉拷
 	public void OnRecvChatPicture(long nGroupID, int nBusinessType,
-			long nFromUserID, long nTime, byte[] pPicData) {
+			long nFromUserID, long nTime, String szSeqID, byte[] pPicData) {
 
-		Log.e("ImRequest UI", "OnRecvChatPicture ���� " + nGroupID + " "
+		Log.e("ImRequest UI", "OnRecvChatPicture 锟斤拷锟斤拷 " + nGroupID + " "
 				+ nBusinessType + " " + nFromUserID + " " + nTime + " ");
 		Log.e("ImRequest UI", "OnRecvChatPicture ****maximum heap size***"
 				+ Runtime.getRuntime().maxMemory() + "*nLength=====**"
@@ -240,10 +247,10 @@ public class ChatRequest {
 		}
 		String guid = new String(guidArr);
 
-		String ext = new String(extArr); // ��չ��
+		String ext = new String(extArr); // 锟斤拷展锟斤拷
 		sb.append(guid.trim()).append(ext.trim());
 
-		// Logger.i(null, "ͼƬ�����:"+sb.toString());
+		// Logger.i(null, "图片锟斤拷锟斤拷锟�:"+sb.toString());
 		// String target = picNvoiceUtil.saveImage(picDataArr,
 		// sb.toString(),nFromUserID,context);
 
@@ -252,7 +259,7 @@ public class ChatRequest {
 	}
 
 	/*
-	 * ext ͼƬ����չ��
+	 * ext 图片锟斤拷锟斤拷展锟斤拷
 	 */
 	@SuppressWarnings("resource")
 	public byte[] getSendPicData(String imgpath) {
@@ -303,7 +310,7 @@ public class ChatRequest {
 
 	}
 
-	// ���ͼƬ·���õ�ͼƬ���ֽ�
+	// 锟斤拷锟酵计�路锟斤拷锟矫碉拷图片锟斤拷锟街斤拷
 	public static byte[] readStream(InputStream inStream) throws Exception {
 		ByteArrayOutputStream outStream;
 		byte[] data;

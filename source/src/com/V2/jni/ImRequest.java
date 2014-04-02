@@ -57,16 +57,16 @@ public class ImRequest {
 	public native void unInitialize();
 	
 	/**
-	 * <ul> Log in to server. server will call {@link #OnLogin(long, int, int)} to indicate response</ul>
+	 * <ul> Log in to server. server will call {@link #OnLogin(long, int, long, int)} to indicate response</ul>
 	 * @param szName   user name 
 	 * @param szPassword  password
 	 * @param status  TODO add comment
 	 * @param type  TODO add  comment
+	 * @param isAnonymous 
 	 * 
-	 * @see #OnLogin(long, int, int)
 	 */
 	public native void login(String szName, String szPassword, int status,
-			int type);
+			int type, boolean isAnonymous);
 	
 	/**
 	 * <ul> Log in call back function. This function only is called by JNI.</ul>
@@ -74,9 +74,9 @@ public class ImRequest {
 	 * @param nStatus 
 	 * @param nResult  0: logged in successfully
 	 * 
-	 * @see #login(String, String, int, int)
+	 * @see #login(String, String, int, int, boolean)
 	 */
-	private void OnLogin(long nUserID, int nStatus, int nResult) {
+	private void OnLogin(long nUserID, int nStatus, long serverTime, int nResult) {
 		V2Log.d( "OnLogin --> " + nUserID + ": " + "-:"
 				+ nStatus + ":" + nResult);
 		for (ImRequestCallback callback : this.callbacks) {
@@ -140,10 +140,10 @@ public class ImRequest {
 	 * @see com.v2tech.logic.User.Status
 	 * @see ImRequestCallback#OnUserStatusUpdatedCallback(long, int, int, String)
 	 */
-	private void OnUserStatusUpdated(long nUserID, int eUEType,  int nStatus, String szStatusDesc) {
-		V2Log.d(" OnUserStatusUpdated--> nUserID:"+nUserID+" eUEType: "+ eUEType+"  nStatus:"+nStatus+"  szStatusDesc:"+szStatusDesc+"  "+new Date());
+	private void OnUserStatusUpdated(long nUserID, int nStatus, String szStatusDesc) {
+		V2Log.d(" OnUserStatusUpdated--> nUserID:"+nUserID+"  nStatus:"+nStatus+"  szStatusDesc:"+szStatusDesc+"  "+new Date());
 		for (ImRequestCallback callback : this.callbacks) {
-			callback.OnUserStatusUpdatedCallback(nUserID, eUEType, nStatus, szStatusDesc);
+			callback.OnUserStatusUpdatedCallback(nUserID, nStatus, szStatusDesc);
 		}
 	}
 	

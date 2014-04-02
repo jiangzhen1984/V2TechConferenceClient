@@ -65,13 +65,13 @@ public class ChatService extends Handler {
 			@Override
 			public void run() {
 				ChatRequest.getInstance().sendChatText(0,
-						msg.getToUser().getmUserId(), msg.toXml(),
+						msg.getToUser().getmUserId(),"1", msg.toXml(),
 						ChatRequest.BT_IM);
 				if (msg.getType() == VMessage.MessageType.IMAGE
 						|| msg.getType() == VMessage.MessageType.IMAGE_AND_TEXT) {
 					byte[] data = ((VImageMessage) msg).getWrapperData();
 					ChatRequest.getInstance().sendChatPicture(0,
-							msg.getToUser().getmUserId(), data, data.length,
+							msg.getToUser().getmUserId(), "1",data, data.length,
 							ChatRequest.BT_IM);
 				}
 				caller.sendToTarget();

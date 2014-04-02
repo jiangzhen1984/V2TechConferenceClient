@@ -42,7 +42,7 @@ public class UserService extends AbstractHandler {
 		initTimeoutMessage(JNI_REQUEST_LOG_IN, null, DEFAULT_TIME_OUT_SECS,
 				caller);
 		ImRequest.getInstance().login(mail, passwd,
-				V2GlobalEnum.USER_STATUS_ONLINE, V2ClientType.IM);
+				V2GlobalEnum.USER_STATUS_ONLINE, V2ClientType.ANDROID, false);
 	}
 	
 	
@@ -128,7 +128,7 @@ public class UserService extends AbstractHandler {
 		}
 
 		@Override
-		public void OnUserStatusUpdatedCallback(long nUserID, int eUEType,
+		public void OnUserStatusUpdatedCallback(long nUserID, 
 				int nStatus, String szStatusDesc) {
 
 		}

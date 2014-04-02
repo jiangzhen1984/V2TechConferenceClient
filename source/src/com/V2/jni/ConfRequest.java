@@ -131,16 +131,34 @@ public class ConfRequest {
 		}
 
 	}
-	
+
 	private void OnKickConf(int nReason) {
 		V2Log.d("-->OnKickConf " + nReason);
 		for (ConfRequestCallback cb : this.callbacks) {
 			cb.OnKickConfCallback(nReason);
 		}
-		
+
 	}
 
-	
+	public native void openVideoMixer(String szMediaID, int nLayout,
+			int videoSizeFormat, int nID);
+
+	public native void closeVideoMixer(String szMediaID);
+
+	public native void syncOpenVideoMixer(String szMediaID, int nLayout,
+			int videoSizeFormat, int nPos, String szVideoMixerListXml);
+
+	public native void syncCloseVideoMixer(String szMediaID);
+
+	public native void addVideoMixerDevID(String szMediaID, long nDstUserID,
+			String szDstDevID, int nPos);
+
+	public native void delVideoMixerDevID(String szMediaID, long nDstUserID,
+			String szDstDevID);
+
+	public native void startMixerVideoToSip(long nSipUserID, String szMediaID);
+
+	public native void stopMixerVideoToSip(long nSipUserID, String szMediaID);
 
 	// 灏嗘煇浜鸿鍑轰細璁�
 	public native void kickConf(long nUserID);
@@ -267,7 +285,6 @@ public class ConfRequest {
 
 	}
 
-
 	private void OnConfNotify(long nSrcUserID, String srcNickName,
 			long nConfID, String subject, long nTime) {
 		// TODO
@@ -340,5 +357,24 @@ public class ConfRequest {
 	private void OnSetCanInviteUser(long nConfID, boolean bInviteUser) {
 		Log.e("ImRequest UI", "OnSetCanInviteUser " + nConfID + " "
 				+ bInviteUser);
+	}
+	
+	private void OnSyncOpenVideoMixer(String sMediaID, int nLayout,
+			int videoSizeFormat, int nPos, String sSyncVideoMixerXml) {
+		V2Log.d("OnSyncOpenVideoMixer");
+	}
+
+	private void OnSyncCloseVideoMixer(String sMediaID) {
+		V2Log.d("OnSyncCloseVideoMixer");
+	}
+
+	private void OnAddVideoMixer(String sMediaID, long nDstUserID,
+			String sDstDevID, int nPos) {
+		V2Log.d("OnAddVideoMixer");
+	}
+
+	private void OnDelVideoMixer(String sMediaID, long nDstUserID,
+			String sDstDevID) {
+		V2Log.d("OnDelVideoMixer");
 	}
 }

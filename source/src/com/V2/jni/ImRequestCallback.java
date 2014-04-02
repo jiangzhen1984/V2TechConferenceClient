@@ -51,13 +51,12 @@ public interface ImRequestCallback {
 	 * <ul>User status update API.</ul>
 	 * 
 	 * @param nUserID
-	 * @param eUEType
 	 * @param nStatus  1 is online, 0 is offline
 	 * @param szStatusDesc
 	 * 
 	 * @see com.v2tech.logic.User.Status
 	 */
-	public void OnUserStatusUpdatedCallback(long nUserID, int eUEType,  int nStatus, String szStatusDesc);
+	public void OnUserStatusUpdatedCallback(long nUserID, int nStatus, String szStatusDesc);
 	
 	
 	

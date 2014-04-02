@@ -451,7 +451,7 @@ public class JNIService extends Service {
 		}
 
 		@Override
-		public void OnUserStatusUpdatedCallback(long nUserID, int eUEType,
+		public void OnUserStatusUpdatedCallback(long nUserID, 
 				int nStatus, String szStatusDesc) {
 			GlobalHolder.getInstance().updateUserStatus(nUserID,
 					User.Status.fromInt(nStatus));
