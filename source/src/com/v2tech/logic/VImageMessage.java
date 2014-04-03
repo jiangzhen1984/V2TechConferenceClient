@@ -19,7 +19,6 @@ import com.v2tech.util.V2Log;
 public class VImageMessage extends VMessage {
 
 	private String mExtension;
-	private String mUUID;
 	private int mHeight = -1;
 	private int mWidth = -1;
 	private byte[] originImageData;
@@ -100,13 +99,15 @@ public class VImageMessage extends VMessage {
 		if (originImageData == null && !loadImageData()) {
 			return null;
 		}
-		byte[] d = new byte[52 + originImageData.length];
-		byte[] uud = mUUID.getBytes();
-		System.arraycopy(uud, 0, d, 0, uud.length);
-		byte[] et = mExtension.getBytes();
-		System.arraycopy(et, 0, d, 41, et.length);
-		System.arraycopy(originImageData, 0, d, 52, originImageData.length);
-		return d;
+		return originImageData;
+		
+//		byte[] d = new byte[52 + originImageData.length];
+//		byte[] uud = mUUID.getBytes();
+//		System.arraycopy(uud, 0, d, 0, uud.length);
+//		byte[] et = mExtension.getBytes();
+//		System.arraycopy(et, 0, d, 41, et.length);
+//		System.arraycopy(originImageData, 0, d, 52, originImageData.length);
+//		return d;
 	}
 
 	public int getHeight() {

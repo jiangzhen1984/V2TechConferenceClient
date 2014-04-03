@@ -6,9 +6,8 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
+import java.util.UUID;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -58,6 +57,8 @@ public class VMessage {
 
 	private String mStrDateTime;
 	
+	protected String mUUID;
+	
 	private VMessage() {
 		
 	}
@@ -81,6 +82,7 @@ public class VMessage {
 		this.mDate = new Date();
 		this.mType = MessageType.TEXT;
 		this.isLocal = !isRemote;
+		this.mUUID = UUID.randomUUID().toString();
 
 		if (System.currentTimeMillis() / (24 * 3600000) == this.mDate.getTime()
 				/ (24 * 3600000)) {
@@ -91,6 +93,10 @@ public class VMessage {
 
 	}
 
+	
+	public String getUUID() {
+		return this.mUUID;
+	}
 	
 	public long getId() {
 		return id;

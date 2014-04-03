@@ -495,6 +495,14 @@ public class JNIService extends Service {
 			sendBroadcast(i);
 		}
 
+		@Override
+		public void OnModifyCommentName(long nUserId, String sCommmentName) {
+			//TODO implment update user nick name
+		}
+		
+		
+		
+
 	}
 
 	class GroupRequestCB implements GroupRequestCallback {

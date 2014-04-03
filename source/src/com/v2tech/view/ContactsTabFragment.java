@@ -2,7 +2,9 @@ package com.v2tech.view;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -61,6 +63,8 @@ public class ContactsTabFragment extends Fragment {
 	private EditText searchedTextET;
 
 	private boolean mIsStartedSearch = false;
+	
+	private Map<Long, ListItem> mCacheHolder = new HashMap<Long, ListItem>();
 
 	private List<ListItem> mItemList = new ArrayList<ListItem>();
 	private List<ListItem> mCacheItemList;
@@ -202,10 +206,25 @@ public class ContactsTabFragment extends Fragment {
 				}
 				mLoaded = true;
 				for (Group g : l) {
-					mItemList.add(new ListItem(g, g.getLevel()));
+					ListItem  li = new ListItem(g, g.getLevel());
+					mItemList.add(li);
+					mCacheHolder.put(Long.valueOf(g.getmGId()), li);
+					iterateGroup(g);
 				}
 			}
 			return null;
+		}
+		
+		
+		private void iterateGroup(Group g) {
+			for (User u : g.getUsers()) {
+				ListItem  liu = new ListItem(u, g.getLevel() + 1);
+				mCacheHolder.put(Long.valueOf(u.getmUserId()), liu);
+			}
+			for (Group subG : g.getChildGroup()) {
+				ListItem  lisubg = new ListItem(subG, g.getLevel());
+				mCacheHolder.put(Long.valueOf(subG.getmGId()), lisubg);
+			}
 		}
 
 		@Override
@@ -304,7 +323,6 @@ public class ContactsTabFragment extends Fragment {
 
 	};
 
-	// FIXME optimze code should not always new ListItem
 	private void updateView(int pos) {
 		ListItem item = mItemList.get(pos);
 		if (item.g == null) {
@@ -312,13 +330,25 @@ public class ContactsTabFragment extends Fragment {
 		}
 		if (item.isExpanded == false) {
 			for (Group g : item.g.getChildGroup()) {
-				mItemList.add(++pos, new ListItem(g, g.getLevel()));
+				Long key = Long.valueOf(g.getmGId());
+				ListItem cache = mCacheHolder.get(key);
+				if (cache == null) {
+					cache =  new ListItem(g, g.getLevel());
+					mCacheHolder.put(key, cache);
+				}
+				mItemList.add(++pos, cache);
 			}
 			List<User> sortList = new ArrayList<User>();
 			sortList.addAll(item.g.getUsers());
 			Collections.sort(sortList);
 			for (User u : sortList) {
-				mItemList.add(++pos, new ListItem(u, item.g.getLevel()));
+				Long key = Long.valueOf(u.getmUserId());
+				ListItem cache = mCacheHolder.get(key);
+				if (cache == null) {
+					cache =  new ListItem(u, item.g.getLevel() + 1);
+					mCacheHolder.put(key, cache);
+				}
+				mItemList.add(++pos, cache);
 			}
 
 		} else {
@@ -334,7 +364,9 @@ public class ContactsTabFragment extends Fragment {
 				if (li.g != null && li.g.getLevel() <= item.g.getLevel()) {
 					break;
 				}
-				// FIXME if find user how to check?
+				if (li.u != null && li.level == item.g.getLevel()) {
+					break;
+				}
 				endRemovePos++;
 			}
 

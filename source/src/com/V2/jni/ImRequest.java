@@ -140,8 +140,8 @@ public class ImRequest {
 	 * @see com.v2tech.logic.User.Status
 	 * @see ImRequestCallback#OnUserStatusUpdatedCallback(long, int, int, String)
 	 */
-	private void OnUserStatusUpdated(long nUserID, int nStatus, String szStatusDesc) {
-		V2Log.d(" OnUserStatusUpdated--> nUserID:"+nUserID+"  nStatus:"+nStatus+"  szStatusDesc:"+szStatusDesc+"  "+new Date());
+	private void OnUserStatusUpdated(long nUserID, int nStatus, int nt, String szStatusDesc) {
+		V2Log.d(" OnUserStatusUpdated--> nUserID:"+nUserID+"  nStatus:"+nStatus+" nt:"+nt +" szStatusDesc:"+szStatusDesc+"  "+new Date());
 		for (ImRequestCallback callback : this.callbacks) {
 			callback.OnUserStatusUpdatedCallback(nUserID, nStatus, szStatusDesc);
 		}
@@ -169,10 +169,34 @@ public class ImRequest {
 	 */
 	public native void modifyBaseInfo(String InfoXml);
 	
+	/**
+	 * <ul>Update contacts nick name</br>
+	 * 
+	 * </ul>
+	 * @param nUserId
+	 * @param sCommentName
+	 * 
+	 * @see ImRequest#OnModifyCommentName(long, String)
+	 */
+	public native void modifyCommentName(long nUserId, String sCommentName);
+	
+	/**
+	 * 
+	 * @param nUserId
+	 * @param sCommmentName
+	 */
+	private void OnModifyCommentName(long nUserId, String sCommmentName) {
+		Log.e("ImRequest UI", "OnModifyCommentName::" + "nUserId:" + nUserId
+				+ "  sCommmentName" + sCommmentName);
+		for (ImRequestCallback callback : this.callbacks) {
+			callback.OnModifyCommentName(nUserId, sCommmentName);
+		}
+	}
+	
 
 	public native void updateMyStatus(int nStatus, String szStatusDesc);
 
-	public native void modifyCommentName(long nUserId, String sCommentName);
+	
 
 
 	// 淇敼涓汉淇℃伅
@@ -325,11 +349,7 @@ public class ImRequest {
 		Log.e("ImRequest UI", "OnDelCrowdFile:" + nCrowdId);
 	}
 
-	// 淇敼澶囨敞濮撳悕
-	private void OnModifyCommentName(long nUserId, String sCommmentName) {
-		Log.e("ImRequest UI", "OnModifyCommentName::" + "nUserId:" + nUserId
-				+ "  sCommmentName" + sCommmentName);
-	}
+
 
 	private void OnSignalDisconnected() {
 		Log.e("ImRequest UI", "OnSignalDisconnected");

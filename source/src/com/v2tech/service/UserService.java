@@ -139,5 +139,12 @@ public class UserService extends AbstractHandler {
 
 		}
 
+		@Override
+		public void OnModifyCommentName(long nUserId, String sCommmentName) {
+			
+		}
+		
+		
+
 	}
 }

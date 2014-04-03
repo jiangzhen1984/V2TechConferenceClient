@@ -67,4 +67,7 @@ public interface ImRequestCallback {
 	 * @param AvatarName  patch of avatar
 	 */
 	public void OnChangeAvatarCallback(int nAvatarType, long nUserID, String AvatarName);
+	
+	
+	public void OnModifyCommentName(long nUserId, String sCommmentName);
 }

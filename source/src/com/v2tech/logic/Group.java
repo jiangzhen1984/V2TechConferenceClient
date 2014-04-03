@@ -372,7 +372,7 @@ public class Group {
 
 			doc.getDocumentElement().normalize();
 
-			if (type == GroupType.CONTACT.intValue()) {
+			if (type == GroupType.ORG.intValue() || type == Group.GroupType.CONTACT.intValue()) {
 				NodeList gList = doc.getChildNodes().item(0).getChildNodes();
 				Element element;
 				for (int i = 0; i < gList.getLength(); i++) {
