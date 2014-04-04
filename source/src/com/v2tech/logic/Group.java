@@ -48,9 +48,8 @@ public class Group {
 	private List<User> users;
 
 	protected int level;
-	
-	
-	
+
+	private Object mLock = new Object();
 
 	public Group(long mGId, GroupType mGroupType, String mName) {
 		super();
@@ -60,7 +59,7 @@ public class Group {
 	}
 
 	public enum GroupType {
-		ORG(1), CONTACT(2), DOCUMENT(3), CONFERENCE(4), UNKNOWN(-1);
+		ORG(1), CONTACT(2), CHATING(3), CONFERENCE(4), UNKNOWN(-1);
 
 		private int type;
 
@@ -75,7 +74,7 @@ public class Group {
 			case 2:
 				return CONTACT;
 			case 3:
-				return DOCUMENT;
+				return CHATING;
 			case 4:
 				return CONFERENCE;
 			default:
@@ -172,7 +171,9 @@ public class Group {
 			V2Log.e(" Invalid user data");
 			return;
 		}
-		this.users.add(u);
+		synchronized (mLock) {
+			this.users.add(u);
+		}
 	}
 
 	public List<User> getUsers() {
@@ -188,8 +189,10 @@ public class Group {
 			V2Log.e(" Invalid group data");
 			return;
 		}
-		this.mChild.add(g);
-		g.setmParent(this);
+		synchronized (mLock) {
+			this.mChild.add(g);
+			g.setmParent(this);
+		}
 	}
 
 	public boolean findUser(User u, Group g) {
@@ -229,17 +232,19 @@ public class Group {
 
 	// FIXME need to be optimize
 	public int getOnlineUserCount() {
-		return getUserOnlineCount(this);
+		//To make sure that prevent update list when iterating
+		synchronized (mLock) {
+			return getUserOnlineCount(this);
+		}
 	}
 
-	//FIXME handle concurrency
 	private int getUserOnlineCount(Group g) {
 		int c = 0;
 		if (g == null) {
 			return 0;
 		}
 		List<User> l = g.getUsers();
-		for (int i = 0; i < l.size(); i ++) {
+		for (int i = 0; i < l.size(); i++) {
 			User u = l.get(i);
 			if (u.getmStatus() == User.Status.ONLINE
 					|| u.getmStatus() == User.Status.BUSY
@@ -268,9 +273,11 @@ public class Group {
 	}
 
 	public void addUserToGroup(List<User> l) {
-		for (User u : l) {
-			this.users.add(u);
-			u.addUserToGroup(this);
+		synchronized (mLock) {
+			for (User u : l) {
+				this.users.add(u);
+				u.addUserToGroup(this);
+			}
 		}
 	}
 
@@ -299,11 +306,11 @@ public class Group {
 			return false;
 		return true;
 	}
-	
-	
+
 	/**
-	 * <conf createuserid='1138' id='513956640327' starttime='2012' subject=' 啊'/>
-		<user id='1138' uetype='2'/>
+	 * <conf createuserid='1138' id='513956640327' starttime='2012' subject='
+	 * 啊'/> <user id='1138' uetype='2'/>
+	 * 
 	 * @param type
 	 * @param xml
 	 * @return
@@ -319,27 +326,28 @@ public class Group {
 			if (start != -1) {
 				end = xml.indexOf("'", start + 14);
 				if (end != -1) {
-					owner = xml.substring(start+14, end);
+					owner = xml.substring(start + 14, end);
 				}
 			}
-			
+
 			start = xml.indexOf(" id='");
 			if (start != -1) {
 				end = xml.indexOf("'", start + 5);
 				if (end != -1) {
-					strId = xml.substring(start+5, end);
+					strId = xml.substring(start + 5, end);
 				}
 			}
-			
+
 			start = xml.indexOf("subject='");
 			if (start != -1) {
 				end = xml.indexOf("'", start + 9);
 				if (end != -1) {
-					name = xml.substring(start+9, end);
+					name = xml.substring(start + 9, end);
 				}
 			}
-			
-			Group g = new Group (Long.parseLong(strId), GroupType.CONFERENCE, name, owner, null);
+
+			Group g = new Group(Long.parseLong(strId), GroupType.CONFERENCE,
+					name, owner, null);
 			return g;
 		} else {
 			return null;
@@ -372,7 +380,8 @@ public class Group {
 
 			doc.getDocumentElement().normalize();
 
-			if (type == GroupType.ORG.intValue() || type == Group.GroupType.CONTACT.intValue()) {
+			if (type == GroupType.ORG.intValue()
+					|| type == Group.GroupType.CONTACT.intValue()) {
 				NodeList gList = doc.getChildNodes().item(0).getChildNodes();
 				Element element;
 				for (int i = 0; i < gList.getLength(); i++) {

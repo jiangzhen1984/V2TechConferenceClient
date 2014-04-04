@@ -49,6 +49,7 @@ public class ChatRequest {
 		for(ChatPicture cp : cpL) {
 			this.callback.OnRecvChatPictureCallback(cp.nGroupID, cp.nBusinessType, cp.nFromUserID, cp.nTime, cp.pPicData);
 		}
+		// clear cache. 
 		ctL.clear();
 		cpL.clear();
 	}
@@ -67,7 +68,7 @@ public class ChatRequest {
 
 	/**
 	 * Send text content to user.<br>
-	 * If nGroupID is 0, means this API as IM API. Otherwise as conference API.<br>
+	 * If nGroupID is 0 P2P message, otherwise is group message.<br>
 	 * The xml content structure as third parameter szText.<br>
 	 * <p>
 	 *    If we only have text context to send, we don't need to add tag TPictureChatItem to xml.<br>
@@ -79,7 +80,7 @@ public class ChatRequest {
 	 * @param nToUserID
 	 *            user ID
 	 *            
-	 * @param  nSeqId TODO need to be commemorate 
+	 * @param  nSeqId unique Id. It's used to if sent message failed, you will according to this parameter distinguish which message is failed. TODO add call back which API will be call if failed
 	 * @param szText
 	 * <br>
 	 *            < ?xml version="1.0" encoding="utf-8"?><br>
@@ -110,7 +111,7 @@ public class ChatRequest {
 	 * <p>If input 0 as nGroupId, means P2P send data. Before call this API, call {@link #sendChatText(long, long, String, int)} first </p>
 	 * @param nGroupID
 	 * @param nToUserID
-	 * @param  nSeqId TODO need to be commemorate 
+	 * @param  nSeqId  unique Id. It's used to if sent message failed, you will according to this parameter distinguish which message is failed. TODO add call back which API will be call if failed 
 	 * @param pPicData <br>
 	 *   |----image  header    52 bytes|----------------image data-------------|  <br>
 	 *   |{UUID} extension bytes       |----------------image data-------------|  <br>

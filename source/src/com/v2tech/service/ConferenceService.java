@@ -50,9 +50,9 @@ import com.v2tech.util.V2Log;
  * {@link #requestOpenVideoDevice(Conference, UserDeviceConfig, Message)}</li>
  * <li>User request to close video device:
  * {@link #requestCloseVideoDevice(Conference, UserDeviceConfig, Message)}</li>
- * <li>User request to request speak in conference
+ * <li>User request to request speak in meeting
  * {@link #applyForControlPermission(ConferencePermission, Message)}</li>
- * <li>User request to release speaker in conference
+ * <li>User request to release speaker in meeting
  * {@link #applyForReleasePermission(ConferencePermission, Message)}</li>
  * </ul>
  * 
@@ -358,35 +358,6 @@ public class ConferenceService extends AbstractHandler {
 		}
 	}
 
-	@Override
-	public void handleMessage(Message msg) {
-		// Do time out handle
-		super.handleMessage(msg);
-		// remove time out message
-		Message caller = super.removeTimeoutMessage(msg.what);
-		if (caller == null || caller.getTarget() == null) {
-			V2Log.w(this.getClass().getName()+ " Igore message client don't expect callback :"+msg.what);
-			return;
-		}
-		switch (msg.what) {
-		case JNI_REQUEST_ENTER_CONF:
-		case JNI_REQUEST_EXIT_CONF:
-		case JNI_REQUEST_OPEN_VIDEO:
-		case JNI_REQUEST_SPEAK:
-		case JNI_REQUEST_RELEASE_SPEAK:
-		case JNI_UPDATE_CAMERA_PAR:
-		case JNI_REQUEST_CREATE_CONFERENCE:
-			Object origObject = caller.obj;
-			caller.obj = new AsynResult(AsynResult.AsynState.SUCCESS, msg.obj);
-			JNIResponse jniRes = (JNIResponse) msg.obj;
-			jniRes.callerObject = origObject;
-			break;
-		default:
-			break;
-		}
-
-		caller.sendToTarget();
-	}
 
 	class ConfRequestCB implements ConfRequestCallback {
 

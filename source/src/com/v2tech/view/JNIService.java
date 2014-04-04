@@ -26,8 +26,6 @@ import android.widget.Toast;
 
 import com.V2.jni.ChatRequest;
 import com.V2.jni.ChatRequestCallback;
-import com.V2.jni.ConfRequest;
-import com.V2.jni.ConfRequestCallback;
 import com.V2.jni.GroupRequest;
 import com.V2.jni.GroupRequestCallback;
 import com.V2.jni.ImRequest;

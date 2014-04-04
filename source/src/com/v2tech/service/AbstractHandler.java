@@ -61,11 +61,11 @@ public abstract class AbstractHandler extends Handler {
 
 	@Override
 	public void handleMessage(Message msg) {
+		Message caller = null;;
 		switch (msg.what) {
 		case REQUEST_TIME_OUT:
 			Meta meta = metaHolder.get(Integer.valueOf(msg.arg1));
-			if (meta != null && meta.caller != null
-					&& meta.caller.getTarget() != null) {
+			if (meta != null && meta.caller != null) {
 				Object origObject = meta.caller.obj;
 				meta.caller.obj = new AsynResult(AsynResult.AsynState.TIME_OUT,
 						null);
@@ -74,11 +74,35 @@ public abstract class AbstractHandler extends Handler {
 					jniRes = new JNIResponse(JNIResponse.Result.FAILED);
 				}
 				jniRes.callerObject = origObject;
-				meta.caller.sendToTarget();
+				caller = meta.caller;
 			} else {
-				V2Log.w("Doesn't find time message in the queue :" + msg.arg1);
+				V2Log.w("Doesn't find time out message in the queue :" + msg.arg1);
 			}
 			break;
+			//Handle normal message 
+		default:
+			caller = removeTimeoutMessage(msg.what);
+			if (caller == null) {
+				V2Log.w(this.getClass().getName()+ " Igore message client don't expect callback :"+msg.what);
+				return;
+			}
+			Object origObject = caller.obj;
+			caller.obj = new AsynResult(AsynResult.AsynState.SUCCESS, msg.obj);
+			JNIResponse jniRes = (JNIResponse) msg.obj;
+			jniRes.callerObject = origObject;
+			caller.sendToTarget();
+			break;
+		}
+		
+		if (caller == null) {
+			V2Log.w(" can not send message:" + msg.what +" to target caller is null");
+			return;
+		} else {
+			if (caller.getTarget() == null) {
+				V2Log.w(" can not send message:" + msg.what +" to target caller target("+caller.what+") is null");
+				return;
+			}
+			caller.sendToTarget();
 		}
 	}
 

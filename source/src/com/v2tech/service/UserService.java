@@ -10,9 +10,7 @@ import com.V2.jni.V2GlobalEnum;
 import com.v2tech.logic.AsynResult;
 import com.v2tech.logic.GlobalHolder;
 import com.v2tech.logic.User;
-import com.v2tech.logic.jni.JNIResponse;
 import com.v2tech.logic.jni.RequestLogInResponse;
-import com.v2tech.util.V2Log;
 
 public class UserService extends AbstractHandler {
 
@@ -47,7 +45,8 @@ public class UserService extends AbstractHandler {
 	
 	
 	/**
-	 * TODO update comment
+	 * Update user information. If updated user is logged user, can update all information.<br>
+	 * otherwise only can update nick name.
 	 * @param user
 	 * @param caller
 	 */
@@ -68,32 +67,6 @@ public class UserService extends AbstractHandler {
 		}
 	}
 
-	@Override
-	public void handleMessage(Message msg) {
-		// handle time out
-		super.handleMessage(msg);
-
-		// remove time out message
-		Message caller = super.removeTimeoutMessage(msg.what);
-		if (caller == null || caller.getTarget() == null) {
-			V2Log.w(this.getClass().getName()+ " Igore message client don't expect callback :"+msg.what);
-			return;
-		}
-
-		switch (msg.what) {
-		case JNI_REQUEST_LOG_IN:
-			Object origObject = caller.obj;
-			caller.obj = new AsynResult(AsynResult.AsynState.SUCCESS, msg.obj);
-			JNIResponse jniRes = (JNIResponse) msg.obj;
-			jniRes.callerObject = origObject;
-			break;
-		case JNI_REQUEST_UPDAE_USER:
-			caller.obj = new AsynResult(AsynResult.AsynState.SUCCESS, msg.obj);
-			break;
-		}
-		caller.sendToTarget();
-
-	}
 
 	class ImRequestCB implements ImRequestCallback {
 

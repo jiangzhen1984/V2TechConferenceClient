@@ -22,7 +22,7 @@ import v2av.VideoPlayer;
 
 /**
  * User video device configuration object.<br>
- * Local user video device unnecessary  VideoPlayer and device id information.<br>
+ * Local user video device is unnecessary  VideoPlayer and device id information.<br>
  * If we want to open remote user's video, we need VidePlayer and device id information.
  * To get remote user's device id, we can listen {@link com.V2.jni.VideoRequestCallback#OnRemoteUserVideoDevice(String)}. 
  * <br>
