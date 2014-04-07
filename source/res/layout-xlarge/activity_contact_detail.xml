@@ -269,7 +269,7 @@
                                     android:id="@+id/radio1"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:tag="0"
+                                    android:tag="2"
                                     android:text="@string/contacts_user_detail_gender_female"
                                     android:textColor="@color/contacts_user_detail_text_color" />
                             </RadioGroup>
@@ -320,6 +320,7 @@
                                 android:layout_weight="1"
                                 android:ems="10"
                                 android:inputType="date"
+                                android:focusable="false"
                                 android:textColor="@color/contacts_user_detail_text_color"
                                 android:visibility="gone" >
                             </EditText>

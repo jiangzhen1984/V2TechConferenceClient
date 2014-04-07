@@ -7,6 +7,7 @@ import java.io.UnsupportedEncodingException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 import java.util.UUID;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -18,7 +19,13 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import com.V2.jni.ChatRequest;
+
 public class VMessage {
+	
+	//TODO add comments
+	public static final int VMESSAGE_CODE_CONF = 1;
+	public static final int VMESSAGE_CODE_IM = 2;
 
 	public enum MessageType {
 		TEXT(1), IMAGE(2), IMAGE_AND_TEXT(3);
@@ -34,11 +41,11 @@ public class VMessage {
 		}
 	}
 
-	private static DateFormat sfF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	private static DateFormat sfF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
 	
-	private static DateFormat sfL = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+	private static DateFormat sfL = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault());
 
-	private static DateFormat sfT = new SimpleDateFormat("HH:mm");
+	private static DateFormat sfT = new SimpleDateFormat("HH:mm", Locale.getDefault());
 
 	
 	private long id;
@@ -59,8 +66,13 @@ public class VMessage {
 	
 	protected String mUUID;
 	
+	protected int mMsgCode;
+	
+	//FIXME should optimize code structure
+	public long mGroupId;
+	
 	private VMessage() {
-		
+		this(null, null, null, false);
 	}
 
 	public VMessage(User u, User toUser) {
@@ -90,9 +102,17 @@ public class VMessage {
 		} else {
 			mStrDateTime = sfL.format(this.mDate);
 		}
+		mMsgCode  = ChatRequest.BT_IM;
 
 	}
 
+	public void setMsgCode(int code) {
+		this.mMsgCode = code;
+	}
+	
+	public int getMsgCode() {
+		return this.mMsgCode;
+	}
 	
 	public String getUUID() {
 		return this.mUUID;
@@ -266,7 +286,7 @@ public class VMessage {
 	public String toXml() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n")
-				.append("<TChatData IsAutoReply=\"False\">\n")
+				.append("<TChatData IsAutoReply=\"False\" MessageID=\"{"+this.mUUID+"}\">\n")
 				.append("<FontList>\n")
 				.append("<TChatFont Color=\"0\" Name=\"Tahoma\" Size=\"9\" Style=\"\"/>")
 				.append("</FontList>\n")

@@ -1,7 +1,11 @@
 package com.v2tech.view.contacts;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 
 import android.app.Activity;
 import android.app.DatePickerDialog;
@@ -31,6 +35,7 @@ import com.v2tech.R;
 import com.v2tech.logic.GlobalHolder;
 import com.v2tech.logic.User;
 import com.v2tech.service.UserService;
+import com.v2tech.util.V2Log;
 import com.v2tech.view.PublicIntent;
 
 public class ContactDetail extends Activity implements OnTouchListener {
@@ -176,7 +181,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 		mAddressET = (EditText) findViewById(R.id.contact_user_detail_address_et);
 
 		mETArr = new EditText[] { mCellphoneET, mTelephoneET,
-				mTitleET, mAddressET };
+				mTitleET, mAddressET, mBirthdayET };
 	}
 
 	private void showUserInfo() {
@@ -227,7 +232,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 			if (u.getGender() != null && u.getGender().equals("1")) {
 				mGenderTV.setText(mContext.getResources().getText(
 						R.string.contacts_user_detail_gender_male));
-			} else if (u.getGender() != null && u.getGender().equals("0")) {
+			} else if (u.getGender() != null && u.getGender().equals("2")) {
 				mGenderTV.setText(mContext.getResources().getText(
 						R.string.contacts_user_detail_gender_female));
 			} else {
@@ -282,7 +287,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 		mButtonInviteVideoTV.setVisibility(View.INVISIBLE);
 
 		mNickNameET.addTextChangedListener(tw);
-		mBirthdayET.setOnFocusChangeListener(datePickerListener);
+		mBirthdayET.setOnClickListener(datePickerListener);
 		bir = u.getBirthday();
 
 	}
@@ -313,37 +318,38 @@ public class ContactDetail extends Activity implements OnTouchListener {
 
 	};
 
-	private View.OnFocusChangeListener datePickerListener = new View.OnFocusChangeListener() {
-
+	private View.OnClickListener datePickerListener = new View.OnClickListener() {
+		
 		@Override
-		public void onFocusChange(final View view, boolean focus) {
-			if (focus) {
-				Calendar c = Calendar.getInstance();
+		public void onClick(final View view) {
+			InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+			imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+			Calendar c = Calendar.getInstance();
 
-				new DatePickerDialog(mContext,
-						new DatePickerDialog.OnDateSetListener() {
-							@Override
-							public void onDateSet(DatePicker dp, int year,
-									int monthOfYear, int dayOfMonth) {
-								((EditText) view).setText(year + "/"
-										+ (monthOfYear + 1) + "/" + dayOfMonth);
-								Calendar cl = Calendar.getInstance();
-								cl.set(Calendar.YEAR, year);
-								cl.set(Calendar.MONTH, monthOfYear);
-								cl.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-								
-								isUpdating = true;
-								Message.obtain(lh, UPDATE_USER_INFO).sendToTarget();;
-								bir = cl.getTime();
-								
-							}
-						}, c.get(Calendar.YEAR), c.get(Calendar.MONTH), c
-								.get(Calendar.DAY_OF_MONTH)).show();
-			}
-
+			new DatePickerDialog(mContext,
+					new DatePickerDialog.OnDateSetListener() {
+						@Override
+						public void onDateSet(DatePicker dp, int year,
+								int monthOfYear, int dayOfMonth) {
+							((EditText) view).setText(year + "/"
+									+ (monthOfYear + 1) + "/" + dayOfMonth);
+							Calendar cl = Calendar.getInstance();
+							cl.set(Calendar.YEAR, year);
+							cl.set(Calendar.MONTH, monthOfYear);
+							cl.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+							
+							isUpdating = true;
+							Message m = Message.obtain(lh, UPDATE_USER_INFO);
+							lh.dispatchMessage(m);
+							bir = cl.getTime();
+							
+						}
+					}, c.get(Calendar.YEAR), c.get(Calendar.MONTH), c
+							.get(Calendar.DAY_OF_MONTH)).show();
 		}
 
 	};
+	
 	
 	private OnFocusChangeListener hidenKeyboardListener = new OnFocusChangeListener() {
 

@@ -1,4 +1,6 @@
-package com.v2tech.logic;
+package com.v2tech.view.vo;
+
+import com.v2tech.logic.User;
 
 import android.graphics.Bitmap;
 

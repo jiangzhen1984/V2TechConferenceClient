@@ -4,5 +4,5 @@
      <color name="common_black">#000000</color>
       <color name="text_tab_selected">#ffffff</color>
     <color name="text_tab_unselected">#bababa</color>
-     
+     <color name ="button_text_color">#82b9d7</color>
 </resources>

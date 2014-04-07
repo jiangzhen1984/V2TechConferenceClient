@@ -12,4 +12,6 @@
    <string name="error_can_not_connect_server">无法链接到服务器</string>
    <string name="conversations_delete_conversaion">删除该会话</string>
    <string name="conversations_kick_notification">你被踢出会议室</string>
+   <string name="confs_public_chatting">公共聊天</string>
+   <string name="confs_attendee_title">参会人数</string>
 </resources>

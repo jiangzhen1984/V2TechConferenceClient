@@ -28,10 +28,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.v2tech.R;
+import com.v2tech.logic.GlobalHolder;
 import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.Notificator;
 import com.v2tech.util.V2Log;
 import com.v2tech.view.JNIService.LocalBinder;
+import com.v2tech.view.vo.Conversation;
 
 public class MainActivity extends FragmentActivity implements
 		TabHost.OnTabChangeListener, ViewPager.OnPageChangeListener {
@@ -48,17 +50,17 @@ public class MainActivity extends FragmentActivity implements
 	public static final String SERVICE_BOUNDED_EVENT = "com.v2tech.SERVICE_BOUNDED_EVENT";
 	public static final String SERVICE_UNBOUNDED_EVENT = "com.v2tech.SERVICE_UNBOUNDED_EVENT";
 
-
 	private TabClass[] mTabClasses = new TabClass[] {
-			new TabClass(PublicIntent.TAG_CONTACT, R.drawable.tab_contact_button,
-					R.string.tab_contact_name,
+			new TabClass(PublicIntent.TAG_CONTACT,
+					R.drawable.tab_contact_button, R.string.tab_contact_name,
 					ContactsTabFragment.class.getName()),
 			new TabClass(PublicIntent.TAG_ORG, R.drawable.tab_org_button,
 					R.string.tab_org_name, ContactsTabFragment.class.getName()),
 			new TabClass(PublicIntent.TAG_GROUP, R.drawable.tab_group_button,
 					R.string.tab_group_name,
 					ConversationsTabFragment.class.getName()),
-			new TabClass(PublicIntent.TAG_CONF, R.drawable.tab_conference_button,
+			new TabClass(PublicIntent.TAG_CONF,
+					R.drawable.tab_conference_button,
 					R.string.tab_conference_name,
 					ConversationsTabFragment.class.getName()),
 			new TabClass(PublicIntent.TAG_COV, R.drawable.tab_msg_cov_button,
@@ -66,8 +68,6 @@ public class MainActivity extends FragmentActivity implements
 					ConversationsTabFragment.class.getName()) };
 
 	private LocalReceiver receiver = new LocalReceiver();
-
-	private ImageView mTabNoticator;
 
 	public JNIService getService() {
 		return mService;
@@ -166,6 +166,7 @@ public class MainActivity extends FragmentActivity implements
 		this.mViewPager = (ViewPager) super.findViewById(R.id.viewpager);
 		this.mViewPager.setAdapter(this.mPagerAdapter);
 		this.mViewPager.setOnPageChangeListener(this);
+		this.mViewPager.setOffscreenPageLimit(5);
 	}
 
 	/**
@@ -177,8 +178,7 @@ public class MainActivity extends FragmentActivity implements
 
 		for (TabClass tc : mTabClasses) {
 			TabHost.TabSpec confTabSpec = this.mTabHost.newTabSpec(tc.mTabName)
-					.setIndicator(
-							getTabView(tc));
+					.setIndicator(getTabView(tc));
 			confTabSpec.setContent(new TabFactory(this));
 			mTabHost.addTab(confTabSpec);
 
@@ -192,7 +192,7 @@ public class MainActivity extends FragmentActivity implements
 	}
 
 	private View getTabView(TabClass tcl) {
-		
+
 		LayoutInflater inflater = LayoutInflater.from(this);
 		View v = inflater.inflate(R.layout.tab_widget_view, null, false);
 		ImageView iv = (ImageView) v.findViewById(R.id.tab_image);
@@ -204,8 +204,13 @@ public class MainActivity extends FragmentActivity implements
 		TextView tv = (TextView) v.findViewById(R.id.tab_name);
 		if (tv != null) {
 			tv.setText(this.getResources().getText(tcl.mTabNameId));
+			tv.setTextSize(10);
 			tv.bringToFront();
 		}
+
+		View notifi = v.findViewById(R.id.tab_notificator);
+		tcl.notificator = notifi;
+		tcl.notificator.setVisibility(View.INVISIBLE);
 		return v;
 	}
 
@@ -272,6 +277,7 @@ public class MainActivity extends FragmentActivity implements
 	public void onTabChanged(String tag) {
 		int pos = this.mTabHost.getCurrentTab();
 		this.mViewPager.setCurrentItem(pos);
+
 	}
 
 	@Override
@@ -354,11 +360,23 @@ public class MainActivity extends FragmentActivity implements
 		public void onReceive(Context context, Intent intent) {
 			String action = intent.getAction();
 			if (PublicIntent.UPDATE_CONVERSATION.equals(action)) {
-//				if (GlobalHolder.getInstance().getNoticatorCount() > 0) {
-//					mTabNoticator.setVisibility(View.VISIBLE);
-//				} else {
-//					mTabNoticator.setVisibility(View.GONE);
-//				}
+				String type = intent.getExtras().getString("type");
+				View noticator = null;
+				if (type.equals(Conversation.TYPE_GROUP)) {
+					noticator = mTabClasses[2].notificator;
+				} else if (type.equals(Conversation.TYPE_CONFERNECE)) {
+					noticator = mTabClasses[3].notificator;
+				} else if (type.equals(Conversation.TYPE_CONTACT)) {
+					noticator = mTabClasses[4].notificator;
+				}
+
+				if (noticator != null) {
+					if (GlobalHolder.getInstance().getNoticatorCount(type) > 0) {
+						noticator.setVisibility(View.VISIBLE);
+					} else {
+						noticator.setVisibility(View.GONE);
+					}
+				}
 			} else if (PublicIntent.FINISH_APPLICATION.equals(action)) {
 				finish();
 			}
@@ -371,14 +389,20 @@ public class MainActivity extends FragmentActivity implements
 		int mDraId;
 		int mTabNameId;
 		String clsName;
+		View notificator;
 
 		public TabClass(String mTabName, int mDraId, int mTabTitle,
-				String clsName) {
+				String clsName, View notificator) {
 			super();
 			this.mTabName = mTabName;
 			this.mDraId = mDraId;
 			this.mTabNameId = mTabTitle;
 			this.clsName = clsName;
+			this.notificator = notificator;
+		}
+
+		public TabClass(String tabName, int draId, int tabTitle, String clsName) {
+			this(tabName, draId, tabTitle, clsName, null);
 		}
 
 	}

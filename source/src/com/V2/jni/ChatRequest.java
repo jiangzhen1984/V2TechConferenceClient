@@ -47,7 +47,7 @@ public class ChatRequest {
 		}
 		
 		for(ChatPicture cp : cpL) {
-			this.callback.OnRecvChatPictureCallback(cp.nGroupID, cp.nBusinessType, cp.nFromUserID, cp.nTime, cp.pPicData);
+			this.callback.OnRecvChatPictureCallback(cp.nGroupID, cp.nBusinessType, cp.nFromUserID, cp.nTime, cp.nSeqId, cp.pPicData);
 		}
 		// clear cache. 
 		ctL.clear();
@@ -143,7 +143,7 @@ public class ChatRequest {
 				+ szSeqID + " "
 				+ szXmlText);
 		if (callback != null) {
-			callback.OnRecvChatTextCallback(nGroupID, nBusinessType, nFromUserID, nTime, szXmlText);
+			callback.OnRecvChatTextCallback(nGroupID, nBusinessType, nFromUserID, nTime,  szXmlText);
 		} else {
 			ctL.add(new ChatText(nGroupID,  nBusinessType,
 					 nFromUserID,  nTime,  szXmlText));
@@ -176,14 +176,16 @@ public class ChatRequest {
 		int nBusinessType;
 		long nFromUserID;
 		long nTime;
+		String nSeqId;
 		byte[] pPicData;
 		public ChatPicture(long nGroupID, int nBusinessType, long nFromUserID,
-				long nTime, byte[] pPicData) {
+				long nTime, String nSeqId, byte[] pPicData) {
 			super();
 			this.nGroupID = nGroupID;
 			this.nBusinessType = nBusinessType;
 			this.nFromUserID = nFromUserID;
 			this.nTime = nTime;
+			this.nSeqId  = nSeqId;
 			this.pPicData = pPicData;
 		}
 		
@@ -209,10 +211,10 @@ public class ChatRequest {
 				+ Runtime.getRuntime().maxMemory() + "*nLength=====**"
 				+ "****pPicData.length===***" + pPicData.length);
 		if (callback != null) {
-			callback.OnRecvChatPictureCallback(nGroupID, nBusinessType, nFromUserID, nTime, pPicData);
+			callback.OnRecvChatPictureCallback(nGroupID, nBusinessType, nFromUserID, nTime, szSeqID, pPicData);
 		} else {
 			cpL.add(new ChatPicture(nGroupID,  nBusinessType,
-					 nFromUserID,  nTime,  pPicData));
+					 nFromUserID,  nTime, szSeqID,  pPicData));
 		}
 	}
 

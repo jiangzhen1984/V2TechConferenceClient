@@ -63,7 +63,7 @@ public class UserService extends AbstractHandler {
 		if (user.getmUserId() == GlobalHolder.getInstance().getCurrentUserId()) {
 			ImRequest.getInstance().modifyBaseInfo(user.toXml());
 		} else {
-			ImRequest.getInstance().modifyCommentName(user.getmUserId(), user.getName());
+	//		ImRequest.getInstance().modifyCommentName(user.getmUserId(), user.getName());
 		}
 	}
 
@@ -97,7 +97,8 @@ public class UserService extends AbstractHandler {
 
 		@Override
 		public void OnUpdateBaseInfoCallback(long nUserID, String updatexml) {
-			Message.obtain(handler, JNI_REQUEST_UPDAE_USER, updatexml).sendToTarget();
+			//TODO do not send result
+			//Message.obtain(handler, JNI_REQUEST_UPDAE_USER, updatexml).sendToTarget();
 		}
 
 		@Override

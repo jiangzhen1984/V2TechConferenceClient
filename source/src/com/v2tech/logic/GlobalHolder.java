@@ -6,10 +6,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import android.graphics.Bitmap;
 
+import com.v2tech.logic.Group.GroupType;
 import com.v2tech.util.V2Log;
+import com.v2tech.view.vo.Conversation;
 
 public class GlobalHolder {
 
@@ -24,12 +27,14 @@ public class GlobalHolder {
 	private List<Group> mConfGroup = new ArrayList<Group>();
 	
 	private Set<Group> mContactsGroup = new HashSet<Group>();
+	
+	private Set<Group> mChattingGroup = new HashSet<Group>();
 
 	private Map<Long, User> mUserHolder = new HashMap<Long, User>();
 	private Map<Long, Group> mGroupHolder = new HashMap<Long, Group>();
 	private Map<Long, String> mAvatarHolder = new HashMap<Long, String>();
 
-	private List<Conversation> mConversationHolder = new ArrayList<Conversation>();
+	private List<Conversation> mConversationHolder = new CopyOnWriteArrayList<Conversation>();
 	
 
 	private Set<UserDeviceConfig> mUserDeviceList = new HashSet<UserDeviceConfig>();
@@ -89,7 +94,10 @@ public class GlobalHolder {
 				if (u.getName() != null) {
 					cu.setName(u.getName());
 				}
-				//FIXME update new data
+				if (u.getGender() != null) {
+					V2Log.d("========aaaa======" + u.getGender());
+					cu.setGender(u.getGender());
+				}
 				V2Log.e(" merge user information " + id);
 				return cu;
 			}
@@ -136,12 +144,15 @@ public class GlobalHolder {
 	 * FIXME need to optimize code
 	 */
 	public void updateGroupList(Group.GroupType gType, List<Group> list) {
+		
 		if (gType == Group.GroupType.ORG) {
 			mOrgGroup = list;
 		} else if (gType == Group.GroupType.CONFERENCE) {
 			mConfGroup.addAll(list);
 		} else if (gType == Group.GroupType.CONTACT) {
 			this.mContactsGroup.addAll(list);
+		} else if (gType == GroupType.CHATING) {
+			this.mChattingGroup.addAll(list);
 		}
 		for (Group g : list) {
 			g.setOwnerUser(this.getUser(g.getOwner()));
@@ -199,6 +210,10 @@ public class GlobalHolder {
 			List<Group> cl = new ArrayList<Group>();
 			cl.addAll(this.mContactsGroup);
 			return cl;
+		case CHATING:
+			List<Group> ct = new ArrayList<Group>();
+			ct.addAll(this.mChattingGroup);
+			return ct;
 		case CONFERENCE:
 			return mConfGroup;
 		default:
@@ -329,10 +344,10 @@ public class GlobalHolder {
 	}
 	
 	
-	public int getNoticatorCount() {
+	public int getNoticatorCount(String type) {
 		int c = 0;
 		for (Conversation cov : this.mConversationHolder) {
-			if (cov.getNotiFlag() == Conversation.NOTIFICATION) {
+			if (cov.getNotiFlag() == Conversation.NOTIFICATION && type.equals(cov.getType())) {
 				c ++;
 			}
 		}

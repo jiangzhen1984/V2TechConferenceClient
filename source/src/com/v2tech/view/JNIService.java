@@ -1,6 +1,7 @@
 package com.v2tech.view;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -34,6 +35,7 @@ import com.V2.jni.VideoRequest;
 import com.V2.jni.VideoRequestCallback;
 import com.v2tech.R;
 import com.v2tech.db.ContentDescriptor;
+import com.v2tech.logic.ConferenceGroup;
 import com.v2tech.logic.GlobalHolder;
 import com.v2tech.logic.Group;
 import com.v2tech.logic.Group.GroupType;
@@ -46,6 +48,7 @@ import com.v2tech.logic.VMessage.MessageType;
 import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.Notificator;
 import com.v2tech.util.V2Log;
+import com.v2tech.util.XmlParser;
 
 /**
  * This service is used to wrap JNI call.<br>
@@ -68,6 +71,7 @@ public class JNIService extends Service {
 	public static final String JNI_BROADCAST_GROUP_NOTIFICATION = "com.v2tech.jni.broadcast.group_geted";
 	public static final String JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION = "com.v2tech.jni.broadcast.group_user_updated";
 	public static final String JNI_BROADCAST_NEW_MESSAGE = "com.v2tech.jni.broadcast.new.message";
+	public static final String JNI_BROADCAST_NEW_CONF_MESSAGE = "com.v2tech.jni.broadcast.new.conf.message";
 	public static final String JNI_BROADCAST_CONFERENCE_INVATITION = "com.v2tech.jni.broadcast.conference_invatition";
 	public static final String JNI_BROADCAST_CONFERENCE_REMOVED = "com.v2tech.jni.broadcast.conference_removed";
 
@@ -92,6 +96,8 @@ public class JNIService extends Service {
 	// ////////////////////////////////////////
 
 	private Context mContext;
+	
+	private List<VMessage> cacheImageMeta = new ArrayList<VMessage>();
 
 	// ////////////////////////////////////////
 
@@ -256,7 +262,7 @@ public class JNIService extends Service {
 						Toast.LENGTH_LONG).show();
 				break;
 			case JNI_GROUP_NOTIFY:
-				List<Group> gl = Group
+				List<Group> gl = XmlParser
 						.parserFromXml(msg.arg1, (String) msg.obj);
 				GlobalHolder.getInstance().updateGroupList(
 						Group.GroupType.fromInt(msg.arg1), gl);
@@ -304,14 +310,25 @@ public class JNIService extends Service {
 			case JNI_RECEIVED_MESSAGE:
 				VMessage vm = (VMessage) msg.obj;
 				if (vm != null) {
-					Uri uri = saveMessageToDB(vm);
-					Intent ii = new Intent(JNI_BROADCAST_NEW_MESSAGE);
+					String action = null;
+					String msgUri = null;
+					//FIXME handle for image message
+					if (vm.getMsgCode() == VMessage.VMESSAGE_CODE_CONF) {
+						action = JNI_BROADCAST_NEW_CONF_MESSAGE;
+					} else {
+						action = JNI_BROADCAST_NEW_MESSAGE;
+						Uri uri = saveMessageToDB(vm);
+						msgUri = uri.getLastPathSegment();
+						sendNotification();
+						updateStatusBar(vm);
+					}
+					Intent ii = new Intent(action);
+					ii.putExtra("content", vm.getText());
 					ii.addCategory(JNI_BROADCAST_CATEGROY);
-					ii.putExtra("mid", uri.getLastPathSegment());
+					ii.putExtra("gid", vm.mGroupId);
+					ii.putExtra("mid", msgUri);
 					ii.putExtra("fromuid", vm.getUser().getmUserId());
 					mContext.sendBroadcast(ii);
-					sendNotification();
-					updateStatusBar(vm);
 				}
 				break;
 			case JNI_RECEIVED_VIDEO_INVITION:
@@ -339,6 +356,7 @@ public class JNIService extends Service {
 					.getIntValue());
 			cv.put(ContentDescriptor.Messages.Cols.SEND_TIME,
 					vm.getFullDateStr());
+			cv.put(ContentDescriptor.Messages.Cols.GROUP_ID, vm.mGroupId);
 			Uri uri = getContentResolver().insert(
 					ContentDescriptor.Messages.CONTENT_URI, cv);
 			return uri;
@@ -357,6 +375,7 @@ public class JNIService extends Service {
 			}
 		}
 
+		//FIXME update message for group message
 		private void updateStatusBar(VMessage vm) {
 			if (vm.getUser().getmUserId() == GlobalHolder.getInstance().CURRENT_CONVERSATION_USER) {
 				return;
@@ -537,7 +556,7 @@ public class JNIService extends Service {
 		public void OnInviteJoinGroupCallback(int groupType, String groupInfo,
 				String userInfo, String additInfo) {
 			GroupType gType = GroupType.fromInt(groupType);
-			Group g = Group.parseConferenceGroupFromXML(groupType, groupInfo);
+			Group g = ConferenceGroup.parseConferenceGroupFromXML(groupInfo);
 			if (g != null) {
 				GlobalHolder.getInstance().addGroupToList(gType, g);
 				if (gType == GroupType.CONFERENCE) {
@@ -620,10 +639,11 @@ public class JNIService extends Service {
 		@Override
 		public void OnRecvChatTextCallback(long nGroupID, int nBusinessType,
 				long nFromUserID, long nTime, String szXmlText) {
-			if (nGroupID > 0) {
-				V2Log.w("igonre group message:" +nGroupID+"  "+ szXmlText);
-				return;
-			}
+//			if (nGroupID > 0) {
+//				V2Log.w("igonre group message:" +nGroupID+"  "+ szXmlText);
+//				return;
+//			}
+			
 			User toUser = GlobalHolder.getInstance().getCurrentUser();
 			User fromUser = GlobalHolder.getInstance().getUser(nFromUserID);
 			if (toUser == null) {
@@ -636,19 +656,43 @@ public class JNIService extends Service {
 						+ "  " + fromUser);
 				fromUser = new User(nFromUserID);
 			}
+			
+			//Record image data meta
+			List<VMessage> l = VImageMessage.extraMetaFrom(fromUser, toUser,szXmlText);
+			synchronized(cacheImageMeta) {
+				cacheImageMeta.addAll(l);
+			}
 			VMessage vm = VMessage.fromXml(fromUser, toUser, new Date(),
 					szXmlText);
 			if (vm == null) {
 				V2Log.e(" xml parsed failed : " + szXmlText);
 				return;
 			}
+			vm.mGroupId = nGroupID;
+			vm.setMsgCode(nBusinessType);
 			Message.obtain(mCallbackHandler, JNI_RECEIVED_MESSAGE, vm)
 					.sendToTarget();
 		}
 
 		@Override
 		public void OnRecvChatPictureCallback(long nGroupID, int nBusinessType,
-				long nFromUserID, long nTime, byte[] pPicData) {
+				long nFromUserID, long nTime, String nSeqId, byte[] pPicData) {
+			boolean isCache = false;
+			VMessage vm = null;
+			synchronized(cacheImageMeta) {
+				for (VMessage v : cacheImageMeta) {
+					if (v.getUUID().equals(nSeqId.subSequence(1, nSeqId.length() -1))) {
+						vm = v;
+						isCache = true;
+						cacheImageMeta.remove(v);
+						break;
+					}
+				}
+			}
+			if (isCache == false) {
+				V2Log.e(" Didn't receive image meta data: "+ nSeqId);
+				return;
+			}
 			if (nGroupID > 0) {
 				V2Log.w("igonre group image message:" +nGroupID);
 				return;
@@ -665,9 +709,10 @@ public class JNIService extends Service {
 						+ "  " + fromUser);
 				fromUser = new User(nFromUserID);
 			}
-			VMessage vm = new VImageMessage(fromUser, toUser, pPicData);
 			vm.setLocal(false);
 			vm.setDate(new Date());
+			vm.mGroupId = nGroupID;
+			((VImageMessage)vm).updateImageData(pPicData);
 			Message.obtain(mCallbackHandler, JNI_RECEIVED_MESSAGE, vm)
 					.sendToTarget();
 		}

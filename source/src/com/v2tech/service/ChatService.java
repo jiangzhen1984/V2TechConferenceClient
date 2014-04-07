@@ -64,17 +64,21 @@ public class ChatService extends Handler {
 		thread.post(new Runnable() {
 			@Override
 			public void run() {
-				ChatRequest.getInstance().sendChatText(0,
+				ChatRequest.getInstance().sendChatText(msg.mGroupId,
 						msg.getToUser().getmUserId(), msg.getUUID(), msg.toXml(),
-						ChatRequest.BT_IM);
+						msg.getMsgCode());
 				if (msg.getType() == VMessage.MessageType.IMAGE
 						|| msg.getType() == VMessage.MessageType.IMAGE_AND_TEXT) {
 					byte[] data = ((VImageMessage) msg).getWrapperData();
-					ChatRequest.getInstance().sendChatPicture(0,
+					ChatRequest.getInstance().sendChatPicture(msg.mGroupId,
 							msg.getToUser().getmUserId(), msg.getUUID(),data, data.length,
-							ChatRequest.BT_IM);
+							msg.getMsgCode());
 				}
-				caller.sendToTarget();
+				if (caller != null) {
+					caller.sendToTarget();
+				} else {
+					V2Log.w(" requester don't expect response");
+				}
 			}
 
 		});

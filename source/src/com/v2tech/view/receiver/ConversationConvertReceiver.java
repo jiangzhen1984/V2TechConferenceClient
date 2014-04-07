@@ -9,14 +9,14 @@ import android.database.Cursor;
 import android.net.Uri;
 
 import com.v2tech.db.ContentDescriptor;
-import com.v2tech.logic.ContactConversation;
-import com.v2tech.logic.Conversation;
 import com.v2tech.logic.GlobalHolder;
 import com.v2tech.logic.User;
 import com.v2tech.logic.VMessage;
 import com.v2tech.util.V2Log;
 import com.v2tech.view.JNIService;
 import com.v2tech.view.PublicIntent;
+import com.v2tech.view.vo.ContactConversation;
+import com.v2tech.view.vo.Conversation;
 
 public class ConversationConvertReceiver extends BroadcastReceiver {
 
@@ -29,11 +29,12 @@ public class ConversationConvertReceiver extends BroadcastReceiver {
 		if (JNIService.JNI_BROADCAST_NEW_MESSAGE.equals(action)) {
 			String msgId = intent.getExtras().getString("mid");
 			Long fromUid = intent.getExtras().getLong("fromuid");
+			Long gid = intent.getExtras().getLong("gid");
 			if (msgId == null || msgId.equals("")) {
 				V2Log.e("Invalid msgId: " + msgId);
 			} else {
 				int mid = Integer.parseInt(msgId);
-				updateContactsConversation(fromUid, mid);
+				updateContactsConversation(fromUid, mid, gid);
 			}
 		} else if (PublicIntent.REQUEST_UPDATE_CONVERSATION.equals(action)) {
 			long extId = intent.getLongExtra("extId", 0);
@@ -76,7 +77,7 @@ public class ConversationConvertReceiver extends BroadcastReceiver {
 	 * @param fromUid
 	 * @param msgId
 	 */
-	private void updateContactsConversation(long fromUid, int msgId) {
+	private void updateContactsConversation(long fromUid, int msgId, long gid) {
 		int type = -1;
 		String content = null;
 		String dateString = null;
@@ -173,7 +174,11 @@ public class ConversationConvertReceiver extends BroadcastReceiver {
 		Intent i = new Intent(PublicIntent.UPDATE_CONVERSATION);
 		i.addCategory(PublicIntent.DEFAULT_CATEGORY);
 		i.putExtra("extId", fromUid);
-		i.putExtra("type", Conversation.TYPE_CONTACT);
+		if (gid == 0) {
+			i.putExtra("type", Conversation.TYPE_CONTACT);
+		} else {
+			i.putExtra("type", Conversation.TYPE_GROUP);
+		}
 		if (type != VMessage.MessageType.IMAGE.getIntValue()) {
 			i.putExtra("date", dateString);
 			i.putExtra("content", content);

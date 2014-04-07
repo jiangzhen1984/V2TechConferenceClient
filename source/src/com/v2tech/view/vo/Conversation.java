@@ -1,4 +1,4 @@
-package com.v2tech.logic;
+package com.v2tech.view.vo;
 
 
 public class Conversation {
@@ -6,6 +6,8 @@ public class Conversation {
 	public static final String TYPE_CONFERNECE ="1";
 	
 	public static final String TYPE_CONTACT ="2";
+	
+	public static final String TYPE_GROUP ="3";
 	
 	public static final int NOTIFICATION = 1;
 	public static final int NONE = 0;

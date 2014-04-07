@@ -10,7 +10,7 @@
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
-        android:src="@drawable/selector_conference" />
+        android:src="@drawable/tab_org_button" />
 
     <TextView
         android:id="@+id/tab_name"
@@ -29,5 +29,13 @@
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
         android:src="@drawable/selector_tab_bg" />
+
+    <ImageView
+        android:id="@+id/tab_notificator"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/imageView1"
+        android:layout_alignRight="@+id/imageView1"
+        android:src="@drawable/tab_notificator" />
 
 </RelativeLayout>

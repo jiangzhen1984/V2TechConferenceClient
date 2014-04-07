@@ -35,7 +35,6 @@ import android.widget.Toast;
 
 import com.v2tech.R;
 import com.v2tech.db.ContentDescriptor;
-import com.v2tech.logic.Conversation;
 import com.v2tech.logic.GlobalHolder;
 import com.v2tech.logic.User;
 import com.v2tech.logic.VImageMessage;
@@ -46,6 +45,7 @@ import com.v2tech.view.JNIService;
 import com.v2tech.view.PublicIntent;
 import com.v2tech.view.cus.ItemScrollView;
 import com.v2tech.view.cus.ScrollViewListener;
+import com.v2tech.view.vo.Conversation;
 
 public class ConversationView extends Activity {
 
@@ -419,6 +419,7 @@ public class ConversationView extends Activity {
 		Intent i = new Intent(PublicIntent.REQUEST_UPDATE_CONVERSATION);
 		i.addCategory(PublicIntent.DEFAULT_CATEGORY);
 		i.putExtra("extId", user2Id);
+		//TODO update type for group message
 		i.putExtra("type", Conversation.TYPE_CONTACT);
 		i.putExtra("date", date);
 		i.putExtra("content", content);

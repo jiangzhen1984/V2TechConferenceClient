@@ -8,7 +8,20 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 import java.util.UUID;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -34,6 +47,12 @@ public class VImageMessage extends VMessage {
 		init();
 	}
 
+	/**
+	 * @deprecated
+	 * @param u
+	 * @param toUser
+	 * @param data
+	 */
 	public VImageMessage(User u, User toUser, byte[] data) {
 		super(u, toUser, null, true);
 		this.mType = VMessage.MessageType.IMAGE;
@@ -70,6 +89,11 @@ public class VImageMessage extends VMessage {
 			}
 		}
 	}
+	
+	
+	
+	
+	
 
 	public VImageMessage(User u, User toUser, String uuid, String ext) {
 		super(u, toUser, null, true);
@@ -79,7 +103,37 @@ public class VImageMessage extends VMessage {
 		mImagePath = StorageUtil.getAbsoluteSdcardPath() + "/v2tech/pics/"
 				+ uuid + ext;
 	}
+	
+	
+	public void updateImageData(byte[] b) {
+		this.originImageData = b;
+		saveFile();
+	}
 
+	
+	
+	private void saveFile() {
+		File f = new File(mImagePath);
+		OutputStream os = null;
+		try {
+			os = new FileOutputStream(f);
+			os.write(originImageData, 0, originImageData.length);
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			if (os != null) {
+				try {
+					os.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+	
+	
 	@Override
 	public String getText() {
 		return mUUID + "|" + mExtension + "|" + mHeight + "|" + mWidth + "|"
@@ -169,6 +223,47 @@ public class VImageMessage extends VMessage {
 			V2Log.e("can not close stream for bitmap");
 		}
 		return true;
+	}
+	
+	
+	public static List<VMessage> extraMetaFrom(User fromUser, User toUser, String xml) {
+		List<VMessage> li = new ArrayList<VMessage>();
+		InputStream is = null;
+
+		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+		DocumentBuilder dBuilder;
+			try {
+				dBuilder = dbFactory.newDocumentBuilder();
+				is = new ByteArrayInputStream(xml.getBytes("UTF-8"));
+				Document doc = dBuilder.parse(is);
+
+				doc.getDocumentElement().normalize();
+				
+				NodeList imgMsgItemNL = doc.getElementsByTagName("TPictureChatItem");
+				for (int i=0;i<imgMsgItemNL.getLength(); i++) {
+					Element msgEl = (Element)imgMsgItemNL.item(i);
+					String uuid = msgEl.getAttribute("GUID");
+					if (uuid == null) {
+						V2Log.e("Invalid uuid ");
+						continue;
+					}
+					VMessage vmImage = new VImageMessage(fromUser, toUser, uuid.substring(1, uuid.length() - 1), msgEl.getAttribute("FileExt"));
+					vmImage.setDate(new Date());
+					vmImage.setType(MessageType.IMAGE);
+					li.add(vmImage);
+				}
+				
+			} catch (ParserConfigurationException e) {
+				e.printStackTrace();
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
+			} catch (SAXException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			
+			return li;
 	}
 
 	// < TPictureChatItem NewLine="False" AutoResize="True" FileExt=".png"

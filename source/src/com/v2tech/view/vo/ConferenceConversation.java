@@ -1,4 +1,7 @@
-package com.v2tech.logic;
+package com.v2tech.view.vo;
+
+import com.v2tech.logic.Group;
+import com.v2tech.logic.User;
 
 public class ConferenceConversation extends Conversation {
 
@@ -34,7 +37,7 @@ public class ConferenceConversation extends Conversation {
 	@Override
 	public String getDate() {
 		if (g != null) {
-			return g.getCreateDate();
+			return g.getStrCreateDate();
 		}
 		return super.getDate();
 	}

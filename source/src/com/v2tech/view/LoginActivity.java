@@ -1,27 +1,28 @@
 package com.v2tech.view;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
+import android.view.Window;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -60,8 +61,6 @@ public class LoginActivity extends Activity {
 	// UI references.
 	private EditText mEmailView;
 	private EditText mPasswordView;
-	private View mLoginFormView;
-	private View mLoginStatusView;
 	private TextView mLoginStatusMessageView;
 	private View mShowIpSettingButton;
 	private Dialog mSettingDialog;
@@ -84,8 +83,6 @@ public class LoginActivity extends Activity {
 
 		mPasswordView = (EditText) findViewById(R.id.password);
 
-		mLoginFormView = findViewById(R.id.login_form_ll);
-		mLoginStatusView = findViewById(R.id.login_status);
 		mLoginStatusMessageView = (TextView) findViewById(R.id.login_status_message);
 
 		findViewById(R.id.login_form_ll).setOnClickListener(
@@ -114,12 +111,12 @@ public class LoginActivity extends Activity {
 		loginView.setVisibility(View.GONE);
 		init();
 	}
-	
+
 	private String[] local;
 
 	private void init() {
-		String user = SPUtil.getConfigStrValue(this,"user");
-		String password = SPUtil.getConfigStrValue(this,"passwd");
+		String user = SPUtil.getConfigStrValue(this, "user");
+		String password = SPUtil.getConfigStrValue(this, "passwd");
 		mEmailView.setText(user);
 		mPasswordView.setText(password);
 	}
@@ -134,23 +131,22 @@ public class LoginActivity extends Activity {
 		tabBlockHolderAnimation.setDuration(700);
 		loginView.startAnimation(tabBlockHolderAnimation);
 	}
-	
+
 	private TextWatcher userNameTextWAtcher = new TextWatcher() {
 
 		@Override
 		public void afterTextChanged(Editable arg0) {
-			
+
 		}
 
 		@Override
 		public void beforeTextChanged(CharSequence arg0, int arg1, int arg2,
 				int arg3) {
-			
+
 		}
 
 		@Override
-		public void onTextChanged(CharSequence str, int arg1, int arg2,
-				int arg3) {
+		public void onTextChanged(CharSequence str, int arg1, int arg2, int arg3) {
 			if (local == null || local.length < 2) {
 				return;
 			}
@@ -160,7 +156,7 @@ public class LoginActivity extends Activity {
 				mPasswordView.setText("");
 			}
 		}
-		
+
 	};
 
 	private OnClickListener showIpSetting = new OnClickListener() {
@@ -185,7 +181,7 @@ public class LoginActivity extends Activity {
 			final String cacheIp = SPUtil.getConfigStrValue(mContext, "ip");
 			et.setText(cacheIp);
 
-			port.setText( SPUtil.getConfigStrValue(mContext, "port"));
+			port.setText(SPUtil.getConfigStrValue(mContext, "port"));
 
 			saveButton.setOnClickListener(new OnClickListener() {
 				@Override
@@ -193,7 +189,8 @@ public class LoginActivity extends Activity {
 					String ets = et.getText().toString();
 					String portStr5 = port.getText().toString();
 					if (!checkIPorDNS(ets)) {
-						et.setError(mContext.getText(R.string.error_host_invalid));
+						et.setError(mContext
+								.getText(R.string.error_host_invalid));
 						return;
 					}
 					if (!saveHostConfig(ets, portStr5)) {
@@ -225,15 +222,15 @@ public class LoginActivity extends Activity {
 		}
 
 	};
-	
-	
+
 	private boolean checkIPorDNS(String str) {
-		
+
 		String ValidIpAddressRegex = "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$";
 
 		String ValidHostnameRegex = "^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.){1,}([A-Za-z][A-Za-z][A-Za-z]*)$";
-		
-		return str.matches(ValidIpAddressRegex) || str.matches(ValidHostnameRegex);
+
+		return str.matches(ValidIpAddressRegex)
+				|| str.matches(ValidHostnameRegex);
 	}
 
 	@Override
@@ -253,11 +250,14 @@ public class LoginActivity extends Activity {
 	}
 
 	private boolean saveHostConfig(String ip, String port) {
-		return SPUtil.putConfigStrValue(this, new String[]{"ip","port"}, new String[]{ip, port});
+		return SPUtil.putConfigStrValue(this, new String[] { "ip", "port" },
+				new String[] { ip, port });
 	}
 
 	private boolean saveUserConfig(String user, String passwd) {
-		return SPUtil.putConfigStrValue(this, new String[]{"user","passwd"}, new String[]{user, passwd});
+		return SPUtil.putConfigStrValue(this,
+				new String[] { "user", "passwd" },
+				new String[] { user, passwd });
 	}
 
 	/**
@@ -267,7 +267,7 @@ public class LoginActivity extends Activity {
 	 */
 	public void attemptLogin() {
 		String ip = SPUtil.getConfigStrValue(this, "ip");
-		String port =  SPUtil.getConfigStrValue(this, "port");
+		String port = SPUtil.getConfigStrValue(this, "port");
 
 		if (ip == null || ip.isEmpty() || port == null || port.isEmpty()) {
 			Toast.makeText(mContext, R.string.error_no_host_configuration,
@@ -325,45 +325,50 @@ public class LoginActivity extends Activity {
 		}
 	}
 
-	/**
-	 * Shows the progress UI and hides the login form.
-	 */
-	@TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
+	private Dialog mProgressDialog;
+
 	private void showProgress(final boolean show) {
-		// On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
-		// for very easy animations. If available, use these APIs to fade-in
-		// the progress spinner.
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
-			int shortAnimTime = getResources().getInteger(
-					android.R.integer.config_shortAnimTime);
-
-			mLoginStatusView.setVisibility(View.VISIBLE);
-			mLoginStatusView.animate().setDuration(shortAnimTime)
-					.alpha(show ? 1 : 0)
-					.setListener(new AnimatorListenerAdapter() {
-						@Override
-						public void onAnimationEnd(Animator animation) {
-							mLoginStatusView.setVisibility(show ? View.VISIBLE
-									: View.GONE);
-						}
-					});
-
-			mLoginFormView.setVisibility(View.VISIBLE);
-			mLoginFormView.animate().setDuration(shortAnimTime)
-					.alpha(show ? 0 : 1)
-					.setListener(new AnimatorListenerAdapter() {
-						@Override
-						public void onAnimationEnd(Animator animation) {
-							mLoginFormView.setVisibility(show ? View.GONE
-									: View.VISIBLE);
-						}
-					});
-		} else {
-			// The ViewPropertyAnimator APIs are not available, so simply show
-			// and hide the relevant UI components.
-			mLoginStatusView.setVisibility(show ? View.VISIBLE : View.GONE);
-			mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
+		if (show == false) {
+			if (mProgressDialog != null) {
+				mProgressDialog.dismiss();
+				return;
+			}
 		}
+
+		if (mProgressDialog != null) {
+			mProgressDialog.show();
+			return;
+		}
+		final Dialog dialog = new Dialog(mContext, R.style.IpSettingDialog);
+		dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+		LinearLayout ll = new LinearLayout(mContext);
+		ll.setBackgroundResource(R.drawable.progress_bg);
+		ll.setOrientation(LinearLayout.VERTICAL);
+
+		TextView tv = new TextView(mContext);
+		tv.setText(R.string.login_progress_signing_in);
+		tv.setTextSize(20F);
+		tv.setPadding(60, 80, 60, 60);
+		tv.setGravity(Gravity.CENTER);
+		ll.addView(tv, new LinearLayout.LayoutParams(
+				ViewGroup.LayoutParams.MATCH_PARENT,
+				ViewGroup.LayoutParams.WRAP_CONTENT));
+
+		ImageView iv = new ImageView(mContext);
+		iv.setImageResource(R.drawable.progress_animation);
+		iv.setPadding(60, 30, 60, 60);
+		ll.addView(iv, new LinearLayout.LayoutParams(
+				ViewGroup.LayoutParams.MATCH_PARENT,
+				ViewGroup.LayoutParams.WRAP_CONTENT));
+
+		dialog.setContentView(ll);
+
+		dialog.setCancelable(false);
+		dialog.setCanceledOnTouchOutside(false);
+
+		mProgressDialog = dialog;
+		dialog.show();
+
 	}
 
 	private static final int LOG_IN_CALL_BACK = 1;
@@ -373,48 +378,49 @@ public class LoginActivity extends Activity {
 		public void handleMessage(Message msg) {
 			switch (msg.what) {
 			case LOG_IN_CALL_BACK:
-				showProgress(false);
-
 				AsynResult ar = (AsynResult) msg.obj;
 				if (ar.getState() == AsynResult.AsynState.TIME_OUT) {
 					Toast.makeText(mContext, R.string.error_time_out,
 							Toast.LENGTH_LONG).show();
-					return;
-				}
-				RequestLogInResponse rlr = (RequestLogInResponse) ar
-						.getObject();
-
-				if (rlr.getResult() == RequestLogInResponse.Result.FAILED) {
-
-					mPasswordView
-							.setError(getString(R.string.error_incorrect_password));
-					mPasswordView.requestFocus();
 				} else {
-					// Save user info
-					saveUserConfig(mEmailView.getText().toString(), "");
-					GlobalHolder.getInstance().setCurrentUser(rlr.getUser());
-					SPUtil.putConfigIntValue(mContext, GlobalConfig.KEY_LOGGED_IN, 1);
-					mContext.startActivity(new Intent(mContext,
-							MainActivity.class));
-					finish();
+					RequestLogInResponse rlr = (RequestLogInResponse) ar
+							.getObject();
+
+					if (rlr.getResult() == RequestLogInResponse.Result.FAILED) {
+
+						mPasswordView
+								.setError(getString(R.string.error_incorrect_password));
+						mPasswordView.requestFocus();
+					} else {
+						// Save user info
+						saveUserConfig(mEmailView.getText().toString(), "");
+						GlobalHolder.getInstance()
+								.setCurrentUser(rlr.getUser());
+						SPUtil.putConfigIntValue(mContext,
+								GlobalConfig.KEY_LOGGED_IN, 1);
+						mContext.startActivity(new Intent(mContext,
+								MainActivity.class));
+						finish();
+					}
 				}
+
+				showProgress(false);
 				break;
 			}
 		}
 
 	};
 
-
 	@Override
 	protected void onStart() {
 		super.onStart();
-	
+
 	}
 
 	@Override
 	protected void onStop() {
 		super.onStop();
-		
+
 	}
 
 }

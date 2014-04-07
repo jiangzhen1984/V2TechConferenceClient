@@ -1,23 +1,11 @@
 package com.v2tech.logic;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
 
 import com.v2tech.util.V2Log;
 
@@ -39,7 +27,7 @@ public class Group {
 
 	private User mOwnerUser;
 
-	private String mCreateDate;
+	private Date mCreateDate;
 
 	protected Group mParent;
 
@@ -50,13 +38,6 @@ public class Group {
 	protected int level;
 
 	private Object mLock = new Object();
-
-	public Group(long mGId, GroupType mGroupType, String mName) {
-		super();
-		this.mGId = mGId;
-		this.mGroupType = mGroupType;
-		this.mName = mName;
-	}
 
 	public enum GroupType {
 		ORG(1), CONTACT(2), CHATING(3), CONFERENCE(4), UNKNOWN(-1);
@@ -88,21 +69,48 @@ public class Group {
 		}
 	}
 
-	public Group(long mGId, GroupType mGroupType, String mName, String mOwner,
+	public Group(long gId, GroupType groupType, String name) {
+		this(gId, groupType, name, 0, null);
+	}
+
+	public Group(long gId, GroupType groupType, String name, long owner) {
+		this(gId, groupType, name, owner, null);
+	}
+
+	/**
+	 * 
+	 * @param gId
+	 * @param groupType
+	 * @param name
+	 * @param owner
+	 * @param createDate
+	 */
+	public Group(long gId, GroupType groupType, String name, String owner,
 			String createDate) {
-		super();
-		this.mGId = mGId;
-		this.mGroupType = mGroupType;
-		this.mName = mName;
-		if (mOwner != null) {
-			this.mOwner = Long.parseLong(mOwner);
+		this.mGId = gId;
+		this.mGroupType = groupType;
+		this.mName = name;
+		if (owner != null) {
+			this.mOwner = Long.parseLong(owner);
 		}
-		this.mCreateDate = createDate;
+
 		if (createDate != null && createDate.trim().length() > 0) {
-			Date d = new Date(Long.parseLong(createDate) * 1000);
-			DateFormat sd = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.US);
-			this.mCreateDate = sd.format(d);
+			this.mCreateDate = new Date(Long.parseLong(createDate) * 1000);
 		}
+
+		users = new ArrayList<User>();
+		mChild = new ArrayList<Group>();
+		level = 1;
+
+	}
+
+	public Group(long gId, GroupType groupType, String name, long owner,
+			Date createDate) {
+		this.mGId = gId;
+		this.mGroupType = groupType;
+		this.mName = name;
+		this.mOwner = owner;
+		this.mCreateDate = createDate;
 
 		users = new ArrayList<User>();
 		mChild = new ArrayList<Group>();
@@ -141,12 +149,23 @@ public class Group {
 		this.mOwner = mOwner;
 	}
 
-	public String getCreateDate() {
+	public Date getCreateDate() {
 		return mCreateDate;
 	}
 
-	public void setCreateDate(String mCreateDate) {
-		this.mCreateDate = mCreateDate;
+	public String getStrCreateDate() {
+		if (this.mCreateDate != null) {
+			DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm",
+					Locale.getDefault());
+			return df.format(this.mCreateDate);
+		} else {
+			return null;
+		}
+
+	}
+
+	public void setCreateDate(Date createDate) {
+		this.mCreateDate = createDate;
 	}
 
 	public User getOwnerUser() {
@@ -232,7 +251,7 @@ public class Group {
 
 	// FIXME need to be optimize
 	public int getOnlineUserCount() {
-		//To make sure that prevent update list when iterating
+		// To make sure that prevent update list when iterating
 		synchronized (mLock) {
 			return getUserOnlineCount(this);
 		}
@@ -305,147 +324,6 @@ public class Group {
 		if (mGId != other.mGId)
 			return false;
 		return true;
-	}
-
-	/**
-	 * <conf createuserid='1138' id='513956640327' starttime='2012' subject='
-	 * 啊'/> <user id='1138' uetype='2'/>
-	 * 
-	 * @param type
-	 * @param xml
-	 * @return
-	 */
-	public static Group parseConferenceGroupFromXML(int type, String xml) {
-		if (type == Group.GroupType.CONFERENCE.intValue()) {
-			String strId = null;
-			String name = null;
-			String owner = null;
-			String startTimeStr = null;
-			int start, end = -1;
-			start = xml.indexOf("createuserid='");
-			if (start != -1) {
-				end = xml.indexOf("'", start + 14);
-				if (end != -1) {
-					owner = xml.substring(start + 14, end);
-				}
-			}
-
-			start = xml.indexOf(" id='");
-			if (start != -1) {
-				end = xml.indexOf("'", start + 5);
-				if (end != -1) {
-					strId = xml.substring(start + 5, end);
-				}
-			}
-
-			start = xml.indexOf("subject='");
-			if (start != -1) {
-				end = xml.indexOf("'", start + 9);
-				if (end != -1) {
-					name = xml.substring(start + 9, end);
-				}
-			}
-
-			Group g = new Group(Long.parseLong(strId), GroupType.CONFERENCE,
-					name, owner, null);
-			return g;
-		} else {
-			return null;
-		}
-	}
-
-	/**
-	 * 
-	 * type contact(1): <xml><pubgroup id='61' name='ronghuo的组织'><pubgroup
-	 * id='21' name='1'/></pubgroup></xml>
-	 * 
-	 * type conference(4): <xml><conf createuserid='1124' id='513891897880'
-	 * start time='1389189927' subject='est'/><conf createuserid='1124'
-	 * id='513891899176' starttime='1389190062' subject='eee'/></xml>
-	 * 
-	 * @param xml
-	 * @return
-	 */
-	public static List<Group> parserFromXml(int type, String xml) {
-		List<Group> list = new ArrayList<Group>();
-
-		InputStream is = null;
-
-		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-		DocumentBuilder dBuilder;
-		try {
-			dBuilder = dbFactory.newDocumentBuilder();
-			is = new ByteArrayInputStream(xml.getBytes("UTF-8"));
-			Document doc = dBuilder.parse(is);
-
-			doc.getDocumentElement().normalize();
-
-			if (type == GroupType.ORG.intValue()
-					|| type == Group.GroupType.CONTACT.intValue()) {
-				NodeList gList = doc.getChildNodes().item(0).getChildNodes();
-				Element element;
-				for (int i = 0; i < gList.getLength(); i++) {
-					element = (Element) gList.item(i);
-					Group g = new Group(Long.parseLong(element
-							.getAttribute("id")), GroupType.fromInt(type),
-							element.getAttribute("name"), null, null);
-					list.add(g);
-
-					// TODO add sub Group
-					NodeList subGroupNodeList = element.getChildNodes();
-					for (int j = 0; j < subGroupNodeList.getLength(); j++) {
-						Element subGroupEl = (Element) subGroupNodeList.item(j);
-						Group subGroup = new Group(Long.parseLong(subGroupEl
-								.getAttribute("id")), GroupType.fromInt(type),
-								subGroupEl.getAttribute("name"), null, null);
-						g.addGroupToGroup(subGroup);
-
-						NodeList subSubGroupNodeList = subGroupEl
-								.getChildNodes();
-
-						for (int k = 0; k < subSubGroupNodeList.getLength(); k++) {
-							Element subSubGroupEl = (Element) subSubGroupNodeList
-									.item(k);
-							subGroup.addGroupToGroup(new Group(
-									Long.parseLong(subSubGroupEl
-											.getAttribute("id")), GroupType
-											.fromInt(type), subSubGroupEl
-											.getAttribute("name"), null, null));
-						}
-
-					}
-				}
-
-			} else if (type == GroupType.CONFERENCE.intValue()) {
-				NodeList conferenceList = doc.getElementsByTagName("conf");
-				Element conferenceElement;
-
-				for (int i = 0; i < conferenceList.getLength(); i++) {
-					conferenceElement = (Element) conferenceList.item(i);
-					list.add(new Group(Long.parseLong(conferenceElement
-							.getAttribute("id")), GroupType.fromInt(type),
-							conferenceElement.getAttribute("subject"),
-							conferenceElement.getAttribute("createuserid"),
-							conferenceElement.getAttribute("starttime")));
-				}
-			}
-		} catch (ParserConfigurationException e) {
-			e.printStackTrace();
-		} catch (SAXException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		} finally {
-			if (is != null) {
-				try {
-					is.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-		}
-
-		return list;
 	}
 
 }

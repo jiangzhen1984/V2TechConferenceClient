@@ -61,7 +61,8 @@ public abstract class AbstractHandler extends Handler {
 
 	@Override
 	public void handleMessage(Message msg) {
-		Message caller = null;;
+		Message caller = null;
+		V2Log.d(this.getClass().getName()+"   "+ msg.what);
 		switch (msg.what) {
 		case REQUEST_TIME_OUT:
 			Meta meta = metaHolder.get(Integer.valueOf(msg.arg1));
@@ -90,7 +91,6 @@ public abstract class AbstractHandler extends Handler {
 			caller.obj = new AsynResult(AsynResult.AsynState.SUCCESS, msg.obj);
 			JNIResponse jniRes = (JNIResponse) msg.obj;
 			jniRes.callerObject = origObject;
-			caller.sendToTarget();
 			break;
 		}
 		

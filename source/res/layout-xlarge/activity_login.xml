@@ -151,10 +151,11 @@
                     android:layout_gravity="center"
                     android:layout_marginBottom="20dp"
                     android:layout_marginTop="16dp"
-                    android:background="@drawable/rounded_corners_login_button"
                     android:minHeight="30dp"
                     android:paddingLeft="32dp"
                     android:paddingRight="32dp"
+                    android:background="@drawable/button_bg"
+                    android:textColor="@color/button_text_color"
                     android:text="@string/action_sign_in_register" />
 
                 <ImageView

@@ -24,7 +24,8 @@ public class V2TechDBHelper extends SQLiteOpenHelper {
 			+ ContentDescriptor.Messages.Cols.MSG_TYPE + " numeric,"
 			+ ContentDescriptor.Messages.Cols.SEND_TIME
 			+ "  TIMESTAMP  DEFAULT CURRENT_TIMESTAMP, "
-			+ ContentDescriptor.Messages.Cols.STATE + " integer) ";
+			+ ContentDescriptor.Messages.Cols.STATE + " integer,"
+			+ContentDescriptor.Messages.Cols.GROUP_ID+ " numeric) ";
 
 	private static final String CONVERSATION_TABLE_CREATE_SQL = " create table "
 			+ ContentDescriptor.Conversation.NAME

@@ -26,6 +26,6 @@ public interface ChatRequestCallback {
 	 * @param pPicData
 	 */
 	public void OnRecvChatPictureCallback(long nGroupID, int nBusinessType,
-			long nFromUserID, long nTime, byte[] pPicData);
+			long nFromUserID, long nTime, String szSeqID, byte[] pPicData);
 
 }

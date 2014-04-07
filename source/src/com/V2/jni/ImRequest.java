@@ -140,8 +140,8 @@ public class ImRequest {
 	 * @see com.v2tech.logic.User.Status
 	 * @see ImRequestCallback#OnUserStatusUpdatedCallback(long, int, int, String)
 	 */
-	private void OnUserStatusUpdated(long nUserID, int nStatus, int nt, String szStatusDesc) {
-		V2Log.d(" OnUserStatusUpdated--> nUserID:"+nUserID+"  nStatus:"+nStatus+" nt:"+nt +" szStatusDesc:"+szStatusDesc+"  "+new Date());
+	private void OnUserStatusUpdated(long nUserID, int nType, int nStatus, String szStatusDesc) {
+		V2Log.d(" OnUserStatusUpdated--> nUserID:"+nUserID+"  nStatus:"+nStatus+" nType:"+nType +" szStatusDesc:"+szStatusDesc+"  "+new Date());
 		for (ImRequestCallback callback : this.callbacks) {
 			callback.OnUserStatusUpdatedCallback(nUserID, nStatus, szStatusDesc);
 		}
