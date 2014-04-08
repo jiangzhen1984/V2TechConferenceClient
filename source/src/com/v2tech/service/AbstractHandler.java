@@ -70,6 +70,9 @@ public abstract class AbstractHandler extends Handler {
 				Object origObject = meta.caller.obj;
 				meta.caller.obj = new AsynResult(AsynResult.AsynState.TIME_OUT,
 						null);
+				if (msg.obj != null) {
+					V2Log.d(msg.obj.getClass().getName()+"   "+ msg.what);
+				}
 				JNIResponse jniRes = (JNIResponse) msg.obj;
 				if (jniRes == null) {
 					jniRes = new JNIResponse(JNIResponse.Result.FAILED);

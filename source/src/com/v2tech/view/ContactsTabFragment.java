@@ -29,6 +29,7 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.v2tech.R;
 import com.v2tech.logic.GlobalHolder;
@@ -117,6 +118,13 @@ public class ContactsTabFragment extends Fragment {
 
 		searchedTextET = (EditText) rootView.findViewById(R.id.contacts_search);
 		searchedTextET.setOnFocusChangeListener(focusListener);
+		TextView tv = (TextView)rootView.findViewById(R.id.fragment_title);
+		if (flag == TAG_ORG) {
+			tv.setText(R.string.tab_org_name);
+		} else if (flag == TAG_CONTACT) {
+			tv.setText(R.string.tab_contact_name);
+		}
+		
 		return rootView;
 	}
 

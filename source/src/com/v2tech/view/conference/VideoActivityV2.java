@@ -18,7 +18,6 @@ import android.content.IntentFilter;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
-import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.Handler;
@@ -63,7 +62,6 @@ import com.v2tech.view.conference.VideoMsgChattingLayout.ChattingListener;
 public class VideoActivityV2 extends Activity {
 
 	private static final int ONLY_SHOW_LOCAL_VIDEO = 1;
-	private static final int FILL_USER_LIST = 2;
 	private static final int APPLY_OR_RELEASE_SPEAK = 3;
 	private static final int REQUEST_OPEN_DEVICE_RESPONSE = 4;
 	private static final int REQUEST_CLOSE_DEVICE_RESPONSE = 5;
@@ -89,14 +87,10 @@ public class VideoActivityV2 extends Activity {
 	private RelativeLayout mVideoLayout;
 
 	private ImageView mSettingIV;
-	private ImageView mListUserIV;
 	private ImageView mQuitIV;
 	private ImageView mSpeakerIV;
 	private ImageView mSettingArrowIV;
-	private ImageView mAttendeeArrowIV;
 	private PopupWindow mSettingWindow;
-	private PopupWindow mUserListWindow;
-	private LinearLayout mUserListContainer;
 	private Dialog mQuitDialog;
 	private ProgressDialog mWaitingDialog;
 	private VideoMsgChattingLayout mMessageContainer;
@@ -107,8 +101,7 @@ public class VideoActivityV2 extends Activity {
 
 	private ImageView mMenuMessageButton;
 	private ImageView mMenuAttendeeButton;
-	
-	
+
 	private Conference conf;
 
 	private ConferenceService cb = new ConferenceService();
@@ -128,35 +121,38 @@ public class VideoActivityV2 extends Activity {
 		this.mVideoLayout = (RelativeLayout) findViewById(R.id.in_metting_video_main);
 		this.mSettingIV = (ImageView) findViewById(R.id.in_meeting_setting_iv);
 		this.mSettingIV.setOnClickListener(mShowSettingListener);
-		this.mListUserIV = (ImageView) findViewById(R.id.in_meeting_show_attendee_iv);
-		//this.mListUserIV.setOnClickListener(mShowConfUsersListener);
+		// this.mListUserIV = (ImageView)
+		// findViewById(R.id.in_meeting_show_attendee_iv);
+		// this.mListUserIV.setOnClickListener(mShowConfUsersListener);
 		this.mQuitIV = (ImageView) findViewById(R.id.in_meeting_log_out_iv);
 		this.mQuitIV.setOnClickListener(mShowQuitWindowListener);
 		this.mSpeakerIV = (ImageView) findViewById(R.id.speaker_iv);
 		this.mSpeakerIV.setOnClickListener(mApplySpeakerListener);
 		this.mSettingArrowIV = (ImageView) findViewById(R.id.in_meeting_setting_arrow);
 		// mSettingArrowIV.setVisibility(View.INVISIBLE);
-		this.mAttendeeArrowIV = (ImageView) findViewById(R.id.in_meeting_attendee_arrow);
+		// this.mAttendeeArrowIV = (ImageView)
+		// findViewById(R.id.in_meeting_attendee_arrow);
 
 		mMenuButton = (ImageView) findViewById(R.id.in_meeting_menu_button);
 		mMenuButton.setOnClickListener(mMenuButtonListener);
 		mMenuButtonContainer = (LinearLayout) findViewById(R.id.in_meeting_menu_layout);
-		
-		mMenuMessageButton= (ImageView) findViewById(R.id.in_meeting_menu_show_msg_button);
-		mMenuMessageButton.setOnClickListener(mMenuShowMsgButtonListener);
-		
-		mMenuAttendeeButton= (ImageView) findViewById(R.id.in_meeting_menu_show_attendees_button);
-		mMenuAttendeeButton.setOnClickListener(mMenuShowAttendeeButtonListener);
-		
+
+		mMenuMessageButton = (ImageView) findViewById(R.id.in_meeting_menu_show_msg_button);
+		mMenuMessageButton.setTag("msg");
+		mMenuMessageButton.setOnClickListener(mMenuShowButtonListener);
+
+		mMenuAttendeeButton = (ImageView) findViewById(R.id.in_meeting_menu_show_attendees_button);
+		mMenuAttendeeButton.setTag("attendee");
+		mMenuAttendeeButton.setOnClickListener(mMenuShowButtonListener);
+
 		// mAttendeeArrowIV.setVisibility(View.INVISIBLE);
 		initConfsListener();
 		init();
 		registerOrRemoveListener(true);
 
-		//initMenuFeature();
+		// initMenuFeature();
 	}
-	
-	
+
 	private OnClickListener mMenuButtonListener = new OnClickListener() {
 
 		@Override
@@ -167,28 +163,22 @@ public class VideoActivityV2 extends Activity {
 				mMenuButtonContainer.setVisibility(View.GONE);
 			}
 		}
-		
+
 	};
-	
-	
-	
-	
-	private OnClickListener mMenuShowMsgButtonListener = new OnClickListener() {
+
+	private OnClickListener mMenuShowButtonListener = new OnClickListener() {
 
 		@Override
 		public void onClick(View v) {
-			showOrHidenMsgContainer();
+			if (v.getTag().equals("msg")) {
+				showOrHidenMsgContainer(View.VISIBLE);
+				showOrHidenAttendeeContainer(View.GONE);
+			} else if (v.getTag().equals("attendee")) {
+				showOrHidenAttendeeContainer(View.VISIBLE);
+				showOrHidenMsgContainer(View.GONE);
+			}
 		}
-		
-	};
-	
-	private OnClickListener mMenuShowAttendeeButtonListener = new OnClickListener() {
 
-		@Override
-		public void onClick(View v) {
-			showOrHidenAttendeeContainer();
-		}
-		
 	};
 
 	private OnClickListener mApplySpeakerListener = new OnClickListener() {
@@ -209,48 +199,6 @@ public class VideoActivityV2 extends Activity {
 		public void onClick(View view) {
 			showQuitDialog();
 		}
-	};
-
-	private OnClickListener mShowConfUsersListener = new OnClickListener() {
-
-		@Override
-		public void onClick(View anchor) {
-			if (mUserListWindow == null) {
-				LayoutInflater inflater = (LayoutInflater) mContext
-						.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-				View view = inflater.inflate(
-						R.layout.in_meeting_user_list_pop_up_window, null);
-				mUserListContainer = (LinearLayout) view
-						.findViewById(R.id.in_meeting_user_list_layout);
-
-				mUserListWindow = new PopupWindow(view,
-						ViewGroup.LayoutParams.WRAP_CONTENT,
-						ViewGroup.LayoutParams.WRAP_CONTENT, true);
-				mUserListWindow.setBackgroundDrawable(new ColorDrawable(
-						Color.TRANSPARENT));
-
-				mUserListWindow.setFocusable(true);
-				mUserListWindow.setTouchable(true);
-				mUserListWindow.setOutsideTouchable(true);
-				mUserListWindow.setOnDismissListener(new OnDismissListener() {
-
-					@Override
-					public void onDismiss() {
-						mUserListWindow.dismiss();
-						mAttendeeArrowIV.setVisibility(View.INVISIBLE);
-					}
-
-				});
-
-				fillUserList();
-			}
-
-			if (!mUserListWindow.isShowing()) {
-				mUserListWindow.showAsDropDown(mAttendeeArrowIV, -50, 0);
-				mAttendeeArrowIV.setVisibility(View.VISIBLE);
-			}
-		}
-
 	};
 
 	private OnClickListener mShowSettingListener = new OnClickListener() {
@@ -369,17 +317,18 @@ public class VideoActivityV2 extends Activity {
 		conf = new Conference(mGroupId);
 	}
 
-	private void showOrHidenMsgContainer() {
+	private void showOrHidenMsgContainer(int visible) {
 		if (mMessageContainer == null) {
 			mMessageContainer = new VideoMsgChattingLayout(this);
-			RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(400,mVideoLayout.getMeasuredHeight());
+			RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
+					400, mVideoLayout.getMeasuredHeight());
 			lp.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
 			lp.addRule(RelativeLayout.RIGHT_OF, mMenuButtonContainer.getId());
 			mVideoLayoutMain.addView(mMessageContainer, lp);
 			mMessageContainer.bringToFront();
 			mMessageContainer.setVisibility(View.GONE);
 			mMessageContainer.setListener(new ChattingListener() {
-	
+
 				@Override
 				public void requestSendMsg(VMessage vm) {
 					vm.mGroupId = mGroupId;
@@ -388,59 +337,62 @@ public class VideoActivityV2 extends Activity {
 					vm.setMsgCode(VMessage.VMESSAGE_CODE_CONF);
 					cs.sendVMessage(vm, null);
 				}
-	
+
 			});
-		} 
-		if (mMessageContainer.getVisibility() == View.GONE) {
-			mMessageContainer.setVisibility(View.VISIBLE);
-			mMenuMessageButton.setBackgroundColor(Color.rgb(221, 221, 221));
-		} else {
+		}
+		if (visible == View.GONE
+				|| visible == mMessageContainer.getVisibility()) {
 			mMessageContainer.setVisibility(View.GONE);
 			mMenuMessageButton.setBackgroundColor(Color.rgb(255, 255, 255));
+		} else {
+			mMessageContainer.setVisibility(View.VISIBLE);
+			mMenuMessageButton.setBackgroundColor(Color.rgb(221, 221, 221));
 		}
 	}
-	
-	private void showOrHidenAttendeeContainer() {
+
+	private void showOrHidenAttendeeContainer(int visible) {
 		if (mAttendeeContainer == null) {
 			mAttendeeContainer = new VideoAttendeeListLayout(this);
-			Group conf = GlobalHolder.getInstance().getGroupById(Group.GroupType.CONFERENCE, this.mGroupId);
+			Group conf = GlobalHolder.getInstance().getGroupById(
+					Group.GroupType.CONFERENCE, this.mGroupId);
 			List<User> l = new ArrayList<User>(conf.getUsers());
 			Set<Attendee> al = new HashSet<Attendee>();
-			
+
 			for (Attendee t : this.mAttendeeList) {
 				al.add(t);
 			}
-			
+
 			for (User u : l) {
 				al.add(new Attendee(u));
 			}
 			mAttendeeContainer.setAttendsList(al);
-			RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(400,mVideoLayout.getMeasuredHeight());
+			RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
+					400, mVideoLayout.getMeasuredHeight());
 			lp.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
 			lp.addRule(RelativeLayout.RIGHT_OF, mMenuButtonContainer.getId());
 			mVideoLayoutMain.addView(mAttendeeContainer, lp);
 			mAttendeeContainer.bringToFront();
 			mAttendeeContainer.setVisibility(View.GONE);
-			mAttendeeContainer.setListener( new VideoAttendeeListLayout.VideoAttendeeActionListener() {
+			mAttendeeContainer
+					.setListener(new VideoAttendeeListLayout.VideoAttendeeActionListener() {
 
-				@Override
-				public void OnAttendeeClicked(Attendee at, UserDeviceConfig udc) {
-					showOrCloseAttendeeVideo(udc);
-				}
-				
-			});
-		} 
-		if (mAttendeeContainer.getVisibility() == View.GONE) {
-			mAttendeeContainer.setVisibility(View.VISIBLE);
-			mMenuAttendeeButton.setBackgroundColor(Color.rgb(221, 221, 221));
-		} else {
+						@Override
+						public void OnAttendeeClicked(Attendee at,
+								UserDeviceConfig udc) {
+							showOrCloseAttendeeVideo(udc);
+						}
+
+					});
+		}
+		if (visible == View.GONE
+				|| visible == mAttendeeContainer.getVisibility()) {
 			mAttendeeContainer.setVisibility(View.GONE);
 			mMenuAttendeeButton.setBackgroundColor(Color.rgb(255, 255, 255));
+		} else {
+			mAttendeeContainer.setVisibility(View.VISIBLE);
+			mMenuAttendeeButton.setBackgroundColor(Color.rgb(221, 221, 221));
 		}
 	}
-	
-	
-	
 
 	/**
 	 * 
@@ -593,9 +545,6 @@ public class VideoActivityV2 extends Activity {
 		if (mSettingWindow != null && mSettingWindow.isShowing()) {
 			mSettingWindow.dismiss();
 		}
-		if (this.mUserListWindow != null && mUserListWindow.isShowing()) {
-			mUserListWindow.dismiss();
-		}
 	}
 
 	private void showQuitDialog() {
@@ -682,15 +631,6 @@ public class VideoActivityV2 extends Activity {
 		return super.onKeyDown(keyCode, event);
 	}
 
-	/**
-	 * @deprecated
-	 */
-	private void fillUserList() {
-		for (Attendee at : mAttendeeList) {
-			mUserListContainer.addView(getAttendeeView(at));
-		}
-	}
-
 	private void doApplyOrReleaseSpeak() {
 		if (isSpeaking) {
 			cb.applyForReleasePermission(ConferencePermission.SPEAKING, null);
@@ -719,135 +659,11 @@ public class VideoActivityV2 extends Activity {
 			a.addDevice(udc);
 		}
 
-		if (mUserListContainer != null) {
-			mUserListContainer.addView(getAttendeeView(a));
-		}
 		if (mAttendeeContainer != null) {
 			mAttendeeContainer.updateEnteredAttendee(a);
 		}
 		Toast.makeText(mContext, user.getName() + "进入会议室! ", Toast.LENGTH_SHORT)
 				.show();
-	}
-
-	/**
-	 * FIXME use stand alone view object
-	 * 
-	 * @param a
-	 * @return
-	 * @deprecated
-	 */
-	private View getAttendeeView(final Attendee a) {
-		LinearLayout root = new LinearLayout(mContext);
-		root.setOrientation(LinearLayout.VERTICAL);
-		root.setId((int) a.getUser().getmUserId());
-
-		RelativeLayout rl = new RelativeLayout(mContext);
-		rl.setBackgroundColor(Color.WHITE);
-
-		TextView tv = new TextView(mContext);
-		final ImageView iv = new ImageView(mContext);
-		tv.setTextColor(Color.BLACK);
-		tv.setText(a.getUser().getName());
-
-		if (a.isSelf() == false) {
-			tv.setTextSize(20);
-			iv.setImageResource(R.drawable.camera);
-			iv.setTag("camera");
-		} else {
-			tv.setTextSize(22);
-			tv.setTypeface(null, Typeface.BOLD);
-			iv.setImageResource(R.drawable.camera_showing);
-			iv.setTag("camera_showing");
-		}
-
-		RelativeLayout.LayoutParams rp = new RelativeLayout.LayoutParams(
-				RelativeLayout.LayoutParams.WRAP_CONTENT,
-				RelativeLayout.LayoutParams.WRAP_CONTENT);
-		rp.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
-		rp.addRule(RelativeLayout.CENTER_VERTICAL);
-		rp.leftMargin = 20;
-		rl.addView(tv, rp);
-
-		rl.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View arg0) {
-				if (a.getDefaultDevice() == null) {
-					V2Log.e("Invalid vidoe device ");
-					return;
-				}
-				if (iv.getTag().toString().equals("camera_showing")) {
-					iv.setImageResource(R.drawable.camera);
-					iv.setTag("camera");
-				} else {
-					iv.setImageResource(R.drawable.camera_showing);
-					iv.setTag("camera_showing");
-				}
-				showOrCloseAttendeeVideo(a.getDefaultDevice());
-				if (mUserListWindow != null) {
-					mUserListWindow.dismiss();
-				}
-			}
-		});
-
-		// add secondary video
-		RelativeLayout.LayoutParams rpIv = new RelativeLayout.LayoutParams(
-				RelativeLayout.LayoutParams.WRAP_CONTENT,
-				RelativeLayout.LayoutParams.WRAP_CONTENT);
-		rpIv.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
-		rpIv.addRule(RelativeLayout.CENTER_VERTICAL);
-		rpIv.rightMargin = 20;
-		rl.addView(iv, rpIv);
-
-		root.addView(rl, new LinearLayout.LayoutParams(
-				LinearLayout.LayoutParams.MATCH_PARENT,
-				LinearLayout.LayoutParams.WRAP_CONTENT));
-
-		LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
-				LinearLayout.LayoutParams.MATCH_PARENT,
-				LinearLayout.LayoutParams.WRAP_CONTENT);
-
-		for (int i = 1; a.getmDevices() != null && i < a.getmDevices().size(); i++) {
-			RelativeLayout rlm = new RelativeLayout(mContext);
-
-			final UserDeviceConfig udc = a.getmDevices().get(i);
-			TextView tt = new TextView(mContext);
-			tt.setText(a.getUser().getName() + (i > 0 ? ("_视频" + i) : ""));
-			tt.setTextSize(20);
-			tt.setTextColor(Color.BLACK);
-
-			RelativeLayout.LayoutParams rp1 = new RelativeLayout.LayoutParams(
-					RelativeLayout.LayoutParams.WRAP_CONTENT,
-					RelativeLayout.LayoutParams.WRAP_CONTENT);
-
-			rp1.leftMargin = 20;
-			rlm.addView(tt, rp1);
-
-			final ImageView ivm = new ImageView(mContext);
-			ivm.setImageResource(R.drawable.camera);
-			ivm.setTag("camera");
-			rlm.setOnClickListener(new OnClickListener() {
-				@Override
-				public void onClick(View arg0) {
-					if (ivm.getTag().toString().equals("camera_showing")) {
-						ivm.setImageResource(R.drawable.camera);
-						ivm.setTag("camera");
-					} else {
-						ivm.setImageResource(R.drawable.camera_showing);
-						ivm.setTag("camera_showing");
-					}
-					showOrCloseAttendeeVideo(udc);
-					if (mUserListWindow != null) {
-						mUserListWindow.dismiss();
-					}
-				}
-			});
-
-			rlm.addView(ivm, rpIv);
-
-			root.addView(rlm, lp);
-		}
-
-		return root;
 	}
 
 	private void requestEnterConf() {
@@ -877,21 +693,14 @@ public class VideoActivityV2 extends Activity {
 			}
 			this.mAttendeeList.remove(a);
 		}
-
-		if (mUserListContainer == null) {
-			return;
-		}
-		int count = mUserListContainer.getChildCount();
-		for (int i = 0; i < count; i++) {
-			View v = mUserListContainer.getChildAt(i);
-			if (v.getId() == (int) user.getmUserId()) {
-				mUserListContainer.removeView(v);
-				break;
-			}
-		}
 		if (mAttendeeContainer != null) {
-			mAttendeeContainer.updateEnteredAttendee(a);
+			mAttendeeContainer.updateExitedAttendee(a);
 		}
+
+	}
+
+	private boolean checkVideoExceedMaminum() {
+		return mCurrentShowedSV.size() >= 4;
 	}
 
 	private void showOrCloseAttendeeVideo(UserDeviceConfig udc) {
@@ -917,6 +726,12 @@ public class VideoActivityV2 extends Activity {
 			udc.doClose();
 			adjustLayout();
 		} else {
+			if (checkVideoExceedMaminum()) {
+				Toast.makeText(mContext,
+						R.string.error_exceed_support_video_count,
+						Toast.LENGTH_SHORT).show();
+				return;
+			}
 			if (!udc.getBelongsAttendee().isSelf()) {
 				VideoPlayer vp = new VideoPlayer();
 				udc.setSVHolder(new SurfaceView(this));
@@ -1007,9 +822,6 @@ public class VideoActivityV2 extends Activity {
 			switch (msg.what) {
 			case ONLY_SHOW_LOCAL_VIDEO:
 				showOrCloseLocalSurViewOnly();
-				break;
-			case FILL_USER_LIST:
-				fillUserList();
 				break;
 			case APPLY_OR_RELEASE_SPEAK:
 				doApplyOrReleaseSpeak();

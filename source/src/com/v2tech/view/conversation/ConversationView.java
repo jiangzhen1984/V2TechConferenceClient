@@ -5,6 +5,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import android.app.Activity;
 import android.app.NotificationManager;
@@ -67,6 +68,8 @@ public class ConversationView extends Activity {
 	private long user1Id;
 
 	private long user2Id;
+	
+	private long groupId;
 
 	private String user2Name;
 
@@ -175,6 +178,7 @@ public class ConversationView extends Activity {
 
 		user1Id = this.getIntent().getLongExtra("user1id", 0);
 		user2Id = this.getIntent().getLongExtra("user2id", 0);
+		groupId = this.getIntent().getLongExtra("gid", 0);
 		user2Name = this.getIntent().getStringExtra("user2Name");
 
 		local = GlobalHolder.getInstance().getUser(user1Id);
@@ -383,8 +387,8 @@ public class ConversationView extends Activity {
 		if (remote == null) {
 			remote = new User(user2Id);
 		}
-		V2Log.d(" send text msg: " + content);
 		VMessage m = new VMessage(local, remote, content);
+		m.mGroupId = groupId;
 		saveMessageToDB(m);
 
 		mMessageET.setText("");
@@ -420,7 +424,11 @@ public class ConversationView extends Activity {
 		i.addCategory(PublicIntent.DEFAULT_CATEGORY);
 		i.putExtra("extId", user2Id);
 		//TODO update type for group message
-		i.putExtra("type", Conversation.TYPE_CONTACT);
+		if (groupId == 0) {
+			i.putExtra("type", Conversation.TYPE_CONTACT);
+		} else {
+			i.putExtra("type", Conversation.TYPE_GROUP);
+		}
 		i.putExtra("date", date);
 		i.putExtra("content", content);
 		i.putExtra("noti", false);
@@ -522,7 +530,6 @@ public class ConversationView extends Activity {
 	
 	private boolean pending = false;
 	private void queryAndAddMessage(final int mid) {
-		V2Log.d("=====start  " + mid);
 		Uri uri = ContentUris.withAppendedId(
 				ContentDescriptor.Messages.CONTENT_URI, mid);
 
@@ -531,7 +538,7 @@ public class ConversationView extends Activity {
 		MessageBodyView mv = null;
 		while (mCur.moveToNext()) {
 			VMessage m = extractMsg(mCur);
-			if (m.getUser().getmUserId() == user2Id) {
+			if (groupId == m.mGroupId || (m.getUser().getmUserId() == user2Id && groupId == 0)) {
 				mv = new MessageBodyView(this, m, true);
 				mv.setCallback(listener);
 				mMessagesContainer.addView(mv);
@@ -557,7 +564,7 @@ public class ConversationView extends Activity {
 		if (cur.isClosed()) {
 			throw new RuntimeException(" cursor is closed");
 		}
-		DateFormat dp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		DateFormat dp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
 
 		int id = cur.getInt(0);
 		long localUserId = cur.getLong(1);
@@ -568,6 +575,8 @@ public class ConversationView extends Activity {
 		int type = cur.getInt(6);
 		// date time
 		String dateString = cur.getString(7);
+		
+		long groupId = cur.getLong(9);
 
 		User lo = GlobalHolder.getInstance().getUser(localUserId);
 		User ro = GlobalHolder.getInstance().getUser(remoteUserId);
@@ -579,6 +588,7 @@ public class ConversationView extends Activity {
 					localUserId == user2Id);
 		}
 		vm.setId(id);
+		vm.mGroupId = groupId;
 		try {
 			vm.setDate(dp.parse(dateString));
 		} catch (ParseException e) {

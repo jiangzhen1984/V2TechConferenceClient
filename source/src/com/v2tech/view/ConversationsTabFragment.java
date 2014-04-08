@@ -147,9 +147,19 @@ public class ConversationsTabFragment extends Fragment {
 			mSearchTextET.setOnTouchListener(mTouchListener);
 			rootView.setOnTouchListener(mTouchListener);
 			mConversationsListView.setOnTouchListener(mTouchListener);
-			
-			if (mCurrentTabFlag == TAG_GROUP_CHATTING_COV || mCurrentTabFlag == TAG_MSG_COV) {
+
+			if (mCurrentTabFlag == TAG_GROUP_CHATTING_COV
+					|| mCurrentTabFlag == TAG_MSG_COV) {
 				mFeatureIV.setVisibility(View.INVISIBLE);
+			}
+
+			TextView tv = (TextView) rootView.findViewById(R.id.fragment_title);
+			if (mCurrentTabFlag == TAG_CONF) {
+				tv.setText(R.string.tab_conference_name);
+			} else if (mCurrentTabFlag == TAG_MSG_COV) {
+				tv.setText(R.string.tab_conversation_name);
+			} else if (mCurrentTabFlag == TAG_GROUP_CHATTING_COV) {
+				tv.setText(R.string.tab_group_name);
 			}
 
 		}
@@ -210,11 +220,12 @@ public class ConversationsTabFragment extends Fragment {
 			intentFilter.addAction(PublicIntent.UPDATE_CONVERSATION);
 			intentFilter
 					.addAction(JNIService.JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION);
-			//Only conference conversation fragment can hand conference
+			// Only conference conversation fragment can hand conference
 			if (mCurrentTabFlag == TAG_CONF) {
 				intentFilter
 						.addAction(JNIService.JNI_BROADCAST_CONFERENCE_INVATITION);
-				intentFilter.addAction(JNIService.JNI_BROADCAST_CONFERENCE_REMOVED);
+				intentFilter
+						.addAction(JNIService.JNI_BROADCAST_CONFERENCE_REMOVED);
 			}
 
 		}
@@ -277,6 +288,24 @@ public class ConversationsTabFragment extends Fragment {
 		gp.updateNotificator(flag);
 		if (mCurrentTabFlag == TAG_CONF) {
 			gp.setOnClickListener(mEnterConfListener);
+		} else if (mCurrentTabFlag == TAG_GROUP_CHATTING_COV) {
+
+			gp.setOnClickListener(new OnClickListener() {
+
+				@Override
+				public void onClick(View view) {
+					Intent i = new Intent(
+							PublicIntent.START_CONVERSACTION_ACTIVITY);
+					i.putExtra("user1id", GlobalHolder.getInstance()
+							.getCurrentUserId());
+					i.putExtra("gid", g.getmGId());
+					i.putExtra("user2Name", g.getName());
+					i.addCategory(PublicIntent.DEFAULT_CATEGORY);
+					startActivity(i);
+
+				}
+			});
+
 		}
 		mItemList.add(0, new ScrollItem(cov, gp));
 	}
@@ -515,7 +544,7 @@ public class ConversationsTabFragment extends Fragment {
 				conCv.put(ContentDescriptor.Conversation.Cols.TYPE,
 						Conversation.TYPE_CONTACT);
 				conCv.put(ContentDescriptor.Conversation.Cols.EXT_NAME,
-						fromUser.getName());
+						fromUser == null ? "" : fromUser.getName());
 				conCv.put(ContentDescriptor.Conversation.Cols.NOTI_FLAG,
 						showNotification ? Conversation.NOTIFICATION
 								: Conversation.NONE);
@@ -687,6 +716,7 @@ public class ConversationsTabFragment extends Fragment {
 				}
 			} else if (JNIService.JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION
 					.equals(intent.getAction())) {
+				//FIXME crash
 				for (ScrollItem item : mItemList) {
 					if (item.cov.getType().equals(Conversation.TYPE_CONFERNECE)) {
 						Group g = ((ConferenceConversation) item.cov)

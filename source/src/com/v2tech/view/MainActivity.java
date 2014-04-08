@@ -324,7 +324,8 @@ public class MainActivity extends FragmentActivity implements
 		 */
 		@Override
 		public Fragment getItem(int position) {
-			return this.fragments.get(position);
+			Fragment frag = this.fragments.get(position);
+			return frag;
 		}
 
 		/*

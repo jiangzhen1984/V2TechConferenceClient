@@ -31,10 +31,10 @@
                 android:id="@+id/in_meeting_setting_iv"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentLeft="true"
                 android:layout_marginBottom="5dp"
-                android:layout_marginLeft="102dp"
+                android:layout_marginRight="41dp"
                 android:layout_marginTop="10dp"
+                android:layout_toLeftOf="@+id/speaker_iv"
                 android:src="@drawable/video_setting" />
 
             <ImageView
@@ -42,26 +42,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/in_meeting_setting_iv"
-                android:layout_marginLeft="102dp"
-                android:src="@drawable/arrow"
-                android:visibility="invisible" />
-
-            <ImageView
-                android:id="@+id/in_meeting_show_attendee_iv"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignBottom="@+id/in_meeting_setting_iv"
-                android:layout_marginLeft="20dp"
-                android:layout_toRightOf="@+id/in_meeting_setting_iv"
-                android:src="@drawable/attendee" />
-
-            <ImageView
-                android:id="@+id/in_meeting_attendee_arrow"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignBottom="@+id/in_meeting_setting_arrow"
-                android:layout_marginLeft="20dp"
-                android:layout_toRightOf="@+id/in_meeting_setting_iv"
+                android:layout_marginRight="41dp"
+                android:layout_toLeftOf="@+id/speaker_iv"
                 android:src="@drawable/arrow"
                 android:visibility="invisible" />
 
@@ -91,8 +73,8 @@
             android:layout_below="@+id/in_meeting_menu_button"
             android:layout_marginTop="40dp"
             android:orientation="vertical" >
-            
-             <ImageView
+
+            <ImageView
                 android:id="@+id/in_meeting_menu_show_attendees_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
