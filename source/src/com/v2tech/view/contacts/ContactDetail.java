@@ -200,7 +200,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 				public void onCheckedChanged(RadioGroup rg, int id) {
 					isUpdating = true;
 					Message m = Message.obtain(lh, UPDATE_USER_INFO);
-					lh.sendMessageDelayed(m, 2000);
+					lh.dispatchMessage(m);
 				}
 
 			});

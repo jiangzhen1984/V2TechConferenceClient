@@ -105,6 +105,8 @@ public class VideoAttendeeListLayout extends LinearLayout {
 	}
 	
 	
+	
+	//FIXME should use resource instead this
 	private List<View> buildAttendeeView(final Attendee a) {
 		Context ctx = this.getContext();
 		List<View> list = new ArrayList<View>();

@@ -321,7 +321,9 @@ public class VideoActivityV2 extends Activity {
 				VMessage vm = new VMessage(GlobalHolder.getInstance().getUser(
 						fromUid), GlobalHolder.getInstance().getCurrentUser(),
 						content);
-				mMessageContainer.addNewMessage(vm);
+				if (mMessageContainer != null) {
+					mMessageContainer.addNewMessage(vm);
+				}
 			}
 		}
 
@@ -680,6 +682,9 @@ public class VideoActivityV2 extends Activity {
 		return super.onKeyDown(keyCode, event);
 	}
 
+	/**
+	 * @deprecated
+	 */
 	private void fillUserList() {
 		for (Attendee at : mAttendeeList) {
 			mUserListContainer.addView(getAttendeeView(at));
@@ -729,6 +734,7 @@ public class VideoActivityV2 extends Activity {
 	 * 
 	 * @param a
 	 * @return
+	 * @deprecated
 	 */
 	private View getAttendeeView(final Attendee a) {
 		LinearLayout root = new LinearLayout(mContext);

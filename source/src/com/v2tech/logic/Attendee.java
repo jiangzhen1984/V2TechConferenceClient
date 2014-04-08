@@ -17,6 +17,7 @@ public class Attendee {
 	private List<UserDeviceConfig> mDevices;
 	private boolean isSelf;
 	private boolean isChairMan;
+	private boolean isJoined;
 
 	public Attendee(User user) {
 		this(user, null, false, false);
@@ -118,5 +119,15 @@ public class Attendee {
 	public void setChairMan(boolean isChairMan) {
 		this.isChairMan = isChairMan;
 	}
+
+	public boolean isJoined() {
+		return isJoined;
+	}
+
+	public void setJoined(boolean isJoined) {
+		this.isJoined = isJoined;
+	}
+	
+	
 
 }

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:alpha="0.7"
@@ -12,23 +12,28 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:text="@string/confs_public_chatting"
+        android:layout_alignParentTop="true"
         android:textColor="#000000"
         android:textSize="18sp" />
 
     <ScrollView
         android:id="@+id/video_msg_container_scroller"
+        android:layout_above="@+id/video_msg_chatting_bottom_bar"
+        android:layout_below="@+id/textView1"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" >
+        android:layout_height="match_parent" >
 
         <LinearLayout
             android:id="@+id/video_msg_container"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:orientation="vertical" >
         </LinearLayout>
     </ScrollView>
 
     <LinearLayout
+        android:id="@+id/video_msg_chatting_bottom_bar"
+        android:layout_alignParentBottom="true"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" >
 
@@ -48,4 +53,4 @@
             android:src="@drawable/video_send_msg_button" />
     </LinearLayout>
 
-</LinearLayout>
+</RelativeLayout>
