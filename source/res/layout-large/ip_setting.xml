@@ -34,7 +34,7 @@
                 android:background="@drawable/rounded_corners"
                 android:ems="10"
                 android:enabled="true"
-                 android:gravity="center_vertical|left"
+                android:gravity="center_vertical|left"
                 android:inputType="text"
                 android:nextFocusDown="@+id/port"
                 android:paddingLeft="8dp" />
@@ -88,9 +88,9 @@
                 android:layout_height="50dp"
                 android:layout_alignParentLeft="true"
                 android:layout_marginLeft="40dp"
-                android:background="@drawable/rounded_corners_login_button"
+                android:background="@drawable/button_bg"
                 android:text="@string/ip_setting_button_save"
-                android:textColor="#ffffff" />
+                android:textColor="@color/button_text_color" />
 
             <Button
                 android:id="@+id/ip_setting_cancel"
@@ -98,9 +98,9 @@
                 android:layout_height="50dp"
                 android:layout_alignParentRight="true"
                 android:layout_marginRight="40dp"
-                android:background="@drawable/rounded_corners_login_button"
+                android:background="@drawable/button_bg"
                 android:text="@string/ip_setting_button_cancel"
-                android:textColor="#ffffff" />
+                android:textColor="@color/button_text_color" />
         </RelativeLayout>
     </LinearLayout>
 

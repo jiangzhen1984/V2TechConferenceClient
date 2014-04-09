@@ -54,6 +54,30 @@ public class Notificator {
 	
 	
 	
+	public static void  updateSystemNotification(Context context, String title, String content, int tone) {
+		if (tone > 0 && ((System.currentTimeMillis() /1000) - lastNotificatorTime) >2 ) {
+			Uri notification = RingtoneManager
+					.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+			Ringtone r = RingtoneManager.getRingtone(context,
+					notification);
+			r.play();
+			lastNotificatorTime = System.currentTimeMillis() /1000;
+		}
+		
+
+		NotificationCompat.Builder builder = new NotificationCompat.Builder(
+				context).setSmallIcon(R.drawable.ic_launcher)
+				.setContentTitle(title)
+				.setContentText(content);
+
+
+		NotificationManager mNotificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+		// mId allows you to update the notification later on.
+		mNotificationManager.notify(PublicIntent.MESSAGE_NOTIFICATION_ID,
+				builder.build());
+	}
+	
+	
 	public  static void cancelSystemNotification(Context context) {
 		NotificationManager mNotificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 		// mId allows you to update the notification later on.

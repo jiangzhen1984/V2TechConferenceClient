@@ -47,9 +47,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginLeft="30dp"
-        android:layout_toRightOf="@+id/group_list_conference_image_view_rl"
         android:layout_alignBottom="@+id/group_list_conference_image_view_rl"
+            android:layout_marginRight="10dp"
         android:layout_toLeftOf="@+id/gourp_list_conference_create_time_tv"
+        android:layout_toRightOf="@+id/group_list_conference_image_view_rl"
         android:ellipsize="end"
         android:singleLine="true"
         android:text="TextView" />

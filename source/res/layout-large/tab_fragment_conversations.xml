@@ -23,7 +23,7 @@
                 android:orientation="vertical" >
 
                 <TextView
-                    android:id="@+id/group_list_conference_title_tv"
+                   android:id="@+id/fragment_title"
                     android:layout_width="wrap_content"
                     android:layout_height="fill_parent"
                     android:layout_gravity="center"
@@ -53,12 +53,13 @@
 
             <ImageView
                 android:id="@+id/conversation_features"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"
-                android:layout_marginRight="10dp"
+                android:layout_marginRight="30dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:src="@drawable/white_plus" />
+
         </RelativeLayout>
 
         <RelativeLayout
