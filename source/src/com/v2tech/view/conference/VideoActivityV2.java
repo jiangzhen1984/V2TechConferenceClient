@@ -161,6 +161,8 @@ public class VideoActivityV2 extends Activity {
 				mMenuButtonContainer.setVisibility(View.VISIBLE);
 			} else {
 				mMenuButtonContainer.setVisibility(View.GONE);
+				showOrHidenMsgContainer(View.GONE);
+				showOrHidenAttendeeContainer(View.GONE);
 			}
 		}
 

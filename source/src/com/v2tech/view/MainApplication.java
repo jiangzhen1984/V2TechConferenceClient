@@ -97,6 +97,7 @@ public class MainApplication extends Application {
 	@Override
 	public void onTerminate() {
 		super.onTerminate();
+		V2Log.d(" terminating....");
 		ImRequest.getInstance(this).unInitialize();
 		GroupRequest.getInstance(this).unInitialize();
 		VideoRequest.getInstance(this).unInitialize();
@@ -106,6 +107,7 @@ public class MainApplication extends Application {
 		ChatRequest.getInstance(this).unInitialize();
 		this.getApplicationContext().stopService(
 				new Intent(this.getApplicationContext(), JNIService.class));
+		V2Log.d(" terminated");
 
 	}
 

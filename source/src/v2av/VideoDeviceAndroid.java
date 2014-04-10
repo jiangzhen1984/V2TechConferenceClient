@@ -1,5 +1,7 @@
 package v2av;
 
+import java.util.ArrayList;
+
 import v2av.VideoCaptureDevInfo.VideoCaptureDevice;
 
 public class VideoDeviceAndroid
@@ -8,6 +10,9 @@ public class VideoDeviceAndroid
 	
 	private String GetVideoDevInfo()
 	{
+		if (mCapDevInfo.deviceList == null) {
+			mCapDevInfo.deviceList =  new ArrayList<VideoCaptureDevice>();
+		}
 		int devNum = mCapDevInfo.deviceList.size();
 		
 		StringBuilder sb = new StringBuilder();

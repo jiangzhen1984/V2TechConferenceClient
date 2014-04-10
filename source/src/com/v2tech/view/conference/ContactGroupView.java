@@ -36,7 +36,7 @@ public class ContactGroupView extends LinearLayout {
 		View view = LayoutInflater.from(getContext()).inflate(
 				R.layout.contacts_group_view, null, false);
 
-		RelativeLayout contentContainer = (RelativeLayout) view
+		View contentContainer =  view
 				.findViewById(R.id.contact_group_view_root);
 
 		mGroupIndicatorIV = (ImageView) view

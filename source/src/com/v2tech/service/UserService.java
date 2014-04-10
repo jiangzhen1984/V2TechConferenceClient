@@ -54,7 +54,10 @@ public class UserService extends AbstractHandler {
 		if (user == null) {
 			if (caller != null) {
 				caller.obj = new AsynResult(AsynResult.AsynState.INCORRECT_PAR, null); 
-				caller.sendToTarget();
+				Handler target = caller.getTarget();
+				if (target != null) {
+					target.dispatchMessage(caller);
+				}
 			}
 			return;
 		}
@@ -80,9 +83,9 @@ public class UserService extends AbstractHandler {
 		public void OnLoginCallback(long nUserID, int nStatus, int nResult) {
 			RequestLogInResponse.Result res = nResult == 1 ? RequestLogInResponse.Result.FAILED
 					: RequestLogInResponse.Result.SUCCESS;
-			Message.obtain(handler, JNI_REQUEST_LOG_IN,
-					new RequestLogInResponse(new User(nUserID), res))
-					.sendToTarget();
+			Message m = Message.obtain(handler, JNI_REQUEST_LOG_IN,
+					new RequestLogInResponse(new User(nUserID), res));
+			handler.dispatchMessage(m);
 		}
 
 		@Override

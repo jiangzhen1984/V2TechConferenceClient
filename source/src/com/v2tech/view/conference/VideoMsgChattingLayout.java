@@ -6,6 +6,7 @@ import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.v2tech.R;
@@ -15,7 +16,7 @@ import com.v2tech.logic.VMessage;
 public class VideoMsgChattingLayout extends LinearLayout {
 	
 	private ChattingListener listener;
-	
+	private ScrollView  mScroller;
 	private LinearLayout mMsgContainer;
 	private View mSendButton;
 	private TextView mContentTV;
@@ -48,6 +49,7 @@ public class VideoMsgChattingLayout extends LinearLayout {
 				LinearLayout.LayoutParams.MATCH_PARENT,
 				LinearLayout.LayoutParams.MATCH_PARENT));
 		
+		this.mScroller = (ScrollView)view.findViewById(R.id.video_msg_container_scroller);
 		this.mMsgContainer = (LinearLayout)view.findViewById(R.id.video_msg_container);
 		this.mContentTV = (TextView)view.findViewById(R.id.video_msg_chatting_layout_msg_content);
 		this.mSendButton = view.findViewById(R.id.video_msg_chatting_layout_send_button);
@@ -85,5 +87,13 @@ public class VideoMsgChattingLayout extends LinearLayout {
 		tv.setPadding(15, 5, 15, 5);
 		tv.setTextColor(Color.BLACK);
 		this.mMsgContainer.addView(tv);
+		this.mScroller.post(new Runnable() {
+
+			@Override
+			public void run() {
+				mScroller.scrollTo(0, mMsgContainer.getChildAt(mMsgContainer.getChildCount()-1).getBottom());
+			}
+			
+		});
 	}
 }
