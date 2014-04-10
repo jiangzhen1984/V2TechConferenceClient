@@ -4,8 +4,11 @@ import java.lang.ref.WeakReference;
 
 import android.os.Handler;
 
+
+//FIXME need to wrap obj
 public class Registrant {
 
+	
 	public Registrant(Handler h, int what, Object obj) {
 		refH = new WeakReference<Handler>(h);
 		this.what = what;

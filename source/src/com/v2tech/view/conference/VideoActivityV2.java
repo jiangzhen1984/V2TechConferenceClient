@@ -1,8 +1,11 @@
 package com.v2tech.view.conference;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import v2av.VideoCaptureDevInfo;
@@ -55,9 +58,12 @@ import com.v2tech.logic.jni.JNIResponse;
 import com.v2tech.logic.jni.RequestEnterConfResponse;
 import com.v2tech.service.ChatService;
 import com.v2tech.service.ConferenceService;
+import com.v2tech.service.DocumentService;
 import com.v2tech.util.V2Log;
 import com.v2tech.view.JNIService;
 import com.v2tech.view.conference.VideoMsgChattingLayout.ChattingListener;
+import com.v2tech.view.vo.V2Doc;
+import com.v2tech.view.vo.V2Doc.Page;
 
 public class VideoActivityV2 extends Activity {
 
@@ -73,6 +79,11 @@ public class VideoActivityV2 extends Activity {
 
 	private static final int ATTENDEE_LISTENER = 21;
 	private static final int CONF_USER_DEVICE_EVENT = 23;
+	
+	private static final int NEW_DOC_NOTIFICATION = 50;
+	private static final int DOC_PAGE_NOTIFICATION = 51;
+	private static final int DOC_PAGE_ACTIVITE_NOTIFICATION = 52;
+	private static final int DOC_DOWNLOADED_NOTIFICATION = 54;
 
 	public static final String JNI_EVENT_VIDEO_CATEGORY = "com.v2tech.conf_video_event";
 	public static final String JNI_EVENT_VIDEO_CATEGORY_OPEN_VIDEO_EVENT_ACTION = "com.v2tech.conf_video_event.open_video_event";
@@ -95,12 +106,14 @@ public class VideoActivityV2 extends Activity {
 	private ProgressDialog mWaitingDialog;
 	private VideoMsgChattingLayout mMessageContainer;
 	private VideoAttendeeListLayout mAttendeeContainer;
+	private VideoDocLayout mDocContainer;
 
 	private ImageView mMenuButton;
 	private LinearLayout mMenuButtonContainer;
 
-	private ImageView mMenuMessageButton;
-	private ImageView mMenuAttendeeButton;
+	private View mMenuMessageButton;
+	private View mMenuAttendeeButton;
+	private View mMenuDocButton;
 
 	private Conference conf;
 
@@ -110,6 +123,9 @@ public class VideoActivityV2 extends Activity {
 
 	private Long mGroupId;
 	private Set<Attendee> mAttendeeList = new HashSet<Attendee>();
+	private DocumentService ds = new DocumentService();
+	
+	private Map<String , V2Doc> mDocs = new HashMap<String, V2Doc>(); 
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -137,13 +153,18 @@ public class VideoActivityV2 extends Activity {
 		mMenuButton.setOnClickListener(mMenuButtonListener);
 		mMenuButtonContainer = (LinearLayout) findViewById(R.id.in_meeting_menu_layout);
 
-		mMenuMessageButton = (ImageView) findViewById(R.id.in_meeting_menu_show_msg_button);
+		mMenuMessageButton =  findViewById(R.id.in_meeting_menu_show_msg_button);
 		mMenuMessageButton.setTag("msg");
 		mMenuMessageButton.setOnClickListener(mMenuShowButtonListener);
 
-		mMenuAttendeeButton = (ImageView) findViewById(R.id.in_meeting_menu_show_attendees_button);
+		mMenuAttendeeButton =  findViewById(R.id.in_meeting_menu_show_attendees_button);
 		mMenuAttendeeButton.setTag("attendee");
 		mMenuAttendeeButton.setOnClickListener(mMenuShowButtonListener);
+		
+		mMenuDocButton =  findViewById(R.id.in_meeting_menu_show_doc_button);
+		mMenuDocButton.setTag("doc");
+		mMenuDocButton.setOnClickListener(mMenuShowButtonListener);
+		
 
 		// mAttendeeArrowIV.setVisibility(View.INVISIBLE);
 		initConfsListener();
@@ -151,6 +172,12 @@ public class VideoActivityV2 extends Activity {
 		registerOrRemoveListener(true);
 
 		// initMenuFeature();
+		
+		//listen callback
+		ds.registerNewDocNotification(mVideoHandler, NEW_DOC_NOTIFICATION, null);
+		ds.registerDocDisplayNotification(mVideoHandler, DOC_DOWNLOADED_NOTIFICATION, null);
+		ds.registerdocPageActiveNotification(mVideoHandler, DOC_PAGE_ACTIVITE_NOTIFICATION, null);
+		ds.registerDocPageNotification(mVideoHandler, DOC_PAGE_NOTIFICATION, null);
 	}
 
 	private OnClickListener mMenuButtonListener = new OnClickListener() {
@@ -175,8 +202,14 @@ public class VideoActivityV2 extends Activity {
 			if (v.getTag().equals("msg")) {
 				showOrHidenMsgContainer(View.VISIBLE);
 				showOrHidenAttendeeContainer(View.GONE);
+				showOrHidenDocContainer(View.GONE);
 			} else if (v.getTag().equals("attendee")) {
 				showOrHidenAttendeeContainer(View.VISIBLE);
+				showOrHidenMsgContainer(View.GONE);
+				showOrHidenDocContainer(View.GONE);
+			} else if (v.getTag().equals("doc")) {
+				showOrHidenDocContainer(View.VISIBLE);
+				showOrHidenAttendeeContainer(View.GONE);
 				showOrHidenMsgContainer(View.GONE);
 			}
 		}
@@ -399,6 +432,42 @@ public class VideoActivityV2 extends Activity {
 			mMenuAttendeeButton.setBackgroundColor(Color.rgb(221, 221, 221));
 		}
 	}
+	
+	
+	
+	private void showOrHidenDocContainer(int visible) {
+		if (mDocContainer == null) {
+			mDocContainer = new VideoDocLayout(this);
+			
+			
+			RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
+					800, mVideoLayout.getMeasuredHeight());
+			lp.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+			lp.addRule(RelativeLayout.RIGHT_OF, mMenuButtonContainer.getId());
+			mVideoLayoutMain.addView(mDocContainer, lp);
+			
+			mDocContainer.bringToFront();
+			mDocContainer.setVisibility(View.GONE);
+			synchronized (mDocs) {
+				for (Entry<String,V2Doc> e :mDocs.entrySet()) {
+					mDocContainer.addDoc(e.getValue());
+				}
+			}
+			mDocContainer.updateCurrentDoc();
+			
+		}
+		if (visible == View.GONE
+				|| visible == mDocContainer.getVisibility()) {
+			mDocContainer.setVisibility(View.GONE);
+			mMenuDocButton.setBackgroundColor(Color.rgb(255, 255, 255));
+		} else {
+			mDocContainer.setVisibility(View.VISIBLE);
+			mMenuDocButton.setBackgroundColor(Color.rgb(221, 221, 221));
+		}
+	}
+	
+	
+	
 
 	/**
 	 * 
@@ -539,6 +608,8 @@ public class VideoActivityV2 extends Activity {
 		mVideoLayout.removeAllViews();
 		registerOrRemoveListener(false);
 		cb.removeAttendeeListener(this.mVideoHandler, ATTENDEE_LISTENER, null);
+		ds.unRegisterNewDocNotification(mVideoHandler, NEW_DOC_NOTIFICATION, null);
+		ds.unRegisterDocDisplayNotification(mVideoHandler, DOC_DOWNLOADED_NOTIFICATION, null);
 	}
 
 	@Override
@@ -897,6 +968,34 @@ public class VideoActivityV2 extends Activity {
 				break;
 			case REQUEST_EXIT_CONF:
 				cb.requestExitConference(new Conference((Long) msg.obj), null);
+				break;
+				
+			case NEW_DOC_NOTIFICATION:
+				V2Doc vd = (V2Doc)((DocumentService.AsyncResult)(msg.obj)).getResult();
+				synchronized (mDocs) {
+					mDocs.put(vd.getId(), vd);
+				}
+				break;
+			case DOC_PAGE_NOTIFICATION:
+				V2Doc.PageArray vpr = (V2Doc.PageArray)((DocumentService.AsyncResult)(msg.obj)).getResult();
+				V2Doc vc = mDocs.get(vpr.getDocId());
+				for (V2Doc.Page p : vpr.getPr()) {
+					vc.addPage(p);
+				}
+				break;
+			case DOC_PAGE_ACTIVITE_NOTIFICATION:
+				break;
+			
+			case DOC_DOWNLOADED_NOTIFICATION:
+				V2Doc.Page vp = (V2Doc.Page)((DocumentService.AsyncResult)(msg.obj)).getResult();
+				V2Doc cache = mDocs.get(vp.getDocId());
+				Page ppC = cache.findPage(vp.getNo());
+				if (ppC == null) {
+					cache.addPage(vp);
+				} else {
+					ppC.setFilePath(vp.getFilePath());
+				}
+				//TODO show picture
 				break;
 
 			}
