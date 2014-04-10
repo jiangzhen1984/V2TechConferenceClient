@@ -240,7 +240,7 @@ public class Group {
 			return;
 		}
 		for (User u : g.getUsers()) {
-			if (u.getName().contains(text)) {
+			if (u != null && u.getName() != null && u.getName().contains(text)) {
 				l.add(u);
 			}
 		}

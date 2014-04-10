@@ -81,8 +81,7 @@ public class UserService extends AbstractHandler {
 
 		@Override
 		public void OnLoginCallback(long nUserID, int nStatus, int nResult) {
-			RequestLogInResponse.Result res = nResult == 1 ? RequestLogInResponse.Result.FAILED
-					: RequestLogInResponse.Result.SUCCESS;
+			RequestLogInResponse.Result res =RequestLogInResponse.Result.fromInt(nResult);
 			Message m = Message.obtain(handler, JNI_REQUEST_LOG_IN,
 					new RequestLogInResponse(new User(nUserID), res));
 			handler.dispatchMessage(m);
@@ -95,7 +94,12 @@ public class UserService extends AbstractHandler {
 
 		@Override
 		public void OnConnectResponseCallback(int nResult) {
-
+			RequestLogInResponse.Result res =RequestLogInResponse.Result.fromInt(nResult);
+			if (res != RequestLogInResponse.Result.SUCCESS) {
+				Message m = Message.obtain(handler, JNI_REQUEST_LOG_IN,
+						new RequestLogInResponse(null, res));
+				handler.dispatchMessage(m);
+			}
 		}
 
 		@Override

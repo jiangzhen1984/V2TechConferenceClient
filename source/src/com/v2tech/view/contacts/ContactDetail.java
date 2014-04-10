@@ -1,11 +1,7 @@
 package com.v2tech.view.contacts;
 
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Locale;
 
 import android.app.Activity;
 import android.app.DatePickerDialog;
@@ -35,7 +31,6 @@ import com.v2tech.R;
 import com.v2tech.logic.GlobalHolder;
 import com.v2tech.logic.User;
 import com.v2tech.service.UserService;
-import com.v2tech.util.V2Log;
 import com.v2tech.view.PublicIntent;
 
 public class ContactDetail extends Activity implements OnTouchListener {
@@ -95,12 +90,12 @@ public class ContactDetail extends Activity implements OnTouchListener {
 		mUid = this.getIntent().getExtras().getLong("uid");
 		initView();
 		mContext = this;
-	    View v = findViewById(R.id.contact_detail_main_layout);
-	    v.setOnTouchListener(this);
-	    v = findViewById(R.id.contact_detail_scroll_view);
-	    if (v != null) {
-	    	 v.setOnTouchListener(this);
-	    }
+		View v = findViewById(R.id.contact_detail_main_layout);
+		v.setOnTouchListener(this);
+		v = findViewById(R.id.contact_detail_scroll_view);
+		if (v != null) {
+			v.setOnTouchListener(this);
+		}
 	}
 
 	@Override
@@ -116,14 +111,10 @@ public class ContactDetail extends Activity implements OnTouchListener {
 	protected void onStop() {
 		super.onStop();
 	}
-	
-	
-	
-	
 
 	@Override
 	public boolean onTouch(View view, MotionEvent mv) {
-		//contact_detail_main_layout
+		// contact_detail_main_layout
 		for (View v : mETArr) {
 			if (v == null) {
 				continue;
@@ -180,8 +171,8 @@ public class ContactDetail extends Activity implements OnTouchListener {
 		mTitleET = (EditText) findViewById(R.id.contact_user_detail_title_et);
 		mAddressET = (EditText) findViewById(R.id.contact_user_detail_address_et);
 
-		mETArr = new EditText[] { mCellphoneET, mTelephoneET,
-				mTitleET, mAddressET, mBirthdayET };
+		mETArr = new EditText[] { mCellphoneET, mTelephoneET, mTitleET,
+				mAddressET, mBirthdayET };
 	}
 
 	private void showUserInfo() {
@@ -195,6 +186,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 			}
 
 			mGenderRG.setVisibility(View.VISIBLE);
+			selectedRG(u.getGender());
 			mGenderRG.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 				@Override
 				public void onCheckedChanged(RadioGroup rg, int id) {
@@ -204,8 +196,6 @@ public class ContactDetail extends Activity implements OnTouchListener {
 				}
 
 			});
-
-			selectedRG(u.getGender());
 			mBirthdayET.setText(u.getBirthdayStr());
 			mCellphoneET.setText(u.getCellPhone());
 			mTelephoneET.setText(u.getTelephone());
@@ -319,7 +309,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 	};
 
 	private View.OnClickListener datePickerListener = new View.OnClickListener() {
-		
+
 		@Override
 		public void onClick(final View view) {
 			InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -337,20 +327,19 @@ public class ContactDetail extends Activity implements OnTouchListener {
 							cl.set(Calendar.YEAR, year);
 							cl.set(Calendar.MONTH, monthOfYear);
 							cl.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-							
+
 							isUpdating = true;
 							Message m = Message.obtain(lh, UPDATE_USER_INFO);
 							lh.dispatchMessage(m);
 							bir = cl.getTime();
-							
+
 						}
-					}, c.get(Calendar.YEAR), c.get(Calendar.MONTH), c
-							.get(Calendar.DAY_OF_MONTH)).show();
+					}, c.get(Calendar.YEAR), c.get(Calendar.MONTH),
+					c.get(Calendar.DAY_OF_MONTH)).show();
 		}
 
 	};
-	
-	
+
 	private OnFocusChangeListener hidenKeyboardListener = new OnFocusChangeListener() {
 
 		@Override
@@ -360,7 +349,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 				imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
 			}
 		}
-		
+
 	};
 
 	private void gatherUserData() {
@@ -396,6 +385,15 @@ public class ContactDetail extends Activity implements OnTouchListener {
 		}
 	}
 
+	private boolean check() {
+		if (u.getName() == null || u.getName().isEmpty()) {
+			mNickNameET.setError(this.getText(R.string.error_contacts_user_detail_no_nick_name));
+			mNickNameET.requestFocus();
+			return false;
+		}
+		return true;
+	}
+
 	class LocalHandler extends Handler {
 
 		@Override
@@ -413,8 +411,10 @@ public class ContactDetail extends Activity implements OnTouchListener {
 				break;
 			case UPDATE_USER_INFO:
 				gatherUserData();
+				if (check()) {
 					us.updateUser(u,
 							Message.obtain(this, UPDATE_USER_INFO_DONE));
+				}
 				isUpdating = false;
 				break;
 			case UPDATE_USER_INFO_DONE:

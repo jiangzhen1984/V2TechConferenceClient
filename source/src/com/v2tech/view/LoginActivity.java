@@ -391,7 +391,10 @@ public class LoginActivity extends Activity {
 						mPasswordView
 								.setError(getString(R.string.error_incorrect_password));
 						mPasswordView.requestFocus();
-					} else {
+					} else if (rlr.getResult() == RequestLogInResponse.Result.CONNECT_ERROR) {
+						Toast.makeText(mContext, R.string.error_connect_to_server,
+								Toast.LENGTH_LONG).show();
+					}else {
 						// Save user info
 						saveUserConfig(mEmailView.getText().toString(), "");
 						GlobalHolder.getInstance()

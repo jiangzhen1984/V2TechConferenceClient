@@ -624,6 +624,7 @@ public class ConferenceCreateActivity extends Activity {
 						conf.getName(), currU.getmUserId() + "", conf.getDate()
 								.getTime() / 1000 + "");
 				g.setOwnerUser(currU);
+				g.addUserToGroup(new ArrayList<User>(mAttendeeList));
 				GlobalHolder.getInstance().addGroupToList(GroupType.CONFERENCE,
 						g);
 				Intent i = new Intent();

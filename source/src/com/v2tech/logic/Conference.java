@@ -116,7 +116,7 @@ public class Conference {
 				.append(GlobalHolder.getInstance().getCurrentUserId())
 				.append("\" ").append("chairnickname=\"")
 				.append(GlobalHolder.getInstance().getCurrentUser().getName())
-				.append("\"  starttime=\""+this.startTime+"\" >").append("</conf>");
+				.append("\"  starttime=\""+getDate().getTime()/1000+"\" >").append("</conf>");
 		return sb.toString();
 
 	}

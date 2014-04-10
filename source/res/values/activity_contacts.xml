@@ -22,6 +22,7 @@
     <string name="contacts_user_detail_item_title">职务</string>
     <string name="contacts_user_detail_item_address">地址</string>
      <string name="error_contacts_user_detail_no_avai_user">没有找到可用的用户信息</string>
+     <string name="error_contacts_user_detail_no_nick_name">用户昵称不能为空</string>
     
     <color name="contacts_user_view_under_line">#dbdbdb</color>
     <color name="contacts_user_view_bg">#f0f0f0</color>

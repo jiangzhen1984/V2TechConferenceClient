@@ -166,14 +166,14 @@ public class VImageMessage extends VMessage {
 
 	public int getHeight() {
 		if (mHeight <= 0) {
-			loadImageData();
+			loadBounds();
 		}
 		return mHeight;
 	}
 
 	public int getWidth() {
 		if (mWidth <= 0) {
-			loadImageData();
+			loadBounds();
 		}
 		return mWidth;
 	}
@@ -181,7 +181,17 @@ public class VImageMessage extends VMessage {
 	public String getImagePath() {
 		return this.mImagePath;
 	}
+	
+	
+	private void loadBounds() {
+		BitmapFactory.Options opts = new BitmapFactory.Options();
+		opts.inJustDecodeBounds = true;
+		BitmapFactory.decodeFile(mImagePath, opts);
+		mHeight = opts.outHeight;
+		mWidth = opts.outWidth;
+	}
 
+	//FIXME optimze code
 	private boolean loadImageData() {
 		if (originImageData == null) {
 			File f = new File(mImagePath);
@@ -211,17 +221,17 @@ public class VImageMessage extends VMessage {
 			}
 		}
 
-		InputStream is = null;
-		is = new ByteArrayInputStream(originImageData);
-		Bitmap bm = BitmapFactory.decodeStream(is);
-		mHeight = bm.getHeight();
-		mWidth = bm.getWidth();
-		bm.recycle();
-		try {
-			is.close();
-		} catch (IOException e) {
-			V2Log.e("can not close stream for bitmap");
-		}
+//		InputStream is = null;
+//		is = new ByteArrayInputStream(originImageData);
+//		Bitmap bm = BitmapFactory.decodeStream(is);
+//		mHeight = bm.getHeight();
+//		mWidth = bm.getWidth();
+//		bm.recycle();
+//		try {
+//			is.close();
+//		} catch (IOException e) {
+//			V2Log.e("can not close stream for bitmap");
+//		}
 		return true;
 	}
 	
