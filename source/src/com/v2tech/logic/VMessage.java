@@ -16,14 +16,15 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import com.V2.jni.ChatRequest;
 
 public class VMessage {
-	
-	//TODO add comments
+
+	// TODO add comments
 	public static final int VMESSAGE_CODE_CONF = 1;
 	public static final int VMESSAGE_CODE_IM = 2;
 
@@ -41,15 +42,17 @@ public class VMessage {
 		}
 	}
 
-	private static DateFormat sfF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
-	
-	private static DateFormat sfL = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault());
+	private static DateFormat sfF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss",
+			Locale.getDefault());
 
-	private static DateFormat sfT = new SimpleDateFormat("HH:mm", Locale.getDefault());
+	private static DateFormat sfL = new SimpleDateFormat("yyyy-MM-dd HH:mm",
+			Locale.getDefault());
 
-	
+	private static DateFormat sfT = new SimpleDateFormat("HH:mm",
+			Locale.getDefault());
+
 	private long id;
-	
+
 	private User mUser;
 
 	private User mToUser;
@@ -63,14 +66,14 @@ public class VMessage {
 	private boolean isLocal;
 
 	private String mStrDateTime;
-	
+
 	protected String mUUID;
-	
+
 	protected int mMsgCode;
-	
-	//FIXME should optimize code structure
+
+	// FIXME should optimize code structure
 	public long mGroupId;
-	
+
 	private VMessage() {
 		this(null, null, null, false);
 	}
@@ -102,22 +105,22 @@ public class VMessage {
 		} else {
 			mStrDateTime = sfL.format(this.mDate);
 		}
-		mMsgCode  = ChatRequest.BT_IM;
+		mMsgCode = ChatRequest.BT_IM;
 
 	}
 
 	public void setMsgCode(int code) {
 		this.mMsgCode = code;
 	}
-	
+
 	public int getMsgCode() {
 		return this.mMsgCode;
 	}
-	
+
 	public String getUUID() {
 		return this.mUUID;
 	}
-	
+
 	public long getId() {
 		return id;
 	}
@@ -133,7 +136,7 @@ public class VMessage {
 	public void setUser(User mUser) {
 		this.mUser = mUser;
 	}
-	
+
 	public void setToUser(User toUser) {
 		this.mToUser = toUser;
 	}
@@ -170,23 +173,22 @@ public class VMessage {
 			mStrDateTime = sfL.format(this.mDate);
 		}
 	}
-	
+
 	public String getNormalDateStr() {
 		if (this.mDate != null) {
-			return  sfL.format(this.mDate);
-		} else {
-			return null;
-		}
-	}
-	
-	public String getFullDateStr() {
-		if (this.mDate != null) {
-			return  sfF.format(this.mDate);
+			return sfL.format(this.mDate);
 		} else {
 			return null;
 		}
 	}
 
+	public String getFullDateStr() {
+		if (this.mDate != null) {
+			return sfF.format(this.mDate);
+		} else {
+			return null;
+		}
+	}
 
 	public boolean isLocal() {
 		return isLocal;
@@ -203,10 +205,10 @@ public class VMessage {
 	public User getToUser() {
 		return this.mToUser;
 	}
-	
-	
+
 	/**
 	 * return null if parse failed
+	 * 
 	 * @param xml
 	 * @return
 	 */
@@ -225,68 +227,87 @@ public class VMessage {
 		}
 		return null;
 	}
-	
-	
-	public static VMessage fromXml(User from, User to, Date date, String xml) {
-		//List<VMessage> msgList = new ArrayList<VMessage>();
-		VMessage vm = new VMessage(from, to,"", true);
-		InputStream is = null;
 
+	public static VMessage fromXml(User from, User to, Date date, String xml) {
+		// List<VMessage> msgList = new ArrayList<VMessage>();
+		VMessage vm = new VMessage(from, to, "", true);
+		InputStream is = null;
+		int dataCount = 0;
 		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder dBuilder;
-			try {
-				dBuilder = dbFactory.newDocumentBuilder();
-				is = new ByteArrayInputStream(xml.getBytes("UTF-8"));
-				Document doc = dBuilder.parse(is);
+		try {
+			dBuilder = dbFactory.newDocumentBuilder();
+			is = new ByteArrayInputStream(xml.getBytes("UTF-8"));
+			Document doc = dBuilder.parse(is);
 
-				doc.getDocumentElement().normalize();
-				NodeList textMsgItemNL = doc.getElementsByTagName("TTextChatItem");
-				if (textMsgItemNL.getLength() <=0) {
-					return null;
-				}
-				vm.setDate(date);
-				vm.setType(MessageType.TEXT);
-				//msgList.add(vm);
-				for (int i=0;i<textMsgItemNL.getLength(); i++) {
-					Element msgEl = (Element)textMsgItemNL.item(i);
-					if (i == textMsgItemNL.getLength() - 1) {
-						vm.setText(vm.getText()+msgEl.getAttribute("Text"));
-					} else {
-						vm.setText(vm.getText()+msgEl.getAttribute("Text")+"\n");
-					}
-				}
-				
-				
-//				NodeList imgMsgItemNL = doc.getElementsByTagName("TPictureChatItem");
-//				for (int i=0;i<imgMsgItemNL.getLength(); i++) {
-//					Element msgEl = (Element)imgMsgItemNL.item(i);
-//					VMessage vmImage = new VImageMessage(from, to, msgEl.getAttribute("GUID"), msgEl.getAttribute("FileExt"));
-//					vmImage.setDate(date);
-//					vmImage.setType(MessageType.IMAGE);
-//					msgList.add(vmImage);
-//				}
-				
-			} catch (ParserConfigurationException e) {
-				e.printStackTrace();
-			} catch (UnsupportedEncodingException e) {
-				e.printStackTrace();
-			} catch (SAXException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
+			doc.getDocumentElement().normalize();
+			// NodeList textMsgItemNL =
+			// doc.getElementsByTagName("TTextChatItem");
+			NodeList textMsgItemNL = doc.getElementsByTagName("ItemList");
+			if (textMsgItemNL.getLength() <= 0) {
+				return null;
 			}
-		
+			vm.setDate(date);
+			vm.setType(MessageType.TEXT);
+			// msgList.add(vm);
+			Element msgEl = (Element) textMsgItemNL.item(0);
+			NodeList itemList = msgEl.getChildNodes();
+			//FIMXE optimze code
+			for (int i = 0; i < itemList.getLength(); i++) {
+				Node n = itemList.item(i);
+				if (n instanceof Element) {
+					msgEl = (Element) itemList.item(i);
+					if (!msgEl.getTagName().equals("TPictureChatItem")) {
+						dataCount++;
+						if (i == textMsgItemNL.getLength() - 1) {
+							vm.setText(vm.getText()
+									+ msgEl.getAttribute("Text"));
+						} else {
+							vm.setText(vm.getText()
+									+ msgEl.getAttribute("Text") + "\n");
+						}
+					}
+
+				}
+			}
+
+			// NodeList imgMsgItemNL =
+			// doc.getElementsByTagName("TPictureChatItem");
+			// for (int i=0;i<imgMsgItemNL.getLength(); i++) {
+			// Element msgEl = (Element)imgMsgItemNL.item(i);
+			// VMessage vmImage = new VImageMessage(from, to,
+			// msgEl.getAttribute("GUID"), msgEl.getAttribute("FileExt"));
+			// vmImage.setDate(date);
+			// vmImage.setType(MessageType.IMAGE);
+			// msgList.add(vmImage);
+			// }
+
+		} catch (ParserConfigurationException e) {
+			e.printStackTrace();
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		} catch (SAXException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		if (dataCount > 0)
 			return vm;
+		else
+			return null;
 	}
 
 	/**
-	 *Color user  BGR 
+	 * Color user BGR
+	 * 
 	 * @return
 	 */
 	public String toXml() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n")
-				.append("<TChatData IsAutoReply=\"False\" MessageID=\"{"+this.mUUID+"}\">\n")
+				.append("<TChatData IsAutoReply=\"False\" MessageID=\"{"
+						+ this.mUUID + "}\">\n")
 				.append("<FontList>\n")
 				.append("<TChatFont Color=\"0\" Name=\"Tahoma\" Size=\"9\" Style=\"\"/>")
 				.append("</FontList>\n")

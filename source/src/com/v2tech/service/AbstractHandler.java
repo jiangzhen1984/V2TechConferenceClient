@@ -73,6 +73,9 @@ public abstract class AbstractHandler extends Handler {
 				if (msg.obj != null) {
 					V2Log.d(msg.obj.getClass().getName()+"   "+ msg.what);
 				}
+				if (msg.obj != null && !(msg.obj instanceof JNIResponse)) {
+					throw new RuntimeException(" cast exception :"+ msg.obj);
+				}
 				JNIResponse jniRes = (JNIResponse) msg.obj;
 				if (jniRes == null) {
 					jniRes = new JNIResponse(JNIResponse.Result.FAILED);

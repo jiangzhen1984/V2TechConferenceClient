@@ -161,8 +161,8 @@ public class VideoActivityV2 extends Activity {
 				mMenuButtonContainer.setVisibility(View.VISIBLE);
 			} else {
 				mMenuButtonContainer.setVisibility(View.GONE);
-				showOrHidenMsgContainer(View.GONE);
 				showOrHidenAttendeeContainer(View.GONE);
+				showOrHidenMsgContainer(View.GONE);
 			}
 		}
 
@@ -235,7 +235,11 @@ public class VideoActivityV2 extends Activity {
 
 					@Override
 					public void onClick(View v) {
-						doReverseCamera();
+						if (VideoCaptureDevInfo.CreateVideoCaptureDevInfo().deviceList.size() > 1) {
+							doReverseCamera();
+						} else {
+							Toast.makeText(mContext, R.string.error_no_second_camera, Toast.LENGTH_SHORT).show();
+						}
 						mSettingWindow.dismiss();
 						mSettingArrowIV.setVisibility(View.INVISIBLE);
 					}

@@ -24,7 +24,7 @@ public class GlobalHolder {
 
 	private List<Group> mOrgGroup = null;
 
-	private List<Group> mConfGroup = new ArrayList<Group>();
+	private Set<Group> mConfGroup = new HashSet<Group>();
 	
 	private Set<Group> mContactsGroup = new HashSet<Group>();
 	
@@ -148,7 +148,9 @@ public class GlobalHolder {
 		if (gType == Group.GroupType.ORG) {
 			mOrgGroup = list;
 		} else if (gType == Group.GroupType.CONFERENCE) {
-			mConfGroup.addAll(list);
+			synchronized (mConfGroup) {
+				mConfGroup.addAll(list);
+			}
 		} else if (gType == Group.GroupType.CONTACT) {
 			this.mContactsGroup.addAll(list);
 		} else if (gType == GroupType.CHATING) {
@@ -164,7 +166,11 @@ public class GlobalHolder {
 	public void addGroupToList(Group.GroupType gType, Group g) {
 		if (gType == Group.GroupType.ORG) {
 		} else if (gType == Group.GroupType.CONFERENCE) {
-			mConfGroup.add(g);
+			synchronized (mConfGroup) {
+				if (getGroupById(gType, g.getmGId()) == null) {
+					mConfGroup.add(g);
+				}
+			}
 		}
 	}
 	
@@ -215,7 +221,9 @@ public class GlobalHolder {
 			ct.addAll(this.mChattingGroup);
 			return ct;
 		case CONFERENCE:
-			return mConfGroup;
+			List<Group> confL = new ArrayList<Group>();
+			confL.addAll(this.mConfGroup);
+			return confL;
 		default:
 			throw new RuntimeException("Unkonw type");
 		}
