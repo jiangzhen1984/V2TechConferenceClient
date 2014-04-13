@@ -156,7 +156,7 @@ public class User implements Comparable<User> {
 				}
 			}
 			if (abbra.equals("")) {
-				abbra = this.mName.toLowerCase();
+				abbra = this.mName.toLowerCase(Locale.getDefault());
 			}
 		}
 	}
@@ -310,6 +310,10 @@ public class User implements Comparable<User> {
 	public Status getmStatus() {
 		return mStatus;
 	}
+	
+	public String getArra() {
+		return this.abbra;
+	}
 
 	public void updateStatus(Status mStatus) {
 		this.mStatus = mStatus;
@@ -433,7 +437,7 @@ public class User implements Comparable<User> {
 	}
 
 	public String toXml() {
-		DateFormat dp = new SimpleDateFormat("yyyy-MM-dd");
+		DateFormat dp = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
 		String xml = "<user " + " address='"
 				+ (this.getAddress() == null ? "" : this.getAddress()) + "' "
 				+ "birthday='" + (this.mBirthday == null ? "" : dp
@@ -470,7 +474,7 @@ public class User implements Comparable<User> {
 
 		InputStream is = null;
 
-		DateFormat dp = new SimpleDateFormat("yyyy-MM-dd");
+		DateFormat dp = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
 		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder dBuilder;
 		try {
@@ -548,7 +552,7 @@ public class User implements Comparable<User> {
 		String email = extraAttri("email='", "'", xml);
 		String bir = extraAttri("birthday='", "'", xml);
 
-		DateFormat dp = new SimpleDateFormat("yyyy-MM-dd");
+		DateFormat dp = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
 		
 		User u = new User(uID, nickName);
 		u.setSignature(signature);

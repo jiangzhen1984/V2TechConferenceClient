@@ -14,7 +14,12 @@ public class RequestLogInResponse extends JNIResponse {
 		this.res = res;
 	}
 	
-
+	public RequestLogInResponse(User u, Result res, Object originObject) {
+		super(res);
+		this.u = u;
+		this.res = res;
+		this.callerObject = originObject;
+	}
 	
 	public User getUser() {
 		return u;

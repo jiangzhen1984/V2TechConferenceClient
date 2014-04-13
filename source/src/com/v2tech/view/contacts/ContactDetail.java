@@ -29,6 +29,7 @@ import android.widget.Toast;
 
 import com.v2tech.R;
 import com.v2tech.logic.GlobalHolder;
+import com.v2tech.logic.Registrant;
 import com.v2tech.logic.User;
 import com.v2tech.service.UserService;
 import com.v2tech.view.PublicIntent;
@@ -413,7 +414,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 				gatherUserData();
 				if (check()) {
 					us.updateUser(u,
-							Message.obtain(this, UPDATE_USER_INFO_DONE));
+							new Registrant(this, UPDATE_USER_INFO_DONE, null));
 				}
 				isUpdating = false;
 				break;

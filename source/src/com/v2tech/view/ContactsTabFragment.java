@@ -209,7 +209,7 @@ public class ContactsTabFragment extends Fragment {
 		@Override
 		protected Void doInBackground(Void... params) {
 			synchronized (mLock) {
-				if (mLoaded == true) {
+				if (mLoaded == true || l.size() <= 0) {
 					return null;
 				}
 				mLoaded = true;

@@ -28,6 +28,13 @@ public class V2Doc {
 		public PageArray(Page[] pr) {
 			this.pr = pr;
 		}
+		
+		
+
+		public PageArray() {
+		}
+
+
 
 		public String getDocId() {
 			return docId;
@@ -169,6 +176,9 @@ public class V2Doc {
 	}
 	
 	public Page getActivatePage() {
+		if (pages == null) {
+			return null;
+		}
 		for (Page p : pages) {
 			if (p.no == this.currentPageNo) {
 				return p;
@@ -180,4 +190,10 @@ public class V2Doc {
 	public void setActivatePageNo(int no) {
 		this.currentPageNo = no;
 	}
+	
+	
+	public int getPageSize() {
+		return pages == null? 0 : pages.size();
+	}
+
 }

@@ -3,20 +3,27 @@ package com.v2tech.view.conference;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.util.AttributeSet;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.PopupWindow;
+import android.widget.PopupWindow.OnDismissListener;
 import android.widget.TextView;
 
 import com.v2tech.R;
 import com.v2tech.util.V2Log;
+import com.v2tech.view.cus.TouchImageView;
 import com.v2tech.view.vo.V2Doc;
 
 public class VideoDocLayout extends LinearLayout {
@@ -28,6 +35,15 @@ public class VideoDocLayout extends LinearLayout {
 	private Bitmap mCurrentBitMap;
 
 	private FrameLayout container;
+
+	private TextView mDocPageTV;
+
+	private ImageView mPrePageButton;
+
+	private ImageView mNextPageButton;
+	private PopupWindow mDocListWindow;
+	private LinearLayout mDodListContainer;
+	private View mShowDocListButton;
 
 	private V2Doc mCurrentDoc;
 
@@ -57,6 +73,16 @@ public class VideoDocLayout extends LinearLayout {
 				R.layout.video_doc_layout, null, false);
 		container = (FrameLayout) view.findViewById(R.id.video_doc_container);
 
+		mDocPageTV = (TextView) view.findViewById(R.id.video_doc_navgator);
+		mPrePageButton = (ImageView) view
+				.findViewById(R.id.video_doc_pre_button);
+		mNextPageButton = (ImageView) view
+				.findViewById(R.id.video_doc_next_button);
+		mPrePageButton.setOnClickListener(pageChangeListener);
+		mNextPageButton.setOnClickListener(pageChangeListener);
+		mShowDocListButton = view.findViewById(R.id.video_doc_list_button);
+		mShowDocListButton.setOnClickListener(showDocListListener);
+
 		this.addView(view, new LinearLayout.LayoutParams(
 				LinearLayout.LayoutParams.MATCH_PARENT,
 				LinearLayout.LayoutParams.MATCH_PARENT));
@@ -65,22 +91,90 @@ public class VideoDocLayout extends LinearLayout {
 
 	}
 
+	private void showPopUpWindow(View anchor) {
+		if (mDocListWindow == null) {
+			LayoutInflater inflater = (LayoutInflater) this.getContext()
+					.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+			View view = inflater.inflate(R.layout.video_doc_list_layout, null);
+			mDocListWindow = new PopupWindow(view, LayoutParams.WRAP_CONTENT,
+					LayoutParams.WRAP_CONTENT);
+			mDocListWindow.setBackgroundDrawable(new ColorDrawable(
+					Color.TRANSPARENT));
+			mDocListWindow.setFocusable(true);
+			mDocListWindow.setTouchable(true);
+			mDocListWindow.setOutsideTouchable(true);
+			mDocListWindow.setOnDismissListener(new OnDismissListener() {
+				@Override
+				public void onDismiss() {
+					mDocListWindow.dismiss();
+				}
+
+			});
+
+			mDodListContainer = (LinearLayout) view
+					.findViewById(R.id.video_doc_list_container);
+			for (Entry<String, V2Doc> e : mDocs.entrySet()) {
+				addViewToDoc(e.getValue());
+			}
+		}
+		if (mDocListWindow.isShowing()) {
+			mDocListWindow.dismiss();
+		} else {
+			int[] l = new int[2];
+			anchor.getLocationInWindow(l);
+
+			mDocListWindow.getContentView()
+					.measure(container.getMeasuredWidth(),
+							container.getMeasuredHeight());
+
+			mDocListWindow.showAtLocation(anchor, Gravity.NO_GRAVITY, l[0],
+					l[1] - mDocListWindow.getContentView().getMeasuredHeight());
+		}
+	}
+
+	private void addViewToDoc(V2Doc d) {
+		if (mDodListContainer == null) {
+			return;
+		}
+		TextView content = new TextView(this.getContext());
+		content.setText(d.getId());
+		content.setPadding(10, 10, 10, 10);
+		if (d == mCurrentDoc) {
+			content.setBackgroundColor(this.getResources().getColor(
+					R.color.in_meeting_doc_list_activited_doc_bg));
+
+		}
+		mDodListContainer.addView(content, new LinearLayout.LayoutParams(
+				LinearLayout.LayoutParams.MATCH_PARENT,
+				LinearLayout.LayoutParams.WRAP_CONTENT));
+
+		LinearLayout separatedLine = new LinearLayout(this.getContext());
+		separatedLine.setBackgroundColor(this.getResources().getColor(
+				R.color.in_meeting_doc_list_separation));
+		mDodListContainer.addView(separatedLine, new LinearLayout.LayoutParams(
+				LinearLayout.LayoutParams.MATCH_PARENT, 1));
+
+	}
+
 	public void updateCurrentDoc() {
 
 		if (mDocs.size() <= 0) {
-			// TODO update icon
 			return;
 		}
 
 		if (mCurrentDoc == null) {
 			mCurrentDoc = mDocs.entrySet().iterator().next().getValue();
+			if (mCurrentDoc == null) {
+				V2Log.w(" No Doc");
+				return;
+			}
 		}
 
-		if (mCurrentPage == null) {
-			mCurrentPage = mCurrentDoc.getActivatePage();
-		}
+		mCurrentPage = mCurrentDoc.getActivatePage();
 
 		updateCurrentDocPage(mCurrentPage);
+		updateLayoutPageInformation();
+		updatePageButton();
 	}
 
 	private void updateCurrentDocPage(V2Doc.Page p) {
@@ -99,9 +193,9 @@ public class VideoDocLayout extends LinearLayout {
 				BitmapFactory.decodeFile(p.getFilePath(), ops);
 				ops.inJustDecodeBounds = false;
 				BitmapFactory.Options opsNew = new BitmapFactory.Options();
-				opsNew.inPurgeable = true;  
-				opsNew.inInputShareable = true; 
-				// TODO
+				opsNew.inPurgeable = true;
+				opsNew.inInputShareable = true;
+
 				if (ops.outHeight < 600 || ops.outWidth < 1080) {
 					opsNew.inSampleSize = 1;
 				} else if (ops.outHeight < 1080 || ops.outWidth < 1920) {
@@ -112,13 +206,14 @@ public class VideoDocLayout extends LinearLayout {
 					opsNew.inSampleSize = 2;
 				}
 
-				mCurrentBitMap = BitmapFactory.decodeFile(p.getFilePath(), opsNew);
+				mCurrentBitMap = BitmapFactory.decodeFile(p.getFilePath(),
+						opsNew);
 				container.removeAllViews();
-				ImageView iv = new ImageView(this.getContext());
+				TouchImageView iv = new TouchImageView(this.getContext());
 				iv.setImageBitmap(mCurrentBitMap);
 				container.addView(iv, new FrameLayout.LayoutParams(
-						FrameLayout.LayoutParams.WRAP_CONTENT,
-						FrameLayout.LayoutParams.WRAP_CONTENT));
+						FrameLayout.LayoutParams.MATCH_PARENT,
+						FrameLayout.LayoutParams.MATCH_PARENT));
 			} else {
 				V2Log.e(" doc file doesn't exist " + f.getAbsolutePath());
 			}
@@ -131,6 +226,72 @@ public class VideoDocLayout extends LinearLayout {
 
 	public void addDoc(V2Doc doc) {
 		mDocs.put(doc.getId(), doc);
+		addViewToDoc(doc);
 	}
 
+	public void updateLayoutPageInformation() {
+		if (mCurrentDoc == null) {
+			mDocPageTV.setText("0/0");
+		} else {
+			mDocPageTV.setText(mCurrentDoc.getActivatePageNo() + "/"
+					+ mCurrentDoc.getPageSize());
+		}
+	}
+
+	private void updatePageButton() {
+		if (mCurrentDoc == null) {
+			mPrePageButton
+					.setImageResource(R.drawable.video_doc_letf_arrow_gray);
+			mNextPageButton
+					.setImageResource(R.drawable.video_doc_right_arrow_gray);
+			return;
+		}
+
+		if (mCurrentDoc.getActivatePageNo() == 1) {
+			mPrePageButton
+					.setImageResource(R.drawable.video_doc_letf_arrow_gray);
+		} else {
+			mPrePageButton
+					.setImageResource(R.drawable.video_doc_letf_arrow_color);
+		}
+		if (mCurrentDoc.getActivatePageNo() == mCurrentDoc.getPageSize()) {
+			mNextPageButton
+					.setImageResource(R.drawable.video_doc_right_arrow_gray);
+		} else {
+			mNextPageButton
+					.setImageResource(R.drawable.video_doc_right_arrow_color);
+		}
+	}
+
+	private OnClickListener pageChangeListener = new OnClickListener() {
+
+		@Override
+		public void onClick(View view) {
+			if (view == mNextPageButton) {
+				if (mCurrentDoc.getActivatePageNo() < mCurrentDoc.getPageSize()) {
+					mCurrentDoc.setActivatePageNo(mCurrentDoc
+							.getActivatePageNo() + 1);
+					updateCurrentDoc();
+				}
+			} else if (view == mPrePageButton) {
+				if (mCurrentDoc.getActivatePageNo() > 1) {
+					mCurrentDoc.setActivatePageNo(mCurrentDoc
+							.getActivatePageNo() - 1);
+					updateCurrentDoc();
+				}
+			} else {
+				V2Log.e(" Invalid click listener");
+			}
+		}
+
+	};
+
+	private OnClickListener showDocListListener = new OnClickListener() {
+
+		@Override
+		public void onClick(View view) {
+			showPopUpWindow(view);
+		}
+
+	};
 }

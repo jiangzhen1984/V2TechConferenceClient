@@ -1,12 +1,15 @@
 package com.v2tech.view.vo;
 
 import com.v2tech.logic.Group;
-import com.v2tech.logic.User;
 import com.v2tech.logic.Group.GroupType;
+import com.v2tech.logic.User;
 
 public class CrowdConversation extends Conversation {
 	
 	private Group g;
+	private User lastSendUser;
+	private String msg;
+	private String date;
 
 	public CrowdConversation(Group g) {
 		if (g == null) {
@@ -16,6 +19,9 @@ public class CrowdConversation extends Conversation {
 			throw new IllegalArgumentException(" group type is not GroupType.CHATING");
 		}
 		this.g = g;
+		super.mExtId = g.getmGId();
+		super.mType = TYPE_GROUP;
+		super.mNotiFlag = NONE;
 	}
 
 	
@@ -30,19 +36,20 @@ public class CrowdConversation extends Conversation {
 
 	@Override
 	public String getMsg() {
-		if (g != null) {
-			User u = g.getOwnerUser();
-			return u == null ? g.getOwner() + "" : u.getName();
-		}
-		return super.getMsg();
+		return msg;
 	}
 
 	@Override
 	public String getDate() {
-		if (g != null) {
-			return g.getStrCreateDate();
-		}
-		return super.getDate();
+		return date;
+	}
+	
+	public void setMsg(String msg) {
+		this.msg = msg;
+	}
+	
+	public void setDate(String date) {
+		this.date = date;
 	}
 	
 	

@@ -9,7 +9,7 @@ package com.v2tech.logic.jni;
 public class JNIResponse {
 
 	public enum Result {
-		SUCCESS(0), FAILED(1), CONNECT_ERROR(301), SERVER_REJECT(300), UNKNOWN(-1);
+		SUCCESS(0), FAILED(1), CONNECT_ERROR(301), SERVER_REJECT(300), UNKNOWN(-1), TIME_OUT(-2), INCORRECT_PAR(-3);
 
 		private int val;
 		private Result(int i) {
@@ -30,6 +30,10 @@ public class JNIResponse {
 				return CONNECT_ERROR;
 			case 300:
 				return SERVER_REJECT;
+			case -2:
+				return TIME_OUT;
+			case -3:
+				return INCORRECT_PAR;
 			default:
 				return UNKNOWN;
 			}

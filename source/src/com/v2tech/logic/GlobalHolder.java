@@ -25,24 +25,25 @@ public class GlobalHolder {
 	private List<Group> mOrgGroup = null;
 
 	private Set<Group> mConfGroup = new HashSet<Group>();
-	
+
 	private Set<Group> mContactsGroup = new HashSet<Group>();
-	
+
 	private Set<Group> mChattingGroup = new HashSet<Group>();
 
 	private Map<Long, User> mUserHolder = new HashMap<Long, User>();
 	private Map<Long, Group> mGroupHolder = new HashMap<Long, Group>();
 	private Map<Long, String> mAvatarHolder = new HashMap<Long, String>();
 
-	private List<Conversation> mConversationHolder = new CopyOnWriteArrayList<Conversation>();
-	
+	private List<Conversation> mConatactConversationHolder = new CopyOnWriteArrayList<Conversation>();
+
+	private List<Conversation> mGroupConversationHolder = new CopyOnWriteArrayList<Conversation>();
 
 	private Set<UserDeviceConfig> mUserDeviceList = new HashSet<UserDeviceConfig>();
-	
+
 	private Map<Long, Bitmap> mAvatarBmHolder = new HashMap<Long, Bitmap>();
-	
-	public long CURRENT_CONVERSATION_USER = 0;
-	
+
+	// Use to hold current opened conversation
+	public Conversation CURRENT_CONVERSATION  = null;
 
 	public static synchronized GlobalHolder getInstance() {
 		if (holder == null) {
@@ -75,16 +76,17 @@ public class GlobalHolder {
 		if (mU != null) {
 			mU.updateStatus(User.Status.ONLINE);
 		} else {
-			//putUser(u.getmUserId(), u);
+			// putUser(u.getmUserId(), u);
 		}
 	}
 
 	private Object mUserLock = new Object();
+
 	public User putUser(long id, User u) {
 		if (u == null) {
 			return null;
 		}
-		synchronized(mUserLock) {
+		synchronized (mUserLock) {
 			Long key = Long.valueOf(id);
 			User cu = mUserHolder.get(key);
 			if (cu != null) {
@@ -95,7 +97,6 @@ public class GlobalHolder {
 					cu.setName(u.getName());
 				}
 				if (u.getGender() != null) {
-					V2Log.d("========aaaa======" + u.getGender());
 					cu.setGender(u.getGender());
 				}
 				V2Log.e(" merge user information " + id);
@@ -107,8 +108,8 @@ public class GlobalHolder {
 	}
 
 	public User getUser(long id) {
-			Long key = Long.valueOf(id);
-			return mUserHolder.get(key);
+		Long key = Long.valueOf(id);
+		return mUserHolder.get(key);
 	}
 
 	public void updateUserStatus(User u) {
@@ -141,10 +142,10 @@ public class GlobalHolder {
 	 * @param gType
 	 * @param list
 	 * 
-	 * FIXME need to optimize code
+	 *            FIXME need to optimize code
 	 */
 	public void updateGroupList(Group.GroupType gType, List<Group> list) {
-		
+
 		if (gType == Group.GroupType.ORG) {
 			mOrgGroup = list;
 		} else if (gType == Group.GroupType.CONFERENCE) {
@@ -161,8 +162,7 @@ public class GlobalHolder {
 			populateGroup(g);
 		}
 	}
-	
-	
+
 	public void addGroupToList(Group.GroupType gType, Group g) {
 		if (gType == Group.GroupType.ORG) {
 		} else if (gType == Group.GroupType.CONFERENCE) {
@@ -173,13 +173,18 @@ public class GlobalHolder {
 			}
 		}
 	}
-	
+
 	public Group getGroupById(Group.GroupType gType, long gId) {
+		Set<Group> gSet = null;
 		if (gType == Group.GroupType.CONFERENCE) {
-			for (Group g : mConfGroup) {
-				if (g.getmGId() == gId) {
-					return g;
-				}
+			gSet = mConfGroup;
+		} else if (gType == Group.GroupType.CHATING) {
+			gSet = mChattingGroup;
+		}
+
+		for (Group g : gSet) {
+			if (g.getmGId() == gId) {
+				return g;
 			}
 		}
 		return null;
@@ -274,8 +279,8 @@ public class GlobalHolder {
 			return;
 		}
 		g.addUserToGroup(uList);
-		
-		//update reference for conference group
+
+		// update reference for conference group
 		for (Group confG : mConfGroup) {
 			User u = getUser(confG.getOwner());
 			if (u != null) {
@@ -283,7 +288,7 @@ public class GlobalHolder {
 			}
 		}
 	}
-	
+
 	public void addUserToGroup(User u, long belongGID) {
 		Group g = findGroupById(belongGID);
 		if (g == null) {
@@ -292,10 +297,9 @@ public class GlobalHolder {
 		}
 		g.addUserToGroup(u);
 	}
-	
-	
+
 	public void removeConferenceGroup(long gid) {
-		for (Group g: mConfGroup) {
+		for (Group g : mConfGroup) {
 			if (g.getmGId() == gid) {
 				mConfGroup.remove(g);
 				break;
@@ -313,16 +317,28 @@ public class GlobalHolder {
 		this.mAvatarHolder.put(key, path);
 	}
 
-	public void updateConversation(List<Conversation> cache) {
-		this.mConversationHolder.addAll(cache);
-	}
-
-	public void addConversation(Conversation con) {
-		this.mConversationHolder.add(con);
+	public void addConversation(Conversation cov) {
+		if (cov == null) {
+			return;
+		}
+		if (Conversation.TYPE_CONTACT.equals(cov.getType())) {
+			this.mConatactConversationHolder.add(cov);
+		} else if (Conversation.TYPE_GROUP.equals(cov.getType())) {
+			this.mGroupConversationHolder.add(cov);
+		}
 	}
 
 	public boolean findConversation(Conversation cov) {
-		for (Conversation c : this.mConversationHolder) {
+		if (cov == null) {
+			return false;
+		}
+		List<Conversation> tmp = null;
+		if (Conversation.TYPE_CONTACT.equals(cov.getType())) {
+			tmp = mConatactConversationHolder;
+		} else if (Conversation.TYPE_GROUP.equals(cov.getType())) {
+			tmp = mGroupConversationHolder;
+		}
+		for (Conversation c : tmp) {
 			if (cov.equals(c)) {
 				return true;
 			}
@@ -331,37 +347,52 @@ public class GlobalHolder {
 	}
 
 	public Conversation findConversationByType(String type, long extId) {
-		for (Conversation c : this.mConversationHolder) {
-			if (c.getExtId() == extId
-					&& ((type == null && c.getType() == type) || (type != null && type
-							.equals(c.getType())))) {
+		List<Conversation> tmp = null;
+		if (Conversation.TYPE_CONTACT.equals(type)) {
+			tmp = mConatactConversationHolder;
+		} else if (Conversation.TYPE_GROUP.equals(type)) {
+			tmp = mGroupConversationHolder;
+		}
+
+		for (Conversation c : tmp) {
+			if (c.getExtId() == extId) {
 				return c;
 			}
 		}
 		return null;
 	}
-	
+
 	public void removeConversation(String type, long extId) {
-		for (Conversation c : this.mConversationHolder) {
-			if (c.getExtId() == extId
-					&& ((type == null && c.getType() == type) || (type != null && type
-							.equals(c.getType())))) {
-				mConversationHolder.remove(c);
+		List<Conversation> tmp = null;
+		if (Conversation.TYPE_CONTACT.equals(type)) {
+			tmp = mConatactConversationHolder;
+		} else if (Conversation.TYPE_GROUP.equals(type)) {
+			tmp = mGroupConversationHolder;
+		}
+
+		for (Conversation c : tmp) {
+			if (c.getExtId() == extId) {
+				tmp.remove(c);
 			}
 		}
 	}
-	
-	
+
 	public int getNoticatorCount(String type) {
 		int c = 0;
-		for (Conversation cov : this.mConversationHolder) {
-			if (cov.getNotiFlag() == Conversation.NOTIFICATION && type.equals(cov.getType())) {
-				c ++;
+		List<Conversation> tmp = null;
+		if (Conversation.TYPE_CONTACT.equals(type)) {
+			tmp = mConatactConversationHolder;
+		} else if (Conversation.TYPE_GROUP.equals(type)) {
+			tmp = mGroupConversationHolder;
+		}
+
+		for (Conversation cov : tmp) {
+			if (cov.getNotiFlag() == Conversation.NOTIFICATION) {
+				c++;
 			}
 		}
 		return c;
 	}
-	
 
 	/**
 	 * Get user's video device according to user id.<br>
@@ -381,15 +412,15 @@ public class GlobalHolder {
 		}
 		return l;
 	}
-	
+
 	public void addAttendeeDevice(UserDeviceConfig udc) {
 		mUserDeviceList.add(udc);
 	}
-	
+
 	public void addAttendeeDevice(List<UserDeviceConfig> udcList) {
 		mUserDeviceList.addAll(udcList);
 	}
-	
+
 	public Bitmap getAvatarBm(long uid) {
 		Long key = Long.valueOf(uid);
 		return mAvatarBmHolder.get(key);
@@ -403,5 +434,5 @@ public class GlobalHolder {
 		Long key = Long.valueOf(uid);
 		mAvatarBmHolder.put(key, bm);
 	}
-	
+
 }

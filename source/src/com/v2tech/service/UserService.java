@@ -7,8 +7,8 @@ import com.V2.jni.ImRequest;
 import com.V2.jni.ImRequestCallback;
 import com.V2.jni.V2ClientType;
 import com.V2.jni.V2GlobalEnum;
-import com.v2tech.logic.AsynResult;
 import com.v2tech.logic.GlobalHolder;
+import com.v2tech.logic.Registrant;
 import com.v2tech.logic.User;
 import com.v2tech.logic.jni.RequestLogInResponse;
 
@@ -36,28 +36,28 @@ public class UserService extends AbstractHandler {
 	 * @param message
 	 *            callback message Message.obj is {@link AsynResult}
 	 */
-	public void login(String mail, String passwd, Message caller) {
+	public void login(String mail, String passwd, Registrant caller) {
 		initTimeoutMessage(JNI_REQUEST_LOG_IN, null, DEFAULT_TIME_OUT_SECS,
 				caller);
 		ImRequest.getInstance().login(mail, passwd,
 				V2GlobalEnum.USER_STATUS_ONLINE, V2ClientType.ANDROID, false);
 	}
-	
-	
+
 	/**
-	 * Update user information. If updated user is logged user, can update all information.<br>
+	 * Update user information. If updated user is logged user, can update all
+	 * information.<br>
 	 * otherwise only can update nick name.
+	 * 
 	 * @param user
 	 * @param caller
 	 */
-	public void updateUser(User user, Message caller) {
+	public void updateUser(User user, Registrant caller) {
 		if (user == null) {
-			if (caller != null) {
-				caller.obj = new AsynResult(AsynResult.AsynState.INCORRECT_PAR, null); 
-				Handler target = caller.getTarget();
-				if (target != null) {
-					target.dispatchMessage(caller);
-				}
+			if (caller != null && caller.getHandler() != null) {
+				sendResult(caller,
+						new RequestLogInResponse(null,
+								RequestLogInResponse.Result.INCORRECT_PAR,
+								caller.getObject()));
 			}
 			return;
 		}
@@ -66,10 +66,10 @@ public class UserService extends AbstractHandler {
 		if (user.getmUserId() == GlobalHolder.getInstance().getCurrentUserId()) {
 			ImRequest.getInstance().modifyBaseInfo(user.toXml());
 		} else {
-	//		ImRequest.getInstance().modifyCommentName(user.getmUserId(), user.getName());
+			ImRequest.getInstance().modifyCommentName(user.getmUserId(),
+					user.getName());
 		}
 	}
-
 
 	class ImRequestCB implements ImRequestCallback {
 
@@ -81,7 +81,8 @@ public class UserService extends AbstractHandler {
 
 		@Override
 		public void OnLoginCallback(long nUserID, int nStatus, int nResult) {
-			RequestLogInResponse.Result res =RequestLogInResponse.Result.fromInt(nResult);
+			RequestLogInResponse.Result res = RequestLogInResponse.Result
+					.fromInt(nResult);
 			Message m = Message.obtain(handler, JNI_REQUEST_LOG_IN,
 					new RequestLogInResponse(new User(nUserID), res));
 			handler.dispatchMessage(m);
@@ -94,7 +95,8 @@ public class UserService extends AbstractHandler {
 
 		@Override
 		public void OnConnectResponseCallback(int nResult) {
-			RequestLogInResponse.Result res =RequestLogInResponse.Result.fromInt(nResult);
+			RequestLogInResponse.Result res = RequestLogInResponse.Result
+					.fromInt(nResult);
 			if (res != RequestLogInResponse.Result.SUCCESS) {
 				Message m = Message.obtain(handler, JNI_REQUEST_LOG_IN,
 						new RequestLogInResponse(null, res));
@@ -104,13 +106,14 @@ public class UserService extends AbstractHandler {
 
 		@Override
 		public void OnUpdateBaseInfoCallback(long nUserID, String updatexml) {
-			//TODO do not send result
-			//Message.obtain(handler, JNI_REQUEST_UPDAE_USER, updatexml).sendToTarget();
+			// TODO do not send result
+			// Message.obtain(handler, JNI_REQUEST_UPDAE_USER,
+			// updatexml).sendToTarget();
 		}
 
 		@Override
-		public void OnUserStatusUpdatedCallback(long nUserID, 
-				int nStatus, String szStatusDesc) {
+		public void OnUserStatusUpdatedCallback(long nUserID, int nStatus,
+				String szStatusDesc) {
 
 		}
 
@@ -122,10 +125,8 @@ public class UserService extends AbstractHandler {
 
 		@Override
 		public void OnModifyCommentName(long nUserId, String sCommmentName) {
-			
+
 		}
-		
-		
 
 	}
 }

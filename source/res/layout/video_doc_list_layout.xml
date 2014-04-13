@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/rounded_corners_of_in_meeting_quit_window_outer_box"
+    android:orientation="vertical" >
+
+    <LinearLayout
+        android:id="@+id/video_doc_list_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_margin="10dp"
+        android:background="#ffffff"
+        android:orientation="vertical" >
+
+        <LinearLayout
+            android:id="@+id/imq_l1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/in_meeting_quit_window_title_bg"
+            android:orientation="vertical" >
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/imq_l2"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/in_meeting_quit_window_separation"
+            android:orientation="vertical" >
+        </LinearLayout>
+    </LinearLayout>
+
+</LinearLayout>

@@ -21,6 +21,8 @@ import com.v2tech.logic.Group;
 import com.v2tech.logic.NormalGroup;
 import com.v2tech.logic.Group.GroupType;
 import com.v2tech.logic.OrgGroup;
+import com.v2tech.view.vo.V2Doc;
+import com.v2tech.view.vo.V2Doc.Page;
 
 public class XmlParser {
 
@@ -143,5 +145,52 @@ public class XmlParser {
 			iterateNodeList(type, subGroup, subGroupEl.getChildNodes());
 		}
 
+	}
+	
+	
+	
+	
+	public static V2Doc.PageArray parserDocPage(String docId, String xml) {
+		V2Doc.PageArray pr = new V2Doc.PageArray();
+		pr.setDocId(docId);
+		InputStream is = null;
+
+		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+		DocumentBuilder dBuilder;
+		try {
+			dBuilder = dbFactory.newDocumentBuilder();
+			is = new ByteArrayInputStream(xml.getBytes("UTF-8"));
+			Document doc = dBuilder.parse(is);
+			doc.getDocumentElement().normalize();
+			
+			NodeList pageList = doc.getElementsByTagName("page");
+			Page[] p = new Page[pageList.getLength()];
+			for (int i =0; i < pageList.getLength(); i++) {
+				Element page = (Element)pageList.item(i);
+				String pid = page.getAttribute("id");
+				if (pid == null) {
+					continue;
+				}
+				int no = Integer.parseInt(pid);
+				p[no-1] = new Page(no, docId, null);
+			}
+			pr.setPr(p);
+		} catch (ParserConfigurationException e) {
+			e.printStackTrace();
+		} catch (SAXException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			if (is != null) {
+				try {
+					is.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		
+		return pr;
 	}
 }

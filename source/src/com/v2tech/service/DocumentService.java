@@ -13,8 +13,8 @@ import com.v2tech.logic.Group;
 import com.v2tech.logic.Group.GroupType;
 import com.v2tech.logic.Registrant;
 import com.v2tech.logic.User;
+import com.v2tech.util.XmlParser;
 import com.v2tech.view.vo.V2Doc;
-import com.v2tech.view.vo.V2Doc.Page;
 import com.v2tech.view.vo.V2ImageDoc;
 
 public class DocumentService extends AbstractHandler {
@@ -119,8 +119,7 @@ public class DocumentService extends AbstractHandler {
 				if (r.getHandler() != null) {
 					Message m = Message.obtain();
 					m.what =  r.getWhat();
-					//FIXM parse szPageData
-					m.obj = new AsyncResult(r.getObject(), new V2Doc.PageArray(new Page[]{new Page(1, szWBoardID, null)}));
+					m.obj = new AsyncResult(r.getObject(), XmlParser.parserDocPage(szWBoardID, szPageData));
 					r.getHandler().sendMessage(m);
 				}
 

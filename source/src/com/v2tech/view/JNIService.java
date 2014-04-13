@@ -49,6 +49,8 @@ import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.Notificator;
 import com.v2tech.util.V2Log;
 import com.v2tech.util.XmlParser;
+import com.v2tech.view.vo.Conversation;
+import com.v2tech.view.vo.CrowdConversation;
 
 /**
  * This service is used to wrap JNI call.<br>
@@ -266,6 +268,11 @@ public class JNIService extends Service {
 						(String) msg.obj);
 				GlobalHolder.getInstance().updateGroupList(
 						Group.GroupType.fromInt(msg.arg1), gl);
+				if (Group.GroupType.fromInt(msg.arg1) == GroupType.CHATING) {
+					for (Group g : gl) {
+						GlobalHolder.getInstance().addConversation(new CrowdConversation(g));
+					}
+				}
 				Intent gi = new Intent(JNI_BROADCAST_GROUP_NOTIFICATION);
 				gi.addCategory(JNI_BROADCAST_CATEGROY);
 				mContext.sendBroadcast(gi);
@@ -377,7 +384,14 @@ public class JNIService extends Service {
 
 		// FIXME update message for group message
 		private void updateStatusBar(VMessage vm) {
-			if (vm.getUser().getmUserId() == GlobalHolder.getInstance().CURRENT_CONVERSATION_USER) {
+			Conversation cov  = null;
+			if (vm.mGroupId != 0) {
+				cov = GlobalHolder.getInstance().findConversationByType(Conversation.TYPE_GROUP, vm.mGroupId);
+			} else {
+				cov = GlobalHolder.getInstance().findConversationByType(Conversation.TYPE_CONTACT, vm.getUser().getmUserId());
+			}
+			//
+			if (cov == GlobalHolder.getInstance().CURRENT_CONVERSATION) {
 				return;
 			}
 			NotificationCompat.Builder builder = new NotificationCompat.Builder(

@@ -44,13 +44,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.v2tech.R;
-import com.v2tech.logic.AsynResult;
 import com.v2tech.logic.Attendee;
 import com.v2tech.logic.CameraConfiguration;
 import com.v2tech.logic.Conference;
 import com.v2tech.logic.ConferencePermission;
 import com.v2tech.logic.GlobalHolder;
 import com.v2tech.logic.Group;
+import com.v2tech.logic.Registrant;
 import com.v2tech.logic.User;
 import com.v2tech.logic.UserDeviceConfig;
 import com.v2tech.logic.VMessage;
@@ -79,7 +79,7 @@ public class VideoActivityV2 extends Activity {
 
 	private static final int ATTENDEE_LISTENER = 21;
 	private static final int CONF_USER_DEVICE_EVENT = 23;
-	
+
 	private static final int NEW_DOC_NOTIFICATION = 50;
 	private static final int DOC_PAGE_NOTIFICATION = 51;
 	private static final int DOC_PAGE_ACTIVITE_NOTIFICATION = 52;
@@ -124,8 +124,8 @@ public class VideoActivityV2 extends Activity {
 	private Long mGroupId;
 	private Set<Attendee> mAttendeeList = new HashSet<Attendee>();
 	private DocumentService ds = new DocumentService();
-	
-	private Map<String , V2Doc> mDocs = new HashMap<String, V2Doc>(); 
+
+	private Map<String, V2Doc> mDocs = new HashMap<String, V2Doc>();
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -153,18 +153,17 @@ public class VideoActivityV2 extends Activity {
 		mMenuButton.setOnClickListener(mMenuButtonListener);
 		mMenuButtonContainer = (LinearLayout) findViewById(R.id.in_meeting_menu_layout);
 
-		mMenuMessageButton =  findViewById(R.id.in_meeting_menu_show_msg_button);
+		mMenuMessageButton = findViewById(R.id.in_meeting_menu_show_msg_button);
 		mMenuMessageButton.setTag("msg");
 		mMenuMessageButton.setOnClickListener(mMenuShowButtonListener);
 
-		mMenuAttendeeButton =  findViewById(R.id.in_meeting_menu_show_attendees_button);
+		mMenuAttendeeButton = findViewById(R.id.in_meeting_menu_show_attendees_button);
 		mMenuAttendeeButton.setTag("attendee");
 		mMenuAttendeeButton.setOnClickListener(mMenuShowButtonListener);
-		
-		mMenuDocButton =  findViewById(R.id.in_meeting_menu_show_doc_button);
+
+		mMenuDocButton = findViewById(R.id.in_meeting_menu_show_doc_button);
 		mMenuDocButton.setTag("doc");
 		mMenuDocButton.setOnClickListener(mMenuShowButtonListener);
-		
 
 		// mAttendeeArrowIV.setVisibility(View.INVISIBLE);
 		initConfsListener();
@@ -172,12 +171,15 @@ public class VideoActivityV2 extends Activity {
 		registerOrRemoveListener(true);
 
 		// initMenuFeature();
-		
-		//listen callback
+
+		// listen callback
 		ds.registerNewDocNotification(mVideoHandler, NEW_DOC_NOTIFICATION, null);
-		ds.registerDocDisplayNotification(mVideoHandler, DOC_DOWNLOADED_NOTIFICATION, null);
-		ds.registerdocPageActiveNotification(mVideoHandler, DOC_PAGE_ACTIVITE_NOTIFICATION, null);
-		ds.registerDocPageNotification(mVideoHandler, DOC_PAGE_NOTIFICATION, null);
+		ds.registerDocDisplayNotification(mVideoHandler,
+				DOC_DOWNLOADED_NOTIFICATION, null);
+		ds.registerdocPageActiveNotification(mVideoHandler,
+				DOC_PAGE_ACTIVITE_NOTIFICATION, null);
+		ds.registerDocPageNotification(mVideoHandler, DOC_PAGE_NOTIFICATION,
+				null);
 	}
 
 	private OnClickListener mMenuButtonListener = new OnClickListener() {
@@ -268,10 +270,13 @@ public class VideoActivityV2 extends Activity {
 
 					@Override
 					public void onClick(View v) {
-						if (VideoCaptureDevInfo.CreateVideoCaptureDevInfo().deviceList.size() > 1) {
+						if (VideoCaptureDevInfo.CreateVideoCaptureDevInfo().deviceList
+								.size() > 1) {
 							doReverseCamera();
 						} else {
-							Toast.makeText(mContext, R.string.error_no_second_camera, Toast.LENGTH_SHORT).show();
+							Toast.makeText(mContext,
+									R.string.error_no_second_camera,
+									Toast.LENGTH_SHORT).show();
 						}
 						mSettingWindow.dismiss();
 						mSettingArrowIV.setVisibility(View.INVISIBLE);
@@ -432,32 +437,28 @@ public class VideoActivityV2 extends Activity {
 			mMenuAttendeeButton.setBackgroundColor(Color.rgb(221, 221, 221));
 		}
 	}
-	
-	
-	
+
 	private void showOrHidenDocContainer(int visible) {
 		if (mDocContainer == null) {
 			mDocContainer = new VideoDocLayout(this);
-			
-			
+
 			RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
 					800, mVideoLayout.getMeasuredHeight());
 			lp.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
 			lp.addRule(RelativeLayout.RIGHT_OF, mMenuButtonContainer.getId());
 			mVideoLayoutMain.addView(mDocContainer, lp);
-			
+
 			mDocContainer.bringToFront();
 			mDocContainer.setVisibility(View.GONE);
 			synchronized (mDocs) {
-				for (Entry<String,V2Doc> e :mDocs.entrySet()) {
+				for (Entry<String, V2Doc> e : mDocs.entrySet()) {
 					mDocContainer.addDoc(e.getValue());
 				}
 			}
 			mDocContainer.updateCurrentDoc();
-			
+
 		}
-		if (visible == View.GONE
-				|| visible == mDocContainer.getVisibility()) {
+		if (visible == View.GONE || visible == mDocContainer.getVisibility()) {
 			mDocContainer.setVisibility(View.GONE);
 			mMenuDocButton.setBackgroundColor(Color.rgb(255, 255, 255));
 		} else {
@@ -465,9 +466,6 @@ public class VideoActivityV2 extends Activity {
 			mMenuDocButton.setBackgroundColor(Color.rgb(221, 221, 221));
 		}
 	}
-	
-	
-	
 
 	/**
 	 * 
@@ -608,8 +606,10 @@ public class VideoActivityV2 extends Activity {
 		mVideoLayout.removeAllViews();
 		registerOrRemoveListener(false);
 		cb.removeAttendeeListener(this.mVideoHandler, ATTENDEE_LISTENER, null);
-		ds.unRegisterNewDocNotification(mVideoHandler, NEW_DOC_NOTIFICATION, null);
-		ds.unRegisterDocDisplayNotification(mVideoHandler, DOC_DOWNLOADED_NOTIFICATION, null);
+		ds.unRegisterNewDocNotification(mVideoHandler, NEW_DOC_NOTIFICATION,
+				null);
+		ds.unRegisterDocDisplayNotification(mVideoHandler,
+				DOC_DOWNLOADED_NOTIFICATION, null);
 	}
 
 	@Override
@@ -787,8 +787,8 @@ public class VideoActivityV2 extends Activity {
 		}
 		// if already opened attendee's video, switch action to close
 		if (udc.isShowing()) {
-			cb.requestCloseVideoDevice(conf, udc, Message.obtain(mVideoHandler,
-					REQUEST_CLOSE_DEVICE_RESPONSE));
+			cb.requestCloseVideoDevice(conf, udc, new Registrant(mVideoHandler,
+					REQUEST_CLOSE_DEVICE_RESPONSE, null));
 
 			for (SurfaceViewW sw : mCurrentShowedSV) {
 				if (sw.udc == udc) {
@@ -894,7 +894,7 @@ public class VideoActivityV2 extends Activity {
 	class VideoHandler extends Handler {
 
 		@Override
-		public void handleMessage(Message msg) {
+		public synchronized void handleMessage(Message msg) {
 
 			switch (msg.what) {
 			case ONLY_SHOW_LOCAL_VIDEO:
@@ -919,13 +919,13 @@ public class VideoActivityV2 extends Activity {
 			case REQUEST_OPEN_OR_CLOSE_DEVICE:
 				if (msg.arg1 == 0) {
 					cb.requestCloseVideoDevice(conf,
-							(UserDeviceConfig) msg.obj, Message.obtain(
+							(UserDeviceConfig) msg.obj, new Registrant(
 									mVideoHandler,
-									REQUEST_CLOSE_DEVICE_RESPONSE));
+									REQUEST_CLOSE_DEVICE_RESPONSE, null));
 				} else if (msg.arg1 == 1) {
 					cb.requestOpenVideoDevice(conf, (UserDeviceConfig) msg.obj,
-							Message.obtain(mVideoHandler,
-									REQUEST_OPEN_DEVICE_RESPONSE));
+							new Registrant(mVideoHandler,
+									REQUEST_OPEN_DEVICE_RESPONSE, null));
 				}
 				break;
 			case NOTIFICATION_KICKED:
@@ -937,22 +937,13 @@ public class VideoActivityV2 extends Activity {
 				break;
 			case REQUEST_ENTER_CONF:
 				cb.requestEnterConference(new Conference((Long) msg.obj),
-						Message.obtain(this, REQUEST_ENTER_CONF_RESPONSE));
+						new Registrant(this, REQUEST_ENTER_CONF_RESPONSE, null));
 				break;
 			case REQUEST_ENTER_CONF_RESPONSE:
-				AsynResult ar = (AsynResult) msg.obj;
-				if (ar.getState() == AsynResult.AsynState.SUCCESS) {
-					RequestEnterConfResponse recr = (RequestEnterConfResponse) ar
-							.getObject();
-					if (recr.getResult() == JNIResponse.Result.SUCCESS) {
+				RequestEnterConfResponse recr = (RequestEnterConfResponse) msg.obj;
+				if (recr.getResult() == JNIResponse.Result.SUCCESS) {
 
-					} else {
-						Toast.makeText(mContext,
-								R.string.error_request_enter_conference,
-								Toast.LENGTH_SHORT).show();
-					}
-
-				} else if (ar.getState() == AsynResult.AsynState.TIME_OUT) {
+				} else if (recr.getResult() == RequestEnterConfResponse.Result.TIME_OUT) {
 					Toast.makeText(mContext,
 							R.string.error_request_enter_conference_time_out,
 							Toast.LENGTH_SHORT).show();
@@ -961,6 +952,7 @@ public class VideoActivityV2 extends Activity {
 							R.string.error_request_enter_conference,
 							Toast.LENGTH_SHORT).show();
 				}
+
 				if (mWaitingDialog != null && mWaitingDialog.isShowing()) {
 					mWaitingDialog.dismiss();
 
@@ -969,25 +961,31 @@ public class VideoActivityV2 extends Activity {
 			case REQUEST_EXIT_CONF:
 				cb.requestExitConference(new Conference((Long) msg.obj), null);
 				break;
-				
+
 			case NEW_DOC_NOTIFICATION:
-				V2Doc vd = (V2Doc)((DocumentService.AsyncResult)(msg.obj)).getResult();
+				V2Doc vd = (V2Doc) ((DocumentService.AsyncResult) (msg.obj))
+						.getResult();
 				synchronized (mDocs) {
 					mDocs.put(vd.getId(), vd);
 				}
 				break;
 			case DOC_PAGE_NOTIFICATION:
-				V2Doc.PageArray vpr = (V2Doc.PageArray)((DocumentService.AsyncResult)(msg.obj)).getResult();
+				V2Doc.PageArray vpr = (V2Doc.PageArray) ((DocumentService.AsyncResult) (msg.obj))
+						.getResult();
 				V2Doc vc = mDocs.get(vpr.getDocId());
 				for (V2Doc.Page p : vpr.getPr()) {
-					vc.addPage(p);
+					V2Doc.Page existP = vc.findPage(p.getNo());
+					if (existP == null) {
+						vc.addPage(p);
+					}
 				}
 				break;
 			case DOC_PAGE_ACTIVITE_NOTIFICATION:
 				break;
-			
+
 			case DOC_DOWNLOADED_NOTIFICATION:
-				V2Doc.Page vp = (V2Doc.Page)((DocumentService.AsyncResult)(msg.obj)).getResult();
+				V2Doc.Page vp = (V2Doc.Page) ((DocumentService.AsyncResult) (msg.obj))
+						.getResult();
 				V2Doc cache = mDocs.get(vp.getDocId());
 				Page ppC = cache.findPage(vp.getNo());
 				if (ppC == null) {
@@ -995,7 +993,6 @@ public class VideoActivityV2 extends Activity {
 				} else {
 					ppC.setFilePath(vp.getFilePath());
 				}
-				//TODO show picture
 				break;
 
 			}

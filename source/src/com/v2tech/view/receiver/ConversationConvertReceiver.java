@@ -10,6 +10,8 @@ import android.net.Uri;
 
 import com.v2tech.db.ContentDescriptor;
 import com.v2tech.logic.GlobalHolder;
+import com.v2tech.logic.Group;
+import com.v2tech.logic.Group.GroupType;
 import com.v2tech.logic.User;
 import com.v2tech.logic.VMessage;
 import com.v2tech.util.V2Log;
@@ -17,6 +19,7 @@ import com.v2tech.view.JNIService;
 import com.v2tech.view.PublicIntent;
 import com.v2tech.view.vo.ContactConversation;
 import com.v2tech.view.vo.Conversation;
+import com.v2tech.view.vo.CrowdConversation;
 
 public class ConversationConvertReceiver extends BroadcastReceiver {
 
@@ -34,7 +37,11 @@ public class ConversationConvertReceiver extends BroadcastReceiver {
 				V2Log.e("Invalid msgId: " + msgId);
 			} else {
 				int mid = Integer.parseInt(msgId);
-				updateContactsConversation(fromUid, mid, gid);
+				if (gid != 0) {
+					updateGroupConversation(gid, fromUid, mid);
+				} else {
+					updateContactsConversation(fromUid, mid);
+				}
 			}
 		} else if (PublicIntent.REQUEST_UPDATE_CONVERSATION.equals(action)) {
 			long extId = intent.getLongExtra("extId", 0);
@@ -71,13 +78,7 @@ public class ConversationConvertReceiver extends BroadcastReceiver {
 				new String[] { extId + "", type });
 	}
 
-	/**
-	 * Convert new message to update conversation broadcast
-	 * 
-	 * @param fromUid
-	 * @param msgId
-	 */
-	private void updateContactsConversation(long fromUid, int msgId, long gid) {
+	private void updateGroupConversation(long gid, long fromUid, int msgId) {
 		int type = -1;
 		String content = null;
 		String dateString = null;
@@ -98,10 +99,59 @@ public class ConversationConvertReceiver extends BroadcastReceiver {
 		}
 		cur.close();
 
+		// FIXME if doesn't receive group information yet, how to do?
+		Group g = GlobalHolder.getInstance().getGroupById(GroupType.CHATING,
+				gid);
+		Conversation cov = GlobalHolder.getInstance().findConversationByType(
+				Conversation.TYPE_GROUP, gid);
+		if (cov == null) {
+			cov = new CrowdConversation(g);
+			GlobalHolder.getInstance().addConversation(cov);
+		}
 		
+		Intent i = new Intent(PublicIntent.UPDATE_CONVERSATION);
+		i.addCategory(PublicIntent.DEFAULT_CATEGORY);
+		i.putExtra("extId", gid);
+		i.putExtra("type", Conversation.TYPE_GROUP);
+		
+		if (type != VMessage.MessageType.IMAGE.getIntValue()) {
+			i.putExtra("date", dateString);
+			i.putExtra("content", content);
+		}
+		notif =  GlobalHolder.getInstance().CURRENT_CONVERSATION == cov ? false : true;
+		i.putExtra("noti", notif);
+		mContext.sendBroadcast(i);
 
-		notif = (fromUid == GlobalHolder.getInstance().CURRENT_CONVERSATION_USER ? false
-				: true);
+	}
+
+	/**
+	 * Convert new message to update conversation broadcast
+	 * 
+	 * @param fromUid
+	 * @param msgId
+	 */
+	private void updateContactsConversation(long fromUid, int msgId) {
+		int type = -1;
+		String content = null;
+		String dateString = null;
+		boolean notif = true;
+		Uri uri = ContentUris.withAppendedId(
+				ContentDescriptor.Messages.CONTENT_URI, msgId);
+
+		Cursor cur = mContext.getContentResolver().query(uri,
+				ContentDescriptor.Messages.Cols.ALL_CLOS, null, null, null);
+
+		if (cur.moveToNext()) {
+			content = cur.getString(5);
+			// message type
+			type = cur.getInt(6);
+			// date time
+			dateString = cur.getString(7);
+
+		}
+		cur.close();
+
+	
 
 		cur = mContext.getContentResolver().query(
 				ContentDescriptor.Conversation.CONTENT_URI,
@@ -137,10 +187,11 @@ public class ConversationConvertReceiver extends BroadcastReceiver {
 
 			ContentValues conCv = new ContentValues();
 			conCv.put(ContentDescriptor.Conversation.Cols.EXT_ID, fromUid);
+
 			conCv.put(ContentDescriptor.Conversation.Cols.TYPE,
-					Conversation.TYPE_CONTACT);
+						Conversation.TYPE_GROUP);
 			conCv.put(ContentDescriptor.Conversation.Cols.EXT_NAME,
-					fromUser == null? "":fromUser.getName());
+					fromUser == null ? "" : fromUser.getName());
 			conCv.put(ContentDescriptor.Conversation.Cols.NOTI_FLAG,
 					notif ? Conversation.NOTIFICATION : Conversation.NONE);
 			conCv.put(ContentDescriptor.Conversation.Cols.OWNER, GlobalHolder
@@ -171,14 +222,11 @@ public class ConversationConvertReceiver extends BroadcastReceiver {
 
 		}
 
+		notif =  GlobalHolder.getInstance().CURRENT_CONVERSATION == c ? false : true;
 		Intent i = new Intent(PublicIntent.UPDATE_CONVERSATION);
 		i.addCategory(PublicIntent.DEFAULT_CATEGORY);
 		i.putExtra("extId", fromUid);
-		if (gid == 0) {
-			i.putExtra("type", Conversation.TYPE_CONTACT);
-		} else {
-			i.putExtra("type", Conversation.TYPE_GROUP);
-		}
+		i.putExtra("type", Conversation.TYPE_CONTACT);
 		if (type != VMessage.MessageType.IMAGE.getIntValue()) {
 			i.putExtra("date", dateString);
 			i.putExtra("content", content);

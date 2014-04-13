@@ -6,7 +6,7 @@ import java.util.Map;
 import android.os.Handler;
 import android.os.Message;
 
-import com.v2tech.logic.AsynResult;
+import com.v2tech.logic.Registrant;
 import com.v2tech.logic.jni.JNIResponse;
 import com.v2tech.util.V2Log;
 
@@ -25,7 +25,7 @@ public abstract class AbstractHandler extends Handler {
 	private Map<Integer, Meta> metaHolder = new HashMap<Integer, Meta>();
 
 	protected Message initTimeoutMessage(int mointorMessageID, Object obj,
-			long timeOutSec, Message caller) {
+			long timeOutSec, Registrant caller) {
 		Message msg = Message.obtain(this, REQUEST_TIME_OUT, mointorMessageID,
 				0, obj);
 		metaHolder.put(Integer.valueOf(mointorMessageID), new Meta(
@@ -34,7 +34,7 @@ public abstract class AbstractHandler extends Handler {
 		return msg;
 	}
 
-	protected Message removeTimeoutMessage(int mointorMessageID) {
+	protected Registrant removeTimeoutMessage(int mointorMessageID) {
 		Meta meta = metaHolder.get(Integer.valueOf(mointorMessageID));
 		metaHolder.remove(Integer.valueOf(mointorMessageID));
 		if (meta != null) {
@@ -44,13 +44,21 @@ public abstract class AbstractHandler extends Handler {
 			return null;
 		}
 	}
+	
+	
+	protected void sendResult(Registrant caller, Object obj) {
+		Message result = Message.obtain();
+		result.what = caller.getWhat();
+		result.obj = obj; 
+		caller.getHandler().sendMessage(result);
+	}
 
 	class Meta {
 		int mointorMessageID;
-		Message caller;
+		Registrant caller;
 		Message timeoutMessage;
 
-		public Meta(int mointorMessageID, Message caller, Message timeoutMessage) {
+		public Meta(int mointorMessageID, Registrant caller, Message timeoutMessage) {
 			super();
 			this.mointorMessageID = mointorMessageID;
 			this.caller = caller;
@@ -66,10 +74,7 @@ public abstract class AbstractHandler extends Handler {
 		switch (msg.what) {
 		case REQUEST_TIME_OUT:
 			Meta meta = metaHolder.get(Integer.valueOf(msg.arg1));
-			if (meta != null && meta.caller != null) {
-				Object origObject = meta.caller.obj;
-				meta.caller.obj = new AsynResult(AsynResult.AsynState.TIME_OUT,
-						null);
+			if (meta != null && meta.caller != null ) {
 				if (msg.obj != null) {
 					V2Log.d(msg.obj.getClass().getName()+"   "+ msg.what);
 				}
@@ -78,25 +83,34 @@ public abstract class AbstractHandler extends Handler {
 				}
 				JNIResponse jniRes = (JNIResponse) msg.obj;
 				if (jniRes == null) {
-					jniRes = new JNIResponse(JNIResponse.Result.FAILED);
+					jniRes = new JNIResponse(JNIResponse.Result.TIME_OUT);
 				}
-				jniRes.callerObject = origObject;
-				caller = meta.caller;
+				jniRes.callerObject = meta.caller.getObject();
+				if (meta.caller.getHandler() != null) {
+					caller = Message.obtain(meta.caller.getHandler(), meta.caller.getWhat());
+				} else {
+					V2Log.w(" message no target:" + meta.caller);
+				}
 			} else {
 				V2Log.w("Doesn't find time out message in the queue :" + msg.arg1);
 			}
 			break;
 			//Handle normal message 
 		default:
-			caller = removeTimeoutMessage(msg.what);
-			if (caller == null) {
+			Registrant resgister = removeTimeoutMessage(msg.what);
+			if (resgister == null) {
 				V2Log.w(this.getClass().getName()+ " Igore message client don't expect callback :"+msg.what);
 				return;
 			}
-			Object origObject = caller.obj;
-			caller.obj = new AsynResult(AsynResult.AsynState.SUCCESS, msg.obj);
-			JNIResponse jniRes = (JNIResponse) msg.obj;
-			jniRes.callerObject = origObject;
+			Object origObject = resgister.getObject();
+			if (resgister.getHandler() != null) {
+				caller = Message.obtain(resgister.getHandler(), resgister.getWhat());
+				JNIResponse jniRes = (JNIResponse) msg.obj;
+				jniRes.callerObject = origObject;
+				caller.obj =  jniRes;
+			} else {
+				V2Log.w("Doesn't find time out message in the queue :" + msg.arg1);
+			}
 			break;
 		}
 		

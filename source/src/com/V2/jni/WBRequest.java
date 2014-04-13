@@ -66,6 +66,11 @@ public class WBRequest {
 			int nPageID) {
 		Log.e("WBRequest UI", "OnWBoardPageList " + szWBoardID + " "
 				+ szPageData + " " + nPageID);
+		for (WeakReference<WBRequestCallback> wr : mCallbacks) {
+			if (wr != null && wr.get() != null) {
+				wr.get().OnWBoardPageList(szWBoardID, szPageData, nPageID);
+			}
+		}
 	}
 
 	// 3d4805676-0f02-4fd6-bf98-b8166832e51a 1

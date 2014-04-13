@@ -50,7 +50,9 @@
             android:id="@+id/video_doc_navgator"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal|center_vertical"
             android:layout_weight="0.25"
+            android:gravity="center"
             android:text="TextView" />
 
         <ImageView

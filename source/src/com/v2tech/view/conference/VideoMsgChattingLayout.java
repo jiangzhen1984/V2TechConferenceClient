@@ -18,7 +18,6 @@ public class VideoMsgChattingLayout extends LinearLayout {
 	private ChattingListener listener;
 	private ScrollView  mScroller;
 	private LinearLayout mMsgContainer;
-	private ScrollView mScrollor;
 	private View mSendButton;
 	private TextView mContentTV;
 	
@@ -52,7 +51,6 @@ public class VideoMsgChattingLayout extends LinearLayout {
 		
 		this.mScroller = (ScrollView)view.findViewById(R.id.video_msg_container_scroller);
 		this.mMsgContainer = (LinearLayout)view.findViewById(R.id.video_msg_container);
-		this.mScrollor = (ScrollView)view.findViewById(R.id.video_msg_container_scroller);
 		this.mContentTV = (TextView)view.findViewById(R.id.video_msg_chatting_layout_msg_content);
 		this.mSendButton = view.findViewById(R.id.video_msg_chatting_layout_send_button);
 		mSendButton.setOnClickListener(new OnClickListener() {
@@ -60,6 +58,9 @@ public class VideoMsgChattingLayout extends LinearLayout {
 			@Override
 			public void onClick(View view) {
 				if (listener != null) {
+					if (mContentTV.getText() == null || mContentTV.getText().toString().trim().isEmpty()) {
+						return;
+					}
 					VMessage vm = new VMessage(GlobalHolder.getInstance().getCurrentUser(), null, mContentTV.getText().toString());
 					addNewMessage(vm);
 					listener.requestSendMsg(vm);
@@ -89,11 +90,11 @@ public class VideoMsgChattingLayout extends LinearLayout {
 		tv.setPadding(15, 5, 15, 5);
 		tv.setTextColor(Color.BLACK);
 		this.mMsgContainer.addView(tv);
-		this.mScrollor.post(new Runnable() {
+		this.mScroller.post(new Runnable() {
 
 			@Override
 			public void run() {
-				mScrollor.scrollTo(0, mMsgContainer.getChildAt(mMsgContainer.getChildCount() -1 ).getBottom());
+				mScroller.scrollTo(0, mMsgContainer.getChildAt(mMsgContainer.getChildCount() -1 ).getBottom());
 			}
 			
 		});

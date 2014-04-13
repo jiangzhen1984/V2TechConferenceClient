@@ -55,6 +55,7 @@ import com.v2tech.view.conference.VideoActivityV2;
 import com.v2tech.view.vo.ConferenceConversation;
 import com.v2tech.view.vo.ContactConversation;
 import com.v2tech.view.vo.Conversation;
+import com.v2tech.view.vo.CrowdConversation;
 
 public class ConversationsTabFragment extends Fragment {
 
@@ -101,24 +102,18 @@ public class ConversationsTabFragment extends Fragment {
 
 	private ConferenceService cb = new ConferenceService();
 
-	private static final int TAG_CONF = 1;
-
-	private static final int TAG_MSG_COV = 2;
-
-	private static final int TAG_GROUP_CHATTING_COV = 3;
-
-	private int mCurrentTabFlag;
+	private String mCurrentTabFlag;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		String tag = this.getArguments().getString("tag");
 		if (PublicIntent.TAG_CONF.equals(tag)) {
-			mCurrentTabFlag = TAG_CONF;
+			mCurrentTabFlag = Conversation.TYPE_CONFERNECE;
 		} else if (PublicIntent.TAG_COV.equals(tag)) {
-			mCurrentTabFlag = TAG_MSG_COV;
+			mCurrentTabFlag = Conversation.TYPE_CONTACT;
 		} else if (PublicIntent.TAG_GROUP.equals(tag)) {
-			mCurrentTabFlag = TAG_GROUP_CHATTING_COV;
+			mCurrentTabFlag = Conversation.TYPE_GROUP;
 		}
 		getActivity().registerReceiver(receiver, getIntentFilter());
 		mContext = getActivity();
@@ -148,17 +143,17 @@ public class ConversationsTabFragment extends Fragment {
 			rootView.setOnTouchListener(mTouchListener);
 			mConversationsListView.setOnTouchListener(mTouchListener);
 
-			if (mCurrentTabFlag == TAG_GROUP_CHATTING_COV
-					|| mCurrentTabFlag == TAG_MSG_COV) {
+			if (mCurrentTabFlag.equals(Conversation.TYPE_GROUP)
+					|| mCurrentTabFlag.equals(Conversation.TYPE_CONTACT)) {
 				mFeatureIV.setVisibility(View.INVISIBLE);
 			}
 
 			TextView tv = (TextView) rootView.findViewById(R.id.fragment_title);
-			if (mCurrentTabFlag == TAG_CONF) {
+			if (mCurrentTabFlag.equals(Conversation.TYPE_CONFERNECE)) {
 				tv.setText(R.string.tab_conference_name);
-			} else if (mCurrentTabFlag == TAG_MSG_COV) {
+			} else if (mCurrentTabFlag.equals(Conversation.TYPE_CONTACT)) {
 				tv.setText(R.string.tab_conversation_name);
-			} else if (mCurrentTabFlag == TAG_GROUP_CHATTING_COV) {
+			} else if (mCurrentTabFlag.equals(Conversation.TYPE_GROUP)) {
 				tv.setText(R.string.tab_group_name);
 			}
 
@@ -221,7 +216,7 @@ public class ConversationsTabFragment extends Fragment {
 			intentFilter
 					.addAction(JNIService.JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION);
 			// Only conference conversation fragment can hand conference
-			if (mCurrentTabFlag == TAG_CONF) {
+			if (mCurrentTabFlag.equals(Conversation.TYPE_CONFERNECE)) {
 				intentFilter
 						.addAction(JNIService.JNI_BROADCAST_CONFERENCE_INVATITION);
 				intentFilter
@@ -286,9 +281,9 @@ public class ConversationsTabFragment extends Fragment {
 		Conversation cov = new ConferenceConversation(g);
 		final GroupLayout gp = new GroupLayout(this.getActivity(), cov);
 		gp.updateNotificator(flag);
-		if (mCurrentTabFlag == TAG_CONF) {
+		if (mCurrentTabFlag.equals(Conversation.TYPE_CONFERNECE)) {
 			gp.setOnClickListener(mEnterConfListener);
-		} else if (mCurrentTabFlag == TAG_GROUP_CHATTING_COV) {
+		} else if (mCurrentTabFlag.equals(Conversation.TYPE_GROUP)) {
 
 			gp.setOnClickListener(new OnClickListener() {
 
@@ -514,11 +509,13 @@ public class ConversationsTabFragment extends Fragment {
 
 	private void updateConversation(long extId, String mType, String content,
 			String date, boolean showNotification) {
+		if (extId == 0) {
+			return;
+		}
 		boolean foundFlag = false;
 		GroupLayout gl = null;
 		for (ScrollItem item : mItemList) {
-			if (item.cov.getExtId() == extId
-					&& Conversation.TYPE_CONTACT.equals(item.cov.getType())) {
+			if (item.cov.getExtId() == extId) {
 				item.cov.setNotiFlag(showNotification ? Conversation.NOTIFICATION
 						: Conversation.NONE);
 				gl = (GroupLayout) item.gp;
@@ -529,29 +526,34 @@ public class ConversationsTabFragment extends Fragment {
 
 		if (!foundFlag) {
 			Conversation cov = (ContactConversation) GlobalHolder.getInstance()
-					.findConversationByType(Conversation.TYPE_CONTACT, extId);
+					.findConversationByType(mCurrentTabFlag, extId);
 			if (cov == null) {
-				cov = new ContactConversation(GlobalHolder.getInstance()
-						.getUser(extId),
-						showNotification ? Conversation.NOTIFICATION
-								: Conversation.NONE);
+				if (mCurrentTabFlag.equals(Conversation.TYPE_CONTACT)) {
+					cov = new ContactConversation(GlobalHolder.getInstance()
+							.getUser(extId),
+							showNotification ? Conversation.NOTIFICATION
+									: Conversation.NONE);
+				} else if (mCurrentTabFlag.equals(Conversation.TYPE_GROUP)) {
+					cov = new CrowdConversation(GlobalHolder.getInstance()
+							.getGroupById(GroupType.CHATING, extId));
+				}
 				GlobalHolder.getInstance().addConversation(cov);
-				// TODO insert to database
-
-				User fromUser = GlobalHolder.getInstance().getUser(extId);
-				ContentValues conCv = new ContentValues();
-				conCv.put(ContentDescriptor.Conversation.Cols.EXT_ID, extId);
-				conCv.put(ContentDescriptor.Conversation.Cols.TYPE,
-						Conversation.TYPE_CONTACT);
-				conCv.put(ContentDescriptor.Conversation.Cols.EXT_NAME,
-						fromUser == null ? "" : fromUser.getName());
-				conCv.put(ContentDescriptor.Conversation.Cols.NOTI_FLAG,
-						showNotification ? Conversation.NOTIFICATION
-								: Conversation.NONE);
-				conCv.put(ContentDescriptor.Conversation.Cols.OWNER,
-						GlobalHolder.getInstance().getCurrentUserId());
-				mContext.getContentResolver().insert(
-						ContentDescriptor.Conversation.CONTENT_URI, conCv);
+				if (mCurrentTabFlag.equals(Conversation.TYPE_CONTACT)) {
+					User fromUser = GlobalHolder.getInstance().getUser(extId);
+					ContentValues conCv = new ContentValues();
+					conCv.put(ContentDescriptor.Conversation.Cols.EXT_ID, extId);
+					conCv.put(ContentDescriptor.Conversation.Cols.TYPE,
+							Conversation.TYPE_CONTACT);
+					conCv.put(ContentDescriptor.Conversation.Cols.EXT_NAME,
+							fromUser == null ? "" : fromUser.getName());
+					conCv.put(ContentDescriptor.Conversation.Cols.NOTI_FLAG,
+							showNotification ? Conversation.NOTIFICATION
+									: Conversation.NONE);
+					conCv.put(ContentDescriptor.Conversation.Cols.OWNER,
+							GlobalHolder.getInstance().getCurrentUserId());
+					mContext.getContentResolver().insert(
+							ContentDescriptor.Conversation.CONTENT_URI, conCv);
+				}
 
 			}
 			gl = new GroupLayout(mContext, cov);
@@ -706,17 +708,13 @@ public class ConversationsTabFragment extends Fragment {
 						intent.getExtras().getString("content"),
 						intent.getExtras().getString("date"),
 						intent.getExtras().getBoolean("noti") };
-				if ((mCurrentTabFlag == TAG_MSG_COV && Conversation.TYPE_CONTACT
-						.equals(ar[1]))
-						|| (mCurrentTabFlag == TAG_CONF
-								&& Conversation.TYPE_CONFERNECE.equals(ar[1]) || mCurrentTabFlag == TAG_GROUP_CHATTING_COV
-								&& Conversation.TYPE_GROUP.equals(ar[1]))) {
+				if (mCurrentTabFlag.equals(ar[1])) {
 					Message.obtain(mHandler, UPDATE_CONVERSATION, ar)
 							.sendToTarget();
 				}
 			} else if (JNIService.JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION
 					.equals(intent.getAction())) {
-				//FIXME crash
+				// FIXME crash
 				for (ScrollItem item : mItemList) {
 					if (item.cov.getType().equals(Conversation.TYPE_CONFERNECE)) {
 						Group g = ((ConferenceConversation) item.cov)
@@ -777,7 +775,7 @@ public class ConversationsTabFragment extends Fragment {
 			switch (msg.what) {
 			case FILL_CONFS_LIST:
 				// FIXME optimze code
-				if (mCurrentTabFlag == TAG_CONF) {
+				if (mCurrentTabFlag.equals(Conversation.TYPE_CONFERNECE)) {
 					mConferenceList = GlobalHolder.getInstance().getGroup(
 							Group.GroupType.CONFERENCE);
 					if (mConferenceList != null && mConferenceList.size() > 0) {
@@ -786,7 +784,7 @@ public class ConversationsTabFragment extends Fragment {
 							isLoaded = true;
 						}
 					}
-				} else if (mCurrentTabFlag == TAG_GROUP_CHATTING_COV) {
+				} else if (mCurrentTabFlag.equals(Conversation.TYPE_GROUP)) {
 					mConferenceList = GlobalHolder.getInstance().getGroup(
 							Group.GroupType.CHATING);
 					if (mConferenceList != null && mConferenceList.size() > 0) {
@@ -796,7 +794,7 @@ public class ConversationsTabFragment extends Fragment {
 						}
 					}
 				}
-				if (mCurrentTabFlag == TAG_MSG_COV) {
+				if (mCurrentTabFlag.equals(Conversation.TYPE_CONTACT)) {
 					if (!isLoadedCov) {
 						loadConversation();
 					}

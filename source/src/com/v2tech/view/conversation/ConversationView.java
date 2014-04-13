@@ -41,7 +41,6 @@ import com.v2tech.logic.User;
 import com.v2tech.logic.VImageMessage;
 import com.v2tech.logic.VMessage;
 import com.v2tech.service.ChatService;
-import com.v2tech.util.V2Log;
 import com.v2tech.view.JNIService;
 import com.v2tech.view.PublicIntent;
 import com.v2tech.view.cus.ItemScrollView;
@@ -68,7 +67,7 @@ public class ConversationView extends Activity {
 	private long user1Id;
 
 	private long user2Id;
-	
+
 	private long groupId;
 
 	private String user2Name;
@@ -110,6 +109,8 @@ public class ConversationView extends Activity {
 	private User local;
 	private User remote;
 
+	private Conversation mCurrentConv;
+
 	private boolean isStopped;
 
 	@Override
@@ -132,9 +133,9 @@ public class ConversationView extends Activity {
 			@Override
 			public void onClick(View arg0) {
 				scrollToBottom();
-				
+
 			}
-			
+
 		});
 		mReturnButtonTV = (TextView) findViewById(R.id.contact_detail_return_button);
 		// mReturnButtonTV.setOnClickListener(new OnClickListener() {
@@ -184,7 +185,7 @@ public class ConversationView extends Activity {
 		local = GlobalHolder.getInstance().getUser(user1Id);
 		remote = GlobalHolder.getInstance().getUser(user2Id);
 		if (remote != null && remote.getName() != null) {
-			user2Name =  remote.getName();
+			user2Name = remote.getName();
 		}
 
 		lh = new LocalHandler();
@@ -202,13 +203,20 @@ public class ConversationView extends Activity {
 			backEndHandler = new BackendHandler(thread.getLooper());
 		}
 
+		if (groupId != 0) {
+			mCurrentConv = GlobalHolder.getInstance().findConversationByType(
+					Conversation.TYPE_GROUP, groupId);
+		} else {
+			mCurrentConv = GlobalHolder.getInstance().findConversationByType(
+					Conversation.TYPE_CONTACT, user2Id);
+		}
+
 		IntentFilter filter = new IntentFilter();
 		filter.addAction(JNIService.JNI_BROADCAST_NEW_MESSAGE);
 		filter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
 		registerReceiver(receiver, filter);
 
-		if (GlobalHolder.getInstance().findConversationByType(
-				Conversation.TYPE_CONTACT, user2Id) != null) {
+		if (mCurrentConv != null) {
 			notificateConversationUpdate(null, null);
 		}
 	}
@@ -231,12 +239,10 @@ public class ConversationView extends Activity {
 		NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 		// mId allows you to update the notification later on.
 		mNotificationManager.cancel(PublicIntent.MESSAGE_NOTIFICATION_ID);
-		GlobalHolder.getInstance().CURRENT_CONVERSATION_USER = user2Id;
+		GlobalHolder.getInstance().CURRENT_CONVERSATION = mCurrentConv;
 		isStopped = false;
 	}
 
-	
-	
 	@Override
 	protected void onResume() {
 		super.onResume();
@@ -257,16 +263,21 @@ public class ConversationView extends Activity {
 		super.onDestroy();
 		this.unregisterReceiver(receiver);
 		cleanCache();
-		GlobalHolder.getInstance().CURRENT_CONVERSATION_USER = 0;
+		GlobalHolder.getInstance().CURRENT_CONVERSATION = null;
+		;
 	}
-	
-	
+
 	private void scrollToBottom() {
-		if (mMessagesContainer != null && mMessagesContainer.getChildCount() > 0) {
+		if (mMessagesContainer != null
+				&& mMessagesContainer.getChildCount() > 0) {
 			mScrollView.postDelayed(new Runnable() {
 				@Override
 				public void run() {
-					mScrollView.scrollTo(0, mMessagesContainer.getChildAt(mMessagesContainer.getChildCount() - 1).getBottom());
+					mScrollView.scrollTo(
+							0,
+							mMessagesContainer.getChildAt(
+									mMessagesContainer.getChildCount() - 1)
+									.getBottom());
 				}
 			}, 500);
 		}
@@ -402,7 +413,7 @@ public class ConversationView extends Activity {
 
 	}
 
-	//FIXME optimize code
+	// FIXME optimize code
 	private String removeEmoji(String content) {
 		byte[] bys = new byte[] { -16, -97 };
 		byte[] bc = content.getBytes();
@@ -422,12 +433,12 @@ public class ConversationView extends Activity {
 	private void notificateConversationUpdate(String content, String date) {
 		Intent i = new Intent(PublicIntent.REQUEST_UPDATE_CONVERSATION);
 		i.addCategory(PublicIntent.DEFAULT_CATEGORY);
-		i.putExtra("extId", user2Id);
-		//TODO update type for group message
 		if (groupId == 0) {
+			i.putExtra("extId", user2Id);
 			i.putExtra("type", Conversation.TYPE_CONTACT);
 		} else {
 			i.putExtra("type", Conversation.TYPE_GROUP);
+			i.putExtra("extId", groupId);
 		}
 		i.putExtra("date", date);
 		i.putExtra("content", content);
@@ -489,13 +500,23 @@ public class ConversationView extends Activity {
 
 	private List<VMessage> loadMessages() {
 
-		String selection = "(" + ContentDescriptor.Messages.Cols.FROM_USER_ID
-				+ "=? and " + ContentDescriptor.Messages.Cols.TO_USER_ID
-				+ "=? ) or " + "("
-				+ ContentDescriptor.Messages.Cols.FROM_USER_ID + "=? and "
-				+ ContentDescriptor.Messages.Cols.TO_USER_ID + "=? ) ";
-		String[] args = new String[] { user1Id + "", user2Id + "",
-				user2Id + "", user1Id + "" };
+		String selection = null;
+		String[] args = null;
+
+		if (Conversation.TYPE_CONTACT.equals(this.mCurrentConv.getType())) {
+			selection = "(" + ContentDescriptor.Messages.Cols.FROM_USER_ID
+					+ "=? and " + ContentDescriptor.Messages.Cols.TO_USER_ID
+					+ "=? ) or " + "("
+					+ ContentDescriptor.Messages.Cols.FROM_USER_ID + "=? and "
+					+ ContentDescriptor.Messages.Cols.TO_USER_ID + "=? ) and "
+					+ ContentDescriptor.Messages.Cols.GROUP_ID + "=0 ";
+			args = new String[] { user1Id + "", user2Id + "", user2Id + "",
+					user1Id + "" };
+		} else if (Conversation.TYPE_GROUP.equals(this.mCurrentConv.getType())) {
+			selection = "(" + ContentDescriptor.Messages.Cols.GROUP_ID
+					+ "=? ) ";
+			args = new String[] { this.groupId + "" };
+		}
 
 		Cursor mCur = this.getContentResolver().query(
 				ContentDescriptor.Messages.CONTENT_URI,
@@ -527,8 +548,8 @@ public class ConversationView extends Activity {
 		return array;
 	}
 
-	
 	private boolean pending = false;
+
 	private void queryAndAddMessage(final int mid) {
 		Uri uri = ContentUris.withAppendedId(
 				ContentDescriptor.Messages.CONTENT_URI, mid);
@@ -538,7 +559,8 @@ public class ConversationView extends Activity {
 		MessageBodyView mv = null;
 		while (mCur.moveToNext()) {
 			VMessage m = extractMsg(mCur);
-			if (groupId == m.mGroupId || (m.getUser().getmUserId() == user2Id && groupId == 0)) {
+			if (groupId == m.mGroupId
+					|| (m.getUser().getmUserId() == user2Id && m.mGroupId == 0)) {
 				mv = new MessageBodyView(this, m, true);
 				mv.setCallback(listener);
 				mMessagesContainer.addView(mv);
@@ -564,7 +586,8 @@ public class ConversationView extends Activity {
 		if (cur.isClosed()) {
 			throw new RuntimeException(" cursor is closed");
 		}
-		DateFormat dp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+		DateFormat dp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss",
+				Locale.getDefault());
 
 		int id = cur.getInt(0);
 		long localUserId = cur.getLong(1);
@@ -575,7 +598,7 @@ public class ConversationView extends Activity {
 		int type = cur.getInt(6);
 		// date time
 		String dateString = cur.getString(7);
-		
+
 		long groupId = cur.getLong(9);
 
 		User lo = GlobalHolder.getInstance().getUser(localUserId);

@@ -42,12 +42,13 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.v2tech.R;
-import com.v2tech.logic.AsynResult;
 import com.v2tech.logic.Conference;
 import com.v2tech.logic.GlobalHolder;
 import com.v2tech.logic.Group;
 import com.v2tech.logic.Group.GroupType;
+import com.v2tech.logic.Registrant;
 import com.v2tech.logic.User;
+import com.v2tech.logic.jni.JNIResponse;
 import com.v2tech.logic.jni.RequestConfCreateResponse;
 import com.v2tech.service.ConferenceService;
 import com.v2tech.view.cus.DateTimePicker;
@@ -476,7 +477,7 @@ public class ConferenceCreateActivity extends Activity {
 			List<User> l = new ArrayList<User>(mAttendeeList);
 			conf = new Conference(title, startTimeStr, null, l);
 			cs.createConference(conf,
-					Message.obtain(mLocalHandler, CREATE_CONFERENC_RESP));
+					new Registrant(mLocalHandler, CREATE_CONFERENC_RESP, null));
 			view.setEnabled(false);
 		}
 
@@ -612,13 +613,11 @@ public class ConferenceCreateActivity extends Activity {
 				updateSearchedUserList((List<User>) msg.obj);
 				break;
 			case CREATE_CONFERENC_RESP:
-				AsynResult ar = (AsynResult) msg.obj;
-				if (ar.getState() != AsynResult.AsynState.SUCCESS) {
+				RequestConfCreateResponse rccr = (RequestConfCreateResponse)  msg.obj;
+				if (rccr.getResult() != JNIResponse.Result.SUCCESS) {
 					mErrorNotificationLayout.setVisibility(View.VISIBLE);
 					break;
 				}
-				RequestConfCreateResponse rccr = (RequestConfCreateResponse) ar
-						.getObject();
 				User currU = GlobalHolder.getInstance().getCurrentUser();
 				Group g = new Group(rccr.getConfId(), GroupType.CONFERENCE,
 						conf.getName(), currU.getmUserId() + "", conf.getDate()

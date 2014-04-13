@@ -28,8 +28,8 @@ import android.widget.Toast;
 
 import com.V2.jni.ConfigRequest;
 import com.v2tech.R;
-import com.v2tech.logic.AsynResult;
 import com.v2tech.logic.GlobalHolder;
+import com.v2tech.logic.Registrant;
 import com.v2tech.logic.jni.RequestLogInResponse;
 import com.v2tech.service.UserService;
 import com.v2tech.util.GlobalConfig;
@@ -101,6 +101,11 @@ public class LoginActivity extends Activity {
 				new View.OnClickListener() {
 					@Override
 					public void onClick(View view) {
+						InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+						imm.hideSoftInputFromWindow(
+								mEmailView.getWindowToken(), 0);
+						imm.hideSoftInputFromWindow(
+								mPasswordView.getWindowToken(), 0);
 						attemptLogin();
 					}
 				});
@@ -321,7 +326,7 @@ public class LoginActivity extends Activity {
 			mLoginStatusMessageView.setText(R.string.login_progress_signing_in);
 			showProgress(true);
 			us.login(mEmailView.getText().toString(), mPasswordView.getText()
-					.toString(), Message.obtain(mHandler, LOG_IN_CALL_BACK));
+					.toString(), new Registrant(mHandler, LOG_IN_CALL_BACK, null));
 		}
 	}
 
@@ -378,33 +383,27 @@ public class LoginActivity extends Activity {
 		public void handleMessage(Message msg) {
 			switch (msg.what) {
 			case LOG_IN_CALL_BACK:
-				AsynResult ar = (AsynResult) msg.obj;
-				if (ar.getState() == AsynResult.AsynState.TIME_OUT) {
+
+				RequestLogInResponse rlr = (RequestLogInResponse) msg.obj;
+				if (rlr.getResult() == RequestLogInResponse.Result.TIME_OUT) {
 					Toast.makeText(mContext, R.string.error_time_out,
 							Toast.LENGTH_LONG).show();
+				} else if (rlr.getResult() == RequestLogInResponse.Result.FAILED) {
+					mPasswordView
+							.setError(getString(R.string.error_incorrect_password));
+					mPasswordView.requestFocus();
+				} else if (rlr.getResult() == RequestLogInResponse.Result.CONNECT_ERROR) {
+					Toast.makeText(mContext, R.string.error_connect_to_server,
+							Toast.LENGTH_LONG).show();
 				} else {
-					RequestLogInResponse rlr = (RequestLogInResponse) ar
-							.getObject();
-
-					if (rlr.getResult() == RequestLogInResponse.Result.FAILED) {
-
-						mPasswordView
-								.setError(getString(R.string.error_incorrect_password));
-						mPasswordView.requestFocus();
-					} else if (rlr.getResult() == RequestLogInResponse.Result.CONNECT_ERROR) {
-						Toast.makeText(mContext, R.string.error_connect_to_server,
-								Toast.LENGTH_LONG).show();
-					}else {
-						// Save user info
-						saveUserConfig(mEmailView.getText().toString(), "");
-						GlobalHolder.getInstance()
-								.setCurrentUser(rlr.getUser());
-						SPUtil.putConfigIntValue(mContext,
-								GlobalConfig.KEY_LOGGED_IN, 1);
-						mContext.startActivity(new Intent(mContext,
-								MainActivity.class));
-						finish();
-					}
+					// Save user info
+					saveUserConfig(mEmailView.getText().toString(), "");
+					GlobalHolder.getInstance().setCurrentUser(rlr.getUser());
+					SPUtil.putConfigIntValue(mContext,
+							GlobalConfig.KEY_LOGGED_IN, 1);
+					mContext.startActivity(new Intent(mContext,
+							MainActivity.class));
+					finish();
 				}
 
 				showProgress(false);

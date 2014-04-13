@@ -36,6 +36,12 @@ public class VImageMessage extends VMessage {
 	private int mWidth = -1;
 	private byte[] originImageData;
 	private String mImagePath;
+	
+	
+
+	protected VImageMessage() {
+		super();
+	}
 
 	public VImageMessage(User u, User toUser, String imagePath, boolean isRemote) {
 		super(u, toUser, null, isRemote);

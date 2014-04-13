@@ -12,7 +12,6 @@ import com.V2.jni.GroupRequest;
 import com.V2.jni.GroupRequestCallback;
 import com.V2.jni.VideoRequest;
 import com.V2.jni.VideoRequestCallback;
-import com.v2tech.logic.AsynResult;
 import com.v2tech.logic.CameraConfiguration;
 import com.v2tech.logic.Conference;
 import com.v2tech.logic.ConferencePermission;
@@ -94,12 +93,11 @@ public class ConferenceService extends AbstractHandler {
 	 *            {@link Conference} object which user wants to enter
 	 * @param caller
 	 *            if input is null, ignore response Message.object is
-	 *            {@link AsynResult} AsynResult.obj is
 	 *            {@link com.v2tech.logic.jni.RequestEnterConfResponse}
 	 * 
 	 * @see com.v2tech.logic.jni.RequestEnterConfResponse
 	 */
-	public void requestEnterConference(Conference conf, Message caller) {
+	public void requestEnterConference(Conference conf, Registrant caller) {
 		initTimeoutMessage(JNI_REQUEST_ENTER_CONF, null, DEFAULT_TIME_OUT_SECS,
 				caller);
 		ConfRequest.getInstance().enterConf(conf.getId());
@@ -112,11 +110,10 @@ public class ConferenceService extends AbstractHandler {
 	 * @param conf
 	 *            {@link Conference} object which user wants to enter
 	 * @param msg
-	 *            if input is null, ignore response Message.object is
-	 *            {@link AsynResult} AsynResult.obj is
+	 *            if input is null, ignore response Message. Response Message object is
 	 *            {@link com.v2tech.logic.jni.RequestExitedConfResponse}
 	 */
-	public void requestExitConference(Conference conf, Message caller) {
+	public void requestExitConference(Conference conf, Registrant caller) {
 		initTimeoutMessage(JNI_REQUEST_EXIT_CONF, null, DEFAULT_TIME_OUT_SECS,
 				caller);
 		ConfRequest.getInstance().exitConf(conf.getId());
@@ -130,19 +127,20 @@ public class ConferenceService extends AbstractHandler {
 	}
 
 	/**
-	 * TODO add comment
+	 * Create conference.
+	 * <ul></ul>
 	 * 
-	 * @param conf
-	 * @param caller
+	 * @param conf {@link Conference} object.
+	 * @param caller   if input is null, ignore response Message. Response Message object is
+	 *            {@link com.v2tech.logic.jni.RequestConfCreateResponse}
 	 */
-	public void createConference(Conference conf, Message caller) {
+	public void createConference(Conference conf, Registrant caller) {
 		if (conf == null) {
-			if (caller != null) {
+			if (caller != null && caller.getHandler() != null) {
 				JNIResponse jniRes = new RequestConfCreateResponse(
 						0, 0,
 						RequestConfCreateResponse.Result.FAILED);
-				caller.obj = jniRes; 
-				caller.sendToTarget();
+				sendResult(caller, jniRes);
 			}
 			return;
 		}
@@ -160,14 +158,13 @@ public class ConferenceService extends AbstractHandler {
 	 * @param conf
 	 * @param caller
 	 */
-	public void quitConference(Conference conf, Message caller) {
+	public void quitConference(Conference conf, Registrant caller) {
 		if (conf == null) {
 			if (caller != null) {
 				JNIResponse jniRes = new RequestConfCreateResponse(
 						0, 0,
 						RequestConfCreateResponse.Result.FAILED);
-				caller.obj = jniRes; 
-				caller.sendToTarget();
+				sendResult(caller, jniRes);
 			}
 			return;
 		}
@@ -191,13 +188,12 @@ public class ConferenceService extends AbstractHandler {
 	 *            {@link UserDeviceConfig#getDeviceID()} should be ""
 	 * @param caller
 	 *            if input is null, ignore response Message.object is
-	 *            {@link AsynResult} AsynResult.obj is
 	 *            {@link com.v2tech.logic.jni.RequestOpenUserVideoDeviceResponse}
 	 * 
 	 * @see UserDeviceConfig
 	 */
 	public void requestOpenVideoDevice(Conference conf,
-			UserDeviceConfig userDevice, Message caller) {
+			UserDeviceConfig userDevice, Registrant caller) {
 		initTimeoutMessage(JNI_REQUEST_OPEN_VIDEO, null, DEFAULT_TIME_OUT_SECS,
 				caller);
 
@@ -224,13 +220,12 @@ public class ConferenceService extends AbstractHandler {
 	 *            {@link UserDeviceConfig#getDeviceID()} should be ""
 	 * @param caller
 	 *            if input is null, ignore response Message.object is
-	 *            {@link AsynResult} AsynResult.obj is
 	 *            {@link com.v2tech.logic.jni.RequestCloseUserVideoDeviceResponse}
 	 * 
 	 * @see UserDeviceConfig
 	 */
 	public void requestCloseVideoDevice(Conference conf,
-			UserDeviceConfig userDevice, Message caller) {
+			UserDeviceConfig userDevice, Registrant caller) {
 
 		initTimeoutMessage(JNI_REQUEST_CLOSE_VIDEO, null,
 				DEFAULT_TIME_OUT_SECS, caller);
@@ -254,13 +249,12 @@ public class ConferenceService extends AbstractHandler {
 	 *            speak type should be {@link ConferencePermission#SPEAKING}
 	 * @param caller
 	 *            if input is null, ignore response Message.object is
-	 *            {@link AsynResult} AsynResult.obj is
 	 *            {@link com.v2tech.logic.jni.RequestPermissionResponse}
 	 * 
 	 * @see ConferencePermission
 	 */
 	public void applyForControlPermission(ConferencePermission type,
-			Message caller) {
+			Registrant caller) {
 		initTimeoutMessage(JNI_REQUEST_SPEAK, null, DEFAULT_TIME_OUT_SECS,
 				caller);
 
@@ -281,13 +275,12 @@ public class ConferenceService extends AbstractHandler {
 	 *            speak type should be {@link ConferencePermission#SPEAKING}
 	 * @param caller
 	 *            if input is null, ignore response Message.object is
-	 *            {@link AsynResult} AsynResult.obj is
 	 *            {@link com.v2tech.logic.jni.RequestPermissionResponse}
 	 * 
 	 * @see ConferencePermission
 	 */
 	public void applyForReleasePermission(ConferencePermission type,
-			Message caller) {
+			Registrant caller) {
 
 		initTimeoutMessage(JNI_REQUEST_RELEASE_SPEAK, null,
 				DEFAULT_TIME_OUT_SECS, caller);
@@ -310,10 +303,9 @@ public class ConferenceService extends AbstractHandler {
 	 *            {@link CameraConfiguration}
 	 * @param caller
 	 *            if input is null, ignore response Message.object is
-	 *            {@link AsynResult} AsynResult.obj is
 	 *            {@link com.v2tech.logic.jni.RequestUpdateCameraParametersResponse}
 	 */
-	public void updateCameraParameters(CameraConfiguration cc, Message caller) {
+	public void updateCameraParameters(CameraConfiguration cc, Registrant caller) {
 		initTimeoutMessage(JNI_UPDATE_CAMERA_PAR, null, DEFAULT_TIME_OUT_SECS,
 				caller);
 		VideoRequest.getInstance().setCapParam(cc.getDeviceId(),

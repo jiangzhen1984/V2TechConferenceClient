@@ -70,11 +70,11 @@ public class VMessage {
 	protected String mUUID;
 
 	protected int mMsgCode;
-
-	// FIXME should optimize code structure
+	
+	//FIXM optimize code
 	public long mGroupId;
 
-	private VMessage() {
+	protected VMessage() {
 		this(null, null, null, false);
 	}
 
