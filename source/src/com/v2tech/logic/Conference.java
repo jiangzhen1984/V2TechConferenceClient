@@ -13,7 +13,6 @@ public class Conference {
 
 	private String name;
 	private String startTime;
-	private String endTime;
 	private List<User> invitedList;
 	private Date d;
 	private long creator;
@@ -31,7 +30,6 @@ public class Conference {
 			List<User> invitedList) {
 		this.name = name;
 		this.startTime = startTime;
-		this.endTime = endTime;
 		this.invitedList = invitedList;
 	}
 

@@ -5,6 +5,14 @@
    <string name="conversation_accept">接  受</string>
    <string name="conversation_reject">拒  绝</string>
    <string name="conversation_cancel">挂  断</string>
+   
+   <string name="conversation_popup_menu_video_call_button">发起视频会议</string>
+   <string name="conversation_popup_menu_call_button">拨打电话</string>
+   <string name="conversation_popup_menu_sms_call_button">发送短信</string>
+   <string name="conversation_popup_menu_email_button">发送邮件</string>
+   <string name="conversation_popup_menu_files_button">文件柜</string>
+   <string name="conversation_popup_menu_setting_button">设 置</string>
+   
     
     
 </resources>

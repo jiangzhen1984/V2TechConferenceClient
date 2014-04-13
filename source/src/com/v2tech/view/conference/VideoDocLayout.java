@@ -144,6 +144,8 @@ public class VideoDocLayout extends LinearLayout {
 					R.color.in_meeting_doc_list_activited_doc_bg));
 
 		}
+		content.setTag(d);
+		
 		mDodListContainer.addView(content, new LinearLayout.LayoutParams(
 				LinearLayout.LayoutParams.MATCH_PARENT,
 				LinearLayout.LayoutParams.WRAP_CONTENT));
@@ -153,6 +155,8 @@ public class VideoDocLayout extends LinearLayout {
 				R.color.in_meeting_doc_list_separation));
 		mDodListContainer.addView(separatedLine, new LinearLayout.LayoutParams(
 				LinearLayout.LayoutParams.MATCH_PARENT, 1));
+		
+		content.setOnClickListener(updateDocListener);
 
 	}
 
@@ -214,6 +218,7 @@ public class VideoDocLayout extends LinearLayout {
 				container.addView(iv, new FrameLayout.LayoutParams(
 						FrameLayout.LayoutParams.MATCH_PARENT,
 						FrameLayout.LayoutParams.MATCH_PARENT));
+				container.postInvalidate();
 			} else {
 				V2Log.e(" doc file doesn't exist " + f.getAbsolutePath());
 			}
@@ -262,6 +267,12 @@ public class VideoDocLayout extends LinearLayout {
 					.setImageResource(R.drawable.video_doc_right_arrow_color);
 		}
 	}
+	
+	public void cleanCache() {
+		if (this.mCurrentBitMap != null && !this.mCurrentBitMap.isRecycled()) {
+			this.mCurrentBitMap.recycle();
+		}
+	}
 
 	private OnClickListener pageChangeListener = new OnClickListener() {
 
@@ -293,5 +304,29 @@ public class VideoDocLayout extends LinearLayout {
 			showPopUpWindow(view);
 		}
 
+	};
+	
+	private OnClickListener updateDocListener = new OnClickListener () {
+
+		@Override
+		public void onClick(View v) {
+			V2Doc d = (V2Doc)v.getTag();
+			if (d != mCurrentDoc) {
+				for (int i = 0; i < mDodListContainer.getChildCount(); i++) {
+					View child = mDodListContainer.getChildAt(i);
+					if (child.getTag() != null) {
+						child.setBackgroundColor(Color.WHITE);
+					} else {
+						continue;
+					}
+				}
+				v.setBackgroundColor(getResources().getColor(
+						R.color.in_meeting_doc_list_activited_doc_bg));
+				mCurrentDoc = d;
+				updateCurrentDoc();
+				mDocListWindow.dismiss();
+			}
+		}
+		
 	};
 }

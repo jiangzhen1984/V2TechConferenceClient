@@ -14,6 +14,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.Handler;
@@ -144,7 +145,7 @@ public class ConversationsTabFragment extends Fragment {
 			mConversationsListView.setOnTouchListener(mTouchListener);
 
 			if (mCurrentTabFlag.equals(Conversation.TYPE_GROUP)
-					|| mCurrentTabFlag.equals(Conversation.TYPE_CONTACT)) {
+				) {
 				mFeatureIV.setVisibility(View.INVISIBLE);
 			}
 
@@ -425,21 +426,30 @@ public class ConversationsTabFragment extends Fragment {
 			}
 			LinearLayout root = new LinearLayout(mContext);
 			root.setOrientation(LinearLayout.VERTICAL);
-			root.setBackgroundColor(mContext.getResources().getColor(
-					R.color.confs_title_bg));
-			TextView createConferenceTV = new TextView(mContext);
-			createConferenceTV.setTextSize(18);
-			createConferenceTV.setGravity(Gravity.CENTER);
-			createConferenceTV.setText(R.string.conference_create_title);
-			createConferenceTV
-					.setOnClickListener(mConferenceCreateButtonListener);
-
-			LinearLayout.LayoutParams ll = new LinearLayout.LayoutParams(
-					LinearLayout.LayoutParams.MATCH_PARENT,
-					LinearLayout.LayoutParams.WRAP_CONTENT);
-			ll.setMargins(5, 20, 5, 20);
-			ll.gravity = Gravity.CENTER;
-			root.addView(createConferenceTV, ll);
+			if (mCurrentTabFlag.equals(Conversation.TYPE_CONTACT)) {
+				View v = getMenuButtonView(R.string.conversation_popup_menu_video_call_button);
+				root.addView(v);
+				
+				v = getMenuButtonView(R.string.conversation_popup_menu_call_button);
+				root.addView(v);
+				
+				v = getMenuButtonView(R.string.conversation_popup_menu_sms_call_button);
+				root.addView(v);
+				
+				v = getMenuButtonView(R.string.conversation_popup_menu_email_button);
+				root.addView(v);
+				v = getMenuButtonView(R.string.conversation_popup_menu_files_button);
+				root.addView(v);
+				v = getMenuButtonView(R.string.conversation_popup_menu_setting_button);
+				root.addView(v);
+				
+			} else {
+				root.setBackgroundColor(mContext.getResources().getColor(
+						R.color.confs_title_bg));
+				View v = getMenuButtonView(R.string.conference_create_title);
+				v.setOnClickListener(mConferenceCreateButtonListener);
+				root.addView(v);
+			}
 			pw = new PopupWindow(root, ViewGroup.LayoutParams.WRAP_CONTENT,
 					ViewGroup.LayoutParams.WRAP_CONTENT, true);
 			pw.setBackgroundDrawable(new ColorDrawable(R.color.confs_title_bg));
@@ -460,6 +470,33 @@ public class ConversationsTabFragment extends Fragment {
 		}
 
 	};
+	
+	private View getMenuButtonView(int resId) {
+		LinearLayout l = new LinearLayout(mContext);
+		
+		TextView tv = new TextView(mContext);
+		tv.setTextSize(18);
+		tv.setGravity(Gravity.CENTER);
+		tv.setText(resId);
+
+		LinearLayout.LayoutParams ll = new LinearLayout.LayoutParams(
+				LinearLayout.LayoutParams.MATCH_PARENT,
+				LinearLayout.LayoutParams.WRAP_CONTENT);
+		ll.setMargins(5, 20, 5, 20);
+		ll.gravity = Gravity.CENTER;
+		tv.setLayoutParams(ll);
+		
+		l.addView(tv);
+		l.setLayoutParams(ll);
+		
+		LinearLayout line =  new LinearLayout(mContext);
+		line.setBackgroundColor(Color.GRAY);
+		
+		l.addView(line,  new LinearLayout.LayoutParams(
+				LinearLayout.LayoutParams.MATCH_PARENT, 1));
+		
+		return  l;
+	}
 
 	private void loadConversation() {
 		isLoadedCov = true;

@@ -80,8 +80,6 @@ public class ContactDetail extends Activity implements OnTouchListener {
 
 	private boolean isUpdating;
 
-	private boolean isChanged;
-
 	private Date bir;
 
 	@Override
@@ -274,7 +272,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 		mComapnyTV.setText(u.getCompany());
 		mDepartmentTV.setText(u.getDepartment());
 
-		// TODO hidden button of invite video conversation
+		//hidden button of invite video conversation
 		mButtonInviteVideoTV.setVisibility(View.INVISIBLE);
 
 		mNickNameET.addTextChangedListener(tw);

@@ -610,6 +610,10 @@ public class VideoActivityV2 extends Activity {
 				null);
 		ds.unRegisterDocDisplayNotification(mVideoHandler,
 				DOC_DOWNLOADED_NOTIFICATION, null);
+		if (mDocContainer != null) {
+			//clean document bitmap cache
+			mDocContainer.cleanCache();
+		}
 	}
 
 	@Override
