@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
     <string name="contacts_title">组织结构</string>
     <string name="contacts_user_action_invite_chat">发 起 聊 天</string>
     <string name="contacts_user_action_invite_video">发 起 会 议</string>
     <string name="contacts_user_action_call">拨 打 电 话</string>
-    <string name="contacts_user_action_view_detail">查 看 详 情</string>	
-    
+    <string name="contacts_user_action_view_detail">查 看 详 情</string>
     <string name="contacts_user_detail_gender_male">男</string>
     <string name="contacts_user_detail_gender_female">女</string>
     <string name="contacts_user_detail_return_button">返回</string>
@@ -21,14 +21,23 @@
     <string name="contacts_user_detail_item_department">部门</string>
     <string name="contacts_user_detail_item_title">职务</string>
     <string name="contacts_user_detail_item_address">地址</string>
-     <string name="error_contacts_user_detail_no_avai_user">没有找到可用的用户信息</string>
-     <string name="error_contacts_user_detail_no_nick_name">用户昵称不能为空</string>
     
+    <string name="contacts_user_detail_button_invite_video_conference">发起视频会议</string>
+    <string name="contacts_user_detail_button_call">拨打电话</string>
+    <string name="contacts_user_detail_button_invite_video_call">视频通话</string>
+    <string name="contacts_user_detail_button_send_sms">发送短信</string>
+    <string name="contacts_user_detail_button_send_text_msg">发送即时消息</string>
+    <string name="contacts_user_detail_button_send_file">发送文件</string>
+    
+    
+    
+    <string name="error_contacts_user_detail_no_avai_user">没有找到可用的用户信息</string>
+    <string name="error_contacts_user_detail_no_nick_name">用户昵称不能为空</string>
+
     <color name="contacts_user_view_under_line">#dbdbdb</color>
     <color name="contacts_user_view_bg">#f0f0f0</color>
     <color name="contacts_user_group_bg">#f5f5f5</color>
-     <color name="contacts_user_detail_item_bg">#ffffff</color>
-     <color name="contacts_user_detail_text_color">#0099ff</color>
-    
-    
+    <color name="contacts_user_detail_item_bg">#ffffff</color>
+    <color name="contacts_user_detail_text_color">#0099ff</color>
+
 </resources>

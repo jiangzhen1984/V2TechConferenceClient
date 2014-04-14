@@ -8,20 +8,20 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
-        android:background="@color/confs_title_bg"
+        android:background="#ffffff"
         android:orientation="vertical" >
 
         <TextView
             android:id="@+id/message_user_title"
-            android:layout_width="880dp"
+            android:layout_width="480dp"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
             android:layout_gravity="center"
             android:layout_marginBottom="10dp"
             android:layout_marginTop="10dp"
             android:ellipsize="end"
-            android:text=""
             android:gravity="center"
+            android:text=""
             android:textSize="17sp" />
 
         <TextView
@@ -37,14 +37,13 @@
             android:layout_alignParentLeft="true"
             android:layout_centerVertical="true"
             android:layout_marginLeft="56dp"
-            android:background="@drawable/contact_user_detail_return"
             android:gravity="center"
             android:paddingBottom="5dp"
             android:paddingLeft="10dp"
-            android:paddingRight="7dp"
+            android:paddingRight="10dp"
             android:paddingTop="5dp"
             android:text="@string/contacts_user_detail_return_button"
-            android:textColor="#ffffff" />
+            android:textColor="@color/button_text_color" />
     </RelativeLayout>
 
     <LinearLayout
@@ -55,6 +54,13 @@
         android:layout_below="@+id/RelativeLayout1"
         android:background="#f2f2f2"
         android:orientation="vertical" >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#cfcfcf"
+            android:orientation="vertical" >
+        </LinearLayout>
 
         <com.v2tech.view.cus.ItemScrollView
             android:id="@+id/conversation_message_list_scroll_view"
@@ -82,7 +88,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
-            android:layout_margin="10dp"
+            android:layout_margin="15dp"
             android:src="@drawable/message_speaker" />
 
         <TextView
@@ -103,7 +109,7 @@
         <ImageView
             android:id="@+id/imageView3"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="110dp"
             android:layout_centerVertical="true"
             android:layout_marginLeft="15dp"
             android:layout_toRightOf="@+id/contact_message_plus"
@@ -131,21 +137,21 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
+            android:layout_marginBottom="5dp"
             android:layout_marginLeft="20dp"
             android:layout_marginRight="20dp"
+            android:layout_marginTop="5dp"
             android:layout_toLeftOf="@+id/message_send"
             android:layout_toRightOf="@+id/imageView3"
             android:background="@drawable/input_bg"
             android:ems="10"
-            android:layout_marginTop="5dp"
-            android:layout_marginBottom="5dp"
             android:inputType="textCapSentences|textMultiLine"
-            android:minLines="1"
-            android:maxLines ="3" >
+            android:maxLines="3"
+            android:minLines="1" >
         </EditText>
     </RelativeLayout>
-    
-        <RelativeLayout
+
+    <RelativeLayout
         android:id="@+id/contact_message_sub_feature_ly"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -175,9 +181,9 @@
                 android:layout_width="60dp"
                 android:layout_height="60dp"
                 android:layout_centerVertical="true"
-                android:layout_marginTop="15dp"
                 android:layout_marginBottom="15dp"
                 android:layout_marginLeft="15dp"
+                android:layout_marginTop="15dp"
                 android:layout_toRightOf="@+id/message_smile_icon"
                 android:src="@drawable/message_send_image_button" />
         </RelativeLayout>
