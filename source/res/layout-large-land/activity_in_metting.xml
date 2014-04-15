@@ -90,6 +90,15 @@
                 android:paddingLeft="10dp"
                 android:paddingRight="10dp"
                 android:src="@drawable/video_menu_msg_button" />
+
+            <ImageView
+               android:id="@+id/in_meeting_menu_show_doc_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp"
+                android:src="@drawable/video_menu_doc_button" />
         </LinearLayout>
 
         <RelativeLayout

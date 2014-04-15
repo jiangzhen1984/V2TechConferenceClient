@@ -32,14 +32,13 @@
             android:layout_alignParentLeft="true"
             android:layout_centerVertical="true"
             android:layout_marginLeft="15dp"
-            android:background="@drawable/contact_user_detail_return"
             android:gravity="center"
             android:paddingBottom="5dp"
             android:paddingLeft="10dp"
             android:paddingRight="7dp"
             android:paddingTop="5dp"
             android:text="@string/contacts_user_detail_return_button"
-            android:textColor="#ffffff"
+            android:textColor="@color/button_text_color"
             android:textSize="18sp" />
 
         <TextView
@@ -48,6 +47,12 @@
             android:layout_below="@+id/contact_user_detail_title"
             android:text="" />
     </RelativeLayout>
+        <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#cfcfcf"
+        android:orientation="vertical" >
+    </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -94,11 +99,11 @@
                 android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"
                 android:layout_marginRight="10dp"
-                android:background="@drawable/button_selector"
+                android:background="@drawable/button_bg"
                 android:clickable="true"
                 android:gravity="center"
                 android:text="@string/contacts_user_detail_send_msg"
-                android:textColor="#ffffff" />
+                android:textColor="@color/button_text_color" />
 
             <TextView
                 android:id="@+id/contact_user_detail_invite_video"
@@ -107,12 +112,12 @@
                 android:layout_centerVertical="true"
                 android:layout_marginRight="10dp"
                 android:layout_toLeftOf="@+id/contact_user_detail_send_msg"
-                android:background="@drawable/button_selector"
+                android:background="@drawable/button_bg"
                 android:gravity="center"
                 android:paddingLeft="3dp"
                 android:paddingRight="3dp"
                 android:text="@string/contacts_user_detail_invite_video"
-                android:textColor="#ffffff" />
+                android:textColor="@color/button_text_color" />
         </RelativeLayout>
 
         <ScrollView

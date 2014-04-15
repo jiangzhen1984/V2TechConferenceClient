@@ -8,50 +8,65 @@
         android:layout_width="match_parent"
         android:layout_height="fill_parent" >
 
-        <LinearLayout
-            android:id="@+id/linearLayout1"
+        <RelativeLayout
+            android:id="@+id/RelativeLayout1"
             android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_centerHorizontal="true"
-            android:background="@color/confs_title_bg"
-            android:orientation="vertical" >
+            android:layout_height="wrap_content" >
 
-            <TextView
-                android:id="@+id/group_list_conference_title_tv"
-                android:layout_width="wrap_content"
-                android:layout_height="fill_parent"
-                android:layout_gravity="center"
-                android:layout_marginBottom="8dp"
-                android:layout_marginTop="8dp"
-                  android:textSize="25sp"
-                android:text="@string/confs_title" />
-            
             <LinearLayout
-                android:id="@+id/recent_conversation_network_nt"
-                android:layout_width="match_parent"
+                android:id="@+id/linearLayout1"
+                android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:background="#FFDEAD"
-                android:visibility="gone" >
+                android:layout_alignParentTop="true"
+                android:layout_centerHorizontal="true"
+                android:background="@color/confs_title_bg"
+                android:orientation="vertical" >
 
                 <TextView
-                    android:layout_width="fill_parent"
+                   android:id="@+id/fragment_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="fill_parent"
+                    android:layout_gravity="center"
+                    android:layout_marginBottom="8dp"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/confs_title"
+                    android:textSize="25sp" />
+
+                <LinearLayout
+                    android:id="@+id/recent_conversation_network_nt"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal|center"
-                    android:layout_marginBottom="4dp"
-                    android:layout_marginTop="4dp"
-                    android:gravity="center_horizontal"
-                    android:text="@string/error_can_not_connect_server"
-                    android:textSize="12sp" />
+                    android:background="#FFDEAD"
+                    android:visibility="gone" >
 
+                    <TextView
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal|center"
+                        android:layout_marginBottom="4dp"
+                        android:layout_marginTop="4dp"
+                        android:gravity="center_horizontal"
+                        android:text="@string/error_can_not_connect_server"
+                        android:textSize="12sp" />
+                </LinearLayout>
             </LinearLayout>
-        </LinearLayout>
 
-        <LinearLayout
-            android:id="@+id/linearLayout2"
+            <ImageView
+                android:id="@+id/conversation_features"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:layout_marginRight="30dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/white_plus" />
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/RelativeLayout2"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/linearLayout1"
+            android:layout_below="@+id/RelativeLayout1"
             android:layout_centerHorizontal="true"
             android:background="@color/confs_search_bar_bg"
             android:orientation="horizontal" >
@@ -60,34 +75,47 @@
                 android:id="@+id/imageView8"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
+                android:layout_alignParentLeft="true"
+                android:layout_gravity="center_vertical"
+                android:layout_marginBottom="10dp"
+                android:layout_marginLeft="30dp"
+                android:layout_marginTop="10dp"
                 android:src="@drawable/group_list_search_button" />
 
             <EditText
                 android:id="@+id/confs_search"
                 android:layout_width="match_parent"
-                android:layout_height="40dp"
+                android:layout_height="50dp"
+                android:layout_alignParentLeft="true"
                 android:layout_gravity="center_vertical"
+                android:layout_marginBottom="10dp"
+                android:layout_marginLeft="30dp"
                 android:layout_marginRight="30dp"
-                android:background="@drawable/rounded_corners"
-                android:ems="10"
-                android:inputType="text" >
-
+                android:layout_marginTop="10dp"
+                android:background="@drawable/input_bg"
+                android:inputType="text"
+                android:paddingLeft="100dp"
+                android:textColor="#000000"
+                android:textSize="18sp" >
             </EditText>
-        </LinearLayout>
 
-      <ListView
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="1dp"
+                android:layout_below="@+id/confs_search" />
+        </RelativeLayout>
+
+        <ListView
             android:id="@+id/conversations_list_container"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:layout_below="@+id/RelativeLayout2"
             android:layout_centerHorizontal="true"
-            android:divider="@null"
-            android:background="@color/confs_group_list_bg" >
-
+            android:background="@color/confs_group_list_bg"
+            android:divider="@null" >
         </ListView>
-        
-          <ImageView
+
+        <ImageView
             android:id="@+id/conference_loading_icon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

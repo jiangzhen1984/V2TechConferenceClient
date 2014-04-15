@@ -1,14 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content" >
+    android:layout_height="wrap_content"
+    android:background="#ffffff" >
 
     <RelativeLayout
         android:id="@+id/contact_user_view_root"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="10dp"
-        android:layout_marginTop="10dp" >
+        android:layout_height="wrap_content" >
 
         <RelativeLayout
             android:id="@+id/contact_user_img_container"
@@ -17,7 +16,7 @@
             android:layout_alignParentLeft="true"
             android:layout_centerVertical="true"
             android:layout_marginBottom="15dp"
-            android:layout_marginLeft="30dp"
+            android:layout_marginLeft="10dp"
             android:layout_marginTop="15dp" >
 
             <ImageView
@@ -38,12 +37,12 @@
 
         <TextView
             android:id="@+id/contact_user_name"
-            android:layout_width="wrap_content"
+            android:layout_width="100dp"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
-            android:layout_marginLeft="30dp"
+            android:layout_marginLeft="50dp"
+            android:layout_marginRight="30dp"
             android:layout_toRightOf="@+id/contact_user_img_container"
-             android:layout_marginRight="35dp"
             android:ellipsize="end"
             android:singleLine="true"
             android:text="TextView" />
@@ -55,20 +54,23 @@
             android:layout_centerVertical="true"
             android:layout_marginLeft="85dp"
             android:layout_marginRight="15dp"
-            android:layout_toLeftOf="@+id/contact_show_user_menu"
+            android:layout_toLeftOf="@+id/conf_create_contact_view_ck"
             android:layout_toRightOf="@+id/contact_user_name"
             android:ellipsize="end"
             android:singleLine="true"
             android:text="TextView" />
 
-        <ImageView
-            android:id="@+id/contact_show_user_menu"
+        <CheckBox
+            android:id="@+id/conf_create_contact_view_ck"
+            style="@style/GraySquareCheckbox"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
-            android:layout_marginRight="62dp"
-            android:src="@drawable/arrow_right_gray" />
+            android:layout_marginRight="60dp"
+            android:clickable="false"
+            android:focusable="false"
+            android:text="" />
     </RelativeLayout>
 
     <LinearLayout

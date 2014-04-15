@@ -8,7 +8,7 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
-        android:background="@color/confs_title_bg"
+        android:background="#ffffff"
         android:orientation="vertical" >
 
         <TextView
@@ -29,10 +29,19 @@
             android:text="" />
     </RelativeLayout>
 
+    <LinearLayout
+        android:id="@+id/LinearLayout1"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_below="@+id/RelativeLayout1"
+        android:background="#cfcfcf"
+        android:orientation="vertical" >
+    </LinearLayout>
+
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/RelativeLayout1"
+        android:layout_below="@+id/LinearLayout1"
         android:layout_centerHorizontal="true" >
 
         <android.support.v4.view.ViewPager
