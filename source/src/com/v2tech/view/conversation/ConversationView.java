@@ -503,7 +503,7 @@ public class ConversationView extends Activity {
 		String selection = null;
 		String[] args = null;
 
-		if (Conversation.TYPE_CONTACT.equals(this.mCurrentConv.getType())) {
+		if (this.groupId == 0) {
 			selection = "(" + ContentDescriptor.Messages.Cols.FROM_USER_ID
 					+ "=? and " + ContentDescriptor.Messages.Cols.TO_USER_ID
 					+ "=? ) or " + "("
@@ -512,10 +512,10 @@ public class ConversationView extends Activity {
 					+ ContentDescriptor.Messages.Cols.GROUP_ID + "=0 ";
 			args = new String[] { user1Id + "", user2Id + "", user2Id + "",
 					user1Id + "" };
-		} else if (Conversation.TYPE_GROUP.equals(this.mCurrentConv.getType())) {
+		} else if (this.groupId != 0) {
 			selection = "(" + ContentDescriptor.Messages.Cols.GROUP_ID
 					+ "=? ) ";
-			args = new String[] { this.groupId + "" };
+			args = new String[] {this.groupId + "" };
 		}
 
 		Cursor mCur = this.getContentResolver().query(

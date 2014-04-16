@@ -24,10 +24,9 @@ public abstract class AbstractHandler extends Handler {
 
 	private Map<Integer, Meta> metaHolder = new HashMap<Integer, Meta>();
 
-	protected Message initTimeoutMessage(int mointorMessageID, Object obj,
+	protected Message initTimeoutMessage(int mointorMessageID,
 			long timeOutSec, Registrant caller) {
-		Message msg = Message.obtain(this, REQUEST_TIME_OUT, mointorMessageID,
-				0, obj);
+		Message msg = Message.obtain(this, REQUEST_TIME_OUT, mointorMessageID, 0);
 		metaHolder.put(Integer.valueOf(mointorMessageID), new Meta(
 				mointorMessageID, caller, msg));
 		this.sendMessageDelayed(msg, timeOutSec * 1000);
@@ -75,19 +74,12 @@ public abstract class AbstractHandler extends Handler {
 		case REQUEST_TIME_OUT:
 			Meta meta = metaHolder.get(Integer.valueOf(msg.arg1));
 			if (meta != null && meta.caller != null ) {
-				if (msg.obj != null) {
-					V2Log.d(msg.obj.getClass().getName()+"   "+ msg.what);
-				}
-				if (msg.obj != null && !(msg.obj instanceof JNIResponse)) {
-					throw new RuntimeException(" cast exception :"+ (msg.obj == null? msg.obj: msg.obj.getClass().getName()));
-				}
-				JNIResponse jniRes = (JNIResponse) msg.obj;
-				if (jniRes == null) {
-					jniRes = new JNIResponse(JNIResponse.Result.TIME_OUT);
-				}
+				
+				JNIResponse jniRes = new JNIResponse(JNIResponse.Result.TIME_OUT);
+				
 				jniRes.callerObject = meta.caller.getObject();
 				if (meta.caller.getHandler() != null) {
-					caller = Message.obtain(meta.caller.getHandler(), meta.caller.getWhat());
+					caller = Message.obtain(meta.caller.getHandler(), meta.caller.getWhat(), jniRes);
 				} else {
 					V2Log.w(" message no target:" + meta.caller);
 				}

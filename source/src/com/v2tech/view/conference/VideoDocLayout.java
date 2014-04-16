@@ -27,7 +27,7 @@ import com.v2tech.view.cus.TouchImageView;
 import com.v2tech.view.vo.V2Doc;
 
 public class VideoDocLayout extends LinearLayout {
-
+	
 	private DocListener listener;
 
 	private Map<String, V2Doc> mDocs;
@@ -278,6 +278,10 @@ public class VideoDocLayout extends LinearLayout {
 
 		@Override
 		public void onClick(View view) {
+			if (mCurrentDoc == null) {
+				V2Log.w(" mCurrentDoc is null  doc is not selected yet");
+				return;
+			}
 			if (view == mNextPageButton) {
 				if (mCurrentDoc.getActivatePageNo() < mCurrentDoc.getPageSize()) {
 					mCurrentDoc.setActivatePageNo(mCurrentDoc

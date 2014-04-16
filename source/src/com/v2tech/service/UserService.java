@@ -37,7 +37,7 @@ public class UserService extends AbstractHandler {
 	 *            callback message Message.obj is {@link AsynResult}
 	 */
 	public void login(String mail, String passwd, Registrant caller) {
-		initTimeoutMessage(JNI_REQUEST_LOG_IN, null, DEFAULT_TIME_OUT_SECS,
+		initTimeoutMessage(JNI_REQUEST_LOG_IN, DEFAULT_TIME_OUT_SECS,
 				caller);
 		ImRequest.getInstance().login(mail, passwd,
 				V2GlobalEnum.USER_STATUS_ONLINE, V2ClientType.ANDROID, false);
@@ -61,7 +61,7 @@ public class UserService extends AbstractHandler {
 			}
 			return;
 		}
-		initTimeoutMessage(JNI_REQUEST_UPDAE_USER, null, DEFAULT_TIME_OUT_SECS,
+		initTimeoutMessage(JNI_REQUEST_UPDAE_USER, DEFAULT_TIME_OUT_SECS,
 				caller);
 		if (user.getmUserId() == GlobalHolder.getInstance().getCurrentUserId()) {
 			ImRequest.getInstance().modifyBaseInfo(user.toXml());

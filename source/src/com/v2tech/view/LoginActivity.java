@@ -32,6 +32,7 @@ import com.V2.jni.ConfigRequest;
 import com.v2tech.R;
 import com.v2tech.logic.GlobalHolder;
 import com.v2tech.logic.Registrant;
+import com.v2tech.logic.jni.JNIResponse;
 import com.v2tech.logic.jni.RequestLogInResponse;
 import com.v2tech.service.UserService;
 import com.v2tech.util.GlobalConfig;
@@ -192,9 +193,7 @@ public class LoginActivity extends Activity {
 			final EditText et = (EditText) dialog.findViewById(R.id.ip);
 			final EditText port = (EditText) dialog.findViewById(R.id.port);
 
-			final String cacheIp = SPUtil.getConfigStrValue(mContext, "ip");
-			et.setText(cacheIp);
-
+			et.setText(SPUtil.getConfigStrValue(mContext, "ip"));
 			port.setText(SPUtil.getConfigStrValue(mContext, "port"));
 
 			saveButton.setOnClickListener(new OnClickListener() {
@@ -223,7 +222,8 @@ public class LoginActivity extends Activity {
 			cancelButton.setOnClickListener(new OnClickListener() {
 				@Override
 				public void onClick(View v) {
-					et.setText(cacheIp);
+					et.setText(SPUtil.getConfigStrValue(mContext, "ip"));
+					port.setText(SPUtil.getConfigStrValue(mContext, "port"));
 					dialog.dismiss();
 				}
 			});
@@ -394,21 +394,21 @@ public class LoginActivity extends Activity {
 			switch (msg.what) {
 			case LOG_IN_CALL_BACK:
 
-				RequestLogInResponse rlr = (RequestLogInResponse) msg.obj;
-				if (rlr.getResult() == RequestLogInResponse.Result.TIME_OUT) {
+				JNIResponse rlr = (JNIResponse) msg.obj;
+				if (rlr.getResult() == JNIResponse.Result.TIME_OUT) {
 					Toast.makeText(mContext, R.string.error_time_out,
 							Toast.LENGTH_LONG).show();
-				} else if (rlr.getResult() == RequestLogInResponse.Result.FAILED) {
+				} else if (rlr.getResult() == JNIResponse.Result.FAILED) {
 					mPasswordView
 							.setError(getString(R.string.error_incorrect_password));
 					mPasswordView.requestFocus();
-				} else if (rlr.getResult() == RequestLogInResponse.Result.CONNECT_ERROR) {
+				} else if (rlr.getResult() == JNIResponse.Result.CONNECT_ERROR) {
 					Toast.makeText(mContext, R.string.error_connect_to_server,
 							Toast.LENGTH_LONG).show();
 				} else {
 					// Save user info
 					saveUserConfig(mEmailView.getText().toString(), "");
-					GlobalHolder.getInstance().setCurrentUser(rlr.getUser());
+					GlobalHolder.getInstance().setCurrentUser(((RequestLogInResponse)rlr).getUser());
 					SPUtil.putConfigIntValue(mContext,
 							GlobalConfig.KEY_LOGGED_IN, 1);
 					mContext.startActivity(new Intent(mContext,

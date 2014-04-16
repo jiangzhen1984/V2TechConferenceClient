@@ -98,7 +98,7 @@ public class ConferenceService extends AbstractHandler {
 	 * @see com.v2tech.logic.jni.RequestEnterConfResponse
 	 */
 	public void requestEnterConference(Conference conf, Registrant caller) {
-		initTimeoutMessage(JNI_REQUEST_ENTER_CONF, null, DEFAULT_TIME_OUT_SECS,
+		initTimeoutMessage(JNI_REQUEST_ENTER_CONF, DEFAULT_TIME_OUT_SECS,
 				caller);
 		ConfRequest.getInstance().enterConf(conf.getId());
 	}
@@ -114,7 +114,7 @@ public class ConferenceService extends AbstractHandler {
 	 *            {@link com.v2tech.logic.jni.RequestExitedConfResponse}
 	 */
 	public void requestExitConference(Conference conf, Registrant caller) {
-		initTimeoutMessage(JNI_REQUEST_EXIT_CONF, null, DEFAULT_TIME_OUT_SECS,
+		initTimeoutMessage(JNI_REQUEST_EXIT_CONF, DEFAULT_TIME_OUT_SECS,
 				caller);
 		ConfRequest.getInstance().exitConf(conf.getId());
 		// send response to caller because exitConf no call back from JNI
@@ -144,7 +144,7 @@ public class ConferenceService extends AbstractHandler {
 			}
 			return;
 		}
-		initTimeoutMessage(JNI_REQUEST_CREATE_CONFERENCE, null, DEFAULT_TIME_OUT_SECS,
+		initTimeoutMessage(JNI_REQUEST_CREATE_CONFERENCE, DEFAULT_TIME_OUT_SECS,
 				caller);
 		GroupRequest.getInstance().createGroup(
 				Group.GroupType.CONFERENCE.intValue(),
@@ -168,7 +168,7 @@ public class ConferenceService extends AbstractHandler {
 			}
 			return;
 		}
-		initTimeoutMessage(JNI_REQUEST_QUIT_CONFERENCE, null, DEFAULT_TIME_OUT_SECS,
+		initTimeoutMessage(JNI_REQUEST_QUIT_CONFERENCE, DEFAULT_TIME_OUT_SECS,
 				caller);
 		if (conf.getCreator() == GlobalHolder.getInstance().getCurrentUserId()) {
 			GroupRequest.getInstance().delGroup(Group.GroupType.CONFERENCE.intValue(), conf.getId());
@@ -194,7 +194,7 @@ public class ConferenceService extends AbstractHandler {
 	 */
 	public void requestOpenVideoDevice(Conference conf,
 			UserDeviceConfig userDevice, Registrant caller) {
-		initTimeoutMessage(JNI_REQUEST_OPEN_VIDEO, null, DEFAULT_TIME_OUT_SECS,
+		initTimeoutMessage(JNI_REQUEST_OPEN_VIDEO, DEFAULT_TIME_OUT_SECS,
 				caller);
 
 		VideoRequest.getInstance().openVideoDevice(conf.getId(),
@@ -227,7 +227,7 @@ public class ConferenceService extends AbstractHandler {
 	public void requestCloseVideoDevice(Conference conf,
 			UserDeviceConfig userDevice, Registrant caller) {
 
-		initTimeoutMessage(JNI_REQUEST_CLOSE_VIDEO, null,
+		initTimeoutMessage(JNI_REQUEST_CLOSE_VIDEO, 
 				DEFAULT_TIME_OUT_SECS, caller);
 
 		VideoRequest.getInstance().closeVideoDevice(conf.getId(),
@@ -255,7 +255,7 @@ public class ConferenceService extends AbstractHandler {
 	 */
 	public void applyForControlPermission(ConferencePermission type,
 			Registrant caller) {
-		initTimeoutMessage(JNI_REQUEST_SPEAK, null, DEFAULT_TIME_OUT_SECS,
+		initTimeoutMessage(JNI_REQUEST_SPEAK, DEFAULT_TIME_OUT_SECS,
 				caller);
 
 		ConfRequest.getInstance().applyForControlPermission(type.intValue());
@@ -282,7 +282,7 @@ public class ConferenceService extends AbstractHandler {
 	public void applyForReleasePermission(ConferencePermission type,
 			Registrant caller) {
 
-		initTimeoutMessage(JNI_REQUEST_RELEASE_SPEAK, null,
+		initTimeoutMessage(JNI_REQUEST_RELEASE_SPEAK, 
 				DEFAULT_TIME_OUT_SECS, caller);
 
 		ConfRequest.getInstance().releaseControlPermission(type.intValue());
@@ -306,7 +306,7 @@ public class ConferenceService extends AbstractHandler {
 	 *            {@link com.v2tech.logic.jni.RequestUpdateCameraParametersResponse}
 	 */
 	public void updateCameraParameters(CameraConfiguration cc, Registrant caller) {
-		initTimeoutMessage(JNI_UPDATE_CAMERA_PAR, null, DEFAULT_TIME_OUT_SECS,
+		initTimeoutMessage(JNI_UPDATE_CAMERA_PAR, DEFAULT_TIME_OUT_SECS,
 				caller);
 		VideoRequest.getInstance().setCapParam(cc.getDeviceId(),
 				cc.getCameraIndex(), cc.getFrameRate(), cc.getBitRate());

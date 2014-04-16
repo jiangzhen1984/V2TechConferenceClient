@@ -110,6 +110,15 @@ public class ContactDetail extends Activity implements OnTouchListener {
 	protected void onStop() {
 		super.onStop();
 	}
+	
+	
+
+	@Override
+	public void onBackPressed() {
+		if(check()) {
+			super.onBackPressed();
+		}
+	}
 
 	@Override
 	public boolean onTouch(View view, MotionEvent mv) {
@@ -385,7 +394,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 	}
 
 	private boolean check() {
-		if (u.getName() == null || u.getName().isEmpty()) {
+		if (mNickNameET.getText() == null || mNickNameET.getText().toString().isEmpty()) {
 			mNickNameET.setError(this.getText(R.string.error_contacts_user_detail_no_nick_name));
 			mNickNameET.requestFocus();
 			return false;

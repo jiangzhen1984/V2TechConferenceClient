@@ -32,6 +32,13 @@ public class Conference {
 		this.startTime = startTime;
 		this.invitedList = invitedList;
 	}
+	
+	public Conference(String name, Date startTime, Date endTime,
+			List<User> invitedList) {
+		this.name = name;
+		this.d = startTime;
+		this.invitedList = invitedList;
+	}
 
 
 	@Override
@@ -76,7 +83,7 @@ public class Conference {
 	}
 
 	public Date getDate() {
-		if (d == null && this.startTime != null && this.startTime.trim().length() == 16) {
+		if (d == null && this.startTime != null && this.startTime.trim().length() <= 16) {
 			DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.CHINA);
 			try {
 				d = df.parse(this.startTime);

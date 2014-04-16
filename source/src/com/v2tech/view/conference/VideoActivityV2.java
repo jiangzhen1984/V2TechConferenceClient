@@ -944,7 +944,7 @@ public class VideoActivityV2 extends Activity {
 						new Registrant(this, REQUEST_ENTER_CONF_RESPONSE, null));
 				break;
 			case REQUEST_ENTER_CONF_RESPONSE:
-				RequestEnterConfResponse recr = (RequestEnterConfResponse) msg.obj;
+				JNIResponse recr = (JNIResponse) msg.obj;
 				if (recr.getResult() == JNIResponse.Result.SUCCESS) {
 
 				} else if (recr.getResult() == RequestEnterConfResponse.Result.TIME_OUT) {
