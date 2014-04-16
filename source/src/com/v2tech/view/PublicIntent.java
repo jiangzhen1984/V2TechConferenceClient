@@ -11,6 +11,7 @@ public class PublicIntent {
 	
 
 	public static final int MESSAGE_NOTIFICATION_ID = 1;
+	public static final int VIDEO_NOTIFICATION_ID = 2;
 	
 	public static final String DEFAULT_CATEGORY = "com.v2tech";
 	/**

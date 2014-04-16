@@ -137,7 +137,7 @@ public class VideoDocLayout extends LinearLayout {
 			return;
 		}
 		TextView content = new TextView(this.getContext());
-		content.setText(d.getId());
+		content.setText(d.getDocName());
 		content.setPadding(10, 10, 10, 10);
 		if (d == mCurrentDoc) {
 			content.setBackgroundColor(this.getResources().getColor(
@@ -158,6 +158,22 @@ public class VideoDocLayout extends LinearLayout {
 		
 		content.setOnClickListener(updateDocListener);
 
+	}
+	
+	
+	
+	public void updateCurrentDoc(V2Doc d) {
+		if (d == null) {
+			return;
+		}
+		
+		mCurrentDoc = d;
+		
+		mCurrentPage = mCurrentDoc.getActivatePage();
+
+		updateCurrentDocPage(mCurrentPage);
+		updateLayoutPageInformation();
+		updatePageButton();
 	}
 
 	public void updateCurrentDoc() {
@@ -230,8 +246,10 @@ public class VideoDocLayout extends LinearLayout {
 	}
 
 	public void addDoc(V2Doc doc) {
-		mDocs.put(doc.getId(), doc);
-		addViewToDoc(doc);
+		if (!mDocs.containsKey(doc.getId())) {
+			mDocs.put(doc.getId(), doc);
+			addViewToDoc(doc);
+		}
 	}
 
 	public void updateLayoutPageInformation() {

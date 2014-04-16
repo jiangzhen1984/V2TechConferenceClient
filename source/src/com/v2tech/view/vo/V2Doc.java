@@ -16,6 +16,7 @@ public class V2Doc {
 	protected User mSharedUser;
 	protected int mDocType;
 	protected List<Page> pages;
+	protected String mDocName;
 	
 	protected int currentPageNo = 1;	
 	
@@ -99,9 +100,10 @@ public class V2Doc {
 	
 	
 
-	public V2Doc(String id, Group mGroup, int mBType, User mSharedUser) {
+	public V2Doc(String id, String docName, Group mGroup, int mBType, User mSharedUser) {
 		super();
 		this.id = id;
+		this.mDocName = docName;
 		this.mGroup = mGroup;
 		this.mBType = mBType;
 		this.mSharedUser = mSharedUser;
@@ -113,6 +115,16 @@ public class V2Doc {
 
 	public void setId(String id) {
 		this.id = id;
+	}
+
+	
+	
+	public String getDocName() {
+		return mDocName;
+	}
+
+	public void setDocName(String docName) {
+		this.mDocName = docName;
 	}
 
 	public Group getGroup() {

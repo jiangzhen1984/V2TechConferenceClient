@@ -13,6 +13,7 @@ import v2av.VideoPlayer;
 import v2av.VideoRecorder;
 import android.app.Activity;
 import android.app.Dialog;
+import android.app.NotificationManager;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -61,6 +62,7 @@ import com.v2tech.service.ConferenceService;
 import com.v2tech.service.DocumentService;
 import com.v2tech.util.V2Log;
 import com.v2tech.view.JNIService;
+import com.v2tech.view.PublicIntent;
 import com.v2tech.view.conference.VideoMsgChattingLayout.ChattingListener;
 import com.v2tech.view.vo.V2Doc;
 import com.v2tech.view.vo.V2Doc.Page;
@@ -327,6 +329,9 @@ public class VideoActivityV2 extends Activity {
 		requestEnterConf();
 		// adjustLayout();
 		Message.obtain(mVideoHandler, ONLY_SHOW_LOCAL_VIDEO).sendToTarget();
+		NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+		// mId allows you to update the notification later on.
+		mNotificationManager.cancel(PublicIntent.VIDEO_NOTIFICATION_ID);
 	}
 
 	private void initConfsListener() {
@@ -897,6 +902,8 @@ public class VideoActivityV2 extends Activity {
 
 	class VideoHandler extends Handler {
 
+		Map<String, V2Doc.PageArray> prLegacy = new HashMap<String, V2Doc.PageArray>();
+		
 		@Override
 		public synchronized void handleMessage(Message msg) {
 
@@ -971,12 +978,33 @@ public class VideoActivityV2 extends Activity {
 						.getResult();
 				synchronized (mDocs) {
 					mDocs.put(vd.getId(), vd);
+					//check weather received doc before
+					if (prLegacy.containsKey(vd.getId())) {
+						V2Doc.PageArray vpr = prLegacy.get(vd.getId());
+						for (V2Doc.Page p : vpr.getPr()) {
+							V2Doc.Page existP = vd.findPage(p.getNo());
+							if (existP == null) {
+								vd.addPage(p);
+							}
+						}
+						prLegacy.remove(vd.getId());
+					}
+					
+					//FIXME ?????
+					if (mDocContainer != null) {
+						mDocContainer.addDoc(vd);
+					}
 				}
 				break;
 			case DOC_PAGE_NOTIFICATION:
 				V2Doc.PageArray vpr = (V2Doc.PageArray) ((DocumentService.AsyncResult) (msg.obj))
 						.getResult();
 				V2Doc vc = mDocs.get(vpr.getDocId());
+				// If doesn't receive doc yet, record page arry first for further use.
+				if (vc == null) {
+					prLegacy.put(vpr.getDocId(), vpr);
+					break;
+				}
 				for (V2Doc.Page p : vpr.getPr()) {
 					V2Doc.Page existP = vc.findPage(p.getNo());
 					if (existP == null) {
@@ -985,6 +1013,17 @@ public class VideoActivityV2 extends Activity {
 				}
 				break;
 			case DOC_PAGE_ACTIVITE_NOTIFICATION:
+				V2Doc.Page vpa = (V2Doc.Page)((DocumentService.AsyncResult) (msg.obj))
+						.getResult();
+				if (vpa != null) {
+					V2Doc v2d = mDocs.get(vpa.getDocId());
+					if (v2d != null) {
+						v2d.setActivatePageNo(vpa.getNo());
+						if (mDocContainer != null) {
+							mDocContainer.updateCurrentDoc(v2d);
+						}
+					}
+				}
 				break;
 
 			case DOC_DOWNLOADED_NOTIFICATION:

@@ -49,6 +49,7 @@ import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.Notificator;
 import com.v2tech.util.V2Log;
 import com.v2tech.util.XmlParser;
+import com.v2tech.view.conference.VideoActivityV2;
 import com.v2tech.view.vo.Conversation;
 import com.v2tech.view.vo.CrowdConversation;
 
@@ -590,7 +591,9 @@ public class JNIService extends Service {
 						i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
 						i.putExtra("gid", g.getmGId());
 						sendBroadcast(i);
-						Notificator.updateSystemNotification(mContext, name+" 会议邀请:", g.getName(), 1);
+						Intent enterConference =  new Intent(mContext, VideoActivityV2.class);
+						enterConference.putExtra("gid", g.getmGId());
+						Notificator.updateSystemNotification(mContext, name+" 会议邀请:", g.getName(), 1, enterConference, PublicIntent.VIDEO_NOTIFICATION_ID);
 					}
 
 				}

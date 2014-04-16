@@ -99,12 +99,19 @@ public class DocumentService extends AbstractHandler {
 			Group g = GlobalHolder.getInstance().getGroupById(
 					GroupType.CONFERENCE, nGroupID);
 			User u = GlobalHolder.getInstance().getUser(nFromUserID);
+			int pos = szFileName.lastIndexOf("/");
+			if (pos == -1) {
+				pos = szFileName.lastIndexOf("\\");
+				if (pos != -1) {
+					szFileName = szFileName.substring(pos+1);
+				}
+			}
 			for (Registrant r : newDocNotificatorHodler) {
 				if (r.getHandler() != null) {
 					Message m = Message.obtain();
 					m.what =  r.getWhat();
 					m.obj = new AsyncResult(r.getObject(), new V2ImageDoc(
-							szWBoardID, g, nBusinessType, u));
+							szWBoardID, szFileName, g, nBusinessType, u));
 					r.getHandler().sendMessage(m);
 				}
 
