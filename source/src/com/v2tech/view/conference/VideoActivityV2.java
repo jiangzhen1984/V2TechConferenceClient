@@ -86,6 +86,7 @@ public class VideoActivityV2 extends Activity {
 	private static final int DOC_PAGE_NOTIFICATION = 51;
 	private static final int DOC_PAGE_ACTIVITE_NOTIFICATION = 52;
 	private static final int DOC_DOWNLOADED_NOTIFICATION = 54;
+	private static final int DOC_CLOSED_NOTIFICATION = 55;
 
 	public static final String JNI_EVENT_VIDEO_CATEGORY = "com.v2tech.conf_video_event";
 	public static final String JNI_EVENT_VIDEO_CATEGORY_OPEN_VIDEO_EVENT_ACTION = "com.v2tech.conf_video_event.open_video_event";
@@ -182,6 +183,8 @@ public class VideoActivityV2 extends Activity {
 				DOC_PAGE_ACTIVITE_NOTIFICATION, null);
 		ds.registerDocPageNotification(mVideoHandler, DOC_PAGE_NOTIFICATION,
 				null);
+		ds.registerDocClosedNotification(mVideoHandler,
+				DOC_CLOSED_NOTIFICATION, null);
 	}
 
 	private OnClickListener mMenuButtonListener = new OnClickListener() {
@@ -615,8 +618,10 @@ public class VideoActivityV2 extends Activity {
 				null);
 		ds.unRegisterDocDisplayNotification(mVideoHandler,
 				DOC_DOWNLOADED_NOTIFICATION, null);
+		ds.unRegisterDocClosedNotification(mVideoHandler,
+				DOC_CLOSED_NOTIFICATION, null);
 		if (mDocContainer != null) {
-			//clean document bitmap cache
+			// clean document bitmap cache
 			mDocContainer.cleanCache();
 		}
 	}
@@ -903,7 +908,7 @@ public class VideoActivityV2 extends Activity {
 	class VideoHandler extends Handler {
 
 		Map<String, V2Doc.PageArray> prLegacy = new HashMap<String, V2Doc.PageArray>();
-		
+
 		@Override
 		public synchronized void handleMessage(Message msg) {
 
@@ -978,7 +983,7 @@ public class VideoActivityV2 extends Activity {
 						.getResult();
 				synchronized (mDocs) {
 					mDocs.put(vd.getId(), vd);
-					//check weather received doc before
+					// check weather received doc before
 					if (prLegacy.containsKey(vd.getId())) {
 						V2Doc.PageArray vpr = prLegacy.get(vd.getId());
 						for (V2Doc.Page p : vpr.getPr()) {
@@ -989,8 +994,8 @@ public class VideoActivityV2 extends Activity {
 						}
 						prLegacy.remove(vd.getId());
 					}
-					
-					//FIXME ?????
+
+					// FIXME ?????
 					if (mDocContainer != null) {
 						mDocContainer.addDoc(vd);
 					}
@@ -1000,7 +1005,8 @@ public class VideoActivityV2 extends Activity {
 				V2Doc.PageArray vpr = (V2Doc.PageArray) ((DocumentService.AsyncResult) (msg.obj))
 						.getResult();
 				V2Doc vc = mDocs.get(vpr.getDocId());
-				// If doesn't receive doc yet, record page arry first for further use.
+				// If doesn't receive doc yet, record page arry first for
+				// further use.
 				if (vc == null) {
 					prLegacy.put(vpr.getDocId(), vpr);
 					break;
@@ -1013,7 +1019,7 @@ public class VideoActivityV2 extends Activity {
 				}
 				break;
 			case DOC_PAGE_ACTIVITE_NOTIFICATION:
-				V2Doc.Page vpa = (V2Doc.Page)((DocumentService.AsyncResult) (msg.obj))
+				V2Doc.Page vpa = (V2Doc.Page) ((DocumentService.AsyncResult) (msg.obj))
 						.getResult();
 				if (vpa != null) {
 					V2Doc v2d = mDocs.get(vpa.getDocId());
@@ -1035,6 +1041,18 @@ public class VideoActivityV2 extends Activity {
 					cache.addPage(vp);
 				} else {
 					ppC.setFilePath(vp.getFilePath());
+				}
+				break;
+
+			case DOC_CLOSED_NOTIFICATION:
+				V2Doc removedDoc = (V2Doc) ((DocumentService.AsyncResult) (msg.obj))
+						.getResult();
+				synchronized (mDocs) {
+					removedDoc = mDocs.get(removedDoc.getId());
+					if (removedDoc != null) {
+						mDocContainer.closeDoc(removedDoc);
+						mDocs.remove(removedDoc.getId());
+					}
 				}
 				break;
 

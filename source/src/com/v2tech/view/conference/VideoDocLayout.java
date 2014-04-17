@@ -161,6 +161,31 @@ public class VideoDocLayout extends LinearLayout {
 	}
 	
 	
+	public void closeDoc(V2Doc d) {
+		if (d == null) {
+			V2Log.e(" closed Doc is null");
+			return;
+		}
+		if (d == mCurrentDoc) {
+			mCurrentDoc = null;
+			mCurrentPage = null;
+			updateLayoutPageInformation();
+			updatePageButton();
+			//recycle bitmap
+			cleanCache();
+		}
+		
+		for (int i =0; mDodListContainer != null && i<mDodListContainer.getChildCount(); i++) {
+			View v = mDodListContainer.getChildAt(i);
+			if (v instanceof TextView) {
+				V2Doc va = (V2Doc)v.getTag();
+				if (va != null && va.getId().equals(d.getId())) {
+					mDodListContainer.removeView(v);
+				}
+			}
+		}
+		mDocs.remove(d.getId());
+	}
 	
 	public void updateCurrentDoc(V2Doc d) {
 		if (d == null) {
@@ -201,13 +226,15 @@ public class VideoDocLayout extends LinearLayout {
 		if (p == null) {
 			return;
 		}
-		if (mCurrentBitMap != null && !mCurrentBitMap.isRecycled()) {
-			mCurrentBitMap.recycle();
-			mCurrentBitMap = null;
-		}
+		
 		if (p.getFilePath() != null) {
 			File f = new File(p.getFilePath());
 			if (f.exists()) {
+				if (mCurrentBitMap != null && !mCurrentBitMap.isRecycled()) {
+					mCurrentBitMap.recycle();
+					mCurrentBitMap = null;
+				}
+				
 				BitmapFactory.Options ops = new BitmapFactory.Options();
 				ops.inJustDecodeBounds = true;
 				BitmapFactory.decodeFile(p.getFilePath(), ops);
@@ -287,6 +314,7 @@ public class VideoDocLayout extends LinearLayout {
 	}
 	
 	public void cleanCache() {
+		container.removeAllViews();
 		if (this.mCurrentBitMap != null && !this.mCurrentBitMap.isRecycled()) {
 			this.mCurrentBitMap.recycle();
 		}
@@ -334,6 +362,11 @@ public class VideoDocLayout extends LinearLayout {
 		public void onClick(View v) {
 			V2Doc d = (V2Doc)v.getTag();
 			if (d != mCurrentDoc) {
+				V2Doc.Page p = d.getActivatePage();
+				if (p.getFilePath() == null || p.getFilePath().isEmpty()) {
+					//FIXME should inform user doc is downloading
+					return;
+				}
 				for (int i = 0; i < mDodListContainer.getChildCount(); i++) {
 					View child = mDodListContainer.getChildAt(i);
 					if (child.getTag() != null) {

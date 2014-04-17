@@ -147,7 +147,8 @@
             android:ems="10"
             android:inputType="textCapSentences|textMultiLine"
             android:maxLines="3"
-            android:minLines="1" >
+            android:minLines="1"
+            android:maxLength="4500" >
         </EditText>
     </RelativeLayout>
 

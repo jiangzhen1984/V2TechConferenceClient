@@ -1,7 +1,18 @@
 package com.V2.jni;
 
+
 public interface WBRequestCallback {
 	
+	/**
+	 * FIXME add comment
+	 * @param nGroupID
+	 * @param nBusinessType
+	 * @param nFromUserID
+	 * @param szWBoardID
+	 * @param nWhiteIndex
+	 * @param szFileName
+	 * @param type
+	 */
 	public void OnWBoardChatInvite(long nGroupID, int nBusinessType, long  nFromUserID, String szWBoardID, 
 			int nWhiteIndex,String szFileName, int type);
 
@@ -12,5 +23,9 @@ public interface WBRequestCallback {
 
 	public void OnWBoardDocDisplay(String szWBoardID, int nPageID,
 			String szFileName, int result);
+	
+	
+	public void OnWBoardClosed(long nGroupID, int nBusinessType, long nUserID,
+			String szWBoardID);
 
 }

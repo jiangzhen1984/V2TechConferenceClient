@@ -605,13 +605,14 @@ public class JNIService extends Service {
 				boolean bMovetoRoot) {
 			// TODO just support conference
 			if (groupType == Group.GroupType.CONFERENCE.intValue()) {
+				Group rG = GlobalHolder.getInstance().getGroupById(Group.GroupType.CONFERENCE, nGroupID);
 				GlobalHolder.getInstance().removeConferenceGroup(nGroupID);
 				Intent i = new Intent();
 				i.setAction(JNIService.JNI_BROADCAST_CONFERENCE_REMOVED);
 				i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
 				i.putExtra("gid", nGroupID);
 				sendBroadcast(i);
-
+				Notificator.updateSystemNotification(mContext, rG.getOwnerUser().getName()+" 删除会议:", rG.getName(), 1, PublicIntent.VIDEO_NOTIFICATION_ID);
 			}
 		}
 

@@ -9,10 +9,10 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -133,7 +133,7 @@ public class User implements Comparable<User> {
 		this.mName = name;
 		this.mEmail = email;
 		this.mSignature = signature;
-		mBelongsGroup = new HashSet<Group>();
+		mBelongsGroup = new CopyOnWriteArraySet<Group>();
 		isCurrentLoggedInUser = false;
 		this.mStatus = Status.OFFLINE;
 		initAbbr();
@@ -256,6 +256,7 @@ public class User implements Comparable<User> {
 	}
 
 	public String getDepartment() {
+		//FIXM me 
 		if (this.getFirstBelongsGroup() != null) {
 			mDepartment = this.getFirstBelongsGroup().getName();
 		}
@@ -310,7 +311,7 @@ public class User implements Comparable<User> {
 	public Status getmStatus() {
 		return mStatus;
 	}
-	
+
 	public String getArra() {
 		return this.abbra;
 	}
@@ -329,10 +330,13 @@ public class User implements Comparable<User> {
 
 	public Group getFirstBelongsGroup() {
 		if (this.mBelongsGroup.size() > 0) {
-			return this.mBelongsGroup.iterator().next();
-		} else {
-			return null;
+			for (Group g : mBelongsGroup) {
+				if (g.getGroupType() != Group.GroupType.CONFERENCE) {
+					return g;
+				}
+			}
 		}
+		return null;
 	}
 
 	public String getAvatarPath() {
@@ -349,7 +353,7 @@ public class User implements Comparable<User> {
 
 	private Bitmap avatar;
 
-	public Bitmap getAvatarBitmap() {
+	public synchronized Bitmap getAvatarBitmap() {
 		if (avatar != null && !avatar.isRecycled()) {
 			return avatar;
 		}
@@ -371,14 +375,15 @@ public class User implements Comparable<User> {
 			BitmapFactory.Options opt = new BitmapFactory.Options();
 			Bitmap tmep = BitmapFactory.decodeFile(mAvatarPath, opt);
 			if (GlobalConfig.GLOBAL_DPI == DisplayMetrics.DENSITY_HIGH) {
-				avatar = Bitmap .createScaledBitmap(tmep, 60, 60, true);
+				avatar = Bitmap.createScaledBitmap(tmep, 60, 60, true);
 			} else if (GlobalConfig.GLOBAL_DPI >= DisplayMetrics.DENSITY_XHIGH) {
-				avatar = Bitmap .createScaledBitmap(tmep, 100, 100, true);
+				avatar = Bitmap.createScaledBitmap(tmep, 100, 100, true);
 			} else {
-				avatar = Bitmap .createScaledBitmap(tmep, 100, 100, true);
+				avatar = Bitmap.createScaledBitmap(tmep, 100, 100, true);
 			}
 			tmep.recycle();
-			V2Log.d("decode result: width "+avatar.getWidth() +"  height:"+avatar.getHeight());
+			V2Log.d("decode result: width " + avatar.getWidth() + "  height:"
+					+ avatar.getHeight());
 		}
 		return avatar;
 	}
@@ -423,13 +428,19 @@ public class User implements Comparable<User> {
 		} else if (another.getmStatus() == Status.ONLINE) {
 			return 1;
 		}
-		if (this.mStatus == Status.LEAVE || this.mStatus == Status.DO_NOT_DISTURB || this.mStatus == Status.BUSY) {
-			if (another.getmStatus() == Status.LEAVE && another.getmStatus() == Status.DO_NOT_DISTURB && another.getmStatus() == Status.BUSY) {
+		if (this.mStatus == Status.LEAVE
+				|| this.mStatus == Status.DO_NOT_DISTURB
+				|| this.mStatus == Status.BUSY) {
+			if (another.getmStatus() == Status.LEAVE
+					&& another.getmStatus() == Status.DO_NOT_DISTURB
+					&& another.getmStatus() == Status.BUSY) {
 				return this.abbra.compareTo(another.abbra);
 			} else {
 				return -1;
 			}
-		} else if (another.getmStatus() == Status.LEAVE && another.getmStatus() == Status.DO_NOT_DISTURB && another.getmStatus() == Status.BUSY) {
+		} else if (another.getmStatus() == Status.LEAVE
+				&& another.getmStatus() == Status.DO_NOT_DISTURB
+				&& another.getmStatus() == Status.BUSY) {
 			return 1;
 		}
 
@@ -440,25 +451,18 @@ public class User implements Comparable<User> {
 		DateFormat dp = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
 		String xml = "<user " + " address='"
 				+ (this.getAddress() == null ? "" : this.getAddress()) + "' "
-				+ "birthday='" + (this.mBirthday == null ? "" : dp
-				.format(this.mBirthday))
-				+ "' "
-				+ "job='"
-				+ (this.getTitle() == null ? "" : this.getTitle())
-				+ "' "
+				+ "birthday='"
+				+ (this.mBirthday == null ? "" : dp.format(this.mBirthday))
+				+ "' " + "job='"
+				+ (this.getTitle() == null ? "" : this.getTitle()) + "' "
 				+ "mobile='"
 				+ (this.getCellPhone() == null ? "" : this.getCellPhone())
-				+ "' "
-				+ "nickname='"
-				+ (this.getName() == null ? "" : this.getName())
-				+ "'  "
-				+ "sex='"
-				+ (this.getGender() == null ? "" : this.getGender())
-				+ "'  "
-				+ "sign='"
+				+ "' " + "nickname='"
+				+ (this.getName() == null ? "" : this.getName()) + "'  "
+				+ "sex='" + (this.getGender() == null ? "" : this.getGender())
+				+ "'  " + "sign='"
 				+ (this.getSignature() == null ? "" : this.getSignature())
-				+ "' "
-				+ "telephone='"
+				+ "' " + "telephone='"
 				+ (this.getTelephone() == null ? "" : this.getTelephone())
 				+ "'> " + "<videolist/> </user> ";
 		return xml;
@@ -489,8 +493,8 @@ public class User implements Comparable<User> {
 			for (int i = 0; i < gList.getLength(); i++) {
 				element = (Element) gList.item(i);
 				User u = new User(Long.parseLong(element.getAttribute("id")),
-						getAttribute(element, "nickname"),
-						getAttribute(element, "email"),
+						getAttribute(element, "nickname"), getAttribute(
+								element, "email"),
 						getAttribute(element, "sign"));
 				u.setTelephone(getAttribute(element, "telephone"));
 				u.setGender(getAttribute(element, "sex"));
@@ -526,9 +530,9 @@ public class User implements Comparable<User> {
 
 		return l;
 	}
-	
+
 	private static String getAttribute(Element el, String name) {
-		Attr  atr = el.getAttributeNode(name);
+		Attr atr = el.getAttributeNode(name);
 		if (atr != null) {
 			return atr.getValue();
 		}
@@ -553,7 +557,7 @@ public class User implements Comparable<User> {
 		String bir = extraAttri("birthday='", "'", xml);
 
 		DateFormat dp = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-		
+
 		User u = new User(uID, nickName);
 		u.setSignature(signature);
 		u.setTitle(job);

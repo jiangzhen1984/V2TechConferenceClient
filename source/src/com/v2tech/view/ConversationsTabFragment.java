@@ -144,8 +144,7 @@ public class ConversationsTabFragment extends Fragment {
 			rootView.setOnTouchListener(mTouchListener);
 			mConversationsListView.setOnTouchListener(mTouchListener);
 
-			if (mCurrentTabFlag.equals(Conversation.TYPE_GROUP)
-				) {
+			if (mCurrentTabFlag.equals(Conversation.TYPE_GROUP)) {
 				mFeatureIV.setVisibility(View.INVISIBLE);
 			}
 
@@ -429,20 +428,20 @@ public class ConversationsTabFragment extends Fragment {
 			if (mCurrentTabFlag.equals(Conversation.TYPE_CONTACT)) {
 				View v = getMenuButtonView(R.string.conversation_popup_menu_video_call_button);
 				root.addView(v);
-				
+
 				v = getMenuButtonView(R.string.conversation_popup_menu_call_button);
 				root.addView(v);
-				
+
 				v = getMenuButtonView(R.string.conversation_popup_menu_sms_call_button);
 				root.addView(v);
-				
+
 				v = getMenuButtonView(R.string.conversation_popup_menu_email_button);
 				root.addView(v);
 				v = getMenuButtonView(R.string.conversation_popup_menu_files_button);
 				root.addView(v);
 				v = getMenuButtonView(R.string.conversation_popup_menu_setting_button);
 				root.addView(v);
-				
+
 			} else {
 				root.setBackgroundColor(mContext.getResources().getColor(
 						R.color.confs_title_bg));
@@ -470,10 +469,10 @@ public class ConversationsTabFragment extends Fragment {
 		}
 
 	};
-	
+
 	private View getMenuButtonView(int resId) {
 		LinearLayout l = new LinearLayout(mContext);
-		
+
 		TextView tv = new TextView(mContext);
 		tv.setTextSize(18);
 		tv.setGravity(Gravity.CENTER);
@@ -485,17 +484,17 @@ public class ConversationsTabFragment extends Fragment {
 		ll.setMargins(5, 20, 5, 20);
 		ll.gravity = Gravity.CENTER;
 		tv.setLayoutParams(ll);
-		
+
 		l.addView(tv);
 		l.setLayoutParams(ll);
-		
-		LinearLayout line =  new LinearLayout(mContext);
+
+		LinearLayout line = new LinearLayout(mContext);
 		line.setBackgroundColor(Color.GRAY);
-		
-		l.addView(line,  new LinearLayout.LayoutParams(
+
+		l.addView(line, new LinearLayout.LayoutParams(
 				LinearLayout.LayoutParams.MATCH_PARENT, 1));
-		
-		return  l;
+
+		return l;
 	}
 
 	private void loadConversation() {
@@ -648,12 +647,22 @@ public class ConversationsTabFragment extends Fragment {
 
 		@Override
 		public boolean onLongClick(final View v) {
+			String[] item = null;
+
+			if (mCurrentTabFlag == Conversation.TYPE_CONFERNECE) {
+				item = new String[] { mContext.getResources().getString(
+						R.string.conversations_delete_conf) };
+			} else if (mCurrentTabFlag == Conversation.TYPE_CONTACT) {
+				item = new String[] { mContext.getResources().getString(
+						R.string.conversations_delete_conversaion) };
+			} else {
+				item = new String[] { mContext.getResources().getString(
+						R.string.conversations_delete_conversaion) };
+			}
 
 			final Conversation cov = (Conversation) v.getTag();
 			AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-			builder.setTitle(cov.getName()).setItems(
-					new String[] { mContext.getResources().getString(
-							R.string.conversations_delete_conversaion) },
+			builder.setTitle(cov.getName()).setItems(item,
 					new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog, int which) {
 							long ownID = 0;

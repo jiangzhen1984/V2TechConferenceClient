@@ -25,7 +25,7 @@ public class WBRequest {
 		}
 		return mWBRequest;
 	}
-	
+
 	public static synchronized WBRequest getInstance() {
 		return mWBRequest;
 	}
@@ -48,8 +48,8 @@ public class WBRequest {
 			long nFromUserID, String szWBoardID, int nWhiteIndex,
 			String szFileName, int type) {
 		Log.e("WBRequest UI", "OnWBoardChatInvite " + nGroupID + " "
-				+ nBusinessType + " " + nFromUserID + " " + szWBoardID
-				+ " :" + nWhiteIndex + " :" + szFileName);
+				+ nBusinessType + " " + nFromUserID + " " + szWBoardID + " :"
+				+ nWhiteIndex + " :" + szFileName);
 		for (WeakReference<WBRequestCallback> wr : mCallbacks) {
 			if (wr != null && wr.get() != null) {
 				wr.get().OnWBoardChatInvite(nGroupID, nBusinessType,
@@ -138,6 +138,12 @@ public class WBRequest {
 			String szWBoardID) {
 		Log.e("WBRequest UI", "OnWBoardClosed " + nGroupID + " "
 				+ nBusinessType + " " + szWBoardID);
+		for (WeakReference<WBRequestCallback> wr : mCallbacks) {
+			if (wr != null && wr.get() != null) {
+				wr.get().OnWBoardClosed(nGroupID, nBusinessType, nUserID,
+						szWBoardID);
+			}
+		}
 	}
 
 	private void OnRecvChangeWBoardData(String szWBoardID, int nPageID,

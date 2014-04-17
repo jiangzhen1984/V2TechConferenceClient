@@ -89,6 +89,25 @@ public class DocumentService extends AbstractHandler {
 			}
 		}
 	}
+	
+	
+	
+	
+	private List<Registrant> docClosedNotificatorHodler = new ArrayList<Registrant>();
+
+	public void registerDocClosedNotification(Handler h, int what, Object obj) {
+		docClosedNotificatorHodler.add(new Registrant(h, what, obj));
+	}
+
+	public void unRegisterDocClosedNotification(Handler h, int what, Object obj) {
+		for (Registrant r : docClosedNotificatorHodler) {
+			if (r.getHandler() == h && r.getWhat() == what
+					&& r.getObject() == obj) {
+				docClosedNotificatorHodler.remove(r);
+				return;
+			}
+		}
+	}
 
 	class WBRequestCallbackCB implements WBRequestCallback {
 
@@ -163,6 +182,27 @@ public class DocumentService extends AbstractHandler {
 			}
 
 		}
+
+		@Override
+		public void OnWBoardClosed(long nGroupID, int nBusinessType,
+				long nUserID, String szWBoardID) {
+			Group g = GlobalHolder.getInstance().getGroupById(
+					GroupType.CONFERENCE, nGroupID);
+			User u = GlobalHolder.getInstance().getUser(nUserID);
+			
+			for (Registrant r : docClosedNotificatorHodler) {
+				if (r.getHandler() != null) {
+					Message m = Message.obtain();
+					m.what =  r.getWhat();
+					m.obj = new AsyncResult(r.getObject(), new V2Doc(szWBoardID, "", g, nBusinessType, u));
+					r.getHandler().sendMessage(m);
+				}
+
+			}
+		}
+		
+		
+		
 
 	}
 
