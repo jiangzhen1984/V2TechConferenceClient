@@ -21,7 +21,6 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Parcelable;
-import android.os.Process;
 import android.support.v4.app.NotificationCompat;
 import android.widget.Toast;
 
@@ -449,7 +448,7 @@ public class JNIService extends Service {
 		@Override
 		public void OnLogoutCallback(int nUserID) {
 			Message.obtain(mCallbackHandler, JNI_LOG_OUT).sendToTarget();
-			Notificator.cancelSystemNotification(mContext);
+			Notificator.cancelAllSystemNotification(mContext);
 			mCallbackHandler.postDelayed(new Runnable() {
 				@Override
 				public void run() {
@@ -459,12 +458,6 @@ public class JNIService extends Service {
 					i.setAction(PublicIntent.FINISH_APPLICATION);
 					i.addCategory(PublicIntent.DEFAULT_CATEGORY);
 					mContext.sendBroadcast(i);
-					try {
-						Thread.sleep(500);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-					Process.killProcess(Process.myPid());
 				}
 
 			}, 2000);

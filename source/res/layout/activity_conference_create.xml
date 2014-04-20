@@ -142,7 +142,7 @@
                 android:layout_alignBaseline="@+id/textView1"
                 android:layout_marginLeft="29dp"
                 android:layout_toRightOf="@+id/textView1"
-                android:background="@drawable/conference_create_et_bg"
+                android:background="@drawable/input_bg"
                 android:ems="10"
                 android:maxLength="50"
                 android:inputType="text" >
@@ -165,7 +165,7 @@
                 android:layout_alignBaseline="@+id/textView2"
                 android:layout_alignBottom="@+id/textView2"
                 android:layout_alignLeft="@+id/conference_create_conf_name"
-                android:background="@drawable/conference_create_et_bg"
+                android:background="@drawable/input_bg"
                 android:ems="10"
                 android:inputType="none" >
             </EditText>

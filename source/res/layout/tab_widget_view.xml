@@ -6,10 +6,11 @@
 
     <ImageView
         android:id="@+id/tab_image"
+        android:layout_marginTop="5dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"
+        android:layout_alignParentTop="true"
         android:src="@drawable/tab_org_button" />
 
     <TextView
@@ -19,7 +20,8 @@
         android:layout_below="@+id/tab_image"
         android:gravity="center"
         android:textColor="@color/selector_tab_text_color"
-        android:paddingBottom="5dp"
+        android:textSize="14sp"
+        android:paddingBottom="2dp"
         android:text="@string/tab_conference_name" />
 
     <ImageView
@@ -36,6 +38,6 @@
         android:layout_height="wrap_content"
         android:layout_alignTop="@+id/imageView1"
         android:layout_alignRight="@+id/imageView1"
-        android:src="@drawable/tab_notificator" />
+        android:src="@drawable/red_nofificator" />
 
 </RelativeLayout>

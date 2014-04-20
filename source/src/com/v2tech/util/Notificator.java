@@ -69,10 +69,18 @@ public class Notificator {
 		mNotificationManager.notify(notificationID, builder.build());
 	}
 
-	public static void cancelSystemNotification(Context context) {
+	public static void cancelSystemNotification(Context context, int nId) {
+		NotificationManager mNotificationManager = (NotificationManager) context
+				.getSystemService(Context.NOTIFICATION_SERVICE);
+		// mId allows you to update the notification later on.
+		mNotificationManager.cancel(nId);
+	}
+	
+	public static void cancelAllSystemNotification(Context context) {
 		NotificationManager mNotificationManager = (NotificationManager) context
 				.getSystemService(Context.NOTIFICATION_SERVICE);
 		// mId allows you to update the notification later on.
 		mNotificationManager.cancel(PublicIntent.MESSAGE_NOTIFICATION_ID);
+		mNotificationManager.cancel(PublicIntent.VIDEO_NOTIFICATION_ID);
 	}
 }

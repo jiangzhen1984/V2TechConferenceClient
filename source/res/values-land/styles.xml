@@ -16,9 +16,6 @@
  <!-- Application theme. -->
     <style name="AppTheme" parent="@android:style/Theme.NoTitleBar">
 
-        <!-- All customizations that are NOT specific to a particular API-level can go here. -->
-        <item name="switchStyle">@style/switch_light</item>
-		<item name="textAppearance">@style/TextAppearance</item>
     </style>
 
     <style name="LoginFormContainer">

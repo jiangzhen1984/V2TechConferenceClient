@@ -27,8 +27,8 @@
             android:layout_height="0dp"
             android:layout_below="@+id/conversation_user_title"
             android:text="" />
-
-        <TextView
+        
+          <TextView
             android:id="@+id/video_conversation_time_counter"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -36,7 +36,6 @@
             android:layout_centerVertical="true"
             android:layout_marginRight="30dp"
             android:text="TextView" />
-
     </RelativeLayout>
 
     <LinearLayout
@@ -46,45 +45,26 @@
         android:layout_below="@+id/RelativeLayout1"
         android:layout_above="@+id/LinearLayout3"
         android:layout_centerHorizontal="true"
-        android:background="#ffffff" >
+        android:background="#ffffff"
+        android:orientation="vertical" >
 
         <LinearLayout
             android:id="@+id/video_conversation_remote_video"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
             android:layout_weight=".5"
             android:orientation="horizontal" >
         </LinearLayout>
          <LinearLayout
               android:id="@+id/video_conversation_local_video"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
             android:layout_weight=".5"
             android:orientation="horizontal" >
-
-             <RelativeLayout
-                 android:layout_width="match_parent"
-                 android:layout_height="match_parent" >
-
-                 <SurfaceView
+            <SurfaceView
                      android:id="@+id/video_conversation_local_surface_view"
                      android:layout_width="match_parent"
-                     android:layout_height="match_parent"
-                     android:layout_centerHorizontal="true"
-                     android:layout_centerVertical="true" />
-
-                 <ImageView
-                     android:id="@+id/video_conversation_camera_reverse"
-                     android:layout_width="wrap_content"
-                     android:layout_height="wrap_content"
-                     android:layout_alignParentRight="true"
-                     android:layout_alignParentTop="true"
-                     android:layout_marginRight="20dp"
-                     android:layout_marginTop="20dp"
-                     android:src="@drawable/reverse_camera" />
-
-             </RelativeLayout>
-
+                     android:layout_height="match_parent" />
         </LinearLayout>
     </LinearLayout>
 
@@ -132,7 +112,7 @@
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
                 android:layout_centerVertical="true"
-                android:src="@drawable/speaking" />
+                android:src="@drawable/speaking_button" />
             
                <ImageView
                 android:id="@+id/imageView2"
@@ -145,7 +125,7 @@
 
         </RelativeLayout>
 
-       
+        
         <RelativeLayout
             android:id="@+id/video_conversation_hang_off_button"
             android:layout_width="0dp"

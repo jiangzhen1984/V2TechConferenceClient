@@ -111,6 +111,7 @@ public class Conference {
 	 * @return
 	 */
 	public String getConferenceConfigXml() {
+		User  loggedUser = GlobalHolder.getInstance().getCurrentUser();
 		StringBuilder sb = new StringBuilder();
 		sb.append(
 				"<conf canaudio=\"1\" candataop=\"1\" canvideo=\"1\" conftype=\"0\" haskey=\"0\" ")
@@ -120,7 +121,7 @@ public class Conference {
 				.append("chairuserid=\"")
 				.append(GlobalHolder.getInstance().getCurrentUserId())
 				.append("\" ").append("chairnickname=\"")
-				.append(GlobalHolder.getInstance().getCurrentUser().getName())
+				.append(loggedUser == null? "" : loggedUser.getName())
 				.append("\"  starttime=\""+getDate().getTime()/1000+"\" >").append("</conf>");
 		return sb.toString();
 

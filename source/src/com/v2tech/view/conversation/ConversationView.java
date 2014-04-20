@@ -299,9 +299,7 @@ public class ConversationView extends Activity {
 			int action = mv.getAction();
 			if (action == MotionEvent.ACTION_DOWN
 					|| action == MotionEvent.ACTION_HOVER_ENTER) {
-				anchor.setBackgroundResource(R.drawable.message_send_button_pressed_bg);
 			} else if (action == MotionEvent.ACTION_UP) {
-				anchor.setBackgroundResource(R.drawable.message_send_button_bg);
 				doSendMessage();
 			}
 			return true;

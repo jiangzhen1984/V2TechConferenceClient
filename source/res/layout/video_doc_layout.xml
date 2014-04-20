@@ -37,14 +37,14 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_weight="0.25"
-            android:src="@drawable/video_send_msg_button" />
+            android:src="@drawable/video_show_doc_button_selector" />
 
         <ImageView
             android:id="@+id/video_doc_pre_button"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="0.25"
-            android:src="@drawable/video_doc_letf_arrow_gray" />
+            android:src="@drawable/video_doc_left_arrow_gray" />
 
         <TextView
             android:id="@+id/video_doc_navgator"
@@ -53,7 +53,7 @@
             android:layout_gravity="center_horizontal|center_vertical"
             android:layout_weight="0.25"
             android:gravity="center"
-            android:text="TextView" />
+            android:text=" " />
 
         <ImageView
             android:id="@+id/video_doc_next_button"
@@ -62,5 +62,14 @@
             android:layout_weight="0.25"
             android:src="@drawable/video_doc_right_arrow_gray" />
     </LinearLayout>
+
+    <ImageView
+        android:id="@+id/video_doc_pin_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignBottom="@+id/textView1"
+        android:layout_marginRight="20dp"
+        android:src="@drawable/pin_button_selector" />
 
 </RelativeLayout>

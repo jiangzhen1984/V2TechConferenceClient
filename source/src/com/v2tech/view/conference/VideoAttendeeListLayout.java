@@ -116,12 +116,12 @@ public class VideoAttendeeListLayout extends LinearLayout {
 		if (a.isSelf() == false) {
 			nameTV.setTextSize(20);
 			if (a.getDefaultDevice() != null) {
-				cameraIV.setImageResource(R.drawable.camera_showing);
+				cameraIV.setImageResource(R.drawable.camera);
 			}
 		} else {
 			nameTV.setTextSize(22);
 			nameTV.setTypeface(null, Typeface.BOLD);
-			cameraIV.setImageResource(R.drawable.camera_showing);
+			cameraIV.setImageResource(R.drawable.camera);
 		}
 		view.setTag(a.getDefaultDevice());
 		list.add(view);
@@ -136,7 +136,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 			UserDeviceConfig udc = a.getmDevices().get(i);
 			nameTV2.setText(a.getUser().getName() + (i > 0 ? ("_视频" + i) : ""));
 			nameTV2.setTextSize(20);
-			cameraIV2.setImageResource(R.drawable.camera_showing);
+			cameraIV2.setImageResource(R.drawable.camera);
 
 			view2.setTag(udc);
 			list.add(view2);

@@ -78,14 +78,7 @@
             android:id ="@+id/in_meeting_setting_reverse_camera"
              >
 
-            <ImageView
-                android:id="@+id/imageView1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentRight="true"
-                android:layout_marginRight="30dp"
-               	android:layout_centerVertical="true"
-                android:src="@drawable/reverse_camera" />
+         
 
             <TextView
                 android:id="@+id/textView2"

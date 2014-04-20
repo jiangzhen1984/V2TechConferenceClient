@@ -291,7 +291,7 @@ public class VideoDocLayout extends LinearLayout {
 	private void updatePageButton() {
 		if (mCurrentDoc == null) {
 			mPrePageButton
-					.setImageResource(R.drawable.video_doc_letf_arrow_gray);
+					.setImageResource(R.drawable.video_doc_left_arrow_gray);
 			mNextPageButton
 					.setImageResource(R.drawable.video_doc_right_arrow_gray);
 			return;
@@ -299,17 +299,17 @@ public class VideoDocLayout extends LinearLayout {
 
 		if (mCurrentDoc.getActivatePageNo() == 1) {
 			mPrePageButton
-					.setImageResource(R.drawable.video_doc_letf_arrow_gray);
+					.setImageResource(R.drawable.video_doc_left_arrow_gray);
 		} else {
 			mPrePageButton
-					.setImageResource(R.drawable.video_doc_letf_arrow_color);
+					.setImageResource(R.drawable.video_doc_page_button_left_selector);
 		}
 		if (mCurrentDoc.getActivatePageNo() == mCurrentDoc.getPageSize()) {
 			mNextPageButton
 					.setImageResource(R.drawable.video_doc_right_arrow_gray);
 		} else {
 			mNextPageButton
-					.setImageResource(R.drawable.video_doc_right_arrow_color);
+					.setImageResource(R.drawable.video_doc_page_button_right_selector);
 		}
 	}
 	

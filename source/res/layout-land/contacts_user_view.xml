@@ -6,7 +6,9 @@
     <RelativeLayout
         android:id="@+id/contact_user_view_root"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" >
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:layout_marginTop="10dp" >
 
         <RelativeLayout
             android:id="@+id/contact_user_img_container"
@@ -15,7 +17,7 @@
             android:layout_alignParentLeft="true"
             android:layout_centerVertical="true"
             android:layout_marginBottom="15dp"
-            android:layout_marginLeft="10dp"
+            android:layout_marginLeft="30dp"
             android:layout_marginTop="15dp" >
 
             <ImageView
@@ -23,7 +25,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
-                 android:src="@drawable/avatar" />
+                android:src="@drawable/avatar" />
 
             <ImageView
                 android:id="@+id/contact_user_status_iv"
@@ -39,7 +41,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
-            android:layout_marginLeft="20dp"
+            android:layout_marginLeft="30dp"
             android:layout_toRightOf="@+id/contact_user_img_container"
              android:layout_marginRight="35dp"
             android:ellipsize="end"
@@ -51,10 +53,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
-            android:layout_marginLeft="30dp"
+            android:layout_marginLeft="85dp"
             android:layout_marginRight="15dp"
-            android:layout_toRightOf="@+id/contact_user_name"
             android:layout_toLeftOf="@+id/contact_show_user_menu"
+            android:layout_toRightOf="@+id/contact_user_name"
             android:ellipsize="end"
             android:singleLine="true"
             android:text="TextView" />

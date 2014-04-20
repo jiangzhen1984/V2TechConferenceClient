@@ -3,6 +3,7 @@ package com.v2tech.view.cus;
 import java.util.Calendar;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.text.TextUtils;
@@ -51,7 +52,7 @@ public class DateTimePicker extends PopupWindow {
 		this.setTouchable(true);
 		this.setOutsideTouchable(true);
 		this.setContentView(v);
-		this.setBackgroundDrawable(new ColorDrawable(drawable.transparent));
+		this.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
 
 		mYearET = (EditText) v.findViewById(R.id.date_time_picker_year);
 		mMonthET = (EditText) v.findViewById(R.id.date_time_picker_month);

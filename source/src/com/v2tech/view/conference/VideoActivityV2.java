@@ -51,6 +51,7 @@ import com.v2tech.logic.Conference;
 import com.v2tech.logic.ConferencePermission;
 import com.v2tech.logic.GlobalHolder;
 import com.v2tech.logic.Group;
+import com.v2tech.logic.Group.GroupType;
 import com.v2tech.logic.Registrant;
 import com.v2tech.logic.User;
 import com.v2tech.logic.UserDeviceConfig;
@@ -100,10 +101,10 @@ public class VideoActivityV2 extends Activity {
 	private RelativeLayout mVideoLayoutMain;
 	private RelativeLayout mVideoLayout;
 
+	private TextView mGroupNameTV;
 	private ImageView mSettingIV;
 	private ImageView mQuitIV;
 	private ImageView mSpeakerIV;
-	private ImageView mSettingArrowIV;
 	private PopupWindow mSettingWindow;
 	private Dialog mQuitDialog;
 	private ProgressDialog mWaitingDialog;
@@ -113,6 +114,8 @@ public class VideoActivityV2 extends Activity {
 
 	private ImageView mMenuButton;
 	private LinearLayout mMenuButtonContainer;
+	private LinearLayout mMenuLine;
+	private LinearLayout mVideoLine;
 
 	private View mMenuMessageButton;
 	private View mMenuAttendeeButton;
@@ -129,6 +132,7 @@ public class VideoActivityV2 extends Activity {
 	private DocumentService ds = new DocumentService();
 
 	private Map<String, V2Doc> mDocs = new HashMap<String, V2Doc>();
+	private V2Doc mCurrentActivateDoc = null;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -147,10 +151,9 @@ public class VideoActivityV2 extends Activity {
 		this.mQuitIV.setOnClickListener(mShowQuitWindowListener);
 		this.mSpeakerIV = (ImageView) findViewById(R.id.speaker_iv);
 		this.mSpeakerIV.setOnClickListener(mApplySpeakerListener);
-		this.mSettingArrowIV = (ImageView) findViewById(R.id.in_meeting_setting_arrow);
-		// mSettingArrowIV.setVisibility(View.INVISIBLE);
-		// this.mAttendeeArrowIV = (ImageView)
-		// findViewById(R.id.in_meeting_attendee_arrow);
+		this.mGroupNameTV = (TextView) findViewById(R.id.in_meeting_name);
+		this.mMenuLine = (LinearLayout) findViewById(R.id.in_meeting_menu_separation_line);
+		this.mVideoLine = (LinearLayout) findViewById(R.id.in_meeting_video_separation_line1);
 
 		mMenuButton = (ImageView) findViewById(R.id.in_meeting_menu_button);
 		mMenuButton.setOnClickListener(mMenuButtonListener);
@@ -227,9 +230,9 @@ public class VideoActivityV2 extends Activity {
 		@Override
 		public void onClick(View view) {
 			if (isSpeaking) {
-				mSpeakerIV.setImageResource(R.drawable.speaker);
+				mSpeakerIV.setImageResource(R.drawable.mute_button);
 			} else {
-				mSpeakerIV.setImageResource(R.drawable.speaking);
+				mSpeakerIV.setImageResource(R.drawable.speaking_button);
 			}
 			Message.obtain(mVideoHandler, APPLY_OR_RELEASE_SPEAK)
 					.sendToTarget();
@@ -263,7 +266,6 @@ public class VideoActivityV2 extends Activity {
 
 					@Override
 					public void onDismiss() {
-						mSettingArrowIV.setVisibility(View.INVISIBLE);
 						mSettingWindow.dismiss();
 					}
 
@@ -284,15 +286,13 @@ public class VideoActivityV2 extends Activity {
 									Toast.LENGTH_SHORT).show();
 						}
 						mSettingWindow.dismiss();
-						mSettingArrowIV.setVisibility(View.INVISIBLE);
 					}
 
 				});
 			}
 
 			if (!mSettingWindow.isShowing()) {
-				mSettingWindow.showAsDropDown(mSettingArrowIV, -50, 0);
-				mSettingArrowIV.setVisibility(View.VISIBLE);
+				mSettingWindow.showAsDropDown(v, -50, 0);
 			}
 
 		}
@@ -367,6 +367,9 @@ public class VideoActivityV2 extends Activity {
 		}
 
 		conf = new Conference(mGroupId);
+		Group g = GlobalHolder.getInstance().getGroupById(GroupType.CONFERENCE,
+				mGroupId);
+		mGroupNameTV.setText(g.getName());
 	}
 
 	private void showOrHidenMsgContainer(int visible) {
@@ -375,7 +378,8 @@ public class VideoActivityV2 extends Activity {
 			RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
 					400, mVideoLayout.getMeasuredHeight());
 			lp.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
-			lp.addRule(RelativeLayout.RIGHT_OF, mMenuButtonContainer.getId());
+			lp.addRule(RelativeLayout.RIGHT_OF, mMenuLine.getId());
+			lp.addRule(RelativeLayout.BELOW, mVideoLine.getId());
 			mVideoLayoutMain.addView(mMessageContainer, lp);
 			mMessageContainer.bringToFront();
 			mMessageContainer.setVisibility(View.GONE);
@@ -398,7 +402,8 @@ public class VideoActivityV2 extends Activity {
 			mMenuMessageButton.setBackgroundColor(Color.rgb(255, 255, 255));
 		} else {
 			mMessageContainer.setVisibility(View.VISIBLE);
-			mMenuMessageButton.setBackgroundColor(Color.rgb(221, 221, 221));
+			mMenuMessageButton.setBackgroundColor(mContext.getResources()
+					.getColor(R.color.confs_common_bg));
 		}
 	}
 
@@ -421,7 +426,8 @@ public class VideoActivityV2 extends Activity {
 			RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
 					400, mVideoLayout.getMeasuredHeight());
 			lp.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
-			lp.addRule(RelativeLayout.RIGHT_OF, mMenuButtonContainer.getId());
+			lp.addRule(RelativeLayout.RIGHT_OF, mMenuLine.getId());
+			lp.addRule(RelativeLayout.BELOW, mVideoLine.getId());
 			mVideoLayoutMain.addView(mAttendeeContainer, lp);
 			mAttendeeContainer.bringToFront();
 			mAttendeeContainer.setVisibility(View.GONE);
@@ -442,7 +448,8 @@ public class VideoActivityV2 extends Activity {
 			mMenuAttendeeButton.setBackgroundColor(Color.rgb(255, 255, 255));
 		} else {
 			mAttendeeContainer.setVisibility(View.VISIBLE);
-			mMenuAttendeeButton.setBackgroundColor(Color.rgb(221, 221, 221));
+			mMenuAttendeeButton.setBackgroundColor(mContext.getResources()
+					.getColor(R.color.confs_common_bg));
 		}
 	}
 
@@ -453,7 +460,8 @@ public class VideoActivityV2 extends Activity {
 			RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
 					800, mVideoLayout.getMeasuredHeight());
 			lp.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
-			lp.addRule(RelativeLayout.RIGHT_OF, mMenuButtonContainer.getId());
+			lp.addRule(RelativeLayout.RIGHT_OF, mMenuLine.getId());
+			lp.addRule(RelativeLayout.BELOW, mVideoLine.getId());
 			mVideoLayoutMain.addView(mDocContainer, lp);
 
 			mDocContainer.bringToFront();
@@ -463,7 +471,7 @@ public class VideoActivityV2 extends Activity {
 					mDocContainer.addDoc(e.getValue());
 				}
 			}
-			mDocContainer.updateCurrentDoc();
+			mDocContainer.updateCurrentDoc(mCurrentActivateDoc);
 
 		}
 		if (visible == View.GONE || visible == mDocContainer.getVisibility()) {
@@ -471,7 +479,8 @@ public class VideoActivityV2 extends Activity {
 			mMenuDocButton.setBackgroundColor(Color.rgb(255, 255, 255));
 		} else {
 			mDocContainer.setVisibility(View.VISIBLE);
-			mMenuDocButton.setBackgroundColor(Color.rgb(221, 221, 221));
+			mMenuDocButton.setBackgroundColor(mContext.getResources().getColor(
+					R.color.confs_common_bg));
 		}
 	}
 
@@ -1005,7 +1014,7 @@ public class VideoActivityV2 extends Activity {
 				V2Doc.PageArray vpr = (V2Doc.PageArray) ((DocumentService.AsyncResult) (msg.obj))
 						.getResult();
 				V2Doc vc = mDocs.get(vpr.getDocId());
-				// If doesn't receive doc yet, record page arry first for
+				// If doesn't receive doc yet, record page array first for
 				// further use.
 				if (vc == null) {
 					prLegacy.put(vpr.getDocId(), vpr);
@@ -1028,6 +1037,7 @@ public class VideoActivityV2 extends Activity {
 						if (mDocContainer != null) {
 							mDocContainer.updateCurrentDoc(v2d);
 						}
+						mCurrentActivateDoc = v2d;
 					}
 				}
 				break;
@@ -1041,6 +1051,12 @@ public class VideoActivityV2 extends Activity {
 					cache.addPage(vp);
 				} else {
 					ppC.setFilePath(vp.getFilePath());
+				}
+				// try to update current doc's bitmap
+				if (mDocContainer != null
+						&& vp.getDocId().equals(mCurrentActivateDoc.getId())
+						&& vp.getNo() == cache.getActivatePageNo()) {
+					mDocContainer.updateCurrentDoc(mCurrentActivateDoc);
 				}
 				break;
 

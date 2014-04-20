@@ -58,7 +58,7 @@
                 android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"
                 android:layout_marginRight="10dp"
-                android:src="@drawable/white_plus" />
+                android:src="@drawable/plus_button" />
         </RelativeLayout>
 
         <RelativeLayout

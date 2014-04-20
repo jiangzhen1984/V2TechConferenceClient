@@ -23,14 +23,15 @@
                 android:orientation="vertical" >
 
                 <TextView
-                   android:id="@+id/fragment_title"
+                    android:id="@+id/fragment_title"
                     android:layout_width="wrap_content"
                     android:layout_height="fill_parent"
                     android:layout_gravity="center"
-                    android:layout_marginBottom="8dp"
-                    android:layout_marginTop="8dp"
+                    android:layout_marginBottom="10dp"
+                    android:layout_marginTop="10dp"
                     android:text="@string/confs_title"
-                    android:textSize="25sp" />
+                    android:textColor="#515151"
+                    android:textSize="23sp" />
 
                 <LinearLayout
                     android:id="@+id/recent_conversation_network_nt"
@@ -49,17 +50,23 @@
                         android:text="@string/error_can_not_connect_server"
                         android:textSize="12sp" />
                 </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="1dp"
+                    android:background="#cdcdcf"
+                    android:orientation="vertical" >
+                </LinearLayout>
             </LinearLayout>
 
             <ImageView
                 android:id="@+id/conversation_features"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"
                 android:layout_marginRight="30dp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/white_plus" />
-
+                android:src="@drawable/plus_button" />
         </RelativeLayout>
 
         <RelativeLayout
@@ -71,27 +78,16 @@
             android:background="@color/confs_search_bar_bg"
             android:orientation="horizontal" >
 
-            <ImageView
-                android:id="@+id/imageView8"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentLeft="true"
-                android:layout_gravity="center_vertical"
-                android:layout_marginBottom="10dp"
-                android:layout_marginLeft="30dp"
-                android:layout_marginTop="10dp"
-                android:src="@drawable/group_list_search_button" />
-
             <EditText
                 android:id="@+id/confs_search"
                 android:layout_width="match_parent"
-                android:layout_height="50dp"
+                android:layout_height="wrap_content"
                 android:layout_alignParentLeft="true"
                 android:layout_gravity="center_vertical"
-                android:layout_marginBottom="10dp"
-                android:layout_marginLeft="30dp"
-                android:layout_marginRight="30dp"
-                android:layout_marginTop="10dp"
+                android:layout_marginBottom="6dp"
+                android:layout_marginLeft="15dp"
+                android:layout_marginRight="15dp"
+                android:layout_marginTop="6dp"
                 android:background="@drawable/input_bg"
                 android:inputType="text"
                 android:paddingLeft="100dp"
@@ -103,13 +99,32 @@
                 android:layout_width="wrap_content"
                 android:layout_height="1dp"
                 android:layout_below="@+id/confs_search" />
+
+            <ImageView
+                android:id="@+id/imageView1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBaseline="@+id/confs_search"
+                android:layout_alignLeft="@+id/confs_search"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="10dp"
+                android:src="@drawable/group_list_search_button" />
         </RelativeLayout>
+
+        <LinearLayout
+            android:id="@+id/LinearLayout2"
+            android:layout_width="fill_parent"
+            android:layout_height="1dp"
+            android:layout_below="@+id/RelativeLayout2"
+            android:background="#cdcdcf"
+            android:orientation="vertical" >
+        </LinearLayout>
 
         <ListView
             android:id="@+id/conversations_list_container"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
-            android:layout_below="@+id/RelativeLayout2"
+            android:layout_below="@+id/LinearLayout2"
             android:layout_centerHorizontal="true"
             android:background="@color/confs_group_list_bg"
             android:divider="@null" >

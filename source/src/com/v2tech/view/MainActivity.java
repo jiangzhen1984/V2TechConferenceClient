@@ -9,7 +9,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -52,18 +51,18 @@ public class MainActivity extends FragmentActivity implements
 
 	private TabClass[] mTabClasses = new TabClass[] {
 			new TabClass(PublicIntent.TAG_CONTACT,
-					R.drawable.tab_contact_button, R.string.tab_contact_name,
+					R.drawable.selector_tab_contact_button, R.string.tab_contact_name,
 					ContactsTabFragment.class.getName()),
-			new TabClass(PublicIntent.TAG_ORG, R.drawable.tab_org_button,
+			new TabClass(PublicIntent.TAG_ORG, R.drawable.selector_tab_org_button,
 					R.string.tab_org_name, ContactsTabFragment.class.getName()),
-			new TabClass(PublicIntent.TAG_GROUP, R.drawable.tab_group_button,
+			new TabClass(PublicIntent.TAG_GROUP, R.drawable.selector_tab_group_button,
 					R.string.tab_group_name,
 					ConversationsTabFragment.class.getName()),
 			new TabClass(PublicIntent.TAG_CONF,
-					R.drawable.tab_conference_button,
+					R.drawable.selector_tab_conference_button,
 					R.string.tab_conference_name,
 					ConversationsTabFragment.class.getName()),
-			new TabClass(PublicIntent.TAG_COV, R.drawable.tab_msg_cov_button,
+			new TabClass(PublicIntent.TAG_COV, R.drawable.selector_tab_conversation_button,
 					R.string.tab_conversation_name,
 					ConversationsTabFragment.class.getName()) };
 
@@ -185,10 +184,10 @@ public class MainActivity extends FragmentActivity implements
 		}
 
 		mTabHost.setOnTabChangedListener(this);
-		for (int i = 0; i < mTabHost.getTabWidget().getChildCount(); i++) {
-			mTabHost.getTabWidget().getChildAt(i)
-					.setBackgroundColor(Color.rgb(247, 247, 247));
-		}
+//		for (int i = 0; i < mTabHost.getTabWidget().getChildCount(); i++) {
+//			mTabHost.getTabWidget().getChildAt(i)
+//					.setBackgroundColor(Color.rgb(247, 247, 247));
+//		}
 	}
 
 	private View getTabView(TabClass tcl) {
@@ -204,7 +203,6 @@ public class MainActivity extends FragmentActivity implements
 		TextView tv = (TextView) v.findViewById(R.id.tab_name);
 		if (tv != null) {
 			tv.setText(this.getResources().getText(tcl.mTabNameId));
-			tv.setTextSize(10);
 			tv.bringToFront();
 		}
 
@@ -244,14 +242,12 @@ public class MainActivity extends FragmentActivity implements
 
 	public void requestQuit() {
 		if (exitedFlag) {
+			unbindService(mConnection);
+			this.getApplicationContext().stopService(
+					new Intent(this.getApplicationContext(), JNIService.class));
+			
 			GlobalConfig.saveLogoutFlag(this);
-			Notificator.cancelSystemNotification(this);
-			finish();
-			try {
-				Thread.sleep(500);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
+			Notificator.cancelAllSystemNotification(this);
 			System.exit(0);
 		} else {
 			exitedFlag = true;
@@ -379,7 +375,8 @@ public class MainActivity extends FragmentActivity implements
 					}
 				}
 			} else if (PublicIntent.FINISH_APPLICATION.equals(action)) {
-				finish();
+				exitedFlag = true;				
+				requestQuit();
 			}
 		}
 

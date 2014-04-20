@@ -3,8 +3,9 @@
    <color name="confs_title_bg">#ffffff</color>
    <string name="confs_title">我 的 信 息</string>
    <color name="confs_panel_bg">#363636</color>
-   <color name="confs_search_bar_bg">#f0f0f0</color>
+   <color name="confs_search_bar_bg">#eff0f2</color>
    <color name="confs_group_list_bg">#ffffff</color>
+   <color name="confs_common_bg">#eff0f3</color>
    <color name="confs_group_widget_separation_line">#f2f2f2</color>
    <string name="error_request_enter_conference_time_out">登入超时</string>
    <string name="error_request_enter_conference">登入会议出错!</string>
