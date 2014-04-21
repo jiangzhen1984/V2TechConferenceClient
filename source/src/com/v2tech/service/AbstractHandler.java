@@ -1,10 +1,8 @@
 package com.v2tech.service;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import android.os.Handler;
 import android.os.Message;
+import android.util.SparseArray;
 
 import com.v2tech.logic.Registrant;
 import com.v2tech.logic.jni.JNIResponse;
@@ -22,7 +20,7 @@ public abstract class AbstractHandler extends Handler {
 
 	protected static final int DEFAULT_TIME_OUT_SECS = 10;
 
-	private Map<Integer, Meta> metaHolder = new HashMap<Integer, Meta>();
+	private SparseArray<Meta> metaHolder = new SparseArray<Meta>();
 
 	protected Message initTimeoutMessage(int mointorMessageID,
 			long timeOutSec, Registrant caller) {

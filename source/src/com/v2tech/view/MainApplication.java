@@ -1,7 +1,5 @@
 package com.v2tech.view;
 
-import java.io.File;
-
 import net.sourceforge.pinyin4j.PinyinHelper;
 import android.app.Application;
 import android.content.Context;
@@ -15,13 +13,11 @@ import android.content.res.Configuration;
 import com.V2.jni.AudioRequest;
 import com.V2.jni.ChatRequest;
 import com.V2.jni.ConfRequest;
-import com.V2.jni.ConfigRequest;
 import com.V2.jni.GroupRequest;
 import com.V2.jni.ImRequest;
 import com.V2.jni.VideoRequest;
 import com.V2.jni.WBRequest;
 import com.v2tech.util.GlobalConfig;
-import com.v2tech.util.StorageUtil;
 import com.v2tech.util.V2Log;
 
 public class MainApplication extends Application {
@@ -34,11 +30,6 @@ public class MainApplication extends Application {
 		// crashHandler.init(getApplicationContext());
 		V2Log.d("=====create=====");
 	
-		
-		//
-		//
-		
-
 		
 
 		V2Log.isDebuggable = (0 != (getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE));

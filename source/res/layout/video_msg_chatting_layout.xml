@@ -10,18 +10,26 @@
         android:id="@+id/textView1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
         android:gravity="center"
         android:text="@string/confs_public_chatting"
-        android:layout_alignParentTop="true"
         android:textColor="#000000"
         android:textSize="18sp" />
 
+    <LinearLayout
+        android:id="@+id/LinearLayout1"
+        android:layout_width="fill_parent"
+        android:layout_height="1dp"
+        android:layout_below="@+id/textView1"
+        android:background="#cdcdcf"
+        android:orientation="vertical" ></LinearLayout>
+
     <ScrollView
         android:id="@+id/video_msg_container_scroller"
-        android:layout_above="@+id/video_msg_chatting_bottom_bar"
-        android:layout_below="@+id/textView1"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" >
+        android:layout_height="match_parent"
+        android:layout_above="@+id/video_msg_chatting_bottom_bar"
+        android:layout_below="@+id/LinearLayout1" >
 
         <LinearLayout
             android:id="@+id/video_msg_container"
@@ -33,9 +41,9 @@
 
     <LinearLayout
         android:id="@+id/video_msg_chatting_bottom_bar"
-        android:layout_alignParentBottom="true"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" >
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true" >
 
         <EditText
             android:id="@+id/video_msg_chatting_layout_msg_content"
@@ -52,10 +60,10 @@
             android:layout_weight="1"
             android:background="@drawable/button_bg"
             android:gravity="center"
-            android:textSize="15sp"
-            android:paddingTop="10dp"
             android:paddingBottom="10dp"
-            android:text="@string/contact_message_send_button" />
+            android:paddingTop="10dp"
+            android:text="@string/contact_message_send_button"
+            android:textSize="15sp" />
     </LinearLayout>
 
 </RelativeLayout>

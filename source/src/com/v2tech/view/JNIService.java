@@ -122,16 +122,16 @@ public class JNIService extends Service {
 		mCallbackHandler = new JNICallbackHandler(callback.getLooper());
 
 		mImCB = new ImRequestCB(mCallbackHandler);
-		ImRequest.getInstance().setCallback(mImCB);
+		ImRequest.getInstance(this.getApplicationContext()).setCallback(mImCB);
 
 		mGRCB = new GroupRequestCB(mCallbackHandler);
-		GroupRequest.getInstance().addCallback(mGRCB);
+		GroupRequest.getInstance(this.getApplicationContext()).addCallback(mGRCB);
 
 		mVRCB = new VideoRequestCB(mCallbackHandler);
-		VideoRequest.getInstance().addCallback(mVRCB);
+		VideoRequest.getInstance(this.getApplicationContext()).addCallback(mVRCB);
 
 		mChRCB = new ChatRequestCB(mCallbackHandler);
-		ChatRequest.getInstance().setChatRequestCallback(mChRCB);
+		ChatRequest.getInstance(this.getApplicationContext()).setChatRequestCallback(mChRCB);
 	}
 
 	@Override

@@ -50,7 +50,6 @@ public class StartupActivity extends Activity {
 
 		@Override
 		public void run() {
-			System.out.println("============================");
 			System.loadLibrary("event");
 			System.loadLibrary("udt");
 			System.loadLibrary("v2vi");

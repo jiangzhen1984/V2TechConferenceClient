@@ -16,7 +16,7 @@
             android:layout_height="wrap_content"
             android:layout_alignBaseline="@+id/in_meeting_tools_bar"
             android:background="#ffffff"
-            android:paddingBottom="10dp"
+            android:paddingBottom="13dp"
             android:paddingLeft="16dp"
             android:paddingRight="16dp"
             android:paddingTop="10dp"
@@ -35,7 +35,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="5dp"
-                android:layout_marginRight="41dp"
+                android:layout_marginRight="20dp"
                 android:layout_marginTop="10dp"
                 android:layout_toLeftOf="@+id/speaker_iv"
                 android:src="@drawable/video_setting_button_selector" />
@@ -46,7 +46,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignBottom="@+id/in_meeting_setting_iv"
                 android:layout_alignParentRight="true"
-                android:layout_marginRight="119dp"
+                android:layout_marginRight="20dp"
                 android:src="@drawable/video_logout_button_selector" />
 
             <ImageView
@@ -54,7 +54,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignBottom="@+id/in_meeting_setting_iv"
-                android:layout_marginRight="41dp"
+                android:layout_marginRight="20dp"
                 android:layout_toLeftOf="@+id/in_meeting_log_out_iv"
                 android:src="@drawable/mute_button" />
 

@@ -8,20 +8,20 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
-        android:background="@color/confs_title_bg"
+        android:background="#ffffff"
         android:orientation="vertical" >
 
         <TextView
             android:id="@+id/message_user_title"
-            android:layout_width="180dp"
+            android:layout_width="480dp"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
             android:layout_gravity="center"
             android:layout_marginBottom="10dp"
             android:layout_marginTop="10dp"
             android:ellipsize="end"
-            android:text=""
             android:gravity="center"
+            android:text=""
             android:textSize="17sp" />
 
         <TextView
@@ -36,14 +36,23 @@
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_centerVertical="true"
-            android:layout_marginLeft="15dp"
+            android:layout_marginLeft="5dp"
             android:gravity="center"
             android:paddingBottom="5dp"
             android:paddingLeft="10dp"
-            android:paddingRight="7dp"
+            android:paddingRight="10dp"
             android:paddingTop="5dp"
             android:text="@string/contacts_user_detail_return_button"
             android:textColor="@color/button_text_color" />
+
+        <ImageView
+            android:id="@+id/contact_detail_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="10dp"
+            android:src="@drawable/contact_detail_button_selector" />
     </RelativeLayout>
 
     <LinearLayout
@@ -54,7 +63,7 @@
         android:layout_below="@+id/RelativeLayout1"
         android:background="#f2f2f2"
         android:orientation="vertical" >
-        
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="1dp"
@@ -83,12 +92,16 @@
         android:layout_above="@+id/contact_message_sub_feature_ly"
         android:background="@color/message_panel_bg" >
 
-        <TextView
-            android:id="@+id/textView1"
+        <ImageView
+            android:id="@+id/contact_message_speaker"
             android:layout_width="wrap_content"
-            android:layout_height="0dp"
-            android:layout_below="@+id/contact_message_speaker"
-            android:text="" />
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:paddingBottom="5dp"
+            android:paddingLeft="5dp"
+            android:paddingRight="5dp"
+            android:paddingTop="5dp"
+            android:src="@drawable/speaking_button" />
 
         <ImageView
             android:id="@+id/contact_message_plus"
@@ -98,15 +111,6 @@
             android:layout_toRightOf="@+id/contact_message_speaker"
             android:src="@drawable/message_plus" />
 
-        <ImageView
-            android:id="@+id/imageView3"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_marginLeft="15dp"
-            android:layout_toRightOf="@+id/contact_message_plus"
-            android:src="@drawable/message_panel_sep" />
-
         <TextView
             android:id="@+id/message_send"
             android:layout_width="wrap_content"
@@ -114,41 +118,34 @@
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
             android:layout_marginRight="5dp"
-            android:background="@drawable/message_send_button_bg"
+            android:background="@drawable/button_bg"
             android:gravity="center"
+            android:paddingBottom="5dp"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:paddingTop="5dp"
             android:text="@string/contact_message_send_button"
-            android:textColor="#ffffff"
-            android:textSize="15sp" />
+            android:textColor="@color/button_text_color"
+            android:textSize="12sp" />
 
         <EditText
             android:id="@+id/message_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
+            android:layout_marginBottom="5dp"
             android:layout_marginLeft="20dp"
             android:layout_marginRight="20dp"
+            android:layout_marginTop="5dp"
             android:layout_toLeftOf="@+id/message_send"
-            android:layout_toRightOf="@+id/imageView3"
+            android:layout_toRightOf="@+id/contact_message_plus"
             android:background="@drawable/input_bg"
             android:ems="10"
-            android:layout_marginTop="5dp"
-            android:layout_marginBottom="5dp"
             android:inputType="textCapSentences|textMultiLine"
-            android:minLines="1"
-            android:maxLines ="3" 
-            android:maxLength="4500"  >
-
+            android:maxLength="4500"
+            android:maxLines="3"
+            android:minLines="1" >
         </EditText>
-
-        <ImageView
-            android:id="@+id/contact_message_speaker"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_centerVertical="true"
-            android:layout_margin="5dp"
-            android:layout_marginLeft="15dp"
-            android:src="@drawable/message_speaker" />
     </RelativeLayout>
 
     <RelativeLayout
@@ -162,8 +159,16 @@
             android:id="@+id/contact_message_sub_feature_ly_inner"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="#ffffff"
+            android:background="#f2f2f2"
             android:visibility="gone" >
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="1dp"
+                android:layout_alignParentTop="true"
+                android:background="#cdcdcf"
+                android:orientation="vertical" >
+            </LinearLayout>
 
             <ImageView
                 android:id="@+id/message_smile_icon"
@@ -173,17 +178,17 @@
                 android:layout_centerVertical="true"
                 android:layout_margin="5dp"
                 android:layout_marginLeft="15dp"
-                android:src="@drawable/message_smile_icon" 
-                android:visibility="gone"/>
+                android:src="@drawable/message_smile_icon"
+                android:visibility="gone" />
 
             <ImageView
                 android:id="@+id/contact_message_send_image_button"
-                android:layout_width="60dp"
-                android:layout_height="60dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
-                android:layout_marginTop="15dp"
                 android:layout_marginBottom="15dp"
                 android:layout_marginLeft="15dp"
+                android:layout_marginTop="15dp"
                 android:layout_toRightOf="@+id/message_smile_icon"
                 android:src="@drawable/message_send_image_button" />
         </RelativeLayout>

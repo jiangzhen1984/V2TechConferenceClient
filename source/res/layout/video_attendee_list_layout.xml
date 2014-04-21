@@ -16,21 +16,52 @@
         android:textSize="18sp" />
 
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" >
+        android:layout_width="fill_parent"
+        android:layout_height="1dp"
+        android:background="#cdcdcf"
+        android:orientation="vertical" >
+    </LinearLayout>
+
+    <RelativeLayout
+        android:id="@+id/RelativeLayout2"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/confs_search_bar_bg"
+        android:orientation="horizontal" >
+
+        <EditText
+            android:id="@+id/contacts_search"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_gravity="center_vertical"
+            android:layout_marginBottom="6dp"
+            android:layout_marginLeft="15dp"
+            android:layout_marginRight="15dp"
+            android:layout_marginTop="6dp"
+            android:background="@drawable/input_bg"
+            android:inputType="text"
+            android:paddingLeft="40dp"
+            android:textColor="#000000"
+            android:textSize="12sp" >
+        </EditText>
 
         <ImageView
             android:id="@+id/imageView1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/search_icon" />
+            android:layout_alignBaseline="@+id/contacts_search"
+            android:layout_alignLeft="@+id/contacts_search"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="10dp"
+            android:src="@drawable/group_list_search_button" />
+    </RelativeLayout>
 
-        <EditText
-            android:id="@+id/video_msg_chatting_layout_msg_content"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/searched_edit_bg"
-            android:ems="10" />
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="1dp"
+        android:background="#cdcdcf"
+        android:orientation="vertical" >
     </LinearLayout>
 
     <ListView

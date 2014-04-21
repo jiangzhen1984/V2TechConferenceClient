@@ -34,13 +34,14 @@
 
             <TabWidget
                 android:id="@android:id/tabs"
-                
+                android:background="#ffffff"
+                android:paddingLeft="350dp"
+                android:paddingRight="350dp"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"
                 android:orientation="horizontal"
                 android:showDividers="none"
-                android:background="#ffffff"
                 android:tabStripEnabled="false" />
 
         </LinearLayout>

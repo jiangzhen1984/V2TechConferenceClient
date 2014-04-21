@@ -145,6 +145,7 @@
                     android:minHeight="30dp"
                     android:paddingLeft="32dp"
                     android:paddingRight="32dp"
+                    android:textColor="@color/button_text_color"
                     android:text="@string/action_sign_in_register" />
 
                 <ImageView

@@ -35,6 +35,8 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -195,11 +197,22 @@ public class VideoActivityV2 extends Activity {
 		@Override
 		public void onClick(View view) {
 			if (mMenuButtonContainer.getVisibility() == View.GONE) {
+				Animation tabBlockHolderAnimation = AnimationUtils.loadAnimation(
+						mContext, R.animator.right_in);
+				tabBlockHolderAnimation.setDuration(1000);
+				mMenuButtonContainer.startAnimation(tabBlockHolderAnimation);
 				mMenuButtonContainer.setVisibility(View.VISIBLE);
+				
 			} else {
-				mMenuButtonContainer.setVisibility(View.GONE);
+				
 				showOrHidenAttendeeContainer(View.GONE);
 				showOrHidenMsgContainer(View.GONE);
+				showOrHidenDocContainer(View.GONE);
+				Animation tabBlockHolderAnimation = AnimationUtils.loadAnimation(
+						mContext, R.animator.left_out);
+				tabBlockHolderAnimation.setDuration(1000);
+				mMenuButtonContainer.startAnimation(tabBlockHolderAnimation);
+				mMenuButtonContainer.setVisibility(View.GONE);
 			}
 		}
 
@@ -250,51 +263,7 @@ public class VideoActivityV2 extends Activity {
 
 		@Override
 		public void onClick(View v) {
-			if (mSettingWindow == null) {
-				LayoutInflater inflater = (LayoutInflater) mContext
-						.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-				View view = inflater.inflate(
-						R.layout.in_meeting_setting_pop_up_window, null);
-				mSettingWindow = new PopupWindow(view,
-						LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-				mSettingWindow.setBackgroundDrawable(new ColorDrawable(
-						Color.TRANSPARENT));
-				mSettingWindow.setFocusable(true);
-				mSettingWindow.setTouchable(true);
-				mSettingWindow.setOutsideTouchable(true);
-				mSettingWindow.setOnDismissListener(new OnDismissListener() {
-
-					@Override
-					public void onDismiss() {
-						mSettingWindow.dismiss();
-					}
-
-				});
-
-				RelativeLayout ll = (RelativeLayout) view
-						.findViewById(R.id.in_meeting_setting_reverse_camera);
-				ll.setOnClickListener(new OnClickListener() {
-
-					@Override
-					public void onClick(View v) {
-						if (VideoCaptureDevInfo.CreateVideoCaptureDevInfo().deviceList
-								.size() > 1) {
-							doReverseCamera();
-						} else {
-							Toast.makeText(mContext,
-									R.string.error_no_second_camera,
-									Toast.LENGTH_SHORT).show();
-						}
-						mSettingWindow.dismiss();
-					}
-
-				});
-			}
-
-			if (!mSettingWindow.isShowing()) {
-				mSettingWindow.showAsDropDown(v, -50, 0);
-			}
-
+			
 		}
 
 	};
@@ -396,14 +365,30 @@ public class VideoActivityV2 extends Activity {
 
 			});
 		}
+		if (visible == View.GONE && View.GONE == mMessageContainer.getVisibility()) {
+			return;
+		}
+		
 		if (visible == View.GONE
 				|| visible == mMessageContainer.getVisibility()) {
 			mMessageContainer.setVisibility(View.GONE);
 			mMenuMessageButton.setBackgroundColor(Color.rgb(255, 255, 255));
+
+			Animation tabBlockHolderAnimation = AnimationUtils.loadAnimation(
+					this, R.animator.right_out);
+			tabBlockHolderAnimation.setDuration(1000);
+			mMessageContainer.startAnimation(tabBlockHolderAnimation);
+
 		} else {
 			mMessageContainer.setVisibility(View.VISIBLE);
 			mMenuMessageButton.setBackgroundColor(mContext.getResources()
 					.getColor(R.color.confs_common_bg));
+
+			Animation tabBlockHolderAnimation = AnimationUtils.loadAnimation(
+					this, R.animator.left_in);
+			tabBlockHolderAnimation.setDuration(1000);
+			mMessageContainer.startAnimation(tabBlockHolderAnimation);
+			
 		}
 	}
 
@@ -442,14 +427,29 @@ public class VideoActivityV2 extends Activity {
 
 					});
 		}
+		
+		//View is hidded, do not need to hide again
+		if (visible == View.GONE && View.GONE == mAttendeeContainer.getVisibility()) {
+			return;
+		}
 		if (visible == View.GONE
 				|| visible == mAttendeeContainer.getVisibility()) {
 			mAttendeeContainer.setVisibility(View.GONE);
 			mMenuAttendeeButton.setBackgroundColor(Color.rgb(255, 255, 255));
+
+			Animation tabBlockHolderAnimation = AnimationUtils.loadAnimation(
+					this, R.animator.right_out);
+			tabBlockHolderAnimation.setDuration(1000);
+			mAttendeeContainer.startAnimation(tabBlockHolderAnimation);
 		} else {
 			mAttendeeContainer.setVisibility(View.VISIBLE);
 			mMenuAttendeeButton.setBackgroundColor(mContext.getResources()
 					.getColor(R.color.confs_common_bg));
+			// set animation when visible
+			Animation tabBlockHolderAnimation = AnimationUtils.loadAnimation(
+					this, R.animator.left_in);
+			tabBlockHolderAnimation.setDuration(1000);
+			mAttendeeContainer.startAnimation(tabBlockHolderAnimation);
 		}
 	}
 
@@ -474,13 +474,29 @@ public class VideoActivityV2 extends Activity {
 			mDocContainer.updateCurrentDoc(mCurrentActivateDoc);
 
 		}
+		//View is hidded, do not need to hide again
+		if (visible == View.GONE && View.GONE == mDocContainer.getVisibility()) {
+			return;
+		}
+				
 		if (visible == View.GONE || visible == mDocContainer.getVisibility()) {
 			mDocContainer.setVisibility(View.GONE);
 			mMenuDocButton.setBackgroundColor(Color.rgb(255, 255, 255));
+
+			Animation tabBlockHolderAnimation = AnimationUtils.loadAnimation(
+					this, R.animator.right_out);
+			tabBlockHolderAnimation.setDuration(1000);
+			mDocContainer.startAnimation(tabBlockHolderAnimation);
 		} else {
 			mDocContainer.setVisibility(View.VISIBLE);
 			mMenuDocButton.setBackgroundColor(mContext.getResources().getColor(
 					R.color.confs_common_bg));
+
+			// set animation when visible
+			Animation tabBlockHolderAnimation = AnimationUtils.loadAnimation(
+					this, R.animator.left_in);
+			tabBlockHolderAnimation.setDuration(1000);
+			mDocContainer.startAnimation(tabBlockHolderAnimation);
 		}
 	}
 

@@ -48,8 +48,8 @@
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
                 android:layout_marginTop="40dp"
-                android:layout_marginRight="140dp"
-                android:layout_marginLeft="140dp"
+                android:layout_marginRight="340dp"
+                android:layout_marginLeft="340dp"
                 android:background="@drawable/rounded_corners_of_login_outer_box"
                 android:orientation="vertical" >
 
@@ -193,8 +193,10 @@
                 android:id="@+id/group_list_conf_list"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignBottom="@+id/textView1"
+                android:layout_above="@+id/textView1"
                 android:layout_alignRight="@+id/login_layout"
+                android:layout_marginBottom="35dp"
+                android:layout_marginRight="103dp"
                 android:contentDescription="@string/banner_desc"
                 android:src="@drawable/logo" />
 

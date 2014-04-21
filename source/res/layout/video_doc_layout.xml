@@ -16,12 +16,21 @@
         android:textColor="#000000"
         android:textSize="18sp" />
 
+    <LinearLayout
+        android:id="@+id/LinearLayout1"
+        android:layout_width="fill_parent"
+        android:layout_height="1dp"
+        android:layout_below="@+id/textView1"
+        android:background="#cdcdcf"
+        android:orientation="vertical" >
+    </LinearLayout>
+
     <FrameLayout
         android:id="@+id/video_doc_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_above="@+id/video_doc_bottom_bar"
-        android:layout_below="@+id/textView1"
+        android:layout_below="@+id/LinearLayout1"
         android:orientation="vertical" >
     </FrameLayout>
 
@@ -67,8 +76,8 @@
         android:id="@+id/video_doc_pin_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
         android:layout_alignBottom="@+id/textView1"
+        android:layout_alignParentRight="true"
         android:layout_marginRight="20dp"
         android:src="@drawable/pin_button_selector" />
 

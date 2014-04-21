@@ -17,6 +17,8 @@
    <string name="confs_public_chatting">公共聊天</string>
     <string name="confs_doc">文档共享</string>
    <string name="confs_attendee_title">参会人数</string>
+   <string name="confs_camear_quanlity">视频质量</string>
    <string name="error_exceed_support_video_count">最多只支持4路视频</string>
    <string name="error_no_second_camera">用户没有另一个摄像头</string>
+   
 </resources>
