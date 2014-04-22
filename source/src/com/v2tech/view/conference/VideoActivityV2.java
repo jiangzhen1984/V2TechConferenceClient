@@ -84,6 +84,7 @@ public class VideoActivityV2 extends Activity {
 	private static final int NEW_DOC_NOTIFICATION = 50;
 	private static final int DOC_PAGE_NOTIFICATION = 51;
 	private static final int DOC_PAGE_ACTIVITE_NOTIFICATION = 52;
+	private static final int DOC_PAGE_ADDED_NOTIFICATION = 53;
 	private static final int DOC_DOWNLOADED_NOTIFICATION = 54;
 	private static final int DOC_CLOSED_NOTIFICATION = 55;
 
@@ -118,6 +119,8 @@ public class VideoActivityV2 extends Activity {
 	private View mMenuMessageButton;
 	private View mMenuAttendeeButton;
 	private View mMenuDocButton;
+	
+	private SurfaceView mLocalSurface;
 
 	private Conference conf;
 
@@ -152,6 +155,7 @@ public class VideoActivityV2 extends Activity {
 		this.mGroupNameTV = (TextView) findViewById(R.id.in_meeting_name);
 		this.mMenuLine = (LinearLayout) findViewById(R.id.in_meeting_menu_separation_line);
 		this.mVideoLine = (LinearLayout) findViewById(R.id.in_meeting_video_separation_line1);
+		this.mLocalSurface =(SurfaceView) findViewById(R.id.local_surface_view);
 
 		mMenuButton = (ImageView) findViewById(R.id.in_meeting_menu_button);
 		mMenuButton.setOnClickListener(mMenuButtonListener);
@@ -186,6 +190,7 @@ public class VideoActivityV2 extends Activity {
 				null);
 		ds.registerDocClosedNotification(mVideoHandler,
 				DOC_CLOSED_NOTIFICATION, null);
+		ds.registerDocPageAddedNotification(mVideoHandler, DOC_PAGE_ADDED_NOTIFICATION, null);
 	}
 
 	private OnClickListener mMenuButtonListener = new OnClickListener() {
@@ -419,7 +424,14 @@ public class VideoActivityV2 extends Activity {
 						@Override
 						public void OnAttendeeClicked(Attendee at,
 								UserDeviceConfig udc) {
-							showOrCloseAttendeeVideo(udc);
+							if (udc == null || at == null) {
+								return;
+							}
+							if (at.getUser().getmUserId() == GlobalHolder.getInstance().getCurrentUserId()) {
+								
+							} else {
+								showOrCloseAttendeeVideo(udc);
+							}
 						}
 
 					});
@@ -526,7 +538,21 @@ public class VideoActivityV2 extends Activity {
 		}
 
 		// layout must before open device
-		showOrCloseAttendeeVideo(udc);
+		//showOrCloseAttendeeVideo(udc);
+		
+		udc.setSVHolder(mLocalSurface);
+		VideoRecorder.VideoPreviewSurfaceHolder = udc.getSVHolder()
+				.getHolder();
+		VideoRecorder.VideoPreviewSurfaceHolder
+				.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
+		VideoRecorder.VideoPreviewSurfaceHolder
+				.setFormat(PixelFormat.TRANSPARENT);
+		VideoCaptureDevInfo.CreateVideoCaptureDevInfo()
+				.updateCameraOrientation(Surface.ROTATION_0);
+		Message m = Message.obtain(mVideoHandler,
+				REQUEST_OPEN_OR_CLOSE_DEVICE, 1, 0, udc);
+		mVideoHandler.sendMessageDelayed(m, 300);
+		udc.setShowing(true);
 	}
 
 	private void adjustLayout() {
@@ -642,6 +668,7 @@ public class VideoActivityV2 extends Activity {
 				DOC_DOWNLOADED_NOTIFICATION, null);
 		ds.unRegisterDocClosedNotification(mVideoHandler,
 				DOC_CLOSED_NOTIFICATION, null);
+		ds.unRegisterDocPageAddedNotification(mVideoHandler, DOC_PAGE_ADDED_NOTIFICATION, null);
 		if (mDocContainer != null) {
 			// clean document bitmap cache
 			mDocContainer.cleanCache();
@@ -1039,6 +1066,22 @@ public class VideoActivityV2 extends Activity {
 						vc.addPage(p);
 					}
 				}
+				if (mDocContainer != null) {
+					mDocContainer.updateLayoutPageInformation();
+					mDocContainer.updatePageButton();
+				}
+				break;
+			case DOC_PAGE_ADDED_NOTIFICATION:
+				V2Doc.Page vpp = (V2Doc.Page) ((DocumentService.AsyncResult) (msg.obj))
+				.getResult();
+				if (vpp != null) {
+					V2Doc v2d = mDocs.get(vpp.getDocId());
+					v2d.addPage(vpp);
+				}
+				if (mDocContainer != null) {
+					mDocContainer.updateLayoutPageInformation();
+					mDocContainer.updatePageButton();
+				}
 				break;
 			case DOC_PAGE_ACTIVITE_NOTIFICATION:
 				V2Doc.Page vpa = (V2Doc.Page) ((DocumentService.AsyncResult) (msg.obj))
@@ -1049,10 +1092,12 @@ public class VideoActivityV2 extends Activity {
 						v2d.setActivatePageNo(vpa.getNo());
 						if (mDocContainer != null) {
 							mDocContainer.updateCurrentDoc(v2d);
+							
 						}
 						mCurrentActivateDoc = v2d;
 					}
 				}
+				
 				break;
 
 			case DOC_DOWNLOADED_NOTIFICATION:

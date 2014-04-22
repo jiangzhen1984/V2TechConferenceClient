@@ -69,7 +69,8 @@ public class VideoAttendeeListLayout extends LinearLayout {
 			public void onItemClick(AdapterView<?> ad, View view, int pos,
 					long id) {
 				if (listener != null) {
-					listener.OnAttendeeClicked(mAttends.get(pos),
+					UserDeviceConfig udc = (UserDeviceConfig) view.getTag();
+					listener.OnAttendeeClicked(udc ==null ? null : udc.getBelongsAttendee(),
 							(UserDeviceConfig) view.getTag());
 				}
 			}

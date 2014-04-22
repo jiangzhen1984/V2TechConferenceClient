@@ -91,6 +91,22 @@ public class DocumentService extends AbstractHandler {
 	}
 	
 	
+	private List<Registrant> docPageAddNotificatorHodler = new ArrayList<Registrant>();
+
+	public void registerDocPageAddedNotification(Handler h, int what, Object obj) {
+		docPageAddNotificatorHodler.add(new Registrant(h, what, obj));
+	}
+
+	public void unRegisterDocPageAddedNotification(Handler h, int what, Object obj) {
+		for (Registrant r : docPageAddNotificatorHodler) {
+			if (r.getHandler() == h && r.getWhat() == what
+					&& r.getObject() == obj) {
+				docPageAddNotificatorHodler.remove(r);
+				return;
+			}
+		}
+	}
+	
 	
 	
 	private List<Registrant> docClosedNotificatorHodler = new ArrayList<Registrant>();
@@ -112,7 +128,7 @@ public class DocumentService extends AbstractHandler {
 	class WBRequestCallbackCB implements WBRequestCallback {
 
 		@Override
-		public void OnWBoardChatInvite(long nGroupID, int nBusinessType,
+		public void OnWBoardChatInviteCallback(long nGroupID, int nBusinessType,
 				long nFromUserID, String szWBoardID, int nWhiteIndex,
 				String szFileName, int type) {
 			Group g = GlobalHolder.getInstance().getGroupById(
@@ -139,7 +155,7 @@ public class DocumentService extends AbstractHandler {
 		}
 
 		@Override
-		public void OnWBoardPageList(String szWBoardID, String szPageData,
+		public void OnWBoardPageListCallback(String szWBoardID, String szPageData,
 				int nPageID) {
 			for (Registrant r : docPageNotificatorHodler) {
 				if (r.getHandler() != null) {
@@ -154,7 +170,7 @@ public class DocumentService extends AbstractHandler {
 		}
 
 		@Override
-		public void OnWBoardActivePage(long nUserID, String szWBoardID,
+		public void OnWBoardActivePageCallback(long nUserID, String szWBoardID,
 				int nPageID) {
 			for (Registrant r : docPageActiveNotificatorHodler) {
 				if (r.getHandler() != null) {
@@ -169,7 +185,7 @@ public class DocumentService extends AbstractHandler {
 		}
 
 		@Override
-		public void OnWBoardDocDisplay(String szWBoardID, int nPageID,
+		public void OnWBoardDocDisplayCallback(String szWBoardID, int nPageID,
 				String szFileName, int result) {
 			for (Registrant r : docDisplayNotificatorHodler) {
 				if (r.getHandler() != null) {
@@ -184,7 +200,7 @@ public class DocumentService extends AbstractHandler {
 		}
 
 		@Override
-		public void OnWBoardClosed(long nGroupID, int nBusinessType,
+		public void OnWBoardClosedCallback(long nGroupID, int nBusinessType,
 				long nUserID, String szWBoardID) {
 			Group g = GlobalHolder.getInstance().getGroupById(
 					GroupType.CONFERENCE, nGroupID);
@@ -200,6 +216,21 @@ public class DocumentService extends AbstractHandler {
 
 			}
 		}
+
+		@Override
+		public void OnWBoardAddPageCallback(String szWBoardID, int nPageID) {
+			for (Registrant r : docPageAddNotificatorHodler) {
+				if (r.getHandler() != null) {
+					Message m = Message.obtain();
+					m.what =  r.getWhat();
+					m.obj = new AsyncResult(r.getObject(), new V2Doc.Page(nPageID, szWBoardID, ""));
+					r.getHandler().sendMessage(m);
+				}
+
+			}
+		}
+		
+		
 		
 		
 		

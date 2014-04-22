@@ -5,8 +5,10 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Handler;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -231,7 +233,18 @@ public class MessageBodyView extends LinearLayout {
 				}
 				int offsetX = (anchor.getMeasuredWidth() - 50) / 2;
 				int offsetY = -(anchor.getMeasuredHeight() + 60);
-				pw.showAsDropDown(anchor, offsetX, offsetY);
+			
+				int[] location = new int[2];
+				anchor.getLocationInWindow(location);
+				if (location[1] <= 0) {
+					Rect r = new Rect();
+					anchor.getDrawingRect(r);
+					Rect r1 = new Rect();
+					anchor.getGlobalVisibleRect(r1);
+					pw.showAtLocation((View)anchor.getParent(), Gravity.NO_GRAVITY, r1.left + (r.right - r.left)/2, r1.top );
+				} else {
+					pw.showAsDropDown(anchor, offsetX, offsetY);
+				}
 				updateSelectedBg(false);
 				popupWindowListener = null;
 

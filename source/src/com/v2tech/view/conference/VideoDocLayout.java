@@ -288,7 +288,7 @@ public class VideoDocLayout extends LinearLayout {
 		}
 	}
 
-	private void updatePageButton() {
+	public void updatePageButton() {
 		if (mCurrentDoc == null) {
 			mPrePageButton
 					.setImageResource(R.drawable.video_doc_left_arrow_gray);

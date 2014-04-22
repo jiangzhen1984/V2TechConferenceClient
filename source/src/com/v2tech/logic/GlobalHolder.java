@@ -172,6 +172,7 @@ public class GlobalHolder {
 				}
 			}
 		}
+		mGroupHolder.put(Long.valueOf(g.getmGId()), g);
 	}
 
 	public Group getGroupById(Group.GroupType gType, long gId) {

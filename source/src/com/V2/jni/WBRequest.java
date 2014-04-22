@@ -54,7 +54,7 @@ public class WBRequest {
 				+ nWhiteIndex + " :" + szFileName);
 		for (WeakReference<WBRequestCallback> wr : mCallbacks) {
 			if (wr != null && wr.get() != null) {
-				wr.get().OnWBoardChatInvite(nGroupID, nBusinessType,
+				wr.get().OnWBoardChatInviteCallback(nGroupID, nBusinessType,
 						nFromUserID, szWBoardID, nWhiteIndex, szFileName, type);
 			}
 		}
@@ -70,7 +70,7 @@ public class WBRequest {
 				+ szPageData + " " + nPageID);
 		for (WeakReference<WBRequestCallback> wr : mCallbacks) {
 			if (wr != null && wr.get() != null) {
-				wr.get().OnWBoardPageList(szWBoardID, szPageData, nPageID);
+				wr.get().OnWBoardPageListCallback(szWBoardID, szPageData, nPageID);
 			}
 		}
 	}
@@ -81,7 +81,7 @@ public class WBRequest {
 				+ nPageID);
 		for (WeakReference<WBRequestCallback> wr : mCallbacks) {
 			if (wr != null && wr.get() != null) {
-				wr.get().OnWBoardActivePage(nUserID, szWBoardID, nPageID);
+				wr.get().OnWBoardActivePageCallback(nUserID, szWBoardID, nPageID);
 			}
 		}
 
@@ -94,7 +94,7 @@ public class WBRequest {
 				+ " " + nPageID + " " + szFileName);
 		for (WeakReference<WBRequestCallback> wr : mCallbacks) {
 			if (wr != null && wr.get() != null) {
-				wr.get().OnWBoardDocDisplay(szWBoardID, nPageID, szFileName,
+				wr.get().OnWBoardDocDisplayCallback(szWBoardID, nPageID, szFileName,
 						result);
 			}
 		}
@@ -142,7 +142,7 @@ public class WBRequest {
 				+ nBusinessType + " " + szWBoardID);
 		for (WeakReference<WBRequestCallback> wr : mCallbacks) {
 			if (wr != null && wr.get() != null) {
-				wr.get().OnWBoardClosed(nGroupID, nBusinessType, nUserID,
+				wr.get().OnWBoardClosedCallback(nGroupID, nBusinessType, nUserID,
 						szWBoardID);
 			}
 		}
@@ -166,6 +166,11 @@ public class WBRequest {
 	// �յ��ĵ����ӵĻص�
 	private void OnWBoardAddPage(String szWBoardID, int nPageID) {
 		Log.e("WBRequest UI", "OnWBoardAddPage " + szWBoardID + " " + nPageID);
+		for (WeakReference<WBRequestCallback> wr : mCallbacks) {
+			if (wr != null && wr.get() != null) {
+				wr.get().OnWBoardAddPageCallback(szWBoardID, nPageID);
+			}
+		}
 
 	}
 

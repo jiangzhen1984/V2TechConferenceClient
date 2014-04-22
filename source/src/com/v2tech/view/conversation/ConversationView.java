@@ -557,7 +557,7 @@ public class ConversationView extends Activity {
 		MessageBodyView mv = null;
 		while (mCur.moveToNext()) {
 			VMessage m = extractMsg(mCur);
-			if (groupId == m.mGroupId
+			if ((groupId == m.mGroupId && groupId !=0)
 					|| (m.getUser().getmUserId() == user2Id && m.mGroupId == 0)) {
 				mv = new MessageBodyView(this, m, true);
 				mv.setCallback(listener);
