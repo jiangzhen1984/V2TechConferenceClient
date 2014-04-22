@@ -8,13 +8,11 @@ import android.content.Context;
 import android.util.Log;
 
 public class WBRequest {
-	private Context context;
 	private static WBRequest mWBRequest;
 
 	private List<WeakReference<WBRequestCallback>> mCallbacks = new ArrayList<WeakReference<WBRequestCallback>>();
 
 	private WBRequest(Context context) {
-		this.context = context;
 	}
 
 	public static synchronized WBRequest getInstance(Context context) {
@@ -27,6 +25,10 @@ public class WBRequest {
 	}
 
 	public static synchronized WBRequest getInstance() {
+		if (mWBRequest == null) {
+			mWBRequest = new WBRequest(null);
+			mWBRequest.initialize(mWBRequest);
+		}
 		return mWBRequest;
 	}
 

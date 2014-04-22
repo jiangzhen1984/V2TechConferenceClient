@@ -14,13 +14,13 @@ import com.v2tech.logic.GlobalHolder;
 import com.v2tech.logic.VMessage;
 
 public class VideoMsgChattingLayout extends LinearLayout {
-	
+
 	private ChattingListener listener;
-	private ScrollView  mScroller;
+	private ScrollView mScroller;
 	private LinearLayout mMsgContainer;
 	private View mSendButton;
 	private TextView mContentTV;
-	
+
 	public interface ChattingListener {
 		public void requestSendMsg(VMessage vm);
 	};
@@ -48,43 +48,64 @@ public class VideoMsgChattingLayout extends LinearLayout {
 		this.addView(view, new LinearLayout.LayoutParams(
 				LinearLayout.LayoutParams.MATCH_PARENT,
 				LinearLayout.LayoutParams.MATCH_PARENT));
-		
-		this.mScroller = (ScrollView)view.findViewById(R.id.video_msg_container_scroller);
-		this.mMsgContainer = (LinearLayout)view.findViewById(R.id.video_msg_container);
-		this.mContentTV = (TextView)view.findViewById(R.id.video_msg_chatting_layout_msg_content);
-		this.mSendButton = view.findViewById(R.id.video_msg_chatting_layout_send_button);
+
+		this.mScroller = (ScrollView) view
+				.findViewById(R.id.video_msg_container_scroller);
+		this.mMsgContainer = (LinearLayout) view
+				.findViewById(R.id.video_msg_container);
+		this.mContentTV = (TextView) view
+				.findViewById(R.id.video_msg_chatting_layout_msg_content);
+		this.mSendButton = view
+				.findViewById(R.id.video_msg_chatting_layout_send_button);
 		mSendButton.setOnClickListener(new OnClickListener() {
 
 			@Override
 			public void onClick(View view) {
 				if (listener != null) {
-					if (mContentTV.getText() == null || mContentTV.getText().toString().trim().isEmpty()) {
+					if (mContentTV.getText() == null
+							|| mContentTV.getText().toString().trim().isEmpty()) {
 						return;
 					}
-					VMessage vm = new VMessage(GlobalHolder.getInstance().getCurrentUser(), null, mContentTV.getText().toString());
+					VMessage vm = new VMessage(GlobalHolder.getInstance()
+							.getCurrentUser(), null, mContentTV.getText()
+							.toString());
 					addNewMessage(vm);
 					listener.requestSendMsg(vm);
 					mContentTV.setText("");
 				}
 			}
-			
+
 		});
 	}
-	
-	
-	
+
 	public void setListener(ChattingListener listener) {
 		this.listener = listener;
 	}
-	
-	
+
+	public void requestScrollToNewMessage() {
+		if (mMsgContainer.getChildCount() <= 0) {
+			return;
+		}
+		this.mScroller.post(new Runnable() {
+
+			@Override
+			public void run() {
+				mScroller.scrollTo(
+						0,
+						mMsgContainer.getChildAt(
+								mMsgContainer.getChildCount() - 1).getBottom());
+			}
+
+		});
+	}
+
 	public void addNewMessage(VMessage vm) {
 		TextView tvSender = new TextView(this.getContext());
-		tvSender.setText(vm.getUser().getName()+" "+ vm.getDateTimeStr());
+		tvSender.setText(vm.getUser().getName() + " " + vm.getDateTimeStr());
 		tvSender.setTextColor(Color.rgb(0, 0, 255));
 		tvSender.setPadding(15, 5, 15, 5);
 		this.mMsgContainer.addView(tvSender);
-		
+
 		TextView tv = new TextView(this.getContext());
 		tv.setText(vm.getText());
 		tv.setPadding(15, 5, 15, 5);
@@ -94,9 +115,12 @@ public class VideoMsgChattingLayout extends LinearLayout {
 
 			@Override
 			public void run() {
-				mScroller.scrollTo(0, mMsgContainer.getChildAt(mMsgContainer.getChildCount() -1 ).getBottom());
+				mScroller.scrollTo(
+						0,
+						mMsgContainer.getChildAt(
+								mMsgContainer.getChildCount() - 1).getBottom());
 			}
-			
+
 		});
 	}
 }

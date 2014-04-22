@@ -22,7 +22,8 @@
         android:layout_height="1dp"
         android:layout_below="@+id/textView1"
         android:background="#cdcdcf"
-        android:orientation="vertical" ></LinearLayout>
+        android:orientation="vertical" >
+    </LinearLayout>
 
     <ScrollView
         android:id="@+id/video_msg_container_scroller"
@@ -50,7 +51,11 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:ems="10" />
+            android:ems="10"
+            android:inputType="textCapSentences|textMultiLine"
+            android:maxLength="4500"
+            android:maxLines="3"
+            android:minLines="1" />
 
         <TextView
             android:id="@+id/video_msg_chatting_layout_send_button"

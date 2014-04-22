@@ -6,9 +6,11 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 
 import android.app.Activity;
@@ -86,6 +88,8 @@ public class ConferenceCreateActivity extends Activity {
 	private List<ListItem> mCacheItemList;
 	private List<Group> mGroupList;
 
+	
+	private Map<Long, ListItem> mCacheHolder = new HashMap<Long, ListItem>();
 	private Set<User> mAttendeeList = new HashSet<User>();
 
 	private ConferenceService cs = new ConferenceService();
@@ -163,22 +167,31 @@ public class ConferenceCreateActivity extends Activity {
 	}
 
 	private void updateView(int pos) {
-
 		ListItem item = mItemList.get(pos);
 		if (item.g == null) {
 			return;
 		}
 		if (item.isExpanded == false) {
 			for (Group g : item.g.getChildGroup()) {
-				mItemList.add(++pos, new ListItem(g, g.getLevel()));
+				Long key = Long.valueOf(g.getmGId());
+				ListItem cache = mCacheHolder.get(key);
+				if (cache == null) {
+					cache =  new ListItem(g, g.getLevel());
+					mCacheHolder.put(key, cache);
+				}
+				mItemList.add(++pos, cache);
 			}
 			List<User> sortList = new ArrayList<User>();
 			sortList.addAll(item.g.getUsers());
 			Collections.sort(sortList);
 			for (User u : sortList) {
-				ListItem li = new ListItem(u, item.g.getLevel());
-				mItemList.add(++pos, li);
-				updateItem(li);
+				Long key = Long.valueOf(u.getmUserId());
+				ListItem cache = mCacheHolder.get(key);
+				if (cache == null) {
+					cache =  new ListItem(u, item.g.getLevel() + 1);
+					mCacheHolder.put(key, cache);
+				}
+				mItemList.add(++pos, cache);
 			}
 
 		} else {
@@ -194,7 +207,9 @@ public class ConferenceCreateActivity extends Activity {
 				if (li.g != null && li.g.getLevel() <= item.g.getLevel()) {
 					break;
 				}
-				// FIXME if find user how to check?
+				if (li.u != null && li.level == item.g.getLevel()) {
+					break;
+				}
 				endRemovePos++;
 			}
 
@@ -207,7 +222,6 @@ public class ConferenceCreateActivity extends Activity {
 
 		item.isExpanded = !item.isExpanded;
 		adapter.notifyDataSetChanged();
-
 	}
 
 	private void updateUserToAttendList(final User u) {

@@ -139,7 +139,6 @@ public class ContactsTabFragment extends Fragment {
 		super.onDestroy();
 		mLoaded = false;
 		getActivity().unregisterReceiver(receiver);
-		V2Log.d("====destroy contact tab fragment");
 	}
 
 	@Override

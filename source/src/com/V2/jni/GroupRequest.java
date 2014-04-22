@@ -12,14 +12,12 @@ import com.v2tech.util.V2Log;
 
 public class GroupRequest {
 
-	private Context context;
 	public boolean loginResult;
 	private static GroupRequest mGroupRequest;
 	
 	private List<GroupRequestCallback> callbacks;
 
 	private GroupRequest(Context context) {
-		this.context = context;
 		callbacks = new ArrayList<GroupRequestCallback>();
 	};
 
@@ -34,6 +32,12 @@ public class GroupRequest {
 	}
 	
 	public static synchronized GroupRequest getInstance() {
+		if (mGroupRequest == null) {
+			mGroupRequest = new GroupRequest(null);
+			if (!mGroupRequest.initialize(mGroupRequest)) {
+				throw new RuntimeException(" can't not inintialize group request");
+			}
+		}
 		return mGroupRequest;
 	}
 

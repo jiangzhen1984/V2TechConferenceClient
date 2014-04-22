@@ -12,10 +12,8 @@ import com.v2tech.util.V2Log;
 public class VideoRequest {
 	private static VideoRequest mVideoRequest;
 	private List<VideoRequestCallback> callback;
-	private Context context;
 
 	private VideoRequest(Context context) {
-		this.context = context;
 		callback = new ArrayList<VideoRequestCallback>();
 	};
 
@@ -31,6 +29,12 @@ public class VideoRequest {
 	}
 
 	public static synchronized VideoRequest getInstance() {
+		if (mVideoRequest == null) {
+			mVideoRequest = new VideoRequest(null);
+			if (!mVideoRequest.initialize(mVideoRequest)) {
+				Log.e("mVideoRequest", "can't initialize mVideoRequest ");
+			}
+		}
 		return mVideoRequest;
 	}
 

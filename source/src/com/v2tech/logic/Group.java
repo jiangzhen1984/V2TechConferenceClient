@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.v2tech.util.V2Log;
 
@@ -98,8 +99,8 @@ public class Group {
 			this.mCreateDate = new Date(Long.parseLong(createDate) * 1000);
 		}
 
-		users = new ArrayList<User>();
-		mChild = new ArrayList<Group>();
+		users = new CopyOnWriteArrayList<User>();
+		mChild = new CopyOnWriteArrayList<Group>();
 		level = 1;
 
 	}
@@ -112,8 +113,8 @@ public class Group {
 		this.mOwner = owner;
 		this.mCreateDate = createDate;
 
-		users = new ArrayList<User>();
-		mChild = new ArrayList<Group>();
+		users = new CopyOnWriteArrayList<User>();
+		mChild = new CopyOnWriteArrayList<Group>();
 		level = 1;
 	}
 

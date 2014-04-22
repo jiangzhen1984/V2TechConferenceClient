@@ -12,12 +12,10 @@ import android.util.Log;
 public class ConfRequest {
 
 	private static ConfRequest mConfRequest;
-	private Context context;
 
 	private List<ConfRequestCallback> callbacks;
 
 	private ConfRequest(Context context) {
-		this.context = context;
 		this.callbacks = new ArrayList<ConfRequestCallback>();
 	};
 
@@ -32,8 +30,8 @@ public class ConfRequest {
 
 	public static synchronized ConfRequest getInstance() {
 		if (mConfRequest == null) {
-			throw new RuntimeException(
-					"doesn't initliaze ConfRequest yet, please getInstance(Context) first");
+			mConfRequest = new ConfRequest(null);
+			mConfRequest.initialize(mConfRequest);
 		}
 
 		return mConfRequest;
@@ -358,7 +356,7 @@ public class ConfRequest {
 		Log.e("ImRequest UI", "OnSetCanInviteUser " + nConfID + " "
 				+ bInviteUser);
 	}
-	
+
 	private void OnSyncOpenVideoMixer(String sMediaID, int nLayout,
 			int videoSizeFormat, int nPos, String sSyncVideoMixerXml) {
 		V2Log.d("OnSyncOpenVideoMixer");

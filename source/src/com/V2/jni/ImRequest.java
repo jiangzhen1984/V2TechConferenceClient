@@ -9,20 +9,13 @@ import android.util.Log;
 
 import com.v2tech.util.V2Log;
 
-
-
 public class ImRequest {
-	private Context context;
 	public boolean loginResult;
 	private static ImRequest mImRequest;
-	
+
 	private List<ImRequestCallback> callbacks;
 
-
-
-
 	private ImRequest(Context context) {
-		this.context = context;
 		callbacks = new ArrayList<ImRequestCallback>();
 	};
 
@@ -40,77 +33,102 @@ public class ImRequest {
 
 	public static synchronized ImRequest getInstance() {
 		if (mImRequest == null) {
-			throw new RuntimeException(
-					"doesn't initliaze ImRequest yet, please getInstance(Context) first");
+			mImRequest = new ImRequest(null);
+			if (!mImRequest.initialize(mImRequest)) {
+				V2Log.e(" can't  initialize imrequest ");
+				throw new RuntimeException("can't initilaize imrequest");
+			}
 		}
 
 		return mImRequest;
 	}
-	
+
 	public void setCallback(ImRequestCallback callback) {
 		this.callbacks.add(callback);
 	}
 
-
 	public native boolean initialize(ImRequest request);
 
 	public native void unInitialize();
-	
+
 	/**
-	 * <ul> Log in to server. server will call {@link #OnLogin(long, int, long, int)} to indicate response</ul>
-	 * @param szName   user name 
-	 * @param szPassword  password
-	 * @param status  TODO add comment
-	 * @param type  TODO add  comment
-	 * @param isAnonymous 
+	 * <ul>
+	 * Log in to server. server will call {@link #OnLogin(long, int, long, int)}
+	 * to indicate response
+	 * </ul>
+	 * 
+	 * @param szName
+	 *            user name
+	 * @param szPassword
+	 *            password
+	 * @param status
+	 *            TODO add comment
+	 * @param type
+	 *            TODO add comment
+	 * @param isAnonymous
 	 * 
 	 */
 	public native void login(String szName, String szPassword, int status,
 			int type, boolean isAnonymous);
-	
+
 	/**
-	 * <ul> Log in call back function. This function only is called by JNI.</ul>
-	 * @param nUserID logged in user ID
-	 * @param nStatus 
-	 * @param nResult  0: logged in successfully
+	 * <ul>
+	 * Log in call back function. This function only is called by JNI.
+	 * </ul>
+	 * 
+	 * @param nUserID
+	 *            logged in user ID
+	 * @param nStatus
+	 * @param nResult
+	 *            0: logged in successfully
 	 * 
 	 * @see #login(String, String, int, int, boolean)
 	 */
 	private void OnLogin(long nUserID, int nStatus, long serverTime, int nResult) {
-		V2Log.d( "OnLogin --> " + nUserID + ": " + "-:"
-				+ nStatus + ":" + nResult);
+		V2Log.d("OnLogin --> " + nUserID + ": " + "-:" + nStatus + ":"
+				+ nResult);
 		for (ImRequestCallback callback : this.callbacks) {
 			callback.OnLoginCallback(nUserID, nStatus, nResult);
 		}
 	}
-	
 
 	/**
-	 * <ul>When Same user log in with other device, then this function will be called</ul>
-	 * @param nType device type of logged
+	 * <ul>
+	 * When Same user log in with other device, then this function will be
+	 * called
+	 * </ul>
+	 * 
+	 * @param nType
+	 *            device type of logged
 	 */
 	private void OnLogout(int nType) {
 		V2Log.d("OnLogout::" + nType);
-		for (ImRequestCallback cb :this.callbacks) {
+		for (ImRequestCallback cb : this.callbacks) {
 			cb.OnLogoutCallback(nType);
 		}
-		
+
 	}
 
 	/**
-	 * <ul>Get user information from server.<br>
-	 * when call this API, JNI will call {@link #OnUpdateBaseInfo(long, String)} to indicate response.<br>
+	 * <ul>
+	 * Get user information from server.<br>
+	 * when call this API, JNI will call {@link #OnUpdateBaseInfo(long, String)}
+	 * to indicate response.<br>
 	 * </ul>
 	 * 
-	 * @param nUserID user ID which want to get user information
+	 * @param nUserID
+	 *            user ID which want to get user information
 	 */
 	public native void getUserBaseInfo(long nUserID);
-	
+
 	/**
-	 * <ul> call back function. This function only is called by JNI.</ul>
+	 * <ul>
+	 * call back function. This function only is called by JNI.
+	 * </ul>
 	 * <ul>
 	 * {@link #getUserBaseInfo(long)} callback.
 	 * </ul>
+	 * 
 	 * @param nUserID
 	 * @param updatexml
 	 * 
@@ -120,66 +138,89 @@ public class ImRequest {
 			callback.OnUpdateBaseInfoCallback(nUserID, updatexml);
 		}
 	}
-	
-	
+
 	/**
-	 * <ul>Indicate user's status changed.</ul>
-	 * @param nUserID user ID
-	 * @param eUEType device type of user logged in
-	 * @param nStatus <ul> new status of user</ul>
 	 * <ul>
-	 * <li>0 : off line</li>
-	 * <li>1 : on line</li>
-	 * <li>2 : leave</li>
-	 * <li>3 : busy</li>
-	 * <li>4 : do not disturb</li>
-	 * <li>5 : hidden</li>
-	 * </ul> 
+	 * Indicate user's status changed.
+	 * </ul>
+	 * 
+	 * @param nUserID
+	 *            user ID
+	 * @param eUEType
+	 *            device type of user logged in
+	 * @param nStatus
+	 *            <ul>
+	 *            new status of user
+	 *            </ul>
+	 *            <ul>
+	 *            <li>0 : off line</li>
+	 *            <li>1 : on line</li>
+	 *            <li>2 : leave</li>
+	 *            <li>3 : busy</li>
+	 *            <li>4 : do not disturb</li>
+	 *            <li>5 : hidden</li>
+	 *            </ul>
 	 * @param szStatusDesc
 	 * 
 	 * @see com.v2tech.logic.User.Status
-	 * @see ImRequestCallback#OnUserStatusUpdatedCallback(long, int, int, String)
+	 * @see ImRequestCallback#OnUserStatusUpdatedCallback(long, int, int,
+	 *      String)
 	 */
-	private void OnUserStatusUpdated(long nUserID, int nType, int nStatus, String szStatusDesc) {
-		V2Log.d(" OnUserStatusUpdated--> nUserID:"+nUserID+"  nStatus:"+nStatus+" nType:"+nType +" szStatusDesc:"+szStatusDesc+"  "+new Date());
+	private void OnUserStatusUpdated(long nUserID, int nType, int nStatus,
+			String szStatusDesc) {
+		V2Log.d(" OnUserStatusUpdated--> nUserID:" + nUserID + "  nStatus:"
+				+ nStatus + " nType:" + nType + " szStatusDesc:" + szStatusDesc
+				+ "  " + new Date());
 		for (ImRequestCallback callback : this.callbacks) {
 			callback.OnUserStatusUpdatedCallback(nUserID, nStatus, szStatusDesc);
 		}
 	}
-	
+
 	/**
-	 *  <ul>Indicate user avatar changed.</ul>
+	 * <ul>
+	 * Indicate user avatar changed.
+	 * </ul>
+	 * 
 	 * @param nAvatarType
-	 * @param nUserID  User ID which user's changed avatar
-	 * @param AvatarName  patch of avatar
+	 * @param nUserID
+	 *            User ID which user's changed avatar
+	 * @param AvatarName
+	 *            patch of avatar
 	 * 
 	 * @see ImRequestCallback#OnChangeAvatarCallback(int, long, String)
 	 */
 	private void OnChangeAvatar(int nAvatarType, long nUserID, String AvatarName) {
-		V2Log.d("OnChangeAvatar--> nAvatarType:"+nAvatarType+"    nUserID:"+nUserID+" AvatarName:"+ AvatarName);
+		V2Log.d("OnChangeAvatar--> nAvatarType:" + nAvatarType + "    nUserID:"
+				+ nUserID + " AvatarName:" + AvatarName);
 		for (ImRequestCallback callback : this.callbacks) {
 			callback.OnChangeAvatarCallback(nAvatarType, nUserID, AvatarName);
 		}
 	}
-	
+
 	/**
-	 * <ul>Update user information</ul>
-	 * @param InfoXml content as below:<br>
-	 * {@code <user address="" birthday="" fax="" homepage="" job="" mobile="" nickname="" sex="1" sign="" telephone=""><videolist/> </user> }
+	 * <ul>
+	 * Update user information
+	 * </ul>
+	 * 
+	 * @param InfoXml
+	 *            content as below:<br>
+	 *            {@code <user address="" birthday="" fax="" homepage="" job="" mobile="" nickname="" sex="1" sign="" telephone=""><videolist/> </user> }
 	 */
 	public native void modifyBaseInfo(String InfoXml);
-	
+
 	/**
-	 * <ul>Update contacts nick name</br>
+	 * <ul>
+	 * Update contacts nick name</br>
 	 * 
 	 * </ul>
+	 * 
 	 * @param nUserId
 	 * @param sCommentName
 	 * 
 	 * @see ImRequest#OnModifyCommentName(long, String)
 	 */
 	public native void modifyCommentName(long nUserId, String sCommentName);
-	
+
 	/**
 	 * 
 	 * @param nUserId
@@ -192,12 +233,8 @@ public class ImRequest {
 			callback.OnModifyCommentName(nUserId, sCommmentName);
 		}
 	}
-	
 
 	public native void updateMyStatus(int nStatus, String szStatusDesc);
-
-	
-
 
 	// 淇敼涓汉淇℃伅
 	/*
@@ -230,11 +267,6 @@ public class ImRequest {
 
 	public native void getCrowdFileInfo(long nCrowdId);
 
-	
-
-
-
-
 	// 杈撳叆鍏抽敭璇嶈繘琛屾悳绱�
 	private void OnGetSearchMember(String xmlinfo) {
 		Log.e("ImRequest UI", "OnGetSearchMember:" + xmlinfo);
@@ -249,9 +281,6 @@ public class ImRequest {
 		// addIntent.putExtra("MSG", searchMsgType);
 		// context.sendOrderedBroadcast(addIntent,null);
 	}
-
-
-	
 
 	private void OnUserPrivacyUpdated(long nUserID, int nPrivacy) {
 		Log.e("ImRequest UI", "OnUserPrivacyUpdated");
@@ -286,8 +315,6 @@ public class ImRequest {
 		// moveIntent.putExtra("MSG", moveMsgtype);
 		// context.sendOrderedBroadcast(moveIntent,null);
 	}
-
-	
 
 	private void OnHaveUpdateNotify(String updatefilepath, String updatetext) {
 		Log.e("ImRequest UI", "OnHaveUpdateNotify");
@@ -349,8 +376,6 @@ public class ImRequest {
 		Log.e("ImRequest UI", "OnDelCrowdFile:" + nCrowdId);
 	}
 
-
-
 	private void OnSignalDisconnected() {
 		Log.e("ImRequest UI", "OnSignalDisconnected");
 	}
@@ -371,8 +396,5 @@ public class ImRequest {
 	private void OnGetGroupsInfoEnd() {
 
 	}
-	
-
-
 
 }
