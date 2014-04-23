@@ -24,6 +24,7 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
 
 import com.v2tech.util.StorageUtil;
@@ -310,15 +311,15 @@ public class VImageMessage extends VMessage {
 		if (mFullQualityBitmap == null || mFullQualityBitmap.isRecycled()) {
 			 BitmapFactory.Options options= new  BitmapFactory.Options();
 			 options.inJustDecodeBounds = true;
-//			 options.inPreferredConfig = Config.ALPHA_8;
-//			 options.inDither = true;
+			 options.inPreferredConfig = Config.ALPHA_8;
+			 options.inDither = true;
 			BitmapFactory.decodeFile(this.mImagePath, options);
 			if (options.outWidth > 1920 || options.outHeight > 1080) {
 				options.inJustDecodeBounds = false;
-				options.inSampleSize = 4;
+				options.inSampleSize = 2;
 			} else if (options.outWidth > 800 || options.outHeight > 600){
 				options.inJustDecodeBounds = false;
-				options.inSampleSize = 2;
+				options.inSampleSize = 1;
 			}else {
 				options.inJustDecodeBounds = false;
 				options.inSampleSize = 1;

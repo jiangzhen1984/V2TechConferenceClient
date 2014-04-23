@@ -13,11 +13,10 @@
         android:textColor="#000000"
         android:text="@string/confs_camear_quanlity" />
 
-    <SeekBar
-        android:id="@+id/seekBar1"
+    <com.v2tech.view.cus.VerticalSeekBar
+        android:id="@+id/verticalSeekBar1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:max="3"
         android:thumb="@drawable/red_nofificator" />
 
 </LinearLayout>

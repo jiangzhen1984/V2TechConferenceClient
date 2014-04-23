@@ -19,6 +19,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ActivityInfo;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
@@ -138,6 +139,7 @@ public class VideoActivityV2 extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 		setContentView(R.layout.activity_in_metting);
 		mContext = this;
 		this.mVideoLayoutMain = (RelativeLayout) findViewById(R.id.video_layout_root);
@@ -825,10 +827,14 @@ public class VideoActivityV2 extends Activity {
 		Toast.makeText(mContext, user.getName() + "退出会议室! ", Toast.LENGTH_SHORT)
 				.show();
 		Attendee a = getAttendee(user.getmUserId());
+		
 		if (a != null) {
-			for (UserDeviceConfig udc : a.getmDevices()) {
-				if (udc != null && udc.isShowing()) {
-					showOrCloseAttendeeVideo(udc);
+			// User do exist video device
+			if (a.getmDevices() != null) {
+				for (UserDeviceConfig udc : a.getmDevices()) {
+					if (udc != null && udc.isShowing()) {
+						showOrCloseAttendeeVideo(udc);
+					}
 				}
 			}
 			this.mAttendeeList.remove(a);
