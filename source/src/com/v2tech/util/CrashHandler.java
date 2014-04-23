@@ -2,6 +2,7 @@ package com.v2tech.util;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
@@ -11,6 +12,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 import android.content.Context;
@@ -36,7 +38,7 @@ public class CrashHandler implements UncaughtExceptionHandler {
     private Map<String, String> infos = new HashMap<String, String>();  
   
     //用于格式化日期,作为日志文件名的一部分  
-    private DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss");  
+    private DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss", Locale.getDefault());  
   
     /** 保证只有一个CrashHandler实例 */  
     private CrashHandler() {  
@@ -70,7 +72,7 @@ public class CrashHandler implements UncaughtExceptionHandler {
             mDefaultHandler.uncaughtException(thread, ex);  
         } else {  
             try {  
-                Thread.sleep(3000);  
+                Thread.sleep(5000);  
             } catch (InterruptedException e) {  
                 Log.e(TAG, "error : ", e);  
             }  
@@ -102,7 +104,8 @@ public class CrashHandler implements UncaughtExceptionHandler {
         //收集设备参数信息   
         collectDeviceInfo(mContext);  
         //保存日志文件   
-        saveCrashInfo2File(ex);  
+        saveCrashInfo2File(ex);
+        catchLog();
         return true;  
     }  
       
@@ -166,7 +169,7 @@ public class CrashHandler implements UncaughtExceptionHandler {
             String time = formatter.format(new Date());  
             String fileName = "crash-" + time + "-" + timestamp + ".log";  
             if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {  
-                String path = "/sdcard/crash/";  
+                String path = StorageUtil.getSdcardPath()+"/v2tech/crash/";  
                 File dir = new File(path);  
                 if (!dir.exists()) {  
                     dir.mkdirs();  
@@ -180,5 +183,19 @@ public class CrashHandler implements UncaughtExceptionHandler {
             Log.e(TAG, "an error occured while writing file...", e);  
         }  
         return null;  
-    }  
+    } 
+    
+    
+    private void catchLog() {
+    	String logName = StorageUtil.getSdcardPath()+"/v2tech/crash/"+System.currentTimeMillis()+"_crash_log.log" ;
+    	
+    	
+    	V2Log.i("Catching log to  "+ logName);;
+    	String cmd ="logcat -v time -d -f  " + logName;
+    	try {
+			Runtime.getRuntime().exec(cmd);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+    }
 }  

@@ -17,7 +17,9 @@ import com.V2.jni.GroupRequest;
 import com.V2.jni.ImRequest;
 import com.V2.jni.VideoRequest;
 import com.V2.jni.WBRequest;
+import com.v2tech.util.CrashHandler;
 import com.v2tech.util.GlobalConfig;
+import com.v2tech.util.LogcatThread;
 import com.v2tech.util.V2Log;
 
 public class MainApplication extends Application {
@@ -26,10 +28,8 @@ public class MainApplication extends Application {
 	@Override
 	public void onCreate() {
 		super.onCreate();
-		// CrashHandler crashHandler = CrashHandler.getInstance();
-		// crashHandler.init(getApplicationContext());
-		V2Log.d("=====create=====");
-	
+		CrashHandler crashHandler = CrashHandler.getInstance();
+		crashHandler.init(getApplicationContext());
 		
 
 		V2Log.isDebuggable = (0 != (getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE));
@@ -59,6 +59,8 @@ public class MainApplication extends Application {
 		//Init screen size
 		GlobalConfig.GLOBAL_LAYOUT_SIZE = getResources().getConfiguration().screenLayout
 				& Configuration.SCREENLAYOUT_SIZE_MASK;
+		
+		new LogcatThread().start();
 	}
 
 	@Override

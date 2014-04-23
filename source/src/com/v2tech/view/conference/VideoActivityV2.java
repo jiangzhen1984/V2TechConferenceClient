@@ -411,6 +411,7 @@ public class VideoActivityV2 extends Activity {
 			for (User u : l) {
 				al.add(new Attendee(u));
 			}
+			V2Log.i("Conference attendee size: "+ al.size() +"  " + conf.getmGId() +"  " + conf.getName());
 			mAttendeeContainer.setAttendsList(al);
 			RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
 					400, mVideoLayout.getMeasuredHeight());

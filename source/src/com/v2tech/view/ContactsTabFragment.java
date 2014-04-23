@@ -64,17 +64,17 @@ public class ContactsTabFragment extends Fragment {
 	private EditText searchedTextET;
 
 	private boolean mIsStartedSearch = false;
-	
+
 	private Map<Long, ListItem> mCacheHolder = new HashMap<Long, ListItem>();
 
 	private List<ListItem> mItemList = new ArrayList<ListItem>();
 	private List<ListItem> mCacheItemList;
-	
+
 	private View rootView;
-	
+
 	private static final int TAG_ORG = 1;
 	private static final int TAG_CONTACT = 2;
-	
+
 	private int flag;
 
 	@Override
@@ -98,7 +98,8 @@ public class ContactsTabFragment extends Fragment {
 		rootView = inflater.inflate(R.layout.tab_fragment_contacts, container,
 				false);
 		rootView.setOnTouchListener(mTouchListener);
-		mContactsContainer = (ListView) rootView.findViewById(R.id.contacts_container);
+		mContactsContainer = (ListView) rootView
+				.findViewById(R.id.contacts_container);
 		mContactsContainer.setOnTouchListener(mTouchListener);
 		mContactsContainer.setOnItemClickListener(new OnItemClickListener() {
 
@@ -118,20 +119,20 @@ public class ContactsTabFragment extends Fragment {
 
 		searchedTextET = (EditText) rootView.findViewById(R.id.contacts_search);
 		searchedTextET.setOnFocusChangeListener(focusListener);
-		TextView tv = (TextView)rootView.findViewById(R.id.fragment_title);
+		TextView tv = (TextView) rootView.findViewById(R.id.fragment_title);
 		if (flag == TAG_ORG) {
 			tv.setText(R.string.tab_org_name);
 		} else if (flag == TAG_CONTACT) {
 			tv.setText(R.string.tab_contact_name);
 		}
-		
+
 		return rootView;
 	}
 
 	@Override
 	public void onDestroyView() {
 		super.onDestroyView();
-		((ViewGroup)rootView.getParent()).removeView(rootView);
+		((ViewGroup) rootView.getParent()).removeView(rootView);
 	}
 
 	@Override
@@ -213,7 +214,7 @@ public class ContactsTabFragment extends Fragment {
 				}
 				mLoaded = true;
 				for (Group g : l) {
-					ListItem  li = new ListItem(g, g.getLevel());
+					ListItem li = new ListItem(g, g.getLevel());
 					mItemList.add(li);
 					mCacheHolder.put(Long.valueOf(g.getmGId()), li);
 					iterateGroup(g);
@@ -221,15 +222,14 @@ public class ContactsTabFragment extends Fragment {
 			}
 			return null;
 		}
-		
-		
+
 		private void iterateGroup(Group g) {
 			for (User u : g.getUsers()) {
-				ListItem  liu = new ListItem(u, g.getLevel() + 1);
+				ListItem liu = new ListItem(u, g.getLevel() + 1);
 				mCacheHolder.put(Long.valueOf(u.getmUserId()), liu);
 			}
 			for (Group subG : g.getChildGroup()) {
-				ListItem  lisubg = new ListItem(subG, g.getLevel());
+				ListItem lisubg = new ListItem(subG, g.getLevel());
 				mCacheHolder.put(Long.valueOf(subG.getmGId()), lisubg);
 			}
 		}
@@ -278,7 +278,6 @@ public class ContactsTabFragment extends Fragment {
 
 	}
 
-	
 	private OnFocusChangeListener focusListener = new OnFocusChangeListener() {
 
 		@Override
@@ -289,9 +288,9 @@ public class ContactsTabFragment extends Fragment {
 				searchedTextET.removeTextChangedListener(textChangedListener);
 			}
 		}
-		
+
 	};
-	
+
 	private TextWatcher textChangedListener = new TextWatcher() {
 
 		@Override
@@ -319,7 +318,7 @@ public class ContactsTabFragment extends Fragment {
 				mIsStartedSearch = false;
 				return;
 			}
-			String str = s == null?"":s.toString();
+			String str = s == null ? "" : s.toString();
 			List<User> searchedUserList = new ArrayList<User>();
 			for (Group g : l) {
 				Group.searchUser(str, searchedUserList, g);
@@ -340,7 +339,7 @@ public class ContactsTabFragment extends Fragment {
 				Long key = Long.valueOf(g.getmGId());
 				ListItem cache = mCacheHolder.get(key);
 				if (cache == null) {
-					cache =  new ListItem(g, g.getLevel());
+					cache = new ListItem(g, g.getLevel());
 					mCacheHolder.put(key, cache);
 				}
 				mItemList.add(++pos, cache);
@@ -352,7 +351,7 @@ public class ContactsTabFragment extends Fragment {
 				Long key = Long.valueOf(u.getmUserId());
 				ListItem cache = mCacheHolder.get(key);
 				if (cache == null) {
-					cache =  new ListItem(u, item.g.getLevel() + 1);
+					cache = new ListItem(u, item.g.getLevel() + 1);
 					mCacheHolder.put(key, cache);
 				}
 				mItemList.add(++pos, cache);
@@ -376,7 +375,7 @@ public class ContactsTabFragment extends Fragment {
 				}
 				endRemovePos++;
 			}
-
+			V2Log.i("Contacts collpse " + startRemovePos + "  " + endRemovePos);
 			while (startRemovePos <= endRemovePos
 					&& endRemovePos < mItemList.size()) {
 				mItemList.remove(startRemovePos);
@@ -398,6 +397,7 @@ public class ContactsTabFragment extends Fragment {
 	}
 
 	private synchronized void updateUserViewPostionV2(int userId, int status) {
+		V2Log.i(" Contacts update user status : "+userId+"  : "+ status);
 		User.Status newSt = User.Status.fromInt(status);
 		int startSortIndex = 0;
 		boolean foundUserView = false;
@@ -476,6 +476,7 @@ public class ContactsTabFragment extends Fragment {
 			}
 		}
 
+		V2Log.i(" Contacts update pos "+ pos);
 		if (pos == mItemList.size()) {
 			mItemList.add(self);
 		} else {

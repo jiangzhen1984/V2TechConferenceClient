@@ -101,7 +101,7 @@ public class ConversationsTabFragment extends Fragment {
 
 	private ConversationsAdapter adapter = new ConversationsAdapter();
 
-	private ConferenceService cb = new ConferenceService();
+	private ConferenceService cb;
 
 	private String mCurrentTabFlag;
 
@@ -118,6 +118,7 @@ public class ConversationsTabFragment extends Fragment {
 		}
 		getActivity().registerReceiver(receiver, getIntentFilter());
 		mContext = getActivity();
+		cb = new ConferenceService();
 	}
 
 	@Override
