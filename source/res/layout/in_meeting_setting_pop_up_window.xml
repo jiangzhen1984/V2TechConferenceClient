@@ -13,26 +13,69 @@
         android:layout_marginBottom="-3dp"
         android:src="@drawable/camera_setting_window_arrow_bg" />
 
-    <LinearLayout
-        android:layout_width="wrap_content"
+    <RelativeLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/camera_setting_window_bg"
         android:layout_below="@+id/camera_setting_window_arrow"
         android:orientation="vertical" >
 
+      
         <TextView
             android:id="@+id/textView1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:gravity="center"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
             android:text="@string/confs_camear_quanlity"
             android:textColor="#000000" />
+        
+          <com.v2tech.view.cus.VerticalSeekBar
+              android:id="@+id/verticalSeekBar1"
+              android:layout_width="wrap_content"
+              android:layout_height="match_parent"
+              android:layout_below="@+id/textView1"
+              android:layout_centerHorizontal="true"
+              android:max="2"
+              android:progress="1"
+              android:progressDrawable="@drawable/seek_bar_progress"
+              android:thumb="@drawable/seekbar_ball" />
 
-        <com.v2tech.view.cus.VerticalSeekBar
-            android:id="@+id/verticalSeekBar1"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:thumb="@drawable/red_nofificator" />
-    </LinearLayout>
+          <RelativeLayout
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_toRightOf="@+id/verticalSeekBar1"
+              android:layout_alignTop="@+id/verticalSeekBar1"
+              android:layout_alignBottom="@+id/verticalSeekBar1" >
+
+              <TextView
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:layout_alignParentLeft="true"
+                  android:layout_alignParentTop="true"
+                  android:paddingLeft="5dp"
+                  android:textColor="#787878"
+                  android:text="@string/confs_camear_quanlity_high" />
+              
+              <TextView
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:layout_alignParentLeft="true"
+                  android:layout_centerVertical="true"
+                  android:paddingLeft="5dp"
+                  android:textColor="#787878"
+                  android:text="@string/confs_camear_quanlity_middle" />
+               <TextView
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:layout_alignParentLeft="true"
+                  android:layout_alignParentBottom="true"
+                  android:paddingLeft="5dp"
+                  android:textColor="#787878"
+                  android:text="@string/confs_camear_quanlity_low" />
+
+          </RelativeLayout>
+
+    </RelativeLayout>
 
 </RelativeLayout>
