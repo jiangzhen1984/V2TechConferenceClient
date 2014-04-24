@@ -560,18 +560,28 @@ public class VideoActivityV2 extends Activity {
 
 				@Override
 				public void requestFixedLayout(View v) {
-					RelativeLayout.LayoutParams rl = (RelativeLayout.LayoutParams)mVideoLayout.getLayoutParams();
-					rl.addRule(RelativeLayout.RIGHT_OF, v.getId());
-					mVideoLayout.setLayoutParams(rl);
-					adjustLayout();
+//					RelativeLayout.LayoutParams rl = (RelativeLayout.LayoutParams)mVideoLayout.getLayoutParams();
+//					int[] location  = new int[2];
+//					v.getLocationInWindow(location);
+//					DisplayMetrics dm = new DisplayMetrics();
+//					getWindowManager().getDefaultDisplay().getMetrics(dm);
+//					rl.width = dm.widthPixels - (location[0] + v.getMeasuredWidth());
+//					mVideoLayout.setLayoutParams(rl);
+//					adjustLayout();
 				}
 
 				@Override
 				public void requestFloatLayout(View v) {
-					RelativeLayout.LayoutParams rl = (RelativeLayout.LayoutParams)mVideoLayout.getLayoutParams();
-					rl.addRule(RelativeLayout.RIGHT_OF, R.id.in_meeting_menu_layout);
-					mVideoLayout.setLayoutParams(rl);
-					adjustLayout();
+//					RelativeLayout.LayoutParams rl = (RelativeLayout.LayoutParams)mVideoLayout.getLayoutParams();
+//					rl.addRule(RelativeLayout.RIGHT_OF, R.id.in_meeting_menu_layout);
+//					int[] location  = new int[2];
+//					v.getLocationInWindow(location);
+//					DisplayMetrics dm = new DisplayMetrics();
+//					getWindowManager().getDefaultDisplay().getMetrics(dm);
+//					rl.width = dm.widthPixels - location[0];
+//					mVideoLayout.setLayoutParams(rl);
+//					
+//					adjustLayout();
 				}
 				
 				public void requestFillParent(View v) {
@@ -638,15 +648,17 @@ public class VideoActivityV2 extends Activity {
 				break;
 			}
 		}
-		if (atd == null) {
-			V2Log.e("Didn't find self object in  mAttendeeList");
-			return;
-		}
+		
 
 		if (selfInAttendeeList == false) {
 			atd = new Attendee(GlobalHolder.getInstance().getCurrentUser(),
 					true, false);
 			mAttendeeList.add(atd);
+		}
+		
+		if (atd == null) {
+			V2Log.e("Didn't find self object in  mAttendeeList");
+			return;
 		}
 
 		udc = atd.getDefaultDevice();
@@ -689,7 +701,7 @@ public class VideoActivityV2 extends Activity {
 
 		Rect outR = new Rect();
 		mVideoLayout.getDrawingRect(outR);
-		int containerW = outR.right - outR.left;
+		int containerW =mVideoLayout.getWidth();
 		int containerH = outR.bottom - outR.top;
 
 		int normalW = containerW / cols, normalH = normalW / 16 * 9;

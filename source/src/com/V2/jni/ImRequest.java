@@ -245,7 +245,7 @@ public class ImRequest {
 	public native void changeSystemAvatar(String szAvatarName);
 
 	// 鏇存敼鑷畾涔夊ご鍍�
-	public native void changeCustomAvatar(String szAvatar, int len,
+	public native void changeCustomAvatar(byte[] b, int len,
 			String szExtensionName);
 
 	// 鍚姩鑷姩鏇存柊
