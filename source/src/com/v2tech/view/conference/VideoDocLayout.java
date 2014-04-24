@@ -27,7 +27,9 @@ import com.v2tech.view.cus.TouchImageView;
 import com.v2tech.view.vo.V2Doc;
 
 public class VideoDocLayout extends LinearLayout {
-	
+
+	private View rootView;
+
 	private DocListener listener;
 
 	private Map<String, V2Doc> mDocs;
@@ -44,6 +46,7 @@ public class VideoDocLayout extends LinearLayout {
 	private PopupWindow mDocListWindow;
 	private LinearLayout mDodListContainer;
 	private View mShowDocListButton;
+	private View mRequestFixedPosButton;
 
 	private V2Doc mCurrentDoc;
 
@@ -51,6 +54,13 @@ public class VideoDocLayout extends LinearLayout {
 
 	public interface DocListener {
 		public void updateDoc(V2Doc doc, V2Doc.Page p);
+
+		public void requestFixedLayout(View v);
+
+		public void requestFloatLayout(View v);
+		
+		public void requestFillParent(View v);
+		public void requestRestore(View v);
 	};
 
 	public VideoDocLayout(Context context) {
@@ -82,13 +92,15 @@ public class VideoDocLayout extends LinearLayout {
 		mNextPageButton.setOnClickListener(pageChangeListener);
 		mShowDocListButton = view.findViewById(R.id.video_doc_list_button);
 		mShowDocListButton.setOnClickListener(showDocListListener);
+		mRequestFixedPosButton = view.findViewById(R.id.video_doc_pin_button);
+		mRequestFixedPosButton.setOnClickListener(mRequestFixedListener);
 
 		this.addView(view, new LinearLayout.LayoutParams(
 				LinearLayout.LayoutParams.MATCH_PARENT,
 				LinearLayout.LayoutParams.MATCH_PARENT));
 
+		rootView = this;
 		mDocs = new HashMap<String, V2Doc>();
-
 	}
 
 	private void showPopUpWindow(View anchor) {
@@ -145,7 +157,7 @@ public class VideoDocLayout extends LinearLayout {
 
 		}
 		content.setTag(d);
-		
+
 		mDodListContainer.addView(content, new LinearLayout.LayoutParams(
 				LinearLayout.LayoutParams.MATCH_PARENT,
 				LinearLayout.LayoutParams.WRAP_CONTENT));
@@ -155,12 +167,11 @@ public class VideoDocLayout extends LinearLayout {
 				R.color.in_meeting_doc_list_separation));
 		mDodListContainer.addView(separatedLine, new LinearLayout.LayoutParams(
 				LinearLayout.LayoutParams.MATCH_PARENT, 1));
-		
+
 		content.setOnClickListener(updateDocListener);
 
 	}
-	
-	
+
 	public void closeDoc(V2Doc d) {
 		if (d == null) {
 			V2Log.e(" closed Doc is null");
@@ -171,14 +182,15 @@ public class VideoDocLayout extends LinearLayout {
 			mCurrentPage = null;
 			updateLayoutPageInformation();
 			updatePageButton();
-			//recycle bitmap
+			// recycle bitmap
 			cleanCache();
 		}
-		
-		for (int i =0; mDodListContainer != null && i<mDodListContainer.getChildCount(); i++) {
+
+		for (int i = 0; mDodListContainer != null
+				&& i < mDodListContainer.getChildCount(); i++) {
 			View v = mDodListContainer.getChildAt(i);
 			if (v instanceof TextView) {
-				V2Doc va = (V2Doc)v.getTag();
+				V2Doc va = (V2Doc) v.getTag();
 				if (va != null && va.getId().equals(d.getId())) {
 					mDodListContainer.removeView(v);
 				}
@@ -186,14 +198,14 @@ public class VideoDocLayout extends LinearLayout {
 		}
 		mDocs.remove(d.getId());
 	}
-	
+
 	public void updateCurrentDoc(V2Doc d) {
 		if (d == null) {
 			return;
 		}
-		
+
 		mCurrentDoc = d;
-		
+
 		mCurrentPage = mCurrentDoc.getActivatePage();
 
 		updateCurrentDocPage(mCurrentPage);
@@ -226,7 +238,7 @@ public class VideoDocLayout extends LinearLayout {
 		if (p == null) {
 			return;
 		}
-		
+
 		if (p.getFilePath() != null) {
 			File f = new File(p.getFilePath());
 			if (f.exists()) {
@@ -234,7 +246,7 @@ public class VideoDocLayout extends LinearLayout {
 					mCurrentBitMap.recycle();
 					mCurrentBitMap = null;
 				}
-				
+
 				BitmapFactory.Options ops = new BitmapFactory.Options();
 				ops.inJustDecodeBounds = true;
 				BitmapFactory.decodeFile(p.getFilePath(), ops);
@@ -312,13 +324,14 @@ public class VideoDocLayout extends LinearLayout {
 					.setImageResource(R.drawable.video_doc_page_button_right_selector);
 		}
 	}
-	
+
 	public void cleanCache() {
 		container.removeAllViews();
 		if (this.mCurrentBitMap != null && !this.mCurrentBitMap.isRecycled()) {
 			this.mCurrentBitMap.recycle();
 		}
 	}
+	
 
 	private OnClickListener pageChangeListener = new OnClickListener() {
 
@@ -355,16 +368,16 @@ public class VideoDocLayout extends LinearLayout {
 		}
 
 	};
-	
-	private OnClickListener updateDocListener = new OnClickListener () {
+
+	private OnClickListener updateDocListener = new OnClickListener() {
 
 		@Override
 		public void onClick(View v) {
-			V2Doc d = (V2Doc)v.getTag();
+			V2Doc d = (V2Doc) v.getTag();
 			if (d != mCurrentDoc) {
 				V2Doc.Page p = d.getActivatePage();
 				if (p.getFilePath() == null || p.getFilePath().isEmpty()) {
-					//FIXME should inform user doc is downloading
+					// FIXME should inform user doc is downloading
 					return;
 				}
 				for (int i = 0; i < mDodListContainer.getChildCount(); i++) {
@@ -382,6 +395,30 @@ public class VideoDocLayout extends LinearLayout {
 				mDocListWindow.dismiss();
 			}
 		}
-		
+
+	};
+
+	private OnClickListener mRequestFixedListener = new OnClickListener() {
+
+		@Override
+		public void onClick(View view) {
+
+			if (view.getTag().equals("float")) {
+				if (listener != null) {
+					listener.requestFixedLayout(rootView);
+				}
+			} else {
+				if (listener != null) {
+					listener.requestFloatLayout(rootView);
+				}
+			}
+			
+			if (view.getTag().equals("float")) {
+				view.setTag("fix");
+			} else {
+				view.setTag("float");
+			}
+		}
+
 	};
 }

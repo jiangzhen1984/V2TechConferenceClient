@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
@@ -66,9 +67,11 @@ import com.v2tech.logic.jni.RequestEnterConfResponse;
 import com.v2tech.service.ChatService;
 import com.v2tech.service.ConferenceService;
 import com.v2tech.service.DocumentService;
+import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.V2Log;
 import com.v2tech.view.JNIService;
 import com.v2tech.view.PublicIntent;
+import com.v2tech.view.conference.VideoDocLayout.DocListener;
 import com.v2tech.view.conference.VideoMsgChattingLayout.ChattingListener;
 import com.v2tech.view.vo.V2Doc;
 import com.v2tech.view.vo.V2Doc.Page;
@@ -279,8 +282,18 @@ public class VideoActivityV2 extends Activity {
 						.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 				View view = inflater.inflate(
 						R.layout.in_meeting_setting_pop_up_window, null);
+				DisplayMetrics dm = new DisplayMetrics();
+				getWindowManager().getDefaultDisplay().getMetrics(dm);
+				int height = 300;
+				//Cacul
+				if (GlobalConfig.GLOBAL_LAYOUT_SIZE == Configuration.SCREENLAYOUT_SIZE_NORMAL) {
+					height = (int)(dm.heightPixels * 0.6);
+				} else {
+					height = (int)(dm.heightPixels * 0.4);
+				}
+				// set 
 				mSettingWindow = new PopupWindow(view,
-						LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+						LayoutParams.WRAP_CONTENT,height);
 				mSettingWindow.setBackgroundDrawable(new ColorDrawable(
 						Color.TRANSPARENT));
 				mSettingWindow.setFocusable(true);
@@ -294,12 +307,12 @@ public class VideoActivityV2 extends Activity {
 
 				});
 
-				DisplayMetrics m = new DisplayMetrics();
+				/*DisplayMetrics m = new DisplayMetrics();
 				getWindowManager().getDefaultDisplay().getMetrics(m);
-				v.measure(m.widthPixels, m.heightPixels);
+				v.measure(m.widthPixels, m.heightPixels);*/
 				mSettingWindow.getContentView()
 						.findViewById(R.id.camera_setting_window_arrow)
-						.measure(m.widthPixels, m.heightPixels);
+						.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
 			}
 
 			int[] pos = new int[2];
@@ -397,8 +410,9 @@ public class VideoActivityV2 extends Activity {
 	private void showOrHidenMsgContainer(int visible) {
 		if (mMessageContainer == null) {
 			mMessageContainer = new VideoMsgChattingLayout(this);
-			RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
-					400, mVideoLayout.getMeasuredHeight());
+			mMessageContainer.setId(0x7ffff000);
+			RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams((int)(
+					mVideoLayout.getMeasuredWidth() * 0.4), mVideoLayout.getMeasuredHeight());
 			lp.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
 			lp.addRule(RelativeLayout.RIGHT_OF, mMenuLine.getId());
 			lp.addRule(RelativeLayout.BELOW, mVideoLine.getId());
@@ -450,6 +464,7 @@ public class VideoActivityV2 extends Activity {
 	private void showOrHidenAttendeeContainer(int visible) {
 		if (mAttendeeContainer == null) {
 			mAttendeeContainer = new VideoAttendeeListLayout(this);
+			mAttendeeContainer.setId(0x7ffff001);
 			Group conf = GlobalHolder.getInstance().getGroupById(
 					Group.GroupType.CONFERENCE, this.mGroupId);
 			if (conf != null) {
@@ -471,7 +486,8 @@ public class VideoActivityV2 extends Activity {
 			}
 			
 			RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
-					400, mVideoLayout.getMeasuredHeight());
+					(int)(
+							mVideoLayout.getMeasuredWidth() * 0.4), mVideoLayout.getMeasuredHeight());
 			lp.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
 			lp.addRule(RelativeLayout.RIGHT_OF, mMenuLine.getId());
 			lp.addRule(RelativeLayout.BELOW, mVideoLine.getId());
@@ -527,12 +543,49 @@ public class VideoActivityV2 extends Activity {
 	private void showOrHidenDocContainer(int visible) {
 		if (mDocContainer == null) {
 			mDocContainer = new VideoDocLayout(this);
-
+			mDocContainer.setId(0x7ffff002);
 			RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
-					800, mVideoLayout.getMeasuredHeight());
+					(int)(
+							mVideoLayout.getMeasuredWidth() * 0.5), mVideoLayout.getMeasuredHeight());
 			lp.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
 			lp.addRule(RelativeLayout.RIGHT_OF, mMenuLine.getId());
 			lp.addRule(RelativeLayout.BELOW, mVideoLine.getId());
+			
+			mDocContainer.setListener(new DocListener() {
+
+				@Override
+				public void updateDoc(V2Doc doc, Page p) {
+					
+				}
+
+				@Override
+				public void requestFixedLayout(View v) {
+					RelativeLayout.LayoutParams rl = (RelativeLayout.LayoutParams)mVideoLayout.getLayoutParams();
+					rl.addRule(RelativeLayout.RIGHT_OF, v.getId());
+					mVideoLayout.setLayoutParams(rl);
+					adjustLayout();
+				}
+
+				@Override
+				public void requestFloatLayout(View v) {
+					RelativeLayout.LayoutParams rl = (RelativeLayout.LayoutParams)mVideoLayout.getLayoutParams();
+					rl.addRule(RelativeLayout.RIGHT_OF, R.id.in_meeting_menu_layout);
+					mVideoLayout.setLayoutParams(rl);
+					adjustLayout();
+				}
+				
+				public void requestFillParent(View v) {
+					
+				}
+				
+				public void requestRestore(View v) {
+					
+				}
+				
+			});
+			
+			
+			
 			mVideoLayoutMain.addView(mDocContainer, lp);
 
 			mDocContainer.bringToFront();
