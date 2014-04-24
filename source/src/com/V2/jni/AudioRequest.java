@@ -49,8 +49,10 @@ public class AudioRequest {
 
 	public static synchronized AudioRequest getInstance() {
 		if (mAudioRequest == null) {
-			throw new RuntimeException(
-					" AudioRequest is null do getInstance(Context context) first");
+			mAudioRequest = new AudioRequest(null);
+			if (!mAudioRequest.initialize(mAudioRequest)) {
+				Log.e("AudioRequest", "can't initialize AudioRequest ");
+			}
 		}
 		return mAudioRequest;
 	}

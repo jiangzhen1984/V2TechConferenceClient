@@ -119,12 +119,6 @@ public class JNIService extends Service {
 				}
 			}
 		}
-		//FIXME should optimze code
-		System.loadLibrary("event");
-		System.loadLibrary("udt");
-		System.loadLibrary("v2vi");
-		System.loadLibrary("v2ve");
-		System.loadLibrary("v2client");
 		
 		mCallbackHandler = new JNICallbackHandler(callback.getLooper());
 

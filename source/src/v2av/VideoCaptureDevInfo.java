@@ -93,7 +93,8 @@ public class VideoCaptureDevInfo
     		s_self = new VideoCaptureDevInfo();
     		if (s_self.Init() != 0)
     		{
-    			s_self = null;
+    			// Even through doesn't initialize camera successfully, we still create object
+    			//s_self = null;
     			Log.d(TAG, "Failed to create VideoCaptureDevInfo.");
     		}
     	}

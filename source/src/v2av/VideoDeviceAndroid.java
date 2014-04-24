@@ -10,6 +10,9 @@ public class VideoDeviceAndroid
 	
 	private String GetVideoDevInfo()
 	{
+		if (mCapDevInfo == null) {
+			mCapDevInfo = VideoCaptureDevInfo.CreateVideoCaptureDevInfo();
+		}
 		if (mCapDevInfo.deviceList == null) {
 			mCapDevInfo.deviceList =  new ArrayList<VideoCaptureDevice>();
 		}
