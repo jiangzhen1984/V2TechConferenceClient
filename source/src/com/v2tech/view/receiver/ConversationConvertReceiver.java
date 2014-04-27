@@ -9,17 +9,18 @@ import android.database.Cursor;
 import android.net.Uri;
 
 import com.v2tech.db.ContentDescriptor;
-import com.v2tech.logic.GlobalHolder;
-import com.v2tech.logic.Group;
-import com.v2tech.logic.Group.GroupType;
-import com.v2tech.logic.User;
-import com.v2tech.logic.VMessage;
+import com.v2tech.service.GlobalHolder;
 import com.v2tech.util.V2Log;
 import com.v2tech.view.JNIService;
 import com.v2tech.view.PublicIntent;
-import com.v2tech.view.vo.ContactConversation;
-import com.v2tech.view.vo.Conversation;
-import com.v2tech.view.vo.CrowdConversation;
+import com.v2tech.vo.ConferenceConversation;
+import com.v2tech.vo.ContactConversation;
+import com.v2tech.vo.Conversation;
+import com.v2tech.vo.CrowdConversation;
+import com.v2tech.vo.Group;
+import com.v2tech.vo.User;
+import com.v2tech.vo.VMessage;
+import com.v2tech.vo.Group.GroupType;
 
 public class ConversationConvertReceiver extends BroadcastReceiver {
 
@@ -50,7 +51,7 @@ public class ConversationConvertReceiver extends BroadcastReceiver {
 			saveCOnversationStatusToDB(extId, type, noti);
 
 			Conversation cv = GlobalHolder.getInstance()
-					.findConversationByType(Conversation.TYPE_CONTACT, extId);
+					.findConversationByType(type, extId);
 			if (cv != null) {
 				cv.setNotiFlag(noti ? Conversation.NOTIFICATION
 						: Conversation.NONE);
@@ -61,6 +62,24 @@ public class ConversationConvertReceiver extends BroadcastReceiver {
 			i.putExtras(intent.getExtras());
 			mContext.sendBroadcast(i);
 
+		} else if (JNIService.JNI_BROADCAST_CONFERENCE_INVATITION.equals(action)) {
+			long gid = intent.getLongExtra("gid", 0);
+			Group g  = GlobalHolder.getInstance().findGroupById(gid);
+			Conversation cv = GlobalHolder.getInstance()
+					.findConversationByType(Conversation.TYPE_CONFERNECE, gid);
+			if (cv == null) {
+				cv = new ConferenceConversation(g);
+				GlobalHolder.getInstance().addConversation(cv);
+			}
+			
+			cv.setNotiFlag(Conversation.NOTIFICATION);
+			
+			Intent i = new Intent(PublicIntent.UPDATE_CONVERSATION);
+			i.addCategory(PublicIntent.DEFAULT_CATEGORY);
+			i.putExtra("extId", gid);
+			i.putExtra("type", Conversation.TYPE_CONFERNECE);
+			i.putExtra("noti", true);
+			mContext.sendBroadcast(i);
 		}
 	}
 
@@ -109,6 +128,7 @@ public class ConversationConvertReceiver extends BroadcastReceiver {
 			GlobalHolder.getInstance().addConversation(cov);
 		}
 		
+		//FIXME optimize code
 		Intent i = new Intent(PublicIntent.UPDATE_CONVERSATION);
 		i.addCategory(PublicIntent.DEFAULT_CATEGORY);
 		i.putExtra("extId", gid);

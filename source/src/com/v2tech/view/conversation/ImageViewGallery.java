@@ -17,9 +17,9 @@ import android.widget.Toast;
 
 import com.v2tech.R;
 import com.v2tech.db.ContentDescriptor;
-import com.v2tech.logic.User;
-import com.v2tech.logic.VImageMessage;
-import com.v2tech.logic.VMessage;
+import com.v2tech.vo.User;
+import com.v2tech.vo.VImageMessage;
+import com.v2tech.vo.VMessage;
 
 public class ImageViewGallery extends FragmentActivity {
 

@@ -8,15 +8,19 @@ import android.os.Message;
 
 import com.V2.jni.WBRequest;
 import com.V2.jni.WBRequestCallback;
-import com.v2tech.logic.GlobalHolder;
-import com.v2tech.logic.Group;
-import com.v2tech.logic.Group.GroupType;
-import com.v2tech.logic.Registrant;
-import com.v2tech.logic.User;
 import com.v2tech.util.XmlParser;
-import com.v2tech.view.vo.V2Doc;
-import com.v2tech.view.vo.V2ImageDoc;
+import com.v2tech.vo.Group;
+import com.v2tech.vo.Group.GroupType;
+import com.v2tech.vo.User;
+import com.v2tech.vo.V2Doc;
+import com.v2tech.vo.V2ImageDoc;
+import com.v2tech.vo.V2ShapeMeta;
 
+/**
+ * FIXME optimize register notification
+ * @author jiangzhen
+ *
+ */
 public class DocumentService extends AbstractHandler {
 
 	private WBRequestCallbackCB cb;
@@ -120,6 +124,24 @@ public class DocumentService extends AbstractHandler {
 			if (r.getHandler() == h && r.getWhat() == what
 					&& r.getObject() == obj) {
 				docClosedNotificatorHodler.remove(r);
+				return;
+			}
+		}
+	}
+	
+	
+	
+	private List<Registrant> pageCanvasUpdateNotificatorHodler = new ArrayList<Registrant>();
+
+	public void registerPageCanvasUpdateNotification(Handler h, int what, Object obj) {
+		pageCanvasUpdateNotificatorHodler.add(new Registrant(h, what, obj));
+	}
+
+	public void unRegisterPageCanvasUpdateNotification(Handler h, int what, Object obj) {
+		for (Registrant r : pageCanvasUpdateNotificatorHodler) {
+			if (r.getHandler() == h && r.getWhat() == what
+					&& r.getObject() == obj) {
+				pageCanvasUpdateNotificatorHodler.remove(r);
 				return;
 			}
 		}
@@ -229,6 +251,42 @@ public class DocumentService extends AbstractHandler {
 
 			}
 		}
+
+		@Override
+		public void OnRecvAddWBoardDataCallback(String szWBoardID, int nPageID,
+				String szDataID, String szData) {
+			for (Registrant r : pageCanvasUpdateNotificatorHodler) {
+				if (r.getHandler() != null) {
+					Message m = Message.obtain();
+					m.what =  r.getWhat();
+					V2ShapeMeta meta = XmlParser.parseV2ShapeMetaSingle(szData);
+					meta.setDocId(szWBoardID);
+					meta.setPageNo(nPageID);
+					m.obj = new AsyncResult(r.getObject(), meta);
+					r.getHandler().sendMessage(m);
+				}
+
+			}
+		}
+
+		@Override
+		public void OnRecvAppendWBoardDataCallback(String szWBoardID,
+				int nPageID, String szDataID, String szData) {
+			for (Registrant r : pageCanvasUpdateNotificatorHodler) {
+				if (r.getHandler() != null) {
+					Message m = Message.obtain();
+					m.what =  r.getWhat();
+					V2ShapeMeta meta = XmlParser.parseV2ShapeMetaSingle(szData);
+					meta.setDocId(szWBoardID);
+					meta.setPageNo(nPageID);
+					m.obj = new AsyncResult(r.getObject(), meta);
+					r.getHandler().sendMessage(m);
+				}
+
+			}
+		}
+		
+		
 		
 		
 		

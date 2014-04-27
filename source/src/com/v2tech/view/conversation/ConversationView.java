@@ -36,16 +36,16 @@ import android.widget.Toast;
 
 import com.v2tech.R;
 import com.v2tech.db.ContentDescriptor;
-import com.v2tech.logic.GlobalHolder;
-import com.v2tech.logic.User;
-import com.v2tech.logic.VImageMessage;
-import com.v2tech.logic.VMessage;
 import com.v2tech.service.ChatService;
+import com.v2tech.service.GlobalHolder;
 import com.v2tech.view.JNIService;
 import com.v2tech.view.PublicIntent;
 import com.v2tech.view.cus.ItemScrollView;
 import com.v2tech.view.cus.ScrollViewListener;
-import com.v2tech.view.vo.Conversation;
+import com.v2tech.vo.Conversation;
+import com.v2tech.vo.User;
+import com.v2tech.vo.VImageMessage;
+import com.v2tech.vo.VMessage;
 
 public class ConversationView extends Activity {
 
@@ -219,6 +219,8 @@ public class ConversationView extends Activity {
 		if (mCurrentConv != null) {
 			notificateConversationUpdate(null, null);
 		}
+		//Start animation
+		this.overridePendingTransition(R.animator.nonam_scale_center_0_100, R.animator.nonam_scale_null);
 	}
 
 	@Override
@@ -257,6 +259,14 @@ public class ConversationView extends Activity {
 		super.onStop();
 		isStopped = true;
 	}
+	
+	
+
+	@Override
+	public void finish() {
+		super.finish();
+		this.overridePendingTransition(R.animator.nonam_scale_null, R.animator.nonam_scale_center_100_0);
+	}
 
 	@Override
 	protected void onDestroy() {
@@ -264,7 +274,6 @@ public class ConversationView extends Activity {
 		this.unregisterReceiver(receiver);
 		cleanCache();
 		GlobalHolder.getInstance().CURRENT_CONVERSATION = null;
-		;
 	}
 
 	private void scrollToBottom() {

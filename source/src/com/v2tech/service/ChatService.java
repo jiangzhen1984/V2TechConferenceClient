@@ -8,10 +8,10 @@ import android.os.Message;
 import com.V2.jni.AudioRequest;
 import com.V2.jni.AudioRequestCallback;
 import com.V2.jni.ChatRequest;
-import com.v2tech.logic.UserAudioDevice;
-import com.v2tech.logic.VImageMessage;
-import com.v2tech.logic.VMessage;
 import com.v2tech.util.V2Log;
+import com.v2tech.vo.UserAudioDevice;
+import com.v2tech.vo.VImageMessage;
+import com.v2tech.vo.VMessage;
 
 public class ChatService extends Handler {
 

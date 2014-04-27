@@ -14,12 +14,12 @@ import android.widget.TextView;
 
 import com.v2tech.R;
 import com.v2tech.db.ContentDescriptor;
-import com.v2tech.logic.GlobalHolder;
-import com.v2tech.logic.VMessage;
+import com.v2tech.service.GlobalHolder;
 import com.v2tech.view.PublicIntent;
-import com.v2tech.view.vo.ConferenceConversation;
-import com.v2tech.view.vo.ContactConversation;
-import com.v2tech.view.vo.Conversation;
+import com.v2tech.vo.ConferenceConversation;
+import com.v2tech.vo.ContactConversation;
+import com.v2tech.vo.Conversation;
+import com.v2tech.vo.VMessage;
 
 public class GroupLayout extends LinearLayout {
 

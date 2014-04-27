@@ -4,16 +4,13 @@ import java.util.List;
 import java.util.Vector;
 
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.ServiceConnection;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.IBinder;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
@@ -29,19 +26,16 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.v2tech.R;
-import com.v2tech.logic.GlobalHolder;
+import com.v2tech.service.GlobalHolder;
 import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.Notificator;
 import com.v2tech.util.V2Log;
-import com.v2tech.view.JNIService.LocalBinder;
-import com.v2tech.view.vo.Conversation;
+import com.v2tech.vo.Conversation;
 
 public class MainActivity extends FragmentActivity implements
 		TabHost.OnTabChangeListener, ViewPager.OnPageChangeListener {
 
 	private Context mContext;
-	private JNIService mService;
-	private boolean isBound = false;
 	private boolean exitedFlag = false;
 
 	private TabHost mTabHost;
@@ -70,9 +64,7 @@ public class MainActivity extends FragmentActivity implements
 
 	private LocalReceiver receiver = new LocalReceiver();
 
-	public JNIService getService() {
-		return mService;
-	}
+	
 
 	/**
 	 * A simple factory that returns dummy views to the Tabhost
@@ -129,6 +121,9 @@ public class MainActivity extends FragmentActivity implements
 		this.intialiseViewPager();
 		initDPI();
 		initReceiver();
+		//Start animation
+		this.overridePendingTransition(R.animator.left_in, R.animator.left_out);
+		V2Log.d(" main onStart " );
 	}
 
 	/**
@@ -232,16 +227,12 @@ public class MainActivity extends FragmentActivity implements
 	@Override
 	protected void onStart() {
 		super.onStart();
-		isBound = bindService(new Intent(this, JNIService.class), mConnection,
-				Context.BIND_AUTO_CREATE);
+		V2Log.d(" main onStart " );
 	}
 
 	@Override
 	protected void onStop() {
 		super.onStop();
-		if (isBound) {
-			unbindService(mConnection);
-		}
 	}
 
 	@Override
@@ -251,7 +242,6 @@ public class MainActivity extends FragmentActivity implements
 
 	public void requestQuit() {
 		if (exitedFlag) {
-			unbindService(mConnection);
 			this.getApplicationContext().stopService(
 					new Intent(this.getApplicationContext(), JNIService.class));
 			
@@ -281,6 +271,7 @@ public class MainActivity extends FragmentActivity implements
 	 */
 	public void onTabChanged(String tag) {
 		int pos = this.mTabHost.getCurrentTab();
+		V2Log.d(" onTabChanged " +"  "+ pos);
 		this.mViewPager.setCurrentItem(pos);
 
 	}
@@ -344,22 +335,6 @@ public class MainActivity extends FragmentActivity implements
 		}
 	}
 
-	private ServiceConnection mConnection = new ServiceConnection() {
-
-		@Override
-		public void onServiceConnected(ComponentName className, IBinder service) {
-			LocalBinder binder = (LocalBinder) service;
-			mService = binder.getService();
-			isBound = true;
-			mContext.sendBroadcast(new Intent(SERVICE_BOUNDED_EVENT));
-		}
-
-		@Override
-		public void onServiceDisconnected(ComponentName arg0) {
-			isBound = false;
-			mContext.sendBroadcast(new Intent(SERVICE_UNBOUNDED_EVENT));
-		}
-	};
 
 	class LocalReceiver extends BroadcastReceiver {
 		@Override

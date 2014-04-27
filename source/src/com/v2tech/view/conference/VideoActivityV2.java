@@ -43,38 +43,40 @@ import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.LinearLayout.LayoutParams;
 import android.widget.PopupWindow;
+import android.widget.PopupWindow.OnDismissListener;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.LinearLayout.LayoutParams;
-import android.widget.PopupWindow.OnDismissListener;
 
 import com.v2tech.R;
-import com.v2tech.logic.Attendee;
-import com.v2tech.logic.CameraConfiguration;
-import com.v2tech.logic.Conference;
-import com.v2tech.logic.ConferencePermission;
-import com.v2tech.logic.GlobalHolder;
-import com.v2tech.logic.Group;
-import com.v2tech.logic.Group.GroupType;
-import com.v2tech.logic.Registrant;
-import com.v2tech.logic.User;
-import com.v2tech.logic.UserDeviceConfig;
-import com.v2tech.logic.VMessage;
-import com.v2tech.logic.jni.JNIResponse;
-import com.v2tech.logic.jni.RequestEnterConfResponse;
 import com.v2tech.service.ChatService;
 import com.v2tech.service.ConferenceService;
 import com.v2tech.service.DocumentService;
+import com.v2tech.service.GlobalHolder;
+import com.v2tech.service.Registrant;
+import com.v2tech.service.jni.JNIResponse;
+import com.v2tech.service.jni.RequestEnterConfResponse;
 import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.V2Log;
 import com.v2tech.view.JNIService;
 import com.v2tech.view.PublicIntent;
 import com.v2tech.view.conference.VideoDocLayout.DocListener;
 import com.v2tech.view.conference.VideoMsgChattingLayout.ChattingListener;
-import com.v2tech.view.vo.V2Doc;
-import com.v2tech.view.vo.V2Doc.Page;
+import com.v2tech.vo.Attendee;
+import com.v2tech.vo.CameraConfiguration;
+import com.v2tech.vo.Conference;
+import com.v2tech.vo.ConferencePermission;
+import com.v2tech.vo.Conversation;
+import com.v2tech.vo.Group;
+import com.v2tech.vo.Group.GroupType;
+import com.v2tech.vo.User;
+import com.v2tech.vo.UserDeviceConfig;
+import com.v2tech.vo.V2Doc;
+import com.v2tech.vo.V2Doc.Page;
+import com.v2tech.vo.V2ShapeMeta;
+import com.v2tech.vo.VMessage;
 
 public class VideoActivityV2 extends Activity {
 
@@ -97,6 +99,7 @@ public class VideoActivityV2 extends Activity {
 	private static final int DOC_PAGE_ADDED_NOTIFICATION = 53;
 	private static final int DOC_DOWNLOADED_NOTIFICATION = 54;
 	private static final int DOC_CLOSED_NOTIFICATION = 55;
+	private static final int DOC_PAGE_CANVAS_NOTIFICATION = 56;
 
 	public static final String JNI_EVENT_VIDEO_CATEGORY = "com.v2tech.conf_video_event";
 	public static final String JNI_EVENT_VIDEO_CATEGORY_OPEN_VIDEO_EVENT_ACTION = "com.v2tech.conf_video_event.open_video_event";
@@ -203,6 +206,14 @@ public class VideoActivityV2 extends Activity {
 				DOC_CLOSED_NOTIFICATION, null);
 		ds.registerDocPageAddedNotification(mVideoHandler,
 				DOC_PAGE_ADDED_NOTIFICATION, null);
+		ds.registerPageCanvasUpdateNotification(mVideoHandler,
+				DOC_PAGE_CANVAS_NOTIFICATION, null);
+
+		// Update main activity tab notificator
+		notificateConversationUpdate();
+		// Start animation
+		this.overridePendingTransition(R.animator.nonam_scale_center_0_100,
+				R.animator.nonam_scale_null);
 	}
 
 	private OnClickListener mMenuButtonListener = new OnClickListener() {
@@ -210,10 +221,9 @@ public class VideoActivityV2 extends Activity {
 		@Override
 		public void onClick(View view) {
 			if (mMenuButtonContainer.getVisibility() == View.GONE) {
-				Animation tabBlockHolderAnimation = AnimationUtils
-						.loadAnimation(mContext, R.animator.right_in);
-				tabBlockHolderAnimation.setDuration(1000);
-				mMenuButtonContainer.startAnimation(tabBlockHolderAnimation);
+				Animation animation = AnimationUtils.loadAnimation(mContext,
+						R.animator.nonam_scale_y_0_100);
+				mMenuButtonContainer.startAnimation(animation);
 				mMenuButtonContainer.setVisibility(View.VISIBLE);
 
 			} else {
@@ -221,10 +231,10 @@ public class VideoActivityV2 extends Activity {
 				showOrHidenAttendeeContainer(View.GONE);
 				showOrHidenMsgContainer(View.GONE);
 				showOrHidenDocContainer(View.GONE);
-				Animation tabBlockHolderAnimation = AnimationUtils
-						.loadAnimation(mContext, R.animator.left_out);
-				tabBlockHolderAnimation.setDuration(1000);
-				mMenuButtonContainer.startAnimation(tabBlockHolderAnimation);
+				Animation animation = AnimationUtils.loadAnimation(mContext,
+						R.animator.nonam_scale_y_100_0);
+				animation.setDuration(1000);
+				mMenuButtonContainer.startAnimation(animation);
 				mMenuButtonContainer.setVisibility(View.GONE);
 			}
 		}
@@ -285,15 +295,15 @@ public class VideoActivityV2 extends Activity {
 				DisplayMetrics dm = new DisplayMetrics();
 				getWindowManager().getDefaultDisplay().getMetrics(dm);
 				int height = 300;
-				//Cacul
+				// Cacul
 				if (GlobalConfig.GLOBAL_LAYOUT_SIZE == Configuration.SCREENLAYOUT_SIZE_NORMAL) {
-					height = (int)(dm.heightPixels * 0.6);
+					height = (int) (dm.heightPixels * 0.6);
 				} else {
-					height = (int)(dm.heightPixels * 0.4);
+					height = (int) (dm.heightPixels * 0.4);
 				}
-				// set 
+				// set
 				mSettingWindow = new PopupWindow(view,
-						LayoutParams.WRAP_CONTENT,height);
+						LayoutParams.WRAP_CONTENT, height);
 				mSettingWindow.setBackgroundDrawable(new ColorDrawable(
 						Color.TRANSPARENT));
 				mSettingWindow.setFocusable(true);
@@ -307,12 +317,16 @@ public class VideoActivityV2 extends Activity {
 
 				});
 
-				/*DisplayMetrics m = new DisplayMetrics();
-				getWindowManager().getDefaultDisplay().getMetrics(m);
-				v.measure(m.widthPixels, m.heightPixels);*/
-				mSettingWindow.getContentView()
+				/*
+				 * DisplayMetrics m = new DisplayMetrics();
+				 * getWindowManager().getDefaultDisplay().getMetrics(m);
+				 * v.measure(m.widthPixels, m.heightPixels);
+				 */
+				mSettingWindow
+						.getContentView()
 						.findViewById(R.id.camera_setting_window_arrow)
-						.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
+						.measure(View.MeasureSpec.UNSPECIFIED,
+								View.MeasureSpec.UNSPECIFIED);
 			}
 
 			int[] pos = new int[2];
@@ -326,8 +340,9 @@ public class VideoActivityV2 extends Activity {
 			RelativeLayout.LayoutParams rl = (RelativeLayout.LayoutParams) arrow
 					.getLayoutParams();
 			pos[0] -= (rl.leftMargin + arrow.getMeasuredWidth() / 2);
-		
-			mSettingWindow.setAnimationStyle(R.style.InMeetingCameraSettingAnim);
+
+			mSettingWindow
+					.setAnimationStyle(R.style.InMeetingCameraSettingAnim);
 			mSettingWindow
 					.showAtLocation(v, Gravity.NO_GRAVITY, pos[0], pos[1]);
 		}
@@ -407,12 +422,22 @@ public class VideoActivityV2 extends Activity {
 		mGroupNameTV.setText(g.getName());
 	}
 
+	private void notificateConversationUpdate() {
+		Intent i = new Intent(PublicIntent.REQUEST_UPDATE_CONVERSATION);
+		i.addCategory(PublicIntent.DEFAULT_CATEGORY);
+		i.putExtra("type", Conversation.TYPE_CONFERNECE);
+		i.putExtra("extId", this.mGroupId);
+		i.putExtra("noti", false);
+		mContext.sendBroadcast(i);
+	}
+
 	private void showOrHidenMsgContainer(int visible) {
 		if (mMessageContainer == null) {
 			mMessageContainer = new VideoMsgChattingLayout(this);
 			mMessageContainer.setId(0x7ffff000);
-			RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams((int)(
-					mVideoLayout.getMeasuredWidth() * 0.4), mVideoLayout.getMeasuredHeight());
+			RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
+					(int) (mVideoLayout.getMeasuredWidth() * 0.4),
+					mVideoLayout.getMeasuredHeight());
 			lp.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
 			lp.addRule(RelativeLayout.RIGHT_OF, mMenuLine.getId());
 			lp.addRule(RelativeLayout.BELOW, mVideoLine.getId());
@@ -465,29 +490,31 @@ public class VideoActivityV2 extends Activity {
 		if (mAttendeeContainer == null) {
 			mAttendeeContainer = new VideoAttendeeListLayout(this);
 			mAttendeeContainer.setId(0x7ffff001);
-			Group conf = GlobalHolder.getInstance().getGroupById(
-					Group.GroupType.CONFERENCE, this.mGroupId);
+			Group conf = GlobalHolder.getInstance()
+					.findGroupById(this.mGroupId);
 			if (conf != null) {
 				List<User> l = new ArrayList<User>(conf.getUsers());
 				Set<Attendee> al = new HashSet<Attendee>();
-	
+
 				for (Attendee t : this.mAttendeeList) {
 					al.add(t);
 				}
-	
+
 				for (User u : l) {
 					al.add(new Attendee(u));
 				}
 				V2Log.i("Conference attendee size: " + al.size() + "  "
-						+ conf.getmGId() + "  " + conf.getName());
+						+ conf.getmGId() + "  " + conf.getName() + "  group:"
+						+ conf);
 				mAttendeeContainer.setAttendsList(al);
 			} else {
-				V2Log.i("Can not find conference in GlobalHolder: "+this.mGroupId);
+				V2Log.i("Can not find conference in GlobalHolder: "
+						+ this.mGroupId);
 			}
-			
+
 			RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
-					(int)(
-							mVideoLayout.getMeasuredWidth() * 0.4), mVideoLayout.getMeasuredHeight());
+					(int) (mVideoLayout.getMeasuredWidth() * 0.4),
+					mVideoLayout.getMeasuredHeight());
 			lp.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
 			lp.addRule(RelativeLayout.RIGHT_OF, mMenuLine.getId());
 			lp.addRule(RelativeLayout.BELOW, mVideoLine.getId());
@@ -545,57 +572,59 @@ public class VideoActivityV2 extends Activity {
 			mDocContainer = new VideoDocLayout(this);
 			mDocContainer.setId(0x7ffff002);
 			RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
-					(int)(
-							mVideoLayout.getMeasuredWidth() * 0.5), mVideoLayout.getMeasuredHeight());
+					(int) (mVideoLayout.getMeasuredWidth() * 0.5),
+					mVideoLayout.getMeasuredHeight());
 			lp.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
 			lp.addRule(RelativeLayout.RIGHT_OF, mMenuLine.getId());
 			lp.addRule(RelativeLayout.BELOW, mVideoLine.getId());
-			
+
 			mDocContainer.setListener(new DocListener() {
 
 				@Override
 				public void updateDoc(V2Doc doc, Page p) {
-					
+
 				}
 
 				@Override
 				public void requestFixedLayout(View v) {
-//					RelativeLayout.LayoutParams rl = (RelativeLayout.LayoutParams)mVideoLayout.getLayoutParams();
-//					int[] location  = new int[2];
-//					v.getLocationInWindow(location);
-//					DisplayMetrics dm = new DisplayMetrics();
-//					getWindowManager().getDefaultDisplay().getMetrics(dm);
-//					rl.width = dm.widthPixels - (location[0] + v.getMeasuredWidth());
-//					mVideoLayout.setLayoutParams(rl);
-//					adjustLayout();
+					// RelativeLayout.LayoutParams rl =
+					// (RelativeLayout.LayoutParams)mVideoLayout.getLayoutParams();
+					// int[] location = new int[2];
+					// v.getLocationInWindow(location);
+					// DisplayMetrics dm = new DisplayMetrics();
+					// getWindowManager().getDefaultDisplay().getMetrics(dm);
+					// rl.width = dm.widthPixels - (location[0] +
+					// v.getMeasuredWidth());
+					// mVideoLayout.setLayoutParams(rl);
+					// adjustLayout();
 				}
 
 				@Override
 				public void requestFloatLayout(View v) {
-//					RelativeLayout.LayoutParams rl = (RelativeLayout.LayoutParams)mVideoLayout.getLayoutParams();
-//					rl.addRule(RelativeLayout.RIGHT_OF, R.id.in_meeting_menu_layout);
-//					int[] location  = new int[2];
-//					v.getLocationInWindow(location);
-//					DisplayMetrics dm = new DisplayMetrics();
-//					getWindowManager().getDefaultDisplay().getMetrics(dm);
-//					rl.width = dm.widthPixels - location[0];
-//					mVideoLayout.setLayoutParams(rl);
-//					
-//					adjustLayout();
+					// RelativeLayout.LayoutParams rl =
+					// (RelativeLayout.LayoutParams)mVideoLayout.getLayoutParams();
+					// rl.addRule(RelativeLayout.RIGHT_OF,
+					// R.id.in_meeting_menu_layout);
+					// int[] location = new int[2];
+					// v.getLocationInWindow(location);
+					// DisplayMetrics dm = new DisplayMetrics();
+					// getWindowManager().getDefaultDisplay().getMetrics(dm);
+					// rl.width = dm.widthPixels - location[0];
+					// mVideoLayout.setLayoutParams(rl);
+					//
+					// adjustLayout();
 				}
-				
+
 				public void requestFillParent(View v) {
-					
+
 				}
-				
+
 				public void requestRestore(View v) {
-					
+
 				}
-				
+
 			});
-			
-			
-			
+
 			mVideoLayoutMain.addView(mDocContainer, lp);
 
 			mDocContainer.bringToFront();
@@ -648,14 +677,13 @@ public class VideoActivityV2 extends Activity {
 				break;
 			}
 		}
-		
 
 		if (selfInAttendeeList == false) {
 			atd = new Attendee(GlobalHolder.getInstance().getCurrentUser(),
 					true, false);
 			mAttendeeList.add(atd);
 		}
-		
+
 		if (atd == null) {
 			V2Log.e("Didn't find self object in  mAttendeeList");
 			return;
@@ -701,7 +729,7 @@ public class VideoActivityV2 extends Activity {
 
 		Rect outR = new Rect();
 		mVideoLayout.getDrawingRect(outR);
-		int containerW =mVideoLayout.getWidth();
+		int containerW = mVideoLayout.getWidth();
 		int containerH = outR.bottom - outR.top;
 
 		int normalW = containerW / cols, normalH = normalW / 16 * 9;
@@ -782,6 +810,13 @@ public class VideoActivityV2 extends Activity {
 	}
 
 	@Override
+	public void finish() {
+		super.finish();
+		this.overridePendingTransition(R.animator.nonam_scale_null,
+				R.animator.nonam_scale_center_100_0);
+	}
+
+	@Override
 	protected void onDestroy() {
 		mContext.unregisterReceiver(mConfUserChangeReceiver);
 		super.onDestroy();
@@ -800,6 +835,8 @@ public class VideoActivityV2 extends Activity {
 				DOC_CLOSED_NOTIFICATION, null);
 		ds.unRegisterDocPageAddedNotification(mVideoHandler,
 				DOC_PAGE_ADDED_NOTIFICATION, null);
+		ds.unRegisterPageCanvasUpdateNotification(mVideoHandler,
+				DOC_PAGE_CANVAS_NOTIFICATION, null);
 		if (mDocContainer != null) {
 			// clean document bitmap cache
 			mDocContainer.cleanCache();
@@ -1259,8 +1296,23 @@ public class VideoActivityV2 extends Activity {
 				synchronized (mDocs) {
 					removedDoc = mDocs.get(removedDoc.getId());
 					if (removedDoc != null) {
-						mDocContainer.closeDoc(removedDoc);
+						if (mDocContainer != null) {
+							mDocContainer.closeDoc(removedDoc);
+						}
 						mDocs.remove(removedDoc.getId());
+					}
+				}
+				break;
+				
+			case DOC_PAGE_CANVAS_NOTIFICATION:
+				V2ShapeMeta shape = (V2ShapeMeta)msg.obj;
+				synchronized(mDocs) {
+					V2Doc ca = mDocs.get(shape.getDocId());
+					V2Doc.Page caVp = ca.findPage(shape.getPageNo());
+					caVp.addMeta(shape);
+					if (mDocContainer != null
+							&& caVp.getDocId().equals(mCurrentActivateDoc.getId())
+							&& caVp.getNo() == mCurrentActivateDoc.getActivatePageNo()) {
 					}
 				}
 				break;

@@ -34,23 +34,23 @@ import com.V2.jni.VideoRequest;
 import com.V2.jni.VideoRequestCallback;
 import com.v2tech.R;
 import com.v2tech.db.ContentDescriptor;
-import com.v2tech.logic.ConferenceGroup;
-import com.v2tech.logic.GlobalHolder;
-import com.v2tech.logic.Group;
-import com.v2tech.logic.Group.GroupType;
-import com.v2tech.logic.NetworkStateCode;
-import com.v2tech.logic.User;
-import com.v2tech.logic.UserDeviceConfig;
-import com.v2tech.logic.VImageMessage;
-import com.v2tech.logic.VMessage;
-import com.v2tech.logic.VMessage.MessageType;
+import com.v2tech.service.GlobalHolder;
 import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.Notificator;
 import com.v2tech.util.V2Log;
 import com.v2tech.util.XmlParser;
 import com.v2tech.view.conference.VideoActivityV2;
-import com.v2tech.view.vo.Conversation;
-import com.v2tech.view.vo.CrowdConversation;
+import com.v2tech.vo.ConferenceGroup;
+import com.v2tech.vo.Conversation;
+import com.v2tech.vo.CrowdConversation;
+import com.v2tech.vo.Group;
+import com.v2tech.vo.NetworkStateCode;
+import com.v2tech.vo.User;
+import com.v2tech.vo.UserDeviceConfig;
+import com.v2tech.vo.VImageMessage;
+import com.v2tech.vo.VMessage;
+import com.v2tech.vo.Group.GroupType;
+import com.v2tech.vo.VMessage.MessageType;
 
 /**
  * This service is used to wrap JNI call.<br>
@@ -283,6 +283,7 @@ public class JNIService extends Service {
 				GroupUserInfoOrig go = (GroupUserInfoOrig) msg.obj;
 				if (go != null && go.xml != null) {
 					List<User> lu = User.fromXml(go.xml);
+					Group g = GlobalHolder.getInstance().findGroupById(go.gId);
 					for (User tu : lu) {
 						User.Status us = GlobalHolder.getInstance()
 								.getOnlineUserStatus(tu.getmUserId());
@@ -296,9 +297,9 @@ public class JNIService extends Service {
 							// Update logged user object.
 							GlobalHolder.getInstance().setCurrentUser(existU);
 						}
-						GlobalHolder.getInstance().addUserToGroup(existU,
-								go.gId);
+						g.addUserToGroup(existU);
 					}
+					V2Log.w("  group:" +go.gId +"  user size:" + lu.size()  +"  "+g);
 					Intent i = new Intent(
 							JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION);
 					i.addCategory(JNI_BROADCAST_CATEGROY);
@@ -565,6 +566,7 @@ public class JNIService extends Service {
 			if (gType == GroupType.CONFERENCE) {
 				Group g = ConferenceGroup
 						.parseConferenceGroupFromXML(groupInfo);
+				GroupRequest.getInstance().getGroupInfo(GroupType.CONFERENCE.intValue(), g.getmGId());
 				String name = "";
 				int pos = -1;
 				if (userInfo != null && (pos = userInfo.indexOf("id='")) != -1) {

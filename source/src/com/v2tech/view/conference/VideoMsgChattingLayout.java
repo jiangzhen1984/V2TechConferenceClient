@@ -10,8 +10,8 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.v2tech.R;
-import com.v2tech.logic.GlobalHolder;
-import com.v2tech.logic.VMessage;
+import com.v2tech.service.GlobalHolder;
+import com.v2tech.vo.VMessage;
 
 public class VideoMsgChattingLayout extends LinearLayout {
 

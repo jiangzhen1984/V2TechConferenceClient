@@ -7,10 +7,8 @@ import com.V2.jni.ImRequest;
 import com.V2.jni.ImRequestCallback;
 import com.V2.jni.V2ClientType;
 import com.V2.jni.V2GlobalEnum;
-import com.v2tech.logic.GlobalHolder;
-import com.v2tech.logic.Registrant;
-import com.v2tech.logic.User;
-import com.v2tech.logic.jni.RequestLogInResponse;
+import com.v2tech.service.jni.RequestLogInResponse;
+import com.v2tech.vo.User;
 
 public class UserService extends AbstractHandler {
 

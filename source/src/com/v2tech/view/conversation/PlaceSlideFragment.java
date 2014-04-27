@@ -10,8 +10,8 @@ import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 
 import com.v2tech.R;
-import com.v2tech.logic.VImageMessage;
 import com.v2tech.view.cus.TouchImageView;
+import com.v2tech.vo.VImageMessage;
 
 public class PlaceSlideFragment extends Fragment {
 

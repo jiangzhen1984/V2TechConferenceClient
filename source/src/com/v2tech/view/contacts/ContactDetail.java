@@ -28,11 +28,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.v2tech.R;
-import com.v2tech.logic.GlobalHolder;
-import com.v2tech.logic.Registrant;
-import com.v2tech.logic.User;
+import com.v2tech.service.GlobalHolder;
+import com.v2tech.service.Registrant;
 import com.v2tech.service.UserService;
 import com.v2tech.view.PublicIntent;
+import com.v2tech.vo.User;
 
 public class ContactDetail extends Activity implements OnTouchListener {
 
@@ -95,6 +95,8 @@ public class ContactDetail extends Activity implements OnTouchListener {
 		if (v != null) {
 			v.setOnTouchListener(this);
 		}
+		//Start animation
+		this.overridePendingTransition(R.animator.nonam_scale_center_0_100, R.animator.nonam_scale_null);
 	}
 
 	@Override
@@ -118,6 +120,12 @@ public class ContactDetail extends Activity implements OnTouchListener {
 		if(check()) {
 			super.onBackPressed();
 		}
+	}
+	
+	@Override
+	public void finish() {
+		super.finish();
+		this.overridePendingTransition(R.animator.nonam_scale_null, R.animator.nonam_scale_center_100_0);
 	}
 
 	@Override

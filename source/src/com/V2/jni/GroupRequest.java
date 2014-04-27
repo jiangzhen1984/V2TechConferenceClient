@@ -1,7 +1,7 @@
 package com.V2.jni;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import android.content.Context;
 import android.util.Log;
@@ -18,7 +18,7 @@ public class GroupRequest {
 	private List<GroupRequestCallback> callbacks;
 
 	private GroupRequest(Context context) {
-		callbacks = new ArrayList<GroupRequestCallback>();
+		callbacks = new CopyOnWriteArrayList<GroupRequestCallback>();
 	};
 
 	public static synchronized GroupRequest getInstance(Context context) {
@@ -90,7 +90,7 @@ public class GroupRequest {
 	public native void moveUserToGroup(int groupType, long srcGroupID,
 			long dstGroupID, long nUserID);
 	
-	public native void getGroupInfo(int type,long userid);
+	public native void getGroupInfo(int type,long groupId);
 	
 	/**********************************************/
 

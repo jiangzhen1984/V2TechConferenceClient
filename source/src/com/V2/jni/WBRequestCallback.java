@@ -1,6 +1,7 @@
 package com.V2.jni;
 
 
+
 public interface WBRequestCallback {
 	
 	/**
@@ -29,5 +30,13 @@ public interface WBRequestCallback {
 			String szWBoardID);
 	
 	public void OnWBoardAddPageCallback(String szWBoardID, int nPageID);
+	
+	
+	
+	public void OnRecvAddWBoardDataCallback(String szWBoardID, int nPageID,
+			String szDataID, String szData);
+
+	public void OnRecvAppendWBoardDataCallback(String szWBoardID, int nPageID,
+			String szDataID, String szData);
 
 }

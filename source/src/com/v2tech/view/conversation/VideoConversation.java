@@ -6,10 +6,10 @@ import android.app.FragmentTransaction;
 import android.os.Bundle;
 
 import com.v2tech.R;
-import com.v2tech.logic.Conference;
-import com.v2tech.logic.UserDeviceConfig;
 import com.v2tech.service.ConferenceService;
-import com.v2tech.logic.GlobalHolder;
+import com.v2tech.service.GlobalHolder;
+import com.v2tech.vo.Conference;
+import com.v2tech.vo.UserDeviceConfig;
 
 public class VideoConversation extends Activity implements TurnListener,
 		VideoConversationListener {

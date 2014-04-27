@@ -3,7 +3,7 @@
     package="com.v2tech"
     android:sharedUserLabel="@string/app_name"
     android:versionCode="1"
-    android:versionName="1.3.0.29" >
+    android:versionName="1.3.0.30" >
 
     <uses-sdk
         android:minSdkVersion="11"
@@ -45,7 +45,7 @@
             android:authorities="com.v2tech.bizcom"
             android:exported="false" />
 
-        <activity android:name="com.v2tech.view.StartupActivity" >
+        <activity android:name="com.v2tech.view.StartupActivity" android:launchMode="singleTop">
               <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -72,6 +72,7 @@
         <activity
             android:name="com.v2tech.view.conference.VideoActivityV2"
             android:configChanges="orientation"
+            android:launchMode="singleTop"
             android:screenOrientation="landscape"
             android:windowSoftInputMode="adjustPan" >
            
@@ -131,7 +132,7 @@
                 <category android:name="com.v2tech.jni.broadcast" />
 
                 <action android:name="com.v2tech.request_update_conversation" />
-
+				<action android:name="com.v2tech.jni.broadcast.conference_invatition" />
                 <category android:name="com.v2tech" />
             </intent-filter>
         </receiver>

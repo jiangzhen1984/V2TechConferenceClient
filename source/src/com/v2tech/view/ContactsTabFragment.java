@@ -32,13 +32,13 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.v2tech.R;
-import com.v2tech.logic.GlobalHolder;
-import com.v2tech.logic.Group;
-import com.v2tech.logic.Group.GroupType;
-import com.v2tech.logic.User;
+import com.v2tech.service.GlobalHolder;
 import com.v2tech.util.V2Log;
 import com.v2tech.view.contacts.ContactGroupView;
 import com.v2tech.view.contacts.ContactUserView;
+import com.v2tech.vo.Group;
+import com.v2tech.vo.User;
+import com.v2tech.vo.Group.GroupType;
 
 public class ContactsTabFragment extends Fragment {
 

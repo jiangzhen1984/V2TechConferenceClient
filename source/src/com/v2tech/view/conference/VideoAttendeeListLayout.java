@@ -21,8 +21,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.v2tech.R;
-import com.v2tech.logic.Attendee;
-import com.v2tech.logic.UserDeviceConfig;
+import com.v2tech.vo.Attendee;
+import com.v2tech.vo.UserDeviceConfig;
 
 public class VideoAttendeeListLayout extends LinearLayout {
 

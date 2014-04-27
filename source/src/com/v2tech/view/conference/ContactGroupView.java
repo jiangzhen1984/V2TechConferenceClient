@@ -8,7 +8,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.v2tech.R;
-import com.v2tech.logic.Group;
+import com.v2tech.vo.Group;
 
 public class ContactGroupView extends LinearLayout {
 

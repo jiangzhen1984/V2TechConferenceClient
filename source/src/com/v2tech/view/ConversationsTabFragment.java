@@ -42,21 +42,21 @@ import android.widget.TextView;
 
 import com.v2tech.R;
 import com.v2tech.db.ContentDescriptor;
-import com.v2tech.logic.Conference;
-import com.v2tech.logic.GlobalHolder;
-import com.v2tech.logic.Group;
-import com.v2tech.logic.Group.GroupType;
-import com.v2tech.logic.NetworkStateCode;
-import com.v2tech.logic.User;
 import com.v2tech.service.ConferenceService;
+import com.v2tech.service.GlobalHolder;
 import com.v2tech.util.BitmapUtil;
 import com.v2tech.util.V2Log;
 import com.v2tech.view.conference.GroupLayout;
 import com.v2tech.view.conference.VideoActivityV2;
-import com.v2tech.view.vo.ConferenceConversation;
-import com.v2tech.view.vo.ContactConversation;
-import com.v2tech.view.vo.Conversation;
-import com.v2tech.view.vo.CrowdConversation;
+import com.v2tech.vo.Conference;
+import com.v2tech.vo.ConferenceConversation;
+import com.v2tech.vo.ContactConversation;
+import com.v2tech.vo.Conversation;
+import com.v2tech.vo.CrowdConversation;
+import com.v2tech.vo.Group;
+import com.v2tech.vo.NetworkStateCode;
+import com.v2tech.vo.User;
+import com.v2tech.vo.Group.GroupType;
 
 public class ConversationsTabFragment extends Fragment {
 
@@ -279,6 +279,10 @@ public class ConversationsTabFragment extends Fragment {
 	}
 
 	private void populateConversation(final Group g, boolean flag) {
+		//FIXME 
+		if (mConferenceList != null) {
+			mConferenceList.add(g);
+		}
 		Conversation cov = new ConferenceConversation(g);
 		final GroupLayout gp = new GroupLayout(this.getActivity(), cov);
 		gp.updateNotificator(flag);
@@ -791,6 +795,15 @@ public class ConversationsTabFragment extends Fragment {
 				if (g != null) {
 					g.setOwnerUser(GlobalHolder.getInstance().getUser(
 							g.getOwner()));
+					// check if group exist in list means:
+					// user operates exist group again
+					if (mConferenceList != null && mConferenceList.size() > 0) {
+						for (Group eg : mConferenceList) {
+							if (eg.getmGId() == g.getmGId()) {
+								return;
+							}
+						}
+					}
 					populateConversation(g, true);
 					adapter.notifyDataSetChanged();
 				} else {

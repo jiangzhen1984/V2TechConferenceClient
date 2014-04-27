@@ -13,9 +13,9 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.v2tech.R;
-import com.v2tech.logic.GlobalHolder;
-import com.v2tech.logic.User;
+import com.v2tech.service.GlobalHolder;
 import com.v2tech.view.PublicIntent;
+import com.v2tech.vo.User;
 
 public class ContactUserView extends LinearLayout {
 

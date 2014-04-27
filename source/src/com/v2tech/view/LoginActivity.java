@@ -30,11 +30,11 @@ import android.widget.Toast;
 
 import com.V2.jni.ConfigRequest;
 import com.v2tech.R;
-import com.v2tech.logic.GlobalHolder;
-import com.v2tech.logic.Registrant;
-import com.v2tech.logic.jni.JNIResponse;
-import com.v2tech.logic.jni.RequestLogInResponse;
+import com.v2tech.service.GlobalHolder;
+import com.v2tech.service.Registrant;
 import com.v2tech.service.UserService;
+import com.v2tech.service.jni.JNIResponse;
+import com.v2tech.service.jni.RequestLogInResponse;
 import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.SPUtil;
 

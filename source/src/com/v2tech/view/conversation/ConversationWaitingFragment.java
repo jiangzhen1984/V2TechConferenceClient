@@ -12,11 +12,11 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.v2tech.R;
-import com.v2tech.logic.GlobalHolder;
-import com.v2tech.logic.User;
-import com.v2tech.logic.UserAudioDevice;
 import com.v2tech.service.ChatService;
+import com.v2tech.service.GlobalHolder;
 import com.v2tech.util.V2Log;
+import com.v2tech.vo.User;
+import com.v2tech.vo.UserAudioDevice;
 
 public class ConversationWaitingFragment extends Fragment {
 

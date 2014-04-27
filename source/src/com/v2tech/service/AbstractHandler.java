@@ -4,8 +4,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.SparseArray;
 
-import com.v2tech.logic.Registrant;
-import com.v2tech.logic.jni.JNIResponse;
+import com.v2tech.service.jni.JNIResponse;
 import com.v2tech.util.V2Log;
 
 public abstract class AbstractHandler extends Handler {

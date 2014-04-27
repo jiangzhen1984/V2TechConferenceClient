@@ -12,23 +12,21 @@ import com.V2.jni.GroupRequest;
 import com.V2.jni.GroupRequestCallback;
 import com.V2.jni.VideoRequest;
 import com.V2.jni.VideoRequestCallback;
-import com.v2tech.logic.CameraConfiguration;
-import com.v2tech.logic.Conference;
-import com.v2tech.logic.ConferencePermission;
-import com.v2tech.logic.GlobalHolder;
-import com.v2tech.logic.Group;
-import com.v2tech.logic.Registrant;
-import com.v2tech.logic.User;
-import com.v2tech.logic.UserDeviceConfig;
-import com.v2tech.logic.jni.JNIResponse;
-import com.v2tech.logic.jni.RequestCloseUserVideoDeviceResponse;
-import com.v2tech.logic.jni.RequestConfCreateResponse;
-import com.v2tech.logic.jni.RequestEnterConfResponse;
-import com.v2tech.logic.jni.RequestExitedConfResponse;
-import com.v2tech.logic.jni.RequestOpenUserVideoDeviceResponse;
-import com.v2tech.logic.jni.RequestPermissionResponse;
-import com.v2tech.logic.jni.RequestUpdateCameraParametersResponse;
+import com.v2tech.service.jni.JNIResponse;
+import com.v2tech.service.jni.RequestCloseUserVideoDeviceResponse;
+import com.v2tech.service.jni.RequestConfCreateResponse;
+import com.v2tech.service.jni.RequestEnterConfResponse;
+import com.v2tech.service.jni.RequestExitedConfResponse;
+import com.v2tech.service.jni.RequestOpenUserVideoDeviceResponse;
+import com.v2tech.service.jni.RequestPermissionResponse;
+import com.v2tech.service.jni.RequestUpdateCameraParametersResponse;
 import com.v2tech.util.V2Log;
+import com.v2tech.vo.CameraConfiguration;
+import com.v2tech.vo.Conference;
+import com.v2tech.vo.ConferencePermission;
+import com.v2tech.vo.Group;
+import com.v2tech.vo.User;
+import com.v2tech.vo.UserDeviceConfig;
 
 /**
  * <ul>
@@ -93,9 +91,9 @@ public class ConferenceService extends AbstractHandler {
 	 *            {@link Conference} object which user wants to enter
 	 * @param caller
 	 *            if input is null, ignore response Message.object is
-	 *            {@link com.v2tech.logic.jni.RequestEnterConfResponse}
+	 *            {@link com.v2tech.service.jni.RequestEnterConfResponse}
 	 * 
-	 * @see com.v2tech.logic.jni.RequestEnterConfResponse
+	 * @see com.v2tech.service.jni.RequestEnterConfResponse
 	 */
 	public void requestEnterConference(Conference conf, Registrant caller) {
 		initTimeoutMessage(JNI_REQUEST_ENTER_CONF, DEFAULT_TIME_OUT_SECS,
@@ -111,7 +109,7 @@ public class ConferenceService extends AbstractHandler {
 	 *            {@link Conference} object which user wants to enter
 	 * @param msg
 	 *            if input is null, ignore response Message. Response Message object is
-	 *            {@link com.v2tech.logic.jni.RequestExitedConfResponse}
+	 *            {@link com.v2tech.service.jni.RequestExitedConfResponse}
 	 */
 	public void requestExitConference(Conference conf, Registrant caller) {
 		initTimeoutMessage(JNI_REQUEST_EXIT_CONF, DEFAULT_TIME_OUT_SECS,
@@ -132,7 +130,7 @@ public class ConferenceService extends AbstractHandler {
 	 * 
 	 * @param conf {@link Conference} object.
 	 * @param caller   if input is null, ignore response Message. Response Message object is
-	 *            {@link com.v2tech.logic.jni.RequestConfCreateResponse}
+	 *            {@link com.v2tech.service.jni.RequestConfCreateResponse}
 	 */
 	public void createConference(Conference conf, Registrant caller) {
 		if (conf == null) {
@@ -188,7 +186,7 @@ public class ConferenceService extends AbstractHandler {
 	 *            {@link UserDeviceConfig#getDeviceID()} should be ""
 	 * @param caller
 	 *            if input is null, ignore response Message.object is
-	 *            {@link com.v2tech.logic.jni.RequestOpenUserVideoDeviceResponse}
+	 *            {@link com.v2tech.service.jni.RequestOpenUserVideoDeviceResponse}
 	 * 
 	 * @see UserDeviceConfig
 	 */
@@ -220,7 +218,7 @@ public class ConferenceService extends AbstractHandler {
 	 *            {@link UserDeviceConfig#getDeviceID()} should be ""
 	 * @param caller
 	 *            if input is null, ignore response Message.object is
-	 *            {@link com.v2tech.logic.jni.RequestCloseUserVideoDeviceResponse}
+	 *            {@link com.v2tech.service.jni.RequestCloseUserVideoDeviceResponse}
 	 * 
 	 * @see UserDeviceConfig
 	 */
@@ -249,7 +247,7 @@ public class ConferenceService extends AbstractHandler {
 	 *            speak type should be {@link ConferencePermission#SPEAKING}
 	 * @param caller
 	 *            if input is null, ignore response Message.object is
-	 *            {@link com.v2tech.logic.jni.RequestPermissionResponse}
+	 *            {@link com.v2tech.service.jni.RequestPermissionResponse}
 	 * 
 	 * @see ConferencePermission
 	 */
@@ -275,7 +273,7 @@ public class ConferenceService extends AbstractHandler {
 	 *            speak type should be {@link ConferencePermission#SPEAKING}
 	 * @param caller
 	 *            if input is null, ignore response Message.object is
-	 *            {@link com.v2tech.logic.jni.RequestPermissionResponse}
+	 *            {@link com.v2tech.service.jni.RequestPermissionResponse}
 	 * 
 	 * @see ConferencePermission
 	 */
@@ -303,7 +301,7 @@ public class ConferenceService extends AbstractHandler {
 	 *            {@link CameraConfiguration}
 	 * @param caller
 	 *            if input is null, ignore response Message.object is
-	 *            {@link com.v2tech.logic.jni.RequestUpdateCameraParametersResponse}
+	 *            {@link com.v2tech.service.jni.RequestUpdateCameraParametersResponse}
 	 */
 	public void updateCameraParameters(CameraConfiguration cc, Registrant caller) {
 		initTimeoutMessage(JNI_UPDATE_CAMERA_PAR, DEFAULT_TIME_OUT_SECS,

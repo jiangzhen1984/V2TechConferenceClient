@@ -17,17 +17,17 @@ public interface GroupRequestCallback {
 	 *            1:contact type 4: conference type
 	 * @param sXml
 	 *            &nbsp;&nbsp;<br>
-	 *            type {@link com.v2tech.logic.Group.GroupType#CONTACT}(1):<br>
+	 *            type {@link com.v2tech.vo.Group.GroupType#CONTACT}(1):<br>
 	 *            {@code <xml><pubgroup id='61' name='ronghuo的组织'><pubgroup id='21' name='1'/></pubgroup></xml>}
 	 * <br>
 	 * 
 	 * 
-	 *            type {@link com.v2tech.logic.Group.GroupType#CONFERENCE}(4):<br>
+	 *            type {@link com.v2tech.vo.Group.GroupType#CONFERENCE}(4):<br>
 	 *            {@code <xml><conf createuserid='1124' id='513891897880' start time='1389189927'
 	 * subject='est'/><conf createuserid='1124' id='513891899176'
 	 * starttime='1389190062' subject='eee'/></xml> }
 	 * 
-	 * @see com.v2tech.logic.Group#GroupType
+	 * @see com.v2tech.vo.Group#GroupType
 	 */
 	public void OnGetGroupInfoCallback(int groupType, String sXml);
 
@@ -44,10 +44,10 @@ public interface GroupRequestCallback {
 	 *            <ul>
 	 *            <br>
 	 *            <li>1: contact type
-	 *            {@link com.v2tech.logic.Group.GroupType#CONTACT}<br>
+	 *            {@link com.v2tech.vo.Group.GroupType#CONTACT}<br>
 	 *            </li>
 	 *            <li>4: conference type
-	 *            {@link com.v2tech.logic.Group.GroupType#CONFERENCE}<br>
+	 *            {@link com.v2tech.vo.Group.GroupType#CONFERENCE}<br>
 	 *            </li>
 	 *            </ul>
 	 * @param nGroupID

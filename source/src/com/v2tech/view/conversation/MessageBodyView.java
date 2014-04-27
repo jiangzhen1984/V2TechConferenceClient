@@ -19,9 +19,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.v2tech.R;
-import com.v2tech.logic.VImageMessage;
-import com.v2tech.logic.VMessage;
 import com.v2tech.util.V2Log;
+import com.v2tech.vo.VImageMessage;
+import com.v2tech.vo.VMessage;
 
 public class MessageBodyView extends LinearLayout {
 

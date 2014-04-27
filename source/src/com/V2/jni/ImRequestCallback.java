@@ -54,7 +54,7 @@ public interface ImRequestCallback {
 	 * @param nStatus  1 is online, 0 is offline
 	 * @param szStatusDesc
 	 * 
-	 * @see com.v2tech.logic.User.Status
+	 * @see com.v2tech.vo.User.Status
 	 */
 	public void OnUserStatusUpdatedCallback(long nUserID, int nStatus, String szStatusDesc);
 	

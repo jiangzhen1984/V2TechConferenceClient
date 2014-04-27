@@ -44,17 +44,17 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.v2tech.R;
-import com.v2tech.logic.Conference;
-import com.v2tech.logic.GlobalHolder;
-import com.v2tech.logic.Group;
-import com.v2tech.logic.Group.GroupType;
-import com.v2tech.logic.Registrant;
-import com.v2tech.logic.User;
-import com.v2tech.logic.jni.JNIResponse;
-import com.v2tech.logic.jni.RequestConfCreateResponse;
 import com.v2tech.service.ConferenceService;
+import com.v2tech.service.GlobalHolder;
+import com.v2tech.service.Registrant;
+import com.v2tech.service.jni.JNIResponse;
+import com.v2tech.service.jni.RequestConfCreateResponse;
 import com.v2tech.view.cus.DateTimePicker;
 import com.v2tech.view.cus.DateTimePicker.OnDateSetListener;
+import com.v2tech.vo.Conference;
+import com.v2tech.vo.Group;
+import com.v2tech.vo.User;
+import com.v2tech.vo.Group.GroupType;
 
 public class ConferenceCreateActivity extends Activity {
 
@@ -627,13 +627,13 @@ public class ConferenceCreateActivity extends Activity {
 				updateSearchedUserList((List<User>) msg.obj);
 				break;
 			case CREATE_CONFERENC_RESP:
-				RequestConfCreateResponse rccr = (RequestConfCreateResponse)  msg.obj;
+				JNIResponse rccr = (RequestConfCreateResponse)  msg.obj;
 				if (rccr.getResult() != JNIResponse.Result.SUCCESS) {
 					mErrorNotificationLayout.setVisibility(View.VISIBLE);
 					break;
 				}
 				User currU = GlobalHolder.getInstance().getCurrentUser();
-				Group g = new Group(rccr.getConfId(), GroupType.CONFERENCE,
+				Group g = new Group(((RequestConfCreateResponse)rccr).getConfId(), GroupType.CONFERENCE,
 						conf.getName(), currU.getmUserId() + "", conf.getDate()
 								.getTime() / 1000 + "");
 				g.setOwnerUser(currU);

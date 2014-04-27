@@ -86,6 +86,17 @@ public class WBRequest {
 		}
 
 	}
+	
+	private void OnWBoardAddPage(String szWBoardID, int nPageID) {
+		Log.e("WBRequest UI", "OnWBoardAddPage " + szWBoardID + " " + nPageID);
+		for (WeakReference<WBRequestCallback> wr : mCallbacks) {
+			if (wr != null && wr.get() != null) {
+				wr.get().OnWBoardAddPageCallback(szWBoardID, nPageID);
+			}
+		}
+
+	}
+
 
 	private void OnWBoardDocDisplay(String szWBoardID, int nPageID,
 			String szFileName, int result) {
@@ -106,17 +117,25 @@ public class WBRequest {
 		Log.e("WBRequest UI",
 				"OnRecvAddWBoardData " + szWBoardID + " " + nPageID + " "
 						+ szDataID + " " + szData + " " + szData.length());
-		// ������
 
+//		for (WeakReference<WBRequestCallback> wr : mCallbacks) {
+//			if (wr != null && wr.get() != null) {
+//				wr.get().OnRecvAddWBoardDataCallback(szWBoardID, nPageID, szDataID, szData);
+//			}
+//		}
 	}
 
-	// �յ�׷�Ӱװ���ݵĻص�
 	private void OnRecvAppendWBoardData(String szWBoardID, int nPageID,
 			String szDataID, String szData) {
 		Log.e("WBRequest UI",
 				"OnRecvAppendWBoardData " + szWBoardID + " " + nPageID + " "
 						+ szDataID + " " + szData + " " + szData.length());
-		// �ж��Ƿ�Ϊ�ĵ���������
+
+//		for (WeakReference<WBRequestCallback> wr : mCallbacks) {
+//			if (wr != null && wr.get() != null) {
+//				wr.get().OnRecvAppendWBoardDataCallback(szWBoardID, nPageID, szDataID, szData);
+//			}
+//		}
 
 	}
 
@@ -163,16 +182,6 @@ public class WBRequest {
 
 	}
 
-	// �յ��ĵ����ӵĻص�
-	private void OnWBoardAddPage(String szWBoardID, int nPageID) {
-		Log.e("WBRequest UI", "OnWBoardAddPage " + szWBoardID + " " + nPageID);
-		for (WeakReference<WBRequestCallback> wr : mCallbacks) {
-			if (wr != null && wr.get() != null) {
-				wr.get().OnWBoardAddPageCallback(szWBoardID, nPageID);
-			}
-		}
-
-	}
 
 	//
 	private void OnWBoardDeletePage(String szWBoardID, int nPageID) {
