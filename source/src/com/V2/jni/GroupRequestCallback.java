@@ -61,6 +61,10 @@ public interface GroupRequestCallback {
 	 * Group information update callback
 	 * </ul>
 	 * <ul>
+	 *  
+	 *   
+	 * </ul>
+	 * <ul>
 	 * TODO: as now only support conference create call back
 	 * </ul>
 	 * 
@@ -68,7 +72,11 @@ public interface GroupRequestCallback {
 	 *            4: conference
 	 * @param nGroupID
 	 *            new conference ID
-	 * @param sXml
+	 * @param sXml   <ul>
+	 *   If current modified group type is conference, sXml content is {@code <conf syncdesktop="1/0"></conf>},<br>
+	 *   1: chairman is synchronizing desktop, user can't change doc content by self.
+	 *   0: chairman released desktop control
+	 *   </ul>
 	 */
 	public void OnModifyGroupInfoCallback(int groupType, long nGroupID,
 			String sXml);

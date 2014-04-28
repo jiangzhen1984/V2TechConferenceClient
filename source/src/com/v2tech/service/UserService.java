@@ -24,8 +24,8 @@ public class UserService extends AbstractHandler {
 	}
 
 	/**
-	 * Asynchronous login function. After login, will call message.sendToTarget
-	 * to caller
+	 * Asynchronous login function. After login, will call post message to your handler
+	 * 
 	 * 
 	 * @param mail
 	 *            user mail

@@ -67,6 +67,7 @@ import com.v2tech.view.conference.VideoMsgChattingLayout.ChattingListener;
 import com.v2tech.vo.Attendee;
 import com.v2tech.vo.CameraConfiguration;
 import com.v2tech.vo.Conference;
+import com.v2tech.vo.ConferenceGroup;
 import com.v2tech.vo.ConferencePermission;
 import com.v2tech.vo.Conversation;
 import com.v2tech.vo.Group;
@@ -100,6 +101,7 @@ public class VideoActivityV2 extends Activity {
 	private static final int DOC_DOWNLOADED_NOTIFICATION = 54;
 	private static final int DOC_CLOSED_NOTIFICATION = 55;
 	private static final int DOC_PAGE_CANVAS_NOTIFICATION = 56;
+	private static final int DESKTOP_SYNC_NOTIFICATION = 57;
 
 	public static final String JNI_EVENT_VIDEO_CATEGORY = "com.v2tech.conf_video_event";
 	public static final String JNI_EVENT_VIDEO_CATEGORY_OPEN_VIDEO_EVENT_ACTION = "com.v2tech.conf_video_event.open_video_event";
@@ -156,45 +158,53 @@ public class VideoActivityV2 extends Activity {
 		mContext = this;
 		this.mVideoLayoutMain = (RelativeLayout) findViewById(R.id.video_layout_root);
 		this.mCurrentShowedSV = new ArrayList<SurfaceViewW>();
+		
 		this.mVideoLayout = (RelativeLayout) findViewById(R.id.in_metting_video_main);
+		//setting button 
 		this.mSettingIV = (ImageView) findViewById(R.id.in_meeting_setting_iv);
 		this.mSettingIV.setOnClickListener(mShowSettingListener);
-		// this.mListUserIV = (ImageView)
-		// findViewById(R.id.in_meeting_show_attendee_iv);
-		// this.mListUserIV.setOnClickListener(mShowConfUsersListener);
+		//request exit button
 		this.mQuitIV = (ImageView) findViewById(R.id.in_meeting_log_out_iv);
 		this.mQuitIV.setOnClickListener(mShowQuitWindowListener);
+		//request speak or mute button
 		this.mSpeakerIV = (ImageView) findViewById(R.id.speaker_iv);
 		this.mSpeakerIV.setOnClickListener(mApplySpeakerListener);
+		//conference name text view
 		this.mGroupNameTV = (TextView) findViewById(R.id.in_meeting_name);
+		
 		this.mMenuLine = (LinearLayout) findViewById(R.id.in_meeting_menu_separation_line);
 		this.mVideoLine = (LinearLayout) findViewById(R.id.in_meeting_video_separation_line1);
+		
+		//local camera surface view
 		this.mLocalSurface = (SurfaceView) findViewById(R.id.local_surface_view);
 
+		// show menu list(Include show message layout, show attendee list layout show document layout) button
 		mMenuButton = (ImageView) findViewById(R.id.in_meeting_menu_button);
 		mMenuButton.setOnClickListener(mMenuButtonListener);
 		mMenuButtonContainer = (LinearLayout) findViewById(R.id.in_meeting_menu_layout);
-
+		//show message layout button
 		mMenuMessageButton = findViewById(R.id.in_meeting_menu_show_msg_button);
 		mMenuMessageButton.setTag("msg");
 		mMenuMessageButton.setOnClickListener(mMenuShowButtonListener);
-
+		//show attendee list layout button
 		mMenuAttendeeButton = findViewById(R.id.in_meeting_menu_show_attendees_button);
 		mMenuAttendeeButton.setTag("attendee");
 		mMenuAttendeeButton.setOnClickListener(mMenuShowButtonListener);
 
+		//show doucment display button
 		mMenuDocButton = findViewById(R.id.in_meeting_menu_show_doc_button);
 		mMenuDocButton.setTag("doc");
 		mMenuDocButton.setOnClickListener(mMenuShowButtonListener);
 
-		// mAttendeeArrowIV.setVisibility(View.INVISIBLE);
+		//Initialize broadcast receiver
 		initConfsListener();
+		//Initialize conference object and show local camera
 		init();
+		//Register listener for kicking or removal of this conference
 		registerOrRemoveListener(true);
 
-		// initMenuFeature();
 
-		// listen callback
+		//Register listen to document notification
 		ds.registerNewDocNotification(mVideoHandler, NEW_DOC_NOTIFICATION, null);
 		ds.registerDocDisplayNotification(mVideoHandler,
 				DOC_DOWNLOADED_NOTIFICATION, null);
@@ -208,6 +218,8 @@ public class VideoActivityV2 extends Activity {
 				DOC_PAGE_ADDED_NOTIFICATION, null);
 		ds.registerPageCanvasUpdateNotification(mVideoHandler,
 				DOC_PAGE_CANVAS_NOTIFICATION, null);
+		
+		cb.registerSyncDesktopListener(mVideoHandler, DESKTOP_SYNC_NOTIFICATION, null);
 
 		// Update main activity tab notificator
 		notificateConversationUpdate();
@@ -417,8 +429,7 @@ public class VideoActivityV2 extends Activity {
 		}
 
 		conf = new Conference(mGroupId);
-		Group g = GlobalHolder.getInstance().getGroupById(GroupType.CONFERENCE,
-				mGroupId);
+		Group g = GlobalHolder.getInstance().findGroupById(mGroupId);
 		mGroupNameTV.setText(g.getName());
 	}
 
@@ -431,6 +442,10 @@ public class VideoActivityV2 extends Activity {
 		mContext.sendBroadcast(i);
 	}
 
+	/**
+	 * Show or hide message layout according to parameter
+	 * @param visible  {@link View#VISIBLE}  {@link View#GONE} 
+	 */
 	private void showOrHidenMsgContainer(int visible) {
 		if (mMessageContainer == null) {
 			mMessageContainer = new VideoMsgChattingLayout(this);
@@ -486,6 +501,11 @@ public class VideoActivityV2 extends Activity {
 		}
 	}
 
+	
+	/**
+	 * Show or hide attendees list layout according to parameter
+	 * @param visible  {@link View#VISIBLE}  {@link View#GONE} 
+	 */
 	private void showOrHidenAttendeeContainer(int visible) {
 		if (mAttendeeContainer == null) {
 			mAttendeeContainer = new VideoAttendeeListLayout(this);
@@ -567,6 +587,10 @@ public class VideoActivityV2 extends Activity {
 		}
 	}
 
+	/**
+	 * Show or hide document layout according to parameter
+	 * @param visible  {@link View#VISIBLE}  {@link View#GONE} 
+	 */
 	private void showOrHidenDocContainer(int visible) {
 		if (mDocContainer == null) {
 			mDocContainer = new VideoDocLayout(this);
@@ -635,6 +659,11 @@ public class VideoActivityV2 extends Activity {
 				}
 			}
 			mDocContainer.updateCurrentDoc(mCurrentActivateDoc);
+			Group g = GlobalHolder.getInstance().findGroupById(mGroupId);
+			if (g != null && g instanceof ConferenceGroup) {
+				mDocContainer.updateSyncStatus(((ConferenceGroup)g).isSyn());
+			}
+			
 
 		}
 		// View is hidded, do not need to hide again
@@ -837,6 +866,7 @@ public class VideoActivityV2 extends Activity {
 				DOC_PAGE_ADDED_NOTIFICATION, null);
 		ds.unRegisterPageCanvasUpdateNotification(mVideoHandler,
 				DOC_PAGE_CANVAS_NOTIFICATION, null);
+		cb.removeSyncDesktopListener(mVideoHandler, DESKTOP_SYNC_NOTIFICATION, null);
 		if (mDocContainer != null) {
 			// clean document bitmap cache
 			mDocContainer.cleanCache();
@@ -1316,7 +1346,16 @@ public class VideoActivityV2 extends Activity {
 					}
 				}
 				break;
-
+			case DESKTOP_SYNC_NOTIFICATION:
+				int sync = msg.arg1;
+				if (mDocContainer != null) {
+					if (sync == 1) {
+						mDocContainer.updateSyncStatus(true);
+					} else {
+						mDocContainer.updateSyncStatus(false);
+					}
+				}
+				break;
 			}
 		}
 

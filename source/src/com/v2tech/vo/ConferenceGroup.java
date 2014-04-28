@@ -3,6 +3,9 @@ package com.v2tech.vo;
 
 
 public class ConferenceGroup extends Group {
+	
+	
+	private boolean isSyn;
 
 	public ConferenceGroup(long mGId, String mName) {
 		super(mGId, GroupType.CONFERENCE, mName);
@@ -20,6 +23,14 @@ public class ConferenceGroup extends Group {
 	
 	
 	
+	public boolean isSyn() {
+		return isSyn;
+	}
+
+	public void setSyn(boolean isSyn) {
+		this.isSyn = isSyn;
+	}
+
 	/**
 	 * <conf createuserid='1138' id='513956640327' starttime='2012' subject='
 	 * 啊'/> <user id='1138' uetype='2'/>

@@ -104,12 +104,6 @@ public class MainApplication extends Application {
 				& Configuration.SCREENLAYOUT_SIZE_MASK;
 		
 		new LogcatThread().start();
-		
-		System.loadLibrary("event");
-		System.loadLibrary("udt");
-		System.loadLibrary("v2vi");
-		System.loadLibrary("v2ve");
-		System.loadLibrary("v2client");
 	}
 
 	@Override

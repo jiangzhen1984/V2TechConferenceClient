@@ -40,7 +40,7 @@ public class VideoDocLayout extends LinearLayout {
 	private Map<String, V2Doc> mDocs;
 
 	private Bitmap mCurrentBitMap;
-	
+
 	private Matrix matrix;
 
 	private FrameLayout container;
@@ -65,8 +65,9 @@ public class VideoDocLayout extends LinearLayout {
 		public void requestFixedLayout(View v);
 
 		public void requestFloatLayout(View v);
-		
+
 		public void requestFillParent(View v);
+
 		public void requestRestore(View v);
 	};
 
@@ -256,16 +257,15 @@ public class VideoDocLayout extends LinearLayout {
 				matrix = new Matrix();
 				RectF src = new RectF();
 				RectF dest = new RectF();
-				
+
 				BitmapFactory.Options ops = new BitmapFactory.Options();
 				ops.inJustDecodeBounds = true;
 				BitmapFactory.decodeFile(p.getFilePath(), ops);
 				src.left = 0;
-				src.right =ops.outWidth ;
+				src.right = ops.outWidth;
 				src.top = 0;
 				src.bottom = ops.outHeight;
-				
-				
+
 				ops.inJustDecodeBounds = false;
 				BitmapFactory.Options opsNew = new BitmapFactory.Options();
 				opsNew.inPurgeable = true;
@@ -283,14 +283,13 @@ public class VideoDocLayout extends LinearLayout {
 
 				mCurrentBitMap = BitmapFactory.decodeFile(p.getFilePath(),
 						opsNew);
-				
-				
+
 				dest.left = 0;
-				dest.right =opsNew.outWidth ;
+				dest.right = opsNew.outWidth;
 				dest.top = 0;
 				dest.bottom = opsNew.outHeight;
 				matrix.mapRect(dest, src);
-				
+
 				container.removeAllViews();
 				TouchImageView iv = new TouchImageView(this.getContext());
 				iv.setImageBitmap(mCurrentBitMap);
@@ -348,8 +347,25 @@ public class VideoDocLayout extends LinearLayout {
 					.setImageResource(R.drawable.video_doc_page_button_right_selector);
 		}
 	}
-	
-	
+
+	/**
+	 * Update sync status according to chairman's setting
+	 * if Set true, user can't switch page any more. Otherwise user can
+	 * @param sync
+	 */
+	public void updateSyncStatus(boolean sync) {
+		if (sync) {
+			mPrePageButton
+					.setImageResource(R.drawable.video_doc_left_arrow_gray);
+			mNextPageButton
+					.setImageResource(R.drawable.video_doc_right_arrow_gray);
+			mShowDocListButton.setEnabled(false);
+		} else {
+			updatePageButton();
+			mShowDocListButton.setEnabled(true);
+		}
+	}
+
 	public void drawShape(List<V2ShapeMeta> list) {
 		if (list == null) {
 			V2Log.w(" shape list is null");
@@ -359,7 +375,7 @@ public class VideoDocLayout extends LinearLayout {
 			V2Log.w(" Doesn't support blank bitmap yet");
 			return;
 		}
-		
+
 		//
 		Canvas ca = new Canvas(mCurrentBitMap);
 		ca.setMatrix(matrix);
@@ -374,7 +390,6 @@ public class VideoDocLayout extends LinearLayout {
 			this.mCurrentBitMap.recycle();
 		}
 	}
-	
 
 	private OnClickListener pageChangeListener = new OnClickListener() {
 
@@ -455,7 +470,7 @@ public class VideoDocLayout extends LinearLayout {
 					listener.requestFloatLayout(rootView);
 				}
 			}
-			
+
 			if (view.getTag().equals("float")) {
 				view.setTag("fix");
 			} else {

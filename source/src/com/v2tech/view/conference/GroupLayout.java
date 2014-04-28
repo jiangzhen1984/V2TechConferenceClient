@@ -157,6 +157,7 @@ public class GroupLayout extends LinearLayout {
 					ContentDescriptor.Messages.Cols.SEND_TIME + " desc "
 							+ " limit " + 1 + " offset " + 0);
 			if (cur.getCount() == 0) {
+				cur.close();
 				return;
 			}
 			if (cur.moveToNext()) {

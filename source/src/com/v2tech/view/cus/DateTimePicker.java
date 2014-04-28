@@ -15,7 +15,6 @@ import android.widget.PopupWindow;
 import android.widget.TextView;
 
 import com.v2tech.R;
-import com.v2tech.R.drawable;
 
 public class DateTimePicker extends PopupWindow {
 

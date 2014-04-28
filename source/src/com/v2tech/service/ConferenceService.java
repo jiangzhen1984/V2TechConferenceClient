@@ -23,6 +23,7 @@ import com.v2tech.service.jni.RequestUpdateCameraParametersResponse;
 import com.v2tech.util.V2Log;
 import com.v2tech.vo.CameraConfiguration;
 import com.v2tech.vo.Conference;
+import com.v2tech.vo.ConferenceGroup;
 import com.v2tech.vo.ConferencePermission;
 import com.v2tech.vo.Group;
 import com.v2tech.vo.User;
@@ -40,17 +41,19 @@ import com.v2tech.vo.UserDeviceConfig;
  * </ul>
  * <ul>
  * <li>User request to enter conference :
- * {@link #requestEnterConference(Conference, Message)}</li>
+ * {@link #requestEnterConference(Conference, Registrant)}</li>
  * <li>User request to exit conference :
- * {@link #requestExitConference(Conference, Message)}</li>
+ * {@link #requestExitConference(Conference, Registrant)}</li>
  * <li>User request to open video device :
- * {@link #requestOpenVideoDevice(Conference, UserDeviceConfig, Message)}</li>
+ * {@link #requestOpenVideoDevice(Conference, UserDeviceConfig, Registrant)}</li>
  * <li>User request to close video device:
- * {@link #requestCloseVideoDevice(Conference, UserDeviceConfig, Message)}</li>
+ * {@link #requestCloseVideoDevice(Conference, UserDeviceConfig, Registrant)}</li>
  * <li>User request to request speak in meeting
- * {@link #applyForControlPermission(ConferencePermission, Message)}</li>
+ * {@link #applyForControlPermission(ConferencePermission, Registrant)}</li>
  * <li>User request to release speaker in meeting
- * {@link #applyForReleasePermission(ConferencePermission, Message)}</li>
+ * {@link #applyForReleasePermission(ConferencePermission, Registrant)}</li>
+ * <li>User create conference: {@link #createConference(Conference, Registrant)}
+ * </li>
  * </ul>
  * 
  * @author 28851274
@@ -102,18 +105,19 @@ public class ConferenceService extends AbstractHandler {
 	}
 
 	/**
-	 * User request to quit conference. This API just use to for quit conference this time.<br>
+	 * User request to quit conference. This API just use to for quit conference
+	 * this time.<br>
 	 * User will receive this conference when log in next time.
 	 * 
 	 * @param conf
 	 *            {@link Conference} object which user wants to enter
 	 * @param msg
-	 *            if input is null, ignore response Message. Response Message object is
+	 *            if input is null, ignore response Message. Response Message
+	 *            object is
 	 *            {@link com.v2tech.service.jni.RequestExitedConfResponse}
 	 */
 	public void requestExitConference(Conference conf, Registrant caller) {
-		initTimeoutMessage(JNI_REQUEST_EXIT_CONF, DEFAULT_TIME_OUT_SECS,
-				caller);
+		initTimeoutMessage(JNI_REQUEST_EXIT_CONF, DEFAULT_TIME_OUT_SECS, caller);
 		ConfRequest.getInstance().exitConf(conf.getId());
 		// send response to caller because exitConf no call back from JNI
 		JNIResponse jniRes = new RequestExitedConfResponse(conf.getId(),
@@ -126,41 +130,43 @@ public class ConferenceService extends AbstractHandler {
 
 	/**
 	 * Create conference.
-	 * <ul></ul>
+	 * <ul>
+	 * </ul>
 	 * 
-	 * @param conf {@link Conference} object.
-	 * @param caller   if input is null, ignore response Message. Response Message object is
+	 * @param conf
+	 *            {@link Conference} object.
+	 * @param caller
+	 *            if input is null, ignore response Message. Response Message
+	 *            object is
 	 *            {@link com.v2tech.service.jni.RequestConfCreateResponse}
 	 */
 	public void createConference(Conference conf, Registrant caller) {
 		if (conf == null) {
 			if (caller != null && caller.getHandler() != null) {
-				JNIResponse jniRes = new RequestConfCreateResponse(
-						0, 0,
+				JNIResponse jniRes = new RequestConfCreateResponse(0, 0,
 						RequestConfCreateResponse.Result.FAILED);
 				sendResult(caller, jniRes);
 			}
 			return;
 		}
-		initTimeoutMessage(JNI_REQUEST_CREATE_CONFERENCE, DEFAULT_TIME_OUT_SECS,
-				caller);
+		initTimeoutMessage(JNI_REQUEST_CREATE_CONFERENCE,
+				DEFAULT_TIME_OUT_SECS, caller);
 		GroupRequest.getInstance().createGroup(
 				Group.GroupType.CONFERENCE.intValue(),
 				conf.getConferenceConfigXml(), conf.getInvitedAttendeesXml());
 	}
-	
-	
+
 	/**
 	 * User request to quit this conference for ever.<br>
 	 * User never receive this conference information any more.
+	 * 
 	 * @param conf
 	 * @param caller
 	 */
 	public void quitConference(Conference conf, Registrant caller) {
 		if (conf == null) {
 			if (caller != null) {
-				JNIResponse jniRes = new RequestConfCreateResponse(
-						0, 0,
+				JNIResponse jniRes = new RequestConfCreateResponse(0, 0,
 						RequestConfCreateResponse.Result.FAILED);
 				sendResult(caller, jniRes);
 			}
@@ -169,9 +175,11 @@ public class ConferenceService extends AbstractHandler {
 		initTimeoutMessage(JNI_REQUEST_QUIT_CONFERENCE, DEFAULT_TIME_OUT_SECS,
 				caller);
 		if (conf.getCreator() == GlobalHolder.getInstance().getCurrentUserId()) {
-			GroupRequest.getInstance().delGroup(Group.GroupType.CONFERENCE.intValue(), conf.getId());
+			GroupRequest.getInstance().delGroup(
+					Group.GroupType.CONFERENCE.intValue(), conf.getId());
 		} else {
-			GroupRequest.getInstance().leaveGroup(Group.GroupType.CONFERENCE.intValue(), conf.getId());
+			GroupRequest.getInstance().leaveGroup(
+					Group.GroupType.CONFERENCE.intValue(), conf.getId());
 		}
 	}
 
@@ -225,8 +233,8 @@ public class ConferenceService extends AbstractHandler {
 	public void requestCloseVideoDevice(Conference conf,
 			UserDeviceConfig userDevice, Registrant caller) {
 
-		initTimeoutMessage(JNI_REQUEST_CLOSE_VIDEO, 
-				DEFAULT_TIME_OUT_SECS, caller);
+		initTimeoutMessage(JNI_REQUEST_CLOSE_VIDEO, DEFAULT_TIME_OUT_SECS,
+				caller);
 
 		VideoRequest.getInstance().closeVideoDevice(conf.getId(),
 				userDevice.getUserID(), userDevice.getDeviceID(),
@@ -253,8 +261,7 @@ public class ConferenceService extends AbstractHandler {
 	 */
 	public void applyForControlPermission(ConferencePermission type,
 			Registrant caller) {
-		initTimeoutMessage(JNI_REQUEST_SPEAK, DEFAULT_TIME_OUT_SECS,
-				caller);
+		initTimeoutMessage(JNI_REQUEST_SPEAK, DEFAULT_TIME_OUT_SECS, caller);
 
 		ConfRequest.getInstance().applyForControlPermission(type.intValue());
 
@@ -280,8 +287,8 @@ public class ConferenceService extends AbstractHandler {
 	public void applyForReleasePermission(ConferencePermission type,
 			Registrant caller) {
 
-		initTimeoutMessage(JNI_REQUEST_RELEASE_SPEAK, 
-				DEFAULT_TIME_OUT_SECS, caller);
+		initTimeoutMessage(JNI_REQUEST_RELEASE_SPEAK, DEFAULT_TIME_OUT_SECS,
+				caller);
 
 		ConfRequest.getInstance().releaseControlPermission(type.intValue());
 
@@ -304,42 +311,42 @@ public class ConferenceService extends AbstractHandler {
 	 *            {@link com.v2tech.service.jni.RequestUpdateCameraParametersResponse}
 	 */
 	public void updateCameraParameters(CameraConfiguration cc, Registrant caller) {
-		initTimeoutMessage(JNI_UPDATE_CAMERA_PAR, DEFAULT_TIME_OUT_SECS,
-				caller);
+		initTimeoutMessage(JNI_UPDATE_CAMERA_PAR, DEFAULT_TIME_OUT_SECS, caller);
 		VideoRequest.getInstance().setCapParam(cc.getDeviceId(),
 				cc.getCameraIndex(), cc.getFrameRate(), cc.getBitRate());
 	}
-	
-	
-	
+
 	private List<Registrant> registerList = new ArrayList<Registrant>();
+
 	/**
 	 * Register listener for out conference by kick.
+	 * 
 	 * @param msg
 	 */
 	public void registerKickedConfListener(Handler h, int what, Object obj) {
 		registerList.add(new Registrant(h, what, obj));
 	}
-	
-	public void removeRegisterOfKickedConfListener(Handler h, int what, Object obj) {
+
+	public void removeRegisterOfKickedConfListener(Handler h, int what,
+			Object obj) {
 		for (Registrant re : registerList) {
 			if (re.getHandler() == h && what == re.getWhat()) {
 				registerList.remove(re);
 			}
 		}
 	}
-	
-	
-	
+
 	private List<Registrant> registerAttendeeStatusListenersList = new ArrayList<Registrant>();
+
 	/**
 	 * Register listener for out conference by kick.
+	 * 
 	 * @param msg
 	 */
 	public void registerAttendeeListener(Handler h, int what, Object obj) {
 		registerAttendeeStatusListenersList.add(new Registrant(h, what, obj));
 	}
-	
+
 	public void removeAttendeeListener(Handler h, int what, Object obj) {
 		for (Registrant re : registerAttendeeStatusListenersList) {
 			if (re.getHandler() == h && what == re.getWhat()) {
@@ -347,7 +354,27 @@ public class ConferenceService extends AbstractHandler {
 			}
 		}
 	}
+	
+	
+	
+	private List<Registrant> syncDesktopListenersList = new ArrayList<Registrant>();
 
+	/**
+	 * Register listener for chairman control or release desktop
+	 * 
+	 * @param msg
+	 */
+	public void registerSyncDesktopListener(Handler h, int what, Object obj) {
+		syncDesktopListenersList.add(new Registrant(h, what, obj));
+	}
+
+	public void removeSyncDesktopListener(Handler h, int what, Object obj) {
+		for (Registrant re : syncDesktopListenersList) {
+			if (re.getHandler() == h && what == re.getWhat()) {
+				syncDesktopListenersList.remove(re);
+			}
+		}
+	}
 
 	class ConfRequestCB implements ConfRequestCallback {
 
@@ -378,14 +405,16 @@ public class ConferenceService extends AbstractHandler {
 				int end = szUserInfos.indexOf("'", start + 4);
 				if (end != -1) {
 					String id = szUserInfos.substring(start + 4, end);
-					User u = GlobalHolder.getInstance().getUser(Long.parseLong(id));
+					User u = GlobalHolder.getInstance().getUser(
+							Long.parseLong(id));
 					for (Registrant re : registerAttendeeStatusListenersList) {
 						Handler h = re.getHandler();
 						if (h != null) {
-							Message.obtain(h, re.getWhat(), 1, 0, u).sendToTarget();
+							Message.obtain(h, re.getWhat(), 1, 0, u)
+									.sendToTarget();
 						}
 					}
-					
+
 				} else {
 					V2Log.e("Invalid attendee user id ignore callback message");
 				}
@@ -397,13 +426,13 @@ public class ConferenceService extends AbstractHandler {
 		@Override
 		public void OnConfMemberExitCallback(long nConfID, long nTime,
 				long nUserID) {
-			
+
 			User u = GlobalHolder.getInstance().getUser(nUserID);
-			
+
 			for (Registrant re : registerAttendeeStatusListenersList) {
 				Handler h = re.getHandler();
 				if (h != null) {
-					Message.obtain(h, re.getWhat(),0, 0, u).sendToTarget();
+					Message.obtain(h, re.getWhat(), 0, 0, u).sendToTarget();
 				}
 			}
 
@@ -414,12 +443,11 @@ public class ConferenceService extends AbstractHandler {
 			for (Registrant re : registerList) {
 				Handler h = re.getHandler();
 				if (h != null) {
-					Message.obtain(h, re.getWhat(), nReason, 0, re.getObject()).sendToTarget();
+					Message.obtain(h, re.getWhat(), nReason, 0, re.getObject())
+							.sendToTarget();
 				}
 			}
 		}
-		
-		
 
 	}
 
@@ -478,43 +506,54 @@ public class ConferenceService extends AbstractHandler {
 		public void OnModifyGroupInfoCallback(int groupType, long nGroupID,
 				String sXml) {
 			if (groupType == Group.GroupType.CONFERENCE.intValue()) {
-				List<Group> confList = GlobalHolder.getInstance().getGroup(
-						Group.GroupType.CONFERENCE);
-				boolean newGroupIdFlag = true;
-				for (Group g : confList) {
-					if (g.getmGId() == nGroupID) {
-						newGroupIdFlag = false;
-						break;
-					}
-				}
+				Group cache = GlobalHolder.getInstance().findGroupById(nGroupID);
+				
 				// if doesn't find matched group, mean this is new group
-				if (newGroupIdFlag) {
+				if (cache == null) {
 					JNIResponse jniRes = new RequestConfCreateResponse(
 							nGroupID, 0,
 							RequestConfCreateResponse.Result.SUCCESS);
 					Message.obtain(mCallbackHandler,
 							JNI_REQUEST_CREATE_CONFERENCE, jniRes)
 							.sendToTarget();
+				} else {
+					int pos = sXml.indexOf(" syncdesktop=\"");
+					int end = sXml.indexOf("\"", pos+14);
+					String sync = "0";
+					if (pos != -1 && end != -1) {
+						sync = sXml.substring(pos+14, end);
+						if (sync.equals("1")) {
+							((ConferenceGroup)cache).setSyn(true);
+						} else {
+							((ConferenceGroup)cache).setSyn(false);
+						}
+					}
+					// notify sync desktop listener
+					for (Registrant re : syncDesktopListenersList) {
+						Handler h = re.getHandler();
+						if (h != null) {
+							Message.obtain(h, re.getWhat(), Integer.parseInt(sync), 0, null).sendToTarget();
+						}
+					}
+					
+					
 				}
+				
 			}
 		}
 
 		@Override
 		public void OnInviteJoinGroupCallback(int groupType, String groupInfo,
 				String userInfo, String additInfo) {
-			
+
 		}
 
 		@Override
 		public void OnDelGroupCallback(int groupType, long nGroupID,
 				boolean bMovetoRoot) {
-			
+
 		}
-		
-		
-		
-		
-		
+
 	}
 
 }

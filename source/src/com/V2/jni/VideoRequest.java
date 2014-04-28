@@ -1,5 +1,6 @@
 package com.V2.jni;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,10 +12,10 @@ import com.v2tech.util.V2Log;
 
 public class VideoRequest {
 	private static VideoRequest mVideoRequest;
-	private List<VideoRequestCallback> callback;
+	private List<WeakReference<VideoRequestCallback>> callback;
 
 	private VideoRequest(Context context) {
-		callback = new ArrayList<VideoRequestCallback>();
+		callback = new ArrayList<WeakReference<VideoRequestCallback>>();
 	};
 
 	public static synchronized VideoRequest getInstance(Context context) {
@@ -39,7 +40,7 @@ public class VideoRequest {
 	}
 
 	public void addCallback(VideoRequestCallback callback) {
-		this.callback.add(callback);
+		this.callback.add(new WeakReference<VideoRequestCallback>(callback));
 	}
 
 	public native boolean initialize(VideoRequest request);
@@ -98,7 +99,11 @@ public class VideoRequest {
 			String szDeviceID, VideoPlayer vp, int businessType);
 
 	/**
-	 * <ul>Update local camera configuration. JNI call {@link #OnSetCapParamDone(String, int, int, int)} to indicate response.</ul>
+	 * <ul>
+	 * Update local camera configuration. JNI call
+	 * {@link #OnSetCapParamDone(String, int, int, int)} to indicate response.
+	 * </ul>
+	 * 
 	 * @param szDevID
 	 *            ""
 	 * @param nSizeIndex
@@ -110,10 +115,12 @@ public class VideoRequest {
 	 */
 	public native void setCapParam(String szDevID, int nSizeIndex,
 			int nFrameRate, int nBitRate);
-	
-	
+
 	/**
-	 * <ul>Indicate response that update camera configuration.</ul>
+	 * <ul>
+	 * Indicate response that update camera configuration.
+	 * </ul>
+	 * 
 	 * @param szDevID
 	 * @param nSizeIndex
 	 * @param nFrameRate
@@ -123,8 +130,12 @@ public class VideoRequest {
 			int nFrameRate, int nBitRate) {
 		V2Log.d("OnSetCapParamDone " + szDevID + " " + nSizeIndex + " "
 				+ nFrameRate + " " + nBitRate);
-		for (VideoRequestCallback cb : this.callback) {
-			cb.OnSetCapParamDone(szDevID, nSizeIndex, nFrameRate, nBitRate);
+		for (WeakReference<VideoRequestCallback> wrCB : this.callback) {
+			Object obj = wrCB.get();
+			if (obj != null) {
+				VideoRequestCallback cb = (VideoRequestCallback) obj;
+				cb.OnSetCapParamDone(szDevID, nSizeIndex, nFrameRate, nBitRate);
+			}
 		}
 	}
 
@@ -155,10 +166,14 @@ public class VideoRequest {
 	 *            user devices list as XML format
 	 */
 	private void OnRemoteUserVideoDevice(String szXmlData) {
-		for (VideoRequestCallback cb : this.callback) {
-			cb.OnRemoteUserVideoDevice(szXmlData);
-		}
 		V2Log.d("OnRemoteUserVideoDevice:---" + szXmlData);
+		for (WeakReference<VideoRequestCallback> wrCB : this.callback) {
+			Object obj = wrCB.get();
+			if (obj != null) {
+				VideoRequestCallback cb = (VideoRequestCallback) obj;
+				cb.OnRemoteUserVideoDevice(szXmlData);
+			}
+		}
 	}
 
 	/**
@@ -170,15 +185,18 @@ public class VideoRequest {
 	 */
 	private void OnVideoChatInvite(long nGroupID, int nBusinessType,
 			long nFromUserID, String szDeviceID) {
-	//	acceptVideoChat(nGroupID, nFromUserID, szDeviceID, nBusinessType);
-		for (VideoRequestCallback cb : this.callback) {
-			cb.OnVideoChatInviteCallback(nGroupID, nBusinessType, nFromUserID,
-					szDeviceID);
+		for (WeakReference<VideoRequestCallback> wrCB : this.callback) {
+			Object obj = wrCB.get();
+			if (obj != null) {
+				VideoRequestCallback cb = (VideoRequestCallback) obj;
+				cb.OnVideoChatInviteCallback(nGroupID, nBusinessType,
+						nFromUserID, szDeviceID);
+			}
 		}
 		V2Log.d("OnVideoChatInvite: nGroupID:" + nGroupID + "  nBusinessType:"
 				+ nBusinessType + " nFromUserID:" + nFromUserID
 				+ "  szDeviceID:" + szDeviceID);
-		
+
 	}
 
 	// 鏋氫妇鎽勫儚澶�
@@ -280,8 +298,6 @@ public class VideoRequest {
 	}
 
 	// private void OnGetDevSizeFormats(String szXml);
-
-
 
 	// // 閫氱煡绐楀彛瑙嗛姣旂壒鐜囷紝鍗曚綅Kbps
 	private void OnVideoBitRate(Object hwnd, int bps) {
