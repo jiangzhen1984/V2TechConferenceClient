@@ -366,10 +366,13 @@ public class XmlParser {
 				V2ShapeLine shape = new V2ShapeLine(points);
 
 				for (int j = 0; j < shapeDataList.getLength(); j++) {
+					if (shapeDataList.item(j).getNodeType() != Element.ELEMENT_NODE) {
+						continue;
+					}
 					Element shapeE = (Element) shapeDataList.item(j);
 
 					if (shapeE.getTagName().equals("Points")) {
-						String pointsStr = e.getTextContent();
+						String pointsStr = e.getTextContent().trim();
 						String[] str = pointsStr.split(" ");
 						points = new V2ShapePoint[str.length / 2];
 						for (int index = 0, pi = 0; index < points.length; index++, pi += 2) {
@@ -377,6 +380,7 @@ public class XmlParser {
 									Integer.parseInt(str[pi]),
 									Integer.parseInt(str[pi + 1]));
 						}
+						shape.addPoints(points);
 					} else if (shapeE.getTagName().equals("Pen")) {
 						shape.setWidth(Integer.parseInt(shapeE
 								.getAttribute("Width")));
@@ -405,10 +409,13 @@ public class XmlParser {
 				V2Shape shape = null;
 
 				for (int j = 0; j < shapeDataList.getLength(); j++) {
+					if (shapeDataList.item(j).getNodeType() != Element.ELEMENT_NODE) {
+						continue;
+					}
 					Element shapeE = (Element) shapeDataList.item(j);
 
 					if (shapeE.getTagName().equals("Points")) {
-						String pointsStr = e.getTextContent();
+						String pointsStr = e.getTextContent().trim();
 						String[] str = pointsStr.split(" ");
 						if (str.length == 4) {
 							if (isRect) {

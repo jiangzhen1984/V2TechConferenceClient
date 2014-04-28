@@ -517,8 +517,8 @@ public class ConferenceService extends AbstractHandler {
 							JNI_REQUEST_CREATE_CONFERENCE, jniRes)
 							.sendToTarget();
 				} else {
-					int pos = sXml.indexOf(" syncdesktop=\"");
-					int end = sXml.indexOf("\"", pos+14);
+					int pos = sXml.indexOf(" syncdesktop='");
+					int end = sXml.indexOf("'", pos+14);
 					String sync = "0";
 					if (pos != -1 && end != -1) {
 						sync = sXml.substring(pos+14, end);
@@ -553,6 +553,19 @@ public class ConferenceService extends AbstractHandler {
 				boolean bMovetoRoot) {
 
 		}
+
+		@Override
+		public void OnDelGroupUserCallback(int groupType, long nGroupID, long nUserID) {
+			
+		}
+
+		@Override
+		public void OnAddGroupUserInfoCallback(int groupType, long nGroupID, String sXml) {
+			
+		}
+		
+		
+		
 
 	}
 

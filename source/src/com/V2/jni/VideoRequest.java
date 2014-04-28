@@ -1,8 +1,8 @@
 package com.V2.jni;
 
 import java.lang.ref.WeakReference;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import v2av.VideoPlayer;
 import android.content.Context;
@@ -15,7 +15,7 @@ public class VideoRequest {
 	private List<WeakReference<VideoRequestCallback>> callback;
 
 	private VideoRequest(Context context) {
-		callback = new ArrayList<WeakReference<VideoRequestCallback>>();
+		callback = new CopyOnWriteArrayList<WeakReference<VideoRequestCallback>>();
 	};
 
 	public static synchronized VideoRequest getInstance(Context context) {

@@ -1,6 +1,7 @@
 package com.v2tech.vo;
 
 import android.graphics.Canvas;
+import android.graphics.Paint;
 
 public class V2ShapePoint extends V2Shape {
 
@@ -19,6 +20,9 @@ public class V2ShapePoint extends V2Shape {
 	}
 	@Override
 	public void draw(Canvas canvas) {
+		if (paint == null) {
+			paint = new Paint();
+		}
 		canvas.drawPoint(x, y, paint);
 		
 	}

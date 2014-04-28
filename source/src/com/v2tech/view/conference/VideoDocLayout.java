@@ -216,7 +216,11 @@ public class VideoDocLayout extends LinearLayout {
 
 		mCurrentPage = mCurrentDoc.getActivatePage();
 
-		updateCurrentDocPage(mCurrentPage);
+		//draw shape
+		if (mCurrentPage != null) {
+			updateCurrentDocPage(mCurrentPage);
+			drawShape(mCurrentPage.getVsMeta());
+		}
 		updateLayoutPageInformation();
 		updatePageButton();
 	}
@@ -270,6 +274,7 @@ public class VideoDocLayout extends LinearLayout {
 				BitmapFactory.Options opsNew = new BitmapFactory.Options();
 				opsNew.inPurgeable = true;
 				opsNew.inInputShareable = true;
+				opsNew.inMutable = true;
 
 				if (ops.outHeight < 600 || ops.outWidth < 1080) {
 					opsNew.inSampleSize = 1;
@@ -284,9 +289,9 @@ public class VideoDocLayout extends LinearLayout {
 				mCurrentBitMap = BitmapFactory.decodeFile(p.getFilePath(),
 						opsNew);
 
-				dest.left = 0;
+				dest.left = (src.right -opsNew.outWidth)/2;
 				dest.right = opsNew.outWidth;
-				dest.top = 0;
+				dest.top = (src.bottom -opsNew.outHeight)/2;
 				dest.bottom = opsNew.outHeight;
 				matrix.mapRect(dest, src);
 
@@ -382,6 +387,7 @@ public class VideoDocLayout extends LinearLayout {
 		for (V2ShapeMeta meta : list) {
 			meta.draw(ca);
 		}
+		container.postInvalidate();
 	}
 
 	public void cleanCache() {

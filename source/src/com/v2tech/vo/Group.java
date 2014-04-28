@@ -197,6 +197,23 @@ public class Group {
 			this.users.add(u);
 		}
 	}
+	
+	public void removeUserFromGroup(User u) {
+		synchronized (mLock) {
+			this.users.remove(u);
+		}
+	}
+	
+	public void removeUserFromGroup(long uid) {
+		synchronized (mLock) {
+			for (User u : this.users) {
+				if (uid == u.getmUserId()) {
+					this.users.remove(u);
+					break;
+				}
+			}
+		}
+	}
 
 	/**
 	 * return copy collection

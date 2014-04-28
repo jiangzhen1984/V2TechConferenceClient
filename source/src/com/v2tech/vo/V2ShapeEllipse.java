@@ -1,6 +1,7 @@
 package com.v2tech.vo;
 
 import android.graphics.Canvas;
+import android.graphics.Paint;
 import android.graphics.RectF;
 
 public class V2ShapeEllipse extends V2Shape {
@@ -20,6 +21,10 @@ public class V2ShapeEllipse extends V2Shape {
 
 	@Override
 	public void draw(Canvas canvas) {
+		if (paint == null) {
+			paint = new Paint();
+		}
+		paint.setStyle(Paint.Style.STROKE);
 		RectF f = new RectF();
 		f.left = left;
 		f.top = top;

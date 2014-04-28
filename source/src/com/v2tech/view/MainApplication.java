@@ -32,12 +32,14 @@ public class MainApplication extends Application {
 	@Override
 	public void onCreate() {
 		super.onCreate();
-		CrashHandler crashHandler = CrashHandler.getInstance();
-		crashHandler.init(getApplicationContext());
+	
 		
 
 		V2Log.isDebuggable = (0 != (getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE));
-
+		if (!V2Log.isDebuggable) {
+			CrashHandler crashHandler = CrashHandler.getInstance();
+			crashHandler.init(getApplicationContext());
+		}
 		SharedPreferences sf = getSharedPreferences("config",
 				Context.MODE_PRIVATE);
 		Editor ed = sf.edit();
@@ -103,7 +105,10 @@ public class MainApplication extends Application {
 		GlobalConfig.GLOBAL_LAYOUT_SIZE = getResources().getConfiguration().screenLayout
 				& Configuration.SCREENLAYOUT_SIZE_MASK;
 		
-		new LogcatThread().start();
+		if (!V2Log.isDebuggable) {
+			new LogcatThread().start();
+		}
+	
 	}
 
 	@Override

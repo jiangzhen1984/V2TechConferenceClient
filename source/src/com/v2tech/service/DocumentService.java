@@ -8,6 +8,7 @@ import android.os.Message;
 
 import com.V2.jni.WBRequest;
 import com.V2.jni.WBRequestCallback;
+import com.v2tech.util.V2Log;
 import com.v2tech.util.XmlParser;
 import com.v2tech.vo.Group;
 import com.v2tech.vo.Group.GroupType;
@@ -260,10 +261,14 @@ public class DocumentService extends AbstractHandler {
 					Message m = Message.obtain();
 					m.what =  r.getWhat();
 					V2ShapeMeta meta = XmlParser.parseV2ShapeMetaSingle(szData);
-					meta.setDocId(szWBoardID);
-					meta.setPageNo(nPageID);
-					m.obj = new AsyncResult(r.getObject(), meta);
-					r.getHandler().sendMessage(m);
+					if (meta != null) {
+						meta.setDocId(szWBoardID);
+						meta.setPageNo(nPageID);
+						m.obj = new AsyncResult(r.getObject(), meta);
+						r.getHandler().sendMessage(m);
+					} else {
+						V2Log.e("Parse board data error ");
+					}
 				}
 
 			}

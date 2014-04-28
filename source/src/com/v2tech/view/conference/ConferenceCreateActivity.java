@@ -52,9 +52,10 @@ import com.v2tech.service.jni.RequestConfCreateResponse;
 import com.v2tech.view.cus.DateTimePicker;
 import com.v2tech.view.cus.DateTimePicker.OnDateSetListener;
 import com.v2tech.vo.Conference;
+import com.v2tech.vo.ConferenceGroup;
 import com.v2tech.vo.Group;
-import com.v2tech.vo.User;
 import com.v2tech.vo.Group.GroupType;
+import com.v2tech.vo.User;
 
 public class ConferenceCreateActivity extends Activity {
 
@@ -633,7 +634,7 @@ public class ConferenceCreateActivity extends Activity {
 					break;
 				}
 				User currU = GlobalHolder.getInstance().getCurrentUser();
-				Group g = new Group(((RequestConfCreateResponse)rccr).getConfId(), GroupType.CONFERENCE,
+				Group g = new ConferenceGroup(((RequestConfCreateResponse)rccr).getConfId(), GroupType.CONFERENCE,
 						conf.getName(), currU.getmUserId() + "", conf.getDate()
 								.getTime() / 1000 + "");
 				g.setOwnerUser(currU);

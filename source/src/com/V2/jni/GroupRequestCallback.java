@@ -100,4 +100,22 @@ public interface GroupRequestCallback {
 	 * @param bMovetoRoot
 	 */
 	public void OnDelGroupCallback(int groupType, long nGroupID, boolean bMovetoRoot);
+	
+	
+	/**
+	 * TODO add comment
+	 * @param groupType
+	 * @param nGroupID
+	 * @param nUserID
+	 */
+	public void OnDelGroupUserCallback(int groupType, long nGroupID, long nUserID);
+	
+	
+	/**
+	 * TODO add comment
+	 * @param groupType
+	 * @param nGroupID
+	 * @param sXml
+	 */
+	public void OnAddGroupUserInfoCallback(int groupType, long nGroupID, String sXml);
 }

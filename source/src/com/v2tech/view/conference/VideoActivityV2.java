@@ -62,6 +62,7 @@ import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.V2Log;
 import com.v2tech.view.JNIService;
 import com.v2tech.view.PublicIntent;
+import com.v2tech.view.bo.GroupUserObject;
 import com.v2tech.view.conference.VideoDocLayout.DocListener;
 import com.v2tech.view.conference.VideoMsgChattingLayout.ChattingListener;
 import com.v2tech.vo.Attendee;
@@ -71,7 +72,6 @@ import com.v2tech.vo.ConferenceGroup;
 import com.v2tech.vo.ConferencePermission;
 import com.v2tech.vo.Conversation;
 import com.v2tech.vo.Group;
-import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.User;
 import com.v2tech.vo.UserDeviceConfig;
 import com.v2tech.vo.V2Doc;
@@ -93,6 +93,8 @@ public class VideoActivityV2 extends Activity {
 
 	private static final int ATTENDEE_LISTENER = 21;
 	private static final int CONF_USER_DEVICE_EVENT = 23;
+	private static final int USER_DELETE_GROUP = 24;
+	private static final int GROUP_ADD_USER = 25;
 
 	private static final int NEW_DOC_NOTIFICATION = 50;
 	private static final int DOC_PAGE_NOTIFICATION = 51;
@@ -102,6 +104,7 @@ public class VideoActivityV2 extends Activity {
 	private static final int DOC_CLOSED_NOTIFICATION = 55;
 	private static final int DOC_PAGE_CANVAS_NOTIFICATION = 56;
 	private static final int DESKTOP_SYNC_NOTIFICATION = 57;
+	
 
 	public static final String JNI_EVENT_VIDEO_CATEGORY = "com.v2tech.conf_video_event";
 	public static final String JNI_EVENT_VIDEO_CATEGORY_OPEN_VIDEO_EVENT_ACTION = "com.v2tech.conf_video_event.open_video_event";
@@ -383,7 +386,16 @@ public class VideoActivityV2 extends Activity {
 				if (mMessageContainer != null) {
 					mMessageContainer.addNewMessage(vm);
 				}
+			} else if (JNIService.JNI_BROADCAST_GROUP_USER_REMOVED.equals(intent.getAction())) {
+				Object obj = intent.getExtras().get("obj");
+				Message.obtain(mVideoHandler, USER_DELETE_GROUP, obj).sendToTarget();
+				
+			}else if (JNIService.JNI_BROADCAST_GROUP_USER_ADDED.equals(intent.getAction())) {
+				Object obj = intent.getExtras().get("obj");
+				Message.obtain(mVideoHandler, GROUP_ADD_USER, obj).sendToTarget();
+				
 			}
+			
 		}
 
 	};
@@ -404,6 +416,8 @@ public class VideoActivityV2 extends Activity {
 		filter.addCategory(JNI_EVENT_VIDEO_CATEGORY);
 		filter.addAction(JNI_EVENT_VIDEO_CATEGORY_OPEN_VIDEO_EVENT_ACTION);
 		filter.addAction(JNIService.JNI_BROADCAST_NEW_CONF_MESSAGE);
+		filter.addAction(JNIService.JNI_BROADCAST_GROUP_USER_REMOVED);
+		filter.addAction(JNIService.JNI_BROADCAST_GROUP_USER_ADDED);
 		filter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
 		mContext.registerReceiver(mConfUserChangeReceiver, filter);
 
@@ -1176,6 +1190,18 @@ public class VideoActivityV2 extends Activity {
 			case CONF_USER_DEVICE_EVENT:
 				// recordUserDevice((ConfUserDeviceInfo) msg.obj);
 				break;
+			case USER_DELETE_GROUP:
+				GroupUserObject ro = (GroupUserObject) msg.obj;
+				Attendee a = new Attendee(GlobalHolder.getInstance().getUser(ro.getmUserId()));
+				mAttendeeList.remove(a);
+				mAttendeeContainer.removeAttendee(a);
+				break;
+			case GROUP_ADD_USER:
+				GroupUserObject ro1 = (GroupUserObject) msg.obj;
+				Attendee a1 = new Attendee(GlobalHolder.getInstance().getUser(ro1.getmUserId()));
+				mAttendeeList.add(a1);
+				mAttendeeContainer.addAttendee(a1);
+				break;
 			case ATTENDEE_LISTENER:
 				if (msg.arg1 == 1) {
 					doHandleNewUserEntered((User) msg.obj);
@@ -1335,7 +1361,8 @@ public class VideoActivityV2 extends Activity {
 				break;
 				
 			case DOC_PAGE_CANVAS_NOTIFICATION:
-				V2ShapeMeta shape = (V2ShapeMeta)msg.obj;
+				V2ShapeMeta shape = (V2ShapeMeta)((DocumentService.AsyncResult) (msg.obj))
+						.getResult();
 				synchronized(mDocs) {
 					V2Doc ca = mDocs.get(shape.getDocId());
 					V2Doc.Page caVp = ca.findPage(shape.getPageNo());
@@ -1343,6 +1370,7 @@ public class VideoActivityV2 extends Activity {
 					if (mDocContainer != null
 							&& caVp.getDocId().equals(mCurrentActivateDoc.getId())
 							&& caVp.getNo() == mCurrentActivateDoc.getActivatePageNo()) {
+						mDocContainer.drawShape(caVp.getVsMeta());
 					}
 				}
 				break;

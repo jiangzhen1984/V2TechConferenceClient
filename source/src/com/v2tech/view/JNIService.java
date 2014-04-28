@@ -39,17 +39,18 @@ import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.Notificator;
 import com.v2tech.util.V2Log;
 import com.v2tech.util.XmlParser;
+import com.v2tech.view.bo.GroupUserObject;
 import com.v2tech.view.conference.VideoActivityV2;
 import com.v2tech.vo.ConferenceGroup;
 import com.v2tech.vo.Conversation;
 import com.v2tech.vo.CrowdConversation;
 import com.v2tech.vo.Group;
+import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.NetworkStateCode;
 import com.v2tech.vo.User;
 import com.v2tech.vo.UserDeviceConfig;
 import com.v2tech.vo.VImageMessage;
 import com.v2tech.vo.VMessage;
-import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.VMessage.MessageType;
 
 /**
@@ -76,6 +77,8 @@ public class JNIService extends Service {
 	public static final String JNI_BROADCAST_NEW_CONF_MESSAGE = "com.v2tech.jni.broadcast.new.conf.message";
 	public static final String JNI_BROADCAST_CONFERENCE_INVATITION = "com.v2tech.jni.broadcast.conference_invatition";
 	public static final String JNI_BROADCAST_CONFERENCE_REMOVED = "com.v2tech.jni.broadcast.conference_removed";
+	public static final String JNI_BROADCAST_GROUP_USER_REMOVED = "com.v2tech.jni.broadcast.group_user_removed";
+	public static final String JNI_BROADCAST_GROUP_USER_ADDED = "com.v2tech.jni.broadcast.group_user_added";
 
 	private boolean isDebug = true;
 
@@ -119,20 +122,23 @@ public class JNIService extends Service {
 				}
 			}
 		}
-		
+
 		mCallbackHandler = new JNICallbackHandler(callback.getLooper());
 
 		mImCB = new ImRequestCB(mCallbackHandler);
 		ImRequest.getInstance(this.getApplicationContext()).setCallback(mImCB);
 
 		mGRCB = new GroupRequestCB(mCallbackHandler);
-		GroupRequest.getInstance(this.getApplicationContext()).addCallback(mGRCB);
+		GroupRequest.getInstance(this.getApplicationContext()).addCallback(
+				mGRCB);
 
 		mVRCB = new VideoRequestCB(mCallbackHandler);
-		VideoRequest.getInstance(this.getApplicationContext()).addCallback(mVRCB);
+		VideoRequest.getInstance(this.getApplicationContext()).addCallback(
+				mVRCB);
 
 		mChRCB = new ChatRequestCB(mCallbackHandler);
-		ChatRequest.getInstance(this.getApplicationContext()).setChatRequestCallback(mChRCB);
+		ChatRequest.getInstance(this.getApplicationContext())
+				.setChatRequestCallback(mChRCB);
 	}
 
 	@Override
@@ -271,7 +277,8 @@ public class JNIService extends Service {
 						Group.GroupType.fromInt(msg.arg1), gl);
 				if (Group.GroupType.fromInt(msg.arg1) == GroupType.CHATING) {
 					for (Group g : gl) {
-						GlobalHolder.getInstance().addConversation(new CrowdConversation(g));
+						GlobalHolder.getInstance().addConversation(
+								new CrowdConversation(g));
 					}
 				}
 				Intent gi = new Intent(JNI_BROADCAST_GROUP_NOTIFICATION);
@@ -299,7 +306,8 @@ public class JNIService extends Service {
 						}
 						g.addUserToGroup(existU);
 					}
-					V2Log.w("  group:" +go.gId +"  user size:" + lu.size()  +"  "+g);
+					V2Log.w("  group:" + go.gId + "  user size:" + lu.size()
+							+ "  " + g);
 					Intent i = new Intent(
 							JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION);
 					i.addCategory(JNI_BROADCAST_CATEGROY);
@@ -386,11 +394,13 @@ public class JNIService extends Service {
 
 		// FIXME update message for group message
 		private void updateStatusBar(VMessage vm) {
-			Conversation cov  = null;
+			Conversation cov = null;
 			if (vm.mGroupId != 0) {
-				cov = GlobalHolder.getInstance().findConversationByType(Conversation.TYPE_GROUP, vm.mGroupId);
+				cov = GlobalHolder.getInstance().findConversationByType(
+						Conversation.TYPE_GROUP, vm.mGroupId);
 			} else {
-				cov = GlobalHolder.getInstance().findConversationByType(Conversation.TYPE_CONTACT, vm.getUser().getmUserId());
+				cov = GlobalHolder.getInstance().findConversationByType(
+						Conversation.TYPE_CONTACT, vm.getUser().getmUserId());
 			}
 			//
 			if (cov == GlobalHolder.getInstance().CURRENT_CONVERSATION) {
@@ -557,7 +567,7 @@ public class JNIService extends Service {
 		public void OnModifyGroupInfoCallback(int groupType, long nGroupID,
 				String sXml) {
 			if (groupType == GroupType.CONFERENCE.intValue()) {
-			
+
 			}
 
 		}
@@ -569,13 +579,15 @@ public class JNIService extends Service {
 			if (gType == GroupType.CONFERENCE) {
 				Group g = ConferenceGroup
 						.parseConferenceGroupFromXML(groupInfo);
-				GroupRequest.getInstance().getGroupInfo(GroupType.CONFERENCE.intValue(), g.getmGId());
+				GroupRequest.getInstance().getGroupInfo(
+						GroupType.CONFERENCE.intValue(), g.getmGId());
 				String name = "";
 				int pos = -1;
 				if (userInfo != null && (pos = userInfo.indexOf("id='")) != -1) {
 					int end = userInfo.indexOf("'", pos + 4);
 					if (end != -1) {
-						Long uid = Long.parseLong(userInfo.substring(pos+4, end));
+						Long uid = Long.parseLong(userInfo.substring(pos + 4,
+								end));
 						User u = GlobalHolder.getInstance().getUser(uid);
 						if (u != null) {
 							name = u.getName();
@@ -590,9 +602,12 @@ public class JNIService extends Service {
 						i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
 						i.putExtra("gid", g.getmGId());
 						sendBroadcast(i);
-						Intent enterConference =  new Intent(mContext, VideoActivityV2.class);
+						Intent enterConference = new Intent(mContext,
+								VideoActivityV2.class);
 						enterConference.putExtra("gid", g.getmGId());
-						Notificator.updateSystemNotification(mContext, name+" 会议邀请:", g.getName(), 1, enterConference, PublicIntent.VIDEO_NOTIFICATION_ID);
+						Notificator.updateSystemNotification(mContext, name
+								+ " 会议邀请:", g.getName(), 1, enterConference,
+								PublicIntent.VIDEO_NOTIFICATION_ID);
 					}
 
 				}
@@ -604,16 +619,17 @@ public class JNIService extends Service {
 				boolean bMovetoRoot) {
 			// TODO just support conference
 			if (groupType == Group.GroupType.CONFERENCE.intValue()) {
-				String name ="";
-				String gName ="";
-				Group rG = GlobalHolder.getInstance().getGroupById(Group.GroupType.CONFERENCE, nGroupID);
+				String name = "";
+				String gName = "";
+				Group rG = GlobalHolder.getInstance().getGroupById(
+						Group.GroupType.CONFERENCE, nGroupID);
 				if (rG != null) {
 					gName = rG.getName();
 					if (rG.getOwnerUser() != null) {
 						name = rG.getOwnerUser().getName();
 					}
 				} else {
-					gName =nGroupID+"";
+					gName = nGroupID + "";
 				}
 				GlobalHolder.getInstance().removeConferenceGroup(nGroupID);
 				Intent i = new Intent();
@@ -621,8 +637,50 @@ public class JNIService extends Service {
 				i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
 				i.putExtra("gid", nGroupID);
 				sendBroadcast(i);
-				Notificator.updateSystemNotification(mContext, name+" 删除会议:", gName, 1, PublicIntent.VIDEO_NOTIFICATION_ID);
+				Notificator.updateSystemNotification(mContext, name + " 删除会议:",
+						gName, 1, PublicIntent.VIDEO_NOTIFICATION_ID);
 			}
+		}
+
+		@Override
+		public void OnDelGroupUserCallback(int groupType, long nGroupID,
+				long nUserID) {
+			GlobalHolder.getInstance().removeGroupUser(nGroupID, nUserID);
+			GroupUserObject obj = new GroupUserObject(groupType, nGroupID,
+					nUserID);
+			Intent i = new Intent();
+			i.setAction(JNIService.JNI_BROADCAST_GROUP_USER_REMOVED);
+			i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
+			i.putExtra("obj", obj);
+			sendBroadcast(i);
+		}
+
+		@Override
+		public void OnAddGroupUserInfoCallback(int groupType, long nGroupID,
+				String sXml) {
+			if (sXml == null || sXml.isEmpty()) {
+				V2Log.e("Incorrect user xml ");
+				return;
+			}
+			int start = sXml.indexOf("id='");
+			int end = sXml.indexOf("'", start + 4);
+			String uidStr = sXml.substring(start + 4, end);
+			long uid = 0;
+			try {
+				uid = Long.parseLong(uidStr);
+			} catch (NumberFormatException e) {
+				V2Log.e("Incorrect user id  " + sXml);
+				return;
+			}
+
+			GlobalHolder.getInstance().addUserToGroup(
+					GlobalHolder.getInstance().getUser(uid), nGroupID);
+			GroupUserObject obj = new GroupUserObject(groupType, nGroupID, uid);
+			Intent i = new Intent();
+			i.setAction(JNIService.JNI_BROADCAST_GROUP_USER_ADDED);
+			i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
+			i.putExtra("obj", obj);
+			sendBroadcast(i);
 		}
 
 	}

@@ -272,6 +272,14 @@ public class GlobalHolder {
 			addUserToGroup(g.getChildGroup(), uList, belongGID);
 		}
 	}
+	
+	
+	public void removeGroupUser(long gid, long uid) {
+		Group g = this.findGroupById(gid) ;
+		if (g != null) {
+			g.removeUserFromGroup(uid);
+		}
+	}
 
 	/**
 	 * Add user collections to group collections

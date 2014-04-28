@@ -69,9 +69,9 @@ public class VideoAttendeeListLayout extends LinearLayout {
 			public void onItemClick(AdapterView<?> ad, View view, int pos,
 					long id) {
 				if (listener != null) {
-					UserDeviceConfig udc = (UserDeviceConfig) view.getTag();
-					listener.OnAttendeeClicked(udc ==null ? null : udc.getBelongsAttendee(),
-							(UserDeviceConfig) view.getTag());
+					Wrapper wr = (Wrapper)view.getTag() ;
+					listener.OnAttendeeClicked(wr.a,
+							wr.udc);
 				}
 			}
 
@@ -124,7 +124,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 			nameTV.setTypeface(null, Typeface.BOLD);
 			cameraIV.setImageResource(R.drawable.camera);
 		}
-		view.setTag(a.getDefaultDevice());
+		view.setTag(new Wrapper(a, a.getDefaultDevice()));
 		list.add(view);
 
 		for (int i = 1; a.getmDevices() != null && i < a.getmDevices().size(); i++) {
@@ -139,7 +139,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 			nameTV2.setTextSize(20);
 			cameraIV2.setImageResource(R.drawable.camera);
 
-			view2.setTag(udc);
+			view2.setTag(new Wrapper(a, udc));
 			list.add(view2);
 		}
 
@@ -158,6 +158,33 @@ public class VideoAttendeeListLayout extends LinearLayout {
 		mAttends.put(Long.valueOf(at.getUser().getmUserId()), at);
 		mAttendsView.clear();
 		populate();
+	}
+	
+	/**
+	 * Remove attend and device from layout.
+	 * @param at
+	 */
+	public void removeAttendee(Attendee at) {
+		mAttends.remove(Long.valueOf(at.getUser().getmUserId()));
+		synchronized (mAttendsView) {
+			for (View v : mAttendsView) {
+				Wrapper wr = (Wrapper)v.getTag();
+				if (wr.a.getUser().getmUserId() == at.getUser().getmUserId()) {
+					mAttendsView.remove(v);
+				}
+			}
+		}
+		adapter.notifyDataSetChanged();
+	}
+	
+	/**
+	 * Add attend and device from layout.
+	 * @param at
+	 */
+	public void addAttendee(Attendee at) {
+		mAttendsView.addAll(buildAttendeeView(at));
+		adapter.notifyDataSetChanged();
+		
 	}
 
 	class AttendeesAdapter extends BaseAdapter {
@@ -182,6 +209,18 @@ public class VideoAttendeeListLayout extends LinearLayout {
 			return mAttendsView.get(position);
 		}
 
+	}
+	
+	
+	class Wrapper {
+		Attendee a;
+		UserDeviceConfig udc;
+		public Wrapper(Attendee a, UserDeviceConfig udc) {
+			super();
+			this.a = a;
+			this.udc = udc;
+		}
+		
 	}
 
 }

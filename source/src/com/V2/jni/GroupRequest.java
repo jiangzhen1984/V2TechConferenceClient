@@ -151,37 +151,27 @@ public class GroupRequest {
 	}
 
 	private void OnAddGroupUserInfo(int groupType, long nGroupID, String sXml) {
-		Log.e("ImRequest UI", "OnAddGroupUserInfo::��Ӻ��ѵ������Ϣ" + groupType
+		V2Log.d("OnAddGroupUserInfo ->" + groupType
 				+ ":" + nGroupID + ":" + sXml);
-
-		// List<NYXUser> addUsers = XmlParserUtils
-		// .parserNYXUser(new
-		// ByteArrayInputStream(sXml.getBytes()),application.getLocalUser().getId());
-		//
-		// // ƴװ��Ϣ
-		// AddFriMsgType addFriMsgType = new AddFriMsgType();
-		//
-		// addFriMsgType.setAddUsers(addUsers);
-		// addFriMsgType.setGroupid(nGroupID);
-		//
-		// Intent addIntent = new Intent(SplashActivity.IM);
-		// addIntent.putExtra("MsgType", MsgType.ADDFRI);
-		// addIntent.putExtra("MSG", addFriMsgType);
-		// context.sendOrderedBroadcast(addIntent,null);
+		for (WeakReference<GroupRequestCallback> wrcb : callbacks) {
+			Object obj = wrcb.get();
+			if (obj != null) {
+				GroupRequestCallback callback = (GroupRequestCallback) obj;
+				callback.OnAddGroupUserInfoCallback(groupType, nGroupID, sXml);
+			}
+		}
 	}
 
 	private void OnDelGroupUser(int groupType, long nGroupID, long nUserID) {
-		Log.e("ImRequest UI", "OnDelGroupUser:: ������ɾ�����" + groupType + ":"
+		V2Log.d("OnDelGroupUser -> " + groupType + ":"
 				+ nGroupID + ":" + nUserID);
-		// ƴװ��Ϣ
-		// DelFriMsgType delFri = new DelFriMsgType();
-		// delFri.setUserid(nUserID);
-		//
-		// // ͨ��㲥������Ϣ��֪ͨ,������������˻���
-		// Intent delIntent = new Intent(SplashActivity.IM);
-		// delIntent.putExtra("MsgType", MsgType.DELFRI);
-		// delIntent.putExtra("MSG", delFri);
-		// context.sendOrderedBroadcast(delIntent,null);
+		for (WeakReference<GroupRequestCallback> wrcb : callbacks) {
+			Object obj = wrcb.get();
+			if (obj != null) {
+				GroupRequestCallback callback = (GroupRequestCallback) obj;
+				callback.OnDelGroupUserCallback(groupType, nGroupID, nUserID);
+			}
+		}
 	}
 
 	private void OnAddGroupInfo(int groupType, long nParentID, long nGroupID,
