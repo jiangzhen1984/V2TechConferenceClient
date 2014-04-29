@@ -70,5 +70,13 @@
             android:text="@string/contact_message_send_button"
             android:textSize="15sp" />
     </LinearLayout>
+    
+     <LinearLayout
+        android:layout_width="1dp"
+        android:layout_height="fill_parent"
+        android:layout_alignParentRight="true"
+        android:background="#cdcdcf"
+        android:orientation="vertical" >
+    </LinearLayout>
 
 </RelativeLayout>

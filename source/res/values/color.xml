@@ -2,9 +2,9 @@
 <resources>
 
     <color name="common_black">#000000</color>
-    <color name="text_tab_selected">#ffffff</color>
-    <color name="text_tab_unselected">#bababa</color>
-    <color name="button_text_color">#82b9d7</color>
+    <color name="text_tab_selected">#007aff</color>
+    <color name="text_tab_unselected">#8c8c8c</color>
+    <color name="button_text_color">#007aff</color>
     <color name="in_meeting_camera_setting_progress_bar">#c2c2c2</color>
 
 </resources>

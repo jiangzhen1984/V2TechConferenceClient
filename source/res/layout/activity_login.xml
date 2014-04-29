@@ -133,7 +133,7 @@
                 android:layout_marginLeft="15dp"
                 android:layout_marginTop="10dp" >
 
-                <Button
+                <TextView
                     android:id="@+id/sign_in_button"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -141,11 +141,12 @@
                     android:layout_gravity="center"
                     android:layout_marginBottom="20dp"
                     android:layout_marginTop="16dp"
-                    android:background="@drawable/button_bg"
                     android:minHeight="30dp"
                     android:paddingLeft="32dp"
                     android:paddingRight="32dp"
                     android:textColor="@color/button_text_color"
+                     android:textSize="18sp"
+                    android:gravity="center"
                     android:text="@string/action_sign_in_register" />
 
                 <ImageView
@@ -154,7 +155,7 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentLeft="true"
                     android:layout_centerVertical="true"
-                    android:src="@drawable/setting_button" />
+                    android:src="@drawable/login_setting_button" />
             </RelativeLayout>
 
             <TextView

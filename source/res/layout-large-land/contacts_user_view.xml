@@ -42,8 +42,8 @@
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
             android:layout_marginLeft="30dp"
+            android:layout_marginRight="35dp"
             android:layout_toRightOf="@+id/contact_user_img_container"
-             android:layout_marginRight="35dp"
             android:ellipsize="end"
             android:singleLine="true"
             android:text="TextView" />
@@ -68,7 +68,8 @@
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
             android:layout_marginRight="62dp"
-            android:src="@drawable/arrow_right_gray" />
+            android:src="@drawable/arrow_right_gray"
+            android:visibility="invisible" />
     </RelativeLayout>
 
     <LinearLayout

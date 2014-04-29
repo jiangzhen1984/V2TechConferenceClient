@@ -4,6 +4,8 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.v2tech.util.V2Log;
+
 import android.content.Context;
 import android.util.Log;
 
@@ -101,7 +103,7 @@ public class WBRequest {
 	private void OnWBoardDocDisplay(String szWBoardID, int nPageID,
 			String szFileName, int result) {
 		// return ;
-		Log.e("WBRequest UI", "�ĵ���ʾ---->OnWBoardDocDisplay " + szWBoardID
+		V2Log.d("---->OnWBoardDocDisplay " + szWBoardID
 				+ " " + nPageID + " " + szFileName);
 		for (WeakReference<WBRequestCallback> wr : mCallbacks) {
 			if (wr != null && wr.get() != null) {
@@ -114,15 +116,15 @@ public class WBRequest {
 
 	private void OnRecvAddWBoardData(String szWBoardID, int nPageID,
 			String szDataID, String szData) {
-		Log.e("WBRequest UI",
+		V2Log.d(
 				"OnRecvAddWBoardData " + szWBoardID + " " + nPageID + " "
 						+ szDataID + " " + szData + " " + szData.length());
 
-		for (WeakReference<WBRequestCallback> wr : mCallbacks) {
-			if (wr != null && wr.get() != null) {
-				wr.get().OnRecvAddWBoardDataCallback(szWBoardID, nPageID, szDataID, szData);
-			}
-		}
+//		for (WeakReference<WBRequestCallback> wr : mCallbacks) {
+//			if (wr != null && wr.get() != null) {
+//				wr.get().OnRecvAddWBoardDataCallback(szWBoardID, nPageID, szDataID, szData);
+//			}
+//		}
 	}
 
 	private void OnRecvAppendWBoardData(String szWBoardID, int nPageID,
@@ -131,20 +133,20 @@ public class WBRequest {
 				"OnRecvAppendWBoardData " + szWBoardID + " " + nPageID + " "
 						+ szDataID + " " + szData + " " + szData.length());
 
-		for (WeakReference<WBRequestCallback> wr : mCallbacks) {
-			if (wr != null && wr.get() != null) {
-				wr.get().OnRecvAppendWBoardDataCallback(szWBoardID, nPageID, szDataID, szData);
-			}
-		}
+//		for (WeakReference<WBRequestCallback> wr : mCallbacks) {
+//			if (wr != null && wr.get() != null) {
+//				wr.get().OnRecvAppendWBoardDataCallback(szWBoardID, nPageID, szDataID, szData);
+//			}
+//		}
 
 	}
 
 	// / �յ��Է��������ҵİװ�Ự����Ļص�
-	private void OnWBoardChatAccepted(long nGroupID, int nBusinessType,
+	private void OnWBoardChatAccepted(long nGroupID, int nBuVideoActivityV2sinessType,
 			long nFromUserID, String szWBoardID, int nWhiteIndex,
 			String szFileName, int type) {
-		Log.e("WBRequest UI", "OnWBoardChatAccepted " + nGroupID + " "
-				+ nBusinessType + " " + nFromUserID + " " + szWBoardID + " "
+		V2Log.d("OnWBoardChatAccepted " + nGroupID + " "
+				+ nFromUserID + " " + szWBoardID + " "
 				+ szFileName + " " + type);
 	}
 

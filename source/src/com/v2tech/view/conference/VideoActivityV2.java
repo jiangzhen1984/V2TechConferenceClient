@@ -444,6 +444,10 @@ public class VideoActivityV2 extends Activity {
 
 		conf = new Conference(mGroupId);
 		Group g = GlobalHolder.getInstance().findGroupById(mGroupId);
+		if (g == null) {
+			V2Log.e(" doesn't receive group information  yet");
+			return;
+		}
 		mGroupNameTV.setText(g.getName());
 	}
 
@@ -967,6 +971,9 @@ public class VideoActivityV2 extends Activity {
 			// mVideoHandler, REQUEST_CLOSE_DEVICE_RESPONSE));
 		}
 
+		//close local camera
+		Message.obtain(mVideoHandler, REQUEST_OPEN_OR_CLOSE_DEVICE, 0, 0,
+				new UserDeviceConfig(GlobalHolder.getInstance().getCurrentUserId(), "", null)).sendToTarget();
 		VideoRecorder.VideoPreviewSurfaceHolder = null;
 		mAttendeeList.clear();
 		mCurrentShowedSV.clear();
@@ -1366,7 +1373,11 @@ public class VideoActivityV2 extends Activity {
 				synchronized(mDocs) {
 					V2Doc ca = mDocs.get(shape.getDocId());
 					V2Doc.Page caVp = ca.findPage(shape.getPageNo());
-					caVp.addMeta(shape);
+					if (caVp != null) {
+						caVp.addMeta(shape);
+					} else {
+						V2Log.e(" didn't find page for canvas"+shape.getPageNo());
+					}
 					if (mDocContainer != null
 							&& caVp.getDocId().equals(mCurrentActivateDoc.getId())
 							&& caVp.getNo() == mCurrentActivateDoc.getActivatePageNo()) {

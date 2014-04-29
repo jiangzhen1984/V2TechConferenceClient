@@ -12,6 +12,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.Configuration;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -22,6 +23,7 @@ import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -37,6 +39,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.PopupWindow;
+import android.widget.RelativeLayout;
 import android.widget.PopupWindow.OnDismissListener;
 import android.widget.TextView;
 
@@ -45,6 +48,7 @@ import com.v2tech.db.ContentDescriptor;
 import com.v2tech.service.ConferenceService;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.util.BitmapUtil;
+import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.V2Log;
 import com.v2tech.view.conference.GroupLayout;
 import com.v2tech.view.conference.VideoActivityV2;
@@ -279,7 +283,7 @@ public class ConversationsTabFragment extends Fragment {
 	}
 
 	private void populateConversation(final Group g, boolean flag) {
-		//FIXME 
+		// FIXME
 		if (mConferenceList != null) {
 			mConferenceList.add(g);
 		}
@@ -424,83 +428,62 @@ public class ConversationsTabFragment extends Fragment {
 		@Override
 		public void onClick(View view) {
 
-			if (pw != null) {
-				pw.showAsDropDown(view);
-				return;
-			}
-			LinearLayout root = new LinearLayout(mContext);
-			root.setOrientation(LinearLayout.VERTICAL);
-			if (mCurrentTabFlag.equals(Conversation.TYPE_CONTACT)) {
-				View v = getMenuButtonView(R.string.conversation_popup_menu_video_call_button);
-				root.addView(v);
-
-				v = getMenuButtonView(R.string.conversation_popup_menu_call_button);
-				root.addView(v);
-
-				v = getMenuButtonView(R.string.conversation_popup_menu_sms_call_button);
-				root.addView(v);
-
-				v = getMenuButtonView(R.string.conversation_popup_menu_email_button);
-				root.addView(v);
-				v = getMenuButtonView(R.string.conversation_popup_menu_files_button);
-				root.addView(v);
-				v = getMenuButtonView(R.string.conversation_popup_menu_setting_button);
-				root.addView(v);
-
-			} else {
-				root.setBackgroundColor(mContext.getResources().getColor(
-						R.color.confs_title_bg));
-				View v = getMenuButtonView(R.string.conference_create_title);
-				v.setOnClickListener(mConferenceCreateButtonListener);
-				root.addView(v);
-			}
-			pw = new PopupWindow(root, ViewGroup.LayoutParams.WRAP_CONTENT,
-					ViewGroup.LayoutParams.WRAP_CONTENT, true);
-			pw.setBackgroundDrawable(new ColorDrawable(R.color.confs_title_bg));
-			pw.setOnDismissListener(new OnDismissListener() {
-
-				@Override
-				public void onDismiss() {
-					pw.dismiss();
+			if (pw == null) {
+				LayoutInflater inflater = (LayoutInflater) mContext
+						.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+				View layout = inflater.inflate(
+						R.layout.conversation_pop_up_window_contact, null);
+				
+				DisplayMetrics dm = new DisplayMetrics();
+				((Activity) mContext).getWindowManager().getDefaultDisplay()
+						.getMetrics(dm);
+				int height = 300;
+				if (GlobalConfig.GLOBAL_LAYOUT_SIZE == Configuration.SCREENLAYOUT_SIZE_NORMAL) {
+					height = (int) (dm.heightPixels * 0.6);
+				} else {
+					height = (int) (dm.heightPixels * 0.4);
 				}
 
-			});
+				pw = new PopupWindow(layout,
+						ViewGroup.LayoutParams.WRAP_CONTENT, height, true);
+				pw.setOnDismissListener(new OnDismissListener() {
+					@Override
+					public void onDismiss() {
+						pw.dismiss();
+					}
 
-			pw.setFocusable(true);
-			pw.setTouchable(true);
-			pw.setOutsideTouchable(true);
-			pw.showAsDropDown(view);
+				});
+				pw.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+				pw.setFocusable(true);
+				pw.setTouchable(true);
+				pw.setOutsideTouchable(true);
+				pw.setFocusable(true);
+				pw.setTouchable(true);
+				pw.setOutsideTouchable(true);
 
+				layout.findViewById(R.id.common_pop_up_arrow_up).measure(
+						View.MeasureSpec.UNSPECIFIED,
+						View.MeasureSpec.UNSPECIFIED);
+			}
+			int[] pos = new int[2];
+			view.getLocationInWindow(pos);
+			pos[0] += view.getMeasuredWidth() / 2;
+			pos[1] += view.getMeasuredHeight();
+			// calculate arrow offset
+			View arrow = pw.getContentView().findViewById(
+					R.id.common_pop_up_arrow_up);
+			// TODO hand position
+			arrow.bringToFront();
+			RelativeLayout.LayoutParams rl = (RelativeLayout.LayoutParams) arrow
+					.getLayoutParams();
+			pos[0] -= (rl.leftMargin + arrow.getMeasuredWidth() / 2);
+
+			pw.setAnimationStyle(R.style.InMeetingCameraSettingAnim);
+			pw.showAtLocation(view, Gravity.NO_GRAVITY, pos[0], pos[1]);
 		}
 
 	};
 
-	private View getMenuButtonView(int resId) {
-		LinearLayout l = new LinearLayout(mContext);
-
-		TextView tv = new TextView(mContext);
-		tv.setTextSize(18);
-		tv.setGravity(Gravity.CENTER);
-		tv.setText(resId);
-
-		LinearLayout.LayoutParams ll = new LinearLayout.LayoutParams(
-				LinearLayout.LayoutParams.MATCH_PARENT,
-				LinearLayout.LayoutParams.WRAP_CONTENT);
-		ll.setMargins(5, 20, 5, 20);
-		ll.gravity = Gravity.CENTER;
-		tv.setLayoutParams(ll);
-
-		l.addView(tv);
-		l.setLayoutParams(ll);
-
-		LinearLayout line = new LinearLayout(mContext);
-		line.setBackgroundColor(Color.GRAY);
-
-		l.addView(line, new LinearLayout.LayoutParams(
-				LinearLayout.LayoutParams.MATCH_PARENT, 1));
-
-		return l;
-	}
 
 	private void loadConversation() {
 		isLoadedCov = true;

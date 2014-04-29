@@ -627,16 +627,15 @@
             </LinearLayout>
         </ScrollView>
 
-          <LinearLayout
+        <LinearLayout
             android:id="@+id/LinearLayout2"
             android:layout_width="fill_parent"
             android:layout_height="1dp"
             android:layout_above="@id/LinearLayout1"
             android:background="#cfcfcf"
             android:orientation="horizontal" >
-		</LinearLayout>
-        
-        
+        </LinearLayout>
+
         <LinearLayout
             android:id="@+id/LinearLayout1"
             android:layout_width="fill_parent"
@@ -751,6 +750,7 @@
                     android:gravity="center"
                     android:padding="10dp"
                     android:text="@string/contacts_user_detail_button_send_text_msg"
+                    android:textColor="@color/button_text_color"
                     android:textSize="18sp" />
             </LinearLayout>
 

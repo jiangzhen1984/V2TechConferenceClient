@@ -81,5 +81,13 @@
         android:layout_marginRight="20dp"
         android:tag="float"
         android:src="@drawable/pin_button_selector" />
+    
+     <LinearLayout
+        android:layout_width="1dp"
+        android:layout_height="fill_parent"
+        android:layout_alignParentRight="true"
+        android:background="#cdcdcf"
+        android:orientation="vertical" >
+    </LinearLayout>
 
 </RelativeLayout>

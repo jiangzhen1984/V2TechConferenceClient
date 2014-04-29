@@ -24,13 +24,6 @@
         android:paddingBottom="2dp"
         android:text="@string/tab_conference_name" />
 
-    <ImageView
-        android:id="@+id/imageView1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"
-        android:src="@drawable/selector_tab_bg" />
 
     <ImageView
         android:id="@+id/tab_notificator"

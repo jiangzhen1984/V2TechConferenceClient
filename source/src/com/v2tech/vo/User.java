@@ -377,8 +377,10 @@ public class User implements Comparable<User> {
 			Bitmap tmep = BitmapFactory.decodeFile(mAvatarPath, opt);
 			if (GlobalConfig.GLOBAL_DPI == DisplayMetrics.DENSITY_HIGH) {
 				avatar = Bitmap.createScaledBitmap(tmep, 60, 60, true);
-			} else if (GlobalConfig.GLOBAL_DPI >= DisplayMetrics.DENSITY_XHIGH) {
-				avatar = Bitmap.createScaledBitmap(tmep, 60, 60, true);
+			} else if (GlobalConfig.GLOBAL_DPI == DisplayMetrics.DENSITY_XHIGH) {
+				avatar = Bitmap.createScaledBitmap(tmep, 80, 80, true);
+			} else if (GlobalConfig.GLOBAL_DPI == DisplayMetrics.DENSITY_XXHIGH) {
+				avatar = Bitmap.createScaledBitmap(tmep, 100, 100, true);
 			} else {
 				avatar = Bitmap.createScaledBitmap(tmep, 60, 60, true);
 			}
