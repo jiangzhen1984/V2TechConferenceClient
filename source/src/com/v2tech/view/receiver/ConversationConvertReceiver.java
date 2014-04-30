@@ -124,8 +124,14 @@ public class ConversationConvertReceiver extends BroadcastReceiver {
 		Conversation cov = GlobalHolder.getInstance().findConversationByType(
 				Conversation.TYPE_GROUP, gid);
 		if (cov == null) {
-			cov = new CrowdConversation(g);
-			GlobalHolder.getInstance().addConversation(cov);
+			if (g != null) {
+				//FIXME how to do notification if group information didn't receive
+				cov = new CrowdConversation(g);
+				GlobalHolder.getInstance().addConversation(cov);
+			} else {
+				V2Log.e(" didn't receive group informaion");
+				return ;
+			}
 		}
 		
 		//FIXME optimize code

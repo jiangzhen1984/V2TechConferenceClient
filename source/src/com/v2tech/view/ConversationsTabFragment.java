@@ -431,8 +431,17 @@ public class ConversationsTabFragment extends Fragment {
 			if (pw == null) {
 				LayoutInflater inflater = (LayoutInflater) mContext
 						.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-				View layout = inflater.inflate(
-						R.layout.conversation_pop_up_window_contact, null);
+				View layout = null;
+				
+				if (mCurrentTabFlag == Conversation.TYPE_CONFERNECE) {
+					layout = inflater.inflate(
+							R.layout.conversation_pop_up_window_conference, null);
+					View  v= layout.findViewById(R.id.conversation_pop_up_window_conf_create_conf_button);
+					v.setOnClickListener(mConferenceCreateButtonListener);
+				} else if (mCurrentTabFlag == Conversation.TYPE_CONTACT) {
+					layout = inflater.inflate(
+							R.layout.conversation_pop_up_window_contact, null);
+				}
 				
 				DisplayMetrics dm = new DisplayMetrics();
 				((Activity) mContext).getWindowManager().getDefaultDisplay()
