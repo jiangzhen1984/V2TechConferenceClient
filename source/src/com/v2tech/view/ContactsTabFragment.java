@@ -65,8 +65,6 @@ public class ContactsTabFragment extends Fragment {
 
 	private boolean mIsStartedSearch = false;
 
-	private Map<Long, ListItem> mCacheHolder = new HashMap<Long, ListItem>();
-
 	private List<ListItem> mItemList = new ArrayList<ListItem>();
 	private List<ListItem> mCacheItemList;
 
@@ -216,7 +214,6 @@ public class ContactsTabFragment extends Fragment {
 				for (Group g : l) {
 					ListItem li = new ListItem(g, g.getLevel());
 					mItemList.add(li);
-					mCacheHolder.put(Long.valueOf(g.getmGId()), li);
 					iterateGroup(g);
 				}
 			}
@@ -226,11 +223,9 @@ public class ContactsTabFragment extends Fragment {
 		private void iterateGroup(Group g) {
 			for (User u : g.getUsers()) {
 				ListItem liu = new ListItem(u, g.getLevel() + 1);
-				mCacheHolder.put(Long.valueOf(u.getmUserId()), liu);
 			}
 			for (Group subG : g.getChildGroup()) {
 				ListItem lisubg = new ListItem(subG, g.getLevel());
-				mCacheHolder.put(Long.valueOf(subG.getmGId()), lisubg);
 			}
 		}
 
@@ -337,11 +332,7 @@ public class ContactsTabFragment extends Fragment {
 		if (item.isExpanded == false) {
 			for (Group g : item.g.getChildGroup()) {
 				Long key = Long.valueOf(g.getmGId());
-				ListItem cache = mCacheHolder.get(key);
-				if (cache == null) {
-					cache = new ListItem(g, g.getLevel());
-					mCacheHolder.put(key, cache);
-				}
+				ListItem cache =new ListItem(g, g.getLevel());
 				mItemList.add(++pos, cache);
 			}
 			List<User> sortList = new ArrayList<User>();
@@ -349,11 +340,7 @@ public class ContactsTabFragment extends Fragment {
 			Collections.sort(sortList);
 			for (User u : sortList) {
 				Long key = Long.valueOf(u.getmUserId());
-				ListItem cache = mCacheHolder.get(key);
-				if (cache == null) {
-					cache = new ListItem(u, item.g.getLevel() + 1);
-					mCacheHolder.put(key, cache);
-				}
+				ListItem cache =new ListItem(u, item.g.getLevel() + 1);
 				mItemList.add(++pos, cache);
 			}
 
