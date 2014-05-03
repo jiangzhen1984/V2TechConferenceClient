@@ -403,7 +403,7 @@ public class JNIService extends Service {
 						Conversation.TYPE_CONTACT, vm.getUser().getmUserId());
 			}
 			//
-			if (cov == GlobalHolder.getInstance().CURRENT_CONVERSATION) {
+			if (GlobalHolder.getInstance().CURRENT_CONVERSATION != null && cov == GlobalHolder.getInstance().CURRENT_CONVERSATION) {
 				return;
 			}
 			NotificationCompat.Builder builder = new NotificationCompat.Builder(

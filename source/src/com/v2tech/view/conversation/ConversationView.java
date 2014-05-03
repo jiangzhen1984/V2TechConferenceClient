@@ -40,6 +40,7 @@ import com.v2tech.service.ChatService;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.view.JNIService;
 import com.v2tech.view.PublicIntent;
+import com.v2tech.view.contacts.ContactDetail;
 import com.v2tech.view.cus.ItemScrollView;
 import com.v2tech.view.cus.ScrollViewListener;
 import com.v2tech.vo.Conversation;
@@ -101,6 +102,8 @@ public class ConversationView extends Activity {
 	private ImageView mSelectImageButtonIV;
 
 	private ImageView mAudioSpeakerIV;
+	
+	private View mShowContactDetailButton;
 
 	private MessageReceiver receiver = new MessageReceiver();
 
@@ -126,6 +129,9 @@ public class ConversationView extends Activity {
 		mSendButtonTV = (TextView) findViewById(R.id.message_send);
 		// mSendButtonTV.setOnClickListener(sendMessageListener);
 		mSendButtonTV.setOnTouchListener(sendMessageButtonListener);
+		
+		mShowContactDetailButton = findViewById(R.id.contact_detail_button);
+		mShowContactDetailButton.setOnClickListener(mShowContactDetailListener);
 
 		mMessageET = (EditText) findViewById(R.id.message_text);
 		mMessageET.setOnClickListener(new OnClickListener() {
@@ -629,6 +635,19 @@ public class ConversationView extends Activity {
 
 	}
 
+	
+	private OnClickListener mShowContactDetailListener = new OnClickListener() {
+
+		@Override
+		public void onClick(View view) {
+			Intent i = new Intent();
+			i.setClass(mContext, ContactDetail.class);
+			i.putExtra("uid", user2Id);
+			mContext.startActivity(i);
+		}
+		
+	};
+	
 	class MessageReceiver extends BroadcastReceiver {
 
 		@Override

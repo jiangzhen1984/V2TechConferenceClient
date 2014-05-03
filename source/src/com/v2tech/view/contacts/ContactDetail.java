@@ -86,7 +86,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		this.setContentView(R.layout.activity_contact_detail);
-		mUid = this.getIntent().getExtras().getLong("uid");
+		mUid = this.getIntent().getLongExtra("uid", 0);
 		initView();
 		mContext = this;
 		View v = findViewById(R.id.contact_detail_main_layout);

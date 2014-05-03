@@ -2,9 +2,7 @@ package com.v2tech.view;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -18,16 +16,11 @@ import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
-import android.view.View.OnFocusChangeListener;
-import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
-import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -36,9 +29,10 @@ import com.v2tech.service.GlobalHolder;
 import com.v2tech.util.V2Log;
 import com.v2tech.view.contacts.ContactGroupView;
 import com.v2tech.view.contacts.ContactUserView;
+import com.v2tech.view.widget.TitleBar;
 import com.v2tech.vo.Group;
-import com.v2tech.vo.User;
 import com.v2tech.vo.Group.GroupType;
+import com.v2tech.vo.User;
 
 public class ContactsTabFragment extends Fragment {
 
@@ -53,6 +47,7 @@ public class ContactsTabFragment extends Fragment {
 	private Tab1BroadcastReceiver receiver = new Tab1BroadcastReceiver();
 	private IntentFilter intentFilter;
 
+	private TitleBar titleBar;
 	private ListView mContactsContainer;
 
 	private ContactsAdapter adapter = new ContactsAdapter();
@@ -60,8 +55,6 @@ public class ContactsTabFragment extends Fragment {
 	private boolean mLoaded;
 
 	private ContactsHandler mHandler = new ContactsHandler();
-
-	private EditText searchedTextET;
 
 	private boolean mIsStartedSearch = false;
 
@@ -95,10 +88,8 @@ public class ContactsTabFragment extends Fragment {
 		}
 		rootView = inflater.inflate(R.layout.tab_fragment_contacts, container,
 				false);
-		rootView.setOnTouchListener(mTouchListener);
 		mContactsContainer = (ListView) rootView
 				.findViewById(R.id.contacts_container);
-		mContactsContainer.setOnTouchListener(mTouchListener);
 		mContactsContainer.setOnItemClickListener(new OnItemClickListener() {
 
 			@Override
@@ -115,8 +106,9 @@ public class ContactsTabFragment extends Fragment {
 		});
 		mContactsContainer.setDivider(null);
 
-		searchedTextET = (EditText) rootView.findViewById(R.id.contacts_search);
-		searchedTextET.setOnFocusChangeListener(focusListener);
+		//FIXME should optimize
+		View titleBarLayout = rootView.findViewById(R.id.title_bar_container);
+		titleBar = new TitleBar(getActivity(),titleBarLayout);
 		TextView tv = (TextView) rootView.findViewById(R.id.fragment_title);
 		if (flag == TAG_ORG) {
 			tv.setText(R.string.tab_org_name);
@@ -138,6 +130,7 @@ public class ContactsTabFragment extends Fragment {
 		super.onDestroy();
 		mLoaded = false;
 		getActivity().unregisterReceiver(receiver);
+		titleBar.dismiss();
 	}
 
 	@Override
@@ -146,11 +139,13 @@ public class ContactsTabFragment extends Fragment {
 		if (!mLoaded) {
 			Message.obtain(mHandler, FILL_CONTACTS_GROUP).sendToTarget();
 		}
+		titleBar.regsiterSearchedTextListener(textChangedListener);
 	}
 
 	@Override
 	public void onStop() {
 		super.onStop();
+		titleBar.unRegsiterSearchedTextListener(textChangedListener);
 	}
 
 	private IntentFilter getIntentFilter() {
@@ -170,19 +165,6 @@ public class ContactsTabFragment extends Fragment {
 		return intentFilter;
 	}
 
-	private OnTouchListener mTouchListener = new OnTouchListener() {
-
-		@Override
-		public boolean onTouch(View v, MotionEvent event) {
-			if (searchedTextET != null) {
-				InputMethodManager imm = (InputMethodManager) getActivity()
-						.getSystemService(Context.INPUT_METHOD_SERVICE);
-				imm.hideSoftInputFromWindow(searchedTextET.getWindowToken(), 0);
-			}
-			return false;
-		}
-
-	};
 
 	List<Group> l;
 
@@ -232,6 +214,7 @@ public class ContactsTabFragment extends Fragment {
 		@Override
 		protected void onPostExecute(Void result) {
 			mContactsContainer.setAdapter(adapter);
+			adapter.notifyDataSetChanged();
 		}
 
 	}
@@ -273,18 +256,6 @@ public class ContactsTabFragment extends Fragment {
 
 	}
 
-	private OnFocusChangeListener focusListener = new OnFocusChangeListener() {
-
-		@Override
-		public void onFocusChange(View arg0, boolean flag) {
-			if (flag) {
-				searchedTextET.addTextChangedListener(textChangedListener);
-			} else {
-				searchedTextET.removeTextChangedListener(textChangedListener);
-			}
-		}
-
-	};
 
 	private TextWatcher textChangedListener = new TextWatcher() {
 

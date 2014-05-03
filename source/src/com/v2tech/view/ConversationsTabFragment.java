@@ -12,35 +12,24 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.res.Configuration;
 import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
-import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.BaseAdapter;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.PopupWindow;
-import android.widget.RelativeLayout;
-import android.widget.PopupWindow.OnDismissListener;
 import android.widget.TextView;
 
 import com.v2tech.R;
@@ -48,19 +37,18 @@ import com.v2tech.db.ContentDescriptor;
 import com.v2tech.service.ConferenceService;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.util.BitmapUtil;
-import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.V2Log;
 import com.v2tech.view.conference.GroupLayout;
 import com.v2tech.view.conference.VideoActivityV2;
+import com.v2tech.view.widget.TitleBar;
 import com.v2tech.vo.Conference;
 import com.v2tech.vo.ConferenceConversation;
 import com.v2tech.vo.ContactConversation;
 import com.v2tech.vo.Conversation;
 import com.v2tech.vo.CrowdConversation;
 import com.v2tech.vo.Group;
-import com.v2tech.vo.NetworkStateCode;
-import com.v2tech.vo.User;
 import com.v2tech.vo.Group.GroupType;
+import com.v2tech.vo.User;
 
 public class ConversationsTabFragment extends Fragment {
 
@@ -80,8 +68,6 @@ public class ConversationsTabFragment extends Fragment {
 
 	private List<Group> mConferenceList;
 
-	private EditText mSearchTextET;
-
 	private ConfsHandler mHandler = new ConfsHandler();
 
 	private ImageView mLoadingImageIV;
@@ -91,17 +77,14 @@ public class ConversationsTabFragment extends Fragment {
 	private boolean isInMeeting = false;
 
 	private View rootView;
+	private TitleBar titleBar;
 
 	private List<ScrollItem> mItemList = new CopyOnWriteArrayList<ScrollItem>();
 	private List<ScrollItem> mCacheItemList;
 
 	private Context mContext;
 
-	private LinearLayout networkNotificationContainer;
-
 	private ListView mConversationsListView;
-
-	private ImageView mFeatureIV;
 
 	private ConversationsAdapter adapter = new ConversationsAdapter();
 
@@ -109,16 +92,44 @@ public class ConversationsTabFragment extends Fragment {
 
 	private String mCurrentTabFlag;
 
+	private int[] imgs = null;
+	private int[] items = null;
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		String tag = this.getArguments().getString("tag");
 		if (PublicIntent.TAG_CONF.equals(tag)) {
 			mCurrentTabFlag = Conversation.TYPE_CONFERNECE;
+			imgs = new int[] { R.drawable.conversation_popup_menu_video_call_button };
+			items = new int[] { R.string.conference_create_title };
+
 		} else if (PublicIntent.TAG_COV.equals(tag)) {
 			mCurrentTabFlag = Conversation.TYPE_CONTACT;
+			imgs = new int[] { R.drawable.conversation_video_button,
+					R.drawable.conversation_call_button,
+					R.drawable.conversation_sms_button,
+					R.drawable.conversation_email_button,
+					R.drawable.conversation_files_button };
+			items = new int[] {
+					R.string.conversation_popup_menu_video_call_button,
+					R.string.conversation_popup_menu_call_button,
+					R.string.conversation_popup_menu_sms_call_button,
+					R.string.conversation_popup_menu_email_button,
+					R.string.conversation_popup_menu_files_button };
 		} else if (PublicIntent.TAG_GROUP.equals(tag)) {
 			mCurrentTabFlag = Conversation.TYPE_GROUP;
+			imgs = new int[] { R.drawable.conversation_video_button,
+					R.drawable.conversation_call_button,
+					R.drawable.conversation_sms_button,
+					R.drawable.conversation_email_button,
+					R.drawable.conversation_files_button };
+			items = new int[] {
+					R.string.conversation_popup_menu_video_call_button,
+					R.string.conversation_popup_menu_call_button,
+					R.string.conversation_popup_menu_sms_call_button,
+					R.string.conversation_popup_menu_email_button,
+					R.string.conversation_popup_menu_files_button };
 		}
 		getActivity().registerReceiver(receiver, getIntentFilter());
 		mContext = getActivity();
@@ -137,22 +148,11 @@ public class ConversationsTabFragment extends Fragment {
 			mConversationsListView.setAdapter(adapter);
 			mLoadingImageIV = (ImageView) rootView
 					.findViewById(R.id.conference_loading_icon);
-
-			mSearchTextET = (EditText) rootView.findViewById(R.id.confs_search);
-			networkNotificationContainer = (LinearLayout) rootView
-					.findViewById(R.id.recent_conversation_network_nt);
-			mFeatureIV = (ImageView) rootView
-					.findViewById(R.id.conversation_features);
-			mFeatureIV.setOnClickListener(mFeatureButtonListener);
-
-			mSearchTextET.setOnTouchListener(mTouchListener);
-			rootView.setOnTouchListener(mTouchListener);
-			mConversationsListView.setOnTouchListener(mTouchListener);
-
-			if (mCurrentTabFlag.equals(Conversation.TYPE_GROUP)) {
-				mFeatureIV.setVisibility(View.INVISIBLE);
-			}
-
+			// FIXME should optimize
+			View titleBarLayout = rootView
+					.findViewById(R.id.title_bar_container);
+			titleBar = new TitleBar(getActivity(), titleBarLayout);
+			initPlusItem();
 			TextView tv = (TextView) rootView.findViewById(R.id.fragment_title);
 			if (mCurrentTabFlag.equals(Conversation.TYPE_CONFERNECE)) {
 				tv.setText(R.string.tab_conference_name);
@@ -189,6 +189,7 @@ public class ConversationsTabFragment extends Fragment {
 		getActivity().unregisterReceiver(receiver);
 		isLoaded = false;
 		mItemList.clear();
+		titleBar.dismiss();
 	}
 
 	@Override
@@ -214,8 +215,6 @@ public class ConversationsTabFragment extends Fragment {
 					.addAction(JNIService.JNI_BROADCAST_USER_UPDATE_NAME_OR_SIGNATURE);
 			intentFilter
 					.addAction(JNIService.JNI_BROADCAST_USER_AVATAR_CHANGED_NOTIFICATION);
-			intentFilter
-					.addAction(JNIService.JNI_BROADCAST_CONNECT_STATE_NOTIFICATION);
 			intentFilter.addCategory(PublicIntent.DEFAULT_CATEGORY);
 			intentFilter.addAction(PublicIntent.UPDATE_CONVERSATION);
 			intentFilter
@@ -238,13 +237,13 @@ public class ConversationsTabFragment extends Fragment {
 		if (!isLoaded) {
 			Message.obtain(mHandler, FILL_CONFS_LIST).sendToTarget();
 		}
-		mSearchTextET.addTextChangedListener(searchListener);
+		titleBar.regsiterSearchedTextListener(searchListener);
 	}
 
 	@Override
 	public void onStop() {
 		super.onStop();
-		mSearchTextET.removeTextChangedListener(searchListener);
+		titleBar.unRegsiterSearchedTextListener(searchListener);
 	}
 
 	@Override
@@ -279,6 +278,37 @@ public class ConversationsTabFragment extends Fragment {
 					V2Log.e(" Can not find created group id :" + gid);
 				}
 			}
+		}
+	}
+
+	private void initPlusItem() {
+		for (int i = 0; i < imgs.length; i++) {
+			LinearLayout ll = new LinearLayout(mContext);
+			ll.setOrientation(LinearLayout.HORIZONTAL);
+
+			ImageView iv = new ImageView(mContext);
+			iv.setImageResource(imgs[i]);
+			iv.setPadding(10, 5, 5, 10);
+			LinearLayout.LayoutParams ivLL = new LinearLayout.LayoutParams(0,
+					LinearLayout.LayoutParams.WRAP_CONTENT);
+			ivLL.gravity = Gravity.RIGHT;
+			ivLL.weight = 0.3F;
+
+			ll.addView(iv, ivLL);
+
+			TextView tv = new TextView(mContext);
+			tv.setText(items[i]);
+			tv.setPadding(10, 5, 5, 10);
+			LinearLayout.LayoutParams tvLL = new LinearLayout.LayoutParams(0,
+					LinearLayout.LayoutParams.WRAP_CONTENT);
+			tvLL.gravity = Gravity.LEFT | Gravity.CENTER_VERTICAL;
+			tvLL.weight = 0.7F;
+
+			ll.addView(tv, tvLL);
+			ll.setOnClickListener(titleBarMenuItemClickListener);
+
+			ll.setId(imgs[i]);
+			titleBar.addAdditionalPopupMenuItem(ll, null);
 		}
 	}
 
@@ -330,30 +360,31 @@ public class ConversationsTabFragment extends Fragment {
 
 	}
 
-	private OnClickListener mConferenceCreateButtonListener = new OnClickListener() {
+	
+	private OnClickListener titleBarMenuItemClickListener = new OnClickListener() {
 
 		@Override
-		public void onClick(View arg0) {
-			Intent i = new Intent(PublicIntent.START_CONFERENCE_CREATE_ACTIVITY);
-			i.addCategory(PublicIntent.DEFAULT_CATEGORY);
-			startActivityForResult(i, SUB_ACTIVITY_CODE_CREATE_CONF);
-			if (pw != null) {
-				pw.dismiss();
+		public void onClick(View view) {
+			int id = view.getId();
+			switch(id) {
+			case R.drawable.conversation_video_button:
+				break;
+			case R.drawable.conversation_call_button:
+				break;
+			case R.drawable.conversation_sms_button:
+				break;
+			case R.drawable.conversation_email_button:
+				break;
+			case R.drawable.conversation_files_button:
+				break;
+			case R.drawable.conversation_popup_menu_video_call_button:
+			{
+				Intent i = new Intent(PublicIntent.START_CONFERENCE_CREATE_ACTIVITY);
+				i.addCategory(PublicIntent.DEFAULT_CATEGORY);
+				startActivityForResult(i, SUB_ACTIVITY_CODE_CREATE_CONF);
 			}
-		}
-
-	};
-
-	private OnTouchListener mTouchListener = new OnTouchListener() {
-
-		@Override
-		public boolean onTouch(View v, MotionEvent event) {
-			if (mSearchTextET != null) {
-				InputMethodManager imm = (InputMethodManager) getActivity()
-						.getSystemService(Context.INPUT_METHOD_SERVICE);
-				imm.hideSoftInputFromWindow(mSearchTextET.getWindowToken(), 0);
+				break;
 			}
-			return false;
 		}
 
 	};
@@ -421,78 +452,6 @@ public class ConversationsTabFragment extends Fragment {
 		}
 
 	};
-
-	private PopupWindow pw;
-	private OnClickListener mFeatureButtonListener = new OnClickListener() {
-
-		@Override
-		public void onClick(View view) {
-
-			if (pw == null) {
-				LayoutInflater inflater = (LayoutInflater) mContext
-						.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-				View layout = null;
-				
-				if (mCurrentTabFlag == Conversation.TYPE_CONFERNECE) {
-					layout = inflater.inflate(
-							R.layout.conversation_pop_up_window_conference, null);
-					View  v= layout.findViewById(R.id.conversation_pop_up_window_conf_create_conf_button);
-					v.setOnClickListener(mConferenceCreateButtonListener);
-				} else if (mCurrentTabFlag == Conversation.TYPE_CONTACT) {
-					layout = inflater.inflate(
-							R.layout.conversation_pop_up_window_contact, null);
-				}
-				
-				DisplayMetrics dm = new DisplayMetrics();
-				((Activity) mContext).getWindowManager().getDefaultDisplay()
-						.getMetrics(dm);
-				int height = 300;
-				if (GlobalConfig.GLOBAL_LAYOUT_SIZE == Configuration.SCREENLAYOUT_SIZE_NORMAL) {
-					height = (int) (dm.heightPixels * 0.6);
-				} else {
-					height = (int) (dm.heightPixels * 0.4);
-				}
-
-				pw = new PopupWindow(layout,
-						ViewGroup.LayoutParams.WRAP_CONTENT, height, true);
-				pw.setOnDismissListener(new OnDismissListener() {
-					@Override
-					public void onDismiss() {
-						pw.dismiss();
-					}
-
-				});
-				pw.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-				pw.setFocusable(true);
-				pw.setTouchable(true);
-				pw.setOutsideTouchable(true);
-				pw.setFocusable(true);
-				pw.setTouchable(true);
-				pw.setOutsideTouchable(true);
-
-				layout.findViewById(R.id.common_pop_up_arrow_up).measure(
-						View.MeasureSpec.UNSPECIFIED,
-						View.MeasureSpec.UNSPECIFIED);
-			}
-			int[] pos = new int[2];
-			view.getLocationInWindow(pos);
-			pos[0] += view.getMeasuredWidth() / 2;
-			pos[1] += view.getMeasuredHeight();
-			// calculate arrow offset
-			View arrow = pw.getContentView().findViewById(
-					R.id.common_pop_up_arrow_up);
-			// TODO hand position
-			arrow.bringToFront();
-			RelativeLayout.LayoutParams rl = (RelativeLayout.LayoutParams) arrow
-					.getLayoutParams();
-			pos[0] -= (rl.leftMargin + arrow.getMeasuredWidth() / 2);
-
-			pw.setAnimationStyle(R.style.InMeetingCameraSettingAnim);
-			pw.showAtLocation(view, Gravity.NO_GRAVITY, pos[0], pos[1]);
-		}
-
-	};
-
 
 	private void loadConversation() {
 		isLoadedCov = true;
@@ -735,15 +694,6 @@ public class ConversationsTabFragment extends Fragment {
 				Object[] ar = new Object[] { intent.getExtras().get("uid"),
 						intent.getExtras().get("avatar") };
 				Message.obtain(mHandler, UPDATE_USER_AVATAR, ar).sendToTarget();
-			} else if (JNIService.JNI_BROADCAST_CONNECT_STATE_NOTIFICATION
-					.equals(intent.getAction())) {
-				NetworkStateCode code = (NetworkStateCode) intent.getExtras()
-						.get("state");
-				if (code != NetworkStateCode.CONNECTED) {
-					networkNotificationContainer.setVisibility(View.VISIBLE);
-				} else {
-					networkNotificationContainer.setVisibility(View.GONE);
-				}
 			} else if (PublicIntent.UPDATE_CONVERSATION.equals(intent
 					.getAction())) {
 				Object[] ar = new Object[] { intent.getLongExtra("extId", 0),

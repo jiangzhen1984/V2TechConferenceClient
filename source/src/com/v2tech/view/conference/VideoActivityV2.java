@@ -502,7 +502,7 @@ public class VideoActivityV2 extends Activity {
 
 			Animation tabBlockHolderAnimation = AnimationUtils.loadAnimation(
 					this, R.animator.right_out);
-			tabBlockHolderAnimation.setDuration(1000);
+			tabBlockHolderAnimation.setDuration(400);
 			mMessageContainer.startAnimation(tabBlockHolderAnimation);
 
 		} else {
@@ -512,7 +512,7 @@ public class VideoActivityV2 extends Activity {
 
 			Animation tabBlockHolderAnimation = AnimationUtils.loadAnimation(
 					this, R.animator.left_in);
-			tabBlockHolderAnimation.setDuration(1000);
+			tabBlockHolderAnimation.setDuration(400);
 			mMessageContainer.startAnimation(tabBlockHolderAnimation);
 			mMessageContainer.requestScrollToNewMessage();
 
@@ -731,8 +731,12 @@ public class VideoActivityV2 extends Activity {
 			mAttendeeList.add(atd);
 		}
 
-		if (atd == null) {
+		if (atd == null ) {
 			V2Log.e("Didn't find self object in  mAttendeeList");
+			return;
+		}
+		if (atd.getUser() == null) {
+			V2Log.e("No available user in atd");
 			return;
 		}
 

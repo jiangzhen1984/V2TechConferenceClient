@@ -6,5 +6,7 @@
     <color name="text_tab_unselected">#8c8c8c</color>
     <color name="button_text_color">#007aff</color>
     <color name="in_meeting_camera_setting_progress_bar">#c2c2c2</color>
+     <color name="line_color">#cdcdcf</color>
+    
 
 </resources>

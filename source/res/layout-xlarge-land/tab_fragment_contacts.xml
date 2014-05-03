@@ -4,90 +4,17 @@
     android:layout_height="match_parent"
     android:orientation="vertical" >
 
+    <include layout="@layout/title_bar" >
+    </include>
+
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="fill_parent" >
-
-        <LinearLayout
-            android:id="@+id/linearLayout1"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_centerHorizontal="true"
-            android:background="@color/confs_title_bg"
-            android:orientation="vertical" >
-
-            <TextView
-                android:id="@+id/fragment_title"
-                android:layout_width="wrap_content"
-                android:layout_height="fill_parent"
-                android:layout_gravity="center"
-                android:layout_marginBottom="10dp"
-                android:layout_marginTop="10dp"
-                android:text="@string/contacts_title"
-                android:textColor="#515151"
-                android:textSize="23sp" />
-
-            <LinearLayout
-                android:layout_width="fill_parent"
-                android:layout_height="1dp"
-                android:background="#cdcdcf"
-                android:orientation="vertical" >
-            </LinearLayout>
-        </LinearLayout>
-
-        <RelativeLayout
-            android:id="@+id/RelativeLayout2"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/linearLayout1"
-            android:layout_centerHorizontal="true"
-            android:background="@color/confs_search_bar_bg"
-            android:orientation="horizontal" >
-
-            <EditText
-                android:id="@+id/contacts_search"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_alignParentLeft="true"
-                android:layout_gravity="center_vertical"
-                android:layout_marginBottom="6dp"
-                android:layout_marginLeft="15dp"
-                android:layout_marginRight="15dp"
-                android:layout_marginTop="6dp"
-                android:background="@drawable/input_bg"
-                android:inputType="text"
-                android:paddingLeft="60dp"
-                android:textColor="#000000"
-                android:textSize="18sp" >
-            </EditText>
-
-       
-            <ImageView
-                android:id="@+id/imageView1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignBaseline="@+id/contacts_search"
-                android:layout_alignLeft="@+id/contacts_search"
-                android:layout_centerVertical="true"
-                android:layout_marginLeft="10dp"
-                android:src="@drawable/group_list_search_button" />
-        </RelativeLayout>
-
-        <LinearLayout
-            android:id="@+id/LinearLayout2"
-            android:layout_width="fill_parent"
-            android:layout_height="1dp"
-            android:layout_below="@+id/RelativeLayout2"
-            android:background="#cdcdcf"
-            android:orientation="vertical" >
-        </LinearLayout>
 
         <ListView
             android:id="@+id/contacts_container"
             android:layout_width="match_parent"
             android:layout_height="fill_parent"
-            android:layout_below="@+id/LinearLayout2"
             android:layout_centerHorizontal="true"
             android:background="@color/confs_group_list_bg" >
         </ListView>

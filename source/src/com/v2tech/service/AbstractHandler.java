@@ -7,6 +7,13 @@ import android.util.SparseArray;
 import com.v2tech.service.jni.JNIResponse;
 import com.v2tech.util.V2Log;
 
+/**
+ * Abstract handler.
+ * <ul>It used to handle message and handle time out message</ul>
+ * <ul>Notice: If you want to override {@link #handleMessage(Message)}, please handle time out message </ul>
+ * @author jiangzhen
+ *
+ */
 public abstract class AbstractHandler extends Handler {
 
 	protected static final int REQUEST_TIME_OUT = 0;
@@ -23,7 +30,8 @@ public abstract class AbstractHandler extends Handler {
 
 	protected Message initTimeoutMessage(int mointorMessageID,
 			long timeOutSec, Registrant caller) {
-		Message msg = Message.obtain(this, REQUEST_TIME_OUT, mointorMessageID, 0);
+		//Create unique message object
+		Message msg = Message.obtain(this, REQUEST_TIME_OUT,  mointorMessageID, 0,new Object());
 		metaHolder.put(Integer.valueOf(mointorMessageID), new Meta(
 				mointorMessageID, caller, msg));
 		this.sendMessageDelayed(msg, timeOutSec * 1000);
@@ -34,7 +42,7 @@ public abstract class AbstractHandler extends Handler {
 		Meta meta = metaHolder.get(Integer.valueOf(mointorMessageID));
 		metaHolder.remove(Integer.valueOf(mointorMessageID));
 		if (meta != null) {
-			this.removeMessages(REQUEST_TIME_OUT, meta.timeoutMessage);
+			this.removeMessages(REQUEST_TIME_OUT, meta.timeoutMessage.obj);
 			return meta.caller;
 		} else {
 			return null;
@@ -69,7 +77,8 @@ public abstract class AbstractHandler extends Handler {
 		V2Log.d(this.getClass().getName()+"   "+ msg.what);
 		switch (msg.what) {
 		case REQUEST_TIME_OUT:
-			Meta meta = metaHolder.get(Integer.valueOf(msg.arg1));
+			Integer key = Integer.valueOf(msg.arg1);
+			Meta meta = metaHolder.get(key);
 			if (meta != null && meta.caller != null ) {
 				
 				JNIResponse jniRes = new JNIResponse(JNIResponse.Result.TIME_OUT);
@@ -83,6 +92,8 @@ public abstract class AbstractHandler extends Handler {
 			} else {
 				V2Log.w("Doesn't find time out message in the queue :" + msg.arg1);
 			}
+			//remove cache
+			metaHolder.remove(key);
 			break;
 			//Handle normal message 
 		default:
@@ -98,7 +109,7 @@ public abstract class AbstractHandler extends Handler {
 				jniRes.callerObject = origObject;
 				caller.obj =  jniRes;
 			} else {
-				V2Log.w("Doesn't find time out message in the queue :" + msg.arg1);
+				V2Log.w("Doesn't find  message in the queue :" + msg.arg1);
 			}
 			break;
 		}

@@ -232,7 +232,14 @@ public class ConferenceService extends AbstractHandler {
 	 */
 	public void requestCloseVideoDevice(Conference conf,
 			UserDeviceConfig userDevice, Registrant caller) {
-
+		if (conf == null || userDevice == null) {
+			if (caller != null) {
+				JNIResponse jniRes = new RequestCloseUserVideoDeviceResponse(0, 0,
+						RequestCloseUserVideoDeviceResponse.Result.INCORRECT_PAR);
+				sendResult(caller, jniRes);
+			}
+			return;
+		}
 		initTimeoutMessage(JNI_REQUEST_CLOSE_VIDEO, DEFAULT_TIME_OUT_SECS,
 				caller);
 
