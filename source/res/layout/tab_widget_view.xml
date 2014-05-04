@@ -24,13 +24,12 @@
         android:paddingBottom="2dp"
         android:text="@string/tab_conference_name" />
 
-
     <ImageView
         android:id="@+id/tab_notificator"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignTop="@+id/imageView1"
-        android:layout_alignRight="@+id/imageView1"
+        android:layout_alignTop="@+id/tab_image"
+        android:layout_toRightOf="@+id/tab_image"
         android:src="@drawable/red_nofificator" />
 
 </RelativeLayout>

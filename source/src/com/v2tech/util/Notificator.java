@@ -10,7 +10,6 @@ import android.net.Uri;
 import android.support.v4.app.NotificationCompat;
 
 import com.v2tech.R;
-import com.v2tech.view.MainActivity;
 import com.v2tech.view.PublicIntent;
 
 public class Notificator {
@@ -32,12 +31,11 @@ public class Notificator {
 				context).setSmallIcon(R.drawable.ic_launcher)
 				.setContentTitle(title).setContentText(content);
 
-		Intent startupActivity = new Intent(context, MainActivity.class);
 
 		// Creates the PendingIntent
 		PendingIntent notifyPendingIntent = PendingIntent.getActivities(
-				context, 0, new Intent[] { startupActivity, trigger },
-				PendingIntent.FLAG_ONE_SHOT);
+				context, 0, new Intent[] {trigger },
+				PendingIntent.FLAG_UPDATE_CURRENT);
 
 		// Puts the PendingIntent into the notification builder
 		builder.setContentIntent(notifyPendingIntent);

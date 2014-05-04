@@ -202,7 +202,10 @@ public class ConferenceService extends AbstractHandler {
 			UserDeviceConfig userDevice, Registrant caller) {
 		initTimeoutMessage(JNI_REQUEST_OPEN_VIDEO, DEFAULT_TIME_OUT_SECS,
 				caller);
-
+		V2Log.i(" request open video group:" + conf.getId() + "   UID:"
+				+ userDevice.getUserID() + " deviceid:"
+				+ userDevice.getDeviceID() + "   videoplayer:"
+				+ userDevice.getVp());
 		VideoRequest.getInstance().openVideoDevice(conf.getId(),
 				userDevice.getUserID(), userDevice.getDeviceID(),
 				userDevice.getVp(), userDevice.getBusinessType());
@@ -234,7 +237,9 @@ public class ConferenceService extends AbstractHandler {
 			UserDeviceConfig userDevice, Registrant caller) {
 		if (conf == null || userDevice == null) {
 			if (caller != null) {
-				JNIResponse jniRes = new RequestCloseUserVideoDeviceResponse(0, 0,
+				JNIResponse jniRes = new RequestCloseUserVideoDeviceResponse(
+						0,
+						0,
 						RequestCloseUserVideoDeviceResponse.Result.INCORRECT_PAR);
 				sendResult(caller, jniRes);
 			}
@@ -361,9 +366,7 @@ public class ConferenceService extends AbstractHandler {
 			}
 		}
 	}
-	
-	
-	
+
 	private List<Registrant> syncDesktopListenersList = new ArrayList<Registrant>();
 
 	/**
@@ -513,8 +516,9 @@ public class ConferenceService extends AbstractHandler {
 		public void OnModifyGroupInfoCallback(int groupType, long nGroupID,
 				String sXml) {
 			if (groupType == Group.GroupType.CONFERENCE.intValue()) {
-				Group cache = GlobalHolder.getInstance().findGroupById(nGroupID);
-				
+				Group cache = GlobalHolder.getInstance()
+						.findGroupById(nGroupID);
+
 				// if doesn't find matched group, mean this is new group
 				if (cache == null) {
 					JNIResponse jniRes = new RequestConfCreateResponse(
@@ -525,27 +529,28 @@ public class ConferenceService extends AbstractHandler {
 							.sendToTarget();
 				} else {
 					int pos = sXml.indexOf(" syncdesktop='");
-					int end = sXml.indexOf("'", pos+14);
+					int end = sXml.indexOf("'", pos + 14);
 					String sync = "0";
 					if (pos != -1 && end != -1) {
-						sync = sXml.substring(pos+14, end);
+						sync = sXml.substring(pos + 14, end);
 						if (sync.equals("1")) {
-							((ConferenceGroup)cache).setSyn(true);
+							((ConferenceGroup) cache).setSyn(true);
 						} else {
-							((ConferenceGroup)cache).setSyn(false);
+							((ConferenceGroup) cache).setSyn(false);
 						}
 					}
 					// notify sync desktop listener
 					for (Registrant re : syncDesktopListenersList) {
 						Handler h = re.getHandler();
 						if (h != null) {
-							Message.obtain(h, re.getWhat(), Integer.parseInt(sync), 0, null).sendToTarget();
+							Message.obtain(h, re.getWhat(),
+									Integer.parseInt(sync), 0, null)
+									.sendToTarget();
 						}
 					}
-					
-					
+
 				}
-				
+
 			}
 		}
 
@@ -562,17 +567,16 @@ public class ConferenceService extends AbstractHandler {
 		}
 
 		@Override
-		public void OnDelGroupUserCallback(int groupType, long nGroupID, long nUserID) {
-			
+		public void OnDelGroupUserCallback(int groupType, long nGroupID,
+				long nUserID) {
+
 		}
 
 		@Override
-		public void OnAddGroupUserInfoCallback(int groupType, long nGroupID, String sXml) {
-			
+		public void OnAddGroupUserInfoCallback(int groupType, long nGroupID,
+				String sXml) {
+
 		}
-		
-		
-		
 
 	}
 

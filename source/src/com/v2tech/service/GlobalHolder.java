@@ -14,9 +14,9 @@ import android.graphics.Bitmap;
 import com.v2tech.util.V2Log;
 import com.v2tech.vo.Conversation;
 import com.v2tech.vo.Group;
+import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.User;
 import com.v2tech.vo.UserDeviceConfig;
-import com.v2tech.vo.Group.GroupType;
 
 public class GlobalHolder {
 
@@ -38,11 +38,11 @@ public class GlobalHolder {
 	private Map<Long, Group> mGroupHolder = new HashMap<Long, Group>();
 	private Map<Long, String> mAvatarHolder = new HashMap<Long, String>();
 
-	private List<Conversation> mConatactConversationHolder = new CopyOnWriteArrayList<Conversation>();
+	private Set<Conversation> mConatactConversationHolder = new CopyOnWriteArraySet<Conversation>();
 
-	private List<Conversation> mGroupConversationHolder = new CopyOnWriteArrayList<Conversation>();
+	private Set<Conversation> mGroupConversationHolder = new CopyOnWriteArraySet<Conversation>();
 	
-	private List<Conversation> mConferenceConversationHolder = new CopyOnWriteArrayList<Conversation>();
+	private Set<Conversation> mConferenceConversationHolder = new CopyOnWriteArraySet<Conversation>();
 
 	private Set<UserDeviceConfig> mUserDeviceList = new HashSet<UserDeviceConfig>();
 
@@ -350,7 +350,7 @@ public class GlobalHolder {
 		if (cov == null) {
 			return false;
 		}
-		List<Conversation> tmp = null;
+		Set<Conversation> tmp = null;
 		if (Conversation.TYPE_CONTACT.equals(cov.getType())) {
 			tmp = mConatactConversationHolder;
 		} else if (Conversation.TYPE_GROUP.equals(cov.getType())) {
@@ -367,7 +367,7 @@ public class GlobalHolder {
 	}
 
 	public Conversation findConversationByType(String type, long extId) {
-		List<Conversation> tmp = null;
+		Set<Conversation> tmp = null;
 		if (Conversation.TYPE_CONTACT.equals(type)) {
 			tmp = mConatactConversationHolder;
 		} else if (Conversation.TYPE_GROUP.equals(type)) {
@@ -389,7 +389,7 @@ public class GlobalHolder {
 	}
 
 	public void removeConversation(String type, long extId) {
-		List<Conversation> tmp = null;
+		Set<Conversation> tmp = null;
 		if (Conversation.TYPE_CONTACT.equals(type)) {
 			tmp = mConatactConversationHolder;
 		} else if (Conversation.TYPE_GROUP.equals(type)) {
@@ -407,7 +407,7 @@ public class GlobalHolder {
 
 	public int getNoticatorCount(String type) {
 		int c = 0;
-		List<Conversation> tmp = null;
+		Set<Conversation> tmp = null;
 		if (Conversation.TYPE_CONTACT.equals(type)) {
 			tmp = mConatactConversationHolder;
 		} else if (Conversation.TYPE_GROUP.equals(type)) {

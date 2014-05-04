@@ -313,11 +313,12 @@
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="center_vertical"
-                                android:layout_marginRight="350dp"
+                                android:layout_marginRight="50dp"
                                 android:layout_weight="1"
                                 android:ems="10"
                                 android:focusable="false"
                                 android:inputType="date"
+                                android:background="@drawable/input_bg"
                                 android:textColor="@color/contacts_user_detail_text_color"
                                 android:visibility="gone" >
                             </EditText>
@@ -363,11 +364,12 @@
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="center_vertical"
-                                android:layout_marginRight="350dp"
+                                android:layout_marginRight="50dp"
                                 android:layout_weight="1"
                                 android:ems="10"
                                 android:inputType="phone"
                                 android:maxLength="11"
+                                android:background="@drawable/input_bg"
                                 android:textColor="@color/contacts_user_detail_text_color"
                                 android:visibility="gone" >
                             </EditText>
@@ -414,11 +416,12 @@
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="center_vertical"
-                                android:layout_marginRight="350dp"
+                                android:layout_marginRight="50dp"
                                 android:layout_weight="1"
                                 android:ems="10"
                                 android:inputType="text"
                                 android:maxLength="30"
+                                android:background="@drawable/input_bg"
                                 android:textColor="@color/contacts_user_detail_text_color"
                                 android:visibility="gone" />
                         </LinearLayout>
@@ -462,10 +465,11 @@
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="center_vertical"
-                                android:layout_marginRight="250dp"
+                                android:layout_marginRight="50dp"
                                 android:layout_weight="1"
                                 android:ems="10"
                                 android:inputType="text"
+                                android:background="@drawable/input_bg"
                                 android:textColor="@color/contacts_user_detail_text_color"
                                 android:visibility="gone" />
                         </LinearLayout>
@@ -510,10 +514,11 @@
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="center_vertical"
-                                android:layout_marginRight="250dp"
+                                android:layout_marginRight="50dp"
                                 android:layout_weight="1"
                                 android:ems="10"
                                 android:inputType="text"
+                                android:background="@drawable/input_bg"
                                 android:textColor="@color/contacts_user_detail_text_color"
                                 android:visibility="gone" />
                         </LinearLayout>
@@ -558,11 +563,12 @@
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="center_vertical"
-                                android:layout_marginRight="250dp"
+                                android:layout_marginRight="50dp"
                                 android:layout_weight="1"
                                 android:ems="10"
                                 android:inputType="text"
                                 android:maxLength="50"
+                                android:background="@drawable/input_bg"
                                 android:textColor="@color/contacts_user_detail_text_color"
                                 android:visibility="gone" />
                         </LinearLayout>
@@ -608,11 +614,12 @@
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="center_vertical"
-                                android:layout_marginRight="100dp"
+                                android:layout_marginRight="50dp"
                                 android:layout_weight="1"
                                 android:ems="10"
                                 android:inputType="text"
                                 android:maxLength="100"
+                                android:background="@drawable/input_bg"
                                 android:textColor="@color/contacts_user_detail_text_color"
                                 android:visibility="gone" />
                         </LinearLayout>
@@ -661,7 +668,7 @@
                         android:id="@+id/imageView1"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="left"
+                        android:layout_gravity="center_vertical|left"
                         android:layout_weight=".3"
                         android:paddingLeft="5dp"
                         android:paddingRight="5dp"
@@ -736,7 +743,7 @@
                     <ImageView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="left"
+                        android:layout_gravity="center_vertical|left"
                         android:layout_weight=".3"
                         android:paddingLeft="5dp"
                         android:paddingRight="5dp"
@@ -810,7 +817,7 @@
                     <ImageView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="center"
+                        android:layout_gravity="center|center_vertical"
                         android:layout_weight=".3"
                         android:paddingLeft="5dp"
                         android:paddingRight="5dp"

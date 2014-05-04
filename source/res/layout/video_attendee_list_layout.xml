@@ -45,20 +45,10 @@
             android:layout_marginTop="6dp"
             android:background="@drawable/input_bg"
             android:inputType="text"
-            android:paddingLeft="40dp"
+            android:paddingLeft="5dp"
             android:textColor="#000000"
             android:textSize="12sp" >
         </EditText>
-
-        <ImageView
-            android:id="@+id/imageView1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignBaseline="@+id/contacts_search"
-            android:layout_alignLeft="@+id/contacts_search"
-            android:layout_centerVertical="true"
-            android:layout_marginLeft="10dp"
-            android:src="@drawable/group_list_search_button" />
     </RelativeLayout>
 
     <LinearLayout

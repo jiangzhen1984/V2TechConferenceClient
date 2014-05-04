@@ -72,6 +72,7 @@ import com.v2tech.vo.ConferenceGroup;
 import com.v2tech.vo.ConferencePermission;
 import com.v2tech.vo.Conversation;
 import com.v2tech.vo.Group;
+import com.v2tech.vo.NetworkStateCode;
 import com.v2tech.vo.User;
 import com.v2tech.vo.UserDeviceConfig;
 import com.v2tech.vo.V2Doc;
@@ -238,6 +239,7 @@ public class VideoActivityV2 extends Activity {
 			if (mMenuButtonContainer.getVisibility() == View.GONE) {
 				Animation animation = AnimationUtils.loadAnimation(mContext,
 						R.animator.nonam_scale_y_0_100);
+				animation.setDuration(400);
 				mMenuButtonContainer.startAnimation(animation);
 				mMenuButtonContainer.setVisibility(View.VISIBLE);
 
@@ -248,7 +250,7 @@ public class VideoActivityV2 extends Activity {
 				showOrHidenDocContainer(View.GONE);
 				Animation animation = AnimationUtils.loadAnimation(mContext,
 						R.animator.nonam_scale_y_100_0);
-				animation.setDuration(1000);
+				animation.setDuration(400);
 				mMenuButtonContainer.startAnimation(animation);
 				mMenuButtonContainer.setVisibility(View.GONE);
 			}
@@ -394,6 +396,12 @@ public class VideoActivityV2 extends Activity {
 				Object obj = intent.getExtras().get("obj");
 				Message.obtain(mVideoHandler, GROUP_ADD_USER, obj).sendToTarget();
 				
+			} else if (JNIService.JNI_BROADCAST_CONNECT_STATE_NOTIFICATION.equals(intent.getAction())) {
+				NetworkStateCode code = (NetworkStateCode) intent.getExtras()
+						.get("state");
+				if (code != NetworkStateCode.CONNECTED) {
+					Toast.makeText(mContext, R.string.error_connect_to_server, Toast.LENGTH_SHORT).show();
+				} 
 			}
 			
 		}
@@ -418,6 +426,7 @@ public class VideoActivityV2 extends Activity {
 		filter.addAction(JNIService.JNI_BROADCAST_NEW_CONF_MESSAGE);
 		filter.addAction(JNIService.JNI_BROADCAST_GROUP_USER_REMOVED);
 		filter.addAction(JNIService.JNI_BROADCAST_GROUP_USER_ADDED);
+		filter.addAction(JNIService.JNI_BROADCAST_CONNECT_STATE_NOTIFICATION);
 		filter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
 		mContext.registerReceiver(mConfUserChangeReceiver, filter);
 
@@ -502,7 +511,7 @@ public class VideoActivityV2 extends Activity {
 
 			Animation tabBlockHolderAnimation = AnimationUtils.loadAnimation(
 					this, R.animator.right_out);
-			tabBlockHolderAnimation.setDuration(400);
+			tabBlockHolderAnimation.setDuration(1000);
 			mMessageContainer.startAnimation(tabBlockHolderAnimation);
 
 		} else {
@@ -512,7 +521,7 @@ public class VideoActivityV2 extends Activity {
 
 			Animation tabBlockHolderAnimation = AnimationUtils.loadAnimation(
 					this, R.animator.left_in);
-			tabBlockHolderAnimation.setDuration(400);
+			tabBlockHolderAnimation.setDuration(1000);
 			mMessageContainer.startAnimation(tabBlockHolderAnimation);
 			mMessageContainer.requestScrollToNewMessage();
 
@@ -602,6 +611,7 @@ public class VideoActivityV2 extends Activity {
 					this, R.animator.left_in);
 			tabBlockHolderAnimation.setDuration(1000);
 			mAttendeeContainer.startAnimation(tabBlockHolderAnimation);
+			mAttendeeContainer.bringToFront();
 		}
 	}
 

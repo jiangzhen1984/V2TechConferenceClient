@@ -62,23 +62,33 @@ public class ConversationConvertReceiver extends BroadcastReceiver {
 			i.putExtras(intent.getExtras());
 			mContext.sendBroadcast(i);
 
-		} else if (JNIService.JNI_BROADCAST_CONFERENCE_INVATITION.equals(action)) {
+		} else if (JNIService.JNI_BROADCAST_CONFERENCE_INVATITION
+				.equals(action)
+				|| JNIService.JNI_BROADCAST_CONFERENCE_REMOVED.equals(action)) {
 			long gid = intent.getLongExtra("gid", 0);
-			Group g  = GlobalHolder.getInstance().findGroupById(gid);
+			Group g = GlobalHolder.getInstance().findGroupById(gid);
 			Conversation cv = GlobalHolder.getInstance()
 					.findConversationByType(Conversation.TYPE_CONFERNECE, gid);
 			if (cv == null) {
 				cv = new ConferenceConversation(g);
 				GlobalHolder.getInstance().addConversation(cv);
 			}
-			
-			cv.setNotiFlag(Conversation.NOTIFICATION);
-			
+
+			boolean noti = true;
+			if (JNIService.JNI_BROADCAST_CONFERENCE_INVATITION
+				.equals(action)) {
+				cv.setNotiFlag(Conversation.NOTIFICATION);
+				noti = true;
+			} else {
+				cv.setNotiFlag(Conversation.NONE);
+				noti = false;
+			}
+
 			Intent i = new Intent(PublicIntent.UPDATE_CONVERSATION);
 			i.addCategory(PublicIntent.DEFAULT_CATEGORY);
 			i.putExtra("extId", gid);
 			i.putExtra("type", Conversation.TYPE_CONFERNECE);
-			i.putExtra("noti", true);
+			i.putExtra("noti", noti);
 			mContext.sendBroadcast(i);
 		}
 	}
@@ -125,26 +135,28 @@ public class ConversationConvertReceiver extends BroadcastReceiver {
 				Conversation.TYPE_GROUP, gid);
 		if (cov == null) {
 			if (g != null) {
-				//FIXME how to do notification if group information didn't receive
+				// FIXME how to do notification if group information didn't
+				// receive
 				cov = new CrowdConversation(g);
 				GlobalHolder.getInstance().addConversation(cov);
 			} else {
 				V2Log.e(" didn't receive group informaion");
-				return ;
+				return;
 			}
 		}
-		
-		//FIXME optimize code
+
+		// FIXME optimize code
 		Intent i = new Intent(PublicIntent.UPDATE_CONVERSATION);
 		i.addCategory(PublicIntent.DEFAULT_CATEGORY);
 		i.putExtra("extId", gid);
 		i.putExtra("type", Conversation.TYPE_GROUP);
-		
+
 		if (type != VMessage.MessageType.IMAGE.getIntValue()) {
 			i.putExtra("date", dateString);
 			i.putExtra("content", content);
 		}
-		notif =  GlobalHolder.getInstance().CURRENT_CONVERSATION == cov ? false : true;
+		notif = GlobalHolder.getInstance().CURRENT_CONVERSATION == cov ? false
+				: true;
 		i.putExtra("noti", notif);
 		mContext.sendBroadcast(i);
 
@@ -177,8 +189,6 @@ public class ConversationConvertReceiver extends BroadcastReceiver {
 		}
 		cur.close();
 
-	
-
 		cur = mContext.getContentResolver().query(
 				ContentDescriptor.Conversation.CONTENT_URI,
 				ContentDescriptor.Conversation.Cols.ALL_CLOS,
@@ -207,6 +217,10 @@ public class ConversationConvertReceiver extends BroadcastReceiver {
 		// = GlobalHolder.getInstance().findConversationByType(
 		// Conversation.TYPE_CONTACT, fromUid);
 		if (c == null) {
+			c = GlobalHolder.getInstance().findConversationByType(
+					Conversation.TYPE_CONTACT, fromUid);
+		}
+		if (c == null) {
 			User fromUser = GlobalHolder.getInstance().getUser(fromUid);
 			c = new ContactConversation(fromUser, Conversation.NOTIFICATION);
 			GlobalHolder.getInstance().addConversation(c);
@@ -215,7 +229,7 @@ public class ConversationConvertReceiver extends BroadcastReceiver {
 			conCv.put(ContentDescriptor.Conversation.Cols.EXT_ID, fromUid);
 
 			conCv.put(ContentDescriptor.Conversation.Cols.TYPE,
-						Conversation.TYPE_GROUP);
+					Conversation.TYPE_CONTACT);
 			conCv.put(ContentDescriptor.Conversation.Cols.EXT_NAME,
 					fromUser == null ? "" : fromUser.getName());
 			conCv.put(ContentDescriptor.Conversation.Cols.NOTI_FLAG,
@@ -248,7 +262,13 @@ public class ConversationConvertReceiver extends BroadcastReceiver {
 
 		}
 
-		notif =  GlobalHolder.getInstance().CURRENT_CONVERSATION == c ? false : true;
+		notif = c.equals(GlobalHolder.getInstance().CURRENT_CONVERSATION) ? false
+				: true;
+		if (GlobalHolder.getInstance().CURRENT_CONVERSATION != null) {
+			GlobalHolder.getInstance().CURRENT_CONVERSATION
+					.setNotiFlag(notif ? Conversation.NOTIFICATION
+							: Conversation.NONE);
+		}
 		Intent i = new Intent(PublicIntent.UPDATE_CONVERSATION);
 		i.addCategory(PublicIntent.DEFAULT_CATEGORY);
 		i.putExtra("extId", fromUid);

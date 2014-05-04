@@ -425,13 +425,11 @@ public class JNIService extends Service {
 			resultIntent.putExtra("user2Name", vm.getUser().getName());
 			resultIntent.addCategory(PublicIntent.DEFAULT_CATEGORY);
 
-			Intent startupActivity = new Intent(mContext, StartupActivity.class);
-
 			// Creates the PendingIntent
 			PendingIntent notifyPendingIntent = PendingIntent.getActivities(
 					mContext, 0,
-					new Intent[] { startupActivity, resultIntent },
-					PendingIntent.FLAG_ONE_SHOT);
+					new Intent[] {resultIntent },
+					PendingIntent.FLAG_UPDATE_CURRENT);
 
 			// Puts the PendingIntent into the notification builder
 			builder.setContentIntent(notifyPendingIntent);

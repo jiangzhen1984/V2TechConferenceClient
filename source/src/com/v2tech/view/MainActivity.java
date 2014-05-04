@@ -32,8 +32,7 @@ import com.v2tech.util.Notificator;
 import com.v2tech.util.V2Log;
 import com.v2tech.vo.Conversation;
 
-public class MainActivity extends FragmentActivity implements
-		TabHost.OnTabChangeListener, ViewPager.OnPageChangeListener {
+public class MainActivity extends FragmentActivity {
 
 	private Context mContext;
 	private boolean exitedFlag = false;
@@ -47,24 +46,26 @@ public class MainActivity extends FragmentActivity implements
 
 	private TabClass[] mTabClasses = new TabClass[] {
 			new TabClass(PublicIntent.TAG_CONTACT,
-					R.drawable.selector_tab_contact_button, R.string.tab_contact_name,
+					R.drawable.selector_tab_contact_button,
+					R.string.tab_contact_name,
 					ContactsTabFragment.class.getName()),
-			new TabClass(PublicIntent.TAG_ORG, R.drawable.selector_tab_org_button,
-					R.string.tab_org_name, ContactsTabFragment.class.getName()),
-			new TabClass(PublicIntent.TAG_GROUP, R.drawable.selector_tab_group_button,
+			new TabClass(PublicIntent.TAG_ORG,
+					R.drawable.selector_tab_org_button, R.string.tab_org_name,
+					ContactsTabFragment.class.getName()),
+			new TabClass(PublicIntent.TAG_GROUP,
+					R.drawable.selector_tab_group_button,
 					R.string.tab_group_name,
 					ConversationsTabFragment.class.getName()),
 			new TabClass(PublicIntent.TAG_CONF,
 					R.drawable.selector_tab_conference_button,
 					R.string.tab_conference_name,
 					ConversationsTabFragment.class.getName()),
-			new TabClass(PublicIntent.TAG_COV, R.drawable.selector_tab_conversation_button,
+			new TabClass(PublicIntent.TAG_COV,
+					R.drawable.selector_tab_conversation_button,
 					R.string.tab_conversation_name,
 					ConversationsTabFragment.class.getName()) };
 
 	private LocalReceiver receiver = new LocalReceiver();
-
-	
 
 	/**
 	 * A simple factory that returns dummy views to the Tabhost
@@ -108,7 +109,7 @@ public class MainActivity extends FragmentActivity implements
 		} else {
 			setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 		}
-		
+
 		// Inflate the layout
 		setContentView(R.layout.activity_main);
 		// Initialise the TabHost
@@ -121,9 +122,9 @@ public class MainActivity extends FragmentActivity implements
 		this.intialiseViewPager();
 		initDPI();
 		initReceiver();
-		//Start animation
+		// Start animation
 		this.overridePendingTransition(R.animator.left_in, R.animator.left_out);
-		V2Log.d(" main onStart " );
+		V2Log.d(" main onStart ");
 	}
 
 	/**
@@ -168,7 +169,7 @@ public class MainActivity extends FragmentActivity implements
 				super.getSupportFragmentManager(), fragments);
 		this.mViewPager = (ViewPager) super.findViewById(R.id.viewpager);
 		this.mViewPager.setAdapter(this.mPagerAdapter);
-		this.mViewPager.setOnPageChangeListener(this);
+		this.mViewPager.setOnPageChangeListener(pageChangeListener);
 		this.mViewPager.setOffscreenPageLimit(5);
 	}
 
@@ -184,14 +185,9 @@ public class MainActivity extends FragmentActivity implements
 					.setIndicator(getTabView(tc));
 			confTabSpec.setContent(new TabFactory(this));
 			mTabHost.addTab(confTabSpec);
-
 		}
 
-		mTabHost.setOnTabChangedListener(this);
-//		for (int i = 0; i < mTabHost.getTabWidget().getChildCount(); i++) {
-//			mTabHost.getTabWidget().getChildAt(i)
-//					.setBackgroundColor(Color.rgb(247, 247, 247));
-//		}
+		mTabHost.setOnTabChangedListener(tabChnageListener);
 	}
 
 	private View getTabView(TabClass tcl) {
@@ -227,7 +223,7 @@ public class MainActivity extends FragmentActivity implements
 	@Override
 	protected void onStart() {
 		super.onStart();
-		V2Log.d(" main onStart " );
+		V2Log.d(" main onStart ");
 	}
 
 	@Override
@@ -244,7 +240,7 @@ public class MainActivity extends FragmentActivity implements
 		if (exitedFlag) {
 			this.getApplicationContext().stopService(
 					new Intent(this.getApplicationContext(), JNIService.class));
-			
+
 			GlobalConfig.saveLogoutFlag(this);
 			Notificator.cancelAllSystemNotification(this);
 			System.exit(0);
@@ -264,23 +260,6 @@ public class MainActivity extends FragmentActivity implements
 		}
 	}
 
-	/**
-	 * (non-Javadoc)
-	 * 
-	 * @see android.widget.TabHost.OnTabChangeListener#onTabChanged(java.lang.String)
-	 */
-	public void onTabChanged(String tag) {
-		int pos = this.mTabHost.getCurrentTab();
-		V2Log.d(" onTabChanged " +"  "+ pos);
-		this.mViewPager.setCurrentItem(pos);
-
-	}
-
-	@Override
-	public void onPageScrollStateChanged(int pos) {
-
-	}
-
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
@@ -290,15 +269,40 @@ public class MainActivity extends FragmentActivity implements
 		V2Log.d("system destroyed v2tech");
 	}
 
-	@Override
-	public void onPageScrolled(int arg0, float arg1, int arg2) {
+	private TabHost.OnTabChangeListener tabChnageListener = new TabHost.OnTabChangeListener() {
 
-	}
+		/**
+		 * (non-Javadoc)
+		 * 
+		 * @see android.widget.TabHost.OnTabChangeListener#onTabChanged(java.lang.String)
+		 */
+		public void onTabChanged(String tag) {
+			int pos = mTabHost.getCurrentTab();
+			V2Log.d(" onTabChanged " + "  " + pos);
+			mViewPager.setCurrentItem(pos);
 
-	@Override
-	public void onPageSelected(int pos) {
-		this.mTabHost.setCurrentTab(pos);
-	}
+		}
+
+	};
+
+	private ViewPager.OnPageChangeListener pageChangeListener = new ViewPager.OnPageChangeListener() {
+
+		@Override
+		public void onPageScrollStateChanged(int arg0) {
+
+		}
+
+		@Override
+		public void onPageScrolled(int arg0, float arg1, int arg2) {
+
+		}
+
+		@Override
+		public void onPageSelected(int pos) {
+			mTabHost.setCurrentTab(pos);
+		}
+
+	};
 
 	public class PagerAdapter extends FragmentPagerAdapter {
 
@@ -335,7 +339,6 @@ public class MainActivity extends FragmentActivity implements
 		}
 	}
 
-
 	class LocalReceiver extends BroadcastReceiver {
 		@Override
 		public void onReceive(Context context, Intent intent) {
@@ -359,7 +362,7 @@ public class MainActivity extends FragmentActivity implements
 					}
 				}
 			} else if (PublicIntent.FINISH_APPLICATION.equals(action)) {
-				exitedFlag = true;				
+				exitedFlag = true;
 				requestQuit();
 			}
 		}

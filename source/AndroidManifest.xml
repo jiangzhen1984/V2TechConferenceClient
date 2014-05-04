@@ -3,7 +3,7 @@
     package="com.v2tech"
     android:sharedUserLabel="@string/app_name"
     android:versionCode="1"
-    android:versionName="1.3.0.32" >
+    android:versionName="1.3.0.33" >
 
     <uses-sdk
         android:minSdkVersion="11"
@@ -149,7 +149,7 @@
 
                 <action android:name="com.v2tech.request_update_conversation" />
                 <action android:name="com.v2tech.jni.broadcast.conference_invatition" />
-
+				<action android:name="com.v2tech.jni.broadcast.conference_removed" />
                 <category android:name="com.v2tech" />
             </intent-filter>
         </receiver>
