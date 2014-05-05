@@ -117,7 +117,7 @@ public class VideoDocLayout extends LinearLayout {
 					.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 			View view = inflater.inflate(R.layout.video_doc_list_layout, null);
 			mDocListWindow = new PopupWindow(view, LayoutParams.WRAP_CONTENT,
-					LayoutParams.WRAP_CONTENT);
+					(int)(rootView.getHeight() * 0.5));
 			mDocListWindow.setBackgroundDrawable(new ColorDrawable(
 					Color.TRANSPARENT));
 			mDocListWindow.setFocusable(true);

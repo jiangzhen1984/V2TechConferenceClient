@@ -417,6 +417,10 @@ public class ConferenceService extends AbstractHandler {
 					String id = szUserInfos.substring(start + 4, end);
 					User u = GlobalHolder.getInstance().getUser(
 							Long.parseLong(id));
+					if (u == null) {
+						V2Log.e(" Can't not find user "+ id);
+						return;
+					}
 					for (Registrant re : registerAttendeeStatusListenersList) {
 						Handler h = re.getHandler();
 						if (h != null) {

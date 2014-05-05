@@ -375,6 +375,10 @@ public class User implements Comparable<User> {
 		if (avatar == null || avatar.isRecycled()) {
 			BitmapFactory.Options opt = new BitmapFactory.Options();
 			Bitmap tmep = BitmapFactory.decodeFile(mAvatarPath, opt);
+			if (tmep == null) {
+				V2Log.i(" bitmap object is null");
+				return null;
+			}
 			if (GlobalConfig.GLOBAL_DPI == DisplayMetrics.DENSITY_HIGH) {
 				avatar = Bitmap.createScaledBitmap(tmep, 60, 60, true);
 			} else if (GlobalConfig.GLOBAL_DPI == DisplayMetrics.DENSITY_XHIGH) {

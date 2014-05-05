@@ -259,12 +259,11 @@ public class VMessage {
 					msgEl = (Element) itemList.item(i);
 					if (!msgEl.getTagName().equals("TPictureChatItem")) {
 						dataCount++;
-						if (i == textMsgItemNL.getLength() - 1) {
-							vm.setText(vm.getText()
+						if ("True".equals(msgEl.getAttribute("NewLine")) && !vm.getText().isEmpty()) {
+							vm.setText(vm.getText()+"\n"
 									+ msgEl.getAttribute("Text"));
 						} else {
-							vm.setText(vm.getText()
-									+ msgEl.getAttribute("Text") + "\n");
+							vm.setText(msgEl.getAttribute("Text"));
 						}
 					}
 

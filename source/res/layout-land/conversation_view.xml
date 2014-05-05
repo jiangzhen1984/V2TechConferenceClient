@@ -40,6 +40,8 @@
         android:layout_marginLeft="30dp"
         android:layout_toRightOf="@+id/group_list_conference_image_view_rl"
         android:layout_alignTop="@+id/group_list_conference_image_view_rl"
+        android:ellipsize="end"
+        android:singleLine="true"
         android:text="TextView" />
 
     <TextView

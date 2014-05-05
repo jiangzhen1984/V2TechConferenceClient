@@ -38,7 +38,7 @@ public class V2Log {
 	}
 	
 	public static void e(String msg) {
-		Log.e(TAG, msg);
+		Log.e(TAG, "[V2-TECH-ERROR]"+msg);
 	}
 	
 	public static void w(String msg) {

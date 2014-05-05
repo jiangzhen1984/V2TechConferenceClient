@@ -66,21 +66,23 @@ public class ConversationConvertReceiver extends BroadcastReceiver {
 				.equals(action)
 				|| JNIService.JNI_BROADCAST_CONFERENCE_REMOVED.equals(action)) {
 			long gid = intent.getLongExtra("gid", 0);
+
+			boolean noti = false;
 			Group g = GlobalHolder.getInstance().findGroupById(gid);
 			Conversation cv = GlobalHolder.getInstance()
 					.findConversationByType(Conversation.TYPE_CONFERNECE, gid);
-			if (cv == null) {
-				cv = new ConferenceConversation(g);
-				GlobalHolder.getInstance().addConversation(cv);
-			}
+			if (JNIService.JNI_BROADCAST_CONFERENCE_INVATITION.equals(action)) {
 
-			boolean noti = true;
-			if (JNIService.JNI_BROADCAST_CONFERENCE_INVATITION
-				.equals(action)) {
+				if (cv == null) {
+					cv = new ConferenceConversation(g);
+					GlobalHolder.getInstance().addConversation(cv);
+				}
 				cv.setNotiFlag(Conversation.NOTIFICATION);
 				noti = true;
 			} else {
-				cv.setNotiFlag(Conversation.NONE);
+				if (cv != null) {
+					cv.setNotiFlag(Conversation.NONE);
+				}
 				noti = false;
 			}
 
@@ -89,6 +91,7 @@ public class ConversationConvertReceiver extends BroadcastReceiver {
 			i.putExtra("extId", gid);
 			i.putExtra("type", Conversation.TYPE_CONFERNECE);
 			i.putExtra("noti", noti);
+			i.putExtra("action", action);
 			mContext.sendBroadcast(i);
 		}
 	}

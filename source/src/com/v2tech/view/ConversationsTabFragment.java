@@ -379,6 +379,7 @@ public class ConversationsTabFragment extends Fragment {
 				break;
 			case R.drawable.conversation_popup_menu_video_call_button:
 			{
+				titleBar.dismissPlusWindow();
 				Intent i = new Intent(PublicIntent.START_CONFERENCE_CREATE_ACTIVITY);
 				i.addCategory(PublicIntent.DEFAULT_CATEGORY);
 				startActivityForResult(i, SUB_ACTIVITY_CODE_CREATE_CONF);
@@ -517,7 +518,7 @@ public class ConversationsTabFragment extends Fragment {
 		}
 
 		if (!foundFlag) {
-			Conversation cov = (ContactConversation) GlobalHolder.getInstance()
+			Conversation cov =  GlobalHolder.getInstance()
 					.findConversationByType(mCurrentTabFlag, extId);
 			if (cov == null) {
 				if (mCurrentTabFlag.equals(Conversation.TYPE_CONTACT)) {
@@ -701,6 +702,9 @@ public class ConversationsTabFragment extends Fragment {
 						intent.getExtras().getString("content"),
 						intent.getExtras().getString("date"),
 						intent.getExtras().getBoolean("noti") };
+				if (JNIService.JNI_BROADCAST_CONFERENCE_REMOVED.equals(intent.getStringExtra("action"))) {
+					return;
+				}
 				if (mCurrentTabFlag.equals(ar[1])) {
 					Message.obtain(mHandler, UPDATE_CONVERSATION, ar)
 							.sendToTarget();

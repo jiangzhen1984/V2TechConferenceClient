@@ -148,6 +148,13 @@ public class TitleBar {
 		normalList.clear();
 		context.unregisterReceiver(receiver);
 	}
+	
+	
+	public void dismissPlusWindow() {
+		if(plusWindow!= null && plusWindow.isShowing()) {
+			plusWindow.dismiss();
+		}
+	}
 
 	private OnClickListener plusItemClickListener = new OnClickListener() {
 

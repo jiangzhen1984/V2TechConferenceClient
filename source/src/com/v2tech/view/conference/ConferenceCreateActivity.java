@@ -90,7 +90,6 @@ public class ConferenceCreateActivity extends Activity {
 	private List<Group> mGroupList;
 
 	
-	private Map<Long, ListItem> mCacheHolder = new HashMap<Long, ListItem>();
 	private Set<User> mAttendeeList = new HashSet<User>();
 
 	private ConferenceService cs = new ConferenceService();
@@ -175,11 +174,11 @@ public class ConferenceCreateActivity extends Activity {
 		if (item.isExpanded == false) {
 			for (Group g : item.g.getChildGroup()) {
 				Long key = Long.valueOf(g.getmGId());
-				ListItem cache = mCacheHolder.get(key);
-				if (cache == null) {
-					cache =  new ListItem(g, g.getLevel());
-					mCacheHolder.put(key, cache);
-				}
+//				ListItem cache = mCacheHolder.get(key);
+//				if (cache == null) {
+				ListItem	cache =  new ListItem(g, g.getLevel());
+			//		mCacheHolder.put(key, cache);
+			//	}
 				mItemList.add(++pos, cache);
 			}
 			List<User> sortList = new ArrayList<User>();
@@ -187,11 +186,11 @@ public class ConferenceCreateActivity extends Activity {
 			Collections.sort(sortList);
 			for (User u : sortList) {
 				Long key = Long.valueOf(u.getmUserId());
-				ListItem cache = mCacheHolder.get(key);
-				if (cache == null) {
-					cache =  new ListItem(u, item.g.getLevel() + 1);
-					mCacheHolder.put(key, cache);
-				}
+				//ListItem cache = mCacheHolder.get(key);
+			//	if (cache == null) {
+					ListItem	cache =  new ListItem(u, item.g.getLevel() + 1);
+			//		mCacheHolder.put(key, cache);
+			//	}
 				mItemList.add(++pos, cache);
 			}
 
