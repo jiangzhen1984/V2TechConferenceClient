@@ -1215,13 +1215,17 @@ public class VideoActivityV2 extends Activity {
 				GroupUserObject ro = (GroupUserObject) msg.obj;
 				Attendee a = new Attendee(GlobalHolder.getInstance().getUser(ro.getmUserId()));
 				mAttendeeList.remove(a);
-				mAttendeeContainer.removeAttendee(a);
+				if (mAttendeeContainer != null) {
+					mAttendeeContainer.removeAttendee(a);
+				}
 				break;
 			case GROUP_ADD_USER:
 				GroupUserObject ro1 = (GroupUserObject) msg.obj;
 				Attendee a1 = new Attendee(GlobalHolder.getInstance().getUser(ro1.getmUserId()));
 				mAttendeeList.add(a1);
-				mAttendeeContainer.addAttendee(a1);
+				if (mAttendeeContainer != null) {
+					mAttendeeContainer.addAttendee(a1);
+				}
 				break;
 			case ATTENDEE_LISTENER:
 				if (msg.arg1 == 1) {

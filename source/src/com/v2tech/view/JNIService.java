@@ -304,7 +304,11 @@ public class JNIService extends Service {
 							// Update logged user object.
 							GlobalHolder.getInstance().setCurrentUser(existU);
 						}
-						g.addUserToGroup(existU);
+						if (g == null) {
+							V2Log.e(" didn't find group information  "+ go.gId);
+						} else {
+							g.addUserToGroup(existU);
+						}
 					}
 					V2Log.w("  group:" + go.gId + "  user size:" + lu.size()
 							+ "  " + g);
