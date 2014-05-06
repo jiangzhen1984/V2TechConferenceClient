@@ -9,7 +9,7 @@ import com.v2tech.util.V2Log;
  * As conference's attendee object. <br>
  * 
  * @author 28851274
- *
+ * 
  */
 public class Attendee {
 
@@ -40,7 +40,6 @@ public class Attendee {
 		this.isChairMan = isChairMan;
 	}
 
-	
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -65,8 +64,7 @@ public class Attendee {
 			return false;
 		return true;
 	}
-	
-	
+
 	public UserDeviceConfig getDefaultDevice() {
 		if (this.mDevices != null && this.mDevices.size() > 0) {
 			return this.mDevices.get(0);
@@ -74,7 +72,7 @@ public class Attendee {
 			return null;
 		}
 	}
-	
+
 	public void addDevice(UserDeviceConfig udc) {
 		if (udc == null) {
 			V2Log.w(" null device");
@@ -83,10 +81,15 @@ public class Attendee {
 		if (mDevices == null) {
 			mDevices = new ArrayList<UserDeviceConfig>();
 		}
+		for (int i = 0; i < mDevices.size(); i++) {
+			if (mDevices.get(i).equals(udc)) {
+				V2Log.w("device "+udc.getDeviceID() +"  exist");
+				return;
+			}
+		}
 		mDevices.add(udc);
 		udc.setBelongsAttendee(this);
 	}
-	
 
 	public User getUser() {
 		return user;
@@ -127,7 +130,5 @@ public class Attendee {
 	public void setJoined(boolean isJoined) {
 		this.isJoined = isJoined;
 	}
-	
-	
 
 }

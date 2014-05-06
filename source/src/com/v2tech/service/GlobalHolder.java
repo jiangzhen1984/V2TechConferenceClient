@@ -50,6 +50,8 @@ public class GlobalHolder {
 
 	// Use to hold current opened conversation
 	public Conversation CURRENT_CONVERSATION  = null;
+	
+	public long CURRENT_ID  = 0;
 
 	public static synchronized GlobalHolder getInstance() {
 		if (holder == null) {
@@ -314,13 +316,14 @@ public class GlobalHolder {
 		g.addUserToGroup(u);
 	}
 
-	public void removeConferenceGroup(long gid) {
+	public boolean removeConferenceGroup(long gid) {
 		for (Group g : mConfGroup) {
 			if (g.getmGId() == gid) {
 				mConfGroup.remove(g);
-				break;
+				return true;
 			}
 		}
+		return false;
 	}
 
 	public String getAvatarPath(long uid) {

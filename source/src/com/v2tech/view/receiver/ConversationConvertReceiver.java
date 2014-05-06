@@ -256,6 +256,8 @@ public class ConversationConvertReceiver extends BroadcastReceiver {
 							+ ContentDescriptor.Conversation.Cols.TYPE + "=?",
 					new String[] { fromUid + "", Conversation.TYPE_CONTACT });
 
+			//FIXME sometimes c object is not same with cv object
+			// 
 			Conversation cv = GlobalHolder.getInstance()
 					.findConversationByType(Conversation.TYPE_CONTACT, fromUid);
 			if (cv != null) {
@@ -265,8 +267,10 @@ public class ConversationConvertReceiver extends BroadcastReceiver {
 
 		}
 
-		notif = c.equals(GlobalHolder.getInstance().CURRENT_CONVERSATION) ? false
-				: true;
+		notif = (c.equals(GlobalHolder.getInstance().CURRENT_CONVERSATION) || (GlobalHolder
+				.getInstance().CURRENT_ID == fromUid)) ? false : true;
+		c.setNotiFlag(notif ? Conversation.NOTIFICATION
+				: Conversation.NONE);
 		if (GlobalHolder.getInstance().CURRENT_CONVERSATION != null) {
 			GlobalHolder.getInstance().CURRENT_CONVERSATION
 					.setNotiFlag(notif ? Conversation.NOTIFICATION

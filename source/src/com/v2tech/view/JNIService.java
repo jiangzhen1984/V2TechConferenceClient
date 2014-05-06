@@ -305,7 +305,7 @@ public class JNIService extends Service {
 							GlobalHolder.getInstance().setCurrentUser(existU);
 						}
 						if (g == null) {
-							V2Log.e(" didn't find group information  "+ go.gId);
+							V2Log.e(" didn't find group information  " + go.gId);
 						} else {
 							g.addUserToGroup(existU);
 						}
@@ -407,7 +407,10 @@ public class JNIService extends Service {
 						Conversation.TYPE_CONTACT, vm.getUser().getmUserId());
 			}
 			//
-			if (GlobalHolder.getInstance().CURRENT_CONVERSATION != null && cov == GlobalHolder.getInstance().CURRENT_CONVERSATION) {
+			if ((GlobalHolder.getInstance().CURRENT_CONVERSATION != null && cov == GlobalHolder
+					.getInstance().CURRENT_CONVERSATION)
+					|| (GlobalHolder.getInstance().CURRENT_ID == vm.getUser()
+							.getmUserId())) {
 				return;
 			}
 			NotificationCompat.Builder builder = new NotificationCompat.Builder(
@@ -431,8 +434,7 @@ public class JNIService extends Service {
 
 			// Creates the PendingIntent
 			PendingIntent notifyPendingIntent = PendingIntent.getActivities(
-					mContext, 0,
-					new Intent[] {resultIntent },
+					mContext, 0, new Intent[] { resultIntent },
 					PendingIntent.FLAG_UPDATE_CURRENT);
 
 			// Puts the PendingIntent into the notification builder
@@ -633,14 +635,21 @@ public class JNIService extends Service {
 				} else {
 					gName = nGroupID + "";
 				}
-				GlobalHolder.getInstance().removeConferenceGroup(nGroupID);
-				Intent i = new Intent();
-				i.setAction(JNIService.JNI_BROADCAST_CONFERENCE_REMOVED);
-				i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
-				i.putExtra("gid", nGroupID);
-				sendBroadcast(i);
-				Notificator.updateSystemNotification(mContext, name + " 删除会议:",
-						gName, 1, PublicIntent.VIDEO_NOTIFICATION_ID);
+				boolean flag = GlobalHolder.getInstance()
+						.removeConferenceGroup(nGroupID);
+				// If flag is true, mean current user dosn't remove this group
+				// should notify
+				// Otherwise this user removed this group should not notify
+				if (flag) {
+					Intent i = new Intent();
+					i.setAction(JNIService.JNI_BROADCAST_CONFERENCE_REMOVED);
+					i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
+					i.putExtra("gid", nGroupID);
+					sendBroadcast(i);
+					Notificator.updateSystemNotification(mContext, name
+							+ " 删除会议:", gName, 1,
+							PublicIntent.VIDEO_NOTIFICATION_ID);
+				}
 			}
 		}
 

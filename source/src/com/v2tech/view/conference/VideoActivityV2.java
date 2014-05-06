@@ -38,6 +38,7 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
@@ -153,6 +154,7 @@ public class VideoActivityV2 extends Activity {
 
 	private Map<String, V2Doc> mDocs = new HashMap<String, V2Doc>();
 	private V2Doc mCurrentActivateDoc = null;
+	
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -402,6 +404,14 @@ public class VideoActivityV2 extends Activity {
 				if (code != NetworkStateCode.CONNECTED) {
 					Toast.makeText(mContext, R.string.error_connect_to_server, Toast.LENGTH_SHORT).show();
 				} 
+			} else if (JNIService.JNI_BROADCAST_USER_STATUS_NOTIFICATION.equals(intent.getAction())) {
+				long uid = intent.getExtras().getLong("uid");
+				User user = GlobalHolder.getInstance().getUser(uid);
+				int status = intent.getExtras().getInt("status");
+				User.Status st = User.Status.fromInt(status);
+				if (st == User.Status.OFFLINE && user != null) {
+					Message.obtain(mVideoHandler, ATTENDEE_LISTENER, 0, 0, user).sendToTarget();
+				}
 			}
 			
 		}
@@ -417,6 +427,8 @@ public class VideoActivityV2 extends Activity {
 		NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 		// mId allows you to update the notification later on.
 		mNotificationManager.cancel(PublicIntent.VIDEO_NOTIFICATION_ID);
+		//keep screen on
+		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 	}
 
 	private void initConfsListener() {
@@ -428,6 +440,8 @@ public class VideoActivityV2 extends Activity {
 		filter.addAction(JNIService.JNI_BROADCAST_GROUP_USER_ADDED);
 		filter.addAction(JNIService.JNI_BROADCAST_CONNECT_STATE_NOTIFICATION);
 		filter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
+		filter
+		.addAction(JNIService.JNI_BROADCAST_USER_STATUS_NOTIFICATION);
 		mContext.registerReceiver(mConfUserChangeReceiver, filter);
 
 		cb.registerAttendeeListener(this.mVideoHandler, ATTENDEE_LISTENER, null);
@@ -865,6 +879,8 @@ public class VideoActivityV2 extends Activity {
 	@Override
 	protected void onStop() {
 		super.onStop();
+		getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+		
 		mVideoLayout.removeAllViews();
 		quit();
 		finish();

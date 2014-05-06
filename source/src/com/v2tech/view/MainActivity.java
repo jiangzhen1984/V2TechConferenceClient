@@ -124,7 +124,7 @@ public class MainActivity extends FragmentActivity {
 		initReceiver();
 		// Start animation
 		this.overridePendingTransition(R.animator.left_in, R.animator.left_out);
-		V2Log.d(" main onStart ");
+		V2Log.d(" main onCreate ");
 	}
 
 	/**
@@ -229,6 +229,7 @@ public class MainActivity extends FragmentActivity {
 	@Override
 	protected void onStop() {
 		super.onStop();
+		V2Log.d(" main onStop ");
 	}
 
 	@Override
@@ -279,6 +280,10 @@ public class MainActivity extends FragmentActivity {
 		public void onTabChanged(String tag) {
 			int pos = mTabHost.getCurrentTab();
 			V2Log.d(" onTabChanged " + "  " + pos);
+			if (mViewPager == null) {
+				V2Log.e(" MainActivity state is illegal");
+				return;
+			}
 			mViewPager.setCurrentItem(pos);
 
 		}

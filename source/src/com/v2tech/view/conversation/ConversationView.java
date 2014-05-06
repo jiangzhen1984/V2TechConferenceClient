@@ -38,6 +38,7 @@ import com.v2tech.R;
 import com.v2tech.db.ContentDescriptor;
 import com.v2tech.service.ChatService;
 import com.v2tech.service.GlobalHolder;
+import com.v2tech.util.V2Log;
 import com.v2tech.view.JNIService;
 import com.v2tech.view.PublicIntent;
 import com.v2tech.view.contacts.ContactDetail;
@@ -248,6 +249,7 @@ public class ConversationView extends Activity {
 		// mId allows you to update the notification later on.
 		mNotificationManager.cancel(PublicIntent.MESSAGE_NOTIFICATION_ID);
 		GlobalHolder.getInstance().CURRENT_CONVERSATION = mCurrentConv;
+		GlobalHolder.getInstance().CURRENT_ID = user2Id;
 		isStopped = false;
 	}
 
@@ -280,6 +282,8 @@ public class ConversationView extends Activity {
 		this.unregisterReceiver(receiver);
 		cleanCache();
 		GlobalHolder.getInstance().CURRENT_CONVERSATION = null;
+		GlobalHolder.getInstance().CURRENT_ID = 0;
+		V2Log.e("conversation view exited");
 	}
 
 	private void scrollToBottom() {
