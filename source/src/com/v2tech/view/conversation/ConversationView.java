@@ -371,6 +371,12 @@ public class ConversationView extends Activity {
 
 				Cursor cursor = getContentResolver().query(selectedImage,
 						filePathColumn, null, null, null);
+				if (cursor == null) {
+					Toast.makeText(mContext,
+							R.string.error_contact_messag_invalid_image_path,
+							Toast.LENGTH_SHORT).show();
+					return;
+				}
 				cursor.moveToFirst();
 
 				int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
