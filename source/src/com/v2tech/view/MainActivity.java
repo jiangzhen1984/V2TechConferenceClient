@@ -142,7 +142,7 @@ public class MainActivity extends FragmentActivity {
 
 		getWindowManager().getDefaultDisplay().getMetrics(metrics);
 		GlobalConfig.GLOBAL_DPI = metrics.densityDpi;
-
+		V2Log.i("Init user device DPI: " + GlobalConfig.GLOBAL_DPI);
 		DisplayMetrics dm = new DisplayMetrics();
 		getWindowManager().getDefaultDisplay().getMetrics(dm);
 		double x = Math.pow(dm.widthPixels / dm.xdpi, 2);
@@ -359,6 +359,7 @@ public class MainActivity extends FragmentActivity {
 					noticator = mTabClasses[4].notificator;
 				}
 
+				V2Log.i("type:" + type+"  count:"+GlobalHolder.getInstance().getNoticatorCount(type));
 				if (noticator != null) {
 					if (GlobalHolder.getInstance().getNoticatorCount(type) > 0) {
 						noticator.setVisibility(View.VISIBLE);

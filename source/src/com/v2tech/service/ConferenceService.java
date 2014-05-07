@@ -579,6 +579,9 @@ public class ConferenceService extends AbstractHandler {
 						} else {
 							((ConferenceGroup) cache).setSyn(false);
 						}
+					} else {
+						V2Log.w(" no sync item");
+						return;
 					}
 					// notify sync desktop listener
 					for (Registrant re : syncDesktopListenersList) {

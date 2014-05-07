@@ -13,6 +13,10 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.support.v4.view.ViewPager.OnPageChangeListener;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.v2tech.R;
@@ -23,6 +27,8 @@ import com.v2tech.vo.VMessage;
 
 public class ImageViewGallery extends FragmentActivity {
 
+	private View mReturnButton;
+	
 	private ViewPager mImageViewPager;
 
 	private List<ListItem> vimList;
@@ -30,6 +36,8 @@ public class ImageViewGallery extends FragmentActivity {
 	private long initMid;
 	
 	private int initPos;
+	
+	private TextView mTitle;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -40,11 +48,44 @@ public class ImageViewGallery extends FragmentActivity {
 		initMid = getIntent().getLongExtra("cid", 0);
 		loadImages(getIntent().getLongExtra("uid1", 0), getIntent()
 				.getLongExtra("uid2", 0));
+	
+		mTitle = (TextView)findViewById(R.id.image_galley_title);
+		mReturnButton = findViewById(R.id.image_galley_detail_return_button);
+		mReturnButton.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				onBackPressed();
+			}
+			
+		});
+		
 		mImageViewPager.setAdapter(new ImageAdapter(this.getSupportFragmentManager()));
+		
+		mImageViewPager.setOnPageChangeListener(new OnPageChangeListener() {
+
+			@Override
+			public void onPageScrollStateChanged(int arg0) {
+				
+			}
+
+			@Override
+			public void onPageScrolled(int arg0, float arg1, int arg2) {
+				
+			}
+
+			@Override
+			public void onPageSelected(int pos) {
+				mTitle.setText((pos+1)+"/"+vimList.size());
+			}
+			
+		});
+		mTitle.setText((initPos+1)+"/"+vimList.size());
 		mImageViewPager.setCurrentItem(initPos);
 	}
 
 	private void loadImages(long user1Id, long user2Id) {
+		
 		if (user1Id <= 0 || user2Id <= 0) {
 			Toast.makeText(ImageViewGallery.this, "invalid user id",
 					Toast.LENGTH_SHORT).show();

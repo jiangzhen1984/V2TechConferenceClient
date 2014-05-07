@@ -37,8 +37,8 @@ public class MainApplication extends Application {
 
 		V2Log.isDebuggable = (0 != (getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE));
 		if (!V2Log.isDebuggable) {
-			CrashHandler crashHandler = CrashHandler.getInstance();
-			crashHandler.init(getApplicationContext());
+			//CrashHandler crashHandler = CrashHandler.getInstance();
+			//crashHandler.init(getApplicationContext());
 		}
 		SharedPreferences sf = getSharedPreferences("config",
 				Context.MODE_PRIVATE);
@@ -104,7 +104,7 @@ public class MainApplication extends Application {
 		//Init screen size
 		GlobalConfig.GLOBAL_LAYOUT_SIZE = getResources().getConfiguration().screenLayout
 				& Configuration.SCREENLAYOUT_SIZE_MASK;
-		
+		V2Log.i("Init user device screen: " + GlobalConfig.GLOBAL_LAYOUT_SIZE);
 		if (!V2Log.isDebuggable) {
 			new LogcatThread().start();
 		}

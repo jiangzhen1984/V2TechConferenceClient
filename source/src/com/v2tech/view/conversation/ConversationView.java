@@ -261,6 +261,14 @@ public class ConversationView extends Activity {
 			scrollToBottom();
 		}
 	}
+	
+	
+
+	@Override
+	public void onBackPressed() {
+		super.onBackPressed();
+		V2Log.i("-----User pressed back key");
+	}
 
 	@Override
 	protected void onStop() {

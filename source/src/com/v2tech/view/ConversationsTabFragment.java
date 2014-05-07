@@ -570,6 +570,13 @@ public class ConversationsTabFragment extends Fragment {
 			GlobalHolder.getInstance().removeConversation(type, id);
 			// FIXME remove notification?
 		} else if (Conversation.TYPE_CONFERNECE.equals(type)) {
+			//remove group from list
+			for (Group g : mConferenceList) {
+				if (g.getmGId() == id) {
+					mConferenceList.remove(g);
+					break;
+				}
+			}
 			this.cb.quitConference(new Conference(id, owner), null);
 		} else {
 			V2Log.e(" Unkonw type:" + type);

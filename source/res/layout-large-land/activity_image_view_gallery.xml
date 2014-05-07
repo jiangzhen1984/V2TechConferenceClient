@@ -12,21 +12,28 @@
         android:orientation="vertical" >
 
         <TextView
-            android:id="@+id/message_user_title"
+            android:id="@+id/image_galley_detail_return_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:paddingBottom="10dp"
+            android:paddingLeft="15dp"
+            android:paddingRight="8dp"
+            android:paddingTop="10dp"
+            android:text="@string/contacts_user_detail_return_button"
+            android:textColor="@color/button_text_color"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/image_galley_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
             android:layout_gravity="center"
-            android:layout_marginBottom="15dp"
-            android:layout_marginTop="15dp"
+            android:paddingBottom="15dp"
+            android:paddingTop="15dp"
             android:text=""
             android:textSize="25sp" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="0dp"
-            android:layout_below="@+id/message_user_title"
-            android:text="" />
     </RelativeLayout>
 
     <LinearLayout

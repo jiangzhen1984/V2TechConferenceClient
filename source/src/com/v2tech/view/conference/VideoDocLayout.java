@@ -54,6 +54,8 @@ public class VideoDocLayout extends LinearLayout {
 	private LinearLayout mDodListContainer;
 	private View mShowDocListButton;
 	private View mRequestFixedPosButton;
+	
+	private boolean mSyncStatus;
 
 	private V2Doc mCurrentDoc;
 
@@ -148,7 +150,7 @@ public class VideoDocLayout extends LinearLayout {
 							container.getMeasuredHeight());
 
 			mDocListWindow.showAtLocation(anchor, Gravity.NO_GRAVITY, l[0],
-					l[1] - mDocListWindow.getContentView().getMeasuredHeight());
+					l[1] - mDocListWindow.getHeight());
 		}
 	}
 
@@ -223,6 +225,17 @@ public class VideoDocLayout extends LinearLayout {
 		}
 		updateLayoutPageInformation();
 		updatePageButton();
+		
+		//Update selected doc
+		for (int i = 0; mDodListContainer != null && i < mDodListContainer.getChildCount(); i++) {
+			View child = mDodListContainer.getChildAt(i);
+			if (mCurrentDoc != child.getTag()) {
+				child.setBackgroundColor(Color.WHITE);
+			} else {
+				child.setBackgroundColor(getResources().getColor(
+						R.color.in_meeting_doc_list_activited_doc_bg));;
+			}
+		}
 	}
 
 	public void updateCurrentDoc() {
@@ -329,7 +342,7 @@ public class VideoDocLayout extends LinearLayout {
 	}
 
 	public void updatePageButton() {
-		if (mCurrentDoc == null) {
+		if (mCurrentDoc == null || mSyncStatus) {
 			mPrePageButton
 					.setImageResource(R.drawable.video_doc_left_arrow_gray);
 			mNextPageButton
@@ -359,6 +372,7 @@ public class VideoDocLayout extends LinearLayout {
 	 * @param sync
 	 */
 	public void updateSyncStatus(boolean sync) {
+		mSyncStatus = sync;
 		if (sync) {
 			mPrePageButton
 					.setImageResource(R.drawable.video_doc_left_arrow_gray);
@@ -437,6 +451,9 @@ public class VideoDocLayout extends LinearLayout {
 
 		@Override
 		public void onClick(View v) {
+			if (mSyncStatus) {
+				return;
+			}
 			V2Doc d = (V2Doc) v.getTag();
 			if (d != mCurrentDoc) {
 				V2Doc.Page p = d.getActivatePage();
