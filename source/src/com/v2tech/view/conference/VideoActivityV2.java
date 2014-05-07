@@ -1103,9 +1103,9 @@ public class VideoActivityV2 extends Activity {
 				}
 			}
 			this.mAttendeeList.remove(a);
-		}
-		if (mAttendeeContainer != null) {
-			mAttendeeContainer.updateExitedAttendee(a);
+			if (mAttendeeContainer != null) {
+				mAttendeeContainer.updateExitedAttendee(a);
+			}
 		}
 
 	}
