@@ -42,4 +42,13 @@ public interface ConfRequestCallback {
 	 */
 	public void OnKickConfCallback(int nReason);
 	
+	
+	/**
+	 * 
+	 * @param userid
+	 * @param type
+	 * @param status
+	 */
+	public void OnGrantPermissionCallback(long userid, int type, int status);
+	
 }

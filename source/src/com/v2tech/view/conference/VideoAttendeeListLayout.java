@@ -22,6 +22,8 @@ import android.widget.TextView;
 
 import com.v2tech.R;
 import com.v2tech.vo.Attendee;
+import com.v2tech.vo.ConferencePermission;
+import com.v2tech.vo.PermissionState;
 import com.v2tech.vo.UserDeviceConfig;
 
 public class VideoAttendeeListLayout extends LinearLayout {
@@ -158,6 +160,33 @@ public class VideoAttendeeListLayout extends LinearLayout {
 		mAttends.put(Long.valueOf(at.getUser().getmUserId()), at);
 		mAttendsView.clear();
 		populate();
+	}
+	
+	/**
+	 * Update attendee speaker image according to user speaking state
+	 * @param at
+	 * @param cp
+	 * @param state
+	 */
+	public void updateAttendeeSpeakingState(Attendee at,ConferencePermission cp, PermissionState state) {
+		View atView = null;
+		synchronized (mAttendsView) {
+			for (View v : mAttendsView) {
+				Wrapper wr = (Wrapper)v.getTag();
+				if (wr.a.getUser().getmUserId() == at.getUser().getmUserId()) {
+					atView = v;
+					break;
+				}
+			}
+		}
+		if (atView != null) {
+			ImageView spIV = (ImageView)atView.findViewById(R.id.video_attendee_device_speaker_icon);
+			if (state == PermissionState.NORMAL) {
+				spIV.setImageResource(R.drawable.conf_speaker);
+			} else if (state == PermissionState.GRANTED) {
+				spIV.setImageResource(R.drawable.conf_speaking);
+			}
+		}
 	}
 	
 	/**

@@ -58,6 +58,7 @@ import com.v2tech.service.DocumentService;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.service.Registrant;
 import com.v2tech.service.jni.JNIResponse;
+import com.v2tech.service.jni.PermissionUpdateIndication;
 import com.v2tech.service.jni.RequestEnterConfResponse;
 import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.V2Log;
@@ -74,6 +75,7 @@ import com.v2tech.vo.ConferencePermission;
 import com.v2tech.vo.Conversation;
 import com.v2tech.vo.Group;
 import com.v2tech.vo.NetworkStateCode;
+import com.v2tech.vo.PermissionState;
 import com.v2tech.vo.User;
 import com.v2tech.vo.UserDeviceConfig;
 import com.v2tech.vo.V2Doc;
@@ -92,6 +94,8 @@ public class VideoActivityV2 extends Activity {
 	private static final int REQUEST_ENTER_CONF = 8;
 	private static final int REQUEST_ENTER_CONF_RESPONSE = 9;
 	private static final int REQUEST_EXIT_CONF = 10;
+	private static final int NOTIFY_USER_PERMISSION_UPDATED = 11;
+	
 
 	private static final int ATTENDEE_LISTENER = 21;
 	private static final int CONF_USER_DEVICE_EVENT = 23;
@@ -106,7 +110,6 @@ public class VideoActivityV2 extends Activity {
 	private static final int DOC_CLOSED_NOTIFICATION = 55;
 	private static final int DOC_PAGE_CANVAS_NOTIFICATION = 56;
 	private static final int DESKTOP_SYNC_NOTIFICATION = 57;
-	
 
 	public static final String JNI_EVENT_VIDEO_CATEGORY = "com.v2tech.conf_video_event";
 	public static final String JNI_EVENT_VIDEO_CATEGORY_OPEN_VIDEO_EVENT_ACTION = "com.v2tech.conf_video_event.open_video_event";
@@ -154,7 +157,6 @@ public class VideoActivityV2 extends Activity {
 
 	private Map<String, V2Doc> mDocs = new HashMap<String, V2Doc>();
 	private V2Doc mCurrentActivateDoc = null;
-	
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -164,70 +166,51 @@ public class VideoActivityV2 extends Activity {
 		mContext = this;
 		this.mVideoLayoutMain = (RelativeLayout) findViewById(R.id.video_layout_root);
 		this.mCurrentShowedSV = new ArrayList<SurfaceViewW>();
-		
+
 		this.mVideoLayout = (RelativeLayout) findViewById(R.id.in_metting_video_main);
-		//setting button 
+		// setting button
 		this.mSettingIV = (ImageView) findViewById(R.id.in_meeting_setting_iv);
 		this.mSettingIV.setOnClickListener(mShowSettingListener);
-		//request exit button
+		// request exit button
 		this.mQuitIV = (ImageView) findViewById(R.id.in_meeting_log_out_iv);
 		this.mQuitIV.setOnClickListener(mShowQuitWindowListener);
-		//request speak or mute button
+		// request speak or mute button
 		this.mSpeakerIV = (ImageView) findViewById(R.id.speaker_iv);
 		this.mSpeakerIV.setOnClickListener(mApplySpeakerListener);
-		//conference name text view
+		// conference name text view
 		this.mGroupNameTV = (TextView) findViewById(R.id.in_meeting_name);
-		
+
 		this.mMenuLine = (LinearLayout) findViewById(R.id.in_meeting_menu_separation_line);
 		this.mVideoLine = (LinearLayout) findViewById(R.id.in_meeting_video_separation_line1);
-		
-		//local camera surface view
+
+		// local camera surface view
 		this.mLocalSurface = (SurfaceView) findViewById(R.id.local_surface_view);
 
-		// show menu list(Include show message layout, show attendee list layout show document layout) button
+		// show menu list(Include show message layout, show attendee list layout
+		// show document layout) button
 		mMenuButton = (ImageView) findViewById(R.id.in_meeting_menu_button);
 		mMenuButton.setOnClickListener(mMenuButtonListener);
 		mMenuButtonContainer = (LinearLayout) findViewById(R.id.in_meeting_menu_layout);
-		//show message layout button
+		// show message layout button
 		mMenuMessageButton = findViewById(R.id.in_meeting_menu_show_msg_button);
 		mMenuMessageButton.setTag("msg");
 		mMenuMessageButton.setOnClickListener(mMenuShowButtonListener);
-		//show attendee list layout button
+		// show attendee list layout button
 		mMenuAttendeeButton = findViewById(R.id.in_meeting_menu_show_attendees_button);
 		mMenuAttendeeButton.setTag("attendee");
 		mMenuAttendeeButton.setOnClickListener(mMenuShowButtonListener);
 
-		//show doucment display button
+		// show doucment display button
 		mMenuDocButton = findViewById(R.id.in_meeting_menu_show_doc_button);
 		mMenuDocButton.setTag("doc");
 		mMenuDocButton.setOnClickListener(mMenuShowButtonListener);
 
-		//Initialize broadcast receiver
+		// Initialize broadcast receiver
 		initConfsListener();
-		//Initialize conference object and show local camera
+		// Initialize conference object and show local camera
 		init();
-		//Register listener for kicking or removal of this conference
-		registerOrRemoveListener(true);
 
-
-		//Register listen to document notification
-		ds.registerNewDocNotification(mVideoHandler, NEW_DOC_NOTIFICATION, null);
-		ds.registerDocDisplayNotification(mVideoHandler,
-				DOC_DOWNLOADED_NOTIFICATION, null);
-		ds.registerdocPageActiveNotification(mVideoHandler,
-				DOC_PAGE_ACTIVITE_NOTIFICATION, null);
-		ds.registerDocPageNotification(mVideoHandler, DOC_PAGE_NOTIFICATION,
-				null);
-		ds.registerDocClosedNotification(mVideoHandler,
-				DOC_CLOSED_NOTIFICATION, null);
-		ds.registerDocPageAddedNotification(mVideoHandler,
-				DOC_PAGE_ADDED_NOTIFICATION, null);
-		ds.registerPageCanvasUpdateNotification(mVideoHandler,
-				DOC_PAGE_CANVAS_NOTIFICATION, null);
-		
-		cb.registerSyncDesktopListener(mVideoHandler, DESKTOP_SYNC_NOTIFICATION, null);
-
-		// Update main activity tab notificator
+		// Update main activity tab notificatior
 		notificateConversationUpdate();
 		// Start animation
 		this.overridePendingTransition(R.animator.nonam_scale_center_0_100,
@@ -390,30 +373,38 @@ public class VideoActivityV2 extends Activity {
 				if (mMessageContainer != null) {
 					mMessageContainer.addNewMessage(vm);
 				}
-			} else if (JNIService.JNI_BROADCAST_GROUP_USER_REMOVED.equals(intent.getAction())) {
+			} else if (JNIService.JNI_BROADCAST_GROUP_USER_REMOVED
+					.equals(intent.getAction())) {
 				Object obj = intent.getExtras().get("obj");
-				Message.obtain(mVideoHandler, USER_DELETE_GROUP, obj).sendToTarget();
-				
-			}else if (JNIService.JNI_BROADCAST_GROUP_USER_ADDED.equals(intent.getAction())) {
+				Message.obtain(mVideoHandler, USER_DELETE_GROUP, obj)
+						.sendToTarget();
+
+			} else if (JNIService.JNI_BROADCAST_GROUP_USER_ADDED.equals(intent
+					.getAction())) {
 				Object obj = intent.getExtras().get("obj");
-				Message.obtain(mVideoHandler, GROUP_ADD_USER, obj).sendToTarget();
-				
-			} else if (JNIService.JNI_BROADCAST_CONNECT_STATE_NOTIFICATION.equals(intent.getAction())) {
+				Message.obtain(mVideoHandler, GROUP_ADD_USER, obj)
+						.sendToTarget();
+
+			} else if (JNIService.JNI_BROADCAST_CONNECT_STATE_NOTIFICATION
+					.equals(intent.getAction())) {
 				NetworkStateCode code = (NetworkStateCode) intent.getExtras()
 						.get("state");
 				if (code != NetworkStateCode.CONNECTED) {
-					Toast.makeText(mContext, R.string.error_connect_to_server, Toast.LENGTH_SHORT).show();
-				} 
-			} else if (JNIService.JNI_BROADCAST_USER_STATUS_NOTIFICATION.equals(intent.getAction())) {
+					Toast.makeText(mContext, R.string.error_connect_to_server,
+							Toast.LENGTH_SHORT).show();
+				}
+			} else if (JNIService.JNI_BROADCAST_USER_STATUS_NOTIFICATION
+					.equals(intent.getAction())) {
 				long uid = intent.getExtras().getLong("uid");
 				User user = GlobalHolder.getInstance().getUser(uid);
 				int status = intent.getExtras().getInt("status");
 				User.Status st = User.Status.fromInt(status);
 				if (st == User.Status.OFFLINE && user != null) {
-					Message.obtain(mVideoHandler, ATTENDEE_LISTENER, 0, 0, user).sendToTarget();
+					Message.obtain(mVideoHandler, ATTENDEE_LISTENER, 0, 0, user)
+							.sendToTarget();
 				}
 			}
-			
+
 		}
 
 	};
@@ -427,7 +418,7 @@ public class VideoActivityV2 extends Activity {
 		NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 		// mId allows you to update the notification later on.
 		mNotificationManager.cancel(PublicIntent.VIDEO_NOTIFICATION_ID);
-		//keep screen on
+		// keep screen on
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 	}
 
@@ -440,22 +431,35 @@ public class VideoActivityV2 extends Activity {
 		filter.addAction(JNIService.JNI_BROADCAST_GROUP_USER_ADDED);
 		filter.addAction(JNIService.JNI_BROADCAST_CONNECT_STATE_NOTIFICATION);
 		filter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
-		filter
-		.addAction(JNIService.JNI_BROADCAST_USER_STATUS_NOTIFICATION);
+		filter.addAction(JNIService.JNI_BROADCAST_USER_STATUS_NOTIFICATION);
 		mContext.registerReceiver(mConfUserChangeReceiver, filter);
 
+
+		//register listener for conference service 
+		cb.registerPermissionUpdateListener(mVideoHandler, NOTIFY_USER_PERMISSION_UPDATED, null);
 		cb.registerAttendeeListener(this.mVideoHandler, ATTENDEE_LISTENER, null);
+		cb.registerKickedConfListener(mVideoHandler, NOTIFICATION_KICKED, null);
+		cb.registerSyncDesktopListener(mVideoHandler,
+				DESKTOP_SYNC_NOTIFICATION, null);
+		
+		// Register listen to document notification
+		ds.registerNewDocNotification(mVideoHandler, NEW_DOC_NOTIFICATION, null);
+		ds.registerDocDisplayNotification(mVideoHandler,
+				DOC_DOWNLOADED_NOTIFICATION, null);
+		ds.registerdocPageActiveNotification(mVideoHandler,
+				DOC_PAGE_ACTIVITE_NOTIFICATION, null);
+		ds.registerDocPageNotification(mVideoHandler, DOC_PAGE_NOTIFICATION,
+				null);
+		ds.registerDocClosedNotification(mVideoHandler,
+				DOC_CLOSED_NOTIFICATION, null);
+		ds.registerDocPageAddedNotification(mVideoHandler,
+				DOC_PAGE_ADDED_NOTIFICATION, null);
+		ds.registerPageCanvasUpdateNotification(mVideoHandler,
+				DOC_PAGE_CANVAS_NOTIFICATION, null);
+
+
 	}
 
-	private void registerOrRemoveListener(boolean flag) {
-		if (flag) {
-			cb.registerKickedConfListener(mVideoHandler, NOTIFICATION_KICKED,
-					null);
-		} else {
-			cb.removeRegisterOfKickedConfListener(mVideoHandler,
-					NOTIFICATION_KICKED, null);
-		}
-	}
 
 	private void init() {
 		mGroupId = this.getIntent().getLongExtra("gid", 0);
@@ -485,7 +489,9 @@ public class VideoActivityV2 extends Activity {
 
 	/**
 	 * Show or hide message layout according to parameter
-	 * @param visible  {@link View#VISIBLE}  {@link View#GONE} 
+	 * 
+	 * @param visible
+	 *            {@link View#VISIBLE} {@link View#GONE}
 	 */
 	private void showOrHidenMsgContainer(int visible) {
 		if (mMessageContainer == null) {
@@ -542,10 +548,11 @@ public class VideoActivityV2 extends Activity {
 		}
 	}
 
-	
 	/**
 	 * Show or hide attendees list layout according to parameter
-	 * @param visible  {@link View#VISIBLE}  {@link View#GONE} 
+	 * 
+	 * @param visible
+	 *            {@link View#VISIBLE} {@link View#GONE}
 	 */
 	private void showOrHidenAttendeeContainer(int visible) {
 		if (mAttendeeContainer == null) {
@@ -631,7 +638,9 @@ public class VideoActivityV2 extends Activity {
 
 	/**
 	 * Show or hide document layout according to parameter
-	 * @param visible  {@link View#VISIBLE}  {@link View#GONE} 
+	 * 
+	 * @param visible
+	 *            {@link View#VISIBLE} {@link View#GONE}
 	 */
 	private void showOrHidenDocContainer(int visible) {
 		if (mDocContainer == null) {
@@ -703,9 +712,8 @@ public class VideoActivityV2 extends Activity {
 			mDocContainer.updateCurrentDoc(mCurrentActivateDoc);
 			Group g = GlobalHolder.getInstance().findGroupById(mGroupId);
 			if (g != null && g instanceof ConferenceGroup) {
-				mDocContainer.updateSyncStatus(((ConferenceGroup)g).isSyn());
+				mDocContainer.updateSyncStatus(((ConferenceGroup) g).isSyn());
 			}
-			
 
 		}
 		// View is hidded, do not need to hide again
@@ -755,7 +763,7 @@ public class VideoActivityV2 extends Activity {
 			mAttendeeList.add(atd);
 		}
 
-		if (atd == null ) {
+		if (atd == null) {
 			V2Log.e("Didn't find self object in  mAttendeeList");
 			return;
 		}
@@ -880,7 +888,7 @@ public class VideoActivityV2 extends Activity {
 	protected void onStop() {
 		super.onStop();
 		getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-		
+
 		mVideoLayout.removeAllViews();
 		quit();
 		finish();
@@ -902,7 +910,11 @@ public class VideoActivityV2 extends Activity {
 			mCurrentShowedSV.clear();
 		}
 		mVideoLayout.removeAllViews();
-		registerOrRemoveListener(false);
+		
+		
+		cb.unRegisterPermissionUpdateListener(mVideoHandler, NOTIFY_USER_PERMISSION_UPDATED, null);
+		cb.removeRegisterOfKickedConfListener(mVideoHandler,
+				NOTIFICATION_KICKED, null);
 		cb.removeAttendeeListener(this.mVideoHandler, ATTENDEE_LISTENER, null);
 		ds.unRegisterNewDocNotification(mVideoHandler, NEW_DOC_NOTIFICATION,
 				null);
@@ -914,7 +926,8 @@ public class VideoActivityV2 extends Activity {
 				DOC_PAGE_ADDED_NOTIFICATION, null);
 		ds.unRegisterPageCanvasUpdateNotification(mVideoHandler,
 				DOC_PAGE_CANVAS_NOTIFICATION, null);
-		cb.removeSyncDesktopListener(mVideoHandler, DESKTOP_SYNC_NOTIFICATION, null);
+		cb.removeSyncDesktopListener(mVideoHandler, DESKTOP_SYNC_NOTIFICATION,
+				null);
 		if (mDocContainer != null) {
 			// clean document bitmap cache
 			mDocContainer.cleanCache();
@@ -1001,9 +1014,14 @@ public class VideoActivityV2 extends Activity {
 			// mVideoHandler, REQUEST_CLOSE_DEVICE_RESPONSE));
 		}
 
-		//close local camera
-		Message.obtain(mVideoHandler, REQUEST_OPEN_OR_CLOSE_DEVICE, 0, 0,
-				new UserDeviceConfig(GlobalHolder.getInstance().getCurrentUserId(), "", null)).sendToTarget();
+		// close local camera
+		Message.obtain(
+				mVideoHandler,
+				REQUEST_OPEN_OR_CLOSE_DEVICE,
+				0,
+				0,
+				new UserDeviceConfig(GlobalHolder.getInstance()
+						.getCurrentUserId(), "", null)).sendToTarget();
 		VideoRecorder.VideoPreviewSurfaceHolder = null;
 		mAttendeeList.clear();
 		mCurrentShowedSV.clear();
@@ -1229,7 +1247,8 @@ public class VideoActivityV2 extends Activity {
 				break;
 			case USER_DELETE_GROUP:
 				GroupUserObject ro = (GroupUserObject) msg.obj;
-				Attendee a = new Attendee(GlobalHolder.getInstance().getUser(ro.getmUserId()));
+				Attendee a = new Attendee(GlobalHolder.getInstance().getUser(
+						ro.getmUserId()));
 				mAttendeeList.remove(a);
 				if (mAttendeeContainer != null) {
 					mAttendeeContainer.removeAttendee(a);
@@ -1237,7 +1256,8 @@ public class VideoActivityV2 extends Activity {
 				break;
 			case GROUP_ADD_USER:
 				GroupUserObject ro1 = (GroupUserObject) msg.obj;
-				Attendee a1 = new Attendee(GlobalHolder.getInstance().getUser(ro1.getmUserId()));
+				Attendee a1 = new Attendee(GlobalHolder.getInstance().getUser(
+						ro1.getmUserId()));
 				mAttendeeList.add(a1);
 				if (mAttendeeContainer != null) {
 					mAttendeeContainer.addAttendee(a1);
@@ -1295,7 +1315,14 @@ public class VideoActivityV2 extends Activity {
 			case REQUEST_EXIT_CONF:
 				cb.requestExitConference(new Conference((Long) msg.obj), null);
 				break;
-
+				//user permission updated
+			case NOTIFY_USER_PERMISSION_UPDATED:
+				if (mAttendeeContainer != null) {
+					PermissionUpdateIndication ind = (PermissionUpdateIndication) msg.obj;
+					Attendee pa = new Attendee(GlobalHolder.getInstance().getUser(ind.getUid()));
+					mAttendeeContainer.updateAttendeeSpeakingState(pa, ConferencePermission.SPEAKING, PermissionState.fromInt(ind.getState()));
+				}
+				break;
 			case NEW_DOC_NOTIFICATION:
 				V2Doc vd = (V2Doc) ((DocumentService.AsyncResult) (msg.obj))
 						.getResult();
@@ -1400,21 +1427,24 @@ public class VideoActivityV2 extends Activity {
 					}
 				}
 				break;
-				
+
 			case DOC_PAGE_CANVAS_NOTIFICATION:
-				V2ShapeMeta shape = (V2ShapeMeta)((DocumentService.AsyncResult) (msg.obj))
+				V2ShapeMeta shape = (V2ShapeMeta) ((DocumentService.AsyncResult) (msg.obj))
 						.getResult();
-				synchronized(mDocs) {
+				synchronized (mDocs) {
 					V2Doc ca = mDocs.get(shape.getDocId());
 					V2Doc.Page caVp = ca.findPage(shape.getPageNo());
 					if (caVp != null) {
 						caVp.addMeta(shape);
 					} else {
-						V2Log.e(" didn't find page for canvas"+shape.getPageNo());
+						V2Log.e(" didn't find page for canvas"
+								+ shape.getPageNo());
 					}
 					if (mDocContainer != null
-							&& caVp.getDocId().equals(mCurrentActivateDoc.getId())
-							&& caVp.getNo() == mCurrentActivateDoc.getActivatePageNo()) {
+							&& caVp.getDocId().equals(
+									mCurrentActivateDoc.getId())
+							&& caVp.getNo() == mCurrentActivateDoc
+									.getActivatePageNo()) {
 						mDocContainer.drawShape(caVp.getVsMeta());
 					}
 				}

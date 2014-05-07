@@ -12,7 +12,9 @@ import com.V2.jni.GroupRequest;
 import com.V2.jni.GroupRequestCallback;
 import com.V2.jni.VideoRequest;
 import com.V2.jni.VideoRequestCallback;
+import com.v2tech.service.jni.JNIIndication;
 import com.v2tech.service.jni.JNIResponse;
+import com.v2tech.service.jni.PermissionUpdateIndication;
 import com.v2tech.service.jni.RequestCloseUserVideoDeviceResponse;
 import com.v2tech.service.jni.RequestConfCreateResponse;
 import com.v2tech.service.jni.RequestEnterConfResponse;
@@ -385,6 +387,27 @@ public class ConferenceService extends AbstractHandler {
 			}
 		}
 	}
+	
+	
+	
+	private List<Registrant> permissionUpdateListenersList = new ArrayList<Registrant>();
+
+	/**
+	 * Register listener for
+	 * 
+	 * @param msg
+	 */
+	public void registerPermissionUpdateListener(Handler h, int what, Object obj) {
+		permissionUpdateListenersList.add(new Registrant(h, what, obj));
+	}
+
+	public void unRegisterPermissionUpdateListener(Handler h, int what, Object obj) {
+		for (Registrant re : permissionUpdateListenersList) {
+			if (re.getHandler() == h && what == re.getWhat()) {
+				permissionUpdateListenersList.remove(re);
+			}
+		}
+	}
 
 	class ConfRequestCB implements ConfRequestCallback {
 
@@ -462,6 +485,20 @@ public class ConferenceService extends AbstractHandler {
 				}
 			}
 		}
+
+		@Override
+		public void OnGrantPermissionCallback(long userid, int type, int status) {
+			JNIIndication jniInd = new PermissionUpdateIndication(userid, type, status);
+			for (Registrant re : permissionUpdateListenersList) {
+				Handler h = re.getHandler();
+				if (h != null) {
+					Message.obtain(h, re.getWhat(), jniInd)
+							.sendToTarget();
+				}
+			}
+		}
+		
+		
 
 	}
 

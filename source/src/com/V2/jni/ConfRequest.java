@@ -1,22 +1,23 @@
 package com.V2.jni;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
-
-import com.v2tech.util.V2Log;
 
 import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.v2tech.util.V2Log;
+
 public class ConfRequest {
 
 	private static ConfRequest mConfRequest;
 
-	private List<ConfRequestCallback> callbacks;
+	private List<WeakReference<ConfRequestCallback>> callbacks;
 
 	private ConfRequest(Context context) {
-		this.callbacks = new ArrayList<ConfRequestCallback>();
+		this.callbacks = new ArrayList<WeakReference<ConfRequestCallback>>();
 	};
 
 	public static synchronized ConfRequest getInstance(Context context) {
@@ -38,7 +39,7 @@ public class ConfRequest {
 	}
 
 	public void addCallback(ConfRequestCallback callback) {
-		this.callbacks.add(callback);
+		this.callbacks.add(new WeakReference<ConfRequestCallback>(callback));
 	}
 
 	private boolean isInConf = false;
@@ -79,8 +80,12 @@ public class ConfRequest {
 	 */
 	private void OnEnterConf(long nConfID, long nTime, String szConfData,
 			int nJoinResult) {
-		for (ConfRequestCallback cb : this.callbacks) {
-			cb.OnEnterConfCallback(nConfID, nTime, szConfData, nJoinResult);
+		for (WeakReference<ConfRequestCallback> we : this.callbacks) {
+			Object obj = we.get();
+			if (obj != null) {
+				ConfRequestCallback cb = (ConfRequestCallback) obj;
+				cb.OnEnterConfCallback(nConfID, nTime, szConfData, nJoinResult);
+			}
 		}
 		V2Log.d("OnEnterConf called  nConfID:" + nConfID + "  nTime:" + nTime
 				+ " szConfData:" + szConfData + " nJoinResult:" + nJoinResult);
@@ -110,8 +115,12 @@ public class ConfRequest {
 	private void OnConfMemberEnter(long nConfID, long nTime, String szUserInfos) {
 		V2Log.d("-->OnConfMemberEnter " + nConfID + " " + nTime + " "
 				+ szUserInfos);
-		for (ConfRequestCallback cb : this.callbacks) {
-			cb.OnConfMemberEnterCallback(nConfID, nTime, szUserInfos);
+		for (WeakReference<ConfRequestCallback> we : this.callbacks) {
+			Object obj = we.get();
+			if (obj != null) {
+				ConfRequestCallback cb = (ConfRequestCallback) obj;
+				cb.OnConfMemberEnterCallback(nConfID, nTime, szUserInfos);
+			}
 		}
 	}
 
@@ -124,18 +133,38 @@ public class ConfRequest {
 	private void OnConfMemberExit(long nConfID, long nTime, long nUserID) {
 		V2Log.d("-->OnConfMemberExit " + nConfID + " " + nTime + " " + nUserID);
 
-		for (ConfRequestCallback cb : this.callbacks) {
-			cb.OnConfMemberExitCallback(nConfID, nTime, nUserID);
+		for (WeakReference<ConfRequestCallback> we : this.callbacks) {
+			Object obj = we.get();
+			if (obj != null) {
+				ConfRequestCallback cb = (ConfRequestCallback) obj;
+				cb.OnConfMemberExitCallback(nConfID, nTime, nUserID);
+			}
 		}
 
 	}
 
 	private void OnKickConf(int nReason) {
 		V2Log.d("-->OnKickConf " + nReason);
-		for (ConfRequestCallback cb : this.callbacks) {
-			cb.OnKickConfCallback(nReason);
+		for (WeakReference<ConfRequestCallback> we : this.callbacks) {
+			Object obj = we.get();
+			if (obj != null) {
+				ConfRequestCallback cb = (ConfRequestCallback) obj;
+				cb.OnKickConfCallback(nReason);
+			}
 		}
 
+	}
+
+	private void OnGrantPermission(long userid, int type, int status) {
+		V2Log.d("OnGrantPermission " + userid + " type:" + type + " status:" + status);
+
+		for (WeakReference<ConfRequestCallback> we : this.callbacks) {
+			Object obj = we.get();
+			if (obj != null) {
+				ConfRequestCallback cb = (ConfRequestCallback) obj;
+				cb.OnGrantPermissionCallback(userid, type, status);
+			}
+		}
 	}
 
 	public native void openVideoMixer(String szMediaID, int nLayout,
@@ -311,13 +340,6 @@ public class ConfRequest {
 	private void OnNotifyChair(long userid, int type) {
 		Log.e("ImRequest UI", "OnNotifyChair " + userid + " " + type);
 
-	}
-
-	// 閫氱煡浼氳鎴愬憳鏌愪汉鑾峰緱鏌愮鏉冮檺
-	private void OnGrantPermission(long userid, int type, int status) {
-		// type 1 3 鍙戣█ status 1 鐢宠 2 鍙栨秷 3 鍙栧緱
-		Log.e("ImRequest UI", "OnGrantPermission " + userid + " " + type + " "
-				+ status);
 	}
 
 	// 鍚屾鎵撳紑鏌愪汉瑙嗛
