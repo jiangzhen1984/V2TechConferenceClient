@@ -95,8 +95,6 @@ public class ContactDetail extends Activity implements OnTouchListener {
 		if (v != null) {
 			v.setOnTouchListener(this);
 		}
-		//Start animation
-		this.overridePendingTransition(R.animator.nonam_scale_center_0_100, R.animator.nonam_scale_null);
 	}
 
 	@Override
@@ -119,13 +117,13 @@ public class ContactDetail extends Activity implements OnTouchListener {
 	public void onBackPressed() {
 		if(check()) {
 			super.onBackPressed();
+		//	this.overridePendingTransition(R.animator.nonam_scale_null, R.animator.nonam_scale_center_100_0);
 		}
 	}
 	
 	@Override
 	public void finish() {
 		super.finish();
-		this.overridePendingTransition(R.animator.nonam_scale_null, R.animator.nonam_scale_center_100_0);
 	}
 
 	@Override
@@ -159,7 +157,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 					InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 					imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
 				}
-				finish();
+				onBackPressed();
 			}
 
 		});

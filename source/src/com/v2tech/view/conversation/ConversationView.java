@@ -440,7 +440,7 @@ public class ConversationView extends Activity {
 		// make offset
 		offset++;
 
-		notificateConversationUpdate(m.getText(), m.getDateTimeStr());
+		notificateConversationUpdate(m.getText(), m.getNormalDateStr());
 
 	}
 

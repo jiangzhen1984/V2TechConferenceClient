@@ -207,6 +207,7 @@
                                 android:layout_marginRight="30dp"
                                 android:layout_marginTop="15dp"
                                 android:text="account"
+                                android:gravity="center_vertical"
                                 android:textColor="@color/contacts_user_detail_text_color"
                                 android:textSize="18sp" />
                         </LinearLayout>
@@ -304,6 +305,7 @@
                                 android:layout_marginRight="30dp"
                                 android:layout_marginTop="15dp"
                                 android:text="birthday"
+                                android:gravity="center_vertical"
                                 android:textColor="@color/contacts_user_detail_text_color"
                                 android:textSize="18sp"
                                 android:visibility="gone" />
@@ -354,6 +356,7 @@
                                 android:layout_marginRight="30dp"
                                 android:layout_marginTop="15dp"
                                 android:text="Cell phone"
+                                android:gravity="center_vertical"
                                 android:textColor="@color/contacts_user_detail_text_color"
                                 android:textSize="18sp"
                                 android:visibility="gone" />
@@ -405,6 +408,7 @@
                                 android:layout_marginRight="30dp"
                                 android:layout_marginTop="15dp"
                                 android:text="TextView"
+                                android:gravity="center_vertical"
                                 android:textColor="@color/contacts_user_detail_text_color"
                                 android:textSize="18sp"
                                 android:visibility="gone" />
@@ -454,6 +458,7 @@
                                 android:layout_marginRight="30dp"
                                 android:layout_marginTop="15dp"
                                 android:text="TextView"
+                                android:gravity="center_vertical"
                                 android:textColor="@color/contacts_user_detail_text_color"
                                 android:textSize="18sp" />
 
@@ -502,6 +507,7 @@
                                 android:layout_marginRight="30dp"
                                 android:layout_marginTop="15dp"
                                 android:text="TextView"
+                                android:gravity="center_vertical"
                                 android:textColor="@color/contacts_user_detail_text_color"
                                 android:textSize="18sp" />
 
@@ -549,6 +555,7 @@
                                 android:layout_marginRight="30dp"
                                 android:layout_marginTop="15dp"
                                 android:text="TextView"
+                                android:gravity="center_vertical"
                                 android:textColor="@color/contacts_user_detail_text_color"
                                 android:textSize="18sp"
                                 android:visibility="gone" />
@@ -599,6 +606,7 @@
                                 android:layout_marginRight="30dp"
                                 android:layout_marginTop="15dp"
                                 android:text="TextView"
+                                android:gravity="center_vertical"
                                 android:textColor="@color/contacts_user_detail_text_color"
                                 android:textSize="18sp"
                                 android:visibility="gone" />

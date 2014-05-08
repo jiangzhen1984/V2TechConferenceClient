@@ -476,6 +476,7 @@ public class ContactsTabFragment extends Fragment {
 			this.u = u;
 			this.id = 0x03000000 | u.getmUserId();
 			this.v = new ContactUserView(getActivity(), u);
+			this.v.setPadding(level * 35, this.v.getTop(), this.v.getRight(), this.v.getBottom());
 			isExpanded = false;
 			this.level = level;
 		}

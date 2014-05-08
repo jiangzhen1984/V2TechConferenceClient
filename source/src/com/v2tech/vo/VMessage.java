@@ -176,7 +176,7 @@ public class VMessage {
 
 	public String getNormalDateStr() {
 		if (this.mDate != null) {
-			return sfL.format(this.mDate);
+			return sfF.format(this.mDate);
 		} else {
 			return null;
 		}

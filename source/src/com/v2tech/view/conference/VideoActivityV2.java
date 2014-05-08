@@ -897,8 +897,8 @@ public class VideoActivityV2 extends Activity {
 	@Override
 	public void finish() {
 		super.finish();
-		this.overridePendingTransition(R.animator.nonam_scale_null,
-				R.animator.nonam_scale_center_100_0);
+//		this.overridePendingTransition(R.animator.nonam_scale_null,
+//				R.animator.nonam_scale_center_100_0);
 	}
 
 	@Override

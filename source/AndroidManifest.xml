@@ -3,7 +3,7 @@
     package="com.v2tech"
     android:sharedUserLabel="@string/app_name"
     android:versionCode="1"
-    android:versionName="1.3.0.36" >
+    android:versionName="1.3.0.37" >
 
     <uses-sdk
         android:minSdkVersion="11"
@@ -53,8 +53,7 @@
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>	
-           
+            </intent-filter>
         </activity>
         <activity
             android:name="com.v2tech.view.conference.ConferenceCreateActivity"
@@ -127,7 +126,6 @@
             android:launchMode="singleTop"
             android:screenOrientation="nosensor"
             android:windowSoftInputMode="stateHidden|adjustPan" >
-             
         </activity>
         <activity
             android:name="com.v2tech.view.AboutActivity"
@@ -150,10 +148,12 @@
 
                 <action android:name="com.v2tech.request_update_conversation" />
                 <action android:name="com.v2tech.jni.broadcast.conference_invatition" />
-				<action android:name="com.v2tech.jni.broadcast.conference_removed" />
+                <action android:name="com.v2tech.jni.broadcast.conference_removed" />
+
                 <category android:name="com.v2tech" />
             </intent-filter>
         </receiver>
+
     </application>
 
 </manifest>

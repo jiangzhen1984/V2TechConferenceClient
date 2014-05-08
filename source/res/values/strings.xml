@@ -9,7 +9,6 @@
     <string name="quit_promption">请再按一次退出</string>
     <string name="user_logged_with_other_device">用户在其他地方登录， 程序2秒后自动退出</string>
     <string name="receive_image_notification">发送图片!</string>
-    
     <string name="tab_contact_name">好友</string>
     <string name="tab_org_name">组织</string>
     <string name="tab_group_name">群组</string>
@@ -19,7 +18,9 @@
     <string name="title_bar_item_setting">设置</string>
     <string name="title_bar_item_help">帮助</string>
     <string name="title_bar_item_about">关于</string>
-    
-     <string name="error_connect_to_server">无法链接到服务器，请确认网络链接</string>
+    <string name="error_connect_to_server">无法链接到服务器，请确认网络链接</string>
+    <string name="title_activity_test">TestActivity</string>
+    <string name="action_settings">Settings</string>
+    <string name="hello_world">Hello world!</string>
 
 </resources>

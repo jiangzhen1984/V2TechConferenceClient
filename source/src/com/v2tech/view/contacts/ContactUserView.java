@@ -1,5 +1,6 @@
 package com.v2tech.view.contacts;
 
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
@@ -35,8 +36,6 @@ public class ContactUserView extends LinearLayout {
 	private Dialog mUserActionDialog;
 
 	private RelativeLayout contentContainer;
-
-	private int padding = 0;
 
 	public ContactUserView(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
@@ -105,17 +104,7 @@ public class ContactUserView extends LinearLayout {
 			}
 
 		});
-		this.setPadding((u.getFirstBelongsGroup() == null ? 2 : u
-				.getFirstBelongsGroup().getLevel() + 1) * 5, this
-				.getPaddingTop(), this.getPaddingRight(), this
-				.getPaddingRight());
 
-		padding = (u.getFirstBelongsGroup() == null ? 2 : u
-				.getFirstBelongsGroup().getLevel() + 1) * 35;
-
-		contentContainer.setPadding(padding, contentContainer.getPaddingTop(),
-				contentContainer.getPaddingRight(),
-				contentContainer.getPaddingRight());
 
 		this.addView(view, new LinearLayout.LayoutParams(
 				LinearLayout.LayoutParams.MATCH_PARENT,
@@ -170,6 +159,8 @@ public class ContactUserView extends LinearLayout {
 
 	private void handle(int type) {
 		Intent i = new Intent();
+		i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		i.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
 		switch (type) {
 		case ACTION_TYPE_INVITE_VIDEO:
 			i.setAction(PublicIntent.START_VIDEO_CONVERSACTION_ACTIVITY);
@@ -191,6 +182,7 @@ public class ContactUserView extends LinearLayout {
 			break;
 		}
 		this.getContext().startActivity(i);
+		((Activity)this.getContext()).overridePendingTransition(R.animator.nonam_scale_center_0_100, R.animator.nonam_scale_null);
 	}
 
 	public User getUser() {
@@ -242,10 +234,8 @@ public class ContactUserView extends LinearLayout {
 				this.getPaddingRight());
 	}
 
-	public void setPadding() {
-		contentContainer.setPadding(padding, contentContainer.getPaddingTop(),
-				contentContainer.getPaddingRight(),
-				contentContainer.getPaddingRight());
+	public void setPadding(int left, int top, int right, int bottom) {
+		contentContainer.setPadding(left, top,right,bottom);
 	}
 
 }

@@ -51,6 +51,10 @@ public class WBRequest {
 	private void OnWBoardChatInvite(long nGroupID, int nBusinessType,
 			long nFromUserID, String szWBoardID, int nWhiteIndex,
 			String szFileName, int type) {
+		if (type == 1) {
+			V2Log.e(" ignore white board");
+			return;
+		}
 		Log.e("WBRequest UI", "OnWBoardChatInvite " + nGroupID + " "
 				+ nBusinessType + " " + nFromUserID + " " + szWBoardID + " :"
 				+ nWhiteIndex + " :" + szFileName);
