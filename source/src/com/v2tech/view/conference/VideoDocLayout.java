@@ -23,7 +23,9 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.PopupWindow.OnDismissListener;
+import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.v2tech.R;
 import com.v2tech.util.V2Log;
@@ -54,7 +56,9 @@ public class VideoDocLayout extends LinearLayout {
 	private LinearLayout mDodListContainer;
 	private View mShowDocListButton;
 	private View mRequestFixedPosButton;
-	
+
+	private ScrollView mDocListWindowScroller;
+
 	private boolean mSyncStatus;
 
 	private V2Doc mCurrentDoc;
@@ -118,8 +122,11 @@ public class VideoDocLayout extends LinearLayout {
 			LayoutInflater inflater = (LayoutInflater) this.getContext()
 					.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 			View view = inflater.inflate(R.layout.video_doc_list_layout, null);
+
+			mDocListWindowScroller = (ScrollView) view
+					.findViewById(R.id.video_doc_list_container_scroller);
 			mDocListWindow = new PopupWindow(view, LayoutParams.WRAP_CONTENT,
-					(int)(rootView.getHeight() * 0.5));
+					(int) (rootView.getHeight() * 0.5));
 			mDocListWindow.setBackgroundDrawable(new ColorDrawable(
 					Color.TRANSPARENT));
 			mDocListWindow.setFocusable(true);
@@ -135,8 +142,22 @@ public class VideoDocLayout extends LinearLayout {
 
 			mDodListContainer = (LinearLayout) view
 					.findViewById(R.id.video_doc_list_container);
+			View currActivateView = null;
 			for (Entry<String, V2Doc> e : mDocs.entrySet()) {
-				addViewToDoc(e.getValue());
+				View v = addViewToDoc(e.getValue());
+				if (e.getValue() == mCurrentDoc) {
+					currActivateView = v; 
+				}
+			}
+			
+			view.measure(container.getMeasuredWidth(), container.getMeasuredHeight());
+			mDocListWindowScroller.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
+			mDodListContainer.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
+			if (currActivateView != null) {
+				currActivateView.measure(View.MeasureSpec.EXACTLY, View.MeasureSpec.EXACTLY);
+				mDocListWindowScroller.computeScroll();
+				mDocListWindowScroller.scrollTo(0, currActivateView
+						.getBottom());
 			}
 		}
 		if (mDocListWindow.isShowing()) {
@@ -154,9 +175,9 @@ public class VideoDocLayout extends LinearLayout {
 		}
 	}
 
-	private void addViewToDoc(V2Doc d) {
+	private View addViewToDoc(V2Doc d) {
 		if (mDodListContainer == null) {
-			return;
+			return null;
 		}
 		TextView content = new TextView(this.getContext());
 		content.setText(d.getDocName());
@@ -179,6 +200,7 @@ public class VideoDocLayout extends LinearLayout {
 				LinearLayout.LayoutParams.MATCH_PARENT, 1));
 
 		content.setOnClickListener(updateDocListener);
+		return content;
 
 	}
 
@@ -218,22 +240,37 @@ public class VideoDocLayout extends LinearLayout {
 
 		mCurrentPage = mCurrentDoc.getActivatePage();
 
-		//draw shape
+		// draw shape
 		if (mCurrentPage != null) {
 			updateCurrentDocPage(mCurrentPage);
 			drawShape(mCurrentPage.getVsMeta());
 		}
 		updateLayoutPageInformation();
 		updatePageButton();
-		
-		//Update selected doc
-		for (int i = 0; mDodListContainer != null && i < mDodListContainer.getChildCount(); i++) {
-			View child = mDodListContainer.getChildAt(i);
+
+		// Update selected doc
+		for (int i = 0; mDodListContainer != null
+				&& i < mDodListContainer.getChildCount(); i++) {
+			final View child = mDodListContainer.getChildAt(i);
 			if (mCurrentDoc != child.getTag()) {
 				child.setBackgroundColor(Color.WHITE);
 			} else {
 				child.setBackgroundColor(getResources().getColor(
-						R.color.in_meeting_doc_list_activited_doc_bg));;
+						R.color.in_meeting_doc_list_activited_doc_bg));
+				mDocListWindowScroller.post(new Runnable() {
+
+					@Override
+					public void run() {
+						if (child.getBottom() > mDocListWindowScroller
+								.getMaxScrollAmount()) {
+							mDocListWindowScroller.scrollTo(0,
+									child.getBottom());
+						} else {
+							mDocListWindowScroller.scrollTo(0, child.getTop());
+						}
+					}
+
+				});
 			}
 		}
 	}
@@ -302,9 +339,9 @@ public class VideoDocLayout extends LinearLayout {
 				mCurrentBitMap = BitmapFactory.decodeFile(p.getFilePath(),
 						opsNew);
 
-				dest.left = (src.right -opsNew.outWidth)/2;
+				dest.left = (src.right - opsNew.outWidth) / 2;
 				dest.right = opsNew.outWidth;
-				dest.top = (src.bottom -opsNew.outHeight)/2;
+				dest.top = (src.bottom - opsNew.outHeight) / 2;
 				dest.bottom = opsNew.outHeight;
 				matrix.mapRect(dest, src);
 
@@ -367,8 +404,9 @@ public class VideoDocLayout extends LinearLayout {
 	}
 
 	/**
-	 * Update sync status according to chairman's setting
-	 * if Set true, user can't switch page any more. Otherwise user can
+	 * Update sync status according to chairman's setting if Set true, user
+	 * can't switch page any more. Otherwise user can
+	 * 
 	 * @param sync
 	 */
 	public void updateSyncStatus(boolean sync) {
@@ -452,13 +490,17 @@ public class VideoDocLayout extends LinearLayout {
 		@Override
 		public void onClick(View v) {
 			if (mSyncStatus) {
+				Toast.makeText(getContext(), R.string.warning_under_sync,
+						Toast.LENGTH_SHORT).show();
 				return;
 			}
 			V2Doc d = (V2Doc) v.getTag();
 			if (d != mCurrentDoc) {
 				V2Doc.Page p = d.getActivatePage();
 				if (p.getFilePath() == null || p.getFilePath().isEmpty()) {
-					// FIXME should inform user doc is downloading
+					Toast.makeText(getContext(),
+							R.string.warning_downloading_doc,
+							Toast.LENGTH_SHORT).show();
 					return;
 				}
 				for (int i = 0; i < mDodListContainer.getChildCount(); i++) {

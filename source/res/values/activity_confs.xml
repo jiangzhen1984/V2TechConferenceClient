@@ -23,5 +23,7 @@
    <string name="confs_camear_quanlity_low">低</string>
    <string name="error_exceed_support_video_count">最多只支持4路视频</string>
    <string name="error_no_second_camera">用户没有另一个摄像头</string>
+   <string name="warning_under_sync">主席正在同步，无法切换文档</string>
+   <string name="warning_downloading_doc">正在下载文档&#8230;&#8230;&#8230;</string>
    
 </resources>

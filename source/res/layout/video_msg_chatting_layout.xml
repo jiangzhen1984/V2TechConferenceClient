@@ -48,21 +48,23 @@
 
         <EditText
             android:id="@+id/video_msg_chatting_layout_msg_content"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:layout_weight=".6"
             android:ems="10"
+             android:layout_gravity="center"
             android:inputType="textCapSentences|textMultiLine"
+            android:background="@drawable/input_bg"
             android:maxLength="4500"
             android:maxLines="3"
             android:minLines="1" />
 
         <TextView
             android:id="@+id/video_msg_chatting_layout_send_button"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:layout_weight="1"
+            android:layout_weight=".4"
             android:background="@drawable/button_bg"
             android:gravity="center"
             android:paddingBottom="10dp"

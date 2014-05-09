@@ -34,10 +34,11 @@
         android:orientation="horizontal" >
 
         <EditText
-            android:id="@+id/contacts_search"
+            android:id="@+id/attendee_search"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
             android:layout_gravity="center_vertical"
             android:layout_marginBottom="6dp"
             android:layout_marginLeft="15dp"

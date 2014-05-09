@@ -106,9 +106,9 @@ public class ContactsTabFragment extends Fragment {
 		});
 		mContactsContainer.setDivider(null);
 
-		//FIXME should optimize
+		// FIXME should optimize
 		View titleBarLayout = rootView.findViewById(R.id.title_bar_container);
-		titleBar = new TitleBar(getActivity(),titleBarLayout);
+		titleBar = new TitleBar(getActivity(), titleBarLayout);
 		TextView tv = (TextView) rootView.findViewById(R.id.fragment_title);
 		if (flag == TAG_ORG) {
 			tv.setText(R.string.tab_org_name);
@@ -154,6 +154,8 @@ public class ContactsTabFragment extends Fragment {
 			intentFilter.addAction(JNIService.JNI_BROADCAST_GROUP_NOTIFICATION);
 			intentFilter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
 			intentFilter
+					.addAction(JNIService.JNI_BROADCAST_GROUP_USER_ADDED);
+			intentFilter
 					.addAction(JNIService.JNI_BROADCAST_USER_STATUS_NOTIFICATION);
 			intentFilter
 					.addAction(JNIService.JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION);
@@ -164,7 +166,6 @@ public class ContactsTabFragment extends Fragment {
 		}
 		return intentFilter;
 	}
-
 
 	List<Group> l;
 
@@ -203,12 +204,12 @@ public class ContactsTabFragment extends Fragment {
 		}
 
 		private void iterateGroup(Group g) {
-			for (User u : g.getUsers()) {
-				ListItem liu = new ListItem(u, g.getLevel() + 1);
-			}
-			for (Group subG : g.getChildGroup()) {
-				ListItem lisubg = new ListItem(subG, g.getLevel());
-			}
+//			for (User u : g.getUsers()) {
+//				ListItem liu = new ListItem(u, g.getLevel() + 1);
+//			}
+//			for (Group subG : g.getChildGroup()) {
+//				ListItem lisubg = new ListItem(subG, g.getLevel());
+//			}
 		}
 
 		@Override
@@ -251,11 +252,18 @@ public class ContactsTabFragment extends Fragment {
 					.equals(intent.getAction())) {
 				Message.obtain(mHandler, UPDATE_USER_SIGN,
 						intent.getExtras().get("uid")).sendToTarget();
+			} else if (JNIService.JNI_BROADCAST_GROUP_USER_ADDED.equals(intent.getAction())) {
+				// Update all group staticist information
+				for (ListItem item : mItemList) {
+					if (item.g != null) {
+						((ContactGroupView)item.v).updateUserStatus();
+					}
+				}
 			}
+			
 		}
 
 	}
-
 
 	private TextWatcher textChangedListener = new TextWatcher() {
 
@@ -303,7 +311,7 @@ public class ContactsTabFragment extends Fragment {
 		if (item.isExpanded == false) {
 			for (Group g : item.g.getChildGroup()) {
 				Long key = Long.valueOf(g.getmGId());
-				ListItem cache =new ListItem(g, g.getLevel());
+				ListItem cache = new ListItem(g, g.getLevel());
 				mItemList.add(++pos, cache);
 			}
 			List<User> sortList = new ArrayList<User>();
@@ -311,7 +319,7 @@ public class ContactsTabFragment extends Fragment {
 			Collections.sort(sortList);
 			for (User u : sortList) {
 				Long key = Long.valueOf(u.getmUserId());
-				ListItem cache =new ListItem(u, item.g.getLevel() + 1);
+				ListItem cache = new ListItem(u, item.g.getLevel() + 1);
 				mItemList.add(++pos, cache);
 			}
 
@@ -355,7 +363,7 @@ public class ContactsTabFragment extends Fragment {
 	}
 
 	private synchronized void updateUserViewPostionV2(int userId, int status) {
-		V2Log.i(" Contacts update user status : "+userId+"  : "+ status);
+		V2Log.i(" Contacts update user status : " + userId + "  : " + status);
 		User.Status newSt = User.Status.fromInt(status);
 		int startSortIndex = 0;
 		boolean foundUserView = false;
@@ -434,7 +442,7 @@ public class ContactsTabFragment extends Fragment {
 			}
 		}
 
-		V2Log.i(" Contacts update pos "+ pos);
+		V2Log.i(" Contacts update pos " + pos);
 		if (pos == mItemList.size()) {
 			mItemList.add(self);
 		} else {
@@ -476,7 +484,8 @@ public class ContactsTabFragment extends Fragment {
 			this.u = u;
 			this.id = 0x03000000 | u.getmUserId();
 			this.v = new ContactUserView(getActivity(), u);
-			this.v.setPadding(level * 35, this.v.getTop(), this.v.getRight(), this.v.getBottom());
+			this.v.setPadding(level * 35, this.v.getTop(), this.v.getRight(),
+					this.v.getBottom());
 			isExpanded = false;
 			this.level = level;
 		}

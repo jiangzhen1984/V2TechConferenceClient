@@ -275,6 +275,7 @@ public class JNIService extends Service {
 						(String) msg.obj);
 				GlobalHolder.getInstance().updateGroupList(
 						Group.GroupType.fromInt(msg.arg1), gl);
+				
 				if (Group.GroupType.fromInt(msg.arg1) == GroupType.CHATING) {
 					for (Group g : gl) {
 						GlobalHolder.getInstance().addConversation(

@@ -8,6 +8,8 @@ import java.util.Set;
 
 import android.content.Context;
 import android.graphics.Typeface;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,12 +17,14 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import com.v2tech.R;
+import com.v2tech.util.V2Log;
 import com.v2tech.vo.Attendee;
 import com.v2tech.vo.ConferencePermission;
 import com.v2tech.vo.PermissionState;
@@ -34,7 +38,11 @@ public class VideoAttendeeListLayout extends LinearLayout {
 
 	private Map<Long, Attendee> mAttends = new HashMap<Long, Attendee>();
 
+	private List<View> mCachedAttendsView;
 	private List<View> mAttendsView;
+
+	private boolean mIsStartedSearch;
+	private EditText mSearchET;
 
 	private AttendeesAdapter adapter = new AttendeesAdapter();
 
@@ -64,6 +72,8 @@ public class VideoAttendeeListLayout extends LinearLayout {
 
 		mAttendeeContainer = (ListView) view
 				.findViewById(R.id.video_attendee_container);
+		mSearchET = (EditText) view.findViewById(R.id.attendee_search);
+
 		mAttendeeContainer.setAdapter(adapter);
 		mAttendeeContainer.setOnItemClickListener(new OnItemClickListener() {
 
@@ -71,9 +81,8 @@ public class VideoAttendeeListLayout extends LinearLayout {
 			public void onItemClick(AdapterView<?> ad, View view, int pos,
 					long id) {
 				if (listener != null) {
-					Wrapper wr = (Wrapper)view.getTag() ;
-					listener.OnAttendeeClicked(wr.a,
-							wr.udc);
+					Wrapper wr = (Wrapper) view.getTag();
+					listener.OnAttendeeClicked(wr.a, wr.udc);
 				}
 			}
 
@@ -82,6 +91,8 @@ public class VideoAttendeeListLayout extends LinearLayout {
 		this.addView(view, new LinearLayout.LayoutParams(
 				LinearLayout.LayoutParams.MATCH_PARENT,
 				LinearLayout.LayoutParams.MATCH_PARENT));
+
+		mSearchET.addTextChangedListener(mSearchListener);
 	}
 
 	public void setListener(VideoAttendeeActionListener listener) {
@@ -112,7 +123,8 @@ public class VideoAttendeeListLayout extends LinearLayout {
 
 		TextView nameTV = (TextView) view
 				.findViewById(R.id.video_attendee_device_name);
-		ImageView cameraIV =(ImageView)view.findViewById(R.id.video_attendee_device_camera_icon);
+		ImageView cameraIV = (ImageView) view
+				.findViewById(R.id.video_attendee_device_camera_icon);
 
 		nameTV.setText(a.getUser().getName());
 
@@ -134,7 +146,8 @@ public class VideoAttendeeListLayout extends LinearLayout {
 					R.layout.video_attendee_device_layout, null, false);
 			TextView nameTV2 = (TextView) view2
 					.findViewById(R.id.video_attendee_device_name);
-			ImageView cameraIV2 =(ImageView)view2.findViewById(R.id.video_attendee_device_camera_icon);
+			ImageView cameraIV2 = (ImageView) view2
+					.findViewById(R.id.video_attendee_device_camera_icon);
 
 			UserDeviceConfig udc = a.getmDevices().get(i);
 			nameTV2.setText(a.getUser().getName() + (i > 0 ? ("_视频" + i) : ""));
@@ -161,18 +174,20 @@ public class VideoAttendeeListLayout extends LinearLayout {
 		mAttendsView.clear();
 		populate();
 	}
-	
+
 	/**
 	 * Update attendee speaker image according to user speaking state
+	 * 
 	 * @param at
 	 * @param cp
 	 * @param state
 	 */
-	public void updateAttendeeSpeakingState(Attendee at,ConferencePermission cp, PermissionState state) {
+	public void updateAttendeeSpeakingState(Attendee at,
+			ConferencePermission cp, PermissionState state) {
 		View atView = null;
 		synchronized (mAttendsView) {
 			for (View v : mAttendsView) {
-				Wrapper wr = (Wrapper)v.getTag();
+				Wrapper wr = (Wrapper) v.getTag();
 				if (wr.a.getUser().getmUserId() == at.getUser().getmUserId()) {
 					atView = v;
 					break;
@@ -180,7 +195,8 @@ public class VideoAttendeeListLayout extends LinearLayout {
 			}
 		}
 		if (atView != null) {
-			ImageView spIV = (ImageView)atView.findViewById(R.id.video_attendee_device_speaker_icon);
+			ImageView spIV = (ImageView) atView
+					.findViewById(R.id.video_attendee_device_speaker_icon);
 			if (state == PermissionState.NORMAL) {
 				spIV.setImageResource(R.drawable.conf_speaker);
 			} else if (state == PermissionState.GRANTED) {
@@ -188,16 +204,17 @@ public class VideoAttendeeListLayout extends LinearLayout {
 			}
 		}
 	}
-	
+
 	/**
 	 * Remove attend and device from layout.
+	 * 
 	 * @param at
 	 */
 	public void removeAttendee(Attendee at) {
 		mAttends.remove(Long.valueOf(at.getUser().getmUserId()));
 		synchronized (mAttendsView) {
 			for (View v : mAttendsView) {
-				Wrapper wr = (Wrapper)v.getTag();
+				Wrapper wr = (Wrapper) v.getTag();
 				if (wr.a.getUser().getmUserId() == at.getUser().getmUserId()) {
 					mAttendsView.remove(v);
 				}
@@ -205,16 +222,65 @@ public class VideoAttendeeListLayout extends LinearLayout {
 		}
 		adapter.notifyDataSetChanged();
 	}
-	
+
 	/**
 	 * Add attend and device from layout.
+	 * 
 	 * @param at
 	 */
 	public void addAttendee(Attendee at) {
 		mAttendsView.addAll(buildAttendeeView(at));
 		adapter.notifyDataSetChanged();
-		
+
 	}
+
+	private TextWatcher mSearchListener = new TextWatcher() {
+
+		@Override
+		public void afterTextChanged(Editable et) {
+			String str = et.toString().trim();
+			if (str.length() > 0) {
+				if (!mIsStartedSearch) {
+					mCachedAttendsView = mAttendsView;
+					mIsStartedSearch = true;
+				}
+			} else {
+				mAttendsView = mCachedAttendsView;
+				adapter.notifyDataSetChanged();
+				mIsStartedSearch = false;
+				return;
+			}
+			List<View> searchedViewList = new ArrayList<View>();
+			for (View v : mCachedAttendsView) {
+				Wrapper w = (Wrapper) v.getTag();
+				if (w.a.getUser().getName() == null
+						|| w.a.getUser().getArra() == null) {
+					V2Log.w("Attendee name: " + w.a.getUser().getName()
+							+ "  arrba:" + w.a.getUser().getArra());
+					continue;
+				}
+				if (w.a.getUser().getName().contains(str)
+						|| w.a.getUser().getArra().contains(str)) {
+					searchedViewList.add(v);
+				}
+			}
+			mAttendsView = searchedViewList;
+			adapter.notifyDataSetChanged();
+		}
+
+		@Override
+		public void beforeTextChanged(CharSequence arg0, int arg1, int arg2,
+				int arg3) {
+
+		}
+
+		@Override
+		public void onTextChanged(CharSequence s, int start, int before,
+				int cout) {
+
+		}
+
+	};
 
 	class AttendeesAdapter extends BaseAdapter {
 
@@ -239,17 +305,17 @@ public class VideoAttendeeListLayout extends LinearLayout {
 		}
 
 	}
-	
-	
+
 	class Wrapper {
 		Attendee a;
 		UserDeviceConfig udc;
+
 		public Wrapper(Attendee a, UserDeviceConfig udc) {
 			super();
 			this.a = a;
 			this.udc = udc;
 		}
-		
+
 	}
 
 }

@@ -95,7 +95,6 @@ public class VideoActivityV2 extends Activity {
 	private static final int REQUEST_ENTER_CONF_RESPONSE = 9;
 	private static final int REQUEST_EXIT_CONF = 10;
 	private static final int NOTIFY_USER_PERMISSION_UPDATED = 11;
-	
 
 	private static final int ATTENDEE_LISTENER = 21;
 	private static final int CONF_USER_DEVICE_EVENT = 23;
@@ -373,6 +372,24 @@ public class VideoActivityV2 extends Activity {
 				if (mMessageContainer != null) {
 					mMessageContainer.addNewMessage(vm);
 				}
+			} else if (JNIService.JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION
+					.equals(intent.getAction())) {
+				long confID = intent.getLongExtra("gid", 0);
+				if (confID == mGroupId) {
+					Group confGroup = GlobalHolder.getInstance().findGroupById(
+							mGroupId);
+					// load conference attendee list
+					if (confGroup != null) {
+						List<User> l = new ArrayList<User>(confGroup.getUsers());
+						for (User u : l) {
+							mAttendeeList.add(new Attendee(u));
+						}
+						if (mAttendeeContainer != null) {
+							mAttendeeContainer.setAttendsList(mAttendeeList);
+						}
+					}
+				}
+
 			} else if (JNIService.JNI_BROADCAST_GROUP_USER_REMOVED
 					.equals(intent.getAction())) {
 				Object obj = intent.getExtras().get("obj");
@@ -396,10 +413,16 @@ public class VideoActivityV2 extends Activity {
 			} else if (JNIService.JNI_BROADCAST_USER_STATUS_NOTIFICATION
 					.equals(intent.getAction())) {
 				long uid = intent.getExtras().getLong("uid");
+				Attendee at = findAttendee(uid);
+				// If exited user is not attendee in conference, then return
+				if (at != null) {
+					return;
+				}
 				User user = GlobalHolder.getInstance().getUser(uid);
 				int status = intent.getExtras().getInt("status");
 				User.Status st = User.Status.fromInt(status);
-				//TODO 
+				// If client applciation exit directly, we don't receive exit
+				// conference notification
 				if (st == User.Status.OFFLINE && user != null) {
 					Message.obtain(mVideoHandler, ATTENDEE_LISTENER, 0, 0, user)
 							.sendToTarget();
@@ -429,20 +452,21 @@ public class VideoActivityV2 extends Activity {
 		filter.addAction(JNI_EVENT_VIDEO_CATEGORY_OPEN_VIDEO_EVENT_ACTION);
 		filter.addAction(JNIService.JNI_BROADCAST_NEW_CONF_MESSAGE);
 		filter.addAction(JNIService.JNI_BROADCAST_GROUP_USER_REMOVED);
+		filter.addAction(JNIService.JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION);
 		filter.addAction(JNIService.JNI_BROADCAST_GROUP_USER_ADDED);
 		filter.addAction(JNIService.JNI_BROADCAST_CONNECT_STATE_NOTIFICATION);
 		filter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
 		filter.addAction(JNIService.JNI_BROADCAST_USER_STATUS_NOTIFICATION);
 		mContext.registerReceiver(mConfUserChangeReceiver, filter);
 
-
-		//register listener for conference service 
-		cb.registerPermissionUpdateListener(mVideoHandler, NOTIFY_USER_PERMISSION_UPDATED, null);
+		// register listener for conference service
+		cb.registerPermissionUpdateListener(mVideoHandler,
+				NOTIFY_USER_PERMISSION_UPDATED, null);
 		cb.registerAttendeeListener(this.mVideoHandler, ATTENDEE_LISTENER, null);
 		cb.registerKickedConfListener(mVideoHandler, NOTIFICATION_KICKED, null);
 		cb.registerSyncDesktopListener(mVideoHandler,
 				DESKTOP_SYNC_NOTIFICATION, null);
-		
+
 		// Register listen to document notification
 		ds.registerNewDocNotification(mVideoHandler, NEW_DOC_NOTIFICATION, null);
 		ds.registerDocDisplayNotification(mVideoHandler,
@@ -458,9 +482,7 @@ public class VideoActivityV2 extends Activity {
 		ds.registerPageCanvasUpdateNotification(mVideoHandler,
 				DOC_PAGE_CANVAS_NOTIFICATION, null);
 
-
 	}
-
 
 	private void init() {
 		mGroupId = this.getIntent().getLongExtra("gid", 0);
@@ -477,6 +499,17 @@ public class VideoActivityV2 extends Activity {
 			return;
 		}
 		mGroupNameTV.setText(g.getName());
+
+		Group confGroup = GlobalHolder.getInstance().findGroupById(
+				this.mGroupId);
+		// load conference attendee list
+		if (confGroup != null) {
+			List<User> l = new ArrayList<User>(confGroup.getUsers());
+			for (User u : l) {
+				mAttendeeList.add(new Attendee(u));
+			}
+		}
+		V2Log.i(" Conference size:" + mAttendeeList.size());
 	}
 
 	private void notificateConversationUpdate() {
@@ -559,24 +592,7 @@ public class VideoActivityV2 extends Activity {
 		if (mAttendeeContainer == null) {
 			mAttendeeContainer = new VideoAttendeeListLayout(this);
 			mAttendeeContainer.setId(0x7ffff001);
-			Group conf = GlobalHolder.getInstance()
-					.findGroupById(this.mGroupId);
-			if (conf != null) {
-				//FIXME optimize code
-				List<User> l = new ArrayList<User>(conf.getUsers());
-				Set<Attendee> al = new HashSet<Attendee>(mAttendeeList);
-
-				for (User u : l) {
-					al.add(new Attendee(u));
-				}
-				V2Log.i("Conference attendee size: " + al.size() + "  "
-						+ conf.getmGId() + "  " + conf.getName() + "  group:"
-						+ conf);
-				mAttendeeContainer.setAttendsList(al);
-			} else {
-				V2Log.i("Can not find conference in GlobalHolder: "
-						+ this.mGroupId);
-			}
+			mAttendeeContainer.setAttendsList(this.mAttendeeList);
 
 			RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
 					(int) (mVideoLayout.getMeasuredWidth() * 0.4),
@@ -740,6 +756,15 @@ public class VideoActivityV2 extends Activity {
 		}
 	}
 
+	private Attendee findAttendee(long uid) {
+		for (Attendee at : mAttendeeList) {
+			if (at.getUser().getmUserId() == uid) {
+				return at;
+			}
+		}
+		return null;
+	}
+
 	/**
 	 * 
 	 */
@@ -748,7 +773,8 @@ public class VideoActivityV2 extends Activity {
 		Attendee atd = null;
 		UserDeviceConfig udc = null;
 		for (Attendee a : mAttendeeList) {
-			if (a.isSelf()) {
+			if (a.getUser().getmUserId() == GlobalHolder.getInstance()
+					.getCurrentUserId()) {
 				selfInAttendeeList = true;
 				atd = a;
 				break;
@@ -759,12 +785,10 @@ public class VideoActivityV2 extends Activity {
 			atd = new Attendee(GlobalHolder.getInstance().getCurrentUser(),
 					true, false);
 			mAttendeeList.add(atd);
+		} else {
+			atd.setSelf(true);
 		}
 
-		if (atd == null) {
-			V2Log.e("Didn't find self object in  mAttendeeList");
-			return;
-		}
 		if (atd.getUser() == null) {
 			V2Log.e("No available user in atd");
 			return;
@@ -895,8 +919,8 @@ public class VideoActivityV2 extends Activity {
 	@Override
 	public void finish() {
 		super.finish();
-//		this.overridePendingTransition(R.animator.nonam_scale_null,
-//				R.animator.nonam_scale_center_100_0);
+		// this.overridePendingTransition(R.animator.nonam_scale_null,
+		// R.animator.nonam_scale_center_100_0);
 	}
 
 	@Override
@@ -908,9 +932,9 @@ public class VideoActivityV2 extends Activity {
 			mCurrentShowedSV.clear();
 		}
 		mVideoLayout.removeAllViews();
-		
-		
-		cb.unRegisterPermissionUpdateListener(mVideoHandler, NOTIFY_USER_PERMISSION_UPDATED, null);
+
+		cb.unRegisterPermissionUpdateListener(mVideoHandler,
+				NOTIFY_USER_PERMISSION_UPDATED, null);
 		cb.removeRegisterOfKickedConfListener(mVideoHandler,
 				NOTIFICATION_KICKED, null);
 		cb.removeAttendeeListener(this.mVideoHandler, ATTENDEE_LISTENER, null);
@@ -1052,8 +1076,17 @@ public class VideoActivityV2 extends Activity {
 	 * @param user
 	 */
 	private void doHandleNewUserEntered(User user) {
-		Attendee a = new Attendee(user);
-		this.mAttendeeList.add(a);
+		if (user == null) {
+			return;
+		}
+		Attendee a = findAttendee(user.getmUserId());
+		if (a == null) {
+			a = new Attendee(user);
+			this.mAttendeeList.add(a);
+		} else {
+			a.setUser(user);
+		}
+
 		List<UserDeviceConfig> ld = GlobalHolder.getInstance()
 				.getAttendeeDevice(a.getUser().getmUserId());
 		if (ld == null || ld.size() <= 0) {
@@ -1112,6 +1145,10 @@ public class VideoActivityV2 extends Activity {
 		return mCurrentShowedSV.size() >= 4;
 	}
 
+	/**
+	 * show remote user video
+	 * @param udc
+	 */
 	private void showOrCloseAttendeeVideo(UserDeviceConfig udc) {
 		if (udc == null) {
 			V2Log.e(" can't not open or close device");
@@ -1141,22 +1178,11 @@ public class VideoActivityV2 extends Activity {
 						Toast.LENGTH_SHORT).show();
 				return;
 			}
-			if (!udc.getBelongsAttendee().isSelf()) {
-				VideoPlayer vp = new VideoPlayer();
-				udc.setSVHolder(new SurfaceView(this));
-				vp.SetSurface(udc.getSVHolder().getHolder());
-				udc.setVp(vp);
-			} else {
-				udc.setSVHolder(new SurfaceView(this));
-				VideoRecorder.VideoPreviewSurfaceHolder = udc.getSVHolder()
-						.getHolder();
-				VideoRecorder.VideoPreviewSurfaceHolder
-						.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
-				VideoRecorder.VideoPreviewSurfaceHolder
-						.setFormat(PixelFormat.TRANSPARENT);
-				VideoCaptureDevInfo.CreateVideoCaptureDevInfo()
-						.updateCameraOrientation(Surface.ROTATION_0);
-			}
+			VideoPlayer vp = new VideoPlayer();
+			udc.setSVHolder(new SurfaceView(this));
+			vp.SetSurface(udc.getSVHolder().getHolder());
+			udc.setVp(vp);
+
 			mCurrentShowedSV
 					.add(new SurfaceViewW(udc.getBelongsAttendee(), udc));
 			// Do adjust layout first, then request open device.
@@ -1313,12 +1339,15 @@ public class VideoActivityV2 extends Activity {
 			case REQUEST_EXIT_CONF:
 				cb.requestExitConference(new Conference((Long) msg.obj), null);
 				break;
-				//user permission updated
+			// user permission updated
 			case NOTIFY_USER_PERMISSION_UPDATED:
 				if (mAttendeeContainer != null) {
 					PermissionUpdateIndication ind = (PermissionUpdateIndication) msg.obj;
-					Attendee pa = new Attendee(GlobalHolder.getInstance().getUser(ind.getUid()));
-					mAttendeeContainer.updateAttendeeSpeakingState(pa, ConferencePermission.SPEAKING, PermissionState.fromInt(ind.getState()));
+					Attendee pa = new Attendee(GlobalHolder.getInstance()
+							.getUser(ind.getUid()));
+					mAttendeeContainer.updateAttendeeSpeakingState(pa,
+							ConferencePermission.SPEAKING,
+							PermissionState.fromInt(ind.getState()));
 				}
 				break;
 			case NEW_DOC_NOTIFICATION:
@@ -1338,7 +1367,6 @@ public class VideoActivityV2 extends Activity {
 						prLegacy.remove(vd.getId());
 					}
 
-					// FIXME ?????
 					if (mDocContainer != null) {
 						mDocContainer.addDoc(vd);
 					}
