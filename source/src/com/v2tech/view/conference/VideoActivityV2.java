@@ -399,6 +399,7 @@ public class VideoActivityV2 extends Activity {
 				User user = GlobalHolder.getInstance().getUser(uid);
 				int status = intent.getExtras().getInt("status");
 				User.Status st = User.Status.fromInt(status);
+				//TODO 
 				if (st == User.Status.OFFLINE && user != null) {
 					Message.obtain(mVideoHandler, ATTENDEE_LISTENER, 0, 0, user)
 							.sendToTarget();
@@ -561,12 +562,9 @@ public class VideoActivityV2 extends Activity {
 			Group conf = GlobalHolder.getInstance()
 					.findGroupById(this.mGroupId);
 			if (conf != null) {
+				//FIXME optimize code
 				List<User> l = new ArrayList<User>(conf.getUsers());
-				Set<Attendee> al = new HashSet<Attendee>();
-
-				for (Attendee t : this.mAttendeeList) {
-					al.add(t);
-				}
+				Set<Attendee> al = new HashSet<Attendee>(mAttendeeList);
 
 				for (User u : l) {
 					al.add(new Attendee(u));

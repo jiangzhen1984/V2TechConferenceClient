@@ -400,7 +400,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 	}
 
 	private boolean check() {
-		if (mNickNameET.getText() == null || mNickNameET.getText().toString().isEmpty()) {
+		if (mNickNameET.getText() == null || mNickNameET.getText().toString().trim().isEmpty()) {
 			mNickNameET.setError(this.getText(R.string.error_contacts_user_detail_no_nick_name));
 			mNickNameET.requestFocus();
 			return false;
