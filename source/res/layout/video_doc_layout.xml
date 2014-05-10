@@ -4,7 +4,8 @@
     android:layout_height="match_parent"
     android:alpha="0.7"
     android:background="#ffffff"
-    android:orientation="vertical" >
+    android:orientation="vertical"
+    android:animateLayoutChanges="true" >
 
     <TextView
         android:id="@+id/textView1"
@@ -73,16 +74,26 @@
     </LinearLayout>
 
     <ImageView
-        android:id="@+id/video_doc_pin_button"
+        android:id="@+id/video_doc_screen_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignBottom="@+id/textView1"
         android:layout_alignParentRight="true"
         android:layout_marginRight="20dp"
-        android:tag="float"
-        android:src="@drawable/pin_button_selector" />
-    
-     <LinearLayout
+        android:src="@drawable/video_doc_full_screen_button_selector"
+        android:tag="fullscreen" />
+
+    <ImageView
+        android:id="@+id/video_doc_pin_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/textView1"
+        android:layout_marginRight="20dp"
+        android:layout_toLeftOf="@+id/video_doc_screen_button"
+        android:src="@drawable/pin_button_selector"
+        android:tag="float" />
+
+    <LinearLayout
         android:layout_width="1dp"
         android:layout_height="fill_parent"
         android:layout_alignParentRight="true"

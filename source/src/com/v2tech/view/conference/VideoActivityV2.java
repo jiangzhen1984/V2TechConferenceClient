@@ -41,6 +41,7 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.view.animation.TranslateAnimation;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -661,8 +662,8 @@ public class VideoActivityV2 extends Activity {
 			mDocContainer = new VideoDocLayout(this);
 			mDocContainer.setId(0x7ffff002);
 			RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
-					(int) (mVideoLayout.getMeasuredWidth() * 0.5),
-					mVideoLayout.getMeasuredHeight());
+					(int) (mVideoLayoutMain.getWidth() * 0.5 - mMenuButtonContainer.getWidth()),
+					mMenuButtonContainer.getHeight());
 			lp.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
 			lp.addRule(RelativeLayout.RIGHT_OF, mMenuLine.getId());
 			lp.addRule(RelativeLayout.BELOW, mVideoLine.getId());
@@ -676,40 +677,84 @@ public class VideoActivityV2 extends Activity {
 
 				@Override
 				public void requestFixedLayout(View v) {
-					// RelativeLayout.LayoutParams rl =
-					// (RelativeLayout.LayoutParams)mVideoLayout.getLayoutParams();
-					// int[] location = new int[2];
-					// v.getLocationInWindow(location);
-					// DisplayMetrics dm = new DisplayMetrics();
-					// getWindowManager().getDefaultDisplay().getMetrics(dm);
-					// rl.width = dm.widthPixels - (location[0] +
-					// v.getMeasuredWidth());
-					// mVideoLayout.setLayoutParams(rl);
-					// adjustLayout();
+					//If current doc layout size is full screen, then ignore reques fixed size reqeust.
+					if (mDocContainer.isFullScreenSize()) {
+						return;
+					}
+					RelativeLayout.LayoutParams rl = (RelativeLayout.LayoutParams) mVideoLayout
+							.getLayoutParams();
+					rl.addRule(RelativeLayout.RIGHT_OF,
+							v.getId());
+					int[] location = new int[2];
+					v.getLocationInWindow(location);
+					DisplayMetrics dm = new DisplayMetrics();
+					getWindowManager().getDefaultDisplay().getMetrics(dm);
+					rl.width = dm.widthPixels
+							- (location[0] + v.getMeasuredWidth());
+					mVideoLayout.setLayoutParams(rl);
+					adjustLayout();
 				}
 
 				@Override
 				public void requestFloatLayout(View v) {
-					// RelativeLayout.LayoutParams rl =
-					// (RelativeLayout.LayoutParams)mVideoLayout.getLayoutParams();
-					// rl.addRule(RelativeLayout.RIGHT_OF,
-					// R.id.in_meeting_menu_layout);
-					// int[] location = new int[2];
-					// v.getLocationInWindow(location);
-					// DisplayMetrics dm = new DisplayMetrics();
-					// getWindowManager().getDefaultDisplay().getMetrics(dm);
-					// rl.width = dm.widthPixels - location[0];
-					// mVideoLayout.setLayoutParams(rl);
-					//
-					// adjustLayout();
+					//If current doc layout size is full screen, then ignore reques fixed size reqeust.
+					if (mDocContainer.isFullScreenSize()) {
+						return;
+					}
+					RelativeLayout.LayoutParams rl = (RelativeLayout.LayoutParams) mVideoLayout
+							.getLayoutParams();
+					rl.addRule(RelativeLayout.RIGHT_OF,
+							R.id.in_meeting_menu_layout);
+					int[] location = new int[2];
+					v.getLocationInWindow(location);
+					DisplayMetrics dm = new DisplayMetrics();
+					getWindowManager().getDefaultDisplay().getMetrics(dm);
+					rl.width = dm.widthPixels - location[0];
+					mVideoLayout.setLayoutParams(rl);
+
+					adjustLayout();
 				}
 
 				public void requestFillParent(View v) {
-
+					mVideoLayout.setVisibility(View.GONE);
+					DisplayMetrics dm = new DisplayMetrics();
+					getWindowManager().getDefaultDisplay().getMetrics(dm);
+					
+					int[] location = new int[2];
+					v.getLocationInWindow(location);
+					
+					ViewGroup.LayoutParams vl = mDocContainer.getLayoutParams();
+					vl.width = dm.widthPixels - location[0];
+//					
+//					Animation anim = new TranslateAnimation(0, 100F, 0, 0);
+//					anim.setFillAfter(true); 
+//					anim.setDuration(400);
+//					v.startAnimation(anim);
+					v.setLayoutParams(vl);
+					
+					//Update local video layout params make sure local video can float at right and bottom
+					// Because  layout mess up if mVideoLayout gone
+					RelativeLayout.LayoutParams localRL = (RelativeLayout.LayoutParams)mLocalSurface.getLayoutParams();
+					localRL.addRule(RelativeLayout.ALIGN_BOTTOM, v.getId());
+					mLocalSurface.setLayoutParams(localRL);
+					
 				}
 
 				public void requestRestore(View v) {
-
+					mVideoLayout.setVisibility(View.VISIBLE);
+					
+					ViewGroup.LayoutParams vl = mDocContainer.getLayoutParams();
+					vl.width = (int)(mVideoLayoutMain.getWidth() * 0.5 - mMenuButtonContainer.getWidth());
+//					Animation anim = new TranslateAnimation(100, 0, 0, 0);
+//					anim.setFillAfter(true); 
+//					anim.setDuration(400);
+//					v.startAnimation(anim);
+					v.setLayoutParams(vl);
+					
+					//Update local video layout params make sure local video can float at right and bottom
+					RelativeLayout.LayoutParams localRL = (RelativeLayout.LayoutParams)mLocalSurface.getLayoutParams();
+					localRL.addRule(RelativeLayout.ALIGN_BOTTOM, mVideoLayout.getId());
+					mLocalSurface.setLayoutParams(localRL);
 				}
 
 			});
@@ -743,6 +788,8 @@ public class VideoActivityV2 extends Activity {
 					this, R.animator.right_out);
 			tabBlockHolderAnimation.setDuration(1000);
 			mDocContainer.startAnimation(tabBlockHolderAnimation);
+			// Call this function to inform listener 
+			mDocContainer.requestFloatLayout();
 		} else {
 			mDocContainer.setVisibility(View.VISIBLE);
 			mMenuDocButton.setBackgroundColor(mContext.getResources().getColor(
@@ -834,7 +881,15 @@ public class VideoActivityV2 extends Activity {
 
 		Rect outR = new Rect();
 		mVideoLayout.getDrawingRect(outR);
-		int containerW = mVideoLayout.getWidth();
+		int[] po = new int[2];
+		mVideoLayout.getLocationInWindow(po);
+		mVideoLayout.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
+		//First extra from layout parameter. Because if doc layout request fixed position,
+		// will set layout width parameter. At here measure doesn't work with layoutparameter
+		int containerW = mVideoLayout.getLayoutParams().width;
+		if (containerW <= 0) {
+			containerW = mVideoLayout.getWidth();
+		}
 		int containerH = outR.bottom - outR.top;
 
 		int normalW = containerW / cols, normalH = normalW / 16 * 9;

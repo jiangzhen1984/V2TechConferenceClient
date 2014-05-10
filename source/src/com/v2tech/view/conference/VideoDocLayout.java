@@ -56,6 +56,7 @@ public class VideoDocLayout extends LinearLayout {
 	private LinearLayout mDodListContainer;
 	private View mShowDocListButton;
 	private View mRequestFixedPosButton;
+	private ImageView mRequestUpdateSizeButton;
 
 	private ScrollView mDocListWindowScroller;
 
@@ -108,6 +109,8 @@ public class VideoDocLayout extends LinearLayout {
 		mShowDocListButton.setOnClickListener(showDocListListener);
 		mRequestFixedPosButton = view.findViewById(R.id.video_doc_pin_button);
 		mRequestFixedPosButton.setOnClickListener(mRequestFixedListener);
+		mRequestUpdateSizeButton  = (ImageView)view.findViewById(R.id.video_doc_screen_button);
+		mRequestUpdateSizeButton.setOnClickListener(mUpdateSizeListener);
 
 		this.addView(view, new LinearLayout.LayoutParams(
 				LinearLayout.LayoutParams.MATCH_PARENT,
@@ -361,6 +364,30 @@ public class VideoDocLayout extends LinearLayout {
 	public void setListener(DocListener listener) {
 		this.listener = listener;
 	}
+	
+	
+	/**
+	 * Used to manually request FloatLayout, Because when this layout
+	 * will hide, call this function to information interface
+	 */
+	public void requestFloatLayout() {
+		if (this.listener != null) {
+			this.listener.requestFloatLayout(rootView);
+		}
+	}
+
+
+	/**
+	 * Used to manually request requestRestore, Because when this layout
+	 * will hide, call this function to information interface
+	 */
+	public void requestRestore() {
+		if (this.listener != null) {
+			this.listener.requestRestore(rootView);
+		}
+	}
+	
+	
 
 	public void addDoc(V2Doc doc) {
 		if (!mDocs.containsKey(doc.getId())) {
@@ -447,6 +474,11 @@ public class VideoDocLayout extends LinearLayout {
 		if (this.mCurrentBitMap != null && !this.mCurrentBitMap.isRecycled()) {
 			this.mCurrentBitMap.recycle();
 		}
+	}
+	
+	
+	public boolean isFullScreenSize() {
+		return "restorescreen".equals(mRequestUpdateSizeButton.getTag());
 	}
 
 	private OnClickListener pageChangeListener = new OnClickListener() {
@@ -543,5 +575,31 @@ public class VideoDocLayout extends LinearLayout {
 			}
 		}
 
+	};
+	
+	
+	private OnClickListener mUpdateSizeListener = new OnClickListener() {
+
+		@Override
+		public void onClick(View view) {
+			if (view.getTag().equals("fullscreen")) {
+				if (listener != null) {
+					listener.requestFillParent(rootView);
+				}
+			} else {
+				if (listener != null) {
+					listener.requestRestore(rootView);
+				}
+			}
+
+			if (view.getTag().equals("fullscreen")) {
+				view.setTag("restorescreen");
+				mRequestUpdateSizeButton.setImageResource(R.drawable.video_doc_restore_screen_button_selector);
+			} else {
+				view.setTag("fullscreen");
+				mRequestUpdateSizeButton.setImageResource(R.drawable.video_doc_full_screen_button_selector);
+			}
+		}
+		
 	};
 }
