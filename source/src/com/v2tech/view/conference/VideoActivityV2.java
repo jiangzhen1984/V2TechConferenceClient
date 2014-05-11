@@ -40,8 +40,9 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.animation.Animation;
+import android.view.animation.Animation.AnimationListener;
 import android.view.animation.AnimationUtils;
-import android.view.animation.TranslateAnimation;
+import android.view.animation.ScaleAnimation;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -726,11 +727,11 @@ public class VideoActivityV2 extends Activity {
 					ViewGroup.LayoutParams vl = mDocContainer.getLayoutParams();
 					vl.width = dm.widthPixels - location[0];
 //					
-//					Animation anim = new TranslateAnimation(0, 100F, 0, 0);
-//					anim.setFillAfter(true); 
-//					anim.setDuration(400);
-//					v.startAnimation(anim);
 					v.setLayoutParams(vl);
+					Animation anim = new ScaleAnimation(0.5F, 1.0F, 1.0F,1.0F, Animation.ABSOLUTE, 1.0F, Animation.ABSOLUTE, 1.0F);
+					anim.setFillAfter(true); 
+					anim.setDuration(400);
+					v.startAnimation(anim);
 					
 					//Update local video layout params make sure local video can float at right and bottom
 					// Because  layout mess up if mVideoLayout gone
@@ -740,12 +741,13 @@ public class VideoActivityV2 extends Activity {
 					
 				}
 
-				public void requestRestore(View v) {
+				public void requestRestore(final View v) {
 					mVideoLayout.setVisibility(View.VISIBLE);
 					
-					ViewGroup.LayoutParams vl = mDocContainer.getLayoutParams();
+					final ViewGroup.LayoutParams vl = mDocContainer.getLayoutParams();
+					int oriWidth = vl.width;
 					vl.width = (int)(mVideoLayoutMain.getWidth() * 0.5 - mMenuButtonContainer.getWidth());
-//					Animation anim = new TranslateAnimation(100, 0, 0, 0);
+//					Animation anim = new ScaleAnimation(1.0F, 0.5F, 1.0F,1.0F, 1.0F,1.0F);
 //					anim.setFillAfter(true); 
 //					anim.setDuration(400);
 //					v.startAnimation(anim);
@@ -789,6 +791,9 @@ public class VideoActivityV2 extends Activity {
 			tabBlockHolderAnimation.setDuration(1000);
 			mDocContainer.startAnimation(tabBlockHolderAnimation);
 			// Call this function to inform listener 
+			//Notice must restore first, then request float
+			// because if in full screen size, will ignore float request
+			mDocContainer.requestRestore();
 			mDocContainer.requestFloatLayout();
 		} else {
 			mDocContainer.setVisibility(View.VISIBLE);

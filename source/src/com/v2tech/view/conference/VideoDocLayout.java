@@ -374,6 +374,8 @@ public class VideoDocLayout extends LinearLayout {
 		if (this.listener != null) {
 			this.listener.requestFloatLayout(rootView);
 		}
+		
+		mRequestFixedPosButton.setTag("float");
 	}
 
 
@@ -385,6 +387,9 @@ public class VideoDocLayout extends LinearLayout {
 		if (this.listener != null) {
 			this.listener.requestRestore(rootView);
 		}
+		//restore image 
+		mRequestUpdateSizeButton.setTag("fullscreen");
+		mRequestUpdateSizeButton.setImageResource(R.drawable.video_doc_full_screen_button_selector);
 	}
 	
 	
