@@ -534,7 +534,7 @@ public class VideoDocLayout extends LinearLayout {
 			V2Doc d = (V2Doc) v.getTag();
 			if (d != mCurrentDoc) {
 				V2Doc.Page p = d.getActivatePage();
-				if (p.getFilePath() == null || p.getFilePath().isEmpty()) {
+				if (p == null ||p.getFilePath() == null || p.getFilePath().isEmpty()) {
 					Toast.makeText(getContext(),
 							R.string.warning_downloading_doc,
 							Toast.LENGTH_SHORT).show();

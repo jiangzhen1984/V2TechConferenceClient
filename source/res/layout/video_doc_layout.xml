@@ -79,7 +79,7 @@
         android:layout_height="wrap_content"
         android:layout_alignBottom="@+id/textView1"
         android:layout_alignParentRight="true"
-        android:layout_marginRight="20dp"
+        android:layout_marginRight="10dp"
         android:src="@drawable/video_doc_full_screen_button_selector"
         android:tag="fullscreen" />
 
@@ -88,8 +88,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignBottom="@+id/textView1"
-        android:layout_marginRight="20dp"
         android:layout_toLeftOf="@+id/video_doc_screen_button"
+        android:layout_marginRight="5dp"
         android:src="@drawable/pin_button_selector"
         android:tag="float" />
 
