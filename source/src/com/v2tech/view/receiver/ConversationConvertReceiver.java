@@ -243,7 +243,8 @@ public class ConversationConvertReceiver extends BroadcastReceiver {
 					ContentDescriptor.Conversation.CONTENT_URI, conCv);
 
 		} else {
-
+			notif = (c.equals(GlobalHolder.getInstance().CURRENT_CONVERSATION) || (GlobalHolder
+					.getInstance().CURRENT_ID == fromUid)) ? false : true;
 			c.setNotiFlag(notif ? Conversation.NOTIFICATION : Conversation.NONE);
 
 			ContentValues ct = new ContentValues();

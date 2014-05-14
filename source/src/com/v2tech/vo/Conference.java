@@ -18,7 +18,11 @@ public class Conference {
 	private List<User> invitedList;
 	private Date d;
 	private long creator;
-
+	
+	//TODO define type
+	public int getType() {
+		return 1;
+	}
 	public Conference(long id) {
 		this.id = id;
 	}

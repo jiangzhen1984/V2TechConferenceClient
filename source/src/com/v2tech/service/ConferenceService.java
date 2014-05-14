@@ -208,7 +208,7 @@ public class ConferenceService extends AbstractHandler {
 				+ userDevice.getUserID() + " deviceid:"
 				+ userDevice.getDeviceID() + "   videoplayer:"
 				+ userDevice.getVp());
-		VideoRequest.getInstance().openVideoDevice(conf.getId(),
+		VideoRequest.getInstance().openVideoDevice(conf.getType(),
 				userDevice.getUserID(), userDevice.getDeviceID(),
 				userDevice.getVp(), userDevice.getBusinessType());
 		JNIResponse jniRes = new RequestOpenUserVideoDeviceResponse(
@@ -250,7 +250,7 @@ public class ConferenceService extends AbstractHandler {
 		initTimeoutMessage(JNI_REQUEST_CLOSE_VIDEO, DEFAULT_TIME_OUT_SECS,
 				caller);
 
-		VideoRequest.getInstance().closeVideoDevice(conf.getId(),
+		VideoRequest.getInstance().closeVideoDevice(conf.getType(),
 				userDevice.getUserID(), userDevice.getDeviceID(),
 				userDevice.getVp(), userDevice.getBusinessType());
 		JNIResponse jniRes = new RequestCloseUserVideoDeviceResponse(
@@ -496,6 +496,11 @@ public class ConferenceService extends AbstractHandler {
 							.sendToTarget();
 				}
 			}
+		}
+
+		@Override
+		public void OnConfNotify(String confXml, String creatorXml) {
+			
 		}
 		
 		

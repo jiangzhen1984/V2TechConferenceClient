@@ -44,11 +44,19 @@ public interface ConfRequestCallback {
 	
 	
 	/**
-	 * 
+	 * FIXME add code
 	 * @param userid
 	 * @param type
 	 * @param status
 	 */
 	public void OnGrantPermissionCallback(long userid, int type, int status);
+	
+	
+	/**
+	 * User invite current user to join further conference, this function will be called
+	 * @param confXml {@code <conf createuserid='18' id='514000758190' starttime='1400162220' subject=' 就'/> }
+	 * @param creatorXml {@code <user id='18'/>}
+	 */
+	public void OnConfNotify(String confXml, String creatorXml);
 	
 }

@@ -18,6 +18,7 @@ import com.V2.jni.ConfRequest;
 import com.V2.jni.ConfigRequest;
 import com.V2.jni.GroupRequest;
 import com.V2.jni.ImRequest;
+import com.V2.jni.NativeInitializer;
 import com.V2.jni.VideoRequest;
 import com.V2.jni.WBRequest;
 import com.v2tech.util.CrashHandler;
@@ -70,6 +71,7 @@ public class MainApplication extends Application {
 		System.loadLibrary("v2ve");
 		System.loadLibrary("v2client");
 
+		NativeInitializer.getIntance().initialize(getApplicationContext());
 		ImRequest.getInstance(getApplicationContext());
 		GroupRequest.getInstance(getApplicationContext());
 		VideoRequest.getInstance(getApplicationContext());

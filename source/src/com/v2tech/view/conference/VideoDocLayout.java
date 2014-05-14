@@ -449,9 +449,13 @@ public class VideoDocLayout extends LinearLayout {
 			mNextPageButton
 					.setImageResource(R.drawable.video_doc_right_arrow_gray);
 			mShowDocListButton.setEnabled(false);
+			mNextPageButton.setEnabled(false);
+			mPrePageButton.setEnabled(false);
 		} else {
 			updatePageButton();
 			mShowDocListButton.setEnabled(true);
+			mNextPageButton.setEnabled(true);
+			mPrePageButton.setEnabled(true);
 		}
 	}
 

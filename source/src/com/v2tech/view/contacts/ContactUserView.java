@@ -67,7 +67,7 @@ public class ContactUserView extends LinearLayout {
 				.findViewById(R.id.contact_user_view_root);
 
 		mPhotoIV = (ImageView) view.findViewById(R.id.contact_user_img);
-		if (u.getAvatarBitmap() != null) {
+		if (mPhotoIV != null && u.getAvatarBitmap() != null) {
 			mPhotoIV.setImageBitmap(u.getAvatarBitmap());
 		}
 		mUserNameTV = (TextView) view.findViewById(R.id.contact_user_name);

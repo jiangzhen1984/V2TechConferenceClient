@@ -274,6 +274,7 @@ public class ConversationView extends Activity {
 	protected void onStop() {
 		super.onStop();
 		isStopped = true;
+		System.out.println("---------------------------------------s-");
 	}
 	
 	
@@ -282,6 +283,7 @@ public class ConversationView extends Activity {
 	public void finish() {
 		super.finish();
 		this.overridePendingTransition(R.animator.nonam_scale_null, R.animator.nonam_scale_center_100_0);
+		System.out.println("----------------------------22222----------s-");
 	}
 
 	@Override
@@ -292,6 +294,7 @@ public class ConversationView extends Activity {
 		GlobalHolder.getInstance().CURRENT_CONVERSATION = null;
 		GlobalHolder.getInstance().CURRENT_ID = 0;
 		V2Log.e("conversation view exited");
+		System.out.println("--------------------------------33333-------s-");
 	}
 
 	private void scrollToBottom() {

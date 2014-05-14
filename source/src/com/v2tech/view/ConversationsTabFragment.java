@@ -101,17 +101,30 @@ public class ConversationsTabFragment extends Fragment {
 		String tag = this.getArguments().getString("tag");
 		if (PublicIntent.TAG_CONF.equals(tag)) {
 			mCurrentTabFlag = Conversation.TYPE_CONFERNECE;
-			imgs = new int[] { R.drawable.conversation_popup_menu_video_call_button };
-			items = new int[] { R.string.conference_create_title };
-
-		} else if (PublicIntent.TAG_COV.equals(tag)) {
-			mCurrentTabFlag = Conversation.TYPE_CONTACT;
-			imgs = new int[] { R.drawable.conversation_video_button,
+			imgs = new int[] { R.drawable.conversation_popup_menu_video_call_button,
+					R.drawable.conversation_video_button,
 					R.drawable.conversation_call_button,
 					R.drawable.conversation_sms_button,
 					R.drawable.conversation_email_button,
 					R.drawable.conversation_files_button };
 			items = new int[] {
+					R.string.conference_create_title,
+					R.string.conversation_popup_menu_video_call_button,
+					R.string.conversation_popup_menu_call_button,
+					R.string.conversation_popup_menu_sms_call_button,
+					R.string.conversation_popup_menu_email_button,
+					R.string.conversation_popup_menu_files_button };
+
+		} else if (PublicIntent.TAG_COV.equals(tag)) {
+			mCurrentTabFlag = Conversation.TYPE_CONTACT;
+			imgs = new int[] { R.drawable.conversation_popup_menu_video_call_button,
+					R.drawable.conversation_video_button,
+					R.drawable.conversation_call_button,
+					R.drawable.conversation_sms_button,
+					R.drawable.conversation_email_button,
+					R.drawable.conversation_files_button };
+			items = new int[] {
+					R.string.conference_create_title,
 					R.string.conversation_popup_menu_video_call_button,
 					R.string.conversation_popup_menu_call_button,
 					R.string.conversation_popup_menu_sms_call_button,
@@ -119,12 +132,14 @@ public class ConversationsTabFragment extends Fragment {
 					R.string.conversation_popup_menu_files_button };
 		} else if (PublicIntent.TAG_GROUP.equals(tag)) {
 			mCurrentTabFlag = Conversation.TYPE_GROUP;
-			imgs = new int[] { R.drawable.conversation_video_button,
+			imgs = new int[] { R.drawable.conversation_popup_menu_video_call_button,
+					R.drawable.conversation_video_button,
 					R.drawable.conversation_call_button,
 					R.drawable.conversation_sms_button,
 					R.drawable.conversation_email_button,
 					R.drawable.conversation_files_button };
 			items = new int[] {
+					R.string.conference_create_title,
 					R.string.conversation_popup_menu_video_call_button,
 					R.string.conversation_popup_menu_call_button,
 					R.string.conversation_popup_menu_sms_call_button,
@@ -281,6 +296,9 @@ public class ConversationsTabFragment extends Fragment {
 		}
 	}
 
+	/**
+	 * FIXME optimize code
+	 */
 	private void initPlusItem() {
 		for (int i = 0; i < imgs.length; i++) {
 			LinearLayout ll = new LinearLayout(mContext);

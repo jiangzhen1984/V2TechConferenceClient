@@ -70,10 +70,11 @@ public class VideoRequest {
 	 * @see V2ClientType#CONF
 	 * @see V2ClientType#IM
 	 */
-	public native void openVideoDevice(long nGroupID, long nUserID,
+	public native void openVideoDevice(int type, long nUserID,
 			String szDeviceID, VideoPlayer vp, int businessType);
 
 	/**
+	 * FIXME update comment
 	 * Request to close video device. This function no callback call<br>
 	 * 
 	 * @param nGroupID
@@ -95,7 +96,7 @@ public class VideoRequest {
 	 * @see V2ClientType#CONF
 	 * @see V2ClientType#IM
 	 */
-	public native void closeVideoDevice(long nGroupID, long nUserID,
+	public native void closeVideoDevice(int type, long nUserID,
 			String szDeviceID, VideoPlayer vp, int businessType);
 
 	/**

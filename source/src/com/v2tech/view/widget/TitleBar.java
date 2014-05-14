@@ -111,7 +111,7 @@ public class TitleBar {
 
 			TextView tv = new TextView(context);
 			tv.setText(items[i]);
-			tv.setPadding(10, 5, 5, 10);
+			tv.setPadding(10, 15, 5, 15);
 			LinearLayout.LayoutParams tvLL = new LinearLayout.LayoutParams(0,
 					LinearLayout.LayoutParams.WRAP_CONTENT);
 			tvLL.gravity = Gravity.LEFT | Gravity.CENTER_VERTICAL;
@@ -121,6 +121,7 @@ public class TitleBar {
 			ll.setOnClickListener(plusItemClickListener);
 
 			ll.setId(imgs[i]);
+			ll.setPadding(0, 10, 0, 10);
 			vg.addView(ll, new LinearLayout.LayoutParams(
 					LinearLayout.LayoutParams.MATCH_PARENT,
 					LinearLayout.LayoutParams.WRAP_CONTENT));
@@ -194,6 +195,7 @@ public class TitleBar {
 				LinearLayout itemContainer = (LinearLayout) layout
 						.findViewById(R.id.common_pop_window_container);
 				for (int i = 0; i < additionList.size(); i++) {
+					additionList.get(i).v.setPadding(0, 15, 0, 15);
 					itemContainer.addView(additionList.get(i).v,
 							new LinearLayout.LayoutParams(
 									LinearLayout.LayoutParams.WRAP_CONTENT,
@@ -212,7 +214,7 @@ public class TitleBar {
 				if (GlobalConfig.GLOBAL_LAYOUT_SIZE == Configuration.SCREENLAYOUT_SIZE_NORMAL) {
 					height = (int) (dm.heightPixels * 0.6);
 				} else {
-					height = (int) (dm.heightPixels * 0.4);
+					height = (int) (dm.heightPixels * 0.5);
 				}
 
 				layout.findViewById(R.id.common_pop_up_arrow_up).measure(

@@ -26,6 +26,8 @@ import android.widget.Toast;
 
 import com.V2.jni.ChatRequest;
 import com.V2.jni.ChatRequestCallback;
+import com.V2.jni.ConfRequest;
+import com.V2.jni.ConfRequestCallback;
 import com.V2.jni.GroupRequest;
 import com.V2.jni.GroupRequestCallback;
 import com.V2.jni.ImRequest;
@@ -97,6 +99,8 @@ public class JNIService extends Service {
 	private VideoRequestCB mVRCB;
 
 	private ChatRequestCB mChRCB;
+	
+	private ConfRequestCB mCRCB;
 
 	// ////////////////////////////////////////
 
@@ -139,6 +143,9 @@ public class JNIService extends Service {
 		mChRCB = new ChatRequestCB(mCallbackHandler);
 		ChatRequest.getInstance(this.getApplicationContext())
 				.setChatRequestCallback(mChRCB);
+		
+		mCRCB = new ConfRequestCB(mCallbackHandler);
+		ConfRequest.getInstance().addCallback(mCRCB);
 	}
 
 	@Override
@@ -275,7 +282,7 @@ public class JNIService extends Service {
 						(String) msg.obj);
 				GlobalHolder.getInstance().updateGroupList(
 						Group.GroupType.fromInt(msg.arg1), gl);
-				
+
 				if (Group.GroupType.fromInt(msg.arg1) == GroupType.CHATING) {
 					for (Group g : gl) {
 						GlobalHolder.getInstance().addConversation(
@@ -521,6 +528,9 @@ public class JNIService extends Service {
 				AvatarName = null;
 			}
 
+			//FIXME should not update bitmap  at here.
+			// because should update imgage view first then update bitmap
+			
 			User u = GlobalHolder.getInstance().getUser(nUserID);
 			if (u != null) {
 				u.setAvatarPath(AvatarName);
@@ -647,9 +657,8 @@ public class JNIService extends Service {
 					i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
 					i.putExtra("gid", nGroupID);
 					sendBroadcast(i);
-					Notificator.updateSystemNotification(mContext, name
-							+ " 删除会议:", gName, 1,
-							PublicIntent.VIDEO_NOTIFICATION_ID);
+					Notificator.updateSystemNotification(mContext, "", gName
+							+ "会议被删除", 1, PublicIntent.VIDEO_NOTIFICATION_ID);
 				}
 			}
 		}
@@ -731,6 +740,73 @@ public class JNIService extends Service {
 		public void OnSetCapParamDone(String szDevID, int nSizeIndex,
 				int nFrameRate, int nBitRate) {
 
+		}
+
+	}
+
+	class ConfRequestCB implements ConfRequestCallback {
+
+		private JNICallbackHandler mCallbackHandler;
+
+		public ConfRequestCB(JNICallbackHandler mCallbackHandler) {
+			this.mCallbackHandler = mCallbackHandler;
+		}
+
+		
+		
+		@Override
+		public void OnEnterConfCallback(long nConfID, long nTime,
+				String szConfData, int nJoinResult) {
+
+		}
+
+		@Override
+		public void OnConfMemberEnterCallback(long nConfID, long nTime,
+				String szUserInfos) {
+
+		}
+
+		@Override
+		public void OnConfMemberExitCallback(long nConfID, long nTime,
+				long nUserID) {
+
+		}
+
+		@Override
+		public void OnKickConfCallback(int nReason) {
+
+		}
+
+		@Override
+		public void OnGrantPermissionCallback(long userid, int type, int status) {
+
+		}
+
+		@Override
+		public void OnConfNotify(String confXml, String creatorXml) {
+			Group g = ConferenceGroup.parseConferenceGroupFromXML(confXml);
+
+			int start = confXml.indexOf("createuserid='");
+			int end = confXml.indexOf("'", start + 14);
+
+			if (start != -1 && end != -1) {
+				long uid = 0;
+				uid = Long.parseLong(confXml.substring(start + 14, end));
+				if (uid > 0) {
+					User u = GlobalHolder.getInstance().getUser(uid);
+					g.setOwnerUser(u);
+					GlobalHolder.getInstance().addGroupToList(
+							Group.GroupType.CONFERENCE, g);
+					Intent i = new Intent();
+					i.setAction(JNIService.JNI_BROADCAST_CONFERENCE_INVATITION);
+					i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
+					i.putExtra("gid", g.getmGId());
+					sendBroadcast(i);
+
+				} else {
+					V2Log.e(" Incorrect uid : " + confXml);
+				}
+			}
 		}
 
 	}

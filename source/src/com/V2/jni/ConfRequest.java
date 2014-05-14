@@ -143,6 +143,11 @@ public class ConfRequest {
 
 	}
 
+	/**
+	 * 204 user deleted group
+	 * 203 current user is kicked by chairman
+	 * @param nReason
+	 */
 	private void OnKickConf(int nReason) {
 		V2Log.d("-->OnKickConf " + nReason);
 		for (WeakReference<ConfRequestCallback> we : this.callbacks) {
@@ -165,6 +170,23 @@ public class ConfRequest {
 				cb.OnGrantPermissionCallback(userid, type, status);
 			}
 		}
+	}
+	
+	/**
+	 * User invite current user to join further conference, this function will be called
+	 * @param str {@code <conf createuserid='18' id='514000758190' starttime='1400162220' subject=' 就'/> }
+	 * @param str2 {@code <user id='18'/>}
+	 */
+	private void OnConfNotify(String str, String str2) {
+		V2Log.i(str+"   "+ str2);
+		for (WeakReference<ConfRequestCallback> we : this.callbacks) {
+			Object obj = we.get();
+			if (obj != null) {
+				ConfRequestCallback cb = (ConfRequestCallback) obj;
+				cb.OnConfNotify(str, str2);
+			}
+		}
+		
 	}
 
 	public native void openVideoMixer(String szMediaID, int nLayout,
@@ -300,9 +322,7 @@ public class ConfRequest {
 		// bundle);
 	}
 
-	private void OnConfNotify(String str, String str2) {
 
-	}
 
 	public void OnConfSyncOpenVideo(String str) {
 

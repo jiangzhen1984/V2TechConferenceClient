@@ -45,6 +45,30 @@ import com.v2tech.util.V2Log;
  */
 public class User implements Comparable<User> {
 
+	public enum DeviceType {
+		CELL_PHONE(2), PC(3), UNKNOWN(-1);
+		private int code;
+
+		private DeviceType(int code) {
+			this.code = code;
+		}
+
+		public int toIntValue() {
+			return code;
+		}
+
+		public static DeviceType fromInt(int status) {
+			switch (status) {
+			case 2:
+				return CELL_PHONE;
+			case 1:
+				return PC;
+			default:
+				return UNKNOWN;
+			}
+		}
+	}
+
 	public enum Status {
 		LEAVE(2), BUSY(3), DO_NOT_DISTURB(4), HIDDEN(5), ONLINE(1), OFFLINE(0), UNKNOWN(
 				-1);
@@ -257,7 +281,7 @@ public class User implements Comparable<User> {
 	}
 
 	public String getDepartment() {
-		//FIXM me 
+		// FIXM me
 		if (this.getFirstBelongsGroup() != null) {
 			mDepartment = this.getFirstBelongsGroup().getName();
 		}
@@ -382,7 +406,7 @@ public class User implements Comparable<User> {
 			if (GlobalConfig.GLOBAL_DPI == DisplayMetrics.DENSITY_HIGH) {
 				avatar = Bitmap.createScaledBitmap(tmep, 60, 60, true);
 			} else if (GlobalConfig.GLOBAL_DPI == DisplayMetrics.DENSITY_XHIGH) {
-				avatar = Bitmap.createScaledBitmap(tmep, 80, 80, true);
+				avatar = Bitmap.createScaledBitmap(tmep, 100, 100, true);
 			} else if (GlobalConfig.GLOBAL_DPI == DisplayMetrics.DENSITY_XXHIGH) {
 				avatar = Bitmap.createScaledBitmap(tmep, 100, 100, true);
 			} else {

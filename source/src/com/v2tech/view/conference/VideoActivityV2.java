@@ -40,7 +40,6 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.animation.Animation;
-import android.view.animation.Animation.AnimationListener;
 import android.view.animation.AnimationUtils;
 import android.view.animation.ScaleAnimation;
 import android.widget.Button;
@@ -144,6 +143,7 @@ public class VideoActivityV2 extends Activity {
 	private View mMenuAttendeeButton;
 	private View mMenuDocButton;
 
+	private View localSurfaceViewLy;
 	private SurfaceView mLocalSurface;
 
 	private Conference conf;
@@ -186,6 +186,8 @@ public class VideoActivityV2 extends Activity {
 
 		// local camera surface view
 		this.mLocalSurface = (SurfaceView) findViewById(R.id.local_surface_view);
+		
+		this.localSurfaceViewLy = findViewById(R.id.local_surface_view_ly);
 
 		// show menu list(Include show message layout, show attendee list layout
 		// show document layout) button
@@ -566,8 +568,8 @@ public class VideoActivityV2 extends Activity {
 			mMenuMessageButton.setBackgroundColor(Color.rgb(255, 255, 255));
 
 			Animation tabBlockHolderAnimation = AnimationUtils.loadAnimation(
-					this, R.animator.right_out);
-			tabBlockHolderAnimation.setDuration(1000);
+					this, R.animator.normal_scale_x_100_0);
+			tabBlockHolderAnimation.setDuration(500);
 			mMessageContainer.startAnimation(tabBlockHolderAnimation);
 
 		} else {
@@ -576,8 +578,8 @@ public class VideoActivityV2 extends Activity {
 					.getColor(R.color.confs_common_bg));
 
 			Animation tabBlockHolderAnimation = AnimationUtils.loadAnimation(
-					this, R.animator.left_in);
-			tabBlockHolderAnimation.setDuration(1000);
+					this, R.animator.normal_scale_x_0_100);
+			tabBlockHolderAnimation.setDuration(500);
 			mMessageContainer.startAnimation(tabBlockHolderAnimation);
 			mMessageContainer.requestScrollToNewMessage();
 
@@ -636,8 +638,8 @@ public class VideoActivityV2 extends Activity {
 			mMenuAttendeeButton.setBackgroundColor(Color.rgb(255, 255, 255));
 
 			Animation tabBlockHolderAnimation = AnimationUtils.loadAnimation(
-					this, R.animator.right_out);
-			tabBlockHolderAnimation.setDuration(1000);
+					this, R.animator.normal_scale_x_100_0);
+			tabBlockHolderAnimation.setDuration(500);
 			mAttendeeContainer.startAnimation(tabBlockHolderAnimation);
 		} else {
 			mAttendeeContainer.setVisibility(View.VISIBLE);
@@ -645,8 +647,8 @@ public class VideoActivityV2 extends Activity {
 					.getColor(R.color.confs_common_bg));
 			// set animation when visible
 			Animation tabBlockHolderAnimation = AnimationUtils.loadAnimation(
-					this, R.animator.left_in);
-			tabBlockHolderAnimation.setDuration(1000);
+					this, R.animator.normal_scale_x_0_100);
+			tabBlockHolderAnimation.setDuration(500);
 			mAttendeeContainer.startAnimation(tabBlockHolderAnimation);
 			mAttendeeContainer.bringToFront();
 		}
@@ -735,9 +737,9 @@ public class VideoActivityV2 extends Activity {
 					
 					//Update local video layout params make sure local video can float at right and bottom
 					// Because  layout mess up if mVideoLayout gone
-					RelativeLayout.LayoutParams localRL = (RelativeLayout.LayoutParams)mLocalSurface.getLayoutParams();
+					RelativeLayout.LayoutParams localRL = (RelativeLayout.LayoutParams)localSurfaceViewLy.getLayoutParams();
 					localRL.addRule(RelativeLayout.ALIGN_BOTTOM, v.getId());
-					mLocalSurface.setLayoutParams(localRL);
+					localSurfaceViewLy.setLayoutParams(localRL);
 					
 				}
 
@@ -754,9 +756,9 @@ public class VideoActivityV2 extends Activity {
 					v.setLayoutParams(vl);
 					
 					//Update local video layout params make sure local video can float at right and bottom
-					RelativeLayout.LayoutParams localRL = (RelativeLayout.LayoutParams)mLocalSurface.getLayoutParams();
+					RelativeLayout.LayoutParams localRL = (RelativeLayout.LayoutParams)localSurfaceViewLy.getLayoutParams();
 					localRL.addRule(RelativeLayout.ALIGN_BOTTOM, mVideoLayout.getId());
-					mLocalSurface.setLayoutParams(localRL);
+					localSurfaceViewLy.setLayoutParams(localRL);
 				}
 
 			});
@@ -787,8 +789,8 @@ public class VideoActivityV2 extends Activity {
 			mMenuDocButton.setBackgroundColor(Color.rgb(255, 255, 255));
 
 			Animation tabBlockHolderAnimation = AnimationUtils.loadAnimation(
-					this, R.animator.right_out);
-			tabBlockHolderAnimation.setDuration(1000);
+					this, R.animator.normal_scale_x_100_0);
+			tabBlockHolderAnimation.setDuration(500);
 			mDocContainer.startAnimation(tabBlockHolderAnimation);
 			// Call this function to inform listener 
 			//Notice must restore first, then request float
@@ -802,8 +804,8 @@ public class VideoActivityV2 extends Activity {
 
 			// set animation when visible
 			Animation tabBlockHolderAnimation = AnimationUtils.loadAnimation(
-					this, R.animator.left_in);
-			tabBlockHolderAnimation.setDuration(1000);
+					this, R.animator.normal_scale_x_0_100);
+			tabBlockHolderAnimation.setDuration(500);
 			mDocContainer.startAnimation(tabBlockHolderAnimation);
 		}
 	}
@@ -1283,6 +1285,8 @@ public class VideoActivityV2 extends Activity {
 		public View getView() {
 			if (rl == null) {
 				rl = new RelativeLayout(mContext);
+				rl.setPadding(1, 1, 1, 1);
+				rl.setBackgroundColor(Color.rgb(143, 144, 144));
 				// FIXME make sure hash code is unique.
 				layId = (int) udc.hashCode();
 
@@ -1300,7 +1304,7 @@ public class VideoActivityV2 extends Activity {
 				RelativeLayout.LayoutParams tvrl = new RelativeLayout.LayoutParams(
 						RelativeLayout.LayoutParams.WRAP_CONTENT,
 						RelativeLayout.LayoutParams.WRAP_CONTENT);
-				tvrl.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+				tvrl.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
 				tvrl.addRule(RelativeLayout.ALIGN_PARENT_TOP);
 				rl.addView(tv, tvrl);
 				rl.setId(layId);
@@ -1367,11 +1371,19 @@ public class VideoActivityV2 extends Activity {
 				}
 				break;
 			case NOTIFICATION_KICKED:
+			{
+				int r = msg.arg1;
+				int resource = R.string.conversations_kick_notification;
+				//FIXME use error code for user deleted conf
+				if (r == 204) {
+					resource = R.string.confs_is_deleted_notification;
+				}
 				Toast.makeText(mContext,
-						R.string.conversations_kick_notification,
+						resource,
 						Toast.LENGTH_LONG).show();
 				quit();
 				finish();
+			}
 				break;
 			case REQUEST_ENTER_CONF:
 				cb.requestEnterConference(new Conference((Long) msg.obj),
