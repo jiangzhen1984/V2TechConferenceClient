@@ -12,6 +12,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import android.graphics.Bitmap;
 
 import com.v2tech.util.V2Log;
+import com.v2tech.view.bo.UserStatusObject;
 import com.v2tech.vo.Conversation;
 import com.v2tech.vo.Group;
 import com.v2tech.vo.Group.GroupType;
@@ -24,7 +25,7 @@ public class GlobalHolder {
 
 	private User mCurrentUser;
 
-	private Map<Long, User.Status> onlineUsers = new HashMap<Long, User.Status>();
+	private Map<Long, UserStatusObject> onlineUsers = new HashMap<Long, UserStatusObject>();
 
 	private List<Group> mOrgGroup = null;
 
@@ -41,7 +42,7 @@ public class GlobalHolder {
 	private Set<Conversation> mConatactConversationHolder = new CopyOnWriteArraySet<Conversation>();
 
 	private Set<Conversation> mGroupConversationHolder = new CopyOnWriteArraySet<Conversation>();
-	
+
 	private Set<Conversation> mConferenceConversationHolder = new CopyOnWriteArraySet<Conversation>();
 
 	private Set<UserDeviceConfig> mUserDeviceList = new HashSet<UserDeviceConfig>();
@@ -49,9 +50,9 @@ public class GlobalHolder {
 	private Map<Long, Bitmap> mAvatarBmHolder = new HashMap<Long, Bitmap>();
 
 	// Use to hold current opened conversation
-	public Conversation CURRENT_CONVERSATION  = null;
-	
-	public long CURRENT_ID  = 0;
+	public Conversation CURRENT_CONVERSATION = null;
+
+	public long CURRENT_ID = 0;
 
 	public static synchronized GlobalHolder getInstance() {
 		if (holder == null) {
@@ -125,21 +126,24 @@ public class GlobalHolder {
 		if (u.getmStatus() == User.Status.OFFLINE) {
 			onlineUsers.remove(key);
 		} else {
-			onlineUsers.put(key, u.getmStatus());
+			onlineUsers
+					.put(key, new UserStatusObject(u.getmUserId(), u
+							.getDeviceType().toIntValue(), u.getmStatus()
+							.toIntValue()));
 		}
 
 	}
 
-	public void updateUserStatus(long uid, User.Status us) {
+	public void updateUserStatus(long uid, UserStatusObject us) {
 		Long key = Long.valueOf(uid);
-		if (us == User.Status.OFFLINE) {
+		if (User.Status.fromInt(us.getStatus()) == User.Status.OFFLINE) {
 			onlineUsers.remove(key);
 		} else {
 			onlineUsers.put(key, us);
 		}
 	}
 
-	public User.Status getOnlineUserStatus(long uid) {
+	public UserStatusObject getOnlineUserStatus(long uid) {
 		Long key = Long.valueOf(uid);
 		return onlineUsers.get(key);
 	}
@@ -186,9 +190,10 @@ public class GlobalHolder {
 		} else if (gType == Group.GroupType.CHATING) {
 			gSet = mChattingGroup;
 		}
-		
+
 		if (gSet == null) {
-			V2Log.e(" doesn't initialize collection " + gType.intValue() +"    gid:"+gId);
+			V2Log.e(" doesn't initialize collection " + gType.intValue()
+					+ "    gid:" + gId);
 			return null;
 		}
 
@@ -274,10 +279,9 @@ public class GlobalHolder {
 			addUserToGroup(g.getChildGroup(), uList, belongGID);
 		}
 	}
-	
-	
+
 	public void removeGroupUser(long gid, long uid) {
-		Group g = this.findGroupById(gid) ;
+		Group g = this.findGroupById(gid);
 		if (g != null) {
 			g.removeUserFromGroup(uid);
 		}
@@ -375,7 +379,7 @@ public class GlobalHolder {
 			tmp = mConatactConversationHolder;
 		} else if (Conversation.TYPE_GROUP.equals(type)) {
 			tmp = mGroupConversationHolder;
-		}else if (Conversation.TYPE_CONFERNECE.equals(type)) {
+		} else if (Conversation.TYPE_CONFERNECE.equals(type)) {
 			tmp = mConferenceConversationHolder;
 		}
 		if (tmp == null) {
@@ -397,7 +401,7 @@ public class GlobalHolder {
 			tmp = mConatactConversationHolder;
 		} else if (Conversation.TYPE_GROUP.equals(type)) {
 			tmp = mGroupConversationHolder;
-		}else if (Conversation.TYPE_CONFERNECE.equals(type)) {
+		} else if (Conversation.TYPE_CONFERNECE.equals(type)) {
 			tmp = mConferenceConversationHolder;
 		}
 
@@ -415,9 +419,9 @@ public class GlobalHolder {
 			tmp = mConatactConversationHolder;
 		} else if (Conversation.TYPE_GROUP.equals(type)) {
 			tmp = mGroupConversationHolder;
-		}  else if (Conversation.TYPE_CONFERNECE.equals(type)) {
+		} else if (Conversation.TYPE_CONFERNECE.equals(type)) {
 			tmp = mConferenceConversationHolder;
-		} 
+		}
 
 		if (tmp == null) {
 			return 0;

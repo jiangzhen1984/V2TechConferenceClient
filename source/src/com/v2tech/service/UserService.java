@@ -110,7 +110,7 @@ public class UserService extends AbstractHandler {
 		}
 
 		@Override
-		public void OnUserStatusUpdatedCallback(long nUserID, int nStatus,
+		public void OnUserStatusUpdatedCallback(long nUserID, int nType,int nStatus,
 				String szStatusDesc) {
 
 		}

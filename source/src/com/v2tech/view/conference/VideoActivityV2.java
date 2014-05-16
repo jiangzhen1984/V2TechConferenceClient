@@ -419,7 +419,7 @@ public class VideoActivityV2 extends Activity {
 				long uid = intent.getExtras().getLong("uid");
 				Attendee at = findAttendee(uid);
 				// If exited user is not attendee in conference, then return
-				if (at != null) {
+				if (at == null) {
 					return;
 				}
 				User user = GlobalHolder.getInstance().getUser(uid);
@@ -431,6 +431,10 @@ public class VideoActivityV2 extends Activity {
 					Message.obtain(mVideoHandler, ATTENDEE_LISTENER, 0, 0, user)
 							.sendToTarget();
 				}
+			} else if (PublicIntent.PREPARE_FINISH_APPLICATION.equals(intent.getAction())) {
+				//Listen quit request to make sure close all device
+				quit();
+				finish();
 			}
 
 		}
@@ -460,6 +464,8 @@ public class VideoActivityV2 extends Activity {
 		filter.addAction(JNIService.JNI_BROADCAST_GROUP_USER_ADDED);
 		filter.addAction(JNIService.JNI_BROADCAST_CONNECT_STATE_NOTIFICATION);
 		filter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
+		filter.addAction(PublicIntent.PREPARE_FINISH_APPLICATION);
+		filter.addCategory(PublicIntent.DEFAULT_CATEGORY);
 		filter.addAction(JNIService.JNI_BROADCAST_USER_STATUS_NOTIFICATION);
 		mContext.registerReceiver(mConfUserChangeReceiver, filter);
 

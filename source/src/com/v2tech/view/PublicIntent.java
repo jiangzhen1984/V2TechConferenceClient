@@ -34,4 +34,6 @@ public class PublicIntent {
 	
 	public static final String FINISH_APPLICATION ="com.v2tech.finish_application";
 	
+	public static final String PREPARE_FINISH_APPLICATION ="com.v2tech.prepare_finish_application";
+	
 }

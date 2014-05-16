@@ -42,6 +42,7 @@ import com.v2tech.util.Notificator;
 import com.v2tech.util.V2Log;
 import com.v2tech.util.XmlParser;
 import com.v2tech.view.bo.GroupUserObject;
+import com.v2tech.view.bo.UserStatusObject;
 import com.v2tech.view.conference.VideoActivityV2;
 import com.v2tech.vo.ConferenceGroup;
 import com.v2tech.vo.Conversation;
@@ -231,7 +232,6 @@ public class JNIService extends Service {
 
 	private static final int JNI_CONNECT_RESPONSE = 23;
 	private static final int JNI_UPDATE_USER_INFO = 24;
-	private static final int JNI_UPDATE_USER_STATUS = 25;
 	private static final int JNI_LOG_OUT = 26;
 	private static final int JNI_GROUP_NOTIFY = 35;
 	private static final int JNI_GROUP_USER_INFO_NOTIFICATION = 60;
@@ -264,14 +264,6 @@ public class JNIService extends Service {
 				sigatureIntent.putExtra("uid", u.getmUserId());
 				sendBroadcast(sigatureIntent);
 				break;
-			case JNI_UPDATE_USER_STATUS:
-				Intent iun = new Intent(JNI_BROADCAST_USER_STATUS_NOTIFICATION);
-				iun.addCategory(JNI_BROADCAST_CATEGROY);
-				iun.putExtra("uid", Long.valueOf(msg.arg1));
-				iun.putExtra("status", msg.arg2);
-				mContext.sendBroadcast(iun);
-
-				break;
 			case JNI_LOG_OUT:
 				Toast.makeText(mContext,
 						R.string.user_logged_with_other_device,
@@ -300,10 +292,12 @@ public class JNIService extends Service {
 					List<User> lu = User.fromXml(go.xml);
 					Group g = GlobalHolder.getInstance().findGroupById(go.gId);
 					for (User tu : lu) {
-						User.Status us = GlobalHolder.getInstance()
+						UserStatusObject uso =  GlobalHolder.getInstance()
 								.getOnlineUserStatus(tu.getmUserId());
-						if (us != null) {
-							tu.updateStatus(us);
+						//Update user status
+						if (uso != null) {
+							tu.updateStatus(User.Status.fromInt(uso.getStatus()));
+							tu.setDeviceType(User.DeviceType.fromInt(uso.getDeviceType()));
 						}
 						User existU = GlobalHolder.getInstance().putUser(
 								tu.getmUserId(), tu);
@@ -473,6 +467,13 @@ public class JNIService extends Service {
 		public void OnLogoutCallback(int nUserID) {
 			Message.obtain(mCallbackHandler, JNI_LOG_OUT).sendToTarget();
 			Notificator.cancelAllSystemNotification(mContext);
+			//Send broadcast PREPARE_FINISH_APPLICATION first to let all activity quit and release resource
+			//Notice: if any activity doesn't release resource, android will automatically restart main activity
+			Intent i = new Intent();
+			i.setAction(PublicIntent.PREPARE_FINISH_APPLICATION);
+			i.addCategory(PublicIntent.DEFAULT_CATEGORY);
+			mContext.sendBroadcast(i);
+			
 			mCallbackHandler.postDelayed(new Runnable() {
 				@Override
 				public void run() {
@@ -500,19 +501,25 @@ public class JNIService extends Service {
 		}
 
 		@Override
-		public void OnUserStatusUpdatedCallback(long nUserID, int nStatus,
+		public void OnUserStatusUpdatedCallback(long nUserID, int type, int nStatus,
 				String szStatusDesc) {
-			GlobalHolder.getInstance().updateUserStatus(nUserID,
-					User.Status.fromInt(nStatus));
+			UserStatusObject uso = new UserStatusObject(nUserID, type, nStatus);
+			GlobalHolder.getInstance().updateUserStatus(nUserID, uso);
 			User u = GlobalHolder.getInstance().getUser(nUserID);
 			if (u == null) {
 				V2Log.e("Can't update user status, user " + nUserID
 						+ "  isn't exist");
 			} else {
 				u.updateStatus(User.Status.fromInt(nStatus));
+				u.setDeviceType(User.DeviceType.fromInt(type));
 			}
-			Message.obtain(mCallbackHandler, JNI_UPDATE_USER_STATUS,
-					(int) nUserID, nStatus).sendToTarget();
+			
+			
+			Intent iun = new Intent(JNI_BROADCAST_USER_STATUS_NOTIFICATION);
+			iun.addCategory(JNI_BROADCAST_CATEGROY);
+			iun.putExtra("status", uso);
+			mContext.sendBroadcast(iun);
+			
 		}
 
 		@Override
@@ -802,6 +809,12 @@ public class JNIService extends Service {
 					i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
 					i.putExtra("gid", g.getmGId());
 					sendBroadcast(i);
+					
+					Intent enterConference = new Intent(mContext,
+							VideoActivityV2.class);
+					Notificator.updateSystemNotification(mContext, u.getName()
+							+ " 会议邀请:", g.getName(), 1, enterConference,
+							PublicIntent.VIDEO_NOTIFICATION_ID);
 
 				} else {
 					V2Log.e(" Incorrect uid : " + confXml);

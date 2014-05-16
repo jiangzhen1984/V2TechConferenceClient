@@ -172,7 +172,7 @@ public class ImRequest {
 				+ nStatus + " nType:" + nType + " szStatusDesc:" + szStatusDesc
 				+ "  " + new Date());
 		for (ImRequestCallback callback : this.callbacks) {
-			callback.OnUserStatusUpdatedCallback(nUserID, nStatus, szStatusDesc);
+			callback.OnUserStatusUpdatedCallback(nUserID, nType, nStatus, szStatusDesc);
 		}
 	}
 

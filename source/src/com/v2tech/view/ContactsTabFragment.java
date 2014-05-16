@@ -18,8 +18,8 @@ import android.text.TextWatcher;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
@@ -31,6 +31,7 @@ import android.widget.TextView;
 import com.v2tech.R;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.util.V2Log;
+import com.v2tech.view.bo.UserStatusObject;
 import com.v2tech.view.contacts.ContactGroupView;
 import com.v2tech.view.contacts.ContactUserView;
 import com.v2tech.view.widget.TitleBar;
@@ -326,15 +327,7 @@ public class ContactsTabFragment extends Fragment {
 				Message.obtain(mHandler, FILL_CONTACTS_GROUP).sendToTarget();
 			} else if (JNIService.JNI_BROADCAST_USER_STATUS_NOTIFICATION
 					.equals(intent.getAction())) {
-				Message.obtain(
-						mHandler,
-						UPDATE_GROUP_STATUS,
-						GlobalHolder.getInstance().getUser(
-								intent.getExtras().getLong("uid")))
-						.sendToTarget();
-				long uid = intent.getExtras().getLong("uid");
-				int status = intent.getExtras().getInt("status");
-				Message.obtain(mHandler, UPDATE_USER_STATUS, (int) uid, status)
+				Message.obtain(mHandler, UPDATE_USER_STATUS, intent.getExtras().get("status"))
 						.sendToTarget();
 			} else if (JNIService.JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION
 					.equals(intent.getAction())) {
@@ -450,18 +443,16 @@ public class ContactsTabFragment extends Fragment {
 		adapter.notifyDataSetChanged();
 	}
 
-	private void updateUserStatus(int userId, int status) {
-		User.Status st = User.Status.fromInt(status);
+	private void updateUserStatus(long userId, User.DeviceType deiType, User.Status status) {
 		for (ListItem li : mItemList) {
 			if (li.u != null && li.u.getmUserId() == userId) {
-				((ContactUserView) li.v).updateStatus(st);
+				((ContactUserView) li.v).updateStatus(deiType, status);
 			}
 		}
 	}
 
-	private synchronized void updateUserViewPostionV2(int userId, int status) {
-		V2Log.i(" Contacts update user status : " + userId + "  : " + status);
-		User.Status newSt = User.Status.fromInt(status);
+	private synchronized void updateUserViewPostionV2(long userId, User.Status newSt) {
+		V2Log.i(" Contacts update user status : " + userId + "  : " + newSt);
 		int startSortIndex = 0;
 		boolean foundUserView = false;
 		ListItem self = null;
@@ -636,9 +627,11 @@ public class ContactsTabFragment extends Fragment {
 				}
 				break;
 			case UPDATE_USER_STATUS:
-				updateUserStatus(msg.arg1, msg.arg2);
+				UserStatusObject uso =(UserStatusObject) msg.obj;
+				updateUserStatus(uso.getUid(), User.DeviceType.fromInt(uso.getDeviceType()), User.Status.fromInt(uso.getStatus()));
+				
 				// FIXME update all users in all groups
-				updateUserViewPostionV2(msg.arg1, msg.arg2);
+				updateUserViewPostionV2(uso.getUid(), User.Status.fromInt(uso.getStatus()));
 				break;
 			case UPDATE_SEARCHED_USER_LIST:
 				updateSearchedUserList((List<User>) msg.obj);

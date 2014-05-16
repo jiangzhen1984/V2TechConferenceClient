@@ -46,7 +46,7 @@ import com.v2tech.util.V2Log;
 public class User implements Comparable<User> {
 
 	public enum DeviceType {
-		CELL_PHONE(2), PC(3), UNKNOWN(-1);
+		CELL_PHONE(2), PC(1), UNKNOWN(-1);
 		private int code;
 
 		private DeviceType(int code) {
@@ -57,8 +57,8 @@ public class User implements Comparable<User> {
 			return code;
 		}
 
-		public static DeviceType fromInt(int status) {
-			switch (status) {
+		public static DeviceType fromInt(int type) {
+			switch (type) {
 			case 2:
 				return CELL_PHONE;
 			case 1:
@@ -105,6 +105,8 @@ public class User implements Comparable<User> {
 	private long mUserId;
 
 	private NetworkStateCode mResult;
+	
+	private DeviceType mType;
 
 	private Status mStatus;
 
@@ -228,6 +230,13 @@ public class User implements Comparable<User> {
 
 	public String getSignature() {
 		return mSignature;
+	}
+	
+	public DeviceType getDeviceType() {
+		return mType;
+	}
+	public void setDeviceType(DeviceType type) {
+		this.mType = type;
 	}
 
 	public void setSignature(String signature) {

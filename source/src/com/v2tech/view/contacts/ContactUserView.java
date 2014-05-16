@@ -80,7 +80,7 @@ public class ContactUserView extends LinearLayout {
 				.getSignature());
 
 		mStatusIV = (ImageView) view.findViewById(R.id.contact_user_status_iv);
-		updateStatus(u.getmStatus());
+		updateStatus(u.getDeviceType(), u.getmStatus());
 
 		if (this.mUser.getmUserId() != GlobalHolder.getInstance()
 				.getCurrentUserId()) {
@@ -104,7 +104,6 @@ public class ContactUserView extends LinearLayout {
 			}
 
 		});
-
 
 		this.addView(view, new LinearLayout.LayoutParams(
 				LinearLayout.LayoutParams.MATCH_PARENT,
@@ -182,29 +181,36 @@ public class ContactUserView extends LinearLayout {
 			break;
 		}
 		this.getContext().startActivity(i);
-		((Activity)this.getContext()).overridePendingTransition(R.animator.nonam_scale_center_0_100, R.animator.nonam_scale_null);
+		((Activity) this.getContext()).overridePendingTransition(
+				R.animator.nonam_scale_center_0_100,
+				R.animator.nonam_scale_null);
 	}
 
 	public User getUser() {
 		return this.mUser;
 	}
 
-	public void updateStatus(User.Status st) {
-		switch (st) {
-		case ONLINE:
-			mStatusIV.setImageResource(R.drawable.online);
-			break;
-		case LEAVE:
-			mStatusIV.setImageResource(R.drawable.leave);
-			break;
-		case BUSY:
-			mStatusIV.setImageResource(R.drawable.busy);
-			break;
-		case DO_NOT_DISTURB:
-			mStatusIV.setImageResource(R.drawable.do_not_distrub);
-			break;
-		default:
-			break;
+	public void updateStatus(User.DeviceType dType, User.Status st) {
+		// If user logged device is cell phone, only show cell phone icon
+		if (dType == User.DeviceType.CELL_PHONE) {
+			mStatusIV.setImageResource(R.drawable.cell_phone_user);
+		} else {
+			switch (st) {
+			case ONLINE:
+				mStatusIV.setImageResource(R.drawable.online);
+				break;
+			case LEAVE:
+				mStatusIV.setImageResource(R.drawable.leave);
+				break;
+			case BUSY:
+				mStatusIV.setImageResource(R.drawable.busy);
+				break;
+			case DO_NOT_DISTURB:
+				mStatusIV.setImageResource(R.drawable.do_not_distrub);
+				break;
+			default:
+				break;
+			}
 		}
 		if (st == User.Status.OFFLINE || st == User.Status.HIDDEN) {
 			mStatusIV.setVisibility(View.GONE);
@@ -235,7 +241,7 @@ public class ContactUserView extends LinearLayout {
 	}
 
 	public void setPadding(int left, int top, int right, int bottom) {
-		contentContainer.setPadding(left, top,right,bottom);
+		contentContainer.setPadding(left, top, right, bottom);
 	}
 
 }

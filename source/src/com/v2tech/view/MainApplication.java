@@ -19,6 +19,7 @@ import com.V2.jni.ConfigRequest;
 import com.V2.jni.GroupRequest;
 import com.V2.jni.ImRequest;
 import com.V2.jni.NativeInitializer;
+import com.V2.jni.VideoMixerRequest;
 import com.V2.jni.VideoRequest;
 import com.V2.jni.WBRequest;
 import com.v2tech.util.CrashHandler;
@@ -79,6 +80,8 @@ public class MainApplication extends Application {
 		AudioRequest.getInstance(getApplicationContext());
 		WBRequest.getInstance(getApplicationContext());
 		ChatRequest.getInstance(getApplicationContext());
+		VideoMixerRequest.getInstance();
+		VideoMixerRequest.getInstance().initialize(GroupRequest.getInstance());
 
 		getApplicationContext().startService(
 				new Intent(getApplicationContext(), JNIService.class));

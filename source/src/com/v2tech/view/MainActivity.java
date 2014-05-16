@@ -359,7 +359,8 @@ public class MainActivity extends FragmentActivity {
 					noticator = mTabClasses[4].notificator;
 				}
 
-				V2Log.i("type:" + type+"  count:"+GlobalHolder.getInstance().getNoticatorCount(type));
+				V2Log.i("type:" + type + "  count:"
+						+ GlobalHolder.getInstance().getNoticatorCount(type));
 				if (noticator != null) {
 					if (GlobalHolder.getInstance().getNoticatorCount(type) > 0) {
 						noticator.setVisibility(View.VISIBLE);
