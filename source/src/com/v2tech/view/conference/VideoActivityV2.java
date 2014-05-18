@@ -38,6 +38,7 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
 import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -45,7 +46,6 @@ import android.view.animation.ScaleAnimation;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.LinearLayout.LayoutParams;
 import android.widget.PopupWindow;
 import android.widget.PopupWindow.OnDismissListener;
 import android.widget.RelativeLayout;
@@ -68,6 +68,7 @@ import com.v2tech.view.PublicIntent;
 import com.v2tech.view.bo.GroupUserObject;
 import com.v2tech.view.conference.VideoDocLayout.DocListener;
 import com.v2tech.view.conference.VideoMsgChattingLayout.ChattingListener;
+import com.v2tech.view.widget.MixVideoLayout;
 import com.v2tech.vo.Attendee;
 import com.v2tech.vo.CameraConfiguration;
 import com.v2tech.vo.Conference;
@@ -75,6 +76,7 @@ import com.v2tech.vo.ConferenceGroup;
 import com.v2tech.vo.ConferencePermission;
 import com.v2tech.vo.Conversation;
 import com.v2tech.vo.Group;
+import com.v2tech.vo.MixVideo;
 import com.v2tech.vo.NetworkStateCode;
 import com.v2tech.vo.PermissionState;
 import com.v2tech.vo.User;
@@ -110,6 +112,8 @@ public class VideoActivityV2 extends Activity {
 	private static final int DOC_CLOSED_NOTIFICATION = 55;
 	private static final int DOC_PAGE_CANVAS_NOTIFICATION = 56;
 	private static final int DESKTOP_SYNC_NOTIFICATION = 57;
+	
+	private static final int VIDEO_MIX_NOTIFICATION = 70;
 
 	public static final String JNI_EVENT_VIDEO_CATEGORY = "com.v2tech.conf_video_event";
 	public static final String JNI_EVENT_VIDEO_CATEGORY_OPEN_VIDEO_EVENT_ACTION = "com.v2tech.conf_video_event.open_video_event";
@@ -158,6 +162,9 @@ public class VideoActivityV2 extends Activity {
 
 	private Map<String, V2Doc> mDocs = new HashMap<String, V2Doc>();
 	private V2Doc mCurrentActivateDoc = null;
+	
+	
+	private Map<String, MixerWrapper> mMixerWrapper = new HashMap<String, MixerWrapper>();
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -476,6 +483,8 @@ public class VideoActivityV2 extends Activity {
 		cb.registerKickedConfListener(mVideoHandler, NOTIFICATION_KICKED, null);
 		cb.registerSyncDesktopListener(mVideoHandler,
 				DESKTOP_SYNC_NOTIFICATION, null);
+		
+		cb.registerVideoMixerListener(mVideoHandler, VIDEO_MIX_NOTIFICATION, null);
 
 		// Register listen to document notification
 		ds.registerNewDocNotification(mVideoHandler, NEW_DOC_NOTIFICATION, null);
@@ -491,6 +500,8 @@ public class VideoActivityV2 extends Activity {
 				DOC_PAGE_ADDED_NOTIFICATION, null);
 		ds.registerPageCanvasUpdateNotification(mVideoHandler,
 				DOC_PAGE_CANVAS_NOTIFICATION, null);
+		
+		
 
 	}
 
@@ -1006,6 +1017,9 @@ public class VideoActivityV2 extends Activity {
 		cb.removeRegisterOfKickedConfListener(mVideoHandler,
 				NOTIFICATION_KICKED, null);
 		cb.removeAttendeeListener(this.mVideoHandler, ATTENDEE_LISTENER, null);
+		
+		cb.unRegisterVideoMixerListener(mVideoHandler, VIDEO_MIX_NOTIFICATION, null);
+		
 		ds.unRegisterNewDocNotification(mVideoHandler, NEW_DOC_NOTIFICATION,
 				null);
 		ds.unRegisterDocDisplayNotification(mVideoHandler,
@@ -1274,6 +1288,23 @@ public class VideoActivityV2 extends Activity {
 			}
 		}
 		return at;
+	}
+	
+	
+	
+	
+	class MixerWrapper {
+		String id;
+		MixVideo mix;
+		MixVideoLayout layout;
+		public MixerWrapper(String id, MixVideo mix, MixVideoLayout layout) {
+			super();
+			this.id = id;
+			this.mix = mix;
+			this.layout = layout;
+		}
+		
+		
 	}
 
 	class SurfaceViewW {
@@ -1560,6 +1591,30 @@ public class VideoActivityV2 extends Activity {
 						mDocContainer.updateSyncStatus(true);
 					} else {
 						mDocContainer.updateSyncStatus(false);
+					}
+				}
+				break;
+				
+			case VIDEO_MIX_NOTIFICATION:
+				//TODO add mix video
+				// create mixed video
+				if (msg.arg1 == 1) {
+					MixVideo mv = (MixVideo)msg.obj;
+					mMixerWrapper.put(mv.getId(), new MixerWrapper(mv.getId(), mv, new MixVideoLayout(mContext, mv)));
+					
+				
+				} else if (msg.arg1 == 2) {
+					MixVideo mv = (MixVideo)msg.obj;
+					mMixerWrapper.remove(mv.getId());
+					
+					//add user video device
+				}else if (msg.arg1 == 3) {
+					MixVideo.MixVideoDevice mv = (MixVideo.MixVideoDevice)msg.obj;
+					MixVideo mix = mMixerWrapper.get(mv.getMx().getId()).mix;
+					if (mix == null) {
+						V2Log.e(" Doesn't cache mix: "+ mv.getMx().getId());
+					} else {
+						mix.addDevice(mv.getUdc(), mv.getPos());
 					}
 				}
 				break;

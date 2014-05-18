@@ -10,6 +10,8 @@ import com.V2.jni.ConfRequest;
 import com.V2.jni.ConfRequestCallback;
 import com.V2.jni.GroupRequest;
 import com.V2.jni.GroupRequestCallback;
+import com.V2.jni.VideoMixerRequest;
+import com.V2.jni.VideoMixerRequestCallback;
 import com.V2.jni.VideoRequest;
 import com.V2.jni.VideoRequestCallback;
 import com.v2tech.service.jni.JNIIndication;
@@ -28,6 +30,7 @@ import com.v2tech.vo.Conference;
 import com.v2tech.vo.ConferenceGroup;
 import com.v2tech.vo.ConferencePermission;
 import com.v2tech.vo.Group;
+import com.v2tech.vo.MixVideo;
 import com.v2tech.vo.User;
 import com.v2tech.vo.UserDeviceConfig;
 
@@ -77,6 +80,7 @@ public class ConferenceService extends AbstractHandler {
 	private VideoRequestCB videoCallback;
 	private ConfRequestCB confCallback;
 	private GroupRequestCB groupCallback;
+	private MixerRequestCB mrCallback;
 
 	public ConferenceService() {
 		super();
@@ -86,6 +90,8 @@ public class ConferenceService extends AbstractHandler {
 		ConfRequest.getInstance().addCallback(confCallback);
 		groupCallback = new GroupRequestCB(this);
 		GroupRequest.getInstance().addCallback(groupCallback);
+		mrCallback = new MixerRequestCB(this);
+		VideoMixerRequest.getInstance().addCallbacks(mrCallback);
 
 	}
 
@@ -408,6 +414,20 @@ public class ConferenceService extends AbstractHandler {
 			}
 		}
 	}
+	
+	
+	private List<Registrant> mixListenersList = new ArrayList<Registrant>();
+	public void registerVideoMixerListener(Handler h, int what, Object obj) {
+		mixListenersList.add(new Registrant(h, what, obj));
+	}
+	
+	public void unRegisterVideoMixerListener(Handler h, int what, Object obj) {
+		for (Registrant re : mixListenersList) {
+			if (re.getHandler() == h && what == re.getWhat()) {
+				mixListenersList.remove(re);
+			}
+		}
+	}
 
 	class ConfRequestCB implements ConfRequestCallback {
 
@@ -627,6 +647,55 @@ public class ConferenceService extends AbstractHandler {
 
 		}
 
+	}
+	
+	
+	class MixerRequestCB implements VideoMixerRequestCallback {
+
+		private Handler mCallbackHandler;
+
+		public MixerRequestCB(Handler mCallbackHandler) {
+			this.mCallbackHandler = mCallbackHandler;
+		}
+		
+		@Override
+		public void OnCreateVideoMixerCallback(String sMediaId, int layout,
+				int width, int height) {
+			notifyListener(1, new MixVideo(sMediaId, MixVideo.LayoutType.fromInt(layout)));
+		}
+
+		@Override
+		public void OnDestroyVideoMixerCallback(String sMediaId) {
+			notifyListener(2, new MixVideo(sMediaId, MixVideo.LayoutType.UNKOWN));
+		}
+
+		@Override
+		public void OnAddVideoMixerCallback(String sMediaId, long nDstUserId,
+				String sDstDevId, int pos) {
+			UserDeviceConfig udc = new UserDeviceConfig(nDstUserId, sDstDevId, null);
+			MixVideo mix = new MixVideo(sMediaId);
+			notifyListener(3, mix.createMixVideoDevice(pos, sMediaId, udc));
+		}
+
+		@Override
+		public void OnDelVideoMixerCallback(String sMediaId, long nDstUserId,
+				String sDstDevId) {
+			UserDeviceConfig udc = new UserDeviceConfig(nDstUserId, sDstDevId, null);
+			MixVideo mix = new MixVideo(sMediaId);
+			notifyListener(4, mix.createMixVideoDevice(-1, sMediaId, udc));
+			
+		}
+		
+		private void notifyListener(int type, Object obj) {
+			for (Registrant re : mixListenersList) {
+				Handler h = re.getHandler();
+				if (h != null) {
+					Message.obtain(h, re.getWhat(),type, 0, obj)
+							.sendToTarget();
+				}
+			}
+		}
+		
 	}
 
 }
