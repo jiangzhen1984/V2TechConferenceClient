@@ -67,6 +67,7 @@
             android:layout_weight=".4"
             android:background="@drawable/button_bg"
             android:gravity="center"
+            android:layout_margin="15dp"
             android:paddingBottom="10dp"
             android:paddingTop="10dp"
             android:text="@string/contact_message_send_button"

@@ -146,22 +146,43 @@ public class MixVideo {
 		udcs[pos] = new MixVideoDevice(pos, this, udc);
 	}
 	
-	public void removeDevice(int pos) {
+	public MixVideoDevice removeDevice(int pos) {
 		if (udcs.length <= pos) {
 			throw new RuntimeException(" Unsupport this pos:" + pos);
 		}
+		MixVideoDevice mvd = udcs[pos];
 		udcs[pos] = null;
+		return mvd;
 	}
 	
 	
-	public void removeDevice(UserDeviceConfig udc) {
-		for (int i =0; i < udcs.length; i++) {
-			MixVideoDevice uvd = udcs[i];
-			if (uvd != null && uvd.udc.getDeviceID().equals(udc.getDeviceID()) && uvd.udc.getUserID() == udc.getUserID()) {
-				udcs[i] = null;
-			}
+	public MixVideoDevice removeDevice(UserDeviceConfig udc) {
+		MixVideoDevice mvd = null;
+		for (int pos = 0; pos < udcs.length; pos++) {
+		  if (udcs[pos].udc != null && udcs[pos].udc.equals(udc)) {
+			  mvd = udcs[pos];
+			  udcs[pos] = null;
+			  break;
+		  }
 		}
+		return mvd;
 	}
+	
+	public MixVideoDevice removeDevice(MixVideoDevice rmMvd) {
+		if (rmMvd == null || rmMvd.udc == null) {
+			return null;
+		}
+		MixVideoDevice mvd = null;
+		for (int pos = 0; pos < udcs.length; pos++) {
+		  if (udcs[pos].udc != null && udcs[pos].udc.equals(rmMvd.udc)) {
+			  mvd = udcs[pos];
+			  udcs[pos] = null;
+			  break;
+		  }
+		}
+		return mvd;
+	}
+	
 	
 	public MixVideoDevice createMixVideoDevice(int pos, String  id, UserDeviceConfig udc) {
 		return new MixVideoDevice( pos,   id,  udc);

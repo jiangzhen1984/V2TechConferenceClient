@@ -307,6 +307,10 @@ public class VImageMessage extends VMessage {
 	
 	Bitmap mFullQualityBitmap = null;
 	Bitmap mCompressedBitmap = null;
+	/**
+	 * FIXME optimize code
+	 * @return
+	 */
 	public Bitmap getFullQuantityBitmap() {
 		if (mFullQualityBitmap == null || mFullQualityBitmap.isRecycled()) {
 			 BitmapFactory.Options options= new  BitmapFactory.Options();
@@ -314,18 +318,23 @@ public class VImageMessage extends VMessage {
 			 options.inPreferredConfig = Config.ALPHA_8;
 			 options.inDither = true;
 			BitmapFactory.decodeFile(this.mImagePath, options);
+			options.inJustDecodeBounds = false;
 			if (options.outWidth > 1920 || options.outHeight > 1080) {
-				options.inJustDecodeBounds = false;
 				options.inSampleSize = 2;
+				mFullQualityBitmap = BitmapFactory.decodeFile(this.mImagePath, options);
+				return mFullQualityBitmap;
 			} else if (options.outWidth > 800 || options.outHeight > 600){
-				options.inJustDecodeBounds = false;
 				options.inSampleSize = 1;
+				mFullQualityBitmap = BitmapFactory.decodeFile(this.mImagePath, options);
+				return mFullQualityBitmap;
 			}else {
-				options.inJustDecodeBounds = false;
 				options.inSampleSize = 1;
+				mFullQualityBitmap = BitmapFactory.decodeFile(this.mImagePath, options);
+				return mFullQualityBitmap;
 			}
-			mFullQualityBitmap = BitmapFactory.decodeFile(this.mImagePath, options);
+			
 		}
+		
 		return mFullQualityBitmap;
 	}
 	
