@@ -51,7 +51,7 @@ public class VideoMixerRequest {
 		V2Log.d("OnCreateVideoMixer-->" + sMediaId + "   " + layout + "  "
 				+ width + "  " + height);
 
-		for (WeakReference<VideoMixerRequestCallback> we : this.callbacks) {
+		for (WeakReference<VideoMixerRequestCallback> we : callbacks) {
 			Object obj = we.get();
 			if (obj != null) {
 				VideoMixerRequestCallback cb = (VideoMixerRequestCallback) obj;
@@ -62,7 +62,7 @@ public class VideoMixerRequest {
 
 	private void OnDestroyVideoMixer(String sMediaId) {
 		V2Log.d("OnDestroyVideoMixer-->" + sMediaId);
-		for (WeakReference<VideoMixerRequestCallback> we : this.callbacks) {
+		for (WeakReference<VideoMixerRequestCallback> we : callbacks) {
 			Object obj = we.get();
 			if (obj != null) {
 				VideoMixerRequestCallback cb = (VideoMixerRequestCallback) obj;
@@ -75,7 +75,7 @@ public class VideoMixerRequest {
 			String sDstDevId, int pos) {
 		V2Log.d("OnAddVideoMixer-->" + sMediaId + "  " + nDstUserId + "  "
 				+ sDstDevId + "  " + pos);
-		for (WeakReference<VideoMixerRequestCallback> we : this.callbacks) {
+		for (WeakReference<VideoMixerRequestCallback> we : callbacks) {
 			Object obj = we.get();
 			if (obj != null) {
 				VideoMixerRequestCallback cb = (VideoMixerRequestCallback) obj;
@@ -88,7 +88,7 @@ public class VideoMixerRequest {
 			String sDstDevId) {
 		V2Log.d("OnDelVideoMixer-->" + sMediaId + "   " + nDstUserId + "   "
 				+ sDstDevId);
-		for (WeakReference<VideoMixerRequestCallback> we : this.callbacks) {
+		for (WeakReference<VideoMixerRequestCallback> we : callbacks) {
 			Object obj = we.get();
 			if (obj != null) {
 				VideoMixerRequestCallback cb = (VideoMixerRequestCallback) obj;

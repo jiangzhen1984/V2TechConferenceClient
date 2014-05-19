@@ -501,10 +501,8 @@ public class VideoActivityV2 extends Activity {
 				DOC_PAGE_ADDED_NOTIFICATION, null);
 		ds.registerPageCanvasUpdateNotification(mVideoHandler,
 				DOC_PAGE_CANVAS_NOTIFICATION, null);
-		
-		
-
 	}
+	
 
 	private void init() {
 		mGroupId = this.getIntent().getLongExtra("gid", 0);

@@ -3,6 +3,7 @@ package com.v2tech.view;
 import java.util.List;
 import java.util.Vector;
 
+import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -17,9 +18,12 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.DisplayMetrics;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TabHost;
 import android.widget.TabHost.TabContentFactory;
 import android.widget.TextView;
@@ -30,38 +34,62 @@ import com.v2tech.service.GlobalHolder;
 import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.Notificator;
 import com.v2tech.util.V2Log;
+import com.v2tech.view.widget.TitleBar;
 import com.v2tech.vo.Conversation;
+import com.v2tech.vo.Group;
+import com.v2tech.vo.Group.GroupType;
 
 public class MainActivity extends FragmentActivity {
 
 	private Context mContext;
 	private boolean exitedFlag = false;
 
+	private TitleBar titleBar;
+
 	private TabHost mTabHost;
 	private ViewPager mViewPager;
 	private PagerAdapter mPagerAdapter;
 
+	private static final int SUB_ACTIVITY_CODE_VIDEO_ACTIVITY = 0;
+	private static final int SUB_ACTIVITY_CODE_CREATE_CONF = 100;
+
 	public static final String SERVICE_BOUNDED_EVENT = "com.v2tech.SERVICE_BOUNDED_EVENT";
 	public static final String SERVICE_UNBOUNDED_EVENT = "com.v2tech.SERVICE_UNBOUNDED_EVENT";
+
+	private int[] imgs = new int[] {
+			R.drawable.conversation_video_button,
+			R.drawable.conversation_call_button,
+			R.drawable.conversation_sms_button,
+			R.drawable.conversation_email_button,
+			R.drawable.conversation_files_button };
+
+	private int[] items = new int[] { 
+			R.string.conversation_popup_menu_video_call_button,
+			R.string.conversation_popup_menu_call_button,
+			R.string.conversation_popup_menu_sms_call_button,
+			R.string.conversation_popup_menu_email_button,
+			R.string.conversation_popup_menu_files_button };
 
 	private TabClass[] mTabClasses = new TabClass[] {
 			new TabClass(PublicIntent.TAG_CONTACT,
 					R.drawable.selector_tab_contact_button,
-					R.string.tab_contact_name,
+					R.string.tab_contact_name, R.string.tab_contact_name,
+
 					ContactsTabFragment.class.getName()),
 			new TabClass(PublicIntent.TAG_ORG,
 					R.drawable.selector_tab_org_button, R.string.tab_org_name,
-					ContactsTabFragment.class.getName()),
+					R.string.tab_org_name, ContactsTabFragment.class.getName()),
 			new TabClass(PublicIntent.TAG_GROUP,
 					R.drawable.selector_tab_group_button,
-					R.string.tab_group_name,
+					R.string.tab_group_name, R.string.tab_group_name,
 					ConversationsTabFragment.class.getName()),
 			new TabClass(PublicIntent.TAG_CONF,
 					R.drawable.selector_tab_conference_button,
-					R.string.tab_conference_name,
+					R.string.tab_conference_name, R.string.tab_conference_name,
 					ConversationsTabFragment.class.getName()),
 			new TabClass(PublicIntent.TAG_COV,
 					R.drawable.selector_tab_conversation_button,
+					R.string.tab_conversation_name,
 					R.string.tab_conversation_name,
 					ConversationsTabFragment.class.getName()) };
 
@@ -114,10 +142,19 @@ public class MainActivity extends FragmentActivity {
 		setContentView(R.layout.activity_main);
 		// Initialise the TabHost
 		mContext = this;
+
+		// Init title bar
+		View titleBarLayout = findViewById(R.id.title_bar_ly);
+		titleBar = new TitleBar(mContext, titleBarLayout);
+		initPlusItem();
+		//Initialize first title name
+		titleBar.updateTitle(mTabClasses[0].mTabTitleId);
+		
 		this.initialiseTabHost(savedInstanceState);
 		if (savedInstanceState != null) {
 			mTabHost.setCurrentTabByTag(savedInstanceState.getString("tab"));
 		}
+
 		// Intialise ViewPager
 		this.intialiseViewPager();
 		initDPI();
@@ -150,6 +187,37 @@ public class MainActivity extends FragmentActivity {
 		GlobalConfig.SCREEN_INCHES = Math.sqrt(x + y);
 	}
 
+	private void initPlusItem() {
+		for (int i = 0; i < imgs.length; i++) {
+			LinearLayout ll = new LinearLayout(mContext);
+			ll.setOrientation(LinearLayout.HORIZONTAL);
+
+			ImageView iv = new ImageView(mContext);
+			iv.setImageResource(imgs[i]);
+			iv.setPadding(10, 5, 5, 10);
+			LinearLayout.LayoutParams ivLL = new LinearLayout.LayoutParams(0,
+					LinearLayout.LayoutParams.WRAP_CONTENT);
+			ivLL.gravity = Gravity.RIGHT;
+			ivLL.weight = 0.3F;
+
+			ll.addView(iv, ivLL);
+
+			TextView tv = new TextView(mContext);
+			tv.setText(items[i]);
+			tv.setPadding(10, 5, 5, 10);
+			LinearLayout.LayoutParams tvLL = new LinearLayout.LayoutParams(0,
+					LinearLayout.LayoutParams.WRAP_CONTENT);
+			tvLL.gravity = Gravity.LEFT | Gravity.CENTER_VERTICAL;
+			tvLL.weight = 0.7F;
+
+			ll.addView(tv, tvLL);
+			ll.setOnClickListener(titleBarMenuItemClickListener);
+
+			ll.setId(imgs[i]);
+			titleBar.addAdditionalPopupMenuItem(ll, null);
+		}
+	}
+
 	/**
 	 * Initialise ViewPager
 	 */
@@ -171,6 +239,7 @@ public class MainActivity extends FragmentActivity {
 		this.mViewPager.setAdapter(this.mPagerAdapter);
 		this.mViewPager.setOnPageChangeListener(pageChangeListener);
 		this.mViewPager.setOffscreenPageLimit(5);
+		this.mViewPager.setCurrentItem(0);
 	}
 
 	/**
@@ -261,6 +330,38 @@ public class MainActivity extends FragmentActivity {
 		}
 	}
 
+	// TODO add implment
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		if (requestCode == SUB_ACTIVITY_CODE_CREATE_CONF) {
+			if (resultCode == Activity.RESULT_CANCELED) {
+				return;
+			}
+
+			if (resultCode == Activity.RESULT_OK) {
+				long gid = data.getLongExtra("newGid", 0);
+				Group g = GlobalHolder.getInstance().getGroupById(
+						GroupType.CONFERENCE, gid);
+				// if (g != null) {
+				// Conversation cov = new ConferenceConversation(g);
+				// final GroupLayout gp = new GroupLayout(this,
+				// cov);
+				// gp.setOnClickListener(mEnterConfListener);
+				//
+				// mItemList.add(0, new ScrollItem(cov, gp));
+				// adapter.notifyDataSetChanged();
+				//
+				// Intent i = new Intent(getActivity(), VideoActivityV2.class);
+				// i.putExtra("gid", g.getmGId());
+				// startActivityForResult(i, SUB_ACTIVITY_CODE_VIDEO_ACTIVITY);
+				//
+				// } else {
+				// V2Log.e(" Can not find created group id :" + gid);
+				// }
+			}
+		}
+	}
+
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
@@ -269,6 +370,34 @@ public class MainActivity extends FragmentActivity {
 				JNIService.class));
 		V2Log.d("system destroyed v2tech");
 	}
+
+	private OnClickListener titleBarMenuItemClickListener = new OnClickListener() {
+
+		@Override
+		public void onClick(View view) {
+			int id = view.getId();
+			switch (id) {
+			case R.drawable.conversation_video_button:
+			{
+				titleBar.dismissPlusWindow();
+				Intent i = new Intent(
+						PublicIntent.START_CONFERENCE_CREATE_ACTIVITY);
+				i.addCategory(PublicIntent.DEFAULT_CATEGORY);
+				startActivityForResult(i, SUB_ACTIVITY_CODE_CREATE_CONF);
+			}
+				break;
+			case R.drawable.conversation_call_button:
+				break;
+			case R.drawable.conversation_sms_button:
+				break;
+			case R.drawable.conversation_email_button:
+				break;
+			case R.drawable.conversation_files_button:
+				break;
+			}
+		}
+
+	};
 
 	private TabHost.OnTabChangeListener tabChnageListener = new TabHost.OnTabChangeListener() {
 
@@ -285,6 +414,7 @@ public class MainActivity extends FragmentActivity {
 				return;
 			}
 			mViewPager.setCurrentItem(pos);
+			titleBar.updateTitle(mTabClasses[pos].mTabTitleId);
 
 		}
 
@@ -305,6 +435,7 @@ public class MainActivity extends FragmentActivity {
 		@Override
 		public void onPageSelected(int pos) {
 			mTabHost.setCurrentTab(pos);
+			titleBar.updateTitle(mTabClasses[pos].mTabTitleId);
 		}
 
 	};
@@ -380,21 +511,24 @@ public class MainActivity extends FragmentActivity {
 		String mTabName;
 		int mDraId;
 		int mTabNameId;
+		int mTabTitleId;
 		String clsName;
 		View notificator;
 
-		public TabClass(String mTabName, int mDraId, int mTabTitle,
-				String clsName, View notificator) {
+		public TabClass(String mTabName, int mDraId, int mTabNameId,
+				int tabTitleId, String clsName, View notificator) {
 			super();
 			this.mTabName = mTabName;
 			this.mDraId = mDraId;
-			this.mTabNameId = mTabTitle;
+			this.mTabNameId = mTabNameId;
+			this.mTabTitleId = tabTitleId;
 			this.clsName = clsName;
 			this.notificator = notificator;
 		}
 
-		public TabClass(String tabName, int draId, int tabTitle, String clsName) {
-			this(tabName, draId, tabTitle, clsName, null);
+		public TabClass(String tabName, int draId, int tabNameId,
+				int tabTitleId, String clsName) {
+			this(tabName, draId, tabNameId, tabTitleId, clsName, null);
 		}
 
 	}

@@ -82,6 +82,18 @@ public class TitleBar {
 
 	}
 
+	public void updateTitle(String title) {
+		TextView tv = (TextView) rootContainer
+				.findViewById(R.id.fragment_title);
+		tv.setText(title);
+	}
+
+	public void updateTitle(int resId) {
+		TextView tv = (TextView) rootContainer
+				.findViewById(R.id.fragment_title);
+		tv.setText(resId);
+	}
+
 	public void addAdditionalPopupMenuItem(View v, Object obj) {
 		additionList.add(new Wrapper(v, obj));
 	}
@@ -149,10 +161,9 @@ public class TitleBar {
 		normalList.clear();
 		context.unregisterReceiver(receiver);
 	}
-	
-	
+
 	public void dismissPlusWindow() {
-		if(plusWindow!= null && plusWindow.isShowing()) {
+		if (plusWindow != null && plusWindow.isShowing()) {
 			plusWindow.dismiss();
 		}
 	}

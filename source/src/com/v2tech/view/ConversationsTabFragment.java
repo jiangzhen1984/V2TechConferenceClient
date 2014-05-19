@@ -20,7 +20,6 @@ import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -28,9 +27,7 @@ import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.TextView;
 
 import com.v2tech.R;
 import com.v2tech.db.ContentDescriptor;
@@ -40,7 +37,6 @@ import com.v2tech.util.BitmapUtil;
 import com.v2tech.util.V2Log;
 import com.v2tech.view.conference.GroupLayout;
 import com.v2tech.view.conference.VideoActivityV2;
-import com.v2tech.view.widget.TitleBar;
 import com.v2tech.vo.Conference;
 import com.v2tech.vo.ConferenceConversation;
 import com.v2tech.vo.ContactConversation;
@@ -60,7 +56,6 @@ public class ConversationsTabFragment extends Fragment {
 	private static final int REMOVE_CONVERSATION = 12;
 
 	private static final int SUB_ACTIVITY_CODE_VIDEO_ACTIVITY = 0;
-	private static final int SUB_ACTIVITY_CODE_CREATE_CONF = 100;
 
 	private Tab1BroadcastReceiver receiver = new Tab1BroadcastReceiver();
 	private IntentFilter intentFilter;
@@ -77,7 +72,7 @@ public class ConversationsTabFragment extends Fragment {
 	private boolean isInMeeting = false;
 
 	private View rootView;
-	private TitleBar titleBar;
+	
 
 	private List<ScrollItem> mItemList = new CopyOnWriteArrayList<ScrollItem>();
 	private List<ScrollItem> mCacheItemList;
@@ -92,8 +87,7 @@ public class ConversationsTabFragment extends Fragment {
 
 	private String mCurrentTabFlag;
 
-	private int[] imgs = null;
-	private int[] items = null;
+	
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -101,50 +95,10 @@ public class ConversationsTabFragment extends Fragment {
 		String tag = this.getArguments().getString("tag");
 		if (PublicIntent.TAG_CONF.equals(tag)) {
 			mCurrentTabFlag = Conversation.TYPE_CONFERNECE;
-			imgs = new int[] { R.drawable.conversation_popup_menu_video_call_button,
-					R.drawable.conversation_video_button,
-					R.drawable.conversation_call_button,
-					R.drawable.conversation_sms_button,
-					R.drawable.conversation_email_button,
-					R.drawable.conversation_files_button };
-			items = new int[] {
-					R.string.conference_create_title,
-					R.string.conversation_popup_menu_video_call_button,
-					R.string.conversation_popup_menu_call_button,
-					R.string.conversation_popup_menu_sms_call_button,
-					R.string.conversation_popup_menu_email_button,
-					R.string.conversation_popup_menu_files_button };
-
 		} else if (PublicIntent.TAG_COV.equals(tag)) {
 			mCurrentTabFlag = Conversation.TYPE_CONTACT;
-			imgs = new int[] { R.drawable.conversation_popup_menu_video_call_button,
-					R.drawable.conversation_video_button,
-					R.drawable.conversation_call_button,
-					R.drawable.conversation_sms_button,
-					R.drawable.conversation_email_button,
-					R.drawable.conversation_files_button };
-			items = new int[] {
-					R.string.conference_create_title,
-					R.string.conversation_popup_menu_video_call_button,
-					R.string.conversation_popup_menu_call_button,
-					R.string.conversation_popup_menu_sms_call_button,
-					R.string.conversation_popup_menu_email_button,
-					R.string.conversation_popup_menu_files_button };
 		} else if (PublicIntent.TAG_GROUP.equals(tag)) {
 			mCurrentTabFlag = Conversation.TYPE_GROUP;
-			imgs = new int[] { R.drawable.conversation_popup_menu_video_call_button,
-					R.drawable.conversation_video_button,
-					R.drawable.conversation_call_button,
-					R.drawable.conversation_sms_button,
-					R.drawable.conversation_email_button,
-					R.drawable.conversation_files_button };
-			items = new int[] {
-					R.string.conference_create_title,
-					R.string.conversation_popup_menu_video_call_button,
-					R.string.conversation_popup_menu_call_button,
-					R.string.conversation_popup_menu_sms_call_button,
-					R.string.conversation_popup_menu_email_button,
-					R.string.conversation_popup_menu_files_button };
 		}
 		getActivity().registerReceiver(receiver, getIntentFilter());
 		mContext = getActivity();
@@ -163,19 +117,15 @@ public class ConversationsTabFragment extends Fragment {
 			mConversationsListView.setAdapter(adapter);
 			mLoadingImageIV = (ImageView) rootView
 					.findViewById(R.id.conference_loading_icon);
-			// FIXME should optimize
-			View titleBarLayout = rootView
-					.findViewById(R.id.title_bar_container);
-			titleBar = new TitleBar(getActivity(), titleBarLayout);
-			initPlusItem();
-			TextView tv = (TextView) rootView.findViewById(R.id.fragment_title);
-			if (mCurrentTabFlag.equals(Conversation.TYPE_CONFERNECE)) {
-				tv.setText(R.string.tab_conference_name);
-			} else if (mCurrentTabFlag.equals(Conversation.TYPE_CONTACT)) {
-				tv.setText(R.string.tab_conversation_name);
-			} else if (mCurrentTabFlag.equals(Conversation.TYPE_GROUP)) {
-				tv.setText(R.string.tab_group_name);
-			}
+		
+//			TextView tv = (TextView) rootView.findViewById(R.id.fragment_title);
+//			if (mCurrentTabFlag.equals(Conversation.TYPE_CONFERNECE)) {
+//				tv.setText(R.string.tab_conference_name);
+//			} else if (mCurrentTabFlag.equals(Conversation.TYPE_CONTACT)) {
+//				tv.setText(R.string.tab_conversation_name);
+//			} else if (mCurrentTabFlag.equals(Conversation.TYPE_GROUP)) {
+//				tv.setText(R.string.tab_group_name);
+//			}
 
 		}
 		return rootView;
@@ -204,7 +154,6 @@ public class ConversationsTabFragment extends Fragment {
 		getActivity().unregisterReceiver(receiver);
 		isLoaded = false;
 		mItemList.clear();
-		titleBar.dismiss();
 	}
 
 	@Override
@@ -252,83 +201,24 @@ public class ConversationsTabFragment extends Fragment {
 		if (!isLoaded) {
 			Message.obtain(mHandler, FILL_CONFS_LIST).sendToTarget();
 		}
-		titleBar.regsiterSearchedTextListener(searchListener);
 	}
 
 	@Override
 	public void onStop() {
 		super.onStop();
-		titleBar.unRegsiterSearchedTextListener(searchListener);
 	}
 
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if (requestCode == SUB_ACTIVITY_CODE_VIDEO_ACTIVITY) {
 			isInMeeting = false;
-			// Message.obtain(mHandler, REQUEST_EXIT_CONF, currentConfId)
-			// .sendToTarget();
-		} else if (requestCode == SUB_ACTIVITY_CODE_CREATE_CONF) {
-			if (resultCode == Activity.RESULT_CANCELED) {
-				return;
-			}
-
-			if (resultCode == Activity.RESULT_OK) {
-				long gid = data.getLongExtra("newGid", 0);
-				Group g = GlobalHolder.getInstance().getGroupById(
-						GroupType.CONFERENCE, gid);
-				if (g != null) {
-					Conversation cov = new ConferenceConversation(g);
-					final GroupLayout gp = new GroupLayout(this.getActivity(),
-							cov);
-					gp.setOnClickListener(mEnterConfListener);
-
-					mItemList.add(0, new ScrollItem(cov, gp));
-					adapter.notifyDataSetChanged();
-
-					Intent i = new Intent(getActivity(), VideoActivityV2.class);
-					i.putExtra("gid", g.getmGId());
-					startActivityForResult(i, SUB_ACTIVITY_CODE_VIDEO_ACTIVITY);
-
-				} else {
-					V2Log.e(" Can not find created group id :" + gid);
-				}
-			}
-		}
+		} 
 	}
 
 	/**
 	 * FIXME optimize code
 	 */
-	private void initPlusItem() {
-		for (int i = 0; i < imgs.length; i++) {
-			LinearLayout ll = new LinearLayout(mContext);
-			ll.setOrientation(LinearLayout.HORIZONTAL);
-
-			ImageView iv = new ImageView(mContext);
-			iv.setImageResource(imgs[i]);
-			iv.setPadding(10, 5, 5, 10);
-			LinearLayout.LayoutParams ivLL = new LinearLayout.LayoutParams(0,
-					LinearLayout.LayoutParams.WRAP_CONTENT);
-			ivLL.gravity = Gravity.RIGHT;
-			ivLL.weight = 0.3F;
-
-			ll.addView(iv, ivLL);
-
-			TextView tv = new TextView(mContext);
-			tv.setText(items[i]);
-			tv.setPadding(10, 5, 5, 10);
-			LinearLayout.LayoutParams tvLL = new LinearLayout.LayoutParams(0,
-					LinearLayout.LayoutParams.WRAP_CONTENT);
-			tvLL.gravity = Gravity.LEFT | Gravity.CENTER_VERTICAL;
-			tvLL.weight = 0.7F;
-
-			ll.addView(tv, tvLL);
-			ll.setOnClickListener(titleBarMenuItemClickListener);
-
-			ll.setId(imgs[i]);
-			titleBar.addAdditionalPopupMenuItem(ll, null);
-		}
-	}
+	
 
 	private void populateConversation(final Group g, boolean flag) {
 		// FIXME
@@ -379,34 +269,7 @@ public class ConversationsTabFragment extends Fragment {
 	}
 
 	
-	private OnClickListener titleBarMenuItemClickListener = new OnClickListener() {
-
-		@Override
-		public void onClick(View view) {
-			int id = view.getId();
-			switch(id) {
-			case R.drawable.conversation_video_button:
-				break;
-			case R.drawable.conversation_call_button:
-				break;
-			case R.drawable.conversation_sms_button:
-				break;
-			case R.drawable.conversation_email_button:
-				break;
-			case R.drawable.conversation_files_button:
-				break;
-			case R.drawable.conversation_popup_menu_video_call_button:
-			{
-				titleBar.dismissPlusWindow();
-				Intent i = new Intent(PublicIntent.START_CONFERENCE_CREATE_ACTIVITY);
-				i.addCategory(PublicIntent.DEFAULT_CATEGORY);
-				startActivityForResult(i, SUB_ACTIVITY_CODE_CREATE_CONF);
-			}
-				break;
-			}
-		}
-
-	};
+	
 
 	private OnClickListener mEnterConfListener = new OnClickListener() {
 

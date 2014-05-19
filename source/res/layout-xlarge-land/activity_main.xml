@@ -1,50 +1,63 @@
 <?xml version="1.0" encoding="utf-8"?>
-<TabHost xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@android:id/tabhost"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent" >
 
-    <LinearLayout
+    <include
+        android:id="@+id/title_bar_ly"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        layout="@layout/title_bar" />
+
+    <TabHost
+        android:id="@android:id/tabhost"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:orientation="vertical" >
+        android:layout_below="@+id/title_bar_ly" >
 
-        <FrameLayout
-            android:id="@android:id/tabcontent"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:layout_weight="0" />
-
-        <android.support.v4.view.ViewPager
-            android:id="@+android:id/viewpager"
+        <LinearLayout
             android:layout_width="fill_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1" />
+            android:layout_height="fill_parent"
+            android:orientation="vertical" >
 
-          <LinearLayout
+            <FrameLayout
+                android:id="@android:id/tabcontent"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="0" />
+
+            <android.support.v4.view.ViewPager
+                android:id="@+android:id/viewpager"
+                android:layout_width="fill_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+
+            <LinearLayout
                 android:layout_width="fill_parent"
                 android:layout_height="1dp"
                 android:background="#cdcdcf"
                 android:orientation="vertical" >
             </LinearLayout>
-        <LinearLayout
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical" >
 
-            <TabWidget
-                android:id="@android:id/tabs"
-                android:background="#ffffff"
-                android:paddingLeft="350dp"
-                android:paddingRight="350dp"
+            <LinearLayout
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:gravity="center"
-                android:orientation="horizontal"
-                android:showDividers="none"
-                android:tabStripEnabled="false" />
+                android:orientation="vertical" >
 
+                <TabWidget
+                    android:id="@android:id/tabs"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:background="#ffffff"
+                    android:gravity="center"
+                    android:orientation="horizontal"
+                    android:paddingLeft="350dp"
+                    android:paddingRight="350dp"
+                    android:showDividers="none"
+                    android:tabStripEnabled="false" />
+            </LinearLayout>
         </LinearLayout>
-    </LinearLayout>
+    </TabHost>
 
-</TabHost>
+</RelativeLayout>

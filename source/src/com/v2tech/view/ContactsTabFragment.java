@@ -54,7 +54,6 @@ public class ContactsTabFragment extends Fragment {
 	private Tab1BroadcastReceiver receiver = new Tab1BroadcastReceiver();
 	private IntentFilter intentFilter;
 
-	private TitleBar titleBar;
 	private ListView mContactsContainer;
 
 	private ContactsAdapter adapter = new ContactsAdapter();
@@ -75,9 +74,6 @@ public class ContactsTabFragment extends Fragment {
 
 	private int flag;
 	
-	private int[] imgs = null;
-	private int[] items = null;
-
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -88,22 +84,6 @@ public class ContactsTabFragment extends Fragment {
 		} else if (PublicIntent.TAG_CONTACT.equals(tag)) {
 			flag = TAG_CONTACT;
 		}
-		
-		
-		imgs = new int[] { R.drawable.conversation_popup_menu_video_call_button,
-				R.drawable.conversation_video_button,
-				R.drawable.conversation_call_button,
-				R.drawable.conversation_sms_button,
-				R.drawable.conversation_email_button,
-				R.drawable.conversation_files_button };
-		items = new int[] {
-				R.string.conference_create_title,
-				R.string.conversation_popup_menu_video_call_button,
-				R.string.conversation_popup_menu_call_button,
-				R.string.conversation_popup_menu_sms_call_button,
-				R.string.conversation_popup_menu_email_button,
-				R.string.conversation_popup_menu_files_button };
-
 		
 		mContext = getActivity();
 	}
@@ -134,16 +114,13 @@ public class ContactsTabFragment extends Fragment {
 		});
 		mContactsContainer.setDivider(null);
 
-		// FIXME should optimize
-		View titleBarLayout = rootView.findViewById(R.id.title_bar_container);
-		titleBar = new TitleBar(getActivity(), titleBarLayout);
-		initPlusItem();
-		TextView tv = (TextView) rootView.findViewById(R.id.fragment_title);
-		if (flag == TAG_ORG) {
-			tv.setText(R.string.tab_org_name);
-		} else if (flag == TAG_CONTACT) {
-			tv.setText(R.string.tab_contact_name);
-		}
+	
+//		TextView tv = (TextView) rootView.findViewById(R.id.fragment_title);
+//		if (flag == TAG_ORG) {
+//			tv.setText(R.string.tab_org_name);
+//		} else if (flag == TAG_CONTACT) {
+//			tv.setText(R.string.tab_contact_name);
+//		}
 
 		return rootView;
 	}
@@ -159,7 +136,6 @@ public class ContactsTabFragment extends Fragment {
 		super.onDestroy();
 		mLoaded = false;
 		getActivity().unregisterReceiver(receiver);
-		titleBar.dismiss();
 	}
 
 	@Override
@@ -168,13 +144,11 @@ public class ContactsTabFragment extends Fragment {
 		if (!mLoaded) {
 			Message.obtain(mHandler, FILL_CONTACTS_GROUP).sendToTarget();
 		}
-		titleBar.regsiterSearchedTextListener(textChangedListener);
 	}
 
 	@Override
 	public void onStop() {
 		super.onStop();
-		titleBar.unRegsiterSearchedTextListener(textChangedListener);
 	}
 
 	private IntentFilter getIntentFilter() {
@@ -197,72 +171,6 @@ public class ContactsTabFragment extends Fragment {
 	}
 
 	
-	/**
-	 * FIXME optimize code
-	 */
-	private void initPlusItem() {
-		for (int i = 0; i < imgs.length; i++) {
-			LinearLayout ll = new LinearLayout(mContext);
-			ll.setOrientation(LinearLayout.HORIZONTAL);
-
-			ImageView iv = new ImageView(mContext);
-			iv.setImageResource(imgs[i]);
-			iv.setPadding(10, 5, 5, 10);
-			LinearLayout.LayoutParams ivLL = new LinearLayout.LayoutParams(0,
-					LinearLayout.LayoutParams.WRAP_CONTENT);
-			ivLL.gravity = Gravity.RIGHT;
-			ivLL.weight = 0.3F;
-
-			ll.addView(iv, ivLL);
-
-			TextView tv = new TextView(mContext);
-			tv.setText(items[i]);
-			tv.setPadding(10, 5, 5, 10);
-			LinearLayout.LayoutParams tvLL = new LinearLayout.LayoutParams(0,
-					LinearLayout.LayoutParams.WRAP_CONTENT);
-			tvLL.gravity = Gravity.LEFT | Gravity.CENTER_VERTICAL;
-			tvLL.weight = 0.7F;
-
-			ll.addView(tv, tvLL);
-			ll.setOnClickListener(titleBarMenuItemClickListener);
-
-			ll.setId(imgs[i]);
-			titleBar.addAdditionalPopupMenuItem(ll, null);
-		}
-	}
-	
-	/**
-	 * FIXME optimize code
-	 */
-	private OnClickListener titleBarMenuItemClickListener = new OnClickListener() {
-
-		@Override
-		public void onClick(View view) {
-			int id = view.getId();
-			switch(id) {
-			case R.drawable.conversation_video_button:
-				break;
-			case R.drawable.conversation_call_button:
-				break;
-			case R.drawable.conversation_sms_button:
-				break;
-			case R.drawable.conversation_email_button:
-				break;
-			case R.drawable.conversation_files_button:
-				break;
-			case R.drawable.conversation_popup_menu_video_call_button:
-			{
-//				titleBar.dismissPlusWindow();
-//				Intent i = new Intent(PublicIntent.START_CONFERENCE_CREATE_ACTIVITY);
-//				i.addCategory(PublicIntent.DEFAULT_CATEGORY);
-//				startActivityForResult(i, SUB_ACTIVITY_CODE_CREATE_CONF);
-			}
-				break;
-			}
-		}
-
-	};
-
 	
 	
 	List<Group> l;

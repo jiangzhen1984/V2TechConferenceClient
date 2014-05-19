@@ -4,9 +4,6 @@
     android:layout_height="match_parent"
     android:orientation="vertical" >
 
-    <include layout="@layout/title_bar" >
-    </include>
-
     <RelativeLayout
         android:id="@+id/RelativeLayout2"
         android:layout_width="fill_parent"
