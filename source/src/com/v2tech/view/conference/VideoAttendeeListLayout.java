@@ -245,7 +245,9 @@ public class VideoAttendeeListLayout extends LinearLayout {
 	 * @param at
 	 */
 	public void addAttendee(Attendee at) {
-		mAttendsView.addAll(buildAttendeeView(at));
+		synchronized (mAttendsView) {
+			mAttendsView.addAll(buildAttendeeView(at));
+		}
 		adapter.notifyDataSetChanged();
 
 	}
