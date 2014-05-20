@@ -39,7 +39,18 @@
                 android:paddingLeft="20dp"
                 android:paddingRight="5dp"
                 android:paddingTop="10dp"
-                android:text="@string/conference_create_confirm" />
+                android:text="@string/conference_create_confirm"
+                android:textColor="@color/conf_create_button_color" />
+
+            <TextView
+                android:id="@+id/conference_create_return_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="5dp"
+                android:text="@string/conference_create_cancel"
+                android:textColor="@color/conf_create_button_color" />
         </RelativeLayout>
 
         <LinearLayout
@@ -81,7 +92,7 @@
             <EditText
                 android:id="@+id/contacts_search"
                 android:layout_width="match_parent"
-                android:layout_height="50dp"
+                android:layout_height="wrap_content"
                 android:layout_alignParentLeft="true"
                 android:layout_gravity="center_vertical"
                 android:layout_marginBottom="10dp"
@@ -105,14 +116,13 @@
     <RelativeLayout
         android:layout_width="fill_parent"
         android:layout_height="match_parent"
-        android:background="#ffffff"
-       >
+        android:background="#ffffff" >
 
         <ListView
             android:id="@+id/conf_create_contacts_list"
-            android:layout_above="@+id/conf_create_form"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:layout_above="@+id/conf_create_form"
             android:divider="@null"
             android:focusable="false" >
         </ListView>
@@ -121,8 +131,7 @@
             android:id="@+id/conf_create_form"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-             >
+            android:layout_alignParentBottom="true" >
 
             <TextView
                 android:id="@+id/textView1"
@@ -144,8 +153,8 @@
                 android:layout_toRightOf="@+id/textView1"
                 android:background="@drawable/input_bg"
                 android:ems="10"
-                android:maxLength="50"
-                android:inputType="text" >
+                android:inputType="text"
+                android:maxLength="50" >
             </EditText>
 
             <TextView
@@ -170,8 +179,6 @@
                 android:inputType="none" >
             </EditText>
 
-        
-
             <HorizontalScrollView
                 android:id="@+id/conf_create_scroll_view"
                 android:layout_width="match_parent"
@@ -179,16 +186,14 @@
                 android:layout_below="@+id/textView2"
                 android:layout_centerVertical="true"
                 android:layout_marginTop="10dp"
-                android:background="#f2f2f2"
-                 >
+                android:background="#f2f2f2" >
 
-                  <LinearLayout
+                <LinearLayout
                     android:id="@+id/conference_attendee_container"
-                   android:layout_width="wrap_content"
+                    android:layout_width="wrap_content"
                     android:layout_height="match_parent"
-                      android:tag="horizontal"
-                    android:orientation="horizontal" >
-
+                    android:orientation="horizontal"
+                    android:tag="horizontal" >
                 </LinearLayout>
             </HorizontalScrollView>
         </RelativeLayout>

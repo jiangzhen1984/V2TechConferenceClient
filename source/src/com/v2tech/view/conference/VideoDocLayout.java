@@ -69,13 +69,13 @@ public class VideoDocLayout extends LinearLayout {
 	public interface DocListener {
 		public void updateDoc(V2Doc doc, V2Doc.Page p);
 
-		public void requestFixedLayout(View v);
+		public void requestDocViewFixedLayout(View v);
 
-		public void requestFloatLayout(View v);
+		public void requestDocViewFloatLayout(View v);
 
-		public void requestFillParent(View v);
+		public void requestDocViewFillParent(View v);
 
-		public void requestRestore(View v);
+		public void requestDocViewRestore(View v);
 	};
 
 	public VideoDocLayout(Context context) {
@@ -378,11 +378,11 @@ public class VideoDocLayout extends LinearLayout {
 
 	/**
 	 * Used to manually request FloatLayout, Because when this layout will hide,
-	 * call this function to information interface
+	 * call this function to inform interface
 	 */
 	public void requestFloatLayout() {
 		if (this.listener != null) {
-			this.listener.requestFloatLayout(rootView);
+			this.listener.requestDocViewFloatLayout(rootView);
 		}
 
 		mRequestFixedPosButton.setTag("float");
@@ -390,11 +390,11 @@ public class VideoDocLayout extends LinearLayout {
 
 	/**
 	 * Used to manually request requestRestore, Because when this layout will
-	 * hide, call this function to information interface
+	 * hide, call this function to inform interface
 	 */
 	public void requestRestore() {
 		if (this.listener != null) {
-			this.listener.requestRestore(rootView);
+			this.listener.requestDocViewRestore(rootView);
 		}
 		// restore image
 		mRequestUpdateSizeButton.setTag("fullscreen");
@@ -577,11 +577,11 @@ public class VideoDocLayout extends LinearLayout {
 
 			if (view.getTag().equals("float")) {
 				if (listener != null) {
-					listener.requestFixedLayout(rootView);
+					listener.requestDocViewFixedLayout(rootView);
 				}
 			} else {
 				if (listener != null) {
-					listener.requestFloatLayout(rootView);
+					listener.requestDocViewFloatLayout(rootView);
 				}
 			}
 
@@ -600,11 +600,11 @@ public class VideoDocLayout extends LinearLayout {
 		public void onClick(View view) {
 			if (view.getTag().equals("fullscreen")) {
 				if (listener != null) {
-					listener.requestFillParent(rootView);
+					listener.requestDocViewFillParent(rootView);
 				}
 			} else {
 				if (listener != null) {
-					listener.requestRestore(rootView);
+					listener.requestDocViewRestore(rootView);
 				}
 			}
 

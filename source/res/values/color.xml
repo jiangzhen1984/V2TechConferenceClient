@@ -7,6 +7,9 @@
     <color name="button_text_color">#007aff</color>
     <color name="in_meeting_camera_setting_progress_bar">#c2c2c2</color>
      <color name="line_color">#cdcdcf</color>
+     <color name="contact_detail_button_font_color">#057aff</color>
+     <color name="conf_create_button_color">#057aff</color>
+     
     
 
 </resources>

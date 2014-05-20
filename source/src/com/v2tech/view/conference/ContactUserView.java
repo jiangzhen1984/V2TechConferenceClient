@@ -42,11 +42,15 @@ public class ContactUserView extends LinearLayout {
 	}
 
 	public ContactUserView(Context context, User u) {
+		this(context, u, true);
+	}
+	
+	public ContactUserView(Context context, User u, boolean flag) {
 		super(context);
-		initData(u);
+		initData(u,  flag);
 	}
 
-	public void initData(User u) {
+	public void initData(User u, boolean flag) {
 		if (u == null || u.getmUserId() <= 0) {
 			throw new RuntimeException("Invalid user data");
 		}
@@ -71,7 +75,7 @@ public class ContactUserView extends LinearLayout {
 				.getSignature());
 
 		mCheckbox = (CheckBox) view.findViewById(R.id.conf_create_contact_view_ck);
-		if (u.isCurrentLoggedInUser()) {
+		if (u.isCurrentLoggedInUser() || !flag) {
 			mCheckbox.setVisibility(View.INVISIBLE);
 		}
 		mStatusIV = (ImageView) view.findViewById(R.id.contact_user_status_iv);

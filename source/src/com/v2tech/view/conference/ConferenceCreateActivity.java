@@ -74,6 +74,7 @@ public class ConferenceCreateActivity extends Activity {
 	private TextView mConfirmButton;
 	private EditText mConfTitleET;
 	private EditText mConfStartTimeET;
+	private View mReturnButton;
 
 	private LinearLayout mErrorNotificationLayout;
 
@@ -131,6 +132,8 @@ public class ConferenceCreateActivity extends Activity {
 
 		mErrorNotificationLayout = (LinearLayout) findViewById(R.id.conference_create_error_notification);
 		mScroller = findViewById(R.id.conf_create_scroll_view);
+		mReturnButton = findViewById(R.id.conference_create_return_button);
+		mReturnButton.setOnClickListener(mReturnListener);
 	}
 
 	@Override
@@ -268,54 +271,29 @@ public class ConferenceCreateActivity extends Activity {
 		}
 		mAttendeeList.add(u);
 
-		int cot = mAttendeeContainer.getChildCount();
-		LinearLayout lineLayout = null;
-		if (cot <= 0) {
-			lineLayout = new LinearLayout(mContext);
-			mAttendeeContainer.addView(lineLayout,
-					new LinearLayout.LayoutParams(
-							LinearLayout.LayoutParams.MATCH_PARENT,
-							LinearLayout.LayoutParams.WRAP_CONTENT));
-		} else {
-			lineLayout = (LinearLayout) mAttendeeContainer.getChildAt(cot - 1);
-			if (landLayout == PAD_LAYOUT && lineLayout.getChildCount() == 4) {
-				lineLayout = new LinearLayout(mContext);
-				mAttendeeContainer.addView(lineLayout,
-						new LinearLayout.LayoutParams(
-								LinearLayout.LayoutParams.MATCH_PARENT,
-								LinearLayout.LayoutParams.WRAP_CONTENT));
-			}
-		}
-
-		final View v = getAttendeeView(u);
+		View v = null;
 		if (landLayout == PAD_LAYOUT) {
-			LinearLayout.LayoutParams par = new LinearLayout.LayoutParams(0,
-					LinearLayout.LayoutParams.WRAP_CONTENT);
-			par.weight = 0.25F;
-			lineLayout.addView(v, par);
+			v = new ContactUserView(this, u, false);
+			v.setTag(u);
+			v.setOnClickListener(removeAttendeeListener);
 		} else {
-			lineLayout.addView(v);
+			v = getAttendeeView(u);
 		}
+		mAttendeeContainer.addView(v);
 
 		if (mAttendeeContainer.getChildCount() > 0) {
-			if (this.landLayout == PAD_LAYOUT) {
-				((ScrollView) mScroller).postDelayed(new Runnable() {
-					@Override
-					public void run() {
-						((ScrollView) mScroller).scrollTo(0, v.getBottom());
+			mScroller.postDelayed(new Runnable() {
+				@Override
+				public void run() {
+					View child = mAttendeeContainer.getChildAt(mAttendeeContainer.getChildCount() - 1);
+					if (landLayout == PAD_LAYOUT) {
+						((ScrollView) mScroller).scrollTo(child.getRight(), child.getBottom());
+					} else {
+						((HorizontalScrollView) mScroller).scrollTo(child.getRight(), child.getBottom());
 					}
+				}
 
-				}, 100L);
-			} else {
-				((HorizontalScrollView) mScroller).postDelayed(new Runnable() {
-					@Override
-					public void run() {
-						((HorizontalScrollView) mScroller).scrollTo(
-								v.getLeft(), 0);
-					}
-
-				}, 100L);
-			}
+			}, 100L);
 		}
 	}
 
@@ -351,21 +329,8 @@ public class ConferenceCreateActivity extends Activity {
 		if (u.isCurrentLoggedInUser()) {
 			return ll;
 		}
-		ll.setOnClickListener(new OnClickListener() {
-
-			@Override
-			public void onClick(View view) {
-				Message.obtain(mLocalHandler, UPDATE_ATTENDEES, u)
-						.sendToTarget();
-				for (int index = 0; index < mItemList.size(); index++) {
-					ListItem li = mItemList.get(index);
-					if (li.u != null && u.getmUserId() == li.u.getmUserId()) {
-						((ContactUserView) li.v).updateChecked();
-					}
-				}
-			}
-
-		});
+		ll.setTag(u);
+		ll.setOnClickListener(removeAttendeeListener);
 
 		return ll;
 	}
@@ -381,6 +346,26 @@ public class ConferenceCreateActivity extends Activity {
 		adapter.notifyDataSetChanged();
 	}
 
+	
+	
+	private  OnClickListener removeAttendeeListener = new OnClickListener() {
+
+		@Override
+		public void onClick(View view) {
+			User u = (User)view.getTag();
+			Message.obtain(mLocalHandler, UPDATE_ATTENDEES, u)
+					.sendToTarget();
+			for (int index = 0; index < mItemList.size(); index++) {
+				ListItem li = mItemList.get(index);
+				if (li.u != null && u.getmUserId() == li.u.getmUserId()) {
+					((ContactUserView) li.v).updateChecked();
+				}
+			}
+		}
+
+	};
+	
+	
 	private TextWatcher textChangedListener = new TextWatcher() {
 
 		@Override
@@ -536,6 +521,15 @@ public class ConferenceCreateActivity extends Activity {
 		}
 
 	};
+	
+	private OnClickListener mReturnListener = new OnClickListener() {
+
+		@Override
+		public void onClick(View v) {
+			onBackPressed();
+		}
+		
+	};
 
 	class LoadContactsAT extends AsyncTask<Void, Void, Void> {
 
@@ -609,6 +603,7 @@ public class ConferenceCreateActivity extends Activity {
 		}
 
 	}
+	
 
 	class LocalHandler extends Handler {
 

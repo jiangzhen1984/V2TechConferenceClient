@@ -15,14 +15,21 @@ import com.v2tech.vo.VMessage;
 
 public class VideoMsgChattingLayout extends LinearLayout {
 
+	private View rootView;
+	
 	private ChattingListener listener;
 	private ScrollView mScroller;
 	private LinearLayout mMsgContainer;
 	private View mSendButton;
 	private TextView mContentTV;
+	private View mPinButton;
 
 	public interface ChattingListener {
 		public void requestSendMsg(VMessage vm);
+		
+		public void requestChattingViewFixedLayout(View v);
+
+		public void requestChattingViewFloatLayout(View v);
 	};
 
 	public VideoMsgChattingLayout(Context context) {
@@ -45,6 +52,9 @@ public class VideoMsgChattingLayout extends LinearLayout {
 		View view = LayoutInflater.from(getContext()).inflate(
 				R.layout.video_msg_chatting_layout, null, false);
 
+		mPinButton = view.findViewById(R.id.video_msg_chatting_pin_button);
+		mPinButton.setOnClickListener(mRequestFixedListener);
+		
 		this.addView(view, new LinearLayout.LayoutParams(
 				LinearLayout.LayoutParams.MATCH_PARENT,
 				LinearLayout.LayoutParams.MATCH_PARENT));
@@ -76,6 +86,8 @@ public class VideoMsgChattingLayout extends LinearLayout {
 			}
 
 		});
+		
+		rootView = this;
 	}
 
 	public void setListener(ChattingListener listener) {
@@ -123,4 +135,43 @@ public class VideoMsgChattingLayout extends LinearLayout {
 
 		});
 	}
+	
+	
+	/**
+	 * Used to manually request FloatLayout, Because when this layout will hide,
+	 * call this function to inform interface
+	 */
+	public void requestFloatLayout() {
+		if (this.listener != null) {
+			this.listener.requestChattingViewFloatLayout(rootView);
+		}
+
+		mPinButton.setTag("float");
+	}
+	
+	
+	
+	private OnClickListener mRequestFixedListener = new OnClickListener() {
+
+		@Override
+		public void onClick(View view) {
+
+			if (view.getTag().equals("float")) {
+				if (listener != null) {
+					listener.requestChattingViewFixedLayout(rootView);
+				}
+			} else {
+				if (listener != null) {
+					listener.requestChattingViewFloatLayout(rootView);
+				}
+			}
+
+			if (view.getTag().equals("float")) {
+				view.setTag("fix");
+			} else {
+				view.setTag("float");
+			}
+		}
+
+	};
 }

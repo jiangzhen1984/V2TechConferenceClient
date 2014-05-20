@@ -32,6 +32,9 @@ import com.v2tech.vo.UserDeviceConfig;
 
 public class VideoAttendeeListLayout extends LinearLayout {
 
+	
+	private View rootView;
+	
 	private VideoAttendeeActionListener listener;
 
 	private ListView mAttendeeContainer;
@@ -43,11 +46,19 @@ public class VideoAttendeeListLayout extends LinearLayout {
 
 	private boolean mIsStartedSearch;
 	private EditText mSearchET;
+	
+	private View mPinButton;
 
 	private AttendeesAdapter adapter = new AttendeesAdapter();
 
 	public interface VideoAttendeeActionListener {
+		
 		public void OnAttendeeClicked(Attendee at, UserDeviceConfig udc);
+		
+		public void requestAttendeeViewFixedLayout(View v);
+
+		public void requestAttendeeViewFloatLayout(View v);
+
 	};
 
 	public VideoAttendeeListLayout(Context context) {
@@ -73,6 +84,9 @@ public class VideoAttendeeListLayout extends LinearLayout {
 		mAttendeeContainer = (ListView) view
 				.findViewById(R.id.video_attendee_container);
 		mSearchET = (EditText) view.findViewById(R.id.attendee_search);
+		
+		mPinButton = view.findViewById(R.id.video_attendee_pin_button);
+		mPinButton.setOnClickListener(mRequestFixedListener);
 
 		mAttendeeContainer.setAdapter(adapter);
 		mAttendeeContainer.setOnItemClickListener(new OnItemClickListener() {
@@ -93,6 +107,8 @@ public class VideoAttendeeListLayout extends LinearLayout {
 				LinearLayout.LayoutParams.MATCH_PARENT));
 
 		mSearchET.addTextChangedListener(mSearchListener);
+		
+		rootView = this;
 	}
 
 	public void setListener(VideoAttendeeActionListener listener) {
@@ -233,6 +249,44 @@ public class VideoAttendeeListLayout extends LinearLayout {
 		adapter.notifyDataSetChanged();
 
 	}
+	
+	/**
+	 * Used to manually request FloatLayout, Because when this layout will hide,
+	 * call this function to inform interface
+	 */
+	public void requestFloatLayout() {
+		if (this.listener != null) {
+			this.listener.requestAttendeeViewFloatLayout(rootView);
+		}
+
+		mPinButton.setTag("float");
+	}
+	
+	
+	
+	private OnClickListener mRequestFixedListener = new OnClickListener() {
+
+		@Override
+		public void onClick(View view) {
+
+			if (view.getTag().equals("float")) {
+				if (listener != null) {
+					listener.requestAttendeeViewFixedLayout(rootView);
+				}
+			} else {
+				if (listener != null) {
+					listener.requestAttendeeViewFloatLayout(rootView);
+				}
+			}
+
+			if (view.getTag().equals("float")) {
+				view.setTag("fix");
+			} else {
+				view.setTag("float");
+			}
+		}
+
+	};
 
 	private TextWatcher mSearchListener = new TextWatcher() {
 

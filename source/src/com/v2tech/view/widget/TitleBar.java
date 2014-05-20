@@ -33,7 +33,7 @@ import com.v2tech.view.PublicIntent;
 import com.v2tech.vo.NetworkStateCode;
 
 public class TitleBar {
-	
+
 	public static int TITLE_BAR_TYPE_PLUS = 1;
 	public static int TITLE_BAR_TYPE_MORE = 2;
 
@@ -136,10 +136,12 @@ public class TitleBar {
 			ll.setOnClickListener(plusItemClickListener);
 
 			ll.setId(imgs[i]);
-			ll.setPadding(0, 10, 0, 10);
-			vg.addView(ll, new LinearLayout.LayoutParams(
+			ll.setPadding(0, 10, 15, 10);
+			LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
 					LinearLayout.LayoutParams.MATCH_PARENT,
-					LinearLayout.LayoutParams.WRAP_CONTENT));
+					LinearLayout.LayoutParams.WRAP_CONTENT);
+			lp.rightMargin = 20;
+			vg.addView(ll, lp);
 
 			if (i != imgs.length - 1) {
 				LinearLayout line = new LinearLayout(context);
@@ -208,12 +210,14 @@ public class TitleBar {
 						R.layout.title_bar_pop_up_window, null);
 				LinearLayout itemContainer = (LinearLayout) layout
 						.findViewById(R.id.common_pop_window_container);
+
+				LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+						LinearLayout.LayoutParams.WRAP_CONTENT,
+						LinearLayout.LayoutParams.WRAP_CONTENT);
+				lp.rightMargin = 20;
 				for (int i = 0; i < additionList.size(); i++) {
-					additionList.get(i).v.setPadding(0, 15, 0, 15);
-					itemContainer.addView(additionList.get(i).v,
-							new LinearLayout.LayoutParams(
-									LinearLayout.LayoutParams.WRAP_CONTENT,
-									LinearLayout.LayoutParams.WRAP_CONTENT));
+					additionList.get(i).v.setPadding(0, 15, 15, 15);
+					itemContainer.addView(additionList.get(i).v, lp);
 
 					if (i != additionList.size() - 1) {
 						LinearLayout line = new LinearLayout(context);
@@ -309,11 +313,12 @@ public class TitleBar {
 			RelativeLayout.LayoutParams arrowRL = (RelativeLayout.LayoutParams) arrow
 					.getLayoutParams();
 			arrowRL.rightMargin = (dm.widthPixels - pos[0])
-					- arrow.getMeasuredWidth() / 2;
+					- arrow.getMeasuredWidth() / 2 ;
 			arrow.setLayoutParams(arrowRL);
 
 			moreWindow.setAnimationStyle(R.style.TitleBarPopupWindowAnim);
-			moreWindow.showAtLocation(anchor, Gravity.NO_GRAVITY, x, pos[1]);
+			moreWindow.showAtLocation(anchor, Gravity.NO_GRAVITY, x ,
+					pos[1]);
 
 		}
 

@@ -264,9 +264,9 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 
 		@Override
 		public void onClick(View v) {
-			if (isInMeeting) {
-				return;
-			}
+//			if (isInMeeting) {
+//				return;
+//			}
 			isInMeeting = true;
 			GroupLayout gp = (GroupLayout) v;
 

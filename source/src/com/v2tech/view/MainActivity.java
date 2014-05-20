@@ -59,6 +59,7 @@ public class MainActivity extends FragmentActivity implements NotificationListen
 	public static final String SERVICE_UNBOUNDED_EVENT = "com.v2tech.SERVICE_UNBOUNDED_EVENT";
 
 	private int[] imgs = new int[] { R.drawable.conversation_video_button,
+			R.drawable.conversation_group_button,
 			R.drawable.conversation_call_button,
 			R.drawable.conversation_sms_button,
 			R.drawable.conversation_email_button,
@@ -66,6 +67,7 @@ public class MainActivity extends FragmentActivity implements NotificationListen
 
 	private int[] items = new int[] {
 			R.string.conversation_popup_menu_video_call_button,
+			R.string.conversation_popup_menu_group_create_button,
 			R.string.conversation_popup_menu_call_button,
 			R.string.conversation_popup_menu_sms_call_button,
 			R.string.conversation_popup_menu_email_button,
@@ -160,7 +162,6 @@ public class MainActivity extends FragmentActivity implements NotificationListen
 
 		// Intialise ViewPager
 		this.intialiseViewPager();
-		initDPI();
 		initReceiver();
 		// Start animation
 		this.overridePendingTransition(R.animator.left_in, R.animator.left_out);
@@ -175,19 +176,6 @@ public class MainActivity extends FragmentActivity implements NotificationListen
 	protected void onSaveInstanceState(Bundle outState) {
 		outState.putString("tab", mTabHost.getCurrentTabTag());
 		super.onSaveInstanceState(outState);
-	}
-
-	private void initDPI() {
-		DisplayMetrics metrics = new DisplayMetrics();
-
-		getWindowManager().getDefaultDisplay().getMetrics(metrics);
-		GlobalConfig.GLOBAL_DPI = metrics.densityDpi;
-		V2Log.i("Init user device DPI: " + GlobalConfig.GLOBAL_DPI);
-		DisplayMetrics dm = new DisplayMetrics();
-		getWindowManager().getDefaultDisplay().getMetrics(dm);
-		double x = Math.pow(dm.widthPixels / dm.xdpi, 2);
-		double y = Math.pow(dm.heightPixels / dm.ydpi, 2);
-		GlobalConfig.SCREEN_INCHES = Math.sqrt(x + y);
 	}
 
 	private void initPlusItem() {

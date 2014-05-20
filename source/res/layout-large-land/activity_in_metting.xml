@@ -152,7 +152,7 @@
         </RelativeLayout>
 
         <FrameLayout
-             android:id="@+id/local_surface_view_ly"
+            android:id="@+id/local_surface_view_ly"
             android:layout_width="320dp"
             android:layout_height="180dp"
             android:layout_alignBottom="@+id/in_metting_video_main"
@@ -162,10 +162,25 @@
             android:background="#f6f6f6"
             android:padding="1dp" >
 
-            <SurfaceView
-                android:id="@+id/local_surface_view"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" />
+            <RelativeLayout
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent" >
+
+                <SurfaceView
+                    android:id="@+id/local_surface_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+
+                <ImageView
+                    android:id="@+id/converse_camera_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignParentTop="true"
+                    android:layout_marginRight="10dp"
+                    android:layout_marginTop="10dp"
+                    android:src="@drawable/converse_camera_button" />
+            </RelativeLayout>
         </FrameLayout>
     </RelativeLayout>
 
