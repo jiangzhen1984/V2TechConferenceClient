@@ -62,7 +62,7 @@ public class GlobalHolder {
 	}
 
 	private GlobalHolder() {
-
+		BitmapManager.getInstance().registerLastBitmapChangedListener(bitmapChangedListener);
 	}
 
 	public User getCurrentUser() {
@@ -112,7 +112,13 @@ public class GlobalHolder {
 				return cu;
 			}
 			mUserHolder.put(key, u);
+			Bitmap avatar = mAvatarBmHolder.get(key);
+			if (avatar != null) {
+				u.setAvatarBitmap(avatar);
+				mAvatarBmHolder.remove(avatar);
+			}
 		}
+		
 		return u;
 	}
 
@@ -461,18 +467,27 @@ public class GlobalHolder {
 		mUserDeviceList.addAll(udcList);
 	}
 
-	public Bitmap getAvatarBm(long uid) {
-		Long key = Long.valueOf(uid);
-		return mAvatarBmHolder.get(key);
-	}
+	
+	/**
+	 * Use to update cache avatar
+	 */
+	private BitmapManager.BitmapChangedListener bitmapChangedListener = new BitmapManager.BitmapChangedListener() {
 
-	public void saveAvatar(long uid, Bitmap bm) {
-		Bitmap cache = getAvatarBm(uid);
-		if (cache != null) {
-			cache.recycle();
+		@Override
+		public void notifyAvatarChanged(User user, Bitmap newAvatar) {
+			User u = getUser(user.getmUserId());
+			if (u != null) {
+				Bitmap cache = u.getAvatarBitmap();
+				if (cache != null) {
+					cache.recycle();
+				}
+				u.setAvatarBitmap(newAvatar);
+			//Doesn't receive user information from server
+			} else {
+				mAvatarBmHolder.put(Long.valueOf(user.getmUserId()), newAvatar);
+			}
 		}
-		Long key = Long.valueOf(uid);
-		mAvatarBmHolder.put(key, bm);
-	}
+		
+	};
 
 }

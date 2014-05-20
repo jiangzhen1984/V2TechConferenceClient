@@ -19,6 +19,9 @@ public class VideoMixerRequest {
 	public static synchronized VideoMixerRequest getInstance() {
 		if (mVideoMixerRequest == null) {
 			mVideoMixerRequest = new VideoMixerRequest();
+			if (!mVideoMixerRequest.initialize(mVideoMixerRequest)) {
+				V2Log.e(" VideoMixerRequest initialize failed");
+			}
 		}
 		return mVideoMixerRequest;
 	}
@@ -31,7 +34,7 @@ public class VideoMixerRequest {
 	}
 	
 
-	public native boolean initialize(GroupRequest instance);
+	public native boolean initialize(VideoMixerRequest instance);
 
 	public native void unInitialize();
 
@@ -48,7 +51,7 @@ public class VideoMixerRequest {
 
 	private void OnCreateVideoMixer(String sMediaId, int layout, int width,
 			int height) {
-		V2Log.d("OnCreateVideoMixer-->" + sMediaId + "   " + layout + "  "
+		V2Log.d("OnCreateVideoMixer--> sMediaId :" + sMediaId + "   " + layout + "  "
 				+ width + "  " + height);
 
 		for (WeakReference<VideoMixerRequestCallback> we : callbacks) {

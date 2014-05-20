@@ -81,7 +81,6 @@ public class MainApplication extends Application {
 		WBRequest.getInstance(getApplicationContext());
 		ChatRequest.getInstance(getApplicationContext());
 		VideoMixerRequest.getInstance();
-		VideoMixerRequest.getInstance().initialize(GroupRequest.getInstance());
 
 		getApplicationContext().startService(
 				new Intent(getApplicationContext(), JNIService.class));

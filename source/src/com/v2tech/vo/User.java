@@ -1,7 +1,6 @@
 package com.v2tech.vo;
 
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.DateFormat;
@@ -30,11 +29,8 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.util.DisplayMetrics;
 
 import com.v2tech.service.GlobalHolder;
-import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.V2Log;
 
 /**
@@ -379,53 +375,16 @@ public class User implements Comparable<User> {
 
 	public void setAvatarPath(String avatarPath) {
 		this.mAvatarPath = avatarPath;
-		if (avatar != null) {
-			avatar.recycle();
-			avatar = null;
-		}
 	}
 
 	private Bitmap avatar;
 
-	public synchronized Bitmap getAvatarBitmap() {
-		if (avatar != null && !avatar.isRecycled()) {
-			return avatar;
-		}
-		if (mAvatarPath == null) {
-			String path = GlobalHolder.getInstance()
-					.getAvatarPath(this.mUserId);
-			if (path == null) {
-				return null;
-			}
-			mAvatarPath = path;
-		}
-		File f = new File(mAvatarPath);
-		if (!f.exists()) {
-			return null;
-		}
-
-		avatar = GlobalHolder.getInstance().getAvatarBm(this.mUserId);
-		if (avatar == null || avatar.isRecycled()) {
-			BitmapFactory.Options opt = new BitmapFactory.Options();
-			Bitmap tmep = BitmapFactory.decodeFile(mAvatarPath, opt);
-			if (tmep == null) {
-				V2Log.i(" bitmap object is null");
-				return null;
-			}
-			if (GlobalConfig.GLOBAL_DPI == DisplayMetrics.DENSITY_HIGH) {
-				avatar = Bitmap.createScaledBitmap(tmep, 60, 60, true);
-			} else if (GlobalConfig.GLOBAL_DPI == DisplayMetrics.DENSITY_XHIGH) {
-				avatar = Bitmap.createScaledBitmap(tmep, 100, 100, true);
-			} else if (GlobalConfig.GLOBAL_DPI == DisplayMetrics.DENSITY_XXHIGH) {
-				avatar = Bitmap.createScaledBitmap(tmep, 100, 100, true);
-			} else {
-				avatar = Bitmap.createScaledBitmap(tmep, 60, 60, true);
-			}
-			tmep.recycle();
-			V2Log.d("decode result: width " + avatar.getWidth() + "  height:"
-					+ avatar.getHeight());
-		}
+	public Bitmap getAvatarBitmap() {
 		return avatar;
+	}
+	
+	public void setAvatarBitmap(Bitmap bm) {
+		this.avatar = bm;
 	}
 
 	@Override

@@ -109,7 +109,8 @@ public class VideoDocLayout extends LinearLayout {
 		mShowDocListButton.setOnClickListener(showDocListListener);
 		mRequestFixedPosButton = view.findViewById(R.id.video_doc_pin_button);
 		mRequestFixedPosButton.setOnClickListener(mRequestFixedListener);
-		mRequestUpdateSizeButton  = (ImageView)view.findViewById(R.id.video_doc_screen_button);
+		mRequestUpdateSizeButton = (ImageView) view
+				.findViewById(R.id.video_doc_screen_button);
 		mRequestUpdateSizeButton.setOnClickListener(mUpdateSizeListener);
 
 		this.addView(view, new LinearLayout.LayoutParams(
@@ -149,18 +150,22 @@ public class VideoDocLayout extends LinearLayout {
 			for (Entry<String, V2Doc> e : mDocs.entrySet()) {
 				View v = addViewToDoc(e.getValue());
 				if (e.getValue() == mCurrentDoc) {
-					currActivateView = v; 
+					currActivateView = v;
 				}
 			}
-			
-			view.measure(container.getMeasuredWidth(), container.getMeasuredHeight());
-			mDocListWindowScroller.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
-			mDodListContainer.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
+
+			view.measure(container.getMeasuredWidth(),
+					container.getMeasuredHeight());
+			mDocListWindowScroller.measure(View.MeasureSpec.UNSPECIFIED,
+					View.MeasureSpec.UNSPECIFIED);
+			mDodListContainer.measure(View.MeasureSpec.UNSPECIFIED,
+					View.MeasureSpec.UNSPECIFIED);
 			if (currActivateView != null) {
-				currActivateView.measure(View.MeasureSpec.EXACTLY, View.MeasureSpec.EXACTLY);
+				currActivateView.measure(View.MeasureSpec.EXACTLY,
+						View.MeasureSpec.EXACTLY);
 				mDocListWindowScroller.computeScroll();
-				mDocListWindowScroller.scrollTo(0, currActivateView
-						.getBottom());
+				mDocListWindowScroller
+						.scrollTo(0, currActivateView.getBottom());
 			}
 		}
 		if (mDocListWindow.isShowing()) {
@@ -175,6 +180,8 @@ public class VideoDocLayout extends LinearLayout {
 
 			mDocListWindow.showAtLocation(anchor, Gravity.NO_GRAVITY, l[0],
 					l[1] - mDocListWindow.getHeight());
+			
+			moveToShowedTab();
 		}
 	}
 
@@ -251,6 +258,10 @@ public class VideoDocLayout extends LinearLayout {
 		updateLayoutPageInformation();
 		updatePageButton();
 
+		moveToShowedTab();
+	}
+
+	private void moveToShowedTab() {
 		// Update selected doc
 		for (int i = 0; mDodListContainer != null
 				&& i < mDodListContainer.getChildCount(); i++) {
@@ -364,35 +375,32 @@ public class VideoDocLayout extends LinearLayout {
 	public void setListener(DocListener listener) {
 		this.listener = listener;
 	}
-	
-	
+
 	/**
-	 * Used to manually request FloatLayout, Because when this layout
-	 * will hide, call this function to information interface
+	 * Used to manually request FloatLayout, Because when this layout will hide,
+	 * call this function to information interface
 	 */
 	public void requestFloatLayout() {
 		if (this.listener != null) {
 			this.listener.requestFloatLayout(rootView);
 		}
-		
+
 		mRequestFixedPosButton.setTag("float");
 	}
 
-
 	/**
-	 * Used to manually request requestRestore, Because when this layout
-	 * will hide, call this function to information interface
+	 * Used to manually request requestRestore, Because when this layout will
+	 * hide, call this function to information interface
 	 */
 	public void requestRestore() {
 		if (this.listener != null) {
 			this.listener.requestRestore(rootView);
 		}
-		//restore image 
+		// restore image
 		mRequestUpdateSizeButton.setTag("fullscreen");
-		mRequestUpdateSizeButton.setImageResource(R.drawable.video_doc_full_screen_button_selector);
+		mRequestUpdateSizeButton
+				.setImageResource(R.drawable.video_doc_full_screen_button_selector);
 	}
-	
-	
 
 	public void addDoc(V2Doc doc) {
 		if (!mDocs.containsKey(doc.getId())) {
@@ -484,8 +492,7 @@ public class VideoDocLayout extends LinearLayout {
 			this.mCurrentBitMap.recycle();
 		}
 	}
-	
-	
+
 	public boolean isFullScreenSize() {
 		return "restorescreen".equals(mRequestUpdateSizeButton.getTag());
 	}
@@ -538,7 +545,8 @@ public class VideoDocLayout extends LinearLayout {
 			V2Doc d = (V2Doc) v.getTag();
 			if (d != mCurrentDoc) {
 				V2Doc.Page p = d.getActivatePage();
-				if (p == null ||p.getFilePath() == null || p.getFilePath().isEmpty()) {
+				if (p == null || p.getFilePath() == null
+						|| p.getFilePath().isEmpty()) {
 					Toast.makeText(getContext(),
 							R.string.warning_downloading_doc,
 							Toast.LENGTH_SHORT).show();
@@ -585,8 +593,7 @@ public class VideoDocLayout extends LinearLayout {
 		}
 
 	};
-	
-	
+
 	private OnClickListener mUpdateSizeListener = new OnClickListener() {
 
 		@Override
@@ -603,12 +610,14 @@ public class VideoDocLayout extends LinearLayout {
 
 			if (view.getTag().equals("fullscreen")) {
 				view.setTag("restorescreen");
-				mRequestUpdateSizeButton.setImageResource(R.drawable.video_doc_restore_screen_button_selector);
+				mRequestUpdateSizeButton
+						.setImageResource(R.drawable.video_doc_restore_screen_button_selector);
 			} else {
 				view.setTag("fullscreen");
-				mRequestUpdateSizeButton.setImageResource(R.drawable.video_doc_full_screen_button_selector);
+				mRequestUpdateSizeButton
+						.setImageResource(R.drawable.video_doc_full_screen_button_selector);
 			}
 		}
-		
+
 	};
 }

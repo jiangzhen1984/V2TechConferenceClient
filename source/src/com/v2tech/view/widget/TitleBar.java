@@ -33,6 +33,9 @@ import com.v2tech.view.PublicIntent;
 import com.v2tech.vo.NetworkStateCode;
 
 public class TitleBar {
+	
+	public static int TITLE_BAR_TYPE_PLUS = 1;
+	public static int TITLE_BAR_TYPE_MORE = 2;
 
 	private Context context;
 

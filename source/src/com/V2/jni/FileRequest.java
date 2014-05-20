@@ -1,18 +1,14 @@
 package com.V2.jni;
 
 
-import java.io.File;
-
 //import com.xinlan.im.bean.msgtype.FileTransAccepted_MsgType;
 //import com.xinlan.im.bean.msgtype.InvitedMsgType;
 //import com.xinlan.im.bean.msgtype.MsgType;
 //import com.xinlan.im.ui.SplashActivity;
 //import com.xinlan.im.ui.chat.FileDownloadActivity;
 //import com.xinlan.im.utils.Constant;
-
 import android.content.Context;
-import android.content.Intent;
-import android.os.Bundle;
+
 import android.util.Log;
 
 

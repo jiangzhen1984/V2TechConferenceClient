@@ -31,9 +31,9 @@ import android.widget.ListView;
 
 import com.v2tech.R;
 import com.v2tech.db.ContentDescriptor;
+import com.v2tech.service.BitmapManager;
 import com.v2tech.service.ConferenceService;
 import com.v2tech.service.GlobalHolder;
-import com.v2tech.util.BitmapUtil;
 import com.v2tech.util.V2Log;
 import com.v2tech.view.conference.GroupLayout;
 import com.v2tech.view.conference.VideoActivityV2;
@@ -46,16 +46,17 @@ import com.v2tech.vo.Group;
 import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.User;
 
-public class ConversationsTabFragment extends Fragment {
+public class ConversationsTabFragment extends Fragment implements TextWatcher,
+		ActionListener {
 
 	private static final int FILL_CONFS_LIST = 2;
 	private static final int UPDATE_USER_SIGN = 8;
-	private static final int UPDATE_USER_AVATAR = 9;
 	private static final int UPDATE_CONVERSATION = 10;
 	private static final int UPDATE_SEARCHED_LIST = 11;
 	private static final int REMOVE_CONVERSATION = 12;
 
 	private static final int SUB_ACTIVITY_CODE_VIDEO_ACTIVITY = 0;
+	private static final int SUB_ACTIVITY_CODE_CREATE_CONF = 100;
 
 	private Tab1BroadcastReceiver receiver = new Tab1BroadcastReceiver();
 	private IntentFilter intentFilter;
@@ -72,7 +73,6 @@ public class ConversationsTabFragment extends Fragment {
 	private boolean isInMeeting = false;
 
 	private View rootView;
-	
 
 	private List<ScrollItem> mItemList = new CopyOnWriteArrayList<ScrollItem>();
 	private List<ScrollItem> mCacheItemList;
@@ -86,8 +86,6 @@ public class ConversationsTabFragment extends Fragment {
 	private ConferenceService cb;
 
 	private String mCurrentTabFlag;
-
-	
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -103,6 +101,8 @@ public class ConversationsTabFragment extends Fragment {
 		getActivity().registerReceiver(receiver, getIntentFilter());
 		mContext = getActivity();
 		cb = new ConferenceService();
+		
+		BitmapManager.getInstance().registerBitmapChangedListener(this.bitmapChangedListener);
 	}
 
 	@Override
@@ -117,15 +117,16 @@ public class ConversationsTabFragment extends Fragment {
 			mConversationsListView.setAdapter(adapter);
 			mLoadingImageIV = (ImageView) rootView
 					.findViewById(R.id.conference_loading_icon);
-		
-//			TextView tv = (TextView) rootView.findViewById(R.id.fragment_title);
-//			if (mCurrentTabFlag.equals(Conversation.TYPE_CONFERNECE)) {
-//				tv.setText(R.string.tab_conference_name);
-//			} else if (mCurrentTabFlag.equals(Conversation.TYPE_CONTACT)) {
-//				tv.setText(R.string.tab_conversation_name);
-//			} else if (mCurrentTabFlag.equals(Conversation.TYPE_GROUP)) {
-//				tv.setText(R.string.tab_group_name);
-//			}
+
+			// TextView tv = (TextView)
+			// rootView.findViewById(R.id.fragment_title);
+			// if (mCurrentTabFlag.equals(Conversation.TYPE_CONFERNECE)) {
+			// tv.setText(R.string.tab_conference_name);
+			// } else if (mCurrentTabFlag.equals(Conversation.TYPE_CONTACT)) {
+			// tv.setText(R.string.tab_conversation_name);
+			// } else if (mCurrentTabFlag.equals(Conversation.TYPE_GROUP)) {
+			// tv.setText(R.string.tab_group_name);
+			// }
 
 		}
 		return rootView;
@@ -154,6 +155,7 @@ public class ConversationsTabFragment extends Fragment {
 		getActivity().unregisterReceiver(receiver);
 		isLoaded = false;
 		mItemList.clear();
+		BitmapManager.getInstance().unRegisterBitmapChangedListener(this.bitmapChangedListener);
 	}
 
 	@Override
@@ -177,8 +179,6 @@ public class ConversationsTabFragment extends Fragment {
 			intentFilter.addCategory(PublicIntent.DEFAULT_CATEGORY);
 			intentFilter
 					.addAction(JNIService.JNI_BROADCAST_USER_UPDATE_NAME_OR_SIGNATURE);
-			intentFilter
-					.addAction(JNIService.JNI_BROADCAST_USER_AVATAR_CHANGED_NOTIFICATION);
 			intentFilter.addCategory(PublicIntent.DEFAULT_CATEGORY);
 			intentFilter.addAction(PublicIntent.UPDATE_CONVERSATION);
 			intentFilter
@@ -208,17 +208,9 @@ public class ConversationsTabFragment extends Fragment {
 		super.onStop();
 	}
 
-	@Override
-	public void onActivityResult(int requestCode, int resultCode, Intent data) {
-		if (requestCode == SUB_ACTIVITY_CODE_VIDEO_ACTIVITY) {
-			isInMeeting = false;
-		} 
-	}
-
 	/**
 	 * FIXME optimize code
 	 */
-	
 
 	private void populateConversation(final Group g, boolean flag) {
 		// FIXME
@@ -268,9 +260,6 @@ public class ConversationsTabFragment extends Fragment {
 
 	}
 
-	
-	
-
 	private OnClickListener mEnterConfListener = new OnClickListener() {
 
 		@Override
@@ -291,49 +280,69 @@ public class ConversationsTabFragment extends Fragment {
 
 	};
 
-	private TextWatcher searchListener = new TextWatcher() {
+	@Override
+	public void afterTextChanged(Editable s) {
 
-		@Override
-		public void afterTextChanged(Editable s) {
-		}
-
-		@Override
-		public void beforeTextChanged(CharSequence s, int start, int count,
-				int after) {
-
-		}
-
-		@Override
-		public void onTextChanged(CharSequence s, int start, int before,
-				int count) {
-
-			if (s != null && s.length() > 0) {
-				if (!mIsStartedSearch) {
-					mCacheItemList = mItemList;
-					mIsStartedSearch = true;
-				}
-			} else {
-				mItemList = mCacheItemList;
-				adapter.notifyDataSetChanged();
-				mIsStartedSearch = false;
-				return;
+		if (s != null && s.length() > 0) {
+			if (!mIsStartedSearch) {
+				mCacheItemList = mItemList;
+				mIsStartedSearch = true;
 			}
-			List<ScrollItem> newItemList = new ArrayList<ScrollItem>();
-			String searchKey = s == null ? "" : s.toString();
-			for (ScrollItem item : mItemList) {
-				if (item.cov.getName() != null
-						&& item.cov.getName().contains(searchKey)) {
-					newItemList.add(item);
-				} else if (item.cov.getMsg() != null
-						&& item.cov.getMsg().contains(searchKey)) {
-					newItemList.add(item);
-				}
-			}
-			mItemList = newItemList;
+		} else {
+			mItemList = mCacheItemList;
 			adapter.notifyDataSetChanged();
+			mIsStartedSearch = false;
+			return;
+		}
+		List<ScrollItem> newItemList = new ArrayList<ScrollItem>();
+		String searchKey = s == null ? "" : s.toString();
+		for (ScrollItem item : mItemList) {
+			if (item.cov.getName() != null
+					&& item.cov.getName().contains(searchKey)) {
+				newItemList.add(item);
+			} else if (item.cov.getMsg() != null
+					&& item.cov.getMsg().contains(searchKey)) {
+				newItemList.add(item);
+			}
+		}
+		mItemList = newItemList;
+		adapter.notifyDataSetChanged();
+	}
+
+	@Override
+	public void beforeTextChanged(CharSequence s, int start, int count,
+			int after) {
+
+	}
+
+	@Override
+	public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+	}
+
+	@Override
+	public void listenGroupCreated(Group g) {
+		if (g == null) {
+			V2Log.e("Unmatformd group infor");
+			return;
+		}
+		if (mCurrentTabFlag == Conversation.TYPE_CONFERNECE
+				&& g.getGroupType() == GroupType.CONFERENCE) {
+			// if (g != null) {
+			Conversation cov = new ConferenceConversation(g);
+			final GroupLayout gp = new GroupLayout(getActivity(), cov);
+			gp.setOnClickListener(mEnterConfListener);
+
+			mItemList.add(0, new ScrollItem(cov, gp));
+			adapter.notifyDataSetChanged();
+
+			Intent i = new Intent(getActivity(), VideoActivityV2.class);
+			i.putExtra("gid", g.getmGId());
+			startActivityForResult(i, SUB_ACTIVITY_CODE_VIDEO_ACTIVITY);
+
 		}
 
-	};
+	}
 
 	private void loadConversation() {
 		isLoadedCov = true;
@@ -355,6 +364,9 @@ public class ConversationsTabFragment extends Fragment {
 			}
 		}
 		mCur.close();
+		// Notification main activity tab to show notification icon
+		((NotificationListener) getActivity())
+				.updateNotificator(Conversation.TYPE_CONTACT);
 	}
 
 	private Conversation extractConversation(Cursor cur) {
@@ -399,7 +411,7 @@ public class ConversationsTabFragment extends Fragment {
 		}
 
 		if (!foundFlag) {
-			Conversation cov =  GlobalHolder.getInstance()
+			Conversation cov = GlobalHolder.getInstance()
 					.findConversationByType(mCurrentTabFlag, extId);
 			if (cov == null) {
 				if (mCurrentTabFlag.equals(Conversation.TYPE_CONTACT)) {
@@ -451,7 +463,7 @@ public class ConversationsTabFragment extends Fragment {
 			GlobalHolder.getInstance().removeConversation(type, id);
 			// FIXME remove notification?
 		} else if (Conversation.TYPE_CONFERNECE.equals(type)) {
-			//remove group from list
+			// remove group from list
 			for (Group g : mConferenceList) {
 				if (g.getmGId() == id) {
 					mConferenceList.remove(g);
@@ -487,6 +499,20 @@ public class ConversationsTabFragment extends Fragment {
 		}
 
 	}
+
+	private BitmapManager.BitmapChangedListener bitmapChangedListener = new BitmapManager.BitmapChangedListener() {
+
+		@Override
+		public void notifyAvatarChanged(User user, Bitmap bm) {
+			for (ScrollItem item : mItemList) {
+				if (Conversation.TYPE_CONTACT.equals(item.cov.getType())
+						&& item.cov.getExtId() == user.getmUserId()) {
+					((GroupLayout) item.gp).updateIcon(bm);
+				}
+			}
+
+		}
+	};
 
 	private OnLongClickListener mLongClickListener = new OnLongClickListener() {
 
@@ -578,11 +604,6 @@ public class ConversationsTabFragment extends Fragment {
 					Message.obtain(mHandler, UPDATE_USER_SIGN,
 							intent.getExtras().get("uid")).sendToTarget();
 				}
-			} else if (JNIService.JNI_BROADCAST_USER_AVATAR_CHANGED_NOTIFICATION
-					.equals(intent.getAction())) {
-				Object[] ar = new Object[] { intent.getExtras().get("uid"),
-						intent.getExtras().get("avatar") };
-				Message.obtain(mHandler, UPDATE_USER_AVATAR, ar).sendToTarget();
 			} else if (PublicIntent.UPDATE_CONVERSATION.equals(intent
 					.getAction())) {
 				Object[] ar = new Object[] { intent.getLongExtra("extId", 0),
@@ -590,7 +611,8 @@ public class ConversationsTabFragment extends Fragment {
 						intent.getExtras().getString("content"),
 						intent.getExtras().getString("date"),
 						intent.getExtras().getBoolean("noti") };
-				if (JNIService.JNI_BROADCAST_CONFERENCE_REMOVED.equals(intent.getStringExtra("action"))) {
+				if (JNIService.JNI_BROADCAST_CONFERENCE_REMOVED.equals(intent
+						.getStringExtra("action"))) {
 					return;
 				}
 				if (mCurrentTabFlag.equals(ar[1])) {
@@ -711,29 +733,6 @@ public class ConversationsTabFragment extends Fragment {
 						updateConversationToDB(fromuidS,
 								u == null ? "" : u.getName());
 						break;
-					}
-				}
-				break;
-			case UPDATE_USER_AVATAR:
-				Object[] arObj = (Object[]) msg.obj;
-				for (ScrollItem item : mItemList) {
-					if (Conversation.TYPE_CONTACT.equals(item.cov.getType())
-							&& item.cov.getExtId() == (Long) arObj[0]) {
-						User u = GlobalHolder.getInstance().getUser(
-								item.cov.getExtId());
-						if (u != null) {
-							((GroupLayout) item.gp).updateIcon(u
-									.getAvatarBitmap());
-						} else {
-							// FIXME handle concurrency
-							Bitmap bm = BitmapUtil
-									.loadAvatarFromPath(GlobalHolder
-											.getInstance().getAvatarPath(
-													item.cov.getExtId()));
-							GlobalHolder.getInstance().saveAvatar(
-									item.cov.getExtId(), bm);
-							((GroupLayout) item.gp).updateIcon(bm);
-						}
 					}
 				}
 				break;

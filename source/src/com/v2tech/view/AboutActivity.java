@@ -16,8 +16,16 @@ public class AboutActivity extends Activity {
 		setContentView(R.layout.about);
 		mVersion = (TextView)findViewById(R.id.about_version);
 		mVersion.setText(GlobalConfig.GLOBAL_VERSION_NAME);
+		this.overridePendingTransition(R.animator.alpha_from_0_to_1, R.animator.alpha_from_1_to_0);
+	}
+	@Override
+	public void finish() {
+		super.finish();
+		this.overridePendingTransition(R.animator.alpha_from_0_to_1, R.animator.alpha_from_1_to_0);
 	}
 	
 	
 
+	
+	
 }

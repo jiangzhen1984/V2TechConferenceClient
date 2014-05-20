@@ -8,6 +8,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -15,42 +16,36 @@ import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.TextView;
 
 import com.v2tech.R;
+import com.v2tech.service.BitmapManager;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.util.V2Log;
 import com.v2tech.view.bo.UserStatusObject;
 import com.v2tech.view.contacts.ContactGroupView;
 import com.v2tech.view.contacts.ContactUserView;
-import com.v2tech.view.widget.TitleBar;
 import com.v2tech.vo.Group;
 import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.User;
 
-public class ContactsTabFragment extends Fragment {
+public class ContactsTabFragment extends Fragment implements TextWatcher {
 
 	private static final int FILL_CONTACTS_GROUP = 2;
 	private static final int UPDATE_LIST_VIEW = 3;
 	private static final int UPDATE_GROUP_STATUS = 4;
 	private static final int UPDATE_USER_STATUS = 5;
 	private static final int UPDATE_SEARCHED_USER_LIST = 6;
-	private static final int UPDATE_USER_AVATAR = 7;
 	private static final int UPDATE_USER_SIGN = 8;
 
 	private Context mContext;
-	
+
 	private Tab1BroadcastReceiver receiver = new Tab1BroadcastReceiver();
 	private IntentFilter intentFilter;
 
@@ -73,7 +68,7 @@ public class ContactsTabFragment extends Fragment {
 	private static final int TAG_CONTACT = 2;
 
 	private int flag;
-	
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -84,8 +79,10 @@ public class ContactsTabFragment extends Fragment {
 		} else if (PublicIntent.TAG_CONTACT.equals(tag)) {
 			flag = TAG_CONTACT;
 		}
-		
+
 		mContext = getActivity();
+		
+		BitmapManager.getInstance().registerBitmapChangedListener(this.bitmapChangedListener);
 	}
 
 	@Override
@@ -114,13 +111,12 @@ public class ContactsTabFragment extends Fragment {
 		});
 		mContactsContainer.setDivider(null);
 
-	
-//		TextView tv = (TextView) rootView.findViewById(R.id.fragment_title);
-//		if (flag == TAG_ORG) {
-//			tv.setText(R.string.tab_org_name);
-//		} else if (flag == TAG_CONTACT) {
-//			tv.setText(R.string.tab_contact_name);
-//		}
+		// TextView tv = (TextView) rootView.findViewById(R.id.fragment_title);
+		// if (flag == TAG_ORG) {
+		// tv.setText(R.string.tab_org_name);
+		// } else if (flag == TAG_CONTACT) {
+		// tv.setText(R.string.tab_contact_name);
+		// }
 
 		return rootView;
 	}
@@ -136,6 +132,7 @@ public class ContactsTabFragment extends Fragment {
 		super.onDestroy();
 		mLoaded = false;
 		getActivity().unregisterReceiver(receiver);
+		BitmapManager.getInstance().unRegisterBitmapChangedListener(this.bitmapChangedListener);
 	}
 
 	@Override
@@ -156,23 +153,18 @@ public class ContactsTabFragment extends Fragment {
 			intentFilter = new IntentFilter();
 			intentFilter.addAction(JNIService.JNI_BROADCAST_GROUP_NOTIFICATION);
 			intentFilter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
-			intentFilter
-					.addAction(JNIService.JNI_BROADCAST_GROUP_USER_ADDED);
+			intentFilter.addAction(JNIService.JNI_BROADCAST_GROUP_USER_ADDED);
 			intentFilter
 					.addAction(JNIService.JNI_BROADCAST_USER_STATUS_NOTIFICATION);
 			intentFilter
 					.addAction(JNIService.JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION);
-			intentFilter
-					.addAction(JNIService.JNI_BROADCAST_USER_AVATAR_CHANGED_NOTIFICATION);
+
 			intentFilter
 					.addAction(JNIService.JNI_BROADCAST_USER_UPDATE_NAME_OR_SIGNATURE);
 		}
 		return intentFilter;
 	}
 
-	
-	
-	
 	List<Group> l;
 
 	private synchronized void fillContactsGroup() {
@@ -210,12 +202,12 @@ public class ContactsTabFragment extends Fragment {
 		}
 
 		private void iterateGroup(Group g) {
-//			for (User u : g.getUsers()) {
-//				ListItem liu = new ListItem(u, g.getLevel() + 1);
-//			}
-//			for (Group subG : g.getChildGroup()) {
-//				ListItem lisubg = new ListItem(subG, g.getLevel());
-//			}
+			// for (User u : g.getUsers()) {
+			// ListItem liu = new ListItem(u, g.getLevel() + 1);
+			// }
+			// for (Group subG : g.getChildGroup()) {
+			// ListItem lisubg = new ListItem(subG, g.getLevel());
+			// }
 		}
 
 		@Override
@@ -235,71 +227,62 @@ public class ContactsTabFragment extends Fragment {
 				Message.obtain(mHandler, FILL_CONTACTS_GROUP).sendToTarget();
 			} else if (JNIService.JNI_BROADCAST_USER_STATUS_NOTIFICATION
 					.equals(intent.getAction())) {
-				Message.obtain(mHandler, UPDATE_USER_STATUS, intent.getExtras().get("status"))
-						.sendToTarget();
+				Message.obtain(mHandler, UPDATE_USER_STATUS,
+						intent.getExtras().get("status")).sendToTarget();
 			} else if (JNIService.JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION
 					.equals(intent.getAction())) {
 				V2Log.d(" update  status  JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION");
 				Message.obtain(mHandler, UPDATE_GROUP_STATUS).sendToTarget();
-			} else if (JNIService.JNI_BROADCAST_USER_AVATAR_CHANGED_NOTIFICATION
-					.equals(intent.getAction())) {
-				Object[] ar = new Object[] { intent.getExtras().get("uid"),
-						intent.getExtras().get("avatar") };
-				Message.obtain(mHandler, UPDATE_USER_AVATAR, ar).sendToTarget();
-			} else if (JNIService.JNI_BROADCAST_USER_UPDATE_NAME_OR_SIGNATURE
+			}else if (JNIService.JNI_BROADCAST_USER_UPDATE_NAME_OR_SIGNATURE
 					.equals(intent.getAction())) {
 				Message.obtain(mHandler, UPDATE_USER_SIGN,
 						intent.getExtras().get("uid")).sendToTarget();
-			} else if (JNIService.JNI_BROADCAST_GROUP_USER_ADDED.equals(intent.getAction())) {
+			} else if (JNIService.JNI_BROADCAST_GROUP_USER_ADDED.equals(intent
+					.getAction())) {
 				// Update all group staticist information
 				for (ListItem item : mItemList) {
 					if (item.g != null) {
-						((ContactGroupView)item.v).updateUserStatus();
+						((ContactGroupView) item.v).updateUserStatus();
 					}
 				}
 			}
-			
+
 		}
 
 	}
 
-	private TextWatcher textChangedListener = new TextWatcher() {
-
-		@Override
-		public void afterTextChanged(Editable s) {
-
-		}
-
-		@Override
-		public void beforeTextChanged(CharSequence s, int start, int count,
-				int after) {
-
-		}
-
-		@Override
-		public void onTextChanged(CharSequence s, int start, int before,
-				int count) {
-			if (s != null && s.length() > 0) {
-				if (!mIsStartedSearch) {
-					mCacheItemList = mItemList;
-					mIsStartedSearch = true;
-				}
-			} else {
-				mItemList = mCacheItemList;
-				adapter.notifyDataSetChanged();
-				mIsStartedSearch = false;
-				return;
+	@Override
+	public void afterTextChanged(Editable s) {
+		if (s != null && s.length() > 0) {
+			if (!mIsStartedSearch) {
+				mCacheItemList = mItemList;
+				mIsStartedSearch = true;
 			}
-			String str = s == null ? "" : s.toString();
-			List<User> searchedUserList = new ArrayList<User>();
-			for (Group g : l) {
-				Group.searchUser(str, searchedUserList, g);
-			}
-			Message.obtain(mHandler, UPDATE_SEARCHED_USER_LIST,
-					searchedUserList).sendToTarget();
+		} else {
+			mItemList = mCacheItemList;
+			adapter.notifyDataSetChanged();
+			mIsStartedSearch = false;
+			return;
 		}
+		String str = s == null ? "" : s.toString();
+		List<User> searchedUserList = new ArrayList<User>();
+		for (Group g : l) {
+			Group.searchUser(str, searchedUserList, g);
+		}
+		Message.obtain(mHandler, UPDATE_SEARCHED_USER_LIST, searchedUserList)
+				.sendToTarget();
+	}
 
-	};
+	@Override
+	public void beforeTextChanged(CharSequence s, int start, int count,
+			int after) {
+
+	}
+
+	@Override
+	public void onTextChanged(CharSequence s, int start, int before, int count) {
+		
+	}
 
 	private void updateView(int pos) {
 		ListItem item = mItemList.get(pos);
@@ -351,7 +334,8 @@ public class ContactsTabFragment extends Fragment {
 		adapter.notifyDataSetChanged();
 	}
 
-	private void updateUserStatus(long userId, User.DeviceType deiType, User.Status status) {
+	private void updateUserStatus(long userId, User.DeviceType deiType,
+			User.Status status) {
 		for (ListItem li : mItemList) {
 			if (li.u != null && li.u.getmUserId() == userId) {
 				((ContactUserView) li.v).updateStatus(deiType, status);
@@ -359,7 +343,8 @@ public class ContactsTabFragment extends Fragment {
 		}
 	}
 
-	private synchronized void updateUserViewPostionV2(long userId, User.Status newSt) {
+	private synchronized void updateUserViewPostionV2(long userId,
+			User.Status newSt) {
 		V2Log.i(" Contacts update user status : " + userId + "  : " + newSt);
 		int startSortIndex = 0;
 		boolean foundUserView = false;
@@ -457,6 +442,20 @@ public class ContactsTabFragment extends Fragment {
 		}
 		adapter.notifyDataSetChanged();
 	}
+	
+	
+	
+	private BitmapManager.BitmapChangedListener bitmapChangedListener = new BitmapManager.BitmapChangedListener() {
+		
+		@Override
+		public void notifyAvatarChanged(User user, Bitmap bm) {
+			for (ListItem li : mItemList) {
+				if (li.u != null && li.u.getmUserId() ==  user.getmUserId()) {
+					((ContactUserView) li.v).updateAvatar(bm);
+				}
+			}
+		}
+	};
 
 	class ListItem {
 		long id;
@@ -535,27 +534,17 @@ public class ContactsTabFragment extends Fragment {
 				}
 				break;
 			case UPDATE_USER_STATUS:
-				UserStatusObject uso =(UserStatusObject) msg.obj;
-				updateUserStatus(uso.getUid(), User.DeviceType.fromInt(uso.getDeviceType()), User.Status.fromInt(uso.getStatus()));
-				
+				UserStatusObject uso = (UserStatusObject) msg.obj;
+				updateUserStatus(uso.getUid(),
+						User.DeviceType.fromInt(uso.getDeviceType()),
+						User.Status.fromInt(uso.getStatus()));
+
 				// FIXME update all users in all groups
-				updateUserViewPostionV2(uso.getUid(), User.Status.fromInt(uso.getStatus()));
+				updateUserViewPostionV2(uso.getUid(),
+						User.Status.fromInt(uso.getStatus()));
 				break;
 			case UPDATE_SEARCHED_USER_LIST:
 				updateSearchedUserList((List<User>) msg.obj);
-				break;
-			case UPDATE_USER_AVATAR:
-				Object[] ar = (Object[]) msg.obj;
-				for (ListItem li : mItemList) {
-					if (li.u != null && li.u.getmUserId() == (Long) ar[0]) {
-						if (li.u.getAvatarPath() == null) {
-							li.u.setAvatarPath(ar[1] == null ? null : ar[1]
-									.toString());
-						}
-						((ContactUserView) li.v).updateAvatar(li.u
-								.getAvatarBitmap());
-					}
-				}
 				break;
 			case UPDATE_USER_SIGN:
 				Long uid = (Long) msg.obj;

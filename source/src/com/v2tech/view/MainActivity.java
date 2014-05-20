@@ -17,6 +17,8 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -39,7 +41,7 @@ import com.v2tech.vo.Conversation;
 import com.v2tech.vo.Group;
 import com.v2tech.vo.Group.GroupType;
 
-public class MainActivity extends FragmentActivity {
+public class MainActivity extends FragmentActivity implements NotificationListener {
 
 	private Context mContext;
 	private boolean exitedFlag = false;
@@ -56,14 +58,13 @@ public class MainActivity extends FragmentActivity {
 	public static final String SERVICE_BOUNDED_EVENT = "com.v2tech.SERVICE_BOUNDED_EVENT";
 	public static final String SERVICE_UNBOUNDED_EVENT = "com.v2tech.SERVICE_UNBOUNDED_EVENT";
 
-	private int[] imgs = new int[] {
-			R.drawable.conversation_video_button,
+	private int[] imgs = new int[] { R.drawable.conversation_video_button,
 			R.drawable.conversation_call_button,
 			R.drawable.conversation_sms_button,
 			R.drawable.conversation_email_button,
 			R.drawable.conversation_files_button };
 
-	private int[] items = new int[] { 
+	private int[] items = new int[] {
 			R.string.conversation_popup_menu_video_call_button,
 			R.string.conversation_popup_menu_call_button,
 			R.string.conversation_popup_menu_sms_call_button,
@@ -147,9 +148,11 @@ public class MainActivity extends FragmentActivity {
 		View titleBarLayout = findViewById(R.id.title_bar_ly);
 		titleBar = new TitleBar(mContext, titleBarLayout);
 		initPlusItem();
-		//Initialize first title name
+		titleBar.regsiterSearchedTextListener(searchTextWatcher);
+
+		// Initialize first title name
 		titleBar.updateTitle(mTabClasses[0].mTabTitleId);
-		
+
 		this.initialiseTabHost(savedInstanceState);
 		if (savedInstanceState != null) {
 			mTabHost.setCurrentTabByTag(savedInstanceState.getString("tab"));
@@ -333,31 +336,19 @@ public class MainActivity extends FragmentActivity {
 	// TODO add implment
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		if (requestCode == SUB_ACTIVITY_CODE_CREATE_CONF) {
-			if (resultCode == Activity.RESULT_CANCELED) {
-				return;
-			}
 
-			if (resultCode == Activity.RESULT_OK) {
-				long gid = data.getLongExtra("newGid", 0);
-				Group g = GlobalHolder.getInstance().getGroupById(
-						GroupType.CONFERENCE, gid);
-				// if (g != null) {
-				// Conversation cov = new ConferenceConversation(g);
-				// final GroupLayout gp = new GroupLayout(this,
-				// cov);
-				// gp.setOnClickListener(mEnterConfListener);
-				//
-				// mItemList.add(0, new ScrollItem(cov, gp));
-				// adapter.notifyDataSetChanged();
-				//
-				// Intent i = new Intent(getActivity(), VideoActivityV2.class);
-				// i.putExtra("gid", g.getmGId());
-				// startActivityForResult(i, SUB_ACTIVITY_CODE_VIDEO_ACTIVITY);
-				//
-				// } else {
-				// V2Log.e(" Can not find created group id :" + gid);
-				// }
+		if (resultCode == Activity.RESULT_OK) {
+			long gid = data.getLongExtra("newGid", 0);
+			Group g = GlobalHolder.getInstance().getGroupById(
+					GroupType.CONFERENCE, gid);
+			int count = ((FragmentPagerAdapter) mViewPager.getAdapter())
+					.getCount();
+			for (int i = 0; i < count; i++) {
+				Fragment frg = ((FragmentPagerAdapter) mViewPager.getAdapter())
+						.getItem(i);
+				if (frg instanceof ActionListener) {
+					((ActionListener) frg).listenGroupCreated(g);
+				}
 			}
 		}
 	}
@@ -370,6 +361,54 @@ public class MainActivity extends FragmentActivity {
 				JNIService.class));
 		V2Log.d("system destroyed v2tech");
 	}
+	
+	
+	
+	public void updateNotificator(String type) {
+		
+		View noticator = null;
+		if (type.equals(Conversation.TYPE_GROUP)) {
+			noticator = mTabClasses[2].notificator;
+		} else if (type.equals(Conversation.TYPE_CONFERNECE)) {
+			noticator = mTabClasses[3].notificator;
+		} else if (type.equals(Conversation.TYPE_CONTACT)) {
+			noticator = mTabClasses[4].notificator;
+		}
+
+		V2Log.i("type:" + type + "  count:"
+				+ GlobalHolder.getInstance().getNoticatorCount(type));
+		if (noticator != null) {
+			if (GlobalHolder.getInstance().getNoticatorCount(type) > 0) {
+				noticator.setVisibility(View.VISIBLE);
+			} else {
+				noticator.setVisibility(View.GONE);
+			}
+		}
+		
+	}
+
+	private TextWatcher searchTextWatcher = new TextWatcher() {
+
+		@Override
+		public void afterTextChanged(Editable edit) {
+
+			((TextWatcher) ((FragmentPagerAdapter) mViewPager.getAdapter())
+					.getItem(mTabHost.getCurrentTab())).afterTextChanged(edit);
+		}
+
+		@Override
+		public void beforeTextChanged(CharSequence arg0, int arg1, int arg2,
+				int arg3) {
+
+		}
+
+		@Override
+		public void onTextChanged(CharSequence arg0, int arg1, int arg2,
+				int arg3) {
+
+		}
+
+	};
 
 	private OnClickListener titleBarMenuItemClickListener = new OnClickListener() {
 
@@ -377,8 +416,7 @@ public class MainActivity extends FragmentActivity {
 		public void onClick(View view) {
 			int id = view.getId();
 			switch (id) {
-			case R.drawable.conversation_video_button:
-			{
+			case R.drawable.conversation_video_button: {
 				titleBar.dismissPlusWindow();
 				Intent i = new Intent(
 						PublicIntent.START_CONFERENCE_CREATE_ACTIVITY);
@@ -481,24 +519,7 @@ public class MainActivity extends FragmentActivity {
 			String action = intent.getAction();
 			if (PublicIntent.UPDATE_CONVERSATION.equals(action)) {
 				String type = intent.getExtras().getString("type");
-				View noticator = null;
-				if (type.equals(Conversation.TYPE_GROUP)) {
-					noticator = mTabClasses[2].notificator;
-				} else if (type.equals(Conversation.TYPE_CONFERNECE)) {
-					noticator = mTabClasses[3].notificator;
-				} else if (type.equals(Conversation.TYPE_CONTACT)) {
-					noticator = mTabClasses[4].notificator;
-				}
-
-				V2Log.i("type:" + type + "  count:"
-						+ GlobalHolder.getInstance().getNoticatorCount(type));
-				if (noticator != null) {
-					if (GlobalHolder.getInstance().getNoticatorCount(type) > 0) {
-						noticator.setVisibility(View.VISIBLE);
-					} else {
-						noticator.setVisibility(View.GONE);
-					}
-				}
+				updateNotificator(type);
 			} else if (PublicIntent.FINISH_APPLICATION.equals(action)) {
 				exitedFlag = true;
 				requestQuit();

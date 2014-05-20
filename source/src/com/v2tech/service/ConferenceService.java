@@ -661,6 +661,10 @@ public class ConferenceService extends AbstractHandler {
 		@Override
 		public void OnCreateVideoMixerCallback(String sMediaId, int layout,
 				int width, int height) {
+			if (sMediaId == null || sMediaId.isEmpty()) {
+				V2Log.e(" OnCreateVideoMixerCallback -- > unlmatform parameter sMediaId is null ");
+				return;
+			}
 			notifyListener(1, new MixVideo(sMediaId, MixVideo.LayoutType.fromInt(layout)));
 		}
 

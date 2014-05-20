@@ -36,12 +36,14 @@ import com.V2.jni.VideoRequest;
 import com.V2.jni.VideoRequestCallback;
 import com.v2tech.R;
 import com.v2tech.db.ContentDescriptor;
+import com.v2tech.service.BitmapManager;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.Notificator;
 import com.v2tech.util.V2Log;
 import com.v2tech.util.XmlParser;
 import com.v2tech.view.bo.GroupUserObject;
+import com.v2tech.view.bo.UserAvatarObject;
 import com.v2tech.view.bo.UserStatusObject;
 import com.v2tech.view.conference.VideoActivityV2;
 import com.v2tech.vo.ConferenceGroup;
@@ -72,6 +74,12 @@ public class JNIService extends Service {
 	public static final String JNI_BROADCAST_CATEGROY = "com.v2tech.jni.broadcast";
 	public static final String JNI_BROADCAST_CONNECT_STATE_NOTIFICATION = "com.v2tech.jni.broadcast.connect_state_notification";
 	public static final String JNI_BROADCAST_USER_STATUS_NOTIFICATION = "com.v2tech.jni.broadcast.user_stauts_notification";
+	
+	/**
+	 * Notify user avatar changed, notice please do not listen this broadcast if you are UI. 
+	 * Use {@link BitmapManager#registerBitmapChangedListener(com.v2tech.service.BitmapManager.BitmapChangedListener)}
+	 * to listener bitmap change if you are UI.
+	 */
 	public static final String JNI_BROADCAST_USER_AVATAR_CHANGED_NOTIFICATION = "com.v2tech.jni.broadcast.user_avatar_notification";
 	public static final String JNI_BROADCAST_USER_UPDATE_NAME_OR_SIGNATURE = "com.v2tech.jni.broadcast.user_update_sigature";
 	public static final String JNI_BROADCAST_GROUP_NOTIFICATION = "com.v2tech.jni.broadcast.group_geted";
@@ -535,22 +543,13 @@ public class JNIService extends Service {
 				AvatarName = null;
 			}
 
-			//FIXME should not update bitmap  at here.
-			// because should update imgage view first then update bitmap
 			
-			User u = GlobalHolder.getInstance().getUser(nUserID);
-			if (u != null) {
-				u.setAvatarPath(AvatarName);
-			} else {
-				V2Log.e(" Doesn't receive user data :" + nUserID);
-			}
 			GlobalHolder.getInstance().putAvatar(nUserID, AvatarName);
 
 			Intent i = new Intent();
 			i.addCategory(JNI_BROADCAST_CATEGROY);
 			i.setAction(JNI_BROADCAST_USER_AVATAR_CHANGED_NOTIFICATION);
-			i.putExtra("uid", nUserID);
-			i.putExtra("avatar", AvatarName);
+			i.putExtra("avatar", new UserAvatarObject(nUserID, AvatarName));
 			sendBroadcast(i);
 		}
 
