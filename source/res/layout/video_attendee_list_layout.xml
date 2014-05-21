@@ -2,8 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:alpha="0.7"
-    android:background="#ffffff"
+     android:alpha="0.7"
     android:orientation="vertical" >
 
     <RelativeLayout
@@ -11,6 +10,8 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
+        android:background="#ffffff"
+        
         android:orientation="horizontal" >
 
         <TextView
@@ -84,8 +85,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@id/LinearLayout3"
-        android:alpha="0.7"
-        android:background="#ffffff"
         android:divider="@null" >
     </ListView>
 

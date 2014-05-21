@@ -87,8 +87,6 @@
             android:layout_weight=".3"
             android:background="@drawable/button_bg"
             android:gravity="center"
-            android:paddingBottom="10dp"
-            android:paddingTop="10dp"
             android:text="@string/contact_message_send_button"
             android:textSize="15sp" />
     </LinearLayout>

@@ -37,6 +37,7 @@ import com.v2tech.service.jni.JNIResponse;
 import com.v2tech.service.jni.RequestLogInResponse;
 import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.SPUtil;
+import com.v2tech.util.V2Log;
 
 /**
  * Activity which displays a login screen to the user, offering registration as
@@ -71,6 +72,7 @@ public class LoginActivity extends Activity {
 	private Activity mContext;
 
 	private View loginView;
+	private Boolean isLoggingIn = false;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -308,27 +310,35 @@ public class LoginActivity extends Activity {
 			mPasswordView.setError(getString(R.string.error_field_required));
 			focusView = mPasswordView;
 			cancel = true;
-		} 
+		}
 
 		// Check for a valid email address.
 		if (TextUtils.isEmpty(mEmail)) {
 			mEmailView.setError(getString(R.string.error_field_required));
 			focusView = mEmailView;
 			cancel = true;
-		} 
+		}
 
 		if (cancel) {
 			// There was an error; don't attempt login and focus the first
 			// form field with an error.
 			focusView.requestFocus();
 		} else {
-			// Show a progress spinner, and kick off a background task to
-			// perform the user login attempt.
-			mLoginStatusMessageView.setText(R.string.login_progress_signing_in);
-			showProgress(true);
-			us.login(mEmailView.getText().toString(), mPasswordView.getText()
-					.toString(), new Registrant(mHandler, LOG_IN_CALL_BACK,
-					null));
+			synchronized (isLoggingIn) {
+				if (isLoggingIn) {
+					V2Log.w("Current state is logging in");
+					return;
+				}
+				isLoggingIn = true;
+				// Show a progress spinner, and kick off a background task to
+				// perform the user login attempt.
+				mLoginStatusMessageView
+						.setText(R.string.login_progress_signing_in);
+				showProgress(true);
+				us.login(mEmailView.getText().toString(), mPasswordView
+						.getText().toString(), new Registrant(mHandler,
+						LOG_IN_CALL_BACK, null));
+			}
 		}
 	}
 
@@ -343,7 +353,9 @@ public class LoginActivity extends Activity {
 		}
 
 		if (mProgressDialog != null) {
-			mProgressDialog.show();
+			if (!mProgressDialog.isShowing()) {
+				mProgressDialog.show();
+			}
 			return;
 		}
 		final Dialog dialog = new Dialog(mContext, R.style.IpSettingDialog);
@@ -385,7 +397,7 @@ public class LoginActivity extends Activity {
 		public void handleMessage(Message msg) {
 			switch (msg.what) {
 			case LOG_IN_CALL_BACK:
-
+				isLoggingIn = false;
 				JNIResponse rlr = (JNIResponse) msg.obj;
 				if (rlr.getResult() == JNIResponse.Result.TIME_OUT) {
 					Toast.makeText(mContext, R.string.error_time_out,
@@ -400,7 +412,8 @@ public class LoginActivity extends Activity {
 				} else {
 					// Save user info
 					saveUserConfig(mEmailView.getText().toString(), "");
-					GlobalHolder.getInstance().setCurrentUser(((RequestLogInResponse)rlr).getUser());
+					GlobalHolder.getInstance().setCurrentUser(
+							((RequestLogInResponse) rlr).getUser());
 					SPUtil.putConfigIntValue(mContext,
 							GlobalConfig.KEY_LOGGED_IN, 1);
 					mContext.startActivity(new Intent(mContext,
