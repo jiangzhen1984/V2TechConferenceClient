@@ -4,10 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.app.Activity;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -27,9 +25,10 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.v2tech.R;
+import com.v2tech.service.GlobalHolder;
 import com.v2tech.util.GlobalConfig;
-import com.v2tech.view.JNIService;
 import com.v2tech.view.PublicIntent;
+import com.v2tech.view.contacts.ContactDetail;
 import com.v2tech.vo.NetworkStateCode;
 
 public class TitleBar {
@@ -48,7 +47,6 @@ public class TitleBar {
 
 	private List<Wrapper> additionList;
 	private List<Wrapper> normalList;
-	private LocalReceiver receiver;
 
 	private int[] imgs = new int[] { R.drawable.title_bar_item_detail_button,
 			R.drawable.title_bar_item_setting_button,
@@ -76,12 +74,6 @@ public class TitleBar {
 		moreButton.setOnClickListener(mMoreButtonListener);
 		searchEdit = (EditText) this.rootContainer
 				.findViewById(R.id.search_edit);
-
-		receiver = new LocalReceiver();
-		IntentFilter filter = new IntentFilter();
-		filter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
-		filter.addAction(JNIService.JNI_BROADCAST_CONNECT_STATE_NOTIFICATION);
-		context.registerReceiver(receiver, filter);
 
 	}
 
@@ -160,11 +152,19 @@ public class TitleBar {
 	public void unRegsiterSearchedTextListener(TextWatcher tw) {
 		this.searchEdit.removeTextChangedListener(tw);
 	}
+	
+	
+	public void updateConnectState(NetworkStateCode code) {
+		if (code != NetworkStateCode.CONNECTED) {
+			networkNotificationView.setVisibility(View.VISIBLE);
+		} else {
+			networkNotificationView.setVisibility(View.GONE);
+		}
+	}
 
 	public void dismiss() {
 		additionList.clear();
 		normalList.clear();
-		context.unregisterReceiver(receiver);
 	}
 
 	public void dismissPlusWindow() {
@@ -177,17 +177,21 @@ public class TitleBar {
 
 		@Override
 		public void onClick(View v) {
+			Intent intent = new Intent();
+			intent.addCategory(PublicIntent.DEFAULT_CATEGORY);
+			intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 			int id = v.getId();
 			switch (id) {
+			case R.drawable.title_bar_item_detail_button:
+				intent.setClass(context, ContactDetail.class);
+				intent.putExtra("uid", GlobalHolder.getInstance().getCurrentUserId());
+				break;
 			case R.drawable.title_bar_item_about_button:
-				Intent aboutIntent = new Intent(
-						PublicIntent.START_ABOUT_ACTIVITY);
-				aboutIntent.addCategory(PublicIntent.DEFAULT_CATEGORY);
-				aboutIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-				context.startActivity(aboutIntent);
-				moreWindow.dismiss();
+				intent.setAction(PublicIntent.START_ABOUT_ACTIVITY);
 				break;
 			}
+			context.startActivity(intent);
+			moreWindow.dismiss();
 		}
 
 	};
@@ -313,12 +317,11 @@ public class TitleBar {
 			RelativeLayout.LayoutParams arrowRL = (RelativeLayout.LayoutParams) arrow
 					.getLayoutParams();
 			arrowRL.rightMargin = (dm.widthPixels - pos[0])
-					- arrow.getMeasuredWidth() / 2 ;
+					- arrow.getMeasuredWidth() / 2;
 			arrow.setLayoutParams(arrowRL);
 
 			moreWindow.setAnimationStyle(R.style.TitleBarPopupWindowAnim);
-			moreWindow.showAtLocation(anchor, Gravity.NO_GRAVITY, x ,
-					pos[1]);
+			moreWindow.showAtLocation(anchor, Gravity.NO_GRAVITY, x, pos[1]);
 
 		}
 
@@ -339,24 +342,6 @@ public class TitleBar {
 		pw.setTouchable(true);
 		pw.setOutsideTouchable(true);
 		return pw;
-	}
-
-	class LocalReceiver extends BroadcastReceiver {
-
-		@Override
-		public void onReceive(Context context, Intent intent) {
-			if (JNIService.JNI_BROADCAST_CONNECT_STATE_NOTIFICATION
-					.equals(intent.getAction())) {
-				NetworkStateCode code = (NetworkStateCode) intent.getExtras()
-						.get("state");
-				if (code != NetworkStateCode.CONNECTED) {
-					networkNotificationView.setVisibility(View.VISIBLE);
-				} else {
-					networkNotificationView.setVisibility(View.GONE);
-				}
-			}
-		}
-
 	}
 
 	class Wrapper {

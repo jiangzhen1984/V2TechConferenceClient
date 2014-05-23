@@ -88,7 +88,7 @@ public class ConferenceCreateActivity extends Activity {
 	private List<ListItem> mCacheItemList;
 	private List<Group> mGroupList;
 
-	
+	// Used to save current selected user
 	private Set<User> mAttendeeList = new HashSet<User>();
 
 	private ConferenceService cs = new ConferenceService();
@@ -193,6 +193,7 @@ public class ConferenceCreateActivity extends Activity {
 			//		mCacheHolder.put(key, cache);
 			//	}
 				mItemList.add(++pos, cache);
+				updateItem(cache);
 			}
 
 		} else {
@@ -620,7 +621,7 @@ public class ConferenceCreateActivity extends Activity {
 				updateSearchedUserList((List<User>) msg.obj);
 				break;
 			case CREATE_CONFERENC_RESP:
-				JNIResponse rccr = (RequestConfCreateResponse)  msg.obj;
+				JNIResponse rccr = (JNIResponse)  msg.obj;
 				if (rccr.getResult() != JNIResponse.Result.SUCCESS) {
 					mErrorNotificationLayout.setVisibility(View.VISIBLE);
 					break;

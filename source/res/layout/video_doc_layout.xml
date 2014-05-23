@@ -82,7 +82,7 @@
         android:layout_alignBottom="@+id/textView1"
         android:layout_alignParentRight="true"
         android:layout_marginRight="10dp"
-         android:paddingBottom="10dp"
+        android:paddingBottom="10dp"
         android:paddingTop="10dp"
         android:src="@drawable/video_doc_full_screen_button_selector"
         android:tag="fullscreen" />
@@ -93,11 +93,12 @@
         android:layout_height="wrap_content"
         android:layout_alignBottom="@+id/textView1"
         android:layout_marginRight="5dp"
-         android:paddingBottom="10dp"
-        android:paddingTop="10dp"
         android:layout_toLeftOf="@+id/video_doc_screen_button"
+        android:paddingBottom="10dp"
+        android:paddingTop="10dp"
         android:src="@drawable/pin_button_selector"
-        android:tag="float" />
+        android:tag="float"
+        android:visibility="invisible" />
 
     <LinearLayout
         android:layout_width="1dp"

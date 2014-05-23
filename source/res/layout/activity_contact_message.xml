@@ -43,7 +43,8 @@
             android:paddingRight="10dp"
             android:paddingTop="5dp"
             android:text="@string/contacts_user_detail_return_button"
-            android:textColor="@color/button_text_color" />
+            android:textColor="@color/button_text_color"
+            android:textSize="20sp" />
 
         <ImageView
             android:id="@+id/contact_detail_button"

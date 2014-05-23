@@ -66,6 +66,8 @@ public class ContactDetail extends Activity implements OnTouchListener {
 	private TextView mTitleTV;
 	private TextView mAddressTV;
 	private TextView[] mTVArr;
+	private View mSendMsgBottomButton;
+	private View mContactButtonContainer;
 
 	// view for self
 
@@ -95,6 +97,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 		if (v != null) {
 			v.setOnTouchListener(this);
 		}
+		this.overridePendingTransition(R.animator.alpha_from_0_to_1, R.animator.alpha_from_1_to_0);
 	}
 
 	@Override
@@ -124,6 +127,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 	@Override
 	public void finish() {
 		super.finish();
+		this.overridePendingTransition(R.animator.alpha_from_0_to_1, R.animator.alpha_from_1_to_0);
 	}
 
 	@Override
@@ -164,6 +168,11 @@ public class ContactDetail extends Activity implements OnTouchListener {
 		// view definition for non-self
 		mUserSignatureTV = (TextView) findViewById(R.id.contact_user_detail_user_signature_tv);
 		mButtonInviteVideoTV = (TextView) findViewById(R.id.contact_user_detail_invite_video);
+		
+		mSendMsgBottomButton = findViewById(R.id.contact_user_detail_send_bottom_button);
+		
+		mContactButtonContainer = findViewById(R.id.contact_button_ly);
+		
 		mButtonSendMsgTV = (TextView) findViewById(R.id.contact_user_detail_send_msg);
 		mGenderTV = (TextView) findViewById(R.id.contact_user_detail_gender_tv);
 		mBirthdayTV = (TextView) findViewById(R.id.contact_user_detail_birthday_tv);
@@ -199,6 +208,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 				tv.setVisibility(View.GONE);
 			}
 
+			mContactButtonContainer.setVisibility(View.GONE);
 			mGenderRG.setVisibility(View.VISIBLE);
 			selectedRG(u.getGender());
 			mGenderRG.setOnCheckedChangeListener(new OnCheckedChangeListener() {
@@ -231,6 +241,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 				tv.setVisibility(View.VISIBLE);
 			}
 			mGenderRG.setVisibility(View.GONE);
+			
 
 			mUserSignatureTV.setText(u.getSignature());
 			if (u.getGender() != null && u.getGender().equals("1")) {
@@ -248,36 +259,10 @@ public class ContactDetail extends Activity implements OnTouchListener {
 			mTitleTV.setText(u.getTitle());
 			mAddressTV.setText(u.getAddress());
 
-			mButtonInviteVideoTV.setOnClickListener(new OnClickListener() {
+			mButtonInviteVideoTV.setOnClickListener(mInviteVideoCall);
 
-				@Override
-				public void onClick(View arg0) {
-					Intent i = new Intent();
-					i.setAction(PublicIntent.START_VIDEO_CONVERSACTION_ACTIVITY);
-					i.addCategory(PublicIntent.DEFAULT_CATEGORY);
-					i.putExtra("is_coming_call", false);
-					i.putExtra("name", u.getName());
-					i.putExtra("uid", u.getmUserId());
-					mContext.startActivity(i);
-				}
-
-			});
-
-			mButtonSendMsgTV.setOnClickListener(new OnClickListener() {
-
-				@Override
-				public void onClick(View arg0) {
-					Intent i = new Intent(
-							PublicIntent.START_CONVERSACTION_ACTIVITY);
-					i.putExtra("user1id", GlobalHolder.getInstance()
-							.getCurrentUserId());
-					i.putExtra("user2id", u.getmUserId());
-					i.putExtra("user2Name", u.getName());
-					i.addCategory(PublicIntent.DEFAULT_CATEGORY);
-					mContext.startActivity(i);
-				}
-
-			});
+			mSendMsgBottomButton.setOnClickListener(mSendMsgListener);
+			mButtonSendMsgTV.setOnClickListener(mSendMsgListener);
 
 		}
 
@@ -321,7 +306,40 @@ public class ContactDetail extends Activity implements OnTouchListener {
 		}
 
 	};
+	
+	
+	private View.OnClickListener mInviteVideoCall = new View.OnClickListener() {
 
+		@Override
+		public void onClick(View arg0) {
+			Intent i = new Intent();
+			i.setAction(PublicIntent.START_VIDEO_CONVERSACTION_ACTIVITY);
+			i.addCategory(PublicIntent.DEFAULT_CATEGORY);
+			i.putExtra("is_coming_call", false);
+			i.putExtra("name", u.getName());
+			i.putExtra("uid", u.getmUserId());
+			mContext.startActivity(i);
+		}
+
+	};
+	
+	private View.OnClickListener mSendMsgListener = new View.OnClickListener() {
+
+		@Override
+		public void onClick(View arg0) {
+			
+			Intent i = new Intent(
+					PublicIntent.START_CONVERSACTION_ACTIVITY);
+			i.putExtra("user1id", GlobalHolder.getInstance()
+					.getCurrentUserId());
+			i.putExtra("user2id", u.getmUserId());
+			i.putExtra("user2Name", u.getName());
+			i.addCategory(PublicIntent.DEFAULT_CATEGORY);
+			mContext.startActivity(i);
+		}
+
+	};
+	
 	private View.OnClickListener datePickerListener = new View.OnClickListener() {
 
 		@Override

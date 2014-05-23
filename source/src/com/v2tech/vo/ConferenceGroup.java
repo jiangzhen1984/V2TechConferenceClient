@@ -82,6 +82,23 @@ public class ConferenceGroup extends Group {
 					name, owner, startTimeStr);
 			return g;
 	}
+
+	@Override
+	public int compareTo(Group g) {
+		if (g.getCreateDate() == null) {
+			return 1;
+		}
+		if (this.getCreateDate() == null) {
+			return -1;
+		}
+		if (this.getCreateDate().before(g.getCreateDate())) {
+			return -1;
+		}
 		
+		return 1;
+	}
+		
+	
+	
 	
 }

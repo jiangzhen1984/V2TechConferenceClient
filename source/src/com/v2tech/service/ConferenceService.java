@@ -175,7 +175,7 @@ public class ConferenceService extends AbstractHandler {
 		if (conf == null) {
 			if (caller != null) {
 				JNIResponse jniRes = new RequestConfCreateResponse(0, 0,
-						RequestConfCreateResponse.Result.FAILED);
+						RequestConfCreateResponse.Result.INCORRECT_PAR);
 				sendResult(caller, jniRes);
 			}
 			return;
@@ -208,6 +208,14 @@ public class ConferenceService extends AbstractHandler {
 	 */
 	public void requestOpenVideoDevice(Conference conf,
 			UserDeviceConfig userDevice, Registrant caller) {
+		if (conf == null || userDevice == null) {
+			if (caller != null) {
+				JNIResponse jniRes = new RequestOpenUserVideoDeviceResponse(0, 0,
+						RequestConfCreateResponse.Result.INCORRECT_PAR);
+				sendResult(caller, jniRes);
+			}
+			return;
+		}
 		initTimeoutMessage(JNI_REQUEST_OPEN_VIDEO, DEFAULT_TIME_OUT_SECS,
 				caller);
 		V2Log.i(" request open video group:" + conf.getId() + "   UID:"

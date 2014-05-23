@@ -42,7 +42,7 @@
               android:layout_marginTop="15dp"
               android:paddingTop="8dp"
               android:paddingBottom="8dp"
-              android:paddingLeft="10dp"
+              android:paddingLeft="25dp"
               android:paddingRight="10dp"
               android:thumb="@drawable/seekbar_ball" />
 
@@ -73,6 +73,7 @@
                   android:layout_height="wrap_content"
                   android:layout_alignParentLeft="true"
                   android:layout_alignParentBottom="true"
+                  android:paddingBottom="20dp"
                   android:textColor="#787878"
                   android:text="@string/confs_camear_quanlity_low" />
 

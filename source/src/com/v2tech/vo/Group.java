@@ -18,7 +18,7 @@ import com.v2tech.util.V2Log;
  * @author 28851274
  * 
  */
-public class Group {
+public class Group implements Comparable<Group>{
 
 	protected long mGId;
 
@@ -349,5 +349,13 @@ public class Group {
 			return false;
 		return true;
 	}
+
+	@Override
+	public int compareTo(Group arg0) {
+		return 0;
+	}
+
+	
+	
 
 }

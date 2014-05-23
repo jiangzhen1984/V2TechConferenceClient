@@ -42,6 +42,7 @@
             android:paddingLeft="10dp"
             android:paddingRight="10dp"
             android:paddingTop="5dp"
+            android:textSize="20sp"
             android:text="@string/contacts_user_detail_return_button"
             android:textColor="@color/button_text_color" />
 

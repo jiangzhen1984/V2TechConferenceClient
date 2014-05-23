@@ -18,13 +18,20 @@ public class Conference {
 	private List<User> invitedList;
 	private Date d;
 	private long creator;
+	private int type =  1;
 	
 	//TODO define type
 	public int getType() {
-		return 1;
+		return type;
 	}
+	
 	public Conference(long id) {
 		this.id = id;
+	}
+	
+	public Conference(long id, int type) {
+		this.id = id;
+		this.type = type;
 	}
 	
 	public Conference(long id, long creator) {

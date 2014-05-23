@@ -44,6 +44,7 @@
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
                 android:layout_marginRight="41dp"
+                android:padding="10dp"
                 android:layout_toLeftOf="@+id/speaker_iv"
                 android:src="@drawable/video_setting_button_selector" />
 
@@ -54,6 +55,7 @@
                 android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"
                 android:layout_marginRight="30dp"
+                android:padding="10dp"
                 android:src="@drawable/video_logout_button_selector" />
 
             <ImageView
@@ -62,6 +64,7 @@
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
                 android:layout_marginRight="41dp"
+                android:padding="10dp"
                 android:layout_toLeftOf="@+id/in_meeting_log_out_iv"
                 android:src="@drawable/mute_button" />
 

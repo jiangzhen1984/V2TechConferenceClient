@@ -811,6 +811,7 @@ public class JNIService extends Service {
 					
 					Intent enterConference = new Intent(mContext,
 							VideoActivityV2.class);
+					enterConference.putExtra("gid", g.getmGId());
 					Notificator.updateSystemNotification(mContext, u.getName()
 							+ " 会议邀请:", g.getName(), 1, enterConference,
 							PublicIntent.VIDEO_NOTIFICATION_ID);

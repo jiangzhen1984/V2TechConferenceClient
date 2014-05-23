@@ -49,9 +49,11 @@ public class BitmapManager {
 	
 	public void unRegisterBitmapChangedListener(BitmapChangedListener listener) {
 		synchronized (mListeners) {
-			for (WeakReference<BitmapChangedListener> ref : mListeners) {
+			for (int i =0; i< mListeners.size(); i++) {
+				WeakReference<BitmapChangedListener> ref = mListeners.get(i);
 				if (ref.get() != null && ref.get() == listener) {
 					mListeners.remove(ref);
+					i--;
 				}
 			}
 		}
@@ -72,9 +74,11 @@ public class BitmapManager {
 	
 	public void unRegisterLastBitmapChangedListener(BitmapChangedListener listener) {
 		synchronized (mLastListeners) {
-			for (WeakReference<BitmapChangedListener> ref : mLastListeners) {
+			for (int i =0; i< mLastListeners.size(); i++) {
+				WeakReference<BitmapChangedListener> ref = mLastListeners.get(i);
 				if (ref.get() != null && ref.get() == listener) {
 					mLastListeners.remove(ref);
+					i--;
 				}
 			}
 		}

@@ -35,6 +35,8 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_marginLeft="15dp"
+            android:layout_gravity="center"
+            android:gravity="center_vertical"
             android:text="contact_group_online_statist" />
        
     </LinearLayout>

@@ -19,7 +19,6 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -40,6 +39,7 @@ import com.v2tech.view.widget.TitleBar;
 import com.v2tech.vo.Conversation;
 import com.v2tech.vo.Group;
 import com.v2tech.vo.Group.GroupType;
+import com.v2tech.vo.NetworkStateCode;
 
 public class MainActivity extends FragmentActivity implements NotificationListener {
 
@@ -134,8 +134,7 @@ public class MainActivity extends FragmentActivity implements NotificationListen
 	 */
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		if (GlobalConfig.GLOBAL_LAYOUT_SIZE == Configuration.SCREENLAYOUT_SIZE_XLARGE
-				|| GlobalConfig.GLOBAL_LAYOUT_SIZE == Configuration.SCREENLAYOUT_SIZE_LARGE) {
+		if (GlobalConfig.GLOBAL_LAYOUT_SIZE == Configuration.SCREENLAYOUT_SIZE_XLARGE) {
 			setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 		} else {
 			setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
@@ -277,6 +276,7 @@ public class MainActivity extends FragmentActivity implements NotificationListen
 		filter.addAction(PublicIntent.UPDATE_CONVERSATION);
 		filter.addCategory(PublicIntent.DEFAULT_CATEGORY);
 		filter.addAction(PublicIntent.FINISH_APPLICATION);
+		filter.addAction(JNIService.JNI_BROADCAST_CONNECT_STATE_NOTIFICATION);
 		mContext.registerReceiver(receiver, filter);
 	}
 
@@ -301,10 +301,19 @@ public class MainActivity extends FragmentActivity implements NotificationListen
 		if (exitedFlag) {
 			this.getApplicationContext().stopService(
 					new Intent(this.getApplicationContext(), JNIService.class));
+			Handler h = new Handler();
+			h.postDelayed(new Runnable() {
 
-			GlobalConfig.saveLogoutFlag(this);
-			Notificator.cancelAllSystemNotification(this);
-			System.exit(0);
+				@Override
+				public void run() {
+					GlobalConfig.saveLogoutFlag(mContext);
+					Notificator.cancelAllSystemNotification(mContext);
+					System.exit(0);
+				}
+				
+			}, 1000);
+			finish();
+			
 		} else {
 			exitedFlag = true;
 			Toast.makeText(this, R.string.quit_promption, Toast.LENGTH_SHORT)
@@ -511,6 +520,12 @@ public class MainActivity extends FragmentActivity implements NotificationListen
 			} else if (PublicIntent.FINISH_APPLICATION.equals(action)) {
 				exitedFlag = true;
 				requestQuit();
+			} else if (JNIService.JNI_BROADCAST_CONNECT_STATE_NOTIFICATION.equals(action)) {
+				NetworkStateCode code = (NetworkStateCode) intent.getExtras()
+						.get("state");
+				if (titleBar != null) {
+					titleBar.updateConnectState(code);
+				}
 			}
 		}
 

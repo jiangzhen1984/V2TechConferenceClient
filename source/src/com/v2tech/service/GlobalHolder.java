@@ -1,6 +1,7 @@
 package com.v2tech.service;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -247,9 +248,11 @@ public class GlobalHolder {
 			ct.addAll(this.mChattingGroup);
 			return ct;
 		case CONFERENCE:
-			List<Group> confL = new CopyOnWriteArrayList<Group>();
+			List<Group> confL = new ArrayList<Group>();
 			confL.addAll(this.mConfGroup);
-			return confL;
+			Collections.sort(confL);
+			List<Group> sortConfL = new CopyOnWriteArrayList<Group>(confL);
+			return sortConfL;
 		default:
 			throw new RuntimeException("Unkonw type");
 		}
