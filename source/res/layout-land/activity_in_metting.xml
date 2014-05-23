@@ -158,8 +158,8 @@
             android:layout_height="90dp"
             android:layout_alignBottom="@+id/in_metting_video_main"
             android:layout_alignParentRight="true"
-            android:layout_marginBottom="15dp"
-            android:layout_marginRight="15dp"
+            android:layout_marginBottom="5dp"
+            android:layout_marginRight="5dp"
             android:background="#f6f6f6"
             android:padding="1dp" >
 
@@ -178,8 +178,8 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentRight="true"
                     android:layout_alignParentTop="true"
-                    android:layout_marginRight="10dp"
-                    android:layout_marginTop="10dp"
+                    android:layout_marginRight="3dp"
+                    android:layout_marginTop="3dp"
                     android:src="@drawable/converse_camera_button" />
             </RelativeLayout>
         </FrameLayout>

@@ -68,6 +68,7 @@ import com.v2tech.view.PublicIntent;
 import com.v2tech.view.bo.GroupUserObject;
 import com.v2tech.view.widget.MixVideoLayout;
 import com.v2tech.vo.Attendee;
+import com.v2tech.vo.AttendeeMixedDevice;
 import com.v2tech.vo.CameraConfiguration;
 import com.v2tech.vo.Conference;
 import com.v2tech.vo.ConferenceGroup;
@@ -225,8 +226,8 @@ public class VideoActivityV2 extends Activity {
 
 		// Update main activity tab notificatior
 		notificateConversationUpdate();
-		
-		//make sure local is in front of any view
+
+		// make sure local is in front of any view
 		localSurfaceViewLy.bringToFront();
 		// Start animation
 		this.overridePendingTransition(R.animator.nonam_scale_center_0_100,
@@ -404,6 +405,12 @@ public class VideoActivityV2 extends Activity {
 						}
 						if (mAttendeeContainer != null) {
 							mAttendeeContainer.setAttendsList(mAttendeeList);
+							//TODO optize code
+							synchronized (mMixerWrapper) {
+								for (MixerWrapper mw : mMixerWrapper.values()) {
+									mAttendeeContainer.updateEnteredAttendee(mw.amd);
+								}
+							}
 						}
 					}
 				}
@@ -729,7 +736,7 @@ public class VideoActivityV2 extends Activity {
 
 	private Attendee findAttendee(long uid) {
 		for (Attendee at : mAttendeeList) {
-			if (at != null && at.getUser().getmUserId() == uid) {
+			if (at != null && at.getAttId() == uid) {
 				return at;
 			}
 		}
@@ -744,8 +751,7 @@ public class VideoActivityV2 extends Activity {
 		Attendee atd = null;
 		UserDeviceConfig udc = null;
 		for (Attendee a : mAttendeeList) {
-			if (a.getUser().getmUserId() == GlobalHolder.getInstance()
-					.getCurrentUserId()) {
+			if (a.getAttId() == GlobalHolder.getInstance().getCurrentUserId()) {
 				selfInAttendeeList = true;
 				atd = a;
 				break;
@@ -760,15 +766,10 @@ public class VideoActivityV2 extends Activity {
 			atd.setSelf(true);
 		}
 
-		if (atd.getUser() == null) {
-			V2Log.e("No available user in atd");
-			return;
-		}
-
 		udc = atd.getDefaultDevice();
 		// Add default device
 		if (udc == null) {
-			udc = new UserDeviceConfig(atd.getUser().getmUserId(), "", null);
+			udc = new UserDeviceConfig(atd.getAttId(), "", null);
 			atd.addDevice(udc);
 		}
 
@@ -1065,7 +1066,7 @@ public class VideoActivityV2 extends Activity {
 		}
 
 		List<UserDeviceConfig> ld = GlobalHolder.getInstance()
-				.getAttendeeDevice(a.getUser().getmUserId());
+				.getAttendeeDevice(a.getAttId());
 		if (ld == null || ld.size() <= 0) {
 			V2Log.w(" No available device config for user:" + user.getmUserId()
 					+ "  name:" + user.getName());
@@ -1178,7 +1179,7 @@ public class VideoActivityV2 extends Activity {
 	private Attendee getAttendee(long uid) {
 		Attendee at = null;
 		for (Attendee a : this.mAttendeeList) {
-			if (uid == a.getUser().getmUserId()) {
+			if (uid == a.getAttId()) {
 				at = a;
 				break;
 			}
@@ -1217,8 +1218,7 @@ public class VideoActivityV2 extends Activity {
 			if (udc == null || at == null) {
 				return;
 			}
-			if (at.getUser().getmUserId() == GlobalHolder.getInstance()
-					.getCurrentUserId()) {
+			if (at.getAttId() == GlobalHolder.getInstance().getCurrentUserId()) {
 
 			} else {
 				showOrCloseAttendeeVideo(udc);
@@ -1291,8 +1291,8 @@ public class VideoActivityV2 extends Activity {
 					.getLayoutParams();
 			localRL.addRule(RelativeLayout.ALIGN_BOTTOM, v.getId());
 			localSurfaceViewLy.setLayoutParams(localRL);
-			
-			//make sure local is in front of any view
+
+			// make sure local is in front of any view
 			localSurfaceViewLy.bringToFront();
 		}
 
@@ -1354,12 +1354,14 @@ public class VideoActivityV2 extends Activity {
 		String id;
 		MixVideo mix;
 		MixVideoLayout layout;
+		AttendeeMixedDevice amd;
 
 		public MixerWrapper(String id, MixVideo mix, MixVideoLayout layout) {
 			super();
 			this.id = id;
 			this.mix = mix;
 			this.layout = layout;
+			amd = new AttendeeMixedDevice(mix);
 		}
 
 	}
@@ -1395,7 +1397,7 @@ public class VideoActivityV2 extends Activity {
 						RelativeLayout.LayoutParams.MATCH_PARENT,
 						RelativeLayout.LayoutParams.MATCH_PARENT));
 				TextView tv = new TextView(mContext);
-				tv.setText(at.getUser().getName());
+				tv.setText(at.getAttName());
 				tv.setBackgroundColor(Color.rgb(138, 138, 138));
 				tv.setPadding(10, 10, 10, 10);
 				tv.setTextSize(20);
@@ -1704,35 +1706,47 @@ public class VideoActivityV2 extends Activity {
 				break;
 
 			case VIDEO_MIX_NOTIFICATION:
-				 // create mixed video
-				 if (msg.arg1 == 1) {
-				 MixVideo mv = (MixVideo) msg.obj;
-				 mMixerWrapper.put(mv.getId(), new MixerWrapper(mv.getId(),
-				 mv, new MixVideoLayout(mContext, mv)));
-				 mCurrentShowedSV.add(new MixedSurfaceViewW(mv));
-				
-				 // destroy mixed video
-				 } else if (msg.arg1 == 2) {
-				 MixVideo mv = (MixVideo) msg.obj;
-				 mMixerWrapper.remove(mv.getId());
-				 // TODO close all device
-				
-				 // add mixed video device
-				 } /*
+				// create mixed video
+				if (msg.arg1 == 1) {
+					MixVideo mv = (MixVideo) msg.obj;
+
+					MixerWrapper mw = new MixerWrapper(mv.getId(), mv,
+							new MixVideoLayout(mContext, mv));
+					synchronized (mMixerWrapper) {
+						mMixerWrapper.put(mv.getId(),mw);
+					}
+					// Notify attendee list mixed video is created
+					if (mAttendeeContainer != null) {
+						mAttendeeContainer
+								.updateEnteredAttendee(new AttendeeMixedDevice(
+										mv));
+					}
+
+					// destroy mixed video
+				} else if (msg.arg1 == 2) {
+					MixVideo mv = (MixVideo) msg.obj;
+					MixerWrapper mw = null;
+					synchronized (mMixerWrapper) {
+						mw = mMixerWrapper.remove(mv.getId());
+					}
+					// Notify attendee list remove mixed video device
+					if (mAttendeeContainer != null && mw != null) {
+						mAttendeeContainer.updateExitedAttendee(mw.amd);
+					}
+					// TODO close all device
+
+					// add mixed video device
+				} /*
 				 * else if (msg.arg1 == 3) { MixVideo.MixVideoDevice mv =
 				 * (MixVideo.MixVideoDevice) msg.obj; MixVideo mix =
-				 * mMixerWrapper.get(mv.getMx().getId()).mix; if (mix == null)
-				 {
-				 * V2Log.e(" Doesn't cache mix: " + mv.getMx().getId()); }
-				 else
+				 * mMixerWrapper.get(mv.getMx().getId()).mix; if (mix == null) {
+				 * V2Log.e(" Doesn't cache mix: " + mv.getMx().getId()); } else
 				 * { mix.addDevice(mv.getUdc(), mv.getPos()); } //remove mixed
 				 * video device } else if (msg.arg1 == 4) {
 				 * MixVideo.MixVideoDevice mv = (MixVideo.MixVideoDevice)
 				 * msg.obj; MixVideo mix =
-				 * mMixerWrapper.get(mv.getMx().getId()).mix; if (mix == null)
-				 {
-				 * V2Log.e(" Doesn't cache mix: " + mv.getMx().getId()); }
-				 else
+				 * mMixerWrapper.get(mv.getMx().getId()).mix; if (mix == null) {
+				 * V2Log.e(" Doesn't cache mix: " + mv.getMx().getId()); } else
 				 * { MixVideo.MixVideoDevice cacheMVD = mix.removeDevice(mv);
 				 * //TODO close device } }
 				 */

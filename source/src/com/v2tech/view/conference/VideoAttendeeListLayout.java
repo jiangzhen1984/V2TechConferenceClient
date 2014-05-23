@@ -118,7 +118,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 	public void setAttendsList(Set<Attendee> l) {
 		mAttendsView = new ArrayList<View>();
 		for (Attendee at : l) {
-			mAttends.put(Long.valueOf(at.getUser().getmUserId()), at);
+			mAttends.put(Long.valueOf(at.getAttId()), at);
 		}
 		populate();
 	}
@@ -142,7 +142,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 		ImageView cameraIV = (ImageView) view
 				.findViewById(R.id.video_attendee_device_camera_icon);
 
-		nameTV.setText(a.getUser().getName());
+		nameTV.setText(a.getAttName());
 
 		if (a.isSelf() == false) {
 			nameTV.setTextSize(20);
@@ -166,7 +166,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 					.findViewById(R.id.video_attendee_device_camera_icon);
 
 			UserDeviceConfig udc = a.getmDevices().get(i);
-			nameTV2.setText(a.getUser().getName() + (i > 0 ? ("_视频" + i) : ""));
+			nameTV2.setText(a.getAttName() + (i > 0 ? ("_视频" + i) : ""));
 			nameTV2.setTextSize(20);
 			cameraIV2.setImageResource(R.drawable.camera);
 
@@ -179,14 +179,14 @@ public class VideoAttendeeListLayout extends LinearLayout {
 	}
 
 	public void updateEnteredAttendee(Attendee at) {
-		mAttends.put(Long.valueOf(at.getUser().getmUserId()), at);
+		mAttends.put(Long.valueOf(at.getAttId()), at);
 		mAttendsView.clear();
 		populate();
 	}
 
 	public void updateExitedAttendee(Attendee at) {
 		at.setmDevices(null);
-		mAttends.put(Long.valueOf(at.getUser().getmUserId()), at);
+		mAttends.put(Long.valueOf(at.getAttId()), at);
 		mAttendsView.clear();
 		populate();
 	}
@@ -204,7 +204,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 		synchronized (mAttendsView) {
 			for (View v : mAttendsView) {
 				Wrapper wr = (Wrapper) v.getTag();
-				if (wr.a.getUser().getmUserId() == at.getUser().getmUserId()) {
+				if (wr.a.getAttId() == at.getAttId()) {
 					atView = v;
 					break;
 				}
@@ -227,11 +227,11 @@ public class VideoAttendeeListLayout extends LinearLayout {
 	 * @param at
 	 */
 	public void removeAttendee(Attendee at) {
-		mAttends.remove(Long.valueOf(at.getUser().getmUserId()));
+		mAttends.remove(Long.valueOf(at.getAttId()));
 		synchronized (mAttendsView) {
 			for (View v : mAttendsView) {
 				Wrapper wr = (Wrapper) v.getTag();
-				if (wr.a.getUser().getmUserId() == at.getUser().getmUserId()) {
+				if (wr.a.getAttId() == at.getAttId()) {
 					mAttendsView.remove(v);
 				}
 			}
@@ -309,14 +309,14 @@ public class VideoAttendeeListLayout extends LinearLayout {
 			List<View> searchedViewList = new ArrayList<View>();
 			for (View v : mCachedAttendsView) {
 				Wrapper w = (Wrapper) v.getTag();
-				if (w.a.getUser().getName() == null
-						|| w.a.getUser().getArra() == null) {
-					V2Log.w("Attendee name: " + w.a.getUser().getName()
-							+ "  arrba:" + w.a.getUser().getArra());
+				if (w.a.getAttName() == null
+						|| w.a.getAbbraName() == null) {
+					V2Log.w("Attendee name: " + w.a.getAttName()
+							+ "  arrba:" + w.a.getAbbraName());
 					continue;
 				}
-				if (w.a.getUser().getName().contains(str)
-						|| w.a.getUser().getArra().contains(str)) {
+				if (w.a.getAttName().contains(str)
+						|| w.a.getAbbraName().contains(str)) {
 					searchedViewList.add(v);
 				}
 			}

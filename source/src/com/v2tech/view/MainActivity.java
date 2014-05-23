@@ -294,7 +294,7 @@ public class MainActivity extends FragmentActivity implements NotificationListen
 
 	@Override
 	public void onBackPressed() {
-		requestQuit();
+		moveTaskToBack(true);
 	}
 
 	public void requestQuit() {

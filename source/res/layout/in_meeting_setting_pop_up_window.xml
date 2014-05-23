@@ -1,26 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-     >
+    android:layout_height="wrap_content" >
 
     <ImageView
         android:id="@+id/camera_setting_window_arrow"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
-        android:layout_marginLeft="15dp"
         android:layout_marginBottom="-2dp"
+        android:layout_marginLeft="15dp"
         android:src="@drawable/camera_setting_window_arrow_bg" />
 
     <RelativeLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@drawable/camera_setting_window_bg"
         android:layout_below="@+id/camera_setting_window_arrow"
+        android:background="@drawable/camera_setting_window_bg"
         android:orientation="vertical" >
 
-      
         <TextView
             android:id="@+id/textView1"
             android:layout_width="wrap_content"
@@ -29,56 +27,56 @@
             android:layout_centerHorizontal="true"
             android:text="@string/confs_camear_quanlity"
             android:textColor="#000000" />
-        
-          <com.v2tech.view.cus.VerticalSeekBar
-              android:id="@+id/verticalSeekBar1"
-              android:layout_width="wrap_content"
-              android:layout_height="match_parent"
-              android:layout_below="@+id/textView1"
-              android:layout_centerHorizontal="true"
-              android:max="2"
-              android:progress="1"
-              android:progressDrawable="@drawable/seek_bar_progress"
-              android:layout_marginTop="15dp"
-              android:paddingTop="8dp"
-              android:paddingBottom="8dp"
-              android:paddingLeft="25dp"
-              android:paddingRight="10dp"
-              android:thumb="@drawable/seekbar_ball" />
 
-          <RelativeLayout
-              android:layout_width="wrap_content"
-              android:layout_height="wrap_content"
-              android:layout_toRightOf="@+id/verticalSeekBar1"
-              android:layout_alignTop="@+id/verticalSeekBar1"
-              android:layout_alignBottom="@+id/verticalSeekBar1" >
+        <com.v2tech.view.cus.VerticalSeekBar
+            android:id="@+id/verticalSeekBar1"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_below="@+id/textView1"
+            android:layout_marginBottom="15dp"
+            android:layout_marginTop="15dp"
+            android:max="2"
+            android:paddingBottom="20dp"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:paddingTop="20dp"
+            android:progress="1"
+            android:progressDrawable="@drawable/seek_bar_progress"
+            android:thumb="@drawable/seekbar_ball" />
 
-              <TextView
-                  android:layout_width="wrap_content"
-                  android:layout_height="wrap_content"
-                  android:layout_alignParentLeft="true"
-                  android:layout_alignParentTop="true"
-                  android:textColor="#787878"
-                  android:text="@string/confs_camear_quanlity_high" />
-              
-              <TextView
-                  android:layout_width="wrap_content"
-                  android:layout_height="wrap_content"
-                  android:layout_alignParentLeft="true"
-                  android:layout_centerVertical="true"
-                  android:textColor="#787878"
-                  android:text="@string/confs_camear_quanlity_middle" />
-               <TextView
-                  android:layout_width="wrap_content"
-                  android:layout_height="wrap_content"
-                  android:layout_alignParentLeft="true"
-                  android:layout_alignParentBottom="true"
-                  android:paddingBottom="20dp"
-                  android:textColor="#787878"
-                  android:text="@string/confs_camear_quanlity_low" />
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/verticalSeekBar1"
+            android:layout_alignTop="@+id/verticalSeekBar1"
+            android:layout_toRightOf="@+id/verticalSeekBar1"
+            android:paddingBottom="10dp"
+            android:paddingTop="10dp" >
 
-          </RelativeLayout>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentTop="true"
+                android:text="@string/confs_camear_quanlity_high"
+                android:textColor="#787878" />
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_centerVertical="true"
+                android:text="@string/confs_camear_quanlity_middle"
+                android:textColor="#787878" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentLeft="true"
+                android:text="@string/confs_camear_quanlity_low"
+                android:textColor="#787878" />
+        </RelativeLayout>
     </RelativeLayout>
 
 </RelativeLayout>

@@ -3,6 +3,8 @@ package com.v2tech.view;
 import java.io.File;
 
 import net.sourceforge.pinyin4j.PinyinHelper;
+import android.annotation.TargetApi;
+import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
@@ -11,6 +13,8 @@ import android.content.SharedPreferences.Editor;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
+import android.os.Build;
+import android.os.Bundle;
 
 import com.V2.jni.AudioRequest;
 import com.V2.jni.ChatRequest;
@@ -25,17 +29,15 @@ import com.V2.jni.WBRequest;
 import com.v2tech.util.CrashHandler;
 import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.LogcatThread;
+import com.v2tech.util.Notificator;
 import com.v2tech.util.StorageUtil;
 import com.v2tech.util.V2Log;
 
 public class MainApplication extends Application {
 
-
 	@Override
 	public void onCreate() {
 		super.onCreate();
-	
-		
 
 		V2Log.isDebuggable = (0 != (getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE));
 		if (!V2Log.isDebuggable) {
@@ -63,9 +65,7 @@ public class MainApplication extends Application {
 			}
 
 		}.start();
-		
-		
-		
+
 		System.loadLibrary("event");
 		System.loadLibrary("udt");
 		System.loadLibrary("v2vi");
@@ -90,29 +90,31 @@ public class MainApplication extends Application {
 		File pa = new File(path + "/Users");
 		if (!pa.exists()) {
 			boolean res = pa.mkdirs();
-			V2Log.i(" create avatar dir " + pa.getAbsolutePath() + "  "
-					+ res);
+			V2Log.i(" create avatar dir " + pa.getAbsolutePath() + "  " + res);
 		}
 		pa.setWritable(true);
 		pa.setReadable(true);
-		
+
 		File image = new File(path + "/v2tech/pics");
 		if (!image.exists()) {
 			boolean res = image.mkdirs();
 			V2Log.i(" create avatar dir " + image.getAbsolutePath() + "  "
 					+ res);
 		}
-		
-		
 
-		//Init screen size
+		// Init screen size
 		GlobalConfig.GLOBAL_LAYOUT_SIZE = getResources().getConfiguration().screenLayout
 				& Configuration.SCREENLAYOUT_SIZE_MASK;
 		V2Log.i("Init user device screen: " + GlobalConfig.GLOBAL_LAYOUT_SIZE);
+		
 		if (!V2Log.isDebuggable) {
 			new LogcatThread().start();
 		}
-	
+
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+			this.registerActivityLifecycleCallbacks(new LocalActivityLifecycleCallBack());
+		}
+
 	}
 
 	@Override
@@ -129,6 +131,72 @@ public class MainApplication extends Application {
 		this.getApplicationContext().stopService(
 				new Intent(this.getApplicationContext(), JNIService.class));
 		V2Log.d(" terminated");
+
+	}
+
+	@TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
+	class LocalActivityLifecycleCallBack implements ActivityLifecycleCallbacks {
+
+		private Object mLock = new Object();
+		private int refCount = 0;
+
+		@Override
+		public void onActivityCreated(Activity activity,
+				Bundle savedInstanceState) {
+
+		}
+
+		@Override
+		public void onActivityDestroyed(Activity activity) {
+
+		}
+
+		@Override
+		public void onActivityPaused(Activity activity) {
+
+		}
+
+		@Override
+		public void onActivityResumed(Activity activity) {
+
+		}
+
+		@Override
+		public void onActivitySaveInstanceState(Activity activity,
+				Bundle outState) {
+
+		}
+
+		@Override
+		public void onActivityStarted(Activity activity) {
+			if (activity instanceof LoginActivity
+					|| activity instanceof StartupActivity) {
+				return;
+			}
+			synchronized (mLock) {
+
+				refCount++;
+				if (refCount == 1) {
+					Notificator.udpateApplicationNotification(
+							getApplicationContext(), false);
+				}
+			}
+		}
+
+		@Override
+		public void onActivityStopped(Activity activity) {
+			if (activity instanceof LoginActivity
+					|| activity instanceof StartupActivity) {
+				return;
+			}
+			synchronized (mLock) {
+				refCount--;
+				if (refCount == 0) {
+					Notificator.udpateApplicationNotification(
+							getApplicationContext(), true);
+				}
+			}
+		}
 
 	}
 

@@ -231,12 +231,12 @@ public class TitleBar {
 						itemContainer.addView(line, lineLL);
 					}
 				}
+				
+				itemContainer.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
 
 				int height = 300;
-				if (GlobalConfig.GLOBAL_LAYOUT_SIZE == Configuration.SCREENLAYOUT_SIZE_NORMAL) {
-					height = (int) (dm.heightPixels * 0.6);
-				} else {
-					height = (int) (dm.heightPixels * 0.5);
+				if (height < itemContainer.getMeasuredHeight()) {
+					height = itemContainer.getMeasuredHeight();
 				}
 
 				layout.findViewById(R.id.common_pop_up_arrow_up).measure(
@@ -250,7 +250,7 @@ public class TitleBar {
 			int[] pos = new int[2];
 			anchor.getLocationInWindow(pos);
 			pos[0] += anchor.getMeasuredWidth() / 2;
-			pos[1] += anchor.getMeasuredHeight();
+			pos[1] += anchor.getMeasuredHeight()- anchor.getPaddingBottom();
 			// calculate arrow offset
 			View arrow = plusWindow.getContentView().findViewById(
 					R.id.common_pop_up_arrow_up);
@@ -306,7 +306,7 @@ public class TitleBar {
 			int[] pos = new int[2];
 			anchor.getLocationInWindow(pos);
 			pos[0] += anchor.getMeasuredWidth() / 2;
-			pos[1] += anchor.getMeasuredHeight();
+			pos[1] += anchor.getMeasuredHeight() - anchor.getPaddingBottom();
 			// calculate arrow offset
 			View arrow = moreWindow.getContentView().findViewById(
 					R.id.common_pop_up_arrow_up);

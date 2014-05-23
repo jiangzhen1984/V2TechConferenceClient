@@ -18,6 +18,10 @@ public class Attendee {
 	private boolean isSelf;
 	private boolean isChairMan;
 	private boolean isJoined;
+	
+	protected Attendee() {
+		
+	}
 
 	public Attendee(User user) {
 		this(user, null, false, false);
@@ -91,8 +95,29 @@ public class Attendee {
 		udc.setBelongsAttendee(this);
 	}
 
-	public User getUser() {
-		return user;
+//	public User getUser() {
+//		return user;
+//	}
+	
+	public long getAttId() {
+		if (user != null) {
+			return user.getmUserId();
+		}
+		return 0;
+	}
+	
+	public String getAttName() {
+		if (user != null) {
+			return user.getName();
+		}
+		return null;
+	}
+	
+	public String getAbbraName() {
+		if (user != null) {
+			return user.getArra();
+		}
+		return null;
 	}
 
 	public void setUser(User user) {

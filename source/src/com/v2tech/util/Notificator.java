@@ -1,5 +1,6 @@
 package com.v2tech.util;
 
+import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -31,10 +32,9 @@ public class Notificator {
 				context).setSmallIcon(R.drawable.ic_launcher)
 				.setContentTitle(title).setContentText(content);
 
-
 		// Creates the PendingIntent
 		PendingIntent notifyPendingIntent = PendingIntent.getActivities(
-				context, 0, new Intent[] {trigger },
+				context, 0, new Intent[] { trigger },
 				PendingIntent.FLAG_UPDATE_CURRENT);
 
 		// Puts the PendingIntent into the notification builder
@@ -73,12 +73,35 @@ public class Notificator {
 		// mId allows you to update the notification later on.
 		mNotificationManager.cancel(nId);
 	}
-	
+
 	public static void cancelAllSystemNotification(Context context) {
 		NotificationManager mNotificationManager = (NotificationManager) context
 				.getSystemService(Context.NOTIFICATION_SERVICE);
 		// mId allows you to update the notification later on.
 		mNotificationManager.cancel(PublicIntent.MESSAGE_NOTIFICATION_ID);
 		mNotificationManager.cancel(PublicIntent.VIDEO_NOTIFICATION_ID);
+	}
+
+	public static void udpateApplicationNotification(Context context,
+			boolean flag) {
+		NotificationManager mNotificationManager = (NotificationManager) context
+				.getSystemService(Context.NOTIFICATION_SERVICE);
+		if (flag) {
+			NotificationCompat.Builder builder = new NotificationCompat.Builder(
+					context).setSmallIcon(R.drawable.ic_launcher)
+					.setContentTitle(context.getText(R.string.app_name))
+					.setContentText(context.getText(R.string.status_bar_title))
+					.setAutoCancel(false);
+			Notification noti = builder.build();
+			noti.flags |= Notification.FLAG_NO_CLEAR;
+			mNotificationManager.notify(
+					PublicIntent.APPLICATION_STATUS_BAR_NOTIFICATION,
+					noti);
+		} else {
+
+			mNotificationManager
+					.cancel(PublicIntent.APPLICATION_STATUS_BAR_NOTIFICATION);
+
+		}
 	}
 }
