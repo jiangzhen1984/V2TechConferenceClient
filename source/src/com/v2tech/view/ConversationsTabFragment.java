@@ -1,8 +1,6 @@
 package com.v2tech.view;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -58,7 +56,6 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 	private static final int REMOVE_CONVERSATION = 12;
 
 	private static final int SUB_ACTIVITY_CODE_VIDEO_ACTIVITY = 0;
-	private static final int SUB_ACTIVITY_CODE_CREATE_CONF = 100;
 
 	private Tab1BroadcastReceiver receiver = new Tab1BroadcastReceiver();
 	private IntentFilter intentFilter;
@@ -72,7 +69,6 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 
 	private boolean isLoaded = false;
 	private boolean isLoadedCov = false;
-	private boolean isInMeeting = false;
 
 	private View rootView;
 
@@ -269,7 +265,6 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 //			if (isInMeeting) {
 //				return;
 //			}
-			isInMeeting = true;
 			GroupLayout gp = (GroupLayout) v;
 
 			Intent i = new Intent(getActivity(), VideoActivityV2.class);

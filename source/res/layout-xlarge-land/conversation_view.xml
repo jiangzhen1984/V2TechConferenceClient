@@ -10,7 +10,9 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_centerVertical="true"
-        android:padding="5dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginRight="5dp"
+        android:layout_marginBottom="5dp"
         android:layout_marginLeft="15dp" >
 
         <ImageView
@@ -61,7 +63,6 @@
         android:id="@+id/gourp_list_conference_create_time_tv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/group_list_conference_owner_tv"
         android:layout_alignBottom="@+id/group_list_conference_owner_tv"
         android:layout_alignParentRight="true"
         android:layout_marginRight="15dp"

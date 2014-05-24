@@ -307,7 +307,8 @@ public class VideoAttendeeListLayout extends LinearLayout {
 				return;
 			}
 			List<View> searchedViewList = new ArrayList<View>();
-			for (View v : mCachedAttendsView) {
+			for (int i=0; mCachedAttendsView != null && i< mCachedAttendsView.size();i ++ ) {
+				View v =  mCachedAttendsView.get(i);
 				Wrapper w = (Wrapper) v.getTag();
 				if (w.a.getAttName() == null
 						|| w.a.getAbbraName() == null) {

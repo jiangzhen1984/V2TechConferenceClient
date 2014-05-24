@@ -39,6 +39,16 @@
             android:singleLine="true"
             android:text="name"
             android:textSize="25sp" />
+
+        <ImageView
+            android:id="@+id/contact_user_detail_2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="20dp"
+            android:src="@drawable/contact_detail_2_button_selector" />
+
     </RelativeLayout>
 
     <LinearLayout
@@ -98,7 +108,7 @@
                 android:paddingTop="10dp"
                 android:text="@string/contacts_user_detail_send_msg"
                 android:textColor="@color/button_text_color"
-                android:textSize="25sp" />
+                android:textSize="18sp" />
 
             <TextView
                 android:id="@+id/contact_user_detail_invite_video"
@@ -115,7 +125,7 @@
                 android:paddingTop="10dp"
                 android:text="@string/contacts_user_detail_invite_video"
                 android:textColor="@color/button_text_color"
-                android:textSize="25sp" />
+                android:textSize="18sp" />
         </RelativeLayout>
 
         <ScrollView

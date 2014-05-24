@@ -152,8 +152,7 @@ public class TitleBar {
 	public void unRegsiterSearchedTextListener(TextWatcher tw) {
 		this.searchEdit.removeTextChangedListener(tw);
 	}
-	
-	
+
 	public void updateConnectState(NetworkStateCode code) {
 		if (code != NetworkStateCode.CONNECTED) {
 			networkNotificationView.setVisibility(View.VISIBLE);
@@ -184,11 +183,14 @@ public class TitleBar {
 			switch (id) {
 			case R.drawable.title_bar_item_detail_button:
 				intent.setClass(context, ContactDetail.class);
-				intent.putExtra("uid", GlobalHolder.getInstance().getCurrentUserId());
+				intent.putExtra("uid", GlobalHolder.getInstance()
+						.getCurrentUserId());
 				break;
 			case R.drawable.title_bar_item_about_button:
 				intent.setAction(PublicIntent.START_ABOUT_ACTIVITY);
 				break;
+			default:
+				return;
 			}
 			context.startActivity(intent);
 			moreWindow.dismiss();
@@ -231,17 +233,14 @@ public class TitleBar {
 						itemContainer.addView(line, lineLL);
 					}
 				}
-				
-				itemContainer.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
+
+				layout.measure(View.MeasureSpec.UNSPECIFIED,
+						View.MeasureSpec.UNSPECIFIED);
 
 				int height = 300;
-				if (height < itemContainer.getMeasuredHeight()) {
-					height = itemContainer.getMeasuredHeight();
+				if (height < layout.getMeasuredHeight()) {
+					height = layout.getMeasuredHeight();
 				}
-
-				layout.findViewById(R.id.common_pop_up_arrow_up).measure(
-						View.MeasureSpec.UNSPECIFIED,
-						View.MeasureSpec.UNSPECIFIED);
 
 				plusWindow = buildPopupWindow(layout,
 						ViewGroup.LayoutParams.WRAP_CONTENT, height);
@@ -250,7 +249,7 @@ public class TitleBar {
 			int[] pos = new int[2];
 			anchor.getLocationInWindow(pos);
 			pos[0] += anchor.getMeasuredWidth() / 2;
-			pos[1] += anchor.getMeasuredHeight()- anchor.getPaddingBottom();
+			pos[1] += anchor.getMeasuredHeight() - anchor.getPaddingBottom();
 			// calculate arrow offset
 			View arrow = plusWindow.getContentView().findViewById(
 					R.id.common_pop_up_arrow_up);

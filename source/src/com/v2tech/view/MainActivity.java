@@ -52,7 +52,6 @@ public class MainActivity extends FragmentActivity implements NotificationListen
 	private ViewPager mViewPager;
 	private PagerAdapter mPagerAdapter;
 
-	private static final int SUB_ACTIVITY_CODE_VIDEO_ACTIVITY = 0;
 	private static final int SUB_ACTIVITY_CODE_CREATE_CONF = 100;
 
 	public static final String SERVICE_BOUNDED_EVENT = "com.v2tech.SERVICE_BOUNDED_EVENT";
@@ -330,7 +329,6 @@ public class MainActivity extends FragmentActivity implements NotificationListen
 		}
 	}
 
-	// TODO add implment
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 

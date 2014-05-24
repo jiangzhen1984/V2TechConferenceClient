@@ -11,6 +11,7 @@ import android.net.Uri;
 import android.support.v4.app.NotificationCompat;
 
 import com.v2tech.R;
+import com.v2tech.view.MainActivity;
 import com.v2tech.view.PublicIntent;
 
 public class Notificator {
@@ -92,11 +93,19 @@ public class Notificator {
 					.setContentTitle(context.getText(R.string.app_name))
 					.setContentText(context.getText(R.string.status_bar_title))
 					.setAutoCancel(false);
+
+			//FIXME optimize code for decouple 
+			PendingIntent notifyPendingIntent = PendingIntent.getActivities(
+					context, 0, new Intent[] { new Intent(context,
+							MainActivity.class) },
+					PendingIntent.FLAG_UPDATE_CURRENT);
+
+			builder.setContentIntent(notifyPendingIntent);
 			Notification noti = builder.build();
 			noti.flags |= Notification.FLAG_NO_CLEAR;
+
 			mNotificationManager.notify(
-					PublicIntent.APPLICATION_STATUS_BAR_NOTIFICATION,
-					noti);
+					PublicIntent.APPLICATION_STATUS_BAR_NOTIFICATION, noti);
 		} else {
 
 			mNotificationManager
