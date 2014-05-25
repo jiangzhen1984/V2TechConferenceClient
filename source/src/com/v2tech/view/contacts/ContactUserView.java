@@ -104,7 +104,7 @@ public class ContactUserView extends LinearLayout {
 			}
 
 		});
-
+		
 		this.addView(view, new LinearLayout.LayoutParams(
 				LinearLayout.LayoutParams.MATCH_PARENT,
 				LinearLayout.LayoutParams.WRAP_CONTENT));

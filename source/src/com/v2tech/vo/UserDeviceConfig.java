@@ -22,16 +22,24 @@ import v2av.VideoPlayer;
 
 /**
  * User video device configuration object.<br>
- * Local user video device is unnecessary  VideoPlayer and device id information.<br>
- * If we want to open remote user's video, we need VidePlayer and device id information.
- * To get remote user's device id, we can listen {@link com.V2.jni.VideoRequestCallback#OnRemoteUserVideoDevice(String)}. 
- * <br>
+ * Local user video device is unnecessary VideoPlayer and device id information.<br>
+ * If we want to open remote user's video, we need VidePlayer and device id
+ * information. To get remote user's device id, we can listen
+ * {@link com.V2.jni.VideoRequestCallback#OnRemoteUserVideoDevice(String)}. <br>
  * If object as local device, mVP is null and deviceID is "".
+ * 
  * @see v2av.VideoPlayer com.V2.jni.VideoRequestCallback
  * @author jiangzhen
- *
+ * 
  */
 public class UserDeviceConfig {
+
+	public enum UserDeviceConfigType {
+		UNKOWN, EVIDEODEVTYPE_VIDEO, // 摄像头
+		EVIDEODEVTYPE_CAMERA, // 云台
+		EVIDEODEVTYPE_FILE, // 文件源
+		EVIDEODEVTYPE_VIDEOMIXER // 混屏
+	}
 
 	private long mUerID;
 	private String mDeviceID;
@@ -39,20 +47,31 @@ public class UserDeviceConfig {
 	private int mBusinessType;
 	private SurfaceView mSVHolder;
 	private boolean isShowing;
-	
+
 	private Attendee mBelongsAttendee;
 	
+	private UserDeviceConfigType type;
 	
+	
+	public UserDeviceConfig(long mUerID, String mDeviceID, VideoPlayer mVP, UserDeviceConfigType type) {
+		this(mUerID, mDeviceID, mVP, 1);
+		this.mUerID = mUerID;
+		this.mDeviceID = mDeviceID;
+		this.mVP = mVP;
+		this.type = type;
+	}
 
 	public UserDeviceConfig(long mUerID, String mDeviceID, VideoPlayer mVP) {
 		this(mUerID, mDeviceID, mVP, 1);
 		this.mUerID = mUerID;
 		this.mDeviceID = mDeviceID;
 		this.mVP = mVP;
+		this.type = UserDeviceConfigType.EVIDEODEVTYPE_VIDEO;
 	}
 
 	/**
-	 * TODO add comment 
+	 * TODO add comment
+	 * 
 	 * @param mUerID
 	 * @param mDeviceID
 	 * @param mVP
@@ -66,18 +85,18 @@ public class UserDeviceConfig {
 		this.mBusinessType = mBusinessType;
 	}
 
-
 	/**
-	 * Just clear all resources which this object holded.
-	 * Notice: Before call this function, you must call {@link JNIService#requestCloseVideoDevice(long, UserDeviceConfig, android.os.Message)} first
+	 * Just clear all resources which this object holded. Notice: Before call
+	 * this function, you must call
+	 * {@link JNIService#requestCloseVideoDevice(long, UserDeviceConfig, android.os.Message)}
+	 * first
 	 */
 	public void doClose() {
 		this.isShowing = false;
 		this.mSVHolder = null;
 		this.mVP = null;
 	}
-	
-	
+
 	public long getUserID() {
 		return mUerID;
 	}
@@ -109,10 +128,7 @@ public class UserDeviceConfig {
 	public void setBusinessType(int businessType) {
 		this.mBusinessType = businessType;
 	}
-	
-	
-	
-	
+
 	public SurfaceView getSVHolder() {
 		return mSVHolder;
 	}
@@ -128,8 +144,6 @@ public class UserDeviceConfig {
 	public void setShowing(boolean isShowing) {
 		this.isShowing = isShowing;
 	}
-	
-	
 
 	public Attendee getBelongsAttendee() {
 		return mBelongsAttendee;
@@ -138,8 +152,12 @@ public class UserDeviceConfig {
 	public void setBelongsAttendee(Attendee BelongsAttendee) {
 		this.mBelongsAttendee = BelongsAttendee;
 	}
-		
 
+	public UserDeviceConfigType getType() {
+		return this.type;
+	}
+	
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -213,15 +231,15 @@ public class UserDeviceConfig {
 				NodeList videoList = userElement
 						.getElementsByTagName("videolist");
 				for (int j = 0; j < videoList.getLength(); j++) {
-					Element videoListE = (Element)videoList.item(j);
+					Element videoListE = (Element) videoList.item(j);
 					NodeList videol = videoListE.getElementsByTagName("video");
-					for (int t = 0; t< videol.getLength(); t++) {
+					for (int t = 0; t < videol.getLength(); t++) {
 						Element video = (Element) videol.item(t);
 						String deviceId = video.getAttribute("id");
 						l.add(new UserDeviceConfig(uid, deviceId, null));
 					}
 				}
-				
+
 			}
 		} catch (ParserConfigurationException e) {
 			e.printStackTrace();
@@ -241,6 +259,5 @@ public class UserDeviceConfig {
 
 		return l;
 	}
-	
 
 }

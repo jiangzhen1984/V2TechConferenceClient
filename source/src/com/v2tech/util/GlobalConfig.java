@@ -1,7 +1,6 @@
 package com.v2tech.util;
 
 import android.content.Context;
-import android.content.res.Configuration;
 import android.util.DisplayMetrics;
 
 public class GlobalConfig {
@@ -9,8 +8,6 @@ public class GlobalConfig {
 	public static final String KEY_LOGGED_IN = "LoggedIn";
 
 	public static int GLOBAL_DPI = DisplayMetrics.DENSITY_XHIGH;
-	
-	public static int GLOBAL_LAYOUT_SIZE = Configuration.SCREENLAYOUT_SIZE_XLARGE;
 	
 	public static int GLOBAL_VERSION_CODE = 1;
 	

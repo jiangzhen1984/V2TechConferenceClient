@@ -10,6 +10,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
@@ -32,6 +33,7 @@ import com.v2tech.util.LogcatThread;
 import com.v2tech.util.Notificator;
 import com.v2tech.util.StorageUtil;
 import com.v2tech.util.V2Log;
+import com.v2tech.view.conference.VideoActivityV2;
 
 public class MainApplication extends Application {
 
@@ -102,10 +104,6 @@ public class MainApplication extends Application {
 					+ res);
 		}
 
-		// Init screen size
-		GlobalConfig.GLOBAL_LAYOUT_SIZE = getResources().getConfiguration().screenLayout
-				& Configuration.SCREENLAYOUT_SIZE_MASK;
-		V2Log.i("Init user device screen: " + GlobalConfig.GLOBAL_LAYOUT_SIZE);
 		
 		if (!V2Log.isDebuggable) {
 			new LogcatThread().start();
@@ -114,8 +112,12 @@ public class MainApplication extends Application {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
 			this.registerActivityLifecycleCallbacks(new LocalActivityLifecycleCallBack());
 		}
+		
+		initGlobalConfiguration();
 
 	}
+	
+	
 
 	@Override
 	public void onTerminate() {
@@ -133,6 +135,16 @@ public class MainApplication extends Application {
 		V2Log.d(" terminated");
 
 	}
+	
+	
+	private void initGlobalConfiguration() {
+		Configuration conf = getResources().getConfiguration();
+		if (conf.smallestScreenWidthDp >= 600) {
+			conf.orientation = Configuration.ORIENTATION_LANDSCAPE;
+		} else {
+			conf.orientation = Configuration.ORIENTATION_PORTRAIT;
+		}
+	}
 
 	@TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
 	class LocalActivityLifecycleCallBack implements ActivityLifecycleCallbacks {
@@ -143,7 +155,12 @@ public class MainApplication extends Application {
 		@Override
 		public void onActivityCreated(Activity activity,
 				Bundle savedInstanceState) {
-
+			Configuration conf = getResources().getConfiguration();
+			if (conf.smallestScreenWidthDp >= 600 || activity instanceof VideoActivityV2) {
+				activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+			} else {
+				activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+			}
 		}
 
 		@Override

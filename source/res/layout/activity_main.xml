@@ -39,21 +39,37 @@
                 android:background="#cdcdcf"
                 android:orientation="vertical" >
             </LinearLayout>
-
-            <LinearLayout
+ <LinearLayout
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical" >
+                android:orientation="horizontal" >
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="fill_parent"
+                    android:layout_weight="0"
+                    android:background="#ffffff"
+                    android:orientation="horizontal" >
+                </LinearLayout>
 
                 <TabWidget
                     android:id="@android:id/tabs"
-                    android:layout_width="fill_parent"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_weight="1"
                     android:background="#ffffff"
                     android:gravity="center"
                     android:orientation="horizontal"
                     android:showDividers="none"
                     android:tabStripEnabled="false" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="fill_parent"
+                    android:layout_weight="0"
+                    android:background="#ffffff"
+                    android:orientation="horizontal" >
+                </LinearLayout>
             </LinearLayout>
         </LinearLayout>
     </TabHost>

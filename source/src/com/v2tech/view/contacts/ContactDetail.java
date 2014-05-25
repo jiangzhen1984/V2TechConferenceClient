@@ -7,6 +7,8 @@ import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -31,6 +33,7 @@ import com.v2tech.R;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.service.Registrant;
 import com.v2tech.service.UserService;
+import com.v2tech.util.GlobalConfig;
 import com.v2tech.view.PublicIntent;
 import com.v2tech.vo.User;
 
@@ -87,6 +90,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		
 		this.setContentView(R.layout.activity_contact_detail);
 		mUid = this.getIntent().getLongExtra("uid", 0);
 		initView();

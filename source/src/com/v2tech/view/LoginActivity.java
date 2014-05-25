@@ -4,8 +4,6 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
-import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -20,6 +18,7 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.view.animation.BounceInterpolator;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
@@ -77,12 +76,6 @@ public class LoginActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		if (GlobalConfig.GLOBAL_LAYOUT_SIZE == Configuration.SCREENLAYOUT_SIZE_XLARGE) {
-			setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-		} else {
-			setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-		}
-
 		setContentView(R.layout.activity_login);
 		mContext = this;
 
@@ -140,11 +133,12 @@ public class LoginActivity extends Activity {
 	@Override
 	protected void onResume() {
 		super.onResume();
-
 		loginView.setVisibility(View.VISIBLE);
 		final Animation tabBlockHolderAnimation = AnimationUtils.loadAnimation(
 				this, R.animator.login_container_down_in);
-		tabBlockHolderAnimation.setDuration(700);
+		tabBlockHolderAnimation.setDuration(1500);
+		tabBlockHolderAnimation.setFillAfter(true);
+		tabBlockHolderAnimation.setInterpolator(new BounceInterpolator());
 		loginView.startAnimation(tabBlockHolderAnimation);
 	}
 

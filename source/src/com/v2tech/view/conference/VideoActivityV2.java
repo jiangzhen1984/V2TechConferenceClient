@@ -20,7 +20,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
-import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
@@ -40,6 +39,7 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.WindowManager;
+import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.ScaleAnimation;
@@ -61,7 +61,6 @@ import com.v2tech.service.Registrant;
 import com.v2tech.service.jni.JNIResponse;
 import com.v2tech.service.jni.PermissionUpdateIndication;
 import com.v2tech.service.jni.RequestEnterConfResponse;
-import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.V2Log;
 import com.v2tech.view.JNIService;
 import com.v2tech.view.PublicIntent;
@@ -312,15 +311,10 @@ public class VideoActivityV2 extends Activity {
 						.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 				View view = inflater.inflate(
 						R.layout.in_meeting_setting_pop_up_window, null);
-				DisplayMetrics dm = new DisplayMetrics();
-				getWindowManager().getDefaultDisplay().getMetrics(dm);
-				int height = 300;
-				// Cacul
-				if (GlobalConfig.GLOBAL_LAYOUT_SIZE == Configuration.SCREENLAYOUT_SIZE_NORMAL) {
-					height = (int) (dm.heightPixels * 0.6);
-				} else {
-					height = (int) (dm.heightPixels * 0.4);
-				}
+				 DisplayMetrics m = new DisplayMetrics();
+				 getWindowManager().getDefaultDisplay().getMetrics(m);
+				 
+				int height =(int)( m.heightPixels * 0.5);
 				// set
 				mSettingWindow = new PopupWindow(view,
 						LayoutParams.WRAP_CONTENT, height);
@@ -590,6 +584,7 @@ public class VideoActivityV2 extends Activity {
 			Animation tabBlockHolderAnimation = AnimationUtils.loadAnimation(
 					this, R.animator.normal_scale_x_100_0);
 			tabBlockHolderAnimation.setDuration(500);
+			tabBlockHolderAnimation.setInterpolator(new AccelerateInterpolator());
 			mMessageContainer.startAnimation(tabBlockHolderAnimation);
 			mMessageContainer.requestFloatLayout();
 
@@ -600,6 +595,7 @@ public class VideoActivityV2 extends Activity {
 
 			Animation tabBlockHolderAnimation = AnimationUtils.loadAnimation(
 					this, R.animator.normal_scale_x_0_100);
+			tabBlockHolderAnimation.setInterpolator(new AccelerateInterpolator());
 			tabBlockHolderAnimation.setDuration(500);
 			mMessageContainer.startAnimation(tabBlockHolderAnimation);
 			mMessageContainer.requestScrollToNewMessage();
@@ -618,6 +614,11 @@ public class VideoActivityV2 extends Activity {
 			mAttendeeContainer = new VideoAttendeeListLayout(this);
 			mAttendeeContainer.setId(0x7ffff001);
 			mAttendeeContainer.setAttendsList(this.mAttendeeList);
+			synchronized (mMixerWrapper) {
+				for (MixerWrapper mw : mMixerWrapper.values()) {
+					mAttendeeContainer.updateEnteredAttendee(mw.amd);
+				}
+			}
 
 			RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
 					(int) (mVideoLayout.getMeasuredWidth() * 0.4),
@@ -1162,8 +1163,15 @@ public class VideoActivityV2 extends Activity {
 			vp.SetSurface(udc.getSVHolder().getHolder());
 			udc.setVp(vp);
 
-			mCurrentShowedSV
-					.add(new SurfaceViewW(udc.getBelongsAttendee(), udc));
+			//
+			if (udc.getBelongsAttendee() instanceof AttendeeMixedDevice) {
+				mCurrentShowedSV
+				.add(new MixedSurfaceViewW(((AttendeeMixedDevice)udc.getBelongsAttendee()).getMV(), udc));
+			} else {
+				mCurrentShowedSV
+				.add(new SurfaceViewW(udc.getBelongsAttendee(), udc));
+				
+			}
 			// Do adjust layout first, then request open device.
 			// otherwise can't show video
 			adjustLayout();
@@ -1421,7 +1429,13 @@ public class VideoActivityV2 extends Activity {
 			this.at = at;
 			this.udc = new UserDeviceConfig(0, at.getId(), null);
 		}
+		
+		public MixedSurfaceViewW(MixVideo at, UserDeviceConfig udc) {
+			this.at = at;
+			this.udc = udc;
+		}
 
+		@Override
 		public View getView() {
 			if (rl == null) {
 				rl = new RelativeLayout(mContext);
@@ -1713,6 +1727,10 @@ public class VideoActivityV2 extends Activity {
 					MixerWrapper mw = new MixerWrapper(mv.getId(), mv,
 							new MixVideoLayout(mContext, mv));
 					synchronized (mMixerWrapper) {
+						//If exist, do not add again
+						if (mMixerWrapper.containsKey(mv.getId())) {
+							break;
+						}
 						mMixerWrapper.put(mv.getId(),mw);
 					}
 					// Notify attendee list mixed video is created

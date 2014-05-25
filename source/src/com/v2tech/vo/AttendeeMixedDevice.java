@@ -15,7 +15,8 @@ public class AttendeeMixedDevice extends Attendee {
 			MixVideo.MixVideoDevice[] uds = mv.getUdcs();
 			udcs = new UserDeviceConfig[uds.length];
 			for (int i = 0; i < uds.length; i++) {
-				udcs[0] = new UserDeviceConfig(0, mv.getId(), null);
+				udcs[0] = new UserDeviceConfig(0, mv.getId(), null, UserDeviceConfig.UserDeviceConfigType.EVIDEODEVTYPE_VIDEOMIXER);
+				udcs[0].setBelongsAttendee(this);
 			}
 		}
 		
@@ -23,7 +24,9 @@ public class AttendeeMixedDevice extends Attendee {
 		id = r.nextLong() | r.hashCode();
 	}
 
-	
+	public MixVideo getMV() {
+		return this.mv;
+	}
 	
 	@Override
 	public long getAttId() {

@@ -6,7 +6,6 @@ import java.util.List;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.text.TextWatcher;
@@ -26,7 +25,6 @@ import android.widget.TextView;
 
 import com.v2tech.R;
 import com.v2tech.service.GlobalHolder;
-import com.v2tech.util.GlobalConfig;
 import com.v2tech.view.PublicIntent;
 import com.v2tech.view.contacts.ContactDetail;
 import com.v2tech.vo.NetworkStateCode;
@@ -234,16 +232,22 @@ public class TitleBar {
 					}
 				}
 
-				layout.measure(View.MeasureSpec.UNSPECIFIED,
-						View.MeasureSpec.UNSPECIFIED);
-
+				
 				int height = 300;
-				if (height < layout.getMeasuredHeight()) {
-					height = layout.getMeasuredHeight();
-				}
 
 				plusWindow = buildPopupWindow(layout,
 						ViewGroup.LayoutParams.WRAP_CONTENT, height);
+				
+				itemContainer.measure(View.MeasureSpec.UNSPECIFIED,
+						View.MeasureSpec.UNSPECIFIED);
+				View arrow = layout.findViewById(R.id.common_pop_up_arrow_up);
+				arrow.measure(View.MeasureSpec.UNSPECIFIED,
+						View.MeasureSpec.UNSPECIFIED);
+				
+				if (height < itemContainer.getMeasuredHeight() + arrow.getMeasuredHeight()) {
+					height = itemContainer.getMeasuredHeight() + arrow.getMeasuredHeight();
+				}
+				plusWindow.setHeight(height);
 			}
 
 			int[] pos = new int[2];
@@ -286,20 +290,21 @@ public class TitleBar {
 				LinearLayout itemContainer = (LinearLayout) layout
 						.findViewById(R.id.common_pop_window_container);
 
-				int height = 300;
-				if (GlobalConfig.GLOBAL_LAYOUT_SIZE == Configuration.SCREENLAYOUT_SIZE_NORMAL) {
-					height = (int) (dm.heightPixels * 0.6);
-				} else {
-					height = (int) (dm.heightPixels * 0.4);
-				}
-
-				layout.findViewById(R.id.common_pop_up_arrow_up).measure(
-						View.MeasureSpec.UNSPECIFIED,
+				initPlusItemList(itemContainer);
+				
+				
+				
+				itemContainer.measure(View.MeasureSpec.UNSPECIFIED,
 						View.MeasureSpec.UNSPECIFIED);
-
+				View arrow = layout.findViewById(R.id.common_pop_up_arrow_up);
+				arrow.measure(View.MeasureSpec.UNSPECIFIED,
+						View.MeasureSpec.UNSPECIFIED);
+				
+				int height = itemContainer.getMeasuredHeight() + arrow.getMeasuredHeight();
+				
 				moreWindow = buildPopupWindow(layout,
 						ViewGroup.LayoutParams.WRAP_CONTENT, height);
-				initPlusItemList(itemContainer);
+				
 			}
 
 			int[] pos = new int[2];

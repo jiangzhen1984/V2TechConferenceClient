@@ -51,6 +51,12 @@
                     android:layout_weight=".25"
                     android:background="#ffffff"
                     android:orientation="horizontal" >
+                    
+                    <TextView
+                        android:layout_width="1dp"
+                        android:layout_height="fill_parent"
+                        android:text="bbb" />
+                    
                 </LinearLayout>
 
                 <TabWidget
