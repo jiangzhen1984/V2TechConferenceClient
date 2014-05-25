@@ -147,6 +147,21 @@
                 <category android:name="com.v2tech" />
             </intent-filter>
         </activity>
+        <activity
+            android:name="com.v2tech.view.SettingActivity"
+            android:configChanges="screenSize|orientation"
+            android:launchMode="singleTop"
+            android:screenOrientation="nosensor" >
+            <intent-filter>
+                <action android:name="com.v2tech.start_setting_activity" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="com.v2tech" />
+            </intent-filter>
+        </activity>
+        
+        
+        
 
         <receiver android:name="com.v2tech.view.receiver.ConversationConvertReceiver" >
             <intent-filter>

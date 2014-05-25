@@ -5,6 +5,8 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -70,6 +72,7 @@ public class ContactUserView extends LinearLayout {
 		if (mPhotoIV != null && u.getAvatarBitmap() != null) {
 			mPhotoIV.setImageBitmap(u.getAvatarBitmap());
 		}
+		
 		mUserNameTV = (TextView) view.findViewById(R.id.contact_user_name);
 		mUserSignatureTV = (TextView) view
 				.findViewById(R.id.contact_user_signature);
@@ -214,8 +217,10 @@ public class ContactUserView extends LinearLayout {
 		}
 		if (st == User.Status.OFFLINE || st == User.Status.HIDDEN) {
 			mStatusIV.setVisibility(View.GONE);
+			mPhotoIV.setColorFilter(Color.GRAY,PorterDuff.Mode.LIGHTEN);
 		} else {
 			mStatusIV.setVisibility(View.VISIBLE);
+			mPhotoIV.clearColorFilter();
 		}
 	}
 
@@ -236,11 +241,9 @@ public class ContactUserView extends LinearLayout {
 		contentContainer.setPadding(0, contentContainer.getPaddingTop(),
 				contentContainer.getPaddingRight(),
 				contentContainer.getPaddingRight());
-		this.setPadding(0, this.getPaddingTop(), this.getPaddingRight(),
-				this.getPaddingRight());
 	}
 
-	public void setPadding(int left, int top, int right, int bottom) {
+	public void setPaddingT(int left, int top, int right, int bottom) {
 		contentContainer.setPadding(left, top, right, bottom);
 	}
 

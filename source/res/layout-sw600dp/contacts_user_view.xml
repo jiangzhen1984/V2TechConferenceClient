@@ -29,8 +29,8 @@
 
             <ImageView
                 android:id="@+id/contact_user_status_iv"
-                android:layout_width="15dp"
-                android:layout_height="15dp"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
                 android:layout_alignBottom="@+id/contact_user_img"
                 android:layout_alignRight="@+id/contact_user_img"
                 android:src="@drawable/online" />

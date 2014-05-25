@@ -8,7 +8,6 @@ import android.view.View;
 import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.v2tech.R;
@@ -25,7 +24,7 @@ public class ContactUserView extends LinearLayout {
 	private ImageView mStatusIV;
 	private CheckBox mCheckbox;
 
-	private RelativeLayout contentContainer;
+	private View contentContainer;
 
 	private int padding = 0;
 
@@ -59,7 +58,7 @@ public class ContactUserView extends LinearLayout {
 		View view = LayoutInflater.from(getContext()).inflate(
 				R.layout.conf_create_contacts_user_view, null, false);
 
-		contentContainer = (RelativeLayout) view
+		contentContainer =  view
 				.findViewById(R.id.contact_user_view_root);
 
 		mPhotoIV = (ImageView) view.findViewById(R.id.contact_user_img);

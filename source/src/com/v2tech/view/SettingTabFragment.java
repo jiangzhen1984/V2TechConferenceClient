@@ -1,7 +1,5 @@
 package com.v2tech.view;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
@@ -16,10 +14,9 @@ import com.v2tech.R;
 import com.v2tech.util.GlobalConfig;
 
 public class SettingTabFragment extends Fragment {
-	
-	private Tab1BroadcastReceiver receiver;
+
 	private IntentFilter intentFilter;
-	
+
 	private TextView mQuitButton;
 	private TextView mVersionTV;
 
@@ -31,10 +28,11 @@ public class SettingTabFragment extends Fragment {
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
-		View v = inflater.inflate(R.layout.tab_fragment_setting, container, false);
+		View v = inflater.inflate(R.layout.tab_fragment_setting, container,
+				false);
 		mQuitButton = (TextView) v.findViewById(R.id.setting_quit_button);
 		mQuitButton.setOnClickListener(mQuitButtonListener);
-		mVersionTV  = (TextView) v.findViewById(R.id.verson_id);
+		mVersionTV = (TextView) v.findViewById(R.id.verson_id);
 		mVersionTV.setText(GlobalConfig.GLOBAL_VERSION_NAME);
 		return v;
 	}
@@ -43,43 +41,28 @@ public class SettingTabFragment extends Fragment {
 	public void onPause() {
 
 		super.onPause();
-		getActivity().unregisterReceiver(receiver);
 	}
 
 	@Override
 	public void onResume() {
 
 		super.onResume();
-		receiver = new Tab1BroadcastReceiver();
-		getActivity().registerReceiver(receiver, getIntentFilter());
 	}
 
-	private IntentFilter getIntentFilter() {
-		if (intentFilter == null) {
-			intentFilter = new IntentFilter();
-			intentFilter.addAction("TAB1_ACTION");
-		}
-		return intentFilter;
-	}
 
-	
 	private OnClickListener mQuitButtonListener = new OnClickListener() {
 
 		@Override
 		public void onClick(View view) {
-			((MainActivity)getActivity()).requestQuit();
+			//FIXME optimize code for wrap similar code
+			GlobalConfig.saveLogoutFlag(getActivity());
+
+			Intent i = new Intent();
+			i.setAction(PublicIntent.FINISH_APPLICATION);
+			i.addCategory(PublicIntent.DEFAULT_CATEGORY);
+			getActivity().sendBroadcast(i);
 		}
-		
+
 	};
-	
-	
-	class Tab1BroadcastReceiver extends BroadcastReceiver {
 
-		@Override
-		public void onReceive(Context context, Intent intent) {
-			if (intent.getAction().equals("TAB1_ACTION")) {
-			}
-		}
-
-	}
 }

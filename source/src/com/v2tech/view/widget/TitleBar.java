@@ -179,6 +179,9 @@ public class TitleBar {
 			intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 			int id = v.getId();
 			switch (id) {
+			case R.drawable.title_bar_item_setting_button:
+				intent.setAction(PublicIntent.START_SETTING_ACTIVITY);
+				break;
 			case R.drawable.title_bar_item_detail_button:
 				intent.setClass(context, ContactDetail.class);
 				intent.putExtra("uid", GlobalHolder.getInstance()
@@ -232,20 +235,21 @@ public class TitleBar {
 					}
 				}
 
-				
 				int height = 300;
 
 				plusWindow = buildPopupWindow(layout,
 						ViewGroup.LayoutParams.WRAP_CONTENT, height);
-				
+
 				itemContainer.measure(View.MeasureSpec.UNSPECIFIED,
 						View.MeasureSpec.UNSPECIFIED);
 				View arrow = layout.findViewById(R.id.common_pop_up_arrow_up);
 				arrow.measure(View.MeasureSpec.UNSPECIFIED,
 						View.MeasureSpec.UNSPECIFIED);
-				
-				if (height < itemContainer.getMeasuredHeight() + arrow.getMeasuredHeight()) {
-					height = itemContainer.getMeasuredHeight() + arrow.getMeasuredHeight();
+
+				if (height < itemContainer.getMeasuredHeight()
+						+ arrow.getMeasuredHeight()) {
+					height = itemContainer.getMeasuredHeight()
+							+ arrow.getMeasuredHeight();
 				}
 				plusWindow.setHeight(height);
 			}
@@ -291,20 +295,19 @@ public class TitleBar {
 						.findViewById(R.id.common_pop_window_container);
 
 				initPlusItemList(itemContainer);
-				
-				
-				
+
 				itemContainer.measure(View.MeasureSpec.UNSPECIFIED,
 						View.MeasureSpec.UNSPECIFIED);
 				View arrow = layout.findViewById(R.id.common_pop_up_arrow_up);
 				arrow.measure(View.MeasureSpec.UNSPECIFIED,
 						View.MeasureSpec.UNSPECIFIED);
-				
-				int height = itemContainer.getMeasuredHeight() + arrow.getMeasuredHeight();
-				
+
+				int height = itemContainer.getMeasuredHeight()
+						+ arrow.getMeasuredHeight();
+
 				moreWindow = buildPopupWindow(layout,
 						ViewGroup.LayoutParams.WRAP_CONTENT, height);
-				
+
 			}
 
 			int[] pos = new int[2];

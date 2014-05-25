@@ -473,6 +473,7 @@ public class JNIService extends Service {
 
 		@Override
 		public void OnLogoutCallback(int nUserID) {
+			//FIXME optimize code
 			Message.obtain(mCallbackHandler, JNI_LOG_OUT).sendToTarget();
 			Notificator.cancelAllSystemNotification(mContext);
 			//Send broadcast PREPARE_FINISH_APPLICATION first to let all activity quit and release resource

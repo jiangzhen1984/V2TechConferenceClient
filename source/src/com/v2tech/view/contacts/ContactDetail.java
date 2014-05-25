@@ -7,8 +7,6 @@ import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
-import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -33,7 +31,6 @@ import com.v2tech.R;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.service.Registrant;
 import com.v2tech.service.UserService;
-import com.v2tech.util.GlobalConfig;
 import com.v2tech.view.PublicIntent;
 import com.v2tech.vo.User;
 
@@ -71,6 +68,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 	private TextView[] mTVArr;
 	private View mSendMsgBottomButton;
 	private View mContactButtonContainer;
+	private View mCreateConfButton;
 
 	// view for self
 
@@ -176,6 +174,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 		mSendMsgBottomButton = findViewById(R.id.contact_user_detail_send_bottom_button);
 		
 		mContactButtonContainer = findViewById(R.id.contact_button_ly);
+		mCreateConfButton = findViewById(R.id.contact_user_detail_create_conf_bottom_button);
 		
 		mButtonSendMsgTV = (TextView) findViewById(R.id.contact_user_detail_send_msg);
 		mGenderTV = (TextView) findViewById(R.id.contact_user_detail_gender_tv);
@@ -267,6 +266,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 
 			mSendMsgBottomButton.setOnClickListener(mSendMsgListener);
 			mButtonSendMsgTV.setOnClickListener(mSendMsgListener);
+			mCreateConfButton.setOnClickListener(mCreateConfMsgListener);
 
 		}
 
@@ -340,6 +340,20 @@ public class ContactDetail extends Activity implements OnTouchListener {
 			i.putExtra("user2Name", u.getName());
 			i.addCategory(PublicIntent.DEFAULT_CATEGORY);
 			mContext.startActivity(i);
+		}
+
+	};
+	
+	
+	private View.OnClickListener mCreateConfMsgListener = new View.OnClickListener() {
+
+		@Override
+		public void onClick(View arg0) {
+			//FIXME fix bug for enter conference and refresh group list
+			Intent i = new Intent(
+					PublicIntent.START_CONFERENCE_CREATE_ACTIVITY);
+			i.addCategory(PublicIntent.DEFAULT_CATEGORY);
+			startActivityForResult(i, 0);
 		}
 
 	};
