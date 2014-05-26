@@ -32,9 +32,8 @@ import com.v2tech.vo.UserDeviceConfig;
 
 public class VideoAttendeeListLayout extends LinearLayout {
 
-	
 	private View rootView;
-	
+
 	private VideoAttendeeActionListener listener;
 
 	private ListView mAttendeeContainer;
@@ -46,15 +45,15 @@ public class VideoAttendeeListLayout extends LinearLayout {
 
 	private boolean mIsStartedSearch;
 	private EditText mSearchET;
-	
+
 	private View mPinButton;
 
 	private AttendeesAdapter adapter = new AttendeesAdapter();
 
 	public interface VideoAttendeeActionListener {
-		
+
 		public void OnAttendeeClicked(Attendee at, UserDeviceConfig udc);
-		
+
 		public void requestAttendeeViewFixedLayout(View v);
 
 		public void requestAttendeeViewFloatLayout(View v);
@@ -84,7 +83,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 		mAttendeeContainer = (ListView) view
 				.findViewById(R.id.video_attendee_container);
 		mSearchET = (EditText) view.findViewById(R.id.attendee_search);
-		
+
 		mPinButton = view.findViewById(R.id.video_attendee_pin_button);
 		mPinButton.setOnClickListener(mRequestFixedListener);
 
@@ -107,7 +106,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 				LinearLayout.LayoutParams.MATCH_PARENT));
 
 		mSearchET.addTextChangedListener(mSearchListener);
-		
+
 		rootView = this;
 	}
 
@@ -229,10 +228,12 @@ public class VideoAttendeeListLayout extends LinearLayout {
 	public void removeAttendee(Attendee at) {
 		mAttends.remove(Long.valueOf(at.getAttId()));
 		synchronized (mAttendsView) {
-			for (View v : mAttendsView) {
+			for (int i = 0; mAttendsView != null && i < mAttendsView.size(); i++) {
+				View v = mAttendsView.get(i);
 				Wrapper wr = (Wrapper) v.getTag();
 				if (wr.a.getAttId() == at.getAttId()) {
 					mAttendsView.remove(v);
+					i--;
 				}
 			}
 		}
@@ -251,7 +252,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 		adapter.notifyDataSetChanged();
 
 	}
-	
+
 	/**
 	 * Used to manually request FloatLayout, Because when this layout will hide,
 	 * call this function to inform interface
@@ -262,11 +263,10 @@ public class VideoAttendeeListLayout extends LinearLayout {
 		}
 
 		mPinButton.setTag("float");
-		((ImageView)mPinButton).setImageResource(R.drawable.pin_button_selector);
+		((ImageView) mPinButton)
+				.setImageResource(R.drawable.pin_button_selector);
 	}
-	
-	
-	
+
 	private OnClickListener mRequestFixedListener = new OnClickListener() {
 
 		@Override
@@ -284,10 +284,12 @@ public class VideoAttendeeListLayout extends LinearLayout {
 
 			if (view.getTag().equals("float")) {
 				view.setTag("fix");
-				((ImageView)view).setImageResource(R.drawable.pin_fixed_button_selector);
+				((ImageView) view)
+						.setImageResource(R.drawable.pin_fixed_button_selector);
 			} else {
 				view.setTag("float");
-				((ImageView)view).setImageResource(R.drawable.pin_button_selector);
+				((ImageView) view)
+						.setImageResource(R.drawable.pin_button_selector);
 			}
 		}
 
@@ -310,13 +312,13 @@ public class VideoAttendeeListLayout extends LinearLayout {
 				return;
 			}
 			List<View> searchedViewList = new ArrayList<View>();
-			for (int i=0; mCachedAttendsView != null && i< mCachedAttendsView.size();i ++ ) {
-				View v =  mCachedAttendsView.get(i);
+			for (int i = 0; mCachedAttendsView != null
+					&& i < mCachedAttendsView.size(); i++) {
+				View v = mCachedAttendsView.get(i);
 				Wrapper w = (Wrapper) v.getTag();
-				if (w.a.getAttName() == null
-						|| w.a.getAbbraName() == null) {
-					V2Log.w("Attendee name: " + w.a.getAttName()
-							+ "  arrba:" + w.a.getAbbraName());
+				if (w.a.getAttName() == null || w.a.getAbbraName() == null) {
+					V2Log.w("Attendee name: " + w.a.getAttName() + "  arrba:"
+							+ w.a.getAbbraName());
 					continue;
 				}
 				if (w.a.getAttName().contains(str)

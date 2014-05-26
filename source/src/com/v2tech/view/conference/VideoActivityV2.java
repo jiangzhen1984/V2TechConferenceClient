@@ -65,6 +65,7 @@ import com.v2tech.util.V2Log;
 import com.v2tech.view.JNIService;
 import com.v2tech.view.PublicIntent;
 import com.v2tech.view.bo.GroupUserObject;
+import com.v2tech.view.bo.UserStatusObject;
 import com.v2tech.view.widget.MixVideoLayout;
 import com.v2tech.vo.Attendee;
 import com.v2tech.vo.AttendeeMixedDevice;
@@ -438,8 +439,8 @@ public class VideoActivityV2 extends Activity {
 					return;
 				}
 				User user = GlobalHolder.getInstance().getUser(uid);
-				int status = intent.getExtras().getInt("status");
-				User.Status st = User.Status.fromInt(status);
+				UserStatusObject us = (UserStatusObject)intent.getExtras().get("status");
+				User.Status st = User.Status.fromInt(us.getStatus());
 				// If client applciation exit directly, we don't receive exit
 				// conference notification
 				if (st == User.Status.OFFLINE && user != null) {
