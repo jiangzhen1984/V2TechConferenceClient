@@ -8,6 +8,7 @@ import java.util.Set;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.os.AsyncTask;
@@ -33,7 +34,13 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.v2tech.R;
+import com.v2tech.service.CrowdGroupService;
 import com.v2tech.service.GlobalHolder;
+import com.v2tech.service.Registrant;
+import com.v2tech.service.jni.CreateCrowdResponse;
+import com.v2tech.service.jni.JNIResponse;
+import com.v2tech.view.JNIService;
+import com.v2tech.vo.CrowdGroup;
 import com.v2tech.vo.Group;
 import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.User;
@@ -43,6 +50,7 @@ public class GroupCreateActivity extends Activity {
 	private static final int UPDATE_LIST_VIEW = 1;
 	private static final int UPDATE_ATTENDEES = 2;
 	private static final int UPDATE_SEARCHED_USER_LIST = 3;
+	private static final int CREATE_CROWD_RESPONSE = 4;
 
 	private static final int PAD_LAYOUT = 1;
 	private static final int PHONE_LAYOUT = 0;
@@ -70,7 +78,7 @@ public class GroupCreateActivity extends Activity {
 	private List<Group> mGroupList;
 
 	// Used to save current selected user
-	private Set<User> mAttendeeList = new HashSet<User>();
+	private Set<User> mUserList = new HashSet<User>();
 
 	private int landLayout = PAD_LAYOUT;
 
@@ -85,11 +93,11 @@ public class GroupCreateActivity extends Activity {
 
 		setContentView(R.layout.activity_group_create);
 		mContext = this;
-		mContactsContainer = (ListView) findViewById(R.id.group_member_container);
+		mContactsContainer = (ListView) findViewById(R.id.group_create_contacts_list);
 		mContactsContainer.setOnItemClickListener(itemListener);
 		mContactsContainer.setAdapter(adapter);
 
-		mAttendeeContainer = (LinearLayout) findViewById(R.id.group_create_scroll_view);
+		mAttendeeContainer = (LinearLayout) findViewById(R.id.group_member_container);
 		mAttendeeContainer.setGravity(Gravity.CENTER);
 		landLayout = mAttendeeContainer.getTag().equals("vertical") ? PAD_LAYOUT
 				: PHONE_LAYOUT;
@@ -104,7 +112,7 @@ public class GroupCreateActivity extends Activity {
 		searchedTextET = (EditText) findViewById(R.id.contacts_search);
 
 		mErrorNotificationLayout = (LinearLayout) findViewById(R.id.group_create_error_notification);
-		mScroller = findViewById(R.id.conf_create_scroll_view);
+		mScroller = findViewById(R.id.group_create_scroll_view);
 		mReturnButton = findViewById(R.id.group_create_return_button);
 		mReturnButton.setOnClickListener(mReturnListener);
 	}
@@ -140,7 +148,8 @@ public class GroupCreateActivity extends Activity {
 		// finish();
 	}
 
-	//FIXME duplicate code should be merge with conference create and contacts tab fragment
+	// FIXME duplicate code should be merge with conference create and contacts
+	// tab fragment
 	private void updateView(int pos) {
 		ListItem item = mItemList.get(pos);
 		if (item.g == null) {
@@ -149,11 +158,11 @@ public class GroupCreateActivity extends Activity {
 		if (item.isExpanded == false) {
 			for (Group g : item.g.getChildGroup()) {
 				Long key = Long.valueOf(g.getmGId());
-//				ListItem cache = mCacheHolder.get(key);
-//				if (cache == null) {
-				ListItem	cache =  new ListItem(g, g.getLevel());
-			//		mCacheHolder.put(key, cache);
-			//	}
+				// ListItem cache = mCacheHolder.get(key);
+				// if (cache == null) {
+				ListItem cache = new ListItem(g, g.getLevel());
+				// mCacheHolder.put(key, cache);
+				// }
 				mItemList.add(++pos, cache);
 			}
 			List<User> sortList = new ArrayList<User>();
@@ -161,11 +170,11 @@ public class GroupCreateActivity extends Activity {
 			Collections.sort(sortList);
 			for (User u : sortList) {
 				Long key = Long.valueOf(u.getmUserId());
-				//ListItem cache = mCacheHolder.get(key);
-			//	if (cache == null) {
-					ListItem	cache =  new ListItem(u, item.g.getLevel() + 1);
-			//		mCacheHolder.put(key, cache);
-			//	}
+				// ListItem cache = mCacheHolder.get(key);
+				// if (cache == null) {
+				ListItem cache = new ListItem(u, item.g.getLevel() + 1);
+				// mCacheHolder.put(key, cache);
+				// }
 				mItemList.add(++pos, cache);
 				updateItem(cache);
 			}
@@ -205,9 +214,9 @@ public class GroupCreateActivity extends Activity {
 			return;
 		}
 		boolean remove = false;
-		for (User tu : mAttendeeList) {
+		for (User tu : mUserList) {
 			if (tu.getmUserId() == u.getmUserId()) {
-				mAttendeeList.remove(tu);
+				mUserList.remove(tu);
 				remove = true;
 				break;
 			}
@@ -223,7 +232,7 @@ public class GroupCreateActivity extends Activity {
 
 	private void removeAttendee(User u) {
 		mAttendeeContainer.removeAllViews();
-		for (User tmpU : mAttendeeList) {
+		for (User tmpU : mUserList) {
 			addAttendee(tmpU);
 		}
 	}
@@ -233,7 +242,7 @@ public class GroupCreateActivity extends Activity {
 			return;
 		}
 
-		for (User u : mAttendeeList) {
+		for (User u : mUserList) {
 			if (it.u.getmUserId() == u.getmUserId()) {
 				((ContactUserView) it.v).updateChecked();
 			}
@@ -244,7 +253,7 @@ public class GroupCreateActivity extends Activity {
 		if (u.isCurrentLoggedInUser()) {
 			return;
 		}
-		mAttendeeList.add(u);
+		mUserList.add(u);
 
 		View v = null;
 		if (landLayout == PAD_LAYOUT) {
@@ -260,11 +269,14 @@ public class GroupCreateActivity extends Activity {
 			mScroller.postDelayed(new Runnable() {
 				@Override
 				public void run() {
-					View child = mAttendeeContainer.getChildAt(mAttendeeContainer.getChildCount() - 1);
+					View child = mAttendeeContainer
+							.getChildAt(mAttendeeContainer.getChildCount() - 1);
 					if (landLayout == PAD_LAYOUT) {
-						((ScrollView) mScroller).scrollTo(child.getRight(), child.getBottom());
+						((ScrollView) mScroller).scrollTo(child.getRight(),
+								child.getBottom());
 					} else {
-						((HorizontalScrollView) mScroller).scrollTo(child.getRight(), child.getBottom());
+						((HorizontalScrollView) mScroller).scrollTo(
+								child.getRight(), child.getBottom());
 					}
 				}
 
@@ -299,7 +311,8 @@ public class GroupCreateActivity extends Activity {
 		tv.setSingleLine(true);
 		tv.setTextSize(8);
 		ll.setTag(u.getmUserId() + "");
-		ll.addView(tv, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
+		ll.addView(tv, new LinearLayout.LayoutParams(
+				LinearLayout.LayoutParams.WRAP_CONTENT,
 				LinearLayout.LayoutParams.WRAP_CONTENT));
 		ll.setPadding(5, 5, 5, 5);
 		if (u.isCurrentLoggedInUser()) {
@@ -322,15 +335,12 @@ public class GroupCreateActivity extends Activity {
 		adapter.notifyDataSetChanged();
 	}
 
-	
-	
-	private  OnClickListener removeAttendeeListener = new OnClickListener() {
+	private OnClickListener removeAttendeeListener = new OnClickListener() {
 
 		@Override
 		public void onClick(View view) {
-			User u = (User)view.getTag();
-			Message.obtain(mLocalHandler, UPDATE_ATTENDEES, u)
-					.sendToTarget();
+			User u = (User) view.getTag();
+			Message.obtain(mLocalHandler, UPDATE_ATTENDEES, u).sendToTarget();
 			for (int index = 0; index < mItemList.size(); index++) {
 				ListItem li = mItemList.get(index);
 				if (li.u != null && u.getmUserId() == li.u.getmUserId()) {
@@ -340,8 +350,7 @@ public class GroupCreateActivity extends Activity {
 		}
 
 	};
-	
-	
+
 	private TextWatcher textChangedListener = new TextWatcher() {
 
 		@Override
@@ -359,7 +368,7 @@ public class GroupCreateActivity extends Activity {
 				}
 				return;
 			}
-			String str = s == null?"":s.toString();
+			String str = s == null ? "" : s.toString();
 			List<User> searchedUserList = new ArrayList<User>();
 			for (Group g : mGroupList) {
 				Group.searchUser(str, searchedUserList, g);
@@ -419,20 +428,25 @@ public class GroupCreateActivity extends Activity {
 				mGroupTitleET.requestFocus();
 				return;
 			}
-			//TODO call group create API
+			// TODO set call back
+			CrowdGroupService cg = new CrowdGroupService();
+			CrowdGroup crowd = new CrowdGroup(0, mGroupTitleET.getText()
+					.toString());
+			crowd.addUserToGroup(mUserList);
+			cg.createGroup(crowd, new Registrant(mLocalHandler,
+					CREATE_CROWD_RESPONSE, crowd));
 			view.setEnabled(false);
 		}
 
 	};
 
-	
 	private OnClickListener mReturnListener = new OnClickListener() {
 
 		@Override
 		public void onClick(View v) {
 			onBackPressed();
 		}
-		
+
 	};
 
 	class LoadContactsAT extends AsyncTask<Void, Void, Void> {
@@ -507,7 +521,6 @@ public class GroupCreateActivity extends Activity {
 		}
 
 	}
-	
 
 	class LocalHandler extends Handler {
 
@@ -522,6 +535,27 @@ public class GroupCreateActivity extends Activity {
 				break;
 			case UPDATE_SEARCHED_USER_LIST:
 				updateSearchedUserList((List<User>) msg.obj);
+				break;
+			case CREATE_CROWD_RESPONSE: {
+				JNIResponse recr = (JNIResponse) msg.obj;
+				if (recr.getResult() == JNIResponse.Result.SUCCESS) {
+					CrowdGroup cg = (CrowdGroup) recr.callerObject;
+					long id = ((CreateCrowdResponse)recr).getGroupId();
+					cg.setGId(id);
+					//add group to global cache
+					GlobalHolder.getInstance().addGroupToList(GroupType.CHATING, cg);
+					//send broadcast to inform new crowd notification
+					Intent i = new Intent();
+					i.setAction(JNIService.JNI_BROADCAST_NEW_CROWD_NOTIFICATION);
+					i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
+					i.putExtra("crowd", id);
+					mContext.sendBroadcast(i);
+					//finish current activity
+					finish();
+				} else {
+					mErrorNotificationLayout.setVisibility(View.VISIBLE);
+				}
+			}
 				break;
 			}
 		}

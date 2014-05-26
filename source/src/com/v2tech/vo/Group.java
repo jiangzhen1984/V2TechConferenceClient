@@ -3,6 +3,7 @@ package com.v2tech.vo;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -26,17 +27,17 @@ public class Group implements Comparable<Group>{
 
 	protected String mName;
 
-	private long mOwner;
+	protected long mOwner;
 
-	private User mOwnerUser;
+	protected User mOwnerUser;
 
-	private Date mCreateDate;
+	protected Date mCreateDate;
 
 	protected Group mParent;
 
 	protected List<Group> mChild;
 
-	private Set<User> users;
+	protected Set<User> users;
 
 	protected int level;
 
@@ -188,6 +189,17 @@ public class Group implements Comparable<Group>{
 		level = this.getParent().getLevel() + 1;
 	}
 
+	public void addUserToGroup(Collection<User> u) {
+		if (u == null) {
+			V2Log.e(" Invalid user data");
+			return;
+		}
+		synchronized (mLock) {
+			this.users.addAll(u);
+		}
+	}
+	
+	
 	public void addUserToGroup(User u) {
 		if (u == null) {
 			V2Log.e(" Invalid user data");

@@ -3,7 +3,7 @@
     package="com.v2tech"
     android:sharedUserLabel="@string/app_name"
     android:versionCode="1"
-    android:versionName="1.3.0.44" >
+    android:versionName="1.3.0.45" >
 
     <uses-sdk
         android:minSdkVersion="13"
@@ -159,9 +159,10 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.v2tech.view.conference.GroupCreateActivity"
+            android:name="com.v2tech.view.group.GroupCreateActivity"
             android:screenOrientation="nosensor"
-            android:windowSoftInputMode="stateHidden|adjustUnspecified" >
+            android:windowSoftInputMode="stateHidden|adjustPan" 
+            >
             <intent-filter>
                 <action android:name="com.v2tech.start_group_create_activity" />
 
@@ -169,11 +170,6 @@
                 <category android:name="com.v2tech" />
             </intent-filter>
         </activity>
-        
-        
-        
-        
-        
 
         <receiver android:name="com.v2tech.view.receiver.ConversationConvertReceiver" >
             <intent-filter>

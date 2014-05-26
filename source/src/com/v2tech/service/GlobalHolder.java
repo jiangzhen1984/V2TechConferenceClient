@@ -34,7 +34,7 @@ public class GlobalHolder {
 
 	private Set<Group> mContactsGroup = new HashSet<Group>();
 
-	private Set<Group> mChattingGroup = new HashSet<Group>();
+	private Set<Group> mCrowdGroup = new HashSet<Group>();
 
 	private Map<Long, User> mUserHolder = new HashMap<Long, User>();
 	private Map<Long, Group> mGroupHolder = new HashMap<Long, Group>();
@@ -174,7 +174,7 @@ public class GlobalHolder {
 		} else if (gType == Group.GroupType.CONTACT) {
 			this.mContactsGroup.addAll(list);
 		} else if (gType == GroupType.CHATING) {
-			this.mChattingGroup.addAll(list);
+			this.mCrowdGroup.addAll(list);
 		}
 		for (Group g : list) {
 			g.setOwnerUser(this.getUser(g.getOwner()));
@@ -186,6 +186,8 @@ public class GlobalHolder {
 		if (gType == Group.GroupType.ORG) {
 		} else if (gType == Group.GroupType.CONFERENCE) {
 			mConfGroup.add(g);
+		} else if (gType == Group.GroupType.CHATING) {
+			this.mCrowdGroup.add(g);
 		}
 		mGroupHolder.put(Long.valueOf(g.getmGId()), g);
 	}
@@ -195,7 +197,7 @@ public class GlobalHolder {
 		if (gType == Group.GroupType.CONFERENCE) {
 			gSet = mConfGroup;
 		} else if (gType == Group.GroupType.CHATING) {
-			gSet = mChattingGroup;
+			gSet = mCrowdGroup;
 		}
 
 		if (gSet == null) {
@@ -245,7 +247,7 @@ public class GlobalHolder {
 			return cl;
 		case CHATING:
 			List<Group> ct = new CopyOnWriteArrayList<Group>();
-			ct.addAll(this.mChattingGroup);
+			ct.addAll(this.mCrowdGroup);
 			return ct;
 		case CONFERENCE:
 			List<Group> confL = new ArrayList<Group>();

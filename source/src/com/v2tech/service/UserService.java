@@ -20,7 +20,7 @@ public class UserService extends AbstractHandler {
 	public UserService() {
 		super();
 		imCB = new ImRequestCB(this);
-		ImRequest.getInstance().setCallback(imCB);
+		ImRequest.getInstance().addCallback(imCB);
 	}
 
 	/**
@@ -122,9 +122,16 @@ public class UserService extends AbstractHandler {
 		}
 
 		@Override
-		public void OnModifyCommentName(long nUserId, String sCommmentName) {
+		public void OnModifyCommentNameCallback(long nUserId, String sCommmentName) {
 
 		}
+
+		@Override
+		public void OnCreateCrowdCallback(String sCrowdXml, int nResult) {
+			
+		}
+		
+		
 
 	}
 }

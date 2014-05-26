@@ -19,7 +19,7 @@ import com.v2tech.vo.ConferenceGroup;
 import com.v2tech.vo.ContactGroup;
 import com.v2tech.vo.Group;
 import com.v2tech.vo.Group.GroupType;
-import com.v2tech.vo.NormalGroup;
+import com.v2tech.vo.CrowdGroup;
 import com.v2tech.vo.OrgGroup;
 import com.v2tech.vo.V2Doc;
 import com.v2tech.vo.V2Doc.Page;
@@ -105,8 +105,8 @@ public class XmlParser {
 
 				for (int i = 0; i < conferenceList.getLength(); i++) {
 					conferenceElement = (Element) conferenceList.item(i);
-					list.add(new NormalGroup(Long.parseLong(conferenceElement
-							.getAttribute("id")), GroupType.fromInt(type),
+					list.add(new CrowdGroup(Long.parseLong(conferenceElement
+							.getAttribute("id")),
 							conferenceElement.getAttribute("name"), Long
 									.parseLong(conferenceElement
 											.getAttribute("creatoruserid"))));

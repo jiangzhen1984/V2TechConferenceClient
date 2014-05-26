@@ -8,6 +8,7 @@ import java.util.Set;
 
 import android.content.Context;
 import android.graphics.Typeface;
+import android.graphics.drawable.AnimationDrawable;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
@@ -216,6 +217,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 				spIV.setImageResource(R.drawable.conf_speaker);
 			} else if (state == PermissionState.GRANTED) {
 				spIV.setImageResource(R.drawable.conf_speaking);
+				((AnimationDrawable)spIV.getDrawable()).start();
 			}
 		}
 	}

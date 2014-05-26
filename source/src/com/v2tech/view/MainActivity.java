@@ -39,7 +39,8 @@ import com.v2tech.vo.Group;
 import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.NetworkStateCode;
 
-public class MainActivity extends FragmentActivity implements NotificationListener {
+public class MainActivity extends FragmentActivity implements
+		NotificationListener {
 
 	private Context mContext;
 	private boolean exitedFlag = false;
@@ -302,10 +303,10 @@ public class MainActivity extends FragmentActivity implements NotificationListen
 					Notificator.cancelAllSystemNotification(mContext);
 					System.exit(0);
 				}
-				
+
 			}, 1000);
 			finish();
-			
+
 		} else {
 			exitedFlag = true;
 			Toast.makeText(this, R.string.quit_promption, Toast.LENGTH_SHORT)
@@ -349,11 +350,9 @@ public class MainActivity extends FragmentActivity implements NotificationListen
 				JNIService.class));
 		V2Log.d("system destroyed v2tech");
 	}
-	
-	
-	
+
 	public void updateNotificator(String type) {
-		
+
 		View noticator = null;
 		if (type.equals(Conversation.TYPE_GROUP)) {
 			noticator = mTabClasses[2].notificator;
@@ -372,7 +371,7 @@ public class MainActivity extends FragmentActivity implements NotificationListen
 				noticator.setVisibility(View.GONE);
 			}
 		}
-		
+
 	}
 
 	private TextWatcher searchTextWatcher = new TextWatcher() {
@@ -402,10 +401,19 @@ public class MainActivity extends FragmentActivity implements NotificationListen
 
 		@Override
 		public void onClick(View view) {
+			titleBar.dismissPlusWindow();
 			int id = view.getId();
 			switch (id) {
+			case R.drawable.conversation_group_button: {
+
+				Intent i = new Intent(PublicIntent.START_GROUP_CREATE_ACTIVITY);
+				i.addCategory(PublicIntent.DEFAULT_CATEGORY);
+				startActivityForResult(i, SUB_ACTIVITY_CODE_CREATE_CONF);
+				break;
+			}
+
 			case R.drawable.conversation_video_button: {
-				titleBar.dismissPlusWindow();
+
 				Intent i = new Intent(
 						PublicIntent.START_CONFERENCE_CREATE_ACTIVITY);
 				i.addCategory(PublicIntent.DEFAULT_CATEGORY);
@@ -511,7 +519,8 @@ public class MainActivity extends FragmentActivity implements NotificationListen
 			} else if (PublicIntent.FINISH_APPLICATION.equals(action)) {
 				exitedFlag = true;
 				requestQuit();
-			} else if (JNIService.JNI_BROADCAST_CONNECT_STATE_NOTIFICATION.equals(action)) {
+			} else if (JNIService.JNI_BROADCAST_CONNECT_STATE_NOTIFICATION
+					.equals(action)) {
 				NetworkStateCode code = (NetworkStateCode) intent.getExtras()
 						.get("state");
 				if (titleBar != null) {

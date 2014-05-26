@@ -90,6 +90,8 @@ public class JNIService extends Service {
 	public static final String JNI_BROADCAST_CONFERENCE_REMOVED = "com.v2tech.jni.broadcast.conference_removed";
 	public static final String JNI_BROADCAST_GROUP_USER_REMOVED = "com.v2tech.jni.broadcast.group_user_removed";
 	public static final String JNI_BROADCAST_GROUP_USER_ADDED = "com.v2tech.jni.broadcast.group_user_added";
+	//broadcast for new crowd notification, if user created to user is invited
+	public static final String JNI_BROADCAST_NEW_CROWD_NOTIFICATION = "com.v2tech.jni.broadcast.new_crowd_notification";
 
 	private boolean isDebug = true;
 
@@ -139,7 +141,7 @@ public class JNIService extends Service {
 		mCallbackHandler = new JNICallbackHandler(callback.getLooper());
 
 		mImCB = new ImRequestCB(mCallbackHandler);
-		ImRequest.getInstance(this.getApplicationContext()).setCallback(mImCB);
+		ImRequest.getInstance(this.getApplicationContext()).addCallback(mImCB);
 
 		mGRCB = new GroupRequestCB(mCallbackHandler);
 		GroupRequest.getInstance(this.getApplicationContext()).addCallback(
@@ -555,9 +557,16 @@ public class JNIService extends Service {
 		}
 
 		@Override
-		public void OnModifyCommentName(long nUserId, String sCommmentName) {
+		public void OnModifyCommentNameCallback(long nUserId, String sCommmentName) {
 			// TODO implment update user nick name
 		}
+
+		@Override
+		public void OnCreateCrowdCallback(String sCrowdXml, int nResult) {
+			
+		}
+		
+		
 
 	}
 

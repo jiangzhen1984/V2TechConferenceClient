@@ -1,5 +1,6 @@
 package com.V2.jni;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -13,10 +14,10 @@ public class ImRequest {
 	public boolean loginResult;
 	private static ImRequest mImRequest;
 
-	private List<ImRequestCallback> callbacks;
+	private List<WeakReference<ImRequestCallback>> callbacks;
 
 	private ImRequest(Context context) {
-		callbacks = new ArrayList<ImRequestCallback>();
+		callbacks = new ArrayList<WeakReference<ImRequestCallback>>();
 	};
 
 	public static synchronized ImRequest getInstance(Context context) {
@@ -43,8 +44,12 @@ public class ImRequest {
 		return mImRequest;
 	}
 
-	public void setCallback(ImRequestCallback callback) {
-		this.callbacks.add(callback);
+	/**
+	 * 
+	 * @param callback
+	 */
+	public void addCallback(ImRequestCallback callback) {
+		this.callbacks.add(new WeakReference<ImRequestCallback>(callback));
 	}
 
 	public native boolean initialize(ImRequest request);
@@ -87,8 +92,12 @@ public class ImRequest {
 	private void OnLogin(long nUserID, int nStatus, long serverTime, int nResult) {
 		V2Log.d("OnLogin --> " + nUserID + ": " + "-:" + nStatus + ":"
 				+ nResult);
-		for (ImRequestCallback callback : this.callbacks) {
-			callback.OnLoginCallback(nUserID, nStatus, nResult);
+		for (WeakReference<ImRequestCallback> wf : this.callbacks) {
+			Object obj = wf.get();
+			if (obj != null) {
+				ImRequestCallback callback = (ImRequestCallback) obj;
+				callback.OnLoginCallback(nUserID, nStatus, nResult);
+			}
 		}
 	}
 
@@ -103,8 +112,12 @@ public class ImRequest {
 	 */
 	private void OnLogout(int nType) {
 		V2Log.d("OnLogout::" + nType);
-		for (ImRequestCallback cb : this.callbacks) {
-			cb.OnLogoutCallback(nType);
+		for (WeakReference<ImRequestCallback> wf : this.callbacks) {
+			Object obj = wf.get();
+			if (obj != null) {
+				ImRequestCallback callback = (ImRequestCallback) obj;
+				callback.OnLogoutCallback(nType);
+			}
 		}
 
 	}
@@ -134,8 +147,12 @@ public class ImRequest {
 	 * 
 	 */
 	private void OnUpdateBaseInfo(long nUserID, String updatexml) {
-		for (ImRequestCallback callback : this.callbacks) {
-			callback.OnUpdateBaseInfoCallback(nUserID, updatexml);
+		for (WeakReference<ImRequestCallback> wf : this.callbacks) {
+			Object obj = wf.get();
+			if (obj != null) {
+				ImRequestCallback callback = (ImRequestCallback) obj;
+				callback.OnUpdateBaseInfoCallback(nUserID, updatexml);
+			}
 		}
 	}
 
@@ -171,8 +188,13 @@ public class ImRequest {
 		V2Log.d(" OnUserStatusUpdated--> nUserID:" + nUserID + "  nStatus:"
 				+ nStatus + " nType:" + nType + " szStatusDesc:" + szStatusDesc
 				+ "  " + new Date());
-		for (ImRequestCallback callback : this.callbacks) {
-			callback.OnUserStatusUpdatedCallback(nUserID, nType, nStatus, szStatusDesc);
+		for (WeakReference<ImRequestCallback> wf : this.callbacks) {
+			Object obj = wf.get();
+			if (obj != null) {
+				ImRequestCallback callback = (ImRequestCallback) obj;
+				callback.OnUserStatusUpdatedCallback(nUserID, nType, nStatus,
+						szStatusDesc);
+			}
 		}
 	}
 
@@ -192,8 +214,13 @@ public class ImRequest {
 	private void OnChangeAvatar(int nAvatarType, long nUserID, String AvatarName) {
 		V2Log.d("OnChangeAvatar--> nAvatarType:" + nAvatarType + "    nUserID:"
 				+ nUserID + " AvatarName:" + AvatarName);
-		for (ImRequestCallback callback : this.callbacks) {
-			callback.OnChangeAvatarCallback(nAvatarType, nUserID, AvatarName);
+		for (WeakReference<ImRequestCallback> wf : this.callbacks) {
+			Object obj = wf.get();
+			if (obj != null) {
+				ImRequestCallback callback = (ImRequestCallback) obj;
+				callback.OnChangeAvatarCallback(nAvatarType, nUserID,
+						AvatarName);
+			}
 		}
 	}
 
@@ -227,14 +254,57 @@ public class ImRequest {
 	 * @param sCommmentName
 	 */
 	private void OnModifyCommentName(long nUserId, String sCommmentName) {
-		Log.e("ImRequest UI", "OnModifyCommentName::" + "nUserId:" + nUserId
-				+ "  sCommmentName" + sCommmentName);
-		for (ImRequestCallback callback : this.callbacks) {
-			callback.OnModifyCommentName(nUserId, sCommmentName);
+		V2Log.d("ImRequest UI --> OnModifyCommentName:: " + "nUserId:"
+				+ nUserId + "  sCommmentName" + sCommmentName);
+		for (WeakReference<ImRequestCallback> wf : this.callbacks) {
+			Object obj = wf.get();
+			if (obj != null) {
+				ImRequestCallback callback = (ImRequestCallback) obj;
+				callback.OnModifyCommentNameCallback(nUserId, sCommmentName);
+			}
 		}
 	}
 
 	public native void updateMyStatus(int nStatus, String szStatusDesc);
+
+	
+	/**
+	 * Connection state callback
+	 * @param nResult
+	 */
+	private void OnConnectResponse(int nResult) {
+		V2Log.d("OnConnectResponse::" + nResult);
+		for (WeakReference<ImRequestCallback> wf : this.callbacks) {
+			Object obj = wf.get();
+			if (obj != null) {
+				ImRequestCallback callback = (ImRequestCallback) obj;
+				callback.OnConnectResponseCallback(nResult);
+			}
+		}
+
+	}
+	
+	
+	/**
+	 * Crowd created request call back<br>
+	 * 
+	 * @see {@link ImRequestCallback#OnCreateCrowdCallback(String, int)}
+	 * @param sCrowdXml
+	 *            {@code <crowd authtype='0' id='44' name='hhh mjj ' size='100'/>}
+	 * @param nResult
+	 *            0: successfully
+	 */
+	private void OnCreateCrowd(String sCrowdXml, int nResult) {
+		V2Log.d("ImRequest UI -- > OnCreateCrowd  " + "sCrowdXml:" + sCrowdXml
+				+ "  nResult:" + nResult);
+		for (WeakReference<ImRequestCallback> wf : this.callbacks) {
+			Object obj = wf.get();
+			if (obj != null) {
+				ImRequestCallback callback = (ImRequestCallback) obj;
+				callback.OnCreateCrowdCallback(sCrowdXml, nResult);
+			}
+		}
+	}
 
 	// 淇敼涓汉淇℃伅
 	/*
@@ -324,13 +394,7 @@ public class ImRequest {
 		Log.e("ImRequest UI", "OnServerFaild");
 	}
 
-	private void OnConnectResponse(int nResult) {
-		V2Log.d("OnConnectResponse::" + nResult);
-		for (ImRequestCallback callback : this.callbacks) {
-			callback.OnConnectResponseCallback(nResult);
-		}
 
-	}
 
 	private void OnUpdateDownloadBegin(long filesize) {
 		Log.e("ImRequest UI", "OnUpdateDownloadBegin::" + filesize);
@@ -344,11 +408,6 @@ public class ImRequest {
 
 	{
 		Log.e("ImRequest UI", "OnUpdateDownloadEnd:" + error);
-	}
-
-	private void OnCreateCrowd(String sCrowdXml, int nResult) {
-		Log.e("ImRequest UI", "OnCreateCrowd  " + "sCrowdXml:" + sCrowdXml
-				+ "  nResult:" + nResult);
 	}
 
 	// 琚Щ鍑虹兢

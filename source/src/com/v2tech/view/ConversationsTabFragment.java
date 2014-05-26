@@ -99,8 +99,9 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 		getActivity().registerReceiver(receiver, getIntentFilter());
 		mContext = getActivity();
 		cb = new ConferenceService();
-		
-		BitmapManager.getInstance().registerBitmapChangedListener(this.bitmapChangedListener);
+
+		BitmapManager.getInstance().registerBitmapChangedListener(
+				this.bitmapChangedListener);
 	}
 
 	@Override
@@ -153,7 +154,8 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 		getActivity().unregisterReceiver(receiver);
 		isLoaded = false;
 		mItemList.clear();
-		BitmapManager.getInstance().unRegisterBitmapChangedListener(this.bitmapChangedListener);
+		BitmapManager.getInstance().unRegisterBitmapChangedListener(
+				this.bitmapChangedListener);
 	}
 
 	@Override
@@ -187,6 +189,10 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 						.addAction(JNIService.JNI_BROADCAST_CONFERENCE_INVATITION);
 				intentFilter
 						.addAction(JNIService.JNI_BROADCAST_CONFERENCE_REMOVED);
+			}
+			if (mCurrentTabFlag.equals(Conversation.TYPE_GROUP)) {
+				intentFilter
+						.addAction(JNIService.JNI_BROADCAST_NEW_CROWD_NOTIFICATION);
 			}
 
 		}
@@ -226,7 +232,8 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 
 				@Override
 				public void onClick(View view) {
-					//FIXME request enter conference should be here or in video activity 
+					// FIXME request enter conference should be here or in video
+					// activity
 					Intent i = new Intent(
 							PublicIntent.START_CONVERSACTION_ACTIVITY);
 					i.putExtra("user1id", GlobalHolder.getInstance()
@@ -263,9 +270,9 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 
 		@Override
 		public void onClick(View v) {
-//			if (isInMeeting) {
-//				return;
-//			}
+			// if (isInMeeting) {
+			// return;
+			// }
 			GroupLayout gp = (GroupLayout) v;
 
 			Intent i = new Intent(getActivity(), VideoActivityV2.class);
@@ -334,8 +341,8 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 			mItemList.add(0, new ScrollItem(cov, gp));
 			adapter.notifyDataSetChanged();
 
-			//Automatically start video activity
-			//because user has joined conference, once create successfully
+			// Automatically start video activity
+			// because user has joined conference, once create successfully
 			Intent i = new Intent(getActivity(), VideoActivityV2.class);
 			i.putExtra("gid", g.getmGId());
 			i.putExtra("in", true);
@@ -680,6 +687,17 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 					}
 				}
 				adapter.notifyDataSetChanged();
+			} else if (JNIService.JNI_BROADCAST_NEW_CROWD_NOTIFICATION
+					.equals(intent.getAction())) {
+				long gid = intent.getLongExtra("crowd", 0);
+				Group g = GlobalHolder.getInstance().getGroupById(
+						GroupType.CHATING, gid);
+				if (g != null) {
+					populateConversation(g, false);
+					adapter.notifyDataSetChanged();
+				} else {
+					V2Log.e("Can not get crowd :" + gid);
+				}
 			}
 		}
 

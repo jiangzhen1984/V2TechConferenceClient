@@ -70,5 +70,18 @@ public interface ImRequestCallback {
 	public void OnChangeAvatarCallback(int nAvatarType, long nUserID, String AvatarName);
 	
 	
-	public void OnModifyCommentName(long nUserId, String sCommmentName);
+	/**
+	 * 
+	 * @param nUserId
+	 * @param sCommmentName
+	 */
+	public void OnModifyCommentNameCallback(long nUserId, String sCommmentName);
+	
+	
+	/**
+	 * 
+	 * @param sCrowdXml
+	 * @param nResult
+	 */
+	public void OnCreateCrowdCallback(String sCrowdXml, int nResult);
 }
