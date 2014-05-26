@@ -81,6 +81,8 @@ public class Notificator {
 		// mId allows you to update the notification later on.
 		mNotificationManager.cancel(PublicIntent.MESSAGE_NOTIFICATION_ID);
 		mNotificationManager.cancel(PublicIntent.VIDEO_NOTIFICATION_ID);
+		mNotificationManager
+				.cancel(PublicIntent.APPLICATION_STATUS_BAR_NOTIFICATION);
 	}
 
 	public static void udpateApplicationNotification(Context context,
@@ -94,7 +96,7 @@ public class Notificator {
 					.setContentText(context.getText(R.string.status_bar_title))
 					.setAutoCancel(false);
 
-			//FIXME optimize code for decouple 
+			// FIXME optimize code for decouple
 			PendingIntent notifyPendingIntent = PendingIntent.getActivities(
 					context, 0, new Intent[] { new Intent(context,
 							MainActivity.class) },

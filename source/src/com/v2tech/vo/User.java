@@ -105,6 +105,8 @@ public class User implements Comparable<User> {
 	private DeviceType mType;
 
 	private Status mStatus;
+	
+	private String mAccount;
 
 	private String mName;
 
@@ -349,6 +351,15 @@ public class User implements Comparable<User> {
 	public void updateStatus(Status mStatus) {
 		this.mStatus = mStatus;
 	}
+	
+	
+	public String getAccount() {
+		return this.mAccount;
+	}
+	
+	public void setAccount(String acc) {
+		this.mAccount = acc;
+	}
 
 	public void addUserToGroup(Group g) {
 		if (g == null) {
@@ -500,6 +511,7 @@ public class User implements Comparable<User> {
 				u.setAddress(getAttribute(element, "address"));
 				u.setCellPhone(getAttribute(element, "mobile"));
 				u.setTitle(getAttribute(element, "job"));
+				u.setAccount(getAttribute(element, "account"));
 				try {
 					String bir = element.getAttribute("birthday");
 					if (bir != null && !bir.equals("")) {
@@ -554,6 +566,7 @@ public class User implements Comparable<User> {
 		String gender = extraAttri("sex='", "'", xml);
 		String email = extraAttri("email='", "'", xml);
 		String bir = extraAttri("birthday='", "'", xml);
+		String account = extraAttri("account='", "'", xml);
 
 		DateFormat dp = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
 
@@ -565,6 +578,7 @@ public class User implements Comparable<User> {
 		u.setAddress(address);
 		u.setGender(gender);
 		u.setEmail(email);
+		u.setAccount(account);
 		if (bir != null && bir.length() > 0) {
 			try {
 				u.setBirthday(dp.parse(bir));

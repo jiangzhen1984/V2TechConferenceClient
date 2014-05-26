@@ -226,6 +226,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 
 				@Override
 				public void onClick(View view) {
+					//FIXME request enter conference should be here or in video activity 
 					Intent i = new Intent(
 							PublicIntent.START_CONVERSACTION_ACTIVITY);
 					i.putExtra("user1id", GlobalHolder.getInstance()
@@ -333,8 +334,11 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 			mItemList.add(0, new ScrollItem(cov, gp));
 			adapter.notifyDataSetChanged();
 
+			//Automatically start video activity
+			//because user has joined conference, once create successfully
 			Intent i = new Intent(getActivity(), VideoActivityV2.class);
 			i.putExtra("gid", g.getmGId());
+			i.putExtra("in", true);
 			startActivityForResult(i, SUB_ACTIVITY_CODE_VIDEO_ACTIVITY);
 
 		}

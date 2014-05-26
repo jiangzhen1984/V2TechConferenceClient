@@ -323,8 +323,9 @@ public class ConferenceCreateActivity extends Activity {
 		tv.setText(u.getName());
 		tv.setEllipsize(TruncateAt.END);
 		tv.setSingleLine(true);
+		tv.setTextSize(8);
 		ll.setTag(u.getmUserId() + "");
-		ll.addView(tv, new LinearLayout.LayoutParams(60,
+		ll.addView(tv, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
 				LinearLayout.LayoutParams.WRAP_CONTENT));
 		ll.setPadding(5, 5, 5, 5);
 		if (u.isCurrentLoggedInUser()) {

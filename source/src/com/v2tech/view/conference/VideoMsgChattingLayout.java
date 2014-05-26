@@ -5,6 +5,7 @@ import android.graphics.Color;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -147,6 +148,7 @@ public class VideoMsgChattingLayout extends LinearLayout {
 		}
 
 		mPinButton.setTag("float");
+		((ImageView)mPinButton).setImageResource(R.drawable.pin_button_selector);
 	}
 	
 	
@@ -168,8 +170,10 @@ public class VideoMsgChattingLayout extends LinearLayout {
 
 			if (view.getTag().equals("float")) {
 				view.setTag("fix");
+				((ImageView)view).setImageResource(R.drawable.pin_fixed_button_selector);
 			} else {
 				view.setTag("float");
+				((ImageView)view).setImageResource(R.drawable.pin_button_selector);
 			}
 		}
 

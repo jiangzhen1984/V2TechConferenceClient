@@ -1,0 +1,11 @@
+<resources>
+
+   <string name="group_create_title">创建群</string>
+   <string name="group_create_group_name">群名称</string>
+   <string name="group_create_group_size">群规模</string>
+   <string name="group_create_group_qualification">验证类型</string>
+   <string name="group_create_cancel">返回</string>
+   <string name="group_create_confirm">确定</string>
+   <string name="error_group_title_required">会议名称不能为空!</string>
+   <string name="error_create_group_failed_from_server_side">创建群失败</string>
+</resources>

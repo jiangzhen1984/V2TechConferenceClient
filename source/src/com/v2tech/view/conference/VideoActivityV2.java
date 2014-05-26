@@ -460,7 +460,11 @@ public class VideoActivityV2 extends Activity {
 	@Override
 	protected void onStart() {
 		super.onStart();
-		requestEnterConf();
+		boolean  inFlag  = this.getIntent().getExtras().getBoolean("in", false);
+		//If doesn't enter conference, then request
+		if (!inFlag) {
+			requestEnterConf();
+		}
 		// adjustLayout();
 		Message.obtain(mVideoHandler, ONLY_SHOW_LOCAL_VIDEO).sendToTarget();
 		NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);

@@ -272,7 +272,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 
 		mNameTitleIV.setText(u.getName());
 		mNickNameET.setText(u.getName());
-		mAccountTV.setText(u.getmEmail());
+		mAccountTV.setText(u.getAccount());
 		mComapnyTV.setText(u.getCompany());
 		mDepartmentTV.setText(u.getDepartment());
 

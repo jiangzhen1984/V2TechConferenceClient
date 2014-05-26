@@ -711,7 +711,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="right|center_vertical"
-                    android:src="@drawable/contact_detail_call_button" />
+                    android:src="@drawable/contact_detail_call_button_disable" />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -744,7 +744,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="right|center_vertical"
-                    android:src="@drawable/contact_detail_video_button" />
+                    android:src="@drawable/contact_detail_video_button_disable" />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -777,7 +777,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="right|center_vertical"
-                    android:src="@drawable/contact_detail_sms_button" />
+                    android:src="@drawable/contact_detail_sms_button_disable" />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -844,7 +844,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="right|center_vertical"
-                    android:src="@drawable/contact_detail_file_button" />
+                    android:src="@drawable/contact_detail_file_button_disable" />
 
                 <TextView
                     android:layout_width="wrap_content"
