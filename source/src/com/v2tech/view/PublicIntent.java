@@ -37,5 +37,15 @@ public class PublicIntent {
 	public static final String FINISH_APPLICATION = "com.v2tech.finish_application";
 
 	public static final String PREPARE_FINISH_APPLICATION = "com.v2tech.prepare_finish_application";
+	
+	
+	//===========================Broadcast not for start activity
+	//broadcast for new crowd notification, if user created to user is invited
+	public static final String BROADCAST_NEW_CROWD_NOTIFICATION = "com.v2tech.jni.broadcast.new_crowd_notification";
+	//Broadcaset for new conference. This is only use conference is created by self
+	// extra key: newGid : group id
+	// we can get conference object from GlobalHolder
+	public static final String BROADCAST_NEW_CONFERENCE_NOTIFICATION = "com.v2tech.jni.broadcast.new_conference_notification";
+	
 
 }

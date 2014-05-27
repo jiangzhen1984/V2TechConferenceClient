@@ -3,7 +3,6 @@ package com.v2tech.view;
 import java.util.List;
 import java.util.Vector;
 
-import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -35,8 +34,6 @@ import com.v2tech.util.Notificator;
 import com.v2tech.util.V2Log;
 import com.v2tech.view.widget.TitleBar;
 import com.v2tech.vo.Conversation;
-import com.v2tech.vo.Group;
-import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.NetworkStateCode;
 
 public class MainActivity extends FragmentActivity implements
@@ -323,24 +320,7 @@ public class MainActivity extends FragmentActivity implements
 		}
 	}
 
-	@Override
-	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
-		if (resultCode == Activity.RESULT_OK) {
-			long gid = data.getLongExtra("newGid", 0);
-			Group g = GlobalHolder.getInstance().getGroupById(
-					GroupType.CONFERENCE, gid);
-			int count = ((FragmentPagerAdapter) mViewPager.getAdapter())
-					.getCount();
-			for (int i = 0; i < count; i++) {
-				Fragment frg = ((FragmentPagerAdapter) mViewPager.getAdapter())
-						.getItem(i);
-				if (frg instanceof ActionListener) {
-					((ActionListener) frg).listenGroupCreated(g);
-				}
-			}
-		}
-	}
 
 	@Override
 	protected void onDestroy() {
@@ -405,10 +385,10 @@ public class MainActivity extends FragmentActivity implements
 			int id = view.getId();
 			switch (id) {
 			case R.drawable.conversation_group_button: {
-
-				Intent i = new Intent(PublicIntent.START_GROUP_CREATE_ACTIVITY);
-				i.addCategory(PublicIntent.DEFAULT_CATEGORY);
-				startActivityForResult(i, SUB_ACTIVITY_CODE_CREATE_CONF);
+//
+//				Intent i = new Intent(PublicIntent.START_GROUP_CREATE_ACTIVITY);
+//				i.addCategory(PublicIntent.DEFAULT_CATEGORY);
+//				startActivityForResult(i, SUB_ACTIVITY_CODE_CREATE_CONF);
 				break;
 			}
 

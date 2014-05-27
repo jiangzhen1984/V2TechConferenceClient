@@ -12,6 +12,11 @@ import com.v2tech.util.V2Log;
 import com.v2tech.vo.CrowdGroup;
 import com.v2tech.vo.Group;
 
+/**
+ * Crowd group service, used to create crowd and remove crowd
+ * @author 28851274
+ *
+ */
 public class CrowdGroupService extends AbstractHandler {
 
 	private static final int CREATE_GROUP_MESSAGE = 0x0001;
@@ -24,9 +29,11 @@ public class CrowdGroupService extends AbstractHandler {
 	}
 
 	/**
-	 * 
+	 * Create crowd function, it's asynchronization request. response will be send by caller.
 	 * @param group
-	 * @param caller
+	 * @param caller  if input is null, ignore response Message. Response Message
+	 *            object is
+	 *            {@link com.v2tech.service.jni.CreateCrowdResponse}
 	 */
 	public void createGroup(CrowdGroup group, Registrant caller) {
 		this.initTimeoutMessage(CREATE_GROUP_MESSAGE, DEFAULT_TIME_OUT_SECS,
@@ -34,7 +41,6 @@ public class CrowdGroupService extends AbstractHandler {
 		GroupRequest.getInstance().createGroup(
 				Group.GroupType.CHATING.intValue(), group.toGroupXml(),
 				group.toGroupUserListXml());
-		// TODO add callback handle
 
 	}
 

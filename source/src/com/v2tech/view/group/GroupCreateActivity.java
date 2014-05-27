@@ -40,6 +40,7 @@ import com.v2tech.service.Registrant;
 import com.v2tech.service.jni.CreateCrowdResponse;
 import com.v2tech.service.jni.JNIResponse;
 import com.v2tech.view.JNIService;
+import com.v2tech.view.PublicIntent;
 import com.v2tech.vo.CrowdGroup;
 import com.v2tech.vo.Group;
 import com.v2tech.vo.Group.GroupType;
@@ -546,7 +547,7 @@ public class GroupCreateActivity extends Activity {
 					GlobalHolder.getInstance().addGroupToList(GroupType.CHATING, cg);
 					//send broadcast to inform new crowd notification
 					Intent i = new Intent();
-					i.setAction(JNIService.JNI_BROADCAST_NEW_CROWD_NOTIFICATION);
+					i.setAction(PublicIntent.BROADCAST_NEW_CROWD_NOTIFICATION);
 					i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
 					i.putExtra("crowd", id);
 					mContext.sendBroadcast(i);

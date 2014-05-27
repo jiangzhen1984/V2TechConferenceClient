@@ -1,9 +1,7 @@
 package com.v2tech.view.conference;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import android.content.Context;
@@ -38,8 +36,6 @@ public class VideoAttendeeListLayout extends LinearLayout {
 	private VideoAttendeeActionListener listener;
 
 	private ListView mAttendeeContainer;
-
-	private Map<Long, Attendee> mAttends = new HashMap<Long, Attendee>();
 
 	private List<View> mCachedAttendsView;
 	private List<View> mAttendsView;
@@ -117,15 +113,12 @@ public class VideoAttendeeListLayout extends LinearLayout {
 
 	public void setAttendsList(Set<Attendee> l) {
 		mAttendsView = new ArrayList<View>();
-		for (Attendee at : l) {
-			mAttends.put(Long.valueOf(at.getAttId()), at);
-		}
-		populate();
-	}
-
-	private void populate() {
-		for (Attendee at : mAttends.values()) {
-			mAttendsView.addAll(buildAttendeeView(at));
+		// Copy list for void concurrency exception
+		List<Attendee> list = new ArrayList<Attendee>(l);
+		synchronized (mAttendsView) {
+			for (Attendee at : list) {
+				mAttendsView.addAll(buildAttendeeView(at));
+			}
 		}
 		adapter.notifyDataSetChanged();
 	}
@@ -146,13 +139,15 @@ public class VideoAttendeeListLayout extends LinearLayout {
 
 		if (a.isSelf() == false) {
 			nameTV.setTextSize(20);
-			if (a.getDefaultDevice() != null) {
+			if ((a.getDefaultDevice() != null && a.isJoined()) || a.isSelf()) {
 				cameraIV.setImageResource(R.drawable.camera);
 			}
 		} else {
 			nameTV.setTextSize(22);
 			nameTV.setTypeface(null, Typeface.BOLD);
-			cameraIV.setImageResource(R.drawable.camera);
+			if (a.isJoined() || a.isSelf()) {
+				cameraIV.setImageResource(R.drawable.camera);
+			}
 		}
 		view.setTag(new Wrapper(a, a.getDefaultDevice()));
 		list.add(view);
@@ -168,7 +163,9 @@ public class VideoAttendeeListLayout extends LinearLayout {
 			UserDeviceConfig udc = a.getmDevices().get(i);
 			nameTV2.setText(a.getAttName() + (i > 0 ? ("_视频" + i) : ""));
 			nameTV2.setTextSize(20);
-			cameraIV2.setImageResource(R.drawable.camera);
+			if (a.isJoined()|| a.isSelf()) {
+				cameraIV2.setImageResource(R.drawable.camera);
+			}
 
 			view2.setTag(new Wrapper(a, udc));
 			list.add(view2);
@@ -179,16 +176,48 @@ public class VideoAttendeeListLayout extends LinearLayout {
 	}
 
 	public void updateEnteredAttendee(Attendee at) {
-		mAttends.put(Long.valueOf(at.getAttId()), at);
-		mAttendsView.clear();
-		populate();
+		at.setJoined(true);
+		if (mAttendsView == null) {
+			mAttendsView = new ArrayList<View>();
+		}
+		int index = 0;
+		synchronized (mAttendsView) {
+			for (int i = 0; i < mAttendsView.size(); ) {
+				View v = mAttendsView.get(i);
+				Wrapper wr = (Wrapper) v.getTag();
+				if (wr.a.getAttId() == at.getAttId()) {
+					mAttendsView.remove(i);					
+					index = i;
+				} else {
+					i++;
+				}
+			}
+		}
+
+		mAttendsView.addAll(index, buildAttendeeView(at));
+		adapter.notifyDataSetChanged();
 	}
 
 	public void updateExitedAttendee(Attendee at) {
+		if (at == null) {
+			return;
+		}
+		at.setJoined(false);
 		at.setmDevices(null);
-		mAttends.put(Long.valueOf(at.getAttId()), at);
-		mAttendsView.clear();
-		populate();
+		if (mAttendsView == null) {
+			return;
+		}
+
+		for (int i = 0; i < mAttendsView.size(); i++) {
+			View v = mAttendsView.get(i);
+			Wrapper wr = (Wrapper) v.getTag();
+			if (wr.a.getAttId() == at.getAttId()) {
+				ImageView cameraIV2 = (ImageView) v
+						.findViewById(R.id.video_attendee_device_camera_icon);
+				cameraIV2.setImageResource(R.drawable.camera_pressed);
+			}
+		}
+
 	}
 
 	/**
@@ -217,7 +246,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 				spIV.setImageResource(R.drawable.conf_speaker);
 			} else if (state == PermissionState.GRANTED) {
 				spIV.setImageResource(R.drawable.conf_speaking);
-				((AnimationDrawable)spIV.getDrawable()).start();
+				((AnimationDrawable) spIV.getDrawable()).start();
 			}
 		}
 	}
@@ -228,7 +257,6 @@ public class VideoAttendeeListLayout extends LinearLayout {
 	 * @param at
 	 */
 	public void removeAttendee(Attendee at) {
-		mAttends.remove(Long.valueOf(at.getAttId()));
 		synchronized (mAttendsView) {
 			for (int i = 0; mAttendsView != null && i < mAttendsView.size(); i++) {
 				View v = mAttendsView.get(i);

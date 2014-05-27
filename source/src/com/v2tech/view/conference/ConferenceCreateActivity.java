@@ -47,6 +47,7 @@ import com.v2tech.service.GlobalHolder;
 import com.v2tech.service.Registrant;
 import com.v2tech.service.jni.JNIResponse;
 import com.v2tech.service.jni.RequestConfCreateResponse;
+import com.v2tech.view.PublicIntent;
 import com.v2tech.view.cus.DateTimePicker;
 import com.v2tech.view.cus.DateTimePicker.OnDateSetListener;
 import com.v2tech.vo.Conference;
@@ -286,6 +287,9 @@ public class ConferenceCreateActivity extends Activity {
 			mScroller.postDelayed(new Runnable() {
 				@Override
 				public void run() {
+					if (mAttendeeContainer.getChildCount() <= 0) {
+						return;
+					}
 					View child = mAttendeeContainer.getChildAt(mAttendeeContainer.getChildCount() - 1);
 					if (landLayout == PAD_LAYOUT) {
 						((ScrollView) mScroller).scrollTo(child.getRight(), child.getBottom());
@@ -637,7 +641,9 @@ public class ConferenceCreateActivity extends Activity {
 						g);
 				Intent i = new Intent();
 				i.putExtra("newGid", g.getmGId());
-				setResult(Activity.RESULT_OK, i);
+				i.setAction(PublicIntent.BROADCAST_NEW_CONFERENCE_NOTIFICATION);
+				i.addCategory(PublicIntent.DEFAULT_CATEGORY);
+				mContext.sendBroadcast(i);
 				finish();
 				break;
 			}

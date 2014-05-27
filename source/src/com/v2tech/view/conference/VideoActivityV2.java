@@ -1117,7 +1117,7 @@ public class VideoActivityV2 extends Activity {
 					}
 				}
 			}
-			this.mAttendeeList.remove(a);
+			a.setJoined(false);
 			if (mAttendeeContainer != null) {
 				mAttendeeContainer.updateExitedAttendee(a);
 			}

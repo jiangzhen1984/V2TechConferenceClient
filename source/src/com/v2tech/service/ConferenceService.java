@@ -182,9 +182,11 @@ public class ConferenceService extends AbstractHandler {
 		}
 		initTimeoutMessage(JNI_REQUEST_QUIT_CONFERENCE, DEFAULT_TIME_OUT_SECS,
 				caller);
+		//If conference owner is self, then delete group
 		if (conf.getCreator() == GlobalHolder.getInstance().getCurrentUserId()) {
 			GroupRequest.getInstance().delGroup(
 					Group.GroupType.CONFERENCE.intValue(), conf.getId());
+		//If conference owner isn't self, just leave group
 		} else {
 			GroupRequest.getInstance().leaveGroup(
 					Group.GroupType.CONFERENCE.intValue(), conf.getId());

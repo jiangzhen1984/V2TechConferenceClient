@@ -12,6 +12,20 @@ import com.v2tech.util.V2Log;
 import com.v2tech.view.bo.UserAvatarObject;
 import com.v2tech.vo.User;
 
+
+/**
+ * <ul>This is simple Bitmap Management class.</ul>
+ * <ul>This class doesn't manage memory, this just manage bitmap changed indication.<br>
+ * Because once one of bitmap changed, view must change before recycle, otherwise will be get exception error.
+ * </ul>
+ *  New bitmap change event coming, bitmap manager will receive event, and will notify all listeners which 
+ *  register with {@link #registerBitmapChangedListener(BitmapChangedListener)}. <br>
+ *  After notify all view listeners, then notify cache listener which register with {@link #registerLastBitmapChangedListener(BitmapChangedListener)}.
+ *  
+ * <ul></ul>
+ * @author 28851274
+ *
+ */
 public class BitmapManager {
 
 	

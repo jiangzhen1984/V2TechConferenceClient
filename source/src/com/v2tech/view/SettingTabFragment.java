@@ -1,7 +1,6 @@
 package com.v2tech.view;
 
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -14,8 +13,6 @@ import com.v2tech.R;
 import com.v2tech.util.GlobalConfig;
 
 public class SettingTabFragment extends Fragment {
-
-	private IntentFilter intentFilter;
 
 	private TextView mQuitButton;
 	private TextView mVersionTV;

@@ -46,8 +46,7 @@ import com.v2tech.vo.Group;
 import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.User;
 
-public class ConversationsTabFragment extends Fragment implements TextWatcher,
-		ActionListener {
+public class ConversationsTabFragment extends Fragment implements TextWatcher {
 
 	private static final int FILL_CONFS_LIST = 2;
 	private static final int UPDATE_USER_SIGN = 8;
@@ -189,10 +188,11 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 						.addAction(JNIService.JNI_BROADCAST_CONFERENCE_INVATITION);
 				intentFilter
 						.addAction(JNIService.JNI_BROADCAST_CONFERENCE_REMOVED);
+				intentFilter.addAction(PublicIntent.BROADCAST_NEW_CONFERENCE_NOTIFICATION);
 			}
 			if (mCurrentTabFlag.equals(Conversation.TYPE_GROUP)) {
 				intentFilter
-						.addAction(JNIService.JNI_BROADCAST_NEW_CROWD_NOTIFICATION);
+						.addAction(PublicIntent.BROADCAST_NEW_CROWD_NOTIFICATION);
 			}
 
 		}
@@ -325,8 +325,12 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 
 	}
 
-	@Override
-	public void listenGroupCreated(Group g) {
+	/**
+	 * Use to update current list view adapter and start video activity.
+	 * this function will be call only in case of current user create conference
+	 * @param g
+	 */
+	public void updateNewGroup(Group g) {
 		if (g == null) {
 			V2Log.e("Unmatformd group infor");
 			return;
@@ -687,7 +691,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 					}
 				}
 				adapter.notifyDataSetChanged();
-			} else if (JNIService.JNI_BROADCAST_NEW_CROWD_NOTIFICATION
+			} else if (PublicIntent.BROADCAST_NEW_CROWD_NOTIFICATION
 					.equals(intent.getAction())) {
 				long gid = intent.getLongExtra("crowd", 0);
 				Group g = GlobalHolder.getInstance().getGroupById(
@@ -698,6 +702,9 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 				} else {
 					V2Log.e("Can not get crowd :" + gid);
 				}
+			} else if (PublicIntent.BROADCAST_NEW_CONFERENCE_NOTIFICATION.equals(intent.getAction())) {
+				Group conf = GlobalHolder.getInstance().getGroupById(GroupType.CONFERENCE, intent.getLongExtra("newGid", 0));
+				updateNewGroup(conf);
 			}
 		}
 

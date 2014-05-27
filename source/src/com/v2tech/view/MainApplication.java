@@ -68,12 +68,14 @@ public class MainApplication extends Application {
 
 		}.start();
 
+		//Load native library
 		System.loadLibrary("event");
 		System.loadLibrary("udt");
 		System.loadLibrary("v2vi");
 		System.loadLibrary("v2ve");
 		System.loadLibrary("v2client");
 
+		//Initialize native library
 		NativeInitializer.getIntance().initialize(getApplicationContext());
 		ImRequest.getInstance(getApplicationContext());
 		GroupRequest.getInstance(getApplicationContext());
@@ -84,6 +86,7 @@ public class MainApplication extends Application {
 		ChatRequest.getInstance(getApplicationContext());
 		VideoMixerRequest.getInstance();
 
+		//Start deamon service
 		getApplicationContext().startService(
 				new Intent(getApplicationContext(), JNIService.class));
 
