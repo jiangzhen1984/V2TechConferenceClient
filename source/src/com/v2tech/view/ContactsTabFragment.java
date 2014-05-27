@@ -28,6 +28,7 @@ import com.v2tech.R;
 import com.v2tech.service.BitmapManager;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.util.V2Log;
+import com.v2tech.view.bo.GroupUserObject;
 import com.v2tech.view.bo.UserStatusObject;
 import com.v2tech.view.contacts.ContactGroupView;
 import com.v2tech.view.contacts.ContactUserView;
@@ -154,6 +155,7 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 			intentFilter.addAction(JNIService.JNI_BROADCAST_GROUP_NOTIFICATION);
 			intentFilter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
 			intentFilter.addAction(JNIService.JNI_BROADCAST_GROUP_USER_ADDED);
+			intentFilter.addAction(JNIService.JNI_BROADCAST_GROUP_USER_REMOVED);
 			intentFilter
 					.addAction(JNIService.JNI_BROADCAST_USER_STATUS_NOTIFICATION);
 			intentFilter
@@ -238,7 +240,12 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 				Message.obtain(mHandler, UPDATE_USER_SIGN,
 						intent.getExtras().get("uid")).sendToTarget();
 			} else if (JNIService.JNI_BROADCAST_GROUP_USER_ADDED.equals(intent
-					.getAction())) {
+					.getAction()) || JNIService.JNI_BROADCAST_GROUP_USER_REMOVED.equals(intent.getAction())) {
+				GroupUserObject guo = (GroupUserObject)intent.getExtras().get("obj");
+				if (flag == TAG_CONTACT && guo.getmType() == Group.GroupType.CONTACT.intValue()) {
+					
+					
+				}
 				// Update all group staticist information
 				for (ListItem item : mItemList) {
 					if (item.g != null) {

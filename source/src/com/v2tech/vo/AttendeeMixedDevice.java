@@ -45,7 +45,7 @@ public class AttendeeMixedDevice extends Attendee {
 
 	@Override
 	public String getAttName() {
-		return "混屏";
+		return "混合视频";
 	}
 
 }
