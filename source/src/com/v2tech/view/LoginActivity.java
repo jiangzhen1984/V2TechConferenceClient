@@ -139,7 +139,7 @@ public class LoginActivity extends Activity {
 				this, R.animator.login_container_down_in);
 		tabBlockHolderAnimation.setDuration(1500);
 		tabBlockHolderAnimation.setFillAfter(true);
-		tabBlockHolderAnimation.setInterpolator(new BounceInterpolator());
+		//tabBlockHolderAnimation.setInterpolator(new BounceInterpolator());
 		loginView.startAnimation(tabBlockHolderAnimation);
 	}
 

@@ -46,6 +46,8 @@
              android:layout_marginRight="35dp"
             android:ellipsize="end"
             android:singleLine="true"
+             android:textSize="@dimen/common_item_text_size"
+             android:textColor="@color/common_item_text_color"
             android:text="TextView" />
 
         <TextView
@@ -59,6 +61,8 @@
             android:layout_toRightOf="@+id/contact_user_name"
             android:ellipsize="end"
             android:singleLine="true"
+             android:textSize="@dimen/common_item_text_size"
+             android:textColor="@color/common_item_text_color"
             android:text="TextView" />
 
         <ImageView

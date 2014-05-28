@@ -30,15 +30,16 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:paddingBottom="15dp"
             android:layout_marginLeft="150dp"
             android:layout_marginRight="150dp"
             android:layout_marginTop="15dp"
             android:ellipsize="end"
             android:gravity="center"
+            android:paddingBottom="15dp"
             android:singleLine="true"
             android:text="name"
-            android:textSize="25sp" />
+            android:textColor="@color/common_item_text_color"
+            android:textSize="@dimen/common_item_text_size" />
 
         <ImageView
             android:id="@+id/contact_user_detail_2"
@@ -48,7 +49,6 @@
             android:layout_centerVertical="true"
             android:layout_marginRight="20dp"
             android:src="@drawable/contact_detail_2_button_selector" />
-
     </RelativeLayout>
 
     <LinearLayout
@@ -91,6 +91,7 @@
                 android:layout_toRightOf="@+id/contact_user_detail_head_icon"
                 android:ellipsize="end"
                 android:singleLine="true"
+                 android:textColor="@color/button_text_color"
                 android:text="TextView" />
 
             <TextView
@@ -108,7 +109,7 @@
                 android:paddingTop="10dp"
                 android:text="@string/contacts_user_detail_send_msg"
                 android:textColor="@color/button_text_color"
-                android:textSize="18sp" />
+                android:textSize="@dimen/common_item_text_size" />
 
             <TextView
                 android:id="@+id/contact_user_detail_invite_video"
@@ -125,7 +126,7 @@
                 android:paddingTop="10dp"
                 android:text="@string/contacts_user_detail_invite_video"
                 android:textColor="@color/button_text_color"
-                android:textSize="18sp" />
+                android:textSize="@dimen/common_item_text_size" />
         </RelativeLayout>
 
         <ScrollView
@@ -143,8 +144,8 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="15dp"
                     android:layout_marginBottom="15dp"
+                    android:layout_marginLeft="15dp"
                     android:layout_marginRight="15dp"
                     android:background="@drawable/rounded_corners_of_contact_user_detail_outer"
                     android:orientation="vertical" >
@@ -170,7 +171,8 @@
                                 android:layout_marginTop="15dp"
                                 android:padding="10dp"
                                 android:text="@string/contacts_user_detail_item_nick_name"
-                                android:textSize="18sp" />
+                                android:textColor="@color/common_item_text_color"
+                                android:textSize="@dimen/common_item_text_size" />
 
                             <EditText
                                 android:id="@+id/contact_user_detail_nick_name_et"
@@ -179,10 +181,12 @@
                                 android:layout_gravity="center_vertical"
                                 android:layout_marginRight="200dp"
                                 android:layout_weight="1"
+                                android:background="@null"
                                 android:ems="10"
                                 android:inputType="text"
                                 android:maxLength="30"
-                                android:textColor="@color/contacts_user_detail_text_color" >
+                                android:textColor="@color/common_item_text_color"
+                                android:textSize="@dimen/common_item_text_size" >
                             </EditText>
                         </LinearLayout>
 
@@ -207,7 +211,8 @@
                                 android:layout_marginTop="15dp"
                                 android:padding="10dp"
                                 android:text="@string/contacts_user_detail_item_account"
-                                android:textSize="18sp" />
+                                android:textColor="@color/common_item_text_color"
+                                android:textSize="@dimen/common_item_text_size" />
 
                             <TextView
                                 android:id="@+id/contact_user_detail_account_tv"
@@ -217,10 +222,10 @@
                                 android:layout_marginLeft="30dp"
                                 android:layout_marginRight="30dp"
                                 android:layout_marginTop="15dp"
-                                android:text="account"
                                 android:gravity="center_vertical"
-                                android:textColor="@color/contacts_user_detail_text_color"
-                                android:textSize="18sp" />
+                                android:text="account"
+                                android:textColor="@color/common_item_text_color"
+                                android:textSize="@dimen/common_item_text_size" />
                         </LinearLayout>
 
                         <LinearLayout
@@ -243,7 +248,8 @@
                                 android:layout_marginTop="15dp"
                                 android:padding="10dp"
                                 android:text="@string/contacts_user_detail_item_gender"
-                                android:textSize="18sp" />
+                                android:textColor="@color/common_item_text_color"
+                                android:textSize="@dimen/common_item_text_size" />
 
                             <TextView
                                 android:id="@+id/contact_user_detail_gender_tv"
@@ -254,8 +260,8 @@
                                 android:layout_marginRight="30dp"
                                 android:layout_marginTop="15dp"
                                 android:text="gender"
-                                android:textColor="@color/contacts_user_detail_text_color"
-                                android:textSize="18sp"
+                                android:textColor="@color/common_item_text_color"
+                                android:textSize="@dimen/common_item_text_size"
                                 android:visibility="gone" />
 
                             <RadioGroup
@@ -263,7 +269,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:orientation="horizontal"
-                                android:textColor="@color/contacts_user_detail_text_color"
+                                android:textColor="@color/common_item_text_color"
                                 android:visibility="gone" >
 
                                 <RadioButton
@@ -272,7 +278,7 @@
                                     android:layout_height="wrap_content"
                                     android:tag="1"
                                     android:text="@string/contacts_user_detail_gender_male"
-                                    android:textColor="@color/contacts_user_detail_text_color" />
+                                    android:textColor="@color/common_item_text_color" />
 
                                 <RadioButton
                                     android:id="@+id/radio1"
@@ -280,7 +286,7 @@
                                     android:layout_height="wrap_content"
                                     android:tag="2"
                                     android:text="@string/contacts_user_detail_gender_female"
-                                    android:textColor="@color/contacts_user_detail_text_color" />
+                                    android:textColor="@color/common_item_text_color" />
                             </RadioGroup>
                         </LinearLayout>
 
@@ -305,7 +311,8 @@
                                 android:layout_marginTop="15dp"
                                 android:padding="10dp"
                                 android:text="@string/contacts_user_detail_item_birdthday"
-                                android:textSize="18sp" />
+                                android:textColor="@color/common_item_text_color"
+                                android:textSize="@dimen/common_item_text_size" />
 
                             <TextView
                                 android:id="@+id/contact_user_detail_birthday_tv"
@@ -315,10 +322,10 @@
                                 android:layout_marginLeft="30dp"
                                 android:layout_marginRight="30dp"
                                 android:layout_marginTop="15dp"
-                                android:text="birthday"
                                 android:gravity="center_vertical"
-                                android:textColor="@color/contacts_user_detail_text_color"
-                                android:textSize="18sp"
+                                android:text="birthday"
+                                android:textColor="@color/common_item_text_color"
+                                android:textSize="@dimen/common_item_text_size"
                                 android:visibility="gone" />
 
                             <EditText
@@ -331,7 +338,7 @@
                                 android:ems="10"
                                 android:focusable="false"
                                 android:inputType="date"
-                                android:textColor="@color/contacts_user_detail_text_color"
+                                android:textColor="@color/common_item_text_color"
                                 android:visibility="gone" >
                             </EditText>
                         </LinearLayout>
@@ -356,7 +363,8 @@
                                 android:layout_marginTop="15dp"
                                 android:padding="10dp"
                                 android:text="@string/contacts_user_detail_item_cell_phone"
-                                android:textSize="18sp" />
+                                android:textColor="@color/common_item_text_color"
+                                android:textSize="@dimen/common_item_text_size" />
 
                             <TextView
                                 android:id="@+id/contact_user_detail_cell_phone_tv"
@@ -366,10 +374,10 @@
                                 android:layout_marginLeft="30dp"
                                 android:layout_marginRight="30dp"
                                 android:layout_marginTop="15dp"
-                                android:text="Cell phone"
                                 android:gravity="center_vertical"
-                                android:textColor="@color/contacts_user_detail_text_color"
-                                android:textSize="18sp"
+                                android:text="Cell phone"
+                                android:textColor="@color/common_item_text_color"
+                                android:textSize="@dimen/common_item_text_size"
                                 android:visibility="gone" />
 
                             <EditText
@@ -382,7 +390,7 @@
                                 android:ems="10"
                                 android:inputType="phone"
                                 android:maxLength="11"
-                                android:textColor="@color/contacts_user_detail_text_color"
+                                android:textColor="@color/common_item_text_color"
                                 android:visibility="gone" >
                             </EditText>
                         </LinearLayout>
@@ -408,7 +416,8 @@
                                 android:layout_marginTop="15dp"
                                 android:padding="10dp"
                                 android:text="@string/contacts_user_detail_item_telephone"
-                                android:textSize="18sp" />
+                                android:textColor="@color/common_item_text_color"
+                                android:textSize="@dimen/common_item_text_size" />
 
                             <TextView
                                 android:id="@+id/contact_user_detail_telephone_tv"
@@ -418,10 +427,10 @@
                                 android:layout_marginLeft="30dp"
                                 android:layout_marginRight="30dp"
                                 android:layout_marginTop="15dp"
-                                android:text="TextView"
                                 android:gravity="center_vertical"
-                                android:textColor="@color/contacts_user_detail_text_color"
-                                android:textSize="18sp"
+                                android:text="TextView"
+                                android:textColor="@color/common_item_text_color"
+                                android:textSize="@dimen/common_item_text_size"
                                 android:visibility="gone" />
 
                             <EditText
@@ -434,7 +443,7 @@
                                 android:ems="10"
                                 android:inputType="text"
                                 android:maxLength="30"
-                                android:textColor="@color/contacts_user_detail_text_color"
+                                android:textColor="@color/common_item_text_color"
                                 android:visibility="gone" />
                         </LinearLayout>
 
@@ -458,7 +467,8 @@
                                 android:layout_marginTop="15dp"
                                 android:padding="10dp"
                                 android:text="@string/contacts_user_detail_item_company"
-                                android:textSize="18sp" />
+                                android:textColor="@color/common_item_text_color"
+                                android:textSize="@dimen/common_item_text_size" />
 
                             <TextView
                                 android:id="@+id/contact_user_detail_company_tv"
@@ -468,10 +478,10 @@
                                 android:layout_marginLeft="30dp"
                                 android:layout_marginRight="30dp"
                                 android:layout_marginTop="15dp"
-                                android:text="TextView"
                                 android:gravity="center_vertical"
-                                android:textColor="@color/contacts_user_detail_text_color"
-                                android:textSize="18sp" />
+                                android:text="TextView"
+                                android:textColor="@color/common_item_text_color"
+                                android:textSize="@dimen/common_item_text_size" />
 
                             <EditText
                                 android:id="@+id/contact_user_detail_company_et"
@@ -482,7 +492,7 @@
                                 android:layout_weight="1"
                                 android:ems="10"
                                 android:inputType="text"
-                                android:textColor="@color/contacts_user_detail_text_color"
+                                android:textColor="@color/common_item_text_color"
                                 android:visibility="gone" />
                         </LinearLayout>
 
@@ -507,7 +517,8 @@
                                 android:layout_marginTop="15dp"
                                 android:padding="10dp"
                                 android:text="@string/contacts_user_detail_item_department"
-                                android:textSize="18sp" />
+                                android:textColor="@color/common_item_text_color"
+                                android:textSize="@dimen/common_item_text_size" />
 
                             <TextView
                                 android:id="@+id/contact_user_detail_department_tv"
@@ -517,10 +528,10 @@
                                 android:layout_marginLeft="30dp"
                                 android:layout_marginRight="30dp"
                                 android:layout_marginTop="15dp"
-                                android:text="TextView"
                                 android:gravity="center_vertical"
-                                android:textColor="@color/contacts_user_detail_text_color"
-                                android:textSize="18sp" />
+                                android:text="TextView"
+                                android:textColor="@color/common_item_text_color"
+                                android:textSize="@dimen/common_item_text_size" />
 
                             <EditText
                                 android:id="@+id/contact_user_detail_department_et"
@@ -531,7 +542,7 @@
                                 android:layout_weight="1"
                                 android:ems="10"
                                 android:inputType="text"
-                                android:textColor="@color/contacts_user_detail_text_color"
+                                android:textColor="@color/common_item_text_color"
                                 android:visibility="gone" />
                         </LinearLayout>
 
@@ -555,7 +566,8 @@
                                 android:layout_marginTop="15dp"
                                 android:padding="10dp"
                                 android:text="@string/contacts_user_detail_item_title"
-                                android:textSize="18sp" />
+                                android:textColor="@color/common_item_text_color"
+                                android:textSize="@dimen/common_item_text_size" />
 
                             <TextView
                                 android:id="@+id/contact_user_detail_title_tv"
@@ -565,10 +577,10 @@
                                 android:layout_marginLeft="30dp"
                                 android:layout_marginRight="30dp"
                                 android:layout_marginTop="15dp"
-                                android:text="TextView"
                                 android:gravity="center_vertical"
-                                android:textColor="@color/contacts_user_detail_text_color"
-                                android:textSize="18sp"
+                                android:text="TextView"
+                                android:textColor="@color/common_item_text_color"
+                                android:textSize="@dimen/common_item_text_size"
                                 android:visibility="gone" />
 
                             <EditText
@@ -581,7 +593,7 @@
                                 android:ems="10"
                                 android:inputType="text"
                                 android:maxLength="50"
-                                android:textColor="@color/contacts_user_detail_text_color"
+                                android:textColor="@color/common_item_text_color"
                                 android:visibility="gone" />
                         </LinearLayout>
 
@@ -606,7 +618,7 @@
                                 android:layout_marginTop="15dp"
                                 android:padding="10dp"
                                 android:text="@string/contacts_user_detail_item_address"
-                                android:textSize="18sp" />
+                                android:textSize="@dimen/common_item_text_size" />
 
                             <TextView
                                 android:id="@+id/contact_user_detail_address_tv"
@@ -616,10 +628,10 @@
                                 android:layout_marginLeft="30dp"
                                 android:layout_marginRight="30dp"
                                 android:layout_marginTop="15dp"
-                                android:text="TextView"
                                 android:gravity="center_vertical"
-                                android:textColor="@color/contacts_user_detail_text_color"
-                                android:textSize="18sp"
+                                android:text="TextView"
+                                android:textColor="@color/common_item_text_color"
+                                android:textSize="@dimen/common_item_text_size"
                                 android:visibility="gone" />
 
                             <EditText
@@ -632,7 +644,7 @@
                                 android:ems="10"
                                 android:inputType="text"
                                 android:maxLength="100"
-                                android:textColor="@color/contacts_user_detail_text_color"
+                                android:textColor="@color/common_item_text_color"
                                 android:visibility="gone" />
                         </LinearLayout>
                     </LinearLayout>
@@ -665,7 +677,7 @@
             android:orientation="horizontal" >
 
             <LinearLayout
-                 android:id="@+id/contact_user_detail_create_conf_bottom_button"
+                android:id="@+id/contact_user_detail_create_conf_bottom_button"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="0.16"
@@ -689,7 +701,7 @@
                     android:paddingTop="10dp"
                     android:text="@string/contacts_user_detail_button_invite_video_conference"
                     android:textColor="@color/contact_detail_button_font_color"
-                    android:textSize="18sp" />
+                    android:textSize="@dimen/common_item_text_size" />
             </LinearLayout>
 
             <LinearLayout
@@ -723,7 +735,7 @@
                     android:paddingTop="10dp"
                     android:text="@string/contacts_user_detail_button_call"
                     android:textColor="#c2c2c2"
-                    android:textSize="18sp" />
+                    android:textSize="@dimen/common_item_text_size" />
             </LinearLayout>
 
             <LinearLayout
@@ -756,7 +768,7 @@
                     android:paddingTop="10dp"
                     android:text="@string/contacts_user_detail_button_invite_video_call"
                     android:textColor="#c2c2c2"
-                    android:textSize="18sp" />
+                    android:textSize="@dimen/common_item_text_size" />
             </LinearLayout>
 
             <LinearLayout
@@ -789,7 +801,7 @@
                     android:paddingTop="10dp"
                     android:text="@string/contacts_user_detail_button_send_sms"
                     android:textColor="#c2c2c2"
-                    android:textSize="18sp" />
+                    android:textSize="@dimen/common_item_text_size" />
             </LinearLayout>
 
             <LinearLayout
@@ -823,7 +835,7 @@
                     android:paddingTop="10dp"
                     android:text="@string/contacts_user_detail_button_send_text_msg"
                     android:textColor="@color/contact_detail_button_font_color"
-                    android:textSize="18sp" />
+                    android:textSize="@dimen/common_item_text_size" />
             </LinearLayout>
 
             <LinearLayout
@@ -856,7 +868,7 @@
                     android:paddingTop="10dp"
                     android:text="@string/contacts_user_detail_button_send_file"
                     android:textColor="#c2c2c2"
-                    android:textSize="18sp" />
+                    android:textSize="@dimen/common_item_text_size" />
             </LinearLayout>
         </LinearLayout>
     </RelativeLayout>

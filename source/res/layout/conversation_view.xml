@@ -10,10 +10,10 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_centerVertical="true"
+        android:layout_marginBottom="10dp"
         android:layout_marginLeft="15dp"
-        android:layout_marginTop="5dp"
         android:layout_marginRight="5dp"
-        android:layout_marginBottom="5dp" >
+        android:layout_marginTop="10dp" >
 
         <ImageView
             android:id="@+id/group_list_conference_image_view"
@@ -33,38 +33,54 @@
             android:visibility="invisible" />
     </RelativeLayout>
 
-    <TextView
-        android:id="@+id/group_list_conference_title_tv"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignTop="@+id/group_list_conference_image_view_rl"
-        android:layout_marginLeft="30dp"
-        android:layout_toRightOf="@+id/group_list_conference_image_view_rl"
-        android:ellipsize="end"
-        android:singleLine="true"
-        android:text="TextView" />
-
-    <TextView
-        android:id="@+id/group_list_conference_owner_tv"
+    <LinearLayout
+        android:id="@+id/LinearLayout1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignBottom="@+id/group_list_conference_image_view_rl"
+        android:layout_alignTop="@+id/group_list_conference_image_view_rl"
         android:layout_marginLeft="30dp"
+        android:layout_marginRight="10dp"
         android:layout_toLeftOf="@+id/gourp_list_conference_create_time_tv"
         android:layout_toRightOf="@+id/group_list_conference_image_view_rl"
-        android:ellipsize="end"
-        android:singleLine="true"
-        android:text="TextView" />
+        android:orientation="vertical" >
+
+        <TextView
+            android:id="@+id/group_list_conference_title_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:layout_weight=".5"
+            android:ellipsize="end"
+            android:gravity="left|top"
+            android:singleLine="true"
+            android:text="TextView"
+            android:textColor="@color/common_item_text_color"
+            android:textSize="@dimen/common_item_text_size"  />
+
+        <TextView
+            android:id="@+id/group_list_conference_owner_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:layout_weight=".5"
+            android:ellipsize="end"
+            android:gravity="left|bottom"
+            android:singleLine="true"
+            android:text="TextView"
+            android:textColor="@color/common_item_text_color"
+            android:textSize="@dimen/common_item_text_size_16" />
+    </LinearLayout>
 
     <TextView
         android:id="@+id/gourp_list_conference_create_time_tv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/group_list_conference_owner_tv"
+        android:layout_alignBottom="@+id/LinearLayout1"
         android:layout_alignParentRight="true"
         android:layout_marginRight="15dp"
         android:paddingRight="15dp"
-        android:text="TextView" />
+        android:text="TextView"
+        android:textColor="@color/common_item_text_color"
+        android:textSize="18sp" />
 
     <LinearLayout
         android:layout_width="fill_parent"

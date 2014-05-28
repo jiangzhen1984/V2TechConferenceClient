@@ -44,8 +44,8 @@
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
                 android:layout_marginRight="41dp"
-                android:padding="10dp"
                 android:layout_toLeftOf="@+id/speaker_iv"
+                android:padding="10dp"
                 android:src="@drawable/video_setting_button_selector" />
 
             <ImageView
@@ -64,8 +64,8 @@
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
                 android:layout_marginRight="41dp"
-                android:padding="10dp"
                 android:layout_toLeftOf="@+id/in_meeting_log_out_iv"
+                android:padding="10dp"
                 android:src="@drawable/mute_button" />
 
             <TextView
@@ -82,7 +82,8 @@
                 android:gravity="center"
                 android:singleLine="true"
                 android:text=" "
-                android:textSize="23sp" />
+                android:textColor="@color/common_item_text_color"
+                android:textSize="@dimen/common_item_text_size_20" />
         </RelativeLayout>
 
         <LinearLayout
@@ -183,7 +184,6 @@
                     android:layout_marginRight="10dp"
                     android:layout_marginTop="10dp"
                     android:src="@drawable/converse_camera_button" />
-
             </RelativeLayout>
         </FrameLayout>
     </RelativeLayout>

@@ -10,15 +10,16 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_centerVertical="true"
-        android:layout_toRightOf="@+id/video_attendee_device_camera_ly"
         android:layout_marginLeft="22dp"
         android:layout_marginRight="30dp"
-        android:paddingTop="5dp"
-        android:paddingBottom="5dp"
-        android:singleLine="true"
+        android:layout_toRightOf="@+id/video_attendee_device_camera_ly"
         android:ellipsize="end"
-        android:textColor="#000000"
-        android:text="TextView" />
+        android:paddingBottom="5dp"
+        android:paddingTop="5dp"
+        android:singleLine="true"
+        android:text="TextView"
+        android:textColor="@color/common_item_text_color"
+        android:textSize="@dimen/common_item_text_size" />
 
     <LinearLayout
         android:id="@+id/video_attendee_device_camera_ly"
@@ -28,31 +29,30 @@
         android:layout_centerVertical="true"
         android:layout_marginRight="15dp"
         android:orientation="horizontal" >
-        
-         <ImageView
+
+        <ImageView
             android:id="@+id/video_attendee_device_speaker_icon"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight=".5"
             android:layout_gravity="center"
+            android:layout_weight=".5"
             android:src="@drawable/conf_speaker" />
 
         <ImageView
             android:id="@+id/video_attendee_device_camera_icon"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight=".5"
             android:layout_gravity="center"
+            android:layout_weight=".5"
             android:src="@drawable/camera_pressed" />
-
     </LinearLayout>
 
-    
-     <LinearLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:layout_alignParentBottom="true"
         android:background="#f2f2f2"
         android:orientation="horizontal" >
-        </LinearLayout>
+    </LinearLayout>
+
 </RelativeLayout>

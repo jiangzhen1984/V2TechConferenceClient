@@ -27,6 +27,8 @@
             android:gravity="center_vertical"
             android:singleLine="true"
             android:layout_marginRight="10dp"
+             android:textSize="18sp"
+             android:textColor="@color/common_item_text_color"
             android:text="contact_group_name" />
 
         <TextView
@@ -37,6 +39,8 @@
             android:layout_marginLeft="15dp"
             android:layout_gravity="center"
             android:gravity="center_vertical"
+             android:textSize="18sp"
+             android:textColor="@color/common_item_text_color"
             android:text="contact_group_online_statist" />
        
     </LinearLayout>
