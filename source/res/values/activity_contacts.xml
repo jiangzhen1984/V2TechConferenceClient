@@ -2,6 +2,7 @@
 <resources>
 
     <string name="contacts_title">组织结构</string>
+    <string name="contacts_detail_title">个人资料</string>
     <string name="contacts_user_action_invite_chat">发 起 聊 天</string>
     <string name="contacts_user_action_invite_video">发 起 会 议</string>
     <string name="contacts_user_action_call">拨 打 电 话</string>
@@ -11,7 +12,9 @@
     <string name="contacts_user_detail_return_button">返回</string>
     <string name="contacts_user_detail_send_msg">发消息</string>
     <string name="contacts_user_detail_invite_video">发起会议</string>
+    <string name="contacts_user_detail_add_friend">加为好友</string>
     <string name="contacts_user_detail_item_nick_name">昵称</string>
+    <string name="contacts_user_detail_item_signature">签名</string>
     <string name="contacts_user_detail_item_account">帐号</string>
     <string name="contacts_user_detail_item_gender">性别</string>
     <string name="contacts_user_detail_item_birdthday">生日</string>
@@ -21,6 +24,8 @@
     <string name="contacts_user_detail_item_department">部门</string>
     <string name="contacts_user_detail_item_title">职务</string>
     <string name="contacts_user_detail_item_address">地址</string>
+    <string name="contacts_user_detail_item_email">邮箱</string>
+    <string name="contacts_user_detail_item_fax">传真</string>
     
     <string name="contacts_user_detail_button_invite_video_conference">发起视频会议</string>
     <string name="contacts_user_detail_button_call">拨打电话</string>

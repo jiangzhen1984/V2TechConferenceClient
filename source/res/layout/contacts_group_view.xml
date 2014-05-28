@@ -4,7 +4,7 @@
     android:layout_height="wrap_content"
     android:background="#ffffff" >
 
-    <LinearLayout
+      <LinearLayout
         android:id="@+id/contact_group_view_root"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -27,9 +27,9 @@
             android:gravity="center_vertical"
             android:singleLine="true"
             android:layout_marginRight="10dp"
-            android:text="contact_group_name"
-            android:textColor="@color/common_item_text_color"
-            android:textSize="18sp" />
+             android:textSize="18sp"
+             android:textColor="@color/common_item_text_color"
+            android:text="contact_group_name" />
 
         <TextView
             android:id="@+id/contact_group_online_statist"

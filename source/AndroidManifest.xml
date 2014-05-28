@@ -170,6 +170,16 @@
                 <category android:name="com.v2tech" />
             </intent-filter>
         </activity>
+        
+        <activity
+            android:name="com.v2tech.view.contacts.ContactDetail2"
+            android:screenOrientation="nosensor"
+            android:windowSoftInputMode="stateHidden|adjustPan" 
+            >
+        </activity>
+        
+        
+        
 
         <receiver android:name="com.v2tech.view.receiver.ConversationConvertReceiver" >
             <intent-filter>

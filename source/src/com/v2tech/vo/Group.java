@@ -207,6 +207,7 @@ public class Group implements Comparable<Group>{
 		}
 		synchronized (mLock) {
 			this.users.add(u);
+			u.addUserToGroup(this);
 		}
 	}
 	

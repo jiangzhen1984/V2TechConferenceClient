@@ -244,17 +244,19 @@ public class VideoActivityV2 extends Activity {
 				animation.setDuration(400);
 				mMenuButtonContainer.startAnimation(animation);
 				mMenuButtonContainer.setVisibility(View.VISIBLE);
+				((ImageView)view).setImageResource(R.drawable.video_menu_button);
 
 			} else {
-
-				showOrHidenAttendeeContainer(View.GONE);
-				showOrHidenMsgContainer(View.GONE);
-				showOrHidenDocContainer(View.GONE);
+				//Do not hide other window
+//				showOrHidenAttendeeContainer(View.GONE);
+//				showOrHidenMsgContainer(View.GONE);	
+//				showOrHidenDocContainer(View.GONE);
 				Animation animation = AnimationUtils.loadAnimation(mContext,
 						R.animator.nonam_scale_y_100_0);
 				animation.setDuration(400);
 				mMenuButtonContainer.startAnimation(animation);
 				mMenuButtonContainer.setVisibility(View.GONE);
+				((ImageView)view).setImageResource(R.drawable.video_menu_button_pressed);
 			}
 		}
 

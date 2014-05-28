@@ -137,6 +137,8 @@ public class User implements Comparable<User> {
 	private String mAvatarPath;
 
 	private String abbra;
+	
+	private String mFax;
 
 	private static HanyuPinyinOutputFormat format = new HanyuPinyinOutputFormat();
 
@@ -352,6 +354,14 @@ public class User implements Comparable<User> {
 		this.mStatus = mStatus;
 	}
 	
+	
+	public String getFax() {
+		return this.mFax;
+	}
+	
+	public void setFax(String fax) {
+		this.mFax = fax;
+	}
 	
 	public String getAccount() {
 		return this.mAccount;

@@ -137,7 +137,7 @@ public class LoginActivity extends Activity {
 		loginView.setVisibility(View.VISIBLE);
 		final Animation tabBlockHolderAnimation = AnimationUtils.loadAnimation(
 				this, R.animator.login_container_down_in);
-		tabBlockHolderAnimation.setDuration(1500);
+		tabBlockHolderAnimation.setDuration(1000);
 		tabBlockHolderAnimation.setFillAfter(true);
 		//tabBlockHolderAnimation.setInterpolator(new BounceInterpolator());
 		loginView.startAnimation(tabBlockHolderAnimation);

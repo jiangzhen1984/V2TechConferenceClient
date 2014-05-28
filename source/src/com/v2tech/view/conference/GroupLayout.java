@@ -90,7 +90,7 @@ public class GroupLayout extends LinearLayout {
 				) {
 			if ( ((ConferenceConversation) mConv).getGroup().getOwner() != GlobalHolder
 						.getInstance().getCurrentUserId())
-			mGroupIV.setImageResource(R.drawable.conference_icon_o);
+			mGroupIV.setImageResource(R.drawable.conference_icon);
 		}
 		if (this.mConv.getNotiFlag() == Conversation.NOTIFICATION) {
 			mNotificatorIV.setVisibility(View.VISIBLE);

@@ -47,38 +47,39 @@ public class ContactDetail extends Activity implements OnTouchListener {
 	private LocalHandler lh = new LocalHandler();
 	private UserService us = new UserService();
 
-	private TextView mReturnButtonTV;
+	private View mReturnButtonTV;
 	private TextView mNameTitleIV;
 	private ImageView mHeadIconIV;
-	private EditText mNickNameET;
-	private TextView mAccountTV;
 
 	// view definition for non-self
-	private TextView mUserSignatureTV;
-	private TextView mButtonInviteVideoTV;
-	private TextView mButtonSendMsgTV;
-	private TextView mGenderTV;
-	private TextView mBirthdayTV;
 	private TextView mCellphoneTV;
 	private TextView mTelephoneTV;
-	private TextView mComapnyTV;
-	private TextView mDepartmentTV;
 	private TextView mTitleTV;
 	private TextView mAddressTV;
-	private TextView[] mTVArr;
-	private View mSendMsgBottomButton;
+	private TextView mFaxTV;
+	private TextView mEmailTV;
+	private TextView mCompanyTitleTV;
+	private TextView mSignTV;
+	private View[] mTVArr;
+	private View mItemsContainer;
+
 	private View mContactButtonContainer;
+	private View mSendMsgBottomButton;
 	private View mCreateConfButton;
+	private View mMoreDetailButton;
 
 	// view for self
-
+	private EditText mSignature;
+	private TextView mAccountTV;
 	private RadioGroup mGenderRG;
 	private EditText mBirthdayET;
 	private EditText mCellphoneET;
 	private EditText mTelephoneET;
 	private EditText mTitleET;
 	private EditText mAddressET;
-
+	private TextView mDepartmentSelfTV;
+	private TextView mCompanySelfTV;
+	private View mSelfItemsContainer;
 	private EditText[] mETArr;
 
 	private boolean isUpdating;
@@ -88,7 +89,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
+
 		this.setContentView(R.layout.activity_contact_detail);
 		mUid = this.getIntent().getLongExtra("uid", 0);
 		initView();
@@ -99,7 +100,8 @@ public class ContactDetail extends Activity implements OnTouchListener {
 		if (v != null) {
 			v.setOnTouchListener(this);
 		}
-		this.overridePendingTransition(R.animator.alpha_from_0_to_1, R.animator.alpha_from_1_to_0);
+		this.overridePendingTransition(R.animator.alpha_from_0_to_1,
+				R.animator.alpha_from_1_to_0);
 	}
 
 	@Override
@@ -115,21 +117,17 @@ public class ContactDetail extends Activity implements OnTouchListener {
 	protected void onStop() {
 		super.onStop();
 	}
-	
-	
 
 	@Override
 	public void onBackPressed() {
-		if(check()) {
-			super.onBackPressed();
-		//	this.overridePendingTransition(R.animator.nonam_scale_null, R.animator.nonam_scale_center_100_0);
-		}
+		super.onBackPressed();
 	}
-	
+
 	@Override
 	public void finish() {
 		super.finish();
-		this.overridePendingTransition(R.animator.alpha_from_0_to_1, R.animator.alpha_from_1_to_0);
+		this.overridePendingTransition(R.animator.alpha_from_0_to_1,
+				R.animator.alpha_from_1_to_0);
 	}
 
 	@Override
@@ -148,57 +146,47 @@ public class ContactDetail extends Activity implements OnTouchListener {
 	private void initView() {
 		mHeadIconIV = (ImageView) findViewById(R.id.contact_user_detail_head_icon);
 		mNameTitleIV = (TextView) findViewById(R.id.contact_user_detail_title);
-		mNickNameET = (EditText) findViewById(R.id.contact_user_detail_nick_name_et);
-		mAccountTV = (TextView) findViewById(R.id.contact_user_detail_account_tv);
 
 		mReturnButtonTV = (TextView) findViewById(R.id.contact_detail_return_button);
-		mReturnButtonTV.setOnClickListener(new OnClickListener() {
+		mReturnButtonTV.setOnClickListener(mReturnButtonListener);
 
-			@Override
-			public void onClick(View view) {
-				for (View v : mETArr) {
-					if (v == null) {
-						continue;
-					}
-					InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-					imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
-				}
-				onBackPressed();
-			}
+		mMoreDetailButton = findViewById(R.id.contact_user_detail_2);
+		mMoreDetailButton.setOnClickListener(mMoreDetailListener);
+		
 
-		});
 		// view definition for non-self
-		mUserSignatureTV = (TextView) findViewById(R.id.contact_user_detail_user_signature_tv);
-		mButtonInviteVideoTV = (TextView) findViewById(R.id.contact_user_detail_invite_video);
-		
+		mItemsContainer = findViewById(R.id.contact_detail_items_ly);
 		mSendMsgBottomButton = findViewById(R.id.contact_user_detail_send_bottom_button);
-		
 		mContactButtonContainer = findViewById(R.id.contact_button_ly);
 		mCreateConfButton = findViewById(R.id.contact_user_detail_create_conf_bottom_button);
-		
-		mButtonSendMsgTV = (TextView) findViewById(R.id.contact_user_detail_send_msg);
-		mGenderTV = (TextView) findViewById(R.id.contact_user_detail_gender_tv);
-		mBirthdayTV = (TextView) findViewById(R.id.contact_user_detail_birthday_tv);
-		mCellphoneTV = (TextView) findViewById(R.id.contact_user_detail_cell_phone_tv);
-		mTelephoneTV = (TextView) findViewById(R.id.contact_user_detail_telephone_tv);
-		mComapnyTV = (TextView) findViewById(R.id.contact_user_detail_company_tv);
-		mDepartmentTV = (TextView) findViewById(R.id.contact_user_detail_department_tv);
-		mTitleTV = (TextView) findViewById(R.id.contact_user_detail_title_tv);
-		mAddressTV = (TextView) findViewById(R.id.contact_user_detail_address_tv);
-		mTVArr = new TextView[] { mUserSignatureTV, mButtonInviteVideoTV,
-				mButtonSendMsgTV, mGenderTV, mBirthdayTV, mCellphoneTV,
-				mTelephoneTV, mTitleTV, mAddressTV };
+
+		mTitleTV = (TextView) findViewById(R.id.contact_user_n_detail_title_tv);
+		mAddressTV = (TextView) findViewById(R.id.contact_user_n_detail_address_tv);
+		mEmailTV = (TextView) findViewById(R.id.contact_user_n_detail_email_tv);
+		mCellphoneTV = (TextView) findViewById(R.id.contact_user_n_detail_cell_phone_tv);
+		mTelephoneTV = (TextView) findViewById(R.id.contact_user_n_detail_telephone_tv);
+		mFaxTV = (TextView) findViewById(R.id.contact_user_n_detail_fax_tv);
+		mCompanyTitleTV = (TextView) findViewById(R.id.contact_user_company);
+		mSignTV = (TextView) findViewById(R.id.contact_user_detail_user_signature_tv);
+
+		mTVArr = new View[] { mItemsContainer, mCompanyTitleTV,
+				mContactButtonContainer, mMoreDetailButton, mSignTV };
 
 		// view for self
+		mSelfItemsContainer = findViewById(R.id.contact_detail_self_items_ly);
+		mSignature = (EditText) findViewById(R.id.contact_user_detail_signature_et);
+		mAccountTV = (TextView) findViewById(R.id.contact_user_detail_account_tv);
 		mGenderRG = (RadioGroup) findViewById(R.id.contact_user_detail_gender_rg);
 		mBirthdayET = (EditText) findViewById(R.id.contact_user_detail_birthday_et);
 		mCellphoneET = (EditText) findViewById(R.id.contact_user_detail_cell_phone_et);
 		mTelephoneET = (EditText) findViewById(R.id.contact_user_detail_telephone_et);
 		mTitleET = (EditText) findViewById(R.id.contact_user_detail_title_et);
 		mAddressET = (EditText) findViewById(R.id.contact_user_detail_address_et);
+		mCompanySelfTV = (TextView) findViewById(R.id.contact_user_detail_company_tv);
+		mDepartmentSelfTV = (TextView) findViewById(R.id.contact_user_detail_department_tv);
 
-		mETArr = new EditText[] { mCellphoneET, mTelephoneET, mTitleET,
-				mAddressET, mBirthdayET };
+		mETArr = new EditText[] { mSignature, mCellphoneET, mTelephoneET,
+				mTitleET, mAddressET };
 	}
 
 	private void showUserInfo() {
@@ -206,12 +194,15 @@ public class ContactDetail extends Activity implements OnTouchListener {
 			mHeadIconIV.setImageBitmap(u.getAvatarBitmap());
 		}
 
+		mNameTitleIV.setText(u.getName());
+
+		// for self
 		if (u.getmUserId() == GlobalHolder.getInstance().getCurrentUserId()) {
-			for (TextView tv : mTVArr) {
+			for (View tv : mTVArr) {
 				tv.setVisibility(View.GONE);
 			}
+			mSelfItemsContainer.setVisibility(View.VISIBLE);
 
-			mContactButtonContainer.setVisibility(View.GONE);
 			mGenderRG.setVisibility(View.VISIBLE);
 			selectedRG(u.getGender());
 			mGenderRG.setOnCheckedChangeListener(new OnCheckedChangeListener() {
@@ -223,11 +214,15 @@ public class ContactDetail extends Activity implements OnTouchListener {
 				}
 
 			});
+			mAccountTV.setText(u.getAccount());
+			mSignature.setText(u.getSignature());
 			mBirthdayET.setText(u.getBirthdayStr());
 			mCellphoneET.setText(u.getCellPhone());
 			mTelephoneET.setText(u.getTelephone());
 			mTitleET.setText(u.getTitle());
 			mAddressET.setText(u.getAddress());
+			mDepartmentSelfTV.setText(u.getDepartment());
+			mCompanySelfTV.setText(u.getCompany());
 
 			for (EditText et : mETArr) {
 				et.setVisibility(View.VISIBLE);
@@ -236,52 +231,32 @@ public class ContactDetail extends Activity implements OnTouchListener {
 			}
 			mBirthdayET.setVisibility(View.VISIBLE);
 
+			mBirthdayET.setOnClickListener(datePickerListener);
+			bir = u.getBirthday();
+
 		} else {
 			for (EditText et : mETArr) {
 				et.setVisibility(View.GONE);
 			}
-			for (TextView tv : mTVArr) {
+			for (View tv : mTVArr) {
 				tv.setVisibility(View.VISIBLE);
 			}
+			mSelfItemsContainer.setVisibility(View.GONE);
 			mGenderRG.setVisibility(View.GONE);
-			
 
-			mUserSignatureTV.setText(u.getSignature());
-			if (u.getGender() != null && u.getGender().equals("1")) {
-				mGenderTV.setText(mContext.getResources().getText(
-						R.string.contacts_user_detail_gender_male));
-			} else if (u.getGender() != null && u.getGender().equals("2")) {
-				mGenderTV.setText(mContext.getResources().getText(
-						R.string.contacts_user_detail_gender_female));
-			} else {
-				mGenderTV.setText("");
-			}
-			mBirthdayTV.setText(u.getBirthdayStr());
 			mCellphoneTV.setText(u.getCellPhone());
 			mTelephoneTV.setText(u.getTelephone());
 			mTitleTV.setText(u.getTitle());
 			mAddressTV.setText(u.getAddress());
-
-			mButtonInviteVideoTV.setOnClickListener(mInviteVideoCall);
+			mCompanyTitleTV.setText(u.getCompany());
+			mFaxTV.setText(u.getFax());
+			mEmailTV.setText(u.getmEmail());
+			mSignTV.setText(u.getSignature());
 
 			mSendMsgBottomButton.setOnClickListener(mSendMsgListener);
-			mButtonSendMsgTV.setOnClickListener(mSendMsgListener);
 			mCreateConfButton.setOnClickListener(mCreateConfMsgListener);
 
 		}
-
-		mNameTitleIV.setText(u.getName());
-		mNickNameET.setText(u.getName());
-		mAccountTV.setText(u.getAccount());
-		mComapnyTV.setText(u.getCompany());
-		mDepartmentTV.setText(u.getDepartment());
-
-		//hidden button of invite video conversation
-		mButtonInviteVideoTV.setVisibility(View.INVISIBLE);
-
-		mNickNameET.addTextChangedListener(tw);
-		mBirthdayET.setOnClickListener(datePickerListener);
-		bir = u.getBirthday();
 
 	}
 
@@ -310,32 +285,14 @@ public class ContactDetail extends Activity implements OnTouchListener {
 		}
 
 	};
-	
-	
-	private View.OnClickListener mInviteVideoCall = new View.OnClickListener() {
 
-		@Override
-		public void onClick(View arg0) {
-			Intent i = new Intent();
-			i.setAction(PublicIntent.START_VIDEO_CONVERSACTION_ACTIVITY);
-			i.addCategory(PublicIntent.DEFAULT_CATEGORY);
-			i.putExtra("is_coming_call", false);
-			i.putExtra("name", u.getName());
-			i.putExtra("uid", u.getmUserId());
-			mContext.startActivity(i);
-		}
-
-	};
-	
 	private View.OnClickListener mSendMsgListener = new View.OnClickListener() {
 
 		@Override
 		public void onClick(View arg0) {
-			
-			Intent i = new Intent(
-					PublicIntent.START_CONVERSACTION_ACTIVITY);
-			i.putExtra("user1id", GlobalHolder.getInstance()
-					.getCurrentUserId());
+
+			Intent i = new Intent(PublicIntent.START_CONVERSACTION_ACTIVITY);
+			i.putExtra("user1id", GlobalHolder.getInstance().getCurrentUserId());
 			i.putExtra("user2id", u.getmUserId());
 			i.putExtra("user2Name", u.getName());
 			i.addCategory(PublicIntent.DEFAULT_CATEGORY);
@@ -343,21 +300,48 @@ public class ContactDetail extends Activity implements OnTouchListener {
 		}
 
 	};
-	
-	
+
 	private View.OnClickListener mCreateConfMsgListener = new View.OnClickListener() {
 
 		@Override
 		public void onClick(View arg0) {
-			//FIXME fix bug for enter conference and refresh group list
-			Intent i = new Intent(
-					PublicIntent.START_CONFERENCE_CREATE_ACTIVITY);
+			// FIXME fix bug for enter conference and refresh group list
+			Intent i = new Intent(PublicIntent.START_CONFERENCE_CREATE_ACTIVITY);
 			i.addCategory(PublicIntent.DEFAULT_CATEGORY);
 			startActivityForResult(i, 0);
 		}
 
 	};
+
+	private View.OnClickListener mReturnButtonListener = new OnClickListener() {
+
+		@Override
+		public void onClick(View view) {
+			for (View v : mETArr) {
+				if (v == null) {
+					continue;
+				}
+				InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+				imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+			}
+			onBackPressed();
+		}
+
+	};
 	
+	
+	private OnClickListener mMoreDetailListener = new  OnClickListener() {
+
+		@Override
+		public void onClick(View view) {
+			Intent i = new Intent();
+			i.setClass(mContext, ContactDetail2.class);
+			i.putExtra("uid", mUid);
+			mContext.startActivity(i);
+		}
+		
+	};
+
 	private View.OnClickListener datePickerListener = new View.OnClickListener() {
 
 		@Override
@@ -404,15 +388,13 @@ public class ContactDetail extends Activity implements OnTouchListener {
 
 	private void gatherUserData() {
 		if (u.getmUserId() == GlobalHolder.getInstance().getCurrentUserId()) {
-			u.setName(mNickNameET.getText().toString());
+			u.setSignature(mSignature.getText().toString());
 			u.setGender(getRadioValue());
 			u.setBirthday(bir);
 			u.setCellPhone(mCellphoneET.getText().toString());
 			u.setTelephone(mTelephoneET.getText().toString());
 			u.setTitle(mTitleET.getText().toString());
 			u.setAddress(mAddressET.getText().toString());
-		} else {
-			u.setName(mNickNameET.getText().toString());
 		}
 	}
 
@@ -435,15 +417,6 @@ public class ContactDetail extends Activity implements OnTouchListener {
 		}
 	}
 
-	private boolean check() {
-		if (mNickNameET.getText() == null || mNickNameET.getText().toString().trim().isEmpty()) {
-			mNickNameET.setError(this.getText(R.string.error_contacts_user_detail_no_nick_name));
-			mNickNameET.requestFocus();
-			return false;
-		}
-		return true;
-	}
-
 	class LocalHandler extends Handler {
 
 		@Override
@@ -461,10 +434,8 @@ public class ContactDetail extends Activity implements OnTouchListener {
 				break;
 			case UPDATE_USER_INFO:
 				gatherUserData();
-				if (check()) {
-					us.updateUser(u,
-							new Registrant(this, UPDATE_USER_INFO_DONE, null));
-				}
+				us.updateUser(u, new Registrant(this, UPDATE_USER_INFO_DONE,
+						null));
 				isUpdating = false;
 				break;
 			case UPDATE_USER_INFO_DONE:

@@ -19,7 +19,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/tab_image"
         android:gravity="center"
-        android:textColor="@color/selector_tab_text_color"
+        android:textColor="@drawable/selector_tab_text_color"
         android:textSize="14sp"
         android:paddingBottom="2dp"
         android:text="@string/tab_conference_name" />

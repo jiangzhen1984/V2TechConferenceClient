@@ -16,7 +16,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
-            android:layout_marginLeft="60dp"
             android:paddingBottom="10dp"
             android:paddingLeft="15dp"
             android:paddingRight="8dp"
@@ -26,18 +25,13 @@
             android:textSize="20sp" />
 
         <TextView
-            android:id="@+id/contact_user_detail_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginLeft="150dp"
-            android:layout_marginRight="150dp"
-            android:layout_marginTop="15dp"
+            android:layout_centerInParent="true"
             android:ellipsize="end"
             android:gravity="center"
-            android:paddingBottom="15dp"
             android:singleLine="true"
-            android:text="name"
+            android:text="@string/contacts_detail_title"
             android:textColor="@color/common_item_text_color"
             android:textSize="@dimen/common_item_text_size" />
 
@@ -48,6 +42,8 @@
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
             android:layout_marginRight="20dp"
+            android:paddingBottom="10dp"
+            android:paddingTop="10dp"
             android:src="@drawable/contact_detail_2_button_selector" />
     </RelativeLayout>
 
@@ -80,52 +76,45 @@
                 android:layout_marginTop="20dp"
                 android:src="@drawable/avatar" />
 
-            <TextView
-                android:id="@+id/contact_user_detail_user_signature_tv"
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
+                android:layout_alignBottom="@+id/contact_user_detail_head_icon"
+                android:layout_alignTop="@+id/contact_user_detail_head_icon"
                 android:layout_marginLeft="16dp"
-                android:layout_marginRight="25dp"
-                android:layout_toLeftOf="@+id/contact_user_detail_invite_video"
                 android:layout_toRightOf="@+id/contact_user_detail_head_icon"
-                android:ellipsize="end"
-                android:singleLine="true"
-                 android:textColor="@color/button_text_color"
-                android:text="TextView" />
+                android:orientation="vertical" >
+
+                <TextView
+                    android:id="@+id/contact_user_detail_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="top"
+                    android:gravity="top"
+                    android:text="TextView"
+                    android:textColor="@color/common_item_text_color" />
+
+                <TextView
+                    android:id="@+id/contact_user_detail_user_signature_tv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom"
+                    android:ellipsize="end"
+                    android:gravity="bottom"
+                    android:singleLine="true"
+                    android:text="TextView"
+                    android:textColor="@color/common_item_text_color" />
+            </LinearLayout>
 
             <TextView
-                android:id="@+id/contact_user_detail_send_msg"
+                android:id="@+id/contact_user_company"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"
-                android:layout_marginRight="15dp"
-                android:background="@drawable/button_bg"
-                android:gravity="center"
-                android:paddingBottom="10dp"
-                android:paddingLeft="25dp"
-                android:paddingRight="25dp"
-                android:paddingTop="10dp"
-                android:text="@string/contacts_user_detail_send_msg"
-                android:textColor="@color/button_text_color"
-                android:textSize="@dimen/common_item_text_size" />
-
-            <TextView
-                android:id="@+id/contact_user_detail_invite_video"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
-                android:layout_marginRight="15dp"
-                android:layout_toLeftOf="@+id/contact_user_detail_send_msg"
-                android:background="@drawable/button_bg"
-                android:gravity="center"
-                android:paddingBottom="10dp"
-                android:paddingLeft="15dp"
-                android:paddingRight="15dp"
-                android:paddingTop="10dp"
-                android:text="@string/contacts_user_detail_invite_video"
-                android:textColor="@color/button_text_color"
+                android:layout_marginRight="40dp"
+                android:text="Company"
+                android:textColor="@color/common_item_text_color"
                 android:textSize="@dimen/common_item_text_size" />
         </RelativeLayout>
 
@@ -133,7 +122,6 @@
             android:id="@+id/contact_detail_scroll_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_above="@+id/LinearLayout1"
             android:layout_below="@+id/RelativeLayout2" >
 
             <LinearLayout
@@ -142,518 +130,617 @@
                 android:orientation="vertical" >
 
                 <LinearLayout
+                    android:id="@+id/contact_detail_self_items_ly"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="15dp"
                     android:layout_marginLeft="15dp"
                     android:layout_marginRight="15dp"
                     android:background="@drawable/rounded_corners_of_contact_user_detail_outer"
-                    android:orientation="vertical" >
+                    android:orientation="vertical"
+                    android:paddingBottom="15dp"
+                     >
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_margin="1dp"
-                        android:background="@drawable/rounded_corners_of_contact_user_detail_inner"
-                        android:orientation="vertical" >
+                        android:layout_margin="1dp" >
 
-                        <LinearLayout
-                            android:layout_width="match_parent"
+                        <TextView
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_margin="1dp" >
+                            android:layout_marginBottom="15dp"
+                            android:layout_marginLeft="30dp"
+                            android:layout_marginRight="30dp"
+                            android:layout_marginTop="15dp"
+                            android:padding="10dp"
+                            android:text="@string/contacts_user_detail_item_signature"
+                            android:textColor="@color/common_item_text_color"
+                            android:textSize="@dimen/common_item_text_size" />
 
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginBottom="15dp"
-                                android:layout_marginLeft="30dp"
-                                android:layout_marginRight="30dp"
-                                android:layout_marginTop="15dp"
-                                android:padding="10dp"
-                                android:text="@string/contacts_user_detail_item_nick_name"
-                                android:textColor="@color/common_item_text_color"
-                                android:textSize="@dimen/common_item_text_size" />
-
-                            <EditText
-                                android:id="@+id/contact_user_detail_nick_name_et"
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="center_vertical"
-                                android:layout_marginRight="200dp"
-                                android:layout_weight="1"
-                                android:background="@null"
-                                android:ems="10"
-                                android:inputType="text"
-                                android:maxLength="30"
-                                android:textColor="@color/common_item_text_color"
-                                android:textSize="@dimen/common_item_text_size" >
-                            </EditText>
-                        </LinearLayout>
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="1dp"
-                            android:background="#c0c0c0" >
-                        </LinearLayout>
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
+                        <EditText
+                            android:id="@+id/contact_user_detail_signature_et"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_marginLeft="1dp"
-                            android:layout_marginRight="1dp" >
+                            android:layout_gravity="center_vertical"
+                            android:layout_marginRight="200dp"
+                            android:layout_weight="1"
+                            android:background="@null"
+                            android:ems="10"
+                            android:inputType="text"
+                            android:maxLength="30"
+                            android:textColor="@color/common_item_text_color"
+                            android:textSize="@dimen/common_item_text_size" >
+                        </EditText>
+                    </LinearLayout>
 
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginBottom="15dp"
-                                android:layout_marginLeft="30dp"
-                                android:layout_marginRight="30dp"
-                                android:layout_marginTop="15dp"
-                                android:padding="10dp"
-                                android:text="@string/contacts_user_detail_item_account"
-                                android:textColor="@color/common_item_text_color"
-                                android:textSize="@dimen/common_item_text_size" />
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="#c0c0c0" >
+                    </LinearLayout>
 
-                            <TextView
-                                android:id="@+id/contact_user_detail_account_tv"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginBottom="15dp"
-                                android:layout_marginLeft="30dp"
-                                android:layout_marginRight="30dp"
-                                android:layout_marginTop="15dp"
-                                android:gravity="center_vertical"
-                                android:text="account"
-                                android:textColor="@color/common_item_text_color"
-                                android:textSize="@dimen/common_item_text_size" />
-                        </LinearLayout>
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="1dp"
+                        android:layout_marginRight="1dp" >
 
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="1dp"
-                            android:background="#c0c0c0" >
-                        </LinearLayout>
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
+                        <TextView
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_margin="1dp" >
+                            android:layout_marginBottom="15dp"
+                            android:layout_marginLeft="30dp"
+                            android:layout_marginRight="30dp"
+                            android:layout_marginTop="15dp"
+                            android:padding="10dp"
+                            android:text="@string/contacts_user_detail_item_account"
+                            android:textColor="@color/common_item_text_color"
+                            android:textSize="@dimen/common_item_text_size" />
 
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginBottom="15dp"
-                                android:layout_marginLeft="30dp"
-                                android:layout_marginRight="30dp"
-                                android:layout_marginTop="15dp"
-                                android:padding="10dp"
-                                android:text="@string/contacts_user_detail_item_gender"
-                                android:textColor="@color/common_item_text_color"
-                                android:textSize="@dimen/common_item_text_size" />
-
-                            <TextView
-                                android:id="@+id/contact_user_detail_gender_tv"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginBottom="15dp"
-                                android:layout_marginLeft="30dp"
-                                android:layout_marginRight="30dp"
-                                android:layout_marginTop="15dp"
-                                android:text="gender"
-                                android:textColor="@color/common_item_text_color"
-                                android:textSize="@dimen/common_item_text_size"
-                                android:visibility="gone" />
-
-                            <RadioGroup
-                                android:id="@+id/contact_user_detail_gender_rg"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:orientation="horizontal"
-                                android:textColor="@color/common_item_text_color"
-                                android:visibility="gone" >
-
-                                <RadioButton
-                                    android:id="@+id/radio0"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:tag="1"
-                                    android:text="@string/contacts_user_detail_gender_male"
-                                    android:textColor="@color/common_item_text_color" />
-
-                                <RadioButton
-                                    android:id="@+id/radio1"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:tag="2"
-                                    android:text="@string/contacts_user_detail_gender_female"
-                                    android:textColor="@color/common_item_text_color" />
-                            </RadioGroup>
-                        </LinearLayout>
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="1dp"
-                            android:background="#c0c0c0" >
-                        </LinearLayout>
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
+                        <TextView
+                            android:id="@+id/contact_user_detail_account_tv"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginLeft="1dp"
-                            android:layout_marginRight="1dp" >
+                            android:layout_marginBottom="15dp"
+                            android:layout_marginRight="30dp"
+                            android:layout_marginTop="15dp"
+                            android:gravity="center_vertical"
+                            android:text="account"
+                            android:textColor="@color/common_item_text_color"
+                            android:textSize="@dimen/common_item_text_size" />
+                    </LinearLayout>
 
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginBottom="15dp"
-                                android:layout_marginLeft="30dp"
-                                android:layout_marginRight="30dp"
-                                android:layout_marginTop="15dp"
-                                android:padding="10dp"
-                                android:text="@string/contacts_user_detail_item_birdthday"
-                                android:textColor="@color/common_item_text_color"
-                                android:textSize="@dimen/common_item_text_size" />
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="#c0c0c0" >
+                    </LinearLayout>
 
-                            <TextView
-                                android:id="@+id/contact_user_detail_birthday_tv"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginBottom="15dp"
-                                android:layout_marginLeft="30dp"
-                                android:layout_marginRight="30dp"
-                                android:layout_marginTop="15dp"
-                                android:gravity="center_vertical"
-                                android:text="birthday"
-                                android:textColor="@color/common_item_text_color"
-                                android:textSize="@dimen/common_item_text_size"
-                                android:visibility="gone" />
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="1dp" >
 
-                            <EditText
-                                android:id="@+id/contact_user_detail_birthday_et"
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="center_vertical"
-                                android:layout_marginRight="350dp"
-                                android:layout_weight="1"
-                                android:ems="10"
-                                android:focusable="false"
-                                android:inputType="date"
-                                android:textColor="@color/common_item_text_color"
-                                android:visibility="gone" >
-                            </EditText>
-                        </LinearLayout>
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="1dp"
-                            android:background="#c0c0c0" >
-                        </LinearLayout>
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
+                        <TextView
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_margin="1dp" >
+                            android:layout_marginBottom="15dp"
+                            android:layout_marginLeft="30dp"
+                            android:layout_marginRight="30dp"
+                            android:layout_marginTop="15dp"
+                            android:padding="10dp"
+                            android:text="@string/contacts_user_detail_item_gender"
+                            android:textColor="@color/common_item_text_color"
+                            android:textSize="@dimen/common_item_text_size" />
 
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginBottom="15dp"
-                                android:layout_marginLeft="30dp"
-                                android:layout_marginRight="30dp"
-                                android:layout_marginTop="15dp"
-                                android:padding="10dp"
-                                android:text="@string/contacts_user_detail_item_cell_phone"
-                                android:textColor="@color/common_item_text_color"
-                                android:textSize="@dimen/common_item_text_size" />
-
-                            <TextView
-                                android:id="@+id/contact_user_detail_cell_phone_tv"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginBottom="15dp"
-                                android:layout_marginLeft="30dp"
-                                android:layout_marginRight="30dp"
-                                android:layout_marginTop="15dp"
-                                android:gravity="center_vertical"
-                                android:text="Cell phone"
-                                android:textColor="@color/common_item_text_color"
-                                android:textSize="@dimen/common_item_text_size"
-                                android:visibility="gone" />
-
-                            <EditText
-                                android:id="@+id/contact_user_detail_cell_phone_et"
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="center_vertical"
-                                android:layout_marginRight="350dp"
-                                android:layout_weight="1"
-                                android:ems="10"
-                                android:inputType="phone"
-                                android:maxLength="11"
-                                android:textColor="@color/common_item_text_color"
-                                android:visibility="gone" >
-                            </EditText>
-                        </LinearLayout>
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="1dp"
-                            android:background="#c0c0c0" >
-                        </LinearLayout>
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
+                        <RadioGroup
+                            android:id="@+id/contact_user_detail_gender_rg"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginLeft="1dp"
-                            android:layout_marginRight="1dp" >
+                            android:orientation="horizontal"
+                            android:textColor="@color/common_item_text_color" >
 
-                            <TextView
+                            <RadioButton
+                                android:id="@+id/radio0"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_marginBottom="15dp"
-                                android:layout_marginLeft="30dp"
-                                android:layout_marginRight="30dp"
-                                android:layout_marginTop="15dp"
-                                android:padding="10dp"
-                                android:text="@string/contacts_user_detail_item_telephone"
-                                android:textColor="@color/common_item_text_color"
-                                android:textSize="@dimen/common_item_text_size" />
+                                android:tag="1"
+                                android:text="@string/contacts_user_detail_gender_male"
+                                android:textColor="@color/common_item_text_color" />
 
-                            <TextView
-                                android:id="@+id/contact_user_detail_telephone_tv"
+                            <RadioButton
+                                android:id="@+id/radio1"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_marginBottom="15dp"
-                                android:layout_marginLeft="30dp"
-                                android:layout_marginRight="30dp"
-                                android:layout_marginTop="15dp"
-                                android:gravity="center_vertical"
-                                android:text="TextView"
-                                android:textColor="@color/common_item_text_color"
-                                android:textSize="@dimen/common_item_text_size"
-                                android:visibility="gone" />
+                                android:tag="2"
+                                android:text="@string/contacts_user_detail_gender_female"
+                                android:textColor="@color/common_item_text_color" />
+                        </RadioGroup>
+                    </LinearLayout>
 
-                            <EditText
-                                android:id="@+id/contact_user_detail_telephone_et"
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="center_vertical"
-                                android:layout_marginRight="350dp"
-                                android:layout_weight="1"
-                                android:ems="10"
-                                android:inputType="text"
-                                android:maxLength="30"
-                                android:textColor="@color/common_item_text_color"
-                                android:visibility="gone" />
-                        </LinearLayout>
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="#c0c0c0" >
+                    </LinearLayout>
 
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="1dp"
-                            android:background="#c0c0c0" >
-                        </LinearLayout>
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="1dp"
+                        android:layout_marginRight="1dp" >
 
-                        <LinearLayout
-                            android:layout_width="match_parent"
+                        <TextView
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_margin="1dp" >
+                            android:layout_marginBottom="15dp"
+                            android:layout_marginLeft="30dp"
+                            android:layout_marginRight="30dp"
+                            android:layout_marginTop="15dp"
+                            android:padding="10dp"
+                            android:text="@string/contacts_user_detail_item_birdthday"
+                            android:textColor="@color/common_item_text_color"
+                            android:textSize="@dimen/common_item_text_size" />
 
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginBottom="15dp"
-                                android:layout_marginLeft="30dp"
-                                android:layout_marginRight="30dp"
-                                android:layout_marginTop="15dp"
-                                android:padding="10dp"
-                                android:text="@string/contacts_user_detail_item_company"
-                                android:textColor="@color/common_item_text_color"
-                                android:textSize="@dimen/common_item_text_size" />
-
-                            <TextView
-                                android:id="@+id/contact_user_detail_company_tv"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginBottom="15dp"
-                                android:layout_marginLeft="30dp"
-                                android:layout_marginRight="30dp"
-                                android:layout_marginTop="15dp"
-                                android:gravity="center_vertical"
-                                android:text="TextView"
-                                android:textColor="@color/common_item_text_color"
-                                android:textSize="@dimen/common_item_text_size" />
-
-                            <EditText
-                                android:id="@+id/contact_user_detail_company_et"
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="center_vertical"
-                                android:layout_marginRight="250dp"
-                                android:layout_weight="1"
-                                android:ems="10"
-                                android:inputType="text"
-                                android:textColor="@color/common_item_text_color"
-                                android:visibility="gone" />
-                        </LinearLayout>
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="1dp"
-                            android:background="#c0c0c0" >
-                        </LinearLayout>
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
+                        <EditText
+                            android:id="@+id/contact_user_detail_birthday_et"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_marginLeft="1dp"
-                            android:layout_marginRight="1dp" >
+                            android:layout_gravity="center_vertical"
+                            android:layout_marginRight="350dp"
+                            android:layout_weight="1"
+                            android:ems="10"
+                            android:focusable="false"
+                            android:inputType="date"
+                            android:textColor="@color/common_item_text_color"
+                            android:textSize="@dimen/common_item_text_size" >
+                        </EditText>
+                    </LinearLayout>
 
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginBottom="15dp"
-                                android:layout_marginLeft="30dp"
-                                android:layout_marginRight="30dp"
-                                android:layout_marginTop="15dp"
-                                android:padding="10dp"
-                                android:text="@string/contacts_user_detail_item_department"
-                                android:textColor="@color/common_item_text_color"
-                                android:textSize="@dimen/common_item_text_size" />
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="#c0c0c0" >
+                    </LinearLayout>
 
-                            <TextView
-                                android:id="@+id/contact_user_detail_department_tv"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginBottom="15dp"
-                                android:layout_marginLeft="30dp"
-                                android:layout_marginRight="30dp"
-                                android:layout_marginTop="15dp"
-                                android:gravity="center_vertical"
-                                android:text="TextView"
-                                android:textColor="@color/common_item_text_color"
-                                android:textSize="@dimen/common_item_text_size" />
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="1dp" >
 
-                            <EditText
-                                android:id="@+id/contact_user_detail_department_et"
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="center_vertical"
-                                android:layout_marginRight="250dp"
-                                android:layout_weight="1"
-                                android:ems="10"
-                                android:inputType="text"
-                                android:textColor="@color/common_item_text_color"
-                                android:visibility="gone" />
-                        </LinearLayout>
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="1dp"
-                            android:background="#c0c0c0" >
-                        </LinearLayout>
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
+                        <TextView
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_margin="1dp" >
+                            android:layout_marginBottom="15dp"
+                            android:layout_marginLeft="30dp"
+                            android:layout_marginRight="30dp"
+                            android:layout_marginTop="15dp"
+                            android:padding="10dp"
+                            android:text="@string/contacts_user_detail_item_cell_phone"
+                            android:textColor="@color/common_item_text_color"
+                            android:textSize="@dimen/common_item_text_size" />
 
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginBottom="15dp"
-                                android:layout_marginLeft="30dp"
-                                android:layout_marginRight="30dp"
-                                android:layout_marginTop="15dp"
-                                android:padding="10dp"
-                                android:text="@string/contacts_user_detail_item_title"
-                                android:textColor="@color/common_item_text_color"
-                                android:textSize="@dimen/common_item_text_size" />
-
-                            <TextView
-                                android:id="@+id/contact_user_detail_title_tv"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginBottom="15dp"
-                                android:layout_marginLeft="30dp"
-                                android:layout_marginRight="30dp"
-                                android:layout_marginTop="15dp"
-                                android:gravity="center_vertical"
-                                android:text="TextView"
-                                android:textColor="@color/common_item_text_color"
-                                android:textSize="@dimen/common_item_text_size"
-                                android:visibility="gone" />
-
-                            <EditText
-                                android:id="@+id/contact_user_detail_title_et"
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="center_vertical"
-                                android:layout_marginRight="250dp"
-                                android:layout_weight="1"
-                                android:ems="10"
-                                android:inputType="text"
-                                android:maxLength="50"
-                                android:textColor="@color/common_item_text_color"
-                                android:visibility="gone" />
-                        </LinearLayout>
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="1dp"
-                            android:background="#c0c0c0" >
-                        </LinearLayout>
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
+                        <EditText
+                            android:id="@+id/contact_user_detail_cell_phone_et"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_marginLeft="1dp"
-                            android:layout_marginRight="1dp" >
+                            android:layout_gravity="center_vertical"
+                            android:layout_marginRight="350dp"
+                            android:layout_weight="1"
+                            android:ems="10"
+                            android:inputType="phone"
+                            android:maxLength="11"
+                            android:textColor="@color/common_item_text_color"
+                            android:textSize="@dimen/common_item_text_size" >
+                        </EditText>
+                    </LinearLayout>
 
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginBottom="15dp"
-                                android:layout_marginLeft="30dp"
-                                android:layout_marginRight="30dp"
-                                android:layout_marginTop="15dp"
-                                android:padding="10dp"
-                                android:text="@string/contacts_user_detail_item_address"
-                                android:textSize="@dimen/common_item_text_size" />
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="#c0c0c0" >
+                    </LinearLayout>
 
-                            <TextView
-                                android:id="@+id/contact_user_detail_address_tv"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginBottom="15dp"
-                                android:layout_marginLeft="30dp"
-                                android:layout_marginRight="30dp"
-                                android:layout_marginTop="15dp"
-                                android:gravity="center_vertical"
-                                android:text="TextView"
-                                android:textColor="@color/common_item_text_color"
-                                android:textSize="@dimen/common_item_text_size"
-                                android:visibility="gone" />
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="1dp"
+                        android:layout_marginRight="1dp" >
 
-                            <EditText
-                                android:id="@+id/contact_user_detail_address_et"
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="center_vertical"
-                                android:layout_marginRight="100dp"
-                                android:layout_weight="1"
-                                android:ems="10"
-                                android:inputType="text"
-                                android:maxLength="100"
-                                android:textColor="@color/common_item_text_color"
-                                android:visibility="gone" />
-                        </LinearLayout>
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="15dp"
+                            android:layout_marginLeft="30dp"
+                            android:layout_marginRight="30dp"
+                            android:layout_marginTop="15dp"
+                            android:padding="10dp"
+                            android:text="@string/contacts_user_detail_item_telephone"
+                            android:textColor="@color/common_item_text_color"
+                            android:textSize="@dimen/common_item_text_size" />
+
+                        <EditText
+                            android:id="@+id/contact_user_detail_telephone_et"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
+                            android:layout_marginRight="350dp"
+                            android:layout_weight="1"
+                            android:ems="10"
+                            android:inputType="text"
+                            android:maxLength="30"
+                            android:textColor="@color/common_item_text_color"
+                            android:textSize="@dimen/common_item_text_size" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="#c0c0c0" >
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="1dp" >
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="15dp"
+                            android:layout_marginLeft="30dp"
+                            android:layout_marginRight="30dp"
+                            android:layout_marginTop="15dp"
+                            android:padding="10dp"
+                            android:text="@string/contacts_user_detail_item_company"
+                            android:textColor="@color/common_item_text_color"
+                            android:textSize="@dimen/common_item_text_size" />
+
+                        <TextView
+                            android:id="@+id/contact_user_detail_company_tv"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
+                            android:ems="10"
+                            android:textColor="@color/common_item_text_color"
+                            android:textSize="@dimen/common_item_text_size" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="#c0c0c0" >
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="1dp"
+                        android:layout_marginRight="1dp" >
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="15dp"
+                            android:layout_marginLeft="30dp"
+                            android:layout_marginRight="30dp"
+                            android:layout_marginTop="15dp"
+                            android:padding="10dp"
+                            android:text="@string/contacts_user_detail_item_department"
+                            android:textColor="@color/common_item_text_color"
+                            android:textSize="@dimen/common_item_text_size" />
+
+                        <TextView
+                            android:id="@+id/contact_user_detail_department_tv"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
+                            android:layout_marginRight="20dp"
+                            android:ems="10"
+                            android:textColor="@color/common_item_text_color"
+                            android:textSize="@dimen/common_item_text_size" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="#c0c0c0" >
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="1dp" >
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="15dp"
+                            android:layout_marginLeft="30dp"
+                            android:layout_marginRight="30dp"
+                            android:layout_marginTop="15dp"
+                            android:padding="10dp"
+                            android:text="@string/contacts_user_detail_item_title"
+                            android:textColor="@color/common_item_text_color"
+                            android:textSize="@dimen/common_item_text_size" />
+
+                        <EditText
+                            android:id="@+id/contact_user_detail_title_et"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
+                            android:layout_marginRight="20dp"
+                            android:layout_weight="1"
+                            android:ems="10"
+                            android:inputType="text"
+                            android:maxLength="50"
+                            android:textColor="@color/common_item_text_color" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="#c0c0c0" >
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="1dp"
+                        android:layout_marginRight="1dp" >
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="15dp"
+                            android:layout_marginLeft="30dp"
+                            android:layout_marginRight="30dp"
+                            android:layout_marginTop="15dp"
+                            android:padding="10dp"
+                            android:text="@string/contacts_user_detail_item_address"
+                            android:textColor="@color/common_item_text_color"
+                            android:textSize="@dimen/common_item_text_size" />
+
+                        <EditText
+                            android:id="@+id/contact_user_detail_address_et"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
+                            android:layout_marginRight="100dp"
+                            android:layout_weight="1"
+                            android:ems="10"
+                            android:inputType="text"
+                            android:maxLength="100"
+                            android:textColor="@color/common_item_text_color"
+                            android:textSize="@dimen/common_item_text_size" />
                     </LinearLayout>
                 </LinearLayout>
 
                 <LinearLayout
+                    android:id="@+id/contact_detail_items_ly"
                     android:layout_width="match_parent"
-                    android:layout_height="30dp"
-                    android:orientation="vertical" >
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="15dp"
+                    android:layout_marginLeft="15dp"
+                    android:layout_marginRight="15dp"
+                    android:background="@drawable/rounded_corners_of_contact_user_detail_outer"
+                    android:orientation="vertical"
+                    android:visibility="gone" >
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="1dp" >
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="15dp"
+                            android:layout_marginLeft="30dp"
+                            android:layout_marginRight="30dp"
+                            android:layout_marginTop="15dp"
+                            android:padding="10dp"
+                            android:text="@string/contacts_user_detail_item_title"
+                            android:textColor="@color/common_item_text_color"
+                            android:textSize="@dimen/common_item_text_size" />
+
+                        <TextView
+                            android:id="@+id/contact_user_n_detail_title_tv"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="15dp"
+                            android:layout_marginRight="30dp"
+                            android:layout_marginTop="15dp"
+                            android:gravity="center_vertical"
+                            android:text="TextView"
+                            android:textColor="@color/common_item_text_color"
+                            android:textSize="@dimen/common_item_text_size" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="#c0c0c0" >
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="1dp"
+                        android:layout_marginRight="1dp" >
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="15dp"
+                            android:layout_marginLeft="30dp"
+                            android:layout_marginRight="30dp"
+                            android:layout_marginTop="15dp"
+                            android:padding="10dp"
+                            android:text="@string/contacts_user_detail_item_address"
+                            android:textColor="@color/common_item_text_color"
+                            android:textSize="@dimen/common_item_text_size" />
+
+                        <TextView
+                            android:id="@+id/contact_user_n_detail_address_tv"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="15dp"
+                            android:layout_marginRight="30dp"
+                            android:layout_marginTop="15dp"
+                            android:gravity="center_vertical"
+                            android:text="TextView"
+                            android:textColor="@color/common_item_text_color"
+                            android:textSize="@dimen/common_item_text_size" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="#c0c0c0" >
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="1dp"
+                        android:layout_marginRight="1dp" >
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="15dp"
+                            android:layout_marginLeft="30dp"
+                            android:layout_marginRight="30dp"
+                            android:layout_marginTop="15dp"
+                            android:padding="10dp"
+                            android:text="@string/contacts_user_detail_item_email"
+                            android:textColor="@color/common_item_text_color"
+                            android:textSize="@dimen/common_item_text_size" />
+
+                        <TextView
+                            android:id="@+id/contact_user_n_detail_email_tv"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="15dp"
+                            android:layout_marginRight="30dp"
+                            android:layout_marginTop="15dp"
+                            android:gravity="center_vertical"
+                            android:text="TextView"
+                            android:textColor="@color/common_item_text_color"
+                            android:textSize="@dimen/common_item_text_size" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="#c0c0c0" >
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="1dp" >
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="15dp"
+                            android:layout_marginLeft="30dp"
+                            android:layout_marginRight="30dp"
+                            android:layout_marginTop="15dp"
+                            android:padding="10dp"
+                            android:text="@string/contacts_user_detail_item_cell_phone"
+                            android:textColor="@color/common_item_text_color"
+                            android:textSize="@dimen/common_item_text_size" />
+
+                        <TextView
+                            android:id="@+id/contact_user_n_detail_cell_phone_tv"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="15dp"
+                            android:layout_marginRight="30dp"
+                            android:layout_marginTop="15dp"
+                            android:gravity="center_vertical"
+                            android:text="Cell phone"
+                            android:textColor="@color/common_item_text_color"
+                            android:textSize="@dimen/common_item_text_size" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="#c0c0c0" >
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="1dp"
+                        android:layout_marginRight="1dp" >
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="15dp"
+                            android:layout_marginLeft="30dp"
+                            android:layout_marginRight="30dp"
+                            android:layout_marginTop="15dp"
+                            android:padding="10dp"
+                            android:text="@string/contacts_user_detail_item_telephone"
+                            android:textColor="@color/common_item_text_color"
+                            android:textSize="@dimen/common_item_text_size" />
+
+                        <TextView
+                            android:id="@+id/contact_user_n_detail_telephone_tv"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="15dp"
+                            android:layout_marginRight="30dp"
+                            android:layout_marginTop="15dp"
+                            android:gravity="center_vertical"
+                            android:text="TextView"
+                            android:textColor="@color/common_item_text_color"
+                            android:textSize="@dimen/common_item_text_size" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="#c0c0c0" >
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="1dp"
+                        android:layout_marginRight="1dp" >
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="15dp"
+                            android:layout_marginLeft="30dp"
+                            android:layout_marginRight="30dp"
+                            android:layout_marginTop="15dp"
+                            android:padding="10dp"
+                            android:text="@string/contacts_user_detail_item_fax"
+                            android:textColor="@color/common_item_text_color"
+                            android:textSize="@dimen/common_item_text_size" />
+
+                        <TextView
+                            android:id="@+id/contact_user_n_detail_fax_tv"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="15dp"
+                            android:layout_marginRight="30dp"
+                            android:layout_marginTop="15dp"
+                            android:gravity="center_vertical"
+                            android:text="TextView"
+                            android:textColor="@color/common_item_text_color"
+                            android:textSize="@dimen/common_item_text_size" />
+                    </LinearLayout>
                 </LinearLayout>
             </LinearLayout>
         </ScrollView>
@@ -662,7 +749,7 @@
             android:id="@+id/LinearLayout2"
             android:layout_width="fill_parent"
             android:layout_height="1dp"
-            android:layout_above="@id/LinearLayout1"
+            android:layout_above="@id/contact_button_ly"
             android:background="#cfcfcf"
             android:orientation="horizontal" >
         </LinearLayout>

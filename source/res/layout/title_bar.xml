@@ -43,7 +43,6 @@
             android:layout_centerVertical="true"
             android:layout_marginRight="10dp"
             android:paddingLeft="10dp"
-            android:paddingRight="10dp"
             android:paddingTop="10dp"
             android:paddingBottom="10dp"
             android:layout_toLeftOf="@+id/title_bar_feature_more_button"
