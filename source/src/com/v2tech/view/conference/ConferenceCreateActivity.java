@@ -327,6 +327,7 @@ public class ConferenceCreateActivity extends Activity {
 		tv.setEllipsize(TruncateAt.END);
 		tv.setSingleLine(true);
 		tv.setTextSize(8);
+		tv.setMaxWidth(60);
 		ll.setTag(u.getmUserId() + "");
 		ll.addView(tv, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
 				LinearLayout.LayoutParams.WRAP_CONTENT));

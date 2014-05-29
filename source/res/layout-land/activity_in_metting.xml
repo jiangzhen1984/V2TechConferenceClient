@@ -27,7 +27,7 @@
                 android:background="#ffffff"
                 android:paddingLeft="16dp"
                 android:paddingRight="16dp"
-                android:src="@drawable/video_menu_button_selector" />
+                android:src="@drawable/video_menu_button" />
         </RelativeLayout>
 
         <RelativeLayout
@@ -78,6 +78,7 @@
                 android:ellipsize="end"
                 android:gravity="center"
                 android:singleLine="true"
+                android:textColor="#000000"
                 android:text="  "
                 android:textSize="23sp" />
         </RelativeLayout>

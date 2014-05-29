@@ -18,8 +18,9 @@
         android:paddingTop="5dp"
         android:singleLine="true"
         android:text="TextView"
-        android:textColor="@color/common_item_text_color"
-        android:textSize="@dimen/common_item_text_size" />
+        android:maxWidth="@dimen/video_attendee_device_text_max_width"
+        android:textColor="@color/video_attendee_name_color"
+        android:textSize="@dimen/video_attendee_device_text_size" />
 
     <LinearLayout
         android:id="@+id/video_attendee_device_camera_ly"

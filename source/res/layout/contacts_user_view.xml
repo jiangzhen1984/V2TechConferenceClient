@@ -42,13 +42,14 @@
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
             android:layout_marginLeft="30dp"
+            android:layout_marginRight="35dp"
             android:layout_toRightOf="@+id/contact_user_img_container"
-             android:layout_marginRight="35dp"
             android:ellipsize="end"
             android:singleLine="true"
-             android:textSize="@dimen/common_item_text_size"
-             android:textColor="@color/common_item_text_color"
-            android:text="TextView" />
+            android:text="TextView"
+            android:maxWidth="@dimen/contacts_user_view_text_max_width"
+            android:textColor="@color/common_item_text_color"
+            android:textSize="@dimen/common_item_text_size" />
 
         <TextView
             android:id="@+id/contact_user_signature"
@@ -61,9 +62,9 @@
             android:layout_toRightOf="@+id/contact_user_name"
             android:ellipsize="end"
             android:singleLine="true"
-             android:textSize="@dimen/common_item_text_size"
-             android:textColor="@color/common_item_text_color"
-            android:text="TextView" />
+            android:text="TextView"
+            android:textColor="@color/common_item_text_color"
+            android:textSize="@dimen/common_item_text_size" />
 
         <ImageView
             android:id="@+id/contact_show_user_menu"
@@ -72,8 +73,8 @@
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
             android:layout_marginRight="62dp"
-            android:visibility="invisible"
-            android:src="@drawable/arrow_right_gray" />
+            android:src="@drawable/arrow_right_gray"
+            android:visibility="invisible" />
     </RelativeLayout>
 
     <LinearLayout

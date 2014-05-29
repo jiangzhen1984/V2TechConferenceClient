@@ -82,7 +82,7 @@
                 android:gravity="center"
                 android:singleLine="true"
                 android:text=" "
-                android:textColor="@color/common_item_text_color"
+                android:textColor="@color/title_color"
                 android:textSize="@dimen/common_item_text_size_20" />
         </RelativeLayout>
 
@@ -167,6 +167,7 @@
             android:padding="1dp" >
 
             <RelativeLayout
+                android:id="@+id/local_surface_view_inner_ly"
                 android:layout_width="fill_parent"
                 android:layout_height="fill_parent" >
 

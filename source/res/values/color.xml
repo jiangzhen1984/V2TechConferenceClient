@@ -11,6 +11,19 @@
      <color name="conf_create_button_color">#057aff</color>
      <color name="common_item_text_color">#969799</color>
      
+     <color name="activiy_contact_detail_title_color">#000000</color>
+     <color name="contacts_group_item_color">#444444</color>
+     <color name="activiy_contact_detail_item_color">#444444</color>
+     
     
 
+     <color name="conversation_view_name_color">#444444</color>
+     <color name="conversation_view_text_color">#a2a2a2</color>
+     
+     <color name="conference_msg_content_color">#444444</color>
+     
+     <color name="title_color">#000000</color>
+     
+     <color name="video_attendee_chair_man_name_color">#207448</color>
+     <color name="video_attendee_name_color">#444444</color>
 </resources>

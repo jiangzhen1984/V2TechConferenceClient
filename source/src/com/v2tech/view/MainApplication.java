@@ -59,23 +59,25 @@ public class MainApplication extends Application {
 		} catch (NameNotFoundException e) {
 			e.printStackTrace();
 		}
-		new Thread() {
+		if (!V2Log.isDebuggable) {
+			new Thread() {
 
-			@Override
-			public void run() {
-				PinyinHelper.toHanyuPinyinStringArray('c');
-			}
+				@Override
+				public void run() {
+					PinyinHelper.toHanyuPinyinStringArray('c');
+				}
 
-		}.start();
+			}.start();
+		}
 
-		//Load native library
+		// Load native library
 		System.loadLibrary("event");
 		System.loadLibrary("udt");
 		System.loadLibrary("v2vi");
 		System.loadLibrary("v2ve");
 		System.loadLibrary("v2client");
 
-		//Initialize native library
+		// Initialize native library
 		NativeInitializer.getIntance().initialize(getApplicationContext());
 		ImRequest.getInstance(getApplicationContext());
 		GroupRequest.getInstance(getApplicationContext());
@@ -86,7 +88,7 @@ public class MainApplication extends Application {
 		ChatRequest.getInstance(getApplicationContext());
 		VideoMixerRequest.getInstance();
 
-		//Start deamon service
+		// Start deamon service
 		getApplicationContext().startService(
 				new Intent(getApplicationContext(), JNIService.class));
 
@@ -107,7 +109,6 @@ public class MainApplication extends Application {
 					+ res);
 		}
 
-		
 		if (!V2Log.isDebuggable) {
 			new LogcatThread().start();
 		}
@@ -115,12 +116,10 @@ public class MainApplication extends Application {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
 			this.registerActivityLifecycleCallbacks(new LocalActivityLifecycleCallBack());
 		}
-		
+
 		initGlobalConfiguration();
 
 	}
-	
-	
 
 	@Override
 	public void onTerminate() {
@@ -138,25 +137,18 @@ public class MainApplication extends Application {
 		V2Log.d(" terminated");
 
 	}
-	
-	
-	
-	
+
 	@Override
 	public void onLowMemory() {
 		// TODO Auto-generated method stub
 		super.onLowMemory();
 	}
 
-
-
 	@Override
 	public void onTrimMemory(int level) {
 		// TODO Auto-generated method stub
 		super.onTrimMemory(level);
 	}
-
-
 
 	private void initGlobalConfiguration() {
 		Configuration conf = getResources().getConfiguration();
@@ -177,7 +169,8 @@ public class MainApplication extends Application {
 		public void onActivityCreated(Activity activity,
 				Bundle savedInstanceState) {
 			Configuration conf = getResources().getConfiguration();
-			if (conf.smallestScreenWidthDp >= 600 || activity instanceof VideoActivityV2) {
+			if (conf.smallestScreenWidthDp >= 600
+					|| activity instanceof VideoActivityV2) {
 				activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 			} else {
 				activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);

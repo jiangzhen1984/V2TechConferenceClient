@@ -7,6 +7,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
@@ -185,6 +186,7 @@ public class MainActivity extends FragmentActivity implements
 			TextView tv = new TextView(mContext);
 			tv.setText(items[i]);
 			tv.setPadding(10, 5, 5, 10);
+			tv.setTextColor(Color.rgb(223, 223, 223));
 			LinearLayout.LayoutParams tvLL = new LinearLayout.LayoutParams(0,
 					LinearLayout.LayoutParams.WRAP_CONTENT);
 			tvLL.gravity = Gravity.LEFT | Gravity.CENTER_VERTICAL;

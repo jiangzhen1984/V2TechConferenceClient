@@ -27,7 +27,8 @@ public class ConferenceConversation extends Conversation {
 	public String getMsg() {
 		if (g != null) {
 			User u = g.getOwnerUser();
-			return u == null ? g.getOwner() + "" : u.getName();
+			//TODO need use localization
+			return u == null ? g.getOwner() + "" : "创建人:"+u.getName();
 		}
 		return super.getMsg();
 	}

@@ -167,6 +167,8 @@ public class VideoActivityV2 extends Activity {
 
 	private SubViewListener subViewListener = new SubViewListener();
 
+	private boolean inFlag;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -232,6 +234,8 @@ public class VideoActivityV2 extends Activity {
 		// Start animation
 		this.overridePendingTransition(R.animator.nonam_scale_center_0_100,
 				R.animator.nonam_scale_null);
+
+		inFlag = this.getIntent().getExtras().getBoolean("in", false);
 	}
 
 	private OnClickListener mMenuButtonListener = new OnClickListener() {
@@ -244,19 +248,21 @@ public class VideoActivityV2 extends Activity {
 				animation.setDuration(400);
 				mMenuButtonContainer.startAnimation(animation);
 				mMenuButtonContainer.setVisibility(View.VISIBLE);
-				((ImageView)view).setImageResource(R.drawable.video_menu_button);
+				((ImageView) view)
+						.setImageResource(R.drawable.video_menu_button);
 
 			} else {
-				//Do not hide other window
-//				showOrHidenAttendeeContainer(View.GONE);
-//				showOrHidenMsgContainer(View.GONE);	
-//				showOrHidenDocContainer(View.GONE);
+				// Do not hide other window
+				// showOrHidenAttendeeContainer(View.GONE);
+				// showOrHidenMsgContainer(View.GONE);
+				// showOrHidenDocContainer(View.GONE);
 				Animation animation = AnimationUtils.loadAnimation(mContext,
 						R.animator.nonam_scale_y_100_0);
 				animation.setDuration(400);
 				mMenuButtonContainer.startAnimation(animation);
 				mMenuButtonContainer.setVisibility(View.GONE);
-				((ImageView)view).setImageResource(R.drawable.video_menu_button_pressed);
+				((ImageView) view)
+						.setImageResource(R.drawable.video_menu_button_pressed);
 			}
 		}
 
@@ -314,10 +320,10 @@ public class VideoActivityV2 extends Activity {
 						.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 				View view = inflater.inflate(
 						R.layout.in_meeting_setting_pop_up_window, null);
-				 DisplayMetrics m = new DisplayMetrics();
-				 getWindowManager().getDefaultDisplay().getMetrics(m);
-				 
-				int height =(int)( m.heightPixels * 0.5);
+				DisplayMetrics m = new DisplayMetrics();
+				getWindowManager().getDefaultDisplay().getMetrics(m);
+
+				int height = (int) (m.heightPixels * 0.5);
 				// set
 				mSettingWindow = new PopupWindow(view,
 						LayoutParams.WRAP_CONTENT, height);
@@ -402,10 +408,11 @@ public class VideoActivityV2 extends Activity {
 						}
 						if (mAttendeeContainer != null) {
 							mAttendeeContainer.setAttendsList(mAttendeeList);
-							//TODO optize code
+							// TODO optize code
 							synchronized (mMixerWrapper) {
 								for (MixerWrapper mw : mMixerWrapper.values()) {
-									mAttendeeContainer.updateEnteredAttendee(mw.amd);
+									mAttendeeContainer
+											.updateEnteredAttendee(mw.amd);
 								}
 							}
 						}
@@ -441,7 +448,8 @@ public class VideoActivityV2 extends Activity {
 					return;
 				}
 				User user = GlobalHolder.getInstance().getUser(uid);
-				UserStatusObject us = (UserStatusObject)intent.getExtras().get("status");
+				UserStatusObject us = (UserStatusObject) intent.getExtras()
+						.get("status");
 				User.Status st = User.Status.fromInt(us.getStatus());
 				// If client applciation exit directly, we don't receive exit
 				// conference notification
@@ -463,13 +471,14 @@ public class VideoActivityV2 extends Activity {
 	@Override
 	protected void onStart() {
 		super.onStart();
-		boolean  inFlag  = this.getIntent().getExtras().getBoolean("in", false);
-		//If doesn't enter conference, then request
+
+		// If doesn't enter conference, then request
 		if (!inFlag) {
 			requestEnterConf();
 		}
-		// adjustLayout();
-		Message.obtain(mVideoHandler, ONLY_SHOW_LOCAL_VIDEO).sendToTarget();
+		suspendOrResume(true);
+		
+
 		NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 		// mId allows you to update the notification later on.
 		mNotificationManager.cancel(PublicIntent.VIDEO_NOTIFICATION_ID);
@@ -591,7 +600,8 @@ public class VideoActivityV2 extends Activity {
 			Animation tabBlockHolderAnimation = AnimationUtils.loadAnimation(
 					this, R.animator.normal_scale_x_100_0);
 			tabBlockHolderAnimation.setDuration(500);
-			tabBlockHolderAnimation.setInterpolator(new AccelerateInterpolator());
+			tabBlockHolderAnimation
+					.setInterpolator(new AccelerateInterpolator());
 			mMessageContainer.startAnimation(tabBlockHolderAnimation);
 			mMessageContainer.requestFloatLayout();
 
@@ -602,7 +612,8 @@ public class VideoActivityV2 extends Activity {
 
 			Animation tabBlockHolderAnimation = AnimationUtils.loadAnimation(
 					this, R.animator.normal_scale_x_0_100);
-			tabBlockHolderAnimation.setInterpolator(new AccelerateInterpolator());
+			tabBlockHolderAnimation
+					.setInterpolator(new AccelerateInterpolator());
 			tabBlockHolderAnimation.setDuration(500);
 			mMessageContainer.startAnimation(tabBlockHolderAnimation);
 			mMessageContainer.requestScrollToNewMessage();
@@ -901,10 +912,7 @@ public class VideoActivityV2 extends Activity {
 	protected void onStop() {
 		super.onStop();
 		getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-
-		mVideoLayout.removeAllViews();
-		quit();
-		finish();
+		suspendOrResume(false);
 	}
 
 	@Override
@@ -916,6 +924,7 @@ public class VideoActivityV2 extends Activity {
 
 	@Override
 	protected void onDestroy() {
+		quit();
 		mContext.unregisterReceiver(mConfUserChangeReceiver);
 		super.onDestroy();
 		mAttendeeList.clear();
@@ -1005,6 +1014,40 @@ public class VideoActivityV2 extends Activity {
 
 		cb.updateCameraParameters(new CameraConfiguration(""), null);
 		return;
+	}
+
+	/**
+	 * Use to suspend or resume current conference's all video device.<br>
+	 * If current activity do stop then suspend, current activity do start then
+	 * resume.
+	 */
+	private void suspendOrResume(boolean resume) {
+
+		if (resume) {
+			for (SurfaceViewW sw : this.mCurrentShowedSV) {
+				Message.obtain(mVideoHandler, REQUEST_OPEN_OR_CLOSE_DEVICE, 1,
+						0, sw.udc).sendToTarget();
+			}
+			//Make sure local camera is first front of all
+			Message.obtain(mVideoHandler, ONLY_SHOW_LOCAL_VIDEO).sendToTarget();
+			adjustLayout();
+		} else {
+			for (SurfaceViewW sw : this.mCurrentShowedSV) {
+				Message.obtain(mVideoHandler, REQUEST_OPEN_OR_CLOSE_DEVICE, 0,
+						0, sw.udc).sendToTarget();
+			}
+
+			// close local camera
+			Message.obtain(
+					mVideoHandler,
+					REQUEST_OPEN_OR_CLOSE_DEVICE,
+					0,
+					0,
+					new UserDeviceConfig(GlobalHolder.getInstance()
+							.getCurrentUserId(), "", null)).sendToTarget();
+			VideoRecorder.VideoPreviewSurfaceHolder = null;
+			mVideoLayout.removeAllViews();
+		}
 	}
 
 	/**
@@ -1124,6 +1167,9 @@ public class VideoActivityV2 extends Activity {
 				mAttendeeContainer.updateExitedAttendee(a);
 			}
 		}
+		
+		//Clean user device
+		GlobalHolder.getInstance().removeAttendeeDeviceCache(user.getmUserId());
 
 	}
 
@@ -1172,12 +1218,13 @@ public class VideoActivityV2 extends Activity {
 
 			//
 			if (udc.getBelongsAttendee() instanceof AttendeeMixedDevice) {
-				mCurrentShowedSV
-				.add(new MixedSurfaceViewW(((AttendeeMixedDevice)udc.getBelongsAttendee()).getMV(), udc));
+				mCurrentShowedSV.add(new MixedSurfaceViewW(
+						((AttendeeMixedDevice) udc.getBelongsAttendee())
+								.getMV(), udc));
 			} else {
-				mCurrentShowedSV
-				.add(new SurfaceViewW(udc.getBelongsAttendee(), udc));
-				
+				mCurrentShowedSV.add(new SurfaceViewW(udc.getBelongsAttendee(),
+						udc));
+
 			}
 			// Do adjust layout first, then request open device.
 			// otherwise can't show video
@@ -1233,7 +1280,7 @@ public class VideoActivityV2 extends Activity {
 			if (udc == null || at == null) {
 				return;
 			}
-			if (at.getAttId() == GlobalHolder.getInstance().getCurrentUserId()) {
+			if (at.getAttId() == GlobalHolder.getInstance().getCurrentUserId() || !at.isJoined()) {
 
 			} else {
 				showOrCloseAttendeeVideo(udc);
@@ -1436,7 +1483,7 @@ public class VideoActivityV2 extends Activity {
 			this.at = at;
 			this.udc = new UserDeviceConfig(0, at.getId(), null);
 		}
-		
+
 		public MixedSurfaceViewW(MixVideo at, UserDeviceConfig udc) {
 			this.at = at;
 			this.udc = udc;
@@ -1484,6 +1531,8 @@ public class VideoActivityV2 extends Activity {
 
 			switch (msg.what) {
 			case ONLY_SHOW_LOCAL_VIDEO:
+				//make sure local view is first front of all;
+				localSurfaceViewLy.bringToFront();
 				showOrCloseLocalSurViewOnly();
 				break;
 			case APPLY_OR_RELEASE_SPEAK:
@@ -1552,7 +1601,8 @@ public class VideoActivityV2 extends Activity {
 			case REQUEST_ENTER_CONF_RESPONSE:
 				JNIResponse recr = (JNIResponse) msg.obj;
 				if (recr.getResult() == JNIResponse.Result.SUCCESS) {
-
+					//set enter flag to true
+					inFlag = true;
 				} else if (recr.getResult() == RequestEnterConfResponse.Result.TIME_OUT) {
 					Toast.makeText(mContext,
 							R.string.error_request_enter_conference_time_out,
@@ -1734,11 +1784,11 @@ public class VideoActivityV2 extends Activity {
 					MixerWrapper mw = new MixerWrapper(mv.getId(), mv,
 							new MixVideoLayout(mContext, mv));
 					synchronized (mMixerWrapper) {
-						//If exist, do not add again
+						// If exist, do not add again
 						if (mMixerWrapper.containsKey(mv.getId())) {
 							break;
 						}
-						mMixerWrapper.put(mv.getId(),mw);
+						mMixerWrapper.put(mv.getId(), mw);
 					}
 					// Notify attendee list mixed video is created
 					if (mAttendeeContainer != null) {

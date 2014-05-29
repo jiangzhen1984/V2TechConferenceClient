@@ -122,6 +122,10 @@ public class VideoDocLayout extends LinearLayout {
 	}
 
 	private void showPopUpWindow(View anchor) {
+		if (mDocs.isEmpty()) {
+			//TODO prompt doc list is empty
+			return;
+		}
 		if (mDocListWindow == null) {
 			LayoutInflater inflater = (LayoutInflater) this.getContext()
 					.getSystemService(Context.LAYOUT_INFLATER_SERVICE);

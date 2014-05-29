@@ -46,7 +46,7 @@ public class GlobalHolder {
 
 	private Set<Conversation> mConferenceConversationHolder = new CopyOnWriteArraySet<Conversation>();
 
-	private Set<UserDeviceConfig> mUserDeviceList = new HashSet<UserDeviceConfig>();
+	private Map<Long, Set<UserDeviceConfig>> mUserDeviceList = new HashMap<Long, Set<UserDeviceConfig>>();
 
 	private Map<Long, Bitmap> mAvatarBmHolder = new HashMap<Long, Bitmap>();
 
@@ -455,21 +455,32 @@ public class GlobalHolder {
 	 * @return list of user device
 	 */
 	public List<UserDeviceConfig> getAttendeeDevice(long uid) {
-		List<UserDeviceConfig> l = new ArrayList<UserDeviceConfig>();
-		for (UserDeviceConfig udl : mUserDeviceList) {
-			if (udl.getUserID() == uid) {
-				l.add(udl);
-			}
+		Set<UserDeviceConfig> list = mUserDeviceList.get(Long.valueOf(uid));
+		if (list == null) {
+			return null;
 		}
-		return l;
+		
+		return new ArrayList<UserDeviceConfig>(list);
+	}
+	
+	
+	public void removeAttendeeDeviceCache(long uid) {
+		mUserDeviceList.remove(Long.valueOf(uid));
 	}
 
-	public void addAttendeeDevice(UserDeviceConfig udc) {
-		mUserDeviceList.add(udc);
-	}
 
 	public void addAttendeeDevice(List<UserDeviceConfig> udcList) {
-		mUserDeviceList.addAll(udcList);
+		for (UserDeviceConfig udc : udcList) {
+			if (udc == null) {
+				continue;
+			}
+			Set<UserDeviceConfig> list = mUserDeviceList.get(Long.valueOf(udc.getUserID()));
+			if (list == null) {
+				list = new HashSet<UserDeviceConfig>();
+				mUserDeviceList.put(Long.valueOf(udc.getUserID()), list);
+			}
+			list.add(udc);
+		}
 	}
 
 	

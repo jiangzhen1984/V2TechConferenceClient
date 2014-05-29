@@ -44,8 +44,9 @@
         android:gravity="left|top"
         android:singleLine="true"
         android:text="TextView"
-        android:textColor="@color/common_item_text_color"
-        android:textSize="@dimen/common_item_text_size" />
+        android:maxWidth="@dimen/conversation_view_text_max_width"
+        android:textColor="@color/conversation_view_name_color"
+        android:textSize="@dimen/conversation_view_name_text_size" />
 
     <TextView
         android:id="@+id/group_list_conference_owner_tv"
@@ -58,7 +59,8 @@
         android:gravity="left|bottom"
         android:singleLine="true"
         android:text="TextView"
-        android:textColor="@color/common_item_text_color"
+        android:textColor="@color/conversation_view_text_color"
+        android:maxWidth="@dimen/conversation_view_text_max_width"
         android:textSize="@dimen/common_item_text_size_16" />
 
     <TextView

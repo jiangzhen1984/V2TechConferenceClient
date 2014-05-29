@@ -4,22 +4,24 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.text.Editable;
+import android.text.InputType;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnFocusChangeListener;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.view.animation.BounceInterpolator;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
@@ -85,8 +87,28 @@ public class LoginActivity extends Activity {
 		mEmailView = (EditText) findViewById(R.id.email);
 		mEmailView.setText(mEmail);
 		mEmailView.addTextChangedListener(userNameTextWAtcher);
+		mEmailView.setOnFocusChangeListener(new OnFocusChangeListener() {
+
+			@Override
+			public void onFocusChange(View arg0, boolean focus) {
+				if (focus) {
+					mEmailView.setText("");
+					mEmailView.setTextColor(Color.BLACK);
+				}
+			}
+		});
 
 		mPasswordView = (EditText) findViewById(R.id.password);
+		mPasswordView.setOnFocusChangeListener(new OnFocusChangeListener() {
+
+			@Override
+			public void onFocusChange(View arg0, boolean focus) {
+				if (focus) {
+					mPasswordView.setText("");
+					mPasswordView.setTextColor(Color.BLACK);
+				}
+			}
+		});
 
 		mLoginStatusMessageView = (TextView) findViewById(R.id.login_status_message);
 

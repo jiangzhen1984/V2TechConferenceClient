@@ -87,8 +87,9 @@
             android:layout_weight=".3"
             android:background="@drawable/button_bg"
             android:gravity="center"
+            android:textColor="#0060ff"
             android:text="@string/contact_message_send_button"
-            android:textSize="15sp" />
+            android:textSize="@dimen/video_msg_chatting_send_button_font_size" />
     </LinearLayout>
 
     <LinearLayout

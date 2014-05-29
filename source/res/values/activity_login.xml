@@ -28,7 +28,7 @@
     <string name="login_title">V2 BizCom</string>
     <string name="login_title_2">Business Communication</string>
     <string name="login_title_copyright">版权所有&#0169;北京威速科技有限公司 保留所有权</string>
-    <string name="login_user_name">用户名</string>
+    <string name="login_user_name">请输入BzCom用户名</string>
 
     <color name="logo_background">#ffffff</color>
     <color name="setting_outer_bg">#b8c9d4</color>

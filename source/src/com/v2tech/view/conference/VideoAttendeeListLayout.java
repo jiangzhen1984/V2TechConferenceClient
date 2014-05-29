@@ -138,17 +138,19 @@ public class VideoAttendeeListLayout extends LinearLayout {
 		nameTV.setText(a.getAttName());
 
 		if (a.isSelf() == false) {
-			nameTV.setTextSize(20);
 			if ((a.getDefaultDevice() != null && a.isJoined()) || a.isSelf()) {
 				cameraIV.setImageResource(R.drawable.camera);
 			}
 		} else {
-			nameTV.setTextSize(22);
 			nameTV.setTypeface(null, Typeface.BOLD);
 			if (a.isJoined() || a.isSelf()) {
 				cameraIV.setImageResource(R.drawable.camera);
 			}
 		}
+		if (a.isChairMan()) {
+			nameTV.setTextColor(getContext().getResources().getColor(R.color.video_attendee_chair_man_name_color));
+		}
+		
 		view.setTag(new Wrapper(a, a.getDefaultDevice()));
 		list.add(view);
 
@@ -159,10 +161,13 @@ public class VideoAttendeeListLayout extends LinearLayout {
 					.findViewById(R.id.video_attendee_device_name);
 			ImageView cameraIV2 = (ImageView) view2
 					.findViewById(R.id.video_attendee_device_camera_icon);
-
 			UserDeviceConfig udc = a.getmDevices().get(i);
 			nameTV2.setText(a.getAttName() + (i > 0 ? ("_视频" + i) : ""));
 			nameTV2.setTextSize(20);
+			//Hide additional speaker if user has more than one camera
+			view2
+			.findViewById(R.id.video_attendee_device_speaker_icon).setVisibility(View.INVISIBLE);
+			
 			if (a.isJoined()|| a.isSelf()) {
 				cameraIV2.setImageResource(R.drawable.camera);
 			}
@@ -212,6 +217,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 			View v = mAttendsView.get(i);
 			Wrapper wr = (Wrapper) v.getTag();
 			if (wr.a.getAttId() == at.getAttId()) {
+				wr.a.setJoined(false);
 				ImageView cameraIV2 = (ImageView) v
 						.findViewById(R.id.video_attendee_device_camera_icon);
 				cameraIV2.setImageResource(R.drawable.camera_pressed);

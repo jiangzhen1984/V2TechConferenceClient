@@ -61,7 +61,7 @@
                 android:id="@+id/video_doc_pre_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginRight="15dp"
+                android:layout_marginRight="@dimen/video_doc_bottom_button_padding"
                 android:src="@drawable/video_doc_left_arrow_gray" />
 
             <TextView
@@ -69,10 +69,10 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal|center_vertical"
-                android:layout_marginRight="10dp"
-                android:layout_marginLeft="10dp"
-                android:paddingLeft="10dp"
-                android:paddingRight="10dp"
+                android:layout_marginRight="@dimen/video_doc_bottom_button_padding"
+                android:layout_marginLeft="@dimen/video_doc_bottom_button_padding"
+                android:paddingLeft="@dimen/video_doc_bottom_button_padding"
+                android:paddingRight="@dimen/video_doc_bottom_button_padding"
                 android:gravity="center"
                 android:textSize="@dimen/common_item_text_size"
                 android:text=" " />
@@ -81,7 +81,7 @@
                 android:id="@+id/video_doc_next_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="15dp"
+                android:layout_marginLeft="@dimen/video_doc_bottom_button_padding"
                 android:src="@drawable/video_doc_right_arrow_gray" />
         </LinearLayout>
     </RelativeLayout>

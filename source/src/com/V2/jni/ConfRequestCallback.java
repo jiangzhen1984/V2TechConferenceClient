@@ -15,7 +15,7 @@ public interface ConfRequestCallback {
 	public void OnEnterConfCallback(long nConfID, long nTime, String szConfData, int nJoinResult);
 	
 	/**
-	 *  <ul>Indicate new attendee entered current conference.<br>
+	 *  <ul>Indicate new attendee entered current conference which user in.<br>
 	 *  This callback is called many times and same with current conference's attendee count except self.</ul>
 	 *  
 	 * @param nConfID conference ID what user entered
@@ -53,7 +53,7 @@ public interface ConfRequestCallback {
 	
 	
 	/**
-	 * User invite current user to join further conference, this function will be called
+	 * User invite current user to join further conference.
 	 * @param confXml {@code <conf createuserid='18' id='514000758190' starttime='1400162220' subject=' 就'/> }
 	 * @param creatorXml {@code <user id='18'/>}
 	 */

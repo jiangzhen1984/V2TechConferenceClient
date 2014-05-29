@@ -117,6 +117,7 @@ public class TitleBar {
 			TextView tv = new TextView(context);
 			tv.setText(items[i]);
 			tv.setPadding(10, 15, 5, 15);
+			tv.setTextColor(Color.rgb(223, 223, 223));
 			LinearLayout.LayoutParams tvLL = new LinearLayout.LayoutParams(0,
 					LinearLayout.LayoutParams.WRAP_CONTENT);
 			tvLL.gravity = Gravity.LEFT | Gravity.CENTER_VERTICAL;

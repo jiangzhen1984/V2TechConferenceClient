@@ -93,6 +93,9 @@
                     android:layout_weight=".5"
                     android:gravity="top"
                     android:text="TextView"
+                    android:maxWidth="@dimen/detail_detail_name_max_width"
+                    android:ellipsize="end"
+                    android:singleLine="true"
                     android:textColor="@color/common_item_text_color" />
 
                 <TextView
@@ -142,7 +145,8 @@
                     android:layout_marginRight="15dp"
                     android:background="@drawable/rounded_corners_of_contact_user_detail_outer"
                     android:orientation="vertical"
-                    android:paddingBottom="15dp" >
+                    android:paddingBottom="15dp"
+                    android:visibility="gone" >
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -498,7 +502,7 @@
                     android:layout_marginRight="15dp"
                     android:background="@drawable/rounded_corners_of_contact_user_detail_outer"
                     android:orientation="vertical"
-                    android:visibility="gone" >
+                     >
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -519,8 +523,11 @@
                             android:id="@+id/contact_user_n_detail_title_tv"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
                             android:gravity="center_vertical"
                             android:text="TextView"
+                            android:singleLine="true"
+                            android:ellipsize="end"
                             android:textColor="@color/common_item_text_color"
                             android:textSize="@dimen/common_item_text_size" />
                     </LinearLayout>
@@ -552,7 +559,10 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:gravity="center_vertical"
+                           android:layout_gravity="center_vertical"
                             android:text="TextView"
+                            android:singleLine="true"
+                            android:ellipsize="end"
                             android:textColor="@color/common_item_text_color"
                             android:textSize="@dimen/common_item_text_size" />
                     </LinearLayout>
@@ -584,7 +594,10 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:gravity="center_vertical"
+                            android:layout_gravity="center_vertical"
                             android:text="TextView"
+                            android:singleLine="true"
+                            android:ellipsize="end"
                             android:textColor="@color/common_item_text_color"
                             android:textSize="@dimen/common_item_text_size" />
                     </LinearLayout>
@@ -615,7 +628,10 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:gravity="center_vertical"
+                            android:layout_gravity="center_vertical"
                             android:text="Cell phone"
+                            android:singleLine="true"
+                            android:ellipsize="end"
                             android:textColor="@color/common_item_text_color"
                             android:textSize="@dimen/common_item_text_size" />
                     </LinearLayout>
@@ -647,7 +663,10 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:gravity="center_vertical"
+                            android:layout_gravity="center_vertical"
                             android:text="TextView"
+                            android:singleLine="true"
+                            android:ellipsize="end"
                             android:textColor="@color/common_item_text_color"
                             android:textSize="@dimen/common_item_text_size" />
                     </LinearLayout>
@@ -679,7 +698,10 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:gravity="center_vertical"
+                            android:layout_gravity="center_vertical"
                             android:text="TextView"
+                            android:singleLine="true"
+                            android:ellipsize="end"
                             android:textColor="@color/common_item_text_color"
                             android:textSize="@dimen/common_item_text_size" />
                     </LinearLayout>

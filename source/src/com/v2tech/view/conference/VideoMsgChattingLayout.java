@@ -115,15 +115,17 @@ public class VideoMsgChattingLayout extends LinearLayout {
 	public void addNewMessage(VMessage vm) {
 		TextView tvSender = new TextView(this.getContext());
 		tvSender.setText(vm.getUser().getName() + " " + vm.getDateTimeStr());
-		tvSender.setTextColor(Color.rgb(0, 0, 255));
+		tvSender.setTextColor(getContext().getResources().getColor(R.color.conference_msg_content_color));
 		tvSender.setPadding(15, 5, 15, 5);
+		tvSender.setTextSize(14);
+		
 		this.mMsgContainer.addView(tvSender);
 
 		TextView tv = new TextView(this.getContext());
 		tv.setText(vm.getText());
 		tv.setPadding(15, 5, 15, 5);
-		tv.setTextColor(getContext().getResources().getColor(R.color.common_item_text_color));
-		tv.setTextSize(getContext().getResources().getDimension(R.dimen.common_item_text_size_16));
+		tv.setTextColor(getContext().getResources().getColor(R.color.conference_msg_content_color));
+		tv.setTextSize(14);
 		this.mMsgContainer.addView(tv);
 		this.mScroller.post(new Runnable() {
 
