@@ -93,6 +93,20 @@ public class PlaceSlideFragment extends Fragment {
 	}
 
 	@Override
+	public void onPause() {
+		super.onPause();
+		if (rlContainer.getChildCount() > 0) {
+			((TouchImageView) rlContainer.getChildAt(rlContainer
+					.getChildCount() - 1)).resetZoom();
+		}
+	}
+
+	@Override
+	public void onResume() {
+		super.onResume();
+	}
+
+	@Override
 	public void onAttach(Activity activity) {
 		super.onAttach(activity);
 	}

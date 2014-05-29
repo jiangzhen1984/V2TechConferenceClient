@@ -182,11 +182,11 @@ public class ConferenceService extends AbstractHandler {
 		}
 		initTimeoutMessage(JNI_REQUEST_QUIT_CONFERENCE, DEFAULT_TIME_OUT_SECS,
 				caller);
-		//If conference owner is self, then delete group
+		// If conference owner is self, then delete group
 		if (conf.getCreator() == GlobalHolder.getInstance().getCurrentUserId()) {
 			GroupRequest.getInstance().delGroup(
 					Group.GroupType.CONFERENCE.intValue(), conf.getId());
-		//If conference owner isn't self, just leave group
+			// If conference owner isn't self, just leave group
 		} else {
 			GroupRequest.getInstance().leaveGroup(
 					Group.GroupType.CONFERENCE.intValue(), conf.getId());
@@ -212,8 +212,8 @@ public class ConferenceService extends AbstractHandler {
 			UserDeviceConfig userDevice, Registrant caller) {
 		if (conf == null || userDevice == null) {
 			if (caller != null) {
-				JNIResponse jniRes = new RequestOpenUserVideoDeviceResponse(0, 0,
-						RequestConfCreateResponse.Result.INCORRECT_PAR);
+				JNIResponse jniRes = new RequestOpenUserVideoDeviceResponse(0,
+						0, RequestConfCreateResponse.Result.INCORRECT_PAR);
 				sendResult(caller, jniRes);
 			}
 			return;
@@ -224,9 +224,10 @@ public class ConferenceService extends AbstractHandler {
 				+ userDevice.getUserID() + " deviceid:"
 				+ userDevice.getDeviceID() + "   videoplayer:"
 				+ userDevice.getVp());
-		VideoRequest.getInstance().openVideoDevice(userDevice.getType().ordinal(),
-				userDevice.getUserID(), userDevice.getDeviceID(),
-				userDevice.getVp(), userDevice.getBusinessType());
+		VideoRequest.getInstance().openVideoDevice(
+				userDevice.getType().ordinal(), userDevice.getUserID(),
+				userDevice.getDeviceID(), userDevice.getVp(),
+				userDevice.getBusinessType());
 		JNIResponse jniRes = new RequestOpenUserVideoDeviceResponse(
 				conf.getId(), System.currentTimeMillis() / 1000,
 				RequestOpenUserVideoDeviceResponse.Result.SUCCESS);
@@ -266,9 +267,10 @@ public class ConferenceService extends AbstractHandler {
 		initTimeoutMessage(JNI_REQUEST_CLOSE_VIDEO, DEFAULT_TIME_OUT_SECS,
 				caller);
 
-		VideoRequest.getInstance().closeVideoDevice(userDevice.getType().ordinal(),
-				userDevice.getUserID(), userDevice.getDeviceID(),
-				userDevice.getVp(), userDevice.getBusinessType());
+		VideoRequest.getInstance().closeVideoDevice(
+				userDevice.getType().ordinal(), userDevice.getUserID(),
+				userDevice.getDeviceID(), userDevice.getVp(),
+				userDevice.getBusinessType());
 		JNIResponse jniRes = new RequestCloseUserVideoDeviceResponse(
 				conf.getId(), System.currentTimeMillis() / 1000,
 				RequestCloseUserVideoDeviceResponse.Result.SUCCESS);
@@ -366,6 +368,27 @@ public class ConferenceService extends AbstractHandler {
 		}
 	}
 
+	// =============================
+	private List<Registrant> registerAttendeeDeviceNotificationListenersList = new ArrayList<Registrant>();
+
+	/**
+	 * Register listener for out conference by kick.
+	 * 
+	 * @param msg
+	 */
+	public void registerAttendeeDeviceListener(Handler h, int what, Object obj) {
+		registerAttendeeDeviceNotificationListenersList.add(new Registrant(h,
+				what, obj));
+	}
+
+	public void removeAttendeeDeviceListener(Handler h, int what, Object obj) {
+		for (Registrant re : registerAttendeeDeviceNotificationListenersList) {
+			if (re.getHandler() == h && what == re.getWhat()) {
+				registerAttendeeDeviceNotificationListenersList.remove(re);
+			}
+		}
+	}
+
 	private List<Registrant> registerAttendeeStatusListenersList = new ArrayList<Registrant>();
 
 	/**
@@ -403,9 +426,7 @@ public class ConferenceService extends AbstractHandler {
 			}
 		}
 	}
-	
-	
-	
+
 	private List<Registrant> permissionUpdateListenersList = new ArrayList<Registrant>();
 
 	/**
@@ -417,20 +438,21 @@ public class ConferenceService extends AbstractHandler {
 		permissionUpdateListenersList.add(new Registrant(h, what, obj));
 	}
 
-	public void unRegisterPermissionUpdateListener(Handler h, int what, Object obj) {
+	public void unRegisterPermissionUpdateListener(Handler h, int what,
+			Object obj) {
 		for (Registrant re : permissionUpdateListenersList) {
 			if (re.getHandler() == h && what == re.getWhat()) {
 				permissionUpdateListenersList.remove(re);
 			}
 		}
 	}
-	
-	
+
 	private List<Registrant> mixListenersList = new ArrayList<Registrant>();
+
 	public void registerVideoMixerListener(Handler h, int what, Object obj) {
 		mixListenersList.add(new Registrant(h, what, obj));
 	}
-	
+
 	public void unRegisterVideoMixerListener(Handler h, int what, Object obj) {
 		for (Registrant re : mixListenersList) {
 			if (re.getHandler() == h && what == re.getWhat()) {
@@ -471,7 +493,7 @@ public class ConferenceService extends AbstractHandler {
 					User u = GlobalHolder.getInstance().getUser(
 							Long.parseLong(id));
 					if (u == null) {
-						V2Log.e(" Can't not find user "+ id);
+						V2Log.e(" Can't not find user " + id);
 						return;
 					}
 					for (Registrant re : registerAttendeeStatusListenersList) {
@@ -518,22 +540,20 @@ public class ConferenceService extends AbstractHandler {
 
 		@Override
 		public void OnGrantPermissionCallback(long userid, int type, int status) {
-			JNIIndication jniInd = new PermissionUpdateIndication(userid, type, status);
+			JNIIndication jniInd = new PermissionUpdateIndication(userid, type,
+					status);
 			for (Registrant re : permissionUpdateListenersList) {
 				Handler h = re.getHandler();
 				if (h != null) {
-					Message.obtain(h, re.getWhat(), jniInd)
-							.sendToTarget();
+					Message.obtain(h, re.getWhat(), jniInd).sendToTarget();
 				}
 			}
 		}
 
 		@Override
 		public void OnConfNotify(String confXml, String creatorXml) {
-			
+
 		}
-		
-		
 
 	}
 
@@ -547,6 +567,20 @@ public class ConferenceService extends AbstractHandler {
 
 		@Override
 		public void OnRemoteUserVideoDevice(String szXmlData) {
+			if (szXmlData == null) {
+				V2Log.e(" No avaiable user device configuration");
+				return;
+			}
+			List<UserDeviceConfig> ll = UserDeviceConfig
+					.parseFromXml(szXmlData);
+			GlobalHolder.getInstance().addAttendeeDevice(ll);
+
+			for (Registrant re : registerAttendeeDeviceNotificationListenersList) {
+				Handler h = re.getHandler();
+				if (h != null) {
+					Message.obtain(h, re.getWhat(), 0, 0, ll).sendToTarget();
+				}
+			}
 
 		}
 
@@ -658,8 +692,7 @@ public class ConferenceService extends AbstractHandler {
 		}
 
 	}
-	
-	
+
 	class MixerRequestCB implements VideoMixerRequestCallback {
 
 		private Handler mCallbackHandler;
@@ -667,7 +700,7 @@ public class ConferenceService extends AbstractHandler {
 		public MixerRequestCB(Handler mCallbackHandler) {
 			this.mCallbackHandler = mCallbackHandler;
 		}
-		
+
 		@Override
 		public void OnCreateVideoMixerCallback(String sMediaId, int layout,
 				int width, int height) {
@@ -675,18 +708,21 @@ public class ConferenceService extends AbstractHandler {
 				V2Log.e(" OnCreateVideoMixerCallback -- > unlmatform parameter sMediaId is null ");
 				return;
 			}
-			notifyListener(1, new MixVideo(sMediaId, MixVideo.LayoutType.fromInt(layout)));
+			notifyListener(1,
+					new MixVideo(sMediaId, MixVideo.LayoutType.fromInt(layout), width, height));
 		}
 
 		@Override
 		public void OnDestroyVideoMixerCallback(String sMediaId) {
-			notifyListener(2, new MixVideo(sMediaId, MixVideo.LayoutType.UNKOWN));
+			notifyListener(2,
+					new MixVideo(sMediaId, MixVideo.LayoutType.UNKOWN));
 		}
 
 		@Override
 		public void OnAddVideoMixerCallback(String sMediaId, long nDstUserId,
 				String sDstDevId, int pos) {
-			UserDeviceConfig udc = new UserDeviceConfig(nDstUserId, sDstDevId, null);
+			UserDeviceConfig udc = new UserDeviceConfig(nDstUserId, sDstDevId,
+					null);
 			MixVideo mix = new MixVideo(sMediaId);
 			notifyListener(3, mix.createMixVideoDevice(pos, sMediaId, udc));
 		}
@@ -694,22 +730,23 @@ public class ConferenceService extends AbstractHandler {
 		@Override
 		public void OnDelVideoMixerCallback(String sMediaId, long nDstUserId,
 				String sDstDevId) {
-			UserDeviceConfig udc = new UserDeviceConfig(nDstUserId, sDstDevId, null);
+			UserDeviceConfig udc = new UserDeviceConfig(nDstUserId, sDstDevId,
+					null);
 			MixVideo mix = new MixVideo(sMediaId);
 			notifyListener(4, mix.createMixVideoDevice(-1, sMediaId, udc));
-			
+
 		}
-		
+
 		private void notifyListener(int type, Object obj) {
 			for (Registrant re : mixListenersList) {
 				Handler h = re.getHandler();
 				if (h != null) {
-					Message.obtain(h, re.getWhat(),type, 0, obj)
+					Message.obtain(h, re.getWhat(), type, 0, obj)
 							.sendToTarget();
 				}
 			}
 		}
-		
+
 	}
 
 }

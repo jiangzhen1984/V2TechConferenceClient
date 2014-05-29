@@ -67,38 +67,33 @@
                 android:layout_marginTop="20dp"
                 android:src="@drawable/avatar" />
 
-            <LinearLayout
+            <TextView
+                android:id="@+id/contact_user_detail_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignBottom="@+id/contact_user_detail_head_icon"
                 android:layout_alignTop="@+id/contact_user_detail_head_icon"
                 android:layout_marginLeft="16dp"
                 android:layout_toRightOf="@+id/contact_user_detail_head_icon"
-                android:orientation="vertical" >
+                android:ellipsize="end"
+                android:maxWidth="@dimen/detail_detail_2_name_max_width"
+                android:singleLine="true"
+                android:text="TextView"
+                android:textSize="@dimen/common_item_text_size_small"
+                android:textColor="@color/common_item_text_color" />
 
-                <TextView
-                    android:id="@+id/contact_user_detail_title"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="top"
-                    android:ellipsize="end"
-                    android:gravity="top"
-                    android:maxWidth="@dimen/detail_detail_2_name_max_width"
-                    android:singleLine="true"
-                    android:text="TextView"
-                    android:textColor="@color/common_item_text_color" />
-
-                <TextView
-                    android:id="@+id/contact_user_detail_user_signature_tv"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="bottom"
-                    android:ellipsize="end"
-                    android:gravity="bottom"
-                    android:singleLine="true"
-                    android:text="TextView"
-                    android:textColor="@color/common_item_text_color" />
-            </LinearLayout>
+            <TextView
+                android:id="@+id/contact_user_detail_user_signature_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/contact_user_detail_title"
+                android:layout_alignLeft="@+id/contact_user_detail_title"
+                android:ellipsize="end"
+                android:gravity="center"
+                android:maxWidth="@dimen/detail_detail_2_name_max_width"
+                android:singleLine="true"
+                android:text="TextView"
+                 android:textSize="@dimen/common_item_text_size_small"
+                android:textColor="@color/common_item_text_color" />
 
             <TextView
                 android:id="@+id/contact_user_detail_2_send_msg"

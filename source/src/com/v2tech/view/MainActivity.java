@@ -186,7 +186,7 @@ public class MainActivity extends FragmentActivity implements
 			TextView tv = new TextView(mContext);
 			tv.setText(items[i]);
 			tv.setPadding(10, 5, 5, 10);
-			tv.setTextColor(Color.rgb(223, 223, 223));
+			tv.setTextColor(Color.rgb(123, 123, 123));
 			LinearLayout.LayoutParams tvLL = new LinearLayout.LayoutParams(0,
 					LinearLayout.LayoutParams.WRAP_CONTENT);
 			tvLL.gravity = Gravity.LEFT | Gravity.CENTER_VERTICAL;

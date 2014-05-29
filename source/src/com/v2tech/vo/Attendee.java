@@ -94,6 +94,17 @@ public class Attendee {
 		mDevices.add(udc);
 		udc.setBelongsAttendee(this);
 	}
+	
+	
+	public void addDevice(List<UserDeviceConfig> udcs) {
+		if (udcs == null) {
+			V2Log.w(" null device");
+			return;
+		}
+		for (UserDeviceConfig ud : udcs) {
+			this.addDevice(ud);
+		}
+	}
 
 //	public User getUser() {
 //		return user;

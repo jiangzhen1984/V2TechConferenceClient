@@ -15,11 +15,15 @@ public class AttendeeMixedDevice extends Attendee {
 			MixVideo.MixVideoDevice[] uds = mv.getUdcs();
 			udcs = new UserDeviceConfig[uds.length];
 			for (int i = 0; i < uds.length; i++) {
-				udcs[0] = new UserDeviceConfig(0, mv.getId(), null, UserDeviceConfig.UserDeviceConfigType.EVIDEODEVTYPE_VIDEOMIXER);
+				udcs[0] = new UserDeviceConfig(
+						0,
+						mv.getId(),
+						null,
+						UserDeviceConfig.UserDeviceConfigType.EVIDEODEVTYPE_VIDEOMIXER);
 				udcs[0].setBelongsAttendee(this);
 			}
 		}
-		
+
 		Random r = new Random();
 		id = r.nextLong() | r.hashCode();
 	}
@@ -27,13 +31,11 @@ public class AttendeeMixedDevice extends Attendee {
 	public MixVideo getMV() {
 		return this.mv;
 	}
-	
+
 	@Override
 	public long getAttId() {
 		return id;
 	}
-
-
 
 	@Override
 	public UserDeviceConfig getDefaultDevice() {
@@ -45,7 +47,7 @@ public class AttendeeMixedDevice extends Attendee {
 
 	@Override
 	public String getAttName() {
-		return "混合视频";
+		return "混合视频  (" + mv.getWidth() + "  x " + mv.getHeight() + ")";
 	}
 
 }

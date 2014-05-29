@@ -87,6 +87,9 @@ public class MixVideo {
 	private String id;
 	private LayoutType type;
 	
+	private int width;
+	private int height;
+	
 	private MixVideoDevice[]  udcs;
 
 	
@@ -95,11 +98,16 @@ public class MixVideo {
 		this.type = LayoutType.UNKOWN;
 	}
 	
-	
 	public MixVideo(String id, LayoutType type) {
+		this(id, type, 320, 480);
+	}
+	
+	public MixVideo(String id, LayoutType type, int width, int height) {
 		super();
 		this.id = id;
 		this.type = type;
+		this.width = width;
+		this.height = height;
 		int size = 2;
 		switch (type) {
 		case LEFT_RIGHT_2:
@@ -216,6 +224,23 @@ public class MixVideo {
 
 	public void setUdcs(MixVideoDevice[] udcs) {
 		this.udcs = udcs;
+	}
+
+
+	public int getWidth() {
+		return width;
+	}
+
+	public void setWidth(int width) {
+		this.width = width;
+	}
+
+	public int getHeight() {
+		return height;
+	}
+
+	public void setHeight(int height) {
+		this.height = height;
 	}
 
 

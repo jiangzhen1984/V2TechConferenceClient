@@ -61,6 +61,7 @@ public class ImageViewGallery extends FragmentActivity {
 		});
 		
 		mImageViewPager.setAdapter(new ImageAdapter(this.getSupportFragmentManager()));
+		mImageViewPager.setOffscreenPageLimit(1);
 		
 		mImageViewPager.setOnPageChangeListener(new OnPageChangeListener() {
 

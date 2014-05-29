@@ -98,6 +98,7 @@ public class VideoActivityV2 extends Activity {
 	private static final int REQUEST_EXIT_CONF = 10;
 	private static final int NOTIFY_USER_PERMISSION_UPDATED = 11;
 
+	private static final int ATTENDEE_DEVICE_LISTENER = 20;
 	private static final int ATTENDEE_LISTENER = 21;
 	private static final int CONF_USER_DEVICE_EVENT = 23;
 	private static final int USER_DELETE_GROUP = 24;
@@ -167,6 +168,8 @@ public class VideoActivityV2 extends Activity {
 
 	private SubViewListener subViewListener = new SubViewListener();
 
+	private List<VMessage> mPendingMessageList;
+
 	private boolean inFlag;
 
 	@Override
@@ -231,11 +234,13 @@ public class VideoActivityV2 extends Activity {
 
 		// make sure local is in front of any view
 		localSurfaceViewLy.bringToFront();
+
 		// Start animation
 		this.overridePendingTransition(R.animator.nonam_scale_center_0_100,
 				R.animator.nonam_scale_null);
 
 		inFlag = this.getIntent().getExtras().getBoolean("in", false);
+
 	}
 
 	private OnClickListener mMenuButtonListener = new OnClickListener() {
@@ -393,6 +398,8 @@ public class VideoActivityV2 extends Activity {
 						content);
 				if (mMessageContainer != null) {
 					mMessageContainer.addNewMessage(vm);
+				} else {
+					mPendingMessageList.add(vm);
 				}
 			} else if (JNIService.JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION
 					.equals(intent.getAction())) {
@@ -477,7 +484,6 @@ public class VideoActivityV2 extends Activity {
 			requestEnterConf();
 		}
 		suspendOrResume(true);
-		
 
 		NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 		// mId allows you to update the notification later on.
@@ -511,6 +517,9 @@ public class VideoActivityV2 extends Activity {
 
 		cb.registerVideoMixerListener(mVideoHandler, VIDEO_MIX_NOTIFICATION,
 				null);
+
+		cb.registerAttendeeDeviceListener(mVideoHandler,
+				ATTENDEE_DEVICE_LISTENER, null);
 
 		// Register listen to document notification
 		ds.registerNewDocNotification(mVideoHandler, NEW_DOC_NOTIFICATION, null);
@@ -554,6 +563,8 @@ public class VideoActivityV2 extends Activity {
 			}
 		}
 		V2Log.i(" Conference size:" + mAttendeeList.size());
+
+		mPendingMessageList = new ArrayList<VMessage>();
 	}
 
 	private void notificateConversationUpdate() {
@@ -573,18 +584,7 @@ public class VideoActivityV2 extends Activity {
 	 */
 	private void showOrHidenMsgContainer(int visible) {
 		if (mMessageContainer == null) {
-			mMessageContainer = new VideoMsgChattingLayout(this);
-			mMessageContainer.setId(0x7ffff000);
-			RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
-					(int) (mVideoLayout.getMeasuredWidth() * 0.4),
-					mVideoLayout.getMeasuredHeight());
-			lp.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
-			lp.addRule(RelativeLayout.RIGHT_OF, mMenuLine.getId());
-			lp.addRule(RelativeLayout.BELOW, mVideoLine.getId());
-			mVideoLayoutMain.addView(mMessageContainer, lp);
-			mMessageContainer.bringToFront();
-			mMessageContainer.setVisibility(View.GONE);
-			mMessageContainer.setListener(subViewListener);
+			initMsgLayout();
 		}
 
 		if (visible == View.GONE
@@ -618,7 +618,27 @@ public class VideoActivityV2 extends Activity {
 			mMessageContainer.startAnimation(tabBlockHolderAnimation);
 			mMessageContainer.requestScrollToNewMessage();
 
+			for (int i = 0; i < mPendingMessageList.size(); i++) {
+				mMessageContainer.addNewMessage(mPendingMessageList.get(i));
+			}
+			mPendingMessageList.clear();
+
 		}
+	}
+
+	private void initMsgLayout() {
+		mMessageContainer = new VideoMsgChattingLayout(this);
+		mMessageContainer.setId(0x7ffff000);
+		RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
+				(int) (mVideoLayout.getMeasuredWidth() * 0.4),
+				mVideoLayout.getMeasuredHeight());
+		lp.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+		lp.addRule(RelativeLayout.RIGHT_OF, mMenuLine.getId());
+		lp.addRule(RelativeLayout.BELOW, mVideoLine.getId());
+		mVideoLayoutMain.addView(mMessageContainer, lp);
+		mMessageContainer.bringToFront();
+		mMessageContainer.setVisibility(View.GONE);
+		mMessageContainer.setListener(subViewListener);
 	}
 
 	/**
@@ -954,6 +974,8 @@ public class VideoActivityV2 extends Activity {
 				DOC_PAGE_CANVAS_NOTIFICATION, null);
 		cb.removeSyncDesktopListener(mVideoHandler, DESKTOP_SYNC_NOTIFICATION,
 				null);
+		cb.removeAttendeeDeviceListener(mVideoHandler,
+				ATTENDEE_DEVICE_LISTENER, null);
 		if (mDocContainer != null) {
 			// clean document bitmap cache
 			mDocContainer.cleanCache();
@@ -1028,7 +1050,7 @@ public class VideoActivityV2 extends Activity {
 				Message.obtain(mVideoHandler, REQUEST_OPEN_OR_CLOSE_DEVICE, 1,
 						0, sw.udc).sendToTarget();
 			}
-			//Make sure local camera is first front of all
+			// Make sure local camera is first front of all
 			Message.obtain(mVideoHandler, ONLY_SHOW_LOCAL_VIDEO).sendToTarget();
 			adjustLayout();
 		} else {
@@ -1115,15 +1137,17 @@ public class VideoActivityV2 extends Activity {
 		} else {
 			a.setUser(user);
 		}
+		a.setJoined(true);
 
 		List<UserDeviceConfig> ld = GlobalHolder.getInstance()
 				.getAttendeeDevice(a.getAttId());
 		if (ld == null || ld.size() <= 0) {
 			V2Log.w(" No available device config for user:" + user.getmUserId()
 					+ "  name:" + user.getName());
-		}
-		for (UserDeviceConfig udc : ld) {
-			a.addDevice(udc);
+		} else {
+			for (UserDeviceConfig udc : ld) {
+				a.addDevice(udc);
+			}
 		}
 
 		if (mAttendeeContainer != null) {
@@ -1167,8 +1191,8 @@ public class VideoActivityV2 extends Activity {
 				mAttendeeContainer.updateExitedAttendee(a);
 			}
 		}
-		
-		//Clean user device
+
+		// Clean user device
 		GlobalHolder.getInstance().removeAttendeeDeviceCache(user.getmUserId());
 
 	}
@@ -1219,8 +1243,7 @@ public class VideoActivityV2 extends Activity {
 			//
 			if (udc.getBelongsAttendee() instanceof AttendeeMixedDevice) {
 				mCurrentShowedSV.add(new MixedSurfaceViewW(
-						((AttendeeMixedDevice) udc.getBelongsAttendee())
-								.getMV(), udc));
+						((AttendeeMixedDevice) udc.getBelongsAttendee()), udc));
 			} else {
 				mCurrentShowedSV.add(new SurfaceViewW(udc.getBelongsAttendee(),
 						udc));
@@ -1280,7 +1303,8 @@ public class VideoActivityV2 extends Activity {
 			if (udc == null || at == null) {
 				return;
 			}
-			if (at.getAttId() == GlobalHolder.getInstance().getCurrentUserId() || !at.isJoined()) {
+			if (at.getAttId() == GlobalHolder.getInstance().getCurrentUserId()
+					|| !at.isJoined()) {
 
 			} else {
 				showOrCloseAttendeeVideo(udc);
@@ -1477,14 +1501,14 @@ public class VideoActivityV2 extends Activity {
 
 	class MixedSurfaceViewW extends SurfaceViewW {
 
-		MixVideo at;
+		AttendeeMixedDevice at;
 
-		public MixedSurfaceViewW(MixVideo at) {
+		public MixedSurfaceViewW(AttendeeMixedDevice at) {
 			this.at = at;
-			this.udc = new UserDeviceConfig(0, at.getId(), null);
+			this.udc = new UserDeviceConfig(0, at.getMV().getId(), null);
 		}
 
-		public MixedSurfaceViewW(MixVideo at, UserDeviceConfig udc) {
+		public MixedSurfaceViewW(AttendeeMixedDevice at, UserDeviceConfig udc) {
 			this.at = at;
 			this.udc = udc;
 		}
@@ -1505,8 +1529,7 @@ public class VideoActivityV2 extends Activity {
 						RelativeLayout.LayoutParams.MATCH_PARENT,
 						RelativeLayout.LayoutParams.MATCH_PARENT));
 				TextView tv = new TextView(mContext);
-				// FIXME use name
-				tv.setText("混平");
+				tv.setText(at.getAttName());
 				tv.setBackgroundColor(Color.rgb(138, 138, 138));
 				tv.setPadding(10, 10, 10, 10);
 				tv.setTextSize(20);
@@ -1531,7 +1554,7 @@ public class VideoActivityV2 extends Activity {
 
 			switch (msg.what) {
 			case ONLY_SHOW_LOCAL_VIDEO:
-				//make sure local view is first front of all;
+				// make sure local view is first front of all;
 				localSurfaceViewLy.bringToFront();
 				showOrCloseLocalSurViewOnly();
 				break;
@@ -1544,7 +1567,7 @@ public class VideoActivityV2 extends Activity {
 			case CONF_USER_DEVICE_EVENT:
 				// recordUserDevice((ConfUserDeviceInfo) msg.obj);
 				break;
-			case USER_DELETE_GROUP:
+			case USER_DELETE_GROUP: {
 				GroupUserObject ro = (GroupUserObject) msg.obj;
 				Attendee a = new Attendee(GlobalHolder.getInstance().getUser(
 						ro.getmUserId()));
@@ -1552,6 +1575,7 @@ public class VideoActivityV2 extends Activity {
 				if (mAttendeeContainer != null) {
 					mAttendeeContainer.removeAttendee(a);
 				}
+			}
 				break;
 			case GROUP_ADD_USER:
 				GroupUserObject ro1 = (GroupUserObject) msg.obj;
@@ -1561,6 +1585,22 @@ public class VideoActivityV2 extends Activity {
 				if (mAttendeeContainer != null) {
 					mAttendeeContainer.addAttendee(a1);
 				}
+				break;
+			case ATTENDEE_DEVICE_LISTENER: {
+				List<UserDeviceConfig> list = (List<UserDeviceConfig>) msg.obj;
+				for (UserDeviceConfig ud : list) {
+					Attendee a = findAttendee(ud.getUserID());
+					if (a == null) {
+						continue;
+					}
+					// Update attendee device
+					if (mAttendeeContainer != null) {
+						a.addDevice(ud);
+						mAttendeeContainer.updateEnteredAttendee(a);
+					}
+				}
+
+			}
 				break;
 			case ATTENDEE_LISTENER:
 				if (msg.arg1 == 1) {
@@ -1601,7 +1641,7 @@ public class VideoActivityV2 extends Activity {
 			case REQUEST_ENTER_CONF_RESPONSE:
 				JNIResponse recr = (JNIResponse) msg.obj;
 				if (recr.getResult() == JNIResponse.Result.SUCCESS) {
-					//set enter flag to true
+					// set enter flag to true
 					inFlag = true;
 				} else if (recr.getResult() == RequestEnterConfResponse.Result.TIME_OUT) {
 					Toast.makeText(mContext,

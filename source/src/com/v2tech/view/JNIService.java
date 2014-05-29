@@ -731,13 +731,13 @@ public class JNIService extends Service {
 
 		@Override
 		public void OnRemoteUserVideoDevice(String szXmlData) {
-			if (szXmlData == null) {
-				V2Log.e(" No avaiable user device configuration");
-				return;
-			}
-			Message.obtain(mCallbackHandler,
-					JNI_REMOTE_USER_DEVICE_INFO_NOTIFICATION, szXmlData)
-					.sendToTarget();
+//			if (szXmlData == null) {
+//				V2Log.e(" No avaiable user device configuration");
+//				return;
+//			}
+//			Message.obtain(mCallbackHandler,
+//					JNI_REMOTE_USER_DEVICE_INFO_NOTIFICATION, szXmlData)
+//					.sendToTarget();
 		}
 
 		@Override
