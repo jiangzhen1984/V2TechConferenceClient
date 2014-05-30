@@ -28,13 +28,13 @@ public class BitmapUtil {
 		Bitmap avatar = null;
 		
 		if (GlobalConfig.GLOBAL_DPI == DisplayMetrics.DENSITY_HIGH) {
-			avatar = Bitmap.createScaledBitmap(tmep, 60, 60, true);
+			avatar = Bitmap.createScaledBitmap(tmep, 70, 70, true);
 		} else if (GlobalConfig.GLOBAL_DPI == DisplayMetrics.DENSITY_XHIGH) {
-			avatar = Bitmap.createScaledBitmap(tmep, 100, 100, true);
+			avatar = Bitmap.createScaledBitmap(tmep, 115, 115, true);
 		} else if (GlobalConfig.GLOBAL_DPI == DisplayMetrics.DENSITY_XXHIGH) {
-			avatar = Bitmap.createScaledBitmap(tmep, 100, 100, true);
+			avatar = Bitmap.createScaledBitmap(tmep, 115, 115, true);
 		} else {
-			avatar = Bitmap.createScaledBitmap(tmep, 60, 60, true);
+			avatar = Bitmap.createScaledBitmap(tmep, 70, 70, true);
 		}
 		tmep.recycle();
 		V2Log.d("decode result: width " + avatar.getWidth() + "  height:"

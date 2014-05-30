@@ -27,4 +27,6 @@
      
      <color name="video_attendee_chair_man_name_color">#207448</color>
      <color name="video_attendee_name_color">#444444</color>
+     
+     <color name="login_activity_login_box_text_color">#acacac</color>
 </resources>

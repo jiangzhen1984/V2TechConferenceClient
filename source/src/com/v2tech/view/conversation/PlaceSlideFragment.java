@@ -95,10 +95,6 @@ public class PlaceSlideFragment extends Fragment {
 	@Override
 	public void onPause() {
 		super.onPause();
-		if (rlContainer.getChildCount() > 0) {
-			((TouchImageView) rlContainer.getChildAt(rlContainer
-					.getChildCount() - 1)).resetZoom();
-		}
 	}
 
 	@Override
@@ -119,6 +115,14 @@ public class PlaceSlideFragment extends Fragment {
 			vim.recycle();
 		}
 		rlContainer.removeAllViews();
+	}
+
+	@Override
+	public void setUserVisibleHint(boolean isVisibleToUser) {
+		super.setUserVisibleHint(isVisibleToUser);
+		if (!isVisibleToUser && rlContainer != null && rlContainer.getChildCount() > 0)
+			((TouchImageView) rlContainer.getChildAt(rlContainer
+					.getChildCount() - 1)).resetZoom();
 	}
 
 	@Override

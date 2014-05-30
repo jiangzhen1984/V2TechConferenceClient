@@ -27,6 +27,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.text.TextUtils.TruncateAt;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -1484,6 +1485,8 @@ public class VideoActivityV2 extends Activity {
 						RelativeLayout.LayoutParams.MATCH_PARENT));
 				TextView tv = new TextView(mContext);
 				tv.setText(at.getAttName());
+				tv.setMaxWidth(200);
+				tv.setEllipsize(TruncateAt.END);
 				tv.setBackgroundColor(Color.rgb(138, 138, 138));
 				tv.setPadding(10, 10, 10, 10);
 				tv.setTextSize(20);

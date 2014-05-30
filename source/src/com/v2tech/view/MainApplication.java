@@ -93,6 +93,7 @@ public class MainApplication extends Application {
 				new Intent(getApplicationContext(), JNIService.class));
 
 		String path = StorageUtil.getAbsoluteSdcardPath();
+		path = path +"/.v2tech/";
 		new ConfigRequest().setExtStoragePath(path);
 		File pa = new File(path + "/Users");
 		if (!pa.exists()) {
@@ -189,7 +190,6 @@ public class MainApplication extends Application {
 
 		@Override
 		public void onActivityResumed(Activity activity) {
-
 		}
 
 		@Override
@@ -209,7 +209,7 @@ public class MainApplication extends Application {
 				refCount++;
 				if (refCount == 1) {
 					Notificator.udpateApplicationNotification(
-							getApplicationContext(), false);
+							getApplicationContext(), false, null);
 				}
 			}
 		}
@@ -224,7 +224,7 @@ public class MainApplication extends Application {
 				refCount--;
 				if (refCount == 0) {
 					Notificator.udpateApplicationNotification(
-							getApplicationContext(), true);
+							getApplicationContext(), true, activity.getIntent());
 				}
 			}
 		}

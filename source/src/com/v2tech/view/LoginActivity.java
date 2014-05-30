@@ -83,17 +83,22 @@ public class LoginActivity extends Activity {
 		mContext = this;
 
 		// Set up the login form.
-		mEmail = getIntent().getStringExtra(EXTRA_EMAIL);
 		mEmailView = (EditText) findViewById(R.id.email);
-		mEmailView.setText(mEmail);
 		mEmailView.addTextChangedListener(userNameTextWAtcher);
 		mEmailView.setOnFocusChangeListener(new OnFocusChangeListener() {
 
 			@Override
 			public void onFocusChange(View arg0, boolean focus) {
 				if (focus) {
-					mEmailView.setText("");
+					if (mContext.getResources().getText(R.string.login_user_name).equals(mEmailView.getText().toString())) {
+						mEmailView.setText("");
+					}
 					mEmailView.setTextColor(Color.BLACK);
+				} else {
+					if (mEmailView.getText().toString().trim().isEmpty()) {
+						mEmailView.setText(R.string.login_user_name);
+						mEmailView.setTextColor(mContext.getResources().getColor(R.color.login_activity_login_box_text_color));
+					}
 				}
 			}
 		});
@@ -104,7 +109,6 @@ public class LoginActivity extends Activity {
 			@Override
 			public void onFocusChange(View arg0, boolean focus) {
 				if (focus) {
-					mPasswordView.setText("");
 					mPasswordView.setTextColor(Color.BLACK);
 				}
 			}
@@ -149,7 +153,9 @@ public class LoginActivity extends Activity {
 	private void init() {
 		String user = SPUtil.getConfigStrValue(this, "user");
 		String password = SPUtil.getConfigStrValue(this, "passwd");
-		mEmailView.setText(user);
+		if (user != null && !user.trim().isEmpty()) {
+			mEmailView.setText(user);
+		}
 		mPasswordView.setText(password);
 	}
 

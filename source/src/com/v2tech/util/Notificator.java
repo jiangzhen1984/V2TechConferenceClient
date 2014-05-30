@@ -86,7 +86,7 @@ public class Notificator {
 	}
 
 	public static void udpateApplicationNotification(Context context,
-			boolean flag) {
+			boolean flag,Intent intent) {
 		NotificationManager mNotificationManager = (NotificationManager) context
 				.getSystemService(Context.NOTIFICATION_SERVICE);
 		if (flag) {
@@ -96,10 +96,8 @@ public class Notificator {
 					.setContentText(context.getText(R.string.status_bar_title))
 					.setAutoCancel(false);
 
-			// FIXME optimize code for decouple
 			PendingIntent notifyPendingIntent = PendingIntent.getActivities(
-					context, 0, new Intent[] { new Intent(context,
-							MainActivity.class) },
+					context, 0, new Intent[] {intent },
 					PendingIntent.FLAG_UPDATE_CURRENT);
 
 			builder.setContentIntent(notifyPendingIntent);
