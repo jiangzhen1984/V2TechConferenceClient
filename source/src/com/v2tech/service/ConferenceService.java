@@ -25,11 +25,13 @@ import com.v2tech.service.jni.RequestOpenUserVideoDeviceResponse;
 import com.v2tech.service.jni.RequestPermissionResponse;
 import com.v2tech.service.jni.RequestUpdateCameraParametersResponse;
 import com.v2tech.util.V2Log;
+import com.v2tech.vo.Attendee;
 import com.v2tech.vo.CameraConfiguration;
 import com.v2tech.vo.Conference;
 import com.v2tech.vo.ConferenceGroup;
 import com.v2tech.vo.ConferencePermission;
 import com.v2tech.vo.Group;
+import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.MixVideo;
 import com.v2tech.vo.User;
 import com.v2tech.vo.UserDeviceConfig;
@@ -74,6 +76,7 @@ public class ConferenceService extends AbstractHandler {
 	private static final int JNI_REQUEST_RELEASE_SPEAK = 6;
 	private static final int JNI_REQUEST_CREATE_CONFERENCE = 7;
 	private static final int JNI_REQUEST_QUIT_CONFERENCE = 8;
+	private static final int JNI_REQUEST_INVITE_ATTENDEES = 9;
 
 	private static final int JNI_UPDATE_CAMERA_PAR = 75;
 
@@ -191,6 +194,45 @@ public class ConferenceService extends AbstractHandler {
 			GroupRequest.getInstance().leaveGroup(
 					Group.GroupType.CONFERENCE.intValue(), conf.getId());
 		}
+	}
+
+	/**
+	 * Chair man invite extra attendee to join current conference.<br>
+	 * 
+	 * @param conf
+	 *            conference which user current joined
+	 * @param list
+	 *            additional attendee
+	 * @param caller
+	 *            caller
+	 */
+	public void inviteAttendee(Conference conf, List<User> list,
+			Registrant caller) {
+		if (list == null || conf == null || list.isEmpty()) {
+			if (caller != null) {
+				JNIResponse jniRes = new JNIResponse(
+						JNIResponse.Result.INCORRECT_PAR);
+				sendResult(caller, jniRes);
+			}
+			return;
+		}
+		StringBuffer attendees = new StringBuffer();
+		attendees.append("<userlist> ");
+		for (User at : list) {
+			attendees.append(" <user id='" + at.getmUserId() + " ' />");
+		}
+		attendees.append("</userlist>");
+		GroupRequest.getInstance().inviteJoinGroup(
+				GroupType.CONFERENCE.intValue(), conf.getConferenceConfigXml(),
+				attendees.toString(), "");
+
+		// send response to caller because invite attendee no call back from JNI
+		JNIResponse jniRes = new JNIResponse(JNIResponse.Result.SUCCESS);
+		Message res = Message
+				.obtain(this, JNI_REQUEST_INVITE_ATTENDEES, jniRes);
+		// send delayed message for that make sure send response after JNI
+		// request
+		this.sendMessageDelayed(res, 300);
 	}
 
 	/**
@@ -472,6 +514,11 @@ public class ConferenceService extends AbstractHandler {
 		@Override
 		public void OnEnterConfCallback(long nConfID, long nTime,
 				String szConfData, int nJoinResult) {
+			JNIResponse jniConfCreateRes = new RequestConfCreateResponse(
+					nConfID, 0, RequestConfCreateResponse.Result.SUCCESS);
+			Message.obtain(mCallbackHandler, JNI_REQUEST_CREATE_CONFERENCE,
+					jniConfCreateRes).sendToTarget();
+
 			JNIResponse jniRes = new RequestEnterConfResponse(
 					nConfID,
 					nTime,
@@ -631,12 +678,7 @@ public class ConferenceService extends AbstractHandler {
 
 				// if doesn't find matched group, mean this is new group
 				if (cache == null) {
-					JNIResponse jniRes = new RequestConfCreateResponse(
-							nGroupID, 0,
-							RequestConfCreateResponse.Result.SUCCESS);
-					Message.obtain(mCallbackHandler,
-							JNI_REQUEST_CREATE_CONFERENCE, jniRes)
-							.sendToTarget();
+
 				} else {
 					int pos = sXml.indexOf(" syncdesktop='");
 					int end = sXml.indexOf("'", pos + 14);
@@ -709,7 +751,8 @@ public class ConferenceService extends AbstractHandler {
 				return;
 			}
 			notifyListener(1,
-					new MixVideo(sMediaId, MixVideo.LayoutType.fromInt(layout), width, height));
+					new MixVideo(sMediaId, MixVideo.LayoutType.fromInt(layout),
+							width, height));
 		}
 
 		@Override

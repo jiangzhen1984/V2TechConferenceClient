@@ -27,7 +27,7 @@
                 android:background="#ffffff"
                 android:paddingLeft="16dp"
                 android:paddingRight="16dp"
-                android:src="@drawable/video_menu_button_selector" />
+                android:src="@drawable/video_menu_button" />
         </RelativeLayout>
 
         <RelativeLayout
@@ -45,6 +45,7 @@
                 android:layout_centerVertical="true"
                 android:layout_marginRight="20dp"
                 android:layout_toLeftOf="@+id/speaker_iv"
+                android:padding="10dp"
                 android:src="@drawable/video_setting_button_selector" />
 
             <ImageView
@@ -54,6 +55,7 @@
                 android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"
                 android:layout_marginRight="20dp"
+                android:padding="10dp"
                 android:src="@drawable/video_logout_button_selector" />
 
             <ImageView
@@ -63,6 +65,7 @@
                 android:layout_centerVertical="true"
                 android:layout_marginRight="20dp"
                 android:layout_toLeftOf="@+id/in_meeting_log_out_iv"
+                android:padding="10dp"
                 android:src="@drawable/mute_button" />
 
             <TextView
@@ -79,7 +82,8 @@
                 android:gravity="center"
                 android:singleLine="true"
                 android:text=" "
-                android:textSize="23sp" />
+                android:textColor="@color/title_color"
+                android:textSize="@dimen/common_item_text_size_20" />
         </RelativeLayout>
 
         <LinearLayout
@@ -102,6 +106,15 @@
             android:background="#ffffff"
             android:orientation="vertical"
             android:paddingTop="40dp" >
+
+            <ImageView
+                android:id="@+id/in_meeting_menu_show_invition_attendees_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:paddingBottom="10dp"
+                android:paddingTop="10dp"
+                android:src="@drawable/video_menu_invite_attendee_button" />
 
             <ImageView
                 android:id="@+id/in_meeting_menu_show_attendees_button"
@@ -154,7 +167,7 @@
         <FrameLayout
             android:id="@+id/local_surface_view_ly"
             android:layout_width="320dp"
-            android:layout_height="180dp"
+            android:layout_height="160dp"
             android:layout_alignBottom="@+id/in_metting_video_main"
             android:layout_alignParentRight="true"
             android:layout_marginBottom="10dp"

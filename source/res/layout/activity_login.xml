@@ -115,12 +115,12 @@
                         android:ems="10"
                         android:focusable="true"
                         android:focusableInTouchMode="true"
-                        android:inputType="textPassword"
+                        android:inputType="text"
                         android:maxLines="1"
                         android:minHeight="30dp"
                         android:padding="@dimen/login_box_padding"
                         android:singleLine="true"
-                        android:text=""
+                        android:text="@string/prompt_password"
                         android:textColor="@color/login_activity_login_box_text_color"
                         android:textSize="@dimen/login_box_text_size" />
                 </LinearLayout>

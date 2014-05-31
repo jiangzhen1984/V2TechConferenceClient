@@ -89,15 +89,21 @@ public class XmlParser {
 			} else if (type == GroupType.CONFERENCE.intValue()) {
 				NodeList conferenceList = doc.getElementsByTagName("conf");
 				Element conferenceElement;
-
 				for (int i = 0; i < conferenceList.getLength(); i++) {
 					conferenceElement = (Element) conferenceList.item(i);
+					String chairManStr = conferenceElement
+							.getAttribute("chairman");
+					long cid = 0;
+					if (chairManStr != null && !chairManStr.isEmpty()) {
+						cid = Long.parseLong(chairManStr);
+					}
+
 					list.add(new ConferenceGroup(Long
 							.parseLong(conferenceElement.getAttribute("id")),
 							GroupType.fromInt(type), conferenceElement
 									.getAttribute("subject"), conferenceElement
 									.getAttribute("createuserid"),
-							conferenceElement.getAttribute("starttime")));
+							conferenceElement.getAttribute("starttime"), cid));
 				}
 			} else if (type == GroupType.CHATING.intValue()) {
 				NodeList conferenceList = doc.getElementsByTagName("crowd");
@@ -106,10 +112,10 @@ public class XmlParser {
 				for (int i = 0; i < conferenceList.getLength(); i++) {
 					conferenceElement = (Element) conferenceList.item(i);
 					list.add(new CrowdGroup(Long.parseLong(conferenceElement
-							.getAttribute("id")),
-							conferenceElement.getAttribute("name"), Long
-									.parseLong(conferenceElement
-											.getAttribute("creatoruserid"))));
+							.getAttribute("id")), conferenceElement
+							.getAttribute("name"), Long
+							.parseLong(conferenceElement
+									.getAttribute("creatoruserid"))));
 				}
 			}
 		} catch (ParserConfigurationException e) {
@@ -267,7 +273,7 @@ public class XmlParser {
 			nodeList = doc.getElementsByTagName("TRectangleMeta");
 			if (nodeList == null || nodeList.getLength() <= 0) {
 				nodeList = doc.getElementsByTagName("TEllipseMeta");
-				isRect =  false;
+				isRect = false;
 			}
 
 			for (int i = 0; i < nodeList.getLength(); i++) {
@@ -286,9 +292,17 @@ public class XmlParser {
 						String[] str = pointsStr.split(" ");
 						if (str.length == 4) {
 							if (isRect) {
-								shape = new V2ShapeRect(Integer.parseInt(str[0]), Integer.parseInt(str[1]), Integer.parseInt(str[2]), Integer.parseInt(str[3]));
+								shape = new V2ShapeRect(
+										Integer.parseInt(str[0]),
+										Integer.parseInt(str[1]),
+										Integer.parseInt(str[2]),
+										Integer.parseInt(str[3]));
 							} else {
-								shape = new V2ShapeEllipse(Integer.parseInt(str[0]), Integer.parseInt(str[1]), Integer.parseInt(str[2]), Integer.parseInt(str[3]));
+								shape = new V2ShapeEllipse(
+										Integer.parseInt(str[0]),
+										Integer.parseInt(str[1]),
+										Integer.parseInt(str[2]),
+										Integer.parseInt(str[3]));
 							}
 						} else {
 							V2Log.e("Incorrect data ");
@@ -330,10 +344,10 @@ public class XmlParser {
 		return metaList;
 
 	}
-	
-	
+
 	/**
 	 * FIXME optimze code
+	 * 
 	 * @param xml
 	 * @return
 	 */
@@ -358,7 +372,6 @@ public class XmlParser {
 			for (int i = 0; i < nodeList.getLength(); i++) {
 				Element e = (Element) nodeList.item(i);
 
-				
 				meta = new V2ShapeMeta(e.getAttribute("ID"));
 
 				V2ShapePoint[] points = null;
@@ -397,7 +410,7 @@ public class XmlParser {
 			nodeList = doc.getElementsByTagName("TRectangleMeta");
 			if (nodeList == null || nodeList.getLength() <= 0) {
 				nodeList = doc.getElementsByTagName("TEllipseMeta");
-				isRect =  false;
+				isRect = false;
 			}
 
 			for (int i = 0; i < nodeList.getLength(); i++) {
@@ -419,9 +432,17 @@ public class XmlParser {
 						String[] str = pointsStr.split(" ");
 						if (str.length == 4) {
 							if (isRect) {
-								shape = new V2ShapeRect(Integer.parseInt(str[0]), Integer.parseInt(str[1]), Integer.parseInt(str[2]), Integer.parseInt(str[3]));
+								shape = new V2ShapeRect(
+										Integer.parseInt(str[0]),
+										Integer.parseInt(str[1]),
+										Integer.parseInt(str[2]),
+										Integer.parseInt(str[3]));
 							} else {
-								shape = new V2ShapeEllipse(Integer.parseInt(str[0]), Integer.parseInt(str[1]), Integer.parseInt(str[2]), Integer.parseInt(str[3]));
+								shape = new V2ShapeEllipse(
+										Integer.parseInt(str[0]),
+										Integer.parseInt(str[1]),
+										Integer.parseInt(str[2]),
+										Integer.parseInt(str[3]));
 							}
 						} else {
 							V2Log.e("Incorrect data ");
@@ -456,7 +477,6 @@ public class XmlParser {
 			}
 		}
 		return null;
-
 
 	}
 }

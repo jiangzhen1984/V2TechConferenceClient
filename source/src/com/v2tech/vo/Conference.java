@@ -18,31 +18,35 @@ public class Conference {
 	private List<User> invitedList;
 	private Date d;
 	private long creator;
+	private long chairman;
 
-	
 	public Conference(long id) {
-		this.id = id;
+		this(id, 0, null, null, null, null);
 	}
-	
+
 	public Conference(long id, long creator) {
-		this.id = id;
-		this.creator = creator;
+		this(id, creator, null, null, null, null);
 	}
 
 	public Conference(String name, String startTime, String endTime,
 			List<User> invitedList) {
-		this.name = name;
+		this(0, 0, name, null, null, invitedList);
 		this.startTime = startTime;
-		this.invitedList = invitedList;
 	}
-	
+
 	public Conference(String name, Date startTime, Date endTime,
 			List<User> invitedList) {
+		this(0, 0, name, startTime, endTime, invitedList);
+	}
+	
+	public Conference(long id, long creator, String name, Date startTime, Date endTime,
+			List<User> invitedList) {
+		this.id = id;
+		this.creator = creator;
 		this.name = name;
 		this.d = startTime;
 		this.invitedList = invitedList;
 	}
-
 
 	@Override
 	public int hashCode() {
@@ -65,18 +69,30 @@ public class Conference {
 			return false;
 		return true;
 	}
-	
-	
+
 	public String getName() {
 		return this.name;
 	}
-	
+
 	public String getStartTimeStr() {
+		if (this.startTime == null) {
+			if (this.d != null) {
+				DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm",
+						Locale.CHINA);
+				this.startTime = df.format(d);
+			}
+		}
 		return this.startTime;
 	}
-	
-	
-	
+
+	public long getChairman() {
+		return chairman;
+	}
+
+	public void setChairman(long chairman) {
+		this.chairman = chairman;
+	}
+
 	public long getCreator() {
 		return creator;
 	}
@@ -86,8 +102,10 @@ public class Conference {
 	}
 
 	public Date getDate() {
-		if (d == null && this.startTime != null && this.startTime.trim().length() <= 16) {
-			DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.CHINA);
+		if (d == null && this.startTime != null
+				&& this.startTime.trim().length() <= 16) {
+			DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm",
+					Locale.CHINA);
 			try {
 				d = df.parse(this.startTime);
 			} catch (ParseException e) {
@@ -95,12 +113,12 @@ public class Conference {
 			}
 		}
 		if (d == null) {
-			return  new Date();
+			return new Date();
 		} else {
 			return d;
 		}
 	}
-	
+
 	public long getId() {
 		return this.id;
 	}
@@ -114,18 +132,22 @@ public class Conference {
 	 * @return
 	 */
 	public String getConferenceConfigXml() {
-		User  loggedUser = GlobalHolder.getInstance().getCurrentUser();
+		User loggedUser = GlobalHolder.getInstance().getCurrentUser();
 		StringBuilder sb = new StringBuilder();
 		sb.append(
 				"<conf canaudio=\"1\" candataop=\"1\" canvideo=\"1\" conftype=\"0\" haskey=\"0\" ")
 				.append(" id=\"0\" key=\"\" layout=\"1\" lockchat=\"0\" lockconf=\"0\" lockfiletrans=\"0\" mode=\"2\" pollingvideo=\"0\" ")
 				.append(" syncdesktop=\"0\" syncdocument=\"1\" syncvideo=\"0\" ")
-				.append("subject=\" ").append(this.name).append("\" ")
+				.append("subject=\"")
+				.append(this.name)
+				.append("\" ")
 				.append("chairuserid=\"")
 				.append(GlobalHolder.getInstance().getCurrentUserId())
-				.append("\" ").append("chairnickname=\"")
-				.append(loggedUser == null? "" : loggedUser.getName())
-				.append("\"  starttime=\""+getDate().getTime()/1000+"\" >").append("</conf>");
+				.append("\" ")
+				.append("chairnickname=\"")
+				.append(loggedUser == null ? "" : loggedUser.getName())
+				.append("\"  starttime=\"" + getDate().getTime() / 1000
+						+ "\" >").append("</conf>");
 		return sb.toString();
 
 	}
@@ -140,6 +162,52 @@ public class Conference {
 
 		sb.append("</xml>");
 		return sb.toString();
+	}
+
+	/**
+	 * <conf canoper='0' chairuserid='17' createuserid='17' endtime='0'
+	 * id='514015216076' inviteuser='1' layout='1' starttime='1401521340'
+	 * subject=' 斤斤计较斤斤计较' syncdesktop='0' voiceactivation='0'/>
+	 * 
+	 * @return
+	 */
+	public static Conference formConferenceConfigXml(String str) {
+		User loggedUser = GlobalHolder.getInstance().getCurrentUser();
+		String[] ins = { "chairuserid", "createuserid", "id", "subject",
+				"syncdesktop" };
+		long id =0 ;
+		long createor = 0;
+		long chairman = 0;
+		int start = str.indexOf("chairuserid='");
+		if (start != -1) {
+			int end = str.indexOf("'", start + 13);
+			if (end != -1) {
+				chairman = Long.valueOf(str.substring(start+13, end));
+			}
+		}
+		
+		start = str.indexOf("createuserid='");
+		if (start != -1) {
+			int end = str.indexOf("'", start + 14);
+			if (end != -1) {
+				createor = Long.valueOf(str.substring(start+14, end));
+			}
+		}
+		
+		start = str.indexOf("id='");
+		if (start != -1) {
+			int end = str.indexOf("'", start + 4);
+			if (end != -1) {
+				id = Long.valueOf(str.substring(start+4, end));
+			}
+		}
+		
+		Conference conf = new Conference(id);
+		conf.setChairman(chairman);
+		conf.setCreator(createor);
+
+		return conf;
+
 	}
 
 }

@@ -14,20 +14,25 @@ import android.text.InputType;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.Menu;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnFocusChangeListener;
+import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 
 import com.V2.jni.ConfigRequest;
@@ -90,17 +95,35 @@ public class LoginActivity extends Activity {
 			@Override
 			public void onFocusChange(View arg0, boolean focus) {
 				if (focus) {
-					if (mContext.getResources().getText(R.string.login_user_name).equals(mEmailView.getText().toString())) {
+					if (mContext.getResources()
+							.getText(R.string.login_user_name)
+							.equals(mEmailView.getText().toString())) {
 						mEmailView.setText("");
 					}
 					mEmailView.setTextColor(Color.BLACK);
 				} else {
 					if (mEmailView.getText().toString().trim().isEmpty()) {
 						mEmailView.setText(R.string.login_user_name);
-						mEmailView.setTextColor(mContext.getResources().getColor(R.color.login_activity_login_box_text_color));
+						mEmailView
+								.setTextColor(mContext
+										.getResources()
+										.getColor(
+												R.color.login_activity_login_box_text_color));
 					}
 				}
 			}
+		});
+
+		mEmailView.setOnEditorActionListener(new OnEditorActionListener() {
+
+			@Override
+			public boolean onEditorAction(TextView tv, int actionId,
+					KeyEvent event) {
+				mPasswordView.setInputType(InputType.TYPE_CLASS_TEXT
+						| InputType.TYPE_TEXT_VARIATION_PASSWORD);
+				return false;
+			}
+
 		});
 
 		mPasswordView = (EditText) findViewById(R.id.password);
@@ -110,8 +133,61 @@ public class LoginActivity extends Activity {
 			public void onFocusChange(View arg0, boolean focus) {
 				if (focus) {
 					mPasswordView.setTextColor(Color.BLACK);
+					if (mContext.getResources()
+							.getText(R.string.prompt_password)
+							.equals(mPasswordView.getText().toString())) {
+						mPasswordView.setText("");
+					}
+				} else {
+					if (mPasswordView.getText().toString().trim().isEmpty()) {
+						mPasswordView.setText(R.string.prompt_password);
+						mPasswordView
+								.setTextColor(mContext
+										.getResources()
+										.getColor(
+												R.color.login_activity_login_box_text_color));
+						mPasswordView.setInputType(InputType.TYPE_CLASS_TEXT);
+					} else {
+						mPasswordView.setInputType(InputType.TYPE_CLASS_TEXT
+								| InputType.TYPE_TEXT_VARIATION_PASSWORD);
+					}
 				}
 			}
+		});
+
+		mPasswordView.setOnTouchListener(new OnTouchListener() {
+
+			@Override
+			public boolean onTouch(View view, MotionEvent event) {
+				InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+				imm.showSoftInput(mPasswordView, InputMethodManager.SHOW_FORCED);
+				EditText et = ((EditText) view);
+				if (event.getAction() == MotionEvent.ACTION_DOWN) {
+					et.setInputType(InputType.TYPE_CLASS_TEXT
+							| InputType.TYPE_TEXT_VARIATION_PASSWORD);
+					et.requestFocus();
+				}
+				return true;
+			}
+
+		});
+
+		mPasswordView.setOnEditorActionListener(new OnEditorActionListener() {
+
+			@Override
+			public boolean onEditorAction(TextView v, int actionId,
+					KeyEvent event) {
+				// T
+				if (actionId == EditorInfo.IME_ACTION_DONE) {
+					InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+					imm.hideSoftInputFromWindow(mEmailView.getWindowToken(), 0);
+					imm.hideSoftInputFromWindow(mPasswordView.getWindowToken(),
+							0);
+					attemptLogin();
+				}
+				return false;
+			}
+
 		});
 
 		mLoginStatusMessageView = (TextView) findViewById(R.id.login_status_message);
@@ -156,7 +232,9 @@ public class LoginActivity extends Activity {
 		if (user != null && !user.trim().isEmpty()) {
 			mEmailView.setText(user);
 		}
-		mPasswordView.setText(password);
+		if (password != null && !password.trim().isEmpty()) {
+			mPasswordView.setText(password);
+		}
 	}
 
 	@Override
@@ -167,15 +245,17 @@ public class LoginActivity extends Activity {
 				this, R.animator.login_container_down_in);
 		tabBlockHolderAnimation.setDuration(1000);
 		tabBlockHolderAnimation.setFillAfter(true);
-		//tabBlockHolderAnimation.setInterpolator(new BounceInterpolator());
+		// tabBlockHolderAnimation.setInterpolator(new BounceInterpolator());
 		loginView.startAnimation(tabBlockHolderAnimation);
 	}
 
 	private TextWatcher userNameTextWAtcher = new TextWatcher() {
 
 		@Override
-		public void afterTextChanged(Editable arg0) {
-
+		public void afterTextChanged(Editable et) {
+			if (!et.toString().trim().isEmpty()) {
+				mEmailView.setError(null);
+			}
 		}
 
 		@Override
@@ -324,6 +404,22 @@ public class LoginActivity extends Activity {
 		mEmail = mEmailView.getText().toString();
 		mPassword = mPasswordView.getText().toString();
 
+		//Check user name is initial user name or not.
+		if (mContext.getResources().getText(R.string.login_user_name)
+				.equals(mEmail)) {
+			mEmailView.setError(getString(R.string.error_field_required));
+			mEmailView.requestFocus();
+			return;
+		}
+
+		// Check password is initial password
+		if (mContext.getResources().getText(R.string.prompt_password)
+				.equals(mPassword)) {
+			mPasswordView.setError(getString(R.string.error_field_required));
+			mPasswordView.requestFocus();
+			return;
+		}
+
 		boolean cancel = false;
 		View focusView = null;
 
@@ -409,7 +505,7 @@ public class LoginActivity extends Activity {
 
 		mProgressDialog = dialog;
 		dialog.show();
-		((AnimationDrawable)iv.getDrawable()).start();
+		((AnimationDrawable) iv.getDrawable()).start();
 
 	}
 

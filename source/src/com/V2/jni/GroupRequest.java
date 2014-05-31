@@ -115,6 +115,14 @@ public class GroupRequest {
 			long nUserID, String sReason);
 
 	/**
+	 * Add user to group
+	 * @param groupType 4: conference 
+	 * @param nGroupID
+	 * @param sXml
+	 */
+	public native void addGroupUserInfo(int groupType, long nGroupID, String sXml);
+	
+	/**
 	 * This is unsolicited callback. This function will be call after log in
 	 * 
 	 * @param groupType

@@ -5,6 +5,7 @@ package com.v2tech.vo;
 public class ConferenceGroup extends Group {
 	
 	
+	private long chairManUId;
 	private boolean isSyn;
 
 	public ConferenceGroup(long mGId, String mName) {
@@ -12,8 +13,9 @@ public class ConferenceGroup extends Group {
 	}
 
 	public ConferenceGroup(long mGId, GroupType mGroupType, String mName,
-			String mOwner, String createDate) {
+			String mOwner, String createDate, long chairMan) {
 		super(mGId, GroupType.CONFERENCE, mName, mOwner, createDate);
+		this.chairManUId = chairMan;
 	}
 
 	public ConferenceGroup(long mGId, GroupType mGroupType, String mName) {
@@ -23,6 +25,14 @@ public class ConferenceGroup extends Group {
 	
 	
 	
+	public long getChairManUId() {
+		return chairManUId;
+	}
+
+	public void setChairManUId(long chairManUId) {
+		this.chairManUId = chairManUId;
+	}
+
 	public boolean isSyn() {
 		return isSyn;
 	}
@@ -79,7 +89,7 @@ public class ConferenceGroup extends Group {
 			}
 			
 			Group g = new ConferenceGroup(Long.parseLong(strId), GroupType.CONFERENCE,
-					name, owner, startTimeStr);
+					name, owner, startTimeStr, 0);
 			return g;
 	}
 
