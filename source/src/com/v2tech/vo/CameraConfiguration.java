@@ -10,7 +10,7 @@ public class CameraConfiguration {
 
 	public static final int DEFAULT_CAMERA_INDEX = 1;
 
-	public static final int DEFAULT_FRAME_RATE = 15;
+	public static final int DEFAULT_FRAME_RATE = 24;
 
 	public static final int DEFAULT_BIT_RATE = 256000;
 

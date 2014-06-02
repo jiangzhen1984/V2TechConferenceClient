@@ -123,7 +123,7 @@ public class VideoDocLayout extends LinearLayout {
 
 	private void showPopUpWindow(View anchor) {
 		if (mDocs.isEmpty()) {
-			//TODO prompt doc list is empty
+			// TODO prompt doc list is empty
 			return;
 		}
 		if (mDocListWindow == null) {
@@ -184,7 +184,7 @@ public class VideoDocLayout extends LinearLayout {
 
 			mDocListWindow.showAtLocation(anchor, Gravity.NO_GRAVITY, l[0],
 					l[1] - mDocListWindow.getHeight());
-			
+
 			moveToShowedTab();
 		}
 	}
@@ -385,6 +385,11 @@ public class VideoDocLayout extends LinearLayout {
 	 * call this function to inform interface
 	 */
 	public void requestFloatLayout() {
+		// Ignore same state
+		if ("float".equals(mRequestFixedPosButton.getTag())) {
+			return;
+		}
+
 		if (this.listener != null) {
 			this.listener.requestDocViewFloatLayout(rootView);
 		}
@@ -399,6 +404,10 @@ public class VideoDocLayout extends LinearLayout {
 	public void requestRestore() {
 		if (this.listener != null) {
 			this.listener.requestDocViewRestore(rootView);
+		}
+		// Ignore same state
+		if (mRequestUpdateSizeButton.equals("fullscreen")) {
+			return;
 		}
 		// restore image
 		mRequestUpdateSizeButton.setTag("fullscreen");

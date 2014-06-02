@@ -125,6 +125,16 @@ public class ConversationView extends Activity {
 		mMessagesContainer = (LinearLayout) findViewById(R.id.conversation_message_list);
 
 		mScrollView = (ItemScrollView) findViewById(R.id.conversation_message_list_scroll_view);
+		mScrollView.setOnTouchListener(new OnTouchListener() {
+
+			@Override
+			public boolean onTouch(View arg0, MotionEvent arg1) {
+				InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+				imm.hideSoftInputFromWindow(mMessageET.getWindowToken(), InputMethodManager.RESULT_UNCHANGED_SHOWN);
+				return false;
+			}
+			
+		});
 		mScrollView.setScrollListener(scrollListener);
 
 		mSendButtonTV = (TextView) findViewById(R.id.message_send);
@@ -267,23 +277,29 @@ public class ConversationView extends Activity {
 	@Override
 	public void onBackPressed() {
 		super.onBackPressed();
-		V2Log.i("-----User pressed back key");
 	}
 
 	@Override
 	protected void onStop() {
 		super.onStop();
 		isStopped = true;
-		System.out.println("---------------------------------------s-");
 	}
 	
 	
+	
+	
+
+	@Override
+	public boolean onTouchEvent(MotionEvent event) {
+		InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+		imm.hideSoftInputFromWindow(mMessageET.getWindowToken(), InputMethodManager.HIDE_IMPLICIT_ONLY);
+		return super.onTouchEvent(event);
+	}
 
 	@Override
 	public void finish() {
 		super.finish();
 		this.overridePendingTransition(R.animator.nonam_scale_null, R.animator.nonam_scale_center_100_0);
-		System.out.println("----------------------------22222----------s-");
 	}
 
 	@Override
@@ -294,7 +310,6 @@ public class ConversationView extends Activity {
 		GlobalHolder.getInstance().CURRENT_CONVERSATION = null;
 		GlobalHolder.getInstance().CURRENT_ID = 0;
 		V2Log.e("conversation view exited");
-		System.out.println("--------------------------------33333-------s-");
 	}
 
 	private void scrollToBottom() {
@@ -440,8 +455,7 @@ public class ConversationView extends Activity {
 
 		Message.obtain(lh, SEND_MESSAGE, m).sendToTarget();
 		addMessageToContainer(m);
-		// make offset
-		offset++;
+		
 
 		notificateConversationUpdate(m.getText(), m.getNormalDateStr());
 
@@ -481,6 +495,9 @@ public class ConversationView extends Activity {
 	}
 
 	private void addMessageToContainer(VMessage msg) {
+		// make offset
+		offset++;
+		
 		// Add message to container
 		MessageBodyView mv = new MessageBodyView(mContext, msg, true);
 		mv.setCallback(listener);

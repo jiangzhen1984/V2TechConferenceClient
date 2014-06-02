@@ -35,7 +35,7 @@
                 android:textColor="#000000" />
 
             <com.v2tech.view.cus.VerticalSeekBar
-                android:id="@+id/verticalSeekBar1"
+                android:id="@+id/camera_setting_quality"
                 android:layout_width="wrap_content"
                 android:layout_height="fill_parent"
                 android:layout_below="@+id/textView1"
@@ -46,16 +46,16 @@
                 android:paddingLeft="10dp"
                 android:paddingRight="10dp"
                 android:paddingTop="20dp"
-                android:progress="1"
+                android:progress="0"
                 android:progressDrawable="@drawable/seek_bar_progress"
                 android:thumb="@drawable/seekbar_ball" />
 
             <RelativeLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignBottom="@+id/verticalSeekBar1"
-                android:layout_alignTop="@+id/verticalSeekBar1"
-                android:layout_toRightOf="@+id/verticalSeekBar1"
+                android:layout_alignBottom="@+id/camera_setting_quality"
+                android:layout_alignTop="@+id/camera_setting_quality"
+                android:layout_toRightOf="@+id/camera_setting_quality"
                 android:paddingBottom="10dp"
                 android:paddingTop="10dp"
                 android:paddingRight="10dp" >

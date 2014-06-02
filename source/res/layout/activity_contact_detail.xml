@@ -91,11 +91,11 @@
                     android:layout_height="0dp"
                     android:layout_gravity="top"
                     android:layout_weight=".5"
-                    android:gravity="top"
-                    android:text="TextView"
-                    android:maxWidth="@dimen/detail_detail_name_max_width"
                     android:ellipsize="end"
+                    android:gravity="top"
+                    android:maxWidth="@dimen/detail_detail_name_max_width"
                     android:singleLine="true"
+                    android:text="TextView"
                     android:textColor="@color/common_item_text_color" />
 
                 <TextView
@@ -146,7 +146,7 @@
                     android:background="@drawable/rounded_corners_of_contact_user_detail_outer"
                     android:orientation="vertical"
                     android:paddingBottom="15dp"
-                    android:visibility="gone" >
+                     >
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -236,7 +236,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="center"
-                            android:gravity="center"
+                            android:gravity="center_vertical"
                             android:orientation="horizontal"
                             android:textColor="@color/common_item_text_color" >
 
@@ -244,6 +244,7 @@
                                 android:id="@+id/radio0"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
+                                android:layout_gravity="center"
                                 android:tag="1"
                                 android:text="@string/contacts_user_detail_gender_male"
                                 android:textColor="@color/common_item_text_color" />
@@ -252,8 +253,18 @@
                                 android:id="@+id/radio1"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
+                                android:layout_gravity="center"
                                 android:tag="2"
                                 android:text="@string/contacts_user_detail_gender_female"
+                                android:textColor="@color/common_item_text_color" />
+
+                            <RadioButton
+                                android:id="@+id/radio2"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:tag="0"
+                                android:text="@string/contacts_user_detail_gender_priacy"
                                 android:textColor="@color/common_item_text_color" />
                         </RadioGroup>
                     </LinearLayout>
@@ -501,8 +512,8 @@
                     android:layout_marginLeft="15dp"
                     android:layout_marginRight="15dp"
                     android:background="@drawable/rounded_corners_of_contact_user_detail_outer"
-                    android:orientation="vertical"
-                     >
+                    android:orientation="vertical" 
+                    android:visibility="gone">
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -524,10 +535,10 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="center_vertical"
-                            android:gravity="center_vertical"
-                            android:text="TextView"
-                            android:singleLine="true"
                             android:ellipsize="end"
+                            android:gravity="center_vertical"
+                            android:singleLine="true"
+                            android:text="TextView"
                             android:textColor="@color/common_item_text_color"
                             android:textSize="@dimen/common_item_text_size" />
                     </LinearLayout>
@@ -558,11 +569,11 @@
                             android:id="@+id/contact_user_n_detail_address_tv"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:gravity="center_vertical"
-                           android:layout_gravity="center_vertical"
-                            android:text="TextView"
-                            android:singleLine="true"
+                            android:layout_gravity="center_vertical"
                             android:ellipsize="end"
+                            android:gravity="center_vertical"
+                            android:singleLine="true"
+                            android:text="TextView"
                             android:textColor="@color/common_item_text_color"
                             android:textSize="@dimen/common_item_text_size" />
                     </LinearLayout>
@@ -593,11 +604,11 @@
                             android:id="@+id/contact_user_n_detail_email_tv"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:gravity="center_vertical"
                             android:layout_gravity="center_vertical"
-                            android:text="TextView"
-                            android:singleLine="true"
                             android:ellipsize="end"
+                            android:gravity="center_vertical"
+                            android:singleLine="true"
+                            android:text="TextView"
                             android:textColor="@color/common_item_text_color"
                             android:textSize="@dimen/common_item_text_size" />
                     </LinearLayout>
@@ -627,11 +638,11 @@
                             android:id="@+id/contact_user_n_detail_cell_phone_tv"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:gravity="center_vertical"
                             android:layout_gravity="center_vertical"
-                            android:text="Cell phone"
-                            android:singleLine="true"
                             android:ellipsize="end"
+                            android:gravity="center_vertical"
+                            android:singleLine="true"
+                            android:text="Cell phone"
                             android:textColor="@color/common_item_text_color"
                             android:textSize="@dimen/common_item_text_size" />
                     </LinearLayout>
@@ -662,11 +673,11 @@
                             android:id="@+id/contact_user_n_detail_telephone_tv"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:gravity="center_vertical"
                             android:layout_gravity="center_vertical"
-                            android:text="TextView"
-                            android:singleLine="true"
                             android:ellipsize="end"
+                            android:gravity="center_vertical"
+                            android:singleLine="true"
+                            android:text="TextView"
                             android:textColor="@color/common_item_text_color"
                             android:textSize="@dimen/common_item_text_size" />
                     </LinearLayout>
@@ -697,11 +708,11 @@
                             android:id="@+id/contact_user_n_detail_fax_tv"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:gravity="center_vertical"
                             android:layout_gravity="center_vertical"
-                            android:text="TextView"
-                            android:singleLine="true"
                             android:ellipsize="end"
+                            android:gravity="center_vertical"
+                            android:singleLine="true"
+                            android:text="TextView"
                             android:textColor="@color/common_item_text_color"
                             android:textSize="@dimen/common_item_text_size" />
                     </LinearLayout>

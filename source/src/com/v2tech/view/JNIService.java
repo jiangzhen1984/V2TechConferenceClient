@@ -631,7 +631,7 @@ public class JNIService extends Service {
 						i.setAction(JNIService.JNI_BROADCAST_CONFERENCE_INVATITION);
 						i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
 						i.putExtra("gid", g.getmGId());
-						sendBroadcast(i);
+						sendStickyBroadcast(i);
 						Intent enterConference = new Intent(mContext,
 								VideoActivityV2.class);
 						enterConference.putExtra("gid", g.getmGId());

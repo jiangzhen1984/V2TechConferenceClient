@@ -199,7 +199,7 @@ public class VideoCaptureDevInfo
  // Adds the capture capabilities of the currently opened device
     private void AddDeviceInfo(VideoCaptureDevice newDevice, Camera.Parameters parameters)
     {
-        List<Size> sizes = parameters.getSupportedPreviewSizes();
+        List<Size> sizes = parameters.getSupportedVideoSizes();
         List<Integer> frameRates = parameters.getSupportedPreviewFrameRates();
         int maxFPS = 0;
         for(Integer frameRate:frameRates)

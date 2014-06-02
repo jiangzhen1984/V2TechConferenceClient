@@ -51,6 +51,8 @@ import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.PopupWindow.OnDismissListener;
 import android.widget.RelativeLayout;
+import android.widget.SeekBar;
+import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -176,6 +178,8 @@ public class VideoActivityV2 extends Activity {
 	private List<VMessage> mPendingMessageList;
 
 	private boolean inFlag;
+
+	private Toast mToast;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -359,6 +363,66 @@ public class VideoActivityV2 extends Activity {
 					@Override
 					public void onDismiss() {
 						mSettingWindow.dismiss();
+					}
+
+				});
+
+				SeekBar sbar = (SeekBar) view
+						.findViewById(R.id.camera_setting_quality);
+				sbar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
+
+					@Override
+					public void onProgressChanged(SeekBar sb, int v,
+							boolean flag) {
+
+						VideoCaptureDevInfo.VideoCaptureDevice vcd = VideoCaptureDevInfo
+								.CreateVideoCaptureDevInfo().GetDevice(
+										VideoCaptureDevInfo
+												.CreateVideoCaptureDevInfo()
+												.GetDefaultDevName());
+						if (v >= vcd.captureCapabilies.length) {
+							return;
+						}
+
+						int width = vcd.captureCapabilies[v].width;
+						int height = vcd.captureCapabilies[v].height;
+						int bitrate = 256000;
+						int fps = vcd.captureCapabilies[v].maxFPS;
+
+						// // close local camera
+						Message.obtain(
+								mVideoHandler,
+								REQUEST_OPEN_OR_CLOSE_DEVICE,
+								0,
+								0,
+								new UserDeviceConfig(GlobalHolder.getInstance()
+										.getCurrentUserId(), "", null))
+								.sendToTarget();
+						//
+
+						VideoCaptureDevInfo.CreateVideoCaptureDevInfo()
+								.SetCapParams(width, height, bitrate, fps);
+
+						mVideoHandler.postDelayed(new Runnable() {
+
+							@Override
+							public void run() {
+								showOrCloseLocalSurViewOnly();
+							}
+
+						}, 500);
+						mSettingWindow.dismiss();
+					}
+
+					@Override
+					public void onStartTrackingTouch(SeekBar arg0) {
+						// TODO Auto-generated method stub
+
+					}
+
+					@Override
+					public void onStopTrackingTouch(SeekBar arg0) {
+
 					}
 
 				});
@@ -850,8 +914,11 @@ public class VideoActivityV2 extends Activity {
 			tabBlockHolderAnimation.setDuration(500);
 			mInvitionContainer.startAnimation(tabBlockHolderAnimation);
 
-			TranslateAnimation ta = new TranslateAnimation(Animation.RELATIVE_TO_SELF, 1.0f, Animation.RELATIVE_TO_SELF, 0.0f,
-	                Animation.RELATIVE_TO_SELF, 0.0f, Animation.RELATIVE_TO_SELF, 0f);
+			TranslateAnimation ta = new TranslateAnimation(
+					Animation.RELATIVE_TO_SELF, 1.0f,
+					Animation.RELATIVE_TO_SELF, 0.0f,
+					Animation.RELATIVE_TO_SELF, 0.0f,
+					Animation.RELATIVE_TO_SELF, 0f);
 			ta.setDuration(400);
 			mVideoLayout.startAnimation(ta);
 			mVideoLayout.setVisibility(View.VISIBLE);
@@ -876,8 +943,10 @@ public class VideoActivityV2 extends Activity {
 			tabBlockHolderAnimation.setDuration(500);
 			mInvitionContainer.startAnimation(tabBlockHolderAnimation);
 
-			TranslateAnimation ta = new TranslateAnimation(Animation.RELATIVE_TO_SELF, 0.0f, Animation.RELATIVE_TO_SELF, 1f,
-	                Animation.RELATIVE_TO_SELF, 0.0f, Animation.RELATIVE_TO_SELF, 0f);
+			TranslateAnimation ta = new TranslateAnimation(
+					Animation.RELATIVE_TO_SELF, 0.0f,
+					Animation.RELATIVE_TO_SELF, 1f, Animation.RELATIVE_TO_SELF,
+					0.0f, Animation.RELATIVE_TO_SELF, 0f);
 			ta.setDuration(400);
 			mVideoLayout.startAnimation(ta);
 			mVideoLayout.setVisibility(View.GONE);
@@ -1056,6 +1125,9 @@ public class VideoActivityV2 extends Activity {
 			}
 			index++;
 		}
+
+		// make sure local camera is first of all
+		localSurfaceViewLy.bringToFront();
 	}
 
 	@Override
@@ -1286,8 +1358,17 @@ public class VideoActivityV2 extends Activity {
 		if (mAttendeeContainer != null) {
 			mAttendeeContainer.updateEnteredAttendee(a);
 		}
-		Toast.makeText(mContext, user.getName() + "进入会议室! ", Toast.LENGTH_SHORT)
-				.show();
+
+		showToastNotification(user.getName()
+				+ mContext.getText(R.string.conf_notification_joined_meeting));
+	}
+
+	private void showToastNotification(String text) {
+		if (mToast != null) {
+			mToast.cancel();
+		}
+		mToast = Toast.makeText(mContext, text, Toast.LENGTH_SHORT);
+		mToast.show();
 	}
 
 	private void requestEnterConf() {
@@ -1306,8 +1387,6 @@ public class VideoActivityV2 extends Activity {
 	 * @param user
 	 */
 	private void doHandleUserExited(User user) {
-		Toast.makeText(mContext, user.getName() + "退出会议室! ", Toast.LENGTH_SHORT)
-				.show();
 		Attendee a = getAttendee(user.getmUserId());
 
 		if (a != null) {
@@ -1330,6 +1409,8 @@ public class VideoActivityV2 extends Activity {
 
 		// Clean user device
 		GlobalHolder.getInstance().removeAttendeeDeviceCache(user.getmUserId());
+		showToastNotification(user.getName()
+				+ mContext.getText(R.string.conf_notification_quited_meeting));
 
 	}
 
@@ -1433,6 +1514,46 @@ public class VideoActivityV2 extends Activity {
 		public void requestChattingViewFloatLayout(View v) {
 			calculateLayoutParma(v, 2);
 			adjustLayout();
+		}
+		
+		
+
+		@Override
+		public void OnAttendeeDragged(Attendee at, UserDeviceConfig udc, int x,
+				int y) {
+			if (at == null || udc == null) {
+				return;
+			}
+			if (at.getAttId() == GlobalHolder.getInstance().getCurrentUserId()
+					|| !at.isJoined()) {
+				return;
+			}
+			
+			for (SurfaceViewW sw : mCurrentShowedSV) {
+				if (sw.udc.getDeviceID().equals(udc.getDeviceID())) {
+					return;
+				}
+			}
+
+			for (SurfaceViewW sw : mCurrentShowedSV) {
+				int[] lo = new int[2];
+				Rect r = new Rect();
+				sw.getView().getDrawingRect(r);
+				sw.getView().getLocationOnScreen(lo);
+				r.left = lo[0];
+				r.right = lo[0] + r.right;
+				r.top = lo[1];
+				r.bottom = lo[1] + r.bottom;
+				if (r.contains(x, y)) {
+					showOrCloseAttendeeVideo(sw.udc);
+					sw.at = at;
+					sw.udc = udc;
+					showOrCloseAttendeeVideo(udc);
+					return;
+				}
+			}
+			
+			OnAttendeeClicked(at, udc);
 		}
 
 		@Override

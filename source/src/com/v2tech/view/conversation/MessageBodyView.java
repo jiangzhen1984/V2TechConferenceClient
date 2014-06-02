@@ -11,6 +11,7 @@ import android.os.Handler;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewDebug.ExportedProperty;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -170,6 +171,35 @@ public class MessageBodyView extends LinearLayout {
 		}
 		
 
+	}
+	
+	
+
+
+	@Override
+	public void setOverScrollMode(int overScrollMode) {
+		// TODO Auto-generated method stub
+		super.setOverScrollMode(overScrollMode);
+	}
+
+	@Override
+	public void setWillNotDraw(boolean willNotDraw) {
+		// TODO Auto-generated method stub
+		super.setWillNotDraw(willNotDraw);
+	}
+
+	@Override
+	@ExportedProperty(category = "drawing")
+	public boolean willNotCacheDrawing() {
+		// TODO Auto-generated method stub
+		return super.willNotCacheDrawing();
+	}
+
+	@Override
+	@ExportedProperty(category = "drawing")
+	public boolean willNotDraw() {
+		// TODO Auto-generated method stub
+		return super.willNotDraw();
 	}
 
 	private void updateSelectedBg(boolean selected) {

@@ -9,6 +9,7 @@
     <string name="contacts_user_action_view_detail">查 看 详 情</string>
     <string name="contacts_user_detail_gender_male">男</string>
     <string name="contacts_user_detail_gender_female">女</string>
+    <string name="contacts_user_detail_gender_priacy">保密</string>
     <string name="contacts_user_detail_return_button">返回</string>
     <string name="contacts_user_detail_send_msg">发消息</string>
     <string name="contacts_user_detail_invite_video">发起会议</string>

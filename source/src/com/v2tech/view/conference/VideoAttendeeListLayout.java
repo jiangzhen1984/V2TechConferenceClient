@@ -5,21 +5,28 @@ import java.util.List;
 import java.util.Set;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.PixelFormat;
+import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.graphics.drawable.AnimationDrawable;
 import android.text.Editable;
+import android.text.TextUtils.TruncateAt;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
+import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
+import android.view.WindowManager;
 import android.widget.BaseAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.v2tech.R;
@@ -49,6 +56,8 @@ public class VideoAttendeeListLayout extends LinearLayout {
 
 	public interface VideoAttendeeActionListener {
 
+		public void OnAttendeeDragged(Attendee at, UserDeviceConfig udc, int x, int y);
+		
 		public void OnAttendeeClicked(Attendee at, UserDeviceConfig udc);
 
 		public void requestAttendeeViewFixedLayout(View v);
@@ -85,18 +94,20 @@ public class VideoAttendeeListLayout extends LinearLayout {
 		mPinButton.setOnClickListener(mRequestFixedListener);
 
 		mAttendeeContainer.setAdapter(adapter);
-		mAttendeeContainer.setOnItemClickListener(new OnItemClickListener() {
+		// mAttendeeContainer.setOnItemClickListener(new OnItemClickListener() {
+		//
+		// @Override
+		// public void onItemClick(AdapterView<?> ad, View view, int pos,
+		// long id) {
+		// if (listener != null) {
+		// Wrapper wr = (Wrapper) view.getTag();
+		// listener.OnAttendeeClicked(wr.a, wr.udc);
+		// }
+		// }
+		//
+		// });
 
-			@Override
-			public void onItemClick(AdapterView<?> ad, View view, int pos,
-					long id) {
-				if (listener != null) {
-					Wrapper wr = (Wrapper) view.getTag();
-					listener.OnAttendeeClicked(wr.a, wr.udc);
-				}
-			}
-
-		});
+		mAttendeeContainer.setOnTouchListener(mListViewOnTouchListener);
 
 		this.addView(view, new LinearLayout.LayoutParams(
 				LinearLayout.LayoutParams.MATCH_PARENT,
@@ -230,6 +241,10 @@ public class VideoAttendeeListLayout extends LinearLayout {
 						.findViewById(R.id.video_attendee_device_camera_icon);
 				cameraIV2.setImageResource(R.drawable.camera_pressed);
 
+				ImageView spIV = (ImageView) v
+						.findViewById(R.id.video_attendee_device_speaker_icon);
+				spIV.setImageResource(R.drawable.conf_speaker);
+
 				// set offline color
 				TextView nameTV = (TextView) v
 						.findViewById(R.id.video_attendee_device_name);
@@ -309,6 +324,11 @@ public class VideoAttendeeListLayout extends LinearLayout {
 	 * call this function to inform interface
 	 */
 	public void requestFloatLayout() {
+
+		if ("float".equals(mPinButton.getTag())) {
+			return;
+		}
+
 		if (this.listener != null) {
 			this.listener.requestAttendeeViewFloatLayout(rootView);
 		}
@@ -317,6 +337,103 @@ public class VideoAttendeeListLayout extends LinearLayout {
 		((ImageView) mPinButton)
 				.setImageResource(R.drawable.pin_button_selector);
 	}
+
+	private OnTouchListener mListViewOnTouchListener = new OnTouchListener() {
+
+		private View dragView;
+		private Bitmap cbm;
+		int pos = -1;
+		
+		@Override
+		public synchronized boolean onTouch(View view, MotionEvent event) {
+			if (event.getAction() == MotionEvent.ACTION_DOWN) {
+				pos = ((ListView) view).pointToPosition((int) event.getX(),
+						(int) event.getY());
+				if (pos == ListView.INVALID_POSITION) {
+					return false;
+				}
+				if (cbm != null && !cbm.isRecycled()) {
+					cbm.recycle();
+					cbm = null;
+				}
+				dragView = getView((Wrapper)((View)adapter.getItem(pos)).getTag());
+
+				WindowManager wd = (WindowManager) getContext()
+						.getSystemService(Context.WINDOW_SERVICE);
+				WindowManager.LayoutParams vl = getLayoutParams(event);
+				wd.addView(dragView, vl);
+			} else if (event.getAction() == MotionEvent.ACTION_MOVE) {
+				if (dragView !=null) {
+					WindowManager wd = (WindowManager) getContext()
+							.getSystemService(Context.WINDOW_SERVICE);
+					WindowManager.LayoutParams vl = getLayoutParams(event);
+					wd.updateViewLayout(dragView, vl);
+				}
+				
+			} else if (event.getAction() == MotionEvent.ACTION_UP) {
+				if (dragView !=null) {
+					if (listener != null) {
+						View itemView = (View)adapter.getItem(pos);
+						Wrapper wr = (Wrapper) itemView.getTag();
+						Rect r = new Rect ();
+						view.getLocalVisibleRect(r);
+						if (r.contains((int)event.getX(), (int)event.getY())) {
+							listener.OnAttendeeClicked(wr.a, wr.udc);
+						} else {
+							listener.OnAttendeeDragged(wr.a, wr.udc, (int)event.getRawX(),  (int)event.getRawY());
+						}
+					}
+					WindowManager wd = (WindowManager) getContext()
+							.getSystemService(Context.WINDOW_SERVICE);
+					wd.removeView(dragView);
+				}
+				
+				dragView = null;
+				pos = ListView.INVALID_POSITION;
+			}
+			return true;
+		}
+
+		private WindowManager.LayoutParams getLayoutParams(MotionEvent event) {
+			WindowManager.LayoutParams vl = new WindowManager.LayoutParams();
+			vl.format = PixelFormat.TRANSLUCENT;
+			vl.gravity = Gravity.TOP | Gravity.LEFT;
+			vl.width = 80;
+			vl.height = 80;
+			vl.type = WindowManager.LayoutParams.TYPE_APPLICATION_PANEL;
+			vl.x = (int) event.getRawX();
+			vl.y = (int) event.getRawY();
+			return vl;
+		}
+
+		private View getView(Wrapper wr) {
+			RelativeLayout rl = new RelativeLayout(getContext());
+			ImageView iv = new ImageView(getContext());
+			Bitmap bm = wr.a.getAvatar();
+			if (bm == null) {
+				bm = BitmapFactory.decodeResource(getContext().getResources(),
+						R.drawable.avatar);
+				cbm = bm;
+			}
+			iv.setImageBitmap(bm);
+			RelativeLayout.LayoutParams rll = new RelativeLayout.LayoutParams(
+					RelativeLayout.LayoutParams.WRAP_CONTENT,
+					RelativeLayout.LayoutParams.WRAP_CONTENT);
+			rll.addRule(RelativeLayout.CENTER_IN_PARENT);
+			rl.addView(iv, rll);
+			
+			
+			TextView tv = new TextView(getContext());
+			tv.setText(wr.a.getAttName());
+			tv.setGravity(Gravity.CENTER);
+			tv.setEllipsize(TruncateAt.END);
+			tv.setMaxWidth(60);
+			tv.setSingleLine();
+			rl.addView(tv, rll);
+
+			return rl;
+		}
+	};
 
 	private OnClickListener mRequestFixedListener = new OnClickListener() {
 

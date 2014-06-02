@@ -134,7 +134,14 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 		mNameTitleIV.setText(u.getName());
 		mAccountTV.setText(u.getAccount());
 		if (u.getGender() != null) {
-			mGendarTV.setText(u.getGender().equals("1") ? "男" : "女");
+			if (u.getGender().equals("0")) {
+				mGendarTV.setText("保密");
+			} else if (u.getGender().equals("1")) {
+				mGendarTV.setText("男");
+			} else if (u.getGender().equals("2")) {
+				mGendarTV.setText("女");
+			}
+
 		} else {
 			mGendarTV.setText("");
 		}

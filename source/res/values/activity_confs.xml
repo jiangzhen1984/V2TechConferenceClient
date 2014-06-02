@@ -22,6 +22,8 @@
    <string name="confs_camear_quanlity_high">高</string>
    <string name="confs_camear_quanlity_middle">中</string>
    <string name="confs_camear_quanlity_low">低</string>
+   <string name="conf_notification_joined_meeting">进入会议室</string>
+   <string name="conf_notification_quited_meeting">离开会议室</string>
    <string name="error_exceed_support_video_count">最多只支持4路视频</string>
    <string name="error_no_second_camera">用户没有另一个摄像头</string>
    <string name="warning_under_sync">主席正在同步，无法切换文档</string>

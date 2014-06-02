@@ -35,10 +35,7 @@ public class VImageMessage extends VMessage {
 	private String mExtension;
 	private int mHeight = -1;
 	private int mWidth = -1;
-	private byte[] originImageData;
 	private String mImagePath;
-	
-	
 
 	protected VImageMessage() {
 		super();
@@ -54,53 +51,6 @@ public class VImageMessage extends VMessage {
 		init();
 	}
 
-	/**
-	 * @deprecated
-	 * @param u
-	 * @param toUser
-	 * @param data
-	 */
-	public VImageMessage(User u, User toUser, byte[] data) {
-		super(u, toUser, null, true);
-		this.mType = VMessage.MessageType.IMAGE;
-		this.originImageData = data;
-		if (this.originImageData != null) {
-			if (this.originImageData.length < 52) {
-				throw new RuntimeException("Illegal image data");
-			}
-			byte[] uuidBytes = new byte[38];
-			System.arraycopy(originImageData, 0, uuidBytes, 0, 38);
-			mUUID = new String(uuidBytes);
-			byte[] extensionBytes = new byte[4];
-			System.arraycopy(originImageData, 41, extensionBytes, 0, 4);
-			mExtension = new String(extensionBytes);
-			mImagePath = StorageUtil.getAbsoluteSdcardPath() + "/v2tech/pics/"
-					+ mUUID + mExtension;
-			File f = new File(mImagePath);
-			OutputStream os = null;
-			try {
-				os = new FileOutputStream(f);
-				os.write(data, 52, data.length-52);
-			} catch (FileNotFoundException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
-			} finally {
-				if (os != null) {
-					try {
-						os.close();
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-				}
-			}
-		}
-	}
-	
-	
-	
-	
-	
 
 	public VImageMessage(User u, User toUser, String uuid, String ext) {
 		super(u, toUser, null, true);
@@ -110,21 +60,20 @@ public class VImageMessage extends VMessage {
 		mImagePath = StorageUtil.getAbsoluteSdcardPath() + "/v2tech/pics/"
 				+ uuid + ext;
 	}
-	
-	
+
 	public void updateImageData(byte[] b) {
-		this.originImageData = b;
-		saveFile();
+		saveFile(b);
 	}
 
-	
-	
-	private void saveFile() {
+	private void saveFile(byte[] b) {
+		if (b == null || b.length <= 0) {
+			return;
+		}
 		File f = new File(mImagePath);
 		OutputStream os = null;
 		try {
 			os = new FileOutputStream(f);
-			os.write(originImageData, 0, originImageData.length);
+			os.write(b, 0, b.length);
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
@@ -139,8 +88,7 @@ public class VImageMessage extends VMessage {
 			}
 		}
 	}
-	
-	
+
 	@Override
 	public String getText() {
 		return mUUID + "|" + mExtension + "|" + mHeight + "|" + mWidth + "|"
@@ -157,18 +105,17 @@ public class VImageMessage extends VMessage {
 	}
 
 	public byte[] getWrapperData() {
-		if (originImageData == null && !loadImageData()) {
-			return null;
-		}
-		return originImageData;
-		
-//		byte[] d = new byte[52 + originImageData.length];
-//		byte[] uud = mUUID.getBytes();
-//		System.arraycopy(uud, 0, d, 0, uud.length);
-//		byte[] et = mExtension.getBytes();
-//		System.arraycopy(et, 0, d, 41, et.length);
-//		System.arraycopy(originImageData, 0, d, 52, originImageData.length);
-//		return d;
+		//Request gc
+		System.gc();
+		return loadImageData();
+
+		// byte[] d = new byte[52 + originImageData.length];
+		// byte[] uud = mUUID.getBytes();
+		// System.arraycopy(uud, 0, d, 0, uud.length);
+		// byte[] et = mExtension.getBytes();
+		// System.arraycopy(et, 0, d, 41, et.length);
+		// System.arraycopy(originImageData, 0, d, 52, originImageData.length);
+		// return d;
 	}
 
 	public int getHeight() {
@@ -188,8 +135,7 @@ public class VImageMessage extends VMessage {
 	public String getImagePath() {
 		return this.mImagePath;
 	}
-	
-	
+
 	private void loadBounds() {
 		BitmapFactory.Options opts = new BitmapFactory.Options();
 		opts.inJustDecodeBounds = true;
@@ -198,89 +144,91 @@ public class VImageMessage extends VMessage {
 		mWidth = opts.outWidth;
 	}
 
-	//FIXME optimze code
-	private boolean loadImageData() {
-		if (originImageData == null) {
-			File f = new File(mImagePath);
-			if (!f.exists()) {
-				V2Log.e(" file doesn't exist " + mImagePath);
-				return false;
-			}
-			originImageData = new byte[(int) f.length()];
-			InputStream is = null;
-			try {
-				is = new FileInputStream(f);
-				is.read(originImageData);
-			} catch (FileNotFoundException e) {
-				e.printStackTrace();
-				return false;
-			} catch (IOException e) {
-				e.printStackTrace();
-				return false;
-			} finally {
-				if (is != null) {
-					try {
-						is.close();
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
+	// FIXME optimze code
+	private byte[] loadImageData() {
+
+		File f = new File(mImagePath);
+		if (!f.exists()) {
+			V2Log.e(" file doesn't exist " + mImagePath);
+			return null;
+		}
+		byte[] data = new byte[(int) f.length()];
+		InputStream is = null;
+		try {
+			is = new FileInputStream(f);
+			is.read(data);
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+			return null;
+		} catch (IOException e) {
+			e.printStackTrace();
+			return null;
+		} finally {
+			if (is != null) {
+				try {
+					is.close();
+				} catch (IOException e) {
+					e.printStackTrace();
 				}
 			}
 		}
 
-//		InputStream is = null;
-//		is = new ByteArrayInputStream(originImageData);
-//		Bitmap bm = BitmapFactory.decodeStream(is);
-//		mHeight = bm.getHeight();
-//		mWidth = bm.getWidth();
-//		bm.recycle();
-//		try {
-//			is.close();
-//		} catch (IOException e) {
-//			V2Log.e("can not close stream for bitmap");
-//		}
-		return true;
+		// InputStream is = null;
+		// is = new ByteArrayInputStream(originImageData);
+		// Bitmap bm = BitmapFactory.decodeStream(is);
+		// mHeight = bm.getHeight();
+		// mWidth = bm.getWidth();
+		// bm.recycle();
+		// try {
+		// is.close();
+		// } catch (IOException e) {
+		// V2Log.e("can not close stream for bitmap");
+		// }
+		return data;
 	}
-	
-	
-	public static List<VMessage> extraMetaFrom(User fromUser, User toUser, String xml) {
+
+	public static List<VMessage> extraMetaFrom(User fromUser, User toUser,
+			String xml) {
 		List<VMessage> li = new ArrayList<VMessage>();
 		InputStream is = null;
 
 		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder dBuilder;
-			try {
-				dBuilder = dbFactory.newDocumentBuilder();
-				is = new ByteArrayInputStream(xml.getBytes("UTF-8"));
-				Document doc = dBuilder.parse(is);
+		try {
+			dBuilder = dbFactory.newDocumentBuilder();
+			is = new ByteArrayInputStream(xml.getBytes("UTF-8"));
+			Document doc = dBuilder.parse(is);
 
-				doc.getDocumentElement().normalize();
-				
-				NodeList imgMsgItemNL = doc.getElementsByTagName("TPictureChatItem");
-				for (int i=0;i<imgMsgItemNL.getLength(); i++) {
-					Element msgEl = (Element)imgMsgItemNL.item(i);
-					String uuid = msgEl.getAttribute("GUID");
-					if (uuid == null) {
-						V2Log.e("Invalid uuid ");
-						continue;
-					}
-					VMessage vmImage = new VImageMessage(fromUser, toUser, uuid.substring(1, uuid.length() - 1), msgEl.getAttribute("FileExt"));
-					vmImage.setDate(new Date());
-					vmImage.setType(MessageType.IMAGE);
-					li.add(vmImage);
+			doc.getDocumentElement().normalize();
+
+			NodeList imgMsgItemNL = doc
+					.getElementsByTagName("TPictureChatItem");
+			for (int i = 0; i < imgMsgItemNL.getLength(); i++) {
+				Element msgEl = (Element) imgMsgItemNL.item(i);
+				String uuid = msgEl.getAttribute("GUID");
+				if (uuid == null) {
+					V2Log.e("Invalid uuid ");
+					continue;
 				}
-				
-			} catch (ParserConfigurationException e) {
-				e.printStackTrace();
-			} catch (UnsupportedEncodingException e) {
-				e.printStackTrace();
-			} catch (SAXException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
+				VMessage vmImage = new VImageMessage(fromUser, toUser,
+						uuid.substring(1, uuid.length() - 1),
+						msgEl.getAttribute("FileExt"));
+				vmImage.setDate(new Date());
+				vmImage.setType(MessageType.IMAGE);
+				li.add(vmImage);
 			}
-			
-			return li;
+
+		} catch (ParserConfigurationException e) {
+			e.printStackTrace();
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		} catch (SAXException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		return li;
 	}
 
 	// < TPictureChatItem NewLine="False" AutoResize="True" FileExt=".png"
@@ -303,41 +251,45 @@ public class VImageMessage extends VMessage {
 				.append("</ItemList>").append("</TChatData>");
 		return sb.toString();
 	}
-	
-	
+
 	Bitmap mFullQualityBitmap = null;
 	Bitmap mCompressedBitmap = null;
+
 	/**
 	 * FIXME optimize code
+	 * 
 	 * @return
 	 */
 	public Bitmap getFullQuantityBitmap() {
 		if (mFullQualityBitmap == null || mFullQualityBitmap.isRecycled()) {
-			 BitmapFactory.Options options= new  BitmapFactory.Options();
-			 options.inJustDecodeBounds = true;
-			 options.inPreferredConfig = Config.ALPHA_8;
-			 options.inDither = true;
+			BitmapFactory.Options options = new BitmapFactory.Options();
+			options.inJustDecodeBounds = true;
+			options.inPreferredConfig = Config.ALPHA_8;
+			options.inDither = true;
 			BitmapFactory.decodeFile(this.mImagePath, options);
 			options.inJustDecodeBounds = false;
 			if (options.outWidth > 1920 || options.outHeight > 1080) {
 				options.inSampleSize = 2;
-				mFullQualityBitmap = BitmapFactory.decodeFile(this.mImagePath, options);
+				mFullQualityBitmap = BitmapFactory.decodeFile(this.mImagePath,
+						options);
 				return mFullQualityBitmap;
-			} else if (options.outWidth > 800 || options.outHeight > 600){
+			} else if (options.outWidth > 800 || options.outHeight > 600) {
 				options.inSampleSize = 1;
-				mFullQualityBitmap = BitmapFactory.decodeFile(this.mImagePath, options);
+				mFullQualityBitmap = BitmapFactory.decodeFile(this.mImagePath,
+						options);
 				return mFullQualityBitmap;
-			}else {
+			} else {
 				options.inSampleSize = 1;
-				mFullQualityBitmap = BitmapFactory.decodeFile(this.mImagePath, options);
+				mFullQualityBitmap = BitmapFactory.decodeFile(this.mImagePath,
+						options);
 				return mFullQualityBitmap;
 			}
-			
+
 		}
-		
+
 		return mFullQualityBitmap;
 	}
-	
+
 	public Bitmap getCompressedBitmap() {
 		if (mCompressedBitmap == null || mFullQualityBitmap.isRecycled()) {
 			BitmapFactory.Options options = new BitmapFactory.Options();
@@ -351,11 +303,12 @@ public class VImageMessage extends VMessage {
 				options.inSampleSize = 1;
 			}
 			options.inJustDecodeBounds = false;
-			mCompressedBitmap = BitmapFactory.decodeFile(this.mImagePath, options);
+			mCompressedBitmap = BitmapFactory.decodeFile(this.mImagePath,
+					options);
 		}
 		return mCompressedBitmap;
 	}
-	
+
 	public void recycle() {
 		if (mFullQualityBitmap != null) {
 			mFullQualityBitmap.recycle();
@@ -365,5 +318,7 @@ public class VImageMessage extends VMessage {
 			mCompressedBitmap.recycle();
 			mCompressedBitmap = null;
 		}
+		//Request
+		System.gc();
 	}
 }

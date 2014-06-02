@@ -239,6 +239,8 @@
                             android:id="@+id/contact_user_detail_gender_rg"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:gravity="center_vertical"
+                            android:layout_gravity="center_vertical"
                             android:orientation="horizontal"
                             android:textColor="@color/common_item_text_color" >
 
@@ -256,6 +258,14 @@
                                 android:layout_height="wrap_content"
                                 android:tag="2"
                                 android:text="@string/contacts_user_detail_gender_female"
+                                android:textColor="@color/common_item_text_color" />
+                            
+                             <RadioButton
+                                android:id="@+id/radio2"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:tag="0"
+                                android:text="@string/contacts_user_detail_gender_priacy"
                                 android:textColor="@color/common_item_text_color" />
                         </RadioGroup>
                     </LinearLayout>

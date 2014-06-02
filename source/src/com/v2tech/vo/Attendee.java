@@ -3,6 +3,8 @@ package com.v2tech.vo;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.graphics.Bitmap;
+
 import com.v2tech.util.V2Log;
 
 /**
@@ -166,5 +168,12 @@ public class Attendee {
 	public void setJoined(boolean isJoined) {
 		this.isJoined = isJoined;
 	}
+	
+	
+	public Bitmap getAvatar() {
+		Bitmap map = this.user.getAvatarBitmap();
+		return map;
+	}
+	
 
 }

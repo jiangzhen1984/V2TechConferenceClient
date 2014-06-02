@@ -37,6 +37,7 @@ public class VideoRecorder
 	private int mFrameRate;
 	private int mCameraRotation;
 	private boolean mbMirror;
+	private String prs;
 	
 	private VideoEncoder mEncoder = null;
 	
@@ -202,7 +203,7 @@ public class VideoRecorder
 	
 	public void onGetVideoFrame(byte [] databuf, int len)
 	{
-		//¶ªÖ¡
+		//ï¿½ï¿½Ö¡
 		if(dropFrame()){
 			
 			return;
@@ -214,8 +215,8 @@ public class VideoRecorder
 		}
 	}
 	
-	//¶ª°ü²Ù×÷
-	private int framecount=0; //ÕýÔÚ±àµÄÖ¡Êý
+	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	private int framecount=0; //ï¿½ï¿½ï¿½Ú±ï¿½ï¿½Ö¡ï¿½ï¿½
 	private boolean  dropFrame(){
 		framecount++;
 		int fps=10;
@@ -273,7 +274,7 @@ public class VideoRecorder
 				break;
 			}
 		}	
-//		Logger.i(null,"¶ª:"+isdrop);	
+//		Logger.i(null,"ï¿½ï¿½:"+isdrop);	
 		return isdrop;	
 	}
 	
@@ -393,7 +394,7 @@ public class VideoRecorder
 		}
 		catch (IOException e) 
 		{
-			Log.e("VideoRecorder UI","----ÉãÏñÍ·¿ªÊ¼Ô¤ÀÀÊ§°Ü----");
+			Log.e("VideoRecorder UI","----ï¿½ï¿½ï¿½ï¿½Í·ï¿½ï¿½Ê¼Ô¤ï¿½ï¿½Ê§ï¿½ï¿½----");
 			e.printStackTrace();
 			
 			mCamera.release();
@@ -415,7 +416,7 @@ public class VideoRecorder
 	
 	private boolean StartRecord(IPreviewCallBack callback)
 	{
-		Log.e("VideoRecorder UI","----ÉãÏñÍ·¿ªÊ¼²É¼¯Êý¾Ý----");
+		Log.e("VideoRecorder UI","----ï¿½ï¿½ï¿½ï¿½Í·ï¿½ï¿½Ê¼ï¿½É¼ï¿½ï¿½ï¿½ï¿½----");
 		if(mCamera == null)
 		{
 			return false;
