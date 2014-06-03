@@ -161,6 +161,7 @@ public class VideoActivityV2 extends Activity {
 	private SurfaceView mLocalSurface;
 
 	private Conference conf;
+	private ConferenceGroup cg;
 
 	private ConferenceService cb = new ConferenceService();
 
@@ -211,7 +212,6 @@ public class VideoActivityV2 extends Activity {
 		// local camera surface view
 		this.mLocalSurface = (SurfaceView) findViewById(R.id.local_surface_view);
 
-		
 		this.localSurfaceViewLy = findViewById(R.id.local_surface_view_ly);
 		localSurfaceViewLy.setOnTouchListener(mLocalCameraDragListener);
 
@@ -311,10 +311,18 @@ public class VideoActivityV2 extends Activity {
 				showOrHidenMsgContainer(View.GONE);
 				showOrHidenInvitionContainer(View.GONE);
 			} else if (v.getTag().equals("invition")) {
-				showOrHidenDocContainer(View.GONE);
-				showOrHidenAttendeeContainer(View.GONE);
-				showOrHidenMsgContainer(View.GONE);
-				showOrHidenInvitionContainer(View.VISIBLE);
+				if (cg.isCanInvitation() ) {
+					showOrHidenDocContainer(View.GONE);
+					showOrHidenAttendeeContainer(View.GONE);
+					showOrHidenMsgContainer(View.GONE);
+					showOrHidenInvitionContainer(View.VISIBLE);
+				} else {
+					showOrHidenInvitionContainer(View.GONE);
+					Toast.makeText(mContext,
+							R.string.error_no_permission_to_invitation,
+							Toast.LENGTH_SHORT).show();
+				}
+
 			}
 		}
 
@@ -526,7 +534,7 @@ public class VideoActivityV2 extends Activity {
 
 			} else if (JNIService.JNI_BROADCAST_CONNECT_STATE_NOTIFICATION
 					.equals(intent.getAction())) {
-				//TODO show dialog
+				// TODO show dialog
 				NetworkStateCode code = (NetworkStateCode) intent.getExtras()
 						.get("state");
 			} else if (JNIService.JNI_BROADCAST_USER_STATUS_NOTIFICATION
@@ -628,16 +636,16 @@ public class VideoActivityV2 extends Activity {
 			return;
 		}
 
-		ConferenceGroup g = (ConferenceGroup) GlobalHolder.getInstance()
-				.getGroupById(GroupType.CONFERENCE, mGroupId);
-		if (g == null) {
+		cg = (ConferenceGroup) GlobalHolder.getInstance().getGroupById(
+				GroupType.CONFERENCE, mGroupId);
+		if (cg == null) {
 			V2Log.e(" doesn't receive group information  yet");
 			return;
 		}
-		conf = new Conference(mGroupId, g.getOwner(), g.getName(),
-				g.getCreateDate(), null, null);
-		conf.setChairman(g.getChairManUId());
-		mGroupNameTV.setText(g.getName());
+		conf = new Conference(mGroupId, cg.getOwner(), cg.getName(),
+				cg.getCreateDate(), null, null);
+		conf.setChairman(cg.getChairManUId());
+		mGroupNameTV.setText(cg.getName());
 
 		Group confGroup = GlobalHolder.getInstance().findGroupById(
 				this.mGroupId);
@@ -867,6 +875,13 @@ public class VideoActivityV2 extends Activity {
 		}
 	}
 
+	
+	private boolean isInvitionWindowShowing() {
+		if (mInvitionContainer == null) {
+			return false;
+		}
+		return mInvitionContainer.getVisibility() ==View.VISIBLE;
+	}
 	/**
 	 * Show or hide Invitation attendee layout according to parameter
 	 * 
@@ -874,7 +889,7 @@ public class VideoActivityV2 extends Activity {
 	 *            {@link View#VISIBLE} {@link View#GONE}
 	 */
 	private void showOrHidenInvitionContainer(int visible) {
-		// If doesn't initialize layout yet, just break intializion
+		// If doesn't initialize layout yet, just break initialization
 		if (View.GONE == visible && mInvitionContainer == null) {
 			return;
 		}
@@ -924,7 +939,6 @@ public class VideoActivityV2 extends Activity {
 			mVideoLayout.startAnimation(ta);
 			mVideoLayout.setVisibility(View.VISIBLE);
 
-
 			localSurfaceViewLy.bringToFront();
 
 		} else {
@@ -946,7 +960,6 @@ public class VideoActivityV2 extends Activity {
 			mVideoLayout.startAnimation(ta);
 			mVideoLayout.setVisibility(View.GONE);
 
-	
 			localSurfaceViewLy.bringToFront();
 		}
 	}
@@ -1476,10 +1489,7 @@ public class VideoActivityV2 extends Activity {
 		}
 		return at;
 	}
-	
-	
-	
-	
+
 	private boolean dragged = false;
 	private OnTouchListener mLocalCameraDragListener = new OnTouchListener() {
 
@@ -1487,29 +1497,28 @@ public class VideoActivityV2 extends Activity {
 		int offsetY;
 		int lastX;
 		int lastY;
-		
+
 		@Override
 		public boolean onTouch(View view, MotionEvent event) {
 			int action = event.getAction();
 			if (action == MotionEvent.ACTION_DOWN) {
-				lastX = (int)event.getRawX();
-				lastY = (int)event.getRawY();
+				lastX = (int) event.getRawX();
+				lastY = (int) event.getRawY();
 			} else if (action == MotionEvent.ACTION_MOVE) {
 				updateParameters(view, event);
-				lastX = (int)event.getRawX();
-				lastY = (int)event.getRawY();
-				
+				lastX = (int) event.getRawX();
+				lastY = (int) event.getRawY();
+
 			}
 			return true;
 		}
-		
-		
-		
+
 		private void updateParameters(View view, MotionEvent event) {
-			RelativeLayout.LayoutParams rl  = (RelativeLayout.LayoutParams) view.getLayoutParams();
-			rl.bottomMargin -= (event.getRawY() - lastY );
-			rl.rightMargin -= (event.getRawX() -lastX );
-			((ViewGroup)view.getParent()).updateViewLayout(view, rl);
+			RelativeLayout.LayoutParams rl = (RelativeLayout.LayoutParams) view
+					.getLayoutParams();
+			rl.bottomMargin -= (event.getRawY() - lastY);
+			rl.rightMargin -= (event.getRawX() - lastX);
+			((ViewGroup) view.getParent()).updateViewLayout(view, rl);
 		}
 	};
 
@@ -1539,8 +1548,6 @@ public class VideoActivityV2 extends Activity {
 			calculateLayoutParma(v, 2);
 			adjustLayout();
 		}
-		
-		
 
 		@Override
 		public void OnAttendeeDragged(Attendee at, UserDeviceConfig udc, int x,
@@ -1552,7 +1559,7 @@ public class VideoActivityV2 extends Activity {
 					|| !at.isJoined()) {
 				return;
 			}
-			
+
 			for (SurfaceViewW sw : mCurrentShowedSV) {
 				if (sw.udc.getDeviceID().equals(udc.getDeviceID())) {
 					return;
@@ -1576,7 +1583,7 @@ public class VideoActivityV2 extends Activity {
 					return;
 				}
 			}
-			
+
 			OnAttendeeClicked(at, udc);
 		}
 
@@ -1673,10 +1680,13 @@ public class VideoActivityV2 extends Activity {
 
 			// Update local video layout params make sure local video
 			// can float at right and bottom
-			/*RelativeLayout.LayoutParams localRL = (RelativeLayout.LayoutParams) localSurfaceViewLy
-					.getLayoutParams();
-			localRL.addRule(RelativeLayout.ALIGN_BOTTOM, mVideoLayout.getId());
-			localSurfaceViewLy.setLayoutParams(localRL);*/
+			/*
+			 * RelativeLayout.LayoutParams localRL =
+			 * (RelativeLayout.LayoutParams) localSurfaceViewLy
+			 * .getLayoutParams(); localRL.addRule(RelativeLayout.ALIGN_BOTTOM,
+			 * mVideoLayout.getId());
+			 * localSurfaceViewLy.setLayoutParams(localRL);
+			 */
 		}
 
 		@Override

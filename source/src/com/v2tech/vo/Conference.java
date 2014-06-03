@@ -19,6 +19,7 @@ public class Conference {
 	private Date d;
 	private long creator;
 	private long chairman;
+	private boolean isCanInvitation = true;
 
 	public Conference(long id) {
 		this(id, 0, null, null, null, null);
@@ -46,6 +47,17 @@ public class Conference {
 		this.name = name;
 		this.d = startTime;
 		this.invitedList = invitedList;
+	}
+	
+	
+	
+
+	public boolean isCanInvitation() {
+		return isCanInvitation;
+	}
+
+	public void setCanInvitation(boolean isCanInvitation) {
+		this.isCanInvitation = isCanInvitation;
 	}
 
 	@Override

@@ -184,7 +184,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 			ImageView cameraIV2 = (ImageView) view2
 					.findViewById(R.id.video_attendee_device_camera_icon);
 			UserDeviceConfig udc = a.getmDevices().get(i);
-			nameTV2.setText(a.getAttName() + (i > 0 ? ("_视频" + i) : ""));
+			nameTV2.setText("     视频" + i);
 			nameTV2.setTextSize(20);
 			// Hide additional speaker if user has more than one camera
 			view2.findViewById(R.id.video_attendee_device_speaker_icon)

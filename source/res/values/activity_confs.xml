@@ -26,6 +26,7 @@
    <string name="conf_notification_quited_meeting">离开会议室</string>
    <string name="error_exceed_support_video_count">最多只支持4路视频</string>
    <string name="error_no_second_camera">用户没有另一个摄像头</string>
+   <string name="error_no_permission_to_invitation">主席禁用了邀请功能</string>
    <string name="warning_under_sync">主席正在同步，无法切换文档</string>
    <string name="warning_downloading_doc">正在下载文档&#8230;&#8230;&#8230;</string>
    

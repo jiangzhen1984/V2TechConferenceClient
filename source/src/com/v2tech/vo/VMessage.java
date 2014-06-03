@@ -70,8 +70,8 @@ public class VMessage {
 	protected String mUUID;
 
 	protected int mMsgCode;
-	
-	//FIXM optimize code
+
+	// FIXM optimize code
 	public long mGroupId;
 
 	protected VMessage() {
@@ -252,15 +252,16 @@ public class VMessage {
 			// msgList.add(vm);
 			Element msgEl = (Element) textMsgItemNL.item(0);
 			NodeList itemList = msgEl.getChildNodes();
-			//FIMXE optimze code
+			// FIMXE optimze code
 			for (int i = 0; i < itemList.getLength(); i++) {
 				Node n = itemList.item(i);
 				if (n instanceof Element) {
 					msgEl = (Element) itemList.item(i);
 					if (!msgEl.getTagName().equals("TPictureChatItem")) {
 						dataCount++;
-						if ("True".equals(msgEl.getAttribute("NewLine")) && !vm.getText().isEmpty()) {
-							vm.setText(vm.getText()+"\n"
+						if ("True".equals(msgEl.getAttribute("NewLine"))
+								&& !vm.getText().isEmpty()) {
+							vm.setText(vm.getText() + "\n"
 									+ msgEl.getAttribute("Text"));
 						} else {
 							vm.setText(msgEl.getAttribute("Text"));
@@ -303,17 +304,24 @@ public class VMessage {
 	 * @return
 	 */
 	public String toXml() {
+		if (this.mText == null) {
+			return "";
+		}
 		StringBuilder sb = new StringBuilder();
+		String[] str = this.mText.split("\n");
 		sb.append("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n")
 				.append("<TChatData IsAutoReply=\"False\" MessageID=\"{"
 						+ this.mUUID + "}\">\n")
 				.append("<FontList>\n")
 				.append("<TChatFont Color=\"0\" Name=\"Tahoma\" Size=\"9\" Style=\"\"/>")
-				.append("</FontList>\n")
-				.append("<ItemList>\n")
-				.append("<TTextChatItem NewLine=\"True\" FontIndex=\"0\" Text=\""
-						+ this.mText + "\"/>").append("    </ItemList>")
-				.append("</TChatData>");
+				.append("</FontList>\n").append("<ItemList>\n");
+		for (String s : str) {
+			sb.append(
+					"<TTextChatItem NewLine=\"True\" FontIndex=\"0\" Text=\""
+							+ s + "\"/>");
+		}
+		sb.append("    </ItemList>");
+		sb.append("</TChatData>");
 		return sb.toString();
 	}
 }

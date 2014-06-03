@@ -513,6 +513,10 @@ public class ConferenceService extends AbstractHandler {
 		@Override
 		public void OnEnterConfCallback(long nConfID, long nTime,
 				String szConfData, int nJoinResult) {
+			ConferenceGroup cache = (ConferenceGroup) GlobalHolder
+					.getInstance().findGroupById(nConfID);
+			int flag = ConferenceGroup.extraAttrFromXml(cache, szConfData);
+			
 			JNIResponse jniConfCreateRes = new RequestConfCreateResponse(
 					nConfID, 0, RequestConfCreateResponse.Result.SUCCESS);
 			Message.obtain(mCallbackHandler, JNI_REQUEST_CREATE_CONFERENCE,
@@ -672,34 +676,24 @@ public class ConferenceService extends AbstractHandler {
 		public void OnModifyGroupInfoCallback(int groupType, long nGroupID,
 				String sXml) {
 			if (groupType == Group.GroupType.CONFERENCE.intValue()) {
-				Group cache = GlobalHolder.getInstance()
-						.findGroupById(nGroupID);
+				ConferenceGroup cache = (ConferenceGroup) GlobalHolder
+						.getInstance().findGroupById(nGroupID);
 
 				// if doesn't find matched group, mean this is new group
 				if (cache == null) {
 
 				} else {
-					int pos = sXml.indexOf(" syncdesktop='");
-					int end = sXml.indexOf("'", pos + 14);
-					String sync = "0";
-					if (pos != -1 && end != -1) {
-						sync = sXml.substring(pos + 14, end);
-						if (sync.equals("1")) {
-							((ConferenceGroup) cache).setSyn(true);
-						} else {
-							((ConferenceGroup) cache).setSyn(false);
-						}
-					} else {
-						V2Log.w(" no sync item");
-						return;
-					}
-					// notify sync desktop listener
-					for (Registrant re : syncDesktopListenersList) {
-						Handler h = re.getHandler();
-						if (h != null) {
-							Message.obtain(h, re.getWhat(),
-									Integer.parseInt(sync), 0, null)
-									.sendToTarget();
+					int flag = ConferenceGroup.extraAttrFromXml(cache, sXml);
+
+					if ((flag & ConferenceGroup.EXTRA_FLAG_SYNC) == ConferenceGroup.EXTRA_FLAG_SYNC) {
+						// notify sync desktop listener
+						for (Registrant re : syncDesktopListenersList) {
+							Handler h = re.getHandler();
+							if (h != null) {
+								Message.obtain(h, re.getWhat(),
+										(cache.isSyn() ? 1 : 0), 0, null)
+										.sendToTarget();
+							}
 						}
 					}
 
