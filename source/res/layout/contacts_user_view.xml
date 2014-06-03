@@ -48,7 +48,7 @@
             android:singleLine="true"
             android:text="TextView"
             android:maxWidth="@dimen/contacts_user_view_text_max_width"
-            android:textColor="@color/contacts_user_view_item_color"
+            android:textColor="@color/contacts_user_view_item_color_offline"
             android:textSize="@dimen/common_item_text_size" />
 
         <TextView

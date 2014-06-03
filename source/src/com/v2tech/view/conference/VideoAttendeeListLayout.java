@@ -21,6 +21,8 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -56,8 +58,9 @@ public class VideoAttendeeListLayout extends LinearLayout {
 
 	public interface VideoAttendeeActionListener {
 
-		public void OnAttendeeDragged(Attendee at, UserDeviceConfig udc, int x, int y);
-		
+		public void OnAttendeeDragged(Attendee at, UserDeviceConfig udc, int x,
+				int y);
+
 		public void OnAttendeeClicked(Attendee at, UserDeviceConfig udc);
 
 		public void requestAttendeeViewFixedLayout(View v);
@@ -94,20 +97,18 @@ public class VideoAttendeeListLayout extends LinearLayout {
 		mPinButton.setOnClickListener(mRequestFixedListener);
 
 		mAttendeeContainer.setAdapter(adapter);
-		// mAttendeeContainer.setOnItemClickListener(new OnItemClickListener() {
-		//
-		// @Override
-		// public void onItemClick(AdapterView<?> ad, View view, int pos,
-		// long id) {
-		// if (listener != null) {
-		// Wrapper wr = (Wrapper) view.getTag();
-		// listener.OnAttendeeClicked(wr.a, wr.udc);
-		// }
-		// }
-		//
-		// });
+		mAttendeeContainer.setOnItemClickListener(new OnItemClickListener() {
 
-		mAttendeeContainer.setOnTouchListener(mListViewOnTouchListener);
+			@Override
+			public void onItemClick(AdapterView<?> ad, View view, int pos,
+					long id) {
+				if (listener != null) {
+					Wrapper wr = (Wrapper) view.getTag();
+					listener.OnAttendeeClicked(wr.a, wr.udc);
+				}
+			}
+
+		});
 
 		this.addView(view, new LinearLayout.LayoutParams(
 				LinearLayout.LayoutParams.MATCH_PARENT,
@@ -146,6 +147,8 @@ public class VideoAttendeeListLayout extends LinearLayout {
 		ImageView cameraIV = (ImageView) view
 				.findViewById(R.id.video_attendee_device_camera_icon);
 
+		cameraIV.setOnTouchListener(mListViewOnTouchListener);
+		
 		nameTV.setText(a.getAttName());
 
 		if (a.isSelf() == false) {
@@ -191,6 +194,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 				cameraIV2.setImageResource(R.drawable.camera);
 			}
 
+			cameraIV2.setOnTouchListener(mListViewOnTouchListener);
 			view2.setTag(new Wrapper(a, udc));
 			list.add(view2);
 		}
@@ -342,54 +346,51 @@ public class VideoAttendeeListLayout extends LinearLayout {
 
 		private View dragView;
 		private Bitmap cbm;
-		int pos = -1;
-		
+
 		@Override
 		public synchronized boolean onTouch(View view, MotionEvent event) {
 			if (event.getAction() == MotionEvent.ACTION_DOWN) {
-				pos = ((ListView) view).pointToPosition((int) event.getX(),
-						(int) event.getY());
-				if (pos == ListView.INVALID_POSITION) {
-					return false;
-				}
+			
 				if (cbm != null && !cbm.isRecycled()) {
 					cbm.recycle();
 					cbm = null;
 				}
-				dragView = getView((Wrapper)((View)adapter.getItem(pos)).getTag());
+				dragView = getView((Wrapper) ((View)view.getParent().getParent())
+						.getTag());
 
 				WindowManager wd = (WindowManager) getContext()
 						.getSystemService(Context.WINDOW_SERVICE);
 				WindowManager.LayoutParams vl = getLayoutParams(event);
 				wd.addView(dragView, vl);
 			} else if (event.getAction() == MotionEvent.ACTION_MOVE) {
-				if (dragView !=null) {
+				if (dragView != null) {
 					WindowManager wd = (WindowManager) getContext()
 							.getSystemService(Context.WINDOW_SERVICE);
 					WindowManager.LayoutParams vl = getLayoutParams(event);
 					wd.updateViewLayout(dragView, vl);
 				}
-				
-			} else if (event.getAction() == MotionEvent.ACTION_UP) {
-				if (dragView !=null) {
-					if (listener != null) {
-						View itemView = (View)adapter.getItem(pos);
+
+			} else if (event.getAction() == MotionEvent.ACTION_UP || event.getAction() == MotionEvent.ACTION_CANCEL ) {
+				if (dragView != null) {
+					if (listener != null && event.getAction() != MotionEvent.ACTION_CANCEL ) {
+						View itemView = (View) (View)view.getParent().getParent();
 						Wrapper wr = (Wrapper) itemView.getTag();
-						Rect r = new Rect ();
-						view.getLocalVisibleRect(r);
-						if (r.contains((int)event.getX(), (int)event.getY())) {
+						Rect r = new Rect();
+						mAttendeeContainer.getLocalVisibleRect(r);
+						if (r.contains((int) event.getX(), (int) event.getY())) {
 							listener.OnAttendeeClicked(wr.a, wr.udc);
 						} else {
-							listener.OnAttendeeDragged(wr.a, wr.udc, (int)event.getRawX(),  (int)event.getRawY());
+							listener.OnAttendeeDragged(wr.a, wr.udc,
+									(int) event.getRawX(),
+									(int) event.getRawY());
 						}
 					}
 					WindowManager wd = (WindowManager) getContext()
 							.getSystemService(Context.WINDOW_SERVICE);
 					wd.removeView(dragView);
 				}
-				
+
 				dragView = null;
-				pos = ListView.INVALID_POSITION;
 			}
 			return true;
 		}
@@ -421,8 +422,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 					RelativeLayout.LayoutParams.WRAP_CONTENT);
 			rll.addRule(RelativeLayout.CENTER_IN_PARENT);
 			rl.addView(iv, rll);
-			
-			
+
 			TextView tv = new TextView(getContext());
 			tv.setText(wr.a.getAttName());
 			tv.setGravity(Gravity.CENTER);

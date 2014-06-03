@@ -32,11 +32,13 @@ import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.WindowManager;
@@ -209,7 +211,9 @@ public class VideoActivityV2 extends Activity {
 		// local camera surface view
 		this.mLocalSurface = (SurfaceView) findViewById(R.id.local_surface_view);
 
+		
 		this.localSurfaceViewLy = findViewById(R.id.local_surface_view_ly);
+		localSurfaceViewLy.setOnTouchListener(mLocalCameraDragListener);
 
 		// show menu list(Include show message layout, show attendee list layout
 		// show document layout) button
@@ -522,12 +526,9 @@ public class VideoActivityV2 extends Activity {
 
 			} else if (JNIService.JNI_BROADCAST_CONNECT_STATE_NOTIFICATION
 					.equals(intent.getAction())) {
+				//TODO show dialog
 				NetworkStateCode code = (NetworkStateCode) intent.getExtras()
 						.get("state");
-				if (code != NetworkStateCode.CONNECTED) {
-					Toast.makeText(mContext, R.string.error_connect_to_server,
-							Toast.LENGTH_SHORT).show();
-				}
 			} else if (JNIService.JNI_BROADCAST_USER_STATUS_NOTIFICATION
 					.equals(intent.getAction())) {
 				long uid = intent.getExtras().getLong("uid");
@@ -923,13 +924,7 @@ public class VideoActivityV2 extends Activity {
 			mVideoLayout.startAnimation(ta);
 			mVideoLayout.setVisibility(View.VISIBLE);
 
-			// Update local video layout params make sure local video
-			// can float at right and bottom
-			// Because layout mess up if mVideoLayout gone
-			RelativeLayout.LayoutParams localRL = (RelativeLayout.LayoutParams) localSurfaceViewLy
-					.getLayoutParams();
-			localRL.addRule(RelativeLayout.ALIGN_BOTTOM, mVideoLayout.getId());
-			localSurfaceViewLy.setLayoutParams(localRL);
+
 			localSurfaceViewLy.bringToFront();
 
 		} else {
@@ -951,14 +946,7 @@ public class VideoActivityV2 extends Activity {
 			mVideoLayout.startAnimation(ta);
 			mVideoLayout.setVisibility(View.GONE);
 
-			// Update local video layout params make sure local video
-			// can float at right and bottom
-			// Because layout mess up if mVideoLayout gone
-			RelativeLayout.LayoutParams localRL = (RelativeLayout.LayoutParams) localSurfaceViewLy
-					.getLayoutParams();
-			localRL.addRule(RelativeLayout.ALIGN_BOTTOM,
-					mInvitionContainer.getId());
-			localSurfaceViewLy.setLayoutParams(localRL);
+	
 			localSurfaceViewLy.bringToFront();
 		}
 	}
@@ -1488,6 +1476,42 @@ public class VideoActivityV2 extends Activity {
 		}
 		return at;
 	}
+	
+	
+	
+	
+	private boolean dragged = false;
+	private OnTouchListener mLocalCameraDragListener = new OnTouchListener() {
+
+		int offsetX;
+		int offsetY;
+		int lastX;
+		int lastY;
+		
+		@Override
+		public boolean onTouch(View view, MotionEvent event) {
+			int action = event.getAction();
+			if (action == MotionEvent.ACTION_DOWN) {
+				lastX = (int)event.getRawX();
+				lastY = (int)event.getRawY();
+			} else if (action == MotionEvent.ACTION_MOVE) {
+				updateParameters(view, event);
+				lastX = (int)event.getRawX();
+				lastY = (int)event.getRawY();
+				
+			}
+			return true;
+		}
+		
+		
+		
+		private void updateParameters(View view, MotionEvent event) {
+			RelativeLayout.LayoutParams rl  = (RelativeLayout.LayoutParams) view.getLayoutParams();
+			rl.bottomMargin -= (event.getRawY() - lastY );
+			rl.rightMargin -= (event.getRawX() -lastX );
+			((ViewGroup)view.getParent()).updateViewLayout(view, rl);
+		}
+	};
 
 	class SubViewListener implements VideoDocLayout.DocListener,
 			VideoAttendeeListLayout.VideoAttendeeActionListener,
@@ -1628,14 +1652,6 @@ public class VideoActivityV2 extends Activity {
 			anim.setDuration(400);
 			v.startAnimation(anim);
 
-			// Update local video layout params make sure local video
-			// can float at right and bottom
-			// Because layout mess up if mVideoLayout gone
-			RelativeLayout.LayoutParams localRL = (RelativeLayout.LayoutParams) localSurfaceViewLy
-					.getLayoutParams();
-			localRL.addRule(RelativeLayout.ALIGN_BOTTOM, v.getId());
-			localSurfaceViewLy.setLayoutParams(localRL);
-
 			// make sure local is in front of any view
 			localSurfaceViewLy.bringToFront();
 		}
@@ -1657,10 +1673,10 @@ public class VideoActivityV2 extends Activity {
 
 			// Update local video layout params make sure local video
 			// can float at right and bottom
-			RelativeLayout.LayoutParams localRL = (RelativeLayout.LayoutParams) localSurfaceViewLy
+			/*RelativeLayout.LayoutParams localRL = (RelativeLayout.LayoutParams) localSurfaceViewLy
 					.getLayoutParams();
 			localRL.addRule(RelativeLayout.ALIGN_BOTTOM, mVideoLayout.getId());
-			localSurfaceViewLy.setLayoutParams(localRL);
+			localSurfaceViewLy.setLayoutParams(localRL);*/
 		}
 
 		@Override

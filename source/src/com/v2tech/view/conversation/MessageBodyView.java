@@ -129,8 +129,8 @@ public class MessageBodyView extends LinearLayout {
 			Bitmap bm = ((VImageMessage)mMsg).getCompressedBitmap();
 			mImageIV.setImageBitmap(bm);
 			mContentContainer.addView(mImageIV,new LinearLayout.LayoutParams(
-					150,
-					150));
+					LinearLayout.LayoutParams.WRAP_CONTENT,
+					LinearLayout.LayoutParams.WRAP_CONTENT));
 		}
 
 		LinearLayout.LayoutParams ll = new LinearLayout.LayoutParams(

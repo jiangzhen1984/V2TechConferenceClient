@@ -266,6 +266,7 @@ public class MainActivity extends FragmentActivity implements
 	private void initReceiver() {
 		IntentFilter filter = new IntentFilter();
 		filter.addAction(PublicIntent.UPDATE_CONVERSATION);
+		filter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
 		filter.addCategory(PublicIntent.DEFAULT_CATEGORY);
 		filter.addAction(PublicIntent.FINISH_APPLICATION);
 		filter.addAction(JNIService.JNI_BROADCAST_CONNECT_STATE_NOTIFICATION);

@@ -20,7 +20,7 @@
     <!-- conversation view -->
     <dimen name="conversation_view_margin">5dp</dimen>
     <dimen name="conversation_view_name_text_size">17sp</dimen>
-    <dimen name="conversation_view_text_max_width">120dp</dimen>
+    <dimen name="conversation_view_text_max_width">100dp</dimen>
     
     <!-- contact user view -->
     <dimen name="contacts_user_view_text_max_width">150dp</dimen>
@@ -44,7 +44,7 @@
     <dimen name="video_doc_bottom_button_padding">5dp</dimen>
     
     
-    <dimen name="conf_create_contacts_user_text_max_width">60dp</dimen>
+    <dimen name="conf_create_contacts_user_text_max_width">40dp</dimen>
     <dimen name="conf_create_contacts_user_signature_max_width">60dp</dimen>
     
     
@@ -53,4 +53,9 @@
     
     <!-- video msg layout -->
     <dimen name="video_msg_chatting_send_button_font_size">13sp</dimen>
+    
+    
+     <!-- conf_create_contacts_use_layout -->
+    <dimen name="conf_create_contacts_use_layout_name_margin_left">10dp</dimen>
+    <dimen name="conf_create_contacts_use_layout_name_margin_right">20dp</dimen>
 </resources>

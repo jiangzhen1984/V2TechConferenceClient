@@ -132,6 +132,7 @@
                         android:paddingLeft="20dp"
                         android:paddingRight="10dp"
                         android:text="@string/conference_create_conf_name"
+                        android:textColor="@color/invitation_attendee_layout_item_color"
                         android:textSize="15sp" />
 
                     <EditText
@@ -143,6 +144,7 @@
                         android:ems="10"
                         android:inputType="text"
                         android:maxLength="50"
+                         android:textColor="@color/invitation_attendee_layout_item_color"
                         android:paddingBottom="5dp"
                         android:paddingTop="5dp" >
                     </EditText>
@@ -169,6 +171,7 @@
                         android:layout_gravity="center"
                         android:paddingLeft="20dp"
                         android:paddingRight="10dp"
+                         android:textColor="@color/invitation_attendee_layout_item_color"
                         android:text="@string/conference_create_conf_start_time"
                         android:textSize="15sp" />
 
@@ -179,6 +182,7 @@
                         android:layout_gravity="center"
                         android:background="@null"
                         android:ems="10"
+                         android:textColor="@color/invitation_attendee_layout_item_color"
                         android:inputType="datetime"
                         android:paddingBottom="5dp"
                         android:paddingTop="5dp" >

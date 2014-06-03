@@ -349,7 +349,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 			InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 			imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
 			Calendar c = Calendar.getInstance();
-
+			c.setTime(bir);
 			new DatePickerDialog(mContext,
 					new DatePickerDialog.OnDateSetListener() {
 						@Override

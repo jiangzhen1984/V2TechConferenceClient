@@ -294,9 +294,10 @@ public class VImageMessage extends VMessage {
 		if (mCompressedBitmap == null || mFullQualityBitmap.isRecycled()) {
 			BitmapFactory.Options options = new BitmapFactory.Options();
 			options.inJustDecodeBounds = true;
+			options.inPreferredConfig =  Bitmap.Config.ALPHA_8;
 			BitmapFactory.decodeFile(this.mImagePath, options);
-			if (options.outHeight > 1080 || options.outHeight > 1080) {
-				options.inSampleSize = 4;
+			if (options.outHeight >= 1080 || options.outHeight >= 1080) {
+				options.inSampleSize = 6;
 			} else if (options.outHeight > 500 || options.outHeight > 500) {
 				options.inSampleSize = 2;
 			} else {

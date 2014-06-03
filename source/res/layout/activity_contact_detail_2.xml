@@ -78,22 +78,22 @@
                 android:maxWidth="@dimen/detail_detail_2_name_max_width"
                 android:singleLine="true"
                 android:text="TextView"
-                android:textSize="@dimen/common_item_text_size_small"
-                android:textColor="@color/common_item_text_color" />
+                android:textColor="@color/common_item_text_color"
+                android:textSize="@dimen/common_item_text_size_small" />
 
             <TextView
                 android:id="@+id/contact_user_detail_user_signature_tv"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/contact_user_detail_title"
                 android:layout_alignLeft="@+id/contact_user_detail_title"
+                android:layout_below="@+id/contact_user_detail_title"
                 android:ellipsize="end"
                 android:gravity="center"
                 android:maxWidth="@dimen/detail_detail_2_name_max_width"
                 android:singleLine="true"
                 android:text="TextView"
-                 android:textSize="@dimen/common_item_text_size_small"
-                android:textColor="@color/common_item_text_color" />
+                android:textColor="@color/common_item_text_color"
+                android:textSize="@dimen/common_item_text_size_small" />
 
             <TextView
                 android:id="@+id/contact_user_detail_2_send_msg"
@@ -110,7 +110,8 @@
                 android:paddingTop="@dimen/detail_detail_2_button_padding_vertical"
                 android:text="@string/contacts_user_detail_send_msg"
                 android:textColor="@color/button_text_color"
-                android:textSize="@dimen/common_item_text_size_small" />
+                android:textSize="@dimen/common_item_text_size_small"
+                android:visibility="gone" />
 
             <TextView
                 android:id="@+id/contact_user_detail_invite_video"
@@ -127,15 +128,16 @@
                 android:paddingTop="@dimen/detail_detail_2_button_padding_vertical"
                 android:text="@string/contacts_user_detail_invite_video"
                 android:textColor="@color/button_text_color"
-                android:textSize="@dimen/common_item_text_size_small" />
+                android:textSize="@dimen/common_item_text_size_small"
+                android:visibility="gone" />
 
             <TextView
                 android:id="@+id/contact_user_detail_add_friend"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"
                 android:layout_marginRight="@dimen/button_gap_horizontal"
-                android:layout_toLeftOf="@+id/contact_user_detail_invite_video"
                 android:background="@drawable/button_bg"
                 android:gravity="center"
                 android:paddingBottom="@dimen/detail_detail_2_button_padding_vertical"

@@ -231,6 +231,7 @@ public class LoginActivity extends Activity {
 		String password = SPUtil.getConfigStrValue(this, "passwd");
 		if (user != null && !user.trim().isEmpty()) {
 			mEmailView.setText(user);
+			mEmailView.setTextColor(Color.BLACK);
 		}
 		if (password != null && !password.trim().isEmpty()) {
 			mPasswordView.setText(password);

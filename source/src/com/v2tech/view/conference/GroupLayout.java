@@ -141,13 +141,12 @@ public class GroupLayout extends LinearLayout {
 					+ ContentDescriptor.Messages.Cols.TO_USER_ID + "=? ) or "
 					+ "(" + ContentDescriptor.Messages.Cols.FROM_USER_ID
 					+ "=? and " + ContentDescriptor.Messages.Cols.TO_USER_ID
-					+ "=? )) and  (" + ContentDescriptor.Messages.Cols.MSG_TYPE
-					+ "=? )";
+					+ "=? )) ";
+			
 			String[] args = new String[] {
 					GlobalHolder.getInstance().getCurrentUserId() + "",
 					mConv.getExtId() + "", mConv.getExtId() + "",
-					GlobalHolder.getInstance().getCurrentUserId() + "",
-					VMessage.MessageType.TEXT.getIntValue() + "" };
+					GlobalHolder.getInstance().getCurrentUserId() + "" };
 
 			Cursor cur = getContext().getContentResolver().query(
 					ContentDescriptor.Messages.CONTENT_URI,
@@ -162,12 +161,17 @@ public class GroupLayout extends LinearLayout {
 			}
 			if (cur.moveToNext()) {
 				String content = cur.getString(5);
+				String type =  cur.getString(6);
 				String dateString = cur.getString(7);
-				mGroupOwnerTV.setText(content);
-				mGroupDateTV.setText(dateString);
+				if (type.equals(VMessage.MessageType.IMAGE.getIntValue()+"")) {
+					content = getContext().getText(R.string.contact_message_pic_text).toString();
+				} 
 				((ContactConversation) mConv).setMsg(content);
+				((ContactConversation) mConv).setDate(dateString);
 			}
 			cur.close();
+			//UPdate UI
+			update();
 		}
 
 	};

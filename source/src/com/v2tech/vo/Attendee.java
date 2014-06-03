@@ -171,6 +171,9 @@ public class Attendee {
 	
 	
 	public Bitmap getAvatar() {
+		if (user == null) {
+			return null;
+		}
 		Bitmap map = this.user.getAvatarBitmap();
 		return map;
 	}

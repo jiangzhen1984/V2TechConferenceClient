@@ -218,9 +218,11 @@ public class ContactUserView extends LinearLayout {
 		if (st == User.Status.OFFLINE || st == User.Status.HIDDEN) {
 			mStatusIV.setVisibility(View.GONE);
 			mPhotoIV.setColorFilter(Color.GRAY,PorterDuff.Mode.LIGHTEN);
+			mUserNameTV.setTextColor(getContext().getResources().getColor(R.color.contacts_user_view_item_color_offline));
 		} else {
 			mStatusIV.setVisibility(View.VISIBLE);
 			mPhotoIV.clearColorFilter();
+			mUserNameTV.setTextColor(getContext().getResources().getColor(R.color.contacts_user_view_item_color));
 		}
 	}
 

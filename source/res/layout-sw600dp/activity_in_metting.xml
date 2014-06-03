@@ -163,13 +163,22 @@
             android:layout_below="@+id/in_meeting_video_separation_line1"
             android:layout_toRightOf="@+id/in_meeting_menu_layout" >
         </RelativeLayout>
+        
+        
+         <TextView
+            android:id="@+id/video_bottom_view"
+            android:layout_width="wrap_content"
+            android:layout_height="1dp"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentRight="true"
+            android:text="" />
 
         <FrameLayout
             android:id="@+id/local_surface_view_ly"
             android:layout_width="320dp"
             android:layout_height="160dp"
-            android:layout_alignBottom="@+id/in_metting_video_main"
             android:layout_alignParentRight="true"
+            android:layout_above="@+id/video_bottom_view"
             android:layout_marginBottom="10dp"
             android:layout_marginRight="10dp"
             android:background="#f6f6f6"
@@ -196,6 +205,9 @@
                     android:src="@drawable/converse_camera_button" />
             </RelativeLayout>
         </FrameLayout>
+
+
+
     </RelativeLayout>
 
 </LinearLayout>

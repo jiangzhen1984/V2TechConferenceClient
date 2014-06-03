@@ -420,7 +420,7 @@ public class ConversationView extends Activity {
 				Message.obtain(lh, SEND_MESSAGE, vim).sendToTarget();
 				addMessageToContainer(vim);
 
-				notificateConversationUpdate(null, null);
+				notificateConversationUpdate(mContext.getText(R.string.contact_message_pic_text).toString(), vim.getDateTimeStr());
 			}
 		}
 	}

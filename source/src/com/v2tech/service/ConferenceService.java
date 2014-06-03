@@ -25,7 +25,6 @@ import com.v2tech.service.jni.RequestOpenUserVideoDeviceResponse;
 import com.v2tech.service.jni.RequestPermissionResponse;
 import com.v2tech.service.jni.RequestUpdateCameraParametersResponse;
 import com.v2tech.util.V2Log;
-import com.v2tech.vo.Attendee;
 import com.v2tech.vo.CameraConfiguration;
 import com.v2tech.vo.Conference;
 import com.v2tech.vo.ConferenceGroup;
