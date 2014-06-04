@@ -3,16 +3,16 @@ package v2av;
 import java.nio.ByteBuffer;
 
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.Config;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
+import android.graphics.Bitmap.Config;
 import android.util.Log;
 import android.view.SurfaceHolder;
-import android.view.SurfaceHolder.Callback;
-
 
 public class VideoPlayer 
 {
+	public static int DisplayRotation = 0;
+	
 	private SurfaceHolder mSurfaceH;
 	private Bitmap mBitmap;
 	private Matrix mMatrix = null;
@@ -44,6 +44,7 @@ public class VideoPlayer
 	{
 		if(mDisMatrix == null)
 			return;
+		
 		mDisMatrix.zoomOut();
 		mMatrix = mDisMatrix.getDisplayMatrix();
 		mClearCanvas = 0;
@@ -104,19 +105,6 @@ public class VideoPlayer
 		mSurfaceH = holder;
 	}
 	
-	@SuppressWarnings("unused")
-	private void SetBitmapRotation(int rotation)
-	{
-		mBmpRotation = rotation;	
-		mClearCanvas = 0;
-		
-		if(mDisMatrix != null)
-		{
-			mDisMatrix.setRotation((mRotation + mBmpRotation) % 360);
-			UpdateMatrix();
-		}
-	}
-	
 	public void SetRotation(int rotation)
 	{
 		if (mRotation == rotation)
@@ -124,7 +112,18 @@ public class VideoPlayer
 			return;
 		}
 		
-		mRotation = rotation;
+		int temp = (rotation + 45) / 90 * 90;
+    	temp = (temp + DisplayRotation) % 360;
+    	
+    	temp = 360 - temp;
+    	
+    	if (mRotation == temp)
+		{
+			return;
+		}
+    	
+    	mRotation = temp;
+
 		mClearCanvas = 0;
 
 		if(mDisMatrix != null)
@@ -160,46 +159,62 @@ public class VideoPlayer
 	/*
 	 * Called by native 
 	 */
-	
-	
-	void CreateBitmap(int width, int height)
+	@SuppressWarnings("unused")
+	private void SetBitmapRotation(int rotation)
 	{
+		mBmpRotation = rotation;	
+		mClearCanvas = 0;
+		
+		if(mDisMatrix != null)
+		{
+			mDisMatrix.setRotation((mRotation + mBmpRotation) % 360);
+			UpdateMatrix();
+		}
+	}
+	
+	/*
+	 * Called by native 
+	 */
+	@SuppressWarnings("unused")
+	private void CreateBitmap(int width, int height)
+	{
+		Log.i("jni","call create bitmap " + width + " " + height);
 		if (mBitmap != null && !mBitmap.isRecycled())
 		{
 			mBitmap.recycle();
 		}
 		
+		//mBitmap = Bitmap.createBitmap(width, height, Config.ARGB_8888);
 		mBitmap = Bitmap.createBitmap(width, height, Config.RGB_565);
 		
-		if(mDisMatrix == null){
+		if(mDisMatrix == null)
 			mDisMatrix = new VideoDisplayMatrix();
-		}
 		
 		mDisMatrix.setBitmap(mBitmap);
 		mDisMatrix.setRotation((mRotation + mBmpRotation) % 360);
+		
 		mClearCanvas = 0;
 
-		
-		Canvas canvas= mSurfaceH.lockCanvas();
-		
+		Canvas canvas = mSurfaceH.lockCanvas();
 		if(canvas != null)
 		{
 			SetViewSize(canvas.getWidth(), canvas.getHeight());
 			mSurfaceH.unlockCanvasAndPost(canvas);
 		}
+		
 		_playBuffer = ByteBuffer.allocateDirect(width*height*4);
 	}
 	
 	/*
 	 * Called by native
 	 */
-	void OnPlayVideo()
+	@SuppressWarnings("unused")
+	private void OnPlayVideo()
 	{
 		mBitmap.copyPixelsFromBuffer(_playBuffer);
 		_playBuffer.rewind();
 		
 		Canvas canvas = mSurfaceH.lockCanvas();
-		
 		if(canvas == null)
 		{
 			return;

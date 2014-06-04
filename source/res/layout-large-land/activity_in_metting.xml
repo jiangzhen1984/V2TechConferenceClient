@@ -176,7 +176,7 @@
         <FrameLayout
             android:id="@+id/local_surface_view_ly"
             android:layout_width="320dp"
-            android:layout_height="160dp"
+            android:layout_height="240dp"
             android:layout_above="@+id/video_bottom_view"
             android:layout_alignParentRight="true"
             android:layout_marginBottom="10dp"

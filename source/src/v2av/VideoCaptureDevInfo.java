@@ -2,19 +2,19 @@ package v2av;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.TreeSet;
 
+import android.graphics.ImageFormat;
 import android.hardware.Camera;
 import android.hardware.Camera.Size;
 import android.util.Log;
 
 public class VideoCaptureDevInfo
 {
-	
-	public static final String CAMERA_FACE_FRONT ="Camera Facing front";
-	
-	public static final String CAMERA_FACE_BACK ="Camera Facing back";
-	
 	private final static String TAG = "VideoCaptureDevInfo";
+	
+	private final static String CAMERA_FACE_FRONT = "Camera Facing front";
+	private final static String CAMERA_FACE_BACK = "Camera Facing back";
 	
 	private String mDefaultDevName = "";
 	
@@ -22,10 +22,11 @@ public class VideoCaptureDevInfo
 	
 	public class CapParams
 	{
-		public int width=176;
-		public int height=144;
-		public int bitrate=70000;
-		public int fps=15;
+		public int width = 176;
+		public int height = 144;
+		public int bitrate = 70000;
+		public int fps = 15;
+		public int format = ImageFormat.NV21;
 	}
 	
 	public void SetDefaultDevName(String devName)
@@ -38,12 +39,13 @@ public class VideoCaptureDevInfo
 		return mDefaultDevName;
 	}
 	
-	public void SetCapParams(int width, int height, int bitrate, int fps)
+	public void SetCapParams(int width, int height, int bitrate, int fps, int format)
 	{
 		mCapParams.width = width;
 		mCapParams.height = height;
 		mCapParams.bitrate = bitrate;
 		mCapParams.fps = fps;
+		mCapParams.format = format;
 	}
 	
 	public CapParams GetCapParams()
@@ -61,8 +63,10 @@ public class VideoCaptureDevInfo
         }
 
         public String deviceUniqueName;
-        public CaptureCapability captureCapabilies[];
         public FrontFacingCameraType frontCameraType;
+        
+        public TreeSet<CaptureCapability> capabilites = new TreeSet<CaptureCapability>();
+        public TreeSet<Integer> framerates = new TreeSet<Integer>();
 
         // Orientation of camera as described in
         // android.hardware.Camera.CameraInfo.Orientation
@@ -71,8 +75,7 @@ public class VideoCaptureDevInfo
         // Camera index used in Camera.Open on Android 2.3 and onwards
         public int index;
         
-        public String strFPSs = "";
-        public List<Integer> FPSs=new ArrayList<Integer>();
+        public List<Integer> previewformats;
     }
     
     public enum FrontFacingCameraType
@@ -93,8 +96,7 @@ public class VideoCaptureDevInfo
     		s_self = new VideoCaptureDevInfo();
     		if (s_self.Init() != 0)
     		{
-    			// Even through doesn't initialize camera successfully, we still create object
-    			//s_self = null;
+    			s_self = null;
     			Log.d(TAG, "Failed to create VideoCaptureDevInfo.");
     		}
     	}
@@ -105,7 +107,6 @@ public class VideoCaptureDevInfo
     public VideoCaptureDevice GetDevice(String devName)
     {
     	VideoCaptureDevice device = null;
-    	
     	for (VideoCaptureDevice dev:deviceList)
     	{
     		if (dev.deviceUniqueName.equals(devName))
@@ -116,6 +117,11 @@ public class VideoCaptureDevInfo
     	}
     	
     	return device;
+    }
+    
+    public VideoCaptureDevice GetCurrDevice()
+    {
+    	return GetDevice(mDefaultDevName);
     }
     
     private VideoCaptureDevInfo()
@@ -165,14 +171,13 @@ public class VideoCaptureDevInfo
                 {
                     newDevice.deviceUniqueName = CAMERA_FACE_BACK;
                     newDevice.frontCameraType = FrontFacingCameraType.None;
-                    Log.d(TAG, "Camera " + i +", Facing back, Orientation "+ info.orientation);
-                   
+                    Log.d(TAG, "Camera " + i +", Camera Facing back, Orientation "+ info.orientation);
                 }
                 else
                 {
                     newDevice.deviceUniqueName = CAMERA_FACE_FRONT;
                     newDevice.frontCameraType = FrontFacingCameraType.Android23;
-                    Log.d(TAG, "Camera " + i +", Facing front, Orientation "+ info.orientation);
+                    Log.d(TAG, "Camera " + i +", Camera Facing front, Orientation "+ info.orientation);
                     this.mDefaultDevName = newDevice.deviceUniqueName;
                 }
 
@@ -183,8 +188,8 @@ public class VideoCaptureDevInfo
                 camera = null;
                 deviceList.add(newDevice);
             }
-                
-            VerifyCapabilities();
+
+            //VerifyCapabilities();
         }
         catch (Exception ex)
         {
@@ -199,27 +204,35 @@ public class VideoCaptureDevInfo
  // Adds the capture capabilities of the currently opened device
     private void AddDeviceInfo(VideoCaptureDevice newDevice, Camera.Parameters parameters)
     {
-        List<Size> sizes = parameters.getSupportedVideoSizes();
-        List<Integer> frameRates = parameters.getSupportedPreviewFrameRates();
-        int maxFPS = 0;
-        for(Integer frameRate:frameRates)
+    	newDevice.previewformats = parameters.getSupportedPreviewFormats();
+    	
+        List<Size> sizes = parameters.getSupportedPreviewSizes();
+        for (Size s:sizes)
         {
-        	newDevice.strFPSs = newDevice.strFPSs + frameRate + ",";
-        	newDevice.FPSs.add(frameRate);
-            if(frameRate > maxFPS)
-            {
-                maxFPS = frameRate;
-            }
+        	Log.v(TAG, "VideoCaptureDeviceInfo " + "CaptureCapability:" + s.width + " " + s.height);
+        	newDevice.capabilites.add(new CaptureCapability(s.width, s.height));
         }
-
-        newDevice.captureCapabilies = new CaptureCapability[sizes.size()];
-        for(int i = 0; i < sizes.size(); ++i)
+        
+        List<int[]> fps_ranges = parameters.getSupportedPreviewFpsRange();
+        for (int[] range:fps_ranges)
         {
-            Size s = sizes.get(i);
-            newDevice.captureCapabilies[i] = new CaptureCapability();
-            newDevice.captureCapabilies[i].height = s.height;
-            newDevice.captureCapabilies[i].width = s.width;
-            newDevice.captureCapabilies[i].maxFPS = maxFPS;
+        	String strRange = "range is : ";
+        	for(int val:range)
+        	{
+        		strRange += val + " ";
+        	}
+        	
+        	Log.e("getSupportedPreviewFpsRange", strRange);
+        }
+        
+        List<Integer> frameRates = parameters.getSupportedPreviewFrameRates();
+        for (Integer fps:frameRates)
+        {
+        	if (fps == 5 || fps == 10 || fps == 15 || fps == 30)
+        	{
+        		Log.v(TAG, "VideoCaptureDeviceInfo " + "framerates:" + fps);
+        		newDevice.framerates.add(fps);
+        	}
         }
     }
 
@@ -228,6 +241,7 @@ public class VideoCaptureDevInfo
     // Ie Galaxy S supports CIF but does not list CIF as a supported capability.
     // Motorola Droid Camera does not work with frame rate above 15fps.
     // http://code.google.com/p/android/issues/detail?id=5514#c0
+    /*
     private void VerifyCapabilities()
     {
         // Nexus S or Galaxy S
@@ -296,4 +310,5 @@ public class VideoCaptureDevInfo
     		}
         }
 	}
+	*/
 }

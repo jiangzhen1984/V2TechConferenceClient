@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import v2av.CaptureCapability;
 import v2av.VideoCaptureDevInfo;
 import v2av.VideoPlayer;
 import v2av.VideoRecorder;
@@ -21,6 +22,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.graphics.Color;
+import android.graphics.ImageFormat;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
@@ -392,14 +394,24 @@ public class VideoActivityV2 extends Activity {
 										VideoCaptureDevInfo
 												.CreateVideoCaptureDevInfo()
 												.GetDefaultDevName());
-						if (v >= vcd.captureCapabilies.length) {
+						if (v >= vcd.capabilites.size()) {
 							return;
 						}
 
-						int width = vcd.captureCapabilies[v].width;
-						int height = vcd.captureCapabilies[v].height;
+						int width = 176; 
+						int height = 144; 
 						int bitrate = 256000;
-						int fps = vcd.captureCapabilies[v].maxFPS;
+						int fps = 15;
+						
+						int index = 0;
+						for (CaptureCapability cp : vcd.capabilites) {
+							if (index == v) {
+								width = cp.width;
+								height = cp.height;
+							}
+							index++;
+						}
+					
 
 						// // close local camera
 						Message.obtain(
@@ -413,7 +425,7 @@ public class VideoActivityV2 extends Activity {
 						//
 
 						VideoCaptureDevInfo.CreateVideoCaptureDevInfo()
-								.SetCapParams(width, height, bitrate, fps);
+								.SetCapParams(width, height, bitrate, fps, ImageFormat.NV21);
 
 						mVideoHandler.postDelayed(new Runnable() {
 
@@ -423,7 +435,6 @@ public class VideoActivityV2 extends Activity {
 							}
 
 						}, 500);
-						mSettingWindow.dismiss();
 					}
 
 					@Override

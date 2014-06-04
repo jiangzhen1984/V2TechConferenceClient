@@ -299,9 +299,9 @@ public class VImageMessage extends VMessage {
 			if (options.outHeight >= 1080 || options.outHeight >= 1080) {
 				options.inSampleSize = 6;
 			} else if (options.outHeight > 500 || options.outHeight > 500) {
-				options.inSampleSize = 2;
+				options.inSampleSize = 4;
 			} else {
-				options.inSampleSize = 1;
+				options.inSampleSize = 2;
 			}
 			options.inJustDecodeBounds = false;
 			mCompressedBitmap = BitmapFactory.decodeFile(this.mImagePath,

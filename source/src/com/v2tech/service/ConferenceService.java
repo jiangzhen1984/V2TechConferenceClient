@@ -515,8 +515,10 @@ public class ConferenceService extends AbstractHandler {
 				String szConfData, int nJoinResult) {
 			ConferenceGroup cache = (ConferenceGroup) GlobalHolder
 					.getInstance().findGroupById(nConfID);
-			int flag = ConferenceGroup.extraAttrFromXml(cache, szConfData);
-			
+			if (cache != null) {
+				int flag = ConferenceGroup.extraAttrFromXml(cache, szConfData);
+			}
+
 			JNIResponse jniConfCreateRes = new RequestConfCreateResponse(
 					nConfID, 0, RequestConfCreateResponse.Result.SUCCESS);
 			Message.obtain(mCallbackHandler, JNI_REQUEST_CREATE_CONFERENCE,
