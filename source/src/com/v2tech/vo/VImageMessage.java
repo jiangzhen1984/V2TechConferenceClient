@@ -260,7 +260,7 @@ public class VImageMessage extends VMessage {
 	 * 
 	 * @return
 	 */
-	public Bitmap getFullQuantityBitmap() {
+	public synchronized Bitmap getFullQuantityBitmap() {
 		if (mFullQualityBitmap == null || mFullQualityBitmap.isRecycled()) {
 			BitmapFactory.Options options = new BitmapFactory.Options();
 			options.inJustDecodeBounds = true;
@@ -290,8 +290,10 @@ public class VImageMessage extends VMessage {
 		return mFullQualityBitmap;
 	}
 
-	public Bitmap getCompressedBitmap() {
-		if (mCompressedBitmap == null || mFullQualityBitmap.isRecycled()) {
+	
+	public synchronized Bitmap getCompressedBitmap() {
+		if (mCompressedBitmap == null || mCompressedBitmap.isRecycled()) {
+			V2Log.e(" load bit map");
 			BitmapFactory.Options options = new BitmapFactory.Options();
 			options.inJustDecodeBounds = true;
 			options.inPreferredConfig =  Bitmap.Config.ALPHA_8;
@@ -319,7 +321,5 @@ public class VImageMessage extends VMessage {
 			mCompressedBitmap.recycle();
 			mCompressedBitmap = null;
 		}
-		//Request
-		System.gc();
 	}
 }

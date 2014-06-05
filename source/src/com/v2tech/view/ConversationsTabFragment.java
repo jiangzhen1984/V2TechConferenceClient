@@ -16,6 +16,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -30,6 +31,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 
 import com.v2tech.R;
 import com.v2tech.db.ContentDescriptor;
@@ -121,8 +123,17 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher {
 			mConversationsListView = (ListView) rootView
 					.findViewById(R.id.conversations_list_container);
 			mConversationsListView.setAdapter(adapter);
-			mLoadingImageIV = (ImageView) rootView
-					.findViewById(R.id.conference_loading_icon);
+		/*	
+			RelativeLayout rt = (RelativeLayout)rootView.findViewById(R.id.RelativeLayout2);
+			
+			mLoadingImageIV = new ImageView(getActivity());
+			mLoadingImageIV.setImageResource(R.drawable.progress_animation);
+			
+			RelativeLayout.LayoutParams rl = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+			rl.addRule(RelativeLayout.CENTER_IN_PARENT);
+			rt.addView(mLoadingImageIV, rl);
+			
+			((AnimationDrawable) mLoadingImageIV.getDrawable()).start();*/
 
 			// TextView tv = (TextView)
 			// rootView.findViewById(R.id.fragment_title);
@@ -758,10 +769,6 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher {
 					if (!isLoadedCov) {
 						loadConversation();
 					}
-				}
-				if (mLoadingImageIV.getParent() != null) {
-					((ViewGroup) mLoadingImageIV.getParent())
-							.removeView(mLoadingImageIV);
 				}
 
 				firePendingNotification();

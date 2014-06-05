@@ -1,9 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<animated-rotate xmlns:android="http://schemas.android.com/apk/res/android"
-    android:drawable="@drawable/spinner_black_48"
-    android:fromDegrees="0"
-    android:pivotX="50%"
-    android:pivotY="50%"
-    android:toDegrees="360" >
+<animation-list xmlns:android="http://schemas.android.com/apk/res/android"
+    android:repeatMode="reverse" >
 
-</animated-rotate>
+    <item>
+        <rotate
+            android:drawable="@drawable/spinner_black_48"
+            android:fromDegrees="0"
+            android:pivotX="50%"
+            android:pivotY="50%"
+            android:toDegrees="360" />
+    </item>
+
+</animation-list>

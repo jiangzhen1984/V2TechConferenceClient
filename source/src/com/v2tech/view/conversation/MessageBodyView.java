@@ -7,11 +7,11 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
+import android.os.AsyncTask;
 import android.os.Handler;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewDebug.ExportedProperty;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -47,10 +47,9 @@ public class MessageBodyView extends LinearLayout {
 	private Handler localHandler;
 	private Runnable popupWindowListener = null;
 	private PopupWindow pw;
-	
+
 	private ClickListener callback;
-	
-	
+
 	public interface ClickListener {
 		public void onMessageClicked(VMessage v);
 	}
@@ -67,20 +66,16 @@ public class MessageBodyView extends LinearLayout {
 				null, false);
 		this.isShowTime = isShowTime;
 		this.localHandler = new Handler();
+		initView();
 		initData();
 	}
 
-	private void initData() {
+	private void initView() {
 		if (rootView == null) {
 			V2Log.e(" root view is Null can not initialize");
 			return;
 		}
 		timeTV = (TextView) rootView.findViewById(R.id.message_body_time_text);
-		if (isShowTime && mMsg.getDate() != null) {
-			timeTV.setText(mMsg.getDateTimeStr());
-		} else {
-			timeTV.setVisibility(View.GONE);
-		}
 
 		mLocalMessageContainter = (LinearLayout) rootView
 				.findViewById(R.id.message_body_local_user_ly);
@@ -88,10 +83,24 @@ public class MessageBodyView extends LinearLayout {
 		mRemoteMessageContainter = (LinearLayout) rootView
 				.findViewById(R.id.message_body_remote_ly);
 
+		LinearLayout.LayoutParams ll = new LinearLayout.LayoutParams(
+				LinearLayout.LayoutParams.WRAP_CONTENT,
+				LinearLayout.LayoutParams.WRAP_CONTENT);
+		this.addView(rootView, ll);
+	}
+
+	private void initData() {
+		if (isShowTime && mMsg.getDate() != null) {
+			timeTV.setText(mMsg.getDateTimeStr());
+		} else {
+			timeTV.setVisibility(View.GONE);
+		}
+
 		if (!mMsg.isLocal()) {
 			mHeadIcon = (ImageView) rootView
 					.findViewById(R.id.conversation_message_body_icon_local);
-			if (mMsg.getUser() != null && mMsg.getUser().getAvatarBitmap() != null) {
+			if (mMsg.getUser() != null
+					&& mMsg.getUser().getAvatarBitmap() != null) {
 				mHeadIcon.setImageBitmap(mMsg.getUser().getAvatarBitmap());
 			}
 			mContentContainer = (LinearLayout) rootView
@@ -111,7 +120,8 @@ public class MessageBodyView extends LinearLayout {
 			mArrowIV.bringToFront();
 			mLocalMessageContainter.setVisibility(View.GONE);
 			mRemoteMessageContainter.setVisibility(View.VISIBLE);
-			if (mMsg.getUser() != null && mMsg.getUser().getAvatarBitmap() != null) {
+			if (mMsg.getUser() != null
+					&& mMsg.getUser().getAvatarBitmap() != null) {
 				mHeadIcon.setImageBitmap(mMsg.getUser().getAvatarBitmap());
 			}
 		}
@@ -124,32 +134,22 @@ public class MessageBodyView extends LinearLayout {
 			mContentContainer.addView(contentTV, new LinearLayout.LayoutParams(
 					LinearLayout.LayoutParams.MATCH_PARENT,
 					LinearLayout.LayoutParams.WRAP_CONTENT));
-		} else if (mMsg.getType() ==VMessage.MessageType.IMAGE) {
-			mImageIV = new ImageView(this.getContext());
-			Bitmap bm = ((VImageMessage)mMsg).getCompressedBitmap();
-			mImageIV.setImageBitmap(bm);
-			mContentContainer.addView(mImageIV,new LinearLayout.LayoutParams(
-					LinearLayout.LayoutParams.WRAP_CONTENT,
-					LinearLayout.LayoutParams.WRAP_CONTENT));
+		} else if (mMsg.getType() == VMessage.MessageType.IMAGE) {
+			new LoadTask().execute(new VImageMessage[]{(VImageMessage)mMsg});
 		}
-
-		LinearLayout.LayoutParams ll = new LinearLayout.LayoutParams(
-				LinearLayout.LayoutParams.WRAP_CONTENT,
-				LinearLayout.LayoutParams.WRAP_CONTENT);
-		this.addView(rootView, ll);
 
 		if (mMsg.getType() == VMessage.MessageType.IMAGE) {
 			mContentContainer.setOnClickListener(new OnClickListener() {
 
 				@Override
 				public void onClick(View arg0) {
-					if (callback !=null) {
+					if (callback != null) {
 						callback.onMessageClicked(mMsg);
 					}
 				}
-				
-			}) ;
-			
+
+			});
+
 		} else {
 			mContentContainer.setOnLongClickListener(new OnLongClickListener() {
 
@@ -161,7 +161,7 @@ public class MessageBodyView extends LinearLayout {
 					} else {
 						updateSelectedBg(false);
 					}
-					if (callback !=null) {
+					if (callback != null) {
 						callback.onMessageClicked(mMsg);
 					}
 					return false;
@@ -169,14 +169,8 @@ public class MessageBodyView extends LinearLayout {
 
 			});
 		}
-		
 
 	}
-	
-	
-
-
-
 
 	private void updateSelectedBg(boolean selected) {
 		if (selected) {
@@ -239,7 +233,7 @@ public class MessageBodyView extends LinearLayout {
 				}
 				int offsetX = (anchor.getMeasuredWidth() - 50) / 2;
 				int offsetY = -(anchor.getMeasuredHeight() + 60);
-			
+
 				int[] location = new int[2];
 				anchor.getLocationInWindow(location);
 				if (location[1] <= 0) {
@@ -247,7 +241,9 @@ public class MessageBodyView extends LinearLayout {
 					anchor.getDrawingRect(r);
 					Rect r1 = new Rect();
 					anchor.getGlobalVisibleRect(r1);
-					pw.showAtLocation((View)anchor.getParent(), Gravity.NO_GRAVITY, r1.left + (r.right - r.left)/2, r1.top );
+					pw.showAtLocation((View) anchor.getParent(),
+							Gravity.NO_GRAVITY, r1.left + (r.right - r.left)
+									/ 2, r1.top);
 				} else {
 					pw.showAsDropDown(anchor, offsetX, offsetY);
 				}
@@ -266,15 +262,72 @@ public class MessageBodyView extends LinearLayout {
 		return this.mMsg;
 	}
 
-	
 	public void setCallback(ClickListener cl) {
 		this.callback = cl;
 	}
-	
+
 	public void recycle() {
 		if (this.mMsg.getType() == VMessage.MessageType.IMAGE) {
-			((VImageMessage)this.mMsg).recycle();
+			((VImageMessage) this.mMsg).recycle();
 		}
+	}
+	
+	
+	public void updateView(VMessage vm, boolean showTime) {
+		isShowTime = showTime;
+		updateView(vm);
+	}
+	
+
+	public void updateView(VMessage vm) {
+		if (vm == null) {
+			V2Log.e("Can't not update data vm is null");
+			return;
+		}
+		if (this.mMsg == vm) {
+			return;
+		}
+		if (mContentContainer != null) {
+			mContentContainer.removeAllViews();
+		}
+		this.mMsg = vm;
+		initData();
+	}
+	
+	
+	
+	class LoadTask extends AsyncTask<VImageMessage, Void , VImageMessage[]> {
+
+	
+
+		@Override
+		protected VImageMessage[] doInBackground(VImageMessage... vms) {
+			//Only has one element
+			for (VImageMessage vm : vms) {
+				vm.getCompressedBitmap();
+			}
+			return vms;
+		}
+
+		@Override
+		protected void onPostExecute(VImageMessage[] result) {
+			//Only has one element
+			VImageMessage vm = result[0];
+			//If loaded vm is not same member's, means current view has changed message, igonre this result
+			if (vm != mMsg) {
+				return;
+			}
+			mImageIV = new ImageView(getContext());
+			Bitmap bm = vm.getCompressedBitmap();
+			mImageIV.setImageBitmap(bm);
+			mContentContainer.addView(mImageIV, new LinearLayout.LayoutParams(
+					LinearLayout.LayoutParams.WRAP_CONTENT,
+					LinearLayout.LayoutParams.WRAP_CONTENT));
+		}
+		
+		
+		
+		
 	}
 
 }

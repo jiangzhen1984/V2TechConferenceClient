@@ -27,10 +27,14 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
+import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AbsListView;
+import android.widget.AbsListView.OnScrollListener;
+import android.widget.BaseAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -42,12 +46,11 @@ import com.v2tech.util.V2Log;
 import com.v2tech.view.JNIService;
 import com.v2tech.view.PublicIntent;
 import com.v2tech.view.contacts.ContactDetail;
-import com.v2tech.view.cus.ItemScrollView;
-import com.v2tech.view.cus.ScrollViewListener;
 import com.v2tech.vo.Conversation;
 import com.v2tech.vo.User;
 import com.v2tech.vo.VImageMessage;
 import com.v2tech.vo.VMessage;
+import com.v2tech.vo.VMessage.MessageType;
 
 public class ConversationView extends Activity {
 
@@ -61,10 +64,6 @@ public class ConversationView extends Activity {
 	private final int BATCH_COUNT = 10;
 
 	private int offset = 0;
-
-	private LinearLayout mMessagesContainer;
-
-	private ItemScrollView mScrollView;
 
 	private long user1Id;
 
@@ -103,7 +102,7 @@ public class ConversationView extends Activity {
 	private ImageView mSelectImageButtonIV;
 
 	private ImageView mAudioSpeakerIV;
-	
+
 	private View mShowContactDetailButton;
 
 	private MessageReceiver receiver = new MessageReceiver();
@@ -115,32 +114,35 @@ public class ConversationView extends Activity {
 
 	private Conversation mCurrentConv;
 
+	private ListView mMessagesContainer;
+
+	private MessageAdapter adapter;
+
+	private List<VMessage> messageArray = new ArrayList<VMessage>();
+
 	private boolean isStopped;
+	private Object mLock = new Object();
+	
+	private int currentItemPos = 0;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		mContext = this;
 		setContentView(R.layout.activity_contact_message);
-		mMessagesContainer = (LinearLayout) findViewById(R.id.conversation_message_list);
 
-		mScrollView = (ItemScrollView) findViewById(R.id.conversation_message_list_scroll_view);
-		mScrollView.setOnTouchListener(new OnTouchListener() {
+		lh = new LocalHandler();
 
-			@Override
-			public boolean onTouch(View arg0, MotionEvent arg1) {
-				InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-				imm.hideSoftInputFromWindow(mMessageET.getWindowToken(), InputMethodManager.RESULT_UNCHANGED_SHOWN);
-				return false;
-			}
-			
-		});
-		mScrollView.setScrollListener(scrollListener);
+		mMessagesContainer = (ListView) findViewById(R.id.conversation_message_list);
+		adapter = new MessageAdapter();
+		mMessagesContainer.setAdapter(adapter);
+		mMessagesContainer.setOnTouchListener(mHiddenOnTouchListener);
+		mMessagesContainer.setOnScrollListener(scrollListener);
 
 		mSendButtonTV = (TextView) findViewById(R.id.message_send);
 		// mSendButtonTV.setOnClickListener(sendMessageListener);
 		mSendButtonTV.setOnTouchListener(sendMessageButtonListener);
-		
+
 		mShowContactDetailButton = findViewById(R.id.contact_detail_button);
 		mShowContactDetailButton.setOnClickListener(mShowContactDetailListener);
 
@@ -155,30 +157,8 @@ public class ConversationView extends Activity {
 
 		});
 		mReturnButtonTV = (TextView) findViewById(R.id.contact_detail_return_button);
-		// mReturnButtonTV.setOnClickListener(new OnClickListener() {
-		// @Override
-		// public void onClick(View arg0) {
-		// mReturnButtonTV.setEnabled(false);
-		// InputMethodManager imm = (InputMethodManager)
-		// getSystemService(Context.INPUT_METHOD_SERVICE);
-		// imm.hideSoftInputFromWindow(mMessageET.getWindowToken(), 0);
-		// finish();
-		// }
-		//
-		// });
-		mReturnButtonTV.setOnTouchListener(new OnTouchListener() {
 
-			@Override
-			public boolean onTouch(View view, MotionEvent mv) {
-				if (mv.getAction() == MotionEvent.ACTION_UP) {
-					InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-					imm.hideSoftInputFromWindow(mMessageET.getWindowToken(), 0);
-					finish();
-				}
-				return true;
-			}
-
-		});
+		mReturnButtonTV.setOnTouchListener(mHiddenOnTouchListener);
 
 		mMoreFeatureIV = (ImageView) findViewById(R.id.contact_message_plus);
 		mMoreFeatureIV.setOnClickListener(moreFeatureButtonListenr);
@@ -204,8 +184,6 @@ public class ConversationView extends Activity {
 		if (remote != null && remote.getName() != null) {
 			user2Name = remote.getName();
 		}
-
-		lh = new LocalHandler();
 
 		HandlerThread thread = new HandlerThread("back-end");
 		thread.start();
@@ -236,8 +214,9 @@ public class ConversationView extends Activity {
 		if (mCurrentConv != null) {
 			notificateConversationUpdate(null, null);
 		}
-		//Start animation
-		this.overridePendingTransition(R.animator.nonam_scale_center_0_100, R.animator.nonam_scale_null);
+		// Start animation
+		this.overridePendingTransition(R.animator.nonam_scale_center_0_100,
+				R.animator.nonam_scale_null);
 	}
 
 	@Override
@@ -271,8 +250,6 @@ public class ConversationView extends Activity {
 			scrollToBottom();
 		}
 	}
-	
-	
 
 	@Override
 	public void onBackPressed() {
@@ -284,22 +261,20 @@ public class ConversationView extends Activity {
 		super.onStop();
 		isStopped = true;
 	}
-	
-	
-	
-	
 
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
 		InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-		imm.hideSoftInputFromWindow(mMessageET.getWindowToken(), InputMethodManager.HIDE_IMPLICIT_ONLY);
+		imm.hideSoftInputFromWindow(mMessageET.getWindowToken(),
+				InputMethodManager.HIDE_IMPLICIT_ONLY);
 		return super.onTouchEvent(event);
 	}
 
 	@Override
 	public void finish() {
 		super.finish();
-		this.overridePendingTransition(R.animator.nonam_scale_null, R.animator.nonam_scale_center_100_0);
+		this.overridePendingTransition(R.animator.nonam_scale_null,
+				R.animator.nonam_scale_center_100_0);
 	}
 
 	@Override
@@ -313,28 +288,42 @@ public class ConversationView extends Activity {
 	}
 
 	private void scrollToBottom() {
-		if (mMessagesContainer != null
-				&& mMessagesContainer.getChildCount() > 0) {
-			mScrollView.postDelayed(new Runnable() {
-				@Override
-				public void run() {
-					mScrollView.scrollTo(
-							0,
-							mMessagesContainer.getChildAt(
-									mMessagesContainer.getChildCount() - 1)
-									.getBottom());
-				}
-			}, 500);
+		scrollToPos(messageArray.size()-1);
+	}
+	
+	private void scrollToPos(int pos) {
+		if (pos < 0 || pos >= messageArray.size()) {
+			return;
+		}
+		mMessagesContainer.setSelection(pos);
+		
+	}
+	
+	
+	private void cleanRangeBitmapCache(int before, int after) {
+		int size = messageArray.size();
+		if (size < after && before < 0) {
+			return;
+		}
+		while (--before >= 0) {
+			VMessage vm  = messageArray.get(before);
+			if (vm.getType() == MessageType.IMAGE  || vm.getType() == MessageType.IMAGE_AND_TEXT) {
+				((VImageMessage)vm).recycle();
+			}
+		}
+		
+		
+		while (++after < size) {
+			VMessage vm  = messageArray.get(after);
+			if (vm.getType() == MessageType.IMAGE  || vm.getType() == MessageType.IMAGE_AND_TEXT) {
+				((VImageMessage)vm).recycle();
+			}
 		}
 	}
 
+	// TODO add implements
 	private void cleanCache() {
-		for (int i = 0; i < mMessagesContainer.getChildCount(); i++) {
-			View v = mMessagesContainer.getChildAt(i);
-			if (v instanceof MessageBodyView) {
-				((MessageBodyView) v).recycle();
-			}
-		}
+		messageArray.clear();
 	}
 
 	private OnTouchListener sendMessageButtonListener = new OnTouchListener() {
@@ -420,7 +409,9 @@ public class ConversationView extends Activity {
 				Message.obtain(lh, SEND_MESSAGE, vim).sendToTarget();
 				addMessageToContainer(vim);
 
-				notificateConversationUpdate(mContext.getText(R.string.contact_message_pic_text).toString(), vim.getDateTimeStr());
+				notificateConversationUpdate(
+						mContext.getText(R.string.contact_message_pic_text)
+								.toString(), vim.getDateTimeStr());
 			}
 		}
 	}
@@ -455,7 +446,6 @@ public class ConversationView extends Activity {
 
 		Message.obtain(lh, SEND_MESSAGE, m).sendToTarget();
 		addMessageToContainer(m);
-		
 
 		notificateConversationUpdate(m.getText(), m.getNormalDateStr());
 
@@ -497,37 +487,41 @@ public class ConversationView extends Activity {
 	private void addMessageToContainer(VMessage msg) {
 		// make offset
 		offset++;
-		
-		// Add message to container
-		MessageBodyView mv = new MessageBodyView(mContext, msg, true);
-		mv.setCallback(listener);
-		mMessagesContainer.addView(mv);
-		mScrollView.post(new Runnable() {
-			@Override
-			public void run() {
-				mScrollView.fullScroll(View.FOCUS_DOWN);
-			}
-		});
+
+		messageArray.add(msg);
+		adapter.notifyDataSetChanged();
+		scrollToBottom();
 	}
 
-	private ScrollViewListener scrollListener = new ScrollViewListener() {
-
+	private OnScrollListener scrollListener = new OnScrollListener() {
+		boolean scrolled = false;
+		int lastFirst = 0;
+		boolean isUPScroll = false;
 		@Override
-		public void onScrollBottom(ItemScrollView scrollView, int x, int y,
-				int oldx, int oldy) {
+		public void onScroll(AbsListView view, int first, int allVisibleCount,
+				int allCount) {
+			if (!scrolled) {
+				return;
+			}
+			
+			if (first <= 2 && isUPScroll && !mLoadedAllMessages) {
+				android.os.Message.obtain(lh, START_LOAD_MESSAGE)
+						.sendToTarget();
+				currentItemPos = first;
+			//Do not clean image message state when loading message
+			} else {
+				cleanRangeBitmapCache(first -2, first + allVisibleCount + 2);
+			}
+			//Calculate scrolled direction
+			isUPScroll = first < lastFirst? true:false;
+			lastFirst = first;
 
 		}
 
 		@Override
-		public void onScrollTop(ItemScrollView scrollView, int x, int y,
-				int oldx, int oldy) {
-			if (isLoading || mLoadedAllMessages) {
-				return;
-			}
-			isLoading = true;
-			android.os.Message m = android.os.Message.obtain(lh,
-					START_LOAD_MESSAGE);
-			lh.sendMessageDelayed(m, 500);
+		public void onScrollStateChanged(AbsListView av, int state) {
+			scrolled = state != AbsListView.OnScrollListener.SCROLL_STATE_IDLE;
+
 		}
 
 	};
@@ -566,7 +560,7 @@ public class ConversationView extends Activity {
 		} else if (this.groupId != 0) {
 			selection = "(" + ContentDescriptor.Messages.Cols.GROUP_ID
 					+ "=? ) ";
-			args = new String[] {this.groupId + "" };
+			args = new String[] { this.groupId + "" };
 		}
 
 		Cursor mCur = this.getContentResolver().query(
@@ -586,7 +580,7 @@ public class ConversationView extends Activity {
 		int count = 0;
 		while (mCur.moveToNext()) {
 			VMessage m = extractMsg(mCur);
-			array.add(m);
+			array.add(0,m);
 			count++;
 			offset++;
 			if (count > BATCH_COUNT) {
@@ -610,23 +604,17 @@ public class ConversationView extends Activity {
 		MessageBodyView mv = null;
 		while (mCur.moveToNext()) {
 			VMessage m = extractMsg(mCur);
-			if ((groupId == m.mGroupId && groupId !=0)
+			if ((groupId == m.mGroupId && groupId != 0)
 					|| (m.getUser().getmUserId() == user2Id && m.mGroupId == 0)) {
 				mv = new MessageBodyView(this, m, true);
 				mv.setCallback(listener);
-				mMessagesContainer.addView(mv);
+				messageArray.add(m);
 			}
 		}
 		mCur.close();
 		if (mv != null) {
-			final MessageBodyView fmv = mv;
 			if (!isStopped) {
-				mScrollView.post(new Runnable() {
-					@Override
-					public void run() {
-						mScrollView.scrollTo(0, fmv.getBottom());
-					}
-				});
+				this.scrollToBottom();
 			} else {
 				pending = true;
 			}
@@ -673,7 +661,21 @@ public class ConversationView extends Activity {
 
 	}
 
-	
+	private OnTouchListener mHiddenOnTouchListener = new OnTouchListener() {
+
+		@Override
+		public boolean onTouch(View view, MotionEvent arg1) {
+			InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+			imm.hideSoftInputFromWindow(mMessageET.getWindowToken(),
+					InputMethodManager.RESULT_UNCHANGED_SHOWN);
+			if (mReturnButtonTV == view) {
+				onBackPressed();
+			}
+			return false;
+		}
+
+	};
+
 	private OnClickListener mShowContactDetailListener = new OnClickListener() {
 
 		@Override
@@ -683,9 +685,46 @@ public class ConversationView extends Activity {
 			i.putExtra("uid", user2Id);
 			mContext.startActivity(i);
 		}
-		
+
 	};
-	
+
+	class MessageAdapter extends BaseAdapter {
+
+		@Override
+		public int getCount() {
+			return messageArray.size();
+		}
+
+		@Override
+		public Object getItem(int pos) {
+			return messageArray.get(pos);
+		}
+
+		@Override
+		public long getItemId(int pos) {
+			return messageArray.get(pos).getId();
+		}
+
+		@Override
+		public int getViewTypeCount() {
+			return BATCH_COUNT;
+		}
+
+		@Override
+		public View getView(int pos, View convertView, ViewGroup vg) {
+			VMessage vm = (VMessage) getItem(pos);
+			if (convertView == null) {
+				MessageBodyView mv = new MessageBodyView(mContext, vm, true);
+				mv.setCallback(listener);
+				convertView = mv;
+			} else {
+				((MessageBodyView) convertView).updateView(vm);
+			}
+			return convertView;
+		}
+
+	}
+
 	class MessageReceiver extends BroadcastReceiver {
 
 		@Override
@@ -709,6 +748,10 @@ public class ConversationView extends Activity {
 			switch (msg.what) {
 			case LOAD_MESSAGE:
 				List<VMessage> array = loadMessages();
+				if (array != null) {
+					messageArray.addAll(0, array);
+					currentItemPos += array.size();
+				}
 				android.os.Message.obtain(lh, END_LOAD_MESSAGE, array)
 						.sendToTarget();
 				break;
@@ -723,51 +766,21 @@ public class ConversationView extends Activity {
 		public void handleMessage(android.os.Message msg) {
 			switch (msg.what) {
 			case START_LOAD_MESSAGE:
-				if (mLoadingImg == null) {
-					mLoadingImg = new ImageView(mContext);
-					mLoadingImg.setImageResource(R.drawable.loading);
+				if (isLoading) {
+					break;
 				}
-				mMessagesContainer.addView(mLoadingImg, 0);
-
 				android.os.Message.obtain(backEndHandler, LOAD_MESSAGE)
 						.sendToTarget();
-				break;
-			case LOAD_MESSAGE:
-				loadMessages();
-				android.os.Message.obtain(this, END_LOAD_MESSAGE)
-						.sendToTarget();
+				isLoading = true;
 				break;
 			case END_LOAD_MESSAGE:
-				mMessagesContainer.removeView(mLoadingImg);
-				final List<VMessage> array = (List<VMessage>) msg.obj;
-				MessageBodyView fir = null;
-				for (int i = 0; array != null && i < array.size(); i++) {
-					MessageBodyView mv = new MessageBodyView(mContext,
-							array.get(i), true);
-					mv.setCallback(listener);
-					if (fir == null) {
-						fir = mv;
-					}
-					mMessagesContainer.addView(mv, 0);
-				}
-
-				if (fir != null) {
-					final MessageBodyView firt = fir;
-					mScrollView.post(new Runnable() {
-						@Override
-						public void run() {
-							mScrollView.scrollTo(0, firt.getBottom());
-						}
-					});
-				}
-
+				adapter.notifyDataSetChanged();
+				scrollToPos(currentItemPos);
 				isLoading = false;
 				break;
 			case SEND_MESSAGE:
 				mChat.sendVMessage((VMessage) msg.obj,
 						Message.obtain(this, SEND_MESSAGE_DONE));
-				// mService.sendMessage((VMessage) msg.obj,
-				// Message.obtain(this, SEND_MESSAGE_DONE));
 				break;
 			case QUERY_NEW_MESSAGE:
 				if (msg.obj == null || "".equals(msg.obj.toString())) {

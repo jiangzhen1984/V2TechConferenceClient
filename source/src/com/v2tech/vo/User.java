@@ -537,7 +537,7 @@ public class User implements Comparable<User> {
 			e.printStackTrace();
 		} catch (SAXException e) {
 			e.printStackTrace();
-		} catch (IOException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
 			if (is != null) {
