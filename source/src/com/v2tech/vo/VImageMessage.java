@@ -27,6 +27,7 @@ import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
 
+import com.v2tech.util.BitmapUtil;
 import com.v2tech.util.StorageUtil;
 import com.v2tech.util.V2Log;
 
@@ -291,23 +292,18 @@ public class VImageMessage extends VMessage {
 	}
 
 	
+	public Size getCompressedBitmapSize() {
+		int[] w = new int[2];
+		BitmapUtil.getCompressedBitmapBounds(this.mImagePath, w);
+		Size s = new Size();
+		s.width = w[0];
+		s.height = w[1];
+		return s;
+	}
+	
 	public synchronized Bitmap getCompressedBitmap() {
 		if (mCompressedBitmap == null || mCompressedBitmap.isRecycled()) {
-			V2Log.e(" load bit map");
-			BitmapFactory.Options options = new BitmapFactory.Options();
-			options.inJustDecodeBounds = true;
-			options.inPreferredConfig =  Bitmap.Config.ALPHA_8;
-			BitmapFactory.decodeFile(this.mImagePath, options);
-			if (options.outHeight >= 1080 || options.outHeight >= 1080) {
-				options.inSampleSize = 6;
-			} else if (options.outHeight > 500 || options.outHeight > 500) {
-				options.inSampleSize = 4;
-			} else {
-				options.inSampleSize = 2;
-			}
-			options.inJustDecodeBounds = false;
-			mCompressedBitmap = BitmapFactory.decodeFile(this.mImagePath,
-					options);
+			mCompressedBitmap = BitmapUtil.getCompressedBitmap(this.mImagePath);
 		}
 		return mCompressedBitmap;
 	}
@@ -321,5 +317,12 @@ public class VImageMessage extends VMessage {
 			mCompressedBitmap.recycle();
 			mCompressedBitmap = null;
 		}
+	}
+	
+	
+	
+	public class Size {
+		public  int width;
+		public int height;
 	}
 }

@@ -439,6 +439,7 @@ public class JNIService extends Service {
 					PublicIntent.START_CONVERSACTION_ACTIVITY);
 			resultIntent.putExtra("user1id", GlobalHolder.getInstance()
 					.getCurrentUserId());
+			resultIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 			resultIntent.putExtra("user2id", vm.getUser().getmUserId());
 			resultIntent.putExtra("user2Name", vm.getUser().getName());
 			resultIntent.addCategory(PublicIntent.DEFAULT_CATEGORY);

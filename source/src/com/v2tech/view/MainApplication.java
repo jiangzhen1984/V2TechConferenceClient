@@ -1,6 +1,8 @@
 package com.v2tech.view;
 
 import java.io.File;
+import java.lang.ref.WeakReference;
+import java.util.Vector;
 
 import net.sourceforge.pinyin4j.PinyinHelper;
 import android.annotation.TargetApi;
@@ -16,6 +18,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 
 import com.V2.jni.AudioRequest;
 import com.V2.jni.ChatRequest;
@@ -37,6 +40,9 @@ import com.v2tech.view.conference.VideoActivityV2;
 
 public class MainApplication extends Application {
 
+	private Vector<WeakReference<Activity>> list = new Vector<WeakReference<Activity>>();
+	
+	
 	@Override
 	public void onCreate() {
 		super.onCreate();
@@ -141,14 +147,14 @@ public class MainApplication extends Application {
 
 	@Override
 	public void onLowMemory() {
-		// TODO Auto-generated method stub
 		super.onLowMemory();
+		V2Log.e("=================== low memeory :");
 	}
 
 	@Override
 	public void onTrimMemory(int level) {
-		// TODO Auto-generated method stub
 		super.onTrimMemory(level);
+		V2Log.e("=================== trim memeory :"+ level);
 	}
 
 	private void initGlobalConfiguration() {
@@ -158,6 +164,31 @@ public class MainApplication extends Application {
 		} else {
 			conf.orientation = Configuration.ORIENTATION_PORTRAIT;
 		}
+	}
+	
+	
+	
+	
+	public void requestQuit() {
+		for (int i = 0; i < list.size(); i++){
+			WeakReference<Activity> w = list.get(i);
+			Object obj = w.get();
+			if (obj != null ) {
+				((Activity)obj).finish();
+			}
+		}
+		
+		Handler h = new Handler();
+		h.postDelayed(new Runnable() {
+
+			@Override
+			public void run() {
+				GlobalConfig.saveLogoutFlag(getApplicationContext());
+				Notificator.cancelAllSystemNotification(getApplicationContext());
+				System.exit(0);
+			}
+
+		}, 1000);
 	}
 
 	@TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
@@ -176,11 +207,21 @@ public class MainApplication extends Application {
 			} else {
 				activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 			}
+			
+			list.add(new WeakReference<Activity>(activity));
 		}
 
 		@Override
 		public void onActivityDestroyed(Activity activity) {
-
+			for (int i = 0; i < list.size(); i++){
+				WeakReference<Activity> w = list.get(i);
+				Object obj = w.get();
+				if (obj != null && ((Activity)obj) == activity) {
+					list.remove(i--);
+				}  else {
+					list.remove(i--);
+				}
+			}
 		}
 
 		@Override

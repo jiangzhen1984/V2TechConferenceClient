@@ -174,6 +174,7 @@ public class ContactUserView extends LinearLayout {
 		case ACTION_TYPE_START_CONVERSATION:
 			i.setAction(PublicIntent.START_CONVERSACTION_ACTIVITY);
 			i.addCategory(PublicIntent.DEFAULT_CATEGORY);
+			i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 			i.putExtra("user1id", GlobalHolder.getInstance().getCurrentUserId());
 			i.putExtra("user2id", this.mUser.getmUserId());
 			i.putExtra("user2Name", this.mUser.getName());

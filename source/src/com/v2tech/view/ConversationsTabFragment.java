@@ -254,6 +254,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher {
 					// activity
 					Intent i = new Intent(
 							PublicIntent.START_CONVERSACTION_ACTIVITY);
+					i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 					i.putExtra("user1id", GlobalHolder.getInstance()
 							.getCurrentUserId());
 					i.putExtra("gid", g.getmGId());

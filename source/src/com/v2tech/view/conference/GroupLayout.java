@@ -76,6 +76,7 @@ public class GroupLayout extends LinearLayout {
 
 					Intent i = new Intent(
 							PublicIntent.START_CONVERSACTION_ACTIVITY);
+					i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 					i.putExtra("user1id", GlobalHolder.getInstance()
 							.getCurrentUserId());
 					i.putExtra("user2id", mConv.getExtId());

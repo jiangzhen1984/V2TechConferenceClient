@@ -30,8 +30,6 @@ import android.widget.Toast;
 
 import com.v2tech.R;
 import com.v2tech.service.GlobalHolder;
-import com.v2tech.util.GlobalConfig;
-import com.v2tech.util.Notificator;
 import com.v2tech.util.V2Log;
 import com.v2tech.view.widget.TitleBar;
 import com.v2tech.vo.Conversation;
@@ -294,18 +292,8 @@ public class MainActivity extends FragmentActivity implements
 		if (exitedFlag) {
 			this.getApplicationContext().stopService(
 					new Intent(this.getApplicationContext(), JNIService.class));
-			Handler h = new Handler();
-			h.postDelayed(new Runnable() {
-
-				@Override
-				public void run() {
-					GlobalConfig.saveLogoutFlag(mContext);
-					Notificator.cancelAllSystemNotification(mContext);
-					System.exit(0);
-				}
-
-			}, 1000);
 			finish();
+			((MainApplication)this.getApplicationContext()).requestQuit();
 
 		} else {
 			exitedFlag = true;

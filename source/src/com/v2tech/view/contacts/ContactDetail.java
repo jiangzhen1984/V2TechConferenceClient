@@ -36,7 +36,6 @@ import com.v2tech.vo.User;
 
 public class ContactDetail extends Activity implements OnTouchListener {
 
-	private static final int SHOW_USER_INFO = 1;
 	private static final int UPDATE_USER_INFO = 2;
 	private static final int UPDATE_USER_INFO_DONE = 3;
 
@@ -422,16 +421,6 @@ public class ContactDetail extends Activity implements OnTouchListener {
 		@Override
 		public void handleMessage(Message msg) {
 			switch (msg.what) {
-			case SHOW_USER_INFO:
-				u = GlobalHolder.getInstance().getUser(mUid);
-				if (u == null) {
-					Toast.makeText(mContext,
-							R.string.error_contacts_user_detail_no_avai_user,
-							Toast.LENGTH_SHORT).show();
-				} else {
-					showUserInfo();
-				}
-				break;
 			case UPDATE_USER_INFO:
 				gatherUserData();
 				us.updateUser(u, new Registrant(this, UPDATE_USER_INFO_DONE,

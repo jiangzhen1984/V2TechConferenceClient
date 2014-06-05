@@ -421,48 +421,16 @@ public class VideoInvitionAttendeeLayout extends LinearLayout {
 			if (listener != null) {
 				listener.requestInvitation(conf, l);
 			}
-		}
-
-	};
-
-	private DateTimePicker dtp;
-	private OnTouchListener mDateTimePickerListener = new OnTouchListener() {
-
-		@Override
-		public boolean onTouch(final View view, MotionEvent event) {
-			if (event.getAction() == MotionEvent.ACTION_UP) {
-
-				if (dtp == null) {
-					dtp = new DateTimePicker(mContext,
-							ViewGroup.LayoutParams.WRAP_CONTENT,
-							ViewGroup.LayoutParams.WRAP_CONTENT);
-					dtp.setOnDateSetListener(new OnDateSetListener() {
-
-						@Override
-						public void onDateTimeSet(int year, int monthOfYear,
-								int dayOfMonth, int hour, int minute) {
-							((EditText) view).setText(year
-									+ "-"
-									+ monthOfYear
-									+ "-"
-									+ dayOfMonth
-									+ " "
-									+ (hour < 10 ? ("0" + hour) : (hour + ""))
-									+ ":"
-									+ (minute < 10 ? ("0" + minute)
-											: (minute + "")));
-						}
-
-					});
+			
+			//Clean
+			mAttendeeContainer.removeAllViews();
+			mAttendeeList.clear();
+			for (ListItem li : mItemList) {
+				if (li.u != null && ((ContactUserView)li.v).isChecked()) {
+					((ContactUserView)li.v).updateChecked();
 				}
-
-				dtp.showAsDropDown(view);
-				InputMethodManager imm = (InputMethodManager) mContext.getSystemService(Context.INPUT_METHOD_SERVICE);
-				imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
-				mConfStartTimeET.setError(null);
-
 			}
-			return true;
+			
 		}
 
 	};

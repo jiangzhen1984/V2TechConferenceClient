@@ -510,7 +510,7 @@ public class ConversationView extends Activity {
 				currentItemPos = first;
 			//Do not clean image message state when loading message
 			} else {
-				cleanRangeBitmapCache(first -2, first + allVisibleCount + 2);
+				cleanRangeBitmapCache(first -5, first + allVisibleCount + BATCH_COUNT);
 			}
 			//Calculate scrolled direction
 			isUPScroll = first < lastFirst? true:false;

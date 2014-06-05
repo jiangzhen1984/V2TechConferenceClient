@@ -135,6 +135,12 @@ public class MessageBodyView extends LinearLayout {
 					LinearLayout.LayoutParams.MATCH_PARENT,
 					LinearLayout.LayoutParams.WRAP_CONTENT));
 		} else if (mMsg.getType() == VMessage.MessageType.IMAGE) {
+			VImageMessage.Size si = ((VImageMessage)mMsg).getCompressedBitmapSize();
+			mImageIV = new ImageView(getContext());
+			mContentContainer.addView(mImageIV, new LinearLayout.LayoutParams(
+					si.width,
+					si.height));
+			
 			new LoadTask().execute(new VImageMessage[]{(VImageMessage)mMsg});
 		}
 
@@ -317,12 +323,13 @@ public class MessageBodyView extends LinearLayout {
 			if (vm != mMsg) {
 				return;
 			}
-			mImageIV = new ImageView(getContext());
+			mImageIV = (ImageView)mContentContainer.getChildAt(mContentContainer.getChildCount() - 1);
+			//new ImageView(getContext());
 			Bitmap bm = vm.getCompressedBitmap();
 			mImageIV.setImageBitmap(bm);
-			mContentContainer.addView(mImageIV, new LinearLayout.LayoutParams(
-					LinearLayout.LayoutParams.WRAP_CONTENT,
-					LinearLayout.LayoutParams.WRAP_CONTENT));
+//			mContentContainer.addView(mImageIV, new LinearLayout.LayoutParams(
+//					LinearLayout.LayoutParams.WRAP_CONTENT,
+//					LinearLayout.LayoutParams.WRAP_CONTENT));
 		}
 		
 		
