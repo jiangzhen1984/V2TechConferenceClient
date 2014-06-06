@@ -43,20 +43,15 @@
         android:orientation="vertical" >
     </LinearLayout>
 
-    <ScrollView
-        android:id="@+id/video_msg_container_scroller"
+    <ListView
+        android:id="@+id/video_msg_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@+id/video_msg_chatting_bottom_bar"
+        android:divider="@null"
         android:layout_below="@+id/LinearLayout1" >
 
-        <LinearLayout
-            android:id="@+id/video_msg_container"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical" >
-        </LinearLayout>
-    </ScrollView>
+    </ListView>
 
     <LinearLayout
         android:id="@+id/video_msg_chatting_bottom_bar"

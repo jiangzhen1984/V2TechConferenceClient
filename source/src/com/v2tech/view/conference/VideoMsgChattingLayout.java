@@ -1,29 +1,34 @@
 package com.v2tech.view.conference;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import android.content.Context;
-import android.graphics.Color;
-import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ScrollView;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.v2tech.R;
 import com.v2tech.service.GlobalHolder;
+import com.v2tech.view.adapter.VMessageAdater;
+import com.v2tech.view.widget.CommonAdapter;
+import com.v2tech.view.widget.CommonAdapter.CommonAdapterItemWrapper;
 import com.v2tech.vo.VMessage;
 
 public class VideoMsgChattingLayout extends LinearLayout {
 
 	private View rootView;
-
+	private ListView mMsgContainer;
 	private ChattingListener listener;
-	private ScrollView mScroller;
-	private LinearLayout mMsgContainer;
 	private View mSendButton;
 	private TextView mContentTV;
 	private View mPinButton;
+	private List<CommonAdapterItemWrapper> messageArray;
+	private CommonAdapter adapter;
 
 	public interface ChattingListener {
 		public void requestSendMsg(VMessage vm);
@@ -36,18 +41,9 @@ public class VideoMsgChattingLayout extends LinearLayout {
 	public VideoMsgChattingLayout(Context context) {
 		super(context);
 		initLayout();
+		initData();
 	}
 
-	public VideoMsgChattingLayout(Context context, AttributeSet attrs) {
-		super(context, attrs);
-		initLayout();
-	}
-
-	public VideoMsgChattingLayout(Context context, AttributeSet attrs,
-			int defStyle) {
-		super(context, attrs, defStyle);
-		initLayout();
-	}
 
 	private void initLayout() {
 		View view = LayoutInflater.from(getContext()).inflate(
@@ -60,9 +56,7 @@ public class VideoMsgChattingLayout extends LinearLayout {
 				LinearLayout.LayoutParams.MATCH_PARENT,
 				LinearLayout.LayoutParams.MATCH_PARENT));
 
-		this.mScroller = (ScrollView) view
-				.findViewById(R.id.video_msg_container_scroller);
-		this.mMsgContainer = (LinearLayout) view
+		this.mMsgContainer = (ListView) view
 				.findViewById(R.id.video_msg_container);
 		this.mContentTV = (TextView) view
 				.findViewById(R.id.video_msg_chatting_layout_msg_content);
@@ -91,57 +85,37 @@ public class VideoMsgChattingLayout extends LinearLayout {
 		rootView = this;
 	}
 
+	
+	private void initData() {
+		messageArray = new ArrayList<CommonAdapterItemWrapper>();
+		adapter = new CommonAdapter(messageArray, mConvertListener);
+		mMsgContainer.setAdapter(adapter);
+	}
+	
+	
 	public void setListener(ChattingListener listener) {
 		this.listener = listener;
 	}
 
 	public void requestScrollToNewMessage() {
-		if (mMsgContainer.getChildCount() <= 0) {
+		if (messageArray.size() <= 0) {
 			return;
 		}
-		this.mScroller.post(new Runnable() {
-
-			@Override
-			public void run() {
-				mScroller.scrollTo(
-						0,
-						mMsgContainer.getChildAt(
-								mMsgContainer.getChildCount() - 1).getBottom());
-			}
-
-		});
+		mMsgContainer.setSelection(messageArray.size() - 1);
 	}
 
 	public void addNewMessage(VMessage vm) {
-		TextView tvSender = new TextView(this.getContext());
-		tvSender.setText(vm.getUser().getName() + " " + vm.getDateTimeStr());
-		tvSender.setTextColor(getContext().getResources().getColor(
-				R.color.conference_msg_content_color));
-		tvSender.setPadding(15, 5, 15, 5);
-		tvSender.setTextSize(14);
-
-		this.mMsgContainer.addView(tvSender);
-
-		TextView tv = new TextView(this.getContext());
-		tv.setText(vm.getText());
-		tv.setPadding(15, 5, 15, 5);
-		tv.setTextColor(getContext().getResources().getColor(
-				R.color.conference_msg_content_color));
-		tv.setTextSize(14);
-		this.mMsgContainer.addView(tv);
-		this.mScroller.post(new Runnable() {
-
-			@Override
-			public void run() {
-				mScroller.scrollTo(
-						0,
-						mMsgContainer.getChildAt(
-								mMsgContainer.getChildCount() - 1).getBottom());
-			}
-
-		});
+		messageArray.add(new VMessageAdater(vm));
+		adapter.notifyDataSetChanged();
+		requestScrollToNewMessage();
 	}
 
+	
+	public void clean() {
+		
+	}
+	
+	
 	/**
 	 * Used to manually request FloatLayout, Because when this layout will hide,
 	 * call this function to inform interface
@@ -185,5 +159,24 @@ public class VideoMsgChattingLayout extends LinearLayout {
 			}
 		}
 
+	};
+	
+	
+	
+	private CommonAdapter.ViewConvertListener mConvertListener = new CommonAdapter.ViewConvertListener() {
+
+		@Override
+		public View converView(CommonAdapterItemWrapper wr, View convertView,
+				ViewGroup vg) {
+			
+			VMessage vm = (VMessage) wr.getItemObject();
+			if (convertView == null) {
+				ConferenceMessageBodyView mv = new ConferenceMessageBodyView(getContext(), vm);
+				convertView = mv;
+			} else {
+				((ConferenceMessageBodyView) convertView).updateView(vm);
+			}
+			return convertView;
+		}
 	};
 }

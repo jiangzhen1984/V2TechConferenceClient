@@ -1980,7 +1980,7 @@ public class VideoActivityV2 extends Activity {
 				}
 				if (ind.getUid() == GlobalHolder.getInstance()
 						.getCurrentUserId()) {
-					if (PermissionState.fromInt(ind.getState()) == PermissionState.GRANTED) {
+					if (PermissionState.fromInt(ind.getState()) == PermissionState.GRANTED && ConferencePermission.SPEAKING.intValue() == ind.getType()) {
 						mSpeakerIV.setImageResource(R.drawable.speaking_button);
 						// set flag to speaking
 						isSpeaking = true;

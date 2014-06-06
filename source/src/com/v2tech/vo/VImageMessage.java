@@ -270,12 +270,12 @@ public class VImageMessage extends VMessage {
 			BitmapFactory.decodeFile(this.mImagePath, options);
 			options.inJustDecodeBounds = false;
 			if (options.outWidth > 1920 || options.outHeight > 1080) {
-				options.inSampleSize = 2;
+				options.inSampleSize = 4;
 				mFullQualityBitmap = BitmapFactory.decodeFile(this.mImagePath,
 						options);
 				return mFullQualityBitmap;
 			} else if (options.outWidth > 800 || options.outHeight > 600) {
-				options.inSampleSize = 1;
+				options.inSampleSize = 2;
 				mFullQualityBitmap = BitmapFactory.decodeFile(this.mImagePath,
 						options);
 				return mFullQualityBitmap;
@@ -309,13 +309,18 @@ public class VImageMessage extends VMessage {
 	}
 
 	public void recycle() {
-		if (mFullQualityBitmap != null) {
-			mFullQualityBitmap.recycle();
-			mFullQualityBitmap = null;
-		}
+		recycleFull();
 		if (mCompressedBitmap != null) {
 			mCompressedBitmap.recycle();
 			mCompressedBitmap = null;
+		}
+	}
+	
+	
+	public void recycleFull() {
+		if (mFullQualityBitmap != null) {
+			mFullQualityBitmap.recycle();
+			mFullQualityBitmap = null;
 		}
 	}
 	

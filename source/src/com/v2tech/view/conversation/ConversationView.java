@@ -31,7 +31,6 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
-import android.widget.BaseAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -45,7 +44,10 @@ import com.v2tech.service.GlobalHolder;
 import com.v2tech.util.V2Log;
 import com.v2tech.view.JNIService;
 import com.v2tech.view.PublicIntent;
+import com.v2tech.view.adapter.VMessageAdater;
 import com.v2tech.view.contacts.ContactDetail;
+import com.v2tech.view.widget.CommonAdapter;
+import com.v2tech.view.widget.CommonAdapter.CommonAdapterItemWrapper;
 import com.v2tech.vo.Conversation;
 import com.v2tech.vo.User;
 import com.v2tech.vo.VImageMessage;
@@ -116,13 +118,12 @@ public class ConversationView extends Activity {
 
 	private ListView mMessagesContainer;
 
-	private MessageAdapter adapter;
+	private CommonAdapter adapter;
 
-	private List<VMessage> messageArray = new ArrayList<VMessage>();
+	private List<CommonAdapterItemWrapper> messageArray = new ArrayList<CommonAdapterItemWrapper>();
 
 	private boolean isStopped;
-	private Object mLock = new Object();
-	
+
 	private int currentItemPos = 0;
 
 	@Override
@@ -134,7 +135,7 @@ public class ConversationView extends Activity {
 		lh = new LocalHandler();
 
 		mMessagesContainer = (ListView) findViewById(R.id.conversation_message_list);
-		adapter = new MessageAdapter();
+		adapter = new CommonAdapter(messageArray, mConvertListener);
 		mMessagesContainer.setAdapter(adapter);
 		mMessagesContainer.setOnTouchListener(mHiddenOnTouchListener);
 		mMessagesContainer.setOnScrollListener(scrollListener);
@@ -288,35 +289,35 @@ public class ConversationView extends Activity {
 	}
 
 	private void scrollToBottom() {
-		scrollToPos(messageArray.size()-1);
+		scrollToPos(messageArray.size() - 1);
 	}
-	
+
 	private void scrollToPos(int pos) {
 		if (pos < 0 || pos >= messageArray.size()) {
 			return;
 		}
 		mMessagesContainer.setSelection(pos);
-		
+
 	}
-	
-	
+
 	private void cleanRangeBitmapCache(int before, int after) {
 		int size = messageArray.size();
 		if (size < after && before < 0) {
 			return;
 		}
 		while (--before >= 0) {
-			VMessage vm  = messageArray.get(before);
-			if (vm.getType() == MessageType.IMAGE  || vm.getType() == MessageType.IMAGE_AND_TEXT) {
-				((VImageMessage)vm).recycle();
+			VMessage vm = (VMessage) messageArray.get(before).getItemObject();
+			if (vm.getType() == MessageType.IMAGE
+					|| vm.getType() == MessageType.IMAGE_AND_TEXT) {
+				((VImageMessage) vm).recycle();
 			}
 		}
-		
-		
+
 		while (++after < size) {
-			VMessage vm  = messageArray.get(after);
-			if (vm.getType() == MessageType.IMAGE  || vm.getType() == MessageType.IMAGE_AND_TEXT) {
-				((VImageMessage)vm).recycle();
+			VMessage vm = (VMessage) messageArray.get(after).getItemObject();
+			if (vm.getType() == MessageType.IMAGE
+					|| vm.getType() == MessageType.IMAGE_AND_TEXT) {
+				((VImageMessage) vm).recycle();
 			}
 		}
 	}
@@ -488,7 +489,7 @@ public class ConversationView extends Activity {
 		// make offset
 		offset++;
 
-		messageArray.add(msg);
+		messageArray.add(new VMessageAdater(msg));
 		adapter.notifyDataSetChanged();
 		scrollToBottom();
 	}
@@ -497,23 +498,25 @@ public class ConversationView extends Activity {
 		boolean scrolled = false;
 		int lastFirst = 0;
 		boolean isUPScroll = false;
+
 		@Override
 		public void onScroll(AbsListView view, int first, int allVisibleCount,
 				int allCount) {
 			if (!scrolled) {
 				return;
 			}
-			
+
 			if (first <= 2 && isUPScroll && !mLoadedAllMessages) {
 				android.os.Message.obtain(lh, START_LOAD_MESSAGE)
 						.sendToTarget();
 				currentItemPos = first;
-			//Do not clean image message state when loading message
+				// Do not clean image message state when loading message
 			} else {
-				cleanRangeBitmapCache(first -5, first + allVisibleCount + BATCH_COUNT);
+				cleanRangeBitmapCache(first - 5, first + allVisibleCount
+						+ BATCH_COUNT);
 			}
-			//Calculate scrolled direction
-			isUPScroll = first < lastFirst? true:false;
+			// Calculate scrolled direction
+			isUPScroll = first < lastFirst ? true : false;
 			lastFirst = first;
 
 		}
@@ -580,7 +583,7 @@ public class ConversationView extends Activity {
 		int count = 0;
 		while (mCur.moveToNext()) {
 			VMessage m = extractMsg(mCur);
-			array.add(0,m);
+			array.add(0, m);
 			count++;
 			offset++;
 			if (count > BATCH_COUNT) {
@@ -608,7 +611,7 @@ public class ConversationView extends Activity {
 					|| (m.getUser().getmUserId() == user2Id && m.mGroupId == 0)) {
 				mv = new MessageBodyView(this, m, true);
 				mv.setCallback(listener);
-				messageArray.add(m);
+				messageArray.add(new VMessageAdater(m));
 			}
 		}
 		mCur.close();
@@ -688,31 +691,15 @@ public class ConversationView extends Activity {
 
 	};
 
-	class MessageAdapter extends BaseAdapter {
+	private CommonAdapter.ViewConvertListener mConvertListener = new CommonAdapter.ViewConvertListener() {
 
 		@Override
-		public int getCount() {
-			return messageArray.size();
-		}
-
-		@Override
-		public Object getItem(int pos) {
-			return messageArray.get(pos);
-		}
-
-		@Override
-		public long getItemId(int pos) {
-			return messageArray.get(pos).getId();
-		}
-
-		@Override
-		public int getViewTypeCount() {
-			return BATCH_COUNT;
-		}
-
-		@Override
-		public View getView(int pos, View convertView, ViewGroup vg) {
-			VMessage vm = (VMessage) getItem(pos);
+		public View converView(CommonAdapterItemWrapper wr, View convertView,
+				ViewGroup vg) {
+			if (wr == null) {
+				return null;
+			}
+			VMessage vm = (VMessage) wr.getItemObject();
 			if (convertView == null) {
 				MessageBodyView mv = new MessageBodyView(mContext, vm, true);
 				mv.setCallback(listener);
@@ -722,8 +709,7 @@ public class ConversationView extends Activity {
 			}
 			return convertView;
 		}
-
-	}
+	};
 
 	class MessageReceiver extends BroadcastReceiver {
 
@@ -749,7 +735,9 @@ public class ConversationView extends Activity {
 			case LOAD_MESSAGE:
 				List<VMessage> array = loadMessages();
 				if (array != null) {
-					messageArray.addAll(0, array);
+					for (int i = 0; i < array.size(); i++) {
+						messageArray.add(i, new VMessageAdater(array.get(i)));
+					}
 					currentItemPos += array.size();
 				}
 				android.os.Message.obtain(lh, END_LOAD_MESSAGE, array)

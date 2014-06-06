@@ -5,6 +5,7 @@ import java.util.List;
 
 import android.os.Handler;
 import android.os.Message;
+import android.util.SparseArray;
 
 import com.V2.jni.ConfRequest;
 import com.V2.jni.ConfRequestCallback;
@@ -78,6 +79,15 @@ public class ConferenceService extends AbstractHandler {
 	private static final int JNI_REQUEST_INVITE_ATTENDEES = 9;
 
 	private static final int JNI_UPDATE_CAMERA_PAR = 75;
+
+	private static final int KEY_KICKED_LISTNER = 1;
+	private static final int KEY_ATTENDEE_DEVICE_LISTNER = 2;
+	private static final int KEY_ATTENDEE_STATUS_LISTNER = 3;
+	private static final int KEY_SYNC_LISTNER = 4;
+	private static final int KEY_PERMISSION_CHANGED_LISTNER = 5;
+	private static final int KEY_MIXED_VIDEO_LISTNER = 6;
+
+	private SparseArray<List<Registrant>> registrantHolder = new SparseArray<List<Registrant>>();
 
 	private VideoRequestCB videoCallback;
 	private ConfRequestCB confCallback;
@@ -389,7 +399,45 @@ public class ConferenceService extends AbstractHandler {
 				cc.getCameraIndex(), cc.getFrameRate(), cc.getBitRate());
 	}
 
-	private List<Registrant> registerList = new ArrayList<Registrant>();
+	/********************************************************************************
+	 * Listener
+	 ********************************************************************************/
+
+	private void registerListener(int key, Handler h, int what, Object obj) {
+		List<Registrant> list = registrantHolder.get(key);
+		if (list == null) {
+			list = new ArrayList<Registrant>();
+			registrantHolder.append(key, list);
+		}
+		list.add(new Registrant(h, what, obj));
+	}
+
+	private void unRegisterListener(int key, Handler h, int what, Object obj) {
+		List<Registrant> list = registrantHolder.get(key);
+		if (list != null) {
+			for (Registrant re : list) {
+				if (re.getHandler() == h && what == re.getWhat()) {
+					list.remove(re);
+				}
+			}
+		}
+	}
+
+	private void notifyListener(int key, int arg1, int arg2, Object obj) {
+		List<Registrant> list = registrantHolder.get(key);
+		if (list == null) {
+			V2Log.e(" No listener for " + key);
+			return;
+		} else {
+			V2Log.i(" Notify listener: " + arg1 + "  " + arg2 + "  " + obj);
+		}
+		for (Registrant re : list) {
+			Handler h = re.getHandler();
+			if (h != null) {
+				Message.obtain(h, re.getWhat(), arg1, arg2, obj).sendToTarget();
+			}
+		}
+	}
 
 	/**
 	 * Register listener for out conference by kick.
@@ -397,40 +445,28 @@ public class ConferenceService extends AbstractHandler {
 	 * @param msg
 	 */
 	public void registerKickedConfListener(Handler h, int what, Object obj) {
-		registerList.add(new Registrant(h, what, obj));
+		registerListener(KEY_KICKED_LISTNER, h, what, obj);
 	}
 
 	public void removeRegisterOfKickedConfListener(Handler h, int what,
 			Object obj) {
-		for (Registrant re : registerList) {
-			if (re.getHandler() == h && what == re.getWhat()) {
-				registerList.remove(re);
-			}
-		}
+		unRegisterListener(KEY_KICKED_LISTNER, h, what, obj);
+
 	}
 
 	// =============================
-	private List<Registrant> registerAttendeeDeviceNotificationListenersList = new ArrayList<Registrant>();
-
 	/**
 	 * Register listener for out conference by kick.
 	 * 
 	 * @param msg
 	 */
 	public void registerAttendeeDeviceListener(Handler h, int what, Object obj) {
-		registerAttendeeDeviceNotificationListenersList.add(new Registrant(h,
-				what, obj));
+		registerListener(KEY_ATTENDEE_DEVICE_LISTNER, h, what, obj);
 	}
 
 	public void removeAttendeeDeviceListener(Handler h, int what, Object obj) {
-		for (Registrant re : registerAttendeeDeviceNotificationListenersList) {
-			if (re.getHandler() == h && what == re.getWhat()) {
-				registerAttendeeDeviceNotificationListenersList.remove(re);
-			}
-		}
+		unRegisterListener(KEY_ATTENDEE_DEVICE_LISTNER, h, what, obj);
 	}
-
-	private List<Registrant> registerAttendeeStatusListenersList = new ArrayList<Registrant>();
 
 	/**
 	 * Register listener for out conference by kick.
@@ -438,18 +474,12 @@ public class ConferenceService extends AbstractHandler {
 	 * @param msg
 	 */
 	public void registerAttendeeListener(Handler h, int what, Object obj) {
-		registerAttendeeStatusListenersList.add(new Registrant(h, what, obj));
+		registerListener(KEY_ATTENDEE_STATUS_LISTNER, h, what, obj);
 	}
 
 	public void removeAttendeeListener(Handler h, int what, Object obj) {
-		for (Registrant re : registerAttendeeStatusListenersList) {
-			if (re.getHandler() == h && what == re.getWhat()) {
-				registerAttendeeStatusListenersList.remove(re);
-			}
-		}
+		unRegisterListener(KEY_ATTENDEE_STATUS_LISTNER, h, what, obj);
 	}
-
-	private List<Registrant> syncDesktopListenersList = new ArrayList<Registrant>();
 
 	/**
 	 * Register listener for chairman control or release desktop
@@ -457,49 +487,33 @@ public class ConferenceService extends AbstractHandler {
 	 * @param msg
 	 */
 	public void registerSyncDesktopListener(Handler h, int what, Object obj) {
-		syncDesktopListenersList.add(new Registrant(h, what, obj));
+		registerListener(KEY_SYNC_LISTNER, h, what, obj);
 	}
 
 	public void removeSyncDesktopListener(Handler h, int what, Object obj) {
-		for (Registrant re : syncDesktopListenersList) {
-			if (re.getHandler() == h && what == re.getWhat()) {
-				syncDesktopListenersList.remove(re);
-			}
-		}
+		unRegisterListener(KEY_SYNC_LISTNER, h, what, obj);
 	}
 
-	private List<Registrant> permissionUpdateListenersList = new ArrayList<Registrant>();
-
 	/**
-	 * Register listener for
+	 * Register listener for permission changed
 	 * 
 	 * @param msg
 	 */
 	public void registerPermissionUpdateListener(Handler h, int what, Object obj) {
-		permissionUpdateListenersList.add(new Registrant(h, what, obj));
+		registerListener(KEY_PERMISSION_CHANGED_LISTNER, h, what, obj);
 	}
 
 	public void unRegisterPermissionUpdateListener(Handler h, int what,
 			Object obj) {
-		for (Registrant re : permissionUpdateListenersList) {
-			if (re.getHandler() == h && what == re.getWhat()) {
-				permissionUpdateListenersList.remove(re);
-			}
-		}
+		unRegisterListener(KEY_PERMISSION_CHANGED_LISTNER, h, what, obj);
 	}
 
-	private List<Registrant> mixListenersList = new ArrayList<Registrant>();
-
 	public void registerVideoMixerListener(Handler h, int what, Object obj) {
-		mixListenersList.add(new Registrant(h, what, obj));
+		registerListener(KEY_MIXED_VIDEO_LISTNER, h, what, obj);
 	}
 
 	public void unRegisterVideoMixerListener(Handler h, int what, Object obj) {
-		for (Registrant re : mixListenersList) {
-			if (re.getHandler() == h && what == re.getWhat()) {
-				mixListenersList.remove(re);
-			}
-		}
+		unRegisterListener(KEY_MIXED_VIDEO_LISTNER, h, what, obj);
 	}
 
 	class ConfRequestCB implements ConfRequestCallback {
@@ -516,7 +530,7 @@ public class ConferenceService extends AbstractHandler {
 			ConferenceGroup cache = (ConferenceGroup) GlobalHolder
 					.getInstance().findGroupById(nConfID);
 			if (cache != null) {
-				int flag = ConferenceGroup.extraAttrFromXml(cache, szConfData);
+				ConferenceGroup.extraAttrFromXml(cache, szConfData);
 			}
 
 			JNIResponse jniConfCreateRes = new RequestConfCreateResponse(
@@ -548,13 +562,7 @@ public class ConferenceService extends AbstractHandler {
 						V2Log.e(" Can't not find user " + id);
 						return;
 					}
-					for (Registrant re : registerAttendeeStatusListenersList) {
-						Handler h = re.getHandler();
-						if (h != null) {
-							Message.obtain(h, re.getWhat(), 1, 0, u)
-									.sendToTarget();
-						}
-					}
+					notifyListener(KEY_ATTENDEE_STATUS_LISTNER, 1, 0, u);
 
 				} else {
 					V2Log.e("Invalid attendee user id ignore callback message");
@@ -569,37 +577,20 @@ public class ConferenceService extends AbstractHandler {
 				long nUserID) {
 
 			User u = GlobalHolder.getInstance().getUser(nUserID);
-
-			for (Registrant re : registerAttendeeStatusListenersList) {
-				Handler h = re.getHandler();
-				if (h != null) {
-					Message.obtain(h, re.getWhat(), 0, 0, u).sendToTarget();
-				}
-			}
+			notifyListener(KEY_ATTENDEE_STATUS_LISTNER, 0, 0, u);
 
 		}
 
 		@Override
 		public void OnKickConfCallback(int nReason) {
-			for (Registrant re : registerList) {
-				Handler h = re.getHandler();
-				if (h != null) {
-					Message.obtain(h, re.getWhat(), nReason, 0, re.getObject())
-							.sendToTarget();
-				}
-			}
+			notifyListener(KEY_KICKED_LISTNER, nReason, 0, null);
 		}
 
 		@Override
 		public void OnGrantPermissionCallback(long userid, int type, int status) {
 			JNIIndication jniInd = new PermissionUpdateIndication(userid, type,
 					status);
-			for (Registrant re : permissionUpdateListenersList) {
-				Handler h = re.getHandler();
-				if (h != null) {
-					Message.obtain(h, re.getWhat(), jniInd).sendToTarget();
-				}
-			}
+			notifyListener(KEY_PERMISSION_CHANGED_LISTNER, 0, 0, jniInd);
 		}
 
 		@Override
@@ -627,13 +618,7 @@ public class ConferenceService extends AbstractHandler {
 					.parseFromXml(szXmlData);
 			GlobalHolder.getInstance().addAttendeeDevice(ll);
 
-			for (Registrant re : registerAttendeeDeviceNotificationListenersList) {
-				Handler h = re.getHandler();
-				if (h != null) {
-					Message.obtain(h, re.getWhat(), 0, 0, ll).sendToTarget();
-				}
-			}
-
+			notifyListener(KEY_ATTENDEE_DEVICE_LISTNER, 0, 0, ll);
 		}
 
 		@Override
@@ -688,15 +673,8 @@ public class ConferenceService extends AbstractHandler {
 					int flag = ConferenceGroup.extraAttrFromXml(cache, sXml);
 
 					if ((flag & ConferenceGroup.EXTRA_FLAG_SYNC) == ConferenceGroup.EXTRA_FLAG_SYNC) {
-						// notify sync desktop listener
-						for (Registrant re : syncDesktopListenersList) {
-							Handler h = re.getHandler();
-							if (h != null) {
-								Message.obtain(h, re.getWhat(),
-										(cache.isSyn() ? 1 : 0), 0, null)
-										.sendToTarget();
-							}
-						}
+						notifyListener(KEY_SYNC_LISTNER,
+								(cache.isSyn() ? 1 : 0), 0, null);
 					}
 
 				}
@@ -745,15 +723,15 @@ public class ConferenceService extends AbstractHandler {
 				V2Log.e(" OnCreateVideoMixerCallback -- > unlmatform parameter sMediaId is null ");
 				return;
 			}
-			notifyListener(1,
-					new MixVideo(sMediaId, MixVideo.LayoutType.fromInt(layout),
-							width, height));
+			notifyListener(KEY_MIXED_VIDEO_LISTNER, 1, 0, new MixVideo(
+					sMediaId, MixVideo.LayoutType.fromInt(layout), width,
+					height));
 		}
 
 		@Override
 		public void OnDestroyVideoMixerCallback(String sMediaId) {
-			notifyListener(2,
-					new MixVideo(sMediaId, MixVideo.LayoutType.UNKOWN));
+			notifyListener(KEY_MIXED_VIDEO_LISTNER, 2, 0, new MixVideo(
+					sMediaId, MixVideo.LayoutType.UNKOWN));
 		}
 
 		@Override
@@ -762,7 +740,8 @@ public class ConferenceService extends AbstractHandler {
 			UserDeviceConfig udc = new UserDeviceConfig(nDstUserId, sDstDevId,
 					null);
 			MixVideo mix = new MixVideo(sMediaId);
-			notifyListener(3, mix.createMixVideoDevice(pos, sMediaId, udc));
+			notifyListener(KEY_MIXED_VIDEO_LISTNER, 3, 0,
+					mix.createMixVideoDevice(pos, sMediaId, udc));
 		}
 
 		@Override
@@ -771,18 +750,9 @@ public class ConferenceService extends AbstractHandler {
 			UserDeviceConfig udc = new UserDeviceConfig(nDstUserId, sDstDevId,
 					null);
 			MixVideo mix = new MixVideo(sMediaId);
-			notifyListener(4, mix.createMixVideoDevice(-1, sMediaId, udc));
+			notifyListener(KEY_MIXED_VIDEO_LISTNER, 4, 0,
+					mix.createMixVideoDevice(-1, sMediaId, udc));
 
-		}
-
-		private void notifyListener(int type, Object obj) {
-			for (Registrant re : mixListenersList) {
-				Handler h = re.getHandler();
-				if (h != null) {
-					Message.obtain(h, re.getWhat(), type, 0, obj)
-							.sendToTarget();
-				}
-			}
 		}
 
 	}

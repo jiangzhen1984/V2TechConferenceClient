@@ -65,7 +65,7 @@ public class PlaceSlideFragment extends Fragment {
 				super.onCancelled();
 				synchronized (vim) {
 					if (vim != null) {
-						vim.recycle();
+						vim.recycleFull();
 					}
 				}
 				iv.setImageBitmap(null);
@@ -112,7 +112,7 @@ public class PlaceSlideFragment extends Fragment {
 		super.onDestroyView();
 		at.cancel(true);
 		if (vim != null) {
-			vim.recycle();
+			vim.recycleFull();
 		}
 		rlContainer.removeAllViews();
 	}
