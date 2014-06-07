@@ -27,7 +27,8 @@
                 android:layout_marginBottom="8dp"
                 android:layout_marginTop="8dp"
                 android:text="@string/conference_create_title"
-                android:textSize="25sp" />
+                android:textColor="@color/title_color"
+                android:textSize="@dimen/common_item_text_size" />
 
             <TextView
                 android:id="@+id/conference_create_confirm_button"
@@ -35,12 +36,10 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"
-                android:paddingBottom="10dp"
-                android:paddingLeft="20dp"
-                android:paddingRight="5dp"
-                android:paddingTop="10dp"
+                android:padding="15dp"
                 android:text="@string/conference_create_confirm"
-                android:textColor="@color/conf_create_button_color" />
+                android:textColor="@color/conf_create_button_color"
+                android:textSize="@dimen/common_item_text_size" />
 
             <TextView
                 android:id="@+id/conference_create_return_button"
@@ -48,10 +47,29 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentLeft="true"
                 android:layout_centerVertical="true"
-                android:layout_marginLeft="5dp"
+                android:padding="15dp"
                 android:text="@string/conference_create_cancel"
-                android:textColor="@color/conf_create_button_color" />
+                android:textColor="@color/conf_create_button_color"
+                android:textSize="@dimen/common_item_text_size" />
+
+            <!-- Use translucent image to hold space -->
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_marginRight="10dp"
+                android:paddingBottom="10dp"
+                android:paddingTop="10dp"
+                android:src="@drawable/translucent" />
         </RelativeLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#cfcfcf"
+            android:orientation="vertical" >
+        </LinearLayout>
 
         <LinearLayout
             android:id="@+id/conference_create_error_notification"
@@ -113,6 +131,13 @@
         </RelativeLayout>
     </LinearLayout>
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#cfcfcf"
+        android:orientation="vertical" >
+    </LinearLayout>
+
     <RelativeLayout
         android:layout_width="fill_parent"
         android:layout_height="match_parent"
@@ -133,57 +158,86 @@
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true" >
 
-            <TextView
-                android:id="@+id/textView1"
-                android:layout_width="wrap_content"
+          <LinearLayout
+              	android:id="@+id/conf_create_text_box_ly"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentTop="true"
-                android:layout_marginLeft="10dp"
-                android:layout_marginTop="10dp"
-                android:text="@string/conference_create_conf_name"
-                android:textSize="15sp" />
+                android:layout_margin="3dp"
+                android:background="@drawable/rounded_corners_create_conf_box_bg"
+                android:orientation="vertical"
+                android:padding="1dp" >
 
-            <EditText
-                android:id="@+id/conference_create_conf_name"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignBaseline="@+id/textView1"
-                android:layout_marginLeft="29dp"
-                android:layout_toRightOf="@+id/textView1"
-                android:background="@drawable/input_bg"
-                android:ems="10"
-                android:inputType="text"
-                android:maxLength="50" >
-            </EditText>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal" >
 
-            <TextView
-                android:id="@+id/textView2"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignLeft="@+id/textView1"
-                android:layout_below="@+id/textView1"
-                android:layout_marginTop="10dp"
-                android:text="@string/conference_create_conf_start_time"
-                android:textSize="15sp" />
+                    <TextView
+                        android:id="@+id/textView1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:paddingLeft="20dp"
+                        android:paddingRight="10dp"
+                        android:text="@string/conference_create_conf_name"
+                        android:textSize="15sp" />
 
-            <EditText
-                android:id="@+id/conference_create_conf_start_time"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignBaseline="@+id/textView2"
-                android:layout_alignBottom="@+id/textView2"
-                android:layout_alignLeft="@+id/conference_create_conf_name"
-                android:background="@drawable/input_bg"
-                android:ems="10"
-                android:inputType="none" >
-            </EditText>
+                    <EditText
+                        android:id="@+id/conference_create_conf_name"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:background="@null"
+                        android:ems="10"
+                        android:inputType="text"
+                        android:maxLength="50"
+                        android:paddingBottom="5dp"
+                        android:paddingTop="5dp" >
+                    </EditText>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="#cdcdcf"
+                    android:orientation="vertical" >
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="1dp" >
+
+                    <TextView
+                        android:id="@+id/textView2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:paddingLeft="20dp"
+                        android:paddingRight="10dp"
+                        android:text="@string/conference_create_conf_start_time"
+                        android:textSize="15sp" />
+
+                    <EditText
+                        android:id="@+id/conference_create_conf_start_time"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:background="@null"
+                        android:ems="10"
+                        android:inputType="datetime"
+                        android:paddingBottom="5dp"
+                        android:paddingTop="5dp" >
+                    </EditText>
+                </LinearLayout>
+            </LinearLayout>
 
             <HorizontalScrollView
                 android:id="@+id/conf_create_scroll_view"
                 android:layout_width="match_parent"
                 android:layout_height="100dp"
-                android:layout_below="@+id/textView2"
+                android:layout_below="@+id/conf_create_text_box_ly"
                 android:layout_centerVertical="true"
                 android:layout_marginTop="10dp"
                 android:background="#f2f2f2" >

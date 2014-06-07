@@ -127,7 +127,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:layout_marginTop="10dp"
                 android:paddingBottom="10dp"
                 android:paddingTop="10dp"
                 android:src="@drawable/video_menu_msg_button" />
@@ -137,7 +136,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:layout_marginTop="10dp"
                 android:paddingBottom="10dp"
                 android:paddingTop="10dp"
                 android:src="@drawable/video_menu_doc_button" />

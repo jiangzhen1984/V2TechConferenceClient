@@ -28,14 +28,17 @@
      <color name="invitation_attendee_layout_item_color">#444444</color>
      
      <color name="conf_create_contacts_user_view_item_color">#444444</color>
+     <color name="conf_create_contacts_user_view_item_color_offline">#c2c2c2</color>
      
      <color name="title_color">#000000</color>
      
      <color name="video_attendee_chair_man_name_color">#207448</color>
      <color name="video_attendee_name_color">#444444</color>
-     <color name="video_attendee_online_name_color">#000000</color>
+     <color name="video_attendee_name_color_offline">#c2c2c2</color>
      
      
      
      <color name="login_activity_login_box_text_color">#acacac</color>
+     
+     <color name="attendee_select_bg">#bfe8ff</color>
 </resources>

@@ -223,7 +223,7 @@ public class ContactUserView extends LinearLayout {
 		} else {
 			mStatusIV.setVisibility(View.VISIBLE);
 			mPhotoIV.clearColorFilter();
-			mUserNameTV.setTextColor(getContext().getResources().getColor(R.color.contacts_user_view_item_color));
+			mUserNameTV.setTextColor(getContext().getResources().getColor(R.color.conf_create_contacts_user_view_item_color));
 		}
 	}
 

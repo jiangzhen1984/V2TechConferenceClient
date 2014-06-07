@@ -2,25 +2,16 @@
     android:repeatMode="reverse" >
 
     <item
-        android:drawable="@drawable/progress_0"
-        android:duration="200"/>
+        android:drawable="@drawable/loading_1"
+        android:duration="100"/>
     <item
-        android:drawable="@drawable/progress_1"
-        android:duration="200"/>
+        android:drawable="@drawable/loading_2"
+        android:duration="100"/>
     <item
-        android:drawable="@drawable/progress_2"
-        android:duration="200"/>
+        android:drawable="@drawable/loading_3"
+        android:duration="100"/>
     <item
-        android:drawable="@drawable/progress_3"
-        android:duration="200"/>
-    <item
-        android:drawable="@drawable/progress_4"
-        android:duration="200"/>
-    <item
-        android:drawable="@drawable/progress_5"
-        android:duration="200"/>
-    <item
-        android:drawable="@drawable/progress_6"
-        android:duration="200"/>
+        android:drawable="@drawable/loading_4"
+        android:duration="100"/>
 
 </animation-list>

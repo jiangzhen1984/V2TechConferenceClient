@@ -97,7 +97,6 @@ import com.v2tech.vo.VMessage;
 public class VideoActivityV2 extends Activity {
 
 	private static final int ONLY_SHOW_LOCAL_VIDEO = 1;
-	private static final int APPLY_OR_RELEASE_SPEAK = 3;
 	private static final int REQUEST_OPEN_DEVICE_RESPONSE = 4;
 	private static final int REQUEST_CLOSE_DEVICE_RESPONSE = 5;
 	private static final int REQUEST_OPEN_OR_CLOSE_DEVICE = 6;
@@ -186,12 +185,17 @@ public class VideoActivityV2 extends Activity {
 
 	private Toast mToast;
 
+	private DisplayMetrics dm;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 		setContentView(R.layout.activity_in_metting);
 		mContext = this;
+		dm = new DisplayMetrics();
+		getWindowManager().getDefaultDisplay().getMetrics(dm);
+
 		this.mVideoLayoutMain = (RelativeLayout) findViewById(R.id.video_layout_root);
 		this.mCurrentShowedSV = new ArrayList<SurfaceViewW>();
 
@@ -298,22 +302,22 @@ public class VideoActivityV2 extends Activity {
 		@Override
 		public void onClick(View v) {
 			if (v.getTag().equals("msg")) {
+				showOrHidenAttendeeContainer(View.GONE);
+				showOrHidenDocContainer(View.GONE);
+				showOrHidenInvitionContainer(View.GONE);
 				showOrHidenMsgContainer(View.VISIBLE);
-				showOrHidenAttendeeContainer(View.GONE);
-				showOrHidenDocContainer(View.GONE);
-				showOrHidenInvitionContainer(View.GONE);
 			} else if (v.getTag().equals("attendee")) {
-				showOrHidenAttendeeContainer(View.VISIBLE);
 				showOrHidenMsgContainer(View.GONE);
 				showOrHidenDocContainer(View.GONE);
 				showOrHidenInvitionContainer(View.GONE);
+				showOrHidenAttendeeContainer(View.VISIBLE);
 			} else if (v.getTag().equals("doc")) {
-				showOrHidenDocContainer(View.VISIBLE);
 				showOrHidenAttendeeContainer(View.GONE);
 				showOrHidenMsgContainer(View.GONE);
 				showOrHidenInvitionContainer(View.GONE);
+				showOrHidenDocContainer(View.VISIBLE);
 			} else if (v.getTag().equals("invition")) {
-				if (cg.isCanInvitation() ) {
+				if (cg.isCanInvitation()) {
 					showOrHidenDocContainer(View.GONE);
 					showOrHidenAttendeeContainer(View.GONE);
 					showOrHidenMsgContainer(View.GONE);
@@ -333,14 +337,10 @@ public class VideoActivityV2 extends Activity {
 	private OnClickListener mApplySpeakerListener = new OnClickListener() {
 		@Override
 		public void onClick(View view) {
-			// FIXME code
-			if (isSpeaking) {
-				mSpeakerIV.setImageResource(R.drawable.mute_button);
-			} else {
-				mSpeakerIV.setImageResource(R.drawable.speaking_button);
-			}
-			Message.obtain(mVideoHandler, APPLY_OR_RELEASE_SPEAK)
-					.sendToTarget();
+			doApplyOrReleaseSpeak();
+			//Make sure update start after send request, 
+			// because update state will update isSpeaking value
+			updateSpeakerState(!isSpeaking);
 		}
 	};
 
@@ -361,10 +361,8 @@ public class VideoActivityV2 extends Activity {
 						.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 				View view = inflater.inflate(
 						R.layout.in_meeting_setting_pop_up_window, null);
-				DisplayMetrics m = new DisplayMetrics();
-				getWindowManager().getDefaultDisplay().getMetrics(m);
 
-				int height = (int) (m.heightPixels * 0.5);
+				int height = (int) (dm.heightPixels * 0.5);
 				// set
 				mSettingWindow = new PopupWindow(view,
 						LayoutParams.WRAP_CONTENT, height);
@@ -398,11 +396,11 @@ public class VideoActivityV2 extends Activity {
 							return;
 						}
 
-						int width = 176; 
-						int height = 144; 
+						int width = 176;
+						int height = 144;
 						int bitrate = 256000;
 						int fps = 15;
-						
+
 						int index = 0;
 						for (CaptureCapability cp : vcd.capabilites) {
 							if (index == v) {
@@ -411,7 +409,6 @@ public class VideoActivityV2 extends Activity {
 							}
 							index++;
 						}
-					
 
 						// // close local camera
 						Message.obtain(
@@ -425,7 +422,8 @@ public class VideoActivityV2 extends Activity {
 						//
 
 						VideoCaptureDevInfo.CreateVideoCaptureDevInfo()
-								.SetCapParams(width, height, bitrate, fps, ImageFormat.NV21);
+								.SetCapParams(width, height, bitrate, fps,
+										ImageFormat.NV21);
 
 						mVideoHandler.postDelayed(new Runnable() {
 
@@ -682,6 +680,21 @@ public class VideoActivityV2 extends Activity {
 	}
 
 	/**
+	 * Update speaker icon and state
+	 * 
+	 * @param flag
+	 */
+	private void updateSpeakerState(boolean flag) {
+		isSpeaking = flag;
+		// set flag to speaking icon
+		if (flag) {
+			mSpeakerIV.setImageResource(R.drawable.speaking_button);
+		} else {
+			mSpeakerIV.setImageResource(R.drawable.mute_button);
+		}
+	}
+
+	/**
 	 * Show or hide message layout according to parameter
 	 * 
 	 * @param visible
@@ -883,16 +896,17 @@ public class VideoActivityV2 extends Activity {
 					this, R.animator.normal_scale_x_0_100);
 			tabBlockHolderAnimation.setDuration(500);
 			mDocContainer.startAnimation(tabBlockHolderAnimation);
+			mDocContainer.requestFixedLayout();
 		}
 	}
 
-	
 	private boolean isInvitionWindowShowing() {
 		if (mInvitionContainer == null) {
 			return false;
 		}
-		return mInvitionContainer.getVisibility() ==View.VISIBLE;
+		return mInvitionContainer.getVisibility() == View.VISIBLE;
 	}
+
 	/**
 	 * Show or hide Invitation attendee layout according to parameter
 	 * 
@@ -1070,14 +1084,16 @@ public class VideoActivityV2 extends Activity {
 		}
 		int containerH = outR.bottom - outR.top;
 
-		int normalW = containerW / cols, normalH = normalW / 16 * 9;
+		int normalW = containerW / cols, normalH = normalW / 4 * 3;
 		if (normalH * rows > containerH) {
 			normalH = containerH / rows;
-			normalW = normalH / 9 * 16;
+			normalW = normalH / 3 * 4;
 		}
 
 		int fixedWidth = normalW;
 		int fixedHeight = normalH;
+		fixedWidth -= fixedWidth%16;
+		fixedHeight -= fixedHeight%16;
 
 		marginTop = marginBottom = Math.abs(containerH - fixedHeight * rows) / 2;
 		marginLeft = marginRight = Math.abs(containerW - fixedWidth * cols) / 2;
@@ -1328,10 +1344,8 @@ public class VideoActivityV2 extends Activity {
 	private void doApplyOrReleaseSpeak() {
 		if (isSpeaking) {
 			cb.applyForReleasePermission(ConferencePermission.SPEAKING, null);
-			isSpeaking = false;
 		} else {
 			cb.applyForControlPermission(ConferencePermission.SPEAKING, null);
-			isSpeaking = true;
 		}
 	}
 
@@ -1435,10 +1449,10 @@ public class VideoActivityV2 extends Activity {
 	 * 
 	 * @param udc
 	 */
-	private void showOrCloseAttendeeVideo(UserDeviceConfig udc) {
+	private boolean showOrCloseAttendeeVideo(UserDeviceConfig udc) {
 		if (udc == null) {
 			V2Log.e(" can't not open or close device");
-			return;
+			return false;
 		}
 		// if already opened attendee's video, switch action to close
 		if (udc.isShowing()) {
@@ -1457,12 +1471,13 @@ public class VideoActivityV2 extends Activity {
 			udc.setShowing(false);
 			udc.doClose();
 			adjustLayout();
+			return false;
 		} else {
 			if (checkVideoExceedMaminum()) {
 				Toast.makeText(mContext,
 						R.string.error_exceed_support_video_count,
 						Toast.LENGTH_SHORT).show();
-				return;
+				return false;
 			}
 			VideoPlayer vp = new VideoPlayer();
 			udc.setSVHolder(new SurfaceView(this));
@@ -1486,6 +1501,7 @@ public class VideoActivityV2 extends Activity {
 					REQUEST_OPEN_OR_CLOSE_DEVICE, 1, 0, udc);
 			mVideoHandler.sendMessageDelayed(m, 300);
 			udc.setShowing(true);
+			return true;
 		}
 
 	}
@@ -1527,9 +1543,28 @@ public class VideoActivityV2 extends Activity {
 		private void updateParameters(View view, MotionEvent event) {
 			RelativeLayout.LayoutParams rl = (RelativeLayout.LayoutParams) view
 					.getLayoutParams();
+			Rect r = new Rect();
+			mVideoLayoutMain.getDrawingRect(r);
+
 			rl.bottomMargin -= (event.getRawY() - lastY);
 			rl.rightMargin -= (event.getRawX() - lastX);
+			if (rl.bottomMargin < 0) {
+				rl.bottomMargin = 0;
+			}
+			if (rl.rightMargin < 0) {
+				rl.rightMargin = 0;
+			}
+			if (r.right - r.left - view.getWidth() < rl.rightMargin) {
+				rl.rightMargin = r.right - r.left - view.getWidth();
+			}
+
+			if (r.bottom - r.top - view.getHeight() < rl.bottomMargin) {
+				rl.bottomMargin = r.bottom - r.top - view.getHeight();
+			}
+
 			((ViewGroup) view.getParent()).updateViewLayout(view, rl);
+			// make sure draging view is first front of all
+			view.bringToFront();
 		}
 	};
 
@@ -1587,15 +1622,20 @@ public class VideoActivityV2 extends Activity {
 				r.top = lo[1];
 				r.bottom = lo[1] + r.bottom;
 				if (r.contains(x, y)) {
-					showOrCloseAttendeeVideo(sw.udc);
+					boolean flag = showOrCloseAttendeeVideo(sw.udc);
+					//update opened video view background
+					mAttendeeContainer.updateCurrentSelectedBg(flag, sw.at, sw.udc);
 					sw.at = at;
 					sw.udc = udc;
-					showOrCloseAttendeeVideo(udc);
+					//update new opened video view background
+					flag =showOrCloseAttendeeVideo(udc);
+					mAttendeeContainer.updateCurrentSelectedBg(flag, at, udc);
+					
 					return;
 				}
 			}
 
-			OnAttendeeClicked(at, udc);
+			// OnAttendeeClicked(at, udc);
 		}
 
 		@Override
@@ -1607,7 +1647,9 @@ public class VideoActivityV2 extends Activity {
 					|| !at.isJoined()) {
 
 			} else {
-				showOrCloseAttendeeVideo(udc);
+				boolean flag = showOrCloseAttendeeVideo(udc);
+				mAttendeeContainer.updateCurrentSelectedBg(flag, at, udc);
+
 			}
 		}
 
@@ -1654,8 +1696,6 @@ public class VideoActivityV2 extends Activity {
 		@Override
 		public void requestDocViewFillParent(View v) {
 			mVideoLayout.setVisibility(View.GONE);
-			DisplayMetrics dm = new DisplayMetrics();
-			getWindowManager().getDefaultDisplay().getMetrics(dm);
 
 			int[] location = new int[2];
 			v.getLocationInWindow(location);
@@ -1724,12 +1764,14 @@ public class VideoActivityV2 extends Activity {
 			rl.addRule(RelativeLayout.RIGHT_OF, id);
 			int[] location = new int[2];
 			v.getLocationInWindow(location);
-			DisplayMetrics dm = new DisplayMetrics();
-			getWindowManager().getDefaultDisplay().getMetrics(dm);
 			rl.width = dm.widthPixels - location[0];
 			// if flag is request fixed
 			// video layout width = screen's width - requested view's width
 			if (flag == 1) {
+				if (v.getMeasuredWidth() == 0) {
+					v.measure(View.MeasureSpec.UNSPECIFIED,
+							View.MeasureSpec.UNSPECIFIED);
+				}
 				rl.width -= v.getMeasuredWidth();
 			}
 			mVideoLayout.setLayoutParams(rl);
@@ -1786,12 +1828,12 @@ public class VideoActivityV2 extends Activity {
 						RelativeLayout.LayoutParams.MATCH_PARENT));
 				TextView tv = new TextView(mContext);
 				tv.setText(at.getAttName());
-				tv.setMaxWidth(200);
+				tv.setMaxWidth(80);
 				tv.setEllipsize(TruncateAt.END);
 				tv.setSingleLine();
 				tv.setBackgroundColor(Color.rgb(138, 138, 138));
 				tv.setPadding(10, 10, 10, 10);
-				tv.setTextSize(20);
+				tv.setTextSize(14);
 				RelativeLayout.LayoutParams tvrl = new RelativeLayout.LayoutParams(
 						RelativeLayout.LayoutParams.WRAP_CONTENT,
 						RelativeLayout.LayoutParams.WRAP_CONTENT);
@@ -1863,9 +1905,6 @@ public class VideoActivityV2 extends Activity {
 				localSurfaceViewLy.bringToFront();
 				showOrCloseLocalSurViewOnly();
 				break;
-			case APPLY_OR_RELEASE_SPEAK:
-				doApplyOrReleaseSpeak();
-				break;
 			case REQUEST_OPEN_DEVICE_RESPONSE:
 			case REQUEST_CLOSE_DEVICE_RESPONSE:
 				break;
@@ -1898,9 +1937,9 @@ public class VideoActivityV2 extends Activity {
 					if (a == null) {
 						continue;
 					}
+					a.addDevice(ud);
 					// Update attendee device
 					if (mAttendeeContainer != null) {
-						a.addDevice(ud);
 						mAttendeeContainer.updateEnteredAttendee(a);
 					}
 				}
@@ -1980,14 +2019,10 @@ public class VideoActivityV2 extends Activity {
 				}
 				if (ind.getUid() == GlobalHolder.getInstance()
 						.getCurrentUserId()) {
-					if (PermissionState.fromInt(ind.getState()) == PermissionState.GRANTED && ConferencePermission.SPEAKING.intValue() == ind.getType()) {
-						mSpeakerIV.setImageResource(R.drawable.speaking_button);
-						// set flag to speaking
-						isSpeaking = true;
-					} else {
-						mSpeakerIV.setImageResource(R.drawable.mute_button);
-						isSpeaking = false;
-					}
+
+					updateSpeakerState(PermissionState.fromInt(ind.getState()) == PermissionState.GRANTED
+							&& ConferencePermission.SPEAKING.intValue() == ind
+									.getType());
 				}
 				break;
 			case NEW_DOC_NOTIFICATION:

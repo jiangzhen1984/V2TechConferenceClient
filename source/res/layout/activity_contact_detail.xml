@@ -22,17 +22,17 @@
             android:paddingTop="10dp"
             android:text="@string/contacts_user_detail_return_button"
             android:textColor="@color/button_text_color"
-            android:textSize="20sp" />
+            android:textSize="@dimen/common_item_text_size" />
 
         <TextView
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
             android:ellipsize="end"
             android:gravity="center"
             android:singleLine="true"
             android:text="@string/contacts_detail_title"
-            android:textColor="@color/common_item_text_color"
+            android:textColor="@color/activiy_contact_detail_title_color"
             android:textSize="@dimen/common_item_text_size" />
 
         <ImageView
@@ -72,38 +72,33 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentLeft="true"
                 android:layout_centerVertical="true"
-                android:layout_marginLeft="10dp"
+                android:layout_marginLeft="@dimen/button_padding_horizontal"
                 android:layout_marginTop="20dp"
                 android:src="@drawable/avatar" />
 
-            <LinearLayout
+          <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignBottom="@+id/contact_user_detail_head_icon"
                 android:layout_alignTop="@+id/contact_user_detail_head_icon"
-                android:layout_marginLeft="16dp"
+                android:layout_marginLeft="@dimen/detail_detail_signature_margin_left"
                 android:layout_toRightOf="@+id/contact_user_detail_head_icon"
                 android:orientation="vertical" >
 
                 <TextView
                     android:id="@+id/contact_user_detail_title"
                     android:layout_width="wrap_content"
-                    android:layout_height="0dp"
+                    android:layout_height="wrap_content"
                     android:layout_gravity="top"
-                    android:layout_weight=".5"
-                    android:ellipsize="end"
                     android:gravity="top"
-                    android:maxWidth="@dimen/detail_detail_name_max_width"
-                    android:singleLine="true"
                     android:text="TextView"
                     android:textColor="@color/common_item_text_color" />
 
                 <TextView
                     android:id="@+id/contact_user_detail_user_signature_tv"
                     android:layout_width="wrap_content"
-                    android:layout_height="0dp"
+                    android:layout_height="wrap_content"
                     android:layout_gravity="bottom"
-                    android:layout_weight=".5"
                     android:ellipsize="end"
                     android:gravity="bottom"
                     android:singleLine="true"
@@ -128,8 +123,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_above="@+id/contact_button_ly"
-            android:layout_below="@+id/RelativeLayout2"
-            android:layout_marginTop="10dp" >
+            android:layout_below="@+id/RelativeLayout2" >
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -140,13 +134,13 @@
                     android:id="@+id/contact_detail_self_items_ly"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="15dp"
-                    android:layout_marginLeft="15dp"
-                    android:layout_marginRight="15dp"
+                    android:layout_marginBottom="@dimen/detail_detail_2_item_margin_bottom"
+                    android:layout_marginLeft="@dimen/contact_detail_2_item_margin_left"
+                    android:layout_marginRight="@dimen/contact_detail_2_item_margin_right"
                     android:background="@drawable/rounded_corners_of_contact_user_detail_outer"
                     android:orientation="vertical"
                     android:paddingBottom="15dp"
-                     >
+                    android:visibility="gone" >
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -156,11 +150,13 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginBottom="@dimen/detail_detail_item_margin_bottom"
-                            android:layout_marginTop="@dimen/detail_detail_item_margin_top"
+                             android:layout_marginBottom="@dimen/detail_detail_2_item_margin_bottom"
+                            android:layout_marginLeft="@dimen/contact_detail_2_item_margin_horizontal"
+                            android:layout_marginRight="@dimen/contact_detail_2_item_margin_horizontal"
+                            android:layout_marginTop="@dimen/detail_detail_2_item_margin_top"
                             android:padding="10dp"
                             android:text="@string/contacts_user_detail_item_signature"
-                            android:textColor="@color/common_item_text_color"
+                            android:textColor="@color/activiy_contact_detail_item_color"
                             android:textSize="@dimen/common_item_text_size" />
 
                         <EditText
@@ -173,7 +169,7 @@
                             android:ems="10"
                             android:inputType="text"
                             android:maxLength="30"
-                            android:textColor="@color/common_item_text_color"
+                            android:textColor="@color/activiy_contact_detail_item_color"
                             android:textSize="@dimen/common_item_text_size" >
                         </EditText>
                     </LinearLayout>
@@ -193,20 +189,23 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginBottom="@dimen/detail_detail_item_margin_bottom"
-                            android:layout_marginTop="@dimen/detail_detail_item_margin_top"
+                             android:layout_marginBottom="@dimen/detail_detail_2_item_margin_bottom"
+                            android:layout_marginLeft="@dimen/contact_detail_2_item_margin_horizontal"
+                            android:layout_marginRight="@dimen/contact_detail_2_item_margin_horizontal"
+                            android:layout_marginTop="@dimen/detail_detail_2_item_margin_top"
                             android:padding="10dp"
                             android:text="@string/contacts_user_detail_item_account"
-                            android:textColor="@color/common_item_text_color"
+                            android:textColor="@color/activiy_contact_detail_item_color"
                             android:textSize="@dimen/common_item_text_size" />
 
                         <TextView
                             android:id="@+id/contact_user_detail_account_tv"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
                             android:gravity="center_vertical"
                             android:text="account"
-                            android:textColor="@color/common_item_text_color"
+                            android:textColor="@color/activiy_contact_detail_item_color"
                             android:textSize="@dimen/common_item_text_size" />
                     </LinearLayout>
 
@@ -224,11 +223,13 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginBottom="@dimen/detail_detail_item_margin_bottom"
-                            android:layout_marginTop="@dimen/detail_detail_item_margin_top"
+                             android:layout_marginBottom="@dimen/detail_detail_2_item_margin_bottom"
+                            android:layout_marginLeft="@dimen/contact_detail_2_item_margin_horizontal"
+                            android:layout_marginRight="@dimen/contact_detail_2_item_margin_horizontal"
+                            android:layout_marginTop="@dimen/detail_detail_2_item_margin_top"
                             android:padding="10dp"
                             android:text="@string/contacts_user_detail_item_gender"
-                            android:textColor="@color/common_item_text_color"
+                            android:textColor="@color/activiy_contact_detail_item_color"
                             android:textSize="@dimen/common_item_text_size" />
 
                         <RadioGroup
@@ -238,7 +239,7 @@
                             android:layout_gravity="center"
                             android:gravity="center_vertical"
                             android:orientation="horizontal"
-                            android:textColor="@color/common_item_text_color" >
+                            android:textColor="@color/activiy_contact_detail_item_color" >
 
                             <RadioButton
                                 android:id="@+id/radio0"
@@ -247,7 +248,7 @@
                                 android:layout_gravity="center"
                                 android:tag="1"
                                 android:text="@string/contacts_user_detail_gender_male"
-                                android:textColor="@color/common_item_text_color" />
+                                android:textColor="@color/activiy_contact_detail_item_color" />
 
                             <RadioButton
                                 android:id="@+id/radio1"
@@ -256,7 +257,7 @@
                                 android:layout_gravity="center"
                                 android:tag="2"
                                 android:text="@string/contacts_user_detail_gender_female"
-                                android:textColor="@color/common_item_text_color" />
+                                android:textColor="@color/activiy_contact_detail_item_color" />
 
                             <RadioButton
                                 android:id="@+id/radio2"
@@ -265,7 +266,7 @@
                                 android:layout_gravity="center"
                                 android:tag="0"
                                 android:text="@string/contacts_user_detail_gender_priacy"
-                                android:textColor="@color/common_item_text_color" />
+                                android:textColor="@color/activiy_contact_detail_item_color" />
                         </RadioGroup>
                     </LinearLayout>
 
@@ -284,11 +285,13 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginBottom="@dimen/detail_detail_item_margin_bottom"
-                            android:layout_marginTop="@dimen/detail_detail_item_margin_top"
+                             android:layout_marginBottom="@dimen/detail_detail_2_item_margin_bottom"
+                            android:layout_marginLeft="@dimen/contact_detail_2_item_margin_horizontal"
+                            android:layout_marginRight="@dimen/contact_detail_2_item_margin_horizontal"
+                            android:layout_marginTop="@dimen/detail_detail_2_item_margin_top"
                             android:padding="10dp"
                             android:text="@string/contacts_user_detail_item_birdthday"
-                            android:textColor="@color/common_item_text_color"
+                            android:textColor="@color/activiy_contact_detail_item_color"
                             android:textSize="@dimen/common_item_text_size" />
 
                         <EditText
@@ -300,7 +303,7 @@
                             android:ems="10"
                             android:focusable="false"
                             android:inputType="date"
-                            android:textColor="@color/common_item_text_color" >
+                            android:textColor="@color/activiy_contact_detail_item_color" >
                         </EditText>
                     </LinearLayout>
 
@@ -318,11 +321,13 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginBottom="@dimen/detail_detail_item_margin_bottom"
-                            android:layout_marginTop="@dimen/detail_detail_item_margin_top"
+                             android:layout_marginBottom="@dimen/detail_detail_2_item_margin_bottom"
+                            android:layout_marginLeft="@dimen/contact_detail_2_item_margin_horizontal"
+                            android:layout_marginRight="@dimen/contact_detail_2_item_margin_horizontal"
+                            android:layout_marginTop="@dimen/detail_detail_2_item_margin_top"
                             android:padding="10dp"
                             android:text="@string/contacts_user_detail_item_cell_phone"
-                            android:textColor="@color/common_item_text_color"
+                            android:textColor="@color/activiy_contact_detail_item_color"
                             android:textSize="@dimen/common_item_text_size" />
 
                         <EditText
@@ -334,7 +339,7 @@
                             android:ems="10"
                             android:inputType="phone"
                             android:maxLength="11"
-                            android:textColor="@color/common_item_text_color" >
+                            android:textColor="@color/activiy_contact_detail_item_color" >
                         </EditText>
                     </LinearLayout>
 
@@ -353,11 +358,13 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginBottom="@dimen/detail_detail_item_margin_bottom"
-                            android:layout_marginTop="@dimen/detail_detail_item_margin_top"
+                             android:layout_marginBottom="@dimen/detail_detail_2_item_margin_bottom"
+                            android:layout_marginLeft="@dimen/contact_detail_2_item_margin_horizontal"
+                            android:layout_marginRight="@dimen/contact_detail_2_item_margin_horizontal"
+                            android:layout_marginTop="@dimen/detail_detail_2_item_margin_top"
                             android:padding="10dp"
                             android:text="@string/contacts_user_detail_item_telephone"
-                            android:textColor="@color/common_item_text_color"
+                            android:textColor="@color/activiy_contact_detail_item_color"
                             android:textSize="@dimen/common_item_text_size" />
 
                         <EditText
@@ -369,7 +376,7 @@
                             android:ems="10"
                             android:inputType="text"
                             android:maxLength="30"
-                            android:textColor="@color/common_item_text_color" />
+                            android:textColor="@color/activiy_contact_detail_item_color" />
                     </LinearLayout>
 
                     <LinearLayout
@@ -386,11 +393,13 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginBottom="@dimen/detail_detail_item_margin_bottom"
-                            android:layout_marginTop="@dimen/detail_detail_item_margin_top"
+                             android:layout_marginBottom="@dimen/detail_detail_2_item_margin_bottom"
+                            android:layout_marginLeft="@dimen/contact_detail_2_item_margin_horizontal"
+                            android:layout_marginRight="@dimen/contact_detail_2_item_margin_horizontal"
+                            android:layout_marginTop="@dimen/detail_detail_2_item_margin_top"
                             android:padding="10dp"
                             android:text="@string/contacts_user_detail_item_company"
-                            android:textColor="@color/common_item_text_color"
+                            android:textColor="@color/activiy_contact_detail_item_color"
                             android:textSize="@dimen/common_item_text_size" />
 
                         <TextView
@@ -399,7 +408,7 @@
                             android:layout_height="wrap_content"
                             android:layout_gravity="center_vertical"
                             android:ems="10"
-                            android:textColor="@color/common_item_text_color" />
+                            android:textColor="@color/activiy_contact_detail_item_color" />
                     </LinearLayout>
 
                     <LinearLayout
@@ -417,11 +426,13 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginBottom="@dimen/detail_detail_item_margin_bottom"
-                            android:layout_marginTop="@dimen/detail_detail_item_margin_top"
+                             android:layout_marginBottom="@dimen/detail_detail_2_item_margin_bottom"
+                            android:layout_marginLeft="@dimen/contact_detail_2_item_margin_horizontal"
+                            android:layout_marginRight="@dimen/contact_detail_2_item_margin_horizontal"
+                            android:layout_marginTop="@dimen/detail_detail_2_item_margin_top"
                             android:padding="10dp"
                             android:text="@string/contacts_user_detail_item_department"
-                            android:textColor="@color/common_item_text_color"
+                            android:textColor="@color/activiy_contact_detail_item_color"
                             android:textSize="@dimen/common_item_text_size" />
 
                         <TextView
@@ -431,7 +442,7 @@
                             android:layout_gravity="center_vertical"
                             android:layout_marginRight="20dp"
                             android:ems="10"
-                            android:textColor="@color/common_item_text_color" />
+                            android:textColor="@color/activiy_contact_detail_item_color" />
                     </LinearLayout>
 
                     <LinearLayout
@@ -448,11 +459,13 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginBottom="@dimen/detail_detail_item_margin_bottom"
-                            android:layout_marginTop="@dimen/detail_detail_item_margin_top"
+                             android:layout_marginBottom="@dimen/detail_detail_2_item_margin_bottom"
+                            android:layout_marginLeft="@dimen/contact_detail_2_item_margin_horizontal"
+                            android:layout_marginRight="@dimen/contact_detail_2_item_margin_horizontal"
+                            android:layout_marginTop="@dimen/detail_detail_2_item_margin_top"
                             android:padding="10dp"
                             android:text="@string/contacts_user_detail_item_title"
-                            android:textColor="@color/common_item_text_color"
+                            android:textColor="@color/activiy_contact_detail_item_color"
                             android:textSize="@dimen/common_item_text_size" />
 
                         <EditText
@@ -465,7 +478,7 @@
                             android:ems="10"
                             android:inputType="text"
                             android:maxLength="50"
-                            android:textColor="@color/common_item_text_color" />
+                            android:textColor="@color/activiy_contact_detail_item_color" />
                     </LinearLayout>
 
                     <LinearLayout
@@ -483,11 +496,13 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginBottom="@dimen/detail_detail_item_margin_bottom"
-                            android:layout_marginTop="@dimen/detail_detail_item_margin_top"
+                             android:layout_marginBottom="@dimen/detail_detail_2_item_margin_bottom"
+                            android:layout_marginLeft="@dimen/contact_detail_2_item_margin_horizontal"
+                            android:layout_marginRight="@dimen/contact_detail_2_item_margin_horizontal"
+                            android:layout_marginTop="@dimen/detail_detail_2_item_margin_top"
                             android:padding="10dp"
                             android:text="@string/contacts_user_detail_item_address"
-                            android:textColor="@color/common_item_text_color"
+                            android:textColor="@color/activiy_contact_detail_item_color"
                             android:textSize="@dimen/common_item_text_size" />
 
                         <EditText
@@ -500,7 +515,7 @@
                             android:ems="10"
                             android:inputType="text"
                             android:maxLength="100"
-                            android:textColor="@color/common_item_text_color" />
+                            android:textColor="@color/activiy_contact_detail_item_color" />
                     </LinearLayout>
                 </LinearLayout>
 
@@ -508,12 +523,12 @@
                     android:id="@+id/contact_detail_items_ly"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="15dp"
-                    android:layout_marginLeft="15dp"
-                    android:layout_marginRight="15dp"
+                    android:layout_marginBottom="@dimen/detail_detail_2_item_margin_bottom"
+                    android:layout_marginLeft="@dimen/contact_detail_2_item_margin_left"
+                    android:layout_marginRight="@dimen/contact_detail_2_item_margin_right"
                     android:background="@drawable/rounded_corners_of_contact_user_detail_outer"
-                    android:orientation="vertical" 
-                    android:visibility="gone">
+                    android:orientation="vertical"
+                     >
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -523,11 +538,13 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginBottom="@dimen/detail_detail_item_margin_bottom"
-                            android:layout_marginTop="@dimen/detail_detail_item_margin_top"
+                            android:layout_marginBottom="@dimen/detail_detail_2_item_margin_bottom"
+                            android:layout_marginLeft="@dimen/contact_detail_2_item_margin_horizontal"
+                            android:layout_marginRight="@dimen/contact_detail_2_item_margin_horizontal"
+                            android:layout_marginTop="@dimen/detail_detail_2_item_margin_top"
                             android:padding="10dp"
                             android:text="@string/contacts_user_detail_item_title"
-                            android:textColor="@color/common_item_text_color"
+                            android:textColor="@color/activiy_contact_detail_item_color"
                             android:textSize="@dimen/common_item_text_size" />
 
                         <TextView
@@ -539,7 +556,7 @@
                             android:gravity="center_vertical"
                             android:singleLine="true"
                             android:text="TextView"
-                            android:textColor="@color/common_item_text_color"
+                            android:textColor="@color/activiy_contact_detail_item_color"
                             android:textSize="@dimen/common_item_text_size" />
                     </LinearLayout>
 
@@ -558,11 +575,13 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginBottom="@dimen/detail_detail_item_margin_bottom"
-                            android:layout_marginTop="@dimen/detail_detail_item_margin_top"
+                             android:layout_marginBottom="@dimen/detail_detail_2_item_margin_bottom"
+                            android:layout_marginLeft="@dimen/contact_detail_2_item_margin_horizontal"
+                            android:layout_marginRight="@dimen/contact_detail_2_item_margin_horizontal"
+                            android:layout_marginTop="@dimen/detail_detail_2_item_margin_top"
                             android:padding="10dp"
                             android:text="@string/contacts_user_detail_item_address"
-                            android:textColor="@color/common_item_text_color"
+                            android:textColor="@color/activiy_contact_detail_item_color"
                             android:textSize="@dimen/common_item_text_size" />
 
                         <TextView
@@ -571,10 +590,9 @@
                             android:layout_height="wrap_content"
                             android:layout_gravity="center_vertical"
                             android:ellipsize="end"
-                            android:gravity="center_vertical"
                             android:singleLine="true"
                             android:text="TextView"
-                            android:textColor="@color/common_item_text_color"
+                            android:textColor="@color/activiy_contact_detail_item_color"
                             android:textSize="@dimen/common_item_text_size" />
                     </LinearLayout>
 
@@ -593,11 +611,13 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginBottom="@dimen/detail_detail_item_margin_bottom"
-                            android:layout_marginTop="@dimen/detail_detail_item_margin_top"
+                             android:layout_marginBottom="@dimen/detail_detail_2_item_margin_bottom"
+                            android:layout_marginLeft="@dimen/contact_detail_2_item_margin_horizontal"
+                            android:layout_marginRight="@dimen/contact_detail_2_item_margin_horizontal"
+                            android:layout_marginTop="@dimen/detail_detail_2_item_margin_top"
                             android:padding="10dp"
                             android:text="@string/contacts_user_detail_item_email"
-                            android:textColor="@color/common_item_text_color"
+                            android:textColor="@color/activiy_contact_detail_item_color"
                             android:textSize="@dimen/common_item_text_size" />
 
                         <TextView
@@ -609,7 +629,7 @@
                             android:gravity="center_vertical"
                             android:singleLine="true"
                             android:text="TextView"
-                            android:textColor="@color/common_item_text_color"
+                            android:textColor="@color/activiy_contact_detail_item_color"
                             android:textSize="@dimen/common_item_text_size" />
                     </LinearLayout>
 
@@ -627,11 +647,13 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginBottom="@dimen/detail_detail_item_margin_bottom"
-                            android:layout_marginTop="@dimen/detail_detail_item_margin_top"
+                             android:layout_marginBottom="@dimen/detail_detail_2_item_margin_bottom"
+                            android:layout_marginLeft="@dimen/contact_detail_2_item_margin_horizontal"
+                            android:layout_marginRight="@dimen/contact_detail_2_item_margin_horizontal"
+                            android:layout_marginTop="@dimen/detail_detail_2_item_margin_top"
                             android:padding="10dp"
                             android:text="@string/contacts_user_detail_item_cell_phone"
-                            android:textColor="@color/common_item_text_color"
+                            android:textColor="@color/activiy_contact_detail_item_color"
                             android:textSize="@dimen/common_item_text_size" />
 
                         <TextView
@@ -643,7 +665,7 @@
                             android:gravity="center_vertical"
                             android:singleLine="true"
                             android:text="Cell phone"
-                            android:textColor="@color/common_item_text_color"
+                            android:textColor="@color/activiy_contact_detail_item_color"
                             android:textSize="@dimen/common_item_text_size" />
                     </LinearLayout>
 
@@ -662,11 +684,13 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginBottom="@dimen/detail_detail_item_margin_bottom"
-                            android:layout_marginTop="@dimen/detail_detail_item_margin_top"
+                             android:layout_marginBottom="@dimen/detail_detail_2_item_margin_bottom"
+                            android:layout_marginLeft="@dimen/contact_detail_2_item_margin_horizontal"
+                            android:layout_marginRight="@dimen/contact_detail_2_item_margin_horizontal"
+                            android:layout_marginTop="@dimen/detail_detail_2_item_margin_top"
                             android:padding="10dp"
                             android:text="@string/contacts_user_detail_item_telephone"
-                            android:textColor="@color/common_item_text_color"
+                            android:textColor="@color/activiy_contact_detail_item_color"
                             android:textSize="@dimen/common_item_text_size" />
 
                         <TextView
@@ -678,7 +702,7 @@
                             android:gravity="center_vertical"
                             android:singleLine="true"
                             android:text="TextView"
-                            android:textColor="@color/common_item_text_color"
+                            android:textColor="@color/activiy_contact_detail_item_color"
                             android:textSize="@dimen/common_item_text_size" />
                     </LinearLayout>
 
@@ -697,11 +721,13 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginBottom="@dimen/detail_detail_item_margin_bottom"
-                            android:layout_marginTop="@dimen/detail_detail_item_margin_top"
+                             android:layout_marginBottom="@dimen/detail_detail_2_item_margin_bottom"
+                            android:layout_marginLeft="@dimen/contact_detail_2_item_margin_horizontal"
+                            android:layout_marginRight="@dimen/contact_detail_2_item_margin_horizontal"
+                            android:layout_marginTop="@dimen/detail_detail_2_item_margin_top"
                             android:padding="10dp"
                             android:text="@string/contacts_user_detail_item_fax"
-                            android:textColor="@color/common_item_text_color"
+                            android:textColor="@color/activiy_contact_detail_item_color"
                             android:textSize="@dimen/common_item_text_size" />
 
                         <TextView
@@ -713,7 +739,7 @@
                             android:gravity="center_vertical"
                             android:singleLine="true"
                             android:text="TextView"
-                            android:textColor="@color/common_item_text_color"
+                            android:textColor="@color/activiy_contact_detail_item_color"
                             android:textSize="@dimen/common_item_text_size" />
                     </LinearLayout>
                 </LinearLayout>

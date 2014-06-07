@@ -15,7 +15,6 @@ import com.v2tech.util.GlobalConfig;
 public class SettingTabFragment extends Fragment {
 
 	private TextView mQuitButton;
-	private TextView mVersionTV;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -29,8 +28,6 @@ public class SettingTabFragment extends Fragment {
 				false);
 		mQuitButton = (TextView) v.findViewById(R.id.setting_quit_button);
 		mQuitButton.setOnClickListener(mQuitButtonListener);
-		mVersionTV = (TextView) v.findViewById(R.id.verson_id);
-		mVersionTV.setText(GlobalConfig.GLOBAL_VERSION_NAME);
 		return v;
 	}
 

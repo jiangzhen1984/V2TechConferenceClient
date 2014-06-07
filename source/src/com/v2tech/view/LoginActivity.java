@@ -5,7 +5,6 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
-import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -13,7 +12,6 @@ import android.text.Editable;
 import android.text.InputType;
 import android.text.TextUtils;
 import android.text.TextWatcher;
-import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MotionEvent;
@@ -25,6 +23,8 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.view.animation.LinearInterpolator;
+import android.view.animation.RotateAnimation;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
@@ -405,7 +405,7 @@ public class LoginActivity extends Activity {
 		mEmail = mEmailView.getText().toString();
 		mPassword = mPasswordView.getText().toString();
 
-		//Check user name is initial user name or not.
+		// Check user name is initial user name or not.
 		if (mContext.getResources().getText(R.string.login_user_name)
 				.equals(mEmail)) {
 			mEmailView.setError(getString(R.string.error_field_required));
@@ -480,21 +480,20 @@ public class LoginActivity extends Activity {
 		final Dialog dialog = new Dialog(mContext, R.style.IpSettingDialog);
 		dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
 		LinearLayout ll = new LinearLayout(mContext);
-		ll.setBackgroundResource(R.drawable.progress_bg);
+		ll.setBackgroundColor(Color.TRANSPARENT);
 		ll.setOrientation(LinearLayout.VERTICAL);
 
-		TextView tv = new TextView(mContext);
-		tv.setText(R.string.login_progress_signing_in);
-		tv.setTextSize(20F);
-		tv.setPadding(60, 80, 60, 60);
-		tv.setGravity(Gravity.CENTER);
-		ll.addView(tv, new LinearLayout.LayoutParams(
-				ViewGroup.LayoutParams.MATCH_PARENT,
-				ViewGroup.LayoutParams.WRAP_CONTENT));
-
+		RotateAnimation animation = new RotateAnimation(0f, 359f,
+				Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF,
+				0.5f);
+		animation.setDuration(500);
+		animation.setRepeatCount(RotateAnimation.INFINITE);
+		animation.setRepeatMode(RotateAnimation.RESTART);
+		LinearInterpolator lin = new LinearInterpolator();
+		animation.setInterpolator(lin);
 		ImageView iv = new ImageView(mContext);
-		iv.setImageResource(R.drawable.progress_animation);
-		iv.setPadding(60, 30, 60, 60);
+		iv.setImageResource(R.drawable.spin_black_70);
+		iv.setPadding(60, 60, 60, 60);
 		ll.addView(iv, new LinearLayout.LayoutParams(
 				ViewGroup.LayoutParams.MATCH_PARENT,
 				ViewGroup.LayoutParams.WRAP_CONTENT));
@@ -506,7 +505,7 @@ public class LoginActivity extends Activity {
 
 		mProgressDialog = dialog;
 		dialog.show();
-		((AnimationDrawable) iv.getDrawable()).start();
+		iv.startAnimation(animation);
 
 	}
 

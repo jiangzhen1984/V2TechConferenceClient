@@ -70,7 +70,7 @@ public class ContactUserView extends LinearLayout {
 				.findViewById(R.id.contact_user_signature);
 
 		mUserNameTV.setText(mUser.getName());
-		mUserSignatureTV.setText(mUser.getSignature() == null ? "" : mUser
+		mUserSignatureTV.setText(mUser.getSignature() == null ? "      " : mUser
 				.getSignature());
 
 		mCheckbox = (CheckBox) view.findViewById(R.id.conf_create_contact_view_ck);
@@ -122,9 +122,12 @@ public class ContactUserView extends LinearLayout {
 		}
 		if (st == User.Status.OFFLINE || st == User.Status.HIDDEN) {
 			mStatusIV.setVisibility(View.GONE);
+			mUserNameTV.setTextColor(getContext().getResources().getColor(R.color.conf_create_contacts_user_view_item_color_offline));
 		} else {
 			mStatusIV.setVisibility(View.VISIBLE);
+			mUserNameTV.setTextColor(getContext().getResources().getColor(R.color.contacts_user_view_item_color));
 		}
+
 	}
 
 	public void updateAvatar(Bitmap bt) {
@@ -136,7 +139,8 @@ public class ContactUserView extends LinearLayout {
 	}
 
 	public void updateSign() {
-		mUserSignatureTV.setText(this.mUser.getSignature());
+		//Used to space hold
+		mUserSignatureTV.setText(this.mUser.getSignature() == null? "   ": this.mUser.getSignature());
 		mUserNameTV.setText(mUser.getName());
 	}
 

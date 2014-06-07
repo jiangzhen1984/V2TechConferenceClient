@@ -7,6 +7,7 @@ import java.util.Set;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.Typeface;
@@ -55,6 +56,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 	private View mPinButton;
 
 	private AttendeesAdapter adapter = new AttendeesAdapter();
+
 
 	public interface VideoAttendeeActionListener {
 
@@ -110,6 +112,9 @@ public class VideoAttendeeListLayout extends LinearLayout {
 
 		});
 
+		mAttendeeContainer.setFocusable(true);
+		mAttendeeContainer.setFocusableInTouchMode(true);
+
 		this.addView(view, new LinearLayout.LayoutParams(
 				LinearLayout.LayoutParams.MATCH_PARENT,
 				LinearLayout.LayoutParams.MATCH_PARENT));
@@ -148,30 +153,11 @@ public class VideoAttendeeListLayout extends LinearLayout {
 				.findViewById(R.id.video_attendee_device_camera_icon);
 
 		cameraIV.setOnTouchListener(mListViewOnTouchListener);
-		
+
 		nameTV.setText(a.getAttName());
 
-		if (a.isSelf() == false) {
-			if ((a.getDefaultDevice() != null && a.isJoined()) || a.isSelf()) {
-				cameraIV.setImageResource(R.drawable.camera);
-			}
-		} else {
-			nameTV.setTypeface(null, Typeface.BOLD);
-			if (a.isJoined() || a.isSelf()) {
-				cameraIV.setImageResource(R.drawable.camera);
-			}
-		}
-
-		// set online attendee color
-		if (a.isJoined()) {
-			nameTV.setTextColor(getContext().getResources().getColor(
-					R.color.video_attendee_online_name_color));
-		}
-
-		if (a.isChairMan()) {
-			nameTV.setTextColor(getContext().getResources().getColor(
-					R.color.video_attendee_chair_man_name_color));
-		}
+		// Set text color and camera icon
+		setStyle(a, nameTV, cameraIV);
 
 		view.setTag(new Wrapper(a, a.getDefaultDevice()));
 		list.add(view);
@@ -189,10 +175,8 @@ public class VideoAttendeeListLayout extends LinearLayout {
 			// Hide additional speaker if user has more than one camera
 			view2.findViewById(R.id.video_attendee_device_speaker_icon)
 					.setVisibility(View.INVISIBLE);
-
-			if (a.isJoined() || a.isSelf()) {
-				cameraIV2.setImageResource(R.drawable.camera);
-			}
+			// Set text color and camera icon
+			setStyle(a, nameTV2, cameraIV2);
 
 			cameraIV2.setOnTouchListener(mListViewOnTouchListener);
 			view2.setTag(new Wrapper(a, udc));
@@ -201,6 +185,39 @@ public class VideoAttendeeListLayout extends LinearLayout {
 
 		return list;
 
+	}
+
+	private void setStyle(Attendee at, TextView name, ImageView iv) {
+		if (at.isSelf()) {
+			name.setTypeface(null, Typeface.BOLD);
+			name.setTextColor(getContext().getResources().getColor(
+					R.color.video_attendee_name_color));
+			// set camera icon
+			iv.setImageResource(R.drawable.camera);
+		} else if (at.isChairMan()) {
+			name.setTextColor(getContext().getResources().getColor(
+					R.color.video_attendee_chair_man_name_color));
+		} else if (at.isJoined()) {
+			name.setTextColor(getContext().getResources().getColor(
+					R.color.video_attendee_name_color));
+		} else {
+			name.setTextColor(getContext().getResources().getColor(
+					R.color.video_attendee_name_color_offline));
+
+		}
+
+		// set image view
+		if (at.isSelf()) {
+			iv.setImageResource(R.drawable.camera);
+		} else if (at.isJoined()) {
+			if (at.getType() != Attendee.TYPE_MIXED_VIDEO) {
+				iv.setImageResource(R.drawable.camera);
+			} else {
+				iv.setImageResource(R.drawable.mixed_video_camera);
+			}
+		} else {
+			iv.setImageResource(R.drawable.camera_pressed);
+		}
 	}
 
 	public void updateEnteredAttendee(Attendee at) {
@@ -254,7 +271,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 						.findViewById(R.id.video_attendee_device_name);
 
 				nameTV.setTextColor(getContext().getResources().getColor(
-						R.color.video_attendee_name_color));
+						R.color.video_attendee_name_color_offline));
 			}
 		}
 
@@ -342,6 +359,31 @@ public class VideoAttendeeListLayout extends LinearLayout {
 				.setImageResource(R.drawable.pin_button_selector);
 	}
 
+
+	/**
+	 * request update background of current selected Item
+	 * 
+	 * @param flag
+	 */
+	public void updateCurrentSelectedBg(boolean flag, Attendee at,
+			UserDeviceConfig udc) {
+
+		for (int i = 0; i < mAttendsView.size(); i++) {
+			View v = mAttendsView.get(i);
+			Wrapper w = (Wrapper) v.getTag();
+			if (w.a == at && udc == w.udc) {
+				if (flag) {
+					v.setBackgroundColor(getContext().getResources().getColor(
+							R.color.attendee_select_bg));
+				} else {
+					v.setBackgroundColor(Color.TRANSPARENT);
+				}
+				break;
+			}
+		}
+
+	}
+
 	private OnTouchListener mListViewOnTouchListener = new OnTouchListener() {
 
 		private View dragView;
@@ -350,18 +392,23 @@ public class VideoAttendeeListLayout extends LinearLayout {
 		@Override
 		public synchronized boolean onTouch(View view, MotionEvent event) {
 			if (event.getAction() == MotionEvent.ACTION_DOWN) {
-			
+
 				if (cbm != null && !cbm.isRecycled()) {
 					cbm.recycle();
 					cbm = null;
 				}
-				dragView = getView((Wrapper) ((View)view.getParent().getParent())
-						.getTag());
+
+				Wrapper w = (Wrapper) ((View) view.getParent().getParent())
+						.getTag();
+				dragView = getView(w);
+
 
 				WindowManager wd = (WindowManager) getContext()
 						.getSystemService(Context.WINDOW_SERVICE);
 				WindowManager.LayoutParams vl = getLayoutParams(event);
 				wd.addView(dragView, vl);
+				mAttendeeContainer
+						.setOverScrollMode(ListView.OVER_SCROLL_NEVER);
 			} else if (event.getAction() == MotionEvent.ACTION_MOVE) {
 				if (dragView != null) {
 					WindowManager wd = (WindowManager) getContext()
@@ -370,10 +417,13 @@ public class VideoAttendeeListLayout extends LinearLayout {
 					wd.updateViewLayout(dragView, vl);
 				}
 
-			} else if (event.getAction() == MotionEvent.ACTION_UP || event.getAction() == MotionEvent.ACTION_CANCEL ) {
+			} else if (event.getAction() == MotionEvent.ACTION_UP
+					|| event.getAction() == MotionEvent.ACTION_CANCEL) {
 				if (dragView != null) {
-					if (listener != null && event.getAction() != MotionEvent.ACTION_CANCEL ) {
-						View itemView = (View) (View)view.getParent().getParent();
+					if (listener != null
+							&& event.getAction() != MotionEvent.ACTION_CANCEL) {
+						View itemView = (View) (View) view.getParent()
+								.getParent();
 						Wrapper wr = (Wrapper) itemView.getTag();
 						Rect r = new Rect();
 						mAttendeeContainer.getLocalVisibleRect(r);
@@ -389,7 +439,8 @@ public class VideoAttendeeListLayout extends LinearLayout {
 							.getSystemService(Context.WINDOW_SERVICE);
 					wd.removeView(dragView);
 				}
-
+				mAttendeeContainer
+						.setOverScrollMode(ListView.OVER_SCROLL_ALWAYS);
 				dragView = null;
 			}
 			return true;

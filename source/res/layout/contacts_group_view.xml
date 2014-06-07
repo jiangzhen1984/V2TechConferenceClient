@@ -4,7 +4,7 @@
     android:layout_height="wrap_content"
     android:background="#ffffff" >
 
-      <LinearLayout
+    <RelativeLayout
         android:id="@+id/contact_group_view_root"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -12,38 +12,59 @@
         android:layout_marginTop="10dp"
         android:orientation="horizontal" >
 
-         <ImageView
+        <ImageView
             android:id="@+id/contacts_group_arrow_right"
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
+            android:paddingLeft="15dp"
             android:src="@drawable/arrow_right_gray" />
-         
+
         <TextView
             android:id="@+id/contact_group_name"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight=".4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="10dp"
+            android:layout_toRightOf="@+id/contacts_group_arrow_right"
             android:ellipsize="end"
             android:gravity="center_vertical"
             android:singleLine="true"
-            android:layout_marginRight="10dp"
-             android:textSize="18sp"
-             android:textColor="@color/contacts_group_item_color"
-            android:text="contact_group_name" />
+            android:text="contact_group_name"
+            android:maxWidth="@dimen/contacts_group_view_text_max_width"
+            android:textColor="@color/contacts_group_item_color"
+            android:textSize="18sp" />
 
         <TextView
             android:id="@+id/contact_group_online_statist"
-            android:layout_weight=".3"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
             android:layout_marginLeft="15dp"
-            android:layout_gravity="center"
-            android:gravity="center_vertical"
-             android:textSize="18sp"
-             android:textColor="@color/contacts_group_item_color"
-            android:text="contact_group_online_statist" />
-       
-    </LinearLayout>
+            android:layout_marginRight="10dp"
+            android:layout_toLeftOf="@+id/conf_create_contact_view_ck"
+            android:gravity="center_vertical|right"
+            android:text="contact_group_online_statist"
+            android:maxWidth="@dimen/contacts_group_view_statist_max_width"
+            android:singleLine="true"
+            android:ellipsize="end"
+            android:textColor="@color/contacts_group_item_color"
+            android:textSize="18sp" />
+
+        <CheckBox
+            android:id="@+id/conf_create_contact_view_ck"
+            style="@style/GraySquareCheckbox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="@dimen/conf_create_contacts_use_layout_name_margin_right"
+            android:clickable="false"
+            android:focusable="false"
+            android:gravity="right|center_vertical"
+            android:text=""
+            android:visibility="invisible" />
+    </RelativeLayout>
 
     <LinearLayout
         android:id="@+id/contact_group_view_line"

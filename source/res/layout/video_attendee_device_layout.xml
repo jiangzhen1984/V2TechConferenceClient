@@ -19,7 +19,7 @@
         android:singleLine="true"
         android:text="TextView"
         android:maxWidth="@dimen/video_attendee_device_text_max_width"
-        android:textColor="@color/video_attendee_name_color"
+        android:textColor="@color/video_attendee_name_color_offline"
         android:textSize="@dimen/video_attendee_device_text_size" />
 
     <LinearLayout

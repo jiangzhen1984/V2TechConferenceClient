@@ -14,6 +14,9 @@ import com.v2tech.util.V2Log;
  * 
  */
 public class Attendee {
+	
+	public final static int  TYPE_ATTENDEE = 1;
+	public final static int  TYPE_MIXED_VIDEO = 2;
 
 	private User user;
 	private List<UserDeviceConfig> mDevices;
@@ -24,6 +27,9 @@ public class Attendee {
 	protected Attendee() {
 		
 	}
+	
+	
+	
 
 	public Attendee(User user) {
 		this(user, null, false, false);
@@ -178,5 +184,9 @@ public class Attendee {
 		return map;
 	}
 	
+	
+	public int getType() {
+		return TYPE_ATTENDEE;
+	}
 
 }

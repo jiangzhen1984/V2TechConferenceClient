@@ -49,5 +49,10 @@ public class AttendeeMixedDevice extends Attendee {
 	public String getAttName() {
 		return "混合视频  (" + mv.getWidth() + "  x " + mv.getHeight() + ")";
 	}
+	
+	@Override
+	public int getType() {
+		return TYPE_MIXED_VIDEO;
+	}
 
 }

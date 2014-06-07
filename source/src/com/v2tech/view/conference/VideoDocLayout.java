@@ -396,6 +396,26 @@ public class VideoDocLayout extends LinearLayout {
 
 		mRequestFixedPosButton.setTag("float");
 	}
+	
+	
+	/**
+	 * Used to manually fixed FloatLayout, Because when this layout will hide,
+	 * call this function to inform interface
+	 */
+	public void requestFixedLayout() {
+		// Ignore same state
+		if ("fix".equals(mRequestFixedPosButton.getTag())) {
+			return;
+		}
+
+		if (this.listener != null) {
+			this.listener.requestDocViewFixedLayout(rootView);
+		}
+
+		mRequestFixedPosButton.setTag("fix");
+	}
+	
+	
 
 	/**
 	 * Used to manually request requestRestore, Because when this layout will

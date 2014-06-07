@@ -22,20 +22,29 @@
             android:paddingTop="10dp"
             android:text="@string/contacts_user_detail_return_button"
             android:textColor="@color/button_text_color"
-            android:textSize="20sp" />
+            android:textSize="@dimen/common_item_text_size" />
 
         <TextView
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
+            android:layout_centerInParent="true"
             android:ellipsize="end"
             android:gravity="center"
-            android:paddingBottom="15dp"
-            android:paddingTop="15dp"
             android:singleLine="true"
             android:text="@string/contacts_detail_title"
-            android:textColor="@color/common_item_text_color"
-            android:textSize="20sp" />
+            android:textColor="@color/activiy_contact_detail_title_color"
+            android:textSize="@dimen/common_item_text_size" />
+
+        <!-- Use translucent image to hold space -->
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="10dp"
+            android:paddingBottom="10dp"
+            android:paddingTop="10dp"
+            android:src="@drawable/translucent" />
     </RelativeLayout>
 
     <LinearLayout
@@ -67,33 +76,35 @@
                 android:layout_marginTop="20dp"
                 android:src="@drawable/avatar" />
 
-            <TextView
-                android:id="@+id/contact_user_detail_title"
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_alignBottom="@+id/contact_user_detail_head_icon"
                 android:layout_alignTop="@+id/contact_user_detail_head_icon"
-                android:layout_marginLeft="16dp"
+                android:layout_marginLeft="@dimen/detail_detail_signature_margin_left"
                 android:layout_toRightOf="@+id/contact_user_detail_head_icon"
-                android:ellipsize="end"
-                android:maxWidth="@dimen/detail_detail_2_name_max_width"
-                android:singleLine="true"
-                android:text="TextView"
-                android:textColor="@color/common_item_text_color"
-                android:textSize="@dimen/common_item_text_size_small" />
+                android:orientation="vertical" >
 
-            <TextView
-                android:id="@+id/contact_user_detail_user_signature_tv"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignLeft="@+id/contact_user_detail_title"
-                android:layout_below="@+id/contact_user_detail_title"
-                android:ellipsize="end"
-                android:gravity="center"
-                android:maxWidth="@dimen/detail_detail_2_name_max_width"
-                android:singleLine="true"
-                android:text="TextView"
-                android:textColor="@color/common_item_text_color"
-                android:textSize="@dimen/common_item_text_size_small" />
+                <TextView
+                    android:id="@+id/contact_user_detail_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="top"
+                    android:gravity="top"
+                    android:text="TextView"
+                    android:textColor="@color/common_item_text_color" />
+
+                <TextView
+                    android:id="@+id/contact_user_detail_user_signature_tv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom"
+                    android:ellipsize="end"
+                    android:gravity="bottom"
+                    android:singleLine="true"
+                    android:text="TextView"
+                    android:textColor="@color/common_item_text_color" />
+            </LinearLayout>
 
             <TextView
                 android:id="@+id/contact_user_detail_2_send_msg"
@@ -146,7 +157,7 @@
                 android:paddingTop="@dimen/detail_detail_2_button_padding_vertical"
                 android:text="@string/contacts_user_detail_add_friend"
                 android:textColor="@color/button_text_color"
-                android:textSize="@dimen/common_item_text_size_small" />
+                android:textSize="@dimen/common_item_text_size" />
         </RelativeLayout>
 
         <ScrollView
@@ -178,11 +189,12 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginBottom="@dimen/detail_detail_2_item_margin_bottom"
-                            android:layout_marginRight="30dp"
+                            android:layout_marginLeft="@dimen/contact_detail_2_item_margin_horizontal"
+                            android:layout_marginRight="@dimen/contact_detail_2_item_margin_horizontal"
                             android:layout_marginTop="@dimen/detail_detail_2_item_margin_top"
                             android:padding="10dp"
                             android:text="@string/contacts_user_detail_item_nick_name"
-                            android:textColor="@color/common_item_text_color"
+                            android:textColor="@color/activiy_contact_detail_item_color"
                             android:textSize="@dimen/common_item_text_size" />
 
                         <EditText
@@ -195,7 +207,7 @@
                             android:ems="10"
                             android:inputType="text"
                             android:maxLength="30"
-                            android:textColor="@color/common_item_text_color" >
+                            android:textColor="@color/activiy_contact_detail_item_color" >
                         </EditText>
                     </LinearLayout>
 
@@ -215,11 +227,12 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginBottom="@dimen/detail_detail_2_item_margin_bottom"
-                            android:layout_marginRight="30dp"
+                            android:layout_marginLeft="@dimen/contact_detail_2_item_margin_horizontal"
+                            android:layout_marginRight="@dimen/contact_detail_2_item_margin_horizontal"
                             android:layout_marginTop="@dimen/detail_detail_2_item_margin_top"
                             android:padding="10dp"
                             android:text="@string/contacts_user_detail_item_account"
-                            android:textColor="@color/common_item_text_color"
+                            android:textColor="@color/activiy_contact_detail_item_color"
                             android:textSize="@dimen/common_item_text_size" />
 
                         <TextView
@@ -227,14 +240,11 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="center_vertical"
-                            android:layout_marginBottom="@dimen/detail_detail_2_item_margin_bottom"
-                            android:layout_marginRight="30dp"
-                            android:layout_marginTop="@dimen/detail_detail_2_item_margin_top"
                             android:ellipsize="end"
                             android:gravity="center_vertical"
                             android:singleLine="true"
                             android:text="account"
-                            android:textColor="@color/common_item_text_color"
+                            android:textColor="@color/activiy_contact_detail_item_color"
                             android:textSize="@dimen/common_item_text_size" />
                     </LinearLayout>
 
@@ -253,11 +263,12 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginBottom="@dimen/detail_detail_2_item_margin_bottom"
-                            android:layout_marginRight="30dp"
+                            android:layout_marginLeft="@dimen/contact_detail_2_item_margin_horizontal"
+                            android:layout_marginRight="@dimen/contact_detail_2_item_margin_horizontal"
                             android:layout_marginTop="@dimen/detail_detail_2_item_margin_top"
                             android:padding="10dp"
                             android:text="@string/contacts_user_detail_item_gender"
-                            android:textColor="@color/common_item_text_color"
+                            android:textColor="@color/activiy_contact_detail_item_color"
                             android:textSize="@dimen/common_item_text_size" />
 
                         <TextView
@@ -265,13 +276,10 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="center_vertical"
-                            android:layout_marginBottom="@dimen/detail_detail_2_item_margin_bottom"
-                            android:layout_marginRight="30dp"
-                            android:layout_marginTop="@dimen/detail_detail_2_item_margin_top"
                             android:ellipsize="end"
                             android:singleLine="true"
                             android:text="gender"
-                            android:textColor="@color/common_item_text_color"
+                            android:textColor="@color/activiy_contact_detail_item_color"
                             android:textSize="@dimen/common_item_text_size" />
                     </LinearLayout>
 
@@ -291,11 +299,12 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginBottom="@dimen/detail_detail_2_item_margin_bottom"
-                            android:layout_marginRight="30dp"
+                            android:layout_marginLeft="@dimen/contact_detail_2_item_margin_horizontal"
+                            android:layout_marginRight="@dimen/contact_detail_2_item_margin_horizontal"
                             android:layout_marginTop="@dimen/detail_detail_2_item_margin_top"
                             android:padding="10dp"
                             android:text="@string/contacts_user_detail_item_birdthday"
-                            android:textColor="@color/common_item_text_color"
+                            android:textColor="@color/activiy_contact_detail_item_color"
                             android:textSize="@dimen/common_item_text_size" />
 
                         <TextView
@@ -303,11 +312,11 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginBottom="@dimen/detail_detail_2_item_margin_bottom"
-                            android:layout_marginRight="30dp"
+                            android:layout_marginRight="@dimen/contact_detail_2_item_margin_horizontal"
                             android:layout_marginTop="@dimen/detail_detail_2_item_margin_top"
                             android:gravity="center_vertical"
                             android:text="birthday"
-                            android:textColor="@color/common_item_text_color"
+                            android:textColor="@color/activiy_contact_detail_item_color"
                             android:textSize="@dimen/common_item_text_size" />
                     </LinearLayout>
 
@@ -326,11 +335,12 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginBottom="@dimen/detail_detail_2_item_margin_bottom"
-                            android:layout_marginRight="30dp"
+                            android:layout_marginLeft="@dimen/contact_detail_2_item_margin_horizontal"
+                            android:layout_marginRight="@dimen/contact_detail_2_item_margin_horizontal"
                             android:layout_marginTop="@dimen/detail_detail_2_item_margin_top"
                             android:padding="10dp"
                             android:text="@string/contacts_user_detail_item_cell_phone"
-                            android:textColor="@color/common_item_text_color"
+                            android:textColor="@color/activiy_contact_detail_item_color"
                             android:textSize="@dimen/common_item_text_size" />
 
                         <TextView
@@ -339,13 +349,13 @@
                             android:layout_height="wrap_content"
                             android:layout_gravity="center_vertical"
                             android:layout_marginBottom="@dimen/detail_detail_2_item_margin_bottom"
-                            android:layout_marginRight="30dp"
+                            android:layout_marginRight="@dimen/contact_detail_2_item_margin_horizontal"
                             android:layout_marginTop="@dimen/detail_detail_2_item_margin_top"
                             android:ellipsize="end"
                             android:gravity="center_vertical"
                             android:singleLine="true"
                             android:text="Cell phone"
-                            android:textColor="@color/common_item_text_color"
+                            android:textColor="@color/activiy_contact_detail_item_color"
                             android:textSize="@dimen/common_item_text_size" />
                     </LinearLayout>
 
@@ -365,11 +375,12 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginBottom="@dimen/detail_detail_2_item_margin_bottom"
-                            android:layout_marginRight="30dp"
+                            android:layout_marginLeft="@dimen/contact_detail_2_item_margin_horizontal"
+                            android:layout_marginRight="@dimen/contact_detail_2_item_margin_horizontal"
                             android:layout_marginTop="@dimen/detail_detail_2_item_margin_top"
                             android:padding="10dp"
                             android:text="@string/contacts_user_detail_item_telephone"
-                            android:textColor="@color/common_item_text_color"
+                            android:textColor="@color/activiy_contact_detail_item_color"
                             android:textSize="@dimen/common_item_text_size" />
 
                         <TextView
@@ -378,13 +389,13 @@
                             android:layout_height="wrap_content"
                             android:layout_gravity="center_vertical"
                             android:layout_marginBottom="@dimen/detail_detail_2_item_margin_bottom"
-                            android:layout_marginRight="30dp"
+                            android:layout_marginRight="@dimen/contact_detail_2_item_margin_horizontal"
                             android:layout_marginTop="@dimen/detail_detail_2_item_margin_top"
                             android:ellipsize="end"
                             android:gravity="center_vertical"
                             android:singleLine="true"
                             android:text="TextView"
-                            android:textColor="@color/common_item_text_color"
+                            android:textColor="@color/activiy_contact_detail_item_color"
                             android:textSize="@dimen/common_item_text_size" />
                     </LinearLayout>
 
@@ -403,11 +414,12 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginBottom="@dimen/detail_detail_2_item_margin_bottom"
-                            android:layout_marginRight="30dp"
+                            android:layout_marginLeft="@dimen/contact_detail_2_item_margin_horizontal"
+                            android:layout_marginRight="@dimen/contact_detail_2_item_margin_horizontal"
                             android:layout_marginTop="@dimen/detail_detail_2_item_margin_top"
                             android:padding="10dp"
                             android:text="@string/contacts_user_detail_item_company"
-                            android:textColor="@color/common_item_text_color"
+                            android:textColor="@color/activiy_contact_detail_item_color"
                             android:textSize="@dimen/common_item_text_size" />
 
                         <TextView
@@ -416,13 +428,13 @@
                             android:layout_height="wrap_content"
                             android:layout_gravity="center_vertical"
                             android:layout_marginBottom="@dimen/detail_detail_2_item_margin_bottom"
-                            android:layout_marginRight="30dp"
+                            android:layout_marginRight="@dimen/contact_detail_2_item_margin_horizontal"
                             android:layout_marginTop="@dimen/detail_detail_2_item_margin_top"
                             android:ellipsize="end"
                             android:gravity="center_vertical"
                             android:singleLine="true"
                             android:text="TextView"
-                            android:textColor="@color/common_item_text_color"
+                            android:textColor="@color/activiy_contact_detail_item_color"
                             android:textSize="@dimen/common_item_text_size" />
                     </LinearLayout>
 
@@ -442,11 +454,12 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginBottom="@dimen/detail_detail_2_item_margin_bottom"
-                            android:layout_marginRight="30dp"
+                            android:layout_marginLeft="@dimen/contact_detail_2_item_margin_horizontal"
+                            android:layout_marginRight="@dimen/contact_detail_2_item_margin_horizontal"
                             android:layout_marginTop="@dimen/detail_detail_2_item_margin_top"
                             android:padding="10dp"
                             android:text="@string/contacts_user_detail_item_department"
-                            android:textColor="@color/common_item_text_color"
+                            android:textColor="@color/activiy_contact_detail_item_color"
                             android:textSize="@dimen/common_item_text_size" />
 
                         <TextView
@@ -455,13 +468,13 @@
                             android:layout_height="wrap_content"
                             android:layout_gravity="center_vertical"
                             android:layout_marginBottom="@dimen/detail_detail_2_item_margin_bottom"
-                            android:layout_marginRight="30dp"
+                            android:layout_marginRight="@dimen/contact_detail_2_item_margin_horizontal"
                             android:layout_marginTop="@dimen/detail_detail_2_item_margin_top"
                             android:ellipsize="end"
                             android:gravity="center_vertical"
                             android:singleLine="true"
                             android:text="TextView"
-                            android:textColor="@color/common_item_text_color"
+                            android:textColor="@color/activiy_contact_detail_item_color"
                             android:textSize="@dimen/common_item_text_size" />
                     </LinearLayout>
 
@@ -480,11 +493,12 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginBottom="@dimen/detail_detail_2_item_margin_bottom"
-                            android:layout_marginRight="30dp"
+                            android:layout_marginLeft="@dimen/contact_detail_2_item_margin_horizontal"
+                            android:layout_marginRight="@dimen/contact_detail_2_item_margin_horizontal"
                             android:layout_marginTop="@dimen/detail_detail_2_item_margin_top"
                             android:padding="10dp"
                             android:text="@string/contacts_user_detail_item_title"
-                            android:textColor="@color/common_item_text_color"
+                            android:textColor="@color/activiy_contact_detail_item_color"
                             android:textSize="@dimen/common_item_text_size" />
 
                         <TextView
@@ -493,13 +507,13 @@
                             android:layout_height="wrap_content"
                             android:layout_gravity="center_vertical"
                             android:layout_marginBottom="@dimen/detail_detail_2_item_margin_bottom"
-                            android:layout_marginRight="30dp"
+                            android:layout_marginRight="@dimen/contact_detail_2_item_margin_horizontal"
                             android:layout_marginTop="@dimen/detail_detail_2_item_margin_top"
                             android:ellipsize="end"
                             android:gravity="center_vertical"
                             android:singleLine="true"
                             android:text="TextView"
-                            android:textColor="@color/common_item_text_color"
+                            android:textColor="@color/activiy_contact_detail_item_color"
                             android:textSize="@dimen/common_item_text_size" />
                     </LinearLayout>
 
@@ -519,11 +533,12 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginBottom="@dimen/detail_detail_2_item_margin_bottom"
-                            android:layout_marginRight="30dp"
+                            android:layout_marginLeft="@dimen/contact_detail_2_item_margin_horizontal"
+                            android:layout_marginRight="@dimen/contact_detail_2_item_margin_horizontal"
                             android:layout_marginTop="@dimen/detail_detail_2_item_margin_top"
                             android:padding="10dp"
                             android:text="@string/contacts_user_detail_item_address"
-                            android:textColor="@color/common_item_text_color"
+                            android:textColor="@color/activiy_contact_detail_item_color"
                             android:textSize="@dimen/common_item_text_size" />
 
                         <TextView
@@ -532,13 +547,13 @@
                             android:layout_height="wrap_content"
                             android:layout_gravity="center_vertical"
                             android:layout_marginBottom="@dimen/detail_detail_2_item_margin_bottom"
-                            android:layout_marginRight="30dp"
+                            android:layout_marginRight="@dimen/contact_detail_2_item_margin_horizontal"
                             android:layout_marginTop="@dimen/detail_detail_2_item_margin_top"
                             android:ellipsize="end"
                             android:gravity="center_vertical"
                             android:singleLine="true"
                             android:text="TextView"
-                            android:textColor="@color/common_item_text_color"
+                            android:textColor="@color/activiy_contact_detail_item_color"
                             android:textSize="@dimen/common_item_text_size" />
                     </LinearLayout>
                 </LinearLayout>

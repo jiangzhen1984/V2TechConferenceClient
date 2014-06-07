@@ -215,12 +215,14 @@
 
                 <TextView
                     android:id="@+id/video_invition_attendee_ly_invition_button"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/conference_invition_button_text"
                     android:layout_gravity="left"
                     android:gravity="left"
-                    android:padding="5dp"
+                    android:paddingBottom="10dp"
+                    android:paddingLeft="20dp"
+                    android:paddingTop="10dp"
                     android:textSize="15sp"
                     android:textColor="@color/conf_create_button_color" >
                 </TextView>

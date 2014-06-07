@@ -15,23 +15,15 @@
             android:id="@+id/message_user_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
+            android:layout_centerInParent="true"
             android:layout_gravity="center"
-            android:layout_marginBottom="10dp"
-            android:layout_marginTop="10dp"
             android:ellipsize="end"
             android:gravity="center"
             android:maxWidth="@dimen/activity_contact_message_title_max_width"
             android:singleLine="true"
             android:text=""
-            android:textColor="#000000"
-            android:textSize="17sp" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="0dp"
-            android:layout_below="@+id/message_user_title"
-            android:text="" />
+             android:textColor="@color/activiy_contact_detail_title_color"
+            android:textSize="@dimen/common_item_text_size"  />
 
         <TextView
             android:id="@+id/contact_detail_return_button"
@@ -47,7 +39,7 @@
             android:paddingTop="5dp"
             android:text="@string/contacts_user_detail_return_button"
             android:textColor="@color/button_text_color"
-            android:textSize="20sp" />
+            android:textSize="@dimen/common_item_text_size" />
 
         <ImageView
             android:id="@+id/contact_detail_button"
@@ -56,6 +48,8 @@
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
             android:layout_marginRight="10dp"
+            android:paddingBottom="10dp"
+            android:paddingTop="10dp"
             android:src="@drawable/contact_detail_button_selector" />
     </RelativeLayout>
 
