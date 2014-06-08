@@ -1315,9 +1315,7 @@ public class VideoActivityV2 extends Activity {
 		for (SurfaceViewW sw : this.mCurrentShowedSV) {
 			Message.obtain(mVideoHandler, REQUEST_OPEN_OR_CLOSE_DEVICE, 0, 0,
 					sw.udc).sendToTarget();
-			// mService.requestCloseVideoDevice(mGroupId, sw.udc,
-			// Message.obtain(
-			// mVideoHandler, REQUEST_CLOSE_DEVICE_RESPONSE));
+			sw.udc.doClose();
 		}
 
 		// close local camera
@@ -2199,7 +2197,10 @@ public class VideoActivityV2 extends Activity {
 					if (mAttendeeContainer != null && mw != null) {
 						mAttendeeContainer.updateExitedAttendee(mw.amd);
 					}
-					// TODO close all device
+					//Close opened mixed video
+					if (mw != null && mw.amd.getDefaultDevice().isShowing()) {
+						showOrCloseAttendeeVideo(mw.amd.getDefaultDevice());
+					}
 
 					// add mixed video device
 				} /*

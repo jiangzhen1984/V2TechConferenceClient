@@ -260,6 +260,11 @@ public class VideoAttendeeListLayout extends LinearLayout {
 			ViewWrapper v = mAttendsView.get(i);
 			Wrapper wr = (Wrapper) v.v.getTag();
 			if (wr.a.getAttId() == at.getAttId()) {
+				//If attendee type is mixed video, remove destroyed mixed video
+				if (wr.a.getType() == Attendee.TYPE_MIXED_VIDEO) {
+					mAttendsView.remove(v);
+					break;
+				}
 				wr.a.setJoined(false);
 				ImageView cameraIV2 = (ImageView) v.v
 						.findViewById(R.id.video_attendee_device_camera_icon);
