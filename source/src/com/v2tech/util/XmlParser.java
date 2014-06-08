@@ -3,7 +3,9 @@ package com.v2tech.util;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -12,15 +14,17 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import com.v2tech.vo.ConferenceGroup;
 import com.v2tech.vo.ContactGroup;
+import com.v2tech.vo.CrowdGroup;
 import com.v2tech.vo.Group;
 import com.v2tech.vo.Group.GroupType;
-import com.v2tech.vo.CrowdGroup;
 import com.v2tech.vo.OrgGroup;
+import com.v2tech.vo.User;
 import com.v2tech.vo.V2Doc;
 import com.v2tech.vo.V2Doc.Page;
 import com.v2tech.vo.V2Shape;
@@ -29,10 +33,103 @@ import com.v2tech.vo.V2ShapeLine;
 import com.v2tech.vo.V2ShapeMeta;
 import com.v2tech.vo.V2ShapePoint;
 import com.v2tech.vo.V2ShapeRect;
+import com.v2tech.vo.VImageMessage;
+import com.v2tech.vo.VMessage;
+import com.v2tech.vo.VMessageAbstractItem;
+import com.v2tech.vo.VMessageFaceItem;
+import com.v2tech.vo.VMessageImageItem;
+import com.v2tech.vo.VMessageTextItem;
 
 public class XmlParser {
 
 	public XmlParser() {
+	}
+
+	public static VMessage parseForMessage(User from, User to, Date date,
+			String xml) {
+		VMessage vm = new VMessage(from, to, date);
+		InputStream is = null;
+		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+		DocumentBuilder dBuilder;
+		try {
+			dBuilder = dbFactory.newDocumentBuilder();
+			is = new ByteArrayInputStream(xml.getBytes("UTF-8"));
+			Document doc = dBuilder.parse(is);
+
+			doc.getDocumentElement().normalize();
+			NodeList textMsgItemNL = doc.getElementsByTagName("ItemList");
+			if (textMsgItemNL.getLength() <= 0) {
+				return null;
+			}
+			Element msgEl = (Element) textMsgItemNL.item(0);
+			NodeList itemList = msgEl.getChildNodes();
+
+			for (int i = 0; i < itemList.getLength(); i++) {
+				Node n = itemList.item(i);
+				if (n instanceof Element) {
+					msgEl = (Element) itemList.item(i);
+					boolean isNewLine = "True".equals(msgEl
+							.getAttribute("NewLine"));
+					VMessageAbstractItem va = null;
+					if (msgEl.getTagName().equals("TTextChatItem")) {
+						String text = msgEl.getAttribute("Text");
+						va = new VMessageTextItem(vm, text);
+					} else if (msgEl.getTagName().equals("TSysFaceChatItem")) {
+						String fileName = msgEl.getAttribute("FileName");
+						int start = fileName.indexOf(".");
+						int index = Integer.parseInt(fileName.substring(0,
+								start));
+						va = new VMessageFaceItem(vm, index);
+
+					} else if (msgEl.getTagName().equals("TPictureChatItem")) {
+
+					}
+					va.setNewLine(isNewLine);
+
+				}
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+
+		return vm;
+	}
+
+	public static void extraImageMetaFrom(VMessage vm, String xml) {
+		InputStream is = null;
+
+		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+		DocumentBuilder dBuilder;
+		try {
+			dBuilder = dbFactory.newDocumentBuilder();
+			is = new ByteArrayInputStream(xml.getBytes("UTF-8"));
+			Document doc = dBuilder.parse(is);
+
+			doc.getDocumentElement().normalize();
+
+			NodeList imgMsgItemNL = doc
+					.getElementsByTagName("TPictureChatItem");
+			for (int i = 0; i < imgMsgItemNL.getLength(); i++) {
+				Element msgEl = (Element) imgMsgItemNL.item(i);
+				String uuid = msgEl.getAttribute("GUID");
+				if (uuid == null) {
+					V2Log.e("Invalid uuid ");
+					continue;
+				}
+				boolean isNewLine = "True"
+						.equals(msgEl.getAttribute("NewLine"));
+				VMessageImageItem vii = new VMessageImageItem(vm,
+						uuid.substring(1, uuid.length() - 1),
+						msgEl.getAttribute("FileExt"));
+				vii.setNewLine(isNewLine);
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
 	}
 
 	/**

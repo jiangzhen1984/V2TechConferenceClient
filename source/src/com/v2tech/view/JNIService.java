@@ -1,6 +1,10 @@
 package com.v2tech.view;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -40,6 +44,7 @@ import com.v2tech.service.BitmapManager;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.Notificator;
+import com.v2tech.util.StorageUtil;
 import com.v2tech.util.V2Log;
 import com.v2tech.util.XmlParser;
 import com.v2tech.view.bo.GroupUserObject;
@@ -56,7 +61,8 @@ import com.v2tech.vo.User;
 import com.v2tech.vo.UserDeviceConfig;
 import com.v2tech.vo.VImageMessage;
 import com.v2tech.vo.VMessage;
-import com.v2tech.vo.VMessage.MessageType;
+import com.v2tech.vo.VMessageAbstractItem;
+import com.v2tech.vo.VMessageImageItem;
 
 /**
  * This service is used to wrap JNI call.<br>
@@ -344,7 +350,6 @@ public class JNIService extends Service {
 				if (vm != null) {
 					String action = null;
 					String msgUri = null;
-					// FIXME handle for image message
 					if (vm.getMsgCode() == VMessage.VMESSAGE_CODE_CONF) {
 						action = JNI_BROADCAST_NEW_CONF_MESSAGE;
 					} else {
@@ -355,11 +360,10 @@ public class JNIService extends Service {
 						updateStatusBar(vm);
 					}
 					Intent ii = new Intent(action);
-					ii.putExtra("content", vm.getText());
 					ii.addCategory(JNI_BROADCAST_CATEGROY);
-					ii.putExtra("gid", vm.mGroupId);
+					ii.putExtra("gid", vm.getGroupId());
 					ii.putExtra("mid", msgUri);
-					ii.putExtra("fromuid", vm.getUser().getmUserId());
+					ii.putExtra("fromuid", vm.getFromUser().getmUserId());
 					mContext.sendBroadcast(ii);
 				}
 				break;
@@ -378,20 +382,21 @@ public class JNIService extends Service {
 		}
 
 		private Uri saveMessageToDB(VMessage vm) {
-			ContentValues cv = new ContentValues();
-			cv.put(ContentDescriptor.Messages.Cols.FROM_USER_ID, vm.getUser()
-					.getmUserId());
-			cv.put(ContentDescriptor.Messages.Cols.TO_USER_ID, vm.getToUser()
-					.getmUserId());
-			cv.put(ContentDescriptor.Messages.Cols.MSG_CONTENT, vm.getText());
-			cv.put(ContentDescriptor.Messages.Cols.MSG_TYPE, vm.getType()
-					.getIntValue());
-			cv.put(ContentDescriptor.Messages.Cols.SEND_TIME,
-					vm.getFullDateStr());
-			cv.put(ContentDescriptor.Messages.Cols.GROUP_ID, vm.mGroupId);
-			Uri uri = getContentResolver().insert(
-					ContentDescriptor.Messages.CONTENT_URI, cv);
-			return uri;
+//			ContentValues cv = new ContentValues();
+//			cv.put(ContentDescriptor.Messages.Cols.FROM_USER_ID, vm.getUser()
+//					.getmUserId());
+//			cv.put(ContentDescriptor.Messages.Cols.TO_USER_ID, vm.getToUser()
+//					.getmUserId());
+//			cv.put(ContentDescriptor.Messages.Cols.MSG_CONTENT, vm.getText());
+//			cv.put(ContentDescriptor.Messages.Cols.MSG_TYPE, vm.getType()
+//					.getIntValue());
+//			cv.put(ContentDescriptor.Messages.Cols.SEND_TIME,
+//					vm.getFullDateStr());
+//			cv.put(ContentDescriptor.Messages.Cols.GROUP_ID, vm.mGroupId);
+//			Uri uri = getContentResolver().insert(
+//					ContentDescriptor.Messages.CONTENT_URI, cv);
+//			return uri;
+			return null;
 		}
 
 		private void sendNotification() {
@@ -409,53 +414,53 @@ public class JNIService extends Service {
 
 		// FIXME update message for group message
 		private void updateStatusBar(VMessage vm) {
-			Conversation cov = null;
-			if (vm.mGroupId != 0) {
-				cov = GlobalHolder.getInstance().findConversationByType(
-						Conversation.TYPE_GROUP, vm.mGroupId);
-			} else {
-				cov = GlobalHolder.getInstance().findConversationByType(
-						Conversation.TYPE_CONTACT, vm.getUser().getmUserId());
-			}
-			//
-			if ((GlobalHolder.getInstance().CURRENT_CONVERSATION != null && cov == GlobalHolder
-					.getInstance().CURRENT_CONVERSATION)
-					|| (GlobalHolder.getInstance().CURRENT_ID == vm.getUser()
-							.getmUserId())) {
-				return;
-			}
-			NotificationCompat.Builder builder = new NotificationCompat.Builder(
-					mContext).setSmallIcon(R.drawable.ic_launcher)
-					.setContentTitle(vm.getUser().getName());
-			if (vm.getType() == MessageType.IMAGE) {
-				builder.setContentText(mContext.getResources().getString(
-						R.string.receive_image_notification));
-			} else {
-				builder.setContentText(vm.getText());
-
-			}
-
-			Intent resultIntent = new Intent(
-					PublicIntent.START_CONVERSACTION_ACTIVITY);
-			resultIntent.putExtra("user1id", GlobalHolder.getInstance()
-					.getCurrentUserId());
-			resultIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-			resultIntent.putExtra("user2id", vm.getUser().getmUserId());
-			resultIntent.putExtra("user2Name", vm.getUser().getName());
-			resultIntent.addCategory(PublicIntent.DEFAULT_CATEGORY);
-
-			// Creates the PendingIntent
-			PendingIntent notifyPendingIntent = PendingIntent.getActivities(
-					mContext, 0, new Intent[] { resultIntent },
-					PendingIntent.FLAG_UPDATE_CURRENT);
-
-			// Puts the PendingIntent into the notification builder
-			builder.setContentIntent(notifyPendingIntent);
-
-			NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-			// mId allows you to update the notification later on.
-			mNotificationManager.notify(PublicIntent.MESSAGE_NOTIFICATION_ID,
-					builder.build());
+//			Conversation cov = null;
+//			if (vm.mGroupId != 0) {
+//				cov = GlobalHolder.getInstance().findConversationByType(
+//						Conversation.TYPE_GROUP, vm.mGroupId);
+//			} else {
+//				cov = GlobalHolder.getInstance().findConversationByType(
+//						Conversation.TYPE_CONTACT, vm.getUser().getmUserId());
+//			}
+//			//
+//			if ((GlobalHolder.getInstance().CURRENT_CONVERSATION != null && cov == GlobalHolder
+//					.getInstance().CURRENT_CONVERSATION)
+//					|| (GlobalHolder.getInstance().CURRENT_ID == vm.getUser()
+//							.getmUserId())) {
+//				return;
+//			}
+//			NotificationCompat.Builder builder = new NotificationCompat.Builder(
+//					mContext).setSmallIcon(R.drawable.ic_launcher)
+//					.setContentTitle(vm.getUser().getName());
+//			if (vm.getType() == MessageType.IMAGE) {
+//				builder.setContentText(mContext.getResources().getString(
+//						R.string.receive_image_notification));
+//			} else {
+//				builder.setContentText(vm.getText());
+//
+//			}
+//
+//			Intent resultIntent = new Intent(
+//					PublicIntent.START_CONVERSACTION_ACTIVITY);
+//			resultIntent.putExtra("user1id", GlobalHolder.getInstance()
+//					.getCurrentUserId());
+//			resultIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//			resultIntent.putExtra("user2id", vm.getUser().getmUserId());
+//			resultIntent.putExtra("user2Name", vm.getUser().getName());
+//			resultIntent.addCategory(PublicIntent.DEFAULT_CATEGORY);
+//
+//			// Creates the PendingIntent
+//			PendingIntent notifyPendingIntent = PendingIntent.getActivities(
+//					mContext, 0, new Intent[] { resultIntent },
+//					PendingIntent.FLAG_UPDATE_CURRENT);
+//
+//			// Puts the PendingIntent into the notification builder
+//			builder.setContentIntent(notifyPendingIntent);
+//
+//			NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+//			// mId allows you to update the notification later on.
+//			mNotificationManager.notify(PublicIntent.MESSAGE_NOTIFICATION_ID,
+//					builder.build());
 
 		}
 
@@ -845,11 +850,6 @@ public class JNIService extends Service {
 		@Override
 		public void OnRecvChatTextCallback(long nGroupID, int nBusinessType,
 				long nFromUserID, long nTime, String szXmlText) {
-			// if (nGroupID > 0) {
-			// V2Log.w("igonre group message:" +nGroupID+"  "+ szXmlText);
-			// return;
-			// }
-
 			User toUser = GlobalHolder.getInstance().getCurrentUser();
 			User fromUser = GlobalHolder.getInstance().getUser(nFromUserID);
 			if (toUser == null) {
@@ -863,19 +863,26 @@ public class JNIService extends Service {
 				fromUser = new User(nFromUserID);
 			}
 
-			// Record image data meta
-			List<VMessage> l = VImageMessage.extraMetaFrom(fromUser, toUser,
-					szXmlText);
-			synchronized (cacheImageMeta) {
-				cacheImageMeta.addAll(l);
-			}
-			VMessage vm = VMessage.fromXml(fromUser, toUser, new Date(),
+			
+			
+			VMessage vm = XmlParser.parseForMessage(fromUser, toUser, new Date(),
 					szXmlText);
 			if (vm == null) {
 				V2Log.e(" xml parsed failed : " + szXmlText);
 				return;
 			}
-			vm.mGroupId = nGroupID;
+			
+			// Record image data meta
+			VMessage cache = new VMessage(fromUser, toUser, new Date());
+			XmlParser.extraImageMetaFrom(cache, 
+					szXmlText);
+			if (vm.getItems().size() > 0) {
+				synchronized (cacheImageMeta) {
+					cacheImageMeta.add(cache);
+				}
+			}
+			
+			vm.setGroupId(nGroupID);
 			vm.setMsgCode(nBusinessType);
 			Message.obtain(mCallbackHandler, JNI_RECEIVED_MESSAGE, vm)
 					.sendToTarget();
@@ -886,15 +893,18 @@ public class JNIService extends Service {
 				long nFromUserID, long nTime, String nSeqId, byte[] pPicData) {
 			boolean isCache = false;
 			VMessage vm = null;
+			VMessageImageItem vait = null;;
+			String uuid = nSeqId.substring(1, nSeqId.length() - 1);
 			synchronized (cacheImageMeta) {
 				for (VMessage v : cacheImageMeta) {
-					if (v.getUUID().equals(
-							nSeqId.subSequence(1, nSeqId.length() - 1))) {
-						vm = v;
-						isCache = true;
-						cacheImageMeta.remove(v);
-						break;
+					for (VMessageAbstractItem vai : v.getItems()) {
+						if (((VMessageImageItem)vai).getUUID().equals(uuid)) {
+							isCache = true;
+							vm = v;
+							vait = (VMessageImageItem)vai;
+						}
 					}
+					cacheImageMeta.remove(v);
 				}
 			}
 			if (isCache == false) {
@@ -905,22 +915,35 @@ public class JNIService extends Service {
 				V2Log.w("igonre group image message:" + nGroupID);
 				return;
 			}
-			User toUser = GlobalHolder.getInstance().getCurrentUser();
-			User fromUser = GlobalHolder.getInstance().getUser(nFromUserID);
-			if (toUser == null) {
-				V2Log.w("No valid user object for receive message " + toUser
-						+ "  " + fromUser);
-				toUser = new User(GlobalHolder.getInstance().getCurrentUserId());
-			}
-			if (fromUser == null) {
-				V2Log.w("No valid user object for receive message " + toUser
-						+ "  " + fromUser);
-				fromUser = new User(nFromUserID);
-			}
-			vm.setLocal(false);
-			vm.setDate(new Date());
-			vm.mGroupId = nGroupID;
+			vm.setGroupId(nGroupID);
 			((VImageMessage) vm).updateImageData(pPicData);
+			
+			String filePath = StorageUtil.getAbsoluteSdcardPath() + "/v2tech/pics/"
+			+ vait.getUUID() + vait.getExtension();
+			vait.setFilePath(filePath);
+			
+			File f = new File(filePath);
+			OutputStream os = null;
+			try {
+				os = new FileOutputStream(f);
+				os.write(pPicData, 0, pPicData.length);
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			} finally {
+				if (os != null) {
+					try {
+						os.close();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+			
+			
+			
+			
 			Message.obtain(mCallbackHandler, JNI_RECEIVED_MESSAGE, vm)
 					.sendToTarget();
 		}

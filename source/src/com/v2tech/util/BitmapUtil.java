@@ -86,5 +86,15 @@ public class BitmapUtil {
 		r[0] = options.outWidth;
 		r[1]= options.outHeight;
 	}
+	
+	
+	public static void getFullBitmapBounds(String file, int[] r) {
+		BitmapFactory.Options options = new BitmapFactory.Options();
+		options.inJustDecodeBounds = true;
+		options.inPreferredConfig = Bitmap.Config.ALPHA_8;
+		BitmapFactory.decodeFile(file, options);
+		r[0] = options.outWidth;
+		r[1]= options.outHeight;
+	}
 
 }

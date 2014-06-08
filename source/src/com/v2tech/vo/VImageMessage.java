@@ -188,50 +188,7 @@ public class VImageMessage extends VMessage {
 		return data;
 	}
 
-	public static List<VMessage> extraMetaFrom(User fromUser, User toUser,
-			String xml) {
-		List<VMessage> li = new ArrayList<VMessage>();
-		InputStream is = null;
-
-		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-		DocumentBuilder dBuilder;
-		try {
-			dBuilder = dbFactory.newDocumentBuilder();
-			is = new ByteArrayInputStream(xml.getBytes("UTF-8"));
-			Document doc = dBuilder.parse(is);
-
-			doc.getDocumentElement().normalize();
-
-			NodeList imgMsgItemNL = doc
-					.getElementsByTagName("TPictureChatItem");
-			for (int i = 0; i < imgMsgItemNL.getLength(); i++) {
-				Element msgEl = (Element) imgMsgItemNL.item(i);
-				String uuid = msgEl.getAttribute("GUID");
-				if (uuid == null) {
-					V2Log.e("Invalid uuid ");
-					continue;
-				}
-				VMessage vmImage = new VImageMessage(fromUser, toUser,
-						uuid.substring(1, uuid.length() - 1),
-						msgEl.getAttribute("FileExt"));
-				vmImage.setDate(new Date());
-				vmImage.setType(MessageType.IMAGE);
-				li.add(vmImage);
-			}
-
-		} catch (ParserConfigurationException e) {
-			e.printStackTrace();
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-		} catch (SAXException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
-		return li;
-	}
-
+	
 	// < TPictureChatItem NewLine="False" AutoResize="True" FileExt=".png"
 	// GUID="{F3870296-746D-4E11-B69B-050B2168C624}" Height="109" Width="111"/>
 	@Override

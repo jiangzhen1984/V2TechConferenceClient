@@ -1,46 +1,17 @@
 package com.v2tech.vo;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
-
-import com.V2.jni.ChatRequest;
-
 public class VMessage {
 
-	// TODO add comments
 	public static final int VMESSAGE_CODE_CONF = 1;
 	public static final int VMESSAGE_CODE_IM = 2;
-
-	public enum MessageType {
-		TEXT(1), IMAGE(2), IMAGE_AND_TEXT(3);
-
-		private int code;
-
-		private MessageType(int code) {
-			this.code = code;
-		}
-
-		public int getIntValue() {
-			return code;
-		}
-	}
 
 	private static DateFormat sfF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss",
 			Locale.getDefault());
@@ -51,62 +22,56 @@ public class VMessage {
 	private static DateFormat sfT = new SimpleDateFormat("HH:mm",
 			Locale.getDefault());
 
-	private long id;
+	protected long id;
 
-	private User mUser;
+	protected User mFromUser;
 
-	private User mToUser;
+	protected User mToUser;
 
-	protected MessageType mType;
+	protected Date mDate;
 
-	private String mText;
-
-	private Date mDate;
-
-	private boolean isLocal;
-
-	private String mStrDateTime;
-
-	protected String mUUID;
+	protected String mStrDateTime;
 
 	protected int mMsgCode;
 
-	// FIXM optimize code
-	public long mGroupId;
+	protected String mUUID;
 
-	protected VMessage() {
-		this(null, null, null, false);
+	protected long mGroupId;
+
+	protected List<VMessageAbstractItem> itemList;
+
+	public VMessage(User fromUser, User toUser) {
+		this(0, fromUser, toUser, VMESSAGE_CODE_IM);
+	}
+	
+	public VMessage(User fromUser, User toUser, Date date) {
+		this(0, fromUser, toUser, UUID.randomUUID().toString(), new Date(),VMESSAGE_CODE_IM);
 	}
 
-	public VMessage(User u, User toUser) {
-		this(u, toUser, null, false);
+
+	public VMessage(User fromUser, User toUser, int type) {
+		this(0, fromUser, toUser, type);
 	}
 
-	public VMessage(User u, User toUser, String text) {
-		this(u, toUser, text, false);
+	public VMessage(long groupId, User fromUser, User toUser, int type) {
+		this(0, fromUser, toUser, UUID.randomUUID().toString(), new Date(),type);
 	}
 
-	public VMessage(User u, User toUser, boolean isRemote) {
-		this(u, toUser, null, isRemote);
+	public VMessage(long groupId, User fromUser, User toUser) {
+		this(0, fromUser, toUser, UUID.randomUUID().toString(),new Date(),
+				VMESSAGE_CODE_IM);
 	}
 
-	public VMessage(User u, User toUser, String text, boolean isRemote) {
-		this.mUser = u;
+	public VMessage(long groupId, User fromUser, User toUser, String uuid, Date date,
+			int type) {
+		this.mGroupId = groupId;
+		this.mFromUser = fromUser;
 		this.mToUser = toUser;
-		this.mText = text;
-		this.mDate = new Date();
-		this.mType = MessageType.TEXT;
-		this.isLocal = !isRemote;
-		this.mUUID = UUID.randomUUID().toString();
+		this.mDate = date ;
+		this.mUUID = uuid;
+		mMsgCode = type;
 
-		if (System.currentTimeMillis() / (24 * 3600000) == this.mDate.getTime()
-				/ (24 * 3600000)) {
-			mStrDateTime = sfT.format(this.mDate);
-		} else {
-			mStrDateTime = sfL.format(this.mDate);
-		}
-		mMsgCode = ChatRequest.BT_IM;
-
+		itemList = new ArrayList<VMessageAbstractItem>();
 	}
 
 	public void setMsgCode(int code) {
@@ -117,10 +82,6 @@ public class VMessage {
 		return this.mMsgCode;
 	}
 
-	public String getUUID() {
-		return this.mUUID;
-	}
-
 	public long getId() {
 		return id;
 	}
@@ -129,32 +90,16 @@ public class VMessage {
 		this.id = id;
 	}
 
-	public User getUser() {
-		return mUser;
+	public User getFromUser() {
+		return mFromUser;
 	}
 
-	public void setUser(User mUser) {
-		this.mUser = mUser;
+	public void setFromUser(User fromUser) {
+		this.mFromUser = fromUser;
 	}
 
 	public void setToUser(User toUser) {
 		this.mToUser = toUser;
-	}
-
-	public MessageType getType() {
-		return mType;
-	}
-
-	public void setType(MessageType mType) {
-		this.mType = mType;
-	}
-
-	public String getText() {
-		return mText;
-	}
-
-	public void setText(String mText) {
-		this.mText = mText;
 	}
 
 	public Date getDate() {
@@ -166,12 +111,14 @@ public class VMessage {
 			return;
 		}
 		this.mDate = mDate;
-		if (System.currentTimeMillis() / (24 * 3600000) == this.mDate.getTime()
-				/ (24 * 3600000)) {
-			mStrDateTime = sfT.format(this.mDate);
-		} else {
-			mStrDateTime = sfL.format(this.mDate);
-		}
+	}
+
+	public long getGroupId() {
+		return this.mGroupId;
+	}
+
+	public void setGroupId(long groupId) {
+		this.mGroupId = groupId;
 	}
 
 	public String getNormalDateStr() {
@@ -190,15 +137,15 @@ public class VMessage {
 		}
 	}
 
-	public boolean isLocal() {
-		return isLocal;
-	}
-
-	public void setLocal(boolean isLocal) {
-		this.isLocal = isLocal;
-	}
-
 	public String getDateTimeStr() {
+		if (this.mStrDateTime == null && this.mDate != null) {
+			if (System.currentTimeMillis() / (24 * 3600000) == this.mDate
+					.getTime() / (24 * 3600000)) {
+				mStrDateTime = sfT.format(this.mDate);
+			} else {
+				mStrDateTime = sfL.format(this.mDate);
+			}
+		}
 		return this.mStrDateTime;
 	}
 
@@ -206,119 +153,30 @@ public class VMessage {
 		return this.mToUser;
 	}
 
-	/**
-	 * return null if parse failed
-	 * 
-	 * @param xml
-	 * @return
-	 */
-	public static VMessage fromXml(String xml) {
-		int posS = -1;
-		int posE = -1;
-		posS = xml.indexOf("Text=\"");
-		if (posS != -1) {
-			posE = xml.indexOf("\"", posS + 6);
-			if (posE != -1) {
-				String content = xml.substring(posS + 6, posE);
-				VMessage vm = new VMessage();
-				vm.setText(content);
-				return vm;
-			}
-		}
-		return null;
+	public void addItem(VMessageAbstractItem item) {
+		this.itemList.add(item);
 	}
 
-	public static VMessage fromXml(User from, User to, Date date, String xml) {
-		// List<VMessage> msgList = new ArrayList<VMessage>();
-		VMessage vm = new VMessage(from, to, "", true);
-		InputStream is = null;
-		int dataCount = 0;
-		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-		DocumentBuilder dBuilder;
-		try {
-			dBuilder = dbFactory.newDocumentBuilder();
-			is = new ByteArrayInputStream(xml.getBytes("UTF-8"));
-			Document doc = dBuilder.parse(is);
 
-			doc.getDocumentElement().normalize();
-			// NodeList textMsgItemNL =
-			// doc.getElementsByTagName("TTextChatItem");
-			NodeList textMsgItemNL = doc.getElementsByTagName("ItemList");
-			if (textMsgItemNL.getLength() <= 0) {
-				return null;
-			}
-			vm.setDate(date);
-			vm.setType(MessageType.TEXT);
-			// msgList.add(vm);
-			Element msgEl = (Element) textMsgItemNL.item(0);
-			NodeList itemList = msgEl.getChildNodes();
-			// FIMXE optimze code
-			for (int i = 0; i < itemList.getLength(); i++) {
-				Node n = itemList.item(i);
-				if (n instanceof Element) {
-					msgEl = (Element) itemList.item(i);
-					if (!msgEl.getTagName().equals("TPictureChatItem")) {
-						dataCount++;
-						if ("True".equals(msgEl.getAttribute("NewLine"))
-								&& !vm.getText().isEmpty()) {
-							vm.setText(vm.getText() + "\n"
-									+ msgEl.getAttribute("Text"));
-						} else {
-							vm.setText(msgEl.getAttribute("Text"));
-						}
-					}
-
-				}
-			}
-
-			// NodeList imgMsgItemNL =
-			// doc.getElementsByTagName("TPictureChatItem");
-			// for (int i=0;i<imgMsgItemNL.getLength(); i++) {
-			// Element msgEl = (Element)imgMsgItemNL.item(i);
-			// VMessage vmImage = new VImageMessage(from, to,
-			// msgEl.getAttribute("GUID"), msgEl.getAttribute("FileExt"));
-			// vmImage.setDate(date);
-			// vmImage.setType(MessageType.IMAGE);
-			// msgList.add(vmImage);
-			// }
-
-		} catch (ParserConfigurationException e) {
-			e.printStackTrace();
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-		} catch (SAXException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
-		if (dataCount > 0)
-			return vm;
-		else
-			return null;
+	public List<VMessageAbstractItem> getItems() {
+		return this.itemList;
 	}
-
+	
 	/**
 	 * Color user BGR
 	 * 
 	 * @return
 	 */
 	public String toXml() {
-		if (this.mText == null) {
-			return "";
-		}
 		StringBuilder sb = new StringBuilder();
-		String[] str = this.mText.split("\n");
 		sb.append("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n")
 				.append("<TChatData IsAutoReply=\"False\" MessageID=\"{"
 						+ this.mUUID + "}\">\n")
 				.append("<FontList>\n")
 				.append("<TChatFont Color=\"0\" Name=\"Tahoma\" Size=\"9\" Style=\"\"/>")
 				.append("</FontList>\n").append("<ItemList>\n");
-		for (String s : str) {
-			sb.append(
-					"<TTextChatItem NewLine=\"True\" FontIndex=\"0\" Text=\""
-							+ s + "\"/>");
+		for (VMessageAbstractItem item : itemList) {
+			sb.append(item.toXmlItem());
 		}
 		sb.append("    </ItemList>");
 		sb.append("</TChatData>");
