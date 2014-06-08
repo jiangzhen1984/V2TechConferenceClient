@@ -695,6 +695,7 @@ public class VideoActivityV2 extends Activity {
 	}
 
 	/**
+	 * FIXME layout need to use uniform layout
 	 * Show or hide message layout according to parameter
 	 * 
 	 * @param visible
@@ -760,6 +761,7 @@ public class VideoActivityV2 extends Activity {
 	}
 
 	/**
+	 *  FIXME layout need to use uniform layout
 	 * Show or hide attendees list layout according to parameter
 	 * 
 	 * @param visible
@@ -829,6 +831,7 @@ public class VideoActivityV2 extends Activity {
 	}
 
 	/**
+	 *  FIXME layout need to use uniform layout
 	 * Show or hide document layout according to parameter
 	 * 
 	 * @param visible
@@ -1378,6 +1381,7 @@ public class VideoActivityV2 extends Activity {
 		} else {
 			for (UserDeviceConfig udc : ld) {
 				a.addDevice(udc);
+				V2Log.i("New attendee joined conference :"+a.getAttName()+"   "+udc.getDeviceID() );
 			}
 		}
 
@@ -1627,6 +1631,8 @@ public class VideoActivityV2 extends Activity {
 					mAttendeeContainer.updateCurrentSelectedBg(flag, sw.at, sw.udc);
 					sw.at = at;
 					sw.udc = udc;
+					//FIXME set id
+					sw.getView().setId(udc.hashCode());
 					//update new opened video view background
 					flag =showOrCloseAttendeeVideo(udc);
 					mAttendeeContainer.updateCurrentSelectedBg(flag, at, udc);
@@ -1635,7 +1641,7 @@ public class VideoActivityV2 extends Activity {
 				}
 			}
 
-			// OnAttendeeClicked(at, udc);
+			OnAttendeeClicked(at, udc);
 		}
 
 		@Override

@@ -32,7 +32,6 @@ import com.V2.jni.VideoRequest;
 import com.V2.jni.WBRequest;
 import com.v2tech.util.CrashHandler;
 import com.v2tech.util.GlobalConfig;
-import com.v2tech.util.LogcatThread;
 import com.v2tech.util.Notificator;
 import com.v2tech.util.StorageUtil;
 import com.v2tech.util.V2Log;
@@ -116,9 +115,9 @@ public class MainApplication extends Application {
 					+ res);
 		}
 
-		if (!V2Log.isDebuggable) {
-			new LogcatThread().start();
-		}
+//		if (!V2Log.isDebuggable) {
+//			new LogcatThread().start();
+//		}
 
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
 			this.registerActivityLifecycleCallbacks(new LocalActivityLifecycleCallBack());

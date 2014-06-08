@@ -6,6 +6,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 
+/**
+ * Use to wrap simple adapter for ListView
+ * 
+ * <ul>Use {@link ViewConvertListener} to wrap construct view object.</ul>
+ * <ul>Use {@link CommonAdapterItemWrapper} to wrap List object. </ul>
+ * @author jiangzhen
+ *
+ */
 public class CommonAdapter extends BaseAdapter {
 
 	

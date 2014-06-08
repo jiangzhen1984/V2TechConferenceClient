@@ -109,7 +109,7 @@ public class GlobalHolder {
 				if (u.getGender() != null) {
 					cu.setGender(u.getGender());
 				}
-				V2Log.e(" merge user information " + id);
+				V2Log.i(" merge user information " + id +" "+cu.getName());
 				return cu;
 			}
 			mUserHolder.put(key, u);

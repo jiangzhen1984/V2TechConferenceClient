@@ -1,8 +1,10 @@
 package com.v2tech.view.conference;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -47,8 +49,8 @@ public class VideoAttendeeListLayout extends LinearLayout {
 
 	private ListView mAttendeeContainer;
 
-	private List<View> mCachedAttendsView;
-	private List<View> mAttendsView;
+	private List<ViewWrapper> mCachedAttendsView;
+	private List<ViewWrapper> mAttendsView;
 
 	private boolean mIsStartedSearch;
 	private EditText mSearchET;
@@ -56,7 +58,6 @@ public class VideoAttendeeListLayout extends LinearLayout {
 	private View mPinButton;
 
 	private AttendeesAdapter adapter = new AttendeesAdapter();
-
 
 	public interface VideoAttendeeActionListener {
 
@@ -120,7 +121,6 @@ public class VideoAttendeeListLayout extends LinearLayout {
 				LinearLayout.LayoutParams.MATCH_PARENT));
 
 		mSearchET.addTextChangedListener(mSearchListener);
-
 		rootView = this;
 	}
 
@@ -129,7 +129,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 	}
 
 	public void setAttendsList(Set<Attendee> l) {
-		mAttendsView = new ArrayList<View>();
+		mAttendsView = new ArrayList<ViewWrapper>();
 		// Copy list for void concurrency exception
 		List<Attendee> list = new ArrayList<Attendee>(l);
 		synchronized (mAttendsView) {
@@ -137,12 +137,14 @@ public class VideoAttendeeListLayout extends LinearLayout {
 				mAttendsView.addAll(buildAttendeeView(at));
 			}
 		}
+
+		Collections.sort(mAttendsView);
 		adapter.notifyDataSetChanged();
 	}
 
-	private List<View> buildAttendeeView(final Attendee a) {
+	private List<ViewWrapper> buildAttendeeView(final Attendee a) {
 		Context ctx = this.getContext();
-		List<View> list = new ArrayList<View>();
+		List<ViewWrapper> list = new ArrayList<ViewWrapper>();
 
 		View view = LayoutInflater.from(ctx).inflate(
 				R.layout.video_attendee_device_layout, null, false);
@@ -159,8 +161,8 @@ public class VideoAttendeeListLayout extends LinearLayout {
 		// Set text color and camera icon
 		setStyle(a, nameTV, cameraIV);
 
-		view.setTag(new Wrapper(a, a.getDefaultDevice()));
-		list.add(view);
+		view.setTag(new Wrapper(a, a.getDefaultDevice(), -1));
+		list.add(new ViewWrapper(view));
 
 		for (int i = 1; a.getmDevices() != null && i < a.getmDevices().size(); i++) {
 			View view2 = LayoutInflater.from(ctx).inflate(
@@ -179,8 +181,8 @@ public class VideoAttendeeListLayout extends LinearLayout {
 			setStyle(a, nameTV2, cameraIV2);
 
 			cameraIV2.setOnTouchListener(mListViewOnTouchListener);
-			view2.setTag(new Wrapper(a, udc));
-			list.add(view2);
+			view2.setTag(new Wrapper(a, udc, 1));
+			list.add(new ViewWrapper(view2));
 		}
 
 		return list;
@@ -223,13 +225,13 @@ public class VideoAttendeeListLayout extends LinearLayout {
 	public void updateEnteredAttendee(Attendee at) {
 		at.setJoined(true);
 		if (mAttendsView == null) {
-			mAttendsView = new ArrayList<View>();
+			mAttendsView = new ArrayList<ViewWrapper>();
 		}
 		int index = 0;
 		synchronized (mAttendsView) {
 			for (int i = 0; i < mAttendsView.size();) {
-				View v = mAttendsView.get(i);
-				Wrapper wr = (Wrapper) v.getTag();
+				ViewWrapper v = mAttendsView.get(i);
+				Wrapper wr = (Wrapper) v.v.getTag();
 				if (wr.a.getAttId() == at.getAttId()) {
 					mAttendsView.remove(i);
 					index = i;
@@ -240,6 +242,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 		}
 
 		mAttendsView.addAll(index, buildAttendeeView(at));
+		Collections.sort(mAttendsView);
 		adapter.notifyDataSetChanged();
 	}
 
@@ -254,20 +257,20 @@ public class VideoAttendeeListLayout extends LinearLayout {
 		}
 
 		for (int i = 0; i < mAttendsView.size(); i++) {
-			View v = mAttendsView.get(i);
-			Wrapper wr = (Wrapper) v.getTag();
+			ViewWrapper v = mAttendsView.get(i);
+			Wrapper wr = (Wrapper) v.v.getTag();
 			if (wr.a.getAttId() == at.getAttId()) {
 				wr.a.setJoined(false);
-				ImageView cameraIV2 = (ImageView) v
+				ImageView cameraIV2 = (ImageView) v.v
 						.findViewById(R.id.video_attendee_device_camera_icon);
 				cameraIV2.setImageResource(R.drawable.camera_pressed);
 
-				ImageView spIV = (ImageView) v
+				ImageView spIV = (ImageView) v.v
 						.findViewById(R.id.video_attendee_device_speaker_icon);
 				spIV.setImageResource(R.drawable.conf_speaker);
 
 				// set offline color
-				TextView nameTV = (TextView) v
+				TextView nameTV = (TextView) v.v
 						.findViewById(R.id.video_attendee_device_name);
 
 				nameTV.setTextColor(getContext().getResources().getColor(
@@ -275,6 +278,8 @@ public class VideoAttendeeListLayout extends LinearLayout {
 			}
 		}
 
+		Collections.sort(mAttendsView);
+		adapter.notifyDataSetChanged();
 	}
 
 	/**
@@ -288,10 +293,10 @@ public class VideoAttendeeListLayout extends LinearLayout {
 			ConferencePermission cp, PermissionState state) {
 		View atView = null;
 		synchronized (mAttendsView) {
-			for (View v : mAttendsView) {
-				Wrapper wr = (Wrapper) v.getTag();
+			for (ViewWrapper v : mAttendsView) {
+				Wrapper wr = (Wrapper) v.v.getTag();
 				if (wr.a.getAttId() == at.getAttId()) {
-					atView = v;
+					atView = v.v;
 					break;
 				}
 			}
@@ -316,8 +321,8 @@ public class VideoAttendeeListLayout extends LinearLayout {
 	public void removeAttendee(Attendee at) {
 		synchronized (mAttendsView) {
 			for (int i = 0; mAttendsView != null && i < mAttendsView.size(); i++) {
-				View v = mAttendsView.get(i);
-				Wrapper wr = (Wrapper) v.getTag();
+				ViewWrapper v = mAttendsView.get(i);
+				Wrapper wr = (Wrapper) v.v.getTag();
 				if (wr.a.getAttId() == at.getAttId()) {
 					mAttendsView.remove(v);
 					i--;
@@ -359,7 +364,6 @@ public class VideoAttendeeListLayout extends LinearLayout {
 				.setImageResource(R.drawable.pin_button_selector);
 	}
 
-
 	/**
 	 * request update background of current selected Item
 	 * 
@@ -369,14 +373,14 @@ public class VideoAttendeeListLayout extends LinearLayout {
 			UserDeviceConfig udc) {
 
 		for (int i = 0; i < mAttendsView.size(); i++) {
-			View v = mAttendsView.get(i);
-			Wrapper w = (Wrapper) v.getTag();
+			ViewWrapper v = mAttendsView.get(i);
+			Wrapper w = (Wrapper) v.v.getTag();
 			if (w.a == at && udc == w.udc) {
 				if (flag) {
-					v.setBackgroundColor(getContext().getResources().getColor(
-							R.color.attendee_select_bg));
+					v.v.setBackgroundColor(getContext().getResources()
+							.getColor(R.color.attendee_select_bg));
 				} else {
-					v.setBackgroundColor(Color.TRANSPARENT);
+					v.v.setBackgroundColor(Color.TRANSPARENT);
 				}
 				break;
 			}
@@ -402,7 +406,6 @@ public class VideoAttendeeListLayout extends LinearLayout {
 						.getTag();
 				dragView = getView(w);
 
-
 				WindowManager wd = (WindowManager) getContext()
 						.getSystemService(Context.WINDOW_SERVICE);
 				WindowManager.LayoutParams vl = getLayoutParams(event);
@@ -425,11 +428,12 @@ public class VideoAttendeeListLayout extends LinearLayout {
 						View itemView = (View) (View) view.getParent()
 								.getParent();
 						Wrapper wr = (Wrapper) itemView.getTag();
-						Rect r = new Rect();
-						mAttendeeContainer.getLocalVisibleRect(r);
-						if (r.contains((int) event.getX(), (int) event.getY())) {
-							listener.OnAttendeeClicked(wr.a, wr.udc);
-						} else {
+//						Rect r = new Rect();
+//						mAttendeeContainer.getLocalVisibleRect(r);
+//						if (r.contains((int) event.getX(), (int) event.getY())) {
+//							listener.OnAttendeeClicked(wr.a, wr.udc);
+//						} else 
+						{
 							listener.OnAttendeeDragged(wr.a, wr.udc,
 									(int) event.getRawX(),
 									(int) event.getRawY());
@@ -530,11 +534,11 @@ public class VideoAttendeeListLayout extends LinearLayout {
 				mIsStartedSearch = false;
 				return;
 			}
-			List<View> searchedViewList = new ArrayList<View>();
+			List<ViewWrapper> searchedViewList = new ArrayList<ViewWrapper>();
 			for (int i = 0; mCachedAttendsView != null
 					&& i < mCachedAttendsView.size(); i++) {
-				View v = mCachedAttendsView.get(i);
-				Wrapper w = (Wrapper) v.getTag();
+				ViewWrapper v = mCachedAttendsView.get(i);
+				Wrapper w = (Wrapper) v.v.getTag();
 				if (w.a.getAttName() == null || w.a.getAbbraName() == null) {
 					V2Log.w("Attendee name: " + w.a.getAttName() + "  arrba:"
 							+ w.a.getAbbraName());
@@ -582,19 +586,95 @@ public class VideoAttendeeListLayout extends LinearLayout {
 
 		@Override
 		public View getView(int position, View convertView, ViewGroup parent) {
-			return mAttendsView.get(position);
+			return mAttendsView.get(position).v;
 		}
 
 	}
 
-	class Wrapper {
+	class ViewWrapper implements Comparable<ViewWrapper> {
+		View v;
+
+		public ViewWrapper(View v) {
+			super();
+			this.v = v;
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + v.getTag().hashCode();
+			result = prime * result
+					+ ((v.getTag() == null) ? 0 : v.getTag().hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			ViewWrapper other = (ViewWrapper) obj;
+			if (!v.getTag().equals(other.v.getTag()))
+				return false;
+			if (v == null) {
+				if (other.v != null)
+					return false;
+			} else if (!v.getTag().equals(other.v.getTag()))
+				return false;
+			return true;
+		}
+
+		@Override
+		public int compareTo(ViewWrapper v) {
+			return ((Wrapper) this.v.getTag())
+					.compareTo((Wrapper) v.v.getTag());
+		}
+
+	}
+
+	class Wrapper implements Comparable<Wrapper> {
 		Attendee a;
 		UserDeviceConfig udc;
+		int sortFlag;
 
-		public Wrapper(Attendee a, UserDeviceConfig udc) {
+		public Wrapper(Attendee a, UserDeviceConfig udc, int sortFlag) {
 			super();
 			this.a = a;
 			this.udc = udc;
+			this.sortFlag = sortFlag;
+		}
+
+		@Override
+		public int compareTo(Wrapper wr) {
+			if (this.a.getType() == Attendee.TYPE_MIXED_VIDEO) {
+				return -1;
+			}
+
+			if (wr.a.getType() == Attendee.TYPE_MIXED_VIDEO) {
+				return 1;
+			}
+
+			int ret = this.a.compareTo(wr.a);
+			if (ret == 0) {
+				return this.sortFlag;
+			} else if (ret < 0 || ret > 0) {
+				if (this.a.isJoined()) {
+					return -1;
+				} else if (wr.a.isJoined()) {
+					return 1;
+				} else {
+					return 0;
+				}
+			}
+			return ret;
+		}
+
+		private VideoAttendeeListLayout getOuterType() {
+			return VideoAttendeeListLayout.this;
 		}
 
 	}

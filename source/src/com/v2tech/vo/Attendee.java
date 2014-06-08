@@ -13,7 +13,7 @@ import com.v2tech.util.V2Log;
  * @author 28851274
  * 
  */
-public class Attendee {
+public class Attendee implements Comparable<Attendee>{
 	
 	public final static int  TYPE_ATTENDEE = 1;
 	public final static int  TYPE_MIXED_VIDEO = 2;
@@ -157,6 +157,7 @@ public class Attendee {
 
 	public void setSelf(boolean isSelf) {
 		this.isSelf = isSelf;
+		this.isJoined = true;
 	}
 
 	public boolean isChairMan() {
@@ -188,5 +189,17 @@ public class Attendee {
 	public int getType() {
 		return TYPE_ATTENDEE;
 	}
+
+
+
+
+	@Override
+	public int compareTo(Attendee attendee) {
+		return this.user.getmUserId() == attendee.user.getmUserId() ? 0: 1;
+	}
+	
+	
+	
+	
 
 }
