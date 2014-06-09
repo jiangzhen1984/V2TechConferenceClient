@@ -17,10 +17,12 @@ import com.v2tech.service.GlobalHolder;
 import com.v2tech.view.adapter.VMessageAdater;
 import com.v2tech.view.widget.CommonAdapter;
 import com.v2tech.view.widget.CommonAdapter.CommonAdapterItemWrapper;
+import com.v2tech.vo.ConferenceGroup;
 import com.v2tech.vo.VMessage;
 
 public class VideoMsgChattingLayout extends LinearLayout {
 
+	private ConferenceGroup conf;
 	private View rootView;
 	private ListView mMsgContainer;
 	private ChattingListener listener;
@@ -38,10 +40,12 @@ public class VideoMsgChattingLayout extends LinearLayout {
 		public void requestChattingViewFloatLayout(View v);
 	};
 
-	public VideoMsgChattingLayout(Context context) {
+	public VideoMsgChattingLayout(Context context, ConferenceGroup conf) {
 		super(context);
 		initLayout();
 		initData();
+		this.conf = conf;
+		
 	}
 
 
@@ -71,9 +75,8 @@ public class VideoMsgChattingLayout extends LinearLayout {
 							|| mContentTV.getText().toString().trim().isEmpty()) {
 						return;
 					}
-					VMessage vm = new VMessage(GlobalHolder.getInstance()
-							.getCurrentUser(), null, mContentTV.getText()
-							.toString());
+					VMessage vm = new VMessage(conf.getmGId(), GlobalHolder.getInstance()
+							.getCurrentUser(), null);
 					addNewMessage(vm);
 					listener.requestSendMsg(vm);
 					mContentTV.setText("");

@@ -15,6 +15,9 @@ import com.v2tech.util.V2Log;
 
 public abstract class VMessageAbstractItem {
 
+	
+	public static final int ITEM_TYPE_ALL = 0;
+	
 	public static final int ITEM_TYPE_TEXT = 1;
 
 	public static final int ITEM_TYPE_IMAGE = 2;
@@ -24,6 +27,9 @@ public abstract class VMessageAbstractItem {
 	public static final int ITEM_TYPE_AUDIO = 4;
 
 	public static final int ITEM_TYPE_VIDEO = 5;
+	
+	
+	public static final int NEW_LINE_FLAG_VALUE = 1;
 
 	protected VMessage vm;
 

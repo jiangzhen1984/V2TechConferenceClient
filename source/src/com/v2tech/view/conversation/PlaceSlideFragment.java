@@ -11,11 +11,11 @@ import android.widget.RelativeLayout;
 
 import com.v2tech.R;
 import com.v2tech.view.cus.TouchImageView;
-import com.v2tech.vo.VImageMessage;
+import com.v2tech.vo.VMessageImageItem;
 
 public class PlaceSlideFragment extends Fragment {
 
-	private VImageMessage vim;
+	private VMessageImageItem vim;
 
 	private RelativeLayout rlContainer;
 
@@ -130,7 +130,7 @@ public class PlaceSlideFragment extends Fragment {
 		super.onDetach();
 	}
 
-	public void setMessage(VImageMessage vim) {
+	public void setMessage(VMessageImageItem vim) {
 		this.vim = vim;
 	}
 
@@ -138,7 +138,7 @@ public class PlaceSlideFragment extends Fragment {
 	public void onDestroy() {
 		super.onDestroy();
 		if (vim != null) {
-			vim.recycle();
+			vim.recycleFull();
 		}
 		if (rlContainer != null) {
 			rlContainer.removeAllViews();

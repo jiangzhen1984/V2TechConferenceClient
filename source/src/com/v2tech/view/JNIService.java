@@ -9,10 +9,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.app.Service;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.media.Ringtone;
@@ -25,7 +22,6 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Parcelable;
-import android.support.v4.app.NotificationCompat;
 import android.widget.Toast;
 
 import com.V2.jni.ChatRequest;
@@ -39,7 +35,6 @@ import com.V2.jni.ImRequestCallback;
 import com.V2.jni.VideoRequest;
 import com.V2.jni.VideoRequestCallback;
 import com.v2tech.R;
-import com.v2tech.db.ContentDescriptor;
 import com.v2tech.service.BitmapManager;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.util.GlobalConfig;
@@ -52,14 +47,12 @@ import com.v2tech.view.bo.UserAvatarObject;
 import com.v2tech.view.bo.UserStatusObject;
 import com.v2tech.view.conference.VideoActivityV2;
 import com.v2tech.vo.ConferenceGroup;
-import com.v2tech.vo.Conversation;
 import com.v2tech.vo.CrowdConversation;
 import com.v2tech.vo.Group;
 import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.NetworkStateCode;
 import com.v2tech.vo.User;
 import com.v2tech.vo.UserDeviceConfig;
-import com.v2tech.vo.VImageMessage;
 import com.v2tech.vo.VMessage;
 import com.v2tech.vo.VMessageAbstractItem;
 import com.v2tech.vo.VMessageImageItem;
@@ -916,7 +909,6 @@ public class JNIService extends Service {
 				return;
 			}
 			vm.setGroupId(nGroupID);
-			((VImageMessage) vm).updateImageData(pPicData);
 			
 			String filePath = StorageUtil.getAbsoluteSdcardPath() + "/v2tech/pics/"
 			+ vait.getUUID() + vait.getExtension();

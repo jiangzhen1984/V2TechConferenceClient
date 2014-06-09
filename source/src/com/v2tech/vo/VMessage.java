@@ -37,6 +37,8 @@ public class VMessage {
 	protected String mUUID;
 
 	protected long mGroupId;
+	
+	protected boolean isLocal;
 
 	protected List<VMessageAbstractItem> itemList;
 
@@ -106,11 +108,8 @@ public class VMessage {
 		return mDate;
 	}
 
-	public void setDate(Date mDate) {
-		if (mDate == null) {
-			return;
-		}
-		this.mDate = mDate;
+	public void setDate(Date date) {
+		this.mDate = date;
 	}
 
 	public long getGroupId() {
@@ -119,6 +118,33 @@ public class VMessage {
 
 	public void setGroupId(long groupId) {
 		this.mGroupId = groupId;
+	}
+	
+	
+	
+
+	public boolean isLocal() {
+		return isLocal;
+	}
+
+	public void setLocal(boolean isLocal) {
+		this.isLocal = isLocal;
+	}
+	
+	
+	public List<VMessageImageItem>  getImageItems() {
+		List<VMessageImageItem> imageItems = new ArrayList<VMessageImageItem>();
+		for (VMessageAbstractItem item : itemList) {
+			if (item.getType() == VMessageAbstractItem.ITEM_TYPE_IMAGE) {
+				imageItems.add((VMessageImageItem)item);
+			}
+		}
+		return imageItems;
+	}
+	
+
+	public String getUUID() {
+		return mUUID;
 	}
 
 	public String getNormalDateStr() {
@@ -160,6 +186,31 @@ public class VMessage {
 
 	public List<VMessageAbstractItem> getItems() {
 		return this.itemList;
+	}
+	
+	
+	
+	public String getAllTextContent() {
+		StringBuilder sb = new StringBuilder();
+		for (VMessageAbstractItem item : itemList) {
+			if (item.getType() == VMessageAbstractItem.ITEM_TYPE_TEXT) {
+				if (item.isNewLine() && sb.length() != 0) {
+					sb.append("\n");
+					sb.append(((VMessageTextItem)item).getText());
+				}
+			}
+		}
+		return sb.toString();
+	}
+	
+	
+	
+	public void recycleAllImageMessage() {
+		for (VMessageAbstractItem item : itemList) {
+			if (item.getType() == VMessageAbstractItem.ITEM_TYPE_IMAGE) {
+				((VMessageImageItem)item).recycleAll();
+			}
+		}
 	}
 	
 	/**

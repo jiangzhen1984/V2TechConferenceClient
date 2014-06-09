@@ -1,17 +1,11 @@
 package com.v2tech.view.conversation;
 
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 import android.app.Activity;
 import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
-import android.content.ContentUris;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -38,7 +32,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.v2tech.R;
-import com.v2tech.db.ContentDescriptor;
 import com.v2tech.service.ChatService;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.util.V2Log;
@@ -50,9 +43,7 @@ import com.v2tech.view.widget.CommonAdapter;
 import com.v2tech.view.widget.CommonAdapter.CommonAdapterItemWrapper;
 import com.v2tech.vo.Conversation;
 import com.v2tech.vo.User;
-import com.v2tech.vo.VImageMessage;
 import com.v2tech.vo.VMessage;
-import com.v2tech.vo.VMessage.MessageType;
 
 public class ConversationView extends Activity {
 
@@ -213,7 +204,7 @@ public class ConversationView extends Activity {
 		registerReceiver(receiver, filter);
 
 		if (mCurrentConv != null) {
-			notificateConversationUpdate(null, null);
+			notificateConversationUpdate();
 		}
 		// Start animation
 		this.overridePendingTransition(R.animator.nonam_scale_center_0_100,
@@ -307,18 +298,12 @@ public class ConversationView extends Activity {
 		}
 		while (--before >= 0) {
 			VMessage vm = (VMessage) messageArray.get(before).getItemObject();
-			if (vm.getType() == MessageType.IMAGE
-					|| vm.getType() == MessageType.IMAGE_AND_TEXT) {
-				((VImageMessage) vm).recycle();
-			}
+			vm.recycleAllImageMessage();
 		}
 
 		while (++after < size) {
 			VMessage vm = (VMessage) messageArray.get(after).getItemObject();
-			if (vm.getType() == MessageType.IMAGE
-					|| vm.getType() == MessageType.IMAGE_AND_TEXT) {
-				((VImageMessage) vm).recycle();
-			}
+			vm.recycleAllImageMessage();
 		}
 	}
 
@@ -404,30 +389,17 @@ public class ConversationView extends Activity {
 							Toast.LENGTH_SHORT).show();
 					return;
 				}
-				VImageMessage vim = new VImageMessage(local, remote, filePath,
-						false);
-				saveMessageToDB(vim);
+				VMessage vim = MessageBuilder.buildImageMessage(local, remote,
+						filePath);
+				// Save message
+				MessageBuilder.saveMessage(this, vim);
+
 				Message.obtain(lh, SEND_MESSAGE, vim).sendToTarget();
 				addMessageToContainer(vim);
-
-				notificateConversationUpdate(
-						mContext.getText(R.string.contact_message_pic_text)
-								.toString(), vim.getDateTimeStr());
+				// send notification
+				notificateConversationUpdate();
 			}
 		}
-	}
-
-	private void saveMessageToDB(VMessage vm) {
-		ContentValues cv = new ContentValues();
-		cv.put(ContentDescriptor.Messages.Cols.FROM_USER_ID, user1Id);
-		cv.put(ContentDescriptor.Messages.Cols.TO_USER_ID, user2Id);
-		cv.put(ContentDescriptor.Messages.Cols.MSG_CONTENT, vm.getText());
-		cv.put(ContentDescriptor.Messages.Cols.MSG_TYPE, vm.getType()
-				.getIntValue());
-		cv.put(ContentDescriptor.Messages.Cols.SEND_TIME, vm.getFullDateStr());
-		Uri uri = getContentResolver().insert(
-				ContentDescriptor.Messages.CONTENT_URI, cv);
-		vm.setId(Long.parseLong(uri.getLastPathSegment()));
 	}
 
 	private void doSendMessage() {
@@ -439,16 +411,18 @@ public class ConversationView extends Activity {
 		if (remote == null) {
 			remote = new User(user2Id);
 		}
-		VMessage m = new VMessage(local, remote, content);
-		m.mGroupId = groupId;
-		saveMessageToDB(m);
+		// FIXME add face item
+		VMessage m = MessageBuilder.buildTextMessage(local, remote, content);
+		m.setGroupId(groupId);
+		// Save message
+		MessageBuilder.saveMessage(this, m);
 
 		mMessageET.setText("");
 
 		Message.obtain(lh, SEND_MESSAGE, m).sendToTarget();
 		addMessageToContainer(m);
-
-		notificateConversationUpdate(m.getText(), m.getNormalDateStr());
+		// send notification
+		notificateConversationUpdate();
 
 	}
 
@@ -469,7 +443,7 @@ public class ConversationView extends Activity {
 		return new String(copy, 0, j);
 	}
 
-	private void notificateConversationUpdate(String content, String date) {
+	private void notificateConversationUpdate() {
 		Intent i = new Intent(PublicIntent.REQUEST_UPDATE_CONVERSATION);
 		i.addCategory(PublicIntent.DEFAULT_CATEGORY);
 		if (groupId == 0) {
@@ -479,8 +453,6 @@ public class ConversationView extends Activity {
 			i.putExtra("type", Conversation.TYPE_GROUP);
 			i.putExtra("extId", groupId);
 		}
-		i.putExtra("date", date);
-		i.putExtra("content", content);
 		i.putExtra("noti", false);
 		mContext.sendBroadcast(i);
 	}
@@ -533,88 +505,46 @@ public class ConversationView extends Activity {
 
 		@Override
 		public void onMessageClicked(VMessage v) {
-			if (v.getType() == VMessage.MessageType.IMAGE) {
-				Intent i = new Intent();
-				i.addCategory(PublicIntent.DEFAULT_CATEGORY);
-				i.setAction(PublicIntent.START_VIDEO_IMAGE_GALLERY);
-				i.putExtra("uid1", user1Id);
-				i.putExtra("uid2", user2Id);
-				i.putExtra("cid", v.getId());
-				mContext.startActivity(i);
-			}
+			Intent i = new Intent();
+			i.addCategory(PublicIntent.DEFAULT_CATEGORY);
+			i.setAction(PublicIntent.START_VIDEO_IMAGE_GALLERY);
+			i.putExtra("uid1", user1Id);
+			i.putExtra("uid2", user2Id);
+			i.putExtra("cid", v.getId());
+			// type 0: is not group image view
+			// type 1: group image view
+			i.putExtra("type", groupId == 0 ? 0 : 1);
+			mContext.startActivity(i);
 		}
 
 	};
 
 	private List<VMessage> loadMessages() {
 
-		String selection = null;
-		String[] args = null;
-
+		List<VMessage> array = null;
 		if (this.groupId == 0) {
-			selection = "(" + ContentDescriptor.Messages.Cols.FROM_USER_ID
-					+ "=? and " + ContentDescriptor.Messages.Cols.TO_USER_ID
-					+ "=? ) or " + "("
-					+ ContentDescriptor.Messages.Cols.FROM_USER_ID + "=? and "
-					+ ContentDescriptor.Messages.Cols.TO_USER_ID + "=? ) and "
-					+ ContentDescriptor.Messages.Cols.GROUP_ID + "=0 ";
-			args = new String[] { user1Id + "", user2Id + "", user2Id + "",
-					user1Id + "" };
+			array = MessageLoader.loadMessageByPage(mContext, user1Id, user2Id,
+					BATCH_COUNT, offset);
 		} else if (this.groupId != 0) {
-			selection = "(" + ContentDescriptor.Messages.Cols.GROUP_ID
-					+ "=? ) ";
-			args = new String[] { this.groupId + "" };
+			array = MessageLoader.loadGroupMessageByPage(mContext, groupId,
+					BATCH_COUNT, offset);
 		}
 
-		Cursor mCur = this.getContentResolver().query(
-				ContentDescriptor.Messages.CONTENT_URI,
-				ContentDescriptor.Messages.Cols.ALL_CLOS,
-				selection,
-				args,
-				ContentDescriptor.Messages.Cols.SEND_TIME + " desc "
-						+ " limit " + BATCH_COUNT + " offset " + offset);
-
-		if (mCur.getCount() == 0) {
-			mCur.close();
-			mLoadedAllMessages = true;
-			return null;
+		if (array != null) {
+			offset += array.size();
+			mIsInited = true;
 		}
-		List<VMessage> array = new ArrayList<VMessage>();
-		int count = 0;
-		while (mCur.moveToNext()) {
-			VMessage m = extractMsg(mCur);
-			array.add(0, m);
-			count++;
-			offset++;
-			if (count > BATCH_COUNT) {
-				break;
-			}
-		}
-		mCur.close();
-
-		mIsInited = true;
 		return array;
 	}
 
 	private boolean pending = false;
 
-	private void queryAndAddMessage(final int mid) {
-		Uri uri = ContentUris.withAppendedId(
-				ContentDescriptor.Messages.CONTENT_URI, mid);
+	private void queryAndAddMessage(final int msgId) {
 
-		Cursor mCur = this.getContentResolver().query(uri,
-				ContentDescriptor.Messages.Cols.ALL_CLOS, null, null, null);
-		MessageBodyView mv = null;
-		while (mCur.moveToNext()) {
-			VMessage m = extractMsg(mCur);
-			if ((groupId == m.mGroupId && groupId != 0)
-					|| (m.getUser().getmUserId() == user2Id && m.mGroupId == 0)) {
-				mv = new MessageBodyView(this, m, true);
-				mv.setCallback(listener);
-				messageArray.add(new VMessageAdater(m));
-			}
-		}
-		mCur.close();
+		VMessage m = MessageLoader.loadMessageById(mContext, msgId);
+		MessageBodyView mv = new MessageBodyView(this, m, true);
+
+		messageArray.add(new VMessageAdater(m));
 		if (mv != null) {
 			if (!isStopped) {
 				this.scrollToBottom();
@@ -622,46 +552,6 @@ public class ConversationView extends Activity {
 				pending = true;
 			}
 		}
-	}
-
-	private VMessage extractMsg(Cursor cur) {
-		if (cur.isClosed()) {
-			throw new RuntimeException(" cursor is closed");
-		}
-		DateFormat dp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss",
-				Locale.getDefault());
-
-		int id = cur.getInt(0);
-		long localUserId = cur.getLong(1);
-		long remoteUserId = cur.getLong(3);
-		// msg_content column
-		String content = cur.getString(5);
-		// message type
-		int type = cur.getInt(6);
-		// date time
-		String dateString = cur.getString(7);
-
-		long groupId = cur.getLong(9);
-
-		User lo = GlobalHolder.getInstance().getUser(localUserId);
-		User ro = GlobalHolder.getInstance().getUser(remoteUserId);
-		VMessage vm = null;
-		if (type == VMessage.MessageType.TEXT.getIntValue()) {
-			vm = new VMessage(lo, ro, content, localUserId == user2Id);
-		} else {
-			vm = new VImageMessage(lo, ro, content.split("\\|")[4],
-					localUserId == user2Id);
-		}
-		vm.setId(id);
-		vm.mGroupId = groupId;
-		try {
-			vm.setDate(dp.parse(dateString));
-		} catch (ParseException e) {
-			e.printStackTrace();
-		}
-
-		return vm;
-
 	}
 
 	private OnTouchListener mHiddenOnTouchListener = new OnTouchListener() {

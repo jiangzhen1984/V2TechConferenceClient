@@ -1,8 +1,9 @@
 package com.v2tech.view.conference;
 
+import java.util.List;
+
 import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.os.Handler;
 import android.util.AttributeSet;
@@ -13,13 +14,15 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.v2tech.R;
-import com.v2tech.db.ContentDescriptor;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.view.PublicIntent;
+import com.v2tech.view.conversation.MessageLoader;
 import com.v2tech.vo.ConferenceConversation;
 import com.v2tech.vo.ContactConversation;
 import com.v2tech.vo.Conversation;
 import com.v2tech.vo.VMessage;
+import com.v2tech.vo.VMessageAbstractItem;
+import com.v2tech.vo.VMessageTextItem;
 
 public class GroupLayout extends LinearLayout {
 
@@ -137,42 +140,22 @@ public class GroupLayout extends LinearLayout {
 			if (getContext() == null) {
 				return;
 			}
-			String selection = "(("
-					+ ContentDescriptor.Messages.Cols.FROM_USER_ID + "=? and "
-					+ ContentDescriptor.Messages.Cols.TO_USER_ID + "=? ) or "
-					+ "(" + ContentDescriptor.Messages.Cols.FROM_USER_ID
-					+ "=? and " + ContentDescriptor.Messages.Cols.TO_USER_ID
-					+ "=? )) ";
+			VMessage vm =MessageLoader.getNewestMessage(getContext(), GlobalHolder.getInstance().getCurrentUserId(), mConv.getExtId());
+			List<VMessageAbstractItem> items  = vm.getItems();
+			mConv.setDate(vm.getDateTimeStr());
+			if (items.size() > 0) {
+				VMessageAbstractItem item = items.get(items.size() -1);
+				if (item.getType() == VMessageAbstractItem.ITEM_TYPE_TEXT) {
+					mConv.setMsg(((VMessageTextItem)item).getText());
+				} else {
+					//FIXME Use resource
+					mConv.setMsg("图片");
+				}
+				
+				//UPdate UI
+				update();
+			}
 			
-			String[] args = new String[] {
-					GlobalHolder.getInstance().getCurrentUserId() + "",
-					mConv.getExtId() + "", mConv.getExtId() + "",
-					GlobalHolder.getInstance().getCurrentUserId() + "" };
-
-			Cursor cur = getContext().getContentResolver().query(
-					ContentDescriptor.Messages.CONTENT_URI,
-					ContentDescriptor.Messages.Cols.ALL_CLOS,
-					selection,
-					args,
-					ContentDescriptor.Messages.Cols.SEND_TIME + " desc "
-							+ " limit " + 1 + " offset " + 0);
-			if (cur.getCount() == 0) {
-				cur.close();
-				return;
-			}
-			if (cur.moveToNext()) {
-				String content = cur.getString(5);
-				String type =  cur.getString(6);
-				String dateString = cur.getString(7);
-				if (type.equals(VMessage.MessageType.IMAGE.getIntValue()+"")) {
-					content = getContext().getText(R.string.contact_message_pic_text).toString();
-				} 
-				((ContactConversation) mConv).setMsg(content);
-				((ContactConversation) mConv).setDate(dateString);
-			}
-			cur.close();
-			//UPdate UI
-			update();
 		}
 
 	};

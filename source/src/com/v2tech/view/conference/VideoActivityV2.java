@@ -74,6 +74,7 @@ import com.v2tech.view.JNIService;
 import com.v2tech.view.PublicIntent;
 import com.v2tech.view.bo.GroupUserObject;
 import com.v2tech.view.bo.UserStatusObject;
+import com.v2tech.view.conversation.MessageLoader;
 import com.v2tech.view.widget.MixVideoLayout;
 import com.v2tech.vo.Attendee;
 import com.v2tech.vo.AttendeeMixedDevice;
@@ -494,11 +495,8 @@ public class VideoActivityV2 extends Activity {
 				}
 			} else if (JNIService.JNI_BROADCAST_NEW_CONF_MESSAGE.equals(intent
 					.getAction())) {
-				String content = intent.getExtras().getString("content");
-				long fromUid = intent.getLongExtra("fromuid", 0);
-				VMessage vm = new VMessage(GlobalHolder.getInstance().getUser(
-						fromUid), GlobalHolder.getInstance().getCurrentUser(),
-						content);
+				long mid = intent.getLongExtra("mid", 0);
+				VMessage vm =MessageLoader.loadMessageById(mContext, mid);
 				if (mMessageContainer != null) {
 					mMessageContainer.addNewMessage(vm);
 				} else {
@@ -746,7 +744,7 @@ public class VideoActivityV2 extends Activity {
 	}
 
 	private void initMsgLayout() {
-		mMessageContainer = new VideoMsgChattingLayout(this);
+		mMessageContainer = new VideoMsgChattingLayout(this, cg);
 		mMessageContainer.setId(0x7ffff000);
 		RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
 				(int) (mVideoLayout.getMeasuredWidth() * 0.4),
@@ -1577,9 +1575,8 @@ public class VideoActivityV2 extends Activity {
 
 		@Override
 		public void requestSendMsg(VMessage vm) {
-			vm.mGroupId = mGroupId;
 			vm.setToUser(new User(0));
-			vm.setUser(GlobalHolder.getInstance().getCurrentUser());
+			vm.setFromUser(GlobalHolder.getInstance().getCurrentUser());
 			vm.setMsgCode(VMessage.VMESSAGE_CODE_CONF);
 			cs.sendVMessage(vm, null);
 

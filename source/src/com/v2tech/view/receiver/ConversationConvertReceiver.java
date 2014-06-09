@@ -153,11 +153,6 @@ public class ConversationConvertReceiver extends BroadcastReceiver {
 		i.addCategory(PublicIntent.DEFAULT_CATEGORY);
 		i.putExtra("extId", gid);
 		i.putExtra("type", Conversation.TYPE_GROUP);
-
-		if (type != VMessage.MessageType.IMAGE.getIntValue()) {
-			i.putExtra("date", dateString);
-			i.putExtra("content", content);
-		}
 		notif = GlobalHolder.getInstance().CURRENT_CONVERSATION == cov ? false
 				: true;
 		i.putExtra("noti", notif);
@@ -280,10 +275,6 @@ public class ConversationConvertReceiver extends BroadcastReceiver {
 		i.addCategory(PublicIntent.DEFAULT_CATEGORY);
 		i.putExtra("extId", fromUid);
 		i.putExtra("type", Conversation.TYPE_CONTACT);
-		if (type != VMessage.MessageType.IMAGE.getIntValue()) {
-			i.putExtra("date", dateString);
-			i.putExtra("content", content);
-		}
 		i.putExtra("noti", notif);
 		mContext.sendBroadcast(i);
 	}

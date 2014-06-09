@@ -655,10 +655,16 @@ public class VideoAttendeeListLayout extends LinearLayout {
 
 		@Override
 		public int compareTo(Wrapper wr) {
+			if (this.a == null) {
+				return 1;
+			}
 			if (this.a.getType() == Attendee.TYPE_MIXED_VIDEO) {
 				return -1;
 			}
 
+			if (wr.a == null) {
+				return -1;
+			}
 			if (wr.a.getType() == Attendee.TYPE_MIXED_VIDEO) {
 				return 1;
 			}

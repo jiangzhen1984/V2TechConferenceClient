@@ -1,7 +1,10 @@
 package com.v2tech.view.conference;
 
+import java.util.List;
+
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,9 +13,13 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.v2tech.R;
+import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.V2Log;
-import com.v2tech.vo.VImageMessage;
 import com.v2tech.vo.VMessage;
+import com.v2tech.vo.VMessageAbstractItem;
+import com.v2tech.vo.VMessageFaceItem;
+import com.v2tech.vo.VMessageImageItem;
+import com.v2tech.vo.VMessageTextItem;
 
 public class ConferenceMessageBodyView extends LinearLayout {
 
@@ -58,28 +65,45 @@ public class ConferenceMessageBodyView extends LinearLayout {
 	}
 
 	private void initData() {
-		senderTV.setText(this.mMsg.getUser().getName() + "  "
+		senderTV.setText(this.mMsg.getFromUser().getName() + "  "
 				+ mMsg.getDateTimeStr());
-
-		if (mMsg.getType() == VMessage.MessageType.TEXT) {
-			TextView contentTV = new TextView(this.getContext());
-			contentTV.setText(mMsg.getText());
-			mContentContainer.addView(contentTV, new LinearLayout.LayoutParams(
-					LinearLayout.LayoutParams.MATCH_PARENT,
-					LinearLayout.LayoutParams.WRAP_CONTENT));
-		} else if (mMsg.getType() == VMessage.MessageType.IMAGE) {
-			VImageMessage.Size si = ((VImageMessage) mMsg)
-					.getCompressedBitmapSize();
-			mImageIV = new ImageView(getContext());
-			mContentContainer.addView(mImageIV, new LinearLayout.LayoutParams(
-					si.width, si.height));
-
-			new LoadTask()
-					.execute(new VImageMessage[] { (VImageMessage) mMsg });
-		}
-
-		if (mMsg.getType() == VMessage.MessageType.IMAGE) {
-			mContentContainer.setOnClickListener(new OnClickListener() {
+		
+		
+		mContentContainer.removeAllViews();
+		LinearLayout line = new LinearLayout(this.getContext());
+		LinearLayout.LayoutParams ll = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,  LinearLayout.LayoutParams.WRAP_CONTENT);
+		line.setOrientation(LinearLayout.HORIZONTAL);
+		mContentContainer.addView(line, ll);
+		List<VMessageAbstractItem>  items = mMsg.getItems();
+		for (VMessageAbstractItem item : items) {
+			//Add new layout for new line
+			if (item.isNewLine()) {
+				line = new LinearLayout(this.getContext());
+				line.setOrientation(LinearLayout.HORIZONTAL);
+				mContentContainer.addView(line, ll);
+			}
+			View child = null;
+			if (item.getType() == VMessageAbstractItem.ITEM_TYPE_TEXT) {
+				TextView contentTV = new TextView(this.getContext());
+				contentTV.setText(((VMessageTextItem)item).getText());
+				contentTV.setTextColor(Color.GRAY);
+				contentTV.setHighlightColor(Color.GRAY);
+				child = contentTV;
+				line.addView(child, ll);
+			} else if (item.getType() == VMessageAbstractItem.ITEM_TYPE_FACE) {
+				ImageView iv = new ImageView(this.getContext());
+				iv.setImageResource(GlobalConfig.GLOBAL_FACE_ARRAY[((VMessageFaceItem)item).getIndex()]);
+				child = iv;
+				line.addView(child, ll);
+			} else if (item.getType() == VMessageAbstractItem.ITEM_TYPE_IMAGE) {
+				ImageView iv = new ImageView(this.getContext());
+				VMessageImageItem.Size si = ((VMessageImageItem)item).getCompressedBitmapSize();
+				line.addView(iv, new LinearLayout.LayoutParams(
+						si.width,
+						si.height));
+				iv.setTag(item);
+				child = iv;
+				iv.setOnClickListener(new OnClickListener() {
 
 				@Override
 				public void onClick(View arg0) {
@@ -89,8 +113,12 @@ public class ConferenceMessageBodyView extends LinearLayout {
 				}
 
 			});
-
+				new LoadTask().execute(new ImageView[]{(ImageView)iv});
+			}
+			
 		}
+		
+		mContentContainer.setTag(this.mMsg);
 
 	}
 
@@ -103,9 +131,7 @@ public class ConferenceMessageBodyView extends LinearLayout {
 	}
 
 	public void recycle() {
-		if (this.mMsg.getType() == VMessage.MessageType.IMAGE) {
-			((VImageMessage) this.mMsg).recycle();
-		}
+		mMsg.recycleAllImageMessage();
 	}
 
 	public void updateView(VMessage vm) {
@@ -123,32 +149,32 @@ public class ConferenceMessageBodyView extends LinearLayout {
 		initData();
 	}
 
-	class LoadTask extends AsyncTask<VImageMessage, Void, VImageMessage[]> {
+	class LoadTask extends AsyncTask<ImageView, Void , ImageView[]> {
+
+		
 
 		@Override
-		protected VImageMessage[] doInBackground(VImageMessage... vms) {
-			// Only has one element
-			for (VImageMessage vm : vms) {
-				vm.getCompressedBitmap();
+		protected ImageView[] doInBackground(ImageView... vms) {
+			//Only has one element
+			for (ImageView vm : vms) {
+				((VMessageImageItem)vm.getTag()).getCompressedBitmap();
 			}
 			return vms;
 		}
 
 		@Override
-		protected void onPostExecute(VImageMessage[] result) {
-			// Only has one element
-			VImageMessage vm = result[0];
-			// If loaded vm is not same member's, means current view has changed
-			// message, igonre this result
-			if (vm != mMsg) {
+		protected void onPostExecute(ImageView[] result) {
+			//Only has one element
+			ImageView vm = result[0];
+			//If loaded vm is not same member's, means current view has changed message, ignore this result
+			VMessageImageItem item  =((VMessageImageItem)vm.getTag());
+			if (item.getVm() != mMsg) {
 				return;
 			}
-			mImageIV = (ImageView) mContentContainer
-					.getChildAt(mContentContainer.getChildCount() - 1);
-			Bitmap bm = vm.getCompressedBitmap();
-			mImageIV.setImageBitmap(bm);
+			Bitmap bm = item.getCompressedBitmap();
+			vm.setImageBitmap(bm);
 		}
-
+		
 	}
 
 }

@@ -15,7 +15,7 @@
             android:text="00:00" />
 
     <LinearLayout
-        android:id="@+id/message_body_local_user_ly"
+        android:id="@+id/message_body_left_user_ly"
         android:layout_below="@+id/message_body_time_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" >
@@ -28,7 +28,7 @@
             android:layout_weight=".9" >
 
             <ImageView
-                android:id="@+id/conversation_message_body_icon_local"
+                android:id="@+id/conversation_message_body_icon_left"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentLeft="true"
@@ -42,19 +42,19 @@
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
                 android:layout_marginLeft="10dp"
-                android:layout_toRightOf="@+id/conversation_message_body_icon_local"
-                android:src="@drawable/message_body_arrow_left" />
+                android:layout_toRightOf="@+id/conversation_message_body_icon_left"
+                android:src="@drawable/message_body_left_arrow_selector" />
 
             <LinearLayout
-                android:id="@+id/messag_body_content_ly_local"
+                android:id="@+id/messag_body_content_ly_left"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
                 android:layout_marginLeft="-1dp"
                 android:layout_marginRight="30dp"
                 android:layout_toRightOf="@+id/message_body_arrow_left"
-                android:background="@drawable/message_body_bg"
-                android:orientation="horizontal" >
+                android:background="@drawable/message_body_left_bg_selector"
+                android:orientation="vertical" >
             </LinearLayout>
         </RelativeLayout>
 
@@ -87,7 +87,7 @@
             >
 
             <ImageView
-                android:id="@+id/conversation_message_body_icon_remote"
+                android:id="@+id/conversation_message_body_icon_right"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
@@ -101,19 +101,19 @@
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
                 android:layout_marginRight="10dp"
-                android:layout_toLeftOf="@+id/conversation_message_body_icon_remote"
-                android:src="@drawable/message_body_arrow_right" />
+                android:layout_toLeftOf="@+id/conversation_message_body_icon_right"
+                android:src="@drawable/message_body_right_arrow_selector" />
 
             <LinearLayout
-                android:id="@+id/messag_body_content_ly_remote"
+                android:id="@+id/messag_body_content_ly_right"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
                 android:layout_marginLeft="30dp"
                 android:layout_marginRight="-1dp"
                 android:layout_toLeftOf="@+id/message_body_arrow_right"
-                android:background="@drawable/message_body_bg_remote"
-                android:orientation="horizontal" >
+                android:background="@drawable/message_body_right_bg_selector"
+                android:orientation="vertical" >
             </LinearLayout>
         </RelativeLayout>
     </LinearLayout>

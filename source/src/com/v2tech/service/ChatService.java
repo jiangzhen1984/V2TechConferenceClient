@@ -1,5 +1,7 @@
 package com.v2tech.service;
 
+import java.util.List;
+
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
@@ -10,8 +12,8 @@ import com.V2.jni.AudioRequestCallback;
 import com.V2.jni.ChatRequest;
 import com.v2tech.util.V2Log;
 import com.v2tech.vo.UserAudioDevice;
-import com.v2tech.vo.VImageMessage;
 import com.v2tech.vo.VMessage;
+import com.v2tech.vo.VMessageImageItem;
 
 public class ChatService extends Handler {
 
@@ -64,15 +66,16 @@ public class ChatService extends Handler {
 		thread.post(new Runnable() {
 			@Override
 			public void run() {
-				ChatRequest.getInstance().sendChatText(msg.mGroupId,
-						msg.getToUser().getmUserId(), msg.getUUID(), msg.toXml(),
-						msg.getMsgCode());
-				if (msg.getType() == VMessage.MessageType.IMAGE
-						|| msg.getType() == VMessage.MessageType.IMAGE_AND_TEXT) {
-					byte[] data = ((VImageMessage) msg).getWrapperData();
-					ChatRequest.getInstance().sendChatPicture(msg.mGroupId,
-							msg.getToUser().getmUserId(), msg.getUUID(),data, data.length,
-							msg.getMsgCode());
+				ChatRequest.getInstance().sendChatText(msg.getGroupId(),
+						msg.getToUser().getmUserId(), msg.getUUID(),
+						msg.toXml(), msg.getMsgCode());
+
+				List<VMessageImageItem> imageItems = msg.getImageItems();
+				for (VMessageImageItem item : imageItems) {
+					byte[] data = item.loadImageData();
+					ChatRequest.getInstance().sendChatPicture(msg.getGroupId(),
+							msg.getToUser().getmUserId(), item.getUUID(), data,
+							data.length, msg.getMsgCode());
 				}
 				if (caller != null) {
 					caller.sendToTarget();
@@ -86,6 +89,7 @@ public class ChatService extends Handler {
 
 	/**
 	 * Invite contact for chat
+	 * 
 	 * @param ud
 	 * @param caller
 	 */

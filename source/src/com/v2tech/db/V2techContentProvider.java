@@ -60,6 +60,11 @@ public class V2techContentProvider extends ContentProvider {
 			getContext().getContentResolver().notifyChange(uri, null);
 			return ContentDescriptor.Conversation.CONTENT_URI.buildUpon()
 					.appendPath(String.valueOf(id)).build();
+		case ContentDescriptor.MessageItems.TOKEN:
+			id = db.insert(ContentDescriptor.MessageItems.NAME, null, values);
+			getContext().getContentResolver().notifyChange(uri, null);
+			return ContentDescriptor.MessageItems.CONTENT_URI.buildUpon()
+					.appendPath(String.valueOf(id)).build();
 		}
 		return null;
 	}
@@ -83,6 +88,11 @@ public class V2techContentProvider extends ContentProvider {
 			qb.setTables(ContentDescriptor.Messages.NAME);
 			selection = ContentDescriptor.Messages.Cols.ID + "=?  ";
 			selectionArgs = new String[] { uri.getLastPathSegment() };
+			break;
+		case ContentDescriptor.Messages.TOKEN_BY_PAGE:
+			break;
+		case ContentDescriptor.MessageItems.TOKEN:
+			qb.setTables(ContentDescriptor.MessageItems.NAME);
 			break;
 		case ContentDescriptor.Conversation.TOKEN:
 			qb.setTables(ContentDescriptor.Conversation.NAME);

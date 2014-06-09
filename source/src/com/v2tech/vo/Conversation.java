@@ -77,6 +77,12 @@ public class Conversation {
 	}
 	
 	
+	public void setMsg(String msg) {
+	}
+	
+	public void setDate(String date) {
+	}
+	
 	
 
 	@Override
