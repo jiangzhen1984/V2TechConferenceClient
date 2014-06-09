@@ -4,14 +4,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
-import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.graphics.drawable.AnimationDrawable;
 import android.text.Editable;
@@ -159,7 +157,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 		nameTV.setText(a.getAttName());
 
 		// Set text color and camera icon
-		setStyle(a, nameTV, cameraIV);
+		setStyle(a, a.getDefaultDevice(), nameTV, cameraIV);
 
 		view.setTag(new Wrapper(a, a.getDefaultDevice(), -1));
 		list.add(new ViewWrapper(view));
@@ -178,7 +176,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 			view2.findViewById(R.id.video_attendee_device_speaker_icon)
 					.setVisibility(View.INVISIBLE);
 			// Set text color and camera icon
-			setStyle(a, nameTV2, cameraIV2);
+			setStyle(a, udc, nameTV2, cameraIV2);
 
 			cameraIV2.setOnTouchListener(mListViewOnTouchListener);
 			view2.setTag(new Wrapper(a, udc, 1));
@@ -189,7 +187,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 
 	}
 
-	private void setStyle(Attendee at, TextView name, ImageView iv) {
+	private void setStyle(Attendee at, UserDeviceConfig udc, TextView name, ImageView iv) {
 		if (at.isSelf()) {
 			name.setTypeface(null, Typeface.BOLD);
 			name.setTextColor(getContext().getResources().getColor(
@@ -212,8 +210,10 @@ public class VideoAttendeeListLayout extends LinearLayout {
 		if (at.isSelf()) {
 			iv.setImageResource(R.drawable.camera);
 		} else if (at.isJoined()) {
-			if (at.getType() != Attendee.TYPE_MIXED_VIDEO) {
-				iv.setImageResource(R.drawable.camera);
+			if (at.getType() != Attendee.TYPE_MIXED_VIDEO ) {
+				if (udc != null) {
+					iv.setImageResource(R.drawable.camera);
+				}
 			} else {
 				iv.setImageResource(R.drawable.mixed_video_camera);
 			}
@@ -669,6 +669,11 @@ public class VideoAttendeeListLayout extends LinearLayout {
 				return 1;
 			}
 
+			if (this.a.isSelf()) {
+				return -1;
+			} else if (wr.a.isSelf()) {
+				return 1;
+			}
 			int ret = this.a.compareTo(wr.a);
 			if (ret == 0) {
 				return this.sortFlag;

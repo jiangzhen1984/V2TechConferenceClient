@@ -46,6 +46,7 @@ import com.v2tech.view.bo.GroupUserObject;
 import com.v2tech.view.bo.UserAvatarObject;
 import com.v2tech.view.bo.UserStatusObject;
 import com.v2tech.view.conference.VideoActivityV2;
+import com.v2tech.view.conversation.MessageBuilder;
 import com.v2tech.vo.ConferenceGroup;
 import com.v2tech.vo.CrowdConversation;
 import com.v2tech.vo.Group;
@@ -73,10 +74,11 @@ public class JNIService extends Service {
 	public static final String JNI_BROADCAST_CATEGROY = "com.v2tech.jni.broadcast";
 	public static final String JNI_BROADCAST_CONNECT_STATE_NOTIFICATION = "com.v2tech.jni.broadcast.connect_state_notification";
 	public static final String JNI_BROADCAST_USER_STATUS_NOTIFICATION = "com.v2tech.jni.broadcast.user_stauts_notification";
-	
+
 	/**
-	 * Notify user avatar changed, notice please do not listen this broadcast if you are UI. 
-	 * Use {@link BitmapManager#registerBitmapChangedListener(com.v2tech.service.BitmapManager.BitmapChangedListener)}
+	 * Notify user avatar changed, notice please do not listen this broadcast if
+	 * you are UI. Use
+	 * {@link BitmapManager#registerBitmapChangedListener(com.v2tech.service.BitmapManager.BitmapChangedListener)}
 	 * to listener bitmap change if you are UI.
 	 */
 	public static final String JNI_BROADCAST_USER_AVATAR_CHANGED_NOTIFICATION = "com.v2tech.jni.broadcast.user_avatar_notification";
@@ -89,7 +91,6 @@ public class JNIService extends Service {
 	public static final String JNI_BROADCAST_CONFERENCE_REMOVED = "com.v2tech.jni.broadcast.conference_removed";
 	public static final String JNI_BROADCAST_GROUP_USER_REMOVED = "com.v2tech.jni.broadcast.group_user_removed";
 	public static final String JNI_BROADCAST_GROUP_USER_ADDED = "com.v2tech.jni.broadcast.group_user_added";
-
 
 	private boolean isDebug = true;
 
@@ -108,7 +109,7 @@ public class JNIService extends Service {
 	private VideoRequestCB mVRCB;
 
 	private ChatRequestCB mChRCB;
-	
+
 	private ConfRequestCB mCRCB;
 
 	// ////////////////////////////////////////
@@ -152,7 +153,7 @@ public class JNIService extends Service {
 		mChRCB = new ChatRequestCB(mCallbackHandler);
 		ChatRequest.getInstance(this.getApplicationContext())
 				.setChatRequestCallback(mChRCB);
-		
+
 		mCRCB = new ConfRequestCB(mCallbackHandler);
 		ConfRequest.getInstance().addCallback(mCRCB);
 	}
@@ -300,12 +301,13 @@ public class JNIService extends Service {
 					List<User> lu = User.fromXml(go.xml);
 					Group g = GlobalHolder.getInstance().findGroupById(go.gId);
 					for (User tu : lu) {
-						UserStatusObject uso =  GlobalHolder.getInstance()
+						UserStatusObject uso = GlobalHolder.getInstance()
 								.getOnlineUserStatus(tu.getmUserId());
-						//Update user status
+						// Update user status
 						if (uso != null) {
 							tu.updateStatus(User.Status.fromInt(uso.getStatus()));
-							tu.setDeviceType(User.DeviceType.fromInt(uso.getDeviceType()));
+							tu.setDeviceType(User.DeviceType.fromInt(uso
+									.getDeviceType()));
 						}
 						User existU = GlobalHolder.getInstance().putUser(
 								tu.getmUserId(), tu);
@@ -343,19 +345,20 @@ public class JNIService extends Service {
 				if (vm != null) {
 					String action = null;
 					String msgUri = null;
+					Uri uri = MessageBuilder.saveMessage(mContext, vm);
+					
 					if (vm.getMsgCode() == VMessage.VMESSAGE_CODE_CONF) {
 						action = JNI_BROADCAST_NEW_CONF_MESSAGE;
 					} else {
 						action = JNI_BROADCAST_NEW_MESSAGE;
-						Uri uri = saveMessageToDB(vm);
-						msgUri = uri.getLastPathSegment();
 						sendNotification();
 						updateStatusBar(vm);
 					}
+					
 					Intent ii = new Intent(action);
 					ii.addCategory(JNI_BROADCAST_CATEGROY);
 					ii.putExtra("gid", vm.getGroupId());
-					ii.putExtra("mid", msgUri);
+					ii.putExtra("mid", vm.getId());
 					ii.putExtra("fromuid", vm.getFromUser().getmUserId());
 					mContext.sendBroadcast(ii);
 				}
@@ -374,24 +377,6 @@ public class JNIService extends Service {
 
 		}
 
-		private Uri saveMessageToDB(VMessage vm) {
-//			ContentValues cv = new ContentValues();
-//			cv.put(ContentDescriptor.Messages.Cols.FROM_USER_ID, vm.getUser()
-//					.getmUserId());
-//			cv.put(ContentDescriptor.Messages.Cols.TO_USER_ID, vm.getToUser()
-//					.getmUserId());
-//			cv.put(ContentDescriptor.Messages.Cols.MSG_CONTENT, vm.getText());
-//			cv.put(ContentDescriptor.Messages.Cols.MSG_TYPE, vm.getType()
-//					.getIntValue());
-//			cv.put(ContentDescriptor.Messages.Cols.SEND_TIME,
-//					vm.getFullDateStr());
-//			cv.put(ContentDescriptor.Messages.Cols.GROUP_ID, vm.mGroupId);
-//			Uri uri = getContentResolver().insert(
-//					ContentDescriptor.Messages.CONTENT_URI, cv);
-//			return uri;
-			return null;
-		}
-
 		private void sendNotification() {
 			if ((System.currentTimeMillis() / 1000) - lastNotificatorTime > 2) {
 				Uri notification = RingtoneManager
@@ -407,53 +392,56 @@ public class JNIService extends Service {
 
 		// FIXME update message for group message
 		private void updateStatusBar(VMessage vm) {
-//			Conversation cov = null;
-//			if (vm.mGroupId != 0) {
-//				cov = GlobalHolder.getInstance().findConversationByType(
-//						Conversation.TYPE_GROUP, vm.mGroupId);
-//			} else {
-//				cov = GlobalHolder.getInstance().findConversationByType(
-//						Conversation.TYPE_CONTACT, vm.getUser().getmUserId());
-//			}
-//			//
-//			if ((GlobalHolder.getInstance().CURRENT_CONVERSATION != null && cov == GlobalHolder
-//					.getInstance().CURRENT_CONVERSATION)
-//					|| (GlobalHolder.getInstance().CURRENT_ID == vm.getUser()
-//							.getmUserId())) {
-//				return;
-//			}
-//			NotificationCompat.Builder builder = new NotificationCompat.Builder(
-//					mContext).setSmallIcon(R.drawable.ic_launcher)
-//					.setContentTitle(vm.getUser().getName());
-//			if (vm.getType() == MessageType.IMAGE) {
-//				builder.setContentText(mContext.getResources().getString(
-//						R.string.receive_image_notification));
-//			} else {
-//				builder.setContentText(vm.getText());
-//
-//			}
-//
-//			Intent resultIntent = new Intent(
-//					PublicIntent.START_CONVERSACTION_ACTIVITY);
-//			resultIntent.putExtra("user1id", GlobalHolder.getInstance()
-//					.getCurrentUserId());
-//			resultIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//			resultIntent.putExtra("user2id", vm.getUser().getmUserId());
-//			resultIntent.putExtra("user2Name", vm.getUser().getName());
-//			resultIntent.addCategory(PublicIntent.DEFAULT_CATEGORY);
-//
-//			// Creates the PendingIntent
-//			PendingIntent notifyPendingIntent = PendingIntent.getActivities(
-//					mContext, 0, new Intent[] { resultIntent },
-//					PendingIntent.FLAG_UPDATE_CURRENT);
-//
-//			// Puts the PendingIntent into the notification builder
-//			builder.setContentIntent(notifyPendingIntent);
-//
-//			NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-//			// mId allows you to update the notification later on.
-//			mNotificationManager.notify(PublicIntent.MESSAGE_NOTIFICATION_ID,
-//					builder.build());
+			// Conversation cov = null;
+			// if (vm.mGroupId != 0) {
+			// cov = GlobalHolder.getInstance().findConversationByType(
+			// Conversation.TYPE_GROUP, vm.mGroupId);
+			// } else {
+			// cov = GlobalHolder.getInstance().findConversationByType(
+			// Conversation.TYPE_CONTACT, vm.getUser().getmUserId());
+			// }
+			// //
+			// if ((GlobalHolder.getInstance().CURRENT_CONVERSATION != null &&
+			// cov == GlobalHolder
+			// .getInstance().CURRENT_CONVERSATION)
+			// || (GlobalHolder.getInstance().CURRENT_ID == vm.getUser()
+			// .getmUserId())) {
+			// return;
+			// }
+			// NotificationCompat.Builder builder = new
+			// NotificationCompat.Builder(
+			// mContext).setSmallIcon(R.drawable.ic_launcher)
+			// .setContentTitle(vm.getUser().getName());
+			// if (vm.getType() == MessageType.IMAGE) {
+			// builder.setContentText(mContext.getResources().getString(
+			// R.string.receive_image_notification));
+			// } else {
+			// builder.setContentText(vm.getText());
+			//
+			// }
+			//
+			// Intent resultIntent = new Intent(
+			// PublicIntent.START_CONVERSACTION_ACTIVITY);
+			// resultIntent.putExtra("user1id", GlobalHolder.getInstance()
+			// .getCurrentUserId());
+			// resultIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+			// resultIntent.putExtra("user2id", vm.getUser().getmUserId());
+			// resultIntent.putExtra("user2Name", vm.getUser().getName());
+			// resultIntent.addCategory(PublicIntent.DEFAULT_CATEGORY);
+			//
+			// // Creates the PendingIntent
+			// PendingIntent notifyPendingIntent = PendingIntent.getActivities(
+			// mContext, 0, new Intent[] { resultIntent },
+			// PendingIntent.FLAG_UPDATE_CURRENT);
+			//
+			// // Puts the PendingIntent into the notification builder
+			// builder.setContentIntent(notifyPendingIntent);
+			//
+			// NotificationManager mNotificationManager = (NotificationManager)
+			// getSystemService(Context.NOTIFICATION_SERVICE);
+			// // mId allows you to update the notification later on.
+			// mNotificationManager.notify(PublicIntent.MESSAGE_NOTIFICATION_ID,
+			// builder.build());
 
 		}
 
@@ -473,16 +461,18 @@ public class JNIService extends Service {
 
 		@Override
 		public void OnLogoutCallback(int nUserID) {
-			//FIXME optimize code
+			// FIXME optimize code
 			Message.obtain(mCallbackHandler, JNI_LOG_OUT).sendToTarget();
 			Notificator.cancelAllSystemNotification(mContext);
-			//Send broadcast PREPARE_FINISH_APPLICATION first to let all activity quit and release resource
-			//Notice: if any activity doesn't release resource, android will automatically restart main activity
+			// Send broadcast PREPARE_FINISH_APPLICATION first to let all
+			// activity quit and release resource
+			// Notice: if any activity doesn't release resource, android will
+			// automatically restart main activity
 			Intent i = new Intent();
 			i.setAction(PublicIntent.PREPARE_FINISH_APPLICATION);
 			i.addCategory(PublicIntent.DEFAULT_CATEGORY);
 			mContext.sendBroadcast(i);
-			
+
 			mCallbackHandler.postDelayed(new Runnable() {
 				@Override
 				public void run() {
@@ -510,8 +500,8 @@ public class JNIService extends Service {
 		}
 
 		@Override
-		public void OnUserStatusUpdatedCallback(long nUserID, int type, int nStatus,
-				String szStatusDesc) {
+		public void OnUserStatusUpdatedCallback(long nUserID, int type,
+				int nStatus, String szStatusDesc) {
 			UserStatusObject uso = new UserStatusObject(nUserID, type, nStatus);
 			GlobalHolder.getInstance().updateUserStatus(nUserID, uso);
 			User u = GlobalHolder.getInstance().getUser(nUserID);
@@ -522,13 +512,12 @@ public class JNIService extends Service {
 				u.updateStatus(User.Status.fromInt(nStatus));
 				u.setDeviceType(User.DeviceType.fromInt(type));
 			}
-			
-			
+
 			Intent iun = new Intent(JNI_BROADCAST_USER_STATUS_NOTIFICATION);
 			iun.addCategory(JNI_BROADCAST_CATEGROY);
 			iun.putExtra("status", uso);
 			mContext.sendBroadcast(iun);
-			
+
 		}
 
 		@Override
@@ -544,7 +533,6 @@ public class JNIService extends Service {
 				AvatarName = null;
 			}
 
-			
 			GlobalHolder.getInstance().putAvatar(nUserID, AvatarName);
 
 			Intent i = new Intent();
@@ -555,16 +543,15 @@ public class JNIService extends Service {
 		}
 
 		@Override
-		public void OnModifyCommentNameCallback(long nUserId, String sCommmentName) {
+		public void OnModifyCommentNameCallback(long nUserId,
+				String sCommmentName) {
 			// TODO implment update user nick name
 		}
 
 		@Override
 		public void OnCreateCrowdCallback(String sCrowdXml, int nResult) {
-			
+
 		}
-		
-		
 
 	}
 
@@ -730,13 +717,13 @@ public class JNIService extends Service {
 
 		@Override
 		public void OnRemoteUserVideoDevice(String szXmlData) {
-//			if (szXmlData == null) {
-//				V2Log.e(" No avaiable user device configuration");
-//				return;
-//			}
-//			Message.obtain(mCallbackHandler,
-//					JNI_REMOTE_USER_DEVICE_INFO_NOTIFICATION, szXmlData)
-//					.sendToTarget();
+			// if (szXmlData == null) {
+			// V2Log.e(" No avaiable user device configuration");
+			// return;
+			// }
+			// Message.obtain(mCallbackHandler,
+			// JNI_REMOTE_USER_DEVICE_INFO_NOTIFICATION, szXmlData)
+			// .sendToTarget();
 		}
 
 		@Override
@@ -766,8 +753,6 @@ public class JNIService extends Service {
 			this.mCallbackHandler = mCallbackHandler;
 		}
 
-		
-		
 		@Override
 		public void OnEnterConfCallback(long nConfID, long nTime,
 				String szConfData, int nJoinResult) {
@@ -816,7 +801,7 @@ public class JNIService extends Service {
 					i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
 					i.putExtra("gid", g.getmGId());
 					sendBroadcast(i);
-					
+
 					Intent enterConference = new Intent(mContext,
 							VideoActivityV2.class);
 					enterConference.putExtra("gid", g.getmGId());
@@ -856,25 +841,21 @@ public class JNIService extends Service {
 				fromUser = new User(nFromUserID);
 			}
 
-			
-			
-			VMessage vm = XmlParser.parseForMessage(fromUser, toUser, new Date(),
-					szXmlText);
-			if (vm == null) {
-				V2Log.e(" xml parsed failed : " + szXmlText);
-				return;
-			}
-			
 			// Record image data meta
 			VMessage cache = new VMessage(fromUser, toUser, new Date());
-			XmlParser.extraImageMetaFrom(cache, 
-					szXmlText);
-			if (vm.getItems().size() > 0) {
+			XmlParser.extraImageMetaFrom(cache, szXmlText);
+			if (cache.getItems().size() > 0) {
 				synchronized (cacheImageMeta) {
 					cacheImageMeta.add(cache);
 				}
 			}
-			
+
+			VMessage vm = XmlParser.parseForMessage(fromUser, toUser,
+					new Date(), szXmlText);
+			if (vm == null || vm.getItems().size() == 0) {
+				return;
+			}
+
 			vm.setGroupId(nGroupID);
 			vm.setMsgCode(nBusinessType);
 			Message.obtain(mCallbackHandler, JNI_RECEIVED_MESSAGE, vm)
@@ -886,15 +867,16 @@ public class JNIService extends Service {
 				long nFromUserID, long nTime, String nSeqId, byte[] pPicData) {
 			boolean isCache = false;
 			VMessage vm = null;
-			VMessageImageItem vait = null;;
+			VMessageImageItem vait = null;
+			;
 			String uuid = nSeqId.substring(1, nSeqId.length() - 1);
 			synchronized (cacheImageMeta) {
 				for (VMessage v : cacheImageMeta) {
 					for (VMessageAbstractItem vai : v.getItems()) {
-						if (((VMessageImageItem)vai).getUUID().equals(uuid)) {
+						if (((VMessageImageItem) vai).getUUID().equals(uuid)) {
 							isCache = true;
 							vm = v;
-							vait = (VMessageImageItem)vai;
+							vait = (VMessageImageItem) vai;
 						}
 					}
 					cacheImageMeta.remove(v);
@@ -904,16 +886,13 @@ public class JNIService extends Service {
 				V2Log.e(" Didn't receive image meta data: " + nSeqId);
 				return;
 			}
-			if (nGroupID > 0) {
-				V2Log.w("igonre group image message:" + nGroupID);
-				return;
-			}
+
 			vm.setGroupId(nGroupID);
-			
-			String filePath = StorageUtil.getAbsoluteSdcardPath() + "/v2tech/pics/"
-			+ vait.getUUID() + vait.getExtension();
+
+			String filePath = StorageUtil.getAbsoluteSdcardPath()
+					+ "/v2tech/pics/" + vait.getUUID() + vait.getExtension();
 			vait.setFilePath(filePath);
-			
+
 			File f = new File(filePath);
 			OutputStream os = null;
 			try {
@@ -932,10 +911,7 @@ public class JNIService extends Service {
 					}
 				}
 			}
-			
-			
-			
-			
+
 			Message.obtain(mCallbackHandler, JNI_RECEIVED_MESSAGE, vm)
 					.sendToTarget();
 		}

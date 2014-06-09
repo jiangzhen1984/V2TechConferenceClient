@@ -72,17 +72,19 @@ public class XmlParser {
 					if (msgEl.getTagName().equals("TTextChatItem")) {
 						String text = msgEl.getAttribute("Text");
 						va = new VMessageTextItem(vm, text);
+						va.setNewLine(isNewLine);
 					} else if (msgEl.getTagName().equals("TSysFaceChatItem")) {
 						String fileName = msgEl.getAttribute("FileName");
 						int start = fileName.indexOf(".");
 						int index = Integer.parseInt(fileName.substring(0,
 								start));
 						va = new VMessageFaceItem(vm, index);
-
+						va.setNewLine(isNewLine);
 					} else if (msgEl.getTagName().equals("TPictureChatItem")) {
 
 					}
-					va.setNewLine(isNewLine);
+					
+					
 
 				}
 			}

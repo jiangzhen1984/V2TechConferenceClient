@@ -101,13 +101,13 @@ public class MessageBodyView extends LinearLayout {
 
 		if (!mMsg.isLocal()) {
 			mHeadIcon = (ImageView) rootView
-					.findViewById(R.id.conversation_message_body_icon_right);
+					.findViewById(R.id.conversation_message_body_icon_left);
 			if (mMsg.getFromUser() != null
 					&& mMsg.getFromUser().getAvatarBitmap() != null) {
 				mHeadIcon.setImageBitmap(mMsg.getFromUser().getAvatarBitmap());
 			}
 			mContentContainer = (LinearLayout) rootView
-					.findViewById(R.id.messag_body_content_ly_right);
+					.findViewById(R.id.messag_body_content_ly_left);
 			mArrowIV = (ImageView) rootView
 					.findViewById(R.id.message_body_arrow_left);
 			mArrowIV.bringToFront();
@@ -115,9 +115,9 @@ public class MessageBodyView extends LinearLayout {
 			mRemoteMessageContainter.setVisibility(View.GONE);
 		} else {
 			mHeadIcon = (ImageView) rootView
-					.findViewById(R.id.conversation_message_body_icon_left);
+					.findViewById(R.id.conversation_message_body_icon_right);
 			mContentContainer = (LinearLayout) rootView
-					.findViewById(R.id.messag_body_content_ly_left);
+					.findViewById(R.id.messag_body_content_ly_right);
 			mArrowIV = (ImageView) rootView
 					.findViewById(R.id.message_body_arrow_right);
 			mArrowIV.bringToFront();
@@ -132,55 +132,51 @@ public class MessageBodyView extends LinearLayout {
 		populateMessage();
 
 	}
-	
-	
-	
+
 	private void populateMessage() {
-		mContentContainer.removeAllViews();
 		LinearLayout line = new LinearLayout(this.getContext());
-		LinearLayout.LayoutParams ll = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,  LinearLayout.LayoutParams.WRAP_CONTENT);
+		LinearLayout.LayoutParams ll = new LinearLayout.LayoutParams(
+				LinearLayout.LayoutParams.WRAP_CONTENT,
+				LinearLayout.LayoutParams.WRAP_CONTENT);
 		line.setOrientation(LinearLayout.HORIZONTAL);
 		mContentContainer.addView(line, ll);
-		List<VMessageAbstractItem>  items = mMsg.getItems();
+		List<VMessageAbstractItem> items = mMsg.getItems();
 		for (VMessageAbstractItem item : items) {
-			//Add new layout for new line
+			// Add new layout for new line
 			if (item.isNewLine()) {
 				line = new LinearLayout(this.getContext());
 				line.setOrientation(LinearLayout.HORIZONTAL);
 				mContentContainer.addView(line, ll);
 			}
-			View child = null;
 			if (item.getType() == VMessageAbstractItem.ITEM_TYPE_TEXT) {
 				TextView contentTV = new TextView(this.getContext());
-				contentTV.setText(((VMessageTextItem)item).getText());
+				contentTV.setText(((VMessageTextItem) item).getText());
 				contentTV.setTextColor(Color.GRAY);
 				contentTV.setHighlightColor(Color.GRAY);
-				child = contentTV;
-				line.addView(child, ll);
-				mContentContainer.setOnLongClickListener(messageLongClickListener);
+				line.addView(contentTV, ll);
+				mContentContainer
+						.setOnLongClickListener(messageLongClickListener);
 			} else if (item.getType() == VMessageAbstractItem.ITEM_TYPE_FACE) {
 				ImageView iv = new ImageView(this.getContext());
-				iv.setImageResource(GlobalConfig.GLOBAL_FACE_ARRAY[((VMessageFaceItem)item).getIndex()]);
-				child = iv;
-				line.addView(child, ll);
-				mContentContainer.setOnLongClickListener(messageLongClickListener);
+				iv.setImageResource(GlobalConfig.GLOBAL_FACE_ARRAY[((VMessageFaceItem) item)
+						.getIndex()]);
+				line.addView(iv, ll);
+				mContentContainer
+						.setOnLongClickListener(messageLongClickListener);
 			} else if (item.getType() == VMessageAbstractItem.ITEM_TYPE_IMAGE) {
 				ImageView iv = new ImageView(this.getContext());
-				VMessageImageItem.Size si = ((VMessageImageItem)item).getCompressedBitmapSize();
-				line.addView(iv, new LinearLayout.LayoutParams(
-						si.width,
+				VMessageImageItem.Size si = ((VMessageImageItem) item)
+						.getCompressedBitmapSize();
+				line.addView(iv, new LinearLayout.LayoutParams(si.width,
 						si.height));
 				iv.setTag(item);
-				child = iv;
-				new LoadTask().execute(new ImageView[]{(ImageView)iv});
+				new LoadTask().execute(new ImageView[] { (ImageView) iv });
 			}
-			
+
 		}
-		
+
 		mContentContainer.setTag(this.mMsg);
 	}
-	
-	
 
 	private void updateSelectedBg(boolean selected) {
 		if (selected) {
@@ -276,12 +272,10 @@ public class MessageBodyView extends LinearLayout {
 		this.callback = cl;
 	}
 
-	
 	public void updateView(VMessage vm, boolean showTime) {
 		isShowTime = showTime;
 		updateView(vm);
 	}
-	
 
 	public void updateView(VMessage vm) {
 		if (vm == null) {
@@ -297,10 +291,8 @@ public class MessageBodyView extends LinearLayout {
 		this.mMsg = vm;
 		initData();
 	}
-	
-	
-	
-	private OnLongClickListener messageLongClickListener  = new OnLongClickListener() {
+
+	private OnLongClickListener messageLongClickListener = new OnLongClickListener() {
 
 		@Override
 		public boolean onLongClick(View anchor) {
@@ -309,35 +301,32 @@ public class MessageBodyView extends LinearLayout {
 		}
 
 	};
-	
-	
-	
-	class LoadTask extends AsyncTask<ImageView, Void , ImageView[]> {
 
-	
+	class LoadTask extends AsyncTask<ImageView, Void, ImageView[]> {
 
 		@Override
 		protected ImageView[] doInBackground(ImageView... vms) {
-			//Only has one element
+			// Only has one element
 			for (ImageView vm : vms) {
-				((VMessageImageItem)vm.getTag()).getCompressedBitmap();
+				((VMessageImageItem) vm.getTag()).getCompressedBitmap();
 			}
 			return vms;
 		}
 
 		@Override
 		protected void onPostExecute(ImageView[] result) {
-			//Only has one element
+			// Only has one element
 			ImageView vm = result[0];
-			//If loaded vm is not same member's, means current view has changed message, ignore this result
-			VMessageImageItem item  =((VMessageImageItem)vm.getTag());
+			// If loaded vm is not same member's, means current view has changed
+			// message, ignore this result
+			VMessageImageItem item = ((VMessageImageItem) vm.getTag());
 			if (item.getVm() != mMsg) {
 				return;
 			}
 			Bitmap bm = item.getCompressedBitmap();
 			vm.setImageBitmap(bm);
 		}
-		
+
 	}
 
 }

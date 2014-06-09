@@ -339,7 +339,7 @@ public class VideoActivityV2 extends Activity {
 		@Override
 		public void onClick(View view) {
 			doApplyOrReleaseSpeak();
-			//Make sure update start after send request, 
+			// Make sure update start after send request,
 			// because update state will update isSpeaking value
 			updateSpeakerState(!isSpeaking);
 		}
@@ -496,7 +496,7 @@ public class VideoActivityV2 extends Activity {
 			} else if (JNIService.JNI_BROADCAST_NEW_CONF_MESSAGE.equals(intent
 					.getAction())) {
 				long mid = intent.getLongExtra("mid", 0);
-				VMessage vm =MessageLoader.loadMessageById(mContext, mid);
+				VMessage vm = MessageLoader.loadMessageById(mContext, mid);
 				if (mMessageContainer != null) {
 					mMessageContainer.addNewMessage(vm);
 				} else {
@@ -693,8 +693,8 @@ public class VideoActivityV2 extends Activity {
 	}
 
 	/**
-	 * FIXME layout need to use uniform layout
-	 * Show or hide message layout according to parameter
+	 * FIXME layout need to use uniform layout Show or hide message layout
+	 * according to parameter
 	 * 
 	 * @param visible
 	 *            {@link View#VISIBLE} {@link View#GONE}
@@ -759,8 +759,8 @@ public class VideoActivityV2 extends Activity {
 	}
 
 	/**
-	 *  FIXME layout need to use uniform layout
-	 * Show or hide attendees list layout according to parameter
+	 * FIXME layout need to use uniform layout Show or hide attendees list
+	 * layout according to parameter
 	 * 
 	 * @param visible
 	 *            {@link View#VISIBLE} {@link View#GONE}
@@ -829,8 +829,8 @@ public class VideoActivityV2 extends Activity {
 	}
 
 	/**
-	 *  FIXME layout need to use uniform layout
-	 * Show or hide document layout according to parameter
+	 * FIXME layout need to use uniform layout Show or hide document layout
+	 * according to parameter
 	 * 
 	 * @param visible
 	 *            {@link View#VISIBLE} {@link View#GONE}
@@ -1093,8 +1093,8 @@ public class VideoActivityV2 extends Activity {
 
 		int fixedWidth = normalW;
 		int fixedHeight = normalH;
-		fixedWidth -= fixedWidth%16;
-		fixedHeight -= fixedHeight%16;
+		fixedWidth -= fixedWidth % 16;
+		fixedHeight -= fixedHeight % 16;
 
 		marginTop = marginBottom = Math.abs(containerH - fixedHeight * rows) / 2;
 		marginLeft = marginRight = Math.abs(containerW - fixedWidth * cols) / 2;
@@ -1377,7 +1377,8 @@ public class VideoActivityV2 extends Activity {
 		} else {
 			for (UserDeviceConfig udc : ld) {
 				a.addDevice(udc);
-				V2Log.i("New attendee joined conference :"+a.getAttName()+"   "+udc.getDeviceID() );
+				V2Log.i("New attendee joined conference :" + a.getAttName()
+						+ "   " + udc.getDeviceID());
 			}
 		}
 
@@ -1545,6 +1546,9 @@ public class VideoActivityV2 extends Activity {
 					.getLayoutParams();
 			Rect r = new Rect();
 			mVideoLayoutMain.getDrawingRect(r);
+			
+			int[] pos  = new int[2];
+			mVideoLayoutMain.getLocationInWindow(pos);
 
 			rl.bottomMargin -= (event.getRawY() - lastY);
 			rl.rightMargin -= (event.getRawX() - lastX);
@@ -1554,13 +1558,14 @@ public class VideoActivityV2 extends Activity {
 			if (rl.rightMargin < 0) {
 				rl.rightMargin = 0;
 			}
-			if (r.right - r.left - view.getWidth() < rl.rightMargin) {
+			if ((r.right - r.left - view.getWidth()) < rl.rightMargin) {
 				rl.rightMargin = r.right - r.left - view.getWidth();
 			}
 
-			if (r.bottom - r.top - view.getHeight() < rl.bottomMargin) {
-				rl.bottomMargin = r.bottom - r.top - view.getHeight();
-			}
+			V2Log.i(r.bottom + "  " + r.top + "  " +pos[1] + " " + view.getHeight() + "  " + rl.bottomMargin);
+			if ((r.bottom - r.top ) - (rl.bottomMargin + view.getHeight()) <=5) {
+				rl.bottomMargin = r.bottom - r.top - view.getHeight() - 5;
+			} 
 
 			((ViewGroup) view.getParent()).updateViewLayout(view, rl);
 			// make sure draging view is first front of all
@@ -1622,16 +1627,17 @@ public class VideoActivityV2 extends Activity {
 				r.bottom = lo[1] + r.bottom;
 				if (r.contains(x, y)) {
 					boolean flag = showOrCloseAttendeeVideo(sw.udc);
-					//update opened video view background
-					mAttendeeContainer.updateCurrentSelectedBg(flag, sw.at, sw.udc);
+					// update opened video view background
+					mAttendeeContainer.updateCurrentSelectedBg(flag, sw.at,
+							sw.udc);
 					sw.at = at;
 					sw.udc = udc;
-					//FIXME set id
+					// FIXME set id
 					sw.getView().setId(udc.hashCode());
-					//update new opened video view background
-					flag =showOrCloseAttendeeVideo(udc);
+					// update new opened video view background
+					flag = showOrCloseAttendeeVideo(udc);
 					mAttendeeContainer.updateCurrentSelectedBg(flag, at, udc);
-					
+
 					return;
 				}
 			}
@@ -2194,7 +2200,7 @@ public class VideoActivityV2 extends Activity {
 					if (mAttendeeContainer != null && mw != null) {
 						mAttendeeContainer.updateExitedAttendee(mw.amd);
 					}
-					//Close opened mixed video
+					// Close opened mixed video
 					if (mw != null && mw.amd.getDefaultDevice().isShowing()) {
 						showOrCloseAttendeeVideo(mw.amd.getDefaultDevice());
 					}

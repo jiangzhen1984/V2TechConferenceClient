@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
+import com.v2tech.service.GlobalHolder;
+
 public class VMessage {
 
 	public static final int VMESSAGE_CODE_CONF = 1;
@@ -124,7 +126,7 @@ public class VMessage {
 	
 
 	public boolean isLocal() {
-		return isLocal;
+		return GlobalHolder.getInstance().getCurrentUserId() == this.mFromUser.getmUserId()? true:false;
 	}
 
 	public void setLocal(boolean isLocal) {

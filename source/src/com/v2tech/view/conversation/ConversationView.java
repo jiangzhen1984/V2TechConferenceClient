@@ -626,7 +626,7 @@ public class ConversationView extends Activity {
 				List<VMessage> array = loadMessages();
 				if (array != null) {
 					for (int i = 0; i < array.size(); i++) {
-						messageArray.add(i, new VMessageAdater(array.get(i)));
+						messageArray.add(0, new VMessageAdater(array.get(i)));
 					}
 					currentItemPos += array.size();
 				}

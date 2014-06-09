@@ -11,6 +11,7 @@ import android.content.Context;
 import android.database.Cursor;
 
 import com.v2tech.db.ContentDescriptor;
+import com.v2tech.service.GlobalHolder;
 import com.v2tech.vo.User;
 import com.v2tech.vo.VMessage;
 import com.v2tech.vo.VMessageAbstractItem;
@@ -217,8 +218,14 @@ public class MessageLoader {
 				Locale.getDefault());
 		long user1Id = cur.getLong(1);
 		long user2Id = cur.getLong(3);
-		User localUser = new User(user1Id);
-		User remoteUser = new User(user2Id);
+		User fromUser = GlobalHolder.getInstance().getUser(user1Id);
+		if (fromUser == null) {
+			fromUser = new User(user1Id);
+		}
+		User toUser =  GlobalHolder.getInstance().getUser(user2Id);
+		if (toUser == null) {
+			toUser = new User(user2Id);
+		}
 
 		int id = cur.getInt(0);
 		// message type
@@ -228,7 +235,7 @@ public class MessageLoader {
 		// group id
 		long groupId = cur.getLong(8);
 
-		VMessage vm = new VMessage(groupId, localUser, remoteUser, type);
+		VMessage vm = new VMessage(groupId, fromUser, toUser, type);
 		vm.setId(id);
 		try {
 			vm.setDate(dp.parse(dateString));

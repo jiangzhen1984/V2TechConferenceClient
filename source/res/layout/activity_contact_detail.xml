@@ -92,6 +92,9 @@
                     android:layout_gravity="top"
                     android:gravity="top"
                     android:text="TextView"
+                    android:singleLine="true"
+                    android:ellipsize="end"
+                    android:maxWidth="@dimen/detail_detail_name_max_width"
                     android:textColor="@color/common_item_text_color" />
 
                 <TextView
@@ -103,6 +106,7 @@
                     android:gravity="bottom"
                     android:singleLine="true"
                     android:text="TextView"
+                     android:maxWidth="@dimen/detail_detail_name_max_width"
                     android:textColor="@color/common_item_text_color" />
             </LinearLayout>
 

@@ -7,6 +7,7 @@ public class VMessageFaceItem extends VMessageAbstractItem {
 	public VMessageFaceItem(VMessage vm, int index) {
 		super(vm);
 		this.type = ITEM_TYPE_FACE;
+		this.index = index;
 	}
 
 	public int getIndex() {

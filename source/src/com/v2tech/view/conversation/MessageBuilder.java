@@ -48,7 +48,8 @@ public class MessageBuilder {
 
 		Uri uri = context.getContentResolver().insert(
 				ContentDescriptor.Messages.CONTENT_URI, values);
-
+		vm.setId(Long.parseLong(uri.getLastPathSegment()));
+		
 		List<VMessageAbstractItem> items = vm.getItems();
 		for (VMessageAbstractItem item : items) {
 			ContentValues itemVal = new ContentValues();
