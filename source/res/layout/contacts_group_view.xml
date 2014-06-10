@@ -18,7 +18,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_centerVertical="true"
-            android:paddingLeft="15dp"
+            android:paddingLeft="@dimen/contacts_group_view_arrow_padding_left"
             android:src="@drawable/arrow_right_gray" />
 
         <TextView

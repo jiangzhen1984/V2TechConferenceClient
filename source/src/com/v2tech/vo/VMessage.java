@@ -198,8 +198,8 @@ public class VMessage {
 			if (item.getType() == VMessageAbstractItem.ITEM_TYPE_TEXT) {
 				if (item.isNewLine() && sb.length() != 0) {
 					sb.append("\n");
-					sb.append(((VMessageTextItem)item).getText());
 				}
+				sb.append(((VMessageTextItem)item).getText());
 			}
 		}
 		return sb.toString();

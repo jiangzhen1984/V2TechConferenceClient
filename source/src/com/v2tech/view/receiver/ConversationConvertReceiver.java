@@ -1,26 +1,25 @@
 package com.v2tech.view.receiver;
 
 import android.content.BroadcastReceiver;
-import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
-import android.net.Uri;
 
 import com.v2tech.db.ContentDescriptor;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.util.V2Log;
 import com.v2tech.view.JNIService;
 import com.v2tech.view.PublicIntent;
+import com.v2tech.view.conversation.MessageLoader;
 import com.v2tech.vo.ConferenceConversation;
 import com.v2tech.vo.ContactConversation;
 import com.v2tech.vo.Conversation;
 import com.v2tech.vo.CrowdConversation;
 import com.v2tech.vo.Group;
+import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.User;
 import com.v2tech.vo.VMessage;
-import com.v2tech.vo.Group.GroupType;
 
 public class ConversationConvertReceiver extends BroadcastReceiver {
 
@@ -31,19 +30,9 @@ public class ConversationConvertReceiver extends BroadcastReceiver {
 		this.mContext = context;
 		String action = intent.getAction();
 		if (JNIService.JNI_BROADCAST_NEW_MESSAGE.equals(action)) {
-			String msgId = intent.getExtras().getString("mid");
-			Long fromUid = intent.getExtras().getLong("fromuid");
-			Long gid = intent.getExtras().getLong("gid");
-			if (msgId == null || msgId.equals("")) {
-				V2Log.e("Invalid msgId: " + msgId);
-			} else {
-				int mid = Integer.parseInt(msgId);
-				if (gid != 0) {
-					updateGroupConversation(gid, fromUid, mid);
-				} else {
-					updateContactsConversation(fromUid, mid);
-				}
-			}
+			long msgId = intent.getExtras().getLong("mid");
+			VMessage vm = MessageLoader.loadMessageById(context, msgId);
+			updateMessageConversation(vm);
 		} else if (PublicIntent.REQUEST_UPDATE_CONVERSATION.equals(action)) {
 			long extId = intent.getLongExtra("extId", 0);
 			String type = intent.getExtras().getString("type");
@@ -110,84 +99,55 @@ public class ConversationConvertReceiver extends BroadcastReceiver {
 				new String[] { extId + "", type });
 	}
 
-	private void updateGroupConversation(long gid, long fromUid, int msgId) {
-		int type = -1;
-		String content = null;
-		String dateString = null;
-		boolean notif = true;
-		Uri uri = ContentUris.withAppendedId(
-				ContentDescriptor.Messages.CONTENT_URI, msgId);
-
-		Cursor cur = mContext.getContentResolver().query(uri,
-				ContentDescriptor.Messages.Cols.ALL_CLOS, null, null, null);
-
-		if (cur.moveToNext()) {
-			content = cur.getString(5);
-			// message type
-			type = cur.getInt(6);
-			// date time
-			dateString = cur.getString(7);
-
-		}
-		cur.close();
-
-		// FIXME if doesn't receive group information yet, how to do?
-		Group g = GlobalHolder.getInstance().getGroupById(GroupType.CHATING,
-				gid);
-		Conversation cov = GlobalHolder.getInstance().findConversationByType(
-				Conversation.TYPE_GROUP, gid);
-		if (cov == null) {
-			if (g != null) {
-				// FIXME how to do notification if group information didn't
-				// receive
-				cov = new CrowdConversation(g);
-				GlobalHolder.getInstance().addConversation(cov);
-			} else {
-				V2Log.e(" didn't receive group informaion");
-				return;
-			}
-		}
-
-		// FIXME optimize code
+	
+	
+	private void updateMessageConversation(VMessage vm) {
+		
 		Intent i = new Intent(PublicIntent.UPDATE_CONVERSATION);
 		i.addCategory(PublicIntent.DEFAULT_CATEGORY);
-		i.putExtra("extId", gid);
-		i.putExtra("type", Conversation.TYPE_GROUP);
-		notif = GlobalHolder.getInstance().CURRENT_CONVERSATION == cov ? false
-				: true;
-		i.putExtra("noti", notif);
-		mContext.sendBroadcast(i);
-
+		
+		if (vm.getGroupId() > 0) {
+			// FIXME if doesn't receive group information yet, how to do?
+			Group g = GlobalHolder.getInstance().getGroupById(GroupType.CHATING,
+					vm.getGroupId());
+			//FIXME if doesn't find conversation how to do?
+			Conversation cov = GlobalHolder.getInstance().findConversationByType(
+					Conversation.TYPE_GROUP, vm.getGroupId());
+			if (cov == null) {
+				if (g != null) {
+					// FIXME how to do notification if group information didn't
+					// receive
+					cov = new CrowdConversation(g);
+					GlobalHolder.getInstance().addConversation(cov);
+				} else {
+					V2Log.e(" didn't receive group informaion");
+					return;
+				}
+			}
+			
+			i.putExtra("extId", vm.getGroupId());
+			i.putExtra("type", Conversation.TYPE_GROUP);
+			boolean notif = GlobalHolder.getInstance().CURRENT_CONVERSATION == cov ? false
+					: true;
+			i.putExtra("noti", notif);
+			mContext.sendBroadcast(i);
+		} else {
+			updateContactsConversation(vm);
+			return;
+		}
+		
+		
+		
 	}
 
 	/**
 	 * Convert new message to update conversation broadcast
 	 * FIXME update code structure
-	 * @param fromUid
-	 * @param msgId
 	 */
-	private void updateContactsConversation(long fromUid, int msgId) {
-		int type = -1;
-		String content = null;
-		String dateString = null;
+	private void updateContactsConversation(VMessage vm) {
 		boolean notif = true;
-		Uri uri = ContentUris.withAppendedId(
-				ContentDescriptor.Messages.CONTENT_URI, msgId);
 
-		Cursor cur = mContext.getContentResolver().query(uri,
-				ContentDescriptor.Messages.Cols.ALL_CLOS, null, null, null);
-
-		if (cur.moveToNext()) {
-			content = cur.getString(5);
-			// message type
-			type = cur.getInt(6);
-			// date time
-			dateString = cur.getString(7);
-
-		}
-		cur.close();
-
-		cur = mContext.getContentResolver().query(
+		Cursor cur = mContext.getContentResolver().query(
 				ContentDescriptor.Conversation.CONTENT_URI,
 				ContentDescriptor.Conversation.Cols.ALL_CLOS,
 				ContentDescriptor.Conversation.Cols.TYPE + "=? and "
@@ -195,7 +155,7 @@ public class ConversationConvertReceiver extends BroadcastReceiver {
 						+ ContentDescriptor.Conversation.Cols.EXT_ID + " =?",
 				new String[] { Conversation.TYPE_CONTACT,
 						GlobalHolder.getInstance().getCurrentUserId() + "",
-						fromUid + "" }, null);
+						vm.getFromUser().getmUserId() + "" }, null);
 
 		Conversation c = null;
 		if (cur.moveToNext()) {
@@ -216,15 +176,15 @@ public class ConversationConvertReceiver extends BroadcastReceiver {
 		// Conversation.TYPE_CONTACT, fromUid);
 		if (c == null) {
 			c = GlobalHolder.getInstance().findConversationByType(
-					Conversation.TYPE_CONTACT, fromUid);
+					Conversation.TYPE_CONTACT, vm.getFromUser().getmUserId());
 		}
 		if (c == null) {
-			User fromUser = GlobalHolder.getInstance().getUser(fromUid);
+			User fromUser = GlobalHolder.getInstance().getUser(vm.getFromUser().getmUserId());
 			c = new ContactConversation(fromUser, Conversation.NOTIFICATION);
 			GlobalHolder.getInstance().addConversation(c);
 
 			ContentValues conCv = new ContentValues();
-			conCv.put(ContentDescriptor.Conversation.Cols.EXT_ID, fromUid);
+			conCv.put(ContentDescriptor.Conversation.Cols.EXT_ID, vm.getFromUser().getmUserId());
 
 			conCv.put(ContentDescriptor.Conversation.Cols.TYPE,
 					Conversation.TYPE_CONTACT);
@@ -239,7 +199,7 @@ public class ConversationConvertReceiver extends BroadcastReceiver {
 
 		} else {
 			notif = (c.equals(GlobalHolder.getInstance().CURRENT_CONVERSATION) || (GlobalHolder
-					.getInstance().CURRENT_ID == fromUid)) ? false : true;
+					.getInstance().CURRENT_ID == vm.getFromUser().getmUserId())) ? false : true;
 			c.setNotiFlag(notif ? Conversation.NOTIFICATION : Conversation.NONE);
 
 			ContentValues ct = new ContentValues();
@@ -250,17 +210,17 @@ public class ConversationConvertReceiver extends BroadcastReceiver {
 					ct,
 					ContentDescriptor.Conversation.Cols.EXT_ID + "=? and "
 							+ ContentDescriptor.Conversation.Cols.TYPE + "=?",
-					new String[] { fromUid + "", Conversation.TYPE_CONTACT });
+					new String[] { vm.getFromUser().getmUserId() + "", Conversation.TYPE_CONTACT });
 
 		}
 
 		notif = (c.equals(GlobalHolder.getInstance().CURRENT_CONVERSATION) || (GlobalHolder
-				.getInstance().CURRENT_ID == fromUid)) ? false : true;
+				.getInstance().CURRENT_ID == vm.getFromUser().getmUserId())) ? false : true;
 		c.setNotiFlag(notif ? Conversation.NOTIFICATION
 				: Conversation.NONE);
 		//FIXME sometimes c object is not same with cv object
 		Conversation cv = GlobalHolder.getInstance()
-				.findConversationByType(Conversation.TYPE_CONTACT, fromUid);
+				.findConversationByType(Conversation.TYPE_CONTACT, vm.getFromUser().getmUserId());
 		if (cv != null) {
 			cv.setNotiFlag(notif ? Conversation.NOTIFICATION
 					: Conversation.NONE);
@@ -273,8 +233,10 @@ public class ConversationConvertReceiver extends BroadcastReceiver {
 		}
 		Intent i = new Intent(PublicIntent.UPDATE_CONVERSATION);
 		i.addCategory(PublicIntent.DEFAULT_CATEGORY);
-		i.putExtra("extId", fromUid);
+		i.putExtra("extId", vm.getFromUser().getmUserId());
 		i.putExtra("type", Conversation.TYPE_CONTACT);
+		i.putExtra("content", vm.getAllTextContent());
+		i.putExtra("date", vm.getFullDateStr());
 		i.putExtra("noti", notif);
 		mContext.sendBroadcast(i);
 	}

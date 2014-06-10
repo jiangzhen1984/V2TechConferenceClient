@@ -59,7 +59,7 @@ public class ChatService extends Handler {
 	 * @param caller
 	 */
 	public void sendVMessage(final VMessage msg, final Message caller) {
-		if (msg == null || msg.getToUser() == null) {
+		if (msg == null) {
 			V2Log.w(" ToUser is null can not send message");
 			return;
 		}
@@ -67,14 +67,14 @@ public class ChatService extends Handler {
 			@Override
 			public void run() {
 				ChatRequest.getInstance().sendChatText(msg.getGroupId(),
-						msg.getToUser().getmUserId(), msg.getUUID(),
+						msg.getToUser() == null? 0: msg.getToUser().getmUserId(), msg.getUUID(),
 						msg.toXml(), msg.getMsgCode());
 
 				List<VMessageImageItem> imageItems = msg.getImageItems();
 				for (VMessageImageItem item : imageItems) {
 					byte[] data = item.loadImageData();
 					ChatRequest.getInstance().sendChatPicture(msg.getGroupId(),
-							msg.getToUser().getmUserId(), item.getUUID(), data,
+							msg.getToUser() == null? 0: msg.getToUser().getmUserId(), item.getUUID(), data,
 							data.length, msg.getMsgCode());
 				}
 				if (caller != null) {

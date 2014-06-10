@@ -53,7 +53,7 @@ public class ContactGroupView extends LinearLayout {
 
 		updateUserStatus();
 
-		contentContainer.setPadding(g.getLevel() * 35,
+		contentContainer.setPadding((g.getLevel() -1) * 35,
 				contentContainer.getPaddingTop(),
 				contentContainer.getPaddingRight(),
 				contentContainer.getPaddingRight());

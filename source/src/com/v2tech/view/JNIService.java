@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -22,6 +24,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Parcelable;
+import android.support.v4.app.NotificationCompat;
 import android.widget.Toast;
 
 import com.V2.jni.ChatRequest;
@@ -48,6 +51,7 @@ import com.v2tech.view.bo.UserStatusObject;
 import com.v2tech.view.conference.VideoActivityV2;
 import com.v2tech.view.conversation.MessageBuilder;
 import com.v2tech.vo.ConferenceGroup;
+import com.v2tech.vo.Conversation;
 import com.v2tech.vo.CrowdConversation;
 import com.v2tech.vo.Group;
 import com.v2tech.vo.Group.GroupType;
@@ -344,9 +348,8 @@ public class JNIService extends Service {
 				VMessage vm = (VMessage) msg.obj;
 				if (vm != null) {
 					String action = null;
-					String msgUri = null;
-					Uri uri = MessageBuilder.saveMessage(mContext, vm);
-					
+					MessageBuilder.saveMessage(mContext, vm);
+
 					if (vm.getMsgCode() == VMessage.VMESSAGE_CODE_CONF) {
 						action = JNI_BROADCAST_NEW_CONF_MESSAGE;
 					} else {
@@ -354,12 +357,10 @@ public class JNIService extends Service {
 						sendNotification();
 						updateStatusBar(vm);
 					}
-					
+
 					Intent ii = new Intent(action);
 					ii.addCategory(JNI_BROADCAST_CATEGROY);
-					ii.putExtra("gid", vm.getGroupId());
 					ii.putExtra("mid", vm.getId());
-					ii.putExtra("fromuid", vm.getFromUser().getmUserId());
 					mContext.sendBroadcast(ii);
 				}
 				break;
@@ -392,56 +393,56 @@ public class JNIService extends Service {
 
 		// FIXME update message for group message
 		private void updateStatusBar(VMessage vm) {
-			// Conversation cov = null;
-			// if (vm.mGroupId != 0) {
-			// cov = GlobalHolder.getInstance().findConversationByType(
-			// Conversation.TYPE_GROUP, vm.mGroupId);
-			// } else {
-			// cov = GlobalHolder.getInstance().findConversationByType(
-			// Conversation.TYPE_CONTACT, vm.getUser().getmUserId());
-			// }
-			// //
-			// if ((GlobalHolder.getInstance().CURRENT_CONVERSATION != null &&
-			// cov == GlobalHolder
-			// .getInstance().CURRENT_CONVERSATION)
-			// || (GlobalHolder.getInstance().CURRENT_ID == vm.getUser()
-			// .getmUserId())) {
-			// return;
-			// }
-			// NotificationCompat.Builder builder = new
-			// NotificationCompat.Builder(
-			// mContext).setSmallIcon(R.drawable.ic_launcher)
-			// .setContentTitle(vm.getUser().getName());
-			// if (vm.getType() == MessageType.IMAGE) {
-			// builder.setContentText(mContext.getResources().getString(
-			// R.string.receive_image_notification));
-			// } else {
-			// builder.setContentText(vm.getText());
+			Conversation cov = null;
+			if (vm.getGroupId() != 0) {
+				cov = GlobalHolder.getInstance().findConversationByType(
+						Conversation.TYPE_GROUP, vm.getGroupId());
+			} else {
+				cov = GlobalHolder.getInstance().findConversationByType(
+						Conversation.TYPE_CONTACT, vm.getFromUser().getmUserId());
+			}
 			//
-			// }
-			//
-			// Intent resultIntent = new Intent(
-			// PublicIntent.START_CONVERSACTION_ACTIVITY);
-			// resultIntent.putExtra("user1id", GlobalHolder.getInstance()
-			// .getCurrentUserId());
-			// resultIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-			// resultIntent.putExtra("user2id", vm.getUser().getmUserId());
-			// resultIntent.putExtra("user2Name", vm.getUser().getName());
-			// resultIntent.addCategory(PublicIntent.DEFAULT_CATEGORY);
-			//
-			// // Creates the PendingIntent
-			// PendingIntent notifyPendingIntent = PendingIntent.getActivities(
-			// mContext, 0, new Intent[] { resultIntent },
-			// PendingIntent.FLAG_UPDATE_CURRENT);
-			//
-			// // Puts the PendingIntent into the notification builder
-			// builder.setContentIntent(notifyPendingIntent);
-			//
-			// NotificationManager mNotificationManager = (NotificationManager)
-			// getSystemService(Context.NOTIFICATION_SERVICE);
-			// // mId allows you to update the notification later on.
-			// mNotificationManager.notify(PublicIntent.MESSAGE_NOTIFICATION_ID,
-			// builder.build());
+			if ((GlobalHolder.getInstance().CURRENT_CONVERSATION != null && cov == GlobalHolder
+					.getInstance().CURRENT_CONVERSATION)
+					|| (GlobalHolder.getInstance().CURRENT_ID == vm.getFromUser()
+							.getmUserId())) {
+				return;
+			}
+			NotificationCompat.Builder builder = new NotificationCompat.Builder(
+					mContext).setSmallIcon(R.drawable.ic_launcher)
+					.setContentTitle(vm.getFromUser().getName());
+			String textContent = vm.getAllTextContent();
+			if (textContent == null || textContent.isEmpty()) {
+				builder.setContentText(mContext.getResources().getString(
+						R.string.receive_image_notification));
+			} else {
+				builder.setContentText(textContent);
+
+			}
+
+			Intent resultIntent = new Intent(
+					PublicIntent.START_CONVERSACTION_ACTIVITY);
+			
+			resultIntent.putExtra("gid", vm.getGroupId());
+			resultIntent.putExtra("user1id", GlobalHolder.getInstance()
+					.getCurrentUserId());
+			resultIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+			resultIntent.putExtra("user2id", vm.getFromUser().getmUserId());
+			resultIntent.putExtra("user2Name", vm.getFromUser().getName());
+			resultIntent.addCategory(PublicIntent.DEFAULT_CATEGORY);
+
+			// Creates the PendingIntent
+			PendingIntent notifyPendingIntent = PendingIntent.getActivities(
+					mContext, 0, new Intent[] { resultIntent },
+					PendingIntent.FLAG_UPDATE_CURRENT);
+
+			// Puts the PendingIntent into the notification builder
+			builder.setContentIntent(notifyPendingIntent);
+
+			NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+			// mId allows you to update the notification later on.
+			mNotificationManager.notify(PublicIntent.MESSAGE_NOTIFICATION_ID,
+					builder.build());
 
 		}
 

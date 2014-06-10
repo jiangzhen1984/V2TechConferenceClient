@@ -28,7 +28,7 @@
                 android:layout_marginTop="8dp"
                 android:text="@string/conference_create_title"
                 android:textColor="@color/title_color"
-            android:textSize="@dimen/common_item_text_size" />
+                android:textSize="@dimen/common_item_text_size" />
 
             <TextView
                 android:id="@+id/conference_create_confirm_button"
@@ -39,7 +39,7 @@
                 android:padding="15dp"
                 android:text="@string/conference_create_confirm"
                 android:textColor="@color/conf_create_button_color"
-                 android:textSize="@dimen/common_item_text_size" />
+                android:textSize="@dimen/common_item_text_size" />
 
             <TextView
                 android:id="@+id/conference_create_return_button"
@@ -51,7 +51,7 @@
                 android:padding="15dp"
                 android:text="@string/conference_create_cancel"
                 android:textColor="@color/conf_create_button_color"
-                android:textSize="@dimen/common_item_text_size"/>
+                android:textSize="@dimen/common_item_text_size" />
 
             <!-- Use translucent image to hold space -->
 
@@ -98,27 +98,13 @@
             android:background="@color/confs_search_bar_bg"
             android:orientation="horizontal" >
 
-            <ImageView
-                android:id="@+id/imageView8"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentLeft="true"
-                android:layout_gravity="center_vertical"
-                android:layout_marginBottom="10dp"
-                android:layout_marginLeft="30dp"
-                android:layout_marginTop="10dp"
-                android:src="@drawable/group_list_search_button" />
-
             <EditText
                 android:id="@+id/contacts_search"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
-                android:layout_alignParentLeft="true"
-                android:layout_gravity="center_vertical"
-                android:layout_marginBottom="10dp"
+                android:layout_centerInParent="true"
                 android:layout_marginLeft="30dp"
                 android:layout_marginRight="30dp"
-                android:layout_marginTop="10dp"
                 android:background="@drawable/input_bg"
                 android:inputType="text"
                 android:paddingLeft="100dp"
@@ -126,10 +112,14 @@
                 android:textSize="18sp" >
             </EditText>
 
-            <TextView
+            <ImageView
+                android:id="@+id/imageView8"
                 android:layout_width="wrap_content"
-                android:layout_height="1dp"
-                android:layout_below="@+id/contacts_search" />
+                android:layout_height="wrap_content"
+                android:layout_alignLeft="@+id/contacts_search"
+                android:layout_centerVertical="true"
+                android:padding="15dp"
+                android:src="@drawable/group_list_search_button" />
         </RelativeLayout>
 
         <LinearLayout

@@ -246,6 +246,7 @@ public class VideoInvitionAttendeeLayout extends LinearLayout {
 		View v = null;
 		if (landLayout == PAD_LAYOUT) {
 			v = new ContactUserView(mContext, u, false);
+			((ContactUserView)v).removePadding();
 			v.setTag(u);
 			v.setOnClickListener(removeAttendeeListener);
 		} else {

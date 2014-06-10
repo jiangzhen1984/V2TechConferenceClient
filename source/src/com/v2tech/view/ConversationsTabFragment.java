@@ -647,15 +647,16 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher {
 				}
 			} else if (PublicIntent.UPDATE_CONVERSATION.equals(intent
 					.getAction())) {
+				if (JNIService.JNI_BROADCAST_CONFERENCE_REMOVED.equals(intent
+						.getStringExtra("action"))) {
+					return;
+				}
+				
 				Object[] ar = new Object[] { intent.getLongExtra("extId", 0),
 						intent.getExtras().getString("type"),
 						intent.getExtras().getString("content"),
 						intent.getExtras().getString("date"),
 						intent.getExtras().getBoolean("noti") };
-				if (JNIService.JNI_BROADCAST_CONFERENCE_REMOVED.equals(intent
-						.getStringExtra("action"))) {
-					return;
-				}
 
 				if (mCurrentTabFlag.equals(ar[1])) {
 					Message.obtain(mHandler, UPDATE_CONVERSATION, ar)

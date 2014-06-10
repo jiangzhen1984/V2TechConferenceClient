@@ -36,38 +36,30 @@
             android:background="@color/confs_search_bar_bg"
             android:orientation="horizontal" >
 
+           <EditText
+                android:id="@+id/contacts_search"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:layout_marginLeft="30dp"
+                android:layout_marginRight="30dp"
+                android:background="@drawable/input_bg"
+                android:inputType="text"
+                android:paddingLeft="45dp"
+                android:textColor="#000000"
+                android:textSize="16sp" >
+            </EditText>
+
             <ImageView
                 android:id="@+id/imageView8"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentLeft="true"
+                android:layout_alignLeft="@+id/contacts_search"
+                android:layout_centerVertical="true"
                 android:layout_gravity="center_vertical"
-                android:layout_marginBottom="10dp"
-                android:layout_marginLeft="30dp"
-                android:layout_marginTop="10dp"
+                android:padding="10dp"
                 android:src="@drawable/group_list_search_button" />
 
-            <EditText
-                android:id="@+id/contacts_search"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_alignParentLeft="true"
-                android:layout_gravity="center_vertical"
-                android:layout_marginBottom="10dp"
-                android:layout_marginLeft="30dp"
-                android:layout_marginRight="30dp"
-                android:layout_marginTop="10dp"
-                android:background="@drawable/input_bg"
-                android:inputType="text"
-                android:paddingLeft="20dp"
-                android:textColor="#000000"
-                android:textSize="18sp" >
-            </EditText>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="1dp"
-                android:layout_below="@+id/contacts_search" />
         </RelativeLayout>
 
         <LinearLayout

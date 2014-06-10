@@ -747,7 +747,7 @@ public class VideoActivityV2 extends Activity {
 		mMessageContainer = new VideoMsgChattingLayout(this, cg);
 		mMessageContainer.setId(0x7ffff000);
 		RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
-				(int) (mVideoLayout.getMeasuredWidth() * 0.4),
+				(int) (mVideoLayout.getWidth() * 0.4),
 				mVideoLayout.getMeasuredHeight());
 		lp.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
 		lp.addRule(RelativeLayout.RIGHT_OF, mMenuLine.getId());
@@ -782,7 +782,7 @@ public class VideoActivityV2 extends Activity {
 			}
 
 			RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
-					(int) (mVideoLayout.getMeasuredWidth() * 0.4),
+					(int) (mVideoLayout.getWidth() * 0.4),
 					mVideoLayout.getMeasuredHeight());
 			lp.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
 			lp.addRule(RelativeLayout.RIGHT_OF, mMenuLine.getId());
@@ -845,7 +845,7 @@ public class VideoActivityV2 extends Activity {
 			mDocContainer = new VideoDocLayout(this);
 			mDocContainer.setId(0x7ffff002);
 			RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
-					(int) (mVideoLayoutMain.getWidth() * 0.5 - mMenuButtonContainer
+					(int) (mVideoLayout.getWidth() * 0.5 - mMenuButtonContainer
 							.getWidth()), mMenuButtonContainer.getHeight());
 			lp.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
 			lp.addRule(RelativeLayout.RIGHT_OF, mMenuLine.getId());

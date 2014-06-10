@@ -26,7 +26,8 @@
     <dimen name="contacts_user_view_text_max_width">150dp</dimen>
     
      <!-- contact group view -->
-    <dimen name="contacts_group_view_text_max_width">150dp</dimen>
+     <dimen name="contacts_group_view_arrow_padding_left">5dp</dimen>
+    <dimen name="contacts_group_view_text_max_width">100dp</dimen>
     <dimen name="contacts_group_view_statist_max_width">90dp</dimen>
 
     <!-- contact detail item margin -->
