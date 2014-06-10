@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.UUID;
 
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
@@ -25,6 +26,7 @@ public class VMessageImageItem extends VMessageAbstractItem {
 		super(vm);
 		this.filePath = filePath;
 		this.type = ITEM_TYPE_IMAGE;
+		this.uuid = UUID.randomUUID().toString();
 	}
 
 	public VMessageImageItem(VMessage vm, String uuid, String extension) {
@@ -65,7 +67,7 @@ public class VMessageImageItem extends VMessageAbstractItem {
 		BitmapUtil.getFullBitmapBounds(this.filePath, w);
 		String str = " <TPictureChatItem NewLine=\"True\" AutoResize=\"True\" FileExt=\""
 				+ getExtension()
-				+ "\" GUID=\"\" Height=\""
+				+ "\" GUID=\""+uuid+"\" Height=\""
 				+ w[1]
 				+ "\" Width=\"" + w[0] + "\" />";
 		return str;

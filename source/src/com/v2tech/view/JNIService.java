@@ -870,7 +870,7 @@ public class JNIService extends Service {
 			VMessage vm = null;
 			VMessageImageItem vait = null;
 			;
-			String uuid = nSeqId.substring(1, nSeqId.length() - 1);
+			String uuid = nSeqId;
 			synchronized (cacheImageMeta) {
 				for (VMessage v : cacheImageMeta) {
 					for (VMessageAbstractItem vai : v.getItems()) {

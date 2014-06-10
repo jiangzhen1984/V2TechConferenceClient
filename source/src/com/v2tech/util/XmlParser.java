@@ -121,7 +121,7 @@ public class XmlParser {
 				boolean isNewLine = "True"
 						.equals(msgEl.getAttribute("NewLine"));
 				VMessageImageItem vii = new VMessageImageItem(vm,
-						uuid.substring(1, uuid.length() - 1),
+						uuid,
 						msgEl.getAttribute("FileExt"));
 				vii.setNewLine(isNewLine);
 			}

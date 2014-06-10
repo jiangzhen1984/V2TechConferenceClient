@@ -223,8 +223,8 @@ public class VMessage {
 	public String toXml() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n")
-				.append("<TChatData IsAutoReply=\"False\" MessageID=\"{"
-						+ this.mUUID + "}\">\n")
+				.append("<TChatData IsAutoReply=\"False\" MessageID=\""
+						+ this.mUUID + "\">\n")
 				.append("<FontList>\n")
 				.append("<TChatFont Color=\"0\" Name=\"Tahoma\" Size=\"9\" Style=\"\"/>")
 				.append("</FontList>\n").append("<ItemList>\n");

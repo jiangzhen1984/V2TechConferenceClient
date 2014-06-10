@@ -44,7 +44,7 @@
             android:layout_marginLeft="15dp"
             android:layout_marginRight="10dp"
             android:layout_toLeftOf="@+id/conf_create_contact_view_ck"
-            android:gravity="center_vertical|right"
+            android:gravity="center_vertical"
             android:text="contact_group_online_statist"
             android:maxWidth="@dimen/contacts_group_view_statist_max_width"
             android:singleLine="true"

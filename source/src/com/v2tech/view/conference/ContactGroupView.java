@@ -44,7 +44,6 @@ public class ContactGroupView extends LinearLayout {
 		mGroupNameTV.setText(g.getName());
 		mGroupStsTV = (TextView) view
 				.findViewById(R.id.contact_group_online_statist);
-		mGroupStsTV.setText("");
 
 		if (this.callback != null) {
 			this.setOnClickListener(this.callback);
@@ -80,6 +79,8 @@ public class ContactGroupView extends LinearLayout {
 	}
 
 	public void updateUserStatus() {
+//		V2Log.e(mGroup.getOnlineUserCount() + " / "
+//				+ mGroup.getUserCount());
 		mGroupStsTV.setText(mGroup.getOnlineUserCount() + " / "
 				+ mGroup.getUserCount());
 	}

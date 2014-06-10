@@ -801,12 +801,12 @@ public class VideoActivityV2 extends Activity {
 						GlobalHolder.getInstance().getCurrentUser()),
 						ConferencePermission.SPEAKING, PermissionState.GRANTED);
 			}
-			//Update pending attendee state
+			// Update pending attendee state
 			for (PermissionUpdateIndication ind : mPendingPermissionUpdateList) {
 				updateAttendeePermissionStateIcon(ind);
 			}
 			mPendingPermissionUpdateList.clear();
-			
+
 		}
 
 		// View is hidded, do not need to hide again
@@ -1548,11 +1548,9 @@ public class VideoActivityV2 extends Activity {
 		}
 	}
 
-	private boolean dragged = false;
 	private OnTouchListener mLocalCameraDragListener = new OnTouchListener() {
 
-		int offsetX;
-		int offsetY;
+		private long lastPressedTime = 0;
 		int lastX;
 		int lastY;
 
@@ -1567,8 +1565,37 @@ public class VideoActivityV2 extends Activity {
 				lastX = (int) event.getRawX();
 				lastY = (int) event.getRawY();
 
+			} else if (action == MotionEvent.ACTION_UP) {
+				long currTime = System.currentTimeMillis();
+				if (currTime - lastPressedTime < 200) {
+					zoom(view);
+					lastPressedTime = 0;
+				} else {
+					lastPressedTime = System.currentTimeMillis();
+				}
 			}
 			return true;
+		}
+
+		private void zoom(View view) {
+			int width = 0;
+			int height = 0;
+			ViewGroup.LayoutParams vl = view.getLayoutParams();;
+			if (view.getTag() == null
+					|| view.getTag().toString().equals("out")) {
+				width = vl.width / 2;
+				view.setTag( "in");
+			} else {
+				width = vl.width * 2;
+				view.setTag("out");
+			}
+
+			width -= width % 16;
+			height = width / 4 * 3;
+			height -= height % 16;
+			vl.width = width;
+			vl.height = height;
+			view.setLayoutParams(vl);
 		}
 
 		private void updateParameters(View view, MotionEvent event) {
@@ -1592,8 +1619,6 @@ public class VideoActivityV2 extends Activity {
 				rl.rightMargin = r.right - r.left - view.getWidth();
 			}
 
-			V2Log.i(r.bottom + "  " + r.top + "  " + pos[1] + " "
-					+ view.getHeight() + "  " + rl.bottomMargin);
 			if ((r.bottom - r.top) - (rl.bottomMargin + view.getHeight()) <= 5) {
 				rl.bottomMargin = r.bottom - r.top - view.getHeight() - 5;
 			}
@@ -2036,7 +2061,7 @@ public class VideoActivityV2 extends Activity {
 							R.string.error_request_enter_conference,
 							Toast.LENGTH_SHORT).show();
 				}
-				//Do quit when login time out
+				// Do quit when login time out
 				if (!inFlag) {
 					// Do quit action
 					quit();
