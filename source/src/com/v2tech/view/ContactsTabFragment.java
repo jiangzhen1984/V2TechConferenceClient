@@ -17,7 +17,9 @@ import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -297,7 +299,6 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 		}
 		if (item.isExpanded == false) {
 			for (Group g : item.g.getChildGroup()) {
-				Long key = Long.valueOf(g.getmGId());
 				ListItem cache = new ListItem(g, g.getLevel());
 				mItemList.add(++pos, cache);
 			}
@@ -305,7 +306,6 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 			sortList.addAll(item.g.getUsers());
 			Collections.sort(sortList);
 			for (User u : sortList) {
-				Long key = Long.valueOf(u.getmUserId());
 				ListItem cache = new ListItem(u, item.g.getLevel() + 1);
 				mItemList.add(++pos, cache);
 			}
@@ -449,6 +449,15 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 		adapter.notifyDataSetChanged();
 	}
 	
+	
+	private OnTouchListener hideSoftKeyListener = new OnTouchListener() {
+
+		@Override
+		public boolean onTouch(View arg0, MotionEvent arg1) {
+			return false;
+		}
+		
+	};
 	
 	
 	private BitmapManager.BitmapChangedListener bitmapChangedListener = new BitmapManager.BitmapChangedListener() {

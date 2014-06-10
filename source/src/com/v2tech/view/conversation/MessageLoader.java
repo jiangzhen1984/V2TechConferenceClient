@@ -252,7 +252,7 @@ public class MessageLoader {
 		String selection = ContentDescriptor.MessageItems.Cols.MSG_ID + "=? ";
 		String[] args = null;
 		if (msgType != 0) {
-			selection += ContentDescriptor.MessageItems.Cols.TYPE + "=? ";
+			selection += "and " + ContentDescriptor.MessageItems.Cols.TYPE + "=? ";
 			args = new String[] { vm.getId() + "", msgType + "" };
 		} else {
 			args = new String[] { vm.getId() + "" };

@@ -628,7 +628,7 @@ public class ConversationView extends Activity {
 					for (int i = 0; i < array.size(); i++) {
 						messageArray.add(0, new VMessageAdater(array.get(i)));
 					}
-					currentItemPos += array.size();
+					currentItemPos += array.size() -1 ;
 				}
 				android.os.Message.obtain(lh, END_LOAD_MESSAGE, array)
 						.sendToTarget();

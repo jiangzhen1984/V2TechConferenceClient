@@ -92,11 +92,19 @@ public class ImageViewGallery extends FragmentActivity {
 	}
 
 	private void populateImageMessage(List<VMessage> list) {
+		boolean flag = false;
 		vimList = new ArrayList<ListItem>();
 		for (VMessage vm : list) {
 			List<VMessageImageItem> items = vm.getImageItems();
 			for (VMessageImageItem item : items) {
 				vimList.add(new ListItem(item));
+			}
+			
+			if (vm.getId() == this.initMid) {
+				flag = true;
+			} 
+			if (!flag) {
+				initPos++;
 			}
 		}
 

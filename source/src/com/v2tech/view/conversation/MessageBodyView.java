@@ -171,6 +171,9 @@ public class MessageBodyView extends LinearLayout {
 						si.height));
 				iv.setTag(item);
 				new LoadTask().execute(new ImageView[] { (ImageView) iv });
+				//Actually Image item do not combine with other item,
+				//So we add special listener for image
+				mContentContainer.setOnClickListener(imageMessageClickListener);
 			}
 
 		}
@@ -298,6 +301,18 @@ public class MessageBodyView extends LinearLayout {
 		public boolean onLongClick(View anchor) {
 			showPopupWindow(anchor);
 			return false;
+		}
+
+	};
+	
+	
+	private OnClickListener imageMessageClickListener = new OnClickListener() {
+
+		@Override
+		public void onClick(View anchor) {
+			if (callback != null) {
+				callback.onMessageClicked((VMessage)anchor.getTag());
+			}
 		}
 
 	};

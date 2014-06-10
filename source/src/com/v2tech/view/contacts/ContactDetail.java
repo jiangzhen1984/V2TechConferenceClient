@@ -359,11 +359,11 @@ public class ContactDetail extends Activity implements OnTouchListener {
 							cl.set(Calendar.YEAR, year);
 							cl.set(Calendar.MONTH, monthOfYear);
 							cl.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-
+							bir = cl.getTime();
 							isUpdating = true;
 							Message m = Message.obtain(lh, UPDATE_USER_INFO);
 							lh.dispatchMessage(m);
-							bir = cl.getTime();
+							
 
 						}
 					}, c.get(Calendar.YEAR), c.get(Calendar.MONTH),

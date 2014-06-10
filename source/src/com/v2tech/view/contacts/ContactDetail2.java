@@ -20,6 +20,7 @@ import com.v2tech.service.GlobalHolder;
 import com.v2tech.service.Registrant;
 import com.v2tech.service.UserService;
 import com.v2tech.view.PublicIntent;
+import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.User;
 
 public class ContactDetail2 extends Activity implements OnTouchListener {

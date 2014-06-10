@@ -50,7 +50,7 @@ public class BitmapUtil {
 		if (!f.exists()) {
 			return null;
 		}
-		
+
 		BitmapFactory.Options options = new BitmapFactory.Options();
 		options.inJustDecodeBounds = true;
 		options.inPreferredConfig = Bitmap.Config.ALPHA_8;
@@ -66,11 +66,9 @@ public class BitmapUtil {
 		Bitmap bp = BitmapFactory.decodeFile(file, options);
 		return bp;
 	}
-	
-	
-	
+
 	public static void getCompressedBitmapBounds(String file, int[] r) {
-		
+
 		BitmapFactory.Options options = new BitmapFactory.Options();
 		options.inJustDecodeBounds = true;
 		options.inPreferredConfig = Bitmap.Config.ALPHA_8;
@@ -79,22 +77,23 @@ public class BitmapUtil {
 			options.inSampleSize = 8;
 		} else if (options.outWidth > 500 || options.outHeight > 500) {
 			options.inSampleSize = 4;
-		} else {
+		} else if (options.outWidth > 200 || options.outHeight > 200) {
 			options.inSampleSize = 2;
+		} else {
+			options.inSampleSize = 1;
 		}
 		BitmapFactory.decodeFile(file, options);
 		r[0] = options.outWidth;
-		r[1]= options.outHeight;
+		r[1] = options.outHeight;
 	}
-	
-	
+
 	public static void getFullBitmapBounds(String file, int[] r) {
 		BitmapFactory.Options options = new BitmapFactory.Options();
 		options.inJustDecodeBounds = true;
 		options.inPreferredConfig = Bitmap.Config.ALPHA_8;
 		BitmapFactory.decodeFile(file, options);
 		r[0] = options.outWidth;
-		r[1]= options.outHeight;
+		r[1] = options.outHeight;
 	}
 
 }

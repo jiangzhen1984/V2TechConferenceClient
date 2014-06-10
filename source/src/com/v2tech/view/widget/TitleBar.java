@@ -14,6 +14,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.inputmethod.InputMethodManager;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -169,6 +170,13 @@ public class TitleBar {
 		if (plusWindow != null && plusWindow.isShowing()) {
 			plusWindow.dismiss();
 		}
+	}
+	
+	
+	public void requestHidenSoftKeyboard() {
+		InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
+		imm.hideSoftInputFromWindow(
+				searchEdit.getWindowToken(), InputMethodManager.RESULT_UNCHANGED_SHOWN);
 	}
 
 	private OnClickListener plusItemClickListener = new OnClickListener() {

@@ -182,6 +182,8 @@ public class VideoActivityV2 extends Activity {
 
 	private List<VMessage> mPendingMessageList;
 
+	private List<PermissionUpdateIndication> mPendingPermissionUpdateList;
+
 	private boolean inFlag;
 
 	private Toast mToast;
@@ -666,6 +668,8 @@ public class VideoActivityV2 extends Activity {
 		V2Log.i(" Conference size:" + mAttendeeList.size());
 
 		mPendingMessageList = new ArrayList<VMessage>();
+
+		mPendingPermissionUpdateList = new ArrayList<PermissionUpdateIndication>();
 	}
 
 	private void notificateConversationUpdate() {
@@ -797,6 +801,12 @@ public class VideoActivityV2 extends Activity {
 						GlobalHolder.getInstance().getCurrentUser()),
 						ConferencePermission.SPEAKING, PermissionState.GRANTED);
 			}
+			//Update pending attendee state
+			for (PermissionUpdateIndication ind : mPendingPermissionUpdateList) {
+				updateAttendeePermissionStateIcon(ind);
+			}
+			mPendingPermissionUpdateList.clear();
+			
 		}
 
 		// View is hidded, do not need to hide again
@@ -846,7 +856,8 @@ public class VideoActivityV2 extends Activity {
 			mDocContainer.setId(0x7ffff002);
 			RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
 					(int) (mVideoLayout.getWidth() * 0.5 - mMenuButtonContainer
-							.getWidth()), mMenuButtonContainer.getHeight());
+							.getWidth()),
+					mMenuButtonContainer.getHeight());
 			lp.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
 			lp.addRule(RelativeLayout.RIGHT_OF, mMenuLine.getId());
 			lp.addRule(RelativeLayout.BELOW, mVideoLine.getId());
@@ -1518,6 +1529,25 @@ public class VideoActivityV2 extends Activity {
 		return at;
 	}
 
+	/**
+	 * Update attendee state
+	 * 
+	 * @param ind
+	 */
+	private boolean updateAttendeePermissionStateIcon(
+			PermissionUpdateIndication ind) {
+		Attendee pa = new Attendee(GlobalHolder.getInstance().getUser(
+				ind.getUid()));
+		if (pa != null && mAttendeeContainer != null) {
+			mAttendeeContainer.updateAttendeeSpeakingState(pa,
+					ConferencePermission.SPEAKING,
+					PermissionState.fromInt(ind.getState()));
+			return true;
+		} else {
+			return false;
+		}
+	}
+
 	private boolean dragged = false;
 	private OnTouchListener mLocalCameraDragListener = new OnTouchListener() {
 
@@ -1546,8 +1576,8 @@ public class VideoActivityV2 extends Activity {
 					.getLayoutParams();
 			Rect r = new Rect();
 			mVideoLayoutMain.getDrawingRect(r);
-			
-			int[] pos  = new int[2];
+
+			int[] pos = new int[2];
 			mVideoLayoutMain.getLocationInWindow(pos);
 
 			rl.bottomMargin -= (event.getRawY() - lastY);
@@ -1562,10 +1592,11 @@ public class VideoActivityV2 extends Activity {
 				rl.rightMargin = r.right - r.left - view.getWidth();
 			}
 
-			V2Log.i(r.bottom + "  " + r.top + "  " +pos[1] + " " + view.getHeight() + "  " + rl.bottomMargin);
-			if ((r.bottom - r.top ) - (rl.bottomMargin + view.getHeight()) <=5) {
+			V2Log.i(r.bottom + "  " + r.top + "  " + pos[1] + " "
+					+ view.getHeight() + "  " + rl.bottomMargin);
+			if ((r.bottom - r.top) - (rl.bottomMargin + view.getHeight()) <= 5) {
 				rl.bottomMargin = r.bottom - r.top - view.getHeight() - 5;
-			} 
+			}
 
 			((ViewGroup) view.getParent()).updateViewLayout(view, rl);
 			// make sure draging view is first front of all
@@ -2005,6 +2036,12 @@ public class VideoActivityV2 extends Activity {
 							R.string.error_request_enter_conference,
 							Toast.LENGTH_SHORT).show();
 				}
+				//Do quit when login time out
+				if (!inFlag) {
+					// Do quit action
+					quit();
+					finish();
+				}
 
 				if (mWaitingDialog != null && mWaitingDialog.isShowing()) {
 					mWaitingDialog.dismiss();
@@ -2017,12 +2054,8 @@ public class VideoActivityV2 extends Activity {
 			// user permission updated
 			case NOTIFY_USER_PERMISSION_UPDATED:
 				PermissionUpdateIndication ind = (PermissionUpdateIndication) msg.obj;
-				if (mAttendeeContainer != null) {
-					Attendee pa = new Attendee(GlobalHolder.getInstance()
-							.getUser(ind.getUid()));
-					mAttendeeContainer.updateAttendeeSpeakingState(pa,
-							ConferencePermission.SPEAKING,
-							PermissionState.fromInt(ind.getState()));
+				if (!updateAttendeePermissionStateIcon(ind)) {
+					mPendingPermissionUpdateList.add(ind);
 				}
 				if (ind.getUid() == GlobalHolder.getInstance()
 						.getCurrentUserId()) {
@@ -2223,7 +2256,6 @@ public class VideoActivityV2 extends Activity {
 				break;
 			}
 		}
-
 	}
 
 }

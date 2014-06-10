@@ -10,7 +10,7 @@
         android:layout_alignParentTop="true"
         android:background="@color/confs_title_bg"
         android:orientation="vertical" >
-        
+
         <TextView
             android:id="@+id/image_galley_detail_return_button"
             android:layout_width="wrap_content"
@@ -22,25 +22,41 @@
             android:paddingTop="10dp"
             android:text="@string/contacts_user_detail_return_button"
             android:textColor="@color/button_text_color"
-            android:textSize="14sp" />
+            android:textSize="@dimen/common_item_text_size" />
 
         <TextView
             android:id="@+id/image_galley_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:layout_gravity="center"
-            android:paddingBottom="15dp"
-            android:paddingTop="15dp"
-            android:text=""
-            android:textSize="25sp" />
+            android:layout_centerInParent="true"
+            android:textColor="@color/activiy_contact_detail_title_color"
+            android:textSize="@dimen/common_item_text_size" />
 
+        <!-- Use translucent image to hold space -->
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="10dp"
+            android:paddingBottom="10dp"
+            android:paddingTop="10dp"
+            android:src="@drawable/translucent" />
     </RelativeLayout>
+
+    <LinearLayout
+        android:id="@+id/image_view_gallery_line1"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_below="@+id/RelativeLayout1"
+        android:background="#cfcfcf"
+        android:orientation="vertical" >
+    </LinearLayout>
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/RelativeLayout1"
+        android:layout_below="@+id/image_view_gallery_line1"
         android:layout_centerHorizontal="true" >
 
         <android.support.v4.view.ViewPager
