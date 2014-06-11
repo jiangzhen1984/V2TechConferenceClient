@@ -333,6 +333,8 @@ public class VideoActivityV2 extends Activity {
 				}
 
 			}
+			//Make sure local camera is first front of all
+			localSurfaceViewLy.bringToFront();
 		}
 
 	};
@@ -976,7 +978,6 @@ public class VideoActivityV2 extends Activity {
 			mVideoLayout.startAnimation(ta);
 			mVideoLayout.setVisibility(View.VISIBLE);
 
-			localSurfaceViewLy.bringToFront();
 
 		} else {
 			mInvitionContainer.setVisibility(View.VISIBLE);
@@ -997,7 +998,6 @@ public class VideoActivityV2 extends Activity {
 			mVideoLayout.startAnimation(ta);
 			mVideoLayout.setVisibility(View.GONE);
 
-			localSurfaceViewLy.bringToFront();
 		}
 	}
 
@@ -1540,7 +1540,7 @@ public class VideoActivityV2 extends Activity {
 				ind.getUid()));
 		if (pa != null && mAttendeeContainer != null) {
 			mAttendeeContainer.updateAttendeeSpeakingState(pa,
-					ConferencePermission.SPEAKING,
+					ConferencePermission.fromInt(ind.getType()),
 					PermissionState.fromInt(ind.getState()));
 			return true;
 		} else {
@@ -1580,7 +1580,7 @@ public class VideoActivityV2 extends Activity {
 		private void zoom(View view) {
 			int width = 0;
 			int height = 0;
-			ViewGroup.LayoutParams vl = view.getLayoutParams();;
+			RelativeLayout.LayoutParams vl =(RelativeLayout.LayoutParams) view.getLayoutParams();
 			if (view.getTag() == null
 					|| view.getTag().toString().equals("out")) {
 				width = vl.width / 2;
@@ -1588,14 +1588,32 @@ public class VideoActivityV2 extends Activity {
 			} else {
 				width = vl.width * 2;
 				view.setTag("out");
+				int[] location = new int[2];
+				view.getLocationInWindow(location);
+				
+				//If zoom out 
+				if (location[0] < vl.width +16 ) {
+					vl.rightMargin -= (vl.width +16 - location[0]);
+				}
+				height = width / 4 * 3;
+				if (location[1] < height +16 ) {
+					vl.bottomMargin -= (height +16 - location[1]);
+				}
+				
 			}
 
 			width -= width % 16;
 			height = width / 4 * 3;
 			height -= height % 16;
+			
+			
+			
 			vl.width = width;
 			vl.height = height;
+			
+			
 			view.setLayoutParams(vl);
+			
 		}
 
 		private void updateParameters(View view, MotionEvent event) {
@@ -1940,9 +1958,12 @@ public class VideoActivityV2 extends Activity {
 						RelativeLayout.LayoutParams.MATCH_PARENT));
 				TextView tv = new TextView(mContext);
 				tv.setText(at.getAttName());
+				tv.setMaxWidth(80);
+				tv.setEllipsize(TruncateAt.END);
+				tv.setSingleLine();
 				tv.setBackgroundColor(Color.rgb(138, 138, 138));
 				tv.setPadding(10, 10, 10, 10);
-				tv.setTextSize(20);
+				tv.setTextSize(14);
 				RelativeLayout.LayoutParams tvrl = new RelativeLayout.LayoutParams(
 						RelativeLayout.LayoutParams.WRAP_CONTENT,
 						RelativeLayout.LayoutParams.WRAP_CONTENT);

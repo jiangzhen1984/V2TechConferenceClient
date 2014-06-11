@@ -141,6 +141,9 @@ public class GroupLayout extends LinearLayout {
 				return;
 			}
 			VMessage vm =MessageLoader.getNewestMessage(getContext(), GlobalHolder.getInstance().getCurrentUserId(), mConv.getExtId());
+			if (vm == null) {
+				return;
+			}
 			List<VMessageAbstractItem> items  = vm.getItems();
 			mConv.setDate(vm.getDateTimeStr());
 			if (items.size() > 0) {

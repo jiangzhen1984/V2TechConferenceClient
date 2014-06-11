@@ -381,10 +381,10 @@ public class MainActivity extends FragmentActivity implements
 			int id = view.getId();
 			switch (id) {
 			case R.drawable.conversation_group_button: {
-//
-//				Intent i = new Intent(PublicIntent.START_GROUP_CREATE_ACTIVITY);
-//				i.addCategory(PublicIntent.DEFAULT_CATEGORY);
-//				startActivityForResult(i, SUB_ACTIVITY_CODE_CREATE_CONF);
+
+				Intent i = new Intent(PublicIntent.START_GROUP_CREATE_ACTIVITY);
+				i.addCategory(PublicIntent.DEFAULT_CATEGORY);
+				startActivityForResult(i, SUB_ACTIVITY_CODE_CREATE_CONF);
 				break;
 			}
 

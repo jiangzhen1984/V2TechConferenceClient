@@ -27,6 +27,7 @@ import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -34,6 +35,7 @@ import android.widget.Toast;
 import com.v2tech.R;
 import com.v2tech.service.ChatService;
 import com.v2tech.service.GlobalHolder;
+import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.V2Log;
 import com.v2tech.view.JNIService;
 import com.v2tech.view.PublicIntent;
@@ -108,6 +110,9 @@ public class ConversationView extends Activity {
 	private Conversation mCurrentConv;
 
 	private ListView mMessagesContainer;
+	
+	private LinearLayout mFaceLayout;
+	private View mSmileIconButton;
 
 	private CommonAdapter adapter;
 
@@ -155,6 +160,9 @@ public class ConversationView extends Activity {
 		mMoreFeatureIV = (ImageView) findViewById(R.id.contact_message_plus);
 		mMoreFeatureIV.setOnClickListener(moreFeatureButtonListenr);
 
+		mSmileIconButton = findViewById(R.id.message_smile_icon);
+		mSmileIconButton.setOnClickListener(mSmileIconListener);
+		
 		mSelectImageButtonIV = (ImageView) findViewById(R.id.contact_message_send_image_button);
 		mSelectImageButtonIV.setOnClickListener(selectImageButtonListener);
 
@@ -165,6 +173,8 @@ public class ConversationView extends Activity {
 		mAdditionFeatureContainer = findViewById(R.id.contact_message_sub_feature_ly_inner);
 
 		mUserTitleTV = (TextView) findViewById(R.id.message_user_title);
+		
+		mFaceLayout = (LinearLayout) findViewById(R.id.contact_message_face_item_ly);
 
 		user1Id = this.getIntent().getLongExtra("user1id", 0);
 		user2Id = this.getIntent().getLongExtra("user2id", 0);
@@ -361,6 +371,43 @@ public class ConversationView extends Activity {
 		}
 
 	};
+	
+	
+	
+	private OnClickListener  mSmileIconListener = new OnClickListener() {
+
+		@Override
+		public void onClick(View v) {
+			if (mFaceLayout.getChildCount() <= 0) {
+				//init faceItem
+				for (int i =1; i< GlobalConfig.GLOBAL_FACE_ARRAY.length; i++) {
+					ImageView iv = new ImageView(mContext);
+					iv.setImageResource(GlobalConfig.GLOBAL_FACE_ARRAY[i]);
+					iv.setOnClickListener(mFaceSelectListener);
+					mFaceLayout.addView(iv);
+				}
+			}
+			if (mFaceLayout.getVisibility() == View.GONE) {
+				mFaceLayout.setVisibility(View.VISIBLE);
+			} else {
+				mFaceLayout.setVisibility(View.GONE);
+			}
+
+		}
+
+	};
+	
+	
+	private OnClickListener mFaceSelectListener = new OnClickListener() {
+
+		@Override
+		public void onClick(View smile) {
+			mMessageET.setCompoundDrawables(null, ((ImageView)smile).getDrawable(), null, null);
+			mMessageET.append(" ");
+		}
+		
+	};
+	
 
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -423,7 +470,7 @@ public class ConversationView extends Activity {
 		addMessageToContainer(m);
 		// send notification
 		notificateConversationUpdate();
-
+		
 	}
 
 	// FIXME optimize code

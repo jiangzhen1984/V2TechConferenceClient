@@ -15,11 +15,23 @@ import com.v2tech.vo.VMessageImageItem;
 import com.v2tech.vo.VMessageTextItem;
 
 public class MessageBuilder {
+	
+	
+	
+	
+	public static VMessage buildGroupTextMessage(long gid, User fromUser,
+			String text) {
+		VMessage vm = new VMessage(gid, fromUser, null);
+		VMessageTextItem vti = new VMessageTextItem(vm, text);
+		vti.setNewLine(true);
+		return vm;
+	}
 
 	public static VMessage buildTextMessage(User fromUser, User toUser,
 			String text) {
 		VMessage vm = new VMessage(0, fromUser, toUser);
-		new VMessageTextItem(vm, text);
+		VMessageTextItem vti = new VMessageTextItem(vm, text);
+		vti.setNewLine(true);
 		return vm;
 	}
 

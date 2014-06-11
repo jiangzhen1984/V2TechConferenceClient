@@ -7,6 +7,8 @@ package com.v2tech.vo;
  * 
  */
 public enum ConferencePermission {
+	//
+	UNKOWN(0),
 	// 1 mean user want to control in meeting
 	CONTROL(1),
 	// 3 means speaking permission, this number is defined by server side.
@@ -21,5 +23,16 @@ public enum ConferencePermission {
 	public int intValue() {
 		return code;
 	}
-	
+
+	public static ConferencePermission fromInt(int i) {
+		switch (i) {
+		case 1:
+			return CONTROL;
+		case 3:
+			return SPEAKING;
+		default:
+			return UNKOWN;
+
+		}
+	}
 }

@@ -311,7 +311,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 					.findViewById(R.id.video_attendee_device_speaker_icon);
 			if (state == PermissionState.NORMAL) {
 				spIV.setImageResource(R.drawable.conf_speaker);
-			} else if (state == PermissionState.GRANTED) {
+			} else if (state == PermissionState.GRANTED && cp == ConferencePermission.SPEAKING) {
 				spIV.setImageResource(R.drawable.conf_speaking);
 				((AnimationDrawable) spIV.getDrawable()).start();
 			}
@@ -674,6 +674,14 @@ public class VideoAttendeeListLayout extends LinearLayout {
 			} else if (wr.a.isSelf()) {
 				return 1;
 			}
+			if (this.a == null) {
+				V2Log.e(" attendee  is null ");
+				return -1;
+			} else if (wr.a == null) {
+				V2Log.e(" wr attendee  is null ");
+				return 1;
+			}
+			
 			int ret = this.a.compareTo(wr.a);
 			if (ret == 0) {
 				return this.sortFlag;

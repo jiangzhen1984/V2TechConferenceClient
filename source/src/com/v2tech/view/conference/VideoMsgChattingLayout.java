@@ -15,6 +15,7 @@ import android.widget.TextView;
 import com.v2tech.R;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.view.adapter.VMessageAdater;
+import com.v2tech.view.conversation.MessageBuilder;
 import com.v2tech.view.widget.CommonAdapter;
 import com.v2tech.view.widget.CommonAdapter.CommonAdapterItemWrapper;
 import com.v2tech.vo.ConferenceGroup;
@@ -75,8 +76,8 @@ public class VideoMsgChattingLayout extends LinearLayout {
 							|| mContentTV.getText().toString().trim().isEmpty()) {
 						return;
 					}
-					VMessage vm = new VMessage(conf.getmGId(), GlobalHolder.getInstance()
-							.getCurrentUser(), null);
+					VMessage vm  = MessageBuilder.buildGroupTextMessage(conf.getmGId(), GlobalHolder.getInstance()
+							.getCurrentUser(), mContentTV.getText().toString());
 					addNewMessage(vm);
 					listener.requestSendMsg(vm);
 					mContentTV.setText("");
