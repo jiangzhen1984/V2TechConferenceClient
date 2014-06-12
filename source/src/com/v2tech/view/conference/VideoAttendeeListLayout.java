@@ -151,13 +151,15 @@ public class VideoAttendeeListLayout extends LinearLayout {
 				.findViewById(R.id.video_attendee_device_name);
 		ImageView cameraIV = (ImageView) view
 				.findViewById(R.id.video_attendee_device_camera_icon);
+		ImageView spIV = (ImageView) view
+				.findViewById(R.id.video_attendee_device_speaker_icon);
 
 		cameraIV.setOnTouchListener(mListViewOnTouchListener);
 
 		nameTV.setText(a.getAttName());
 
 		// Set text color and camera icon
-		setStyle(a, a.getDefaultDevice(), nameTV, cameraIV);
+		setStyle(a, a.getDefaultDevice(), nameTV, cameraIV, spIV);
 
 		view.setTag(new Wrapper(a, a.getDefaultDevice(), -1));
 		list.add(new ViewWrapper(view));
@@ -169,14 +171,15 @@ public class VideoAttendeeListLayout extends LinearLayout {
 					.findViewById(R.id.video_attendee_device_name);
 			ImageView cameraIV2 = (ImageView) view2
 					.findViewById(R.id.video_attendee_device_camera_icon);
+			ImageView spIV2 = (ImageView) view2
+					.findViewById(R.id.video_attendee_device_speaker_icon);
+			
 			UserDeviceConfig udc = a.getmDevices().get(i);
 			nameTV2.setText("     视频" + i);
 			nameTV2.setTextSize(20);
-			// Hide additional speaker if user has more than one camera
-			view2.findViewById(R.id.video_attendee_device_speaker_icon)
-					.setVisibility(View.INVISIBLE);
+		
 			// Set text color and camera icon
-			setStyle(a, udc, nameTV2, cameraIV2);
+			setStyle(a, udc, nameTV2, cameraIV2, spIV2);
 
 			cameraIV2.setOnTouchListener(mListViewOnTouchListener);
 			view2.setTag(new Wrapper(a, udc, 1));
@@ -187,7 +190,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 
 	}
 
-	private void setStyle(Attendee at, UserDeviceConfig udc, TextView name, ImageView iv) {
+	private void setStyle(Attendee at, UserDeviceConfig udc, TextView name, ImageView iv, ImageView speaker) {
 		if (at.isSelf()) {
 			name.setTypeface(null, Typeface.BOLD);
 			name.setTextColor(getContext().getResources().getColor(
@@ -219,6 +222,10 @@ public class VideoAttendeeListLayout extends LinearLayout {
 			}
 		} else {
 			iv.setImageResource(R.drawable.camera_pressed);
+		}
+		
+		if (at.getType() == Attendee.TYPE_MIXED_VIDEO) {
+			speaker.setVisibility(View.INVISIBLE);
 		}
 	}
 
@@ -280,6 +287,10 @@ public class VideoAttendeeListLayout extends LinearLayout {
 
 				nameTV.setTextColor(getContext().getResources().getColor(
 						R.color.video_attendee_name_color_offline));
+				
+				v.v.setBackgroundColor(Color.TRANSPARENT);
+				
+				
 			}
 		}
 

@@ -318,7 +318,8 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher {
 		}
 		List<ScrollItem> newItemList = new ArrayList<ScrollItem>();
 		String searchKey = s == null ? "" : s.toString();
-		for (ScrollItem item : mItemList) {
+		for (int i =0; mItemList != null && i < mItemList.size(); i++) {
+			ScrollItem item = mItemList.get(i);
 			if (item.cov.getName() != null
 					&& item.cov.getName().contains(searchKey)) {
 				newItemList.add(item);

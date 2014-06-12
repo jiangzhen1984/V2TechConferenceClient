@@ -1867,12 +1867,12 @@ public class VideoActivityV2 extends Activity {
 		MixVideoLayout layout;
 		AttendeeMixedDevice amd;
 
-		public MixerWrapper(String id, MixVideo mix, MixVideoLayout layout) {
+		public MixerWrapper(String id, MixVideo mix, MixVideoLayout layout, AttendeeMixedDevice amd) {
 			super();
 			this.id = id;
 			this.mix = mix;
 			this.layout = layout;
-			amd = new AttendeeMixedDevice(mix);
+			this.amd = amd;
 		}
 
 	}
@@ -2253,7 +2253,8 @@ public class VideoActivityV2 extends Activity {
 					MixVideo mv = (MixVideo) msg.obj;
 
 					MixerWrapper mw = new MixerWrapper(mv.getId(), mv,
-							new MixVideoLayout(mContext, mv));
+							new MixVideoLayout(mContext, mv) , new AttendeeMixedDevice(
+									mv));
 					synchronized (mMixerWrapper) {
 						// If exist, do not add again
 						if (mMixerWrapper.containsKey(mv.getId())) {
@@ -2264,8 +2265,7 @@ public class VideoActivityV2 extends Activity {
 					// Notify attendee list mixed video is created
 					if (mAttendeeContainer != null) {
 						mAttendeeContainer
-								.updateEnteredAttendee(new AttendeeMixedDevice(
-										mv));
+								.updateEnteredAttendee(mw.amd);
 					}
 
 					// destroy mixed video

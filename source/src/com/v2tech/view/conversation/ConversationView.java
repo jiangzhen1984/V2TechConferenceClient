@@ -180,7 +180,7 @@ public class ConversationView extends Activity {
 		// TODO hidden button of send audio message
 		mAudioSpeakerIV.setVisibility(View.GONE);
 
-		mAdditionFeatureContainer = findViewById(R.id.contact_message_sub_feature_ly_inner);
+		mAdditionFeatureContainer = findViewById(R.id.contact_message_sub_feature_ly);
 
 		mUserTitleTV = (TextView) findViewById(R.id.message_user_title);
 

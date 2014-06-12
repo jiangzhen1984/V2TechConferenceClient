@@ -3,7 +3,7 @@
     package="com.v2tech"
     android:sharedUserLabel="@string/app_name"
     android:versionCode="1"
-    android:versionName="1.3.0.53" >
+    android:versionName="1.3.0.54" >
 
     <uses-sdk
         android:minSdkVersion="13"
@@ -80,19 +80,16 @@
         </activity>
         <activity
             android:name="com.v2tech.view.conference.VideoActivityV2"
-            android:launchMode="singleTop"
             android:screenOrientation="landscape"
             android:windowSoftInputMode="adjustPan" >
         </activity>
         <activity
             android:name="com.v2tech.view.contacts.ContactDetail"
-            android:launchMode="singleTask"
             android:screenOrientation="nosensor"
             android:windowSoftInputMode="stateHidden" >
         </activity>
         <activity
             android:name="com.v2tech.view.conversation.ConversationView"
-            android:launchMode="singleTask"
             android:parentActivityName="com.v2tech.view.StartupActivity"
             android:screenOrientation="nosensor"
             android:windowSoftInputMode="stateHidden|adjustUnspecified" >
