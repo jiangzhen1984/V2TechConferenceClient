@@ -20,7 +20,7 @@ public class VMessageTextItem extends VMessageAbstractItem {
 
 	public String toXmlItem() {
 		String str = "<TTextChatItem NewLine=\""
-				+ (isNewLine ? "TRUE" : "FALSE")
+				+ (isNewLine ? "True" : "False")
 				+ "\" FontIndex=\"0\" Text=\"" + text + "\"/>";
 		return str;
 	}

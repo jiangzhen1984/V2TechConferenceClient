@@ -20,8 +20,8 @@ public class VMessageFaceItem extends VMessageAbstractItem {
 
 	public String toXmlItem() {
 		String str = "<TSysFaceChatItem NewLine=\""
-				+ (isNewLine ? "TRUE" : "FALSE") + " FileName=\"" + index
-				+ ".png ShortCut=\"\" />";
+				+ (isNewLine ? "True" : "False") + "\" FileName=\"" + index
+				+ ".png\" ShortCut=\"\" />";
 		return str;
 	}
 

@@ -22,8 +22,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.v2tech.R;
+import com.v2tech.service.GlobalHolder;
 import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.V2Log;
+import com.v2tech.vo.User;
 import com.v2tech.vo.VMessage;
 import com.v2tech.vo.VMessageAbstractItem;
 import com.v2tech.vo.VMessageFaceItem;
@@ -102,10 +104,14 @@ public class MessageBodyView extends LinearLayout {
 		if (!mMsg.isLocal()) {
 			mHeadIcon = (ImageView) rootView
 					.findViewById(R.id.conversation_message_body_icon_left);
-			if (mMsg.getToUser() != null
-					&& mMsg.getToUser().getAvatarBitmap() != null) {
-				mHeadIcon.setImageBitmap(mMsg.getToUser().getAvatarBitmap());
-			}
+//			if (mMsg.getToUser() != null && mMsg.getToUser().isDirty()) {
+//				User toUser = GlobalHolder.getInstance().getUser(mMsg.getToUser().getmUserId());
+//				mMsg.setToUser(toUser);
+//			}
+//			if (mMsg.getToUser() != null
+//					&& mMsg.getToUser().getAvatarBitmap() != null) {
+//				mHeadIcon.setImageBitmap(mMsg.getToUser().getAvatarBitmap());
+//			}
 			mContentContainer = (LinearLayout) rootView
 					.findViewById(R.id.messag_body_content_ly_left);
 			mArrowIV = (ImageView) rootView
@@ -123,11 +129,21 @@ public class MessageBodyView extends LinearLayout {
 			mArrowIV.bringToFront();
 			mLocalMessageContainter.setVisibility(View.GONE);
 			mRemoteMessageContainter.setVisibility(View.VISIBLE);
-			if (mMsg.getFromUser() != null
-					&& mMsg.getFromUser().getAvatarBitmap() != null) {
-				mHeadIcon.setImageBitmap(mMsg.getFromUser().getAvatarBitmap());
-			}
 			
+		}
+		
+		if (mMsg.getFromUser() != null && mMsg.getFromUser().isDirty()) {
+			User fromUser = GlobalHolder.getInstance().getUser(mMsg.getFromUser().getmUserId());
+			if (fromUser != null) {
+				mMsg.setFromUser(fromUser);
+			} else {
+				V2Log.e(" MessageBody doesn't receve user["+mMsg.getFromUser().getmUserId()+"] information from server");
+			}
+		}
+		
+		if (mMsg.getFromUser() != null
+				&& mMsg.getFromUser().getAvatarBitmap() != null) {
+			mHeadIcon.setImageBitmap(mMsg.getFromUser().getAvatarBitmap());
 		}
 
 		populateMessage();
@@ -312,7 +328,7 @@ public class MessageBodyView extends LinearLayout {
 		@Override
 		public void onClick(View anchor) {
 			if (callback != null) {
-				callback.onMessageClicked((VMessage)anchor.getTag());
+				callback.onMessageClicked(((VMessageImageItem)anchor.getTag()).getVm());
 			}
 		}
 

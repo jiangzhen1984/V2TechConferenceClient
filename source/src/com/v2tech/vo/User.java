@@ -141,9 +141,13 @@ public class User implements Comparable<User> {
 	private String mFax;
 
 	private static HanyuPinyinOutputFormat format = new HanyuPinyinOutputFormat();
+	
+	//This value indicate this object is dirty, construct locally without any user information
+	private boolean isDirty;
 
 	public User(long mUserId) {
 		this(mUserId, null, null, null);
+		isDirty = true;
 	}
 
 	public User(long mUserId, String name) {
@@ -377,6 +381,12 @@ public class User implements Comparable<User> {
 			return;
 		}
 		this.mBelongsGroup.add(g);
+	}
+	
+	
+
+	public boolean isDirty() {
+		return isDirty;
 	}
 
 	public Group getFirstBelongsGroup() {

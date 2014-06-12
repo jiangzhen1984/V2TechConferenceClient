@@ -10,6 +10,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -17,6 +18,10 @@ import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
 import android.provider.MediaStore;
+import android.text.Editable;
+import android.text.Spannable;
+import android.text.SpannableStringBuilder;
+import android.text.style.ImageSpan;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -46,6 +51,9 @@ import com.v2tech.view.widget.CommonAdapter.CommonAdapterItemWrapper;
 import com.v2tech.vo.Conversation;
 import com.v2tech.vo.User;
 import com.v2tech.vo.VMessage;
+import com.v2tech.vo.VMessageAbstractItem;
+import com.v2tech.vo.VMessageFaceItem;
+import com.v2tech.vo.VMessageTextItem;
 
 public class ConversationView extends Activity {
 
@@ -110,7 +118,7 @@ public class ConversationView extends Activity {
 	private Conversation mCurrentConv;
 
 	private ListView mMessagesContainer;
-	
+
 	private LinearLayout mFaceLayout;
 	private View mSmileIconButton;
 
@@ -121,6 +129,8 @@ public class ConversationView extends Activity {
 	private boolean isStopped;
 
 	private int currentItemPos = 0;
+
+	private VMessage preparedMessage;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -162,7 +172,7 @@ public class ConversationView extends Activity {
 
 		mSmileIconButton = findViewById(R.id.message_smile_icon);
 		mSmileIconButton.setOnClickListener(mSmileIconListener);
-		
+
 		mSelectImageButtonIV = (ImageView) findViewById(R.id.contact_message_send_image_button);
 		mSelectImageButtonIV.setOnClickListener(selectImageButtonListener);
 
@@ -173,7 +183,7 @@ public class ConversationView extends Activity {
 		mAdditionFeatureContainer = findViewById(R.id.contact_message_sub_feature_ly_inner);
 
 		mUserTitleTV = (TextView) findViewById(R.id.message_user_title);
-		
+
 		mFaceLayout = (LinearLayout) findViewById(R.id.contact_message_face_item_ly);
 
 		user1Id = this.getIntent().getLongExtra("user1id", 0);
@@ -371,18 +381,17 @@ public class ConversationView extends Activity {
 		}
 
 	};
-	
-	
-	
-	private OnClickListener  mSmileIconListener = new OnClickListener() {
+
+	private OnClickListener mSmileIconListener = new OnClickListener() {
 
 		@Override
 		public void onClick(View v) {
 			if (mFaceLayout.getChildCount() <= 0) {
-				//init faceItem
-				for (int i =1; i< GlobalConfig.GLOBAL_FACE_ARRAY.length; i++) {
+				// init faceItem
+				for (int i = 1; i < GlobalConfig.GLOBAL_FACE_ARRAY.length; i++) {
 					ImageView iv = new ImageView(mContext);
 					iv.setImageResource(GlobalConfig.GLOBAL_FACE_ARRAY[i]);
+					iv.setTag(i + "");
 					iv.setOnClickListener(mFaceSelectListener);
 					mFaceLayout.addView(iv);
 				}
@@ -396,18 +405,36 @@ public class ConversationView extends Activity {
 		}
 
 	};
-	
-	
+
 	private OnClickListener mFaceSelectListener = new OnClickListener() {
 
 		@Override
 		public void onClick(View smile) {
-			mMessageET.setCompoundDrawables(null, ((ImageView)smile).getDrawable(), null, null);
-			mMessageET.append(" ");
+
+			Drawable drawable = ((ImageView) (smile)).getDrawable();
+			drawable.setBounds(0, 0, drawable.getIntrinsicWidth(),
+					drawable.getIntrinsicHeight());
+
+			int selectionCursor = mMessageET.getSelectionStart();
+			if (selectionCursor == 0
+					|| ((CharSequence) mMessageET.getText()).charAt(mMessageET
+							.getSelectionStart() - 1) == '\n') {
+
+			}
+			mMessageET.getText().insert(selectionCursor, ".");
+			selectionCursor = mMessageET.getSelectionStart();
+
+			SpannableStringBuilder builder = new SpannableStringBuilder(
+					mMessageET.getText());
+			ImageSpan is = new ImageSpan(drawable, smile.getTag().toString());
+			builder.setSpan(is, selectionCursor - ".".length(),
+					selectionCursor, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+			mMessageET.setText(builder);
+
+			mMessageET.setSelection(selectionCursor);
 		}
-		
+
 	};
-	
 
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -458,19 +485,82 @@ public class ConversationView extends Activity {
 		if (remote == null) {
 			remote = new User(user2Id);
 		}
-		// FIXME add face item
-		VMessage m = MessageBuilder.buildTextMessage(local, remote, content);
-		m.setGroupId(groupId);
-		// Save message
-		MessageBuilder.saveMessage(this, m);
+
+		VMessage vm = new VMessage(this.groupId, local, remote);
+
+		ImageSpan[] spans = mMessageET.getText().getSpans(0,
+				mMessageET.getText().length(), ImageSpan.class);
+
+		Editable et = mMessageET.getText();
+		int imageIndex = 0;
+		StringBuilder textContent = new StringBuilder();
+		for (int index = 0; index < et.length(); ) {
+			char c = et.charAt(index);
+			ImageSpan is = null;
+			if (imageIndex < spans.length){
+				is = spans[imageIndex];
+			}
+
+			int start = et.getSpanStart(is);
+			if (index == start && is != null) {
+				if (textContent.length() != 0) {
+					VMessageTextItem vmi = new VMessageTextItem(vm, textContent.toString());
+					if (start == 0) {
+						vmi.setNewLine(true);
+					}
+					textContent = new StringBuilder();
+				}
+				VMessageFaceItem vfm = new VMessageFaceItem(vm,
+						Integer.parseInt(is.getSource()));
+				if (start == 0
+						|| (start != -1 && et.subSequence(start - 1, start)
+								.toString().equals("\n"))) {
+					vfm.setNewLine(true);
+				}
+				imageIndex ++;
+				index = et.getSpanEnd(is);
+				continue;
+				
+			}
+			
+			
+			if (c != '\n') {
+				textContent.append(c);
+			} else if (c == '\n' && textContent.length() != 0 ){
+				VMessageTextItem vmi = new VMessageTextItem(vm, textContent.toString());
+				textContent = new StringBuilder();
+			}
+			
+			// Check last span is text or new line span is text
+			if ((index == et.length() -1  || c == '\n') && textContent.length() != 0 ) {
+				VMessageTextItem vmi = new VMessageTextItem(vm, textContent.toString());
+				vmi.setNewLine(true);
+				textContent = new StringBuilder();
+			}
+			
+			index++;
+				
+		}
+		
+		List<VMessageAbstractItem> items = vm.getItems();
+		for (VMessageAbstractItem item: items) {
+			if (item.getType() == VMessageAbstractItem.ITEM_TYPE_TEXT) {
+				System.out.println(((VMessageTextItem)item).getText()+"    "+ item.isNewLine());
+			} else {
+				System.out.println(((VMessageFaceItem)item).getIndex()+"    "+ item.isNewLine());
+			}
+		}
+//
+//		// Save message
+		MessageBuilder.saveMessage(this, vm);
 
 		mMessageET.setText("");
 
-		Message.obtain(lh, SEND_MESSAGE, m).sendToTarget();
-		addMessageToContainer(m);
+		Message.obtain(lh, SEND_MESSAGE, vm).sendToTarget();
+		addMessageToContainer(vm);
 		// send notification
 		notificateConversationUpdate();
-		
+
 	}
 
 	// FIXME optimize code
@@ -589,6 +679,9 @@ public class ConversationView extends Activity {
 	private void queryAndAddMessage(final int msgId) {
 
 		VMessage m = MessageLoader.loadMessageById(mContext, msgId);
+		if (m == null || m.getFromUser().getmUserId() != this.user2Id) {
+			return;
+		}
 		MessageBodyView mv = new MessageBodyView(this, m, true);
 
 		messageArray.add(new VMessageAdater(m));
@@ -675,7 +768,7 @@ public class ConversationView extends Activity {
 					for (int i = 0; i < array.size(); i++) {
 						messageArray.add(0, new VMessageAdater(array.get(i)));
 					}
-					currentItemPos += array.size() -1 ;
+					currentItemPos += array.size() - 1;
 				}
 				android.os.Message.obtain(lh, END_LOAD_MESSAGE, array)
 						.sendToTarget();
