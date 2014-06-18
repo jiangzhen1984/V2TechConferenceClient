@@ -2073,6 +2073,11 @@ public class VideoActivityV2 extends Activity {
 					conf.setChairman(c.getChairman());
 					// set enter flag to true
 					inFlag = true;
+					// Request grant speaking permission
+					// If chair man is current user, then automatically apply speaking
+					if (c.getChairman() == GlobalHolder.getInstance().getCurrentUserId()) {
+						doApplyOrReleaseSpeak();
+					}
 				} else if (recr.getResult() == RequestEnterConfResponse.Result.TIME_OUT) {
 					Toast.makeText(mContext,
 							R.string.error_request_enter_conference_time_out,

@@ -145,6 +145,7 @@ public class ConversationView extends Activity {
 		mMessagesContainer.setAdapter(adapter);
 		mMessagesContainer.setOnTouchListener(mHiddenOnTouchListener);
 		mMessagesContainer.setOnScrollListener(scrollListener);
+		mMessagesContainer.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
 
 		mSendButtonTV = (TextView) findViewById(R.id.message_send);
 		// mSendButtonTV.setOnClickListener(sendMessageListener);
@@ -308,7 +309,6 @@ public class ConversationView extends Activity {
 			return;
 		}
 		mMessagesContainer.setSelection(pos);
-
 	}
 
 	private void cleanRangeBitmapCache(int before, int after) {

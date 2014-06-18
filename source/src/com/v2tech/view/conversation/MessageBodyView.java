@@ -9,12 +9,17 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Handler;
+import android.text.Spannable;
+import android.text.SpannableStringBuilder;
+import android.text.style.ImageSpan;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
@@ -104,14 +109,15 @@ public class MessageBodyView extends LinearLayout {
 		if (!mMsg.isLocal()) {
 			mHeadIcon = (ImageView) rootView
 					.findViewById(R.id.conversation_message_body_icon_left);
-//			if (mMsg.getToUser() != null && mMsg.getToUser().isDirty()) {
-//				User toUser = GlobalHolder.getInstance().getUser(mMsg.getToUser().getmUserId());
-//				mMsg.setToUser(toUser);
-//			}
-//			if (mMsg.getToUser() != null
-//					&& mMsg.getToUser().getAvatarBitmap() != null) {
-//				mHeadIcon.setImageBitmap(mMsg.getToUser().getAvatarBitmap());
-//			}
+			// if (mMsg.getToUser() != null && mMsg.getToUser().isDirty()) {
+			// User toUser =
+			// GlobalHolder.getInstance().getUser(mMsg.getToUser().getmUserId());
+			// mMsg.setToUser(toUser);
+			// }
+			// if (mMsg.getToUser() != null
+			// && mMsg.getToUser().getAvatarBitmap() != null) {
+			// mHeadIcon.setImageBitmap(mMsg.getToUser().getAvatarBitmap());
+			// }
 			mContentContainer = (LinearLayout) rootView
 					.findViewById(R.id.messag_body_content_ly_left);
 			mArrowIV = (ImageView) rootView
@@ -129,18 +135,21 @@ public class MessageBodyView extends LinearLayout {
 			mArrowIV.bringToFront();
 			mLocalMessageContainter.setVisibility(View.GONE);
 			mRemoteMessageContainter.setVisibility(View.VISIBLE);
-			
+
 		}
-		
+
 		if (mMsg.getFromUser() != null && mMsg.getFromUser().isDirty()) {
-			User fromUser = GlobalHolder.getInstance().getUser(mMsg.getFromUser().getmUserId());
+			User fromUser = GlobalHolder.getInstance().getUser(
+					mMsg.getFromUser().getmUserId());
 			if (fromUser != null) {
 				mMsg.setFromUser(fromUser);
 			} else {
-				V2Log.e(" MessageBody doesn't receve user["+mMsg.getFromUser().getmUserId()+"] information from server");
+				V2Log.e(" MessageBody doesn't receve user["
+						+ mMsg.getFromUser().getmUserId()
+						+ "] information from server");
 			}
 		}
-		
+
 		if (mMsg.getFromUser() != null
 				&& mMsg.getFromUser().getAvatarBitmap() != null) {
 			mHeadIcon.setImageBitmap(mMsg.getFromUser().getAvatarBitmap());
@@ -151,36 +160,45 @@ public class MessageBodyView extends LinearLayout {
 	}
 
 	private void populateMessage() {
-		LinearLayout line = new LinearLayout(this.getContext());
+
+		EditText et = new EditText(this.getContext());
+		et.setEnabled(false);
+		et.setBackgroundColor(Color.TRANSPARENT);
 		LinearLayout.LayoutParams ll = new LinearLayout.LayoutParams(
 				LinearLayout.LayoutParams.WRAP_CONTENT,
 				LinearLayout.LayoutParams.WRAP_CONTENT);
-		line.setOrientation(LinearLayout.HORIZONTAL);
-		mContentContainer.addView(line, ll);
+		mContentContainer.addView(et, ll);
+
 		List<VMessageAbstractItem> items = mMsg.getItems();
 		for (VMessageAbstractItem item : items) {
 			// Add new layout for new line
 			if (item.isNewLine()) {
-				line = new LinearLayout(this.getContext());
-				line.setOrientation(LinearLayout.HORIZONTAL);
-				mContentContainer.addView(line, ll);
+			//	et.append("\n");
 			}
 			if (item.getType() == VMessageAbstractItem.ITEM_TYPE_TEXT) {
-				TextView contentTV = new TextView(this.getContext());
-				contentTV.setText(((VMessageTextItem) item).getText());
-				contentTV.setTextColor(Color.GRAY);
-				contentTV.setHighlightColor(Color.GRAY);
-				line.addView(contentTV, ll);
-				mContentContainer
-						.setOnLongClickListener(messageLongClickListener);
+				et.append(((VMessageTextItem) item).getText());
 			} else if (item.getType() == VMessageAbstractItem.ITEM_TYPE_FACE) {
-				ImageView iv = new ImageView(this.getContext());
-				iv.setImageResource(GlobalConfig.GLOBAL_FACE_ARRAY[((VMessageFaceItem) item)
-						.getIndex()]);
-				line.addView(iv, ll);
-				mContentContainer
-						.setOnLongClickListener(messageLongClickListener);
+				Drawable dr = this
+						.getResources()
+						.getDrawable(
+								GlobalConfig.GLOBAL_FACE_ARRAY[((VMessageFaceItem) item)
+										.getIndex()]);
+				dr.setBounds(0, 0, dr.getIntrinsicWidth(),
+						dr.getIntrinsicHeight());
+
+				int selectionCursor = et.getSelectionStart();
+				et.getText().insert(selectionCursor, ".");
+				selectionCursor = et.getSelectionStart();
+				
+				SpannableStringBuilder builder = new SpannableStringBuilder(
+						et.getText());
+				ImageSpan is = new ImageSpan(dr);
+				builder.setSpan(is, selectionCursor - ".".length(),
+						selectionCursor,
+						Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+				et.setText(builder);
 			} else if (item.getType() == VMessageAbstractItem.ITEM_TYPE_IMAGE) {
+				LinearLayout line = new LinearLayout(this.getContext());
 				ImageView iv = new ImageView(this.getContext());
 				VMessageImageItem.Size si = ((VMessageImageItem) item)
 						.getCompressedBitmapSize();
@@ -188,8 +206,8 @@ public class MessageBodyView extends LinearLayout {
 						si.height));
 				iv.setTag(item);
 				new LoadTask().execute(new ImageView[] { (ImageView) iv });
-				//Actually Image item do not combine with other item,
-				//So we add special listener for image
+				// Actually Image item do not combine with other item,
+				// So we add special listener for image
 				iv.setOnClickListener(imageMessageClickListener);
 			}
 
@@ -321,14 +339,14 @@ public class MessageBodyView extends LinearLayout {
 		}
 
 	};
-	
-	
+
 	private OnClickListener imageMessageClickListener = new OnClickListener() {
 
 		@Override
 		public void onClick(View anchor) {
 			if (callback != null) {
-				callback.onMessageClicked(((VMessageImageItem)anchor.getTag()).getVm());
+				callback.onMessageClicked(((VMessageImageItem) anchor.getTag())
+						.getVm());
 			}
 		}
 
