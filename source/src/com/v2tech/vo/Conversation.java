@@ -68,7 +68,7 @@ public class Conversation {
 		return null;
 	}
 	
-	public String getMsg() {
+	public CharSequence getMsg() {
 		return null;
 	}
 	

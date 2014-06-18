@@ -109,7 +109,7 @@ public class GroupLayout extends LinearLayout {
 		return mConv.getExtId();
 	}
 
-	public void update(String content, String date, boolean flag) {
+	public void update(CharSequence content, String date, boolean flag) {
 		if (flag) {
 			mNotificatorIV.setVisibility(View.VISIBLE);
 		} else {
@@ -118,7 +118,7 @@ public class GroupLayout extends LinearLayout {
 
 		if (this.mConv instanceof ContactConversation) {
 			if (content != null) {
-				((ContactConversation) mConv).setMsg(content);
+				((ContactConversation) mConv).setMsg(content.toString());
 			}
 			if (date != null) {
 				((ContactConversation) mConv).setDate(date);

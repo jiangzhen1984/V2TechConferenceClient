@@ -679,7 +679,7 @@ public class ConversationView extends Activity {
 	private void queryAndAddMessage(final int msgId) {
 
 		VMessage m = MessageLoader.loadMessageById(mContext, msgId);
-		if (m == null || m.getFromUser().getmUserId() != this.user2Id) {
+		if (m == null || m.getFromUser().getmUserId() != this.user2Id || m.getGroupId() != this.groupId) {
 			return;
 		}
 		MessageBodyView mv = new MessageBodyView(this, m, true);

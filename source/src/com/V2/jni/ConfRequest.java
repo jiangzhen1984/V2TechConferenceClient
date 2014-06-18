@@ -80,7 +80,8 @@ public class ConfRequest {
 	 */
 	private void OnEnterConf(long nConfID, long nTime, String szConfData,
 			int nJoinResult) {
-		for (WeakReference<ConfRequestCallback> we : this.callbacks) {
+		for (int i = 0; i < this.callbacks.size(); i++) {
+			WeakReference<ConfRequestCallback> we = this.callbacks.get(i);
 			Object obj = we.get();
 			if (obj != null) {
 				ConfRequestCallback cb = (ConfRequestCallback) obj;

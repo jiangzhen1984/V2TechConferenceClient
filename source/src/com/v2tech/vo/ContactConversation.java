@@ -40,7 +40,7 @@ public class ContactConversation extends Conversation {
 	}
 
 	@Override
-	public String getMsg() {
+	public CharSequence getMsg() {
 		return msg;
 	}
 

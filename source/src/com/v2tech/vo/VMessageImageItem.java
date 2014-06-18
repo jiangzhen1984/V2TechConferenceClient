@@ -21,6 +21,7 @@ public class VMessageImageItem extends VMessageAbstractItem {
 	private String extension;
 	private Bitmap mFullQualityBitmap = null;
 	private Bitmap mCompressedBitmap = null;
+	private boolean isReceived;
 
 	public VMessageImageItem(VMessage vm, String filePath) {
 		super(vm);
@@ -60,6 +61,16 @@ public class VMessageImageItem extends VMessageAbstractItem {
 			}
 		}
 		return extension;
+	}
+	
+	
+
+	public boolean isReceived() {
+		return isReceived;
+	}
+
+	public void setReceived(boolean isReceived) {
+		this.isReceived = isReceived;
 	}
 
 	public String toXmlItem() {

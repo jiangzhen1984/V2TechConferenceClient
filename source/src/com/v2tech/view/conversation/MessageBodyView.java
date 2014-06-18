@@ -173,7 +173,7 @@ public class MessageBodyView extends LinearLayout {
 		for (VMessageAbstractItem item : items) {
 			// Add new layout for new line
 			if (item.isNewLine()) {
-			//	et.append("\n");
+				et.append("\n");
 			}
 			if (item.getType() == VMessageAbstractItem.ITEM_TYPE_TEXT) {
 				et.append(((VMessageTextItem) item).getText());
@@ -209,6 +209,7 @@ public class MessageBodyView extends LinearLayout {
 				// Actually Image item do not combine with other item,
 				// So we add special listener for image
 				iv.setOnClickListener(imageMessageClickListener);
+				mContentContainer.addView(line, ll);
 			}
 
 		}

@@ -324,7 +324,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher {
 					&& item.cov.getName().contains(searchKey)) {
 				newItemList.add(item);
 			} else if (item.cov.getMsg() != null
-					&& item.cov.getMsg().contains(searchKey)) {
+					&& item.cov.getMsg().toString().contains(searchKey)) {
 				newItemList.add(item);
 			}
 		}

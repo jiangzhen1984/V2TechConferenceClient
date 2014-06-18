@@ -1,17 +1,5 @@
 package com.v2tech.vo;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Bitmap.Config;
-
-import com.v2tech.util.BitmapUtil;
-import com.v2tech.util.V2Log;
 
 public abstract class VMessageAbstractItem {
 

@@ -24,7 +24,7 @@ public class ConferenceConversation extends Conversation {
 	}
 
 	@Override
-	public String getMsg() {
+	public CharSequence getMsg() {
 		if (g != null) {
 			User u = g.getOwnerUser();
 			//TODO need use localization

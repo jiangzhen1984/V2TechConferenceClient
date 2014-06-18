@@ -869,8 +869,8 @@ public class JNIService extends Service {
 			boolean isCache = false;
 			VMessage vm = null;
 			VMessageImageItem vait = null;
-			;
 			String uuid = nSeqId;
+			boolean receivedAllImageData = true;
 			synchronized (cacheImageMeta) {
 				for (VMessage v : cacheImageMeta) {
 					for (VMessageAbstractItem vai : v.getItems()) {
@@ -878,9 +878,15 @@ public class JNIService extends Service {
 							isCache = true;
 							vm = v;
 							vait = (VMessageImageItem) vai;
+							vait.setReceived(true);
+							if (!vait.isReceived()) {
+								receivedAllImageData = false;
+							}
 						}
 					}
-					cacheImageMeta.remove(v);
+					if (receivedAllImageData) {
+						cacheImageMeta.remove(v);
+					}
 				}
 			}
 			if (isCache == false) {

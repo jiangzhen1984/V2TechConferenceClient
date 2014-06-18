@@ -191,7 +191,9 @@ public class MessageLoader {
 		while (mCur.moveToNext()) {
 			VMessage vm = extractMsg(mCur);
 			loadVMessageItem(context, vm, itemType);
-			vimList.add(vm);
+			if (vm.getItems().size() > 0) {
+				vimList.add(vm);
+			}
 		}
 
 		mCur.close();
