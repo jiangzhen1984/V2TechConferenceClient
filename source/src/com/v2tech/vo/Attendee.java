@@ -195,6 +195,12 @@ public class Attendee implements Comparable<Attendee>{
 
 	@Override
 	public int compareTo(Attendee attendee) {
+		if (this.user == null) {
+			return 1;
+		}
+		if (attendee.user == null) {
+			return -1;
+		}
 		return this.user.getmUserId() == attendee.user.getmUserId() ? 0: 1;
 	}
 	
