@@ -304,11 +304,20 @@ public class ConversationView extends Activity {
 		scrollToPos(messageArray.size() - 1);
 	}
 
-	private void scrollToPos(int pos) {
+	private void scrollToPos(final int pos) {
 		if (pos < 0 || pos >= messageArray.size()) {
 			return;
 		}
-		mMessagesContainer.setSelection(pos);
+		mMessagesContainer.post(new Runnable() {
+
+			@Override
+			public void run() {
+				mMessagesContainer.setSelection(pos);
+				
+			}
+			
+		});
+		
 	}
 
 	private void cleanRangeBitmapCache(int before, int after) {
@@ -504,8 +513,9 @@ public class ConversationView extends Activity {
 			int start = et.getSpanStart(is);
 			if (index == start && is != null) {
 				if (textContent.length() != 0) {
+					int pos = start - textContent.length();
 					VMessageTextItem vmi = new VMessageTextItem(vm, textContent.toString());
-					if (start == 0) {
+					if (start == 0 || pos == 0 || et.charAt(pos - 1) == '\n') {
 						vmi.setNewLine(true);
 					}
 					textContent = new StringBuilder();

@@ -8,6 +8,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Rect;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
@@ -170,9 +171,10 @@ public class MessageBodyView extends LinearLayout {
 		mContentContainer.addView(et, ll);
 
 		List<VMessageAbstractItem> items = mMsg.getItems();
-		for (VMessageAbstractItem item : items) {
+		for (int i =0; items!= null && i < items.size(); i++) {
+			VMessageAbstractItem item = items.get(i);
 			// Add new layout for new line
-			if (item.isNewLine()) {
+			if (item.isNewLine() && et.length()!=0) {
 				et.append("\n");
 			}
 			if (item.getType() == VMessageAbstractItem.ITEM_TYPE_TEXT) {
@@ -197,19 +199,26 @@ public class MessageBodyView extends LinearLayout {
 						selectionCursor,
 						Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 				et.setText(builder);
+				et.setSelection(selectionCursor);
 			} else if (item.getType() == VMessageAbstractItem.ITEM_TYPE_IMAGE) {
-				LinearLayout line = new LinearLayout(this.getContext());
-				ImageView iv = new ImageView(this.getContext());
-				VMessageImageItem.Size si = ((VMessageImageItem) item)
-						.getCompressedBitmapSize();
-				line.addView(iv, new LinearLayout.LayoutParams(si.width,
-						si.height));
-				iv.setTag(item);
-				new LoadTask().execute(new ImageView[] { (ImageView) iv });
-				// Actually Image item do not combine with other item,
-				// So we add special listener for image
-				iv.setOnClickListener(imageMessageClickListener);
-				mContentContainer.addView(line, ll);
+				
+				Drawable dr =new BitmapDrawable(this.getContext().getResources(), ((VMessageImageItem) item).getCompressedBitmap());
+				dr.setBounds(0, 0, dr.getIntrinsicWidth(),
+						dr.getIntrinsicHeight());
+
+				int selectionCursor = et.getSelectionStart();
+				et.getText().insert(selectionCursor, ".");
+				selectionCursor = et.getSelectionStart();
+				
+				SpannableStringBuilder builder = new SpannableStringBuilder(
+						et.getText());
+				ImageSpan is = new ImageSpan(dr);
+				builder.setSpan(is, selectionCursor - ".".length(),
+						selectionCursor,
+						Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+				et.setText(builder);
+				et.setSelection(selectionCursor);
+				
 			}
 
 		}

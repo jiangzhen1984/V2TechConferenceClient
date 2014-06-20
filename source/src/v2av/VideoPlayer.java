@@ -190,6 +190,9 @@ public class VideoPlayer {
 	 */
 	@SuppressWarnings("unused")
 	private void OnPlayVideo() {
+		if (mSurfaceH  == null || !mSurfaceH.getSurface().isValid()) {
+			return;
+		}
 		mBitmap.copyPixelsFromBuffer(_playBuffer);
 		_playBuffer.rewind();
 

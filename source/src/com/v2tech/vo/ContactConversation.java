@@ -6,7 +6,7 @@ import android.graphics.Bitmap;
 public class ContactConversation extends Conversation {
 	
 	private User u;
-	private String msg;
+	private CharSequence msg;
 	private String date;
 	
 	public ContactConversation(User u) {
@@ -49,7 +49,7 @@ public class ContactConversation extends Conversation {
 		return date;
 	}
 	
-	public void setMsg(String msg) {
+	public void setMsg(CharSequence msg) {
 		this.msg = msg;
 	}
 	

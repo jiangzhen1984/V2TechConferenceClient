@@ -36,6 +36,7 @@ import com.v2tech.db.ContentDescriptor;
 import com.v2tech.service.BitmapManager;
 import com.v2tech.service.ConferenceService;
 import com.v2tech.service.GlobalHolder;
+import com.v2tech.util.Notificator;
 import com.v2tech.util.V2Log;
 import com.v2tech.view.conference.GroupLayout;
 import com.v2tech.view.conference.VideoActivityV2;
@@ -57,6 +58,8 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher {
 	private static final int REMOVE_CONVERSATION = 12;
 
 	private static final int SUB_ACTIVITY_CODE_VIDEO_ACTIVITY = 0;
+	
+	private NotificationListener notificationListener;
 
 	private Tab1BroadcastReceiver receiver = new Tab1BroadcastReceiver();
 	private IntentFilter intentFilter;
@@ -104,6 +107,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher {
 
 		pendingNotification = new ArrayList<Object[]>();
 
+		notificationListener = (NotificationListener)getActivity();
 		BitmapManager.getInstance().registerBitmapChangedListener(
 				this.bitmapChangedListener);
 
@@ -121,17 +125,22 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher {
 			mConversationsListView = (ListView) rootView
 					.findViewById(R.id.conversations_list_container);
 			mConversationsListView.setAdapter(adapter);
-		/*	
-			RelativeLayout rt = (RelativeLayout)rootView.findViewById(R.id.RelativeLayout2);
-			
-			mLoadingImageIV = new ImageView(getActivity());
-			mLoadingImageIV.setImageResource(R.drawable.progress_animation);
-			
-			RelativeLayout.LayoutParams rl = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
-			rl.addRule(RelativeLayout.CENTER_IN_PARENT);
-			rt.addView(mLoadingImageIV, rl);
-			
-			((AnimationDrawable) mLoadingImageIV.getDrawable()).start();*/
+			/*
+			 * RelativeLayout rt =
+			 * (RelativeLayout)rootView.findViewById(R.id.RelativeLayout2);
+			 * 
+			 * mLoadingImageIV = new ImageView(getActivity());
+			 * mLoadingImageIV.setImageResource(R.drawable.progress_animation);
+			 * 
+			 * RelativeLayout.LayoutParams rl = new
+			 * RelativeLayout.LayoutParams(RelativeLayout
+			 * .LayoutParams.WRAP_CONTENT,
+			 * RelativeLayout.LayoutParams.WRAP_CONTENT);
+			 * rl.addRule(RelativeLayout.CENTER_IN_PARENT);
+			 * rt.addView(mLoadingImageIV, rl);
+			 * 
+			 * ((AnimationDrawable) mLoadingImageIV.getDrawable()).start();
+			 */
 
 			// TextView tv = (TextView)
 			// rootView.findViewById(R.id.fragment_title);
@@ -318,7 +327,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher {
 		}
 		List<ScrollItem> newItemList = new ArrayList<ScrollItem>();
 		String searchKey = s == null ? "" : s.toString();
-		for (int i =0; mItemList != null && i < mItemList.size(); i++) {
+		for (int i = 0; mItemList != null && i < mItemList.size(); i++) {
 			ScrollItem item = mItemList.get(i);
 			if (item.cov.getName() != null
 					&& item.cov.getName().contains(searchKey)) {
@@ -478,7 +487,9 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher {
 			adapter.notifyDataSetChanged();
 		}
 
-		gl.update(content, date, showNotification);
+		if (gl != null) {
+			gl.update(content, date, showNotification);
+		}
 
 	}
 
@@ -492,7 +503,6 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher {
 							+ ContentDescriptor.Conversation.Cols.TYPE + "=?",
 					new String[] { id + "", type });
 			GlobalHolder.getInstance().removeConversation(type, id);
-			// FIXME remove notification?
 		} else if (Conversation.TYPE_CONFERNECE.equals(type)) {
 			// remove group from list
 			for (Group g : mConferenceList) {
@@ -514,6 +524,9 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher {
 		}
 
 		adapter.notifyDataSetChanged();
+		//notify tab to hide notificator
+		notificationListener.updateNotificator(type);
+		Notificator.cancelSystemNotification(getActivity(), PublicIntent.MESSAGE_NOTIFICATION_ID);
 
 	}
 
@@ -652,7 +665,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher {
 						.getStringExtra("action"))) {
 					return;
 				}
-				
+
 				Object[] ar = new Object[] { intent.getLongExtra("extId", 0),
 						intent.getExtras().getString("type"),
 						intent.getExtras().getString("content"),

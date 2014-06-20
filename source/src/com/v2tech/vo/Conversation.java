@@ -77,7 +77,7 @@ public class Conversation {
 	}
 	
 	
-	public void setMsg(String msg) {
+	public void setMsg(CharSequence msg) {
 	}
 	
 	public void setDate(String date) {

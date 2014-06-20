@@ -201,6 +201,8 @@ public class LoginActivity extends Activity {
 								mEmailView.getWindowToken(), 0);
 						imm.hideSoftInputFromWindow(
 								mPasswordView.getWindowToken(), 0);
+						mPasswordView.setError(null);
+						mEmailView.setError(null);
 					}
 				});
 

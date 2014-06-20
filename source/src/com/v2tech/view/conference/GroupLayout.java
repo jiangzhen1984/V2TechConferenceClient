@@ -5,7 +5,11 @@ import java.util.List;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.os.Handler;
+import android.text.Spannable;
+import android.text.SpannableStringBuilder;
+import android.text.style.ImageSpan;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,6 +19,8 @@ import android.widget.TextView;
 
 import com.v2tech.R;
 import com.v2tech.service.GlobalHolder;
+import com.v2tech.util.GlobalConfig;
+import com.v2tech.util.MessageUtil;
 import com.v2tech.view.PublicIntent;
 import com.v2tech.view.conversation.MessageLoader;
 import com.v2tech.vo.ConferenceConversation;
@@ -22,6 +28,7 @@ import com.v2tech.vo.ContactConversation;
 import com.v2tech.vo.Conversation;
 import com.v2tech.vo.VMessage;
 import com.v2tech.vo.VMessageAbstractItem;
+import com.v2tech.vo.VMessageFaceItem;
 import com.v2tech.vo.VMessageTextItem;
 
 public class GroupLayout extends LinearLayout {
@@ -144,20 +151,14 @@ public class GroupLayout extends LinearLayout {
 			if (vm == null) {
 				return;
 			}
-			List<VMessageAbstractItem> items  = vm.getItems();
+			CharSequence builder = MessageUtil.getMixedConversationContent(getContext(), vm);
 			mConv.setDate(vm.getDateTimeStr());
-			if (items.size() > 0) {
-				VMessageAbstractItem item = items.get(items.size() -1);
-				if (item.getType() == VMessageAbstractItem.ITEM_TYPE_TEXT) {
-					mConv.setMsg(((VMessageTextItem)item).getText());
-				} else {
-					//FIXME Use resource
-					mConv.setMsg("图片");
-				}
-				
-				//UPdate UI
-				update();
+			if (builder != null){
+				mConv.setMsg(builder);
 			}
+
+			//UPdate UI
+			update();
 			
 		}
 

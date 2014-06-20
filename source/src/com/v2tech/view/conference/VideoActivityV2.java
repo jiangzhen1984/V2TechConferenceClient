@@ -1654,6 +1654,7 @@ public class VideoActivityV2 extends Activity {
 
 		@Override
 		public void requestSendMsg(VMessage vm) {
+			vm.setGroupId(mGroupId);
 			vm.setToUser(new User(0));
 			vm.setFromUser(GlobalHolder.getInstance().getCurrentUser());
 			vm.setMsgCode(VMessage.VMESSAGE_CODE_CONF);
