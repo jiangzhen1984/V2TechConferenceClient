@@ -7,6 +7,7 @@ import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -63,6 +64,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 
 	private View mContactButtonContainer;
 	private View mSendMsgBottomButton;
+	private View mCallButtomButton;
 	private View mCreateConfButton;
 	private View mMoreDetailButton;
 
@@ -150,11 +152,11 @@ public class ContactDetail extends Activity implements OnTouchListener {
 
 		mMoreDetailButton = findViewById(R.id.contact_user_detail_2);
 		mMoreDetailButton.setOnClickListener(mMoreDetailListener);
-		
 
 		// view definition for non-self
 		mItemsContainer = findViewById(R.id.contact_detail_items_ly);
 		mSendMsgBottomButton = findViewById(R.id.contact_user_detail_send_bottom_button);
+		mCallButtomButton = findViewById(R.id.contact_user_detail_call_bottom_button);
 		mContactButtonContainer = findViewById(R.id.contact_button_ly);
 		mCreateConfButton = findViewById(R.id.contact_user_detail_create_conf_bottom_button);
 
@@ -252,6 +254,9 @@ public class ContactDetail extends Activity implements OnTouchListener {
 			mSignTV.setText(u.getSignature());
 
 			mSendMsgBottomButton.setOnClickListener(mSendMsgListener);
+			if (mCallButtomButton != null) {
+				//mCallButtomButton.setOnClickListener(mCallButtonListener);
+			}
 			mCreateConfButton.setOnClickListener(mCreateConfMsgListener);
 
 		}
@@ -280,6 +285,24 @@ public class ContactDetail extends Activity implements OnTouchListener {
 		public void onTextChanged(CharSequence arg0, int arg1, int arg2,
 				int arg3) {
 
+		}
+
+	};
+
+	private View.OnClickListener mCallButtonListener = new View.OnClickListener() {
+
+		@Override
+		public void onClick(View arg0) {
+			if (u.getTelephone() == null || u.getTelephone().isEmpty()) {
+				Intent intent = new Intent();
+				intent.setAction(Intent.ACTION_DIAL); // android.intent.action.DIAL
+				startActivity(intent);
+			} else {
+				Intent intent=new Intent(); 
+				intent.setAction(Intent.ACTION_CALL);
+				intent.setData(Uri.parse("tel:"+u.getTelephone()));
+				startActivity(intent);
+			}
 		}
 
 	};
@@ -326,9 +349,8 @@ public class ContactDetail extends Activity implements OnTouchListener {
 		}
 
 	};
-	
-	
-	private OnClickListener mMoreDetailListener = new  OnClickListener() {
+
+	private OnClickListener mMoreDetailListener = new OnClickListener() {
 
 		@Override
 		public void onClick(View view) {
@@ -337,7 +359,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 			i.putExtra("uid", mUid);
 			mContext.startActivity(i);
 		}
-		
+
 	};
 
 	private View.OnClickListener datePickerListener = new View.OnClickListener() {
@@ -363,7 +385,6 @@ public class ContactDetail extends Activity implements OnTouchListener {
 							isUpdating = true;
 							Message m = Message.obtain(lh, UPDATE_USER_INFO);
 							lh.dispatchMessage(m);
-							
 
 						}
 					}, c.get(Calendar.YEAR), c.get(Calendar.MONTH),

@@ -39,7 +39,7 @@ public class MessageUtil {
 								GlobalConfig.GLOBAL_FACE_ARRAY[((VMessageFaceItem) item)
 										.getIndex()]);
 				dr.setBounds(0, 0, dr.getIntrinsicWidth(),
-						dr.getIntrinsicHeight());
+						30);
 
 				builder.append(".");
 

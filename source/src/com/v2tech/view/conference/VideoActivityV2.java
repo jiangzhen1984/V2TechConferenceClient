@@ -1567,7 +1567,7 @@ public class VideoActivityV2 extends Activity {
 
 			} else if (action == MotionEvent.ACTION_UP) {
 				long currTime = System.currentTimeMillis();
-				if (currTime - lastPressedTime < 200) {
+				if (currTime - lastPressedTime < 400) {
 					zoom(view);
 					lastPressedTime = 0;
 				} else {

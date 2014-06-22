@@ -46,6 +46,7 @@ public class V2techContentProvider extends ContentProvider {
 
 	@Override
 	public Uri insert(Uri uri, ContentValues values) {
+		Uri newUri = null;
 		long id;
 		SQLiteDatabase db = mOpenHelper.getWritableDatabase();
 		int token = ContentDescriptor.URI_MATCHER.match(uri);
@@ -53,20 +54,24 @@ public class V2techContentProvider extends ContentProvider {
 		case ContentDescriptor.Messages.TOKEN:
 			id = db.insert(ContentDescriptor.Messages.NAME, null, values);
 			getContext().getContentResolver().notifyChange(uri, null);
-			return ContentDescriptor.Messages.CONTENT_URI.buildUpon()
+			newUri = ContentDescriptor.Messages.CONTENT_URI.buildUpon()
 					.appendPath(String.valueOf(id)).build();
+			break;
 		case ContentDescriptor.Conversation.TOKEN:
 			id = db.insert(ContentDescriptor.Conversation.NAME, null, values);
 			getContext().getContentResolver().notifyChange(uri, null);
-			return ContentDescriptor.Conversation.CONTENT_URI.buildUpon()
+			newUri = ContentDescriptor.Conversation.CONTENT_URI.buildUpon()
 					.appendPath(String.valueOf(id)).build();
+			break;
 		case ContentDescriptor.MessageItems.TOKEN:
 			id = db.insert(ContentDescriptor.MessageItems.NAME, null, values);
 			getContext().getContentResolver().notifyChange(uri, null);
-			return ContentDescriptor.MessageItems.CONTENT_URI.buildUpon()
+			newUri = ContentDescriptor.MessageItems.CONTENT_URI.buildUpon()
 					.appendPath(String.valueOf(id)).build();
+			break;
 		}
-		return null;
+		getContext().getContentResolver().notifyChange(newUri, null);
+		return newUri;
 	}
 
 	@Override

@@ -802,8 +802,8 @@ public class ConversationView extends Activity {
 				isLoading = true;
 				break;
 			case END_LOAD_MESSAGE:
-				adapter.notifyDataSetChanged();
 				scrollToPos(currentItemPos);
+				adapter.notifyDataSetChanged();
 				isLoading = false;
 				break;
 			case SEND_MESSAGE:

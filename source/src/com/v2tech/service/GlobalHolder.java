@@ -109,6 +109,16 @@ public class GlobalHolder {
 				if (u.getGender() != null) {
 					cu.setGender(u.getGender());
 				}
+				
+				if (u.getTelephone() != null) {
+					cu.setTelephone(u.getTelephone());
+				}
+				if (u.getCellPhone() != null) {
+					cu.setCellPhone(u.getCellPhone());
+				}
+				if (u.getAddress() != null) {
+					cu.setAddress(u.getAddress());
+				}
 				V2Log.i(" merge user information " + id +" "+cu.getName());
 				return cu;
 			}

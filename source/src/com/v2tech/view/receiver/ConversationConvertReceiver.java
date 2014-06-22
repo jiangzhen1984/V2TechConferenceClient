@@ -236,7 +236,7 @@ public class ConversationConvertReceiver extends BroadcastReceiver {
 		i.putExtra("extId", vm.getFromUser().getmUserId());
 		i.putExtra("type", Conversation.TYPE_CONTACT);
 		i.putExtra("content", vm.getAllTextContent());
-		i.putExtra("date", vm.getFullDateStr());
+		i.putExtra("date", vm.getDateTimeStr());
 		i.putExtra("noti", notif);
 		mContext.sendBroadcast(i);
 	}

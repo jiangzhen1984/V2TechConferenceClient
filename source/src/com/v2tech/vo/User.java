@@ -180,7 +180,7 @@ public class User implements Comparable<User> {
 					String[] ars = PinyinHelper.toHanyuPinyinStringArray(c,
 							format);
 					if (ars != null && ars.length > 0) {
-						abbra += ars[0];
+						abbra += ars[0].charAt(0);
 					}
 				} catch (BadHanyuPinyinOutputFormatCombination e) {
 					e.printStackTrace();

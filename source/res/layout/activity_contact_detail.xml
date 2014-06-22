@@ -802,7 +802,7 @@
                         android:paddingTop="10dp"
                         android:text="@string/contacts_user_detail_button_invite_video_conference"
                         android:textColor="@color/contact_detail_button_font_color"
-                        android:textSize="18sp" />
+                        android:textSize="16sp" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -813,6 +813,7 @@
                 </LinearLayout>
 
                 <LinearLayout
+                      android:id="@+id/contact_user_detail_call_bottom_button"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="0.5"
@@ -837,7 +838,7 @@
                         android:paddingTop="10dp"
                         android:text="@string/contacts_user_detail_button_call"
                         android:textColor="#c2c2c2"
-                        android:textSize="18sp" />
+                        android:textSize="16sp" />
                 </LinearLayout>
             </LinearLayout>
 
@@ -879,7 +880,7 @@
                         android:paddingTop="10dp"
                         android:text="@string/contacts_user_detail_button_invite_video_call"
                         android:textColor="#c2c2c2"
-                        android:textSize="18sp" />
+                        android:textSize="16sp" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -913,7 +914,7 @@
                         android:paddingTop="10dp"
                         android:text="@string/contacts_user_detail_button_send_sms"
                         android:textColor="#c2c2c2"
-                        android:textSize="18sp" />
+                        android:textSize="16sp" />
                 </LinearLayout>
             </LinearLayout>
 
@@ -956,7 +957,7 @@
                         android:paddingTop="10dp"
                         android:text="@string/contacts_user_detail_button_send_text_msg"
                         android:textColor="@color/contact_detail_button_font_color"
-                        android:textSize="18sp" />
+                        android:textSize="16sp" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -990,7 +991,7 @@
                         android:paddingTop="10dp"
                         android:text="@string/contacts_user_detail_button_send_file"
                         android:textColor="#c2c2c2"
-                        android:textSize="18sp" />
+                        android:textSize="16sp" />
                 </LinearLayout>
             </LinearLayout>
         </LinearLayout>

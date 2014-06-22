@@ -13,6 +13,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Handler;
+import android.text.Editable;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.style.ImageSpan;
@@ -30,6 +31,7 @@ import android.widget.Toast;
 import com.v2tech.R;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.util.GlobalConfig;
+import com.v2tech.util.MessageUtil;
 import com.v2tech.util.V2Log;
 import com.v2tech.vo.User;
 import com.v2tech.vo.VMessage;
@@ -162,8 +164,9 @@ public class MessageBodyView extends LinearLayout {
 
 	private void populateMessage() {
 
-		EditText et = new EditText(this.getContext());
-		et.setEnabled(false);
+		TextView et = new TextView(this.getContext());
+		et.setOnLongClickListener(messageLongClickListener);
+		et.setOnClickListener(imageMessageClickListener);
 		et.setBackgroundColor(Color.TRANSPARENT);
 		LinearLayout.LayoutParams ll = new LinearLayout.LayoutParams(
 				LinearLayout.LayoutParams.WRAP_CONTENT,
@@ -188,42 +191,35 @@ public class MessageBodyView extends LinearLayout {
 				dr.setBounds(0, 0, dr.getIntrinsicWidth(),
 						dr.getIntrinsicHeight());
 
-				int selectionCursor = et.getSelectionStart();
-				et.getText().insert(selectionCursor, ".");
-				selectionCursor = et.getSelectionStart();
+				et.append(".");
 				
 				SpannableStringBuilder builder = new SpannableStringBuilder(
 						et.getText());
 				ImageSpan is = new ImageSpan(dr);
-				builder.setSpan(is, selectionCursor - ".".length(),
-						selectionCursor,
+				builder.setSpan(is, et.getText().length() - 1,
+						et.getText().length(),
 						Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 				et.setText(builder);
-				et.setSelection(selectionCursor);
 			} else if (item.getType() == VMessageAbstractItem.ITEM_TYPE_IMAGE) {
 				
 				Drawable dr =new BitmapDrawable(this.getContext().getResources(), ((VMessageImageItem) item).getCompressedBitmap());
 				dr.setBounds(0, 0, dr.getIntrinsicWidth(),
 						dr.getIntrinsicHeight());
-
-				int selectionCursor = et.getSelectionStart();
-				et.getText().insert(selectionCursor, ".");
-				selectionCursor = et.getSelectionStart();
-				
+				et.append(".");
 				SpannableStringBuilder builder = new SpannableStringBuilder(
 						et.getText());
 				ImageSpan is = new ImageSpan(dr);
-				builder.setSpan(is, selectionCursor - ".".length(),
-						selectionCursor,
+				builder.setSpan(is,et.getText().length() - 1,
+						et.getText().length(),
 						Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 				et.setText(builder);
-				et.setSelection(selectionCursor);
 				
 			}
 
 		}
 
 		mContentContainer.setTag(this.mMsg);
+		
 	}
 
 	private void updateSelectedBg(boolean selected) {
@@ -271,10 +267,11 @@ public class MessageBodyView extends LinearLayout {
 					tv.setOnClickListener(new OnClickListener() {
 						@Override
 						public void onClick(View view) {
+							
 							ClipboardManager clipboard = (ClipboardManager) getContext()
 									.getSystemService(Context.CLIPBOARD_SERVICE);
 							ClipData clip = ClipData.newPlainText("label",
-									mMsg.getAllTextContent());
+									MessageUtil.getMixedConversationContent(getContext(), mMsg));
 							clipboard.setPrimaryClip(clip);
 							pw.dismiss();
 							Toast.makeText(getContext(),
@@ -355,8 +352,11 @@ public class MessageBodyView extends LinearLayout {
 		@Override
 		public void onClick(View anchor) {
 			if (callback != null) {
-				callback.onMessageClicked(((VMessageImageItem) anchor.getTag())
-						.getVm());
+			//	VMessage vm  =(VMessage) anchor.getTag();
+				List<VMessageImageItem> vl = mMsg.getImageItems();
+				if (vl != null && vl.size() > 0 ){
+					callback.onMessageClicked(mMsg);
+				}
 			}
 		}
 

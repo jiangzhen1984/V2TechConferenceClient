@@ -14,8 +14,10 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.database.ContentObserver;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -58,7 +60,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher {
 	private static final int REMOVE_CONVERSATION = 12;
 
 	private static final int SUB_ACTIVITY_CODE_VIDEO_ACTIVITY = 0;
-	
+
 	private NotificationListener notificationListener;
 
 	private Tab1BroadcastReceiver receiver = new Tab1BroadcastReceiver();
@@ -107,12 +109,21 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher {
 
 		pendingNotification = new ArrayList<Object[]>();
 
-		notificationListener = (NotificationListener)getActivity();
+		notificationListener = (NotificationListener) getActivity();
 		BitmapManager.getInstance().registerBitmapChangedListener(
 				this.bitmapChangedListener);
 
 		mConferenceList = new HashSet<Group>();
 		Message.obtain(mHandler, FILL_CONFS_LIST).sendToTarget();
+
+		if (mCurrentTabFlag == Conversation.TYPE_CONTACT) {
+//			this.getActivity()
+//					.getContentResolver()
+//					.registerContentObserver(
+//							ContentDescriptor.Messages.CONTENT_URI, true,
+//							messageObserver);
+		}
+
 	}
 
 	@Override
@@ -179,6 +190,8 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher {
 		mItemList.clear();
 		BitmapManager.getInstance().unRegisterBitmapChangedListener(
 				this.bitmapChangedListener);
+//		this.getActivity().getContentResolver()
+//				.unregisterContentObserver(messageObserver);
 	}
 
 	@Override
@@ -524,9 +537,10 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher {
 		}
 
 		adapter.notifyDataSetChanged();
-		//notify tab to hide notificator
+		// notify tab to hide notificator
 		notificationListener.updateNotificator(type);
-		Notificator.cancelSystemNotification(getActivity(), PublicIntent.MESSAGE_NOTIFICATION_ID);
+		Notificator.cancelSystemNotification(getActivity(),
+				PublicIntent.MESSAGE_NOTIFICATION_ID);
 
 	}
 
@@ -604,6 +618,15 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher {
 			AlertDialog ad = builder.create();
 			ad.show();
 			return true;
+		}
+
+	};
+
+	private ContentObserver messageObserver = new ContentObserver(mHandler) {
+
+		@Override
+		public void onChange(boolean selfChange) {
+			super.onChange(selfChange);
 		}
 
 	};

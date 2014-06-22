@@ -4,13 +4,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.content.Context;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.TextView;
 
 import com.v2tech.R;
 import com.v2tech.service.GlobalHolder;
@@ -28,7 +31,7 @@ public class VideoMsgChattingLayout extends LinearLayout {
 	private ListView mMsgContainer;
 	private ChattingListener listener;
 	private View mSendButton;
-	private TextView mContentTV;
+	private EditText mContentTV;
 	private View mPinButton;
 	private List<CommonAdapterItemWrapper> messageArray;
 	private CommonAdapter adapter;
@@ -63,7 +66,7 @@ public class VideoMsgChattingLayout extends LinearLayout {
 
 		this.mMsgContainer = (ListView) view
 				.findViewById(R.id.video_msg_container);
-		this.mContentTV = (TextView) view
+		this.mContentTV = (EditText) view
 				.findViewById(R.id.video_msg_chatting_layout_msg_content);
 		this.mSendButton = view
 				.findViewById(R.id.video_msg_chatting_layout_send_button);
@@ -85,6 +88,9 @@ public class VideoMsgChattingLayout extends LinearLayout {
 			}
 
 		});
+		
+		mContentTV.setOnKeyListener(keyListener);
+		
 
 		rootView = this;
 	}
@@ -136,6 +142,20 @@ public class VideoMsgChattingLayout extends LinearLayout {
 		((ImageView) mPinButton)
 				.setImageResource(R.drawable.pin_button_selector);
 	}
+	
+	
+	private OnKeyListener keyListener = new OnKeyListener() {
+
+		@Override
+		public boolean onKey(View view, int actionId, KeyEvent event) {
+			if (actionId == EditorInfo.IME_ACTION_DONE) {
+				InputMethodManager imm = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+				imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+			}
+			return false;
+		}
+		
+	};
 
 	private OnClickListener mRequestFixedListener = new OnClickListener() {
 

@@ -465,8 +465,21 @@ public class LoginActivity extends Activity {
 
 	private Dialog mProgressDialog;
 
+	private RotateAnimation animation;
+
 	private void showProgress(final boolean show) {
+		if (animation == null) {
+			animation = new RotateAnimation(0f, 359f,
+					Animation.RELATIVE_TO_SELF, 0.5f,
+					Animation.RELATIVE_TO_SELF, 0.5f);
+			animation.setDuration(500);
+			animation.setRepeatCount(RotateAnimation.INFINITE);
+			animation.setRepeatMode(RotateAnimation.RESTART);
+			LinearInterpolator lin = new LinearInterpolator();
+			animation.setInterpolator(lin);
+		}
 		if (show == false) {
+			animation.cancel();
 			if (mProgressDialog != null) {
 				mProgressDialog.dismiss();
 				return;
@@ -485,14 +498,6 @@ public class LoginActivity extends Activity {
 		ll.setBackgroundColor(Color.TRANSPARENT);
 		ll.setOrientation(LinearLayout.VERTICAL);
 
-		RotateAnimation animation = new RotateAnimation(0f, 359f,
-				Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF,
-				0.5f);
-		animation.setDuration(500);
-		animation.setRepeatCount(RotateAnimation.INFINITE);
-		animation.setRepeatMode(RotateAnimation.RESTART);
-		LinearInterpolator lin = new LinearInterpolator();
-		animation.setInterpolator(lin);
 		ImageView iv = new ImageView(mContext);
 		iv.setImageResource(R.drawable.spin_black_70);
 		iv.setPadding(60, 60, 60, 60);
