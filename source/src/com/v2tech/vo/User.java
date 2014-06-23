@@ -522,7 +522,11 @@ public class User implements Comparable<User> {
 			Element element;
 			for (int i = 0; i < gList.getLength(); i++) {
 				element = (Element) gList.item(i);
-				User u = new User(Long.parseLong(element.getAttribute("id")),
+				String strId = element.getAttribute("id");
+				if (strId == null || strId.isEmpty()) {
+					continue;
+				}
+				User u = new User(Long.parseLong(strId),
 						getAttribute(element, "nickname"), getAttribute(
 								element, "email"),
 						getAttribute(element, "sign"));

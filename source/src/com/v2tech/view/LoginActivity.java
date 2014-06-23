@@ -464,7 +464,7 @@ public class LoginActivity extends Activity {
 	}
 
 	private Dialog mProgressDialog;
-
+	private ImageView iv;
 	private RotateAnimation animation;
 
 	private void showProgress(final boolean show) {
@@ -488,6 +488,7 @@ public class LoginActivity extends Activity {
 
 		if (mProgressDialog != null) {
 			if (!mProgressDialog.isShowing()) {
+				iv.startAnimation(animation);
 				mProgressDialog.show();
 			}
 			return;
@@ -498,7 +499,7 @@ public class LoginActivity extends Activity {
 		ll.setBackgroundColor(Color.TRANSPARENT);
 		ll.setOrientation(LinearLayout.VERTICAL);
 
-		ImageView iv = new ImageView(mContext);
+		iv = new ImageView(mContext);
 		iv.setImageResource(R.drawable.spin_black_70);
 		iv.setPadding(60, 60, 60, 60);
 		ll.addView(iv, new LinearLayout.LayoutParams(

@@ -44,14 +44,12 @@ import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.WindowManager;
-import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.view.animation.ScaleAnimation;
 import android.view.animation.TranslateAnimation;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.PopupWindow.OnDismissListener;
 import android.widget.RelativeLayout;
@@ -133,8 +131,12 @@ public class VideoActivityV2 extends Activity {
 
 	private Context mContext;
 	private List<SurfaceViewW> mCurrentShowedSV;
-	private RelativeLayout mVideoLayoutMain;
+	
+	private RelativeLayout mRootContainer;
+
+	private FrameLayout mContentLayoutMain;
 	private RelativeLayout mVideoLayout;
+	private FrameLayout mSubWindowLayout;
 
 	private TextView mGroupNameTV;
 	private ImageView mSettingIV;
@@ -149,9 +151,7 @@ public class VideoActivityV2 extends Activity {
 	private VideoDocLayout mDocContainer;
 
 	private ImageView mMenuButton;
-	private LinearLayout mMenuButtonContainer;
-	private LinearLayout mMenuLine;
-	private LinearLayout mVideoLine;
+	private View mMenuButtonContainer;
 
 	private View mMenuInviteAttendeeButton;
 	private View mMenuMessageButton;
@@ -199,10 +199,15 @@ public class VideoActivityV2 extends Activity {
 		dm = new DisplayMetrics();
 		getWindowManager().getDefaultDisplay().getMetrics(dm);
 
-		this.mVideoLayoutMain = (RelativeLayout) findViewById(R.id.video_layout_root);
+		this.mRootContainer = (RelativeLayout) findViewById(R.id.video_layout_root);
+		this.mContentLayoutMain = (FrameLayout) findViewById(R.id.in_meeting_content_main);
 		this.mCurrentShowedSV = new ArrayList<SurfaceViewW>();
 
-		this.mVideoLayout = (RelativeLayout) findViewById(R.id.in_metting_video_main);
+		this.mVideoLayout = new RelativeLayout(this);
+		mContentLayoutMain.addView(this.mVideoLayout);
+		this.mSubWindowLayout = new FrameLayout(this);
+		mContentLayoutMain.addView(this.mSubWindowLayout);
+
 		// setting button
 		this.mSettingIV = (ImageView) findViewById(R.id.in_meeting_setting_iv);
 		this.mSettingIV.setOnClickListener(mShowSettingListener);
@@ -215,9 +220,6 @@ public class VideoActivityV2 extends Activity {
 		// conference name text view
 		this.mGroupNameTV = (TextView) findViewById(R.id.in_meeting_name);
 
-		this.mMenuLine = (LinearLayout) findViewById(R.id.in_meeting_menu_separation_line);
-		this.mVideoLine = (LinearLayout) findViewById(R.id.in_meeting_video_separation_line1);
-
 		// local camera surface view
 		this.mLocalSurface = (SurfaceView) findViewById(R.id.local_surface_view);
 
@@ -228,7 +230,7 @@ public class VideoActivityV2 extends Activity {
 		// show document layout) button
 		mMenuButton = (ImageView) findViewById(R.id.in_meeting_menu_button);
 		mMenuButton.setOnClickListener(mMenuButtonListener);
-		mMenuButtonContainer = (LinearLayout) findViewById(R.id.in_meeting_menu_layout);
+		mMenuButtonContainer = findViewById(R.id.in_meeting_menu_layout);
 		// show message layout button
 		mMenuMessageButton = findViewById(R.id.in_meeting_menu_show_msg_button);
 		mMenuMessageButton.setTag("msg");
@@ -270,6 +272,358 @@ public class VideoActivityV2 extends Activity {
 
 	}
 
+
+
+	@Override
+	protected void onStart() {
+		super.onStart();
+
+		// If doesn't enter conference, then request
+		if (!inFlag) {
+			requestEnterConf();
+		}
+		suspendOrResume(true);
+
+		NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+		// mId allows you to update the notification later on.
+		mNotificationManager.cancel(PublicIntent.VIDEO_NOTIFICATION_ID);
+		// keep screen on
+		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
+		// Adjust content layout
+		adjustContentLayout();
+	}
+
+	private void initConfsListener() {
+		IntentFilter filter = new IntentFilter();
+		filter.addCategory(JNI_EVENT_VIDEO_CATEGORY);
+		filter.addAction(JNI_EVENT_VIDEO_CATEGORY_OPEN_VIDEO_EVENT_ACTION);
+		filter.addAction(JNIService.JNI_BROADCAST_NEW_CONF_MESSAGE);
+		filter.addAction(JNIService.JNI_BROADCAST_GROUP_USER_REMOVED);
+		filter.addAction(JNIService.JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION);
+		filter.addAction(JNIService.JNI_BROADCAST_GROUP_USER_ADDED);
+		filter.addAction(JNIService.JNI_BROADCAST_CONNECT_STATE_NOTIFICATION);
+		filter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
+		filter.addAction(PublicIntent.PREPARE_FINISH_APPLICATION);
+		filter.addCategory(PublicIntent.DEFAULT_CATEGORY);
+		filter.addAction(JNIService.JNI_BROADCAST_USER_STATUS_NOTIFICATION);
+		mContext.registerReceiver(mConfUserChangeReceiver, filter);
+
+		// register listener for conference service
+		cb.registerPermissionUpdateListener(mVideoHandler,
+				NOTIFY_USER_PERMISSION_UPDATED, null);
+		cb.registerAttendeeListener(this.mVideoHandler, ATTENDEE_LISTENER, null);
+		cb.registerKickedConfListener(mVideoHandler, NOTIFICATION_KICKED, null);
+		cb.registerSyncDesktopListener(mVideoHandler,
+				DESKTOP_SYNC_NOTIFICATION, null);
+
+		cb.registerVideoMixerListener(mVideoHandler, VIDEO_MIX_NOTIFICATION,
+				null);
+
+		cb.registerAttendeeDeviceListener(mVideoHandler,
+				ATTENDEE_DEVICE_LISTENER, null);
+
+		// Register listen to document notification
+		ds.registerNewDocNotification(mVideoHandler, NEW_DOC_NOTIFICATION, null);
+		ds.registerDocDisplayNotification(mVideoHandler,
+				DOC_DOWNLOADED_NOTIFICATION, null);
+		ds.registerdocPageActiveNotification(mVideoHandler,
+				DOC_PAGE_ACTIVITE_NOTIFICATION, null);
+		ds.registerDocPageNotification(mVideoHandler, DOC_PAGE_NOTIFICATION,
+				null);
+		ds.registerDocClosedNotification(mVideoHandler,
+				DOC_CLOSED_NOTIFICATION, null);
+		ds.registerDocPageAddedNotification(mVideoHandler,
+				DOC_PAGE_ADDED_NOTIFICATION, null);
+		ds.registerPageCanvasUpdateNotification(mVideoHandler,
+				DOC_PAGE_CANVAS_NOTIFICATION, null);
+	}
+
+	private void init() {
+		mGroupId = this.getIntent().getLongExtra("gid", 0);
+		if (mGroupId <= 0) {
+			Toast.makeText(this, R.string.error_in_meeting_invalid_gid,
+					Toast.LENGTH_LONG).show();
+			return;
+		}
+
+		cg = (ConferenceGroup) GlobalHolder.getInstance().getGroupById(
+				GroupType.CONFERENCE, mGroupId);
+		if (cg == null) {
+			V2Log.e(" doesn't receive group information  yet");
+			return;
+		}
+		conf = new Conference(mGroupId, cg.getOwner(), cg.getName(),
+				cg.getCreateDate(), null, null);
+		conf.setChairman(cg.getChairManUId());
+		mGroupNameTV.setText(cg.getName());
+
+		Group confGroup = GlobalHolder.getInstance().findGroupById(
+				this.mGroupId);
+		// load conference attendee list
+		if (confGroup != null) {
+			List<User> l = new ArrayList<User>(confGroup.getUsers());
+			for (User u : l) {
+				mAttendeeList.add(new Attendee(u));
+			}
+		}
+		V2Log.i(" Conference size:" + mAttendeeList.size());
+
+		mPendingMessageList = new ArrayList<VMessage>();
+
+		mPendingPermissionUpdateList = new ArrayList<PermissionUpdateIndication>();
+	}
+
+	private void notificateConversationUpdate() {
+		Intent i = new Intent(PublicIntent.REQUEST_UPDATE_CONVERSATION);
+		i.addCategory(PublicIntent.DEFAULT_CATEGORY);
+		i.putExtra("type", Conversation.TYPE_CONFERNECE);
+		i.putExtra("extId", this.mGroupId);
+		i.putExtra("noti", false);
+		mContext.sendBroadcast(i);
+	}
+
+	/**
+	 * Update speaker icon and state
+	 * 
+	 * @param flag
+	 */
+	private void updateSpeakerState(boolean flag) {
+		isSpeaking = flag;
+		// set flag to speaking icon
+		if (flag) {
+			mSpeakerIV.setImageResource(R.drawable.speaking_button);
+		} else {
+			mSpeakerIV.setImageResource(R.drawable.mute_button);
+		}
+	}
+
+	private void showOrHideSubWindow(View content) {
+		View currentChild = null;
+		if (mSubWindowLayout.getChildCount() > 0) {
+			currentChild = mSubWindowLayout.getChildAt(0);
+		}
+
+		// Update content
+		if (currentChild != content) {
+			mSubWindowLayout.removeAllViews();
+			FrameLayout.LayoutParams fl = new FrameLayout.LayoutParams(
+					FrameLayout.LayoutParams.MATCH_PARENT,
+					FrameLayout.LayoutParams.MATCH_PARENT);
+			fl.leftMargin = 0;
+			fl.topMargin = 0;
+			mSubWindowLayout.addView(content, fl);
+		}
+
+		int visible = View.VISIBLE;
+		if (mSubWindowLayout.getVisibility() == View.VISIBLE) {
+			visible = View.GONE;
+		} else if (mSubWindowLayout.getVisibility() == View.GONE) {
+			visible = View.VISIBLE;
+		}
+
+		//Show or hide sub window with animation
+		Animation animation = null;
+		if (visible == View.GONE) {
+			animation = new TranslateAnimation(Animation.RELATIVE_TO_SELF,
+					1.0f, Animation.RELATIVE_TO_SELF, 0.0f,
+					Animation.RELATIVE_TO_SELF, 0.0f,
+					Animation.RELATIVE_TO_SELF, 0f);
+		} else if (visible == View.VISIBLE) {
+			animation = new TranslateAnimation(Animation.RELATIVE_TO_SELF,
+					0.0f, Animation.RELATIVE_TO_SELF, 1.0f,
+					Animation.RELATIVE_TO_SELF, 0.0f,
+					Animation.RELATIVE_TO_SELF, 0f);
+
+		}
+		animation.setDuration(400);
+		mSubWindowLayout.startAnimation(animation);
+		mSubWindowLayout.setVisibility(visible);
+		adjustContentLayout();
+	}
+
+
+	
+	private View initMsgLayout() {
+		if (mMessageContainer != null)  {
+			return mMessageContainer;
+		}
+		mMessageContainer = new VideoMsgChattingLayout(this, cg);
+		mMessageContainer.setListener(subViewListener);
+		
+		//Populate message
+		for (int i = 0; i < mPendingMessageList.size(); i++) {
+			mMessageContainer.addNewMessage(mPendingMessageList.get(i));
+		}
+		mMessageContainer.requestScrollToNewMessage();
+		mPendingMessageList.clear();
+		return mMessageContainer;
+	}
+
+	
+	private View initAttendeeContainer() {
+		if (mAttendeeContainer == null) {
+			mAttendeeContainer = new VideoAttendeeListLayout(this);
+			mAttendeeContainer.setAttendsList(this.mAttendeeList);
+			synchronized (mMixerWrapper) {
+				for (MixerWrapper mw : mMixerWrapper.values()) {
+					mAttendeeContainer.updateEnteredAttendee(mw.amd);
+				}
+			}
+
+			mAttendeeContainer.bringToFront();
+			mAttendeeContainer.setVisibility(View.GONE);
+			mAttendeeContainer.setListener(subViewListener);
+			// Initialize speaking
+			if (isSpeaking) {
+				mAttendeeContainer.updateAttendeeSpeakingState(new Attendee(
+						GlobalHolder.getInstance().getCurrentUser()),
+						ConferencePermission.SPEAKING, PermissionState.GRANTED);
+			}
+			// Update pending attendee state
+			for (PermissionUpdateIndication ind : mPendingPermissionUpdateList) {
+				updateAttendeePermissionStateIcon(ind);
+			}
+			mPendingPermissionUpdateList.clear();
+
+		}
+
+		return mAttendeeContainer;
+	}
+
+
+	private View initDocLayout() {
+		
+
+		if (mDocContainer == null) {
+			mDocContainer = new VideoDocLayout(this);
+			mDocContainer.setListener(subViewListener);
+			synchronized (mDocs) {
+				for (Entry<String, V2Doc> e : mDocs.entrySet()) {
+					mDocContainer.addDoc(e.getValue());
+				}
+			}
+			mDocContainer.updateCurrentDoc(mCurrentActivateDoc);
+			Group g = GlobalHolder.getInstance().findGroupById(mGroupId);
+			if (g != null && g instanceof ConferenceGroup) {
+				mDocContainer.updateSyncStatus(((ConferenceGroup) g).isSyn());
+			}
+
+		}
+		
+		return mDocContainer;
+	}
+
+
+	private View initInvitionContainer() {
+		if (mInvitionContainer == null) {
+			mInvitionContainer = new VideoInvitionAttendeeLayout(this, conf);
+			mInvitionContainer.setListener(subViewListener);
+
+		}
+		return mInvitionContainer;
+	}
+	
+	
+	
+	
+	
+	private void adjustContentLayout() {
+		int width = 0, height = 0;
+		int marginLeft = 0;
+
+		// Calculate offset
+		if (mMenuButtonContainer.getVisibility() == View.VISIBLE) {
+			if (mMenuButtonContainer.getMeasuredWidth() == 0) {
+				mMenuButtonContainer.measure(View.MeasureSpec.UNSPECIFIED,
+						View.MeasureSpec.UNSPECIFIED);
+			}
+			marginLeft = mMenuButtonContainer.getMeasuredWidth();
+		}
+
+		if (mSubWindowLayout.getVisibility() == View.VISIBLE) {
+			FrameLayout.LayoutParams fl = (FrameLayout.LayoutParams) mSubWindowLayout
+					.getLayoutParams();
+			if (mContentLayoutMain.getMeasuredWidth() == 0) {
+				mContentLayoutMain.measure(View.MeasureSpec.UNSPECIFIED,
+						View.MeasureSpec.UNSPECIFIED);
+			}
+			width = mContentLayoutMain.getMeasuredWidth();
+			height = mContentLayoutMain.getMeasuredHeight();
+
+			//If sub window request full screen 
+			if (mSubWindowLayout.getTag() != null && mSubWindowLayout.getTag().equals("full")) {
+				width = (width - marginLeft);
+			} else {
+				width = (width - marginLeft) / 2;
+			}
+
+			if (fl == null) {
+				fl = new FrameLayout.LayoutParams(width, height);
+			} else {
+				fl.width = width;
+				fl.height = height;
+			}
+			fl.leftMargin = marginLeft;
+
+			mContentLayoutMain.updateViewLayout(mSubWindowLayout, fl);
+
+			// Update left offset for video layout
+			if (mSubWindowLayout.getTag() != null && mSubWindowLayout.getTag().equals("fixed")) {
+				marginLeft += width;
+			}
+		}
+
+		FrameLayout.LayoutParams fl = (FrameLayout.LayoutParams) mVideoLayout
+				.getLayoutParams();
+		width = mContentLayoutMain.getMeasuredWidth() - marginLeft;
+		height = mContentLayoutMain.getMeasuredHeight();
+		if (fl == null) {
+			fl = new FrameLayout.LayoutParams(width, height);
+		} else {
+			fl.width = width;
+			fl.height = height;
+		}
+		fl.leftMargin = marginLeft;
+
+		mContentLayoutMain.updateViewLayout(mVideoLayout, fl);
+		//
+		this.adjustLayout();
+
+		// make sure local is in front of any view
+		localSurfaceViewLy.bringToFront();
+	}
+	
+	/**
+	 * Call this before {@link #adjustContentLayout} 
+	 */
+	private void requestSubViewFixed() {
+		mSubWindowLayout.setTag("fix");
+	}
+	
+	/**
+	 * Call this before {@link #adjustContentLayout} 
+	 */
+	private void requestSubViewFloat() {
+		mSubWindowLayout.setTag("float");
+	}
+	
+	/**
+	 * Call this before {@link #adjustContentLayout} 
+	 */
+	private void requestSubViewFillScreen() {
+		mSubWindowLayout.setTag("full");
+	}
+	
+	/**
+	 * Call this before {@link #adjustContentLayout} 
+	 */
+	private void requestSubViewRestore() {
+		mSubWindowLayout.setTag("restore");
+	}
+	
+	
+
 	private OnClickListener mMenuButtonListener = new OnClickListener() {
 
 		@Override
@@ -296,6 +650,8 @@ public class VideoActivityV2 extends Activity {
 				((ImageView) view)
 						.setImageResource(R.drawable.video_menu_button_pressed);
 			}
+
+			adjustContentLayout();
 		}
 
 	};
@@ -304,36 +660,69 @@ public class VideoActivityV2 extends Activity {
 
 		@Override
 		public void onClick(View v) {
+			View content = null;
 			if (v.getTag().equals("msg")) {
-				showOrHidenAttendeeContainer(View.GONE);
-				showOrHidenDocContainer(View.GONE);
-				showOrHidenInvitionContainer(View.GONE);
-				showOrHidenMsgContainer(View.VISIBLE);
+				content = initMsgLayout();
+				
+				//Update button background
+				mMenuMessageButton.setBackgroundColor(mContext.getResources()
+						.getColor(R.color.confs_common_bg));
+				mMenuAttendeeButton.setBackgroundColor(Color.rgb(255, 255,
+						255));
+				mMenuDocButton.setBackgroundColor(Color.rgb(255, 255,
+						255));
+				mMenuInviteAttendeeButton.setBackgroundColor(Color.rgb(255, 255,
+						255));
+				
 			} else if (v.getTag().equals("attendee")) {
-				showOrHidenMsgContainer(View.GONE);
-				showOrHidenDocContainer(View.GONE);
-				showOrHidenInvitionContainer(View.GONE);
-				showOrHidenAttendeeContainer(View.VISIBLE);
+				content =initAttendeeContainer();
+				
+				mMenuAttendeeButton.setBackgroundColor(mContext.getResources()
+						.getColor(R.color.confs_common_bg));
+				mMenuInviteAttendeeButton.setBackgroundColor(Color.rgb(255, 255,
+						255));
+				mMenuDocButton.setBackgroundColor(Color.rgb(255, 255,
+						255));
+				mMenuMessageButton.setBackgroundColor(Color.rgb(255, 255,
+						255));
+				
 			} else if (v.getTag().equals("doc")) {
-				showOrHidenAttendeeContainer(View.GONE);
-				showOrHidenMsgContainer(View.GONE);
-				showOrHidenInvitionContainer(View.GONE);
-				showOrHidenDocContainer(View.VISIBLE);
+				content =initDocLayout();
+				mMenuDocButton.setBackgroundColor(mContext.getResources().getColor(
+						R.color.confs_common_bg));
+				mMenuInviteAttendeeButton.setBackgroundColor(Color.rgb(255, 255,
+						255));
+				mMenuMessageButton.setBackgroundColor(Color.rgb(255, 255,
+						255));
+				mMenuAttendeeButton.setBackgroundColor(Color.rgb(255, 255,
+						255));
+				
 			} else if (v.getTag().equals("invition")) {
 				if (cg.isCanInvitation()) {
-					showOrHidenDocContainer(View.GONE);
-					showOrHidenAttendeeContainer(View.GONE);
-					showOrHidenMsgContainer(View.GONE);
-					showOrHidenInvitionContainer(View.VISIBLE);
+					content = initInvitionContainer();
+					mMenuInviteAttendeeButton.setBackgroundColor(mContext
+							.getResources().getColor(R.color.confs_common_bg));
+					mMenuAttendeeButton.setBackgroundColor(Color.rgb(255, 255,
+							255));
+					mMenuDocButton.setBackgroundColor(Color.rgb(255, 255,
+							255));
+					mMenuMessageButton.setBackgroundColor(Color.rgb(255, 255,
+							255));
+					
+					
 				} else {
-					showOrHidenInvitionContainer(View.GONE);
 					Toast.makeText(mContext,
 							R.string.error_no_permission_to_invitation,
 							Toast.LENGTH_SHORT).show();
 				}
 
 			}
-			//Make sure local camera is first front of all
+			
+			if (content != null) {
+				showOrHideSubWindow(content);
+			}
+			
+			// Make sure local camera is first front of all
 			localSurfaceViewLy.bringToFront();
 		}
 
@@ -576,430 +965,10 @@ public class VideoActivityV2 extends Activity {
 		}
 
 	};
-
-	@Override
-	protected void onStart() {
-		super.onStart();
-
-		// If doesn't enter conference, then request
-		if (!inFlag) {
-			requestEnterConf();
-		}
-		suspendOrResume(true);
-
-		NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-		// mId allows you to update the notification later on.
-		mNotificationManager.cancel(PublicIntent.VIDEO_NOTIFICATION_ID);
-		// keep screen on
-		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-	}
-
-	private void initConfsListener() {
-		IntentFilter filter = new IntentFilter();
-		filter.addCategory(JNI_EVENT_VIDEO_CATEGORY);
-		filter.addAction(JNI_EVENT_VIDEO_CATEGORY_OPEN_VIDEO_EVENT_ACTION);
-		filter.addAction(JNIService.JNI_BROADCAST_NEW_CONF_MESSAGE);
-		filter.addAction(JNIService.JNI_BROADCAST_GROUP_USER_REMOVED);
-		filter.addAction(JNIService.JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION);
-		filter.addAction(JNIService.JNI_BROADCAST_GROUP_USER_ADDED);
-		filter.addAction(JNIService.JNI_BROADCAST_CONNECT_STATE_NOTIFICATION);
-		filter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
-		filter.addAction(PublicIntent.PREPARE_FINISH_APPLICATION);
-		filter.addCategory(PublicIntent.DEFAULT_CATEGORY);
-		filter.addAction(JNIService.JNI_BROADCAST_USER_STATUS_NOTIFICATION);
-		mContext.registerReceiver(mConfUserChangeReceiver, filter);
-
-		// register listener for conference service
-		cb.registerPermissionUpdateListener(mVideoHandler,
-				NOTIFY_USER_PERMISSION_UPDATED, null);
-		cb.registerAttendeeListener(this.mVideoHandler, ATTENDEE_LISTENER, null);
-		cb.registerKickedConfListener(mVideoHandler, NOTIFICATION_KICKED, null);
-		cb.registerSyncDesktopListener(mVideoHandler,
-				DESKTOP_SYNC_NOTIFICATION, null);
-
-		cb.registerVideoMixerListener(mVideoHandler, VIDEO_MIX_NOTIFICATION,
-				null);
-
-		cb.registerAttendeeDeviceListener(mVideoHandler,
-				ATTENDEE_DEVICE_LISTENER, null);
-
-		// Register listen to document notification
-		ds.registerNewDocNotification(mVideoHandler, NEW_DOC_NOTIFICATION, null);
-		ds.registerDocDisplayNotification(mVideoHandler,
-				DOC_DOWNLOADED_NOTIFICATION, null);
-		ds.registerdocPageActiveNotification(mVideoHandler,
-				DOC_PAGE_ACTIVITE_NOTIFICATION, null);
-		ds.registerDocPageNotification(mVideoHandler, DOC_PAGE_NOTIFICATION,
-				null);
-		ds.registerDocClosedNotification(mVideoHandler,
-				DOC_CLOSED_NOTIFICATION, null);
-		ds.registerDocPageAddedNotification(mVideoHandler,
-				DOC_PAGE_ADDED_NOTIFICATION, null);
-		ds.registerPageCanvasUpdateNotification(mVideoHandler,
-				DOC_PAGE_CANVAS_NOTIFICATION, null);
-	}
-
-	private void init() {
-		mGroupId = this.getIntent().getLongExtra("gid", 0);
-		if (mGroupId <= 0) {
-			Toast.makeText(this, R.string.error_in_meeting_invalid_gid,
-					Toast.LENGTH_LONG).show();
-			return;
-		}
-
-		cg = (ConferenceGroup) GlobalHolder.getInstance().getGroupById(
-				GroupType.CONFERENCE, mGroupId);
-		if (cg == null) {
-			V2Log.e(" doesn't receive group information  yet");
-			return;
-		}
-		conf = new Conference(mGroupId, cg.getOwner(), cg.getName(),
-				cg.getCreateDate(), null, null);
-		conf.setChairman(cg.getChairManUId());
-		mGroupNameTV.setText(cg.getName());
-
-		Group confGroup = GlobalHolder.getInstance().findGroupById(
-				this.mGroupId);
-		// load conference attendee list
-		if (confGroup != null) {
-			List<User> l = new ArrayList<User>(confGroup.getUsers());
-			for (User u : l) {
-				mAttendeeList.add(new Attendee(u));
-			}
-		}
-		V2Log.i(" Conference size:" + mAttendeeList.size());
-
-		mPendingMessageList = new ArrayList<VMessage>();
-
-		mPendingPermissionUpdateList = new ArrayList<PermissionUpdateIndication>();
-	}
-
-	private void notificateConversationUpdate() {
-		Intent i = new Intent(PublicIntent.REQUEST_UPDATE_CONVERSATION);
-		i.addCategory(PublicIntent.DEFAULT_CATEGORY);
-		i.putExtra("type", Conversation.TYPE_CONFERNECE);
-		i.putExtra("extId", this.mGroupId);
-		i.putExtra("noti", false);
-		mContext.sendBroadcast(i);
-	}
-
-	/**
-	 * Update speaker icon and state
-	 * 
-	 * @param flag
-	 */
-	private void updateSpeakerState(boolean flag) {
-		isSpeaking = flag;
-		// set flag to speaking icon
-		if (flag) {
-			mSpeakerIV.setImageResource(R.drawable.speaking_button);
-		} else {
-			mSpeakerIV.setImageResource(R.drawable.mute_button);
-		}
-	}
-
-	/**
-	 * FIXME layout need to use uniform layout Show or hide message layout
-	 * according to parameter
-	 * 
-	 * @param visible
-	 *            {@link View#VISIBLE} {@link View#GONE}
-	 */
-	private void showOrHidenMsgContainer(int visible) {
-		if (mMessageContainer == null) {
-			initMsgLayout();
-		}
-
-		if (visible == View.GONE
-				&& View.GONE == mMessageContainer.getVisibility()) {
-			return;
-		}
-
-		if (visible == View.GONE
-				|| visible == mMessageContainer.getVisibility()) {
-			mMessageContainer.setVisibility(View.GONE);
-			mMenuMessageButton.setBackgroundColor(Color.rgb(255, 255, 255));
-
-			Animation tabBlockHolderAnimation = AnimationUtils.loadAnimation(
-					this, R.animator.normal_scale_x_100_0);
-			tabBlockHolderAnimation.setDuration(500);
-			tabBlockHolderAnimation
-					.setInterpolator(new AccelerateInterpolator());
-			mMessageContainer.startAnimation(tabBlockHolderAnimation);
-			mMessageContainer.requestFloatLayout();
-
-		} else {
-			mMessageContainer.setVisibility(View.VISIBLE);
-			mMenuMessageButton.setBackgroundColor(mContext.getResources()
-					.getColor(R.color.confs_common_bg));
-
-			Animation tabBlockHolderAnimation = AnimationUtils.loadAnimation(
-					this, R.animator.normal_scale_x_0_100);
-			tabBlockHolderAnimation
-					.setInterpolator(new AccelerateInterpolator());
-			tabBlockHolderAnimation.setDuration(500);
-			mMessageContainer.startAnimation(tabBlockHolderAnimation);
-			mMessageContainer.requestScrollToNewMessage();
-
-			for (int i = 0; i < mPendingMessageList.size(); i++) {
-				mMessageContainer.addNewMessage(mPendingMessageList.get(i));
-			}
-			mPendingMessageList.clear();
-
-		}
-	}
-
-	private void initMsgLayout() {
-		mMessageContainer = new VideoMsgChattingLayout(this, cg);
-		mMessageContainer.setId(0x7ffff000);
-		RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
-				(int) (mVideoLayout.getWidth() * 0.4),
-				mVideoLayout.getMeasuredHeight());
-		lp.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
-		lp.addRule(RelativeLayout.RIGHT_OF, mMenuLine.getId());
-		lp.addRule(RelativeLayout.BELOW, mVideoLine.getId());
-		mVideoLayoutMain.addView(mMessageContainer, lp);
-		mMessageContainer.bringToFront();
-		mMessageContainer.setVisibility(View.GONE);
-		mMessageContainer.setListener(subViewListener);
-	}
-
-	/**
-	 * FIXME layout need to use uniform layout Show or hide attendees list
-	 * layout according to parameter
-	 * 
-	 * @param visible
-	 *            {@link View#VISIBLE} {@link View#GONE}
-	 */
-	private void showOrHidenAttendeeContainer(int visible) {
-		// If doesn't initialize layout yet, just break initialization
-		if (View.GONE == visible && mAttendeeContainer == null) {
-			return;
-		}
-
-		if (mAttendeeContainer == null) {
-			mAttendeeContainer = new VideoAttendeeListLayout(this);
-			mAttendeeContainer.setId(0x7ffff001);
-			mAttendeeContainer.setAttendsList(this.mAttendeeList);
-			synchronized (mMixerWrapper) {
-				for (MixerWrapper mw : mMixerWrapper.values()) {
-					mAttendeeContainer.updateEnteredAttendee(mw.amd);
-				}
-			}
-
-			RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
-					(int) (mVideoLayout.getWidth() * 0.4),
-					mVideoLayout.getMeasuredHeight());
-			lp.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
-			lp.addRule(RelativeLayout.RIGHT_OF, mMenuLine.getId());
-			lp.addRule(RelativeLayout.BELOW, mVideoLine.getId());
-			mVideoLayoutMain.addView(mAttendeeContainer, lp);
-			mAttendeeContainer.bringToFront();
-			mAttendeeContainer.setVisibility(View.GONE);
-			mAttendeeContainer.setListener(subViewListener);
-			// Initialize speaking
-			if (isSpeaking) {
-				mAttendeeContainer.updateAttendeeSpeakingState(new Attendee(
-						GlobalHolder.getInstance().getCurrentUser()),
-						ConferencePermission.SPEAKING, PermissionState.GRANTED);
-			}
-			// Update pending attendee state
-			for (PermissionUpdateIndication ind : mPendingPermissionUpdateList) {
-				updateAttendeePermissionStateIcon(ind);
-			}
-			mPendingPermissionUpdateList.clear();
-
-		}
-
-		// View is hidded, do not need to hide again
-		if (visible == View.GONE
-				&& View.GONE == mAttendeeContainer.getVisibility()) {
-			return;
-		}
-
-		if (visible == View.GONE
-				|| visible == mAttendeeContainer.getVisibility()) {
-			mAttendeeContainer.setVisibility(View.GONE);
-			mMenuAttendeeButton.setBackgroundColor(Color.rgb(255, 255, 255));
-
-			Animation tabBlockHolderAnimation = AnimationUtils.loadAnimation(
-					this, R.animator.normal_scale_x_100_0);
-			tabBlockHolderAnimation.setDuration(500);
-			mAttendeeContainer.startAnimation(tabBlockHolderAnimation);
-			mAttendeeContainer.requestFloatLayout();
-		} else {
-			mAttendeeContainer.setVisibility(View.VISIBLE);
-			mMenuAttendeeButton.setBackgroundColor(mContext.getResources()
-					.getColor(R.color.confs_common_bg));
-			// set animation when visible
-			Animation tabBlockHolderAnimation = AnimationUtils.loadAnimation(
-					this, R.animator.normal_scale_x_0_100);
-			tabBlockHolderAnimation.setDuration(500);
-			mAttendeeContainer.startAnimation(tabBlockHolderAnimation);
-			mAttendeeContainer.bringToFront();
-		}
-	}
-
-	/**
-	 * FIXME layout need to use uniform layout Show or hide document layout
-	 * according to parameter
-	 * 
-	 * @param visible
-	 *            {@link View#VISIBLE} {@link View#GONE}
-	 */
-	private void showOrHidenDocContainer(int visible) {
-		// If doesn't initialize layout yet, just break initialization
-		if (View.GONE == visible && mDocContainer == null) {
-			return;
-		}
-
-		if (mDocContainer == null) {
-			mDocContainer = new VideoDocLayout(this);
-			mDocContainer.setId(0x7ffff002);
-			RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
-					(int) (mVideoLayout.getWidth() * 0.5 - mMenuButtonContainer
-							.getWidth()),
-					mMenuButtonContainer.getHeight());
-			lp.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
-			lp.addRule(RelativeLayout.RIGHT_OF, mMenuLine.getId());
-			lp.addRule(RelativeLayout.BELOW, mVideoLine.getId());
-
-			mDocContainer.setListener(subViewListener);
-
-			mVideoLayoutMain.addView(mDocContainer, lp);
-
-			mDocContainer.bringToFront();
-			mDocContainer.setVisibility(View.GONE);
-			synchronized (mDocs) {
-				for (Entry<String, V2Doc> e : mDocs.entrySet()) {
-					mDocContainer.addDoc(e.getValue());
-				}
-			}
-			mDocContainer.updateCurrentDoc(mCurrentActivateDoc);
-			Group g = GlobalHolder.getInstance().findGroupById(mGroupId);
-			if (g != null && g instanceof ConferenceGroup) {
-				mDocContainer.updateSyncStatus(((ConferenceGroup) g).isSyn());
-			}
-
-		}
-		// View is hidded, do not need to hide again
-		if (visible == View.GONE && View.GONE == mDocContainer.getVisibility()) {
-			return;
-		}
-
-		if (visible == View.GONE || visible == mDocContainer.getVisibility()) {
-			mDocContainer.setVisibility(View.GONE);
-			mMenuDocButton.setBackgroundColor(Color.rgb(255, 255, 255));
-
-			Animation tabBlockHolderAnimation = AnimationUtils.loadAnimation(
-					this, R.animator.normal_scale_x_100_0);
-			tabBlockHolderAnimation.setDuration(500);
-			mDocContainer.startAnimation(tabBlockHolderAnimation);
-			// Call this function to inform listener
-			// Notice must restore first, then request float
-			// because if in full screen size, will ignore float request
-			mDocContainer.requestRestore();
-			mDocContainer.requestFloatLayout();
-		} else {
-			mDocContainer.setVisibility(View.VISIBLE);
-			mMenuDocButton.setBackgroundColor(mContext.getResources().getColor(
-					R.color.confs_common_bg));
-
-			// set animation when visible
-			Animation tabBlockHolderAnimation = AnimationUtils.loadAnimation(
-					this, R.animator.normal_scale_x_0_100);
-			tabBlockHolderAnimation.setDuration(500);
-			mDocContainer.startAnimation(tabBlockHolderAnimation);
-			mDocContainer.requestFixedLayout();
-		}
-	}
-
-	private boolean isInvitionWindowShowing() {
-		if (mInvitionContainer == null) {
-			return false;
-		}
-		return mInvitionContainer.getVisibility() == View.VISIBLE;
-	}
-
-	/**
-	 * Show or hide Invitation attendee layout according to parameter
-	 * 
-	 * @param visible
-	 *            {@link View#VISIBLE} {@link View#GONE}
-	 */
-	private void showOrHidenInvitionContainer(int visible) {
-		// If doesn't initialize layout yet, just break initialization
-		if (View.GONE == visible && mInvitionContainer == null) {
-			return;
-		}
-		if (mInvitionContainer == null) {
-			mInvitionContainer = new VideoInvitionAttendeeLayout(this, conf);
-			mInvitionContainer.setId(0x7ffff003);
-			RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
-					(int) (mVideoLayoutMain.getWidth() - mInvitionContainer
-							.getWidth()),
-					mInvitionContainer.getHeight());
-			lp.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
-			lp.addRule(RelativeLayout.RIGHT_OF, mMenuLine.getId());
-			lp.addRule(RelativeLayout.BELOW, mVideoLine.getId());
-
-			// mInvitionContainer.setListener(subViewListener);
-
-			mVideoLayoutMain.addView(mInvitionContainer, lp);
-
-			mInvitionContainer.bringToFront();
-			mInvitionContainer.setVisibility(View.GONE);
-			mInvitionContainer.setListener(subViewListener);
-
-		}
-		// View is hided, do not need to hide again
-		if (visible == View.GONE
-				&& View.GONE == mInvitionContainer.getVisibility()) {
-			return;
-		}
-
-		if (visible == View.GONE
-				|| visible == mInvitionContainer.getVisibility()) {
-			mInvitionContainer.setVisibility(View.GONE);
-			mMenuInviteAttendeeButton.setBackgroundColor(Color.rgb(255, 255,
-					255));
-
-			Animation tabBlockHolderAnimation = AnimationUtils.loadAnimation(
-					this, R.animator.normal_scale_x_100_0);
-			tabBlockHolderAnimation.setDuration(500);
-			mInvitionContainer.startAnimation(tabBlockHolderAnimation);
-
-			TranslateAnimation ta = new TranslateAnimation(
-					Animation.RELATIVE_TO_SELF, 1.0f,
-					Animation.RELATIVE_TO_SELF, 0.0f,
-					Animation.RELATIVE_TO_SELF, 0.0f,
-					Animation.RELATIVE_TO_SELF, 0f);
-			ta.setDuration(400);
-			mVideoLayout.startAnimation(ta);
-			mVideoLayout.setVisibility(View.VISIBLE);
-
-
-		} else {
-			mInvitionContainer.setVisibility(View.VISIBLE);
-			mMenuInviteAttendeeButton.setBackgroundColor(mContext
-					.getResources().getColor(R.color.confs_common_bg));
-
-			// set animation when visible
-			Animation tabBlockHolderAnimation = AnimationUtils.loadAnimation(
-					this, R.animator.normal_scale_x_0_100);
-			tabBlockHolderAnimation.setDuration(500);
-			mInvitionContainer.startAnimation(tabBlockHolderAnimation);
-
-			TranslateAnimation ta = new TranslateAnimation(
-					Animation.RELATIVE_TO_SELF, 0.0f,
-					Animation.RELATIVE_TO_SELF, 1f, Animation.RELATIVE_TO_SELF,
-					0.0f, Animation.RELATIVE_TO_SELF, 0f);
-			ta.setDuration(400);
-			mVideoLayout.startAnimation(ta);
-			mVideoLayout.setVisibility(View.GONE);
-
-		}
-	}
+	
+	
+	
+	
 
 	private OnClickListener mConverseCameraListener = new OnClickListener() {
 
@@ -1580,50 +1549,47 @@ public class VideoActivityV2 extends Activity {
 		private void zoom(View view) {
 			int width = 0;
 			int height = 0;
-			RelativeLayout.LayoutParams vl =(RelativeLayout.LayoutParams) view.getLayoutParams();
-			if (view.getTag() == null
-					|| view.getTag().toString().equals("out")) {
+			RelativeLayout.LayoutParams vl = (RelativeLayout.LayoutParams) view
+					.getLayoutParams();
+			if (view.getTag() == null || view.getTag().toString().equals("out")) {
 				width = vl.width / 2;
-				view.setTag( "in");
+				view.setTag("in");
 			} else {
 				width = vl.width * 2;
 				view.setTag("out");
 				int[] location = new int[2];
 				view.getLocationInWindow(location);
-				
-				//If zoom out 
-				if (location[0] < vl.width +16 ) {
-					vl.rightMargin -= (vl.width +16 - location[0]);
+
+				// If zoom out
+				if (location[0] < vl.width + 16) {
+					vl.rightMargin -= (vl.width + 16 - location[0]);
 				}
 				height = width / 4 * 3;
-				if (location[1] < height +16 ) {
-					vl.bottomMargin -= (height +16 - location[1]);
+				if (location[1] < height + 16) {
+					vl.bottomMargin -= (height + 16 - location[1]);
 				}
-				
+
 			}
 
 			width -= width % 16;
 			height = width / 4 * 3;
 			height -= height % 16;
-			
-			
-			
+
 			vl.width = width;
 			vl.height = height;
-			
-			
+
 			view.setLayoutParams(vl);
-			
+
 		}
 
 		private void updateParameters(View view, MotionEvent event) {
 			RelativeLayout.LayoutParams rl = (RelativeLayout.LayoutParams) view
 					.getLayoutParams();
 			Rect r = new Rect();
-			mVideoLayoutMain.getDrawingRect(r);
+			mRootContainer.getDrawingRect(r);
 
 			int[] pos = new int[2];
-			mVideoLayoutMain.getLocationInWindow(pos);
+			mRootContainer.getLocationInWindow(pos);
 
 			rl.bottomMargin -= (event.getRawY() - lastY);
 			rl.rightMargin -= (event.getRawX() - lastX);
@@ -1664,14 +1630,14 @@ public class VideoActivityV2 extends Activity {
 
 		@Override
 		public void requestChattingViewFixedLayout(View v) {
-			calculateLayoutParma(v, 1);
-			adjustLayout();
+			requestSubViewFixed();
+			adjustContentLayout();
 		}
 
 		@Override
 		public void requestChattingViewFloatLayout(View v) {
-			calculateLayoutParma(v, 2);
-			adjustLayout();
+			requestSubViewFloat();
+			adjustContentLayout();
 		}
 
 		@Override
@@ -1737,14 +1703,14 @@ public class VideoActivityV2 extends Activity {
 
 		@Override
 		public void requestAttendeeViewFixedLayout(View v) {
-			calculateLayoutParma(v, 1);
-			adjustLayout();
+			requestSubViewFixed();
+			adjustContentLayout();
 		}
 
 		@Override
 		public void requestAttendeeViewFloatLayout(View v) {
-			calculateLayoutParma(v, 2);
-			adjustLayout();
+			requestSubViewFloat();
+			adjustContentLayout();
 		}
 
 		@Override
@@ -1759,8 +1725,8 @@ public class VideoActivityV2 extends Activity {
 			if (mDocContainer.isFullScreenSize()) {
 				return;
 			}
-			calculateLayoutParma(v, 1);
-			adjustLayout();
+			requestSubViewFixed();
+			adjustContentLayout();
 
 		}
 
@@ -1771,93 +1737,30 @@ public class VideoActivityV2 extends Activity {
 			if (mDocContainer.isFullScreenSize()) {
 				return;
 			}
-			calculateLayoutParma(v, 2);
-			adjustLayout();
+			requestSubViewFloat();
+			adjustContentLayout();
 		}
 
 		@Override
 		public void requestDocViewFillParent(View v) {
-			mVideoLayout.setVisibility(View.GONE);
-
-			int[] location = new int[2];
-			v.getLocationInWindow(location);
-
-			ViewGroup.LayoutParams vl = mDocContainer.getLayoutParams();
-			vl.width = dm.widthPixels - location[0];
-			//
-			v.setLayoutParams(vl);
-			Animation anim = new ScaleAnimation(0.5F, 1.0F, 1.0F, 1.0F,
-					Animation.ABSOLUTE, 1.0F, Animation.ABSOLUTE, 1.0F);
-			anim.setFillAfter(true);
-			anim.setDuration(400);
-			v.startAnimation(anim);
-
-			// make sure local is in front of any view
-			localSurfaceViewLy.bringToFront();
+			requestSubViewFillScreen();
+			adjustContentLayout();
+	
 		}
 
 		@Override
 		public void requestDocViewRestore(View v) {
-			mVideoLayout.setVisibility(View.VISIBLE);
-
-			final ViewGroup.LayoutParams vl = mDocContainer.getLayoutParams();
-			int oriWidth = vl.width;
-			vl.width = (int) (mVideoLayoutMain.getWidth() * 0.5 - mMenuButtonContainer
-					.getWidth());
-			// Animation anim = new ScaleAnimation(1.0F, 0.5F,
-			// 1.0F,1.0F, 1.0F,1.0F);
-			// anim.setFillAfter(true);
-			// anim.setDuration(400);
-			// v.startAnimation(anim);
-			v.setLayoutParams(vl);
-
-			// Update local video layout params make sure local video
-			// can float at right and bottom
-			/*
-			 * RelativeLayout.LayoutParams localRL =
-			 * (RelativeLayout.LayoutParams) localSurfaceViewLy
-			 * .getLayoutParams(); localRL.addRule(RelativeLayout.ALIGN_BOTTOM,
-			 * mVideoLayout.getId());
-			 * localSurfaceViewLy.setLayoutParams(localRL);
-			 */
+			requestSubViewRestore();
+			adjustContentLayout();
+			
 		}
 
 		@Override
 		public void requestInvitation(Conference conf, List<User> l) {
 			// ignore call back;
 			cb.inviteAttendee(conf, l, null);
-			showOrHidenInvitionContainer(View.GONE);
-		}
-
-		/**
-		 * 
-		 * @param flag
-		 *            1 request fixed 2 request float
-		 */
-		private void calculateLayoutParma(View v, int flag) {
-			int id = v.getId();
-			// request float
-			if (flag == 2) {
-				// set video layout layout to right of in_meeting_menu_layout
-				id = R.id.in_meeting_menu_layout;
-			}
-			RelativeLayout.LayoutParams rl = (RelativeLayout.LayoutParams) mVideoLayout
-					.getLayoutParams();
-			rl.addRule(RelativeLayout.RIGHT_OF, id);
-			int[] location = new int[2];
-			v.getLocationInWindow(location);
-			rl.width = dm.widthPixels - location[0];
-			// if flag is request fixed
-			// video layout width = screen's width - requested view's width
-			if (flag == 1) {
-				if (v.getMeasuredWidth() == 0) {
-					v.measure(View.MeasureSpec.UNSPECIFIED,
-							View.MeasureSpec.UNSPECIFIED);
-				}
-				rl.width -= v.getMeasuredWidth();
-			}
-			mVideoLayout.setLayoutParams(rl);
-
+			//Hide invitation layout
+			showOrHideSubWindow(initInvitionContainer());
 		}
 
 	}
@@ -1868,7 +1771,8 @@ public class VideoActivityV2 extends Activity {
 		MixVideoLayout layout;
 		AttendeeMixedDevice amd;
 
-		public MixerWrapper(String id, MixVideo mix, MixVideoLayout layout, AttendeeMixedDevice amd) {
+		public MixerWrapper(String id, MixVideo mix, MixVideoLayout layout,
+				AttendeeMixedDevice amd) {
 			super();
 			this.id = id;
 			this.mix = mix;
@@ -2075,8 +1979,10 @@ public class VideoActivityV2 extends Activity {
 					// set enter flag to true
 					inFlag = true;
 					// Request grant speaking permission
-					// If chair man is current user, then automatically apply speaking
-					if (c.getChairman() == GlobalHolder.getInstance().getCurrentUserId()) {
+					// If chair man is current user, then automatically apply
+					// speaking
+					if (c.getChairman() == GlobalHolder.getInstance()
+							.getCurrentUserId()) {
 						doApplyOrReleaseSpeak();
 					}
 				} else if (recr.getResult() == RequestEnterConfResponse.Result.TIME_OUT) {
@@ -2259,8 +2165,8 @@ public class VideoActivityV2 extends Activity {
 					MixVideo mv = (MixVideo) msg.obj;
 
 					MixerWrapper mw = new MixerWrapper(mv.getId(), mv,
-							new MixVideoLayout(mContext, mv) , new AttendeeMixedDevice(
-									mv));
+							new MixVideoLayout(mContext, mv),
+							new AttendeeMixedDevice(mv));
 					synchronized (mMixerWrapper) {
 						// If exist, do not add again
 						if (mMixerWrapper.containsKey(mv.getId())) {
@@ -2270,8 +2176,7 @@ public class VideoActivityV2 extends Activity {
 					}
 					// Notify attendee list mixed video is created
 					if (mAttendeeContainer != null) {
-						mAttendeeContainer
-								.updateEnteredAttendee(mw.amd);
+						mAttendeeContainer.updateEnteredAttendee(mw.amd);
 					}
 
 					// destroy mixed video

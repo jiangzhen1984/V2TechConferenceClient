@@ -13,7 +13,7 @@
     <dimen name="contact_detail_2_item_margin_right">10dp</dimen>
 
     <!-- login activity -->
-    <dimen name="login_box_text_size">24sp</dimen>
+    <dimen name="login_box_text_size">22sp</dimen>
     <dimen name="login_box_padding">10sp</dimen>
 
     <!-- conversation view -->
@@ -65,5 +65,10 @@
     <dimen name="about_version_text_size">25sp</dimen>
     <dimen name="about_version_text_padding_left">6dp</dimen>
     <dimen name="about_version_layout_margin_top">30dp</dimen>
+    
+    
+    <!-- in meeting layout -->
+    <dimen name="in_meeting_feature_menu_button_padding_vertical">10dp</dimen>
+    <dimen name="in_meeting_feature_menu_button_padding_horizontal">16dp</dimen>
 
 </resources>

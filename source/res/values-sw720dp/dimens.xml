@@ -66,4 +66,8 @@
     <dimen name="about_version_text_padding_left">6dp</dimen>
     <dimen name="about_version_layout_margin_top">30dp</dimen>
 
+    
+    <!-- in meeting layout -->
+    <dimen name="in_meeting_feature_menu_button_padding_vertical">10dp</dimen>
+    <dimen name="in_meeting_feature_menu_button_padding_horizontal">16dp</dimen>
 </resources>
