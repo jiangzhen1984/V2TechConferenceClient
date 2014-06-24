@@ -361,6 +361,7 @@ public class JNIService extends Service {
 					Intent ii = new Intent(action);
 					ii.addCategory(JNI_BROADCAST_CATEGROY);
 					ii.putExtra("mid", vm.getId());
+					ii.putExtra("gm", vm.getGroupId() != 0);
 					mContext.sendBroadcast(ii);
 				}
 				break;

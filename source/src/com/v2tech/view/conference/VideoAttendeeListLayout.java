@@ -533,6 +533,15 @@ public class VideoAttendeeListLayout extends LinearLayout {
 		}
 
 	};
+	
+	public boolean getWindowSizeState() {
+		String str =(String)mPinButton.getTag();
+		if (str == null || str.equals("float")) {
+			return false;
+		} else {
+			return true;
+		}
+	}
 
 	private TextWatcher mSearchListener = new TextWatcher() {
 
@@ -706,10 +715,6 @@ public class VideoAttendeeListLayout extends LinearLayout {
 				}
 			}
 			return ret;
-		}
-
-		private VideoAttendeeListLayout getOuterType() {
-			return VideoAttendeeListLayout.this;
 		}
 
 	}

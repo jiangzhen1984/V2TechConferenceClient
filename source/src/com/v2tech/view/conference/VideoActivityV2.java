@@ -46,7 +46,7 @@ import android.view.ViewGroup.LayoutParams;
 import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.view.animation.TranslateAnimation;
+import android.view.animation.ScaleAnimation;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -95,6 +95,11 @@ import com.v2tech.vo.VMessage;
 
 public class VideoActivityV2 extends Activity {
 
+	private static final int TAG_SUB_WINDOW_STATE_FIXED = 0x1;
+	private static final int TAG_SUB_WINDOW_STATE_FLOAT = 0x0;
+	private static final int TAG_SUB_WINDOW_STATE_FULL_SCRREN = 0x10;
+	private static final int TAG_SUB_WINDOW_STATE_RESTORED = 0x00;
+
 	private static final int ONLY_SHOW_LOCAL_VIDEO = 1;
 	private static final int REQUEST_OPEN_DEVICE_RESPONSE = 4;
 	private static final int REQUEST_CLOSE_DEVICE_RESPONSE = 5;
@@ -131,7 +136,7 @@ public class VideoActivityV2 extends Activity {
 
 	private Context mContext;
 	private List<SurfaceViewW> mCurrentShowedSV;
-	
+
 	private RelativeLayout mRootContainer;
 
 	private FrameLayout mContentLayoutMain;
@@ -158,6 +163,7 @@ public class VideoActivityV2 extends Activity {
 	private View mMenuAttendeeButton;
 	private View mMenuDocButton;
 	private View mConverseLocalCameraButton;
+	private View mMenuButtonGroup[];
 
 	private View localSurfaceViewLy;
 	private SurfaceView mLocalSurface;
@@ -206,6 +212,7 @@ public class VideoActivityV2 extends Activity {
 		this.mVideoLayout = new RelativeLayout(this);
 		mContentLayoutMain.addView(this.mVideoLayout);
 		this.mSubWindowLayout = new FrameLayout(this);
+		mSubWindowLayout.setVisibility(View.GONE);
 		mContentLayoutMain.addView(this.mSubWindowLayout);
 
 		// setting button
@@ -253,6 +260,8 @@ public class VideoActivityV2 extends Activity {
 		mConverseLocalCameraButton = findViewById(R.id.converse_camera_button);
 		mConverseLocalCameraButton.setOnClickListener(mConverseCameraListener);
 
+		mMenuButtonGroup = new View[] { mMenuInviteAttendeeButton,
+				mMenuMessageButton, mMenuAttendeeButton, mMenuDocButton };
 		// Initialize broadcast receiver
 		initConfsListener();
 		// Initialize conference object and show local camera
@@ -271,8 +280,6 @@ public class VideoActivityV2 extends Activity {
 		inFlag = this.getIntent().getExtras().getBoolean("in", false);
 
 	}
-
-
 
 	@Override
 	protected void onStart() {
@@ -404,6 +411,7 @@ public class VideoActivityV2 extends Activity {
 			currentChild = mSubWindowLayout.getChildAt(0);
 		}
 
+		int visible = View.VISIBLE;
 		// Update content
 		if (currentChild != content) {
 			mSubWindowLayout.removeAllViews();
@@ -413,45 +421,43 @@ public class VideoActivityV2 extends Activity {
 			fl.leftMargin = 0;
 			fl.topMargin = 0;
 			mSubWindowLayout.addView(content, fl);
-		}
-
-		int visible = View.VISIBLE;
-		if (mSubWindowLayout.getVisibility() == View.VISIBLE) {
-			visible = View.GONE;
-		} else if (mSubWindowLayout.getVisibility() == View.GONE) {
+			// If content is different, always visible
 			visible = View.VISIBLE;
+		} else {
+			// Otherwise check current visibility state.
+			if (mSubWindowLayout.getVisibility() == View.VISIBLE) {
+				visible = View.GONE;
+			} else if (mSubWindowLayout.getVisibility() == View.GONE) {
+				visible = View.VISIBLE;
+			}
 		}
 
-		//Show or hide sub window with animation
+		// Show or hide sub window with animation
 		Animation animation = null;
 		if (visible == View.GONE) {
-			animation = new TranslateAnimation(Animation.RELATIVE_TO_SELF,
-					1.0f, Animation.RELATIVE_TO_SELF, 0.0f,
+			animation = new ScaleAnimation(1.0F, 0.0f, 1.0F, 1.0f,
 					Animation.RELATIVE_TO_SELF, 0.0f,
-					Animation.RELATIVE_TO_SELF, 0f);
+					Animation.RELATIVE_TO_SELF, 1.0f);
 		} else if (visible == View.VISIBLE) {
-			animation = new TranslateAnimation(Animation.RELATIVE_TO_SELF,
-					0.0f, Animation.RELATIVE_TO_SELF, 1.0f,
+			animation = new ScaleAnimation(0.0F, 1.0f, 1.0F, 1.0f,
 					Animation.RELATIVE_TO_SELF, 0.0f,
-					Animation.RELATIVE_TO_SELF, 0f);
+					Animation.RELATIVE_TO_SELF, 1.0f);
 
 		}
 		animation.setDuration(400);
-		mSubWindowLayout.startAnimation(animation);
 		mSubWindowLayout.setVisibility(visible);
+		mSubWindowLayout.startAnimation(animation);
 		adjustContentLayout();
 	}
 
-
-	
 	private View initMsgLayout() {
-		if (mMessageContainer != null)  {
+		if (mMessageContainer != null) {
 			return mMessageContainer;
 		}
 		mMessageContainer = new VideoMsgChattingLayout(this, cg);
 		mMessageContainer.setListener(subViewListener);
-		
-		//Populate message
+
+		// Populate message
 		for (int i = 0; i < mPendingMessageList.size(); i++) {
 			mMessageContainer.addNewMessage(mPendingMessageList.get(i));
 		}
@@ -460,7 +466,6 @@ public class VideoActivityV2 extends Activity {
 		return mMessageContainer;
 	}
 
-	
 	private View initAttendeeContainer() {
 		if (mAttendeeContainer == null) {
 			mAttendeeContainer = new VideoAttendeeListLayout(this);
@@ -472,7 +477,6 @@ public class VideoActivityV2 extends Activity {
 			}
 
 			mAttendeeContainer.bringToFront();
-			mAttendeeContainer.setVisibility(View.GONE);
 			mAttendeeContainer.setListener(subViewListener);
 			// Initialize speaking
 			if (isSpeaking) {
@@ -491,9 +495,7 @@ public class VideoActivityV2 extends Activity {
 		return mAttendeeContainer;
 	}
 
-
 	private View initDocLayout() {
-		
 
 		if (mDocContainer == null) {
 			mDocContainer = new VideoDocLayout(this);
@@ -510,10 +512,9 @@ public class VideoActivityV2 extends Activity {
 			}
 
 		}
-		
+
 		return mDocContainer;
 	}
-
 
 	private View initInvitionContainer() {
 		if (mInvitionContainer == null) {
@@ -523,11 +524,7 @@ public class VideoActivityV2 extends Activity {
 		}
 		return mInvitionContainer;
 	}
-	
-	
-	
-	
-	
+
 	private void adjustContentLayout() {
 		int width = 0, height = 0;
 		int marginLeft = 0;
@@ -551,8 +548,9 @@ public class VideoActivityV2 extends Activity {
 			width = mContentLayoutMain.getMeasuredWidth();
 			height = mContentLayoutMain.getMeasuredHeight();
 
-			//If sub window request full screen 
-			if (mSubWindowLayout.getTag() != null && mSubWindowLayout.getTag().equals("full")) {
+			int flag = getSubViewWindowState();
+			// If sub window request full screen
+			if ((flag & TAG_SUB_WINDOW_STATE_FULL_SCRREN) == TAG_SUB_WINDOW_STATE_FULL_SCRREN) {
 				width = (width - marginLeft);
 			} else {
 				width = (width - marginLeft) / 2;
@@ -569,7 +567,7 @@ public class VideoActivityV2 extends Activity {
 			mContentLayoutMain.updateViewLayout(mSubWindowLayout, fl);
 
 			// Update left offset for video layout
-			if (mSubWindowLayout.getTag() != null && mSubWindowLayout.getTag().equals("fixed")) {
+			if ((flag & TAG_SUB_WINDOW_STATE_FIXED) == TAG_SUB_WINDOW_STATE_FIXED) {
 				marginLeft += width;
 			}
 		}
@@ -580,49 +578,90 @@ public class VideoActivityV2 extends Activity {
 		height = mContentLayoutMain.getMeasuredHeight();
 		if (fl == null) {
 			fl = new FrameLayout.LayoutParams(width, height);
+		}
+
+		if (fl.leftMargin == marginLeft && fl.width == width
+				&& fl.height == height) {
+
 		} else {
 			fl.width = width;
 			fl.height = height;
-		}
-		fl.leftMargin = marginLeft;
 
-		mContentLayoutMain.updateViewLayout(mVideoLayout, fl);
-		//
-		this.adjustLayout();
+			fl.leftMargin = marginLeft;
+			mContentLayoutMain.updateViewLayout(mVideoLayout, fl);
+			//
+			this.adjustLayout();
+		}
 
 		// make sure local is in front of any view
 		localSurfaceViewLy.bringToFront();
 	}
-	
+
 	/**
-	 * Call this before {@link #adjustContentLayout} 
+	 * Call this before {@link #adjustContentLayout}
 	 */
 	private void requestSubViewFixed() {
-		mSubWindowLayout.setTag("fix");
+		Integer flag = (Integer) mSubWindowLayout.getTag();
+		if (flag == null) {
+			mSubWindowLayout
+					.setTag(Integer.valueOf(TAG_SUB_WINDOW_STATE_FIXED));
+		} else {
+			mSubWindowLayout.setTag(Integer.valueOf(flag.intValue()
+					| TAG_SUB_WINDOW_STATE_FIXED));
+		}
+
 	}
-	
+
 	/**
-	 * Call this before {@link #adjustContentLayout} 
+	 * Call this before {@link #adjustContentLayout}
 	 */
 	private void requestSubViewFloat() {
-		mSubWindowLayout.setTag("float");
+		Integer flag = (Integer) mSubWindowLayout.getTag();
+		if (flag == null) {
+			mSubWindowLayout
+					.setTag(Integer.valueOf(TAG_SUB_WINDOW_STATE_FLOAT));
+		} else {
+			mSubWindowLayout.setTag(Integer.valueOf(flag.intValue()
+					& TAG_SUB_WINDOW_STATE_FLOAT));
+		}
 	}
-	
+
 	/**
-	 * Call this before {@link #adjustContentLayout} 
+	 * Call this before {@link #adjustContentLayout}
 	 */
 	private void requestSubViewFillScreen() {
-		mSubWindowLayout.setTag("full");
+		Integer flag = (Integer) mSubWindowLayout.getTag();
+		if (flag == null) {
+			mSubWindowLayout.setTag(Integer
+					.valueOf(TAG_SUB_WINDOW_STATE_FULL_SCRREN));
+		} else {
+			mSubWindowLayout.setTag(Integer.valueOf(flag.intValue()
+					| TAG_SUB_WINDOW_STATE_FULL_SCRREN));
+		}
 	}
-	
+
 	/**
-	 * Call this before {@link #adjustContentLayout} 
+	 * Call this before {@link #adjustContentLayout}
 	 */
 	private void requestSubViewRestore() {
-		mSubWindowLayout.setTag("restore");
+		Integer flag = (Integer) mSubWindowLayout.getTag();
+		if (flag == null) {
+			mSubWindowLayout.setTag(Integer
+					.valueOf(TAG_SUB_WINDOW_STATE_RESTORED));
+		} else {
+			mSubWindowLayout.setTag(Integer.valueOf(flag.intValue()
+					& TAG_SUB_WINDOW_STATE_RESTORED));
+		}
 	}
-	
-	
+
+	private int getSubViewWindowState() {
+		Integer flag = (Integer) mSubWindowLayout.getTag();
+		if (flag == null) {
+			return 0;
+		} else {
+			return flag.intValue();
+		}
+	}
 
 	private OnClickListener mMenuButtonListener = new OnClickListener() {
 
@@ -661,55 +700,34 @@ public class VideoActivityV2 extends Activity {
 		@Override
 		public void onClick(View v) {
 			View content = null;
+			// Call cancel full screen request first.
+			// because we can't make sure user press invitation layout or not,
+			// we have to restore first.
+			requestSubViewRestore();
 			if (v.getTag().equals("msg")) {
 				content = initMsgLayout();
-				
-				//Update button background
-				mMenuMessageButton.setBackgroundColor(mContext.getResources()
-						.getColor(R.color.confs_common_bg));
-				mMenuAttendeeButton.setBackgroundColor(Color.rgb(255, 255,
-						255));
-				mMenuDocButton.setBackgroundColor(Color.rgb(255, 255,
-						255));
-				mMenuInviteAttendeeButton.setBackgroundColor(Color.rgb(255, 255,
-						255));
-				
+				//If last state is fixed 
+				if (mMessageContainer.getWindowSizeState()) {
+					requestSubViewFixed();
+				}
+
 			} else if (v.getTag().equals("attendee")) {
-				content =initAttendeeContainer();
-				
-				mMenuAttendeeButton.setBackgroundColor(mContext.getResources()
-						.getColor(R.color.confs_common_bg));
-				mMenuInviteAttendeeButton.setBackgroundColor(Color.rgb(255, 255,
-						255));
-				mMenuDocButton.setBackgroundColor(Color.rgb(255, 255,
-						255));
-				mMenuMessageButton.setBackgroundColor(Color.rgb(255, 255,
-						255));
-				
+				content = initAttendeeContainer();
+				//If last state is fixed 
+				if (mAttendeeContainer.getWindowSizeState()) {
+					requestSubViewFixed();
+				}
+
 			} else if (v.getTag().equals("doc")) {
-				content =initDocLayout();
-				mMenuDocButton.setBackgroundColor(mContext.getResources().getColor(
-						R.color.confs_common_bg));
-				mMenuInviteAttendeeButton.setBackgroundColor(Color.rgb(255, 255,
-						255));
-				mMenuMessageButton.setBackgroundColor(Color.rgb(255, 255,
-						255));
-				mMenuAttendeeButton.setBackgroundColor(Color.rgb(255, 255,
-						255));
-				
+				requestSubViewFixed();
+				content = initDocLayout();
+
 			} else if (v.getTag().equals("invition")) {
 				if (cg.isCanInvitation()) {
+					// Make sure invitation layout fill full screen
+					requestSubViewFillScreen();
 					content = initInvitionContainer();
-					mMenuInviteAttendeeButton.setBackgroundColor(mContext
-							.getResources().getColor(R.color.confs_common_bg));
-					mMenuAttendeeButton.setBackgroundColor(Color.rgb(255, 255,
-							255));
-					mMenuDocButton.setBackgroundColor(Color.rgb(255, 255,
-							255));
-					mMenuMessageButton.setBackgroundColor(Color.rgb(255, 255,
-							255));
-					
-					
+
 				} else {
 					Toast.makeText(mContext,
 							R.string.error_no_permission_to_invitation,
@@ -717,11 +735,24 @@ public class VideoActivityV2 extends Activity {
 				}
 
 			}
-			
+
+			// Update button background
+			for (View button : mMenuButtonGroup) {
+				int c = 0;
+				if (button == v) {
+					c = mContext.getResources().getColor(
+							R.color.confs_common_bg);
+				} else {
+					c = Color.rgb(255, 255, 255);
+				}
+
+				button.setBackgroundColor(c);
+			}
+
 			if (content != null) {
 				showOrHideSubWindow(content);
 			}
-			
+
 			// Make sure local camera is first front of all
 			localSurfaceViewLy.bringToFront();
 		}
@@ -830,14 +861,15 @@ public class VideoActivityV2 extends Activity {
 					}
 
 					@Override
-					public void onStartTrackingTouch(SeekBar arg0) {
-						// TODO Auto-generated method stub
+					public void onStartTrackingTouch(SeekBar seekBar) {
+						seekBar.getVerticalScrollbarPosition();
+						System.out.println("===");
 
 					}
 
 					@Override
-					public void onStopTrackingTouch(SeekBar arg0) {
-
+					public void onStopTrackingTouch(SeekBar seekBar) {
+						System.out.println("===");
 					}
 
 				});
@@ -965,10 +997,6 @@ public class VideoActivityV2 extends Activity {
 		}
 
 	};
-	
-	
-	
-	
 
 	private OnClickListener mConverseCameraListener = new OnClickListener() {
 
@@ -1745,21 +1773,21 @@ public class VideoActivityV2 extends Activity {
 		public void requestDocViewFillParent(View v) {
 			requestSubViewFillScreen();
 			adjustContentLayout();
-	
+
 		}
 
 		@Override
 		public void requestDocViewRestore(View v) {
 			requestSubViewRestore();
 			adjustContentLayout();
-			
+
 		}
 
 		@Override
 		public void requestInvitation(Conference conf, List<User> l) {
 			// ignore call back;
 			cb.inviteAttendee(conf, l, null);
-			//Hide invitation layout
+			// Hide invitation layout
 			showOrHideSubWindow(initInvitionContainer());
 		}
 

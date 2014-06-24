@@ -211,7 +211,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher {
 			intentFilter.addAction(JNIService.JNI_BROADCAST_GROUP_NOTIFICATION);
 			intentFilter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
 			intentFilter.addAction(MainActivity.SERVICE_BOUNDED_EVENT);
-			intentFilter.addAction(JNIService.JNI_BROADCAST_NEW_MESSAGE);
+			
 			intentFilter.addCategory(PublicIntent.DEFAULT_CATEGORY);
 			intentFilter
 					.addAction(JNIService.JNI_BROADCAST_USER_UPDATE_NAME_OR_SIGNATURE);
@@ -227,6 +227,8 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher {
 						.addAction(JNIService.JNI_BROADCAST_CONFERENCE_REMOVED);
 				intentFilter
 						.addAction(PublicIntent.BROADCAST_NEW_CONFERENCE_NOTIFICATION);
+			} else {
+				intentFilter.addAction(JNIService.JNI_BROADCAST_NEW_MESSAGE);
 			}
 			if (mCurrentTabFlag.equals(Conversation.TYPE_GROUP)) {
 				intentFilter

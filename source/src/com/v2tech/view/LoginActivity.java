@@ -313,6 +313,11 @@ public class LoginActivity extends Activity {
 								.getText(R.string.error_host_invalid));
 						return;
 					}
+					if (portStr5 == null || portStr5.isEmpty()) {
+						port.setError(mContext
+								.getText(R.string.error_field_required));
+						return;
+					}
 					if (!saveHostConfig(ets, portStr5)) {
 						Toast.makeText(mContext,
 								R.string.error_save_host_config,
@@ -331,6 +336,8 @@ public class LoginActivity extends Activity {
 				public void onClick(View v) {
 					et.setText(SPUtil.getConfigStrValue(mContext, "ip"));
 					port.setText(SPUtil.getConfigStrValue(mContext, "port"));
+					et.setError(null);
+					port.setError(null);
 					dialog.dismiss();
 				}
 			});

@@ -50,7 +50,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
-                android:layout_marginRight="20dp"
+                android:layout_marginRight="@dimen/in_meeting_tools_bar_margin_right"
                 android:layout_toLeftOf="@+id/speaker_iv"
                 android:src="@drawable/video_setting_button_selector" />
 
@@ -60,7 +60,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"
-                android:layout_marginRight="15dp"
+                android:layout_marginRight="@dimen/in_meeting_tools_bar_margin_right"
                 android:src="@drawable/video_logout_button_selector" />
 
             <ImageView
@@ -68,7 +68,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
-                android:layout_marginRight="20dp"
+                android:layout_marginRight="@dimen/in_meeting_tools_bar_margin_right"
                 android:layout_toLeftOf="@+id/in_meeting_log_out_iv"
                 android:src="@drawable/mute_button" />
 
@@ -104,12 +104,13 @@
             android:id="@+id/in_meeting_content_main"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
-            android:layout_below="@+id/in_meeting_video_separation_line1" >
+            android:layout_below="@+id/in_meeting_video_separation_line1"
+            android:background="#ffffff" >
 
             <RelativeLayout
                 android:id="@+id/in_meeting_menu_layout"
                 android:layout_width="wrap_content"
-                android:layout_height="fill_parent"
+                android:layout_height="match_parent"
                 android:layout_marginLeft="0dp"
                 android:layout_marginTop="0dp" >
 
@@ -183,8 +184,8 @@
 
         <FrameLayout
             android:id="@+id/local_surface_view_ly"
-            android:layout_width="176dp"
-            android:layout_height="144dp"
+            android:layout_width="@dimen/in_meeting_local_video_layout_width"
+            android:layout_height="@dimen/in_meeting_local_video_layout_height"
             android:layout_above="@+id/video_bottom_view"
             android:layout_alignParentRight="true"
             android:layout_marginBottom="10dp"

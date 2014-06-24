@@ -143,6 +143,15 @@ public class VideoMsgChattingLayout extends LinearLayout {
 				.setImageResource(R.drawable.pin_button_selector);
 	}
 	
+	public boolean getWindowSizeState() {
+		String str =(String)mPinButton.getTag();
+		if (str == null || str.equals("float")) {
+			return false;
+		} else {
+			return true;
+		}
+	}
+	
 	
 	private OnKeyListener keyListener = new OnKeyListener() {
 
