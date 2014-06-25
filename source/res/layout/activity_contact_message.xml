@@ -128,7 +128,7 @@
                 android:textColor="@color/button_text_color"
                 android:textSize="12sp" />
 
-            <com.v2tech.view.widget.FaceItemEditText
+            <EditText
                 android:id="@+id/message_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -141,8 +141,11 @@
                 android:layout_toRightOf="@+id/contact_message_plus"
                 android:background="@drawable/input_bg"
                 android:ems="10"
-                android:inputType="text|textCapCharacters|textCapSentences|textMultiLine" android:maxLength="4500" android:maxLines="3" android:minLines="1">
-            </com.v2tech.view.widget.FaceItemEditText>
+                android:inputType="text|textCapCharacters|textCapSentences|textMultiLine"
+                android:maxLength="4500"
+                android:maxLines="3"
+                android:minLines="1" >
+            </EditText>
         </RelativeLayout>
 
         <LinearLayout

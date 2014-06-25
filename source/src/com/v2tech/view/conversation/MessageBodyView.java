@@ -175,10 +175,10 @@ public class MessageBodyView extends LinearLayout {
 		mContentContainer.addView(et, ll);
 
 		List<VMessageAbstractItem> items = mMsg.getItems();
-		for (int i =0; items!= null && i < items.size(); i++) {
+		for (int i = 0; items != null && i < items.size(); i++) {
 			VMessageAbstractItem item = items.get(i);
 			// Add new layout for new line
-			if (item.isNewLine() && et.length()!=0) {
+			if (item.isNewLine() && et.length() != 0) {
 				et.append("\n");
 			}
 			if (item.getType() == VMessageAbstractItem.ITEM_TYPE_TEXT) {
@@ -193,34 +193,34 @@ public class MessageBodyView extends LinearLayout {
 						dr.getIntrinsicHeight());
 
 				et.append(".");
-				
+
 				SpannableStringBuilder builder = new SpannableStringBuilder(
 						et.getText());
 				ImageSpan is = new ImageSpan(dr);
-				builder.setSpan(is, et.getText().length() - 1,
-						et.getText().length(),
-						Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+				builder.setSpan(is, et.getText().length() - 1, et.getText()
+						.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 				et.setText(builder);
 			} else if (item.getType() == VMessageAbstractItem.ITEM_TYPE_IMAGE) {
-				
-				Drawable dr =new BitmapDrawable(this.getContext().getResources(), ((VMessageImageItem) item).getCompressedBitmap());
+
+				Drawable dr = new BitmapDrawable(this.getContext()
+						.getResources(),
+						((VMessageImageItem) item).getCompressedBitmap());
 				dr.setBounds(0, 0, dr.getIntrinsicWidth(),
 						dr.getIntrinsicHeight());
 				et.append(".");
 				SpannableStringBuilder builder = new SpannableStringBuilder(
 						et.getText());
 				ImageSpan is = new ImageSpan(dr);
-				builder.setSpan(is,et.getText().length() - 1,
-						et.getText().length(),
-						Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+				builder.setSpan(is, et.getText().length() - 1, et.getText()
+						.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 				et.setText(builder);
-				
+
 			}
 
 		}
 
 		mContentContainer.setTag(this.mMsg);
-		
+
 	}
 
 	private void updateSelectedBg(boolean selected) {
@@ -268,14 +268,17 @@ public class MessageBodyView extends LinearLayout {
 					tv.setOnClickListener(new OnClickListener() {
 						@Override
 						public void onClick(View view) {
-							
+
 							ClipboardManager clipboard = (ClipboardManager) getContext()
 									.getSystemService(Context.CLIPBOARD_SERVICE);
-							ClipData clip = ClipData.newPlainText("label","[[[["+mMsg.getId()+"]]]]");
-	
+							ClipData clip = ClipData.newPlainText(
+									"label",
+									MessageUtil
+											.getMixedConversationCopyedContent(mMsg));
+
 							clipboard.setPrimaryClip(clip);
 							pw.dismiss();
-							
+
 							Toast.makeText(getContext(),
 									R.string.contact_message_copy_message,
 									Toast.LENGTH_SHORT).show();
@@ -354,9 +357,9 @@ public class MessageBodyView extends LinearLayout {
 		@Override
 		public void onClick(View anchor) {
 			if (callback != null) {
-			//	VMessage vm  =(VMessage) anchor.getTag();
+				// VMessage vm =(VMessage) anchor.getTag();
 				List<VMessageImageItem> vl = mMsg.getImageItems();
-				if (vl != null && vl.size() > 0 ){
+				if (vl != null && vl.size() > 0) {
 					callback.onMessageClicked(mMsg);
 				}
 			}

@@ -132,6 +132,9 @@ public class VMessage {
 	
 
 	public boolean isLocal() {
+		if (this.mFromUser == null) {
+			return false;
+		}
 		return GlobalHolder.getInstance().getCurrentUserId() == this.mFromUser.getmUserId()? true:false;
 	}
 

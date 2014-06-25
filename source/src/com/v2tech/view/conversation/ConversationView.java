@@ -42,6 +42,7 @@ import com.v2tech.R;
 import com.v2tech.service.ChatService;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.util.GlobalConfig;
+import com.v2tech.util.MessageUtil;
 import com.v2tech.util.V2Log;
 import com.v2tech.view.JNIService;
 import com.v2tech.view.PublicIntent;
@@ -131,12 +132,11 @@ public class ConversationView extends Activity {
 
 	private int currentItemPos = 0;
 
-	private VMessage preparedMessage;
-
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		mContext = this;
+	
 		setContentView(R.layout.activity_contact_message);
 
 		lh = new LocalHandler();
@@ -146,7 +146,8 @@ public class ConversationView extends Activity {
 		mMessagesContainer.setAdapter(adapter);
 		mMessagesContainer.setOnTouchListener(mHiddenOnTouchListener);
 		mMessagesContainer.setOnScrollListener(scrollListener);
-		mMessagesContainer.setTranscriptMode(ListView.TRANSCRIPT_MODE_ALWAYS_SCROLL);
+		mMessagesContainer
+				.setTranscriptMode(ListView.TRANSCRIPT_MODE_ALWAYS_SCROLL);
 
 		mSendButtonTV = (TextView) findViewById(R.id.message_send);
 		// mSendButtonTV.setOnClickListener(sendMessageListener);
@@ -156,6 +157,7 @@ public class ConversationView extends Activity {
 		mShowContactDetailButton.setOnClickListener(mShowContactDetailListener);
 
 		mMessageET = (EditText) findViewById(R.id.message_text);
+		mMessageET.addTextChangedListener(mPasteWatcher);
 		mMessageET.setOnClickListener(new OnClickListener() {
 
 			@Override
@@ -314,11 +316,11 @@ public class ConversationView extends Activity {
 			@Override
 			public void run() {
 				mMessagesContainer.setSelection(pos);
-				
+
 			}
-			
+
 		});
-		
+
 	}
 
 	private void cleanRangeBitmapCache(int before, int after) {
@@ -445,27 +447,58 @@ public class ConversationView extends Activity {
 		}
 
 	};
-	
-	
+
 	private TextWatcher mPasteWatcher = new TextWatcher() {
 
 		@Override
-		public void afterTextChanged(Editable arg0) {
-			
+		public void afterTextChanged(Editable edit) {
+			int start = -1, end = -1;
+			int index = 0;
+			while (index < edit.length()) {
+				if (edit.charAt(index) == '/' && index < edit.length() - 1
+						&& edit.charAt(index + 1) == ':') {
+					start = index;
+					index += 2;
+					continue;
+				} else if (start != -1) {
+					if (edit.charAt(index) == ':' && index < edit.length() - 1
+							&& edit.charAt(index + 1) == '/') {
+						end = index + 2;
+						SpannableStringBuilder builder = new SpannableStringBuilder();
+
+						int ind = GlobalConfig.getDrawableIndexByEmoji(edit
+								.subSequence(start, end).toString());
+						// replay emoji and clean
+						if (ind > 0) {
+							MessageUtil
+									.appendSpan(
+											builder,
+											mContext.getResources()
+													.getDrawable(
+															GlobalConfig.GLOBAL_FACE_ARRAY[ind]),
+											ind);
+							edit.replace(start, end, builder);
+						}
+						index = start;
+						start = -1;
+						end = -1;
+					}
+				}
+				index++;
+			}
 		}
 
 		@Override
-		public void beforeTextChanged(CharSequence arg0, int arg1, int arg2,
+		public void beforeTextChanged(CharSequence ch, int arg1, int arg2,
 				int arg3) {
-			
 		}
 
 		@Override
 		public void onTextChanged(CharSequence arg0, int arg1, int arg2,
 				int arg3) {
-			
+
 		}
-		
+
 	};
 
 	@Override
@@ -526,10 +559,10 @@ public class ConversationView extends Activity {
 		Editable et = mMessageET.getText();
 		int imageIndex = 0;
 		StringBuilder textContent = new StringBuilder();
-		for (int index = 0; index < et.length(); ) {
+		for (int index = 0; index < et.length();) {
 			char c = et.charAt(index);
 			ImageSpan is = null;
-			if (imageIndex < spans.length){
+			if (imageIndex < spans.length) {
 				is = spans[imageIndex];
 			}
 
@@ -537,7 +570,8 @@ public class ConversationView extends Activity {
 			if (index == start && is != null) {
 				if (textContent.length() != 0) {
 					int pos = start - textContent.length();
-					VMessageTextItem vmi = new VMessageTextItem(vm, textContent.toString());
+					VMessageTextItem vmi = new VMessageTextItem(vm,
+							textContent.toString());
 					if (start == 0 || pos == 0 || et.charAt(pos - 1) == '\n') {
 						vmi.setNewLine(true);
 					}
@@ -550,41 +584,45 @@ public class ConversationView extends Activity {
 								.toString().equals("\n"))) {
 					vfm.setNewLine(true);
 				}
-				imageIndex ++;
+				imageIndex++;
 				index = et.getSpanEnd(is);
 				continue;
-				
+
 			}
-			
-			
+
 			if (c != '\n') {
 				textContent.append(c);
-			} else if (c == '\n' && textContent.length() != 0 ){
-				VMessageTextItem vmi = new VMessageTextItem(vm, textContent.toString());
+			} else if (c == '\n' && textContent.length() != 0) {
+				VMessageTextItem vmi = new VMessageTextItem(vm,
+						textContent.toString());
 				textContent = new StringBuilder();
 			}
-			
+
 			// Check last span is text or new line span is text
-			if ((index == et.length() -1  || c == '\n') && textContent.length() != 0 ) {
-				VMessageTextItem vmi = new VMessageTextItem(vm, textContent.toString());
+			if ((index == et.length() - 1 || c == '\n')
+					&& textContent.length() != 0) {
+				VMessageTextItem vmi = new VMessageTextItem(vm,
+						textContent.toString());
 				vmi.setNewLine(true);
 				textContent = new StringBuilder();
 			}
-			
+
 			index++;
-				
+
 		}
-		
+
 		List<VMessageAbstractItem> items = vm.getItems();
-		for (VMessageAbstractItem item: items) {
+		for (VMessageAbstractItem item : items) {
 			if (item.getType() == VMessageAbstractItem.ITEM_TYPE_TEXT) {
-				System.out.println(((VMessageTextItem)item).getText()+"    "+ item.isNewLine());
+				System.out.println(((VMessageTextItem) item).getText() + "    "
+						+ item.isNewLine());
 			} else {
-				System.out.println(((VMessageFaceItem)item).getIndex()+"    "+ item.isNewLine());
+				System.out.println(((VMessageFaceItem) item).getIndex()
+						+ "    " + item.isNewLine());
 			}
 		}
-//
-//		// Save message
+		//
+		// // Save message
 		MessageBuilder.saveMessage(this, vm);
 
 		mMessageET.setText("");
@@ -712,7 +750,8 @@ public class ConversationView extends Activity {
 	private void queryAndAddMessage(final int msgId) {
 
 		VMessage m = MessageLoader.loadMessageById(mContext, msgId);
-		if (m == null || m.getFromUser().getmUserId() != this.user2Id || m.getGroupId() != this.groupId) {
+		if (m == null || m.getFromUser().getmUserId() != this.user2Id
+				|| m.getGroupId() != this.groupId) {
 			return;
 		}
 		MessageBodyView mv = new MessageBodyView(this, m, true);

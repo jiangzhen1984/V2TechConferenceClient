@@ -1,9 +1,10 @@
 package com.v2tech.util;
 
-import com.v2tech.R;
-
 import android.content.Context;
 import android.util.DisplayMetrics;
+import android.util.SparseArray;
+
+import com.v2tech.R;
 
 public class GlobalConfig {
 
@@ -33,8 +34,83 @@ public class GlobalConfig {
 			R.drawable.face_38, R.drawable.face_39, R.drawable.face_40,
 			R.drawable.face_41, R.drawable.face_42, R.drawable.face_43,
 			R.drawable.face_44, R.drawable.face_45};
+	
+	private static SparseArray<EmojiWraper> EMOJI_ARRAY = new SparseArray<EmojiWraper>();
+	
+	static {
+		String preFix = "/:";
+		String suffFix = ":/";
+		for (int i = 1; i < GLOBAL_FACE_ARRAY.length; i++) {
+			
+			EMOJI_ARRAY.put(GLOBAL_FACE_ARRAY[i], new EmojiWraper(preFix + (char)i+ suffFix,GLOBAL_FACE_ARRAY[i]));
+		}
+	}
 
 	public static void saveLogoutFlag(Context context) {
 		SPUtil.putConfigIntValue(context, KEY_LOGGED_IN, 0);
+	}
+	
+	
+	public static String getEmojiStrByIndex(int index) {
+		if (index <=0 || index >= GLOBAL_FACE_ARRAY.length) {
+			return null;
+		}
+		EmojiWraper wrapper = EMOJI_ARRAY.get(GLOBAL_FACE_ARRAY[index]);
+		if (wrapper != null) {
+			return wrapper.emojiStr;
+		}
+		return null;
+	}
+	
+	
+	public static int getDrawableIdByEmoji(String str) {
+		for (int i = 1; i < GLOBAL_FACE_ARRAY.length; i++) {
+			EmojiWraper wrapper = EMOJI_ARRAY.get(GLOBAL_FACE_ARRAY[i]);
+			if (wrapper == null) {
+				continue;
+			}
+			if (wrapper.emojiStr.equals(str)) {
+				return wrapper.id;
+			}
+		}
+		return -1;
+	}
+	
+	
+	public static int getDrawableIndexByEmoji(String str) {
+		for (int i = 1; i < GLOBAL_FACE_ARRAY.length; i++) {
+			EmojiWraper wrapper = EMOJI_ARRAY.get(GLOBAL_FACE_ARRAY[i]);
+			if (wrapper == null) {
+				continue;
+			}
+			if (wrapper.emojiStr.equals(str)) {
+				return i;
+			}
+		}
+		return -1;
+	}
+	
+	
+	public static String getEmojiStr(int id) {
+		EmojiWraper wrapper = EMOJI_ARRAY.get(id);
+		if (wrapper != null) {
+			return wrapper.emojiStr;
+		}
+		return null;
+	}
+	
+	
+	
+	
+	static class EmojiWraper {
+		String emojiStr;
+		int id;
+		
+		public EmojiWraper(String emojiStr, int id) {
+			super();
+			this.emojiStr = emojiStr;
+			this.id = id;
+		}
+		
 	}
 }

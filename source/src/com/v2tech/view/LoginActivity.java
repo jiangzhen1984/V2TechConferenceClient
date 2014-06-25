@@ -373,7 +373,7 @@ public class LoginActivity extends Activity {
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		super.onCreateOptionsMenu(menu);
-		//getMenuInflater().inflate(R.menu.login, menu);
+		// getMenuInflater().inflate(R.menu.login, menu);
 		return true;
 	}
 
@@ -541,6 +541,9 @@ public class LoginActivity extends Activity {
 							.setError(getString(R.string.error_incorrect_password));
 					mPasswordView.requestFocus();
 				} else if (rlr.getResult() == JNIResponse.Result.CONNECT_ERROR) {
+					Toast.makeText(mContext, R.string.error_connect_to_server,
+							Toast.LENGTH_LONG).show();
+				} else if (rlr.getResult() == JNIResponse.Result.SERVER_REJECT) {
 					Toast.makeText(mContext, R.string.error_connect_to_server,
 							Toast.LENGTH_LONG).show();
 				} else {
