@@ -73,7 +73,10 @@
             android:id="@+id/conversation_message_list"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:divider="@null" >
+            android:clickable="false"
+            android:divider="@null"
+            android:focusable="false"
+            android:focusableInTouchMode="false" >
         </ListView>
     </LinearLayout>
 
@@ -125,7 +128,7 @@
                 android:textColor="@color/button_text_color"
                 android:textSize="12sp" />
 
-            <EditText
+            <com.v2tech.view.widget.FaceItemEditText
                 android:id="@+id/message_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -138,11 +141,8 @@
                 android:layout_toRightOf="@+id/contact_message_plus"
                 android:background="@drawable/input_bg"
                 android:ems="10"
-                android:inputType="textCapSentences|textMultiLine"
-                android:maxLength="4500"
-                android:maxLines="3"
-                android:minLines="1" >
-            </EditText>
+                android:inputType="text|textCapCharacters|textCapSentences|textMultiLine" android:maxLength="4500" android:maxLines="3" android:minLines="1">
+            </com.v2tech.view.widget.FaceItemEditText>
         </RelativeLayout>
 
         <LinearLayout
@@ -151,7 +151,7 @@
             android:layout_height="wrap_content"
             android:background="#ffffff"
             android:orientation="vertical"
-            android:visibility="gone"  >
+            android:visibility="gone" >
 
             <RelativeLayout
                 android:id="@+id/contact_message_sub_feature_ly_inner"

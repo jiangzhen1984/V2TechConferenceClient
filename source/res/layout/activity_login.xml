@@ -138,8 +138,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="15dp"
                 android:layout_marginRight="15dp"
-                android:layout_marginTop="10dp"
-                android:orientation="horizontal" >
+                android:layout_marginTop="10dp" >
 
                 <ImageView
                     android:id="@+id/show_setting"
@@ -155,7 +154,6 @@
                     android:layout_alignBottom="@+id/show_setting"
                     android:layout_alignParentRight="true"
                     android:gravity="right|center_vertical"
-                    android:minHeight="30dp"
                     android:paddingLeft="20dp"
                     android:paddingRight="20dp"
                     android:text="@string/action_sign_in_register"

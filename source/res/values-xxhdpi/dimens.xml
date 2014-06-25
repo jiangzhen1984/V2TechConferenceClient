@@ -30,7 +30,7 @@
      <dimen name="contacts_group_view_group_name_margin_right">5dp</dimen>
      <dimen name="contacts_group_view_online_statist_margin_right">5dp</dimen>
     <dimen name="contacts_group_view_text_max_width">100dp</dimen>
-    <dimen name="contacts_group_view_statist_max_width">90dp</dimen>
+    <dimen name="contacts_group_view_statist_max_width">120dp</dimen>
 
     <!-- contact detail item margin -->
     <dimen name="detail_detail_name_max_width">100dp</dimen>

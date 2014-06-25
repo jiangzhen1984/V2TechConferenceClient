@@ -700,21 +700,23 @@ public class VideoAttendeeListLayout extends LinearLayout {
 			} else if (wr.a == null) {
 				V2Log.e(" wr attendee  is null ");
 				return 1;
-			}
+			} else {
 			
-			int ret = this.a.compareTo(wr.a);
-			if (ret == 0) {
-				return this.sortFlag;
-			} else if (ret < 0 || ret > 0) {
-				if (this.a.isJoined()) {
-					return -1;
-				} else if (wr.a.isJoined()) {
-					return 1;
+				int ret = this.a.compareTo(wr.a);
+				if (ret == 0) {
+					return this.sortFlag;
+				} else if (ret < 0 || ret > 0) {
+					if (this.a.isJoined()) {
+						return -1;
+					} else if (wr.a.isJoined()) {
+						return 1;
+					} else {
+						return 0;
+					}
 				} else {
-					return 0;
+					return ret;
 				}
 			}
-			return ret;
 		}
 
 	}

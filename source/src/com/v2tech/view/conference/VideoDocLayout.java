@@ -527,7 +527,7 @@ public class VideoDocLayout extends LinearLayout {
 	}
 
 	public boolean isFullScreenSize() {
-		return "restorescreen".equals(mRequestUpdateSizeButton.getTag());
+		return "fullscreen".equals(mRequestUpdateSizeButton.getTag());
 	}
 
 	private OnClickListener pageChangeListener = new OnClickListener() {
@@ -632,6 +632,17 @@ public class VideoDocLayout extends LinearLayout {
 		@Override
 		public void onClick(View view) {
 			if (view.getTag().equals("fullscreen")) {
+				view.setTag("restorescreen");
+				mRequestUpdateSizeButton
+						.setImageResource(R.drawable.video_doc_full_screen_button_selector);
+			} else {
+				view.setTag("fullscreen");
+				mRequestUpdateSizeButton
+						.setImageResource(R.drawable.video_doc_restore_screen_button_selector);
+			}
+			
+			
+			if (view.getTag().equals("fullscreen")) {
 				if (listener != null) {
 					listener.requestDocViewFillParent(rootView);
 				}
@@ -641,15 +652,6 @@ public class VideoDocLayout extends LinearLayout {
 				}
 			}
 
-			if (view.getTag().equals("fullscreen")) {
-				view.setTag("restorescreen");
-				mRequestUpdateSizeButton
-						.setImageResource(R.drawable.video_doc_restore_screen_button_selector);
-			} else {
-				view.setTag("fullscreen");
-				mRequestUpdateSizeButton
-						.setImageResource(R.drawable.video_doc_full_screen_button_selector);
-			}
 		}
 
 	};

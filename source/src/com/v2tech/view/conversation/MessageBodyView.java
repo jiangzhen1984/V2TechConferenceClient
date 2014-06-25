@@ -11,6 +11,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.text.Spannable;
@@ -27,6 +28,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.v2tech.R;
+import com.v2tech.db.ContentDescriptor;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.MessageUtil;
@@ -166,6 +168,7 @@ public class MessageBodyView extends LinearLayout {
 		et.setOnLongClickListener(messageLongClickListener);
 		et.setOnClickListener(imageMessageClickListener);
 		et.setBackgroundColor(Color.TRANSPARENT);
+		et.setSelected(false);
 		LinearLayout.LayoutParams ll = new LinearLayout.LayoutParams(
 				LinearLayout.LayoutParams.WRAP_CONTENT,
 				LinearLayout.LayoutParams.WRAP_CONTENT);
@@ -268,10 +271,11 @@ public class MessageBodyView extends LinearLayout {
 							
 							ClipboardManager clipboard = (ClipboardManager) getContext()
 									.getSystemService(Context.CLIPBOARD_SERVICE);
-							ClipData clip = ClipData.newPlainText("label",
-									MessageUtil.getMixedConversationContent(getContext(), mMsg));
+							ClipData clip = ClipData.newPlainText("label","[[[["+mMsg.getId()+"]]]]");
+	
 							clipboard.setPrimaryClip(clip);
 							pw.dismiss();
+							
 							Toast.makeText(getContext(),
 									R.string.contact_message_copy_message,
 									Toast.LENGTH_SHORT).show();

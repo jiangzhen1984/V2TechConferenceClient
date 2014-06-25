@@ -95,7 +95,7 @@
         android:paddingBottom="10dp"
         android:paddingTop="10dp"
         android:src="@drawable/video_doc_full_screen_button_selector"
-        android:tag="fullscreen" />
+        android:tag="restorescreen" />
 
     <ImageView
         android:id="@+id/video_doc_pin_button"

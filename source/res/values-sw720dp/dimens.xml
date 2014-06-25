@@ -26,6 +26,8 @@
     
     <!-- contact group view -->
     <dimen name="contacts_group_view_arrow_padding_left">15dp</dimen>
+    <dimen name="contacts_group_view_group_name_margin_right">25dp</dimen>
+     <dimen name="contacts_group_view_online_statist_margin_right">10dp</dimen>
     <dimen name="contacts_group_view_text_max_width">200dp</dimen>
     <dimen name="contacts_group_view_statist_max_width">100dp</dimen>
 

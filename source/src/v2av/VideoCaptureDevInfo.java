@@ -133,13 +133,20 @@ public class VideoCaptureDevInfo
      * Before do this option, please do close local device first. After call this function, 
      * then open local device again.
      */
-    public void reverseCamera() {
+    public boolean reverseCamera() {
+    	//Only has one camera, can not reverse
+    	if (Camera.getNumberOfCameras() <= 1) {
+    		return false;
+    	}
     	if (CAMERA_FACE_FRONT.equals(mDefaultDevName)) {
     		mDefaultDevName = CAMERA_FACE_BACK;
+    		return true;
     	} else if (CAMERA_FACE_BACK.equals(mDefaultDevName)) {
     		mDefaultDevName = CAMERA_FACE_FRONT;
+    		return true;
     	} else {
     		Log.e("VideoCaptureDevInfo", " Unknow camera default name:" + mDefaultDevName);
+    		return false;
     	}
     }
     
@@ -162,7 +169,11 @@ public class VideoCaptureDevInfo
             for (int i = 0; i < Camera.getNumberOfCameras(); ++i)
             {
                 VideoCaptureDevice newDevice = new VideoCaptureDevice();
-
+                //Set first camera
+                if ( this.mDefaultDevName == null ||  this.mDefaultDevName.isEmpty()) {
+                	 this.mDefaultDevName = newDevice.deviceUniqueName;
+                }
+                
                 Camera.CameraInfo info = new Camera.CameraInfo();
                 Camera.getCameraInfo(i, info);
                 newDevice.index = i;
@@ -178,6 +189,7 @@ public class VideoCaptureDevInfo
                     newDevice.deviceUniqueName = CAMERA_FACE_FRONT;
                     newDevice.frontCameraType = FrontFacingCameraType.Android23;
                     Log.d(TAG, "Camera " + i +", Camera Facing front, Orientation "+ info.orientation);
+                    //If has front-side camera, use front-side camera as default 
                     this.mDefaultDevName = newDevice.deviceUniqueName;
                 }
 

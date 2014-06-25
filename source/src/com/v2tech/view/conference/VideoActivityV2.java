@@ -719,8 +719,14 @@ public class VideoActivityV2 extends Activity {
 				}
 
 			} else if (v.getTag().equals("doc")) {
-				requestSubViewFixed();
 				content = initDocLayout();
+				
+				if (mDocContainer.isFullScreenSize()) {
+					requestSubViewFillScreen();
+				} else {
+					requestSubViewFixed();
+				}
+				
 
 			} else if (v.getTag().equals("invition")) {
 				if (cg.isCanInvitation()) {
@@ -1271,9 +1277,10 @@ public class VideoActivityV2 extends Activity {
 	 */
 	private void doReverseCamera() {
 
-		VideoCaptureDevInfo.CreateVideoCaptureDevInfo().reverseCamera();
-
-		cb.updateCameraParameters(new CameraConfiguration(""), null);
+		boolean flag = VideoCaptureDevInfo.CreateVideoCaptureDevInfo().reverseCamera();
+		if (flag) {
+			cb.updateCameraParameters(new CameraConfiguration(""), null);
+		}
 		return;
 	}
 
@@ -1779,6 +1786,8 @@ public class VideoActivityV2 extends Activity {
 		@Override
 		public void requestDocViewRestore(View v) {
 			requestSubViewRestore();
+			//Request fixed size for doc layout
+			requestSubViewFixed();
 			adjustContentLayout();
 
 		}

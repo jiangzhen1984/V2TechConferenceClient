@@ -21,6 +21,7 @@ import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
+import android.text.TextWatcher;
 import android.text.style.ImageSpan;
 import android.view.MotionEvent;
 import android.view.View;
@@ -145,7 +146,7 @@ public class ConversationView extends Activity {
 		mMessagesContainer.setAdapter(adapter);
 		mMessagesContainer.setOnTouchListener(mHiddenOnTouchListener);
 		mMessagesContainer.setOnScrollListener(scrollListener);
-		mMessagesContainer.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+		mMessagesContainer.setTranscriptMode(ListView.TRANSCRIPT_MODE_ALWAYS_SCROLL);
 
 		mSendButtonTV = (TextView) findViewById(R.id.message_send);
 		// mSendButtonTV.setOnClickListener(sendMessageListener);
@@ -443,6 +444,28 @@ public class ConversationView extends Activity {
 			mMessageET.setSelection(selectionCursor);
 		}
 
+	};
+	
+	
+	private TextWatcher mPasteWatcher = new TextWatcher() {
+
+		@Override
+		public void afterTextChanged(Editable arg0) {
+			
+		}
+
+		@Override
+		public void beforeTextChanged(CharSequence arg0, int arg1, int arg2,
+				int arg3) {
+			
+		}
+
+		@Override
+		public void onTextChanged(CharSequence arg0, int arg1, int arg2,
+				int arg3) {
+			
+		}
+		
 	};
 
 	@Override
