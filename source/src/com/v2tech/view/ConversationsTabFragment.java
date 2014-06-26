@@ -42,6 +42,7 @@ import com.v2tech.util.Notificator;
 import com.v2tech.util.V2Log;
 import com.v2tech.view.conference.GroupLayout;
 import com.v2tech.view.conference.VideoActivityV2;
+import com.v2tech.view.cus.TouchImageView;
 import com.v2tech.vo.Conference;
 import com.v2tech.vo.ConferenceConversation;
 import com.v2tech.vo.ContactConversation;
@@ -187,7 +188,12 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher {
 	public void onDestroy() {
 		super.onDestroy();
 		getActivity().unregisterReceiver(receiver);
-		mItemList.clear();
+		if (mItemList != null) {
+			mItemList.clear();
+		}
+		if (mCacheItemList != null) {
+			mCacheItemList.clear();
+		}
 		BitmapManager.getInstance().unRegisterBitmapChangedListener(
 				this.bitmapChangedListener);
 //		this.getActivity().getContentResolver()
@@ -328,22 +334,23 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher {
 
 	@Override
 	public void afterTextChanged(Editable s) {
-
 		if (s != null && s.length() > 0) {
 			if (!mIsStartedSearch) {
 				mCacheItemList = mItemList;
 				mIsStartedSearch = true;
 			}
 		} else {
-			mItemList = mCacheItemList;
-			adapter.notifyDataSetChanged();
-			mIsStartedSearch = false;
+			if (mIsStartedSearch) {
+				mItemList = mCacheItemList;
+				adapter.notifyDataSetChanged();
+				mIsStartedSearch = false;
+			}
 			return;
 		}
 		List<ScrollItem> newItemList = new ArrayList<ScrollItem>();
 		String searchKey = s == null ? "" : s.toString();
-		for (int i = 0; mItemList != null && i < mItemList.size(); i++) {
-			ScrollItem item = mItemList.get(i);
+		for (int i = 0; mCacheItemList != null && i < mCacheItemList.size(); i++) {
+			ScrollItem item = mCacheItemList.get(i);
 			if (item.cov.getName() != null
 					&& item.cov.getName().contains(searchKey)) {
 				newItemList.add(item);
@@ -359,13 +366,30 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher {
 	@Override
 	public void beforeTextChanged(CharSequence s, int start, int count,
 			int after) {
-
+		
 	}
 
 	@Override
 	public void onTextChanged(CharSequence s, int start, int before, int count) {
-
+		
 	}
+	
+	
+	
+	
+	@Override
+	public void setUserVisibleHint(boolean isVisibleToUser) {
+		super.setUserVisibleHint(isVisibleToUser);
+		//recover search result
+		if (!isVisibleToUser && mIsStartedSearch) {
+			mItemList = mCacheItemList;
+			adapter.notifyDataSetChanged();
+			mIsStartedSearch = false;
+			return;
+		}
+	}
+	
+	
 
 	/**
 	 * Use to update current list view adapter and start video activity. this
@@ -667,6 +691,9 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher {
 		public View getView(int position, View convertView, ViewGroup parent) {
 			return mItemList.get(position).gp;
 		}
+		
+		
+		
 
 	}
 

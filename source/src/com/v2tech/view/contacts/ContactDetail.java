@@ -255,7 +255,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 
 			mSendMsgBottomButton.setOnClickListener(mSendMsgListener);
 			if (mCallButtomButton != null) {
-				//mCallButtomButton.setOnClickListener(mCallButtonListener);
+				mCallButtomButton.setOnClickListener(mCallButtonListener);
 			}
 			mCreateConfButton.setOnClickListener(mCreateConfMsgListener);
 

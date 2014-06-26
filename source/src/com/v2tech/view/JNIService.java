@@ -42,7 +42,6 @@ import com.v2tech.service.BitmapManager;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.Notificator;
-import com.v2tech.util.StorageUtil;
 import com.v2tech.util.V2Log;
 import com.v2tech.util.XmlParser;
 import com.v2tech.view.bo.GroupUserObject;
@@ -621,7 +620,7 @@ public class JNIService extends Service {
 						i.putExtra("gid", g.getmGId());
 						sendStickyBroadcast(i);
 						Intent enterConference = new Intent(mContext,
-								VideoActivityV2.class);
+								MainActivity.class);
 						enterConference.putExtra("gid", g.getmGId());
 						Notificator.updateSystemNotification(mContext, name
 								+ " 会议邀请:", g.getName(), 1, enterConference,
@@ -897,8 +896,7 @@ public class JNIService extends Service {
 
 			vm.setGroupId(nGroupID);
 
-			String filePath = StorageUtil.getAbsoluteSdcardPath()
-					+ "/v2tech/pics/" + vait.getUUID() + vait.getExtension();
+			String filePath = GlobalConfig.getGlobalPicsPath()+"/" + vait.getUUID() + vait.getExtension();
 			vait.setFilePath(filePath);
 
 			File f = new File(filePath);

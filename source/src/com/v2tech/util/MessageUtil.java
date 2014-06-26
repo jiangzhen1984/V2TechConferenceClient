@@ -54,11 +54,13 @@ public class MessageUtil {
 	}
 
 	/**
-	 * TODO add comment
+	 * Get text content from message. convert face item to special symbol
 	 * 
 	 * @param context
 	 * @param vm
 	 * @return
+	 * 
+	 * @see GlobalConfig#getEmojiStrByIndex(int)
 	 */
 	public static CharSequence getMixedConversationCopyedContent(VMessage vm) {
 		if (vm == null) {
@@ -90,10 +92,11 @@ public class MessageUtil {
 		}
 
 		drw.setBounds(0, 0, drw.getIntrinsicWidth(), drw.getIntrinsicHeight());
-		builder.append(".");
+		String emoji = GlobalConfig.getEmojiStrByIndex(index);
+		builder.append(emoji);
 
 		ImageSpan is = new ImageSpan(drw, index + "");
-		builder.setSpan(is, builder.length() - ".".length(), builder.length(),
+		builder.setSpan(is, builder.length() - emoji.length(), builder.length(),
 				Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 	}
 }

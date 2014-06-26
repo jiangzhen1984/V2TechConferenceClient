@@ -8,13 +8,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
-import android.graphics.drawable.Drawable;
-import android.text.Spannable;
-import android.text.SpannableStringBuilder;
-import android.text.style.ImageSpan;
-
 import com.v2tech.service.GlobalHolder;
-import com.v2tech.util.GlobalConfig;
 
 public class VMessage {
 

@@ -17,7 +17,7 @@ import android.widget.BaseAdapter;
 public class CommonAdapter extends BaseAdapter {
 
 	
-	private List<CommonAdapterItemWrapper> adapter;
+	private List<CommonAdapterItemWrapper> dataset;
 	
 	private ViewConvertListener listener;
 	
@@ -35,20 +35,20 @@ public class CommonAdapter extends BaseAdapter {
 	
 	
 	
-	public CommonAdapter(List<CommonAdapterItemWrapper> adapter,
+	public CommonAdapter(List<CommonAdapterItemWrapper> dataset,
 			ViewConvertListener listener) {
-		this(adapter, listener, 10);
+		this(dataset, listener, 10);
 	}
 	
 	
 	
-	public CommonAdapter(List<CommonAdapterItemWrapper> adapter,
+	public CommonAdapter(List<CommonAdapterItemWrapper> dataset,
 			ViewConvertListener listener, int viewCount) {
 		super();
-		this.adapter = adapter;
+		this.dataset = dataset;
 		this.listener = listener;
 		this.batchCount = viewCount;
-		if (this.adapter == null || this.listener == null) {
+		if (this.dataset == null || this.listener == null) {
 			throw new NullPointerException(" parameters can not be null");
 		}
 	}
@@ -57,17 +57,17 @@ public class CommonAdapter extends BaseAdapter {
 
 	@Override
 	public int getCount() {
-		return adapter.size();
+		return dataset.size();
 	}
 
 	@Override
 	public Object getItem(int pos) {
-		return adapter.get(pos).getItemObject();
+		return dataset.get(pos).getItemObject();
 	}
 
 	@Override
 	public long getItemId(int pos) {
-		return adapter.get(pos).getItemLongId();
+		return dataset.get(pos).getItemLongId();
 	}
 	
 	public int getViewTypeCount() {
@@ -76,7 +76,7 @@ public class CommonAdapter extends BaseAdapter {
 
 	@Override
 	public View getView(int pos, View view, ViewGroup vg) {
-		return listener.converView(adapter.get(pos), view, vg);
+		return listener.converView(dataset.get(pos), view, vg);
 	}
 
 }

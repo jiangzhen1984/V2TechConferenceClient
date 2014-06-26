@@ -101,6 +101,22 @@ public class GlobalConfig {
 	
 	
 	
+	public static String getGlobalPath() {
+		return StorageUtil.getAbsoluteSdcardPath()+"/.v2tech/";
+	}
+	
+	public static String getGlobalUserAvatarPath() {
+		return StorageUtil.getAbsoluteSdcardPath()+"/.v2tech/Users";
+	}
+	
+	
+	public static String getGlobalPicsPath() {
+		return StorageUtil.getAbsoluteSdcardPath()+"/.v2tech/pics";
+	}
+	
+	
+	
+	
 	
 	static class EmojiWraper {
 		String emojiStr;

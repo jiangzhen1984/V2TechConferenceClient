@@ -19,10 +19,8 @@ import android.os.Looper;
 import android.os.Message;
 import android.provider.MediaStore;
 import android.text.Editable;
-import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.TextWatcher;
-import android.text.style.ImageSpan;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -136,7 +134,7 @@ public class ConversationView extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		mContext = this;
-	
+
 		setContentView(R.layout.activity_contact_message);
 
 		lh = new LocalHandler();
@@ -146,8 +144,8 @@ public class ConversationView extends Activity {
 		mMessagesContainer.setAdapter(adapter);
 		mMessagesContainer.setOnTouchListener(mHiddenOnTouchListener);
 		mMessagesContainer.setOnScrollListener(scrollListener);
-		mMessagesContainer
-				.setTranscriptMode(ListView.TRANSCRIPT_MODE_ALWAYS_SCROLL);
+		// mMessagesContainer
+		// .setTranscriptMode(ListView.TRANSCRIPT_MODE_ALWAYS_SCROLL);
 
 		mSendButtonTV = (TextView) findViewById(R.id.message_send);
 		// mSendButtonTV.setOnClickListener(sendMessageListener);
@@ -339,7 +337,6 @@ public class ConversationView extends Activity {
 		}
 	}
 
-	// TODO add implements
 	private void cleanCache() {
 		messageArray.clear();
 	}
@@ -427,23 +424,27 @@ public class ConversationView extends Activity {
 			drawable.setBounds(0, 0, drawable.getIntrinsicWidth(),
 					drawable.getIntrinsicHeight());
 
-			int selectionCursor = mMessageET.getSelectionStart();
-			if (selectionCursor == 0
-					|| ((CharSequence) mMessageET.getText()).charAt(mMessageET
-							.getSelectionStart() - 1) == '\n') {
-
-			}
-			mMessageET.getText().insert(selectionCursor, ".");
-			selectionCursor = mMessageET.getSelectionStart();
-
-			SpannableStringBuilder builder = new SpannableStringBuilder(
-					mMessageET.getText());
-			ImageSpan is = new ImageSpan(drawable, smile.getTag().toString());
-			builder.setSpan(is, selectionCursor - ".".length(),
-					selectionCursor, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-			mMessageET.setText(builder);
-
-			mMessageET.setSelection(selectionCursor);
+			String emoji = GlobalConfig
+					.getEmojiStr(GlobalConfig.GLOBAL_FACE_ARRAY[Integer
+							.parseInt(smile.getTag().toString())]);
+			mMessageET.append(emoji);
+//			int selectionCursor = mMessageET.getSelectionStart();
+//			if (selectionCursor == 0
+//					|| ((CharSequence) mMessageET.getText()).charAt(mMessageET
+//							.getSelectionStart() - 1) == '\n') {
+//
+//			}
+//			mMessageET.getText().insert(selectionCursor, emoji);
+//			selectionCursor = mMessageET.getSelectionStart();
+//
+//			SpannableStringBuilder builder = new SpannableStringBuilder(
+//					mMessageET.getText());
+//			ImageSpan is = new ImageSpan(drawable, smile.getTag().toString());
+//			builder.setSpan(is, selectionCursor -1 ,
+//					selectionCursor , Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+//			mMessageET.setText(builder);
+//
+//			mMessageET.setSelection(selectionCursor);
 		}
 
 	};
@@ -452,6 +453,7 @@ public class ConversationView extends Activity {
 
 		@Override
 		public void afterTextChanged(Editable edit) {
+			mMessageET.removeTextChangedListener(this);
 			int start = -1, end = -1;
 			int index = 0;
 			while (index < edit.length()) {
@@ -486,6 +488,8 @@ public class ConversationView extends Activity {
 				}
 				index++;
 			}
+			
+			mMessageET.addTextChangedListener(this);
 		}
 
 		@Override
@@ -553,63 +557,119 @@ public class ConversationView extends Activity {
 
 		VMessage vm = new VMessage(this.groupId, local, remote);
 
-		ImageSpan[] spans = mMessageET.getText().getSpans(0,
-				mMessageET.getText().length(), ImageSpan.class);
+//		ImageSpan[] spans = mMessageET.getText().getSpans(0,
+//				mMessageET.getText().length(), ImageSpan.class);
 
-		Editable et = mMessageET.getText();
-		int imageIndex = 0;
-		StringBuilder textContent = new StringBuilder();
-		for (int index = 0; index < et.length();) {
-			char c = et.charAt(index);
-			ImageSpan is = null;
-			if (imageIndex < spans.length) {
-				is = spans[imageIndex];
-			}
-
-			int start = et.getSpanStart(is);
-			if (index == start && is != null) {
-				if (textContent.length() != 0) {
-					int pos = start - textContent.length();
-					VMessageTextItem vmi = new VMessageTextItem(vm,
-							textContent.toString());
-					if (start == 0 || pos == 0 || et.charAt(pos - 1) == '\n') {
-						vmi.setNewLine(true);
-					}
-					textContent = new StringBuilder();
-				}
-				VMessageFaceItem vfm = new VMessageFaceItem(vm,
-						Integer.parseInt(is.getSource()));
-				if (start == 0
-						|| (start != -1 && et.subSequence(start - 1, start)
-								.toString().equals("\n"))) {
-					vfm.setNewLine(true);
-				}
-				imageIndex++;
-				index = et.getSpanEnd(is);
+		//Editable et = mMessageET.getText();
+		String[] array = content.split("\n");
+		for (int i =0 ; i < array.length; i++) {
+			String str = array[i];
+			int len = str.length();
+			if (str.length() <= 4) {
+				VMessageAbstractItem vai =  new VMessageTextItem(vm, str);
+				vai.setNewLine(true);
 				continue;
-
 			}
+			
+			
+			int emojiStart = -1, end = -1, strStart = 0;
+			int index = 0;
+			while (index < str.length()) {
+				if (str.charAt(index) == '/' && index < len - 1
+						&& str.charAt(index + 1) == ':') {
+					emojiStart = index;
+					index += 2;
+					continue;
+				} else if (emojiStart != -1) {
+					//Found end flag of emoji
+					if (str.charAt(index) == ':' && index < len - 1
+							&& str.charAt(index + 1) == '/') {
+						end = index + 2;
 
-			if (c != '\n') {
-				textContent.append(c);
-			} else if (c == '\n' && textContent.length() != 0) {
-				VMessageTextItem vmi = new VMessageTextItem(vm,
-						textContent.toString());
-				textContent = new StringBuilder();
+						
+						//If emojiStart lesser than strStart, 
+						//mean there exist string before emoji
+						if (strStart < emojiStart) {
+							String strTextContent = str.substring(strStart, emojiStart);
+							new VMessageTextItem(vm, strTextContent);
+						}
+						
+						
+						int ind = GlobalConfig.getDrawableIndexByEmoji(str
+								.subSequence(emojiStart, end).toString());
+						if (ind > 0) {
+							//new face item and add list
+							new VMessageFaceItem(vm, ind);
+						}
+						//Assign end to index -1, do not assign end because index will be ++
+						index = end -1;
+						strStart = end ;
+						emojiStart = -1;
+						end = -1;
+						//Means no emoji any more
+					} else if (index == len - 1) {
+						String strTextContent = str.substring(strStart, index);
+						new VMessageTextItem(vm, strTextContent);
+					}
+				}
+				index++;
 			}
-
-			// Check last span is text or new line span is text
-			if ((index == et.length() - 1 || c == '\n')
-					&& textContent.length() != 0) {
-				VMessageTextItem vmi = new VMessageTextItem(vm,
-						textContent.toString());
-				vmi.setNewLine(true);
-				textContent = new StringBuilder();
-			}
-
-			index++;
-
+			
 		}
+		
+//		int imageIndex = 0;
+//		StringBuilder textContent = new StringBuilder();
+//		for (int index = 0; index < et.length();) {
+//			char c = et.charAt(index);
+//			ImageSpan is = null;
+//			if (imageIndex < spans.length) {
+//				is = spans[imageIndex];
+//			}
+//
+//			int start = et.getSpanStart(is);
+//			if (index == start && is != null) {
+//				if (textContent.length() != 0) {
+//					int pos = start - textContent.length();
+//					VMessageTextItem vmi = new VMessageTextItem(vm,
+//							textContent.toString());
+//					if (start == 0 || pos == 0 || et.charAt(pos - 1) == '\n') {
+//						vmi.setNewLine(true);
+//					}
+//					textContent = new StringBuilder();
+//				}
+//				VMessageFaceItem vfm = new VMessageFaceItem(vm,
+//						Integer.parseInt(is.getSource()));
+//				if (start == 0
+//						|| (start != -1 && et.subSequence(start - 1, start)
+//								.toString().equals("\n"))) {
+//					vfm.setNewLine(true);
+//				}
+//				imageIndex++;
+//				index = et.getSpanEnd(is);
+//				continue;
+//
+//			}
+//
+//			if (c != '\n') {
+//				textContent.append(c);
+//			} else if (c == '\n' && textContent.length() != 0) {
+//				VMessageTextItem vmi = new VMessageTextItem(vm,
+//						textContent.toString());
+//				textContent = new StringBuilder();
+//			}
+//
+//			// Check last span is text or new line span is text
+//			if ((index == et.length() - 1 || c == '\n')
+//					&& textContent.length() != 0) {
+//				VMessageTextItem vmi = new VMessageTextItem(vm,
+//						textContent.toString());
+//				vmi.setNewLine(true);
+//				textContent = new StringBuilder();
+//			}
+//
+//			index++;
+//
+//		}
 
 		List<VMessageAbstractItem> items = vm.getItems();
 		for (VMessageAbstractItem item : items) {

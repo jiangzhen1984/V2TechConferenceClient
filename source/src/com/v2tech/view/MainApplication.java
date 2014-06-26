@@ -34,7 +34,6 @@ import com.v2tech.util.CrashHandler;
 import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.LogcatThread;
 import com.v2tech.util.Notificator;
-import com.v2tech.util.StorageUtil;
 import com.v2tech.util.V2Log;
 import com.v2tech.view.conference.VideoActivityV2;
 
@@ -98,10 +97,9 @@ public class MainApplication extends Application {
 		getApplicationContext().startService(
 				new Intent(getApplicationContext(), JNIService.class));
 
-		String path = StorageUtil.getAbsoluteSdcardPath();
-		path = path +"/.v2tech/";
+		String path = GlobalConfig.getGlobalPath();
 		new ConfigRequest().setExtStoragePath(path);
-		File pa = new File(path + "/Users");
+		File pa = new File(GlobalConfig.getGlobalUserAvatarPath());
 		if (!pa.exists()) {
 			boolean res = pa.mkdirs();
 			V2Log.i(" create avatar dir " + pa.getAbsolutePath() + "  " + res);
@@ -109,7 +107,7 @@ public class MainApplication extends Application {
 		pa.setWritable(true);
 		pa.setReadable(true);
 
-		File image = new File(path + "/v2tech/pics");
+		File image = new File(GlobalConfig.getGlobalPicsPath());
 		if (!image.exists()) {
 			boolean res = image.mkdirs();
 			V2Log.i(" create avatar dir " + image.getAbsolutePath() + "  "

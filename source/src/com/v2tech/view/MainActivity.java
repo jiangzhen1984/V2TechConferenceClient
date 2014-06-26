@@ -281,6 +281,16 @@ public class MainActivity extends FragmentActivity implements
 		super.onStart();
 		V2Log.d(" main onStart ");
 	}
+	
+	
+
+	@Override
+	protected void onNewIntent(Intent intent) {
+		super.onNewIntent(intent);
+		if (intent.getExtras() != null) {
+			intent.getExtras().get("gid");
+		}
+	}
 
 	@Override
 	protected void onStop() {
@@ -362,13 +372,15 @@ public class MainActivity extends FragmentActivity implements
 		@Override
 		public void beforeTextChanged(CharSequence arg0, int arg1, int arg2,
 				int arg3) {
-
+			((TextWatcher) ((FragmentPagerAdapter) mViewPager.getAdapter())
+					.getItem(mTabHost.getCurrentTab())).beforeTextChanged(arg0, arg1, arg2, arg3);
 		}
 
 		@Override
 		public void onTextChanged(CharSequence arg0, int arg1, int arg2,
 				int arg3) {
-
+			((TextWatcher) ((FragmentPagerAdapter) mViewPager.getAdapter())
+					.getItem(mTabHost.getCurrentTab())).onTextChanged(arg0, arg1, arg2, arg3);
 		}
 
 	};
