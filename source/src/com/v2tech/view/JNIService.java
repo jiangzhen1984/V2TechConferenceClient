@@ -620,7 +620,7 @@ public class JNIService extends Service {
 						i.putExtra("gid", g.getmGId());
 						sendStickyBroadcast(i);
 						Intent enterConference = new Intent(mContext,
-								MainActivity.class);
+								VideoActivityV2.class);
 						enterConference.putExtra("gid", g.getmGId());
 						Notificator.updateSystemNotification(mContext, name
 								+ " 会议邀请:", g.getName(), 1, enterConference,
@@ -844,6 +844,7 @@ public class JNIService extends Service {
 
 			// Record image data meta
 			VMessage cache = new VMessage(fromUser, toUser, new Date());
+			cache.setMsgCode(nBusinessType);
 			XmlParser.extraImageMetaFrom(cache, szXmlText);
 			if (cache.getItems().size() > 0) {
 				synchronized (cacheImageMeta) {

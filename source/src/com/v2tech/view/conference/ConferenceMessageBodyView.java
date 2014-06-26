@@ -5,7 +5,12 @@ import java.util.List;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
+import android.text.Spannable;
+import android.text.SpannableStringBuilder;
+import android.text.style.ImageSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
@@ -68,57 +73,62 @@ public class ConferenceMessageBodyView extends LinearLayout {
 		senderTV.setText(this.mMsg.getFromUser().getName() + "  "
 				+ mMsg.getDateTimeStr());
 		
-		
-		mContentContainer.removeAllViews();
-		LinearLayout line = new LinearLayout(this.getContext());
-		LinearLayout.LayoutParams ll = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,  LinearLayout.LayoutParams.WRAP_CONTENT);
-		line.setOrientation(LinearLayout.HORIZONTAL);
-		mContentContainer.addView(line, ll);
-		List<VMessageAbstractItem>  items = mMsg.getItems();
-		for (VMessageAbstractItem item : items) {
-			//Add new layout for new line
-			if (item.isNewLine()) {
-				line = new LinearLayout(this.getContext());
-				line.setOrientation(LinearLayout.HORIZONTAL);
-				mContentContainer.addView(line, ll);
+
+		TextView et = new TextView(this.getContext());
+		et.setBackgroundColor(Color.TRANSPARENT);
+		et.setSelected(false);
+		LinearLayout.LayoutParams ll = new LinearLayout.LayoutParams(
+				LinearLayout.LayoutParams.WRAP_CONTENT,
+				LinearLayout.LayoutParams.WRAP_CONTENT);
+		mContentContainer.addView(et, ll);
+
+		List<VMessageAbstractItem> items = mMsg.getItems();
+		for (int i = 0; items != null && i < items.size(); i++) {
+			VMessageAbstractItem item = items.get(i);
+			// Add new layout for new line
+			if (item.isNewLine() && et.length() != 0) {
+				et.append("\n");
 			}
-			View child = null;
 			if (item.getType() == VMessageAbstractItem.ITEM_TYPE_TEXT) {
-				TextView contentTV = new TextView(this.getContext());
-				contentTV.setText(((VMessageTextItem)item).getText());
-				contentTV.setTextColor(Color.GRAY);
-				contentTV.setHighlightColor(Color.GRAY);
-				child = contentTV;
-				line.addView(child, ll);
+				et.append(((VMessageTextItem) item).getText());
 			} else if (item.getType() == VMessageAbstractItem.ITEM_TYPE_FACE) {
-				ImageView iv = new ImageView(this.getContext());
-				iv.setImageResource(GlobalConfig.GLOBAL_FACE_ARRAY[((VMessageFaceItem)item).getIndex()]);
-				child = iv;
-				line.addView(child, ll);
+				Drawable dr = this
+						.getResources()
+						.getDrawable(
+								GlobalConfig.GLOBAL_FACE_ARRAY[((VMessageFaceItem) item)
+										.getIndex()]);
+				dr.setBounds(0, 0, dr.getIntrinsicWidth(),
+						dr.getIntrinsicHeight());
+
+				et.append(".");
+
+				SpannableStringBuilder builder = new SpannableStringBuilder(
+						et.getText());
+				ImageSpan is = new ImageSpan(dr);
+				builder.setSpan(is, et.getText().length() - 1, et.getText()
+						.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+				et.setText(builder);
 			} else if (item.getType() == VMessageAbstractItem.ITEM_TYPE_IMAGE) {
-				ImageView iv = new ImageView(this.getContext());
-				VMessageImageItem.Size si = ((VMessageImageItem)item).getCompressedBitmapSize();
-				line.addView(iv, new LinearLayout.LayoutParams(
-						si.width,
-						si.height));
-				iv.setTag(item);
-				child = iv;
-				iv.setOnClickListener(new OnClickListener() {
 
-				@Override
-				public void onClick(View arg0) {
-					if (callback != null) {
-						callback.onMessageClicked(mMsg);
-					}
-				}
+				Drawable dr = new BitmapDrawable(this.getContext()
+						.getResources(),
+						((VMessageImageItem) item).getCompressedBitmap());
+				dr.setBounds(0, 0, dr.getIntrinsicWidth(),
+						dr.getIntrinsicHeight());
+				et.append(".");
+				SpannableStringBuilder builder = new SpannableStringBuilder(
+						et.getText());
+				ImageSpan is = new ImageSpan(dr);
+				builder.setSpan(is, et.getText().length() - 1, et.getText()
+						.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+				et.setText(builder);
 
-			});
-				new LoadTask().execute(new ImageView[]{(ImageView)iv});
 			}
-			
+
 		}
-		
+
 		mContentContainer.setTag(this.mMsg);
+
 
 	}
 
