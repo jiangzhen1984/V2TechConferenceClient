@@ -137,33 +137,6 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher {
 			mConversationsListView = (ListView) rootView
 					.findViewById(R.id.conversations_list_container);
 			mConversationsListView.setAdapter(adapter);
-			/*
-			 * RelativeLayout rt =
-			 * (RelativeLayout)rootView.findViewById(R.id.RelativeLayout2);
-			 * 
-			 * mLoadingImageIV = new ImageView(getActivity());
-			 * mLoadingImageIV.setImageResource(R.drawable.progress_animation);
-			 * 
-			 * RelativeLayout.LayoutParams rl = new
-			 * RelativeLayout.LayoutParams(RelativeLayout
-			 * .LayoutParams.WRAP_CONTENT,
-			 * RelativeLayout.LayoutParams.WRAP_CONTENT);
-			 * rl.addRule(RelativeLayout.CENTER_IN_PARENT);
-			 * rt.addView(mLoadingImageIV, rl);
-			 * 
-			 * ((AnimationDrawable) mLoadingImageIV.getDrawable()).start();
-			 */
-
-			// TextView tv = (TextView)
-			// rootView.findViewById(R.id.fragment_title);
-			// if (mCurrentTabFlag.equals(Conversation.TYPE_CONFERNECE)) {
-			// tv.setText(R.string.tab_conference_name);
-			// } else if (mCurrentTabFlag.equals(Conversation.TYPE_CONTACT)) {
-			// tv.setText(R.string.tab_conversation_name);
-			// } else if (mCurrentTabFlag.equals(Conversation.TYPE_GROUP)) {
-			// tv.setText(R.string.tab_group_name);
-			// }
-
 		}
 		return rootView;
 	}
@@ -225,7 +198,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher {
 			intentFilter.addAction(PublicIntent.UPDATE_CONVERSATION);
 			intentFilter
 					.addAction(JNIService.JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION);
-			// Only conference conversation fragment can hand conference
+			// Only conference conversation fragment can handle conference
 			if (mCurrentTabFlag.equals(Conversation.TYPE_CONFERNECE)) {
 				intentFilter
 						.addAction(JNIService.JNI_BROADCAST_CONFERENCE_INVATITION);

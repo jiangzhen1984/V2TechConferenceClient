@@ -506,7 +506,7 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 
 		@Override
 		public int getCount() {
-			return mItemList.size();
+			return mItemList==null? 0 : mItemList.size();
 		}
 
 		@Override
