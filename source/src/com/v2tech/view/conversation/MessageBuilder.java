@@ -10,6 +10,7 @@ import com.v2tech.db.ContentDescriptor;
 import com.v2tech.vo.User;
 import com.v2tech.vo.VMessage;
 import com.v2tech.vo.VMessageAbstractItem;
+import com.v2tech.vo.VMessageAudioItem;
 import com.v2tech.vo.VMessageFaceItem;
 import com.v2tech.vo.VMessageImageItem;
 import com.v2tech.vo.VMessageTextItem;
@@ -80,6 +81,8 @@ public class MessageBuilder {
 				content = ((VMessageImageItem)item).getFilePath();
 			} else if (item.getType() == VMessageAbstractItem.ITEM_TYPE_FACE) {
 				content = ((VMessageFaceItem)item).getIndex()+"";
+			} else if (item.getType() == VMessageAbstractItem.ITEM_TYPE_AUDIO) {
+				content = ((VMessageAudioItem)item).getAudioFilePath()+"|" +((VMessageAudioItem)item).getSeconds();
 			}
 			
 			itemVal.put(ContentDescriptor.MessageItems.Cols.CONTENT, content);

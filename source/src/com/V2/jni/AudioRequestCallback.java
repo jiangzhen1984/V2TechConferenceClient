@@ -3,6 +3,15 @@ package com.V2.jni;
 
 public interface AudioRequestCallback {
 	
+	/**
+	 * 
+	 * @param nGroupID
+	 * @param nBusinessType
+	 * @param nFromUserID
+	 */
+	public void OnAudioChatInvite(long nGroupID, long nBusinessType,
+			long nFromUserID);
+	
 	
 	/**
 	 * 
@@ -21,5 +30,14 @@ public interface AudioRequestCallback {
 	 */
 	public void OnAudioChatRefused(long nGroupID, long nBusinessType,
 			long nFromUserID);
+	
+	/**
+	 * 
+	 * @param nGroupID
+	 * @param nBusinessType
+	 * @param nFromUserID
+	 */
+	public void OnAudioChatClosed(long nGroupID, long nBusinessType,
+				long nFromUserID) ;
 
 }

@@ -41,4 +41,6 @@
      <color name="login_activity_login_box_text_color">#acacac</color>
      
      <color name="attendee_select_bg">#bfe8ff</color>
+     
+     <color name="fragment_conversation_title_text_color">#ffffff</color>
 </resources>

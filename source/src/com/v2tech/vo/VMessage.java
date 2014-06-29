@@ -147,6 +147,17 @@ public class VMessage {
 		return imageItems;
 	}
 	
+	
+	public List<VMessageAudioItem>  getAudioItems() {
+		List<VMessageAudioItem> videoItems = new ArrayList<VMessageAudioItem>();
+		for (VMessageAbstractItem item : itemList) {
+			if (item.getType() == VMessageAbstractItem.ITEM_TYPE_AUDIO) {
+				videoItems.add((VMessageAudioItem)item);
+			}
+		}
+		return videoItems;
+	}
+	
 
 	public String getUUID() {
 		return mUUID;

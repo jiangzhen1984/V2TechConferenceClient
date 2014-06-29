@@ -27,8 +27,14 @@ public class MessageUtil {
 		if (vm == null || context == null) {
 			return null;
 		}
-
 		SpannableStringBuilder builder = new SpannableStringBuilder();
+		if (vm.getAudioItems().size() > 0) {
+			builder.append(context.getResources().getText(
+					R.string.conversation_display_item_audio));
+			return builder;
+		}
+		
+		
 		for (int i = 0; i < vm.getItems().size(); i++) {
 			VMessageAbstractItem item = vm.getItems().get(i);
 			if (item.getType() == VMessageAbstractItem.ITEM_TYPE_TEXT) {

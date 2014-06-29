@@ -18,7 +18,7 @@ public class PublicIntent {
 	 */
 	public static final String START_CONVERSACTION_ACTIVITY = "com.v2tech.start_conversation_activity";
 
-	public static final String START_VIDEO_CONVERSACTION_ACTIVITY = "com.v2tech.start_video_conversation_activity";
+	public static final String START_P2P_CONVERSACTION_ACTIVITY = "com.v2tech.start_p2p_conversation_activity";
 
 	public static final String START_VIDEO_IMAGE_GALLERY = "com.v2tech.image_gallery";
 

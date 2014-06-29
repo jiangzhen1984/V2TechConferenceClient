@@ -24,6 +24,7 @@ import com.V2.jni.AudioRequest;
 import com.V2.jni.ChatRequest;
 import com.V2.jni.ConfRequest;
 import com.V2.jni.ConfigRequest;
+import com.V2.jni.FileRequest;
 import com.V2.jni.GroupRequest;
 import com.V2.jni.ImRequest;
 import com.V2.jni.NativeInitializer;
@@ -92,6 +93,7 @@ public class MainApplication extends Application {
 		WBRequest.getInstance(getApplicationContext());
 		ChatRequest.getInstance(getApplicationContext());
 		VideoMixerRequest.getInstance();
+		FileRequest.getInstance(getApplicationContext());
 
 		// Start deamon service
 		getApplicationContext().startService(
@@ -113,7 +115,14 @@ public class MainApplication extends Application {
 			V2Log.i(" create avatar dir " + image.getAbsolutePath() + "  "
 					+ res);
 		}
-
+		File audioPath = new File(GlobalConfig.getGlobalAudioPath());
+		if (!audioPath.exists()) {
+			boolean res = audioPath.mkdirs();
+			V2Log.i(" create avatar dir " + audioPath.getAbsolutePath() + "  "
+					+ res);
+		}
+		
+		
 		if (!V2Log.isDebuggable) {
 			new LogcatThread().start();
 		}

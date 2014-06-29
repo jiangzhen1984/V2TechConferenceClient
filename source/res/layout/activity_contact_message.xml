@@ -101,7 +101,8 @@
                 android:paddingLeft="5dp"
                 android:paddingRight="5dp"
                 android:paddingTop="5dp"
-                android:src="@drawable/speaking_button" />
+                android:src="@drawable/speaking_button"
+                android:tag="speaker" />
 
             <ImageView
                 android:id="@+id/contact_message_plus"
@@ -111,41 +112,61 @@
                 android:layout_toRightOf="@+id/contact_message_speaker"
                 android:src="@drawable/message_plus" />
 
-            <TextView
-                android:id="@+id/message_send"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentRight="true"
-                android:layout_centerVertical="true"
-                android:layout_marginRight="5dp"
-                android:background="@drawable/button_bg"
-                android:gravity="center"
-                android:paddingBottom="5dp"
-                android:paddingLeft="10dp"
-                android:paddingRight="10dp"
-                android:paddingTop="5dp"
-                android:text="@string/contact_message_send_button"
-                android:textColor="@color/button_text_color"
-                android:textSize="12sp" />
-
-            <EditText
-                android:id="@+id/message_text"
+            <LinearLayout
+                android:id="@+id/contact_panel_bottom_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
                 android:layout_marginBottom="5dp"
                 android:layout_marginLeft="20dp"
-                android:layout_marginRight="20dp"
                 android:layout_marginTop="5dp"
-                android:layout_toLeftOf="@+id/message_send"
+                android:layout_marginRight="10dp"
                 android:layout_toRightOf="@+id/contact_message_plus"
-                android:background="@drawable/input_bg"
-                android:ems="10"
-                android:inputType="text|textCapCharacters|textCapSentences|textMultiLine"
-                android:maxLength="4500"
-                android:maxLines="3"
-                android:minLines="1" >
-            </EditText>
+                android:orientation="horizontal" >
+
+                <Button
+                     android:id="@+id/message_button_audio_record"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:background="@drawable/input_bg"
+                    android:textSize="@dimen/activity_contact_audio_button_text_size"
+                    android:text="@string/contact_message_button_send_audio_msg" 
+                    android:visibility="gone"/>
+
+                <EditText
+                    android:id="@+id/message_text"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_weight=".7"
+                    android:background="@drawable/input_bg"
+                    android:ems="10"
+                    android:inputType="text|textCapCharacters|textCapSentences|textMultiLine"
+                    android:maxLength="4500"
+                    android:maxLines="3"
+                    android:minLines="1"
+                     >
+                </EditText>
+
+                <TextView
+                    android:id="@+id/message_send"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="5dp"
+                    android:background="@drawable/button_bg"
+                    android:gravity="center"
+                    android:paddingBottom="5dp"
+                    android:paddingLeft="10dp"
+                    android:paddingRight="10dp"
+                    android:paddingTop="5dp"
+                    android:text="@string/contact_message_send_button"
+                    android:textColor="@color/button_text_color"
+                    android:textSize="12sp"
+                     />
+            </LinearLayout>
         </RelativeLayout>
 
         <LinearLayout

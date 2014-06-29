@@ -638,6 +638,27 @@ public class ConferenceService extends AbstractHandler {
 
 		}
 
+		@Override
+		public void OnVideoChatAccepted(long nGroupID, int nBusinessType,
+				long nFromuserID, String szDeviceID) {
+			
+		}
+
+		@Override
+		public void OnVideoChatRefused(long nGroupID, int nBusinessType,
+				long nFromUserID, String szDeviceID) {
+			
+		}
+
+		@Override
+		public void OnVideoChatClosed(long nGroupID, int nBusinessType,
+				long nFromUserID, String szDeviceID) {
+			
+		}
+		
+		
+		
+
 	}
 
 	class GroupRequestCB implements GroupRequestCallback {

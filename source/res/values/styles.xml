@@ -38,5 +38,13 @@
         <item name="@android:windowEnterAnimation">@animator/translation_down_to_up_related_self</item>
         <item name="@android:windowExitAnimation">@animator/translation_up_to_down_related_self</item>
     </style>
+    
+     
+     <style name="MessageVoiceDialog" parent="@android:style/Theme.Translucent.NoTitleBar">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowIsFloating">true</item>
+    </style>
 
 </resources>

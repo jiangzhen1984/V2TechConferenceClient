@@ -14,30 +14,36 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import com.v2tech.service.*;
 
 import com.v2tech.R;
+import com.v2tech.service.ChatService;
+import com.v2tech.service.ConferenceService;
 
-public class VideoConversationFragment extends Fragment {
+public class ConversationConnectedFragment extends Fragment {
 
 	private static final int UPDATE_TIME = 1;
+	private static final int CANCELLED_NOTIFICATION = 2;
 
 	private SurfaceView mLocalSurface;
 	private TextView mTimerTV;
 
 	private long mTimeLine = 0;
 
-	private LocalHandler mLocalHandler;
-	
+	private LocalHandler mLocalHandler = new LocalHandler(
+			Looper.getMainLooper());
+
 	private VideoConversationListener call;
-	
+
+	private ChatService chatService = new ChatService();
+
 	private ConferenceService cs = new ConferenceService();
-	
 
 	@Override
 	public void onAttach(Activity activity) {
 		super.onAttach(activity);
 		call = (VideoConversationListener) activity;
+		chatService.registerCancelledListener(mLocalHandler,
+				CANCELLED_NOTIFICATION, null);
 	}
 
 	@Override
@@ -51,32 +57,36 @@ public class VideoConversationFragment extends Fragment {
 		mTimerTV = (TextView) v
 				.findViewById(R.id.video_conversation_time_counter);
 
-		mLocalHandler = new LocalHandler(Looper.getMainLooper());
-		 Message.obtain(mLocalHandler, UPDATE_TIME).sendToTarget();
+		Message.obtain(mLocalHandler, UPDATE_TIME).sendToTarget();
 		return v;
 	}
 
 	@Override
 	public void onStart() {
 		super.onStart();
-		 VideoRecorder.VideoPreviewSurfaceHolder = mLocalSurface.getHolder();
-		 VideoRecorder.VideoPreviewSurfaceHolder
-		 .setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
-		 VideoRecorder.VideoPreviewSurfaceHolder
-		 .setFormat(PixelFormat.TRANSPARENT);
-		 call.openLocalCamera();
+		VideoRecorder.VideoPreviewSurfaceHolder = mLocalSurface.getHolder();
+		VideoRecorder.VideoPreviewSurfaceHolder
+				.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
+		VideoRecorder.VideoPreviewSurfaceHolder
+				.setFormat(PixelFormat.TRANSPARENT);
+		call.openLocalCamera();
 	}
-	
-	
+
 	@Override
 	public void onStop() {
 		super.onStop();
 		call.closeLocalCamera();
 	}
-	
-	
+
+	@Override
+	public void onDetach() {
+		super.onDetach();
+		chatService.removeRegisterCancelledListener(mLocalHandler,
+				CANCELLED_NOTIFICATION, null);
+	}
+
 	public void quit() {
-		//TODO close audio
+		getActivity().finish();
 	}
 
 	private void updateTimer() {
@@ -89,7 +99,6 @@ public class VideoConversationFragment extends Fragment {
 				+ (minute < 10 ? "0" + minute : minute) + ":"
 				+ (second < 10 ? "0" + second : second));
 	}
-
 
 	class LocalHandler extends Handler {
 
@@ -105,6 +114,9 @@ public class VideoConversationFragment extends Fragment {
 				updateTimer();
 				Message m = Message.obtain(mLocalHandler, UPDATE_TIME);
 				mLocalHandler.sendMessageDelayed(m, 1000);
+				break;
+			case CANCELLED_NOTIFICATION:
+				quit();
 				break;
 			}
 		}

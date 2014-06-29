@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/conversation_framgent_bg" >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical" >
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight=".25" >
+
+            <TextView
+                android:id="@+id/fragment_conversation_title"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:gravity="center"
+                android:text="@string/conversation_waiting"
+                android:textColor="@color/fragment_conversation_title_text_color"
+                android:textSize="@dimen/fragment_conversation_waiting_title_text_size" />
+        </RelativeLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight=".5"
+            android:orientation="vertical" >
+
+            <RelativeLayout
+                android:id="@+id/conversation_fragment_voice_center_container"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent" >
+
+                <ImageView
+                    android:id="@+id/conversation_fragment_voice_avatar"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentTop="true"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginTop="@dimen/fragment_conversation_waiting_invitation_voice_avatar_margin_top"
+                    android:src="@drawable/avatar" />
+
+                <TextView
+                    android:id="@+id/conversation_fragment_voice_invitation_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/conversation_fragment_voice_avatar"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginTop="10dp"
+                    android:text="名字"
+                    android:textColor="@color/fragment_conversation_title_text_color"
+                    android:textSize="@dimen/fragment_conversation_waiting_invitation_host_name_size" />
+            </RelativeLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_gravity="bottom"
+            android:layout_weight=".25"
+            android:orientation="vertical" >
+
+            <LinearLayout
+                android:id="@+id/conversation_fragment_voice_invitation_button_container"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_gravity="bottom"
+                android:orientation="horizontal"
+                >
+
+                <TextView
+                    android:id="@+id/conversation_fragment_voice_reject_button"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom"
+                    android:layout_marginBottom="@dimen/fragment_conversation_waiting_invitation_button_margin_bottom"
+                    android:layout_marginLeft="@dimen/fragment_conversation_waiting_invitation_button_margin"
+                    android:layout_marginRight="@dimen/fragment_conversation_waiting_invitation_button_margin_hor"
+                    android:layout_weight=".5"
+                    android:background="@drawable/conversation_framgent_reject_button_bg"
+                    android:gravity="center"
+                    android:padding="@dimen/fragment_conversation_waiting_invitation_button_padding_vertical"
+                    android:text="@string/conversation_reject_text"
+                    android:textColor="@color/fragment_conversation_title_text_color"
+                    android:textSize="@dimen/fragment_conversation_waiting_button_text_size" />
+
+                <TextView
+                    android:id="@+id/conversation_fragment_voice_accept_button"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom"
+                    android:layout_marginBottom="@dimen/fragment_conversation_waiting_invitation_button_margin_bottom"
+                    android:layout_marginLeft="@dimen/fragment_conversation_waiting_invitation_button_margin_hor"
+                    android:layout_marginRight="@dimen/fragment_conversation_waiting_invitation_button_margin"
+                    android:layout_weight=".5"
+                    android:background="@drawable/conversation_framgent_accept_button_bg"
+                    android:gravity="center"
+                    android:padding="@dimen/fragment_conversation_waiting_invitation_button_padding_vertical"
+                    android:text="@string/conversation_accept_text"
+                    android:textColor="@color/fragment_conversation_title_text_color"
+                    android:textSize="@dimen/fragment_conversation_waiting_button_text_size" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/conversation_fragment_voice_host_invitation_button_container"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_gravity="bottom"
+                android:orientation="horizontal" >
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom"
+                    android:layout_weight=".1"
+                    android:text="" />
+
+                <TextView
+                    android:id="@+id/conversation_fragment_voice_host_cancel_button"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom"
+                    android:layout_marginBottom="@dimen/fragment_conversation_waiting_invitation_button_margin_bottom"
+                    android:layout_marginLeft="@dimen/fragment_conversation_waiting_host_invitation_button_margin_left"
+                    android:layout_marginRight="@dimen/fragment_conversation_waiting_host_invitation_button_margin_right"
+                    android:layout_weight=".8"
+                    android:background="@drawable/conversation_framgent_reject_button_bg"
+                    android:gravity="center"
+                    android:padding="@dimen/fragment_conversation_waiting_invitation_button_padding_vertical"
+                    android:text="@string/conversation_cancel_text"
+                    android:textColor="@color/fragment_conversation_title_text_color"
+                    android:textSize="@dimen/fragment_conversation_waiting_button_text_size" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom"
+                    android:layout_weight=".1"
+                    android:text="" />
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+
+</RelativeLayout>

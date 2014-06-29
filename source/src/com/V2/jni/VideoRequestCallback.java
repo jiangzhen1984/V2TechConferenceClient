@@ -1,6 +1,7 @@
 package com.V2.jni;
 
 
+
 public interface VideoRequestCallback {
 
 	/**
@@ -40,4 +41,17 @@ public interface VideoRequestCallback {
 	 */
 	public void OnSetCapParamDone(String szDevID, int nSizeIndex,
 			int nFrameRate, int nBitRate);
+	
+	
+	
+	public void OnVideoChatAccepted(long nGroupID, int nBusinessType,
+			long nFromuserID, String szDeviceID);
+
+	public void OnVideoChatRefused(long nGroupID, int nBusinessType,
+			long nFromUserID, String szDeviceID);
+	
+	
+	public void OnVideoChatClosed(long nGroupID, int nBusinessType,
+			long nFromUserID, String szDeviceID);
+
 }

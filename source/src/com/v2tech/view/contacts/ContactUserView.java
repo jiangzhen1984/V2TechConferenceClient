@@ -165,11 +165,12 @@ public class ContactUserView extends LinearLayout {
 		i.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
 		switch (type) {
 		case ACTION_TYPE_INVITE_VIDEO:
-			i.setAction(PublicIntent.START_VIDEO_CONVERSACTION_ACTIVITY);
+			i.setAction(PublicIntent.START_P2P_CONVERSACTION_ACTIVITY);
 			i.addCategory(PublicIntent.DEFAULT_CATEGORY);
 			i.putExtra("is_coming_call", false);
 			i.putExtra("name", this.mUser.getName());
 			i.putExtra("uid", this.mUser.getmUserId());
+			i.putExtra("voice", false);
 			break;
 		case ACTION_TYPE_START_CONVERSATION:
 			i.setAction(PublicIntent.START_CONVERSACTION_ACTIVITY);

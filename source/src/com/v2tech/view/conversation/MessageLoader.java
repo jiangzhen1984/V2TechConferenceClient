@@ -15,6 +15,7 @@ import com.v2tech.service.GlobalHolder;
 import com.v2tech.vo.User;
 import com.v2tech.vo.VMessage;
 import com.v2tech.vo.VMessageAbstractItem;
+import com.v2tech.vo.VMessageAudioItem;
 import com.v2tech.vo.VMessageFaceItem;
 import com.v2tech.vo.VMessageImageItem;
 import com.v2tech.vo.VMessageTextItem;
@@ -224,7 +225,7 @@ public class MessageLoader {
 		if (fromUser == null) {
 			fromUser = new User(user1Id);
 		}
-		User toUser =  GlobalHolder.getInstance().getUser(user2Id);
+		User toUser = GlobalHolder.getInstance().getUser(user2Id);
 		if (toUser == null) {
 			toUser = new User(user2Id);
 		}
@@ -254,7 +255,8 @@ public class MessageLoader {
 		String selection = ContentDescriptor.MessageItems.Cols.MSG_ID + "=? ";
 		String[] args = null;
 		if (msgType != 0) {
-			selection += "and " + ContentDescriptor.MessageItems.Cols.TYPE + "=? ";
+			selection += "and " + ContentDescriptor.MessageItems.Cols.TYPE
+					+ "=? ";
 			args = new String[] { vm.getId() + "", msgType + "" };
 		} else {
 			args = new String[] { vm.getId() + "" };
@@ -283,7 +285,14 @@ public class MessageLoader {
 				break;
 			case VMessageAbstractItem.ITEM_TYPE_IMAGE:
 				vai = new VMessageImageItem(vm, content);
-
+			case VMessageAbstractItem.ITEM_TYPE_AUDIO:
+				if (content != null && !content.isEmpty()) {
+					String[] str = content.split("\\|");
+					if (str.length > 1) {
+						vai = new VMessageAudioItem(vm, str[0],
+								Integer.parseInt(str[1]));
+					}
+				}
 				break;
 
 			}

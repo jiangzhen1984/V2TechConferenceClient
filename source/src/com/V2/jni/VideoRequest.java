@@ -11,6 +11,9 @@ import android.util.Log;
 import com.v2tech.util.V2Log;
 
 public class VideoRequest {
+	public static final int BT_CONF = 1;
+	public static final int BT_IM = 2;
+
 	private static VideoRequest mVideoRequest;
 	private List<WeakReference<VideoRequestCallback>> callback;
 
@@ -74,8 +77,8 @@ public class VideoRequest {
 			String szDeviceID, VideoPlayer vp, int businessType);
 
 	/**
-	 * FIXME update comment
-	 * Request to close video device. This function no callback call<br>
+	 * FIXME update comment Request to close video device. This function no
+	 * callback call<br>
 	 * 
 	 * @param nGroupID
 	 *            conference id. If open P2P user device, this parameter should
@@ -200,6 +203,62 @@ public class VideoRequest {
 
 	}
 
+	/**
+	 * 
+	 * @param nGroupID
+	 * @param nBusinessType
+	 * @param nFromuserID
+	 * @param szDeviceID
+	 */
+	private void OnVideoChatAccepted(long nGroupID, int nBusinessType,
+			long nFromuserID, String szDeviceID) {
+		V2Log.d("OnVideoChatAccepted " + nGroupID + " " + nBusinessType + " "
+				+ nFromuserID + " " + szDeviceID);
+		for (WeakReference<VideoRequestCallback> wrCB : this.callback) {
+			Object obj = wrCB.get();
+			if (obj != null) {
+				VideoRequestCallback cb = (VideoRequestCallback) obj;
+				cb.OnVideoChatAccepted(nGroupID, nBusinessType, nFromuserID,
+						szDeviceID);
+			}
+		}
+	}
+
+	/**
+	 * 
+	 * @param nGroupID
+	 * @param nBusinessType
+	 * @param nFromUserID
+	 * @param szDeviceID
+	 */
+	private void OnVideoChatRefused(long nGroupID, int nBusinessType,
+			long nFromUserID, String szDeviceID) {
+		V2Log.d("OnVideoChatRefused " + nGroupID + " " + nBusinessType + " "
+				+ nFromUserID + " " + szDeviceID);
+		for (WeakReference<VideoRequestCallback> wrCB : this.callback) {
+			Object obj = wrCB.get();
+			if (obj != null) {
+				VideoRequestCallback cb = (VideoRequestCallback) obj;
+				cb.OnVideoChatRefused(nGroupID, nBusinessType, nFromUserID,
+						szDeviceID);
+			}
+		}
+	}
+
+	private void OnVideoChatClosed(long nGroupID, int nBusinessType,
+			long nFromUserID, String szDeviceID) {
+		V2Log.d("OnVideoChatClosed " + nGroupID + " " + nBusinessType + " "
+				+ nFromUserID + " " + szDeviceID);
+		for (WeakReference<VideoRequestCallback> wrCB : this.callback) {
+			Object obj = wrCB.get();
+			if (obj != null) {
+				VideoRequestCallback cb = (VideoRequestCallback) obj;
+				cb.OnVideoChatClosed(nGroupID, nBusinessType, nFromUserID,
+						szDeviceID);
+			}
+		}
+	}
+
 	// 鏋氫妇鎽勫儚澶�
 	public native void enumMyVideos(int p);
 
@@ -229,63 +288,11 @@ public class VideoRequest {
 	// 閭�鍒汉鍚庡緱鍒板簲绛� OnVideoChatAccepted 0 2 1112627 1112627:Integrated
 	// Camera____2889200338
 
-	private void OnVideoChatAccepted(long nGroupID, int nBusinessType,
-			long nFromuserID, String szDeviceID) {
-		Log.e("ImRequest UI", "OnVideoChatAccepted " + nGroupID + " "
-				+ nBusinessType + " " + nFromuserID + " " + szDeviceID);
-
-		// 鎷艰淇℃伅
-		// VideoAcceptMsgType videoMsgType=new VideoAcceptMsgType();
-		// videoMsgType.setnFromuserID(nFromuserID);
-		// videoMsgType.setSzDeviceID(szDeviceID);
-		//
-		// Intent intent=new Intent(VideoChatActivity.VIDEOCHAT);
-		// intent.putExtra("MsgType", MsgType.VIDEOACCEPT_CHAT);
-		// intent.putExtra("MSG", videoMsgType);
-		// intent.putExtra("videochat", Constant.VIDEOCHATACCEPTED);
-		// context.sendBroadcast(intent);
-	}
-
-	// 閭�鍒汉鍚庨伃鍒版嫆缁濈殑 鍥炴帀 OnVideoChatRefused 0 2 1112627
-	private void OnVideoChatRefused(long nGroupID, int nBusinessType,
-			long nFromUserID, String szDeviceID) {
-		Log.e("ImRequest UI", "OnVideoChatRefused " + nGroupID + " "
-				+ nBusinessType + " " + nFromUserID + " " + szDeviceID);
-
-		// 鎷艰淇℃伅
-		// VideoRefuseMsgType videoMsgType=new VideoRefuseMsgType();
-		// videoMsgType.setnFromuserID(nFromUserID);
-		// videoMsgType.setSzDeviceID(szDeviceID);
-		//
-		// Intent intent=new Intent(VideoChatActivity.VIDEOCHAT);
-		// intent.putExtra("MsgType", MsgType.VIDEOREFUSE_CHAT);
-		// intent.putExtra("MSG", videoMsgType);
-		// intent.putExtra("videochat", Constant.VIDEOCHATREFUSED);
-		// context.sendBroadcast(intent);
-	}
-
 	// 鏀跺埌瑙嗛浼氳瘽宸茬粡寤虹珛鐨勫洖璋�
 	private void OnVideoChating(long nGroupID, int nBusinessType,
 			long nFromUserID, String szDeviceID) {
 		Log.e("ImRequest UI", "OnVideoChating " + nGroupID + " "
 				+ nBusinessType + " " + nFromUserID + " " + szDeviceID);
-	}
-
-	// 鏀跺埌瑙嗛浼氳瘽琚叧闂殑鍥炶皟
-	private void OnVideoChatClosed(long nGroupID, int nBusinessType,
-			long nFromUserID, String szDeviceID) {
-		Log.e("ImRequest UI", "OnVideoChatClosed " + nGroupID + " "
-				+ nBusinessType + " " + nFromUserID + " " + szDeviceID);
-
-		// 鍙戦�骞挎挱锛岄�鐭ヨ棰戦�璇濆凡缁忕粨鏉� 2浠ｈ〃鍏抽棴
-		// Intent intent=new Intent(VideoChatActivity.VIDEOCHAT);
-		// intent.putExtra("videochat", Constant.VIDEOCHATCLOSED);
-		// context.sendBroadcast(intent);
-		//
-		// Intent intent1=new
-		// Intent(HandleVideoInviteActivity.CLOSE_VIDEOCHAT1);
-		// intent1.putExtra("videochat", "2");
-		// context.sendBroadcast(intent1);
 	}
 
 	private void OnVideoWindowSet(String sDevId, Object hwnd) {

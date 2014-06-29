@@ -115,7 +115,9 @@ public class GlobalConfig {
 	}
 	
 	
-	
+	public static String getGlobalAudioPath() {
+		return StorageUtil.getAbsoluteSdcardPath()+"/.v2tech/audio";
+	}
 	
 	
 	static class EmojiWraper {

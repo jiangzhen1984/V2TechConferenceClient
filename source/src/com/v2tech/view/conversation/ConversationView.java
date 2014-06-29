@@ -1,16 +1,24 @@
 package com.v2tech.view.conversation;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.media.AudioManager;
+import android.media.MediaPlayer;
+import android.media.MediaPlayer.OnCompletionListener;
+import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -21,11 +29,13 @@ import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.SpannableStringBuilder;
 import android.text.TextWatcher;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
@@ -39,6 +49,7 @@ import android.widget.Toast;
 import com.v2tech.R;
 import com.v2tech.service.ChatService;
 import com.v2tech.service.GlobalHolder;
+import com.v2tech.service.Registrant;
 import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.MessageUtil;
 import com.v2tech.util.V2Log;
@@ -52,6 +63,7 @@ import com.v2tech.vo.Conversation;
 import com.v2tech.vo.User;
 import com.v2tech.vo.VMessage;
 import com.v2tech.vo.VMessageAbstractItem;
+import com.v2tech.vo.VMessageAudioItem;
 import com.v2tech.vo.VMessageFaceItem;
 import com.v2tech.vo.VMessageTextItem;
 
@@ -108,6 +120,11 @@ public class ConversationView extends Activity {
 
 	private View mShowContactDetailButton;
 
+	private View mButtonRecordAudio;
+
+	private MediaRecorder mRecorder = null;
+	private MediaPlayer mPlayer;
+
 	private MessageReceiver receiver = new MessageReceiver();
 
 	private ChatService mChat = new ChatService();
@@ -156,17 +173,8 @@ public class ConversationView extends Activity {
 
 		mMessageET = (EditText) findViewById(R.id.message_text);
 		mMessageET.addTextChangedListener(mPasteWatcher);
-		mMessageET.setOnTouchListener(new OnTouchListener() {
 
-			@Override
-			public boolean onTouch(View arg0, MotionEvent arg1) {
-				scrollToBottom();
-				return false;
-			}
-			
-		});
 		mReturnButtonTV = (TextView) findViewById(R.id.contact_detail_return_button);
-
 		mReturnButtonTV.setOnTouchListener(mHiddenOnTouchListener);
 
 		mMoreFeatureIV = (ImageView) findViewById(R.id.contact_message_plus);
@@ -179,8 +187,10 @@ public class ConversationView extends Activity {
 		mSelectImageButtonIV.setOnClickListener(selectImageButtonListener);
 
 		mAudioSpeakerIV = (ImageView) findViewById(R.id.contact_message_speaker);
-		// TODO hidden button of send audio message
-		mAudioSpeakerIV.setVisibility(View.GONE);
+		mAudioSpeakerIV.setOnClickListener(mMessageTypeSwitchListener);
+
+		mButtonRecordAudio = findViewById(R.id.message_button_audio_record);
+		mButtonRecordAudio.setOnTouchListener(mButtonHolderListener);
 
 		mAdditionFeatureContainer = findViewById(R.id.contact_message_sub_feature_ly);
 
@@ -294,6 +304,8 @@ public class ConversationView extends Activity {
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
+		stopPlaying();
+		releasePlayer();
 		this.unregisterReceiver(receiver);
 		cleanCache();
 		GlobalHolder.getInstance().CURRENT_CONVERSATION = null;
@@ -319,6 +331,135 @@ public class ConversationView extends Activity {
 
 		});
 
+	}
+
+	private synchronized boolean startPlaying(String fileName) {
+		if (mPlayer != null && mPlayer.isPlaying()) {
+			mPlayer.release();
+		}
+		mPlayer = new MediaPlayer();
+		mPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+		mPlayer.setVolume(1.0f, 1.0f);
+		mPlayer.setOnCompletionListener(new OnCompletionListener() {
+
+			@Override
+			public void onCompletion(MediaPlayer mp) {
+				// TODO auto play next
+			}
+
+		});
+		mPlayer.setOnErrorListener(new MediaPlayer.OnErrorListener() {
+
+			@Override
+			public boolean onError(MediaPlayer arg0, int arg1, int arg2) {
+				return false;
+			}
+
+		});
+		try {
+			if (mPlayer.isPlaying()) {
+				mPlayer.stop();
+			}
+			mPlayer.setDataSource(fileName);
+			mPlayer.prepare();
+			mPlayer.start();
+		} catch (IOException e) {
+			e.printStackTrace();
+			return false;
+		}
+		return true;
+	}
+
+	private void stopPlaying() {
+		if (mPlayer != null) {
+			mPlayer.stop();
+		}
+	}
+
+	private void releasePlayer() {
+		if (mPlayer != null) {
+			mPlayer.release();
+			mPlayer = null;
+		}
+	}
+
+	private Dialog mVoiceDialog = null;
+	private ImageView mVolume;
+
+	
+	
+	private void showOrCloseVoiceDialog() {
+		if (mVoiceDialog == null) {
+			mVoiceDialog = new Dialog(mContext, R.style.MessageVoiceDialog);
+			mVoiceDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+			LayoutInflater flater = LayoutInflater.from(mContext);
+			View root = flater.inflate(R.layout.message_voice_dialog, null);
+			mVoiceDialog.setContentView(root);
+			mVolume = (ImageView) root
+					.findViewById(R.id.message_voice_dialog_voice_volume);
+		}
+
+		if (mVoiceDialog.isShowing()) {
+			mVoiceDialog.dismiss();
+		} else {
+			mVoiceDialog.show();
+		}
+	}
+
+	private void updateVoiceVolume(int vol) {
+		if (mVolume != null) {
+			int resId = R.drawable.message_voice_volume_1;
+			switch (vol) {
+			case 0:
+			case 1:
+				resId = R.drawable.message_voice_volume_1;
+				break;
+			case 2:
+				resId = R.drawable.message_voice_volume_2;
+				break;
+			case 3:
+				resId = R.drawable.message_voice_volume_3;
+				break;
+			case 4:
+				resId = R.drawable.message_voice_volume_4;
+				break;
+			default:
+				resId = R.drawable.message_voice_volume_4;
+				break;
+			}
+			mVolume.setImageResource(resId);
+
+		}
+	}
+
+	/**
+	 * FIXME If want to support lower 4.0 for ACC should code by self
+	 * 
+	 * @param filePath
+	 * @return
+	 */
+	private boolean startReocrding(String filePath) {
+		mRecorder = new MediaRecorder();
+		mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+		mRecorder.setOutputFormat(MediaRecorder.OutputFormat.AAC_ADTS);
+		mRecorder.setOutputFile(filePath);
+		mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
+
+		try {
+			mRecorder.prepare();
+		} catch (IOException e) {
+			V2Log.e(" can not prepare media recorder ");
+			return false;
+		}
+
+		mRecorder.start();
+		return true;
+	}
+
+	private void stopRecording() {
+		// mRecorder.stop();
+		mRecorder.release();
+		mRecorder = null;
 	}
 
 	private void cleanRangeBitmapCache(int before, int after) {
@@ -352,6 +493,78 @@ public class ConversationView extends Activity {
 				doSendMessage();
 			}
 			return true;
+		}
+
+	};
+
+	private OnClickListener mMessageTypeSwitchListener = new OnClickListener() {
+
+		@Override
+		public void onClick(View view) {
+			String tag = (String) view.getTag();
+			if (tag != null) {
+				if (tag.equals("speaker")) {
+					view.setTag("keyboard");
+					((ImageView) view)
+							.setImageResource(R.drawable.message_keyboard);
+					mButtonRecordAudio.setVisibility(View.VISIBLE);
+					mMessageET.setVisibility(View.GONE);
+					mSendButtonTV.setVisibility(View.GONE);
+
+				} else if (tag.equals("keyboard")) {
+					view.setTag("speaker");
+					((ImageView) view)
+							.setImageResource(R.drawable.speaking_button);
+					mButtonRecordAudio.setVisibility(View.GONE);
+					mMessageET.setVisibility(View.VISIBLE);
+					mSendButtonTV.setVisibility(View.VISIBLE);
+				}
+			}
+		}
+
+	};
+
+	private OnTouchListener mButtonHolderListener = new OnTouchListener() {
+		private String fileName = null;
+		private long starttime = 0;
+
+		@Override
+		public boolean onTouch(View view, MotionEvent event) {
+			if (event.getAction() == MotionEvent.ACTION_DOWN) {
+				showOrCloseVoiceDialog();
+				fileName = GlobalConfig.getGlobalAudioPath() + "/"
+						+ System.currentTimeMillis() + ".aac";
+				if (!startReocrding(fileName)) {
+					// hide dialog
+					showOrCloseVoiceDialog();
+				}
+				// Start update db for voice
+				lh.postDelayed(mUpdateMicStatusTimer, 200);
+				starttime = System.currentTimeMillis();
+			} else if (event.getAction() == MotionEvent.ACTION_UP) {
+				stopRecording();
+
+				Rect r = new Rect();
+				view.getDrawingRect(r);
+				// check if touch position out of button than cancel send voice message
+				if (r.contains((int)event.getX(), (int)event.getY())) {
+					// send
+					VMessage vm = new VMessage(groupId, local, remote);
+					int seconds = (int) ((System.currentTimeMillis() - starttime) / 1000) + 1;
+					new VMessageAudioItem(vm, fileName, seconds);
+					// Send message to server
+					sendMessageToRemote(vm);
+				} else {
+					Toast.makeText(mContext, R.string.contact_message_message_cancelled, Toast.LENGTH_SHORT).show();
+					File f = new File(fileName);
+					f.deleteOnExit();
+				}
+				starttime = 0;
+				fileName = null;
+				lh.removeCallbacks(mUpdateMicStatusTimer);
+				showOrCloseVoiceDialog();
+			}
+			return false;
 		}
 
 	};
@@ -428,24 +641,6 @@ public class ConversationView extends Activity {
 					.getEmojiStr(GlobalConfig.GLOBAL_FACE_ARRAY[Integer
 							.parseInt(smile.getTag().toString())]);
 			mMessageET.append(emoji);
-			// int selectionCursor = mMessageET.getSelectionStart();
-			// if (selectionCursor == 0
-			// || ((CharSequence) mMessageET.getText()).charAt(mMessageET
-			// .getSelectionStart() - 1) == '\n') {
-			//
-			// }
-			// mMessageET.getText().insert(selectionCursor, emoji);
-			// selectionCursor = mMessageET.getSelectionStart();
-			//
-			// SpannableStringBuilder builder = new SpannableStringBuilder(
-			// mMessageET.getText());
-			// ImageSpan is = new ImageSpan(drawable,
-			// smile.getTag().toString());
-			// builder.setSpan(is, selectionCursor -1 ,
-			// selectionCursor , Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-			// mMessageET.setText(builder);
-			//
-			// mMessageET.setSelection(selectionCursor);
 		}
 
 	};
@@ -535,13 +730,8 @@ public class ConversationView extends Activity {
 				}
 				VMessage vim = MessageBuilder.buildImageMessage(local, remote,
 						filePath);
-				// Save message
-				MessageBuilder.saveMessage(this, vim);
-
-				Message.obtain(lh, SEND_MESSAGE, vim).sendToTarget();
-				addMessageToContainer(vim);
-				// send notification
-				notificateConversationUpdate();
+				// Send message to server
+				sendMessageToRemote(vim);
 			}
 		}
 	}
@@ -557,7 +747,6 @@ public class ConversationView extends Activity {
 		}
 
 		VMessage vm = new VMessage(this.groupId, local, remote);
-
 
 		String[] array = content.split("\n");
 		for (int i = 0; i < array.length; i++) {
@@ -603,18 +792,17 @@ public class ConversationView extends Activity {
 						strStart = end;
 						emojiStart = -1;
 						end = -1;
-						
+
 					}
 				}
-				
+
 				// check if exist last string
 				if (index == len - 1 && strStart < index) {
 					String strTextContent = str.substring(strStart, index);
 					new VMessageTextItem(vm, strTextContent);
 					strStart = index;
 				}
-				
-				
+
 				index++;
 			}
 
@@ -631,16 +819,19 @@ public class ConversationView extends Activity {
 			}
 		}
 		//
+		mMessageET.setText("");
+		// Send message to server
+		sendMessageToRemote(vm);
+	}
+
+	private void sendMessageToRemote(VMessage vm) {
 		// // Save message
 		MessageBuilder.saveMessage(this, vm);
-
-		mMessageET.setText("");
 
 		Message.obtain(lh, SEND_MESSAGE, vm).sendToTarget();
 		addMessageToContainer(vm);
 		// send notification
 		notificateConversationUpdate();
-
 	}
 
 	// FIXME optimize code
@@ -734,6 +925,13 @@ public class ConversationView extends Activity {
 			mContext.startActivity(i);
 		}
 
+		@Override
+		public void requestPlayAudio(View v, VMessage vm, VMessageAudioItem vai) {
+			if (vai != null && vai.getAudioFilePath() != null) {
+				startPlaying(vai.getAudioFilePath());
+			}
+		}
+
 	};
 
 	private List<VMessage> loadMessages() {
@@ -822,6 +1020,19 @@ public class ConversationView extends Activity {
 		}
 	};
 
+	private Runnable mUpdateMicStatusTimer = new Runnable() {
+		public void run() {
+			int ratio = mRecorder.getMaxAmplitude() / 600;
+			int db = 0;// 分贝
+			if (ratio > 1)
+				db = (int) (20 * Math.log10(ratio));
+			System.out.println("分贝值：" + db + "     " + Math.log10(ratio));
+			updateVoiceVolume(db / 4);
+
+			lh.postDelayed(mUpdateMicStatusTimer, 200);
+		}
+	};
+
 	class MessageReceiver extends BroadcastReceiver {
 
 		@Override
@@ -878,8 +1089,9 @@ public class ConversationView extends Activity {
 				isLoading = false;
 				break;
 			case SEND_MESSAGE:
+				
 				mChat.sendVMessage((VMessage) msg.obj,
-						Message.obtain(this, SEND_MESSAGE_DONE));
+						new Registrant(this, SEND_MESSAGE_DONE, null));
 				break;
 			case QUERY_NEW_MESSAGE:
 				if (msg.obj == null || "".equals(msg.obj.toString())) {

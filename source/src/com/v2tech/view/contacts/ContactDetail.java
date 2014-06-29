@@ -2,6 +2,7 @@ package com.v2tech.view.contacts;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 import android.app.Activity;
 import android.app.DatePickerDialog;
@@ -33,6 +34,7 @@ import com.v2tech.service.Registrant;
 import com.v2tech.service.UserService;
 import com.v2tech.view.PublicIntent;
 import com.v2tech.vo.User;
+import com.v2tech.vo.UserDeviceConfig;
 
 public class ContactDetail extends Activity implements OnTouchListener {
 
@@ -67,6 +69,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 	private View mCallButtomButton;
 	private View mCreateConfButton;
 	private View mMoreDetailButton;
+	private View mVideoCallButton;
 
 	// view for self
 	private EditText mSignature;
@@ -159,6 +162,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 		mCallButtomButton = findViewById(R.id.contact_user_detail_call_bottom_button);
 		mContactButtonContainer = findViewById(R.id.contact_button_ly);
 		mCreateConfButton = findViewById(R.id.contact_user_detail_create_conf_bottom_button);
+		mVideoCallButton = findViewById(R.id.contact_user_detail_video_call_bottom_button);
 
 		mTitleTV = (TextView) findViewById(R.id.contact_user_n_detail_title_tv);
 		mAddressTV = (TextView) findViewById(R.id.contact_user_n_detail_address_tv);
@@ -258,6 +262,8 @@ public class ContactDetail extends Activity implements OnTouchListener {
 				mCallButtomButton.setOnClickListener(mCallButtonListener);
 			}
 			mCreateConfButton.setOnClickListener(mCreateConfMsgListener);
+			
+			mVideoCallButton.setOnClickListener(mVideoCallButtonListener);
 
 		}
 
@@ -320,6 +326,26 @@ public class ContactDetail extends Activity implements OnTouchListener {
 			mContext.startActivity(i);
 		}
 
+	};
+	
+	private View.OnClickListener mVideoCallButtonListener = new View.OnClickListener() {
+		@Override
+		public void onClick(View arg0) {
+			Intent iv = new Intent();
+			iv.addCategory(PublicIntent.DEFAULT_CATEGORY);
+			iv.setAction(PublicIntent.START_P2P_CONVERSACTION_ACTIVITY);
+			iv.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+			iv.putExtra("uid", mUid);
+			iv.putExtra("is_coming_call", false);
+			iv.putExtra("voice", false);
+			List<UserDeviceConfig> list = GlobalHolder.getInstance().getAttendeeDevice(mUid);
+			if (list != null && list.size() > 0) {
+				iv.putExtra("device", list.get(0).getDeviceID());
+			} else {
+				iv.putExtra("device", "");
+			}
+			mContext.startActivity(iv);
+		}
 	};
 
 	private View.OnClickListener mCreateConfMsgListener = new View.OnClickListener() {

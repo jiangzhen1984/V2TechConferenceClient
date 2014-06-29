@@ -26,7 +26,12 @@ public class FileRequest
 		
 		if(mFileRequest==null){
 			mFileRequest=new FileRequest(context);
+			mFileRequest.initialize(mFileRequest);
 		}
+		return mFileRequest;
+	}
+	
+	public static synchronized  FileRequest getInstance(){
 		return mFileRequest;
 	}
 	

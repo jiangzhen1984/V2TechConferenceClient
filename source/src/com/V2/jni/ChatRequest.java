@@ -10,6 +10,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import com.v2tech.util.V2Log;
+
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.util.Log;
@@ -102,7 +104,15 @@ public class ChatRequest {
 	public native void sendChatText(long nGroupID, long nToUserID, String nSeqId, 
 			String szText, int bussinessType);
 
-	// 锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷锟狡碉拷锟斤拷 nGroupID锟斤拷0
+	
+	/**
+	 * Send audio message.
+	 * @param nGroupID  if message is P2P, this parameter should be  0
+	 * @param nToUserID if message is group or meeting message, this parameter should be 0
+	 * @param szText
+	 * @param filename audio file message, only support AAC
+	 * @param bussinessType  if message is not meeting message should be 2,  if message is conference's msg, should be 1
+	 */
 	public native void sendChatAudio(long nGroupID, long nToUserID,
 			String szText, String filename, int bussinessType);
 
@@ -127,6 +137,7 @@ public class ChatRequest {
 
 	List<ChatPicture> cpL = new ArrayList<ChatPicture>();
 	List<ChatText> ctL = new ArrayList<ChatText>();
+	List<ChatAudio> caL = new ArrayList<ChatAudio>();
 	/**
 	 * 
 	 * @param nGroupID
@@ -191,9 +202,37 @@ public class ChatRequest {
 		
 	}
 	
-	public void OnRecvChatAudio(long gid, int i, long j, long j1, String str,
-			String str1) {
-
+	
+	class ChatAudio {
+		long nGroupID;
+		int nBusinessType;
+		long nFromUserID;
+		long nTime;
+		String nSeqId;
+		String audioPath;
+		public ChatAudio(long nGroupID, int nBusinessType, long nFromUserID,
+				long nTime, String nSeqId, String audioPath) {
+			super();
+			this.nGroupID = nGroupID;
+			this.nBusinessType = nBusinessType;
+			this.nFromUserID = nFromUserID;
+			this.nTime = nTime;
+			this.nSeqId = nSeqId;
+			this.audioPath = audioPath;
+		}
+		
+		
+	}
+	
+	public void OnRecvChatAudio(long gid, int businessType, long fromUserId, long timeStamp, String messageId,
+			String audioPath) {
+		V2Log.e(gid +"   " +businessType+ "  "+ fromUserId+"   " +timeStamp  + "  "+messageId+"   "+audioPath);
+		if (callback != null) {
+			callback.OnRecvChatAudio(gid, businessType, fromUserId, timeStamp, messageId, audioPath);
+		} else {
+			caL.add(new ChatAudio(gid,  businessType,
+					fromUserId,   timeStamp,  messageId, audioPath));
+		}
 	}
 	
 	public void OnSendChatResult(String str, int i, int j) {
@@ -205,7 +244,7 @@ public class ChatRequest {
 	public void OnRecvChatPicture(long nGroupID, int nBusinessType,
 			long nFromUserID, long nTime, String szSeqID, byte[] pPicData) {
 
-		Log.e("ImRequest UI", "OnRecvChatPicture 锟斤拷锟斤拷 " + nGroupID + " "
+		Log.e("ImRequest UI", "OnRecvChatPicture  " + nGroupID + " "
 				+ nBusinessType + " " + nFromUserID + " " + nTime + " ");
 		Log.e("ImRequest UI", "OnRecvChatPicture ****maximum heap size***"
 				+ Runtime.getRuntime().maxMemory() + "*nLength=====**"

@@ -9,11 +9,15 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.v2tech.R;
 import com.v2tech.service.ChatService;
 import com.v2tech.service.GlobalHolder;
+import com.v2tech.service.Registrant;
+import com.v2tech.service.jni.JNIResponse;
+import com.v2tech.service.jni.RequestChatServiceResponse;
 import com.v2tech.util.V2Log;
 import com.v2tech.vo.User;
 import com.v2tech.vo.UserAudioDevice;
@@ -22,71 +26,98 @@ public class ConversationWaitingFragment extends Fragment {
 
 	private static final int CALL_RESPONSE = 1;
 
-	private TextView mUserNameTV;
-	private TextView mTextTV;
-	private TextView mRejectButtonTV;
-	private TextView mAcceptButtonTV;
-	private TextView mCancelButtonTV;
+	private TextView mInvitationNameTV;
+	private TextView mTitleTV;
+	private ImageView mAvatar;
+
+	private View mRejectButton;
+	private View mAcceptButton;
+	private View mCancelButton;
+
+	private View mInvitationButtonLayout;
+	private View mHostInvitationButtonLayout;
 
 	private boolean mIsInComingCall;
+	private boolean mIsVoiceCall;
 
 	private ChatService chat = new ChatService();
-	
+
 	private Handler mLocalHandler = new LocalHandler();
-	
+
 	private TurnListener mIndicator;
+
+	private UserAudioDevice uad;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		long uid = getActivity().getIntent().getExtras().getLong("uid");
+		mIsInComingCall = getActivity().getIntent().getExtras()
+				.getBoolean("is_coming_call");
+		mIsVoiceCall = getActivity().getIntent().getExtras()
+				.getBoolean("voice");
+		String deviceId = getActivity().getIntent().getExtras()
+				.getString("device");
 		User u = GlobalHolder.getInstance().getUser(uid);
 		if (u == null) {
 
 		} else {
-			UserAudioDevice uad = new UserAudioDevice(u);
-			chat.inviteUserAudioChat(uad, Message.obtain(mLocalHandler, CALL_RESPONSE));
+			uad = new UserAudioDevice(u,
+					mIsVoiceCall ? UserAudioDevice.VOICE_CALL
+							: UserAudioDevice.VIDEO_CALL, deviceId);
+			if (!mIsInComingCall) {
+				chat.inviteUserChat(uad, new Registrant(mLocalHandler,
+						CALL_RESPONSE, null));
+			}
 		}
 	}
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
-		View v = inflater.inflate(R.layout.activity_conversation_waiting,
+
+		View v = inflater.inflate(R.layout.fragment_conversation_waiting,
 				container, false);
 
-		this.mUserNameTV = (TextView) v
-				.findViewById(R.id.conversation_user_title);
-		this.mTextTV = (TextView) v.findViewById(R.id.conversation_text);
-		this.mRejectButtonTV = (TextView) v
-				.findViewById(R.id.conversation_reject_button);
-		this.mAcceptButtonTV = (TextView) v
-				.findViewById(R.id.conversation_accept_button);
-		this.mCancelButtonTV = (TextView) v
-				.findViewById(R.id.conversation_cancel_button);
-		mIsInComingCall = getActivity().getIntent().getBooleanExtra(
-				"is_coming_call", false);
+		this.mInvitationNameTV = (TextView) v
+				.findViewById(R.id.conversation_fragment_voice_invitation_name);
+		this.mTitleTV = (TextView) v
+				.findViewById(R.id.fragment_conversation_title);
+		this.mAvatar = (ImageView) v
+				.findViewById(R.id.conversation_fragment_voice_avatar);
+
+		this.mInvitationButtonLayout = v
+				.findViewById(R.id.conversation_fragment_voice_invitation_button_container);
+		this.mHostInvitationButtonLayout = v
+				.findViewById(R.id.conversation_fragment_voice_host_invitation_button_container);
+
+		this.mRejectButton = v
+				.findViewById(R.id.conversation_fragment_voice_reject_button);
+		this.mAcceptButton = v
+				.findViewById(R.id.conversation_fragment_voice_accept_button);
+		this.mCancelButton = v
+				.findViewById(R.id.conversation_fragment_voice_host_cancel_button);
+
+		mRejectButton.setOnClickListener(rejectListener);
+		mAcceptButton.setOnClickListener(acceptListener);
+		mCancelButton.setOnClickListener(cancelListener);
+
 		if (mIsInComingCall) {
-			mCancelButtonTV.setVisibility(View.GONE);
-			mRejectButtonTV.setVisibility(View.VISIBLE);
-			mAcceptButtonTV.setVisibility(View.VISIBLE);
-			mTextTV.setText(R.string.conversation_notification);
+			mInvitationButtonLayout.setVisibility(View.VISIBLE);
+			mHostInvitationButtonLayout.setVisibility(View.GONE);
 		} else {
-			mRejectButtonTV.setVisibility(View.GONE);
-			mAcceptButtonTV.setVisibility(View.GONE);
-			mCancelButtonTV.setVisibility(View.VISIBLE);
-			mTextTV.setText(R.string.conversation_waiting);
+			mInvitationButtonLayout.setVisibility(View.GONE);
+			mHostInvitationButtonLayout.setVisibility(View.VISIBLE);
 		}
 
-		mUserNameTV.setText(getActivity().getIntent().getStringExtra("name"));
-		mRejectButtonTV.setOnClickListener(rejectListener);
-		mAcceptButtonTV.setOnClickListener(acceptListener);
-		mCancelButtonTV.setOnClickListener(cancelListener);
+		// FIXME handle when user changed avatar
+		if (uad.getUser().getAvatarBitmap() != null) {
+			mAvatar.setImageBitmap(uad.getUser().getAvatarBitmap());
+		}
+		mInvitationNameTV.setText(uad.getUser().getName());
 		return v;
 
 	}
-	
-	
 
 	@Override
 	public void onAttach(Activity activity) {
@@ -100,13 +131,11 @@ public class ConversationWaitingFragment extends Fragment {
 		mIndicator = null;
 	}
 
-
-
 	private OnClickListener rejectListener = new OnClickListener() {
 
 		@Override
 		public void onClick(View arg0) {
-			// TODO reject call
+			chat.refuseChatting(uad, null);
 			getActivity().finish();
 		}
 
@@ -116,7 +145,7 @@ public class ConversationWaitingFragment extends Fragment {
 
 		@Override
 		public void onClick(View arg0) {
-			// TODO cancel call
+			chat.cancelChattingCall(uad, null);
 			getActivity().finish();
 		}
 
@@ -126,7 +155,7 @@ public class ConversationWaitingFragment extends Fragment {
 
 		@Override
 		public void onClick(View arg0) {
-			// TODO accept call
+			chat.acceptChatting(uad, null);
 			((TurnListener) getActivity()).turnToVideoUI();
 		}
 
@@ -137,13 +166,20 @@ public class ConversationWaitingFragment extends Fragment {
 		@Override
 		public void handleMessage(Message msg) {
 			switch (msg.what) {
-				case CALL_RESPONSE: {
-					if (mIndicator != null) {
+			case CALL_RESPONSE: {
+				JNIResponse resp = (JNIResponse)msg.obj;
+				if (resp.getResult() == JNIResponse.Result.SUCCESS)  {
+					RequestChatServiceResponse rcsr = (RequestChatServiceResponse)resp;
+					if (rcsr.getCode() == RequestChatServiceResponse.REJCTED) {
+						chat.cancelChattingCall(uad, null);
+						getActivity().finish();
+					} else if (rcsr.getCode() == RequestChatServiceResponse.ACCEPTED && mIndicator != null) {
 						mIndicator.turnToVideoUI();
 					} else {
 						V2Log.e(" indicator is null can not open audio UI ");
 					}
 				}
+			}
 				break;
 			}
 		}

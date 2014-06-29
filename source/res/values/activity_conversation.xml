@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="conversation_waiting">等待对方接受.....</string>
+    <string name="conversation_waiting">正在呼叫..</string>
    <string name="conversation_notification">邀请您进入聊天.....</string>
-   <string name="conversation_accept">接  受</string>
-   <string name="conversation_reject">拒  绝</string>
-   <string name="conversation_cancel">挂  断</string>
+   <string name="conversation_accept_text">接  受</string>
+   <string name="conversation_reject_text">拒  绝</string>
+   <string name="conversation_cancel_text">挂  断</string>
    
    
    <string name="conversation_popup_menu_video_call_button">创建会议</string>
@@ -14,7 +14,9 @@
    <string name="conversation_popup_menu_email_button">发送邮件</string>
    <string name="conversation_popup_menu_files_button">文件柜</string>
    <string name="conversation_popup_menu_setting_button">设 置</string>
+   
    <string name="conversation_display_item_pic">[图片]</string>
+   <string name="conversation_display_item_audio">[语音]</string>
    
     
     

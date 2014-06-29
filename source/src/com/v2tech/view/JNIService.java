@@ -27,6 +27,8 @@ import android.os.Parcelable;
 import android.support.v4.app.NotificationCompat;
 import android.widget.Toast;
 
+import com.V2.jni.AudioRequest;
+import com.V2.jni.AudioRequestCallback;
 import com.V2.jni.ChatRequest;
 import com.V2.jni.ChatRequestCallback;
 import com.V2.jni.ConfRequest;
@@ -59,6 +61,7 @@ import com.v2tech.vo.User;
 import com.v2tech.vo.UserDeviceConfig;
 import com.v2tech.vo.VMessage;
 import com.v2tech.vo.VMessageAbstractItem;
+import com.v2tech.vo.VMessageAudioItem;
 import com.v2tech.vo.VMessageImageItem;
 
 /**
@@ -114,12 +117,15 @@ public class JNIService extends Service {
 	private ChatRequestCB mChRCB;
 
 	private ConfRequestCB mCRCB;
+	
+	private AudioRequestCB mARCB;
 
 	// ////////////////////////////////////////
 
 	private Context mContext;
 
 	private List<VMessage> cacheImageMeta = new ArrayList<VMessage>();
+	private List<VMessage> cacheAudioMeta = new ArrayList<VMessage>();
 
 	// ////////////////////////////////////////
 
@@ -159,6 +165,9 @@ public class JNIService extends Service {
 
 		mCRCB = new ConfRequestCB(mCallbackHandler);
 		ConfRequest.getInstance().addCallback(mCRCB);
+		
+		mARCB = new AudioRequestCB();
+		AudioRequest.getInstance().addCallback(mARCB);
 	}
 
 	@Override
@@ -367,10 +376,12 @@ public class JNIService extends Service {
 			case JNI_RECEIVED_VIDEO_INVITION:
 				Intent iv = new Intent();
 				iv.addCategory(PublicIntent.DEFAULT_CATEGORY);
-				iv.setAction(PublicIntent.START_VIDEO_CONVERSACTION_ACTIVITY);
+				iv.setAction(PublicIntent.START_P2P_CONVERSACTION_ACTIVITY);
 				iv.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 				iv.putExtra("uid", ((VideoInvitionWrapper) msg.obj).nFromUserID);
 				iv.putExtra("is_coming_call", true);
+				iv.putExtra("voice", false);
+				iv.putExtra("device", ((VideoInvitionWrapper) msg.obj).szDeviceID);
 				mContext.startActivity(iv);
 				break;
 
@@ -399,30 +410,34 @@ public class JNIService extends Service {
 						Conversation.TYPE_GROUP, vm.getGroupId());
 			} else {
 				cov = GlobalHolder.getInstance().findConversationByType(
-						Conversation.TYPE_CONTACT, vm.getFromUser().getmUserId());
+						Conversation.TYPE_CONTACT,
+						vm.getFromUser().getmUserId());
 			}
 			//
 			if ((GlobalHolder.getInstance().CURRENT_CONVERSATION != null && cov == GlobalHolder
 					.getInstance().CURRENT_CONVERSATION)
-					|| (GlobalHolder.getInstance().CURRENT_ID == vm.getFromUser()
-							.getmUserId())) {
+					|| (GlobalHolder.getInstance().CURRENT_ID == vm
+							.getFromUser().getmUserId())) {
 				return;
 			}
 			NotificationCompat.Builder builder = new NotificationCompat.Builder(
 					mContext).setSmallIcon(R.drawable.ic_launcher)
 					.setContentTitle(vm.getFromUser().getName());
-			String textContent = vm.getAllTextContent();
-			if (textContent == null || textContent.isEmpty()) {
+			if (vm.getAudioItems().size() > 0) {
+				builder.setContentText(mContext.getResources().getString(
+						R.string.receive_voice_notification));
+			} else if (vm.getImageItems().size() > 0) {
 				builder.setContentText(mContext.getResources().getString(
 						R.string.receive_image_notification));
 			} else {
+				String textContent = vm.getAllTextContent();
 				builder.setContentText(textContent);
-
 			}
+			
 
 			Intent resultIntent = new Intent(
 					PublicIntent.START_CONVERSACTION_ACTIVITY);
-			
+
 			resultIntent.putExtra("gid", vm.getGroupId());
 			resultIntent.putExtra("user1id", GlobalHolder.getInstance()
 					.getCurrentUserId());
@@ -707,6 +722,45 @@ public class JNIService extends Service {
 		}
 
 	}
+	
+	
+	class AudioRequestCB implements AudioRequestCallback {
+
+		@Override
+		public void OnAudioChatInvite(long nGroupID, long nBusinessType,
+				long nFromUserID) {
+			Intent iv = new Intent();
+			iv.addCategory(PublicIntent.DEFAULT_CATEGORY);
+			iv.setAction(PublicIntent.START_P2P_CONVERSACTION_ACTIVITY);
+			iv.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+			iv.putExtra("uid", nFromUserID);
+			iv.putExtra("is_coming_call", true);
+			iv.putExtra("voice", true);
+			mContext.startActivity(iv);
+			
+		}
+
+		@Override
+		public void OnAudioChatAccepted(long nGroupID, long nBusinessType,
+				long nFromUserID) {
+			
+		}
+
+		@Override
+		public void OnAudioChatRefused(long nGroupID, long nBusinessType,
+				long nFromUserID) {
+			
+		}
+
+		@Override
+		public void OnAudioChatClosed(long nGroupID, long nBusinessType,
+				long nFromUserID) {
+			
+		}
+		
+		
+		
+	}
 
 	class VideoRequestCB implements VideoRequestCallback {
 
@@ -743,6 +797,28 @@ public class JNIService extends Service {
 				int nFrameRate, int nBitRate) {
 
 		}
+
+		@Override
+		public void OnVideoChatAccepted(long nGroupID, int nBusinessType,
+				long nFromuserID, String szDeviceID) {
+			
+		}
+
+		@Override
+		public void OnVideoChatRefused(long nGroupID, int nBusinessType,
+				long nFromUserID, String szDeviceID) {
+			
+		}
+
+		@Override
+		public void OnVideoChatClosed(long nGroupID, int nBusinessType,
+				long nFromUserID, String szDeviceID) {
+			
+		}
+		
+		
+		
+		
 
 	}
 
@@ -852,6 +928,16 @@ public class JNIService extends Service {
 				}
 			}
 
+			// Record audio data meta
+			VMessage cacheAudio = new VMessage(fromUser, toUser, new Date());
+			cacheAudio.setMsgCode(nBusinessType);
+			XmlParser.extraAudioMetaFrom(cacheAudio, szXmlText);
+			if (cacheAudio.getItems().size() > 0) {
+				synchronized (cacheAudioMeta) {
+					cacheAudioMeta.add(cacheAudio);
+				}
+			}
+
 			VMessage vm = XmlParser.parseForMessage(fromUser, toUser,
 					new Date(), szXmlText);
 			if (vm == null || vm.getItems().size() == 0) {
@@ -897,7 +983,8 @@ public class JNIService extends Service {
 
 			vm.setGroupId(nGroupID);
 
-			String filePath = GlobalConfig.getGlobalPicsPath()+"/" + vait.getUUID() + vait.getExtension();
+			String filePath = GlobalConfig.getGlobalPicsPath() + "/"
+					+ vait.getUUID() + vait.getExtension();
 			vait.setFilePath(filePath);
 
 			File f = new File(filePath);
@@ -921,6 +1008,40 @@ public class JNIService extends Service {
 
 			Message.obtain(mCallbackHandler, JNI_RECEIVED_MESSAGE, vm)
 					.sendToTarget();
+		}
+
+		@Override
+		public void OnRecvChatAudio(long gid, int businessType,
+				long fromUserId, long timeStamp, String messageId,
+				String audioPath) {
+			VMessage vm = null;
+			synchronized (cacheAudioMeta) {
+				for (VMessage v : cacheAudioMeta) {
+					List<VMessageAudioItem> list = v.getAudioItems();
+					for (int i = 0; i < list.size(); i++) {
+						VMessageAudioItem item = list.get(i);
+						if (item.getUUID().equals(messageId)) {
+							item.setAudioFilePath(audioPath);
+							cacheAudioMeta.remove(item);
+							vm = v;
+							break;
+						}
+					}
+					if (vm != null) {
+						break;
+					}
+				}
+
+			}
+
+			if (vm != null) {
+				vm.setGroupId(gid);
+				Message.obtain(mCallbackHandler, JNI_RECEIVED_MESSAGE, vm)
+				.sendToTarget();
+			} else {
+				V2Log.e(" Didn't find audio item : "+messageId);
+			}
+
 		}
 
 	}

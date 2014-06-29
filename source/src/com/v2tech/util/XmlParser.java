@@ -34,6 +34,7 @@ import com.v2tech.vo.V2ShapePoint;
 import com.v2tech.vo.V2ShapeRect;
 import com.v2tech.vo.VMessage;
 import com.v2tech.vo.VMessageAbstractItem;
+import com.v2tech.vo.VMessageAudioItem;
 import com.v2tech.vo.VMessageFaceItem;
 import com.v2tech.vo.VMessageImageItem;
 import com.v2tech.vo.VMessageTextItem;
@@ -131,7 +132,45 @@ public class XmlParser {
 		}
 
 	}
+	
+	
+	public static void extraAudioMetaFrom(VMessage vm, String xml) {
+		InputStream is = null;
 
+		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+		DocumentBuilder dBuilder;
+		try {
+			dBuilder = dbFactory.newDocumentBuilder();
+			is = new ByteArrayInputStream(xml.getBytes("UTF-8"));
+			Document doc = dBuilder.parse(is);
+
+			doc.getDocumentElement().normalize();
+
+			NodeList audioMsgItemNL = doc
+					.getElementsByTagName("TAudioChatItem");
+			for (int i = 0; i < audioMsgItemNL.getLength(); i++) {
+				Element audioItemEl = (Element) audioMsgItemNL.item(i);
+				String uuid = audioItemEl.getAttribute("FileID");
+				if (uuid == null) {
+					V2Log.e("Invalid uuid ");
+					continue;
+				}
+				VMessageAudioItem vii = new VMessageAudioItem(vm,
+						uuid,
+						audioItemEl.getAttribute("FileExt"),
+						null,
+						Integer.parseInt(audioItemEl.getAttribute("Seconds")));
+				vii.setNewLine(true);
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+	}
+	
+	
+	
 	/**
 	 * 
 	 * type org(1): type contact(2) <xml><pubgroup id='61'

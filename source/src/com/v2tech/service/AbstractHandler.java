@@ -9,10 +9,16 @@ import com.v2tech.util.V2Log;
 
 /**
  * Abstract handler.
- * <ul>It used to handle message and handle time out message</ul>
- * <ul>Notice: If you want to override {@link #handleMessage(Message)}, please handle time out message </ul>
+ * <ul>
+ * It used to handle message and handle time out message
+ * </ul>
+ * <ul>
+ * Notice: If you want to override {@link #handleMessage(Message)}, please
+ * handle time out message
+ * </ul>
+ * 
  * @author jiangzhen
- *
+ * 
  */
 public abstract class AbstractHandler extends Handler {
 
@@ -28,10 +34,11 @@ public abstract class AbstractHandler extends Handler {
 
 	private SparseArray<Meta> metaHolder = new SparseArray<Meta>();
 
-	protected Message initTimeoutMessage(int mointorMessageID,
-			long timeOutSec, Registrant caller) {
-		//Create unique message object
-		Message msg = Message.obtain(this, REQUEST_TIME_OUT,  mointorMessageID, 0,new Object());
+	protected Message initTimeoutMessage(int mointorMessageID, long timeOutSec,
+			Registrant caller) {
+		// Create unique message object
+		Message msg = Message.obtain(this, REQUEST_TIME_OUT, mointorMessageID,
+				0, new Object());
 		metaHolder.put(Integer.valueOf(mointorMessageID), new Meta(
 				mointorMessageID, caller, msg));
 		this.sendMessageDelayed(msg, timeOutSec * 1000);
@@ -48,13 +55,14 @@ public abstract class AbstractHandler extends Handler {
 			return null;
 		}
 	}
-	
-	
+
 	protected void sendResult(Registrant caller, Object obj) {
-		Message result = Message.obtain();
-		result.what = caller.getWhat();
-		result.obj = obj; 
-		caller.getHandler().sendMessage(result);
+		if (caller != null) {
+			Message result = Message.obtain();
+			result.what = caller.getWhat();
+			result.obj = obj;
+			caller.getHandler().sendMessage(result);
+		}
 	}
 
 	class Meta {
@@ -62,7 +70,8 @@ public abstract class AbstractHandler extends Handler {
 		Registrant caller;
 		Message timeoutMessage;
 
-		public Meta(int mointorMessageID, Registrant caller, Message timeoutMessage) {
+		public Meta(int mointorMessageID, Registrant caller,
+				Message timeoutMessage) {
 			super();
 			this.mointorMessageID = mointorMessageID;
 			this.caller = caller;
@@ -74,52 +83,61 @@ public abstract class AbstractHandler extends Handler {
 	@Override
 	public void handleMessage(Message msg) {
 		Message caller = null;
-		V2Log.d(this.getClass().getName()+"   "+ msg.what);
+		V2Log.d(this.getClass().getName() + "   " + msg.what);
 		switch (msg.what) {
 		case REQUEST_TIME_OUT:
 			Integer key = Integer.valueOf(msg.arg1);
 			Meta meta = metaHolder.get(key);
-			if (meta != null && meta.caller != null ) {
-				
-				JNIResponse jniRes = new JNIResponse(JNIResponse.Result.TIME_OUT);
-				
+			if (meta != null && meta.caller != null) {
+
+				JNIResponse jniRes = new JNIResponse(
+						JNIResponse.Result.TIME_OUT);
+
 				jniRes.callerObject = meta.caller.getObject();
 				if (meta.caller.getHandler() != null) {
-					caller = Message.obtain(meta.caller.getHandler(), meta.caller.getWhat(), jniRes);
+					caller = Message.obtain(meta.caller.getHandler(),
+							meta.caller.getWhat(), jniRes);
 				} else {
 					V2Log.w(" message no target:" + meta.caller);
 				}
 			} else {
-				V2Log.w("Doesn't find time out message in the queue :" + msg.arg1);
+				V2Log.w("Doesn't find time out message in the queue :"
+						+ msg.arg1);
 			}
-			//remove cache
+			// remove cache
 			metaHolder.remove(key);
 			break;
-			//Handle normal message 
+		// Handle normal message
 		default:
 			Registrant resgister = removeTimeoutMessage(msg.what);
 			if (resgister == null) {
-				V2Log.w(this.getClass().getName()+ " Igore message client don't expect callback :"+msg.what);
+				V2Log.w(this.getClass().getName()
+						+ " Igore message client don't expect callback :"
+						+ msg.what);
 				return;
 			}
 			Object origObject = resgister.getObject();
 			if (resgister.getHandler() != null) {
-				caller = Message.obtain(resgister.getHandler(), resgister.getWhat());
+				caller = Message.obtain(resgister.getHandler(),
+						resgister.getWhat());
 				JNIResponse jniRes = (JNIResponse) msg.obj;
 				jniRes.callerObject = origObject;
-				caller.obj =  jniRes;
+				caller.obj = jniRes;
 			} else {
 				V2Log.w("Doesn't find  message in the queue :" + msg.arg1);
 			}
 			break;
 		}
-		
+
 		if (caller == null) {
-			V2Log.w(" can not send message:" + msg.what +" to target caller is null");
+			V2Log.w(" can not send message:" + msg.what
+					+ " to target caller is null");
 			return;
 		} else {
 			if (caller.getTarget() == null) {
-				V2Log.w(" can not send message:" + msg.what +" to target caller target("+caller.what+") is null");
+				V2Log.w(" can not send message:" + msg.what
+						+ " to target caller target(" + caller.what
+						+ ") is null");
 				return;
 			}
 			caller.sendToTarget();

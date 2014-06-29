@@ -11,7 +11,6 @@ import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.text.Spannable;
@@ -28,7 +27,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.v2tech.R;
-import com.v2tech.db.ContentDescriptor;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.MessageUtil;
@@ -36,6 +34,7 @@ import com.v2tech.util.V2Log;
 import com.v2tech.vo.User;
 import com.v2tech.vo.VMessage;
 import com.v2tech.vo.VMessageAbstractItem;
+import com.v2tech.vo.VMessageAudioItem;
 import com.v2tech.vo.VMessageFaceItem;
 import com.v2tech.vo.VMessageImageItem;
 import com.v2tech.vo.VMessageTextItem;
@@ -48,6 +47,7 @@ public class MessageBodyView extends LinearLayout {
 	private LinearLayout mContentContainer;
 	private ImageView mArrowIV;
 	private TextView timeTV;
+	private TextView seconds;
 
 	private View rootView;
 
@@ -65,6 +65,7 @@ public class MessageBodyView extends LinearLayout {
 
 	public interface ClickListener {
 		public void onMessageClicked(VMessage v);
+		public void requestPlayAudio(View v, VMessage vm, VMessageAudioItem vai);
 	}
 
 	public MessageBodyView(Context context, VMessage m) {
@@ -128,6 +129,8 @@ public class MessageBodyView extends LinearLayout {
 			mArrowIV.bringToFront();
 			mLocalMessageContainter.setVisibility(View.VISIBLE);
 			mRemoteMessageContainter.setVisibility(View.GONE);
+			seconds = (TextView)rootView
+					.findViewById(R.id.message_body_video_item_second_left);
 		} else {
 			mHeadIcon = (ImageView) rootView
 					.findViewById(R.id.conversation_message_body_icon_right);
@@ -138,6 +141,8 @@ public class MessageBodyView extends LinearLayout {
 			mArrowIV.bringToFront();
 			mLocalMessageContainter.setVisibility(View.GONE);
 			mRemoteMessageContainter.setVisibility(View.VISIBLE);
+			seconds = (TextView)rootView
+					.findViewById(R.id.message_body_video_item_second_right);
 
 		}
 
@@ -174,6 +179,7 @@ public class MessageBodyView extends LinearLayout {
 				LinearLayout.LayoutParams.WRAP_CONTENT);
 		mContentContainer.addView(et, ll);
 
+		boolean existAudioItem = false;
 		List<VMessageAbstractItem> items = mMsg.getItems();
 		for (int i = 0; items != null && i < items.size(); i++) {
 			VMessageAbstractItem item = items.get(i);
@@ -214,11 +220,25 @@ public class MessageBodyView extends LinearLayout {
 				builder.setSpan(is, et.getText().length() - 1, et.getText()
 						.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 				et.setText(builder);
-
+			//AudioItem only has one item 
+			} else if (item.getType() == VMessageAbstractItem.ITEM_TYPE_AUDIO) {
+				VMessageAudioItem  vai = (VMessageAudioItem)item;
+				StringBuilder sb = new StringBuilder(vai.getSeconds());
+				for (int in =0;in <vai.getSeconds(); in++) {
+					sb.append("   ");
+				}
+				et.setText(sb.toString());
+				seconds.setText(vai.getSeconds()+"''");
+				existAudioItem = true;
 			}
 
 		}
 
+		if (existAudioItem) {
+			seconds.setVisibility(View.VISIBLE);
+		} else {
+			seconds.setVisibility(View.GONE);
+		}
 		mContentContainer.setTag(this.mMsg);
 
 	}
@@ -361,6 +381,11 @@ public class MessageBodyView extends LinearLayout {
 				List<VMessageImageItem> vl = mMsg.getImageItems();
 				if (vl != null && vl.size() > 0) {
 					callback.onMessageClicked(mMsg);
+				}
+				
+				List<VMessageAudioItem> al = mMsg.getAudioItems();
+				if (al != null && al.size() > 0) {
+					callback.requestPlayAudio(anchor, mMsg, al.get(0));
 				}
 			}
 		}

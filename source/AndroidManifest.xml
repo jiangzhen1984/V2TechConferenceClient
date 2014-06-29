@@ -3,7 +3,7 @@
     package="com.v2tech"
     android:sharedUserLabel="@string/app_name"
     android:versionCode="1"
-    android:versionName="1.3.0.58" >
+    android:versionName="1.3.0.59" >
 
     <uses-sdk
         android:minSdkVersion="13"
@@ -32,7 +32,7 @@
     <uses-permission android:name="android.permission.READ_LOGS" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.CALL_PHONE" />
-    
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
 
 
     
@@ -110,10 +110,11 @@
                 android:value="com.v2tech.view.StartupActivity" />
         </activity>
         <activity
-            android:name="com.v2tech.view.conversation.VideoConversation"
-            android:screenOrientation="nosensor" >
+            android:name="com.v2tech.view.conversation.P2PConversation"
+            android:screenOrientation="nosensor"
+             android:launchMode="singleTop" >
             <intent-filter>
-                <action android:name="com.v2tech.start_video_conversation_activity" />
+                <action android:name="com.v2tech.start_p2p_conversation_activity" />
 
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="com.v2tech" />
