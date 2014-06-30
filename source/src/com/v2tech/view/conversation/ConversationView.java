@@ -13,6 +13,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
@@ -47,6 +48,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.v2tech.R;
+import com.v2tech.service.BitmapManager;
 import com.v2tech.service.ChatService;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.service.Registrant;
@@ -229,6 +231,8 @@ public class ConversationView extends Activity {
 			mCurrentConv = GlobalHolder.getInstance().findConversationByType(
 					Conversation.TYPE_CONTACT, user2Id);
 		}
+		//Register listener for avatar changed
+		BitmapManager.getInstance().registerBitmapChangedListener(avatarChangedListener);
 
 		IntentFilter filter = new IntentFilter();
 		filter.addAction(JNIService.JNI_BROADCAST_NEW_MESSAGE);
@@ -304,6 +308,8 @@ public class ConversationView extends Activity {
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
+		BitmapManager.getInstance().registerBitmapChangedListener(avatarChangedListener);
+		
 		stopPlaying();
 		releasePlayer();
 		this.unregisterReceiver(receiver);
@@ -1058,6 +1064,19 @@ public class ConversationView extends Activity {
 			}
 			return convertView;
 		}
+	};
+	
+	
+	private BitmapManager.BitmapChangedListener avatarChangedListener = new BitmapManager.BitmapChangedListener() {
+
+		@Override
+		public void notifyAvatarChanged(User user, Bitmap bm) {
+			if (user.getmUserId() == local.getmUserId() || user.getmUserId() == remote.getmUserId()) {
+				adapter.notifyDataSetInvalidated();
+			}
+			
+		}
+		
 	};
 
 	private Runnable mUpdateMicStatusTimer = new Runnable() {
