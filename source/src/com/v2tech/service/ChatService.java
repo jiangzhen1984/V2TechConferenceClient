@@ -17,7 +17,8 @@ import com.v2tech.service.jni.JNIResponse;
 import com.v2tech.service.jni.RequestChatServiceResponse;
 import com.v2tech.service.jni.RequestSendMessageResponse;
 import com.v2tech.util.V2Log;
-import com.v2tech.vo.UserAudioDevice;
+import com.v2tech.vo.UserChattingObject;
+import com.v2tech.vo.UserDeviceConfig;
 import com.v2tech.vo.VMessage;
 import com.v2tech.vo.VMessageAudioItem;
 import com.v2tech.vo.VMessageImageItem;
@@ -25,15 +26,15 @@ import com.v2tech.vo.VMessageImageItem;
 public class ChatService extends AbstractHandler {
 
 	private AudioRequestCallback callback;
-	
+
 	private VideoRequestCallback videoCallback;
 
 	private Registrant mCaller;
 
 	private Handler thread;
-	
+
 	private static final int KEY_CANCELLED_LISTNER = 1;
-	
+
 	private SparseArray<List<Registrant>> registrantHolder = new SparseArray<List<Registrant>>();
 
 	public ChatService() {
@@ -47,13 +48,12 @@ public class ChatService extends AbstractHandler {
 
 		videoCallback = new VideoRequestCallbackImpl();
 		VideoRequest.getInstance().addCallback(videoCallback);
-		
+
 		HandlerThread backEnd = new HandlerThread("back-end");
 		backEnd.start();
 		thread = new Handler(backEnd.getLooper());
 	}
-	
-	
+
 	private void notifyListener(int key, int arg1, int arg2, Object obj) {
 		List<Registrant> list = registrantHolder.get(key);
 		if (list == null) {
@@ -69,8 +69,7 @@ public class ChatService extends AbstractHandler {
 			}
 		}
 	}
-	
-	
+
 	private void registerListener(int key, Handler h, int what, Object obj) {
 		List<Registrant> list = registrantHolder.get(key);
 		if (list == null) {
@@ -90,7 +89,7 @@ public class ChatService extends AbstractHandler {
 			}
 		}
 	}
-	
+
 	/**
 	 * Register listener for out conference by kick.
 	 * 
@@ -100,8 +99,7 @@ public class ChatService extends AbstractHandler {
 		registerListener(KEY_CANCELLED_LISTNER, h, what, obj);
 	}
 
-	public void removeRegisterCancelledListener(Handler h, int what,
-			Object obj) {
+	public void removeRegisterCancelledListener(Handler h, int what, Object obj) {
 		unRegisterListener(KEY_CANCELLED_LISTNER, h, what, obj);
 
 	}
@@ -166,7 +164,7 @@ public class ChatService extends AbstractHandler {
 	 * @param ud
 	 * @param caller
 	 */
-	public void inviteUserChat(UserAudioDevice ud, Registrant caller) {
+	public void inviteUserChat(UserChattingObject ud, Registrant caller) {
 		JNIResponse resp = null;
 		if (mCaller != null) {
 			V2Log.e(" audio call is on going");
@@ -196,11 +194,12 @@ public class ChatService extends AbstractHandler {
 	}
 
 	/**
+	 * C
 	 * 
 	 * @param ud
 	 * @param caller
 	 */
-	public void cancelChattingCall(UserAudioDevice ud, Registrant caller) {
+	public void cancelChattingCall(UserChattingObject ud, Registrant caller) {
 		if (ud == null) {
 			JNIResponse resp = new RequestChatServiceResponse(
 					RequestChatServiceResponse.Result.INCORRECT_PAR);
@@ -226,7 +225,13 @@ public class ChatService extends AbstractHandler {
 		this.mCaller = null;
 	}
 
-	public void acceptChatting(UserAudioDevice ud, Registrant caller) {
+	/**
+	 * accept incoming call
+	 * 
+	 * @param ud
+	 * @param caller
+	 */
+	public void acceptChatting(UserChattingObject ud, Registrant caller) {
 		if (ud == null) {
 			JNIResponse resp = new RequestChatServiceResponse(
 					RequestChatServiceResponse.Result.INCORRECT_PAR);
@@ -249,8 +254,14 @@ public class ChatService extends AbstractHandler {
 		}
 	}
 
-	public void refuseChatting(UserAudioDevice ud, Registrant caller) {
-		if (mCaller != null) {
+	/**
+	 * Reject incoming call
+	 * 
+	 * @param ud
+	 * @param caller
+	 */
+	public void refuseChatting(UserChattingObject ud, Registrant caller) {
+		if (ud == null) {
 			JNIResponse resp = new RequestChatServiceResponse(
 					RequestChatServiceResponse.Result.INCORRECT_PAR);
 			sendResult(caller, resp);
@@ -271,31 +282,99 @@ public class ChatService extends AbstractHandler {
 			sendResult(caller, resp);
 		}
 	}
-	
-	
+
+	public void muteChatting(UserChattingObject ud, Registrant caller) {
+		if (ud == null) {
+			JNIResponse resp = new RequestChatServiceResponse(
+					RequestChatServiceResponse.Result.INCORRECT_PAR);
+			sendResult(caller, resp);
+			return;
+		}
+		AudioRequest.getInstance().MuteMic(ud.getGroupdId(),
+				ud.getUser().getmUserId(), ud.isMute(), AudioRequest.BT_IM);
+
+		if (caller != null) {
+			JNIResponse resp = new RequestChatServiceResponse(
+					RequestChatServiceResponse.Result.SUCCESS);
+			sendResult(caller, resp);
+		}
+
+	}
+
+	/**
+	 * Open remote video device of conversation
+	 * 
+	 * @param ud
+	 * @param caller
+	 */
+	public void openVideoDevice(UserChattingObject ud, Registrant caller) {
+		if (ud == null) {
+			JNIResponse resp = new RequestChatServiceResponse(
+					RequestChatServiceResponse.Result.INCORRECT_PAR);
+			sendResult(caller, resp);
+			return;
+		}
+
+		VideoRequest
+				.getInstance()
+				.openVideoDevice(
+						UserDeviceConfig.UserDeviceConfigType.EVIDEODEVTYPE_CAMERA
+								.ordinal(), ud.getUser().getmUserId(),
+						ud.getDeviceId(), ud.getVp(), VideoRequest.BT_IM);
+
+		if (caller != null) {
+			JNIResponse resp = new RequestChatServiceResponse(
+					RequestChatServiceResponse.Result.SUCCESS);
+			sendResult(caller, resp);
+		}
+	}
+
+	public void closeVideoDevice(UserChattingObject ud, Registrant caller) {
+		if (ud == null) {
+			JNIResponse resp = new RequestChatServiceResponse(
+					RequestChatServiceResponse.Result.INCORRECT_PAR);
+			sendResult(caller, resp);
+			return;
+		}
+
+		VideoRequest
+				.getInstance()
+				.closeVideoDevice(
+						UserDeviceConfig.UserDeviceConfigType.EVIDEODEVTYPE_CAMERA
+								.ordinal(), ud.getUser().getmUserId(),
+						ud.getDeviceId(), ud.getVp(), VideoRequest.BT_IM);
+
+		if (caller != null) {
+			JNIResponse resp = new RequestChatServiceResponse(
+					RequestChatServiceResponse.Result.SUCCESS);
+			sendResult(caller, resp);
+		}
+	}
+
 	class VideoRequestCallbackImpl implements VideoRequestCallback {
 
 		@Override
 		public void OnRemoteUserVideoDevice(String szXmlData) {
-			
+
 		}
 
 		@Override
 		public void OnVideoChatInviteCallback(long nGroupID, int nBusinessType,
 				long nFromUserID, String szDeviceID) {
-			
+
 		}
 
 		@Override
 		public void OnSetCapParamDone(String szDevID, int nSizeIndex,
 				int nFrameRate, int nBitRate) {
-			
+
 		}
-		
+
 		public void OnVideoChatAccepted(long nGroupID, int nBusinessType,
 				long nFromuserID, String szDeviceID) {
 			if (mCaller != null) {
-				JNIResponse resp = new RequestChatServiceResponse(RequestChatServiceResponse.ACCEPTED,
+				JNIResponse resp = new RequestChatServiceResponse(
+						RequestChatServiceResponse.ACCEPTED,
 						RequestChatServiceResponse.Result.SUCCESS);
 				sendResult(mCaller, resp);
 				mCaller = null;
@@ -305,7 +384,8 @@ public class ChatService extends AbstractHandler {
 		public void OnVideoChatRefused(long nGroupID, int nBusinessType,
 				long nFromUserID, String szDeviceID) {
 			if (mCaller != null) {
-				JNIResponse resp = new RequestChatServiceResponse(RequestChatServiceResponse.REJCTED,
+				JNIResponse resp = new RequestChatServiceResponse(
+						RequestChatServiceResponse.REJCTED,
 						RequestChatServiceResponse.Result.SUCCESS);
 				sendResult(mCaller, resp);
 				mCaller = null;
@@ -316,12 +396,10 @@ public class ChatService extends AbstractHandler {
 		public void OnVideoChatClosed(long nGroupID, int nBusinessType,
 				long nFromUserID, String szDeviceID) {
 			notifyListener(KEY_CANCELLED_LISTNER, 0, 0, null);
-			//Clean cache
+			// Clean cache
 			mCaller = null;
 		}
-		
-		
-		
+
 	}
 
 	class AudioRequestCallbackImpl implements AudioRequestCallback {
@@ -330,7 +408,8 @@ public class ChatService extends AbstractHandler {
 		public void OnAudioChatAccepted(long nGroupID, long nBusinessType,
 				long nFromUserID) {
 			if (mCaller != null) {
-				JNIResponse resp = new RequestChatServiceResponse(RequestChatServiceResponse.ACCEPTED,
+				JNIResponse resp = new RequestChatServiceResponse(
+						RequestChatServiceResponse.ACCEPTED,
 						RequestChatServiceResponse.Result.SUCCESS);
 				sendResult(mCaller, resp);
 				mCaller = null;
@@ -341,7 +420,8 @@ public class ChatService extends AbstractHandler {
 		public void OnAudioChatRefused(long nGroupID, long nBusinessType,
 				long nFromUserID) {
 			if (mCaller != null) {
-				JNIResponse resp = new RequestChatServiceResponse(RequestChatServiceResponse.REJCTED,
+				JNIResponse resp = new RequestChatServiceResponse(
+						RequestChatServiceResponse.REJCTED,
 						RequestChatServiceResponse.Result.SUCCESS);
 				sendResult(mCaller, resp);
 				mCaller = null;
@@ -359,11 +439,9 @@ public class ChatService extends AbstractHandler {
 		public void OnAudioChatClosed(long nGroupID, long nBusinessType,
 				long nFromUserID) {
 			notifyListener(KEY_CANCELLED_LISTNER, 0, 0, null);
-			//Clean cache
+			// Clean cache
 			mCaller = null;
 		}
-		
-		
 
 	}
 

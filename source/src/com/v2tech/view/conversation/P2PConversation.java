@@ -10,6 +10,8 @@ import com.v2tech.R;
 import com.v2tech.service.ConferenceService;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.vo.Conference;
+import com.v2tech.vo.User;
+import com.v2tech.vo.UserChattingObject;
 import com.v2tech.vo.UserDeviceConfig;
 
 public class P2PConversation extends Activity implements TurnListener,
@@ -17,10 +19,28 @@ public class P2PConversation extends Activity implements TurnListener,
 
 	private ConferenceService cb = new ConferenceService();
 
+	private UserChattingObject uad;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_p2p_conversation);
+
+		long uid = getIntent().getExtras().getLong("uid");
+		boolean mIsInComingCall = getIntent().getExtras().getBoolean(
+				"is_coming_call");
+		boolean mIsVoiceCall = getIntent().getExtras().getBoolean("voice");
+		String deviceId = getIntent().getExtras().getString("device");
+		User u = GlobalHolder.getInstance().getUser(uid);
+
+		int flag = mIsVoiceCall ? UserChattingObject.VOICE_CALL
+				: UserChattingObject.VIDEO_CALL;
+		if (mIsInComingCall) {
+			flag |= UserChattingObject.INCOMING_CALL;
+		} else {
+			flag |= UserChattingObject.OUTING_CALL;
+		}
+		uad = new UserChattingObject(u, flag, deviceId);
 
 		Fragment fragment1 = new ConversationWaitingFragment();
 		FragmentTransaction transaction = getFragmentManager()
@@ -42,6 +62,11 @@ public class P2PConversation extends Activity implements TurnListener,
 	}
 
 	@Override
+	public UserChattingObject getObject() {
+		return uad;
+	}
+
+	@Override
 	protected void onStart() {
 		super.onStart();
 	}
@@ -50,8 +75,6 @@ public class P2PConversation extends Activity implements TurnListener,
 	protected void onStop() {
 		super.onStop();
 	}
-	
-	
 
 	@Override
 	protected void onNewIntent(Intent intent) {
@@ -71,8 +94,8 @@ public class P2PConversation extends Activity implements TurnListener,
 
 	@Override
 	public void closeLocalCamera() {
-		cb.requestCloseVideoDevice(new Conference(0), new UserDeviceConfig(1,
-				"", null), null);
+		cb.requestCloseVideoDevice(new Conference(0), new UserDeviceConfig(
+				GlobalHolder.getInstance().getCurrentUserId(), "", null), null);
 	}
 
 	@Override

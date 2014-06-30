@@ -1928,6 +1928,7 @@ public class VideoActivityV2 extends Activity {
 			switch (msg.what) {
 			case ONLY_SHOW_LOCAL_VIDEO:
 				// make sure local view is first front of all;
+				mLocalSurface.setZOrderOnTop(true);
 				localSurfaceViewLy.bringToFront();
 				showOrCloseLocalSurViewOnly();
 				break;

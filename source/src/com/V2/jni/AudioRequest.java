@@ -62,22 +62,49 @@ public class AudioRequest {
 
 	public native void unInitialize();
 
-	// ����Է���ʼ��Ƶͨ��
+	/**
+	 * Invite user to join audio call
+	 * @param nGroupID
+	 * @param nToUserID
+	 * @param businesstype
+	 */
 	public native void InviteAudioChat(long nGroupID, long nToUserID,
 			int businesstype);
 
-	// ���ܶԷ�����Ƶͨ������
+	/**
+	 * Accept audio conversation
+	 * @param nGroupID
+	 * @param nToUserID
+	 * @param businesstype
+	 */
 	public native void AcceptAudioChat(long nGroupID, long nToUserID,
 			int businesstype);
 
-	// �ܾ�Է�����Ƶͨ������
+	/**
+	 * reject audio conversation
+	 * @param nGroupID
+	 * @param nToUserID
+	 * @param businesstype
+	 */
 	public native void RefuseAudioChat(long nGroupID, long nToUserID,
 			int businesstype);
 
-	// ȡ����Ƶͨ��
+	/**
+	 * 
+	 * @param nGroupID
+	 * @param nToUserID
+	 * @param businesstype
+	 */
 	public native void CloseAudioChat(long nGroupID, long nToUserID,
 			int businesstype);
 
+	/**
+	 * 
+	 * @param nGroupID
+	 * @param nUserID
+	 * @param bMute
+	 * @param businesstype
+	 */
 	public native void MuteMic(long nGroupID, long nUserID, boolean bMute,
 			int businesstype);
 

@@ -14,13 +14,11 @@ import android.widget.TextView;
 
 import com.v2tech.R;
 import com.v2tech.service.ChatService;
-import com.v2tech.service.GlobalHolder;
 import com.v2tech.service.Registrant;
 import com.v2tech.service.jni.JNIResponse;
 import com.v2tech.service.jni.RequestChatServiceResponse;
 import com.v2tech.util.V2Log;
-import com.v2tech.vo.User;
-import com.v2tech.vo.UserAudioDevice;
+import com.v2tech.vo.UserChattingObject;
 
 public class ConversationWaitingFragment extends Fragment {
 
@@ -37,38 +35,22 @@ public class ConversationWaitingFragment extends Fragment {
 	private View mInvitationButtonLayout;
 	private View mHostInvitationButtonLayout;
 
-	private boolean mIsInComingCall;
-	private boolean mIsVoiceCall;
-
 	private ChatService chat = new ChatService();
 
 	private Handler mLocalHandler = new LocalHandler();
 
 	private TurnListener mIndicator;
 
-	private UserAudioDevice uad;
+	private UserChattingObject uad;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		long uid = getActivity().getIntent().getExtras().getLong("uid");
-		mIsInComingCall = getActivity().getIntent().getExtras()
-				.getBoolean("is_coming_call");
-		mIsVoiceCall = getActivity().getIntent().getExtras()
-				.getBoolean("voice");
-		String deviceId = getActivity().getIntent().getExtras()
-				.getString("device");
-		User u = GlobalHolder.getInstance().getUser(uid);
-		if (u == null) {
-
-		} else {
-			uad = new UserAudioDevice(u,
-					mIsVoiceCall ? UserAudioDevice.VOICE_CALL
-							: UserAudioDevice.VIDEO_CALL, deviceId);
-			if (!mIsInComingCall) {
-				chat.inviteUserChat(uad, new Registrant(mLocalHandler,
-						CALL_RESPONSE, null));
-			}
+		uad = mIndicator.getObject();
+		//If is outing call, send invitation request
+		if (!uad.isIncoming()) {
+			chat.inviteUserChat(uad, new Registrant(mLocalHandler,
+					CALL_RESPONSE, null));
 		}
 	}
 
@@ -102,7 +84,7 @@ public class ConversationWaitingFragment extends Fragment {
 		mAcceptButton.setOnClickListener(acceptListener);
 		mCancelButton.setOnClickListener(cancelListener);
 
-		if (mIsInComingCall) {
+		if (uad.isIncoming()) {
 			mInvitationButtonLayout.setVisibility(View.VISIBLE);
 			mHostInvitationButtonLayout.setVisibility(View.GONE);
 		} else {
@@ -167,13 +149,14 @@ public class ConversationWaitingFragment extends Fragment {
 		public void handleMessage(Message msg) {
 			switch (msg.what) {
 			case CALL_RESPONSE: {
-				JNIResponse resp = (JNIResponse)msg.obj;
-				if (resp.getResult() == JNIResponse.Result.SUCCESS)  {
-					RequestChatServiceResponse rcsr = (RequestChatServiceResponse)resp;
+				JNIResponse resp = (JNIResponse) msg.obj;
+				if (resp.getResult() == JNIResponse.Result.SUCCESS) {
+					RequestChatServiceResponse rcsr = (RequestChatServiceResponse) resp;
 					if (rcsr.getCode() == RequestChatServiceResponse.REJCTED) {
 						chat.cancelChattingCall(uad, null);
 						getActivity().finish();
-					} else if (rcsr.getCode() == RequestChatServiceResponse.ACCEPTED && mIndicator != null) {
+					} else if (rcsr.getCode() == RequestChatServiceResponse.ACCEPTED
+							&& mIndicator != null) {
 						mIndicator.turnToVideoUI();
 					} else {
 						V2Log.e(" indicator is null can not open audio UI ");

@@ -1,7 +1,303 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/video_conversation_main"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    >
+    android:layout_height="match_parent" >
+
+    <LinearLayout
+        android:id="@+id/fragment_conversation_connected_voice_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/conversation_framgent_bg"
+        android:orientation="vertical"
+        >
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight=".25" >
+
+            <TextView
+                android:id="@+id/fragment_conversation_connected_duration"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:gravity="center"
+                android:text="00:00"
+                android:textColor="@color/fragment_conversation_title_text_color"
+                android:textSize="@dimen/fragment_conversation_waiting_title_text_size" />
+        </RelativeLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight=".5"
+            android:orientation="vertical" >
+
+            <RelativeLayout
+                android:id="@+id/conversation_fragment_voice_center_container"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent" >
+
+                <ImageView
+                    android:id="@+id/conversation_fragment_voice_avatar"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentTop="true"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginTop="@dimen/fragment_conversation_waiting_invitation_voice_avatar_margin_top"
+                    android:src="@drawable/avatar" />
+
+                <TextView
+                    android:id="@+id/conversation_fragment_connected_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/conversation_fragment_voice_avatar"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginTop="10dp"
+                    android:text="名字"
+                    android:textColor="@color/fragment_conversation_title_text_color"
+                    android:textSize="@dimen/fragment_conversation_waiting_invitation_host_name_size" />
+            </RelativeLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_gravity="bottom"
+            android:layout_weight=".25"
+            android:orientation="horizontal" >
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_gravity="bottom"
+                android:layout_marginLeft="@dimen/fragment_conversation_connected_gray_button_margin_screen"
+                android:layout_marginRight="@dimen/fragment_conversation_connected_gray_button_margin_screen"
+                android:orientation="horizontal" >
+
+                <LinearLayout
+                    android:id="@+id/conversation_fragment_connected_speaker_button"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom"
+                    android:layout_marginBottom="@dimen/fragment_conversation_waiting_invitation_button_margin_bottom"
+                    android:layout_marginLeft="@dimen/fragment_conversation_connected_gray_button_margin_hor"
+                    android:layout_marginRight="@dimen/fragment_conversation_connected_gray_button_margin_hor"
+                    android:layout_weight=".25"
+                    android:background="@drawable/conversation_fragment_gray_button_selector"
+                    android:orientation="vertical" >
+
+                    <TextView
+                        android:layout_width="fill_parent"
+                        android:layout_height="fill_parent"
+                        android:gravity="center"
+                        android:paddingBottom="@dimen/fragment_conversation_connected_voice_gray_button_padding_vertical"
+                        android:paddingTop="@dimen/fragment_conversation_connected_voice_gray_button_padding_vertical"
+                        android:text="@string/conversation_speaker_text"
+                        android:textColor="@color/fragment_conversation_connected_gray_text_color"
+                        android:textSize="@dimen/fragment_conversation_connected_button_text_size" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/conversation_fragment_connected_cancel_button"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom"
+                    android:layout_marginBottom="@dimen/fragment_conversation_waiting_invitation_button_margin_bottom"
+                    android:layout_marginLeft="@dimen/fragment_conversation_connected_gray_button_margin_hor"
+                    android:layout_marginRight="@dimen/fragment_conversation_connected_gray_button_margin_hor"
+                    android:layout_weight=".5"
+                    android:background="@drawable/conversation_fragment_reject_button_selector"
+                    android:orientation="vertical" >
+
+                    <TextView
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:padding="@dimen/fragment_conversation_connected_voice_gray_button_padding_vertical"
+                        android:text="@string/conversation_cancel_text"
+                        android:textColor="@color/fragment_conversation_title_text_color"
+                        android:textSize="@dimen/fragment_conversation_connected_button_text_size" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/conversation_fragment_connected_mute_button"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom"
+                    android:layout_marginBottom="@dimen/fragment_conversation_waiting_invitation_button_margin_bottom"
+                    android:layout_marginLeft="@dimen/fragment_conversation_connected_gray_button_margin_hor"
+                    android:layout_marginRight="@dimen/fragment_conversation_connected_gray_button_margin_hor"
+                    android:layout_weight=".25"
+                    android:background="@drawable/conversation_fragment_gray_button_selector"
+                    android:orientation="vertical" >
+
+                    <TextView
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:paddingBottom="@dimen/fragment_conversation_connected_voice_gray_button_padding_vertical"
+                        android:paddingTop="@dimen/fragment_conversation_connected_voice_gray_button_padding_vertical"
+                        android:text="@string/conversation_mute_text"
+                        android:textColor="@color/fragment_conversation_connected_gray_text_color"
+                        android:textSize="@dimen/fragment_conversation_connected_button_text_size" />
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- vodeo conversation layout -->
+
+    <RelativeLayout
+        android:id="@+id/fragment_conversation_connected_video_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/conversation_framgent_bg" 
+        android:visibility="gone" >
+
+        <FrameLayout
+            android:id="@+id/fragment_conversation_connected_video_remote_surface_container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true" >
+
+            <SurfaceView
+                android:id="@+id/fragment_conversation_connected_video_remote_surface"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent" />
+        </FrameLayout>
+
+        <LinearLayout
+            android:id="@+id/fragment_conversation_connected_video_button_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_gravity="bottom"
+            android:layout_marginLeft="@dimen/fragment_conversation_connected_gray_button_margin_screen"
+            android:layout_marginRight="@dimen/fragment_conversation_connected_gray_button_margin_screen"
+            android:orientation="horizontal" >
+
+            <LinearLayout
+                android:id="@+id/conversation_fragment_connected_video_camera_button"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:layout_marginBottom="@dimen/fragment_conversation_waiting_invitation_button_margin_bottom"
+                android:layout_marginLeft="@dimen/fragment_conversation_connected_gray_button_margin_hor"
+                android:layout_marginRight="@dimen/fragment_conversation_connected_gray_button_margin_hor"
+                android:layout_weight=".25"
+                android:background="@drawable/conversation_fragment_gray_button_selector"
+                android:orientation="vertical"
+                android:paddingBottom="@dimen/fragment_conversation_connected_gray_button_padding_vertical"
+                android:paddingTop="@dimen/fragment_conversation_connected_gray_button_padding_vertical" >
+
+                <ImageView
+                    android:id="@+id/imageView1"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/conversation_connected_camera_button" />
+
+                <TextView
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="@string/conversation_close_video_text"
+                    android:textColor="@color/fragment_conversation_connected_gray_text_color"
+                    android:textSize="@dimen/fragment_conversation_connected_button_text_size_1" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/conversation_fragment_connected_video_cancel_button"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:layout_marginBottom="@dimen/fragment_conversation_waiting_invitation_button_margin_bottom"
+                android:layout_marginLeft="@dimen/fragment_conversation_connected_gray_button_margin_hor"
+                android:layout_marginRight="@dimen/fragment_conversation_connected_gray_button_margin_hor"
+                android:layout_weight=".5"
+                android:background="@drawable/conversation_fragment_reject_button_selector"
+                android:orientation="vertical"
+                android:paddingBottom="@dimen/fragment_conversation_connected_gray_button_padding_vertical"
+                android:paddingTop="@dimen/fragment_conversation_connected_gray_button_padding_vertical" >
+
+                <ImageView
+                    android:id="@+id/imageView3"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:src="@drawable/conversation_connected_cancel_button" />
+
+                <TextView
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="@string/conversation_cancel_text"
+                    android:textColor="@color/fragment_conversation_title_text_color"
+                    android:textSize="@dimen/fragment_conversation_connected_button_text_size" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/conversation_fragment_connected_video_mute_button"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:layout_marginBottom="@dimen/fragment_conversation_waiting_invitation_button_margin_bottom"
+                android:layout_marginLeft="@dimen/fragment_conversation_connected_gray_button_margin_hor"
+                android:layout_marginRight="@dimen/fragment_conversation_connected_gray_button_margin_hor"
+                android:layout_weight=".25"
+                android:background="@drawable/conversation_fragment_gray_button_selector"
+                android:orientation="vertical"
+                android:paddingBottom="@dimen/fragment_conversation_connected_gray_button_padding_vertical"
+                android:paddingTop="@dimen/fragment_conversation_connected_gray_button_padding_vertical" >
+
+                <ImageView
+                    android:id="@+id/imageView2"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:src="@drawable/conversation_connected_mute_button" />
+
+                <TextView
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="@string/conversation_mute_text"
+                    android:textColor="@color/fragment_conversation_connected_gray_text_color"
+                    android:textSize="@dimen/fragment_conversation_connected_button_text_size" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/conversation_fragment_connected_title_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginLeft="@dimen/fragment_conversation_connected_title_text_margin_left"
+            android:layout_marginTop="@dimen/fragment_conversation_connected_title_text_margin_top"
+            android:text="@string/conversation_video_title_text"
+            android:textColor="@color/fragment_conversation_title_text_color"
+            android:textSize="@dimen/fragment_conversation_connected_title_text_text_size" />
+
+        <TextView
+            android:id="@+id/conversation_fragment_connected_video_duration"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@+id/conversation_fragment_connected_title_text"
+            android:layout_below="@+id/conversation_fragment_connected_title_text"
+            android:text="00:00"
+            android:textColor="@color/fragment_conversation_title_text_color"
+            android:textSize="@dimen/fragment_conversation_connected_title_text_text_size" />
+
+        <SurfaceView
+            android:id="@+id/fragment_conversation_connected_video_local_surface"
+            android:layout_width="@dimen/fragment_conversation_connected_local_video_layout_width"
+            android:layout_height="@dimen/fragment_conversation_connected_local_video_layout_height"
+            android:layout_above="@+id/fragment_conversation_connected_video_button_container"
+            android:layout_alignParentRight="true"
+            android:layout_marginBottom="@dimen/fragment_conversation_connected_local_surface_margin_bottom"
+            android:layout_marginRight="@dimen/fragment_conversation_connected_local_surface_margin_right" />
+    </RelativeLayout>
+
 </RelativeLayout>

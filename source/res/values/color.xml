@@ -43,4 +43,5 @@
      <color name="attendee_select_bg">#bfe8ff</color>
      
      <color name="fragment_conversation_title_text_color">#ffffff</color>
+     <color name="fragment_conversation_connected_gray_text_color">#000000</color>
 </resources>

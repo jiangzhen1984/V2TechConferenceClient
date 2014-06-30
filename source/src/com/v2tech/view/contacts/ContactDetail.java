@@ -132,6 +132,20 @@ public class ContactDetail extends Activity implements OnTouchListener {
 		this.overridePendingTransition(R.animator.alpha_from_0_to_1,
 				R.animator.alpha_from_1_to_0);
 	}
+	
+	
+
+	@Override
+	protected void onNewIntent(Intent intent) {
+		super.onNewIntent(intent);
+		if (intent != null) {
+			mUid =intent.getLongExtra("uid", 0);
+			u = GlobalHolder.getInstance().getUser(mUid);
+			if (u != null) {
+				showUserInfo();
+			}
+		}
+	}
 
 	@Override
 	public boolean onTouch(View view, MotionEvent mv) {

@@ -385,9 +385,9 @@ public class ConversationView extends Activity {
 
 	private Dialog mVoiceDialog = null;
 	private ImageView mVolume;
+	private View mSpeakingLayout;
+	private View mPreparedCancelLayout;
 
-	
-	
 	private void showOrCloseVoiceDialog() {
 		if (mVoiceDialog == null) {
 			mVoiceDialog = new Dialog(mContext, R.style.MessageVoiceDialog);
@@ -397,12 +397,37 @@ public class ConversationView extends Activity {
 			mVoiceDialog.setContentView(root);
 			mVolume = (ImageView) root
 					.findViewById(R.id.message_voice_dialog_voice_volume);
+			mSpeakingLayout = root
+					.findViewById(R.id.message_voice_dialog_listening_container);
+			mPreparedCancelLayout = root
+					.findViewById(R.id.message_voice_dialog_cancel_container);
 		}
 
 		if (mVoiceDialog.isShowing()) {
 			mVoiceDialog.dismiss();
 		} else {
+			updateCancelSendVoiceMsgNotification(false);
+
 			mVoiceDialog.show();
+		}
+	}
+
+	private void updateCancelSendVoiceMsgNotification(boolean flag) {
+		if (flag) {
+			if (mSpeakingLayout != null) {
+				mSpeakingLayout.setVisibility(View.GONE);
+			}
+
+			if (mPreparedCancelLayout != null) {
+				mPreparedCancelLayout.setVisibility(View.VISIBLE);
+			}
+		} else {
+			if (mSpeakingLayout != null) {
+				mSpeakingLayout.setVisibility(View.VISIBLE);
+			}
+			if (mPreparedCancelLayout != null) {
+				mPreparedCancelLayout.setVisibility(View.GONE);
+			}
 		}
 	}
 
@@ -541,13 +566,26 @@ public class ConversationView extends Activity {
 				// Start update db for voice
 				lh.postDelayed(mUpdateMicStatusTimer, 200);
 				starttime = System.currentTimeMillis();
+			} else if (event.getAction() == MotionEvent.ACTION_MOVE) {
+				boolean flag = false;
+				Rect r = new Rect();
+				view.getDrawingRect(r);
+				// check if touch position out of button than cancel send voice
+				// message
+				if (r.contains((int) event.getX(), (int) event.getY())) {
+					flag = false;
+				} else {
+					flag = true;
+				}
+				updateCancelSendVoiceMsgNotification(flag);
 			} else if (event.getAction() == MotionEvent.ACTION_UP) {
 				stopRecording();
 
 				Rect r = new Rect();
 				view.getDrawingRect(r);
-				// check if touch position out of button than cancel send voice message
-				if (r.contains((int)event.getX(), (int)event.getY())) {
+				// check if touch position out of button than cancel send voice
+				// message
+				if (r.contains((int) event.getX(), (int) event.getY())) {
 					// send
 					VMessage vm = new VMessage(groupId, local, remote);
 					int seconds = (int) ((System.currentTimeMillis() - starttime) / 1000) + 1;
@@ -555,7 +593,9 @@ public class ConversationView extends Activity {
 					// Send message to server
 					sendMessageToRemote(vm);
 				} else {
-					Toast.makeText(mContext, R.string.contact_message_message_cancelled, Toast.LENGTH_SHORT).show();
+					Toast.makeText(mContext,
+							R.string.contact_message_message_cancelled,
+							Toast.LENGTH_SHORT).show();
 					File f = new File(fileName);
 					f.deleteOnExit();
 				}
@@ -1089,9 +1129,9 @@ public class ConversationView extends Activity {
 				isLoading = false;
 				break;
 			case SEND_MESSAGE:
-				
-				mChat.sendVMessage((VMessage) msg.obj,
-						new Registrant(this, SEND_MESSAGE_DONE, null));
+
+				mChat.sendVMessage((VMessage) msg.obj, new Registrant(this,
+						SEND_MESSAGE_DONE, null));
 				break;
 			case QUERY_NEW_MESSAGE:
 				if (msg.obj == null || "".equals(msg.obj.toString())) {

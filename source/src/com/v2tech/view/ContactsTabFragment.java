@@ -150,6 +150,21 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 	public void onStop() {
 		super.onStop();
 	}
+	
+	
+	
+	@Override
+	public void setUserVisibleHint(boolean isVisibleToUser) {
+		super.setUserVisibleHint(isVisibleToUser);
+		//recover search result
+		if (!isVisibleToUser && mIsStartedSearch) {
+			mItemList = mCacheItemList;
+			adapter.notifyDataSetChanged();
+			mIsStartedSearch = false;
+			return;
+		}
+	}
+	
 
 	private IntentFilter getIntentFilter() {
 		if (intentFilter == null) {

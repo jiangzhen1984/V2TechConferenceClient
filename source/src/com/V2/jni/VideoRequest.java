@@ -53,9 +53,11 @@ public class VideoRequest {
 	/**
 	 * Request to open video device include remote user and self.
 	 * 
-	 * @param nGroupID
-	 *            conference id. If open P2P user device, this parameter should
-	 *            be 0
+	 * @param type<br>
+	 *            1: camera<br>
+	 *            2: <br>
+	 *            3:  file <br>
+	 *            4: mixed video device<br>
 	 * @param nUserID
 	 *            user id
 	 * @param szDeviceID
@@ -80,9 +82,11 @@ public class VideoRequest {
 	 * FIXME update comment Request to close video device. This function no
 	 * callback call<br>
 	 * 
-	 * @param nGroupID
-	 *            conference id. If open P2P user device, this parameter should
-	 *            be 0
+	 * @param type<br>
+	 *            1: camera<br>
+	 *            2: <br>
+	 *            3:  file <br>
+	 *            4: mixed video device<br>
 	 * @param nUserID
 	 *            user id
 	 * @param szDeviceID
@@ -265,23 +269,45 @@ public class VideoRequest {
 	// 璁剧疆鏈湴鎽勫儚澶�
 	public native void setDefaultVideoDev(String szDeviceID);
 
-	// 閭�浠栦汉寮�瑙嗛浼氳瘽
+	/**
+	 * Invite user to join video call
+	 * @param nGroupID
+	 * @param nToUserID
+	 * @param szDeviceID
+	 * @param businessType
+	 */
 	public native void inviteVideoChat(long nGroupID, long nToUserID,
 			String szDeviceID, int businessType);
 
-	// 鎺ュ彈瀵规柟鐨勮棰戜細璇濋個璇�
+	/**
+	 * Accept video invitation
+	 * @param nGroupID
+	 * @param nToUserID
+	 * @param szDeviceID
+	 * @param businessType
+	 */
 	public native void acceptVideoChat(long nGroupID, long nToUserID,
 			String szDeviceID, int businessType);
 
-	// 鎷掔粷瀵规柟鐨勮棰戜細璇濋個璇�
+	/**
+	 * Reject video invitation call
+	 * @param nGroupID
+	 * @param nToUserID
+	 * @param szDeviceID
+	 * @param businessType
+	 */
 	public native void refuseVideoChat(long nGroupID, long nToUserID,
 			String szDeviceID, int businessType);
 
-	// 鍙栨秷瑙嗛浼氳瘽
 	public native void cancelVideoChat(long nGroupID, long nToUserID,
 			String szDeviceID, int businessType);
 
-	// 鍏抽棴瑙嗛浼氳瘽
+	/**
+	 * @param nGroupID
+	 * @param nToUserID
+	 * @param szDeviceID
+	 * @param businessType
+	 */
 	public native void closeVideoChat(long nGroupID, long nToUserID,
 			String szDeviceID, int businessType);
 
