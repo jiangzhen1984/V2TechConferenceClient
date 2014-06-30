@@ -70,6 +70,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 	private View mCreateConfButton;
 	private View mMoreDetailButton;
 	private View mVideoCallButton;
+	private View mSendSmsButton;
 
 	// view for self
 	private EditText mSignature;
@@ -177,6 +178,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 		mContactButtonContainer = findViewById(R.id.contact_button_ly);
 		mCreateConfButton = findViewById(R.id.contact_user_detail_create_conf_bottom_button);
 		mVideoCallButton = findViewById(R.id.contact_user_detail_video_call_bottom_button);
+		mSendSmsButton = findViewById(R.id.contact_user_detail_send_sms_bottom_button);
 
 		mTitleTV = (TextView) findViewById(R.id.contact_user_n_detail_title_tv);
 		mAddressTV = (TextView) findViewById(R.id.contact_user_n_detail_address_tv);
@@ -278,6 +280,10 @@ public class ContactDetail extends Activity implements OnTouchListener {
 			mCreateConfButton.setOnClickListener(mCreateConfMsgListener);
 			
 			mVideoCallButton.setOnClickListener(mVideoCallButtonListener);
+			
+			if (mSendSmsButton != null) {
+				mSendSmsButton.setOnClickListener(mSendSmsMsgListener);
+			}
 
 		}
 
@@ -361,6 +367,22 @@ public class ContactDetail extends Activity implements OnTouchListener {
 			mContext.startActivity(iv);
 		}
 	};
+	
+	private View.OnClickListener mSendSmsMsgListener = new View.OnClickListener() {
+		@Override
+		public void onClick(View arg0) {
+			Intent smsIntent = new Intent(Intent.ACTION_VIEW);
+			if (u.getTelephone() == null || u.getTelephone().isEmpty()) {
+				smsIntent.putExtra("address", "");
+			} else {
+				smsIntent.putExtra("address", u.getTelephone()+"");
+			}
+			
+			smsIntent.setType("vnd.android-dir/mms-sms");
+			startActivity(smsIntent);
+		}
+	};
+	
 
 	private View.OnClickListener mCreateConfMsgListener = new View.OnClickListener() {
 
