@@ -67,7 +67,7 @@ public class UserChattingObject {
 	}
 	
 	public boolean isMute() {
-		return (this.flag & SPEAKING) == SPEAKING;
+		return !((this.flag & SPEAKING) == SPEAKING);
 	}
 	
 	public boolean isAudioType() {
@@ -80,5 +80,10 @@ public class UserChattingObject {
 	
 	public boolean isIncoming() {
 		return (flag & INCOMING_CALL) == INCOMING_CALL;
+	}
+	
+	public void updateAudioType() {
+		flag &= VOICE_CALL;
+		flag |= VOICE_CALL;
 	}
 }

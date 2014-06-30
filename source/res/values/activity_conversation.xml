@@ -3,6 +3,7 @@
     <string name="conversation_waiting">正在呼叫..</string>
    <string name="conversation_notification">邀请您进入聊天.....</string>
    <string name="conversation_accept_text">接  受</string>
+   <string name="conversation_voice_accept_only_text">语音接听</string>
    <string name="conversation_reject_text">拒  绝</string>
    <string name="conversation_cancel_text">挂  断</string>
    <string name="conversation_video_title_text">您正在与[]视频</string>

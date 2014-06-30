@@ -236,7 +236,7 @@ public class ChatRequest {
 	}
 	
 	public void OnSendChatResult(String str, int i, int j) {
-
+		V2Log.e("OnSendChatResult  " +str + "  "+ i+ "  "+j);
 	}
 	
 
@@ -244,9 +244,9 @@ public class ChatRequest {
 	public void OnRecvChatPicture(long nGroupID, int nBusinessType,
 			long nFromUserID, long nTime, String szSeqID, byte[] pPicData) {
 
-		Log.e("ImRequest UI", "OnRecvChatPicture  " + nGroupID + " "
+		V2Log.e( "OnRecvChatPicture  " + nGroupID + " "
 				+ nBusinessType + " " + nFromUserID + " " + nTime + " ");
-		Log.e("ImRequest UI", "OnRecvChatPicture ****maximum heap size***"
+		V2Log.e( "OnRecvChatPicture ****maximum heap size***"
 				+ Runtime.getRuntime().maxMemory() + "*nLength=====**"
 				+ "****pPicData.length===***" + pPicData.length);
 		if (callback != null) {

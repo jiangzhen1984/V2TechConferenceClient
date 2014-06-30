@@ -26,6 +26,7 @@ public class ConversationConnectedFragment extends Fragment {
 
 	private static final int UPDATE_TIME = 1;
 	private static final int CANCELLED_NOTIFICATION = 2;
+	private static final int OPEN_REMOTE_VIDEO = 3;
 
 	private View voiceLayout;
 	private View videoLayout;
@@ -120,7 +121,7 @@ public class ConversationConnectedFragment extends Fragment {
 		} else if (uad.isAudioType()) {
 
 			mTimerTV = (TextView) v
-					.findViewById(R.id.conversation_fragment_connected_video_duration);
+					.findViewById(R.id.fragment_conversation_connected_duration);
 			((TextView) v
 					.findViewById(R.id.conversation_fragment_connected_name))
 					.setText(uad.getUser().getName());
@@ -145,8 +146,8 @@ public class ConversationConnectedFragment extends Fragment {
 			mLocalSurface.setZOrderOnTop(true);
 			mLocalSurface.bringToFront();
 
-			openRemoteVideo();
-
+			Message m = Message.obtain(mLocalHandler, OPEN_REMOTE_VIDEO);
+			mLocalHandler.sendMessageDelayed(m, 300);
 		}
 	}
 
@@ -263,6 +264,9 @@ public class ConversationConnectedFragment extends Fragment {
 				break;
 			case CANCELLED_NOTIFICATION:
 				quit();
+				break;
+			case OPEN_REMOTE_VIDEO:
+				openRemoteVideo();
 				break;
 			}
 		}

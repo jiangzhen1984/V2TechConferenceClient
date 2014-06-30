@@ -79,7 +79,7 @@
      
      <!-- fragment conversation_waiting layout -->
     <dimen name="fragment_conversation_waiting_title_text_size">25sp</dimen>
-     <dimen name="fragment_conversation_waiting_invitation_button_padding_vertical">20dp</dimen>
+     <dimen name="fragment_conversation_waiting_invitation_button_padding_vertical">15dp</dimen>
     <dimen name="fragment_conversation_waiting_invitation_button_margin">200dp</dimen>
     <dimen name="fragment_conversation_waiting_invitation_button_margin_hor">200dp</dimen>
     <dimen name="fragment_conversation_waiting_invitation_button_margin_bottom">10dp</dimen>

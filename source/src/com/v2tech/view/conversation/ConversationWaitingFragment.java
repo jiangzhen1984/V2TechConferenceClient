@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.media.MediaPlayer;
 import android.media.RingtoneManager;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -35,6 +34,7 @@ public class ConversationWaitingFragment extends Fragment {
 	private View mRejectButton;
 	private View mAcceptButton;
 	private View mCancelButton;
+	private View mAcceptVocieOnlyButton;
 
 	private View mInvitationButtonLayout;
 	private View mHostInvitationButtonLayout;
@@ -86,10 +86,13 @@ public class ConversationWaitingFragment extends Fragment {
 				.findViewById(R.id.conversation_fragment_voice_accept_button);
 		this.mCancelButton = v
 				.findViewById(R.id.conversation_fragment_voice_host_cancel_button);
+		this.mAcceptVocieOnlyButton = v
+				.findViewById(R.id.conversation_fragment_voice_accept_only_button);
 
 		mRejectButton.setOnClickListener(rejectListener);
 		mAcceptButton.setOnClickListener(acceptListener);
 		mCancelButton.setOnClickListener(cancelListener);
+		mAcceptVocieOnlyButton.setOnClickListener(acceptVoicOnlyListener);
 
 		if (uad.isIncoming()) {
 			mInvitationButtonLayout.setVisibility(View.VISIBLE);
@@ -97,6 +100,12 @@ public class ConversationWaitingFragment extends Fragment {
 		} else {
 			mInvitationButtonLayout.setVisibility(View.GONE);
 			mHostInvitationButtonLayout.setVisibility(View.VISIBLE);
+		}
+		
+		if (uad.isVideoType()) {
+			mAcceptVocieOnlyButton.setVisibility(View.VISIBLE);
+		} else {
+			mAcceptVocieOnlyButton.setVisibility(View.GONE);
 		}
 
 		// FIXME handle when user changed avatar
@@ -163,11 +172,27 @@ public class ConversationWaitingFragment extends Fragment {
 		}
 
 	};
+	
+	
+	private OnClickListener acceptVoicOnlyListener = new OnClickListener() {
+
+		@Override
+		public void onClick(View arg0) {
+			stopRingTone();
+		//	uad.updateAudioType();
+			chat.acceptChatting(uad, null);
+			((TurnListener) getActivity()).turnToVideoUI();
+		}
+
+	};
+	
+	
 
 	private OnClickListener acceptListener = new OnClickListener() {
 
 		@Override
 		public void onClick(View arg0) {
+			stopRingTone();
 			chat.acceptChatting(uad, null);
 			((TurnListener) getActivity()).turnToVideoUI();
 		}

@@ -28,7 +28,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight=".5"
+            android:layout_weight=".45"
             android:orientation="vertical" >
 
             <RelativeLayout
@@ -62,56 +62,76 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_gravity="bottom"
-            android:layout_weight=".25"
+            android:layout_weight=".3"
             android:orientation="vertical" >
 
             <LinearLayout
                 android:id="@+id/conversation_fragment_voice_invitation_button_container"
                 android:layout_width="fill_parent"
                 android:layout_height="fill_parent"
+                android:gravity="bottom"
                 android:layout_gravity="bottom"
-                android:orientation="horizontal"
-                >
+                android:orientation="vertical" >
 
-                <TextView
-                    android:id="@+id/conversation_fragment_voice_reject_button"
-                    android:layout_width="0dp"
+                <LinearLayout
+                    android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="bottom"
                     android:layout_marginBottom="@dimen/fragment_conversation_waiting_invitation_button_margin_bottom"
                     android:layout_marginLeft="@dimen/fragment_conversation_waiting_invitation_button_margin"
-                    android:layout_marginRight="@dimen/fragment_conversation_waiting_invitation_button_margin_hor"
-                    android:layout_weight=".5"
-                    android:background="@drawable/conversation_fragment_reject_button_selector"
-                    android:gravity="center"
-                    android:padding="@dimen/fragment_conversation_waiting_invitation_button_padding_vertical"
-                    android:text="@string/conversation_reject_text"
-                    android:textColor="@color/fragment_conversation_title_text_color"
-                    android:textSize="@dimen/fragment_conversation_waiting_button_text_size" />
+                    android:layout_marginRight="@dimen/fragment_conversation_waiting_invitation_button_margin"
+                    android:orientation="horizontal" >
+
+                    <TextView
+                        android:id="@+id/conversation_fragment_voice_reject_button"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="bottom"
+                        android:layout_marginRight="@dimen/fragment_conversation_waiting_invitation_button_margin_hor"
+                        android:layout_weight=".5"
+                        android:background="@drawable/conversation_fragment_reject_button_selector"
+                        android:gravity="center"
+                        android:padding="@dimen/fragment_conversation_waiting_invitation_button_padding_vertical"
+                        android:text="@string/conversation_reject_text"
+                        android:textColor="@color/fragment_conversation_title_text_color"
+                        android:textSize="@dimen/fragment_conversation_waiting_button_text_size" />
+
+                    <TextView
+                        android:id="@+id/conversation_fragment_voice_accept_button"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="bottom"
+                        android:layout_marginLeft="@dimen/fragment_conversation_waiting_invitation_button_margin_hor"
+                        android:layout_weight=".5"
+                        android:background="@drawable/conversation_fragment_accept_button_selector"
+                        android:gravity="center"
+                        android:padding="@dimen/fragment_conversation_waiting_invitation_button_padding_vertical"
+                        android:text="@string/conversation_accept_text"
+                        android:textColor="@color/fragment_conversation_title_text_color"
+                        android:textSize="@dimen/fragment_conversation_waiting_button_text_size" />
+                </LinearLayout>
 
                 <TextView
-                    android:id="@+id/conversation_fragment_voice_accept_button"
-                    android:layout_width="0dp"
+                    android:id="@+id/conversation_fragment_voice_accept_only_button"
+                    android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="bottom"
                     android:layout_marginBottom="@dimen/fragment_conversation_waiting_invitation_button_margin_bottom"
-                    android:layout_marginLeft="@dimen/fragment_conversation_waiting_invitation_button_margin_hor"
+                    android:layout_marginLeft="@dimen/fragment_conversation_waiting_invitation_button_margin"
                     android:layout_marginRight="@dimen/fragment_conversation_waiting_invitation_button_margin"
-                    android:layout_weight=".5"
-                    android:background="@drawable/conversation_fragment_accept_button_selector"
+                    android:background="@drawable/conversation_fragment_gray_button_selector"
                     android:gravity="center"
                     android:padding="@dimen/fragment_conversation_waiting_invitation_button_padding_vertical"
-                    android:text="@string/conversation_accept_text"
-                    android:textColor="@color/fragment_conversation_title_text_color"
+                    android:text="@string/conversation_voice_accept_only_text"
+                    android:textColor="@color/fragment_conversation_connected_gray_text_color"
                     android:textSize="@dimen/fragment_conversation_waiting_button_text_size" />
             </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/conversation_fragment_voice_host_invitation_button_container"
                 android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
+                android:layout_height="wrap_content"
                 android:layout_gravity="bottom"
-                android:orientation="horizontal" >
+                android:orientation="horizontal"
+                android:visibility="gone" >
 
                 <TextView
                     android:layout_width="0dp"

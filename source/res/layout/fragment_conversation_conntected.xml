@@ -8,8 +8,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@drawable/conversation_framgent_bg"
-        android:orientation="vertical"
-        >
+        android:orientation="vertical" >
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -85,14 +84,20 @@
                     android:layout_marginRight="@dimen/fragment_conversation_connected_gray_button_margin_hor"
                     android:layout_weight=".25"
                     android:background="@drawable/conversation_fragment_gray_button_selector"
-                    android:orientation="vertical" >
+                    android:orientation="vertical"
+                    android:paddingBottom="@dimen/fragment_conversation_connected_gray_button_padding_vertical"
+                    android:paddingTop="@dimen/fragment_conversation_connected_gray_button_padding_vertical" >
+
+                    <ImageView
+                        android:id="@+id/imageView1"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/message_voice_lounder" />
 
                     <TextView
                         android:layout_width="fill_parent"
                         android:layout_height="fill_parent"
                         android:gravity="center"
-                        android:paddingBottom="@dimen/fragment_conversation_connected_voice_gray_button_padding_vertical"
-                        android:paddingTop="@dimen/fragment_conversation_connected_voice_gray_button_padding_vertical"
                         android:text="@string/conversation_speaker_text"
                         android:textColor="@color/fragment_conversation_connected_gray_text_color"
                         android:textSize="@dimen/fragment_conversation_connected_button_text_size" />
@@ -108,13 +113,20 @@
                     android:layout_marginRight="@dimen/fragment_conversation_connected_gray_button_margin_hor"
                     android:layout_weight=".5"
                     android:background="@drawable/conversation_fragment_reject_button_selector"
-                    android:orientation="vertical" >
+                    android:orientation="vertical"
+                    android:paddingBottom="@dimen/fragment_conversation_connected_gray_button_padding_vertical"
+                    android:paddingTop="@dimen/fragment_conversation_connected_gray_button_padding_vertical" >
+
+                    <ImageView
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:src="@drawable/conversation_connected_cancel_button" />
 
                     <TextView
                         android:layout_width="fill_parent"
                         android:layout_height="wrap_content"
                         android:gravity="center"
-                        android:padding="@dimen/fragment_conversation_connected_voice_gray_button_padding_vertical"
                         android:text="@string/conversation_cancel_text"
                         android:textColor="@color/fragment_conversation_title_text_color"
                         android:textSize="@dimen/fragment_conversation_connected_button_text_size" />
@@ -130,14 +142,19 @@
                     android:layout_marginRight="@dimen/fragment_conversation_connected_gray_button_margin_hor"
                     android:layout_weight=".25"
                     android:background="@drawable/conversation_fragment_gray_button_selector"
-                    android:orientation="vertical" >
+                    android:orientation="vertical"
+                    android:paddingBottom="@dimen/fragment_conversation_connected_gray_button_padding_vertical"
+                    android:paddingTop="@dimen/fragment_conversation_connected_gray_button_padding_vertical" >
+
+                    <ImageView
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/message_voice_mute" />
 
                     <TextView
                         android:layout_width="fill_parent"
                         android:layout_height="wrap_content"
                         android:gravity="center"
-                        android:paddingBottom="@dimen/fragment_conversation_connected_voice_gray_button_padding_vertical"
-                        android:paddingTop="@dimen/fragment_conversation_connected_voice_gray_button_padding_vertical"
                         android:text="@string/conversation_mute_text"
                         android:textColor="@color/fragment_conversation_connected_gray_text_color"
                         android:textSize="@dimen/fragment_conversation_connected_button_text_size" />
@@ -152,7 +169,7 @@
         android:id="@+id/fragment_conversation_connected_video_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@drawable/conversation_framgent_bg" 
+        android:background="@drawable/conversation_framgent_bg"
         android:visibility="gone" >
 
         <FrameLayout
