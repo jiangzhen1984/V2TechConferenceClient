@@ -2,6 +2,9 @@ package com.v2tech.view.conversation;
 
 import android.app.Activity;
 import android.app.Fragment;
+import android.media.MediaPlayer;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -23,6 +26,7 @@ import com.v2tech.vo.UserChattingObject;
 public class ConversationWaitingFragment extends Fragment {
 
 	private static final int CALL_RESPONSE = 1;
+	private static final int CANCELLED_NOTIFICATION = 2;
 
 	private TextView mInvitationNameTV;
 	private TextView mTitleTV;
@@ -47,11 +51,14 @@ public class ConversationWaitingFragment extends Fragment {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		uad = mIndicator.getObject();
-		//If is outing call, send invitation request
+		// If is outing call, send invitation request
 		if (!uad.isIncoming()) {
 			chat.inviteUserChat(uad, new Registrant(mLocalHandler,
 					CALL_RESPONSE, null));
+		} else {
+			playRingToneIncoming();
 		}
+
 	}
 
 	@Override
@@ -105,12 +112,36 @@ public class ConversationWaitingFragment extends Fragment {
 	public void onAttach(Activity activity) {
 		super.onAttach(activity);
 		mIndicator = (TurnListener) activity;
+		chat.registerCancelledListener(mLocalHandler, CANCELLED_NOTIFICATION,
+				null);
 	}
 
 	@Override
 	public void onDetach() {
 		super.onDetach();
 		mIndicator = null;
+		chat.removeRegisterCancelledListener(mLocalHandler,
+				CANCELLED_NOTIFICATION, null);
+		stopRingTone();
+	}
+
+	public void quit() {
+		if (getActivity() != null) {
+			getActivity().finish();
+		}
+	}
+
+	private MediaPlayer thePlayer;
+	private void playRingToneIncoming() {
+		thePlayer = MediaPlayer.create(getActivity(), RingtoneManager
+				.getDefaultUri(RingtoneManager.TYPE_RINGTONE));
+		thePlayer.start();
+	}
+	
+	private void stopRingTone() {
+		if (thePlayer != null) {
+			thePlayer.release();
+		}
 	}
 
 	private OnClickListener rejectListener = new OnClickListener() {
@@ -118,7 +149,7 @@ public class ConversationWaitingFragment extends Fragment {
 		@Override
 		public void onClick(View arg0) {
 			chat.refuseChatting(uad, null);
-			getActivity().finish();
+			quit();
 		}
 
 	};
@@ -128,7 +159,7 @@ public class ConversationWaitingFragment extends Fragment {
 		@Override
 		public void onClick(View arg0) {
 			chat.cancelChattingCall(uad, null);
-			getActivity().finish();
+			quit();
 		}
 
 	};
@@ -163,6 +194,9 @@ public class ConversationWaitingFragment extends Fragment {
 					}
 				}
 			}
+				break;
+			case CANCELLED_NOTIFICATION:
+				quit();
 				break;
 			}
 		}
