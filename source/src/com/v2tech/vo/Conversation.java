@@ -9,8 +9,6 @@ public class Conversation {
 	
 	public static final String TYPE_GROUP ="3";
 	
-	public static final int NOTIFICATION = 1;
-	public static final int NONE = 0;
 	
 	private int mId;
 	
@@ -18,23 +16,11 @@ public class Conversation {
 	
 	protected long mExtId;
 	
-	protected int mNotiFlag;
-	
 	
 	
 	protected Conversation() {
 		
 	}
-	
-
-	public Conversation(int mId, String mType, long mExtId, int mNotiFlag) {
-		super();
-		this.mId = mId;
-		this.mType = mType;
-		this.mExtId = mExtId;
-		this.mNotiFlag = mNotiFlag;
-	}
-
 	
 	
 	
@@ -54,15 +40,6 @@ public class Conversation {
 	}
 	
 	
-
-
-	public Conversation(String mType, long mExtId, int mNotiFlag) {
-		super();
-		this.mType = mType;
-		this.mExtId = mExtId;
-		this.mNotiFlag = mNotiFlag;
-	}
-
 
 	public String getName() {
 		return null;
@@ -143,14 +120,5 @@ public class Conversation {
 		this.mExtId = extId;
 	}
 
-	public int getNotiFlag() {
-		return mNotiFlag;
-	}
-
-	public void setNotiFlag(int notiFlag) {
-		this.mNotiFlag = notiFlag;
-	}
-	
-	
 
 }

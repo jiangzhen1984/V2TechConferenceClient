@@ -14,7 +14,6 @@ import android.graphics.Bitmap;
 
 import com.v2tech.util.V2Log;
 import com.v2tech.view.bo.UserStatusObject;
-import com.v2tech.vo.Conversation;
 import com.v2tech.vo.Group;
 import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.User;
@@ -40,20 +39,9 @@ public class GlobalHolder {
 	private Map<Long, Group> mGroupHolder = new HashMap<Long, Group>();
 	private Map<Long, String> mAvatarHolder = new HashMap<Long, String>();
 
-	private Set<Conversation> mConatactConversationHolder = new CopyOnWriteArraySet<Conversation>();
-
-	private Set<Conversation> mGroupConversationHolder = new CopyOnWriteArraySet<Conversation>();
-
-	private Set<Conversation> mConferenceConversationHolder = new CopyOnWriteArraySet<Conversation>();
-
 	private Map<Long, Set<UserDeviceConfig>> mUserDeviceList = new HashMap<Long, Set<UserDeviceConfig>>();
 
 	private Map<Long, Bitmap> mAvatarBmHolder = new HashMap<Long, Bitmap>();
-
-	// Use to hold current opened conversation
-	public Conversation CURRENT_CONVERSATION = null;
-
-	public long CURRENT_ID = 0;
 
 	public static synchronized GlobalHolder getInstance() {
 		if (holder == null) {
@@ -361,100 +349,9 @@ public class GlobalHolder {
 		this.mAvatarHolder.put(key, path);
 	}
 
-	public void addConversation(Conversation cov) {
-		if (cov == null) {
-			return;
-		}
-		if (Conversation.TYPE_CONTACT.equals(cov.getType())) {
-			this.mConatactConversationHolder.add(cov);
-		} else if (Conversation.TYPE_GROUP.equals(cov.getType())) {
-			this.mGroupConversationHolder.add(cov);
-		} else if (Conversation.TYPE_CONFERNECE.equals(cov.getType())) {
-			mConferenceConversationHolder.add(cov);
-		}
-	}
+	
 
-	public boolean findConversation(Conversation cov) {
-		if (cov == null) {
-			return false;
-		}
-		Set<Conversation> tmp = null;
-		if (Conversation.TYPE_CONTACT.equals(cov.getType())) {
-			tmp = mConatactConversationHolder;
-		} else if (Conversation.TYPE_GROUP.equals(cov.getType())) {
-			tmp = mGroupConversationHolder;
-		} else if (Conversation.TYPE_CONFERNECE.equals(cov.getType())) {
-			tmp = mConferenceConversationHolder;
-		}
-		for (Conversation c : tmp) {
-			if (cov.equals(c)) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	public Conversation findConversationByType(String type, long extId) {
-		Set<Conversation> tmp = null;
-		if (Conversation.TYPE_CONTACT.equals(type)) {
-			tmp = mConatactConversationHolder;
-		} else if (Conversation.TYPE_GROUP.equals(type)) {
-			tmp = mGroupConversationHolder;
-		} else if (Conversation.TYPE_CONFERNECE.equals(type)) {
-			tmp = mConferenceConversationHolder;
-		}
-		if (tmp == null) {
-			V2Log.w("No avialiable holder : " + type);
-			return null;
-		}
-
-		for (Conversation c : tmp) {
-			if (c.getExtId() == extId) {
-				return c;
-			}
-		}
-		return null;
-	}
-
-	public void removeConversation(String type, long extId) {
-		Set<Conversation> tmp = null;
-		if (Conversation.TYPE_CONTACT.equals(type)) {
-			tmp = mConatactConversationHolder;
-		} else if (Conversation.TYPE_GROUP.equals(type)) {
-			tmp = mGroupConversationHolder;
-		} else if (Conversation.TYPE_CONFERNECE.equals(type)) {
-			tmp = mConferenceConversationHolder;
-		}
-
-		for (Conversation c : tmp) {
-			if (c.getExtId() == extId) {
-				tmp.remove(c);
-			}
-		}
-	}
-
-	public int getNoticatorCount(String type) {
-		int c = 0;
-		Set<Conversation> tmp = null;
-		if (Conversation.TYPE_CONTACT.equals(type)) {
-			tmp = mConatactConversationHolder;
-		} else if (Conversation.TYPE_GROUP.equals(type)) {
-			tmp = mGroupConversationHolder;
-		} else if (Conversation.TYPE_CONFERNECE.equals(type)) {
-			tmp = mConferenceConversationHolder;
-		}
-
-		if (tmp == null) {
-			return 0;
-		}
-		for (Conversation cov : tmp) {
-			if (cov.getNotiFlag() == Conversation.NOTIFICATION) {
-				c++;
-			}
-		}
-		return c;
-	}
-
+	
 	/**
 	 * Get user's video device according to user id.<br>
 	 * This function never return null, even through we don't receive video

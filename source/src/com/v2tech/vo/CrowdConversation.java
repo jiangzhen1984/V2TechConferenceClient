@@ -19,7 +19,6 @@ public class CrowdConversation extends Conversation {
 		this.g = g;
 		super.mExtId = g.getmGId();
 		super.mType = TYPE_GROUP;
-		super.mNotiFlag = NONE;
 	}
 
 	

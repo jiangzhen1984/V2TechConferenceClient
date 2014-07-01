@@ -54,7 +54,6 @@ import com.v2tech.view.conference.VideoActivityV2;
 import com.v2tech.view.conversation.MessageBuilder;
 import com.v2tech.vo.ConferenceGroup;
 import com.v2tech.vo.Conversation;
-import com.v2tech.vo.CrowdConversation;
 import com.v2tech.vo.Group;
 import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.NetworkStateCode;
@@ -294,18 +293,15 @@ public class JNIService extends Service {
 			case JNI_GROUP_NOTIFY:
 				List<Group> gl = XmlParser.parserFromXml(msg.arg1,
 						(String) msg.obj);
-				GlobalHolder.getInstance().updateGroupList(
-						Group.GroupType.fromInt(msg.arg1), gl);
 
-				if (Group.GroupType.fromInt(msg.arg1) == GroupType.CHATING) {
-					for (Group g : gl) {
-						GlobalHolder.getInstance().addConversation(
-								new CrowdConversation(g));
-					}
+				if (gl != null && gl.size() > 0) {
+					GlobalHolder.getInstance().updateGroupList(
+							Group.GroupType.fromInt(msg.arg1), gl);
+					Intent gi = new Intent(JNI_BROADCAST_GROUP_NOTIFICATION);
+					gi.putExtra("gtype", msg.arg1);
+					gi.addCategory(JNI_BROADCAST_CATEGROY);
+					mContext.sendBroadcast(gi);
 				}
-				Intent gi = new Intent(JNI_BROADCAST_GROUP_NOTIFICATION);
-				gi.addCategory(JNI_BROADCAST_CATEGROY);
-				mContext.sendBroadcast(gi);
 				break;
 
 			case JNI_GROUP_USER_INFO_NOTIFICATION:
@@ -406,24 +402,7 @@ public class JNIService extends Service {
 			}
 		}
 
-		// FIXME update message for group message
 		private void updateStatusBar(VMessage vm) {
-			Conversation cov = null;
-			if (vm.getGroupId() != 0) {
-				cov = GlobalHolder.getInstance().findConversationByType(
-						Conversation.TYPE_GROUP, vm.getGroupId());
-			} else {
-				cov = GlobalHolder.getInstance().findConversationByType(
-						Conversation.TYPE_CONTACT,
-						vm.getFromUser().getmUserId());
-			}
-			//
-			if ((GlobalHolder.getInstance().CURRENT_CONVERSATION != null && cov == GlobalHolder
-					.getInstance().CURRENT_CONVERSATION)
-					|| (GlobalHolder.getInstance().CURRENT_ID == vm
-							.getFromUser().getmUserId())) {
-				return;
-			}
 			NotificationCompat.Builder builder = new NotificationCompat.Builder(
 					mContext).setSmallIcon(R.drawable.ic_launcher)
 					.setContentTitle(vm.getFromUser().getName());

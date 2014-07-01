@@ -7,9 +7,12 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.v2tech.service.GlobalHolder;
 
-public class Conference {
+public class Conference implements Parcelable {
 
 	private long id;
 
@@ -39,18 +42,54 @@ public class Conference {
 			List<User> invitedList) {
 		this(0, 0, name, startTime, endTime, invitedList);
 	}
-	
-	public Conference(long id, long creator, String name, Date startTime, Date endTime,
-			List<User> invitedList) {
+
+	public Conference(long id, long creator, String name, Date startTime,
+			Date endTime, List<User> invitedList) {
 		this.id = id;
 		this.creator = creator;
 		this.name = name;
 		this.d = startTime;
 		this.invitedList = invitedList;
 	}
-	
-	
-	
+
+	public Conference(Parcel par) {
+		id = par.readLong();
+		name = par.readString();
+		startTime = par.readString();
+		creator = par.readLong();
+		chairman = par.readLong();
+		int ir = par.readInt();
+		if (ir == 1) {
+			isCanInvitation = true;
+		} else {
+			isCanInvitation = false;
+		}
+	}
+
+	public static final Parcelable.Creator<Conference> CREATOR = new Parcelable.Creator<Conference>() {
+		public Conference createFromParcel(Parcel in) {
+			return new Conference(in);
+		}
+
+		public Conference[] newArray(int size) {
+			return new Conference[size];
+		}
+	};
+
+	@Override
+	public int describeContents() {
+		return 0;
+	}
+
+	@Override
+	public void writeToParcel(Parcel par, int flag) {
+		par.writeLong(id);
+		par.writeString(name);
+		par.writeString(this.startTime);
+		par.writeLong(creator);
+		par.writeLong(chairman);
+		par.writeInt(isCanInvitation ? 1 : 0);
+	}
 
 	public boolean isCanInvitation() {
 		return isCanInvitation;
@@ -187,33 +226,33 @@ public class Conference {
 		User loggedUser = GlobalHolder.getInstance().getCurrentUser();
 		String[] ins = { "chairuserid", "createuserid", "id", "subject",
 				"syncdesktop" };
-		long id =0 ;
+		long id = 0;
 		long createor = 0;
 		long chairman = 0;
 		int start = str.indexOf("chairuserid='");
 		if (start != -1) {
 			int end = str.indexOf("'", start + 13);
 			if (end != -1) {
-				chairman = Long.valueOf(str.substring(start+13, end));
+				chairman = Long.valueOf(str.substring(start + 13, end));
 			}
 		}
-		
+
 		start = str.indexOf("createuserid='");
 		if (start != -1) {
 			int end = str.indexOf("'", start + 14);
 			if (end != -1) {
-				createor = Long.valueOf(str.substring(start+14, end));
+				createor = Long.valueOf(str.substring(start + 14, end));
 			}
 		}
-		
-		start = str.indexOf("id='");
+
+		start = str.indexOf(" id='");
 		if (start != -1) {
-			int end = str.indexOf("'", start + 4);
+			int end = str.indexOf("'", start + 5);
 			if (end != -1) {
-				id = Long.valueOf(str.substring(start+4, end));
+				id = Long.valueOf(str.substring(start + 5, end));
 			}
 		}
-		
+
 		Conference conf = new Conference(id);
 		conf.setChairman(chairman);
 		conf.setCreator(createor);

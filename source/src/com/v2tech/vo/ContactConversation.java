@@ -15,18 +15,6 @@ public class ContactConversation extends Conversation {
 		if (u != null) {
 			this.mExtId =u.getmUserId();
 			this.mType = TYPE_CONTACT;
-			this.mNotiFlag = NONE;
-		}
-	}
-	
-	
-	public ContactConversation(User u, int nofiFlag) {
-		super();
-		this.u = u;
-		if (u != null) {
-			this.mExtId =u.getmUserId();
-			this.mType = TYPE_CONTACT;
-			this.mNotiFlag = nofiFlag;
 		}
 	}
 	

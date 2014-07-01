@@ -133,8 +133,6 @@ public class ConversationView extends Activity {
 	private User local;
 	private User remote;
 
-	private Conversation mCurrentConv;
-
 	private ListView mMessagesContainer;
 
 	private LinearLayout mFaceLayout;
@@ -199,9 +197,9 @@ public class ConversationView extends Activity {
 
 		mFaceLayout = (LinearLayout) findViewById(R.id.contact_message_face_item_ly);
 
-		
-		ConversationNotificationObject cov = (ConversationNotificationObject) this.getIntent().getExtras().get("obj");
-		user1Id = this.getIntent().getLongExtra("user1id", 0);
+		ConversationNotificationObject cov = (ConversationNotificationObject) this
+				.getIntent().getExtras().get("obj");
+		user1Id = GlobalHolder.getInstance().getCurrentUserId();
 		if (cov.getType().equals(Conversation.TYPE_CONTACT)) {
 			user2Id = cov.getExtId();
 		} else if (cov.getType().equals(Conversation.TYPE_GROUP)) {
@@ -210,7 +208,10 @@ public class ConversationView extends Activity {
 
 		local = GlobalHolder.getInstance().getUser(user1Id);
 		remote = GlobalHolder.getInstance().getUser(user2Id);
-		
+		// If current conversation is group then user2 is null;
+		if (remote == null) {
+			remote = new User(user2Id);
+		}
 
 		HandlerThread thread = new HandlerThread("back-end");
 		thread.start();
@@ -225,25 +226,18 @@ public class ConversationView extends Activity {
 			backEndHandler = new BackendHandler(thread.getLooper());
 		}
 
-		if (groupId != 0) {
-			mCurrentConv = GlobalHolder.getInstance().findConversationByType(
-					Conversation.TYPE_GROUP, groupId);
-		} else {
-			mCurrentConv = GlobalHolder.getInstance().findConversationByType(
-					Conversation.TYPE_CONTACT, user2Id);
-		}
-		//Register listener for avatar changed
-		BitmapManager.getInstance().registerBitmapChangedListener(avatarChangedListener);
+		// Register listener for avatar changed
+		BitmapManager.getInstance().registerBitmapChangedListener(
+				avatarChangedListener);
 
 		IntentFilter filter = new IntentFilter();
 		filter.addAction(JNIService.JNI_BROADCAST_NEW_MESSAGE);
 		filter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
-		filter.setPriority(IntentFilter.SYSTEM_LOW_PRIORITY);
+		filter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
 		registerReceiver(receiver, filter);
 
-		if (mCurrentConv != null) {
-			notificateConversationUpdate();
-		}
+		notificateConversationUpdate();
+
 		// Start animation
 		this.overridePendingTransition(R.animator.nonam_scale_center_0_100,
 				R.animator.nonam_scale_null);
@@ -267,8 +261,6 @@ public class ConversationView extends Activity {
 		NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 		// mId allows you to update the notification later on.
 		mNotificationManager.cancel(PublicIntent.MESSAGE_NOTIFICATION_ID);
-		GlobalHolder.getInstance().CURRENT_CONVERSATION = mCurrentConv;
-		GlobalHolder.getInstance().CURRENT_ID = user2Id;
 		isStopped = false;
 	}
 
@@ -310,14 +302,13 @@ public class ConversationView extends Activity {
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
-		BitmapManager.getInstance().registerBitmapChangedListener(avatarChangedListener);
-		
+		BitmapManager.getInstance().registerBitmapChangedListener(
+				avatarChangedListener);
+
 		stopPlaying();
 		releasePlayer();
 		this.unregisterReceiver(receiver);
 		cleanCache();
-		GlobalHolder.getInstance().CURRENT_CONVERSATION = null;
-		GlobalHolder.getInstance().CURRENT_ID = 0;
 		V2Log.e("conversation view exited");
 	}
 
@@ -904,9 +895,11 @@ public class ConversationView extends Activity {
 		i.addCategory(PublicIntent.DEFAULT_CATEGORY);
 		ConversationNotificationObject obj = null;
 		if (groupId == 0) {
-			obj = new ConversationNotificationObject(Conversation.TYPE_CONTACT, user2Id);
+			obj = new ConversationNotificationObject(Conversation.TYPE_CONTACT,
+					user2Id);
 		} else {
-			obj = new ConversationNotificationObject(Conversation.TYPE_GROUP, groupId);
+			obj = new ConversationNotificationObject(Conversation.TYPE_GROUP,
+					groupId);
 		}
 		i.putExtra("obj", obj);
 		mContext.sendBroadcast(i);
@@ -1067,18 +1060,18 @@ public class ConversationView extends Activity {
 			return convertView;
 		}
 	};
-	
-	
+
 	private BitmapManager.BitmapChangedListener avatarChangedListener = new BitmapManager.BitmapChangedListener() {
 
 		@Override
 		public void notifyAvatarChanged(User user, Bitmap bm) {
-			if (user.getmUserId() == local.getmUserId() || user.getmUserId() == remote.getmUserId()) {
+			if (user.getmUserId() == local.getmUserId()
+					|| user.getmUserId() == remote.getmUserId()) {
 				adapter.notifyDataSetInvalidated();
 			}
-			
+
 		}
-		
+
 	};
 
 	private Runnable mUpdateMicStatusTimer = new Runnable() {
@@ -1099,13 +1092,11 @@ public class ConversationView extends Activity {
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			if (JNIService.JNI_BROADCAST_NEW_MESSAGE.equals(intent.getAction())) {
-				String strId = (String)intent.getExtras().get("mid");
-				if (strId != null) {
-					boolean result = queryAndAddMessage(Integer.parseInt(strId));
-					if (result) {
-						//abort send down broadcast
-						this.abortBroadcast();
-					}
+				boolean result = queryAndAddMessage((int) intent.getExtras()
+						.getLong("mid"));
+				if (result) {
+					// abort send down broadcast
+					this.abortBroadcast();
 				}
 			}
 		}

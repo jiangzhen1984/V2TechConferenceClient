@@ -11,7 +11,6 @@ public class ConferenceConversation extends Conversation {
 		if (g != null) {
 			super.mExtId = g.getmGId();
 			super.mType = TYPE_CONFERNECE;
-			super.mNotiFlag = NONE;
 		}
 	}
 

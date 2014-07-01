@@ -179,19 +179,6 @@
             android:windowSoftInputMode="stateHidden|adjustPan" >
         </activity>
 
-        <receiver android:name="com.v2tech.view.receiver.ConversationConvertReceiver" >
-            <intent-filter>
-                <action android:name="com.v2tech.jni.broadcast.new.message" />
-
-                <category android:name="com.v2tech.jni.broadcast" />
-
-                <action android:name="com.v2tech.request_update_conversation" />
-                <action android:name="com.v2tech.jni.broadcast.conference_invatition" />
-                <action android:name="com.v2tech.jni.broadcast.conference_removed" />
-
-                <category android:name="com.v2tech" />
-            </intent-filter>
-        </receiver>
         <receiver android:name="com.v2tech.view.receiver.AvatarChangedReceiver" >
             <intent-filter>
                 <action android:name="com.v2tech.jni.broadcast.user_avatar_notification" />

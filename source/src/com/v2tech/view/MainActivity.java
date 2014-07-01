@@ -29,7 +29,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.v2tech.R;
-import com.v2tech.service.GlobalHolder;
 import com.v2tech.util.V2Log;
 import com.v2tech.view.widget.TitleBar;
 import com.v2tech.vo.Conversation;
@@ -347,16 +346,7 @@ public class MainActivity extends FragmentActivity implements
 		} else if (type.equals(Conversation.TYPE_CONTACT)) {
 			noticator = mTabClasses[4].notificator;
 		}
-
-		V2Log.i("type:" + type + "  count:"
-				+ GlobalHolder.getInstance().getNoticatorCount(type));
-		if (noticator != null) {
-			if (GlobalHolder.getInstance().getNoticatorCount(type) > 0) {
-				noticator.setVisibility(View.VISIBLE);
-			} else {
-				noticator.setVisibility(View.GONE);
-			}
-		}
+		//TODO add to implement
 
 	}
 

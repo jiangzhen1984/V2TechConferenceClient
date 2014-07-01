@@ -15,7 +15,6 @@ import v2av.VideoRecorder;
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.NotificationManager;
-import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -64,9 +63,7 @@ import com.v2tech.service.ConferenceService;
 import com.v2tech.service.DocumentService;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.service.Registrant;
-import com.v2tech.service.jni.JNIResponse;
 import com.v2tech.service.jni.PermissionUpdateIndication;
-import com.v2tech.service.jni.RequestEnterConfResponse;
 import com.v2tech.util.V2Log;
 import com.v2tech.view.JNIService;
 import com.v2tech.view.PublicIntent;
@@ -80,7 +77,6 @@ import com.v2tech.vo.CameraConfiguration;
 import com.v2tech.vo.Conference;
 import com.v2tech.vo.ConferenceGroup;
 import com.v2tech.vo.ConferencePermission;
-import com.v2tech.vo.Conversation;
 import com.v2tech.vo.Group;
 import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.MixVideo;
@@ -105,9 +101,6 @@ public class VideoActivityV2 extends Activity {
 	private static final int REQUEST_CLOSE_DEVICE_RESPONSE = 5;
 	private static final int REQUEST_OPEN_OR_CLOSE_DEVICE = 6;
 	private static final int NOTIFICATION_KICKED = 7;
-	private static final int REQUEST_ENTER_CONF = 8;
-	private static final int REQUEST_ENTER_CONF_RESPONSE = 9;
-	private static final int REQUEST_EXIT_CONF = 10;
 	private static final int NOTIFY_USER_PERMISSION_UPDATED = 11;
 
 	private static final int ATTENDEE_DEVICE_LISTENER = 20;
@@ -149,7 +142,6 @@ public class VideoActivityV2 extends Activity {
 	private ImageView mSpeakerIV;
 	private PopupWindow mSettingWindow;
 	private Dialog mQuitDialog;
-	private ProgressDialog mWaitingDialog;
 	private VideoInvitionAttendeeLayout mInvitionContainer;
 	private VideoMsgChattingLayout mMessageContainer;
 	private VideoAttendeeListLayout mAttendeeContainer;
@@ -175,7 +167,6 @@ public class VideoActivityV2 extends Activity {
 
 	private ChatService cs = new ChatService();
 
-	private Long mGroupId;
 	private Set<Attendee> mAttendeeList = new HashSet<Attendee>();
 	private DocumentService ds = new DocumentService();
 
@@ -189,8 +180,6 @@ public class VideoActivityV2 extends Activity {
 	private List<VMessage> mPendingMessageList;
 
 	private List<PermissionUpdateIndication> mPendingPermissionUpdateList;
-
-	private boolean inFlag;
 
 	private Toast mToast;
 
@@ -267,9 +256,6 @@ public class VideoActivityV2 extends Activity {
 		// Initialize conference object and show local camera
 		init();
 
-		// Update main activity tab notificatior
-		notificateConversationUpdate();
-
 		// make sure local is in front of any view
 		localSurfaceViewLy.bringToFront();
 
@@ -277,18 +263,12 @@ public class VideoActivityV2 extends Activity {
 		this.overridePendingTransition(R.animator.nonam_scale_center_0_100,
 				R.animator.nonam_scale_null);
 
-		inFlag = this.getIntent().getExtras().getBoolean("in", false);
-
 	}
 
 	@Override
 	protected void onStart() {
 		super.onStart();
 
-		// If doesn't enter conference, then request
-		if (!inFlag) {
-			requestEnterConf();
-		}
 		suspendOrResume(true);
 
 		NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
@@ -347,26 +327,19 @@ public class VideoActivityV2 extends Activity {
 	}
 
 	private void init() {
-		mGroupId = this.getIntent().getLongExtra("gid", 0);
-		if (mGroupId <= 0) {
-			Toast.makeText(this, R.string.error_in_meeting_invalid_gid,
-					Toast.LENGTH_LONG).show();
-			return;
-		}
+		conf = (Conference) this.getIntent().getExtras().get("conf");
 
 		cg = (ConferenceGroup) GlobalHolder.getInstance().getGroupById(
-				GroupType.CONFERENCE, mGroupId);
+				GroupType.CONFERENCE, conf.getId());
 		if (cg == null) {
 			V2Log.e(" doesn't receive group information  yet");
 			return;
 		}
-		conf = new Conference(mGroupId, cg.getOwner(), cg.getName(),
-				cg.getCreateDate(), null, null);
-		conf.setChairman(cg.getChairManUId());
+		
 		mGroupNameTV.setText(cg.getName());
 
 		Group confGroup = GlobalHolder.getInstance().findGroupById(
-				this.mGroupId);
+				conf.getId());
 		// load conference attendee list
 		if (confGroup != null) {
 			List<User> l = new ArrayList<User>(confGroup.getUsers());
@@ -381,15 +354,7 @@ public class VideoActivityV2 extends Activity {
 		mPendingPermissionUpdateList = new ArrayList<PermissionUpdateIndication>();
 	}
 
-	private void notificateConversationUpdate() {
-		Intent i = new Intent(PublicIntent.REQUEST_UPDATE_CONVERSATION);
-		i.addCategory(PublicIntent.DEFAULT_CATEGORY);
-		i.putExtra("type", Conversation.TYPE_CONFERNECE);
-		i.putExtra("extId", this.mGroupId);
-		i.putExtra("noti", false);
-		mContext.sendBroadcast(i);
-	}
-
+	
 	/**
 	 * Update speaker icon and state
 	 * 
@@ -506,7 +471,7 @@ public class VideoActivityV2 extends Activity {
 				}
 			}
 			mDocContainer.updateCurrentDoc(mCurrentActivateDoc);
-			Group g = GlobalHolder.getInstance().findGroupById(mGroupId);
+			Group g = GlobalHolder.getInstance().findGroupById(conf.getId());
 			if (g != null && g instanceof ConferenceGroup) {
 				mDocContainer.updateSyncStatus(((ConferenceGroup) g).isSyn());
 			}
@@ -936,9 +901,9 @@ public class VideoActivityV2 extends Activity {
 			} else if (JNIService.JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION
 					.equals(intent.getAction())) {
 				long confID = intent.getLongExtra("gid", 0);
-				if (confID == mGroupId) {
+				if (confID == conf.getId()) {
 					Group confGroup = GlobalHolder.getInstance().findGroupById(
-							mGroupId);
+							conf.getId());
 					// load conference attendee list
 					if (confGroup != null) {
 						List<User> l = new ArrayList<User>(confGroup.getUsers());
@@ -1260,7 +1225,7 @@ public class VideoActivityV2 extends Activity {
 				public void onClick(View v) {
 					d.dismiss();
 					Intent i = new Intent();
-					i.putExtra("gid", mGroupId);
+					i.putExtra("gid", conf.getId());
 					setResult(0, i);
 					finish();
 				}
@@ -1322,9 +1287,6 @@ public class VideoActivityV2 extends Activity {
 	 * user quit conference, however positive or negative
 	 */
 	private void quit() {
-		if (mWaitingDialog != null) {
-			mWaitingDialog.dismiss();
-		}
 		for (SurfaceViewW sw : this.mCurrentShowedSV) {
 			Message.obtain(mVideoHandler, REQUEST_OPEN_OR_CLOSE_DEVICE, 0, 0,
 					sw.udc).sendToTarget();
@@ -1342,8 +1304,6 @@ public class VideoActivityV2 extends Activity {
 		VideoRecorder.VideoPreviewSurfaceHolder = null;
 		mAttendeeList.clear();
 		mCurrentShowedSV.clear();
-		Message.obtain(this.mVideoHandler, REQUEST_EXIT_CONF, this.mGroupId)
-				.sendToTarget();
 	}
 
 	@Override
@@ -1413,15 +1373,7 @@ public class VideoActivityV2 extends Activity {
 		mToast.show();
 	}
 
-	private void requestEnterConf() {
-		mWaitingDialog = ProgressDialog.show(
-				mContext,
-				"",
-				mContext.getResources().getString(
-						R.string.requesting_enter_conference), true);
-		Message.obtain(mVideoHandler, REQUEST_ENTER_CONF,
-				Long.valueOf(mGroupId)).sendToTarget();
-	}
+
 
 	/**
 	 * Handle event which user exited conference
@@ -1655,7 +1607,7 @@ public class VideoActivityV2 extends Activity {
 
 		@Override
 		public void requestSendMsg(VMessage vm) {
-			vm.setGroupId(mGroupId);
+			vm.setGroupId(conf.getId());
 			vm.setToUser(new User(0));
 			vm.setFromUser(GlobalHolder.getInstance().getCurrentUser());
 			vm.setMsgCode(VMessage.VMESSAGE_CODE_CONF);
@@ -1928,8 +1880,6 @@ public class VideoActivityV2 extends Activity {
 			switch (msg.what) {
 			case ONLY_SHOW_LOCAL_VIDEO:
 				// make sure local view is first front of all;
-				mLocalSurface.setZOrderOnTop(true);
-				localSurfaceViewLy.bringToFront();
 				showOrCloseLocalSurViewOnly();
 				break;
 			case REQUEST_OPEN_DEVICE_RESPONSE:
@@ -2005,48 +1955,7 @@ public class VideoActivityV2 extends Activity {
 				finish();
 			}
 				break;
-			case REQUEST_ENTER_CONF:
-				cb.requestEnterConference(new Conference((Long) msg.obj),
-						new Registrant(this, REQUEST_ENTER_CONF_RESPONSE, null));
-				break;
-			case REQUEST_ENTER_CONF_RESPONSE:
-				JNIResponse recr = (JNIResponse) msg.obj;
-				if (recr.getResult() == JNIResponse.Result.SUCCESS) {
-					Conference c = ((RequestEnterConfResponse) recr).getConf();
-					conf.setChairman(c.getChairman());
-					// set enter flag to true
-					inFlag = true;
-					// Request grant speaking permission
-					// If chair man is current user, then automatically apply
-					// speaking
-					if (c.getChairman() == GlobalHolder.getInstance()
-							.getCurrentUserId()) {
-						doApplyOrReleaseSpeak();
-					}
-				} else if (recr.getResult() == RequestEnterConfResponse.Result.TIME_OUT) {
-					Toast.makeText(mContext,
-							R.string.error_request_enter_conference_time_out,
-							Toast.LENGTH_SHORT).show();
-				} else {
-					Toast.makeText(mContext,
-							R.string.error_request_enter_conference,
-							Toast.LENGTH_SHORT).show();
-				}
-				// Do quit when login time out
-				if (!inFlag) {
-					// Do quit action
-					quit();
-					finish();
-				}
-
-				if (mWaitingDialog != null && mWaitingDialog.isShowing()) {
-					mWaitingDialog.dismiss();
-
-				}
-				break;
-			case REQUEST_EXIT_CONF:
-				cb.requestExitConference(new Conference((Long) msg.obj), null);
-				break;
+		
 			// user permission updated
 			case NOTIFY_USER_PERMISSION_UPDATED:
 				PermissionUpdateIndication ind = (PermissionUpdateIndication) msg.obj;

@@ -1,15 +1,8 @@
 package com.v2tech.view.conference;
 
-import java.util.List;
-
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.drawable.Drawable;
 import android.os.Handler;
-import android.text.Spannable;
-import android.text.SpannableStringBuilder;
-import android.text.style.ImageSpan;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,18 +12,12 @@ import android.widget.TextView;
 
 import com.v2tech.R;
 import com.v2tech.service.GlobalHolder;
-import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.MessageUtil;
-import com.v2tech.view.PublicIntent;
-import com.v2tech.view.bo.ConversationNotificationObject;
 import com.v2tech.view.conversation.MessageLoader;
 import com.v2tech.vo.ConferenceConversation;
 import com.v2tech.vo.ContactConversation;
 import com.v2tech.vo.Conversation;
 import com.v2tech.vo.VMessage;
-import com.v2tech.vo.VMessageAbstractItem;
-import com.v2tech.vo.VMessageFaceItem;
-import com.v2tech.vo.VMessageTextItem;
 
 public class GroupLayout extends LinearLayout {
 
@@ -57,7 +44,7 @@ public class GroupLayout extends LinearLayout {
 	}
 
 	private void init() {
-		View view = LayoutInflater.from(super.getContext()).inflate(
+		View view = LayoutInflater.from(getContext()).inflate(
 				R.layout.conversation_view, null, false);
 
 		mGroupIV = (ImageView) view
@@ -80,30 +67,13 @@ public class GroupLayout extends LinearLayout {
 			} else {
 				mGroupIV.setImageResource(R.drawable.avatar);
 			}
-			this.setOnClickListener(new OnClickListener() {
-
-				@Override
-				public void onClick(View arg0) {
-
-					Intent i = new Intent(
-							PublicIntent.START_CONVERSACTION_ACTIVITY);
-					i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-					i.putExtra("obj",new ConversationNotificationObject(mConv));
-					i.addCategory(PublicIntent.DEFAULT_CATEGORY);
-					getContext().startActivity(i);
-					mNotificatorIV.setVisibility(View.GONE);
-				}
-
-			});
 		} else if (mConv.getType().equals(Conversation.TYPE_CONFERNECE)
 				) {
 			if ( ((ConferenceConversation) mConv).getGroup().getOwner() != GlobalHolder
 						.getInstance().getCurrentUserId())
 			mGroupIV.setImageResource(R.drawable.conference_icon);
 		}
-		if (this.mConv.getNotiFlag() == Conversation.NOTIFICATION) {
-			mNotificatorIV.setVisibility(View.VISIBLE);
-		}
+
 		mGroupNameTV.setText(this.mConv.getName());
 		mGroupOwnerTV.setText(mConv.getMsg());
 		mGroupDateTV.setText(mConv.getDate());
@@ -123,7 +93,7 @@ public class GroupLayout extends LinearLayout {
 
 		if (this.mConv instanceof ContactConversation) {
 			if (content != null) {
-				((ContactConversation) mConv).setMsg(content.toString());
+				((ContactConversation) mConv).setMsg(content);
 			}
 			if (date != null) {
 				((ContactConversation) mConv).setDate(date);
