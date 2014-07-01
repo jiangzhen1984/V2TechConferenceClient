@@ -25,23 +25,7 @@ public class P2PConversation extends Activity implements TurnListener,
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_p2p_conversation);
-
-		long uid = getIntent().getExtras().getLong("uid");
-		boolean mIsInComingCall = getIntent().getExtras().getBoolean(
-				"is_coming_call");
-		boolean mIsVoiceCall = getIntent().getExtras().getBoolean("voice");
-		String deviceId = getIntent().getExtras().getString("device");
-		User u = GlobalHolder.getInstance().getUser(uid);
-
-		int flag = mIsVoiceCall ? UserChattingObject.VOICE_CALL
-				: UserChattingObject.VIDEO_CALL;
-		if (mIsInComingCall) {
-			flag |= UserChattingObject.INCOMING_CALL;
-		} else {
-			flag |= UserChattingObject.OUTING_CALL;
-		}
-		uad = new UserChattingObject(u, flag, deviceId);
-
+		buildObject();
 		Fragment fragment1 = new ConversationWaitingFragment();
 		FragmentTransaction transaction = getFragmentManager()
 				.beginTransaction();
@@ -63,6 +47,9 @@ public class P2PConversation extends Activity implements TurnListener,
 
 	@Override
 	public UserChattingObject getObject() {
+		if (uad == null) {
+			buildObject();
+		}
 		return uad;
 	}
 
@@ -101,6 +88,25 @@ public class P2PConversation extends Activity implements TurnListener,
 	@Override
 	public void onBackPressed() {
 		finish();
+	}
+
+	private UserChattingObject buildObject() {
+		long uid = getIntent().getExtras().getLong("uid");
+		boolean mIsInComingCall = getIntent().getExtras().getBoolean(
+				"is_coming_call");
+		boolean mIsVoiceCall = getIntent().getExtras().getBoolean("voice");
+		String deviceId = getIntent().getExtras().getString("device");
+		User u = GlobalHolder.getInstance().getUser(uid);
+
+		int flag = mIsVoiceCall ? UserChattingObject.VOICE_CALL
+				: UserChattingObject.VIDEO_CALL;
+		if (mIsInComingCall) {
+			flag |= UserChattingObject.INCOMING_CALL;
+		} else {
+			flag |= UserChattingObject.OUTING_CALL;
+		}
+		uad = new UserChattingObject(u, flag, deviceId);
+		return uad;
 	}
 
 }

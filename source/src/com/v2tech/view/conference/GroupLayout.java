@@ -22,6 +22,7 @@ import com.v2tech.service.GlobalHolder;
 import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.MessageUtil;
 import com.v2tech.view.PublicIntent;
+import com.v2tech.view.bo.ConversationNotificationObject;
 import com.v2tech.view.conversation.MessageLoader;
 import com.v2tech.vo.ConferenceConversation;
 import com.v2tech.vo.ContactConversation;
@@ -87,10 +88,7 @@ public class GroupLayout extends LinearLayout {
 					Intent i = new Intent(
 							PublicIntent.START_CONVERSACTION_ACTIVITY);
 					i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-					i.putExtra("user1id", GlobalHolder.getInstance()
-							.getCurrentUserId());
-					i.putExtra("user2id", mConv.getExtId());
-					i.putExtra("user2Name", mConv.getName());
+					i.putExtra("obj",new ConversationNotificationObject(mConv));
 					i.addCategory(PublicIntent.DEFAULT_CATEGORY);
 					getContext().startActivity(i);
 					mNotificatorIV.setVisibility(View.GONE);

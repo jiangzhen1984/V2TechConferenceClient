@@ -50,7 +50,6 @@ public class ConversationWaitingFragment extends Fragment {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		uad = mIndicator.getObject();
 		// If is outing call, send invitation request
 		if (!uad.isIncoming()) {
 			chat.inviteUserChat(uad, new Registrant(mLocalHandler,
@@ -123,6 +122,15 @@ public class ConversationWaitingFragment extends Fragment {
 		mIndicator = (TurnListener) activity;
 		chat.registerCancelledListener(mLocalHandler, CANCELLED_NOTIFICATION,
 				null);
+		uad = mIndicator.getObject();
+	}
+	
+	
+
+	@Override
+	public void onStop() {
+		super.onStop();
+		stopRingTone();
 	}
 
 	@Override
@@ -131,7 +139,6 @@ public class ConversationWaitingFragment extends Fragment {
 		mIndicator = null;
 		chat.removeRegisterCancelledListener(mLocalHandler,
 				CANCELLED_NOTIFICATION, null);
-		stopRingTone();
 	}
 
 	public void quit() {

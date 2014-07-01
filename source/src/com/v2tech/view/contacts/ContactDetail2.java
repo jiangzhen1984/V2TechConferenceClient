@@ -20,7 +20,9 @@ import com.v2tech.service.GlobalHolder;
 import com.v2tech.service.Registrant;
 import com.v2tech.service.UserService;
 import com.v2tech.view.PublicIntent;
+import com.v2tech.view.bo.ConversationNotificationObject;
 import com.v2tech.vo.Group.GroupType;
+import com.v2tech.vo.Conversation;
 import com.v2tech.vo.User;
 
 public class ContactDetail2 extends Activity implements OnTouchListener {
@@ -189,9 +191,7 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 		public void onClick(View arg0) {
 
 			Intent i = new Intent(PublicIntent.START_CONVERSACTION_ACTIVITY);
-			i.putExtra("user1id", GlobalHolder.getInstance().getCurrentUserId());
-			i.putExtra("user2id", u.getmUserId());
-			i.putExtra("user2Name", u.getName());
+			i.putExtra("obj", new ConversationNotificationObject(Conversation.TYPE_CONTACT, u.getmUserId()));
 			i.addCategory(PublicIntent.DEFAULT_CATEGORY);
 			mContext.startActivity(i);
 		}

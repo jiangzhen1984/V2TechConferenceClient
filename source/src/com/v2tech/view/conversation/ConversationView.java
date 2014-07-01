@@ -58,6 +58,7 @@ import com.v2tech.util.V2Log;
 import com.v2tech.view.JNIService;
 import com.v2tech.view.PublicIntent;
 import com.v2tech.view.adapter.VMessageAdater;
+import com.v2tech.view.bo.ConversationNotificationObject;
 import com.v2tech.view.contacts.ContactDetail;
 import com.v2tech.view.widget.CommonAdapter;
 import com.v2tech.view.widget.CommonAdapter.CommonAdapterItemWrapper;
@@ -76,7 +77,7 @@ public class ConversationView extends Activity {
 	private final int END_LOAD_MESSAGE = 3;
 	private final int SEND_MESSAGE = 4;
 	private final int SEND_MESSAGE_DONE = 5;
-	private final int QUERY_NEW_MESSAGE = 6;
+	private final int SEND_MESSAGE_ERROR = 6;
 
 	private final int BATCH_COUNT = 10;
 
@@ -87,8 +88,6 @@ public class ConversationView extends Activity {
 	private long user2Id;
 
 	private long groupId;
-
-	private String user2Name;
 
 	private LocalHandler lh;
 
@@ -200,16 +199,18 @@ public class ConversationView extends Activity {
 
 		mFaceLayout = (LinearLayout) findViewById(R.id.contact_message_face_item_ly);
 
+		
+		ConversationNotificationObject cov = (ConversationNotificationObject) this.getIntent().getExtras().get("obj");
 		user1Id = this.getIntent().getLongExtra("user1id", 0);
-		user2Id = this.getIntent().getLongExtra("user2id", 0);
-		groupId = this.getIntent().getLongExtra("gid", 0);
-		user2Name = this.getIntent().getStringExtra("user2Name");
+		if (cov.getType().equals(Conversation.TYPE_CONTACT)) {
+			user2Id = cov.getExtId();
+		} else if (cov.getType().equals(Conversation.TYPE_GROUP)) {
+			groupId = cov.getExtId();
+		}
 
 		local = GlobalHolder.getInstance().getUser(user1Id);
 		remote = GlobalHolder.getInstance().getUser(user2Id);
-		if (remote != null && remote.getName() != null) {
-			user2Name = remote.getName();
-		}
+		
 
 		HandlerThread thread = new HandlerThread("back-end");
 		thread.start();
@@ -237,6 +238,7 @@ public class ConversationView extends Activity {
 		IntentFilter filter = new IntentFilter();
 		filter.addAction(JNIService.JNI_BROADCAST_NEW_MESSAGE);
 		filter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
+		filter.setPriority(IntentFilter.SYSTEM_LOW_PRIORITY);
 		registerReceiver(receiver, filter);
 
 		if (mCurrentConv != null) {
@@ -260,7 +262,7 @@ public class ConversationView extends Activity {
 			Toast.makeText(this, R.string.error_contact_messag_invalid_user_id,
 					Toast.LENGTH_SHORT).show();
 		}
-		mUserTitleTV.setText(user2Name);
+		mUserTitleTV.setText(remote.getName());
 
 		NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 		// mId allows you to update the notification later on.
@@ -900,14 +902,13 @@ public class ConversationView extends Activity {
 	private void notificateConversationUpdate() {
 		Intent i = new Intent(PublicIntent.REQUEST_UPDATE_CONVERSATION);
 		i.addCategory(PublicIntent.DEFAULT_CATEGORY);
+		ConversationNotificationObject obj = null;
 		if (groupId == 0) {
-			i.putExtra("extId", user2Id);
-			i.putExtra("type", Conversation.TYPE_CONTACT);
+			obj = new ConversationNotificationObject(Conversation.TYPE_CONTACT, user2Id);
 		} else {
-			i.putExtra("type", Conversation.TYPE_GROUP);
-			i.putExtra("extId", groupId);
+			obj = new ConversationNotificationObject(Conversation.TYPE_GROUP, groupId);
 		}
-		i.putExtra("noti", false);
+		i.putExtra("obj", obj);
 		mContext.sendBroadcast(i);
 	}
 
@@ -1000,12 +1001,12 @@ public class ConversationView extends Activity {
 
 	private boolean pending = false;
 
-	private void queryAndAddMessage(final int msgId) {
+	private boolean queryAndAddMessage(final int msgId) {
 
 		VMessage m = MessageLoader.loadMessageById(mContext, msgId);
 		if (m == null || m.getFromUser().getmUserId() != this.user2Id
 				|| m.getGroupId() != this.groupId) {
-			return;
+			return false;
 		}
 		MessageBodyView mv = new MessageBodyView(this, m, true);
 
@@ -1017,6 +1018,7 @@ public class ConversationView extends Activity {
 				pending = true;
 			}
 		}
+		return true;
 	}
 
 	private OnTouchListener mHiddenOnTouchListener = new OnTouchListener() {
@@ -1097,8 +1099,14 @@ public class ConversationView extends Activity {
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			if (JNIService.JNI_BROADCAST_NEW_MESSAGE.equals(intent.getAction())) {
-				Message.obtain(lh, QUERY_NEW_MESSAGE,
-						intent.getExtras().get("mid")).sendToTarget();
+				String strId = (String)intent.getExtras().get("mid");
+				if (strId != null) {
+					boolean result = queryAndAddMessage(Integer.parseInt(strId));
+					if (result) {
+						//abort send down broadcast
+						this.abortBroadcast();
+					}
+				}
 			}
 		}
 
@@ -1148,15 +1156,10 @@ public class ConversationView extends Activity {
 				isLoading = false;
 				break;
 			case SEND_MESSAGE:
-
 				mChat.sendVMessage((VMessage) msg.obj, new Registrant(this,
 						SEND_MESSAGE_DONE, null));
 				break;
-			case QUERY_NEW_MESSAGE:
-				if (msg.obj == null || "".equals(msg.obj.toString())) {
-					break;
-				}
-				queryAndAddMessage(Integer.parseInt(msg.obj.toString()));
+			case SEND_MESSAGE_ERROR:
 				break;
 			}
 		}

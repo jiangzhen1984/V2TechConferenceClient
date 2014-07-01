@@ -46,6 +46,7 @@ import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.Notificator;
 import com.v2tech.util.V2Log;
 import com.v2tech.util.XmlParser;
+import com.v2tech.view.bo.ConversationNotificationObject;
 import com.v2tech.view.bo.GroupUserObject;
 import com.v2tech.view.bo.UserAvatarObject;
 import com.v2tech.view.bo.UserStatusObject;
@@ -117,7 +118,7 @@ public class JNIService extends Service {
 	private ChatRequestCB mChRCB;
 
 	private ConfRequestCB mCRCB;
-	
+
 	private AudioRequestCB mARCB;
 
 	// ////////////////////////////////////////
@@ -165,7 +166,7 @@ public class JNIService extends Service {
 
 		mCRCB = new ConfRequestCB(mCallbackHandler);
 		ConfRequest.getInstance().addCallback(mCRCB);
-		
+
 		mARCB = new AudioRequestCB();
 		AudioRequest.getInstance().addCallback(mARCB);
 	}
@@ -370,7 +371,9 @@ public class JNIService extends Service {
 					ii.addCategory(JNI_BROADCAST_CATEGROY);
 					ii.putExtra("mid", vm.getId());
 					ii.putExtra("gm", vm.getGroupId() != 0);
-					mContext.sendBroadcast(ii);
+					// Send ordered broadcast, make sure conversationview
+					// receive message first
+					mContext.sendOrderedBroadcast(ii, null);
 				}
 				break;
 			case JNI_RECEIVED_VIDEO_INVITION:
@@ -381,7 +384,8 @@ public class JNIService extends Service {
 				iv.putExtra("uid", ((VideoInvitionWrapper) msg.obj).nFromUserID);
 				iv.putExtra("is_coming_call", true);
 				iv.putExtra("voice", false);
-				iv.putExtra("device", ((VideoInvitionWrapper) msg.obj).szDeviceID);
+				iv.putExtra("device",
+						((VideoInvitionWrapper) msg.obj).szDeviceID);
 				mContext.startActivity(iv);
 				break;
 
@@ -433,17 +437,22 @@ public class JNIService extends Service {
 				String textContent = vm.getAllTextContent();
 				builder.setContentText(textContent);
 			}
-			
 
 			Intent resultIntent = new Intent(
 					PublicIntent.START_CONVERSACTION_ACTIVITY);
 
-			resultIntent.putExtra("gid", vm.getGroupId());
-			resultIntent.putExtra("user1id", GlobalHolder.getInstance()
-					.getCurrentUserId());
 			resultIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-			resultIntent.putExtra("user2id", vm.getFromUser().getmUserId());
-			resultIntent.putExtra("user2Name", vm.getFromUser().getName());
+			if (vm.getGroupId() != 0) {
+				resultIntent.putExtra("obj",
+						new ConversationNotificationObject(
+								Conversation.TYPE_GROUP, vm.getFromUser()
+										.getmUserId()));
+			} else {
+				resultIntent.putExtra("obj",
+						new ConversationNotificationObject(
+								Conversation.TYPE_CONTACT, vm.getFromUser()
+										.getmUserId()));
+			}
 			resultIntent.addCategory(PublicIntent.DEFAULT_CATEGORY);
 
 			// Creates the PendingIntent
@@ -722,8 +731,7 @@ public class JNIService extends Service {
 		}
 
 	}
-	
-	
+
 	class AudioRequestCB implements AudioRequestCallback {
 
 		@Override
@@ -737,29 +745,27 @@ public class JNIService extends Service {
 			iv.putExtra("is_coming_call", true);
 			iv.putExtra("voice", true);
 			mContext.startActivity(iv);
-			
+
 		}
 
 		@Override
 		public void OnAudioChatAccepted(long nGroupID, long nBusinessType,
 				long nFromUserID) {
-			
+
 		}
 
 		@Override
 		public void OnAudioChatRefused(long nGroupID, long nBusinessType,
 				long nFromUserID) {
-			
+
 		}
 
 		@Override
 		public void OnAudioChatClosed(long nGroupID, long nBusinessType,
 				long nFromUserID) {
-			
+
 		}
-		
-		
-		
+
 	}
 
 	class VideoRequestCB implements VideoRequestCallback {
@@ -801,24 +807,20 @@ public class JNIService extends Service {
 		@Override
 		public void OnVideoChatAccepted(long nGroupID, int nBusinessType,
 				long nFromuserID, String szDeviceID) {
-			
+
 		}
 
 		@Override
 		public void OnVideoChatRefused(long nGroupID, int nBusinessType,
 				long nFromUserID, String szDeviceID) {
-			
+
 		}
 
 		@Override
 		public void OnVideoChatClosed(long nGroupID, int nBusinessType,
 				long nFromUserID, String szDeviceID) {
-			
+
 		}
-		
-		
-		
-		
 
 	}
 
@@ -1037,9 +1039,9 @@ public class JNIService extends Service {
 			if (vm != null) {
 				vm.setGroupId(gid);
 				Message.obtain(mCallbackHandler, JNI_RECEIVED_MESSAGE, vm)
-				.sendToTarget();
+						.sendToTarget();
 			} else {
-				V2Log.e(" Didn't find audio item : "+messageId);
+				V2Log.e(" Didn't find audio item : " + messageId);
 			}
 
 		}

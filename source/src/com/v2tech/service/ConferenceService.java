@@ -113,7 +113,7 @@ public class ConferenceService extends AbstractHandler {
 	 * @param conf
 	 *            {@link Conference} object which user wants to enter
 	 * @param caller
-	 *            if input is null, ignore response Message.object is
+	 *            if input is null, ignore response. Message.object is
 	 *            {@link com.v2tech.service.jni.RequestEnterConfResponse}
 	 * 
 	 * @see com.v2tech.service.jni.RequestEnterConfResponse

@@ -1,5 +1,6 @@
 package com.v2tech.view;
 
+
 public class PublicIntent {
 
 	public static final String TAG_CONTACT = "contacts";
@@ -32,6 +33,9 @@ public class PublicIntent {
 
 	public static final String UPDATE_CONVERSATION = "com.v2tech.update_conversation";
 
+	/**
+	 * extras key: obj  value: {@link com.v2tech.view.bo.ConversationNotificationObject}
+	 */
 	public static final String REQUEST_UPDATE_CONVERSATION = "com.v2tech.request_update_conversation";
 
 	public static final String FINISH_APPLICATION = "com.v2tech.finish_application";

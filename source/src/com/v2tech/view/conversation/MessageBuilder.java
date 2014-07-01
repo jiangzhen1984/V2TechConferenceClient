@@ -44,7 +44,7 @@ public class MessageBuilder {
 	}
 
 	public static Uri saveMessage(Context context, VMessage vm) {
-		if (vm == null) {
+		if (vm == null || vm.getFromUser() == null || vm.getToUser() ==null) {
 			return null;
 		}
 		ContentValues values = new ContentValues();

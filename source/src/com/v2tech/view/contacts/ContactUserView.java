@@ -18,6 +18,8 @@ import android.widget.TextView;
 import com.v2tech.R;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.view.PublicIntent;
+import com.v2tech.view.bo.ConversationNotificationObject;
+import com.v2tech.vo.Conversation;
 import com.v2tech.vo.User;
 
 public class ContactUserView extends LinearLayout {
@@ -176,9 +178,7 @@ public class ContactUserView extends LinearLayout {
 			i.setAction(PublicIntent.START_CONVERSACTION_ACTIVITY);
 			i.addCategory(PublicIntent.DEFAULT_CATEGORY);
 			i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-			i.putExtra("user1id", GlobalHolder.getInstance().getCurrentUserId());
-			i.putExtra("user2id", this.mUser.getmUserId());
-			i.putExtra("user2Name", this.mUser.getName());
+			i.putExtra("obj", new ConversationNotificationObject(Conversation.TYPE_CONTACT, this.mUser.getmUserId()));
 			break;
 		case ACTION_TYPE_VIEW_DETAIL:
 			i.setClass(this.getContext(), ContactDetail.class);
