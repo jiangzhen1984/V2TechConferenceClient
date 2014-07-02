@@ -281,6 +281,19 @@ public class VideoActivityV2 extends Activity {
 		adjustContentLayout();
 	}
 
+	@Override
+	protected void onNewIntent(Intent intent) {
+		super.onNewIntent(intent);
+		Conference newConf = (Conference) intent.getExtras().get("conf");
+		if (newConf != null && newConf.getId() != conf.getId()) {
+			// Pop up dialog to exit conference
+			showQuitDialog(mContext
+					.getText(R.string.in_meeting_quit_text_for_new).toString()
+					.replace("[]", conf.getName()));
+		}
+
+	}
+
 	private void initConfsListener() {
 		IntentFilter filter = new IntentFilter();
 		filter.addCategory(JNI_EVENT_VIDEO_CATEGORY);
@@ -335,11 +348,10 @@ public class VideoActivityV2 extends Activity {
 			V2Log.e(" doesn't receive group information  yet");
 			return;
 		}
-		
 		mGroupNameTV.setText(cg.getName());
 
-		Group confGroup = GlobalHolder.getInstance().findGroupById(
-				conf.getId());
+		Group confGroup = GlobalHolder.getInstance()
+				.findGroupById(conf.getId());
 		// load conference attendee list
 		if (confGroup != null) {
 			List<User> l = new ArrayList<User>(confGroup.getUsers());
@@ -354,7 +366,6 @@ public class VideoActivityV2 extends Activity {
 		mPendingPermissionUpdateList = new ArrayList<PermissionUpdateIndication>();
 	}
 
-	
 	/**
 	 * Update speaker icon and state
 	 * 
@@ -671,27 +682,26 @@ public class VideoActivityV2 extends Activity {
 			requestSubViewRestore();
 			if (v.getTag().equals("msg")) {
 				content = initMsgLayout();
-				//If last state is fixed 
+				// If last state is fixed
 				if (mMessageContainer.getWindowSizeState()) {
 					requestSubViewFixed();
 				}
 
 			} else if (v.getTag().equals("attendee")) {
 				content = initAttendeeContainer();
-				//If last state is fixed 
+				// If last state is fixed
 				if (mAttendeeContainer.getWindowSizeState()) {
 					requestSubViewFixed();
 				}
 
 			} else if (v.getTag().equals("doc")) {
 				content = initDocLayout();
-				
+
 				if (mDocContainer.isFullScreenSize()) {
 					requestSubViewFillScreen();
 				} else {
 					requestSubViewFixed();
 				}
-				
 
 			} else if (v.getTag().equals("invition")) {
 				if (cg.isCanInvitation()) {
@@ -743,7 +753,8 @@ public class VideoActivityV2 extends Activity {
 	private OnClickListener mShowQuitWindowListener = new OnClickListener() {
 		@Override
 		public void onClick(View view) {
-			showQuitDialog();
+			showQuitDialog(mContext.getText(R.string.in_meeting_quit_text)
+					.toString());
 		}
 	};
 
@@ -1204,7 +1215,7 @@ public class VideoActivityV2 extends Activity {
 		}
 	}
 
-	private void showQuitDialog() {
+	private void showQuitDialog(String content) {
 		if (mQuitDialog == null) {
 
 			final Dialog d = new Dialog(mContext, R.style.InMeetingQuitDialog);
@@ -1234,6 +1245,10 @@ public class VideoActivityV2 extends Activity {
 			mQuitDialog = d;
 		}
 
+		TextView v = (TextView) mQuitDialog
+				.findViewById(R.id.in_meeting_quit_window_content);
+		v.setText(content);
+
 		mQuitDialog.show();
 	}
 
@@ -1242,7 +1257,8 @@ public class VideoActivityV2 extends Activity {
 	 */
 	private void doReverseCamera() {
 
-		boolean flag = VideoCaptureDevInfo.CreateVideoCaptureDevInfo().reverseCamera();
+		boolean flag = VideoCaptureDevInfo.CreateVideoCaptureDevInfo()
+				.reverseCamera();
 		if (flag) {
 			cb.updateCameraParameters(new CameraConfiguration(""), null);
 		}
@@ -1309,7 +1325,8 @@ public class VideoActivityV2 extends Activity {
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		if (keyCode == KeyEvent.KEYCODE_BACK) {
-			showQuitDialog();
+			showQuitDialog(mContext.getText(R.string.in_meeting_quit_text)
+					.toString());
 			return true;
 		}
 		return super.onKeyDown(keyCode, event);
@@ -1372,8 +1389,6 @@ public class VideoActivityV2 extends Activity {
 		mToast = Toast.makeText(mContext, text, Toast.LENGTH_SHORT);
 		mToast.show();
 	}
-
-
 
 	/**
 	 * Handle event which user exited conference
@@ -1738,7 +1753,7 @@ public class VideoActivityV2 extends Activity {
 		@Override
 		public void requestDocViewRestore(View v) {
 			requestSubViewRestore();
-			//Request fixed size for doc layout
+			// Request fixed size for doc layout
 			requestSubViewFixed();
 			adjustContentLayout();
 
@@ -1955,7 +1970,7 @@ public class VideoActivityV2 extends Activity {
 				finish();
 			}
 				break;
-		
+
 			// user permission updated
 			case NOTIFY_USER_PERMISSION_UPDATED:
 				PermissionUpdateIndication ind = (PermissionUpdateIndication) msg.obj;

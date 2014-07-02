@@ -267,7 +267,6 @@ public class MainActivity extends FragmentActivity implements
 
 	private void initReceiver() {
 		IntentFilter filter = new IntentFilter();
-		filter.addAction(PublicIntent.UPDATE_CONVERSATION);
 		filter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
 		filter.addCategory(PublicIntent.DEFAULT_CATEGORY);
 		filter.addAction(PublicIntent.FINISH_APPLICATION);
@@ -336,7 +335,7 @@ public class MainActivity extends FragmentActivity implements
 		V2Log.d("system destroyed v2tech");
 	}
 
-	public void updateNotificator(String type) {
+	public void updateNotificator(String type, boolean flag) {
 
 		View noticator = null;
 		if (type.equals(Conversation.TYPE_GROUP)) {
@@ -346,8 +345,12 @@ public class MainActivity extends FragmentActivity implements
 		} else if (type.equals(Conversation.TYPE_CONTACT)) {
 			noticator = mTabClasses[4].notificator;
 		}
-		//TODO add to implement
-
+		
+		if (flag) {
+			noticator.setVisibility(View.VISIBLE);
+		} else {
+			noticator.setVisibility(View.GONE);
+		}
 	}
 
 	private TextWatcher searchTextWatcher = new TextWatcher() {
@@ -491,10 +494,7 @@ public class MainActivity extends FragmentActivity implements
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			String action = intent.getAction();
-			if (PublicIntent.UPDATE_CONVERSATION.equals(action)) {
-				String type = intent.getExtras().getString("type");
-				updateNotificator(type);
-			} else if (PublicIntent.FINISH_APPLICATION.equals(action)) {
+			if (PublicIntent.FINISH_APPLICATION.equals(action)) {
 				exitedFlag = true;
 				requestQuit();
 			} else if (JNIService.JNI_BROADCAST_CONNECT_STATE_NOTIFICATION

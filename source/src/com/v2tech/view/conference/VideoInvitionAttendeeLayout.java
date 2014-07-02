@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Set;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.AsyncTask;
 import android.os.Handler;
@@ -32,11 +31,7 @@ import android.widget.TextView;
 
 import com.v2tech.R;
 import com.v2tech.service.GlobalHolder;
-import com.v2tech.service.jni.JNIResponse;
-import com.v2tech.service.jni.RequestConfCreateResponse;
-import com.v2tech.view.PublicIntent;
 import com.v2tech.vo.Conference;
-import com.v2tech.vo.ConferenceGroup;
 import com.v2tech.vo.Group;
 import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.User;
@@ -46,7 +41,6 @@ public class VideoInvitionAttendeeLayout extends LinearLayout {
 	private static final int UPDATE_LIST_VIEW = 1;
 	private static final int UPDATE_ATTENDEES = 2;
 	private static final int UPDATE_SEARCHED_USER_LIST = 3;
-	private static final int CREATE_CONFERENC_RESP = 4;
 
 	private static final int PAD_LAYOUT = 1;
 	private static final int PHONE_LAYOUT = 0;
@@ -519,29 +513,6 @@ public class VideoInvitionAttendeeLayout extends LinearLayout {
 				break;
 			case UPDATE_SEARCHED_USER_LIST:
 				updateSearchedUserList((List<User>) msg.obj);
-				break;
-			case CREATE_CONFERENC_RESP:
-				JNIResponse rccr = (JNIResponse) msg.obj;
-				if (rccr.getResult() != JNIResponse.Result.SUCCESS) {
-					mErrorNotificationLayout.setVisibility(View.VISIBLE);
-					break;
-				}
-				User currU = GlobalHolder.getInstance().getCurrentUser();
-				ConferenceGroup g = new ConferenceGroup(
-						((RequestConfCreateResponse) rccr).getConfId(),
-						GroupType.CONFERENCE, conf.getName(),
-						currU.getmUserId() + "", conf.getDate().getTime()
-								/ 1000 + "", currU.getmUserId());
-				g.setOwnerUser(currU);
-				g.setChairManUId(currU.getmUserId());
-				g.addUserToGroup(new ArrayList<User>(mAttendeeList));
-				GlobalHolder.getInstance().addGroupToList(GroupType.CONFERENCE,
-						g);
-				Intent i = new Intent();
-				i.putExtra("newGid", g.getmGId());
-				i.setAction(PublicIntent.BROADCAST_NEW_CONFERENCE_NOTIFICATION);
-				i.addCategory(PublicIntent.DEFAULT_CATEGORY);
-				mContext.sendBroadcast(i);
 				break;
 			}
 		}

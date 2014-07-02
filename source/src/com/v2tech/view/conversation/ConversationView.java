@@ -548,9 +548,12 @@ public class ConversationView extends Activity {
 
 	};
 
+	
+	private boolean voiceIsSentByTimer;
+	private String fileName = null;
+	private long starttime = 0;
+	
 	private OnTouchListener mButtonHolderListener = new OnTouchListener() {
-		private String fileName = null;
-		private long starttime = 0;
 
 		@Override
 		public boolean onTouch(View view, MotionEvent event) {
@@ -564,7 +567,10 @@ public class ConversationView extends Activity {
 				}
 				// Start update db for voice
 				lh.postDelayed(mUpdateMicStatusTimer, 200);
+				//Start timer
+				lh.postDelayed(timeOutMonitor, 60*1000);
 				starttime = System.currentTimeMillis();
+				voiceIsSentByTimer = false;
 			} else if (event.getAction() == MotionEvent.ACTION_MOVE) {
 				boolean flag = false;
 				Rect r = new Rect();
@@ -578,6 +584,9 @@ public class ConversationView extends Activity {
 				}
 				updateCancelSendVoiceMsgNotification(flag);
 			} else if (event.getAction() == MotionEvent.ACTION_UP) {
+				if (voiceIsSentByTimer) {
+					return false;
+				}
 				stopRecording();
 
 				Rect r = new Rect();
@@ -602,10 +611,34 @@ public class ConversationView extends Activity {
 				fileName = null;
 				lh.removeCallbacks(mUpdateMicStatusTimer);
 				showOrCloseVoiceDialog();
+				//Remove timer
+				lh.removeCallbacks(timeOutMonitor);
 			}
 			return false;
 		}
 
+	};
+	
+	
+	private Runnable timeOutMonitor = new Runnable() {
+
+		@Override
+		public void run() {
+			voiceIsSentByTimer = true;
+			stopRecording();
+			// send
+			VMessage vm = new VMessage(groupId, local, remote);
+			int seconds = (int) ((System.currentTimeMillis() - starttime) / 1000) + 1;
+			new VMessageAudioItem(vm, fileName, seconds);
+			// Send message to server
+			sendMessageToRemote(vm);
+			
+			starttime = 0;
+			fileName = null;
+			lh.removeCallbacks(mUpdateMicStatusTimer);
+			showOrCloseVoiceDialog();
+		}
+		
 	};
 
 	private OnClickListener moreFeatureButtonListenr = new OnClickListener() {

@@ -29,11 +29,16 @@
     <string name="contacts_user_detail_item_fax">传真</string>
     
     <string name="contacts_user_detail_button_invite_video_conference">发起视频会议</string>
-    <string name="contacts_user_detail_button_call">拨打电话</string>
+    <string name="contacts_user_detail_button_call">语音通话</string>
     <string name="contacts_user_detail_button_invite_video_call">视频通话</string>
     <string name="contacts_user_detail_button_send_sms">发送短信</string>
     <string name="contacts_user_detail_button_send_text_msg">发送即时消息</string>
     <string name="contacts_user_detail_button_send_file">发送文件</string>
+    
+    
+    
+    <string name="contacts_user_detail_voice_dialog_voice_call">点对点语音通话</string>
+    <string name="contacts_user_detail_voice_dialog_call">拨打电话号码</string>
     
     
     

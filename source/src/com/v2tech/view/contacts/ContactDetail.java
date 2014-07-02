@@ -6,6 +6,7 @@ import java.util.List;
 
 import android.app.Activity;
 import android.app.DatePickerDialog;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -20,6 +21,7 @@ import android.view.View.OnClickListener;
 import android.view.View.OnFocusChangeListener;
 import android.view.View.OnTouchListener;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -135,14 +137,12 @@ public class ContactDetail extends Activity implements OnTouchListener {
 		this.overridePendingTransition(R.animator.alpha_from_0_to_1,
 				R.animator.alpha_from_1_to_0);
 	}
-	
-	
 
 	@Override
 	protected void onNewIntent(Intent intent) {
 		super.onNewIntent(intent);
 		if (intent != null) {
-			mUid =intent.getLongExtra("uid", 0);
+			mUid = intent.getLongExtra("uid", 0);
 			u = GlobalHolder.getInstance().getUser(mUid);
 			if (u != null) {
 				showUserInfo();
@@ -280,9 +280,9 @@ public class ContactDetail extends Activity implements OnTouchListener {
 				mCallButtomButton.setOnClickListener(mCallButtonListener);
 			}
 			mCreateConfButton.setOnClickListener(mCreateConfMsgListener);
-			
+
 			mVideoCallButton.setOnClickListener(mVideoCallButtonListener);
-			
+
 			if (mSendSmsButton != null) {
 				mSendSmsButton.setOnClickListener(mSendSmsMsgListener);
 			}
@@ -290,6 +290,91 @@ public class ContactDetail extends Activity implements OnTouchListener {
 		}
 
 	}
+
+	private void startVoiceCall() {
+		Intent iv = new Intent();
+		iv.addCategory(PublicIntent.DEFAULT_CATEGORY);
+		iv.setAction(PublicIntent.START_P2P_CONVERSACTION_ACTIVITY);
+		iv.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		iv.putExtra("uid", mUid);
+		iv.putExtra("is_coming_call", false);
+		iv.putExtra("voice", true);
+		mContext.startActivity(iv);
+	}
+
+	private void startVideoCall() {
+		Intent iv = new Intent();
+		iv.addCategory(PublicIntent.DEFAULT_CATEGORY);
+		iv.setAction(PublicIntent.START_P2P_CONVERSACTION_ACTIVITY);
+		iv.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		iv.putExtra("uid", mUid);
+		iv.putExtra("is_coming_call", false);
+		iv.putExtra("voice", false);
+		List<UserDeviceConfig> list = GlobalHolder.getInstance()
+				.getAttendeeDevice(mUid);
+		if (list != null && list.size() > 0) {
+			iv.putExtra("device", list.get(0).getDeviceID());
+		} else {
+			iv.putExtra("device", "");
+		}
+		mContext.startActivity(iv);
+	}
+
+	Dialog d = null;
+
+	private void showCallDialog(String tel, String phone, boolean voice) {
+
+		d = new Dialog(mContext,
+				R.style.ContactUserDetailVoiceCallDialog);
+
+		d.setContentView(R.layout.contacts_user_detail_call_dialog_window);
+		TextView tv = (TextView) d
+				.findViewById(R.id.contact_user_detail_call_dialog_1);
+		tv.setOnClickListener(itemClickListener);
+		TextView tv1 = (TextView) d
+				.findViewById(R.id.contact_user_detail_call_dialog_2);
+		tv1.setOnClickListener(itemClickListener);
+		TextView tv2 = (TextView) d
+				.findViewById(R.id.contact_user_detail_call_dialog_3);
+		tv2.setOnClickListener(itemClickListener);
+
+		if (tel != null && phone != null) {
+			tv.setTag(tel);
+			tv1.setTag(phone);
+		} else {
+			tv.setTag(tel == null ? phone : tel);
+			tv1.setVisibility(View.GONE);
+		}
+
+		if (voice) {
+			tv2.setTag("voice");
+		} else {
+			tv2.setVisibility(View.GONE);
+		}
+		
+		d.show();
+
+	}
+
+	private OnClickListener itemClickListener = new OnClickListener() {
+
+		@Override
+		public void onClick(View view) {
+			if (d != null) {
+				d.dismiss();
+				d = null;
+			}
+			if (view.getTag() != null && view.getTag().equals("voice")) {
+				startVoiceCall();
+			} else {
+				Intent intent = new Intent();
+				intent.setAction(Intent.ACTION_CALL);
+				intent.setData(Uri.parse("tel:" + (String)view.getTag()));
+				startActivity(intent);
+			}
+		}
+
+	};
 
 	private TextWatcher tw = new TextWatcher() {
 
@@ -321,15 +406,38 @@ public class ContactDetail extends Activity implements OnTouchListener {
 
 		@Override
 		public void onClick(View arg0) {
-			if (u.getTelephone() == null || u.getTelephone().isEmpty()) {
-				Intent intent = new Intent();
-				intent.setAction(Intent.ACTION_DIAL); // android.intent.action.DIAL
-				startActivity(intent);
+			boolean phoneEmpty = u.getTelephone() == null
+					|| u.getTelephone().isEmpty();
+			boolean mobileEmpty = u.getCellPhone() == null
+					|| u.getCellPhone().isEmpty();
+			boolean offline = (u.getmStatus() == User.Status.OFFLINE || u
+					.getmStatus() == User.Status.HIDDEN);
+
+			if (offline) {
+				if (phoneEmpty && mobileEmpty) {
+					Intent intent = new Intent();
+					intent.setAction(Intent.ACTION_DIAL); // android.intent.action.DIAL
+					startActivity(intent);
+				} else if (!phoneEmpty || !mobileEmpty) {
+					Intent intent = new Intent();
+					intent.setAction(Intent.ACTION_CALL);
+					if (!phoneEmpty) {
+						intent.setData(Uri.parse("tel:" + u.getTelephone()));
+					} else {
+						intent.setData(Uri.parse("tel:" + u.getCellPhone()));
+					}
+					startActivity(intent);
+				} else {
+					showCallDialog(u.getTelephone(), u.getCellPhone(), false);
+				}
 			} else {
-				Intent intent=new Intent(); 
-				intent.setAction(Intent.ACTION_CALL);
-				intent.setData(Uri.parse("tel:"+u.getTelephone()));
-				startActivity(intent);
+				if (phoneEmpty && mobileEmpty) {
+					startVoiceCall();
+				} else if (!phoneEmpty || !mobileEmpty) {
+					showCallDialog(u.getTelephone(), u.getCellPhone(), true);
+				} else {
+					showCallDialog(u.getTelephone(), u.getCellPhone(), true);
+				}
 			}
 		}
 
@@ -341,33 +449,21 @@ public class ContactDetail extends Activity implements OnTouchListener {
 		public void onClick(View arg0) {
 
 			Intent i = new Intent(PublicIntent.START_CONVERSACTION_ACTIVITY);
-			i.putExtra("obj", new ConversationNotificationObject(Conversation.TYPE_CONTACT, u.getmUserId()));
+			i.putExtra("obj", new ConversationNotificationObject(
+					Conversation.TYPE_CONTACT, u.getmUserId()));
 			i.addCategory(PublicIntent.DEFAULT_CATEGORY);
 			mContext.startActivity(i);
 		}
 
 	};
-	
+
 	private View.OnClickListener mVideoCallButtonListener = new View.OnClickListener() {
 		@Override
 		public void onClick(View arg0) {
-			Intent iv = new Intent();
-			iv.addCategory(PublicIntent.DEFAULT_CATEGORY);
-			iv.setAction(PublicIntent.START_P2P_CONVERSACTION_ACTIVITY);
-			iv.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-			iv.putExtra("uid", mUid);
-			iv.putExtra("is_coming_call", false);
-			iv.putExtra("voice", false);
-			List<UserDeviceConfig> list = GlobalHolder.getInstance().getAttendeeDevice(mUid);
-			if (list != null && list.size() > 0) {
-				iv.putExtra("device", list.get(0).getDeviceID());
-			} else {
-				iv.putExtra("device", "");
-			}
-			mContext.startActivity(iv);
+			startVideoCall();
 		}
 	};
-	
+
 	private View.OnClickListener mSendSmsMsgListener = new View.OnClickListener() {
 		@Override
 		public void onClick(View arg0) {
@@ -375,14 +471,13 @@ public class ContactDetail extends Activity implements OnTouchListener {
 			if (u.getTelephone() == null || u.getTelephone().isEmpty()) {
 				smsIntent.putExtra("address", "");
 			} else {
-				smsIntent.putExtra("address", u.getTelephone()+"");
+				smsIntent.putExtra("address", u.getTelephone() + "");
 			}
-			
+
 			smsIntent.setType("vnd.android-dir/mms-sms");
 			startActivity(smsIntent);
 		}
 	};
-	
 
 	private View.OnClickListener mCreateConfMsgListener = new View.OnClickListener() {
 

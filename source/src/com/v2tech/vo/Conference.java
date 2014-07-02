@@ -124,6 +124,10 @@ public class Conference implements Parcelable {
 	public String getName() {
 		return this.name;
 	}
+	
+	public void setName(String name) {
+		this.name = name;
+	}
 
 	public String getStartTimeStr() {
 		if (this.startTime == null) {
@@ -229,6 +233,7 @@ public class Conference implements Parcelable {
 		long id = 0;
 		long createor = 0;
 		long chairman = 0;
+		String subject = "";
 		int start = str.indexOf("chairuserid='");
 		if (start != -1) {
 			int end = str.indexOf("'", start + 13);
@@ -252,11 +257,27 @@ public class Conference implements Parcelable {
 				id = Long.valueOf(str.substring(start + 5, end));
 			}
 		}
-
+		
+		start = str.indexOf(" id='");
+		if (start != -1) {
+			int end = str.indexOf("'", start + 5);
+			if (end != -1) {
+				id = Long.valueOf(str.substring(start + 5, end));
+			}
+		}
+		
+		start = str.indexOf(" subject='");
+		if (start != -1) {
+			int end = str.indexOf("'", start + 10);
+			if (end != -1) {
+				subject = str.substring(start + 10, end);
+			}
+		}
+		
 		Conference conf = new Conference(id);
 		conf.setChairman(chairman);
 		conf.setCreator(createor);
-
+		conf.setName(subject);
 		return conf;
 
 	}

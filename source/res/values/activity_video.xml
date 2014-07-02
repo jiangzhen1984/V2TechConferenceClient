@@ -8,6 +8,7 @@
     <string name="in_meeting_quit_quit_button">退出</string>
     <string name="in_meeting_quit_cancel_button">取消</string>
     <string name="in_meeting_quit_text">此操作将退出会议，是否继续?</string>
+    <string name="in_meeting_quit_text_for_new">您已经在会议[]中，要加入新的会议，请先退出该会议，是否继续?</string>
     <string name="in_meeting_quit_rem">记住此操作</string>
     <string name="in_meeting_setting_video_qulity">视频质量</string>
     <string name="in_meeting_setting_video_qulity_high">高</string>

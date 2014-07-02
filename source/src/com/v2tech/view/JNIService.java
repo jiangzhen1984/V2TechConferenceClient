@@ -9,8 +9,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -24,7 +22,6 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Parcelable;
-import android.support.v4.app.NotificationCompat;
 import android.widget.Toast;
 
 import com.V2.jni.AudioRequest;
@@ -46,14 +43,12 @@ import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.Notificator;
 import com.v2tech.util.V2Log;
 import com.v2tech.util.XmlParser;
-import com.v2tech.view.bo.ConversationNotificationObject;
 import com.v2tech.view.bo.GroupUserObject;
 import com.v2tech.view.bo.UserAvatarObject;
 import com.v2tech.view.bo.UserStatusObject;
 import com.v2tech.view.conference.VideoActivityV2;
 import com.v2tech.view.conversation.MessageBuilder;
 import com.v2tech.vo.ConferenceGroup;
-import com.v2tech.vo.Conversation;
 import com.v2tech.vo.Group;
 import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.NetworkStateCode;
@@ -360,7 +355,6 @@ public class JNIService extends Service {
 					} else {
 						action = JNI_BROADCAST_NEW_MESSAGE;
 						sendNotification();
-						updateStatusBar(vm);
 					}
 
 					Intent ii = new Intent(action);
@@ -402,52 +396,7 @@ public class JNIService extends Service {
 			}
 		}
 
-		private void updateStatusBar(VMessage vm) {
-			NotificationCompat.Builder builder = new NotificationCompat.Builder(
-					mContext).setSmallIcon(R.drawable.ic_launcher)
-					.setContentTitle(vm.getFromUser().getName());
-			if (vm.getAudioItems().size() > 0) {
-				builder.setContentText(mContext.getResources().getString(
-						R.string.receive_voice_notification));
-			} else if (vm.getImageItems().size() > 0) {
-				builder.setContentText(mContext.getResources().getString(
-						R.string.receive_image_notification));
-			} else {
-				String textContent = vm.getAllTextContent();
-				builder.setContentText(textContent);
-			}
-
-			Intent resultIntent = new Intent(
-					PublicIntent.START_CONVERSACTION_ACTIVITY);
-
-			resultIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-			if (vm.getGroupId() != 0) {
-				resultIntent.putExtra("obj",
-						new ConversationNotificationObject(
-								Conversation.TYPE_GROUP, vm.getFromUser()
-										.getmUserId()));
-			} else {
-				resultIntent.putExtra("obj",
-						new ConversationNotificationObject(
-								Conversation.TYPE_CONTACT, vm.getFromUser()
-										.getmUserId()));
-			}
-			resultIntent.addCategory(PublicIntent.DEFAULT_CATEGORY);
-
-			// Creates the PendingIntent
-			PendingIntent notifyPendingIntent = PendingIntent.getActivities(
-					mContext, 0, new Intent[] { resultIntent },
-					PendingIntent.FLAG_UPDATE_CURRENT);
-
-			// Puts the PendingIntent into the notification builder
-			builder.setContentIntent(notifyPendingIntent);
-
-			NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-			// mId allows you to update the notification later on.
-			mNotificationManager.notify(PublicIntent.MESSAGE_NOTIFICATION_ID,
-					builder.build());
-
-		}
+	
 
 	}
 
@@ -622,12 +571,6 @@ public class JNIService extends Service {
 						i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
 						i.putExtra("gid", g.getmGId());
 						sendStickyBroadcast(i);
-						Intent enterConference = new Intent(mContext,
-								VideoActivityV2.class);
-						enterConference.putExtra("gid", g.getmGId());
-						Notificator.updateSystemNotification(mContext, name
-								+ " 会议邀请:", g.getName(), 1, enterConference,
-								PublicIntent.VIDEO_NOTIFICATION_ID);
 					}
 
 				}
@@ -859,13 +802,6 @@ public class JNIService extends Service {
 					i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
 					i.putExtra("gid", g.getmGId());
 					sendBroadcast(i);
-
-					Intent enterConference = new Intent(mContext,
-							VideoActivityV2.class);
-					enterConference.putExtra("gid", g.getmGId());
-					Notificator.updateSystemNotification(mContext, u.getName()
-							+ " 会议邀请:", g.getName(), 1, enterConference,
-							PublicIntent.VIDEO_NOTIFICATION_ID);
 
 				} else {
 					V2Log.e(" Incorrect uid : " + confXml);

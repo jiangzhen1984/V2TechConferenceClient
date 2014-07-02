@@ -46,6 +46,7 @@ public class ConversationWaitingFragment extends Fragment {
 	private TurnListener mIndicator;
 
 	private UserChattingObject uad;
+	
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -57,7 +58,9 @@ public class ConversationWaitingFragment extends Fragment {
 		} else {
 			playRingToneIncoming();
 		}
-
+		//Start timer
+		mLocalHandler.postDelayed(timeOutMonitor, 1000*60);
+		
 	}
 
 	@Override
@@ -139,6 +142,8 @@ public class ConversationWaitingFragment extends Fragment {
 		mIndicator = null;
 		chat.removeRegisterCancelledListener(mLocalHandler,
 				CANCELLED_NOTIFICATION, null);
+		//Remove timer
+		this.mLocalHandler.removeCallbacks(timeOutMonitor);
 	}
 
 	public void quit() {
@@ -204,6 +209,15 @@ public class ConversationWaitingFragment extends Fragment {
 			((TurnListener) getActivity()).turnToVideoUI();
 		}
 
+	};
+	
+	private Runnable timeOutMonitor = new Runnable() {
+
+		@Override
+		public void run() {
+			Message.obtain(mLocalHandler, CANCELLED_NOTIFICATION).sendToTarget();
+		}
+		
 	};
 
 	class LocalHandler extends Handler {
