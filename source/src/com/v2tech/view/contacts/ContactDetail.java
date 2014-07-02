@@ -468,10 +468,12 @@ public class ContactDetail extends Activity implements OnTouchListener {
 		@Override
 		public void onClick(View arg0) {
 			Intent smsIntent = new Intent(Intent.ACTION_VIEW);
-			if (u.getTelephone() == null || u.getTelephone().isEmpty()) {
-				smsIntent.putExtra("address", "");
+			if (u.getTelephone() != null && !u.getTelephone().isEmpty()) {
+				smsIntent.putExtra("address", u.getTelephone());
+			} else if (u.getCellPhone() != null && !u.getCellPhone().isEmpty()){
+				smsIntent.putExtra("address", u.getCellPhone());
 			} else {
-				smsIntent.putExtra("address", u.getTelephone() + "");
+				smsIntent.putExtra("address", "");
 			}
 
 			smsIntent.setType("vnd.android-dir/mms-sms");
