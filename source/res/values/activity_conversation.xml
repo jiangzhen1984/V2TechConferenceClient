@@ -24,6 +24,11 @@
    <string name="conversation_display_item_pic">[图片]</string>
    <string name="conversation_display_item_audio">[语音]</string>
    
+   <string name="conversation_quit_dialog_video_text">确定退出视频通话吗?</string>
+   <string name="conversation_quit_dialog_audio_text">确定退出音频通话吗?</string>
+   <string name="conversation_quit_dialog_confirm_text">确定</string>
+   <string name="conversation_quit_dialog_cancel_text">取消</string>
+   
     
     
 </resources>
