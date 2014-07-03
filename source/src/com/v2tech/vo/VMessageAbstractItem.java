@@ -18,12 +18,23 @@ public abstract class VMessageAbstractItem {
 	
 	
 	public static final int NEW_LINE_FLAG_VALUE = 1;
+	
+	
+	public static final int STATE_NORMAL = 0;
+	
+	public static final int STATE_UNREAD = 1;
+	
+	public static final int STATE_SENT_FALIED = 2;
 
 	protected VMessage vm;
 
 	protected boolean isNewLine;
 
 	protected int type;
+	
+	protected int state;
+	
+	protected String uuid;
 
 	public VMessageAbstractItem(VMessage vm) {
 		super();
@@ -53,6 +64,24 @@ public abstract class VMessageAbstractItem {
 
 	public void setType(int type) {
 		this.type = type;
+	}
+	
+	
+
+	public int getState() {
+		return state;
+	}
+
+	public void setState(int state) {
+		this.state = state;
+	}
+
+	public String getUuid() {
+		return uuid;
+	}
+
+	public void setUuid(String uuid) {
+		this.uuid = uuid;
 	}
 
 	public abstract String toXmlItem();

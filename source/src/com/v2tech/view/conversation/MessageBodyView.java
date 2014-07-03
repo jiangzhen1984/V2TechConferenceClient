@@ -224,8 +224,8 @@ public class MessageBodyView extends LinearLayout {
 			} else if (item.getType() == VMessageAbstractItem.ITEM_TYPE_AUDIO) {
 				VMessageAudioItem  vai = (VMessageAudioItem)item;
 				StringBuilder sb = new StringBuilder(vai.getSeconds());
-				for (int in =0;in <vai.getSeconds(); in++) {
-					sb.append("   ");
+				for (int in =0;in <vai.getSeconds() && in < 25; in++) {
+					sb.append("  ");
 				}
 				et.setText(sb.toString());
 				seconds.setText(vai.getSeconds()+"''");

@@ -436,6 +436,30 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher {
 			viewLayout.updateNotificator(false);
 			//Update unread list
 			updateUnreadConversation(existedCov);
+		} else {
+			
+			if (type.equals(Conversation.TYPE_CONTACT)) {
+				existedCov = new ContactConversation(GlobalHolder.getInstance()
+						.getUser(extId));
+				User fromUser = GlobalHolder.getInstance().getUser(extId);
+				ContentValues conCv = new ContentValues();
+				conCv.put(ContentDescriptor.Conversation.Cols.EXT_ID, extId);
+				conCv.put(ContentDescriptor.Conversation.Cols.TYPE,
+						Conversation.TYPE_CONTACT);
+				conCv.put(ContentDescriptor.Conversation.Cols.EXT_NAME,
+						fromUser == null ? "" : fromUser.getName());
+				conCv.put(ContentDescriptor.Conversation.Cols.OWNER,
+						GlobalHolder.getInstance().getCurrentUserId());
+				conCv.put(ContentDescriptor.Conversation.Cols.NOTI_FLAG, 0);
+				mContext.getContentResolver().insert(
+						ContentDescriptor.Conversation.CONTENT_URI, conCv);
+				
+				this.mConvList.add(existedCov);
+				viewLayout = new GroupLayout(mContext, existedCov);
+				mItemList.add(new ScrollItem(existedCov, viewLayout));
+				adapter.notifyDataSetChanged();
+			}
+
 		}
 	}
 

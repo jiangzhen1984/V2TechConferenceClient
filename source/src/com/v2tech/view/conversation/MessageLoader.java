@@ -274,6 +274,10 @@ public class MessageLoader {
 			int type = cur.getInt(3);
 			// new line flag
 			int newLineFlag = cur.getInt(4);
+			
+			String uuid = cur.getString(5);
+			
+			int state = cur.getInt(6);
 
 			VMessageAbstractItem vai = null;
 			switch (type) {
@@ -300,6 +304,9 @@ public class MessageLoader {
 					&& newLineFlag == VMessageAbstractItem.NEW_LINE_FLAG_VALUE) {
 				vai.setNewLine(true);
 			}
+			
+			vai.setUuid(uuid);
+			vai.setState(state);
 		}
 
 		cur.close();

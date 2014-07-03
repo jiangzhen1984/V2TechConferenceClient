@@ -4,7 +4,12 @@ import v2av.VideoPlayer;
 import v2av.VideoRecorder;
 import android.app.Activity;
 import android.app.Fragment;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.PixelFormat;
+import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -16,10 +21,14 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.v2tech.R;
 import com.v2tech.service.ChatService;
+import com.v2tech.view.JNIService;
+import com.v2tech.view.PublicIntent;
+import com.v2tech.vo.NetworkStateCode;
 import com.v2tech.vo.UserChattingObject;
 
 public class ConversationConnectedFragment extends Fragment {
@@ -40,9 +49,11 @@ public class ConversationConnectedFragment extends Fragment {
 	private View mVideoCancelButton;
 	private View mVideoMuteButton;
 
+	private ImageView mAudioSpeakerImage;
 	private View mAudioSpeakerButton;
 	private View mAudioCancelButton;
 	private View mAudioMuteButton;
+	private ImageView mAudioMuteImage;
 
 	private long mTimeLine = 0;
 
@@ -67,6 +78,8 @@ public class ConversationConnectedFragment extends Fragment {
 		mIndicator = (TurnListener) activity;
 
 		uad = mIndicator.getObject();
+
+		initReceiver();
 	}
 
 	@Override
@@ -92,6 +105,15 @@ public class ConversationConnectedFragment extends Fragment {
 				.findViewById(R.id.conversation_fragment_connected_cancel_button);
 		mAudioMuteButton = v
 				.findViewById(R.id.conversation_fragment_connected_mute_button);
+		
+		
+		mAudioSpeakerImage= (ImageView)v
+				.findViewById(R.id.conversation_fragment_connected_speaker_image);
+		
+		mAudioMuteImage= (ImageView)v
+				.findViewById(R.id.conversation_fragment_connected_mute_image);
+
+
 
 		mVideoCancelButton.setOnClickListener(mCancelButtonListener);
 		mVieoLocalCameraButton.setOnClickListener(mVideoCameraButtonListener);
@@ -110,8 +132,8 @@ public class ConversationConnectedFragment extends Fragment {
 
 			mRemoteSurface = (SurfaceView) v
 					.findViewById(R.id.fragment_conversation_connected_video_remote_surface);
-			
-			remoteSurfaceLayout = (FrameLayout)v
+
+			remoteSurfaceLayout = (FrameLayout) v
 					.findViewById(R.id.fragment_conversation_connected_video_remote_surface_container);
 
 			voiceLayout.setVisibility(View.GONE);
@@ -149,6 +171,9 @@ public class ConversationConnectedFragment extends Fragment {
 			Message m = Message.obtain(mLocalHandler, OPEN_REMOTE_VIDEO);
 			mLocalHandler.sendMessageDelayed(m, 300);
 		}
+		
+		uad.setMute(false);
+		chatService.muteChatting(uad, null);
 	}
 
 	@Override
@@ -158,6 +183,8 @@ public class ConversationConnectedFragment extends Fragment {
 			call.closeLocalCamera();
 			closeRemoteVideo();
 		}
+		uad.setMute(true);
+		chatService.muteChatting(uad, null);
 	}
 
 	@Override
@@ -165,14 +192,40 @@ public class ConversationConnectedFragment extends Fragment {
 		super.onDetach();
 		chatService.removeRegisterCancelledListener(mLocalHandler,
 				CANCELLED_NOTIFICATION, null);
+		getActivity().unregisterReceiver(receiver);
 	}
-	
-	
 
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
 		chatService.cancelChattingCall(uad, null);
+	}
+
+	private BroadcastReceiver receiver = new LocalReceiver();
+
+	private void initReceiver() {
+		IntentFilter filter = new IntentFilter();
+		filter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
+		filter.addCategory(PublicIntent.DEFAULT_CATEGORY);
+		filter.addAction(PublicIntent.FINISH_APPLICATION);
+		filter.addAction(JNIService.JNI_BROADCAST_CONNECT_STATE_NOTIFICATION);
+		getActivity().registerReceiver(receiver, filter);
+	}
+
+	class LocalReceiver extends BroadcastReceiver {
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			String action = intent.getAction();
+			if (JNIService.JNI_BROADCAST_CONNECT_STATE_NOTIFICATION
+					.equals(action)) {
+				NetworkStateCode code = (NetworkStateCode) intent.getExtras()
+						.get("state");
+				if (code != NetworkStateCode.CONNECTED) {
+					quit();
+				}
+			}
+		}
+
 	}
 
 	public void quit() {
@@ -195,6 +248,7 @@ public class ConversationConnectedFragment extends Fragment {
 	private void openRemoteVideo() {
 		if (uad.getVp() == null) {
 			VideoPlayer vp = new VideoPlayer();
+			vp.SetRotation(270);
 			vp.SetSurface(mRemoteSurface.getHolder());
 			uad.setVp(vp);
 		}
@@ -232,6 +286,22 @@ public class ConversationConnectedFragment extends Fragment {
 
 		@Override
 		public void onClick(View view) {
+			AudioManager audioManager;
+			audioManager = (AudioManager) getActivity().getSystemService(
+					Context.AUDIO_SERVICE);
+			audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
+			if (view.getTag() == null || view.getTag().equals("earphone")) {
+				audioManager.setSpeakerphoneOn(true);
+				view.setTag("speakerphone");
+				mAudioSpeakerImage.setImageResource(R.drawable.message_voice_lounder_pressed);
+				view.setBackgroundResource(R.drawable.conversation_framgent_gray_button_bg_pressed);
+			} else {
+				audioManager.setSpeakerphoneOn(false);
+				view.setTag("earphone");
+				mAudioSpeakerImage.setImageResource(R.drawable.message_voice_lounder);
+				view.setBackgroundResource(R.drawable.conversation_framgent_gray_button_bg);
+			}
+
 		}
 
 	};
@@ -240,9 +310,21 @@ public class ConversationConnectedFragment extends Fragment {
 
 		@Override
 		public void onClick(View view) {
-			// TODO update button text
-			uad.setMute(!uad.isMute());
-			chatService.muteChatting(uad, null);
+			AudioManager audioManager;
+			audioManager = (AudioManager) getActivity().getSystemService(
+					Context.AUDIO_SERVICE);
+			audioManager.setMicrophoneMute(!audioManager.isMicrophoneMute());
+			
+			if (view.getTag() == null || view.getTag().equals("mute")) {
+				view.setTag("speaking");
+				mAudioMuteImage.setImageResource(R.drawable.message_voice_mute_pressed);
+				view.setBackgroundResource(R.drawable.conversation_framgent_gray_button_bg_pressed);
+			} else {
+				view.setTag("mute");
+				mAudioMuteImage.setImageResource(R.drawable.message_voice_mute);
+				view.setBackgroundResource(R.drawable.conversation_framgent_gray_button_bg);
+			}
+
 		}
 
 	};

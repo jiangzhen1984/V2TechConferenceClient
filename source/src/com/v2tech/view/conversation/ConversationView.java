@@ -568,7 +568,7 @@ public class ConversationView extends Activity {
 				// Start update db for voice
 				lh.postDelayed(mUpdateMicStatusTimer, 200);
 				//Start timer
-				lh.postDelayed(timeOutMonitor, 60*1000);
+				lh.postDelayed(timeOutMonitor, 59*1000);
 				starttime = System.currentTimeMillis();
 				voiceIsSentByTimer = false;
 			} else if (event.getAction() == MotionEvent.ACTION_MOVE) {
@@ -593,11 +593,12 @@ public class ConversationView extends Activity {
 				view.getDrawingRect(r);
 				// check if touch position out of button than cancel send voice
 				// message
-				if (r.contains((int) event.getX(), (int) event.getY())) {
+				long seconds = (System.currentTimeMillis() - starttime);
+				if (r.contains((int) event.getX(), (int) event.getY())  && seconds > 1500) {
 					// send
 					VMessage vm = new VMessage(groupId, local, remote);
-					int seconds = (int) ((System.currentTimeMillis() - starttime) / 1000) + 1;
-					new VMessageAudioItem(vm, fileName, seconds);
+					
+					new VMessageAudioItem(vm, fileName, (int)(seconds / 1000));
 					// Send message to server
 					sendMessageToRemote(vm);
 				} else {

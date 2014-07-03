@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="conversation_waiting">正在呼叫..</string>
+    <string name="conversation_waiting_voice_incoming">语音通话</string>
    <string name="conversation_notification">邀请您进入聊天.....</string>
    <string name="conversation_accept_text">接  受</string>
    <string name="conversation_voice_accept_only_text">语音接听</string>

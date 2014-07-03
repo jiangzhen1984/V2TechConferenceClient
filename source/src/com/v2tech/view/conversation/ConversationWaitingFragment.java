@@ -2,6 +2,10 @@ package com.v2tech.view.conversation;
 
 import android.app.Activity;
 import android.app.Fragment;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.media.MediaPlayer;
 import android.media.RingtoneManager;
 import android.os.Bundle;
@@ -20,6 +24,9 @@ import com.v2tech.service.Registrant;
 import com.v2tech.service.jni.JNIResponse;
 import com.v2tech.service.jni.RequestChatServiceResponse;
 import com.v2tech.util.V2Log;
+import com.v2tech.view.JNIService;
+import com.v2tech.view.PublicIntent;
+import com.v2tech.vo.NetworkStateCode;
 import com.v2tech.vo.UserChattingObject;
 
 public class ConversationWaitingFragment extends Fragment {
@@ -56,7 +63,7 @@ public class ConversationWaitingFragment extends Fragment {
 			chat.inviteUserChat(uad, new Registrant(mLocalHandler,
 					CALL_RESPONSE, null));
 		} else {
-			playRingToneIncoming();
+		//	playRingToneIncoming();
 		}
 		//Start timer
 		mLocalHandler.postDelayed(timeOutMonitor, 1000*60);
@@ -99,6 +106,9 @@ public class ConversationWaitingFragment extends Fragment {
 		if (uad.isIncoming()) {
 			mInvitationButtonLayout.setVisibility(View.VISIBLE);
 			mHostInvitationButtonLayout.setVisibility(View.GONE);
+			if (uad.isAudioType()) {
+				mTitleTV.setText(this.getActivity().getResources().getText(R.string.conversation_waiting_voice_incoming));
+			}
 		} else {
 			mInvitationButtonLayout.setVisibility(View.GONE);
 			mHostInvitationButtonLayout.setVisibility(View.VISIBLE);
@@ -126,6 +136,7 @@ public class ConversationWaitingFragment extends Fragment {
 		chat.registerCancelledListener(mLocalHandler, CANCELLED_NOTIFICATION,
 				null);
 		uad = mIndicator.getObject();
+		initReceiver();
 	}
 	
 	
@@ -142,9 +153,39 @@ public class ConversationWaitingFragment extends Fragment {
 		mIndicator = null;
 		chat.removeRegisterCancelledListener(mLocalHandler,
 				CANCELLED_NOTIFICATION, null);
-		//Remove timer
-		this.mLocalHandler.removeCallbacks(timeOutMonitor);
+		getActivity().unregisterReceiver(receiver);
 	}
+	
+	
+	private BroadcastReceiver receiver = new LocalReceiver();
+	private void initReceiver () {
+		IntentFilter filter = new IntentFilter();
+		filter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
+		filter.addCategory(PublicIntent.DEFAULT_CATEGORY);
+		filter.addAction(PublicIntent.FINISH_APPLICATION);
+		filter.addAction(JNIService.JNI_BROADCAST_CONNECT_STATE_NOTIFICATION);
+		getActivity().registerReceiver(receiver, filter);
+	}
+	
+	
+	class LocalReceiver extends BroadcastReceiver {
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			String action = intent.getAction();
+			 if (JNIService.JNI_BROADCAST_CONNECT_STATE_NOTIFICATION
+					.equals(action)) {
+				NetworkStateCode code = (NetworkStateCode) intent.getExtras()
+						.get("state");
+				if (code  != NetworkStateCode.CONNECTED) {
+					stopRingTone();
+					quit();
+				}
+			}
+		}
+
+	}
+	
+	
 
 	public void quit() {
 		if (getActivity() != null) {
@@ -170,6 +211,8 @@ public class ConversationWaitingFragment extends Fragment {
 		@Override
 		public void onClick(View arg0) {
 			chat.refuseChatting(uad, null);
+			//Remove timer
+			mLocalHandler.removeCallbacks(timeOutMonitor);
 			quit();
 		}
 
@@ -180,6 +223,8 @@ public class ConversationWaitingFragment extends Fragment {
 		@Override
 		public void onClick(View arg0) {
 			chat.cancelChattingCall(uad, null);
+			//Remove timer
+			mLocalHandler.removeCallbacks(timeOutMonitor);
 			quit();
 		}
 
@@ -193,6 +238,8 @@ public class ConversationWaitingFragment extends Fragment {
 			stopRingTone();
 		//	uad.updateAudioType();
 			chat.acceptChatting(uad, null);
+			//Remove timer
+			mLocalHandler.removeCallbacks(timeOutMonitor);
 			((TurnListener) getActivity()).turnToVideoUI();
 		}
 
@@ -206,6 +253,8 @@ public class ConversationWaitingFragment extends Fragment {
 		public void onClick(View arg0) {
 			stopRingTone();
 			chat.acceptChatting(uad, null);
+			//Remove timer
+			mLocalHandler.removeCallbacks(timeOutMonitor);
 			((TurnListener) getActivity()).turnToVideoUI();
 		}
 
@@ -215,6 +264,7 @@ public class ConversationWaitingFragment extends Fragment {
 
 		@Override
 		public void run() {
+			chat.cancelChattingCall(uad, null);
 			Message.obtain(mLocalHandler, CANCELLED_NOTIFICATION).sendToTarget();
 		}
 		
@@ -234,6 +284,8 @@ public class ConversationWaitingFragment extends Fragment {
 						getActivity().finish();
 					} else if (rcsr.getCode() == RequestChatServiceResponse.ACCEPTED
 							&& mIndicator != null) {
+						//Remove timer
+						mLocalHandler.removeCallbacks(timeOutMonitor);
 						mIndicator.turnToVideoUI();
 					} else {
 						V2Log.e(" indicator is null can not open audio UI ");

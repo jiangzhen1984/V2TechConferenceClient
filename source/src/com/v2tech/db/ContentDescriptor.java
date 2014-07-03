@@ -84,10 +84,11 @@ public final class ContentDescriptor {
 			public static final String CONTENT = "content";
 			public static final String TYPE = "item_type";
 			public static final String LINE = "is_new_line";
-			public static final String RESERVE = "rt_1";
+			public static final String UUID = "uuid";
+			public static final String STATE = "item_state";
 
 			public static final String[] ALL_CLOS = { ID, MSG_ID, CONTENT,
-					TYPE, LINE,  RESERVE };
+					TYPE, LINE,  UUID, STATE };
 		}
 	}
 

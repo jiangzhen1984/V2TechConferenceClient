@@ -149,6 +149,7 @@ public class VideoActivityV2 extends Activity {
 
 	private ImageView mMenuButton;
 	private View mMenuButtonContainer;
+	private View mMenuSparationLine;
 
 	private View mMenuInviteAttendeeButton;
 	private View mMenuMessageButton;
@@ -227,6 +228,9 @@ public class VideoActivityV2 extends Activity {
 		mMenuButton = (ImageView) findViewById(R.id.in_meeting_menu_button);
 		mMenuButton.setOnClickListener(mMenuButtonListener);
 		mMenuButtonContainer = findViewById(R.id.in_meeting_menu_layout);
+		mMenuSparationLine = findViewById(R.id.in_meeting_video_separation_line0);
+		
+		
 		// show message layout button
 		mMenuMessageButton = findViewById(R.id.in_meeting_menu_show_msg_button);
 		mMenuMessageButton.setTag("msg");
@@ -651,6 +655,8 @@ public class VideoActivityV2 extends Activity {
 				mMenuButtonContainer.setVisibility(View.VISIBLE);
 				((ImageView) view)
 						.setImageResource(R.drawable.video_menu_button);
+				//If menu layout is visible, hide line of below at menu button
+				mMenuSparationLine.setVisibility(View.GONE);
 
 			} else {
 				// Do not hide other window
@@ -664,6 +670,9 @@ public class VideoActivityV2 extends Activity {
 				mMenuButtonContainer.setVisibility(View.GONE);
 				((ImageView) view)
 						.setImageResource(R.drawable.video_menu_button_pressed);
+				
+				//If menu layout is invisible, show line of below at menu button
+				mMenuSparationLine.setVisibility(View.VISIBLE);
 			}
 
 			adjustContentLayout();

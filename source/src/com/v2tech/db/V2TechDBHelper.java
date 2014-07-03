@@ -35,8 +35,9 @@ public class V2TechDBHelper extends SQLiteOpenHelper {
 			+ ContentDescriptor.MessageItems.Cols.MSG_ID + " integer,"
 			+ ContentDescriptor.MessageItems.Cols.CONTENT + " text,"
 			+ ContentDescriptor.MessageItems.Cols.LINE + " numeric,"
-			+ContentDescriptor.MessageItems.Cols.TYPE+ " numeric, "
-			+ ContentDescriptor.MessageItems.Cols.RESERVE + " text )";
+			+ ContentDescriptor.MessageItems.Cols.TYPE+ " numeric, "
+			+ ContentDescriptor.MessageItems.Cols.UUID + " text, "
+			+ ContentDescriptor.MessageItems.Cols.STATE + " numeric )";
 	
 	
 	

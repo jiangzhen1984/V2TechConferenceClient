@@ -339,10 +339,16 @@ public class ContactDetail extends Activity implements OnTouchListener {
 		tv2.setOnClickListener(itemClickListener);
 
 		if (tel != null && phone != null) {
+			tv.setText(tel);
 			tv.setTag(tel);
+			tv1.setText(phone);
 			tv1.setTag(phone);
-		} else {
+		} else if (tel != null || phone != null ){
+			tv.setText(tel == null ? phone : tel);
 			tv.setTag(tel == null ? phone : tel);
+			tv1.setVisibility(View.GONE);
+		} else {
+			tv.setTag("");
 			tv1.setVisibility(View.GONE);
 		}
 
@@ -432,7 +438,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 				}
 			} else {
 				if (phoneEmpty && mobileEmpty) {
-					startVoiceCall();
+					showCallDialog(null, null, true);
 				} else if (!phoneEmpty || !mobileEmpty) {
 					showCallDialog(u.getTelephone(), u.getCellPhone(), true);
 				} else {

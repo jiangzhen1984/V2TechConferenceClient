@@ -8,7 +8,6 @@ public class UserChattingObject {
 	public static final int VIDEO_CALL = 0x02;
 	public static final int INCOMING_CALL = 0x10;
 	public static final int OUTING_CALL = 0x00;
-	public static final int MUTE = 0x000;
 	public static final int SPEAKING = 0x100;
 	
 	private int flag;
@@ -60,7 +59,7 @@ public class UserChattingObject {
 
 	public void setMute(boolean b) {
 		if (b) {
-			this.flag &= MUTE;
+			this.flag &= (~SPEAKING);
 		} else {
 			this.flag |= SPEAKING;
 		}
