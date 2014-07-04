@@ -151,12 +151,24 @@ public class ConversationWaitingFragment extends Fragment {
 	public void onDetach() {
 		super.onDetach();
 		mIndicator = null;
+		mLocalHandler.removeCallbacks(timeOutMonitor);
 		chat.removeRegisterCancelledListener(mLocalHandler,
 				CANCELLED_NOTIFICATION, null);
 		getActivity().unregisterReceiver(receiver);
 	}
 	
 	
+	
+	
+	@Override
+	public void onDestroy() {
+		super.onDestroy();
+		chat.cancelChattingCall(uad, null);
+	}
+
+
+
+
 	private BroadcastReceiver receiver = new LocalReceiver();
 	private void initReceiver () {
 		IntentFilter filter = new IntentFilter();
@@ -274,6 +286,9 @@ public class ConversationWaitingFragment extends Fragment {
 
 		@Override
 		public void handleMessage(Message msg) {
+			if (getActivity() ==null) {
+				return;
+			}
 			switch (msg.what) {
 			case CALL_RESPONSE: {
 				JNIResponse resp = (JNIResponse) msg.obj;
@@ -284,6 +299,12 @@ public class ConversationWaitingFragment extends Fragment {
 						getActivity().finish();
 					} else if (rcsr.getCode() == RequestChatServiceResponse.ACCEPTED
 							&& mIndicator != null) {
+						//If current is video call and current user is host then invite video too.
+						if (uad.isVideoType() && !uad.isIncoming()) {
+							int flag = UserChattingObject.OUTING_CALL | UserChattingObject.VOICE_CALL;
+							UserChattingObject audioInviation = new UserChattingObject(uad.getUser(), flag, uad.getDeviceId());
+							chat.inviteUserChat(audioInviation, null);
+						}
 						//Remove timer
 						mLocalHandler.removeCallbacks(timeOutMonitor);
 						mIndicator.turnToVideoUI();

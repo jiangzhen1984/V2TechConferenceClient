@@ -41,8 +41,11 @@ public class GlobalConfig {
 		String preFix = "/:";
 		String suffFix = ":/";
 		for (int i = 1; i < GLOBAL_FACE_ARRAY.length; i++) {
-			
-			EMOJI_ARRAY.put(GLOBAL_FACE_ARRAY[i], new EmojiWraper(preFix + (char)i+ suffFix,GLOBAL_FACE_ARRAY[i]));
+			char c = (char)i;
+			if (c == '\n') {
+				c += 100;
+			}
+			EMOJI_ARRAY.put(GLOBAL_FACE_ARRAY[i], new EmojiWraper(preFix + c+ suffFix,GLOBAL_FACE_ARRAY[i]));
 		}
 	}
 

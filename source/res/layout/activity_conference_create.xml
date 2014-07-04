@@ -182,7 +182,7 @@
                         android:background="@null"
                         android:ems="10"
                         android:inputType="text"
-                        android:maxLength="50"
+                        android:maxLength="64"
                         android:paddingBottom="5dp"
                         android:paddingTop="5dp" >
                         <requestFocus />

@@ -64,6 +64,7 @@ public class AudioRequest {
 
 	/**
 	 * Invite user to join audio call
+	 * 
 	 * @param nGroupID
 	 * @param nToUserID
 	 * @param businesstype
@@ -73,6 +74,7 @@ public class AudioRequest {
 
 	/**
 	 * Accept audio conversation
+	 * 
 	 * @param nGroupID
 	 * @param nToUserID
 	 * @param businesstype
@@ -82,6 +84,7 @@ public class AudioRequest {
 
 	/**
 	 * reject audio conversation
+	 * 
 	 * @param nGroupID
 	 * @param nToUserID
 	 * @param businesstype
@@ -116,7 +119,8 @@ public class AudioRequest {
 			long nFromUserID) {
 		V2Log.d("OnAudioChaInvite " + nGroupID + ":" + nBusinessType + ":"
 				+ nFromUserID);
-		for (WeakReference<AudioRequestCallback> wr : callbacks) {
+		for (int i = 0; i < callbacks.size(); i++) {
+			WeakReference<AudioRequestCallback> wr = callbacks.get(i);
 			Object obj = wr.get();
 			if (obj != null) {
 				((AudioRequestCallback) obj).OnAudioChatInvite(nGroupID,
@@ -130,7 +134,8 @@ public class AudioRequest {
 		V2Log.d("OnAudioChatAccepted " + nGroupID + ":" + nBusinessType + ":"
 				+ nFromUserID);
 
-		for (WeakReference<AudioRequestCallback> wr : callbacks) {
+		for (int i = 0; i < callbacks.size(); i++) {
+			WeakReference<AudioRequestCallback> wr = callbacks.get(i);
 			Object obj = wr.get();
 			if (obj != null) {
 				((AudioRequestCallback) obj).OnAudioChatAccepted(nGroupID,
@@ -144,7 +149,8 @@ public class AudioRequest {
 			long nFromUserID) {
 		V2Log.d("OnAudioChatRefused " + nGroupID + ":" + nBusinessType + ":"
 				+ nFromUserID);
-		for (WeakReference<AudioRequestCallback> wr : callbacks) {
+		for (int i = 0; i < callbacks.size(); i++) {
+			WeakReference<AudioRequestCallback> wr = callbacks.get(i);
 			Object obj = wr.get();
 			if (obj != null) {
 				((AudioRequestCallback) obj).OnAudioChatRefused(nGroupID,
@@ -158,7 +164,8 @@ public class AudioRequest {
 			long nFromUserID) {
 		V2Log.d("OnAudioChatClosed " + nGroupID + ":" + nBusinessType + ":"
 				+ nFromUserID);
-		for (WeakReference<AudioRequestCallback> wr : callbacks) {
+		for (int i = 0; i < callbacks.size(); i++) {
+			WeakReference<AudioRequestCallback> wr = callbacks.get(i);
 			Object obj = wr.get();
 			if (obj != null) {
 				((AudioRequestCallback) obj).OnAudioChatClosed(nGroupID,

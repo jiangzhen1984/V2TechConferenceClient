@@ -95,6 +95,7 @@
                         android:src="@drawable/message_voice_lounder" />
 
                     <TextView
+                          android:id="@+id/conversation_fragment_connected_speaker_text"
                         android:layout_width="fill_parent"
                         android:layout_height="fill_parent"
                         android:gravity="center"
@@ -153,6 +154,7 @@
                         android:src="@drawable/message_voice_mute" />
 
                     <TextView
+                         android:id="@+id/conversation_fragment_connected_mute_text"
                         android:layout_width="fill_parent"
                         android:layout_height="wrap_content"
                         android:gravity="center"

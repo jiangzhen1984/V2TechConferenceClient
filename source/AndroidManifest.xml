@@ -3,7 +3,7 @@
     package="com.v2tech"
     android:sharedUserLabel="@string/app_name"
     android:versionCode="1"
-    android:versionName="1.3.0.61" >
+    android:versionName="1.3.0.62" >
 
     <uses-sdk
         android:minSdkVersion="13"
@@ -99,6 +99,7 @@
             android:name="com.v2tech.view.conversation.ConversationView"
             android:parentActivityName="com.v2tech.view.StartupActivity"
             android:screenOrientation="nosensor"
+             android:launchMode="singleTop"
             android:windowSoftInputMode="stateHidden|adjustUnspecified" >
             <intent-filter>
                 <action android:name="com.v2tech.start_conversation_activity" />

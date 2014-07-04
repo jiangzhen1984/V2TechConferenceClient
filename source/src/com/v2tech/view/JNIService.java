@@ -939,6 +939,7 @@ public class JNIService extends Service {
 						VMessageAudioItem item = list.get(i);
 						if (item.getUUID().equals(messageId)) {
 							item.setAudioFilePath(audioPath);
+							item.setState(VMessageAbstractItem.STATE_UNREAD);
 							cacheAudioMeta.remove(item);
 							vm = v;
 							break;

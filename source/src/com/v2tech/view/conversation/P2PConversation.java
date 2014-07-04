@@ -1,10 +1,16 @@
 package com.v2tech.view.conversation;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.content.Intent;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.Window;
+import android.widget.TextView;
 
 import com.v2tech.R;
 import com.v2tech.service.ConferenceService;
@@ -20,6 +26,10 @@ public class P2PConversation extends Activity implements TurnListener,
 	private ConferenceService cb = new ConferenceService();
 
 	private UserChattingObject uad;
+	
+	private boolean isStoped;
+	
+	private boolean isPending;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -37,12 +47,26 @@ public class P2PConversation extends Activity implements TurnListener,
 
 	@Override
 	public void turnToVideoUI() {
+		if (isStoped) {
+			isPending = true;
+			return;
+		}
 		Fragment fragment1 = new ConversationConnectedFragment();
 		FragmentTransaction transaction = getFragmentManager()
 				.beginTransaction();
 		transaction.replace(R.id.p2p_conversation_main, fragment1, "video");
 		transaction.addToBackStack(null);
 		transaction.commit();
+	}
+	
+	
+	
+	
+	
+
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		super.onSaveInstanceState(outState);
 	}
 
 	@Override
@@ -56,11 +80,16 @@ public class P2PConversation extends Activity implements TurnListener,
 	@Override
 	protected void onStart() {
 		super.onStart();
+		isStoped = false;
+		if (isPending) {
+			turnToVideoUI();
+		}
 	}
 
 	@Override
 	protected void onStop() {
 		super.onStop();
+		isStoped = true;
 	}
 
 	@Override
@@ -87,7 +116,41 @@ public class P2PConversation extends Activity implements TurnListener,
 
 	@Override
 	public void onBackPressed() {
-		finish();
+		showConfirmDialog();
+	}
+
+	private void showConfirmDialog() {
+		final Dialog dialog = new Dialog(this);
+		dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+		dialog.setContentView(R.layout.fragment_conversation_quit_dialog);
+		dialog.getWindow().setBackgroundDrawable(
+				new ColorDrawable(android.graphics.Color.TRANSPARENT));
+		
+		if (getObject().isAudioType()) {
+			((TextView) dialog
+					.findViewById(R.id.fragment_conversation_quit_dialog_content))
+					.setText(R.string.conversation_quit_dialog_audio_text);
+		}
+		dialog.findViewById(R.id.fragment_conversation_IMWCancelButton)
+				.setOnClickListener(new OnClickListener() {
+
+					@Override
+					public void onClick(View view) {
+						dialog.dismiss();
+					}
+
+				});
+
+		dialog.findViewById(R.id.fragment_conversation_IMWQuitButton)
+				.setOnClickListener(new OnClickListener() {
+
+					@Override
+					public void onClick(View view) {
+						finish();
+					}
+
+				});
+		dialog.show();
 	}
 
 	private UserChattingObject buildObject() {

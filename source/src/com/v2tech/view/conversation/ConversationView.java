@@ -9,6 +9,7 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -48,6 +49,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.v2tech.R;
+import com.v2tech.db.ContentDescriptor;
 import com.v2tech.service.BitmapManager;
 import com.v2tech.service.ChatService;
 import com.v2tech.service.GlobalHolder;
@@ -331,6 +333,33 @@ public class ConversationView extends Activity {
 		});
 
 	}
+	
+	private VMessage currentPlayed;
+	private boolean playNextUnreadMessage() {
+		boolean found = false;
+		for (int i =0; i < messageArray.size(); i++) {
+			CommonAdapterItemWrapper  wrapper = messageArray.get(i);
+			VMessage vm = (VMessage)wrapper.getItemObject();
+			if (vm == currentPlayed) {
+				found = true;
+				continue;
+			}
+			
+			if (found) {
+				List<VMessageAudioItem> items  = vm.getAudioItems();
+				if (items.size() > 0 && items.get(0).getState() == VMessageAbstractItem.STATE_UNREAD) {
+					this.scrollToPos(i);
+					listener.requestPlayAudio(null, vm, items.get(0));
+					((MessageBodyView)wrapper.getView()).updateUnreadFlag(false);
+					((MessageBodyView)wrapper.getView()).startVoiceAnimation();
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	
+	
 
 	private synchronized boolean startPlaying(String fileName) {
 		if (mPlayer != null && mPlayer.isPlaying()) {
@@ -343,7 +372,12 @@ public class ConversationView extends Activity {
 
 			@Override
 			public void onCompletion(MediaPlayer mp) {
-				// TODO auto play next
+				boolean flag = playNextUnreadMessage();
+				//To last message
+				if (!flag) {
+					currentPlayed = null;
+				}
+				
 			}
 
 		});
@@ -400,6 +434,7 @@ public class ConversationView extends Activity {
 					.findViewById(R.id.message_voice_dialog_listening_container);
 			mPreparedCancelLayout = root
 					.findViewById(R.id.message_voice_dialog_cancel_container);
+			mVoiceDialog.setCancelable(false);
 		}
 
 		if (mVoiceDialog.isShowing()) {
@@ -548,11 +583,10 @@ public class ConversationView extends Activity {
 
 	};
 
-	
 	private boolean voiceIsSentByTimer;
 	private String fileName = null;
 	private long starttime = 0;
-	
+
 	private OnTouchListener mButtonHolderListener = new OnTouchListener() {
 
 		@Override
@@ -567,8 +601,8 @@ public class ConversationView extends Activity {
 				}
 				// Start update db for voice
 				lh.postDelayed(mUpdateMicStatusTimer, 200);
-				//Start timer
-				lh.postDelayed(timeOutMonitor, 59*1000);
+				// Start timer
+				lh.postDelayed(timeOutMonitor, 59 * 1000);
 				starttime = System.currentTimeMillis();
 				voiceIsSentByTimer = false;
 			} else if (event.getAction() == MotionEvent.ACTION_MOVE) {
@@ -594,11 +628,12 @@ public class ConversationView extends Activity {
 				// check if touch position out of button than cancel send voice
 				// message
 				long seconds = (System.currentTimeMillis() - starttime);
-				if (r.contains((int) event.getX(), (int) event.getY())  && seconds > 1500) {
+				if (r.contains((int) event.getX(), (int) event.getY())
+						&& seconds > 1500) {
 					// send
 					VMessage vm = new VMessage(groupId, local, remote);
-					
-					new VMessageAudioItem(vm, fileName, (int)(seconds / 1000));
+
+					new VMessageAudioItem(vm, fileName, (int) (seconds / 1000));
 					// Send message to server
 					sendMessageToRemote(vm);
 				} else {
@@ -612,15 +647,14 @@ public class ConversationView extends Activity {
 				fileName = null;
 				lh.removeCallbacks(mUpdateMicStatusTimer);
 				showOrCloseVoiceDialog();
-				//Remove timer
+				// Remove timer
 				lh.removeCallbacks(timeOutMonitor);
 			}
 			return false;
 		}
 
 	};
-	
-	
+
 	private Runnable timeOutMonitor = new Runnable() {
 
 		@Override
@@ -630,16 +664,17 @@ public class ConversationView extends Activity {
 			// send
 			VMessage vm = new VMessage(groupId, local, remote);
 			int seconds = (int) ((System.currentTimeMillis() - starttime) / 1000) + 1;
-			new VMessageAudioItem(vm, fileName, seconds);
+			VMessageAudioItem vai = new VMessageAudioItem(vm, fileName, seconds);
+			vai.setState(VMessageAbstractItem.STATE_NORMAL);
 			// Send message to server
 			sendMessageToRemote(vm);
-			
+
 			starttime = 0;
 			fileName = null;
 			lh.removeCallbacks(mUpdateMicStatusTimer);
 			showOrCloseVoiceDialog();
 		}
-		
+
 	};
 
 	private OnClickListener moreFeatureButtonListenr = new OnClickListener() {
@@ -870,8 +905,8 @@ public class ConversationView extends Activity {
 				}
 
 				// check if exist last string
-				if (index == len - 1 && strStart < index) {
-					String strTextContent = str.substring(strStart, index);
+				if (index == len - 1 && strStart <= index) {
+					String strTextContent = str.substring(strStart, len);
 					new VMessageTextItem(vm, strTextContent);
 					strStart = index;
 				}
@@ -1002,8 +1037,25 @@ public class ConversationView extends Activity {
 		@Override
 		public void requestPlayAudio(View v, VMessage vm, VMessageAudioItem vai) {
 			if (vai != null && vai.getAudioFilePath() != null) {
+				currentPlayed = vm;
 				startPlaying(vai.getAudioFilePath());
+				if (vai.getState() == VMessageAbstractItem.STATE_UNREAD) {
+					vai.setState(VMessageAbstractItem.STATE_NORMAL);
+					ContentValues cv = new ContentValues();
+					cv.put(ContentDescriptor.MessageItems.Cols.STATE,
+							vai.getState());
+					mContext.getContentResolver().update(
+							ContentDescriptor.MessageItems.CONTENT_URI, cv,
+							ContentDescriptor.MessageItems.Cols.ID + " = ? ",
+							new String[] { vai.getId() + "" });
+
+				}
 			}
+		}
+
+		@Override
+		public void requestStopAudio(View v, VMessage vm, VMessageAudioItem vai) {
+			stopPlaying();
 		}
 
 	};
@@ -1091,6 +1143,7 @@ public class ConversationView extends Activity {
 			} else {
 				((MessageBodyView) convertView).updateView(vm);
 			}
+			((VMessageAdater)wr).setView(convertView);
 			return convertView;
 		}
 	};

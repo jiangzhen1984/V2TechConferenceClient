@@ -16,17 +16,22 @@ public abstract class VMessageAbstractItem {
 
 	public static final int ITEM_TYPE_VIDEO = 5;
 	
+	public static final int ITEM_TYPE_FILE = 6;
+	
 	
 	public static final int NEW_LINE_FLAG_VALUE = 1;
 	
 	
 	public static final int STATE_NORMAL = 0;
 	
+	//Use to mark audio item
 	public static final int STATE_UNREAD = 1;
 	
 	public static final int STATE_SENT_FALIED = 2;
 
 	protected VMessage vm;
+	
+	protected int id;
 
 	protected boolean isNewLine;
 
@@ -67,6 +72,14 @@ public abstract class VMessageAbstractItem {
 	}
 	
 	
+
+	public int getId() {
+		return id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
+	}
 
 	public int getState() {
 		return state;

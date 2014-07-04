@@ -268,6 +268,7 @@ public class MessageLoader {
 				ContentDescriptor.MessageItems.Cols.ID);
 
 		while (cur.moveToNext()) {
+			int id = cur.getInt(0);
 			// content
 			String content = cur.getString(2);
 			// Item type
@@ -305,6 +306,7 @@ public class MessageLoader {
 				vai.setNewLine(true);
 			}
 			
+			vai.setId(id);
 			vai.setUuid(uuid);
 			vai.setState(state);
 		}

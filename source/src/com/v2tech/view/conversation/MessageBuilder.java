@@ -72,7 +72,8 @@ public class MessageBuilder {
 					item.getType());
 			itemVal.put(ContentDescriptor.MessageItems.Cols.LINE,
 					item.isNewLine());
-			
+			itemVal.put(ContentDescriptor.MessageItems.Cols.STATE,
+					item.getState());
 			String content = null;
 
 			if (item.getType() == VMessageAbstractItem.ITEM_TYPE_TEXT) {
@@ -86,8 +87,9 @@ public class MessageBuilder {
 			}
 			
 			itemVal.put(ContentDescriptor.MessageItems.Cols.CONTENT, content);
-			context.getContentResolver().insert(
+			Uri itemUri = context.getContentResolver().insert(
 					ContentDescriptor.MessageItems.CONTENT_URI, itemVal);
+			item.setId(Integer.parseInt(itemUri.getLastPathSegment()));
 
 		}
 		return uri;

@@ -282,10 +282,13 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 				mIsStartedSearch = true;
 			}
 		} else {
-			mItemList = mCacheItemList;
-			adapter.notifyDataSetChanged();
-			mIsStartedSearch = false;
+			if (mIsStartedSearch) {
+				mItemList = mCacheItemList;
+				adapter.notifyDataSetChanged();
+				mIsStartedSearch = false;
+			}
 			return;
+			
 		}
 		String str = s == null ? "" : s.toString();
 		List<User> searchedUserList = new ArrayList<User>();

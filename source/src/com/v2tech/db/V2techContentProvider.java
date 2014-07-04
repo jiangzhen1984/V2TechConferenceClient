@@ -122,6 +122,9 @@ public class V2techContentProvider extends ContentProvider {
 		case ContentDescriptor.Messages.TOKEN:
 			table = ContentDescriptor.Messages.NAME;
 			break;
+		case ContentDescriptor.MessageItems.TOKEN:
+			table = ContentDescriptor.MessageItems.NAME;
+			break;
 		case ContentDescriptor.Conversation.TOKEN:
 			table = ContentDescriptor.Conversation.NAME;
 			break;

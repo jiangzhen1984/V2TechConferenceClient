@@ -9,6 +9,8 @@ public class VMessageAudioItem extends VMessageAbstractItem {
 	private String audioFilePath;
 	private int seconds;
 	
+	private boolean isPlaying;
+	
 	
 	public VMessageAudioItem(VMessage vm, String uuid, String extension,
 			String audioFilePath, int seconds) {
@@ -54,6 +56,18 @@ public class VMessageAudioItem extends VMessageAbstractItem {
 
 	public int getSeconds() {
 		return seconds;
+	}
+	
+	
+
+
+	public boolean isPlaying() {
+		return isPlaying;
+	}
+
+
+	public void setPlaying(boolean isPlaying) {
+		this.isPlaying = isPlaying;
 	}
 
 

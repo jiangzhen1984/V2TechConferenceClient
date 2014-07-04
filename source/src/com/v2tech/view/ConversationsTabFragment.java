@@ -86,7 +86,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher {
 	private View rootView;
 
 	private List<ScrollItem> mItemList = new CopyOnWriteArrayList<ScrollItem>();
-	private List<ScrollItem> mCacheItemList;
+	private List<Conversation> mCacheItemList;
 
 	private Context mContext;
 
@@ -244,30 +244,30 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher {
 	public void afterTextChanged(Editable s) {
 		if (s != null && s.length() > 0) {
 			if (!mIsStartedSearch) {
-				mCacheItemList = mItemList;
+				mCacheItemList = this.mConvList;
 				mIsStartedSearch = true;
 			}
 		} else {
 			if (mIsStartedSearch) {
-				mItemList = mCacheItemList;
+				mConvList = mCacheItemList;
 				adapter.notifyDataSetChanged();
 				mIsStartedSearch = false;
 			}
 			return;
 		}
-		List<ScrollItem> newItemList = new ArrayList<ScrollItem>();
+		List<Conversation> newItemList = new ArrayList<Conversation>();
 		String searchKey = s == null ? "" : s.toString();
 		for (int i = 0; mCacheItemList != null && i < mCacheItemList.size(); i++) {
-			ScrollItem item = mCacheItemList.get(i);
-			if (item.cov.getName() != null
-					&& item.cov.getName().contains(searchKey)) {
-				newItemList.add(item);
-			} else if (item.cov.getMsg() != null
-					&& item.cov.getMsg().toString().contains(searchKey)) {
-				newItemList.add(item);
+			Conversation cov = mCacheItemList.get(i);
+			if (cov.getName() != null
+					&& cov.getName().contains(searchKey)) {
+				newItemList.add(cov);
+			} else if (cov.getMsg() != null
+					&& cov.getMsg().toString().contains(searchKey)) {
+				newItemList.add(cov);
 			}
 		}
-		mItemList = newItemList;
+		mConvList = newItemList;
 		adapter.notifyDataSetChanged();
 	}
 
@@ -287,7 +287,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher {
 		super.setUserVisibleHint(isVisibleToUser);
 		// recover search result
 		if (!isVisibleToUser && mIsStartedSearch) {
-			mItemList = mCacheItemList;
+			mConvList = mCacheItemList;
 			adapter.notifyDataSetChanged();
 			mIsStartedSearch = false;
 			return;
@@ -351,7 +351,9 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher {
 	 * Load local conversation list
 	 */
 	private synchronized void loadConversation() {
-		isLoadedCov = true;
+		if (isLoadedCov) {
+			return;
+		}
 		Cursor mCur = getActivity().getContentResolver().query(
 				ContentDescriptor.Conversation.CONTENT_URI,
 				ContentDescriptor.Conversation.Cols.ALL_CLOS,
@@ -366,7 +368,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher {
 			mConvList.add(cov);
 		}
 		mCur.close();
-		
+		isLoadedCov = true;
 
 		fillAdapter(mConvList);
 	}
@@ -414,6 +416,9 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher {
 	
 
 	private void updateConversation(long extId, String type) {
+		if (!isLoadedCov) {
+			this.loadConversation();
+		}
 		Conversation existedCov = null;
 		GroupLayout viewLayout = null;
 		boolean foundFlag = false;
@@ -426,6 +431,8 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher {
 				break;
 			}
 		}
+		
+		
 		if (foundFlag) {
 			VMessage vm = MessageLoader.getNewestMessage(mContext, GlobalHolder
 					.getInstance().getCurrentUserId(), existedCov.getExtId());
@@ -470,6 +477,9 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher {
 	 * @param msgId
 	 */
 	private void updateConversation(long msgId) {
+		if (!isLoadedCov) {
+			this.loadConversation();
+		}
 		VMessage vm = MessageLoader.loadMessageById(mContext, msgId);
 		if (vm == null) {
 			V2Log.e("Didn't find message " + msgId);
@@ -497,6 +507,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher {
 				break;
 			}
 		}
+		
 
 		if (!foundFlag) {
 			if (mCurrentTabFlag.equals(Conversation.TYPE_CONTACT)) {
@@ -811,8 +822,11 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher {
 			//From this broadcast, user has already read conversation
 			} else if (PublicIntent.REQUEST_UPDATE_CONVERSATION.equals(intent
 					.getAction())) {
-				Message.obtain(mHandler, UPDATE_CONVERSATION,
-						intent.getExtras().get("obj")).sendToTarget();
+				ConversationNotificationObject uao = (ConversationNotificationObject)intent.getExtras().get("obj");
+				if (mCurrentTabFlag.equals(uao.getType())) {
+					Message.obtain(mHandler, UPDATE_CONVERSATION,
+							uao).sendToTarget();
+				}
 
 			} else if (JNIService.JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION
 					.equals(intent.getAction())) {

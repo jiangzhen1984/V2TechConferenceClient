@@ -23,6 +23,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -48,6 +49,8 @@ public class MessageBodyView extends LinearLayout {
 	private ImageView mArrowIV;
 	private TextView timeTV;
 	private TextView seconds;
+	private View failedIcon;
+	private View unReadIcon;
 
 	private View rootView;
 
@@ -65,7 +68,10 @@ public class MessageBodyView extends LinearLayout {
 
 	public interface ClickListener {
 		public void onMessageClicked(VMessage v);
+
 		public void requestPlayAudio(View v, VMessage vm, VMessageAudioItem vai);
+
+		public void requestStopAudio(View v, VMessage vm, VMessageAudioItem vai);
 	}
 
 	public MessageBodyView(Context context, VMessage m) {
@@ -129,8 +135,15 @@ public class MessageBodyView extends LinearLayout {
 			mArrowIV.bringToFront();
 			mLocalMessageContainter.setVisibility(View.VISIBLE);
 			mRemoteMessageContainter.setVisibility(View.GONE);
-			seconds = (TextView)rootView
+			seconds = (TextView) rootView
 					.findViewById(R.id.message_body_video_item_second_left);
+
+			failedIcon = rootView
+					.findViewById(R.id.message_body_failed_item_left);
+			failedIcon.setVisibility(View.GONE);
+			unReadIcon = rootView
+					.findViewById(R.id.message_body_unread_icon_left);
+			unReadIcon.setVisibility(View.GONE);
 		} else {
 			mHeadIcon = (ImageView) rootView
 					.findViewById(R.id.conversation_message_body_icon_right);
@@ -141,9 +154,15 @@ public class MessageBodyView extends LinearLayout {
 			mArrowIV.bringToFront();
 			mLocalMessageContainter.setVisibility(View.GONE);
 			mRemoteMessageContainter.setVisibility(View.VISIBLE);
-			seconds = (TextView)rootView
+			seconds = (TextView) rootView
 					.findViewById(R.id.message_body_video_item_second_right);
+			failedIcon = rootView
+					.findViewById(R.id.message_body_failed_item_right);
 
+			unReadIcon = rootView
+					.findViewById(R.id.message_body_unread_icon_right);
+			unReadIcon.setVisibility(View.GONE);
+			failedIcon.setVisibility(View.GONE);
 		}
 
 		if (mMsg.getFromUser() != null && mMsg.getFromUser().isDirty()) {
@@ -168,6 +187,11 @@ public class MessageBodyView extends LinearLayout {
 	}
 
 	private void populateMessage() {
+		List<VMessageAudioItem> audioItems = mMsg.getAudioItems();
+		if (audioItems.size() > 0) {
+			populateAudioMessage(audioItems);
+			return;
+		}
 
 		TextView et = new TextView(this.getContext());
 		et.setOnLongClickListener(messageLongClickListener);
@@ -179,7 +203,6 @@ public class MessageBodyView extends LinearLayout {
 				LinearLayout.LayoutParams.WRAP_CONTENT);
 		mContentContainer.addView(et, ll);
 
-		boolean existAudioItem = false;
 		List<VMessageAbstractItem> items = mMsg.getItems();
 		for (int i = 0; items != null && i < items.size(); i++) {
 			VMessageAbstractItem item = items.get(i);
@@ -220,26 +243,92 @@ public class MessageBodyView extends LinearLayout {
 				builder.setSpan(is, et.getText().length() - 1, et.getText()
 						.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 				et.setText(builder);
-			//AudioItem only has one item 
-			} else if (item.getType() == VMessageAbstractItem.ITEM_TYPE_AUDIO) {
-				VMessageAudioItem  vai = (VMessageAudioItem)item;
-				StringBuilder sb = new StringBuilder(vai.getSeconds());
-				for (int in =0;in <vai.getSeconds() && in < 25; in++) {
-					sb.append("  ");
-				}
-				et.setText(sb.toString());
-				seconds.setText(vai.getSeconds()+"''");
-				existAudioItem = true;
+				// AudioItem only has one item
+			} 
+
+			if (item.getState() == VMessageAbstractItem.STATE_SENT_FALIED) {
+				failedIcon.setVisibility(View.VISIBLE);
 			}
 
 		}
 
-		if (existAudioItem) {
-			seconds.setVisibility(View.VISIBLE);
-		} else {
-			seconds.setVisibility(View.GONE);
-		}
+		
 		mContentContainer.setTag(this.mMsg);
+
+	}
+
+	/**
+	 * Now only handle one audio message
+	 * 
+	 * @param audioItems
+	 */
+	private void populateAudioMessage(List<VMessageAudioItem> audioItems) {
+		final VMessageAudioItem item = audioItems.get(0);
+		if (item.getState() == VMessageAbstractItem.STATE_UNREAD) {
+			unReadIcon.setVisibility(View.VISIBLE);
+		} else if (item.getState() == VMessageAbstractItem.STATE_SENT_FALIED) {
+			failedIcon.setVisibility(View.VISIBLE);
+		}
+
+		seconds.setVisibility(View.VISIBLE);
+		seconds.setText(item.getSeconds() + "''");
+		
+		RelativeLayout audioRoot = new RelativeLayout(getContext());
+		ImageView micIv = new ImageView(getContext());
+		micIv.setId(micIv.hashCode());
+		
+		
+		RelativeLayout.LayoutParams micIvLy = new RelativeLayout.LayoutParams(
+				RelativeLayout.LayoutParams.WRAP_CONTENT,
+				RelativeLayout.LayoutParams.WRAP_CONTENT);
+		
+		
+		TextView tv = new TextView(getContext());
+		tv.setId(tv.hashCode());
+		for (int in = 0; in < item.getSeconds() && in < 40; in++) {
+			tv.append(" ");
+		}
+		
+		RelativeLayout.LayoutParams tvIvLy = new RelativeLayout.LayoutParams(
+				RelativeLayout.LayoutParams.WRAP_CONTENT,
+				RelativeLayout.LayoutParams.WRAP_CONTENT);
+		
+		
+		if (mMsg.isLocal()) {
+			micIv.setImageResource(R.drawable.voice_message_mic_icon_selector);
+			audioRoot.addView(tv, tvIvLy);
+			
+			micIvLy.addRule(RelativeLayout.RIGHT_OF, tv.getId());
+			audioRoot.addView(micIv, micIvLy);
+			
+		} else {
+			micIvLy.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+			micIv.setImageResource(R.drawable.voice_message_mic_icon_selector);
+			audioRoot.addView(micIv, micIvLy);
+			
+			tvIvLy.addRule(RelativeLayout.RIGHT_OF, micIv.getId());
+			audioRoot.addView(tv, tvIvLy);
+		}
+		
+	
+		
+		audioRoot.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View view) {
+				if (item.isPlaying()) {
+					callback.requestStopAudio(view, mMsg, item);
+				} else {
+					callback.requestPlayAudio(view, mMsg, item);
+					item.setPlaying(true);
+					updateUnreadFlag(false);
+				}
+			}
+			
+		});
+		mContentContainer.addView(audioRoot, new LinearLayout.LayoutParams(
+				LinearLayout.LayoutParams.WRAP_CONTENT,
+				LinearLayout.LayoutParams.WRAP_CONTENT));
 
 	}
 
@@ -346,6 +435,22 @@ public class MessageBodyView extends LinearLayout {
 		isShowTime = showTime;
 		updateView(vm);
 	}
+	
+	public void updateUnreadFlag(boolean flag) {
+		if (!flag) {
+			this.unReadIcon.setVisibility(View.GONE);
+		} else {
+			this.unReadIcon.setVisibility(View.VISIBLE);
+		}
+	}
+	
+	public void startVoiceAnimation() {
+		
+	}
+	
+	public void stopVoiceAnimation() {
+		
+	}
 
 	public void updateView(VMessage vm) {
 		if (vm == null) {
@@ -382,10 +487,16 @@ public class MessageBodyView extends LinearLayout {
 				if (vl != null && vl.size() > 0) {
 					callback.onMessageClicked(mMsg);
 				}
-				
+
 				List<VMessageAudioItem> al = mMsg.getAudioItems();
 				if (al != null && al.size() > 0) {
-					callback.requestPlayAudio(anchor, mMsg, al.get(0));
+					VMessageAudioItem audioItem = al.get(0);
+					if (audioItem.isPlaying()) {
+						callback.requestStopAudio(anchor, mMsg, audioItem);
+					} else {
+						callback.requestPlayAudio(anchor, mMsg, audioItem);
+						audioItem.setPlaying(true);
+					}
 				}
 			}
 		}

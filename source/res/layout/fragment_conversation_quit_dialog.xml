@@ -34,7 +34,7 @@
         android:layout_height="fill_parent" >
 
         <Button
-            android:id="@+id/IMWQuitButton"
+            android:id="@+id/fragment_conversation_IMWCancelButton"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight=".5"
@@ -55,7 +55,7 @@
         </LinearLayout>
 
         <Button
-            android:id="@+id/IMWCancelButton"
+            android:id="@+id/fragment_conversation_IMWQuitButton"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight=".5"
