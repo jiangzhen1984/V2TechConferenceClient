@@ -923,6 +923,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher {
 				// Add conference to conversation list
 				addConversation(conf, false);
 				Conference c = new Conference(conf.getmGId());
+				c.setCreator(conf.getOwner());
 				c.setName(conf.getName());
 				startConferenceActivity(c);
 			}

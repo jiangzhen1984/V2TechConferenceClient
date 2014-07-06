@@ -290,6 +290,13 @@ public class ConversationConnectedFragment extends Fragment {
 
 		@Override
 		public void onClick(View view) {
+			if (view.getTag()== null || view.getTag().equals("opened")) {
+				call.closeLocalCamera();
+				view.setTag("closed");
+			} else {
+				call.openLocalCamera();
+				view.setTag("opened");
+			}
 		}
 
 	};

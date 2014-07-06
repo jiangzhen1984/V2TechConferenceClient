@@ -8,7 +8,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@drawable/conversation_framgent_bg"
-        android:orientation="vertical" >
+        android:orientation="vertical"
+        android:visibility="gone" >
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -173,7 +174,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@drawable/conversation_framgent_bg"
-        android:visibility="gone" >
+         >
 
         <FrameLayout
             android:id="@+id/fragment_conversation_connected_video_remote_surface_container"

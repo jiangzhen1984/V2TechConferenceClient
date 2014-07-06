@@ -368,6 +368,8 @@ public class VideoActivityV2 extends Activity {
 		mPendingMessageList = new ArrayList<VMessage>();
 
 		mPendingPermissionUpdateList = new ArrayList<PermissionUpdateIndication>();
+		//Set default speaking state if current user is owner, then should apply speaking default;
+		isSpeaking = conf.getCreator() == GlobalHolder.getInstance().getCurrentUserId()? true: false;
 	}
 
 	/**
@@ -1289,6 +1291,13 @@ public class VideoActivityV2 extends Activity {
 			// Make sure local camera is first front of all
 			Message.obtain(mVideoHandler, ONLY_SHOW_LOCAL_VIDEO).sendToTarget();
 			adjustLayout();
+			
+			//Send speaking status
+			doApplyOrReleaseSpeak();
+			// Make sure update start after send request,
+			// because update state will update isSpeaking value
+			updateSpeakerState(isSpeaking);
+			
 		} else {
 			for (SurfaceViewW sw : this.mCurrentShowedSV) {
 				Message.obtain(mVideoHandler, REQUEST_OPEN_OR_CLOSE_DEVICE, 0,

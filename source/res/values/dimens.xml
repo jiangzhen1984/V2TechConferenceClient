@@ -88,6 +88,10 @@
     <dimen name="fragment_conversation_waiting_invitation_voice_avatar_margin_top">40dp</dimen>
     <dimen name="fragment_conversation_waiting_host_invitation_button_margin_left">20dp</dimen>
     <dimen name="fragment_conversation_waiting_host_invitation_button_margin_right">20dp</dimen>
+    <dimen name="fragment_conversation_waiting_invitation_video_avatar_margin_top">40dp</dimen>
+    <dimen name="fragment_conversation_waiting_invitation_video_avatar_margin_left">20dp</dimen>
+    <dimen name="fragment_conversation_waiting_invitation_video_name_margin_left">20dp</dimen>
+    
 
     <!-- fragment conversation connected layout -->
     <dimen name="fragment_conversation_connected_voice_gray_button_padding_vertical">20dp</dimen>

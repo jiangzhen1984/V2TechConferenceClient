@@ -14,6 +14,38 @@
             android:layout_height="0dp"
             android:layout_weight=".25" >
 
+            <ImageView
+                android:id="@+id/conversation_fragment_video_avatar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentTop="true"
+                android:layout_marginLeft="@dimen/fragment_conversation_waiting_invitation_video_avatar_margin_left"
+                android:layout_marginTop="@dimen/fragment_conversation_waiting_invitation_video_avatar_margin_top"
+                android:src="@drawable/avatar" />
+
+            <TextView
+                android:id="@+id/conversation_fragment_video_invitation_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignTop="@+id/conversation_fragment_video_avatar"
+                android:layout_marginLeft="@dimen/fragment_conversation_waiting_invitation_video_name_margin_left"
+                android:layout_toRightOf="@+id/conversation_fragment_video_avatar"
+                android:text="名字"
+                android:textColor="@color/fragment_conversation_title_text_color"
+                android:textSize="@dimen/fragment_conversation_waiting_invitation_host_name_size" />
+
+            <TextView
+                android:id="@+id/fragment_conversation_video_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBottom="@+id/conversation_fragment_video_avatar"
+                android:layout_marginLeft="@dimen/fragment_conversation_waiting_invitation_video_name_margin_left"
+                android:layout_toRightOf="@+id/conversation_fragment_video_avatar"
+                android:text="@string/conversation_waiting"
+                android:textColor="@color/fragment_conversation_title_text_color"
+                android:textSize="@dimen/fragment_conversation_waiting_title_text_size" />
+
             <TextView
                 android:id="@+id/fragment_conversation_title"
                 android:layout_width="fill_parent"

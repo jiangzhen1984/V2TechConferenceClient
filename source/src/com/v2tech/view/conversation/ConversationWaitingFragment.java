@@ -116,8 +116,16 @@ public class ConversationWaitingFragment extends Fragment {
 		
 		if (uad.isVideoType()) {
 			mAcceptVocieOnlyButton.setVisibility(View.VISIBLE);
+			mTitleTV.setVisibility(View.GONE);
+			v.findViewById(R.id.conversation_fragment_voice_center_container).setVisibility(View.GONE);
+			mAvatar = (ImageView)v.findViewById(R.id.conversation_fragment_video_avatar);
+			mInvitationNameTV = (TextView)v.findViewById(R.id.conversation_fragment_video_invitation_name);
+			
 		} else {
 			mAcceptVocieOnlyButton.setVisibility(View.GONE);
+			v.findViewById(R.id.conversation_fragment_video_avatar).setVisibility(View.GONE);
+			v.findViewById(R.id.conversation_fragment_voice_invitation_name).setVisibility(View.GONE);
+			v.findViewById(R.id.fragment_conversation_video_title).setVisibility(View.GONE);
 		}
 
 		// FIXME handle when user changed avatar
