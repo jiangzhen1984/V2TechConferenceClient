@@ -1,7 +1,6 @@
 package com.v2tech.view.conversation;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -388,17 +387,18 @@ public class ConversationView extends Activity {
 	}
 
 	private InputStream currentPlayedStream;
+
 	private synchronized boolean startPlaying(String fileName) {
 
 		mAACPlayer = new ArrayAACPlayer(
 				ArrayDecoder.create(Decoder.DECODER_FAAD2), mAACPlayerCallback,
-				1200, 600);
+				AACPlayer.DEFAULT_AUDIO_BUFFER_CAPACITY_MS, AACPlayer.DEFAULT_DECODE_BUFFER_CAPACITY_MS);
 		try {
 			if (currentPlayedStream != null) {
 				currentPlayedStream.close();
 			}
-			currentPlayedStream = new FileInputStream(new File (fileName));
-			mAACPlayer.play(currentPlayedStream);
+			//currentPlayedStream = new FileInputStream(new File(fileName));
+			mAACPlayer.playAsync(fileName);
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (Exception e) {
@@ -510,25 +510,30 @@ public class ConversationView extends Activity {
 	 * @return
 	 */
 	private boolean startReocrding(String filePath) {
-		mRecorder = new MediaRecorder();
-		mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-		mRecorder.setOutputFormat(MediaRecorder.OutputFormat.AAC_ADTS);
-		mRecorder.setOutputFile(filePath);
-		mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
-
-		try {
-			mRecorder.prepare();
-		} catch (IOException e) {
-			V2Log.e(" can not prepare media recorder ");
-			return false;
-		}
-
-		mRecorder.start();
+		
+		 mRecorder = new MediaRecorder();
+		 mRecorder.reset();
+		 mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+		 mRecorder.setOutputFormat(MediaRecorder.OutputFormat.AAC_ADTS);
+		 mRecorder.setOutputFile(filePath);
+		 mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
+		 mRecorder.setMaxDuration(60000);
+		 mRecorder.setAudioSamplingRate(44100);
+		 mRecorder.setAudioChannels(2);
+		 try {
+		 mRecorder.prepare();
+		 } catch (IOException e) {
+		 V2Log.e(" can not prepare media recorder ");
+		 return false;
+		 }
+		
+		 mRecorder.start();
 		return true;
 	}
 
 	private void stopRecording() {
 		// mRecorder.stop();
+		mRecorder.stop();
 		mRecorder.release();
 		mRecorder = null;
 	}
@@ -557,30 +562,34 @@ public class ConversationView extends Activity {
 
 		@Override
 		public void playerStarted() {
-			V2Log.e("=====start");
+			currentPlayed.getAudioItems().get(0).setPlaying(true);
 		}
 
 		@Override
 		public void playerPCMFeedBuffer(boolean isPlaying,
 				int audioBufferSizeMs, int audioBufferCapacityMs) {
-			V2Log.e(audioBufferSizeMs + "  "+ audioBufferCapacityMs);
+			V2Log.e(audioBufferSizeMs + "  " + audioBufferCapacityMs);
 			if (audioBufferSizeMs == audioBufferCapacityMs) {
-				boolean flag = playNextUnreadMessage();
-				// To last message
-				if (!flag) {
-					currentPlayed = null;
-				}
+				
 			}
 		}
 
 		@Override
 		public void playerStopped(int perf) {
-
+			if (currentPlayed != null && currentPlayed.getAudioItems().size() > 0) {
+				currentPlayed.getAudioItems().get(0).setPlaying(false);
+			}
+			boolean flag = playNextUnreadMessage();
+			// To last message
+			if (!flag) {
+				currentPlayed = null;
+			}
 		}
 
 		@Override
 		public void playerException(Throwable t) {
 			playerStopped(0);
+			currentPlayed.getAudioItems().get(0).setPlaying(false);
 		}
 
 	};
@@ -1136,6 +1145,7 @@ public class ConversationView extends Activity {
 
 		@Override
 		public void requestStopAudio(View v, VMessage vm, VMessageAudioItem vai) {
+			vai.setPlaying(false);
 			stopPlaying();
 		}
 

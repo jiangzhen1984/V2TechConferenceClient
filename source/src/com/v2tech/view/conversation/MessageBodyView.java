@@ -333,7 +333,6 @@ public class MessageBodyView extends LinearLayout {
 					callback.requestStopAudio(view, mMsg, item);
 				} else {
 					callback.requestPlayAudio(view, mMsg, item);
-					item.setPlaying(true);
 					updateUnreadFlag(false);
 				}
 			}

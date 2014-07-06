@@ -193,10 +193,12 @@ public abstract class PCMFeed implements Runnable, AudioTrack.OnPlaybackPosition
      */
     public void onPeriodicNotification( AudioTrack track ) {
         if (playerCallback != null) {
-            int buffered = writtenTotal - track.getPlaybackHeadPosition()*channels;
-            int ms = samplesToMs( buffered, sampleRate, channels );
-
-            playerCallback.playerPCMFeedBuffer( isPlaying, ms, bufferSizeInMs );
+        	if (track.getPlayState() != AudioTrack.PLAYSTATE_STOPPED) { 
+	            int buffered = writtenTotal - track.getPlaybackHeadPosition()*channels;
+	            int ms = samplesToMs( buffered, sampleRate, channels );
+	
+	            playerCallback.playerPCMFeedBuffer( isPlaying, ms, bufferSizeInMs );
+        	}
         }
     }
 
