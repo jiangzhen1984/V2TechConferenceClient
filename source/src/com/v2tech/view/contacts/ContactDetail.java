@@ -21,7 +21,6 @@ import android.view.View.OnClickListener;
 import android.view.View.OnFocusChangeListener;
 import android.view.View.OnTouchListener;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -29,11 +28,13 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.RadioGroup.OnCheckedChangeListener;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.v2tech.R;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.service.Registrant;
 import com.v2tech.service.UserService;
+import com.v2tech.util.SPUtil;
 import com.v2tech.view.PublicIntent;
 import com.v2tech.view.bo.ConversationNotificationObject;
 import com.v2tech.vo.Conversation;
@@ -44,6 +45,8 @@ public class ContactDetail extends Activity implements OnTouchListener {
 
 	private static final int UPDATE_USER_INFO = 2;
 	private static final int UPDATE_USER_INFO_DONE = 3;
+
+	private static final int FILE_SELECT_CODE = 100;
 
 	private Context mContext;
 
@@ -75,6 +78,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 	private View mMoreDetailButton;
 	private View mVideoCallButton;
 	private View mSendSmsButton;
+	private View mSendFilesButton;
 
 	// view for self
 	private EditText mSignature;
@@ -108,6 +112,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 		if (v != null) {
 			v.setOnTouchListener(this);
 		}
+
 		this.overridePendingTransition(R.animator.alpha_from_0_to_1,
 				R.animator.alpha_from_1_to_0);
 	}
@@ -163,6 +168,26 @@ public class ContactDetail extends Activity implements OnTouchListener {
 		return super.onTouchEvent(mv);
 	}
 
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		switch (requestCode) {
+		case FILE_SELECT_CODE:
+			if (resultCode == RESULT_OK) {
+				// Get the Uri of the selected file
+				Uri uri = data.getData();
+				String path = SPUtil.getPath(this, uri);
+				if (path == null) {
+					Toast.makeText(
+							mContext,
+							R.string.contacts_user_detail_file_selection_not_found_path,
+							Toast.LENGTH_SHORT).show();
+				}
+			}
+			break;
+		}
+		super.onActivityResult(requestCode, resultCode, data);
+	}
+
 	private void initView() {
 		mHeadIconIV = (ImageView) findViewById(R.id.contact_user_detail_head_icon);
 		mNameTitleIV = (TextView) findViewById(R.id.contact_user_detail_title);
@@ -181,6 +206,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 		mCreateConfButton = findViewById(R.id.contact_user_detail_create_conf_bottom_button);
 		mVideoCallButton = findViewById(R.id.contact_user_detail_video_call_bottom_button);
 		mSendSmsButton = findViewById(R.id.contact_user_detail_send_sms_bottom_button);
+		mSendFilesButton = findViewById(R.id.contact_user_detail_send_files_bottom_button);
 
 		mTitleTV = (TextView) findViewById(R.id.contact_user_n_detail_title_tv);
 		mAddressTV = (TextView) findViewById(R.id.contact_user_n_detail_address_tv);
@@ -286,6 +312,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 			if (mSendSmsButton != null) {
 				mSendSmsButton.setOnClickListener(mSendSmsMsgListener);
 			}
+			mSendFilesButton.setOnClickListener(mfileSelectionButtonListener);
 
 		}
 
@@ -324,8 +351,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 
 	private void showCallDialog(String tel, String phone, boolean voice) {
 
-		d = new Dialog(mContext,
-				R.style.ContactUserDetailVoiceCallDialog);
+		d = new Dialog(mContext, R.style.ContactUserDetailVoiceCallDialog);
 
 		d.setContentView(R.layout.contacts_user_detail_call_dialog_window);
 		TextView tv = (TextView) d
@@ -343,7 +369,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 			tv.setTag(tel);
 			tv1.setText(phone);
 			tv1.setTag(phone);
-		} else if (tel != null || phone != null ){
+		} else if (tel != null || phone != null) {
 			tv.setText(tel == null ? phone : tel);
 			tv.setTag(tel == null ? phone : tel);
 			tv1.setVisibility(View.GONE);
@@ -357,7 +383,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 		} else {
 			tv2.setVisibility(View.GONE);
 		}
-		
+
 		d.show();
 
 	}
@@ -375,7 +401,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 			} else {
 				Intent intent = new Intent();
 				intent.setAction(Intent.ACTION_CALL);
-				intent.setData(Uri.parse("tel:" + (String)view.getTag()));
+				intent.setData(Uri.parse("tel:" + (String) view.getTag()));
 				startActivity(intent);
 			}
 		}
@@ -476,7 +502,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 			Intent smsIntent = new Intent(Intent.ACTION_VIEW);
 			if (u.getTelephone() != null && !u.getTelephone().isEmpty()) {
 				smsIntent.putExtra("address", u.getTelephone());
-			} else if (u.getCellPhone() != null && !u.getCellPhone().isEmpty()){
+			} else if (u.getCellPhone() != null && !u.getCellPhone().isEmpty()) {
 				smsIntent.putExtra("address", u.getCellPhone());
 			} else {
 				smsIntent.putExtra("address", "");
@@ -484,6 +510,24 @@ public class ContactDetail extends Activity implements OnTouchListener {
 
 			smsIntent.setType("vnd.android-dir/mms-sms");
 			startActivity(smsIntent);
+		}
+	};
+
+	private View.OnClickListener mfileSelectionButtonListener = new View.OnClickListener() {
+		@Override
+		public void onClick(View arg0) {
+			Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+			intent.setType("*/*");
+			intent.addCategory(Intent.CATEGORY_OPENABLE);
+
+			try {
+				startActivityForResult(
+						Intent.createChooser(intent, "Select a File to Upload"),
+						FILE_SELECT_CODE);
+			} catch (android.content.ActivityNotFoundException ex) {
+				Toast.makeText(mContext, "Please install a File Manager.",
+						Toast.LENGTH_SHORT).show();
+			}
 		}
 	};
 

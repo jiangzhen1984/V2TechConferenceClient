@@ -144,7 +144,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="1dp"
-                        android:layout_marginRight="1dp"  >
+                        android:layout_marginRight="1dp" >
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -221,7 +221,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="1dp"
-                        android:layout_marginRight="1dp"  >
+                        android:layout_marginRight="1dp" >
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -319,7 +319,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="1dp"
-                        android:layout_marginRight="1dp"  >
+                        android:layout_marginRight="1dp" >
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -396,7 +396,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="1dp"
-                        android:layout_marginRight="1dp"  >
+                        android:layout_marginRight="1dp" >
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -465,7 +465,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="1dp"
-                        android:layout_marginRight="1dp"  >
+                        android:layout_marginRight="1dp" >
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -545,7 +545,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="1dp"
-                        android:layout_marginRight="1dp"  >
+                        android:layout_marginRight="1dp" >
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -656,7 +656,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="1dp"
-                        android:layout_marginRight="1dp"  >
+                        android:layout_marginRight="1dp" >
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -848,7 +848,7 @@
             </LinearLayout>
 
             <LinearLayout
-                 android:id="@+id/contact_user_detail_video_call_bottom_button"
+                android:id="@+id/contact_user_detail_video_call_bottom_button"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="0.16"
@@ -870,7 +870,7 @@
                     android:paddingRight="10dp"
                     android:paddingTop="10dp"
                     android:text="@string/contacts_user_detail_button_invite_video_call"
-                   android:textColor="@color/contact_detail_button_font_color"
+                    android:textColor="@color/contact_detail_button_font_color"
                     android:textSize="@dimen/common_item_text_size" />
             </LinearLayout>
 
@@ -949,6 +949,7 @@
             </LinearLayout>
 
             <LinearLayout
+                android:id="@+id/contact_user_detail_send_files_bottom_button"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="0.16"
@@ -959,7 +960,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="right|center_vertical"
-                    android:src="@drawable/contact_detail_file_button_disable" />
+                    android:src="@drawable/contact_detail_file_button" />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -970,7 +971,7 @@
                     android:paddingRight="10dp"
                     android:paddingTop="10dp"
                     android:text="@string/contacts_user_detail_button_send_file"
-                    android:textColor="#c2c2c2"
+                    android:textColor="@color/contact_detail_button_font_color"
                     android:textSize="@dimen/common_item_text_size" />
             </LinearLayout>
         </LinearLayout>

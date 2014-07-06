@@ -158,6 +158,17 @@ public class VMessage {
 		return videoItems;
 	}
 	
+	
+	public List<VMessageFileItem>  getFileItems() {
+		List<VMessageFileItem> fileItems = new ArrayList<VMessageFileItem>();
+		for (VMessageAbstractItem item : itemList) {
+			if (item.getType() == VMessageAbstractItem.ITEM_TYPE_FILE) {
+				fileItems.add((VMessageFileItem)item);
+			}
+		}
+		return fileItems;
+	}
+	
 
 	public String getUUID() {
 		return mUUID;

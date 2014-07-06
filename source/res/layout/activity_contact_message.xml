@@ -175,7 +175,8 @@
             android:layout_height="wrap_content"
             android:background="#ffffff"
             android:orientation="vertical"
-            android:visibility="gone" >
+            android:visibility="gone"
+             >
 
             <RelativeLayout
                 android:id="@+id/contact_message_sub_feature_ly_inner"
@@ -208,6 +209,15 @@
                     android:layout_toRightOf="@+id/message_smile_icon"
                     android:padding="15dp"
                     android:src="@drawable/message_send_image_button" />
+                
+                <ImageView
+                    android:id="@+id/contact_message_send_file_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_toRightOf="@+id/contact_message_send_image_button"
+                    android:padding="15dp"
+                    android:src="@drawable/contact_detail_file_button" />
             </RelativeLayout>
 
             <HorizontalScrollView

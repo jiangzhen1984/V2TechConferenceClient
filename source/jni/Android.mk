@@ -35,3 +35,10 @@ LOCAL_MODULE := udt-prebuilt
 LOCAL_SRC_FILES := ../libs/libudt.so
 LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)/..
 include $(PREBUILT_SHARED_LIBRARY)
+
+AAC_DECODERS 	:=	faad2 opencore-aacdec
+LOGLEVEL 		:=	info
+# ffmpeg 
+
+
+include $(LOCAL_PATH)/aac-decoder/Android.mk

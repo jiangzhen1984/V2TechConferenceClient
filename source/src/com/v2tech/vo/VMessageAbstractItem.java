@@ -28,6 +28,16 @@ public abstract class VMessageAbstractItem {
 	public static final int STATE_UNREAD = 1;
 	
 	public static final int STATE_SENT_FALIED = 2;
+	
+	//Use to mark file item
+	public static final int STATE_FILE_NORMAL = 0;
+	public static final int STATE_FILE_DOWNLOADING = 4;
+	public static final int STATE_FILE_PAUSED = 5;
+	public static final int STATE_FILE_MISS_DOWNLOAD = 6;
+	public static final int STATE_FILE_SENDING = 7;
+	public static final int STATE_FILE_DOWNLOADED_FALIED = 8;
+	public static final int STATE_FILE_SENT_FALIED = 9;
+	
 
 	protected VMessage vm;
 	

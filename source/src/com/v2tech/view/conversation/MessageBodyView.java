@@ -37,6 +37,7 @@ import com.v2tech.vo.VMessage;
 import com.v2tech.vo.VMessageAbstractItem;
 import com.v2tech.vo.VMessageAudioItem;
 import com.v2tech.vo.VMessageFaceItem;
+import com.v2tech.vo.VMessageFileItem;
 import com.v2tech.vo.VMessageImageItem;
 import com.v2tech.vo.VMessageTextItem;
 
@@ -72,6 +73,16 @@ public class MessageBodyView extends LinearLayout {
 		public void requestPlayAudio(View v, VMessage vm, VMessageAudioItem vai);
 
 		public void requestStopAudio(View v, VMessage vm, VMessageAudioItem vai);
+
+		public void requestDownloadFile(View v, VMessage vm,
+				VMessageFileItem vfi);
+
+		public void requestPauseDownloadingFile(View v, VMessage vm,
+				VMessageFileItem vfi);
+
+		public void requestResumeDownloadingFile(View v, VMessage vm,
+				VMessageAudioItem vfi);
+
 	}
 
 	public MessageBodyView(Context context, VMessage m) {
@@ -140,10 +151,11 @@ public class MessageBodyView extends LinearLayout {
 
 			failedIcon = rootView
 					.findViewById(R.id.message_body_failed_item_left);
-			failedIcon.setVisibility(View.GONE);
 			unReadIcon = rootView
 					.findViewById(R.id.message_body_unread_icon_left);
+			failedIcon.setVisibility(View.GONE);
 			unReadIcon.setVisibility(View.GONE);
+			seconds.setVisibility(View.GONE);
 		} else {
 			mHeadIcon = (ImageView) rootView
 					.findViewById(R.id.conversation_message_body_icon_right);
@@ -163,6 +175,7 @@ public class MessageBodyView extends LinearLayout {
 					.findViewById(R.id.message_body_unread_icon_right);
 			unReadIcon.setVisibility(View.GONE);
 			failedIcon.setVisibility(View.GONE);
+			seconds.setVisibility(View.GONE);
 		}
 
 		if (mMsg.getFromUser() != null && mMsg.getFromUser().isDirty()) {
@@ -190,6 +203,12 @@ public class MessageBodyView extends LinearLayout {
 		List<VMessageAudioItem> audioItems = mMsg.getAudioItems();
 		if (audioItems.size() > 0) {
 			populateAudioMessage(audioItems);
+			return;
+		}
+
+		List<VMessageFileItem> fileItems = mMsg.getFileItems();
+		if (fileItems.size() > 0) {
+			populateFileItem(fileItems);
 			return;
 		}
 
@@ -244,7 +263,7 @@ public class MessageBodyView extends LinearLayout {
 						.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 				et.setText(builder);
 				// AudioItem only has one item
-			} 
+			}
 
 			if (item.getState() == VMessageAbstractItem.STATE_SENT_FALIED) {
 				failedIcon.setVisibility(View.VISIBLE);
@@ -252,7 +271,6 @@ public class MessageBodyView extends LinearLayout {
 
 		}
 
-		
 		mContentContainer.setTag(this.mMsg);
 
 	}
@@ -272,46 +290,41 @@ public class MessageBodyView extends LinearLayout {
 
 		seconds.setVisibility(View.VISIBLE);
 		seconds.setText(item.getSeconds() + "''");
-		
+
 		RelativeLayout audioRoot = new RelativeLayout(getContext());
 		ImageView micIv = new ImageView(getContext());
 		micIv.setId(micIv.hashCode());
-		
-		
+
 		RelativeLayout.LayoutParams micIvLy = new RelativeLayout.LayoutParams(
 				RelativeLayout.LayoutParams.WRAP_CONTENT,
 				RelativeLayout.LayoutParams.WRAP_CONTENT);
-		
-		
+
 		TextView tv = new TextView(getContext());
 		tv.setId(tv.hashCode());
 		for (int in = 0; in < item.getSeconds() && in < 40; in++) {
 			tv.append(" ");
 		}
-		
+
 		RelativeLayout.LayoutParams tvIvLy = new RelativeLayout.LayoutParams(
 				RelativeLayout.LayoutParams.WRAP_CONTENT,
 				RelativeLayout.LayoutParams.WRAP_CONTENT);
-		
-		
+
 		if (mMsg.isLocal()) {
 			micIv.setImageResource(R.drawable.voice_message_mic_icon_selector);
 			audioRoot.addView(tv, tvIvLy);
-			
+
 			micIvLy.addRule(RelativeLayout.RIGHT_OF, tv.getId());
 			audioRoot.addView(micIv, micIvLy);
-			
+
 		} else {
 			micIvLy.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
 			micIv.setImageResource(R.drawable.voice_message_mic_icon_selector);
 			audioRoot.addView(micIv, micIvLy);
-			
+
 			tvIvLy.addRule(RelativeLayout.RIGHT_OF, micIv.getId());
 			audioRoot.addView(tv, tvIvLy);
 		}
-		
-	
-		
+
 		audioRoot.setOnClickListener(new OnClickListener() {
 
 			@Override
@@ -324,9 +337,83 @@ public class MessageBodyView extends LinearLayout {
 					updateUnreadFlag(false);
 				}
 			}
-			
+
 		});
 		mContentContainer.addView(audioRoot, new LinearLayout.LayoutParams(
+				LinearLayout.LayoutParams.WRAP_CONTENT,
+				LinearLayout.LayoutParams.WRAP_CONTENT));
+
+	}
+
+	private void populateFileItem(List<VMessageFileItem> fileItems) {
+		final VMessageFileItem item = fileItems.get(0);
+		View fileRootView = LayoutInflater.from(getContext()).inflate(
+				R.layout.message_body_file_item, null, false);
+		TextView fileName = (TextView) fileRootView
+				.findViewById(R.id.message_body_file_item_file_name);
+		fileName.setText(item.getFileName());
+
+		TextView fileSize = (TextView) fileRootView
+				.findViewById(R.id.message_body_file_item_file_size);
+		fileSize.setText(item.getFileSizeStr());
+
+		TextView state = (TextView) fileRootView
+				.findViewById(R.id.message_body_file_item_state);
+		String strState = "";
+		boolean showProgressLayout = false;
+		if (item.getState() == VMessageAbstractItem.STATE_FILE_DOWNLOADING) {
+			strState = getContext().getResources()
+					.getText(R.string.contact_message_file_item_downloading)
+					.toString();
+			showProgressLayout = true;
+		} else if (item.getState() == VMessageAbstractItem.STATE_FILE_SENDING) {
+			strState = getContext().getResources()
+					.getText(R.string.contact_message_file_item_sending)
+					.toString();
+			showProgressLayout = true;
+		} else if (item.getState() == VMessageAbstractItem.STATE_FILE_PAUSED) {
+			strState = getContext().getResources()
+					.getText(R.string.contact_message_file_item_pause)
+					.toString();
+			showProgressLayout = true;
+		} else if (item.getState() == VMessageAbstractItem.STATE_FILE_SENT_FALIED) {
+			strState = getContext().getResources()
+					.getText(R.string.contact_message_file_item_sent_failed)
+					.toString();
+		} else if (item.getState() == VMessageAbstractItem.STATE_FILE_DOWNLOADED_FALIED) {
+			strState = getContext()
+					.getResources()
+					.getText(R.string.contact_message_file_item_download_failed)
+					.toString();
+		} else if (item.getState() == VMessageAbstractItem.STATE_FILE_MISS_DOWNLOAD) {
+			strState = getContext().getResources()
+					.getText(R.string.contact_message_file_item_miss_download)
+					.toString();
+		}
+
+		if (showProgressLayout) {
+			fileRootView.findViewById(
+					R.id.message_body_file_item_progress_layout).setVisibility(
+					View.VISIBLE);
+
+			TextView progress = (TextView) fileRootView
+					.findViewById(R.id.message_body_file_item_progress_size);
+			progress.setText(item.getDownloadedSize() + "/"
+					+ item.getFileSizeStr());
+
+			TextView speed = (TextView) fileRootView
+					.findViewById(R.id.message_body_file_item_progress_speed);
+			speed.setText(item.getSpeed() + "K");
+
+		} else {
+			fileRootView.findViewById(
+					R.id.message_body_file_item_progress_layout).setVisibility(
+					View.INVISIBLE);
+		}
+
+		state.setText(strState);
+
+		mContentContainer.addView(fileRootView, new LinearLayout.LayoutParams(
 				LinearLayout.LayoutParams.WRAP_CONTENT,
 				LinearLayout.LayoutParams.WRAP_CONTENT));
 
@@ -435,7 +522,7 @@ public class MessageBodyView extends LinearLayout {
 		isShowTime = showTime;
 		updateView(vm);
 	}
-	
+
 	public void updateUnreadFlag(boolean flag) {
 		if (!flag) {
 			this.unReadIcon.setVisibility(View.GONE);
@@ -443,13 +530,13 @@ public class MessageBodyView extends LinearLayout {
 			this.unReadIcon.setVisibility(View.VISIBLE);
 		}
 	}
-	
+
 	public void startVoiceAnimation() {
-		
+
 	}
-	
+
 	public void stopVoiceAnimation() {
-		
+
 	}
 
 	public void updateView(VMessage vm) {

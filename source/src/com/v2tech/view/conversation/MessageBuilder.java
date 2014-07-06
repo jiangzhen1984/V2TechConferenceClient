@@ -12,6 +12,7 @@ import com.v2tech.vo.VMessage;
 import com.v2tech.vo.VMessageAbstractItem;
 import com.v2tech.vo.VMessageAudioItem;
 import com.v2tech.vo.VMessageFaceItem;
+import com.v2tech.vo.VMessageFileItem;
 import com.v2tech.vo.VMessageImageItem;
 import com.v2tech.vo.VMessageTextItem;
 
@@ -40,6 +41,14 @@ public class MessageBuilder {
 			String imagePath) {
 		VMessage vm = new VMessage(0, fromUser, toUser);
 		new VMessageImageItem(vm, imagePath);
+		return vm;
+	}
+	
+	
+	public static VMessage buildFileMessage(User fromUser, User toUser,
+			String filePath) {
+		VMessage vm = new VMessage(0, fromUser, toUser);
+		new VMessageFileItem(vm, filePath);
 		return vm;
 	}
 

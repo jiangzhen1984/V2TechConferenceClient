@@ -11,5 +11,11 @@
     <string name="contact_message_voice_dialog_text">手指上滑， 取消发送</string>
     <string name="contact_message_voice_dialog_cancel_text">松开手指， 取消发送</string>
     <string name="contact_message_message_cancelled">已取消发送</string>
+    <string name="contact_message_file_item_downloading">下载中</string>
+    <string name="contact_message_file_item_pause">暂停中</string>
+    <string name="contact_message_file_item_sending">发送中</string>
+    <string name="contact_message_file_item_download_failed">下载失败</string>
+    <string name="contact_message_file_item_miss_download">未下载</string>
+    <string name="contact_message_file_item_sent_failed">发送失败</string>
     <color name="message_panel_bg">#ffffff</color>
 </resources>

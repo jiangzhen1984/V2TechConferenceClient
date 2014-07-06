@@ -1,7 +1,10 @@
 package com.v2tech.view.conversation;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,9 +20,6 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
-import android.media.AudioManager;
-import android.media.MediaPlayer;
-import android.media.MediaPlayer.OnCompletionListener;
 import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Bundle;
@@ -48,6 +48,11 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.spoledge.aacplayer.AACPlayer;
+import com.spoledge.aacplayer.ArrayAACPlayer;
+import com.spoledge.aacplayer.ArrayDecoder;
+import com.spoledge.aacplayer.Decoder;
+import com.spoledge.aacplayer.PlayerCallback;
 import com.v2tech.R;
 import com.v2tech.db.ContentDescriptor;
 import com.v2tech.service.BitmapManager;
@@ -56,6 +61,7 @@ import com.v2tech.service.GlobalHolder;
 import com.v2tech.service.Registrant;
 import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.MessageUtil;
+import com.v2tech.util.SPUtil;
 import com.v2tech.util.V2Log;
 import com.v2tech.view.JNIService;
 import com.v2tech.view.PublicIntent;
@@ -70,6 +76,7 @@ import com.v2tech.vo.VMessage;
 import com.v2tech.vo.VMessageAbstractItem;
 import com.v2tech.vo.VMessageAudioItem;
 import com.v2tech.vo.VMessageFaceItem;
+import com.v2tech.vo.VMessageFileItem;
 import com.v2tech.vo.VMessageTextItem;
 
 public class ConversationView extends Activity {
@@ -82,6 +89,8 @@ public class ConversationView extends Activity {
 	private final int SEND_MESSAGE_ERROR = 6;
 
 	private final int BATCH_COUNT = 10;
+	private static final int SELECT_PICTURE_CODE = 100;
+	private static final int FILE_SELECT_CODE = 101;
 
 	private int offset = 0;
 
@@ -118,6 +127,7 @@ public class ConversationView extends Activity {
 	private View mAdditionFeatureContainer;
 
 	private ImageView mSelectImageButtonIV;
+	private View mSelectFileButtonIV;
 
 	private ImageView mAudioSpeakerIV;
 
@@ -126,7 +136,7 @@ public class ConversationView extends Activity {
 	private View mButtonRecordAudio;
 
 	private MediaRecorder mRecorder = null;
-	private MediaPlayer mPlayer;
+	private AACPlayer mAACPlayer = null;
 
 	private MessageReceiver receiver = new MessageReceiver();
 
@@ -187,6 +197,9 @@ public class ConversationView extends Activity {
 		mSelectImageButtonIV = (ImageView) findViewById(R.id.contact_message_send_image_button);
 		mSelectImageButtonIV.setOnClickListener(selectImageButtonListener);
 
+		mSelectFileButtonIV = findViewById(R.id.contact_message_send_file_button);
+		mSelectFileButtonIV.setOnClickListener(mfileSelectionButtonListener);
+
 		mAudioSpeakerIV = (ImageView) findViewById(R.id.contact_message_speaker);
 		mAudioSpeakerIV.setOnClickListener(mMessageTypeSwitchListener);
 
@@ -198,22 +211,6 @@ public class ConversationView extends Activity {
 		mUserTitleTV = (TextView) findViewById(R.id.message_user_title);
 
 		mFaceLayout = (LinearLayout) findViewById(R.id.contact_message_face_item_ly);
-
-		ConversationNotificationObject cov = (ConversationNotificationObject) this
-				.getIntent().getExtras().get("obj");
-		user1Id = GlobalHolder.getInstance().getCurrentUserId();
-		if (cov.getType().equals(Conversation.TYPE_CONTACT)) {
-			user2Id = cov.getExtId();
-		} else if (cov.getType().equals(Conversation.TYPE_GROUP)) {
-			groupId = cov.getExtId();
-		}
-
-		local = GlobalHolder.getInstance().getUser(user1Id);
-		remote = GlobalHolder.getInstance().getUser(user2Id);
-		// If current conversation is group then user2 is null;
-		if (remote == null) {
-			remote = new User(user2Id);
-		}
 
 		HandlerThread thread = new HandlerThread("back-end");
 		thread.start();
@@ -227,6 +224,8 @@ public class ConversationView extends Activity {
 			}
 			backEndHandler = new BackendHandler(thread.getLooper());
 		}
+
+		initExtraObject();
 
 		// Register listener for avatar changed
 		BitmapManager.getInstance().registerBitmapChangedListener(
@@ -314,6 +313,32 @@ public class ConversationView extends Activity {
 		V2Log.e("conversation view exited");
 	}
 
+	private void initExtraObject() {
+		Bundle bundle = this.getIntent().getExtras();
+
+		ConversationNotificationObject cov = null;
+
+		if (bundle != null) {
+			cov = (ConversationNotificationObject) bundle.get("obj");
+		} else {
+			cov = new ConversationNotificationObject(Conversation.TYPE_CONTACT,
+					1);
+		}
+		user1Id = GlobalHolder.getInstance().getCurrentUserId();
+		if (cov.getType().equals(Conversation.TYPE_CONTACT)) {
+			user2Id = cov.getExtId();
+		} else if (cov.getType().equals(Conversation.TYPE_GROUP)) {
+			groupId = cov.getExtId();
+		}
+
+		local = GlobalHolder.getInstance().getUser(user1Id);
+		remote = GlobalHolder.getInstance().getUser(user2Id);
+		// If current conversation is group then user2 is null;
+		if (remote == null) {
+			remote = new User(user2Id);
+		}
+	}
+
 	private void scrollToBottom() {
 		scrollToPos(messageArray.size() - 1);
 	}
@@ -333,86 +358,73 @@ public class ConversationView extends Activity {
 		});
 
 	}
-	
+
 	private VMessage currentPlayed;
+
 	private boolean playNextUnreadMessage() {
 		boolean found = false;
-		for (int i =0; i < messageArray.size(); i++) {
-			CommonAdapterItemWrapper  wrapper = messageArray.get(i);
-			VMessage vm = (VMessage)wrapper.getItemObject();
+		for (int i = 0; i < messageArray.size(); i++) {
+			CommonAdapterItemWrapper wrapper = messageArray.get(i);
+			VMessage vm = (VMessage) wrapper.getItemObject();
 			if (vm == currentPlayed) {
 				found = true;
 				continue;
 			}
-			
+
 			if (found) {
-				List<VMessageAudioItem> items  = vm.getAudioItems();
-				if (items.size() > 0 && items.get(0).getState() == VMessageAbstractItem.STATE_UNREAD) {
+				List<VMessageAudioItem> items = vm.getAudioItems();
+				if (items.size() > 0
+						&& items.get(0).getState() == VMessageAbstractItem.STATE_UNREAD) {
 					this.scrollToPos(i);
 					listener.requestPlayAudio(null, vm, items.get(0));
-					((MessageBodyView)wrapper.getView()).updateUnreadFlag(false);
-					((MessageBodyView)wrapper.getView()).startVoiceAnimation();
+					((MessageBodyView) wrapper.getView())
+							.updateUnreadFlag(false);
+					((MessageBodyView) wrapper.getView()).startVoiceAnimation();
 					return true;
 				}
 			}
 		}
 		return false;
 	}
-	
-	
 
+	private InputStream currentPlayedStream;
 	private synchronized boolean startPlaying(String fileName) {
-		if (mPlayer != null && mPlayer.isPlaying()) {
-			mPlayer.release();
-		}
-		mPlayer = new MediaPlayer();
-		mPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-		mPlayer.setVolume(1.0f, 1.0f);
-		mPlayer.setOnCompletionListener(new OnCompletionListener() {
 
-			@Override
-			public void onCompletion(MediaPlayer mp) {
-				boolean flag = playNextUnreadMessage();
-				//To last message
-				if (!flag) {
-					currentPlayed = null;
-				}
-				
-			}
-
-		});
-		mPlayer.setOnErrorListener(new MediaPlayer.OnErrorListener() {
-
-			@Override
-			public boolean onError(MediaPlayer arg0, int arg1, int arg2) {
-				return false;
-			}
-
-		});
+		mAACPlayer = new ArrayAACPlayer(
+				ArrayDecoder.create(Decoder.DECODER_FAAD2), mAACPlayerCallback,
+				1200, 600);
 		try {
-			if (mPlayer.isPlaying()) {
-				mPlayer.stop();
+			if (currentPlayedStream != null) {
+				currentPlayedStream.close();
 			}
-			mPlayer.setDataSource(fileName);
-			mPlayer.prepare();
-			mPlayer.start();
-		} catch (IOException e) {
+			currentPlayedStream = new FileInputStream(new File (fileName));
+			mAACPlayer.play(currentPlayedStream);
+		} catch (FileNotFoundException e) {
 			e.printStackTrace();
-			return false;
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 		return true;
 	}
 
 	private void stopPlaying() {
-		if (mPlayer != null) {
-			mPlayer.stop();
+		if (mAACPlayer != null) {
+			mAACPlayer.stop();
+			mAACPlayer = null;
+		}
+		if (currentPlayedStream != null) {
+			try {
+				currentPlayedStream.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 
 	private void releasePlayer() {
-		if (mPlayer != null) {
-			mPlayer.release();
-			mPlayer = null;
+		if (mAACPlayer != null) {
+			mAACPlayer.stop();
+			mAACPlayer = null;
 		}
 	}
 
@@ -540,6 +552,38 @@ public class ConversationView extends Activity {
 	private void cleanCache() {
 		messageArray.clear();
 	}
+
+	private PlayerCallback mAACPlayerCallback = new PlayerCallback() {
+
+		@Override
+		public void playerStarted() {
+			V2Log.e("=====start");
+		}
+
+		@Override
+		public void playerPCMFeedBuffer(boolean isPlaying,
+				int audioBufferSizeMs, int audioBufferCapacityMs) {
+			V2Log.e(audioBufferSizeMs + "  "+ audioBufferCapacityMs);
+			if (audioBufferSizeMs == audioBufferCapacityMs) {
+				boolean flag = playNextUnreadMessage();
+				// To last message
+				if (!flag) {
+					currentPlayed = null;
+				}
+			}
+		}
+
+		@Override
+		public void playerStopped(int perf) {
+
+		}
+
+		@Override
+		public void playerException(Throwable t) {
+			playerStopped(0);
+		}
+
+	};
 
 	private OnTouchListener sendMessageButtonListener = new OnTouchListener() {
 
@@ -695,8 +739,6 @@ public class ConversationView extends Activity {
 
 	};
 
-	private static final int SELECT_PICTURE = 1;
-
 	private OnClickListener selectImageButtonListener = new OnClickListener() {
 
 		@Override
@@ -706,7 +748,7 @@ public class ConversationView extends Activity {
 			intent.setAction(Intent.ACTION_GET_CONTENT);
 			startActivityForResult(
 					Intent.createChooser(intent, "Select Picture"),
-					SELECT_PICTURE);
+					SELECT_PICTURE_CODE);
 
 		}
 
@@ -751,6 +793,24 @@ public class ConversationView extends Activity {
 			mMessageET.append(emoji);
 		}
 
+	};
+
+	private View.OnClickListener mfileSelectionButtonListener = new View.OnClickListener() {
+		@Override
+		public void onClick(View arg0) {
+			Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+			intent.setType("*/*");
+			intent.addCategory(Intent.CATEGORY_OPENABLE);
+
+			try {
+				startActivityForResult(
+						Intent.createChooser(intent, "Select a File to Upload"),
+						FILE_SELECT_CODE);
+			} catch (android.content.ActivityNotFoundException ex) {
+				Toast.makeText(mContext, "Please install a File Manager.",
+						Toast.LENGTH_SHORT).show();
+			}
+		}
 	};
 
 	private TextWatcher mPasteWatcher = new TextWatcher() {
@@ -812,7 +872,7 @@ public class ConversationView extends Activity {
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
-		if (requestCode == SELECT_PICTURE) {
+		if (requestCode == SELECT_PICTURE_CODE) {
 			if (resultCode == RESULT_OK) {
 				Uri selectedImage = data.getData();
 				String[] filePathColumn = { MediaStore.Images.Media.DATA };
@@ -840,6 +900,27 @@ public class ConversationView extends Activity {
 						filePath);
 				// Send message to server
 				sendMessageToRemote(vim);
+			}
+		} else if (requestCode == FILE_SELECT_CODE) {
+			if (resultCode == RESULT_OK) {
+				// Get the Uri of the selected file
+				Uri uri = data.getData();
+				String path = SPUtil.getPath(this, uri);
+				if (path == null) {
+					Toast.makeText(
+							mContext,
+							R.string.contacts_user_detail_file_selection_not_found_path,
+							Toast.LENGTH_SHORT).show();
+				} else {
+					// VMessage vim = MessageBuilder.buildFileMessage(local,
+					// remote,
+					// path);
+					// VMessageFileItem vfi = vim.getFileItems().get(0);
+					// vfi.setState(VMessageFileItem.STATE_FILE_SENDING);
+					// TODO send file
+					// Send message to server
+					// sendMessageToRemote(vim);
+				}
 			}
 		}
 	}
@@ -1058,6 +1139,27 @@ public class ConversationView extends Activity {
 			stopPlaying();
 		}
 
+		@Override
+		public void requestDownloadFile(View v, VMessage vm,
+				VMessageFileItem vfi) {
+			// TODO Auto-generated method stub
+
+		}
+
+		@Override
+		public void requestPauseDownloadingFile(View v, VMessage vm,
+				VMessageFileItem vfi) {
+			// TODO Auto-generated method stub
+
+		}
+
+		@Override
+		public void requestResumeDownloadingFile(View v, VMessage vm,
+				VMessageAudioItem vfi) {
+			// TODO Auto-generated method stub
+
+		}
+
 	};
 
 	private List<VMessage> loadMessages() {
@@ -1143,7 +1245,7 @@ public class ConversationView extends Activity {
 			} else {
 				((MessageBodyView) convertView).updateView(vm);
 			}
-			((VMessageAdater)wr).setView(convertView);
+			((VMessageAdater) wr).setView(convertView);
 			return convertView;
 		}
 	};
@@ -1167,7 +1269,6 @@ public class ConversationView extends Activity {
 			int db = 0;// 分贝
 			if (ratio > 1)
 				db = (int) (20 * Math.log10(ratio));
-			System.out.println("分贝值：" + db + "     " + Math.log10(ratio));
 			updateVoiceVolume(db / 4);
 
 			lh.postDelayed(mUpdateMicStatusTimer, 200);
