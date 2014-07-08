@@ -108,13 +108,15 @@ public class ConversationWaitingFragment extends Fragment {
 			mHostInvitationButtonLayout.setVisibility(View.GONE);
 			if (uad.isAudioType()) {
 				mTitleTV.setText(this.getActivity().getResources().getText(R.string.conversation_waiting_voice_incoming));
+			} else {
+				mTitleTV.setText(this.getActivity().getResources().getText(R.string.conversation_waiting_video_incoming));
 			}
 		} else {
 			mInvitationButtonLayout.setVisibility(View.GONE);
 			mHostInvitationButtonLayout.setVisibility(View.VISIBLE);
 		}
 		
-		if (uad.isVideoType()) {
+		if (uad.isVideoType()  && !uad.isIncoming()) {
 			mAcceptVocieOnlyButton.setVisibility(View.VISIBLE);
 			mTitleTV.setVisibility(View.GONE);
 			v.findViewById(R.id.conversation_fragment_voice_center_container).setVisibility(View.GONE);
@@ -124,7 +126,7 @@ public class ConversationWaitingFragment extends Fragment {
 		} else {
 			mAcceptVocieOnlyButton.setVisibility(View.GONE);
 			v.findViewById(R.id.conversation_fragment_video_avatar).setVisibility(View.GONE);
-			v.findViewById(R.id.conversation_fragment_voice_invitation_name).setVisibility(View.GONE);
+			v.findViewById(R.id.conversation_fragment_video_invitation_name).setVisibility(View.GONE);
 			v.findViewById(R.id.fragment_conversation_video_title).setVisibility(View.GONE);
 		}
 

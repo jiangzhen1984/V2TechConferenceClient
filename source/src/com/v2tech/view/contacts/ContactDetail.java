@@ -360,28 +360,20 @@ public class ContactDetail extends Activity implements OnTouchListener {
 		TextView tv1 = (TextView) d
 				.findViewById(R.id.contact_user_detail_call_dialog_2);
 		tv1.setOnClickListener(itemClickListener);
-		TextView tv2 = (TextView) d
-				.findViewById(R.id.contact_user_detail_call_dialog_3);
-		tv2.setOnClickListener(itemClickListener);
 
 		if (tel != null && phone != null) {
-			tv.setText(tel);
-			tv.setTag(tel);
-			tv1.setText(phone);
-			tv1.setTag(phone);
+			tv.setTag("call:"+tel+"|"+phone);
 		} else if (tel != null || phone != null) {
-			tv.setText(tel == null ? phone : tel);
 			tv.setTag(tel == null ? phone : tel);
-			tv1.setVisibility(View.GONE);
 		} else {
 			tv.setTag("");
-			tv1.setVisibility(View.GONE);
+			tv.setVisibility(View.GONE);
 		}
 
 		if (voice) {
-			tv2.setTag("voice");
+			tv1.setTag("voice");
 		} else {
-			tv2.setVisibility(View.GONE);
+			tv1.setVisibility(View.GONE);
 		}
 
 		d.show();
@@ -392,6 +384,25 @@ public class ContactDetail extends Activity implements OnTouchListener {
 
 		@Override
 		public void onClick(View view) {
+			String tag =(String)view.getTag();
+			if (tag != null && tag.startsWith("call:")) {
+				String[] nums = tag.substring(5).split("\\|");
+				
+				TextView tv = (TextView) d
+						.findViewById(R.id.contact_user_detail_call_dialog_1);
+				tv.setOnClickListener(itemClickListener);
+				TextView tv1 = (TextView) d
+						.findViewById(R.id.contact_user_detail_call_dialog_2);
+				tv1.setOnClickListener(itemClickListener);
+				tv.setText(nums[0]);
+				tv.setTag(nums[0]);
+				tv1.setText(nums[1]);
+				tv1.setTag(nums[1]);
+				return;
+			}
+			
+			
+			
 			if (d != null) {
 				d.dismiss();
 				d = null;

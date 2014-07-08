@@ -70,7 +70,8 @@
         <activity
             android:name="com.v2tech.view.conference.ConferenceCreateActivity"
             android:screenOrientation="nosensor"
-            android:windowSoftInputMode="stateHidden|adjustUnspecified" >
+            android:windowSoftInputMode="stateHidden|adjustUnspecified"
+             android:launchMode="singleTop" >
             <intent-filter>
                 <action android:name="com.v2tech.start_conference_create_activity" />
 

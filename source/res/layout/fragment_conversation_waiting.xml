@@ -33,7 +33,7 @@
                 android:layout_toRightOf="@+id/conversation_fragment_video_avatar"
                 android:text="名字"
                 android:textColor="@color/fragment_conversation_title_text_color"
-                android:textSize="@dimen/fragment_conversation_waiting_invitation_host_name_size" />
+                android:textSize="@dimen/fragment_conversation_waiting_video_invitation_host_name_size" />
 
             <TextView
                 android:id="@+id/fragment_conversation_video_title"
@@ -44,7 +44,7 @@
                 android:layout_toRightOf="@+id/conversation_fragment_video_avatar"
                 android:text="@string/conversation_waiting"
                 android:textColor="@color/fragment_conversation_title_text_color"
-                android:textSize="@dimen/fragment_conversation_waiting_title_text_size" />
+                android:textSize="@dimen/fragment_conversation_waiting_video_invitation_host_name_size" />
 
             <TextView
                 android:id="@+id/fragment_conversation_title"

@@ -122,6 +122,28 @@ public class GroupRequest {
 	 */
 	public native void addGroupUserInfo(int groupType, long nGroupID, String sXml);
 	
+	
+	
+	public native void groupUploadFile(int groupType, long nGroupId, String sXml);
+	
+	public native void delGroupFile(int groupType, long nGroupId, String sXml);
+	
+	public native void getGroupFileInfo(int groupType, long nGroupId);
+	
+	
+	private void OnAddGroupFile(int type, long nGroupId, String sXml) {
+		V2Log.e("Group Request  OnAddGroupFile" + type+"   "+ nGroupId+"  "+ sXml);
+	}
+	
+	private void OnDelGroupFile(int type, long nGroupId, String sXml) {
+		V2Log.e("Group Request  OnDelGroupFile" + type+"   "+ nGroupId+"  "+ sXml);
+	}
+	
+	private void OnGetGroupFileInfo(int type, long nGroupId, String sXml) {
+		V2Log.e("Group Request  OnGetGroupFileInfo" + type+"   "+ nGroupId+"  "+ sXml);
+	}
+	
+	
 	/**
 	 * This is unsolicited callback. This function will be call after log in
 	 * 

@@ -40,7 +40,7 @@ public class FileRequest {
 	// 閭�浠栦汉寮�鏂囦欢浼犺緭
 
 	public native void inviteFileTrans(long nGroupID, String szToUserXml,
-			String szFilesXml, int linetype, int businesstype);
+			 int businesstype);
 
 	// 鎺ュ彈瀵规柟鐨勬枃浠朵紶杈撻個璇�
 	public native void acceptFileTrans(String szFileID, String szSavePath,

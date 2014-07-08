@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@drawable/contact_user_detail_call_dialog_bg"
     android:orientation="vertical" >
 
     <TextView
         android:id="@+id/contact_user_detail_call_dialog_1"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
         android:paddingBottom="10dp"
@@ -24,30 +24,11 @@
         android:background="#c0c0c0"
         android:orientation="vertical" >
     </LinearLayout>
+
 
     <TextView
         android:id="@+id/contact_user_detail_call_dialog_2"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:paddingBottom="10dp"
-        android:paddingLeft="80dp"
-        android:paddingRight="80dp"
-        android:paddingTop="10dp"
-        android:text="@string/contacts_user_detail_voice_dialog_call"
-        android:textColor="@color/contact_detail_button_font_color"
-        android:textSize="16sp" />
-
-    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="#c0c0c0"
-        android:orientation="vertical" >
-    </LinearLayout>
-
-    <TextView
-        android:id="@+id/contact_user_detail_call_dialog_3"
-        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
         android:paddingBottom="10dp"
