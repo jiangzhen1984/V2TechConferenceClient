@@ -3,6 +3,7 @@ package com.v2tech.vo;
 import java.io.File;
 import java.text.DecimalFormat;
 import java.text.Format;
+import java.util.UUID;
 
 public class VMessageFileItem extends VMessageAbstractItem {
 
@@ -17,7 +18,7 @@ public class VMessageFileItem extends VMessageAbstractItem {
 	private long downloadedSize;
 	
 	private float speed;
-
+	
 	public VMessageFileItem(VMessage vm, String filePath) {
 		super(vm);
 		this.filePath = filePath;
@@ -30,10 +31,23 @@ public class VMessageFileItem extends VMessageAbstractItem {
 			fileSize = f.length();
 		}
 		this.type = VMessageAbstractItem.ITEM_TYPE_FILE;
+		this.uuid = UUID.randomUUID().toString();
+	}
+	
+	
+	public VMessageFileItem(VMessage vm, String uuid, String fileName) {
+		super(vm);
+		this.fileName = fileName;
+		this.uuid = uuid;
+		this.type = VMessageAbstractItem.ITEM_TYPE_FILE;
 	}
 
 	public long getFileSize() {
 		return fileSize;
+	}
+	
+	public void setFileSize(long size) {
+		this.fileSize = size;
 	}
 
 	public String getFileSizeStr() {
@@ -61,6 +75,11 @@ public class VMessageFileItem extends VMessageAbstractItem {
 	public void setFilePath(String filePath) {
 		this.filePath = filePath;
 	}
+	
+	public void setFileName(String fileName) {
+		this.fileName = fileName;
+	}
+	
 
 	@Override
 	public String toXmlItem() {

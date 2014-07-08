@@ -93,9 +93,12 @@ public class MessageBuilder {
 				content = ((VMessageFaceItem)item).getIndex()+"";
 			} else if (item.getType() == VMessageAbstractItem.ITEM_TYPE_AUDIO) {
 				content = ((VMessageAudioItem)item).getAudioFilePath()+"|" +((VMessageAudioItem)item).getSeconds();
+			}else if (item.getType() == VMessageAbstractItem.ITEM_TYPE_FILE) {
+				content =  ((VMessageFileItem)item).getFileName()+"|"+((VMessageFileItem)item).getFilePath()+"|"+((VMessageFileItem)item).getFileSize();
 			}
 			
 			itemVal.put(ContentDescriptor.MessageItems.Cols.CONTENT, content);
+			itemVal.put(ContentDescriptor.MessageItems.Cols.UUID, item.getUuid());
 			Uri itemUri = context.getContentResolver().insert(
 					ContentDescriptor.MessageItems.CONTENT_URI, itemVal);
 			item.setId(Integer.parseInt(itemUri.getLastPathSegment()));

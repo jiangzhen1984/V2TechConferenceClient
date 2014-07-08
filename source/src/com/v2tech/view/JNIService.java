@@ -30,6 +30,8 @@ import com.V2.jni.ChatRequest;
 import com.V2.jni.ChatRequestCallback;
 import com.V2.jni.ConfRequest;
 import com.V2.jni.ConfRequestCallback;
+import com.V2.jni.FileRequest;
+import com.V2.jni.FileRequestCallback;
 import com.V2.jni.GroupRequest;
 import com.V2.jni.GroupRequestCallback;
 import com.V2.jni.ImRequest;
@@ -46,7 +48,6 @@ import com.v2tech.util.XmlParser;
 import com.v2tech.view.bo.GroupUserObject;
 import com.v2tech.view.bo.UserAvatarObject;
 import com.v2tech.view.bo.UserStatusObject;
-import com.v2tech.view.conference.VideoActivityV2;
 import com.v2tech.view.conversation.MessageBuilder;
 import com.v2tech.vo.ConferenceGroup;
 import com.v2tech.vo.Group;
@@ -57,6 +58,7 @@ import com.v2tech.vo.UserDeviceConfig;
 import com.v2tech.vo.VMessage;
 import com.v2tech.vo.VMessageAbstractItem;
 import com.v2tech.vo.VMessageAudioItem;
+import com.v2tech.vo.VMessageFileItem;
 import com.v2tech.vo.VMessageImageItem;
 
 /**
@@ -114,6 +116,8 @@ public class JNIService extends Service {
 	private ConfRequestCB mCRCB;
 
 	private AudioRequestCB mARCB;
+	
+	private FileRequestCB  mFRCB;
 
 	// ////////////////////////////////////////
 
@@ -163,6 +167,9 @@ public class JNIService extends Service {
 
 		mARCB = new AudioRequestCB();
 		AudioRequest.getInstance().addCallback(mARCB);
+		
+		mFRCB = new FileRequestCB(mCallbackHandler);
+		FileRequest.getInstance().addCallback(mFRCB);
 	}
 
 	@Override
@@ -962,6 +969,40 @@ public class JNIService extends Service {
 
 		}
 
+	}
+	
+	
+	
+	class FileRequestCB implements FileRequestCallback {
+
+		private JNICallbackHandler mCallbackHandler;
+
+		public FileRequestCB(JNICallbackHandler mCallbackHandler) {
+			this.mCallbackHandler = mCallbackHandler;
+		}
+
+		
+		@Override
+		public void OnFileTransInvite(long nGroupID, int nBusinessType,
+				long userid, String szFileID, String szFileName,
+				long nFileBytes, int linetype) {
+			User fromUser = GlobalHolder.getInstance().getUser(userid);
+			//If doesn't receive user information from server side, 
+			// construct new user object
+			if (fromUser == null) {
+				fromUser = new User(userid);
+			}
+			
+			
+			VMessage vm = new VMessage(nGroupID,fromUser, GlobalHolder.getInstance().getCurrentUser());
+			int pos = szFileName.lastIndexOf("/");
+			VMessageFileItem vfi = new VMessageFileItem(vm, szFileID, pos == -1 ? szFileName:szFileName.substring(pos + 1));
+			vfi.setState(VMessageFileItem.STATE_FILE_UNDOWNLOAD);
+			vfi.setFileSize(nFileBytes);
+			Message.obtain(mCallbackHandler, JNI_RECEIVED_MESSAGE, vm)
+			.sendToTarget();
+		}
+		
 	}
 
 }

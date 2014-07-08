@@ -388,6 +388,11 @@ public class MessageBodyView extends LinearLayout {
 			strState = getContext().getResources()
 					.getText(R.string.contact_message_file_item_miss_download)
 					.toString();
+		} else if (item.getState() == VMessageAbstractItem.STATE_FILE_UNDOWNLOAD) {
+			showProgressLayout = true;
+			strState = getContext().getResources()
+					.getText(R.string.contact_message_file_item_miss_download)
+					.toString();
 		}
 
 		if (showProgressLayout) {
@@ -412,6 +417,9 @@ public class MessageBodyView extends LinearLayout {
 
 		state.setText(strState);
 
+		
+		fileRootView.setOnClickListener(fileMessageItemClickListener);
+		fileRootView.setTag(item);
 		mContentContainer.addView(fileRootView, new LinearLayout.LayoutParams(
 				LinearLayout.LayoutParams.WRAP_CONTENT,
 				LinearLayout.LayoutParams.WRAP_CONTENT));
@@ -552,6 +560,7 @@ public class MessageBodyView extends LinearLayout {
 		this.mMsg = vm;
 		initData();
 	}
+	
 
 	private OnLongClickListener messageLongClickListener = new OnLongClickListener() {
 
@@ -561,6 +570,22 @@ public class MessageBodyView extends LinearLayout {
 			return false;
 		}
 
+	};
+	
+	private OnClickListener fileMessageItemClickListener = new OnClickListener() {
+
+		@Override
+		public void onClick(View view) {
+			VMessageFileItem item = (VMessageFileItem) view.getTag();
+			
+			if (item.getState() == VMessageFileItem.STATE_FILE_UNDOWNLOAD) {
+				if (callback != null) {
+					callback.requestDownloadFile(view, item.getVm(), item);
+				}
+			}
+			
+		}
+		
 	};
 
 	private OnClickListener imageMessageClickListener = new OnClickListener() {

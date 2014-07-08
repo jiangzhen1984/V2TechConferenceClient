@@ -122,6 +122,11 @@ public class GlobalConfig {
 		return StorageUtil.getAbsoluteSdcardPath()+"/.v2tech/audio";
 	}
 	
+	public static String getGlobalFilePath() {
+		return StorageUtil.getAbsoluteSdcardPath()+"/.v2tech/file";
+	}
+	
+	
 	
 	static class EmojiWraper {
 		String emojiStr;

@@ -11,6 +11,7 @@ import android.util.SparseArray;
 import com.V2.jni.AudioRequest;
 import com.V2.jni.AudioRequestCallback;
 import com.V2.jni.ChatRequest;
+import com.V2.jni.FileRequest;
 import com.V2.jni.VideoRequest;
 import com.V2.jni.VideoRequestCallback;
 import com.v2tech.service.jni.JNIResponse;
@@ -21,6 +22,7 @@ import com.v2tech.vo.UserChattingObject;
 import com.v2tech.vo.UserDeviceConfig;
 import com.v2tech.vo.VMessage;
 import com.v2tech.vo.VMessageAudioItem;
+import com.v2tech.vo.VMessageFileItem;
 import com.v2tech.vo.VMessageImageItem;
 
 public class ChatService extends AbstractHandler {
@@ -119,6 +121,11 @@ public class ChatService extends AbstractHandler {
 			@Override
 			public void run() {
 
+				//Send file 
+				if (msg.getFileItems().size() > 0) {
+					sendFileMessage(msg, null);
+					return;
+				}
 				// If message items do not only contain audio message item
 				// then send text or image message
 				ChatRequest.getInstance().sendChatText(
@@ -156,6 +163,43 @@ public class ChatService extends AbstractHandler {
 			}
 
 		});
+	}
+	
+	
+	public void sendFileMessage(VMessage vm, Registrant caller) {
+		List<VMessageFileItem> items = vm.getFileItems();
+		if (items == null || items.size() <= 0) {
+			if (caller != null) {
+				JNIResponse resp = new RequestChatServiceResponse(
+						RequestChatServiceResponse.Result.INCORRECT_PAR);
+				sendResult(caller, resp);
+			} else {
+				V2Log.e("Incorrect parameters");
+			}
+			return;
+		}
+		
+		StringBuilder sb = new StringBuilder();
+		sb.append("<xml desc=\"TCoreFileTransIMInviteTransCmd\">").append("\n");
+		sb.append("<longlong desc=\"ToUserID\" value=\""+vm.getToUser().getmUserId()+"\"/>").append("\n");
+		sb.append("<string desc=\"FileXml\" value=\"<?xml version='1.0' encoding='utf-8'?>").append("\n");
+		for (VMessageFileItem item : items) {
+			sb.append(
+					"<file id=\""
+							+ item.getUuid()
+							+ "\" name=\""
+							+ item.getFilePath()
+							+ "\" encrypttype=\"0\" uploader=\"0\" time=\"0\" size=\"0\" url=\"\"/> \" />").append("\n");
+		}
+		
+		sb.append("<int desc=\"LineType\" value=\"1\"/>").append("\n");
+		sb.append("</xml>").append("\n");
+		
+		FileRequest.getInstance().inviteFileTrans(vm.getGroupId(), sb.toString(), FileRequest.BT_IM);
+		
+		JNIResponse resp = new RequestChatServiceResponse(
+				RequestChatServiceResponse.Result.SUCCESS);
+		sendResult(caller, resp);
 	}
 
 	/**

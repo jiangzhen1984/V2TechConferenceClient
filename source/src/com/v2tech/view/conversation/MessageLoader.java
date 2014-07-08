@@ -17,6 +17,7 @@ import com.v2tech.vo.VMessage;
 import com.v2tech.vo.VMessageAbstractItem;
 import com.v2tech.vo.VMessageAudioItem;
 import com.v2tech.vo.VMessageFaceItem;
+import com.v2tech.vo.VMessageFileItem;
 import com.v2tech.vo.VMessageImageItem;
 import com.v2tech.vo.VMessageTextItem;
 
@@ -298,6 +299,25 @@ public class MessageLoader {
 								Integer.parseInt(str[1]));
 					}
 				}
+				break;
+			case VMessageAbstractItem.ITEM_TYPE_FILE: {
+				String fileName = null;
+				String filePath = null;
+				long fileSize = 0;
+				if (content != null && !content.isEmpty()) {
+					String[] str = content.split("\\|");
+					if (str.length > 2) {
+						fileName = str[0];
+						filePath = str[1];
+						fileSize = Long.parseLong(str[2]);
+					}
+				}
+				
+				vai = new VMessageFileItem(vm, filePath);
+				((VMessageFileItem)vai).setFileSize(fileSize);
+				((VMessageFileItem)vai).setFileName(fileName);
+				
+			}
 				break;
 
 			}

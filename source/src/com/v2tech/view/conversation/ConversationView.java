@@ -47,6 +47,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.V2.jni.FileRequest;
 import com.spoledge.aacplayer.AACPlayer;
 import com.spoledge.aacplayer.ArrayAACPlayer;
 import com.spoledge.aacplayer.ArrayDecoder;
@@ -392,12 +393,13 @@ public class ConversationView extends Activity {
 
 		mAACPlayer = new ArrayAACPlayer(
 				ArrayDecoder.create(Decoder.DECODER_FAAD2), mAACPlayerCallback,
-				AACPlayer.DEFAULT_AUDIO_BUFFER_CAPACITY_MS, AACPlayer.DEFAULT_DECODE_BUFFER_CAPACITY_MS);
+				AACPlayer.DEFAULT_AUDIO_BUFFER_CAPACITY_MS,
+				AACPlayer.DEFAULT_DECODE_BUFFER_CAPACITY_MS);
 		try {
 			if (currentPlayedStream != null) {
 				currentPlayedStream.close();
 			}
-			//currentPlayedStream = new FileInputStream(new File(fileName));
+			// currentPlayedStream = new FileInputStream(new File(fileName));
 			mAACPlayer.playAsync(fileName);
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
@@ -510,24 +512,24 @@ public class ConversationView extends Activity {
 	 * @return
 	 */
 	private boolean startReocrding(String filePath) {
-		
-		 mRecorder = new MediaRecorder();
-		 mRecorder.reset();
-		 mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-		 mRecorder.setOutputFormat(MediaRecorder.OutputFormat.AAC_ADTS);
-		 mRecorder.setOutputFile(filePath);
-		 mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
-		 mRecorder.setMaxDuration(60000);
-		 mRecorder.setAudioSamplingRate(44100);
-		 mRecorder.setAudioChannels(2);
-		 try {
-		 mRecorder.prepare();
-		 } catch (IOException e) {
-		 V2Log.e(" can not prepare media recorder ");
-		 return false;
-		 }
-		
-		 mRecorder.start();
+
+		mRecorder = new MediaRecorder();
+		mRecorder.reset();
+		mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+		mRecorder.setOutputFormat(MediaRecorder.OutputFormat.AAC_ADTS);
+		mRecorder.setOutputFile(filePath);
+		mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
+		mRecorder.setMaxDuration(60000);
+		mRecorder.setAudioSamplingRate(44100);
+		mRecorder.setAudioChannels(2);
+		try {
+			mRecorder.prepare();
+		} catch (IOException e) {
+			V2Log.e(" can not prepare media recorder ");
+			return false;
+		}
+
+		mRecorder.start();
 		return true;
 	}
 
@@ -570,13 +572,14 @@ public class ConversationView extends Activity {
 				int audioBufferSizeMs, int audioBufferCapacityMs) {
 			V2Log.e(audioBufferSizeMs + "  " + audioBufferCapacityMs);
 			if (audioBufferSizeMs == audioBufferCapacityMs) {
-				
+
 			}
 		}
 
 		@Override
 		public void playerStopped(int perf) {
-			if (currentPlayed != null && currentPlayed.getAudioItems().size() > 0) {
+			if (currentPlayed != null
+					&& currentPlayed.getAudioItems().size() > 0) {
 				currentPlayed.getAudioItems().get(0).setPlaying(false);
 			}
 			boolean flag = playNextUnreadMessage();
@@ -921,14 +924,11 @@ public class ConversationView extends Activity {
 							R.string.contacts_user_detail_file_selection_not_found_path,
 							Toast.LENGTH_SHORT).show();
 				} else {
-					// VMessage vim = MessageBuilder.buildFileMessage(local,
-					// remote,
-					// path);
-					// VMessageFileItem vfi = vim.getFileItems().get(0);
-					// vfi.setState(VMessageFileItem.STATE_FILE_SENDING);
-					// TODO send file
-					// Send message to server
-					// sendMessageToRemote(vim);
+					VMessage vim = MessageBuilder.buildFileMessage(local,
+							remote, path);
+					VMessageFileItem vfi = vim.getFileItems().get(0);
+					vfi.setState(VMessageFileItem.STATE_FILE_SENDING);
+					sendMessageToRemote(vim);
 				}
 			}
 		}
@@ -1152,7 +1152,10 @@ public class ConversationView extends Activity {
 		@Override
 		public void requestDownloadFile(View v, VMessage vm,
 				VMessageFileItem vfi) {
-			// TODO Auto-generated method stub
+			vfi.setState(VMessageFileItem.STATE_FILE_DOWNLOADING);
+			FileRequest.getInstance().acceptFileTrans(vfi.getUuid(),
+					GlobalConfig.getGlobalFilePath() + "/" + vfi.getFileName(),
+					FileRequest.BT_IM);
 
 		}
 

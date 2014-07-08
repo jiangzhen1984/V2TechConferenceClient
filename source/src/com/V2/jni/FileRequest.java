@@ -6,17 +6,28 @@ package com.V2.jni;
 //import com.xinlan.im.ui.SplashActivity;
 //import com.xinlan.im.ui.chat.FileDownloadActivity;
 //import com.xinlan.im.utils.Constant;
-import android.content.Context;
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.List;
 
+import android.content.Context;
 import android.util.Log;
 
 public class FileRequest {
+	
+	public static final int BT_CONF = 1;
+	public static final int BT_IM = 2;
+
+	
 	private Context context;
 	private static FileRequest mFileRequest;
 	private String TAG = "FileRequest UI";
 
+	private List<WeakReference<FileRequestCallback>> callbacks;
+
 	private FileRequest(Context context) {
 		this.context = context;
+		callbacks = new ArrayList<WeakReference<FileRequestCallback>>();
 	}
 
 	public static synchronized FileRequest getInstance(Context context) {
@@ -31,6 +42,12 @@ public class FileRequest {
 	public static synchronized FileRequest getInstance() {
 		return mFileRequest;
 	}
+	
+	
+	
+	public void addCallback(FileRequestCallback callback) {
+		this.callbacks.add(new WeakReference<FileRequestCallback>(callback));
+	}
 
 	public native boolean initialize(FileRequest request);
 
@@ -40,7 +57,7 @@ public class FileRequest {
 	// 閭�浠栦汉寮�鏂囦欢浼犺緭
 
 	public native void inviteFileTrans(long nGroupID, String szToUserXml,
-			 int businesstype);
+			int businesstype);
 
 	// 鎺ュ彈瀵规柟鐨勬枃浠朵紶杈撻個璇�
 	public native void acceptFileTrans(String szFileID, String szSavePath,
@@ -101,25 +118,14 @@ public class FileRequest {
 		Log.e(TAG, "OnFileTransInvite--->" + nGroupID + ":" + nBusinessType
 				+ ":" + userid + ":" + szFileID + ":" + szFileName + ":"
 				+ nFileBytes + ":" + linetype);
-
-		// //鎷艰淇℃伅
-		// InvitedMsgType inviteMsgType=new InvitedMsgType();
-		// inviteMsgType.setnFileBytes(nFileBytes);
-		// inviteMsgType.setSzFileID(szFileID);
-		// inviteMsgType.setSzFileName(szFileName);
-		// inviteMsgType.setUserid(userid);
-		// inviteMsgType.setLinetype(linetype);
-		//
-		// Intent intent=new Intent(SplashActivity.IM);
-		// intent.putExtra("MsgType", MsgType.INVITED_FILE);
-		// intent.putExtra("MSG", inviteMsgType);
-		// context.sendBroadcast(intent);
-		//
-		// File path=new
-		// File(Constant.getInstance(context).getFilesDir(userid));
-		// if(!path.exists()){
-		// path.mkdirs();
-		// }
+		for (int i = 0; i < callbacks.size(); i++) {
+			WeakReference<FileRequestCallback> wrf = callbacks.get(i);
+			if (wrf != null && wrf.get() != null) {
+				((FileRequestCallback) wrf.get()).OnFileTransInvite(nGroupID,
+						nBusinessType, userid, szFileID, szFileName,
+						nFileBytes, linetype);
+			}
+		}
 	}
 
 	// 鏀跺埌鎴戠殑鏂囦欢浼犺緭閭�琚鏂规帴鍙楃殑鍥炶皟

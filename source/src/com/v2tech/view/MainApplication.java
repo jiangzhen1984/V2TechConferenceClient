@@ -112,15 +112,22 @@ public class MainApplication extends Application {
 		File image = new File(GlobalConfig.getGlobalPicsPath());
 		if (!image.exists()) {
 			boolean res = image.mkdirs();
-			V2Log.i(" create avatar dir " + image.getAbsolutePath() + "  "
+			V2Log.i(" create image dir " + image.getAbsolutePath() + "  "
 					+ res);
 		}
 		File audioPath = new File(GlobalConfig.getGlobalAudioPath());
 		if (!audioPath.exists()) {
 			boolean res = audioPath.mkdirs();
-			V2Log.i(" create avatar dir " + audioPath.getAbsolutePath() + "  "
+			V2Log.i(" create audio dir " + audioPath.getAbsolutePath() + "  "
 					+ res);
 		}
+		File filePath = new File(GlobalConfig.getGlobalFilePath());
+		if (!filePath.exists()) {
+			boolean res = filePath.mkdirs();
+			V2Log.i(" create file dir " + filePath.getAbsolutePath() + "  "
+					+ res);
+		}
+		
 		
 		
 		if (!V2Log.isDebuggable) {
