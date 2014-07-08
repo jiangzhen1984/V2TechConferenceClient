@@ -310,7 +310,7 @@ public class MessageBodyView extends LinearLayout {
 				RelativeLayout.LayoutParams.WRAP_CONTENT);
 
 		if (mMsg.isLocal()) {
-			micIv.setImageResource(R.drawable.voice_message_mic_icon_selector);
+			micIv.setImageResource(R.drawable.voice_message_mic_icon_self_selector);
 			audioRoot.addView(tv, tvIvLy);
 
 			micIvLy.addRule(RelativeLayout.RIGHT_OF, tv.getId());
