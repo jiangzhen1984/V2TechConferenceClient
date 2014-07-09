@@ -3,7 +3,7 @@
     package="com.v2tech"
     android:sharedUserLabel="@string/app_name"
     android:versionCode="1"
-    android:versionName="1.3.0.64" >
+    android:versionName="1.3.0.65" >
 
     <uses-sdk
         android:minSdkVersion="13"
@@ -85,7 +85,8 @@
             android:name="com.v2tech.view.conference.VideoActivityV2"
             android:launchMode="singleTop"
             android:screenOrientation="landscape"
-            android:windowSoftInputMode="adjustPan" >
+            android:windowSoftInputMode="adjustPan"
+            android:exported="true" >
         </activity>
         <activity
             android:name="com.v2tech.view.contacts.ContactDetail"

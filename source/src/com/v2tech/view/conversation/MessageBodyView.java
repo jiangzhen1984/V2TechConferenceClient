@@ -77,11 +77,11 @@ public class MessageBodyView extends LinearLayout {
 		public void requestDownloadFile(View v, VMessage vm,
 				VMessageFileItem vfi);
 
-		public void requestPauseDownloadingFile(View v, VMessage vm,
+		public void requestPauseTransFile(View v, VMessage vm,
 				VMessageFileItem vfi);
 
-		public void requestResumeDownloadingFile(View v, VMessage vm,
-				VMessageAudioItem vfi);
+		public void requestResumeTransFile(View v, VMessage vm,
+				VMessageFileItem vfi);
 
 	}
 
@@ -356,45 +356,9 @@ public class MessageBodyView extends LinearLayout {
 				.findViewById(R.id.message_body_file_item_file_size);
 		fileSize.setText(item.getFileSizeStr());
 
-		TextView state = (TextView) fileRootView
-				.findViewById(R.id.message_body_file_item_state);
-
-		ImageView button = (ImageView) fileRootView.findViewById(R.id.message_body_file_item_progress_action_button);
-		boolean showProgressLayout = updateFileItemStateText(item, state, button);
-
-		if (showProgressLayout) {
-			fileRootView.findViewById(
-					R.id.message_body_file_item_progress_layout).setVisibility(
-					View.VISIBLE);
-
-			TextView progress = (TextView) fileRootView
-					.findViewById(R.id.message_body_file_item_progress_size);
-			progress.setText(item.getDownloadSizeStr() + "/"
-					+ item.getFileSizeStr());
-
-			TextView speed = (TextView) fileRootView
-					.findViewById(R.id.message_body_file_item_progress_speed);
-			speed.setText(item.getSpeed() + "K");
-
-			float percent = (float) ((double) item.getDownloadedSize() / (double) item
-					.getFileSize());
-
-			ViewGroup progressC = (ViewGroup) fileRootView
-					.findViewById(R.id.message_body_file_item_progress_state_ly);
-
-			View iv = fileRootView
-					.findViewById(R.id.message_body_file_item_progress_state);
-			ViewGroup.LayoutParams lp = iv.getLayoutParams();
-			lp.width = (int) (progressC.getWidth() * percent);
-			progressC.updateViewLayout(iv, lp);
-
-		} else {
-			fileRootView.findViewById(
-					R.id.message_body_file_item_progress_layout).setVisibility(
-					View.GONE);
-		}
-
+		updateFileItemView(item, fileRootView);
 		fileRootView.setOnClickListener(fileMessageItemClickListener);
+
 		fileRootView.setTag(item);
 		mContentContainer.addView(fileRootView, new LinearLayout.LayoutParams(
 				LinearLayout.LayoutParams.WRAP_CONTENT,
@@ -543,46 +507,50 @@ public class MessageBodyView extends LinearLayout {
 		}
 
 		View fileRootView = mContentContainer.getChildAt(0);
-		TextView state = (TextView) fileRootView
+		updateFileItemView(vfi, fileRootView);
+
+	}
+
+	private void updateFileItemView(VMessageFileItem vfi, View rootView) {
+		TextView state = (TextView) rootView
 				.findViewById(R.id.message_body_file_item_state);
-		ImageView button = (ImageView) fileRootView.findViewById(R.id.message_body_file_item_progress_action_button);
+		ImageView button = (ImageView) rootView
+				.findViewById(R.id.message_body_file_item_progress_action_button);
 		boolean showProgressLayout = updateFileItemStateText(vfi, state, button);
 
 		if (showProgressLayout) {
-			fileRootView.findViewById(
-					R.id.message_body_file_item_progress_layout).setVisibility(
-					View.VISIBLE);
+			rootView.findViewById(R.id.message_body_file_item_progress_layout)
+					.setVisibility(View.VISIBLE);
 
-			TextView progress = (TextView) fileRootView
+			TextView progress = (TextView) rootView
 					.findViewById(R.id.message_body_file_item_progress_size);
 			progress.setText(vfi.getDownloadSizeStr() + "/"
 					+ vfi.getFileSizeStr());
 
-			TextView speed = (TextView) fileRootView
+			TextView speed = (TextView) rootView
 					.findViewById(R.id.message_body_file_item_progress_speed);
 			speed.setText(vfi.getSpeed() + "K");
 
 			float percent = (float) ((double) vfi.getDownloadedSize() / (double) vfi
 					.getFileSize());
 
-			ViewGroup progressC = (ViewGroup) fileRootView
+			ViewGroup progressC = (ViewGroup) rootView
 					.findViewById(R.id.message_body_file_item_progress_state_ly);
 
-			View iv = fileRootView
+			View iv = rootView
 					.findViewById(R.id.message_body_file_item_progress_state);
 			ViewGroup.LayoutParams lp = iv.getLayoutParams();
 			lp.width = (int) (progressC.getWidth() * percent);
 			progressC.updateViewLayout(iv, lp);
 
 		} else {
-			fileRootView.findViewById(
-					R.id.message_body_file_item_progress_layout).setVisibility(
-					View.INVISIBLE);
+			rootView.findViewById(R.id.message_body_file_item_progress_layout)
+					.setVisibility(View.GONE);
 		}
-
 	}
 
-	private boolean updateFileItemStateText(VMessageFileItem vfi, TextView view, ImageView actionButton) {
+	private boolean updateFileItemStateText(VMessageFileItem vfi,
+			TextView view, ImageView actionButton) {
 		String strState = "";
 		boolean showProgressLayout = false;
 		if (vfi.getState() == VMessageAbstractItem.STATE_FILE_DOWNLOADING) {
@@ -597,21 +565,27 @@ public class MessageBodyView extends LinearLayout {
 					.toString();
 			actionButton.setImageResource(R.drawable.message_file_pause_button);
 			showProgressLayout = true;
-		} else if (vfi.getState() == VMessageAbstractItem.STATE_FILE_PAUSED) {
+		} else if (vfi.getState() == VMessageAbstractItem.STATE_FILE_PAUSED_SENDING
+				|| vfi.getState() == VMessageAbstractItem.STATE_FILE_PAUSED_DOWNLOADING) {
 			strState = getContext().getResources()
 					.getText(R.string.contact_message_file_item_pause)
 					.toString();
-			actionButton.setImageResource(R.drawable.message_file_download_button);
+			actionButton
+					.setImageResource(R.drawable.message_file_download_button);
 			showProgressLayout = true;
 		} else if (vfi.getState() == VMessageAbstractItem.STATE_FILE_SENT_FALIED) {
 			strState = getContext().getResources()
 					.getText(R.string.contact_message_file_item_sent_failed)
 					.toString();
+			//Show failed icon
+			failedIcon.setVisibility(View.VISIBLE);
 		} else if (vfi.getState() == VMessageAbstractItem.STATE_FILE_DOWNLOADED_FALIED) {
 			strState = getContext()
 					.getResources()
 					.getText(R.string.contact_message_file_item_download_failed)
 					.toString();
+			//Show failed icon
+			failedIcon.setVisibility(View.VISIBLE);
 		} else if (vfi.getState() == VMessageAbstractItem.STATE_FILE_MISS_DOWNLOAD) {
 			strState = getContext().getResources()
 					.getText(R.string.contact_message_file_item_miss_download)
@@ -655,8 +629,17 @@ public class MessageBodyView extends LinearLayout {
 				if (callback != null) {
 					callback.requestDownloadFile(view, item.getVm(), item);
 				}
+			} else if (item.getState() == VMessageFileItem.STATE_FILE_SENDING) {
+				if (callback != null) {
+					callback.requestPauseTransFile(view, item.getVm(), item);
+				}
+			} else if (item.getState() == VMessageFileItem.STATE_FILE_PAUSED_SENDING) {
+				if (callback != null) {
+					callback.requestResumeTransFile(view, item.getVm(), item);
+				}
 			}
 
+			updateView(item);
 		}
 
 	};

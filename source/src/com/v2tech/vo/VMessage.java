@@ -125,6 +125,10 @@ public class VMessage {
 	
 	
 
+	public void setUUID(String UUID) {
+		this.mUUID = UUID;
+	}
+
 	public boolean isLocal() {
 		if (this.mFromUser == null) {
 			return false;

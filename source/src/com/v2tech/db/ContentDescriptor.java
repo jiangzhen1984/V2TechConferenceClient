@@ -56,10 +56,11 @@ public final class ContentDescriptor {
 			public static final String SEND_TIME = "send_time";
 			public static final String STATE = "state";
 			public static final String GROUP_ID = "group_id";
+			public static final String UUID = "uuid";
 
 			public static final String[] ALL_CLOS = { ID, FROM_USER_ID,
 					FROM_USER_NAME, TO_USER_ID, TO_USER_NAME, MSG_TYPE,
-					SEND_TIME, STATE, GROUP_ID };
+					SEND_TIME, STATE, GROUP_ID, UUID };
 		}
 	}
 

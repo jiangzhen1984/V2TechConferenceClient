@@ -27,17 +27,17 @@ import android.widget.Toast;
 import com.V2.jni.AudioRequest;
 import com.V2.jni.AudioRequestCallback;
 import com.V2.jni.ChatRequest;
-import com.V2.jni.ChatRequestCallback;
+import com.V2.jni.ChatRequestCallbackAdapter;
 import com.V2.jni.ConfRequest;
-import com.V2.jni.ConfRequestCallback;
+import com.V2.jni.ConfRequestCallbackAdapter;
 import com.V2.jni.FileRequest;
-import com.V2.jni.FileRequestCallback;
+import com.V2.jni.FileRequestCallbackAdapter;
 import com.V2.jni.GroupRequest;
 import com.V2.jni.GroupRequestCallback;
 import com.V2.jni.ImRequest;
 import com.V2.jni.ImRequestCallback;
 import com.V2.jni.VideoRequest;
-import com.V2.jni.VideoRequestCallback;
+import com.V2.jni.VideoRequestCallbackAdapter;
 import com.v2tech.R;
 import com.v2tech.service.BitmapManager;
 import com.v2tech.service.GlobalHolder;
@@ -89,6 +89,7 @@ public class JNIService extends Service {
 	public static final String JNI_BROADCAST_GROUP_NOTIFICATION = "com.v2tech.jni.broadcast.group_geted";
 	public static final String JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION = "com.v2tech.jni.broadcast.group_user_updated";
 	public static final String JNI_BROADCAST_NEW_MESSAGE = "com.v2tech.jni.broadcast.new.message";
+	public static final String JNI_BROADCAST_MESSAGE_SENT_FAILED = "com.v2tech.jni.broadcast.message_sent_failed";
 	public static final String JNI_BROADCAST_NEW_CONF_MESSAGE = "com.v2tech.jni.broadcast.new.conf.message";
 	public static final String JNI_BROADCAST_CONFERENCE_INVATITION = "com.v2tech.jni.broadcast.conference_invatition";
 	public static final String JNI_BROADCAST_CONFERENCE_REMOVED = "com.v2tech.jni.broadcast.conference_removed";
@@ -697,7 +698,7 @@ public class JNIService extends Service {
 
 	}
 
-	class VideoRequestCB implements VideoRequestCallback {
+	class VideoRequestCB extends VideoRequestCallbackAdapter {
 
 		private JNICallbackHandler mCallbackHandler;
 
@@ -727,33 +728,9 @@ public class JNIService extends Service {
 							nFromUserID, szDeviceID)).sendToTarget();
 		}
 
-		@Override
-		public void OnSetCapParamDone(String szDevID, int nSizeIndex,
-				int nFrameRate, int nBitRate) {
-
-		}
-
-		@Override
-		public void OnVideoChatAccepted(long nGroupID, int nBusinessType,
-				long nFromuserID, String szDeviceID) {
-
-		}
-
-		@Override
-		public void OnVideoChatRefused(long nGroupID, int nBusinessType,
-				long nFromUserID, String szDeviceID) {
-
-		}
-
-		@Override
-		public void OnVideoChatClosed(long nGroupID, int nBusinessType,
-				long nFromUserID, String szDeviceID) {
-
-		}
-
 	}
 
-	class ConfRequestCB implements ConfRequestCallback {
+	class ConfRequestCB extends ConfRequestCallbackAdapter {
 
 		private JNICallbackHandler mCallbackHandler;
 
@@ -761,33 +738,6 @@ public class JNIService extends Service {
 			this.mCallbackHandler = mCallbackHandler;
 		}
 
-		@Override
-		public void OnEnterConfCallback(long nConfID, long nTime,
-				String szConfData, int nJoinResult) {
-
-		}
-
-		@Override
-		public void OnConfMemberEnterCallback(long nConfID, long nTime,
-				String szUserInfos) {
-
-		}
-
-		@Override
-		public void OnConfMemberExitCallback(long nConfID, long nTime,
-				long nUserID) {
-
-		}
-
-		@Override
-		public void OnKickConfCallback(int nReason) {
-
-		}
-
-		@Override
-		public void OnGrantPermissionCallback(long userid, int type, int status) {
-
-		}
 
 		@Override
 		public void OnConfNotify(String confXml, String creatorXml) {
@@ -818,7 +768,7 @@ public class JNIService extends Service {
 
 	}
 
-	class ChatRequestCB implements ChatRequestCallback {
+	class ChatRequestCB extends ChatRequestCallbackAdapter {
 
 		private JNICallbackHandler mCallbackHandler;
 
@@ -944,7 +894,7 @@ public class JNIService extends Service {
 					List<VMessageAudioItem> list = v.getAudioItems();
 					for (int i = 0; i < list.size(); i++) {
 						VMessageAudioItem item = list.get(i);
-						if (item.getUUID().equals(messageId)) {
+						if (item.getUuid().equals(messageId)) {
 							item.setAudioFilePath(audioPath);
 							item.setState(VMessageAbstractItem.STATE_UNREAD);
 							cacheAudioMeta.remove(item);
@@ -969,11 +919,26 @@ public class JNIService extends Service {
 
 		}
 
+		@Override
+		public void OnSendChatResult(String uuid, int ret, int code) {
+			super.OnSendChatResult(uuid, ret, code);
+			MessageBuilder.updateVMessageItemToSentFalied(mContext, uuid);
+			Intent i = new Intent();
+			i.setAction(JNIService.JNI_BROADCAST_MESSAGE_SENT_FAILED);
+			i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
+			i.putExtra("uuid", uuid);
+			sendBroadcast(i);
+			
+		}
+		
+		
+		
+
 	}
 	
 	
 	
-	class FileRequestCB implements FileRequestCallback {
+	class FileRequestCB extends FileRequestCallbackAdapter {
 
 		private JNICallbackHandler mCallbackHandler;
 
@@ -1003,22 +968,6 @@ public class JNIService extends Service {
 			.sendToTarget();
 		}
 
-
-		@Override
-		public void OnFileTransProgress(String szFileID, long nBytesTransed,
-				int nTransType) {
-			
-		}
-
-
-		@Override
-		public void OnFileTransEnd(String szFileID, String szFileName,
-				long nFileSize, int nTransType) {
-			
-		}
-		
-		
-		
 		
 	}
 

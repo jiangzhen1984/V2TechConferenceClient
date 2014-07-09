@@ -63,6 +63,7 @@ public class MessageBuilder {
 		values.put(ContentDescriptor.Messages.Cols.GROUP_ID, vm.getGroupId());
 		values.put(ContentDescriptor.Messages.Cols.SEND_TIME,
 				vm.getFullDateStr());
+		values.put(ContentDescriptor.Messages.Cols.UUID, vm.getUUID());
 
 		Uri uri = context.getContentResolver().insert(
 				ContentDescriptor.Messages.CONTENT_URI, values);
@@ -136,5 +137,18 @@ public class MessageBuilder {
 				ContentDescriptor.MessageItems.CONTENT_URI, itemVal,
 				ContentDescriptor.MessageItems.Cols.ID + "=?",
 				new String[] { item.getId() + "" });
+	}
+	
+	
+	
+	
+	public static int updateVMessageItemToSentFalied(Context context, String uuid) {
+		ContentValues itemVal = new ContentValues();
+		itemVal.put(ContentDescriptor.MessageItems.Cols.STATE, VMessageAbstractItem.STATE_SENT_FALIED);
+
+		return context.getContentResolver().update(
+				ContentDescriptor.MessageItems.CONTENT_URI, itemVal,
+				ContentDescriptor.MessageItems.Cols.UUID + "=?",
+				new String[] { uuid });
 	}
 }

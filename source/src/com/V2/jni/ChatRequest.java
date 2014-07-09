@@ -235,8 +235,11 @@ public class ChatRequest {
 		}
 	}
 	
-	public void OnSendChatResult(String str, int i, int j) {
-		V2Log.e("OnSendChatResult  " +str + "  "+ i+ "  "+j);
+	public void OnSendChatResult(String uuid, int ret, int code) {
+		V2Log.e("OnSendChatResult  " +uuid + "  "+ ret+ "  "+code);
+		if (callback != null) {
+			callback.OnSendChatResult(uuid, ret, code);
+		}
 	}
 	
 
@@ -257,48 +260,7 @@ public class ChatRequest {
 		}
 	}
 
-	private String SaveImage2SD(long nGroupID, long nFromUserID, long nTime,
-			byte[] pPicData) {
-		byte[] guidArr = new byte[41];
-		byte[] extArr = new byte[11];
-		byte[] picDataArr = new byte[pPicData.length - 52];
-		// int len = pPicData.length;
-		for (int i = 0; i < pPicData.length; i++) {
-			if (i <= 40) {
-				if (pPicData[i] == 0) {
-					i = 40;
-					continue;
-				}
-				guidArr[i] = pPicData[i];
-			} else if (i > 40 && i < 52) {
-				if (pPicData[i] == 0) {
-					i = 51;
-					continue;
-				}
-				extArr[i - 41] = pPicData[i];
-			} else {
-				picDataArr[i - 52] = pPicData[i];
-			}
-		}
-		StringBuffer sb = new StringBuffer();
-		String fromId = "";
-		if (nGroupID == 0) {
-			fromId = nFromUserID + "";
-		} else {
-			fromId = "0" + nGroupID;
-		}
-		String guid = new String(guidArr);
-
-		String ext = new String(extArr); // 锟斤拷展锟斤拷
-		sb.append(guid.trim()).append(ext.trim());
-
-		// Logger.i(null, "图片锟斤拷锟斤拷锟�:"+sb.toString());
-		// String target = picNvoiceUtil.saveImage(picDataArr,
-		// sb.toString(),nFromUserID,context);
-
-		// return target;
-		return "";
-	}
+	
 
 	/*
 	 * ext 图片锟斤拷锟斤拷展锟斤拷

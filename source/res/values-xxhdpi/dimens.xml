@@ -122,6 +122,10 @@
     <dimen name="message_body_file_item_progress_action_button_margin_left">10dp</dimen>
     
     
+        <!-- message voice dialog layout -->
+    <dimen name="message_voice_dialog_width">230dp</dimen>
+    <dimen name="message_voice_dialog_height">180dp</dimen>
+    
     
 
 </resources>

@@ -4,7 +4,6 @@ import java.util.UUID;
 
 public class VMessageAudioItem extends VMessageAbstractItem {
 
-	private String uuid;
 	private String extension;
 	private String audioFilePath;
 	private int seconds;
@@ -44,12 +43,6 @@ public class VMessageAudioItem extends VMessageAbstractItem {
 
 	public void setAudioFilePath(String audioFilePath) {
 		this.audioFilePath = audioFilePath;
-	}
-	
-	
-
-	public String getUUID() {
-		return uuid;
 	}
 	
 	

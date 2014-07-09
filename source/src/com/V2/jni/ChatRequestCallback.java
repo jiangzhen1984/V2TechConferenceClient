@@ -43,5 +43,12 @@ public interface ChatRequestCallback {
 	public void OnRecvChatAudio(long gid, int businessType, long fromUserId, long timeStamp, String messageId,
 			String audioPath);
 	
+	/**
+	 * 
+	 * @param uuid
+	 * @param ret
+	 * @param code
+	 */
+	public void OnSendChatResult(String uuid, int ret, int code);
 
 }

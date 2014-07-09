@@ -224,12 +224,12 @@ public class FileRequest {
 	// 鏂囦欢浼犺緭澶辫触
 	private void OnFileDownloadError(String sFileID) {
 		Log.e(TAG, "OnFileDownloadError--->" + sFileID);
-		// if(FileDownloadActivity.mFileActivity!=null){
-		// Bundle bundle=new Bundle();
-		// bundle.putString("fileid",sFileID);
-		// FileDownloadActivity.mFileActivity.SendMessage(Constant.FILE_DOWN_FAILD,
-		// bundle);
-		// }
+		for (int i = 0; i < callbacks.size(); i++) {
+			WeakReference<FileRequestCallback> wrf = callbacks.get(i);
+			if (wrf != null && wrf.get() != null) {
+				((FileRequestCallback) wrf.get()).OnFileDownloadError(sFileID);
+			}
+		}
 	}
 
 }

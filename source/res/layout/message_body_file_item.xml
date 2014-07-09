@@ -1,8 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="@dimen/message_body_file_width"
+    android:layout_width="wrap_content"
     android:layout_height="wrap_content" >
 
+   <LinearLayout
+        android:id="@+id/message_body_file_item_width_base"
+        android:layout_width="@dimen/message_body_file_width"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal" >
+    </LinearLayout>
+    
     <LinearLayout
         android:id="@+id/message_body_file_item_icon_ly"
         android:layout_width="wrap_content"
@@ -38,16 +45,17 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignBottom="@+id/message_body_file_item_file_size"
-        android:layout_alignParentRight="true"
+        android:layout_alignRight="@+id/message_body_file_item_width_base"
         android:layout_marginLeft="@dimen/message_body_file_item_state_margin_left"
         android:text="@string/contact_message_file_item_sent_failed"
         android:textSize="@dimen/message_body_file_item_state_text_size" />
 
     <RelativeLayout
         android:id="@+id/message_body_file_item_progress_layout"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/message_body_file_item_icon_ly"
+        android:layout_alignLeft="@+id/message_body_file_item_width_base"
+        android:layout_alignRight="@+id/message_body_file_item_width_base"
         android:layout_below="@+id/message_body_file_item_file_size"
         android:layout_marginBottom="@dimen/message_body_file_item_progress_layout_margin_bottom"
         android:layout_marginLeft="@dimen/message_body_file_item_progress_layout_margin_left"
@@ -74,7 +82,7 @@
 
             <LinearLayout
                 android:id="@+id/message_body_file_item_progress_state"
-                android:layout_width="1dp"
+                android:layout_width="100dp"
                 android:layout_height="wrap_content"
                 android:background="@drawable/message_file_progress" 
                 android:orientation="horizontal"/>

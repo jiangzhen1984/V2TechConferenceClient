@@ -24,7 +24,8 @@ public class V2TechDBHelper extends SQLiteOpenHelper {
 			+ ContentDescriptor.Messages.Cols.SEND_TIME
 			+ "  TIMESTAMP  DEFAULT CURRENT_TIMESTAMP, "
 			+ ContentDescriptor.Messages.Cols.STATE + " integer,"
-			+ContentDescriptor.Messages.Cols.GROUP_ID+ " numeric) ";
+			+ContentDescriptor.Messages.Cols.GROUP_ID+ " numeric,"
+			+ContentDescriptor.Messages.Cols.UUID+ " text) ";
 	
 	
 	

@@ -238,6 +238,7 @@ public class ConversationView extends Activity {
 		IntentFilter filter = new IntentFilter();
 		filter.addAction(JNIService.JNI_BROADCAST_NEW_MESSAGE);
 		filter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
+		filter.addAction(JNIService.JNI_BROADCAST_MESSAGE_SENT_FAILED);
 		filter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
 		registerReceiver(receiver, filter);
 
@@ -589,9 +590,9 @@ public class ConversationView extends Activity {
 					&& currentPlayed.getAudioItems().size() > 0) {
 				currentPlayed.getAudioItems().get(0).setPlaying(false);
 			}
-			//Call in main thread
+			// Call in main thread
 			Message.obtain(lh, PLAY_NEXT_UNREAD_MESSAGE).sendToTarget();
-			
+
 		}
 
 		@Override
@@ -1159,6 +1160,9 @@ public class ConversationView extends Activity {
 		@Override
 		public void requestDownloadFile(View v, VMessage vm,
 				VMessageFileItem vfi) {
+			if (vfi == null) {
+				return;
+			}
 			vfi.setState(VMessageFileItem.STATE_FILE_DOWNLOADING);
 			FileRequest.getInstance().acceptFileTrans(vfi.getUuid(),
 					GlobalConfig.getGlobalFilePath() + "/" + vfi.getFileName(),
@@ -1167,16 +1171,33 @@ public class ConversationView extends Activity {
 		}
 
 		@Override
-		public void requestPauseDownloadingFile(View v, VMessage vm,
+		public void requestPauseTransFile(View v, VMessage vm,
 				VMessageFileItem vfi) {
-			// TODO Auto-generated method stub
+			if (vfi == null) {
+				return;
+			}
+			FileRequest.getInstance().pauseSendFile(vfi.getUuid(), 1);
+			if (vfi.getState() == VMessageFileItem.STATE_FILE_DOWNLOADING) {
+				vfi.setState(VMessageFileItem.STATE_FILE_PAUSED_DOWNLOADING);
+			} else if (vfi.getState() == VMessageFileItem.STATE_FILE_SENDING) {
+				vfi.setState(VMessageFileItem.STATE_FILE_PAUSED_SENDING);
+			}
 
 		}
 
 		@Override
-		public void requestResumeDownloadingFile(View v, VMessage vm,
-				VMessageAudioItem vfi) {
-			// TODO Auto-generated method stub
+		public void requestResumeTransFile(View v, VMessage vm,
+				VMessageFileItem vfi) {
+			if (vfi == null) {
+				return;
+			}
+			FileRequest.getInstance().resumeSendFile(vfi.getUuid(), 1);
+
+			if (vfi.getState() == VMessageFileItem.STATE_FILE_PAUSED_DOWNLOADING) {
+				vfi.setState(VMessageFileItem.STATE_FILE_DOWNLOADING);
+			} else if (vfi.getState() == VMessageFileItem.STATE_FILE_PAUSED_SENDING) {
+				vfi.setState(VMessageFileItem.STATE_FILE_SENDING);
+			}
 
 		}
 
@@ -1230,26 +1251,50 @@ public class ConversationView extends Activity {
 				if (item.getType() == VMessageAbstractItem.ITEM_TYPE_FILE
 						&& item.getUuid().equals(uuid)) {
 					VMessageFileItem vfi = ((VMessageFileItem) item);
-					
+
 					if (vfi.getFileSize() == tranedSize) {
 						if (vfi.getState() == VMessageAbstractItem.STATE_FILE_SENDING) {
 							vfi.setState(VMessageAbstractItem.STATE_FILE_SENT);
-						} else if (vfi.getState()== VMessageAbstractItem.STATE_FILE_DOWNLOADING) {
+						} else if (vfi.getState() == VMessageAbstractItem.STATE_FILE_DOWNLOADING) {
 							vfi.setState(VMessageAbstractItem.STATE_FILE_DOWNLOADED);
 						}
-						
+
 						MessageBuilder.updateVMessageItem(this, vfi);
 					}
-					
+
 					vfi.setDownloadedSize(tranedSize);
 					((MessageBodyView) messageArray.get(i).getView())
 							.updateView(vfi);
-					
-					
+
 				}
 			}
 		}
 
+	}
+
+	private void updateFileTransErrorView(String uuid) {
+		for (int i = 0; i < messageArray.size(); i++) {
+			VMessage vm = (VMessage) messageArray.get(i).getItemObject();
+			if (vm.getItems().size() > 0) {
+				VMessageAbstractItem item = vm.getItems().get(0);
+				if (item.getType() == VMessageAbstractItem.ITEM_TYPE_FILE
+						&& item.getUuid().equals(uuid)) {
+					VMessageFileItem vfi = ((VMessageFileItem) item);
+					vfi.setDownloadedSize(0);
+					// If lesser than sending, means file is receive
+					if (vfi.getState() < VMessageFileItem.STATE_FILE_SENDING) {
+						vfi.setState(VMessageFileItem.STATE_FILE_DOWNLOADED_FALIED);
+					} else {
+						vfi.setState(VMessageFileItem.STATE_FILE_SENT_FALIED);
+					}
+					MessageBuilder.updateVMessageItem(this, vfi);
+
+					((MessageBodyView) messageArray.get(i).getView())
+							.updateView(vfi);
+
+				}
+			}
+		}
 	}
 
 	private OnTouchListener mHiddenOnTouchListener = new OnTouchListener() {
@@ -1340,6 +1385,33 @@ public class ConversationView extends Activity {
 					// abort send down broadcast
 					this.abortBroadcast();
 				}
+			} else if (JNIService.JNI_BROADCAST_MESSAGE_SENT_FAILED
+					.equals(intent.getAction())) {
+				String uuid = intent.getExtras().getString("uuid");
+				for (int i = 0; i < messageArray.size(); i++) {
+					VMessage vm = (VMessage) messageArray.get(i)
+							.getItemObject();
+					if (vm.getUUID().equals(uuid)) {
+						MessageBodyView mdv = ((MessageBodyView)  messageArray.get(i).getView());
+						if (mdv != null)  {
+							mdv.updateView(vm);
+						}
+						break;
+					}
+					List<VMessageAbstractItem> items = vm.getItems();
+					for (int j =0; j < items.size(); j++) {
+						VMessageAbstractItem item = items.get(j);
+						if (uuid.equals(item.getUuid())) {
+							item.setState(VMessageAbstractItem.STATE_FILE_SENT_FALIED);
+							MessageBodyView mdv = ((MessageBodyView)  messageArray.get(i).getView());
+							if (mdv != null)  {
+								mdv.updateView(vm);
+							}
+							break;
+						}
+						
+					}
+				}
 			}
 		}
 
@@ -1401,15 +1473,17 @@ public class ConversationView extends Activity {
 					currentPlayed = null;
 				}
 				break;
-			case FILE_STATUS_LISTENER: {
+			case FILE_STATUS_LISTENER:
 				FileTransStatusIndication ind = (FileTransStatusIndication) msg.obj;
 				if (ind.indType == FileTransStatusIndication.IND_TYPE_PROGRESS) {
 					updateFileProgressView(
 							ind.uuid,
 							((FileTransProgressStatusIndication) ind).nTranedSize);
+				} else if (ind.indType == FileTransStatusIndication.IND_TYPE_TRANS_ERR) {
+					updateFileTransErrorView(ind.uuid);
 				}
 			}
-			}
+
 		}
 
 	}

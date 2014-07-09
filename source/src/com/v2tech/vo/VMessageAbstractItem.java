@@ -33,14 +33,16 @@ public abstract class VMessageAbstractItem {
 	public static final int STATE_FILE_NORMAL = 0;
 	public static final int STATE_FILE_UNDOWNLOAD = 2;
 	public static final int STATE_FILE_DOWNLOADING = 4;
-	public static final int STATE_FILE_PAUSED = 5;
+	public static final int STATE_FILE_PAUSED_DOWNLOADING = 5;
 	public static final int STATE_FILE_MISS_DOWNLOAD = 6;
-	public static final int STATE_FILE_SENDING = 7;
-	public static final int STATE_FILE_DOWNLOADED_FALIED = 8;
-	public static final int STATE_FILE_SENT_FALIED = 9;
-	public static final int STATE_FILE_SENDER_CANCEL = 10;
-	public static final int STATE_FILE_SENT = 11;
-	public static final int STATE_FILE_DOWNLOADED = 12;
+	public static final int STATE_FILE_DOWNLOADED_FALIED = 7;
+	public static final int STATE_FILE_DOWNLOADED = 8;
+	
+	public static final int STATE_FILE_SENDING = 20;
+	public static final int STATE_FILE_SENT_FALIED = 21;
+	public static final int STATE_FILE_SENDER_CANCEL = 22;
+	public static final int STATE_FILE_SENT = 23;
+	public static final int STATE_FILE_PAUSED_SENDING = 24;
 	
 
 	protected VMessage vm;

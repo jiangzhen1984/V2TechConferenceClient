@@ -15,6 +15,7 @@ import com.V2.jni.FileRequest;
 import com.V2.jni.FileRequestCallback;
 import com.V2.jni.VideoRequest;
 import com.V2.jni.VideoRequestCallback;
+import com.v2tech.service.jni.FileTransStatusIndication.FileTransErrorIndication;
 import com.v2tech.service.jni.FileTransStatusIndication.FileTransProgressStatusIndication;
 import com.v2tech.service.jni.JNIResponse;
 import com.v2tech.service.jni.RequestChatServiceResponse;
@@ -203,7 +204,7 @@ public class ChatService extends AbstractHandler {
 				for (int i = 0; audioList != null && i < audioList.size(); i++) {
 					ChatRequest.getInstance().sendChatAudio(msg.getGroupId(),
 							msg.getToUser().getmUserId(),
-							audioList.get(i).getUUID(),
+							audioList.get(i).getUuid(),
 							audioList.get(i).getAudioFilePath(),
 							msg.getMsgCode());
 				}
@@ -610,6 +611,13 @@ public class ChatService extends AbstractHandler {
 				long nFileSize, int nTransType) {
 			notifyListener(KEY_FILE_TRANS_STATUS_NOTIFICATION_LISTNER, 0, 0,
 					new FileTransProgressStatusIndication(nTransType, szFileID, nFileSize));
+		}
+
+		@Override
+		public void OnFileDownloadError(String sFileID) {
+			notifyListener(KEY_FILE_TRANS_STATUS_NOTIFICATION_LISTNER, 0, 0,
+					new FileTransErrorIndication(sFileID));
+
 		}
 		
 		

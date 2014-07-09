@@ -29,4 +29,11 @@ public interface FileRequestCallback {
 	
 	public void OnFileTransEnd(String szFileID, String szFileName,
 			long nFileSize, int nTransType);
+	
+	
+	/**
+	 * 
+	 * @param sFileID
+	 */
+	public void OnFileDownloadError(String sFileID);
 }
