@@ -39,6 +39,8 @@ public abstract class VMessageAbstractItem {
 	public static final int STATE_FILE_DOWNLOADED_FALIED = 8;
 	public static final int STATE_FILE_SENT_FALIED = 9;
 	public static final int STATE_FILE_SENDER_CANCEL = 10;
+	public static final int STATE_FILE_SENT = 11;
+	public static final int STATE_FILE_DOWNLOADED = 12;
 	
 
 	protected VMessage vm;

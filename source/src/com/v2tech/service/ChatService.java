@@ -12,8 +12,10 @@ import com.V2.jni.AudioRequest;
 import com.V2.jni.AudioRequestCallback;
 import com.V2.jni.ChatRequest;
 import com.V2.jni.FileRequest;
+import com.V2.jni.FileRequestCallback;
 import com.V2.jni.VideoRequest;
 import com.V2.jni.VideoRequestCallback;
+import com.v2tech.service.jni.FileTransStatusIndication.FileTransProgressStatusIndication;
 import com.v2tech.service.jni.JNIResponse;
 import com.v2tech.service.jni.RequestChatServiceResponse;
 import com.v2tech.service.jni.RequestSendMessageResponse;
@@ -27,15 +29,48 @@ import com.v2tech.vo.VMessageImageItem;
 
 public class ChatService extends AbstractHandler {
 
+	/**
+	 * Pause sending file to others
+	 */
+	public static final int OPERATION_PAUSE_SENDING = 1;
+
+	/**
+	 * Resume send file to others
+	 */
+	public static final int OPERATION_RESUME_SEND = 2;
+
+	/**
+	 * Pause downloading file
+	 */
+	public static final int OPERATION_PAUSE_DOWNLOADING = 3;
+
+	/**
+	 * Resume download file
+	 */
+	public static final int OPERATION_RESUME_DOWNLOAD = 4;
+
+	/**
+	 * Cancel sending file
+	 */
+	public static final int OPERATION_CANCEL_SENDING = 5;
+
+	/**
+	 * Cancel download file
+	 */
+	public static final int OPERATION_CANCEL_DOWNLOADING = 6;
+
 	private AudioRequestCallback callback;
 
 	private VideoRequestCallback videoCallback;
+	
+	private FileRequestCB fileCallback;
 
 	private Registrant mCaller;
 
 	private Handler thread;
 
 	private static final int KEY_CANCELLED_LISTNER = 1;
+	private static final int KEY_FILE_TRANS_STATUS_NOTIFICATION_LISTNER = 2;
 
 	private SparseArray<List<Registrant>> registrantHolder = new SparseArray<List<Registrant>>();
 
@@ -50,6 +85,9 @@ public class ChatService extends AbstractHandler {
 
 		videoCallback = new VideoRequestCallbackImpl();
 		VideoRequest.getInstance().addCallback(videoCallback);
+		
+		fileCallback = new FileRequestCB();
+		FileRequest.getInstance().addCallback(fileCallback);
 
 		HandlerThread backEnd = new HandlerThread("back-end");
 		backEnd.start();
@@ -107,6 +145,23 @@ public class ChatService extends AbstractHandler {
 	}
 
 	/**
+	 * Register listener for out conference by kick.
+	 * 
+	 * @param msg
+	 */
+	public void registerFileTransStatusListener(Handler h, int what, Object obj) {
+		registerListener(KEY_FILE_TRANS_STATUS_NOTIFICATION_LISTNER, h, what,
+				obj);
+	}
+
+	public void removeRegisterFileTransStatusListener(Handler h, int what,
+			Object obj) {
+		unRegisterListener(KEY_FILE_TRANS_STATUS_NOTIFICATION_LISTNER, h, what,
+				obj);
+
+	}
+
+	/**
 	 * send message
 	 * 
 	 * @param msg
@@ -121,7 +176,7 @@ public class ChatService extends AbstractHandler {
 			@Override
 			public void run() {
 
-				//Send file 
+				// Send file
 				if (msg.getFileItems().size() > 0) {
 					sendFileMessage(msg, null);
 					return;
@@ -164,8 +219,7 @@ public class ChatService extends AbstractHandler {
 
 		});
 	}
-	
-	
+
 	public void sendFileMessage(VMessage vm, Registrant caller) {
 		List<VMessageFileItem> items = vm.getFileItems();
 		if (items == null || items.size() <= 0) {
@@ -178,28 +232,73 @@ public class ChatService extends AbstractHandler {
 			}
 			return;
 		}
-		
+
 		StringBuilder sb = new StringBuilder();
-		sb.append("<xml desc=\"TCoreFileTransIMInviteTransCmd\">").append("\n");
-		sb.append("<longlong desc=\"ToUserID\" value=\""+vm.getToUser().getmUserId()+"\"/>").append("\n");
-		sb.append("<string desc=\"FileXml\" value=\"<?xml version='1.0' encoding='utf-8'?>").append("\n");
 		for (VMessageFileItem item : items) {
 			sb.append(
-					"<file id=\""
-							+ item.getUuid()
-							+ "\" name=\""
-							+ item.getFilePath()
-							+ "\" encrypttype=\"0\" uploader=\"0\" time=\"0\" size=\"0\" url=\"\"/> \" />").append("\n");
+					"<file id=\"" + item.getUuid() + "\" name=\""
+							+ item.getFilePath() + "\" encrypttype=\"0\"  />")
+					.append("\n");
 		}
-		
-		sb.append("<int desc=\"LineType\" value=\"1\"/>").append("\n");
-		sb.append("</xml>").append("\n");
-		
-		FileRequest.getInstance().inviteFileTrans(vm.getGroupId(), sb.toString(), FileRequest.BT_IM);
+
+		FileRequest.getInstance().inviteFileTrans(vm.getToUser().getmUserId(),
+				sb.toString(), 1);
+
+		JNIResponse resp = new RequestChatServiceResponse(
+				RequestChatServiceResponse.Result.SUCCESS);
+		sendResult(caller, resp);
+	}
+
+	/**
+	 * Update file operation, like pause transport; resume transport; cancel
+	 * transport
+	 * 
+	 * @param vfi
+	 *            file item Object
+	 * @param opt
+	 *            operation of file
+	 * @param caller
+	 * 
+	 * @see {@link #OPERATION_PAUSE_SENDING}
+	 * @see {@link #OPERATION_RESUME_SEND}
+	 * @see {@link #OPERATION_PAUSE_DOWNLOADING}
+	 * @see {@link #OPERATION_RESUME_DOWNLOAD}
+	 * @see {@link #OPERATION_CANCEL_SENDING}
+	 * @see {@link #OPERATION_CANCEL_DOWNLOADING}
+	 */
+	public void updateFileOperation(VMessageFileItem vfi, int opt,
+			Registrant caller) {
+		if (vfi == null
+				|| (opt < OPERATION_PAUSE_SENDING || opt > OPERATION_CANCEL_DOWNLOADING)) {
+			JNIResponse resp = new RequestChatServiceResponse(
+					RequestChatServiceResponse.Result.INCORRECT_PAR);
+			sendResult(caller, resp);
+			return;
+		}
+
+		switch (opt) {
+		case OPERATION_PAUSE_SENDING:
+			FileRequest.getInstance().pauseSendFile(vfi.getUuid(), vfi.getTransType());
+			break;
+		case OPERATION_RESUME_SEND:
+			FileRequest.getInstance().resumeSendFile(vfi.getUuid(), vfi.getTransType());
+			break;
+		case OPERATION_PAUSE_DOWNLOADING:
+			break;
+		case OPERATION_RESUME_DOWNLOAD:
+			break;
+		case OPERATION_CANCEL_SENDING:
+			FileRequest.getInstance().cancelSendFile(vfi.getUuid(), vfi.getTransType());
+			break;
+		case OPERATION_CANCEL_DOWNLOADING:
+			break;
+
+		}
 		
 		JNIResponse resp = new RequestChatServiceResponse(
 				RequestChatServiceResponse.Result.SUCCESS);
 		sendResult(caller, resp);
+
 	}
 
 	/**
@@ -486,6 +585,35 @@ public class ChatService extends AbstractHandler {
 			// Clean cache
 			mCaller = null;
 		}
+
+	}
+
+	class FileRequestCB implements FileRequestCallback {
+
+		@Override
+		public void OnFileTransInvite(long nGroupID, int nBusinessType,
+				long userid, String szFileID, String szFileName,
+				long nFileBytes, int linetype) {
+
+		}
+
+		@Override
+		public void OnFileTransProgress(String szFileID, long nBytesTransed,
+				int nTransType) {
+			notifyListener(KEY_FILE_TRANS_STATUS_NOTIFICATION_LISTNER, 0, 0,
+					new FileTransProgressStatusIndication(nTransType, szFileID, nBytesTransed));
+
+		}
+
+		@Override
+		public void OnFileTransEnd(String szFileID, String szFileName,
+				long nFileSize, int nTransType) {
+			notifyListener(KEY_FILE_TRANS_STATUS_NOTIFICATION_LISTNER, 0, 0,
+					new FileTransProgressStatusIndication(nTransType, szFileID, nFileSize));
+		}
+		
+		
+		
 
 	}
 

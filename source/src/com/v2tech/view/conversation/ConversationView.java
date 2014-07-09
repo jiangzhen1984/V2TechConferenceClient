@@ -59,6 +59,8 @@ import com.v2tech.service.BitmapManager;
 import com.v2tech.service.ChatService;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.service.Registrant;
+import com.v2tech.service.jni.FileTransStatusIndication;
+import com.v2tech.service.jni.FileTransStatusIndication.FileTransProgressStatusIndication;
 import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.MessageUtil;
 import com.v2tech.util.SPUtil;
@@ -87,6 +89,8 @@ public class ConversationView extends Activity {
 	private final int SEND_MESSAGE = 4;
 	private final int SEND_MESSAGE_DONE = 5;
 	private final int SEND_MESSAGE_ERROR = 6;
+	private final int PLAY_NEXT_UNREAD_MESSAGE = 7;
+	private final int FILE_STATUS_LISTENER = 20;
 
 	private final int BATCH_COUNT = 10;
 	private static final int SELECT_PICTURE_CODE = 100;
@@ -237,6 +241,8 @@ public class ConversationView extends Activity {
 		filter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
 		registerReceiver(receiver, filter);
 
+		mChat.registerFileTransStatusListener(this.lh, FILE_STATUS_LISTENER,
+				null);
 		notificateConversationUpdate();
 
 		// Start animation
@@ -303,7 +309,7 @@ public class ConversationView extends Activity {
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
-		BitmapManager.getInstance().registerBitmapChangedListener(
+		BitmapManager.getInstance().unRegisterBitmapChangedListener(
 				avatarChangedListener);
 
 		stopPlaying();
@@ -311,6 +317,8 @@ public class ConversationView extends Activity {
 		this.unregisterReceiver(receiver);
 		cleanCache();
 		V2Log.e("conversation view exited");
+		mChat.removeRegisterFileTransStatusListener(this.lh,
+				FILE_STATUS_LISTENER, null);
 	}
 
 	private void initExtraObject() {
@@ -535,7 +543,6 @@ public class ConversationView extends Activity {
 
 	private void stopRecording() {
 		// mRecorder.stop();
-		mRecorder.stop();
 		mRecorder.release();
 		mRecorder = null;
 	}
@@ -577,22 +584,22 @@ public class ConversationView extends Activity {
 		}
 
 		@Override
-		public void playerStopped(int perf) {
+		public synchronized void playerStopped(int perf) {
 			if (currentPlayed != null
 					&& currentPlayed.getAudioItems().size() > 0) {
 				currentPlayed.getAudioItems().get(0).setPlaying(false);
 			}
-			boolean flag = playNextUnreadMessage();
-			// To last message
-			if (!flag) {
-				currentPlayed = null;
-			}
+			//Call in main thread
+			Message.obtain(lh, PLAY_NEXT_UNREAD_MESSAGE).sendToTarget();
+			
 		}
 
 		@Override
 		public void playerException(Throwable t) {
 			playerStopped(0);
-			currentPlayed.getAudioItems().get(0).setPlaying(false);
+			if (currentPlayed != null) {
+				currentPlayed.getAudioItems().get(0).setPlaying(false);
+			}
 		}
 
 	};
@@ -1215,6 +1222,36 @@ public class ConversationView extends Activity {
 		return true;
 	}
 
+	private void updateFileProgressView(String uuid, long tranedSize) {
+		for (int i = 0; i < messageArray.size(); i++) {
+			VMessage vm = (VMessage) messageArray.get(i).getItemObject();
+			if (vm.getItems().size() > 0) {
+				VMessageAbstractItem item = vm.getItems().get(0);
+				if (item.getType() == VMessageAbstractItem.ITEM_TYPE_FILE
+						&& item.getUuid().equals(uuid)) {
+					VMessageFileItem vfi = ((VMessageFileItem) item);
+					
+					if (vfi.getFileSize() == tranedSize) {
+						if (vfi.getState() == VMessageAbstractItem.STATE_FILE_SENDING) {
+							vfi.setState(VMessageAbstractItem.STATE_FILE_SENT);
+						} else if (vfi.getState()== VMessageAbstractItem.STATE_FILE_DOWNLOADING) {
+							vfi.setState(VMessageAbstractItem.STATE_FILE_DOWNLOADED);
+						}
+						
+						MessageBuilder.updateVMessageItem(this, vfi);
+					}
+					
+					vfi.setDownloadedSize(tranedSize);
+					((MessageBodyView) messageArray.get(i).getView())
+							.updateView(vfi);
+					
+					
+				}
+			}
+		}
+
+	}
+
 	private OnTouchListener mHiddenOnTouchListener = new OnTouchListener() {
 
 		@Override
@@ -1237,6 +1274,7 @@ public class ConversationView extends Activity {
 			Intent i = new Intent();
 			i.setClass(mContext, ContactDetail.class);
 			i.putExtra("uid", user2Id);
+			i.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
 			mContext.startActivity(i);
 		}
 
@@ -1267,6 +1305,9 @@ public class ConversationView extends Activity {
 
 		@Override
 		public void notifyAvatarChanged(User user, Bitmap bm) {
+			if (user == null) {
+				return;
+			}
 			if (user.getmUserId() == local.getmUserId()
 					|| user.getmUserId() == remote.getmUserId()) {
 				adapter.notifyDataSetInvalidated();
@@ -1353,6 +1394,21 @@ public class ConversationView extends Activity {
 				break;
 			case SEND_MESSAGE_ERROR:
 				break;
+			case PLAY_NEXT_UNREAD_MESSAGE:
+				boolean flag = playNextUnreadMessage();
+				// To last message
+				if (!flag) {
+					currentPlayed = null;
+				}
+				break;
+			case FILE_STATUS_LISTENER: {
+				FileTransStatusIndication ind = (FileTransStatusIndication) msg.obj;
+				if (ind.indType == FileTransStatusIndication.IND_TYPE_PROGRESS) {
+					updateFileProgressView(
+							ind.uuid,
+							((FileTransProgressStatusIndication) ind).nTranedSize);
+				}
+			}
 			}
 		}
 

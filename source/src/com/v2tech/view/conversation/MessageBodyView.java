@@ -358,42 +358,9 @@ public class MessageBodyView extends LinearLayout {
 
 		TextView state = (TextView) fileRootView
 				.findViewById(R.id.message_body_file_item_state);
-		String strState = "";
-		boolean showProgressLayout = false;
-		if (item.getState() == VMessageAbstractItem.STATE_FILE_DOWNLOADING) {
-			strState = getContext().getResources()
-					.getText(R.string.contact_message_file_item_downloading)
-					.toString();
-			showProgressLayout = true;
-		} else if (item.getState() == VMessageAbstractItem.STATE_FILE_SENDING) {
-			strState = getContext().getResources()
-					.getText(R.string.contact_message_file_item_sending)
-					.toString();
-			showProgressLayout = true;
-		} else if (item.getState() == VMessageAbstractItem.STATE_FILE_PAUSED) {
-			strState = getContext().getResources()
-					.getText(R.string.contact_message_file_item_pause)
-					.toString();
-			showProgressLayout = true;
-		} else if (item.getState() == VMessageAbstractItem.STATE_FILE_SENT_FALIED) {
-			strState = getContext().getResources()
-					.getText(R.string.contact_message_file_item_sent_failed)
-					.toString();
-		} else if (item.getState() == VMessageAbstractItem.STATE_FILE_DOWNLOADED_FALIED) {
-			strState = getContext()
-					.getResources()
-					.getText(R.string.contact_message_file_item_download_failed)
-					.toString();
-		} else if (item.getState() == VMessageAbstractItem.STATE_FILE_MISS_DOWNLOAD) {
-			strState = getContext().getResources()
-					.getText(R.string.contact_message_file_item_miss_download)
-					.toString();
-		} else if (item.getState() == VMessageAbstractItem.STATE_FILE_UNDOWNLOAD) {
-			showProgressLayout = true;
-			strState = getContext().getResources()
-					.getText(R.string.contact_message_file_item_miss_download)
-					.toString();
-		}
+
+		ImageView button = (ImageView) fileRootView.findViewById(R.id.message_body_file_item_progress_action_button);
+		boolean showProgressLayout = updateFileItemStateText(item, state, button);
 
 		if (showProgressLayout) {
 			fileRootView.findViewById(
@@ -402,22 +369,31 @@ public class MessageBodyView extends LinearLayout {
 
 			TextView progress = (TextView) fileRootView
 					.findViewById(R.id.message_body_file_item_progress_size);
-			progress.setText(item.getDownloadedSize() + "/"
+			progress.setText(item.getDownloadSizeStr() + "/"
 					+ item.getFileSizeStr());
 
 			TextView speed = (TextView) fileRootView
 					.findViewById(R.id.message_body_file_item_progress_speed);
 			speed.setText(item.getSpeed() + "K");
 
+			float percent = (float) ((double) item.getDownloadedSize() / (double) item
+					.getFileSize());
+
+			ViewGroup progressC = (ViewGroup) fileRootView
+					.findViewById(R.id.message_body_file_item_progress_state_ly);
+
+			View iv = fileRootView
+					.findViewById(R.id.message_body_file_item_progress_state);
+			ViewGroup.LayoutParams lp = iv.getLayoutParams();
+			lp.width = (int) (progressC.getWidth() * percent);
+			progressC.updateViewLayout(iv, lp);
+
 		} else {
 			fileRootView.findViewById(
 					R.id.message_body_file_item_progress_layout).setVisibility(
-					View.INVISIBLE);
+					View.GONE);
 		}
 
-		state.setText(strState);
-
-		
 		fileRootView.setOnClickListener(fileMessageItemClickListener);
 		fileRootView.setTag(item);
 		mContentContainer.addView(fileRootView, new LinearLayout.LayoutParams(
@@ -560,7 +536,104 @@ public class MessageBodyView extends LinearLayout {
 		this.mMsg = vm;
 		initData();
 	}
-	
+
+	public void updateView(VMessageFileItem vfi) {
+		if (vfi == null || vfi.getVm() != mMsg) {
+			return;
+		}
+
+		View fileRootView = mContentContainer.getChildAt(0);
+		TextView state = (TextView) fileRootView
+				.findViewById(R.id.message_body_file_item_state);
+		ImageView button = (ImageView) fileRootView.findViewById(R.id.message_body_file_item_progress_action_button);
+		boolean showProgressLayout = updateFileItemStateText(vfi, state, button);
+
+		if (showProgressLayout) {
+			fileRootView.findViewById(
+					R.id.message_body_file_item_progress_layout).setVisibility(
+					View.VISIBLE);
+
+			TextView progress = (TextView) fileRootView
+					.findViewById(R.id.message_body_file_item_progress_size);
+			progress.setText(vfi.getDownloadSizeStr() + "/"
+					+ vfi.getFileSizeStr());
+
+			TextView speed = (TextView) fileRootView
+					.findViewById(R.id.message_body_file_item_progress_speed);
+			speed.setText(vfi.getSpeed() + "K");
+
+			float percent = (float) ((double) vfi.getDownloadedSize() / (double) vfi
+					.getFileSize());
+
+			ViewGroup progressC = (ViewGroup) fileRootView
+					.findViewById(R.id.message_body_file_item_progress_state_ly);
+
+			View iv = fileRootView
+					.findViewById(R.id.message_body_file_item_progress_state);
+			ViewGroup.LayoutParams lp = iv.getLayoutParams();
+			lp.width = (int) (progressC.getWidth() * percent);
+			progressC.updateViewLayout(iv, lp);
+
+		} else {
+			fileRootView.findViewById(
+					R.id.message_body_file_item_progress_layout).setVisibility(
+					View.INVISIBLE);
+		}
+
+	}
+
+	private boolean updateFileItemStateText(VMessageFileItem vfi, TextView view, ImageView actionButton) {
+		String strState = "";
+		boolean showProgressLayout = false;
+		if (vfi.getState() == VMessageAbstractItem.STATE_FILE_DOWNLOADING) {
+			strState = getContext().getResources()
+					.getText(R.string.contact_message_file_item_downloading)
+					.toString();
+			actionButton.setImageResource(R.drawable.message_file_pause_button);
+			showProgressLayout = true;
+		} else if (vfi.getState() == VMessageAbstractItem.STATE_FILE_SENDING) {
+			strState = getContext().getResources()
+					.getText(R.string.contact_message_file_item_sending)
+					.toString();
+			actionButton.setImageResource(R.drawable.message_file_pause_button);
+			showProgressLayout = true;
+		} else if (vfi.getState() == VMessageAbstractItem.STATE_FILE_PAUSED) {
+			strState = getContext().getResources()
+					.getText(R.string.contact_message_file_item_pause)
+					.toString();
+			actionButton.setImageResource(R.drawable.message_file_download_button);
+			showProgressLayout = true;
+		} else if (vfi.getState() == VMessageAbstractItem.STATE_FILE_SENT_FALIED) {
+			strState = getContext().getResources()
+					.getText(R.string.contact_message_file_item_sent_failed)
+					.toString();
+		} else if (vfi.getState() == VMessageAbstractItem.STATE_FILE_DOWNLOADED_FALIED) {
+			strState = getContext()
+					.getResources()
+					.getText(R.string.contact_message_file_item_download_failed)
+					.toString();
+		} else if (vfi.getState() == VMessageAbstractItem.STATE_FILE_MISS_DOWNLOAD) {
+			strState = getContext().getResources()
+					.getText(R.string.contact_message_file_item_miss_download)
+					.toString();
+		} else if (vfi.getState() == VMessageAbstractItem.STATE_FILE_UNDOWNLOAD) {
+			showProgressLayout = true;
+			strState = getContext().getResources()
+					.getText(R.string.contact_message_file_item_miss_download)
+					.toString();
+		} else if (vfi.getState() == VMessageAbstractItem.STATE_FILE_SENT) {
+			strState = getContext().getResources()
+					.getText(R.string.contact_message_file_item_sent)
+					.toString();
+		} else if (vfi.getState() == VMessageAbstractItem.STATE_FILE_DOWNLOADED) {
+			strState = getContext().getResources()
+					.getText(R.string.contact_message_file_item_downloaded)
+					.toString();
+		}
+
+		view.setText(strState);
+		return showProgressLayout;
+	}
 
 	private OnLongClickListener messageLongClickListener = new OnLongClickListener() {
 
@@ -571,21 +644,21 @@ public class MessageBodyView extends LinearLayout {
 		}
 
 	};
-	
+
 	private OnClickListener fileMessageItemClickListener = new OnClickListener() {
 
 		@Override
 		public void onClick(View view) {
 			VMessageFileItem item = (VMessageFileItem) view.getTag();
-			
+
 			if (item.getState() == VMessageFileItem.STATE_FILE_UNDOWNLOAD) {
 				if (callback != null) {
 					callback.requestDownloadFile(view, item.getVm(), item);
 				}
 			}
-			
+
 		}
-		
+
 	};
 
 	private OnClickListener imageMessageClickListener = new OnClickListener() {

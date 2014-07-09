@@ -362,12 +362,12 @@ public class ContactDetail extends Activity implements OnTouchListener {
 		tv1.setOnClickListener(itemClickListener);
 
 		if (tel != null && phone != null) {
-			tv.setTag("call:"+tel+"|"+phone);
+			tv.setTag("call:" + tel + "|" + phone);
 		} else if (tel != null || phone != null) {
 			tv.setTag(tel == null ? phone : tel);
 		} else {
 			tv.setTag("");
-			tv.setVisibility(View.GONE);
+			// tv.setVisibility(View.GONE);
 		}
 
 		if (voice) {
@@ -384,10 +384,10 @@ public class ContactDetail extends Activity implements OnTouchListener {
 
 		@Override
 		public void onClick(View view) {
-			String tag =(String)view.getTag();
+			String tag = (String) view.getTag();
 			if (tag != null && tag.startsWith("call:")) {
 				String[] nums = tag.substring(5).split("\\|");
-				
+
 				TextView tv = (TextView) d
 						.findViewById(R.id.contact_user_detail_call_dialog_1);
 				tv.setOnClickListener(itemClickListener);
@@ -400,9 +400,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 				tv1.setTag(nums[1]);
 				return;
 			}
-			
-			
-			
+
 			if (d != null) {
 				d.dismiss();
 				d = null;
@@ -410,10 +408,18 @@ public class ContactDetail extends Activity implements OnTouchListener {
 			if (view.getTag() != null && view.getTag().equals("voice")) {
 				startVoiceCall();
 			} else {
-				Intent intent = new Intent();
-				intent.setAction(Intent.ACTION_CALL);
-				intent.setData(Uri.parse("tel:" + (String) view.getTag()));
-				startActivity(intent);
+				if (view.getTag() == null
+						|| view.getTag().toString().equals("")) {
+					Intent intent = new Intent();
+					intent.setAction(Intent.ACTION_DIAL);
+					startActivity(intent);
+
+				} else {
+					Intent intent = new Intent();
+					intent.setAction(Intent.ACTION_CALL);
+					intent.setData(Uri.parse("tel:" + (String) view.getTag()));
+					startActivity(intent);
+				}
 			}
 		}
 
@@ -461,7 +467,9 @@ public class ContactDetail extends Activity implements OnTouchListener {
 					Intent intent = new Intent();
 					intent.setAction(Intent.ACTION_DIAL); // android.intent.action.DIAL
 					startActivity(intent);
-				} else if (!phoneEmpty || !mobileEmpty) {
+				} else if (!phoneEmpty && !mobileEmpty) {
+					showCallDialog(u.getTelephone(), u.getCellPhone(), false);
+				} else {
 					Intent intent = new Intent();
 					intent.setAction(Intent.ACTION_CALL);
 					if (!phoneEmpty) {
@@ -470,8 +478,6 @@ public class ContactDetail extends Activity implements OnTouchListener {
 						intent.setData(Uri.parse("tel:" + u.getCellPhone()));
 					}
 					startActivity(intent);
-				} else {
-					showCallDialog(u.getTelephone(), u.getCellPhone(), false);
 				}
 			} else {
 				if (phoneEmpty && mobileEmpty) {
@@ -495,6 +501,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 			i.putExtra("obj", new ConversationNotificationObject(
 					Conversation.TYPE_CONTACT, u.getmUserId()));
 			i.addCategory(PublicIntent.DEFAULT_CATEGORY);
+			i.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
 			mContext.startActivity(i);
 		}
 

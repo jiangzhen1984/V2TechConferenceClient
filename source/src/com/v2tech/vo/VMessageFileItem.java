@@ -19,13 +19,15 @@ public class VMessageFileItem extends VMessageAbstractItem {
 	
 	private float speed;
 	
+	private int transType = 1;
+	
 	public VMessageFileItem(VMessage vm, String filePath) {
 		super(vm);
 		this.filePath = filePath;
 		if (filePath != null) {
 			int start = filePath.lastIndexOf("/");
 			if (start != -1) {
-				this.fileName = filePath.substring(start);
+				this.fileName = filePath.substring(start+1);
 			}
 			File f = new File(filePath);
 			fileSize = f.length();
@@ -56,7 +58,7 @@ public class VMessageFileItem extends VMessageAbstractItem {
 		if (fileSize >= 1073741824) {
 			return (df.format((double) fileSize / (double) 1073741824)) + "G";
 		} else if (fileSize >= 1048576) {
-			return (df.format((double) fileSize / (double) 1073741824)) + "M";
+			return (df.format((double) fileSize / (double) 1048576)) + "M";
 		} else if (fileSize >= 1024) {
 			return (df.format((double) fileSize / (double) 1024)) + "K";
 		} else {
@@ -97,6 +99,20 @@ public class VMessageFileItem extends VMessageAbstractItem {
 	public long getDownloadedSize() {
 		return downloadedSize;
 	}
+	
+	public String getDownloadSizeStr() {
+		Format df=new DecimalFormat("#.00");
+		
+		if (downloadedSize >= 1073741824) {
+			return (df.format((double) downloadedSize / (double) 1073741824)) + "G";
+		} else if (downloadedSize >= 1048576) {
+			return (df.format((double) downloadedSize / (double) 1048576)) + "M";
+		} else if (downloadedSize >= 1024) {
+			return (df.format((double) downloadedSize / (double) 1024)) + "K";
+		} else {
+			return downloadedSize + "B";
+		}
+	}
 
 	public void setDownloadedSize(long downloadedSize) {
 		this.downloadedSize = downloadedSize;
@@ -109,6 +125,18 @@ public class VMessageFileItem extends VMessageAbstractItem {
 	public void setSpeed(float speed) {
 		this.speed = speed;
 	}
+
+
+	public int getTransType() {
+		return transType;
+	}
+
+
+	public void setTransType(int transType) {
+		this.transType = transType;
+	}
+
+
 	
 	
 

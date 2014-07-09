@@ -1002,6 +1002,23 @@ public class JNIService extends Service {
 			Message.obtain(mCallbackHandler, JNI_RECEIVED_MESSAGE, vm)
 			.sendToTarget();
 		}
+
+
+		@Override
+		public void OnFileTransProgress(String szFileID, long nBytesTransed,
+				int nTransType) {
+			
+		}
+
+
+		@Override
+		public void OnFileTransEnd(String szFileID, String szFileName,
+				long nFileSize, int nTransType) {
+			
+		}
+		
+		
+		
 		
 	}
 

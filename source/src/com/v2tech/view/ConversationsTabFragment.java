@@ -710,7 +710,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher {
 					|| mCurrentTabFlag == Conversation.TYPE_CONTACT) {
 				Intent i = new Intent(PublicIntent.START_CONVERSACTION_ACTIVITY);
 				i.addCategory(PublicIntent.DEFAULT_CATEGORY);
-				i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+				i.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
 				i.putExtra("obj",
 						new ConversationNotificationObject(cov));
 				startActivity(i);

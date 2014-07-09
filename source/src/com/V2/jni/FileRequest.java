@@ -14,11 +14,10 @@ import android.content.Context;
 import android.util.Log;
 
 public class FileRequest {
-	
+
 	public static final int BT_CONF = 1;
 	public static final int BT_IM = 2;
 
-	
 	private Context context;
 	private static FileRequest mFileRequest;
 	private String TAG = "FileRequest UI";
@@ -42,9 +41,7 @@ public class FileRequest {
 	public static synchronized FileRequest getInstance() {
 		return mFileRequest;
 	}
-	
-	
-	
+
 	public void addCallback(FileRequestCallback callback) {
 		this.callbacks.add(new WeakReference<FileRequestCallback>(callback));
 	}
@@ -53,11 +50,18 @@ public class FileRequest {
 
 	public native void unInitialize();
 
-	// 鍙戦�鏂囦欢
-	// 閭�浠栦汉寮�鏂囦欢浼犺緭
-
-	public native void inviteFileTrans(long nGroupID, String szToUserXml,
-			int businesstype);
+	/**
+	 * Send file to user
+	 * 
+	 * @param nUserId
+	 *            user Id
+	 * @param filePath
+	 *            <file id="" name="{FILE PATH}" encrypttype="0"/>
+	 * @param linetype
+	 *            2: OFFLINE 1:ONLINE
+	 */
+	public native void inviteFileTrans(long nUserId, String filePath,
+			int linetype);
 
 	// 鎺ュ彈瀵规柟鐨勬枃浠朵紶杈撻個璇�
 	public native void acceptFileTrans(String szFileID, String szSavePath,
@@ -88,21 +92,21 @@ public class FileRequest {
 	public native void pauseGroupFile(String szFileID, int type,
 			int businesstype);
 
-	private native void cancelSendFile(String patch, int type);
+	public native void cancelSendFile(String szFileID, int type);
 
-	private native void cancelP2PRecvFile(String patch, int type);
+	public native void cancelP2PRecvFile(String szFileID, int type);
 
-	private native void cancelHttpRecvFile(String patch, int type);
+	public native void cancelHttpRecvFile(String szFileID, int type);
 
-	private native void resumeSendFile(String patch, int type);
+	public native void resumeSendFile(String szFileID, int type);
 
-	private native void pauseSendFile(String patch, int type);
+	public native void pauseSendFile(String szFileID, int type);
 
-	private native void resumeHttpRecvFile(String patch, int type);
+	public native void resumeHttpRecvFile(String szFileID, int type);
 
-	private native void pauseHttpRecvFile(String patch, int type);
+	public native void pauseHttpRecvFile(String szFileID, int type);
 
-	private native void httpDownloadFile(String patch, String patch1,
+	public native void httpDownloadFile(String patch, String patch1,
 			String patch2, int i, int i1);
 
 	// 鏀跺埌浠栦汉鐨勬枃浠朵紶杈撻個璇风殑鍥炶皟
@@ -171,36 +175,45 @@ public class FileRequest {
 				+ nFileSize);
 	}
 
-	// 鏀跺埌鏂囦欢浼犺緭杩涘害鐨勫洖璋僌nFileTransProgress--->{D27BDEE0-7C5B-40B2-8DF2-7DA3EECCD831}:368640:368640
-
+	/**
+	 * 
+	 * @param szFileID
+	 * @param nBytesTransed
+	 * @param nTransType
+	 */
 	private void OnFileTransProgress(String szFileID, long nBytesTransed,
 			int nTransType) {
 		Log.e(TAG, "OnFileTransProgress--->" + szFileID + ":" + nBytesTransed
 				+ ":" + nTransType);
 
-		// if(FileDownloadActivity.mFileActivity!=null){
-		// Bundle bundle=new Bundle();
-		// bundle.putLong("progress",nBytesTransed);
-		// bundle.putString("fileid",szFileID);
-		// FileDownloadActivity.mFileActivity.SendMessage(Constant.FILE_PROGRESS,
-		// bundle);
-		// }
+		for (int i = 0; i < callbacks.size(); i++) {
+			WeakReference<FileRequestCallback> wrf = callbacks.get(i);
+			if (wrf != null && wrf.get() != null) {
+				((FileRequestCallback) wrf.get()).OnFileTransProgress(szFileID,
+						nBytesTransed, nTransType);
+			}
+		}
 	}
 
-	// 鏀跺埌鏂囦欢浼犺緭瀹屾垚鐨勫洖璋�
-	// {D27BDEE0-7C5B-40B2-8DF2-7DA3EECCD831}:/mnt/sdcard/XinLan_IM/files/ConfSession:1611176:2
-
+	
+	/**
+	 * 
+	 * @param szFileID
+	 * @param szFileName
+	 * @param nFileSize
+	 * @param nTransType
+	 */
 	private void OnFileTransEnd(String szFileID, String szFileName,
 			long nFileSize, int nTransType) {
 		Log.e(TAG, "OnFileTransEnd--->" + szFileID + ":" + szFileName + ":"
 				+ nFileSize + ":" + nTransType);
-		// if(FileDownloadActivity.mFileActivity!=null){
-		// Bundle bundle=new Bundle();
-		// bundle.putString("path",szFileName);
-		// bundle.putString("fileid",szFileID);
-		// FileDownloadActivity.mFileActivity.SendMessage(Constant.FILE_DOWN_SUCCESS,
-		// bundle);
-		// }
+		for (int i = 0; i < callbacks.size(); i++) {
+			WeakReference<FileRequestCallback> wrf = callbacks.get(i);
+			if (wrf != null && wrf.get() != null) {
+				((FileRequestCallback) wrf.get()).OnFileTransEnd(szFileID,
+						szFileName, nFileSize, nTransType);
+			}
+		}
 	}
 
 	// 鏀跺埌瀵规柟鍙栨秷鏂囦欢浼犺緭鍥炶皟
