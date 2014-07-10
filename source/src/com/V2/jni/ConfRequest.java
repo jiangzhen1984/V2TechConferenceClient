@@ -116,7 +116,8 @@ public class ConfRequest {
 	private void OnConfMemberEnter(long nConfID, long nTime, String szUserInfos) {
 		V2Log.d("-->OnConfMemberEnter " + nConfID + " " + nTime + " "
 				+ szUserInfos);
-		for (WeakReference<ConfRequestCallback> we : this.callbacks) {
+		for (int i =0; i < this.callbacks.size(); i++) {
+			WeakReference<ConfRequestCallback> we  = this.callbacks.get(i);
 			Object obj = we.get();
 			if (obj != null) {
 				ConfRequestCallback cb = (ConfRequestCallback) obj;
@@ -134,7 +135,8 @@ public class ConfRequest {
 	private void OnConfMemberExit(long nConfID, long nTime, long nUserID) {
 		V2Log.d("-->OnConfMemberExit " + nConfID + " " + nTime + " " + nUserID);
 
-		for (WeakReference<ConfRequestCallback> we : this.callbacks) {
+		for (int i =0; i < this.callbacks.size(); i++) {
+			WeakReference<ConfRequestCallback> we  = this.callbacks.get(i);
 			Object obj = we.get();
 			if (obj != null) {
 				ConfRequestCallback cb = (ConfRequestCallback) obj;
@@ -151,7 +153,8 @@ public class ConfRequest {
 	 */
 	private void OnKickConf(int nReason) {
 		V2Log.d("-->OnKickConf " + nReason);
-		for (WeakReference<ConfRequestCallback> we : this.callbacks) {
+		for (int i =0; i < this.callbacks.size(); i++) {
+			WeakReference<ConfRequestCallback> we  = this.callbacks.get(i);
 			Object obj = we.get();
 			if (obj != null) {
 				ConfRequestCallback cb = (ConfRequestCallback) obj;
@@ -164,7 +167,8 @@ public class ConfRequest {
 	private void OnGrantPermission(long userid, int type, int status) {
 		V2Log.d("OnGrantPermission " + userid + " type:" + type + " status:" + status);
 
-		for (WeakReference<ConfRequestCallback> we : this.callbacks) {
+		for (int i =0; i < this.callbacks.size(); i++) {
+			WeakReference<ConfRequestCallback> we  = this.callbacks.get(i);
 			Object obj = we.get();
 			if (obj != null) {
 				ConfRequestCallback cb = (ConfRequestCallback) obj;
@@ -180,7 +184,8 @@ public class ConfRequest {
 	 */
 	private void OnConfNotify(String str, String str2) {
 		V2Log.i(str+"   "+ str2);
-		for (WeakReference<ConfRequestCallback> we : this.callbacks) {
+		for (int i =0; i < this.callbacks.size(); i++) {
+			WeakReference<ConfRequestCallback> we  = this.callbacks.get(i);
 			Object obj = we.get();
 			if (obj != null) {
 				ConfRequestCallback cb = (ConfRequestCallback) obj;

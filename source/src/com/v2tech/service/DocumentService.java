@@ -20,19 +20,19 @@ import com.v2tech.vo.V2ShapeMeta;
  */
 public class DocumentService extends AbstractHandler {
 
-	private static final int KEY_NEW_DOC_LISTENER = 1;
+	private static final int KEY_NEW_DOC_LISTENER = 50;
 
-	private static final int KEY_DOC_PAGE_NOTIFY_LISTENER = 2;
+	private static final int KEY_DOC_PAGE_NOTIFY_LISTENER = 52;
 
-	private static final int KEY_PAGE_ACTIVE_NOTIFY_LISTENER = 3;
+	private static final int KEY_PAGE_ACTIVE_NOTIFY_LISTENER = 53;
 
-	private static final int KEY_DOC_PAGE_ADD_NOTIFY_LISTENER = 4;
+	private static final int KEY_DOC_PAGE_ADD_NOTIFY_LISTENER = 54;
 
-	private static final int KEY_DOC_DISPLAY_NOTIFY_LISTENER = 5;
+	private static final int KEY_DOC_DISPLAY_NOTIFY_LISTENER = 55;
 
-	private static final int KEY_DOC_CLOSE_NOTIFY_LISTENER = 6;
+	private static final int KEY_DOC_CLOSE_NOTIFY_LISTENER = 56;
 
-	private static final int KEY_PAGE_CANVAS_NOTIFY_LISTENER = 7;
+	private static final int KEY_PAGE_CANVAS_NOTIFY_LISTENER = 57;
 
 	private WBRequestCallbackCB cb;
 
@@ -131,7 +131,7 @@ public class DocumentService extends AbstractHandler {
 				}
 			}
 
-			notifyListener(KEY_NEW_DOC_LISTENER, 0, 0, new V2ImageDoc(
+			notifyListenerWithPending(KEY_NEW_DOC_LISTENER, 0, 0, new V2ImageDoc(
 					szWBoardID, szFileName, g, nBusinessType, u));
 
 		}
@@ -139,13 +139,13 @@ public class DocumentService extends AbstractHandler {
 		@Override
 		public void OnWBoardPageListCallback(String szWBoardID,
 				String szPageData, int nPageID) {
-			notifyListener(KEY_DOC_PAGE_NOTIFY_LISTENER, 0, 0,  XmlParser.parserDocPage(szWBoardID, szPageData));
+			notifyListenerWithPending(KEY_DOC_PAGE_NOTIFY_LISTENER, 0, 0,  XmlParser.parserDocPage(szWBoardID, szPageData));
 		}
 
 		@Override
 		public void OnWBoardActivePageCallback(long nUserID, String szWBoardID,
 				int nPageID) {
-			notifyListener(KEY_PAGE_ACTIVE_NOTIFY_LISTENER, 0, 0,
+			notifyListenerWithPending(KEY_PAGE_ACTIVE_NOTIFY_LISTENER, 0, 0,
 					new V2Doc.Page(nPageID, szWBoardID, null));
 		}
 
@@ -153,7 +153,7 @@ public class DocumentService extends AbstractHandler {
 		public void OnWBoardDocDisplayCallback(String szWBoardID, int nPageID,
 				String szFileName, int result) {
 
-			notifyListener(KEY_DOC_DISPLAY_NOTIFY_LISTENER, 0, 0,
+			notifyListenerWithPending(KEY_DOC_DISPLAY_NOTIFY_LISTENER, 0, 0,
 					new V2Doc.Page(nPageID, szWBoardID, szFileName));
 		}
 
@@ -164,13 +164,13 @@ public class DocumentService extends AbstractHandler {
 					GroupType.CONFERENCE, nGroupID);
 			User u = GlobalHolder.getInstance().getUser(nUserID);
 
-			notifyListener(KEY_DOC_CLOSE_NOTIFY_LISTENER, 0, 0, new V2Doc(
+			notifyListenerWithPending(KEY_DOC_CLOSE_NOTIFY_LISTENER, 0, 0, new V2Doc(
 					szWBoardID, "", g, nBusinessType, u));
 		}
 
 		@Override
 		public void OnWBoardAddPageCallback(String szWBoardID, int nPageID) {
-			notifyListener(KEY_DOC_PAGE_ADD_NOTIFY_LISTENER, 0, 0,
+			notifyListenerWithPending(KEY_DOC_PAGE_ADD_NOTIFY_LISTENER, 0, 0,
 					new V2Doc.Page(nPageID, szWBoardID, ""));
 		}
 
@@ -178,14 +178,14 @@ public class DocumentService extends AbstractHandler {
 		public void OnRecvAddWBoardDataCallback(String szWBoardID, int nPageID,
 				String szDataID, String szData) {
 			V2ShapeMeta meta = XmlParser.parseV2ShapeMetaSingle(szData);
-			notifyListener(KEY_PAGE_CANVAS_NOTIFY_LISTENER, 0, 0, meta);
+			notifyListenerWithPending(KEY_PAGE_CANVAS_NOTIFY_LISTENER, 0, 0, meta);
 		}
 
 		@Override
 		public void OnRecvAppendWBoardDataCallback(String szWBoardID,
 				int nPageID, String szDataID, String szData) {
 			V2ShapeMeta meta = XmlParser.parseV2ShapeMetaSingle(szData);
-			notifyListener(KEY_PAGE_CANVAS_NOTIFY_LISTENER, 0, 0, meta);
+			notifyListenerWithPending(KEY_PAGE_CANVAS_NOTIFY_LISTENER, 0, 0, meta);
 		}
 
 	}

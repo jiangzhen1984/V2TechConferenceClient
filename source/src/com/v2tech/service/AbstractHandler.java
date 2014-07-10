@@ -36,8 +36,10 @@ public abstract class AbstractHandler extends Handler {
 	protected static final int DEFAULT_TIME_OUT_SECS = 10;
 
 	private SparseArray<Meta> metaHolder = new SparseArray<Meta>();
-	
+
 	private SparseArray<List<Registrant>> registrantHolder = new SparseArray<List<Registrant>>();
+
+	private static SparseArray<List<PendingObject>> pendingObjectHolder = new SparseArray<List<PendingObject>>();
 
 	protected Message initTimeoutMessage(int mointorMessageID, long timeOutSec,
 			Registrant caller) {
@@ -69,8 +71,7 @@ public abstract class AbstractHandler extends Handler {
 			caller.getHandler().sendMessage(result);
 		}
 	}
-	
-	
+
 	/**
 	 * 
 	 * @param key
@@ -80,27 +81,80 @@ public abstract class AbstractHandler extends Handler {
 	 */
 	protected void notifyListener(int key, int arg1, int arg2, Object obj) {
 		List<Registrant> list = registrantHolder.get(key);
-		if (list == null) {
-			V2Log.e(" ChatService : No listener for " + key);
+		if (list == null || list.size() <= 0) {
+			V2Log.i(this.getClass().getName() + "  : No listener: " + key
+					+ " " + arg1 + "  " + arg2 + "  " + obj);
 			return;
 		} else {
-			V2Log.i(" ChatService : Notify listener: " + arg1 + "  " + arg2 + "  " + obj);
+			V2Log.i(this.getClass().getName() + "  : Notify listener: " + key
+					+ " " + arg1 + "  " + arg2 + "  " + obj);
 		}
 		for (Registrant re : list) {
 			Handler h = re.getHandler();
 			if (h != null) {
-				Message.obtain(h, re.getWhat(), arg1, arg2, new AsyncResult(re.getObject(), obj)).sendToTarget();
+				Message.obtain(h, re.getWhat(), arg1, arg2,
+						new AsyncResult(re.getObject(), obj)).sendToTarget();
 			}
 		}
 	}
+	
+	
+	
+	/**
+	 * 
+	 * @param key
+	 * @param arg1
+	 * @param arg2
+	 * @param obj
+	 */
+	protected void notifyListenerWithPending(int key, int arg1, int arg2, Object obj) {
+		List<Registrant> list = registrantHolder.get(key);
+		if (list == null || list.size() <= 0) {
+			List<PendingObject> pendingList = pendingObjectHolder.get(key);
+			if (pendingList == null) {
+				pendingList = new ArrayList<PendingObject>();
+				pendingObjectHolder.put(key, pendingList);
+			}
+			pendingList.add(new PendingObject(key, arg1, arg2, obj));
+			V2Log.i(this.getClass().getName() + "  : pend obj for " + key
+					+ "  " + pendingList.size() + "   " + pendingObjectHolder);
+			return;
+		} else {
+			V2Log.i(this.getClass().getName() + "  : Notify listener: " + key
+					+ " " + arg1 + "  " + arg2 + "  " + obj);
+		}
+		for (Registrant re : list) {
+			Handler h = re.getHandler();
+			if (h != null) {
+				Message.obtain(h, re.getWhat(), arg1, arg2,
+						new AsyncResult(re.getObject(), obj)).sendToTarget();
+			}
+		}
+	}
+	
 
 	protected void registerListener(int key, Handler h, int what, Object obj) {
-		List<Registrant> list = registrantHolder.get(key);
-		if (list == null) {
-			list = new ArrayList<Registrant>();
-			registrantHolder.append(key, list);
+		synchronized (pendingObjectHolder) {
+			List<Registrant> list = registrantHolder.get(key);
+			if (list == null) {
+				list = new ArrayList<Registrant>();
+				registrantHolder.append(key, list);
+			}
+			Registrant re = new Registrant(h, what, obj);
+			list.add(re);
+
+			List<PendingObject> pendingList = pendingObjectHolder.get(key);
+			if (pendingList == null || pendingList.size() <= 0) {
+
+				return;
+			}
+
+			for (int i = 0; i < pendingList.size(); i++) {
+				PendingObject po = pendingList.get(i);
+				Message.obtain(h, re.getWhat(), po.arg1, po.arg2,
+						new AsyncResult(re.getObject(), po.obj)).sendToTarget();
+			}
 		}
-		list.add(new Registrant(h, what, obj));
 	}
 
 	protected void unRegisterListener(int key, Handler h, int what, Object obj) {
@@ -113,9 +167,6 @@ public abstract class AbstractHandler extends Handler {
 			}
 		}
 	}
-	
-	
-	
 
 	class Meta {
 		int mointorMessageID;
@@ -128,6 +179,22 @@ public abstract class AbstractHandler extends Handler {
 			this.mointorMessageID = mointorMessageID;
 			this.caller = caller;
 			this.timeoutMessage = timeoutMessage;
+		}
+
+	}
+
+	class PendingObject {
+		int key;
+		int arg1;
+		int arg2;
+		Object obj;
+
+		public PendingObject(int key, int arg1, int arg2, Object obj) {
+			super();
+			this.key = key;
+			this.arg1 = arg1;
+			this.arg2 = arg2;
+			this.obj = obj;
 		}
 
 	}

@@ -597,7 +597,11 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher {
 							+ ContentDescriptor.Conversation.Cols.TYPE + "=?",
 					new String[] { id + "", type });
 		} else if (this.mCurrentTabFlag.equals(Conversation.TYPE_CONFERNECE)) {
-			cb.quitConference(new Conference(id), null);
+			Group g = GlobalHolder.getInstance().getGroupById(GroupType.CONFERENCE, id);
+			//If group is null, means we have removed this conversaion
+			if (g != null) {
+				cb.quitConference(new Conference(id, g.getOwner()), null);
+			}
 		}
 
 		Conversation cache = null;

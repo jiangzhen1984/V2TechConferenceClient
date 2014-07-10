@@ -78,12 +78,12 @@ public class ConferenceService extends AbstractHandler {
 
 	private static final int JNI_UPDATE_CAMERA_PAR = 75;
 
-	private static final int KEY_KICKED_LISTNER = 1;
-	private static final int KEY_ATTENDEE_DEVICE_LISTNER = 2;
-	private static final int KEY_ATTENDEE_STATUS_LISTNER = 3;
-	private static final int KEY_SYNC_LISTNER = 4;
-	private static final int KEY_PERMISSION_CHANGED_LISTNER = 5;
-	private static final int KEY_MIXED_VIDEO_LISTNER = 6;
+	private static final int KEY_KICKED_LISTNER = 100;
+	private static final int KEY_ATTENDEE_DEVICE_LISTNER = 101;
+	private static final int KEY_ATTENDEE_STATUS_LISTNER = 102;
+	private static final int KEY_SYNC_LISTNER = 103;
+	private static final int KEY_PERMISSION_CHANGED_LISTNER = 104;
+	private static final int KEY_MIXED_VIDEO_LISTNER = 105;
 
 	private VideoRequestCB videoCallback;
 	private ConfRequestCB confCallback;
@@ -513,13 +513,15 @@ public class ConferenceService extends AbstractHandler {
 				int end = szUserInfos.indexOf("'", start + 4);
 				if (end != -1) {
 					String id = szUserInfos.substring(start + 4, end);
-					User u = GlobalHolder.getInstance().getUser(
+					final User u = GlobalHolder.getInstance().getUser(
 							Long.parseLong(id));
 					if (u == null) {
 						V2Log.e(" Can't not find user " + id);
 						return;
 					}
-					notifyListener(KEY_ATTENDEE_STATUS_LISTNER, 1, 0, u);
+	
+					notifyListenerWithPending(KEY_ATTENDEE_STATUS_LISTNER, 1, 0, u);
+
 
 				} else {
 					V2Log.e("Invalid attendee user id ignore callback message");
@@ -534,20 +536,20 @@ public class ConferenceService extends AbstractHandler {
 				long nUserID) {
 
 			User u = GlobalHolder.getInstance().getUser(nUserID);
-			notifyListener(KEY_ATTENDEE_STATUS_LISTNER, 0, 0, u);
+			notifyListenerWithPending(KEY_ATTENDEE_STATUS_LISTNER, 0, 0, u);
 
 		}
 
 		@Override
 		public void OnKickConfCallback(int nReason) {
-			notifyListener(KEY_KICKED_LISTNER, nReason, 0, null);
+			notifyListenerWithPending(KEY_KICKED_LISTNER, nReason, 0, null);
 		}
 
 		@Override
 		public void OnGrantPermissionCallback(long userid, int type, int status) {
 			JNIIndication jniInd = new PermissionUpdateIndication(userid, type,
 					status);
-			notifyListener(KEY_PERMISSION_CHANGED_LISTNER, 0, 0, jniInd);
+			notifyListenerWithPending(KEY_PERMISSION_CHANGED_LISTNER, 0, 0, jniInd);
 		}
 
 		@Override
@@ -575,7 +577,7 @@ public class ConferenceService extends AbstractHandler {
 					.parseFromXml(szXmlData);
 			GlobalHolder.getInstance().addAttendeeDevice(ll);
 
-			notifyListener(KEY_ATTENDEE_DEVICE_LISTNER, 0, 0, ll);
+			notifyListenerWithPending(KEY_ATTENDEE_DEVICE_LISTNER, 0, 0, ll);
 		}
 
 		
@@ -619,7 +621,7 @@ public class ConferenceService extends AbstractHandler {
 					int flag = ConferenceGroup.extraAttrFromXml(cache, sXml);
 
 					if ((flag & ConferenceGroup.EXTRA_FLAG_SYNC) == ConferenceGroup.EXTRA_FLAG_SYNC) {
-						notifyListener(KEY_SYNC_LISTNER,
+						notifyListenerWithPending(KEY_SYNC_LISTNER,
 								(cache.isSyn() ? 1 : 0), 0, null);
 					}
 
@@ -646,14 +648,14 @@ public class ConferenceService extends AbstractHandler {
 				V2Log.e(" OnCreateVideoMixerCallback -- > unlmatform parameter sMediaId is null ");
 				return;
 			}
-			notifyListener(KEY_MIXED_VIDEO_LISTNER, 1, 0, new MixVideo(
+			notifyListenerWithPending(KEY_MIXED_VIDEO_LISTNER, 1, 0, new MixVideo(
 					sMediaId, MixVideo.LayoutType.fromInt(layout), width,
 					height));
 		}
 
 		@Override
 		public void OnDestroyVideoMixerCallback(String sMediaId) {
-			notifyListener(KEY_MIXED_VIDEO_LISTNER, 2, 0, new MixVideo(
+			notifyListenerWithPending(KEY_MIXED_VIDEO_LISTNER, 2, 0, new MixVideo(
 					sMediaId, MixVideo.LayoutType.UNKOWN));
 		}
 
@@ -663,7 +665,7 @@ public class ConferenceService extends AbstractHandler {
 			UserDeviceConfig udc = new UserDeviceConfig(nDstUserId, sDstDevId,
 					null);
 			MixVideo mix = new MixVideo(sMediaId);
-			notifyListener(KEY_MIXED_VIDEO_LISTNER, 3, 0,
+			notifyListenerWithPending(KEY_MIXED_VIDEO_LISTNER, 3, 0,
 					mix.createMixVideoDevice(pos, sMediaId, udc));
 		}
 
@@ -673,7 +675,7 @@ public class ConferenceService extends AbstractHandler {
 			UserDeviceConfig udc = new UserDeviceConfig(nDstUserId, sDstDevId,
 					null);
 			MixVideo mix = new MixVideo(sMediaId);
-			notifyListener(KEY_MIXED_VIDEO_LISTNER, 4, 0,
+			notifyListenerWithPending(KEY_MIXED_VIDEO_LISTNER, 4, 0,
 					mix.createMixVideoDevice(-1, sMediaId, udc));
 
 		}

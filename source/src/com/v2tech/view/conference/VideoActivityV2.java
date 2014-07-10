@@ -383,9 +383,9 @@ public class VideoActivityV2 extends Activity {
 		isSpeaking = flag;
 		// set flag to speaking icon
 		if (flag) {
-			mSpeakerIV.setImageResource(R.drawable.speaking_button);
-		} else {
 			mSpeakerIV.setImageResource(R.drawable.mute_button);
+		} else {
+			mSpeakerIV.setImageResource(R.drawable.speaking_button);
 		}
 	}
 
@@ -756,7 +756,7 @@ public class VideoActivityV2 extends Activity {
 	private OnClickListener mApplySpeakerListener = new OnClickListener() {
 		@Override
 		public void onClick(View view) {
-			doApplyOrReleaseSpeak();
+			doApplyOrReleaseSpeak(!isSpeaking);
 			// Make sure update start after send request,
 			// because update state will update isSpeaking value
 			updateSpeakerState(!isSpeaking);
@@ -1295,7 +1295,7 @@ public class VideoActivityV2 extends Activity {
 			adjustLayout();
 			
 			//Send speaking status
-			doApplyOrReleaseSpeak();
+			doApplyOrReleaseSpeak(isSpeaking);
 			// Make sure update start after send request,
 			// because update state will update isSpeaking value
 			updateSpeakerState(isSpeaking);
@@ -1352,8 +1352,8 @@ public class VideoActivityV2 extends Activity {
 		return super.onKeyDown(keyCode, event);
 	}
 
-	private void doApplyOrReleaseSpeak() {
-		if (isSpeaking) {
+	private void doApplyOrReleaseSpeak(boolean flag) {
+		if (!flag) {
 			cb.applyForReleasePermission(ConferencePermission.SPEAKING, null);
 		} else {
 			cb.applyForControlPermission(ConferencePermission.SPEAKING, null);

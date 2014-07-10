@@ -83,17 +83,25 @@
         </activity>
         <activity
             android:name="com.v2tech.view.conference.VideoActivityV2"
+            android:exported="true"
             android:launchMode="singleTop"
             android:screenOrientation="landscape"
-            android:windowSoftInputMode="adjustPan"
-            android:exported="true" >
+            android:windowSoftInputMode="adjustPan" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" >
+                </action>
+            </intent-filter>
         </activity>
         <activity
             android:name="com.v2tech.view.contacts.ContactDetail"
+            android:exported="true"
             android:launchMode="singleTop"
-             android:exported="true"
             android:screenOrientation="nosensor"
             android:windowSoftInputMode="stateHidden" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" >
+                </action>
+            </intent-filter>
         </activity>
         <activity
             android:name="com.v2tech.view.conversation.ConversationView"
@@ -101,6 +109,7 @@
             android:screenOrientation="nosensor"
             android:windowSoftInputMode="stateHidden|adjustUnspecified" >
             <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
                 <action android:name="com.v2tech.start_conversation_activity" />
 
                 <category android:name="android.intent.category.DEFAULT" />
