@@ -36,6 +36,7 @@ import com.V2.jni.GroupRequest;
 import com.V2.jni.GroupRequestCallback;
 import com.V2.jni.ImRequest;
 import com.V2.jni.ImRequestCallback;
+import com.V2.jni.V2GlobalEnum;
 import com.V2.jni.VideoRequest;
 import com.V2.jni.VideoRequestCallbackAdapter;
 import com.v2tech.R;
@@ -358,7 +359,7 @@ public class JNIService extends Service {
 					String action = null;
 					MessageBuilder.saveMessage(mContext, vm);
 
-					if (vm.getMsgCode() == VMessage.VMESSAGE_CODE_CONF) {
+					if (vm.getMsgCode() == V2GlobalEnum.REQUEST_TYPE_CONF) {
 						action = JNI_BROADCAST_NEW_CONF_MESSAGE;
 					} else {
 						action = JNI_BROADCAST_NEW_MESSAGE;
@@ -558,19 +559,6 @@ public class JNIService extends Service {
 						.parseConferenceGroupFromXML(groupInfo);
 				GroupRequest.getInstance().getGroupInfo(
 						GroupType.CONFERENCE.intValue(), g.getmGId());
-				String name = "";
-				int pos = -1;
-				if (userInfo != null && (pos = userInfo.indexOf("id='")) != -1) {
-					int end = userInfo.indexOf("'", pos + 4);
-					if (end != -1) {
-						Long uid = Long.parseLong(userInfo.substring(pos + 4,
-								end));
-						User u = GlobalHolder.getInstance().getUser(uid);
-						if (u != null) {
-							name = u.getName();
-						}
-					}
-				}
 				if (g != null) {
 					GlobalHolder.getInstance().addGroupToList(gType, g);
 					if (gType == GroupType.CONFERENCE) {

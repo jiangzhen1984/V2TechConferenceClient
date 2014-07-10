@@ -5,7 +5,7 @@ import android.os.Message;
 
 import com.V2.jni.GroupRequest;
 import com.V2.jni.ImRequest;
-import com.V2.jni.ImRequestCallback;
+import com.V2.jni.ImRequestCallbackAdapter;
 import com.v2tech.service.jni.CreateCrowdResponse;
 import com.v2tech.service.jni.JNIResponse;
 import com.v2tech.util.V2Log;
@@ -44,7 +44,7 @@ public class CrowdGroupService extends AbstractHandler {
 
 	}
 
-	class ImRequestCB implements ImRequestCallback {
+	class ImRequestCB extends ImRequestCallbackAdapter {
 
 		private Handler mCallbackHandler;
 
@@ -52,43 +52,6 @@ public class CrowdGroupService extends AbstractHandler {
 			this.mCallbackHandler = mCallbackHandler;
 		}
 
-		@Override
-		public void OnLoginCallback(long nUserID, int nStatus, int nResult) {
-
-		}
-
-		@Override
-		public void OnLogoutCallback(int nType) {
-
-		}
-
-		@Override
-		public void OnConnectResponseCallback(int nResult) {
-
-		}
-
-		@Override
-		public void OnUpdateBaseInfoCallback(long nUserID, String updatexml) {
-
-		}
-
-		@Override
-		public void OnUserStatusUpdatedCallback(long nUserID, int nType,
-				int nStatus, String szStatusDesc) {
-
-		}
-
-		@Override
-		public void OnChangeAvatarCallback(int nAvatarType, long nUserID,
-				String AvatarName) {
-
-		}
-
-		@Override
-		public void OnModifyCommentNameCallback(long nUserId,
-				String sCommmentName) {
-
-		}
 
 		@Override
 		public void OnCreateCrowdCallback(String sCrowdXml, int nResult) {

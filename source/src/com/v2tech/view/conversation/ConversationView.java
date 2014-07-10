@@ -55,6 +55,7 @@ import com.spoledge.aacplayer.Decoder;
 import com.spoledge.aacplayer.PlayerCallback;
 import com.v2tech.R;
 import com.v2tech.db.ContentDescriptor;
+import com.v2tech.service.AsyncResult;
 import com.v2tech.service.BitmapManager;
 import com.v2tech.service.ChatService;
 import com.v2tech.service.GlobalHolder;
@@ -1392,10 +1393,12 @@ public class ConversationView extends Activity {
 					VMessage vm = (VMessage) messageArray.get(i)
 							.getItemObject();
 					if (vm.getUUID().equals(uuid)) {
+						vm.setState(VMessage.STATE_SENT_FAILED);
 						MessageBodyView mdv = ((MessageBodyView)  messageArray.get(i).getView());
 						if (mdv != null)  {
 							mdv.updateView(vm);
 						}
+						//TODO update database
 						break;
 					}
 					List<VMessageAbstractItem> items = vm.getItems();
@@ -1405,12 +1408,14 @@ public class ConversationView extends Activity {
 							item.setState(VMessageAbstractItem.STATE_FILE_SENT_FALIED);
 							MessageBodyView mdv = ((MessageBodyView)  messageArray.get(i).getView());
 							if (mdv != null)  {
+								//TODO update database
 								mdv.updateView(vm);
 							}
 							break;
 						}
 						
 					}
+					
 				}
 			}
 		}
@@ -1474,7 +1479,7 @@ public class ConversationView extends Activity {
 				}
 				break;
 			case FILE_STATUS_LISTENER:
-				FileTransStatusIndication ind = (FileTransStatusIndication) msg.obj;
+				FileTransStatusIndication ind = (FileTransStatusIndication) (((AsyncResult)msg.obj).getResult());
 				if (ind.indType == FileTransStatusIndication.IND_TYPE_PROGRESS) {
 					updateFileProgressView(
 							ind.uuid,

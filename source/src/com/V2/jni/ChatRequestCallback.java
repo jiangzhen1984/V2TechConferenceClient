@@ -1,6 +1,5 @@
 package com.V2.jni;
 
-import com.v2tech.util.V2Log;
 
 
 public interface ChatRequestCallback {
@@ -10,7 +9,7 @@ public interface ChatRequestCallback {
 	 * <ul>Use to receive message from server side.</ul>
 	 * 
 	 * @param nGroupID
-	 * @param nBusinessType
+	 * @param nBusinessType  1: conference  2: IM
 	 * @param nFromUserID
 	 * @param nTime
 	 * @param szXmlText
@@ -22,7 +21,7 @@ public interface ChatRequestCallback {
 	/**
 	 * <ul>Receive image data from server side.</ul>
 	 * @param nGroupID
-	 * @param nBusinessType
+	 * @param nBusinessType  1: conference  2: IM
 	 * @param nFromUserID
 	 * @param nTime
 	 * @param pPicData
@@ -34,7 +33,7 @@ public interface ChatRequestCallback {
 	/**
 	 * <ul>Receive audio data from server side.</ul>
 	 * @param gid  belong group id
-	 * @param businessType   1: IM  2: conference
+	 * @param businessType   1: conference  2: IM
 	 * @param fromUserId  
 	 * @param timeStamp
 	 * @param messageId
@@ -44,7 +43,7 @@ public interface ChatRequestCallback {
 			String audioPath);
 	
 	/**
-	 * 
+	 * <ul>Send message result. JNI doesn't call this API if sent successfully</ul>
 	 * @param uuid
 	 * @param ret
 	 * @param code

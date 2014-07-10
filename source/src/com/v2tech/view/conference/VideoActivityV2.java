@@ -57,7 +57,9 @@ import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.V2.jni.V2GlobalEnum;
 import com.v2tech.R;
+import com.v2tech.service.AsyncResult;
 import com.v2tech.service.ChatService;
 import com.v2tech.service.ConferenceService;
 import com.v2tech.service.DocumentService;
@@ -1643,7 +1645,7 @@ public class VideoActivityV2 extends Activity {
 			vm.setGroupId(conf.getId());
 			vm.setToUser(new User(0));
 			vm.setFromUser(GlobalHolder.getInstance().getCurrentUser());
-			vm.setMsgCode(VMessage.VMESSAGE_CODE_CONF);
+			vm.setMsgCode(V2GlobalEnum.REQUEST_TYPE_IM);
 			cs.sendVMessage(vm, null);
 
 		}
@@ -1941,7 +1943,7 @@ public class VideoActivityV2 extends Activity {
 				}
 				break;
 			case ATTENDEE_DEVICE_LISTENER: {
-				List<UserDeviceConfig> list = (List<UserDeviceConfig>) msg.obj;
+				List<UserDeviceConfig> list = (List<UserDeviceConfig>) (((AsyncResult)msg.obj).getResult());
 				for (UserDeviceConfig ud : list) {
 					Attendee a = findAttendee(ud.getUserID());
 					if (a == null) {
@@ -1958,9 +1960,9 @@ public class VideoActivityV2 extends Activity {
 				break;
 			case ATTENDEE_LISTENER:
 				if (msg.arg1 == 1) {
-					doHandleNewUserEntered((User) msg.obj);
+					doHandleNewUserEntered((User) (((AsyncResult)msg.obj).getResult()));
 				} else {
-					doHandleUserExited((User) msg.obj);
+					doHandleUserExited((User) (((AsyncResult)msg.obj).getResult()));
 				}
 				break;
 			case REQUEST_OPEN_OR_CLOSE_DEVICE:
@@ -1991,7 +1993,7 @@ public class VideoActivityV2 extends Activity {
 
 			// user permission updated
 			case NOTIFY_USER_PERMISSION_UPDATED:
-				PermissionUpdateIndication ind = (PermissionUpdateIndication) msg.obj;
+				PermissionUpdateIndication ind = (PermissionUpdateIndication)(((AsyncResult)msg.obj).getResult());
 				if (!updateAttendeePermissionStateIcon(ind)) {
 					mPendingPermissionUpdateList.add(ind);
 				}
@@ -2004,7 +2006,7 @@ public class VideoActivityV2 extends Activity {
 				}
 				break;
 			case NEW_DOC_NOTIFICATION:
-				V2Doc vd = (V2Doc) ((DocumentService.AsyncResult) (msg.obj))
+				V2Doc vd = (V2Doc) ((AsyncResult) (msg.obj))
 						.getResult();
 				synchronized (mDocs) {
 					mDocs.put(vd.getId(), vd);
@@ -2026,7 +2028,7 @@ public class VideoActivityV2 extends Activity {
 				}
 				break;
 			case DOC_PAGE_NOTIFICATION:
-				V2Doc.PageArray vpr = (V2Doc.PageArray) ((DocumentService.AsyncResult) (msg.obj))
+				V2Doc.PageArray vpr = (V2Doc.PageArray) ((AsyncResult) (msg.obj))
 						.getResult();
 				V2Doc vc = mDocs.get(vpr.getDocId());
 				// If doesn't receive doc yet, record page array first for
@@ -2047,7 +2049,7 @@ public class VideoActivityV2 extends Activity {
 				}
 				break;
 			case DOC_PAGE_ADDED_NOTIFICATION:
-				V2Doc.Page vpp = (V2Doc.Page) ((DocumentService.AsyncResult) (msg.obj))
+				V2Doc.Page vpp = (V2Doc.Page) ((AsyncResult) (msg.obj))
 						.getResult();
 				if (vpp != null) {
 					V2Doc v2d = mDocs.get(vpp.getDocId());
@@ -2059,7 +2061,7 @@ public class VideoActivityV2 extends Activity {
 				}
 				break;
 			case DOC_PAGE_ACTIVITE_NOTIFICATION:
-				V2Doc.Page vpa = (V2Doc.Page) ((DocumentService.AsyncResult) (msg.obj))
+				V2Doc.Page vpa = (V2Doc.Page) ((AsyncResult) (msg.obj))
 						.getResult();
 				if (vpa != null) {
 					V2Doc v2d = mDocs.get(vpa.getDocId());
@@ -2076,7 +2078,7 @@ public class VideoActivityV2 extends Activity {
 				break;
 
 			case DOC_DOWNLOADED_NOTIFICATION:
-				V2Doc.Page vp = (V2Doc.Page) ((DocumentService.AsyncResult) (msg.obj))
+				V2Doc.Page vp = (V2Doc.Page) ((AsyncResult) (msg.obj))
 						.getResult();
 				V2Doc cache = mDocs.get(vp.getDocId());
 				Page ppC = cache.findPage(vp.getNo());
@@ -2094,7 +2096,7 @@ public class VideoActivityV2 extends Activity {
 				break;
 
 			case DOC_CLOSED_NOTIFICATION:
-				V2Doc removedDoc = (V2Doc) ((DocumentService.AsyncResult) (msg.obj))
+				V2Doc removedDoc = (V2Doc) ((AsyncResult) (msg.obj))
 						.getResult();
 				synchronized (mDocs) {
 					removedDoc = mDocs.get(removedDoc.getId());
@@ -2108,7 +2110,7 @@ public class VideoActivityV2 extends Activity {
 				break;
 
 			case DOC_PAGE_CANVAS_NOTIFICATION:
-				V2ShapeMeta shape = (V2ShapeMeta) ((DocumentService.AsyncResult) (msg.obj))
+				V2ShapeMeta shape = (V2ShapeMeta) ((AsyncResult) (msg.obj))
 						.getResult();
 				synchronized (mDocs) {
 					V2Doc ca = mDocs.get(shape.getDocId());
@@ -2142,7 +2144,7 @@ public class VideoActivityV2 extends Activity {
 			case VIDEO_MIX_NOTIFICATION:
 				// create mixed video
 				if (msg.arg1 == 1) {
-					MixVideo mv = (MixVideo) msg.obj;
+					MixVideo mv = (MixVideo) (((AsyncResult)msg.obj).getResult());
 
 					MixerWrapper mw = new MixerWrapper(mv.getId(), mv,
 							new MixVideoLayout(mContext, mv),

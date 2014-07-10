@@ -238,11 +238,13 @@ public class MessageLoader {
 		String dateString = cur.getString(6);
 		// group id
 		long groupId = cur.getLong(8);
+		int state = cur.getInt(7);
 		String uuid = cur.getString(9);
 
 		VMessage vm = new VMessage(groupId, fromUser, toUser, type);
 		vm.setId(id);
 		vm.setUUID(uuid);
+		vm.setState(state);
 		try {
 			vm.setDate(dp.parse(dateString));
 		} catch (ParseException e) {

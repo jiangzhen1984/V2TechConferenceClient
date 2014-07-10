@@ -1,20 +1,18 @@
 package com.v2tech.service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import android.os.Handler;
 import android.os.Message;
-import android.util.SparseArray;
 
 import com.V2.jni.ConfRequest;
 import com.V2.jni.ConfRequestCallback;
 import com.V2.jni.GroupRequest;
-import com.V2.jni.GroupRequestCallback;
+import com.V2.jni.GroupRequestCallbackAdapter;
 import com.V2.jni.VideoMixerRequest;
 import com.V2.jni.VideoMixerRequestCallback;
 import com.V2.jni.VideoRequest;
-import com.V2.jni.VideoRequestCallback;
+import com.V2.jni.VideoRequestCallbackAdapter;
 import com.v2tech.service.jni.JNIIndication;
 import com.v2tech.service.jni.JNIResponse;
 import com.v2tech.service.jni.PermissionUpdateIndication;
@@ -86,8 +84,6 @@ public class ConferenceService extends AbstractHandler {
 	private static final int KEY_SYNC_LISTNER = 4;
 	private static final int KEY_PERMISSION_CHANGED_LISTNER = 5;
 	private static final int KEY_MIXED_VIDEO_LISTNER = 6;
-
-	private SparseArray<List<Registrant>> registrantHolder = new SparseArray<List<Registrant>>();
 
 	private VideoRequestCB videoCallback;
 	private ConfRequestCB confCallback;
@@ -399,45 +395,6 @@ public class ConferenceService extends AbstractHandler {
 				cc.getCameraIndex(), cc.getFrameRate(), cc.getBitRate());
 	}
 
-	/********************************************************************************
-	 * Listener
-	 ********************************************************************************/
-
-	private void registerListener(int key, Handler h, int what, Object obj) {
-		List<Registrant> list = registrantHolder.get(key);
-		if (list == null) {
-			list = new ArrayList<Registrant>();
-			registrantHolder.append(key, list);
-		}
-		list.add(new Registrant(h, what, obj));
-	}
-
-	private void unRegisterListener(int key, Handler h, int what, Object obj) {
-		List<Registrant> list = registrantHolder.get(key);
-		if (list != null) {
-			for (Registrant re : list) {
-				if (re.getHandler() == h && what == re.getWhat()) {
-					list.remove(re);
-				}
-			}
-		}
-	}
-
-	private void notifyListener(int key, int arg1, int arg2, Object obj) {
-		List<Registrant> list = registrantHolder.get(key);
-		if (list == null) {
-			V2Log.e(" No listener for " + key);
-			return;
-		} else {
-			V2Log.i(" Notify listener: " + arg1 + "  " + arg2 + "  " + obj);
-		}
-		for (Registrant re : list) {
-			Handler h = re.getHandler();
-			if (h != null) {
-				Message.obtain(h, re.getWhat(), arg1, arg2, obj).sendToTarget();
-			}
-		}
-	}
 
 	/**
 	 * Register listener for out conference by kick.
@@ -600,7 +557,7 @@ public class ConferenceService extends AbstractHandler {
 
 	}
 
-	class VideoRequestCB implements VideoRequestCallback {
+	class VideoRequestCB extends VideoRequestCallbackAdapter {
 
 		private Handler mCallbackHandler;
 
@@ -621,11 +578,7 @@ public class ConferenceService extends AbstractHandler {
 			notifyListener(KEY_ATTENDEE_DEVICE_LISTNER, 0, 0, ll);
 		}
 
-		@Override
-		public void OnVideoChatInviteCallback(long nGroupID, int nBusinessType,
-				long nFromUserID, String szDeviceID) {
-
-		}
+		
 
 		@Override
 		public void OnSetCapParamDone(String szDevID, int nSizeIndex,
@@ -638,30 +591,11 @@ public class ConferenceService extends AbstractHandler {
 
 		}
 
-		@Override
-		public void OnVideoChatAccepted(long nGroupID, int nBusinessType,
-				long nFromuserID, String szDeviceID) {
-			
-		}
-
-		@Override
-		public void OnVideoChatRefused(long nGroupID, int nBusinessType,
-				long nFromUserID, String szDeviceID) {
-			
-		}
-
-		@Override
-		public void OnVideoChatClosed(long nGroupID, int nBusinessType,
-				long nFromUserID, String szDeviceID) {
-			
-		}
-		
-		
 		
 
 	}
 
-	class GroupRequestCB implements GroupRequestCallback {
+	class GroupRequestCB extends GroupRequestCallbackAdapter {
 
 		private Handler mCallbackHandler;
 
@@ -669,16 +603,7 @@ public class ConferenceService extends AbstractHandler {
 			this.mCallbackHandler = mCallbackHandler;
 		}
 
-		@Override
-		public void OnGetGroupInfoCallback(int groupType, String sXml) {
 
-		}
-
-		@Override
-		public void OnGetGroupUserInfoCallback(int groupType, long nGroupID,
-				String sXml) {
-
-		}
 
 		@Override
 		public void OnModifyGroupInfoCallback(int groupType, long nGroupID,
@@ -703,29 +628,6 @@ public class ConferenceService extends AbstractHandler {
 			}
 		}
 
-		@Override
-		public void OnInviteJoinGroupCallback(int groupType, String groupInfo,
-				String userInfo, String additInfo) {
-
-		}
-
-		@Override
-		public void OnDelGroupCallback(int groupType, long nGroupID,
-				boolean bMovetoRoot) {
-
-		}
-
-		@Override
-		public void OnDelGroupUserCallback(int groupType, long nGroupID,
-				long nUserID) {
-
-		}
-
-		@Override
-		public void OnAddGroupUserInfoCallback(int groupType, long nGroupID,
-				String sXml) {
-
-		}
 
 	}
 

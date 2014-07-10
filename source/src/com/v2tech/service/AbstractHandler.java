@@ -1,5 +1,8 @@
 package com.v2tech.service;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import android.os.Handler;
 import android.os.Message;
 import android.util.SparseArray;
@@ -33,6 +36,8 @@ public abstract class AbstractHandler extends Handler {
 	protected static final int DEFAULT_TIME_OUT_SECS = 10;
 
 	private SparseArray<Meta> metaHolder = new SparseArray<Meta>();
+	
+	private SparseArray<List<Registrant>> registrantHolder = new SparseArray<List<Registrant>>();
 
 	protected Message initTimeoutMessage(int mointorMessageID, long timeOutSec,
 			Registrant caller) {
@@ -64,6 +69,53 @@ public abstract class AbstractHandler extends Handler {
 			caller.getHandler().sendMessage(result);
 		}
 	}
+	
+	
+	/**
+	 * 
+	 * @param key
+	 * @param arg1
+	 * @param arg2
+	 * @param obj
+	 */
+	protected void notifyListener(int key, int arg1, int arg2, Object obj) {
+		List<Registrant> list = registrantHolder.get(key);
+		if (list == null) {
+			V2Log.e(" ChatService : No listener for " + key);
+			return;
+		} else {
+			V2Log.i(" ChatService : Notify listener: " + arg1 + "  " + arg2 + "  " + obj);
+		}
+		for (Registrant re : list) {
+			Handler h = re.getHandler();
+			if (h != null) {
+				Message.obtain(h, re.getWhat(), arg1, arg2, new AsyncResult(re.getObject(), obj)).sendToTarget();
+			}
+		}
+	}
+
+	protected void registerListener(int key, Handler h, int what, Object obj) {
+		List<Registrant> list = registrantHolder.get(key);
+		if (list == null) {
+			list = new ArrayList<Registrant>();
+			registrantHolder.append(key, list);
+		}
+		list.add(new Registrant(h, what, obj));
+	}
+
+	protected void unRegisterListener(int key, Handler h, int what, Object obj) {
+		List<Registrant> list = registrantHolder.get(key);
+		if (list != null) {
+			for (Registrant re : list) {
+				if (re.getHandler() == h && what == re.getWhat()) {
+					list.remove(re);
+				}
+			}
+		}
+	}
+	
+	
+	
 
 	class Meta {
 		int mointorMessageID;

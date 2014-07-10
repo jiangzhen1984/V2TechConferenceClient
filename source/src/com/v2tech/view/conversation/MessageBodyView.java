@@ -211,6 +211,10 @@ public class MessageBodyView extends LinearLayout {
 			populateFileItem(fileItems);
 			return;
 		}
+		
+		if (mMsg.getState() == VMessage.STATE_SENT_FAILED) {
+			failedIcon.setVisibility(View.VISIBLE);
+		}
 
 		TextView et = new TextView(this.getContext());
 		et.setOnLongClickListener(messageLongClickListener);

@@ -11,8 +11,6 @@ import android.util.Log;
 import com.v2tech.util.V2Log;
 
 public class VideoRequest {
-	public static final int BT_CONF = 1;
-	public static final int BT_IM = 2;
 
 	private static VideoRequest mVideoRequest;
 	private List<WeakReference<VideoRequestCallback>> callback;
@@ -53,10 +51,11 @@ public class VideoRequest {
 	/**
 	 * Request to open video device include remote user and self.
 	 * 
-	 * @param type<br>
+	 * @param type
+	 * <br>
 	 *            1: camera<br>
 	 *            2: <br>
-	 *            3:  file <br>
+	 *            3: file <br>
 	 *            4: mixed video device<br>
 	 * @param nUserID
 	 *            user id
@@ -67,7 +66,10 @@ public class VideoRequest {
 	 *            if open local device, input null. Otherwise
 	 *            {@link VideoPlayer}
 	 * @param businessType
-	 *            1 : conference 2: IM type
+	 *            type of request
+	 * 
+	 * @see V2GlobalEnum#REQUEST_TYPE_CONF
+	 * @see V2GlobalEnum#REQUEST_TYPE_IM
 	 * 
 	 * 
 	 * @see {@link #OnRemoteUserVideoDevice(String)}
@@ -82,10 +84,11 @@ public class VideoRequest {
 	 * FIXME update comment Request to close video device. This function no
 	 * callback call<br>
 	 * 
-	 * @param type<br>
+	 * @param type
+	 * <br>
 	 *            1: camera<br>
 	 *            2: <br>
-	 *            3:  file <br>
+	 *            3: file <br>
 	 *            4: mixed video device<br>
 	 * @param nUserID
 	 *            user id
@@ -96,7 +99,10 @@ public class VideoRequest {
 	 *            if open local device, input null. Otherwise input
 	 *            {@link VideoPlayer}
 	 * @param businessType
-	 *            1: conference 2: IM type
+	 *            type of request
+	 * 
+	 * @see V2GlobalEnum#REQUEST_TYPE_CONF
+	 * @see V2GlobalEnum#REQUEST_TYPE_IM
 	 * 
 	 * @see {@link #OnRemoteUserVideoDevice(String)}
 	 * @see VideoPlayer
@@ -271,6 +277,7 @@ public class VideoRequest {
 
 	/**
 	 * Invite user to join video call
+	 * 
 	 * @param nGroupID
 	 * @param nToUserID
 	 * @param szDeviceID
@@ -281,6 +288,7 @@ public class VideoRequest {
 
 	/**
 	 * Accept video invitation
+	 * 
 	 * @param nGroupID
 	 * @param nToUserID
 	 * @param szDeviceID
@@ -291,6 +299,7 @@ public class VideoRequest {
 
 	/**
 	 * Reject video invitation call
+	 * 
 	 * @param nGroupID
 	 * @param nToUserID
 	 * @param szDeviceID

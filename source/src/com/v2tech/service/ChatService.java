@@ -1,20 +1,19 @@
 package com.v2tech.service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.os.Message;
-import android.util.SparseArray;
 
 import com.V2.jni.AudioRequest;
 import com.V2.jni.AudioRequestCallback;
 import com.V2.jni.ChatRequest;
 import com.V2.jni.FileRequest;
 import com.V2.jni.FileRequestCallback;
+import com.V2.jni.V2GlobalEnum;
 import com.V2.jni.VideoRequest;
 import com.V2.jni.VideoRequestCallback;
+import com.V2.jni.VideoRequestCallbackAdapter;
 import com.v2tech.service.jni.FileTransStatusIndication.FileTransErrorIndication;
 import com.v2tech.service.jni.FileTransStatusIndication.FileTransProgressStatusIndication;
 import com.v2tech.service.jni.JNIResponse;
@@ -28,6 +27,14 @@ import com.v2tech.vo.VMessageAudioItem;
 import com.v2tech.vo.VMessageFileItem;
 import com.v2tech.vo.VMessageImageItem;
 
+
+/**
+ * <ul>Internet Message Service.</ul>
+ * <ul>Send message {@link #sendVMessage(VMessage, Registrant)}</ul>
+ * <ul>Invite User video or audio call {@link #inviteUserChat(UserChattingObject, Registrant)}</ul>
+ * @author 28851274
+ *
+ */
 public class ChatService extends AbstractHandler {
 
 	/**
@@ -73,8 +80,6 @@ public class ChatService extends AbstractHandler {
 	private static final int KEY_CANCELLED_LISTNER = 1;
 	private static final int KEY_FILE_TRANS_STATUS_NOTIFICATION_LISTNER = 2;
 
-	private SparseArray<List<Registrant>> registrantHolder = new SparseArray<List<Registrant>>();
-
 	public ChatService() {
 		super();
 		init();
@@ -95,41 +100,7 @@ public class ChatService extends AbstractHandler {
 		thread = new Handler(backEnd.getLooper());
 	}
 
-	private void notifyListener(int key, int arg1, int arg2, Object obj) {
-		List<Registrant> list = registrantHolder.get(key);
-		if (list == null) {
-			V2Log.e(" No listener for " + key);
-			return;
-		} else {
-			V2Log.i(" Notify listener: " + arg1 + "  " + arg2 + "  " + obj);
-		}
-		for (Registrant re : list) {
-			Handler h = re.getHandler();
-			if (h != null) {
-				Message.obtain(h, re.getWhat(), arg1, arg2, obj).sendToTarget();
-			}
-		}
-	}
 
-	private void registerListener(int key, Handler h, int what, Object obj) {
-		List<Registrant> list = registrantHolder.get(key);
-		if (list == null) {
-			list = new ArrayList<Registrant>();
-			registrantHolder.append(key, list);
-		}
-		list.add(new Registrant(h, what, obj));
-	}
-
-	private void unRegisterListener(int key, Handler h, int what, Object obj) {
-		List<Registrant> list = registrantHolder.get(key);
-		if (list != null) {
-			for (Registrant re : list) {
-				if (re.getHandler() == h && what == re.getWhat()) {
-					list.remove(re);
-				}
-			}
-		}
-	}
 
 	/**
 	 * Register listener for out conference by kick.
@@ -329,16 +300,16 @@ public class ChatService extends AbstractHandler {
 
 		if (ud.isAudioType()) {
 			AudioRequest.getInstance().InviteAudioChat(ud.getGroupdId(),
-					ud.getUser().getmUserId(), AudioRequest.BT_IM);
+					ud.getUser().getmUserId(), V2GlobalEnum.REQUEST_TYPE_IM);
 		} else if (ud.isVideoType()) {
 			VideoRequest.getInstance().inviteVideoChat(ud.getGroupdId(),
 					ud.getUser().getmUserId(), ud.getDeviceId(),
-					VideoRequest.BT_IM);
+					V2GlobalEnum.REQUEST_TYPE_IM);
 		}
 	}
 
 	/**
-	 * C
+	 * Cancel current video or audio conversation.
 	 * 
 	 * @param ud
 	 * @param caller
@@ -353,11 +324,11 @@ public class ChatService extends AbstractHandler {
 
 		if (ud.isAudioType()) {
 			AudioRequest.getInstance().CloseAudioChat(ud.getGroupdId(),
-					ud.getUser().getmUserId(), AudioRequest.BT_IM);
+					ud.getUser().getmUserId(), V2GlobalEnum.REQUEST_TYPE_IM);
 		} else if (ud.isVideoType()) {
 			VideoRequest.getInstance().closeVideoChat(ud.getGroupdId(),
 					ud.getUser().getmUserId(), ud.getDeviceId(),
-					VideoRequest.BT_IM);
+					V2GlobalEnum.REQUEST_TYPE_IM);
 		}
 
 		if (caller != null) {
@@ -385,11 +356,11 @@ public class ChatService extends AbstractHandler {
 
 		if (ud.isAudioType()) {
 			AudioRequest.getInstance().AcceptAudioChat(ud.getGroupdId(),
-					ud.getUser().getmUserId(), AudioRequest.BT_IM);
+					ud.getUser().getmUserId(), V2GlobalEnum.REQUEST_TYPE_IM);
 		} else if (ud.isVideoType()) {
 			VideoRequest.getInstance().acceptVideoChat(ud.getGroupdId(),
 					ud.getUser().getmUserId(), ud.getDeviceId(),
-					VideoRequest.BT_IM);
+					V2GlobalEnum.REQUEST_TYPE_IM);
 		}
 		if (caller != null) {
 			JNIResponse resp = new RequestChatServiceResponse(
@@ -414,11 +385,11 @@ public class ChatService extends AbstractHandler {
 
 		if (ud.isAudioType()) {
 			AudioRequest.getInstance().RefuseAudioChat(ud.getGroupdId(),
-					ud.getUser().getmUserId(), AudioRequest.BT_IM);
+					ud.getUser().getmUserId(), V2GlobalEnum.REQUEST_TYPE_IM);
 		} else if (ud.isVideoType()) {
 			VideoRequest.getInstance().refuseVideoChat(ud.getGroupdId(),
 					ud.getUser().getmUserId(), ud.getDeviceId(),
-					VideoRequest.BT_IM);
+					V2GlobalEnum.REQUEST_TYPE_IM);
 		}
 		if (caller != null) {
 			JNIResponse resp = new RequestChatServiceResponse(
@@ -427,6 +398,7 @@ public class ChatService extends AbstractHandler {
 		}
 	}
 
+	
 	public void muteChatting(UserChattingObject ud, Registrant caller) {
 		if (ud == null) {
 			JNIResponse resp = new RequestChatServiceResponse(
@@ -435,7 +407,7 @@ public class ChatService extends AbstractHandler {
 			return;
 		}
 		AudioRequest.getInstance().MuteMic(ud.getGroupdId(),
-				ud.getUser().getmUserId(), ud.isMute(), AudioRequest.BT_IM);
+				ud.getUser().getmUserId(), ud.isMute(), V2GlobalEnum.REQUEST_TYPE_IM);
 
 		if (caller != null) {
 			JNIResponse resp = new RequestChatServiceResponse(
@@ -464,7 +436,7 @@ public class ChatService extends AbstractHandler {
 				.openVideoDevice(
 						UserDeviceConfig.UserDeviceConfigType.EVIDEODEVTYPE_CAMERA
 								.ordinal(), ud.getUser().getmUserId(),
-						ud.getDeviceId(), ud.getVp(), VideoRequest.BT_IM);
+						ud.getDeviceId(), ud.getVp(), V2GlobalEnum.REQUEST_TYPE_IM);
 
 		if (caller != null) {
 			JNIResponse resp = new RequestChatServiceResponse(
@@ -486,7 +458,7 @@ public class ChatService extends AbstractHandler {
 				.closeVideoDevice(
 						UserDeviceConfig.UserDeviceConfigType.EVIDEODEVTYPE_CAMERA
 								.ordinal(), ud.getUser().getmUserId(),
-						ud.getDeviceId(), ud.getVp(), VideoRequest.BT_IM);
+						ud.getDeviceId(), ud.getVp(), V2GlobalEnum.REQUEST_TYPE_IM);
 
 		if (caller != null) {
 			JNIResponse resp = new RequestChatServiceResponse(
@@ -495,24 +467,8 @@ public class ChatService extends AbstractHandler {
 		}
 	}
 
-	class VideoRequestCallbackImpl implements VideoRequestCallback {
+	class VideoRequestCallbackImpl extends VideoRequestCallbackAdapter {
 
-		@Override
-		public void OnRemoteUserVideoDevice(String szXmlData) {
-
-		}
-
-		@Override
-		public void OnVideoChatInviteCallback(long nGroupID, int nBusinessType,
-				long nFromUserID, String szDeviceID) {
-
-		}
-
-		@Override
-		public void OnSetCapParamDone(String szDevID, int nSizeIndex,
-				int nFrameRate, int nBitRate) {
-
-		}
 
 		public void OnVideoChatAccepted(long nGroupID, int nBusinessType,
 				long nFromuserID, String szDeviceID) {

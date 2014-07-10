@@ -1,6 +1,18 @@
 package com.V2.jni;
 
 public class V2GlobalEnum {
+	
+	/**
+	 * Global request type for conference
+	 */
+	public static final int REQUEST_TYPE_CONF = 1;
+	
+	/**
+	 * Global request type for IM
+	 */
+	public static final int REQUEST_TYPE_IM = 2;
+	
+	
 
 	public static final int USER_STATUS_ONLINE = 1;
 

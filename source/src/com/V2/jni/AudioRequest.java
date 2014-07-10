@@ -11,9 +11,6 @@ import android.util.Log;
 
 public class AudioRequest {
 
-	public static final int BT_CONF = 1;
-	public static final int BT_IM = 2;
-
 	private Context context;
 	private static AudioRequest mAudioRequest;
 
@@ -68,6 +65,10 @@ public class AudioRequest {
 	 * @param nGroupID
 	 * @param nToUserID
 	 * @param businesstype
+	 *            type of request
+	 * 
+	 * @see V2GlobalEnum#REQUEST_TYPE_CONF
+	 * @see V2GlobalEnum#REQUEST_TYPE_IM
 	 */
 	public native void InviteAudioChat(long nGroupID, long nToUserID,
 			int businesstype);
@@ -78,6 +79,10 @@ public class AudioRequest {
 	 * @param nGroupID
 	 * @param nToUserID
 	 * @param businesstype
+	 *            type of request
+	 * 
+	 * @see V2GlobalEnum#REQUEST_TYPE_CONF
+	 * @see V2GlobalEnum#REQUEST_TYPE_IM
 	 */
 	public native void AcceptAudioChat(long nGroupID, long nToUserID,
 			int businesstype);
@@ -88,6 +93,10 @@ public class AudioRequest {
 	 * @param nGroupID
 	 * @param nToUserID
 	 * @param businesstype
+	 *            type of request
+	 * 
+	 * @see V2GlobalEnum#REQUEST_TYPE_CONF
+	 * @see V2GlobalEnum#REQUEST_TYPE_IM
 	 */
 	public native void RefuseAudioChat(long nGroupID, long nToUserID,
 			int businesstype);
@@ -97,6 +106,10 @@ public class AudioRequest {
 	 * @param nGroupID
 	 * @param nToUserID
 	 * @param businesstype
+	 *            type of request
+	 * 
+	 * @see V2GlobalEnum#REQUEST_TYPE_CONF
+	 * @see V2GlobalEnum#REQUEST_TYPE_IM
 	 */
 	public native void CloseAudioChat(long nGroupID, long nToUserID,
 			int businesstype);
@@ -107,6 +120,10 @@ public class AudioRequest {
 	 * @param nUserID
 	 * @param bMute
 	 * @param businesstype
+	 *            type of request
+	 * 
+	 * @see V2GlobalEnum#REQUEST_TYPE_CONF
+	 * @see V2GlobalEnum#REQUEST_TYPE_IM
 	 */
 	public native void MuteMic(long nGroupID, long nUserID, boolean bMute,
 			int businesstype);

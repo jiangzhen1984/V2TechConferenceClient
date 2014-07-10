@@ -64,6 +64,7 @@ public class MessageBuilder {
 		values.put(ContentDescriptor.Messages.Cols.SEND_TIME,
 				vm.getFullDateStr());
 		values.put(ContentDescriptor.Messages.Cols.UUID, vm.getUUID());
+		values.put(ContentDescriptor.Messages.Cols.STATE, vm.getState());
 
 		Uri uri = context.getContentResolver().insert(
 				ContentDescriptor.Messages.CONTENT_URI, values);

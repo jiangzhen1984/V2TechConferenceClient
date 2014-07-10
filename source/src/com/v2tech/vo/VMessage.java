@@ -8,12 +8,15 @@ import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
+import com.V2.jni.V2GlobalEnum;
 import com.v2tech.service.GlobalHolder;
+import com.v2tech.util.V2Log;
 
 public class VMessage {
-
-	public static final int VMESSAGE_CODE_CONF = 1;
-	public static final int VMESSAGE_CODE_IM = 2;
+	
+	
+	public static final int STATE_UNREAD = 0 ;
+	public static final int STATE_SENT_FAILED = 1 ;
 
 	private static DateFormat sfF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss",
 			Locale.getDefault());
@@ -41,15 +44,17 @@ public class VMessage {
 	protected long mGroupId;
 	
 	protected boolean isLocal;
+	
+	protected int mState;
 
 	protected List<VMessageAbstractItem> itemList;
 
 	public VMessage(User fromUser, User toUser) {
-		this(0, fromUser, toUser, VMESSAGE_CODE_IM);
+		this(0, fromUser, toUser, V2GlobalEnum.REQUEST_TYPE_IM);
 	}
 	
 	public VMessage(User fromUser, User toUser, Date date) {
-		this(0, fromUser, toUser, UUID.randomUUID().toString(), new Date(),VMESSAGE_CODE_IM);
+		this(0, fromUser, toUser, UUID.randomUUID().toString(), new Date(), V2GlobalEnum.REQUEST_TYPE_IM);
 	}
 
 
@@ -63,7 +68,7 @@ public class VMessage {
 
 	public VMessage(long groupId, User fromUser, User toUser) {
 		this(0, fromUser, toUser, UUID.randomUUID().toString(),new Date(),
-				VMESSAGE_CODE_IM);
+				 V2GlobalEnum.REQUEST_TYPE_IM);
 	}
 
 	public VMessage(long groupId, User fromUser, User toUser, String uuid, Date date,
@@ -122,8 +127,14 @@ public class VMessage {
 		this.mGroupId = groupId;
 	}
 	
-	
-	
+
+	public int getState() {
+		return mState;
+	}
+
+	public void setState(int state) {
+		this.mState = state;
+	}
 
 	public void setUUID(String UUID) {
 		this.mUUID = UUID;
@@ -262,6 +273,9 @@ public class VMessage {
 		}
 		sb.append("    </ItemList>");
 		sb.append("</TChatData>");
+		if(V2Log.isDebuggable) {
+			V2Log.d(sb.toString());
+		}
 		return sb.toString();
 	}
 }

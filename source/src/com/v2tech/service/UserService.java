@@ -4,7 +4,7 @@ import android.os.Handler;
 import android.os.Message;
 
 import com.V2.jni.ImRequest;
-import com.V2.jni.ImRequestCallback;
+import com.V2.jni.ImRequestCallbackAdapter;
 import com.V2.jni.V2ClientType;
 import com.V2.jni.V2GlobalEnum;
 import com.v2tech.service.jni.RequestLogInResponse;
@@ -69,7 +69,7 @@ public class UserService extends AbstractHandler {
 		}
 	}
 
-	class ImRequestCB implements ImRequestCallback {
+	class ImRequestCB extends ImRequestCallbackAdapter {
 
 		private Handler handler;
 
@@ -86,10 +86,7 @@ public class UserService extends AbstractHandler {
 			handler.dispatchMessage(m);
 		}
 
-		@Override
-		public void OnLogoutCallback(int nUserID) {
-
-		}
+		
 
 		@Override
 		public void OnConnectResponseCallback(int nResult) {
@@ -101,37 +98,6 @@ public class UserService extends AbstractHandler {
 				handler.dispatchMessage(m);
 			}
 		}
-
-		@Override
-		public void OnUpdateBaseInfoCallback(long nUserID, String updatexml) {
-			// TODO do not send result
-			// Message.obtain(handler, JNI_REQUEST_UPDAE_USER,
-			// updatexml).sendToTarget();
-		}
-
-		@Override
-		public void OnUserStatusUpdatedCallback(long nUserID, int nType,int nStatus,
-				String szStatusDesc) {
-
-		}
-
-		@Override
-		public void OnChangeAvatarCallback(int nAvatarType, long nUserID,
-				String AvatarName) {
-
-		}
-
-		@Override
-		public void OnModifyCommentNameCallback(long nUserId, String sCommmentName) {
-
-		}
-
-		@Override
-		public void OnCreateCrowdCallback(String sCrowdXml, int nResult) {
-			
-		}
-		
-		
 
 	}
 }
