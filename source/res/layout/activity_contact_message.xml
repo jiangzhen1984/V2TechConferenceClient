@@ -119,20 +119,20 @@
                 android:layout_centerVertical="true"
                 android:layout_marginBottom="5dp"
                 android:layout_marginLeft="20dp"
-                android:layout_marginTop="5dp"
                 android:layout_marginRight="10dp"
+                android:layout_marginTop="5dp"
                 android:layout_toRightOf="@+id/contact_message_plus"
                 android:orientation="horizontal" >
 
                 <Button
-                     android:id="@+id/message_button_audio_record"
+                    android:id="@+id/message_button_audio_record"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
                     android:background="@drawable/input_bg"
+                    android:text="@string/contact_message_button_send_audio_msg"
                     android:textSize="@dimen/activity_contact_audio_button_text_size"
-                    android:text="@string/contact_message_button_send_audio_msg" 
-                    android:visibility="gone"/>
+                    android:visibility="gone" />
 
                 <EditText
                     android:id="@+id/message_text"
@@ -145,8 +145,7 @@
                     android:inputType="text|textCapCharacters|textCapSentences|textMultiLine"
                     android:maxLength="4500"
                     android:maxLines="3"
-                    android:minLines="1"
-                     >
+                    android:minLines="1" >
                 </EditText>
 
                 <TextView
@@ -164,8 +163,7 @@
                     android:paddingTop="5dp"
                     android:text="@string/contact_message_send_button"
                     android:textColor="@color/button_text_color"
-                    android:textSize="12sp"
-                     />
+                    android:textSize="12sp" />
             </LinearLayout>
         </RelativeLayout>
 
@@ -174,9 +172,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="#ffffff"
-            android:orientation="vertical"
-            android:visibility="gone"
-             >
+            android:orientation="vertical" >
 
             <RelativeLayout
                 android:id="@+id/contact_message_sub_feature_ly_inner"
@@ -199,7 +195,7 @@
                     android:layout_alignParentLeft="true"
                     android:layout_centerVertical="true"
                     android:padding="15dp"
-                    android:src="@drawable/message_smile_icon" />
+                    android:src="@drawable/message_smile_icon_button_selector" />
 
                 <ImageView
                     android:id="@+id/contact_message_send_image_button"
@@ -208,8 +204,8 @@
                     android:layout_centerVertical="true"
                     android:layout_toRightOf="@+id/message_smile_icon"
                     android:padding="15dp"
-                    android:src="@drawable/message_send_image_button" />
-                
+                    android:src="@drawable/message_send_image_button_selector" />
+
                 <ImageView
                     android:id="@+id/contact_message_send_file_button"
                     android:layout_width="wrap_content"
@@ -217,7 +213,25 @@
                     android:layout_centerVertical="true"
                     android:layout_toRightOf="@+id/contact_message_send_image_button"
                     android:padding="15dp"
-                    android:src="@drawable/contact_detail_file_button" />
+                    android:src="@drawable/message_file_button_selector" />
+
+                <ImageView
+                    android:id="@+id/contact_message_video_call_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_toRightOf="@+id/contact_message_send_file_button"
+                    android:padding="15dp"
+                    android:src="@drawable/message_video_call_button_selector" />
+
+                <ImageView
+                    android:id="@+id/contact_message_audio_call_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_toRightOf="@+id/contact_message_video_call_button"
+                    android:padding="15dp"
+                    android:src="@drawable/message_audio_call_button_selector" />
             </RelativeLayout>
 
             <HorizontalScrollView

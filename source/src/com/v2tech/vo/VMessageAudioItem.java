@@ -2,6 +2,8 @@ package com.v2tech.vo;
 
 import java.util.UUID;
 
+import com.v2tech.util.V2Log;
+
 public class VMessageAudioItem extends VMessageAbstractItem {
 
 	private String extension;
@@ -67,6 +69,14 @@ public class VMessageAudioItem extends VMessageAbstractItem {
 	/**
 	 */
 	public String toXmlItem() {
+		if (vm.getToUser()== null) {
+			V2Log.e(" audo message item to xml failed no to user");
+			return "";
+		}
+		if (vm.getFromUser() == null) {
+			V2Log.e(" audo message item to xml failed no from user");
+			return "";
+		}
 		String xml = "<TAudioChatItem NewLine=\"True\" FileExt=\"" + extension
 				+ "\" FileID=\"" + uuid + "\" RecvUserID=\""
 				+ vm.getToUser().getmUserId() + "\" Seconds=\"" + seconds

@@ -215,7 +215,7 @@ public class MainApplication extends Application {
 		public void onActivityCreated(Activity activity,
 				Bundle savedInstanceState) {
 			Configuration conf = getResources().getConfiguration();
-			if (conf.smallestScreenWidthDp >= 720
+			if (conf.smallestScreenWidthDp >= 600
 					|| activity instanceof VideoActivityV2) {
 				activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 			} else {
