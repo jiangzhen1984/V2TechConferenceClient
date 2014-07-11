@@ -174,7 +174,7 @@ public class ConversationConnectedFragment extends Fragment {
 			mLocalSurface.bringToFront();
 
 			Message m = Message.obtain(mLocalHandler, OPEN_REMOTE_VIDEO);
-			mLocalHandler.sendMessageDelayed(m, 500);
+			mLocalHandler.sendMessageDelayed(m, 2000);
 		}
 		
 		uad.setMute(false);
@@ -314,13 +314,11 @@ public class ConversationConnectedFragment extends Fragment {
 				view.setTag("speakerphone");
 				mAudioSpeakerImage.setImageResource(R.drawable.message_voice_lounder_pressed);
 				mAudioSpeakerText.setTextColor(getActivity().getResources().getColor(R.color.fragment_conversation_connected_pressed_text_color));
-				view.setBackgroundResource(R.drawable.conversation_framgent_gray_button_bg_pressed);
 			} else {
 				audioManager.setSpeakerphoneOn(false);
 				view.setTag("earphone");
 				mAudioSpeakerImage.setImageResource(R.drawable.message_voice_lounder);
 				mAudioSpeakerText.setTextColor(getActivity().getResources().getColor(R.color.fragment_conversation_connected_gray_text_color));
-				view.setBackgroundResource(R.drawable.conversation_framgent_gray_button_bg);
 			}
 
 		}
@@ -340,12 +338,10 @@ public class ConversationConnectedFragment extends Fragment {
 				view.setTag("speaking");
 				mAudioMuteImage.setImageResource(R.drawable.message_voice_mute_pressed);
 				mAudioMuteText.setTextColor(getActivity().getResources().getColor(R.color.fragment_conversation_connected_pressed_text_color));
-				view.setBackgroundResource(R.drawable.conversation_framgent_gray_button_bg_pressed);
 			} else {
 				view.setTag("mute");
 				mAudioMuteImage.setImageResource(R.drawable.message_voice_mute);
 				mAudioMuteText.setTextColor(getActivity().getResources().getColor(R.color.fragment_conversation_connected_gray_text_color));
-				view.setBackgroundResource(R.drawable.conversation_framgent_gray_button_bg);
 			}
 
 		}
