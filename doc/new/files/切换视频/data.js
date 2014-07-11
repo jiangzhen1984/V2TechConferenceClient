@@ -1,0 +1,197 @@
+﻿$axure.loadCurrentPage({
+  "url":"切换视频.html",
+  "generationDate":new Date(1403848988388.36),
+  "isCanvasEnabled":false,
+  "variables":["OnLoadVariable"],
+  "page":{
+    "packageId":"e8b72b89aadc4b6f8e33f04994bdef59",
+    "type":"Axure:Page",
+    "name":"切换视频",
+    "notes":{
+},
+    "style":{
+      "baseStyle":"627587b6038d43cca051c114ac41ad32",
+      "pageAlignment":"near",
+      "fill":{
+        "fillType":"solid",
+        "color":0xFFFFFFFF},
+      "image":null,
+      "imageHorizontalAlignment":"near",
+      "imageVerticalAlignment":"near",
+      "imageRepeat":"auto",
+      "favicon":null,
+      "sketchFactor":"0",
+      "colorStyle":"appliedColor",
+      "fontName":"应用字体",
+      "borderWidth":"0"},
+    "adaptiveStyles":{
+},
+    "interactionMap":{
+},
+    "diagram":{
+      "objects":[{
+          "id":"97d092613dbf4e498cf8d127385c58a8",
+          "label":"",
+          "type":"imageBox",
+          "styleType":"imageBox",
+          "visible":true,
+          "style":{
+            "size":{
+              "width":640,
+              "height":960}},
+          "adaptiveStyles":{
+},
+          "objects":[{
+              "id":"d4f81d8ae9bd463c9bd7721169f3fef7",
+              "label":"",
+              "isContained":true,
+              "type":"richTextPanel",
+              "styleType":"paragraph",
+              "visible":true,
+              "style":{
+                "size":{
+                  "width":640,
+                  "height":960}},
+              "adaptiveStyles":{
+}}],
+          "images":{
+            "normal~":"images/切换视频/u0.jpg"}},
+{
+          "id":"f3fb48e5257b40b6b96bfc325e9fb84b",
+          "label":"",
+          "type":"buttonShape",
+          "styleType":"buttonShape",
+          "visible":true,
+          "style":{
+            "fill":{
+              "fillType":"solid",
+              "color":0xFFFFFF},
+            "location":{
+              "x":470,
+              "y":650},
+            "size":{
+              "width":140,
+              "height":140},
+            "borderFill":{
+              "fillType":"solid",
+              "color":0x797979},
+            "cornerRadiusTopLeft":"5"},
+          "adaptiveStyles":{
+},
+          "objects":[{
+              "id":"79ae8d4dd2ea4b1e914431c4db702518",
+              "label":"",
+              "isContained":true,
+              "type":"richTextPanel",
+              "styleType":"paragraph",
+              "visible":true,
+              "style":{
+                "fill":{
+                  "fillType":"solid",
+                  "color":0xFFFFFF},
+                "location":{
+                  "x":470,
+                  "y":650},
+                "size":{
+                  "width":140,
+                  "height":140},
+                "borderFill":{
+                  "fillType":"solid",
+                  "color":0x797979},
+                "cornerRadiusTopLeft":"5"},
+              "adaptiveStyles":{
+}}],
+          "interactionMap":{
+            "onClick":{
+              "description":"OnClick",
+              "cases":[{
+                  "description":"用例 1",
+                  "isNewIfGroup":false,
+                  "actions":[{
+                      "action":"linkWindow",
+                      "description":"在 当前窗口 打开 视频接通后",
+                      "target":{
+                        "targetType":"page",
+                        "url":"视频接通后.html",
+                        "includeVariables":true},
+                      "linkType":"current"}]}]}},
+          "tabbable":true,
+          "images":{
+            "normal~":"resources/images/transparent.gif"}},
+{
+          "id":"41efecbc45b9484d896cb5b8f9382cab",
+          "label":"",
+          "type":"buttonShape",
+          "styleType":"buttonShape",
+          "visible":true,
+          "style":{
+            "fill":{
+              "fillType":"solid",
+              "color":0xFFFFFF},
+            "location":{
+              "x":250,
+              "y":850},
+            "size":{
+              "width":130,
+              "height":90},
+            "borderFill":{
+              "fillType":"solid",
+              "color":0x797979},
+            "cornerRadiusTopLeft":"5"},
+          "adaptiveStyles":{
+},
+          "objects":[{
+              "id":"ecc504654bf94dc5ba144a0cffe865dc",
+              "label":"",
+              "isContained":true,
+              "type":"richTextPanel",
+              "styleType":"paragraph",
+              "visible":true,
+              "style":{
+                "fill":{
+                  "fillType":"solid",
+                  "color":0xFFFFFF},
+                "location":{
+                  "x":250,
+                  "y":850},
+                "size":{
+                  "width":130,
+                  "height":90},
+                "borderFill":{
+                  "fillType":"solid",
+                  "color":0x797979},
+                "cornerRadiusTopLeft":"5"},
+              "adaptiveStyles":{
+}}],
+          "interactionMap":{
+            "onClick":{
+              "description":"OnClick",
+              "cases":[{
+                  "description":"用例 1",
+                  "isNewIfGroup":false,
+                  "actions":[{
+                      "action":"linkWindow",
+                      "description":"在 当前窗口 打开 个人资料",
+                      "target":{
+                        "targetType":"page",
+                        "url":"个人资料.html",
+                        "includeVariables":true},
+                      "linkType":"current"}]}]}},
+          "tabbable":true,
+          "images":{
+            "normal~":"resources/images/transparent.gif"}}]}},
+  "masters":{
+},
+  "objectPaths":{
+    "97d092613dbf4e498cf8d127385c58a8":{
+      "scriptId":"u0"},
+    "d4f81d8ae9bd463c9bd7721169f3fef7":{
+      "scriptId":"u1"},
+    "f3fb48e5257b40b6b96bfc325e9fb84b":{
+      "scriptId":"u2"},
+    "79ae8d4dd2ea4b1e914431c4db702518":{
+      "scriptId":"u3"},
+    "41efecbc45b9484d896cb5b8f9382cab":{
+      "scriptId":"u4"},
+    "ecc504654bf94dc5ba144a0cffe865dc":{
+      "scriptId":"u5"}}});
