@@ -602,7 +602,7 @@ public class JNIService extends Service {
 					i.putExtra("gid", nGroupID);
 					sendBroadcast(i);
 					Notificator.updateSystemNotification(mContext, "", gName
-							+ "会议被删除", 1, PublicIntent.VIDEO_NOTIFICATION_ID);
+							+ mContext.getText(R.string.confs_is_deleted_notification), 1, PublicIntent.VIDEO_NOTIFICATION_ID);
 				}
 			}
 		}

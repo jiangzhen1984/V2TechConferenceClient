@@ -35,10 +35,10 @@ import v2av.VideoPlayer;
 public class UserDeviceConfig {
 
 	public enum UserDeviceConfigType {
-		UNKOWN, EVIDEODEVTYPE_VIDEO, // 摄像头
-		EVIDEODEVTYPE_CAMERA, // 云台
-		EVIDEODEVTYPE_FILE, // 文件源
-		EVIDEODEVTYPE_VIDEOMIXER // 混屏
+		UNKOWN, EVIDEODEVTYPE_VIDEO, // camera
+		EVIDEODEVTYPE_CAMERA,    // 
+		EVIDEODEVTYPE_FILE,     // file source
+		EVIDEODEVTYPE_VIDEOMIXER  // mixed video
 	}
 
 	private long mUerID;
