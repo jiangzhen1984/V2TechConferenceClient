@@ -314,30 +314,23 @@ public class ImRequest {
 	// 鏇存敼绯荤粺澶村儚
 	public native void changeSystemAvatar(String szAvatarName);
 
-	// 鏇存敼鑷畾涔夊ご鍍�
 	public native void changeCustomAvatar(byte[] b, int len,
 			String szExtensionName);
 
-	// 鍚姩鑷姩鏇存柊
 	public native void onStartUpdate();
 
-	// 鍋滄鑷姩鏇存柊
 	public native void onStopUpdate();
 
-	// 鎼滅储鐢ㄦ埛淇℃伅
 	public native void searchMember(String szUnsharpName, int nStartNum,
 			int nSearchNum);
 
-	// 鎼滅储缇�
 	public native void searchCrowd(String szUnsharpName, int nStartNum,
 			int nSearchNum);
 
-	// 鍒犻櫎缇ゅ叡浜枃浠�
 	public native void delCrowdFile(long nCrowdId, String sFileID);
 
 	public native void getCrowdFileInfo(long nCrowdId);
 
-	// 杈撳叆鍏抽敭璇嶈繘琛屾悳绱�
 	private void OnGetSearchMember(String xmlinfo) {
 		Log.e("ImRequest UI", "OnGetSearchMember:" + xmlinfo);
 		// List<NYXUser> searchUsers = XmlParserUtils
@@ -356,20 +349,17 @@ public class ImRequest {
 		Log.e("ImRequest UI", "OnUserPrivacyUpdated");
 	}
 
-	// 鍒涘缓缁勬垚鍔熷悗鐨勫洖璋�
 	private void OnCreateFriendGroup(long nGroupID, String szGroupName) {
 		Log.e("ImRequest UI", "OnCreateFriendGroup锛氾細" + nGroupID + ":"
 				+ szGroupName);
 	}
 
-	// 淇敼缁勬垚鍔熷悗鐨勫洖璋�
 	private void OnModifyFriendGroup(long nGroupID, String szGroupName) {
 		Log.e("ImRequest UI", "OnModifyFriendGroup::" + nGroupID + ":"
 				+ szGroupName);
 
 	}
 
-	// 鍙楀埌濂藉弸鎴愬姛绉诲姩缁勭殑鍥炶皟
 	private void OnMoveFriendsToGroup(long nDstUserID, long nDstGroupID) {
 		Log.e("ImRequest UI", "OnMoveFriendsToGroup" + nDstUserID + ":"
 				+ nDstGroupID);
@@ -410,27 +400,22 @@ public class ImRequest {
 		Log.e("ImRequest UI", "OnUpdateDownloadEnd:" + error);
 	}
 
-	// 琚Щ鍑虹兢
 	private void OnKickCrowd(long nCrowdId, long nAdminId) {
 		Log.e("ImRequest UI", "OnKickCrowd:" + nCrowdId);
 	}
 
-	// 鎼滅储缇ゅ洖璋�
 	private void OnSearchCrowd(String InfoXml) {
 		Log.e("ImRequest UI", "OnSearchCrowd::" + InfoXml);
 	}
 
-	// 缇ゅ叡浜洖璋�
 	private void Oncrowdfile(long nCrowdId, String InfoXml) {
 		Log.e("ImRequest UI", "Oncrowdfile:" + nCrowdId);
 	}
 
-	// 鑾峰彇缇ゅ叡浜俊鎭�
 	private void OnGetCrowdFileInfo(long nCrowdId, String InfoXml) {
 		Log.e("ImRequest UI", "OnGetCrowdFileInfo:" + nCrowdId);
 	}
 
-	// 鍒犻櫎缇ゅ叡浜枃浠跺洖璋�
 	private void OnDelCrowdFile(long nCrowdId, String sFileID) {
 		Log.e("ImRequest UI", "OnDelCrowdFile:" + nCrowdId);
 	}
@@ -444,13 +429,11 @@ public class ImRequest {
 				+ isdel);
 	}
 
-	// 鏍囧織鐫�幏鍙栫敤鎴峰紑濮�
 	private void OnGetGroupsInfoBegin() {
 	}
 
-	// 鏍囧織鐫�幏鍙栫敤鎴风粨鏉�
 
-	private boolean haslogin = false; // 鏍囧織宸茬粡鍙戦�浜嗙櫥闄嗙姸鎬�
+	private boolean haslogin = false;
 
 	private void OnGetGroupsInfoEnd() {
 

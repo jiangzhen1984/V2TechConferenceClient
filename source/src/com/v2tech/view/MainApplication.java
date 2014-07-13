@@ -1,6 +1,10 @@
 package com.v2tech.view;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.lang.ref.WeakReference;
 import java.util.Vector;
 
@@ -41,8 +45,7 @@ import com.v2tech.view.conference.VideoActivityV2;
 public class MainApplication extends Application {
 
 	private Vector<WeakReference<Activity>> list = new Vector<WeakReference<Activity>>();
-	
-	
+
 	@Override
 	public void onCreate() {
 		super.onCreate();
@@ -76,12 +79,43 @@ public class MainApplication extends Application {
 			}.start();
 		}
 
+		String path = GlobalConfig.getGlobalPath();
+		File pa = new File(GlobalConfig.getGlobalUserAvatarPath());
+		if (!pa.exists()) {
+			boolean res = pa.mkdirs();
+			V2Log.i(" create avatar dir " + pa.getAbsolutePath() + "  " + res);
+		}
+		pa.setWritable(true);
+		pa.setReadable(true);
+
+		File image = new File(GlobalConfig.getGlobalPicsPath());
+		if (!image.exists()) {
+			boolean res = image.mkdirs();
+			V2Log.i(" create image dir " + image.getAbsolutePath() + "  " + res);
+		}
+		File audioPath = new File(GlobalConfig.getGlobalAudioPath());
+		if (!audioPath.exists()) {
+			boolean res = audioPath.mkdirs();
+			V2Log.i(" create audio dir " + audioPath.getAbsolutePath() + "  "
+					+ res);
+		}
+		File filePath = new File(GlobalConfig.getGlobalFilePath());
+		if (!filePath.exists()) {
+			boolean res = filePath.mkdirs();
+			V2Log.i(" create file dir " + filePath.getAbsolutePath() + "  "
+					+ res);
+		}
+
+		initConfFile();
+
 		// Load native library
 		System.loadLibrary("event");
 		System.loadLibrary("udt");
 		System.loadLibrary("v2vi");
 		System.loadLibrary("v2ve");
 		System.loadLibrary("v2client");
+		
+		new ConfigRequest().setExtStoragePath(path);
 
 		// Initialize native library
 		NativeInitializer.getIntance().initialize(getApplicationContext());
@@ -99,37 +133,6 @@ public class MainApplication extends Application {
 		getApplicationContext().startService(
 				new Intent(getApplicationContext(), JNIService.class));
 
-		String path = GlobalConfig.getGlobalPath();
-		new ConfigRequest().setExtStoragePath(path);
-		File pa = new File(GlobalConfig.getGlobalUserAvatarPath());
-		if (!pa.exists()) {
-			boolean res = pa.mkdirs();
-			V2Log.i(" create avatar dir " + pa.getAbsolutePath() + "  " + res);
-		}
-		pa.setWritable(true);
-		pa.setReadable(true);
-
-		File image = new File(GlobalConfig.getGlobalPicsPath());
-		if (!image.exists()) {
-			boolean res = image.mkdirs();
-			V2Log.i(" create image dir " + image.getAbsolutePath() + "  "
-					+ res);
-		}
-		File audioPath = new File(GlobalConfig.getGlobalAudioPath());
-		if (!audioPath.exists()) {
-			boolean res = audioPath.mkdirs();
-			V2Log.i(" create audio dir " + audioPath.getAbsolutePath() + "  "
-					+ res);
-		}
-		File filePath = new File(GlobalConfig.getGlobalFilePath());
-		if (!filePath.exists()) {
-			boolean res = filePath.mkdirs();
-			V2Log.i(" create file dir " + filePath.getAbsolutePath() + "  "
-					+ res);
-		}
-		
-		
-		
 		if (!V2Log.isDebuggable) {
 			new LogcatThread().start();
 		}
@@ -139,6 +142,57 @@ public class MainApplication extends Application {
 		}
 
 		initGlobalConfiguration();
+
+	}
+
+	private void initConfFile() {
+		// Initialize global configuration file
+
+		File optionsFile = new File(GlobalConfig.getGlobalPath()
+				+ "/log_options.xml");
+		if (!optionsFile.exists()) {
+			String content = "<xml><path></path><v2platform><level>1</level><basename>v2platform</basename><size>1024</size></v2platform></xml>";
+			OutputStream os = null;
+			try {
+				os = new FileOutputStream(optionsFile);
+				os.write(content.getBytes());
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			} finally {
+				if (os != null) {
+					try {
+						os.close();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		}
+
+		File cfgFile = new File(GlobalConfig.getGlobalPath()
+				+ "/v2platform.cfg");
+		if (!cfgFile.exists()) {
+			String contentCFG = "<v2platform><C2SProxy><ipv4 value=''/><tcpport value=''/></C2SProxy></v2platform>";
+			OutputStream os = null;
+			try {
+				os = new FileOutputStream(cfgFile);
+				os.write(contentCFG.getBytes());
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			} finally {
+				if (os != null) {
+					try {
+						os.close();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		}
 
 	}
 
@@ -168,7 +222,7 @@ public class MainApplication extends Application {
 	@Override
 	public void onTrimMemory(int level) {
 		super.onTrimMemory(level);
-		V2Log.e("=================== trim memeory :"+ level);
+		V2Log.e("=================== trim memeory :" + level);
 	}
 
 	private void initGlobalConfiguration() {
@@ -179,26 +233,24 @@ public class MainApplication extends Application {
 			conf.orientation = Configuration.ORIENTATION_PORTRAIT;
 		}
 	}
-	
-	
-	
-	
+
 	public void requestQuit() {
-		for (int i = 0; i < list.size(); i++){
+		for (int i = 0; i < list.size(); i++) {
 			WeakReference<Activity> w = list.get(i);
 			Object obj = w.get();
-			if (obj != null ) {
-				((Activity)obj).finish();
+			if (obj != null) {
+				((Activity) obj).finish();
 			}
 		}
-		
+
 		Handler h = new Handler();
 		h.postDelayed(new Runnable() {
 
 			@Override
 			public void run() {
 				GlobalConfig.saveLogoutFlag(getApplicationContext());
-				Notificator.cancelAllSystemNotification(getApplicationContext());
+				Notificator
+						.cancelAllSystemNotification(getApplicationContext());
 				System.exit(0);
 			}
 
@@ -221,18 +273,18 @@ public class MainApplication extends Application {
 			} else {
 				activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 			}
-			
+
 			list.add(new WeakReference<Activity>(activity));
 		}
 
 		@Override
 		public void onActivityDestroyed(Activity activity) {
-			for (int i = 0; i < list.size(); i++){
+			for (int i = 0; i < list.size(); i++) {
 				WeakReference<Activity> w = list.get(i);
 				Object obj = w.get();
-				if (obj != null && ((Activity)obj) == activity) {
+				if (obj != null && ((Activity) obj) == activity) {
 					list.remove(i--);
-				}  else {
+				} else {
 					list.remove(i--);
 				}
 			}
@@ -279,7 +331,8 @@ public class MainApplication extends Application {
 				refCount--;
 				if (refCount == 0) {
 					Intent i = activity.getIntent();
-					i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+					i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+							| Intent.FLAG_ACTIVITY_SINGLE_TOP);
 					Notificator.udpateApplicationNotification(
 							getApplicationContext(), true, i);
 				}

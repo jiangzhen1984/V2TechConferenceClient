@@ -279,7 +279,7 @@ public class GroupRequest {
 
 	private void OnMoveUserToGroup(int groupType, long srcGroupID,
 			long dstGroupID, long nUserID) {
-		Log.e("ImRequest UI", "OnMoveUserToGroup:: �ƶ����ѵ�ʲô��" + groupType
+		Log.e("ImRequest UI", "OnMoveUserToGroup:: " + groupType
 				+ ":" + srcGroupID + ":" + dstGroupID + ":" + nUserID);
 
 		// ƴװ��Ϣ
@@ -296,7 +296,7 @@ public class GroupRequest {
 
 	private void OnRefuseInviteJoinGroup(int groupType, long nGroupID,
 			long nUserID, String sxml) {
-		Log.e("ImRequest UI", "OnRefuseInviteJoinGroup:: �ܾ���˵��������ʲô��"
+		Log.e("ImRequest UI", "OnRefuseInviteJoinGroup:: "
 				+ groupType + ":" + nGroupID + ":" + nUserID + ":" + sxml);
 
 		// // ƴװ������Ϣ
@@ -312,18 +312,18 @@ public class GroupRequest {
 
 	private void OnApplyJoinGroup(int groupType, long nGroupID,
 			String userInfo, String reason) {
-		Log.e("ImRequest UI", "OnApplyJoinGroup:: ���������" + groupType + ":"
+		Log.e("ImRequest UI", "OnApplyJoinGroup:: " + groupType + ":"
 				+ nGroupID + ":" + userInfo + ":" + reason);
 	}
 
 	private void OnAcceptApplyJoinGroup(int groupType, String sXml) {
-		Log.e("ImRequest UI", "OnAcceptApplyJoinGroup:: �������������"
+		Log.e("ImRequest UI", "OnAcceptApplyJoinGroup:: "
 				+ groupType + ":" + sXml);
 	}
 
 	private void OnRefuseApplyJoinGroup(int groupType, String sGroupInfo,
 			String reason) {
-		Log.e("ImRequest UI", "OnRefuseApplyJoinGroup:: �ܾ����������"
+		Log.e("ImRequest UI", "OnRefuseApplyJoinGroup::"
 				+ groupType + ":" + sGroupInfo + ":" + reason);
 	}
 

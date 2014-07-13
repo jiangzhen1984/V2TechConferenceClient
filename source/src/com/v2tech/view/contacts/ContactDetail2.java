@@ -21,7 +21,6 @@ import com.v2tech.service.Registrant;
 import com.v2tech.service.UserService;
 import com.v2tech.view.PublicIntent;
 import com.v2tech.view.bo.ConversationNotificationObject;
-import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.Conversation;
 import com.v2tech.vo.User;
 
@@ -138,11 +137,11 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 		mAccountTV.setText(u.getAccount());
 		if (u.getGender() != null) {
 			if (u.getGender().equals("0")) {
-				mGendarTV.setText("保密");
+				mGendarTV.setText(mContext.getText(R.string.contacts_user_detail_gender_priacy));
 			} else if (u.getGender().equals("1")) {
-				mGendarTV.setText("男");
+				mGendarTV.setText(mContext.getText(R.string.contacts_user_detail_gender_male));
 			} else if (u.getGender().equals("2")) {
-				mGendarTV.setText("女");
+				mGendarTV.setText(mContext.getText(R.string.contacts_user_detail_gender_female));
 			}
 
 		} else {
