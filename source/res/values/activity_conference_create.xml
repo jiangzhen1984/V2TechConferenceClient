@@ -11,6 +11,7 @@
    <string name="error_conf_start_time_required">会议开始时间不能为空!</string>
    <string name="error_conf_end_time_required">会议结束时间不能为空!</string>
    <string name="error_create_conference_failed_from_server_side">创建会议失败</string>
+   <string name="error_create_conference_failed_no_network">当前网络不可用，请检查网络连接</string>
    <string name="error_conf_start_time_format_failed">会议开始时间格式错误: yyyy-MM-dd HH:mm</string>
    <string name="error_conf_do_not_permit_create_piror_conf">不允许创建历史会议</string>
 </resources>

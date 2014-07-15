@@ -391,13 +391,16 @@ public class ContactDetail extends Activity implements OnTouchListener {
 				TextView tv = (TextView) d
 						.findViewById(R.id.contact_user_detail_call_dialog_1);
 				tv.setOnClickListener(itemClickListener);
-				TextView tv1 = (TextView) d
-						.findViewById(R.id.contact_user_detail_call_dialog_2);
-				tv1.setOnClickListener(itemClickListener);
 				tv.setText(nums[0]);
 				tv.setTag(nums[0]);
-				tv1.setText(nums[1]);
-				tv1.setTag(nums[1]);
+				
+				if (nums.length > 1) {
+					TextView tv1 = (TextView) d
+							.findViewById(R.id.contact_user_detail_call_dialog_2);
+					tv1.setOnClickListener(itemClickListener);
+					tv1.setText(nums[1]);
+					tv1.setTag(nums[1]);
+				}
 				return;
 			}
 

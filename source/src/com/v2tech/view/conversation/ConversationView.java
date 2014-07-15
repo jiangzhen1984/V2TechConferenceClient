@@ -261,10 +261,6 @@ public class ConversationView extends Activity {
 			lh.sendMessageDelayed(m, 500);
 		}
 
-		if (user1Id == 0 || user2Id == 0) {
-			Toast.makeText(this, R.string.error_contact_messag_invalid_user_id,
-					Toast.LENGTH_SHORT).show();
-		}
 		mUserTitleTV.setText(remote.getName());
 
 		NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);

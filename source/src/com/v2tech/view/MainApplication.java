@@ -115,7 +115,7 @@ public class MainApplication extends Application {
 		System.loadLibrary("v2ve");
 		System.loadLibrary("v2client");
 		
-		new ConfigRequest().setExtStoragePath(path);
+	//	new ConfigRequest().setExtStoragePath(path);
 
 		// Initialize native library
 		NativeInitializer.getIntance().initialize(getApplicationContext());
@@ -129,6 +129,8 @@ public class MainApplication extends Application {
 		VideoMixerRequest.getInstance();
 		FileRequest.getInstance(getApplicationContext());
 
+		
+		
 		// Start deamon service
 		getApplicationContext().startService(
 				new Intent(getApplicationContext(), JNIService.class));

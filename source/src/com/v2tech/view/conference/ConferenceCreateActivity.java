@@ -16,6 +16,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+import android.net.ConnectivityManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -40,6 +41,7 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.v2tech.R;
 import com.v2tech.service.ConferenceService;
@@ -76,6 +78,7 @@ public class ConferenceCreateActivity extends Activity {
 	private EditText mConfTitleET;
 	private EditText mConfStartTimeET;
 	private View mReturnButton;
+	private TextView mErrorMessageTV;
 
 	private LinearLayout mErrorNotificationLayout;
 
@@ -135,6 +138,8 @@ public class ConferenceCreateActivity extends Activity {
 		mScroller = findViewById(R.id.conf_create_scroll_view);
 		mReturnButton = findViewById(R.id.conference_create_return_button);
 		mReturnButton.setOnClickListener(mReturnListener);
+		
+		mErrorMessageTV =  (TextView) findViewById(R.id.conference_create_error_notification_tv);
 	}
 
 	@Override
@@ -157,7 +162,7 @@ public class ConferenceCreateActivity extends Activity {
 	public boolean isScreenLarge() {
 		final int screenSize = getResources().getConfiguration().screenLayout
 				& Configuration.SCREENLAYOUT_SIZE_MASK;
-		return  screenSize == Configuration.SCREENLAYOUT_SIZE_XLARGE;
+		return screenSize == Configuration.SCREENLAYOUT_SIZE_XLARGE;
 	}
 
 	@Override
@@ -175,11 +180,11 @@ public class ConferenceCreateActivity extends Activity {
 		if (item.isExpanded == false) {
 			for (Group g : item.g.getChildGroup()) {
 				Long key = Long.valueOf(g.getmGId());
-//				ListItem cache = mCacheHolder.get(key);
-//				if (cache == null) {
-				ListItem	cache =  new ListItem(g, g.getLevel());
-			//		mCacheHolder.put(key, cache);
-			//	}
+				// ListItem cache = mCacheHolder.get(key);
+				// if (cache == null) {
+				ListItem cache = new ListItem(g, g.getLevel());
+				// mCacheHolder.put(key, cache);
+				// }
 				mItemList.add(++pos, cache);
 			}
 			List<User> sortList = new ArrayList<User>();
@@ -187,11 +192,11 @@ public class ConferenceCreateActivity extends Activity {
 			Collections.sort(sortList);
 			for (User u : sortList) {
 				Long key = Long.valueOf(u.getmUserId());
-				//ListItem cache = mCacheHolder.get(key);
-			//	if (cache == null) {
-					ListItem	cache =  new ListItem(u, item.g.getLevel() + 1);
-			//		mCacheHolder.put(key, cache);
-			//	}
+				// ListItem cache = mCacheHolder.get(key);
+				// if (cache == null) {
+				ListItem cache = new ListItem(u, item.g.getLevel() + 1);
+				// mCacheHolder.put(key, cache);
+				// }
 				mItemList.add(++pos, cache);
 				updateItem(cache);
 			}
@@ -289,11 +294,14 @@ public class ConferenceCreateActivity extends Activity {
 					if (mAttendeeContainer.getChildCount() <= 0) {
 						return;
 					}
-					View child = mAttendeeContainer.getChildAt(mAttendeeContainer.getChildCount() - 1);
+					View child = mAttendeeContainer
+							.getChildAt(mAttendeeContainer.getChildCount() - 1);
 					if (landLayout == PAD_LAYOUT) {
-						((ScrollView) mScroller).scrollTo(child.getRight(), child.getBottom());
+						((ScrollView) mScroller).scrollTo(child.getRight(),
+								child.getBottom());
 					} else {
-						((HorizontalScrollView) mScroller).scrollTo(child.getRight(), child.getBottom());
+						((HorizontalScrollView) mScroller).scrollTo(
+								child.getRight(), child.getBottom());
 					}
 				}
 
@@ -329,7 +337,8 @@ public class ConferenceCreateActivity extends Activity {
 		tv.setTextSize(12);
 		tv.setMaxWidth(80);
 		ll.setTag(u.getmUserId() + "");
-		ll.addView(tv, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
+		ll.addView(tv, new LinearLayout.LayoutParams(
+				LinearLayout.LayoutParams.WRAP_CONTENT,
 				LinearLayout.LayoutParams.WRAP_CONTENT));
 		ll.setPadding(5, 5, 5, 5);
 		if (u.isCurrentLoggedInUser()) {
@@ -352,15 +361,30 @@ public class ConferenceCreateActivity extends Activity {
 		adapter.notifyDataSetChanged();
 	}
 
-	
-	
-	private  OnClickListener removeAttendeeListener = new OnClickListener() {
+	private boolean checkNetwork() {
+		final ConnectivityManager connMgr = (ConnectivityManager) this
+				.getSystemService(Context.CONNECTIVITY_SERVICE);
+
+		final android.net.NetworkInfo wifi = connMgr
+				.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+
+		final android.net.NetworkInfo mobile = connMgr
+				.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
+
+		if (wifi.isAvailable() || mobile.isAvailable()) {
+			return true;
+		} else {
+			return false;
+		}
+
+	}
+
+	private OnClickListener removeAttendeeListener = new OnClickListener() {
 
 		@Override
 		public void onClick(View view) {
-			User u = (User)view.getTag();
-			Message.obtain(mLocalHandler, UPDATE_ATTENDEES, u)
-					.sendToTarget();
+			User u = (User) view.getTag();
+			Message.obtain(mLocalHandler, UPDATE_ATTENDEES, u).sendToTarget();
 			for (int index = 0; index < mItemList.size(); index++) {
 				ListItem li = mItemList.get(index);
 				if (li.u != null && u.getmUserId() == li.u.getmUserId()) {
@@ -370,8 +394,7 @@ public class ConferenceCreateActivity extends Activity {
 		}
 
 	};
-	
-	
+
 	private TextWatcher textChangedListener = new TextWatcher() {
 
 		@Override
@@ -389,7 +412,7 @@ public class ConferenceCreateActivity extends Activity {
 				}
 				return;
 			}
-			String str = s == null?"":s.toString();
+			String str = s == null ? "" : s.toString();
 			List<User> searchedUserList = new ArrayList<User>();
 			for (Group g : mGroupList) {
 				Group.searchUser(str, searchedUserList, g);
@@ -442,7 +465,12 @@ public class ConferenceCreateActivity extends Activity {
 
 		@Override
 		public void onClick(View view) {
-			String title = mConfTitleET.getText().toString();
+			if (!checkNetwork()) {
+				mErrorNotificationLayout.setVisibility(View.VISIBLE);
+				mErrorMessageTV.setText(R.string.error_create_conference_failed_no_network);
+				return;
+			}
+			String title = mConfTitleET.getText().toString().trim();
 			if (title == null || title.length() == 0) {
 				mConfTitleET
 						.setError(getString(R.string.error_conf_title_required));
@@ -479,8 +507,8 @@ public class ConferenceCreateActivity extends Activity {
 
 			List<User> l = new ArrayList<User>(mAttendeeList);
 			conf = new Conference(title, startTimeStr, null, l);
-			cs.createConference(conf,
-					new Registrant(mLocalHandler, CREATE_CONFERENC_RESP, null));
+			cs.createConference(conf, new Registrant(mLocalHandler,
+					CREATE_CONFERENC_RESP, null));
 			view.setEnabled(false);
 		}
 
@@ -527,14 +555,14 @@ public class ConferenceCreateActivity extends Activity {
 		}
 
 	};
-	
+
 	private OnClickListener mReturnListener = new OnClickListener() {
 
 		@Override
 		public void onClick(View v) {
 			onBackPressed();
 		}
-		
+
 	};
 
 	class LoadContactsAT extends AsyncTask<Void, Void, Void> {
@@ -609,7 +637,6 @@ public class ConferenceCreateActivity extends Activity {
 		}
 
 	}
-	
 
 	class LocalHandler extends Handler {
 
@@ -626,15 +653,18 @@ public class ConferenceCreateActivity extends Activity {
 				updateSearchedUserList((List<User>) msg.obj);
 				break;
 			case CREATE_CONFERENC_RESP:
-				JNIResponse rccr = (JNIResponse)  msg.obj;
+				JNIResponse rccr = (JNIResponse) msg.obj;
 				if (rccr.getResult() != JNIResponse.Result.SUCCESS) {
 					mErrorNotificationLayout.setVisibility(View.VISIBLE);
+					mErrorMessageTV.setText(R.string.error_create_conference_failed_from_server_side);
 					break;
 				}
 				User currU = GlobalHolder.getInstance().getCurrentUser();
-				ConferenceGroup g = new ConferenceGroup(((RequestConfCreateResponse)rccr).getConfId(), GroupType.CONFERENCE,
-						conf.getName(), currU.getmUserId() + "", conf.getDate()
-								.getTime() / 1000 + "", currU.getmUserId());
+				ConferenceGroup g = new ConferenceGroup(
+						((RequestConfCreateResponse) rccr).getConfId(),
+						GroupType.CONFERENCE, conf.getName(),
+						currU.getmUserId() + "", conf.getDate().getTime()
+								/ 1000 + "", currU.getmUserId());
 				g.setOwnerUser(currU);
 				g.setChairManUId(currU.getmUserId());
 				g.addUserToGroup(new ArrayList<User>(mAttendeeList));
