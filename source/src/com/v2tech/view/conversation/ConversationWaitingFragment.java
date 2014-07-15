@@ -74,68 +74,69 @@ public class ConversationWaitingFragment extends Fragment {
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
 
-		View v = inflater.inflate(R.layout.fragment_conversation_waiting,
-				container, false);
+//		View v = inflater.inflate(R.layout.fragment_conversation_waiting,
+//				container, false);
+//
+//		this.mInvitationNameTV = (TextView) v
+//				.findViewById(R.id.conversation_fragment_voice_invitation_name);
+//		this.mTitleTV = (TextView) v
+//				.findViewById(R.id.fragment_conversation_title);
+//		this.mAvatar = (ImageView) v
+//				.findViewById(R.id.conversation_fragment_voice_avatar);
+//
+//		this.mInvitationButtonLayout = v
+//				.findViewById(R.id.conversation_fragment_voice_invitation_button_container);
+//		this.mHostInvitationButtonLayout = v
+//				.findViewById(R.id.conversation_fragment_voice_host_invitation_button_container);
+//
+//		this.mRejectButton = v
+//				.findViewById(R.id.conversation_fragment_voice_reject_button);
+//		this.mAcceptButton = v
+//				.findViewById(R.id.conversation_fragment_voice_accept_button);
+//		this.mCancelButton = v
+//				.findViewById(R.id.conversation_fragment_voice_host_cancel_button);
+//		this.mAcceptVocieOnlyButton = v
+//				.findViewById(R.id.conversation_fragment_voice_accept_only_button);
 
-		this.mInvitationNameTV = (TextView) v
-				.findViewById(R.id.conversation_fragment_voice_invitation_name);
-		this.mTitleTV = (TextView) v
-				.findViewById(R.id.fragment_conversation_title);
-		this.mAvatar = (ImageView) v
-				.findViewById(R.id.conversation_fragment_voice_avatar);
-
-		this.mInvitationButtonLayout = v
-				.findViewById(R.id.conversation_fragment_voice_invitation_button_container);
-		this.mHostInvitationButtonLayout = v
-				.findViewById(R.id.conversation_fragment_voice_host_invitation_button_container);
-
-		this.mRejectButton = v
-				.findViewById(R.id.conversation_fragment_voice_reject_button);
-		this.mAcceptButton = v
-				.findViewById(R.id.conversation_fragment_voice_accept_button);
-		this.mCancelButton = v
-				.findViewById(R.id.conversation_fragment_voice_host_cancel_button);
-		this.mAcceptVocieOnlyButton = v
-				.findViewById(R.id.conversation_fragment_voice_accept_only_button);
-
-		mRejectButton.setOnClickListener(rejectListener);
-		mAcceptButton.setOnClickListener(acceptListener);
-		mCancelButton.setOnClickListener(cancelListener);
-		mAcceptVocieOnlyButton.setOnClickListener(acceptVoicOnlyListener);
-
-		if (uad.isIncoming()) {
-			mInvitationButtonLayout.setVisibility(View.VISIBLE);
-			mHostInvitationButtonLayout.setVisibility(View.GONE);
-			if (uad.isAudioType()) {
-				mTitleTV.setText(this.getActivity().getResources().getText(R.string.conversation_waiting_voice_incoming));
-			} else {
-				mTitleTV.setText(this.getActivity().getResources().getText(R.string.conversation_waiting_video_incoming));
-			}
-		} else {
-			mInvitationButtonLayout.setVisibility(View.GONE);
-			mHostInvitationButtonLayout.setVisibility(View.VISIBLE);
-		}
-		
-		if (uad.isVideoType()  && !uad.isIncoming()) {
-			mAcceptVocieOnlyButton.setVisibility(View.VISIBLE);
-			mTitleTV.setVisibility(View.GONE);
-			v.findViewById(R.id.conversation_fragment_voice_center_container).setVisibility(View.GONE);
-			mAvatar = (ImageView)v.findViewById(R.id.conversation_fragment_video_avatar);
-			mInvitationNameTV = (TextView)v.findViewById(R.id.conversation_fragment_video_invitation_name);
-			
-		} else {
-			mAcceptVocieOnlyButton.setVisibility(View.GONE);
-			v.findViewById(R.id.conversation_fragment_video_avatar).setVisibility(View.GONE);
-			v.findViewById(R.id.conversation_fragment_video_invitation_name).setVisibility(View.GONE);
-			v.findViewById(R.id.fragment_conversation_video_title).setVisibility(View.GONE);
-		}
-
-		// FIXME handle when user changed avatar
-		if (uad.getUser().getAvatarBitmap() != null) {
-			mAvatar.setImageBitmap(uad.getUser().getAvatarBitmap());
-		}
-		mInvitationNameTV.setText(uad.getUser().getName());
-		return v;
+//		mRejectButton.setOnClickListener(rejectListener);
+//		mAcceptButton.setOnClickListener(acceptListener);
+//		mCancelButton.setOnClickListener(cancelListener);
+//		mAcceptVocieOnlyButton.setOnClickListener(acceptVoicOnlyListener);
+//
+//		if (uad.isIncoming()) {
+//			mInvitationButtonLayout.setVisibility(View.VISIBLE);
+//			mHostInvitationButtonLayout.setVisibility(View.GONE);
+//			if (uad.isAudioType()) {
+//				mTitleTV.setText(this.getActivity().getResources().getText(R.string.conversation_waiting_voice_incoming));
+//			} else {
+//				mTitleTV.setText(this.getActivity().getResources().getText(R.string.conversation_waiting_video_incoming));
+//			}
+//		} else {
+//			mInvitationButtonLayout.setVisibility(View.GONE);
+//			mHostInvitationButtonLayout.setVisibility(View.VISIBLE);
+//		}
+//		
+//		if (uad.isVideoType()  && !uad.isIncoming()) {
+//			mAcceptVocieOnlyButton.setVisibility(View.VISIBLE);
+//			mTitleTV.setVisibility(View.GONE);
+//			v.findViewById(R.id.conversation_fragment_voice_center_container).setVisibility(View.GONE);
+//			mAvatar = (ImageView)v.findViewById(R.id.conversation_fragment_video_avatar);
+//			mInvitationNameTV = (TextView)v.findViewById(R.id.conversation_fragment_video_invitation_name);
+//			
+//		} else {
+//			mAcceptVocieOnlyButton.setVisibility(View.GONE);
+//			v.findViewById(R.id.conversation_fragment_video_avatar).setVisibility(View.GONE);
+//			v.findViewById(R.id.conversation_fragment_video_invitation_name).setVisibility(View.GONE);
+//			v.findViewById(R.id.fragment_conversation_video_title).setVisibility(View.GONE);
+//		}
+//
+//		// FIXME handle when user changed avatar
+//		if (uad.getUser().getAvatarBitmap() != null) {
+//			mAvatar.setImageBitmap(uad.getUser().getAvatarBitmap());
+//		}
+//		mInvitationNameTV.setText(uad.getUser().getName());
+		//return v;
+		return null;
 
 	}
 

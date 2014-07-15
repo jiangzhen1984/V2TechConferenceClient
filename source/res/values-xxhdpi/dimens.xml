@@ -78,19 +78,7 @@
     <dimen name="in_meeting_local_video_layout_height">144dp</dimen>
     <dimen name="in_meeting_tools_bar_margin_right">15dp</dimen>
     
-    <!-- fragment conversation_waiting layout -->
-    <dimen name="fragment_conversation_waiting_title_text_size">25sp</dimen>
-     <dimen name="fragment_conversation_waiting_invitation_button_padding_vertical">15dp</dimen>
-    <dimen name="fragment_conversation_waiting_invitation_button_margin">20dp</dimen>
-    <dimen name="fragment_conversation_waiting_invitation_button_margin_hor">10dp</dimen>
-    <dimen name="fragment_conversation_waiting_invitation_button_margin_bottom">10dp</dimen>
-    <dimen name="fragment_conversation_waiting_button_text_size">25sp</dimen>
-     <dimen name="fragment_conversation_waiting_invitation_host_name_size">22sp</dimen>
-     <dimen name="fragment_conversation_waiting_video_invitation_host_name_size">16sp</dimen>
-    <dimen name="fragment_conversation_waiting_invitation_voice_avatar_margin_top">40dp</dimen>
-    <dimen name="fragment_conversation_waiting_host_invitation_button_margin_left">20dp</dimen>
-    <dimen name="fragment_conversation_waiting_host_invitation_button_margin_right">20dp</dimen>
-    
+
         <!-- fragment conversation connected layout -->
         <dimen name="fragment_conversation_connected_voice_gray_button_padding_vertical">20dp</dimen>
     <dimen name="fragment_conversation_connected_gray_button_padding_vertical">10dp</dimen>
