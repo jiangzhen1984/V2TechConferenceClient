@@ -46,4 +46,6 @@
      <color name="fragment_conversation_connected_gray_text_color">#000000</color>
      
      <color name="fragment_conversation_connected_pressed_text_color">#0079fe</color>
+     
+      <color name="fragment_conversation_disable_text_color">#909090</color>
 </resources>

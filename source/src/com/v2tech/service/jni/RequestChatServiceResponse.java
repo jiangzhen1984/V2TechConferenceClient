@@ -12,6 +12,7 @@ public class RequestChatServiceResponse extends JNIResponse {
 	public static final int ACCEPTED = 1;
 	public static final int REJCTED = 2;
 	public static final int CANCELED = 3;
+	public static final int HANGUP = 4;
 	
 	int code;
 	

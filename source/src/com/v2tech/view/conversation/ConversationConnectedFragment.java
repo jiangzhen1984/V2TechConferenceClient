@@ -97,15 +97,15 @@ public class ConversationConnectedFragment extends Fragment {
 
 		mVieoLocalCameraButton = v
 				.findViewById(R.id.conversation_fragment_connected_video_camera_button);
-		mVideoCancelButton = v
-				.findViewById(R.id.conversation_fragment_connected_video_cancel_button);
+//		mVideoCancelButton = v
+//				.findViewById(R.id.conversation_fragment_connected_video_cancel_button);
 		mVideoMuteButton = v
 				.findViewById(R.id.conversation_fragment_connected_video_mute_button);
 		mAudioSpeakerButton = v
 				.findViewById(R.id.conversation_fragment_connected_speaker_button);
-		mAudioCancelButton = v
-				.findViewById(R.id.conversation_fragment_connected_cancel_button);
-		mAudioMuteButton = v
+//		mAudioCancelButton = v
+//				.findViewById(R.id.conversation_fragment_connected_cancel_button);
+	/*	mAudioMuteButton = v
 				.findViewById(R.id.conversation_fragment_connected_mute_button);
 		
 		
@@ -118,7 +118,7 @@ public class ConversationConnectedFragment extends Fragment {
 				.findViewById(R.id.conversation_fragment_connected_mute_image);
 		mAudioMuteText= (TextView)v
 				.findViewById(R.id.conversation_fragment_connected_mute_text);
-
+*/
 
 		mVideoCancelButton.setOnClickListener(mCancelButtonListener);
 		mVieoLocalCameraButton.setOnClickListener(mVideoCameraButtonListener);
@@ -138,8 +138,8 @@ public class ConversationConnectedFragment extends Fragment {
 			mRemoteSurface = (SurfaceView) v
 					.findViewById(R.id.fragment_conversation_connected_video_remote_surface);
 
-			remoteSurfaceLayout = (FrameLayout) v
-					.findViewById(R.id.fragment_conversation_connected_video_remote_surface_container);
+			/*remoteSurfaceLayout = (FrameLayout) v
+					.findViewById(R.id.fragment_conversation_connected_video_remote_surface_container);*/
 
 			voiceLayout.setVisibility(View.GONE);
 			videoLayout.setVisibility(View.VISIBLE);

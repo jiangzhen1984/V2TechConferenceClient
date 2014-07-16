@@ -9,12 +9,14 @@ public class UserChattingObject {
 	public static final int INCOMING_CALL = 0x10;
 	public static final int OUTING_CALL = 0x00;
 	public static final int SPEAKING = 0x100;
+	public static final int CONNECTED = 0x200;
 	
 	private int flag;
 	private User mUser;
 	private long groupdId;
 	private String mDeviceId;
 	private VideoPlayer vp;
+	
 
 	public UserChattingObject(User user, int flag) {
 		this(0, user, flag, "", null);
@@ -82,7 +84,21 @@ public class UserChattingObject {
 	}
 	
 	public void updateAudioType() {
-		flag &= VOICE_CALL;
+		//Clear video call flag
+		flag &= ~VIDEO_CALL;
 		flag |= VOICE_CALL;
+	}
+	
+	
+	public boolean isConnected() {
+		return (flag & CONNECTED) == CONNECTED?true:false;
+	}
+	
+	public void setConnected(boolean cFlag) {
+		if (cFlag)  {
+			flag |= CONNECTED;
+		} else {
+			flag &= (~CONNECTED);
+		}
 	}
 }

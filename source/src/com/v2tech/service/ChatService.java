@@ -27,13 +27,20 @@ import com.v2tech.vo.VMessageAudioItem;
 import com.v2tech.vo.VMessageFileItem;
 import com.v2tech.vo.VMessageImageItem;
 
-
 /**
- * <ul>Internet Message Service.</ul>
- * <ul>Send message {@link #sendVMessage(VMessage, Registrant)}</ul>
- * <ul>Invite User video or audio call {@link #inviteUserChat(UserChattingObject, Registrant)}</ul>
+ * <ul>
+ * Internet Message Service.
+ * </ul>
+ * <ul>
+ * Send message {@link #sendVMessage(VMessage, Registrant)}
+ * </ul>
+ * <ul>
+ * Invite User video or audio call
+ * {@link #inviteUserChat(UserChattingObject, Registrant)}
+ * </ul>
+ * 
  * @author 28851274
- *
+ * 
  */
 public class ChatService extends AbstractHandler {
 
@@ -70,7 +77,7 @@ public class ChatService extends AbstractHandler {
 	private AudioRequestCallback callback;
 
 	private VideoRequestCallback videoCallback;
-	
+
 	private FileRequestCB fileCallback;
 
 	private Registrant mCaller;
@@ -91,7 +98,7 @@ public class ChatService extends AbstractHandler {
 
 		videoCallback = new VideoRequestCallbackImpl();
 		VideoRequest.getInstance().addCallback(videoCallback);
-		
+
 		fileCallback = new FileRequestCB();
 		FileRequest.getInstance().addCallback(fileCallback);
 
@@ -99,8 +106,6 @@ public class ChatService extends AbstractHandler {
 		backEnd.start();
 		thread = new Handler(backEnd.getLooper());
 	}
-
-
 
 	/**
 	 * Register listener for out conference by kick.
@@ -250,23 +255,26 @@ public class ChatService extends AbstractHandler {
 
 		switch (opt) {
 		case OPERATION_PAUSE_SENDING:
-			FileRequest.getInstance().pauseSendFile(vfi.getUuid(), vfi.getTransType());
+			FileRequest.getInstance().pauseSendFile(vfi.getUuid(),
+					vfi.getTransType());
 			break;
 		case OPERATION_RESUME_SEND:
-			FileRequest.getInstance().resumeSendFile(vfi.getUuid(), vfi.getTransType());
+			FileRequest.getInstance().resumeSendFile(vfi.getUuid(),
+					vfi.getTransType());
 			break;
 		case OPERATION_PAUSE_DOWNLOADING:
 			break;
 		case OPERATION_RESUME_DOWNLOAD:
 			break;
 		case OPERATION_CANCEL_SENDING:
-			FileRequest.getInstance().cancelSendFile(vfi.getUuid(), vfi.getTransType());
+			FileRequest.getInstance().cancelSendFile(vfi.getUuid(),
+					vfi.getTransType());
 			break;
 		case OPERATION_CANCEL_DOWNLOADING:
 			break;
 
 		}
-		
+
 		JNIResponse resp = new RequestChatServiceResponse(
 				RequestChatServiceResponse.Result.SUCCESS);
 		sendResult(caller, resp);
@@ -323,12 +331,28 @@ public class ChatService extends AbstractHandler {
 		}
 
 		if (ud.isAudioType()) {
-			AudioRequest.getInstance().CloseAudioChat(ud.getGroupdId(),
-					ud.getUser().getmUserId(), V2GlobalEnum.REQUEST_TYPE_IM);
+			if (ud.isConnected()) {
+				AudioRequest.getInstance()
+						.CloseAudioChat(ud.getGroupdId(),
+								ud.getUser().getmUserId(),
+								V2GlobalEnum.REQUEST_TYPE_IM);
+			} else {
+				AudioRequest.getInstance()
+						.RefuseAudioChat(ud.getGroupdId(),
+								ud.getUser().getmUserId(),
+								V2GlobalEnum.REQUEST_TYPE_IM);
+			}
+
 		} else if (ud.isVideoType()) {
-			VideoRequest.getInstance().closeVideoChat(ud.getGroupdId(),
-					ud.getUser().getmUserId(), ud.getDeviceId(),
-					V2GlobalEnum.REQUEST_TYPE_IM);
+			if (ud.isConnected()) {
+				VideoRequest.getInstance().closeVideoChat(ud.getGroupdId(),
+						ud.getUser().getmUserId(), ud.getDeviceId(),
+						V2GlobalEnum.REQUEST_TYPE_IM);
+			} else {
+				VideoRequest.getInstance().refuseVideoChat(ud.getGroupdId(),
+						ud.getUser().getmUserId(), ud.getDeviceId(),
+						V2GlobalEnum.REQUEST_TYPE_IM);
+			}
 		}
 
 		if (caller != null) {
@@ -398,7 +422,6 @@ public class ChatService extends AbstractHandler {
 		}
 	}
 
-	
 	public void muteChatting(UserChattingObject ud, Registrant caller) {
 		if (ud == null) {
 			JNIResponse resp = new RequestChatServiceResponse(
@@ -407,7 +430,8 @@ public class ChatService extends AbstractHandler {
 			return;
 		}
 		AudioRequest.getInstance().MuteMic(ud.getGroupdId(),
-				ud.getUser().getmUserId(), ud.isMute(), V2GlobalEnum.REQUEST_TYPE_IM);
+				ud.getUser().getmUserId(), ud.isMute(),
+				V2GlobalEnum.REQUEST_TYPE_IM);
 
 		if (caller != null) {
 			JNIResponse resp = new RequestChatServiceResponse(
@@ -436,7 +460,8 @@ public class ChatService extends AbstractHandler {
 				.openVideoDevice(
 						UserDeviceConfig.UserDeviceConfigType.EVIDEODEVTYPE_CAMERA
 								.ordinal(), ud.getUser().getmUserId(),
-						ud.getDeviceId(), ud.getVp(), V2GlobalEnum.REQUEST_TYPE_IM);
+						ud.getDeviceId(), ud.getVp(),
+						V2GlobalEnum.REQUEST_TYPE_IM);
 
 		if (caller != null) {
 			JNIResponse resp = new RequestChatServiceResponse(
@@ -458,7 +483,8 @@ public class ChatService extends AbstractHandler {
 				.closeVideoDevice(
 						UserDeviceConfig.UserDeviceConfigType.EVIDEODEVTYPE_CAMERA
 								.ordinal(), ud.getUser().getmUserId(),
-						ud.getDeviceId(), ud.getVp(), V2GlobalEnum.REQUEST_TYPE_IM);
+						ud.getDeviceId(), ud.getVp(),
+						V2GlobalEnum.REQUEST_TYPE_IM);
 
 		if (caller != null) {
 			JNIResponse resp = new RequestChatServiceResponse(
@@ -468,7 +494,6 @@ public class ChatService extends AbstractHandler {
 	}
 
 	class VideoRequestCallbackImpl extends VideoRequestCallbackAdapter {
-
 
 		public void OnVideoChatAccepted(long nGroupID, int nBusinessType,
 				long nFromuserID, String szDeviceID) {
@@ -558,7 +583,8 @@ public class ChatService extends AbstractHandler {
 		public void OnFileTransProgress(String szFileID, long nBytesTransed,
 				int nTransType) {
 			notifyListener(KEY_FILE_TRANS_STATUS_NOTIFICATION_LISTNER, 0, 0,
-					new FileTransProgressStatusIndication(nTransType, szFileID, nBytesTransed));
+					new FileTransProgressStatusIndication(nTransType, szFileID,
+							nBytesTransed));
 
 		}
 
@@ -566,7 +592,8 @@ public class ChatService extends AbstractHandler {
 		public void OnFileTransEnd(String szFileID, String szFileName,
 				long nFileSize, int nTransType) {
 			notifyListener(KEY_FILE_TRANS_STATUS_NOTIFICATION_LISTNER, 0, 0,
-					new FileTransProgressStatusIndication(nTransType, szFileID, nFileSize));
+					new FileTransProgressStatusIndication(nTransType, szFileID,
+							nFileSize));
 		}
 
 		@Override
@@ -575,9 +602,6 @@ public class ChatService extends AbstractHandler {
 					new FileTransErrorIndication(sFileID));
 
 		}
-		
-		
-		
 
 	}
 
