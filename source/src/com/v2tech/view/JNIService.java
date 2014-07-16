@@ -557,6 +557,12 @@ public class JNIService extends Service {
 			if (gType == GroupType.CONFERENCE) {
 				Group g = ConferenceGroup
 						.parseConferenceGroupFromXML(groupInfo);
+				Group cache = GlobalHolder.getInstance().getGroupById(GroupType.CONFERENCE, g.getmGId());
+				//User already in current conference 
+				if (cache != null && g.getmGId() != 0) {
+					V2Log.i("Current user exists in group:" + cache.getName() +"  "+ cache.getmGId());
+					return;
+				}
 				GroupRequest.getInstance().getGroupInfo(
 						GroupType.CONFERENCE.intValue(), g.getmGId());
 				if (g != null) {

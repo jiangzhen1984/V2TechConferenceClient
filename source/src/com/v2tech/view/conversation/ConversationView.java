@@ -40,6 +40,7 @@ import android.view.Window;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -138,7 +139,7 @@ public class ConversationView extends Activity {
 
 	private View mShowContactDetailButton;
 
-	private View mButtonRecordAudio;
+	private Button mButtonRecordAudio;
 
 	private MediaRecorder mRecorder = null;
 	private AACPlayer mAACPlayer = null;
@@ -208,7 +209,7 @@ public class ConversationView extends Activity {
 		mAudioSpeakerIV = (ImageView) findViewById(R.id.contact_message_speaker);
 		mAudioSpeakerIV.setOnClickListener(mMessageTypeSwitchListener);
 
-		mButtonRecordAudio = findViewById(R.id.message_button_audio_record);
+		mButtonRecordAudio = (Button)findViewById(R.id.message_button_audio_record);
 		mButtonRecordAudio.setOnTouchListener(mButtonHolderListener);
 
 		mAdditionFeatureContainer = findViewById(R.id.contact_message_sub_feature_ly);
@@ -475,6 +476,7 @@ public class ConversationView extends Activity {
 			if (mPreparedCancelLayout != null) {
 				mPreparedCancelLayout.setVisibility(View.VISIBLE);
 			}
+			mButtonRecordAudio.setText(R.string.contact_message_button_up_to_cancel);
 		} else {
 			if (mSpeakingLayout != null) {
 				mSpeakingLayout.setVisibility(View.VISIBLE);
@@ -482,7 +484,10 @@ public class ConversationView extends Activity {
 			if (mPreparedCancelLayout != null) {
 				mPreparedCancelLayout.setVisibility(View.GONE);
 			}
+			mButtonRecordAudio.setText(R.string.contact_message_button_up_to_send);
 		}
+		
+		
 	}
 
 	private void updateVoiceVolume(int vol) {
@@ -698,9 +703,16 @@ public class ConversationView extends Activity {
 					// Send message to server
 					sendMessageToRemote(vm);
 				} else {
-					Toast.makeText(mContext,
-							R.string.contact_message_message_cancelled,
-							Toast.LENGTH_SHORT).show();
+
+					if (seconds < 1500) {
+						Toast.makeText(mContext,
+								R.string.error_contact_messag_time_too_short,
+								Toast.LENGTH_SHORT).show();
+					} else {
+						Toast.makeText(mContext,
+								R.string.contact_message_message_cancelled,
+								Toast.LENGTH_SHORT).show();
+					}
 					File f = new File(fileName);
 					f.deleteOnExit();
 				}
@@ -710,6 +722,8 @@ public class ConversationView extends Activity {
 				showOrCloseVoiceDialog();
 				// Remove timer
 				lh.removeCallbacks(timeOutMonitor);
+				
+				mButtonRecordAudio.setText(R.string.contact_message_button_send_audio_msg);
 			}
 			return false;
 		}
@@ -1390,28 +1404,30 @@ public class ConversationView extends Activity {
 							.getItemObject();
 					if (vm.getUUID().equals(uuid)) {
 						vm.setState(VMessage.STATE_SENT_FAILED);
-						MessageBodyView mdv = ((MessageBodyView)  messageArray.get(i).getView());
-						if (mdv != null)  {
+						MessageBodyView mdv = ((MessageBodyView) messageArray
+								.get(i).getView());
+						if (mdv != null) {
 							mdv.updateView(vm);
 						}
-						//TODO update database
+						// TODO update database
 						break;
 					}
 					List<VMessageAbstractItem> items = vm.getItems();
-					for (int j =0; j < items.size(); j++) {
+					for (int j = 0; j < items.size(); j++) {
 						VMessageAbstractItem item = items.get(j);
 						if (uuid.equals(item.getUuid())) {
 							item.setState(VMessageAbstractItem.STATE_FILE_SENT_FALIED);
-							MessageBodyView mdv = ((MessageBodyView)  messageArray.get(i).getView());
-							if (mdv != null)  {
-								//TODO update database
+							MessageBodyView mdv = ((MessageBodyView) messageArray
+									.get(i).getView());
+							if (mdv != null) {
+								// TODO update database
 								mdv.updateView(vm);
 							}
 							break;
 						}
-						
+
 					}
-					
+
 				}
 			}
 		}
@@ -1475,7 +1491,8 @@ public class ConversationView extends Activity {
 				}
 				break;
 			case FILE_STATUS_LISTENER:
-				FileTransStatusIndication ind = (FileTransStatusIndication) (((AsyncResult)msg.obj).getResult());
+				FileTransStatusIndication ind = (FileTransStatusIndication) (((AsyncResult) msg.obj)
+						.getResult());
 				if (ind.indType == FileTransStatusIndication.IND_TYPE_PROGRESS) {
 					updateFileProgressView(
 							ind.uuid,

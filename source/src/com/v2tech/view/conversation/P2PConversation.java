@@ -8,7 +8,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.ColorDrawable;
 import android.media.AudioManager;
@@ -16,6 +15,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.telephony.PhoneStateListener;
+import android.telephony.TelephonyManager;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
@@ -43,7 +44,7 @@ public class P2PConversation extends Activity implements
 
 	private static final int UPDATE_TIME = 1;
 	private static final int OPEN_REMOTE_VIDEO = 2;
-	private static final int TIME_OUT = 3;
+	private static final int QUIT = 3;
 	private static final int HANG_UP_NOTIFICATION = 4;
 	private static final int CALL_RESPONSE = 5;
 
@@ -83,6 +84,10 @@ public class P2PConversation extends Activity implements
 				setContentView(R.layout.fragment_conversation_incoming_audio_call);
 				mRejectButton = findViewById(R.id.conversation_fragment_voice_reject_button);
 				mAcceptButton = findViewById(R.id.conversation_fragment_voice_accept_button);
+				TextView tv = (TextView) findViewById(R.id.conversation_fragment_audio_incoming_call_name);
+				if (tv != null) {
+					tv.setText(uad.getUser().getName());
+				}
 			} else if (uad.isVideoType()) {
 				setContentView(R.layout.fragment_conversation_incoming_video_call);
 				mRejectButton = findViewById(R.id.conversation_fragment_video_reject_button);
@@ -120,10 +125,14 @@ public class P2PConversation extends Activity implements
 						.replace("[]", uad.getUser().getName()));
 			} else {
 				mTimerTV.setText(R.string.conversation_waiting_voice_incoming);
-				TextView nameTV = (TextView)findViewById(R.id.conversation_fragment_connected_name);
+				TextView nameTV = (TextView) findViewById(R.id.conversation_fragment_connected_name);
 				nameTV.setText(uad.getUser().getName());
+				// Update mute button to disale
+				setMuteButtonDisable(true);
 			}
 		}
+
+		initTelephonyManagerListener();
 
 	}
 
@@ -152,7 +161,7 @@ public class P2PConversation extends Activity implements
 	@Override
 	protected void onNewIntent(Intent intent) {
 		super.onNewIntent(intent);
-		//TODO 
+		// TODO
 	}
 
 	@Override
@@ -192,6 +201,21 @@ public class P2PConversation extends Activity implements
 		showConfirmDialog();
 	}
 
+	private void initTelephonyManagerListener() {
+		TelephonyManager tm = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+		tm.listen(new PhoneStateListener() {
+
+			@Override
+			public void onCallStateChanged(int state, String incomingNumber) {
+				if (state == TelephonyManager.CALL_STATE_OFFHOOK
+						|| state == TelephonyManager.CALL_STATE_RINGING) {
+					hangUp();
+				}
+			}
+
+		}, PhoneStateListener.LISTEN_CALL_STATE);
+	}
+
 	private void initButtons() {
 		// For video button
 		View cameraButton = findViewById(R.id.conversation_fragment_connected_video_camera_button);
@@ -224,6 +248,55 @@ public class P2PConversation extends Activity implements
 		}
 	}
 
+	private void setMuteButtonDisable(boolean flag) {
+		View audioMuteButton = findViewById(R.id.conversation_fragment_connected_audio_mute_button);
+		TextView audioMuteButtonText = (TextView) findViewById(R.id.conversation_fragment_connected_audio_mute_text);
+		ImageView audioMuteButtonImage = (ImageView) findViewById(R.id.conversation_fragment_connected_audio_mute_image);
+
+		if (flag) {
+			if (audioMuteButton != null) {
+				audioMuteButton.setEnabled(false);
+				audioMuteButton
+						.setBackgroundResource(R.drawable.conversation_framgent_gray_button_bg_pressed);
+			}
+
+			if (audioMuteButtonText != null) {
+				audioMuteButtonText
+						.setTextColor(mContext
+								.getResources()
+								.getColor(
+										R.color.fragment_conversation_disable_text_color));
+			}
+
+			if (audioMuteButtonImage != null) {
+				audioMuteButtonImage
+						.setImageResource(R.drawable.conversation_connected_mute_button_gray);
+			}
+		} else {
+			if (audioMuteButton != null) {
+				audioMuteButton.setEnabled(false);
+				audioMuteButton
+						.setBackgroundResource(R.drawable.conversation_fragment_gray_button_selector);
+			}
+
+			if (audioMuteButtonText != null) {
+				audioMuteButtonText
+						.setTextColor(mContext
+								.getResources()
+								.getColor(
+										R.color.fragment_conversation_connected_gray_text_color));
+			}
+
+			if (audioMuteButtonImage != null) {
+				audioMuteButtonImage
+						.setImageResource(R.drawable.message_voice_mute);
+			}
+		}
+	}
+
+	/**
+	 * FIXME optimze code
+	 */
 	private void disableAllButtons() {
 
 		/*
@@ -273,8 +346,8 @@ public class P2PConversation extends Activity implements
 
 		ImageView cameraButtonImage = (ImageView) findViewById(R.id.conversation_fragment_connected_open_or_close_camera_image);
 		if (cameraButtonImage != null) {
-			cameraButtonImage.setImageResource
-					(R.drawable.conversation_connected_camera_button_gray);
+			cameraButtonImage
+					.setImageResource(R.drawable.conversation_connected_camera_button_gray);
 		}
 
 		ImageView hangUpButtonImage = (ImageView) findViewById(R.id.conversation_fragment_connected_video_hang_up_button_image);
@@ -288,8 +361,6 @@ public class P2PConversation extends Activity implements
 			muteButtonImage
 					.setImageResource(R.drawable.conversation_connected_mute_button_gray);
 		}
-		
-		
 
 		// For audio Button
 		View audioSpeakerButton = findViewById(R.id.conversation_fragment_connected_speaker_button);
@@ -505,8 +576,7 @@ public class P2PConversation extends Activity implements
 		mContext.unregisterReceiver(receiver);
 		finish();
 	}
-	
-	
+
 	private void hangUp() {
 		if (uad.isVideoType()) {
 			closeRemoteVideo();
@@ -563,7 +633,7 @@ public class P2PConversation extends Activity implements
 				openRemoteVideo();
 			}
 			// Start to time
-			updateTimer();
+			Message.obtain(mLocalHandler, UPDATE_TIME).sendToTarget();
 
 		}
 	};
@@ -593,7 +663,7 @@ public class P2PConversation extends Activity implements
 			int color = R.color.fragment_conversation_connected_pressed_text_color;
 			TextView cameraText = (TextView) findViewById(R.id.conversation_fragment_connected_open_or_close_camera_text);
 			ImageView cameraImage = (ImageView) findViewById(R.id.conversation_fragment_connected_open_or_close_camera_image);
-			
+
 			if (view.getTag() == null || view.getTag().equals("close")) {
 				view.setTag("open");
 				drawId = R.drawable.conversation_connected_camera_button_pressed;
@@ -609,9 +679,6 @@ public class P2PConversation extends Activity implements
 				cameraText.setText(R.string.conversation_close_video_text);
 				openLocalCamera();
 			}
-
-			
-			
 
 			if (cameraImage != null) {
 				cameraImage.setImageResource(drawId);
@@ -725,7 +792,7 @@ public class P2PConversation extends Activity implements
 		@Override
 		public void run() {
 			chatService.cancelChattingCall(uad, null);
-			Message.obtain(mLocalHandler, TIME_OUT).sendToTarget();
+			Message.obtain(mLocalHandler, HANG_UP_NOTIFICATION).sendToTarget();
 		}
 
 	};
@@ -748,6 +815,9 @@ public class P2PConversation extends Activity implements
 
 	}
 
+	private Object mLocal = new Object();
+	private boolean inProgress = false;
+
 	class LocalHandler extends Handler {
 
 		public LocalHandler(Looper looper) {
@@ -768,11 +838,17 @@ public class P2PConversation extends Activity implements
 			case OPEN_REMOTE_VIDEO:
 				openRemoteVideo();
 				break;
-			case TIME_OUT:
+			case QUIT:
 				quit();
 				break;
 			case HANG_UP_NOTIFICATION:
-				Message timeoutMessage = Message.obtain(this, TIME_OUT);
+				synchronized (mLocal) {
+					if (inProgress) {
+						break;
+					}
+					inProgress = true;
+				}
+				Message timeoutMessage = Message.obtain(this, QUIT);
 				this.sendMessageDelayed(timeoutMessage, 2000);
 				// TODO update UI
 				disableAllButtons();
@@ -786,8 +862,12 @@ public class P2PConversation extends Activity implements
 								Integer.valueOf(HAND_UP_REASON_REMOTE_REJECT))
 								.sendToTarget();
 					} else if (rcsr.getCode() == RequestChatServiceResponse.ACCEPTED) {
+						uad.setConnected(true);
 						if (uad.isVideoType()) {
 							openRemoteVideo();
+						} else {
+							// set mute button to enable
+							setMuteButtonDisable(false);
 						}
 						// Start to time
 						Message.obtain(mLocalHandler, UPDATE_TIME)
