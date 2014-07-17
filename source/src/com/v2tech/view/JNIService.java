@@ -25,7 +25,7 @@ import android.os.Parcelable;
 import android.widget.Toast;
 
 import com.V2.jni.AudioRequest;
-import com.V2.jni.AudioRequestCallback;
+import com.V2.jni.AudioRequestCallbackAdapter;
 import com.V2.jni.ChatRequest;
 import com.V2.jni.ChatRequestCallbackAdapter;
 import com.V2.jni.ConfRequest;
@@ -118,8 +118,8 @@ public class JNIService extends Service {
 	private ConfRequestCB mCRCB;
 
 	private AudioRequestCB mARCB;
-	
-	private FileRequestCB  mFRCB;
+
+	private FileRequestCB mFRCB;
 
 	// ////////////////////////////////////////
 
@@ -169,7 +169,7 @@ public class JNIService extends Service {
 
 		mARCB = new AudioRequestCB();
 		AudioRequest.getInstance().addCallback(mARCB);
-		
+
 		mFRCB = new FileRequestCB(mCallbackHandler);
 		FileRequest.getInstance().addCallback(mFRCB);
 	}
@@ -405,8 +405,6 @@ public class JNIService extends Service {
 			}
 		}
 
-	
-
 	}
 
 	class ImRequestCB implements ImRequestCallback {
@@ -557,10 +555,12 @@ public class JNIService extends Service {
 			if (gType == GroupType.CONFERENCE) {
 				Group g = ConferenceGroup
 						.parseConferenceGroupFromXML(groupInfo);
-				Group cache = GlobalHolder.getInstance().getGroupById(GroupType.CONFERENCE, g.getmGId());
-				//User already in current conference 
+				Group cache = GlobalHolder.getInstance().getGroupById(
+						GroupType.CONFERENCE, g.getmGId());
+				// User already in current conference
 				if (cache != null && g.getmGId() != 0) {
-					V2Log.i("Current user exists in group:" + cache.getName() +"  "+ cache.getmGId());
+					V2Log.i("Current user exists in group:" + cache.getName()
+							+ "  " + cache.getmGId());
 					return;
 				}
 				GroupRequest.getInstance().getGroupInfo(
@@ -607,8 +607,14 @@ public class JNIService extends Service {
 					i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
 					i.putExtra("gid", nGroupID);
 					sendBroadcast(i);
-					Notificator.updateSystemNotification(mContext, "", gName
-							+ mContext.getText(R.string.confs_is_deleted_notification), 1, PublicIntent.VIDEO_NOTIFICATION_ID);
+					Notificator
+							.updateSystemNotification(
+									mContext,
+									"",
+									gName
+											+ mContext
+													.getText(R.string.confs_is_deleted_notification),
+									1, PublicIntent.VIDEO_NOTIFICATION_ID);
 				}
 			}
 		}
@@ -656,11 +662,20 @@ public class JNIService extends Service {
 
 	}
 
-	class AudioRequestCB implements AudioRequestCallback {
+	class AudioRequestCB extends AudioRequestCallbackAdapter {
 
 		@Override
 		public void OnAudioChatInvite(long nGroupID, long nBusinessType,
 				long nFromUserID) {
+			if (GlobalHolder.getInstance().isInMeeting()
+					|| GlobalHolder.getInstance().isInAudioCall()
+					|| GlobalHolder.getInstance().isInVideoCall()) {
+				V2Log.i("Ignore audio call ");
+				AudioRequest.getInstance().RefuseAudioChat(nGroupID,
+						nFromUserID, (int) nBusinessType);
+				return;
+			}
+
 			Intent iv = new Intent();
 			iv.addCategory(PublicIntent.DEFAULT_CATEGORY);
 			iv.setAction(PublicIntent.START_P2P_CONVERSACTION_ACTIVITY);
@@ -669,24 +684,6 @@ public class JNIService extends Service {
 			iv.putExtra("is_coming_call", true);
 			iv.putExtra("voice", true);
 			mContext.startActivity(iv);
-
-		}
-
-		@Override
-		public void OnAudioChatAccepted(long nGroupID, long nBusinessType,
-				long nFromUserID) {
-
-		}
-
-		@Override
-		public void OnAudioChatRefused(long nGroupID, long nBusinessType,
-				long nFromUserID) {
-
-		}
-
-		@Override
-		public void OnAudioChatClosed(long nGroupID, long nBusinessType,
-				long nFromUserID) {
 
 		}
 
@@ -714,7 +711,14 @@ public class JNIService extends Service {
 		@Override
 		public void OnVideoChatInviteCallback(long nGroupID, int nBusinessType,
 				long nFromUserID, String szDeviceID) {
-
+			if (GlobalHolder.getInstance().isInMeeting()
+					|| GlobalHolder.getInstance().isInAudioCall()
+					|| GlobalHolder.getInstance().isInVideoCall()) {
+				V2Log.i("Ignore video call ");
+				VideoRequest.getInstance().refuseVideoChat(nGroupID,
+						nFromUserID, szDeviceID, nBusinessType);
+				return;
+			}
 			Message.obtain(
 					mCallbackHandler,
 					JNI_RECEIVED_VIDEO_INVITION,
@@ -731,7 +735,6 @@ public class JNIService extends Service {
 		public ConfRequestCB(JNICallbackHandler mCallbackHandler) {
 			this.mCallbackHandler = mCallbackHandler;
 		}
-
 
 		@Override
 		public void OnConfNotify(String confXml, String creatorXml) {
@@ -922,16 +925,11 @@ public class JNIService extends Service {
 			i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
 			i.putExtra("uuid", uuid);
 			sendBroadcast(i);
-			
+
 		}
-		
-		
-		
 
 	}
-	
-	
-	
+
 	class FileRequestCB extends FileRequestCallbackAdapter {
 
 		private JNICallbackHandler mCallbackHandler;
@@ -940,29 +938,28 @@ public class JNIService extends Service {
 			this.mCallbackHandler = mCallbackHandler;
 		}
 
-		
 		@Override
 		public void OnFileTransInvite(long nGroupID, int nBusinessType,
 				long userid, String szFileID, String szFileName,
 				long nFileBytes, int linetype) {
 			User fromUser = GlobalHolder.getInstance().getUser(userid);
-			//If doesn't receive user information from server side, 
+			// If doesn't receive user information from server side,
 			// construct new user object
 			if (fromUser == null) {
 				fromUser = new User(userid);
 			}
-			
-			
-			VMessage vm = new VMessage(nGroupID,fromUser, GlobalHolder.getInstance().getCurrentUser());
+
+			VMessage vm = new VMessage(nGroupID, fromUser, GlobalHolder
+					.getInstance().getCurrentUser());
 			int pos = szFileName.lastIndexOf("/");
-			VMessageFileItem vfi = new VMessageFileItem(vm, szFileID, pos == -1 ? szFileName:szFileName.substring(pos + 1));
+			VMessageFileItem vfi = new VMessageFileItem(vm, szFileID,
+					pos == -1 ? szFileName : szFileName.substring(pos + 1));
 			vfi.setState(VMessageFileItem.STATE_FILE_UNDOWNLOAD);
 			vfi.setFileSize(nFileBytes);
 			Message.obtain(mCallbackHandler, JNI_RECEIVED_MESSAGE, vm)
-			.sendToTarget();
+					.sendToTarget();
 		}
 
-		
 	}
 
 }

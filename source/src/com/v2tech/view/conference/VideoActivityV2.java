@@ -1151,7 +1151,9 @@ public class VideoActivityV2 extends Activity {
 	protected void onStop() {
 		super.onStop();
 		getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-		suspendOrResume(false);
+		if (mServiceBound) {
+			suspendOrResume(false);
+		}
 	}
 
 	@Override
@@ -1204,8 +1206,11 @@ public class VideoActivityV2 extends Activity {
 
 			unbindService(mLocalServiceConnection);
 		}
-		
-		mContext.stopService(new Intent(mContext, ConferencMessageSyncService.class));
+
+		mContext.stopService(new Intent(mContext,
+				ConferencMessageSyncService.class));
+		// clear current meeting state
+		GlobalHolder.getInstance().setMeetingState(false);
 	}
 
 	@Override
@@ -1315,20 +1320,23 @@ public class VideoActivityV2 extends Activity {
 	 * user quit conference, however positive or negative
 	 */
 	private void quit() {
-		for (SurfaceViewW sw : this.mCurrentShowedSV) {
-			Message.obtain(mVideoHandler, REQUEST_OPEN_OR_CLOSE_DEVICE, 0, 0,
-					sw.udc).sendToTarget();
-			sw.udc.doClose();
-		}
+		//if bound, then conference service is initialized. Otherwise not. 
+		if (mServiceBound) {
+			for (SurfaceViewW sw : this.mCurrentShowedSV) {
+				Message.obtain(mVideoHandler, REQUEST_OPEN_OR_CLOSE_DEVICE, 0,
+						0, sw.udc).sendToTarget();
+				sw.udc.doClose();
+			}
 
-		// close local camera
-		Message.obtain(
-				mVideoHandler,
-				REQUEST_OPEN_OR_CLOSE_DEVICE,
-				0,
-				0,
-				new UserDeviceConfig(GlobalHolder.getInstance()
-						.getCurrentUserId(), "", null)).sendToTarget();
+			// close local camera
+			Message.obtain(
+					mVideoHandler,
+					REQUEST_OPEN_OR_CLOSE_DEVICE,
+					0,
+					0,
+					new UserDeviceConfig(GlobalHolder.getInstance()
+							.getCurrentUserId(), "", null)).sendToTarget();
+		}
 		VideoRecorder.VideoPreviewSurfaceHolder = null;
 		mAttendeeList.clear();
 		mCurrentShowedSV.clear();
@@ -1535,8 +1543,10 @@ public class VideoActivityV2 extends Activity {
 
 		@Override
 		public void onServiceConnected(ComponentName cname, IBinder binder) {
+			V2Log.i(" Service bound in video meeting");
 			mServiceBound = true;
-			ConferencMessageSyncService cms = ((ConferencMessageSyncService.LocalBinder)binder).getService();
+			ConferencMessageSyncService cms = ((ConferencMessageSyncService.LocalBinder) binder)
+					.getService();
 			cb = cms.getConferenceService();
 			ds = cms.getDocService();
 
@@ -1823,6 +1833,10 @@ public class VideoActivityV2 extends Activity {
 
 		@Override
 		public void requestInvitation(Conference conf, List<User> l) {
+			if (l == null || l.size()<=0) {
+				Toast.makeText(mContext, R.string.warning_no_attendee_selected, Toast.LENGTH_SHORT).show();
+				return;
+			}
 			// ignore call back;
 			cb.inviteAttendee(conf, l, null);
 			// Hide invitation layout

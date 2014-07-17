@@ -673,6 +673,8 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher {
 	private Conference currentEntered;
 
 	private void startConferenceActivity(Conference conf) {
+		//Set current state to in meeting state
+		GlobalHolder.getInstance().setMeetingState(true);
 		mContext.startService(new Intent(mContext, ConferencMessageSyncService.class));
 		Intent enterConference = new Intent(mContext, VideoActivityV2.class);
 		enterConference.putExtra("conf", conf);

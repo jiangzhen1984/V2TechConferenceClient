@@ -11,6 +11,8 @@ import android.content.IntentFilter;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.ColorDrawable;
 import android.media.AudioManager;
+import android.media.MediaPlayer;
+import android.media.RingtoneManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -69,6 +71,8 @@ public class P2PConversation extends Activity implements
 	// Video call view
 	private SurfaceView mLocalSurface;
 	private SurfaceView mRemoteSurface;
+	
+	private MediaPlayer mPlayer;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -136,7 +140,10 @@ public class P2PConversation extends Activity implements
 			}
 		}
 
+		//initialize phone state listener
 		initTelephonyManagerListener();
+		//Update global state
+		setGlobalState(true);
 
 	}
 
@@ -155,17 +162,20 @@ public class P2PConversation extends Activity implements
 	@Override
 	protected void onStart() {
 		super.onStart();
+		if (uad.isIncoming() && !uad.isConnected()) {
+			playRingToneIncoming();
+		}
 	}
 
 	@Override
 	protected void onStop() {
 		super.onStop();
+		stopRingTone();
 	}
 
 	@Override
 	protected void onNewIntent(Intent intent) {
 		super.onNewIntent(intent);
-		// TODO
 	}
 
 	@Override
@@ -220,6 +230,31 @@ public class P2PConversation extends Activity implements
 		}, PhoneStateListener.LISTEN_CALL_STATE);
 	}
 
+	
+	
+	
+	private void playRingToneIncoming() {
+		mPlayer = MediaPlayer.create(mContext, RingtoneManager
+				.getDefaultUri(RingtoneManager.TYPE_RINGTONE));
+		mPlayer.start();
+	}
+	
+	private void stopRingTone() {
+		if (mPlayer != null) {
+			mPlayer.release();
+		}
+	}
+	
+	
+	private void setGlobalState(boolean flag) {
+		if (uad.isAudioType()) {
+			GlobalHolder.getInstance().setAudioState(flag);
+		} else if (uad.isVideoType()) {
+			GlobalHolder.getInstance().setVideoState(flag);
+		}
+	}
+	
+	
 	private void initButtons() {
 		// For video button
 		View cameraButton = findViewById(R.id.conversation_fragment_connected_video_camera_button);
@@ -420,6 +455,18 @@ public class P2PConversation extends Activity implements
 					.setImageResource(R.drawable.conversation_connected_mute_button_gray);
 		}
 
+		//incoming audio call title
+		TextView incomingCallTitle = (TextView)findViewById(R.id.fragment_conversation_audio_incoming_call_title);
+		if (incomingCallTitle != null) {
+			incomingCallTitle.setText(R.string.conversation_end);
+		}
+		
+		//Incoming video call title
+		TextView incomingVideoCallTitle = (TextView)findViewById(R.id.fragment_conversation_video_title);
+		if (incomingVideoCallTitle != null) {
+			incomingVideoCallTitle.setText(R.string.conversation_end);
+		}
+		
 		//If is incoming layout, no mTimerTV view
 		if (mTimerTV != null) {
 			mTimerTV.setText(R.string.conversation_end);
@@ -591,6 +638,7 @@ public class P2PConversation extends Activity implements
 		closeLocalCamera();
 		chatService.cancelChattingCall(uad, null);
 		Message.obtain(mLocalHandler, HANG_UP_NOTIFICATION).sendToTarget();
+		setGlobalState(false);
 	}
 
 	private OnClickListener surfaceViewListener = new OnClickListener() {
@@ -609,7 +657,7 @@ public class P2PConversation extends Activity implements
 			chatService.refuseChatting(uad, null);
 			// Remove timer
 			mLocalHandler.removeCallbacks(timeOutMonitor);
-			quit();
+			hangUp();
 		}
 
 	};
@@ -618,6 +666,8 @@ public class P2PConversation extends Activity implements
 
 		@Override
 		public void onClick(View arg0) {
+			//Stop ring tone
+			stopRingTone();
 			// set state to connected
 			uad.setConnected(true);
 			chatService.acceptChatting(uad, null);
@@ -641,7 +691,6 @@ public class P2PConversation extends Activity implements
 			}
 			// Start to time
 			Message.obtain(mLocalHandler, UPDATE_TIME).sendToTarget();
-
 		}
 	};
 
@@ -649,6 +698,9 @@ public class P2PConversation extends Activity implements
 
 		@Override
 		public void onClick(View arg0) {
+			//Stop ring tone
+			stopRingTone();
+			
 			uad.setConnected(true);
 			chatService.acceptChatting(uad, null);
 			// Remove timer
@@ -658,6 +710,7 @@ public class P2PConversation extends Activity implements
 
 			// Start to time
 			updateTimer();
+			
 		}
 
 	};

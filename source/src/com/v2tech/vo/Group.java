@@ -309,8 +309,9 @@ public class Group implements Comparable<Group>{
 				c++;
 			}
 		}
-
-		for (Group subG : g.getChildGroup()) {
+		List<Group> sGs = g.getChildGroup();
+		for (int i =0; i< sGs.size(); i++) {
+			Group subG = sGs.get(i);
 			c += getUserOnlineCount(subG);
 		}
 		return c;
@@ -322,7 +323,9 @@ public class Group implements Comparable<Group>{
 
 	private int getUserCount(Group g) {
 		int c = g.getUsers().size();
-		for (Group subG : g.getChildGroup()) {
+		List<Group> sGs = g.getChildGroup();
+		for (int i =0; i< sGs.size(); i++) {
+			Group subG = sGs.get(i);
 			c += getUserCount(subG);
 		}
 		return c;

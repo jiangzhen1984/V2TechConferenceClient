@@ -10,7 +10,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:text="@string/conversation_waiting"
+        android:text="@string/conversation_waiting_voice_incoming"
         android:layout_marginTop="@dimen/fragment_conversation_audio_incoming_call_title_margin_top"
         android:textColor="@color/fragment_conversation_title_text_color"
         android:textSize="@dimen/fragment_conversation_audio_incoming_call_title_text_size" />
