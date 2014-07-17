@@ -50,6 +50,9 @@
         android:theme="@style/AppTheme" >
         <service android:name="com.v2tech.view.JNIService" >
         </service>
+        
+          <service android:name="com.v2tech.service.ConferencMessageSyncService" >
+        </service>
 
         <provider
             android:name="com.v2tech.db.V2techContentProvider"

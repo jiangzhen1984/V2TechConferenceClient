@@ -93,6 +93,10 @@ public class P2PConversation extends Activity implements
 				mRejectButton = findViewById(R.id.conversation_fragment_video_reject_button);
 				mAcceptButton = findViewById(R.id.conversation_fragment_video_accept_button);
 				mAudioOnlyButton = findViewById(R.id.conversation_fragment_voice_accept_only_button);
+				TextView tv = (TextView) findViewById(R.id.conversation_fragment_video_invitation_name);
+				if (tv != null) {
+					tv.setText(uad.getUser().getName());
+				}
 			}
 			mRejectButton.setOnClickListener(rejectListener);
 			mAcceptButton.setOnClickListener(acceptListener);
@@ -416,7 +420,10 @@ public class P2PConversation extends Activity implements
 					.setImageResource(R.drawable.conversation_connected_mute_button_gray);
 		}
 
-		mTimerTV.setText(R.string.conversation_end);
+		//If is incoming layout, no mTimerTV view
+		if (mTimerTV != null) {
+			mTimerTV.setText(R.string.conversation_end);
+		}
 		// set -1 to stop update time timer
 		mTimeLine = -1;
 	}

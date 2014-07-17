@@ -16,9 +16,11 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.content.pm.ActivityInfo;
 import android.graphics.Color;
 import android.graphics.ImageFormat;
@@ -27,6 +29,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Message;
 import android.text.TextUtils.TruncateAt;
 import android.util.DisplayMetrics;
@@ -61,6 +64,7 @@ import com.V2.jni.V2GlobalEnum;
 import com.v2tech.R;
 import com.v2tech.service.AsyncResult;
 import com.v2tech.service.ChatService;
+import com.v2tech.service.ConferencMessageSyncService;
 import com.v2tech.service.ConferenceService;
 import com.v2tech.service.DocumentService;
 import com.v2tech.service.GlobalHolder;
@@ -166,12 +170,12 @@ public class VideoActivityV2 extends Activity {
 	private Conference conf;
 	private ConferenceGroup cg;
 
-	private ConferenceService cb = new ConferenceService();
+	private ConferenceService cb;
 
 	private ChatService cs = new ChatService();
 
 	private Set<Attendee> mAttendeeList = new HashSet<Attendee>();
-	private DocumentService ds = new DocumentService();
+	private DocumentService ds;
 
 	private Map<String, V2Doc> mDocs = new HashMap<String, V2Doc>();
 	private V2Doc mCurrentActivateDoc = null;
@@ -187,6 +191,8 @@ public class VideoActivityV2 extends Activity {
 	private Toast mToast;
 
 	private DisplayMetrics dm;
+
+	private boolean mServiceBound = false;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -231,8 +237,7 @@ public class VideoActivityV2 extends Activity {
 		mMenuButton.setOnClickListener(mMenuButtonListener);
 		mMenuButtonContainer = findViewById(R.id.in_meeting_menu_layout);
 		mMenuSparationLine = findViewById(R.id.in_meeting_video_separation_line0);
-		
-		
+
 		// show message layout button
 		mMenuMessageButton = findViewById(R.id.in_meeting_menu_show_msg_button);
 		mMenuMessageButton.setTag("msg");
@@ -269,13 +274,18 @@ public class VideoActivityV2 extends Activity {
 		this.overridePendingTransition(R.animator.nonam_scale_center_0_100,
 				R.animator.nonam_scale_null);
 
+		bindService(new Intent(mContext, ConferencMessageSyncService.class),
+				mLocalServiceConnection, Context.BIND_AUTO_CREATE);
+
 	}
 
 	@Override
 	protected void onStart() {
 		super.onStart();
 
-		suspendOrResume(true);
+		if (mServiceBound) {
+			suspendOrResume(true);
+		}
 
 		NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 		// mId allows you to update the notification later on.
@@ -315,34 +325,6 @@ public class VideoActivityV2 extends Activity {
 		filter.addAction(JNIService.JNI_BROADCAST_USER_STATUS_NOTIFICATION);
 		mContext.registerReceiver(mConfUserChangeReceiver, filter);
 
-		// register listener for conference service
-		cb.registerPermissionUpdateListener(mVideoHandler,
-				NOTIFY_USER_PERMISSION_UPDATED, null);
-		cb.registerAttendeeListener(this.mVideoHandler, ATTENDEE_LISTENER, null);
-		cb.registerKickedConfListener(mVideoHandler, NOTIFICATION_KICKED, null);
-		cb.registerSyncDesktopListener(mVideoHandler,
-				DESKTOP_SYNC_NOTIFICATION, null);
-
-		cb.registerVideoMixerListener(mVideoHandler, VIDEO_MIX_NOTIFICATION,
-				null);
-
-		cb.registerAttendeeDeviceListener(mVideoHandler,
-				ATTENDEE_DEVICE_LISTENER, null);
-
-		// Register listen to document notification
-		ds.registerNewDocNotification(mVideoHandler, NEW_DOC_NOTIFICATION, null);
-		ds.registerDocDisplayNotification(mVideoHandler,
-				DOC_DOWNLOADED_NOTIFICATION, null);
-		ds.registerdocPageActiveNotification(mVideoHandler,
-				DOC_PAGE_ACTIVITE_NOTIFICATION, null);
-		ds.registerDocPageNotification(mVideoHandler, DOC_PAGE_NOTIFICATION,
-				null);
-		ds.registerDocClosedNotification(mVideoHandler,
-				DOC_CLOSED_NOTIFICATION, null);
-		ds.registerDocPageAddedNotification(mVideoHandler,
-				DOC_PAGE_ADDED_NOTIFICATION, null);
-		ds.registerPageCanvasUpdateNotification(mVideoHandler,
-				DOC_PAGE_CANVAS_NOTIFICATION, null);
 	}
 
 	private void init() {
@@ -370,8 +352,10 @@ public class VideoActivityV2 extends Activity {
 		mPendingMessageList = new ArrayList<VMessage>();
 
 		mPendingPermissionUpdateList = new ArrayList<PermissionUpdateIndication>();
-		//Set default speaking state if current user is owner, then should apply speaking default;
-		isSpeaking = conf.getCreator() == GlobalHolder.getInstance().getCurrentUserId()? true: false;
+		// Set default speaking state if current user is owner, then should
+		// apply speaking default;
+		isSpeaking = conf.getCreator() == GlobalHolder.getInstance()
+				.getCurrentUserId() ? true : false;
 	}
 
 	/**
@@ -659,7 +643,7 @@ public class VideoActivityV2 extends Activity {
 				mMenuButtonContainer.setVisibility(View.VISIBLE);
 				((ImageView) view)
 						.setImageResource(R.drawable.video_menu_button);
-				//If menu layout is visible, hide line of below at menu button
+				// If menu layout is visible, hide line of below at menu button
 				mMenuSparationLine.setVisibility(View.GONE);
 
 			} else {
@@ -674,8 +658,9 @@ public class VideoActivityV2 extends Activity {
 				mMenuButtonContainer.setVisibility(View.GONE);
 				((ImageView) view)
 						.setImageResource(R.drawable.video_menu_button_pressed);
-				
-				//If menu layout is invisible, show line of below at menu button
+
+				// If menu layout is invisible, show line of below at menu
+				// button
 				mMenuSparationLine.setVisibility(View.VISIBLE);
 			}
 
@@ -1186,34 +1171,41 @@ public class VideoActivityV2 extends Activity {
 			mCurrentShowedSV.clear();
 		}
 		mVideoLayout.removeAllViews();
-
-		cb.unRegisterPermissionUpdateListener(mVideoHandler,
-				NOTIFY_USER_PERMISSION_UPDATED, null);
-		cb.removeRegisterOfKickedConfListener(mVideoHandler,
-				NOTIFICATION_KICKED, null);
-		cb.removeAttendeeListener(this.mVideoHandler, ATTENDEE_LISTENER, null);
-
-		cb.unRegisterVideoMixerListener(mVideoHandler, VIDEO_MIX_NOTIFICATION,
-				null);
-
-		ds.unRegisterNewDocNotification(mVideoHandler, NEW_DOC_NOTIFICATION,
-				null);
-		ds.unRegisterDocDisplayNotification(mVideoHandler,
-				DOC_DOWNLOADED_NOTIFICATION, null);
-		ds.unRegisterDocClosedNotification(mVideoHandler,
-				DOC_CLOSED_NOTIFICATION, null);
-		ds.unRegisterDocPageAddedNotification(mVideoHandler,
-				DOC_PAGE_ADDED_NOTIFICATION, null);
-		ds.unRegisterPageCanvasUpdateNotification(mVideoHandler,
-				DOC_PAGE_CANVAS_NOTIFICATION, null);
-		cb.removeSyncDesktopListener(mVideoHandler, DESKTOP_SYNC_NOTIFICATION,
-				null);
-		cb.removeAttendeeDeviceListener(mVideoHandler,
-				ATTENDEE_DEVICE_LISTENER, null);
 		if (mDocContainer != null) {
 			// clean document bitmap cache
 			mDocContainer.cleanCache();
 		}
+
+		if (mServiceBound) {
+			cb.unRegisterPermissionUpdateListener(mVideoHandler,
+					NOTIFY_USER_PERMISSION_UPDATED, null);
+			cb.removeRegisterOfKickedConfListener(mVideoHandler,
+					NOTIFICATION_KICKED, null);
+			cb.removeAttendeeListener(this.mVideoHandler, ATTENDEE_LISTENER,
+					null);
+
+			cb.unRegisterVideoMixerListener(mVideoHandler,
+					VIDEO_MIX_NOTIFICATION, null);
+
+			ds.unRegisterNewDocNotification(mVideoHandler,
+					NEW_DOC_NOTIFICATION, null);
+			ds.unRegisterDocDisplayNotification(mVideoHandler,
+					DOC_DOWNLOADED_NOTIFICATION, null);
+			ds.unRegisterDocClosedNotification(mVideoHandler,
+					DOC_CLOSED_NOTIFICATION, null);
+			ds.unRegisterDocPageAddedNotification(mVideoHandler,
+					DOC_PAGE_ADDED_NOTIFICATION, null);
+			ds.unRegisterPageCanvasUpdateNotification(mVideoHandler,
+					DOC_PAGE_CANVAS_NOTIFICATION, null);
+			cb.removeSyncDesktopListener(mVideoHandler,
+					DESKTOP_SYNC_NOTIFICATION, null);
+			cb.removeAttendeeDeviceListener(mVideoHandler,
+					ATTENDEE_DEVICE_LISTENER, null);
+
+			unbindService(mLocalServiceConnection);
+		}
+		
+		mContext.stopService(new Intent(mContext, ConferencMessageSyncService.class));
 	}
 
 	@Override
@@ -1293,13 +1285,13 @@ public class VideoActivityV2 extends Activity {
 			// Make sure local camera is first front of all
 			Message.obtain(mVideoHandler, ONLY_SHOW_LOCAL_VIDEO).sendToTarget();
 			adjustLayout();
-			
-			//Send speaking status
+
+			// Send speaking status
 			doApplyOrReleaseSpeak(isSpeaking);
 			// Make sure update start after send request,
 			// because update state will update isSpeaking value
 			updateSpeakerState(isSpeaking);
-			
+
 		} else {
 			for (SurfaceViewW sw : this.mCurrentShowedSV) {
 				Message.obtain(mVideoHandler, REQUEST_OPEN_OR_CLOSE_DEVICE, 0,
@@ -1538,6 +1530,56 @@ public class VideoActivityV2 extends Activity {
 			return false;
 		}
 	}
+
+	private ServiceConnection mLocalServiceConnection = new ServiceConnection() {
+
+		@Override
+		public void onServiceConnected(ComponentName cname, IBinder binder) {
+			mServiceBound = true;
+			ConferencMessageSyncService cms = ((ConferencMessageSyncService.LocalBinder)binder).getService();
+			cb = cms.getConferenceService();
+			ds = cms.getDocService();
+
+			// register listener for conference service
+			cb.registerPermissionUpdateListener(mVideoHandler,
+					NOTIFY_USER_PERMISSION_UPDATED, null);
+			cb.registerAttendeeListener(mVideoHandler, ATTENDEE_LISTENER, null);
+			cb.registerKickedConfListener(mVideoHandler, NOTIFICATION_KICKED,
+					null);
+			cb.registerSyncDesktopListener(mVideoHandler,
+					DESKTOP_SYNC_NOTIFICATION, null);
+
+			cb.registerVideoMixerListener(mVideoHandler,
+					VIDEO_MIX_NOTIFICATION, null);
+
+			cb.registerAttendeeDeviceListener(mVideoHandler,
+					ATTENDEE_DEVICE_LISTENER, null);
+
+			// Register listen to document notification
+			ds.registerNewDocNotification(mVideoHandler, NEW_DOC_NOTIFICATION,
+					null);
+			ds.registerDocDisplayNotification(mVideoHandler,
+					DOC_DOWNLOADED_NOTIFICATION, null);
+			ds.registerdocPageActiveNotification(mVideoHandler,
+					DOC_PAGE_ACTIVITE_NOTIFICATION, null);
+			ds.registerDocPageNotification(mVideoHandler,
+					DOC_PAGE_NOTIFICATION, null);
+			ds.registerDocClosedNotification(mVideoHandler,
+					DOC_CLOSED_NOTIFICATION, null);
+			ds.registerDocPageAddedNotification(mVideoHandler,
+					DOC_PAGE_ADDED_NOTIFICATION, null);
+			ds.registerPageCanvasUpdateNotification(mVideoHandler,
+					DOC_PAGE_CANVAS_NOTIFICATION, null);
+
+			suspendOrResume(true);
+		}
+
+		@Override
+		public void onServiceDisconnected(ComponentName cname) {
+			mServiceBound = false;
+		}
+
+	};
 
 	private OnTouchListener mLocalCameraDragListener = new OnTouchListener() {
 
@@ -1943,7 +1985,8 @@ public class VideoActivityV2 extends Activity {
 				}
 				break;
 			case ATTENDEE_DEVICE_LISTENER: {
-				List<UserDeviceConfig> list = (List<UserDeviceConfig>) (((AsyncResult)msg.obj).getResult());
+				List<UserDeviceConfig> list = (List<UserDeviceConfig>) (((AsyncResult) msg.obj)
+						.getResult());
 				for (UserDeviceConfig ud : list) {
 					Attendee a = findAttendee(ud.getUserID());
 					if (a == null) {
@@ -1960,9 +2003,11 @@ public class VideoActivityV2 extends Activity {
 				break;
 			case ATTENDEE_LISTENER:
 				if (msg.arg1 == 1) {
-					doHandleNewUserEntered((User) (((AsyncResult)msg.obj).getResult()));
+					doHandleNewUserEntered((User) (((AsyncResult) msg.obj)
+							.getResult()));
 				} else {
-					doHandleUserExited((User) (((AsyncResult)msg.obj).getResult()));
+					doHandleUserExited((User) (((AsyncResult) msg.obj)
+							.getResult()));
 				}
 				break;
 			case REQUEST_OPEN_OR_CLOSE_DEVICE:
@@ -1993,7 +2038,8 @@ public class VideoActivityV2 extends Activity {
 
 			// user permission updated
 			case NOTIFY_USER_PERMISSION_UPDATED:
-				PermissionUpdateIndication ind = (PermissionUpdateIndication)(((AsyncResult)msg.obj).getResult());
+				PermissionUpdateIndication ind = (PermissionUpdateIndication) (((AsyncResult) msg.obj)
+						.getResult());
 				if (!updateAttendeePermissionStateIcon(ind)) {
 					mPendingPermissionUpdateList.add(ind);
 				}
@@ -2006,8 +2052,7 @@ public class VideoActivityV2 extends Activity {
 				}
 				break;
 			case NEW_DOC_NOTIFICATION:
-				V2Doc vd = (V2Doc) ((AsyncResult) (msg.obj))
-						.getResult();
+				V2Doc vd = (V2Doc) ((AsyncResult) (msg.obj)).getResult();
 				synchronized (mDocs) {
 					mDocs.put(vd.getId(), vd);
 					// check weather received doc before
@@ -2144,7 +2189,8 @@ public class VideoActivityV2 extends Activity {
 			case VIDEO_MIX_NOTIFICATION:
 				// create mixed video
 				if (msg.arg1 == 1) {
-					MixVideo mv = (MixVideo) (((AsyncResult)msg.obj).getResult());
+					MixVideo mv = (MixVideo) (((AsyncResult) msg.obj)
+							.getResult());
 
 					MixerWrapper mw = new MixerWrapper(mv.getId(), mv,
 							new MixVideoLayout(mContext, mv),

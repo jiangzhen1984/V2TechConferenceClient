@@ -36,6 +36,7 @@ import android.widget.Toast;
 import com.v2tech.R;
 import com.v2tech.db.ContentDescriptor;
 import com.v2tech.service.BitmapManager;
+import com.v2tech.service.ConferencMessageSyncService;
 import com.v2tech.service.ConferenceService;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.service.Registrant;
@@ -104,6 +105,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher {
 		String tag = this.getArguments().getString("tag");
 		if (PublicIntent.TAG_CONF.equals(tag)) {
 			mCurrentTabFlag = Conversation.TYPE_CONFERNECE;
+			cb = new ConferenceService();
 		} else if (PublicIntent.TAG_COV.equals(tag)) {
 			mCurrentTabFlag = Conversation.TYPE_CONTACT;
 		} else if (PublicIntent.TAG_GROUP.equals(tag)) {
@@ -113,7 +115,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher {
 
 		initReceiver(mCurrentTabFlag);
 
-		cb = new ConferenceService();
+		
 
 		notificationListener = (NotificationListener) getActivity();
 		BitmapManager.getInstance().registerBitmapChangedListener(
@@ -671,6 +673,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher {
 	private Conference currentEntered;
 
 	private void startConferenceActivity(Conference conf) {
+		mContext.startService(new Intent(mContext, ConferencMessageSyncService.class));
 		Intent enterConference = new Intent(mContext, VideoActivityV2.class);
 		enterConference.putExtra("conf", conf);
 		currentEntered = conf;

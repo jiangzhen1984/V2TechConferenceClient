@@ -39,7 +39,7 @@ public abstract class AbstractHandler extends Handler {
 
 	private SparseArray<List<Registrant>> registrantHolder = new SparseArray<List<Registrant>>();
 
-	private static SparseArray<List<PendingObject>> pendingObjectHolder = new SparseArray<List<PendingObject>>();
+	private SparseArray<List<PendingObject>> pendingObjectHolder = new SparseArray<List<PendingObject>>();
 
 	protected Message initTimeoutMessage(int mointorMessageID, long timeOutSec,
 			Registrant caller) {
@@ -154,6 +154,8 @@ public abstract class AbstractHandler extends Handler {
 				Message.obtain(h, re.getWhat(), po.arg1, po.arg2,
 						new AsyncResult(re.getObject(), po.obj)).sendToTarget();
 			}
+			
+			pendingList.clear();
 		}
 	}
 

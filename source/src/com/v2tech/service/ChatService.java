@@ -550,6 +550,9 @@ public class ChatService extends AbstractHandler {
 						RequestChatServiceResponse.Result.SUCCESS);
 				sendResult(mCaller, resp);
 				mCaller = null;
+			//Else means remote side is out and then cancel calling
+			} else {
+				notifyListener(KEY_CANCELLED_LISTNER, 0, 0, null);
 			}
 
 		}

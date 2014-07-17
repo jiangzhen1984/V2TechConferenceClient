@@ -20,6 +20,10 @@ import com.v2tech.vo.User;
 import com.v2tech.vo.UserDeviceConfig;
 
 public class GlobalHolder {
+	
+	public static final int STATE_IN_AUDIO_CONVERSATION = 0x00001;
+	public static final int STATE_IN_VIDEO_CONVERSATION = 0x00002;
+	public static final int STATE_IN_MEETING_CONVERSATION = 0x00004;
 
 	private static GlobalHolder holder;
 
@@ -42,6 +46,8 @@ public class GlobalHolder {
 	private Map<Long, Set<UserDeviceConfig>> mUserDeviceList = new HashMap<Long, Set<UserDeviceConfig>>();
 
 	private Map<Long, Bitmap> mAvatarBmHolder = new HashMap<Long, Bitmap>();
+	
+	private int mState;
 
 	public static synchronized GlobalHolder getInstance() {
 		if (holder == null) {
@@ -388,6 +394,45 @@ public class GlobalHolder {
 			}
 			list.add(udc);
 		}
+	}
+	
+	
+	public void setAudioState(boolean flag) {
+		if (flag) {
+			this.mState |= STATE_IN_AUDIO_CONVERSATION;
+		} else {
+			this.mState &=(~STATE_IN_AUDIO_CONVERSATION);
+		}
+	}
+	
+	
+	public void setVideoState(boolean flag) {
+		if (flag) {
+			this.mState |= STATE_IN_VIDEO_CONVERSATION;
+		} else {
+			this.mState &=(~STATE_IN_VIDEO_CONVERSATION);
+		}
+	}
+	
+	public void setMeetingState(boolean flag) {
+		if (flag) {
+			this.mState |= STATE_IN_MEETING_CONVERSATION;
+		} else {
+			this.mState &=(~STATE_IN_MEETING_CONVERSATION);
+		}
+	}
+	
+	
+	public boolean isInAudioCall() {
+		return (this.mState & STATE_IN_AUDIO_CONVERSATION) == STATE_IN_AUDIO_CONVERSATION;
+	}
+	
+	public boolean isInVideoCall() {
+		return (this.mState & STATE_IN_VIDEO_CONVERSATION) == STATE_IN_VIDEO_CONVERSATION;
+	}
+	
+	public boolean isInMeeting() {
+		return (this.mState & STATE_IN_MEETING_CONVERSATION) == STATE_IN_MEETING_CONVERSATION;
 	}
 
 	
