@@ -1,16 +1,15 @@
 package com.v2tech.view.contacts;
 
 import android.content.Context;
-import android.os.Handler;
+import android.os.AsyncTask;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.v2tech.R;
-import com.v2tech.logic.Group;
+import com.v2tech.vo.Group;
 
 public class ContactGroupView extends LinearLayout {
 
@@ -20,8 +19,6 @@ public class ContactGroupView extends LinearLayout {
 	private TextView mGroupNameTV;
 	private TextView mGroupStsTV;
 	private OnClickListener callback;
-
-	private Handler innerHandler = new Handler();
 
 	public ContactGroupView(Context context, Group g,
 			OnClickListener callbackListener) {
@@ -39,7 +36,7 @@ public class ContactGroupView extends LinearLayout {
 		View view = LayoutInflater.from(getContext()).inflate(
 				R.layout.contacts_group_view, null, false);
 
-		RelativeLayout contentContainer = (RelativeLayout) view
+		View contentContainer =view
 				.findViewById(R.id.contact_group_view_root);
 
 		mGroupIndicatorIV = (ImageView) view
@@ -56,7 +53,7 @@ public class ContactGroupView extends LinearLayout {
 
 		updateUserStatus();
 
-		contentContainer.setPadding(g.getLevel() * 35,
+		contentContainer.setPadding((g.getLevel() -1) * 35,
 				contentContainer.getPaddingTop(),
 				contentContainer.getPaddingRight(),
 				contentContainer.getPaddingRight());
@@ -65,7 +62,6 @@ public class ContactGroupView extends LinearLayout {
 				LinearLayout.LayoutParams.MATCH_PARENT,
 				LinearLayout.LayoutParams.WRAP_CONTENT));
 	}
-
 
 	public Group getGroup() {
 		return this.mGroup;
@@ -84,13 +80,23 @@ public class ContactGroupView extends LinearLayout {
 	}
 
 	public void updateUserStatus() {
-		innerHandler.post(new Runnable() {
+
+		new AsyncTask<Void, Void, Void>() {
+			String content = "";
 
 			@Override
-			public void run() {
-				mGroupStsTV.setText(mGroup.getOnlineUserCount() + " / "
-						+ mGroup.getUserCount());
+			protected Void doInBackground(Void... params) {
+				content = mGroup.getOnlineUserCount() + " / "
+						+ mGroup.getUserCount();
+				return null;
 			}
-		});
+
+			@Override
+			protected void onPostExecute(Void result) {
+				mGroupStsTV.setText(content);
+			}
+
+		}.execute();
+
 	}
 }

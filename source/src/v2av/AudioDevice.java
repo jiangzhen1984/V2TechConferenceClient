@@ -95,6 +95,23 @@ class AudioDevice {
 
     @SuppressWarnings("unused")
     private int StartRecording() {
+    	
+    	if (_audioManager == null && _context != null) {
+            _audioManager = (AudioManager)
+                _context.getSystemService(Context.AUDIO_SERVICE);
+            
+            // bug fixed for some devices like sony z1
+        	if (android.os.Build.VERSION.SDK_INT >= 11)
+        	{
+        		int mode = _audioManager.getMode();
+        		_audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
+        	}
+        	else
+        	{
+        		_audioManager.setMode(AudioManager.MODE_IN_CALL);
+        	}
+        }
+    	
         if (_isPlaying == false) {
             SetAudioMode(true);
         }
@@ -214,6 +231,9 @@ class AudioDevice {
             _doRecInit = true;
             _recLock.unlock();
         }
+        
+        if (_audioManager != null)
+        	_audioManager.setMode(AudioManager.MODE_NORMAL);
 
         if (_isPlaying == false) {
             SetAudioMode(false);

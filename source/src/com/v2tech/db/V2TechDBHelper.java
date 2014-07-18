@@ -20,11 +20,28 @@ public class V2TechDBHelper extends SQLiteOpenHelper {
 			+ ContentDescriptor.Messages.Cols.FROM_USER_NAME + " text,"
 			+ ContentDescriptor.Messages.Cols.TO_USER_ID + " numeric,"
 			+ ContentDescriptor.Messages.Cols.TO_USER_NAME + " text,"
-			+ ContentDescriptor.Messages.Cols.MSG_CONTENT + " text,"
 			+ ContentDescriptor.Messages.Cols.MSG_TYPE + " numeric,"
 			+ ContentDescriptor.Messages.Cols.SEND_TIME
 			+ "  TIMESTAMP  DEFAULT CURRENT_TIMESTAMP, "
-			+ ContentDescriptor.Messages.Cols.STATE + " integer) ";
+			+ ContentDescriptor.Messages.Cols.STATE + " integer,"
+			+ContentDescriptor.Messages.Cols.GROUP_ID+ " numeric,"
+			+ContentDescriptor.Messages.Cols.UUID+ " text) ";
+	
+	
+	
+	private static final String MESSAGE_ITEM_TABLE_CREATE_SQL = " create table  "
+			+ ContentDescriptor.MessageItems.NAME + " ( "
+			+ ContentDescriptor.MessageItems.Cols.ID
+			+ "  integer primary key AUTOINCREMENT,"
+			+ ContentDescriptor.MessageItems.Cols.MSG_ID + " integer,"
+			+ ContentDescriptor.MessageItems.Cols.CONTENT + " text,"
+			+ ContentDescriptor.MessageItems.Cols.LINE + " numeric,"
+			+ ContentDescriptor.MessageItems.Cols.TYPE+ " numeric, "
+			+ ContentDescriptor.MessageItems.Cols.UUID + " text, "
+			+ ContentDescriptor.MessageItems.Cols.STATE + " numeric )";
+	
+	
+	
 
 	private static final String CONVERSATION_TABLE_CREATE_SQL = " create table "
 			+ ContentDescriptor.Conversation.NAME
@@ -35,10 +52,12 @@ public class V2TechDBHelper extends SQLiteOpenHelper {
 			+ " text not null,"
 			+ ContentDescriptor.Conversation.Cols.EXT_ID
 			+ " numeric not null,"
-			+ContentDescriptor.Conversation.Cols.EXT_NAME
-			+" text not null,"
+			+ ContentDescriptor.Conversation.Cols.EXT_NAME
+			+ " text not null,"
 			+ ContentDescriptor.Conversation.Cols.NOTI_FLAG
-			+ " integer not null" + ")";
+			+ " integer not null,"
+			+ ContentDescriptor.Conversation.Cols.OWNER
+			+ " numeric not null" + ")";
 
 	public V2TechDBHelper(Context context, String name, CursorFactory factory,
 			int version, DatabaseErrorHandler errorHandler) {
@@ -58,6 +77,7 @@ public class V2TechDBHelper extends SQLiteOpenHelper {
 	public void onCreate(SQLiteDatabase db) {
 		db.execSQL(MESSAGES_TABLE_CREATE_SQL);
 		db.execSQL(CONVERSATION_TABLE_CREATE_SQL);
+		db.execSQL(MESSAGE_ITEM_TABLE_CREATE_SQL);
 	}
 
 	@Override

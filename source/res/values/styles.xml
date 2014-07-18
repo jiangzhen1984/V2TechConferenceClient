@@ -1,13 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
-
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
 
     <!-- Application theme. -->
     <style name="AppTheme" parent="@android:style/Theme.NoTitleBar">
-
         <!-- All customizations that are NOT specific to a particular API-level can go here. -->
-        <item name="switchStyle">@style/switch_light</item>
-		<item name="textAppearance">@style/TextAppearance</item>
     </style>
 
     <style name="IpSettingDialog" parent="@android:style/Theme.Translucent.NoTitleBar">
@@ -17,18 +13,44 @@
         <item name="android:windowIsFloating">true</item>
     </style>
 
-    <style name="LoginFormContainer">
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:padding">16dp</item>
-    </style>
-
     <style name="InMeetingQuitDialog" parent="@android:style/Theme.Translucent.NoTitleBar">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowIsFloating">true</item>
     </style>
 
     <style name="ContactUserActionDialog" parent="@android:style/Theme.Translucent.NoTitleBar">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowIsFloating">true</item>
+    </style>
+
+    <style name="GraySquareCheckbox" parent="@android:style/Widget.CompoundButton.CheckBox">
+        <item name="android:button">@drawable/selector_check_box</item>
+    </style>
+
+    <style name="InMeetingCameraSettingAnim">
+        <item name="@android:windowEnterAnimation">@animator/nonam_scale_0_100</item>
+        <item name="@android:windowExitAnimation">@animator/nonam_scale_100_0</item>
+    </style>
+    
+     <style name="TitleBarPopupWindowAnim">
+        <item name="@android:windowEnterAnimation">@animator/translation_down_to_up_related_self</item>
+        <item name="@android:windowExitAnimation">@animator/translation_up_to_down_related_self</item>
+    </style>
+    
+     
+     <style name="MessageVoiceDialog" parent="@android:style/Theme.Translucent.NoTitleBar">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowIsFloating">true</item>
+    </style>
+    
+     
+      <style name="ContactUserDetailVoiceCallDialog" parent="@android:style/Theme.Translucent.NoTitleBar">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowIsFloating">true</item>
     </style>

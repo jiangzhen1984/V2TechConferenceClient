@@ -19,7 +19,11 @@ public interface ImRequestCallback {
 	public void OnLoginCallback(long nUserID, int nStatus, int nResult);
 	
 	
-	public void OnLogoutCallback(int nUserID);
+	/**
+	 * <ul>When Same user log in with other device, then this function will be called</ul>
+	 * @param nType device type of logged
+	 */
+	public void OnLogoutCallback(int nType);
 	
 	/**
 	 * When network connection state changed, this function will be called.<br>
@@ -47,13 +51,13 @@ public interface ImRequestCallback {
 	 * <ul>User status update API.</ul>
 	 * 
 	 * @param nUserID
-	 * @param eUEType
+	 * @param nType 1 PC 2 cell phone
 	 * @param nStatus  1 is online, 0 is offline
 	 * @param szStatusDesc
 	 * 
-	 * @see com.v2tech.logic.User.Status
+	 * @see com.v2tech.vo.User.Status
 	 */
-	public void OnUserStatusUpdatedCallback(long nUserID, int eUEType,  int nStatus, String szStatusDesc);
+	public void OnUserStatusUpdatedCallback(long nUserID, int nType, int nStatus, String szStatusDesc);
 	
 	
 	
@@ -64,4 +68,20 @@ public interface ImRequestCallback {
 	 * @param AvatarName  patch of avatar
 	 */
 	public void OnChangeAvatarCallback(int nAvatarType, long nUserID, String AvatarName);
+	
+	
+	/**
+	 * 
+	 * @param nUserId
+	 * @param sCommmentName
+	 */
+	public void OnModifyCommentNameCallback(long nUserId, String sCommmentName);
+	
+	
+	/**
+	 * 
+	 * @param sCrowdXml
+	 * @param nResult
+	 */
+	public void OnCreateCrowdCallback(String sCrowdXml, int nResult);
 }

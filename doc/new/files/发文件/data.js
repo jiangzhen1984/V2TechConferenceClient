@@ -1,0 +1,197 @@
+﻿$axure.loadCurrentPage({
+  "url":"发文件.html",
+  "generationDate":new Date(1403848988035.34),
+  "isCanvasEnabled":false,
+  "variables":["OnLoadVariable"],
+  "page":{
+    "packageId":"180abe77c5d04c9aa4e2451ef87d6cff",
+    "type":"Axure:Page",
+    "name":"发文件",
+    "notes":{
+},
+    "style":{
+      "baseStyle":"627587b6038d43cca051c114ac41ad32",
+      "pageAlignment":"near",
+      "fill":{
+        "fillType":"solid",
+        "color":0xFFFFFFFF},
+      "image":null,
+      "imageHorizontalAlignment":"near",
+      "imageVerticalAlignment":"near",
+      "imageRepeat":"auto",
+      "favicon":null,
+      "sketchFactor":"0",
+      "colorStyle":"appliedColor",
+      "fontName":"应用字体",
+      "borderWidth":"0"},
+    "adaptiveStyles":{
+},
+    "interactionMap":{
+},
+    "diagram":{
+      "objects":[{
+          "id":"3af671bfaaad4bf7b25ce9bf08afbf9b",
+          "label":"",
+          "type":"imageBox",
+          "styleType":"imageBox",
+          "visible":true,
+          "style":{
+            "size":{
+              "width":640,
+              "height":960}},
+          "adaptiveStyles":{
+},
+          "objects":[{
+              "id":"fadf734f484f4609b8005d1ee8115ef4",
+              "label":"",
+              "isContained":true,
+              "type":"richTextPanel",
+              "styleType":"paragraph",
+              "visible":true,
+              "style":{
+                "size":{
+                  "width":640,
+                  "height":960}},
+              "adaptiveStyles":{
+}}],
+          "images":{
+            "normal~":"images/发文件/u0.jpg"}},
+{
+          "id":"5ab6c0a73e324650a210b07512abd152",
+          "label":"",
+          "type":"buttonShape",
+          "styleType":"buttonShape",
+          "visible":true,
+          "style":{
+            "fill":{
+              "fillType":"solid",
+              "color":0xFFFFFF},
+            "location":{
+              "x":10,
+              "y":40},
+            "size":{
+              "width":100,
+              "height":80},
+            "borderFill":{
+              "fillType":"solid",
+              "color":0x797979},
+            "cornerRadiusTopLeft":"5"},
+          "adaptiveStyles":{
+},
+          "objects":[{
+              "id":"9bd393bbe3004eb79fda7c0d16403d01",
+              "label":"",
+              "isContained":true,
+              "type":"richTextPanel",
+              "styleType":"paragraph",
+              "visible":true,
+              "style":{
+                "fill":{
+                  "fillType":"solid",
+                  "color":0xFFFFFF},
+                "location":{
+                  "x":10,
+                  "y":40},
+                "size":{
+                  "width":100,
+                  "height":80},
+                "borderFill":{
+                  "fillType":"solid",
+                  "color":0x797979},
+                "cornerRadiusTopLeft":"5"},
+              "adaptiveStyles":{
+}}],
+          "interactionMap":{
+            "onClick":{
+              "description":"OnClick",
+              "cases":[{
+                  "description":"用例 1",
+                  "isNewIfGroup":false,
+                  "actions":[{
+                      "action":"linkWindow",
+                      "description":"在 当前窗口 打开 个人资料",
+                      "target":{
+                        "targetType":"page",
+                        "url":"个人资料.html",
+                        "includeVariables":true},
+                      "linkType":"current"}]}]}},
+          "tabbable":true,
+          "images":{
+            "normal~":"resources/images/transparent.gif"}},
+{
+          "id":"7d9dd2e63cbd4e73af9c275f5ef66216",
+          "label":"",
+          "type":"buttonShape",
+          "styleType":"buttonShape",
+          "visible":true,
+          "style":{
+            "fill":{
+              "fillType":"solid",
+              "color":0x9DD9},
+            "location":{
+              "x":530,
+              "y":50},
+            "size":{
+              "width":100,
+              "height":70},
+            "borderFill":{
+              "fillType":"solid",
+              "color":0x777777},
+            "cornerRadiusTopLeft":"5"},
+          "adaptiveStyles":{
+},
+          "objects":[{
+              "id":"6c85e664568041489cba1fc28a2c8bd4",
+              "label":"",
+              "isContained":true,
+              "type":"richTextPanel",
+              "styleType":"paragraph",
+              "visible":true,
+              "style":{
+                "fill":{
+                  "fillType":"solid",
+                  "color":0x9DD9},
+                "location":{
+                  "x":530,
+                  "y":50},
+                "size":{
+                  "width":100,
+                  "height":70},
+                "borderFill":{
+                  "fillType":"solid",
+                  "color":0x777777},
+                "cornerRadiusTopLeft":"5"},
+              "adaptiveStyles":{
+}}],
+          "interactionMap":{
+            "onClick":{
+              "description":"OnClick",
+              "cases":[{
+                  "description":"用例 1",
+                  "isNewIfGroup":false,
+                  "actions":[{
+                      "action":"linkWindow",
+                      "description":"在 当前窗口 打开 聊天",
+                      "target":{
+                        "targetType":"page",
+                        "url":"聊天.html",
+                        "includeVariables":true},
+                      "linkType":"current"}]}]}},
+          "tabbable":true,
+          "images":{
+            "normal~":"resources/images/transparent.gif"}}]}},
+  "masters":{
+},
+  "objectPaths":{
+    "3af671bfaaad4bf7b25ce9bf08afbf9b":{
+      "scriptId":"u0"},
+    "fadf734f484f4609b8005d1ee8115ef4":{
+      "scriptId":"u1"},
+    "5ab6c0a73e324650a210b07512abd152":{
+      "scriptId":"u2"},
+    "9bd393bbe3004eb79fda7c0d16403d01":{
+      "scriptId":"u3"},
+    "7d9dd2e63cbd4e73af9c275f5ef66216":{
+      "scriptId":"u4"},
+    "6c85e664568041489cba1fc28a2c8bd4":{
+      "scriptId":"u5"}}});

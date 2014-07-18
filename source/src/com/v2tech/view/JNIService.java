@@ -1,15 +1,15 @@
 package com.v2tech.view;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Hashtable;
 import java.util.List;
-import java.util.Set;
 
 import android.app.Service;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.media.Ringtone;
@@ -21,57 +21,46 @@ import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.os.Parcelable;
 import android.widget.Toast;
 
+import com.V2.jni.AudioRequest;
+import com.V2.jni.AudioRequestCallbackAdapter;
 import com.V2.jni.ChatRequest;
-import com.V2.jni.ChatRequestCallback;
+import com.V2.jni.ChatRequestCallbackAdapter;
 import com.V2.jni.ConfRequest;
-import com.V2.jni.ConfRequestCallback;
+import com.V2.jni.ConfRequestCallbackAdapter;
+import com.V2.jni.FileRequest;
+import com.V2.jni.FileRequestCallbackAdapter;
 import com.V2.jni.GroupRequest;
 import com.V2.jni.GroupRequestCallback;
 import com.V2.jni.ImRequest;
 import com.V2.jni.ImRequestCallback;
+import com.V2.jni.V2GlobalEnum;
 import com.V2.jni.VideoRequest;
-import com.V2.jni.VideoRequestCallback;
+import com.V2.jni.VideoRequestCallbackAdapter;
 import com.v2tech.R;
-import com.v2tech.db.ContentDescriptor;
-import com.v2tech.logic.AsynResult;
-import com.v2tech.logic.AsynResult.AsynState;
-import com.v2tech.logic.CameraConfiguration;
-import com.v2tech.logic.ConferencePermission;
-import com.v2tech.logic.ContactConversation;
-import com.v2tech.logic.Conversation;
-import com.v2tech.logic.GlobalHolder;
-import com.v2tech.logic.Group;
-import com.v2tech.logic.NetworkStateCode;
-import com.v2tech.logic.User;
-import com.v2tech.logic.UserDeviceConfig;
-import com.v2tech.logic.VImageMessage;
-import com.v2tech.logic.VMessage;
-import com.v2tech.logic.VMessage.MessageType;
+import com.v2tech.service.BitmapManager;
+import com.v2tech.service.GlobalHolder;
+import com.v2tech.util.GlobalConfig;
+import com.v2tech.util.Notificator;
 import com.v2tech.util.V2Log;
-
-class MetaData {
-
-	static long searil = 1;
-	static Object lock = new Object();
-	Long id;
-	Message caller;
-	Message timeOutMessage;
-	Runnable timeoutCallback;
-
-	private MetaData() {
-		synchronized (lock) {
-			id = searil++;
-		}
-	}
-
-	static MetaData obtain(Message message) {
-		MetaData m = new MetaData();
-		m.caller = message;
-		return m;
-	}
-}
+import com.v2tech.util.XmlParser;
+import com.v2tech.view.bo.GroupUserObject;
+import com.v2tech.view.bo.UserAvatarObject;
+import com.v2tech.view.bo.UserStatusObject;
+import com.v2tech.view.conversation.MessageBuilder;
+import com.v2tech.vo.ConferenceGroup;
+import com.v2tech.vo.Group;
+import com.v2tech.vo.Group.GroupType;
+import com.v2tech.vo.NetworkStateCode;
+import com.v2tech.vo.User;
+import com.v2tech.vo.UserDeviceConfig;
+import com.v2tech.vo.VMessage;
+import com.v2tech.vo.VMessageAbstractItem;
+import com.v2tech.vo.VMessageAudioItem;
+import com.v2tech.vo.VMessageFileItem;
+import com.v2tech.vo.VMessageImageItem;
 
 /**
  * This service is used to wrap JNI call.<br>
@@ -87,35 +76,38 @@ class MetaData {
 public class JNIService extends Service {
 
 	public static final String JNI_BROADCAST_CATEGROY = "com.v2tech.jni.broadcast";
+	public static final String JNI_BROADCAST_CONNECT_STATE_NOTIFICATION = "com.v2tech.jni.broadcast.connect_state_notification";
 	public static final String JNI_BROADCAST_USER_STATUS_NOTIFICATION = "com.v2tech.jni.broadcast.user_stauts_notification";
+
+	/**
+	 * Notify user avatar changed, notice please do not listen this broadcast if
+	 * you are UI. Use
+	 * {@link BitmapManager#registerBitmapChangedListener(com.v2tech.service.BitmapManager.BitmapChangedListener)}
+	 * to listener bitmap change if you are UI.
+	 */
 	public static final String JNI_BROADCAST_USER_AVATAR_CHANGED_NOTIFICATION = "com.v2tech.jni.broadcast.user_avatar_notification";
-	public static final String JNI_BROADCAST_USER_UPDATE_SIGNATURE = "com.v2tech.jni.broadcast.user_update_sigature";
+	public static final String JNI_BROADCAST_USER_UPDATE_NAME_OR_SIGNATURE = "com.v2tech.jni.broadcast.user_update_sigature";
 	public static final String JNI_BROADCAST_GROUP_NOTIFICATION = "com.v2tech.jni.broadcast.group_geted";
 	public static final String JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION = "com.v2tech.jni.broadcast.group_user_updated";
-	public static final String JNI_BROADCAST_ATTENDEE_ENTERED_NOTIFICATION = "com.v2tech.jni.broadcast.attendee.entered.notification";
-	public static final String JNI_BROADCAST_ATTENDEE_EXITED_NOTIFICATION = "com.v2tech.jni.broadcast.attendee.exited.notification";
 	public static final String JNI_BROADCAST_NEW_MESSAGE = "com.v2tech.jni.broadcast.new.message";
-
+	public static final String JNI_BROADCAST_MESSAGE_SENT_FAILED = "com.v2tech.jni.broadcast.message_sent_failed";
+	public static final String JNI_BROADCAST_NEW_CONF_MESSAGE = "com.v2tech.jni.broadcast.new.conf.message";
+	public static final String JNI_BROADCAST_CONFERENCE_INVATITION = "com.v2tech.jni.broadcast.conference_invatition";
+	public static final String JNI_BROADCAST_CONFERENCE_REMOVED = "com.v2tech.jni.broadcast.conference_removed";
+	public static final String JNI_BROADCAST_GROUP_USER_REMOVED = "com.v2tech.jni.broadcast.group_user_removed";
+	public static final String JNI_BROADCAST_GROUP_USER_ADDED = "com.v2tech.jni.broadcast.group_user_added";
 
 	private boolean isDebug = true;
-
-	private static Hashtable<Integer, MetaData> map = new Hashtable<Integer, MetaData>();
 
 	private final LocalBinder mBinder = new LocalBinder();
 
 	private Integer mBinderRef = 0;
 
-	private LocalHander mHandler;
-
 	private JNICallbackHandler mCallbackHandler;
-
-	private Handler thread;
 
 	// ////////////////////////////////////////
 	// JNI call back definitions
 	private ImRequestCallback mImCB;
-
-	private ConfRequestCallback mCRCB;
 
 	private GroupRequestCB mGRCB;
 
@@ -123,19 +115,18 @@ public class JNIService extends Service {
 
 	private ChatRequestCB mChRCB;
 
+	private ConfRequestCB mCRCB;
+
+	private AudioRequestCB mARCB;
+
+	private FileRequestCB mFRCB;
+
 	// ////////////////////////////////////////
 
 	private Context mContext;
 
-	// ///////////////////////////////////////
-	// only refer group data which group is GroupType.CONFERENCE
-	// private List<Group> mConfGroup = null;
-
-	private Set<UserDeviceConfig> mUserDeviceList = new HashSet<UserDeviceConfig>();
-
-	private long mloggedInUserId;
-
-	private int mLoadGroupOwnerCount = 0;
+	private List<VMessage> cacheImageMeta = new ArrayList<VMessage>();
+	private List<VMessage> cacheAudioMeta = new ArrayList<VMessage>();
 
 	// ////////////////////////////////////////
 
@@ -143,33 +134,44 @@ public class JNIService extends Service {
 	public void onCreate() {
 		super.onCreate();
 		mContext = this;
-		// start handler thread
-		HandlerThread hd = new HandlerThread("queue");
-		hd.start();
-		mHandler = new LocalHander(hd.getLooper());
 
 		HandlerThread callback = new HandlerThread("callback");
 		callback.start();
+		synchronized (callback) {
+			while (!callback.isAlive()) {
+				try {
+					Thread.sleep(200);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+
 		mCallbackHandler = new JNICallbackHandler(callback.getLooper());
 
-		HandlerThread backEnd = new HandlerThread("back-end");
-		backEnd.start();
-		thread = new Handler(backEnd.getLooper());
-
 		mImCB = new ImRequestCB(mCallbackHandler);
-		ImRequest.getInstance().setCallback(mImCB);
+		ImRequest.getInstance(this.getApplicationContext()).addCallback(mImCB);
+
+		mGRCB = new GroupRequestCB(mCallbackHandler);
+		GroupRequest.getInstance(this.getApplicationContext()).addCallback(
+				mGRCB);
+
+		mVRCB = new VideoRequestCB(mCallbackHandler);
+		VideoRequest.getInstance(this.getApplicationContext()).addCallback(
+				mVRCB);
+
+		mChRCB = new ChatRequestCB(mCallbackHandler);
+		ChatRequest.getInstance(this.getApplicationContext())
+				.setChatRequestCallback(mChRCB);
 
 		mCRCB = new ConfRequestCB(mCallbackHandler);
 		ConfRequest.getInstance().addCallback(mCRCB);
 
-		mGRCB = new GroupRequestCB(mCallbackHandler);
-		GroupRequest.getInstance().setCallback(mGRCB);
+		mARCB = new AudioRequestCB();
+		AudioRequest.getInstance().addCallback(mARCB);
 
-		mVRCB = new VideoRequestCB(mCallbackHandler);
-		VideoRequest.getInstance().addCallback(mVRCB);
-
-		mChRCB = new ChatRequestCB(mCallbackHandler);
-		ChatRequest.getInstance().setChatRequestCallback(mChRCB);
+		mFRCB = new FileRequestCB(mCallbackHandler);
+		FileRequest.getInstance().addCallback(mFRCB);
 	}
 
 	@Override
@@ -208,380 +210,6 @@ public class JNIService extends Service {
 		}
 	}
 
-	/**
-	 * 
-	 * @param msgId
-	 * @param m
-	 * @return
-	 */
-	private MetaData getAndQueued(Integer msgId, Message caller) {
-		Integer key = Integer.valueOf(msgId);
-		synchronized (map) {
-			if (map.containsKey(key)) {
-				V2Log.e(" MSG ID:" + msgId + " in the queque!");
-				return null;
-			} else {
-				MetaData meta = MetaData.obtain(caller);
-				map.put(key, meta);
-				return meta;
-			}
-		}
-	}
-
-	/**
-	 * 
-	 * @param msgId
-	 * @return
-	 */
-	private MetaData getMeta(Integer msgId) {
-		// To regenerate key for make sure hash code is same with integer value.
-		// otherwise maybe we query incorrect answer
-		Integer key = Integer.valueOf(msgId);
-		synchronized (map) {
-			MetaData m = map.get(key);
-			map.remove(key);
-			return m;
-		}
-	}
-
-	/**
-	 * 
-	 * @param msgId
-	 * @return
-	 */
-	private MetaData getMetaWithoutRemvoe(Integer msgId) {
-		// To regenerate key for make sure hash code is same with integer value.
-		// otherwise maybe we query incorrect answer
-		Integer key = Integer.valueOf(msgId);
-		synchronized (map) {
-			MetaData m = map.get(key);
-			return m;
-		}
-	}
-
-	private synchronized boolean existMessage(Integer msgId) {
-		// To regenerate key for make sure hash code is same with integer value.
-		// otherwise maybe we query incorrect answer
-		Integer key = Integer.valueOf(msgId);
-		return map.containsKey(key);
-	}
-
-	/**
-	 * Asynchronous login function. After login, will call message.sendToTarget
-	 * to caller
-	 * 
-	 * @param mail
-	 *            user mail
-	 * @param passwd
-	 *            password
-	 * @param message
-	 *            callback message Message.obj is {@link AsynResult}
-	 */
-	public void login(String mail, String passwd, Message message) {
-		MetaData m = getAndQueued(JNI_LOG_IN, message);
-		if (m != null) {
-			Message.obtain(mHandler, JNI_LOG_IN, new InnerUser(m, mail, passwd))
-					.sendToTarget();
-		} else {
-			V2Log.e(" can't get metadata for login");
-		}
-	}
-
-	/**
-	 * Get current logged user id
-	 * 
-	 * @return
-	 */
-	public long getLoggedUserId() {
-		return this.mloggedInUserId;
-	}
-
-	/**
-	 * Get current logged user's object
-	 * 
-	 * @return {@link com.v2tech.logic.User}
-	 * 
-	 * @see com.v2tech.logic.User
-	 */
-	public User getloggedUser() {
-		return GlobalHolder.getInstance().getUser(
-				Long.valueOf(this.mloggedInUserId));
-	}
-
-	/**
-	 * Get user data according to user id
-	 * 
-	 * @param id
-	 * @return
-	 */
-	public User getUser(long id) {
-		return GlobalHolder.getInstance().getUser(Long.valueOf(id));
-	}
-
-	/**
-	 * Update user data according to user object
-	 * 
-	 * @param u
-	 *            user data
-	 * @param caller
-	 *            After update, send message to caller
-	 */
-	public void updateUserData(User u, Message caller) {
-		// TODO need to implement
-	}
-
-	/**
-	 * get user object according to user id.
-	 * 
-	 * @param nUserID
-	 * @return {@link com.v2tech.logic.User}
-	 * 
-	 * @see com.v2tech.logic.User
-	 */
-	public User getUserBaseInfo(long nUserID) {
-		return GlobalHolder.getInstance().getUser(nUserID);
-	}
-
-	/**
-	 * User request to enter conference.<br>
-	 * 
-	 * @param confID
-	 * @param msg
-	 *            if input is null, ignore response Message.object is
-	 *            {@link AsynResult} AsynResult.obj is Integer 0: success 1:
-	 *            failed
-	 * @deprecated
-	 */
-	public void requestEnterConference(long confID, Message msg) {
-		MetaData m = getAndQueued(JNI_REQUEST_ENTER_CONF, msg);
-		if (m != null) {
-			m.timeOutMessage = Message.obtain(mCallbackHandler,
-					REQUEST_TIME_OUT, JNI_REQUEST_ENTER_CONF, 0);
-			Message.obtain(mHandler, JNI_REQUEST_ENTER_CONF,
-					Long.valueOf(confID)).sendToTarget();
-			mCallbackHandler.sendMessageDelayed(m.timeOutMessage, 10000);
-		} else {
-			if (msg != null) {
-				V2Log.e(" Enter conf request already in queue");
-				msg.obj = new AsynResult(AsynState.FAIL, new Exception(
-						"Request already in the queue"));
-				msg.sendToTarget();
-			}
-		}
-	}
-
-	/**
-	 * User request quit conference
-	 * 
-	 * @param confID
-	 * @param msg
-	 *            if input is null, ignore response Message.object is
-	 *            {@link AsynResult} AsynResult.obj is Object[] Object[0]
-	 *            Integer 0: success 1: failed Object[1] Long conference id
-	 *@deprecated
-	 */
-	public void requestExitConference(long confID, Message msg) {
-		MetaData m = getAndQueued(JNI_REQUEST_EXIT_CONF, msg);
-		if (m != null) {
-			Message.obtain(mHandler, JNI_REQUEST_EXIT_CONF,
-					Long.valueOf(confID)).sendToTarget();
-		} else {
-			if (msg != null) {
-				V2Log.e(" exit conf request already in queue");
-				msg.obj = new AsynResult(AsynState.FAIL, new Exception(
-						"Request already in the queue"));
-				msg.sendToTarget();
-			}
-		}
-	}
-
-	/**
-	 * Request open video device.
-	 * 
-	 * @param nGroupID
-	 *            conference id
-	 * @param userDevice
-	 *            {@link UserDeviceConfig} if want to open local video,
-	 *            {@link UserDeviceConfig#getVp()} should be null and
-	 *            {@link UserDeviceConfig#getDeviceID()} should be ""
-	 * @param caller
-	 *            message object for response
-	 * 
-	 * @see UserDeviceConfig
-	 * @deprecated
-	 */
-	public void requestOpenVideoDevice(long nGroupID,
-			UserDeviceConfig userDevice, Message caller) {
-		if (nGroupID < 0 || userDevice == null || userDevice.getUserID() <= 0) {
-			V2Log.e("Invalid device parameters");
-			if (caller != null) {
-				caller.obj = new AsynResult(AsynState.FAIL, new Exception(
-						"Invalid device parameters"));
-				caller.sendToTarget();
-				return;
-			}
-		}
-		// put to queue
-		getAndQueued(JNI_REQUEST_OPEN_VIDEO, caller);
-		Message.obtain(mHandler, JNI_REQUEST_OPEN_VIDEO,
-				new OpenVideoRequest(nGroupID, userDevice)).sendToTarget();
-	}
-
-	/**
-	 * Request close video device.
-	 * 
-	 * @param nGroupID
-	 * @param userDevice
-	 *            {@link UserDeviceConfig} if want to open local video,
-	 *            {@link UserDeviceConfig#getVp()} should be null and
-	 *            {@link UserDeviceConfig#getDeviceID()} should be ""
-	 * @param caller
-	 *            message object for response
-	 * 
-	 * @see UserDeviceConfig
-	 * @deprecated
-	 */
-	public void requestCloseVideoDevice(long nGroupID,
-			UserDeviceConfig userDevice, Message caller) {
-		if (nGroupID < 0 || userDevice == null || userDevice.getUserID() <= 0) {
-			V2Log.e("Invalid device parameters");
-			if (caller != null) {
-				caller.obj = new AsynResult(AsynState.FAIL, new Exception(
-						"Invalid device parameters"));
-				caller.sendToTarget();
-				return;
-			}
-		}
-		// put to queue
-		getAndQueued(JNI_REQUEST_CLOSE_VIDEO, caller);
-		Message.obtain(mHandler, JNI_REQUEST_CLOSE_VIDEO,
-				new OpenVideoRequest(nGroupID, userDevice)).sendToTarget();
-	}
-
-	/**
-	 * Request speak permission on the conference.
-	 * 
-	 * @param type
-	 *            speak type should be {@link ConferencePermission#SPEAKING}
-	 * @param caller
-	 *            message for response, as now no response to send
-	 * 
-	 * @see ConferencePermission
-	 * 
-	 * @deprecated
-	 */
-	public void applyForControlPermission(ConferencePermission type,
-			Message caller) {
-		Message.obtain(mHandler, JNI_REQUEST_SPEAK, type.intValue(), 0)
-				.sendToTarget();
-	}
-
-	/**
-	 * Request release permission on the conference.
-	 * 
-	 * @param type
-	 *            speak type should be {@link ConferencePermission#SPEAKING}
-	 * @param caller
-	 *            message for response, as now no response to send
-	 * 
-	 * @see ConferencePermission
-	 * @deprecated
-	 */
-	public void applyForReleasePermission(ConferencePermission type,
-			Message caller) {
-		Message.obtain(mHandler, JNI_REQUEST_RELEASE_SPEAK, type.intValue(), 0)
-				.sendToTarget();
-	}
-
-	/**
-	 * 
-	 * @param cc
-	 * @param caller
-	 * @deprecated
-	 */
-	public void updateCameraParameters(CameraConfiguration cc, Message caller) {
-		if (caller != null) {
-			// put caller message to the queue
-			getAndQueued(JNI_UPDATE_CAMERA_PAR, caller);
-		}
-		Message.obtain(mHandler, JNI_UPDATE_CAMERA_PAR, cc).sendToTarget();
-	}
-
-
-	/**
-	 * Get user's video device according to user id.<br>
-	 * This function never return null, even through we don't receive video
-	 * device data from server.
-	 * 
-	 * @param uid
-	 *            user's id
-	 * @return list of user device
-	 */
-	public List<UserDeviceConfig> getAttendeeDevice(long uid) {
-		List<UserDeviceConfig> l = new ArrayList<UserDeviceConfig>();
-		for (UserDeviceConfig udl : mUserDeviceList) {
-			if (udl.getUserID() == uid) {
-				l.add(udl);
-			}
-		}
-		return l;
-	}
-	
-	
-	class InnerUser {
-		// call parameter
-		MetaData m;
-		String mail;
-		String passwd;
-
-		// call back parameter
-		long idCallback;
-		int status;
-		int nResult;
-
-		InnerUser(MetaData m, String mail, String passwd) {
-			this.m = m;
-			this.mail = mail;
-			this.passwd = passwd;
-		}
-
-		InnerUser(MetaData m, long idCallback, int status, int nResult) {
-			this.m = m;
-			this.idCallback = idCallback;
-			this.status = status;
-			this.nResult = nResult;
-		}
-	}
-
-	class OpenVideoRequest {
-		long group;
-		UserDeviceConfig userDevice;
-
-		public OpenVideoRequest(long group, UserDeviceConfig userDevice) {
-			super();
-			this.group = group;
-			this.userDevice = userDevice;
-		}
-
-	}
-
-	class RequestEnterConfResponse {
-		long nConfID;
-		long nTime;
-		String szConfData;
-		int nJoinResult;
-
-		public RequestEnterConfResponse(long nConfID, long nTime,
-				String szConfData, int nJoinResult) {
-			super();
-			this.nConfID = nConfID;
-			this.nTime = nTime;
-			this.szConfData = szConfData;
-			this.nJoinResult = nJoinResult;
-		}
-
-	}
-
 	class GroupUserInfoOrig {
 		int gType;
 		long gId;
@@ -613,142 +241,28 @@ public class JNIService extends Service {
 
 	}
 
+	private void broadcastNetworkState(NetworkStateCode code) {
+		Intent i = new Intent();
+		i.setAction(JNI_BROADCAST_CONNECT_STATE_NOTIFICATION);
+		i.addCategory(JNI_BROADCAST_CATEGROY);
+		i.putExtra("state", (Parcelable) code);
+		sendBroadcast(i);
+	}
+
+	static long lastNotificatorTime = 0;
+
 	// //////////////////////////////////////////////////////////
 	// Internal message definition //
 	// //////////////////////////////////////////////////////////
 
-	private static final int CANCEL_REQUEST = 0x1000;
-	private static final int REQUEST_TIME_OUT = 0x2000;
-	private static final int JNI_LOG_IN = 21;
-	private static final int JNI_LOG_OUT = 22;
 	private static final int JNI_CONNECT_RESPONSE = 23;
 	private static final int JNI_UPDATE_USER_INFO = 24;
-	private static final int JNI_UPDATE_USER_STATUS = 25;
+	private static final int JNI_LOG_OUT = 26;
 	private static final int JNI_GROUP_NOTIFY = 35;
-	private static final int JNI_LOAD_GROUP_OWNER_INFO = 36;
-	private static final int JNI_REQUEST_ENTER_CONF = 55;
-	private static final int JNI_REQUEST_EXIT_CONF = 56;
-	private static final int JNI_ATTENDEE_ENTERED_NOTIFICATION = 57;
-	private static final int JNI_ATTENDEE_EXITED_NOTIFICATION = 58;
-	private static final int JNI_GET_ATTENDEE_INFO_DONE = 59;
 	private static final int JNI_GROUP_USER_INFO_NOTIFICATION = 60;
-	private static final int JNI_REQUEST_OPEN_VIDEO = 70;
-	private static final int JNI_REQUEST_CLOSE_VIDEO = 71;
-	private static final int JNI_REQUEST_SPEAK = 72;
-	private static final int JNI_REQUEST_RELEASE_SPEAK = 73;
-	private static final int JNI_UPDATE_CAMERA_PAR = 75;
 	private static final int JNI_REMOTE_USER_DEVICE_INFO_NOTIFICATION = 80;
 	private static final int JNI_RECEIVED_MESSAGE = 91;
 	private static final int JNI_RECEIVED_VIDEO_INVITION = 92;
-
-	class LocalHander extends Handler {
-
-		public LocalHander(Looper looper) {
-			super(looper);
-		}
-
-		@Override
-		public void handleMessage(Message msg) {
-			switch (msg.what) {
-			case JNI_LOG_IN:
-				InnerUser iu = (InnerUser) msg.obj;
-				ImRequest.getInstance().login(iu.mail, iu.passwd, 1, 2);
-				Message m = Message.obtain(mCallbackHandler, REQUEST_TIME_OUT,
-						JNI_LOG_IN, 0);
-				iu.m.timeOutMessage = m;
-				mCallbackHandler.sendMessageDelayed(m, 10000);
-				break;
-
-			case JNI_LOG_OUT:
-				break;
-			case JNI_UPDATE_USER_INFO:
-				ImRequest.getInstance().getUserBaseInfo((Long) msg.obj);
-				break;
-			case JNI_GROUP_NOTIFY:
-				break;
-			case JNI_LOAD_GROUP_OWNER_INFO:
-				MetaData gmd = getAndQueued(JNI_UPDATE_USER_INFO,
-						Message.obtain(mCallbackHandler,
-								JNI_LOAD_GROUP_OWNER_INFO, msg.arg1, 0));
-				if (gmd == null) {
-					// TODO
-				} else {
-					List<Group>  lg = GlobalHolder.getInstance().getGroup(Group.GroupType.CONFERENCE);
-					if (lg == null || msg.arg1 >= lg.size() ) {
-						break;
-					}
-					//FIXME optimize code
-					Message.obtain(mHandler, JNI_UPDATE_USER_INFO,
-							lg.get(msg.arg1).getOwner()).sendToTarget();
-				}
-
-				break;
-			case JNI_REQUEST_ENTER_CONF:
-				ConfRequest.getInstance().enterConf((Long) msg.obj);
-				break;
-			case JNI_REQUEST_EXIT_CONF:
-				ConfRequest.getInstance().exitConf((Long) msg.obj);
-				// As now exit conference request no call back.
-				// So send successful message to caller
-				MetaData exitD = getMeta(JNI_REQUEST_EXIT_CONF);
-				if (exitD != null && exitD.caller != null) {
-					exitD.caller.obj = new AsynResult(AsynState.SUCCESS, null);
-					exitD.caller.sendToTarget();
-				}
-				break;
-			case JNI_REQUEST_OPEN_VIDEO:
-				OpenVideoRequest requestObj = (OpenVideoRequest) msg.obj;
-				VideoRequest.getInstance().openVideoDevice(requestObj.group,
-						requestObj.userDevice.getUserID(),
-						requestObj.userDevice.getDeviceID(),
-						requestObj.userDevice.getVp(),
-						requestObj.userDevice.getBusinessType());
-				// As now open video device no call back.
-				// So send successful message to caller
-				MetaData d = getMeta(JNI_REQUEST_OPEN_VIDEO);
-				if (d != null && d.caller != null) {
-					d.caller.obj = new AsynResult(AsynState.SUCCESS, null);
-					d.caller.sendToTarget();
-				}
-				break;
-			case JNI_REQUEST_CLOSE_VIDEO:
-				OpenVideoRequest requestCloseObj = (OpenVideoRequest) msg.obj;
-				VideoRequest.getInstance().closeVideoDevice(
-						requestCloseObj.group,
-						requestCloseObj.userDevice.getUserID(),
-						requestCloseObj.userDevice.getDeviceID(),
-						requestCloseObj.userDevice.getVp(),
-						requestCloseObj.userDevice.getBusinessType());
-				// As now open video device no call back.
-				// So send successful message to caller
-				MetaData response = getMeta(JNI_REQUEST_CLOSE_VIDEO);
-				if (response != null && response.caller != null) {
-					response.caller.obj = new AsynResult(AsynState.SUCCESS,
-							null);
-					response.caller.sendToTarget();
-				}
-				break;
-			case JNI_REQUEST_SPEAK:
-				// 3 means apply speak
-				ConfRequest.getInstance().applyForControlPermission(msg.arg1);
-				break;
-			case JNI_REQUEST_RELEASE_SPEAK:
-				ConfRequest.getInstance().releaseControlPermission(msg.arg1);
-				break;
-			case JNI_UPDATE_CAMERA_PAR:
-				if (msg.obj == null) {
-					// FIXME send error result
-				} else {
-					CameraConfiguration cc = (CameraConfiguration) msg.obj;
-					VideoRequest.getInstance().setCapParam(cc.getDeviceId(),
-							cc.getCameraIndex(), cc.getFrameRate(),
-							cc.getBitRate());
-				}
-				break;
-			}
-		}
-
-	}
 
 	class JNICallbackHandler extends Handler {
 
@@ -758,304 +272,140 @@ public class JNIService extends Service {
 
 		@Override
 		public synchronized void handleMessage(Message msg) {
-			MetaData d = getMeta(msg.what);
-			AsynResult ar = null;
-			int arg1 = 0;
-			int arg2 = 0;
 			switch (msg.what) {
-			case REQUEST_TIME_OUT:
 
-				MetaData origin = getMeta(msg.arg1);
-				if (origin == null) {
-					V2Log.w(msg.arg1 + " REQUEST_TIME_OUT : empty ");
-				} else {
-					origin.caller.obj = new AsynResult(
-							AsynResult.AsynState.TIME_OUT, new Exception(
-									msg.arg1 + " time out"));
-					origin.caller.sendToTarget();
-				}
-				break;
-
-			case CANCEL_REQUEST:
-				// just remove message from queue
-				getMeta(msg.arg1);
-				break;
-			case JNI_LOG_IN:
-				InnerUser iu = ((InnerUser) msg.obj);
-				User loggedUser = new User(iu.idCallback, "",
-						NetworkStateCode.fromInt(iu.nResult));
-				ar = new AsynResult(AsynResult.AsynState.SUCCESS, loggedUser);
-				mloggedInUserId = iu.idCallback;
-				GlobalHolder.getInstance().setCurrentUser(loggedUser);
-				break;
-			case JNI_LOG_OUT:
-				break;
 			case JNI_CONNECT_RESPONSE:
-				// Can't not connect to server
-				if (msg.arg1 == NetworkStateCode.CONNECTED_ERROR.intValue()) {
-					// Logging event in progress, need to send error message to
-					// Login caller
-					if (existMessage(JNI_LOG_IN)) {
-						MetaData m = getMeta(JNI_LOG_IN);
-						m.caller.obj = new AsynResult(
-								AsynResult.AsynState.SUCCESS, new User(0, "",
-										NetworkStateCode.CONNECTED_ERROR));
-						m.caller.sendToTarget();
-						if (m.timeOutMessage != null) {
-							// You can't use this because mCallbackHandler is
-							// different object.
-							// we use handler thread
-							mCallbackHandler.removeMessages(REQUEST_TIME_OUT);
-						}
-					}
-					// after login or before log in send broadcast
-					Toast.makeText(mContext, R.string.error_connect_to_server,
-							Toast.LENGTH_SHORT).show();
-
-				}
+				broadcastNetworkState(NetworkStateCode.fromInt(msg.arg1));
 				break;
 			case JNI_UPDATE_USER_INFO:
 				User u = User.fromXml(msg.arg1, (String) msg.obj);
-				if (u.getmUserId() == mloggedInUserId) {
-					u.setCurrentLoggedInUser(true);
-				}
+
 				GlobalHolder.getInstance().putUser(u.getmUserId(), u);
-				// If someone waiting for this event
-				ar = new AsynResult(AsynResult.AsynState.SUCCESS, u);
-				if (d != null && d.caller != null
-						&& d.caller.what == JNI_LOAD_GROUP_OWNER_INFO) {
-					arg1 = d.caller.arg1;
-				}
-				
+
 				Intent sigatureIntent = new Intent();
-				sigatureIntent.setAction(JNI_BROADCAST_USER_UPDATE_SIGNATURE);
+				sigatureIntent
+						.setAction(JNI_BROADCAST_USER_UPDATE_NAME_OR_SIGNATURE);
 				sigatureIntent.addCategory(JNI_BROADCAST_CATEGROY);
 				sigatureIntent.putExtra("uid", u.getmUserId());
 				sendBroadcast(sigatureIntent);
 				break;
-			case JNI_UPDATE_USER_STATUS:
-				Intent iun = new Intent(JNI_BROADCAST_USER_STATUS_NOTIFICATION);
-				iun.addCategory(JNI_BROADCAST_CATEGROY);
-				iun.putExtra("uid", Long.valueOf(msg.arg1));
-				iun.putExtra("status", msg.arg2);
-				mContext.sendBroadcast(iun);
-
+			case JNI_LOG_OUT:
+				Toast.makeText(mContext,
+						R.string.user_logged_with_other_device,
+						Toast.LENGTH_LONG).show();
 				break;
 			case JNI_GROUP_NOTIFY:
+				List<Group> gl = XmlParser.parserFromXml(msg.arg1,
+						(String) msg.obj);
 
-				List<Group> gl = Group
-						.parserFromXml(msg.arg1, (String) msg.obj);
-				GlobalHolder.getInstance().updateGroupList(
-						Group.GroupType.fromInt(msg.arg1), gl);
-				if (msg.arg1 == Group.GroupType.CONFERENCE.intValue()) {
-
-					mLoadGroupOwnerCount = gl.size();
-					if (gl != null && gl.size() > 0) {
-						Message.obtain(mHandler, JNI_LOAD_GROUP_OWNER_INFO, 0,
-								0).sendToTarget();
-					}
-				}
-
-				break;
-			case JNI_LOAD_GROUP_OWNER_INFO:
-				mLoadGroupOwnerCount--;
-				User gu = (User) ((AsynResult) msg.obj).getObject();
-				//TODO optimize code
-				Group g = GlobalHolder.getInstance().getGroup(Group.GroupType.CONFERENCE).get(msg.arg1);
-				if (g != null && g.getOwner() == gu.getmUserId()) {
-					g.setOwnerUser(gu);
-				}
-
-				if (mLoadGroupOwnerCount == 0) {
-					Intent ei = new Intent(JNI_BROADCAST_GROUP_NOTIFICATION);
-					ei.addCategory(JNI_BROADCAST_CATEGROY);
-					ei.putExtra("gtype", Group.GroupType.CONFERENCE.intValue());
-					mContext.sendBroadcast(ei);
-				} else {
-					arg1 = msg.arg1 + 1;
-					Message.obtain(mHandler, JNI_LOAD_GROUP_OWNER_INFO,
-							msg.arg1 + 1, 0).sendToTarget();
+				if (gl != null && gl.size() > 0) {
+					GlobalHolder.getInstance().updateGroupList(
+							Group.GroupType.fromInt(msg.arg1), gl);
+					Intent gi = new Intent(JNI_BROADCAST_GROUP_NOTIFICATION);
+					gi.putExtra("gtype", msg.arg1);
+					gi.addCategory(JNI_BROADCAST_CATEGROY);
+					mContext.sendBroadcast(gi);
 				}
 				break;
+
 			case JNI_GROUP_USER_INFO_NOTIFICATION:
 				GroupUserInfoOrig go = (GroupUserInfoOrig) msg.obj;
 				if (go != null && go.xml != null) {
 					List<User> lu = User.fromXml(go.xml);
-					GlobalHolder.getInstance().addUserToGroup(lu, go.gId);
+					Group g = GlobalHolder.getInstance().findGroupById(go.gId);
 					for (User tu : lu) {
-						User.Status us = GlobalHolder.getInstance()
+						UserStatusObject uso = GlobalHolder.getInstance()
 								.getOnlineUserStatus(tu.getmUserId());
-						if (us != null) {
-							tu.updateStatus(us);
+						// Update user status
+						if (uso != null) {
+							tu.updateStatus(User.Status.fromInt(uso.getStatus()));
+							tu.setDeviceType(User.DeviceType.fromInt(uso
+									.getDeviceType()));
 						}
-						GlobalHolder.getInstance().putUser(tu.getmUserId(), tu);
+						User existU = GlobalHolder.getInstance().putUser(
+								tu.getmUserId(), tu);
+						if (existU.getmUserId() == GlobalHolder.getInstance()
+								.getCurrentUserId()) {
+							// Update logged user object.
+							GlobalHolder.getInstance().setCurrentUser(existU);
+						}
+						if (g == null) {
+							V2Log.e(" didn't find group information  " + go.gId);
+						} else {
+							g.addUserToGroup(existU);
+						}
 					}
+					V2Log.w("  group:" + go.gId + "  user size:" + lu.size()
+							+ "  " + g);
 					Intent i = new Intent(
 							JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION);
 					i.addCategory(JNI_BROADCAST_CATEGROY);
 					i.putExtra("gid", go.gId);
 					i.putExtra("gtype", go.gType);
-					mContext.sendStickyBroadcast(i);
+					mContext.sendBroadcast(i);
 
 				} else {
 					V2Log.e("Invalid group user data");
 				}
 				break;
-			case JNI_REQUEST_ENTER_CONF:
-				RequestEnterConfResponse recr = (RequestEnterConfResponse) msg.obj;
-				ar = new AsynResult(AsynResult.AsynState.SUCCESS, new Object[] {
-						recr.nJoinResult, recr.nConfID });
-				break;
-			case JNI_ATTENDEE_ENTERED_NOTIFICATION:
-				Long uid = Long.valueOf(Long.parseLong(msg.obj.toString()));
-				User attendeeUser = GlobalHolder.getInstance().getUser(uid);
-				// check cache, if exist, send successful event
-				// message directly.
-				if (attendeeUser != null && attendeeUser.getName() != null
-						&& !attendeeUser.getName().equals("")) {
-					Message.obtain(
-							this,
-							JNI_GET_ATTENDEE_INFO_DONE,
-							new AsynResult(AsynResult.AsynState.SUCCESS,
-									attendeeUser)).sendToTarget();
-				} else {
-					// put caller message to queue
-					getAndQueued(JNI_UPDATE_USER_INFO,
-							Message.obtain(this, JNI_GET_ATTENDEE_INFO_DONE));
-					Message.obtain(mHandler, JNI_UPDATE_USER_INFO, uid)
-							.sendToTarget();
-				}
-				break;
-			case JNI_ATTENDEE_EXITED_NOTIFICATION:
-				Intent ei = new Intent(
-						JNI_BROADCAST_ATTENDEE_EXITED_NOTIFICATION);
-				ei.addCategory(JNI_BROADCAST_CATEGROY);
-				ei.putExtra("uid", (Long) msg.obj);
-				ei.putExtra(
-						"name",
-						GlobalHolder.getInstance()
-								.getUser(Long.valueOf((Long) msg.obj))
-								.getName());
-				mContext.sendBroadcast(ei);
-				break;
-			case JNI_GET_ATTENDEE_INFO_DONE:
-
-				User attendee = (User) ((AsynResult) msg.obj).getObject();
-				Intent i = new Intent(
-						JNI_BROADCAST_ATTENDEE_ENTERED_NOTIFICATION);
-				i.addCategory(JNI_BROADCAST_CATEGROY);
-				i.putExtra("uid", attendee.getmUserId());
-				i.putExtra("name", attendee.getName());
-				mContext.sendStickyBroadcast(i);
-				V2Log.i("send broad cast for attendee enter :"
-						+ attendee.getName());
-				break;
-			case JNI_UPDATE_CAMERA_PAR:
-				break;
 			case JNI_REMOTE_USER_DEVICE_INFO_NOTIFICATION:
-				mUserDeviceList.addAll(UserDeviceConfig
-						.parseFromXml((String) msg.obj));
+				GlobalHolder.getInstance().addAttendeeDevice(
+						UserDeviceConfig.parseFromXml((String) msg.obj));
 				break;
 
 			case JNI_RECEIVED_MESSAGE:
 				VMessage vm = (VMessage) msg.obj;
 				if (vm != null) {
-					Uri uri = saveMessageToDB(vm);
-					Intent ii = new Intent(JNI_BROADCAST_NEW_MESSAGE);
+					String action = null;
+					MessageBuilder.saveMessage(mContext, vm);
+
+					if (vm.getMsgCode() == V2GlobalEnum.REQUEST_TYPE_CONF) {
+						action = JNI_BROADCAST_NEW_CONF_MESSAGE;
+					} else {
+						action = JNI_BROADCAST_NEW_MESSAGE;
+						sendNotification();
+					}
+
+					Intent ii = new Intent(action);
 					ii.addCategory(JNI_BROADCAST_CATEGROY);
-					ii.putExtra("mid", uri.getLastPathSegment());
-					ii.putExtra("fromuid", vm.getUser().getmUserId());
-					mContext.sendBroadcast(ii);
-					sendNotification();
+					ii.putExtra("mid", vm.getId());
+					ii.putExtra("gm", vm.getGroupId() != 0);
+					// Send ordered broadcast, make sure conversationview
+					// receive message first
+					mContext.sendOrderedBroadcast(ii, null);
 				}
 				break;
 			case JNI_RECEIVED_VIDEO_INVITION:
 				Intent iv = new Intent();
 				iv.addCategory(PublicIntent.DEFAULT_CATEGORY);
-				iv.setAction(PublicIntent.START_VIDEO_CONVERSACTION_ACTIVITY);
+				iv.setAction(PublicIntent.START_P2P_CONVERSACTION_ACTIVITY);
 				iv.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 				iv.putExtra("uid", ((VideoInvitionWrapper) msg.obj).nFromUserID);
 				iv.putExtra("is_coming_call", true);
+				iv.putExtra("voice", false);
+				iv.putExtra("device",
+						((VideoInvitionWrapper) msg.obj).szDeviceID);
 				mContext.startActivity(iv);
 				break;
 
 			}
 
-			if (d != null && d.caller != null) {
-				d.caller.obj = ar;
-				d.caller.arg1 = arg1;
-				d.caller.arg2 = arg2;
-				d.caller.sendToTarget();
-				if (d.timeOutMessage != null) {
-					// You can't use this because mCallbackHandler is different
-					// object.
-					// we use handler thread
-					mCallbackHandler.removeMessages(REQUEST_TIME_OUT);
-				}
-			} else {
-				V2Log.w("MSG: " + msg.what
-						+ " Metadata object or call is null ");
-			}
-		}
-
-		private Uri saveMessageToDB(VMessage vm) {
-			ContentValues cv = new ContentValues();
-			cv.put(ContentDescriptor.Messages.Cols.FROM_USER_ID, vm.getUser()
-					.getmUserId());
-			cv.put(ContentDescriptor.Messages.Cols.TO_USER_ID, vm.getToUser()
-					.getmUserId());
-			cv.put(ContentDescriptor.Messages.Cols.MSG_CONTENT, vm.getText());
-			cv.put(ContentDescriptor.Messages.Cols.MSG_TYPE, vm.getType()
-					.getIntValue());
-			cv.put(ContentDescriptor.Messages.Cols.SEND_TIME,
-					vm.getNormalDateStr());
-			Uri uri= getContentResolver().insert(
-					ContentDescriptor.Messages.CONTENT_URI, cv);
-			
-			//TODO add notification
-			 Conversation cov = GlobalHolder.getInstance().findConversationByType(Conversation.TYPE_CONTACT, vm.getUser().getmUserId());
-			if (cov == null) {
-				cov = new ContactConversation(vm.getUser(), Conversation.NOTIFICATION);
-				GlobalHolder.getInstance().addConversation(cov);
-				ContentValues conCv = new ContentValues();
-				conCv.put(ContentDescriptor.Conversation.Cols.EXT_ID, vm.getUser().getmUserId());
-				conCv.put(ContentDescriptor.Conversation.Cols.TYPE, Conversation.TYPE_CONTACT);
-				conCv.put(ContentDescriptor.Conversation.Cols.EXT_NAME, vm.getUser().getName());
-				conCv.put(ContentDescriptor.Conversation.Cols.NOTI_FLAG, Conversation.NOTIFICATION);
-				getContentResolver().insert(ContentDescriptor.Conversation.CONTENT_URI, conCv);
-				 GlobalHolder.getInstance().addConversation(cov);
-			} else {
-				cov.setNotiFlag(Conversation.NOTIFICATION);
-				
-				ContentValues ct = new ContentValues();
-				ct.put(ContentDescriptor.Conversation.Cols.NOTI_FLAG, Conversation.NOTIFICATION);
-				getContentResolver().update(
-						ContentDescriptor.Conversation.CONTENT_URI,
-						ct,
-						ContentDescriptor.Conversation.Cols.EXT_ID + "=? and "
-								+ ContentDescriptor.Conversation.Cols.TYPE + "=?",
-						new String[] { vm.getUser().getmUserId() + "", Conversation.TYPE_CONTACT });
-			}
-			
-			return uri;
 		}
 
 		private void sendNotification() {
-			Uri notification = RingtoneManager
-					.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-			Ringtone r = RingtoneManager.getRingtone(getApplicationContext(),
-					notification);
-			r.play();
+			if ((System.currentTimeMillis() / 1000) - lastNotificatorTime > 2) {
+				Uri notification = RingtoneManager
+						.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+				Ringtone r = RingtoneManager.getRingtone(
+						getApplicationContext(), notification);
+				if (r != null) {
+					r.play();
+				}
+				lastNotificatorTime = System.currentTimeMillis() / 1000;
+			}
 		}
-		
-		
-		
-	}
 
-	// ///////////////////////////////////////////////
-	// JNI call back implements //
-	// FIXME Need to be optimize code structure //
-	// ///////////////////////////////////////////////
+	}
 
 	class ImRequestCB implements ImRequestCallback {
 
@@ -1067,16 +417,34 @@ public class JNIService extends Service {
 
 		@Override
 		public void OnLoginCallback(long nUserID, int nStatus, int nResult) {
-			Message.obtain(
-					mCallbackHandler,
-					JNI_LOG_IN,
-					new InnerUser(getMetaWithoutRemvoe(JNI_LOG_IN), nUserID,
-							nStatus, nResult)).sendToTarget();
 		}
 
 		@Override
 		public void OnLogoutCallback(int nUserID) {
+			// FIXME optimize code
+			Message.obtain(mCallbackHandler, JNI_LOG_OUT).sendToTarget();
+			Notificator.cancelAllSystemNotification(mContext);
+			// Send broadcast PREPARE_FINISH_APPLICATION first to let all
+			// activity quit and release resource
+			// Notice: if any activity doesn't release resource, android will
+			// automatically restart main activity
+			Intent i = new Intent();
+			i.setAction(PublicIntent.PREPARE_FINISH_APPLICATION);
+			i.addCategory(PublicIntent.DEFAULT_CATEGORY);
+			mContext.sendBroadcast(i);
 
+			mCallbackHandler.postDelayed(new Runnable() {
+				@Override
+				public void run() {
+					GlobalConfig.saveLogoutFlag(mContext);
+
+					Intent i = new Intent();
+					i.setAction(PublicIntent.FINISH_APPLICATION);
+					i.addCategory(PublicIntent.DEFAULT_CATEGORY);
+					mContext.sendBroadcast(i);
+				}
+
+			}, 2000);
 		}
 
 		@Override
@@ -1092,19 +460,24 @@ public class JNIService extends Service {
 		}
 
 		@Override
-		public void OnUserStatusUpdatedCallback(long nUserID, int eUEType,
+		public void OnUserStatusUpdatedCallback(long nUserID, int type,
 				int nStatus, String szStatusDesc) {
-			GlobalHolder.getInstance().updateUserStatus(nUserID,
-					User.Status.fromInt(nStatus));
+			UserStatusObject uso = new UserStatusObject(nUserID, type, nStatus);
+			GlobalHolder.getInstance().updateUserStatus(nUserID, uso);
 			User u = GlobalHolder.getInstance().getUser(nUserID);
 			if (u == null) {
 				V2Log.e("Can't update user status, user " + nUserID
 						+ "  isn't exist");
 			} else {
 				u.updateStatus(User.Status.fromInt(nStatus));
+				u.setDeviceType(User.DeviceType.fromInt(type));
 			}
-			Message.obtain(mCallbackHandler, JNI_UPDATE_USER_STATUS,
-					(int) nUserID, nStatus).sendToTarget();
+
+			Intent iun = new Intent(JNI_BROADCAST_USER_STATUS_NOTIFICATION);
+			iun.addCategory(JNI_BROADCAST_CATEGROY);
+			iun.putExtra("status", uso);
+			mContext.sendBroadcast(iun);
+
 		}
 
 		@Override
@@ -1115,22 +488,30 @@ public class JNIService extends Service {
 				// Do not notify if is not file;
 				return;
 			}
-			User u = GlobalHolder.getInstance().getUser(nUserID);
-			if (u != null) {
-				u.setAvatarPath(AvatarName);
+			// System default icon
+			if (AvatarName.equals("Default.png")) {
+				AvatarName = null;
 			}
+
 			GlobalHolder.getInstance().putAvatar(nUserID, AvatarName);
-			
+
 			Intent i = new Intent();
 			i.addCategory(JNI_BROADCAST_CATEGROY);
 			i.setAction(JNI_BROADCAST_USER_AVATAR_CHANGED_NOTIFICATION);
-			i.putExtra("uid", nUserID);
-			i.putExtra("avatar", AvatarName);
+			i.putExtra("avatar", new UserAvatarObject(nUserID, AvatarName));
 			sendBroadcast(i);
 		}
-		
-		
-		
+
+		@Override
+		public void OnModifyCommentNameCallback(long nUserId,
+				String sCommmentName) {
+			// TODO implment update user nick name
+		}
+
+		@Override
+		public void OnCreateCrowdCallback(String sCrowdXml, int nResult) {
+
+		}
 
 	}
 
@@ -1158,55 +539,157 @@ public class JNIService extends Service {
 					.sendToTarget();
 		}
 
-	}
+		@Override
+		public void OnModifyGroupInfoCallback(int groupType, long nGroupID,
+				String sXml) {
+			if (groupType == GroupType.CONFERENCE.intValue()) {
 
-	class ConfRequestCB implements ConfRequestCallback {
+			}
 
-		private JNICallbackHandler mCallbackHandler;
-
-		public ConfRequestCB(JNICallbackHandler mCallbackHandler) {
-			this.mCallbackHandler = mCallbackHandler;
 		}
 
 		@Override
-		public void OnEnterConfCallback(long nConfID, long nTime,
-				String szConfData, int nJoinResult) {
-			Message.obtain(
-					mCallbackHandler,
-					JNI_REQUEST_ENTER_CONF,
-					new RequestEnterConfResponse(nConfID, nTime, szConfData,
-							nJoinResult)).sendToTarget();
-		}
-
-		@Override
-		public void OnConfMemberEnterCallback(long nConfID, long nTime,
-				String szUserInfos) {
-			int start = szUserInfos.indexOf("id='");
-			if (start != -1) {
-				int end = szUserInfos.indexOf("'", start + 4);
-				if (end != -1) {
-					String id = szUserInfos.substring(start + 4, end);
-					Message.obtain(mCallbackHandler,
-							JNI_ATTENDEE_ENTERED_NOTIFICATION, id)
-							.sendToTarget();
-				} else {
-					V2Log.e("Invalid attendee user id ignore callback message");
+		public void OnInviteJoinGroupCallback(int groupType, String groupInfo,
+				String userInfo, String additInfo) {
+			GroupType gType = GroupType.fromInt(groupType);
+			if (gType == GroupType.CONFERENCE) {
+				Group g = ConferenceGroup
+						.parseConferenceGroupFromXML(groupInfo);
+				Group cache = GlobalHolder.getInstance().getGroupById(
+						GroupType.CONFERENCE, g.getmGId());
+				// User already in current conference
+				if (cache != null && g.getmGId() != 0) {
+					V2Log.i("Current user exists in group:" + cache.getName()
+							+ "  " + cache.getmGId());
+					return;
 				}
-			} else {
-				V2Log.e("Invalid attendee user id ignore callback message");
+				GroupRequest.getInstance().getGroupInfo(
+						GroupType.CONFERENCE.intValue(), g.getmGId());
+				if (g != null) {
+					GlobalHolder.getInstance().addGroupToList(gType, g);
+					if (gType == GroupType.CONFERENCE) {
+						Intent i = new Intent();
+						i.setAction(JNIService.JNI_BROADCAST_CONFERENCE_INVATITION);
+						i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
+						i.putExtra("gid", g.getmGId());
+						sendStickyBroadcast(i);
+					}
+
+				}
 			}
 		}
 
 		@Override
-		public void OnConfMemberExitCallback(long nConfID, long nTime,
+		public void OnDelGroupCallback(int groupType, long nGroupID,
+				boolean bMovetoRoot) {
+			// TODO just support conference
+			if (groupType == Group.GroupType.CONFERENCE.intValue()) {
+				String name = "";
+				String gName = "";
+				Group rG = GlobalHolder.getInstance().getGroupById(
+						Group.GroupType.CONFERENCE, nGroupID);
+				if (rG != null) {
+					gName = rG.getName();
+					if (rG.getOwnerUser() != null) {
+						name = rG.getOwnerUser().getName();
+					}
+				} else {
+					gName = nGroupID + "";
+				}
+				boolean flag = GlobalHolder.getInstance()
+						.removeConferenceGroup(nGroupID);
+				// If flag is true, mean current user dosn't remove this group
+				// should notify
+				// Otherwise this user removed this group should not notify
+				if (flag) {
+					Intent i = new Intent();
+					i.setAction(JNIService.JNI_BROADCAST_CONFERENCE_REMOVED);
+					i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
+					i.putExtra("gid", nGroupID);
+					sendBroadcast(i);
+					Notificator
+							.updateSystemNotification(
+									mContext,
+									"",
+									gName
+											+ mContext
+													.getText(R.string.confs_is_deleted_notification),
+									1, PublicIntent.VIDEO_NOTIFICATION_ID);
+				}
+			}
+		}
+
+		@Override
+		public void OnDelGroupUserCallback(int groupType, long nGroupID,
 				long nUserID) {
-			Message.obtain(mCallbackHandler, JNI_ATTENDEE_EXITED_NOTIFICATION,
-					0, 0, nUserID).sendToTarget();
+			GlobalHolder.getInstance().removeGroupUser(nGroupID, nUserID);
+			GroupUserObject obj = new GroupUserObject(groupType, nGroupID,
+					nUserID);
+			Intent i = new Intent();
+			i.setAction(JNIService.JNI_BROADCAST_GROUP_USER_REMOVED);
+			i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
+			i.putExtra("obj", obj);
+			sendBroadcast(i);
+		}
+
+		@Override
+		public void OnAddGroupUserInfoCallback(int groupType, long nGroupID,
+				String sXml) {
+			if (sXml == null || sXml.isEmpty()) {
+				V2Log.e("Incorrect user xml ");
+				return;
+			}
+			int start = sXml.indexOf("id='");
+			int end = sXml.indexOf("'", start + 4);
+			String uidStr = sXml.substring(start + 4, end);
+			long uid = 0;
+			try {
+				uid = Long.parseLong(uidStr);
+			} catch (NumberFormatException e) {
+				V2Log.e("Incorrect user id  " + sXml);
+				return;
+			}
+
+			GlobalHolder.getInstance().addUserToGroup(
+					GlobalHolder.getInstance().getUser(uid), nGroupID);
+			GroupUserObject obj = new GroupUserObject(groupType, nGroupID, uid);
+			Intent i = new Intent();
+			i.setAction(JNIService.JNI_BROADCAST_GROUP_USER_ADDED);
+			i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
+			i.putExtra("obj", obj);
+			sendBroadcast(i);
 		}
 
 	}
 
-	class VideoRequestCB implements VideoRequestCallback {
+	class AudioRequestCB extends AudioRequestCallbackAdapter {
+
+		@Override
+		public void OnAudioChatInvite(long nGroupID, long nBusinessType,
+				long nFromUserID) {
+			if (GlobalHolder.getInstance().isInMeeting()
+					|| GlobalHolder.getInstance().isInAudioCall()
+					|| GlobalHolder.getInstance().isInVideoCall()) {
+				V2Log.i("Ignore audio call ");
+				AudioRequest.getInstance().RefuseAudioChat(nGroupID,
+						nFromUserID, (int) nBusinessType);
+				return;
+			}
+
+			Intent iv = new Intent();
+			iv.addCategory(PublicIntent.DEFAULT_CATEGORY);
+			iv.setAction(PublicIntent.START_P2P_CONVERSACTION_ACTIVITY);
+			iv.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+			iv.putExtra("uid", nFromUserID);
+			iv.putExtra("is_coming_call", true);
+			iv.putExtra("voice", true);
+			mContext.startActivity(iv);
+
+		}
+
+	}
+
+	class VideoRequestCB extends VideoRequestCallbackAdapter {
 
 		private JNICallbackHandler mCallbackHandler;
 
@@ -1216,19 +699,26 @@ public class JNIService extends Service {
 
 		@Override
 		public void OnRemoteUserVideoDevice(String szXmlData) {
-			if (szXmlData == null) {
-				V2Log.e(" No avaiable user device configuration");
-				return;
-			}
-			Message.obtain(mCallbackHandler,
-					JNI_REMOTE_USER_DEVICE_INFO_NOTIFICATION, szXmlData)
-					.sendToTarget();
+			// if (szXmlData == null) {
+			// V2Log.e(" No avaiable user device configuration");
+			// return;
+			// }
+			// Message.obtain(mCallbackHandler,
+			// JNI_REMOTE_USER_DEVICE_INFO_NOTIFICATION, szXmlData)
+			// .sendToTarget();
 		}
 
 		@Override
 		public void OnVideoChatInviteCallback(long nGroupID, int nBusinessType,
 				long nFromUserID, String szDeviceID) {
-
+			if (GlobalHolder.getInstance().isInMeeting()
+					|| GlobalHolder.getInstance().isInAudioCall()
+					|| GlobalHolder.getInstance().isInVideoCall()) {
+				V2Log.i("Ignore video call ");
+				VideoRequest.getInstance().refuseVideoChat(nGroupID,
+						nFromUserID, szDeviceID, nBusinessType);
+				return;
+			}
 			Message.obtain(
 					mCallbackHandler,
 					JNI_RECEIVED_VIDEO_INVITION,
@@ -1236,15 +726,46 @@ public class JNIService extends Service {
 							nFromUserID, szDeviceID)).sendToTarget();
 		}
 
-		@Override
-		public void OnSetCapParamDone(String szDevID, int nSizeIndex,
-				int nFrameRate, int nBitRate) {
+	}
 
+	class ConfRequestCB extends ConfRequestCallbackAdapter {
+
+		private JNICallbackHandler mCallbackHandler;
+
+		public ConfRequestCB(JNICallbackHandler mCallbackHandler) {
+			this.mCallbackHandler = mCallbackHandler;
+		}
+
+		@Override
+		public void OnConfNotify(String confXml, String creatorXml) {
+			Group g = ConferenceGroup.parseConferenceGroupFromXML(confXml);
+
+			int start = confXml.indexOf("createuserid='");
+			int end = confXml.indexOf("'", start + 14);
+
+			if (start != -1 && end != -1) {
+				long uid = 0;
+				uid = Long.parseLong(confXml.substring(start + 14, end));
+				if (uid > 0) {
+					User u = GlobalHolder.getInstance().getUser(uid);
+					g.setOwnerUser(u);
+					GlobalHolder.getInstance().addGroupToList(
+							Group.GroupType.CONFERENCE, g);
+					Intent i = new Intent();
+					i.setAction(JNIService.JNI_BROADCAST_CONFERENCE_INVATITION);
+					i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
+					i.putExtra("gid", g.getmGId());
+					sendBroadcast(i);
+
+				} else {
+					V2Log.e(" Incorrect uid : " + confXml);
+				}
+			}
 		}
 
 	}
 
-	class ChatRequestCB implements ChatRequestCallback {
+	class ChatRequestCB extends ChatRequestCallbackAdapter {
 
 		private JNICallbackHandler mCallbackHandler;
 
@@ -1257,32 +778,184 @@ public class JNIService extends Service {
 				long nFromUserID, long nTime, String szXmlText) {
 			User toUser = GlobalHolder.getInstance().getCurrentUser();
 			User fromUser = GlobalHolder.getInstance().getUser(nFromUserID);
-			if (toUser == null || fromUser == null) {
-				V2Log.e("No valid user object " + toUser + "  " + fromUser);
+			if (toUser == null) {
+				V2Log.w("No valid user object for receive message " + toUser
+						+ "  " + fromUser);
+				toUser = new User(GlobalHolder.getInstance().getCurrentUserId());
+			}
+			if (fromUser == null) {
+				V2Log.w("No valid user object for receive message " + toUser
+						+ "  " + fromUser);
+				fromUser = new User(nFromUserID);
+			}
+
+			// Record image data meta
+			VMessage cache = new VMessage(fromUser, toUser, new Date());
+			cache.setMsgCode(nBusinessType);
+			XmlParser.extraImageMetaFrom(cache, szXmlText);
+			if (cache.getItems().size() > 0) {
+				synchronized (cacheImageMeta) {
+					cacheImageMeta.add(cache);
+				}
+			}
+
+			// Record audio data meta
+			VMessage cacheAudio = new VMessage(fromUser, toUser, new Date());
+			cacheAudio.setMsgCode(nBusinessType);
+			XmlParser.extraAudioMetaFrom(cacheAudio, szXmlText);
+			if (cacheAudio.getItems().size() > 0) {
+				synchronized (cacheAudioMeta) {
+					cacheAudioMeta.add(cacheAudio);
+				}
+			}
+
+			VMessage vm = XmlParser.parseForMessage(fromUser, toUser,
+					new Date(), szXmlText);
+			if (vm == null || vm.getItems().size() == 0) {
 				return;
 			}
-			VMessage vm = VMessage.fromXml(szXmlText);
-			if (vm == null) {
-				V2Log.e(" xml parsed failed : " + szXmlText);
-				return;
-			}
-			vm.setToUser(toUser);
-			vm.setUser(fromUser);
-			vm.setLocal(false);
-			vm.setDate(new Date(nTime * 1000));
-			vm.setType(MessageType.TEXT);
+
+			vm.setGroupId(nGroupID);
+			vm.setMsgCode(nBusinessType);
 			Message.obtain(mCallbackHandler, JNI_RECEIVED_MESSAGE, vm)
 					.sendToTarget();
 		}
 
 		@Override
 		public void OnRecvChatPictureCallback(long nGroupID, int nBusinessType,
-				long nFromUserID, long nTime, byte[] pPicData) {
-			User toUser = GlobalHolder.getInstance().getCurrentUser();
-			User fromUser = GlobalHolder.getInstance().getUser(nFromUserID);
-			VMessage vm = new VImageMessage(fromUser, toUser, pPicData);
-			vm.setLocal(false);
-			vm.setDate(new Date(nTime * 1000));
+				long nFromUserID, long nTime, String nSeqId, byte[] pPicData) {
+			boolean isCache = false;
+			VMessage vm = null;
+			VMessageImageItem vait = null;
+			String uuid = nSeqId;
+			boolean receivedAllImageData = true;
+			synchronized (cacheImageMeta) {
+				for (VMessage v : cacheImageMeta) {
+					for (VMessageAbstractItem vai : v.getItems()) {
+						if (((VMessageImageItem) vai).getUUID().equals(uuid)) {
+							isCache = true;
+							vm = v;
+							vait = (VMessageImageItem) vai;
+							vait.setReceived(true);
+							if (!vait.isReceived()) {
+								receivedAllImageData = false;
+							}
+						}
+					}
+					if (receivedAllImageData) {
+						cacheImageMeta.remove(v);
+					}
+				}
+			}
+			if (isCache == false) {
+				V2Log.e(" Didn't receive image meta data: " + nSeqId);
+				return;
+			}
+
+			vm.setGroupId(nGroupID);
+
+			String filePath = GlobalConfig.getGlobalPicsPath() + "/"
+					+ vait.getUUID() + vait.getExtension();
+			vait.setFilePath(filePath);
+
+			File f = new File(filePath);
+			OutputStream os = null;
+			try {
+				os = new FileOutputStream(f);
+				os.write(pPicData, 0, pPicData.length);
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			} finally {
+				if (os != null) {
+					try {
+						os.close();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+
+			Message.obtain(mCallbackHandler, JNI_RECEIVED_MESSAGE, vm)
+					.sendToTarget();
+		}
+
+		@Override
+		public void OnRecvChatAudio(long gid, int businessType,
+				long fromUserId, long timeStamp, String messageId,
+				String audioPath) {
+			VMessage vm = null;
+			synchronized (cacheAudioMeta) {
+				for (VMessage v : cacheAudioMeta) {
+					List<VMessageAudioItem> list = v.getAudioItems();
+					for (int i = 0; i < list.size(); i++) {
+						VMessageAudioItem item = list.get(i);
+						if (item.getUuid().equals(messageId)) {
+							item.setAudioFilePath(audioPath);
+							item.setState(VMessageAbstractItem.STATE_UNREAD);
+							cacheAudioMeta.remove(item);
+							vm = v;
+							break;
+						}
+					}
+					if (vm != null) {
+						break;
+					}
+				}
+
+			}
+
+			if (vm != null) {
+				vm.setGroupId(gid);
+				Message.obtain(mCallbackHandler, JNI_RECEIVED_MESSAGE, vm)
+						.sendToTarget();
+			} else {
+				V2Log.e(" Didn't find audio item : " + messageId);
+			}
+
+		}
+
+		@Override
+		public void OnSendChatResult(String uuid, int ret, int code) {
+			super.OnSendChatResult(uuid, ret, code);
+			MessageBuilder.updateVMessageItemToSentFalied(mContext, uuid);
+			Intent i = new Intent();
+			i.setAction(JNIService.JNI_BROADCAST_MESSAGE_SENT_FAILED);
+			i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
+			i.putExtra("uuid", uuid);
+			sendBroadcast(i);
+
+		}
+
+	}
+
+	class FileRequestCB extends FileRequestCallbackAdapter {
+
+		private JNICallbackHandler mCallbackHandler;
+
+		public FileRequestCB(JNICallbackHandler mCallbackHandler) {
+			this.mCallbackHandler = mCallbackHandler;
+		}
+
+		@Override
+		public void OnFileTransInvite(long nGroupID, int nBusinessType,
+				long userid, String szFileID, String szFileName,
+				long nFileBytes, int linetype) {
+			User fromUser = GlobalHolder.getInstance().getUser(userid);
+			// If doesn't receive user information from server side,
+			// construct new user object
+			if (fromUser == null) {
+				fromUser = new User(userid);
+			}
+
+			VMessage vm = new VMessage(nGroupID, fromUser, GlobalHolder
+					.getInstance().getCurrentUser());
+			int pos = szFileName.lastIndexOf("/");
+			VMessageFileItem vfi = new VMessageFileItem(vm, szFileID,
+					pos == -1 ? szFileName : szFileName.substring(pos + 1));
+			vfi.setState(VMessageFileItem.STATE_FILE_UNDOWNLOAD);
+			vfi.setFileSize(nFileBytes);
 			Message.obtain(mCallbackHandler, JNI_RECEIVED_MESSAGE, vm)
 					.sendToTarget();
 		}

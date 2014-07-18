@@ -1,0 +1,299 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="#ffffff"
+    android:orientation="vertical" >
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="1dp"
+        android:orientation="vertical" >
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" >
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight=".2"
+                android:background="#949494"
+                android:gravity="center"
+                android:paddingLeft="20dp"
+                android:paddingRight="20dp"
+                android:text="@string/date_time_picker_year" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="1dp"
+                android:layout_weight=".2"
+                android:background="#949494"
+                android:gravity="center"
+                 android:paddingLeft="20dp"
+                android:paddingRight="20dp"
+                android:text="@string/date_time_picker_month_of_year" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="1dp"
+                android:layout_weight=".2"
+                android:background="#949494"
+                android:gravity="center"
+                 android:paddingLeft="20dp"
+                android:paddingRight="20dp"
+                android:text="@string/date_time_picker_day_of_month" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="1dp"
+                android:layout_weight=".2"
+                android:background="#949494"
+                android:gravity="center"
+                 android:paddingLeft="20dp"
+                android:paddingRight="20dp"
+                android:text="@string/date_time_picker_hour" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="1dp"
+                android:layout_weight=".2"
+                android:background="#949494"
+                android:gravity="center"
+                 android:paddingLeft="20dp"
+                android:paddingRight="20dp"
+                android:text="@string/date_time_picker_minute" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" >
+
+            <TextView
+                android:id="@+id/date_time_button_plus_year"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight=".2"
+                android:background="#f0f0f0"
+                android:gravity="center"
+                android:paddingLeft="20dp"
+                android:paddingRight="20dp"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp"
+                android:text="@string/date_time_picker_plus" />
+
+            <TextView
+                android:id="@+id/date_time_button_plus_month"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="1dp"
+                android:layout_weight=".2"
+                android:background="#f0f0f0"
+                android:gravity="center"
+                 android:paddingTop="10dp"
+                android:paddingBottom="10dp"
+                android:text="@string/date_time_picker_plus" />
+
+            <TextView
+                android:id="@+id/date_time_button_plus_day"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="1dp"
+                android:layout_weight=".2"
+                android:background="#f0f0f0"
+                android:gravity="center"
+                 android:paddingTop="10dp"
+                android:paddingBottom="10dp"
+                android:text="@string/date_time_picker_plus" />
+
+            <TextView
+                android:id="@+id/date_time_button_plus_hour"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="1dp"
+                android:layout_weight=".2"
+                android:background="#f0f0f0"
+                android:gravity="center"
+                 android:paddingTop="10dp"
+                android:paddingBottom="10dp"
+                android:text="@string/date_time_picker_plus" />
+
+            <TextView
+                android:id="@+id/date_time_button_plus_minute"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="1dp"
+                android:layout_weight=".2"
+                android:background="#f0f0f0"
+                android:gravity="center"
+                 android:paddingTop="10dp"
+                android:paddingBottom="10dp"
+                android:text="@string/date_time_picker_plus" />
+        </LinearLayout>
+        
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" >
+
+            <EditText
+                android:id="@+id/date_time_picker_year"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight=".2"
+                android:background="#f0f0f0"
+                android:gravity="center"
+                android:inputType="number"
+                android:maxLength="4"
+                android:text="" />
+
+            <EditText
+                android:id="@+id/date_time_picker_month"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="1dp"
+                android:layout_weight=".2"
+                android:background="#f0f0f0"
+                android:gravity="center"
+                android:inputType="number"
+                android:maxLength="2"
+                android:text="" />
+
+            <EditText
+                 android:id="@+id/date_time_picker_day"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="1dp"
+                android:layout_weight=".2"
+                android:background="#f0f0f0"
+                android:gravity="center"
+                android:inputType="number"
+                android:maxLength="2"
+                android:text="" />
+
+            <EditText
+                 android:id="@+id/date_time_picker_hour"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="1dp"
+                android:layout_weight=".2"
+                android:background="#f0f0f0"
+                android:gravity="center"
+                android:inputType="number"
+                android:maxLength="2"
+                android:text="" />
+
+            <EditText
+                 android:id="@+id/date_time_picker_minute"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="1dp"
+                android:layout_weight=".2"
+                android:gravity="center"
+                android:background="#f0f0f0"
+                android:inputType="number"
+                android:maxLength="2"
+                android:text="" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" >
+
+            <TextView
+                android:id="@+id/date_time_button_minus_year"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight=".2"
+                android:background="#f0f0f0"
+                android:gravity="center"
+                 android:paddingTop="10dp"
+                android:paddingBottom="10dp"
+                android:text="@string/date_time_picker_minus" />
+
+            <TextView
+                android:id="@+id/date_time_button_minus_month"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="1dp"
+                android:layout_weight=".2"
+                android:background="#f0f0f0"
+                android:gravity="center"
+                 android:paddingTop="10dp"
+                android:paddingBottom="10dp"
+                android:text="@string/date_time_picker_minus" />
+
+            <TextView
+                android:id="@+id/date_time_button_minus_day"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="1dp"
+                android:layout_weight=".2"
+                android:background="#f0f0f0"
+                android:gravity="center"
+                 android:paddingTop="10dp"
+                android:paddingBottom="10dp"
+                android:text="@string/date_time_picker_minus" />
+
+            <TextView
+                android:id="@+id/date_time_button_minus_hour"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="1dp"
+                android:layout_weight=".2"
+                android:background="#f0f0f0"
+                android:gravity="center"
+                 android:paddingTop="10dp"
+                android:paddingBottom="10dp"
+                android:text="@string/date_time_picker_minus" />
+
+            <TextView
+                android:id="@+id/date_time_button_minus_minute"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="1dp"
+                android:layout_weight=".2"
+                android:gravity="center"
+                android:background="#f0f0f0"
+                 android:paddingTop="10dp"
+                android:paddingBottom="10dp"
+                android:text="@string/date_time_picker_minus" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+
+            <TextView
+                android:id="@+id/date_time_picker_setting"
+                android:layout_width="0dp"
+                android:layout_weight="0.5"
+                android:layout_height="wrap_content"
+                android:gravity="right"
+                android:paddingTop="10dp"
+                android:paddingRight="15dp"
+                android:paddingBottom="10dp"
+                android:text="@string/date_time_picker_set" />
+             <TextView
+                android:id="@+id/date_time_picker_cancel"
+                android:layout_width="0dp"
+                android:layout_weight="0.5"
+                android:layout_height="wrap_content"
+                android:paddingTop="10dp"
+                android:paddingLeft="15dp"
+                android:paddingBottom="10dp"
+                android:text="@string/date_time_picker_cancel" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</LinearLayout>

@@ -56,7 +56,12 @@ public class VideoDisplayMatrix
     
 	//Í¼Ïñ·Å´ó
 	public void zoomIn(float rate)
-	{    	
+	{
+		if (getScale() > 3)
+        {
+     	   return;
+        }
+		
         float cx = mViewWidth / 2F;
         float cy = mViewHeight / 2F;
 
@@ -66,13 +71,13 @@ public class VideoDisplayMatrix
 	//Í¼ÏñËõÐ¡
 	public void zoomOut(float rate)
 	{
-        float cx = mViewWidth / 2F;
-        float cy = mViewHeight / 2F;
-        
-        if(getScale() < 0.3)
+		if(getScale() < 0.3)
         {
      	   return;
         }
+		
+        float cx = mViewWidth / 2F;
+        float cy = mViewHeight / 2F;
         
         mSuppMatrix.postScale(1F / rate, 1F / rate, cx, cy);
 	}

@@ -1,41 +1,50 @@
 package com.v2tech.view;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.Dialog;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
-import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
-import android.os.Build;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.Message;
+import android.text.Editable;
+import android.text.InputType;
 import android.text.TextUtils;
+import android.text.TextWatcher;
+import android.view.KeyEvent;
 import android.view.Menu;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnFocusChangeListener;
+import android.view.View.OnTouchListener;
+import android.view.ViewGroup;
+import android.view.Window;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.view.animation.LinearInterpolator;
+import android.view.animation.RotateAnimation;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 
 import com.V2.jni.ConfigRequest;
 import com.v2tech.R;
-import com.v2tech.logic.AsynResult;
-import com.v2tech.logic.GlobalHolder;
-import com.v2tech.logic.NetworkStateCode;
-import com.v2tech.logic.User;
-import com.v2tech.view.JNIService.LocalBinder;
+import com.v2tech.service.GlobalHolder;
+import com.v2tech.service.Registrant;
+import com.v2tech.service.UserService;
+import com.v2tech.service.jni.JNIResponse;
+import com.v2tech.service.jni.RequestLogInResponse;
+import com.v2tech.util.GlobalConfig;
+import com.v2tech.util.SPUtil;
+import com.v2tech.util.V2Log;
 
 /**
  * Activity which displays a login screen to the user, offering registration as
@@ -43,7 +52,6 @@ import com.v2tech.view.JNIService.LocalBinder;
  */
 public class LoginActivity extends Activity {
 
-	
 	/**
 	 * The default email to populate the email field with.
 	 */
@@ -55,6 +63,8 @@ public class LoginActivity extends Activity {
 
 	private ConfigRequest mCR = new ConfigRequest();
 
+	private UserService us = new UserService();
+
 	// Values for email and password at the time of the login attempt.
 	private String mEmail;
 	private String mPassword;
@@ -62,84 +72,214 @@ public class LoginActivity extends Activity {
 	// UI references.
 	private EditText mEmailView;
 	private EditText mPasswordView;
-	private CheckBox mRemPwdCkbx;
-	private View mLoginFormView;
-	private View mLoginStatusView;
 	private TextView mLoginStatusMessageView;
 	private View mShowIpSettingButton;
 	private Dialog mSettingDialog;
 
 	private Activity mContext;
-	
+
 	private View loginView;
+	private Boolean isLoggingIn = false;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		mContext = this;
 		setContentView(R.layout.activity_login);
+		mContext = this;
 
 		// Set up the login form.
-		mEmail = getIntent().getStringExtra(EXTRA_EMAIL);
 		mEmailView = (EditText) findViewById(R.id.email);
-		mEmailView.setText(mEmail);
+		mEmailView.addTextChangedListener(userNameTextWAtcher);
+		mEmailView.setOnFocusChangeListener(new OnFocusChangeListener() {
+
+			@Override
+			public void onFocusChange(View arg0, boolean focus) {
+				if (focus) {
+					if (mContext.getResources()
+							.getText(R.string.login_user_name)
+							.equals(mEmailView.getText().toString())) {
+						mEmailView.setText("");
+					}
+					mEmailView.setTextColor(Color.BLACK);
+				} else {
+					if (mEmailView.getText().toString().trim().isEmpty()) {
+						mEmailView.setText(R.string.login_user_name);
+						mEmailView
+								.setTextColor(mContext
+										.getResources()
+										.getColor(
+												R.color.login_activity_login_box_text_color));
+					}
+				}
+			}
+		});
+
+		mEmailView.setOnEditorActionListener(new OnEditorActionListener() {
+
+			@Override
+			public boolean onEditorAction(TextView tv, int actionId,
+					KeyEvent event) {
+				mPasswordView.setInputType(InputType.TYPE_CLASS_TEXT
+						| InputType.TYPE_TEXT_VARIATION_PASSWORD);
+				return false;
+			}
+
+		});
 
 		mPasswordView = (EditText) findViewById(R.id.password);
+		mPasswordView.setOnFocusChangeListener(new OnFocusChangeListener() {
 
-		mLoginFormView = findViewById(R.id.login_form);
-		mLoginStatusView = findViewById(R.id.login_status);
+			@Override
+			public void onFocusChange(View arg0, boolean focus) {
+				if (focus) {
+					mPasswordView.setTextColor(Color.BLACK);
+					if (mContext.getResources()
+							.getText(R.string.prompt_password)
+							.equals(mPasswordView.getText().toString())) {
+						mPasswordView.setText("");
+					}
+				} else {
+					if (mPasswordView.getText().toString().trim().isEmpty()) {
+						mPasswordView.setText(R.string.prompt_password);
+						mPasswordView
+								.setTextColor(mContext
+										.getResources()
+										.getColor(
+												R.color.login_activity_login_box_text_color));
+						mPasswordView.setInputType(InputType.TYPE_CLASS_TEXT);
+					} else {
+						mPasswordView.setInputType(InputType.TYPE_CLASS_TEXT
+								| InputType.TYPE_TEXT_VARIATION_PASSWORD);
+					}
+				}
+			}
+		});
+
+		mPasswordView.setOnTouchListener(new OnTouchListener() {
+
+			@Override
+			public boolean onTouch(View view, MotionEvent event) {
+				InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+				imm.showSoftInput(mPasswordView, InputMethodManager.SHOW_FORCED);
+				EditText et = ((EditText) view);
+				if (event.getAction() == MotionEvent.ACTION_DOWN) {
+					et.setInputType(InputType.TYPE_CLASS_TEXT
+							| InputType.TYPE_TEXT_VARIATION_PASSWORD);
+					et.requestFocus();
+				}
+				return true;
+			}
+
+		});
+
+		mPasswordView.setOnEditorActionListener(new OnEditorActionListener() {
+
+			@Override
+			public boolean onEditorAction(TextView v, int actionId,
+					KeyEvent event) {
+				// T
+				if (actionId == EditorInfo.IME_ACTION_DONE) {
+					InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+					imm.hideSoftInputFromWindow(mEmailView.getWindowToken(), 0);
+					imm.hideSoftInputFromWindow(mPasswordView.getWindowToken(),
+							0);
+					attemptLogin();
+				}
+				return false;
+			}
+
+		});
+
 		mLoginStatusMessageView = (TextView) findViewById(R.id.login_status_message);
-		
-		findViewById(R.id.login_form).setOnClickListener(
+
+		findViewById(R.id.login_form_ll).setOnClickListener(
 				new View.OnClickListener() {
 					@Override
 					public void onClick(View view) {
 						InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-						imm.hideSoftInputFromWindow(mEmailView.getWindowToken(), 0);
-						imm.hideSoftInputFromWindow(mPasswordView.getWindowToken(), 0);
+						imm.hideSoftInputFromWindow(
+								mEmailView.getWindowToken(), 0);
+						imm.hideSoftInputFromWindow(
+								mPasswordView.getWindowToken(), 0);
+						mPasswordView.setError(null);
+						mEmailView.setError(null);
 					}
 				});
-		
 
 		findViewById(R.id.sign_in_button).setOnClickListener(
 				new View.OnClickListener() {
 					@Override
 					public void onClick(View view) {
+						InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+						imm.hideSoftInputFromWindow(
+								mEmailView.getWindowToken(), 0);
+						imm.hideSoftInputFromWindow(
+								mPasswordView.getWindowToken(), 0);
 						attemptLogin();
 					}
 				});
 		mShowIpSettingButton = findViewById(R.id.show_setting);
 		mShowIpSettingButton.setOnClickListener(showIpSetting);
 
-		mRemPwdCkbx = (CheckBox) findViewById(R.id.login_rem_pwd);
-
 		loginView = findViewById(R.id.login_layout);
 		loginView.setVisibility(View.GONE);
 		init();
 	}
 
-	private void init() {
+	private String[] local;
 
-		SharedPreferences sf = mContext.getSharedPreferences("config",
-				Context.MODE_PRIVATE);
-		mEmailView.setText(sf.getString("user", ""));
-		mPasswordView.setText(sf.getString("passwd", ""));
-		if (!sf.getString("user", "").equals("")
-				&& !sf.getString("passwd", "").equals("")) {
-			mRemPwdCkbx.setChecked(true);
+	private void init() {
+		String user = SPUtil.getConfigStrValue(this, "user");
+		String password = SPUtil.getConfigStrValue(this, "passwd");
+		if (user != null && !user.trim().isEmpty()) {
+			mEmailView.setText(user);
+			mEmailView.setTextColor(Color.BLACK);
+		}
+		if (password != null && !password.trim().isEmpty()) {
+			mPasswordView.setText(password);
 		}
 	}
 
 	@Override
 	protected void onResume() {
 		super.onResume();
-		
-		
 		loginView.setVisibility(View.VISIBLE);
-	    final Animation tabBlockHolderAnimation = AnimationUtils.loadAnimation(this, R.animator.login_container_down_in);
-	    tabBlockHolderAnimation.setDuration(700);
-	    loginView.startAnimation(tabBlockHolderAnimation);
+		final Animation tabBlockHolderAnimation = AnimationUtils.loadAnimation(
+				this, R.animator.login_container_down_in);
+		tabBlockHolderAnimation.setDuration(1000);
+		tabBlockHolderAnimation.setFillAfter(true);
+		// tabBlockHolderAnimation.setInterpolator(new BounceInterpolator());
+		loginView.startAnimation(tabBlockHolderAnimation);
 	}
+
+	private TextWatcher userNameTextWAtcher = new TextWatcher() {
+
+		@Override
+		public void afterTextChanged(Editable et) {
+			if (!et.toString().trim().isEmpty()) {
+				mEmailView.setError(null);
+			}
+		}
+
+		@Override
+		public void beforeTextChanged(CharSequence arg0, int arg1, int arg2,
+				int arg3) {
+
+		}
+
+		@Override
+		public void onTextChanged(CharSequence str, int arg1, int arg2, int arg3) {
+			if (local == null || local.length < 2) {
+				return;
+			}
+			if (str.toString().equals(local[0])) {
+				mPasswordView.setText(local[1]);
+			} else {
+				mPasswordView.setText("");
+			}
+		}
+
+	};
 
 	private OnClickListener showIpSetting = new OnClickListener() {
 
@@ -157,48 +297,28 @@ public class LoginActivity extends Activity {
 			Button saveButton = (Button) dialog
 					.findViewById(R.id.ip_setting_save);
 
-			final EditText et1 = (EditText) dialog.findViewById(R.id.ip1);
-			final EditText et2 = (EditText) dialog.findViewById(R.id.ip2);
-			final EditText et3 = (EditText) dialog.findViewById(R.id.ip3);
-			final EditText et4 = (EditText) dialog.findViewById(R.id.ip4);
+			final EditText et = (EditText) dialog.findViewById(R.id.ip);
 			final EditText port = (EditText) dialog.findViewById(R.id.port);
 
-			SharedPreferences sf = mContext.getSharedPreferences("config",
-					Context.MODE_PRIVATE);
-			String cacheIp = sf.getString("ip", null);
-			if (cacheIp != null && cacheIp.length() <= 15) {
-				String[] ips = cacheIp.split("\\.");
-				et1.setText(ips[0]);
-				et2.setText(ips[1]);
-				et3.setText(ips[2]);
-				et4.setText(ips[3]);
-			}
-
-			port.setText(sf.getString("port", ""));
+			et.setText(SPUtil.getConfigStrValue(mContext, "ip"));
+			port.setText(SPUtil.getConfigStrValue(mContext, "port"));
 
 			saveButton.setOnClickListener(new OnClickListener() {
 				@Override
 				public void onClick(View v) {
-					String ets1 = et1.getText().toString();
-					String ets2 = et2.getText().toString();
-					String ets3 = et3.getText().toString();
-					String ets4 = et4.getText().toString();
+					String ets = et.getText().toString();
 					String portStr5 = port.getText().toString();
-
-					if (ets1 == null || "".equals(ets1) || ets2 == null
-							|| "".equals(ets2) || ets3 == null || "".equals(ets3)
-							|| ets4 == null || "".equals(ets4) || portStr5 == null
-							|| "".equals(portStr5)) {
-						Toast.makeText(mContext, R.string.error_host_required,
-								Toast.LENGTH_SHORT).show();
+					if (!checkIPorDNS(ets)) {
+						et.setError(mContext
+								.getText(R.string.error_host_invalid));
 						return;
 					}
-					final String ip = ets1 + "."
-							+ ets2 + "."
-							+ ets3 + "."
-							+ ets4;
-					if (!saveHostConfig(ip,
-							Integer.parseInt(portStr5))) {
+					if (portStr5 == null || portStr5.isEmpty()) {
+						port.setError(mContext
+								.getText(R.string.error_field_required));
+						return;
+					}
+					if (!saveHostConfig(ets, portStr5)) {
 						Toast.makeText(mContext,
 								R.string.error_save_host_config,
 								Toast.LENGTH_LONG).show();
@@ -214,22 +334,32 @@ public class LoginActivity extends Activity {
 			cancelButton.setOnClickListener(new OnClickListener() {
 				@Override
 				public void onClick(View v) {
+					et.setText(SPUtil.getConfigStrValue(mContext, "ip"));
+					port.setText(SPUtil.getConfigStrValue(mContext, "port"));
+					et.setError(null);
+					port.setError(null);
 					dialog.dismiss();
 				}
 			});
-			
+
 			dialog.setCancelable(true);
 			dialog.setCanceledOnTouchOutside(true);
-			
+
 			mSettingDialog = dialog;
 			dialog.show();
 		}
 
 	};
-	
-	
-	
 
+	private boolean checkIPorDNS(String str) {
+
+		String ValidIpAddressRegex = "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$";
+
+		String ValidHostnameRegex = "^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.){1,}([A-Za-z][A-Za-z][A-Za-z]*)$";
+
+		return str.matches(ValidIpAddressRegex)
+				|| str.matches(ValidHostnameRegex);
+	}
 
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
@@ -237,33 +367,25 @@ public class LoginActivity extends Activity {
 		if (mSettingDialog != null && mSettingDialog.isShowing()) {
 			mSettingDialog.dismiss();
 		}
-	
-	}
 
+	}
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		super.onCreateOptionsMenu(menu);
-		getMenuInflater().inflate(R.menu.login, menu);
+		// getMenuInflater().inflate(R.menu.login, menu);
 		return true;
 	}
 
-	private boolean saveHostConfig(String ip, int port) {
-		SharedPreferences sf = mContext.getSharedPreferences("config",
-				Context.MODE_PRIVATE);
-		Editor e = sf.edit();
-		e.putString("ip", ip);
-		e.putString("port", port + "");
-		return e.commit();
+	private boolean saveHostConfig(String ip, String port) {
+		return SPUtil.putConfigStrValue(this, new String[] { "ip", "port" },
+				new String[] { ip, port });
 	}
 
 	private boolean saveUserConfig(String user, String passwd) {
-		SharedPreferences sf = mContext.getSharedPreferences("config",
-				Context.MODE_PRIVATE);
-		Editor e = sf.edit();
-		e.putString("user", user);
-		e.putString("passwd", passwd);
-		return e.commit();
+		return SPUtil.putConfigStrValue(this,
+				new String[] { "user", "passwd" },
+				new String[] { user, passwd });
 	}
 
 	/**
@@ -272,10 +394,8 @@ public class LoginActivity extends Activity {
 	 * errors are presented and no actual login attempt is made.
 	 */
 	public void attemptLogin() {
-		SharedPreferences sf = mContext.getSharedPreferences("config",
-				Context.MODE_PRIVATE);
-		String ip = sf.getString("ip", null);
-		String port = sf.getString("port", null);
+		String ip = SPUtil.getConfigStrValue(this, "ip");
+		String port = SPUtil.getConfigStrValue(this, "port");
 
 		if (ip == null || ip.isEmpty() || port == null || port.isEmpty()) {
 			Toast.makeText(mContext, R.string.error_no_host_configuration,
@@ -294,16 +414,28 @@ public class LoginActivity extends Activity {
 		mEmail = mEmailView.getText().toString();
 		mPassword = mPasswordView.getText().toString();
 
+		// Check user name is initial user name or not.
+		if (mContext.getResources().getText(R.string.login_user_name)
+				.equals(mEmail)) {
+			mEmailView.setError(getString(R.string.error_field_required));
+			mEmailView.requestFocus();
+			return;
+		}
+
+		// Check password is initial password
+		if (mContext.getResources().getText(R.string.prompt_password)
+				.equals(mPassword)) {
+			mPasswordView.setError(getString(R.string.error_field_required));
+			mPasswordView.requestFocus();
+			return;
+		}
+
 		boolean cancel = false;
 		View focusView = null;
 
 		// Check for a valid password.
 		if (TextUtils.isEmpty(mPassword)) {
 			mPasswordView.setError(getString(R.string.error_field_required));
-			focusView = mPasswordView;
-			cancel = true;
-		} else if (mPassword.length() < 4) {
-			mPasswordView.setError(getString(R.string.error_invalid_password));
 			focusView = mPasswordView;
 			cancel = true;
 		}
@@ -313,10 +445,6 @@ public class LoginActivity extends Activity {
 			mEmailView.setError(getString(R.string.error_field_required));
 			focusView = mEmailView;
 			cancel = true;
-		} else if (!mEmail.contains("@")) {
-			mEmailView.setError(getString(R.string.error_invalid_email));
-			focusView = mEmailView;
-			cancel = true;
 		}
 
 		if (cancel) {
@@ -324,58 +452,77 @@ public class LoginActivity extends Activity {
 			// form field with an error.
 			focusView.requestFocus();
 		} else {
-			// Show a progress spinner, and kick off a background task to
-			// perform the user login attempt.
-			mLoginStatusMessageView.setText(R.string.login_progress_signing_in);
-			showProgress(true);
-		//	mAuthTask = new UserLoginTask();
-		//	mAuthTask.execute((Void) null);
-			mService.login(mEmailView.getText().toString(), mPasswordView
-						.getText().toString(), Message.obtain(mHandler, LOG_IN_CALL_BACK));
+			synchronized (isLoggingIn) {
+				if (isLoggingIn) {
+					V2Log.w("Current state is logging in");
+					return;
+				}
+				isLoggingIn = true;
+				// Show a progress spinner, and kick off a background task to
+				// perform the user login attempt.
+				mLoginStatusMessageView
+						.setText(R.string.login_progress_signing_in);
+				showProgress(true);
+				us.login(mEmailView.getText().toString(), mPasswordView
+						.getText().toString(), new Registrant(mHandler,
+						LOG_IN_CALL_BACK, null));
+			}
 		}
 	}
 
-	/**
-	 * Shows the progress UI and hides the login form.
-	 */
-	@TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
+	private Dialog mProgressDialog;
+	private ImageView iv;
+	private RotateAnimation animation;
+
 	private void showProgress(final boolean show) {
-		// On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
-		// for very easy animations. If available, use these APIs to fade-in
-		// the progress spinner.
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
-			int shortAnimTime = getResources().getInteger(
-					android.R.integer.config_shortAnimTime);
-
-			mLoginStatusView.setVisibility(View.VISIBLE);
-			mLoginStatusView.animate().setDuration(shortAnimTime)
-					.alpha(show ? 1 : 0)
-					.setListener(new AnimatorListenerAdapter() {
-						@Override
-						public void onAnimationEnd(Animator animation) {
-							mLoginStatusView.setVisibility(show ? View.VISIBLE
-									: View.GONE);
-						}
-					});
-
-			mLoginFormView.setVisibility(View.VISIBLE);
-			mLoginFormView.animate().setDuration(shortAnimTime)
-					.alpha(show ? 0 : 1)
-					.setListener(new AnimatorListenerAdapter() {
-						@Override
-						public void onAnimationEnd(Animator animation) {
-							mLoginFormView.setVisibility(show ? View.GONE
-									: View.VISIBLE);
-						}
-					});
-		} else {
-			// The ViewPropertyAnimator APIs are not available, so simply show
-			// and hide the relevant UI components.
-			mLoginStatusView.setVisibility(show ? View.VISIBLE : View.GONE);
-			mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
+		if (animation == null) {
+			animation = new RotateAnimation(0f, 359f,
+					Animation.RELATIVE_TO_SELF, 0.5f,
+					Animation.RELATIVE_TO_SELF, 0.5f);
+			animation.setDuration(500);
+			animation.setRepeatCount(RotateAnimation.INFINITE);
+			animation.setRepeatMode(RotateAnimation.RESTART);
+			LinearInterpolator lin = new LinearInterpolator();
+			animation.setInterpolator(lin);
 		}
-	}
+		if (show == false) {
+			animation.cancel();
+			if (mProgressDialog != null) {
+				mProgressDialog.dismiss();
+				return;
+			}
+		}
 
+		if (mProgressDialog != null) {
+			if (!mProgressDialog.isShowing()) {
+				iv.startAnimation(animation);
+				mProgressDialog.show();
+			}
+			return;
+		}
+		final Dialog dialog = new Dialog(mContext, R.style.IpSettingDialog);
+		dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+		LinearLayout ll = new LinearLayout(mContext);
+		ll.setBackgroundColor(Color.TRANSPARENT);
+		ll.setOrientation(LinearLayout.VERTICAL);
+
+		iv = new ImageView(mContext);
+		iv.setImageResource(R.drawable.spin_black_70);
+		iv.setPadding(60, 60, 60, 60);
+		ll.addView(iv, new LinearLayout.LayoutParams(
+				ViewGroup.LayoutParams.MATCH_PARENT,
+				ViewGroup.LayoutParams.WRAP_CONTENT));
+
+		dialog.setContentView(ll);
+
+		dialog.setCancelable(false);
+		dialog.setCanceledOnTouchOutside(false);
+
+		mProgressDialog = dialog;
+		dialog.show();
+		iv.startAnimation(animation);
+
+	}
 
 	private static final int LOG_IN_CALL_BACK = 1;
 	private Handler mHandler = new Handler() {
@@ -384,85 +531,49 @@ public class LoginActivity extends Activity {
 		public void handleMessage(Message msg) {
 			switch (msg.what) {
 			case LOG_IN_CALL_BACK:
-				showProgress(false);
-				AsynResult ar = (AsynResult) msg.obj;
-				if (ar.getState() == AsynResult.AsynState.TIME_OUT) {
+				isLoggingIn = false;
+				JNIResponse rlr = (JNIResponse) msg.obj;
+				if (rlr.getResult() == JNIResponse.Result.TIME_OUT) {
 					Toast.makeText(mContext, R.string.error_time_out,
 							Toast.LENGTH_LONG).show();
-					return;
-				}
-				User u = (User)ar.getObject();
-				
-				if (u.getmResult() == NetworkStateCode.CONNECTED_ERROR || u.getmResult() == NetworkStateCode.TIME_OUT) {
-					Toast.makeText(mContext, R.string.error_connect_to_server,
-							Toast.LENGTH_LONG).show();
-				} else if (u.getmResult() == NetworkStateCode.INCORRECT_INFO){
+				} else if (rlr.getResult() == JNIResponse.Result.FAILED) {
 					mPasswordView
 							.setError(getString(R.string.error_incorrect_password));
 					mPasswordView.requestFocus();
+				} else if (rlr.getResult() == JNIResponse.Result.CONNECT_ERROR) {
+					Toast.makeText(mContext, R.string.error_connect_to_server,
+							Toast.LENGTH_LONG).show();
+				} else if (rlr.getResult() == JNIResponse.Result.SERVER_REJECT) {
+					Toast.makeText(mContext, R.string.error_connect_to_server,
+							Toast.LENGTH_LONG).show();
 				} else {
 					// Save user info
-					if (mRemPwdCkbx.isChecked()) {
-						saveUserConfig(mEmailView.getText().toString(), mPasswordView
-								.getText().toString());
-					} else {
-						saveUserConfig("", "");
-					}
-					// record current logged in user to global holder
-					//FIXME optimze code
-					GlobalHolder.getInstance().setCurrentUser(u);
-					SharedPreferences sf = mContext.getSharedPreferences("config", Context.MODE_PRIVATE);
-					Editor ed = sf.edit();
-					ed.putInt("LoggedIn", 1);
-					ed.commit();
-					
-					mContext.startActivity(new Intent(mContext, MainActivity.class));
+					saveUserConfig(mEmailView.getText().toString(), "");
+					GlobalHolder.getInstance().setCurrentUser(
+							((RequestLogInResponse) rlr).getUser());
+					SPUtil.putConfigIntValue(mContext,
+							GlobalConfig.KEY_LOGGED_IN, 1);
+					mContext.startActivity(new Intent(mContext,
+							MainActivity.class));
 					finish();
 				}
+
+				showProgress(false);
 				break;
 			}
 		}
-		
+
 	};
 
-	private boolean isBound;
 	@Override
 	protected void onStart() {
 		super.onStart();
-		isBound = bindService(new Intent(this.getApplicationContext(), JNIService.class), mConnection, Context.BIND_AUTO_CREATE);
 	}
 
 	@Override
 	protected void onStop() {
 		super.onStop();
-		if (isBound) {
-			this.unbindService(mConnection);
-		}
+
 	}
-	
-	private JNIService mService;
-	
-	
-	  /** Defines callbacks for service binding, passed to bindService() */
-    private ServiceConnection mConnection = new ServiceConnection() {
-
-        @Override
-        public void onServiceConnected(ComponentName className,
-                IBinder service) {
-            LocalBinder binder = (LocalBinder) service;
-            mService = binder.getService();
-            isBound = true;
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName arg0) {
-        	isBound = false;
-        }
-    };
-	
-	
-	
-	
-	
 
 }

@@ -1,0 +1,131 @@
+﻿$axure.loadCurrentPage({
+  "url":"成功通话.html",
+  "generationDate":new Date(1403848988510.36),
+  "isCanvasEnabled":false,
+  "variables":["OnLoadVariable"],
+  "page":{
+    "packageId":"73f0dc7b8b7f4d23b743dbec321dafdf",
+    "type":"Axure:Page",
+    "name":"成功通话",
+    "notes":{
+},
+    "style":{
+      "baseStyle":"627587b6038d43cca051c114ac41ad32",
+      "pageAlignment":"near",
+      "fill":{
+        "fillType":"solid",
+        "color":0xFFFFFFFF},
+      "image":null,
+      "imageHorizontalAlignment":"near",
+      "imageVerticalAlignment":"near",
+      "imageRepeat":"auto",
+      "favicon":null,
+      "sketchFactor":"0",
+      "colorStyle":"appliedColor",
+      "fontName":"应用字体",
+      "borderWidth":"0"},
+    "adaptiveStyles":{
+},
+    "interactionMap":{
+},
+    "diagram":{
+      "objects":[{
+          "id":"cd9fe91134b2498d805827123b133cdf",
+          "label":"",
+          "type":"imageBox",
+          "styleType":"imageBox",
+          "visible":true,
+          "style":{
+            "size":{
+              "width":640,
+              "height":960}},
+          "adaptiveStyles":{
+},
+          "objects":[{
+              "id":"e307d32f1ea64b2fb68ef72a830288d3",
+              "label":"",
+              "isContained":true,
+              "type":"richTextPanel",
+              "styleType":"paragraph",
+              "visible":true,
+              "style":{
+                "size":{
+                  "width":640,
+                  "height":960}},
+              "adaptiveStyles":{
+}}],
+          "images":{
+            "normal~":"images/成功通话/u0.jpg"}},
+{
+          "id":"7c3be45cfb6d43e3bcf75770b49d2f19",
+          "label":"",
+          "type":"buttonShape",
+          "styleType":"buttonShape",
+          "visible":true,
+          "style":{
+            "fill":{
+              "fillType":"solid",
+              "color":0xFFFFFF},
+            "location":{
+              "x":250,
+              "y":850},
+            "size":{
+              "width":170,
+              "height":100},
+            "borderFill":{
+              "fillType":"solid",
+              "color":0x797979},
+            "cornerRadiusTopLeft":"5"},
+          "adaptiveStyles":{
+},
+          "objects":[{
+              "id":"75df3810877e46aba095d99b9617f3f1",
+              "label":"",
+              "isContained":true,
+              "type":"richTextPanel",
+              "styleType":"paragraph",
+              "visible":true,
+              "style":{
+                "fill":{
+                  "fillType":"solid",
+                  "color":0xFFFFFF},
+                "location":{
+                  "x":250,
+                  "y":850},
+                "size":{
+                  "width":170,
+                  "height":100},
+                "borderFill":{
+                  "fillType":"solid",
+                  "color":0x797979},
+                "cornerRadiusTopLeft":"5"},
+              "adaptiveStyles":{
+}}],
+          "interactionMap":{
+            "onClick":{
+              "description":"OnClick",
+              "cases":[{
+                  "description":"用例 1",
+                  "isNewIfGroup":false,
+                  "actions":[{
+                      "action":"linkWindow",
+                      "description":"在 当前窗口 打开 个人资料",
+                      "target":{
+                        "targetType":"page",
+                        "url":"个人资料.html",
+                        "includeVariables":true},
+                      "linkType":"current"}]}]}},
+          "tabbable":true,
+          "images":{
+            "normal~":"resources/images/transparent.gif"}}]}},
+  "masters":{
+},
+  "objectPaths":{
+    "cd9fe91134b2498d805827123b133cdf":{
+      "scriptId":"u0"},
+    "e307d32f1ea64b2fb68ef72a830288d3":{
+      "scriptId":"u1"},
+    "7c3be45cfb6d43e3bcf75770b49d2f19":{
+      "scriptId":"u2"},
+    "75df3810877e46aba095d99b9617f3f1":{
+      "scriptId":"u3"}}});

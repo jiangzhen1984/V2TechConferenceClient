@@ -1,35 +1,38 @@
 package com.v2tech.view.conversation;
 
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.widget.Toast;
+import android.support.v4.view.ViewPager.OnPageChangeListener;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.TextView;
 
 import com.v2tech.R;
-import com.v2tech.db.ContentDescriptor;
-import com.v2tech.logic.User;
-import com.v2tech.logic.VImageMessage;
-import com.v2tech.logic.VMessage;
+import com.v2tech.vo.VMessage;
+import com.v2tech.vo.VMessageImageItem;
 
 public class ImageViewGallery extends FragmentActivity {
+
+	private View mReturnButton;
 
 	private ViewPager mImageViewPager;
 
 	private List<ListItem> vimList;
-	
+
 	private long initMid;
-	
+
 	private int initPos;
+
+	private TextView mTitle;
+
+	private ImageAdapter adapter;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -38,84 +41,95 @@ public class ImageViewGallery extends FragmentActivity {
 
 		mImageViewPager = (ViewPager) findViewById(R.id.image_view_view_pager);
 		initMid = getIntent().getLongExtra("cid", 0);
-		loadImages(getIntent().getLongExtra("uid1", 0), getIntent()
-				.getLongExtra("uid2", 0));
-		mImageViewPager.setAdapter(new ImageAdapter(this.getSupportFragmentManager()));
+		int type = getIntent().getIntExtra("type", 0);
+		if (type == 1) {
+			long gid = getIntent().getLongExtra("gid", 0);
+			loadImages(gid);
+		} else {
+			loadImages(getIntent().getLongExtra("uid1", 0), getIntent()
+					.getLongExtra("uid2", 0));
+		}
+
+		mTitle = (TextView) findViewById(R.id.image_galley_title);
+		mReturnButton = findViewById(R.id.image_galley_detail_return_button);
+		mReturnButton.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				onBackPressed();
+			}
+
+		});
+
+		mImageViewPager.setOffscreenPageLimit(1);
+
+		mImageViewPager.setOnPageChangeListener(pageChangeListener);
+		mTitle.setText((initPos + 1) + "/" + vimList.size());
 		mImageViewPager.setCurrentItem(initPos);
 	}
 
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		vimList.clear();
+	}
+
+	/**
+	 * Load group image message list
+	 * 
+	 * @param groupId
+	 */
+	private void loadImages(long groupId) {
+		List<VMessage> list = MessageLoader
+				.loadGroupImageMessage(this, groupId);
+		populateImageMessage(list);
+	}
+
 	private void loadImages(long user1Id, long user2Id) {
-		if (user1Id <= 0 || user2Id <= 0) {
-			Toast.makeText(ImageViewGallery.this, "invalid user id",
-					Toast.LENGTH_SHORT).show();
-			return;
-		}
+		List<VMessage> list = MessageLoader.loadImageMessage(this, user1Id,
+				user2Id);
+		populateImageMessage(list);
+	}
+
+	private void populateImageMessage(List<VMessage> list) {
+		boolean flag = false;
 		vimList = new ArrayList<ListItem>();
-		String selection = "((" + ContentDescriptor.Messages.Cols.FROM_USER_ID
-				+ "=? and " + ContentDescriptor.Messages.Cols.TO_USER_ID
-				+ "=? ) or " + "("
-				+ ContentDescriptor.Messages.Cols.FROM_USER_ID + "=? and "
-				+ ContentDescriptor.Messages.Cols.TO_USER_ID + "=? )) and "
-				+ ContentDescriptor.Messages.Cols.MSG_TYPE + "=?";
-		String[] args = new String[] { user1Id + "", user2Id + "",
-				user2Id + "", user1Id + "", VMessage.MessageType.IMAGE.getIntValue() + "" };
-
-		Cursor mCur = this.getContentResolver()
-				.query(ContentDescriptor.Messages.CONTENT_URI,
-						ContentDescriptor.Messages.Cols.ALL_CLOS, selection,
-						args, null);
-
-		if (mCur.getCount() == 0) {
-			mCur.close();
-			return;
-		}
-		int index =0;
-		while (mCur.moveToNext()) {
-			VMessage vm = extractMsg(mCur, user1Id, user2Id);
-			vimList.add(new ListItem((VImageMessage) vm));
-			if (vm.getId() == initMid) {
-				initPos = index;
+		for (VMessage vm : list) {
+			List<VMessageImageItem> items = vm.getImageItems();
+			for (VMessageImageItem item : items) {
+				vimList.add(new ListItem(item));
 			}
-			index++;
+			
+			if (vm.getId() == this.initMid) {
+				flag = true;
+			} 
+			if (!flag) {
+				initPos++;
+			}
 		}
-		mCur.close();
+
+		adapter = new ImageAdapter(this.getSupportFragmentManager());
+		mImageViewPager.setAdapter(adapter);
 	}
 
-	private VMessage extractMsg(Cursor cur, long user1Id, long user2Id) {
-		if (cur.isClosed()) {
-			throw new RuntimeException(" cursor is closed");
-		}
-		DateFormat dp = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-		User localUser = new User(user1Id);
-		User remoteUser = new User(user2Id);
+	private OnPageChangeListener pageChangeListener = new OnPageChangeListener() {
 
-		int id = cur.getInt(0);
-		long localUserId = cur.getLong(1);
-		// msg_content column
-		String content = cur.getString(5);
-		// message type
-		int type = cur.getInt(6);
-		// date time
-		String dateString = cur.getString(7);
+		@Override
+		public void onPageScrollStateChanged(int arg0) {
 
-		VMessage vm = null;
-		if (type == VMessage.MessageType.TEXT.getIntValue()) {
-			vm = new VMessage(localUser, remoteUser, content,
-					localUserId == user2Id);
-		} else {
-			vm = new VImageMessage(localUser, remoteUser,
-					content.split("\\|")[4], localUserId == user2Id);
-		}
-		vm.setId(id);
-		try {
-			vm.setDate(dp.parse(dateString));
-		} catch (ParseException e) {
-			e.printStackTrace();
 		}
 
-		return vm;
+		@Override
+		public void onPageScrolled(int arg0, float arg1, int arg2) {
 
-	}
+		}
+
+		@Override
+		public void onPageSelected(int pos) {
+			mTitle.setText((pos + 1) + "/" + vimList.size());
+		}
+
+	};
 
 	class ImageAdapter extends FragmentPagerAdapter {
 
@@ -130,25 +144,23 @@ public class ImageViewGallery extends FragmentActivity {
 
 		@Override
 		public int getCount() {
-			return vimList.size();
+			return vimList == null ? 0 : vimList.size();
 		}
 
 	}
 
 	class ListItem {
-		VImageMessage vm;
+		VMessageImageItem vm;
 		PlaceSlideFragment frg;
 
-		public ListItem(VImageMessage vm) {
+		public ListItem(VMessageImageItem vm) {
 			super();
 			this.vm = vm;
 			frg = new PlaceSlideFragment();
 			frg.setMessage(vm);
-			//frg.setBitmap(vm.getFullQuantityBitmap());
+			// frg.setBitmap(vm.getFullQuantityBitmap());
 		}
 
 	}
-	
-
 
 }

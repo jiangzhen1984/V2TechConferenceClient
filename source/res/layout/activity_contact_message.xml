@@ -8,25 +8,22 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
-        android:background="@color/confs_title_bg"
+        android:background="#ffffff"
         android:orientation="vertical" >
 
         <TextView
             android:id="@+id/message_user_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
+            android:layout_centerInParent="true"
             android:layout_gravity="center"
-            android:layout_marginBottom="10dp"
-            android:layout_marginTop="10dp"
+            android:ellipsize="end"
+            android:gravity="center"
+            android:maxWidth="@dimen/activity_contact_message_title_max_width"
+            android:singleLine="true"
             android:text=""
-            android:textSize="20sp" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="0dp"
-            android:layout_below="@+id/message_user_title"
-            android:text="" />
+            android:textColor="@color/activiy_contact_detail_title_color"
+            android:textSize="@dimen/common_item_text_size" />
 
         <TextView
             android:id="@+id/contact_detail_return_button"
@@ -34,15 +31,26 @@
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_centerVertical="true"
-            android:layout_marginLeft="15dp"
-            android:background="@drawable/contact_user_detail_return"
+            android:layout_marginLeft="5dp"
             android:gravity="center"
             android:paddingBottom="5dp"
             android:paddingLeft="10dp"
-            android:paddingRight="7dp"
+            android:paddingRight="10dp"
             android:paddingTop="5dp"
             android:text="@string/contacts_user_detail_return_button"
-            android:textColor="#ffffff" />
+            android:textColor="@color/button_text_color"
+            android:textSize="@dimen/common_item_text_size" />
+
+        <ImageView
+            android:id="@+id/contact_detail_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="10dp"
+            android:paddingBottom="10dp"
+            android:paddingTop="10dp"
+            android:src="@drawable/contact_detail_button_selector" />
     </RelativeLayout>
 
     <LinearLayout
@@ -54,124 +62,193 @@
         android:background="#f2f2f2"
         android:orientation="vertical" >
 
-        <com.v2tech.view.cus.ItemScrollView
-            android:id="@+id/conversation_message_list_scroll_view"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" >
+            android:layout_height="1dp"
+            android:background="#cfcfcf"
+            android:orientation="vertical" >
+        </LinearLayout>
 
-            <LinearLayout
-                android:id="@+id/conversation_message_list"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical" >
-            </LinearLayout>
-        </com.v2tech.view.cus.ItemScrollView>
+        <ListView
+            android:id="@+id/conversation_message_list"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clickable="false"
+            android:divider="@null"
+            android:focusable="false"
+            android:focusableInTouchMode="false" >
+        </ListView>
     </LinearLayout>
 
-    <RelativeLayout
+    <LinearLayout
         android:id="@+id/message_panel_ly"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/contact_message_sub_feature_ly"
-        android:background="@color/message_panel_bg" >
-
-        <TextView
-            android:id="@+id/textView1"
-            android:layout_width="wrap_content"
-            android:layout_height="0dp"
-            android:layout_below="@+id/contact_message_speaker"
-            android:text="" />
-
-        <ImageView
-            android:id="@+id/contact_message_plus"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_toRightOf="@+id/contact_message_speaker"
-            android:src="@drawable/message_plus" />
-
-        <ImageView
-            android:id="@+id/imageView3"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_marginLeft="15dp"
-            android:layout_toRightOf="@+id/contact_message_plus"
-            android:src="@drawable/message_panel_sep" />
-
-        <TextView
-            android:id="@+id/message_send"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_centerVertical="true"
-            android:layout_marginRight="5dp"
-            android:background="@drawable/message_send_button_bg"
-            android:gravity="center"
-            android:text="@string/contact_message_send_button"
-            android:textColor="#ffffff"
-            android:textSize="15sp" />
-
-        <EditText
-            android:id="@+id/message_text"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_marginLeft="20dp"
-            android:layout_marginRight="20dp"
-            android:layout_toLeftOf="@+id/message_send"
-            android:layout_toRightOf="@+id/imageView3"
-            android:background="@drawable/input_bg"
-            android:ems="10" >
-        </EditText>
-
-        <ImageView
-            android:id="@+id/contact_message_speaker"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_centerVertical="true"
-            android:layout_margin="5dp"
-            android:layout_marginLeft="15dp"
-            android:src="@drawable/message_speaker" />
-    </RelativeLayout>
-
-    <RelativeLayout
-        android:id="@+id/contact_message_sub_feature_ly"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:background="#ffffff" >
+        android:background="@color/message_panel_bg"
+        android:orientation="vertical" >
 
         <RelativeLayout
-            android:id="@+id/contact_message_sub_feature_ly_inner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+
+            <ImageView
+                android:id="@+id/contact_message_speaker"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:paddingBottom="5dp"
+                android:paddingLeft="5dp"
+                android:paddingRight="5dp"
+                android:paddingTop="5dp"
+                android:src="@drawable/speaking_button"
+                android:tag="speaker" />
+
+            <ImageView
+                android:id="@+id/contact_message_plus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_toRightOf="@+id/contact_message_speaker"
+                android:src="@drawable/message_plus" />
+
+            <LinearLayout
+                android:id="@+id/contact_panel_bottom_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginBottom="5dp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="10dp"
+                android:layout_marginTop="5dp"
+                android:layout_toRightOf="@+id/contact_message_plus"
+                android:orientation="horizontal" >
+
+                <Button
+                    android:id="@+id/message_button_audio_record"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:background="@drawable/input_bg"
+                    android:text="@string/contact_message_button_send_audio_msg"
+                    android:textSize="@dimen/activity_contact_audio_button_text_size"
+                    android:visibility="gone" />
+
+                <EditText
+                    android:id="@+id/message_text"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_weight=".7"
+                    android:background="@drawable/input_bg"
+                    android:ems="10"
+                    android:inputType="text|textCapCharacters|textCapSentences|textMultiLine"
+                    android:maxLength="4500"
+                    android:maxLines="3"
+                    android:minLines="1" >
+                </EditText>
+
+                <TextView
+                    android:id="@+id/message_send"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="5dp"
+                    android:background="@drawable/button_bg"
+                    android:gravity="center"
+                    android:paddingBottom="5dp"
+                    android:paddingLeft="10dp"
+                    android:paddingRight="10dp"
+                    android:paddingTop="5dp"
+                    android:text="@string/contact_message_send_button"
+                    android:textColor="@color/button_text_color"
+                    android:textSize="12sp" />
+            </LinearLayout>
+        </RelativeLayout>
+
+        <LinearLayout
+            android:id="@+id/contact_message_sub_feature_ly"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="#ffffff"
+            android:orientation="vertical"
             android:visibility="gone" >
 
-            <ImageView
-                android:id="@+id/message_smile_icon"
-                android:layout_width="wrap_content"
+            <RelativeLayout
+                android:id="@+id/contact_message_sub_feature_ly_inner"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_alignParentLeft="true"
-                android:layout_centerVertical="true"
-                android:layout_margin="5dp"
-                android:layout_marginLeft="15dp"
-                android:src="@drawable/message_smile_icon" 
-                android:visibility="gone"/>
+                android:background="#f2f2f2" >
 
-            <ImageView
-                android:id="@+id/contact_message_send_image_button"
-                android:layout_width="60dp"
-                android:layout_height="60dp"
-                android:layout_centerVertical="true"
-                android:layout_marginTop="15dp"
-                android:layout_marginBottom="15dp"
-                android:layout_marginLeft="15dp"
-                android:layout_toRightOf="@+id/message_smile_icon"
-                android:src="@drawable/message_send_image_button" />
-        </RelativeLayout>
-    </RelativeLayout>
+                <LinearLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="1dp"
+                    android:layout_alignParentTop="true"
+                    android:background="#cdcdcf"
+                    android:orientation="vertical" >
+                </LinearLayout>
+
+                <ImageView
+                    android:id="@+id/message_smile_icon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_centerVertical="true"
+                    android:padding="15dp"
+                    android:src="@drawable/message_smile_icon_button_selector" />
+
+                <ImageView
+                    android:id="@+id/contact_message_send_image_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_toRightOf="@+id/message_smile_icon"
+                    android:padding="15dp"
+                    android:src="@drawable/message_send_image_button_selector" />
+
+                <ImageView
+                    android:id="@+id/contact_message_send_file_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_toRightOf="@+id/contact_message_send_image_button"
+                    android:padding="15dp"
+                    android:src="@drawable/message_file_button_selector" />
+
+                <ImageView
+                    android:id="@+id/contact_message_video_call_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_toRightOf="@+id/contact_message_send_file_button"
+                    android:padding="15dp"
+                    android:src="@drawable/message_video_call_button_selector" />
+
+                <ImageView
+                    android:id="@+id/contact_message_audio_call_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_toRightOf="@+id/contact_message_video_call_button"
+                    android:padding="15dp"
+                    android:src="@drawable/message_audio_call_button_selector" />
+            </RelativeLayout>
+
+            <HorizontalScrollView
+                android:id="@+id/horizontalScrollView1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" >
+
+                <LinearLayout
+                    android:id="@+id/contact_message_face_item_ly"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:orientation="horizontal"
+                    android:visibility="gone" >
+                </LinearLayout>
+            </HorizontalScrollView>
+        </LinearLayout>
+    </LinearLayout>
 
 </RelativeLayout>

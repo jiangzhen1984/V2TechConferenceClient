@@ -1,19 +1,25 @@
 package com.v2tech.view.conversation;
 
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
 import android.app.Activity;
+import android.app.Dialog;
+import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
-import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
+import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -21,30 +27,61 @@ import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
 import android.provider.MediaStore;
+import android.text.Editable;
+import android.text.SpannableStringBuilder;
+import android.text.TextWatcher;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
+import android.view.ViewGroup;
+import android.view.Window;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AbsListView;
+import android.widget.AbsListView.OnScrollListener;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.V2.jni.FileRequest;
+import com.spoledge.aacplayer.AACPlayer;
+import com.spoledge.aacplayer.ArrayAACPlayer;
+import com.spoledge.aacplayer.ArrayDecoder;
+import com.spoledge.aacplayer.Decoder;
+import com.spoledge.aacplayer.PlayerCallback;
 import com.v2tech.R;
 import com.v2tech.db.ContentDescriptor;
-import com.v2tech.logic.Chat;
-import com.v2tech.logic.ContactConversation;
-import com.v2tech.logic.Conversation;
-import com.v2tech.logic.GlobalHolder;
-import com.v2tech.logic.User;
-import com.v2tech.logic.VImageMessage;
-import com.v2tech.logic.VMessage;
+import com.v2tech.service.AsyncResult;
+import com.v2tech.service.BitmapManager;
+import com.v2tech.service.ChatService;
+import com.v2tech.service.GlobalHolder;
+import com.v2tech.service.Registrant;
+import com.v2tech.service.jni.FileTransStatusIndication;
+import com.v2tech.service.jni.FileTransStatusIndication.FileTransProgressStatusIndication;
+import com.v2tech.util.GlobalConfig;
+import com.v2tech.util.MessageUtil;
+import com.v2tech.util.SPUtil;
+import com.v2tech.util.V2Log;
 import com.v2tech.view.JNIService;
 import com.v2tech.view.PublicIntent;
-import com.v2tech.view.cus.ItemScrollView;
-import com.v2tech.view.cus.ScrollViewListener;
+import com.v2tech.view.adapter.VMessageAdater;
+import com.v2tech.view.bo.ConversationNotificationObject;
+import com.v2tech.view.contacts.ContactDetail;
+import com.v2tech.view.widget.CommonAdapter;
+import com.v2tech.view.widget.CommonAdapter.CommonAdapterItemWrapper;
+import com.v2tech.vo.Conversation;
+import com.v2tech.vo.User;
+import com.v2tech.vo.VMessage;
+import com.v2tech.vo.VMessageAbstractItem;
+import com.v2tech.vo.VMessageAudioItem;
+import com.v2tech.vo.VMessageFaceItem;
+import com.v2tech.vo.VMessageFileItem;
+import com.v2tech.vo.VMessageTextItem;
 
 public class ConversationView extends Activity {
 
@@ -53,21 +90,21 @@ public class ConversationView extends Activity {
 	private final int END_LOAD_MESSAGE = 3;
 	private final int SEND_MESSAGE = 4;
 	private final int SEND_MESSAGE_DONE = 5;
-	private final int QUERY_NEW_MESSAGE = 6;
+	private final int SEND_MESSAGE_ERROR = 6;
+	private final int PLAY_NEXT_UNREAD_MESSAGE = 7;
+	private final int FILE_STATUS_LISTENER = 20;
 
 	private final int BATCH_COUNT = 10;
+	private static final int SELECT_PICTURE_CODE = 100;
+	private static final int FILE_SELECT_CODE = 101;
 
 	private int offset = 0;
-
-	private LinearLayout mMessagesContainer;
-
-	private ItemScrollView mScrollView;
 
 	private long user1Id;
 
 	private long user2Id;
 
-	private String user2Name;
+	private long groupId;
 
 	private LocalHandler lh;
 
@@ -76,6 +113,8 @@ public class ConversationView extends Activity {
 	private boolean isLoading;
 
 	private boolean mLoadedAllMessages;
+
+	private boolean mIsInited;
 
 	private Context mContext;
 
@@ -94,64 +133,90 @@ public class ConversationView extends Activity {
 	private View mAdditionFeatureContainer;
 
 	private ImageView mSelectImageButtonIV;
-	
+	private View mSelectFileButtonIV;
+
 	private ImageView mAudioSpeakerIV;
+
+	private View mShowContactDetailButton;
+
+	private Button mButtonRecordAudio;
+
+	private MediaRecorder mRecorder = null;
+	private AACPlayer mAACPlayer = null;
 
 	private MessageReceiver receiver = new MessageReceiver();
 
-	private Chat mChat = new Chat();
+	private ChatService mChat = new ChatService();
 
 	private User local;
 	private User remote;
+
+	private ListView mMessagesContainer;
+
+	private LinearLayout mFaceLayout;
+	private View mSmileIconButton;
+
+	private CommonAdapter adapter;
+
+	private List<CommonAdapterItemWrapper> messageArray = new ArrayList<CommonAdapterItemWrapper>();
+
+	private boolean isStopped;
+
+	private int currentItemPos = 0;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		mContext = this;
-		setContentView(R.layout.activity_contact_message);
-		mMessagesContainer = (LinearLayout) findViewById(R.id.conversation_message_list);
 
-		mScrollView = (ItemScrollView) findViewById(R.id.conversation_message_list_scroll_view);
-		mScrollView.setScrollListener(scrollListener);
+		setContentView(R.layout.activity_contact_message);
+
+		lh = new LocalHandler();
+
+		mMessagesContainer = (ListView) findViewById(R.id.conversation_message_list);
+		adapter = new CommonAdapter(messageArray, mConvertListener);
+		mMessagesContainer.setAdapter(adapter);
+		mMessagesContainer.setOnTouchListener(mHiddenOnTouchListener);
+		mMessagesContainer.setOnScrollListener(scrollListener);
+		// mMessagesContainer
+		// .setTranscriptMode(ListView.TRANSCRIPT_MODE_ALWAYS_SCROLL);
 
 		mSendButtonTV = (TextView) findViewById(R.id.message_send);
 		// mSendButtonTV.setOnClickListener(sendMessageListener);
 		mSendButtonTV.setOnTouchListener(sendMessageButtonListener);
-		
-		
+
+		mShowContactDetailButton = findViewById(R.id.contact_detail_button);
+		mShowContactDetailButton.setOnClickListener(mShowContactDetailListener);
 
 		mMessageET = (EditText) findViewById(R.id.message_text);
-		mReturnButtonTV = (TextView) findViewById(R.id.contact_detail_return_button);
-		mReturnButtonTV.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View arg0) {
-				finish();
-			}
+		mMessageET.addTextChangedListener(mPasteWatcher);
 
-		});
+		mReturnButtonTV = (TextView) findViewById(R.id.contact_detail_return_button);
+		mReturnButtonTV.setOnTouchListener(mHiddenOnTouchListener);
 
 		mMoreFeatureIV = (ImageView) findViewById(R.id.contact_message_plus);
 		mMoreFeatureIV.setOnClickListener(moreFeatureButtonListenr);
 
+		mSmileIconButton = findViewById(R.id.message_smile_icon);
+		mSmileIconButton.setOnClickListener(mSmileIconListener);
+
 		mSelectImageButtonIV = (ImageView) findViewById(R.id.contact_message_send_image_button);
 		mSelectImageButtonIV.setOnClickListener(selectImageButtonListener);
-		
-		mAudioSpeakerIV = (ImageView) findViewById(R.id.contact_message_speaker);
-		//TODO hidden button of send audio message
-		mAudioSpeakerIV.setVisibility(View.GONE);
 
-		mAdditionFeatureContainer = findViewById(R.id.contact_message_sub_feature_ly_inner);
+		mSelectFileButtonIV = findViewById(R.id.contact_message_send_file_button);
+		mSelectFileButtonIV.setOnClickListener(mfileSelectionButtonListener);
+
+		mAudioSpeakerIV = (ImageView) findViewById(R.id.contact_message_speaker);
+		mAudioSpeakerIV.setOnClickListener(mMessageTypeSwitchListener);
+
+		mButtonRecordAudio = (Button)findViewById(R.id.message_button_audio_record);
+		mButtonRecordAudio.setOnTouchListener(mButtonHolderListener);
+
+		mAdditionFeatureContainer = findViewById(R.id.contact_message_sub_feature_ly);
 
 		mUserTitleTV = (TextView) findViewById(R.id.message_user_title);
 
-		user1Id = this.getIntent().getLongExtra("user1id", 0);
-		user2Id = this.getIntent().getLongExtra("user2id", 0);
-		user2Name = this.getIntent().getStringExtra("user2Name");
-
-		local = GlobalHolder.getInstance().getUser(user1Id);
-		remote = GlobalHolder.getInstance().getUser(user2Id);
-
-		lh = new LocalHandler();
+		mFaceLayout = (LinearLayout) findViewById(R.id.contact_message_face_item_ly);
 
 		HandlerThread thread = new HandlerThread("back-end");
 		thread.start();
@@ -166,51 +231,381 @@ public class ConversationView extends Activity {
 			backEndHandler = new BackendHandler(thread.getLooper());
 		}
 
+		initExtraObject();
+
+		// Register listener for avatar changed
+		BitmapManager.getInstance().registerBitmapChangedListener(
+				avatarChangedListener);
+
 		IntentFilter filter = new IntentFilter();
 		filter.addAction(JNIService.JNI_BROADCAST_NEW_MESSAGE);
 		filter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
+		filter.addAction(JNIService.JNI_BROADCAST_MESSAGE_SENT_FAILED);
+		filter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
 		registerReceiver(receiver, filter);
 
-		saveReaded();
+		mChat.registerFileTransStatusListener(this.lh, FILE_STATUS_LISTENER,
+				null);
+		notificateConversationUpdate();
+
+		// Start animation
+		this.overridePendingTransition(R.animator.nonam_scale_center_0_100,
+				R.animator.nonam_scale_null);
 	}
 
 	@Override
 	protected void onStart() {
 		super.onStart();
-		if (!mLoadedAllMessages) {
+		if (!mIsInited && !mLoadedAllMessages) {
 			android.os.Message m = android.os.Message.obtain(lh,
 					START_LOAD_MESSAGE);
 			lh.sendMessageDelayed(m, 500);
 		}
 
-		if (user1Id == 0 || user2Id == 0) {
-			Toast.makeText(this, R.string.error_contact_messag_invalid_user_id,
-					Toast.LENGTH_SHORT).show();
+		mUserTitleTV.setText(remote.getName());
+
+		NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+		// mId allows you to update the notification later on.
+		mNotificationManager.cancel(PublicIntent.MESSAGE_NOTIFICATION_ID);
+		isStopped = false;
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		if (pending) {
+			pending = false;
+			scrollToBottom();
 		}
-		mUserTitleTV.setText(user2Name);
+	}
+
+	@Override
+	public void onBackPressed() {
+		super.onBackPressed();
 	}
 
 	@Override
 	protected void onStop() {
 		super.onStop();
+		isStopped = true;
+	}
+
+	@Override
+	public boolean onTouchEvent(MotionEvent event) {
+		InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+		imm.hideSoftInputFromWindow(mMessageET.getWindowToken(),
+				InputMethodManager.HIDE_IMPLICIT_ONLY);
+		return super.onTouchEvent(event);
+	}
+
+	@Override
+	public void finish() {
+		super.finish();
+		this.overridePendingTransition(R.animator.nonam_scale_null,
+				R.animator.nonam_scale_center_100_0);
 	}
 
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
+		BitmapManager.getInstance().unRegisterBitmapChangedListener(
+				avatarChangedListener);
+
+		stopPlaying();
+		releasePlayer();
 		this.unregisterReceiver(receiver);
 		cleanCache();
+		V2Log.e("conversation view exited");
+		mChat.removeRegisterFileTransStatusListener(this.lh,
+				FILE_STATUS_LISTENER, null);
+	}
+
+	private void initExtraObject() {
+		Bundle bundle = this.getIntent().getExtras();
+
+		ConversationNotificationObject cov = null;
+
+		if (bundle != null) {
+			cov = (ConversationNotificationObject) bundle.get("obj");
+		} else {
+			cov = new ConversationNotificationObject(Conversation.TYPE_CONTACT,
+					1);
+		}
+		user1Id = GlobalHolder.getInstance().getCurrentUserId();
+		if (cov.getType().equals(Conversation.TYPE_CONTACT)) {
+			user2Id = cov.getExtId();
+		} else if (cov.getType().equals(Conversation.TYPE_GROUP)) {
+			groupId = cov.getExtId();
+		}
+
+		local = GlobalHolder.getInstance().getUser(user1Id);
+		remote = GlobalHolder.getInstance().getUser(user2Id);
+		// If current conversation is group then user2 is null;
+		if (remote == null) {
+			remote = new User(user2Id);
+		}
+	}
+
+	private void scrollToBottom() {
+		scrollToPos(messageArray.size() - 1);
+	}
+
+	private void scrollToPos(final int pos) {
+		if (pos < 0 || pos >= messageArray.size()) {
+			return;
+		}
+		mMessagesContainer.post(new Runnable() {
+
+			@Override
+			public void run() {
+				mMessagesContainer.setSelection(pos);
+
+			}
+
+		});
 
 	}
 
-	private void cleanCache() {
-		for (int i = 0; i < mMessagesContainer.getChildCount(); i++) {
-			View v = mMessagesContainer.getChildAt(i);
-			if (v instanceof MessageBodyView) {
-				((MessageBodyView) v).recycle();
+	private VMessage currentPlayed;
+
+	private boolean playNextUnreadMessage() {
+		boolean found = false;
+		for (int i = 0; i < messageArray.size(); i++) {
+			CommonAdapterItemWrapper wrapper = messageArray.get(i);
+			VMessage vm = (VMessage) wrapper.getItemObject();
+			if (vm == currentPlayed) {
+				found = true;
+				continue;
+			}
+
+			if (found) {
+				List<VMessageAudioItem> items = vm.getAudioItems();
+				if (items.size() > 0
+						&& items.get(0).getState() == VMessageAbstractItem.STATE_UNREAD) {
+					this.scrollToPos(i);
+					listener.requestPlayAudio(null, vm, items.get(0));
+					((MessageBodyView) wrapper.getView())
+							.updateUnreadFlag(false);
+					((MessageBodyView) wrapper.getView()).startVoiceAnimation();
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	private InputStream currentPlayedStream;
+
+	private synchronized boolean startPlaying(String fileName) {
+
+		mAACPlayer = new ArrayAACPlayer(
+				ArrayDecoder.create(Decoder.DECODER_FAAD2), mAACPlayerCallback,
+				AACPlayer.DEFAULT_AUDIO_BUFFER_CAPACITY_MS,
+				AACPlayer.DEFAULT_DECODE_BUFFER_CAPACITY_MS);
+		try {
+			if (currentPlayedStream != null) {
+				currentPlayedStream.close();
+			}
+			// currentPlayedStream = new FileInputStream(new File(fileName));
+			mAACPlayer.playAsync(fileName);
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return true;
+	}
+
+	private void stopPlaying() {
+		if (mAACPlayer != null) {
+			mAACPlayer.stop();
+			mAACPlayer = null;
+		}
+		if (currentPlayedStream != null) {
+			try {
+				currentPlayedStream.close();
+			} catch (IOException e) {
+				e.printStackTrace();
 			}
 		}
 	}
+
+	private void releasePlayer() {
+		if (mAACPlayer != null) {
+			mAACPlayer.stop();
+			mAACPlayer = null;
+		}
+	}
+
+	private Dialog mVoiceDialog = null;
+	private ImageView mVolume;
+	private View mSpeakingLayout;
+	private View mPreparedCancelLayout;
+
+	private void showOrCloseVoiceDialog() {
+		if (mVoiceDialog == null) {
+			mVoiceDialog = new Dialog(mContext, R.style.MessageVoiceDialog);
+			mVoiceDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+			LayoutInflater flater = LayoutInflater.from(mContext);
+			View root = flater.inflate(R.layout.message_voice_dialog, null);
+			mVoiceDialog.setContentView(root);
+			mVolume = (ImageView) root
+					.findViewById(R.id.message_voice_dialog_voice_volume);
+			mSpeakingLayout = root
+					.findViewById(R.id.message_voice_dialog_listening_container);
+			mPreparedCancelLayout = root
+					.findViewById(R.id.message_voice_dialog_cancel_container);
+			mVoiceDialog.setCancelable(false);
+		}
+
+		if (mVoiceDialog.isShowing()) {
+			mVoiceDialog.dismiss();
+		} else {
+			updateCancelSendVoiceMsgNotification(false);
+
+			mVoiceDialog.show();
+		}
+	}
+
+	private void updateCancelSendVoiceMsgNotification(boolean flag) {
+		if (flag) {
+			if (mSpeakingLayout != null) {
+				mSpeakingLayout.setVisibility(View.GONE);
+			}
+
+			if (mPreparedCancelLayout != null) {
+				mPreparedCancelLayout.setVisibility(View.VISIBLE);
+			}
+			mButtonRecordAudio.setText(R.string.contact_message_button_up_to_cancel);
+		} else {
+			if (mSpeakingLayout != null) {
+				mSpeakingLayout.setVisibility(View.VISIBLE);
+			}
+			if (mPreparedCancelLayout != null) {
+				mPreparedCancelLayout.setVisibility(View.GONE);
+			}
+			mButtonRecordAudio.setText(R.string.contact_message_button_up_to_send);
+		}
+		
+		
+	}
+
+	private void updateVoiceVolume(int vol) {
+		if (mVolume != null) {
+			int resId = R.drawable.message_voice_volume_1;
+			switch (vol) {
+			case 0:
+			case 1:
+				resId = R.drawable.message_voice_volume_1;
+				break;
+			case 2:
+				resId = R.drawable.message_voice_volume_2;
+				break;
+			case 3:
+				resId = R.drawable.message_voice_volume_3;
+				break;
+			case 4:
+				resId = R.drawable.message_voice_volume_4;
+				break;
+			default:
+				resId = R.drawable.message_voice_volume_4;
+				break;
+			}
+			mVolume.setImageResource(resId);
+
+		}
+	}
+
+	/**
+	 * FIXME If want to support lower 4.0 for ACC should code by self
+	 * 
+	 * @param filePath
+	 * @return
+	 */
+	private boolean startReocrding(String filePath) {
+
+		mRecorder = new MediaRecorder();
+		mRecorder.reset();
+		mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+		mRecorder.setOutputFormat(MediaRecorder.OutputFormat.AAC_ADTS);
+		mRecorder.setOutputFile(filePath);
+		mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
+		mRecorder.setMaxDuration(60000);
+		mRecorder.setAudioSamplingRate(44100);
+		mRecorder.setAudioChannels(2);
+		try {
+			mRecorder.prepare();
+		} catch (IOException e) {
+			V2Log.e(" can not prepare media recorder ");
+			return false;
+		}
+
+		mRecorder.start();
+		return true;
+	}
+
+	private void stopRecording() {
+		// mRecorder.stop();
+		mRecorder.release();
+		mRecorder = null;
+	}
+
+	private void cleanRangeBitmapCache(int before, int after) {
+		int size = messageArray.size();
+		if (size < after && before < 0) {
+			return;
+		}
+		while (--before >= 0) {
+			VMessage vm = (VMessage) messageArray.get(before).getItemObject();
+			vm.recycleAllImageMessage();
+		}
+
+		while (++after < size) {
+			VMessage vm = (VMessage) messageArray.get(after).getItemObject();
+			vm.recycleAllImageMessage();
+		}
+	}
+
+	private void cleanCache() {
+		messageArray.clear();
+	}
+
+	private PlayerCallback mAACPlayerCallback = new PlayerCallback() {
+
+		@Override
+		public void playerStarted() {
+			currentPlayed.getAudioItems().get(0).setPlaying(true);
+		}
+
+		@Override
+		public void playerPCMFeedBuffer(boolean isPlaying,
+				int audioBufferSizeMs, int audioBufferCapacityMs) {
+			V2Log.e(audioBufferSizeMs + "  " + audioBufferCapacityMs);
+			if (audioBufferSizeMs == audioBufferCapacityMs) {
+
+			}
+		}
+
+		@Override
+		public synchronized void playerStopped(int perf) {
+			if (currentPlayed != null
+					&& currentPlayed.getAudioItems().size() > 0) {
+				currentPlayed.getAudioItems().get(0).setPlaying(false);
+			}
+			// Call in main thread
+			Message.obtain(lh, PLAY_NEXT_UNREAD_MESSAGE).sendToTarget();
+
+		}
+
+		@Override
+		public void playerException(Throwable t) {
+			playerStopped(0);
+			if (currentPlayed != null) {
+				currentPlayed.getAudioItems().get(0).setPlaying(false);
+			}
+		}
+
+	};
 
 	private OnTouchListener sendMessageButtonListener = new OnTouchListener() {
 
@@ -219,12 +614,140 @@ public class ConversationView extends Activity {
 			int action = mv.getAction();
 			if (action == MotionEvent.ACTION_DOWN
 					|| action == MotionEvent.ACTION_HOVER_ENTER) {
-				anchor.setBackgroundResource(R.drawable.message_send_button_pressed_bg);
 			} else if (action == MotionEvent.ACTION_UP) {
-				anchor.setBackgroundResource(R.drawable.message_send_button_bg);
 				doSendMessage();
 			}
 			return true;
+		}
+
+	};
+
+	private OnClickListener mMessageTypeSwitchListener = new OnClickListener() {
+
+		@Override
+		public void onClick(View view) {
+			String tag = (String) view.getTag();
+			if (tag != null) {
+				if (tag.equals("speaker")) {
+					view.setTag("keyboard");
+					((ImageView) view)
+							.setImageResource(R.drawable.message_keyboard);
+					mButtonRecordAudio.setVisibility(View.VISIBLE);
+					mMessageET.setVisibility(View.GONE);
+					mSendButtonTV.setVisibility(View.GONE);
+
+				} else if (tag.equals("keyboard")) {
+					view.setTag("speaker");
+					((ImageView) view)
+							.setImageResource(R.drawable.speaking_button);
+					mButtonRecordAudio.setVisibility(View.GONE);
+					mMessageET.setVisibility(View.VISIBLE);
+					mSendButtonTV.setVisibility(View.VISIBLE);
+				}
+			}
+		}
+
+	};
+
+	private boolean voiceIsSentByTimer;
+	private String fileName = null;
+	private long starttime = 0;
+
+	private OnTouchListener mButtonHolderListener = new OnTouchListener() {
+
+		@Override
+		public boolean onTouch(View view, MotionEvent event) {
+			if (event.getAction() == MotionEvent.ACTION_DOWN) {
+				showOrCloseVoiceDialog();
+				fileName = GlobalConfig.getGlobalAudioPath() + "/"
+						+ System.currentTimeMillis() + ".aac";
+				if (!startReocrding(fileName)) {
+					// hide dialog
+					showOrCloseVoiceDialog();
+				}
+				// Start update db for voice
+				lh.postDelayed(mUpdateMicStatusTimer, 200);
+				// Start timer
+				lh.postDelayed(timeOutMonitor, 59 * 1000);
+				starttime = System.currentTimeMillis();
+				voiceIsSentByTimer = false;
+			} else if (event.getAction() == MotionEvent.ACTION_MOVE) {
+				boolean flag = false;
+				Rect r = new Rect();
+				view.getDrawingRect(r);
+				// check if touch position out of button than cancel send voice
+				// message
+				if (r.contains((int) event.getX(), (int) event.getY())) {
+					flag = false;
+				} else {
+					flag = true;
+				}
+				updateCancelSendVoiceMsgNotification(flag);
+			} else if (event.getAction() == MotionEvent.ACTION_UP) {
+				if (voiceIsSentByTimer) {
+					return false;
+				}
+				stopRecording();
+
+				Rect r = new Rect();
+				view.getDrawingRect(r);
+				// check if touch position out of button than cancel send voice
+				// message
+				long seconds = (System.currentTimeMillis() - starttime);
+				if (r.contains((int) event.getX(), (int) event.getY())
+						&& seconds > 1500) {
+					// send
+					VMessage vm = new VMessage(groupId, local, remote);
+
+					new VMessageAudioItem(vm, fileName, (int) (seconds / 1000));
+					// Send message to server
+					sendMessageToRemote(vm);
+				} else {
+
+					if (seconds < 1500) {
+						Toast.makeText(mContext,
+								R.string.error_contact_messag_time_too_short,
+								Toast.LENGTH_SHORT).show();
+					} else {
+						Toast.makeText(mContext,
+								R.string.contact_message_message_cancelled,
+								Toast.LENGTH_SHORT).show();
+					}
+					File f = new File(fileName);
+					f.deleteOnExit();
+				}
+				starttime = 0;
+				fileName = null;
+				lh.removeCallbacks(mUpdateMicStatusTimer);
+				showOrCloseVoiceDialog();
+				// Remove timer
+				lh.removeCallbacks(timeOutMonitor);
+				
+				mButtonRecordAudio.setText(R.string.contact_message_button_send_audio_msg);
+			}
+			return false;
+		}
+
+	};
+
+	private Runnable timeOutMonitor = new Runnable() {
+
+		@Override
+		public void run() {
+			voiceIsSentByTimer = true;
+			stopRecording();
+			// send
+			VMessage vm = new VMessage(groupId, local, remote);
+			int seconds = (int) ((System.currentTimeMillis() - starttime) / 1000) + 1;
+			VMessageAudioItem vai = new VMessageAudioItem(vm, fileName, seconds);
+			vai.setState(VMessageAbstractItem.STATE_NORMAL);
+			// Send message to server
+			sendMessageToRemote(vm);
+
+			starttime = 0;
+			fileName = null;
+			lh.removeCallbacks(mUpdateMicStatusTimer);
+			showOrCloseVoiceDialog();
 		}
 
 	};
@@ -247,8 +770,6 @@ public class ConversationView extends Activity {
 
 	};
 
-	private static final int SELECT_PICTURE = 1;
-
 	private OnClickListener selectImageButtonListener = new OnClickListener() {
 
 		@Override
@@ -258,7 +779,122 @@ public class ConversationView extends Activity {
 			intent.setAction(Intent.ACTION_GET_CONTENT);
 			startActivityForResult(
 					Intent.createChooser(intent, "Select Picture"),
-					SELECT_PICTURE);
+					SELECT_PICTURE_CODE);
+
+		}
+
+	};
+
+	private OnClickListener mSmileIconListener = new OnClickListener() {
+
+		@Override
+		public void onClick(View v) {
+			if (mFaceLayout.getChildCount() <= 0) {
+				// init faceItem
+				for (int i = 1; i < GlobalConfig.GLOBAL_FACE_ARRAY.length; i++) {
+					ImageView iv = new ImageView(mContext);
+					iv.setImageResource(GlobalConfig.GLOBAL_FACE_ARRAY[i]);
+					iv.setTag(i + "");
+					iv.setOnClickListener(mFaceSelectListener);
+					mFaceLayout.addView(iv);
+				}
+			}
+			if (mFaceLayout.getVisibility() == View.GONE) {
+				mFaceLayout.setVisibility(View.VISIBLE);
+			} else {
+				mFaceLayout.setVisibility(View.GONE);
+			}
+
+		}
+
+	};
+
+	private OnClickListener mFaceSelectListener = new OnClickListener() {
+
+		@Override
+		public void onClick(View smile) {
+
+			Drawable drawable = ((ImageView) (smile)).getDrawable();
+			drawable.setBounds(0, 0, drawable.getIntrinsicWidth(),
+					drawable.getIntrinsicHeight());
+
+			String emoji = GlobalConfig
+					.getEmojiStr(GlobalConfig.GLOBAL_FACE_ARRAY[Integer
+							.parseInt(smile.getTag().toString())]);
+			mMessageET.append(emoji);
+		}
+
+	};
+
+	private View.OnClickListener mfileSelectionButtonListener = new View.OnClickListener() {
+		@Override
+		public void onClick(View arg0) {
+			Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+			intent.setType("*/*");
+			intent.addCategory(Intent.CATEGORY_OPENABLE);
+
+			try {
+				startActivityForResult(
+						Intent.createChooser(intent, "Select a File to Upload"),
+						FILE_SELECT_CODE);
+			} catch (android.content.ActivityNotFoundException ex) {
+				Toast.makeText(mContext, "Please install a File Manager.",
+						Toast.LENGTH_SHORT).show();
+			}
+		}
+	};
+
+	private TextWatcher mPasteWatcher = new TextWatcher() {
+
+		@Override
+		public void afterTextChanged(Editable edit) {
+			mMessageET.removeTextChangedListener(this);
+			int start = -1, end = -1;
+			int index = 0;
+			while (index < edit.length()) {
+				if (edit.charAt(index) == '/' && index < edit.length() - 1
+						&& edit.charAt(index + 1) == ':') {
+					start = index;
+					index += 2;
+					continue;
+				} else if (start != -1) {
+					if (edit.charAt(index) == ':' && index < edit.length() - 1
+							&& edit.charAt(index + 1) == '/') {
+						end = index + 2;
+						SpannableStringBuilder builder = new SpannableStringBuilder();
+
+						int ind = GlobalConfig.getDrawableIndexByEmoji(edit
+								.subSequence(start, end).toString());
+						// replay emoji and clean
+						if (ind > 0) {
+							MessageUtil
+									.appendSpan(
+											builder,
+											mContext.getResources()
+													.getDrawable(
+															GlobalConfig.GLOBAL_FACE_ARRAY[ind]),
+											ind);
+							edit.replace(start, end, builder);
+						}
+						index = start;
+						start = -1;
+						end = -1;
+					}
+				}
+				index++;
+			}
+
+			mMessageET.addTextChangedListener(this);
+		}
+
+		@Override
+		public void beforeTextChanged(CharSequence ch, int arg1, int arg2,
+				int arg3) {
+		}
+
+		@Override
+		public void onTextChanged(CharSequence arg0, int arg1, int arg2,
+				int arg3) {
 
 		}
 
@@ -267,13 +903,19 @@ public class ConversationView extends Activity {
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
-		if (requestCode == SELECT_PICTURE) {
+		if (requestCode == SELECT_PICTURE_CODE) {
 			if (resultCode == RESULT_OK) {
 				Uri selectedImage = data.getData();
 				String[] filePathColumn = { MediaStore.Images.Media.DATA };
 
 				Cursor cursor = getContentResolver().query(selectedImage,
 						filePathColumn, null, null, null);
+				if (cursor == null) {
+					Toast.makeText(mContext,
+							R.string.error_contact_messag_invalid_image_path,
+							Toast.LENGTH_SHORT).show();
+					return;
+				}
 				cursor.moveToFirst();
 
 				int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
@@ -285,135 +927,202 @@ public class ConversationView extends Activity {
 							Toast.LENGTH_SHORT).show();
 					return;
 				}
-				VImageMessage vim = new VImageMessage(local, remote, filePath,
-						false);
-				saveMessageToDB(vim);
-				Message.obtain(lh, SEND_MESSAGE, vim).sendToTarget();
-				addMessageToContainer(vim);
+				VMessage vim = MessageBuilder.buildImageMessage(local, remote,
+						filePath);
+				// Send message to server
+				sendMessageToRemote(vim);
+			}
+		} else if (requestCode == FILE_SELECT_CODE) {
+			if (resultCode == RESULT_OK) {
+				// Get the Uri of the selected file
+				Uri uri = data.getData();
+				String path = SPUtil.getPath(this, uri);
+				if (path == null) {
+					Toast.makeText(
+							mContext,
+							R.string.contacts_user_detail_file_selection_not_found_path,
+							Toast.LENGTH_SHORT).show();
+				} else {
+					VMessage vim = MessageBuilder.buildFileMessage(local,
+							remote, path);
+					VMessageFileItem vfi = vim.getFileItems().get(0);
+					vfi.setState(VMessageFileItem.STATE_FILE_SENDING);
+					sendMessageToRemote(vim);
+				}
 			}
 		}
-	}
-
-	private void saveMessageToDB(VMessage vm) {
-		ContentValues cv = new ContentValues();
-		cv.put(ContentDescriptor.Messages.Cols.FROM_USER_ID, user1Id);
-		cv.put(ContentDescriptor.Messages.Cols.TO_USER_ID, user2Id);
-		cv.put(ContentDescriptor.Messages.Cols.MSG_CONTENT, vm.getText());
-		cv.put(ContentDescriptor.Messages.Cols.MSG_TYPE, vm.getType()
-				.getIntValue());
-		cv.put(ContentDescriptor.Messages.Cols.SEND_TIME, vm.getDateTimeStr());
-		getContentResolver().insert(ContentDescriptor.Messages.CONTENT_URI, cv);
 	}
 
 	private void doSendMessage() {
 		String content = mMessageET.getEditableText().toString();
-
-		VMessage m = new VMessage(local, remote, content);
-		saveMessageToDB(m);
-
-		mMessageET.setText("");
-
-		InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-		imm.hideSoftInputFromWindow(mMessageET.getWindowToken(), 0);
-
-		Message.obtain(lh, SEND_MESSAGE, m).sendToTarget();
-		addMessageToContainer(m);
-		updateConversationList(false);
-		//make offset
-		offset++;
-	}
-
-	private boolean saveConversation;
-
-	private void updateConversationList(boolean flag) {
-		if (saveConversation) {
+		if (content == null || content.equals("")) {
 			return;
 		}
-		Conversation cov = new ContactConversation(remote, Conversation.NONE);
-		saveConversation = GlobalHolder.getInstance().findConversation(cov);
-		if (!saveConversation) {
-			GlobalHolder.getInstance().addConversation(cov);
-			// save to database
-			saveConversation = true;
-			ContentValues cv = new ContentValues();
-			cv.put(ContentDescriptor.Conversation.Cols.EXT_ID, user2Id);
-			cv.put(ContentDescriptor.Conversation.Cols.TYPE,
-					Conversation.TYPE_CONTACT);
-			cv.put(ContentDescriptor.Conversation.Cols.EXT_NAME,
-					remote.getName());
-			if (flag) {
-				cv.put(ContentDescriptor.Conversation.Cols.NOTI_FLAG,
-						Conversation.NOTIFICATION);
-			} else {
-				cv.put(ContentDescriptor.Conversation.Cols.NOTI_FLAG,
-						Conversation.NONE);
-			}
-			getContentResolver().insert(
-					ContentDescriptor.Conversation.CONTENT_URI, cv);
-			GlobalHolder.getInstance().addConversation(cov);
-			
-			Intent i = new Intent();
-			i.addCategory(PublicIntent.DEFAULT_CATEGORY);
-			i.setAction(PublicIntent.NEW_CONVERSATION);
-			i.putExtra("fromuid", user2Id);
-			sendBroadcast(i);
+		content = removeEmoji(content);
+		if (remote == null) {
+			remote = new User(user2Id);
 		}
+
+		VMessage vm = new VMessage(this.groupId, local, remote);
+
+		String[] array = content.split("\n");
+		for (int i = 0; i < array.length; i++) {
+			String str = array[i];
+			int len = str.length();
+			if (str.length() <= 4) {
+				VMessageAbstractItem vai = new VMessageTextItem(vm, str);
+				vai.setNewLine(true);
+				continue;
+			}
+
+			int emojiStart = -1, end = -1, strStart = 0;
+			int index = 0;
+			while (index < str.length()) {
+				if (str.charAt(index) == '/' && index < len - 1
+						&& str.charAt(index + 1) == ':') {
+					emojiStart = index;
+					index += 2;
+					continue;
+				} else if (emojiStart != -1) {
+					// Found end flag of emoji
+					if (str.charAt(index) == ':' && index < len - 1
+							&& str.charAt(index + 1) == '/') {
+						end = index + 2;
+
+						// If emojiStart lesser than strStart,
+						// mean there exist string before emoji
+						if (strStart < emojiStart) {
+							String strTextContent = str.substring(strStart,
+									emojiStart);
+							new VMessageTextItem(vm, strTextContent);
+						}
+
+						int ind = GlobalConfig.getDrawableIndexByEmoji(str
+								.subSequence(emojiStart, end).toString());
+						if (ind > 0) {
+							// new face item and add list
+							new VMessageFaceItem(vm, ind);
+						}
+						// Assign end to index -1, do not assign end because
+						// index will be ++
+						index = end - 1;
+						strStart = end;
+						emojiStart = -1;
+						end = -1;
+
+					}
+				}
+
+				// check if exist last string
+				if (index == len - 1 && strStart <= index) {
+					String strTextContent = str.substring(strStart, len);
+					new VMessageTextItem(vm, strTextContent);
+					strStart = index;
+				}
+
+				index++;
+			}
+
+		}
+
+		List<VMessageAbstractItem> items = vm.getItems();
+		for (VMessageAbstractItem item : items) {
+			if (item.getType() == VMessageAbstractItem.ITEM_TYPE_TEXT) {
+				System.out.println(((VMessageTextItem) item).getText() + "    "
+						+ item.isNewLine());
+			} else {
+				System.out.println(((VMessageFaceItem) item).getIndex()
+						+ "    " + item.isNewLine());
+			}
+		}
+		//
+		mMessageET.setText("");
+		// Send message to server
+		sendMessageToRemote(vm);
 	}
 
-	private void saveReaded() {
-		ContentValues cv = new ContentValues();
-		cv.put(ContentDescriptor.Conversation.Cols.NOTI_FLAG, Conversation.NONE);
-		getContentResolver().update(
-				ContentDescriptor.Conversation.CONTENT_URI,
-				cv,
-				ContentDescriptor.Conversation.Cols.EXT_ID + "=? and "
-						+ ContentDescriptor.Conversation.Cols.TYPE + "=?",
-				new String[] { user2Id + "", Conversation.TYPE_CONTACT });
+	private void sendMessageToRemote(VMessage vm) {
+		// // Save message
+		MessageBuilder.saveMessage(this, vm);
 
-		Conversation cov = GlobalHolder.getInstance().findConversationByType(
-				Conversation.TYPE_CONTACT, user2Id);
-		if (cov != null) {
-			cov.setNotiFlag(Conversation.NONE);
+		Message.obtain(lh, SEND_MESSAGE, vm).sendToTarget();
+		addMessageToContainer(vm);
+		// send notification
+		notificateConversationUpdate();
+	}
+
+	// FIXME optimize code
+	private String removeEmoji(String content) {
+		byte[] bys = new byte[] { -16, -97 };
+		byte[] bc = content.getBytes();
+		byte[] copy = new byte[bc.length];
+		int j = 0;
+		for (int i = 0; i < bc.length; i++) {
+			if (i < bc.length - 2 && bys[0] == bc[i] && bys[1] == bc[i + 1]) {
+				i += 3;
+				continue;
+			}
+			copy[j] = bc[i];
+			j++;
 		}
-		
-		Intent i = new Intent();
+		return new String(copy, 0, j);
+	}
+
+	private void notificateConversationUpdate() {
+		Intent i = new Intent(PublicIntent.REQUEST_UPDATE_CONVERSATION);
 		i.addCategory(PublicIntent.DEFAULT_CATEGORY);
-		i.setAction(PublicIntent.MESSAGE_READED_NOTIFICATION);
-		i.putExtra("fromuid", user2Id);
-		sendBroadcast(i);
+		ConversationNotificationObject obj = null;
+		if (groupId == 0) {
+			obj = new ConversationNotificationObject(Conversation.TYPE_CONTACT,
+					user2Id);
+		} else {
+			obj = new ConversationNotificationObject(Conversation.TYPE_GROUP,
+					groupId);
+		}
+		i.putExtra("obj", obj);
+		mContext.sendBroadcast(i);
 	}
 
 	private void addMessageToContainer(VMessage msg) {
-		// Add message to container
-		MessageBodyView mv = new MessageBodyView(mContext, msg, true);
-		mv.setCallback(listener);
-		mMessagesContainer.addView(mv);
-		mScrollView.post(new Runnable() {
-			@Override
-			public void run() {
-				mScrollView.fullScroll(View.FOCUS_DOWN);
-			}
-		});
+		// make offset
+		offset++;
+
+		messageArray.add(new VMessageAdater(msg));
+		adapter.notifyDataSetChanged();
+		scrollToBottom();
 	}
 
-	private ScrollViewListener scrollListener = new ScrollViewListener() {
+	private OnScrollListener scrollListener = new OnScrollListener() {
+		boolean scrolled = false;
+		int lastFirst = 0;
+		boolean isUPScroll = false;
 
 		@Override
-		public void onScrollBottom(ItemScrollView scrollView, int x, int y,
-				int oldx, int oldy) {
+		public void onScroll(AbsListView view, int first, int allVisibleCount,
+				int allCount) {
+			if (!scrolled) {
+				return;
+			}
+
+			if (first <= 2 && isUPScroll && !mLoadedAllMessages) {
+				android.os.Message.obtain(lh, START_LOAD_MESSAGE)
+						.sendToTarget();
+				currentItemPos = first;
+				// Do not clean image message state when loading message
+			} else {
+				cleanRangeBitmapCache(first - 5, first + allVisibleCount
+						+ BATCH_COUNT);
+			}
+			// Calculate scrolled direction
+			isUPScroll = first < lastFirst ? true : false;
+			lastFirst = first;
 
 		}
 
 		@Override
-		public void onScrollTop(ItemScrollView scrollView, int x, int y,
-				int oldx, int oldy) {
-			if (isLoading || mLoadedAllMessages) {
-				return;
-			}
-			isLoading = true;
-			android.os.Message m = android.os.Message.obtain(lh,
-					START_LOAD_MESSAGE);
-			lh.sendMessageDelayed(m, 500);
+		public void onScrollStateChanged(AbsListView av, int state) {
+			scrolled = state != AbsListView.OnScrollListener.SCROLL_STATE_IDLE;
+
 		}
 
 	};
@@ -422,121 +1131,304 @@ public class ConversationView extends Activity {
 
 		@Override
 		public void onMessageClicked(VMessage v) {
-			if (v.getType() == VMessage.MessageType.IMAGE) {
-				Intent i = new Intent();
-				i.addCategory(PublicIntent.DEFAULT_CATEGORY);
-				i.setAction(PublicIntent.START_VIDEO_IMAGE_GALLERY);
-				i.putExtra("uid1", user1Id);
-				i.putExtra("uid2", user2Id);
-				i.putExtra("cid", v.getId());
-				mContext.startActivity(i);
+			Intent i = new Intent();
+			i.addCategory(PublicIntent.DEFAULT_CATEGORY);
+			i.setAction(PublicIntent.START_VIDEO_IMAGE_GALLERY);
+			i.putExtra("uid1", user1Id);
+			i.putExtra("uid2", user2Id);
+			i.putExtra("cid", v.getId());
+			// type 0: is not group image view
+			// type 1: group image view
+			i.putExtra("type", groupId == 0 ? 0 : 1);
+			mContext.startActivity(i);
+		}
+
+		@Override
+		public void requestPlayAudio(View v, VMessage vm, VMessageAudioItem vai) {
+			if (vai != null && vai.getAudioFilePath() != null) {
+				currentPlayed = vm;
+				startPlaying(vai.getAudioFilePath());
+				if (vai.getState() == VMessageAbstractItem.STATE_UNREAD) {
+					vai.setState(VMessageAbstractItem.STATE_NORMAL);
+					ContentValues cv = new ContentValues();
+					cv.put(ContentDescriptor.MessageItems.Cols.STATE,
+							vai.getState());
+					mContext.getContentResolver().update(
+							ContentDescriptor.MessageItems.CONTENT_URI, cv,
+							ContentDescriptor.MessageItems.Cols.ID + " = ? ",
+							new String[] { vai.getId() + "" });
+
+				}
 			}
+		}
+
+		@Override
+		public void requestStopAudio(View v, VMessage vm, VMessageAudioItem vai) {
+			vai.setPlaying(false);
+			stopPlaying();
+		}
+
+		@Override
+		public void requestDownloadFile(View v, VMessage vm,
+				VMessageFileItem vfi) {
+			if (vfi == null) {
+				return;
+			}
+			vfi.setState(VMessageFileItem.STATE_FILE_DOWNLOADING);
+			FileRequest.getInstance().acceptFileTrans(vfi.getUuid(),
+					GlobalConfig.getGlobalFilePath() + "/" + vfi.getFileName(),
+					FileRequest.BT_IM);
+
+		}
+
+		@Override
+		public void requestPauseTransFile(View v, VMessage vm,
+				VMessageFileItem vfi) {
+			if (vfi == null) {
+				return;
+			}
+			FileRequest.getInstance().pauseSendFile(vfi.getUuid(), 1);
+			if (vfi.getState() == VMessageFileItem.STATE_FILE_DOWNLOADING) {
+				vfi.setState(VMessageFileItem.STATE_FILE_PAUSED_DOWNLOADING);
+			} else if (vfi.getState() == VMessageFileItem.STATE_FILE_SENDING) {
+				vfi.setState(VMessageFileItem.STATE_FILE_PAUSED_SENDING);
+			}
+
+		}
+
+		@Override
+		public void requestResumeTransFile(View v, VMessage vm,
+				VMessageFileItem vfi) {
+			if (vfi == null) {
+				return;
+			}
+			FileRequest.getInstance().resumeSendFile(vfi.getUuid(), 1);
+
+			if (vfi.getState() == VMessageFileItem.STATE_FILE_PAUSED_DOWNLOADING) {
+				vfi.setState(VMessageFileItem.STATE_FILE_DOWNLOADING);
+			} else if (vfi.getState() == VMessageFileItem.STATE_FILE_PAUSED_SENDING) {
+				vfi.setState(VMessageFileItem.STATE_FILE_SENDING);
+			}
+
 		}
 
 	};
 
 	private List<VMessage> loadMessages() {
-		String selection = "(" + ContentDescriptor.Messages.Cols.FROM_USER_ID
-				+ "=? and " + ContentDescriptor.Messages.Cols.TO_USER_ID
-				+ "=? ) or " + "("
-				+ ContentDescriptor.Messages.Cols.FROM_USER_ID + "=? and "
-				+ ContentDescriptor.Messages.Cols.TO_USER_ID + "=? ) ";
-		String[] args = new String[] { user1Id + "", user2Id + "",
-				user2Id + "", user1Id + "" };
 
-		Cursor mCur = this.getContentResolver().query(
-				ContentDescriptor.Messages.CONTENT_URI,
-				ContentDescriptor.Messages.Cols.ALL_CLOS,
-				selection,
-				args,
-				ContentDescriptor.Messages.Cols.SEND_TIME + " desc "
-						+ " limit " + BATCH_COUNT + " offset " + offset);
-
-		if (mCur.getCount() == 0) {
-			mCur.close();
-			mLoadedAllMessages = true;
-			return null;
+		List<VMessage> array = null;
+		if (this.groupId == 0) {
+			array = MessageLoader.loadMessageByPage(mContext, user1Id, user2Id,
+					BATCH_COUNT, offset);
+		} else if (this.groupId != 0) {
+			array = MessageLoader.loadGroupMessageByPage(mContext, groupId,
+					BATCH_COUNT, offset);
 		}
-		List<VMessage> array = new ArrayList<VMessage>();
-		int count = 0;
-		while (mCur.moveToNext()) {
-			VMessage m = extractMsg(mCur);
-			array.add(m);
-			count++;
-			offset++;
-			if (count > BATCH_COUNT) {
-				break;
-			}
-		}
-		mCur.close();
 
+		if (array != null) {
+			offset += array.size();
+			mIsInited = true;
+		}
 		return array;
 	}
 
-	private void queryAndAddMessage(int mid) {
-		Uri uri = ContentUris.withAppendedId(
-				ContentDescriptor.Messages.CONTENT_URI, mid);
+	private boolean pending = false;
 
-		Cursor mCur = this.getContentResolver().query(uri,
-				ContentDescriptor.Messages.Cols.ALL_CLOS, null, null, null);
+	private boolean queryAndAddMessage(final int msgId) {
 
-		while (mCur.moveToNext()) {
-			VMessage m = extractMsg(mCur);
-			MessageBodyView mv = new MessageBodyView(this, m, true);
-			mv.setCallback(listener);
-			mMessagesContainer.addView(mv);
+		VMessage m = MessageLoader.loadMessageById(mContext, msgId);
+		if (m == null || m.getFromUser().getmUserId() != this.user2Id
+				|| m.getGroupId() != this.groupId) {
+			return false;
 		}
-		mCur.close();
-		mScrollView.post(new Runnable() {
-			@Override
-			public void run() {
-				mScrollView.fullScroll(View.FOCUS_DOWN);
+		MessageBodyView mv = new MessageBodyView(this, m, true);
+
+		messageArray.add(new VMessageAdater(m));
+		if (mv != null) {
+			if (!isStopped) {
+				this.scrollToBottom();
+			} else {
+				pending = true;
 			}
-		});
-
-		updateConversationList(true);
+		}
+		return true;
 	}
 
-	private VMessage extractMsg(Cursor cur) {
-		if (cur.isClosed()) {
-			throw new RuntimeException(" cursor is closed");
-		}
-		DateFormat dp = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+	private void updateFileProgressView(String uuid, long tranedSize) {
+		for (int i = 0; i < messageArray.size(); i++) {
+			VMessage vm = (VMessage) messageArray.get(i).getItemObject();
+			if (vm.getItems().size() > 0) {
+				VMessageAbstractItem item = vm.getItems().get(0);
+				if (item.getType() == VMessageAbstractItem.ITEM_TYPE_FILE
+						&& item.getUuid().equals(uuid)) {
+					VMessageFileItem vfi = ((VMessageFileItem) item);
 
-		int id = cur.getInt(0);
-		long localUserId = cur.getLong(1);
-		// msg_content column
-		String content = cur.getString(5);
-		// message type
-		int type = cur.getInt(6);
-		// date time
-		String dateString = cur.getString(7);
+					if (vfi.getFileSize() == tranedSize) {
+						if (vfi.getState() == VMessageAbstractItem.STATE_FILE_SENDING) {
+							vfi.setState(VMessageAbstractItem.STATE_FILE_SENT);
+						} else if (vfi.getState() == VMessageAbstractItem.STATE_FILE_DOWNLOADING) {
+							vfi.setState(VMessageAbstractItem.STATE_FILE_DOWNLOADED);
+						}
 
-		VMessage vm = null;
-		if (type == VMessage.MessageType.TEXT.getIntValue()) {
-			vm = new VMessage(local, remote, content, localUserId == user2Id);
-		} else {
-			vm = new VImageMessage(local, remote, content.split("\\|")[4],
-					localUserId == user2Id);
-		}
-		vm.setId(id);
-		try {
-			vm.setDate(dp.parse(dateString));
-		} catch (ParseException e) {
-			e.printStackTrace();
-		}
+						MessageBuilder.updateVMessageItem(this, vfi);
+					}
 
-		return vm;
+					vfi.setDownloadedSize(tranedSize);
+					((MessageBodyView) messageArray.get(i).getView())
+							.updateView(vfi);
+
+				}
+			}
+		}
 
 	}
+
+	private void updateFileTransErrorView(String uuid) {
+		for (int i = 0; i < messageArray.size(); i++) {
+			VMessage vm = (VMessage) messageArray.get(i).getItemObject();
+			if (vm.getItems().size() > 0) {
+				VMessageAbstractItem item = vm.getItems().get(0);
+				if (item.getType() == VMessageAbstractItem.ITEM_TYPE_FILE
+						&& item.getUuid().equals(uuid)) {
+					VMessageFileItem vfi = ((VMessageFileItem) item);
+					vfi.setDownloadedSize(0);
+					// If lesser than sending, means file is receive
+					if (vfi.getState() < VMessageFileItem.STATE_FILE_SENDING) {
+						vfi.setState(VMessageFileItem.STATE_FILE_DOWNLOADED_FALIED);
+					} else {
+						vfi.setState(VMessageFileItem.STATE_FILE_SENT_FALIED);
+					}
+					MessageBuilder.updateVMessageItem(this, vfi);
+
+					((MessageBodyView) messageArray.get(i).getView())
+							.updateView(vfi);
+
+				}
+			}
+		}
+	}
+
+	private OnTouchListener mHiddenOnTouchListener = new OnTouchListener() {
+
+		@Override
+		public boolean onTouch(View view, MotionEvent arg1) {
+			InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+			imm.hideSoftInputFromWindow(mMessageET.getWindowToken(),
+					InputMethodManager.RESULT_UNCHANGED_SHOWN);
+			if (mReturnButtonTV == view) {
+				onBackPressed();
+			}
+			return false;
+		}
+
+	};
+
+	private OnClickListener mShowContactDetailListener = new OnClickListener() {
+
+		@Override
+		public void onClick(View view) {
+			Intent i = new Intent();
+			i.setClass(mContext, ContactDetail.class);
+			i.putExtra("uid", user2Id);
+			i.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+			mContext.startActivity(i);
+		}
+
+	};
+
+	private CommonAdapter.ViewConvertListener mConvertListener = new CommonAdapter.ViewConvertListener() {
+
+		@Override
+		public View converView(CommonAdapterItemWrapper wr, View convertView,
+				ViewGroup vg) {
+			if (wr == null) {
+				return null;
+			}
+			VMessage vm = (VMessage) wr.getItemObject();
+			if (convertView == null) {
+				MessageBodyView mv = new MessageBodyView(mContext, vm, true);
+				mv.setCallback(listener);
+				convertView = mv;
+			} else {
+				((MessageBodyView) convertView).updateView(vm);
+			}
+			((VMessageAdater) wr).setView(convertView);
+			return convertView;
+		}
+	};
+
+	private BitmapManager.BitmapChangedListener avatarChangedListener = new BitmapManager.BitmapChangedListener() {
+
+		@Override
+		public void notifyAvatarChanged(User user, Bitmap bm) {
+			if (user == null) {
+				return;
+			}
+			if (user.getmUserId() == local.getmUserId()
+					|| user.getmUserId() == remote.getmUserId()) {
+				adapter.notifyDataSetInvalidated();
+			}
+
+		}
+
+	};
+
+	private Runnable mUpdateMicStatusTimer = new Runnable() {
+		public void run() {
+			int ratio = mRecorder.getMaxAmplitude() / 600;
+			int db = 0;// 分贝
+			if (ratio > 1)
+				db = (int) (20 * Math.log10(ratio));
+			updateVoiceVolume(db / 4);
+
+			lh.postDelayed(mUpdateMicStatusTimer, 200);
+		}
+	};
 
 	class MessageReceiver extends BroadcastReceiver {
 
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			if (JNIService.JNI_BROADCAST_NEW_MESSAGE.equals(intent.getAction())) {
-				Message.obtain(lh, QUERY_NEW_MESSAGE,
-						intent.getExtras().get("mid")).sendToTarget();
+				boolean result = queryAndAddMessage((int) intent.getExtras()
+						.getLong("mid"));
+				if (result) {
+					// abort send down broadcast
+					this.abortBroadcast();
+				}
+			} else if (JNIService.JNI_BROADCAST_MESSAGE_SENT_FAILED
+					.equals(intent.getAction())) {
+				String uuid = intent.getExtras().getString("uuid");
+				for (int i = 0; i < messageArray.size(); i++) {
+					VMessage vm = (VMessage) messageArray.get(i)
+							.getItemObject();
+					if (vm.getUUID().equals(uuid)) {
+						vm.setState(VMessage.STATE_SENT_FAILED);
+						MessageBodyView mdv = ((MessageBodyView) messageArray
+								.get(i).getView());
+						if (mdv != null) {
+							mdv.updateView(vm);
+						}
+						// TODO update database
+						break;
+					}
+					List<VMessageAbstractItem> items = vm.getItems();
+					for (int j = 0; j < items.size(); j++) {
+						VMessageAbstractItem item = items.get(j);
+						if (uuid.equals(item.getUuid())) {
+							item.setState(VMessageAbstractItem.STATE_FILE_SENT_FALIED);
+							MessageBodyView mdv = ((MessageBodyView) messageArray
+									.get(i).getView());
+							if (mdv != null) {
+								// TODO update database
+								mdv.updateView(vm);
+							}
+							break;
+						}
+
+					}
+
+				}
 			}
 		}
 
@@ -553,6 +1445,12 @@ public class ConversationView extends Activity {
 			switch (msg.what) {
 			case LOAD_MESSAGE:
 				List<VMessage> array = loadMessages();
+				if (array != null) {
+					for (int i = 0; i < array.size(); i++) {
+						messageArray.add(0, new VMessageAdater(array.get(i)));
+					}
+					currentItemPos += array.size() - 1;
+				}
 				android.os.Message.obtain(lh, END_LOAD_MESSAGE, array)
 						.sendToTarget();
 				break;
@@ -567,61 +1465,43 @@ public class ConversationView extends Activity {
 		public void handleMessage(android.os.Message msg) {
 			switch (msg.what) {
 			case START_LOAD_MESSAGE:
-				if (mLoadingImg == null) {
-					mLoadingImg = new ImageView(mContext);
-					mLoadingImg.setImageResource(R.drawable.loading);
+				if (isLoading) {
+					break;
 				}
-				mMessagesContainer.addView(mLoadingImg, 0);
-
 				android.os.Message.obtain(backEndHandler, LOAD_MESSAGE)
 						.sendToTarget();
-				break;
-			case LOAD_MESSAGE:
-				loadMessages();
-				android.os.Message.obtain(this, END_LOAD_MESSAGE)
-						.sendToTarget();
+				isLoading = true;
 				break;
 			case END_LOAD_MESSAGE:
-				mMessagesContainer.removeView(mLoadingImg);
-				List<VMessage> array = (List<VMessage>) msg.obj;
-				MessageBodyView fir = null;
-				for (int i = 0; array != null && i < array.size(); i++) {
-					MessageBodyView mv = new MessageBodyView(mContext,
-							array.get(i), true);
-					mv.setCallback(listener);
-					if (fir == null) {
-						fir = mv;
-					}
-					mMessagesContainer.addView(mv, 0);
-				}
-				
-				if (fir != null) {
-					final MessageBodyView firt = fir;
-					mScrollView.post(new Runnable() {
-						@Override
-						public void run() {
-							mScrollView.scrollTo(0, firt.getBottom());
-						}
-					});
-				}
-				
-				
+				scrollToPos(currentItemPos);
+				adapter.notifyDataSetChanged();
 				isLoading = false;
 				break;
 			case SEND_MESSAGE:
-				mChat.sendVMessage((VMessage) msg.obj,
-						Message.obtain(this, SEND_MESSAGE_DONE));
-				// mService.sendMessage((VMessage) msg.obj,
-				// Message.obtain(this, SEND_MESSAGE_DONE));
+				mChat.sendVMessage((VMessage) msg.obj, new Registrant(this,
+						SEND_MESSAGE_DONE, null));
 				break;
-			case QUERY_NEW_MESSAGE:
-				if (msg.obj == null || "".equals(msg.obj.toString())) {
-					break;
+			case SEND_MESSAGE_ERROR:
+				break;
+			case PLAY_NEXT_UNREAD_MESSAGE:
+				boolean flag = playNextUnreadMessage();
+				// To last message
+				if (!flag) {
+					currentPlayed = null;
 				}
-				queryAndAddMessage(Integer.parseInt(msg.obj.toString()));
-				saveReaded();
 				break;
+			case FILE_STATUS_LISTENER:
+				FileTransStatusIndication ind = (FileTransStatusIndication) (((AsyncResult) msg.obj)
+						.getResult());
+				if (ind.indType == FileTransStatusIndication.IND_TYPE_PROGRESS) {
+					updateFileProgressView(
+							ind.uuid,
+							((FileTransProgressStatusIndication) ind).nTranedSize);
+				} else if (ind.indType == FileTransStatusIndication.IND_TYPE_TRANS_ERR) {
+					updateFileTransErrorView(ind.uuid);
+				}
 			}
+
 		}
 
 	}

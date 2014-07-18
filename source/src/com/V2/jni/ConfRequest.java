@@ -1,24 +1,23 @@
 package com.V2.jni;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
-
-import com.v2tech.util.V2Log;
 
 import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.v2tech.util.V2Log;
+
 public class ConfRequest {
 
 	private static ConfRequest mConfRequest;
-	private Context context;
 
-	private List<ConfRequestCallback> callbacks;
+	private List<WeakReference<ConfRequestCallback>> callbacks;
 
 	private ConfRequest(Context context) {
-		this.context = context;
-		this.callbacks = new ArrayList<ConfRequestCallback>();
+		this.callbacks = new ArrayList<WeakReference<ConfRequestCallback>>();
 	};
 
 	public static synchronized ConfRequest getInstance(Context context) {
@@ -32,15 +31,15 @@ public class ConfRequest {
 
 	public static synchronized ConfRequest getInstance() {
 		if (mConfRequest == null) {
-			throw new RuntimeException(
-					"doesn't initliaze ConfRequest yet, please getInstance(Context) first");
+			mConfRequest = new ConfRequest(null);
+			mConfRequest.initialize(mConfRequest);
 		}
 
 		return mConfRequest;
 	}
 
 	public void addCallback(ConfRequestCallback callback) {
-		this.callbacks.add(callback);
+		this.callbacks.add(new WeakReference<ConfRequestCallback>(callback));
 	}
 
 	private boolean isInConf = false;
@@ -48,21 +47,6 @@ public class ConfRequest {
 	public native boolean initialize(ConfRequest request);
 
 	public native void unInitialize();
-
-	// sXmlConfData :
-	// <conf canaudio="1" candataop="1" canvideo="1" conftype="0" haskey="0"
-	// id="0" key=""
-	// layout="1" lockchat="0" lockconf="0" lockfiletrans="0" mode="2"
-	// pollingvideo="0"
-	// subject="ss" syncdesktop="0" syncdocument="1" syncvideo="0"
-	// chairuserid='0' chairnickname=''>
-	// </conf>
-	// szInviteUsers :
-	// <xml>
-	// <user id="11760" nickname=""/>
-	// <user id="11762" nickname=""/>
-	// </xml>
-	public native void createConf(String sXmlConfData, String sXmlInviteUsers);
 
 	// 鍒犻櫎浼氳
 	public native void destroyConf(long nConfID);
@@ -96,8 +80,13 @@ public class ConfRequest {
 	 */
 	private void OnEnterConf(long nConfID, long nTime, String szConfData,
 			int nJoinResult) {
-		for (ConfRequestCallback cb : this.callbacks) {
-			cb.OnEnterConfCallback(nConfID, nTime, szConfData, nJoinResult);
+		for (int i = 0; i < this.callbacks.size(); i++) {
+			WeakReference<ConfRequestCallback> we = this.callbacks.get(i);
+			Object obj = we.get();
+			if (obj != null) {
+				ConfRequestCallback cb = (ConfRequestCallback) obj;
+				cb.OnEnterConfCallback(nConfID, nTime, szConfData, nJoinResult);
+			}
 		}
 		V2Log.d("OnEnterConf called  nConfID:" + nConfID + "  nTime:" + nTime
 				+ " szConfData:" + szConfData + " nJoinResult:" + nJoinResult);
@@ -127,8 +116,13 @@ public class ConfRequest {
 	private void OnConfMemberEnter(long nConfID, long nTime, String szUserInfos) {
 		V2Log.d("-->OnConfMemberEnter " + nConfID + " " + nTime + " "
 				+ szUserInfos);
-		for (ConfRequestCallback cb : this.callbacks) {
-			cb.OnConfMemberEnterCallback(nConfID, nTime, szUserInfos);
+		for (int i =0; i < this.callbacks.size(); i++) {
+			WeakReference<ConfRequestCallback> we  = this.callbacks.get(i);
+			Object obj = we.get();
+			if (obj != null) {
+				ConfRequestCallback cb = (ConfRequestCallback) obj;
+				cb.OnConfMemberEnterCallback(nConfID, nTime, szUserInfos);
+			}
 		}
 	}
 
@@ -141,11 +135,85 @@ public class ConfRequest {
 	private void OnConfMemberExit(long nConfID, long nTime, long nUserID) {
 		V2Log.d("-->OnConfMemberExit " + nConfID + " " + nTime + " " + nUserID);
 
-		for (ConfRequestCallback cb : this.callbacks) {
-			cb.OnConfMemberExitCallback(nConfID, nTime, nUserID);
+		for (int i =0; i < this.callbacks.size(); i++) {
+			WeakReference<ConfRequestCallback> we  = this.callbacks.get(i);
+			Object obj = we.get();
+			if (obj != null) {
+				ConfRequestCallback cb = (ConfRequestCallback) obj;
+				cb.OnConfMemberExitCallback(nConfID, nTime, nUserID);
+			}
 		}
 
 	}
+
+	/**
+	 * 204 user deleted group
+	 * 203 current user is kicked by chairman
+	 * @param nReason
+	 */
+	private void OnKickConf(int nReason) {
+		V2Log.d("-->OnKickConf " + nReason);
+		for (int i =0; i < this.callbacks.size(); i++) {
+			WeakReference<ConfRequestCallback> we  = this.callbacks.get(i);
+			Object obj = we.get();
+			if (obj != null) {
+				ConfRequestCallback cb = (ConfRequestCallback) obj;
+				cb.OnKickConfCallback(nReason);
+			}
+		}
+
+	}
+
+	private void OnGrantPermission(long userid, int type, int status) {
+		V2Log.d("OnGrantPermission " + userid + " type:" + type + " status:" + status);
+
+		for (int i =0; i < this.callbacks.size(); i++) {
+			WeakReference<ConfRequestCallback> we  = this.callbacks.get(i);
+			Object obj = we.get();
+			if (obj != null) {
+				ConfRequestCallback cb = (ConfRequestCallback) obj;
+				cb.OnGrantPermissionCallback(userid, type, status);
+			}
+		}
+	}
+	
+	/**
+	 * User invite current user to join further conference, this function will be called
+	 * @param str {@code <conf createuserid='18' id='514000758190' starttime='1400162220' subject=' 就'/> }
+	 * @param str2 {@code <user id='18'/>}
+	 */
+	private void OnConfNotify(String str, String str2) {
+		V2Log.i(str+"   "+ str2);
+		for (int i =0; i < this.callbacks.size(); i++) {
+			WeakReference<ConfRequestCallback> we  = this.callbacks.get(i);
+			Object obj = we.get();
+			if (obj != null) {
+				ConfRequestCallback cb = (ConfRequestCallback) obj;
+				cb.OnConfNotify(str, str2);
+			}
+		}
+		
+	}
+
+	public native void openVideoMixer(String szMediaID, int nLayout,
+			int videoSizeFormat, int nID);
+
+	public native void closeVideoMixer(String szMediaID);
+
+	public native void syncOpenVideoMixer(String szMediaID, int nLayout,
+			int videoSizeFormat, int nPos, String szVideoMixerListXml);
+
+	public native void syncCloseVideoMixer(String szMediaID);
+
+	public native void addVideoMixerDevID(String szMediaID, long nDstUserID,
+			String szDstDevID, int nPos);
+
+	public native void delVideoMixerDevID(String szMediaID, long nDstUserID,
+			String szDstDevID);
+
+	public native void startMixerVideoToSip(long nSipUserID, String szMediaID);
+
+	public native void stopMixerVideoToSip(long nSipUserID, String szMediaID);
 
 	// 灏嗘煇浜鸿鍑轰細璁�
 	public native void kickConf(long nUserID);
@@ -260,9 +328,7 @@ public class ConfRequest {
 		// bundle);
 	}
 
-	private void OnConfNotify(String str, String str2) {
 
-	}
 
 	public void OnConfSyncOpenVideo(String str) {
 
@@ -270,12 +336,6 @@ public class ConfRequest {
 
 	public void OnConfSyncCloseVideo(long gid, String str) {
 
-	}
-
-	// 鎴戣璇峰嚭浼氳鐨勫洖璋�
-	private void OnKickConf(int nReason) {
-		// TODO
-		Log.e("ImRequest UI", "浼氳鏈変汉閫�嚭--->OnKickConf " + nReason);
 	}
 
 	private void OnConfNotify(long nSrcUserID, String srcNickName,
@@ -306,13 +366,6 @@ public class ConfRequest {
 	private void OnNotifyChair(long userid, int type) {
 		Log.e("ImRequest UI", "OnNotifyChair " + userid + " " + type);
 
-	}
-
-	// 閫氱煡浼氳鎴愬憳鏌愪汉鑾峰緱鏌愮鏉冮檺
-	private void OnGrantPermission(long userid, int type, int status) {
-		// type 1 3 鍙戣█ status 1 鐢宠 2 鍙栨秷 3 鍙栧緱
-		Log.e("ImRequest UI", "OnGrantPermission " + userid + " " + type + " "
-				+ status);
 	}
 
 	// 鍚屾鎵撳紑鏌愪汉瑙嗛
@@ -350,5 +403,24 @@ public class ConfRequest {
 	private void OnSetCanInviteUser(long nConfID, boolean bInviteUser) {
 		Log.e("ImRequest UI", "OnSetCanInviteUser " + nConfID + " "
 				+ bInviteUser);
+	}
+
+	private void OnSyncOpenVideoMixer(String sMediaID, int nLayout,
+			int videoSizeFormat, int nPos, String sSyncVideoMixerXml) {
+		V2Log.d("OnSyncOpenVideoMixer");
+	}
+
+	private void OnSyncCloseVideoMixer(String sMediaID) {
+		V2Log.d("OnSyncCloseVideoMixer");
+	}
+
+	private void OnAddVideoMixer(String sMediaID, long nDstUserID,
+			String sDstDevID, int nPos) {
+		V2Log.d("OnAddVideoMixer");
+	}
+
+	private void OnDelVideoMixer(String sMediaID, long nDstUserID,
+			String sDstDevID) {
+		V2Log.d("OnDelVideoMixer");
 	}
 }

@@ -1,42 +1,40 @@
 package com.V2.jni;
 
-
-
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.v2tech.util.V2Log;
 
 import android.content.Context;
 import android.util.Log;
 
 public class AudioRequest {
-	
-	
-	public static final int BT_CONF = 1;
-	public static final int BT_IM = 2;
-	
+
 	private Context context;
 	private static AudioRequest mAudioRequest;
-	
-	private List<AudioRequestCallback> callbacks;
+
+	private List<WeakReference<AudioRequestCallback>> callbacks;
 
 	private AudioRequest(Context context) {
 		this.context = context;
-		callbacks = new ArrayList<AudioRequestCallback>();
+		callbacks = new ArrayList<WeakReference<AudioRequestCallback>>();
 	};
 
-	public void registerCallback(AudioRequestCallback callback) {
-		callbacks.add(callback);
+	public void addCallback(AudioRequestCallback callback) {
+		callbacks.add(new WeakReference<AudioRequestCallback>(callback));
 	}
-	
-	public void unRegisterCallback(AudioRequestCallback callback) {
-		for(AudioRequestCallback ck: callbacks) {
-			if (ck == callback) {
-				callbacks.remove(ck);
+
+	public void removeCallback(AudioRequestCallback callback) {
+		for (WeakReference<AudioRequestCallback> wr : callbacks) {
+			Object obj = wr.get();
+			if (obj == callback) {
+				callbacks.remove(wr);
 				return;
 			}
 		}
 	}
-	
+
 	public static synchronized AudioRequest getInstance(Context context) {
 		if (mAudioRequest == null) {
 			mAudioRequest = new AudioRequest(context);
@@ -49,8 +47,10 @@ public class AudioRequest {
 
 	public static synchronized AudioRequest getInstance() {
 		if (mAudioRequest == null) {
-			throw new RuntimeException(
-					" AudioRequest is null do getInstance(Context context) first");
+			mAudioRequest = new AudioRequest(null);
+			if (!mAudioRequest.initialize(mAudioRequest)) {
+				Log.e("AudioRequest", "can't initialize AudioRequest ");
+			}
 		}
 		return mAudioRequest;
 	}
@@ -59,69 +59,136 @@ public class AudioRequest {
 
 	public native void unInitialize();
 
-	// ����Է���ʼ��Ƶͨ��
+	/**
+	 * Invite user to join audio call
+	 * 
+	 * @param nGroupID
+	 * @param nToUserID
+	 * @param businesstype
+	 *            type of request
+	 * 
+	 * @see V2GlobalEnum#REQUEST_TYPE_CONF
+	 * @see V2GlobalEnum#REQUEST_TYPE_IM
+	 */
 	public native void InviteAudioChat(long nGroupID, long nToUserID,
 			int businesstype);
 
-	// ���ܶԷ�����Ƶͨ������
+	/**
+	 * Accept audio conversation
+	 * 
+	 * @param nGroupID
+	 * @param nToUserID
+	 * @param businesstype
+	 *            type of request
+	 * 
+	 * @see V2GlobalEnum#REQUEST_TYPE_CONF
+	 * @see V2GlobalEnum#REQUEST_TYPE_IM
+	 */
 	public native void AcceptAudioChat(long nGroupID, long nToUserID,
 			int businesstype);
 
-	// �ܾ�Է�����Ƶͨ������
+	/**
+	 * reject audio conversation
+	 * 
+	 * @param nGroupID
+	 * @param nToUserID
+	 * @param businesstype
+	 *            type of request
+	 * 
+	 * @see V2GlobalEnum#REQUEST_TYPE_CONF
+	 * @see V2GlobalEnum#REQUEST_TYPE_IM
+	 */
 	public native void RefuseAudioChat(long nGroupID, long nToUserID,
 			int businesstype);
 
-	// ȡ����Ƶͨ��
+	/**
+	 * 
+	 * @param nGroupID
+	 * @param nToUserID
+	 * @param businesstype
+	 *            type of request
+	 * 
+	 * @see V2GlobalEnum#REQUEST_TYPE_CONF
+	 * @see V2GlobalEnum#REQUEST_TYPE_IM
+	 */
 	public native void CloseAudioChat(long nGroupID, long nToUserID,
 			int businesstype);
 
+	/**
+	 * 
+	 * @param nGroupID
+	 * @param nUserID
+	 * @param bMute
+	 * @param businesstype
+	 *            type of request
+	 * 
+	 * @see V2GlobalEnum#REQUEST_TYPE_CONF
+	 * @see V2GlobalEnum#REQUEST_TYPE_IM
+	 */
 	public native void MuteMic(long nGroupID, long nUserID, boolean bMute,
 			int businesstype);
+
+	public native void CancelAudioChat(long nGroupID, long nToUserID,
+			int businessType);
 
 	// �յ���Ƶͨ��������Ļص�
 	private void OnAudioChatInvite(long nGroupID, long nBusinessType,
 			long nFromUserID) {
-		Log.e("ImRequest UI", "OnAudioChaInvite " + nGroupID + ":"
-				+ nBusinessType + ":" + nFromUserID);
-		// �յ��Է�����Ƶ����
-		// Intent intent=new Intent(VideoChatActivity.VIDEOCHAT);
-		// intent.putExtra("videochat", Constant.AUDIOCHATINVITE);
-		// context.sendBroadcast(intent);
-
-		AcceptAudioChat(nGroupID, nFromUserID, 2);
+		V2Log.d("OnAudioChaInvite " + nGroupID + ":" + nBusinessType + ":"
+				+ nFromUserID);
+		for (int i = 0; i < callbacks.size(); i++) {
+			WeakReference<AudioRequestCallback> wr = callbacks.get(i);
+			Object obj = wr.get();
+			if (obj != null) {
+				((AudioRequestCallback) obj).OnAudioChatInvite(nGroupID,
+						nBusinessType, nFromUserID);
+			}
+		}
 	}
 
 	private void OnAudioChatAccepted(long nGroupID, long nBusinessType,
 			long nFromUserID) {
-		Log.e("ImRequest UI", "OnAudioChatAccepted " + nGroupID + ":"
-				+ nBusinessType + ":" + nFromUserID);
+		V2Log.d("OnAudioChatAccepted " + nGroupID + ":" + nBusinessType + ":"
+				+ nFromUserID);
 
-		for (AudioRequestCallback cb : callbacks) {
-			cb.OnAudioChatAccepted(nGroupID, nBusinessType, nFromUserID);
+		for (int i = 0; i < callbacks.size(); i++) {
+			WeakReference<AudioRequestCallback> wr = callbacks.get(i);
+			Object obj = wr.get();
+			if (obj != null) {
+				((AudioRequestCallback) obj).OnAudioChatAccepted(nGroupID,
+						nBusinessType, nFromUserID);
+			}
 		}
 	}
 
 	// ��Ƶͨ�����뱻�Է��ܾ�Ļص�
 	private void OnAudioChatRefused(long nGroupID, long nBusinessType,
 			long nFromUserID) {
-		Log.e("ImRequest UI", "OnAudioChatRefused " + nGroupID + ":"
-				+ nBusinessType + ":" + nFromUserID);
-
-		// ƴװ��Ϣ
-		// AudioRefuseMsgType videoMsgType=new AudioRefuseMsgType();
-		// videoMsgType.setnFromuserID(nFromUserID);
-		//
-		// Intent intent=new Intent(SplashActivity.IM);
-		// intent.putExtra("MsgType", MsgType.AUIDOACCEPT_CHAT);
-		// intent.putExtra("MSG", videoMsgType);
-		// context.sendBroadcast(intent);
+		V2Log.d("OnAudioChatRefused " + nGroupID + ":" + nBusinessType + ":"
+				+ nFromUserID);
+		for (int i = 0; i < callbacks.size(); i++) {
+			WeakReference<AudioRequestCallback> wr = callbacks.get(i);
+			Object obj = wr.get();
+			if (obj != null) {
+				((AudioRequestCallback) obj).OnAudioChatRefused(nGroupID,
+						nBusinessType, nFromUserID);
+			}
+		}
 	}
 
 	// ��Ƶͨ�����ر���ص�
 	private void OnAudioChatClosed(long nGroupID, long nBusinessType,
 			long nFromUserID) {
-		Log.e("ImRequest UI", "OnAudioChatClosed " + nGroupID + ":"
-				+ nBusinessType + ":" + nFromUserID);
+		V2Log.d("OnAudioChatClosed " + nGroupID + ":" + nBusinessType + ":"
+				+ nFromUserID);
+		for (int i = 0; i < callbacks.size(); i++) {
+			WeakReference<AudioRequestCallback> wr = callbacks.get(i);
+			Object obj = wr.get();
+			if (obj != null) {
+				((AudioRequestCallback) obj).OnAudioChatClosed(nGroupID,
+						nBusinessType, nFromUserID);
+			}
+		}
 	}
 
 	// ��Ƶͨ��������

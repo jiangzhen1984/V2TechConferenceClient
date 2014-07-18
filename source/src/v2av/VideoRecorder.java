@@ -27,6 +27,7 @@ public class VideoRecorder
 {
 	public static SurfaceHolder VideoPreviewSurfaceHolder = null;
 	public static int DisplayRotation = 0;
+	public static int CodecType = 0;
 	
 	private int mSrcWidth;
 	private int mSrcHeight;
@@ -34,10 +35,13 @@ public class VideoRecorder
 	private int mVideoWidth;
 	private int mVideoHeight;
 	private int mBitrate;
+	private int mPreviewFormat;
 	private int mFrameRate;
-	private int mCameraRotation;
-	private boolean mbMirror;
-	
+	private int mSelectedFrameRate;
+//	private int mCameraRotation;
+//	private boolean mbMirror;
+	private int framecount;
+
 	private VideoEncoder mEncoder = null;
 	
 	private Camera mCamera = null;
@@ -47,9 +51,10 @@ public class VideoRecorder
 	
 	VideoRecorder()
 	{
-		Log.e("VideoRecorder UI", "VideoRecorder constructor");
 		mCapDevInfo = VideoCaptureDevInfo.CreateVideoCaptureDevInfo();
 	}
+	
+	@SuppressWarnings("unused")
 	private int StartRecordVideo()
 	{
 		VideoCaptureDevice device = mCapDevInfo.GetDevice(mCapDevInfo.GetDefaultDevName());
@@ -63,6 +68,7 @@ public class VideoRecorder
     	mVideoHeight = capParams.height;
     	mBitrate = capParams.bitrate;
     	mFrameRate = capParams.fps;
+    	mPreviewFormat = capParams.format;
     	
     	VeritifyRecordInfo(device);
     	
@@ -83,34 +89,53 @@ public class VideoRecorder
 		return 0;
 	}
 	
+	@SuppressWarnings("unused")
 	private int StopRecordVideo()
 	{
+		Log.i("VideoRecorder UI","StopRecordVideo");
+		
 		StopPreview();
 		UninitCamera();
 		
 		return 0;
 	}
 	
+	@SuppressWarnings("unused")
+	private int GetCodecType()
+	{
+		return CodecType;
+	}
+	@SuppressWarnings("unused")
 	private int GetRecordWidth()
 	{
 		return mVideoWidth;
 	}
 	
+	@SuppressWarnings("unused")
 	private int GetRecordHeight()
 	{
 		return mVideoHeight;
 	}
 	
+	@SuppressWarnings("unused")
 	private int GetRecordBitrate()
 	{
 		return mBitrate;
 	}
 	
+	@SuppressWarnings("unused")
 	private int GetRecordFPS()
 	{
 		return mFrameRate;
 	}
 	
+	@SuppressWarnings("unused")
+	private int GetRecordFormat()
+	{
+		return mPreviewFormat;
+	}
+	
+	@SuppressWarnings("unused")
 	private int GetPreviewSize()
 	{
 		if(mCamera == null)
@@ -126,16 +151,19 @@ public class VideoRecorder
 		return 0;
 	}
 	
+	@SuppressWarnings("unused")
 	private int GetPreviewWidth()
 	{
 		return mSrcWidth;
 	}
 	
+	@SuppressWarnings("unused")
 	private int GetPreviewHeight()
 	{
 		return mSrcHeight;
 	}
 	
+	@SuppressWarnings("unused")
 	private int StartSend()
 	{
 		mVRCallback = new EncoderPreviewCallBack(this);
@@ -148,6 +176,7 @@ public class VideoRecorder
 		return 0;
 	}
 
+	@SuppressWarnings("unused")
 	private int StopSend()
 	{
 		StopRecord();
@@ -159,36 +188,48 @@ public class VideoRecorder
 		return 0;
 	}
 	
-	private void VeritifyRecordInfo(VideoCaptureDevice device)
+	private VideoSize GetSrcSizeByEncSize(VideoCaptureDevice device, int width, int height)
     {
-    	boolean bSupport = false;
+    	VideoSize size = new VideoSize();
     	
-    	CaptureCapability capbility = null;
-    	for(int i = 0; i < device.captureCapabilies.length; ++i)
+    	for(CaptureCapability capability:device.capabilites)
 		{
-    		capbility = device.captureCapabilies[i];
-    		if (capbility.width == mVideoWidth 
-    				&& capbility.height == mVideoHeight)
+    		if (capability.width*capability.height >= width*height)
     		{
-    			bSupport = true;
-    			if (mFrameRate > capbility.maxFPS)
-    			{
-    				mFrameRate = capbility.maxFPS;
-    			}
+    			size.width = capability.width;
+    			size.height = capability.height;
+    			
     			break;
     		}
 		}
     	
-    	if (!bSupport)
-    	{ 		
-    		mVideoWidth = 176;
-    		mVideoHeight = 144;
-    		if (mFrameRate > 15)
+    	return size;
+    }
+	
+	private int SelectFramerate(VideoCaptureDevice device, int fps)
+    {
+    	int selectedFps = 0;
+    	
+    	for (Integer framerate:device.framerates)
+    	{
+    		if (framerate >= fps)
     		{
-    			mFrameRate = 15;
+    			selectedFps = framerate;
+    			break;
     		}
     	}
-
+    	
+    	return selectedFps;
+    }
+	
+	private void VeritifyRecordInfo(VideoCaptureDevice device)
+    {
+		VideoSize size = GetSrcSizeByEncSize(device, mVideoWidth, mVideoHeight);
+		mSrcWidth = size.width;
+    	mSrcHeight = size.height;
+    	
+    	mSelectedFrameRate = SelectFramerate(device, mFrameRate);
+/*
     	if (device.frontCameraType == VideoCaptureDevInfo.FrontFacingCameraType.Android23)
 		{
     		mbMirror = true;
@@ -197,16 +238,16 @@ public class VideoRecorder
 		{
 			mbMirror = false;
 		}
-    	mCameraRotation = device.orientation;
+*/
+//    	mCameraRotation = device.orientation;
     }
 	
 	public void onGetVideoFrame(byte [] databuf, int len)
 	{
-		//丢帧
-		if(dropFrame()){
-			
-			return;
-		}
+		if (DropFrame())
+    	{
+    		return;
+    	}
 		
 		if (mEncoder != null)
 		{
@@ -214,72 +255,72 @@ public class VideoRecorder
 		}
 	}
 	
-	//丢包操作
-	private int framecount=0; //正在编的帧数
-	private boolean  dropFrame(){
-		framecount++;
-		int fps=10;
-		boolean isdrop=false;
-		if(mFrameRate==15){
-			switch (fps) {
-				case 5:
-					if(framecount%3!=0){
-						isdrop=true;
-					}
-					
-					break;
-				case 8:
-					if(framecount%2!=0){
-						isdrop=true;
-					}
-					
-					break;
-				case 10:
-					if(framecount%3==0){
-						isdrop=true;
-					}
-					break;
-				case 15:
-					break;
-			}
-		}else{
-			switch (fps) {
-			case 5:
-				int devide_5=fps/5;
-				if(framecount%devide_5!=0){
-					isdrop=true;
-				}
-				
-				break;
-			case 8:
-				int devide_8=fps/8;
-				if(framecount%devide_8!=0){
-					isdrop=true;
-				}
-				
-				break;
-
-			case 10:
-				int devide_10=fps/10;
-				if(framecount%devide_10!=0){
-					isdrop=true;
-				}
-				break;
-			case 15:
-				int devide_15=fps/15;
-				if(framecount%devide_15!=0){
-					isdrop=true;
-				}
-				break;
-			}
-		}	
-//		Logger.i(null,"丢:"+isdrop);	
-		return isdrop;	
-	}
+	private boolean DropFrame()
+    {
+    	if (mSelectedFrameRate <= mFrameRate)
+    	{
+    		return false;
+    	}
+    	
+    	framecount++;
+    	
+    	switch (mSelectedFrameRate)
+    	{
+    	case 10:
+    		if (framecount % 2 != 0)
+    		{
+    			return true;
+    		}
+    		break;
+    	case 15:
+    		if (mFrameRate == 5)
+    		{
+    			if (framecount % 3 != 0)
+        		{
+        			return true;
+        		}
+    		}
+    		else // mVideoRecordInfo.mFrameRate == 10
+    		{
+    			if (framecount % 3 == 0)
+        		{
+        			return true;
+        		}
+    		}
+    		break;
+    	case 30:
+    		if (mFrameRate == 5)
+    		{
+    			if (framecount % 6 != 0)
+        		{
+        			return true;
+        		}
+    		}
+    		else if (mFrameRate == 10)
+    		{
+    			if (framecount % 3 != 0)
+        		{
+        			return true;
+        		}
+    		}
+    		else // mVideoRecordInfo.mFrameRate == 15
+    		{
+    			if (framecount % 2 != 0)
+        		{
+        			return true;
+        		}
+    		}
+    		break;
+    	default:
+    		break;
+    	}
+		
+		return false;
+    }
 	
 	private AVCode InitCamera(VideoCaptureDevice device)
 	{
-		Log.e("VideoRecorder UI", "InitCamera");
+		Log.i("VideoRecorder UI", "InitCamera");
 		if(mCamera != null)
 		{
 			return AVCode.Err_CameraAlreadyOpen;
@@ -302,8 +343,6 @@ public class VideoRecorder
 	    {
 	    	return AVCode.Err_CameraOpenError;
 	    }
-	    
-	    Log.e("VideoRecorder UI", "InitCamera OK");
 		
 		return AVCode.Err_None;
 	}
@@ -325,10 +364,9 @@ public class VideoRecorder
 	    }
 
 	    Camera.Parameters para = mCamera.getParameters();
-		para.setPreviewSize(mVideoWidth, mVideoHeight);
+		para.setPreviewSize(mSrcWidth, mSrcHeight);
 		para.setPreviewFrameRate(mFrameRate);
-//		para.setPreviewFrameRate(15);
-		para.setPreviewFormat(ImageFormat.NV21);
+		para.setPreviewFormat(mPreviewFormat);
 		mCamera.setParameters(para);
 		
 		int result;
@@ -375,7 +413,7 @@ public class VideoRecorder
 	
 	private void StartPreview()
 	{
-		Log.e("VideoRecorder UI", "StartPreview");
+		Log.i("VideoRecorder UI", "StartPreview");
 		
 		if(mCamera == null)
 		{
@@ -386,25 +424,24 @@ public class VideoRecorder
 		{
 			if (VideoPreviewSurfaceHolder != null)
 			{
-				Log.e("VideoRecorder UI", "setPreviewDisplay");
 				mCamera.setPreviewDisplay(VideoPreviewSurfaceHolder);
 				mCamera.startPreview();
 			}
 		}
 		catch (IOException e) 
 		{
-			Log.e("VideoRecorder UI","----摄像头开始预览失败----");
+			Log.e("ConfRoomActivity","----摄像头开始预览失败----");
 			e.printStackTrace();
 			
 			mCamera.release();
 			mCamera = null;
 		}
-		
-		Log.e("VideoRecorder UI", "StartPreview ok");
 	}
 	
 	private void StopPreview()
 	{
+		Log.i("VideoRecorder UI", "StopPreview");
+		
 		if(mCamera == null)
 		{
 			return;
@@ -415,7 +452,7 @@ public class VideoRecorder
 	
 	private boolean StartRecord(IPreviewCallBack callback)
 	{
-		Log.e("VideoRecorder UI","----摄像头开始采集数据----");
+		Log.i("VideoRecorder UI", "StartRecord");
 		if(mCamera == null)
 		{
 			return false;
@@ -430,6 +467,7 @@ public class VideoRecorder
 	
 	private void StopRecord()
 	{
+		Log.i("VideoRecorder UI", "StopRecord");
 		if(mCamera == null)
 		{
 			return;
@@ -446,6 +484,4 @@ public class VideoRecorder
 		
 		mEncoder = null;
 	}
-	
-	
 }

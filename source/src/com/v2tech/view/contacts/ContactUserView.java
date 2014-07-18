@@ -1,9 +1,12 @@
 package com.v2tech.view.contacts;
 
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,10 +16,11 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.v2tech.R;
-import com.v2tech.logic.GlobalHolder;
-import com.v2tech.logic.User;
-import com.v2tech.util.V2Log;
+import com.v2tech.service.GlobalHolder;
 import com.v2tech.view.PublicIntent;
+import com.v2tech.view.bo.ConversationNotificationObject;
+import com.v2tech.vo.Conversation;
+import com.v2tech.vo.User;
 
 public class ContactUserView extends LinearLayout {
 
@@ -34,8 +38,8 @@ public class ContactUserView extends LinearLayout {
 	private ImageView mStatusIV;
 
 	private Dialog mUserActionDialog;
-	
-	
+
+	private RelativeLayout contentContainer;
 
 	public ContactUserView(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
@@ -63,13 +67,14 @@ public class ContactUserView extends LinearLayout {
 		View view = LayoutInflater.from(getContext()).inflate(
 				R.layout.contacts_user_view, null, false);
 
-		RelativeLayout contentContainer = (RelativeLayout) view
+		contentContainer = (RelativeLayout) view
 				.findViewById(R.id.contact_user_view_root);
 
 		mPhotoIV = (ImageView) view.findViewById(R.id.contact_user_img);
-		if (u.getAvatarBitmap() != null) {
+		if (mPhotoIV != null && u.getAvatarBitmap() != null) {
 			mPhotoIV.setImageBitmap(u.getAvatarBitmap());
 		}
+		
 		mUserNameTV = (TextView) view.findViewById(R.id.contact_user_name);
 		mUserSignatureTV = (TextView) view
 				.findViewById(R.id.contact_user_signature);
@@ -79,19 +84,21 @@ public class ContactUserView extends LinearLayout {
 		mUserSignatureTV.setText(mUser.getSignature() == null ? "" : mUser
 				.getSignature());
 
-
 		mStatusIV = (ImageView) view.findViewById(R.id.contact_user_status_iv);
-		updateStatus(u.getmStatus());
-		
-		if (this.mUser.getmUserId() != GlobalHolder.getInstance().getCurrentUserId()) {
+		updateStatus(u.getDeviceType(), u.getmStatus());
+
+		if (this.mUser.getmUserId() != GlobalHolder.getInstance()
+				.getCurrentUserId()) {
 			mButtonIV.setOnClickListener(new OnClickListener() {
-	
+
 				@Override
 				public void onClick(View view) {
 					getActionDialog().show();
 				}
-	
+
 			});
+		} else {
+			mButtonIV.setVisibility(View.GONE);
 		}
 
 		this.setOnClickListener(new OnClickListener() {
@@ -102,16 +109,7 @@ public class ContactUserView extends LinearLayout {
 			}
 
 		});
-		this.setPadding((u.getFirstBelongsGroup() == null ? 2 : u
-				.getFirstBelongsGroup().getLevel() + 1) * 5, this
-				.getPaddingTop(), this.getPaddingRight(), this
-				.getPaddingRight());
-
-		contentContainer.setPadding((u.getFirstBelongsGroup() == null ? 2 : u
-				.getFirstBelongsGroup().getLevel() + 1) * 35, contentContainer
-				.getPaddingTop(), contentContainer.getPaddingRight(),
-				contentContainer.getPaddingRight());
-
+		
 		this.addView(view, new LinearLayout.LayoutParams(
 				LinearLayout.LayoutParams.MATCH_PARENT,
 				LinearLayout.LayoutParams.WRAP_CONTENT));
@@ -165,20 +163,22 @@ public class ContactUserView extends LinearLayout {
 
 	private void handle(int type) {
 		Intent i = new Intent();
+		i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		i.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
 		switch (type) {
 		case ACTION_TYPE_INVITE_VIDEO:
-			i.setAction(PublicIntent.START_VIDEO_CONVERSACTION_ACTIVITY);
+			i.setAction(PublicIntent.START_P2P_CONVERSACTION_ACTIVITY);
 			i.addCategory(PublicIntent.DEFAULT_CATEGORY);
 			i.putExtra("is_coming_call", false);
 			i.putExtra("name", this.mUser.getName());
 			i.putExtra("uid", this.mUser.getmUserId());
+			i.putExtra("voice", false);
 			break;
 		case ACTION_TYPE_START_CONVERSATION:
 			i.setAction(PublicIntent.START_CONVERSACTION_ACTIVITY);
 			i.addCategory(PublicIntent.DEFAULT_CATEGORY);
-			i.putExtra("user1id", GlobalHolder.getInstance().getCurrentUserId());
-			i.putExtra("user2id", this.mUser.getmUserId());
-			i.putExtra("user2Name", this.mUser.getName());
+			i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+			i.putExtra("obj", new ConversationNotificationObject(Conversation.TYPE_CONTACT, this.mUser.getmUserId()));
 			break;
 		case ACTION_TYPE_VIEW_DETAIL:
 			i.setClass(this.getContext(), ContactDetail.class);
@@ -186,47 +186,69 @@ public class ContactUserView extends LinearLayout {
 			break;
 		}
 		this.getContext().startActivity(i);
+		((Activity) this.getContext()).overridePendingTransition(
+				R.animator.nonam_scale_center_0_100,
+				R.animator.nonam_scale_null);
 	}
 
 	public User getUser() {
 		return this.mUser;
 	}
 
-	public void updateStatus(User.Status st) {
-		switch (st) {
-		case ONLINE:
-			mStatusIV.setImageResource(R.drawable.online);
-			break;
-		case LEAVE:
-			mStatusIV.setImageResource(R.drawable.leave);
-			break;
-		case BUSY:
-			mStatusIV.setImageResource(R.drawable.busy);
-			break;
-		case DO_NOT_DISTURB:
-			mStatusIV.setImageResource(R.drawable.do_not_distrub);
-			break;
-		default:
-			break;
+	public void updateStatus(User.DeviceType dType, User.Status st) {
+		// If user logged device is cell phone, only show cell phone icon
+		if (dType == User.DeviceType.CELL_PHONE) {
+			mStatusIV.setImageResource(R.drawable.cell_phone_user);
+		} else {
+			switch (st) {
+			case ONLINE:
+				mStatusIV.setImageResource(R.drawable.online);
+				break;
+			case LEAVE:
+				mStatusIV.setImageResource(R.drawable.leave);
+				break;
+			case BUSY:
+				mStatusIV.setImageResource(R.drawable.busy);
+				break;
+			case DO_NOT_DISTURB:
+				mStatusIV.setImageResource(R.drawable.do_not_distrub);
+				break;
+			default:
+				break;
+			}
 		}
-		if (st == User.Status.OFFLINE || st == User.Status.HIDDEN ) {
+		if (st == User.Status.OFFLINE || st == User.Status.HIDDEN) {
 			mStatusIV.setVisibility(View.GONE);
+			mPhotoIV.setColorFilter(Color.GRAY,PorterDuff.Mode.LIGHTEN);
+			mUserNameTV.setTextColor(getContext().getResources().getColor(R.color.contacts_user_view_item_color_offline));
 		} else {
 			mStatusIV.setVisibility(View.VISIBLE);
+			mPhotoIV.clearColorFilter();
+			mUserNameTV.setTextColor(getContext().getResources().getColor(R.color.conf_create_contacts_user_view_item_color));
 		}
 	}
-	
-	
+
 	public void updateAvatar(Bitmap bt) {
 		if (bt == null) {
-			V2Log.w(" Invalid bitmap");
-			return;
+			mPhotoIV.setImageResource(R.drawable.avatar);
+		} else {
+			mPhotoIV.setImageBitmap(bt);
 		}
-		mPhotoIV.setImageBitmap(bt);
 	}
-	
+
 	public void updateSign() {
 		mUserSignatureTV.setText(this.mUser.getSignature());
+		mUserNameTV.setText(mUser.getName());
+	}
+
+	public void removePadding() {
+		contentContainer.setPadding(0, contentContainer.getPaddingTop(),
+				contentContainer.getPaddingRight(),
+				contentContainer.getPaddingRight());
+	}
+
+	public void setPaddingT(int left, int top, int right, int bottom) {
+		contentContainer.setPadding(left, top, right, bottom);
 	}
 
 }

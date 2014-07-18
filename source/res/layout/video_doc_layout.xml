@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:animateLayoutChanges="true"
+    android:background="#ffffff"
+    android:orientation="vertical" >
+
+    <TextView
+        android:id="@+id/textView1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:gravity="center"
+        android:paddingBottom="10dp"
+        android:paddingTop="10dp"
+        android:text="@string/confs_doc"
+        android:textColor="#000000"
+        android:textSize="18sp" />
+
+    <LinearLayout
+        android:id="@+id/LinearLayout1"
+        android:layout_width="fill_parent"
+        android:layout_height="1dp"
+        android:layout_below="@+id/textView1"
+        android:background="#cdcdcf"
+        android:orientation="vertical" >
+    </LinearLayout>
+
+    <FrameLayout
+        android:id="@+id/video_doc_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/video_doc_bottom_bar"
+        android:layout_below="@+id/LinearLayout1"
+        android:orientation="vertical" >
+    </FrameLayout>
+
+    <RelativeLayout
+        android:id="@+id/video_doc_bottom_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true" >
+
+        <ImageView
+            android:id="@+id/video_doc_list_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_marginLeft="15dp"
+            android:src="@drawable/video_show_doc_button_selector" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:orientation="horizontal" >
+
+            <ImageView
+                android:id="@+id/video_doc_pre_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="@dimen/video_doc_bottom_button_padding"
+                android:src="@drawable/video_doc_left_arrow_gray" />
+
+            <TextView
+                android:id="@+id/video_doc_navgator"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal|center_vertical"
+                android:layout_marginRight="@dimen/video_doc_bottom_button_padding"
+                android:layout_marginLeft="@dimen/video_doc_bottom_button_padding"
+                android:paddingLeft="@dimen/video_doc_bottom_button_padding"
+                android:paddingRight="@dimen/video_doc_bottom_button_padding"
+                android:gravity="center"
+                android:textSize="@dimen/common_item_text_size"
+                android:text=" " />
+
+            <ImageView
+                android:id="@+id/video_doc_next_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/video_doc_bottom_button_padding"
+                android:src="@drawable/video_doc_right_arrow_gray" />
+        </LinearLayout>
+    </RelativeLayout>
+
+    <ImageView
+        android:id="@+id/video_doc_screen_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/textView1"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="10dp"
+        android:paddingBottom="10dp"
+        android:paddingTop="10dp"
+        android:src="@drawable/video_doc_full_screen_button_selector"
+        android:tag="restorescreen" />
+
+    <ImageView
+        android:id="@+id/video_doc_pin_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/textView1"
+        android:layout_marginRight="5dp"
+        android:layout_toLeftOf="@+id/video_doc_screen_button"
+        android:paddingBottom="10dp"
+        android:paddingTop="10dp"
+        android:src="@drawable/pin_button_selector"
+        android:tag="float"
+        android:visibility="invisible" />
+
+    <LinearLayout
+        android:layout_width="1dp"
+        android:layout_height="fill_parent"
+        android:layout_alignParentRight="true"
+        android:background="#cdcdcf"
+        android:orientation="vertical" >
+    </LinearLayout>
+
+</RelativeLayout>

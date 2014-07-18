@@ -1,110 +1,90 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="400dp"
-    android:layout_height="100dp"
-    android:background="@drawable/rounded_corners_of_in_metting_setting_pop_up_window"
-    android:orientation="vertical" >
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content" >
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_margin="7dp"
-        android:background="@color/in_meeting_setting_bg"
-        android:orientation="vertical" >
+    <RelativeLayout
+        android:id="@+id/camera_quality_setting_root_container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" >
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" >
+        <ImageView
+            android:id="@+id/camera_setting_window_arrow"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_marginBottom="-2dp"
+            android:layout_marginLeft="15dp"
+            android:src="@drawable/camera_setting_window_arrow_bg" />
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/camera_setting_window_arrow"
+            android:background="@drawable/common_pop_up_window_bg"
+            android:orientation="vertical" >
 
             <TextView
                 android:id="@+id/textView1"
                 android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingTop="5dp"
+                android:layout_alignParentTop="true"
+                android:layout_centerHorizontal="true"
+                android:text="@string/confs_camear_quanlity"
+                android:textColor="#000000" />
+
+            <com.v2tech.view.cus.VerticalSeekBar
+                android:id="@+id/camera_setting_quality"
+                android:layout_width="wrap_content"
                 android:layout_height="fill_parent"
-                android:layout_gravity="center_vertical"
-                android:layout_marginLeft="30dp"
-                android:gravity="center"
-                android:text="@string/in_meeting_setting_video_qulity" />
+                android:layout_below="@+id/textView1"
+                android:layout_marginBottom="15dp"
+                android:layout_marginTop="15dp"
+                android:max="100"
+                android:paddingBottom="20dp"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp"
+                android:paddingTop="20dp"
+                android:progress="0"
+                android:progressDrawable="@drawable/seek_bar_progress"
+                android:thumb="@drawable/seekbar_ball" />
 
-            <RadioGroup
-                android:id="@+id/radioGroup1"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="80dp"
-                android:orientation="horizontal" >
-
-                <RadioButton
-                    android:id="@+id/radio0"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:button="@null"
-                    android:checked="true"
-                    android:drawableRight="@android:drawable/btn_radio"
-                    android:gravity="center"
-                    android:text="@string/in_meeting_setting_video_qulity_high"
-                    android:textColor="#000000" />
-
-                <RadioButton
-                    android:id="@+id/radio1"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:button="@null"
-                    android:gravity="center"
-                    android:drawableRight="@android:drawable/btn_radio"
-                    android:text="@string/in_meeting_setting_video_qulity_middle"
-                    android:textColor="#000000" />
-
-                <RadioButton
-                    android:id="@+id/radio2"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:button="@null"
-                    android:drawableRight="@android:drawable/btn_radio"
-                    android:gravity="center"
-                    android:text="@string/in_meeting_setting_video_qulity_low"
-                    android:textColor="#000000" />
-            </RadioGroup>
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="2dp"
-            android:background="#f2f2f2"
-            android:orientation="vertical" >
-        </LinearLayout>
-
-         <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="fill_parent"
-            android:id ="@+id/in_meeting_setting_reverse_camera"
-             >
-
-            <ImageView
-                android:id="@+id/imageView1"
+            <RelativeLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentRight="true"
-                android:layout_marginRight="30dp"
-               	android:layout_centerVertical="true"
-                android:src="@drawable/reverse_camera" />
+                android:layout_alignBottom="@+id/camera_setting_quality"
+                android:layout_alignTop="@+id/camera_setting_quality"
+                android:layout_toRightOf="@+id/camera_setting_quality"
+                android:paddingBottom="10dp"
+                android:paddingTop="10dp"
+                android:paddingRight="10dp" >
 
-            <TextView
-                android:id="@+id/textView2"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentLeft="true"
-                android:layout_centerVertical="true"
-                 android:layout_marginLeft="30dp"
-                
-                android:text="@string/in_meeting_setting_reverse" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentTop="true"
+                    android:text="@string/confs_camear_quanlity_high"
+                    android:textColor="#787878" />
 
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_centerVertical="true"
+                    android:text="@string/confs_camear_quanlity_middle"
+                    android:textColor="#787878" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentBottom="true"
+                    android:layout_alignParentLeft="true"
+                    android:text="@string/confs_camear_quanlity_low"
+                    android:textColor="#787878" />
+            </RelativeLayout>
         </RelativeLayout>
+    </RelativeLayout>
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="2dp"
-            android:background="@color/setting_separation"
-            android:orientation="vertical" >
-        </LinearLayout>
-    </LinearLayout>
-
-</LinearLayout>
+</RelativeLayout>

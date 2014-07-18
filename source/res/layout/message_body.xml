@@ -2,23 +2,23 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content" >
-    
-        <TextView
-            android:id="@+id/message_body_time_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="20dp"
-            android:background="@drawable/message_body_time_bg"
-            android:gravity="center"
-            android:text="00:00" />
+
+    <TextView
+        android:id="@+id/message_body_time_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="20dp"
+        android:background="@drawable/message_body_time_bg"
+        android:gravity="center"
+        android:text="00:00" />
 
     <LinearLayout
-        android:id="@+id/message_body_local_user_ly"
-        android:layout_below="@+id/message_body_time_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" >
+        android:id="@+id/message_body_left_user_ly"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/message_body_time_text" >
 
         <RelativeLayout
             android:layout_width="0dp"
@@ -28,7 +28,7 @@
             android:layout_weight=".9" >
 
             <ImageView
-                android:id="@+id/conversation_message_body_icon_local"
+                android:id="@+id/conversation_message_body_icon_left"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentLeft="true"
@@ -42,20 +42,49 @@
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
                 android:layout_marginLeft="10dp"
-                android:layout_toRightOf="@+id/conversation_message_body_icon_local"
-                android:src="@drawable/message_body_arrow_left" />
+                android:layout_toRightOf="@+id/conversation_message_body_icon_left"
+                android:src="@drawable/message_body_left_arrow_selector" />
 
             <LinearLayout
-                android:id="@+id/messag_body_content_ly_local"
-                android:layout_width="match_parent"
+                android:id="@+id/messag_body_content_ly_left"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
                 android:layout_marginLeft="-1dp"
-                android:layout_marginRight="30dp"
+                android:layout_marginRight="10dp"
                 android:layout_toRightOf="@+id/message_body_arrow_left"
-                android:background="@drawable/message_body_bg"
-                android:orientation="horizontal" >
+                android:background="@drawable/message_body_left_bg_selector"
+                android:orientation="vertical" >
             </LinearLayout>
+
+            <TextView
+                android:id="@+id/message_body_video_item_second_left"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="5dp"
+                android:layout_toRightOf="@+id/messag_body_content_ly_left"
+                android:text="24&apos;&apos;" />
+
+            <ImageView
+                android:id="@+id/message_body_failed_item_left"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="10dp"
+                android:layout_toRightOf="@+id/message_body_video_item_second_left"
+                android:src="@drawable/message_sent_failed_icon"
+                android:visibility="gone" />
+
+            <ImageView
+                android:id="@+id/message_body_unread_icon_left"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="10dp"
+                android:layout_toRightOf="@+id/message_body_video_item_second_left"
+                android:src="@drawable/voice_message_unread_icon"
+                android:visibility="gone" />
         </RelativeLayout>
 
         <TextView
@@ -69,8 +98,7 @@
         android:id="@+id/message_body_remote_ly"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-         android:layout_below="@+id/message_body_time_text"
-         >
+        android:layout_below="@+id/message_body_time_text" >
 
         <TextView
             android:layout_width="wrap_content"
@@ -83,11 +111,10 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="15dp"
             android:layout_marginTop="15dp"
-            android:layout_weight=".9"
-            >
+            android:layout_weight=".9" >
 
             <ImageView
-                android:id="@+id/conversation_message_body_icon_remote"
+                android:id="@+id/conversation_message_body_icon_right"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
@@ -101,20 +128,49 @@
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
                 android:layout_marginRight="10dp"
-                android:layout_toLeftOf="@+id/conversation_message_body_icon_remote"
-                android:src="@drawable/message_body_arrow_right" />
+                android:layout_toLeftOf="@+id/conversation_message_body_icon_right"
+                android:src="@drawable/message_body_right_arrow_selector" />
 
             <LinearLayout
-                android:id="@+id/messag_body_content_ly_remote"
-                android:layout_width="match_parent"
+                android:id="@+id/messag_body_content_ly_right"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
-                android:layout_marginLeft="30dp"
+                android:layout_marginLeft="10dp"
                 android:layout_marginRight="-1dp"
                 android:layout_toLeftOf="@+id/message_body_arrow_right"
-                android:background="@drawable/message_body_bg_remote"
-                android:orientation="horizontal" >
+                android:background="@drawable/message_body_right_bg_selector"
+                android:orientation="vertical" >
             </LinearLayout>
+
+            <TextView
+                android:id="@+id/message_body_video_item_second_right"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginRight="5dp"
+                android:layout_toLeftOf="@+id/messag_body_content_ly_right"
+                android:text="24&apos;&apos;" />
+
+            <ImageView
+                android:id="@+id/message_body_failed_item_right"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="10dp"
+                android:layout_toLeftOf="@+id/message_body_video_item_second_right"
+                android:src="@drawable/message_sent_failed_icon"
+                android:visibility="gone" />
+
+            <ImageView
+                android:id="@+id/message_body_unread_icon_right"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="10dp"
+                android:layout_toLeftOf="@+id/message_body_video_item_second_right"
+                android:src="@drawable/voice_message_unread_icon"
+                android:visibility="gone" />
         </RelativeLayout>
     </LinearLayout>
 

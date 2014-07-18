@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/conversation_framgent_bg" >
+
+    <TextView
+        android:id="@+id/fragment_conversation_audio_incoming_call_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:text="@string/conversation_waiting_voice_incoming"
+        android:layout_marginTop="@dimen/fragment_conversation_audio_incoming_call_title_margin_top"
+        android:textColor="@color/fragment_conversation_title_text_color"
+        android:textSize="@dimen/fragment_conversation_audio_incoming_call_title_text_size" />
+
+    <LinearLayout
+        android:id="@+id/linearLayout1"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:gravity="center"
+        android:orientation="vertical" >
+
+        <ImageView
+            android:id="@+id/conversation_fragment_audio_incoming_call_avatar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/avatar" />
+
+        <TextView
+            android:id="@+id/conversation_fragment_audio_incoming_call_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="名字"
+            android:textColor="@color/fragment_conversation_title_text_color"
+            android:textSize="@dimen/fragment_conversation_audio_incoming_call_title_text_size" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/conversation_fragment_audio_incoming_call_button_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginLeft="@dimen/fragment_conversation_audio_incoming_call_button_container_margin"
+            android:layout_marginRight="@dimen/fragment_conversation_audio_incoming_call_button_container_margin"
+        android:orientation="vertical" >
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/fragment_conversation_audio_incoming_call_button_margin_bottom"
+            android:layout_marginLeft="@dimen/fragment_conversation_audio_incoming_call_button_margin"
+            android:layout_marginRight="@dimen/fragment_conversation_audio_incoming_call_button_margin"
+            android:orientation="horizontal" >
+
+            <TextView
+                android:id="@+id/conversation_fragment_voice_reject_button"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="@dimen/fragment_conversation_audio_incoming_call_button_margin_hor"
+                android:layout_weight=".5"
+                android:background="@drawable/conversation_fragment_reject_button_selector"
+                android:gravity="center"
+                android:padding="@dimen/fragment_conversation_audio_incoming_call_button_padding_vertical"
+                android:text="@string/conversation_reject_text"
+                android:textColor="@color/fragment_conversation_title_text_color"
+                android:textSize="@dimen/fragment_conversation_waiting_button_text_size" />
+
+            <TextView
+                android:id="@+id/conversation_fragment_voice_accept_button"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/fragment_conversation_audio_incoming_call_button_margin_hor"
+                android:layout_weight=".5"
+                android:background="@drawable/conversation_fragment_accept_button_selector"
+                android:gravity="center"
+                android:padding="@dimen/fragment_conversation_audio_incoming_call_button_padding_vertical"
+                android:text="@string/conversation_accept_text"
+                android:textColor="@color/fragment_conversation_title_text_color"
+                android:textSize="@dimen/fragment_conversation_waiting_button_text_size" />
+        </LinearLayout>
+    </LinearLayout>
+
+</RelativeLayout>

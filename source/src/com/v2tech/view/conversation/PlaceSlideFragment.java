@@ -10,17 +10,18 @@ import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 
 import com.v2tech.R;
-import com.v2tech.logic.VImageMessage;
 import com.v2tech.view.cus.TouchImageView;
+import com.v2tech.vo.VMessageImageItem;
 
 public class PlaceSlideFragment extends Fragment {
 
-	private VImageMessage vim;
+	private VMessageImageItem vim;
 
-	
 	private RelativeLayout rlContainer;
-	
+
 	private Object mLock = new Object();
+
+	private AsyncTask<Void, Void, Void> at;
 
 	public PlaceSlideFragment() {
 
@@ -35,36 +36,70 @@ public class PlaceSlideFragment extends Fragment {
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
-			View v = inflater.inflate(R.layout.image_view, container, false);
-			rlContainer = (RelativeLayout) v
-					.findViewById(R.id.image_view_root);
-		
+		View v = inflater.inflate(R.layout.image_view, container, false);
+		rlContainer = (RelativeLayout) v.findViewById(R.id.image_view_root);
+
 		final TouchImageView iv = new TouchImageView(this.getActivity());
 
-		new AsyncTask<Void, Void, Void>() {
+		at = new AsyncTask<Void, Void, Void>() {
 
 			@Override
 			protected Void doInBackground(Void... params) {
-				synchronized(mLock) {
-					vim.getFullQuantityBitmap();
+				synchronized (mLock) {
+					if (vim != null) {
+						vim.getFullQuantityBitmap();
+					}
 				}
 				return null;
 			}
 
 			@Override
 			protected void onPostExecute(Void result) {
-				iv.setImageBitmap(vim.getFullQuantityBitmap());
+				if (vim != null) {
+					iv.setImageBitmap(vim.getFullQuantityBitmap());
+				}
 			}
 
-			
+			@Override
+			protected void onCancelled() {
+				super.onCancelled();
+				synchronized (vim) {
+					if (vim != null) {
+						vim.recycleFull();
+					}
+				}
+				iv.setImageBitmap(null);
+			}
+
+			@Override
+			protected void onCancelled(Void result) {
+				super.onCancelled(result);
+				synchronized (vim) {
+					if (vim != null) {
+						vim.recycle();
+					}
+				}
+				iv.setImageBitmap(null);
+			}
+
 		}.execute();
-		
+
 		RelativeLayout.LayoutParams rl = new RelativeLayout.LayoutParams(
-				RelativeLayout.LayoutParams.WRAP_CONTENT,
-				RelativeLayout.LayoutParams.WRAP_CONTENT);
+				RelativeLayout.LayoutParams.MATCH_PARENT,
+				RelativeLayout.LayoutParams.MATCH_PARENT);
 		rl.addRule(RelativeLayout.CENTER_IN_PARENT);
 		rlContainer.addView(iv, rl);
 		return v;
+	}
+
+	@Override
+	public void onPause() {
+		super.onPause();
+	}
+
+	@Override
+	public void onResume() {
+		super.onResume();
 	}
 
 	@Override
@@ -75,10 +110,19 @@ public class PlaceSlideFragment extends Fragment {
 	@Override
 	public void onDestroyView() {
 		super.onDestroyView();
+		at.cancel(true);
 		if (vim != null) {
-			vim.recycle();
+			vim.recycleFull();
 		}
 		rlContainer.removeAllViews();
+	}
+
+	@Override
+	public void setUserVisibleHint(boolean isVisibleToUser) {
+		super.setUserVisibleHint(isVisibleToUser);
+		if (!isVisibleToUser && rlContainer != null && rlContainer.getChildCount() > 0)
+			((TouchImageView) rlContainer.getChildAt(rlContainer
+					.getChildCount() - 1)).resetZoom();
 	}
 
 	@Override
@@ -86,7 +130,7 @@ public class PlaceSlideFragment extends Fragment {
 		super.onDetach();
 	}
 
-	public void setMessage(VImageMessage vim) {
+	public void setMessage(VMessageImageItem vim) {
 		this.vim = vim;
 	}
 
@@ -94,9 +138,11 @@ public class PlaceSlideFragment extends Fragment {
 	public void onDestroy() {
 		super.onDestroy();
 		if (vim != null) {
-			vim.recycle();
+			vim.recycleFull();
 		}
-		rlContainer.removeAllViews();
+		if (rlContainer != null) {
+			rlContainer.removeAllViews();
+		}
 	}
 
 }

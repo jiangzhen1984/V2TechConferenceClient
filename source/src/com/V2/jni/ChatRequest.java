@@ -6,7 +6,11 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
+
+import com.v2tech.util.V2Log;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -40,6 +44,16 @@ public class ChatRequest {
 
 	public void setChatRequestCallback(ChatRequestCallback callback) {
 		this.callback = callback;
+		for (ChatText ct : ctL) {
+			this.callback.OnRecvChatTextCallback(ct.nGroupID, ct.nBusinessType, ct.nFromUserID, ct.nTime, ct.szXmlText);
+		}
+		
+		for(ChatPicture cp : cpL) {
+			this.callback.OnRecvChatPictureCallback(cp.nGroupID, cp.nBusinessType, cp.nFromUserID, cp.nTime, cp.nSeqId, cp.pPicData);
+		}
+		// clear cache. 
+		ctL.clear();
+		cpL.clear();
 	}
 
 	public static synchronized ChatRequest getInstance() {
@@ -56,7 +70,7 @@ public class ChatRequest {
 
 	/**
 	 * Send text content to user.<br>
-	 * If nGroupID is 0, means this API as IM API. Otherwise as conference API.<br>
+	 * If nGroupID is 0 P2P message, otherwise is group message.<br>
 	 * The xml content structure as third parameter szText.<br>
 	 * <p>
 	 *    If we only have text context to send, we don't need to add tag TPictureChatItem to xml.<br>
@@ -67,6 +81,8 @@ public class ChatRequest {
 	 *            conference ID
 	 * @param nToUserID
 	 *            user ID
+	 *            
+	 * @param  nSeqId unique Id. It's used to if sent message failed, you will according to this parameter distinguish which message is failed. TODO add call back which API will be call if failed
 	 * @param szText
 	 * <br>
 	 *            < ?xml version="1.0" encoding="utf-8"?><br>
@@ -75,7 +91,7 @@ public class ChatRequest {
 	 *            &nbsp;&nbsp;&nbsp;&nbsp;< TChatFont Color="255" Name="Segoe UI" Size="18" Style=""/><br>
 	 *            &nbsp;&nbsp;&nbsp;&nbsp;< /FontList><br>
 	 *            &nbsp;&nbsp;&nbsp;&nbsp;< ItemList><br>
-	 *            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;< TTextChatItem NewLine="True" FontIndex="0" Text="这是一个测试"/><br>
+	 *            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;< TTextChatItem NewLine="True" FontIndex="0" Text="杩����涓�涓�娴�璇�"/><br>
 	 *            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;< TPictureChatItem NewLine="False" AutoResize="True"
 	 *            FileExt=".png" GUID="{F3870296-746D-4E11-B69B-050B2168C624}"
 	 *            Height="109" Width="111"/><br>
@@ -85,10 +101,18 @@ public class ChatRequest {
 	 * 
 	 * @see {@link #sendChatPicture(long, long, byte[], int, int)}
 	 */
-	public native void sendChatText(long nGroupID, long nToUserID,
+	public native void sendChatText(long nGroupID, long nToUserID, String nSeqId, 
 			String szText, int bussinessType);
 
-	// �����������Ƶ��� nGroupID��0
+	
+	/**
+	 * Send audio message.
+	 * @param nGroupID  if message is P2P, this parameter should be  0
+	 * @param nToUserID if message is group or meeting message, this parameter should be 0
+	 * @param szText
+	 * @param filename audio file message, only support AAC
+	 * @param bussinessType  if message is not meeting message should be 2,  if message is conference's msg, should be 1
+	 */
 	public native void sendChatAudio(long nGroupID, long nToUserID,
 			String szText, String filename, int bussinessType);
 
@@ -97,6 +121,7 @@ public class ChatRequest {
 	 * <p>If input 0 as nGroupId, means P2P send data. Before call this API, call {@link #sendChatText(long, long, String, int)} first </p>
 	 * @param nGroupID
 	 * @param nToUserID
+	 * @param  nSeqId  unique Id. It's used to if sent message failed, you will according to this parameter distinguish which message is failed. TODO add call back which API will be call if failed 
 	 * @param pPicData <br>
 	 *   |----image  header    52 bytes|----------------image data-------------|  <br>
 	 *   |{UUID} extension bytes       |----------------image data-------------|  <br>
@@ -105,98 +130,140 @@ public class ChatRequest {
 	 * 
 	 * @see {@link #sendChatText(long, long, String, int)}
 	 */
-	public native void sendChatPicture(long nGroupID, long nToUserID,
+	public native void sendChatPicture(long nGroupID, long nToUserID, String nSeqId,
 			byte[] pPicData, int nLength, int bussinessType);
+	
+	
 
+	List<ChatPicture> cpL = new ArrayList<ChatPicture>();
+	List<ChatText> ctL = new ArrayList<ChatText>();
+	List<ChatAudio> caL = new ArrayList<ChatAudio>();
 	/**
 	 * 
 	 * @param nGroupID
 	 * @param nBusinessType
 	 * @param nFromUserID
 	 * @param nTime
+	 * @param szSeqID
 	 * @param szXmlText
 	 */
 	public void OnRecvChatText(long nGroupID, int nBusinessType,
-			long nFromUserID, long nTime, String szXmlText) {
-		Log.e("ImRequest UI", "OnRecvChatText " + nGroupID + " "
+			long nFromUserID, long nTime, String szSeqID, String szXmlText) {
+		Log.e("ChatRequest UI", "OnRecvChatText " + nGroupID + " "
 				+ nBusinessType + " " + nFromUserID + " " + nTime + " "
+				+ szSeqID + " "
 				+ szXmlText);
 		if (callback != null) {
-			callback.OnRecvChatTextCallback(nGroupID, nBusinessType, nFromUserID, nTime, szXmlText);
+			callback.OnRecvChatTextCallback(nGroupID, nBusinessType, nFromUserID, nTime,  szXmlText);
+		} else {
+			ctL.add(new ChatText(nGroupID,  nBusinessType,
+					 nFromUserID,  nTime,  szXmlText));
 		}
 
 	}
 	
 	
-	public void OnRecvChatAudio(long gid, int i, long j, long j1, String str,
-			String str1) {
-
+	class ChatText {
+		long nGroupID;
+		int nBusinessType;
+		long nFromUserID;
+		long nTime;
+		String szXmlText;
+		
+		public ChatText(long nGroupID, int nBusinessType, long nFromUserID,
+				long nTime, String szXmlText) {
+			super();
+			this.nGroupID = nGroupID;
+			this.nBusinessType = nBusinessType;
+			this.nFromUserID = nFromUserID;
+			this.nTime = nTime;
+			this.szXmlText = szXmlText;
+		}
+		
 	}
 	
-	public void OnSendChatAudio(String str, int i) {
-
+	class ChatPicture {
+		long nGroupID;
+		int nBusinessType;
+		long nFromUserID;
+		long nTime;
+		String nSeqId;
+		byte[] pPicData;
+		public ChatPicture(long nGroupID, int nBusinessType, long nFromUserID,
+				long nTime, String nSeqId, byte[] pPicData) {
+			super();
+			this.nGroupID = nGroupID;
+			this.nBusinessType = nBusinessType;
+			this.nFromUserID = nFromUserID;
+			this.nTime = nTime;
+			this.nSeqId  = nSeqId;
+			this.pPicData = pPicData;
+		}
+		
+	}
+	
+	
+	class ChatAudio {
+		long nGroupID;
+		int nBusinessType;
+		long nFromUserID;
+		long nTime;
+		String nSeqId;
+		String audioPath;
+		public ChatAudio(long nGroupID, int nBusinessType, long nFromUserID,
+				long nTime, String nSeqId, String audioPath) {
+			super();
+			this.nGroupID = nGroupID;
+			this.nBusinessType = nBusinessType;
+			this.nFromUserID = nFromUserID;
+			this.nTime = nTime;
+			this.nSeqId = nSeqId;
+			this.audioPath = audioPath;
+		}
+		
+		
+	}
+	
+	public void OnRecvChatAudio(long gid, int businessType, long fromUserId, long timeStamp, String messageId,
+			String audioPath) {
+		V2Log.e(gid +"   " +businessType+ "  "+ fromUserId+"   " +timeStamp  + "  "+messageId+"   "+audioPath);
+		if (callback != null) {
+			callback.OnRecvChatAudio(gid, businessType, fromUserId, timeStamp, messageId, audioPath);
+		} else {
+			caL.add(new ChatAudio(gid,  businessType,
+					fromUserId,   timeStamp,  messageId, audioPath));
+		}
+	}
+	
+	public void OnSendChatResult(String uuid, int ret, int code) {
+		V2Log.e("OnSendChatResult  " +uuid + "  "+ ret+ "  "+code);
+		if (callback != null) {
+			callback.OnSendChatResult(uuid, ret, code);
+		}
 	}
 	
 
-	// �յ����˷�����ͼƬ������Ϣ�Ļص�
+	// 锟秸碉拷锟斤拷锟剿凤拷锟斤拷锟斤拷图片锟斤拷锟斤拷锟斤拷息锟侥回碉拷
 	public void OnRecvChatPicture(long nGroupID, int nBusinessType,
-			long nFromUserID, long nTime, byte[] pPicData) {
+			long nFromUserID, long nTime, String szSeqID, byte[] pPicData) {
 
-		Log.e("ImRequest UI", "OnRecvChatPicture ���� " + nGroupID + " "
+		V2Log.e( "OnRecvChatPicture  " + nGroupID + " "
 				+ nBusinessType + " " + nFromUserID + " " + nTime + " ");
-		Log.e("ImRequest UI", "OnRecvChatPicture ****maximum heap size***"
+		V2Log.e( "OnRecvChatPicture ****maximum heap size***"
 				+ Runtime.getRuntime().maxMemory() + "*nLength=====**"
 				+ "****pPicData.length===***" + pPicData.length);
 		if (callback != null) {
-			callback.OnRecvChatPictureCallback(nGroupID, nBusinessType, nFromUserID, nTime, pPicData);
-		}
-	}
-
-	private String SaveImage2SD(long nGroupID, long nFromUserID, long nTime,
-			byte[] pPicData) {
-		byte[] guidArr = new byte[41];
-		byte[] extArr = new byte[11];
-		byte[] picDataArr = new byte[pPicData.length - 52];
-		// int len = pPicData.length;
-		for (int i = 0; i < pPicData.length; i++) {
-			if (i <= 40) {
-				if (pPicData[i] == 0) {
-					i = 40;
-					continue;
-				}
-				guidArr[i] = pPicData[i];
-			} else if (i > 40 && i < 52) {
-				if (pPicData[i] == 0) {
-					i = 51;
-					continue;
-				}
-				extArr[i - 41] = pPicData[i];
-			} else {
-				picDataArr[i - 52] = pPicData[i];
-			}
-		}
-		StringBuffer sb = new StringBuffer();
-		String fromId = "";
-		if (nGroupID == 0) {
-			fromId = nFromUserID + "";
+			callback.OnRecvChatPictureCallback(nGroupID, nBusinessType, nFromUserID, nTime, szSeqID, pPicData);
 		} else {
-			fromId = "0" + nGroupID;
+			cpL.add(new ChatPicture(nGroupID,  nBusinessType,
+					 nFromUserID,  nTime, szSeqID,  pPicData));
 		}
-		String guid = new String(guidArr);
-
-		String ext = new String(extArr); // ��չ��
-		sb.append(guid.trim()).append(ext.trim());
-
-		// Logger.i(null, "ͼƬ�����:"+sb.toString());
-		// String target = picNvoiceUtil.saveImage(picDataArr,
-		// sb.toString(),nFromUserID,context);
-
-		// return target;
-		return "";
 	}
+
+	
 
 	/*
-	 * ext ͼƬ����չ��
+	 * ext 图片锟斤拷锟斤拷展锟斤拷
 	 */
 	@SuppressWarnings("resource")
 	public byte[] getSendPicData(String imgpath) {
@@ -247,7 +314,7 @@ public class ChatRequest {
 
 	}
 
-	// ���ͼƬ·���õ�ͼƬ���ֽ�
+	// 锟斤拷锟酵计�路锟斤拷锟矫碉拷图片锟斤拷锟街斤拷
 	public static byte[] readStream(InputStream inStream) throws Exception {
 		ByteArrayOutputStream outStream;
 		byte[] data;

@@ -1,7 +1,5 @@
 package v2av;
 
-import android.view.SurfaceHolder;
-
 /*
  * 视频录制参数
  */
@@ -18,9 +16,4 @@ public class VideoRecordInfo
 	
 	//当前使用摄像头的角度
 	public int mCameraRotation = 0;
-	
-	//当前设备角度
-	public int mDisplayRotation = 0;
-	
-	public SurfaceHolder mSurfaceHolder = null;
 }
