@@ -1343,14 +1343,11 @@ public class VideoActivityV2 extends Activity {
 	}
 
 	@Override
-	public boolean onKeyDown(int keyCode, KeyEvent event) {
-		if (keyCode == KeyEvent.KEYCODE_BACK) {
-			showQuitDialog(mContext.getText(R.string.in_meeting_quit_text)
-					.toString());
-			return true;
-		}
-		return super.onKeyDown(keyCode, event);
+	public void onBackPressed() {
+		showQuitDialog(mContext.getText(R.string.in_meeting_quit_text)
+				.toString());
 	}
+
 
 	private void doApplyOrReleaseSpeak(boolean flag) {
 		if (!flag) {

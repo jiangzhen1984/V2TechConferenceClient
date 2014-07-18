@@ -467,6 +467,22 @@ public class P2PConversation extends Activity implements
 			incomingVideoCallTitle.setText(R.string.conversation_end);
 		}
 		
+		
+		//outing call
+		if (mRejectButton != null) {
+			mRejectButton.setBackgroundResource(R.drawable.conversation_framgent_gray_button_bg_pressed);
+			((TextView)mRejectButton).setTextColor(grayColor);
+		}
+		
+		if (mAcceptButton != null) {
+			mAcceptButton.setBackgroundResource(R.drawable.conversation_framgent_gray_button_bg_pressed);
+			((TextView)mAcceptButton).setTextColor(grayColor);
+		}
+		if (mAudioOnlyButton != null) {
+			mAudioOnlyButton.setBackgroundResource(R.drawable.conversation_framgent_gray_button_bg_pressed);
+			((TextView)mAudioOnlyButton).setTextColor(grayColor);
+		}
+		
 		//If is incoming layout, no mTimerTV view
 		if (mTimerTV != null) {
 			mTimerTV.setText(R.string.conversation_end);
@@ -907,11 +923,12 @@ public class P2PConversation extends Activity implements
 						break;
 					}
 					inProgress = true;
+					
+					Message timeoutMessage = Message.obtain(this, QUIT);
+					this.sendMessageDelayed(timeoutMessage, 2000);
+					disableAllButtons();
 				}
-				Message timeoutMessage = Message.obtain(this, QUIT);
-				this.sendMessageDelayed(timeoutMessage, 2000);
-				// TODO update UI
-				disableAllButtons();
+			
 				break;
 			case CALL_RESPONSE:
 				JNIResponse resp = (JNIResponse) msg.obj;

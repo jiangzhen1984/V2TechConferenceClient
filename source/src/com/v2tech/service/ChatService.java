@@ -331,7 +331,7 @@ public class ChatService extends AbstractHandler {
 		}
 
 		if (ud.isAudioType()) {
-			if (ud.isConnected()) {
+			if (ud.isConnected() || ! ud.isIncoming()) {
 				AudioRequest.getInstance()
 						.CloseAudioChat(ud.getGroupdId(),
 								ud.getUser().getmUserId(),
@@ -344,7 +344,7 @@ public class ChatService extends AbstractHandler {
 			}
 
 		} else if (ud.isVideoType()) {
-			if (ud.isConnected()) {
+			if (ud.isConnected() || ! ud.isIncoming()) {
 				VideoRequest.getInstance().closeVideoChat(ud.getGroupdId(),
 						ud.getUser().getmUserId(), ud.getDeviceId(),
 						V2GlobalEnum.REQUEST_TYPE_IM);
