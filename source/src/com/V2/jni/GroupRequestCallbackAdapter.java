@@ -35,7 +35,6 @@ public abstract class GroupRequestCallbackAdapter implements
 	@Override
 	public void OnDelGroupUserCallback(int groupType, long nGroupID,
 			long nUserID) {
-		// TODO Auto-generated method stub
 
 	}
 

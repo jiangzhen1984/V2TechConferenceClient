@@ -26,6 +26,7 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.v2tech.R;
@@ -511,10 +512,12 @@ public class P2PConversation extends Activity implements
 			mLocalSurface = (SurfaceView) findViewById(R.id.fragment_conversation_connected_video_local_surface);
 			if (mLocalSurface != null) {
 				mLocalSurface.setOnClickListener(surfaceViewListener);
+				mLocalSurface.setTag("local");
 			}
 			mRemoteSurface = (SurfaceView) findViewById(R.id.fragment_conversation_connected_video_remote_surface);
 			if (mRemoteSurface != null) {
 				mRemoteSurface.setOnClickListener(surfaceViewListener);
+				mRemoteSurface.setTag("remote");
 			}
 		}
 
@@ -654,7 +657,6 @@ public class P2PConversation extends Activity implements
 		closeLocalCamera();
 		chatService.cancelChattingCall(uad, null);
 		Message.obtain(mLocalHandler, HANG_UP_NOTIFICATION).sendToTarget();
-		setGlobalState(false);
 	}
 
 	private OnClickListener surfaceViewListener = new OnClickListener() {
@@ -704,6 +706,10 @@ public class P2PConversation extends Activity implements
 				openLocalCamera();
 
 				openRemoteVideo();
+				
+				TextView tv = (TextView) findViewById(R.id.conversation_fragment_connected_title_text);
+				tv.setText(tv.getText().toString()
+						.replace("[]", uad.getUser().getName()));
 			}
 			// Start to time
 			Message.obtain(mLocalHandler, UPDATE_TIME).sendToTarget();
@@ -725,7 +731,7 @@ public class P2PConversation extends Activity implements
 			openRemoteVideo();
 
 			// Start to time
-			updateTimer();
+			Message.obtain(mLocalHandler, UPDATE_TIME).sendToTarget();
 			
 		}
 
@@ -735,6 +741,16 @@ public class P2PConversation extends Activity implements
 
 		@Override
 		public void onClick(View view) {
+			RelativeLayout.LayoutParams rl  = (RelativeLayout.LayoutParams)mLocalSurface.getLayoutParams();
+			if (rl.width == RelativeLayout.LayoutParams.MATCH_PARENT) {
+				exchangeSurfaceViewPos(mLocalSurface, mRemoteSurface);
+			}
+			
+			if (mLocalSurface.getVisibility() == View.GONE) {
+				mLocalSurface.setVisibility(View.VISIBLE);
+			} else {
+				mLocalSurface.setVisibility(View.GONE);
+			}
 			int drawId = R.drawable.conversation_connected_camera_button_pressed;
 			int color = R.color.fragment_conversation_connected_pressed_text_color;
 			TextView cameraText = (TextView) findViewById(R.id.conversation_fragment_connected_open_or_close_camera_text);
@@ -923,7 +939,7 @@ public class P2PConversation extends Activity implements
 						break;
 					}
 					inProgress = true;
-					
+					setGlobalState(false);
 					Message timeoutMessage = Message.obtain(this, QUIT);
 					this.sendMessageDelayed(timeoutMessage, 2000);
 					disableAllButtons();

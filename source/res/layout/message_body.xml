@@ -74,7 +74,7 @@
                 android:layout_marginLeft="10dp"
                 android:layout_toRightOf="@+id/message_body_video_item_second_left"
                 android:src="@drawable/message_sent_failed_icon"
-                android:visibility="gone" />
+                android:visibility="invisible" />
 
             <ImageView
                 android:id="@+id/message_body_unread_icon_left"
@@ -160,7 +160,7 @@
                 android:layout_marginLeft="10dp"
                 android:layout_toLeftOf="@+id/message_body_video_item_second_right"
                 android:src="@drawable/message_sent_failed_icon"
-                android:visibility="gone" />
+                android:visibility="invisible" />
 
             <ImageView
                 android:id="@+id/message_body_unread_icon_right"

@@ -219,12 +219,9 @@ public class Group implements Comparable<Group>{
 	
 	public void removeUserFromGroup(long uid) {
 		synchronized (mLock) {
-			for (User u : this.users) {
-				if (uid == u.getmUserId()) {
-					this.users.remove(u);
-					break;
-				}
-			}
+			//User object use id as identification
+			User tmpUser = new User(uid);
+			users.remove(tmpUser);
 		}
 	}
 

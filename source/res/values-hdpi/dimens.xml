@@ -22,9 +22,6 @@
     <dimen name="conversation_view_name_text_size">17sp</dimen>
     <dimen name="conversation_view_text_max_width">100dp</dimen>
 
-    <!-- contact user view -->
-    <dimen name="contacts_user_view_text_max_width">150dp</dimen>
-
     <!-- contact group view -->
     <dimen name="contacts_group_view_arrow_padding_left">5dp</dimen>
     <dimen name="contacts_group_view_group_name_margin_right">5dp</dimen>

@@ -104,7 +104,8 @@
                 android:padding="@dimen/fragment_conversation_waiting_invitation_button_padding_vertical"
                 android:text="@string/conversation_voice_accept_only_text"
                 android:textColor="@color/fragment_conversation_connected_gray_text_color"
-                android:textSize="@dimen/fragment_conversation_waiting_button_text_size" />
+                android:textSize="@dimen/fragment_conversation_waiting_button_text_size"
+                android:visibility="gone" />
         </LinearLayout>
     </LinearLayout>
 

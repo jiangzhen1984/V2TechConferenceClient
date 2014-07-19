@@ -23,6 +23,8 @@
 
     <!-- contact user view -->
     <dimen name="contacts_user_view_text_max_width">300dp</dimen>
+    <dimen name="contacts_user_view_contact_user_signature_margin_left">85dp</dimen>
+    <dimen name="contacts_user_view_contact_user_name_margin_left">35dp</dimen>
 
     <!-- contact group view -->
     <dimen name="contacts_group_view_arrow_padding_left">15dp</dimen>
@@ -78,8 +80,7 @@
 
     <!-- fragment conversation_incoming_audio_call layout -->
     <dimen name="fragment_conversation_audio_incoming_call_button_container_margin">200dp</dimen>
-    
-    <dimen name="fragment_conversation_incoming_video_call_button_container_margin">200dp</dimen>  
+    <dimen name="fragment_conversation_incoming_video_call_button_container_margin">200dp</dimen>
 
     <!-- fragment conversation connected layout -->
     <dimen name="fragment_conversation_connected_voice_gray_button_padding_vertical">20dp</dimen>
@@ -96,8 +97,6 @@
     <dimen name="fragment_conversation_connected_local_surface_margin_bottom">30dp</dimen>
     <dimen name="fragment_conversation_connected_local_surface_margin_right">30dp</dimen>
 
-    
-    
     <!-- message body file item layout -->
     <dimen name="message_body_file_item_file_name_text_size">16sp</dimen>
     <dimen name="message_body_file_item_file_name_text_margin_left">10dp</dimen>
@@ -112,9 +111,9 @@
     <dimen name="message_body_file_item_progress_layout_margin_bottom">10dp</dimen>
     <dimen name="message_body_file_item_progress_action_button_margin_left">10dp</dimen>
     <dimen name="message_body_file_width">400dp</dimen>
-    
-    
-        <!-- message voice dialog layout -->
+
+    <!-- message voice dialog layout -->
     <dimen name="message_voice_dialog_width">260dp</dimen>
     <dimen name="message_voice_dialog_height">200dp</dimen>
+
 </resources>

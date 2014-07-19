@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import android.app.Activity;
 import android.app.Dialog;
@@ -30,6 +31,7 @@ import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.SpannableStringBuilder;
 import android.text.TextWatcher;
+import android.text.style.ImageSpan;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -97,6 +99,10 @@ public class ConversationView extends Activity {
 	private final int BATCH_COUNT = 10;
 	private static final int SELECT_PICTURE_CODE = 100;
 	private static final int FILE_SELECT_CODE = 101;
+
+	private static final int VOICE_DIALOG_FLAG_RECORDING = 1;
+	private static final int VOICE_DIALOG_FLAG_CANCEL = 2;
+	private static final int VOICE_DIALOG_FLAG_WARING_FOR_TIME_TOO_SHORT = 3;
 
 	private int offset = 0;
 
@@ -209,7 +215,7 @@ public class ConversationView extends Activity {
 		mAudioSpeakerIV = (ImageView) findViewById(R.id.contact_message_speaker);
 		mAudioSpeakerIV.setOnClickListener(mMessageTypeSwitchListener);
 
-		mButtonRecordAudio = (Button)findViewById(R.id.message_button_audio_record);
+		mButtonRecordAudio = (Button) findViewById(R.id.message_button_audio_record);
 		mButtonRecordAudio.setOnTouchListener(mButtonHolderListener);
 
 		mAdditionFeatureContainer = findViewById(R.id.contact_message_sub_feature_ly);
@@ -441,6 +447,7 @@ public class ConversationView extends Activity {
 	private ImageView mVolume;
 	private View mSpeakingLayout;
 	private View mPreparedCancelLayout;
+	private View mWarningLayout;
 
 	private void showOrCloseVoiceDialog() {
 		if (mVoiceDialog == null) {
@@ -455,39 +462,61 @@ public class ConversationView extends Activity {
 					.findViewById(R.id.message_voice_dialog_listening_container);
 			mPreparedCancelLayout = root
 					.findViewById(R.id.message_voice_dialog_cancel_container);
+			mWarningLayout = root
+					.findViewById(R.id.message_voice_dialog_warning_container);
 			mVoiceDialog.setCancelable(false);
 		}
 
 		if (mVoiceDialog.isShowing()) {
 			mVoiceDialog.dismiss();
 		} else {
-			updateCancelSendVoiceMsgNotification(false);
+			updateCancelSendVoiceMsgNotification(VOICE_DIALOG_FLAG_RECORDING);
 
 			mVoiceDialog.show();
 		}
 	}
 
-	private void updateCancelSendVoiceMsgNotification(boolean flag) {
-		if (flag) {
+	private void updateCancelSendVoiceMsgNotification(int flag) {
+		if (flag == VOICE_DIALOG_FLAG_CANCEL) {
 			if (mSpeakingLayout != null) {
 				mSpeakingLayout.setVisibility(View.GONE);
+			}
+
+			if (mWarningLayout != null) {
+				mWarningLayout.setVisibility(View.GONE);
 			}
 
 			if (mPreparedCancelLayout != null) {
 				mPreparedCancelLayout.setVisibility(View.VISIBLE);
 			}
-			mButtonRecordAudio.setText(R.string.contact_message_button_up_to_cancel);
-		} else {
+			mButtonRecordAudio
+					.setText(R.string.contact_message_button_up_to_cancel);
+		} else if (flag == VOICE_DIALOG_FLAG_RECORDING) {
 			if (mSpeakingLayout != null) {
 				mSpeakingLayout.setVisibility(View.VISIBLE);
 			}
 			if (mPreparedCancelLayout != null) {
 				mPreparedCancelLayout.setVisibility(View.GONE);
 			}
-			mButtonRecordAudio.setText(R.string.contact_message_button_up_to_send);
+			if (mWarningLayout != null) {
+				mWarningLayout.setVisibility(View.GONE);
+			}
+			mButtonRecordAudio
+					.setText(R.string.contact_message_button_up_to_send);
+		} else if (flag == VOICE_DIALOG_FLAG_WARING_FOR_TIME_TOO_SHORT) {
+			if (mSpeakingLayout != null) {
+				mSpeakingLayout.setVisibility(View.GONE);
+			}
+			if (mPreparedCancelLayout != null) {
+				mPreparedCancelLayout.setVisibility(View.GONE);
+			}
+			if (mWarningLayout != null) {
+				mWarningLayout.setVisibility(View.VISIBLE);
+			}
+			mButtonRecordAudio
+					.setText(R.string.contact_message_button_send_audio_msg);
 		}
-		
-		
+
 	}
 
 	private void updateVoiceVolume(int vol) {
@@ -672,17 +701,16 @@ public class ConversationView extends Activity {
 				starttime = System.currentTimeMillis();
 				voiceIsSentByTimer = false;
 			} else if (event.getAction() == MotionEvent.ACTION_MOVE) {
-				boolean flag = false;
 				Rect r = new Rect();
 				view.getDrawingRect(r);
 				// check if touch position out of button than cancel send voice
 				// message
 				if (r.contains((int) event.getX(), (int) event.getY())) {
-					flag = false;
+					updateCancelSendVoiceMsgNotification(VOICE_DIALOG_FLAG_RECORDING);
 				} else {
-					flag = true;
+					updateCancelSendVoiceMsgNotification(VOICE_DIALOG_FLAG_CANCEL);
 				}
-				updateCancelSendVoiceMsgNotification(flag);
+				
 			} else if (event.getAction() == MotionEvent.ACTION_UP) {
 				if (voiceIsSentByTimer) {
 					return false;
@@ -705,9 +733,7 @@ public class ConversationView extends Activity {
 				} else {
 
 					if (seconds < 1500) {
-						Toast.makeText(mContext,
-								R.string.error_contact_messag_time_too_short,
-								Toast.LENGTH_SHORT).show();
+						updateCancelSendVoiceMsgNotification(VOICE_DIALOG_FLAG_WARING_FOR_TIME_TOO_SHORT);
 					} else {
 						Toast.makeText(mContext,
 								R.string.contact_message_message_cancelled,
@@ -719,11 +745,23 @@ public class ConversationView extends Activity {
 				starttime = 0;
 				fileName = null;
 				lh.removeCallbacks(mUpdateMicStatusTimer);
-				showOrCloseVoiceDialog();
+				if (seconds < 1500) {
+					// Send delay message for close dialog
+					lh.postDelayed(new Runnable() {
+						@Override
+						public void run() {
+							showOrCloseVoiceDialog();
+						}
+
+					}, 1000);
+				} else {
+					showOrCloseVoiceDialog();
+				}
 				// Remove timer
 				lh.removeCallbacks(timeOutMonitor);
-				
-				mButtonRecordAudio.setText(R.string.contact_message_button_send_audio_msg);
+
+				mButtonRecordAudio
+						.setText(R.string.contact_message_button_send_audio_msg);
 			}
 			return false;
 		}
@@ -813,7 +851,14 @@ public class ConversationView extends Activity {
 
 		@Override
 		public void onClick(View smile) {
+			Editable et = mMessageET.getEditableText();
 
+			if (Pattern.matches("((/:){1}(.){1}(:/){1}){10}", et.toString())) {
+				Toast.makeText(mContext,
+						R.string.error_contact_message_face_too_much,
+						Toast.LENGTH_SHORT).show();
+				return;
+			}
 			Drawable drawable = ((ImageView) (smile)).getDrawable();
 			drawable.setBounds(0, 0, drawable.getIntrinsicWidth(),
 					drawable.getIntrinsicHeight());
@@ -1088,8 +1133,8 @@ public class ConversationView extends Activity {
 		offset++;
 
 		messageArray.add(new VMessageAdater(msg));
-		adapter.notifyDataSetChanged();
 		scrollToBottom();
+		adapter.notifyDataSetChanged();
 	}
 
 	private OnScrollListener scrollListener = new OnScrollListener() {
@@ -1160,6 +1205,21 @@ public class ConversationView extends Activity {
 
 				}
 			}
+		}
+
+		@Override
+		public void reSendMessageClicked(VMessage v) {
+			v.setState(VMessage.STATE_UNREAD);
+			List<VMessageAbstractItem> items = v.getItems();
+			for (int i = 0; i < items.size(); i++) {
+				VMessageAbstractItem item = items.get(i);
+				if (item.getType() == VMessageAbstractItem.ITEM_TYPE_FILE) {
+					item.setState(VMessageAbstractItem.STATE_FILE_SENDING);
+				} else {
+					item.setState(VMessageAbstractItem.STATE_NORMAL);
+				}
+			}
+			Message.obtain(lh, SEND_MESSAGE, v).sendToTarget();
 		}
 
 		@Override
@@ -1407,7 +1467,7 @@ public class ConversationView extends Activity {
 						MessageBodyView mdv = ((MessageBodyView) messageArray
 								.get(i).getView());
 						if (mdv != null) {
-							mdv.updateView(vm);
+							mdv.updateFailedFlag(true);
 						}
 						// TODO update database
 						break;
@@ -1416,12 +1476,16 @@ public class ConversationView extends Activity {
 					for (int j = 0; j < items.size(); j++) {
 						VMessageAbstractItem item = items.get(j);
 						if (uuid.equals(item.getUuid())) {
-							item.setState(VMessageAbstractItem.STATE_FILE_SENT_FALIED);
+							if (item.getType() == VMessageAbstractItem.ITEM_TYPE_FILE) {
+								item.setState(VMessageAbstractItem.STATE_FILE_SENT_FALIED);
+							} else {
+								item.setState(VMessageAbstractItem.STATE_SENT_FALIED);
+							}
 							MessageBodyView mdv = ((MessageBodyView) messageArray
 									.get(i).getView());
 							if (mdv != null) {
 								// TODO update database
-								mdv.updateView(vm);
+								mdv.updateFailedFlag(true);
 							}
 							break;
 						}

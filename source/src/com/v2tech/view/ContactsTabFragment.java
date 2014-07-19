@@ -84,8 +84,9 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 		}
 
 		mContext = getActivity();
-		
-		BitmapManager.getInstance().registerBitmapChangedListener(this.bitmapChangedListener);
+
+		BitmapManager.getInstance().registerBitmapChangedListener(
+				this.bitmapChangedListener);
 	}
 
 	@Override
@@ -135,7 +136,8 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 		super.onDestroy();
 		mLoaded = false;
 		getActivity().unregisterReceiver(receiver);
-		BitmapManager.getInstance().unRegisterBitmapChangedListener(this.bitmapChangedListener);
+		BitmapManager.getInstance().unRegisterBitmapChangedListener(
+				this.bitmapChangedListener);
 	}
 
 	@Override
@@ -150,13 +152,11 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 	public void onStop() {
 		super.onStop();
 	}
-	
-	
-	
+
 	@Override
 	public void setUserVisibleHint(boolean isVisibleToUser) {
 		super.setUserVisibleHint(isVisibleToUser);
-		//recover search result
+		// recover search result
 		if (!isVisibleToUser && mIsStartedSearch) {
 			mItemList = mCacheItemList;
 			adapter.notifyDataSetChanged();
@@ -164,7 +164,6 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 			return;
 		}
 	}
-	
 
 	private IntentFilter getIntentFilter() {
 		if (intentFilter == null) {
@@ -251,22 +250,65 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 			} else if (JNIService.JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION
 					.equals(intent.getAction())) {
 				Message.obtain(mHandler, UPDATE_GROUP_STATUS).sendToTarget();
-			}else if (JNIService.JNI_BROADCAST_USER_UPDATE_NAME_OR_SIGNATURE
+			} else if (JNIService.JNI_BROADCAST_USER_UPDATE_NAME_OR_SIGNATURE
 					.equals(intent.getAction())) {
 				Message.obtain(mHandler, UPDATE_USER_SIGN,
 						intent.getExtras().get("uid")).sendToTarget();
-			} else if (JNIService.JNI_BROADCAST_GROUP_USER_ADDED.equals(intent
-					.getAction()) || JNIService.JNI_BROADCAST_GROUP_USER_REMOVED.equals(intent.getAction())) {
-				GroupUserObject guo = (GroupUserObject)intent.getExtras().get("obj");
-				if (flag == TAG_CONTACT && guo.getmType() == Group.GroupType.CONTACT.intValue()) {
-					
-					
+			} else if (JNIService.JNI_BROADCAST_GROUP_USER_REMOVED
+					.equals(intent.getAction())) {
+				GroupUserObject guo = (GroupUserObject) intent.getExtras().get(
+						"obj");
+				// FIXME now just support contacts remove do not support
+				if (flag == TAG_CONTACT
+						&& guo.getmType() == Group.GroupType.CONTACT.intValue()) {
+					// Remove from user
+					for (int i = 0; i < l.size(); i++) {
+						Group gr = l.get(i);
+						gr.removeUserFromGroup(guo.getmUserId());
+					}
+					//
+					for (int i = 0; i < mItemList.size(); i++) {
+						ListItem item = mItemList.get(i);
+						if (item.u != null
+								&& item.u.getmUserId() == guo.getmUserId()) {
+							mItemList.remove(i);
+							// Do not break, because use exist in more than one
+							// groups
+							i--;
+						}
+					}
+					adapter.notifyDataSetChanged();
+
 				}
 				// Update all group staticist information
 				for (ListItem item : mItemList) {
 					if (item.g != null) {
 						((ContactGroupView) item.v).updateUserStatus();
 					}
+				}
+			} else if (JNIService.JNI_BROADCAST_GROUP_USER_ADDED.equals(intent
+					.getAction())) {
+				GroupUserObject guo = (GroupUserObject) intent.getExtras().get(
+						"obj");
+				if (flag == TAG_CONTACT
+						&& guo.getmType() == Group.GroupType.CONTACT.intValue()) {
+					// Update all group staticist information
+					for (int i = 0; i < mItemList.size(); i++) {
+						ListItem item = mItemList.get(i);
+						if (item.g != null) {
+							((ContactGroupView) item.v).updateUserStatus();
+							if (item.isExpanded
+									&& item.g.getmGId() == guo.getmGroupId()) {
+								// ADD user
+								User u = GlobalHolder.getInstance().getUser(
+										guo.getmUserId());
+								mItemList.add(++i,
+										new ListItem(u, item.g.getLevel() + 1));
+								continue;
+							}
+						}
+					}
+					adapter.notifyDataSetChanged();
 				}
 			}
 
@@ -288,7 +330,7 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 				mIsStartedSearch = false;
 			}
 			return;
-			
+
 		}
 		String str = s == null ? "" : s.toString();
 		List<User> searchedUserList = new ArrayList<User>();
@@ -307,7 +349,7 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 
 	@Override
 	public void onTextChanged(CharSequence s, int start, int before, int count) {
-		
+
 	}
 
 	private void updateView(int pos) {
@@ -466,24 +508,22 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 		}
 		adapter.notifyDataSetChanged();
 	}
-	
-	
+
 	private OnTouchListener hideSoftKeyListener = new OnTouchListener() {
 
 		@Override
 		public boolean onTouch(View arg0, MotionEvent arg1) {
 			return false;
 		}
-		
+
 	};
-	
-	
+
 	private BitmapManager.BitmapChangedListener bitmapChangedListener = new BitmapManager.BitmapChangedListener() {
-		
+
 		@Override
 		public void notifyAvatarChanged(User user, Bitmap bm) {
 			for (ListItem li : mItemList) {
-				if (li.u != null && li.u.getmUserId() ==  user.getmUserId()) {
+				if (li.u != null && li.u.getmUserId() == user.getmUserId()) {
 					((ContactUserView) li.v).updateAvatar(bm);
 				}
 			}
@@ -512,8 +552,8 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 			this.u = u;
 			this.id = 0x03000000 | u.getmUserId();
 			this.v = new ContactUserView(getActivity(), u);
-			((ContactUserView)this.v).setPaddingT(level * 35, this.v.getTop(), this.v.getRight(),
-					this.v.getBottom());
+			((ContactUserView) this.v).setPaddingT(level * 35, this.v.getTop(),
+					this.v.getRight(), this.v.getBottom());
 			isExpanded = false;
 			this.level = level;
 		}
@@ -524,7 +564,7 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 
 		@Override
 		public int getCount() {
-			return mItemList==null? 0 : mItemList.size();
+			return mItemList == null ? 0 : mItemList.size();
 		}
 
 		@Override

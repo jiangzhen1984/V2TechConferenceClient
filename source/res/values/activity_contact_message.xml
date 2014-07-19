@@ -5,14 +5,17 @@
     <string name="contact_message_send_button">发  送</string>
     <string name="contact_message_copy_message">已复制</string>
     <string name="contact_message_pop_up_item_copy">复制</string>
+    <string name="contact_message_pop_up_item_resend">重新发送</string>
     <string name="error_contact_messag_invalid_user_id">错误的用户id</string>
     <string name="error_contact_messag_invalid_image_path">不可用的图片地址</string>
     <string name="error_contact_messag_time_too_short">录制时间太短</string>
+    <string name="error_contact_message_face_too_much">单条消息表情不能超过10张</string>
     <string name="contact_message_button_up_to_cancel">松开手指， 取消发送</string>
     <string name="contact_message_button_up_to_send">松开， 结束</string>
     <string name="contact_message_button_send_audio_msg">按住  留言</string>
     <string name="contact_message_voice_dialog_text">手指上滑， 取消发送</string>
     <string name="contact_message_voice_dialog_cancel_text">松开手指， 取消发送</string>
+    <string name="contact_message_voice_dialog_waring_text">录制时间太短</string>
     <string name="contact_message_message_cancelled">已取消发送</string>
     <string name="contact_message_file_item_downloading">下载中</string>
     <string name="contact_message_file_item_pause">暂停中</string>

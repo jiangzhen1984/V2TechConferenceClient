@@ -53,7 +53,7 @@ public class VMessageFileItem extends VMessageAbstractItem {
 	}
 
 	public String getFileSizeStr() {
-		Format df=new DecimalFormat("#.00");
+		Format df=new DecimalFormat("#.0");
 		
 		if (fileSize >= 1073741824) {
 			return (df.format((double) fileSize / (double) 1073741824)) + "G";
@@ -101,7 +101,7 @@ public class VMessageFileItem extends VMessageAbstractItem {
 	}
 	
 	public String getDownloadSizeStr() {
-		Format df=new DecimalFormat("#.00");
+		Format df=new DecimalFormat("#.0");
 		
 		if (downloadedSize >= 1073741824) {
 			return (df.format((double) downloadedSize / (double) 1073741824)) + "G";

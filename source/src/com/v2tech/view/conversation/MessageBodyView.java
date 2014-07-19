@@ -69,6 +69,8 @@ public class MessageBodyView extends LinearLayout {
 
 	public interface ClickListener {
 		public void onMessageClicked(VMessage v);
+		
+		public void reSendMessageClicked(VMessage v);
 
 		public void requestPlayAudio(View v, VMessage vm, VMessageAudioItem vai);
 
@@ -153,7 +155,7 @@ public class MessageBodyView extends LinearLayout {
 					.findViewById(R.id.message_body_failed_item_left);
 			unReadIcon = rootView
 					.findViewById(R.id.message_body_unread_icon_left);
-			failedIcon.setVisibility(View.GONE);
+			failedIcon.setVisibility(View.INVISIBLE);
 			unReadIcon.setVisibility(View.GONE);
 			seconds.setVisibility(View.GONE);
 		} else {
@@ -174,7 +176,7 @@ public class MessageBodyView extends LinearLayout {
 			unReadIcon = rootView
 					.findViewById(R.id.message_body_unread_icon_right);
 			unReadIcon.setVisibility(View.GONE);
-			failedIcon.setVisibility(View.GONE);
+			failedIcon.setVisibility(View.INVISIBLE);
 			seconds.setVisibility(View.GONE);
 		}
 
@@ -342,6 +344,9 @@ public class MessageBodyView extends LinearLayout {
 			}
 
 		});
+		
+		audioRoot.setOnLongClickListener(messageLongClickListener);
+		
 		mContentContainer.addView(audioRoot, new LinearLayout.LayoutParams(
 				LinearLayout.LayoutParams.WRAP_CONTENT,
 				LinearLayout.LayoutParams.WRAP_CONTENT));
@@ -362,6 +367,8 @@ public class MessageBodyView extends LinearLayout {
 
 		updateFileItemView(item, fileRootView);
 		fileRootView.setOnClickListener(fileMessageItemClickListener);
+		fileRootView.setOnLongClickListener(messageLongClickListener);
+		
 
 		fileRootView.setTag(item);
 		mContentContainer.addView(fileRootView, new LinearLayout.LayoutParams(
@@ -400,15 +407,34 @@ public class MessageBodyView extends LinearLayout {
 							.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 					View view = inflater.inflate(
 							R.layout.message_selected_pop_up_window, null);
-
+				//FIXME should not hard code
 					pw = new PopupWindow(view,
-							ViewGroup.LayoutParams.WRAP_CONTENT,
-							ViewGroup.LayoutParams.WRAP_CONTENT, true);
+							150,
+							60, true);
 					pw.setBackgroundDrawable(new ColorDrawable(
 							Color.TRANSPARENT));
 					pw.setFocusable(true);
 					pw.setTouchable(true);
 					pw.setOutsideTouchable(true);
+					
+					TextView tvResend = (TextView)view.findViewById(R.id.contact_message_pop_up_item_resend);
+					tvResend.setOnClickListener(new OnClickListener() {
+						@Override
+						public void onClick(View view) {
+							if (callback != null) {
+								callback.reSendMessageClicked(mMsg);
+								failedIcon.setVisibility(View.INVISIBLE);
+								if (mMsg.getItems().size() > 0 && mMsg.getItems().get(0).getType() == VMessageFileItem.ITEM_TYPE_FILE) {
+									mContentContainer.invalidate();
+									View fileRootView = mContentContainer.getChildAt(0);
+									updateFileItemView((VMessageFileItem)mMsg.getItems().get(0), fileRootView);
+								}
+							}
+							pw.dismiss();
+						}
+
+					});
+					
 
 					TextView tv = (TextView) view
 							.findViewById(R.id.contact_message_pop_up_item_copy);
@@ -434,8 +460,18 @@ public class MessageBodyView extends LinearLayout {
 					});
 
 				}
-				int offsetX = (anchor.getMeasuredWidth() - 50) / 2;
-				int offsetY = -(anchor.getMeasuredHeight() + 60);
+				
+				if (failedIcon.getVisibility() == View.INVISIBLE) {
+					pw.getContentView().findViewById(R.id.contact_message_pop_up_item_resend).setVisibility(View.GONE);
+					pw.getContentView()
+						.findViewById(R.id.contact_message_pop_up_item_copy).setVisibility(View.VISIBLE);
+				} else {
+					pw.getContentView().findViewById(R.id.contact_message_pop_up_item_resend).setVisibility(View.VISIBLE);
+					pw.getContentView()
+					.findViewById(R.id.contact_message_pop_up_item_copy).setVisibility(View.GONE);
+				}
+				int offsetX = (anchor.getMeasuredWidth() - pw.getWidth()) / 2;
+				int offsetY = -(anchor.getMeasuredHeight() + pw.getHeight());
 
 				int[] location = new int[2];
 				anchor.getLocationInWindow(location);
@@ -479,6 +515,14 @@ public class MessageBodyView extends LinearLayout {
 			this.unReadIcon.setVisibility(View.GONE);
 		} else {
 			this.unReadIcon.setVisibility(View.VISIBLE);
+		}
+	}
+	
+	public void updateFailedFlag(boolean flag) {
+		if (!flag) {
+			this.failedIcon.setVisibility(View.INVISIBLE);
+		} else {
+			this.failedIcon.setVisibility(View.VISIBLE);
 		}
 	}
 
