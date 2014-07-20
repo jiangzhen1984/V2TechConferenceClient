@@ -49,6 +49,7 @@ import com.v2tech.service.GlobalHolder;
 import com.v2tech.service.Registrant;
 import com.v2tech.service.jni.JNIResponse;
 import com.v2tech.service.jni.RequestConfCreateResponse;
+import com.v2tech.util.SPUtil;
 import com.v2tech.view.PublicIntent;
 import com.v2tech.view.cus.DateTimePicker;
 import com.v2tech.view.cus.DateTimePicker.OnDateSetListener;
@@ -361,23 +362,6 @@ public class ConferenceCreateActivity extends Activity {
 		adapter.notifyDataSetChanged();
 	}
 
-	private boolean checkNetwork() {
-		final ConnectivityManager connMgr = (ConnectivityManager) this
-				.getSystemService(Context.CONNECTIVITY_SERVICE);
-
-		final android.net.NetworkInfo wifi = connMgr
-				.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
-
-		final android.net.NetworkInfo mobile = connMgr
-				.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
-
-		if (wifi.isAvailable() || mobile.isAvailable()) {
-			return true;
-		} else {
-			return false;
-		}
-
-	}
 
 	private OnClickListener removeAttendeeListener = new OnClickListener() {
 
@@ -465,7 +449,7 @@ public class ConferenceCreateActivity extends Activity {
 
 		@Override
 		public void onClick(View view) {
-			if (!checkNetwork()) {
+			if (!SPUtil.checkCurrentAviNetwork(mContext)) {
 				mErrorNotificationLayout.setVisibility(View.VISIBLE);
 				mErrorMessageTV.setText(R.string.error_create_conference_failed_no_network);
 				return;

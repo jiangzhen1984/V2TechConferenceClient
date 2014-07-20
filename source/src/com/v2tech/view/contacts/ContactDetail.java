@@ -182,6 +182,10 @@ public class ContactDetail extends Activity implements OnTouchListener {
 							R.string.contacts_user_detail_file_selection_not_found_path,
 							Toast.LENGTH_SHORT).show();
 				}
+				else{
+					//return current conversationView with selected file
+					returnConversationView(path);
+				}
 			}
 			break;
 		}
@@ -500,15 +504,22 @@ public class ContactDetail extends Activity implements OnTouchListener {
 		@Override
 		public void onClick(View arg0) {
 
-			Intent i = new Intent(PublicIntent.START_CONVERSACTION_ACTIVITY);
-			i.putExtra("obj", new ConversationNotificationObject(
-					Conversation.TYPE_CONTACT, u.getmUserId()));
-			i.addCategory(PublicIntent.DEFAULT_CATEGORY);
-			i.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-			mContext.startActivity(i);
+			returnConversationView(null);
 		}
-
 	};
+	
+	/**
+	 * return ConversationView with infos
+	 */
+	private void returnConversationView(String selectedFile) {
+		Intent i = new Intent(PublicIntent.START_CONVERSACTION_ACTIVITY);
+		i.putExtra("obj", new ConversationNotificationObject(
+				Conversation.TYPE_CONTACT, u.getmUserId()));
+		i.addCategory(PublicIntent.DEFAULT_CATEGORY);
+		i.putExtra("selectedFile", selectedFile);
+		mContext.startActivity(i);
+		finish();
+	}
 
 	private View.OnClickListener mVideoCallButtonListener = new View.OnClickListener() {
 		@Override
@@ -535,17 +546,23 @@ public class ContactDetail extends Activity implements OnTouchListener {
 	private View.OnClickListener mfileSelectionButtonListener = new View.OnClickListener() {
 		@Override
 		public void onClick(View arg0) {
-			Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-			intent.setType("*/*");
-			intent.addCategory(Intent.CATEGORY_OPENABLE);
+			if(SPUtil.checkCurrentAviNetwork(mContext)){
+				Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+				intent.setType("*/*");
+				intent.addCategory(Intent.CATEGORY_OPENABLE);
 
-			try {
-				startActivityForResult(
-						Intent.createChooser(intent, "Select a File to Upload"),
-						FILE_SELECT_CODE);
-			} catch (android.content.ActivityNotFoundException ex) {
-				Toast.makeText(mContext, "Please install a File Manager.",
-						Toast.LENGTH_SHORT).show();
+				try {
+					startActivityForResult(
+							Intent.createChooser(intent, "Select a File to Upload"),
+							FILE_SELECT_CODE);
+				} catch (android.content.ActivityNotFoundException ex) {
+					Toast.makeText(mContext, "Please install a File Manager.",
+							Toast.LENGTH_SHORT).show();
+				}
+			}
+			else{
+				
+				Toast.makeText(mContext, "当前网络不可用，请稍候再试。", Toast.LENGTH_SHORT).show();
 			}
 		}
 	};
