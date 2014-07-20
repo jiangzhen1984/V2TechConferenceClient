@@ -1453,6 +1453,7 @@ public class ConversationView extends Activity {
 				boolean result = queryAndAddMessage((int) intent.getExtras()
 						.getLong("mid"));
 				if (result) {
+					offset += 1;
 					// abort send down broadcast
 					this.abortBroadcast();
 				}
