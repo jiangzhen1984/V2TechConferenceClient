@@ -36,9 +36,9 @@ public class UserDeviceConfig {
 
 	public enum UserDeviceConfigType {
 		UNKOWN, EVIDEODEVTYPE_VIDEO, // camera
-		EVIDEODEVTYPE_CAMERA,    // 
-		EVIDEODEVTYPE_FILE,     // file source
-		EVIDEODEVTYPE_VIDEOMIXER  // mixed video
+		EVIDEODEVTYPE_CAMERA, //
+		EVIDEODEVTYPE_FILE, // file source
+		EVIDEODEVTYPE_VIDEOMIXER // mixed video
 	}
 
 	private long mUerID;
@@ -49,11 +49,11 @@ public class UserDeviceConfig {
 	private boolean isShowing;
 
 	private Attendee mBelongsAttendee;
-	
+
 	private UserDeviceConfigType type;
-	
-	
-	public UserDeviceConfig(long mUerID, String mDeviceID, VideoPlayer mVP, UserDeviceConfigType type) {
+
+	public UserDeviceConfig(long mUerID, String mDeviceID, VideoPlayer mVP,
+			UserDeviceConfigType type) {
 		this(mUerID, mDeviceID, mVP, 1);
 		this.mUerID = mUerID;
 		this.mDeviceID = mDeviceID;
@@ -156,8 +156,7 @@ public class UserDeviceConfig {
 	public UserDeviceConfigType getType() {
 		return this.type;
 	}
-	
-	
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -188,24 +187,20 @@ public class UserDeviceConfig {
 	}
 
 	/**
-	 * <xml><user id='136'><videolist defaultid='136:CyberLink Webcam Sharing
-	 * Manager____2056417056'><video bps='256' camtype='0' comm='0'
-	 * desc='CyberLink Webcam Sharing Manager____2056417056' fps='15'
-	 * id='136:CyberLink Webcam Sharing Manager____2056417056' selectedindex='0'
-	 * videotype='vid'><sizelist><size h='240' w='320'/><size h='360'
-	 * w='640'/><size h='480' w='640'/><size h='600' w='800'/><size h='720'
-	 * w='1280'/><size h='960' w='1280'/><size h='900' w='1600'/><size h='1200'
-	 * w='1600'/></sizelist></video><video bps='256' camtype='0' comm='0'
-	 * desc='HP HD Webcam [Fixed]____1388682949' fps='15' id='136:HP HD Webcam
-	 * [Fixed]____1388682949' selectedindex='3' videotype='vid'><sizelist><size
-	 * h='480' w='640'/><size h='400' w='640'/><size h='288' w='352'/><size
-	 * h='240' w='320'/><size h='720'
-	 * w='1280'/></sizelist></video></videolist></user></xml>
+	 * <xml><videolist defaultid='15:9158Capture____0'><video bps='256'
+	 * desc='9158Capture____0' fps='15' id='15:9158Capture____0' inuse='1'
+	 * selectedindex='0' videotype='1'><sizelist/></video><video bps='256'
+	 * desc='Logitech QuickCam Easy/Cool____3607289526' fps='15' id='15:Logitech
+	 * QuickCam Easy/Cool____3607289526' inuse='0' selectedindex='0'
+	 * videotype='1'><sizelist/></video><video bps='256' desc='Luminositi
+	 * Softcam [VFW]____0' fps='15' id='15:Luminositi Softcam [VFW]____0'
+	 * inuse='1' selectedindex='0'
+	 * videotype='1'><sizelist/></video></videolist></xml>
 	 * 
 	 * @param xmlData
 	 * @return
 	 */
-	public static List<UserDeviceConfig> parseFromXml(String xmlData) {
+	public static List<UserDeviceConfig> parseFromXml(long uid, String xmlData) {
 		if (xmlData == null) {
 			throw new RuntimeException(" user video data is null");
 		}
@@ -222,25 +217,17 @@ public class UserDeviceConfig {
 
 			doc.getDocumentElement().normalize();
 
-			NodeList userList = doc.getElementsByTagName("user");
-			Element userElement;
-
-			for (int i = 0; i < userList.getLength(); i++) {
-				userElement = (Element) userList.item(i);
-				long uid = Long.parseLong(userElement.getAttribute("id"));
-				NodeList videoList = userElement
-						.getElementsByTagName("videolist");
-				for (int j = 0; j < videoList.getLength(); j++) {
-					Element videoListE = (Element) videoList.item(j);
-					NodeList videol = videoListE.getElementsByTagName("video");
-					for (int t = 0; t < videol.getLength(); t++) {
-						Element video = (Element) videol.item(t);
-						String deviceId = video.getAttribute("id");
-						l.add(new UserDeviceConfig(uid, deviceId, null));
-					}
+			NodeList videoList = doc.getElementsByTagName("videolist");
+			for (int j = 0; j < videoList.getLength(); j++) {
+				Element videoListE = (Element) videoList.item(j);
+				NodeList videol = videoListE.getElementsByTagName("video");
+				for (int t = 0; t < videol.getLength(); t++) {
+					Element video = (Element) videol.item(t);
+					String deviceId = video.getAttribute("id");
+					l.add(new UserDeviceConfig(uid, deviceId, null));
 				}
-
 			}
+
 		} catch (ParserConfigurationException e) {
 			e.printStackTrace();
 		} catch (SAXException e) {

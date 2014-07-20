@@ -55,7 +55,6 @@ import com.v2tech.vo.Group;
 import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.NetworkStateCode;
 import com.v2tech.vo.User;
-import com.v2tech.vo.UserDeviceConfig;
 import com.v2tech.vo.VMessage;
 import com.v2tech.vo.VMessageAbstractItem;
 import com.v2tech.vo.VMessageAudioItem;
@@ -260,7 +259,6 @@ public class JNIService extends Service {
 	private static final int JNI_LOG_OUT = 26;
 	private static final int JNI_GROUP_NOTIFY = 35;
 	private static final int JNI_GROUP_USER_INFO_NOTIFICATION = 60;
-	private static final int JNI_REMOTE_USER_DEVICE_INFO_NOTIFICATION = 80;
 	private static final int JNI_RECEIVED_MESSAGE = 91;
 	private static final int JNI_RECEIVED_VIDEO_INVITION = 92;
 
@@ -347,10 +345,6 @@ public class JNIService extends Service {
 				} else {
 					V2Log.e("Invalid group user data");
 				}
-				break;
-			case JNI_REMOTE_USER_DEVICE_INFO_NOTIFICATION:
-				GlobalHolder.getInstance().addAttendeeDevice(
-						UserDeviceConfig.parseFromXml((String) msg.obj));
 				break;
 
 			case JNI_RECEIVED_MESSAGE:
@@ -697,16 +691,6 @@ public class JNIService extends Service {
 			this.mCallbackHandler = mCallbackHandler;
 		}
 
-		@Override
-		public void OnRemoteUserVideoDevice(String szXmlData) {
-			// if (szXmlData == null) {
-			// V2Log.e(" No avaiable user device configuration");
-			// return;
-			// }
-			// Message.obtain(mCallbackHandler,
-			// JNI_REMOTE_USER_DEVICE_INFO_NOTIFICATION, szXmlData)
-			// .sendToTarget();
-		}
 
 		@Override
 		public void OnVideoChatInviteCallback(long nGroupID, int nBusinessType,

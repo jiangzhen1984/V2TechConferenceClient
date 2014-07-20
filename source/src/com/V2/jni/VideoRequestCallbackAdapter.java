@@ -4,7 +4,7 @@ public abstract class VideoRequestCallbackAdapter implements
 		VideoRequestCallback {
 
 	@Override
-	public void OnRemoteUserVideoDevice(String szXmlData) {
+	public void OnRemoteUserVideoDevice(long uid, String szXmlData) {
 
 	}
 

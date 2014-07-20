@@ -1235,9 +1235,9 @@ public class ConversationView extends Activity {
 				return;
 			}
 			vfi.setState(VMessageFileItem.STATE_FILE_DOWNLOADING);
+			//FIXME should move this to service 
 			FileRequest.getInstance().acceptFileTrans(vfi.getUuid(),
-					GlobalConfig.getGlobalFilePath() + "/" + vfi.getFileName(),
-					FileRequest.BT_IM);
+					GlobalConfig.getGlobalFilePath() + "/" + vfi.getFileName());
 
 		}
 

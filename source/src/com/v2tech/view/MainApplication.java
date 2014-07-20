@@ -110,15 +110,14 @@ public class MainApplication extends Application {
 
 		// Load native library
 		System.loadLibrary("event");
-		System.loadLibrary("udt");
 		System.loadLibrary("v2vi");
 		System.loadLibrary("v2ve");
+		//System.loadLibrary("NetEvent");
 		System.loadLibrary("v2client");
-		
-	//	new ConfigRequest().setExtStoragePath(path);
 
 		// Initialize native library
-		NativeInitializer.getIntance().initialize(getApplicationContext());
+		NativeInitializer.getIntance()
+				.initialize(getApplicationContext(), path);
 		ImRequest.getInstance(getApplicationContext());
 		GroupRequest.getInstance(getApplicationContext());
 		VideoRequest.getInstance(getApplicationContext());
@@ -129,8 +128,6 @@ public class MainApplication extends Application {
 		VideoMixerRequest.getInstance();
 		FileRequest.getInstance(getApplicationContext());
 
-		
-		
 		// Start deamon service
 		getApplicationContext().startService(
 				new Intent(getApplicationContext(), JNIService.class));
@@ -152,8 +149,8 @@ public class MainApplication extends Application {
 
 		File optionsFile = new File(GlobalConfig.getGlobalPath()
 				+ "/log_options.xml");
-		if (!optionsFile.exists()) {
-			String content = "<xml><path></path><v2platform><level>1</level><basename>v2platform</basename><size>1024</size></v2platform></xml>";
+		{
+			String content = "<xml><path>log</path><v2platform><outputdebugstring>0</outputdebugstring><level>5</level><basename>v2platform</basename><path>log</path><size>1024</size></v2platform></xml>";
 			OutputStream os = null;
 			try {
 				os = new FileOutputStream(optionsFile);
@@ -173,10 +170,11 @@ public class MainApplication extends Application {
 			}
 		}
 
-		File cfgFile = new File(GlobalConfig.getGlobalPath()
-				+ "/v2platform.cfg");
-		if (!cfgFile.exists()) {
+		{
+			File cfgFile = new File(GlobalConfig.getGlobalPath()
+					+ "/v2platform.cfg");
 			String contentCFG = "<v2platform><C2SProxy><ipv4 value=''/><tcpport value=''/></C2SProxy></v2platform>";
+
 			OutputStream os = null;
 			try {
 				os = new FileOutputStream(cfgFile);

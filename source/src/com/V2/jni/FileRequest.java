@@ -63,15 +63,31 @@ public class FileRequest {
 	public native void inviteFileTrans(long nUserId, String filePath,
 			int linetype);
 
-	// 鎺ュ彈瀵规柟鐨勬枃浠朵紶杈撻個璇�
-	public native void acceptFileTrans(String szFileID, String szSavePath,
-			int businesstype);
+	/**
+	 * TODO add comments
+	 * @param szFileID
+	 * @param szSavePath
+	 */
+	public native void acceptFileTrans(String szFileID, String szSavePath);
 
-	// 鎷掔粷鎺ユ敹鏂囦欢
-	public native void refuseFileTrans(String szFileID, int businesstype);
+	/**
+	 *  TODO add comments
+	 * @param szFileID
+	 */
+	public native void refuseFileTrans(String szFileID);
 
-	// 鍙栨秷鏂囦欢浼犺緭
-	public native void cancelFileTrans(String szFileID, int businesstype);
+	/**
+	 * 
+	 * @param szFileID
+	 */
+	public native void cancelFileTrans(String szFileID);
+	
+	
+	/**
+	 * 
+	 * @param szFileID
+	 */
+	public native void cancelRecvFile(String szFileID, int type);
 
 	// 涓嬭浇鏂囦欢
 	public native void downLoadFile(long nGroupID, String szFileID,
@@ -204,9 +220,9 @@ public class FileRequest {
 	 * @param nTransType
 	 */
 	private void OnFileTransEnd(String szFileID, String szFileName,
-			long nFileSize, int nTransType) {
+			long nFileSize, int nTransType, String tr) {
 		Log.e(TAG, "OnFileTransEnd--->" + szFileID + ":" + szFileName + ":"
-				+ nFileSize + ":" + nTransType);
+				+ nFileSize + ":" + nTransType + "  "+ tr);
 		for (int i = 0; i < callbacks.size(); i++) {
 			WeakReference<FileRequestCallback> wrf = callbacks.get(i);
 			if (wrf != null && wrf.get() != null) {
@@ -222,8 +238,8 @@ public class FileRequest {
 	}
 
 	// 鏂囦欢浼犺緭澶辫触
-	private void OnFileDownloadError(String sFileID) {
-		Log.e(TAG, "OnFileDownloadError--->" + sFileID);
+	private void OnFileDownloadError(String sFileID, int t1, int t2) {
+		Log.e(TAG, "OnFileDownloadError--->" + sFileID +" "+ t1 +" "+t2);
 		for (int i = 0; i < callbacks.size(); i++) {
 			WeakReference<FileRequestCallback> wrf = callbacks.get(i);
 			if (wrf != null && wrf.get() != null) {

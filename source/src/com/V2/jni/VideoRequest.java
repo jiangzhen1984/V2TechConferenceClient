@@ -179,13 +179,13 @@ public class VideoRequest {
 	 * @param szXmlData
 	 *            user devices list as XML format
 	 */
-	private void OnRemoteUserVideoDevice(String szXmlData) {
-		V2Log.d("OnRemoteUserVideoDevice:---" + szXmlData);
+	private void OnRemoteUserVideoDevice(long uid, String szXmlData) {
+		V2Log.d("OnRemoteUserVideoDevice:---" + uid + " "+ szXmlData);
 		for (WeakReference<VideoRequestCallback> wrCB : this.callback) {
 			Object obj = wrCB.get();
 			if (obj != null) {
 				VideoRequestCallback cb = (VideoRequestCallback) obj;
-				cb.OnRemoteUserVideoDevice(szXmlData);
+				cb.OnRemoteUserVideoDevice(uid, szXmlData);
 			}
 		}
 	}
