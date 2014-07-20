@@ -30,6 +30,7 @@ import android.os.Message;
 import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.SpannableStringBuilder;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.text.style.ImageSpan;
 import android.view.LayoutInflater;
@@ -237,6 +238,11 @@ public class ConversationView extends Activity {
 			backEndHandler = new BackendHandler(thread.getLooper());
 		}
 
+		String path = getIntent().getStringExtra("selectedFile");
+		if(path != null){
+			sendSelectedFile(path);
+		}
+		
 		initExtraObject();
 
 		// Register listener for avatar changed
@@ -283,6 +289,7 @@ public class ConversationView extends Activity {
 			pending = false;
 			scrollToBottom();
 		}
+		
 	}
 
 	@Override
@@ -874,17 +881,23 @@ public class ConversationView extends Activity {
 	private View.OnClickListener mfileSelectionButtonListener = new View.OnClickListener() {
 		@Override
 		public void onClick(View arg0) {
-			Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-			intent.setType("*/*");
-			intent.addCategory(Intent.CATEGORY_OPENABLE);
+			if(SPUtil.checkCurrentAviNetwork(mContext)){
+				Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+				intent.setType("*/*");
+				intent.addCategory(Intent.CATEGORY_OPENABLE);
 
-			try {
-				startActivityForResult(
-						Intent.createChooser(intent, "Select a File to Upload"),
-						FILE_SELECT_CODE);
-			} catch (android.content.ActivityNotFoundException ex) {
-				Toast.makeText(mContext, "Please install a File Manager.",
-						Toast.LENGTH_SHORT).show();
+				try {
+					startActivityForResult(
+							Intent.createChooser(intent, "Select a File to Upload"),
+							FILE_SELECT_CODE);
+				} catch (android.content.ActivityNotFoundException ex) {
+					Toast.makeText(mContext, "Please install a File Manager.",
+							Toast.LENGTH_SHORT).show();
+				}
+			}
+			else{
+				
+				Toast.makeText(mContext, "当前网络不可用，请稍候再试。", Toast.LENGTH_SHORT).show();
 			}
 		}
 	};
@@ -988,11 +1001,8 @@ public class ConversationView extends Activity {
 							R.string.contacts_user_detail_file_selection_not_found_path,
 							Toast.LENGTH_SHORT).show();
 				} else {
-					VMessage vim = MessageBuilder.buildFileMessage(local,
-							remote, path);
-					VMessageFileItem vfi = vim.getFileItems().get(0);
-					vfi.setState(VMessageFileItem.STATE_FILE_SENDING);
-					sendMessageToRemote(vim);
+					
+					sendSelectedFile(path);
 				}
 			}
 		}
@@ -1569,6 +1579,21 @@ public class ConversationView extends Activity {
 
 		}
 
+	}
+	
+	/**
+	 * get selected file path to send remote.
+	 */
+	public void sendSelectedFile(String selectPath) {
+		
+		if (!TextUtils.isEmpty(selectPath)) {
+
+			VMessage vim = MessageBuilder.buildFileMessage(local, remote,
+					selectPath);
+			VMessageFileItem vfi = vim.getFileItems().get(0);
+			vfi.setState(VMessageFileItem.STATE_FILE_SENDING);
+			sendMessageToRemote(vim);
+		}
 	}
 
 }

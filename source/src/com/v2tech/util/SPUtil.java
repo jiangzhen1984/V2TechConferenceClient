@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.database.Cursor;
+import android.net.ConnectivityManager;
 import android.net.Uri;
 
 public class SPUtil {
@@ -88,4 +89,30 @@ public class SPUtil {
 		return null;
 
 	}
+	
+	/**
+	 * 
+	 * @param context
+	 * @return
+	 */
+	public static boolean checkCurrentAviNetwork(Context context) {
+		if (context == null) {
+			throw new NullPointerException("Invalid context object");
+		}
+		ConnectivityManager connMgr = (ConnectivityManager) context
+				.getSystemService(Context.CONNECTIVITY_SERVICE);
+
+		android.net.NetworkInfo wifi = connMgr
+				.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+
+		android.net.NetworkInfo mobile = connMgr
+				.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
+
+		if (wifi.isConnected() || mobile.isConnected()) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
 }

@@ -98,6 +98,8 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher {
 	private ConferenceService cb;
 
 	private String mCurrentTabFlag;
+	
+	private int currentPosition;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -811,6 +813,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher {
 
 		@Override
 		public View getView(int position, View convertView, ViewGroup parent) {
+			currentPosition = position;
 			return mItemList.get(position).gp;
 		}
 
@@ -1014,6 +1017,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher {
 				JNIResponse recr = (JNIResponse) msg.obj;
 				if (recr.getResult() == JNIResponse.Result.SUCCESS) {
 					Conference c = ((RequestEnterConfResponse) recr).getConf();
+					c.setStartTime(mConvList.get(currentPosition).getDate());
 					// conf.setChairman(c.getChairman());
 					// // set enter flag to true
 					// // Request grant speaking permission

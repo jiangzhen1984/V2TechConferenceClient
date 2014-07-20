@@ -155,6 +155,10 @@ public class Conference implements Parcelable {
 	public void setCreator(long creator) {
 		this.creator = creator;
 	}
+	
+	public void setStartTime(String startTime) {
+		this.startTime = startTime;
+	}
 
 	public Date getDate() {
 		if (d == null && this.startTime != null
