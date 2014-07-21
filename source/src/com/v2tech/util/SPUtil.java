@@ -107,8 +107,8 @@ public class SPUtil {
 
 		android.net.NetworkInfo mobile = connMgr
 				.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
-
-		if (wifi.isConnected() || mobile.isConnected()) {
+		//need to check mobile !=null, because no mobile network data in PAD
+		if (wifi.isConnected() || (mobile != null && mobile.isConnected())) {
 			return true;
 		} else {
 			return false;
