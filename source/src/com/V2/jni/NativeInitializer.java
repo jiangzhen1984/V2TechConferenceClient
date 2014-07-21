@@ -15,6 +15,6 @@ public class NativeInitializer {
 		}
 		return instance;
 	}
-	public native void initialize(Context context);
+	public native void initialize(Context context, String path);
 
 }

@@ -677,7 +677,6 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher {
 	private void startConferenceActivity(Conference conf) {
 		//Set current state to in meeting state
 		GlobalHolder.getInstance().setMeetingState(true);
-		mContext.startService(new Intent(mContext, ConferencMessageSyncService.class));
 		Intent enterConference = new Intent(mContext, VideoActivityV2.class);
 		enterConference.putExtra("conf", conf);
 		currentEntered = conf;
@@ -1006,6 +1005,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher {
 			case REMOVE_CONVERSATION:
 				break;
 			case REQUEST_ENTER_CONF:
+				mContext.startService(new Intent(mContext, ConferencMessageSyncService.class));
 				cb.requestEnterConference(new Conference((Long) msg.obj),
 						new Registrant(this, REQUEST_ENTER_CONF_RESPONSE, null));
 				break;
@@ -1032,7 +1032,9 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher {
 					Toast.makeText(mContext,
 							R.string.error_request_enter_conference_time_out,
 							Toast.LENGTH_SHORT).show();
+					mContext.stopService(new Intent(mContext, ConferencMessageSyncService.class));
 				} else {
+					mContext.stopService(new Intent(mContext, ConferencMessageSyncService.class));
 					Toast.makeText(mContext,
 							R.string.error_request_enter_conference,
 							Toast.LENGTH_SHORT).show();
