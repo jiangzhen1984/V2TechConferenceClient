@@ -10,6 +10,8 @@ import java.util.regex.Pattern;
 
 import android.app.Activity;
 import android.app.Dialog;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.ContentValues;
@@ -28,6 +30,7 @@ import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
 import android.provider.MediaStore;
+import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
@@ -321,12 +324,16 @@ public class ConversationView extends Activity {
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
+		this.unregisterReceiver(receiver);
+		finishWork();
+	}
+
+	private void finishWork() {
 		BitmapManager.getInstance().unRegisterBitmapChangedListener(
 				avatarChangedListener);
 
 		stopPlaying();
 		releasePlayer();
-		this.unregisterReceiver(receiver);
 		cleanCache();
 		V2Log.e("conversation view exited");
 		mChat.removeRegisterFileTransStatusListener(this.lh,
@@ -882,18 +889,28 @@ public class ConversationView extends Activity {
 		@Override
 		public void onClick(View arg0) {
 			if(SPUtil.checkCurrentAviNetwork(mContext)){
-				Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-				intent.setType("*/*");
-				intent.addCategory(Intent.CATEGORY_OPENABLE);
-
-				try {
-					startActivityForResult(
-							Intent.createChooser(intent, "Select a File to Upload"),
-							FILE_SELECT_CODE);
-				} catch (android.content.ActivityNotFoundException ex) {
-					Toast.makeText(mContext, "Please install a File Manager.",
-							Toast.LENGTH_SHORT).show();
-				}
+//				Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+//				intent.setType("*/*");
+//				intent.addCategory(Intent.CATEGORY_OPENABLE);
+//
+//				try {
+//					startActivityForResult(
+//							Intent.createChooser(intent, "Select a File to Upload"),
+//							FILE_SELECT_CODE);
+//				} catch (android.content.ActivityNotFoundException ex) {
+//					Toast.makeText(mContext, "Please install a File Manager.",
+//							Toast.LENGTH_SHORT).show();
+//				}
+				
+				/*FragmentManager fragmentManager = getFragmentManager();
+				FragmentTransaction beginTransaction = fragmentManager.beginTransaction();
+				ConversationSelectFile fragment = new ConversationSelectFile();
+				beginTransaction.add(R.id.container_fragment , fragment);
+				beginTransaction.commit();*/
+				Intent intent = new Intent(ConversationView.this , ConversationSelectFile.class);
+				startActivity(intent);
+				finishWork();
+				finish();
 			}
 			else{
 				

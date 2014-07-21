@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
+    android:id="@+id/container_fragment"
     android:layout_height="match_parent" >
     <RelativeLayout
         android:id="@+id/RelativeLayout1"
@@ -66,9 +67,9 @@
             android:id="@+id/conversation_message_list"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:cacheColorHint="#00000000"
             android:clickable="false"
             android:divider="@null"
+            android:cacheColorHint="#00000000"
             android:fadingEdge="none"
             android:fastScrollEnabled="true"
             android:focusable="false"
@@ -164,7 +165,7 @@
             android:layout_height="wrap_content"
             android:background="#ffffff"
             android:orientation="vertical"
-            android:visibility="gone" >
+             >
             <RelativeLayout
                 android:id="@+id/contact_message_sub_feature_ly_inner"
                 android:layout_width="match_parent"
@@ -185,14 +186,15 @@
                     android:padding="15dp" >
                     <ImageView
                         android:id="@+id/message_smile_icon"
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:src="@drawable/message_smile_icon_button_selector" />
                     <TextView
-                        android:layout_width="match_parent"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:gravity="center"
                         android:text="表情"
+                        android:textSize="16sp"
                         android:textColor="#000000" />
                 </LinearLayout>
                 <LinearLayout
@@ -204,14 +206,15 @@
                     android:padding="15dp" >
                     <ImageView
                         android:id="@+id/contact_message_send_image_button"
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:src="@drawable/message_send_image_button_selector" />
                     <TextView
-                        android:layout_width="match_parent"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:gravity="center"
                         android:text="图片"
+                        android:textSize="16sp"
                         android:textColor="#000000" />
                 </LinearLayout>
                 <LinearLayout
@@ -223,14 +226,15 @@
                     android:padding="15dp" >
                     <ImageView
                         android:id="@+id/contact_message_send_file_button"
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:src="@drawable/message_file_button_selector" />
                     <TextView
-                        android:layout_width="match_parent"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:gravity="center"
                         android:text="文件"
+                        android:textSize="16sp"
                         android:textColor="#000000" />
                 </LinearLayout>
                 <LinearLayout
@@ -242,14 +246,15 @@
                     android:padding="15dp" >
                     <ImageView
                         android:id="@+id/contact_message_video_call_button"
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:src="@drawable/message_video_call_button_selector" />
                     <TextView
-                        android:layout_width="match_parent"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:gravity="center"
                         android:text="视频"
+                        android:textSize="16sp"
                         android:textColor="#000000" />
                 </LinearLayout>
                 <LinearLayout
@@ -261,14 +266,15 @@
                     android:padding="15dp" >
                     <ImageView
                         android:id="@+id/contact_message_audio_call_button"
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:src="@drawable/message_audio_call_button_selector" />
                     <TextView
-                        android:layout_width="match_parent"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:gravity="center"
                         android:text="语音"
+                        android:textSize="16sp"
                         android:textColor="#000000" />
                 </LinearLayout>
             </RelativeLayout>
