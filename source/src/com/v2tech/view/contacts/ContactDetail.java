@@ -130,6 +130,12 @@ public class ContactDetail extends Activity implements OnTouchListener {
 	protected void onStop() {
 		super.onStop();
 	}
+	
+
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+	}
 
 	@Override
 	public void onBackPressed() {

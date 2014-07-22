@@ -68,6 +68,11 @@ public class P2PConversation extends Activity implements
 	private View mRejectButton;
 	private View mAcceptButton;
 	private View mAudioOnlyButton;
+	
+	//For video conversation
+	private View cameraButton;
+	private View videoMuteButton;
+	private View videoHangUpButton;
 
 	// Video call view
 	private SurfaceView mLocalSurface;
@@ -182,6 +187,7 @@ public class P2PConversation extends Activity implements
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
+		mContext.unregisterReceiver(receiver);
 		chatService.removeRegisterCancelledListener(mLocalHandler,
 				HANG_UP_NOTIFICATION, null);
 	}
@@ -193,7 +199,6 @@ public class P2PConversation extends Activity implements
 				.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
 		VideoRecorder.VideoPreviewSurfaceHolder
 				.setFormat(PixelFormat.TRANSPARENT);
-		mLocalSurface.setZOrderOnTop(true);
 		UserChattingObject selfUCD = new UserChattingObject(GlobalHolder
 				.getInstance().getCurrentUser(), 0, "");
 		chatService.openVideoDevice(selfUCD, null);
@@ -258,18 +263,18 @@ public class P2PConversation extends Activity implements
 	
 	private void initButtons() {
 		// For video button
-		View cameraButton = findViewById(R.id.conversation_fragment_connected_video_camera_button);
+		cameraButton = findViewById(R.id.conversation_fragment_connected_video_camera_button);
 		if (cameraButton != null) {
 			cameraButton.setOnClickListener(mCloseOrOpenCameraButtonListener);
 		}
-		View hangUpButton = findViewById(R.id.conversation_fragment_connected_video_hang_up_button);
-		if (hangUpButton != null) {
-			hangUpButton.setOnClickListener(mHangUpButtonListener);
+		videoHangUpButton = findViewById(R.id.conversation_fragment_connected_video_hang_up_button);
+		if (videoHangUpButton != null) {
+			videoHangUpButton.setOnClickListener(mHangUpButtonListener);
 		}
 
-		View muteButton = findViewById(R.id.conversation_fragment_connected_video_mute_button);
-		if (muteButton != null) {
-			muteButton.setOnClickListener(mMuteButtonListener);
+		videoMuteButton = findViewById(R.id.conversation_fragment_connected_video_mute_button);
+		if (videoMuteButton != null) {
+			videoMuteButton.setOnClickListener(mMuteButtonListener);
 		}
 
 		// For audio Button
@@ -643,10 +648,35 @@ public class P2PConversation extends Activity implements
 
 		sv1.setLayoutParams(vl2);
 		sv2.setLayoutParams(vl1);
+		
+		
+		//Make sure button always in front
+		
+		View v = null;
+		ViewGroup.LayoutParams lp = sv1.getLayoutParams();
+		if (lp.width == RelativeLayout.LayoutParams.MATCH_PARENT) {
+			sv2.setZOrderOnTop(true);
+			sv1.setZOrderOnTop(false);
+			v = sv2;
+		} else {
+			sv1.setZOrderOnTop(true);
+			sv2.setZOrderOnTop(false);
+			v = sv1;
+		}
+		
+		
+		cameraButton.bringToFront();
+		videoHangUpButton.bringToFront();
+		videoMuteButton.bringToFront();
+		
+		findViewById(R.id.fragment_conversation_connected_video_button_container).bringToFront();
+		ViewGroup container = (ViewGroup)findViewById(R.id.fragment_conversation_connected_video_container);
+		container.bringChildToFront(v);
+		container.invalidate();
+		
 	}
 
 	private void quit() {
-		mContext.unregisterReceiver(receiver);
 		finish();
 	}
 

@@ -133,6 +133,14 @@ public class ConferenceService extends AbstractHandler {
 	 *            {@link com.v2tech.service.jni.RequestExitedConfResponse}
 	 */
 	public void requestExitConference(Conference conf, Registrant caller) {
+		if (conf == null) {
+			if (caller != null && caller.getHandler() != null) {
+				JNIResponse jniRes = new RequestConfCreateResponse(0, 0,
+						RequestConfCreateResponse.Result.INCORRECT_PAR);
+				sendResult(caller, jniRes);
+			}
+			return;
+		}
 		initTimeoutMessage(JNI_REQUEST_EXIT_CONF, DEFAULT_TIME_OUT_SECS, caller);
 		ConfRequest.getInstance().exitConf(conf.getId());
 		// send response to caller because exitConf no call back from JNI

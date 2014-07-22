@@ -219,7 +219,7 @@ public class ChatService extends AbstractHandler {
 		}
 
 		FileRequest.getInstance().inviteFileTrans(vm.getToUser().getmUserId(),
-				sb.toString(), 1);
+				sb.toString(), 2);
 
 		JNIResponse resp = new RequestChatServiceResponse(
 				RequestChatServiceResponse.Result.SUCCESS);
@@ -263,14 +263,20 @@ public class ChatService extends AbstractHandler {
 					vfi.getTransType());
 			break;
 		case OPERATION_PAUSE_DOWNLOADING:
+			FileRequest.getInstance().pauseHttpRecvFile(vfi.getUuid(),
+					vfi.getTransType());
 			break;
 		case OPERATION_RESUME_DOWNLOAD:
+			FileRequest.getInstance().resumeHttpRecvFile(vfi.getUuid(),
+					vfi.getTransType());
 			break;
 		case OPERATION_CANCEL_SENDING:
 			FileRequest.getInstance().cancelSendFile(vfi.getUuid(),
 					vfi.getTransType());
 			break;
 		case OPERATION_CANCEL_DOWNLOADING:
+			FileRequest.getInstance().cancelRecvFile(vfi.getUuid(),
+					vfi.getTransType());
 			break;
 
 		}
