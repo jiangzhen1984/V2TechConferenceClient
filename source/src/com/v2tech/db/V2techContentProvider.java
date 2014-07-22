@@ -19,7 +19,7 @@ public class V2techContentProvider extends ContentProvider {
 
 	@Override
 	public int delete(Uri uri, String selection, String[] selectionsArgs) {
-		int ret = 0 ;
+		int ret = 0;
 		SQLiteDatabase db = mOpenHelper.getWritableDatabase();
 		int token = ContentDescriptor.URI_MATCHER.match(uri);
 		String table = null;
@@ -37,7 +37,6 @@ public class V2techContentProvider extends ContentProvider {
 		}
 		return ret;
 	}
-	
 
 	@Override
 	public String getType(Uri arg0) {
@@ -69,6 +68,8 @@ public class V2techContentProvider extends ContentProvider {
 			newUri = ContentDescriptor.MessageItems.CONTENT_URI.buildUpon()
 					.appendPath(String.valueOf(id)).build();
 			break;
+		default:
+			throw new RuntimeException("Does not support operation");
 		}
 		getContext().getContentResolver().notifyChange(newUri, null);
 		return newUri;
@@ -101,8 +102,9 @@ public class V2techContentProvider extends ContentProvider {
 			break;
 		case ContentDescriptor.Conversation.TOKEN:
 			qb.setTables(ContentDescriptor.Conversation.NAME);
-		default:
 			break;
+		default:
+			throw new RuntimeException("Does not support operation");
 		}
 		SQLiteDatabase db = mOpenHelper.getReadableDatabase();
 		Cursor c = qb.query(db, projection, selection, selectionArgs, null,
@@ -114,7 +116,7 @@ public class V2techContentProvider extends ContentProvider {
 	@Override
 	public int update(Uri uri, ContentValues values, String selection,
 			String[] args) {
-		int ret = 0 ;
+		int ret = 0;
 		SQLiteDatabase db = mOpenHelper.getWritableDatabase();
 		int token = ContentDescriptor.URI_MATCHER.match(uri);
 		String table = null;
@@ -128,6 +130,8 @@ public class V2techContentProvider extends ContentProvider {
 		case ContentDescriptor.Conversation.TOKEN:
 			table = ContentDescriptor.Conversation.NAME;
 			break;
+		default:
+			throw new RuntimeException("Does not support operation");
 		}
 		if (table != null) {
 			ret = db.update(table, values, selection, args);

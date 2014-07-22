@@ -71,6 +71,8 @@ public class MessageBodyView extends LinearLayout {
 		public void onMessageClicked(VMessage v);
 		
 		public void reSendMessageClicked(VMessage v);
+		
+		public void requestDelMessage(VMessage v);
 
 		public void requestPlayAudio(View v, VMessage vm, VMessageAudioItem vai);
 
@@ -418,46 +420,18 @@ public class MessageBodyView extends LinearLayout {
 					pw.setOutsideTouchable(true);
 					
 					TextView tvResend = (TextView)view.findViewById(R.id.contact_message_pop_up_item_resend);
-					tvResend.setOnClickListener(new OnClickListener() {
-						@Override
-						public void onClick(View view) {
-							if (callback != null) {
-								callback.reSendMessageClicked(mMsg);
-								failedIcon.setVisibility(View.INVISIBLE);
-								if (mMsg.getItems().size() > 0 && mMsg.getItems().get(0).getType() == VMessageFileItem.ITEM_TYPE_FILE) {
-									mContentContainer.invalidate();
-									View fileRootView = mContentContainer.getChildAt(0);
-									updateFileItemView((VMessageFileItem)mMsg.getItems().get(0), fileRootView);
-								}
-							}
-							pw.dismiss();
-						}
-
-					});
+					tvResend.setOnClickListener(mResendButtonListener);
 					
 
 					TextView tv = (TextView) view
 							.findViewById(R.id.contact_message_pop_up_item_copy);
-					tv.setOnClickListener(new OnClickListener() {
-						@Override
-						public void onClick(View view) {
-
-							ClipboardManager clipboard = (ClipboardManager) getContext()
-									.getSystemService(Context.CLIPBOARD_SERVICE);
-							ClipData clip = ClipData.newPlainText(
-									"label",
-									MessageUtil
-											.getMixedConversationCopyedContent(mMsg));
-
-							clipboard.setPrimaryClip(clip);
-							pw.dismiss();
-
-							Toast.makeText(getContext(),
-									R.string.contact_message_copy_message,
-									Toast.LENGTH_SHORT).show();
-						}
-
-					});
+					tv.setOnClickListener(mCopyButtonListener);
+					
+					
+					TextView deleteText = (TextView) view
+							.findViewById(R.id.contact_message_pop_up_item_delete);
+					deleteText.setOnClickListener(mDeleteButtonListener);
+					
 
 				}
 				
@@ -582,14 +556,15 @@ public class MessageBodyView extends LinearLayout {
 			float percent = (float) ((double) vfi.getDownloadedSize() / (double) vfi
 					.getFileSize());
 
+			
 			ViewGroup progressC = (ViewGroup) rootView
-					.findViewById(R.id.message_body_file_item_progress_state_ly);
+					.findViewById(R.id.message_body_file_item_width_base);
 
 			View iv = rootView
 					.findViewById(R.id.message_body_file_item_progress_state);
 			ViewGroup.LayoutParams lp = iv.getLayoutParams();
-			lp.width = (int) (progressC.getWidth() * percent);
-			progressC.updateViewLayout(iv, lp);
+			lp.width = (int) (progressC.getLayoutParams().width * percent);
+			iv.setLayoutParams(lp);
 
 		} else {
 			rootView.findViewById(R.id.message_body_file_item_progress_layout)
@@ -714,6 +689,58 @@ public class MessageBodyView extends LinearLayout {
 					}
 				}
 			}
+		}
+
+	};
+	
+	
+	private OnClickListener mDeleteButtonListener = new OnClickListener() {
+		@Override
+		public void onClick(View view) {
+			if (callback != null) {
+				callback.requestDelMessage(mMsg);
+			}
+			pw.dismiss();
+		}
+
+	};
+	
+	
+	private OnClickListener mCopyButtonListener = new OnClickListener() {
+		@Override
+		public void onClick(View view) {
+
+			ClipboardManager clipboard = (ClipboardManager) getContext()
+					.getSystemService(Context.CLIPBOARD_SERVICE);
+			ClipData clip = ClipData.newPlainText(
+					"label",
+					MessageUtil
+							.getMixedConversationCopyedContent(mMsg));
+
+			clipboard.setPrimaryClip(clip);
+			pw.dismiss();
+
+			Toast.makeText(getContext(),
+					R.string.contact_message_copy_message,
+					Toast.LENGTH_SHORT).show();
+		}
+
+	};
+	
+	
+	private OnClickListener mResendButtonListener =new OnClickListener() {
+		@Override
+		public void onClick(View view) {
+			if (callback != null) {
+				callback.reSendMessageClicked(mMsg);
+				failedIcon.setVisibility(View.INVISIBLE);
+				if (mMsg.getItems().size() > 0 && mMsg.getItems().get(0).getType() == VMessageFileItem.ITEM_TYPE_FILE) {
+					mContentContainer.invalidate();
+					View fileRootView = mContentContainer.getChildAt(0);
+					updateFileItemView((VMessageFileItem)mMsg.getItems().get(0), fileRootView);
+				}
+			}
+			pw.dismiss();
 		}
 
 	};
