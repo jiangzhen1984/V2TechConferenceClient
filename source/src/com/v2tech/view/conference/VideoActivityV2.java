@@ -34,7 +34,6 @@ import android.os.Message;
 import android.text.TextUtils.TruncateAt;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.Surface;
@@ -448,8 +447,21 @@ public class VideoActivityV2 extends Activity {
 			mAttendeeContainer.setListener(subViewListener);
 			// Initialize speaking
 			if (isSpeaking) {
-				mAttendeeContainer.updateAttendeeSpeakingState(new Attendee(
-						GlobalHolder.getInstance().getCurrentUser()),
+
+				Attendee pa = null;
+				for (Attendee att : mAttendeeList) {
+					if (att.getAttId() == GlobalHolder.getInstance()
+							.getCurrentUser().getmUserId()) {
+						pa = att;
+					}
+				}
+
+				if (pa == null) {
+					pa = new Attendee(GlobalHolder.getInstance()
+							.getCurrentUser());
+					mAttendeeList.add(pa);
+				}
+				mAttendeeContainer.updateAttendeeSpeakingState(pa,
 						ConferencePermission.SPEAKING, PermissionState.GRANTED);
 			}
 			// Update pending attendee state
@@ -917,11 +929,13 @@ public class VideoActivityV2 extends Activity {
 					if (confGroup != null) {
 						List<User> l = new ArrayList<User>(confGroup.getUsers());
 						for (User u : l) {
-							mAttendeeList.add(new Attendee(u));
+							Attendee at =new Attendee(u);
+							boolean bt = mAttendeeList.add(at);
+							if (bt && mAttendeeContainer != null) {
+								mAttendeeContainer.addNewAttendee(at);
+							}
 						}
 						if (mAttendeeContainer != null) {
-							mAttendeeContainer.setAttendsList(mAttendeeList);
-							// TODO optize code
 							synchronized (mMixerWrapper) {
 								for (MixerWrapper mw : mMixerWrapper.values()) {
 									mAttendeeContainer
@@ -1320,7 +1334,7 @@ public class VideoActivityV2 extends Activity {
 	 * user quit conference, however positive or negative
 	 */
 	private void quit() {
-		//if bound, then conference service is initialized. Otherwise not. 
+		// if bound, then conference service is initialized. Otherwise not.
 		if (mServiceBound) {
 			for (SurfaceViewW sw : this.mCurrentShowedSV) {
 				Message.obtain(mVideoHandler, REQUEST_OPEN_OR_CLOSE_DEVICE, 0,
@@ -1347,7 +1361,6 @@ public class VideoActivityV2 extends Activity {
 		showQuitDialog(mContext.getText(R.string.in_meeting_quit_text)
 				.toString());
 	}
-
 
 	private void doApplyOrReleaseSpeak(boolean flag) {
 		if (!flag) {
@@ -1524,8 +1537,13 @@ public class VideoActivityV2 extends Activity {
 	 */
 	private boolean updateAttendeePermissionStateIcon(
 			PermissionUpdateIndication ind) {
-		Attendee pa = new Attendee(GlobalHolder.getInstance().getUser(
-				ind.getUid()));
+		Attendee pa = null;
+		for (Attendee att : mAttendeeList) {
+			if (att.getAttId() == ind.getUid()) {
+				pa = att;
+			}
+		}
+
 		if (pa != null && mAttendeeContainer != null) {
 			mAttendeeContainer.updateAttendeeSpeakingState(pa,
 					ConferencePermission.fromInt(ind.getType()),
@@ -1830,8 +1848,9 @@ public class VideoActivityV2 extends Activity {
 
 		@Override
 		public void requestInvitation(Conference conf, List<User> l) {
-			if (l == null || l.size()<=0) {
-				Toast.makeText(mContext, R.string.warning_no_attendee_selected, Toast.LENGTH_SHORT).show();
+			if (l == null || l.size() <= 0) {
+				Toast.makeText(mContext, R.string.warning_no_attendee_selected,
+						Toast.LENGTH_SHORT).show();
 				return;
 			}
 			// ignore call back;

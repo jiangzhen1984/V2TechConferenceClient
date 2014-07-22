@@ -35,7 +35,7 @@ public class GlobalHolder {
 
 	private Set<Group> mConfGroup = new CopyOnWriteArraySet<Group>();
 
-	private Set<Group> mContactsGroup = new HashSet<Group>();
+	private List<Group> mContactsGroup = new ArrayList<Group>();
 
 	private Set<Group> mCrowdGroup = new HashSet<Group>();
 
@@ -176,7 +176,12 @@ public class GlobalHolder {
 				mConfGroup.addAll(list);
 			}
 		} else if (gType == Group.GroupType.CONTACT) {
-			this.mContactsGroup.addAll(list);
+			for (int i = 0; i < list.size(); i++) {
+				Group g = list.get(i);
+				if (!mGroupHolder.containsKey(Long.valueOf(g.getmGId()))) {
+					this.mContactsGroup.add(g);
+				}
+			}
 		} else if (gType == GroupType.CHATING) {
 			this.mCrowdGroup.addAll(list);
 		}

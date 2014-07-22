@@ -38,7 +38,6 @@ import com.v2tech.util.SPUtil;
 import com.v2tech.view.PublicIntent;
 import com.v2tech.view.bo.ConversationNotificationObject;
 import com.v2tech.view.conversation.ConversationSelectFile;
-import com.v2tech.view.conversation.ConversationView;
 import com.v2tech.vo.Conversation;
 import com.v2tech.vo.User;
 import com.v2tech.vo.UserDeviceConfig;
@@ -587,6 +586,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 			// FIXME fix bug for enter conference and refresh group list
 			Intent i = new Intent(PublicIntent.START_CONFERENCE_CREATE_ACTIVITY);
 			i.addCategory(PublicIntent.DEFAULT_CATEGORY);
+			i.putExtra("uid", u.getmUserId());
 			startActivityForResult(i, 0);
 		}
 

@@ -15,6 +15,9 @@ import com.v2tech.util.V2Log;
  */
 public class Attendee implements Comparable<Attendee>{
 	
+	public static final int CONFERENCE_PERMISSION_CONTROL = 0x0001;
+	public static final int CONFERENCE_PERMISSION_SPEAKING = 0x0002;
+	
 	public final static int  TYPE_ATTENDEE = 1;
 	public final static int  TYPE_MIXED_VIDEO = 2;
 
@@ -23,6 +26,7 @@ public class Attendee implements Comparable<Attendee>{
 	private boolean isSelf;
 	private boolean isChairMan;
 	private boolean isJoined;
+	private int mPermission;
 	
 	protected Attendee() {
 		
@@ -190,6 +194,17 @@ public class Attendee implements Comparable<Attendee>{
 		return TYPE_ATTENDEE;
 	}
 
+	public boolean isSpeaking() {
+		return (mPermission & CONFERENCE_PERMISSION_SPEAKING) == CONFERENCE_PERMISSION_SPEAKING;
+	}
+	
+	public void setSpeakingState(boolean state) {
+		if (state) {
+			mPermission &= (~CONFERENCE_PERMISSION_SPEAKING);
+		} else {
+			mPermission |= CONFERENCE_PERMISSION_SPEAKING;
+		}
+	}
 
 
 
