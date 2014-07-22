@@ -37,6 +37,8 @@ import com.v2tech.service.UserService;
 import com.v2tech.util.SPUtil;
 import com.v2tech.view.PublicIntent;
 import com.v2tech.view.bo.ConversationNotificationObject;
+import com.v2tech.view.conversation.ConversationSelectFile;
+import com.v2tech.view.conversation.ConversationView;
 import com.v2tech.vo.Conversation;
 import com.v2tech.vo.User;
 import com.v2tech.vo.UserDeviceConfig;
@@ -168,29 +170,29 @@ public class ContactDetail extends Activity implements OnTouchListener {
 		return super.onTouchEvent(mv);
 	}
 
-	@Override
-	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		switch (requestCode) {
-		case FILE_SELECT_CODE:
-			if (resultCode == RESULT_OK) {
-				// Get the Uri of the selected file
-				Uri uri = data.getData();
-				String path = SPUtil.getPath(this, uri);
-				if (path == null) {
-					Toast.makeText(
-							mContext,
-							R.string.contacts_user_detail_file_selection_not_found_path,
-							Toast.LENGTH_SHORT).show();
-				}
-				else{
-					//return current conversationView with selected file
-					returnConversationView(path);
-				}
-			}
-			break;
-		}
-		super.onActivityResult(requestCode, resultCode, data);
-	}
+//	@Override
+//	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+//		switch (requestCode) {
+//		case FILE_SELECT_CODE:
+//			if (resultCode == RESULT_OK) {
+//				// Get the Uri of the selected file
+//				Uri uri = data.getData();
+//				String path = SPUtil.getPath(this, uri);
+//				if (path == null) {
+//					Toast.makeText(
+//							mContext,
+//							R.string.contacts_user_detail_file_selection_not_found_path,
+//							Toast.LENGTH_SHORT).show();
+//				}
+//				else{
+//					//return current conversationView with selected file
+//					returnConversationView(path);
+//				}
+//			}
+//			break;
+//		}
+//		super.onActivityResult(requestCode, resultCode, data);
+//	}
 
 	private void initView() {
 		mHeadIconIV = (ImageView) findViewById(R.id.contact_user_detail_head_icon);
@@ -547,18 +549,23 @@ public class ContactDetail extends Activity implements OnTouchListener {
 		@Override
 		public void onClick(View arg0) {
 			if(SPUtil.checkCurrentAviNetwork(mContext)){
-				Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-				intent.setType("*/*");
-				intent.addCategory(Intent.CATEGORY_OPENABLE);
-
-				try {
-					startActivityForResult(
-							Intent.createChooser(intent, "Select a File to Upload"),
-							FILE_SELECT_CODE);
-				} catch (android.content.ActivityNotFoundException ex) {
-					Toast.makeText(mContext, "Please install a File Manager.",
-							Toast.LENGTH_SHORT).show();
-				}
+//				Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+//				intent.setType("*/*");
+//				intent.addCategory(Intent.CATEGORY_OPENABLE);
+//
+//				try {
+//					startActivityForResult(
+//							Intent.createChooser(intent, "Select a File to Upload"),
+//							FILE_SELECT_CODE);
+//				} catch (android.content.ActivityNotFoundException ex) {
+//					Toast.makeText(mContext, "Please install a File Manager.",
+//							Toast.LENGTH_SHORT).show();
+//				}
+				Intent intent = new Intent(ContactDetail.this , ConversationSelectFile.class);
+				intent.putExtra("obj", new ConversationNotificationObject(
+						Conversation.TYPE_CONTACT, u.getmUserId()));
+				startActivity(intent);
+				finish();
 			}
 			else{
 				

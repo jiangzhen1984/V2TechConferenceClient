@@ -10,8 +10,6 @@ import java.util.regex.Pattern;
 
 import android.app.Activity;
 import android.app.Dialog;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
 import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.ContentValues;
@@ -30,12 +28,10 @@ import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
 import android.provider.MediaStore;
-import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 import android.text.TextWatcher;
-import android.text.style.ImageSpan;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -107,6 +103,7 @@ public class ConversationView extends Activity {
 	private static final int VOICE_DIALOG_FLAG_RECORDING = 1;
 	private static final int VOICE_DIALOG_FLAG_CANCEL = 2;
 	private static final int VOICE_DIALOG_FLAG_WARING_FOR_TIME_TOO_SHORT = 3;
+	private static final String TAG = "ConversationView";
 
 	private int offset = 0;
 
@@ -173,6 +170,10 @@ public class ConversationView extends Activity {
 	private boolean isStopped;
 
 	private int currentItemPos = 0;
+	
+	private ArrayList<FileInfoBean> mCheckedList;
+	
+	private ConversationNotificationObject cov = null;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -241,10 +242,8 @@ public class ConversationView extends Activity {
 			backEndHandler = new BackendHandler(thread.getLooper());
 		}
 
-		String path = getIntent().getStringExtra("selectedFile");
-		if(path != null){
-			sendSelectedFile(path);
-		}
+		Intent intent = getIntent();
+		mCheckedList = intent.getParcelableArrayListExtra("checkedFiles");
 		
 		initExtraObject();
 
@@ -291,6 +290,11 @@ public class ConversationView extends Activity {
 		if (pending) {
 			pending = false;
 			scrollToBottom();
+		}
+		
+		if(mCheckedList != null && mCheckedList.size() > 0){
+			startSendMoreFile();
+			mCheckedList = null;
 		}
 		
 	}
@@ -342,11 +346,11 @@ public class ConversationView extends Activity {
 
 	private void initExtraObject() {
 		Bundle bundle = this.getIntent().getExtras();
-
-		ConversationNotificationObject cov = null;
-
 		if (bundle != null) {
 			cov = (ConversationNotificationObject) bundle.get("obj");
+			if(cov == null){
+				cov = getIntent().getParcelableExtra("obj");
+			}
 		} else {
 			cov = new ConversationNotificationObject(Conversation.TYPE_CONTACT,
 					1);
@@ -834,6 +838,7 @@ public class ConversationView extends Activity {
 					SELECT_PICTURE_CODE);
 
 		}
+		
 
 	};
 
@@ -889,6 +894,7 @@ public class ConversationView extends Activity {
 		@Override
 		public void onClick(View arg0) {
 			if(SPUtil.checkCurrentAviNetwork(mContext)){
+				//系统默认的选择界面
 //				Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
 //				intent.setType("*/*");
 //				intent.addCategory(Intent.CATEGORY_OPENABLE);
@@ -907,7 +913,9 @@ public class ConversationView extends Activity {
 				ConversationSelectFile fragment = new ConversationSelectFile();
 				beginTransaction.add(R.id.container_fragment , fragment);
 				beginTransaction.commit();*/
+				
 				Intent intent = new Intent(ConversationView.this , ConversationSelectFile.class);
+				intent.putExtra("obj", cov);
 				startActivity(intent);
 				finishWork();
 				finish();
@@ -1007,22 +1015,23 @@ public class ConversationView extends Activity {
 				// Send message to server
 				sendMessageToRemote(vim);
 			}
-		} else if (requestCode == FILE_SELECT_CODE) {
-			if (resultCode == RESULT_OK) {
-				// Get the Uri of the selected file
-				Uri uri = data.getData();
-				String path = SPUtil.getPath(this, uri);
-				if (path == null) {
-					Toast.makeText(
-							mContext,
-							R.string.contacts_user_detail_file_selection_not_found_path,
-							Toast.LENGTH_SHORT).show();
-				} else {
-					
-					sendSelectedFile(path);
-				}
-			}
-		}
+		} 
+//		else if (requestCode == FILE_SELECT_CODE) {
+//			if (resultCode == RESULT_OK) {
+//				// Get the Uri of the selected file
+//				Uri uri = data.getData();
+//				String path = SPUtil.getPath(this, uri);
+//				if (path == null) {
+//					Toast.makeText(
+//							mContext,
+//							R.string.contacts_user_detail_file_selection_not_found_path,
+//							Toast.LENGTH_SHORT).show();
+//				} else {
+//					
+//					sendSelectedFile(path);
+//				}
+//			}
+//		}
 	}
 
 	private void doSendMessage() {
@@ -1419,6 +1428,9 @@ public class ConversationView extends Activity {
 			i.putExtra("uid", user2Id);
 			i.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
 			mContext.startActivity(i);
+			//跳转到联系人信息页面，需要finish掉当前页面，不然发送文件会重新创建该页面，而以前的页面没有销毁
+			finishWork();
+			finish();
 		}
 
 	};
@@ -1610,6 +1622,14 @@ public class ConversationView extends Activity {
 			VMessageFileItem vfi = vim.getFileItems().get(0);
 			vfi.setState(VMessageFileItem.STATE_FILE_SENDING);
 			sendMessageToRemote(vim);
+		}
+	}
+	
+	private void startSendMoreFile() {
+		
+		for (int i = 0; i < mCheckedList.size(); i++) {
+			
+			sendSelectedFile(mCheckedList.get(i).filePath);
 		}
 	}
 
