@@ -29,6 +29,15 @@
             android:layout_weight=".5"
             android:gravity="center"
             android:text="@string/contact_message_pop_up_item_copy" />
+        
+        <TextView
+            android:id="@+id/contact_message_pop_up_item_delete"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_weight=".5"
+            android:gravity="center"
+            android:text="@string/contact_message_pop_up_item_del" />
     </LinearLayout>
 
     <ImageView

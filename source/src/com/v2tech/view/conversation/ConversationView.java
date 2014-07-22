@@ -94,6 +94,7 @@ public class ConversationView extends Activity {
 	private final int SEND_MESSAGE_DONE = 5;
 	private final int SEND_MESSAGE_ERROR = 6;
 	private final int PLAY_NEXT_UNREAD_MESSAGE = 7;
+	private final int REQUEST_DEL_MESSAGE = 8;
 	private final int FILE_STATUS_LISTENER = 20;
 
 	private final int BATCH_COUNT = 10;
@@ -1257,6 +1258,13 @@ public class ConversationView extends Activity {
 			}
 			Message.obtain(lh, SEND_MESSAGE, v).sendToTarget();
 		}
+		
+		
+
+		@Override
+		public void requestDelMessage(VMessage v) {
+			Message.obtain(lh, REQUEST_DEL_MESSAGE, v).sendToTarget();
+		}
 
 		@Override
 		public void requestStopAudio(View v, VMessage vm, VMessageAudioItem vai) {
@@ -1349,6 +1357,21 @@ public class ConversationView extends Activity {
 		}
 		return true;
 	}
+	
+	
+	private boolean removeMessage(VMessage vm) {
+		if (vm == null) {
+			return false;
+		}
+		for (int i =0; i < messageArray.size(); i++) {
+			VMessageAdater va = (VMessageAdater)messageArray.get(i);
+			if (vm.getId() ==  ((VMessage)va.getItemObject()).getId()) {
+				messageArray.remove(i);
+				return true;
+			}
+		}
+		return false;
+	}
 
 	private void updateFileProgressView(String uuid, long tranedSize) {
 		for (int i = 0; i < messageArray.size(); i++) {
@@ -1372,7 +1395,6 @@ public class ConversationView extends Activity {
 					vfi.setDownloadedSize(tranedSize);
 					((MessageBodyView) messageArray.get(i).getView())
 							.updateView(vfi);
-
 				}
 			}
 		}
@@ -1594,6 +1616,11 @@ public class ConversationView extends Activity {
 					currentPlayed = null;
 				}
 				break;
+			case REQUEST_DEL_MESSAGE:
+				removeMessage((VMessage)msg.obj);
+				MessageLoader.deleteMessage(mContext, (VMessage)msg.obj);
+				adapter.notifyDataSetChanged();
+				break;
 			case FILE_STATUS_LISTENER:
 				FileTransStatusIndication ind = (FileTransStatusIndication) (((AsyncResult) msg.obj)
 						.getResult());
@@ -1604,6 +1631,7 @@ public class ConversationView extends Activity {
 				} else if (ind.indType == FileTransStatusIndication.IND_TYPE_TRANS_ERR) {
 					updateFileTransErrorView(ind.uuid);
 				}
+				break;
 			}
 
 		}

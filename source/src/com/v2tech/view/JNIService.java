@@ -810,24 +810,55 @@ public class JNIService extends Service {
 				long nFromUserID, long nTime, String nSeqId, byte[] pPicData) {
 			boolean isCache = false;
 			VMessage vm = null;
-			VMessageImageItem vait = null;
 			String uuid = nSeqId;
-			boolean receivedAllImageData = true;
 			synchronized (cacheImageMeta) {
 				for (VMessage v : cacheImageMeta) {
-					for (VMessageAbstractItem vai : v.getItems()) {
-						if (((VMessageImageItem) vai).getUUID().equals(uuid)) {
-							isCache = true;
+					List<VMessageImageItem> items  = v.getImageItems();
+					int receivedCount = 0 ;
+					for (int i =0; i < items.size(); i++) {
+						VMessageImageItem vai  = items.get(i);
+							
+						VMessageImageItem vait = (VMessageImageItem) vai;
+						if (vait.isReceived()) {
+							receivedCount ++;
+							continue;
+						}
+						if (vait.getUUID().equals(uuid)) {
+							receivedCount++;
 							vm = v;
-							vait = (VMessageImageItem) vai;
-							vait.setReceived(true);
-							if (!vait.isReceived()) {
-								receivedAllImageData = false;
+							
+							String filePath = GlobalConfig.getGlobalPicsPath() + "/"
+									+ vait.getUUID() + vait.getExtension();
+							vait.setFilePath(filePath);
+
+							File f = new File(filePath);
+							OutputStream os = null;
+							try {
+								os = new FileOutputStream(f);
+								os.write(pPicData, 0, pPicData.length);
+							} catch (FileNotFoundException e) {
+								e.printStackTrace();
+							} catch (IOException e) {
+								e.printStackTrace();
+							} finally {
+								if (os != null) {
+									try {
+										os.close();
+									} catch (IOException e) {
+										e.printStackTrace();
+									}
+								}
 							}
+							
+							vait.setReceived(true);
+							continue;
 						}
 					}
-					if (receivedAllImageData) {
+					
+					if (receivedCount == items.size()) {
 						cacheImageMeta.remove(v);
+						isCache = true;
+						break;
 					}
 				}
 			}
@@ -837,29 +868,6 @@ public class JNIService extends Service {
 			}
 
 			vm.setGroupId(nGroupID);
-
-			String filePath = GlobalConfig.getGlobalPicsPath() + "/"
-					+ vait.getUUID() + vait.getExtension();
-			vait.setFilePath(filePath);
-
-			File f = new File(filePath);
-			OutputStream os = null;
-			try {
-				os = new FileOutputStream(f);
-				os.write(pPicData, 0, pPicData.length);
-			} catch (FileNotFoundException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
-			} finally {
-				if (os != null) {
-					try {
-						os.close();
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-				}
-			}
 
 			Message.obtain(mCallbackHandler, JNI_RECEIVED_MESSAGE, vm)
 					.sendToTarget();

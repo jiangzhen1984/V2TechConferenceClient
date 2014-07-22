@@ -231,6 +231,10 @@ public class FileRequest {
 			}
 		}
 	}
+	
+	private void OnFileTransError(String szFileID, int errorCode, int nTransType) {
+		Log.e(TAG, "OnFileTransError--->" + szFileID + ":" + errorCode + ":" +nTransType);
+	}
 
 	// 鏀跺埌瀵规柟鍙栨秷鏂囦欢浼犺緭鍥炶皟
 	private void OnFileTransCancel(String szFileID) {

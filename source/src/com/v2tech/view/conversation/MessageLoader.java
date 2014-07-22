@@ -214,6 +214,25 @@ public class MessageLoader {
 				VMessageAbstractItem.ITEM_TYPE_ALL);
 	}
 
+	public static int deleteMessage(Context context, VMessage vm) {
+		if (vm == null) {
+			return 0;
+		}
+
+		 int ret = context.getContentResolver().delete(
+				ContentDescriptor.Messages.CONTENT_URI,
+				ContentDescriptor.Messages.Cols.ID + "=?",
+				new String[] { vm.getId() + "" });
+		 
+		 //Delete message items
+		 context.getContentResolver().delete(
+					ContentDescriptor.MessageItems.CONTENT_URI,
+					ContentDescriptor.MessageItems.Cols.MSG_ID + "=?",
+					new String[] { vm.getId() + "" });
+		 
+		 return ret;
+	}
+
 	private static VMessage extractMsg(Cursor cur) {
 		if (cur.isClosed()) {
 			throw new RuntimeException(" cursor is closed");
@@ -280,9 +299,9 @@ public class MessageLoader {
 			int type = cur.getInt(3);
 			// new line flag
 			int newLineFlag = cur.getInt(4);
-			
+
 			String uuid = cur.getString(5);
-			
+
 			int state = cur.getInt(6);
 
 			VMessageAbstractItem vai = null;
@@ -316,11 +335,11 @@ public class MessageLoader {
 						fileSize = Long.parseLong(str[2]);
 					}
 				}
-				
+
 				vai = new VMessageFileItem(vm, filePath);
-				((VMessageFileItem)vai).setFileSize(fileSize);
-				((VMessageFileItem)vai).setFileName(fileName);
-				
+				((VMessageFileItem) vai).setFileSize(fileSize);
+				((VMessageFileItem) vai).setFileName(fileName);
+
 			}
 				break;
 
@@ -329,7 +348,7 @@ public class MessageLoader {
 					&& newLineFlag == VMessageAbstractItem.NEW_LINE_FLAG_VALUE) {
 				vai.setNewLine(true);
 			}
-			
+
 			vai.setId(id);
 			vai.setUuid(uuid);
 			vai.setState(state);
