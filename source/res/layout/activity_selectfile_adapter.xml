@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content" >
+    
+    <RelativeLayout 
+        android:id="@+id/selectfile_adapter_check_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" 
+        android:layout_margin="5dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp">
+    <RadioButton
+        android:id="@+id/selectfile_adapter_check"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:focusable="false"
+        android:focusableInTouchMode="false" />
+    </RelativeLayout>
+    <TextView
+        android:id="@+id/selectfile_adapter_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/selectfile_adapter_check_layout"
+        android:layout_marginLeft="15dp"
+        android:layout_toRightOf="@+id/selectfile_adapter_check_layout"
+        android:text="xxxxxx"
+        android:textColor="@color/conversation_selectfile_adapter_word"
+        android:textSize="@dimen/select_file_adapter_size" />
+    <TextView
+        android:id="@+id/selectfile_adapter_folderName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="15dp"
+        android:layout_toRightOf="@+id/selectfile_adapter_check_layout"
+        android:text="xxxxxx"
+        android:textColor="@color/conversation_selectfile_adapter_word"
+        android:textSize="@dimen/select_file_adapter_size" />
+    <TextView
+        android:id="@+id/selectfile_adapter_date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/selectfile_adapter_check_layout"
+        android:layout_alignLeft="@+id/selectfile_adapter_name"
+        android:layout_toRightOf="@+id/selectfile_adapter_check_layout"
+        android:text="14/11/11 14:06"
+        android:textColor="@color/conversation_selectfile_adapter_word"
+        android:textSize="@dimen/select_file_adapter_size" />
+    <FrameLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/selectfile_adapter_check_layout"
+        android:layout_toLeftOf="@+id/selectfile_adapter_arrow" >
+        <TextView
+            android:id="@+id/selectfile_adapter_size"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="300MB"
+            android:textColor="@color/conversation_selectfile_adapter_word"
+            android:textSize="@dimen/select_file_adapter_size"
+            android:visibility="gone" />
+        <TextView
+            android:id="@+id/selectfile_adapter_numbers"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="50个"
+            android:textColor="@color/conversation_selectfile_adapter_word"
+            android:textSize="@dimen/select_file_adapter_size" />
+    </FrameLayout>
+    <ImageView
+        android:id="@+id/selectfile_adapter_arrow"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:paddingRight="10dp"
+        android:src="@drawable/arrow_right_gray" />
+</RelativeLayout>
