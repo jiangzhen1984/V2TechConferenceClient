@@ -16,9 +16,7 @@
             android:fadingEdge="none"
             android:fastScrollEnabled="true"
             android:listSelector="#00000000" 
-            android:scrollbarStyle="insideInset"
             android:scrollingCache="false"
-            android:transcriptMode="normal"
             android:cacheColorHint="#00000000"
             android:background="@color/confs_group_list_bg" >
         </ListView>

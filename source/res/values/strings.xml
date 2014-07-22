@@ -15,11 +15,14 @@
     <string name="tab_group_name">群组</string>
     <string name="tab_conference_name">会议</string>
     <string name="tab_conversation_name">会话</string>
+    <string name="tab_selectfile_name">发送文件</string>
+    <string name="tab_selectfile_finish">完成</string>
     <string name="title_bar_item_detail">个人信息</string>
     <string name="title_bar_item_setting">设置</string>
     <string name="title_bar_item_help">帮助</string>
     <string name="title_bar_item_about">关于</string>
     <string name="error_connect_to_server">无法链接到服务器，请确认网络链接</string>
     <string name="status_bar_title">正在运行..</string>
+    
 
 </resources>

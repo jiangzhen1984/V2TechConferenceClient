@@ -53,6 +53,7 @@
     <!-- activity contact message -->
     <dimen name="activity_contact_message_title_max_width">150dp</dimen>
     <dimen name="activity_contact_audio_button_text_size">18sp</dimen>
+    <dimen name="activity_contact_iconDescription_text">16sp</dimen>
 
     <!-- video msg layout -->
     <dimen name="video_msg_chatting_send_button_font_size">13sp</dimen>
@@ -95,5 +96,6 @@
     <dimen name="message_voice_dialog_width">230dp</dimen>
     <dimen name="message_voice_dialog_height">180dp</dimen>
     
-
+    <!-- activity selectfile adapter -->
+    <dimen name="select_file_adapter_size">16sp</dimen>
 </resources>
