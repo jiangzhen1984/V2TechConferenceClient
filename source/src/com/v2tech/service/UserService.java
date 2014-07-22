@@ -7,7 +7,9 @@ import com.V2.jni.ImRequest;
 import com.V2.jni.ImRequestCallbackAdapter;
 import com.V2.jni.V2ClientType;
 import com.V2.jni.V2GlobalEnum;
+import com.v2tech.service.jni.JNIResponse;
 import com.v2tech.service.jni.RequestLogInResponse;
+import com.v2tech.service.jni.RequestUserUpdateResponse;
 import com.v2tech.vo.User;
 
 public class UserService extends AbstractHandler {
@@ -65,7 +67,7 @@ public class UserService extends AbstractHandler {
 			ImRequest.getInstance().modifyBaseInfo(user.toXml());
 		} else {
 			ImRequest.getInstance().modifyCommentName(user.getmUserId(),
-					user.getName());
+					user.getNickName());
 		}
 	}
 
@@ -97,6 +99,15 @@ public class UserService extends AbstractHandler {
 						new RequestLogInResponse(null, res));
 				handler.dispatchMessage(m);
 			}
+		}
+		
+		@Override
+		public void OnModifyCommentNameCallback(long nUserId,
+				String sCommmentName) {
+			User u = GlobalHolder.getInstance().getUser(nUserId);
+			Message m = Message.obtain(handler, JNI_REQUEST_UPDAE_USER,
+					new RequestUserUpdateResponse(u, JNIResponse.Result.SUCCESS));
+			handler.dispatchMessage(m);
 		}
 
 	}

@@ -79,7 +79,7 @@
                     android:src="@drawable/conversation_connected_cancel_button" />
 
                 <TextView
-                      android:id="@+id/conversation_fragment_connected_video_hang_up_button_text"
+                    android:id="@+id/conversation_fragment_connected_video_hang_up_button_text"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center"
@@ -119,6 +119,44 @@
                     android:textSize="@dimen/fragment_conversation_connected_button_text_size" />
             </LinearLayout>
         </LinearLayout>
+
+        <RelativeLayout
+            android:id="@+id/conversation_fragment_outing_video_card_container"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginLeft="@dimen/fragment_conversation_connected_title_text_margin_left"
+            android:layout_marginTop="@dimen/fragment_conversation_connected_title_text_margin_top" >
+
+            <ImageView
+                android:id="@+id/conversation_fragment_video_outing_call_avatar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/avatar" />
+
+            <TextView
+                 android:id="@+id/conversation_fragment_video_outing_call_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignTop="@+id/conversation_fragment_video_outing_call_avatar"
+                android:layout_marginLeft="@dimen/fragment_conversation_connected_title_text_margin_left"
+                android:layout_toRightOf="@+id/conversation_fragment_video_outing_call_avatar"
+                android:text="name"
+                android:textColor="@color/fragment_conversation_title_text_color"
+                android:textSize="@dimen/fragment_conversation_connected_title_text_text_size" />
+
+            <TextView
+                android:id="@+id/conversation_fragment_video_outing_waiting_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBottom="@+id/conversation_fragment_video_outing_call_avatar"
+                android:layout_marginLeft="@dimen/fragment_conversation_connected_title_text_margin_left"
+                android:layout_toRightOf="@+id/conversation_fragment_video_outing_call_avatar"
+                android:text="@string/conversation_waiting"
+                android:textColor="@color/fragment_conversation_title_text_color"
+                android:textSize="@dimen/fragment_conversation_connected_title_text_text_size" />
+        </RelativeLayout>
 
         <TextView
             android:id="@+id/conversation_fragment_connected_title_text"

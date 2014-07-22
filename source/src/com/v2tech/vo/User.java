@@ -139,6 +139,8 @@ public class User implements Comparable<User> {
 	private String abbra;
 	
 	private String mFax;
+	
+	private String mNickName;
 
 	private static HanyuPinyinOutputFormat format = new HanyuPinyinOutputFormat();
 	
@@ -384,6 +386,16 @@ public class User implements Comparable<User> {
 	}
 	
 	
+	
+	
+
+	public String getNickName() {
+		return mNickName;
+	}
+
+	public void setNickName(String nickName) {
+		this.mNickName = nickName;
+	}
 
 	public boolean isDirty() {
 		return isDirty;
@@ -536,6 +548,7 @@ public class User implements Comparable<User> {
 				u.setCellPhone(getAttribute(element, "mobile"));
 				u.setTitle(getAttribute(element, "job"));
 				u.setAccount(getAttribute(element, "account"));
+				u.setNickName(getAttribute(element, "commentname"));
 				try {
 					String bir = element.getAttribute("birthday");
 					if (bir != null && !bir.equals("")) {

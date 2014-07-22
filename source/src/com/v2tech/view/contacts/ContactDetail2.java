@@ -67,7 +67,6 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 		u = GlobalHolder.getInstance().getUser(mUid);
 
 		mNickNameET = (EditText) findViewById(R.id.contact_user_detail_nick_name_et);
-		mNickNameET.addTextChangedListener(tw);
 		this.overridePendingTransition(R.animator.alpha_from_0_to_1,
 				R.animator.alpha_from_1_to_0);
 	}
@@ -83,6 +82,7 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 	@Override
 	protected void onStop() {
 		super.onStop();
+		mNickNameET.removeTextChangedListener(tw);
 	}
 
 	@Override
@@ -130,6 +130,9 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 			mHeadIconIV.setImageBitmap(u.getAvatarBitmap());
 		}
 
+		mNickNameET.setText(u.getNickName());
+		mNickNameET.addTextChangedListener(tw);
+		
 		mNameTitleIV.setText(u.getName());
 		mAccountTV.setText(u.getAccount());
 		if (u.getGender() != null) {
@@ -167,7 +170,7 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 			}
 			isUpdating = true;
 			Message m = Message.obtain(lh, UPDATE_USER_INFO);
-			lh.sendMessageDelayed(m, 1000);
+			lh.sendMessageDelayed(m, 1500);
 		}
 
 		@Override
@@ -194,7 +197,7 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 	};
 
 	private void gatherUserData() {
-		u.setName(mNickNameET.getText().toString());
+		u.setNickName(mNickNameET.getText().toString());
 	}
 
 	class LocalHandler extends Handler {

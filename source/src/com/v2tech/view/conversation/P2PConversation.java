@@ -53,6 +53,10 @@ public class P2PConversation extends Activity implements
 
 	private static final int HAND_UP_REASON_REMOTE_REJECT = 1;
 	private static final int HAND_UP_REASON_NO_NETWORK = 2;
+	
+	
+	private static final String SURFACE_HOLDER_TAG_LOCAL="local";
+	private static final String SURFACE_HOLDER_TAG_REMOTE="remote";
 
 	private Context mContext;
 	private ChatService chatService = new ChatService();
@@ -75,8 +79,8 @@ public class P2PConversation extends Activity implements
 	private View videoHangUpButton;
 
 	// Video call view
-	private SurfaceView mLocalSurface;
-	private SurfaceView mRemoteSurface;
+	private SurfaceView mSmallSurface;
+	private SurfaceView mBackgroupdSurface;
 	
 	private MediaPlayer mPlayer;
 
@@ -194,7 +198,8 @@ public class P2PConversation extends Activity implements
 
 	@Override
 	public void openLocalCamera() {
-		VideoRecorder.VideoPreviewSurfaceHolder = mLocalSurface.getHolder();
+	
+		VideoRecorder.VideoPreviewSurfaceHolder = getSurfaceHolder(SURFACE_HOLDER_TAG_LOCAL);
 		VideoRecorder.VideoPreviewSurfaceHolder
 				.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
 		VideoRecorder.VideoPreviewSurfaceHolder
@@ -214,6 +219,7 @@ public class P2PConversation extends Activity implements
 		UserChattingObject selfUCD = new UserChattingObject(GlobalHolder
 				.getInstance().getCurrentUser(), 0, "");
 		chatService.closeVideoDevice(selfUCD, null);
+		VideoRecorder.VideoPreviewSurfaceHolder = null;
 	}
 
 	@Override
@@ -237,6 +243,18 @@ public class P2PConversation extends Activity implements
 	}
 
 	
+	
+	
+	private SurfaceHolder getSurfaceHolder(String type) {
+		SurfaceHolder localHolder = null;
+		if (mSmallSurface.getTag().equals(type)) {
+			localHolder = mSmallSurface.getHolder();
+		} else {
+			localHolder = mBackgroupdSurface.getHolder();
+		}
+		return localHolder;
+		
+	}
 	
 	
 	private void playRingToneIncoming() {
@@ -489,6 +507,12 @@ public class P2PConversation extends Activity implements
 			((TextView)mAudioOnlyButton).setTextColor(grayColor);
 		}
 		
+		TextView outingVideoCallTitle = (TextView)findViewById(R.id.conversation_fragment_video_outing_waiting_text);
+		if (outingVideoCallTitle != null) {
+			outingVideoCallTitle.setText(R.string.conversation_end);
+		}
+		
+		
 		//If is incoming layout, no mTimerTV view
 		if (mTimerTV != null) {
 			mTimerTV.setText(R.string.conversation_end);
@@ -508,21 +532,24 @@ public class P2PConversation extends Activity implements
 			}
 		} else if (uad.isConnected() && uad.isAudioType()) {
 			avatarIV = (ImageView) findViewById(R.id.conversation_fragment_voice_avatar);
+		} else if (!uad.isIncoming() && !uad.isConnected()) {
+			avatarIV = (ImageView) findViewById(R.id.conversation_fragment_video_outing_call_avatar);
 		}
+		
 		if (uad.getUser().getAvatarBitmap() != null && avatarIV != null) {
 			avatarIV.setImageBitmap(uad.getUser().getAvatarBitmap());
 		}
 
 		if ((uad.isConnected() || !uad.isIncoming()) && uad.isVideoType()) {
-			mLocalSurface = (SurfaceView) findViewById(R.id.fragment_conversation_connected_video_local_surface);
-			if (mLocalSurface != null) {
-				mLocalSurface.setOnClickListener(surfaceViewListener);
-				mLocalSurface.setTag("local");
+			mSmallSurface = (SurfaceView) findViewById(R.id.fragment_conversation_connected_video_local_surface);
+			if (mSmallSurface != null) {
+				mSmallSurface.setOnClickListener(surfaceViewListener);
+				mSmallSurface.setTag(SURFACE_HOLDER_TAG_REMOTE);
 			}
-			mRemoteSurface = (SurfaceView) findViewById(R.id.fragment_conversation_connected_video_remote_surface);
-			if (mRemoteSurface != null) {
-				mRemoteSurface.setOnClickListener(surfaceViewListener);
-				mRemoteSurface.setTag("remote");
+			mBackgroupdSurface = (SurfaceView) findViewById(R.id.fragment_conversation_connected_video_remote_surface);
+			if (mBackgroupdSurface != null) {
+				mBackgroupdSurface.setOnClickListener(surfaceViewListener);
+				mBackgroupdSurface.setTag(SURFACE_HOLDER_TAG_LOCAL);
 			}
 		}
 
@@ -531,6 +558,75 @@ public class P2PConversation extends Activity implements
 		} else if (uad.isVideoType()) {
 			mTimerTV = (TextView) findViewById(R.id.conversation_fragment_connected_video_duration);
 		}
+		
+		
+		
+		View cameraButton = findViewById(R.id.conversation_fragment_connected_video_camera_button);
+		if (cameraButton != null) {
+			if (!uad.isIncoming() && !uad.isConnected()) {
+				cameraButton.setVisibility(View.GONE);
+			} else {
+				cameraButton.setVisibility(View.VISIBLE);
+			}
+		}
+		
+
+		View muteButton = findViewById(R.id.conversation_fragment_connected_video_mute_button);
+		if (muteButton != null) {
+			if (!uad.isIncoming() && !uad.isConnected()) {
+				muteButton.setVisibility(View.GONE);
+			} else {
+				muteButton.setVisibility(View.VISIBLE);
+			}
+		}
+		
+		if (uad.isVideoType() ) {
+			if (!uad.isConnected() && !uad.isIncoming() ) {
+				findViewById(R.id.conversation_fragment_connected_title_text).setVisibility(View.GONE);
+				findViewById(R.id.conversation_fragment_connected_video_duration).setVisibility(View.GONE);
+				findViewById(R.id.conversation_fragment_outing_video_card_container).setVisibility(View.VISIBLE);
+				
+				((TextView)findViewById(R.id.conversation_fragment_video_outing_call_name)).setText(uad.getUser().getName());
+			} else if (uad.isConnected()){
+				findViewById(R.id.conversation_fragment_connected_title_text).setVisibility(View.VISIBLE);
+				findViewById(R.id.conversation_fragment_connected_video_duration).setVisibility(View.VISIBLE);
+				findViewById(R.id.conversation_fragment_outing_video_card_container).setVisibility(View.GONE);
+			}
+		}
+		
+	}
+	
+	
+	
+	private void updateViewForVideoAcceptance() {
+		View cameraButton = findViewById(R.id.conversation_fragment_connected_video_camera_button);
+		if (cameraButton != null) {
+			if (!uad.isIncoming() && !uad.isConnected()) {
+				cameraButton.setVisibility(View.GONE);
+			} else {
+				cameraButton.setVisibility(View.VISIBLE);
+			}
+		}
+		
+
+		View muteButton = findViewById(R.id.conversation_fragment_connected_video_mute_button);
+		if (muteButton != null) {
+			if (!uad.isIncoming() && !uad.isConnected()) {
+				muteButton.setVisibility(View.GONE);
+			} else {
+				muteButton.setVisibility(View.VISIBLE);
+			}
+		}
+		
+		
+		if (!uad.isIncoming() && uad.isConnected()) {
+			findViewById(R.id.conversation_fragment_connected_title_text).setVisibility(View.VISIBLE);
+			findViewById(R.id.conversation_fragment_connected_video_duration).setVisibility(View.VISIBLE);
+			findViewById(R.id.conversation_fragment_outing_video_card_container).setVisibility(View.GONE);
+		}
+		
+		this.exchangeSurfaceHolder();
+		
 	}
 
 	private void showConfirmDialog() {
@@ -603,25 +699,50 @@ public class P2PConversation extends Activity implements
 	}
 
 	private void openRemoteVideo() {
-		if (mRemoteSurface == null) {
-			V2Log.e(" no remote surface holder");
-			return;
-		}
-		if (uad.getVp() == null) {
-			VideoPlayer vp = new VideoPlayer();
+		VideoPlayer vp =  uad.getVp();
+		if (vp == null) {
+			vp = new VideoPlayer();
 			vp.SetRotation(270);
-			mRemoteSurface.getHolder().setFormat(PixelFormat.TRANSPARENT);
-			vp.SetSurface(mRemoteSurface.getHolder());
-			// mRemoteSurface.setZOrderOnTop(false);
 			uad.setVp(vp);
-		}
+		} 
+		vp.SetSurface(getSurfaceHolder(SURFACE_HOLDER_TAG_REMOTE));
 		chatService.openVideoDevice(uad, null);
 	}
 
 	private void closeRemoteVideo() {
 		if (uad.getVp() != null && uad.getDeviceId() != null) {
+			uad.getVp().SetSurface(null);
 			chatService.closeVideoDevice(uad, null);
 		}
+	}
+	
+	
+	private void exchangeSurfaceHolder() {
+		closeLocalCamera();
+		closeRemoteVideo();
+		//exchange tag
+		if (mSmallSurface.getTag().equals(SURFACE_HOLDER_TAG_REMOTE)) {
+			mSmallSurface.setTag(SURFACE_HOLDER_TAG_LOCAL);
+		} else {
+			mSmallSurface.setTag(SURFACE_HOLDER_TAG_REMOTE);
+		}
+		
+		if (mBackgroupdSurface.getTag().equals(SURFACE_HOLDER_TAG_REMOTE)) {
+			mBackgroupdSurface.setTag(SURFACE_HOLDER_TAG_LOCAL);
+		} else {
+			mBackgroupdSurface.setTag(SURFACE_HOLDER_TAG_REMOTE);
+		}
+		
+		openLocalCamera();
+		openRemoteVideo();
+		
+		
+		mBackgroupdSurface.setZOrderOnTop(false);
+		mBackgroupdSurface.invalidate();
+		mSmallSurface.setZOrderOnTop(true);
+		mSmallSurface.setZOrderMediaOverlay(true);
+		mSmallSurface.bringToFront();
+		mSmallSurface.invalidate();
 	}
 
 	private void initReceiver() {
@@ -633,48 +754,6 @@ public class P2PConversation extends Activity implements
 		this.registerReceiver(receiver, filter);
 	}
 
-	/**
-	 * 
-	 * @param sv1
-	 * @param sv2
-	 */
-	private void exchangeSurfaceViewPos(SurfaceView sv1, SurfaceView sv2) {
-		if (sv1 == null || sv2 == null) {
-			V2Log.e(" Can not exchange sv1 and sv2 " + sv1 + "   " + sv2);
-			return;
-		}
-		ViewGroup.LayoutParams vl1 = sv1.getLayoutParams();
-		ViewGroup.LayoutParams vl2 = sv2.getLayoutParams();
-
-		sv1.setLayoutParams(vl2);
-		sv2.setLayoutParams(vl1);
-		
-		
-		//Make sure button always in front
-		
-		View v = null;
-		ViewGroup.LayoutParams lp = sv1.getLayoutParams();
-		if (lp.width == RelativeLayout.LayoutParams.MATCH_PARENT) {
-			sv2.setZOrderOnTop(true);
-			sv1.setZOrderOnTop(false);
-			v = sv2;
-		} else {
-			sv1.setZOrderOnTop(true);
-			sv2.setZOrderOnTop(false);
-			v = sv1;
-		}
-		
-		
-		cameraButton.bringToFront();
-		videoHangUpButton.bringToFront();
-		videoMuteButton.bringToFront();
-		
-		findViewById(R.id.fragment_conversation_connected_video_button_container).bringToFront();
-		ViewGroup container = (ViewGroup)findViewById(R.id.fragment_conversation_connected_video_container);
-		container.bringChildToFront(v);
-		container.invalidate();
-		
-	}
 
 	private void quit() {
 		finish();
@@ -693,7 +772,7 @@ public class P2PConversation extends Activity implements
 
 		@Override
 		public void onClick(View view) {
-			exchangeSurfaceViewPos(mLocalSurface, mRemoteSurface);
+			exchangeSurfaceHolder();
 		}
 
 	};
@@ -732,10 +811,7 @@ public class P2PConversation extends Activity implements
 
 			initViews();
 			if (uad.isVideoType()) {
-				// open local camera
-				openLocalCamera();
-
-				openRemoteVideo();
+				exchangeSurfaceHolder();
 				
 				TextView tv = (TextView) findViewById(R.id.conversation_fragment_connected_title_text);
 				tv.setText(tv.getText().toString()
@@ -771,16 +847,18 @@ public class P2PConversation extends Activity implements
 
 		@Override
 		public void onClick(View view) {
-			RelativeLayout.LayoutParams rl  = (RelativeLayout.LayoutParams)mLocalSurface.getLayoutParams();
-			if (rl.width == RelativeLayout.LayoutParams.MATCH_PARENT) {
-				exchangeSurfaceViewPos(mLocalSurface, mRemoteSurface);
+			
+			if (mSmallSurface.getTag().equals(SURFACE_HOLDER_TAG_REMOTE)) {
+				exchangeSurfaceHolder();
 			}
 			
-			if (mLocalSurface.getVisibility() == View.GONE) {
-				mLocalSurface.setVisibility(View.VISIBLE);
+			if (mSmallSurface.getVisibility() == View.GONE) {
+				mSmallSurface.setVisibility(View.VISIBLE);
 			} else {
-				mLocalSurface.setVisibility(View.GONE);
+				mSmallSurface.setVisibility(View.GONE);
 			}
+			
+			
 			int drawId = R.drawable.conversation_connected_camera_button_pressed;
 			int color = R.color.fragment_conversation_connected_pressed_text_color;
 			TextView cameraText = (TextView) findViewById(R.id.conversation_fragment_connected_open_or_close_camera_text);
@@ -988,6 +1066,7 @@ public class P2PConversation extends Activity implements
 						uad.setConnected(true);
 						if (uad.isVideoType()) {
 							openRemoteVideo();
+							updateViewForVideoAcceptance();
 						} else {
 							// set mute button to enable
 							setMuteButtonDisable(false);
