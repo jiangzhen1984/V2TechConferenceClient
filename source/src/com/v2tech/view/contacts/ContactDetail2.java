@@ -2,7 +2,6 @@ package com.v2tech.view.contacts;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -12,16 +11,15 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.v2tech.R;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.service.Registrant;
 import com.v2tech.service.UserService;
-import com.v2tech.view.PublicIntent;
-import com.v2tech.view.bo.ConversationNotificationObject;
-import com.v2tech.vo.Conversation;
 import com.v2tech.vo.User;
 
 public class ContactDetail2 extends Activity implements OnTouchListener {
@@ -52,9 +50,9 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 	private TextView mDeptTV;
 	private TextView mCompanyTV;
 
+	private EditText mNickNameET;
+
 	private View mAddContactButton;
-	private View mSendMsgButton;
-	private View mCreateConfButton;
 
 	private boolean isUpdating;
 
@@ -68,6 +66,7 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 		mContext = this;
 		u = GlobalHolder.getInstance().getUser(mUid);
 
+		mNickNameET = (EditText) findViewById(R.id.contact_user_detail_nick_name_et);
 		this.overridePendingTransition(R.animator.alpha_from_0_to_1,
 				R.animator.alpha_from_1_to_0);
 	}
@@ -83,6 +82,7 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 	@Override
 	protected void onStop() {
 		super.onStop();
+		mNickNameET.removeTextChangedListener(tw);
 	}
 
 	@Override
@@ -109,10 +109,7 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 		mReturnButtonTV = (TextView) findViewById(R.id.contact_detail_2_return_button);
 		mReturnButtonTV.setOnClickListener(mReturnButtonListener);
 
-		mSendMsgButton = findViewById(R.id.contact_user_detail_2_send_msg);
-		mSendMsgButton.setOnClickListener(mSendMsgListener);
 		mAddContactButton = findViewById(R.id.contact_user_detail_add_friend);
-		mCreateConfButton = findViewById(R.id.contact_user_detail_invite_video);
 
 		mAccountTV = (TextView) findViewById(R.id.contact_user_detail_account_tv);
 		mGendarTV = (TextView) findViewById(R.id.contact_user_detail_gender_tv);
@@ -133,15 +130,21 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 			mHeadIconIV.setImageBitmap(u.getAvatarBitmap());
 		}
 
+		mNickNameET.setText(u.getNickName());
+		mNickNameET.addTextChangedListener(tw);
+		
 		mNameTitleIV.setText(u.getName());
 		mAccountTV.setText(u.getAccount());
 		if (u.getGender() != null) {
 			if (u.getGender().equals("0")) {
-				mGendarTV.setText(mContext.getText(R.string.contacts_user_detail_gender_priacy));
+				mGendarTV.setText(mContext
+						.getText(R.string.contacts_user_detail_gender_priacy));
 			} else if (u.getGender().equals("1")) {
-				mGendarTV.setText(mContext.getText(R.string.contacts_user_detail_gender_male));
+				mGendarTV.setText(mContext
+						.getText(R.string.contacts_user_detail_gender_male));
 			} else if (u.getGender().equals("2")) {
-				mGendarTV.setText(mContext.getText(R.string.contacts_user_detail_gender_female));
+				mGendarTV.setText(mContext
+						.getText(R.string.contacts_user_detail_gender_female));
 			}
 
 		} else {
@@ -167,7 +170,7 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 			}
 			isUpdating = true;
 			Message m = Message.obtain(lh, UPDATE_USER_INFO);
-			lh.sendMessageDelayed(m, 2000);
+			lh.sendMessageDelayed(m, 1500);
 		}
 
 		@Override
@@ -184,31 +187,6 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 
 	};
 
-	private View.OnClickListener mSendMsgListener = new View.OnClickListener() {
-
-		@Override
-		public void onClick(View arg0) {
-
-			Intent i = new Intent(PublicIntent.START_CONVERSACTION_ACTIVITY);
-			i.putExtra("obj", new ConversationNotificationObject(Conversation.TYPE_CONTACT, u.getmUserId()));
-			i.addCategory(PublicIntent.DEFAULT_CATEGORY);
-			mContext.startActivity(i);
-		}
-
-	};
-
-	private View.OnClickListener mCreateConfMsgListener = new View.OnClickListener() {
-
-		@Override
-		public void onClick(View arg0) {
-			// FIXME fix bug for enter conference and refresh group list
-			Intent i = new Intent(PublicIntent.START_CONFERENCE_CREATE_ACTIVITY);
-			i.addCategory(PublicIntent.DEFAULT_CATEGORY);
-			startActivityForResult(i, 0);
-		}
-
-	};
-
 	private View.OnClickListener mReturnButtonListener = new OnClickListener() {
 
 		@Override
@@ -219,7 +197,7 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 	};
 
 	private void gatherUserData() {
-		// TODO add implement
+		u.setNickName(mNickNameET.getText().toString());
 	}
 
 	class LocalHandler extends Handler {
@@ -231,9 +209,14 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 				gatherUserData();
 				us.updateUser(u, new Registrant(this, UPDATE_USER_INFO_DONE,
 						null));
-				isUpdating = false;
 				break;
 			case UPDATE_USER_INFO_DONE:
+				if (mContext != null) {
+					Toast.makeText(mContext,
+							R.string.contacts_user_detail_nick_name_updated,
+							Toast.LENGTH_SHORT).show();
+				}
+				isUpdating = false;
 				break;
 			}
 		}

@@ -337,6 +337,7 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 		for (Group g : l) {
 			Group.searchUser(str, searchedUserList, g);
 		}
+		
 		Message.obtain(mHandler, UPDATE_SEARCHED_USER_LIST, searchedUserList)
 				.sendToTarget();
 	}
@@ -500,6 +501,7 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 	}
 
 	private void updateSearchedUserList(List<User> lu) {
+		Collections.sort(lu);
 		mItemList = new ArrayList<ListItem>();
 		for (User u : lu) {
 			ListItem item = new ListItem(u, -1);

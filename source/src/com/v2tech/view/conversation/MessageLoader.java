@@ -110,8 +110,9 @@ public class MessageLoader {
 		String[] args = new String[] { uid1 + "", uid2 + "", uid2 + "",
 				uid1 + "" };
 
-		String order = ContentDescriptor.Messages.Cols.SEND_TIME
-				+ " desc limit " + limit + " offset  " + offset;
+		String order = ContentDescriptor.Messages.Cols.SEND_TIME + " desc , "
+				+ ContentDescriptor.Messages.Cols.ID + " desc limit " + limit
+				+ " offset  " + offset;
 		return queryMessage(context, selection, args, order,
 				VMessageAbstractItem.ITEM_TYPE_ALL);
 	}
@@ -148,7 +149,8 @@ public class MessageLoader {
 		String[] args = new String[] { uid1 + "", uid2 + "", uid2 + "",
 				uid1 + "" };
 
-		String order = ContentDescriptor.Messages.Cols.SEND_TIME
+		String order = ContentDescriptor.Messages.Cols.SEND_TIME + " desc, "
+				+ ContentDescriptor.Messages.Cols.ID
 				+ " desc limit 1 offset 0 ";
 		List<VMessage> list = queryMessage(context, selection, args, order,
 				VMessageAbstractItem.ITEM_TYPE_ALL);
@@ -219,18 +221,18 @@ public class MessageLoader {
 			return 0;
 		}
 
-		 int ret = context.getContentResolver().delete(
+		int ret = context.getContentResolver().delete(
 				ContentDescriptor.Messages.CONTENT_URI,
 				ContentDescriptor.Messages.Cols.ID + "=?",
 				new String[] { vm.getId() + "" });
-		 
-		 //Delete message items
-		 context.getContentResolver().delete(
-					ContentDescriptor.MessageItems.CONTENT_URI,
-					ContentDescriptor.MessageItems.Cols.MSG_ID + "=?",
-					new String[] { vm.getId() + "" });
-		 
-		 return ret;
+
+		// Delete message items
+		context.getContentResolver().delete(
+				ContentDescriptor.MessageItems.CONTENT_URI,
+				ContentDescriptor.MessageItems.Cols.MSG_ID + "=?",
+				new String[] { vm.getId() + "" });
+
+		return ret;
 	}
 
 	private static VMessage extractMsg(Cursor cur) {

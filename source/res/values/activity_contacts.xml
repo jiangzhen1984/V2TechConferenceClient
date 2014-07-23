@@ -41,7 +41,7 @@
     <string name="contacts_user_detail_voice_dialog_call">拨打电话号码</string>
     
     
-    
+    <string name="contacts_user_detail_nick_name_updated">用户昵称已经更新</string>
     <string name="error_contacts_user_detail_no_avai_user">没有找到可用的用户信息</string>
     <string name="error_contacts_user_detail_no_nick_name">用户昵称不能为空</string>
     

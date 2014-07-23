@@ -19,7 +19,8 @@ public class VMessageFileItem extends VMessageAbstractItem {
 	
 	private float speed;
 	
-	private int transType = 1;
+	//Always send offline file
+	private int transType = 2;
 	
 	public VMessageFileItem(VMessage vm, String filePath) {
 		super(vm);

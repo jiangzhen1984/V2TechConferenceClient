@@ -39,7 +39,6 @@ import com.v2tech.view.PublicIntent;
 import com.v2tech.view.bo.ConversationNotificationObject;
 import com.v2tech.view.conversation.ConversationSelectFile;
 import com.v2tech.view.conversation.ConversationSelectFileEntry;
-import com.v2tech.view.conversation.ConversationView;
 import com.v2tech.vo.Conversation;
 import com.v2tech.vo.User;
 import com.v2tech.vo.UserDeviceConfig;

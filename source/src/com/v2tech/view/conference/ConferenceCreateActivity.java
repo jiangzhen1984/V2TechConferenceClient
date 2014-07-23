@@ -16,7 +16,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
-import android.net.ConnectivityManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -41,7 +40,6 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ScrollView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.v2tech.R;
 import com.v2tech.service.ConferenceService;
@@ -50,6 +48,7 @@ import com.v2tech.service.Registrant;
 import com.v2tech.service.jni.JNIResponse;
 import com.v2tech.service.jni.RequestConfCreateResponse;
 import com.v2tech.util.SPUtil;
+import com.v2tech.util.V2Log;
 import com.v2tech.view.PublicIntent;
 import com.v2tech.view.cus.DateTimePicker;
 import com.v2tech.view.cus.DateTimePicker.OnDateSetListener;
@@ -65,6 +64,8 @@ public class ConferenceCreateActivity extends Activity {
 	private static final int UPDATE_ATTENDEES = 2;
 	private static final int UPDATE_SEARCHED_USER_LIST = 3;
 	private static final int CREATE_CONFERENC_RESP = 4;
+	private static final int DO_PRE_SELECT = 5;
+	private static final int DO_PRE_SELECT_CHECK_USER = 6;
 
 	private static final int PAD_LAYOUT = 1;
 	private static final int PHONE_LAYOUT = 0;
@@ -101,6 +102,8 @@ public class ConferenceCreateActivity extends Activity {
 	private Conference conf;
 
 	private int landLayout = PAD_LAYOUT;
+	
+	private long preSelectedUID;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -141,6 +144,7 @@ public class ConferenceCreateActivity extends Activity {
 		mReturnButton.setOnClickListener(mReturnListener);
 		
 		mErrorMessageTV =  (TextView) findViewById(R.id.conference_create_error_notification_tv);
+		preSelectedUID = getIntent().getLongExtra("uid", 0);
 	}
 
 	@Override
@@ -362,6 +366,49 @@ public class ConferenceCreateActivity extends Activity {
 		adapter.notifyDataSetChanged();
 	}
 
+	
+	private void doPreSelect() {
+		User preUser = GlobalHolder.getInstance().getUser(preSelectedUID);
+		if (preUser == null) {
+			V2Log.e("Dose not find pre-selected user");
+			return;
+		}
+		
+		List<Group> li = new ArrayList<Group>();
+		Group  userGroup = null;
+		if (preUser.getBelongsGroup().size() > 0) {
+			userGroup = preUser.getBelongsGroup().iterator().next();
+		}
+		while (true) {
+			if (userGroup == null) {
+				break;
+			}
+			li.add(0, userGroup);
+			userGroup = userGroup.getParent();
+		}
+		
+		for (int i =0; i <li.size(); i++) {
+			Group g = li.get(i);
+			for (int j = 0; j < mItemList.size(); j++) {
+				ListItem item = mItemList.get(j);
+				if (item.g!= null && g.getmGId() == item.g.getmGId()) {
+					updateView(j);
+					break;
+				}
+			}
+		}
+		
+
+		for (int j = 0; j < mItemList.size(); j++) {
+			ListItem item = mItemList.get(j);
+			if (item.u!= null && preUser.getmUserId() == item.u.getmUserId()) {
+				mContactsContainer.performItemClick(item.v, j, item.u.getmUserId());
+				((ContactUserView) item.v).updateChecked();
+				break;
+			}
+		}
+		
+	}
 
 	private OnClickListener removeAttendeeListener = new OnClickListener() {
 
@@ -565,6 +612,9 @@ public class ConferenceCreateActivity extends Activity {
 		@Override
 		protected void onPostExecute(Void result) {
 			adapter.notifyDataSetChanged();
+			if (preSelectedUID > 0) {
+				Message.obtain(mLocalHandler, DO_PRE_SELECT).sendToTarget();
+			}
 		}
 
 	};
@@ -660,6 +710,9 @@ public class ConferenceCreateActivity extends Activity {
 				i.addCategory(PublicIntent.DEFAULT_CATEGORY);
 				mContext.sendBroadcast(i);
 				finish();
+				break;
+			case DO_PRE_SELECT:
+				doPreSelect();
 				break;
 			}
 		}

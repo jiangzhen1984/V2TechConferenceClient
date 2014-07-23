@@ -1288,13 +1288,15 @@ public class ConversationView extends Activity {
 			if (vfi == null) {
 				return;
 			}
-			FileRequest.getInstance().pauseSendFile(vfi.getUuid(), 1);
 			if (vfi.getState() == VMessageFileItem.STATE_FILE_DOWNLOADING) {
+				mChat.updateFileOperation(vfi, ChatService.OPERATION_PAUSE_DOWNLOADING, null);
 				vfi.setState(VMessageFileItem.STATE_FILE_PAUSED_DOWNLOADING);
 			} else if (vfi.getState() == VMessageFileItem.STATE_FILE_SENDING) {
+				mChat.updateFileOperation(vfi, ChatService.OPERATION_PAUSE_SENDING, null);
 				vfi.setState(VMessageFileItem.STATE_FILE_PAUSED_SENDING);
 			}
 
+			
 		}
 
 		@Override
@@ -1303,11 +1305,12 @@ public class ConversationView extends Activity {
 			if (vfi == null) {
 				return;
 			}
-			FileRequest.getInstance().resumeSendFile(vfi.getUuid(), 1);
 
 			if (vfi.getState() == VMessageFileItem.STATE_FILE_PAUSED_DOWNLOADING) {
+				mChat.updateFileOperation(vfi, ChatService.OPERATION_RESUME_DOWNLOAD, null);
 				vfi.setState(VMessageFileItem.STATE_FILE_DOWNLOADING);
 			} else if (vfi.getState() == VMessageFileItem.STATE_FILE_PAUSED_SENDING) {
+				mChat.updateFileOperation(vfi, ChatService.OPERATION_RESUME_SEND, null);
 				vfi.setState(VMessageFileItem.STATE_FILE_SENDING);
 			}
 

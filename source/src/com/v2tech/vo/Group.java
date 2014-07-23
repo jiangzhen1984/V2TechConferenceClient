@@ -254,7 +254,8 @@ public class Group implements Comparable<Group>{
 				return true;
 			}
 		}
-		for (Group subG : g.getChildGroup()) {
+		for (int i = 0; i< mChild.size(); i++) {
+			Group subG = mChild.get(i);
 			boolean flag = findUser(u, subG);
 			if (flag == true) {
 				return flag;

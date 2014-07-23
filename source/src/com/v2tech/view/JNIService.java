@@ -36,6 +36,7 @@ import com.V2.jni.GroupRequest;
 import com.V2.jni.GroupRequestCallback;
 import com.V2.jni.ImRequest;
 import com.V2.jni.ImRequestCallback;
+import com.V2.jni.ImRequestCallbackAdapter;
 import com.V2.jni.V2GlobalEnum;
 import com.V2.jni.VideoRequest;
 import com.V2.jni.VideoRequestCallbackAdapter;
@@ -401,7 +402,7 @@ public class JNIService extends Service {
 
 	}
 
-	class ImRequestCB implements ImRequestCallback {
+	class ImRequestCB extends ImRequestCallbackAdapter {
 
 		private JNICallbackHandler mCallbackHandler;
 
@@ -496,11 +497,6 @@ public class JNIService extends Service {
 			sendBroadcast(i);
 		}
 
-		@Override
-		public void OnModifyCommentNameCallback(long nUserId,
-				String sCommmentName) {
-			// TODO implment update user nick name
-		}
 
 		@Override
 		public void OnCreateCrowdCallback(String sCrowdXml, int nResult) {

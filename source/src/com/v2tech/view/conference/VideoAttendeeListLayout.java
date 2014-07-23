@@ -125,6 +125,12 @@ public class VideoAttendeeListLayout extends LinearLayout {
 	public void setListener(VideoAttendeeActionListener listener) {
 		this.listener = listener;
 	}
+	
+	public void addNewAttendee(Attendee at) {
+		mAttendsView.addAll(buildAttendeeView(at));
+		Collections.sort(mAttendsView);
+		adapter.notifyDataSetChanged();
+	}
 
 	public void setAttendsList(Set<Attendee> l) {
 		mAttendsView = new ArrayList<ViewWrapper>();
@@ -322,8 +328,10 @@ public class VideoAttendeeListLayout extends LinearLayout {
 					.findViewById(R.id.video_attendee_device_speaker_icon);
 			if (state == PermissionState.NORMAL) {
 				spIV.setImageResource(R.drawable.conf_speaker);
+				at.setSpeakingState(false);
 			} else if (state == PermissionState.GRANTED && cp == ConferencePermission.SPEAKING) {
 				spIV.setImageResource(R.drawable.conf_speaking);
+				at.setSpeakingState(true);
 				((AnimationDrawable) spIV.getDrawable()).start();
 			}
 		}
