@@ -945,6 +945,7 @@ public class ConversationView extends Activity {
 	private View.OnClickListener mfileSelectionButtonListener = new View.OnClickListener() {
 		@Override
 		public void onClick(View arg0) {
+<<<<<<< HEAD
 			if (SPUtil.checkCurrentAviNetwork(mContext)) {
 				// 系统默认的选择界面
 				// Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
@@ -971,10 +972,24 @@ public class ConversationView extends Activity {
 
 				Intent intent = new Intent(ConversationView.this,
 						ConversationSelectFile.class);
+			if(SPUtil.checkCurrentAviNetwork(mContext)){
+				//系统默认的选择界面
+//				Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+//				intent.setType("*/*");
+//				intent.addCategory(Intent.CATEGORY_OPENABLE);
+//
+//				try {
+//					startActivityForResult(
+//							Intent.createChooser(intent, "Select a File to Upload"),
+//							FILE_SELECT_CODE);
+//				} catch (android.content.ActivityNotFoundException ex) {
+//					Toast.makeText(mContext, "Please install a File Manager.",
+//							Toast.LENGTH_SHORT).show();
+//				}
+				Intent intent = new Intent(ConversationView.this , ConversationSelectFileEntry.class);
 				intent.putExtra("obj", cov);
+//				startActivityForResult(intent, 1000);
 				startActivity(intent);
-				finishWork();
-				finish();
 			} else {
 
 				Toast.makeText(mContext, "当前网络不可用，请稍候再试。", Toast.LENGTH_SHORT)
@@ -1071,6 +1086,7 @@ public class ConversationView extends Activity {
 				// Send message to server
 				sendMessageToRemote(vim);
 			}
+<<<<<<< HEAD
 		}
 		// else if (requestCode == FILE_SELECT_CODE) {
 		// if (resultCode == RESULT_OK) {
@@ -1088,6 +1104,28 @@ public class ConversationView extends Activity {
 		// }
 		// }
 		// }
+=======
+		} 
+//		else if (requestCode == FILE_SELECT_CODE) {
+//			if (resultCode == RESULT_OK) {
+//				// Get the Uri of the selected file
+//				Uri uri = data.getData();
+//				String path = SPUtil.getPath(this, uri);
+//				if (path == null) {
+//					Toast.makeText(
+//							mContext,
+//							R.string.contacts_user_detail_file_selection_not_found_path,
+//							Toast.LENGTH_SHORT).show();
+//				} else {
+//					
+//					sendSelectedFile(path);
+//				}
+//			}
+//		}
+		else if(requestCode == 1000){
+			
+		}
+>>>>>>> 5e0aa208f9fa2a5321973f5aeaad817ea0b7d15e
 	}
 
 	private void doSendMessage() {
@@ -1512,6 +1550,7 @@ public class ConversationView extends Activity {
 			Intent i = new Intent();
 			i.setClass(mContext, ContactDetail.class);
 			i.putExtra("uid", user2Id);
+			i.putExtra("obj", cov);
 			i.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
 			mContext.startActivity(i);
 			// 跳转到联系人信息页面，需要finish掉当前页面，不然发送文件会重新创建该页面，而以前的页面没有销毁

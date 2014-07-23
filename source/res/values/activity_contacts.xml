@@ -46,6 +46,13 @@
     <string name="error_contacts_user_detail_no_nick_name">用户昵称不能为空</string>
     
     <string name="contacts_user_detail_file_selection_not_found_path">没有获取到文件路径， 请使用系统的文件选择程序!</string>
+    
+    <!-- select send file -->
+    <string name="select_file_title_return">上一级</string>
+    <string name="select_file_title_entry">返回</string>
+    <string name="select_file_title_send">发送文件</string>
+    <string name="select_file_title">文件</string>
+    <string name="select_file_title_cancel">取消</string>
 
     <color name="contacts_user_view_under_line">#dbdbdb</color>
     <color name="contacts_user_view_bg">#f0f0f0</color>
