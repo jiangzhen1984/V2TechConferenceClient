@@ -5,6 +5,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import android.app.Activity;
 import android.content.ContentResolver;
@@ -20,10 +22,13 @@ import android.os.Message;
 import android.provider.MediaStore;
 import android.support.v4.util.LruCache;
 import android.view.Display;
+import android.view.Gravity;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
+import android.widget.AbsListView;
+import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
@@ -34,7 +39,6 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.spoledge.aacplayer.Decoder;
 import com.v2tech.R;
 import com.v2tech.util.StorageUtil;
 import com.v2tech.util.V2Log;
@@ -43,6 +47,11 @@ import com.v2tech.view.bo.ConversationNotificationObject;
 public class ConversationSelectFile extends Activity {
 
 	protected static final String TAG = "ConversationSelectFile";
+	protected static final int NEW_BITMAP = 5;
+	protected static final int SCAN_SDCARD = 6;
+	protected static final int SCROLL_STATE_TOUCH_SCROLL = 2;
+	private static final int ITEM_CHECKED = 7;
+	private static final int ITEM_UNCHECKED = 8;
 	private String mCurrentPath = StorageUtil.getSdcardPath();
 	private TextView backButton;
 	private TextView finishButton;
@@ -67,16 +76,28 @@ public class ConversationSelectFile extends Activity {
 	private String type;
 	private int mScreenHeight;
 	private int mScreenWidth;
+	private int count = 0;
 	private Handler handler = new Handler() {
 
 		public void handleMessage(Message msg) {
 
-			loading.setVisibility(View.GONE);
-			imageAdapter = new ImageListAdapter();
-			filesGrid.setAdapter(imageAdapter);
+			switch (msg.what) {
+			case SCAN_SDCARD:
+				loading.setVisibility(View.GONE);
+				imageAdapter = new ImageListAdapter();
+				filesGrid.setAdapter(imageAdapter);
+				break;
+			case NEW_BITMAP:
+				imageAdapter.notifyDataSetChanged();
+				break;
+			default:
+				break;
+			}
 		};
 	};
 	private LinearLayout loading;
+	private ExecutorService service;
+	protected int isLoading;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -105,16 +126,19 @@ public class ConversationSelectFile extends Activity {
 	}
 
 	private void init() {
-
+		// 设置LRU集合的大小
 		int maxMemory = (int) Runtime.getRuntime().maxMemory();
 		int mCacheSize = maxMemory / 8;
 		bitmapLru = new LruCache<String, Bitmap>(mCacheSize);
-		mCheckedNameList = new ArrayList<String>();
+		// 获取Intent携带的数据
 		Intent intent = getIntent();
 		cov = intent.getParcelableExtra("obj");
 		mCheckedList = intent.getParcelableArrayListExtra("checkedFiles");
-
 		type = intent.getStringExtra("type");
+		// 创建初始对象
+		mCheckedNameList = new ArrayList<String>();
+		service = Executors.newCachedThreadPool();
+
 		if ("image".equals(type)) {
 			titleText.setText("图片");
 			filesList.setVisibility(View.GONE);
@@ -125,7 +149,7 @@ public class ConversationSelectFile extends Activity {
 				public void run() {
 					loading.setVisibility(View.VISIBLE);
 					getSdcardImages();
-					handler.sendEmptyMessage(0);
+					handler.sendEmptyMessage(SCAN_SDCARD);
 
 				}
 			}).start();
@@ -165,6 +189,7 @@ public class ConversationSelectFile extends Activity {
 	private void sendButtonBackground() {
 		sendButton
 				.setBackgroundResource(R.drawable.conversation_selectfile_send_able);
+		sendButton.setGravity(Gravity.CENTER);
 	}
 
 	private void setListener() {
@@ -247,6 +272,25 @@ public class ConversationSelectFile extends Activity {
 					int position, long id) {
 				notifyListChange(view, position);
 				imageAdapter.notifyDataSetChanged();
+			}
+		});
+
+		filesGrid.setOnScrollListener(new OnScrollListener() {
+
+			@Override
+			public void onScrollStateChanged(AbsListView view, int scrollState) {
+
+				isLoading = scrollState;
+				if (scrollState == 0) {
+					imageAdapter.notifyDataSetChanged();
+				}
+				V2Log.d(TAG, "当前状态：" + scrollState);
+			}
+
+			@Override
+			public void onScroll(AbsListView view, int firstVisibleItem,
+					int visibleItemCount, int totalItemCount) {
+
 			}
 		});
 
@@ -418,7 +462,7 @@ public class ConversationSelectFile extends Activity {
 
 			if (position >= mFolderLists.size()) {
 
-				if (holder.fileCheck.isChecked()) {
+				if (mFileLists.get(position - mFolderLists.size()).isCheck == ITEM_CHECKED) {
 					holder.fileCheck.setChecked(true);
 				} else {
 					holder.fileCheck.setChecked(false);
@@ -458,7 +502,8 @@ public class ConversationSelectFile extends Activity {
 		}
 
 		@Override
-		public View getView(int position, View convertView, ViewGroup parent) {
+		public View getView(final int position, View convertView,
+				ViewGroup parent) {
 
 			final ViewHolder holder;
 			if (convertView == null) {
@@ -477,32 +522,48 @@ public class ConversationSelectFile extends Activity {
 			}
 
 			LayoutParams para = holder.fileIcon.getLayoutParams();
-			para.height = mScreenHeight / 4;// 一屏幕显示8行
-			para.width = (mScreenWidth - 20) / 3;// 一屏显示两列
+			para.height = mScreenHeight / 6;//
+			para.width = (mScreenWidth - 20) / 3;// 一屏显示3列
 			holder.fileIcon.setLayoutParams(para);
 
-			try {
+			Bitmap bit = bitmapLru.get(mFileLists.get(position).fileName);
+			if (bit == null) {
 
-				Bitmap bit = bitmapLru.get(mFileLists.get(position).fileName);
-				if (bit == null) {
+				if (isLoading != SCROLL_STATE_TOUCH_SCROLL && isLoading != 1) {
 
-					bitmapLru.put(mFileLists.get(position).fileName,
-							handlerImage(mFileLists.get(position).filePath));
+					service.execute(new Runnable() {
+
+						@Override
+						public void run() {
+
+							try {
+
+								Bitmap bitmap = handlerImage(mFileLists
+										.get(position).filePath);
+								bitmapLru.put(
+										mFileLists.get(position).fileName,
+										bitmap);
+								count += 1;
+								if (count >= 5) {
+
+									handler.sendEmptyMessage(NEW_BITMAP);
+									count = 0;
+								}
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
+						}
+					});
+				} else {
+					// 加载中显示的图片
+					holder.fileIcon.setImageResource(R.drawable.ic_launcher);
 				}
-				holder.fileIcon.setImageBitmap(bitmapLru.get(mFileLists
-						.get(position).fileName));
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			if (mCheckedNameList.contains(mFileLists.get(position).fileName)) {
-
-				holder.fileCheck.setVisibility(View.VISIBLE);
-
 			} else {
-				holder.fileCheck.setVisibility(View.INVISIBLE);
+
+				holder.fileIcon.setImageBitmap(bit);
 			}
 
-			if (holder.fileCheck.isChecked()) {
+			if (mFileLists.get(position).isCheck == ITEM_CHECKED) {
 				holder.fileCheck.setChecked(true);
 				holder.fileCheck.setVisibility(View.VISIBLE);
 			} else {
@@ -524,8 +585,8 @@ public class ConversationSelectFile extends Activity {
 
 	private void reutrnConversationView() {
 		mFileLists.clear();
-		if(mFolderLists != null){
-			
+		if (mFolderLists != null) {
+
 			mFolderLists.clear();
 		}
 		Intent intent = new Intent(ConversationSelectFile.this,
@@ -559,6 +620,7 @@ public class ConversationSelectFile extends Activity {
 		// 判断当前item被选择的状态
 		if (button.isChecked()) {
 			button.setChecked(false);
+			bean.isCheck = ITEM_UNCHECKED;
 			mCheckedList.remove(bean);
 			totalSize -= bean.fileSize;
 			if (mCheckedList.size() == 0) {
@@ -581,6 +643,7 @@ public class ConversationSelectFile extends Activity {
 					}
 				});
 			}
+			bean.isCheck = ITEM_CHECKED;
 			button.setChecked(true);
 			mCheckedList.add(bean);
 			mCheckedNameList.add(bean.fileName);
@@ -604,7 +667,7 @@ public class ConversationSelectFile extends Activity {
 
 		Options options = new Options();
 		options.inJustDecodeBounds = true;
-		Bitmap bitmap = BitmapFactory.decodeFile(path, options);
+		BitmapFactory.decodeFile(path, options);
 		options.inJustDecodeBounds = false;
 
 		int width = options.outWidth;
@@ -615,16 +678,18 @@ public class ConversationSelectFile extends Activity {
 
 		int scale = 1;
 		if (widthScale > heightScale)
-			scale = widthScale;
+			scale = widthScale + 4;
 		else
-			scale = heightScale;
+			scale = heightScale + 4;
 
 		if (scale < 0) {
 			scale = 1;
 		}
 
 		options.inSampleSize = scale;
+		options.inPreferredConfig = Bitmap.Config.RGB_565;
 		options.inInputShareable = true;// 。当系统内存不够时候图片自动被回收
+		options.inPurgeable = true;
 		return BitmapFactory.decodeFile(path, options);
 	}
 }

@@ -12,6 +12,7 @@ public class FileInfoBean implements Parcelable {
 	public String filePath;
 	public long fileSize;
 	public boolean isDir;
+	public int isCheck; 
 
 	public FileInfoBean() {
 		super();
@@ -26,11 +27,12 @@ public class FileInfoBean implements Parcelable {
 //		 this.fileItmes = fileItmes;
 //	}
 
-	public FileInfoBean(String fileName, String filePath , long fileSize) {
+	public FileInfoBean(String fileName, String filePath , long fileSize , int isCheck) {
 		super();
 		this.fileName = fileName;
 		this.filePath = filePath;
 		this.fileSize = fileSize;
+		this.isCheck = isCheck;
 	}
 
 	@Override
@@ -44,6 +46,7 @@ public class FileInfoBean implements Parcelable {
 		dest.writeString(fileName);
 		dest.writeString(filePath);
 		dest.writeLong(fileSize);
+		dest.writeInt(isCheck);
 		// dest.writeString(fileDate);
 		// dest.writeString(fileSize);
 		// dest.writeString(fileItmes);
@@ -58,7 +61,7 @@ public class FileInfoBean implements Parcelable {
 
 		@Override
 		public FileInfoBean createFromParcel(Parcel parcel) {
-			return new FileInfoBean(parcel.readString(), parcel.readString() , parcel.readLong());
+			return new FileInfoBean(parcel.readString(), parcel.readString() , parcel.readLong() , parcel.readInt());
 		}
 	};
 }
