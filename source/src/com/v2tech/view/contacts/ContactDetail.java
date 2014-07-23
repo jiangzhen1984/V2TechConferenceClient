@@ -360,7 +360,8 @@ public class ContactDetail extends Activity implements OnTouchListener {
 	private void showCallDialog(String tel, String phone, boolean voice) {
 
 		d = new Dialog(mContext, R.style.ContactUserDetailVoiceCallDialog);
-
+		d.setCancelable(true);
+		d.setCanceledOnTouchOutside(true);
 		d.setContentView(R.layout.contacts_user_detail_call_dialog_window);
 		TextView tv = (TextView) d
 				.findViewById(R.id.contact_user_detail_call_dialog_1);
@@ -528,6 +529,10 @@ public class ContactDetail extends Activity implements OnTouchListener {
 	private View.OnClickListener mVideoCallButtonListener = new View.OnClickListener() {
 		@Override
 		public void onClick(View arg0) {
+			if (!SPUtil.checkCurrentAviNetwork(mContext)) {
+				Toast.makeText(mContext, R.string.conversation_no_network_notification, Toast.LENGTH_SHORT).show();
+				return;
+			}
 			startVideoCall();
 		}
 	};

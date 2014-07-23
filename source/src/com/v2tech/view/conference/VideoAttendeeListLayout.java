@@ -35,11 +35,14 @@ import android.widget.TextView;
 import com.v2tech.R;
 import com.v2tech.util.V2Log;
 import com.v2tech.vo.Attendee;
+import com.v2tech.vo.Conference;
 import com.v2tech.vo.ConferencePermission;
 import com.v2tech.vo.PermissionState;
 import com.v2tech.vo.UserDeviceConfig;
 
 public class VideoAttendeeListLayout extends LinearLayout {
+	
+	private Conference conf;
 
 	private View rootView;
 
@@ -70,21 +73,12 @@ public class VideoAttendeeListLayout extends LinearLayout {
 
 	};
 
-	public VideoAttendeeListLayout(Context context) {
+	public VideoAttendeeListLayout(Conference conf, Context context) {
 		super(context);
+		this.conf = conf;
 		initLayout();
 	}
 
-	public VideoAttendeeListLayout(Context context, AttributeSet attrs) {
-		super(context, attrs);
-		initLayout();
-	}
-
-	public VideoAttendeeListLayout(Context context, AttributeSet attrs,
-			int defStyle) {
-		super(context, attrs, defStyle);
-		initLayout();
-	}
 
 	private void initLayout() {
 		View view = LayoutInflater.from(getContext()).inflate(
@@ -125,7 +119,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 	public void setListener(VideoAttendeeActionListener listener) {
 		this.listener = listener;
 	}
-	
+
 	public void addNewAttendee(Attendee at) {
 		mAttendsView.addAll(buildAttendeeView(at));
 		Collections.sort(mAttendsView);
@@ -179,11 +173,11 @@ public class VideoAttendeeListLayout extends LinearLayout {
 					.findViewById(R.id.video_attendee_device_camera_icon);
 			ImageView spIV2 = (ImageView) view2
 					.findViewById(R.id.video_attendee_device_speaker_icon);
-			
+
 			UserDeviceConfig udc = a.getmDevices().get(i);
 			nameTV2.setText("     视频" + i);
 			nameTV2.setTextSize(20);
-		
+
 			// Set text color and camera icon
 			setStyle(a, udc, nameTV2, cameraIV2, spIV2);
 
@@ -196,16 +190,17 @@ public class VideoAttendeeListLayout extends LinearLayout {
 
 	}
 
-	private void setStyle(Attendee at, UserDeviceConfig udc, TextView name, ImageView iv, ImageView speaker) {
-		if (at.isSelf()) {
+	private void setStyle(Attendee at, UserDeviceConfig udc, TextView name,
+			ImageView iv, ImageView speaker) {
+		if (at.isChairMan() || conf.getChairman() == at.getAttId()) {
+			name.setTextColor(getContext().getResources().getColor(
+					R.color.video_attendee_chair_man_name_color));
+		} else if (at.isSelf()) {
 			name.setTypeface(null, Typeface.BOLD);
 			name.setTextColor(getContext().getResources().getColor(
 					R.color.video_attendee_name_color));
 			// set camera icon
 			iv.setImageResource(R.drawable.camera);
-		} else if (at.isChairMan()) {
-			name.setTextColor(getContext().getResources().getColor(
-					R.color.video_attendee_chair_man_name_color));
 		} else if (at.isJoined()) {
 			name.setTextColor(getContext().getResources().getColor(
 					R.color.video_attendee_name_color));
@@ -219,7 +214,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 		if (at.isSelf()) {
 			iv.setImageResource(R.drawable.camera);
 		} else if (at.isJoined()) {
-			if (at.getType() != Attendee.TYPE_MIXED_VIDEO ) {
+			if (at.getType() != Attendee.TYPE_MIXED_VIDEO) {
 				if (udc != null) {
 					iv.setImageResource(R.drawable.camera);
 				}
@@ -229,7 +224,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 		} else {
 			iv.setImageResource(R.drawable.camera_pressed);
 		}
-		
+
 		if (at.getType() == Attendee.TYPE_MIXED_VIDEO) {
 			speaker.setVisibility(View.INVISIBLE);
 		}
@@ -273,7 +268,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 			ViewWrapper v = mAttendsView.get(i);
 			Wrapper wr = (Wrapper) v.v.getTag();
 			if (wr.a.getAttId() == at.getAttId()) {
-				//If attendee type is mixed video, remove destroyed mixed video
+				// If attendee type is mixed video, remove destroyed mixed video
 				if (wr.a.getType() == Attendee.TYPE_MIXED_VIDEO) {
 					mAttendsView.remove(v);
 					break;
@@ -293,10 +288,9 @@ public class VideoAttendeeListLayout extends LinearLayout {
 
 				nameTV.setTextColor(getContext().getResources().getColor(
 						R.color.video_attendee_name_color_offline));
-				
+
 				v.v.setBackgroundColor(Color.TRANSPARENT);
-				
-				
+
 			}
 		}
 
@@ -329,7 +323,8 @@ public class VideoAttendeeListLayout extends LinearLayout {
 			if (state == PermissionState.NORMAL) {
 				spIV.setImageResource(R.drawable.conf_speaker);
 				at.setSpeakingState(false);
-			} else if (state == PermissionState.GRANTED && cp == ConferencePermission.SPEAKING) {
+			} else if (state == PermissionState.GRANTED
+					&& cp == ConferencePermission.SPEAKING) {
 				spIV.setImageResource(R.drawable.conf_speaking);
 				at.setSpeakingState(true);
 				((AnimationDrawable) spIV.getDrawable()).start();
@@ -452,11 +447,12 @@ public class VideoAttendeeListLayout extends LinearLayout {
 						View itemView = (View) (View) view.getParent()
 								.getParent();
 						Wrapper wr = (Wrapper) itemView.getTag();
-//						Rect r = new Rect();
-//						mAttendeeContainer.getLocalVisibleRect(r);
-//						if (r.contains((int) event.getX(), (int) event.getY())) {
-//							listener.OnAttendeeClicked(wr.a, wr.udc);
-//						} else 
+						// Rect r = new Rect();
+						// mAttendeeContainer.getLocalVisibleRect(r);
+						// if (r.contains((int) event.getX(), (int)
+						// event.getY())) {
+						// listener.OnAttendeeClicked(wr.a, wr.udc);
+						// } else
 						{
 							listener.OnAttendeeDragged(wr.a, wr.udc,
 									(int) event.getRawX(),
@@ -541,9 +537,9 @@ public class VideoAttendeeListLayout extends LinearLayout {
 		}
 
 	};
-	
+
 	public boolean getWindowSizeState() {
-		String str =(String)mPinButton.getTag();
+		String str = (String) mPinButton.getTag();
 		if (str == null || str.equals("float")) {
 			return false;
 		} else {
@@ -709,7 +705,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 				V2Log.e(" wr attendee  is null ");
 				return 1;
 			} else {
-			
+
 				int ret = this.a.compareTo(wr.a);
 				if (ret == 0) {
 					return this.sortFlag;

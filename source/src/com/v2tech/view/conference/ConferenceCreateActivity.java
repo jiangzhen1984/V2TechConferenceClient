@@ -102,7 +102,7 @@ public class ConferenceCreateActivity extends Activity {
 	private Conference conf;
 
 	private int landLayout = PAD_LAYOUT;
-	
+
 	private long preSelectedUID;
 
 	@Override
@@ -118,7 +118,6 @@ public class ConferenceCreateActivity extends Activity {
 		mContext = this;
 		mContactsContainer = (ListView) findViewById(R.id.conf_create_contacts_list);
 		mContactsContainer.setOnItemClickListener(itemListener);
-		mContactsContainer.setAdapter(adapter);
 
 		mAttendeeContainer = (LinearLayout) findViewById(R.id.conference_attendee_container);
 		mAttendeeContainer.setGravity(Gravity.CENTER);
@@ -142,8 +141,8 @@ public class ConferenceCreateActivity extends Activity {
 		mScroller = findViewById(R.id.conf_create_scroll_view);
 		mReturnButton = findViewById(R.id.conference_create_return_button);
 		mReturnButton.setOnClickListener(mReturnListener);
-		
-		mErrorMessageTV =  (TextView) findViewById(R.id.conference_create_error_notification_tv);
+
+		mErrorMessageTV = (TextView) findViewById(R.id.conference_create_error_notification_tv);
 		preSelectedUID = getIntent().getLongExtra("uid", 0);
 	}
 
@@ -366,16 +365,15 @@ public class ConferenceCreateActivity extends Activity {
 		adapter.notifyDataSetChanged();
 	}
 
-	
 	private void doPreSelect() {
 		User preUser = GlobalHolder.getInstance().getUser(preSelectedUID);
 		if (preUser == null) {
 			V2Log.e("Dose not find pre-selected user");
 			return;
 		}
-		
+
 		List<Group> li = new ArrayList<Group>();
-		Group  userGroup = null;
+		Group userGroup = null;
 		if (preUser.getBelongsGroup().size() > 0) {
 			userGroup = preUser.getBelongsGroup().iterator().next();
 		}
@@ -386,28 +384,31 @@ public class ConferenceCreateActivity extends Activity {
 			li.add(0, userGroup);
 			userGroup = userGroup.getParent();
 		}
-		
-		for (int i =0; i <li.size(); i++) {
+
+		for (int i = 0; i < li.size(); i++) {
 			Group g = li.get(i);
 			for (int j = 0; j < mItemList.size(); j++) {
 				ListItem item = mItemList.get(j);
-				if (item.g!= null && g.getmGId() == item.g.getmGId()) {
-					updateView(j);
+				if (item.g != null && g.getmGId() == item.g.getmGId()) {
+
+					for (Group subGroup : item.g.getChildGroup()) {
+						ListItem cache = new ListItem(subGroup,
+								subGroup.getLevel());
+						mItemList.add(++j, cache);
+					}
+					List<User> sortList = new ArrayList<User>();
+					sortList.addAll(item.g.getUsers());
+					Collections.sort(sortList);
+					for (User u : sortList) {
+						ListItem cache = new ListItem(u, item.g.getLevel() + 1);
+						mItemList.add(++j, cache);
+					}
+
 					break;
 				}
 			}
 		}
-		
 
-		for (int j = 0; j < mItemList.size(); j++) {
-			ListItem item = mItemList.get(j);
-			if (item.u!= null && preUser.getmUserId() == item.u.getmUserId()) {
-				mContactsContainer.performItemClick(item.v, j, item.u.getmUserId());
-				((ContactUserView) item.v).updateChecked();
-				break;
-			}
-		}
-		
 	}
 
 	private OnClickListener removeAttendeeListener = new OnClickListener() {
@@ -498,7 +499,8 @@ public class ConferenceCreateActivity extends Activity {
 		public void onClick(View view) {
 			if (!SPUtil.checkCurrentAviNetwork(mContext)) {
 				mErrorNotificationLayout.setVisibility(View.VISIBLE);
-				mErrorMessageTV.setText(R.string.error_create_conference_failed_no_network);
+				mErrorMessageTV
+						.setText(R.string.error_create_conference_failed_no_network);
 				return;
 			}
 			String title = mConfTitleET.getText().toString().trim();
@@ -606,15 +608,30 @@ public class ConferenceCreateActivity extends Activity {
 					mItemList.add(new ListItem(g, g.getLevel()));
 				}
 			}
+
+			doPreSelect();
 			return null;
 		}
 
 		@Override
 		protected void onPostExecute(Void result) {
-			adapter.notifyDataSetChanged();
 			if (preSelectedUID > 0) {
-				Message.obtain(mLocalHandler, DO_PRE_SELECT).sendToTarget();
+				ListItem item = null;
+				User preUser = GlobalHolder.getInstance().getUser(
+						preSelectedUID);
+				for (int j = 0; j < mItemList.size(); j++) {
+					item = mItemList.get(j);
+					if (item.u != null
+							&& preUser.getmUserId() == item.u.getmUserId()) {
+						mContactsContainer.performItemClick(item.v, j,
+								item.u.getmUserId());
+						break;
+					}
+				}
 			}
+
+			adapter.notifyDataSetChanged();
+			mContactsContainer.setAdapter(adapter);
 		}
 
 	};
@@ -690,7 +707,8 @@ public class ConferenceCreateActivity extends Activity {
 				JNIResponse rccr = (JNIResponse) msg.obj;
 				if (rccr.getResult() != JNIResponse.Result.SUCCESS) {
 					mErrorNotificationLayout.setVisibility(View.VISIBLE);
-					mErrorMessageTV.setText(R.string.error_create_conference_failed_from_server_side);
+					mErrorMessageTV
+							.setText(R.string.error_create_conference_failed_from_server_side);
 					break;
 				}
 				User currU = GlobalHolder.getInstance().getCurrentUser();

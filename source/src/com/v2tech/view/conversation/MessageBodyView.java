@@ -64,14 +64,16 @@ public class MessageBodyView extends LinearLayout {
 	private Handler localHandler;
 	private Runnable popupWindowListener = null;
 	private PopupWindow pw;
+	
+	private long lastUpdateTime;
 
 	private ClickListener callback;
 
 	public interface ClickListener {
 		public void onMessageClicked(VMessage v);
-		
+
 		public void reSendMessageClicked(VMessage v);
-		
+
 		public void requestDelMessage(VMessage v);
 
 		public void requestPlayAudio(View v, VMessage vm, VMessageAudioItem vai);
@@ -215,7 +217,7 @@ public class MessageBodyView extends LinearLayout {
 			populateFileItem(fileItems);
 			return;
 		}
-		
+
 		if (mMsg.getState() == VMessage.STATE_SENT_FAILED) {
 			failedIcon.setVisibility(View.VISIBLE);
 		}
@@ -346,9 +348,9 @@ public class MessageBodyView extends LinearLayout {
 			}
 
 		});
-		
+
 		audioRoot.setOnLongClickListener(messageLongClickListener);
-		
+
 		mContentContainer.addView(audioRoot, new LinearLayout.LayoutParams(
 				LinearLayout.LayoutParams.WRAP_CONTENT,
 				LinearLayout.LayoutParams.WRAP_CONTENT));
@@ -370,7 +372,6 @@ public class MessageBodyView extends LinearLayout {
 		updateFileItemView(item, fileRootView);
 		fileRootView.setOnClickListener(fileMessageItemClickListener);
 		fileRootView.setOnLongClickListener(messageLongClickListener);
-		
 
 		fileRootView.setTag(item);
 		mContentContainer.addView(fileRootView, new LinearLayout.LayoutParams(
@@ -409,40 +410,44 @@ public class MessageBodyView extends LinearLayout {
 							.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 					View view = inflater.inflate(
 							R.layout.message_selected_pop_up_window, null);
-				//FIXME should not hard code
-					pw = new PopupWindow(view,
-							150,
-							60, true);
+					// FIXME should not hard code
+					pw = new PopupWindow(view, 150, 60, true);
 					pw.setBackgroundDrawable(new ColorDrawable(
 							Color.TRANSPARENT));
 					pw.setFocusable(true);
 					pw.setTouchable(true);
 					pw.setOutsideTouchable(true);
-					
-					TextView tvResend = (TextView)view.findViewById(R.id.contact_message_pop_up_item_resend);
+
+					TextView tvResend = (TextView) view
+							.findViewById(R.id.contact_message_pop_up_item_resend);
 					tvResend.setOnClickListener(mResendButtonListener);
-					
 
 					TextView tv = (TextView) view
 							.findViewById(R.id.contact_message_pop_up_item_copy);
 					tv.setOnClickListener(mCopyButtonListener);
-					
-					
+
 					TextView deleteText = (TextView) view
 							.findViewById(R.id.contact_message_pop_up_item_delete);
 					deleteText.setOnClickListener(mDeleteButtonListener);
-					
 
 				}
-				
+
 				if (failedIcon.getVisibility() == View.INVISIBLE) {
-					pw.getContentView().findViewById(R.id.contact_message_pop_up_item_resend).setVisibility(View.GONE);
 					pw.getContentView()
-						.findViewById(R.id.contact_message_pop_up_item_copy).setVisibility(View.VISIBLE);
+							.findViewById(
+									R.id.contact_message_pop_up_item_resend)
+							.setVisibility(View.GONE);
+					pw.getContentView()
+							.findViewById(R.id.contact_message_pop_up_item_copy)
+							.setVisibility(View.VISIBLE);
 				} else {
-					pw.getContentView().findViewById(R.id.contact_message_pop_up_item_resend).setVisibility(View.VISIBLE);
 					pw.getContentView()
-					.findViewById(R.id.contact_message_pop_up_item_copy).setVisibility(View.GONE);
+							.findViewById(
+									R.id.contact_message_pop_up_item_resend)
+							.setVisibility(View.VISIBLE);
+					pw.getContentView()
+							.findViewById(R.id.contact_message_pop_up_item_copy)
+							.setVisibility(View.GONE);
 				}
 				int offsetX = (anchor.getMeasuredWidth() - pw.getWidth()) / 2;
 				int offsetY = -(anchor.getMeasuredHeight() + pw.getHeight());
@@ -491,7 +496,7 @@ public class MessageBodyView extends LinearLayout {
 			this.unReadIcon.setVisibility(View.VISIBLE);
 		}
 	}
-	
+
 	public void updateFailedFlag(boolean flag) {
 		if (!flag) {
 			this.failedIcon.setVisibility(View.INVISIBLE);
@@ -551,12 +556,18 @@ public class MessageBodyView extends LinearLayout {
 
 			TextView speed = (TextView) rootView
 					.findViewById(R.id.message_body_file_item_progress_speed);
+			if (lastUpdateTime == 0 || vfi.getSpeed() == 0) {
+				vfi.setSpeed(100.0F);
+				lastUpdateTime = System.currentTimeMillis();
+			} else {
+				long sec = (System.currentTimeMillis() - lastUpdateTime) /1000;
+				vfi.setSpeed(sec == 0 ? 0: (vfi.getDownloadedSize()/sec));
+			}
 			speed.setText(vfi.getSpeed() + "K");
 
 			float percent = (float) ((double) vfi.getDownloadedSize() / (double) vfi
 					.getFileSize());
 
-			
 			ViewGroup progressC = (ViewGroup) rootView
 					.findViewById(R.id.message_body_file_item_width_base);
 
@@ -600,14 +611,14 @@ public class MessageBodyView extends LinearLayout {
 			strState = getContext().getResources()
 					.getText(R.string.contact_message_file_item_sent_failed)
 					.toString();
-			//Show failed icon
+			// Show failed icon
 			failedIcon.setVisibility(View.VISIBLE);
 		} else if (vfi.getState() == VMessageAbstractItem.STATE_FILE_DOWNLOADED_FALIED) {
 			strState = getContext()
 					.getResources()
 					.getText(R.string.contact_message_file_item_download_failed)
 					.toString();
-			//Show failed icon
+			// Show failed icon
 			failedIcon.setVisibility(View.VISIBLE);
 		} else if (vfi.getState() == VMessageAbstractItem.STATE_FILE_MISS_DOWNLOAD) {
 			strState = getContext().getResources()
@@ -692,8 +703,7 @@ public class MessageBodyView extends LinearLayout {
 		}
 
 	};
-	
-	
+
 	private OnClickListener mDeleteButtonListener = new OnClickListener() {
 		@Override
 		public void onClick(View view) {
@@ -704,41 +714,46 @@ public class MessageBodyView extends LinearLayout {
 		}
 
 	};
-	
-	
+
 	private OnClickListener mCopyButtonListener = new OnClickListener() {
 		@Override
 		public void onClick(View view) {
 
 			ClipboardManager clipboard = (ClipboardManager) getContext()
 					.getSystemService(Context.CLIPBOARD_SERVICE);
-			ClipData clip = ClipData.newPlainText(
-					"label",
-					MessageUtil
-							.getMixedConversationCopyedContent(mMsg));
+			ClipData clip = ClipData.newPlainText("label",
+					MessageUtil.getMixedConversationCopyedContent(mMsg));
 
 			clipboard.setPrimaryClip(clip);
 			pw.dismiss();
 
-			Toast.makeText(getContext(),
-					R.string.contact_message_copy_message,
+			Toast.makeText(getContext(), R.string.contact_message_copy_message,
 					Toast.LENGTH_SHORT).show();
 		}
 
 	};
-	
-	
-	private OnClickListener mResendButtonListener =new OnClickListener() {
+
+	private OnClickListener mResendButtonListener = new OnClickListener() {
 		@Override
 		public void onClick(View view) {
 			if (callback != null) {
-				callback.reSendMessageClicked(mMsg);
+				View fileRootView = mContentContainer.getChildAt(0);
 				failedIcon.setVisibility(View.INVISIBLE);
-				if (mMsg.getItems().size() > 0 && mMsg.getItems().get(0).getType() == VMessageFileItem.ITEM_TYPE_FILE) {
-					mContentContainer.invalidate();
-					View fileRootView = mContentContainer.getChildAt(0);
-					updateFileItemView((VMessageFileItem)mMsg.getItems().get(0), fileRootView);
+
+				if (mMsg.getItems().size() > 0
+						&& mMsg.getItems().get(0).getType() == VMessageFileItem.ITEM_TYPE_FILE) {
+					VMessageFileItem fileItem = (VMessageFileItem) mMsg
+							.getItems().get(0);
+					if (fileItem.getState() < VMessageAbstractItem.STATE_FILE_SENDING) {
+						callback.requestDownloadFile(fileRootView, mMsg,
+								fileItem);
+					} else {
+						callback.reSendMessageClicked(mMsg);
+					}
+
+					updateFileItemView(fileItem, fileRootView);
 				}
+
 			}
 			pw.dismiss();
 		}

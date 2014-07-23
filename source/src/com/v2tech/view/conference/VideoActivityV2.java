@@ -435,7 +435,7 @@ public class VideoActivityV2 extends Activity {
 
 	private View initAttendeeContainer() {
 		if (mAttendeeContainer == null) {
-			mAttendeeContainer = new VideoAttendeeListLayout(this);
+			mAttendeeContainer = new VideoAttendeeListLayout(conf, this);
 			mAttendeeContainer.setAttendsList(this.mAttendeeList);
 			synchronized (mMixerWrapper) {
 				for (MixerWrapper mw : mMixerWrapper.values()) {
