@@ -18,17 +18,18 @@
             android:paddingLeft="15dp"
             android:paddingRight="8dp"
             android:paddingTop="10dp"
-            android:text="@string/contacts_user_detail_return_button"
+            android:text="@string/select_file_title_entry"
             android:textColor="@color/button_text_color"
             android:textSize="@dimen/common_item_text_size" />
         <TextView
+            android:id="@+id/selectfile_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
             android:ellipsize="end"
             android:gravity="center"
             android:singleLine="true"
-            android:text="@string/tab_selectfile_name"
+            android:text="@string/select_file_title"
             android:textColor="@color/activiy_contact_detail_title_color"
             android:textSize="@dimen/common_item_text_size" />
         <TextView
@@ -41,9 +42,9 @@
             android:paddingLeft="8dp"
             android:paddingRight="15dp"
             android:paddingTop="10dp"
-            android:text="@string/tab_selectfile_finish"
-            android:textSize="@dimen/common_item_text_size"
-            android:textColor="@color/button_text_color" />
+            android:text="@string/select_file_title_cancel"
+            android:textColor="@color/button_text_color"
+            android:textSize="@dimen/common_item_text_size" />
     </RelativeLayout>
     <LinearLayout
         android:layout_width="fill_parent"
@@ -51,13 +52,51 @@
         android:background="#cdcdcf"
         android:orientation="vertical" >
     </LinearLayout>
-    <ListView
-        android:id="@+id/selectfile_lsitview"
+    <FrameLayout
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_weight="1" >
+        <LinearLayout
+            android:id="@+id/selectfile_loading"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:gravity="center"
+            android:visibility="gone"
+            android:orientation="vertical" >
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="正在拼命加载中..."
+                android:textColor="#000000"
+                android:textSize="20sp" />
+        </LinearLayout>
+        <ListView
+            android:id="@+id/selectfile_lsitview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:cacheColorHint="#00000000"
+            android:fadingEdge="none"
+            android:fastScrollEnabled="true"
+            android:scrollingCache="false" >
+        </ListView>
+        <GridView
+            android:id="@+id/selectfile_gridview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:cacheColorHint="#00000000"
+            android:fadingEdge="none"
+            android:fastScrollEnabled="true"
+            android:horizontalSpacing="10dp"
+            android:listSelector="#00000000"
+            android:numColumns="3"
+            android:scrollingCache="false"
+            android:verticalSpacing="15dp"
+            android:visibility="gone" >
+        </GridView>
+    </FrameLayout>
+    <include
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:cacheColorHint="#00000000"
-        android:fadingEdge="none"
-        android:fastScrollEnabled="true"
-        android:scrollingCache="false" >
-    </ListView>
+        android:layout_height="wrap_content"
+        layout="@layout/activity_selectfile_buttontitle" />
 </LinearLayout>

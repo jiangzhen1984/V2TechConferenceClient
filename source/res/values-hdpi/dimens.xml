@@ -96,6 +96,8 @@
     <dimen name="message_voice_dialog_width">230dp</dimen>
     <dimen name="message_voice_dialog_height">180dp</dimen>
     
-    <!-- activity selectfile adapter -->
+    <!-- activity selectfile -->
     <dimen name="select_file_adapter_size">16sp</dimen>
+    <dimen name="select_file_entry_interval">12dp</dimen>
+    
 </resources>

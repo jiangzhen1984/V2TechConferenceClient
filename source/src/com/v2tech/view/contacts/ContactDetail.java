@@ -38,6 +38,7 @@ import com.v2tech.util.SPUtil;
 import com.v2tech.view.PublicIntent;
 import com.v2tech.view.bo.ConversationNotificationObject;
 import com.v2tech.view.conversation.ConversationSelectFile;
+import com.v2tech.view.conversation.ConversationSelectFileEntry;
 import com.v2tech.view.conversation.ConversationView;
 import com.v2tech.vo.Conversation;
 import com.v2tech.vo.User;
@@ -99,6 +100,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 	private boolean isUpdating;
 
 	private Date bir;
+	private ConversationNotificationObject cov = null;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -106,6 +108,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 
 		this.setContentView(R.layout.activity_contact_detail);
 		mUid = this.getIntent().getLongExtra("uid", 0);
+		cov = this.getIntent().getParcelableExtra("obj");
 		initView();
 		mContext = this;
 		View v = findViewById(R.id.contact_detail_main_layout);
@@ -561,9 +564,9 @@ public class ContactDetail extends Activity implements OnTouchListener {
 //					Toast.makeText(mContext, "Please install a File Manager.",
 //							Toast.LENGTH_SHORT).show();
 //				}
-				Intent intent = new Intent(ContactDetail.this , ConversationSelectFile.class);
-				intent.putExtra("obj", new ConversationNotificationObject(
-						Conversation.TYPE_CONTACT, u.getmUserId()));
+				Intent intent = new Intent(ContactDetail.this , ConversationSelectFileEntry.class);
+				intent.putExtra("obj", cov);
+//				startActivityForResult(intent, 1000);
 				startActivity(intent);
 				finish();
 			}

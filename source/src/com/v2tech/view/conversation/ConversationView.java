@@ -908,18 +908,12 @@ public class ConversationView extends Activity {
 //					Toast.makeText(mContext, "Please install a File Manager.",
 //							Toast.LENGTH_SHORT).show();
 //				}
-				
-				/*FragmentManager fragmentManager = getFragmentManager();
-				FragmentTransaction beginTransaction = fragmentManager.beginTransaction();
-				ConversationSelectFile fragment = new ConversationSelectFile();
-				beginTransaction.add(R.id.container_fragment , fragment);
-				beginTransaction.commit();*/
-				
-				Intent intent = new Intent(ConversationView.this , ConversationSelectFile.class);
+				Intent intent = new Intent(ConversationView.this , ConversationSelectFileEntry.class);
 				intent.putExtra("obj", cov);
+//				startActivityForResult(intent, 1000);
 				startActivity(intent);
-				finishWork();
-				finish();
+//				finishWork();
+//				finish();
 			}
 			else{
 				
@@ -1033,6 +1027,9 @@ public class ConversationView extends Activity {
 //				}
 //			}
 //		}
+		else if(requestCode == 1000){
+			
+		}
 	}
 
 	private void doSendMessage() {
@@ -1448,6 +1445,7 @@ public class ConversationView extends Activity {
 			Intent i = new Intent();
 			i.setClass(mContext, ContactDetail.class);
 			i.putExtra("uid", user2Id);
+			i.putExtra("obj", cov);
 			i.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
 			mContext.startActivity(i);
 			//跳转到联系人信息页面，需要finish掉当前页面，不然发送文件会重新创建该页面，而以前的页面没有销毁
