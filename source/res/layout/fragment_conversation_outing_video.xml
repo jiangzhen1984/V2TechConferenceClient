@@ -136,7 +136,7 @@
                 android:src="@drawable/avatar" />
 
             <TextView
-                 android:id="@+id/conversation_fragment_video_outing_call_name"
+                android:id="@+id/conversation_fragment_video_outing_call_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignTop="@+id/conversation_fragment_video_outing_call_avatar"
@@ -188,6 +188,15 @@
             android:layout_alignParentRight="true"
             android:layout_marginBottom="@dimen/fragment_conversation_connected_local_surface_margin_bottom"
             android:layout_marginRight="@dimen/fragment_conversation_connected_local_surface_margin_right" />
+
+        <ImageView
+            android:id="@+id/fragment_conversation_reverse_camera_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignRight="@+id/fragment_conversation_connected_video_local_surface"
+            android:layout_alignTop="@+id/conversation_fragment_outing_video_card_container"
+            android:src="@drawable/converse_camera_button"
+            android:visibility="gone" />
     </RelativeLayout>
 
 </RelativeLayout>

@@ -915,7 +915,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher {
 							g.getOwner()));
 					addConversation(g, true);
 					//Notify status bar
-					updateConferenceNotification(gid, g.getName(), g.getOwnerUser().getName());
+					updateConferenceNotification(gid, g.getName(), g.getOwnerUser() ==null? "" : g.getOwnerUser().getName());
 				} else {
 					V2Log.e("Can not get group information of invatition :"
 							+ gid);
@@ -935,6 +935,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher {
 				addConversation(conf, false);
 				Conference c = new Conference(conf.getmGId());
 				c.setCreator(conf.getOwner());
+				c.setChairman(conf.getOwner());
 				c.setName(conf.getName());
 				startConferenceActivity(c);
 			}

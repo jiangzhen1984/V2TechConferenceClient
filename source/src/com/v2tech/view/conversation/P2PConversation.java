@@ -77,7 +77,8 @@ public class P2PConversation extends Activity implements
 	private View cameraButton;
 	private View videoMuteButton;
 	private View videoHangUpButton;
-
+	private View mReverseCameraButton;
+	
 	// Video call view
 	private SurfaceView mSmallSurface;
 	private SurfaceView mBackgroupdSurface;
@@ -142,13 +143,13 @@ public class P2PConversation extends Activity implements
 				tv.setText(tv.getText().toString()
 						.replace("[]", uad.getUser().getName()));
 			} else {
-				mTimerTV.setText(R.string.conversation_waiting_voice_incoming);
+				mTimerTV.setText(R.string.conversation_waiting);
 				TextView nameTV = (TextView) findViewById(R.id.conversation_fragment_connected_name);
 				nameTV.setText(uad.getUser().getName());
-				// Update mute button to disale
+				// Update mute button to disable
 				setMuteButtonDisable(true);
 			}
-		}
+		} 
 
 		//initialize phone state listener
 		initTelephonyManagerListener();
@@ -625,6 +626,11 @@ public class P2PConversation extends Activity implements
 			findViewById(R.id.conversation_fragment_outing_video_card_container).setVisibility(View.GONE);
 		}
 		
+		
+		mReverseCameraButton = findViewById(R.id.fragment_conversation_reverse_camera_button);
+		mReverseCameraButton.setVisibility(View.VISIBLE);
+		mReverseCameraButton.setOnClickListener(surfaceViewListener);
+		
 		this.exchangeSurfaceHolder();
 		
 	}
@@ -816,6 +822,14 @@ public class P2PConversation extends Activity implements
 				TextView tv = (TextView) findViewById(R.id.conversation_fragment_connected_title_text);
 				tv.setText(tv.getText().toString()
 						.replace("[]", uad.getUser().getName()));
+				
+				mReverseCameraButton = findViewById(R.id.fragment_conversation_reverse_camera_button);
+				mReverseCameraButton.setVisibility(View.VISIBLE);
+				mReverseCameraButton.setOnClickListener(surfaceViewListener);
+				
+			} else {
+				TextView nameTV = (TextView) findViewById(R.id.conversation_fragment_connected_name);
+				nameTV.setText(uad.getUser().getName());
 			}
 			// Start to time
 			Message.obtain(mLocalHandler, UPDATE_TIME).sendToTarget();

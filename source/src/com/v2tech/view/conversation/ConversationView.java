@@ -78,6 +78,7 @@ import com.v2tech.view.widget.CommonAdapter;
 import com.v2tech.view.widget.CommonAdapter.CommonAdapterItemWrapper;
 import com.v2tech.vo.Conversation;
 import com.v2tech.vo.User;
+import com.v2tech.vo.UserDeviceConfig;
 import com.v2tech.vo.VMessage;
 import com.v2tech.vo.VMessageAbstractItem;
 import com.v2tech.vo.VMessageAudioItem;
@@ -149,6 +150,9 @@ public class ConversationView extends Activity {
 
 	private Button mButtonRecordAudio;
 
+	private View mVideoCallButton;
+	private View mAudioCallButton;
+
 	private MediaRecorder mRecorder = null;
 	private AACPlayer mAACPlayer = null;
 
@@ -171,9 +175,9 @@ public class ConversationView extends Activity {
 	private boolean isStopped;
 
 	private int currentItemPos = 0;
-	
+
 	private ArrayList<FileInfoBean> mCheckedList;
-	
+
 	private ConversationNotificationObject cov = null;
 
 	@Override
@@ -230,6 +234,11 @@ public class ConversationView extends Activity {
 
 		mFaceLayout = (LinearLayout) findViewById(R.id.contact_message_face_item_ly);
 
+		mVideoCallButton = findViewById(R.id.contact_message_video_call_button_layout);
+		mVideoCallButton.setOnClickListener(mVideoCallButtonListener);
+		mAudioCallButton = findViewById(R.id.contact_message_audio_call_button_layout);
+		mAudioCallButton.setOnClickListener(mAudioCallButtonListener);
+
 		HandlerThread thread = new HandlerThread("back-end");
 		thread.start();
 		synchronized (thread) {
@@ -245,7 +254,7 @@ public class ConversationView extends Activity {
 
 		Intent intent = getIntent();
 		mCheckedList = intent.getParcelableArrayListExtra("checkedFiles");
-		
+
 		initExtraObject();
 
 		// Register listener for avatar changed
@@ -292,12 +301,12 @@ public class ConversationView extends Activity {
 			pending = false;
 			scrollToBottom();
 		}
-		
-		if(mCheckedList != null && mCheckedList.size() > 0){
+
+		if (mCheckedList != null && mCheckedList.size() > 0) {
 			startSendMoreFile();
 			mCheckedList = null;
 		}
-		
+
 	}
 
 	@Override
@@ -349,7 +358,7 @@ public class ConversationView extends Activity {
 		Bundle bundle = this.getIntent().getExtras();
 		if (bundle != null) {
 			cov = (ConversationNotificationObject) bundle.get("obj");
-			if(cov == null){
+			if (cov == null) {
 				cov = getIntent().getParcelableExtra("obj");
 			}
 		} else {
@@ -383,7 +392,9 @@ public class ConversationView extends Activity {
 
 			@Override
 			public void run() {
-				mMessagesContainer.setSelection(pos);
+
+				mMessagesContainer.setSelectionFromTop(pos,
+						mMessagesContainer.getScrollY());
 
 			}
 
@@ -729,7 +740,7 @@ public class ConversationView extends Activity {
 				} else {
 					updateCancelSendVoiceMsgNotification(VOICE_DIALOG_FLAG_CANCEL);
 				}
-				
+
 			} else if (event.getAction() == MotionEvent.ACTION_UP) {
 				if (voiceIsSentByTimer) {
 					return false;
@@ -839,7 +850,6 @@ public class ConversationView extends Activity {
 					SELECT_PICTURE_CODE);
 
 		}
-		
 
 	};
 
@@ -891,39 +901,84 @@ public class ConversationView extends Activity {
 
 	};
 
+	private View.OnClickListener mAudioCallButtonListener = new View.OnClickListener() {
+
+		@Override
+		public void onClick(View arg0) {
+			Intent iv = new Intent();
+			iv.addCategory(PublicIntent.DEFAULT_CATEGORY);
+			iv.setAction(PublicIntent.START_P2P_CONVERSACTION_ACTIVITY);
+			iv.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+			iv.putExtra("uid", user2Id);
+			iv.putExtra("is_coming_call", false);
+			iv.putExtra("voice", true);
+			mContext.startActivity(iv);
+
+		}
+
+	};
+
+	private View.OnClickListener mVideoCallButtonListener = new View.OnClickListener() {
+
+		@Override
+		public void onClick(View arg0) {
+			Intent iv = new Intent();
+			iv.addCategory(PublicIntent.DEFAULT_CATEGORY);
+			iv.setAction(PublicIntent.START_P2P_CONVERSACTION_ACTIVITY);
+			iv.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+			iv.putExtra("uid", user2Id);
+			iv.putExtra("is_coming_call", false);
+			iv.putExtra("voice", false);
+			List<UserDeviceConfig> list = GlobalHolder.getInstance()
+					.getAttendeeDevice(user2Id);
+			if (list != null && list.size() > 0) {
+				iv.putExtra("device", list.get(0).getDeviceID());
+			} else {
+				iv.putExtra("device", "");
+			}
+			mContext.startActivity(iv);
+
+		}
+
+	};
+
 	private View.OnClickListener mfileSelectionButtonListener = new View.OnClickListener() {
 		@Override
 		public void onClick(View arg0) {
-			if(SPUtil.checkCurrentAviNetwork(mContext)){
-				//系统默认的选择界面
-//				Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-//				intent.setType("*/*");
-//				intent.addCategory(Intent.CATEGORY_OPENABLE);
-//
-//				try {
-//					startActivityForResult(
-//							Intent.createChooser(intent, "Select a File to Upload"),
-//							FILE_SELECT_CODE);
-//				} catch (android.content.ActivityNotFoundException ex) {
-//					Toast.makeText(mContext, "Please install a File Manager.",
-//							Toast.LENGTH_SHORT).show();
-//				}
-				
-				/*FragmentManager fragmentManager = getFragmentManager();
-				FragmentTransaction beginTransaction = fragmentManager.beginTransaction();
-				ConversationSelectFile fragment = new ConversationSelectFile();
-				beginTransaction.add(R.id.container_fragment , fragment);
-				beginTransaction.commit();*/
-				
-				Intent intent = new Intent(ConversationView.this , ConversationSelectFile.class);
+			if (SPUtil.checkCurrentAviNetwork(mContext)) {
+				// 系统默认的选择界面
+				// Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+				// intent.setType("*/*");
+				// intent.addCategory(Intent.CATEGORY_OPENABLE);
+				//
+				// try {
+				// startActivityForResult(
+				// Intent.createChooser(intent, "Select a File to Upload"),
+				// FILE_SELECT_CODE);
+				// } catch (android.content.ActivityNotFoundException ex) {
+				// Toast.makeText(mContext, "Please install a File Manager.",
+				// Toast.LENGTH_SHORT).show();
+				// }
+
+				/*
+				 * FragmentManager fragmentManager = getFragmentManager();
+				 * FragmentTransaction beginTransaction =
+				 * fragmentManager.beginTransaction(); ConversationSelectFile
+				 * fragment = new ConversationSelectFile();
+				 * beginTransaction.add(R.id.container_fragment , fragment);
+				 * beginTransaction.commit();
+				 */
+
+				Intent intent = new Intent(ConversationView.this,
+						ConversationSelectFile.class);
 				intent.putExtra("obj", cov);
 				startActivity(intent);
 				finishWork();
 				finish();
-			}
-			else{
-				
-				Toast.makeText(mContext, "当前网络不可用，请稍候再试。", Toast.LENGTH_SHORT).show();
+			} else {
+
+				Toast.makeText(mContext, "当前网络不可用，请稍候再试。", Toast.LENGTH_SHORT)
+						.show();
 			}
 		}
 	};
@@ -1016,23 +1071,23 @@ public class ConversationView extends Activity {
 				// Send message to server
 				sendMessageToRemote(vim);
 			}
-		} 
-//		else if (requestCode == FILE_SELECT_CODE) {
-//			if (resultCode == RESULT_OK) {
-//				// Get the Uri of the selected file
-//				Uri uri = data.getData();
-//				String path = SPUtil.getPath(this, uri);
-//				if (path == null) {
-//					Toast.makeText(
-//							mContext,
-//							R.string.contacts_user_detail_file_selection_not_found_path,
-//							Toast.LENGTH_SHORT).show();
-//				} else {
-//					
-//					sendSelectedFile(path);
-//				}
-//			}
-//		}
+		}
+		// else if (requestCode == FILE_SELECT_CODE) {
+		// if (resultCode == RESULT_OK) {
+		// // Get the Uri of the selected file
+		// Uri uri = data.getData();
+		// String path = SPUtil.getPath(this, uri);
+		// if (path == null) {
+		// Toast.makeText(
+		// mContext,
+		// R.string.contacts_user_detail_file_selection_not_found_path,
+		// Toast.LENGTH_SHORT).show();
+		// } else {
+		//
+		// sendSelectedFile(path);
+		// }
+		// }
+		// }
 	}
 
 	private void doSendMessage() {
@@ -1258,8 +1313,6 @@ public class ConversationView extends Activity {
 			}
 			Message.obtain(lh, SEND_MESSAGE, v).sendToTarget();
 		}
-		
-		
 
 		@Override
 		public void requestDelMessage(VMessage v) {
@@ -1278,8 +1331,14 @@ public class ConversationView extends Activity {
 			if (vfi == null) {
 				return;
 			}
+			if (!SPUtil.checkCurrentAviNetwork(mContext)) {
+				Toast.makeText(mContext,
+						R.string.contact_message_no_network_notification,
+						Toast.LENGTH_SHORT).show();
+				return;
+			}
 			vfi.setState(VMessageFileItem.STATE_FILE_DOWNLOADING);
-			//FIXME should move this to service 
+			// FIXME should move this to service
 			FileRequest.getInstance().acceptFileTrans(vfi.getUuid(),
 					GlobalConfig.getGlobalFilePath() + "/" + vfi.getFileName());
 
@@ -1292,14 +1351,15 @@ public class ConversationView extends Activity {
 				return;
 			}
 			if (vfi.getState() == VMessageFileItem.STATE_FILE_DOWNLOADING) {
-				mChat.updateFileOperation(vfi, ChatService.OPERATION_PAUSE_DOWNLOADING, null);
+				mChat.updateFileOperation(vfi,
+						ChatService.OPERATION_PAUSE_DOWNLOADING, null);
 				vfi.setState(VMessageFileItem.STATE_FILE_PAUSED_DOWNLOADING);
 			} else if (vfi.getState() == VMessageFileItem.STATE_FILE_SENDING) {
-				mChat.updateFileOperation(vfi, ChatService.OPERATION_PAUSE_SENDING, null);
+				mChat.updateFileOperation(vfi,
+						ChatService.OPERATION_PAUSE_SENDING, null);
 				vfi.setState(VMessageFileItem.STATE_FILE_PAUSED_SENDING);
 			}
 
-			
 		}
 
 		@Override
@@ -1310,10 +1370,12 @@ public class ConversationView extends Activity {
 			}
 
 			if (vfi.getState() == VMessageFileItem.STATE_FILE_PAUSED_DOWNLOADING) {
-				mChat.updateFileOperation(vfi, ChatService.OPERATION_RESUME_DOWNLOAD, null);
+				mChat.updateFileOperation(vfi,
+						ChatService.OPERATION_RESUME_DOWNLOAD, null);
 				vfi.setState(VMessageFileItem.STATE_FILE_DOWNLOADING);
 			} else if (vfi.getState() == VMessageFileItem.STATE_FILE_PAUSED_SENDING) {
-				mChat.updateFileOperation(vfi, ChatService.OPERATION_RESUME_SEND, null);
+				mChat.updateFileOperation(vfi,
+						ChatService.OPERATION_RESUME_SEND, null);
 				vfi.setState(VMessageFileItem.STATE_FILE_SENDING);
 			}
 
@@ -1360,15 +1422,14 @@ public class ConversationView extends Activity {
 		}
 		return true;
 	}
-	
-	
+
 	private boolean removeMessage(VMessage vm) {
 		if (vm == null) {
 			return false;
 		}
-		for (int i =0; i < messageArray.size(); i++) {
-			VMessageAdater va = (VMessageAdater)messageArray.get(i);
-			if (vm.getId() ==  ((VMessage)va.getItemObject()).getId()) {
+		for (int i = 0; i < messageArray.size(); i++) {
+			VMessageAdater va = (VMessageAdater) messageArray.get(i);
+			if (vm.getId() == ((VMessage) va.getItemObject()).getId()) {
 				messageArray.remove(i);
 				return true;
 			}
@@ -1453,7 +1514,7 @@ public class ConversationView extends Activity {
 			i.putExtra("uid", user2Id);
 			i.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
 			mContext.startActivity(i);
-			//跳转到联系人信息页面，需要finish掉当前页面，不然发送文件会重新创建该页面，而以前的页面没有销毁
+			// 跳转到联系人信息页面，需要finish掉当前页面，不然发送文件会重新创建该页面，而以前的页面没有销毁
 			finishWork();
 			finish();
 		}
@@ -1620,8 +1681,8 @@ public class ConversationView extends Activity {
 				}
 				break;
 			case REQUEST_DEL_MESSAGE:
-				removeMessage((VMessage)msg.obj);
-				MessageLoader.deleteMessage(mContext, (VMessage)msg.obj);
+				removeMessage((VMessage) msg.obj);
+				MessageLoader.deleteMessage(mContext, (VMessage) msg.obj);
 				adapter.notifyDataSetChanged();
 				break;
 			case FILE_STATUS_LISTENER:
@@ -1640,12 +1701,12 @@ public class ConversationView extends Activity {
 		}
 
 	}
-	
+
 	/**
 	 * get selected file path to send remote.
 	 */
 	public void sendSelectedFile(String selectPath) {
-		
+
 		if (!TextUtils.isEmpty(selectPath)) {
 
 			VMessage vim = MessageBuilder.buildFileMessage(local, remote,
@@ -1655,11 +1716,11 @@ public class ConversationView extends Activity {
 			sendMessageToRemote(vim);
 		}
 	}
-	
+
 	private void startSendMoreFile() {
-		
+
 		for (int i = 0; i < mCheckedList.size(); i++) {
-			
+
 			sendSelectedFile(mCheckedList.get(i).filePath);
 		}
 	}
