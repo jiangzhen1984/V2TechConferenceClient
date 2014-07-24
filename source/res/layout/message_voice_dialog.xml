@@ -34,7 +34,7 @@
             android:src="@drawable/message_voice_volume_4" />
 
         <TextView
-            android:id="@+id/textView1"
+            android:id="@+id/message_voice_dialog_listening_container_tips"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/imageView1"

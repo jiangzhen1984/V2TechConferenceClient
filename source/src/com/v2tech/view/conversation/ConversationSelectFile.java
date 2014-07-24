@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -51,6 +52,8 @@ public class ConversationSelectFile extends Activity {
 	protected static final String TAG = "ConversationSelectFile";
 	protected static final int NEW_BITMAP = 5;
 	protected static final int SCAN_SDCARD = 6;
+	protected static final int UPDATE_BITMAP = 7;
+	protected static final int REMOVE_BITMAP = 8;
 	protected static final int SCROLL_STATE_TOUCH_SCROLL = 2;
 	private static final int ITEM_CHECKED = 7;
 	private static final int ITEM_UNCHECKED = 8;
@@ -71,6 +74,7 @@ public class ConversationSelectFile extends Activity {
 	private ArrayList<FileInfoBean> mCheckedList;
 	private ArrayList<String> mCheckedNameList;
 	private LruCache<String, Bitmap> bitmapLru;
+	private HashMap<Bitmap, ViewHolder> bitmapMapping;
 
 	private FileListAdapter adapter;
 	private ImageListAdapter imageAdapter;
@@ -91,6 +95,24 @@ public class ConversationSelectFile extends Activity {
 				break;
 			case NEW_BITMAP:
 				imageAdapter.notifyDataSetChanged();
+				break;
+
+			case UPDATE_BITMAP:
+				ViewHolder holder = (ViewHolder) ((Object[]) msg.obj)[0];
+				Bitmap bt = (Bitmap) ((Object[]) msg.obj)[1];
+				if (!bt.isRecycled()) {
+					holder.fileIcon.setImageBitmap(bt);
+					bitmapMapping.put(bt, holder);
+				} else {
+					// TODO reload
+				}
+				break;
+			case REMOVE_BITMAP:
+				ViewHolder cach = bitmapMapping.remove(msg.obj);
+				if (cach != null) {
+					cach.fileIcon.setImageResource(R.drawable.ic_launcher);
+				}
+				((Bitmap)msg.obj).recycle();
 				break;
 			default:
 				break;
@@ -131,7 +153,8 @@ public class ConversationSelectFile extends Activity {
 		// 设置LRU集合的大小
 		int maxMemory = (int) Runtime.getRuntime().maxMemory();
 		int mCacheSize = maxMemory / 8;
-		bitmapLru = new LruCache<String, Bitmap>(mCacheSize);
+		bitmapLru = new BitmapLRU(mCacheSize);
+		bitmapMapping = new HashMap<Bitmap, ViewHolder>();
 		// 获取Intent携带的数据
 		Intent intent = getIntent();
 		mCheckedList = intent.getParcelableArrayListExtra("checkedFiles");
@@ -545,34 +568,44 @@ public class ConversationSelectFile extends Activity {
 			para.width = (mScreenWidth - 20) / 3;// 一屏显示3列
 			holder.fileIcon.setLayoutParams(para);
 
-			Bitmap bit = bitmapLru.get(mFileLists.get(position).fileName);
-			if (bit == null) {
+			final FileInfoBean fb = mFileLists.get(position);
+			Bitmap bit = bitmapLru.get(fb.fileName);
+			if (bit == null || bit.isRecycled()) {
 
 				if (isLoading != SCROLL_STATE_TOUCH_SCROLL && isLoading != 1) {
-
-					service.execute(new Runnable() {
-
-						@Override
+					new Thread() {
 						public void run() {
+							service.execute(new Runnable() {
 
-							try {
+								@Override
+								public void run() {
 
-								Bitmap bitmap = handlerImage(mFileLists
-										.get(position).filePath);
-								bitmapLru.put(
-										mFileLists.get(position).fileName,
-										bitmap);
-								count += 1;
-								if (count >= 5) {
+									try {
 
-									handler.sendEmptyMessage(NEW_BITMAP);
-									count = 0;
+										Bitmap bitmap = handlerImage(fb.filePath);
+										if (fb.fileName == null && bitmap != null) {
+											bitmap.recycle();
+											return;
+										}
+										
+										if (bitmap == null) {
+											V2Log.e("Can not extra bitmap ");
+											return;
+										}
+										bitmapLru.put(
+												fb.fileName,
+												bitmap);
+										Message.obtain(handler, UPDATE_BITMAP,
+												new Object[] { holder, bitmap })
+												.sendToTarget();
+									} catch (Exception e) {
+										e.printStackTrace();
+									}
 								}
-							} catch (Exception e) {
-								e.printStackTrace();
-							}
+							});
 						}
-					});
+					}.start();;
+
 				} else {
 					// 加载中显示的图片
 					holder.fileIcon.setImageResource(R.drawable.ic_launcher);
@@ -580,6 +613,7 @@ public class ConversationSelectFile extends Activity {
 			} else {
 
 				holder.fileIcon.setImageBitmap(bit);
+				bitmapMapping.put(bit, holder);
 			}
 
 			if (mFileLists.get(position).isCheck == ITEM_CHECKED) {
@@ -718,5 +752,19 @@ public class ConversationSelectFile extends Activity {
 		options.inInputShareable = true;// 。当系统内存不够时候图片自动被回收
 		options.inPurgeable = true;
 		return BitmapFactory.decodeFile(path, options);
+	}
+
+	class BitmapLRU extends LruCache<String, Bitmap> {
+
+		public BitmapLRU(int maxSize) {
+			super(maxSize);
+		}
+
+		@Override
+		protected void entryRemoved(boolean evicted, String key,
+				Bitmap oldValue, Bitmap newValue) {
+			super.entryRemoved(evicted, key, oldValue, newValue);
+			Message.obtain(handler, REMOVE_BITMAP, oldValue).sendToTarget();
+		}
 	}
 }

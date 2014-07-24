@@ -895,9 +895,10 @@ public class ConversationView extends Activity {
 //				finishWork();
 //				finish();
 			}
-			else{
-				
-				Toast.makeText(mContext, "当前网络不可用，请稍候再试。", Toast.LENGTH_SHORT).show();
+			else {
+
+				Toast.makeText(mContext, "当前网络不可用，请稍候再试。", Toast.LENGTH_SHORT)
+						.show();
 			}
 		}
 	};
@@ -1431,7 +1432,6 @@ public class ConversationView extends Activity {
 			i.putExtra("obj", cov);
 			i.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
 			startActivityForResult(i, RECEIVE_SELECTED_FILE);
-			//跳转到联系人信息页面，需要finish掉当前页面，不然发送文件会重新创建该页面，而以前的页面没有销毁
 		}
 
 	};
@@ -1636,7 +1636,6 @@ public class ConversationView extends Activity {
 		
 		for (int i = 0; i < mCheckedList.size(); i++) {
 			
-			SystemClock.sleep(50);
 			sendSelectedFile(mCheckedList.get(i).filePath);
 		}
 	}

@@ -353,8 +353,9 @@ public class VideoActivityV2 extends Activity {
 		mPendingPermissionUpdateList = new ArrayList<PermissionUpdateIndication>();
 		// Set default speaking state if current user is owner, then should
 		// apply speaking default;
-		isSpeaking = conf.getCreator() == GlobalHolder.getInstance()
-				.getCurrentUserId() ? true : false;
+		isSpeaking = (conf.getCreator() == GlobalHolder.getInstance()
+				.getCurrentUserId() || conf.getChairman() == GlobalHolder.getInstance()
+						.getCurrentUserId() )? true : false;
 	}
 
 	/**

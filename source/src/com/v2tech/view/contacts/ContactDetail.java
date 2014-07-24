@@ -584,6 +584,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 			// FIXME fix bug for enter conference and refresh group list
 			Intent i = new Intent(PublicIntent.START_CONFERENCE_CREATE_ACTIVITY);
 			i.addCategory(PublicIntent.DEFAULT_CATEGORY);
+			i.putExtra("uid", u.getmUserId());
 			startActivityForResult(i, 0);
 		}
 

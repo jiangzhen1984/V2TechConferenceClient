@@ -27,6 +27,7 @@
     <string name="contact_message_file_item_sent">已发送</string>
     <string name="contact_message_file_item_sent_failed">发送失败</string>
      <string name="contact_message_no_network_notification">网络连接不可用，请稍候再试</string>
+     <string name="contact_message_tips_rest_seconds">你还可以说[]秒</string>
     
     <color name="message_panel_bg">#ffffff</color>
 </resources>

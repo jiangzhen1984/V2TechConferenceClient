@@ -12,6 +12,7 @@ import java.util.Locale;
 import java.util.Set;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -33,6 +34,8 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
+import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
@@ -183,24 +186,14 @@ public class ConferenceCreateActivity extends Activity {
 		}
 		if (item.isExpanded == false) {
 			for (Group g : item.g.getChildGroup()) {
-				Long key = Long.valueOf(g.getmGId());
-				// ListItem cache = mCacheHolder.get(key);
-				// if (cache == null) {
 				ListItem cache = new ListItem(g, g.getLevel());
-				// mCacheHolder.put(key, cache);
-				// }
 				mItemList.add(++pos, cache);
 			}
 			List<User> sortList = new ArrayList<User>();
 			sortList.addAll(item.g.getUsers());
 			Collections.sort(sortList);
 			for (User u : sortList) {
-				Long key = Long.valueOf(u.getmUserId());
-				// ListItem cache = mCacheHolder.get(key);
-				// if (cache == null) {
 				ListItem cache = new ListItem(u, item.g.getLevel() + 1);
-				// mCacheHolder.put(key, cache);
-				// }
 				mItemList.add(++pos, cache);
 				updateItem(cache);
 			}
@@ -390,7 +383,7 @@ public class ConferenceCreateActivity extends Activity {
 			for (int j = 0; j < mItemList.size(); j++) {
 				ListItem item = mItemList.get(j);
 				if (item.g != null && g.getmGId() == item.g.getmGId()) {
-
+					item.isExpanded = true;
 					for (Group subGroup : item.g.getChildGroup()) {
 						ListItem cache = new ListItem(subGroup,
 								subGroup.getLevel());
@@ -406,6 +399,23 @@ public class ConferenceCreateActivity extends Activity {
 
 					break;
 				}
+			}
+		}
+
+	}
+	
+	
+	private ProgressDialog mWaitingDialog;
+
+	private void selectGroup(Group selectGroup, boolean addOrRemove) {
+		List<Group> subGroups = selectGroup.getChildGroup();
+		for ( int i= 0; i < subGroups.size(); i++) {
+			selectGroup(subGroups.get(i), addOrRemove);
+		}
+		List<User> list =selectGroup.getUsers();
+		for (int i = 0; i < list.size(); i ++) {
+			if (addOrRemove) {
+				this.addAttendee(list.get(i));
 			}
 		}
 
@@ -597,6 +607,19 @@ public class ConferenceCreateActivity extends Activity {
 		}
 
 	};
+	
+	/**
+	 * TODO add support for horizontal 
+	 */
+	private OnCheckedChangeListener mGroupCheckBoxListener = new OnCheckedChangeListener() {
+
+		@Override
+		public void onCheckedChanged(CompoundButton cb, boolean flag) {
+		
+				
+		}
+		
+	};
 
 	class LoadContactsAT extends AsyncTask<Void, Void, Void> {
 
@@ -648,7 +671,7 @@ public class ConferenceCreateActivity extends Activity {
 			super();
 			this.g = g;
 			this.id = 0x02000000 | g.getmGId();
-			this.v = new ContactGroupView(mContext, g, null);
+			this.v = new ContactGroupView(mContext, g, null, mGroupCheckBoxListener);
 			isExpanded = false;
 			this.level = level;
 		}
