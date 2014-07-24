@@ -10,15 +10,16 @@
         android:layout_marginLeft="20dp"
         android:paddingBottom="10dp"
         android:paddingTop="10dp"
-        android:src="@drawable/conversation_selectfile_icon" />
+        android:background="@null" />
     <TextView
         android:id="@+id/selectfile_adapter_folderName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
-        android:layout_marginLeft="20dp"
+        android:layout_marginLeft="10dp"
         android:layout_toRightOf="@+id/selectfile_adapter_icon"
         android:maxLength="15"
+        android:padding="10dp"
         android:singleLine="true"
         android:text="xxxxxx"
         android:textColor="@color/conversation_selectfile_adapter_word"

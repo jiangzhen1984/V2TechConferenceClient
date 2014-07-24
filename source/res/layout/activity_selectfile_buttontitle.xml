@@ -25,8 +25,8 @@
         android:layout_marginRight="20dp"
         android:background="@drawable/button_bg_noable"
         android:paddingLeft="13dp"
-        android:paddingRight="13dp"
-        android:text="发送(0)"
+        android:paddingRight="10dp"
+        android:text="发送( 0 )"
         android:gravity="center"
         android:textColor="#A5A5A5"
         android:textSize="@dimen/select_file_adapter_size" />

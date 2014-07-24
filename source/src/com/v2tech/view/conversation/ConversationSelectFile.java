@@ -12,10 +12,12 @@ import java.util.concurrent.Executors;
 import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.BitmapFactory.Options;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -155,13 +157,24 @@ public class ConversationSelectFile extends Activity {
 		bitmapMapping = new HashMap<Bitmap, ViewHolder>();
 		// 获取Intent携带的数据
 		Intent intent = getIntent();
-		cov = intent.getParcelableExtra("obj");
 		mCheckedList = intent.getParcelableArrayListExtra("checkedFiles");
 		type = intent.getStringExtra("type");
 		// 创建初始对象
 		mCheckedNameList = new ArrayList<String>();
 		service = Executors.newCachedThreadPool();
 
+		if (mCheckedList.size() > 0) {
+			changeSendAble();
+			for (FileInfoBean bean : mCheckedList) {
+
+				bean.isCheck = ITEM_CHECKED;
+				mCheckedNameList.add(bean.fileName);
+				totalSize += bean.fileSize;
+			}
+			selectedFileSize.setText("已选" + getFileSize(totalSize));
+			sendButton.setText("发送(" + mCheckedList.size() + ")");
+		}
+		
 		if ("image".equals(type)) {
 			titleText.setText("图片");
 			filesList.setVisibility(View.GONE);
@@ -187,31 +200,26 @@ public class ConversationSelectFile extends Activity {
 			filesList.setAdapter(adapter);
 		}
 
-		if (mCheckedList.size() > 0) {
-			sendButton.setClickable(true);
-			sendButton.setOnClickListener(new OnClickListener() {
-
-				@Override
-				public void onClick(View v) {
-					reutrnConversationView();
-					mCheckedList.clear();
-					mCheckedNameList.clear();
-				}
-			});
-			sendButtonBackground();
-			for (FileInfoBean bean : mCheckedList) {
-
-				mCheckedNameList.add(bean.fileName);
-				totalSize += bean.fileSize;
-			}
-			selectedFileSize.setText("已选" + getFileSize(totalSize));
-			sendButton.setText("发送(" + mCheckedList.size() + ")");
-		}
 	}
 
-	private void sendButtonBackground() {
+	/**
+	 * 发送按钮可用
+	 */
+	private void changeSendAble() {
+		sendButton.setClickable(true);
+		sendButton.setTextColor(Color.WHITE);
 		sendButton
 				.setBackgroundResource(R.drawable.conversation_selectfile_send_able);
+		sendButton.setGravity(Gravity.CENTER);
+	}
+
+	/**
+	 * 发送按钮不可用
+	 */
+	private void changeSendUnable() {
+		sendButton.setClickable(false);
+		sendButton.setTextColor(Color.GRAY);
+		sendButton.setBackgroundResource(R.drawable.button_bg_noable);
 		sendButton.setGravity(Gravity.CENTER);
 	}
 
@@ -231,26 +239,22 @@ public class ConversationSelectFile extends Activity {
 				if (StorageUtil.getSdcardPath().equals(mCurrentPath)) {
 
 					// 如果已经是顶级路径，则结束掉当前界面
-					Intent intent = new Intent(ConversationSelectFile.this,
-							ConversationSelectFileEntry.class);
-					intent.putExtra("obj", cov);
-					intent.putParcelableArrayListExtra("checkedFiles",
-							mCheckedList);
-					startActivity(intent);
-					mCheckedList.clear();
-					mFileLists.clear();
-					mCheckedNameList.clear();
-					if ("file".equals(type)) {
-
-						mFolderLists.clear();
-					}
-					finish();
+					reutrnResult(1);
 					return;
 				}
 				File file = new File(mCurrentPath);
 				mCurrentPath = file.getParent();
 				updateFileItems(file.getParent());
 				adapter.notifyDataSetChanged();
+			}
+
+		});
+
+		sendButton.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				reutrnResult(3);
 			}
 		});
 
@@ -259,8 +263,7 @@ public class ConversationSelectFile extends Activity {
 			@Override
 			public void onClick(View v) {
 				mCheckedList.clear();
-				mCheckedNameList.clear();
-				reutrnConversationView();
+				reutrnResult(0);
 			}
 
 		});
@@ -358,7 +361,10 @@ public class ConversationSelectFile extends Activity {
 				bean.fileSize = Long.valueOf(cursor.getString(cursor
 						.getColumnIndex(MediaStore.Images.Media.SIZE)));
 				bean.fileName = cursor.getString(cursor
-						.getColumnIndex(MediaStore.Images.Media.DISPLAY_NAME));
+						.getColumnIndex(MediaStore.Images.Media.DISPLAY_NAME));	
+				if(mCheckedNameList.contains(bean.fileName)){
+					bean.isCheck = ITEM_CHECKED;
+				}
 				mFileLists.add(bean);
 			}
 			// 关闭cursor
@@ -404,6 +410,10 @@ public class ConversationSelectFile extends Activity {
 				mFolderLists.add(file);
 				file.isDir = true;
 			} else {
+				
+				if(mCheckedNameList.contains(file.fileName)){
+					file.isCheck = ITEM_CHECKED;
+				}
 				mFileLists.add(file);
 				file.isDir = false;
 			}
@@ -490,16 +500,19 @@ public class ConversationSelectFile extends Activity {
 				} else {
 					holder.fileCheck.setChecked(false);
 				}
+
+				adapterFileIcon(mFileLists.get(position
+						- mFolderLists.size()).fileName , holder);
 				holder.fileCheck.setVisibility(View.VISIBLE);
-				holder.fileIcon.setVisibility(View.GONE);
 				holder.fileArrow.setVisibility(View.GONE);
 				holder.fileFolderName.setText(mFileLists.get(position
 						- mFolderLists.size()).fileName);
 			} else {
+				
+				holder.fileIcon.setImageResource(R.drawable.selectfile_folder);
 				holder.fileFolderName
 						.setText(mFolderLists.get(position).fileName);
 				holder.fileCheck.setVisibility(View.GONE);
-				holder.fileIcon.setVisibility(View.VISIBLE);
 				holder.fileArrow.setVisibility(View.VISIBLE);
 			}
 
@@ -545,7 +558,13 @@ public class ConversationSelectFile extends Activity {
 			}
 
 			LayoutParams para = holder.fileIcon.getLayoutParams();
-			para.height = mScreenHeight / 6;//
+
+			Configuration conf = getResources().getConfiguration();
+			if (conf.smallestScreenWidthDp >= 600) {
+				para.height = mScreenHeight / 3;//
+			} else {
+				para.height = mScreenHeight / 6;//
+			}
 			para.width = (mScreenWidth - 20) / 3;// 一屏显示3列
 			holder.fileIcon.setLayoutParams(para);
 
@@ -617,18 +636,32 @@ public class ConversationSelectFile extends Activity {
 
 	}
 
-	private void reutrnConversationView() {
+	private void reutrnResult(int resultCode) {
+		
+		Intent intent = new Intent();
+		intent.putParcelableArrayListExtra("checkedFiles", mCheckedList);
+		setResult(resultCode , intent);
 		mFileLists.clear();
-		if (mFolderLists != null) {
+		mCheckedNameList.clear();
+		if ("file".equals(type) && mFolderLists != null) {
 
 			mFolderLists.clear();
 		}
-		Intent intent = new Intent(ConversationSelectFile.this,
-				ConversationView.class);
-		intent.putParcelableArrayListExtra("checkedFiles", mCheckedList);
-		intent.putExtra("obj", cov);
-		startActivity(intent);
 		finish();
+	}
+
+	public void adapterFileIcon(String fileName , ViewHolder holder) {
+		
+		if(fileName.endsWith(".jpg")){
+			
+			holder.fileIcon.setImageResource(R.drawable.selectfile_type_picture);
+		}
+		else if(fileName.endsWith(".txt")){
+			holder.fileIcon.setImageResource(R.drawable.selectfile_type_word);
+		}
+		else{
+			holder.fileIcon.setImageResource(R.drawable.selectfile_type_ohter);
+		}
 	}
 
 	/**
@@ -655,27 +688,21 @@ public class ConversationSelectFile extends Activity {
 		if (button.isChecked()) {
 			button.setChecked(false);
 			bean.isCheck = ITEM_UNCHECKED;
-			mCheckedList.remove(bean);
+			for (int i = 0 ; i < mCheckedList.size() ; i++) {
+				if(mCheckedList.get(i).fileName.equals(bean.fileName)){
+					mCheckedList.remove(i);
+				}
+			}
+			mCheckedNameList.remove(bean.fileName);
 			totalSize -= bean.fileSize;
 			if (mCheckedList.size() == 0) {
-				sendButton.setBackgroundResource(R.drawable.button_bg_noable);
-				sendButton.setClickable(false);
+				changeSendUnable();
 			}
 		} else {
 			// 如果当前item没有被选中，则进一步判断一下当前mCheckedList长度是否为0，如果为0则变为可点击
 			if (mCheckedList.size() == 0) {
 
-				sendButton.setClickable(true);
-				sendButtonBackground();
-				sendButton.setOnClickListener(new OnClickListener() {
-
-					@Override
-					public void onClick(View v) {
-						reutrnConversationView();
-						mCheckedList.clear();
-						mCheckedNameList.clear();
-					}
-				});
+				changeSendAble();
 			}
 			bean.isCheck = ITEM_CHECKED;
 			button.setChecked(true);

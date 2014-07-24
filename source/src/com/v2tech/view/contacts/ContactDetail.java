@@ -1,5 +1,6 @@
 package com.v2tech.view.contacts;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -13,6 +14,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.os.Parcelable;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.MotionEvent;
@@ -169,9 +171,9 @@ public class ContactDetail extends Activity implements OnTouchListener {
 		return super.onTouchEvent(mv);
 	}
 
-//	@Override
-//	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-//		switch (requestCode) {
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		switch (requestCode) {
 //		case FILE_SELECT_CODE:
 //			if (resultCode == RESULT_OK) {
 //				// Get the Uri of the selected file
@@ -189,9 +191,21 @@ public class ContactDetail extends Activity implements OnTouchListener {
 //				}
 //			}
 //			break;
-//		}
-//		super.onActivityResult(requestCode, resultCode, data);
-//	}
+		case FILE_SELECT_CODE:
+			if(data != null){
+				
+				ArrayList<Parcelable> mCheckedList = data.getParcelableArrayListExtra("checkedFiles");
+				
+				if(mCheckedList != null && mCheckedList.size() > 0){
+					Intent intent = new Intent();
+					intent.putParcelableArrayListExtra("checkedFiles", mCheckedList);
+					setResult(1000 , intent);
+					finish();
+				}
+			}
+		}
+		super.onActivityResult(requestCode, resultCode, data);
+	}
 
 	private void initView() {
 		mHeadIconIV = (ImageView) findViewById(R.id.contact_user_detail_head_icon);
@@ -553,24 +567,8 @@ public class ContactDetail extends Activity implements OnTouchListener {
 		@Override
 		public void onClick(View arg0) {
 			if(SPUtil.checkCurrentAviNetwork(mContext)){
-//				Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-//				intent.setType("*/*");
-//				intent.addCategory(Intent.CATEGORY_OPENABLE);
-//
-//				try {
-//					startActivityForResult(
-//							Intent.createChooser(intent, "Select a File to Upload"),
-//							FILE_SELECT_CODE);
-//				} catch (android.content.ActivityNotFoundException ex) {
-//					Toast.makeText(mContext, "Please install a File Manager.",
-//							Toast.LENGTH_SHORT).show();
-//				}
-//				startActivityForResult(intent, 1000);
 				Intent intent = new Intent(ContactDetail.this , ConversationSelectFileEntry.class);
-				intent.putExtra("obj", new ConversationNotificationObject(
-						Conversation.TYPE_CONTACT, u.getmUserId()));
-				startActivity(intent);
-				finish();
+				startActivityForResult(intent, FILE_SELECT_CODE);
 			}
 			else{
 				
