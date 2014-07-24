@@ -531,7 +531,7 @@ public class P2PConversation extends Activity implements
 			} else if (uad.isVideoType()) {
 				avatarIV = (ImageView) findViewById(R.id.conversation_fragment_video_avatar);
 			}
-		} else if (uad.isConnected() && uad.isAudioType()) {
+		} else if (uad.isAudioType()) {
 			avatarIV = (ImageView) findViewById(R.id.conversation_fragment_voice_avatar);
 		} else if (!uad.isIncoming() && !uad.isConnected()) {
 			avatarIV = (ImageView) findViewById(R.id.conversation_fragment_video_outing_call_avatar);

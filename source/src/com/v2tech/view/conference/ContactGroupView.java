@@ -3,8 +3,10 @@ package com.v2tech.view.conference;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.TextView;
 
 import com.v2tech.R;
@@ -18,11 +20,21 @@ public class ContactGroupView extends LinearLayout {
 	private TextView mGroupNameTV;
 	private TextView mGroupStsTV;
 	private OnClickListener callback;
+	private OnCheckedChangeListener checkBoxCallbackListener;
 
 	public ContactGroupView(Context context, Group g,
 			OnClickListener callbackListener) {
 		super(context);
 		this.callback = callbackListener;
+		initData(g);
+	}
+	
+	
+	public ContactGroupView(Context context, Group g,
+			OnClickListener callbackListener, OnCheckedChangeListener checkBoxCallbackListener) {
+		super(context);
+		this.callback = callbackListener;
+		this.checkBoxCallbackListener = checkBoxCallbackListener;
 		initData(g);
 	}
 
@@ -47,6 +59,13 @@ public class ContactGroupView extends LinearLayout {
 
 		if (this.callback != null) {
 			this.setOnClickListener(this.callback);
+		}
+		
+		if (this.checkBoxCallbackListener  != null) {
+			CheckBox cbView = (CheckBox)view.findViewById(R.id.conf_create_contact_view_ck);
+			cbView.setVisibility(View.VISIBLE);
+			cbView.setOnCheckedChangeListener(checkBoxCallbackListener);
+			cbView.setTag(g);
 		}
 
 		updateUserStatus();
