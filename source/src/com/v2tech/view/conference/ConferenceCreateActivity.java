@@ -12,6 +12,7 @@ import java.util.Locale;
 import java.util.Set;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -402,6 +403,23 @@ public class ConferenceCreateActivity extends Activity {
 		}
 
 	}
+	
+	
+	private ProgressDialog mWaitingDialog;
+
+	private void selectGroup(Group selectGroup, boolean addOrRemove) {
+		List<Group> subGroups = selectGroup.getChildGroup();
+		for ( int i= 0; i < subGroups.size(); i++) {
+			selectGroup(subGroups.get(i), addOrRemove);
+		}
+		List<User> list =selectGroup.getUsers();
+		for (int i = 0; i < list.size(); i ++) {
+			if (addOrRemove) {
+				this.addAttendee(list.get(i));
+			}
+		}
+
+	}
 
 	private OnClickListener removeAttendeeListener = new OnClickListener() {
 
@@ -590,11 +608,15 @@ public class ConferenceCreateActivity extends Activity {
 
 	};
 	
+	/**
+	 * TODO add support for horizontal 
+	 */
 	private OnCheckedChangeListener mGroupCheckBoxListener = new OnCheckedChangeListener() {
 
 		@Override
-		public void onCheckedChanged(CompoundButton cb, boolean arg1) {
-			
+		public void onCheckedChanged(CompoundButton cb, boolean flag) {
+		
+				
 		}
 		
 	};

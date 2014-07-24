@@ -45,6 +45,7 @@ public class GlobalConfig {
 			if (c == '\n') {
 				c += 100;
 			}
+			c += 100;
 			EMOJI_ARRAY.put(GLOBAL_FACE_ARRAY[i], new EmojiWraper(preFix + c+ suffFix,GLOBAL_FACE_ARRAY[i]));
 		}
 	}
