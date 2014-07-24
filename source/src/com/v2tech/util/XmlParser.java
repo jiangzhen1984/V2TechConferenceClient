@@ -82,10 +82,18 @@ public class XmlParser {
 						va = new VMessageFaceItem(vm, index);
 						va.setNewLine(isNewLine);
 					} else if (msgEl.getTagName().equals("TPictureChatItem")) {
+						
+						String uuid = msgEl.getAttribute("GUID");
+						if (uuid == null) {
+							V2Log.e("Invalid uuid ");
+							continue;
+						}
+						VMessageImageItem vii = new VMessageImageItem(vm,
+								uuid,
+								msgEl.getAttribute("FileExt"));
+						vii.setNewLine(isNewLine);
 
 					}
-					
-					
 
 				}
 			}

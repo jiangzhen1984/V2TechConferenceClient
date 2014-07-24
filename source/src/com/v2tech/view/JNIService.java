@@ -497,7 +497,6 @@ public class JNIService extends Service {
 			sendBroadcast(i);
 		}
 
-
 		@Override
 		public void OnCreateCrowdCallback(String sCrowdXml, int nResult) {
 
@@ -687,7 +686,6 @@ public class JNIService extends Service {
 			this.mCallbackHandler = mCallbackHandler;
 		}
 
-
 		@Override
 		public void OnVideoChatInviteCallback(long nGroupID, int nBusinessType,
 				long nFromUserID, String szDeviceID) {
@@ -770,14 +768,14 @@ public class JNIService extends Service {
 			}
 
 			// Record image data meta
-			VMessage cache = new VMessage(fromUser, toUser, new Date());
-			cache.setMsgCode(nBusinessType);
-			XmlParser.extraImageMetaFrom(cache, szXmlText);
-			if (cache.getItems().size() > 0) {
-				synchronized (cacheImageMeta) {
-					cacheImageMeta.add(cache);
-				}
-			}
+			// VMessage cache = new VMessage(fromUser, toUser, new Date());
+			// cache.setMsgCode(nBusinessType);
+			// XmlParser.extraImageMetaFrom(cache, szXmlText);
+			// if (cache.getItems().size() > 0) {
+			// synchronized (cacheImageMeta) {
+			// cacheImageMeta.add(cache);
+			// }
+			// }
 
 			// Record audio data meta
 			VMessage cacheAudio = new VMessage(fromUser, toUser, new Date());
@@ -791,12 +789,19 @@ public class JNIService extends Service {
 
 			VMessage vm = XmlParser.parseForMessage(fromUser, toUser,
 					new Date(), szXmlText);
+			vm.setGroupId(nGroupID);
+			vm.setMsgCode(nBusinessType);
 			if (vm == null || vm.getItems().size() == 0) {
 				return;
 			}
 
-			vm.setGroupId(nGroupID);
-			vm.setMsgCode(nBusinessType);
+			if (vm.getImageItems().size() > 0) {
+				synchronized (cacheImageMeta) {
+					cacheImageMeta.add(vm);
+				}
+				return;
+			}
+
 			Message.obtain(mCallbackHandler, JNI_RECEIVED_MESSAGE, vm)
 					.sendToTarget();
 		}
@@ -809,22 +814,23 @@ public class JNIService extends Service {
 			String uuid = nSeqId;
 			synchronized (cacheImageMeta) {
 				for (VMessage v : cacheImageMeta) {
-					List<VMessageImageItem> items  = v.getImageItems();
-					int receivedCount = 0 ;
-					for (int i =0; i < items.size(); i++) {
-						VMessageImageItem vai  = items.get(i);
-							
+					List<VMessageImageItem> items = v.getImageItems();
+					int receivedCount = 0;
+					for (int i = 0; i < items.size(); i++) {
+						VMessageImageItem vai = items.get(i);
+
 						VMessageImageItem vait = (VMessageImageItem) vai;
 						if (vait.isReceived()) {
-							receivedCount ++;
+							receivedCount++;
 							continue;
 						}
 						if (vait.getUUID().equals(uuid)) {
 							receivedCount++;
 							vm = v;
-							
-							String filePath = GlobalConfig.getGlobalPicsPath() + "/"
-									+ vait.getUUID() + vait.getExtension();
+
+							String filePath = GlobalConfig.getGlobalPicsPath()
+									+ "/" + vait.getUUID()
+									+ vait.getExtension();
 							vait.setFilePath(filePath);
 
 							File f = new File(filePath);
@@ -845,12 +851,12 @@ public class JNIService extends Service {
 									}
 								}
 							}
-							
+
 							vait.setReceived(true);
 							continue;
 						}
 					}
-					
+
 					if (receivedCount == items.size()) {
 						cacheImageMeta.remove(v);
 						isCache = true;

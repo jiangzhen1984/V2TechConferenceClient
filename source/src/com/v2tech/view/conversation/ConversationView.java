@@ -105,6 +105,7 @@ public class ConversationView extends Activity {
 	private static final int VOICE_DIALOG_FLAG_CANCEL = 2;
 	private static final int VOICE_DIALOG_FLAG_WARING_FOR_TIME_TOO_SHORT = 3;
 	private static final String TAG = "ConversationView";
+	protected static final int RECEIVE_SELECTED_FILE = 1000;
 
 	private int offset = 0;
 
@@ -243,9 +244,6 @@ public class ConversationView extends Activity {
 			backEndHandler = new BackendHandler(thread.getLooper());
 		}
 
-		Intent intent = getIntent();
-		mCheckedList = intent.getParcelableArrayListExtra("checkedFiles");
-
 		initExtraObject();
 
 		// Register listener for avatar changed
@@ -292,12 +290,6 @@ public class ConversationView extends Activity {
 			pending = false;
 			scrollToBottom();
 		}
-
-		if (mCheckedList != null && mCheckedList.size() > 0) {
-			startSendMoreFile();
-			mCheckedList = null;
-		}
-
 	}
 
 	@Override
@@ -513,20 +505,6 @@ public class ConversationView extends Activity {
 		} else if (flag == VOICE_DIALOG_FLAG_RECORDING) {
 			if (mSpeakingLayout != null) {
 				mSpeakingLayout.setVisibility(View.VISIBLE);
-
-				int duration = (int) (System.currentTimeMillis() - starttime) / 1000;
-				TextView tips = (TextView) mSpeakingLayout
-						.findViewById(R.id.message_voice_dialog_listening_container_tips);
-				if (duration > 50) {
-					String str = mContext.getText(
-							R.string.contact_message_tips_rest_seconds)
-							.toString();
-					str = str.replace("[]", (59 - duration) + "");
-					tips.setText(str);
-				} else {
-					tips.setText(R.string.contact_message_voice_dialog_text);
-				}
-
 			}
 			if (mPreparedCancelLayout != null) {
 				mPreparedCancelLayout.setVisibility(View.GONE);
@@ -730,7 +708,7 @@ public class ConversationView extends Activity {
 				// Start update db for voice
 				lh.postDelayed(mUpdateMicStatusTimer, 200);
 				// Start timer
-				lh.postDelayed(timeOutMonitor, 59000);
+				lh.postDelayed(timeOutMonitor, 59 * 1000);
 				starttime = System.currentTimeMillis();
 				voiceIsSentByTimer = false;
 			} else if (event.getAction() == MotionEvent.ACTION_MOVE) {
@@ -746,9 +724,6 @@ public class ConversationView extends Activity {
 
 			} else if (event.getAction() == MotionEvent.ACTION_UP) {
 				if (voiceIsSentByTimer) {
-					//Recover text for button
-					mButtonRecordAudio
-					.setText(R.string.contact_message_button_send_audio_msg);
 					return false;
 				}
 				stopRecording();
@@ -913,9 +888,9 @@ public class ConversationView extends Activity {
 			if (SPUtil.checkCurrentAviNetwork(mContext)) {
 				Intent intent = new Intent(ConversationView.this,
 						ConversationSelectFileEntry.class);
-				intent.putExtra("obj", cov);
-				startActivity(intent);
-				// startActivityForResult(intent, 1000);
+				startActivityForResult(intent, RECEIVE_SELECTED_FILE);
+				// intent.putExtra("obj", cov);
+				// startActivity(intent);
 				// finishWork();
 				// finish();
 			} else {
@@ -1014,24 +989,16 @@ public class ConversationView extends Activity {
 				// Send message to server
 				sendMessageToRemote(vim);
 			}
-		}
-		// else if (requestCode == FILE_SELECT_CODE) {
-		// if (resultCode == RESULT_OK) {
-		// // Get the Uri of the selected file
-		// Uri uri = data.getData();
-		// String path = SPUtil.getPath(this, uri);
-		// if (path == null) {
-		// Toast.makeText(
-		// mContext,
-		// R.string.contacts_user_detail_file_selection_not_found_path,
-		// Toast.LENGTH_SHORT).show();
-		// } else {
-		//
-		// sendSelectedFile(path);
-		// }
-		// }
-		// }
-		else if (requestCode == 1000) {
+		} else if (requestCode == RECEIVE_SELECTED_FILE) {
+
+			if (data != null) {
+
+				mCheckedList = data.getParcelableArrayListExtra("checkedFiles");
+				if (mCheckedList != null && mCheckedList.size() > 0) {
+					startSendMoreFile();
+					mCheckedList = null;
+				}
+			}
 
 		}
 	}
@@ -1321,6 +1288,29 @@ public class ConversationView extends Activity {
 
 		}
 
+		@Override
+		public void requestPauseDownloadFile(View v, VMessage vm,
+				VMessageFileItem vfi) {
+			if (vfi == null) {
+				return;
+			}
+
+			mChat.updateFileOperation(vfi,
+					ChatService.OPERATION_PAUSE_DOWNLOADING, null);
+			vfi.setState(VMessageFileItem.STATE_FILE_PAUSED_DOWNLOADING);
+		}
+
+		@Override
+		public void requestResumeDownloadFile(View v, VMessage vm,
+				VMessageFileItem vfi) {
+			if (vfi == null) {
+				return;
+			}
+			mChat.updateFileOperation(vfi,
+					ChatService.OPERATION_RESUME_DOWNLOAD, null);
+			vfi.setState(VMessageFileItem.STATE_FILE_DOWNLOADING);
+		}
+
 	};
 
 	private List<VMessage> loadMessages() {
@@ -1454,10 +1444,8 @@ public class ConversationView extends Activity {
 			i.putExtra("uid", user2Id);
 			i.putExtra("obj", cov);
 			i.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-			mContext.startActivity(i);
+			startActivityForResult(i, RECEIVE_SELECTED_FILE);
 			// 跳转到联系人信息页面，需要finish掉当前页面，不然发送文件会重新创建该页面，而以前的页面没有销毁
-			finishWork();
-			finish();
 		}
 
 	};

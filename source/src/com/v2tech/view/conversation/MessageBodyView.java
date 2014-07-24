@@ -64,7 +64,7 @@ public class MessageBodyView extends LinearLayout {
 	private Handler localHandler;
 	private Runnable popupWindowListener = null;
 	private PopupWindow pw;
-	
+
 	private long lastUpdateTime;
 
 	private ClickListener callback;
@@ -81,6 +81,12 @@ public class MessageBodyView extends LinearLayout {
 		public void requestStopAudio(View v, VMessage vm, VMessageAudioItem vai);
 
 		public void requestDownloadFile(View v, VMessage vm,
+				VMessageFileItem vfi);
+
+		public void requestPauseDownloadFile(View v, VMessage vm,
+				VMessageFileItem vfi);
+
+		public void requestResumeDownloadFile(View v, VMessage vm,
 				VMessageFileItem vfi);
 
 		public void requestPauseTransFile(View v, VMessage vm,
@@ -560,8 +566,8 @@ public class MessageBodyView extends LinearLayout {
 				vfi.setSpeed(100.0F);
 				lastUpdateTime = System.currentTimeMillis();
 			} else {
-				long sec = (System.currentTimeMillis() - lastUpdateTime) /1000;
-				vfi.setSpeed(sec == 0 ? 0: (vfi.getDownloadedSize()/sec));
+				long sec = (System.currentTimeMillis() - lastUpdateTime) / 1000;
+				vfi.setSpeed(sec == 0 ? 0 : (vfi.getDownloadedSize() / sec));
 			}
 			speed.setText(vfi.getSpeed() + "K");
 
@@ -659,17 +665,17 @@ public class MessageBodyView extends LinearLayout {
 		public void onClick(View view) {
 			VMessageFileItem item = (VMessageFileItem) view.getTag();
 
-			if (item.getState() == VMessageFileItem.STATE_FILE_UNDOWNLOAD) {
-				if (callback != null) {
+			if (callback != null) {
+				if (item.getState() == VMessageFileItem.STATE_FILE_UNDOWNLOAD) {
 					callback.requestDownloadFile(view, item.getVm(), item);
-				}
-			} else if (item.getState() == VMessageFileItem.STATE_FILE_SENDING) {
-				if (callback != null) {
+				} else if (item.getState() == VMessageFileItem.STATE_FILE_SENDING) {
 					callback.requestPauseTransFile(view, item.getVm(), item);
-				}
-			} else if (item.getState() == VMessageFileItem.STATE_FILE_PAUSED_SENDING) {
-				if (callback != null) {
+				} else if (item.getState() == VMessageFileItem.STATE_FILE_PAUSED_SENDING) {
 					callback.requestResumeTransFile(view, item.getVm(), item);
+				} else if (item.getState() == VMessageFileItem.STATE_FILE_DOWNLOADING) {
+					callback.requestPauseDownloadFile(view, item.getVm(), item);
+				}else if (item.getState() == VMessageFileItem.STATE_FILE_PAUSED_DOWNLOADING) {
+					callback.requestResumeDownloadFile(view, item.getVm(), item);
 				}
 			}
 

@@ -684,12 +684,14 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher {
 	}
 	
 	
-	private void updateConferenceNotification(long gid, String gname, String uname) {
+	private void updateConferenceNotification(Conference conf) {
 		Intent enterConference = new Intent(mContext,
 				VideoActivityV2.class);
-		enterConference.putExtra("conf", new Conference(gid));
-		Notificator.updateSystemNotification(mContext,uname
-				+ " 会议邀请:", gname, 1, enterConference,
+		
+		User creator = GlobalHolder.getInstance().getUser(conf.getCreator());
+		enterConference.putExtra("conf", conf);
+		Notificator.updateSystemNotification(mContext,conf.getName()
+				+ " 会议邀请:", creator == null?"":creator.getName(), 1, enterConference,
 				PublicIntent.VIDEO_NOTIFICATION_ID);
 
 	}
@@ -914,8 +916,14 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher {
 					g.setOwnerUser(GlobalHolder.getInstance().getUser(
 							g.getOwner()));
 					addConversation(g, true);
+
+					Conference c = new Conference(gid);
+					c.setCreator(g.getOwner());
+					c.setChairman(g.getOwner());
+					c.setName(g.getName());
+					
 					//Notify status bar
-					updateConferenceNotification(gid, g.getName(), g.getOwnerUser() ==null? "" : g.getOwnerUser().getName());
+					updateConferenceNotification(c);
 				} else {
 					V2Log.e("Can not get group information of invatition :"
 							+ gid);
