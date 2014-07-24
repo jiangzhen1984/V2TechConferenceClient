@@ -5,6 +5,7 @@ import java.util.ArrayList;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -16,15 +17,21 @@ import com.v2tech.view.bo.ConversationNotificationObject;
 
 public class ConversationSelectFileEntry extends Activity implements OnClickListener{
 
+	
+	private static final int CANCEL = 0;
+	private static final int NORMAL_SELECT_FILE = 1;
+	private static final int SEND_SELECT_FILE = 3;
+	
 	private RelativeLayout entryImage;
 	private RelativeLayout entryFile;
 	private TextView backKey;
-	private ConversationNotificationObject cov;
 	private ArrayList<FileInfoBean> mCheckedList;
 	
 	private TextView selectedFileSize;
 	private TextView sendButton;
 	private long totalSize;
+	private long lastTotal;
+	private int lastSize;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -32,25 +39,9 @@ public class ConversationSelectFileEntry extends Activity implements OnClickList
 		setContentView(R.layout.activity_selectfile_entry);
 		
 		findview();
+		mCheckedList = new ArrayList<FileInfoBean>();
 		
-		Intent intent = getIntent();
-		cov = intent.getParcelableExtra("obj");
-		mCheckedList = intent.getParcelableArrayListExtra("checkedFiles");
-		if(mCheckedList == null){
-			mCheckedList = new ArrayList<FileInfoBean>();
-		}
-		else if(mCheckedList != null && mCheckedList.size() > 0){
-			
-			sendButton.setClickable(true);
-			sendButton.setOnClickListener(this);
-			sendButton.setBackgroundResource(R.drawable.conversation_selectfile_send_able);
-			for (FileInfoBean bean : mCheckedList) {
-				
-				totalSize += bean.fileSize;
-			}
-			selectedFileSize.setText("已选" + getFileSize(totalSize));
-			sendButton.setText("发送("+mCheckedList.size()+")");
-		}
+		
 	}
 
 	private void findview() {
@@ -72,33 +63,77 @@ public class ConversationSelectFileEntry extends Activity implements OnClickList
 	public void onClick(View v) {
 		
 		Intent intent = new Intent(this , ConversationSelectFile.class);
-		intent.putExtra("obj", cov);
 		intent.putParcelableArrayListExtra("checkedFiles", mCheckedList);
 		switch (v.getId()) {
 			case R.id.selectfile_entry_image:
 				intent.putExtra("type", "image");
-				startActivity(intent);
+				startActivityForResult(intent, NORMAL_SELECT_FILE);
 				break;
 			case R.id.selectfile_entry_file:
 				intent.putExtra("type", "file");
-				startActivity(intent);
+				startActivityForResult(intent, NORMAL_SELECT_FILE);
 				break;
 			case R.id.selectfile_back:
-				Intent backIntent = new Intent(this , ConversationView.class);
-				backIntent.putExtra("obj", cov);
-				startActivity(backIntent);
+				setResult(1000);
+				mCheckedList.clear();
+				finish();
 				break;
 			case R.id.selectfile_message_send:
-				mCheckedList.clear();
-				Intent sendIntent = new Intent(this , ConversationView.class);
+				Intent sendIntent = new Intent();
 				sendIntent.putParcelableArrayListExtra("checkedFiles", mCheckedList);
-				sendIntent.putExtra("obj", cov);
-				startActivity(sendIntent);
+				setResult(1000 , sendIntent);
+				mCheckedList.clear();
+				finish();
 			default:
 				break;
 		}
-		mCheckedList.clear();
-		finish();
+	}
+	
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+		switch (resultCode) {
+			case NORMAL_SELECT_FILE:
+				mCheckedList = data.getParcelableArrayListExtra("checkedFiles");
+				if(mCheckedList != null && mCheckedList.size() > 0 && mCheckedList.size() != lastSize){
+					
+					totalSize = 0;
+					lastSize = mCheckedList.size();
+					sendButton.setClickable(true);
+					sendButton.setOnClickListener(this);
+					sendButton.setTextColor(Color.WHITE);
+					sendButton.setBackgroundResource(R.drawable.conversation_selectfile_send_able);
+					for (FileInfoBean bean : mCheckedList) {
+						
+						totalSize += bean.fileSize;
+					}
+					selectedFileSize.setText("已选" + getFileSize(totalSize));
+					sendButton.setText("发送("+mCheckedList.size()+")");
+				}
+				else if(mCheckedList != null && mCheckedList.size() == 0){
+					lastSize = 0;
+					sendButton.setClickable(false);
+					sendButton.setOnClickListener(this);
+					sendButton.setTextColor(Color.GRAY);
+					sendButton.setBackgroundResource(R.drawable.button_bg_noable);
+					selectedFileSize.setText("已选0.0K");
+					sendButton.setText("发送( 0 )");
+				} 
+				break;
+			case CANCEL:
+				setResult(1000);
+				finish();
+				break;
+			case SEND_SELECT_FILE:
+				mCheckedList = data.getParcelableArrayListExtra("checkedFiles");
+				Intent sendIntent = new Intent();
+				sendIntent.putParcelableArrayListExtra("checkedFiles", mCheckedList);
+				setResult(1000 , sendIntent);
+				finish();
+				break;
+			default:
+				break;
+		}	
 	}
 	
 	/**

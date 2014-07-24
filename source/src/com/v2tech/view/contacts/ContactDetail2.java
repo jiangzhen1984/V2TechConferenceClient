@@ -1,5 +1,8 @@
 package com.v2tech.view.contacts;
 
+import java.util.List;
+import java.util.Set;
+
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
@@ -20,6 +23,8 @@ import com.v2tech.R;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.service.Registrant;
 import com.v2tech.service.UserService;
+import com.v2tech.vo.Group;
+import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.User;
 
 public class ContactDetail2 extends Activity implements OnTouchListener {
@@ -55,6 +60,8 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 	private View mAddContactButton;
 
 	private boolean isUpdating;
+	private User currentUser;
+	private boolean isCanelFriend;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -69,6 +76,18 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 		mNickNameET = (EditText) findViewById(R.id.contact_user_detail_nick_name_et);
 		this.overridePendingTransition(R.animator.alpha_from_0_to_1,
 				R.animator.alpha_from_1_to_0);
+		
+		currentUser = GlobalHolder.getInstance().getCurrentUser();
+		List<Group> friendGroup = GlobalHolder.getInstance().getGroup(GroupType.CONTACT);
+		for (Group group : friendGroup) {
+			if(group.findUser(u, group)){
+				isCanelFriend = true;
+			}
+		}
+		
+		if(isCanelFriend == true){
+			mAddContactButton.setVisibility(View.GONE);
+		}
 	}
 
 	@Override
