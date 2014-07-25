@@ -42,9 +42,9 @@ public class MessageBuilder {
 	}
 
 	public static VMessage buildFileMessage(User fromUser, User toUser,
-			String filePath) {
+			String filePath , int fileType) {
 		VMessage vm = new VMessage(0, fromUser, toUser);
-		new VMessageFileItem(vm, filePath);
+		new VMessageFileItem(vm, filePath , fileType);
 		return vm;
 	}
 

@@ -1620,12 +1620,12 @@ public class ConversationView extends Activity {
 	/**
 	 * get selected file path to send remote.
 	 */
-	public void sendSelectedFile(String selectPath) {
+	public void sendSelectedFile(String selectPath , int fileType) {
 		
 		if (!TextUtils.isEmpty(selectPath)) {
 
 			VMessage vim = MessageBuilder.buildFileMessage(local, remote,
-					selectPath);
+					selectPath , fileType);
 			VMessageFileItem vfi = vim.getFileItems().get(0);
 			vfi.setState(VMessageFileItem.STATE_FILE_SENDING);
 			sendMessageToRemote(vim);
@@ -1636,7 +1636,7 @@ public class ConversationView extends Activity {
 		
 		for (int i = 0; i < mCheckedList.size(); i++) {
 			
-			sendSelectedFile(mCheckedList.get(i).filePath);
+			sendSelectedFile(mCheckedList.get(i).filePath , mCheckedList.get(i).fileType);
 		}
 	}
 

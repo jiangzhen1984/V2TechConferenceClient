@@ -43,6 +43,17 @@ import com.v2tech.vo.VMessageTextItem;
 
 public class MessageBodyView extends LinearLayout {
 
+	private static final int PICTURE = 1;
+	private static final int WORD = 2;
+	private static final int EXCEL = 3;
+	private static final int PDF = 4;
+	private static final int PPT = 5;
+	private static final int ZIP = 6;
+	private static final int VIS = 7;
+	private static final int VIDEO = 8;
+	private static final int SOUND = 9;
+	private static final int OTHER = 10;
+
 	private VMessage mMsg;
 
 	private ImageView mHeadIcon;
@@ -64,7 +75,7 @@ public class MessageBodyView extends LinearLayout {
 	private Handler localHandler;
 	private Runnable popupWindowListener = null;
 	private PopupWindow pw;
-	
+
 	private long lastUpdateTime;
 
 	private ClickListener callback;
@@ -361,9 +372,13 @@ public class MessageBodyView extends LinearLayout {
 		final VMessageFileItem item = fileItems.get(0);
 		View fileRootView = LayoutInflater.from(getContext()).inflate(
 				R.layout.message_body_file_item, null, false);
+		ImageView fileIcon = (ImageView) fileRootView
+				.findViewById(R.id.message_body_file_item_icon_ly);
 		TextView fileName = (TextView) fileRootView
 				.findViewById(R.id.message_body_file_item_file_name);
 		fileName.setText(item.getFileName());
+
+		adapterFileIcon(item.getFileType(), fileIcon);
 
 		TextView fileSize = (TextView) fileRootView
 				.findViewById(R.id.message_body_file_item_file_size);
@@ -378,6 +393,42 @@ public class MessageBodyView extends LinearLayout {
 				LinearLayout.LayoutParams.WRAP_CONTENT,
 				LinearLayout.LayoutParams.WRAP_CONTENT));
 
+	}
+
+	private void adapterFileIcon(int fileType, ImageView fileIcon) {
+
+		switch (fileType) {
+		case PICTURE:
+			fileIcon.setBackgroundResource(R.drawable.selectfile_type_picture);
+			break;
+		case WORD:
+			fileIcon.setBackgroundResource(R.drawable.selectfile_type_word);
+			break;
+		case EXCEL:
+			fileIcon.setBackgroundResource(R.drawable.selectfile_type_excel);
+			break;
+		case PDF:
+			fileIcon.setBackgroundResource(R.drawable.selectfile_type_pdf);
+			break;
+		case PPT:
+			fileIcon.setBackgroundResource(R.drawable.selectfile_type_ppt);
+			break;
+		case ZIP:
+			fileIcon.setBackgroundResource(R.drawable.selectfile_type_zip);
+			break;
+		case VIS:
+			fileIcon.setBackgroundResource(R.drawable.selectfile_type_viso);
+			break;
+		case VIDEO:
+			fileIcon.setBackgroundResource(R.drawable.selectfile_type_video);
+			break;
+		case SOUND:
+			fileIcon.setBackgroundResource(R.drawable.selectfile_type_sound);
+			break;
+		case OTHER:
+			fileIcon.setBackgroundResource(R.drawable.selectfile_type_ohter);
+			break;
+		}
 	}
 
 	private void updateSelectedBg(boolean selected) {
@@ -560,8 +611,8 @@ public class MessageBodyView extends LinearLayout {
 				vfi.setSpeed(100.0F);
 				lastUpdateTime = System.currentTimeMillis();
 			} else {
-				long sec = (System.currentTimeMillis() - lastUpdateTime) /1000;
-				vfi.setSpeed(sec == 0 ? 0: (vfi.getDownloadedSize()/sec));
+				long sec = (System.currentTimeMillis() - lastUpdateTime) / 1000;
+				vfi.setSpeed(sec == 0 ? 0 : (vfi.getDownloadedSize() / sec));
 			}
 			speed.setText(vfi.getSpeed() + "K");
 

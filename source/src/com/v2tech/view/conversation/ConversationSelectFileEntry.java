@@ -13,7 +13,6 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.v2tech.R;
-import com.v2tech.view.bo.ConversationNotificationObject;
 
 public class ConversationSelectFileEntry extends Activity implements OnClickListener{
 
@@ -30,8 +29,7 @@ public class ConversationSelectFileEntry extends Activity implements OnClickList
 	private TextView selectedFileSize;
 	private TextView sendButton;
 	private long totalSize;
-	private long lastTotal;
-	private int lastSize;
+	private int lastSize; //通过该变量来判断是否要累加totalSize
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {

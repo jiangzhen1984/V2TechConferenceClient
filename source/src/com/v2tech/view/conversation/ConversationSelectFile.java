@@ -45,7 +45,6 @@ import android.widget.TextView;
 import com.v2tech.R;
 import com.v2tech.util.StorageUtil;
 import com.v2tech.util.V2Log;
-import com.v2tech.view.bo.ConversationNotificationObject;
 
 public class ConversationSelectFile extends Activity {
 
@@ -78,11 +77,9 @@ public class ConversationSelectFile extends Activity {
 
 	private FileListAdapter adapter;
 	private ImageListAdapter imageAdapter;
-	private ConversationNotificationObject cov;
 	private String type;
 	private int mScreenHeight;
 	private int mScreenWidth;
-	private int count = 0;
 	private Handler handler = new Handler() {
 
 		public void handleMessage(Message msg) {
@@ -112,7 +109,7 @@ public class ConversationSelectFile extends Activity {
 				if (cach != null) {
 					cach.fileIcon.setImageResource(R.drawable.ic_launcher);
 				}
-				((Bitmap)msg.obj).recycle();
+				((Bitmap) msg.obj).recycle();
 				break;
 			default:
 				break;
@@ -174,7 +171,7 @@ public class ConversationSelectFile extends Activity {
 			selectedFileSize.setText("已选" + getFileSize(totalSize));
 			sendButton.setText("发送(" + mCheckedList.size() + ")");
 		}
-		
+
 		if ("image".equals(type)) {
 			titleText.setText("图片");
 			filesList.setVisibility(View.GONE);
@@ -361,8 +358,8 @@ public class ConversationSelectFile extends Activity {
 				bean.fileSize = Long.valueOf(cursor.getString(cursor
 						.getColumnIndex(MediaStore.Images.Media.SIZE)));
 				bean.fileName = cursor.getString(cursor
-						.getColumnIndex(MediaStore.Images.Media.DISPLAY_NAME));	
-				if(mCheckedNameList.contains(bean.fileName)){
+						.getColumnIndex(MediaStore.Images.Media.DISPLAY_NAME));
+				if (mCheckedNameList.contains(bean.fileName)) {
 					bean.isCheck = ITEM_CHECKED;
 				}
 				mFileLists.add(bean);
@@ -410,8 +407,8 @@ public class ConversationSelectFile extends Activity {
 				mFolderLists.add(file);
 				file.isDir = true;
 			} else {
-				
-				if(mCheckedNameList.contains(file.fileName)){
+				adapterFileIcon(file.fileName, null, file);
+				if (mCheckedNameList.contains(file.fileName)) {
 					file.isCheck = ITEM_CHECKED;
 				}
 				mFileLists.add(file);
@@ -501,14 +498,15 @@ public class ConversationSelectFile extends Activity {
 					holder.fileCheck.setChecked(false);
 				}
 
-				adapterFileIcon(mFileLists.get(position
-						- mFolderLists.size()).fileName , holder);
+				adapterFileIcon(
+						mFileLists.get(position - mFolderLists.size()).fileName,
+						holder, null);
 				holder.fileCheck.setVisibility(View.VISIBLE);
 				holder.fileArrow.setVisibility(View.GONE);
 				holder.fileFolderName.setText(mFileLists.get(position
 						- mFolderLists.size()).fileName);
 			} else {
-				
+
 				holder.fileIcon.setImageResource(R.drawable.selectfile_folder);
 				holder.fileFolderName
 						.setText(mFolderLists.get(position).fileName);
@@ -583,18 +581,17 @@ public class ConversationSelectFile extends Activity {
 									try {
 
 										Bitmap bitmap = handlerImage(fb.filePath);
-										if (fb.fileName == null && bitmap != null) {
+										if (fb.fileName == null
+												&& bitmap != null) {
 											bitmap.recycle();
 											return;
 										}
-										
+
 										if (bitmap == null) {
 											V2Log.e("Can not extra bitmap ");
 											return;
 										}
-										bitmapLru.put(
-												fb.fileName,
-												bitmap);
+										bitmapLru.put(fb.fileName, bitmap);
 										Message.obtain(handler, UPDATE_BITMAP,
 												new Object[] { holder, bitmap })
 												.sendToTarget();
@@ -604,7 +601,8 @@ public class ConversationSelectFile extends Activity {
 								}
 							});
 						}
-					}.start();;
+					}.start();
+					;
 
 				} else {
 					// 加载中显示的图片
@@ -637,10 +635,10 @@ public class ConversationSelectFile extends Activity {
 	}
 
 	private void reutrnResult(int resultCode) {
-		
+
 		Intent intent = new Intent();
 		intent.putParcelableArrayListExtra("checkedFiles", mCheckedList);
-		setResult(resultCode , intent);
+		setResult(resultCode, intent);
 		mFileLists.clear();
 		mCheckedNameList.clear();
 		if ("file".equals(type) && mFolderLists != null) {
@@ -650,17 +648,96 @@ public class ConversationSelectFile extends Activity {
 		finish();
 	}
 
-	public void adapterFileIcon(String fileName , ViewHolder holder) {
-		
-		if(fileName.endsWith(".jpg")){
-			
-			holder.fileIcon.setImageResource(R.drawable.selectfile_type_picture);
-		}
-		else if(fileName.endsWith(".txt")){
-			holder.fileIcon.setImageResource(R.drawable.selectfile_type_word);
-		}
-		else{
-			holder.fileIcon.setImageResource(R.drawable.selectfile_type_ohter);
+	public void adapterFileIcon(String fileName, ViewHolder holder,
+			FileInfoBean file) {
+
+		if (fileName.endsWith(".jpg") || fileName.endsWith(".png")
+				|| fileName.endsWith(".jpeg") || fileName.endsWith(".bmp")
+				|| fileName.endsWith("gif")) {
+
+			if (holder != null) {
+				holder.fileIcon
+						.setImageResource(R.drawable.selectfile_type_picture);
+			} else if (file != null) {
+				file.fileType = 1;
+			}
+
+		} else if (fileName.endsWith(".doc")) {
+
+			if (holder != null) {
+				holder.fileIcon
+						.setImageResource(R.drawable.selectfile_type_word);
+			} else if (file != null) {
+				file.fileType = 2;
+			}
+
+		} else if (fileName.endsWith(".xls")) {
+			if(holder != null){
+				holder.fileIcon
+				.setImageResource(R.drawable.selectfile_type_excel);
+			}
+			else if(file != null){
+				file.fileType = 3;
+			}
+		} else if (fileName.endsWith(".pdf")) {
+			if(holder != null){
+				holder.fileIcon
+				.setImageResource(R.drawable.selectfile_type_pdf);
+			}
+			else if(file != null){
+				file.fileType = 4;
+			}
+		} else if (fileName.endsWith(".ppt") || fileName.endsWith(".pptx")) {
+			if(holder != null){
+				holder.fileIcon
+				.setImageResource(R.drawable.selectfile_type_ppt);
+			}
+			else if(file != null){
+				file.fileType = 5;
+			}
+		} else if (fileName.endsWith(".zip") || fileName.endsWith(".rar")) {
+			if(holder != null){
+				holder.fileIcon
+				.setImageResource(R.drawable.selectfile_type_zip);
+			}
+			else if(file != null){
+				file.fileType = 6;
+			}
+		} else if (fileName.endsWith(".vsd") || fileName.endsWith(".vss")
+				|| fileName.endsWith(".vst") || fileName.endsWith(".vdx")) {
+			if(holder != null){
+				holder.fileIcon
+				.setImageResource(R.drawable.selectfile_type_viso);
+			}
+			else if(file != null){
+				file.fileType = 7;
+			}
+		} else if (fileName.endsWith(".mp4") || fileName.endsWith(".rmvb")
+				|| fileName.endsWith(".avi") || fileName.endsWith(".3gp")) {
+			if(holder != null){
+				holder.fileIcon
+				.setImageResource(R.drawable.selectfile_type_video);
+			}
+			else if(file != null){
+				file.fileType = 8;
+			}
+		} else if (fileName.endsWith(".mp3") || fileName.endsWith(".wav")
+				|| fileName.endsWith(".ape") || fileName.endsWith(".wmv")) {
+			if(holder != null){
+				holder.fileIcon
+				.setImageResource(R.drawable.selectfile_type_sound);
+			}
+			else if(file != null){
+				file.fileType = 9;
+			}
+		} else {
+			if(holder != null){
+				holder.fileIcon
+				.setImageResource(R.drawable.selectfile_type_ohter);
+			}
+			else if(file != null){
+				file.fileType = 10;
+			}
 		}
 	}
 
@@ -688,8 +765,8 @@ public class ConversationSelectFile extends Activity {
 		if (button.isChecked()) {
 			button.setChecked(false);
 			bean.isCheck = ITEM_UNCHECKED;
-			for (int i = 0 ; i < mCheckedList.size() ; i++) {
-				if(mCheckedList.get(i).fileName.equals(bean.fileName)){
+			for (int i = 0; i < mCheckedList.size(); i++) {
+				if (mCheckedList.get(i).fileName.equals(bean.fileName)) {
 					mCheckedList.remove(i);
 				}
 			}

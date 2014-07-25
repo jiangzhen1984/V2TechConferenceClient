@@ -19,6 +19,17 @@ public class VMessageFileItem extends VMessageAbstractItem {
 	
 	private float speed;
 	
+	private int fileType;
+	
+	public int getFileType() {
+		return fileType;
+	}
+
+	public void setFileType(int fileType) {
+		this.fileType = fileType;
+	}
+
+
 	//Always send offline file
 	private int transType = 2;
 	
@@ -37,6 +48,21 @@ public class VMessageFileItem extends VMessageAbstractItem {
 		this.uuid = UUID.randomUUID().toString();
 	}
 	
+	public VMessageFileItem(VMessage vm, String filePath , int fileType) {
+		super(vm);
+		this.filePath = filePath;
+		if (filePath != null) {
+			int start = filePath.lastIndexOf("/");
+			if (start != -1) {
+				this.fileName = filePath.substring(start+1);
+			}
+			File f = new File(filePath);
+			fileSize = f.length();
+		}
+		this.type = VMessageAbstractItem.ITEM_TYPE_FILE;
+		this.uuid = UUID.randomUUID().toString();
+		this.fileType = fileType;
+	}
 	
 	public VMessageFileItem(VMessage vm, String uuid, String fileName) {
 		super(vm);
