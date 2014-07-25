@@ -2056,8 +2056,7 @@ public class VideoActivityV2 extends Activity {
 			case NOTIFICATION_KICKED: {
 				int r = msg.arg1;
 				int resource = R.string.conversations_kick_notification;
-				// FIXME use error code for user deleted conf
-				if (r == 204) {
+				if (r == V2GlobalEnum.CONF_CODE_DELETED) {
 					resource = R.string.confs_is_deleted_notification;
 				}
 				Toast.makeText(mContext, resource, Toast.LENGTH_LONG).show();

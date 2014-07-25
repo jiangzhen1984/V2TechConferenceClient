@@ -133,19 +133,15 @@ public class VMessageImageItem extends VMessageAbstractItem {
 		if (mFullQualityBitmap == null || mFullQualityBitmap.isRecycled()) {
 			BitmapFactory.Options options = new BitmapFactory.Options();
 			options.inJustDecodeBounds = true;
-			options.inPreferredConfig = Config.ALPHA_8;
+			options.inPreferredConfig = Config.RGB_565;
 			options.inDither = true;
 			BitmapFactory.decodeFile(this.filePath, options);
 			options.inJustDecodeBounds = false;
 			if (options.outWidth > 1920 || options.outHeight > 1080) {
-				options.inSampleSize = 4;
-				mFullQualityBitmap = BitmapFactory.decodeFile(this.filePath,
-						options);
-			} else if (options.outWidth > 800 || options.outHeight > 600) {
 				options.inSampleSize = 2;
 				mFullQualityBitmap = BitmapFactory.decodeFile(this.filePath,
 						options);
-			} else {
+			}  else {
 				options.inSampleSize = 1;
 				mFullQualityBitmap = BitmapFactory.decodeFile(this.filePath,
 						options);

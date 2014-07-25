@@ -27,7 +27,6 @@ import android.os.Handler;
 import com.V2.jni.AudioRequest;
 import com.V2.jni.ChatRequest;
 import com.V2.jni.ConfRequest;
-import com.V2.jni.ConfigRequest;
 import com.V2.jni.FileRequest;
 import com.V2.jni.GroupRequest;
 import com.V2.jni.ImRequest;
@@ -219,6 +218,7 @@ public class MainApplication extends Application {
 		V2Log.e("=================== low memeory :");
 	}
 
+	@TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
 	@Override
 	public void onTrimMemory(int level) {
 		super.onTrimMemory(level);
