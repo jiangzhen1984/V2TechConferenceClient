@@ -427,6 +427,10 @@ public class ContactDetail extends Activity implements OnTouchListener {
 					tv1.setOnClickListener(itemClickListener);
 					tv1.setText(nums[1]);
 					tv1.setTag(nums[1]);
+					
+					if(tv1.getVisibility() == View.GONE){
+						tv1.setVisibility(View.VISIBLE);
+					}
 				}
 				return;
 			}
@@ -445,6 +449,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 					startActivity(intent);
 
 				} else {
+					
 					Intent intent = new Intent();
 					intent.setAction(Intent.ACTION_CALL);
 					intent.setData(Uri.parse("tel:" + (String) view.getTag()));
