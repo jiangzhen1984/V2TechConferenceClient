@@ -27,6 +27,8 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.SpannableStringBuilder;
@@ -176,6 +178,8 @@ public class ConversationView extends Activity {
 	private ArrayList<FileInfoBean> mCheckedList;
 
 	private ConversationNotificationObject cov = null;
+	
+	private boolean reStart;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -183,9 +187,11 @@ public class ConversationView extends Activity {
 		mContext = this;
 
 		setContentView(R.layout.activity_contact_message);
-
+		
+		GlobalConfig.isConversationOpen = true;
+		
 		lh = new LocalHandler();
-
+		
 		mMessagesContainer = (ListView) findViewById(R.id.conversation_message_list);
 		adapter = new CommonAdapter(messageArray, mConvertListener);
 		mMessagesContainer.setAdapter(adapter);
@@ -290,6 +296,14 @@ public class ConversationView extends Activity {
 			pending = false;
 			scrollToBottom();
 		}
+		
+		if(reStart == false){
+			
+			mCheckedList = this.getIntent().getParcelableArrayListExtra("checkedFiles");
+			if(mCheckedList != null && mCheckedList.size() > 0){
+				startSendMoreFile();
+			}
+		}
 	}
 
 	@Override
@@ -301,6 +315,7 @@ public class ConversationView extends Activity {
 	protected void onStop() {
 		super.onStop();
 		isStopped = true;
+		reStart = true;
 	}
 
 	@Override
@@ -322,6 +337,7 @@ public class ConversationView extends Activity {
 	protected void onDestroy() {
 		super.onDestroy();
 		this.unregisterReceiver(receiver);
+		GlobalConfig.isConversationOpen = false;
 		finishWork();
 	}
 
@@ -339,6 +355,7 @@ public class ConversationView extends Activity {
 
 	private void initExtraObject() {
 		Bundle bundle = this.getIntent().getExtras();
+		
 		if (bundle != null) {
 			cov = (ConversationNotificationObject) bundle.get("obj");
 			if (cov == null) {

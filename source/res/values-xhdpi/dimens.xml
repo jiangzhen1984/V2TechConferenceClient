@@ -110,4 +110,6 @@
     <dimen name="message_voice_dialog_width">230dp</dimen>
     <dimen name="message_voice_dialog_height">180dp</dimen>
 
+	 <dimen name="message_selected_pop_up_window">-6dp</dimen>
+	 <dimen name="message_body_file_item_progress_layout_margin_right">270dp</dimen>
 </resources>

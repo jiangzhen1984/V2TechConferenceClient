@@ -1,5 +1,6 @@
 <resources>
 
+    <dimen name="message_body_file_item_progress_layout_margin_right">270dp</dimen>
     <!-- Default screen margins, per the Android Design guidelines. -->
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
@@ -104,4 +105,6 @@
     <!-- activity selectfile adapter -->
     <dimen name="select_file_adapter_size">22sp</dimen>
     <dimen name="select_file_entry_interval">15dp</dimen>
+	
+	 <dimen name="message_selected_pop_up_window">-6dp</dimen>
 </resources>

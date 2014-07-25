@@ -50,6 +50,7 @@ public class ConversationSelectFileEntry extends Activity implements OnClickList
 		
 		selectedFileSize = (TextView) findViewById(R.id.selectfile_entry_size);
 		sendButton = (TextView) findViewById(R.id.selectfile_message_send);
+		sendButton.setBackgroundResource(R.drawable.button_bg_noable);
 		
 		entryImage.setOnClickListener(this);
 		entryFile.setOnClickListener(this);

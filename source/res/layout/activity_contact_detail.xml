@@ -342,7 +342,7 @@
                             android:layout_weight="1"
                             android:ems="10"
                             android:inputType="phone"
-                            android:maxLength="11"
+                            android:maxLength="30"
                             android:textColor="@color/activiy_contact_detail_item_color" >
                         </EditText>
                     </LinearLayout>

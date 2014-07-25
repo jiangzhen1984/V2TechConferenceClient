@@ -6,6 +6,7 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
@@ -20,6 +21,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewParent;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
@@ -29,8 +31,10 @@ import android.widget.Toast;
 
 import com.v2tech.R;
 import com.v2tech.service.GlobalHolder;
+import com.v2tech.util.DensityUtils;
 import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.MessageUtil;
+import com.v2tech.util.SPUtil;
 import com.v2tech.util.V2Log;
 import com.v2tech.vo.User;
 import com.v2tech.vo.VMessage;
@@ -462,28 +466,31 @@ public class MessageBodyView extends LinearLayout {
 				if (!anchor.isShown()) {
 					return;
 				}
+				
+				int width = DensityUtils.dip2px(getContext(), 180);
+				int height = DensityUtils.dip2px(getContext(), 80);
 				if (pw == null) {
 					LayoutInflater inflater = (LayoutInflater) getContext()
 							.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-					View view = inflater.inflate(
+					View popWindow = inflater.inflate(
 							R.layout.message_selected_pop_up_window, null);
-					// FIXME should not hard code
-					pw = new PopupWindow(view, 150, 60, true);
+					// FIXME should not hard code 140 50
+					pw = new PopupWindow(popWindow, width, height, true);
 					pw.setBackgroundDrawable(new ColorDrawable(
 							Color.TRANSPARENT));
 					pw.setFocusable(true);
 					pw.setTouchable(true);
 					pw.setOutsideTouchable(true);
 
-					TextView tvResend = (TextView) view
+					TextView tvResend = (TextView) popWindow
 							.findViewById(R.id.contact_message_pop_up_item_resend);
 					tvResend.setOnClickListener(mResendButtonListener);
 
-					TextView tv = (TextView) view
+					TextView tv = (TextView) popWindow
 							.findViewById(R.id.contact_message_pop_up_item_copy);
 					tv.setOnClickListener(mCopyButtonListener);
 
-					TextView deleteText = (TextView) view
+					TextView deleteText = (TextView) popWindow
 							.findViewById(R.id.contact_message_pop_up_item_delete);
 					deleteText.setOnClickListener(mDeleteButtonListener);
 
@@ -506,8 +513,11 @@ public class MessageBodyView extends LinearLayout {
 							.findViewById(R.id.contact_message_pop_up_item_copy)
 							.setVisibility(View.GONE);
 				}
-				int offsetX = (anchor.getMeasuredWidth() - pw.getWidth()) / 2;
-				int offsetY = -(anchor.getMeasuredHeight() + pw.getHeight());
+			
+				int viewWidth = anchor.getMeasuredWidth();
+				int viewHeight = anchor.getMeasuredHeight();
+				int offsetX = (viewWidth - width) / 2;
+				int offsetY = -(viewHeight + height);
 
 				int[] location = new int[2];
 				anchor.getLocationInWindow(location);
@@ -520,7 +530,8 @@ public class MessageBodyView extends LinearLayout {
 							Gravity.NO_GRAVITY, r1.left + (r.right - r.left)
 									/ 2, r1.top);
 				} else {
-					pw.showAsDropDown(anchor, offsetX, offsetY);
+					pw.showAsDropDown((View) anchor.getParent(), offsetX,
+							offsetY);
 				}
 				updateSelectedBg(false);
 				popupWindowListener = null;
@@ -620,7 +631,7 @@ public class MessageBodyView extends LinearLayout {
 				long sec = (System.currentTimeMillis() - lastUpdateTime) / 1000;
 				vfi.setSpeed(sec == 0 ? 0 : (vfi.getDownloadedSize() / sec));
 			}
-			speed.setText(vfi.getSpeed() + "K");
+			speed.setText(vfi.getSpeedStr());
 
 			float percent = (float) ((double) vfi.getDownloadedSize() / (double) vfi
 					.getFileSize());
@@ -725,7 +736,7 @@ public class MessageBodyView extends LinearLayout {
 					callback.requestResumeTransFile(view, item.getVm(), item);
 				} else if (item.getState() == VMessageFileItem.STATE_FILE_DOWNLOADING) {
 					callback.requestPauseDownloadFile(view, item.getVm(), item);
-				}else if (item.getState() == VMessageFileItem.STATE_FILE_PAUSED_DOWNLOADING) {
+				} else if (item.getState() == VMessageFileItem.STATE_FILE_PAUSED_DOWNLOADING) {
 					callback.requestResumeDownloadFile(view, item.getVm(), item);
 				}
 			}
@@ -793,24 +804,28 @@ public class MessageBodyView extends LinearLayout {
 	private OnClickListener mResendButtonListener = new OnClickListener() {
 		@Override
 		public void onClick(View view) {
-			if (callback != null) {
-				View fileRootView = mContentContainer.getChildAt(0);
-				failedIcon.setVisibility(View.INVISIBLE);
+			if(SPUtil.checkCurrentAviNetwork(getContext())){
+				if (callback != null) {
+					View fileRootView = mContentContainer.getChildAt(0);
+					failedIcon.setVisibility(View.INVISIBLE);
 
-				if (mMsg.getItems().size() > 0
-						&& mMsg.getItems().get(0).getType() == VMessageFileItem.ITEM_TYPE_FILE) {
-					VMessageFileItem fileItem = (VMessageFileItem) mMsg
-							.getItems().get(0);
-					if (fileItem.getState() < VMessageAbstractItem.STATE_FILE_SENDING) {
-						callback.requestDownloadFile(fileRootView, mMsg,
-								fileItem);
-					} else {
-						callback.reSendMessageClicked(mMsg);
+					if (mMsg.getItems().size() > 0
+							&& mMsg.getItems().get(0).getType() == VMessageFileItem.ITEM_TYPE_FILE) {
+						VMessageFileItem fileItem = (VMessageFileItem) mMsg
+								.getItems().get(0);
+						if (fileItem.getState() < VMessageAbstractItem.STATE_FILE_SENDING) {
+							callback.requestDownloadFile(fileRootView, mMsg,
+									fileItem);
+						} else {
+							callback.reSendMessageClicked(mMsg);
+						}
+
+						updateFileItemView(fileItem, fileRootView);
 					}
-
-					updateFileItemView(fileItem, fileRootView);
 				}
-
+			}
+			else{
+				Toast.makeText(getContext(), "网络连接不可用，请稍候再试", Toast.LENGTH_SHORT).show();
 			}
 			pw.dismiss();
 		}

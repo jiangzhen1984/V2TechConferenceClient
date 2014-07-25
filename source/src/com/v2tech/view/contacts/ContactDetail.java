@@ -36,10 +36,12 @@ import com.v2tech.R;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.service.Registrant;
 import com.v2tech.service.UserService;
+import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.SPUtil;
 import com.v2tech.view.PublicIntent;
 import com.v2tech.view.bo.ConversationNotificationObject;
 import com.v2tech.view.conversation.ConversationSelectFileEntry;
+import com.v2tech.view.conversation.ConversationView;
 import com.v2tech.vo.Conversation;
 import com.v2tech.vo.User;
 import com.v2tech.vo.UserDeviceConfig;
@@ -197,9 +199,14 @@ public class ContactDetail extends Activity implements OnTouchListener {
 				ArrayList<Parcelable> mCheckedList = data.getParcelableArrayListExtra("checkedFiles");
 				
 				if(mCheckedList != null && mCheckedList.size() > 0){
-					Intent intent = new Intent();
-					intent.putParcelableArrayListExtra("checkedFiles", mCheckedList);
-					setResult(1000 , intent);
+					if(GlobalConfig.isConversationOpen == true){
+						Intent intent = new Intent();
+						intent.putParcelableArrayListExtra("checkedFiles", mCheckedList);
+						setResult(1000 , intent);
+					}
+					else{
+						returnConversationView(mCheckedList);
+					}
 					finish();
 				}
 			}
@@ -527,12 +534,12 @@ public class ContactDetail extends Activity implements OnTouchListener {
 	/**
 	 * return ConversationView with infos
 	 */
-	private void returnConversationView(String selectedFile) {
+	private void returnConversationView(ArrayList<Parcelable> mCheckedList) {
 		Intent i = new Intent(PublicIntent.START_CONVERSACTION_ACTIVITY);
 		i.putExtra("obj", new ConversationNotificationObject(
 				Conversation.TYPE_CONTACT, u.getmUserId()));
 		i.addCategory(PublicIntent.DEFAULT_CATEGORY);
-		i.putExtra("selectedFile", selectedFile);
+		i.putParcelableArrayListExtra("checkedFiles", mCheckedList);
 		mContext.startActivity(i);
 		finish();
 	}

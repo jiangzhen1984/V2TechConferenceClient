@@ -17,6 +17,8 @@ public class GlobalConfig {
 	public static String GLOBAL_VERSION_NAME = "1.3.0.1";
 
 	public static double SCREEN_INCHES = 0;
+	
+	public static boolean isConversationOpen = false;
 
 	public static int[] GLOBAL_FACE_ARRAY = new int[] { 0,R.drawable.face_1,
 			R.drawable.face_2, R.drawable.face_3, R.drawable.face_4,

@@ -1,6 +1,7 @@
 package com.v2tech.vo;
 
 import java.io.File;
+import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.Format;
 import java.util.UUID;
@@ -145,8 +146,34 @@ public class VMessageFileItem extends VMessageAbstractItem {
 		this.downloadedSize = downloadedSize;
 	}
 
+	public String getSpeedStr() {
+		
+		return getFileSize(speed);
+	}
+	
 	public float getSpeed() {
+		
 		return speed;
+	}
+	
+	/**
+	 * 获取文件大小
+	 * 
+	 * @param totalSpace
+	 * @return
+	 */
+	private String getFileSize(float totalSpace) {
+
+		BigDecimal filesize = new BigDecimal(totalSpace);
+		BigDecimal megabyte = new BigDecimal(1024 * 1024);
+		float returnValue = filesize.divide(megabyte, 2, BigDecimal.ROUND_UP)
+				.floatValue();
+		if (returnValue > 1)
+			return (returnValue + "MB");
+		BigDecimal kilobyte = new BigDecimal(1024);
+		returnValue = filesize.divide(kilobyte, 2, BigDecimal.ROUND_UP)
+				.floatValue();
+		return (returnValue + "  KB ");
 	}
 
 	public void setSpeed(float speed) {

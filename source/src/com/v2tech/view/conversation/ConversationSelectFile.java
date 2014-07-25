@@ -137,6 +137,7 @@ public class ConversationSelectFile extends Activity {
 		titleText = (TextView) findViewById(R.id.selectfile_title);
 		selectedFileSize = (TextView) findViewById(R.id.selectfile_entry_size);
 		sendButton = (TextView) findViewById(R.id.selectfile_message_send);
+		sendButton.setBackgroundResource(R.drawable.button_bg_noable);
 		backButton = (TextView) findViewById(R.id.selectfile_back);
 		finishButton = (TextView) findViewById(R.id.selectfile_finish);
 		loading = (LinearLayout) findViewById(R.id.selectfile_loading);
@@ -359,6 +360,7 @@ public class ConversationSelectFile extends Activity {
 						.getColumnIndex(MediaStore.Images.Media.SIZE)));
 				bean.fileName = cursor.getString(cursor
 						.getColumnIndex(MediaStore.Images.Media.DISPLAY_NAME));
+				bean.fileType = 1;
 				if (mCheckedNameList.contains(bean.fileName)) {
 					bean.isCheck = ITEM_CHECKED;
 				}
