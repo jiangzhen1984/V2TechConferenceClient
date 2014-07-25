@@ -172,9 +172,9 @@ public class ConversationView extends Activity {
 	private boolean isStopped;
 
 	private int currentItemPos = 0;
-	
+
 	private ArrayList<FileInfoBean> mCheckedList;
-	
+
 	private ConversationNotificationObject cov = null;
 
 	@Override
@@ -341,7 +341,7 @@ public class ConversationView extends Activity {
 		Bundle bundle = this.getIntent().getExtras();
 		if (bundle != null) {
 			cov = (ConversationNotificationObject) bundle.get("obj");
-			if(cov == null){
+			if (cov == null) {
 				cov = getIntent().getParcelableExtra("obj");
 			}
 		} else {
@@ -505,6 +505,19 @@ public class ConversationView extends Activity {
 		} else if (flag == VOICE_DIALOG_FLAG_RECORDING) {
 			if (mSpeakingLayout != null) {
 				mSpeakingLayout.setVisibility(View.VISIBLE);
+				int duration = (int) (System.currentTimeMillis() - starttime) / 1000;
+				TextView tips = (TextView) mSpeakingLayout
+						.findViewById(R.id.message_voice_dialog_listening_container_tips);
+				if (duration > 50) {
+					String str = mContext.getText(
+							R.string.contact_message_tips_rest_seconds)
+							.toString();
+					str = str.replace("[]", (59 - duration) + "");
+					tips.setText(str);
+				} else {
+					tips.setText(R.string.contact_message_voice_dialog_text);
+				}
+
 			}
 			if (mPreparedCancelLayout != null) {
 				mPreparedCancelLayout.setVisibility(View.GONE);
@@ -721,7 +734,7 @@ public class ConversationView extends Activity {
 				} else {
 					updateCancelSendVoiceMsgNotification(VOICE_DIALOG_FLAG_CANCEL);
 				}
-				
+
 			} else if (event.getAction() == MotionEvent.ACTION_UP) {
 				if (voiceIsSentByTimer) {
 					return false;
@@ -831,7 +844,6 @@ public class ConversationView extends Activity {
 					SELECT_PICTURE_CODE);
 
 		}
-		
 
 	};
 
@@ -990,11 +1002,10 @@ public class ConversationView extends Activity {
 				// Send message to server
 				sendMessageToRemote(vim);
 			}
-		} 
-		else if(requestCode == RECEIVE_SELECTED_FILE){
-			if(data != null){
+		} else if (requestCode == RECEIVE_SELECTED_FILE) {
+			if (data != null) {
 				mCheckedList = data.getParcelableArrayListExtra("checkedFiles");
-				if(mCheckedList != null && mCheckedList.size() > 0){
+				if (mCheckedList != null && mCheckedList.size() > 0) {
 					startSendMoreFile();
 					mCheckedList = null;
 				}
@@ -1225,8 +1236,6 @@ public class ConversationView extends Activity {
 			}
 			Message.obtain(lh, SEND_MESSAGE, v).sendToTarget();
 		}
-		
-		
 
 		@Override
 		public void requestDelMessage(VMessage v) {
@@ -1246,7 +1255,7 @@ public class ConversationView extends Activity {
 				return;
 			}
 			vfi.setState(VMessageFileItem.STATE_FILE_DOWNLOADING);
-			//FIXME should move this to service 
+			// FIXME should move this to service
 			FileRequest.getInstance().acceptFileTrans(vfi.getUuid(),
 					GlobalConfig.getGlobalFilePath() + "/" + vfi.getFileName());
 
@@ -1259,14 +1268,15 @@ public class ConversationView extends Activity {
 				return;
 			}
 			if (vfi.getState() == VMessageFileItem.STATE_FILE_DOWNLOADING) {
-				mChat.updateFileOperation(vfi, ChatService.OPERATION_PAUSE_DOWNLOADING, null);
+				mChat.updateFileOperation(vfi,
+						ChatService.OPERATION_PAUSE_DOWNLOADING, null);
 				vfi.setState(VMessageFileItem.STATE_FILE_PAUSED_DOWNLOADING);
 			} else if (vfi.getState() == VMessageFileItem.STATE_FILE_SENDING) {
-				mChat.updateFileOperation(vfi, ChatService.OPERATION_PAUSE_SENDING, null);
+				mChat.updateFileOperation(vfi,
+						ChatService.OPERATION_PAUSE_SENDING, null);
 				vfi.setState(VMessageFileItem.STATE_FILE_PAUSED_SENDING);
 			}
 
-			
 		}
 
 		@Override
@@ -1277,10 +1287,12 @@ public class ConversationView extends Activity {
 			}
 
 			if (vfi.getState() == VMessageFileItem.STATE_FILE_PAUSED_DOWNLOADING) {
-				mChat.updateFileOperation(vfi, ChatService.OPERATION_RESUME_DOWNLOAD, null);
+				mChat.updateFileOperation(vfi,
+						ChatService.OPERATION_RESUME_DOWNLOAD, null);
 				vfi.setState(VMessageFileItem.STATE_FILE_DOWNLOADING);
 			} else if (vfi.getState() == VMessageFileItem.STATE_FILE_PAUSED_SENDING) {
-				mChat.updateFileOperation(vfi, ChatService.OPERATION_RESUME_SEND, null);
+				mChat.updateFileOperation(vfi,
+						ChatService.OPERATION_RESUME_SEND, null);
 				vfi.setState(VMessageFileItem.STATE_FILE_SENDING);
 			}
 
@@ -1350,15 +1362,14 @@ public class ConversationView extends Activity {
 		}
 		return true;
 	}
-	
-	
+
 	private boolean removeMessage(VMessage vm) {
 		if (vm == null) {
 			return false;
 		}
-		for (int i =0; i < messageArray.size(); i++) {
-			VMessageAdater va = (VMessageAdater)messageArray.get(i);
-			if (vm.getId() ==  ((VMessage)va.getItemObject()).getId()) {
+		for (int i = 0; i < messageArray.size(); i++) {
+			VMessageAdater va = (VMessageAdater) messageArray.get(i);
+			if (vm.getId() == ((VMessage) va.getItemObject()).getId()) {
 				messageArray.remove(i);
 				return true;
 			}
@@ -1387,12 +1398,11 @@ public class ConversationView extends Activity {
 
 					vfi.setDownloadedSize(tranedSize);
 					CommonAdapterItemWrapper common = messageArray.get(i);
-					MessageBodyView mv = (MessageBodyView) common.getView();	
-					if(mv != null){
-						
-						mv.updateView(vfi);					
-					}
-					else{
+					MessageBodyView mv = (MessageBodyView) common.getView();
+					if (mv != null) {
+
+						mv.updateView(vfi);
+					} else {
 						notificateConversationUpdate();
 					}
 				}
@@ -1615,8 +1625,8 @@ public class ConversationView extends Activity {
 				}
 				break;
 			case REQUEST_DEL_MESSAGE:
-				removeMessage((VMessage)msg.obj);
-				MessageLoader.deleteMessage(mContext, (VMessage)msg.obj);
+				removeMessage((VMessage) msg.obj);
+				MessageLoader.deleteMessage(mContext, (VMessage) msg.obj);
 				adapter.notifyDataSetChanged();
 				break;
 			case FILE_STATUS_LISTENER:
@@ -1635,12 +1645,12 @@ public class ConversationView extends Activity {
 		}
 
 	}
-	
+
 	/**
 	 * get selected file path to send remote.
 	 */
 	public void sendSelectedFile(String selectPath) {
-		
+
 		if (!TextUtils.isEmpty(selectPath)) {
 
 			VMessage vim = MessageBuilder.buildFileMessage(local, remote,
@@ -1650,11 +1660,11 @@ public class ConversationView extends Activity {
 			sendMessageToRemote(vim);
 		}
 	}
-	
+
 	private void startSendMoreFile() {
-		
+
 		for (int i = 0; i < mCheckedList.size(); i++) {
-			
+
 			sendSelectedFile(mCheckedList.get(i).filePath);
 		}
 	}

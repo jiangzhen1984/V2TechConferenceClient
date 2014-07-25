@@ -13,8 +13,6 @@ import com.v2tech.vo.V2ImageDoc;
 import com.v2tech.vo.V2ShapeMeta;
 
 /**
- * FIXME optimize register notification
- * 
  * @author jiangzhen
  * 
  */
