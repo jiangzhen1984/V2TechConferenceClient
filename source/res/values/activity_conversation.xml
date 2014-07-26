@@ -23,7 +23,7 @@
    <string name="conversation_popup_menu_email_button">发送邮件</string>
    <string name="conversation_popup_menu_files_button">文件柜</string>
    <string name="conversation_popup_menu_setting_button">设 置</string>
-   
+   <string name="conversation_display_item_file">[文件]</string>
    <string name="conversation_display_item_pic">[图片]</string>
    <string name="conversation_display_item_audio">[语音]</string>
    

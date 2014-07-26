@@ -1239,6 +1239,13 @@ public class VideoActivityV2 extends Activity {
 			mSettingWindow.dismiss();
 		}
 	}
+	
+	
+
+	@Override
+	protected void onRestoreInstanceState(Bundle savedInstanceState) {
+		super.onRestoreInstanceState(savedInstanceState);
+	}
 
 	private void showQuitDialog(String content) {
 		if (mQuitDialog == null) {
@@ -1713,7 +1720,7 @@ public class VideoActivityV2 extends Activity {
 			vm.setGroupId(conf.getId());
 			vm.setToUser(new User(0));
 			vm.setFromUser(GlobalHolder.getInstance().getCurrentUser());
-			vm.setMsgCode(V2GlobalEnum.REQUEST_TYPE_IM);
+			vm.setMsgCode(V2GlobalEnum.REQUEST_TYPE_CONF);
 			cs.sendVMessage(vm, null);
 
 		}

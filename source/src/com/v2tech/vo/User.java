@@ -423,6 +423,9 @@ public class User implements Comparable<User> {
 	private Bitmap avatar;
 
 	public Bitmap getAvatarBitmap() {
+		if (avatar == null || avatar.isRecycled()) {
+			avatar = GlobalHolder.getInstance().getUserAvatar(this.mUserId);
+		}
 		return avatar;
 	}
 	
