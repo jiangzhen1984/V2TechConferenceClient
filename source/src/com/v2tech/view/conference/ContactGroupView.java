@@ -6,7 +6,6 @@ import android.view.View;
 import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.TextView;
 
 import com.v2tech.R;
@@ -20,7 +19,8 @@ public class ContactGroupView extends LinearLayout {
 	private TextView mGroupNameTV;
 	private TextView mGroupStsTV;
 	private OnClickListener callback;
-	private OnCheckedChangeListener checkBoxCallbackListener;
+	private OnClickListener checkBoxCallbackListener;
+	private CheckBox mCheckBox;
 
 	public ContactGroupView(Context context, Group g,
 			OnClickListener callbackListener) {
@@ -31,7 +31,7 @@ public class ContactGroupView extends LinearLayout {
 	
 	
 	public ContactGroupView(Context context, Group g,
-			OnClickListener callbackListener, OnCheckedChangeListener checkBoxCallbackListener) {
+			OnClickListener callbackListener, OnClickListener checkBoxCallbackListener) {
 		super(context);
 		this.callback = callbackListener;
 		this.checkBoxCallbackListener = checkBoxCallbackListener;
@@ -62,10 +62,10 @@ public class ContactGroupView extends LinearLayout {
 		}
 		
 		if (this.checkBoxCallbackListener  != null) {
-			CheckBox cbView = (CheckBox)view.findViewById(R.id.conf_create_contact_view_ck);
-			cbView.setVisibility(View.VISIBLE);
-			cbView.setOnCheckedChangeListener(checkBoxCallbackListener);
-			cbView.setTag(g);
+			mCheckBox= (CheckBox)view.findViewById(R.id.conf_create_contact_group_view_ck);
+			//mCheckBox.setVisibility(View.VISIBLE);
+			mCheckBox.setChecked(false);
+			mCheckBox.setTag(g);
 		}
 
 		updateUserStatus();
@@ -102,5 +102,14 @@ public class ContactGroupView extends LinearLayout {
 //				+ mGroup.getUserCount());
 		mGroupStsTV.setText(mGroup.getOnlineUserCount() + " / "
 				+ mGroup.getUserCount());
+	}
+	
+	
+	public void updateChecked() {
+		this.mCheckBox.setChecked(!this.mCheckBox.isChecked());
+	}
+	
+	public boolean isChecked() {
+		return this.mCheckBox.isChecked();
 	}
 }

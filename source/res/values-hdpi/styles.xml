@@ -25,10 +25,6 @@
         <item name="android:windowIsFloating">true</item>
     </style>
 
-    <style name="GraySquareCheckbox" parent="@android:style/Widget.CompoundButton.CheckBox">
-        <item name="android:button">@drawable/selector_check_box</item>
-    </style>
-
     <style name="InMeetingCameraSettingAnim">
         <item name="@android:windowEnterAnimation">@animator/nonam_scale_0_100</item>
         <item name="@android:windowExitAnimation">@animator/nonam_scale_100_0</item>

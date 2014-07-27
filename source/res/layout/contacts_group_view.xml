@@ -42,7 +42,7 @@
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
             android:layout_marginRight="@dimen/contacts_group_view_online_statist_margin_right"
-            android:layout_toLeftOf="@+id/conf_create_contact_view_ck"
+            android:layout_toLeftOf="@+id/conf_create_contact_group_view_ck"
             android:gravity="center_vertical"
             android:text="contact_group_online_statist"
             android:maxWidth="@dimen/contacts_group_view_statist_max_width"
@@ -52,17 +52,17 @@
             android:textSize="18sp" />
 
         <CheckBox
-            android:id="@+id/conf_create_contact_view_ck"
+            android:id="@+id/conf_create_contact_group_view_ck"
             style="@style/GraySquareCheckbox"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_marginRight="@dimen/conf_create_contacts_use_layout_name_margin_right"
+            android:gravity="right|center_vertical"
             android:clickable="false"
             android:focusable="false"
-            android:gravity="right|center_vertical"
-            android:text=""
-            android:visibility="invisible" />
+            android:visibility="invisible"
+            android:text="" />
     </RelativeLayout>
 
     <LinearLayout

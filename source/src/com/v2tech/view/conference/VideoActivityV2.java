@@ -2200,8 +2200,12 @@ public class VideoActivityV2 extends Activity {
 					if (caVp != null) {
 						caVp.addMeta(shape);
 					} else {
-						V2Log.e(" didn't find page for canvas"
+						V2Log.i(" construct new page for canvas"
 								+ shape.getPageNo());
+						V2Doc.Page newPage = new V2Doc.Page(shape.getPageNo(), shape.getDocId(), null, null);
+						newPage.addMeta(shape);
+						caVp = newPage;
+						ca.addPage(newPage);
 					}
 					if (mDocContainer != null
 							&& caVp.getDocId().equals(

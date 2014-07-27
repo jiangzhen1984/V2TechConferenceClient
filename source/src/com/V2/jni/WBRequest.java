@@ -124,11 +124,11 @@ public class WBRequest {
 				"OnRecvAddWBoardData " + szWBoardID + " " + nPageID + " "
 						+ szDataID + " " + szData + " " + szData.length());
 
-//		for (WeakReference<WBRequestCallback> wr : mCallbacks) {
-//			if (wr != null && wr.get() != null) {
-//				wr.get().OnRecvAddWBoardDataCallback(szWBoardID, nPageID, szDataID, szData);
-//			}
-//		}
+		for (WeakReference<WBRequestCallback> wr : mCallbacks) {
+			if (wr != null && wr.get() != null) {
+				wr.get().OnRecvAddWBoardDataCallback(szWBoardID, nPageID, szDataID, szData);
+			}
+		}
 	}
 
 	private void OnRecvAppendWBoardData(String szWBoardID, int nPageID,
@@ -137,11 +137,11 @@ public class WBRequest {
 				"OnRecvAppendWBoardData " + szWBoardID + " " + nPageID + " "
 						+ szDataID + " " + szData + " " + szData.length());
 
-//		for (WeakReference<WBRequestCallback> wr : mCallbacks) {
-//			if (wr != null && wr.get() != null) {
-//				wr.get().OnRecvAppendWBoardDataCallback(szWBoardID, nPageID, szDataID, szData);
-//			}
-//		}
+		for (WeakReference<WBRequestCallback> wr : mCallbacks) {
+			if (wr != null && wr.get() != null) {
+				wr.get().OnRecvAppendWBoardDataCallback(szWBoardID, nPageID, szDataID, szData);
+			}
+		}
 
 	}
 
