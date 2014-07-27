@@ -1,5 +1,7 @@
 package com.V2.jni;
 
+import com.V2.jni.ind.VideoJNIObjectInd;
+
 
 
 public interface VideoRequestCallback {
@@ -29,8 +31,7 @@ public interface VideoRequestCallback {
 	
 	
 	
-	public void OnVideoChatInviteCallback(long nGroupID, int nBusinessType,
-			long nFromUserID, String szDeviceID);
+	public void OnVideoChatInviteCallback(VideoJNIObjectInd ind);
 	
 	/**
 	 * 
@@ -43,15 +44,23 @@ public interface VideoRequestCallback {
 			int nFrameRate, int nBitRate);
 	
 	
-	
-	public void OnVideoChatAccepted(long nGroupID, int nBusinessType,
-			long nFromuserID, String szDeviceID);
+	/**
+	 * Other user accept current invitation
+	 * @param ind
+	 */
+	public void OnVideoChatAccepted(VideoJNIObjectInd ind);
 
-	public void OnVideoChatRefused(long nGroupID, int nBusinessType,
-			long nFromUserID, String szDeviceID);
+	/**
+	 * Remote user refuse current user invite video conversation
+	 * @param ind
+	 */
+	public void OnVideoChatRefused(VideoJNIObjectInd ind);
 	
 	
-	public void OnVideoChatClosed(long nGroupID, int nBusinessType,
-			long nFromUserID, String szDeviceID);
+	/**
+	 * Remote user close current connected conversation
+	 * @param ind
+	 */
+	public void OnVideoChatClosed(VideoJNIObjectInd ind);
 
 }

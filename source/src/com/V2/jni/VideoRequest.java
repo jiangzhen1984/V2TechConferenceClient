@@ -8,6 +8,7 @@ import v2av.VideoPlayer;
 import android.content.Context;
 import android.util.Log;
 
+import com.V2.jni.ind.VideoJNIObjectInd;
 import com.v2tech.util.V2Log;
 
 public class VideoRequest {
@@ -180,7 +181,7 @@ public class VideoRequest {
 	 *            user devices list as XML format
 	 */
 	private void OnRemoteUserVideoDevice(long uid, String szXmlData) {
-		V2Log.d("OnRemoteUserVideoDevice:---" + uid + " "+ szXmlData);
+		V2Log.d("OnRemoteUserVideoDevice:---" + uid + " " + szXmlData);
 		for (WeakReference<VideoRequestCallback> wrCB : this.callback) {
 			Object obj = wrCB.get();
 			if (obj != null) {
@@ -203,8 +204,8 @@ public class VideoRequest {
 			Object obj = wrCB.get();
 			if (obj != null) {
 				VideoRequestCallback cb = (VideoRequestCallback) obj;
-				cb.OnVideoChatInviteCallback(nGroupID, nBusinessType,
-						nFromUserID, szDeviceID);
+				cb.OnVideoChatInviteCallback(new VideoJNIObjectInd(nGroupID,
+						nFromUserID, szDeviceID, nBusinessType));
 			}
 		}
 		V2Log.d("OnVideoChatInvite: nGroupID:" + nGroupID + "  nBusinessType:"
@@ -221,15 +222,15 @@ public class VideoRequest {
 	 * @param szDeviceID
 	 */
 	private void OnVideoChatAccepted(long nGroupID, int nBusinessType,
-			long nFromuserID, String szDeviceID) {
+			long nFromUserID, String szDeviceID) {
 		V2Log.d("OnVideoChatAccepted " + nGroupID + " " + nBusinessType + " "
-				+ nFromuserID + " " + szDeviceID);
+				+ nFromUserID + " " + szDeviceID);
 		for (WeakReference<VideoRequestCallback> wrCB : this.callback) {
 			Object obj = wrCB.get();
 			if (obj != null) {
 				VideoRequestCallback cb = (VideoRequestCallback) obj;
-				cb.OnVideoChatAccepted(nGroupID, nBusinessType, nFromuserID,
-						szDeviceID);
+				cb.OnVideoChatAccepted(new VideoJNIObjectInd(nGroupID,
+						nFromUserID, szDeviceID, nBusinessType));
 			}
 		}
 	}
@@ -249,8 +250,8 @@ public class VideoRequest {
 			Object obj = wrCB.get();
 			if (obj != null) {
 				VideoRequestCallback cb = (VideoRequestCallback) obj;
-				cb.OnVideoChatRefused(nGroupID, nBusinessType, nFromUserID,
-						szDeviceID);
+				cb.OnVideoChatRefused(new VideoJNIObjectInd(nGroupID,
+						nFromUserID, szDeviceID, nBusinessType));
 			}
 		}
 	}
@@ -263,8 +264,8 @@ public class VideoRequest {
 			Object obj = wrCB.get();
 			if (obj != null) {
 				VideoRequestCallback cb = (VideoRequestCallback) obj;
-				cb.OnVideoChatClosed(nGroupID, nBusinessType, nFromUserID,
-						szDeviceID);
+				cb.OnVideoChatClosed(new VideoJNIObjectInd(nGroupID,
+						nFromUserID, szDeviceID, nBusinessType));
 			}
 		}
 	}

@@ -5,6 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -284,22 +285,12 @@ public class Group implements Comparable<Group>{
 		}
 	}
 
-	// FIXME need to be optimize
 	public int getOnlineUserCount() {
-		// To make sure that prevent update list when iterating
-		synchronized (mLock) {
-			return getUserOnlineCount(this);
-		}
-	}
-
-	private int getUserOnlineCount(Group g) {
+		Set<User> counter = new HashSet<User>();
+		this.populateUser(this, counter);
+		
 		int c = 0;
-		if (g == null) {
-			return 0;
-		}
-		List<User> l = g.getUsers();
-		for (int i = 0; i < l.size(); i++) {
-			User u = l.get(i);
+		for (User u : counter) {
 			if (u.getmStatus() == User.Status.ONLINE
 					|| u.getmStatus() == User.Status.BUSY
 					|| u.getmStatus() == User.Status.DO_NOT_DISTURB
@@ -307,26 +298,30 @@ public class Group implements Comparable<Group>{
 				c++;
 			}
 		}
-		List<Group> sGs = g.getChildGroup();
-		for (int i =0; i< sGs.size(); i++) {
-			Group subG = sGs.get(i);
-			c += getUserOnlineCount(subG);
-		}
+		
 		return c;
 	}
+
 
 	public int getUserCount() {
-		return getUserCount(this);
+		Set<User> counter = new HashSet<User>();
+
+		populateUser(this, counter);
+		int count = counter.size();
+		counter.clear();
+		return count;
 	}
 
-	private int getUserCount(Group g) {
-		int c = g.getUsers().size();
+	private void populateUser(Group g, Set<User> counter) {
+				List<User> lu = g.getUsers();
+		for (int i =0; i < lu.size(); i++) {
+			counter.add(lu.get(i));
+		}
 		List<Group> sGs = g.getChildGroup();
 		for (int i =0; i< sGs.size(); i++) {
 			Group subG = sGs.get(i);
-			c += getUserCount(subG);
+			populateUser(subG, counter);
 		}
-		return c;
 	}
 
 	public void addUserToGroup(List<User> l) {

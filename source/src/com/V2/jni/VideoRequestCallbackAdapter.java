@@ -1,41 +1,41 @@
 package com.V2.jni;
 
+import com.V2.jni.ind.VideoJNIObjectInd;
+
 public abstract class VideoRequestCallbackAdapter implements
 		VideoRequestCallback {
 
 	@Override
 	public void OnRemoteUserVideoDevice(long uid, String szXmlData) {
-
+		
 	}
 
 	@Override
-	public void OnVideoChatInviteCallback(long nGroupID, int nBusinessType,
-			long nFromUserID, String szDeviceID) {
-
+	public void OnVideoChatInviteCallback(VideoJNIObjectInd ind) {
+		
 	}
 
 	@Override
 	public void OnSetCapParamDone(String szDevID, int nSizeIndex,
 			int nFrameRate, int nBitRate) {
-
+		
 	}
 
 	@Override
-	public void OnVideoChatAccepted(long nGroupID, int nBusinessType,
-			long nFromuserID, String szDeviceID) {
-
+	public void OnVideoChatAccepted(VideoJNIObjectInd ind) {
+		
 	}
 
 	@Override
-	public void OnVideoChatRefused(long nGroupID, int nBusinessType,
-			long nFromUserID, String szDeviceID) {
-
+	public void OnVideoChatRefused(VideoJNIObjectInd ind) {
+		
 	}
 
 	@Override
-	public void OnVideoChatClosed(long nGroupID, int nBusinessType,
-			long nFromUserID, String szDeviceID) {
-
+	public void OnVideoChatClosed(VideoJNIObjectInd ind) {
+		
 	}
+
+
 
 }

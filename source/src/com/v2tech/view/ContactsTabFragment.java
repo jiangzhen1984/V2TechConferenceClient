@@ -2,7 +2,9 @@ package com.v2tech.view;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -17,9 +19,7 @@ import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
-import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -337,7 +337,7 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 		for (Group g : l) {
 			Group.searchUser(str, searchedUserList, g);
 		}
-		
+
 		Message.obtain(mHandler, UPDATE_SEARCHED_USER_LIST, searchedUserList)
 				.sendToTarget();
 	}
@@ -402,10 +402,44 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 	}
 
 	private void updateUserStatus(long userId, User.DeviceType deiType,
-			User.Status status) {
+			User.Status newState) {
+		User u = GlobalHolder.getInstance().getUser(userId);
+		if (u == null) {
+			V2Log.w("No user found, returned");
+			return;
+		}
+//		User.Status oldState = u.getmStatus();
+		
+		Set<Group> groupList = new HashSet<Group>();
+//		// Match user state---Notice we can't match, because JNI update user state before this.
+//		// if new state is online or leave or busy or do not disturb and old
+//		// state is hidden or off-line
+//		// we need to re-calculate group online staticist
+//		if (((oldState == User.Status.HIDDEN || oldState == User.Status.OFFLINE) && (newState == User.Status.ONLINE
+//				|| newState == User.Status.BUSY
+//				|| newState == User.Status.LEAVE || newState == User.Status.DO_NOT_DISTURB))
+//				|| ((newState == User.Status.HIDDEN || newState == User.Status.OFFLINE) && (oldState == User.Status.ONLINE
+//						|| oldState == User.Status.BUSY
+//						|| oldState == User.Status.LEAVE || oldState == User.Status.DO_NOT_DISTURB))) {
+			Set<Group> gSet = u.getBelongsGroup();
+			for (Group tg : gSet) {
+				while (tg != null) {
+					groupList.add(tg);
+					tg = tg.getParent();
+				}
+			}
+
+//		}
 		for (ListItem li : mItemList) {
 			if (li.u != null && li.u.getmUserId() == userId) {
-				((ContactUserView) li.v).updateStatus(deiType, status);
+				((ContactUserView) li.v).updateStatus(deiType, newState);
+			}
+			if (li.g != null) {
+				for (Group g : groupList) {
+					if (g.getmGId() == li.g.getmGId()) {
+						((ContactGroupView) li.v).updateUserStatus();
+					}
+				}
 			}
 		}
 	}
@@ -511,14 +545,6 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 		adapter.notifyDataSetChanged();
 	}
 
-	private OnTouchListener hideSoftKeyListener = new OnTouchListener() {
-
-		@Override
-		public boolean onTouch(View arg0, MotionEvent arg1) {
-			return false;
-		}
-
-	};
 
 	private BitmapManager.BitmapChangedListener bitmapChangedListener = new BitmapManager.BitmapChangedListener() {
 
@@ -554,7 +580,7 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 			this.u = u;
 			this.id = 0x03000000 | u.getmUserId();
 			this.v = new ContactUserView(getActivity(), u);
-			((ContactUserView) this.v).setPaddingT(level * 35, this.v.getTop(),
+			((ContactUserView) this.v).setPaddingT((level - 1) * 35, this.v.getTop(),
 					this.v.getRight(), this.v.getBottom());
 			isExpanded = false;
 			this.level = level;

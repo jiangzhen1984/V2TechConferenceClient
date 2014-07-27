@@ -14,6 +14,8 @@ import com.V2.jni.V2GlobalEnum;
 import com.V2.jni.VideoRequest;
 import com.V2.jni.VideoRequestCallback;
 import com.V2.jni.VideoRequestCallbackAdapter;
+import com.V2.jni.ind.AudioJNIObjectInd;
+import com.V2.jni.ind.VideoJNIObjectInd;
 import com.v2tech.service.jni.FileTransStatusIndication.FileTransErrorIndication;
 import com.v2tech.service.jni.FileTransStatusIndication.FileTransProgressStatusIndication;
 import com.v2tech.service.jni.JNIResponse;
@@ -524,8 +526,7 @@ public class ChatService extends AbstractHandler {
 		}
 
 		@Override
-		public void OnVideoChatClosed(long nGroupID, int nBusinessType,
-				long nFromUserID, String szDeviceID) {
+		public void OnVideoChatClosed(VideoJNIObjectInd ind) {
 			notifyListener(KEY_CANCELLED_LISTNER, 0, 0, null);
 			// Clean cache
 			mCaller = null;
@@ -536,8 +537,7 @@ public class ChatService extends AbstractHandler {
 	class AudioRequestCallbackImpl implements AudioRequestCallback {
 
 		@Override
-		public void OnAudioChatAccepted(long nGroupID, long nBusinessType,
-				long nFromUserID) {
+		public void OnAudioChatAccepted(AudioJNIObjectInd ind) {
 			if (mCaller != null) {
 				JNIResponse resp = new RequestChatServiceResponse(
 						RequestChatServiceResponse.ACCEPTED,
@@ -548,8 +548,7 @@ public class ChatService extends AbstractHandler {
 		}
 
 		@Override
-		public void OnAudioChatRefused(long nGroupID, long nBusinessType,
-				long nFromUserID) {
+		public void OnAudioChatRefused(AudioJNIObjectInd ind) {
 			if (mCaller != null) {
 				JNIResponse resp = new RequestChatServiceResponse(
 						RequestChatServiceResponse.REJCTED,
@@ -564,14 +563,12 @@ public class ChatService extends AbstractHandler {
 		}
 
 		@Override
-		public void OnAudioChatInvite(long nGroupID, long nBusinessType,
-				long nFromUserID) {
+		public void OnAudioChatInvite(AudioJNIObjectInd ind) {
 
 		}
 
 		@Override
-		public void OnAudioChatClosed(long nGroupID, long nBusinessType,
-				long nFromUserID) {
+		public void OnAudioChatClosed(AudioJNIObjectInd ind) {
 			notifyListener(KEY_CANCELLED_LISTNER, 0, 0, null);
 			// Clean cache
 			mCaller = null;

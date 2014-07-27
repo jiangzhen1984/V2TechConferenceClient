@@ -4,10 +4,11 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.v2tech.util.V2Log;
-
 import android.content.Context;
 import android.util.Log;
+
+import com.V2.jni.ind.AudioJNIObjectInd;
+import com.v2tech.util.V2Log;
 
 public class AudioRequest {
 
@@ -140,8 +141,9 @@ public class AudioRequest {
 			WeakReference<AudioRequestCallback> wr = callbacks.get(i);
 			Object obj = wr.get();
 			if (obj != null) {
-				((AudioRequestCallback) obj).OnAudioChatInvite(nGroupID,
-						nBusinessType, nFromUserID);
+				((AudioRequestCallback) obj)
+						.OnAudioChatInvite(new AudioJNIObjectInd(nGroupID,
+								nFromUserID, (int) nBusinessType));
 			}
 		}
 	}
@@ -155,8 +157,8 @@ public class AudioRequest {
 			WeakReference<AudioRequestCallback> wr = callbacks.get(i);
 			Object obj = wr.get();
 			if (obj != null) {
-				((AudioRequestCallback) obj).OnAudioChatAccepted(nGroupID,
-						nBusinessType, nFromUserID);
+				((AudioRequestCallback) obj).OnAudioChatAccepted(new AudioJNIObjectInd(nGroupID,
+						nFromUserID, (int) nBusinessType));
 			}
 		}
 	}
@@ -170,8 +172,8 @@ public class AudioRequest {
 			WeakReference<AudioRequestCallback> wr = callbacks.get(i);
 			Object obj = wr.get();
 			if (obj != null) {
-				((AudioRequestCallback) obj).OnAudioChatRefused(nGroupID,
-						nBusinessType, nFromUserID);
+				((AudioRequestCallback) obj).OnAudioChatRefused(new AudioJNIObjectInd(nGroupID,
+						nFromUserID, (int) nBusinessType));
 			}
 		}
 	}
@@ -185,8 +187,8 @@ public class AudioRequest {
 			WeakReference<AudioRequestCallback> wr = callbacks.get(i);
 			Object obj = wr.get();
 			if (obj != null) {
-				((AudioRequestCallback) obj).OnAudioChatClosed(nGroupID,
-						nBusinessType, nFromUserID);
+				((AudioRequestCallback) obj).OnAudioChatClosed(new AudioJNIObjectInd(nGroupID,
+						nFromUserID, (int) nBusinessType));
 			}
 		}
 	}
