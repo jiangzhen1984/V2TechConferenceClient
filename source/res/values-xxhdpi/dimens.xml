@@ -94,7 +94,7 @@
     
     
         <!-- message body file item layout -->
-    <dimen name="message_body_file_item_file_name_text_size">16sp</dimen>
+    <dimen name="message_body_file_item_file_name_text_size">14sp</dimen>
     <dimen name="message_body_file_item_file_name_text_margin_left">10dp</dimen>
     <dimen name="message_body_file_item_file_name_max_length">100dp</dimen>
     <dimen name="message_body_file_item_file_size_text_size">16sp</dimen>
@@ -102,7 +102,7 @@
     <dimen name="message_body_file_item_state_text_size">16sp</dimen>
     <dimen name="message_body_file_item_state_margin_left">10dp</dimen>
     <dimen name="message_body_file_item_progress_layout_margin_left">10dp</dimen>
-    <dimen name="message_body_file_item_progress_layout_margin_right">180dp</dimen>
+    <dimen name="message_body_file_item_progress_layout_margin_right">300dp</dimen>
     <dimen name="message_body_file_item_progress_layout_margin_top">10dp</dimen>
     <dimen name="message_body_file_item_progress_layout_margin_bottom">10dp</dimen>
     <dimen name="message_body_file_item_progress_action_button_margin_left">10dp</dimen>

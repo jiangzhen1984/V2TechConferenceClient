@@ -6,7 +6,6 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
@@ -17,11 +16,11 @@ import android.os.Handler;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.style.ImageSpan;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewParent;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
@@ -57,6 +56,7 @@ public class MessageBodyView extends LinearLayout {
 	private static final int VIDEO = 8;
 	private static final int SOUND = 9;
 	private static final int OTHER = 10;
+	protected static final String TAG = "MessageBodyView";
 
 	private VMessage mMsg;
 
@@ -466,7 +466,7 @@ public class MessageBodyView extends LinearLayout {
 				if (!anchor.isShown()) {
 					return;
 				}
-				
+
 				int width = DensityUtils.dip2px(getContext(), 180);
 				int height = DensityUtils.dip2px(getContext(), 80);
 				if (pw == null) {
@@ -513,29 +513,30 @@ public class MessageBodyView extends LinearLayout {
 							.findViewById(R.id.contact_message_pop_up_item_copy)
 							.setVisibility(View.GONE);
 				}
-			
-				int viewWidth = anchor.getMeasuredWidth();
-				int viewHeight = anchor.getMeasuredHeight();
-				int offsetX = (viewWidth - width) / 2;
-				int offsetY = -(viewHeight + height);
 
+				int viewWidth = anchor.getMeasuredWidth();
+//				int viewHeight = anchor.getMeasuredHeight();
+				int offsetX = (viewWidth - width) / 2;
+//				int offsetY = (viewHeight + height);
+				
 				int[] location = new int[2];
 				anchor.getLocationInWindow(location);
-				if (location[1] <= 0) {
+//				if (location[1] <= 0) {
 					Rect r = new Rect();
 					anchor.getDrawingRect(r);
 					Rect r1 = new Rect();
 					anchor.getGlobalVisibleRect(r1);
+					int offsetXLocation =  r1.left + offsetX;
+					int offsetYLocation = r1.top - (height / 3);
 					pw.showAtLocation((View) anchor.getParent(),
-							Gravity.NO_GRAVITY, r1.left + (r.right - r.left)
-									/ 2, r1.top);
-				} else {
-					pw.showAsDropDown((View) anchor.getParent(), offsetX,
-							offsetY);
-				}
+							Gravity.NO_GRAVITY, offsetXLocation
+									, offsetYLocation);
+//				} else {
+//					pw.showAsDropDown((View) anchor.getParent(), offsetX,
+//							offsetY);
+//				}
 				updateSelectedBg(false);
 				popupWindowListener = null;
-
 			}
 
 		};
@@ -604,6 +605,15 @@ public class MessageBodyView extends LinearLayout {
 		View fileRootView = mContentContainer.getChildAt(0);
 		updateFileItemView(vfi, fileRootView);
 
+	}
+
+	/**
+	 * Use to user update avatar or re-connect network
+	 * 
+	 * @param bmp
+	 */
+	public void updateHeadIcon(Bitmap bmp) {
+		mHeadIcon.setImageBitmap(bmp);
 	}
 
 	private void updateFileItemView(VMessageFileItem vfi, View rootView) {
@@ -693,7 +703,6 @@ public class MessageBodyView extends LinearLayout {
 					.getText(R.string.contact_message_file_item_miss_download)
 					.toString();
 		} else if (vfi.getState() == VMessageAbstractItem.STATE_FILE_UNDOWNLOAD) {
-			showProgressLayout = true;
 			strState = getContext().getResources()
 					.getText(R.string.contact_message_file_item_miss_download)
 					.toString();
@@ -720,6 +729,14 @@ public class MessageBodyView extends LinearLayout {
 		}
 
 	};
+
+	public VMessage getMsg() {
+		return this.mMsg;
+	}
+
+	public void updateAvatar(Bitmap bmp) {
+		mHeadIcon.setImageBitmap(bmp);
+	}
 
 	private OnClickListener fileMessageItemClickListener = new OnClickListener() {
 
@@ -804,7 +821,7 @@ public class MessageBodyView extends LinearLayout {
 	private OnClickListener mResendButtonListener = new OnClickListener() {
 		@Override
 		public void onClick(View view) {
-			if(SPUtil.checkCurrentAviNetwork(getContext())){
+			if (SPUtil.checkCurrentAviNetwork(getContext())) {
 				if (callback != null) {
 					View fileRootView = mContentContainer.getChildAt(0);
 					failedIcon.setVisibility(View.INVISIBLE);
@@ -823,9 +840,9 @@ public class MessageBodyView extends LinearLayout {
 						updateFileItemView(fileItem, fileRootView);
 					}
 				}
-			}
-			else{
-				Toast.makeText(getContext(), "网络连接不可用，请稍候再试", Toast.LENGTH_SHORT).show();
+			} else {
+				Toast.makeText(getContext(), "网络连接不可用，请稍候再试",
+						Toast.LENGTH_SHORT).show();
 			}
 			pw.dismiss();
 		}

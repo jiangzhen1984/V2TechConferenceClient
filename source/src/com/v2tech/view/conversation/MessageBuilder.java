@@ -60,7 +60,8 @@ public class MessageBuilder {
 					.getToUser().getmUserId());
 		}
 
-		values.put(ContentDescriptor.Messages.Cols.GROUP_ID, vm.getGroupId());
+		values.put(ContentDescriptor.Messages.Cols.GROUP_ID, 
+				+vm.getGroupId());
 		values.put(ContentDescriptor.Messages.Cols.SEND_TIME,
 				vm.getFullDateStr());
 		values.put(ContentDescriptor.Messages.Cols.UUID, vm.getUUID());
