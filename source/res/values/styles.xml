@@ -5,7 +5,7 @@
     <style name="AppTheme" parent="@android:style/Theme.NoTitleBar">
         <!-- All customizations that are NOT specific to a particular API-level can go here. -->
     </style>
-
+    
     <style name="IpSettingDialog" parent="@android:style/Theme.Translucent.NoTitleBar">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>

@@ -1560,6 +1560,11 @@ public class ConversationView extends Activity {
 			CommonAdapterItemWrapper wrapper = messageArray.get(pos);
 			if (wrapper.getView() == null) {
 				VMessage vm = (VMessage) wrapper.getItemObject();
+				List<VMessageFileItem> fileItems = vm.getFileItems();
+				if(fileItems != null){
+					
+					adapterFileIcon(fileItems);
+				}
 				MessageBodyView mv = new MessageBodyView(mContext, vm, true);
 				mv.setCallback(listener);
 				((VMessageAdater) wrapper).setView(mv);
@@ -1714,6 +1719,40 @@ public class ConversationView extends Activity {
 			VMessageFileItem vfi = vim.getFileItems().get(0);
 			vfi.setState(VMessageFileItem.STATE_FILE_SENDING);
 			sendMessageToRemote(vim);
+		}
+	}
+
+	public void adapterFileIcon(List<VMessageFileItem> fileItems) {
+		
+		for (VMessageFileItem vMessageFileItem : fileItems) {
+			fileName = vMessageFileItem.getFileName();
+			if (fileName.endsWith(".jpg") || fileName.endsWith(".png")
+					|| fileName.endsWith(".jpeg") || fileName.endsWith(".bmp")
+					|| fileName.endsWith("gif")) {
+				vMessageFileItem.setFileType(1); //PICTURE = 1
+	
+			} else if (fileName.endsWith(".doc")) {
+				vMessageFileItem.setFileType(2); //WORD = 2
+			} else if (fileName.endsWith(".xls")) {
+				vMessageFileItem.setFileType(3); //EXCEL = 3
+			} else if (fileName.endsWith(".pdf")) {
+				vMessageFileItem.setFileType(4); //PDF = 4
+			} else if (fileName.endsWith(".ppt") || fileName.endsWith(".pptx")) {
+				vMessageFileItem.setFileType(5); //PPT = 5
+			} else if (fileName.endsWith(".zip") || fileName.endsWith(".rar")) {
+				vMessageFileItem.setFileType(6); //ZIP = 6
+			} else if (fileName.endsWith(".vsd") || fileName.endsWith(".vss")
+					|| fileName.endsWith(".vst") || fileName.endsWith(".vdx")) {
+				vMessageFileItem.setFileType(7); //VIS = 7
+			} else if (fileName.endsWith(".mp4") || fileName.endsWith(".rmvb")
+					|| fileName.endsWith(".avi") || fileName.endsWith(".3gp")) {
+				vMessageFileItem.setFileType(8); //VIDEO = 8
+			} else if (fileName.endsWith(".mp3") || fileName.endsWith(".wav")
+					|| fileName.endsWith(".ape") || fileName.endsWith(".wmv")) {
+				vMessageFileItem.setFileType(9); //SOUND = 9
+			} else {
+				vMessageFileItem.setFileType(10); //OTHER = 10
+			}
 		}
 	}
 

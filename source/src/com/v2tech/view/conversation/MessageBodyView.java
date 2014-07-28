@@ -30,6 +30,7 @@ import android.widget.Toast;
 
 import com.v2tech.R;
 import com.v2tech.service.GlobalHolder;
+import com.v2tech.util.DensityUtils;
 import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.MessageUtil;
 import com.v2tech.util.SPUtil;
@@ -514,26 +515,25 @@ public class MessageBodyView extends LinearLayout {
 				}
 
 				int viewWidth = anchor.getMeasuredWidth();
-//				int viewHeight = anchor.getMeasuredHeight();
+				// int viewHeight = anchor.getMeasuredHeight();
 				int offsetX = (viewWidth - width) / 2;
-//				int offsetY = (viewHeight + height);
-				
+				// int offsetY = (viewHeight + height);
+
 				int[] location = new int[2];
 				anchor.getLocationInWindow(location);
-//				if (location[1] <= 0) {
-					Rect r = new Rect();
-					anchor.getDrawingRect(r);
-					Rect r1 = new Rect();
-					anchor.getGlobalVisibleRect(r1);
-					int offsetXLocation =  r1.left + offsetX;
-					int offsetYLocation = r1.top - (height / 3);
-					pw.showAtLocation((View) anchor.getParent(),
-							Gravity.NO_GRAVITY, offsetXLocation
-									, offsetYLocation);
-//				} else {
-//					pw.showAsDropDown((View) anchor.getParent(), offsetX,
-//							offsetY);
-//				}
+				// if (location[1] <= 0) {
+				Rect r = new Rect();
+				anchor.getDrawingRect(r);
+				Rect r1 = new Rect();
+				anchor.getGlobalVisibleRect(r1);
+				int offsetXLocation = r1.left + offsetX;
+				int offsetYLocation = r1.top - (height / 3);
+				pw.showAtLocation((View) anchor.getParent(),
+						Gravity.NO_GRAVITY, offsetXLocation, offsetYLocation);
+				// } else {
+				// pw.showAsDropDown((View) anchor.getParent(), offsetX,
+				// offsetY);
+				// }
 				updateSelectedBg(false);
 				popupWindowListener = null;
 			}
@@ -644,14 +644,20 @@ public class MessageBodyView extends LinearLayout {
 
 			float percent = (float) ((double) vfi.getDownloadedSize() / (double) vfi
 					.getFileSize());
-
+			Log.i(TAG, "当前下载百分比：" + percent);
 			ViewGroup progressC = (ViewGroup) rootView
-					.findViewById(R.id.message_body_file_item_width_base);
-
+					.findViewById(R.id.message_body_file_item_progress_state_ly);
+			progressC.measure(View.MeasureSpec.makeMeasureSpec(0,
+					View.MeasureSpec.UNSPECIFIED), View.MeasureSpec
+					.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
+			int width = progressC.getMeasuredWidth();
 			View iv = rootView
 					.findViewById(R.id.message_body_file_item_progress_state);
 			ViewGroup.LayoutParams lp = iv.getLayoutParams();
-			lp.width = (int) (progressC.getLayoutParams().width * percent);
+			Log.i(TAG, "当前下载进度条总长度----：" + width);
+//			lp.width = (int) (progressC.getLayoutParams().width * percent);
+			lp.width = (int) (width * percent);
+			Log.i(TAG, "当前下载进度条宽度：" + lp.width);
 			iv.setLayoutParams(lp);
 
 		} else {

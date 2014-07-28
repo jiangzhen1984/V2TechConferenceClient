@@ -19,8 +19,10 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TabHost;
@@ -533,6 +535,16 @@ public class MainActivity extends FragmentActivity implements
 			this(tabName, draId, tabNameId, tabTitleId, clsName, null);
 		}
 
+	}
+	
+	@Override
+	public boolean dispatchTouchEvent(MotionEvent ev) {
+		  View v = getCurrentFocus(); 
+		    InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);  
+		    if (imm != null) {  
+		        imm.hideSoftInputFromWindow(v.getWindowToken(), 0);  
+		    }  
+		return super.dispatchTouchEvent(ev);
 	}
 
 }

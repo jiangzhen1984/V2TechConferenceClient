@@ -60,7 +60,7 @@ import com.v2tech.vo.Group;
 import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.User;
 
-public class ConferenceCreateActivity extends Activity {
+public class ConferenceCreateActivity extends Activity{
 
 	private static final int UPDATE_LIST_VIEW = 1;
 	private static final int UPDATE_ATTENDEES = 2;
@@ -111,7 +111,7 @@ public class ConferenceCreateActivity extends Activity {
 	private int landLayout = PAD_LAYOUT;
 
 	private long preSelectedUID;
-
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -120,8 +120,10 @@ public class ConferenceCreateActivity extends Activity {
 		} else {
 			setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 		}
+		
 
 		setContentView(R.layout.activity_conference_create);
+		
 		mContext = this;
 		mContactsContainer = (ListView) findViewById(R.id.conf_create_contacts_list);
 		mContactsContainer.setOnItemClickListener(itemListener);
@@ -136,6 +138,7 @@ public class ConferenceCreateActivity extends Activity {
 		mConfirmButton.setOnClickListener(confirmButtonListener);
 
 		mConfTitleET = (EditText) findViewById(R.id.conference_create_conf_name);
+
 		mConfStartTimeET = (EditText) findViewById(R.id.conference_create_conf_start_time);
 		mConfStartTimeET.setOnTouchListener(mDateTimePickerListener);
 		// mConfStartTimeET.setOnClickListener(mDateTimePickerListener);
@@ -152,6 +155,7 @@ public class ConferenceCreateActivity extends Activity {
 
 		mErrorMessageTV = (TextView) findViewById(R.id.conference_create_error_notification_tv);
 		preSelectedUID = getIntent().getLongExtra("uid", 0);
+
 	}
 
 	@Override
@@ -428,19 +432,20 @@ public class ConferenceCreateActivity extends Activity {
 				removeAttendee(list.get(i));
 			}
 		}
-		
+
 		boolean startFlag = false;
-		for (int i =0; i < mItemList.size(); i++) {
+		for (int i = 0; i < mItemList.size(); i++) {
 			ListItem item = mItemList.get(i);
 			if (item.g != null && item.g.getmGId() == selectGroup.getmGId()) {
 				startFlag = true;
 				continue;
 			}
-			
-			if (startFlag ) {
+
+			if (startFlag) {
 				if (item.u != null) {
-					((ContactUserView)item.v).updateChecked();
-				} else if (item.g != null && item.g.getParent() == selectGroup.getParent()) {
+					((ContactUserView) item.v).updateChecked();
+				} else if (item.g != null
+						&& item.g.getParent() == selectGroup.getParent()) {
 					startFlag = false;
 				}
 			}
@@ -458,15 +463,15 @@ public class ConferenceCreateActivity extends Activity {
 				ListItem li = mItemList.get(index);
 				if (li.u != null && u.getmUserId() == li.u.getmUserId()) {
 					if (((ContactUserView) li.v).isChecked()) {
-						flag = OP_ADD_ALL_GROUP_USER;
-					} else {
 						flag = OP_DEL_ALL_GROUP_USER;
+					} else {
+						flag = OP_ADD_ALL_GROUP_USER;
 					}
 					((ContactUserView) li.v).updateChecked();
 				}
 			}
 			Message.obtain(mLocalHandler, UPDATE_ATTENDEES, flag, 0, u)
-					.sendToTarget();
+			.sendToTarget();
 		}
 
 	};
@@ -841,4 +846,15 @@ public class ConferenceCreateActivity extends Activity {
 
 	}
 
+	@Override
+	public boolean dispatchTouchEvent(MotionEvent ev) {
+	    View v = getCurrentFocus(); 
+	    InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);  
+	    if (imm != null) {  
+	        imm.hideSoftInputFromWindow(v.getWindowToken(), 0);  
+	    }  
+	    return super.dispatchTouchEvent(ev);
+	}
 }
+
+

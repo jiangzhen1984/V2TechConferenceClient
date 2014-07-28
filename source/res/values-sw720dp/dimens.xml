@@ -98,7 +98,7 @@
     <dimen name="fragment_conversation_connected_local_surface_margin_right">30dp</dimen>
 
     <!-- message body file item layout -->
-    <dimen name="message_body_file_item_file_name_text_size">14sp</dimen>
+    <dimen name="message_body_file_item_file_name_text_size">7sp</dimen>
     <dimen name="message_body_file_item_file_name_text_margin_left">10dp</dimen>
     <dimen name="message_body_file_item_file_name_max_length">100dp</dimen>
     <dimen name="message_body_file_item_file_size_text_size">16sp</dimen>
@@ -116,5 +116,5 @@
     <dimen name="message_voice_dialog_width">260dp</dimen>
     <dimen name="message_voice_dialog_height">200dp</dimen>
 
-	 <dimen name="message_selected_pop_up_window">-4dp</dimen>
+	 <dimen name="message_selected_pop_up_window">-11dp</dimen>
 </resources>

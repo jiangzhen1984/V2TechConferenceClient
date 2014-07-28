@@ -105,6 +105,7 @@
     <!-- activity selectfile adapter -->
     <dimen name="select_file_adapter_size">22sp</dimen>
     <dimen name="select_file_entry_interval">15dp</dimen>
+    <dimen name="message_body_file_item_file_name_text_size">7sp</dimen>
 	
 	 <dimen name="message_selected_pop_up_window">-6dp</dimen>
 </resources>
