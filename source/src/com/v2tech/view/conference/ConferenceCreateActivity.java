@@ -442,7 +442,9 @@ public class ConferenceCreateActivity extends Activity{
 			}
 
 			if (startFlag) {
-				if (item.u != null) {
+				//check current user belongs this group or not.
+				// User ListView current user level equals group level -1 
+				if (item.u != null && item.level == selectGroup.getLevel() - 1) {
 					((ContactUserView) item.v).updateChecked();
 				} else if (item.g != null
 						&& item.g.getParent() == selectGroup.getParent()) {

@@ -503,8 +503,8 @@ public class ChatService extends AbstractHandler {
 
 	class VideoRequestCallbackImpl extends VideoRequestCallbackAdapter {
 
-		public void OnVideoChatAccepted(long nGroupID, int nBusinessType,
-				long nFromuserID, String szDeviceID) {
+		@Override
+		public void OnVideoChatAccepted(VideoJNIObjectInd ind) {
 			if (mCaller != null) {
 				JNIResponse resp = new RequestChatServiceResponse(
 						RequestChatServiceResponse.ACCEPTED,
@@ -514,8 +514,8 @@ public class ChatService extends AbstractHandler {
 			}
 		}
 
-		public void OnVideoChatRefused(long nGroupID, int nBusinessType,
-				long nFromUserID, String szDeviceID) {
+		@Override
+		public void OnVideoChatRefused(VideoJNIObjectInd ind) {
 			if (mCaller != null) {
 				JNIResponse resp = new RequestChatServiceResponse(
 						RequestChatServiceResponse.REJCTED,

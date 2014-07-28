@@ -27,6 +27,7 @@ import android.graphics.ImageFormat;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
+import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -286,6 +287,8 @@ public class VideoActivityV2 extends Activity {
 			suspendOrResume(true);
 		}
 
+		//Set audio use speaker phone
+		updateAudioSpeaker(true);
 		NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 		// mId allows you to update the notification later on.
 		mNotificationManager.cancel(PublicIntent.VIDEO_NOTIFICATION_ID);
@@ -1169,6 +1172,7 @@ public class VideoActivityV2 extends Activity {
 		if (mServiceBound) {
 			suspendOrResume(false);
 		}
+		updateAudioSpeaker(false);
 	}
 
 	@Override
@@ -1241,10 +1245,20 @@ public class VideoActivityV2 extends Activity {
 	}
 	
 	
+	
 
 	@Override
 	protected void onRestoreInstanceState(Bundle savedInstanceState) {
 		super.onRestoreInstanceState(savedInstanceState);
+	}
+	
+	
+	private void updateAudioSpeaker(boolean flag) {
+		AudioManager audioManager;
+		audioManager = (AudioManager) mContext
+				.getSystemService(Context.AUDIO_SERVICE);
+		audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
+		audioManager.setSpeakerphoneOn(flag);
 	}
 
 	private void showQuitDialog(String content) {
