@@ -1239,6 +1239,13 @@ public class VideoActivityV2 extends Activity {
 			mSettingWindow.dismiss();
 		}
 	}
+	
+	
+
+	@Override
+	protected void onRestoreInstanceState(Bundle savedInstanceState) {
+		super.onRestoreInstanceState(savedInstanceState);
+	}
 
 	private void showQuitDialog(String content) {
 		if (mQuitDialog == null) {
@@ -1713,7 +1720,7 @@ public class VideoActivityV2 extends Activity {
 			vm.setGroupId(conf.getId());
 			vm.setToUser(new User(0));
 			vm.setFromUser(GlobalHolder.getInstance().getCurrentUser());
-			vm.setMsgCode(V2GlobalEnum.REQUEST_TYPE_IM);
+			vm.setMsgCode(V2GlobalEnum.REQUEST_TYPE_CONF);
 			cs.sendVMessage(vm, null);
 
 		}
@@ -2193,8 +2200,12 @@ public class VideoActivityV2 extends Activity {
 					if (caVp != null) {
 						caVp.addMeta(shape);
 					} else {
-						V2Log.e(" didn't find page for canvas"
+						V2Log.i(" construct new page for canvas"
 								+ shape.getPageNo());
+						V2Doc.Page newPage = new V2Doc.Page(shape.getPageNo(), shape.getDocId(), null, null);
+						newPage.addMeta(shape);
+						caVp = newPage;
+						ca.addPage(newPage);
 					}
 					if (mDocContainer != null
 							&& caVp.getDocId().equals(

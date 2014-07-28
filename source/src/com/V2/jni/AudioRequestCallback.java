@@ -1,43 +1,43 @@
 package com.V2.jni;
 
+import com.V2.jni.ind.AudioJNIObjectInd;
 
 public interface AudioRequestCallback {
-	
-	/**
-	 * 
-	 * @param nGroupID
-	 * @param nBusinessType
-	 * @param nFromUserID
-	 */
-	public void OnAudioChatInvite(long nGroupID, long nBusinessType,
-			long nFromUserID);
-	
-	
-	/**
-	 * 
-	 * @param nGroupID
-	 * @param nBusinessType
-	 * @param nFromUserID
-	 */
-	public void OnAudioChatAccepted(long nGroupID, long nBusinessType,
-			long nFromUserID);
 
 	/**
+	 * Other invite current to join voice call.
 	 * 
-	 * @param nGroupID
-	 * @param nBusinessType
-	 * @param nFromUserID
+	 * @param ind
+	 *            indication object
+	 * @see AudioJNIObjectInd
 	 */
-	public void OnAudioChatRefused(long nGroupID, long nBusinessType,
-			long nFromUserID);
-	
+	public void OnAudioChatInvite(AudioJNIObjectInd ind);
+
 	/**
+	 * Other user accept current voice invitation
 	 * 
-	 * @param nGroupID
-	 * @param nBusinessType
-	 * @param nFromUserID
+	 * @param ind
+	 *            indication object
+	 * @see AudioJNIObjectInd
 	 */
-	public void OnAudioChatClosed(long nGroupID, long nBusinessType,
-				long nFromUserID) ;
+	public void OnAudioChatAccepted(AudioJNIObjectInd ind);
+
+	/**
+	 * Other user refuse current conversation of voice
+	 * 
+	 * @param ind
+	 *            indication object
+	 * @see AudioJNIObjectInd
+	 */
+	public void OnAudioChatRefused(AudioJNIObjectInd ind);
+
+	/**
+	 * Other user close current conversation of voice
+	 * 
+	 * @param ind
+	 *            indication object
+	 * @see AudioJNIObjectInd
+	 */
+	public void OnAudioChatClosed(AudioJNIObjectInd ind);
 
 }

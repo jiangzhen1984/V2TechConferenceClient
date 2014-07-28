@@ -11,7 +11,6 @@ import android.net.Uri;
 import android.support.v4.app.NotificationCompat;
 
 import com.v2tech.R;
-import com.v2tech.view.MainActivity;
 import com.v2tech.view.PublicIntent;
 
 public class Notificator {

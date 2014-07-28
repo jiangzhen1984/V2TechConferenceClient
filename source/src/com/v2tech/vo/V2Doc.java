@@ -77,7 +77,7 @@ public class V2Doc {
 			this.filePath = filePath;
 			this.vsMeta = vsMeta;
 			if (this.vsMeta == null) {
-				vsMeta = new ArrayList<V2ShapeMeta>();
+				this.vsMeta = new ArrayList<V2ShapeMeta>();
 			}
 		}
 

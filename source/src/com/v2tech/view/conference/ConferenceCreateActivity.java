@@ -33,9 +33,8 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.BaseAdapter;
-import android.widget.CompoundButton;
-import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
@@ -68,10 +67,15 @@ public class ConferenceCreateActivity extends Activity {
 	private static final int UPDATE_SEARCHED_USER_LIST = 3;
 	private static final int CREATE_CONFERENC_RESP = 4;
 	private static final int DO_PRE_SELECT = 5;
-	private static final int DO_PRE_SELECT_CHECK_USER = 6;
+	private static final int START_GROUP_SELECT = 6;
+	private static final int DOING_SELECT_GROUP = 7;
+	private static final int END_GROUP_SELECT = 8;
 
 	private static final int PAD_LAYOUT = 1;
 	private static final int PHONE_LAYOUT = 0;
+
+	private static final int OP_ADD_ALL_GROUP_USER = 1;
+	private static final int OP_DEL_ALL_GROUP_USER = 0;
 
 	private Context mContext;
 	private LocalHandler mLocalHandler = new LocalHandler();
@@ -121,6 +125,7 @@ public class ConferenceCreateActivity extends Activity {
 		mContext = this;
 		mContactsContainer = (ListView) findViewById(R.id.conf_create_contacts_list);
 		mContactsContainer.setOnItemClickListener(itemListener);
+		mContactsContainer.setOnItemLongClickListener(itemLongClickListener);
 
 		mAttendeeContainer = (LinearLayout) findViewById(R.id.conference_attendee_container);
 		mAttendeeContainer.setGravity(Gravity.CENTER);
@@ -228,32 +233,33 @@ public class ConferenceCreateActivity extends Activity {
 		adapter.notifyDataSetChanged();
 	}
 
-	private void updateUserToAttendList(final User u) {
+	private void updateUserToAttendList(User u, int op) {
 		if (u == null) {
 			return;
 		}
-		boolean remove = false;
-		for (User tu : mAttendeeList) {
-			if (tu.getmUserId() == u.getmUserId()) {
-				mAttendeeList.remove(tu);
-				remove = true;
-				break;
-			}
-		}
-
-		if (remove) {
+		if (op == OP_DEL_ALL_GROUP_USER) {
 			removeAttendee(u);
-		} else {
+		} else if (op == OP_ADD_ALL_GROUP_USER) {
 			addAttendee(u);
 		}
 
 	}
 
 	private void removeAttendee(User u) {
-		mAttendeeContainer.removeAllViews();
-		for (User tmpU : mAttendeeList) {
-			addAttendee(tmpU);
+		boolean ret = mAttendeeList.remove(u);
+		if (ret) {
+			for (int i = 0; i < mAttendeeContainer.getChildCount(); i++) {
+				User tagU = (User) mAttendeeContainer.getChildAt(i).getTag();
+				if (tagU.getmUserId() == u.getmUserId()) {
+					mAttendeeContainer.removeViewAt(i);
+					break;
+				}
+			}
 		}
+		// mAttendeeContainer.removeAllViews();
+		// for (User tmpU : mAttendeeList) {
+		// addAttendee(tmpU);
+		// }
 	}
 
 	private void updateItem(ListItem it) {
@@ -272,7 +278,10 @@ public class ConferenceCreateActivity extends Activity {
 		if (u.isCurrentLoggedInUser()) {
 			return;
 		}
-		mAttendeeList.add(u);
+		boolean ret = mAttendeeList.add(u);
+		if (!ret) {
+			return;
+		}
 
 		View v = null;
 		if (landLayout == PAD_LAYOUT) {
@@ -403,19 +412,37 @@ public class ConferenceCreateActivity extends Activity {
 		}
 
 	}
-	
-	
+
 	private ProgressDialog mWaitingDialog;
 
 	private void selectGroup(Group selectGroup, boolean addOrRemove) {
 		List<Group> subGroups = selectGroup.getChildGroup();
-		for ( int i= 0; i < subGroups.size(); i++) {
+		for (int i = 0; i < subGroups.size(); i++) {
 			selectGroup(subGroups.get(i), addOrRemove);
 		}
-		List<User> list =selectGroup.getUsers();
-		for (int i = 0; i < list.size(); i ++) {
+		List<User> list = selectGroup.getUsers();
+		for (int i = 0; i < list.size(); i++) {
 			if (addOrRemove) {
-				this.addAttendee(list.get(i));
+				addAttendee(list.get(i));
+			} else {
+				removeAttendee(list.get(i));
+			}
+		}
+		
+		boolean startFlag = false;
+		for (int i =0; i < mItemList.size(); i++) {
+			ListItem item = mItemList.get(i);
+			if (item.g != null && item.g.getmGId() == selectGroup.getmGId()) {
+				startFlag = true;
+				continue;
+			}
+			
+			if (startFlag ) {
+				if (item.u != null) {
+					((ContactUserView)item.v).updateChecked();
+				} else if (item.g != null && item.g.getParent() == selectGroup.getParent()) {
+					startFlag = false;
+				}
 			}
 		}
 
@@ -426,13 +453,20 @@ public class ConferenceCreateActivity extends Activity {
 		@Override
 		public void onClick(View view) {
 			User u = (User) view.getTag();
-			Message.obtain(mLocalHandler, UPDATE_ATTENDEES, u).sendToTarget();
+			int flag = 0;
 			for (int index = 0; index < mItemList.size(); index++) {
 				ListItem li = mItemList.get(index);
 				if (li.u != null && u.getmUserId() == li.u.getmUserId()) {
+					if (((ContactUserView) li.v).isChecked()) {
+						flag = OP_ADD_ALL_GROUP_USER;
+					} else {
+						flag = OP_DEL_ALL_GROUP_USER;
+					}
 					((ContactUserView) li.v).updateChecked();
 				}
 			}
+			Message.obtain(mLocalHandler, UPDATE_ATTENDEES, flag, 0, u)
+					.sendToTarget();
 		}
 
 	};
@@ -477,6 +511,28 @@ public class ConferenceCreateActivity extends Activity {
 
 	};
 
+	private OnItemLongClickListener itemLongClickListener = new OnItemLongClickListener() {
+
+		@Override
+		public boolean onItemLongClick(AdapterView<?> parent, View view,
+				int pos, long id) {
+			ListItem item = mItemList.get(pos);
+			if (item.g != null) {
+				ContactGroupView cgv = ((ContactGroupView) mItemList.get(pos).v);
+				cgv.updateChecked();
+				Message.obtain(
+						mLocalHandler,
+						START_GROUP_SELECT,
+						cgv.isChecked() ? OP_ADD_ALL_GROUP_USER
+								: OP_DEL_ALL_GROUP_USER, 0, item.g)
+						.sendToTarget();
+				return true;
+			}
+			return false;
+		}
+
+	};
+
 	private OnItemClickListener itemListener = new OnItemClickListener() {
 
 		@Override
@@ -490,13 +546,20 @@ public class ConferenceCreateActivity extends Activity {
 						.sendToTarget();
 			} else {
 				ContactUserView cuv = (ContactUserView) view;
+				int flag = 0;
 				for (ListItem li : mItemList) {
 					if (li.u != null
 							&& li.u.getmUserId() == cuv.getUser().getmUserId()) {
+						if (((ContactUserView) li.v).isChecked()) {
+							flag = OP_DEL_ALL_GROUP_USER;
+						} else {
+							flag = OP_ADD_ALL_GROUP_USER;
+						}
+
 						((ContactUserView) li.v).updateChecked();
 					}
 				}
-				Message.obtain(mLocalHandler, UPDATE_ATTENDEES, item.u)
+				Message.obtain(mLocalHandler, UPDATE_ATTENDEES, flag, 0, item.u)
 						.sendToTarget();
 			}
 		}
@@ -607,18 +670,16 @@ public class ConferenceCreateActivity extends Activity {
 		}
 
 	};
-	
+
 	/**
-	 * TODO add support for horizontal 
+	 * TODO add support for horizontal
 	 */
-	private OnCheckedChangeListener mGroupCheckBoxListener = new OnCheckedChangeListener() {
+	private OnClickListener mGroupCheckBoxListener = new OnClickListener() {
 
 		@Override
-		public void onCheckedChanged(CompoundButton cb, boolean flag) {
-		
-				
+		public void onClick(View view) {
 		}
-		
+
 	};
 
 	class LoadContactsAT extends AsyncTask<Void, Void, Void> {
@@ -671,7 +732,8 @@ public class ConferenceCreateActivity extends Activity {
 			super();
 			this.g = g;
 			this.id = 0x02000000 | g.getmGId();
-			this.v = new ContactGroupView(mContext, g, null, mGroupCheckBoxListener);
+			this.v = new ContactGroupView(mContext, g, null,
+					mGroupCheckBoxListener);
 			isExpanded = false;
 			this.level = level;
 		}
@@ -721,7 +783,7 @@ public class ConferenceCreateActivity extends Activity {
 				updateView(msg.arg1);
 				break;
 			case UPDATE_ATTENDEES:
-				updateUserToAttendList((User) msg.obj);
+				updateUserToAttendList((User) msg.obj, msg.arg1);
 				break;
 			case UPDATE_SEARCHED_USER_LIST:
 				updateSearchedUserList((List<User>) msg.obj);
@@ -754,6 +816,25 @@ public class ConferenceCreateActivity extends Activity {
 				break;
 			case DO_PRE_SELECT:
 				doPreSelect();
+				break;
+			case START_GROUP_SELECT: {
+				mWaitingDialog = ProgressDialog.show(
+						mContext,
+						"",
+						mContext.getResources().getString(
+								R.string.notification_watiing_process), true);
+				Message.obtain(this, DOING_SELECT_GROUP, msg.arg1, msg.arg2,
+						msg.obj).sendToTarget();
+				break;
+			}
+			case DOING_SELECT_GROUP:
+				selectGroup((Group) msg.obj,
+						msg.arg1 == OP_ADD_ALL_GROUP_USER ? true : false);
+				Message.obtain(this, END_GROUP_SELECT).sendToTarget();
+				break;
+			case END_GROUP_SELECT:
+				mWaitingDialog.dismiss();
+				mWaitingDialog = null;
 				break;
 			}
 		}

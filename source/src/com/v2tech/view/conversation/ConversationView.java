@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Pattern;
 
 import android.app.Activity;
 import android.app.Dialog;
@@ -27,8 +26,6 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
-import android.os.Parcel;
-import android.os.Parcelable;
 import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.SpannableStringBuilder;
@@ -44,6 +41,7 @@ import android.view.Window;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
+import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -167,7 +165,7 @@ public class ConversationView extends Activity {
 	private LinearLayout mFaceLayout;
 	private View mSmileIconButton;
 
-	private CommonAdapter adapter;
+	private MessageAdapter adapter;
 
 	private List<CommonAdapterItemWrapper> messageArray = new ArrayList<CommonAdapterItemWrapper>();
 
@@ -178,7 +176,7 @@ public class ConversationView extends Activity {
 	private ArrayList<FileInfoBean> mCheckedList;
 
 	private ConversationNotificationObject cov = null;
-	
+
 	private boolean reStart;
 
 	@Override
@@ -187,13 +185,13 @@ public class ConversationView extends Activity {
 		mContext = this;
 
 		setContentView(R.layout.activity_contact_message);
-		
+
 		GlobalConfig.isConversationOpen = true;
-		
+
 		lh = new LocalHandler();
-		
+
 		mMessagesContainer = (ListView) findViewById(R.id.conversation_message_list);
-		adapter = new CommonAdapter(messageArray, mConvertListener);
+		adapter = new MessageAdapter();
 		mMessagesContainer.setAdapter(adapter);
 		mMessagesContainer.setOnTouchListener(mHiddenOnTouchListener);
 		mMessagesContainer.setOnScrollListener(scrollListener);
@@ -296,11 +294,12 @@ public class ConversationView extends Activity {
 			pending = false;
 			scrollToBottom();
 		}
-		
-		if(reStart == false){
-			
-			mCheckedList = this.getIntent().getParcelableArrayListExtra("checkedFiles");
-			if(mCheckedList != null && mCheckedList.size() > 0){
+
+		if (reStart == false) {
+
+			mCheckedList = this.getIntent().getParcelableArrayListExtra(
+					"checkedFiles");
+			if (mCheckedList != null && mCheckedList.size() > 0) {
 				startSendMoreFile();
 			}
 		}
@@ -355,7 +354,7 @@ public class ConversationView extends Activity {
 
 	private void initExtraObject() {
 		Bundle bundle = this.getIntent().getExtras();
-		
+
 		if (bundle != null) {
 			cov = (ConversationNotificationObject) bundle.get("obj");
 			if (cov == null) {
@@ -893,8 +892,9 @@ public class ConversationView extends Activity {
 		@Override
 		public void onClick(View smile) {
 			Editable et = mMessageET.getEditableText();
-
-			if (Pattern.matches("((/:){1}(.){1}(:/){1}){10}", et.toString())) {
+			String str = et.toString() + " ";
+			String[] len = str.split("((/:){1}(.){1}(:/){1})");
+			if (len.length > 10) {
 				Toast.makeText(mContext,
 						R.string.error_contact_message_face_too_much,
 						Toast.LENGTH_SHORT).show();
@@ -1512,7 +1512,14 @@ public class ConversationView extends Activity {
 			}
 			if (user.getmUserId() == local.getmUserId()
 					|| user.getmUserId() == remote.getmUserId()) {
-				adapter.notifyDataSetInvalidated();
+				for (int i = 0; i < messageArray.size(); i++) {
+					MessageBodyView mdv = (MessageBodyView) messageArray
+							.get(i).getView();
+					VMessage vm = mdv.getMsg();
+					if (vm.getFromUser().getmUserId() == user.getmUserId()) {
+						mdv.updateAvatar(bm);
+					}
+				}
 			}
 
 		}
@@ -1530,6 +1537,38 @@ public class ConversationView extends Activity {
 			lh.postDelayed(mUpdateMicStatusTimer, 200);
 		}
 	};
+
+	class MessageAdapter extends BaseAdapter {
+
+		@Override
+		public int getCount() {
+			return messageArray.size();
+		}
+
+		@Override
+		public Object getItem(int pos) {
+			return messageArray.get(pos).getItemObject();
+		}
+
+		@Override
+		public long getItemId(int pos) {
+			return messageArray.get(pos).getItemObject().hashCode();
+		}
+
+		@Override
+		public View getView(int pos, View convertView, ViewGroup v) {
+			CommonAdapterItemWrapper wrapper = messageArray.get(pos);
+			if (wrapper.getView() == null) {
+				VMessage vm = (VMessage) wrapper.getItemObject();
+				MessageBodyView mv = new MessageBodyView(mContext, vm, true);
+				mv.setCallback(listener);
+				((VMessageAdater) wrapper).setView(mv);
+
+			}
+			return wrapper.getView();
+		}
+
+	}
 
 	class MessageReceiver extends BroadcastReceiver {
 
@@ -1666,12 +1705,12 @@ public class ConversationView extends Activity {
 	/**
 	 * get selected file path to send remote.
 	 */
-	public void sendSelectedFile(String selectPath , int fileType) {
-		
+	public void sendSelectedFile(String selectPath, int fileType) {
+
 		if (!TextUtils.isEmpty(selectPath)) {
 
 			VMessage vim = MessageBuilder.buildFileMessage(local, remote,
-					selectPath , fileType);
+					selectPath, fileType);
 			VMessageFileItem vfi = vim.getFileItems().get(0);
 			vfi.setState(VMessageFileItem.STATE_FILE_SENDING);
 			sendMessageToRemote(vim);
@@ -1682,9 +1721,9 @@ public class ConversationView extends Activity {
 
 		for (int i = 0; i < mCheckedList.size(); i++) {
 
-			sendSelectedFile(mCheckedList.get(i).filePath , mCheckedList.get(i).fileType);
+			sendSelectedFile(mCheckedList.get(i).filePath,
+					mCheckedList.get(i).fileType);
 		}
 	}
-
 
 }

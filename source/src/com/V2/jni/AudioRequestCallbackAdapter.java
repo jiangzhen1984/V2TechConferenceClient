@@ -1,30 +1,28 @@
 package com.V2.jni;
 
+import com.V2.jni.ind.AudioJNIObjectInd;
+
 public abstract class AudioRequestCallbackAdapter implements
 		AudioRequestCallback {
 
 	@Override
-	public void OnAudioChatInvite(long nGroupID, long nBusinessType,
-			long nFromUserID) {
-
+	public void OnAudioChatInvite(AudioJNIObjectInd ind) {
+		
 	}
 
 	@Override
-	public void OnAudioChatAccepted(long nGroupID, long nBusinessType,
-			long nFromUserID) {
-
+	public void OnAudioChatAccepted(AudioJNIObjectInd ind) {
+		
 	}
 
 	@Override
-	public void OnAudioChatRefused(long nGroupID, long nBusinessType,
-			long nFromUserID) {
-
+	public void OnAudioChatRefused(AudioJNIObjectInd ind) {
+		
 	}
 
 	@Override
-	public void OnAudioChatClosed(long nGroupID, long nBusinessType,
-			long nFromUserID) {
-
+	public void OnAudioChatClosed(AudioJNIObjectInd ind) {
+		
 	}
-
+	
 }

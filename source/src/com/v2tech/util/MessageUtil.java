@@ -34,6 +34,12 @@ public class MessageUtil {
 			return builder;
 		}
 		
+		if (vm.getFileItems().size() > 0) {
+			builder.append(context.getResources().getText(
+					R.string.conversation_display_item_file));
+			return builder;
+		}
+		
 		
 		for (int i = 0; i < vm.getItems().size(); i++) {
 			VMessageAbstractItem item = vm.getItems().get(i);

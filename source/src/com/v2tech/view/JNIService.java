@@ -40,6 +40,8 @@ import com.V2.jni.ImRequestCallbackAdapter;
 import com.V2.jni.V2GlobalEnum;
 import com.V2.jni.VideoRequest;
 import com.V2.jni.VideoRequestCallbackAdapter;
+import com.V2.jni.ind.AudioJNIObjectInd;
+import com.V2.jni.ind.VideoJNIObjectInd;
 import com.v2tech.R;
 import com.v2tech.service.BitmapManager;
 import com.v2tech.service.GlobalHolder;
@@ -224,22 +226,6 @@ public class JNIService extends Service {
 
 	}
 
-	class VideoInvitionWrapper {
-		long nGroupID;
-		int nBusinessType;
-		long nFromUserID;
-		String szDeviceID;
-
-		public VideoInvitionWrapper(long nGroupID, int nBusinessType,
-				long nFromUserID, String szDeviceID) {
-			super();
-			this.nGroupID = nGroupID;
-			this.nBusinessType = nBusinessType;
-			this.nFromUserID = nFromUserID;
-			this.szDeviceID = szDeviceID;
-		}
-
-	}
 
 	private void broadcastNetworkState(NetworkStateCode code) {
 		Intent i = new Intent();
@@ -371,15 +357,15 @@ public class JNIService extends Service {
 				}
 				break;
 			case JNI_RECEIVED_VIDEO_INVITION:
+				VideoJNIObjectInd vjoi = (VideoJNIObjectInd) msg.obj;
 				Intent iv = new Intent();
 				iv.addCategory(PublicIntent.DEFAULT_CATEGORY);
 				iv.setAction(PublicIntent.START_P2P_CONVERSACTION_ACTIVITY);
 				iv.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-				iv.putExtra("uid", ((VideoInvitionWrapper) msg.obj).nFromUserID);
+				iv.putExtra("uid", vjoi.getFromUserId());
 				iv.putExtra("is_coming_call", true);
 				iv.putExtra("voice", false);
-				iv.putExtra("device",
-						((VideoInvitionWrapper) msg.obj).szDeviceID);
+				iv.putExtra("device",vjoi.getDeviceId());
 				mContext.startActivity(iv);
 				break;
 
@@ -653,15 +639,16 @@ public class JNIService extends Service {
 
 	class AudioRequestCB extends AudioRequestCallbackAdapter {
 
+		
+		
 		@Override
-		public void OnAudioChatInvite(long nGroupID, long nBusinessType,
-				long nFromUserID) {
+		public void OnAudioChatInvite(AudioJNIObjectInd ind) {
 			if (GlobalHolder.getInstance().isInMeeting()
 					|| GlobalHolder.getInstance().isInAudioCall()
 					|| GlobalHolder.getInstance().isInVideoCall()) {
 				V2Log.i("Ignore audio call ");
-				AudioRequest.getInstance().RefuseAudioChat(nGroupID,
-						nFromUserID, (int) nBusinessType);
+				AudioRequest.getInstance().RefuseAudioChat(ind.getGroupId(),
+						ind.getFromUserId(), (int) ind.getRequestType());
 				return;
 			}
 
@@ -669,7 +656,7 @@ public class JNIService extends Service {
 			iv.addCategory(PublicIntent.DEFAULT_CATEGORY);
 			iv.setAction(PublicIntent.START_P2P_CONVERSACTION_ACTIVITY);
 			iv.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-			iv.putExtra("uid", nFromUserID);
+			iv.putExtra("uid", ind.getFromUserId());
 			iv.putExtra("is_coming_call", true);
 			iv.putExtra("voice", true);
 			mContext.startActivity(iv);
@@ -687,21 +674,19 @@ public class JNIService extends Service {
 		}
 
 		@Override
-		public void OnVideoChatInviteCallback(long nGroupID, int nBusinessType,
-				long nFromUserID, String szDeviceID) {
+		public void OnVideoChatInviteCallback(VideoJNIObjectInd ind) {
 			if (GlobalHolder.getInstance().isInMeeting()
 					|| GlobalHolder.getInstance().isInAudioCall()
 					|| GlobalHolder.getInstance().isInVideoCall()) {
 				V2Log.i("Ignore video call ");
-				VideoRequest.getInstance().refuseVideoChat(nGroupID,
-						nFromUserID, szDeviceID, nBusinessType);
+				VideoRequest.getInstance().refuseVideoChat(ind.getGroupId(),
+						ind.getFromUserId(), ind.getDeviceId(), ind.getRequestType());
 				return;
 			}
 			Message.obtain(
 					mCallbackHandler,
 					JNI_RECEIVED_VIDEO_INVITION,
-					new VideoInvitionWrapper(nGroupID, nBusinessType,
-							nFromUserID, szDeviceID)).sendToTarget();
+					ind).sendToTarget();
 		}
 
 	}

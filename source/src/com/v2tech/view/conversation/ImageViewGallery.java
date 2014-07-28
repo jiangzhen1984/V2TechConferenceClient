@@ -98,14 +98,14 @@ public class ImageViewGallery extends FragmentActivity {
 			List<VMessageImageItem> items = vm.getImageItems();
 			for (VMessageImageItem item : items) {
 				vimList.add(new ListItem(item));
+				if (vm.getId() == this.initMid) {
+					flag = true;
+				} 
+				if (!flag) {
+					initPos++;
+				}
 			}
 			
-			if (vm.getId() == this.initMid) {
-				flag = true;
-			} 
-			if (!flag) {
-				initPos++;
-			}
 		}
 
 		adapter = new ImageAdapter(this.getSupportFragmentManager());
