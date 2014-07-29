@@ -23,6 +23,7 @@ public class ContactUserView extends LinearLayout {
 	private TextView mUserSignatureTV;
 	private ImageView mStatusIV;
 	private CheckBox mCheckbox;
+	private int level;
 
 	private View contentContainer;
 
@@ -44,8 +45,19 @@ public class ContactUserView extends LinearLayout {
 		this(context, u, true);
 	}
 	
+	public ContactUserView(Context context, User u , int level) {
+		this(context, u, true , level);
+	}
+	
 	public ContactUserView(Context context, User u, boolean flag) {
+//		super(context);
+//		initData(u,  flag);
+		this(context, u, flag , 0);
+	}
+	
+	public ContactUserView(Context context, User u, boolean flag , int level) {
 		super(context);
+		this.level = level - 1;
 		initData(u,  flag);
 	}
 
@@ -81,13 +93,17 @@ public class ContactUserView extends LinearLayout {
 		mStatusIV = (ImageView) view.findViewById(R.id.contact_user_status_iv);
 		updateStatus(u.getmStatus());
 
-		this.setPadding((u.getFirstBelongsGroup() == null ? 2 : u
-				.getFirstBelongsGroup().getLevel() + 1) * 5, this
+//		this.setPadding((u.getFirstBelongsGroup() == null ? 2 : u
+//				.getFirstBelongsGroup().getLevel() + 1) * 5, this
+//				.getPaddingTop(), this.getPaddingRight(), this
+//				.getPaddingRight());
+		this.setPadding((level + 1) * 5, this
 				.getPaddingTop(), this.getPaddingRight(), this
 				.getPaddingRight());
 
-		padding = (u.getFirstBelongsGroup() == null ? 2 : u
-				.getFirstBelongsGroup().getLevel() + 1) * 35;
+//		padding = (u.getFirstBelongsGroup() == null ? 2 : u
+//				.getFirstBelongsGroup().getLevel()) * 35;
+		padding = level * 35;
 
 		contentContainer.setPadding(padding, contentContainer.getPaddingTop(),
 				contentContainer.getPaddingRight(),

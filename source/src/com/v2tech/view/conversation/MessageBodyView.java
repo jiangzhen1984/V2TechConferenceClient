@@ -505,10 +505,24 @@ public class MessageBodyView extends LinearLayout {
 							.findViewById(R.id.contact_message_pop_up_item_copy)
 							.setVisibility(View.VISIBLE);
 				} else {
-					pw.getContentView()
+					List<VMessageAbstractItem> items = mMsg.getItems();
+					for (VMessageAbstractItem vMessageAbstractItem : items) {
+						if(VMessageAbstractItem.ITEM_TYPE_TEXT == vMessageAbstractItem.getType() || 
+								VMessageAbstractItem.ITEM_TYPE_FACE == vMessageAbstractItem.getType()){
+							
+							pw.getContentView()
 							.findViewById(
 									R.id.contact_message_pop_up_item_resend)
-							.setVisibility(View.VISIBLE);
+									.setVisibility(View.VISIBLE);
+						}
+						else{
+							
+							pw.getContentView()
+							.findViewById(
+									R.id.contact_message_pop_up_item_redownload)
+									.setVisibility(View.VISIBLE);
+						}
+					}
 					pw.getContentView()
 							.findViewById(R.id.contact_message_pop_up_item_copy)
 							.setVisibility(View.GONE);
@@ -527,7 +541,7 @@ public class MessageBodyView extends LinearLayout {
 				Rect r1 = new Rect();
 				anchor.getGlobalVisibleRect(r1);
 				int offsetXLocation = r1.left + offsetX;
-				int offsetYLocation = r1.top - (height / 3);
+				int offsetYLocation = r1.top - (height / 2);
 				pw.showAtLocation((View) anchor.getParent(),
 						Gravity.NO_GRAVITY, offsetXLocation, offsetYLocation);
 				// } else {
@@ -644,7 +658,7 @@ public class MessageBodyView extends LinearLayout {
 
 			float percent = (float) ((double) vfi.getDownloadedSize() / (double) vfi
 					.getFileSize());
-			Log.i(TAG, "当前下载百分比：" + percent);
+			
 			ViewGroup progressC = (ViewGroup) rootView
 					.findViewById(R.id.message_body_file_item_progress_state_ly);
 			progressC.measure(View.MeasureSpec.makeMeasureSpec(0,
@@ -654,10 +668,7 @@ public class MessageBodyView extends LinearLayout {
 			View iv = rootView
 					.findViewById(R.id.message_body_file_item_progress_state);
 			ViewGroup.LayoutParams lp = iv.getLayoutParams();
-			Log.i(TAG, "当前下载进度条总长度----：" + width);
-//			lp.width = (int) (progressC.getLayoutParams().width * percent);
 			lp.width = (int) (width * percent);
-			Log.i(TAG, "当前下载进度条宽度：" + lp.width);
 			iv.setLayoutParams(lp);
 
 		} else {

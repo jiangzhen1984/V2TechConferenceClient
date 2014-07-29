@@ -749,7 +749,7 @@ public class ConferenceCreateActivity extends Activity{
 			super();
 			this.u = u;
 			this.id = 0x03000000 | u.getmUserId();
-			this.v = new ContactUserView(mContext, u);
+			this.v = new ContactUserView(mContext, u , level);;
 			isExpanded = false;
 			this.level = level;
 		}

@@ -23,6 +23,7 @@ import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -60,7 +61,7 @@ import com.v2tech.vo.User;
 import com.v2tech.vo.VMessage;
 
 public class ConversationsTabFragment extends Fragment implements TextWatcher {
-
+	private static final String TAG = "ConversationsTabFragment";
 	private static final int FILL_CONFS_LIST = 2;
 	private static final int UPDATE_USER_SIGN = 8;
 	private static final int UPDATE_CONVERSATION = 9;
@@ -100,6 +101,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher {
 	private String mCurrentTabFlag;
 	
 	private int currentPosition;
+	private List<ScrollItem> mItemListCache = null;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -252,6 +254,10 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher {
 				mIsStartedSearch = true;
 			}
 		} else {
+			
+			mItemList.clear();
+			mItemList.addAll(mItemListCache);
+			mItemListCache = null;
 			if (mIsStartedSearch) {
 				mConvList = mCacheItemList;
 				adapter.notifyDataSetChanged();
@@ -272,13 +278,19 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher {
 			}
 		}
 		mConvList = newItemList;
-		adapter.notifyDataSetChanged();
+		fillAdapter(mConvList);
+//		adapter.notifyDataSetChanged();
 	}
 
 	@Override
 	public void beforeTextChanged(CharSequence s, int start, int count,
 			int after) {
 
+		if(mItemListCache == null){
+			mItemListCache = new CopyOnWriteArrayList<ScrollItem>(); 
+			mItemListCache.addAll(mItemList);
+			mItemList.clear();
+		}
 	}
 
 	@Override
@@ -817,6 +829,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher {
 		public View getView(int position, View convertView, ViewGroup parent) {
 			currentPosition = position;
 			return mItemList.get(position).gp;
+//			return mConvList.get(position).gp;
 		}
 
 	}

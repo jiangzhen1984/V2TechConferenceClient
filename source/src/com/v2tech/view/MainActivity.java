@@ -23,6 +23,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TabHost;
@@ -43,7 +44,7 @@ public class MainActivity extends FragmentActivity implements
 	private boolean exitedFlag = false;
 
 	private TitleBar titleBar;
-
+	private EditText searchEdit;
 	private TabHost mTabHost;
 	private ViewPager mViewPager;
 	private PagerAdapter mPagerAdapter;
@@ -134,7 +135,7 @@ public class MainActivity extends FragmentActivity implements
 		setContentView(R.layout.activity_main);
 		// Initialise the TabHost
 		mContext = this;
-
+		searchEdit = (EditText) findViewById(R.id.search_edit);
 		// Init title bar
 		View titleBarLayout = findViewById(R.id.title_bar_ly);
 		titleBar = new TitleBar(mContext, titleBarLayout);
@@ -451,6 +452,7 @@ public class MainActivity extends FragmentActivity implements
 
 		@Override
 		public void onPageSelected(int pos) {
+			searchEdit.setText("");
 			mTabHost.setCurrentTab(pos);
 			titleBar.updateTitle(mTabClasses[pos].mTabTitleId);
 		}

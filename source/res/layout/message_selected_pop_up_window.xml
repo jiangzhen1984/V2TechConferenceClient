@@ -19,6 +19,16 @@
             android:padding="10dp"
             android:text="@string/contact_message_pop_up_item_resend"
             android:visibility="gone" />
+         <TextView
+            android:id="@+id/contact_message_pop_up_item_redownload"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_weight=".5"
+            android:gravity="center"
+            android:padding="10dp"
+            android:text="@string/contact_message_pop_up_item_redownload"
+            android:visibility="gone" />
         <TextView
             android:id="@+id/contact_message_pop_up_item_copy"
             android:layout_width="0dp"

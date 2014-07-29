@@ -78,6 +78,7 @@ import com.v2tech.view.widget.CommonAdapter;
 import com.v2tech.view.widget.CommonAdapter.CommonAdapterItemWrapper;
 import com.v2tech.vo.Conversation;
 import com.v2tech.vo.User;
+import com.v2tech.vo.UserDeviceConfig;
 import com.v2tech.vo.VMessage;
 import com.v2tech.vo.VMessageAbstractItem;
 import com.v2tech.vo.VMessageAudioItem;
@@ -178,6 +179,8 @@ public class ConversationView extends Activity {
 	private ConversationNotificationObject cov = null;
 
 	private boolean reStart;
+	private ImageView mVideoCallButton;
+	private ImageView mAudioCallButton;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -222,6 +225,12 @@ public class ConversationView extends Activity {
 
 		mSelectFileButtonIV = findViewById(R.id.contact_message_send_file_button);
 		mSelectFileButtonIV.setOnClickListener(mfileSelectionButtonListener);
+		
+		mVideoCallButton = (ImageView) findViewById(R.id.contact_message_video_call_button);
+		mVideoCallButton.setOnClickListener(mVideoCallButtonListener);
+		
+		mAudioCallButton = (ImageView) findViewById(R.id.contact_message_audio_call_button);
+		mAudioCallButton.setOnClickListener(mAudioCallButtonListener);
 
 		mAudioSpeakerIV = (ImageView) findViewById(R.id.contact_message_speaker);
 		mAudioSpeakerIV.setOnClickListener(mMessageTypeSwitchListener);
@@ -315,6 +324,19 @@ public class ConversationView extends Activity {
 		super.onStop();
 		isStopped = true;
 		reStart = true;
+		
+		voiceIsSentByTimer = true;
+		if(mRecorder != null){
+			
+			stopRecording();
+			starttime = 0;
+			fileName = null;
+			File f = new File(fileName);
+			f.deleteOnExit();
+			lh.removeCallbacks(mUpdateMicStatusTimer);
+			lh.removeCallbacks(timeOutMonitor);
+		}
+		
 	}
 
 	@Override
@@ -496,6 +518,8 @@ public class ConversationView extends Activity {
 
 		if (mVoiceDialog.isShowing()) {
 			mVoiceDialog.dismiss();
+			mButtonRecordAudio
+			.setText(R.string.contact_message_button_send_audio_msg);
 		} else {
 			updateCancelSendVoiceMsgNotification(VOICE_DIALOG_FLAG_RECORDING);
 
@@ -726,8 +750,9 @@ public class ConversationView extends Activity {
 
 		@Override
 		public boolean onTouch(View view, MotionEvent event) {
+			
 			if (event.getAction() == MotionEvent.ACTION_DOWN) {
-				showOrCloseVoiceDialog();
+				showOrCloseVoiceDialog(); 
 				fileName = GlobalConfig.getGlobalAudioPath() + "/"
 						+ System.currentTimeMillis() + ".aac";
 				if (!startReocrding(fileName)) {
@@ -755,6 +780,7 @@ public class ConversationView extends Activity {
 				if (voiceIsSentByTimer) {
 					return false;
 				}
+				
 				stopRecording();
 
 				Rect r = new Rect();
@@ -807,7 +833,7 @@ public class ConversationView extends Activity {
 		}
 
 	};
-
+	
 	private Runnable timeOutMonitor = new Runnable() {
 
 		@Override
@@ -930,6 +956,24 @@ public class ConversationView extends Activity {
 			}
 		}
 	};
+	
+	private View.OnClickListener mVideoCallButtonListener = new View.OnClickListener() {
+		@Override
+		public void onClick(View arg0) {
+//			if (!SPUtil.checkCurrentAviNetwork(mContext)) {
+//				Toast.makeText(mContext, R.string.conversation_no_network_notification, Toast.LENGTH_SHORT).show();
+//				return;
+//			}
+//			startVideoCall();
+		}
+	};
+	
+	private View.OnClickListener mAudioCallButtonListener = new View.OnClickListener() {
+		@Override
+		public void onClick(View arg0) {
+			
+		}
+	};
 
 	private TextWatcher mPasteWatcher = new TextWatcher() {
 
@@ -1029,6 +1073,25 @@ public class ConversationView extends Activity {
 			}
 		}
 	}
+
+//	public void startVideoCall() {
+//		Intent iv = new Intent();
+//		iv.addCategory(PublicIntent.DEFAULT_CATEGORY);
+//		iv.setAction(PublicIntent.START_P2P_CONVERSACTION_ACTIVITY);
+//		iv.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//		iv.putExtra("uid", user2Id);
+//		iv.putExtra("is_coming_call", false);
+//		iv.putExtra("voice", false);
+//		List<UserDeviceConfig> list = GlobalHolder.getInstance()
+//				.getAttendeeDevice(user2Id);
+//		if (list != null && list.size() > 0) {
+//			iv.putExtra("device", list.get(0).getDeviceID());
+//		} else {
+//			iv.putExtra("device", "");
+//		}
+//		mContext.startActivity(iv);
+//		
+//	}
 
 	private void doSendMessage() {
 		String content = mMessageET.getEditableText().toString();
