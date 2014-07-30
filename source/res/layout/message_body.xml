@@ -77,6 +77,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginLeft="10dp"
+                            android:visibility="invisible"
                             android:src="@drawable/message_sent_failed_icon" />
                         <ImageView
                             android:id="@+id/message_body_unread_icon_left"
@@ -129,6 +130,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginRight="10dp"
+                            android:visibility="invisible"
                             android:src="@drawable/message_sent_failed_icon" />
                         <ImageView
                             android:id="@+id/message_body_unread_icon_right"

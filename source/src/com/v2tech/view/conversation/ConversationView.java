@@ -408,15 +408,17 @@ public class ConversationView extends Activity {
 		if (pos < 0 || pos >= messageArray.size()) {
 			return;
 		}
-		mMessagesContainer.post(new Runnable() {
-
-			@Override
-			public void run() {
-				mMessagesContainer.setSelection(pos);
-
-			}
-
-		});
+		V2Log.d(TAG, "要移动的位置" + pos);
+		mMessagesContainer.setSelection(pos); 
+//		mMessagesContainer.post(new Runnable() {
+//
+//			@Override
+//			public void run() {
+//				mMessagesContainer.setSelection(pos);
+//
+//			}
+//
+//		});
 
 	}
 
@@ -1261,8 +1263,8 @@ public class ConversationView extends Activity {
 			if (!scrolled) {
 				return;
 			}
-
-			if (first <= 2 && isUPScroll && !mLoadedAllMessages) {
+			
+			if (first <= 0 && isUPScroll && !mLoadedAllMessages) {
 				android.os.Message.obtain(lh, START_LOAD_MESSAGE)
 						.sendToTarget();
 				currentItemPos = first;
@@ -1280,7 +1282,6 @@ public class ConversationView extends Activity {
 		@Override
 		public void onScrollStateChanged(AbsListView av, int state) {
 			scrolled = state != AbsListView.OnScrollListener.SCROLL_STATE_IDLE;
-
 		}
 
 	};
@@ -1721,6 +1722,9 @@ public class ConversationView extends Activity {
 			switch (msg.what) {
 			case LOAD_MESSAGE:
 				List<VMessage> array = loadMessages();
+				V2Log.d(TAG, "获取的消息数量" + array.size());
+				V2Log.d(TAG, "offset" + offset);
+				V2Log.d(TAG, "当前消息集合大小" + messageArray.size());
 				if (array != null) {
 					for (int i = 0; i < array.size(); i++) {
 						messageArray.add(0, new VMessageAdater(array.get(i)));
@@ -1749,8 +1753,9 @@ public class ConversationView extends Activity {
 				isLoading = true;
 				break;
 			case END_LOAD_MESSAGE:
-				scrollToPos(currentItemPos);
+				V2Log.d(TAG, "currentItemPos:" + currentItemPos);
 				adapter.notifyDataSetChanged();
+				scrollToPos(currentItemPos);
 				isLoading = false;
 				break;
 			case SEND_MESSAGE:

@@ -26,6 +26,7 @@
     <dimen name="contacts_user_view_text_max_width">80dp</dimen>
     <dimen name="contacts_user_view_contact_user_signature_margin_left">15dp</dimen>
     <dimen name="contacts_user_view_contact_user_name_margin_left">15dp</dimen>
+    <dimen name="contacts_user_view_contact_user_sign_margin_left">110dp</dimen>
     
 
     <!-- contact group view -->

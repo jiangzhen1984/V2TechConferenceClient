@@ -57,8 +57,11 @@ public class VideoAttendeeListLayout extends LinearLayout {
 	private EditText mSearchET;
 
 	private View mPinButton;
+	private TextView attendPersons;
 
 	private AttendeesAdapter adapter = new AttendeesAdapter();
+
+	private int onLinePersons = 1;
 
 	public interface VideoAttendeeActionListener {
 
@@ -84,6 +87,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 		View view = LayoutInflater.from(getContext()).inflate(
 				R.layout.video_attendee_list_layout, null, false);
 
+		attendPersons = (TextView) view.findViewById(R.id.video_attendee_pin_persons);
 		mAttendeeContainer = (ListView) view
 				.findViewById(R.id.video_attendee_container);
 		mSearchET = (EditText) view.findViewById(R.id.attendee_search);
@@ -123,6 +127,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 	public void addNewAttendee(Attendee at) {
 		mAttendsView.addAll(buildAttendeeView(at));
 		Collections.sort(mAttendsView);
+		attendPersons.setText(onLinePersons + "/" + mAttendsView.size());
 		adapter.notifyDataSetChanged();
 	}
 
@@ -137,6 +142,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 		}
 
 		Collections.sort(mAttendsView);
+		attendPersons.setText(onLinePersons + "/" + mAttendsView.size());
 		adapter.notifyDataSetChanged();
 	}
 
@@ -204,6 +210,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 		} else if (at.isJoined()) {
 			name.setTextColor(getContext().getResources().getColor(
 					R.color.video_attendee_name_color));
+			onLinePersons += 1;
 		} else {
 			name.setTextColor(getContext().getResources().getColor(
 					R.color.video_attendee_name_color_offline));
@@ -245,12 +252,14 @@ public class VideoAttendeeListLayout extends LinearLayout {
 					index = i;
 				} else {
 					i++;
+					onLinePersons += 1;
 				}
 			}
 		}
 
 		mAttendsView.addAll(index, buildAttendeeView(at));
 		Collections.sort(mAttendsView);
+		attendPersons.setText(onLinePersons + "/" + mAttendsView.size());
 		adapter.notifyDataSetChanged();
 	}
 
@@ -285,6 +294,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 				// set offline color
 				TextView nameTV = (TextView) v.v
 						.findViewById(R.id.video_attendee_device_name);
+				onLinePersons -= 1;
 
 				nameTV.setTextColor(getContext().getResources().getColor(
 						R.color.video_attendee_name_color_offline));
@@ -295,6 +305,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 		}
 
 		Collections.sort(mAttendsView);
+		attendPersons.setText(onLinePersons + "/" + mAttendsView.size());
 		adapter.notifyDataSetChanged();
 	}
 
@@ -348,6 +359,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 				}
 			}
 		}
+		attendPersons.setText(onLinePersons + "/" + mAttendsView.size());
 		adapter.notifyDataSetChanged();
 	}
 
@@ -360,6 +372,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 		synchronized (mAttendsView) {
 			mAttendsView.addAll(buildAttendeeView(at));
 		}
+		attendPersons.setText(onLinePersons + "/" + mAttendsView.size());
 		adapter.notifyDataSetChanged();
 
 	}

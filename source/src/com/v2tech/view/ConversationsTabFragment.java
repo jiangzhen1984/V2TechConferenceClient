@@ -61,7 +61,6 @@ import com.v2tech.vo.User;
 import com.v2tech.vo.VMessage;
 
 public class ConversationsTabFragment extends Fragment implements TextWatcher {
-	private static final String TAG = "ConversationsTabFragment";
 	private static final int FILL_CONFS_LIST = 2;
 	private static final int UPDATE_USER_SIGN = 8;
 	private static final int UPDATE_CONVERSATION = 9;
