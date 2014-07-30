@@ -78,7 +78,6 @@ import com.v2tech.view.widget.CommonAdapter;
 import com.v2tech.view.widget.CommonAdapter.CommonAdapterItemWrapper;
 import com.v2tech.vo.Conversation;
 import com.v2tech.vo.User;
-import com.v2tech.vo.UserDeviceConfig;
 import com.v2tech.vo.VMessage;
 import com.v2tech.vo.VMessageAbstractItem;
 import com.v2tech.vo.VMessageAudioItem;
@@ -225,10 +224,10 @@ public class ConversationView extends Activity {
 
 		mSelectFileButtonIV = findViewById(R.id.contact_message_send_file_button);
 		mSelectFileButtonIV.setOnClickListener(mfileSelectionButtonListener);
-		
+
 		mVideoCallButton = (ImageView) findViewById(R.id.contact_message_video_call_button);
 		mVideoCallButton.setOnClickListener(mVideoCallButtonListener);
-		
+
 		mAudioCallButton = (ImageView) findViewById(R.id.contact_message_audio_call_button);
 		mAudioCallButton.setOnClickListener(mAudioCallButtonListener);
 
@@ -324,10 +323,10 @@ public class ConversationView extends Activity {
 		super.onStop();
 		isStopped = true;
 		reStart = true;
-		
+
 		voiceIsSentByTimer = true;
-		if(mRecorder != null){
-			
+		if (mRecorder != null) {
+
 			stopRecording();
 			starttime = 0;
 			fileName = null;
@@ -336,7 +335,7 @@ public class ConversationView extends Activity {
 			lh.removeCallbacks(mUpdateMicStatusTimer);
 			lh.removeCallbacks(timeOutMonitor);
 		}
-		
+
 	}
 
 	@Override
@@ -519,7 +518,7 @@ public class ConversationView extends Activity {
 		if (mVoiceDialog.isShowing()) {
 			mVoiceDialog.dismiss();
 			mButtonRecordAudio
-			.setText(R.string.contact_message_button_send_audio_msg);
+					.setText(R.string.contact_message_button_send_audio_msg);
 		} else {
 			updateCancelSendVoiceMsgNotification(VOICE_DIALOG_FLAG_RECORDING);
 
@@ -750,9 +749,9 @@ public class ConversationView extends Activity {
 
 		@Override
 		public boolean onTouch(View view, MotionEvent event) {
-			
+
 			if (event.getAction() == MotionEvent.ACTION_DOWN) {
-				showOrCloseVoiceDialog(); 
+				showOrCloseVoiceDialog();
 				fileName = GlobalConfig.getGlobalAudioPath() + "/"
 						+ System.currentTimeMillis() + ".aac";
 				if (!startReocrding(fileName)) {
@@ -780,7 +779,7 @@ public class ConversationView extends Activity {
 				if (voiceIsSentByTimer) {
 					return false;
 				}
-				
+
 				stopRecording();
 
 				Rect r = new Rect();
@@ -833,7 +832,7 @@ public class ConversationView extends Activity {
 		}
 
 	};
-	
+
 	private Runnable timeOutMonitor = new Runnable() {
 
 		@Override
@@ -956,22 +955,24 @@ public class ConversationView extends Activity {
 			}
 		}
 	};
-	
+
 	private View.OnClickListener mVideoCallButtonListener = new View.OnClickListener() {
 		@Override
 		public void onClick(View arg0) {
-//			if (!SPUtil.checkCurrentAviNetwork(mContext)) {
-//				Toast.makeText(mContext, R.string.conversation_no_network_notification, Toast.LENGTH_SHORT).show();
-//				return;
-//			}
-//			startVideoCall();
+			// if (!SPUtil.checkCurrentAviNetwork(mContext)) {
+			// Toast.makeText(mContext,
+			// R.string.conversation_no_network_notification,
+			// Toast.LENGTH_SHORT).show();
+			// return;
+			// }
+			// startVideoCall();
 		}
 	};
-	
+
 	private View.OnClickListener mAudioCallButtonListener = new View.OnClickListener() {
 		@Override
 		public void onClick(View arg0) {
-			
+
 		}
 	};
 
@@ -1074,24 +1075,24 @@ public class ConversationView extends Activity {
 		}
 	}
 
-//	public void startVideoCall() {
-//		Intent iv = new Intent();
-//		iv.addCategory(PublicIntent.DEFAULT_CATEGORY);
-//		iv.setAction(PublicIntent.START_P2P_CONVERSACTION_ACTIVITY);
-//		iv.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//		iv.putExtra("uid", user2Id);
-//		iv.putExtra("is_coming_call", false);
-//		iv.putExtra("voice", false);
-//		List<UserDeviceConfig> list = GlobalHolder.getInstance()
-//				.getAttendeeDevice(user2Id);
-//		if (list != null && list.size() > 0) {
-//			iv.putExtra("device", list.get(0).getDeviceID());
-//		} else {
-//			iv.putExtra("device", "");
-//		}
-//		mContext.startActivity(iv);
-//		
-//	}
+	// public void startVideoCall() {
+	// Intent iv = new Intent();
+	// iv.addCategory(PublicIntent.DEFAULT_CATEGORY);
+	// iv.setAction(PublicIntent.START_P2P_CONVERSACTION_ACTIVITY);
+	// iv.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+	// iv.putExtra("uid", user2Id);
+	// iv.putExtra("is_coming_call", false);
+	// iv.putExtra("voice", false);
+	// List<UserDeviceConfig> list = GlobalHolder.getInstance()
+	// .getAttendeeDevice(user2Id);
+	// if (list != null && list.size() > 0) {
+	// iv.putExtra("device", list.get(0).getDeviceID());
+	// } else {
+	// iv.putExtra("device", "");
+	// }
+	// mContext.startActivity(iv);
+	//
+	// }
 
 	private void doSendMessage() {
 		String content = mMessageET.getEditableText().toString();
@@ -1134,14 +1135,25 @@ public class ConversationView extends Activity {
 						if (strStart < emojiStart) {
 							String strTextContent = str.substring(strStart,
 									emojiStart);
-							new VMessageTextItem(vm, strTextContent);
+							VMessageTextItem vti = new VMessageTextItem(vm,
+									strTextContent);
+							// If strStart is 0 means string at new line
+							if (strStart == 0) {
+								vti.setNewLine(true);
+							}
+
 						}
 
 						int ind = GlobalConfig.getDrawableIndexByEmoji(str
 								.subSequence(emojiStart, end).toString());
 						if (ind > 0) {
 							// new face item and add list
-							new VMessageFaceItem(vm, ind);
+							VMessageFaceItem vfi = new VMessageFaceItem(vm, ind);
+							// If emojiStart is 0 means emoji at new line
+							if (emojiStart == 0) {
+								vfi.setNewLine(true);
+							}
+
 						}
 						// Assign end to index -1, do not assign end because
 						// index will be ++
@@ -1156,7 +1168,13 @@ public class ConversationView extends Activity {
 				// check if exist last string
 				if (index == len - 1 && strStart <= index) {
 					String strTextContent = str.substring(strStart, len);
-					new VMessageTextItem(vm, strTextContent);
+					VMessageTextItem vti = new VMessageTextItem(vm,
+							strTextContent);
+					// If strStart is 0 means string at new line
+					if (strStart == 0) {
+						vti.setNewLine(true);
+					}
+
 					strStart = index;
 				}
 
@@ -1576,8 +1594,8 @@ public class ConversationView extends Activity {
 			if (user.getmUserId() == local.getmUserId()
 					|| user.getmUserId() == remote.getmUserId()) {
 				for (int i = 0; i < messageArray.size(); i++) {
-					MessageBodyView mdv = (MessageBodyView) messageArray
-							.get(i).getView();
+					MessageBodyView mdv = (MessageBodyView) messageArray.get(i)
+							.getView();
 					VMessage vm = mdv.getMsg();
 					if (vm.getFromUser().getmUserId() == user.getmUserId()) {
 						mdv.updateAvatar(bm);
@@ -1624,8 +1642,8 @@ public class ConversationView extends Activity {
 			if (wrapper.getView() == null) {
 				VMessage vm = (VMessage) wrapper.getItemObject();
 				List<VMessageFileItem> fileItems = vm.getFileItems();
-				if(fileItems != null){
-					
+				if (fileItems != null) {
+
 					adapterFileIcon(fileItems);
 				}
 				MessageBodyView mv = new MessageBodyView(mContext, vm, true);
@@ -1786,35 +1804,35 @@ public class ConversationView extends Activity {
 	}
 
 	public void adapterFileIcon(List<VMessageFileItem> fileItems) {
-		
+
 		for (VMessageFileItem vMessageFileItem : fileItems) {
 			fileName = vMessageFileItem.getFileName();
 			if (fileName.endsWith(".jpg") || fileName.endsWith(".png")
 					|| fileName.endsWith(".jpeg") || fileName.endsWith(".bmp")
 					|| fileName.endsWith("gif")) {
-				vMessageFileItem.setFileType(1); //PICTURE = 1
-	
+				vMessageFileItem.setFileType(1); // PICTURE = 1
+
 			} else if (fileName.endsWith(".doc")) {
-				vMessageFileItem.setFileType(2); //WORD = 2
+				vMessageFileItem.setFileType(2); // WORD = 2
 			} else if (fileName.endsWith(".xls")) {
-				vMessageFileItem.setFileType(3); //EXCEL = 3
+				vMessageFileItem.setFileType(3); // EXCEL = 3
 			} else if (fileName.endsWith(".pdf")) {
-				vMessageFileItem.setFileType(4); //PDF = 4
+				vMessageFileItem.setFileType(4); // PDF = 4
 			} else if (fileName.endsWith(".ppt") || fileName.endsWith(".pptx")) {
-				vMessageFileItem.setFileType(5); //PPT = 5
+				vMessageFileItem.setFileType(5); // PPT = 5
 			} else if (fileName.endsWith(".zip") || fileName.endsWith(".rar")) {
-				vMessageFileItem.setFileType(6); //ZIP = 6
+				vMessageFileItem.setFileType(6); // ZIP = 6
 			} else if (fileName.endsWith(".vsd") || fileName.endsWith(".vss")
 					|| fileName.endsWith(".vst") || fileName.endsWith(".vdx")) {
-				vMessageFileItem.setFileType(7); //VIS = 7
+				vMessageFileItem.setFileType(7); // VIS = 7
 			} else if (fileName.endsWith(".mp4") || fileName.endsWith(".rmvb")
 					|| fileName.endsWith(".avi") || fileName.endsWith(".3gp")) {
-				vMessageFileItem.setFileType(8); //VIDEO = 8
+				vMessageFileItem.setFileType(8); // VIDEO = 8
 			} else if (fileName.endsWith(".mp3") || fileName.endsWith(".wav")
 					|| fileName.endsWith(".ape") || fileName.endsWith(".wmv")) {
-				vMessageFileItem.setFileType(9); //SOUND = 9
+				vMessageFileItem.setFileType(9); // SOUND = 9
 			} else {
-				vMessageFileItem.setFileType(10); //OTHER = 10
+				vMessageFileItem.setFileType(10); // OTHER = 10
 			}
 		}
 	}
