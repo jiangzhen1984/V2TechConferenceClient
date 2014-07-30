@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import com.V2.jni.ind.SendingResultJNIObjectInd;
 import com.v2tech.util.V2Log;
 
 import android.content.Context;
@@ -235,10 +236,16 @@ public class ChatRequest {
 		}
 	}
 	
-	public void OnSendChatResult(String uuid, int ret, int code) {
+	/**
+	 * 
+	 * @param uuid
+	 * @param code  1 : text  2:image  3: audio
+	 * @param ret
+	 */
+	public void OnSendChatResult(String uuid, int code, int ret) {
 		V2Log.e("OnSendChatResult  " +uuid + "  "+ ret+ "  "+code);
 		if (callback != null) {
-			callback.OnSendChatResult(uuid, ret, code);
+			callback.OnSendChatResult(new SendingResultJNIObjectInd(uuid, SendingResultJNIObjectInd.Result.fromInt(ret), code));
 		}
 	}
 	

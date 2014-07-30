@@ -1,5 +1,7 @@
 package com.V2.jni;
 
+import com.V2.jni.ind.SendingResultJNIObjectInd;
+
 public abstract class ChatRequestCallbackAdapter implements ChatRequestCallback {
 
 	@Override
@@ -21,7 +23,7 @@ public abstract class ChatRequestCallbackAdapter implements ChatRequestCallback 
 	}
 
 	@Override
-	public void OnSendChatResult(String uuid, int ret, int code) {
+	public void OnSendChatResult(SendingResultJNIObjectInd ind) {
 
 	}
 

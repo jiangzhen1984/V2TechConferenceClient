@@ -41,6 +41,7 @@ import com.V2.jni.V2GlobalEnum;
 import com.V2.jni.VideoRequest;
 import com.V2.jni.VideoRequestCallbackAdapter;
 import com.V2.jni.ind.AudioJNIObjectInd;
+import com.V2.jni.ind.SendingResultJNIObjectInd;
 import com.V2.jni.ind.VideoJNIObjectInd;
 import com.v2tech.R;
 import com.v2tech.service.BitmapManager;
@@ -226,7 +227,6 @@ public class JNIService extends Service {
 
 	}
 
-
 	private void broadcastNetworkState(NetworkStateCode code) {
 		Intent i = new Intent();
 		i.setAction(JNI_BROADCAST_CONNECT_STATE_NOTIFICATION);
@@ -365,7 +365,7 @@ public class JNIService extends Service {
 				iv.putExtra("uid", vjoi.getFromUserId());
 				iv.putExtra("is_coming_call", true);
 				iv.putExtra("voice", false);
-				iv.putExtra("device",vjoi.getDeviceId());
+				iv.putExtra("device", vjoi.getDeviceId());
 				mContext.startActivity(iv);
 				break;
 
@@ -639,8 +639,6 @@ public class JNIService extends Service {
 
 	class AudioRequestCB extends AudioRequestCallbackAdapter {
 
-		
-		
 		@Override
 		public void OnAudioChatInvite(AudioJNIObjectInd ind) {
 			if (GlobalHolder.getInstance().isInMeeting()
@@ -680,13 +678,12 @@ public class JNIService extends Service {
 					|| GlobalHolder.getInstance().isInVideoCall()) {
 				V2Log.i("Ignore video call ");
 				VideoRequest.getInstance().refuseVideoChat(ind.getGroupId(),
-						ind.getFromUserId(), ind.getDeviceId(), ind.getRequestType());
+						ind.getFromUserId(), ind.getDeviceId(),
+						ind.getRequestType());
 				return;
 			}
-			Message.obtain(
-					mCallbackHandler,
-					JNI_RECEIVED_VIDEO_INVITION,
-					ind).sendToTarget();
+			Message.obtain(mCallbackHandler, JNI_RECEIVED_VIDEO_INVITION, ind)
+					.sendToTarget();
 		}
 
 	}
@@ -896,14 +893,16 @@ public class JNIService extends Service {
 		}
 
 		@Override
-		public void OnSendChatResult(String uuid, int ret, int code) {
-			super.OnSendChatResult(uuid, ret, code);
-			MessageBuilder.updateVMessageItemToSentFalied(mContext, uuid);
-			Intent i = new Intent();
-			i.setAction(JNIService.JNI_BROADCAST_MESSAGE_SENT_FAILED);
-			i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
-			i.putExtra("uuid", uuid);
-			sendBroadcast(i);
+		public void OnSendChatResult(SendingResultJNIObjectInd ind) {
+			if (ind.getRet() == SendingResultJNIObjectInd.Result.FAILED) {
+				MessageBuilder.updateVMessageItemToSentFalied(mContext,
+						ind.getUuid());
+				Intent i = new Intent();
+				i.setAction(JNIService.JNI_BROADCAST_MESSAGE_SENT_FAILED);
+				i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
+				i.putExtra("uuid", ind.getUuid());
+				sendBroadcast(i);
+			}
 
 		}
 

@@ -1,5 +1,7 @@
 package com.V2.jni;
 
+import com.V2.jni.ind.SendingResultJNIObjectInd;
+
 
 
 public interface ChatRequestCallback {
@@ -43,11 +45,9 @@ public interface ChatRequestCallback {
 			String audioPath);
 	
 	/**
-	 * <ul>Send message result. JNI doesn't call this API if sent successfully</ul>
-	 * @param uuid
-	 * @param ret
-	 * @param code
+	 * <ul>Send message result.</ul>
+	 * @param ind
 	 */
-	public void OnSendChatResult(String uuid, int ret, int code);
+	public void OnSendChatResult(SendingResultJNIObjectInd ind);
 
 }
