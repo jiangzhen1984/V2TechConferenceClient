@@ -645,10 +645,18 @@ public class VideoDocLayout extends LinearLayout {
 			if (view.getTag().equals("fullscreen")) {
 				if (listener != null) {
 					listener.requestDocViewFillParent(rootView);
+					if (container.getChildCount() > 0) {
+						TouchImageView tiv =(TouchImageView)container.getChildAt(0);
+						tiv.setZoom(1.3F);
+					}
 				}
 			} else {
 				if (listener != null) {
 					listener.requestDocViewRestore(rootView);
+					if (container.getChildCount() > 0) {
+						TouchImageView tiv =(TouchImageView)container.getChildAt(0);
+						tiv.setZoom(0.9F);
+					}
 				}
 			}
 
