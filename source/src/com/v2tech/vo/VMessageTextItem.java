@@ -22,9 +22,16 @@ public class VMessageTextItem extends VMessageAbstractItem {
 	}
 
 	public String toXmlItem() {
+		String tmp = new String(text);
+		tmp = tmp.replaceAll("&", "&amp;");
+		tmp = tmp.replaceAll("<", "&lt;");
+		tmp = tmp.replaceAll(">", "&gt;");
+		tmp = tmp.replaceAll("'", "&apos;");
+		tmp = tmp.replaceAll("\"", "&quot;");
+		
 		String str = "<TTextChatItem NewLine=\""
 				+ (isNewLine ? "True" : "False")
-				+ "\" FontIndex=\"0\" Text=\"" + text + "\"/>";
+				+ "\" FontIndex=\"0\" Text=\"" + tmp + "\"/>";
 		return str;
 	}
 

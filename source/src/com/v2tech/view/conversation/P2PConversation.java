@@ -192,6 +192,7 @@ public class P2PConversation extends Activity implements
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
+		setGlobalState(false);
 		mContext.unregisterReceiver(receiver);
 		chatService.removeRegisterCancelledListener(mLocalHandler,
 				HANG_UP_NOTIFICATION, null);
@@ -791,6 +792,7 @@ public class P2PConversation extends Activity implements
 			// Remove timer
 			mLocalHandler.removeCallbacks(timeOutMonitor);
 			hangUp();
+			stopRingTone();
 		}
 
 	};
@@ -1061,7 +1063,6 @@ public class P2PConversation extends Activity implements
 						break;
 					}
 					inProgress = true;
-					setGlobalState(false);
 					Message timeoutMessage = Message.obtain(this, QUIT);
 					this.sendMessageDelayed(timeoutMessage, 2000);
 					disableAllButtons();

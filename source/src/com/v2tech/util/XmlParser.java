@@ -72,6 +72,12 @@ public class XmlParser {
 					VMessageAbstractItem va = null;
 					if (msgEl.getTagName().equals("TTextChatItem")) {
 						String text = msgEl.getAttribute("Text");
+						text = text.replaceAll("&lt;", "<");
+						text = text.replaceAll("&gt;", ">");
+						text = text.replaceAll("&apos;", "'");
+						text = text.replaceAll("&quot;", "\"");
+						text = text.replaceAll("&amp;", "&");
+						
 						va = new VMessageTextItem(vm, text);
 						va.setNewLine(isNewLine);
 					} else if (msgEl.getTagName().equals("TSysFaceChatItem")) {
