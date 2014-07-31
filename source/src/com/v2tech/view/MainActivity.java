@@ -17,6 +17,7 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -53,6 +54,7 @@ public class MainActivity extends FragmentActivity implements
 
 	public static final String SERVICE_BOUNDED_EVENT = "com.v2tech.SERVICE_BOUNDED_EVENT";
 	public static final String SERVICE_UNBOUNDED_EVENT = "com.v2tech.SERVICE_UNBOUNDED_EVENT";
+	private static final String TAG = "MainActivity";
 
 	private int[] imgs = new int[] { R.drawable.conversation_video_button,
 			R.drawable.conversation_group_button,
@@ -130,7 +132,7 @@ public class MainActivity extends FragmentActivity implements
 	 */
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
+		Log.e(TAG, "执行了onCreate");
 		// Inflate the layout
 		setContentView(R.layout.activity_main);
 		// Initialise the TabHost
@@ -281,6 +283,7 @@ public class MainActivity extends FragmentActivity implements
 	protected void onStart() {
 		super.onStart();
 		V2Log.d(" main onStart ");
+		Log.e(TAG, "执行了onStart");
 	}
 	
 	
@@ -291,6 +294,7 @@ public class MainActivity extends FragmentActivity implements
 		if (intent.getExtras() != null) {
 			intent.getExtras().get("gid");
 		}
+		Log.e(TAG, "Main 执行了onNewIntent");
 	}
 
 	@Override

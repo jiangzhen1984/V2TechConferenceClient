@@ -61,7 +61,8 @@ public class VideoAttendeeListLayout extends LinearLayout {
 
 	private AttendeesAdapter adapter = new AttendeesAdapter();
 
-	private int onLinePersons = 1;
+	private int onLinePersons = 0;
+	private boolean initAttendPersons;
 
 	public interface VideoAttendeeActionListener {
 
@@ -133,6 +134,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 
 	public void setAttendsList(Set<Attendee> l) {
 		mAttendsView = new ArrayList<ViewWrapper>();
+		initAttendPersons = true;
 		// Copy list for void concurrency exception
 		List<Attendee> list = new ArrayList<Attendee>(l);
 		synchronized (mAttendsView) {
@@ -143,6 +145,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 
 		Collections.sort(mAttendsView);
 		attendPersons.setText(onLinePersons + "/" + mAttendsView.size());
+		initAttendPersons = false;
 		adapter.notifyDataSetChanged();
 	}
 
@@ -201,16 +204,28 @@ public class VideoAttendeeListLayout extends LinearLayout {
 		if (at.isChairMan() || conf.getChairman() == at.getAttId()) {
 			name.setTextColor(getContext().getResources().getColor(
 					R.color.video_attendee_chair_man_name_color));
+			
+			if(initAttendPersons){
+				
+				onLinePersons += 1;
+			}
 		} else if (at.isSelf()) {
 			name.setTypeface(null, Typeface.BOLD);
 			name.setTextColor(getContext().getResources().getColor(
 					R.color.video_attendee_name_color));
 			// set camera icon
 			iv.setImageResource(R.drawable.camera);
+			if(initAttendPersons){
+				
+				onLinePersons += 1;
+			}
 		} else if (at.isJoined()) {
 			name.setTextColor(getContext().getResources().getColor(
 					R.color.video_attendee_name_color));
-			onLinePersons += 1;
+			if(initAttendPersons){
+				
+				onLinePersons += 1;
+			}
 		} else {
 			name.setTextColor(getContext().getResources().getColor(
 					R.color.video_attendee_name_color_offline));
@@ -236,9 +251,16 @@ public class VideoAttendeeListLayout extends LinearLayout {
 			speaker.setVisibility(View.INVISIBLE);
 		}
 	}
-
+	
+	private Attendee lastAttendee;
 	public void updateEnteredAttendee(Attendee at) {
 		at.setJoined(true);
+		if(lastAttendee == null || !lastAttendee.equals(at)){
+			
+			lastAttendee = at;
+			onLinePersons += 1;
+		}
+		
 		if (mAttendsView == null) {
 			mAttendsView = new ArrayList<ViewWrapper>();
 		}
@@ -251,8 +273,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 					mAttendsView.remove(i);
 					index = i;
 				} else {
-					i++;
-					onLinePersons += 1;
+					i++; 
 				}
 			}
 		}
@@ -295,7 +316,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 				TextView nameTV = (TextView) v.v
 						.findViewById(R.id.video_attendee_device_name);
 				onLinePersons -= 1;
-
+				lastAttendee = null;
 				nameTV.setTextColor(getContext().getResources().getColor(
 						R.color.video_attendee_name_color_offline));
 

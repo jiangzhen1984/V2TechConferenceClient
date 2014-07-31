@@ -18,6 +18,7 @@ import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -69,6 +70,7 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 
 	private static final int TAG_ORG = 1;
 	private static final int TAG_CONTACT = 2;
+	private static final String TAG = "ContactsTabFragment";
 
 	private int flag;
 
@@ -87,6 +89,7 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 
 		BitmapManager.getInstance().registerBitmapChangedListener(
 				this.bitmapChangedListener);
+		Log.e(TAG, "执行了ContactsTabFragment 的 onCreate方法");
 	}
 
 	@Override
@@ -146,6 +149,7 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 		if (!mLoaded) {
 			Message.obtain(mHandler, FILL_CONTACTS_GROUP).sendToTarget();
 		}
+		Log.e(TAG, "执行了ContactsTabFragment 的 onStart方法");
 	}
 
 	@Override

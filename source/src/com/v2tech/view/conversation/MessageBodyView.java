@@ -240,7 +240,6 @@ public class MessageBodyView extends LinearLayout {
 		}
 
 		if (mMsg.getState() == VMessage.STATE_SENT_FAILED) {
-			V2Log.d(TAG, "failedIcon showing");
 			failedIcon.setVisibility(View.VISIBLE);
 		}
 
@@ -298,7 +297,6 @@ public class MessageBodyView extends LinearLayout {
 			}
 
 			if (item.getState() == VMessageAbstractItem.STATE_SENT_FALIED) {
-				V2Log.d(TAG, "failedIcon showing 222222");
 				failedIcon.setVisibility(View.VISIBLE);
 			}
 
@@ -318,7 +316,6 @@ public class MessageBodyView extends LinearLayout {
 		if (item.getState() == VMessageAbstractItem.STATE_UNREAD) {
 			unReadIcon.setVisibility(View.VISIBLE);
 		} else if (item.getState() == VMessageAbstractItem.STATE_SENT_FALIED) {
-			V2Log.d(TAG, "failedIcon showing 33333333333");
 			failedIcon.setVisibility(View.VISIBLE);
 		}
 
@@ -586,7 +583,6 @@ public class MessageBodyView extends LinearLayout {
 		if (!flag) {
 			this.failedIcon.setVisibility(View.INVISIBLE);
 		} else {
-			V2Log.d(TAG, "failedIcon showing 4444444444444");
 			this.failedIcon.setVisibility(View.VISIBLE);
 		}
 	}
@@ -710,7 +706,6 @@ public class MessageBodyView extends LinearLayout {
 					.getText(R.string.contact_message_file_item_sent_failed)
 					.toString();
 			// Show failed icon
-			V2Log.d(TAG, "failedIcon showing 55555555555");
 			failedIcon.setVisibility(View.VISIBLE);
 		} else if (vfi.getState() == VMessageAbstractItem.STATE_FILE_DOWNLOADED_FALIED) {
 			strState = getContext()
@@ -718,7 +713,6 @@ public class MessageBodyView extends LinearLayout {
 					.getText(R.string.contact_message_file_item_download_failed)
 					.toString();
 			// Show failed icon
-			V2Log.d(TAG, "failedIcon showing 666666666");
 			failedIcon.setVisibility(View.VISIBLE);
 		} else if (vfi.getState() == VMessageAbstractItem.STATE_FILE_MISS_DOWNLOAD) {
 			strState = getContext().getResources()

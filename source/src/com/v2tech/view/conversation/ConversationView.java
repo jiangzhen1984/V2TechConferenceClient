@@ -31,6 +31,7 @@ import android.text.Editable;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -180,6 +181,7 @@ public class ConversationView extends Activity {
 	private boolean reStart;
 	private ImageView mVideoCallButton;
 	private ImageView mAudioCallButton;
+	private Bundle bundle;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -255,8 +257,8 @@ public class ConversationView extends Activity {
 			}
 			backEndHandler = new BackendHandler(thread.getLooper());
 		}
-
-		initExtraObject();
+		Log.e(TAG, "执行了onCreate");
+		initExtraObject(savedInstanceState);
 
 		// Register listener for avatar changed
 		BitmapManager.getInstance().registerBitmapChangedListener(
@@ -293,6 +295,7 @@ public class ConversationView extends Activity {
 		// mId allows you to update the notification later on.
 		mNotificationManager.cancel(PublicIntent.MESSAGE_NOTIFICATION_ID);
 		isStopped = false;
+		Log.e(TAG, "执行了onStart");
 	}
 
 	@Override
@@ -311,6 +314,7 @@ public class ConversationView extends Activity {
 				startSendMoreFile();
 			}
 		}
+		Log.e(TAG, "执行了onResume");
 	}
 
 	@Override
@@ -335,7 +339,7 @@ public class ConversationView extends Activity {
 			lh.removeCallbacks(mUpdateMicStatusTimer);
 			lh.removeCallbacks(timeOutMonitor);
 		}
-
+		Log.e(TAG, "执行了onStop");
 	}
 
 	@Override
@@ -356,6 +360,7 @@ public class ConversationView extends Activity {
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
+		Log.e(TAG, "执行了onDestory");
 		this.unregisterReceiver(receiver);
 		GlobalConfig.isConversationOpen = false;
 		finishWork();
@@ -373,8 +378,16 @@ public class ConversationView extends Activity {
 				FILE_STATUS_LISTENER, null);
 	}
 
-	private void initExtraObject() {
-		Bundle bundle = this.getIntent().getExtras();
+	private void initExtraObject(Bundle savedInstanceState) {
+		
+		if(savedInstanceState != null){
+			
+			bundle = savedInstanceState.getBundle("saveBundle");
+		}
+		else{
+			
+			bundle = this.getIntent().getExtras();
+		}
 
 		if (bundle != null) {
 			cov = (ConversationNotificationObject) bundle.get("obj");
@@ -406,19 +419,18 @@ public class ConversationView extends Activity {
 
 	private void scrollToPos(final int pos) {
 		if (pos < 0 || pos >= messageArray.size()) {
+			V2Log.d(TAG, "参数pos不合法 :" + pos);
 			return;
 		}
-		V2Log.d(TAG, "要移动的位置" + pos);
-		mMessagesContainer.setSelection(pos); 
-//		mMessagesContainer.post(new Runnable() {
-//
-//			@Override
-//			public void run() {
-//				mMessagesContainer.setSelection(pos);
-//
-//			}
-//
-//		});
+		mMessagesContainer.post(new Runnable() {
+
+			@Override
+			public void run() {
+				mMessagesContainer.setSelection(pos);
+
+			}
+
+		});
 
 	}
 
@@ -866,6 +878,14 @@ public class ConversationView extends Activity {
 				mMoreFeatureIV.setImageResource(R.drawable.message_minus);
 				mMoreFeatureIV.setTag("minus");
 				mAdditionFeatureContainer.setVisibility(View.VISIBLE);
+				if(!mMessageET.isShown()){
+					mAudioSpeakerIV.setTag("speaker");
+					mAudioSpeakerIV
+							.setImageResource(R.drawable.speaking_button);
+					mButtonRecordAudio.setVisibility(View.GONE);
+					mMessageET.setVisibility(View.VISIBLE);
+					mSendButtonTV.setVisibility(View.VISIBLE);
+				}
 			} else {
 				mMoreFeatureIV.setImageResource(R.drawable.message_plus);
 				mMoreFeatureIV.setTag("plus");
@@ -1264,7 +1284,7 @@ public class ConversationView extends Activity {
 				return;
 			}
 			
-			if (first <= 0 && isUPScroll && !mLoadedAllMessages) {
+			if (first <= 2 && isUPScroll && !mLoadedAllMessages) {
 				android.os.Message.obtain(lh, START_LOAD_MESSAGE)
 						.sendToTarget();
 				currentItemPos = first;
@@ -1723,12 +1743,11 @@ public class ConversationView extends Activity {
 			case LOAD_MESSAGE:
 				List<VMessage> array = loadMessages();
 				V2Log.d(TAG, "获取的消息数量" + array.size());
-				V2Log.d(TAG, "offset" + offset);
-				V2Log.d(TAG, "当前消息集合大小" + messageArray.size());
 				if (array != null) {
 					for (int i = 0; i < array.size(); i++) {
 						messageArray.add(0, new VMessageAdater(array.get(i)));
 					}
+					V2Log.d(TAG, "当前消息集合大小" + messageArray.size());
 					currentItemPos += array.size() - 1;
 				}
 				android.os.Message.obtain(lh, END_LOAD_MESSAGE, array)
@@ -1753,7 +1772,7 @@ public class ConversationView extends Activity {
 				isLoading = true;
 				break;
 			case END_LOAD_MESSAGE:
-				V2Log.d(TAG, "currentItemPos:" + currentItemPos);
+				V2Log.d(TAG, "currentItemPos:--" + currentItemPos);
 				adapter.notifyDataSetChanged();
 				scrollToPos(currentItemPos);
 				isLoading = false;
@@ -1849,6 +1868,12 @@ public class ConversationView extends Activity {
 			sendSelectedFile(mCheckedList.get(i).filePath,
 					mCheckedList.get(i).fileType);
 		}
+	}
+	
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		super.onSaveInstanceState(outState);
+		outState.putBundle("saveBundle", bundle);
 	}
 
 }

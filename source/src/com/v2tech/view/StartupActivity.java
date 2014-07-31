@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
+import android.util.Log;
 
 import com.v2tech.R;
 import com.v2tech.util.GlobalConfig;
@@ -13,17 +14,21 @@ import com.v2tech.util.V2Log;
 public class StartupActivity extends Activity {
 
 
+	private static final String TAG = "StartupActivity";
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.load);
 		initDPI();
+		Log.d(TAG, "执行了StartupActivity 的onCreate方法");
 		new LoaderThread().start();
 	}
 
 	
 	
 	private void forward() {
+		Log.d(TAG, "执行了StartupActivity 的forwrad方法");
 		int flag = SPUtil
 				.getConfigIntValue(this, GlobalConfig.KEY_LOGGED_IN, 0);
 		if (flag == 1) {
