@@ -14,21 +14,21 @@ import com.v2tech.util.V2Log;
 public class StartupActivity extends Activity {
 
 
-	private static final String TAG = "StartupActivity";
-
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		if ((getIntent().getFlags() & Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT) != 0) {  
+	        finish();  
+	        return;  
+	    }  
 		setContentView(R.layout.load);
 		initDPI();
-		Log.d(TAG, "执行了StartupActivity 的onCreate方法");
 		new LoaderThread().start();
 	}
 
 	
 	
 	private void forward() {
-		Log.d(TAG, "执行了StartupActivity 的forwrad方法");
 		int flag = SPUtil
 				.getConfigIntValue(this, GlobalConfig.KEY_LOGGED_IN, 0);
 		if (flag == 1) {

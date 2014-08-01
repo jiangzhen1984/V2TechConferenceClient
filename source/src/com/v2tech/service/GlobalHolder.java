@@ -114,6 +114,9 @@ public class GlobalHolder {
 				if (u.getAddress() != null) {
 					cu.setAddress(u.getAddress());
 				}
+				if (u.getNickName() != null) {
+					cu.setNickName(u.getNickName());
+				}
 				V2Log.i(" merge user information " + id + " " + cu.getName());
 				return cu;
 			}

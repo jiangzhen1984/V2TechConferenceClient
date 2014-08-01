@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -80,7 +81,10 @@ public class ContactUserView extends LinearLayout {
 				.findViewById(R.id.contact_user_signature);
 		mButtonIV = (ImageView) view.findViewById(R.id.contact_show_user_menu);
 
-		mUserNameTV.setText(mUser.getName());
+		if(!TextUtils.isEmpty(mUser.getNickName()))
+			mUserNameTV.setText(mUser.getNickName());
+		else
+			mUserNameTV.setText(mUser.getName());
 		mUserSignatureTV.setText(mUser.getSignature() == null ? "" : mUser
 				.getSignature());
 

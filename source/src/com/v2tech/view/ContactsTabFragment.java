@@ -73,6 +73,7 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 	private static final String TAG = "ContactsTabFragment";
 
 	private int flag;
+	private int currentPos = -1;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -89,7 +90,6 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 
 		BitmapManager.getInstance().registerBitmapChangedListener(
 				this.bitmapChangedListener);
-		Log.e(TAG, "执行了ContactsTabFragment 的 onCreate方法");
 	}
 
 	@Override
@@ -107,6 +107,7 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 			@Override
 			public void onItemClick(AdapterView<?> arg0, View view, int pos,
 					long id) {
+				currentPos = pos;
 				if (mItemList.get(pos).g != null) {
 					((ContactGroupView) mItemList.get(pos).v)
 							.doExpandedOrCollapse();
@@ -149,7 +150,11 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 		if (!mLoaded) {
 			Message.obtain(mHandler, FILL_CONTACTS_GROUP).sendToTarget();
 		}
-		Log.e(TAG, "执行了ContactsTabFragment 的 onStart方法");
+		if (currentPos != -1) {
+			updateListStateRemove(currentPos, mItemList.get(currentPos));
+			updateListState(currentPos, mItemList.get(currentPos));
+			adapter.notifyDataSetChanged();
+		}
 	}
 
 	@Override
@@ -363,46 +368,54 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 			return;
 		}
 		if (item.isExpanded == false) {
-			for (Group g : item.g.getChildGroup()) {
-				ListItem cache = new ListItem(g, g.getLevel());
-				mItemList.add(++pos, cache);
-			}
-			List<User> sortList = new ArrayList<User>();
-			sortList.addAll(item.g.getUsers());
-			Collections.sort(sortList);
-			for (User u : sortList) {
-				ListItem cache = new ListItem(u, item.g.getLevel() + 1);
-				mItemList.add(++pos, cache);
-			}
+			updateListState(pos, item);
 
 		} else {
-			if (item.g.getChildGroup().size() <= 0
-					&& item.g.getUsers().size() <= 0) {
-				return;
-			}
-
-			int startRemovePos = pos + 1;
-			int endRemovePos = pos;
-			for (int index = pos + 1; index < mItemList.size(); index++) {
-				ListItem li = mItemList.get(index);
-				if (li.g != null && li.g.getLevel() <= item.g.getLevel()) {
-					break;
-				}
-				if (li.u != null && li.level == item.g.getLevel()) {
-					break;
-				}
-				endRemovePos++;
-			}
-			V2Log.i("Contacts collpse " + startRemovePos + "  " + endRemovePos);
-			while (startRemovePos <= endRemovePos
-					&& endRemovePos < mItemList.size()) {
-				mItemList.remove(startRemovePos);
-				endRemovePos--;
-			}
+			updateListStateRemove(pos, item);
 		}
 
 		item.isExpanded = !item.isExpanded;
 		adapter.notifyDataSetChanged();
+	}
+
+	private void updateListStateRemove(int pos, ListItem item) {
+		if (item.g.getChildGroup().size() <= 0
+				&& item.g.getUsers().size() <= 0) {
+			return;
+		}
+
+		int startRemovePos = pos + 1;
+		int endRemovePos = pos;
+		for (int index = pos + 1; index < mItemList.size(); index++) {
+			ListItem li = mItemList.get(index);
+			if (li.g != null && li.g.getLevel() <= item.g.getLevel()) {
+				break;
+			}
+			if (li.u != null && li.level == item.g.getLevel()) {
+				break;
+			}
+			endRemovePos++;
+		}
+		V2Log.i("Contacts collpse " + startRemovePos + "  " + endRemovePos);
+		while (startRemovePos <= endRemovePos
+				&& endRemovePos < mItemList.size()) {
+			mItemList.remove(startRemovePos);
+			endRemovePos--;
+		}
+	}
+
+	private void updateListState(int pos, ListItem item) {
+		for (Group g : item.g.getChildGroup()) {
+			ListItem cache = new ListItem(g, g.getLevel());
+			mItemList.add(++pos, cache);
+		}
+		List<User> sortList = new ArrayList<User>();
+		sortList.addAll(item.g.getUsers());
+		Collections.sort(sortList);
+		for (User u : sortList) {
+			ListItem cache = new ListItem(u, item.g.getLevel() + 1);
+			mItemList.add(++pos, cache);
+		}
 	}
 
 	private void updateUserStatus(long userId, User.DeviceType deiType,
@@ -412,28 +425,33 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 			V2Log.w("No user found, returned");
 			return;
 		}
-//		User.Status oldState = u.getmStatus();
-		
-		Set<Group> groupList = new HashSet<Group>();
-//		// Match user state---Notice we can't match, because JNI update user state before this.
-//		// if new state is online or leave or busy or do not disturb and old
-//		// state is hidden or off-line
-//		// we need to re-calculate group online staticist
-//		if (((oldState == User.Status.HIDDEN || oldState == User.Status.OFFLINE) && (newState == User.Status.ONLINE
-//				|| newState == User.Status.BUSY
-//				|| newState == User.Status.LEAVE || newState == User.Status.DO_NOT_DISTURB))
-//				|| ((newState == User.Status.HIDDEN || newState == User.Status.OFFLINE) && (oldState == User.Status.ONLINE
-//						|| oldState == User.Status.BUSY
-//						|| oldState == User.Status.LEAVE || oldState == User.Status.DO_NOT_DISTURB))) {
-			Set<Group> gSet = u.getBelongsGroup();
-			for (Group tg : gSet) {
-				while (tg != null) {
-					groupList.add(tg);
-					tg = tg.getParent();
-				}
-			}
+		// User.Status oldState = u.getmStatus();
 
-//		}
+		Set<Group> groupList = new HashSet<Group>();
+		// // Match user state---Notice we can't match, because JNI update user
+		// state before this.
+		// // if new state is online or leave or busy or do not disturb and old
+		// // state is hidden or off-line
+		// // we need to re-calculate group online staticist
+		// if (((oldState == User.Status.HIDDEN || oldState ==
+		// User.Status.OFFLINE) && (newState == User.Status.ONLINE
+		// || newState == User.Status.BUSY
+		// || newState == User.Status.LEAVE || newState ==
+		// User.Status.DO_NOT_DISTURB))
+		// || ((newState == User.Status.HIDDEN || newState ==
+		// User.Status.OFFLINE) && (oldState == User.Status.ONLINE
+		// || oldState == User.Status.BUSY
+		// || oldState == User.Status.LEAVE || oldState ==
+		// User.Status.DO_NOT_DISTURB))) {
+		Set<Group> gSet = u.getBelongsGroup();
+		for (Group tg : gSet) {
+			while (tg != null) {
+				groupList.add(tg);
+				tg = tg.getParent();
+			}
+		}
+
+		// }
 		for (ListItem li : mItemList) {
 			if (li.u != null && li.u.getmUserId() == userId) {
 				((ContactUserView) li.v).updateStatus(deiType, newState);
@@ -549,7 +567,6 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 		adapter.notifyDataSetChanged();
 	}
 
-
 	private BitmapManager.BitmapChangedListener bitmapChangedListener = new BitmapManager.BitmapChangedListener() {
 
 		@Override
@@ -584,8 +601,8 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 			this.u = u;
 			this.id = 0x03000000 | u.getmUserId();
 			this.v = new ContactUserView(getActivity(), u);
-			((ContactUserView) this.v).setPaddingT((level - 1) * 35, this.v.getTop(),
-					this.v.getRight(), this.v.getBottom());
+			((ContactUserView) this.v).setPaddingT((level - 1) * 35,
+					this.v.getTop(), this.v.getRight(), this.v.getBottom());
 			isExpanded = false;
 			this.level = level;
 		}

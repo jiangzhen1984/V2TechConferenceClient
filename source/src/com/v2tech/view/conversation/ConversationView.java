@@ -257,7 +257,6 @@ public class ConversationView extends Activity {
 			}
 			backEndHandler = new BackendHandler(thread.getLooper());
 		}
-		Log.e(TAG, "执行了onCreate");
 		initExtraObject(savedInstanceState);
 
 		// Register listener for avatar changed
@@ -295,7 +294,6 @@ public class ConversationView extends Activity {
 		// mId allows you to update the notification later on.
 		mNotificationManager.cancel(PublicIntent.MESSAGE_NOTIFICATION_ID);
 		isStopped = false;
-		Log.e(TAG, "执行了onStart");
 	}
 
 	@Override
@@ -314,7 +312,6 @@ public class ConversationView extends Activity {
 				startSendMoreFile();
 			}
 		}
-		Log.e(TAG, "执行了onResume");
 	}
 
 	@Override
@@ -339,7 +336,6 @@ public class ConversationView extends Activity {
 			lh.removeCallbacks(mUpdateMicStatusTimer);
 			lh.removeCallbacks(timeOutMonitor);
 		}
-		Log.e(TAG, "执行了onStop");
 	}
 
 	@Override
@@ -360,7 +356,6 @@ public class ConversationView extends Activity {
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
-		Log.e(TAG, "执行了onDestory");
 		this.unregisterReceiver(receiver);
 		GlobalConfig.isConversationOpen = false;
 		finishWork();
@@ -379,13 +374,12 @@ public class ConversationView extends Activity {
 	}
 
 	private void initExtraObject(Bundle savedInstanceState) {
-		
-		if(savedInstanceState != null){
-			
+
+		if (savedInstanceState != null) {
+
 			bundle = savedInstanceState.getBundle("saveBundle");
-		}
-		else{
-			
+		} else {
+
 			bundle = this.getIntent().getExtras();
 		}
 
@@ -742,6 +736,14 @@ public class ConversationView extends Activity {
 					mMessageET.setVisibility(View.GONE);
 					mSendButtonTV.setVisibility(View.GONE);
 
+					if (mMoreFeatureIV.getTag() != null
+							|| !mMoreFeatureIV.getTag().equals("plus")) {
+						mMoreFeatureIV
+								.setImageResource(R.drawable.message_plus);
+						mMoreFeatureIV.setTag("plus");
+						mAdditionFeatureContainer.setVisibility(View.GONE);
+					}
+
 				} else if (tag.equals("keyboard")) {
 					view.setTag("speaker");
 					((ImageView) view)
@@ -878,7 +880,7 @@ public class ConversationView extends Activity {
 				mMoreFeatureIV.setImageResource(R.drawable.message_minus);
 				mMoreFeatureIV.setTag("minus");
 				mAdditionFeatureContainer.setVisibility(View.VISIBLE);
-				if(!mMessageET.isShown()){
+				if (!mMessageET.isShown()) {
 					mAudioSpeakerIV.setTag("speaker");
 					mAudioSpeakerIV
 							.setImageResource(R.drawable.speaking_button);
@@ -1283,7 +1285,7 @@ public class ConversationView extends Activity {
 			if (!scrolled) {
 				return;
 			}
-			
+
 			if (first <= 2 && isUPScroll && !mLoadedAllMessages) {
 				android.os.Message.obtain(lh, START_LOAD_MESSAGE)
 						.sendToTarget();
@@ -1869,7 +1871,7 @@ public class ConversationView extends Activity {
 					mCheckedList.get(i).fileType);
 		}
 	}
-	
+
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);

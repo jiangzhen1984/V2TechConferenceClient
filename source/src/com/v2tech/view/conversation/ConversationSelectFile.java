@@ -97,11 +97,12 @@ public class ConversationSelectFile extends Activity {
 			case UPDATE_BITMAP:
 				ViewHolder holder = (ViewHolder) ((Object[]) msg.obj)[0];
 				Bitmap bt = (Bitmap) ((Object[]) msg.obj)[1];
+				FileInfoBean fb = (FileInfoBean) ((Object[]) msg.obj)[2];
 				if (!bt.isRecycled()) {
 					holder.fileIcon.setImageBitmap(bt);
 					bitmapMapping.put(bt, holder);
 				} else {
-					// TODO reload
+					startLoadBitmap(holder, fb);
 				}
 				break;
 			case REMOVE_BITMAP:
@@ -568,48 +569,21 @@ public class ConversationSelectFile extends Activity {
 			para.width = (mScreenWidth - 20) / 3;// 一屏显示3列
 			holder.fileIcon.setLayoutParams(para);
 
+			if (mFileLists.size() <= 0) {
+				V2Log.e(TAG, "重新加载了sd卡的图片资源");
+				getSdcardImages();
+			}
 			final FileInfoBean fb = mFileLists.get(position);
 			Bitmap bit = bitmapLru.get(fb.fileName);
 			if (bit == null || bit.isRecycled()) {
 
-				if (isLoading != SCROLL_STATE_TOUCH_SCROLL && isLoading != 1) {
-					new Thread() {
-						public void run() {
-							service.execute(new Runnable() {
-
-								@Override
-								public void run() {
-
-									try {
-
-										Bitmap bitmap = handlerImage(fb.filePath);
-										if (fb.fileName == null
-												&& bitmap != null) {
-											bitmap.recycle();
-											return;
-										}
-
-										if (bitmap == null) {
-											V2Log.e("Can not extra bitmap ");
-											return;
-										}
-										bitmapLru.put(fb.fileName, bitmap);
-										Message.obtain(handler, UPDATE_BITMAP,
-												new Object[] { holder, bitmap })
-												.sendToTarget();
-									} catch (Exception e) {
-										e.printStackTrace();
-									}
-								}
-							});
-						}
-					}.start();
-					;
-
-				} else {
+				if (isLoading != SCROLL_STATE_TOUCH_SCROLL && isLoading != 1)
+					// 开始加载图片
+					startLoadBitmap(holder, fb);
+				else
 					// 加载中显示的图片
 					holder.fileIcon.setImageResource(R.drawable.ic_launcher);
-				}
+
 			} else {
 
 				holder.fileIcon.setImageBitmap(bit);
@@ -625,6 +599,34 @@ public class ConversationSelectFile extends Activity {
 			}
 			return convertView;
 		}
+	}
+
+	public void startLoadBitmap(final ViewHolder holder, final FileInfoBean fb) {
+		service.execute(new Runnable() {
+
+			@Override
+			public void run() {
+
+				try {
+
+					Bitmap bitmap = handlerImage(fb.filePath);
+					if (fb.fileName == null && bitmap != null) {
+						bitmap.recycle();
+						return;
+					}
+
+					if (bitmap == null) {
+						V2Log.e("Can not extra bitmap ");
+						return;
+					}
+					bitmapLru.put(fb.fileName, bitmap);
+					Message.obtain(handler, UPDATE_BITMAP,
+							new Object[] { holder, bitmap, fb }).sendToTarget();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
 	}
 
 	class ViewHolder {
@@ -674,70 +676,62 @@ public class ConversationSelectFile extends Activity {
 			}
 
 		} else if (fileName.endsWith(".xls")) {
-			if(holder != null){
+			if (holder != null) {
 				holder.fileIcon
-				.setImageResource(R.drawable.selectfile_type_excel);
-			}
-			else if(file != null){
+						.setImageResource(R.drawable.selectfile_type_excel);
+			} else if (file != null) {
 				file.fileType = 3;
 			}
 		} else if (fileName.endsWith(".pdf")) {
-			if(holder != null){
+			if (holder != null) {
 				holder.fileIcon
-				.setImageResource(R.drawable.selectfile_type_pdf);
-			}
-			else if(file != null){
+						.setImageResource(R.drawable.selectfile_type_pdf);
+			} else if (file != null) {
 				file.fileType = 4;
 			}
 		} else if (fileName.endsWith(".ppt") || fileName.endsWith(".pptx")) {
-			if(holder != null){
+			if (holder != null) {
 				holder.fileIcon
-				.setImageResource(R.drawable.selectfile_type_ppt);
-			}
-			else if(file != null){
+						.setImageResource(R.drawable.selectfile_type_ppt);
+			} else if (file != null) {
 				file.fileType = 5;
 			}
 		} else if (fileName.endsWith(".zip") || fileName.endsWith(".rar")) {
-			if(holder != null){
+			if (holder != null) {
 				holder.fileIcon
-				.setImageResource(R.drawable.selectfile_type_zip);
-			}
-			else if(file != null){
+						.setImageResource(R.drawable.selectfile_type_zip);
+			} else if (file != null) {
 				file.fileType = 6;
 			}
 		} else if (fileName.endsWith(".vsd") || fileName.endsWith(".vss")
 				|| fileName.endsWith(".vst") || fileName.endsWith(".vdx")) {
-			if(holder != null){
+			if (holder != null) {
 				holder.fileIcon
-				.setImageResource(R.drawable.selectfile_type_viso);
-			}
-			else if(file != null){
+						.setImageResource(R.drawable.selectfile_type_viso);
+			} else if (file != null) {
 				file.fileType = 7;
 			}
 		} else if (fileName.endsWith(".mp4") || fileName.endsWith(".rmvb")
 				|| fileName.endsWith(".avi") || fileName.endsWith(".3gp")) {
-			if(holder != null){
+			if (holder != null) {
 				holder.fileIcon
-				.setImageResource(R.drawable.selectfile_type_video);
-			}
-			else if(file != null){
+						.setImageResource(R.drawable.selectfile_type_video);
+			} else if (file != null) {
 				file.fileType = 8;
 			}
 		} else if (fileName.endsWith(".mp3") || fileName.endsWith(".wav")
 				|| fileName.endsWith(".ape") || fileName.endsWith(".wmv")) {
-			if(holder != null){
+			if (holder != null) {
 				holder.fileIcon
-				.setImageResource(R.drawable.selectfile_type_sound);
-			}
-			else if(file != null){
+						.setImageResource(R.drawable.selectfile_type_sound);
+			} else if (file != null) {
 				file.fileType = 9;
 			}
 		} else {
-			if(holder != null){
+			if (holder != null) {
 				holder.fileIcon
-				.setImageResource(R.drawable.selectfile_type_ohter);
-			}
-			else if(file != null){
+						.setImageResource(R.drawable.selectfile_type_ohter);
+			} else if (file != null) {
 				file.fileType = 10;
 			}
 		}

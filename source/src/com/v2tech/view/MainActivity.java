@@ -132,7 +132,6 @@ public class MainActivity extends FragmentActivity implements
 	 */
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		Log.e(TAG, "执行了onCreate");
 		// Inflate the layout
 		setContentView(R.layout.activity_main);
 		// Initialise the TabHost
@@ -283,7 +282,6 @@ public class MainActivity extends FragmentActivity implements
 	protected void onStart() {
 		super.onStart();
 		V2Log.d(" main onStart ");
-		Log.e(TAG, "执行了onStart");
 	}
 	
 	
@@ -294,7 +292,6 @@ public class MainActivity extends FragmentActivity implements
 		if (intent.getExtras() != null) {
 			intent.getExtras().get("gid");
 		}
-		Log.e(TAG, "Main 执行了onNewIntent");
 	}
 
 	@Override
