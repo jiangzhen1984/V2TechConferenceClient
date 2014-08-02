@@ -339,7 +339,7 @@ public class P2PConversation extends Activity implements
 			}
 		} else {
 			if (audioMuteButton != null) {
-				audioMuteButton.setEnabled(false);
+				audioMuteButton.setEnabled(true);
 				audioMuteButton
 						.setBackgroundResource(R.drawable.conversation_fragment_gray_button_selector);
 			}
