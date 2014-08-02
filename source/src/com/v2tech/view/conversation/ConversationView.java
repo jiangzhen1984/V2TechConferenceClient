@@ -31,7 +31,6 @@ import android.text.Editable;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -51,7 +50,6 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.V2.jni.FileRequest;
 import com.spoledge.aacplayer.AACPlayer;
 import com.spoledge.aacplayer.ArrayAACPlayer;
 import com.spoledge.aacplayer.ArrayDecoder;
@@ -62,6 +60,7 @@ import com.v2tech.db.ContentDescriptor;
 import com.v2tech.service.AsyncResult;
 import com.v2tech.service.BitmapManager;
 import com.v2tech.service.ChatService;
+import com.v2tech.service.FileOperationEnum;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.service.Registrant;
 import com.v2tech.service.jni.FileTransStatusIndication;
@@ -1376,10 +1375,10 @@ public class ConversationView extends Activity {
 				return;
 			}
 			vfi.setState(VMessageFileItem.STATE_FILE_DOWNLOADING);
-			// FIXME should move this to service
-			FileRequest.getInstance().acceptFileTrans(vfi.getUuid(),
-					GlobalConfig.getGlobalFilePath() + "/" + vfi.getFileName());
-
+			
+			
+			mChat.updateFileOperation(vfi,
+					FileOperationEnum.OPERATION_START_DOWNLOAD, null);
 		}
 
 		@Override
@@ -1390,11 +1389,11 @@ public class ConversationView extends Activity {
 			}
 			if (vfi.getState() == VMessageFileItem.STATE_FILE_DOWNLOADING) {
 				mChat.updateFileOperation(vfi,
-						ChatService.OPERATION_PAUSE_DOWNLOADING, null);
+						FileOperationEnum.OPERATION_PAUSE_DOWNLOADING, null);
 				vfi.setState(VMessageFileItem.STATE_FILE_PAUSED_DOWNLOADING);
 			} else if (vfi.getState() == VMessageFileItem.STATE_FILE_SENDING) {
 				mChat.updateFileOperation(vfi,
-						ChatService.OPERATION_PAUSE_SENDING, null);
+						FileOperationEnum.OPERATION_PAUSE_SENDING, null);
 				vfi.setState(VMessageFileItem.STATE_FILE_PAUSED_SENDING);
 			}
 
@@ -1409,11 +1408,11 @@ public class ConversationView extends Activity {
 
 			if (vfi.getState() == VMessageFileItem.STATE_FILE_PAUSED_DOWNLOADING) {
 				mChat.updateFileOperation(vfi,
-						ChatService.OPERATION_RESUME_DOWNLOAD, null);
+						FileOperationEnum.OPERATION_RESUME_DOWNLOAD, null);
 				vfi.setState(VMessageFileItem.STATE_FILE_DOWNLOADING);
 			} else if (vfi.getState() == VMessageFileItem.STATE_FILE_PAUSED_SENDING) {
 				mChat.updateFileOperation(vfi,
-						ChatService.OPERATION_RESUME_SEND, null);
+						FileOperationEnum.OPERATION_RESUME_SEND, null);
 				vfi.setState(VMessageFileItem.STATE_FILE_SENDING);
 			}
 
@@ -1427,7 +1426,7 @@ public class ConversationView extends Activity {
 			}
 
 			mChat.updateFileOperation(vfi,
-					ChatService.OPERATION_PAUSE_DOWNLOADING, null);
+					FileOperationEnum.OPERATION_PAUSE_DOWNLOADING, null);
 			vfi.setState(VMessageFileItem.STATE_FILE_PAUSED_DOWNLOADING);
 		}
 
@@ -1438,7 +1437,7 @@ public class ConversationView extends Activity {
 				return;
 			}
 			mChat.updateFileOperation(vfi,
-					ChatService.OPERATION_RESUME_DOWNLOAD, null);
+					FileOperationEnum.OPERATION_RESUME_DOWNLOAD, null);
 			vfi.setState(VMessageFileItem.STATE_FILE_DOWNLOADING);
 		}
 

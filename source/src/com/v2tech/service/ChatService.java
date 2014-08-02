@@ -21,6 +21,7 @@ import com.v2tech.service.jni.FileTransStatusIndication.FileTransProgressStatusI
 import com.v2tech.service.jni.JNIResponse;
 import com.v2tech.service.jni.RequestChatServiceResponse;
 import com.v2tech.service.jni.RequestSendMessageResponse;
+import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.V2Log;
 import com.v2tech.vo.UserChattingObject;
 import com.v2tech.vo.UserDeviceConfig;
@@ -33,48 +34,36 @@ import com.v2tech.vo.VMessageImageItem;
  * <ul>
  * Internet Message Service.
  * </ul>
- * <ul>
- * Send message {@link #sendVMessage(VMessage, Registrant)}
- * </ul>
- * <ul>
+ * <p>
+ * <li>
+ * Send message {@link #sendVMessage(VMessage, Registrant)}</li>
+ * <li>
  * Invite User video or audio call
- * {@link #inviteUserChat(UserChattingObject, Registrant)}
- * </ul>
+ * {@link #inviteUserChat(UserChattingObject, Registrant)}</li>
+ * <li>
+ * Accept video or audio call
+ * {@link #acceptChatting(UserChattingObject, Registrant)}</li>
+ * 
+ * <li>
+ * decline video or audio call
+ * {@link #refuseChatting(UserChattingObject, Registrant)}</li>
+ * 
+ * <li>
+ * mute microphone when in conversation
+ * {@link #muteChatting(UserChattingObject, Registrant)}</li>
+ * <li>
+ * Operation file when transport file<br>
+ * Notice: this operation doesn't contain send re-send operation. Send file use {@link #sendVMessage(VMessage, Registrant)}<br>
+ * But when send file in progress, resume or cancel or suspend use this function.
+ * {@link #updateFileOperation(VMessageFileItem, FileOperationEnum, Registrant)}<br>
+ * </li>
+ * 
+ * </p>
  * 
  * @author 28851274
  * 
  */
 public class ChatService extends AbstractHandler {
-
-	/**
-	 * Pause sending file to others
-	 */
-	public static final int OPERATION_PAUSE_SENDING = 1;
-
-	/**
-	 * Resume send file to others
-	 */
-	public static final int OPERATION_RESUME_SEND = 2;
-
-	/**
-	 * Pause downloading file
-	 */
-	public static final int OPERATION_PAUSE_DOWNLOADING = 3;
-
-	/**
-	 * Resume download file
-	 */
-	public static final int OPERATION_RESUME_DOWNLOAD = 4;
-
-	/**
-	 * Cancel sending file
-	 */
-	public static final int OPERATION_CANCEL_SENDING = 5;
-
-	/**
-	 * Cancel download file
-	 */
-	public static final int OPERATION_CANCEL_DOWNLOADING = 6;
 
 	private AudioRequestCallback callback;
 
@@ -199,7 +188,7 @@ public class ChatService extends AbstractHandler {
 		});
 	}
 
-	public void sendFileMessage(VMessage vm, Registrant caller) {
+	private void sendFileMessage(VMessage vm, Registrant caller) {
 		List<VMessageFileItem> items = vm.getFileItems();
 		if (items == null || items.size() <= 0) {
 			if (caller != null) {
@@ -221,7 +210,7 @@ public class ChatService extends AbstractHandler {
 		}
 
 		FileRequest.getInstance().inviteFileTrans(vm.getToUser().getmUserId(),
-				sb.toString(), 2);
+				sb.toString(), V2GlobalEnum.FILE_TYPE_OFFLINE);
 
 		JNIResponse resp = new RequestChatServiceResponse(
 				RequestChatServiceResponse.Result.SUCCESS);
@@ -238,17 +227,11 @@ public class ChatService extends AbstractHandler {
 	 *            operation of file
 	 * @param caller
 	 * 
-	 * @see {@link #OPERATION_PAUSE_SENDING}
-	 * @see {@link #OPERATION_RESUME_SEND}
-	 * @see {@link #OPERATION_PAUSE_DOWNLOADING}
-	 * @see {@link #OPERATION_RESUME_DOWNLOAD}
-	 * @see {@link #OPERATION_CANCEL_SENDING}
-	 * @see {@link #OPERATION_CANCEL_DOWNLOADING}
+	 * @see FileOperationEnum
 	 */
-	public void updateFileOperation(VMessageFileItem vfi, int opt,
-			Registrant caller) {
-		if (vfi == null
-				|| (opt < OPERATION_PAUSE_SENDING || opt > OPERATION_CANCEL_DOWNLOADING)) {
+	public void updateFileOperation(VMessageFileItem vfi,
+			FileOperationEnum opt, Registrant caller) {
+		if (vfi == null || (opt == null)) {
 			JNIResponse resp = new RequestChatServiceResponse(
 					RequestChatServiceResponse.Result.INCORRECT_PAR);
 			sendResult(caller, resp);
@@ -279,6 +262,11 @@ public class ChatService extends AbstractHandler {
 		case OPERATION_CANCEL_DOWNLOADING:
 			FileRequest.getInstance().cancelRecvFile(vfi.getUuid(),
 					vfi.getTransType());
+			break;
+		case OPERATION_START_DOWNLOAD:
+			FileRequest.getInstance().acceptFileTrans(vfi.getUuid(),
+					GlobalConfig.getGlobalFilePath() + "/" + vfi.getFileName());
+		default:
 			break;
 
 		}
@@ -339,7 +327,7 @@ public class ChatService extends AbstractHandler {
 		}
 
 		if (ud.isAudioType()) {
-			if (ud.isConnected() || ! ud.isIncoming()) {
+			if (ud.isConnected() || !ud.isIncoming()) {
 				AudioRequest.getInstance()
 						.CloseAudioChat(ud.getGroupdId(),
 								ud.getUser().getmUserId(),
@@ -352,7 +340,7 @@ public class ChatService extends AbstractHandler {
 			}
 
 		} else if (ud.isVideoType()) {
-			if (ud.isConnected() || ! ud.isIncoming()) {
+			if (ud.isConnected() || !ud.isIncoming()) {
 				VideoRequest.getInstance().closeVideoChat(ud.getGroupdId(),
 						ud.getUser().getmUserId(), ud.getDeviceId(),
 						V2GlobalEnum.REQUEST_TYPE_IM);
@@ -430,6 +418,12 @@ public class ChatService extends AbstractHandler {
 		}
 	}
 
+	/**
+	 * Mute microphone when in conversation
+	 * 
+	 * @param ud
+	 * @param caller
+	 */
 	public void muteChatting(UserChattingObject ud, Registrant caller) {
 		if (ud == null) {
 			JNIResponse resp = new RequestChatServiceResponse(
@@ -555,7 +549,7 @@ public class ChatService extends AbstractHandler {
 						RequestChatServiceResponse.Result.SUCCESS);
 				sendResult(mCaller, resp);
 				mCaller = null;
-			//Else means remote side is out and then cancel calling
+				// Else means remote side is out and then cancel calling
 			} else {
 				notifyListener(KEY_CANCELLED_LISTNER, 0, 0, null);
 			}

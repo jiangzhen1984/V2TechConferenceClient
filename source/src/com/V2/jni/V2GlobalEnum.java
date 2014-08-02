@@ -48,4 +48,17 @@ public class V2GlobalEnum {
 	 * error conference code for user deleted conference  
 	 */
 	public static final int CONF_CODE_DELETED = 204;
+	
+	
+	
+	/**
+	 * Indicate send on line file
+	 */
+	public static final int FILE_TYPE_ONLINE = 1;
+	
+	/**
+	 * Indicate send off line file
+	 */
+	public static final int FILE_TYPE_OFFLINE = 2;
+	
 }

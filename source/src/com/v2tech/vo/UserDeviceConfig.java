@@ -70,8 +70,7 @@ public class UserDeviceConfig {
 	}
 
 	/**
-	 * TODO add comment
-	 * 
+	 * According to parameter construct new user device donfiguration object
 	 * @param mUerID
 	 * @param mDeviceID
 	 * @param mVP

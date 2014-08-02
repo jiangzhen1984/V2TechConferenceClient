@@ -221,10 +221,11 @@ public class DateTimePicker extends PopupWindow {
 		final int anchorHeight = anchor.getHeight();
 		int[] mDrawingLocation = new int[2];
 		anchor.getLocationInWindow(mDrawingLocation);
-		//FIXME should not measure every time
-		this.getContentView().measure(
-				android.view.ViewGroup.LayoutParams.WRAP_CONTENT,
-				android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
+		if (this.getContentView().getMeasuredWidth() <= 0) {
+			this.getContentView().measure(
+					android.view.ViewGroup.LayoutParams.WRAP_CONTENT,
+					android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
+		}
 
 		if (displayFrame.bottom - anchorHeight - mDrawingLocation[1] > this
 				.getContentView().getMeasuredHeight()) {
