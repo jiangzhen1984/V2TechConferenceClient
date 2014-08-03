@@ -607,10 +607,8 @@ public class ConferenceService extends AbstractHandler {
 
 	class GroupRequestCB extends GroupRequestCallbackAdapter {
 
-		private Handler mCallbackHandler;
 
 		public GroupRequestCB(Handler mCallbackHandler) {
-			this.mCallbackHandler = mCallbackHandler;
 		}
 
 
@@ -643,10 +641,8 @@ public class ConferenceService extends AbstractHandler {
 
 	class MixerRequestCB implements VideoMixerRequestCallback {
 
-		private Handler mCallbackHandler;
 
 		public MixerRequestCB(Handler mCallbackHandler) {
-			this.mCallbackHandler = mCallbackHandler;
 		}
 
 		@Override

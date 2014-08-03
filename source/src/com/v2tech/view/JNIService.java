@@ -68,10 +68,6 @@ import com.v2tech.vo.VMessageImageItem;
 /**
  * This service is used to wrap JNI call.<br>
  * JNI calls are asynchronous, we don't expect activity involve JNI.<br>
- * <p>
- * This service will hold all data which from server.
- * </p>
- * TODO add permission check to make sure don't let others stop this service.
  * 
  * @author 28851274
  * 
@@ -559,15 +555,11 @@ public class JNIService extends Service {
 				boolean bMovetoRoot) {
 			// TODO just support conference
 			if (groupType == Group.GroupType.CONFERENCE.intValue()) {
-				String name = "";
 				String gName = "";
 				Group rG = GlobalHolder.getInstance().getGroupById(
 						Group.GroupType.CONFERENCE, nGroupID);
 				if (rG != null) {
 					gName = rG.getName();
-					if (rG.getOwnerUser() != null) {
-						name = rG.getOwnerUser().getName();
-					}
 				} else {
 					gName = nGroupID + "";
 				}
@@ -690,10 +682,8 @@ public class JNIService extends Service {
 
 	class ConfRequestCB extends ConfRequestCallbackAdapter {
 
-		private JNICallbackHandler mCallbackHandler;
 
 		public ConfRequestCB(JNICallbackHandler mCallbackHandler) {
-			this.mCallbackHandler = mCallbackHandler;
 		}
 
 		@Override
@@ -727,10 +717,8 @@ public class JNIService extends Service {
 
 	class ChatRequestCB extends ChatRequestCallbackAdapter {
 
-		private JNICallbackHandler mCallbackHandler;
 
 		public ChatRequestCB(JNICallbackHandler mCallbackHandler) {
-			this.mCallbackHandler = mCallbackHandler;
 		}
 
 		@Override

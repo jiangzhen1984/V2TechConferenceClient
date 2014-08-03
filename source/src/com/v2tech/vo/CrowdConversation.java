@@ -48,6 +48,20 @@ public class CrowdConversation extends Conversation {
 	public void setDate(String date) {
 		this.date = date;
 	}
+
+
+
+	public User getLastSendUser() {
+		return lastSendUser;
+	}
+
+
+
+	public void setLastSendUser(User lastSendUser) {
+		this.lastSendUser = lastSendUser;
+	}
+	
+	
 	
 	
 }

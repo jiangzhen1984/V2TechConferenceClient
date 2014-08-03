@@ -231,9 +231,6 @@ public class Conference implements Parcelable {
 	 * @return
 	 */
 	public static Conference formConferenceConfigXml(String str) {
-		User loggedUser = GlobalHolder.getInstance().getCurrentUser();
-		String[] ins = { "chairuserid", "createuserid", "id", "subject",
-				"syncdesktop" };
 		long id = 0;
 		long createor = 0;
 		long chairman = 0;
