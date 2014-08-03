@@ -205,7 +205,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 			name.setTextColor(getContext().getResources().getColor(
 					R.color.video_attendee_chair_man_name_color));
 			
-			if(initAttendPersons){
+			if(initAttendPersons && at.isJoined()){
 				
 				onLinePersons += 1;
 			}

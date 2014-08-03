@@ -102,6 +102,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 	private boolean isUpdating;
 
 	private Date bir;
+	private String fromPlace;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -109,6 +110,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 
 		this.setContentView(R.layout.activity_contact_detail);
 		mUid = this.getIntent().getLongExtra("uid", 0);
+		fromPlace = this.getIntent().getStringExtra("fromPlace");
 		initView();
 		mContext = this;
 		View v = findViewById(R.id.contact_detail_main_layout);
@@ -176,35 +178,36 @@ public class ContactDetail extends Activity implements OnTouchListener {
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		switch (requestCode) {
-//		case FILE_SELECT_CODE:
-//			if (resultCode == RESULT_OK) {
-//				// Get the Uri of the selected file
-//				Uri uri = data.getData();
-//				String path = SPUtil.getPath(this, uri);
-//				if (path == null) {
-//					Toast.makeText(
-//							mContext,
-//							R.string.contacts_user_detail_file_selection_not_found_path,
-//							Toast.LENGTH_SHORT).show();
-//				}
-//				else{
-//					//return current conversationView with selected file
-//					returnConversationView(path);
-//				}
-//			}
-//			break;
+		// case FILE_SELECT_CODE:
+		// if (resultCode == RESULT_OK) {
+		// // Get the Uri of the selected file
+		// Uri uri = data.getData();
+		// String path = SPUtil.getPath(this, uri);
+		// if (path == null) {
+		// Toast.makeText(
+		// mContext,
+		// R.string.contacts_user_detail_file_selection_not_found_path,
+		// Toast.LENGTH_SHORT).show();
+		// }
+		// else{
+		// //return current conversationView with selected file
+		// returnConversationView(path);
+		// }
+		// }
+		// break;
 		case FILE_SELECT_CODE:
-			if(data != null){
-				
-				ArrayList<Parcelable> mCheckedList = data.getParcelableArrayListExtra("checkedFiles");
-				
-				if(mCheckedList != null && mCheckedList.size() > 0){
-					if(GlobalConfig.isConversationOpen == true){
+			if (data != null) {
+
+				ArrayList<Parcelable> mCheckedList = data
+						.getParcelableArrayListExtra("checkedFiles");
+
+				if (mCheckedList != null && mCheckedList.size() > 0) {
+					if (GlobalConfig.isConversationOpen == true) {
 						Intent intent = new Intent();
-						intent.putParcelableArrayListExtra("checkedFiles", mCheckedList);
-						setResult(1000 , intent);
-					}
-					else{
+						intent.putParcelableArrayListExtra("checkedFiles",
+								mCheckedList);
+						setResult(1000, intent);
+					} else {
 						returnConversationView(mCheckedList);
 					}
 					finish();
@@ -420,15 +423,15 @@ public class ContactDetail extends Activity implements OnTouchListener {
 				tv.setOnClickListener(itemClickListener);
 				tv.setText(nums[0]);
 				tv.setTag(nums[0]);
-				
+
 				if (nums.length > 1) {
 					TextView tv1 = (TextView) d
 							.findViewById(R.id.contact_user_detail_call_dialog_2);
 					tv1.setOnClickListener(itemClickListener);
 					tv1.setText(nums[1]);
 					tv1.setTag(nums[1]);
-					
-					if(tv1.getVisibility() == View.GONE){
+
+					if (tv1.getVisibility() == View.GONE) {
 						tv1.setVisibility(View.VISIBLE);
 					}
 				}
@@ -449,7 +452,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 					startActivity(intent);
 
 				} else {
-					
+
 					Intent intent = new Intent();
 					intent.setAction(Intent.ACTION_CALL);
 					intent.setData(Uri.parse("tel:" + (String) view.getTag()));
@@ -532,10 +535,15 @@ public class ContactDetail extends Activity implements OnTouchListener {
 		@Override
 		public void onClick(View arg0) {
 
-			returnConversationView(null);
+			if ("ConversationView".equals(fromPlace)){
+				setResult(0);
+				finish();
+			}
+			else
+				returnConversationView(null);
 		}
 	};
-	
+
 	/**
 	 * return ConversationView with infos
 	 */
@@ -546,14 +554,15 @@ public class ContactDetail extends Activity implements OnTouchListener {
 		i.addCategory(PublicIntent.DEFAULT_CATEGORY);
 		i.putParcelableArrayListExtra("checkedFiles", mCheckedList);
 		mContext.startActivity(i);
-		finish();
 	}
 
 	private View.OnClickListener mVideoCallButtonListener = new View.OnClickListener() {
 		@Override
 		public void onClick(View arg0) {
 			if (!SPUtil.checkCurrentAviNetwork(mContext)) {
-				Toast.makeText(mContext, R.string.conversation_no_network_notification, Toast.LENGTH_SHORT).show();
+				Toast.makeText(mContext,
+						R.string.conversation_no_network_notification,
+						Toast.LENGTH_SHORT).show();
 				return;
 			}
 			startVideoCall();
@@ -566,7 +575,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 			Intent smsIntent = new Intent(Intent.ACTION_VIEW);
 			if (u.getCellPhone() != null && !u.getCellPhone().isEmpty()) {
 				smsIntent.putExtra("address", u.getCellPhone());
-			}else {
+			} else {
 				smsIntent.putExtra("address", "");
 			}
 
@@ -578,13 +587,14 @@ public class ContactDetail extends Activity implements OnTouchListener {
 	private View.OnClickListener mfileSelectionButtonListener = new View.OnClickListener() {
 		@Override
 		public void onClick(View arg0) {
-			if(SPUtil.checkCurrentAviNetwork(mContext)){
-				Intent intent = new Intent(ContactDetail.this , ConversationSelectFileEntry.class);
+			if (SPUtil.checkCurrentAviNetwork(mContext)) {
+				Intent intent = new Intent(ContactDetail.this,
+						ConversationSelectFileEntry.class);
 				startActivityForResult(intent, FILE_SELECT_CODE);
-			}
-			else{
-				
-				Toast.makeText(mContext, "当前网络不可用，请稍候再试。", Toast.LENGTH_SHORT).show();
+			} else {
+
+				Toast.makeText(mContext, "当前网络不可用，请稍候再试。", Toast.LENGTH_SHORT)
+						.show();
 			}
 		}
 	};

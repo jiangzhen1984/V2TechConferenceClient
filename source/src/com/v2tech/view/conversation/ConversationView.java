@@ -735,12 +735,14 @@ public class ConversationView extends Activity {
 					mMessageET.setVisibility(View.GONE);
 					mSendButtonTV.setVisibility(View.GONE);
 
-					if (mMoreFeatureIV.getTag() != null
-							|| !mMoreFeatureIV.getTag().equals("plus")) {
-						mMoreFeatureIV
-								.setImageResource(R.drawable.message_plus);
-						mMoreFeatureIV.setTag("plus");
-						mAdditionFeatureContainer.setVisibility(View.GONE);
+					if (mMoreFeatureIV.getTag() != null) {
+						if (!mMoreFeatureIV.getTag().equals("plus")) {
+
+							mMoreFeatureIV
+									.setImageResource(R.drawable.message_plus);
+							mMoreFeatureIV.setTag("plus");
+							mAdditionFeatureContainer.setVisibility(View.GONE);
+						}
 					}
 
 				} else if (tag.equals("keyboard")) {
@@ -1095,7 +1097,10 @@ public class ConversationView extends Activity {
 					mCheckedList = null;
 				}
 			}
+		}else if(requestCode == 0){
+			
 		}
+		
 	}
 
 	// public void startVideoCall() {
@@ -1375,8 +1380,7 @@ public class ConversationView extends Activity {
 				return;
 			}
 			vfi.setState(VMessageFileItem.STATE_FILE_DOWNLOADING);
-			
-			
+
 			mChat.updateFileOperation(vfi,
 					FileOperationEnum.OPERATION_START_DOWNLOAD, null);
 		}
@@ -1579,6 +1583,7 @@ public class ConversationView extends Activity {
 			i.setClass(mContext, ContactDetail.class);
 			i.putExtra("uid", user2Id);
 			i.putExtra("obj", cov);
+			i.putExtra("fromPlace", "ConversationView");
 			i.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
 			startActivityForResult(i, RECEIVE_SELECTED_FILE);
 		}
@@ -1618,7 +1623,7 @@ public class ConversationView extends Activity {
 				for (int i = 0; i < messageArray.size(); i++) {
 					MessageBodyView mdv = (MessageBodyView) messageArray.get(i)
 							.getView();
-					//TODO need to figure out why it will be null
+					// TODO need to figure out why it will be null
 					// when re-connect network.
 					if (mdv == null) {
 						continue;
