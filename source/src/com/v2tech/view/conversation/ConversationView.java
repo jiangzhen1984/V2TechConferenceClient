@@ -83,6 +83,7 @@ import com.v2tech.vo.VMessageAbstractItem;
 import com.v2tech.vo.VMessageAudioItem;
 import com.v2tech.vo.VMessageFaceItem;
 import com.v2tech.vo.VMessageFileItem;
+import com.v2tech.vo.VMessageImageItem;
 import com.v2tech.vo.VMessageTextItem;
 
 public class ConversationView extends Activity {
@@ -654,13 +655,18 @@ public class ConversationView extends Activity {
 		if (size < after && before < 0) {
 			return;
 		}
+		
 		while (--before >= 0) {
-			VMessage vm = (VMessage) messageArray.get(before).getItemObject();
+			VMessageAdater ItemWrapper = (VMessageAdater) messageArray.get(before);
+			VMessage vm = (VMessage) ItemWrapper.getItemObject();
+			ItemWrapper.setView(null);
 			vm.recycleAllImageMessage();
 		}
 
 		while (++after < size) {
-			VMessage vm = (VMessage) messageArray.get(after).getItemObject();
+			VMessageAdater ItemWrapper = (VMessageAdater) messageArray.get(after);
+			VMessage vm = (VMessage) ItemWrapper.getItemObject();
+			ItemWrapper.setView(null);
 			vm.recycleAllImageMessage();
 		}
 	}
@@ -1295,9 +1301,12 @@ public class ConversationView extends Activity {
 						.sendToTarget();
 				currentItemPos = first;
 				// Do not clean image message state when loading message
-			} else {
+			} 
+			else {
+				if (lastFirst != first) {
 				cleanRangeBitmapCache(first - 5, first + allVisibleCount
 						+ BATCH_COUNT);
+				}
 			}
 			// Calculate scrolled direction
 			isUPScroll = first < lastFirst ? true : false;

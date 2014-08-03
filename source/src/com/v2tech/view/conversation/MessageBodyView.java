@@ -871,6 +871,10 @@ public class MessageBodyView extends LinearLayout {
 		protected ImageView[] doInBackground(ImageView... vms) {
 			// Only has one element
 			for (ImageView vm : vms) {
+				Bitmap bm = ((VMessageImageItem) vm.getTag()).getCompressedBitmap();
+				if (bm == null || bm.isRecycled()) {
+					((VMessageImageItem) vm.getTag()).recycleAll();
+				}
 				((VMessageImageItem) vm.getTag()).getCompressedBitmap();
 			}
 			return vms;
