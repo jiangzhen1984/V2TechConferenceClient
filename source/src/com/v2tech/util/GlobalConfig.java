@@ -126,7 +126,7 @@ public class GlobalConfig {
 	}
 	
 	public static String getGlobalFilePath() {
-		return StorageUtil.getAbsoluteSdcardPath()+"/.v2tech/file";
+		return StorageUtil.getAbsoluteSdcardPath()+"/v2tech/file";
 	}
 	
 	

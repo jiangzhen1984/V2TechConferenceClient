@@ -32,6 +32,17 @@
             android:text="@string/select_file_title"
             android:textColor="@color/activiy_contact_detail_title_color"
             android:textSize="@dimen/common_item_text_size" />
+        <ImageView
+            android:id="@+id/contact_detail_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="10dp"
+            android:paddingBottom="10dp"
+            android:layout_marginLeft="30dp"
+            android:layout_toRightOf="@+id/selectfile_title"
+            android:visibility="invisible"
+            android:paddingTop="10dp"
+            android:src="@drawable/contact_detail_button_selector" />
         <TextView
             android:id="@+id/selectfile_finish"
             android:layout_width="wrap_content"
@@ -61,8 +72,8 @@
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:gravity="center"
-            android:visibility="gone"
-            android:orientation="vertical" >
+            android:orientation="vertical"
+            android:visibility="gone" >
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
