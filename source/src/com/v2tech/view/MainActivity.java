@@ -32,10 +32,14 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.v2tech.R;
+import com.v2tech.service.GlobalHolder;
 import com.v2tech.util.V2Log;
 import com.v2tech.view.widget.TitleBar;
+import com.v2tech.vo.Conference;
 import com.v2tech.vo.Conversation;
+import com.v2tech.vo.Group;
 import com.v2tech.vo.NetworkStateCode;
+import com.v2tech.vo.Group.GroupType;
 
 public class MainActivity extends FragmentActivity implements
 		NotificationListener {
@@ -48,6 +52,8 @@ public class MainActivity extends FragmentActivity implements
 	private TabHost mTabHost;
 	private ViewPager mViewPager;
 	private PagerAdapter mPagerAdapter;
+	
+	private ConferenceListener mConfListener;
 
 	private static final int SUB_ACTIVITY_CODE_CREATE_CONF = 100;
 
@@ -215,6 +221,9 @@ public class MainActivity extends FragmentActivity implements
 			Bundle bundle = new Bundle();
 			bundle.putString("tag", tc.mTabName);
 			Fragment frg = Fragment.instantiate(this, tc.clsName, bundle);
+			if (frg instanceof ConferenceListener && tc.mTabName.equals(PublicIntent.TAG_CONF)) {
+				mConfListener =(ConferenceListener) frg;
+			}
 			fragments.add(frg);
 
 		}
@@ -288,7 +297,8 @@ public class MainActivity extends FragmentActivity implements
 	protected void onNewIntent(Intent intent) {
 		super.onNewIntent(intent);
 		if (intent.getExtras() != null) {
-			intent.getExtras().get("gid");
+			Conference conf= (Conference)intent.getExtras().get("conf");
+			mConfListener.requestJoinConf(conf);
 		}
 	}
 

@@ -59,7 +59,7 @@ import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.User;
 import com.v2tech.vo.VMessage;
 
-public class ConversationsTabFragment extends Fragment implements TextWatcher {
+public class ConversationsTabFragment extends Fragment implements TextWatcher, ConferenceListener {
 	private static final int FILL_CONFS_LIST = 2;
 	private static final int UPDATE_USER_SIGN = 8;
 	private static final int UPDATE_CONVERSATION = 9;
@@ -671,7 +671,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher {
 
 	private ProgressDialog mWaitingDialog;
 
-	private void requestEnterConf(long gid) {
+	private void requestJoinConf(long gid) {
 		mWaitingDialog = ProgressDialog.show(
 				mContext,
 				"",
@@ -694,9 +694,38 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher {
 	}
 	
 	
+	
+	
+	/*
+	 * This request from main activity
+	 * @see com.v2tech.view.ConferenceListener#requestJoinConf(com.v2tech.vo.Conference)
+	 */
+	@Override
+	public boolean requestJoinConf(Conference conf) {
+		if (conf == null) {
+			return false;
+		}
+		requestJoinConf(conf.getId());
+		
+		// This request from main activity
+		// We need to update notificator for conversation
+		for (int i =0; i< mItemList.size(); i++) {
+			// hiden notificator
+			((GroupLayout) mItemList.get(i).gp).updateNotificator(false);
+			Conversation cov = mConvList.get(i);
+			//update main activity notificator
+			cov.setReadFlag(Conversation.READ_FLAG_READ);
+			updateUnreadConversation(cov);
+		}
+		
+		
+		
+		return true;
+	}
+
 	private void updateConferenceNotification(Conference conf) {
 		Intent enterConference = new Intent(mContext,
-				VideoActivityV2.class);
+				MainActivity.class);
 		
 		User creator = GlobalHolder.getInstance().getUser(conf.getCreator());
 		enterConference.putExtra("conf", conf);
@@ -727,7 +756,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher {
 			((GroupLayout) mItemList.get(pos).gp).updateNotificator(false);
 			Conversation cov = mConvList.get(pos);
 			if (mCurrentTabFlag == Conversation.TYPE_CONFERNECE) {
-				requestEnterConf(cov.getExtId());
+				requestJoinConf(cov.getExtId());
 			} else if (mCurrentTabFlag == Conversation.TYPE_GROUP
 					|| mCurrentTabFlag == Conversation.TYPE_CONTACT) {
 				Intent i = new Intent(PublicIntent.START_CONVERSACTION_ACTIVITY);

@@ -538,6 +538,7 @@ public class JNIService extends Service {
 						GroupType.CONFERENCE.intValue(), g.getmGId());
 				if (g != null) {
 					GlobalHolder.getInstance().addGroupToList(gType, g);
+					//FIXME send conf objectF
 					if (gType == GroupType.CONFERENCE) {
 						Intent i = new Intent();
 						i.setAction(JNIService.JNI_BROADCAST_CONFERENCE_INVATITION);
