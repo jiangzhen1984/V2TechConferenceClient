@@ -90,7 +90,13 @@ public class ConferenceService extends AbstractHandler {
 	private GroupRequestCB groupCallback;
 	private MixerRequestCB mrCallback;
 
+	private boolean mFlag = false;
 	public ConferenceService() {
+		this(false);
+	}
+	
+	
+	public ConferenceService(boolean flag) {
 		super();
 		videoCallback = new VideoRequestCB(this);
 		VideoRequest.getInstance().addCallback(videoCallback);
@@ -100,7 +106,7 @@ public class ConferenceService extends AbstractHandler {
 		GroupRequest.getInstance().addCallback(groupCallback);
 		mrCallback = new MixerRequestCB(this);
 		VideoMixerRequest.getInstance().addCallbacks(mrCallback);
-
+		mFlag = flag;
 	}
 
 	/**
@@ -480,6 +486,22 @@ public class ConferenceService extends AbstractHandler {
 	public void unRegisterVideoMixerListener(Handler h, int what, Object obj) {
 		unRegisterListener(KEY_MIXED_VIDEO_LISTNER, h, what, obj);
 	}
+	
+	
+	
+
+	@Override
+	protected void notifyListenerWithPending(int key, int arg1, int arg2,
+			Object obj) {
+		if (mFlag) {
+			super.notifyListenerWithPending(key, arg1, arg2, obj);
+		} else {
+			super.notifyListener(key, arg1, arg2, obj);
+		}
+	}
+
+
+
 
 	class ConfRequestCB implements ConfRequestCallback {
 

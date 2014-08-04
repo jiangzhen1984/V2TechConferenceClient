@@ -31,7 +31,7 @@ public class ConferencMessageSyncService extends Service {
 	@Override
 	public void onCreate() {
 		super.onCreate();
-		 conferenceService = new ConferenceService();
+		 conferenceService = new ConferenceService(true);
 		 docService = new DocumentService();
 	}
 

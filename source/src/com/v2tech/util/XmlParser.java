@@ -608,6 +608,9 @@ public class XmlParser {
 
 				meta.addShape(shape);
 			}
+			
+			
+			//TODO add TEraseLineMeta
 
 			return meta;
 

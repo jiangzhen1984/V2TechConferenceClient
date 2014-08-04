@@ -2210,6 +2210,11 @@ public class VideoActivityV2 extends Activity {
 						.getResult();
 				synchronized (mDocs) {
 					V2Doc ca = mDocs.get(shape.getDocId());
+					//FIXME handle ca is null
+					if (ca == null) {
+						V2Log.e(" ERROR "+ shape.getDocId());
+						break;
+					}
 					V2Doc.Page caVp = ca.findPage(shape.getPageNo());
 					if (caVp != null) {
 						caVp.addMeta(shape);

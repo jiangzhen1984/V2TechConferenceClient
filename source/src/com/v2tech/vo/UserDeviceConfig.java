@@ -71,6 +71,7 @@ public class UserDeviceConfig {
 
 	/**
 	 * According to parameter construct new user device donfiguration object
+	 * 
 	 * @param mUerID
 	 * @param mDeviceID
 	 * @param mVP
@@ -216,15 +217,11 @@ public class UserDeviceConfig {
 
 			doc.getDocumentElement().normalize();
 
-			NodeList videoList = doc.getElementsByTagName("videolist");
-			for (int j = 0; j < videoList.getLength(); j++) {
-				Element videoListE = (Element) videoList.item(j);
-				NodeList videol = videoListE.getElementsByTagName("video");
-				for (int t = 0; t < videol.getLength(); t++) {
-					Element video = (Element) videol.item(t);
-					String deviceId = video.getAttribute("id");
-					l.add(new UserDeviceConfig(uid, deviceId, null));
-				}
+			NodeList videol = doc.getElementsByTagName("video");
+			for (int t = 0; t < videol.getLength(); t++) {
+				Element video = (Element) videol.item(t);
+				String deviceId = video.getAttribute("id");
+				l.add(new UserDeviceConfig(uid, deviceId, null));
 			}
 
 		} catch (ParserConfigurationException e) {
