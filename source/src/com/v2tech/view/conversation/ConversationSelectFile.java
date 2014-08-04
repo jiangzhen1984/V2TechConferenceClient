@@ -93,7 +93,6 @@ public class ConversationSelectFile extends Activity {
 			case NEW_BITMAP:
 				imageAdapter.notifyDataSetChanged();
 				break;
-
 			case UPDATE_BITMAP:
 				ViewHolder holder = (ViewHolder) ((Object[]) msg.obj)[0];
 				Bitmap bt = (Bitmap) ((Object[]) msg.obj)[1];
@@ -107,10 +106,12 @@ public class ConversationSelectFile extends Activity {
 				break;
 			case REMOVE_BITMAP:
 				ViewHolder cach = bitmapMapping.remove(msg.obj);
+				Bitmap bitmap = ((Bitmap) msg.obj);
 				if (cach != null) {
 					cach.fileIcon.setImageResource(R.drawable.ic_launcher);
 				}
-				((Bitmap) msg.obj).recycle();
+				bitmap.recycle();
+				bitmap = null;
 				break;
 			default:
 				break;
@@ -355,8 +356,19 @@ public class ConversationSelectFile extends Activity {
 			while (cursor.moveToNext()) {
 				bean = new FileInfoBean();
 				// 获得图片uri
-				bean.filePath = cursor.getString(cursor
+				String filePath = cursor.getString(cursor
 						.getColumnIndex(MediaStore.Images.Media.DATA));
+				try {
+					Bitmap bitmap = handlerImage(filePath);
+					if (bitmap == null) {
+						V2Log.e(TAG, filePath + "不能被解析");
+						continue;
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+
+				bean.filePath = filePath;
 				bean.fileSize = Long.valueOf(cursor.getString(cursor
 						.getColumnIndex(MediaStore.Images.Media.SIZE)));
 				bean.fileName = cursor.getString(cursor
@@ -564,7 +576,7 @@ public class ConversationSelectFile extends Activity {
 			if (conf.smallestScreenWidthDp >= 600) {
 				para.height = mScreenHeight / 3;//
 			} else {
-				para.height = mScreenHeight / 6;//
+				para.height = mScreenHeight / 5;//
 			}
 			para.width = (mScreenWidth - 20) / 3;// 一屏显示3列
 			holder.fileIcon.setLayoutParams(para);
@@ -615,10 +627,6 @@ public class ConversationSelectFile extends Activity {
 						return;
 					}
 
-					if (bitmap == null) {
-						V2Log.e("Can not extra bitmap ");
-						return;
-					}
 					bitmapLru.put(fb.fileName, bitmap);
 					Message.obtain(handler, UPDATE_BITMAP,
 							new Object[] { holder, bitmap, fb }).sendToTarget();
@@ -807,14 +815,21 @@ public class ConversationSelectFile extends Activity {
 		int width = options.outWidth;
 		int height = options.outHeight;
 
-		int widthScale = width / mScreenWidth;
-		int heightScale = height / mScreenHeight;
+		int widthScale;
+		int heightScale;
+		if (width > 1800 || height > 1800) {
+			widthScale = width / mScreenWidth + 8;
+			heightScale = height / mScreenHeight + 8;
+		} else {
+			widthScale = width / mScreenWidth;
+			heightScale = height / mScreenHeight;
+		}
 
 		int scale = 1;
 		if (widthScale > heightScale)
-			scale = widthScale + 4;
+			scale = widthScale;
 		else
-			scale = heightScale + 4;
+			scale = heightScale;
 
 		if (scale < 0) {
 			scale = 1;
@@ -824,7 +839,8 @@ public class ConversationSelectFile extends Activity {
 		options.inPreferredConfig = Bitmap.Config.RGB_565;
 		options.inInputShareable = true;// 。当系统内存不够时候图片自动被回收
 		options.inPurgeable = true;
-		return BitmapFactory.decodeFile(path, options);
+		Bitmap decodeFile = BitmapFactory.decodeFile(path, options);
+		return decodeFile;
 	}
 
 	class BitmapLRU extends LruCache<String, Bitmap> {

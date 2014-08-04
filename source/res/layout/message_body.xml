@@ -17,7 +17,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/message_body_time_text"
-        android:visibility="gone"
         android:weightSum="1" >
         <RelativeLayout
             android:layout_width="0dp"
@@ -100,6 +99,7 @@
         android:id="@+id/message_body_remote_ly"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:visibility="gone"
         android:layout_below="@+id/message_body_time_text"
         android:weightSum="1" >
         <TextView

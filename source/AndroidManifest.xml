@@ -210,6 +210,11 @@
             android:screenOrientation="nosensor"
             android:windowSoftInputMode="stateHidden|adjustPan" >
         </activity>
+        <activity
+            android:name="com.v2tech.view.conversation.ConversationSelectImage"
+            android:screenOrientation="nosensor"
+            android:windowSoftInputMode="stateHidden|adjustPan" >
+        </activity>
        
 
         <receiver android:name="com.v2tech.view.receiver.AvatarChangedReceiver" >

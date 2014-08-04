@@ -202,11 +202,10 @@ public class VideoAttendeeListLayout extends LinearLayout {
 	private void setStyle(Attendee at, UserDeviceConfig udc, TextView name,
 			ImageView iv, ImageView speaker) {
 		if (at.isChairMan() || conf.getChairman() == at.getAttId()) {
-			name.setTextColor(getContext().getResources().getColor(
-					R.color.video_attendee_chair_man_name_color));
 			
 			if(initAttendPersons && at.isJoined()){
-				
+				name.setTextColor(getContext().getResources().getColor(
+						R.color.video_attendee_chair_man_name_color));
 				onLinePersons += 1;
 			}
 		} else if (at.isSelf()) {

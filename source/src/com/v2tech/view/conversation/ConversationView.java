@@ -655,16 +655,18 @@ public class ConversationView extends Activity {
 		if (size < after && before < 0) {
 			return;
 		}
-		
+
 		while (--before >= 0) {
-			VMessageAdater ItemWrapper = (VMessageAdater) messageArray.get(before);
+			VMessageAdater ItemWrapper = (VMessageAdater) messageArray
+					.get(before);
 			VMessage vm = (VMessage) ItemWrapper.getItemObject();
 			ItemWrapper.setView(null);
 			vm.recycleAllImageMessage();
 		}
 
 		while (++after < size) {
-			VMessageAdater ItemWrapper = (VMessageAdater) messageArray.get(after);
+			VMessageAdater ItemWrapper = (VMessageAdater) messageArray
+					.get(after);
 			VMessage vm = (VMessage) ItemWrapper.getItemObject();
 			ItemWrapper.setView(null);
 			vm.recycleAllImageMessage();
@@ -908,13 +910,15 @@ public class ConversationView extends Activity {
 
 		@Override
 		public void onClick(View v) {
-			Intent intent = new Intent();
-			intent.setType("image/*");
-			intent.setAction(Intent.ACTION_GET_CONTENT);
-			startActivityForResult(
-					Intent.createChooser(intent, "Select Picture"),
-					SELECT_PICTURE_CODE);
-
+			// Intent intent = new Intent();
+			// intent.setType("image/*");
+			// intent.setAction(Intent.ACTION_GET_CONTENT);
+			// startActivityForResult(
+			// Intent.createChooser(intent, "Select Picture"),
+			// SELECT_PICTURE_CODE);
+			Intent intent = new Intent(ConversationView.this,
+					ConversationSelectImage.class);
+			startActivityForResult(intent, SELECT_PICTURE_CODE);
 		}
 
 	};
@@ -1066,35 +1070,48 @@ public class ConversationView extends Activity {
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
+		// if (requestCode == SELECT_PICTURE_CODE) {
+		// Uri selectedImage = data.getData();
+		// Uri selectedImage = Uri.parse(data
+		// .getStringExtra("checkedImage"));
+		// String[] filePathColumn = { MediaStore.Images.Media.DATA };
+		//
+		// Cursor cursor = getContentResolver().query(selectedImage,
+		// filePathColumn, null, null, null);
+		// if (cursor == null) {
+		// Toast.makeText(mContext,
+		// R.string.error_contact_messag_invalid_image_path,
+		// Toast.LENGTH_SHORT).show();
+		// return;
+		// }
+		// cursor.moveToFirst();
+		//
+		// int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
+		// String filePath = cursor.getString(columnIndex);
+		// cursor.close();
+		// if (filePath == null) {
+		// Toast.makeText(mContext,
+		// R.string.error_contact_messag_invalid_image_path,
+		// Toast.LENGTH_SHORT).show();
+		// return;
+		// }
+		// VMessage vim = MessageBuilder.buildImageMessage(local, remote,
+		// filePath);
+		// // Send message to server
+		// sendMessageToRemote(vim);
+		// }
 		if (requestCode == SELECT_PICTURE_CODE) {
-			if (resultCode == RESULT_OK) {
-				Uri selectedImage = data.getData();
-				String[] filePathColumn = { MediaStore.Images.Media.DATA };
-
-				Cursor cursor = getContentResolver().query(selectedImage,
-						filePathColumn, null, null, null);
-				if (cursor == null) {
-					Toast.makeText(mContext,
-							R.string.error_contact_messag_invalid_image_path,
-							Toast.LENGTH_SHORT).show();
-					return;
-				}
-				cursor.moveToFirst();
-
-				int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
-				String filePath = cursor.getString(columnIndex);
-				cursor.close();
-				if (filePath == null) {
-					Toast.makeText(mContext,
-							R.string.error_contact_messag_invalid_image_path,
-							Toast.LENGTH_SHORT).show();
-					return;
-				}
-				VMessage vim = MessageBuilder.buildImageMessage(local, remote,
-						filePath);
-				// Send message to server
-				sendMessageToRemote(vim);
+			String filePath = data.getStringExtra("checkedImage");
+			if (filePath == null) {
+				Toast.makeText(mContext,
+						R.string.error_contact_messag_invalid_image_path,
+						Toast.LENGTH_SHORT).show();
+				return;
 			}
+			VMessage vim = MessageBuilder.buildImageMessage(local, remote,
+					filePath);
+			// Send message to server
+			sendMessageToRemote(vim);
 		} else if (requestCode == RECEIVE_SELECTED_FILE) {
 			if (data != null) {
 				mCheckedList = data.getParcelableArrayListExtra("checkedFiles");
@@ -1103,10 +1120,10 @@ public class ConversationView extends Activity {
 					mCheckedList = null;
 				}
 			}
-		}else if(requestCode == 0){
-			
+		} else if (requestCode == 0) {
+
 		}
-		
+
 	}
 
 	// public void startVideoCall() {
@@ -1301,11 +1318,10 @@ public class ConversationView extends Activity {
 						.sendToTarget();
 				currentItemPos = first;
 				// Do not clean image message state when loading message
-			} 
-			else {
+			} else {
 				if (lastFirst != first) {
-				cleanRangeBitmapCache(first - 5, first + allVisibleCount
-						+ BATCH_COUNT);
+					cleanRangeBitmapCache(first - 5, first + allVisibleCount
+							+ BATCH_COUNT);
 				}
 			}
 			// Calculate scrolled direction
