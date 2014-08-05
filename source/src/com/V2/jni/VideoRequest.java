@@ -270,6 +270,21 @@ public class VideoRequest {
 		}
 	}
 
+	private void OnVideoChating(long nGroupID, int nBusinessType,
+			long nFromUserID, String szDeviceID) {
+		V2Log.d("OnVideoChating " + nGroupID + " " + nBusinessType + " "
+				+ nFromUserID + " " + szDeviceID);
+		for (WeakReference<VideoRequestCallback> wrCB : this.callback) {
+			Object obj = wrCB.get();
+			if (obj != null) {
+				VideoRequestCallback cb = (VideoRequestCallback) obj;
+				cb.OnVideoChating(new VideoJNIObjectInd(nGroupID, nFromUserID,
+						szDeviceID, nBusinessType));
+				
+			}
+		}
+	}
+
 	// 鏋氫妇鎽勫儚澶�
 	public native void enumMyVideos(int p);
 
@@ -323,13 +338,6 @@ public class VideoRequest {
 
 	// 閭�鍒汉鍚庡緱鍒板簲绛� OnVideoChatAccepted 0 2 1112627 1112627:Integrated
 	// Camera____2889200338
-
-	// 鏀跺埌瑙嗛浼氳瘽宸茬粡寤虹珛鐨勫洖璋�
-	private void OnVideoChating(long nGroupID, int nBusinessType,
-			long nFromUserID, String szDeviceID) {
-		Log.e("ImRequest UI", "OnVideoChating " + nGroupID + " "
-				+ nBusinessType + " " + nFromUserID + " " + szDeviceID);
-	}
 
 	private void OnVideoWindowSet(String sDevId, Object hwnd) {
 		Log.e("ImRequest UI",

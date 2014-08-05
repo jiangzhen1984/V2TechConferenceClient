@@ -1,10 +1,10 @@
 package com.v2tech.service.jni;
 
-
 /**
  * Used to wrap response data from JNI when receive call from JNI
+ * 
  * @author 28851274
- *
+ * 
  */
 public class RequestChatServiceResponse extends JNIResponse {
 
@@ -13,26 +13,63 @@ public class RequestChatServiceResponse extends JNIResponse {
 	public static final int REJCTED = 2;
 	public static final int CANCELED = 3;
 	public static final int HANGUP = 4;
-	
+
 	int code;
-	
+
+	private long uid;
+	private long groupId;
+	private String deviceID;
+
 	/**
 	 * This class is wrapper that wrap response of chat service
-	 * @param result {@link Result}
+	 * 
+	 * @param result
+	 *            {@link Result}
 	 */
-	public RequestChatServiceResponse(
-			Result result) {
+	public RequestChatServiceResponse(Result result) {
 		super(result);
 	}
-	
-	public RequestChatServiceResponse(int code,
-			Result result) {
+
+	public RequestChatServiceResponse(int code, Result result) {
 		super(result);
 		this.code = code;
 	}
-	
+
+	public RequestChatServiceResponse(int code, long uid, long groupId,
+			String deviceID, Result result) {
+		super(result);
+		this.uid = uid;
+		this.groupId = groupId;
+		this.deviceID = deviceID;
+		this.code = code;
+	}
+
 	public int getCode() {
 		return code;
+	}
+
+	public long getUid() {
+		return uid;
+	}
+
+	public void setUid(long uid) {
+		this.uid = uid;
+	}
+
+	public long getGroupId() {
+		return groupId;
+	}
+
+	public void setGroupId(long groupId) {
+		this.groupId = groupId;
+	}
+
+	public String getDeviceID() {
+		return deviceID;
+	}
+
+	public void setDeviceID(String deviceID) {
+		this.deviceID = deviceID;
 	}
 
 }

@@ -62,5 +62,13 @@ public interface VideoRequestCallback {
 	 * @param ind
 	 */
 	public void OnVideoChatClosed(VideoJNIObjectInd ind);
+	
+	
+	/**
+	 * Remote user close current connected conversation
+	 * @param ind
+	 */
+	public void OnVideoChating(VideoJNIObjectInd ind);
+	
 
 }

@@ -36,6 +36,11 @@ public abstract class VideoRequestCallbackAdapter implements
 		
 	}
 
+	@Override
+	public void OnVideoChating(VideoJNIObjectInd ind) {
+		
+	}
+
 
 
 }

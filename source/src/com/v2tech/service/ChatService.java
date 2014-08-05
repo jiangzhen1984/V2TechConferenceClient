@@ -77,6 +77,7 @@ public class ChatService extends AbstractHandler {
 
 	private static final int KEY_CANCELLED_LISTNER = 1;
 	private static final int KEY_FILE_TRANS_STATUS_NOTIFICATION_LISTNER = 2;
+	private static final int KEY_VIDEO_CONNECTED = 3;
 
 	public ChatService() {
 		super();
@@ -113,6 +114,24 @@ public class ChatService extends AbstractHandler {
 	}
 
 	/**
+	 * Register listener for video connected, after this notification. can open remote video device
+	 * 
+	 * @param msg
+	 */
+	public void registerVideoChatConnectedListener(Handler h, int what, Object obj) {
+		registerListener(KEY_VIDEO_CONNECTED, h, what,
+				obj);
+	}
+
+	public void removeVideoChatConnectedistener(Handler h, int what,
+			Object obj) {
+		unRegisterListener(KEY_VIDEO_CONNECTED, h, what,
+				obj);
+
+	}
+	
+	
+	/**
 	 * Register listener for out conference by kick.
 	 * 
 	 * @param msg
@@ -128,6 +147,8 @@ public class ChatService extends AbstractHandler {
 				obj);
 
 	}
+	
+	
 
 	/**
 	 * send message
@@ -501,7 +522,7 @@ public class ChatService extends AbstractHandler {
 		public void OnVideoChatAccepted(VideoJNIObjectInd ind) {
 			if (mCaller != null) {
 				JNIResponse resp = new RequestChatServiceResponse(
-						RequestChatServiceResponse.ACCEPTED,
+						RequestChatServiceResponse.ACCEPTED, ind.getFromUserId(), ind.getGroupId(), ind.getDeviceId(),
 						RequestChatServiceResponse.Result.SUCCESS);
 				sendResult(mCaller, resp);
 				mCaller = null;
@@ -524,6 +545,11 @@ public class ChatService extends AbstractHandler {
 			notifyListener(KEY_CANCELLED_LISTNER, 0, 0, null);
 			// Clean cache
 			mCaller = null;
+		}
+		
+		@Override
+		public void OnVideoChating(VideoJNIObjectInd ind) {
+			notifyListener(KEY_VIDEO_CONNECTED, 0, 0, ind);
 		}
 
 	}
@@ -567,6 +593,8 @@ public class ChatService extends AbstractHandler {
 			// Clean cache
 			mCaller = null;
 		}
+		
+		
 
 	}
 

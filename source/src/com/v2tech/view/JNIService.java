@@ -242,6 +242,7 @@ public class JNIService extends Service {
 	private static final int JNI_LOG_OUT = 26;
 	private static final int JNI_GROUP_NOTIFY = 35;
 	private static final int JNI_GROUP_USER_INFO_NOTIFICATION = 60;
+	private static final int JNI_CONFERENCE_INVITATION = 61;
 	private static final int JNI_RECEIVED_MESSAGE = 91;
 	private static final int JNI_RECEIVED_VIDEO_INVITION = 92;
 
@@ -329,7 +330,28 @@ public class JNIService extends Service {
 					V2Log.e("Invalid group user data");
 				}
 				break;
-
+			case JNI_CONFERENCE_INVITATION:
+				Group g = (Group) msg.obj;
+				Group cache = GlobalHolder.getInstance().getGroupById(
+						GroupType.CONFERENCE, g.getmGId());
+				// conference already in cache list
+				if (cache != null && g.getmGId() != 0) {
+					V2Log.i("Current user conference in group:" + cache.getName()
+							+ "  " + cache.getmGId());
+					return;
+				}
+				GroupRequest.getInstance().getGroupInfo(
+						GroupType.CONFERENCE.intValue(), g.getmGId());
+				if (g != null) {
+					GlobalHolder.getInstance().addGroupToList(
+							GroupType.CONFERENCE, g);
+					Intent i = new Intent();
+					i.setAction(JNIService.JNI_BROADCAST_CONFERENCE_INVATITION);
+					i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
+					i.putExtra("gid", g.getmGId());
+					sendStickyBroadcast(i);
+				}
+				break;
 			case JNI_RECEIVED_MESSAGE:
 				VMessage vm = (VMessage) msg.obj;
 				if (vm != null) {
@@ -526,27 +548,10 @@ public class JNIService extends Service {
 			if (gType == GroupType.CONFERENCE) {
 				Group g = ConferenceGroup
 						.parseConferenceGroupFromXML(groupInfo);
-				Group cache = GlobalHolder.getInstance().getGroupById(
-						GroupType.CONFERENCE, g.getmGId());
-				// User already in current conference
-				if (cache != null && g.getmGId() != 0) {
-					V2Log.i("Current user exists in group:" + cache.getName()
-							+ "  " + cache.getmGId());
-					return;
-				}
-				GroupRequest.getInstance().getGroupInfo(
-						GroupType.CONFERENCE.intValue(), g.getmGId());
 				if (g != null) {
-					GlobalHolder.getInstance().addGroupToList(gType, g);
-					//FIXME send conf objectF
-					if (gType == GroupType.CONFERENCE) {
-						Intent i = new Intent();
-						i.setAction(JNIService.JNI_BROADCAST_CONFERENCE_INVATITION);
-						i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
-						i.putExtra("gid", g.getmGId());
-						sendStickyBroadcast(i);
-					}
-
+					//Send message for synchronization
+					Message.obtain(mCallbackHandler, JNI_CONFERENCE_INVITATION,
+							g).sendToTarget();
 				}
 			}
 		}
@@ -683,7 +688,6 @@ public class JNIService extends Service {
 
 	class ConfRequestCB extends ConfRequestCallbackAdapter {
 
-
 		public ConfRequestCB(JNICallbackHandler mCallbackHandler) {
 		}
 
@@ -717,7 +721,6 @@ public class JNIService extends Service {
 	}
 
 	class ChatRequestCB extends ChatRequestCallbackAdapter {
-
 
 		public ChatRequestCB(JNICallbackHandler mCallbackHandler) {
 		}

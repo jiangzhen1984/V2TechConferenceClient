@@ -48,7 +48,9 @@ public class UserChattingObject {
 		return this.mDeviceId;
 	}
 	
-	
+	public void setDeviceId(String devId) {
+		this.mDeviceId = devId;
+	}
 	
 	
 	public VideoPlayer getVp() {
