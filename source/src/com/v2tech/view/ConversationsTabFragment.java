@@ -985,6 +985,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher, C
 				c.setCreator(conf.getOwner());
 				c.setChairman(conf.getOwner());
 				c.setName(conf.getName());
+				c.setStartTime(conf.getStrCreateDate());
 				startConferenceActivity(c);
 			}
 		}

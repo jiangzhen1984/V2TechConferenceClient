@@ -42,6 +42,8 @@ import com.v2tech.vo.UserDeviceConfig;
 
 public class VideoAttendeeListLayout extends LinearLayout {
 	
+	private static final String TAG = "VideoAttendeeListLayout";
+
 	private Conference conf;
 
 	private View rootView;
@@ -63,6 +65,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 
 	private int onLinePersons = 0;
 	private boolean initAttendPersons;
+	private boolean childDevices;
 
 	public interface VideoAttendeeActionListener {
 
@@ -150,6 +153,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 	}
 
 	private List<ViewWrapper> buildAttendeeView(final Attendee a) {
+		
 		Context ctx = this.getContext();
 		List<ViewWrapper> list = new ArrayList<ViewWrapper>();
 
@@ -167,6 +171,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 
 		nameTV.setText(a.getAttName());
 
+		V2Log.e(TAG, a.isJoined() + "---" + a.isSelf() + "---" + a.getAttName());
 		// Set text color and camera icon
 		setStyle(a, a.getDefaultDevice(), nameTV, cameraIV, spIV);
 
@@ -188,25 +193,36 @@ public class VideoAttendeeListLayout extends LinearLayout {
 			nameTV2.setTextSize(20);
 
 			// Set text color and camera icon
+			childDevices = true;
 			setStyle(a, udc, nameTV2, cameraIV2, spIV2);
 
 			cameraIV2.setOnTouchListener(mListViewOnTouchListener);
 			view2.setTag(new Wrapper(a, udc, 1));
 			list.add(new ViewWrapper(view2));
 		}
-
+		childDevices = false;
 		return list;
 
 	}
 
 	private void setStyle(Attendee at, UserDeviceConfig udc, TextView name,
 			ImageView iv, ImageView speaker) {
+		V2Log.e(TAG, conf.getChairman() + "---" +  at.getAttId());
 		if (at.isChairMan() || conf.getChairman() == at.getAttId()) {
 			
-			if(initAttendPersons && at.isJoined()){
+			V2Log.e(TAG, initAttendPersons + "---" +  at.isJoined());
+			if(initAttendPersons && (at.isSelf() || at.isJoined())){
+				if(childDevices == false){
+					
+					onLinePersons += 1;
+				}
 				name.setTextColor(getContext().getResources().getColor(
 						R.color.video_attendee_chair_man_name_color));
-				onLinePersons += 1;
+			}
+			else if(at.isSelf() || at.isJoined()){
+				
+				name.setTextColor(getContext().getResources().getColor(
+						R.color.video_attendee_chair_man_name_color));
 			}
 		} else if (at.isSelf()) {
 			name.setTypeface(null, Typeface.BOLD);
@@ -214,14 +230,14 @@ public class VideoAttendeeListLayout extends LinearLayout {
 					R.color.video_attendee_name_color));
 			// set camera icon
 			iv.setImageResource(R.drawable.camera);
-			if(initAttendPersons){
+			if(initAttendPersons && childDevices == false){
 				
 				onLinePersons += 1;
 			}
 		} else if (at.isJoined()) {
 			name.setTextColor(getContext().getResources().getColor(
 					R.color.video_attendee_name_color));
-			if(initAttendPersons){
+			if(initAttendPersons  && childDevices == false){
 				
 				onLinePersons += 1;
 			}
@@ -254,6 +270,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 	private Attendee lastAttendee;
 	public void updateEnteredAttendee(Attendee at) {
 		at.setJoined(true);
+		V2Log.e(TAG, "updateEnteredAttendee:" + at.getAttName() + "---" + at.isJoined());
 		if(lastAttendee == null || !lastAttendee.equals(at)){
 			
 			lastAttendee = at;

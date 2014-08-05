@@ -32,8 +32,8 @@
      
      <color name="title_color">#000000</color>
      
-     <color name="video_attendee_chair_man_name_color">#207448</color>
-     <color name="video_attendee_name_color">#444444</color>
+     <color name="video_attendee_chair_man_name_color">#019648</color>
+     <color name="video_attendee_name_color">#000000</color>
      <color name="video_attendee_name_color_offline">#c2c2c2</color>
      
      

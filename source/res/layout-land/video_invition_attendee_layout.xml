@@ -5,19 +5,16 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     tools:context=".view.conference.ConferenceCreateActivity" >
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical" >
-
         <LinearLayout
             android:id="@+id/conference_create_error_notification"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="#FFDEAD"
             android:visibility="gone" >
-
             <TextView
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
@@ -28,15 +25,13 @@
                 android:text="@string/error_create_conference_failed_from_server_side"
                 android:textSize="12sp" />
         </LinearLayout>
-
         <RelativeLayout
             android:id="@+id/RelativeLayout2"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:background="@color/confs_search_bar_bg"
             android:orientation="horizontal" >
-
-           <EditText
+            <EditText
                 android:id="@+id/contacts_search"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -49,7 +44,6 @@
                 android:textColor="#000000"
                 android:textSize="16sp" >
             </EditText>
-
             <ImageView
                 android:id="@+id/imageView8"
                 android:layout_width="wrap_content"
@@ -59,9 +53,7 @@
                 android:layout_gravity="center_vertical"
                 android:padding="10dp"
                 android:src="@drawable/group_list_search_button" />
-
         </RelativeLayout>
-
         <LinearLayout
             android:layout_width="fill_parent"
             android:layout_height="1dp"
@@ -69,53 +61,51 @@
             android:orientation="vertical" >
         </LinearLayout>
     </LinearLayout>
-
     <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:background="#ffffff"
         android:orientation="horizontal" >
-
         <ListView
             android:id="@+id/conf_create_contacts_list"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight=".5"
+            android:background="#ffffff"
+            android:cacheColorHint="#00000000"
             android:divider="@null"
-            android:focusable="false" >
+            android:listSelector="#00000000"
+            android:fadingEdge="none"
+            android:focusable="false"
+            android:scrollingCache="false"
+            android:transcriptMode="normal" >
         </ListView>
-
         <LinearLayout
             android:layout_width="1dp"
             android:layout_height="match_parent"
             android:background="#cdcdcf"
             android:orientation="vertical" >
         </LinearLayout>
-
         <RelativeLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight=".5"
             android:background="@color/confs_search_bar_bg"
             android:orientation="vertical" >
-
             <LinearLayout
-                 android:id="@+id/LinearLayout1"
+                android:id="@+id/LinearLayout1"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
                 android:layout_margin="10dp"
                 android:background="@drawable/rounded_corners_create_conf_box_bg"
                 android:orientation="vertical"
-                android:layout_alignParentTop="true"
                 android:padding="1dp" >
-
                 <LinearLayout
-                   
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_margin="5dp"
                     android:orientation="horizontal" >
-
                     <TextView
                         android:id="@+id/textView1"
                         android:layout_width="wrap_content"
@@ -126,7 +116,6 @@
                         android:text="@string/conference_create_conf_name"
                         android:textColor="@color/invitation_attendee_layout_item_color"
                         android:textSize="15sp" />
-
                     <EditText
                         android:id="@+id/conference_create_conf_name"
                         android:layout_width="wrap_content"
@@ -135,25 +124,21 @@
                         android:background="@null"
                         android:ems="10"
                         android:inputType="text"
-                        android:maxLength="50"
-                       >
+                        android:maxLength="50" >
                     </EditText>
                 </LinearLayout>
-
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
                     android:background="#cdcdcf"
                     android:orientation="vertical" >
                 </LinearLayout>
-
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_margin="5dp"
                     android:orientation="horizontal"
                     android:padding="1dp" >
-
                     <TextView
                         android:id="@+id/textView2"
                         android:layout_width="wrap_content"
@@ -164,7 +149,6 @@
                         android:text="@string/conference_create_conf_start_time"
                         android:textColor="@color/invitation_attendee_layout_item_color"
                         android:textSize="15sp" />
-
                     <EditText
                         android:id="@+id/conference_create_conf_start_time"
                         android:layout_width="wrap_content"
@@ -176,16 +160,14 @@
                     </EditText>
                 </LinearLayout>
             </LinearLayout>
-
             <ScrollView
                 android:id="@+id/conf_create_scroll_view"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_below="@+id/LinearLayout1"
                 android:layout_above="@+id/LinearLayout2"
+                android:layout_below="@+id/LinearLayout1"
                 android:layout_margin="5dp"
                 android:background="@drawable/rounded_corners_create_conf_box_bg" >
-
                 <LinearLayout
                     android:id="@+id/conference_attendee_container"
                     android:layout_width="match_parent"
@@ -194,32 +176,29 @@
                     android:tag="vertical" >
                 </LinearLayout>
             </ScrollView>
-
             <LinearLayout
                 android:id="@+id/LinearLayout2"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="10dp"
                 android:layout_alignParentBottom="true"
+                android:layout_margin="10dp"
                 android:background="@drawable/rounded_corners_create_conf_box_bg"
                 android:orientation="vertical"
                 android:padding="1dp" >
-
                 <TextView
                     android:id="@+id/video_invition_attendee_ly_invition_button"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/conference_invition_button_text"
                     android:layout_gravity="left"
                     android:gravity="left"
                     android:paddingBottom="10dp"
                     android:paddingLeft="20dp"
                     android:paddingTop="10dp"
-                    android:textSize="15sp"
-                    android:textColor="@color/conf_create_button_color" >
+                    android:text="@string/conference_invition_button_text"
+                    android:textColor="@color/conf_create_button_color"
+                    android:textSize="15sp" >
                 </TextView>
             </LinearLayout>
         </RelativeLayout>
     </LinearLayout>
-
 </LinearLayout>
