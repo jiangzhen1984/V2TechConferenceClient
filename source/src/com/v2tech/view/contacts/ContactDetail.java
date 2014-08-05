@@ -16,6 +16,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.Parcelable;
 import android.text.Editable;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.MotionEvent;
 import android.view.View;
@@ -390,10 +391,10 @@ public class ContactDetail extends Activity implements OnTouchListener {
 				.findViewById(R.id.contact_user_detail_call_dialog_2);
 		tv1.setOnClickListener(itemClickListener);
 
-		if (tel != null && phone != null) {
+		if (!TextUtils.isEmpty(tel) && !TextUtils.isEmpty(phone)) {
 			tv.setTag("call:" + tel + "|" + phone);
-		} else if (tel != null || phone != null) {
-			tv.setTag(tel == null ? phone : tel);
+		} else if (!TextUtils.isEmpty(tel) || !TextUtils.isEmpty(phone)) {
+			tv.setTag(TextUtils.isEmpty(tel) == true ? phone : tel);
 		} else {
 			tv.setTag("");
 			// tv.setVisibility(View.GONE);

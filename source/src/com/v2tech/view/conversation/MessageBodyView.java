@@ -16,7 +16,6 @@ import android.os.Handler;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.style.ImageSpan;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -109,7 +108,8 @@ public class MessageBodyView extends LinearLayout {
 
 		public void requestResumeTransFile(View v, VMessage vm,
 				VMessageFileItem vfi);
-
+		
+		public void requestStopOtherAudio(VMessage vm);
 	}
 
 	public MessageBodyView(Context context, VMessage m) {
@@ -363,6 +363,7 @@ public class MessageBodyView extends LinearLayout {
 				if (item.isPlaying()) {
 					callback.requestStopAudio(view, mMsg, item);
 				} else {
+					callback.requestStopOtherAudio(mMsg);
 					callback.requestPlayAudio(view, mMsg, item);
 					updateUnreadFlag(false);
 				}

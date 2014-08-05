@@ -682,6 +682,7 @@ public class ConversationView extends Activity {
 		@Override
 		public void playerStarted() {
 			currentPlayed.getAudioItems().get(0).setPlaying(true);
+			V2Log.i(TAG, "设置当前audio正在播放标识 true：" + currentPlayed.getId() + "currentPlayed集合长度：" + currentPlayed.getAudioItems().size());
 		}
 
 		@Override
@@ -695,9 +696,16 @@ public class ConversationView extends Activity {
 
 		@Override
 		public synchronized void playerStopped(int perf) {
+			
+			if(currentFlag == true){
+				currentFlag = false;
+				return;
+			}
+			
 			if (currentPlayed != null
 					&& currentPlayed.getAudioItems().size() > 0) {
 				currentPlayed.getAudioItems().get(0).setPlaying(false);
+				V2Log.i(TAG, "设置当前audio正在播放标识 false：" + currentPlayed.getId());
 			}
 			// Call in main thread
 			Message.obtain(lh, PLAY_NEXT_UNREAD_MESSAGE).sendToTarget();
@@ -1100,7 +1108,7 @@ public class ConversationView extends Activity {
 		// // Send message to server
 		// sendMessageToRemote(vim);
 		// }
-		if (requestCode == SELECT_PICTURE_CODE) {
+		if (requestCode == SELECT_PICTURE_CODE && data != null) {
 			String filePath = data.getStringExtra("checkedImage");
 			if (filePath == null) {
 				Toast.makeText(mContext,
@@ -1336,6 +1344,7 @@ public class ConversationView extends Activity {
 		}
 
 	};
+	private boolean currentFlag;
 
 	private MessageBodyView.ClickListener listener = new MessageBodyView.ClickListener() {
 
@@ -1357,6 +1366,7 @@ public class ConversationView extends Activity {
 		public void requestPlayAudio(View v, VMessage vm, VMessageAudioItem vai) {
 			if (vai != null && vai.getAudioFilePath() != null) {
 				currentPlayed = vm;
+				V2Log.i(TAG, "currentPlayingAudio:--" + currentPlayed.getId());
 				startPlaying(vai.getAudioFilePath());
 				if (vai.getState() == VMessageAbstractItem.STATE_UNREAD) {
 					vai.setState(VMessageAbstractItem.STATE_NORMAL);
@@ -1394,6 +1404,7 @@ public class ConversationView extends Activity {
 
 		@Override
 		public void requestStopAudio(View v, VMessage vm, VMessageAudioItem vai) {
+			V2Log.i(TAG, "当前正在播放的音频item：" + vai.getId() + "停止");
 			vai.setPlaying(false);
 			stopPlaying();
 		}
@@ -1468,6 +1479,17 @@ public class ConversationView extends Activity {
 			mChat.updateFileOperation(vfi,
 					FileOperationEnum.OPERATION_RESUME_DOWNLOAD, null);
 			vfi.setState(VMessageFileItem.STATE_FILE_DOWNLOADING);
+		}
+
+		@Override
+		public void requestStopOtherAudio(VMessage vm) {
+			if(currentPlayed == null || currentPlayed.getId() == vm.getId()){
+				return ;
+			}
+			V2Log.i(TAG, "停止了当前正在播放的currentPlayingAudio:--" + currentPlayed.getId());
+			currentFlag = true;
+			currentPlayed.getAudioItems().get(0).setPlaying(false);
+			stopPlaying();
 		}
 
 	};
