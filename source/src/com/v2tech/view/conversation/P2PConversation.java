@@ -1,5 +1,7 @@
 package com.v2tech.view.conversation;
 
+import java.util.List;
+
 import v2av.VideoPlayer;
 import v2av.VideoRecorder;
 import android.app.Activity;
@@ -40,6 +42,7 @@ import com.v2tech.view.PublicIntent;
 import com.v2tech.vo.NetworkStateCode;
 import com.v2tech.vo.User;
 import com.v2tech.vo.UserChattingObject;
+import com.v2tech.vo.UserDeviceConfig;
 
 public class P2PConversation extends Activity implements
 		VideoConversationListener {
@@ -203,7 +206,6 @@ public class P2PConversation extends Activity implements
 
 	@Override
 	public void openLocalCamera() {
-	
 		VideoRecorder.VideoPreviewSurfaceHolder = getSurfaceHolder(SURFACE_HOLDER_TAG_LOCAL);
 		VideoRecorder.VideoPreviewSurfaceHolder
 				.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
@@ -552,8 +554,12 @@ public class P2PConversation extends Activity implements
 				if (uad.isIncoming()) {
 					mSmallSurface.setTag(SURFACE_HOLDER_TAG_LOCAL);
 					mSmallSurface.bringToFront();
+					mSmallSurface.setZOrderMediaOverlay(true);
+					V2Log.e("+++++++++++++++++++++++++mSmallSurface" + mSmallSurface);
 				} else {
 					mSmallSurface.setTag(SURFACE_HOLDER_TAG_REMOTE);
+					mSmallSurface.setZOrderMediaOverlay(false);
+			
 				}
 			}
 			mBackgroupdSurface = (SurfaceView) findViewById(R.id.fragment_conversation_connected_video_remote_surface);
@@ -561,8 +567,12 @@ public class P2PConversation extends Activity implements
 				mBackgroupdSurface.setOnClickListener(surfaceViewListener);
 				if (!uad.isIncoming()) {
 					mBackgroupdSurface.setTag(SURFACE_HOLDER_TAG_LOCAL);
+					mBackgroupdSurface.setZOrderMediaOverlay(false);
 				} else {
 					mBackgroupdSurface.setTag(SURFACE_HOLDER_TAG_REMOTE);
+					mBackgroupdSurface.bringToFront();
+					mBackgroupdSurface.setZOrderMediaOverlay(true);
+					V2Log.e("+++++++++++++++++++++++++mBackgroupdSurface" + mBackgroupdSurface);
 				}
 			}
 		}
@@ -722,7 +732,16 @@ public class P2PConversation extends Activity implements
 			vp.SetRotation(270);
 			uad.setVp(vp);
 		} 
-		V2Log.i(uad.getDeviceId()+"==============");
+		if (uad.getDeviceId() == null || uad.getDeviceId().isEmpty()) {
+			List<UserDeviceConfig> udcList = GlobalHolder.getInstance().getAttendeeDevice(uad.getUser().getmUserId());
+			if (udcList!= null && udcList.size() > 0) {
+				uad.setDeviceId(udcList.get(0).getDeviceID());
+			}
+		}
+		if (uad.getDeviceId() == null || uad.getDeviceId().isEmpty()) {
+			V2Log.e("No P2P remote device Id");
+			return;
+		}
 		vp.SetSurface(getSurfaceHolder(SURFACE_HOLDER_TAG_REMOTE));
 		chatService.openVideoDevice(uad, null);
 	}
@@ -743,8 +762,12 @@ public class P2PConversation extends Activity implements
 
 		if (backLP.width == ViewGroup.LayoutParams.FILL_PARENT  || backLP.width == ViewGroup.LayoutParams.MATCH_PARENT) {
 			mBackgroupdSurface.bringToFront();
+			mBackgroupdSurface.setZOrderOnTop(true);
+			V2Log.e("+++++++++++++++++++++++++mBackgroupdSurface" + mBackgroupdSurface);
 		} else {
 			mSmallSurface.bringToFront();
+			mSmallSurface.setZOrderOnTop(true);
+			V2Log.e("+++++++++++++++++++++++++mSmallSurface" + mSmallSurface);
 		}
 		
 		mTimerTV.bringToFront();
@@ -819,8 +842,6 @@ public class P2PConversation extends Activity implements
 
 			initViews();
 			if (uad.isVideoType()) {
-				exchangeSurfaceHolder();
-				
 				TextView tv = (TextView) findViewById(R.id.conversation_fragment_connected_title_text);
 				tv.setText(tv.getText().toString()
 						.replace("[]", uad.getUser().getName()));
@@ -828,6 +849,7 @@ public class P2PConversation extends Activity implements
 				mReverseCameraButton = findViewById(R.id.fragment_conversation_reverse_camera_button);
 				mReverseCameraButton.setVisibility(View.VISIBLE);
 				mReverseCameraButton.setOnClickListener(surfaceViewListener);
+				openLocalCamera();
 				
 			} else {
 				TextView nameTV = (TextView) findViewById(R.id.conversation_fragment_connected_name);
@@ -1066,6 +1088,7 @@ public class P2PConversation extends Activity implements
 					Message timeoutMessage = Message.obtain(this, QUIT);
 					this.sendMessageDelayed(timeoutMessage, 2000);
 					disableAllButtons();
+					closeLocalCamera();
 				}
 			
 				break;
@@ -1103,7 +1126,9 @@ public class P2PConversation extends Activity implements
 				
 			case VIDEO_CONECTED:
 				if (uad.isVideoType()) {
-					exchangeSurfaceHolder();
+					if (!uad.isIncoming()) {
+						exchangeSurfaceHolder();
+					}
 					openRemoteVideo();
 					updateViewForVideoAcceptance();
 				}
