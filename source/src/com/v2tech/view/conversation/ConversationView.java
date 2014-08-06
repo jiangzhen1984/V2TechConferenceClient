@@ -682,6 +682,19 @@ public class ConversationView extends Activity {
 		@Override
 		public void playerStarted() {
 			currentPlayed.getAudioItems().get(0).setPlaying(true);
+			runOnUiThread(new Runnable(){
+
+				@Override
+				public void run() {
+					
+					for (int i = 0; i < messageArray.size(); i++) {
+						CommonAdapterItemWrapper wrapper = messageArray.get(i);
+						VMessage vm = (VMessage) wrapper.getItemObject();
+						if (vm == currentPlayed) {
+							((MessageBodyView)wrapper.getView()).startVoiceAnimation();
+						}
+					}
+				}});
 			V2Log.i(TAG, "设置当前audio正在播放标识 true：" + currentPlayed.getId() + "currentPlayed集合长度：" + currentPlayed.getAudioItems().size());
 		}
 
@@ -705,6 +718,19 @@ public class ConversationView extends Activity {
 			if (currentPlayed != null
 					&& currentPlayed.getAudioItems().size() > 0) {
 				currentPlayed.getAudioItems().get(0).setPlaying(false);
+				runOnUiThread(new Runnable(){
+
+					@Override
+					public void run() {
+						
+						for (int i = 0; i < messageArray.size(); i++) {
+							CommonAdapterItemWrapper wrapper = messageArray.get(i);
+							VMessage vm = (VMessage) wrapper.getItemObject();
+							if (vm == currentPlayed) {
+								((MessageBodyView)wrapper.getView()).stopVoiceAnimation();
+							}
+						}
+					}});
 				V2Log.i(TAG, "设置当前audio正在播放标识 false：" + currentPlayed.getId());
 			}
 			// Call in main thread
@@ -1489,9 +1515,21 @@ public class ConversationView extends Activity {
 			V2Log.i(TAG, "停止了当前正在播放的currentPlayingAudio:--" + currentPlayed.getId());
 			currentFlag = true;
 			currentPlayed.getAudioItems().get(0).setPlaying(false);
+			runOnUiThread(new Runnable(){
+
+				@Override
+				public void run() {
+					for (int i = 0; i < messageArray.size(); i++) {
+						CommonAdapterItemWrapper wrapper = messageArray.get(i);
+						VMessage vm = (VMessage) wrapper.getItemObject();
+						if (vm == currentPlayed) {
+							((MessageBodyView)wrapper.getView()).stopVoiceAnimation();
+						}
+					}
+				}
+			});
 			stopPlaying();
 		}
-
 	};
 
 	private List<VMessage> loadMessages() {

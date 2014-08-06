@@ -269,9 +269,9 @@ public class VideoAttendeeListLayout extends LinearLayout {
 	
 	private Attendee lastAttendee;
 	public void updateEnteredAttendee(Attendee at) {
-		at.setJoined(true);
+	
 		V2Log.e(TAG, "updateEnteredAttendee:" + at.getAttName() + "---" + at.isJoined());
-		if(lastAttendee == null || !lastAttendee.equals(at)){
+		if((lastAttendee == null || !lastAttendee.equals(at)) && at.isJoined()){
 			
 			lastAttendee = at;
 			onLinePersons += 1;

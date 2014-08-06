@@ -8,6 +8,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Rect;
+import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
@@ -82,6 +83,7 @@ public class MessageBodyView extends LinearLayout {
 	private long lastUpdateTime;
 
 	private ClickListener callback;
+	private ImageView micIv;
 
 	public interface ClickListener {
 		public void onMessageClicked(VMessage v);
@@ -323,7 +325,7 @@ public class MessageBodyView extends LinearLayout {
 		seconds.setText(item.getSeconds() + "''");
 
 		RelativeLayout audioRoot = new RelativeLayout(getContext());
-		ImageView micIv = new ImageView(getContext());
+		micIv = new ImageView(getContext());
 		micIv.setId(micIv.hashCode());
 
 		RelativeLayout.LayoutParams micIvLy = new RelativeLayout.LayoutParams(
@@ -590,10 +592,29 @@ public class MessageBodyView extends LinearLayout {
 
 	public void startVoiceAnimation() {
 
+		if(mMsg.isLocal())
+			micIv.setImageResource(R.drawable.conversation_local_speaking);
+		else
+			micIv.setImageResource(R.drawable.conversation_remote_speaking);
+		
+		AnimationDrawable drawable = (AnimationDrawable) micIv.getDrawable();
+		drawable.start();
 	}
 
 	public void stopVoiceAnimation() {
 
+		if(mMsg.isLocal())
+			micIv.setImageResource(R.drawable.conversation_local_speaking);
+		else
+			micIv.setImageResource(R.drawable.conversation_remote_speaking);
+		
+		AnimationDrawable drawable = (AnimationDrawable) micIv.getDrawable();
+		drawable.stop();
+		
+		if(mMsg.isLocal())
+			micIv.setImageResource(R.drawable.voice_message_mic_icon_self_selector);
+		else
+			micIv.setImageResource(R.drawable.voice_message_mic_icon_selector);
 	}
 
 	public void updateView(VMessage vm) {

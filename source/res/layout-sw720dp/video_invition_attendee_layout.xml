@@ -86,8 +86,7 @@
             android:fadingEdge="none"
             android:listSelector="#00000000"
             android:focusable="false"
-            android:scrollingCache="false"
-            android:transcriptMode="normal" >
+            android:scrollingCache="false">
         </ListView>
         <LinearLayout
             android:layout_width="1dp"
