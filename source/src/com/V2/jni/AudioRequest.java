@@ -132,6 +132,14 @@ public class AudioRequest {
 	public native void CancelAudioChat(long nGroupID, long nToUserID,
 			int businessType);
 
+	
+	/**
+	 * 
+	 */
+	public native void PausePlayout();
+	
+	public native void ResumePlayout();
+	
 	// �յ���Ƶͨ��������Ļص�
 	private void OnAudioChatInvite(long nGroupID, long nBusinessType,
 			long nFromUserID) {
