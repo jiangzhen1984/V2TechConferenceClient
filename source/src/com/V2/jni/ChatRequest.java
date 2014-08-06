@@ -10,12 +10,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import com.V2.jni.ind.SendingResultJNIObjectInd;
-import com.v2tech.util.V2Log;
-
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.util.Log;
+
+import com.V2.jni.ind.SendingResultJNIObjectInd;
+import com.v2tech.util.V2Log;
 
 
 

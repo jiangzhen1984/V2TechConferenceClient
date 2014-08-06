@@ -22,17 +22,12 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-
 import java.net.URL;
 import java.net.URLConnection;
 
 import android.media.MediaPlayer;
 import android.os.Handler;
 import android.util.Log;
-import android.widget.Button;
-import android.widget.ImageButton;
-import android.widget.ProgressBar;
-import android.widget.TextView;
 
 
 /**

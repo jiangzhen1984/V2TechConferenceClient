@@ -515,6 +515,15 @@ public class ChatService extends AbstractHandler {
 			sendResult(caller, resp);
 		}
 	}
+	
+	
+	public void suspendOrResumeAudio(boolean flag) {
+		if (flag) {
+			AudioRequest.getInstance().ResumePlayout();
+		} else {
+			AudioRequest.getInstance().PausePlayout();
+		}
+	}
 
 	class VideoRequestCallbackImpl extends VideoRequestCallbackAdapter {
 

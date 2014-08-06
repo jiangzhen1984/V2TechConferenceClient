@@ -15,18 +15,15 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.media.MediaRecorder;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
-import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
@@ -83,7 +80,6 @@ import com.v2tech.vo.VMessageAbstractItem;
 import com.v2tech.vo.VMessageAudioItem;
 import com.v2tech.vo.VMessageFaceItem;
 import com.v2tech.vo.VMessageFileItem;
-import com.v2tech.vo.VMessageImageItem;
 import com.v2tech.vo.VMessageTextItem;
 
 public class ConversationView extends Activity {
@@ -1555,8 +1551,8 @@ public class ConversationView extends Activity {
 	private boolean queryAndAddMessage(final int msgId) {
 
 		VMessage m = MessageLoader.loadMessageById(mContext, msgId);
-		if (m == null || m.getFromUser().getmUserId() != this.user2Id
-				|| m.getGroupId() != this.groupId) {
+		if (m == null || (m.getFromUser().getmUserId() != this.user2Id && m.getGroupId() == 0)
+				|| (m.getGroupId() != this.groupId)) {
 			return false;
 		}
 		MessageBodyView mv = new MessageBodyView(this, m, true);

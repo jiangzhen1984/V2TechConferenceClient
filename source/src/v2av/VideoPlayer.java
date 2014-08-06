@@ -7,7 +7,6 @@ import android.graphics.Bitmap.Config;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Rect;
-import android.graphics.RectF;
 import android.util.Log;
 import android.view.SurfaceHolder;
 

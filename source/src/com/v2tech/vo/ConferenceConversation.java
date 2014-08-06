@@ -1,5 +1,7 @@
 package com.v2tech.vo;
 
+import com.v2tech.vo.Group.GroupType;
+
 
 public class ConferenceConversation extends Conversation {
 
@@ -10,7 +12,7 @@ public class ConferenceConversation extends Conversation {
 		this.g = g;
 		if (g != null) {
 			super.mExtId = g.getmGId();
-			super.mType = TYPE_CONFERNECE;
+			super.mType = g.getGroupType() == GroupType.CONFERENCE ? TYPE_CONFERNECE : TYPE_GROUP;
 		}
 	}
 

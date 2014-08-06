@@ -63,11 +63,11 @@ public class VMessage {
 	}
 
 	public VMessage(long groupId, User fromUser, User toUser, int type) {
-		this(0, fromUser, toUser, UUID.randomUUID().toString(), new Date(),type);
+		this(groupId, fromUser, toUser, UUID.randomUUID().toString(), new Date(),type);
 	}
 
 	public VMessage(long groupId, User fromUser, User toUser) {
-		this(0, fromUser, toUser, UUID.randomUUID().toString(),new Date(),
+		this(groupId, fromUser, toUser, UUID.randomUUID().toString(),new Date(),
 				 V2GlobalEnum.REQUEST_TYPE_IM);
 	}
 

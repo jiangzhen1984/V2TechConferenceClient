@@ -85,7 +85,6 @@
         android:orientation="vertical" >
     </LinearLayout>
     <ListView
-        android:alpha="0.7"
         android:id="@+id/video_attendee_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

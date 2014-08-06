@@ -1,27 +1,17 @@
 package v2av;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
-
 
 import v2av.VideoCaptureDevInfo.CapParams;
 import v2av.VideoCaptureDevInfo.FrontFacingCameraType;
 import v2av.VideoCaptureDevInfo.VideoCaptureDevice;
-
-//import v2av.VideoRecordInfo.CameraID;
-import android.content.Context;
-import android.content.SharedPreferences;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.ImageFormat;
-import android.graphics.Matrix;
-import android.graphics.Bitmap.Config;
 import android.hardware.Camera;
 import android.hardware.Camera.Size;
 import android.os.Build;
 import android.os.Build.VERSION_CODES;
 import android.util.Log;
 import android.view.SurfaceHolder;
+//import v2av.VideoRecordInfo.CameraID;
 
 public class VideoRecorder
 {
@@ -430,7 +420,7 @@ public class VideoRecorder
 		}
 		catch (IOException e) 
 		{
-			Log.e("ConfRoomActivity","----ÉãÏñÍ·¿ªÊ¼Ô¤ÀÀÊ§°Ü----");
+			Log.e("ConfRoomActivity","----ï¿½ï¿½ï¿½ï¿½Í·ï¿½ï¿½Ê¼Ô¤ï¿½ï¿½Ê§ï¿½ï¿½----");
 			e.printStackTrace();
 			
 			mCamera.release();

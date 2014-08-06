@@ -40,7 +40,6 @@ import android.widget.TextView;
 
 import com.v2tech.R;
 import com.v2tech.util.V2Log;
-import com.v2tech.view.conversation.ConversationSelectFile.ImageListAdapter;
 
 public class ConversationSelectImage extends Activity {
 

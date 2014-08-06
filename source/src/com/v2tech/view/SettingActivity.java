@@ -1,9 +1,9 @@
 package com.v2tech.view;
 
-import com.v2tech.R;
-
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+
+import com.v2tech.R;
 
 public class SettingActivity extends FragmentActivity {
 

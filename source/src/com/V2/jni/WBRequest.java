@@ -4,10 +4,10 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.v2tech.util.V2Log;
-
 import android.content.Context;
 import android.util.Log;
+
+import com.v2tech.util.V2Log;
 
 public class WBRequest {
 	private static WBRequest mWBRequest;

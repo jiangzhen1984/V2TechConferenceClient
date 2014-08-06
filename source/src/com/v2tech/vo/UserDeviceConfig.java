@@ -15,10 +15,10 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import com.v2tech.view.JNIService;
-
-import android.view.SurfaceView;
 import v2av.VideoPlayer;
+import android.view.SurfaceView;
+
+import com.v2tech.view.JNIService;
 
 /**
  * User video device configuration object.<br>

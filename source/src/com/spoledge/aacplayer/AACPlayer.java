@@ -17,14 +17,12 @@
 **/
 package com.spoledge.aacplayer;
 
-import android.util.Log;
-
 import java.io.FileInputStream;
 import java.io.InputStream;
-import java.io.IOException;
-
 import java.net.URL;
 import java.net.URLConnection;
+
+import android.util.Log;
 
 
 /**

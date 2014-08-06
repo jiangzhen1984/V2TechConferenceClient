@@ -1,10 +1,9 @@
 package v2av;
 
-import v2av.VideoPlayer;
-//import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
+//import android.util.Log;
 
 public class VideoTouchListener implements OnTouchListener
 {
@@ -26,7 +25,7 @@ public class VideoTouchListener implements OnTouchListener
 		mVideoPlayer = vp;
 	}
 	
-	//¼ÆËãÁ½µã¼äµÄ¾àÀë
+	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¾ï¿½ï¿½ï¿½
 	private double Get2PointLength(float x1, float y1, float x2, float y2)
 	{
 		double x = x1 * x1 + x2 * x2 - 2 * x1 * x2;
@@ -41,7 +40,7 @@ public class VideoTouchListener implements OnTouchListener
 			switch (event.getAction()) 
 			{
 				case MotionEvent.ACTION_DOWN:
-					//±£´æ
+					//ï¿½ï¿½ï¿½ï¿½
 					x2 = event.getX(0);
 					y2 = event.getY(0);
 					lastLength  = 0;
@@ -52,7 +51,7 @@ public class VideoTouchListener implements OnTouchListener
 				//	Log.v("touch point","action move..........");
 					x1 = event.getX(0);
 					y1 = event.getY(0);
-					//Ö»ÓÐÒ»¸ö´¥µãÊ±ÒÆ¶¯Í¼Æ¬
+					//Ö»ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½Æ¶ï¿½Í¼Æ¬
 					if(event.getPointerCount() == 1)
 					{
 						if(x2 == -1)
@@ -63,8 +62,8 @@ public class VideoTouchListener implements OnTouchListener
 						if(Math.abs((x1 - x2)) > 5 || Math.abs((y1 - y2)) > 5)
 						{
 							mbClicked = false;
-							//´Óx2ÒÆ¶¯x1
-							mVideoPlayer.translate(x1 - x2, y1 - y2);        //ÒÆ¶¯x1-x2µÄ¾àÀë
+							//ï¿½ï¿½x2ï¿½Æ¶ï¿½x1
+							mVideoPlayer.translate(x1 - x2, y1 - y2);        //ï¿½Æ¶ï¿½x1-x2ï¿½Ä¾ï¿½ï¿½ï¿½
 							x2 = x1;
 							y2 = y1;
 						}
@@ -72,7 +71,7 @@ public class VideoTouchListener implements OnTouchListener
 						return true;
 					}
 					mbClicked = false;
-					//Á½¸öµãËõ·Å
+					//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 					x2 = event.getX(1);
 					y2 = event.getY(1);
 					double tempLength = Get2PointLength(x1,y1,x2,y2);
@@ -97,14 +96,14 @@ public class VideoTouchListener implements OnTouchListener
 				case MotionEvent.ACTION_UP:
 				//	Log.v("touch point","action up..........");
 					lastLength  = 0;
-					//µ÷ÓÃÕâ¸ö¿Ø¼þµÄµ¥»÷ÊÂ¼þ
+					//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ø¼ï¿½ï¿½Äµï¿½ï¿½ï¿½ï¿½Â¼ï¿½
 					if(mbClicked)
 					{
-						v.performClick();       //×Ô¶¯µã»÷
+						v.performClick();       //ï¿½Ô¶ï¿½ï¿½ï¿½ï¿½
 					}
 					else
 					{
-						//ÕâÀïÖ»ÊÇÎªÁËÊ¹Í¼Ïñ¾ÓÖÐ
+						//ï¿½ï¿½ï¿½ï¿½Ö»ï¿½ï¿½Îªï¿½ï¿½Ê¹Í¼ï¿½ï¿½ï¿½ï¿½ï¿½
 						float scale = mVideoPlayer.getScale();
 						if (scale != 0.0f)
 						{
@@ -120,7 +119,7 @@ public class VideoTouchListener implements OnTouchListener
 		{
 			e.printStackTrace();
 		}
-		return true;		//trueÒÑ¾­´¦ÀíÁË,²»½»¸øclick,long click ´¦Àí
+		return true;		//trueï¿½Ñ¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½,ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½click,long click ï¿½ï¿½ï¿½ï¿½
 	}
 
 }

@@ -254,7 +254,7 @@ public class MessageLoader {
 
 		int id = cur.getInt(0);
 		// message type
-		int type = cur.getInt(6);
+		int type = cur.getInt(5);
 		// date time
 		String dateString = cur.getString(6);
 		// group id

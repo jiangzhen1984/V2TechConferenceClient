@@ -32,14 +32,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.v2tech.R;
-import com.v2tech.service.GlobalHolder;
 import com.v2tech.util.V2Log;
 import com.v2tech.view.widget.TitleBar;
 import com.v2tech.vo.Conference;
 import com.v2tech.vo.Conversation;
-import com.v2tech.vo.Group;
 import com.v2tech.vo.NetworkStateCode;
-import com.v2tech.vo.Group.GroupType;
 
 public class MainActivity extends FragmentActivity implements
 		NotificationListener {

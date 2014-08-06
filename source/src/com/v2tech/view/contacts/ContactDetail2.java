@@ -1,7 +1,6 @@
 package com.v2tech.view.contacts;
 
 import java.util.List;
-import java.util.Set;
 
 import android.app.Activity;
 import android.content.Context;

@@ -17,9 +17,6 @@
 **/
 package com.spoledge.aacplayer;
 
-import android.util.Log;
-
-import java.io.IOException;
 
 
 /**
