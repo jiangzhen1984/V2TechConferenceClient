@@ -32,6 +32,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.v2tech.R;
+import com.v2tech.util.Notificator;
 import com.v2tech.util.V2Log;
 import com.v2tech.view.widget.TitleBar;
 import com.v2tech.vo.Conference;
@@ -341,6 +342,10 @@ public class MainActivity extends FragmentActivity implements
 		mContext.unregisterReceiver(receiver);
 		mContext.stopService(new Intent(this.getApplicationContext(),
 				JNIService.class));
+		//Just for user remove application from recent task list
+		Notificator
+		.cancelAllSystemNotification(getApplicationContext());
+
 		V2Log.d("system destroyed v2tech");
 	}
 

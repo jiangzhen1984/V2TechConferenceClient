@@ -22,6 +22,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.ActivityInfo;
+import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.ImageFormat;
 import android.graphics.PixelFormat;
@@ -287,7 +288,7 @@ public class VideoActivityV2 extends Activity {
 			suspendOrResume(true);
 		}
 
-		//Set audio use speaker phone
+		// Set audio use speaker phone
 		updateAudioSpeaker(true);
 		NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 		// mId allows you to update the notification later on.
@@ -357,8 +358,8 @@ public class VideoActivityV2 extends Activity {
 		// Set default speaking state if current user is owner, then should
 		// apply speaking default;
 		isSpeaking = (conf.getCreator() == GlobalHolder.getInstance()
-				.getCurrentUserId() || conf.getChairman() == GlobalHolder.getInstance()
-						.getCurrentUserId() )? true : false;
+				.getCurrentUserId() || conf.getChairman() == GlobalHolder
+				.getInstance().getCurrentUserId()) ? true : false;
 	}
 
 	/**
@@ -933,7 +934,7 @@ public class VideoActivityV2 extends Activity {
 					if (confGroup != null) {
 						List<User> l = new ArrayList<User>(confGroup.getUsers());
 						for (User u : l) {
-							Attendee at =new Attendee(u);
+							Attendee at = new Attendee(u);
 							boolean bt = mAttendeeList.add(at);
 							if (bt && mAttendeeContainer != null) {
 								mAttendeeContainer.addNewAttendee(at);
@@ -1046,15 +1047,39 @@ public class VideoActivityV2 extends Activity {
 
 		// layout must before open device
 		// showOrCloseAttendeeVideo(udc);
-
 		udc.setSVHolder(mLocalSurface);
+		mLocalSurface.getHolder().addCallback(new SurfaceHolder.Callback() {
+
+			@Override
+			public void surfaceDestroyed(SurfaceHolder arg0) {
+				V2Log.e("=====================surfaceDestroyed  " + arg0);
+
+			}
+
+			@Override
+			public void surfaceCreated(SurfaceHolder holder) {
+				Canvas canvas = holder.lockCanvas();
+				canvas.drawColor(Color.GRAY);
+				holder.unlockCanvasAndPost(canvas);
+				V2Log.e("=====================created  " + holder);
+
+			}
+
+			@Override
+			public void surfaceChanged(SurfaceHolder arg0, int arg1, int arg2,
+					int arg3) {
+				V2Log.e("=====================surfaceChanged " + arg0);
+
+			}
+		});
+
+		
 		VideoRecorder.VideoPreviewSurfaceHolder = udc.getSVHolder().getHolder();
 		VideoRecorder.VideoPreviewSurfaceHolder
 				.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
-		VideoRecorder.VideoPreviewSurfaceHolder
-				.setFormat(PixelFormat.TRANSPARENT);
 		VideoCaptureDevInfo.CreateVideoCaptureDevInfo()
-				.updateCameraOrientation(Surface.ROTATION_0);
+		.updateCameraOrientation(Surface.ROTATION_0);
+
 		Message m = Message.obtain(mVideoHandler, REQUEST_OPEN_OR_CLOSE_DEVICE,
 				1, 0, udc);
 		mVideoHandler.sendMessageDelayed(m, 300);
@@ -1243,16 +1268,12 @@ public class VideoActivityV2 extends Activity {
 			mSettingWindow.dismiss();
 		}
 	}
-	
-	
-	
 
 	@Override
 	protected void onRestoreInstanceState(Bundle savedInstanceState) {
 		super.onRestoreInstanceState(savedInstanceState);
 	}
-	
-	
+
 	private void updateAudioSpeaker(boolean flag) {
 		AudioManager audioManager;
 		audioManager = (AudioManager) mContext
@@ -1332,6 +1353,8 @@ public class VideoActivityV2 extends Activity {
 			// Make sure update start after send request,
 			// because update state will update isSpeaking value
 			updateSpeakerState(isSpeaking);
+			// Resume audio
+			cb.updateAudio(true);
 
 		} else {
 			for (SurfaceViewW sw : this.mCurrentShowedSV) {
@@ -1349,6 +1372,8 @@ public class VideoActivityV2 extends Activity {
 							.getCurrentUserId(), "", null)).sendToTarget();
 			VideoRecorder.VideoPreviewSurfaceHolder = null;
 			mVideoLayout.removeAllViews();
+			// suspend audio
+			cb.updateAudio(false);
 		}
 	}
 
@@ -2210,9 +2235,9 @@ public class VideoActivityV2 extends Activity {
 						.getResult();
 				synchronized (mDocs) {
 					V2Doc ca = mDocs.get(shape.getDocId());
-					//FIXME handle ca is null
+					// FIXME handle ca is null
 					if (ca == null) {
-						V2Log.e(" ERROR "+ shape.getDocId());
+						V2Log.e(" ERROR " + shape.getDocId());
 						break;
 					}
 					V2Doc.Page caVp = ca.findPage(shape.getPageNo());
@@ -2221,7 +2246,8 @@ public class VideoActivityV2 extends Activity {
 					} else {
 						V2Log.i(" construct new page for canvas"
 								+ shape.getPageNo());
-						V2Doc.Page newPage = new V2Doc.Page(shape.getPageNo(), shape.getDocId(), null, null);
+						V2Doc.Page newPage = new V2Doc.Page(shape.getPageNo(),
+								shape.getDocId(), null, null);
 						newPage.addMeta(shape);
 						caVp = newPage;
 						ca.addPage(newPage);

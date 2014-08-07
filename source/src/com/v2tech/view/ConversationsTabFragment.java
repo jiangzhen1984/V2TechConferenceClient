@@ -656,7 +656,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher, C
 		resultIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		if (vm.getGroupId() != 0) {
 			resultIntent.putExtra("obj", new ConversationNotificationObject(
-					Conversation.TYPE_GROUP, vm.getFromUser().getmUserId()));
+					Conversation.TYPE_GROUP, vm.getGroupId()));
 		} else {
 			resultIntent.putExtra("obj", new ConversationNotificationObject(
 					Conversation.TYPE_CONTACT, vm.getFromUser().getmUserId()));

@@ -79,8 +79,9 @@ public class VideoMsgChattingLayout extends LinearLayout {
 							|| mContentTV.getText().toString().trim().isEmpty()) {
 						return;
 					}
+					String text = removeEmoji( mContentTV.getText().toString());
 					VMessage vm  = MessageBuilder.buildGroupTextMessage(conf.getmGId(), GlobalHolder.getInstance()
-							.getCurrentUser(), mContentTV.getText().toString());
+							.getCurrentUser(), text);
 					addNewMessage(vm);
 					listener.requestSendMsg(vm);
 					mContentTV.setText("");
@@ -93,6 +94,26 @@ public class VideoMsgChattingLayout extends LinearLayout {
 		
 
 		rootView = this;
+	}
+	
+	// FIXME optimize code
+	private String removeEmoji(String content) {
+		if (content == null || content.isEmpty()) {
+			return "";
+		}
+		byte[] bys = new byte[] { -16, -97 };
+		byte[] bc = content.getBytes();
+		byte[] copy = new byte[bc.length];
+		int j = 0;
+		for (int i = 0; i < bc.length; i++) {
+			if (i < bc.length - 2 && bys[0] == bc[i] && bys[1] == bc[i + 1]) {
+				i += 3;
+				continue;
+			}
+			copy[j] = bc[i];
+			j++;
+		}
+		return new String(copy, 0, j);
 	}
 
 	

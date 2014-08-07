@@ -5,6 +5,7 @@ import java.util.List;
 import android.os.Handler;
 import android.os.Message;
 
+import com.V2.jni.AudioRequest;
 import com.V2.jni.ConfRequest;
 import com.V2.jni.ConfRequestCallback;
 import com.V2.jni.GroupRequest;
@@ -407,6 +408,19 @@ public class ConferenceService extends AbstractHandler {
 		initTimeoutMessage(JNI_UPDATE_CAMERA_PAR, DEFAULT_TIME_OUT_SECS, caller);
 		VideoRequest.getInstance().setCapParam(cc.getDeviceId(),
 				cc.getCameraIndex(), cc.getFrameRate(), cc.getBitRate());
+	}
+	
+	/**
+	 * Pause or resume audio.
+	 * @param flag true for resume false for suspend
+	 */
+	public void updateAudio(boolean flag) {
+		if (flag) {
+			AudioRequest.getInstance().ResumePlayout();
+		} else {
+			AudioRequest.getInstance().PausePlayout();
+		}
+		
 	}
 
 

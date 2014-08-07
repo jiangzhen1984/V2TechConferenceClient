@@ -2,6 +2,8 @@ package v2av;
 
 import java.nio.ByteBuffer;
 
+import com.v2tech.util.V2Log;
+
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.Canvas;
@@ -152,6 +154,11 @@ public class VideoPlayer {
 			mDisMatrix.setRotation((mRotation + mBmpRotation) % 360);
 			UpdateMatrix();
 		}
+	}
+	
+	@SuppressWarnings("unused")
+	private void DestroyBitmap() {
+		Log.w("V2TECH", "JNI destroy bitmap");
 	}
 
 	/*
