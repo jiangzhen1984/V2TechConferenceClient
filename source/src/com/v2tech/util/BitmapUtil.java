@@ -63,6 +63,8 @@ public class BitmapUtil {
 			options.inSampleSize = 2;
 		}
 		options.inJustDecodeBounds = false;
+		options.inInputShareable = true;// 。当系统内存不够时候图片自动被回收
+		options.inPurgeable = true;
 		Bitmap bp = BitmapFactory.decodeFile(file, options);
 		return bp;
 	}

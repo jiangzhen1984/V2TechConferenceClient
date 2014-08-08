@@ -129,6 +129,7 @@ public class VideoActivityV2 extends Activity {
 
 	public static final String JNI_EVENT_VIDEO_CATEGORY = "com.v2tech.conf_video_event";
 	public static final String JNI_EVENT_VIDEO_CATEGORY_OPEN_VIDEO_EVENT_ACTION = "com.v2tech.conf_video_event.open_video_event";
+	private static final String TAG = "VideoActivityV2";
 
 	private boolean isSpeaking;
 
@@ -370,7 +371,7 @@ public class VideoActivityV2 extends Activity {
 	private void updateSpeakerState(boolean flag) {
 		isSpeaking = flag;
 		// set flag to speaking icon
-		if (flag) {
+		if (!flag) {
 			mSpeakerIV.setImageResource(R.drawable.mute_button);
 		} else {
 			mSpeakerIV.setImageResource(R.drawable.speaking_button);
@@ -444,6 +445,7 @@ public class VideoActivityV2 extends Activity {
 			mAttendeeContainer.setAttendsList(this.mAttendeeList);
 			synchronized (mMixerWrapper) {
 				for (MixerWrapper mw : mMixerWrapper.values()) {
+					V2Log.e(TAG, "initAttendeeContainer方法调用了update---");
 					mAttendeeContainer.updateEnteredAttendee(mw.amd);
 				}
 			}
@@ -943,6 +945,7 @@ public class VideoActivityV2 extends Activity {
 						if (mAttendeeContainer != null) {
 							synchronized (mMixerWrapper) {
 								for (MixerWrapper mw : mMixerWrapper.values()) {
+									V2Log.e(TAG, "JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION 方法调用了update---");
 									mAttendeeContainer
 											.updateEnteredAttendee(mw.amd);
 								}
@@ -1452,6 +1455,7 @@ public class VideoActivityV2 extends Activity {
 		}
 
 		if (mAttendeeContainer != null) {
+			V2Log.e(TAG, "doHandleNewUserEntered 方法调用了update---");
 			mAttendeeContainer.updateEnteredAttendee(a);
 		}
 
@@ -2062,6 +2066,7 @@ public class VideoActivityV2 extends Activity {
 				}
 				break;
 			case ATTENDEE_DEVICE_LISTENER: {
+				// TODO need to update user device when remote user removed video device.
 				List<UserDeviceConfig> list = (List<UserDeviceConfig>) (((AsyncResult) msg.obj)
 						.getResult());
 				for (UserDeviceConfig ud : list) {
@@ -2071,9 +2076,10 @@ public class VideoActivityV2 extends Activity {
 					}
 					a.addDevice(ud);
 					// Update attendee device
-					if (mAttendeeContainer != null) {
-						mAttendeeContainer.updateEnteredAttendee(a);
-					}
+//					if (mAttendeeContainer != null) {
+//						V2Log.e(TAG, "ATTENDEE_DEVICE_LISTENER 方法调用了update---");
+//						mAttendeeContainer.updateEnteredAttendee(a);
+//					}
 				}
 
 			}
@@ -2290,12 +2296,15 @@ public class VideoActivityV2 extends Activity {
 					}
 					// Notify attendee list mixed video is created
 					if (mAttendeeContainer != null) {
+						V2Log.e(TAG, "VIDEO_MIX_NOTIFICATION 方法调用了update---");
 						mAttendeeContainer.updateEnteredAttendee(mw.amd);
 					}
 
 					// destroy mixed video
 				} else if (msg.arg1 == 2) {
-					MixVideo mv = (MixVideo) msg.obj;
+//					MixVideo mv = (MixVideo) msg.obj;
+					MixVideo mv = (MixVideo) (((AsyncResult) msg.obj)
+							.getResult());
 					MixerWrapper mw = null;
 					synchronized (mMixerWrapper) {
 						mw = mMixerWrapper.remove(mv.getId());

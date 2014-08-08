@@ -39,6 +39,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.v2tech.R;
+import com.v2tech.util.BitmapUtil;
 import com.v2tech.util.V2Log;
 
 public class ConversationSelectImage extends Activity {
@@ -167,15 +168,15 @@ public class ConversationSelectImage extends Activity {
 				bean = new FileInfoBean();
 				String filePath = cursor.getString(cursor
 						.getColumnIndex(MediaStore.Images.Media.DATA));
-				try {
-					Bitmap bitmap = handlerImage(filePath);
-					if (bitmap == null) {
-						V2Log.e(TAG, filePath + "不能被解析");
-						continue;
-					}
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
+//				try {
+//					Bitmap bitmap = handlerImage(filePath);
+//					if (bitmap == null) {
+//						V2Log.e(TAG, filePath + "不能被解析");
+//						continue;
+//					}
+//				} catch (Exception e) {
+//					e.printStackTrace();
+//				}
 
 				bean.filePath = filePath;
 				bean.fileSize = Long.valueOf(cursor.getString(cursor
@@ -319,7 +320,7 @@ public class ConversationSelectImage extends Activity {
 			public void run() {
 				try {
 
-					Bitmap bitmap = handlerImage(fb.filePath);
+					Bitmap bitmap = BitmapUtil.getCompressedBitmap(fb.filePath);
 					if (fb.fileName == null && bitmap != null) {
 						bitmap.recycle();
 						return;
@@ -333,45 +334,6 @@ public class ConversationSelectImage extends Activity {
 				}
 			}
 		});
-	}
-
-	public Bitmap handlerImage(String path) throws FileNotFoundException,
-			IOException {
-
-		Options options = new Options();
-		options.inJustDecodeBounds = true;
-		BitmapFactory.decodeFile(path, options);
-		options.inJustDecodeBounds = false;
-
-		int width = options.outWidth;
-		int height = options.outHeight;
-
-		int widthScale;
-		int heightScale;
-		if (width > 1800 || height > 1800) {
-			widthScale = width / mScreenWidth + 8;
-			heightScale = height / mScreenHeight + 8;
-		} else {
-			widthScale = width / mScreenWidth;
-			heightScale = height / mScreenHeight;
-		}
-
-		int scale = 1;
-		if (widthScale > heightScale)
-			scale = widthScale;
-		else
-			scale = heightScale;
-
-		if (scale < 0) {
-			scale = 1;
-		}
-
-		options.inSampleSize = scale;
-		options.inPreferredConfig = Bitmap.Config.RGB_565;
-		options.inInputShareable = true;// 。当系统内存不够时候图片自动被回收
-		options.inPurgeable = true;
-		Bitmap decodeFile = BitmapFactory.decodeFile(path, options);
-		return decodeFile;
 	}
 
 }

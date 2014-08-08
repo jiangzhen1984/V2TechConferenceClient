@@ -35,6 +35,7 @@ import android.widget.TextView;
 import com.v2tech.R;
 import com.v2tech.util.V2Log;
 import com.v2tech.vo.Attendee;
+import com.v2tech.vo.AttendeeMixedDevice;
 import com.v2tech.vo.Conference;
 import com.v2tech.vo.ConferencePermission;
 import com.v2tech.vo.PermissionState;
@@ -54,6 +55,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 
 	private List<ViewWrapper> mCachedAttendsView;
 	private List<ViewWrapper> mAttendsView;
+	private List<Attendee> mAttendsSize;
 
 	private boolean mIsStartedSearch;
 	private EditText mSearchET;
@@ -64,6 +66,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 	private AttendeesAdapter adapter = new AttendeesAdapter();
 
 	private int onLinePersons = 0;
+	private int onLineDevices = 0;
 	private boolean initAttendPersons;
 	private boolean childDevices;
 
@@ -129,15 +132,23 @@ public class VideoAttendeeListLayout extends LinearLayout {
 	}
 
 	public void addNewAttendee(Attendee at) {
+		V2Log.d(TAG, "addNewAttendee 执行了");
+		if(at.getType() != Attendee.TYPE_MIXED_VIDEO){
+			
+			mAttendsSize.add(at);
+			configAttendee();
+		}
+		configAttendee();
 		mAttendsView.addAll(buildAttendeeView(at));
 		Collections.sort(mAttendsView);
-		attendPersons.setText(onLinePersons + "/" + mAttendsView.size());
 		adapter.notifyDataSetChanged();
 	}
 
 	public void setAttendsList(Set<Attendee> l) {
+		V2Log.d(TAG, "setAttendsList 执行了");
 		mAttendsView = new ArrayList<ViewWrapper>();
-		initAttendPersons = true;
+		mAttendsSize = new ArrayList<Attendee>(l);
+		configAttendee();
 		// Copy list for void concurrency exception
 		List<Attendee> list = new ArrayList<Attendee>(l);
 		synchronized (mAttendsView) {
@@ -145,10 +156,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 				mAttendsView.addAll(buildAttendeeView(at));
 			}
 		}
-
 		Collections.sort(mAttendsView);
-		attendPersons.setText(onLinePersons + "/" + mAttendsView.size());
-		initAttendPersons = false;
 		adapter.notifyDataSetChanged();
 	}
 
@@ -171,7 +179,6 @@ public class VideoAttendeeListLayout extends LinearLayout {
 
 		nameTV.setText(a.getAttName());
 
-		V2Log.e(TAG, a.isJoined() + "---" + a.isSelf() + "---" + a.getAttName());
 		// Set text color and camera icon
 		setStyle(a, a.getDefaultDevice(), nameTV, cameraIV, spIV);
 
@@ -191,9 +198,13 @@ public class VideoAttendeeListLayout extends LinearLayout {
 			UserDeviceConfig udc = a.getmDevices().get(i);
 			nameTV2.setText("     视频" + i);
 			nameTV2.setTextSize(20);
-
 			// Set text color and camera icon
 			childDevices = true;
+			if(initAttendPersons){
+				
+				onLineDevices += 1;
+				V2Log.d(TAG, "buildAttendeeView onLineDevices + 1;");
+			}
 			setStyle(a, udc, nameTV2, cameraIV2, spIV2);
 
 			cameraIV2.setOnTouchListener(mListViewOnTouchListener);
@@ -207,19 +218,9 @@ public class VideoAttendeeListLayout extends LinearLayout {
 
 	private void setStyle(Attendee at, UserDeviceConfig udc, TextView name,
 			ImageView iv, ImageView speaker) {
-		V2Log.e(TAG, conf.getChairman() + "---" +  at.getAttId());
 		if (at.isChairMan() || conf.getChairman() == at.getAttId()) {
 			
-			V2Log.e(TAG, initAttendPersons + "---" +  at.isJoined());
-			if(initAttendPersons && (at.isSelf() || at.isJoined())){
-				if(childDevices == false){
-					
-					onLinePersons += 1;
-				}
-				name.setTextColor(getContext().getResources().getColor(
-						R.color.video_attendee_chair_man_name_color));
-			}
-			else if(at.isSelf() || at.isJoined()){
+			if(at.isSelf() || at.isJoined()){
 				
 				name.setTextColor(getContext().getResources().getColor(
 						R.color.video_attendee_chair_man_name_color));
@@ -230,17 +231,9 @@ public class VideoAttendeeListLayout extends LinearLayout {
 					R.color.video_attendee_name_color));
 			// set camera icon
 			iv.setImageResource(R.drawable.camera);
-			if(initAttendPersons && childDevices == false){
-				
-				onLinePersons += 1;
-			}
 		} else if (at.isJoined()) {
 			name.setTextColor(getContext().getResources().getColor(
 					R.color.video_attendee_name_color));
-			if(initAttendPersons  && childDevices == false){
-				
-				onLinePersons += 1;
-			}
 		} else {
 			name.setTextColor(getContext().getResources().getColor(
 					R.color.video_attendee_name_color_offline));
@@ -269,17 +262,17 @@ public class VideoAttendeeListLayout extends LinearLayout {
 	
 	private Attendee lastAttendee;
 	public void updateEnteredAttendee(Attendee at) {
+		V2Log.d(TAG, "updateEnteredAttendee 执行了"  + at.getAttName() + "---" + at.isJoined());
 		at.setJoined(true);
-		V2Log.e(TAG, "updateEnteredAttendee:" + at.getAttName() + "---" + at.isJoined());
-		if((lastAttendee == null || !lastAttendee.equals(at))){
-			
-			lastAttendee = at;
-			onLinePersons += 1;
+		if((lastAttendee == null || !lastAttendee.equals(at)) && !(at instanceof AttendeeMixedDevice)){
+			mAttendsSize.add(at);
+			configAttendee(); 
 		}
 		
 		if (mAttendsView == null) {
 			mAttendsView = new ArrayList<ViewWrapper>();
 		}
+		
 		int index = 0;
 		synchronized (mAttendsView) {
 			for (int i = 0; i < mAttendsView.size();) {
@@ -293,23 +286,28 @@ public class VideoAttendeeListLayout extends LinearLayout {
 				}
 			}
 		}
-
 		mAttendsView.addAll(index, buildAttendeeView(at));
 		Collections.sort(mAttendsView);
-		attendPersons.setText(onLinePersons + "/" + mAttendsView.size());
 		adapter.notifyDataSetChanged();
 	}
 
 	public void updateExitedAttendee(Attendee at) {
+		V2Log.d(TAG, "updateExitedAttendee 执行了");
 		if (at == null) {
 			return;
 		}
-		at.setJoined(false);
+		
 		at.setmDevices(null);
+		at.setJoined(false);
 		if (mAttendsView == null) {
 			return;
 		}
 
+		if(at.getType() != Attendee.TYPE_MIXED_VIDEO){
+			
+			mAttendsSize.remove(at);
+			configAttendee();
+		}
 		for (int i = 0; i < mAttendsView.size(); i++) {
 			ViewWrapper v = mAttendsView.get(i);
 			Wrapper wr = (Wrapper) v.v.getTag();
@@ -317,6 +315,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 				// If attendee type is mixed video, remove destroyed mixed video
 				if (wr.a.getType() == Attendee.TYPE_MIXED_VIDEO) {
 					mAttendsView.remove(v);
+					onLineDevices -= 1;
 					break;
 				}
 				wr.a.setJoined(false);
@@ -331,8 +330,6 @@ public class VideoAttendeeListLayout extends LinearLayout {
 				// set offline color
 				TextView nameTV = (TextView) v.v
 						.findViewById(R.id.video_attendee_device_name);
-				onLinePersons -= 1;
-				lastAttendee = null;
 				nameTV.setTextColor(getContext().getResources().getColor(
 						R.color.video_attendee_name_color_offline));
 
@@ -340,9 +337,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 
 			}
 		}
-
 		Collections.sort(mAttendsView);
-		attendPersons.setText(onLinePersons + "/" + mAttendsView.size());
 		adapter.notifyDataSetChanged();
 	}
 
@@ -386,6 +381,12 @@ public class VideoAttendeeListLayout extends LinearLayout {
 	 * @param at
 	 */
 	public void removeAttendee(Attendee at) {
+		V2Log.d(TAG, "removeAttendee 执行了");
+		if(at.getType() != Attendee.TYPE_MIXED_VIDEO){
+			
+			mAttendsSize.remove(at);
+			configAttendee();
+		}
 		synchronized (mAttendsView) {
 			for (int i = 0; mAttendsView != null && i < mAttendsView.size(); i++) {
 				ViewWrapper v = mAttendsView.get(i);
@@ -396,7 +397,6 @@ public class VideoAttendeeListLayout extends LinearLayout {
 				}
 			}
 		}
-		attendPersons.setText(onLinePersons + "/" + mAttendsView.size());
 		adapter.notifyDataSetChanged();
 	}
 
@@ -406,10 +406,15 @@ public class VideoAttendeeListLayout extends LinearLayout {
 	 * @param at
 	 */
 	public void addAttendee(Attendee at) {
+		V2Log.d(TAG, "addAttendee 执行了");
+		if(at.getType() != Attendee.TYPE_MIXED_VIDEO){
+			
+			mAttendsSize.add(at);
+			configAttendee();
+		}
 		synchronized (mAttendsView) {
 			mAttendsView.addAll(buildAttendeeView(at));
 		}
-		attendPersons.setText(onLinePersons + "/" + mAttendsView.size());
 		adapter.notifyDataSetChanged();
 
 	}
@@ -768,11 +773,20 @@ public class VideoAttendeeListLayout extends LinearLayout {
 						return 0;
 					}
 				} else {
-					return ret;
+					return ret; 
 				}
 			}
 		}
-
 	}
-
+	
+	private void configAttendee() {
+		V2Log.d(TAG, "mAttendsSize.size()==" + mAttendsSize.size());
+		for (int i = 0; i < mAttendsSize.size(); i++) {
+			
+			if(mAttendsSize.get(i).getType() != Attendee.TYPE_MIXED_VIDEO && mAttendsSize.get(i).isJoined()){
+				onLinePersons += 1;
+			}
+		}
+		attendPersons.setText(onLinePersons + "/" + (mAttendsSize.size()));
+	}
 }
