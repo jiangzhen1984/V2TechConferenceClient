@@ -58,6 +58,10 @@ public class ConversationSelectImage extends Activity {
 	private ListView listViews;
 	private ImageListAdapter imageAdapter;
 	private ArrayList<FileInfoBean> pictres;
+	private String[][] selectArgs = {{String.valueOf(MediaStore.Images.Media.INTERNAL_CONTENT_URI) , "image/png"} ,
+			{String.valueOf(MediaStore.Images.Media.INTERNAL_CONTENT_URI) , "image/jpeg"} ,
+			{String.valueOf(MediaStore.Images.Media.EXTERNAL_CONTENT_URI) , "image/png"} ,
+			{String.valueOf(MediaStore.Images.Media.EXTERNAL_CONTENT_URI) , "image/jpeg"}};
 
 	private final int LRU_MAX_MEMORY = (int) ((Runtime.getRuntime().maxMemory()) / 8);
 	private LruCache<String, Bitmap> lruCache = new LruCache<String, Bitmap>(
@@ -143,22 +147,24 @@ public class ConversationSelectImage extends Activity {
 			@Override
 			public void run() {
 				loading.setVisibility(View.VISIBLE);
-				initPictures();
+				for (int i = 0; i < selectArgs.length; i++) {
+					
+					initPictures(Uri.parse(selectArgs[i][0]) , selectArgs[i][1]);
+				}
 				handler.sendEmptyMessage(SCAN_SDCARD);
 
 			}
 		}).start();
 	}
 
-	private void initPictures() {
+	private void initPictures(Uri uri , String select) {
 
-		Uri uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
 		ContentResolver resolver = getContentResolver();
 		String[] projection = { MediaStore.Images.Media._ID,
 				MediaStore.Images.Media.DISPLAY_NAME,
 				MediaStore.Images.Media.DATA, MediaStore.Images.Media.SIZE };
 		String selection = MediaStore.Images.Media.MIME_TYPE + "=?";
-		String[] selectionArgs = { "image/jpeg" };
+		String[] selectionArgs = { select };
 		String sortOrder = MediaStore.Images.Media.DATE_MODIFIED + " desc";
 		Cursor cursor = resolver.query(uri, projection, selection,
 				selectionArgs, sortOrder);
@@ -168,16 +174,6 @@ public class ConversationSelectImage extends Activity {
 				bean = new FileInfoBean();
 				String filePath = cursor.getString(cursor
 						.getColumnIndex(MediaStore.Images.Media.DATA));
-//				try {
-//					Bitmap bitmap = handlerImage(filePath);
-//					if (bitmap == null) {
-//						V2Log.e(TAG, filePath + "不能被解析");
-//						continue;
-//					}
-//				} catch (Exception e) {
-//					e.printStackTrace();
-//				}
-
 				bean.filePath = filePath;
 				bean.fileSize = Long.valueOf(cursor.getString(cursor
 						.getColumnIndex(MediaStore.Images.Media.SIZE)));
@@ -283,8 +279,7 @@ public class ConversationSelectImage extends Activity {
 			holder.fileIcon.setLayoutParams(para);
 
 			if (pictres.size() <= 0) {
-				V2Log.e(TAG, "重新加载了sd卡的图片资源");
-				initPictures();
+				V2Log.e(TAG, "error mFileLists size zero");
 			}
 			final FileInfoBean fb = pictres.get(position);
 			Bitmap bit = lruCache.get(fb.fileName);
@@ -324,6 +319,11 @@ public class ConversationSelectImage extends Activity {
 					if (fb.fileName == null && bitmap != null) {
 						bitmap.recycle();
 						return;
+					}
+					
+					if(bitmap == null){
+						V2Log.e(TAG, "get null when loading "+fb.fileName+" picture.");
+						return ;
 					}
 
 					lruCache.put(fb.fileName, bitmap);

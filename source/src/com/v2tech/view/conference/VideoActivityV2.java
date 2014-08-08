@@ -22,6 +22,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.ImageFormat;
@@ -50,6 +51,7 @@ import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.ScaleAnimation;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -195,6 +197,8 @@ public class VideoActivityV2 extends Activity {
 	private DisplayMetrics dm;
 
 	private boolean mServiceBound = false;
+	private int currentWidth;
+	private boolean isStop;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -280,7 +284,7 @@ public class VideoActivityV2 extends Activity {
 				mLocalServiceConnection, Context.BIND_AUTO_CREATE);
 
 	}
-
+	
 	@Override
 	protected void onStart() {
 		super.onStart();
@@ -297,6 +301,7 @@ public class VideoActivityV2 extends Activity {
 		// keep screen on
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
+		
 		// Adjust content layout
 		adjustContentLayout();
 	}
@@ -526,15 +531,25 @@ public class VideoActivityV2 extends Activity {
 		}
 
 		if (mSubWindowLayout.getVisibility() == View.VISIBLE) {
+			
 			FrameLayout.LayoutParams fl = (FrameLayout.LayoutParams) mSubWindowLayout
 					.getLayoutParams();
 			if (mContentLayoutMain.getMeasuredWidth() == 0) {
 				mContentLayoutMain.measure(View.MeasureSpec.UNSPECIFIED,
 						View.MeasureSpec.UNSPECIFIED);
 			}
-			width = mContentLayoutMain.getMeasuredWidth();
+			
+			if(isStop){
+				
+				width = currentWidth;
+				isStop = false;
+			}
+			else{
+				
+				width = mContentLayoutMain.getMeasuredWidth();
+				currentWidth = width;
+			}
 			height = mContentLayoutMain.getMeasuredHeight();
-
 			int flag = getSubViewWindowState();
 			// If sub window request full screen
 			if ((flag & TAG_SUB_WINDOW_STATE_FULL_SCRREN) == TAG_SUB_WINDOW_STATE_FULL_SCRREN) {
@@ -945,7 +960,8 @@ public class VideoActivityV2 extends Activity {
 						if (mAttendeeContainer != null) {
 							synchronized (mMixerWrapper) {
 								for (MixerWrapper mw : mMixerWrapper.values()) {
-									V2Log.e(TAG, "JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION 方法调用了update---");
+									V2Log.e(TAG,
+											"JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION 方法调用了update---");
 									mAttendeeContainer
 											.updateEnteredAttendee(mw.amd);
 								}
@@ -1076,12 +1092,11 @@ public class VideoActivityV2 extends Activity {
 			}
 		});
 
-		
 		VideoRecorder.VideoPreviewSurfaceHolder = udc.getSVHolder().getHolder();
 		VideoRecorder.VideoPreviewSurfaceHolder
 				.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
 		VideoCaptureDevInfo.CreateVideoCaptureDevInfo()
-		.updateCameraOrientation(Surface.ROTATION_0);
+				.updateCameraOrientation(Surface.ROTATION_0);
 
 		Message m = Message.obtain(mVideoHandler, REQUEST_OPEN_OR_CLOSE_DEVICE,
 				1, 0, udc);
@@ -1201,6 +1216,7 @@ public class VideoActivityV2 extends Activity {
 			suspendOrResume(false);
 		}
 		updateAudioSpeaker(false);
+		isStop = true;
 	}
 
 	@Override
@@ -2066,7 +2082,8 @@ public class VideoActivityV2 extends Activity {
 				}
 				break;
 			case ATTENDEE_DEVICE_LISTENER: {
-				// TODO need to update user device when remote user removed video device.
+				// TODO need to update user device when remote user removed
+				// video device.
 				List<UserDeviceConfig> list = (List<UserDeviceConfig>) (((AsyncResult) msg.obj)
 						.getResult());
 				for (UserDeviceConfig ud : list) {
@@ -2076,10 +2093,10 @@ public class VideoActivityV2 extends Activity {
 					}
 					a.addDevice(ud);
 					// Update attendee device
-//					if (mAttendeeContainer != null) {
-//						V2Log.e(TAG, "ATTENDEE_DEVICE_LISTENER 方法调用了update---");
-//						mAttendeeContainer.updateEnteredAttendee(a);
-//					}
+					// if (mAttendeeContainer != null) {
+					// V2Log.e(TAG, "ATTENDEE_DEVICE_LISTENER 方法调用了update---");
+					// mAttendeeContainer.updateEnteredAttendee(a);
+					// }
 				}
 
 			}
@@ -2302,7 +2319,7 @@ public class VideoActivityV2 extends Activity {
 
 					// destroy mixed video
 				} else if (msg.arg1 == 2) {
-//					MixVideo mv = (MixVideo) msg.obj;
+					// MixVideo mv = (MixVideo) msg.obj;
 					MixVideo mv = (MixVideo) (((AsyncResult) msg.obj)
 							.getResult());
 					MixerWrapper mw = null;
@@ -2336,6 +2353,16 @@ public class VideoActivityV2 extends Activity {
 				break;
 			}
 		}
+	}
+
+	@Override
+	public boolean dispatchTouchEvent(MotionEvent ev) {
+		View v = getCurrentFocus();
+		InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+		if (imm != null && v != null) {
+			imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+		}
+		return super.dispatchTouchEvent(ev);
 	}
 
 }

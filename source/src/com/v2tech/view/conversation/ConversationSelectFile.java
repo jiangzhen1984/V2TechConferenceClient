@@ -1,8 +1,6 @@
 package com.v2tech.view.conversation;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,8 +13,6 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.BitmapFactory.Options;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
@@ -122,6 +118,10 @@ public class ConversationSelectFile extends Activity {
 	private LinearLayout loading;
 	private ExecutorService service;
 	protected int isLoading;
+	private String[][] selectArgs = {{String.valueOf(MediaStore.Images.Media.INTERNAL_CONTENT_URI) , "image/png"} ,
+			{String.valueOf(MediaStore.Images.Media.INTERNAL_CONTENT_URI) , "image/jpeg"} ,
+			{String.valueOf(MediaStore.Images.Media.EXTERNAL_CONTENT_URI) , "image/png"} ,
+			{String.valueOf(MediaStore.Images.Media.EXTERNAL_CONTENT_URI) , "image/jpeg"}};
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -185,7 +185,10 @@ public class ConversationSelectFile extends Activity {
 				@Override
 				public void run() {
 					loading.setVisibility(View.VISIBLE);
-					getSdcardImages();
+					for (int i = 0; i < selectArgs.length; i++) {
+						
+						getAllImages(Uri.parse(selectArgs[i][0]) , selectArgs[i][1]);
+					}
 					handler.sendEmptyMessage(SCAN_SDCARD);
 
 				}
@@ -327,15 +330,12 @@ public class ConversationSelectFile extends Activity {
 	 * @description:通过contentprovider获得sd卡上的图片
 	 * @return:void
 	 */
-	private void getSdcardImages() {
+	private void getAllImages(Uri uri , String select) {
 
 		if (mFileLists == null) {
 			mFileLists = new ArrayList<FileInfoBean>();
-		} else {
-			mFileLists.clear();
-		}
-		// 指定要查询的uri资源
-		Uri uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+		} 
+		
 		// 获取ContentResolver
 		ContentResolver contentResolver = getContentResolver();
 		// 查询的字段
@@ -345,7 +345,7 @@ public class ConversationSelectFile extends Activity {
 		// 条件
 		String selection = MediaStore.Images.Media.MIME_TYPE + "=?";
 		// 条件值(這裡的参数不是图片的格式，而是标准，所有不要改动)
-		String[] selectionArgs = { "image/jpeg" };
+		String[] selectionArgs = {select};
 		// 排序
 		String sortOrder = MediaStore.Images.Media.DATE_MODIFIED + " desc";
 		// 查询sd卡上的图片
@@ -353,22 +353,11 @@ public class ConversationSelectFile extends Activity {
 				selectionArgs, sortOrder);
 		if (cursor != null) {
 			FileInfoBean bean = null;
-			cursor.moveToFirst();
 			while (cursor.moveToNext()) {
 				bean = new FileInfoBean();
 				// 获得图片uri
 				String filePath = cursor.getString(cursor
 						.getColumnIndex(MediaStore.Images.Media.DATA));
-//				try {
-//					Bitmap bitmap = handlerImage(filePath);
-//					if (bitmap == null) {
-//						V2Log.e(TAG, filePath + "不能被解析");
-//						continue;
-//					}
-//				} catch (Exception e) {
-//					e.printStackTrace();
-//				}
-
 				bean.filePath = filePath;
 				bean.fileSize = Long.valueOf(cursor.getString(cursor
 						.getColumnIndex(MediaStore.Images.Media.SIZE)));
@@ -552,7 +541,7 @@ public class ConversationSelectFile extends Activity {
 		}
 
 		@Override
-		public View getView(final int position, View convertView,
+		public View getView(int position, View convertView,
 				ViewGroup parent) {
 
 			final ViewHolder holder;
@@ -583,16 +572,16 @@ public class ConversationSelectFile extends Activity {
 			holder.fileIcon.setLayoutParams(para);
 
 			if (mFileLists.size() <= 0) {
-				V2Log.e(TAG, "重新加载了sd卡的图片资源");
-				getSdcardImages();
+				V2Log.e(TAG, "error mFileLists size zero");
 			}
-			final FileInfoBean fb = mFileLists.get(position);
+			FileInfoBean fb = mFileLists.get(position);
 			Bitmap bit = bitmapLru.get(fb.fileName);
 			if (bit == null || bit.isRecycled()) {
 
-				if (isLoading != SCROLL_STATE_TOUCH_SCROLL && isLoading != 1)
+				if (isLoading != SCROLL_STATE_TOUCH_SCROLL && isLoading != 1){
 					// 开始加载图片
 					startLoadBitmap(holder, fb);
+				}
 				else
 					// 加载中显示的图片
 					holder.fileIcon.setImageResource(R.drawable.ic_launcher);
@@ -625,12 +614,18 @@ public class ConversationSelectFile extends Activity {
 					Bitmap bitmap = BitmapUtil.getCompressedBitmap(fb.filePath);
 					if (fb.fileName == null && bitmap != null) {
 						bitmap.recycle();
+						bitmap = null;
 						return;
+					}
+					
+					if(bitmap == null || bitmap.isRecycled()){
+						V2Log.e(TAG, "get null when loading "+fb.fileName+" picture.");
+						return ;
 					}
 
 					bitmapLru.put(fb.fileName, bitmap);
 					Message.obtain(handler, UPDATE_BITMAP,
-							new Object[] { holder, bitmap, fb }).sendToTarget();
+							new Object[] { holder, bitmap, fb}).sendToTarget();
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
