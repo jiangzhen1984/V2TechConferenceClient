@@ -27,6 +27,7 @@ import com.v2tech.vo.User;
 import com.v2tech.vo.V2Doc;
 import com.v2tech.vo.V2Doc.Page;
 import com.v2tech.vo.V2Shape;
+import com.v2tech.vo.V2ShapeEarser;
 import com.v2tech.vo.V2ShapeEllipse;
 import com.v2tech.vo.V2ShapeLine;
 import com.v2tech.vo.V2ShapeMeta;
@@ -77,7 +78,7 @@ public class XmlParser {
 						text = text.replaceAll("&apos;", "'");
 						text = text.replaceAll("&quot;", "\"");
 						text = text.replaceAll("&amp;", "&");
-						
+
 						va = new VMessageTextItem(vm, text);
 						va.setNewLine(isNewLine);
 					} else if (msgEl.getTagName().equals("TSysFaceChatItem")) {
@@ -88,14 +89,13 @@ public class XmlParser {
 						va = new VMessageFaceItem(vm, index);
 						va.setNewLine(isNewLine);
 					} else if (msgEl.getTagName().equals("TPictureChatItem")) {
-						
+
 						String uuid = msgEl.getAttribute("GUID");
 						if (uuid == null) {
 							V2Log.e("Invalid uuid ");
 							continue;
 						}
-						VMessageImageItem vii = new VMessageImageItem(vm,
-								uuid,
+						VMessageImageItem vii = new VMessageImageItem(vm, uuid,
 								msgEl.getAttribute("FileExt"));
 						vii.setNewLine(isNewLine);
 
@@ -135,8 +135,7 @@ public class XmlParser {
 				}
 				boolean isNewLine = "True"
 						.equals(msgEl.getAttribute("NewLine"));
-				VMessageImageItem vii = new VMessageImageItem(vm,
-						uuid,
+				VMessageImageItem vii = new VMessageImageItem(vm, uuid,
 						msgEl.getAttribute("FileExt"));
 				vii.setNewLine(isNewLine);
 			}
@@ -146,8 +145,7 @@ public class XmlParser {
 		}
 
 	}
-	
-	
+
 	public static void extraAudioMetaFrom(VMessage vm, String xml) {
 		InputStream is = null;
 
@@ -169,10 +167,8 @@ public class XmlParser {
 					V2Log.e("Invalid uuid ");
 					continue;
 				}
-				VMessageAudioItem vii = new VMessageAudioItem(vm,
-						uuid,
-						audioItemEl.getAttribute("FileExt"),
-						null,
+				VMessageAudioItem vii = new VMessageAudioItem(vm, uuid,
+						audioItemEl.getAttribute("FileExt"), null,
 						Integer.parseInt(audioItemEl.getAttribute("Seconds")));
 				vii.setNewLine(true);
 			}
@@ -182,9 +178,7 @@ public class XmlParser {
 		}
 
 	}
-	
-	
-	
+
 	/**
 	 * 
 	 * type org(1): type contact(2) <xml><pubgroup id='61'
@@ -608,9 +602,38 @@ public class XmlParser {
 
 				meta.addShape(shape);
 			}
-			
-			
-			//TODO add TEraseLineMeta
+
+			nodeList = doc.getElementsByTagName("TEraseLineMeta");
+			for (int i = 0; i < nodeList.getLength(); i++) {
+				Element e = (Element) nodeList.item(i);
+				meta = new V2ShapeMeta(e.getAttribute("ID"));
+				
+				NodeList shapeDataList = e.getChildNodes();
+
+				V2ShapeEarser earser = new V2ShapeEarser();
+				for (int j = 0; j < shapeDataList.getLength(); j++) {
+					if (shapeDataList.item(j).getNodeType() != Element.ELEMENT_NODE) {
+						continue;
+					}
+					Element shapeE = (Element) shapeDataList.item(j);
+
+					if (shapeE.getTagName().equals("Points")) {
+						String pointsStr = e.getTextContent().trim();
+						String[] str = pointsStr.split(" ");
+						int len = str.length / 4;
+						for (int index = 0; index < len; index += 4) {
+							earser.lineToLine(Integer.parseInt(str[index]),
+									Integer.parseInt(str[index + 2]),
+									Integer.parseInt(str[index + 3]),
+									Integer.parseInt(str[index + 3]));
+						}
+					} else if (shapeE.getTagName().equals("Pen")) {
+
+					}
+				}
+				meta.addShape(earser);
+
+			}
 
 			return meta;
 

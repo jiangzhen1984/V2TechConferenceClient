@@ -321,7 +321,10 @@ public class VideoDocLayout extends LinearLayout {
 		
 		//FIXME optimze code
 		if (this.mCurrentDoc.getDocType() == V2Doc.DOC_TYPE_BLANK_BOARD) {
-			if (mCurrentBitMap == null) {
+			if (mCurrentBitMap != null) {
+				mCurrentBitMap.recycle();
+				mCurrentBitMap = null;
+			}
 				mCurrentBitMap =  Bitmap.createBitmap(800, 600, Bitmap.Config.ARGB_8888);
 				matrix = new Matrix();
 				RectF src = new RectF();
@@ -345,7 +348,6 @@ public class VideoDocLayout extends LinearLayout {
 						FrameLayout.LayoutParams.MATCH_PARENT));
 				container.postInvalidate();
 					
-			}
 			return;
 		}
 
@@ -634,6 +636,7 @@ public class VideoDocLayout extends LinearLayout {
 			}
 			V2Doc d = (V2Doc) v.getTag();
 			if (d != mCurrentDoc) {
+				//FIXME handle blank board switch
 				V2Doc.Page p = d.getActivatePage();
 				if (p == null || p.getFilePath() == null
 						|| p.getFilePath().isEmpty()) {
