@@ -326,9 +326,9 @@ public class ConversationView extends Activity {
 
 			stopRecording();
 			starttime = 0;
-			fileName = null;
 			File f = new File(fileName);
 			f.deleteOnExit();
+			fileName = null;
 			lh.removeCallbacks(mUpdateMicStatusTimer);
 			lh.removeCallbacks(timeOutMonitor);
 		}

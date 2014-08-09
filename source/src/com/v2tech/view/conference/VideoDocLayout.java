@@ -14,7 +14,7 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.RectF;
 import android.graphics.drawable.ColorDrawable;
-import android.util.AttributeSet;
+import android.os.Handler;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -65,6 +65,8 @@ public class VideoDocLayout extends LinearLayout {
 	private V2Doc mCurrentDoc;
 
 	private V2Doc.Page mCurrentPage;
+	
+	private Handler mTimeHanlder = new Handler();
 
 	public interface DocListener {
 		public void updateDoc(V2Doc doc, V2Doc.Page p);
@@ -78,20 +80,17 @@ public class VideoDocLayout extends LinearLayout {
 		public void requestDocViewRestore(View v);
 	};
 
-	public VideoDocLayout(Context context) {
+	public VideoDocLayout(Context context, Map<String, V2Doc> docs, String defaultDocId) {
 		super(context);
+		mDocs = new HashMap<String, V2Doc>();
+		mDocs.putAll(docs);
+		V2Doc defaultDoc = mDocs.get(defaultDocId);
 		initLayout();
+		if (defaultDoc != null) {
+			updateCurrentDoc(defaultDoc);
+		}
 	}
 
-	public VideoDocLayout(Context context, AttributeSet attrs) {
-		super(context, attrs);
-		initLayout();
-	}
-
-	public VideoDocLayout(Context context, AttributeSet attrs, int defStyle) {
-		super(context, attrs, defStyle);
-		initLayout();
-	}
 
 	private void initLayout() {
 		View view = LayoutInflater.from(getContext()).inflate(
@@ -118,7 +117,7 @@ public class VideoDocLayout extends LinearLayout {
 				LinearLayout.LayoutParams.MATCH_PARENT));
 
 		rootView = this;
-		mDocs = new HashMap<String, V2Doc>();
+		
 	}
 
 	private void showPopUpWindow(View anchor) {
@@ -310,12 +309,43 @@ public class VideoDocLayout extends LinearLayout {
 		mCurrentPage = mCurrentDoc.getActivatePage();
 
 		updateCurrentDocPage(mCurrentPage);
+		drawShape(mCurrentPage.getVsMeta());
 		updateLayoutPageInformation();
 		updatePageButton();
 	}
 
 	private void updateCurrentDocPage(V2Doc.Page p) {
 		if (p == null) {
+			return;
+		}
+		
+		//FIXME optimze code
+		if (this.mCurrentDoc.getDocType() == V2Doc.DOC_TYPE_BLANK_BOARD) {
+			if (mCurrentBitMap == null) {
+				mCurrentBitMap =  Bitmap.createBitmap(800, 600, Bitmap.Config.ARGB_8888);
+				matrix = new Matrix();
+				RectF src = new RectF();
+				RectF dest = new RectF();
+				src.left = 0;
+				src.right = 800;
+				src.top = 0;
+				src.bottom = 600;
+				
+				dest.left =0;
+				dest.right = 800;
+				dest.top = 0;
+				dest.bottom =600;
+				matrix.mapRect(dest, src);
+				
+				container.removeAllViews();
+				TouchImageView iv = new TouchImageView(this.getContext());
+				iv.setImageBitmap(mCurrentBitMap);
+				container.addView(iv, new FrameLayout.LayoutParams(
+						FrameLayout.LayoutParams.MATCH_PARENT,
+						FrameLayout.LayoutParams.MATCH_PARENT));
+				container.postInvalidate();
+					
+			}
 			return;
 		}
 
@@ -371,6 +401,15 @@ public class VideoDocLayout extends LinearLayout {
 						FrameLayout.LayoutParams.MATCH_PARENT));
 				container.postInvalidate();
 			} else {
+				//Set interval timer for waiting page download
+				mTimeHanlder.postDelayed(new Runnable() {
+
+					@Override
+					public void run() {
+						updateCurrentDocPage(mCurrentPage);
+					}
+					
+				}, 1000);
 				V2Log.e(" doc file doesn't exist " + f.getAbsolutePath());
 			}
 		}
@@ -441,6 +480,8 @@ public class VideoDocLayout extends LinearLayout {
 			addViewToDoc(doc);
 		}
 	}
+	
+
 
 	public void updateLayoutPageInformation() {
 		if (mCurrentDoc == null) {
@@ -498,6 +539,22 @@ public class VideoDocLayout extends LinearLayout {
 			mNextPageButton.setEnabled(true);
 			mPrePageButton.setEnabled(true);
 		}
+	}
+	
+	/**
+	 * According to docId and pageNo draw shape
+	 * @param docId
+	 * @param pageNo
+	 * @param list
+	 */
+	public void drawShape(String docId, int pageNo, List<V2ShapeMeta> list) {
+		if (this.mCurrentDoc == null || this.mCurrentPage == null || docId == null) {
+			return;
+		}
+		if (!docId.equals(this.mCurrentDoc.getId()) || pageNo != this.mCurrentPage.getNo()) {
+			return;
+		}
+		drawShape(list);
 	}
 
 	public void drawShape(List<V2ShapeMeta> list) {
@@ -647,7 +704,7 @@ public class VideoDocLayout extends LinearLayout {
 					listener.requestDocViewFillParent(rootView);
 					if (container.getChildCount() > 0) {
 						TouchImageView tiv =(TouchImageView)container.getChildAt(0);
-						tiv.setZoom(1.3F);
+						tiv.setZoom(2F);
 					}
 				}
 			} else {
@@ -655,7 +712,7 @@ public class VideoDocLayout extends LinearLayout {
 					listener.requestDocViewRestore(rootView);
 					if (container.getChildCount() > 0) {
 						TouchImageView tiv =(TouchImageView)container.getChildAt(0);
-						tiv.setZoom(0.9F);
+						tiv.setZoom(0.5F);
 					}
 				}
 			}

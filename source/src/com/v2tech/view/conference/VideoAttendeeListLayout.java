@@ -198,7 +198,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 
 			UserDeviceConfig udc = a.getmDevices().get(i);
 			nameTV2.setText("     视频" + i);
-			nameTV2.setTextSize(20);
+			nameTV2.setTextSize(ctx.getResources().getDimension(R.dimen.video_attendee_device_text_size));
 			// Set text color and camera icon
 			childDevices = true;
 			if (initAttendPersons) {

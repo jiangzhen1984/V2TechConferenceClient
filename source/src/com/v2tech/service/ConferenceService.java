@@ -613,15 +613,15 @@ public class ConferenceService extends AbstractHandler {
 
 		@Override
 		public void OnRemoteUserVideoDevice(long uid, String szXmlData) {
-			if (szXmlData == null) {
-				V2Log.e(" No avaiable user device configuration");
-				return;
-			}
-			List<UserDeviceConfig> ll = UserDeviceConfig
-					.parseFromXml(uid, szXmlData);
-			GlobalHolder.getInstance().addAttendeeDevice(ll);
-
-			notifyListenerWithPending(KEY_ATTENDEE_DEVICE_LISTNER, 0, 0, ll);
+//			if (szXmlData == null) {
+//				V2Log.e(" No avaiable user device configuration");
+//				return;
+//			}
+//			List<UserDeviceConfig> ll = UserDeviceConfig
+//					.parseFromXml(uid, szXmlData);
+//			GlobalHolder.getInstance().addAttendeeDevice(ll);
+//
+//			notifyListenerWithPending(KEY_ATTENDEE_DEVICE_LISTNER, 0, 0, ll);
 		}
 
 		

@@ -381,24 +381,26 @@ public class GlobalHolder {
 		return new ArrayList<UserDeviceConfig>(list);
 	}
 
-	public void removeAttendeeDeviceCache(long uid) {
-		mUserDeviceList.remove(Long.valueOf(uid));
+	
+	
+	/**
+	 * Update user video device and clear existed user device first
+	 * @param id
+	 * @param udcList
+	 */
+	public void updateUserDevice(long id, List<UserDeviceConfig> udcList) {
+		Long key = Long.valueOf(id);
+		Set<UserDeviceConfig> list = mUserDeviceList.get(key);
+		if (list != null) {
+			list.clear();
+		} else {
+			list =  new HashSet<UserDeviceConfig>();
+			mUserDeviceList.put(key, list);
+		}
+		list.addAll(udcList);
 	}
 
-	public void addAttendeeDevice(List<UserDeviceConfig> udcList) {
-		for (UserDeviceConfig udc : udcList) {
-			if (udc == null) {
-				continue;
-			}
-			Set<UserDeviceConfig> list = mUserDeviceList.get(Long.valueOf(udc
-					.getUserID()));
-			if (list == null) {
-				list = new HashSet<UserDeviceConfig>();
-				mUserDeviceList.put(Long.valueOf(udc.getUserID()), list);
-			}
-			list.add(udc);
-		}
-	}
+
 
 	public void setAudioState(boolean flag) {
 		if (flag) {

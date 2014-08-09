@@ -2,39 +2,40 @@ package com.v2tech.vo;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 
+import android.util.SparseArray;
 
 public class V2Doc {
 
 	public static final int DOC_TYPE_IMAGE = 1;
+	public static final int DOC_TYPE_BLANK_BOARD = 2;
 
 	protected String id;
 	protected Group mGroup;
 	protected int mBType;
 	protected User mSharedUser;
 	protected int mDocType;
-	protected List<Page> pages;
+	protected PageArray pageArray;
 	protected String mDocName;
-	
-	protected int currentPageNo = 1;	
-	
-	
-	
+
+	protected int currentPageNo = 1;
+
 	public static class PageArray {
 		String docId;
-		Page[] pr;
+		SparseArray<Page> page;
 
 		public PageArray(Page[] pr) {
-			this.pr = pr;
+			page = new SparseArray<Page>();
+			addPages(pr);
 		}
-		
-		
+
+		public PageArray(SparseArray<Page> page) {
+			this.page = page;
+		}
 
 		public PageArray() {
+			page = new SparseArray<Page>();
 		}
-
-
 
 		public String getDocId() {
 			return docId;
@@ -44,34 +45,80 @@ public class V2Doc {
 			this.docId = docId;
 		}
 
-		public Page[] getPr() {
-			return pr;
+		public void addPages(Page[] pr) {
+			for (int i = 0; pr != null && i < pr.length; i++) {
+				page.put(i, pr[i]);
+			}
 		}
 
-		public void setPr(Page[] pr) {
-			this.pr = pr;
+		/**
+		 * Update cache page
+		 * @param p
+		 */
+		public void addPage(Page p) {
+			Page existP = page.get(p.getNo());
+			if (existP != null) {
+				existP.update(p);
+			} else {
+				page.put(p.getNo(), p);
+				
+			}
+		}
+		
+		public void updatePage(Page p) {
+			page.put(p.getNo(), p);
+		}
+
+		public Page getPage(int no) {
+			return page.get(no);
 		}
 		
 		
+		public int getPageSize() {
+			return this.page.size();
+		}
 		
+		public Page getPageByIndex(int index){
+			return this.page.valueAt(index);
+		}
+		
+		
+		public void update(PageArray pa) {
+			if (pa == null) {
+				return;
+			}
+			for (int i = 0; i < pa.getPageSize(); i++) {
+				Page newP = pa.getPageByIndex(i);
+				Page oldP = getPage(newP.no);
+				if (oldP == null) {
+					updatePage(newP);
+				} else {
+					oldP.update(newP);
+				}
+			}
+		}
+
 	}
-	
-	
-	
+
 	public static class Page {
 		int no;
 		String docId;
 		String filePath;
 		List<V2ShapeMeta> vsMeta;
 		
+		protected Page() {
+			
+		}
+
 		public Page(int no, String docId, String filePath) {
 			this.no = no;
 			this.docId = docId;
 			this.filePath = filePath;
 			vsMeta = new ArrayList<V2ShapeMeta>();
 		}
-		
-		public Page(int no, String docId, String filePath, List<V2ShapeMeta> vsMeta) {
+
+		public Page(int no, String docId, String filePath,
+				List<V2ShapeMeta> vsMeta) {
 			this.no = no;
 			this.docId = docId;
 			this.filePath = filePath;
@@ -118,17 +165,52 @@ public class V2Doc {
 		}
 		
 		
+		public void update(Page p) {
+			if (p == null) {
+				return;
+			}
+			
+			if (p.no > 0) {
+				this.no = p.no;
+			}
+			if (p.docId != null) {
+				this.docId = p.docId;
+			}
+			if (p.filePath != null) {
+				this.filePath = p.filePath;
+			}
+			if (this.vsMeta == null) {
+				this.vsMeta = new ArrayList<V2ShapeMeta>();
+			}
+			this.vsMeta.addAll(p.vsMeta);
+			
+		}
+
 	}
 	
 	
+	public static class BlankBorad extends Page {
+		public BlankBorad(int no, String docId,
+				List<V2ShapeMeta> vsMeta) {
+			
+			this.no = no;
+			this.docId = docId;
+			this.vsMeta = vsMeta;
+			if (this.vsMeta == null) {
+				this.vsMeta = new ArrayList<V2ShapeMeta>();
+			}
+		}
+	}
 
-	public V2Doc(String id, String docName, Group mGroup, int mBType, User mSharedUser) {
+	public V2Doc(String id, String docName, Group mGroup, int mBType,
+			User mSharedUser) {
 		super();
 		this.id = id;
 		this.mDocName = docName;
 		this.mGroup = mGroup;
 		this.mBType = mBType;
 		this.mSharedUser = mSharedUser;
+		this.pageArray = new PageArray();
 	}
 
 	public String getId() {
@@ -139,8 +221,6 @@ public class V2Doc {
 		this.id = id;
 	}
 
-	
-	
 	public String getDocName() {
 		return mDocName;
 	}
@@ -173,7 +253,6 @@ public class V2Doc {
 		this.mSharedUser = mSharedUser;
 	}
 
-	
 	public int getDocType() {
 		return mDocType;
 	}
@@ -182,52 +261,64 @@ public class V2Doc {
 		this.mDocType = mDocType;
 	}
 
-	
 	public void addPage(Page p) {
 		if (p == null) {
 			throw new NullPointerException(" page is null");
 		}
-		if (this.pages == null) {
-			this.pages = new CopyOnWriteArrayList<Page>();
-		}
-		this.pages.add(p);
+		pageArray.addPage(p);
 	}
-	
+
 	public Page findPage(int no) {
-		if (pages == null) {
-			return null;
-		}
-		for (Page p : this.pages) {
-			if (p.no == no) {
-				return p;
-			}
-		}
-		return null;
+		return pageArray.getPage(no);
 	}
-	
+
 	public int getActivatePageNo() {
 		return this.currentPageNo;
 	}
-	
+
 	public Page getActivatePage() {
-		if (pages == null) {
-			return null;
-		}
-		for (Page p : pages) {
-			if (p.no == this.currentPageNo) {
-				return p;
-			}
-		}
-		return null;
+		return pageArray.getPage(currentPageNo);
 	}
-	
+
 	public void setActivatePageNo(int no) {
 		this.currentPageNo = no;
 	}
-	
-	
+
 	public int getPageSize() {
-		return pages == null? 0 : pages.size();
+		return pageArray.getPageSize();
 	}
 
+	public Page getPage(int no) {
+		return pageArray.getPage(no);
+	}
+	/**
+	 * Update existed page array. Will ignore if parameter is null
+	 * @param pa
+	 */
+	public void updatePageArray(PageArray pa) {
+		if (pa == null) {
+			return;
+		}
+		this.pageArray.update(pa);
+	}
+	
+	
+	
+	/**
+	 *  Update current doc. Will ignore if parameter is null
+	 * @param doc
+	 */
+	public void updateDoc(V2Doc doc) {
+		if (doc.getDocName() != null) {
+			this.mDocName = doc.getDocName();
+		}
+		if (doc.getGroup() != null) {
+			this.mGroup = doc.getGroup();
+		}
+		if (doc.getSharedUser() != null) {
+			this.mSharedUser = doc.getSharedUser();
+		}
+		this.mBType = doc.getBType();
+		this.pageArray.update(doc.pageArray);
+	}
 }

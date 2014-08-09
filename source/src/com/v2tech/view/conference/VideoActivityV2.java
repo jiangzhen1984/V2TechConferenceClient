@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import v2av.CaptureCapability;
@@ -22,11 +21,9 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.ActivityInfo;
-import android.content.res.Configuration;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.ImageFormat;
-import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.media.AudioManager;
@@ -129,6 +126,10 @@ public class VideoActivityV2 extends Activity {
 
 	private static final int VIDEO_MIX_NOTIFICATION = 70;
 
+	private static final int TAG_CLOSE_DEVICE = 0;
+
+	private static final int TAG_OPEN_DEVICE = 1;
+
 	public static final String JNI_EVENT_VIDEO_CATEGORY = "com.v2tech.conf_video_event";
 	public static final String JNI_EVENT_VIDEO_CATEGORY_OPEN_VIDEO_EVENT_ACTION = "com.v2tech.conf_video_event.open_video_event";
 	private static final String TAG = "VideoActivityV2";
@@ -182,7 +183,7 @@ public class VideoActivityV2 extends Activity {
 	private DocumentService ds;
 
 	private Map<String, V2Doc> mDocs = new HashMap<String, V2Doc>();
-	private V2Doc mCurrentActivateDoc = null;
+	private String mCurrentActivateDocId = null;
 
 	private Map<String, MixerWrapper> mMixerWrapper = new HashMap<String, MixerWrapper>();
 
@@ -197,6 +198,7 @@ public class VideoActivityV2 extends Activity {
 	private DisplayMetrics dm;
 
 	private boolean mServiceBound = false;
+	private boolean mLocalHolderIsCreate = false;
 	private int currentWidth;
 	private boolean isStop;
 
@@ -233,6 +235,8 @@ public class VideoActivityV2 extends Activity {
 
 		// local camera surface view
 		this.mLocalSurface = (SurfaceView) findViewById(R.id.local_surface_view);
+		mLocalSurface.getHolder().addCallback(mLocalCameraHolder);
+		mLocalSurface.setZOrderMediaOverlay(true);
 
 		this.localSurfaceViewLy = findViewById(R.id.local_surface_view_ly);
 		localSurfaceViewLy.setOnTouchListener(mLocalCameraDragListener);
@@ -284,7 +288,7 @@ public class VideoActivityV2 extends Activity {
 				mLocalServiceConnection, Context.BIND_AUTO_CREATE);
 
 	}
-	
+
 	@Override
 	protected void onStart() {
 		super.onStart();
@@ -301,7 +305,6 @@ public class VideoActivityV2 extends Activity {
 		// keep screen on
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
-		
 		// Adjust content layout
 		adjustContentLayout();
 	}
@@ -450,7 +453,6 @@ public class VideoActivityV2 extends Activity {
 			mAttendeeContainer.setAttendsList(this.mAttendeeList);
 			synchronized (mMixerWrapper) {
 				for (MixerWrapper mw : mMixerWrapper.values()) {
-					V2Log.e(TAG, "initAttendeeContainer方法调用了update---");
 					mAttendeeContainer.updateEnteredAttendee(mw.amd);
 				}
 			}
@@ -490,14 +492,8 @@ public class VideoActivityV2 extends Activity {
 	private View initDocLayout() {
 
 		if (mDocContainer == null) {
-			mDocContainer = new VideoDocLayout(this);
+			mDocContainer = new VideoDocLayout(this, mDocs, mCurrentActivateDocId);
 			mDocContainer.setListener(subViewListener);
-			synchronized (mDocs) {
-				for (Entry<String, V2Doc> e : mDocs.entrySet()) {
-					mDocContainer.addDoc(e.getValue());
-				}
-			}
-			mDocContainer.updateCurrentDoc(mCurrentActivateDoc);
 			Group g = GlobalHolder.getInstance().findGroupById(conf.getId());
 			if (g != null && g instanceof ConferenceGroup) {
 				mDocContainer.updateSyncStatus(((ConferenceGroup) g).isSyn());
@@ -531,21 +527,20 @@ public class VideoActivityV2 extends Activity {
 		}
 
 		if (mSubWindowLayout.getVisibility() == View.VISIBLE) {
-			
+
 			FrameLayout.LayoutParams fl = (FrameLayout.LayoutParams) mSubWindowLayout
 					.getLayoutParams();
 			if (mContentLayoutMain.getMeasuredWidth() == 0) {
 				mContentLayoutMain.measure(View.MeasureSpec.UNSPECIFIED,
 						View.MeasureSpec.UNSPECIFIED);
 			}
-			
-			if(isStop){
-				
+
+			if (isStop) {
+
 				width = currentWidth;
 				isStop = false;
-			}
-			else{
-				
+			} else {
+
 				width = mContentLayoutMain.getMeasuredWidth();
 				currentWidth = width;
 			}
@@ -868,7 +863,8 @@ public class VideoActivityV2 extends Activity {
 
 							@Override
 							public void run() {
-								showOrCloseLocalSurViewOnly();
+								closeLocalCamera();
+								showLocalSurViewOnly();
 							}
 
 						}, 500);
@@ -1037,7 +1033,7 @@ public class VideoActivityV2 extends Activity {
 	/**
 	 * 
 	 */
-	private void showOrCloseLocalSurViewOnly() {
+	private void showLocalSurViewOnly() {
 		boolean selfInAttendeeList = false;
 		Attendee atd = null;
 		UserDeviceConfig udc = null;
@@ -1067,31 +1063,6 @@ public class VideoActivityV2 extends Activity {
 		// layout must before open device
 		// showOrCloseAttendeeVideo(udc);
 		udc.setSVHolder(mLocalSurface);
-		mLocalSurface.getHolder().addCallback(new SurfaceHolder.Callback() {
-
-			@Override
-			public void surfaceDestroyed(SurfaceHolder arg0) {
-				V2Log.e("=====================surfaceDestroyed  " + arg0);
-
-			}
-
-			@Override
-			public void surfaceCreated(SurfaceHolder holder) {
-				Canvas canvas = holder.lockCanvas();
-				canvas.drawColor(Color.GRAY);
-				holder.unlockCanvasAndPost(canvas);
-				V2Log.e("=====================created  " + holder);
-
-			}
-
-			@Override
-			public void surfaceChanged(SurfaceHolder arg0, int arg1, int arg2,
-					int arg3) {
-				V2Log.e("=====================surfaceChanged " + arg0);
-
-			}
-		});
-
 		VideoRecorder.VideoPreviewSurfaceHolder = udc.getSVHolder().getHolder();
 		VideoRecorder.VideoPreviewSurfaceHolder
 				.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
@@ -1100,8 +1071,18 @@ public class VideoActivityV2 extends Activity {
 
 		Message m = Message.obtain(mVideoHandler, REQUEST_OPEN_OR_CLOSE_DEVICE,
 				1, 0, udc);
-		mVideoHandler.sendMessageDelayed(m, 300);
+		mVideoHandler.sendMessage(m);
 		udc.setShowing(true);
+	}
+
+	private void closeLocalCamera() {
+		Message.obtain(
+				mVideoHandler,
+				REQUEST_OPEN_OR_CLOSE_DEVICE,
+				0,
+				0,
+				new UserDeviceConfig(GlobalHolder.getInstance()
+						.getCurrentUserId(), "", null)).sendToTarget();
 	}
 
 	private void adjustLayout() {
@@ -1114,7 +1095,7 @@ public class VideoActivityV2 extends Activity {
 		int rows = size / maxWidth + (size % maxWidth == 0 ? 0 : 1);
 		int cols = size > 1 ? maxWidth : size;
 		if (size == 0) {
-			V2Log.e(" No surface to show");
+			V2Log.e(" No remote device need to show size:" + size);
 			return;
 		}
 
@@ -1359,12 +1340,9 @@ public class VideoActivityV2 extends Activity {
 	private void suspendOrResume(boolean resume) {
 
 		if (resume) {
-			for (SurfaceViewW sw : this.mCurrentShowedSV) {
-				Message.obtain(mVideoHandler, REQUEST_OPEN_OR_CLOSE_DEVICE, 1,
-						0, sw.udc).sendToTarget();
-			}
-			// Make sure local camera is first front of all
-			Message.obtain(mVideoHandler, ONLY_SHOW_LOCAL_VIDEO).sendToTarget();
+
+			updateAllRemoteDevice(TAG_OPEN_DEVICE);
+
 			adjustLayout();
 
 			// Send speaking status
@@ -1376,23 +1354,20 @@ public class VideoActivityV2 extends Activity {
 			cb.updateAudio(true);
 
 		} else {
-			for (SurfaceViewW sw : this.mCurrentShowedSV) {
-				Message.obtain(mVideoHandler, REQUEST_OPEN_OR_CLOSE_DEVICE, 0,
-						0, sw.udc).sendToTarget();
-			}
+			updateAllRemoteDevice(TAG_CLOSE_DEVICE);
 
-			// close local camera
-			Message.obtain(
-					mVideoHandler,
-					REQUEST_OPEN_OR_CLOSE_DEVICE,
-					0,
-					0,
-					new UserDeviceConfig(GlobalHolder.getInstance()
-							.getCurrentUserId(), "", null)).sendToTarget();
-			VideoRecorder.VideoPreviewSurfaceHolder = null;
+			closeLocalCamera();
+
 			mVideoLayout.removeAllViews();
 			// suspend audio
 			cb.updateAudio(false);
+		}
+	}
+
+	private void updateAllRemoteDevice(int tag) {
+		for (SurfaceViewW sw : this.mCurrentShowedSV) {
+			Message.obtain(mVideoHandler, REQUEST_OPEN_OR_CLOSE_DEVICE, tag, 0,
+					sw.udc).sendToTarget();
 		}
 	}
 
@@ -1402,20 +1377,10 @@ public class VideoActivityV2 extends Activity {
 	private void quit() {
 		// if bound, then conference service is initialized. Otherwise not.
 		if (mServiceBound) {
-			for (SurfaceViewW sw : this.mCurrentShowedSV) {
-				Message.obtain(mVideoHandler, REQUEST_OPEN_OR_CLOSE_DEVICE, 0,
-						0, sw.udc).sendToTarget();
-				sw.udc.doClose();
-			}
+			updateAllRemoteDevice(TAG_CLOSE_DEVICE);
 
 			// close local camera
-			Message.obtain(
-					mVideoHandler,
-					REQUEST_OPEN_OR_CLOSE_DEVICE,
-					0,
-					0,
-					new UserDeviceConfig(GlobalHolder.getInstance()
-							.getCurrentUserId(), "", null)).sendToTarget();
+			closeLocalCamera();
 		}
 		VideoRecorder.VideoPreviewSurfaceHolder = null;
 		mAttendeeList.clear();
@@ -1471,7 +1436,6 @@ public class VideoActivityV2 extends Activity {
 		}
 
 		if (mAttendeeContainer != null) {
-			V2Log.e(TAG, "doHandleNewUserEntered 方法调用了update---");
 			mAttendeeContainer.updateEnteredAttendee(a);
 		}
 
@@ -1494,27 +1458,28 @@ public class VideoActivityV2 extends Activity {
 	 */
 	private void doHandleUserExited(User user) {
 		Attendee a = getAttendee(user.getmUserId());
-
-		if (a != null) {
-			// User do exist video device
-			if (a.getmDevices() != null) {
-				for (UserDeviceConfig udc : a.getmDevices()) {
-					if (udc != null && udc.isShowing()) {
-						showOrCloseAttendeeVideo(udc);
-					}
+		if (a == null) {
+			V2Log.e("No such attendee in list:" + user.getmUserId() + "  "
+					+ user.getName());
+			return;
+		}
+		// User do exist video device
+		if (a.getmDevices() != null) {
+			for (UserDeviceConfig udc : a.getmDevices()) {
+				if (udc != null && udc.isShowing()) {
+					showOrCloseAttendeeVideo(udc);
 				}
 			}
-			if (conf.getChairman() == a.getAttId()) {
-				a.setChairMan(true);
-			}
-			a.setJoined(false);
-			if (mAttendeeContainer != null) {
-				mAttendeeContainer.updateExitedAttendee(a);
-			}
+		}
+		if (conf.getChairman() == a.getAttId()) {
+			a.setChairMan(true);
+		}
+		a.setJoined(false);
+		if (mAttendeeContainer != null) {
+			mAttendeeContainer.updateExitedAttendee(a);
 		}
 
 		// Clean user device
-		GlobalHolder.getInstance().removeAttendeeDeviceCache(user.getmUserId());
 		showToastNotification(user.getName()
 				+ mContext.getText(R.string.conf_notification_quited_meeting));
 
@@ -1578,7 +1543,7 @@ public class VideoActivityV2 extends Activity {
 			adjustLayout();
 
 			Message m = Message.obtain(mVideoHandler,
-					REQUEST_OPEN_OR_CLOSE_DEVICE, 1, 0, udc);
+					REQUEST_OPEN_OR_CLOSE_DEVICE, TAG_OPEN_DEVICE, 0, udc);
 			mVideoHandler.sendMessageDelayed(m, 300);
 			udc.setShowing(true);
 			return true;
@@ -1619,6 +1584,122 @@ public class VideoActivityV2 extends Activity {
 		} else {
 			return false;
 		}
+	}
+
+	/**
+	 * 
+	 * @param res
+	 * @param opt
+	 */
+	private void updateDocNotification(AsyncResult res, int opt) {
+		V2Doc doc = null;
+		V2Doc.Page page = null;
+		V2Doc.PageArray pageArray = null;
+		V2ShapeMeta shape = null;
+		if (opt == NEW_DOC_NOTIFICATION) {
+			doc = (V2Doc) res.getResult();
+			V2Doc cacheDoc = mDocs.get(doc.getId());
+			if (cacheDoc == null) {
+				mDocs.put(doc.getId(), doc);
+			} else {
+				cacheDoc.updateDoc(doc);
+				doc = cacheDoc;
+			}
+		} else if (opt == DOC_CLOSED_NOTIFICATION) {
+			doc = (V2Doc) res.getResult();
+			mDocs.remove(doc.getId());
+		}
+
+		String docId = null;
+		switch (opt) {
+		case NEW_DOC_NOTIFICATION:
+		case DOC_CLOSED_NOTIFICATION:
+			doc = (V2Doc) res.getResult();
+			docId = doc.getId();
+			break;
+		case DOC_PAGE_NOTIFICATION:
+			pageArray = (V2Doc.PageArray) res.getResult();
+			docId = pageArray.getDocId();
+			break;
+		case DOC_PAGE_ADDED_NOTIFICATION:
+		case DOC_DOWNLOADED_NOTIFICATION:
+		case DOC_PAGE_ACTIVITE_NOTIFICATION:
+			page = (V2Doc.Page) res.getResult();
+			docId = page.getDocId();
+			//Record current activate Id;
+			mCurrentActivateDocId = docId;
+			break;
+		case DOC_PAGE_CANVAS_NOTIFICATION:
+			shape = (V2ShapeMeta) res.getResult();
+			docId = shape.getDocId();
+			break;
+		default:
+			V2Log.e("Unknow doc operation:" + opt);
+			return;
+		}
+		;
+
+		if (doc == null) {
+			doc = mDocs.get(docId);
+			// Put fake doc, because page events before doc event;
+			if (doc == null) {
+				doc = new V2Doc(docId, null, null, 0, null);
+				mDocs.put(docId, doc);
+			}
+			// If doc is not null, means new doc event or doc close event. need
+			// to update cache doc or not.
+			// If doc page event before new doc event, need to update cache
+			// update
+		} else if (NEW_DOC_NOTIFICATION == opt) {
+			V2Doc cache = mDocs.get(docId);
+			cache.updateDoc(doc);
+		}
+
+		if (pageArray != null) {
+			doc.updatePageArray(pageArray);
+		}
+		if (page != null) {
+			doc.addPage(page);
+		}
+
+		if (opt == DOC_PAGE_CANVAS_NOTIFICATION) {
+			page = doc.getPage(shape.getPageNo());
+			if (page == null) {
+				page = new Page(shape.getPageNo(), docId, null);
+				page.addMeta(shape);
+				doc.addPage(page);
+			} else {
+				page.addMeta(shape);
+			}
+		}
+
+		// Update UI
+		if (mDocContainer != null) {
+			switch (opt) {
+			case NEW_DOC_NOTIFICATION:
+				mDocContainer.addDoc(doc);
+				break;
+			case DOC_CLOSED_NOTIFICATION:
+				mDocContainer.closeDoc(doc);
+				break;
+			case DOC_PAGE_NOTIFICATION:
+			case DOC_PAGE_ADDED_NOTIFICATION:
+				mDocContainer.updateLayoutPageInformation();
+				mDocContainer.updatePageButton();
+				break;
+			case DOC_PAGE_ACTIVITE_NOTIFICATION:
+				doc.setActivatePageNo(page.getNo());
+			case DOC_DOWNLOADED_NOTIFICATION:
+				mDocContainer.updateCurrentDoc(doc);
+				break;
+			case DOC_PAGE_CANVAS_NOTIFICATION:
+				mDocContainer.drawShape(page.getDocId(), page.getNo(),
+						page.getVsMeta());
+				break;
+			}
+			;
+		}
+
 	}
 
 	private ServiceConnection mLocalServiceConnection = new ServiceConnection() {
@@ -1663,12 +1744,41 @@ public class VideoActivityV2 extends Activity {
 			ds.registerPageCanvasUpdateNotification(mVideoHandler,
 					DOC_PAGE_CANVAS_NOTIFICATION, null);
 
+			Message.obtain(mVideoHandler, ONLY_SHOW_LOCAL_VIDEO).sendToTarget();
+
 			suspendOrResume(true);
+
 		}
 
 		@Override
 		public void onServiceDisconnected(ComponentName cname) {
 			mServiceBound = false;
+		}
+
+	};
+
+	private SurfaceHolder.Callback mLocalCameraHolder = new SurfaceHolder.Callback() {
+
+		@Override
+		public void surfaceChanged(SurfaceHolder holder, int arg1, int arg2,
+				int arg3) {
+			mLocalHolderIsCreate = true;
+		}
+
+		@Override
+		public void surfaceCreated(SurfaceHolder holder) {
+			V2Log.e("Create new holder " + holder);
+			Canvas canvas = holder.lockCanvas();
+			canvas.drawColor(Color.GRAY);
+			holder.unlockCanvasAndPost(canvas);
+			mLocalHolderIsCreate = true;
+			Message.obtain(mVideoHandler, ONLY_SHOW_LOCAL_VIDEO).sendToTarget();
+		}
+
+		@Override
+		public void surfaceDestroyed(SurfaceHolder holder) {
+			closeLocalCamera();
+			mLocalHolderIsCreate = false;
 		}
 
 	};
@@ -2046,15 +2156,16 @@ public class VideoActivityV2 extends Activity {
 
 	class VideoHandler extends Handler {
 
-		Map<String, V2Doc.PageArray> prLegacy = new HashMap<String, V2Doc.PageArray>();
-
 		@Override
 		public synchronized void handleMessage(Message msg) {
 
 			switch (msg.what) {
 			case ONLY_SHOW_LOCAL_VIDEO:
-				// make sure local view is first front of all;
-				showOrCloseLocalSurViewOnly();
+				// Make sure open local camera after service bound and holder
+				// created
+				if (mLocalHolderIsCreate && mServiceBound) {
+					showLocalSurViewOnly();
+				}
 				break;
 			case REQUEST_OPEN_DEVICE_RESPONSE:
 			case REQUEST_CLOSE_DEVICE_RESPONSE:
@@ -2082,22 +2193,22 @@ public class VideoActivityV2 extends Activity {
 				}
 				break;
 			case ATTENDEE_DEVICE_LISTENER: {
-				// TODO need to update user device when remote user removed
-				// video device.
-				List<UserDeviceConfig> list = (List<UserDeviceConfig>) (((AsyncResult) msg.obj)
-						.getResult());
-				for (UserDeviceConfig ud : list) {
-					Attendee a = findAttendee(ud.getUserID());
-					if (a == null) {
-						continue;
-					}
-					a.addDevice(ud);
-					// Update attendee device
-					// if (mAttendeeContainer != null) {
-					// V2Log.e(TAG, "ATTENDEE_DEVICE_LISTENER 方法调用了update---");
-					// mAttendeeContainer.updateEnteredAttendee(a);
-					// }
-				}
+//				// TODO need to update user device when remote user removed
+//				// video device.
+//				List<UserDeviceConfig> list = (List<UserDeviceConfig>) (((AsyncResult) msg.obj)
+//						.getResult());
+//				for (UserDeviceConfig ud : list) {
+//					Attendee a = findAttendee(ud.getUserID());
+//					if (a == null) {
+//						continue;
+//					}
+//					a.addDevice(ud);
+//					// Update attendee device
+//					// if (mAttendeeContainer != null) {
+//					// V2Log.e(TAG, "ATTENDEE_DEVICE_LISTENER 方法调用了update---");
+//					// mAttendeeContainer.updateEnteredAttendee(a);
+//					// }
+//				}
 
 			}
 				break;
@@ -2111,12 +2222,12 @@ public class VideoActivityV2 extends Activity {
 				}
 				break;
 			case REQUEST_OPEN_OR_CLOSE_DEVICE:
-				if (msg.arg1 == 0) {
+				if (msg.arg1 == TAG_CLOSE_DEVICE) {
 					cb.requestCloseVideoDevice(conf,
 							(UserDeviceConfig) msg.obj, new Registrant(
 									mVideoHandler,
 									REQUEST_CLOSE_DEVICE_RESPONSE, null));
-				} else if (msg.arg1 == 1) {
+				} else if (msg.arg1 == TAG_OPEN_DEVICE) {
 					cb.requestOpenVideoDevice(conf, (UserDeviceConfig) msg.obj,
 							new Registrant(mVideoHandler,
 									REQUEST_OPEN_DEVICE_RESPONSE, null));
@@ -2151,138 +2262,13 @@ public class VideoActivityV2 extends Activity {
 				}
 				break;
 			case NEW_DOC_NOTIFICATION:
-				V2Doc vd = (V2Doc) ((AsyncResult) (msg.obj)).getResult();
-				synchronized (mDocs) {
-					mDocs.put(vd.getId(), vd);
-					// check weather received doc before
-					if (prLegacy.containsKey(vd.getId())) {
-						V2Doc.PageArray vpr = prLegacy.get(vd.getId());
-						for (V2Doc.Page p : vpr.getPr()) {
-							V2Doc.Page existP = vd.findPage(p.getNo());
-							if (existP == null) {
-								vd.addPage(p);
-							}
-						}
-						prLegacy.remove(vd.getId());
-					}
-
-					if (mDocContainer != null) {
-						mDocContainer.addDoc(vd);
-					}
-				}
-				break;
 			case DOC_PAGE_NOTIFICATION:
-				V2Doc.PageArray vpr = (V2Doc.PageArray) ((AsyncResult) (msg.obj))
-						.getResult();
-				V2Doc vc = mDocs.get(vpr.getDocId());
-				// If doesn't receive doc yet, record page array first for
-				// further use.
-				if (vc == null) {
-					prLegacy.put(vpr.getDocId(), vpr);
-					break;
-				}
-				for (V2Doc.Page p : vpr.getPr()) {
-					V2Doc.Page existP = vc.findPage(p.getNo());
-					if (existP == null) {
-						vc.addPage(p);
-					}
-				}
-				if (mDocContainer != null) {
-					mDocContainer.updateLayoutPageInformation();
-					mDocContainer.updatePageButton();
-				}
-				break;
 			case DOC_PAGE_ADDED_NOTIFICATION:
-				V2Doc.Page vpp = (V2Doc.Page) ((AsyncResult) (msg.obj))
-						.getResult();
-				if (vpp != null) {
-					V2Doc v2d = mDocs.get(vpp.getDocId());
-					v2d.addPage(vpp);
-				}
-				if (mDocContainer != null) {
-					mDocContainer.updateLayoutPageInformation();
-					mDocContainer.updatePageButton();
-				}
-				break;
 			case DOC_PAGE_ACTIVITE_NOTIFICATION:
-				V2Doc.Page vpa = (V2Doc.Page) ((AsyncResult) (msg.obj))
-						.getResult();
-				if (vpa != null) {
-					V2Doc v2d = mDocs.get(vpa.getDocId());
-					if (v2d != null) {
-						v2d.setActivatePageNo(vpa.getNo());
-						if (mDocContainer != null) {
-							mDocContainer.updateCurrentDoc(v2d);
-
-						}
-						mCurrentActivateDoc = v2d;
-					}
-				}
-
-				break;
-
 			case DOC_DOWNLOADED_NOTIFICATION:
-				V2Doc.Page vp = (V2Doc.Page) ((AsyncResult) (msg.obj))
-						.getResult();
-				V2Doc cache = mDocs.get(vp.getDocId());
-				Page ppC = cache.findPage(vp.getNo());
-				if (ppC == null) {
-					cache.addPage(vp);
-				} else {
-					ppC.setFilePath(vp.getFilePath());
-				}
-				// try to update current doc's bitmap
-				if (mDocContainer != null
-						&& vp.getDocId().equals(mCurrentActivateDoc.getId())
-						&& vp.getNo() == cache.getActivatePageNo()) {
-					mDocContainer.updateCurrentDoc(mCurrentActivateDoc);
-				}
-				break;
-
 			case DOC_CLOSED_NOTIFICATION:
-				V2Doc removedDoc = (V2Doc) ((AsyncResult) (msg.obj))
-						.getResult();
-				synchronized (mDocs) {
-					removedDoc = mDocs.get(removedDoc.getId());
-					if (removedDoc != null) {
-						if (mDocContainer != null) {
-							mDocContainer.closeDoc(removedDoc);
-						}
-						mDocs.remove(removedDoc.getId());
-					}
-				}
-				break;
-
 			case DOC_PAGE_CANVAS_NOTIFICATION:
-				V2ShapeMeta shape = (V2ShapeMeta) ((AsyncResult) (msg.obj))
-						.getResult();
-				synchronized (mDocs) {
-					V2Doc ca = mDocs.get(shape.getDocId());
-					// FIXME handle ca is null
-					if (ca == null) {
-						V2Log.e(" ERROR " + shape.getDocId());
-						break;
-					}
-					V2Doc.Page caVp = ca.findPage(shape.getPageNo());
-					if (caVp != null) {
-						caVp.addMeta(shape);
-					} else {
-						V2Log.i(" construct new page for canvas"
-								+ shape.getPageNo());
-						V2Doc.Page newPage = new V2Doc.Page(shape.getPageNo(),
-								shape.getDocId(), null, null);
-						newPage.addMeta(shape);
-						caVp = newPage;
-						ca.addPage(newPage);
-					}
-					if (mDocContainer != null
-							&& caVp.getDocId().equals(
-									mCurrentActivateDoc.getId())
-							&& caVp.getNo() == mCurrentActivateDoc
-									.getActivatePageNo()) {
-						mDocContainer.drawShape(caVp.getVsMeta());
-					}
-				}
+				updateDocNotification((AsyncResult) (msg.obj), msg.what);
 				break;
 			case DESKTOP_SYNC_NOTIFICATION:
 				int sync = msg.arg1;

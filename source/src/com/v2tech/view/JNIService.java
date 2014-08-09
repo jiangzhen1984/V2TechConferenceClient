@@ -59,6 +59,7 @@ import com.v2tech.vo.Group;
 import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.NetworkStateCode;
 import com.v2tech.vo.User;
+import com.v2tech.vo.UserDeviceConfig;
 import com.v2tech.vo.VMessage;
 import com.v2tech.vo.VMessageAbstractItem;
 import com.v2tech.vo.VMessageAudioItem;
@@ -682,6 +683,17 @@ public class JNIService extends Service {
 			}
 			Message.obtain(mCallbackHandler, JNI_RECEIVED_VIDEO_INVITION, ind)
 					.sendToTarget();
+		}
+		
+		@Override
+		public void OnRemoteUserVideoDevice(long uid, String szXmlData) {
+			if (szXmlData == null) {
+				V2Log.e(" No avaiable user device configuration");
+				return;
+			}
+			List<UserDeviceConfig> ll = UserDeviceConfig
+					.parseFromXml(uid, szXmlData);
+			GlobalHolder.getInstance().updateUserDevice(uid, ll);
 		}
 
 	}

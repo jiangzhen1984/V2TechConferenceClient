@@ -9,6 +9,7 @@ import com.v2tech.util.XmlParser;
 import com.v2tech.vo.Group;
 import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.User;
+import com.v2tech.vo.V2BlankBoardDoc;
 import com.v2tech.vo.V2Doc;
 import com.v2tech.vo.V2ImageDoc;
 import com.v2tech.vo.V2ShapeMeta;
@@ -130,8 +131,17 @@ public class DocumentService extends AbstractHandler {
 				}
 			}
 
-			notifyListenerWithPending(KEY_NEW_DOC_LISTENER, 0, 0, new V2ImageDoc(
-					szWBoardID, szFileName, g, nBusinessType, u));
+			V2Doc doc = null;
+			//Blank board
+			if (type == 1) {
+				doc =  new V2BlankBoardDoc(
+						szWBoardID, "Blank board", g, nBusinessType, u);
+				
+			} else {
+				doc =  new V2ImageDoc(
+						szWBoardID, szFileName, g, nBusinessType, u);
+			}
+			notifyListenerWithPending(KEY_NEW_DOC_LISTENER, 0, 0,doc);
 
 		}
 

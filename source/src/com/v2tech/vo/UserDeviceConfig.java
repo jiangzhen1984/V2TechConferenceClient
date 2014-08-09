@@ -47,6 +47,7 @@ public class UserDeviceConfig {
 	private int mBusinessType;
 	private SurfaceView mSVHolder;
 	private boolean isShowing;
+	private boolean isEnable;
 
 	private Attendee mBelongsAttendee;
 
@@ -157,6 +158,16 @@ public class UserDeviceConfig {
 		return this.type;
 	}
 
+	
+	
+	public boolean isEnable() {
+		return isEnable;
+	}
+
+	public void setEnable(boolean isEnable) {
+		this.isEnable = isEnable;
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -221,7 +232,9 @@ public class UserDeviceConfig {
 			for (int t = 0; t < videol.getLength(); t++) {
 				Element video = (Element) videol.item(t);
 				String deviceId = video.getAttribute("id");
-				l.add(new UserDeviceConfig(uid, deviceId, null));
+				UserDeviceConfig udc =new UserDeviceConfig(uid, deviceId, null);
+				udc.setEnable("1".equals(video.getAttribute("inuse"))? true: false);
+				l.add(udc);
 			}
 
 		} catch (ParserConfigurationException e) {

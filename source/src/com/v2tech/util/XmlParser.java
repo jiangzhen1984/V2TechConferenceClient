@@ -333,7 +333,7 @@ public class XmlParser {
 				int no = Integer.parseInt(pid);
 				p[no - 1] = new Page(no, docId, null);
 			}
-			pr.setPr(p);
+			pr.addPages(p);
 		} catch (ParserConfigurationException e) {
 			e.printStackTrace();
 		} catch (SAXException e) {
