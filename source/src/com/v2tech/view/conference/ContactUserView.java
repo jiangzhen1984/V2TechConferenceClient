@@ -57,7 +57,7 @@ public class ContactUserView extends LinearLayout {
 	
 	public ContactUserView(Context context, User u, boolean flag , int level) {
 		super(context);
-		this.level = level - 1;
+		this.level = level;
 		initData(u,  flag);
 	}
 

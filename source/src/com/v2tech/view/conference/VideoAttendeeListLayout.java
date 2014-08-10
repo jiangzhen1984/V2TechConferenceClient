@@ -16,7 +16,6 @@ import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextUtils.TruncateAt;
 import android.text.TextWatcher;
-import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -198,7 +197,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 
 			UserDeviceConfig udc = a.getmDevices().get(i);
 			nameTV2.setText("     视频" + i);
-			nameTV2.setTextSize(ctx.getResources().getDimension(R.dimen.video_attendee_device_text_size));
+			nameTV2.setTextSize(16);
 			// Set text color and camera icon
 			childDevices = true;
 			if (initAttendPersons) {
@@ -457,7 +456,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 					v.v.setBackgroundColor(getContext().getResources()
 							.getColor(R.color.attendee_select_bg));
 				} else {
-					v.v.setBackgroundColor(Color.TRANSPARENT);
+					v.v.setBackgroundColor(Color.WHITE);
 				}
 				break;
 			}

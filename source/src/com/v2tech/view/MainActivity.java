@@ -192,6 +192,7 @@ public class MainActivity extends FragmentActivity implements
 			//TODO gray disable button
 			if (i > 0) {
 				tv.setTextColor(Color.rgb(198, 198, 198));
+				ll.setVisibility(View.GONE);
 			} else {
 				tv.setTextColor(Color.rgb(123, 123, 123));
 			}

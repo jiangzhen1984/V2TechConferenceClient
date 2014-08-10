@@ -117,6 +117,9 @@ public class GlobalHolder {
 				if (u.getNickName() != null) {
 					cu.setNickName(u.getNickName());
 				}
+				if (u.getBirthday()  != null) {
+					cu.setBirthday(u.getBirthday());
+				}
 				V2Log.i(" merge user information " + id + " " + cu.getName());
 				return cu;
 			}
@@ -210,7 +213,10 @@ public class GlobalHolder {
 			gSet = mConfGroup;
 		} else if (gType == Group.GroupType.CHATING) {
 			gSet = mCrowdGroup;
+		} else if (gType == Group.GroupType.ORG) {
+			//TODO handle organzation
 		}
+		
 
 		if (gSet == null) {
 			V2Log.e(" doesn't initialize collection " + gType.intValue()

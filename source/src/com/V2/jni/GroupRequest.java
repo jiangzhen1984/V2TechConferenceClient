@@ -100,10 +100,22 @@ public class GroupRequest {
 	public native void acceptApplyJoinGroup(int groupType, String sGroupInfo,
 			long nUserID);
 
-	public native void acceptInviteJoinGroup(int groupType, long t, long nUserID);
+	/**
+	 * 
+	 * @param groupType
+	 * @param t
+	 * @param nUserID
+	 */
+	public native void acceptInviteJoinGroup(int groupType, long groupId, long nUserID);
 
-	public void OnAcceptInviteJoinGroup(int groupType, long t, long nUserID) {
-
+	/**
+	 * 
+	 * @param groupType
+	 * @param t
+	 * @param nUserID
+	 */
+	public void OnAcceptInviteJoinGroup(int groupType, long groupId, long nUserID) {
+		
 	}
 
 	public void OnConfSyncOpenVideo(String str) {
@@ -272,6 +284,9 @@ public class GroupRequest {
 				GroupRequestCallback callback = (GroupRequestCallback) obj;
 				callback.OnInviteJoinGroupCallback(groupType, groupInfo,
 						userInfo, additInfo);
+				
+				V2Log.d("OnInviteJoinGroup::callback===================>" + groupType + ":" + groupInfo + ":"
+						+ userInfo + ":" + additInfo);
 			}
 		}
 

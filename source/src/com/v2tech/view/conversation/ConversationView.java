@@ -75,6 +75,7 @@ import com.v2tech.view.widget.CommonAdapter;
 import com.v2tech.view.widget.CommonAdapter.CommonAdapterItemWrapper;
 import com.v2tech.vo.Conversation;
 import com.v2tech.vo.User;
+import com.v2tech.vo.UserDeviceConfig;
 import com.v2tech.vo.VMessage;
 import com.v2tech.vo.VMessageAbstractItem;
 import com.v2tech.vo.VMessageAudioItem;
@@ -138,8 +139,11 @@ public class ConversationView extends Activity {
 
 	private View mAdditionFeatureContainer;
 
-	private ImageView mSelectImageButtonIV;
+	private View mSmileIconButton;
+	private View mSelectImageButtonIV;
 	private View mSelectFileButtonIV;
+	private View mVideoCallButton;
+	private View mAudioCallButton;
 
 	private ImageView mAudioSpeakerIV;
 
@@ -160,7 +164,6 @@ public class ConversationView extends Activity {
 	private ListView mMessagesContainer;
 
 	private LinearLayout mFaceLayout;
-	private View mSmileIconButton;
 
 	private MessageAdapter adapter;
 
@@ -175,8 +178,6 @@ public class ConversationView extends Activity {
 	private ConversationNotificationObject cov = null;
 
 	private boolean reStart;
-	private ImageView mVideoCallButton;
-	private ImageView mAudioCallButton;
 	private Bundle bundle;
 
 	@Override
@@ -214,19 +215,19 @@ public class ConversationView extends Activity {
 		mMoreFeatureIV = (ImageView) findViewById(R.id.contact_message_plus);
 		mMoreFeatureIV.setOnClickListener(moreFeatureButtonListenr);
 
-		mSmileIconButton = findViewById(R.id.message_smile_icon);
+		mSmileIconButton = findViewById(R.id.message_smile_icon_layout);
 		mSmileIconButton.setOnClickListener(mSmileIconListener);
 
-		mSelectImageButtonIV = (ImageView) findViewById(R.id.contact_message_send_image_button);
+		mSelectImageButtonIV = findViewById(R.id.contact_message_send_image_button_layout);
 		mSelectImageButtonIV.setOnClickListener(selectImageButtonListener);
 
-		mSelectFileButtonIV = findViewById(R.id.contact_message_send_file_button);
+		mSelectFileButtonIV = findViewById(R.id.contact_message_send_file_button_layout);
 		mSelectFileButtonIV.setOnClickListener(mfileSelectionButtonListener);
 
-		mVideoCallButton = (ImageView) findViewById(R.id.contact_message_video_call_button);
+		mVideoCallButton = findViewById(R.id.contact_message_video_call_button_layout);
 		mVideoCallButton.setOnClickListener(mVideoCallButtonListener);
 
-		mAudioCallButton = (ImageView) findViewById(R.id.contact_message_audio_call_button);
+		mAudioCallButton = findViewById(R.id.contact_message_audio_call_button_layout);
 		mAudioCallButton.setOnClickListener(mAudioCallButtonListener);
 
 		mAudioSpeakerIV = (ImageView) findViewById(R.id.contact_message_speaker);
@@ -254,6 +255,15 @@ public class ConversationView extends Activity {
 			backEndHandler = new BackendHandler(thread.getLooper());
 		}
 		initExtraObject(savedInstanceState);
+		// TODO for group conversation
+		if (groupId > 0) {
+			mSelectFileButtonIV.setVisibility(View.INVISIBLE);
+			mVideoCallButton.setVisibility(View.INVISIBLE);
+			mAudioCallButton.setVisibility(View.INVISIBLE);
+			mAudioSpeakerIV.setVisibility(View.INVISIBLE);
+			mShowContactDetailButton.setVisibility(View.INVISIBLE);
+		}
+
 
 		// Register listener for avatar changed
 		BitmapManager.getInstance().registerBitmapChangedListener(
@@ -326,11 +336,17 @@ public class ConversationView extends Activity {
 
 			stopRecording();
 			starttime = 0;
-			File f = new File(fileName);
-			f.deleteOnExit();
-			fileName = null;
+			if (fileName != null) {
+				File f = new File(fileName);
+				f.deleteOnExit();
+				fileName = null;
+			}
 			lh.removeCallbacks(mUpdateMicStatusTimer);
 			lh.removeCallbacks(timeOutMonitor);
+			// Hide voice dialog
+			if (mVoiceDialog != null && mVoiceDialog.isShowing()) {
+				mVoiceDialog.dismiss();
+			}
 		}
 	}
 
@@ -673,25 +689,58 @@ public class ConversationView extends Activity {
 		messageArray.clear();
 	}
 
+	private void startVoiceCall() {
+		Intent iv = new Intent();
+		iv.addCategory(PublicIntent.DEFAULT_CATEGORY);
+		iv.setAction(PublicIntent.START_P2P_CONVERSACTION_ACTIVITY);
+		iv.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		iv.putExtra("uid", user2Id);
+		iv.putExtra("is_coming_call", false);
+		iv.putExtra("voice", true);
+		mContext.startActivity(iv);
+	}
+
+	private void startVideoCall() {
+		Intent iv = new Intent();
+		iv.addCategory(PublicIntent.DEFAULT_CATEGORY);
+		iv.setAction(PublicIntent.START_P2P_CONVERSACTION_ACTIVITY);
+		iv.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		iv.putExtra("uid", user2Id);
+		iv.putExtra("is_coming_call", false);
+		iv.putExtra("voice", false);
+		List<UserDeviceConfig> list = GlobalHolder.getInstance()
+				.getAttendeeDevice(user2Id);
+		if (list != null && list.size() > 0) {
+			iv.putExtra("device", list.get(0).getDeviceID());
+		} else {
+			iv.putExtra("device", "");
+		}
+		mContext.startActivity(iv);
+	}
+
 	private PlayerCallback mAACPlayerCallback = new PlayerCallback() {
 
 		@Override
 		public void playerStarted() {
 			currentPlayed.getAudioItems().get(0).setPlaying(true);
-			runOnUiThread(new Runnable(){
+			runOnUiThread(new Runnable() {
 
 				@Override
 				public void run() {
-					
+
 					for (int i = 0; i < messageArray.size(); i++) {
 						CommonAdapterItemWrapper wrapper = messageArray.get(i);
 						VMessage vm = (VMessage) wrapper.getItemObject();
 						if (vm == currentPlayed) {
-							((MessageBodyView)wrapper.getView()).startVoiceAnimation();
+							((MessageBodyView) wrapper.getView())
+									.startVoiceAnimation();
 						}
 					}
-				}});
-			V2Log.i(TAG, "设置当前audio正在播放标识 true：" + currentPlayed.getId() + "currentPlayed集合长度：" + currentPlayed.getAudioItems().size());
+				}
+			});
+			V2Log.i(TAG, "设置当前audio正在播放标识 true：" + currentPlayed.getId()
+					+ "currentPlayed集合长度："
+					+ currentPlayed.getAudioItems().size());
 		}
 
 		@Override
@@ -705,28 +754,31 @@ public class ConversationView extends Activity {
 
 		@Override
 		public synchronized void playerStopped(int perf) {
-			
-			if(currentFlag == true){
+
+			if (currentFlag == true) {
 				currentFlag = false;
 				return;
 			}
-			
+
 			if (currentPlayed != null
 					&& currentPlayed.getAudioItems().size() > 0) {
 				currentPlayed.getAudioItems().get(0).setPlaying(false);
-				runOnUiThread(new Runnable(){
+				runOnUiThread(new Runnable() {
 
 					@Override
 					public void run() {
-						
+
 						for (int i = 0; i < messageArray.size(); i++) {
-							CommonAdapterItemWrapper wrapper = messageArray.get(i);
+							CommonAdapterItemWrapper wrapper = messageArray
+									.get(i);
 							VMessage vm = (VMessage) wrapper.getItemObject();
 							if (vm == currentPlayed) {
-								((MessageBodyView)wrapper.getView()).stopVoiceAnimation();
+								((MessageBodyView) wrapper.getView())
+										.stopVoiceAnimation();
 							}
 						}
-					}});
+					}
+				});
 				V2Log.i(TAG, "设置当前audio正在播放标识 false：" + currentPlayed.getId());
 			}
 			// Call in main thread
@@ -1024,20 +1076,20 @@ public class ConversationView extends Activity {
 	private View.OnClickListener mVideoCallButtonListener = new View.OnClickListener() {
 		@Override
 		public void onClick(View arg0) {
-			// if (!SPUtil.checkCurrentAviNetwork(mContext)) {
-			// Toast.makeText(mContext,
-			// R.string.conversation_no_network_notification,
-			// Toast.LENGTH_SHORT).show();
-			// return;
-			// }
-			// startVideoCall();
+			if (!SPUtil.checkCurrentAviNetwork(mContext)) {
+				Toast.makeText(mContext,
+						R.string.conversation_no_network_notification,
+						Toast.LENGTH_SHORT).show();
+				return;
+			}
+			startVideoCall();
 		}
 	};
 
 	private View.OnClickListener mAudioCallButtonListener = new View.OnClickListener() {
 		@Override
 		public void onClick(View arg0) {
-
+			startVoiceCall();
 		}
 	};
 
@@ -1140,6 +1192,7 @@ public class ConversationView extends Activity {
 			}
 			VMessage vim = MessageBuilder.buildImageMessage(local, remote,
 					filePath);
+			vim.setGroupId(groupId);
 			// Send message to server
 			sendMessageToRemote(vim);
 		} else if (requestCode == RECEIVE_SELECTED_FILE) {
@@ -1381,6 +1434,7 @@ public class ConversationView extends Activity {
 			// type 0: is not group image view
 			// type 1: group image view
 			i.putExtra("type", groupId == 0 ? 0 : 1);
+			i.putExtra("gid", groupId);
 			mContext.startActivity(i);
 		}
 
@@ -1505,13 +1559,14 @@ public class ConversationView extends Activity {
 
 		@Override
 		public void requestStopOtherAudio(VMessage vm) {
-			if(currentPlayed == null || currentPlayed.getId() == vm.getId()){
-				return ;
+			if (currentPlayed == null || currentPlayed.getId() == vm.getId()) {
+				return;
 			}
-			V2Log.i(TAG, "停止了当前正在播放的currentPlayingAudio:--" + currentPlayed.getId());
+			V2Log.i(TAG,
+					"停止了当前正在播放的currentPlayingAudio:--" + currentPlayed.getId());
 			currentFlag = true;
 			currentPlayed.getAudioItems().get(0).setPlaying(false);
-			runOnUiThread(new Runnable(){
+			runOnUiThread(new Runnable() {
 
 				@Override
 				public void run() {
@@ -1519,7 +1574,8 @@ public class ConversationView extends Activity {
 						CommonAdapterItemWrapper wrapper = messageArray.get(i);
 						VMessage vm = (VMessage) wrapper.getItemObject();
 						if (vm == currentPlayed) {
-							((MessageBodyView)wrapper.getView()).stopVoiceAnimation();
+							((MessageBodyView) wrapper.getView())
+									.stopVoiceAnimation();
 						}
 					}
 				}
@@ -1551,8 +1607,9 @@ public class ConversationView extends Activity {
 	private boolean queryAndAddMessage(final int msgId) {
 
 		VMessage m = MessageLoader.loadMessageById(mContext, msgId);
-		if (m == null || (m.getFromUser().getmUserId() != this.user2Id && m.getGroupId() == 0)
-				|| (m.getGroupId() != this.groupId)) {
+		if (m == null
+				|| (m.getFromUser().getmUserId() != this.user2Id && m
+						.getGroupId() == 0) || (m.getGroupId() != this.groupId)) {
 			return false;
 		}
 		MessageBodyView mv = new MessageBodyView(this, m, true);
@@ -1886,6 +1943,8 @@ public class ConversationView extends Activity {
 				removeMessage((VMessage) msg.obj);
 				MessageLoader.deleteMessage(mContext, (VMessage) msg.obj);
 				adapter.notifyDataSetChanged();
+				//Update conversation
+				notificateConversationUpdate();
 				break;
 			case FILE_STATUS_LISTENER:
 				FileTransStatusIndication ind = (FileTransStatusIndication) (((AsyncResult) msg.obj)

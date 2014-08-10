@@ -55,6 +55,7 @@ import com.v2tech.view.bo.UserAvatarObject;
 import com.v2tech.view.bo.UserStatusObject;
 import com.v2tech.view.conversation.MessageBuilder;
 import com.v2tech.vo.ConferenceGroup;
+import com.v2tech.vo.CrowdGroup;
 import com.v2tech.vo.Group;
 import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.NetworkStateCode;
@@ -92,7 +93,7 @@ public class JNIService extends Service {
 	public static final String JNI_BROADCAST_NEW_MESSAGE = "com.v2tech.jni.broadcast.new.message";
 	public static final String JNI_BROADCAST_MESSAGE_SENT_FAILED = "com.v2tech.jni.broadcast.message_sent_failed";
 	public static final String JNI_BROADCAST_NEW_CONF_MESSAGE = "com.v2tech.jni.broadcast.new.conf.message";
-	public static final String JNI_BROADCAST_CONFERENCE_INVATITION = "com.v2tech.jni.broadcast.conference_invatition";
+	public static final String JNI_BROADCAST_CONFERENCE_INVATITION = "com.v2tech.jni.broadcast.conference_invatition_new";
 	public static final String JNI_BROADCAST_CONFERENCE_REMOVED = "com.v2tech.jni.broadcast.conference_removed";
 	public static final String JNI_BROADCAST_GROUP_USER_REMOVED = "com.v2tech.jni.broadcast.group_user_removed";
 	public static final String JNI_BROADCAST_GROUP_USER_ADDED = "com.v2tech.jni.broadcast.group_user_added";
@@ -337,8 +338,8 @@ public class JNIService extends Service {
 						GroupType.CONFERENCE, g.getmGId());
 				// conference already in cache list
 				if (cache != null && g.getmGId() != 0) {
-					V2Log.i("Current user conference in group:" + cache.getName()
-							+ "  " + cache.getmGId());
+					V2Log.i("Current user conference in group:"
+							+ cache.getName() + "  " + cache.getmGId());
 					return;
 				}
 				GroupRequest.getInstance().getGroupInfo(
@@ -350,7 +351,7 @@ public class JNIService extends Service {
 					i.setAction(JNIService.JNI_BROADCAST_CONFERENCE_INVATITION);
 					i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
 					i.putExtra("gid", g.getmGId());
-					sendStickyBroadcast(i);
+					sendBroadcast(i);
 				}
 				break;
 			case JNI_RECEIVED_MESSAGE:
@@ -550,10 +551,17 @@ public class JNIService extends Service {
 				Group g = ConferenceGroup
 						.parseConferenceGroupFromXML(groupInfo);
 				if (g != null) {
-					//Send message for synchronization
+					// Send message for synchronization
 					Message.obtain(mCallbackHandler, JNI_CONFERENCE_INVITATION,
 							g).sendToTarget();
 				}
+			} else if (gType == GroupType.CHATING) {
+				//TODO just accept automatically
+				Group g = CrowdGroup.parseXml(groupInfo);
+				GlobalHolder.getInstance().addGroupToList(GroupType.CHATING, g);
+				GroupRequest.getInstance().acceptInviteJoinGroup(groupType,
+						g.getmGId(),
+						GlobalHolder.getInstance().getCurrentUserId());
 			}
 		}
 
@@ -640,6 +648,15 @@ public class JNIService extends Service {
 
 		@Override
 		public void OnAudioChatInvite(AudioJNIObjectInd ind) {
+			// FIXME if in video automatically accept audio.
+			// because audio and video use different message
+			// Need to handle other user audio call
+			if (GlobalHolder.getInstance().isInVideoCall()) {
+				AudioRequest.getInstance().AcceptAudioChat(ind.getGroupId(),
+						ind.getFromUserId(), V2GlobalEnum.REQUEST_TYPE_IM);
+				return;
+			}
+
 			if (GlobalHolder.getInstance().isInMeeting()
 					|| GlobalHolder.getInstance().isInAudioCall()
 					|| GlobalHolder.getInstance().isInVideoCall()) {
@@ -684,15 +701,15 @@ public class JNIService extends Service {
 			Message.obtain(mCallbackHandler, JNI_RECEIVED_VIDEO_INVITION, ind)
 					.sendToTarget();
 		}
-		
+
 		@Override
 		public void OnRemoteUserVideoDevice(long uid, String szXmlData) {
 			if (szXmlData == null) {
 				V2Log.e(" No avaiable user device configuration");
 				return;
 			}
-			List<UserDeviceConfig> ll = UserDeviceConfig
-					.parseFromXml(uid, szXmlData);
+			List<UserDeviceConfig> ll = UserDeviceConfig.parseFromXml(uid,
+					szXmlData);
 			GlobalHolder.getInstance().updateUserDevice(uid, ll);
 		}
 
@@ -706,7 +723,7 @@ public class JNIService extends Service {
 		@Override
 		public void OnConfNotify(String confXml, String creatorXml) {
 			Group g = ConferenceGroup.parseConferenceGroupFromXML(confXml);
-
+			V2Log.e("==================notification============"+creatorXml);
 			int start = confXml.indexOf("createuserid='");
 			int end = confXml.indexOf("'", start + 14);
 

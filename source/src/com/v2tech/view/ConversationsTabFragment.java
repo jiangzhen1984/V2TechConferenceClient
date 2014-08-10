@@ -528,8 +528,12 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher, C
 				existedCov = new ContactConversation(GlobalHolder.getInstance()
 						.getUser(extId));
 			} else if (mCurrentTabFlag.equals(Conversation.TYPE_GROUP)) {
-				existedCov = new CrowdConversation(GlobalHolder.getInstance()
-						.getGroupById(GroupType.CHATING, extId));
+				Group g = GlobalHolder.getInstance().findGroupById(extId);
+				//Handle for department chatting
+				if (g == null) {
+					 return;
+				}
+				existedCov = new CrowdConversation(g);
 			}
 			if (mCurrentTabFlag.equals(Conversation.TYPE_CONTACT)) {
 				User fromUser = GlobalHolder.getInstance().getUser(extId);
@@ -672,6 +676,10 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher, C
 	private ProgressDialog mWaitingDialog;
 
 	private void requestJoinConf(long gid) {
+		if (currentEntered != null) {
+			V2Log.e("Already in meeting "+currentEntered.getId());
+			return;
+		}
 		mWaitingDialog = ProgressDialog.show(
 				mContext,
 				"",
@@ -750,9 +758,17 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher, C
 
 	private OnItemClickListener mItemClickListener = new OnItemClickListener() {
 
+		long lasttime;
 		@Override
 		public void onItemClick(AdapterView<?> adapter, View v, int pos, long id) {
-			// hiden notificator
+			if (System.currentTimeMillis() - lasttime < 300) {
+				V2Log.w("Too short pressed");
+				return;
+			}
+			
+			lasttime = System.currentTimeMillis();
+			
+			// hide notificator
 			((GroupLayout) mItemList.get(pos).gp).updateNotificator(false);
 			Conversation cov = mConvList.get(pos);
 			if (mCurrentTabFlag == Conversation.TYPE_CONFERNECE) {
@@ -770,7 +786,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher, C
 			//update main activity notificator
 			cov.setReadFlag(Conversation.READ_FLAG_READ);
 			updateUnreadConversation(cov);
-
+			
 		}
 	};
 
@@ -946,7 +962,6 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher, C
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			super.onReceive(context, intent);
-
 			if (JNIService.JNI_BROADCAST_CONFERENCE_INVATITION.equals(intent
 					.getAction())) {
 				long gid = intent.getLongExtra("gid", 0);
@@ -1015,6 +1030,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher, C
 					List<Group> gl = GlobalHolder.getInstance().getGroup(
 							Group.GroupType.CONFERENCE);
 					if (gl != null && gl.size() > 0 && !isLoadedCov) {
+						V2Log.e("===================="+gl.size());
 						populateConversation(gl);
 					}
 				} else if (mCurrentTabFlag.equals(Conversation.TYPE_GROUP)) {

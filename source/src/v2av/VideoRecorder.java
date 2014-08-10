@@ -353,24 +353,24 @@ public class VideoRecorder
 	    	return false;
 	    }
 
-	    Camera.Parameters para = mCamera.getParameters();
-		para.setPreviewSize(mSrcWidth, mSrcHeight);
-		para.setPreviewFrameRate(mFrameRate);
-		para.setPreviewFormat(mPreviewFormat);
-		mCamera.setParameters(para);
-		
-		int result;
-		if (device.frontCameraType == FrontFacingCameraType.Android23)
-		{
-			result = (device.orientation + DisplayRotation) % 360;
-			result = (360 - result) % 360;  // compensate the mirror
-		}
-		else
-		{
-			// back-facing
-			result = (device.orientation - DisplayRotation + 360) % 360;
-		}
-		mCamera.setDisplayOrientation(result);
+//	    Camera.Parameters para = mCamera.getParameters();
+//		para.setPreviewSize(mSrcWidth, mSrcHeight);
+//		para.setPreviewFrameRate(mFrameRate);
+//		para.setPreviewFormat(mPreviewFormat);
+//		mCamera.setParameters(para);
+//		
+//		int result;
+//		if (device.frontCameraType == FrontFacingCameraType.Android23)
+//		{
+//			result = (device.orientation + DisplayRotation) % 360;
+//			result = (360 - result) % 360;  // compensate the mirror
+//		}
+//		else
+//		{
+//			// back-facing
+//			result = (device.orientation - DisplayRotation + 360) % 360;
+//		}
+//		mCamera.setDisplayOrientation(result);
 
 		return true;
 	}

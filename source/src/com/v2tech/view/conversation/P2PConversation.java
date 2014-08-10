@@ -2,6 +2,7 @@ package com.v2tech.view.conversation;
 
 import java.util.List;
 
+import v2av.VideoCaptureDevInfo;
 import v2av.VideoPlayer;
 import v2av.VideoRecorder;
 import android.app.Activity;
@@ -10,9 +11,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.PixelFormat;
 import android.graphics.drawable.ColorDrawable;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
@@ -23,13 +21,14 @@ import android.os.Looper;
 import android.os.Message;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
+import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
-import android.view.WindowManager;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -42,6 +41,7 @@ import com.v2tech.service.jni.RequestChatServiceResponse;
 import com.v2tech.util.V2Log;
 import com.v2tech.view.JNIService;
 import com.v2tech.view.PublicIntent;
+import com.v2tech.vo.CameraConfiguration;
 import com.v2tech.vo.NetworkStateCode;
 import com.v2tech.vo.User;
 import com.v2tech.vo.UserChattingObject;
@@ -89,7 +89,7 @@ public class P2PConversation extends Activity implements
 	private SurfaceView mRemoteSurface;
 
 	private MediaPlayer mPlayer;
-	
+
 	private boolean isOpenedRemote;
 	private boolean isStoped;
 	private boolean isOpenedLocal;
@@ -241,10 +241,9 @@ public class P2PConversation extends Activity implements
 		V2Log.e("    open local holder"
 				+ getSurfaceHolder(SURFACE_HOLDER_TAG_LOCAL));
 		VideoRecorder.VideoPreviewSurfaceHolder = getSurfaceHolder(SURFACE_HOLDER_TAG_LOCAL);
-		VideoRecorder.VideoPreviewSurfaceHolder
-				.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
-		VideoRecorder.VideoPreviewSurfaceHolder
-				.setFormat(PixelFormat.TRANSPARENT);
+		VideoCaptureDevInfo.CreateVideoCaptureDevInfo()
+		.updateCameraOrientation(Surface.ROTATION_270);
+		
 		UserChattingObject selfUCD = new UserChattingObject(GlobalHolder
 				.getInstance().getCurrentUser(), 0, "");
 		chatService.openVideoDevice(selfUCD, null);
@@ -252,7 +251,11 @@ public class P2PConversation extends Activity implements
 
 	@Override
 	public void reverseLocalCamera() {
-
+		boolean flag = VideoCaptureDevInfo.CreateVideoCaptureDevInfo()
+				.reverseCamera();
+		if (flag) {
+			chatService.updateCameraParameters(new CameraConfiguration(""), null);
+		}
 	}
 
 	@Override
@@ -761,8 +764,16 @@ public class P2PConversation extends Activity implements
 			V2Log.w(" Remote device already opened ");
 			return;
 		}
-		V2Log.e("++++++ remote holder"
-				+ getSurfaceHolder(SURFACE_HOLDER_TAG_REMOTE));
+		if (!isOpenedLocal) {
+			mLocalHandler.postDelayed(new Runnable()  {
+
+				@Override
+				public void run() {
+					openRemoteVideo();
+				}
+				
+			}, 1000);
+		}
 		VideoPlayer vp = uad.getVp();
 		if (vp == null) {
 			vp = new VideoPlayer();
@@ -815,13 +826,14 @@ public class P2PConversation extends Activity implements
 			mRemoteSurface.setZOrderOnTop(false);
 			mRemoteSurface.setOnClickListener(null);
 		}
-		
+
 		mLcalSurface.setLayoutParams(backLP);
 		mRemoteSurface.setLayoutParams(smallP);
 
 		bringButtonsToFront();
-		
-		findViewById(R.id.fragment_conversation_connected_video_container).invalidate();
+
+		findViewById(R.id.fragment_conversation_connected_video_container)
+				.invalidate();
 	}
 
 	private void bringButtonsToFront() {
@@ -840,9 +852,8 @@ public class P2PConversation extends Activity implements
 		if (mReverseCameraButton != null) {
 			mReverseCameraButton.bringToFront();
 		}
-		
-		v = findViewById(
-				R.id.conversation_fragment_outing_video_card_container);
+
+		v = findViewById(R.id.conversation_fragment_outing_video_card_container);
 		if (v != null) {
 			v.bringToFront();
 		}
@@ -877,15 +888,25 @@ public class P2PConversation extends Activity implements
 
 		@Override
 		public void onClick(final View view) {
+			// view.setEnabled(false);
+			// exchangeSurfaceHolder();
+			// mLocalHandler.postDelayed(new Runnable() {
+			//
+			// @Override
+			// public void run() {
+			// view.setEnabled(true);
+			// }
+			//
+			// }, 500);
 			view.setEnabled(false);
-			exchangeSurfaceHolder();
+			reverseLocalCamera();
 			mLocalHandler.postDelayed(new Runnable() {
 
 				@Override
 				public void run() {
 					view.setEnabled(true);
 				}
-				
+
 			}, 500);
 		}
 
@@ -1130,9 +1151,6 @@ public class P2PConversation extends Activity implements
 
 		@Override
 		public void surfaceCreated(SurfaceHolder holder) {
-			Canvas canvas = holder.lockCanvas();
-			canvas.drawColor(Color.GRAY);
-			holder.unlockCanvasAndPost(canvas);
 			if (uad.isConnected()) {
 				V2Log.e("Create new holder " + holder);
 				openRemoteVideo();
@@ -1141,7 +1159,7 @@ public class P2PConversation extends Activity implements
 
 		@Override
 		public void surfaceDestroyed(SurfaceHolder holder) {
-			if (uad.isConnected()) {
+			if (uad.isConnected() && !isOpenedRemote) {
 				closeRemoteVideo();
 			}
 		}
@@ -1153,18 +1171,23 @@ public class P2PConversation extends Activity implements
 		@Override
 		public void surfaceChanged(SurfaceHolder holder, int flag, int width,
 				int height) {
-			if (!isStoped) {
+			if (!isStoped && !isOpenedLocal) {
 				openLocalCamera();
 			}
 		}
 
 		@Override
 		public void surfaceCreated(SurfaceHolder holder) {
+			if (isStoped) {
+				return;
+			}
+			if (isOpenedLocal) {
+				closeLocalCamera();
+			}
+			holder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
+
 			// when conversation is connected or during outing call
 			if (uad.isConnected() || (!uad.isConnected() && !uad.isIncoming())) {
-				Canvas canvas = holder.lockCanvas();
-				canvas.drawColor(Color.GRAY);
-				holder.unlockCanvasAndPost(canvas);
 				V2Log.e("Create new holder " + holder);
 				openLocalCamera();
 			}
@@ -1172,7 +1195,9 @@ public class P2PConversation extends Activity implements
 
 		@Override
 		public void surfaceDestroyed(SurfaceHolder holder) {
-			closeLocalCamera();
+			if (isOpenedLocal) {
+				closeLocalCamera();
+			}
 		}
 
 	};
@@ -1192,14 +1217,16 @@ public class P2PConversation extends Activity implements
 				}
 			} else if (Intent.ACTION_SCREEN_ON.equals(intent.getAction())) {
 			} else if (Intent.ACTION_SCREEN_OFF.equals(intent.getAction())) {
-				if (uad.isVideoType() && (!uad.isConnected() && uad.isIncoming())) {
+				if (uad.isVideoType()
+						&& (!uad.isConnected() && uad.isIncoming())) {
 					closeLocalCamera();
 					if (uad.isConnected()) {
 						closeRemoteVideo();
 					}
 				}
 			} else if (Intent.ACTION_USER_PRESENT.equals(intent.getAction())) {
-				if (uad.isVideoType()&& (!uad.isConnected() && uad.isIncoming())) {
+				if (uad.isVideoType()
+						&& (!uad.isConnected() && uad.isIncoming())) {
 					openLocalCamera();
 					if (uad.isConnected()) {
 						openRemoteVideo();
@@ -1259,6 +1286,9 @@ public class P2PConversation extends Activity implements
 								.sendToTarget();
 					} else if (rcsr.getCode() == RequestChatServiceResponse.ACCEPTED) {
 						uad.setConnected(true);
+						// Send audio invitation
+						// Do not need to modify any values. because this API will handler this case
+						chatService.inviteUserChat(uad, null);
 						// Notice do not open remote video at here
 						// because we must open remote video after get video
 						// connected event

@@ -224,6 +224,9 @@ public class VideoActivityV2 extends Activity {
 		// setting button
 		this.mSettingIV = (ImageView) findViewById(R.id.in_meeting_setting_iv);
 		this.mSettingIV.setOnClickListener(mShowSettingListener);
+		//TODO hide for temp release
+		this.mSettingIV.setVisibility(View.INVISIBLE);
+		
 		// request exit button
 		this.mQuitIV = (ImageView) findViewById(R.id.in_meeting_log_out_iv);
 		this.mQuitIV.setOnClickListener(mShowQuitWindowListener);
@@ -1768,9 +1771,6 @@ public class VideoActivityV2 extends Activity {
 		@Override
 		public void surfaceCreated(SurfaceHolder holder) {
 			V2Log.e("Create new holder " + holder);
-			Canvas canvas = holder.lockCanvas();
-			canvas.drawColor(Color.GRAY);
-			holder.unlockCanvasAndPost(canvas);
 			mLocalHolderIsCreate = true;
 			Message.obtain(mVideoHandler, ONLY_SHOW_LOCAL_VIDEO).sendToTarget();
 		}
@@ -2106,8 +2106,6 @@ public class VideoActivityV2 extends Activity {
 	}
 
 	class MixedSurfaceViewW extends SurfaceViewW {
-
-		AttendeeMixedDevice at;
 
 		public MixedSurfaceViewW(AttendeeMixedDevice at) {
 			this.at = at;

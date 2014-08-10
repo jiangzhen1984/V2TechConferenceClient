@@ -23,6 +23,7 @@ import com.v2tech.service.jni.RequestChatServiceResponse;
 import com.v2tech.service.jni.RequestSendMessageResponse;
 import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.V2Log;
+import com.v2tech.vo.CameraConfiguration;
 import com.v2tech.vo.UserChattingObject;
 import com.v2tech.vo.UserDeviceConfig;
 import com.v2tech.vo.VMessage;
@@ -53,9 +54,12 @@ import com.v2tech.vo.VMessageImageItem;
  * {@link #muteChatting(UserChattingObject, Registrant)}</li>
  * <li>
  * Operation file when transport file<br>
- * Notice: this operation doesn't contain send re-send operation. Send file use {@link #sendVMessage(VMessage, Registrant)}<br>
- * But when send file in progress, resume or cancel or suspend use this function.
- * {@link #updateFileOperation(VMessageFileItem, FileOperationEnum, Registrant)}<br>
+ * Notice: this operation doesn't contain send re-send operation. Send file use
+ * {@link #sendVMessage(VMessage, Registrant)}<br>
+ * But when send file in progress, resume or cancel or suspend use this
+ * function.
+ * {@link #updateFileOperation(VMessageFileItem, FileOperationEnum, Registrant)}
+ * <br>
  * </li>
  * 
  * </p>
@@ -114,23 +118,21 @@ public class ChatService extends AbstractHandler {
 	}
 
 	/**
-	 * Register listener for video connected, after this notification. can open remote video device
+	 * Register listener for video connected, after this notification. can open
+	 * remote video device
 	 * 
 	 * @param msg
 	 */
-	public void registerVideoChatConnectedListener(Handler h, int what, Object obj) {
-		registerListener(KEY_VIDEO_CONNECTED, h, what,
-				obj);
-	}
-
-	public void removeVideoChatConnectedistener(Handler h, int what,
+	public void registerVideoChatConnectedListener(Handler h, int what,
 			Object obj) {
-		unRegisterListener(KEY_VIDEO_CONNECTED, h, what,
-				obj);
+		registerListener(KEY_VIDEO_CONNECTED, h, what, obj);
+	}
+
+	public void removeVideoChatConnectedistener(Handler h, int what, Object obj) {
+		unRegisterListener(KEY_VIDEO_CONNECTED, h, what, obj);
 
 	}
-	
-	
+
 	/**
 	 * Register listener for out conference by kick.
 	 * 
@@ -147,8 +149,6 @@ public class ChatService extends AbstractHandler {
 				obj);
 
 	}
-	
-	
 
 	/**
 	 * send message
@@ -324,12 +324,24 @@ public class ChatService extends AbstractHandler {
 		this.mCaller = caller;
 
 		if (ud.isAudioType()) {
+
 			AudioRequest.getInstance().InviteAudioChat(ud.getGroupdId(),
 					ud.getUser().getmUserId(), V2GlobalEnum.REQUEST_TYPE_IM);
+
 		} else if (ud.isVideoType()) {
-			VideoRequest.getInstance().inviteVideoChat(ud.getGroupdId(),
-					ud.getUser().getmUserId(), ud.getDeviceId(),
-					V2GlobalEnum.REQUEST_TYPE_IM);
+
+			// If connected, send audio message
+			if (ud.isConnected()) {
+				AudioRequest.getInstance()
+						.InviteAudioChat(ud.getGroupdId(),
+								ud.getUser().getmUserId(),
+								V2GlobalEnum.REQUEST_TYPE_IM);
+			} else {
+				VideoRequest.getInstance().inviteVideoChat(ud.getGroupdId(),
+						ud.getUser().getmUserId(), ud.getDeviceId(),
+						V2GlobalEnum.REQUEST_TYPE_IM);
+			}
+
 		}
 	}
 
@@ -365,6 +377,11 @@ public class ChatService extends AbstractHandler {
 				VideoRequest.getInstance().closeVideoChat(ud.getGroupdId(),
 						ud.getUser().getmUserId(), ud.getDeviceId(),
 						V2GlobalEnum.REQUEST_TYPE_IM);
+
+				AudioRequest.getInstance()
+						.CloseAudioChat(ud.getGroupdId(),
+								ud.getUser().getmUserId(),
+								V2GlobalEnum.REQUEST_TYPE_IM);
 			} else {
 				VideoRequest.getInstance().refuseVideoChat(ud.getGroupdId(),
 						ud.getUser().getmUserId(), ud.getDeviceId(),
@@ -515,8 +532,29 @@ public class ChatService extends AbstractHandler {
 			sendResult(caller, resp);
 		}
 	}
-	
-	
+
+	/**
+	 * Update current user's camera. Including front-side or back-side camera
+	 * switch.
+	 * 
+	 * @param cc
+	 *            {@link CameraConfiguration}
+	 * @param caller
+	 *            if input is null, ignore response Message.object is
+	 *            {@link com.v2tech.service.jni.RequestUpdateCameraParametersResponse}
+	 */
+	public void updateCameraParameters(CameraConfiguration cc, Registrant caller) {
+		if (cc == null) {
+			JNIResponse resp = new RequestChatServiceResponse(
+					RequestChatServiceResponse.Result.INCORRECT_PAR);
+			sendResult(caller, resp);
+			return;
+		}
+
+		VideoRequest.getInstance().setCapParam(cc.getDeviceId(),
+				cc.getCameraIndex(), cc.getFrameRate(), cc.getBitRate());
+	}
+
 	public void suspendOrResumeAudio(boolean flag) {
 		if (flag) {
 			AudioRequest.getInstance().ResumePlayout();
@@ -531,7 +569,9 @@ public class ChatService extends AbstractHandler {
 		public void OnVideoChatAccepted(VideoJNIObjectInd ind) {
 			if (mCaller != null) {
 				JNIResponse resp = new RequestChatServiceResponse(
-						RequestChatServiceResponse.ACCEPTED, ind.getFromUserId(), ind.getGroupId(), ind.getDeviceId(),
+						RequestChatServiceResponse.ACCEPTED,
+						ind.getFromUserId(), ind.getGroupId(),
+						ind.getDeviceId(),
 						RequestChatServiceResponse.Result.SUCCESS);
 				sendResult(mCaller, resp);
 				mCaller = null;
@@ -555,7 +595,7 @@ public class ChatService extends AbstractHandler {
 			// Clean cache
 			mCaller = null;
 		}
-		
+
 		@Override
 		public void OnVideoChating(VideoJNIObjectInd ind) {
 			notifyListener(KEY_VIDEO_CONNECTED, 0, 0, ind);
@@ -593,7 +633,6 @@ public class ChatService extends AbstractHandler {
 
 		@Override
 		public void OnAudioChatInvite(AudioJNIObjectInd ind) {
-
 		}
 
 		@Override
@@ -602,8 +641,6 @@ public class ChatService extends AbstractHandler {
 			// Clean cache
 			mCaller = null;
 		}
-		
-		
 
 	}
 
