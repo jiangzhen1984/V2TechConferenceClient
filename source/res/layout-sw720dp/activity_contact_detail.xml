@@ -814,6 +814,7 @@
             </LinearLayout>
 
             <LinearLayout
+                android:id="@+id/contact_user_detail_call_bottom_button"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="0.16"
@@ -825,7 +826,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="right|center_vertical"
-                    android:src="@drawable/contact_detail_call_button_disable" />
+                    android:src="@drawable/contact_detail_call_button" />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -836,7 +837,7 @@
                     android:paddingRight="10dp"
                     android:paddingTop="10dp"
                     android:text="@string/contacts_user_detail_button_call"
-                    android:textColor="#c2c2c2"
+                    android:textColor="@color/contact_detail_button_font_color"
                     android:textSize="@dimen/common_item_text_size" />
             </LinearLayout>
 

@@ -74,7 +74,7 @@ public class GroupLayout extends LinearLayout {
 			mGroupIV.setImageResource(R.drawable.conference_icon);
 		}
 		else if(this.mConv.getType().equals(Conversation.TYPE_GROUP)) {
-			mGroupIV.setImageResource(R.drawable.conference_icon);
+			mGroupIV.setImageResource(R.drawable.chat_group_icon);
 		}
 
 		mGroupNameTV.setText(this.mConv.getName());

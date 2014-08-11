@@ -20,15 +20,19 @@ public class VideoDeviceAndroid
 		
 		StringBuilder sb = new StringBuilder();
 		sb.append("<devicelist>");
-		
 		for (int i = 0; i < devNum; i++)
 		{
 			VideoCaptureDevice dev = mCapDevInfo.deviceList.get(i);
-			
+			int frameSize = dev.framerates.size();
 			sb.append("<device devName='");
 			sb.append(dev.deviceUniqueName);
 			sb.append("' fps='");
-			sb.append(dev.framerates.last());
+			if(frameSize > 0 && dev.framerates.get(frameSize - i - 1) != null){
+				sb.append(dev.framerates.get(frameSize - i - 1));
+			}
+			else{
+				sb.append(15);
+			}
 			sb.append("'>");
 			
 			for (CaptureCapability cap : dev.capabilites)

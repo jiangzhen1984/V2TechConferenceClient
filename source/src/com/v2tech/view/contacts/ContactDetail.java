@@ -10,6 +10,7 @@ import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -100,6 +101,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 	private EditText[] mETArr;
 
 	private boolean isUpdating;
+	private boolean isPad;
 
 	private Date bir;
 	private String fromPlace;
@@ -109,6 +111,10 @@ public class ContactDetail extends Activity implements OnTouchListener {
 		super.onCreate(savedInstanceState);
 
 		this.setContentView(R.layout.activity_contact_detail);
+		Configuration configuration = getResources().getConfiguration();
+		if(configuration.smallestScreenWidthDp > 600){
+			isPad = true;
+		}
 		mUid = this.getIntent().getLongExtra("uid", 0);
 		fromPlace = this.getIntent().getStringExtra("fromPlace");
 		initView();
@@ -501,29 +507,39 @@ public class ContactDetail extends Activity implements OnTouchListener {
 					.getmStatus() == User.Status.HIDDEN);
 
 			if (offline) {
-				if (phoneEmpty && mobileEmpty) {
-					Intent intent = new Intent();
-					intent.setAction(Intent.ACTION_DIAL); // android.intent.action.DIAL
-					startActivity(intent);
-				} else if (!phoneEmpty && !mobileEmpty) {
-					showCallDialog(u.getTelephone(), u.getCellPhone(), false);
-				} else {
-					Intent intent = new Intent();
-					intent.setAction(Intent.ACTION_CALL);
-					if (!phoneEmpty) {
-						intent.setData(Uri.parse("tel:" + u.getTelephone()));
+				if(isPad){
+					Toast.makeText(getApplicationContext(), "对方目前不在线，无法语音通话", Toast.LENGTH_SHORT).show();
+				}
+				else{
+					if (phoneEmpty && mobileEmpty) {
+						Intent intent = new Intent();
+						intent.setAction(Intent.ACTION_DIAL); // android.intent.action.DIAL
+						startActivity(intent);
+					} else if (!phoneEmpty && !mobileEmpty) {
+						showCallDialog(u.getTelephone(), u.getCellPhone(), false);
 					} else {
-						intent.setData(Uri.parse("tel:" + u.getCellPhone()));
+						Intent intent = new Intent();
+						intent.setAction(Intent.ACTION_CALL);
+						if (!phoneEmpty) {
+							intent.setData(Uri.parse("tel:" + u.getTelephone()));
+						} else {
+							intent.setData(Uri.parse("tel:" + u.getCellPhone()));
+						}
+						startActivity(intent);
 					}
-					startActivity(intent);
 				}
 			} else {
-				if (phoneEmpty && mobileEmpty) {
-					showCallDialog(null, null, true);
-				} else if (!phoneEmpty || !mobileEmpty) {
-					showCallDialog(u.getTelephone(), u.getCellPhone(), true);
-				} else {
-					showCallDialog(u.getTelephone(), u.getCellPhone(), true);
+				if(isPad){
+					startVoiceCall();
+				}
+				else{
+					if (phoneEmpty && mobileEmpty) {
+						showCallDialog(null, null, true);
+					} else if (!phoneEmpty || !mobileEmpty) {
+						showCallDialog(u.getTelephone(), u.getCellPhone(), true);
+					} else {
+						showCallDialog(u.getTelephone(), u.getCellPhone(), true);
+					}
 				}
 			}
 		}

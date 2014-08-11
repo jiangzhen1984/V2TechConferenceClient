@@ -172,8 +172,13 @@ public class CrashHandler implements UncaughtExceptionHandler {
                 File dir = new File(path);  
                 if (!dir.exists()) {  
                     dir.mkdirs();  
-                }  
-                FileOutputStream fos = new FileOutputStream(path + fileName);  
+                }
+                
+                File desFile = new File(path + fileName);
+                if(!desFile.exists()){
+                	desFile.createNewFile();
+                }
+                FileOutputStream fos = new FileOutputStream(desFile);  
                 fos.write(sb.toString().getBytes());  
                 fos.close();  
             }  

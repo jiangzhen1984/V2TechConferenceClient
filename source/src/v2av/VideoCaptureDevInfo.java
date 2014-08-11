@@ -1,6 +1,7 @@
 package v2av;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.TreeSet;
 
@@ -65,8 +66,8 @@ public class VideoCaptureDevInfo
         public String deviceUniqueName;
         public FrontFacingCameraType frontCameraType;
         
-        public TreeSet<CaptureCapability> capabilites = new TreeSet<CaptureCapability>();
-        public TreeSet<Integer> framerates = new TreeSet<Integer>();
+        public LinkedList<CaptureCapability> capabilites = new LinkedList<CaptureCapability>();
+        public LinkedList<Integer> framerates = new LinkedList<Integer>();
 
         // Orientation of camera as described in
         // android.hardware.Camera.CameraInfo.Orientation

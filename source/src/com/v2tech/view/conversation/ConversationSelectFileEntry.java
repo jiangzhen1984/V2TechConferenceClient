@@ -51,7 +51,6 @@ public class ConversationSelectFileEntry extends Activity implements OnClickList
 		selectedFileSize = (TextView) findViewById(R.id.selectfile_entry_size);
 		sendButton = (TextView) findViewById(R.id.selectfile_message_send);
 		sendButton.setBackgroundResource(R.drawable.button_bg_noable);
-		sendButton.setVisibility(View.INVISIBLE);
 		entryImage.setOnClickListener(this);
 		entryFile.setOnClickListener(this);
 		backKey.setOnClickListener(this);
@@ -81,7 +80,6 @@ public class ConversationSelectFileEntry extends Activity implements OnClickList
 				Intent sendIntent = new Intent();
 				sendIntent.putParcelableArrayListExtra("checkedFiles", mCheckedList);
 				setResult(1000 , sendIntent);
-				mCheckedList.clear();
 				finish();
 			default:
 				break;

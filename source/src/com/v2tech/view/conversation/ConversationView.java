@@ -859,6 +859,7 @@ public class ConversationView extends Activity {
 
 			if (event.getAction() == MotionEvent.ACTION_DOWN) {
 				showOrCloseVoiceDialog();
+				stopCurrentAudioPlaying();
 				fileName = GlobalConfig.getGlobalAudioPath() + "/"
 						+ System.currentTimeMillis() + ".aac";
 				if (!startReocrding(fileName)) {
@@ -1565,9 +1566,17 @@ public class ConversationView extends Activity {
 			V2Log.i(TAG,
 					"停止了当前正在播放的currentPlayingAudio:--" + currentPlayed.getId());
 			currentFlag = true;
+			stopCurrentAudioPlaying();
+		}
+	};
+	
+	protected void stopCurrentAudioPlaying() {
+		
+		if (currentPlayed != null
+				&& currentPlayed.getAudioItems().size() > 0){
 			currentPlayed.getAudioItems().get(0).setPlaying(false);
 			runOnUiThread(new Runnable() {
-
+	
 				@Override
 				public void run() {
 					for (int i = 0; i < messageArray.size(); i++) {
@@ -1582,7 +1591,7 @@ public class ConversationView extends Activity {
 			});
 			stopPlaying();
 		}
-	};
+	}
 
 	private List<VMessage> loadMessages() {
 
@@ -1613,7 +1622,11 @@ public class ConversationView extends Activity {
 			return false;
 		}
 		MessageBodyView mv = new MessageBodyView(this, m, true);
-
+		for (int i = 0; i < messageArray.size(); i++) {
+			if(((VMessage)messageArray.get(0).getItemObject()).getDate().equals(m.getDate())){
+				return true;
+			}
+		}
 		messageArray.add(new VMessageAdater(m));
 		if (mv != null) {
 			if (!isStopped) {
