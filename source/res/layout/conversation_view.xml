@@ -44,11 +44,11 @@
         android:gravity="left|top"
         android:singleLine="true"
         android:text="TextView"
-        android:maxWidth="@dimen/conversation_view_text_max_width"
         android:textColor="@color/conversation_view_name_color"
         android:textSize="@dimen/conversation_view_name_text_size" />
 
     <TextView
+        android:layout_below="@+id/group_list_conference_title_tv"
         android:id="@+id/group_list_conference_owner_tv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

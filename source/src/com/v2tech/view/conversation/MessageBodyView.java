@@ -45,7 +45,7 @@ import com.v2tech.vo.VMessageImageItem;
 import com.v2tech.vo.VMessageTextItem;
 
 public class MessageBodyView extends LinearLayout {
-	
+
 	private static final String TAG = "MessageBodyView";
 	private static final int PICTURE = 1;
 	private static final int WORD = 2;
@@ -59,7 +59,7 @@ public class MessageBodyView extends LinearLayout {
 	private static final int OTHER = 10;
 	private static final int MESSAGE_TYPE_TEXT = 11;
 	private static final int MESSAGE_TYPE_NON_TEXT = 12;
-	
+
 	private int messageType = MESSAGE_TYPE_TEXT;
 	private VMessage mMsg;
 	private ImageView mHeadIcon;
@@ -112,7 +112,7 @@ public class MessageBodyView extends LinearLayout {
 
 		public void requestResumeTransFile(View v, VMessage vm,
 				VMessageFileItem vfi);
-		
+
 		public void requestStopOtherAudio(VMessage vm);
 	}
 
@@ -492,11 +492,11 @@ public class MessageBodyView extends LinearLayout {
 							.findViewById(R.id.contact_message_pop_up_item_resend);
 					tvResend.setOnClickListener(mResendButtonListener);
 
-					if(messageType == MESSAGE_TYPE_TEXT){
+					if (messageType == MESSAGE_TYPE_TEXT) {
 						TextView tv = (TextView) popWindow
 								.findViewById(R.id.contact_message_pop_up_item_copy);
-							tv.setVisibility(View.VISIBLE);
-							tv.setOnClickListener(mCopyButtonListener);
+						tv.setVisibility(View.VISIBLE);
+						tv.setOnClickListener(mCopyButtonListener);
 					}
 
 					TextView deleteText = (TextView) popWindow
@@ -510,29 +510,42 @@ public class MessageBodyView extends LinearLayout {
 							.findViewById(
 									R.id.contact_message_pop_up_item_resend)
 							.setVisibility(View.GONE);
-					if(messageType == MESSAGE_TYPE_TEXT){
+					if (messageType == MESSAGE_TYPE_TEXT) {
 						pw.getContentView()
-						.findViewById(R.id.contact_message_pop_up_item_copy)
-						.setVisibility(View.VISIBLE);
+								.findViewById(
+										R.id.contact_message_pop_up_item_copy)
+								.setVisibility(View.VISIBLE);
 					}
 				} else {
-					List<VMessageAbstractItem> items = mMsg.getItems();
-					for (VMessageAbstractItem vMessageAbstractItem : items) {
-						if(VMessageAbstractItem.ITEM_TYPE_TEXT == vMessageAbstractItem.getType() || 
-								VMessageAbstractItem.ITEM_TYPE_FACE == vMessageAbstractItem.getType()){
-							
-							pw.getContentView()
-							.findViewById(
-									R.id.contact_message_pop_up_item_resend)
-									.setVisibility(View.VISIBLE);
-						}
-						else{
-							
-							pw.getContentView()
-							.findViewById(
-									R.id.contact_message_pop_up_item_redownload)
-									.setVisibility(View.VISIBLE);
-						}
+					// List<VMessageAbstractItem> items = mMsg.getItems();
+					// for (VMessageAbstractItem vMessageAbstractItem : items) {
+					// if(VMessageAbstractItem.ITEM_TYPE_TEXT ==
+					// vMessageAbstractItem.getType() ||
+					// VMessageAbstractItem.ITEM_TYPE_FACE ==
+					// vMessageAbstractItem.getType()){
+					// pw.getContentView()
+					// .findViewById(
+					// R.id.contact_message_pop_up_item_resend)
+					// .setVisibility(View.VISIBLE);
+					// }
+					// else{
+					//
+					// pw.getContentView()
+					// .findViewById(
+					// R.id.contact_message_pop_up_item_redownload)
+					// .setVisibility(View.VISIBLE);
+					// }
+					// }
+					if (mMsg.isLocal()) {
+						pw.getContentView()
+								.findViewById(
+										R.id.contact_message_pop_up_item_resend)
+								.setVisibility(View.VISIBLE);
+					} else {
+						pw.getContentView()
+								.findViewById(
+										R.id.contact_message_pop_up_item_redownload)
+								.setVisibility(View.VISIBLE);
 					}
 					pw.getContentView()
 							.findViewById(R.id.contact_message_pop_up_item_copy)
@@ -600,26 +613,26 @@ public class MessageBodyView extends LinearLayout {
 
 	public void startVoiceAnimation() {
 
-		if(mMsg.isLocal())
+		if (mMsg.isLocal())
 			micIv.setImageResource(R.drawable.conversation_local_speaking);
 		else
 			micIv.setImageResource(R.drawable.conversation_remote_speaking);
-		
+
 		AnimationDrawable drawable = (AnimationDrawable) micIv.getDrawable();
 		drawable.start();
 	}
 
 	public void stopVoiceAnimation() {
 
-		if(mMsg.isLocal())
+		if (mMsg.isLocal())
 			micIv.setImageResource(R.drawable.conversation_local_speaking);
 		else
 			micIv.setImageResource(R.drawable.conversation_remote_speaking);
-		
+
 		AnimationDrawable drawable = (AnimationDrawable) micIv.getDrawable();
 		drawable.stop();
-		
-		if(mMsg.isLocal())
+
+		if (mMsg.isLocal())
 			micIv.setImageResource(R.drawable.voice_message_mic_icon_self_selector);
 		else
 			micIv.setImageResource(R.drawable.voice_message_mic_icon_selector);
@@ -688,7 +701,7 @@ public class MessageBodyView extends LinearLayout {
 
 			float percent = (float) ((double) vfi.getDownloadedSize() / (double) vfi
 					.getFileSize());
-			
+
 			ViewGroup progressC = (ViewGroup) rootView
 					.findViewById(R.id.message_body_file_item_progress_state_ly);
 			progressC.measure(View.MeasureSpec.makeMeasureSpec(0,
@@ -901,7 +914,8 @@ public class MessageBodyView extends LinearLayout {
 		protected ImageView[] doInBackground(ImageView... vms) {
 			// Only has one element
 			for (ImageView vm : vms) {
-				Bitmap bm = ((VMessageImageItem) vm.getTag()).getCompressedBitmap();
+				Bitmap bm = ((VMessageImageItem) vm.getTag())
+						.getCompressedBitmap();
 				if (bm == null || bm.isRecycled()) {
 					((VMessageImageItem) vm.getTag()).recycleAll();
 				}
