@@ -1483,7 +1483,7 @@ public class VideoActivityV2 extends Activity {
 		}
 
 		// Clean user device
-		showToastNotification(user.getName()
+		showToastNotification(a.getAttName()
 				+ mContext.getText(R.string.conf_notification_quited_meeting));
 
 	}

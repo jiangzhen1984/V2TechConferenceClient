@@ -549,22 +549,39 @@ public class ConferenceService extends AbstractHandler {
 					.sendToTarget();
 		}
 
+		//08-12 20:52:56.262: D/V2TECH(7463): -->OnConfMemberEnter 514078477608 1407848229 <user accounttype='2' id='81003' nickname='1234' uetype='1'/>
+
 		@Override
 		public void OnConfMemberEnterCallback(long nConfID, long nTime,
 				String szUserInfos) {
+			User user = null;
 			int start = szUserInfos.indexOf("id='");
 			if (start != -1) {
 				int end = szUserInfos.indexOf("'", start + 4);
 				if (end != -1) {
 					String id = szUserInfos.substring(start + 4, end);
-					final User u = GlobalHolder.getInstance().getUser(
+					user = GlobalHolder.getInstance().getUser(
 							Long.parseLong(id));
-					if (u == null) {
+					if (user == null) {
 						V2Log.e(" Can't not find user " + id);
+						start = szUserInfos.indexOf("accounttype='");
+						end =  szUserInfos.indexOf( "'", start+ 13);
+						if (start != -1 && end != -1) {
+							int type = Integer.parseInt(szUserInfos.substring(start+13, end));
+							if (type == 2) {
+								start = szUserInfos.indexOf("nickname='");
+								end =  szUserInfos.indexOf( "'", start+ 10);
+								if (start != -1 && end != -1) {
+									String name = szUserInfos.substring(start+10, end);
+									user = new User(Long.parseLong(id), name);
+									notifyListenerWithPending(KEY_ATTENDEE_STATUS_LISTNER, 1, 0, user);
+								}
+							}
+						}
 						return;
 					}
 	
-					notifyListenerWithPending(KEY_ATTENDEE_STATUS_LISTNER, 1, 0, u);
+					notifyListenerWithPending(KEY_ATTENDEE_STATUS_LISTNER, 1, 0, user);
 
 
 				} else {
@@ -580,6 +597,10 @@ public class ConferenceService extends AbstractHandler {
 				long nUserID) {
 
 			User u = GlobalHolder.getInstance().getUser(nUserID);
+			//For quick logged in User.
+			if (u == null) {
+				u = new User(nUserID);
+			}
 			notifyListenerWithPending(KEY_ATTENDEE_STATUS_LISTNER, 0, 0, u);
 
 		}

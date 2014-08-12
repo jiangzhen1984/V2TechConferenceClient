@@ -48,6 +48,8 @@ public class UserDeviceConfig {
 	private SurfaceView mSVHolder;
 	private boolean isShowing;
 	private boolean isEnable;
+	private boolean isDefault;
+	
 
 	private Attendee mBelongsAttendee;
 
@@ -167,6 +169,15 @@ public class UserDeviceConfig {
 	public void setEnable(boolean isEnable) {
 		this.isEnable = isEnable;
 	}
+	
+
+	public boolean isDefault() {
+		return isDefault;
+	}
+
+	public void setDefault(boolean isDefault) {
+		this.isDefault = isDefault;
+	}
 
 	@Override
 	public int hashCode() {
@@ -198,15 +209,13 @@ public class UserDeviceConfig {
 	}
 
 	/**
-	 * <xml><videolist defaultid='15:9158Capture____0'><video bps='256'
-	 * desc='9158Capture____0' fps='15' id='15:9158Capture____0' inuse='1'
-	 * selectedindex='0' videotype='1'><sizelist/></video><video bps='256'
-	 * desc='Logitech QuickCam Easy/Cool____3607289526' fps='15' id='15:Logitech
-	 * QuickCam Easy/Cool____3607289526' inuse='0' selectedindex='0'
-	 * videotype='1'><sizelist/></video><video bps='256' desc='Luminositi
-	 * Softcam [VFW]____0' fps='15' id='15:Luminositi Softcam [VFW]____0'
-	 * inuse='1' selectedindex='0'
-	 * videotype='1'><sizelist/></video></videolist></xml>
+	 * * <xml defaultid='12:USB Camera____2080603797'><video bps='2048'
+	 * camtype='0' comm='0' desc='USB Camera____2080603797' fps='25' h='720'
+	 * id='12:USB Camera____2080603797' inuse='1' videotype='1' w='1280'/><video
+	 * bps='256' camtype='0' comm='0' desc='USB Camera____92543101' fps='15'
+	 * h='240' id='12:USB Camera____92543101' inuse='1' videotype='1'
+	 * w='320'/></xml>
+	 * 
 	 * 
 	 * @param xmlData
 	 * @return
@@ -227,14 +236,22 @@ public class UserDeviceConfig {
 			Document doc = dBuilder.parse(is);
 
 			doc.getDocumentElement().normalize();
-
+			String defaultId = "";
+			int start = xmlData.indexOf("defaultid='");
+			int end =  xmlData.indexOf("'", start+11);
+			defaultId = xmlData.substring(start+11, end);
 			NodeList videol = doc.getElementsByTagName("video");
 			for (int t = 0; t < videol.getLength(); t++) {
 				Element video = (Element) videol.item(t);
 				String deviceId = video.getAttribute("id");
 				UserDeviceConfig udc =new UserDeviceConfig(uid, deviceId, null);
 				udc.setEnable("1".equals(video.getAttribute("inuse"))? true: false);
-				l.add(udc);
+				if (defaultId.equals(deviceId)) {
+					udc.setDefault(true);
+					l.add(0, udc);
+				} else {
+					l.add(udc);
+				}
 			}
 
 		} catch (ParserConfigurationException e) {
