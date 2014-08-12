@@ -37,6 +37,7 @@
             android:layout_weight=".5"
             android:gravity="center"
             android:padding="10dp"
+            android:visibility="gone"
             android:text="@string/contact_message_pop_up_item_copy" />
         <TextView
             android:id="@+id/contact_message_pop_up_item_delete"

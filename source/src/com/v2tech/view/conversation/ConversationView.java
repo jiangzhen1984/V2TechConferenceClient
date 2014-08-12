@@ -28,6 +28,7 @@ import android.text.Editable;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -179,6 +180,7 @@ public class ConversationView extends Activity {
 
 	private boolean reStart;
 	private Bundle bundle;
+	private View root;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -283,8 +285,33 @@ public class ConversationView extends Activity {
 		// Start animation
 		this.overridePendingTransition(R.animator.nonam_scale_center_0_100,
 				R.animator.nonam_scale_null);
+		//initalize vioce function that showing dialog 
+		createVideoDialog();
 	}
-
+	
+	private Dialog mVoiceDialog = null;
+	private ImageView mVolume;
+	private View mSpeakingLayout;
+	private View mPreparedCancelLayout;
+	private View mWarningLayout;
+	
+	public void createVideoDialog(){
+		mVoiceDialog = new Dialog(mContext, R.style.MessageVoiceDialog);
+		mVoiceDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+		LayoutInflater flater = LayoutInflater.from(mContext);
+		root = flater.inflate(R.layout.message_voice_dialog, null);
+		mVoiceDialog.setContentView(root);
+		mVolume = (ImageView) root
+				.findViewById(R.id.message_voice_dialog_voice_volume);
+		mSpeakingLayout = root
+				.findViewById(R.id.message_voice_dialog_listening_container);
+		mPreparedCancelLayout = root
+				.findViewById(R.id.message_voice_dialog_cancel_container);
+		mWarningLayout = root
+				.findViewById(R.id.message_voice_dialog_warning_container);
+		mVoiceDialog.setCancelable(false);
+		root.setVisibility(View.INVISIBLE);
+	}
 	@Override
 	protected void onStart() {
 		super.onStart();
@@ -300,6 +327,13 @@ public class ConversationView extends Activity {
 		// mId allows you to update the notification later on.
 		mNotificationManager.cancel(PublicIntent.MESSAGE_NOTIFICATION_ID);
 		isStopped = false;
+		
+		starttime = 0;
+		lastTime = 0;
+		realRecoding = false;
+		cannelRecoding = false;
+		mButtonRecordAudio
+		.setText(R.string.contact_message_button_send_audio_msg);
 	}
 
 	@Override
@@ -330,7 +364,6 @@ public class ConversationView extends Activity {
 		super.onStop();
 		isStopped = true;
 		reStart = true;
-
 		voiceIsSentByTimer = true;
 		if (mRecorder != null) {
 
@@ -469,6 +502,7 @@ public class ConversationView extends Activity {
 	}
 
 	private InputStream currentPlayedStream;
+	private boolean startInitalize;
 
 	private synchronized boolean startPlaying(String fileName) {
 
@@ -511,43 +545,21 @@ public class ConversationView extends Activity {
 		}
 	}
 
-	private Dialog mVoiceDialog = null;
-	private ImageView mVolume;
-	private View mSpeakingLayout;
-	private View mPreparedCancelLayout;
-	private View mWarningLayout;
-
 	private void showOrCloseVoiceDialog() {
-		if (mVoiceDialog == null) {
-			mVoiceDialog = new Dialog(mContext, R.style.MessageVoiceDialog);
-			mVoiceDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-			LayoutInflater flater = LayoutInflater.from(mContext);
-			View root = flater.inflate(R.layout.message_voice_dialog, null);
-			mVoiceDialog.setContentView(root);
-			mVolume = (ImageView) root
-					.findViewById(R.id.message_voice_dialog_voice_volume);
-			mSpeakingLayout = root
-					.findViewById(R.id.message_voice_dialog_listening_container);
-			mPreparedCancelLayout = root
-					.findViewById(R.id.message_voice_dialog_cancel_container);
-			mWarningLayout = root
-					.findViewById(R.id.message_voice_dialog_warning_container);
-			mVoiceDialog.setCancelable(false);
-		}
 
 		if (mVoiceDialog.isShowing()) {
 			mVoiceDialog.dismiss();
 			mButtonRecordAudio
 					.setText(R.string.contact_message_button_send_audio_msg);
 		} else {
-			updateCancelSendVoiceMsgNotification(VOICE_DIALOG_FLAG_RECORDING);
-
+			root.setVisibility(View.VISIBLE);
 			mVoiceDialog.show();
+			updateCancelSendVoiceMsgNotification(VOICE_DIALOG_FLAG_RECORDING);
 		}
 	}
 
 	private void updateCancelSendVoiceMsgNotification(int flag) {
-		if (flag == VOICE_DIALOG_FLAG_CANCEL) {
+		if (flag == VOICE_DIALOG_FLAG_CANCEL) { //松开手指，取消发送
 			if (mSpeakingLayout != null) {
 				mSpeakingLayout.setVisibility(View.GONE);
 			}
@@ -647,12 +659,15 @@ public class ConversationView extends Activity {
 		mRecorder.setAudioChannels(2);
 		try {
 			mRecorder.prepare();
+			mRecorder.start();
 		} catch (IOException e) {
 			V2Log.e(" can not prepare media recorder ");
 			return false;
 		}
-
-		mRecorder.start();
+		catch (IllegalStateException e) {
+			V2Log.e(" can not prepare media recorder ");
+			return false;
+		}
 		return true;
 	}
 
@@ -851,27 +866,25 @@ public class ConversationView extends Activity {
 	private boolean voiceIsSentByTimer;
 	private String fileName = null;
 	private long starttime = 0;
-
+	private long lastTime = 0;
+	private boolean realRecoding;
+	private boolean cannelRecoding;
 	private OnTouchListener mButtonHolderListener = new OnTouchListener() {
 
 		@Override
 		public boolean onTouch(View view, MotionEvent event) {
 
 			if (event.getAction() == MotionEvent.ACTION_DOWN) {
+				cannelRecoding = false;
 				showOrCloseVoiceDialog();
 				stopCurrentAudioPlaying();
-				fileName = GlobalConfig.getGlobalAudioPath() + "/"
-						+ System.currentTimeMillis() + ".aac";
-				if (!startReocrding(fileName)) {
-					// hide dialog
-					showOrCloseVoiceDialog();
+				long currentTime = System.currentTimeMillis();
+				Log.e(TAG, (currentTime - lastTime) + "");
+				lh.postDelayed(preparedRecoding, 200);
+				if(currentTime - lastTime < 300){
+					Log.d(TAG, "间隔太短，取消录音");
 				}
-				// Start update db for voice
-				lh.postDelayed(mUpdateMicStatusTimer, 200);
-				// Start timer
-				lh.postDelayed(timeOutMonitor, 59 * 1000);
-				starttime = System.currentTimeMillis();
-				voiceIsSentByTimer = false;
+				lastTime = currentTime;
 			} else if (event.getAction() == MotionEvent.ACTION_MOVE) {
 				Rect r = new Rect();
 				view.getDrawingRect(r);
@@ -884,63 +897,102 @@ public class ConversationView extends Activity {
 				}
 
 			} else if (event.getAction() == MotionEvent.ACTION_UP) {
-				if (voiceIsSentByTimer) {
-					return false;
-				}
-
-				stopRecording();
-
-				Rect r = new Rect();
-				view.getDrawingRect(r);
-				// check if touch position out of button than cancel send voice
-				// message
-				long seconds = (System.currentTimeMillis() - starttime);
-				if (r.contains((int) event.getX(), (int) event.getY())
-						&& seconds > 1500) {
-					// send
-					VMessage vm = new VMessage(groupId, local, remote);
-
-					new VMessageAudioItem(vm, fileName, (int) (seconds / 1000));
-					// Send message to server
-					sendMessageToRemote(vm);
-				} else {
-
-					if (seconds < 1500) {
-						updateCancelSendVoiceMsgNotification(VOICE_DIALOG_FLAG_WARING_FOR_TIME_TOO_SHORT);
-					} else {
-						Toast.makeText(mContext,
-								R.string.contact_message_message_cancelled,
-								Toast.LENGTH_SHORT).show();
+				
+				if(realRecoding == true){
+					lastTime = 0;
+					if (voiceIsSentByTimer) {
+						return false;
 					}
-					File f = new File(fileName);
-					f.deleteOnExit();
-				}
-				starttime = 0;
-				fileName = null;
-				lh.removeCallbacks(mUpdateMicStatusTimer);
-				if (seconds < 1500) {
-					// Send delay message for close dialog
-					lh.postDelayed(new Runnable() {
-						@Override
-						public void run() {
-							showOrCloseVoiceDialog();
+	
+					long seconds = (System.currentTimeMillis() - starttime);
+					stopRecording();
+					Rect r = new Rect();
+					view.getDrawingRect(r);
+					// check if touch position out of button than cancel send voice
+					// message
+					if (r.contains((int) event.getX(), (int) event.getY())
+							&& seconds > 1500) {
+						// send
+						VMessage vm = new VMessage(groupId, local, remote);
+	
+						new VMessageAudioItem(vm, fileName, (int) (seconds / 1000));
+						// Send message to server
+						sendMessageToRemote(vm);
+					} else {
+						
+						if (seconds < 1500) {
+							updateCancelSendVoiceMsgNotification(VOICE_DIALOG_FLAG_WARING_FOR_TIME_TOO_SHORT);
 						}
-
-					}, 1000);
-				} else {
+						else{
+							Toast.makeText(mContext,
+									R.string.contact_message_message_cancelled,
+									Toast.LENGTH_SHORT).show();
+						}
+						File f = new File(fileName);
+						f.deleteOnExit();
+					}
+					starttime = 0;
+					fileName = null;
+					if (seconds < 1500) {
+						// Send delay message for close dialog
+						lh.postDelayed(new Runnable() {
+							@Override
+							public void run() {
+								showOrCloseVoiceDialog();
+							}
+	
+						}, 1000);
+					} else {
+						showOrCloseVoiceDialog();
+					}
+					lh.removeCallbacks(mUpdateMicStatusTimer);
+					// Remove timer
+					lh.removeCallbacks(timeOutMonitor);
+					mButtonRecordAudio
+							.setText(R.string.contact_message_button_send_audio_msg);
+					realRecoding = false;
+				}
+				else{
+					cannelRecoding = true;
+					Log.d(TAG, "由于间隔太短，显示short对话框");
+					lh.removeCallbacks(preparedRecoding);
+					updateCancelSendVoiceMsgNotification(VOICE_DIALOG_FLAG_WARING_FOR_TIME_TOO_SHORT);
 					showOrCloseVoiceDialog();
 				}
-				// Remove timer
-				lh.removeCallbacks(timeOutMonitor);
-
-				mButtonRecordAudio
-						.setText(R.string.contact_message_button_send_audio_msg);
 			}
 			return false;
 		}
 
 	};
+	
+	private Runnable preparedRecoding = new Runnable(){
 
+		@Override
+		public void run() {
+			
+			if(cannelRecoding == false){
+				fileName = GlobalConfig.getGlobalAudioPath() + "/"
+						+ System.currentTimeMillis() + ".aac";
+				boolean resultReocrding = startReocrding(fileName);
+				if(resultReocrding){
+					
+					// Start update db for voice
+					lh.postDelayed(mUpdateMicStatusTimer, 200);
+					// Start timer
+					lh.postDelayed(timeOutMonitor, 59 * 1000);
+					starttime = System.currentTimeMillis();
+					voiceIsSentByTimer = false;
+					realRecoding = true;
+				}
+				else{
+					File f = new File(fileName);
+					f.deleteOnExit();
+					fileName = null;
+				}
+			}
+		}
+	};
+	
 	private Runnable timeOutMonitor = new Runnable() {
 
 		@Override
@@ -1636,6 +1688,12 @@ public class ConversationView extends Activity {
 			}
 		}
 		return true;
+	}
+	
+	@Override
+	protected void onPause() {
+		super.onPause();
+		Log.e(TAG, "entry onPause....");
 	}
 
 	private boolean removeMessage(VMessage vm) {

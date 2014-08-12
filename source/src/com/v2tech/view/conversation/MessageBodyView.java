@@ -57,9 +57,11 @@ public class MessageBodyView extends LinearLayout {
 	private static final int VIDEO = 8;
 	private static final int SOUND = 9;
 	private static final int OTHER = 10;
-
+	private static final int MESSAGE_TYPE_TEXT = 11;
+	private static final int MESSAGE_TYPE_NON_TEXT = 12;
+	
+	private int messageType = MESSAGE_TYPE_TEXT;
 	private VMessage mMsg;
-
 	private ImageView mHeadIcon;
 	private LinearLayout mContentContainer;
 	private ImageView mArrowIV;
@@ -121,7 +123,6 @@ public class MessageBodyView extends LinearLayout {
 	public MessageBodyView(Context context, VMessage m, boolean isShowTime) {
 		super(context);
 		this.mMsg = m;
-
 		rootView = LayoutInflater.from(context).inflate(R.layout.message_body,
 				null, false);
 		this.isShowTime = isShowTime;
@@ -231,12 +232,14 @@ public class MessageBodyView extends LinearLayout {
 	private void populateMessage() {
 		List<VMessageAudioItem> audioItems = mMsg.getAudioItems();
 		if (audioItems.size() > 0) {
+			messageType = MESSAGE_TYPE_NON_TEXT;
 			populateAudioMessage(audioItems);
 			return;
 		}
 
 		List<VMessageFileItem> fileItems = mMsg.getFileItems();
 		if (fileItems.size() > 0) {
+			messageType = MESSAGE_TYPE_NON_TEXT;
 			populateFileItem(fileItems);
 			return;
 		}
@@ -282,7 +285,7 @@ public class MessageBodyView extends LinearLayout {
 						.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 				et.setText(builder);
 			} else if (item.getType() == VMessageAbstractItem.ITEM_TYPE_IMAGE) {
-
+				messageType = MESSAGE_TYPE_NON_TEXT;
 				Drawable dr = new BitmapDrawable(this.getContext()
 						.getResources(),
 						((VMessageImageItem) item).getCompressedBitmap());
@@ -489,9 +492,12 @@ public class MessageBodyView extends LinearLayout {
 							.findViewById(R.id.contact_message_pop_up_item_resend);
 					tvResend.setOnClickListener(mResendButtonListener);
 
-					TextView tv = (TextView) popWindow
-							.findViewById(R.id.contact_message_pop_up_item_copy);
-					tv.setOnClickListener(mCopyButtonListener);
+					if(messageType == MESSAGE_TYPE_TEXT){
+						TextView tv = (TextView) popWindow
+								.findViewById(R.id.contact_message_pop_up_item_copy);
+							tv.setVisibility(View.VISIBLE);
+							tv.setOnClickListener(mCopyButtonListener);
+					}
 
 					TextView deleteText = (TextView) popWindow
 							.findViewById(R.id.contact_message_pop_up_item_delete);
@@ -504,9 +510,11 @@ public class MessageBodyView extends LinearLayout {
 							.findViewById(
 									R.id.contact_message_pop_up_item_resend)
 							.setVisibility(View.GONE);
-					pw.getContentView()
-							.findViewById(R.id.contact_message_pop_up_item_copy)
-							.setVisibility(View.VISIBLE);
+					if(messageType == MESSAGE_TYPE_TEXT){
+						pw.getContentView()
+						.findViewById(R.id.contact_message_pop_up_item_copy)
+						.setVisibility(View.VISIBLE);
+					}
 				} else {
 					List<VMessageAbstractItem> items = mMsg.getItems();
 					for (VMessageAbstractItem vMessageAbstractItem : items) {

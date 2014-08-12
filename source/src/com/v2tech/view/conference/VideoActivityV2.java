@@ -129,7 +129,7 @@ public class VideoActivityV2 extends Activity {
 	private static final int TAG_CLOSE_DEVICE = 0;
 
 	private static final int TAG_OPEN_DEVICE = 1;
-
+	
 	public static final String JNI_EVENT_VIDEO_CATEGORY = "com.v2tech.conf_video_event";
 	public static final String JNI_EVENT_VIDEO_CATEGORY_OPEN_VIDEO_EVENT_ACTION = "com.v2tech.conf_video_event.open_video_event";
 	private static final String TAG = "VideoActivityV2";
@@ -2181,13 +2181,23 @@ public class VideoActivityV2 extends Activity {
 				}
 			}
 				break;
+			/*
+			 *  EGROUPTYPE_PUBGROUP = 1;
+			    EGROUPTYPE_FRIGROUP = 2;
+			    EGROUPTYPE_CROWDGROUP = 3;
+			    EGROUPTYPE_CONFGROUP = 4;
+			    EGROUPTYPE_DISCUSSION = 5;
+			 */
 			case GROUP_ADD_USER:
+				V2Log.e(TAG, "GROUP_ADD_USER...");
 				GroupUserObject ro1 = (GroupUserObject) msg.obj;
-				Attendee a1 = new Attendee(GlobalHolder.getInstance().getUser(
-						ro1.getmUserId()));
-				mAttendeeList.add(a1);
-				if (mAttendeeContainer != null) {
-					mAttendeeContainer.addAttendee(a1);
+				if(ro1.getmType() == 4){ //CONFGROUP
+					Attendee a1 = new Attendee(GlobalHolder.getInstance().getUser(
+							ro1.getmUserId()));
+					mAttendeeList.add(a1);
+					if (mAttendeeContainer != null) {
+						mAttendeeContainer.addAttendee(a1);
+					}
 				}
 				break;
 			case ATTENDEE_DEVICE_LISTENER: {
