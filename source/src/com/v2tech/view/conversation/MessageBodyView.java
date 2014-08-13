@@ -885,18 +885,20 @@ public class MessageBodyView extends LinearLayout {
 					View fileRootView = mContentContainer.getChildAt(0);
 					failedIcon.setVisibility(View.INVISIBLE);
 
-					if (mMsg.getItems().size() > 0
-							&& mMsg.getItems().get(0).getType() == VMessageFileItem.ITEM_TYPE_FILE) {
-						VMessageFileItem fileItem = (VMessageFileItem) mMsg
-								.getItems().get(0);
-						if (fileItem.getState() < VMessageAbstractItem.STATE_FILE_SENDING) {
-							callback.requestDownloadFile(fileRootView, mMsg,
-									fileItem);
-						} else {
-							callback.reSendMessageClicked(mMsg);
+					if(mMsg.isLocal()){
+						callback.reSendMessageClicked(mMsg);
+					}
+					else{
+						if (mMsg.getItems().size() > 0
+								&& mMsg.getItems().get(0).getType() == VMessageFileItem.ITEM_TYPE_FILE) {
+							VMessageFileItem fileItem = (VMessageFileItem) mMsg
+									.getItems().get(0);
+							if (fileItem.getState() != VMessageAbstractItem.STATE_FILE_SENDING) {
+								callback.requestDownloadFile(fileRootView, mMsg,
+										fileItem);
+							}
+							updateFileItemView(fileItem, fileRootView);
 						}
-
-						updateFileItemView(fileItem, fileRootView);
 					}
 				}
 			} else {

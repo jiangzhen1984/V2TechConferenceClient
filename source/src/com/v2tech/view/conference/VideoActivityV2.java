@@ -2181,17 +2181,9 @@ public class VideoActivityV2 extends Activity {
 				}
 			}
 				break;
-			/*
-			 *  EGROUPTYPE_PUBGROUP = 1;
-			    EGROUPTYPE_FRIGROUP = 2;
-			    EGROUPTYPE_CROWDGROUP = 3;
-			    EGROUPTYPE_CONFGROUP = 4;
-			    EGROUPTYPE_DISCUSSION = 5;
-			 */
 			case GROUP_ADD_USER:
-				V2Log.e(TAG, "GROUP_ADD_USER...");
 				GroupUserObject ro1 = (GroupUserObject) msg.obj;
-				if(ro1.getmType() == 4){ //CONFGROUP
+				if(ro1.getmType() == GroupType.CONFERENCE.intValue()){ //CONFGROUP
 					Attendee a1 = new Attendee(GlobalHolder.getInstance().getUser(
 							ro1.getmUserId()));
 					mAttendeeList.add(a1);

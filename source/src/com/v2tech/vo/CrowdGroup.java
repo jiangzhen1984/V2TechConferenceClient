@@ -65,9 +65,9 @@ public class CrowdGroup extends Group {
 
 		start = xml.indexOf("name='");
 		if (start != -1) {
-			end = xml.indexOf("'", start + 9);
+			end = xml.indexOf("'", start + 6);
 			if (end != -1) {
-				name = xml.substring(start + 9, end);
+				name = xml.substring(start + 6, end);
 			}
 		}
 

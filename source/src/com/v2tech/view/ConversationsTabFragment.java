@@ -23,6 +23,7 @@ import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -69,6 +70,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher, C
 	private static final int REQUEST_ENTER_CONF_RESPONSE = 15;
 
 	private static final int CONFERENCE_ENTER_CODE = 100;
+	private static final String TAG = "ConversationsTabFragment";
 
 	private NotificationListener notificationListener;
 
@@ -116,7 +118,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher, C
 		mContext = getActivity();
 
 		initReceiver(mCurrentTabFlag);
-
+		Log.d(TAG, "current tag:" + tag);
 		
 
 		notificationListener = (NotificationListener) getActivity();
@@ -329,7 +331,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher, C
 			Conversation cov = new ConferenceConversation(g);
 			//Update all initial conversation to read
 			cov.setReadFlag(Conversation.READ_FLAG_READ);
-			this.mConvList.add(cov);
+			this.mConvList.add(cov); 
 		}
 
 		fillAdapter(this.mConvList);
@@ -379,7 +381,10 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher, C
 
 		while (mCur.moveToNext()) {
 			Conversation cov = extractConversation(mCur);
-			mConvList.add(cov);
+			if(cov.getType().equals(mCurrentTabFlag)){
+				
+				mConvList.add(cov);
+			}
 		}
 		mCur.close();
 		isLoadedCov = true;
@@ -430,6 +435,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher, C
 	
 
 	private void updateConversation(long extId, String type) {
+		Log.d(TAG, "updateConversation two param calling...");
 		if (!isLoadedCov) {
 			this.loadConversation();
 		}
@@ -491,6 +497,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher, C
 	 * @param msgId
 	 */
 	private void updateConversation(long msgId) {
+		Log.d(TAG, "updateConversation calling...");
 		if (!isLoadedCov) {
 			this.loadConversation();
 		}
@@ -499,8 +506,6 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher, C
 			V2Log.e("Didn't find message " + msgId);
 			return;
 		}
-		// Update status bar
-		updateStatusBar(vm);
 
 		long extId = 0;
 		if (vm.getGroupId() != 0) {
@@ -521,6 +526,9 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher, C
 				break;
 			}
 		}
+		
+		// Update status bar
+		updateStatusBar(vm);
 		
 
 		if (!foundFlag) {
@@ -951,6 +959,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher, C
 					.getAction())) {
 				boolean groupMessage = intent.getBooleanExtra("gm", false);
 				if (groupMessage) {
+					V2Log.d(TAG, "JNI_BROADCAST_NEW_MESSAGE update..");
 					updateConversation(intent.getExtras().getLong("mid"));
 				}
 			}
@@ -1014,6 +1023,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher, C
 			if (JNIService.JNI_BROADCAST_NEW_MESSAGE.equals(intent.getAction())) {
 				boolean groupMessage = intent.getBooleanExtra("gm", false);
 				if (!groupMessage) {
+					V2Log.e(TAG, "JNI_BROADCAST_NEW_MESSAGE update..");
 					updateConversation(intent.getExtras().getLong("mid"));
 				}
 			}

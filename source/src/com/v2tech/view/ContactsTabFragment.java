@@ -377,8 +377,8 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 	}
 
 	private void updateListStateRemove(int pos, ListItem item) {
-		if (item.g.getChildGroup().size() <= 0
-				&& item.g.getUsers().size() <= 0) {
+		if (item.g.getChildGroup() == null || item.g.getChildGroup().size() <= 0
+				&& item.g.getUsers() == null || item.g.getUsers().size() <= 0) {
 			return;
 		}
 

@@ -20,6 +20,7 @@
     <!-- conversation view -->
     <dimen name="conversation_view_margin">5dp</dimen>
     <dimen name="conversation_view_name_text_size">17sp</dimen>
+    <dimen name="conversation_view_title_margin">10dp</dimen>
     <dimen name="conversation_view_text_max_width">100dp</dimen>
 
     

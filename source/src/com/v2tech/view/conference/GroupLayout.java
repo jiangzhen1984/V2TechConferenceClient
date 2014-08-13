@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Handler;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
@@ -20,6 +21,8 @@ import com.v2tech.vo.Conversation;
 import com.v2tech.vo.VMessage;
 
 public class GroupLayout extends LinearLayout {
+
+	private static final String TAG = "GroupLayout";
 
 	private Conversation mConv;
 
@@ -78,7 +81,7 @@ public class GroupLayout extends LinearLayout {
 		}
 
 		mGroupNameTV.setText(this.mConv.getName());
-		mGroupOwnerTV.setText(mConv.getMsg());
+		mGroupOwnerTV.setText(mConv.getMsg()); 
 		mGroupDateTV.setText(mConv.getDate());
 		addView(view);
 	}
@@ -148,7 +151,7 @@ public class GroupLayout extends LinearLayout {
 	}
 
 	public void updateContent(String content) {
-		mGroupOwnerTV.setText(content);
+		mGroupOwnerTV.setText("创建人：" + content);
 	}
 	
 	

@@ -29,6 +29,7 @@ import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -181,6 +182,7 @@ public class ConversationView extends Activity {
 	private boolean reStart;
 	private Bundle bundle;
 	private View root;
+	private SparseArray<VMessage> messageAllID;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -266,7 +268,6 @@ public class ConversationView extends Activity {
 			mShowContactDetailButton.setVisibility(View.INVISIBLE);
 		}
 
-
 		// Register listener for avatar changed
 		BitmapManager.getInstance().registerBitmapChangedListener(
 				avatarChangedListener);
@@ -285,17 +286,18 @@ public class ConversationView extends Activity {
 		// Start animation
 		this.overridePendingTransition(R.animator.nonam_scale_center_0_100,
 				R.animator.nonam_scale_null);
-		//initalize vioce function that showing dialog 
+		// initalize vioce function that showing dialog
 		createVideoDialog();
+		messageAllID = new SparseArray<VMessage>();
 	}
-	
+
 	private Dialog mVoiceDialog = null;
 	private ImageView mVolume;
 	private View mSpeakingLayout;
 	private View mPreparedCancelLayout;
 	private View mWarningLayout;
-	
-	public void createVideoDialog(){
+
+	public void createVideoDialog() {
 		mVoiceDialog = new Dialog(mContext, R.style.MessageVoiceDialog);
 		mVoiceDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
 		LayoutInflater flater = LayoutInflater.from(mContext);
@@ -312,9 +314,11 @@ public class ConversationView extends Activity {
 		mVoiceDialog.setCancelable(false);
 		root.setVisibility(View.INVISIBLE);
 	}
+
 	@Override
 	protected void onStart() {
 		super.onStart();
+		
 		if (!mIsInited && !mLoadedAllMessages) {
 			android.os.Message m = android.os.Message.obtain(lh,
 					START_LOAD_MESSAGE);
@@ -327,13 +331,13 @@ public class ConversationView extends Activity {
 		// mId allows you to update the notification later on.
 		mNotificationManager.cancel(PublicIntent.MESSAGE_NOTIFICATION_ID);
 		isStopped = false;
-		
+
 		starttime = 0;
 		lastTime = 0;
 		realRecoding = false;
 		cannelRecoding = false;
 		mButtonRecordAudio
-		.setText(R.string.contact_message_button_send_audio_msg);
+				.setText(R.string.contact_message_button_send_audio_msg);
 	}
 
 	@Override
@@ -559,7 +563,7 @@ public class ConversationView extends Activity {
 	}
 
 	private void updateCancelSendVoiceMsgNotification(int flag) {
-		if (flag == VOICE_DIALOG_FLAG_CANCEL) { //松开手指，取消发送
+		if (flag == VOICE_DIALOG_FLAG_CANCEL) { // 松开手指，取消发送
 			if (mSpeakingLayout != null) {
 				mSpeakingLayout.setVisibility(View.GONE);
 			}
@@ -663,8 +667,7 @@ public class ConversationView extends Activity {
 		} catch (IOException e) {
 			V2Log.e(" can not prepare media recorder ");
 			return false;
-		}
-		catch (IllegalStateException e) {
+		} catch (IllegalStateException e) {
 			V2Log.e(" can not prepare media recorder ");
 			return false;
 		}
@@ -881,7 +884,7 @@ public class ConversationView extends Activity {
 				long currentTime = System.currentTimeMillis();
 				Log.e(TAG, (currentTime - lastTime) + "");
 				lh.postDelayed(preparedRecoding, 200);
-				if(currentTime - lastTime < 300){
+				if (currentTime - lastTime < 300) {
 					Log.d(TAG, "间隔太短，取消录音");
 				}
 				lastTime = currentTime;
@@ -897,33 +900,34 @@ public class ConversationView extends Activity {
 				}
 
 			} else if (event.getAction() == MotionEvent.ACTION_UP) {
-				
-				if(realRecoding == true){
+
+				if (realRecoding == true) {
 					lastTime = 0;
 					if (voiceIsSentByTimer) {
 						return false;
 					}
-	
+
 					long seconds = (System.currentTimeMillis() - starttime);
 					stopRecording();
 					Rect r = new Rect();
 					view.getDrawingRect(r);
-					// check if touch position out of button than cancel send voice
+					// check if touch position out of button than cancel send
+					// voice
 					// message
 					if (r.contains((int) event.getX(), (int) event.getY())
 							&& seconds > 1500) {
 						// send
 						VMessage vm = new VMessage(groupId, local, remote);
-	
-						new VMessageAudioItem(vm, fileName, (int) (seconds / 1000));
+
+						new VMessageAudioItem(vm, fileName,
+								(int) (seconds / 1000));
 						// Send message to server
 						sendMessageToRemote(vm);
 					} else {
-						
+
 						if (seconds < 1500) {
 							updateCancelSendVoiceMsgNotification(VOICE_DIALOG_FLAG_WARING_FOR_TIME_TOO_SHORT);
-						}
-						else{
+						} else {
 							Toast.makeText(mContext,
 									R.string.contact_message_message_cancelled,
 									Toast.LENGTH_SHORT).show();
@@ -940,7 +944,7 @@ public class ConversationView extends Activity {
 							public void run() {
 								showOrCloseVoiceDialog();
 							}
-	
+
 						}, 1000);
 					} else {
 						showOrCloseVoiceDialog();
@@ -951,8 +955,7 @@ public class ConversationView extends Activity {
 					mButtonRecordAudio
 							.setText(R.string.contact_message_button_send_audio_msg);
 					realRecoding = false;
-				}
-				else{
+				} else {
 					cannelRecoding = true;
 					Log.d(TAG, "由于间隔太短，显示short对话框");
 					lh.removeCallbacks(preparedRecoding);
@@ -964,18 +967,18 @@ public class ConversationView extends Activity {
 		}
 
 	};
-	
-	private Runnable preparedRecoding = new Runnable(){
+
+	private Runnable preparedRecoding = new Runnable() {
 
 		@Override
 		public void run() {
-			
-			if(cannelRecoding == false){
+
+			if (cannelRecoding == false) {
 				fileName = GlobalConfig.getGlobalAudioPath() + "/"
 						+ System.currentTimeMillis() + ".aac";
 				boolean resultReocrding = startReocrding(fileName);
-				if(resultReocrding){
-					
+				if (resultReocrding) {
+
 					// Start update db for voice
 					lh.postDelayed(mUpdateMicStatusTimer, 200);
 					// Start timer
@@ -983,8 +986,7 @@ public class ConversationView extends Activity {
 					starttime = System.currentTimeMillis();
 					voiceIsSentByTimer = false;
 					realRecoding = true;
-				}
-				else{
+				} else {
 					File f = new File(fileName);
 					f.deleteOnExit();
 					fileName = null;
@@ -992,7 +994,7 @@ public class ConversationView extends Activity {
 			}
 		}
 	};
-	
+
 	private Runnable timeOutMonitor = new Runnable() {
 
 		@Override
@@ -1513,17 +1515,20 @@ public class ConversationView extends Activity {
 
 		@Override
 		public void reSendMessageClicked(VMessage v) {
-			v.setState(VMessage.STATE_UNREAD);
-			List<VMessageAbstractItem> items = v.getItems();
-			for (int i = 0; i < items.size(); i++) {
-				VMessageAbstractItem item = items.get(i);
-				if (item.getType() == VMessageAbstractItem.ITEM_TYPE_FILE) {
-					item.setState(VMessageAbstractItem.STATE_FILE_SENDING);
-				} else {
-					item.setState(VMessageAbstractItem.STATE_NORMAL);
-				}
-			}
-			Message.obtain(lh, SEND_MESSAGE, v).sendToTarget();
+//			v.setState(VMessage.STATE_UNREAD);
+//			List<VMessageAbstractItem> items = v.getItems();
+//			for (int i = 0; i < items.size(); i++) {
+//				VMessageAbstractItem item = items.get(i);
+//				if (item.getType() == VMessageAbstractItem.ITEM_TYPE_FILE) {
+//					item.setState(VMessageAbstractItem.STATE_FILE_SENDING);
+//				} else {
+//					item.setState(VMessageAbstractItem.STATE_NORMAL);
+//				}
+//			}
+//			Message.obtain(lh, SEND_MESSAGE, v).sendToTarget();
+			mChat.sendVMessage(v, new Registrant(lh,
+					SEND_MESSAGE_DONE, null));
+			notificateConversationUpdate();
 		}
 
 		@Override
@@ -1621,14 +1626,13 @@ public class ConversationView extends Activity {
 			stopCurrentAudioPlaying();
 		}
 	};
-	
+
 	protected void stopCurrentAudioPlaying() {
-		
-		if (currentPlayed != null
-				&& currentPlayed.getAudioItems().size() > 0){
+
+		if (currentPlayed != null && currentPlayed.getAudioItems().size() > 0) {
 			currentPlayed.getAudioItems().get(0).setPlaying(false);
 			runOnUiThread(new Runnable() {
-	
+
 				@Override
 				public void run() {
 					for (int i = 0; i < messageArray.size(); i++) {
@@ -1667,18 +1671,20 @@ public class ConversationView extends Activity {
 
 	private boolean queryAndAddMessage(final int msgId) {
 
+		if(messageAllID.get(msgId) != null){
+			Log.e(TAG, "happen erupt , the message ：" + msgId + "  already save in messageArray!");
+			return false;
+		}
+		
 		VMessage m = MessageLoader.loadMessageById(mContext, msgId);
 		if (m == null
 				|| (m.getFromUser().getmUserId() != this.user2Id && m
 						.getGroupId() == 0) || (m.getGroupId() != this.groupId)) {
-			return false;
+			return false; 
 		}
+		
 		MessageBodyView mv = new MessageBodyView(this, m, true);
-		for (int i = 0; i < messageArray.size(); i++) {
-			if(((VMessage)messageArray.get(0).getItemObject()).getDate().equals(m.getDate())){
-				return true;
-			}
-		}
+
 		messageArray.add(new VMessageAdater(m));
 		if (mv != null) {
 			if (!isStopped) {
@@ -1689,7 +1695,7 @@ public class ConversationView extends Activity {
 		}
 		return true;
 	}
-	
+
 	@Override
 	protected void onPause() {
 		super.onPause();
@@ -1965,6 +1971,11 @@ public class ConversationView extends Activity {
 				V2Log.d(TAG, "获取的消息数量" + array.size());
 				if (array != null) {
 					for (int i = 0; i < array.size(); i++) {
+						if(messageAllID.get((int) array.get(i).getId()) != null){
+							Log.e(TAG, "happen erupt , the message ：" + (int) array.get(i).getId() + "  already save in messageArray!");
+							continue;
+						}
+						messageAllID.append((int) array.get(i).getId(), array.get(i));
 						messageArray.add(0, new VMessageAdater(array.get(i)));
 					}
 					V2Log.d(TAG, "当前消息集合大小" + messageArray.size());
@@ -2014,7 +2025,7 @@ public class ConversationView extends Activity {
 				removeMessage((VMessage) msg.obj);
 				MessageLoader.deleteMessage(mContext, (VMessage) msg.obj);
 				adapter.notifyDataSetChanged();
-				//Update conversation
+				// Update conversation
 				notificateConversationUpdate();
 				break;
 			case FILE_STATUS_LISTENER:
@@ -2090,6 +2101,12 @@ public class ConversationView extends Activity {
 			sendSelectedFile(mCheckedList.get(i).filePath,
 					mCheckedList.get(i).fileType);
 		}
+	}
+
+	@Override
+	protected void onNewIntent(Intent intent) {
+		Log.d(TAG, "onNewIntent entry...");
+		super.onNewIntent(intent);
 	}
 
 	@Override
