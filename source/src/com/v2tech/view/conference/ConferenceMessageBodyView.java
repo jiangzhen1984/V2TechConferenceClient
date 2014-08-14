@@ -30,8 +30,8 @@ public class ConferenceMessageBodyView extends LinearLayout {
 
 	private VMessage mMsg;
 
-	private LinearLayout mContentContainer;
 
+	private LinearLayout mContentContainer;
 	private View rootView;
 
 	private TextView senderTV;

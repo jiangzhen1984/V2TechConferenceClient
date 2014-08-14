@@ -42,6 +42,8 @@ import com.v2tech.vo.VMessageTextItem;
 
 public class XmlParser {
 
+	private static final String TAG = "XmlParser";
+
 	public XmlParser() {
 	}
 
@@ -196,7 +198,7 @@ public class XmlParser {
 	 */
 	public static List<Group> parserFromXml(int type, String xml) {
 		List<Group> list = new ArrayList<Group>();
-
+		V2Log.e(TAG, xml);
 		InputStream is = null;
 
 		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();

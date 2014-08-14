@@ -671,9 +671,9 @@ public class ChatService extends AbstractHandler {
 		}
 
 		@Override
-		public void OnFileDownloadError(String sFileID) {
+		public void OnFileDownloadError(String sFileID , int t1) {
 			notifyListener(KEY_FILE_TRANS_STATUS_NOTIFICATION_LISTNER, 0, 0,
-					new FileTransErrorIndication(sFileID));
+					new FileTransErrorIndication(sFileID , t1));
 
 		}
 

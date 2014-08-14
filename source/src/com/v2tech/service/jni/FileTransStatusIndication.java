@@ -9,6 +9,16 @@ public class FileTransStatusIndication extends JNIIndication {
 	public int indType;
 	public int nTransType;
 	public String uuid;
+	public int errorCode;
+	
+	public FileTransStatusIndication(int indType, int nTransType,
+			String uuid , int errorCode) {
+		super(Result.SUCCESS);
+		this.indType = indType;
+		this.nTransType = nTransType;
+		this.uuid = uuid;
+		this.errorCode = errorCode;
+	}
 	
 	public FileTransStatusIndication(int indType, int nTransType,
 			String uuid) {
@@ -34,8 +44,8 @@ public class FileTransStatusIndication extends JNIIndication {
 	
 	public static class FileTransErrorIndication extends FileTransStatusIndication {
 
-		public FileTransErrorIndication(String uuid) {
-			super(IND_TYPE_TRANS_ERR, 1, uuid);
+		public FileTransErrorIndication(String uuid , int t1) {
+			super(IND_TYPE_TRANS_ERR, 1, uuid , t1);
 		}
 		
 	}

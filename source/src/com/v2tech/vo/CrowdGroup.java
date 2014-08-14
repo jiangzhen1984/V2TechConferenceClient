@@ -42,11 +42,15 @@ public class CrowdGroup extends Group {
 	 * @param xml
 	 * @return
 	 */
-	public static Group parseXml(String xml) {
+	public static Group parseXml(String xml , String userInfo) {
 		String strId = null;
 		String name = null;
 		String owner = null;
 		int start, end = -1;
+		
+		User mOwnerUser = null;
+		String nickname = null;
+		long userId = 0;
 		start = xml.indexOf("createuserid='");
 		if (start != -1) {
 			end = xml.indexOf("'", start + 14);
@@ -70,8 +74,26 @@ public class CrowdGroup extends Group {
 				name = xml.substring(start + 6, end);
 			}
 		}
+		
+		start = userInfo.indexOf(" nickname='");
+		if (start != -1) {
+			end = userInfo.indexOf("'", start + 11);
+			if (end != -1) {
+				nickname = userInfo.substring(start + 11, end);
+			}
+		}
+		
+		start = userInfo.indexOf(" id='");
+		if (start != -1) {
+			end = userInfo.indexOf("'", start + 5);
+			if (end != -1) {
+				userId = Long.parseLong(userInfo.substring(start + 5, end));
+			}
+		}
 
+		mOwnerUser = new User(userId , nickname);
 		Group g = new CrowdGroup(Long.parseLong(strId),name, owner, null);
+		g.setOwnerUser(mOwnerUser);
 		return g;
 	}
 }

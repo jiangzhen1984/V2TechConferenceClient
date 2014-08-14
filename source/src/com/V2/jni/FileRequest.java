@@ -247,7 +247,7 @@ public class FileRequest {
 		for (int i = 0; i < callbacks.size(); i++) {
 			WeakReference<FileRequestCallback> wrf = callbacks.get(i);
 			if (wrf != null && wrf.get() != null) {
-				((FileRequestCallback) wrf.get()).OnFileDownloadError(sFileID);
+				((FileRequestCallback) wrf.get()).OnFileDownloadError(sFileID , t1);
 			}
 		}
 	}

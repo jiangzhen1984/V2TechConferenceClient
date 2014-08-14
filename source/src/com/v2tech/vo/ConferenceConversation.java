@@ -1,10 +1,12 @@
 package com.v2tech.vo;
 
+import com.v2tech.util.V2Log;
 import com.v2tech.vo.Group.GroupType;
 
 
 public class ConferenceConversation extends Conversation {
 
+	private static final String TAG = "ConferenceConversation";
 	private Group g;
 
 	public ConferenceConversation(Group g) {
@@ -28,6 +30,7 @@ public class ConferenceConversation extends Conversation {
 	public CharSequence getMsg() {
 		if (g != null) {
 			User u = g.getOwnerUser();
+			V2Log.e(TAG, "group name : " + g.getName());
 			//TODO need use localization
 			return u == null ? g.getOwner() + "" : "创建人:"+u.getName();
 		}

@@ -21,6 +21,8 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
+import android.view.ViewTreeObserver.OnPreDrawListener;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
@@ -86,6 +88,7 @@ public class MessageBodyView extends LinearLayout {
 
 	private ClickListener callback;
 	private ImageView micIv;
+	private int width = 0;
 
 	public interface ClickListener {
 		public void onMessageClicked(VMessage v);
@@ -698,21 +701,32 @@ public class MessageBodyView extends LinearLayout {
 				vfi.setSpeed(sec == 0 ? 0 : (vfi.getDownloadedSize() / sec));
 			}
 			speed.setText(vfi.getSpeedStr());
-
 			float percent = (float) ((double) vfi.getDownloadedSize() / (double) vfi
 					.getFileSize());
 
-			ViewGroup progressC = (ViewGroup) rootView
+			final ViewGroup progressC = (ViewGroup) rootView
 					.findViewById(R.id.message_body_file_item_progress_state_ly);
-			progressC.measure(View.MeasureSpec.makeMeasureSpec(0,
-					View.MeasureSpec.UNSPECIFIED), View.MeasureSpec
-					.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
-			int width = progressC.getMeasuredWidth();
+			ViewTreeObserver viewTreeObserver = progressC.getViewTreeObserver();
+			viewTreeObserver.addOnPreDrawListener(new OnPreDrawListener() {
+				
+				@Override
+				public boolean onPreDraw() {
+					if(width == 0){
+						width = progressC.getMeasuredWidth();
+						V2Log.d(TAG, "total width：" + width);
+					}
+					return true;
+				}
+			});
+//			progressC.measure(View.MeasureSpec.makeMeasureSpec(0,
+//					View.MeasureSpec.UNSPECIFIED), View.MeasureSpec
+//					.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
+//			width = progressC.getMeasuredWidth();
 			View iv = rootView
 					.findViewById(R.id.message_body_file_item_progress_state);
-			ViewGroup.LayoutParams lp = iv.getLayoutParams();
-			lp.width = (int) (width * percent);
-			iv.setLayoutParams(lp);
+			android.view.ViewGroup.LayoutParams params = iv.getLayoutParams();
+			params.width = (int) (width * percent);
+			iv.setLayoutParams(params);
 
 		} else {
 			rootView.findViewById(R.id.message_body_file_item_progress_layout)

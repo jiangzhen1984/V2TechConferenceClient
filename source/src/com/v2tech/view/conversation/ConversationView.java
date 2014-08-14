@@ -1725,7 +1725,7 @@ public class ConversationView extends Activity {
 						&& item.getUuid().equals(uuid)) {
 					VMessageFileItem vfi = ((VMessageFileItem) item);
 
-					if (vfi.getFileSize() == tranedSize) {
+					if (vfi.getFileSize() <= tranedSize) {
 						if (vfi.getState() == VMessageAbstractItem.STATE_FILE_SENDING) {
 							vfi.setState(VMessageAbstractItem.STATE_FILE_SENT);
 						} else if (vfi.getState() == VMessageAbstractItem.STATE_FILE_DOWNLOADING) {
@@ -2037,6 +2037,9 @@ public class ConversationView extends Activity {
 							((FileTransProgressStatusIndication) ind).nTranedSize);
 				} else if (ind.indType == FileTransStatusIndication.IND_TYPE_TRANS_ERR) {
 					updateFileTransErrorView(ind.uuid);
+					if(ind.errorCode == 415){
+						Toast.makeText(getApplicationContext(), "亲，不可以发送0大小的文件，抱歉...", Toast.LENGTH_SHORT).show();
+					}
 				}
 				break;
 			}

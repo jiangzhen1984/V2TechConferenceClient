@@ -34,6 +34,7 @@ public interface FileRequestCallback {
 	/**
 	 * 
 	 * @param sFileID
+	 * @param t1 错误代码
 	 */
-	public void OnFileDownloadError(String sFileID);
+	public void OnFileDownloadError(String sFileID , int t1);
 }

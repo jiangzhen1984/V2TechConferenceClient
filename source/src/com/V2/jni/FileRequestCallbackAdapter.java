@@ -22,7 +22,7 @@ public abstract class FileRequestCallbackAdapter implements FileRequestCallback 
 	}
 
 	@Override
-	public void OnFileDownloadError(String sFileID) {
+	public void OnFileDownloadError(String sFileID , int t1) {
 
 	}
 

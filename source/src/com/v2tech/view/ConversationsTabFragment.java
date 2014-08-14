@@ -278,7 +278,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher, C
 			}
 		}
 		mConvList = newItemList;
-		fillAdapter(mConvList);
+		fillAdapter(mConvList , true);
 //		adapter.notifyDataSetChanged();
 	}
 
@@ -334,7 +334,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher, C
 			this.mConvList.add(cov); 
 		}
 
-		fillAdapter(this.mConvList);
+		fillAdapter(this.mConvList , true);
 	}
 
 	/**
@@ -389,7 +389,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher, C
 		mCur.close();
 		isLoadedCov = true;
 
-		fillAdapter(mConvList);
+		fillAdapter(mConvList , true);
 	}
 
 	private Conversation extractConversation(Cursor cur) {
@@ -406,7 +406,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher, C
 		return cov;
 	}
 
-	private void fillAdapter(List<Conversation> list) {
+	private void fillAdapter(List<Conversation> list , boolean isFresh) {
 		for (int i = 0; i < list.size(); i++) {
 			Conversation cov = list.get(i);
 			GroupLayout gp = new GroupLayout(mContext, cov);
@@ -417,8 +417,10 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher, C
 			mItemList.add(new ScrollItem(cov, gp));
 		}
 
-		
-		adapter.notifyDataSetChanged();
+		if(isFresh){
+			
+			adapter.notifyDataSetChanged();
+		}
 	}
 
 	private void updateConversationToDB(long extId, String name) {
@@ -863,6 +865,9 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher, C
 
 		@Override
 		public int getCount() {
+			if(mConvList.size() != mItemList.size()){
+				fillAdapter(mConvList, false);
+			}
 			return mConvList == null ? 0 : mConvList.size();
 		}
 
@@ -879,8 +884,13 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher, C
 		@Override
 		public View getView(int position, View convertView, ViewGroup parent) {
 			currentPosition = position;
-			return mItemList.get(position).gp;
-//			return mConvList.get(position).gp;
+			if(currentPosition < mItemList.size()){
+				
+				return mItemList.get(position).gp;
+			}
+			else{
+				return convertView;
+			}
 		}
 
 	}

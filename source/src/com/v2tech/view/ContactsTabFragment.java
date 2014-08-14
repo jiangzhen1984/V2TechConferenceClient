@@ -34,6 +34,7 @@ import com.v2tech.view.bo.GroupUserObject;
 import com.v2tech.view.bo.UserStatusObject;
 import com.v2tech.view.contacts.ContactGroupView;
 import com.v2tech.view.contacts.ContactUserView;
+import com.v2tech.vo.CrowdGroup;
 import com.v2tech.vo.Group;
 import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.User;
@@ -46,6 +47,7 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 	private static final int UPDATE_USER_STATUS = 5;
 	private static final int UPDATE_SEARCHED_USER_LIST = 6;
 	private static final int UPDATE_USER_SIGN = 8;
+	private static final int UPDATE_GROUP_LIST = 9;
 
 	private Context mContext;
 
@@ -69,6 +71,7 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 
 	private static final int TAG_ORG = 1;
 	private static final int TAG_CONTACT = 2;
+	public static final String TAG = "ContactsTabFragment";
 
 	private int flag;
 	private int currentPos = -1;
@@ -148,6 +151,8 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 		if (!mLoaded) {
 			Message.obtain(mHandler, FILL_CONTACTS_GROUP).sendToTarget();
 		}
+		
+		V2Log.e(TAG, "size :" + mItemList.size());
 		if (currentPos != -1) {
 			updateListStateRemove(currentPos, mItemList.get(currentPos));
 			updateListState(currentPos, mItemList.get(currentPos));
@@ -186,6 +191,8 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 
 			intentFilter
 					.addAction(JNIService.JNI_BROADCAST_USER_UPDATE_NAME_OR_SIGNATURE);
+			intentFilter
+					.addAction(JNIService.JNI_BROADCAST_GROUP_INVATITION);
 		}
 		return intentFilter;
 	}
@@ -299,9 +306,14 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 						"obj");
 				if (flag == TAG_CONTACT
 						&& guo.getmType() == Group.GroupType.CONTACT.intValue()) {
+					
 					// Update all group staticist information
 					for (int i = 0; i < mItemList.size(); i++) {
 						ListItem item = mItemList.get(i);
+						if(item.u != null){
+							
+							V2Log.e(TAG, "已存在的好友：" + GlobalHolder.getInstance().getUser(item.u.getmUserId()).getArra());
+						}
 						if (item.g != null) {
 							((ContactGroupView) item.v).updateUserStatus();
 							if (item.isExpanded
@@ -309,6 +321,7 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 								// ADD user
 								User u = GlobalHolder.getInstance().getUser(
 										guo.getmUserId());
+								V2Log.e(TAG, "获取刚添加的好友 " + u.getArra());
 								mItemList.add(++i,
 										new ListItem(u, item.g.getLevel() + 1));
 								continue;
@@ -317,6 +330,11 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 					}
 					adapter.notifyDataSetChanged();
 				}
+			}
+			else if(JNIService.JNI_BROADCAST_GROUP_INVATITION
+					.equals(intent.getAction())){
+				Message.obtain(mHandler, UPDATE_GROUP_LIST,
+						intent.getExtras().get("gid")).sendToTarget();
 			}
 
 		}
@@ -377,8 +395,8 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 	}
 
 	private void updateListStateRemove(int pos, ListItem item) {
-		if (item.g.getChildGroup() == null || item.g.getChildGroup().size() <= 0
-				&& item.g.getUsers() == null || item.g.getUsers().size() <= 0) {
+		if ((item.g.getChildGroup() == null || item.g.getChildGroup().size() <= 0)
+				&& (item.g.getUsers() == null || item.g.getUsers().size() <= 0)) {
 			return;
 		}
 
@@ -634,6 +652,7 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 
 	class ContactsHandler extends Handler {
 
+
 		@Override
 		public void handleMessage(Message msg) {
 			switch (msg.what) {
@@ -673,8 +692,24 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 						((ContactUserView) li.v).updateSign();
 					}
 				}
+				break;
+			case UPDATE_GROUP_LIST:
+//				long groupId = (Long) msg.obj;
+//				Group group = GlobalHolder.getInstance().getGroupById(GroupType.CHATING, groupId);
+//				if(group == null){
+//					V2Log.e(TAG, "update failed , non get new group...");
+//					return ;
+//				}
+//				V2Log.e(TAG, "get new group: " + group.getOwnerUser().getArra());
+//				ListItem li = new ListItem(group, group.getLevel());
+//				updateListState(pos, item);
+//				mItemList.
+//				adapter.notifyDataSetChanged();
+				fillContactsGroup();
+				break;
 
 			}
+			
 		}
 
 	}
