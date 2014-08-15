@@ -317,7 +317,10 @@ public class ConversationSelectImage extends Activity {
 
 					Bitmap bitmap = BitmapUtil.getCompressedBitmap(fb.filePath);
 					if (fb.fileName == null && bitmap != null) {
-						bitmap.recycle();
+						if (!bitmap.isRecycled()) {  
+							bitmap.recycle();
+							bitmap = null;
+						} 
 						return;
 					}
 					

@@ -185,6 +185,7 @@ public class ConversationView extends Activity {
 	private Bundle bundle;
 	private View root;
 	private SparseArray<VMessage> messageAllID;
+	private List<VMessage> currentGetMessages;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -508,7 +509,7 @@ public class ConversationView extends Activity {
 	}
 
 	private InputStream currentPlayedStream;
-	private boolean startInitalize;
+	private TextView tips;
 
 	private synchronized boolean startPlaying(String fileName) {
 
@@ -583,16 +584,16 @@ public class ConversationView extends Activity {
 			if (mSpeakingLayout != null) {
 				mSpeakingLayout.setVisibility(View.VISIBLE);
 				int duration = (int) (System.currentTimeMillis() - starttime) / 1000;
-				TextView tips = (TextView) mSpeakingLayout
+				tips = (TextView) mSpeakingLayout
 						.findViewById(R.id.message_voice_dialog_listening_container_tips);
 				if (duration > 50) {
 //					isBeginTimer = true;
 //					startCounter(tips);
-					String str = mContext.getText(
-							R.string.contact_message_tips_rest_seconds)
-							.toString();
-					str = str.replace("[]", (59 - duration) + "");
-					tips.setText(str);
+//					String str = mContext.getText(
+//							R.string.contact_message_tips_rest_seconds)
+//							.toString();
+//					str = str.replace("[]", (59 - duration) + "");
+//					tips.setText(str);
 				} else {
 					tips.setText(R.string.contact_message_voice_dialog_text);
 				}
@@ -621,35 +622,6 @@ public class ConversationView extends Activity {
 		}
 
 	}
-
-//	private int count = 9;
-//	private String str;
-//	private Timer mTimer;
-//	private boolean isBeginTimer;
-//	private void startCounter(final TextView tips) {
-//		V2Log.e(TAG, "进入倒计时状态");
-//		mTimer = new Timer();
-//		mTimer.schedule(new TimerTask() {
-//
-//			@Override
-//			public void run() {
-//				
-//				runOnUiThread(new Runnable() {
-//					public void run() {
-//						str = str.replace("[]", (count - 1) + "");
-//						tips.setText(str);
-//						if(count == 0){
-//							V2Log.e(TAG, "时间到，恢复原状");
-//							isBeginTimer = false;
-//							mTimer.cancel();
-//							count = 9;
-//						}
-//						count--;
-//					}
-//				});
-//			} 
-//		}, 0, 1000); 
-//	}
 
 	private void updateVoiceVolume(int vol) {
 		if (mVolume != null) {
@@ -942,12 +914,15 @@ public class ConversationView extends Activity {
 						return false;
 					}
 					
-//					if(mTimer != null){
-//						V2Log.e(TAG, "时间没到，手动停止，恢复原状");
-//						isBeginTimer = false;
-//						mTimer.cancel();
-//						count = 9;
-//					}
+					if(mTimer != null){
+						V2Log.d(TAG, "时间没到，手动停止，恢复原状");
+						mTimer.cancel();
+						count = 11;
+						mTimer = null;
+					}
+					else{
+						lh.removeCallbacks(mUpdateSurplusTime);
+					}
 
 					long seconds = (System.currentTimeMillis() - starttime);
 					stopRecording();
@@ -991,8 +966,8 @@ public class ConversationView extends Activity {
 					} else {
 						showOrCloseVoiceDialog();
 					}
-					lh.removeCallbacks(mUpdateMicStatusTimer);
 					// Remove timer
+					lh.removeCallbacks(mUpdateMicStatusTimer);
 					lh.removeCallbacks(timeOutMonitor);
 					mButtonRecordAudio
 							.setText(R.string.contact_message_button_send_audio_msg);
@@ -1025,6 +1000,8 @@ public class ConversationView extends Activity {
 					lh.postDelayed(mUpdateMicStatusTimer, 200);
 					// Start timer
 					lh.postDelayed(timeOutMonitor, 59 * 1000);
+					// start timer for prompt surplus time
+					lh.postDelayed(mUpdateSurplusTime, 8 * 1000);
 					starttime = System.currentTimeMillis();
 					voiceIsSentByTimer = false;
 					realRecoding = true;
@@ -1034,6 +1011,40 @@ public class ConversationView extends Activity {
 					fileName = null;
 				}
 			}
+		}
+	};
+	
+	private int count = 11;
+	private Timer mTimer;
+	private Runnable mUpdateSurplusTime = new Runnable() {
+		
+		@Override
+		public void run() {
+			V2Log.d(TAG, "entry surplus time ...");
+			mTimer = new Timer();
+			mTimer.schedule(new TimerTask() {
+	
+				@Override
+				public void run() {
+					
+					runOnUiThread(new Runnable() {
+
+						public void run() {
+							if(count == 0){
+								V2Log.d(TAG, "time is over.");
+								mTimer.cancel();
+								count = 11;
+							}
+							String str = mContext.getText(
+									R.string.contact_message_tips_rest_seconds)
+									.toString();
+							str = str.replace("[]", (count - 1) + "");
+							tips.setText(str);
+							count--;
+						}
+					});
+				} 
+			}, 0, 1000); 
 		}
 	};
 
@@ -1752,6 +1763,14 @@ public class ConversationView extends Activity {
 			VMessageAdater va = (VMessageAdater) messageArray.get(i);
 			if (vm.getId() == ((VMessage) va.getItemObject()).getId()) {
 				messageArray.remove(i);
+				if(messageArray.size() < currentGetMessages.size() / 2){
+					android.os.Message.obtain(lh,
+							START_LOAD_MESSAGE);
+					isLoading = false;
+					V2Log.e(TAG, "自动开始加载");
+				}
+				V2Log.d(TAG, "现在集合长度：" + messageArray.size());
+				V2Log.d(TAG, "总集合长度：" + currentGetMessages.size());
 				return true;
 			}
 		}
@@ -1937,6 +1956,15 @@ public class ConversationView extends Activity {
 				}
 				MessageBodyView mv = new MessageBodyView(mContext, vm, true);
 				mv.setCallback(listener);
+				if(vm.getFileItems().size() > 0){
+					VMessageFileItem vMessageFileItem = vm.getFileItems().get(0);
+					if(vMessageFileItem != null && vMessageFileItem.getState() == VMessageFileItem.STATE_FILE_SENDING){
+						mChat.sendVMessage(vMessageFileItem.getVm(), new Registrant(lh,
+								SEND_MESSAGE_DONE, null));
+						notificateConversationUpdate();
+						V2Log.d(TAG, "the file :" + vMessageFileItem.getFileName() + " restart sending");
+					}
+				}
 				((VMessageAdater) wrapper).setView(mv);
 
 			}
@@ -2012,6 +2040,7 @@ public class ConversationView extends Activity {
 				List<VMessage> array = loadMessages();
 				V2Log.d(TAG, "获取的消息数量" + array.size());
 				if (array != null) {
+					currentGetMessages = array;
 					for (int i = 0; i < array.size(); i++) {
 						if(messageAllID.get((int) array.get(i).getId()) != null){
 							Log.e(TAG, "happen erupt , the message ：" + (int) array.get(i).getId() + "  already save in messageArray!");

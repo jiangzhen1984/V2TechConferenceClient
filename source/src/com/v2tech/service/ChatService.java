@@ -83,6 +83,8 @@ public class ChatService extends AbstractHandler {
 	private static final int KEY_FILE_TRANS_STATUS_NOTIFICATION_LISTNER = 2;
 	private static final int KEY_VIDEO_CONNECTED = 3;
 
+	private static final String TAG = "ChatService";
+
 	public ChatService() {
 		super();
 		init();
@@ -279,6 +281,7 @@ public class ChatService extends AbstractHandler {
 		case OPERATION_CANCEL_SENDING:
 			FileRequest.getInstance().cancelSendFile(vfi.getUuid(),
 					vfi.getTransType());
+			V2Log.e(TAG, "cannel sending file");
 			break;
 		case OPERATION_CANCEL_DOWNLOADING:
 			FileRequest.getInstance().cancelRecvFile(vfi.getUuid(),

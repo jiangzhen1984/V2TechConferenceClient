@@ -107,8 +107,11 @@ public class ConversationSelectFile extends Activity {
 				if (cach != null) {
 					cach.fileIcon.setImageResource(R.drawable.ic_launcher);
 				}
-				bitmap.recycle();
-				bitmap = null;
+				
+				if (!bitmap.isRecycled()) {  
+					bitmap.recycle();
+					bitmap = null;
+				} 
 				break;
 			default:
 				break;
@@ -613,8 +616,10 @@ public class ConversationSelectFile extends Activity {
 
 					Bitmap bitmap = BitmapUtil.getCompressedBitmap(fb.filePath);
 					if (fb.fileName == null && bitmap != null) {
-						bitmap.recycle();
-						bitmap = null;
+						if (!bitmap.isRecycled()) {  
+							bitmap.recycle();
+							bitmap = null;
+						} 
 						return;
 					}
 					

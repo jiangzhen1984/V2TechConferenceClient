@@ -928,16 +928,18 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher, C
 				for (ScrollItem item : mItemList) {
 					if (item.cov.getType().equals(Conversation.TYPE_CONFERNECE) ||
 							item.cov.getType().equals(Conversation.TYPE_GROUP)) {
-						Group g = ((ConferenceConversation) item.cov) 
-								.getGroup();
-						User u = GlobalHolder.getInstance().getUser(
-								g.getOwner());
-						if (u == null) {
-							continue;
+						if(item.cov instanceof ConferenceConversation){
+							Group g = ((ConferenceConversation) item.cov) 
+									.getGroup();
+							User u = GlobalHolder.getInstance().getUser(
+									g.getOwner());
+							if (u == null) {
+								continue;
+							}
+							V2Log.e(TAG, "group user update :type:" + item.cov.getType() + "-- name:" + u.getName());
+							((GroupLayout) item.gp).updateContent(u.getName());
+							g.setOwnerUser(u);
 						}
-						V2Log.e(TAG, "group user update :type:" + item.cov.getType() + "-- name:" + u.getName());
-						((GroupLayout) item.gp).updateContent(u.getName());
-						g.setOwnerUser(u);
 					}
 					else if (item.cov.getType().equals(
 							Conversation.TYPE_CONTACT)) {
