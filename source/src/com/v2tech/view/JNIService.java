@@ -97,7 +97,6 @@ public class JNIService extends Service {
 	public static final String JNI_BROADCAST_CONFERENCE_REMOVED = "com.v2tech.jni.broadcast.conference_removed";
 	public static final String JNI_BROADCAST_GROUP_USER_REMOVED = "com.v2tech.jni.broadcast.group_user_removed";
 	public static final String JNI_BROADCAST_GROUP_USER_ADDED = "com.v2tech.jni.broadcast.group_user_added";
-	public static final String JNI_BROADCAST_GROUP_INVATITION = "com.v2tech.jni.broadcast.group_invatition_new";
 
 	private boolean isDebug = true;
 
@@ -393,10 +392,10 @@ public class JNIService extends Service {
 			case JNI_GROUP_INVITATION:
 				long groupId = (Long) msg.obj;
 				Intent i = new Intent();
-				i.setAction(JNIService.JNI_BROADCAST_GROUP_INVATITION);
+				i.setAction(PublicIntent.BROADCAST_NEW_CROWD_NOTIFICATION);
 				i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
-				i.putExtra("gid", groupId);
-				sendBroadcast(i);
+				i.putExtra("crowd", groupId);
+				mContext.sendBroadcast(i);
 				break;
 
 			}
@@ -644,7 +643,6 @@ public class JNIService extends Service {
 				return;
 			}
 
-			V2Log.e(TAG, "get friends :" + GlobalHolder.getInstance().getUser(uid).getArra());
 			GlobalHolder.getInstance().addUserToGroup(
 					GlobalHolder.getInstance().getUser(uid), nGroupID);
 			GroupUserObject obj = new GroupUserObject(groupType, nGroupID, uid);

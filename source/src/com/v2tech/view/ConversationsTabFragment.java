@@ -324,9 +324,16 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher, C
 			return;
 		}
 
-		for (final Group g : list) {
+		for (Group g : list) {
 			if (g.getOwnerUser() == null) {
 				g.setOwnerUser(GlobalHolder.getInstance().getUser(g.getOwner()));
+				if(g.getOwnerUser() == null){
+					
+					V2Log.d(TAG, "failed to get create user");
+				}
+				else{
+					V2Log.d(TAG, "create user :" + g.getOwnerUser().getArra());
+				}
 			}
 			Conversation cov = new ConferenceConversation(g);
 			//Update all initial conversation to read
@@ -919,17 +926,20 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher, C
 					.equals(intent.getAction())) {
 				// FIXME crash
 				for (ScrollItem item : mItemList) {
-					if (item.cov.getType().equals(Conversation.TYPE_CONFERNECE)) {
-						Group g = ((ConferenceConversation) item.cov)
+					if (item.cov.getType().equals(Conversation.TYPE_CONFERNECE) ||
+							item.cov.getType().equals(Conversation.TYPE_GROUP)) {
+						Group g = ((ConferenceConversation) item.cov) 
 								.getGroup();
 						User u = GlobalHolder.getInstance().getUser(
 								g.getOwner());
 						if (u == null) {
 							continue;
 						}
+						V2Log.e(TAG, "group user update :type:" + item.cov.getType() + "-- name:" + u.getName());
 						((GroupLayout) item.gp).updateContent(u.getName());
 						g.setOwnerUser(u);
-					} else if (item.cov.getType().equals(
+					}
+					else if (item.cov.getType().equals(
 							Conversation.TYPE_CONTACT)) {
 						User u = GlobalHolder.getInstance().getUser(
 								((ContactConversation) item.cov).getExtId());
@@ -1039,7 +1049,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher, C
 			}
 		}
 	}
-
+	
 	class LocalHandler extends Handler {
 
 		@Override

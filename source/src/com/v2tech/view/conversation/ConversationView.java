@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import android.app.Activity;
 import android.app.Dialog;
@@ -584,6 +586,8 @@ public class ConversationView extends Activity {
 				TextView tips = (TextView) mSpeakingLayout
 						.findViewById(R.id.message_voice_dialog_listening_container_tips);
 				if (duration > 50) {
+//					isBeginTimer = true;
+//					startCounter(tips);
 					String str = mContext.getText(
 							R.string.contact_message_tips_rest_seconds)
 							.toString();
@@ -617,6 +621,35 @@ public class ConversationView extends Activity {
 		}
 
 	}
+
+//	private int count = 9;
+//	private String str;
+//	private Timer mTimer;
+//	private boolean isBeginTimer;
+//	private void startCounter(final TextView tips) {
+//		V2Log.e(TAG, "进入倒计时状态");
+//		mTimer = new Timer();
+//		mTimer.schedule(new TimerTask() {
+//
+//			@Override
+//			public void run() {
+//				
+//				runOnUiThread(new Runnable() {
+//					public void run() {
+//						str = str.replace("[]", (count - 1) + "");
+//						tips.setText(str);
+//						if(count == 0){
+//							V2Log.e(TAG, "时间到，恢复原状");
+//							isBeginTimer = false;
+//							mTimer.cancel();
+//							count = 9;
+//						}
+//						count--;
+//					}
+//				});
+//			} 
+//		}, 0, 1000); 
+//	}
 
 	private void updateVoiceVolume(int vol) {
 		if (mVolume != null) {
@@ -904,8 +937,17 @@ public class ConversationView extends Activity {
 				if (realRecoding == true) {
 					lastTime = 0;
 					if (voiceIsSentByTimer) {
+						mButtonRecordAudio
+						.setText(R.string.contact_message_button_send_audio_msg);
 						return false;
 					}
+					
+//					if(mTimer != null){
+//						V2Log.e(TAG, "时间没到，手动停止，恢复原状");
+//						isBeginTimer = false;
+//						mTimer.cancel();
+//						count = 9;
+//					}
 
 					long seconds = (System.currentTimeMillis() - starttime);
 					stopRecording();
@@ -968,8 +1010,8 @@ public class ConversationView extends Activity {
 
 	};
 
-	private Runnable preparedRecoding = new Runnable() {
 
+	private Runnable preparedRecoding = new Runnable() {
 		@Override
 		public void run() {
 

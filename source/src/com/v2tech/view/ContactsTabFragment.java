@@ -47,7 +47,6 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 	private static final int UPDATE_USER_STATUS = 5;
 	private static final int UPDATE_SEARCHED_USER_LIST = 6;
 	private static final int UPDATE_USER_SIGN = 8;
-	private static final int UPDATE_GROUP_LIST = 9;
 
 	private Context mContext;
 
@@ -191,8 +190,6 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 
 			intentFilter
 					.addAction(JNIService.JNI_BROADCAST_USER_UPDATE_NAME_OR_SIGNATURE);
-			intentFilter
-					.addAction(JNIService.JNI_BROADCAST_GROUP_INVATITION);
 		}
 		return intentFilter;
 	}
@@ -331,12 +328,6 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 					adapter.notifyDataSetChanged();
 				}
 			}
-			else if(JNIService.JNI_BROADCAST_GROUP_INVATITION
-					.equals(intent.getAction())){
-				Message.obtain(mHandler, UPDATE_GROUP_LIST,
-						intent.getExtras().get("gid")).sendToTarget();
-			}
-
 		}
 
 	}
@@ -693,21 +684,6 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 					}
 				}
 				break;
-			case UPDATE_GROUP_LIST:
-//				long groupId = (Long) msg.obj;
-//				Group group = GlobalHolder.getInstance().getGroupById(GroupType.CHATING, groupId);
-//				if(group == null){
-//					V2Log.e(TAG, "update failed , non get new group...");
-//					return ;
-//				}
-//				V2Log.e(TAG, "get new group: " + group.getOwnerUser().getArra());
-//				ListItem li = new ListItem(group, group.getLevel());
-//				updateListState(pos, item);
-//				mItemList.
-//				adapter.notifyDataSetChanged();
-				fillContactsGroup();
-				break;
-
 			}
 			
 		}
