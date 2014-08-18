@@ -73,13 +73,11 @@ public class VideoInvitionAttendeeLayout extends LinearLayout {
 	private Conference conf;
 
 	private int landLayout = PAD_LAYOUT;
-	
+
 	private Listener listener;
-	
-	
-	
+
 	public interface Listener {
-		public void requestInvitation(Conference conf, List<User> l); 
+		public void requestInvitation(Conference conf, List<User> l);
 	}
 
 	public VideoInvitionAttendeeLayout(Context context, Conference conf) {
@@ -88,7 +86,6 @@ public class VideoInvitionAttendeeLayout extends LinearLayout {
 		initLayout();
 	}
 
-	
 	private void initLayout() {
 		mContext = getContext();
 		View view = LayoutInflater.from(getContext()).inflate(
@@ -99,38 +96,41 @@ public class VideoInvitionAttendeeLayout extends LinearLayout {
 		mContactsContainer.setOnItemClickListener(itemListener);
 		mContactsContainer.setAdapter(adapter);
 
-		mAttendeeContainer = (LinearLayout) view.findViewById(R.id.conference_attendee_container);
+		mAttendeeContainer = (LinearLayout) view
+				.findViewById(R.id.conference_attendee_container);
 		mAttendeeContainer.setGravity(Gravity.CENTER);
 		landLayout = mAttendeeContainer.getTag().equals("vertical") ? PAD_LAYOUT
 				: PHONE_LAYOUT;
 
-
-		mConfTitleET = (EditText) view.findViewById(R.id.conference_create_conf_name);
+		mConfTitleET = (EditText) view
+				.findViewById(R.id.conference_create_conf_name);
 		mConfTitleET.setEnabled(false);
-		mConfStartTimeET = (EditText) view.findViewById(R.id.conference_create_conf_start_time);
+		mConfStartTimeET = (EditText) view
+				.findViewById(R.id.conference_create_conf_start_time);
 		mConfStartTimeET.setEnabled(false);
-		
 
 		searchedTextET = (EditText) view.findViewById(R.id.contacts_search);
 		searchedTextET.addTextChangedListener(textChangedListener);
 
-		mErrorNotificationLayout = (LinearLayout) view.findViewById(R.id.conference_create_error_notification);
+		mErrorNotificationLayout = (LinearLayout) view
+				.findViewById(R.id.conference_create_error_notification);
 		mScroller = view.findViewById(R.id.conf_create_scroll_view);
-		mInvitionButton =  view.findViewById(R.id.video_invition_attendee_ly_invition_button);
+		mInvitionButton = view
+				.findViewById(R.id.video_invition_attendee_ly_invition_button);
 		mInvitionButton.setOnClickListener(confirmButtonListener);
 
 		this.addView(view, new LinearLayout.LayoutParams(
 				LinearLayout.LayoutParams.MATCH_PARENT,
 				LinearLayout.LayoutParams.MATCH_PARENT));
 		initData();
-		
+
 		new LoadContactsAT().execute();
 	}
-	
+
 	public void setListener(Listener l) {
 		this.listener = l;
 	}
-	
+
 	private void initData() {
 		mConfTitleET.setText(conf.getName());
 		mConfStartTimeET.setText(conf.getStartTimeStr());
@@ -240,7 +240,7 @@ public class VideoInvitionAttendeeLayout extends LinearLayout {
 		View v = null;
 		if (landLayout == PAD_LAYOUT) {
 			v = new ContactUserView(mContext, u, false);
-			((ContactUserView)v).removePadding();
+			((ContactUserView) v).removePadding();
 			v.setTag(u);
 			v.setOnClickListener(removeAttendeeListener);
 		} else {
@@ -350,6 +350,9 @@ public class VideoInvitionAttendeeLayout extends LinearLayout {
 			} else {
 				if (mIsStartedSearch) {
 					mItemList = mCacheItemList;
+					for (ListItem ListItem : mItemList) {
+						updateItem(ListItem);
+					}
 					adapter.notifyDataSetChanged();
 					mIsStartedSearch = false;
 				}
@@ -412,20 +415,19 @@ public class VideoInvitionAttendeeLayout extends LinearLayout {
 			if (listener != null) {
 				listener.requestInvitation(conf, l);
 			}
-			
-			//Clean
+
+			// Clean
 			mAttendeeContainer.removeAllViews();
 			mAttendeeList.clear();
 			for (ListItem li : mItemList) {
-				if (li.u != null && ((ContactUserView)li.v).isChecked()) {
-					((ContactUserView)li.v).updateChecked();
+				if (li.u != null && ((ContactUserView) li.v).isChecked()) {
+					((ContactUserView) li.v).updateChecked();
 				}
 			}
-			
+
 		}
 
 	};
-
 
 	class LoadContactsAT extends AsyncTask<Void, Void, Void> {
 
@@ -495,6 +497,7 @@ public class VideoInvitionAttendeeLayout extends LinearLayout {
 
 		@Override
 		public View getView(int position, View convertView, ViewGroup parent) {
+			
 			return mItemList.get(position).v;
 		}
 

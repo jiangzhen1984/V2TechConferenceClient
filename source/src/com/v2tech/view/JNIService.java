@@ -632,8 +632,20 @@ public class JNIService extends Service {
 				V2Log.e("Incorrect user xml ");
 				return;
 			}
-			int start = sXml.indexOf("id='");
-			int end = sXml.indexOf("'", start + 4);
+			
+			int start = -1;
+			int end = -1;
+			try {
+				
+				start = sXml.indexOf("id='");
+				end = sXml.indexOf("'", start + 4);
+			} catch (NullPointerException e) {
+				
+				V2Log.e(TAG, "occur a null exception with:" + e.getStackTrace());
+				V2Log.e(TAG, "Incorrect user xml: " + sXml);
+				return ;
+			}
+			
 			String uidStr = sXml.substring(start + 4, end);
 			long uid = 0;
 			try {
@@ -643,6 +655,7 @@ public class JNIService extends Service {
 				return;
 			}
 
+			V2Log.e(TAG, "接收到新的好友：" + GlobalHolder.getInstance().getUser(uid));
 			GlobalHolder.getInstance().addUserToGroup(
 					GlobalHolder.getInstance().getUser(uid), nGroupID);
 			GroupUserObject obj = new GroupUserObject(groupType, nGroupID, uid);

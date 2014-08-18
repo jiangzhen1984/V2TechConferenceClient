@@ -312,7 +312,6 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 							V2Log.e(TAG, "已存在的好友：" + GlobalHolder.getInstance().getUser(item.u.getmUserId()).getArra());
 						}
 						if (item.g != null) {
-							((ContactGroupView) item.v).updateUserStatus();
 							if (item.isExpanded
 									&& item.g.getmGId() == guo.getmGroupId()) {
 								// ADD user
@@ -325,6 +324,7 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 							}
 						}
 					}
+					Message.obtain(mHandler, UPDATE_GROUP_STATUS).sendToTarget();
 					adapter.notifyDataSetChanged();
 				}
 			}

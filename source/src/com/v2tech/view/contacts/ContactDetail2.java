@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.text.Editable;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.MotionEvent;
 import android.view.View;
@@ -168,7 +169,15 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 		} else {
 			mGendarTV.setText("");
 		}
-		mBirthdayTV.setText(u.getBirthdayStr());
+		
+		if(!TextUtils.isEmpty(u.getBirthdayStr())){
+			
+			mBirthdayTV.setText(u.getBirthdayStr());
+		}
+		else{
+			mBirthdayTV.setText("保密");
+		}
+		
 		mCellphoneTV.setText(u.getCellPhone());
 		mTelephoneTV.setText(u.getTelephone());
 		mTitleTV.setText(u.getTitle());

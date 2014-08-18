@@ -285,7 +285,6 @@ public class ContactDetail extends Activity implements OnTouchListener {
 				tv.setVisibility(View.GONE);
 			}
 			mSelfItemsContainer.setVisibility(View.VISIBLE);
-
 			mGenderRG.setVisibility(View.VISIBLE);
 			selectedRG(u.getGender());
 			mGenderRG.setOnCheckedChangeListener(new OnCheckedChangeListener() {
@@ -721,12 +720,19 @@ public class ContactDetail extends Activity implements OnTouchListener {
 		return "1";
 	}
 
+	private boolean isNeedDefault;
 	private void selectedRG(String genderVal) {
 		for (int i = 0; i < mGenderRG.getChildCount(); i++) {
 			RadioButton rg = (RadioButton) mGenderRG.getChildAt(i);
 			if (rg.getTag().equals(genderVal)) {
 				rg.setChecked(true);
+				isNeedDefault = true;
 			}
+		}
+		
+		if(!isNeedDefault){
+			RadioButton radioButton = (RadioButton) findViewById(R.id.radio2);
+			radioButton.setChecked(true);
 		}
 	}
 

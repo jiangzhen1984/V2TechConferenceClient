@@ -1208,6 +1208,7 @@ public class ConversationView extends Activity {
 			mMessageET.removeTextChangedListener(this);
 			int start = -1, end = -1;
 			int index = 0;
+			V2Log.e(TAG, "输入的字符串：" + edit.toString());
 			while (index < edit.length()) {
 				if (edit.charAt(index) == '/' && index < edit.length() - 1
 						&& edit.charAt(index + 1) == ':') {
@@ -1765,7 +1766,7 @@ public class ConversationView extends Activity {
 				messageArray.remove(i);
 				if(messageArray.size() < currentGetMessages.size() / 2){
 					android.os.Message.obtain(lh,
-							START_LOAD_MESSAGE);
+							START_LOAD_MESSAGE).sendToTarget();
 					isLoading = false;
 					V2Log.e(TAG, "自动开始加载");
 				}

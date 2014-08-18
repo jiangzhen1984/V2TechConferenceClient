@@ -187,6 +187,10 @@ public class DocumentService extends AbstractHandler {
 		public void OnRecvAddWBoardDataCallback(String szWBoardID, int nPageID,
 				String szDataID, String szData) {
 			V2ShapeMeta meta = XmlParser.parseV2ShapeMetaSingle(szData);
+			if (meta == null) {
+				V2Log.e("No shape data");
+				return;
+			}
 			meta.setDocId(szWBoardID);
 			meta.setPageNo(nPageID);
 			notifyListenerWithPending(KEY_PAGE_CANVAS_NOTIFY_LISTENER, 0, 0, meta);
