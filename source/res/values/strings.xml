@@ -2,7 +2,7 @@
 <resources>
 
     <string name="error_time_out">操作超时!</string>
-    <string name="app_name">BizCom</string>
+    <string name="app_name">融合通讯系统</string>
     <string name="banner_desc">全球网络会议领导者</string>
     <string name="textOn">ON</string>
     <string name="textOff">OFF</string>
