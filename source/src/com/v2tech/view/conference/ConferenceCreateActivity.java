@@ -43,6 +43,7 @@ import android.widget.ListView;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
+import com.V2.jni.util.V2Log;
 import com.v2tech.R;
 import com.v2tech.service.ConferenceService;
 import com.v2tech.service.GlobalHolder;
@@ -50,7 +51,6 @@ import com.v2tech.service.Registrant;
 import com.v2tech.service.jni.JNIResponse;
 import com.v2tech.service.jni.RequestConfCreateResponse;
 import com.v2tech.util.SPUtil;
-import com.v2tech.util.V2Log;
 import com.v2tech.view.PublicIntent;
 import com.v2tech.view.cus.DateTimePicker;
 import com.v2tech.view.cus.DateTimePicker.OnDateSetListener;

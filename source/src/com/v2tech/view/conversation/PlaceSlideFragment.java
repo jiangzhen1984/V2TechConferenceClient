@@ -9,8 +9,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 
+import com.V2.jni.util.V2Log;
 import com.v2tech.R;
-import com.v2tech.util.V2Log;
 import com.v2tech.view.cus.TouchImageView;
 import com.v2tech.vo.VMessageImageItem;
 

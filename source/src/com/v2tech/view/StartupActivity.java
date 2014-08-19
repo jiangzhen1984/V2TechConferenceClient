@@ -11,10 +11,10 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 
+import com.V2.jni.util.V2Log;
 import com.v2tech.R;
 import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.SPUtil;
-import com.v2tech.util.V2Log;
 
 public class StartupActivity extends Activity {
 

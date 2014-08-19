@@ -7,8 +7,8 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.SparseArray;
 
+import com.V2.jni.util.V2Log;
 import com.v2tech.service.jni.JNIResponse;
-import com.v2tech.util.V2Log;
 
 /**
  * Abstract handler.

@@ -7,7 +7,9 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import android.content.Context;
 import android.util.Log;
 
-import com.v2tech.util.V2Log;
+import com.V2.jni.ind.V2Group;
+import com.V2.jni.util.V2Log;
+import com.V2.jni.util.XmlAttributeExtractor;
 
 public class GroupRequest {
 
@@ -106,7 +108,8 @@ public class GroupRequest {
 	 * @param t
 	 * @param nUserID
 	 */
-	public native void acceptInviteJoinGroup(int groupType, long groupId, long nUserID);
+	public native void acceptInviteJoinGroup(int groupType, long groupId,
+			long nUserID);
 
 	/**
 	 * 
@@ -114,8 +117,9 @@ public class GroupRequest {
 	 * @param t
 	 * @param nUserID
 	 */
-	public void OnAcceptInviteJoinGroup(int groupType, long groupId, long nUserID) {
-		
+	public void OnAcceptInviteJoinGroup(int groupType, long groupId,
+			long nUserID) {
+
 	}
 
 	public void OnConfSyncOpenVideo(String str) {
@@ -128,34 +132,36 @@ public class GroupRequest {
 
 	/**
 	 * Add user to group
-	 * @param groupType 4: conference 
+	 * 
+	 * @param groupType
+	 *            4: conference
 	 * @param nGroupID
 	 * @param sXml
 	 */
-	public native void addGroupUserInfo(int groupType, long nGroupID, String sXml);
-	
-	
-	
+	public native void addGroupUserInfo(int groupType, long nGroupID,
+			String sXml);
+
 	public native void groupUploadFile(int groupType, long nGroupId, String sXml);
-	
+
 	public native void delGroupFile(int groupType, long nGroupId, String sXml);
-	
+
 	public native void getGroupFileInfo(int groupType, long nGroupId);
-	
-	
+
 	private void OnAddGroupFile(int type, long nGroupId, String sXml) {
-		V2Log.e("Group Request  OnAddGroupFile" + type+"   "+ nGroupId+"  "+ sXml);
+		V2Log.e("Group Request  OnAddGroupFile" + type + "   " + nGroupId
+				+ "  " + sXml);
 	}
-	
+
 	private void OnDelGroupFile(int type, long nGroupId, String sXml) {
-		V2Log.e("Group Request  OnDelGroupFile" + type+"   "+ nGroupId+"  "+ sXml);
+		V2Log.e("Group Request  OnDelGroupFile" + type + "   " + nGroupId
+				+ "  " + sXml);
 	}
-	
+
 	private void OnGetGroupFileInfo(int type, long nGroupId, String sXml) {
-		V2Log.e("Group Request  OnGetGroupFileInfo" + type+"   "+ nGroupId+"  "+ sXml);
+		V2Log.e("Group Request  OnGetGroupFileInfo" + type + "   " + nGroupId
+				+ "  " + sXml);
 	}
-	
-	
+
 	/**
 	 * This is unsolicited callback. This function will be call after log in
 	 * 
@@ -164,14 +170,25 @@ public class GroupRequest {
 	 * @param sXml
 	 */
 	private void OnGetGroupInfo(int groupType, String sXml) {
-		for (WeakReference<GroupRequestCallback> wrcb : callbacks) {
+		V2Log.d("OnGetGroupInfo::" + groupType + ":" + sXml);
+		List<V2Group> list = null;
+		if (groupType == V2Group.TYPE_CONF) {
+			list = XmlAttributeExtractor.parseConference(sXml);
+		} else if (groupType == V2Group.TYPE_CROWD) {
+			list = XmlAttributeExtractor.parseCrowd(sXml);
+		} else if (groupType == V2Group.TYPE_CONTACTS_GROUP) {
+			list = XmlAttributeExtractor.parseContactsGroup(sXml);
+		} else if (groupType == V2Group.TYPE_ORG) {
+			list = XmlAttributeExtractor.parseOrgGroup(sXml);
+		}
+		for (int i = 0; i < this.callbacks.size(); i++) {
+			WeakReference<GroupRequestCallback> wrcb = this.callbacks.get(i);
 			Object obj = wrcb.get();
 			if (obj != null) {
 				GroupRequestCallback callback = (GroupRequestCallback) obj;
-				callback.OnGetGroupInfoCallback(groupType, sXml);
+				callback.OnGetGroupInfoCallback(groupType, list);
 			}
 		}
-		V2Log.d("OnGetGroupInfo::" + groupType + ":" + sXml);
 
 	}
 
@@ -193,8 +210,8 @@ public class GroupRequest {
 	}
 
 	private void OnAddGroupUserInfo(int groupType, long nGroupID, String sXml) {
-		V2Log.d("OnAddGroupUserInfo ->" + groupType
-				+ ":" + nGroupID + ":" + sXml);
+		V2Log.d("OnAddGroupUserInfo ->" + groupType + ":" + nGroupID + ":"
+				+ sXml);
 		for (WeakReference<GroupRequestCallback> wrcb : callbacks) {
 			Object obj = wrcb.get();
 			if (obj != null) {
@@ -205,8 +222,8 @@ public class GroupRequest {
 	}
 
 	private void OnDelGroupUser(int groupType, long nGroupID, long nUserID) {
-		V2Log.d("OnDelGroupUser -> " + groupType + ":"
-				+ nGroupID + ":" + nUserID);
+		V2Log.d("OnDelGroupUser -> " + groupType + ":" + nGroupID + ":"
+				+ nUserID);
 		for (WeakReference<GroupRequestCallback> wrcb : callbacks) {
 			Object obj = wrcb.get();
 			if (obj != null) {
@@ -284,9 +301,10 @@ public class GroupRequest {
 				GroupRequestCallback callback = (GroupRequestCallback) obj;
 				callback.OnInviteJoinGroupCallback(groupType, groupInfo,
 						userInfo, additInfo);
-				
-				V2Log.d("OnInviteJoinGroup::callback===================>" + groupType + ":" + groupInfo + ":"
-						+ userInfo + ":" + additInfo);
+
+				V2Log.d("OnInviteJoinGroup::callback===================>"
+						+ groupType + ":" + groupInfo + ":" + userInfo + ":"
+						+ additInfo);
 			}
 		}
 
@@ -294,8 +312,8 @@ public class GroupRequest {
 
 	private void OnMoveUserToGroup(int groupType, long srcGroupID,
 			long dstGroupID, long nUserID) {
-		Log.e("ImRequest UI", "OnMoveUserToGroup:: " + groupType
-				+ ":" + srcGroupID + ":" + dstGroupID + ":" + nUserID);
+		Log.e("ImRequest UI", "OnMoveUserToGroup:: " + groupType + ":"
+				+ srcGroupID + ":" + dstGroupID + ":" + nUserID);
 
 		// ƴװ��Ϣ
 		// MoveGroupMsgType moveMsgtype = new MoveGroupMsgType();
@@ -311,8 +329,8 @@ public class GroupRequest {
 
 	private void OnRefuseInviteJoinGroup(int groupType, long nGroupID,
 			long nUserID, String sxml) {
-		Log.e("ImRequest UI", "OnRefuseInviteJoinGroup:: "
-				+ groupType + ":" + nGroupID + ":" + nUserID + ":" + sxml);
+		Log.e("ImRequest UI", "OnRefuseInviteJoinGroup:: " + groupType + ":"
+				+ nGroupID + ":" + nUserID + ":" + sxml);
 
 		// // ƴװ������Ϣ
 		// RefuseMsgType refuseMsgType = new RefuseMsgType();
@@ -332,14 +350,14 @@ public class GroupRequest {
 	}
 
 	private void OnAcceptApplyJoinGroup(int groupType, String sXml) {
-		Log.e("ImRequest UI", "OnAcceptApplyJoinGroup:: "
-				+ groupType + ":" + sXml);
+		Log.e("ImRequest UI", "OnAcceptApplyJoinGroup:: " + groupType + ":"
+				+ sXml);
 	}
 
 	private void OnRefuseApplyJoinGroup(int groupType, String sGroupInfo,
 			String reason) {
-		Log.e("ImRequest UI", "OnRefuseApplyJoinGroup::"
-				+ groupType + ":" + sGroupInfo + ":" + reason);
+		Log.e("ImRequest UI", "OnRefuseApplyJoinGroup::" + groupType + ":"
+				+ sGroupInfo + ":" + reason);
 	}
 
 }

@@ -1,10 +1,14 @@
 package com.V2.jni;
 
+import java.util.List;
+
+import com.V2.jni.ind.V2Group;
+
 public abstract class GroupRequestCallbackAdapter implements
 		GroupRequestCallback {
 
 	@Override
-	public void OnGetGroupInfoCallback(int groupType, String sXml) {
+	public void OnGetGroupInfoCallback(int groupType, List<V2Group> list) {
 
 	}
 

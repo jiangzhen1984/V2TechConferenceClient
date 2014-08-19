@@ -26,10 +26,10 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
 
+import com.V2.jni.util.V2Log;
 import com.v2tech.R;
 import com.v2tech.service.BitmapManager;
 import com.v2tech.service.GlobalHolder;
-import com.v2tech.util.V2Log;
 import com.v2tech.view.bo.GroupUserObject;
 import com.v2tech.view.bo.UserStatusObject;
 import com.v2tech.view.contacts.ContactGroupView;

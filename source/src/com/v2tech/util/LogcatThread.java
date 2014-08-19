@@ -2,6 +2,8 @@ package com.v2tech.util;
 
 import java.io.IOException;
 
+import com.V2.jni.util.V2Log;
+
 public class LogcatThread extends Thread {
 
 	@Override

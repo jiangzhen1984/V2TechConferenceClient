@@ -6,9 +6,9 @@ import android.os.Message;
 import com.V2.jni.GroupRequest;
 import com.V2.jni.ImRequest;
 import com.V2.jni.ImRequestCallbackAdapter;
+import com.V2.jni.util.V2Log;
 import com.v2tech.service.jni.CreateCrowdResponse;
 import com.v2tech.service.jni.JNIResponse;
-import com.v2tech.util.V2Log;
 import com.v2tech.vo.CrowdGroup;
 import com.v2tech.vo.Group;
 

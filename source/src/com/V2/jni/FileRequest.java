@@ -13,6 +13,8 @@ import java.util.List;
 import android.content.Context;
 import android.util.Log;
 
+import com.V2.jni.ind.FileJNIObject;
+
 public class FileRequest {
 
 	public static final int BT_CONF = 1;
@@ -65,13 +67,15 @@ public class FileRequest {
 
 	/**
 	 * TODO add comments
+	 * 
 	 * @param szFileID
 	 * @param szSavePath
 	 */
 	public native void acceptFileTrans(String szFileID, String szSavePath);
 
 	/**
-	 *  TODO add comments
+	 * TODO add comments
+	 * 
 	 * @param szFileID
 	 */
 	public native void refuseFileTrans(String szFileID);
@@ -81,8 +85,7 @@ public class FileRequest {
 	 * @param szFileID
 	 */
 	public native void cancelFileTrans(String szFileID);
-	
-	
+
 	/**
 	 * 
 	 * @param szFileID
@@ -141,9 +144,10 @@ public class FileRequest {
 		for (int i = 0; i < callbacks.size(); i++) {
 			WeakReference<FileRequestCallback> wrf = callbacks.get(i);
 			if (wrf != null && wrf.get() != null) {
-				((FileRequestCallback) wrf.get()).OnFileTransInvite(nGroupID,
-						nBusinessType, userid, szFileID, szFileName,
-						nFileBytes, linetype);
+				((FileRequestCallback) wrf.get())
+						.OnFileTransInvite(new FileJNIObject(nBusinessType,
+								nGroupID,szFileID, userid,  szFileName,
+								nFileBytes, linetype));
 			}
 		}
 	}
@@ -211,7 +215,6 @@ public class FileRequest {
 		}
 	}
 
-	
 	/**
 	 * 
 	 * @param szFileID
@@ -222,7 +225,7 @@ public class FileRequest {
 	private void OnFileTransEnd(String szFileID, String szFileName,
 			long nFileSize, int nTransType, String tr) {
 		Log.e(TAG, "OnFileTransEnd--->" + szFileID + ":" + szFileName + ":"
-				+ nFileSize + ":" + nTransType + "  "+ tr);
+				+ nFileSize + ":" + nTransType + "  " + tr);
 		for (int i = 0; i < callbacks.size(); i++) {
 			WeakReference<FileRequestCallback> wrf = callbacks.get(i);
 			if (wrf != null && wrf.get() != null) {
@@ -231,9 +234,10 @@ public class FileRequest {
 			}
 		}
 	}
-	
+
 	private void OnFileTransError(String szFileID, int errorCode, int nTransType) {
-		Log.e(TAG, "OnFileTransError--->" + szFileID + ":" + errorCode + ":" +nTransType);
+		Log.e(TAG, "OnFileTransError--->" + szFileID + ":" + errorCode + ":"
+				+ nTransType);
 	}
 
 	// 鏀跺埌瀵规柟鍙栨秷鏂囦欢浼犺緭鍥炶皟
@@ -243,11 +247,12 @@ public class FileRequest {
 
 	// 鏂囦欢浼犺緭澶辫触
 	private void OnFileDownloadError(String sFileID, int t1, int t2) {
-		Log.e(TAG, "OnFileDownloadError--->" + sFileID +" "+ t1 +" "+t2);
+		Log.e(TAG, "OnFileDownloadError--->" + sFileID + " " + t1 + " " + t2);
 		for (int i = 0; i < callbacks.size(); i++) {
 			WeakReference<FileRequestCallback> wrf = callbacks.get(i);
 			if (wrf != null && wrf.get() != null) {
-				((FileRequestCallback) wrf.get()).OnFileDownloadError(sFileID , t1);
+				((FileRequestCallback) wrf.get()).OnFileDownloadError(sFileID,
+						t1);
 			}
 		}
 	}

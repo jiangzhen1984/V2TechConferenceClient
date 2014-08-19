@@ -1,6 +1,6 @@
 package com.v2tech.vo;
 
-import com.v2tech.util.V2Log;
+import com.V2.jni.util.V2Log;
 import com.v2tech.vo.Group.GroupType;
 
 

@@ -1,5 +1,8 @@
 package com.V2.jni;
 
+import com.V2.jni.ind.V2Conference;
+import com.V2.jni.ind.V2User;
+
 public abstract class ConfRequestCallbackAdapter implements ConfRequestCallback {
 
 	@Override
@@ -9,8 +12,7 @@ public abstract class ConfRequestCallbackAdapter implements ConfRequestCallback 
 	}
 
 	@Override
-	public void OnConfMemberEnterCallback(long nConfID, long nTime,
-			String szUserInfos) {
+	public void OnConfMemberEnterCallback(long nConfID, long nTime, V2User user) {
 
 	}
 
@@ -30,7 +32,7 @@ public abstract class ConfRequestCallbackAdapter implements ConfRequestCallback 
 	}
 
 	@Override
-	public void OnConfNotify(String confXml, String creatorXml) {
+	public void OnConfNotify(V2Conference v2conf,  V2User user) {
 
 	}
 

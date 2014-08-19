@@ -58,18 +58,17 @@ public class UserDeviceConfig {
 	public UserDeviceConfig(long mUerID, String mDeviceID, VideoPlayer mVP,
 			UserDeviceConfigType type) {
 		this(mUerID, mDeviceID, mVP, 1);
-		this.mUerID = mUerID;
-		this.mDeviceID = mDeviceID;
-		this.mVP = mVP;
 		this.type = type;
 	}
 
+	/**
+	 * Construct EVIDEODEVTYPE_VIDEO device
+	 * @param mUerID
+	 * @param mDeviceID
+	 * @param mVP
+	 */
 	public UserDeviceConfig(long mUerID, String mDeviceID, VideoPlayer mVP) {
-		this(mUerID, mDeviceID, mVP, 1);
-		this.mUerID = mUerID;
-		this.mDeviceID = mDeviceID;
-		this.mVP = mVP;
-		this.type = UserDeviceConfigType.EVIDEODEVTYPE_VIDEO;
+		this(mUerID, mDeviceID, mVP, 1,UserDeviceConfigType.EVIDEODEVTYPE_VIDEO);
 	}
 
 	/**
@@ -86,6 +85,25 @@ public class UserDeviceConfig {
 		this.mDeviceID = mDeviceID;
 		this.mVP = mVP;
 		this.mBusinessType = mBusinessType;
+	}
+	
+	
+	
+	/**
+	 * According to parameter construct new user device donfiguration object
+	 * 
+	 * @param mUerID
+	 * @param mDeviceID
+	 * @param mVP
+	 * @param mBusinessType
+	 */
+	public UserDeviceConfig(long mUerID, String mDeviceID, VideoPlayer mVP,
+			int mBusinessType, UserDeviceConfigType type) {
+		this.mUerID = mUerID;
+		this.mDeviceID = mDeviceID;
+		this.mVP = mVP;
+		this.mBusinessType = mBusinessType;
+		this.type = type;
 	}
 
 	/**

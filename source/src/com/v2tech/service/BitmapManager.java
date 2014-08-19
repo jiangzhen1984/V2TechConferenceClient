@@ -7,8 +7,8 @@ import java.util.List;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 
+import com.V2.jni.util.V2Log;
 import com.v2tech.util.BitmapUtil;
-import com.v2tech.util.V2Log;
 import com.v2tech.view.bo.UserAvatarObject;
 import com.v2tech.vo.User;
 

@@ -12,7 +12,7 @@ import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CopyOnWriteArraySet;
 
-import com.v2tech.util.V2Log;
+import com.V2.jni.util.V2Log;
 
 /**
  * Group information

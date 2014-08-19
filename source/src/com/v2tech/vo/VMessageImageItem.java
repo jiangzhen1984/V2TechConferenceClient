@@ -11,8 +11,8 @@ import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
 
+import com.V2.jni.util.V2Log;
 import com.v2tech.util.BitmapUtil;
-import com.v2tech.util.V2Log;
 
 public class VMessageImageItem extends VMessageAbstractItem {
 

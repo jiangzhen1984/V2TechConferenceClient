@@ -30,8 +30,8 @@ import org.xml.sax.SAXException;
 
 import android.graphics.Bitmap;
 
+import com.V2.jni.util.V2Log;
 import com.v2tech.service.GlobalHolder;
-import com.v2tech.util.V2Log;
 
 /**
  * User information

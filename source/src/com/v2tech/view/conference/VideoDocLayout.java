@@ -27,8 +27,8 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.V2.jni.util.V2Log;
 import com.v2tech.R;
-import com.v2tech.util.V2Log;
 import com.v2tech.view.cus.TouchImageView;
 import com.v2tech.vo.V2Doc;
 import com.v2tech.vo.V2ShapeMeta;

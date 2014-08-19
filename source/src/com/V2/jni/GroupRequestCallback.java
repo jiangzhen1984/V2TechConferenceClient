@@ -1,5 +1,9 @@
 package com.V2.jni;
 
+import java.util.List;
+
+import com.V2.jni.ind.V2Group;
+
 
 /**
  * 
@@ -13,22 +17,12 @@ public interface GroupRequestCallback {
 	 * To indicate group information current user belongs and owns.
 	 * 
 	 * @param groupType
-	 *            1:contact type 4: conference type
-	 * @param sXml
-	 *            &nbsp;&nbsp;<br>
-	 *            type {@link com.v2tech.vo.Group.GroupType#CONTACT}(1):<br>
-	 *            {@code <xml><pubgroup id='61' name='ronghuo的组织'><pubgroup id='21' name='1'/></pubgroup></xml>}
-	 * <br>
-	 * 
-	 * 
-	 *            type {@link com.v2tech.vo.Group.GroupType#CONFERENCE}(4):<br>
-	 *            {@code <xml><conf createuserid='1124' id='513891897880' start time='1389189927'
-	 * subject='est'/><conf createuserid='1124' id='513891899176'
-	 * starttime='1389190062' subject='eee'/></xml> }
+	 *            1:org  2: contacts group 3: crowd type 4: conference type
+	 * @param list group list
 	 * 
 	 * @see com.v2tech.vo.Group#GroupType
 	 */
-	public void OnGetGroupInfoCallback(int groupType, String sXml);
+	public void OnGetGroupInfoCallback(int groupType, List<V2Group> list);
 
 	/**
 	 * When log in successfully, this function will be call by JNI.<br>

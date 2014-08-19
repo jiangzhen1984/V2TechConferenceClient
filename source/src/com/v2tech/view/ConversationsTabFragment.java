@@ -36,6 +36,7 @@ import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.V2.jni.util.V2Log;
 import com.v2tech.R;
 import com.v2tech.db.ContentDescriptor;
 import com.v2tech.db.V2techSearchContentProvider;
@@ -48,7 +49,6 @@ import com.v2tech.service.jni.JNIResponse;
 import com.v2tech.service.jni.RequestEnterConfResponse;
 import com.v2tech.util.MessageUtil;
 import com.v2tech.util.Notificator;
-import com.v2tech.util.V2Log;
 import com.v2tech.view.bo.ConversationNotificationObject;
 import com.v2tech.view.conference.GroupLayout;
 import com.v2tech.view.conference.VideoActivityV2;
@@ -891,7 +891,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher, C
 
 	private void startConferenceActivity(Conference conf) {
 		//Set current state to in meeting state
-		GlobalHolder.getInstance().setMeetingState(true);
+		GlobalHolder.getInstance().setMeetingState(true, conf.getId());
 		Intent enterConference = new Intent(mContext, VideoActivityV2.class);
 		enterConference.putExtra("conf", conf);
 		currentEntered = conf;

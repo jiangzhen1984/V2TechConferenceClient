@@ -41,14 +41,19 @@ import com.V2.jni.V2GlobalEnum;
 import com.V2.jni.VideoRequest;
 import com.V2.jni.VideoRequestCallbackAdapter;
 import com.V2.jni.ind.AudioJNIObjectInd;
+import com.V2.jni.ind.FileJNIObject;
 import com.V2.jni.ind.SendingResultJNIObjectInd;
+import com.V2.jni.ind.V2Conference;
+import com.V2.jni.ind.V2Group;
+import com.V2.jni.ind.V2User;
 import com.V2.jni.ind.VideoJNIObjectInd;
+import com.V2.jni.util.V2Log;
 import com.v2tech.R;
 import com.v2tech.service.BitmapManager;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.util.GlobalConfig;
+import com.v2tech.util.GlobalState;
 import com.v2tech.util.Notificator;
-import com.v2tech.util.V2Log;
 import com.v2tech.util.XmlParser;
 import com.v2tech.view.bo.GroupUserObject;
 import com.v2tech.view.bo.UserAvatarObject;
@@ -280,8 +285,7 @@ public class JNIService extends Service {
 						Toast.LENGTH_LONG).show();
 				break;
 			case JNI_GROUP_NOTIFY:
-				List<Group> gl = XmlParser.parserFromXml(msg.arg1,
-						(String) msg.obj);
+				List<V2Group> gl = (List<V2Group>) msg.obj;
 
 				if (gl != null && gl.size() > 0) {
 					GlobalHolder.getInstance().updateGroupList(
@@ -299,14 +303,6 @@ public class JNIService extends Service {
 					List<User> lu = User.fromXml(go.xml);
 					Group g = GlobalHolder.getInstance().findGroupById(go.gId);
 					for (User tu : lu) {
-						UserStatusObject uso = GlobalHolder.getInstance()
-								.getOnlineUserStatus(tu.getmUserId());
-						// Update user status
-						if (uso != null) {
-							tu.updateStatus(User.Status.fromInt(uso.getStatus()));
-							tu.setDeviceType(User.DeviceType.fromInt(uso
-									.getDeviceType()));
-						}
 						User existU = GlobalHolder.getInstance().putUser(
 								tu.getmUserId(), tu);
 						if (existU.getmUserId() == GlobalHolder.getInstance()
@@ -356,7 +352,7 @@ public class JNIService extends Service {
 				}
 				break;
 			case JNI_RECEIVED_MESSAGE:
-				VMessage vm = (VMessage) msg.obj; 
+				VMessage vm = (VMessage) msg.obj;
 				if (vm != null) {
 					String action = null;
 					MessageBuilder.saveMessage(mContext, vm);
@@ -473,7 +469,6 @@ public class JNIService extends Service {
 		public void OnUserStatusUpdatedCallback(long nUserID, int type,
 				int nStatus, String szStatusDesc) {
 			UserStatusObject uso = new UserStatusObject(nUserID, type, nStatus);
-			GlobalHolder.getInstance().updateUserStatus(nUserID, uso);
 			User u = GlobalHolder.getInstance().getUser(nUserID);
 			if (u == null) {
 				V2Log.e("Can't update user status, user " + nUserID
@@ -528,9 +523,9 @@ public class JNIService extends Service {
 		}
 
 		@Override
-		public void OnGetGroupInfoCallback(int groupType, String sXml) {
+		public void OnGetGroupInfoCallback(int groupType, List<V2Group> list) {
 			Message.obtain(mCallbackHandler, JNI_GROUP_NOTIFY, groupType, 0,
-					sXml).sendToTarget();
+					list).sendToTarget();
 		}
 
 		@Override
@@ -566,13 +561,14 @@ public class JNIService extends Service {
 							g).sendToTarget();
 				}
 			} else if (gType == GroupType.CHATING) {
-				//TODO just accept automatically
-				Group g = CrowdGroup.parseXml(groupInfo , userInfo);
+				// TODO just accept automatically
+				Group g = CrowdGroup.parseXml(groupInfo, userInfo);
 				GlobalHolder.getInstance().addGroupToList(GroupType.CHATING, g);
 				GroupRequest.getInstance().acceptInviteJoinGroup(groupType,
 						g.getmGId(),
 						GlobalHolder.getInstance().getCurrentUserId());
-				Message.obtain(mCallbackHandler, JNI_GROUP_INVITATION , g.getmGId()).sendToTarget(); 
+				Message.obtain(mCallbackHandler, JNI_GROUP_INVITATION,
+						g.getmGId()).sendToTarget();
 			}
 		}
 
@@ -632,20 +628,20 @@ public class JNIService extends Service {
 				V2Log.e("Incorrect user xml ");
 				return;
 			}
-			
+
 			int start = -1;
 			int end = -1;
 			try {
-				
+
 				start = sXml.indexOf("id='");
 				end = sXml.indexOf("'", start + 4);
 			} catch (NullPointerException e) {
-				
+
 				V2Log.e(TAG, "occur a null exception with:" + e.getStackTrace());
 				V2Log.e(TAG, "Incorrect user xml: " + sXml);
-				return ;
+				return;
 			}
-			
+
 			String uidStr = sXml.substring(start + 4, end);
 			long uid = 0;
 			try {
@@ -672,12 +668,20 @@ public class JNIService extends Service {
 
 		@Override
 		public void OnAudioChatInvite(AudioJNIObjectInd ind) {
-			// FIXME if in video automatically accept audio.
-			// because audio and video use different message
-			// Need to handle other user audio call
+		
 			if (GlobalHolder.getInstance().isInVideoCall()) {
-				AudioRequest.getInstance().AcceptAudioChat(ind.getGroupId(),
-						ind.getFromUserId(), V2GlobalEnum.REQUEST_TYPE_IM);
+				GlobalState state = GlobalHolder.getInstance().getGlobalState();
+				// if in video automatically accept audio.
+				// because audio and video use different message
+				if (state.getUid() == ind.getFromUserId()) {
+					AudioRequest.getInstance().AcceptAudioChat(
+							ind.getGroupId(), ind.getFromUserId(),
+							V2GlobalEnum.REQUEST_TYPE_IM);
+				} else {
+					V2Log.i("Ignore audio call for others: " +ind.getFromUserId());
+					AudioRequest.getInstance().RefuseAudioChat(ind.getGroupId(),
+							ind.getFromUserId(), (int) ind.getRequestType());
+				}
 				return;
 			}
 
@@ -745,30 +749,24 @@ public class JNIService extends Service {
 		}
 
 		@Override
-		public void OnConfNotify(String confXml, String creatorXml) {
-			Group g = ConferenceGroup.parseConferenceGroupFromXML(confXml);
-			V2Log.e("==================notification============"+creatorXml);
-			int start = confXml.indexOf("createuserid='");
-			int end = confXml.indexOf("'", start + 14);
-
-			if (start != -1 && end != -1) {
-				long uid = 0;
-				uid = Long.parseLong(confXml.substring(start + 14, end));
-				if (uid > 0) {
-					User u = GlobalHolder.getInstance().getUser(uid);
-					g.setOwnerUser(u);
-					GlobalHolder.getInstance().addGroupToList(
-							Group.GroupType.CONFERENCE, g);
-					Intent i = new Intent();
-					i.setAction(JNIService.JNI_BROADCAST_CONFERENCE_INVATITION);
-					i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
-					i.putExtra("gid", g.getmGId());
-					sendBroadcast(i);
-
-				} else {
-					V2Log.e(" Incorrect uid : " + confXml);
-				}
+		public void OnConfNotify(V2Conference v2conf, V2User user) {
+			if (v2conf == null || user == null) {
+				V2Log.e(" v2conf is " + v2conf + " or user is null" + user);
+				return;
 			}
+
+			Group g = new ConferenceGroup(v2conf.cid, v2conf.name, user.uid,
+					v2conf.startTime);
+			User u = GlobalHolder.getInstance().getUser(user.uid);
+			g.setOwnerUser(u);
+			GlobalHolder.getInstance().addGroupToList(
+					Group.GroupType.CONFERENCE, g);
+
+			Intent i = new Intent();
+			i.setAction(JNIService.JNI_BROADCAST_CONFERENCE_INVATITION);
+			i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
+			i.putExtra("gid", g.getmGId());
+			sendBroadcast(i);
 		}
 
 	}
@@ -962,23 +960,22 @@ public class JNIService extends Service {
 		}
 
 		@Override
-		public void OnFileTransInvite(long nGroupID, int nBusinessType,
-				long userid, String szFileID, String szFileName,
-				long nFileBytes, int linetype) {
-			User fromUser = GlobalHolder.getInstance().getUser(userid);
+		public void OnFileTransInvite(FileJNIObject file) {
+			User fromUser = GlobalHolder.getInstance().getUser(file.fromUserId);
 			// If doesn't receive user information from server side,
 			// construct new user object
 			if (fromUser == null) {
-				fromUser = new User(userid);
+				fromUser = new User(file.fromUserId);
 			}
 
-			VMessage vm = new VMessage(nGroupID, fromUser, GlobalHolder
+			VMessage vm = new VMessage(file.groupId, fromUser, GlobalHolder
 					.getInstance().getCurrentUser());
-			int pos = szFileName.lastIndexOf("/");
-			VMessageFileItem vfi = new VMessageFileItem(vm, szFileID,
-					pos == -1 ? szFileName : szFileName.substring(pos + 1));
+			int pos = file.fileName.lastIndexOf("/");
+			VMessageFileItem vfi = new VMessageFileItem(vm, file.fileId,
+					pos == -1 ? file.fileName
+							: file.fileName.substring(pos + 1));
 			vfi.setState(VMessageFileItem.STATE_FILE_UNDOWNLOAD);
-			vfi.setFileSize(nFileBytes);
+			vfi.setFileSize(file.fileSize);
 			Message.obtain(mCallbackHandler, JNI_RECEIVED_MESSAGE, vm)
 					.sendToTarget();
 		}

@@ -31,10 +31,10 @@ import android.widget.TabHost.TabContentFactory;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.V2.jni.util.V2Log;
 import com.v2tech.R;
 import com.v2tech.db.V2techSearchContentProvider;
 import com.v2tech.util.Notificator;
-import com.v2tech.util.V2Log;
 import com.v2tech.view.widget.TitleBar;
 import com.v2tech.vo.Conference;
 import com.v2tech.vo.Conversation;

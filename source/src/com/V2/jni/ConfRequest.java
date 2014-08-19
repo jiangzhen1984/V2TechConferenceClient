@@ -1,6 +1,7 @@
 package com.V2.jni;
 
 import java.lang.ref.WeakReference;
+import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -8,7 +9,10 @@ import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 
-import com.v2tech.util.V2Log;
+import com.V2.jni.ind.V2Conference;
+import com.V2.jni.ind.V2User;
+import com.V2.jni.util.V2Log;
+import com.V2.jni.util.XmlAttributeExtractor;
 
 public class ConfRequest {
 
@@ -109,22 +113,44 @@ public class ConfRequest {
 	 * 
 	 * @param nConfID
 	 * @param nTime
-	 * @param szUserInfos
+	 * @param szUserInfos <user accounttype='2' id='81003' nickname='1234' uetype='1'/>
 	 * 
 	 * @see ConfRequestCallback
 	 */
 	private void OnConfMemberEnter(long nConfID, long nTime, String szUserInfos) {
 		V2Log.d("-->OnConfMemberEnter " + nConfID + " " + nTime + " "
 				+ szUserInfos);
+		
+		String uid = XmlAttributeExtractor.extract(szUserInfos, "id='", "'");
+		String act = XmlAttributeExtractor.extract(szUserInfos, "accounttype='", "'");
+		String nickName = XmlAttributeExtractor.extract(szUserInfos, "nickname='", "'");
+		
+		if (uid == null) {
+			V2Log.e("Can not dispatch request for member joined, cause by uid is null");
+			return;
+		}
+		
+		V2User v2user= new V2User();
+		v2user.uid = Long.parseLong(uid);
+		if (act != null) {
+			v2user.type = Integer.parseInt(act);
+		}
+		v2user.name = nickName;
+		
 		for (int i =0; i < this.callbacks.size(); i++) {
 			WeakReference<ConfRequestCallback> we  = this.callbacks.get(i);
 			Object obj = we.get();
 			if (obj != null) {
 				ConfRequestCallback cb = (ConfRequestCallback) obj;
-				cb.OnConfMemberEnterCallback(nConfID, nTime, szUserInfos);
+				cb.OnConfMemberEnterCallback(nConfID, nTime, v2user);
 			}
 		}
 	}
+	
+	
+	
+	
+	
 
 	/**
 	 * 
@@ -180,16 +206,44 @@ public class ConfRequest {
 	/**
 	 * User invite current user to join further conference, this function will be called
 	 * @param str {@code <conf createuserid='18' id='514000758190' starttime='1400162220' subject=' 就'/> }
-	 * @param str2 {@code <user id='18'/>}
+	 * @param creatorXml {@code <user id='18'/>}
 	 */
-	private void OnConfNotify(String str, String str2) {
-		V2Log.i(str+"   "+ str2);
+	private void OnConfNotify(String confXml, String creatorXml) {
+		if (confXml == null || confXml.isEmpty()) {
+			V2Log.e(" confXml is null " );
+			return;
+		}
+		V2Log.d("OnConfNotify " + confXml + " creatorXml:"+ creatorXml);
+		
+		V2Conference conf = new V2Conference();
+		String confId = XmlAttributeExtractor.extract(creatorXml, "id='", "'");
+		if (confId == null || confId.isEmpty()) {
+			V2Log.e("confId is null  can not pasrse");
+			return;
+		}
+		String startTime = XmlAttributeExtractor.extract(creatorXml, "starttime='", "'");
+		String subject = XmlAttributeExtractor.extract(creatorXml, "subject='", "'");
+		//String creator = XmlAttributeExtractor.extract(creatorXml, "createuserid='", "'");
+		conf.cid = Long.parseLong(confId);
+		conf.name = subject;
+		conf.startTime = new Date(Long.parseLong(startTime)/1000);
+		
+		V2User user = new V2User();
+		String uid = XmlAttributeExtractor.extract(creatorXml, "id='", "'");
+		if (uid == null || uid.isEmpty()) {
+			V2Log.e("uid is null  can not pasrse");
+			return;
+		}
+		user.uid = Long.parseLong(uid);
+		
+		conf.creator =user;
+		
 		for (int i =0; i < this.callbacks.size(); i++) {
 			WeakReference<ConfRequestCallback> we  = this.callbacks.get(i);
 			Object obj = we.get();
 			if (obj != null) {
 				ConfRequestCallback cb = (ConfRequestCallback) obj;
-				cb.OnConfNotify(str, str2);
+				cb.OnConfNotify(conf, user);
 			}
 		}
 		

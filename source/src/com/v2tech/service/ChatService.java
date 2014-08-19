@@ -9,23 +9,21 @@ import com.V2.jni.AudioRequest;
 import com.V2.jni.AudioRequestCallback;
 import com.V2.jni.ChatRequest;
 import com.V2.jni.FileRequest;
-import com.V2.jni.FileRequestCallback;
+import com.V2.jni.FileRequestCallbackAdapter;
 import com.V2.jni.V2GlobalEnum;
 import com.V2.jni.VideoRequest;
 import com.V2.jni.VideoRequestCallback;
 import com.V2.jni.VideoRequestCallbackAdapter;
 import com.V2.jni.ind.AudioJNIObjectInd;
 import com.V2.jni.ind.VideoJNIObjectInd;
+import com.V2.jni.util.V2Log;
 import com.v2tech.service.jni.FileTransStatusIndication.FileTransErrorIndication;
 import com.v2tech.service.jni.FileTransStatusIndication.FileTransProgressStatusIndication;
 import com.v2tech.service.jni.JNIResponse;
 import com.v2tech.service.jni.RequestChatServiceResponse;
 import com.v2tech.service.jni.RequestSendMessageResponse;
 import com.v2tech.util.GlobalConfig;
-import com.v2tech.util.V2Log;
-import com.v2tech.vo.CameraConfiguration;
 import com.v2tech.vo.UserChattingObject;
-import com.v2tech.vo.UserDeviceConfig;
 import com.v2tech.vo.VMessage;
 import com.v2tech.vo.VMessageAudioItem;
 import com.v2tech.vo.VMessageFileItem;
@@ -67,7 +65,7 @@ import com.v2tech.vo.VMessageImageItem;
  * @author 28851274
  * 
  */
-public class ChatService extends AbstractHandler {
+public class ChatService extends DeviceService {
 
 	private AudioRequestCallback callback;
 
@@ -484,79 +482,7 @@ public class ChatService extends AbstractHandler {
 
 	}
 
-	/**
-	 * Open remote video device of conversation
-	 * 
-	 * @param ud
-	 * @param caller
-	 */
-	public void openVideoDevice(UserChattingObject ud, Registrant caller) {
-		if (ud == null) {
-			JNIResponse resp = new RequestChatServiceResponse(
-					RequestChatServiceResponse.Result.INCORRECT_PAR);
-			sendResult(caller, resp);
-			return;
-		}
 
-		VideoRequest
-				.getInstance()
-				.openVideoDevice(
-						UserDeviceConfig.UserDeviceConfigType.EVIDEODEVTYPE_CAMERA
-								.ordinal(), ud.getUser().getmUserId(),
-						ud.getDeviceId(), ud.getVp(),
-						V2GlobalEnum.REQUEST_TYPE_IM);
-
-		if (caller != null) {
-			JNIResponse resp = new RequestChatServiceResponse(
-					RequestChatServiceResponse.Result.SUCCESS);
-			sendResult(caller, resp);
-		}
-	}
-
-	public void closeVideoDevice(UserChattingObject ud, Registrant caller) {
-		if (ud == null) {
-			JNIResponse resp = new RequestChatServiceResponse(
-					RequestChatServiceResponse.Result.INCORRECT_PAR);
-			sendResult(caller, resp);
-			return;
-		}
-
-		VideoRequest
-				.getInstance()
-				.closeVideoDevice(
-						UserDeviceConfig.UserDeviceConfigType.EVIDEODEVTYPE_CAMERA
-								.ordinal(), ud.getUser().getmUserId(),
-						ud.getDeviceId(), ud.getVp(),
-						V2GlobalEnum.REQUEST_TYPE_IM);
-
-		if (caller != null) {
-			JNIResponse resp = new RequestChatServiceResponse(
-					RequestChatServiceResponse.Result.SUCCESS);
-			sendResult(caller, resp);
-		}
-	}
-
-	/**
-	 * Update current user's camera. Including front-side or back-side camera
-	 * switch.
-	 * 
-	 * @param cc
-	 *            {@link CameraConfiguration}
-	 * @param caller
-	 *            if input is null, ignore response Message.object is
-	 *            {@link com.v2tech.service.jni.RequestUpdateCameraParametersResponse}
-	 */
-	public void updateCameraParameters(CameraConfiguration cc, Registrant caller) {
-		if (cc == null) {
-			JNIResponse resp = new RequestChatServiceResponse(
-					RequestChatServiceResponse.Result.INCORRECT_PAR);
-			sendResult(caller, resp);
-			return;
-		}
-
-		VideoRequest.getInstance().setCapParam(cc.getDeviceId(),
-				cc.getCameraIndex(), cc.getFrameRate(), cc.getBitRate());
-	}
 
 	public void suspendOrResumeAudio(boolean flag) {
 		if (flag) {
@@ -647,14 +573,8 @@ public class ChatService extends AbstractHandler {
 
 	}
 
-	class FileRequestCB implements FileRequestCallback {
+	class FileRequestCB extends FileRequestCallbackAdapter {
 
-		@Override
-		public void OnFileTransInvite(long nGroupID, int nBusinessType,
-				long userid, String szFileID, String szFileName,
-				long nFileBytes, int linetype) {
-
-		}
 
 		@Override
 		public void OnFileTransProgress(String szFileID, long nBytesTransed,

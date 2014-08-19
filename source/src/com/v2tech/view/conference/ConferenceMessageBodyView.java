@@ -18,9 +18,9 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.V2.jni.util.V2Log;
 import com.v2tech.R;
 import com.v2tech.util.GlobalConfig;
-import com.v2tech.util.V2Log;
 import com.v2tech.view.PublicIntent;
 import com.v2tech.vo.ConferenceGroup;
 import com.v2tech.vo.VMessage;

@@ -3,7 +3,7 @@ package com.v2tech.vo;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 
-import com.v2tech.util.V2Log;
+import com.V2.jni.util.V2Log;
 
 public class V2ShapeLine extends V2Shape {
 

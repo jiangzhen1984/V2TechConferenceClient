@@ -9,8 +9,8 @@ import java.util.Locale;
 import java.util.UUID;
 
 import com.V2.jni.V2GlobalEnum;
+import com.V2.jni.util.V2Log;
 import com.v2tech.service.GlobalHolder;
-import com.v2tech.util.V2Log;
 
 public class VMessage {
 	

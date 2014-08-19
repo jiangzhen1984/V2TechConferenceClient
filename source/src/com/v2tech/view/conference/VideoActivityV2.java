@@ -21,7 +21,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.ActivityInfo;
-import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.ImageFormat;
 import android.graphics.Rect;
@@ -61,8 +60,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.V2.jni.V2GlobalEnum;
+import com.V2.jni.util.V2Log;
 import com.v2tech.R;
-import com.v2tech.db.V2techSearchContentProvider;
 import com.v2tech.service.AsyncResult;
 import com.v2tech.service.ChatService;
 import com.v2tech.service.ConferencMessageSyncService;
@@ -72,13 +71,11 @@ import com.v2tech.service.GlobalHolder;
 import com.v2tech.service.Registrant;
 import com.v2tech.service.jni.PermissionUpdateIndication;
 import com.v2tech.util.DensityUtils;
-import com.v2tech.util.V2Log;
 import com.v2tech.view.JNIService;
 import com.v2tech.view.PublicIntent;
 import com.v2tech.view.bo.GroupUserObject;
 import com.v2tech.view.bo.UserStatusObject;
 import com.v2tech.view.conversation.MessageLoader;
-import com.v2tech.view.widget.MixVideoLayout;
 import com.v2tech.vo.Attendee;
 import com.v2tech.vo.AttendeeMixedDevice;
 import com.v2tech.vo.CameraConfiguration;
@@ -146,7 +143,7 @@ public class VideoActivityV2 extends Activity{
 	private RelativeLayout mRootContainer;
 
 	private FrameLayout mContentLayoutMain;
-	private RelativeLayout mVideoLayout;
+	private FrameLayout mVideoLayout;
 	private FrameLayout mSubWindowLayout;
 
 	private TextView mGroupNameTV;
@@ -178,16 +175,13 @@ public class VideoActivityV2 extends Activity{
 	private ConferenceGroup cg;
 
 	private ConferenceService cb;
-
+	private DocumentService ds;
 	private ChatService cs = new ChatService();
 
 	private Set<Attendee> mAttendeeList = new HashSet<Attendee>();
-	private DocumentService ds;
 
 	private Map<String, V2Doc> mDocs = new HashMap<String, V2Doc>();
 	private String mCurrentActivateDocId = null;
-
-	private Map<String, MixerWrapper> mMixerWrapper = new HashMap<String, MixerWrapper>();
 
 	private SubViewListener subViewListener = new SubViewListener();
 
@@ -203,6 +197,8 @@ public class VideoActivityV2 extends Activity{
 	private boolean mLocalHolderIsCreate = false;
 	private int currentWidth;
 	private boolean isStop;
+	
+	private int mVideoMaxCols = 2;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -229,7 +225,7 @@ public class VideoActivityV2 extends Activity{
 		});
 		this.mCurrentShowedSV = new ArrayList<SurfaceViewW>();
 
-		this.mVideoLayout = new RelativeLayout(this);
+		this.mVideoLayout = new FrameLayout(this);
 		mContentLayoutMain.addView(this.mVideoLayout);
 		this.mSubWindowLayout = new FrameLayout(this);
 		mSubWindowLayout.setVisibility(View.GONE);
@@ -468,11 +464,6 @@ public class VideoActivityV2 extends Activity{
 		if (mAttendeeContainer == null) {
 			mAttendeeContainer = new VideoAttendeeListLayout(conf, this);
 			mAttendeeContainer.setAttendsList(this.mAttendeeList);
-			synchronized (mMixerWrapper) {
-				for (MixerWrapper mw : mMixerWrapper.values()) {
-					mAttendeeContainer.updateEnteredAttendee(mw.amd);
-				}
-			}
 
 			mAttendeeContainer.bringToFront();
 			mAttendeeContainer.setListener(subViewListener);
@@ -604,7 +595,7 @@ public class VideoActivityV2 extends Activity{
 			fl.leftMargin = marginLeft;
 			mContentLayoutMain.updateViewLayout(mVideoLayout, fl);
 			//
-			this.adjustLayout();
+			this.adjustVideoLayout();
 		}
 
 		// make sure local is in front of any view
@@ -971,16 +962,6 @@ public class VideoActivityV2 extends Activity{
 								mAttendeeContainer.addNewAttendee(at);
 							}
 						}
-						if (mAttendeeContainer != null) {
-							synchronized (mMixerWrapper) {
-								for (MixerWrapper mw : mMixerWrapper.values()) {
-									V2Log.e(TAG,
-											"JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION 方法调用了update---");
-									mAttendeeContainer
-											.updateEnteredAttendee(mw.amd);
-								}
-							}
-						}
 					}
 				}
 
@@ -1103,15 +1084,12 @@ public class VideoActivityV2 extends Activity{
 						.getCurrentUserId(), "", null)).sendToTarget();
 	}
 
-	private void adjustLayout() {
-		int maxWidth = 2;
+	private void adjustVideoLayout() {
 		int marginTop = 0;
-		int marginBottom = 0;
 		int marginLeft = 0;
-		int marginRight = 0;
 		int size = mCurrentShowedSV.size();
-		int rows = size / maxWidth + (size % maxWidth == 0 ? 0 : 1);
-		int cols = size > 1 ? maxWidth : size;
+		int rows = size / mVideoMaxCols + (size % mVideoMaxCols == 0 ? 0 : 1);
+		int cols = size > 1 ? mVideoMaxCols : size;
 		if (size == 0) {
 			V2Log.e(" No remote device need to show size:" + size);
 			return;
@@ -1144,50 +1122,18 @@ public class VideoActivityV2 extends Activity{
 		fixedWidth -= fixedWidth % 16;
 		fixedHeight -= fixedHeight % 16;
 
-		marginTop = marginBottom = Math.abs(containerH - fixedHeight * rows) / 2;
-		marginLeft = marginRight = Math.abs(containerW - fixedWidth * cols) / 2;
+		marginTop =  Math.abs(containerH - fixedHeight * rows) / 2;
+		marginLeft =  Math.abs(containerW - fixedWidth * cols) / 2;
 
 		int index = 0;
 		for (SurfaceViewW sw : mCurrentShowedSV) {
 			View v = mVideoLayout.findViewById(sw.getView().getId());
-			RelativeLayout.LayoutParams p = new RelativeLayout.LayoutParams(
+			FrameLayout.LayoutParams p = new FrameLayout.LayoutParams(
 					fixedWidth, fixedHeight);
-			int row = index / maxWidth;
-			int column = index % maxWidth;
-			if (column == 0 && row == 0) {
-				p.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
-				p.addRule(RelativeLayout.ALIGN_PARENT_TOP);
-			} else {
-
-				if (column > 0) {
-					p.addRule(RelativeLayout.RIGHT_OF,
-							mCurrentShowedSV.get(column - 1).getView().getId());
-				} else {
-					p.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
-				}
-				if (row > 0) {
-					p.addRule(RelativeLayout.BELOW,
-							mCurrentShowedSV.get((row - 1) * maxWidth + column)
-									.getView().getId());
-				} else {
-					p.addRule(RelativeLayout.ALIGN_PARENT_TOP);
-				}
-
-			}
-			if (column == 0) {
-				p.leftMargin = marginLeft;
-			}
-			if (row == 0) {
-
-				p.topMargin = marginTop;
-			}
-			if (column - 1 == maxWidth) {
-				p.rightMargin = marginRight;
-			}
-			if (row == rows) {
-				p.bottomMargin = marginBottom;
-			}
-
+			int row = index / mVideoMaxCols;
+			int column = index % mVideoMaxCols;
+			p.leftMargin =  marginLeft + column * fixedWidth;
+			p.topMargin =  marginTop+ row * fixedHeight;
 			if (v != null) {
 				mVideoLayout.updateViewLayout(v, p);
 			} else {
@@ -1272,7 +1218,7 @@ public class VideoActivityV2 extends Activity{
 		mContext.stopService(new Intent(mContext,
 				ConferencMessageSyncService.class));
 		// clear current meeting state
-		GlobalHolder.getInstance().setMeetingState(false);
+		GlobalHolder.getInstance().setMeetingState(false, 0);
 	}
 
 	@Override
@@ -1361,7 +1307,7 @@ public class VideoActivityV2 extends Activity{
 
 			updateAllRemoteDevice(TAG_OPEN_DEVICE);
 
-			adjustLayout();
+			adjustVideoLayout();
 
 			// Send speaking status
 			doApplyOrReleaseSpeak(isSpeaking);
@@ -1384,8 +1330,11 @@ public class VideoActivityV2 extends Activity{
 
 	private void updateAllRemoteDevice(int tag) {
 		for (SurfaceViewW sw : this.mCurrentShowedSV) {
-			Message.obtain(mVideoHandler, REQUEST_OPEN_OR_CLOSE_DEVICE, tag, 0,
-					sw.udc).sendToTarget();
+			if (TAG_OPEN_DEVICE ==  tag) {
+				sw.observer.open();
+			} else {
+				sw.observer.close();
+			}
 		}
 	}
 
@@ -1424,40 +1373,29 @@ public class VideoActivityV2 extends Activity{
 	 * 
 	 * @param user
 	 */
-	private void doHandleNewUserEntered(User user) {
-		if (user == null) {
+	private void doHandleNewUserEntered(Attendee att) {
+		if (att == null) {
 			return;
 		}
-		Attendee a = findAttendee(user.getmUserId());
-		if (a == null) {
-			a = new Attendee(user);
-			this.mAttendeeList.add(a);
-		} else {
-			a.setUser(user);
-		}
-		a.setJoined(true);
-		if (conf.getChairman() == a.getAttId()) {
-			a.setChairMan(true);
+		
+		att.setJoined(true);
+		if (conf.getChairman() == att.getAttId()) {
+			att.setChairMan(true);
 		}
 
-		List<UserDeviceConfig> ld = GlobalHolder.getInstance()
-				.getAttendeeDevice(a.getAttId());
-		if (ld == null || ld.size() <= 0) {
-			V2Log.w(" No available device config for user:" + user.getmUserId()
-					+ "  name:" + user.getName());
-		} else {
-			for (UserDeviceConfig udc : ld) {
-				a.addDevice(udc);
-				V2Log.i("New attendee joined conference :" + a.getAttName()
-						+ "   " + udc.getDeviceID());
-			}
+		List<UserDeviceConfig> devs = att.getmDevices();
+		if (devs == null || devs.size() <= 0) {
+			List<UserDeviceConfig> ld = GlobalHolder.getInstance()
+					.getAttendeeDevice(att.getAttId());
+			att.setmDevices(ld);
 		}
+		
 
 		if (mAttendeeContainer != null) {
-			mAttendeeContainer.updateEnteredAttendee(a);
+			mAttendeeContainer.updateEnteredAttendee(att);
 		}
 
-		showToastNotification(user.getName()
+		showToastNotification(att.getAttName()
 				+ mContext.getText(R.string.conf_notification_joined_meeting));
 	}
 
@@ -1474,31 +1412,29 @@ public class VideoActivityV2 extends Activity{
 	 * 
 	 * @param user
 	 */
-	private void doHandleUserExited(User user) {
-		Attendee a = getAttendee(user.getmUserId());
-		if (a == null) {
-			V2Log.e("No such attendee in list:" + user.getmUserId() + "  "
-					+ user.getName());
+	private void doHandleUserExited(Attendee att) {
+		if (att == null) {
+			V2Log.e("Attendee is null");
 			return;
 		}
 		// User do exist video device
-		if (a.getmDevices() != null) {
-			for (UserDeviceConfig udc : a.getmDevices()) {
+		if (att.getmDevices() != null) {
+			for (UserDeviceConfig udc : att.getmDevices()) {
 				if (udc != null && udc.isShowing()) {
 					showOrCloseAttendeeVideo(udc);
 				}
 			}
 		}
-		if (conf.getChairman() == a.getAttId()) {
-			a.setChairMan(true);
+		if (conf.getChairman() == att.getAttId()) {
+			att.setChairMan(true);
 		}
-		a.setJoined(false);
+		att.setJoined(false);
 		if (mAttendeeContainer != null) {
-			mAttendeeContainer.updateExitedAttendee(a);
+			mAttendeeContainer.updateExitedAttendee(att);
 		}
 
 		// Clean user device
-		showToastNotification(a.getAttName()
+		showToastNotification(att.getAttName()
 				+ mContext.getText(R.string.conf_notification_quited_meeting));
 
 	}
@@ -1519,21 +1455,19 @@ public class VideoActivityV2 extends Activity{
 		}
 		// if already opened attendee's video, switch action to close
 		if (udc.isShowing()) {
-			cb.requestCloseVideoDevice(conf, udc, new Registrant(mVideoHandler,
-					REQUEST_CLOSE_DEVICE_RESPONSE, null));
-
+			
 			for (SurfaceViewW sw : mCurrentShowedSV) {
 				if (sw.udc == udc) {
+					sw.observer.close();
 					mCurrentShowedSV.remove(sw);
 					mVideoLayout.removeView(sw.getView());
 					sw.rl.removeAllViews();
 					break;
 				}
 			}
-
 			udc.setShowing(false);
 			udc.doClose();
-			adjustLayout();
+			adjustVideoLayout();
 			return false;
 		} else {
 			if (checkVideoExceedMaminum()) {
@@ -1544,41 +1478,23 @@ public class VideoActivityV2 extends Activity{
 			}
 			VideoPlayer vp = new VideoPlayer();
 			udc.setSVHolder(new SurfaceView(this));
-			vp.SetSurface(udc.getSVHolder().getHolder());
 			udc.setVp(vp);
+			SurfaceHolderObserver observer = new SurfaceHolderObserver(cs, udc);
+			SurfaceViewW sw = new SurfaceViewW(udc.getBelongsAttendee(),
+					udc, observer);
+			mCurrentShowedSV.add(sw);
 
-			//
-			if (udc.getBelongsAttendee() instanceof AttendeeMixedDevice) {
-				mCurrentShowedSV.add(new MixedSurfaceViewW(
-						((AttendeeMixedDevice) udc.getBelongsAttendee()), udc));
-			} else {
-				mCurrentShowedSV.add(new SurfaceViewW(udc.getBelongsAttendee(),
-						udc));
-
-			}
 			// Do adjust layout first, then request open device.
 			// otherwise can't show video
-			adjustLayout();
-
-			Message m = Message.obtain(mVideoHandler,
-					REQUEST_OPEN_OR_CLOSE_DEVICE, TAG_OPEN_DEVICE, 0, udc);
-			mVideoHandler.sendMessageDelayed(m, 300);
+			adjustVideoLayout();
+			//Request open device
+			sw.observer.open();
 			udc.setShowing(true);
 			return true;
 		}
 
 	}
 
-	private Attendee getAttendee(long uid) {
-		Attendee at = null;
-		for (Attendee a : this.mAttendeeList) {
-			if (uid == a.getAttId()) {
-				at = a;
-				break;
-			}
-		}
-		return at;
-	}
 
 	/**
 	 * Update attendee state
@@ -1954,8 +1870,6 @@ public class VideoActivityV2 extends Activity{
 							sw.udc);
 					sw.at = at;
 					sw.udc = udc;
-					// FIXME set id
-					sw.getView().setId(udc.hashCode());
 					// update new opened video view background
 					flag = showOrCloseAttendeeVideo(udc);
 					mAttendeeContainer.updateCurrentSelectedBg(flag, at, udc);
@@ -1976,9 +1890,7 @@ public class VideoActivityV2 extends Activity{
 					|| !at.isJoined()) {
 
 			} else {
-				boolean flag = showOrCloseAttendeeVideo(udc);
-				mAttendeeContainer.updateCurrentSelectedBg(flag, at, udc);
-
+				showOrCloseAttendeeVideo(udc);
 			}
 		}
 
@@ -2053,22 +1965,6 @@ public class VideoActivityV2 extends Activity{
 
 	}
 
-	class MixerWrapper {
-		String id;
-		MixVideo mix;
-		MixVideoLayout layout;
-		AttendeeMixedDevice amd;
-
-		public MixerWrapper(String id, MixVideo mix, MixVideoLayout layout,
-				AttendeeMixedDevice amd) {
-			super();
-			this.id = id;
-			this.mix = mix;
-			this.layout = layout;
-			this.amd = amd;
-		}
-
-	}
 
 	class SurfaceViewW {
 
@@ -2076,14 +1972,17 @@ public class VideoActivityV2 extends Activity{
 		UserDeviceConfig udc;
 		int layId;
 		RelativeLayout rl;
+		SurfaceHolderObserver observer;
 
 		public SurfaceViewW() {
 
 		}
 
-		public SurfaceViewW(Attendee at, UserDeviceConfig udc) {
+		public SurfaceViewW(Attendee at, UserDeviceConfig udc, SurfaceHolderObserver observer) {
 			this.at = at;
 			this.udc = udc;
+			this.observer = observer;
+			this.udc.getSVHolder().getHolder().addCallback(observer);
 		}
 
 		public View getView() {
@@ -2091,7 +1990,6 @@ public class VideoActivityV2 extends Activity{
 				rl = new RelativeLayout(mContext);
 				rl.setPadding(1, 1, 1, 1);
 				rl.setBackgroundColor(Color.rgb(143, 144, 144));
-				// FIXME make sure hash code is unique.
 				layId = (int) udc.hashCode();
 
 				if (udc.getSVHolder() == null) {
@@ -2121,52 +2019,6 @@ public class VideoActivityV2 extends Activity{
 		}
 	}
 
-	class MixedSurfaceViewW extends SurfaceViewW {
-
-		public MixedSurfaceViewW(AttendeeMixedDevice at) {
-			this.at = at;
-			this.udc = new UserDeviceConfig(0, at.getMV().getId(), null);
-		}
-
-		public MixedSurfaceViewW(AttendeeMixedDevice at, UserDeviceConfig udc) {
-			this.at = at;
-			this.udc = udc;
-		}
-
-		@Override
-		public View getView() {
-			if (rl == null) {
-				rl = new RelativeLayout(mContext);
-				rl.setPadding(1, 1, 1, 1);
-				rl.setBackgroundColor(Color.rgb(143, 144, 144));
-				// FIXME make sure hash code is unique.
-				layId = (int) udc.hashCode();
-
-				if (udc.getSVHolder() == null) {
-					udc.setSVHolder(new SurfaceView(mContext));
-				}
-				rl.addView(udc.getSVHolder(), new RelativeLayout.LayoutParams(
-						RelativeLayout.LayoutParams.MATCH_PARENT,
-						RelativeLayout.LayoutParams.MATCH_PARENT));
-				TextView tv = new TextView(mContext);
-				tv.setText(at.getAttName());
-				tv.setMaxWidth(80);
-				tv.setEllipsize(TruncateAt.END);
-				tv.setSingleLine();
-				tv.setBackgroundColor(Color.rgb(138, 138, 138));
-				tv.setPadding(10, 10, 10, 10);
-				tv.setTextSize(14);
-				RelativeLayout.LayoutParams tvrl = new RelativeLayout.LayoutParams(
-						RelativeLayout.LayoutParams.WRAP_CONTENT,
-						RelativeLayout.LayoutParams.WRAP_CONTENT);
-				tvrl.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
-				tvrl.addRule(RelativeLayout.ALIGN_PARENT_TOP);
-				rl.addView(tv, tvrl);
-				rl.setId(layId);
-			}
-			return rl;
-		}
-	}
 
 	class VideoHandler extends Handler {
 
@@ -2229,22 +2081,23 @@ public class VideoActivityV2 extends Activity{
 			}
 				break;
 			case ATTENDEE_LISTENER:
+				User ut = (User) (((AsyncResult) msg.obj)
+						.getResult());
+				Attendee at = findAttendee(ut.getmUserId());
 				if (msg.arg1 == 1) {
-					doHandleNewUserEntered((User) (((AsyncResult) msg.obj)
-							.getResult()));
+					doHandleNewUserEntered(at);
 				} else {
-					doHandleUserExited((User) (((AsyncResult) msg.obj)
-							.getResult()));
+					doHandleUserExited(at);
 				}
 				break;
 			case REQUEST_OPEN_OR_CLOSE_DEVICE:
 				if (msg.arg1 == TAG_CLOSE_DEVICE) {
-					cb.requestCloseVideoDevice(conf,
+					cb.requestCloseVideoDevice(
 							(UserDeviceConfig) msg.obj, new Registrant(
 									mVideoHandler,
 									REQUEST_CLOSE_DEVICE_RESPONSE, null));
 				} else if (msg.arg1 == TAG_OPEN_DEVICE) {
-					cb.requestOpenVideoDevice(conf, (UserDeviceConfig) msg.obj,
+					cb.requestOpenVideoDevice( (UserDeviceConfig) msg.obj,
 							new Registrant(mVideoHandler,
 									REQUEST_OPEN_DEVICE_RESPONSE, null));
 				}
@@ -2302,21 +2155,14 @@ public class VideoActivityV2 extends Activity{
 				if (msg.arg1 == 1) {
 					MixVideo mv = (MixVideo) (((AsyncResult) msg.obj)
 							.getResult());
-
-					MixerWrapper mw = new MixerWrapper(mv.getId(), mv,
-							new MixVideoLayout(mContext, mv),
-							new AttendeeMixedDevice(mv));
-					synchronized (mMixerWrapper) {
-						// If exist, do not add again
-						if (mMixerWrapper.containsKey(mv.getId())) {
-							break;
-						}
-						mMixerWrapper.put(mv.getId(), mw);
-					}
+					AttendeeMixedDevice amd = new AttendeeMixedDevice(mv);
+					mAttendeeList.add(amd);
+					
+					
 					// Notify attendee list mixed video is created
 					if (mAttendeeContainer != null) {
 						V2Log.e(TAG, "VIDEO_MIX_NOTIFICATION 方法调用了update---");
-						mAttendeeContainer.updateEnteredAttendee(mw.amd);
+						mAttendeeContainer.updateEnteredAttendee(amd);
 					}
 
 					// destroy mixed video
@@ -2324,17 +2170,16 @@ public class VideoActivityV2 extends Activity{
 					// MixVideo mv = (MixVideo) msg.obj;
 					MixVideo mv = (MixVideo) (((AsyncResult) msg.obj)
 							.getResult());
-					MixerWrapper mw = null;
-					synchronized (mMixerWrapper) {
-						mw = mMixerWrapper.remove(mv.getId());
-					}
+					AttendeeMixedDevice amd = new AttendeeMixedDevice(mv);
+					//Remove from attendee list, because chairman closed mixed video device
+					mAttendeeList.remove(amd);
 					// Notify attendee list remove mixed video device
-					if (mAttendeeContainer != null && mw != null) {
-						mAttendeeContainer.updateExitedAttendee(mw.amd);
+					if (mAttendeeContainer != null) {
+						mAttendeeContainer.updateExitedAttendee(amd);
 					}
 					// Close opened mixed video
-					if (mw != null && mw.amd.getDefaultDevice().isShowing()) {
-						showOrCloseAttendeeVideo(mw.amd.getDefaultDevice());
+					if (amd.getDefaultDevice().isShowing()) {
+						showOrCloseAttendeeVideo(amd.getDefaultDevice());
 					}
 
 					// add mixed video device

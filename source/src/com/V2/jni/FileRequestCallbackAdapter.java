@@ -1,11 +1,11 @@
 package com.V2.jni;
 
+import com.V2.jni.ind.FileJNIObject;
+
 public abstract class FileRequestCallbackAdapter implements FileRequestCallback {
 
 	@Override
-	public void OnFileTransInvite(long nGroupID, int nBusinessType,
-			long userid, String szFileID, String szFileName, long nFileBytes,
-			int linetype) {
+	public void OnFileTransInvite(FileJNIObject file) {
 
 	}
 

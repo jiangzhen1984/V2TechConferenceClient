@@ -1,6 +1,6 @@
-package com.V2.jni;
+package com.v2tech.vo;
 
-public class V2GlobalEnum {
+public class V2GlobalConstants {
 	
 	/**
 	 * Global request type for conference
@@ -60,11 +60,5 @@ public class V2GlobalEnum {
 	 * Indicate send off line file
 	 */
 	public static final int FILE_TYPE_OFFLINE = 2;
-	
-	
-	/**
-	 * User non-registered acount type for joined conference
-	 */
-	public static final int USER_ACCOUT_TYPE_NON_REGISTERED = 2;
 	
 }

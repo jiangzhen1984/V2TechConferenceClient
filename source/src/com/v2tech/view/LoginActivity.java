@@ -36,6 +36,7 @@ import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 
 import com.V2.jni.ConfigRequest;
+import com.V2.jni.util.V2Log;
 import com.v2tech.R;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.service.Registrant;
@@ -44,7 +45,6 @@ import com.v2tech.service.jni.JNIResponse;
 import com.v2tech.service.jni.RequestLogInResponse;
 import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.SPUtil;
-import com.v2tech.util.V2Log;
 
 /**
  * Activity which displays a login screen to the user, offering registration as

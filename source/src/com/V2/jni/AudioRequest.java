@@ -8,7 +8,7 @@ import android.content.Context;
 import android.util.Log;
 
 import com.V2.jni.ind.AudioJNIObjectInd;
-import com.v2tech.util.V2Log;
+import com.V2.jni.util.V2Log;
 
 public class AudioRequest {
 

@@ -2,6 +2,8 @@ package com.v2tech.util;
 
 import java.io.File;
 
+import com.V2.jni.util.V2Log;
+
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.DisplayMetrics;

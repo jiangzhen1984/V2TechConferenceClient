@@ -2,7 +2,7 @@ package com.v2tech.vo;
 
 import java.util.UUID;
 
-import com.v2tech.util.V2Log;
+import com.V2.jni.util.V2Log;
 
 public class VMessageAudioItem extends VMessageAbstractItem {
 

@@ -15,7 +15,7 @@ import android.graphics.Bitmap;
 import android.util.Log;
 
 import com.V2.jni.ind.SendingResultJNIObjectInd;
-import com.v2tech.util.V2Log;
+import com.V2.jni.util.V2Log;
 
 
 

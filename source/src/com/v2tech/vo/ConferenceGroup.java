@@ -1,5 +1,7 @@
 package com.v2tech.vo;
 
+import java.util.Date;
+
 public class ConferenceGroup extends Group {
 
 	private long chairManUId;
@@ -18,6 +20,10 @@ public class ConferenceGroup extends Group {
 
 	public ConferenceGroup(long mGId, GroupType mGroupType, String mName) {
 		super(mGId, GroupType.CONFERENCE, mName);
+	}
+	
+	public ConferenceGroup(long mGId, String mName, long mOwner, Date startTime) {
+		super(mGId, GroupType.CONFERENCE, mName, mOwner,startTime );
 	}
 
 	public long getChairManUId() {

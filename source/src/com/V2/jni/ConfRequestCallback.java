@@ -1,5 +1,8 @@
 package com.V2.jni;
 
+import com.V2.jni.ind.V2Conference;
+import com.V2.jni.ind.V2User;
+
 public interface ConfRequestCallback {
 
 	/**
@@ -20,9 +23,9 @@ public interface ConfRequestCallback {
 	 *  
 	 * @param nConfID conference ID what user entered
 	 * @param nTime
-	 * @param szUserInfos  < user id='146' uetype='1'/>
+	 * @param user  
 	 */
-	public void OnConfMemberEnterCallback(long nConfID, long  nTime, String szUserInfos);
+	public void OnConfMemberEnterCallback(long nConfID, long  nTime, V2User user);
 	
 	/**
 	 * <ul><Indicate attendee exited current conference. </ul>
@@ -54,9 +57,9 @@ public interface ConfRequestCallback {
 	
 	/**
 	 * User invite current user to join further conference.
-	 * @param confXml {@code <conf createuserid='18' id='514000758190' starttime='1400162220' subject=' 就'/> }
-	 * @param creatorXml {@code <user id='18'/>}
+	 * @param v2conf 
+	 * @param user 
 	 */
-	public void OnConfNotify(String confXml, String creatorXml);
+	public void OnConfNotify(V2Conference v2conf,  V2User user);
 	
 }

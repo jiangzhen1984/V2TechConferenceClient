@@ -4,7 +4,7 @@ import android.os.Handler;
 
 import com.V2.jni.WBRequest;
 import com.V2.jni.WBRequestCallback;
-import com.v2tech.util.V2Log;
+import com.V2.jni.util.V2Log;
 import com.v2tech.util.XmlParser;
 import com.v2tech.vo.Group;
 import com.v2tech.vo.Group.GroupType;

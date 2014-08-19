@@ -40,10 +40,10 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.V2.jni.util.V2Log;
 import com.v2tech.R;
 import com.v2tech.util.BitmapUtil;
 import com.v2tech.util.StorageUtil;
-import com.v2tech.util.V2Log;
 
 public class ConversationSelectFile extends Activity {
 

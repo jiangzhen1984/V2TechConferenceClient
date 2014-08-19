@@ -4,7 +4,7 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.v2tech.util.V2Log;
+import com.V2.jni.util.V2Log;
 
 public class VideoMixerRequest {
 

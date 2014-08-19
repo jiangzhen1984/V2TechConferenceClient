@@ -1,12 +1,10 @@
 package com.v2tech.vo;
 
-import java.util.Random;
 
 public class AttendeeMixedDevice extends Attendee {
 
 	private MixVideo mv;
 	private UserDeviceConfig[] udcs;
-	private long id;
 
 	public AttendeeMixedDevice(MixVideo mv) {
 		super();
@@ -23,9 +21,6 @@ public class AttendeeMixedDevice extends Attendee {
 				udcs[0].setBelongsAttendee(this);
 			}
 		}
-
-		Random r = new Random();
-		id = r.nextLong() | r.hashCode();
 	}
 
 	public MixVideo getMV() {
@@ -34,7 +29,7 @@ public class AttendeeMixedDevice extends Attendee {
 
 	@Override
 	public long getAttId() {
-		return id;
+		return mv.getId().hashCode();
 	}
 
 	@Override

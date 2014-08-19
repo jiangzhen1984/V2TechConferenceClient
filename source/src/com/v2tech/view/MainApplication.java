@@ -34,11 +34,11 @@ import com.V2.jni.NativeInitializer;
 import com.V2.jni.VideoMixerRequest;
 import com.V2.jni.VideoRequest;
 import com.V2.jni.WBRequest;
+import com.V2.jni.util.V2Log;
 import com.v2tech.util.CrashHandler;
 import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.LogcatThread;
 import com.v2tech.util.Notificator;
-import com.v2tech.util.V2Log;
 import com.v2tech.view.conference.VideoActivityV2;
 
 public class MainApplication extends Application {

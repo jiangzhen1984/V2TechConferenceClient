@@ -1,4 +1,4 @@
-package com.v2tech.util;
+package com.V2.jni.util;
 
 import android.util.Log;
 

@@ -32,13 +32,13 @@ import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.V2.jni.util.V2Log;
 import com.v2tech.R;
 import com.v2tech.service.ChatService;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.service.Registrant;
 import com.v2tech.service.jni.JNIResponse;
 import com.v2tech.service.jni.RequestChatServiceResponse;
-import com.v2tech.util.V2Log;
 import com.v2tech.view.JNIService;
 import com.v2tech.view.PublicIntent;
 import com.v2tech.vo.CameraConfiguration;
@@ -247,7 +247,7 @@ public class P2PConversation extends Activity implements
 		
 		UserChattingObject selfUCD = new UserChattingObject(GlobalHolder
 				.getInstance().getCurrentUser(), 0, "");
-		chatService.openVideoDevice(selfUCD, null);
+		chatService.requestOpenVideoDevice(selfUCD.getUdc(), null);
 	}
 
 	@Override
@@ -263,7 +263,7 @@ public class P2PConversation extends Activity implements
 	public void closeLocalCamera() {
 		UserChattingObject selfUCD = new UserChattingObject(GlobalHolder
 				.getInstance().getCurrentUser(), 0, "");
-		chatService.closeVideoDevice(selfUCD, null);
+		chatService.requestCloseVideoDevice(selfUCD.getUdc(), null);
 		isOpenedLocal = false;
 	}
 
@@ -312,10 +312,11 @@ public class P2PConversation extends Activity implements
 	}
 
 	private void setGlobalState(boolean flag) {
+		long uid =flag? uad.getUser().getmUserId() : 0;
 		if (uad.isAudioType()) {
-			GlobalHolder.getInstance().setAudioState(flag);
+			GlobalHolder.getInstance().setAudioState(flag, uid);
 		} else if (uad.isVideoType()) {
-			GlobalHolder.getInstance().setVideoState(flag);
+			GlobalHolder.getInstance().setVideoState(flag, uid);
 		}
 	}
 
@@ -795,12 +796,12 @@ public class P2PConversation extends Activity implements
 		}
 		isOpenedRemote = true;
 		vp.SetSurface(getSurfaceHolder(SURFACE_HOLDER_TAG_REMOTE));
-		chatService.openVideoDevice(uad, null);
+		chatService.requestOpenVideoDevice(uad.getUdc(), null);
 	}
 
 	private void closeRemoteVideo() {
 		if (uad.getVp() != null && uad.getDeviceId() != null) {
-			chatService.closeVideoDevice(uad, null);
+			chatService.requestCloseVideoDevice(uad.getUdc(), null);
 		}
 		isOpenedRemote = false;
 	}

@@ -7,24 +7,24 @@ import android.os.Message;
 
 import com.V2.jni.AudioRequest;
 import com.V2.jni.ConfRequest;
-import com.V2.jni.ConfRequestCallback;
+import com.V2.jni.ConfRequestCallbackAdapter;
 import com.V2.jni.GroupRequest;
 import com.V2.jni.GroupRequestCallbackAdapter;
+import com.V2.jni.V2GlobalEnum;
 import com.V2.jni.VideoMixerRequest;
 import com.V2.jni.VideoMixerRequestCallback;
 import com.V2.jni.VideoRequest;
 import com.V2.jni.VideoRequestCallbackAdapter;
+import com.V2.jni.ind.V2User;
+import com.V2.jni.util.V2Log;
 import com.v2tech.service.jni.JNIIndication;
 import com.v2tech.service.jni.JNIResponse;
 import com.v2tech.service.jni.PermissionUpdateIndication;
-import com.v2tech.service.jni.RequestCloseUserVideoDeviceResponse;
 import com.v2tech.service.jni.RequestConfCreateResponse;
 import com.v2tech.service.jni.RequestEnterConfResponse;
 import com.v2tech.service.jni.RequestExitedConfResponse;
-import com.v2tech.service.jni.RequestOpenUserVideoDeviceResponse;
 import com.v2tech.service.jni.RequestPermissionResponse;
 import com.v2tech.service.jni.RequestUpdateCameraParametersResponse;
-import com.v2tech.util.V2Log;
 import com.v2tech.vo.CameraConfiguration;
 import com.v2tech.vo.Conference;
 import com.v2tech.vo.ConferenceGroup;
@@ -50,10 +50,6 @@ import com.v2tech.vo.UserDeviceConfig;
  * {@link #requestEnterConference(Conference, Registrant)}</li>
  * <li>User request to exit conference :
  * {@link #requestExitConference(Conference, Registrant)}</li>
- * <li>User request to open video device :
- * {@link #requestOpenVideoDevice(Conference, UserDeviceConfig, Registrant)}</li>
- * <li>User request to close video device:
- * {@link #requestCloseVideoDevice(Conference, UserDeviceConfig, Registrant)}</li>
  * <li>User request to request speak in meeting
  * {@link #applyForControlPermission(ConferencePermission, Registrant)}</li>
  * <li>User request to release speaker in meeting
@@ -65,12 +61,10 @@ import com.v2tech.vo.UserDeviceConfig;
  * @author 28851274
  * 
  */
-public class ConferenceService extends AbstractHandler {
+public class ConferenceService extends DeviceService {
 
 	private static final int JNI_REQUEST_ENTER_CONF = 1;
 	private static final int JNI_REQUEST_EXIT_CONF = 2;
-	private static final int JNI_REQUEST_OPEN_VIDEO = 3;
-	private static final int JNI_REQUEST_CLOSE_VIDEO = 4;
 	private static final int JNI_REQUEST_SPEAK = 5;
 	private static final int JNI_REQUEST_RELEASE_SPEAK = 6;
 	private static final int JNI_REQUEST_CREATE_CONFERENCE = 7;
@@ -255,92 +249,7 @@ public class ConferenceService extends AbstractHandler {
 		this.sendMessageDelayed(res, 300);
 	}
 
-	/**
-	 * User request to open video device.
-	 * 
-	 * @param conf
-	 *            {@link Conference} object which user entered
-	 * @param userDevice
-	 *            {@link UserDeviceConfig} if want to open local video,
-	 *            {@link UserDeviceConfig#getVp()} should be null and
-	 *            {@link UserDeviceConfig#getDeviceID()} should be ""
-	 * @param caller
-	 *            if input is null, ignore response Message.object is
-	 *            {@link com.v2tech.service.jni.RequestOpenUserVideoDeviceResponse}
-	 * 
-	 * @see UserDeviceConfig
-	 */
-	public void requestOpenVideoDevice(Conference conf,
-			UserDeviceConfig userDevice, Registrant caller) {
-		if (conf == null || userDevice == null) {
-			if (caller != null) {
-				JNIResponse jniRes = new RequestOpenUserVideoDeviceResponse(0,
-						0, RequestConfCreateResponse.Result.INCORRECT_PAR);
-				sendResult(caller, jniRes);
-			}
-			return;
-		}
-		initTimeoutMessage(JNI_REQUEST_OPEN_VIDEO, DEFAULT_TIME_OUT_SECS,
-				caller);
-		V2Log.i(" request open video group:" + conf.getId() + "   UID:"
-				+ userDevice.getUserID() + " deviceid:"
-				+ userDevice.getDeviceID() + "   videoplayer:"
-				+ userDevice.getVp());
-		VideoRequest.getInstance().openVideoDevice(
-				userDevice.getType().ordinal(), userDevice.getUserID(),
-				userDevice.getDeviceID(), userDevice.getVp(),
-				userDevice.getBusinessType());
-		JNIResponse jniRes = new RequestOpenUserVideoDeviceResponse(
-				conf.getId(), System.currentTimeMillis() / 1000,
-				RequestOpenUserVideoDeviceResponse.Result.SUCCESS);
 
-		// send delayed message for that make sure send response after JNI
-		Message res = Message.obtain(this, JNI_REQUEST_OPEN_VIDEO, jniRes);
-		this.sendMessageDelayed(res, 300);
-
-	}
-
-	/**
-	 * User request to close video device.
-	 * 
-	 * @param nGroupID
-	 * @param userDevice
-	 *            {@link UserDeviceConfig} if want to open local video,
-	 *            {@link UserDeviceConfig#getVp()} should be null and
-	 *            {@link UserDeviceConfig#getDeviceID()} should be ""
-	 * @param caller
-	 *            if input is null, ignore response Message.object is
-	 *            {@link com.v2tech.service.jni.RequestCloseUserVideoDeviceResponse}
-	 * 
-	 * @see UserDeviceConfig
-	 */
-	public void requestCloseVideoDevice(Conference conf,
-			UserDeviceConfig userDevice, Registrant caller) {
-		if (conf == null || userDevice == null) {
-			if (caller != null) {
-				JNIResponse jniRes = new RequestCloseUserVideoDeviceResponse(
-						0,
-						0,
-						RequestCloseUserVideoDeviceResponse.Result.INCORRECT_PAR);
-				sendResult(caller, jniRes);
-			}
-			return;
-		}
-		initTimeoutMessage(JNI_REQUEST_CLOSE_VIDEO, DEFAULT_TIME_OUT_SECS,
-				caller);
-
-		VideoRequest.getInstance().closeVideoDevice(
-				userDevice.getType().ordinal(), userDevice.getUserID(),
-				userDevice.getDeviceID(), userDevice.getVp(),
-				userDevice.getBusinessType());
-		JNIResponse jniRes = new RequestCloseUserVideoDeviceResponse(
-				conf.getId(), System.currentTimeMillis() / 1000,
-				RequestCloseUserVideoDeviceResponse.Result.SUCCESS);
-
-		// send delayed message for that make sure send response after JNI
-		Message res = Message.obtain(this, JNI_REQUEST_CLOSE_VIDEO, jniRes);
-		this.sendMessageDelayed(res, 300);
-	}
 
 	/**
 	 * User request speak permission on the conference.
@@ -394,22 +303,7 @@ public class ConferenceService extends AbstractHandler {
 		this.sendMessageDelayed(res, 300);
 	}
 
-	/**
-	 * Update current user's camera. Including front-side or back-side camera
-	 * switch.
-	 * 
-	 * @param cc
-	 *            {@link CameraConfiguration}
-	 * @param caller
-	 *            if input is null, ignore response Message.object is
-	 *            {@link com.v2tech.service.jni.RequestUpdateCameraParametersResponse}
-	 */
-	public void updateCameraParameters(CameraConfiguration cc, Registrant caller) {
-		initTimeoutMessage(JNI_UPDATE_CAMERA_PAR, DEFAULT_TIME_OUT_SECS, caller);
-		VideoRequest.getInstance().setCapParam(cc.getDeviceId(),
-				cc.getCameraIndex(), cc.getFrameRate(), cc.getBitRate());
-	}
-	
+
 	/**
 	 * Pause or resume audio.
 	 * @param flag true for resume false for suspend
@@ -517,7 +411,7 @@ public class ConferenceService extends AbstractHandler {
 
 
 
-	class ConfRequestCB implements ConfRequestCallback {
+	class ConfRequestCB extends  ConfRequestCallbackAdapter {
 
 		private Handler mCallbackHandler;
 
@@ -549,47 +443,23 @@ public class ConferenceService extends AbstractHandler {
 					.sendToTarget();
 		}
 
-		//08-12 20:52:56.262: D/V2TECH(7463): -->OnConfMemberEnter 514078477608 1407848229 <user accounttype='2' id='81003' nickname='1234' uetype='1'/>
 
 		@Override
 		public void OnConfMemberEnterCallback(long nConfID, long nTime,
-				String szUserInfos) {
-			User user = null;
-			int start = szUserInfos.indexOf("id='");
-			if (start != -1) {
-				int end = szUserInfos.indexOf("'", start + 4);
-				if (end != -1) {
-					String id = szUserInfos.substring(start + 4, end);
-					user = GlobalHolder.getInstance().getUser(
-							Long.parseLong(id));
-					if (user == null) {
-						V2Log.e(" Can't not find user " + id);
-						start = szUserInfos.indexOf("accounttype='");
-						end =  szUserInfos.indexOf( "'", start+ 13);
-						if (start != -1 && end != -1) {
-							int type = Integer.parseInt(szUserInfos.substring(start+13, end));
-							if (type == 2) {
-								start = szUserInfos.indexOf("nickname='");
-								end =  szUserInfos.indexOf( "'", start+ 10);
-								if (start != -1 && end != -1) {
-									String name = szUserInfos.substring(start+10, end);
-									user = new User(Long.parseLong(id), name);
-									notifyListenerWithPending(KEY_ATTENDEE_STATUS_LISTNER, 1, 0, user);
-								}
-							}
-						}
-						return;
-					}
-	
-					notifyListenerWithPending(KEY_ATTENDEE_STATUS_LISTNER, 1, 0, user);
-
-
-				} else {
-					V2Log.e("Invalid attendee user id ignore callback message");
-				}
+				V2User v2user) {
+			User user = GlobalHolder.getInstance().getUser(v2user.uid);
+			if (user == null && v2user.type == V2GlobalEnum.USER_ACCOUT_TYPE_NON_REGISTERED) {
+				user = new User(v2user.uid, v2user.name);
 			} else {
-				V2Log.e("Invalid attendee user id ignore callback message");
+				V2Log.e("User is null but account type is not USER_ACCOUT_TYPE_NON_REGISTERED : "+ v2user.type );
 			}
+			
+			if (user == null) {
+				V2Log.e("User is null can not dispatch notification");
+				return;
+			}
+			
+			notifyListenerWithPending(KEY_ATTENDEE_STATUS_LISTNER, 1, 0, user);
 		}
 
 		@Override
@@ -615,11 +485,6 @@ public class ConferenceService extends AbstractHandler {
 			JNIIndication jniInd = new PermissionUpdateIndication(userid, type,
 					status);
 			notifyListenerWithPending(KEY_PERMISSION_CHANGED_LISTNER, 0, 0, jniInd);
-		}
-
-		@Override
-		public void OnConfNotify(String confXml, String creatorXml) {
-
 		}
 
 	}

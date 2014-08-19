@@ -8,14 +8,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.CopyOnWriteArraySet;
 
 import android.graphics.Bitmap;
 
-import com.v2tech.util.V2Log;
-import com.v2tech.view.bo.UserStatusObject;
+import com.V2.jni.ind.V2Group;
+import com.V2.jni.util.V2Log;
+import com.v2tech.util.GlobalState;
+import com.v2tech.vo.ConferenceGroup;
+import com.v2tech.vo.ContactGroup;
+import com.v2tech.vo.CrowdGroup;
 import com.v2tech.vo.Group;
 import com.v2tech.vo.Group.GroupType;
+import com.v2tech.vo.OrgGroup;
 import com.v2tech.vo.User;
 import com.v2tech.vo.UserDeviceConfig;
 
@@ -29,15 +33,13 @@ public class GlobalHolder {
 
 	private User mCurrentUser;
 
-	private Map<Long, UserStatusObject> onlineUsers = new HashMap<Long, UserStatusObject>();
+	private List<Group> mOrgGroup = new ArrayList<Group>();
 
-	private List<Group> mOrgGroup = null;
-
-	private Set<Group> mConfGroup = new CopyOnWriteArraySet<Group>();
+	private List<Group> mConfGroup = new ArrayList<Group>();
 
 	private List<Group> mContactsGroup = new ArrayList<Group>();
 
-	private Set<Group> mCrowdGroup = new HashSet<Group>();
+	private List<Group> mCrowdGroup = new ArrayList<Group>();
 
 	private Map<Long, User> mUserHolder = new HashMap<Long, User>();
 	private Map<Long, Group> mGroupHolder = new HashMap<Long, Group>();
@@ -47,7 +49,7 @@ public class GlobalHolder {
 
 	private Map<Long, Bitmap> mAvatarBmHolder = new HashMap<Long, Bitmap>();
 
-	private int mState;
+	private GlobalState mState = new GlobalState();
 
 	public static synchronized GlobalHolder getInstance() {
 		if (holder == null) {
@@ -117,7 +119,7 @@ public class GlobalHolder {
 				if (u.getNickName() != null) {
 					cu.setNickName(u.getNickName());
 				}
-				if (u.getBirthday()  != null) {
+				if (u.getBirthday() != null) {
 					cu.setBirthday(u.getBirthday());
 				}
 				V2Log.i(" merge user information " + id + " " + cu.getName());
@@ -138,63 +140,43 @@ public class GlobalHolder {
 		return mUserHolder.get(key);
 	}
 
-	public void updateUserStatus(User u) {
-		Long key = Long.valueOf(u.getmUserId());
-		if (u.getmStatus() == User.Status.OFFLINE) {
-			onlineUsers.remove(key);
-		} else {
-			onlineUsers
-					.put(key, new UserStatusObject(u.getmUserId(), u
-							.getDeviceType().toIntValue(), u.getmStatus()
-							.toIntValue()));
-		}
-
-	}
-
-	public void updateUserStatus(long uid, UserStatusObject us) {
-		Long key = Long.valueOf(uid);
-		if (User.Status.fromInt(us.getStatus()) == User.Status.OFFLINE) {
-			onlineUsers.remove(key);
-		} else {
-			onlineUsers.put(key, us);
-		}
-	}
-
-	public UserStatusObject getOnlineUserStatus(long uid) {
-		Long key = Long.valueOf(uid);
-		return onlineUsers.get(key);
-	}
-
 	/**
 	 * Update group information according server's side push data
 	 * 
 	 * @param gType
 	 * @param list
 	 * 
-	 *            FIXME need to optimize code
 	 */
-	public void updateGroupList(Group.GroupType gType, List<Group> list) {
+	public void updateGroupList(Group.GroupType gType, List<V2Group> list) {
 
-		if (gType == Group.GroupType.ORG) {
-			mOrgGroup = list;
-		} else if (gType == Group.GroupType.CONFERENCE) {
-			synchronized (mConfGroup) {
-				mConfGroup.addAll(list);
+		for (V2Group vg : list) {
+			Group cache = mGroupHolder.get(Long.valueOf(vg.id));
+			if (cache != null) {
+				continue;
 			}
-		} else if (gType == Group.GroupType.CONTACT) {
-			for (int i = 0; i < list.size(); i++) {
-				Group g = list.get(i);
-				if (!mGroupHolder.containsKey(Long.valueOf(g.getmGId()))) {
-					this.mContactsGroup.add(g);
-				}
+			Group g = null;
+			if (gType == GroupType.CHATING) {
+				g = new CrowdGroup(vg.id, vg.name, vg.owner.uid);
+				mCrowdGroup.add(g);
+			} else if (gType == GroupType.CONFERENCE) {
+				g = new ConferenceGroup(vg.id, vg.name, vg.owner.uid,
+						vg.createTime);
+				mConfGroup.add(g);
+			} else if (gType == GroupType.ORG) {
+				g = new OrgGroup(vg.id, vg.name);
+				mOrgGroup.add(g);
+			} else if (gType == GroupType.CONTACT) {
+				g = new ContactGroup(vg.id, vg.name);
+				mContactsGroup.add(g);
+			} else {
+				throw new RuntimeException(" Can not support this type");
 			}
-		} else if (gType == GroupType.CHATING) {
-			this.mCrowdGroup.addAll(list);
+
+			mGroupHolder.put(Long.valueOf(g.getmGId()), g);
+
+			populateGroup(gType, g, vg.childs);
 		}
-		for (Group g : list) {
-			g.setOwnerUser(this.getUser(g.getOwner()));
-			populateGroup(g);
-		}
+
 	}
 
 	public void addGroupToList(Group.GroupType gType, Group g) {
@@ -208,34 +190,40 @@ public class GlobalHolder {
 	}
 
 	public Group getGroupById(Group.GroupType gType, long gId) {
-		Set<Group> gSet = null;
-		if (gType == Group.GroupType.CONFERENCE) {
-			gSet = mConfGroup;
-		} else if (gType == Group.GroupType.CHATING) {
-			gSet = mCrowdGroup;
-		} else if (gType == Group.GroupType.ORG) {
-			//TODO handle organzation
-		}
-		
-
-		if (gSet == null) {
-			V2Log.e(" doesn't initialize collection " + gType.intValue()
-					+ "    gid:" + gId);
-			return null;
-		}
-
-		for (Group g : gSet) {
-			if (g.getmGId() == gId) {
-				return g;
-			}
-		}
-		return null;
+		return mGroupHolder.get(Long.valueOf(gId));
 	}
 
-	private void populateGroup(Group g) {
-		mGroupHolder.put(Long.valueOf(g.getmGId()), g);
-		for (Group subG : g.getChildGroup()) {
-			populateGroup(subG);
+	private void populateGroup(GroupType gType, Group parent, Set<V2Group> list) {
+		for (V2Group vg : list) {
+			Group cache = mGroupHolder.get(Long.valueOf(vg.id));
+
+			Group g = null;
+			if (cache != null) {
+				g = cache;
+				//Update new name
+				cache.setName(vg.name);
+			} else {
+				if (gType == GroupType.CHATING) {
+					g = new CrowdGroup(vg.id, vg.name, vg.owner.uid);
+				} else if (gType == GroupType.CONFERENCE) {
+					g = new ConferenceGroup(vg.id, vg.name, vg.owner.uid,
+							vg.createTime);
+				} else if (gType == GroupType.ORG) {
+					g = new OrgGroup(vg.id, vg.name);
+				} else if (gType == GroupType.CONTACT) {
+					g = new ContactGroup(vg.id, vg.name);
+				} else {
+					throw new RuntimeException(" Can not support this type");
+				}
+			}
+			
+			
+			parent.addGroupToGroup(g);
+			
+			mGroupHolder.put(Long.valueOf(g.getmGId()), g);
+			
+			populateGroup(gType, g, vg.childs);
+
 		}
 	}
 
@@ -387,10 +375,9 @@ public class GlobalHolder {
 		return new ArrayList<UserDeviceConfig>(list);
 	}
 
-	
-	
 	/**
 	 * Update user video device and clear existed user device first
+	 * 
 	 * @param id
 	 * @param udcList
 	 */
@@ -400,55 +387,71 @@ public class GlobalHolder {
 		if (list != null) {
 			list.clear();
 		} else {
-			list =  new HashSet<UserDeviceConfig>();
+			list = new HashSet<UserDeviceConfig>();
 			mUserDeviceList.put(key, list);
 		}
 		list.addAll(udcList);
 	}
 
-
-
-	public void setAudioState(boolean flag) {
+	public void setAudioState(boolean flag, long uid) {
+		int st = this.mState.getState();
 		if (flag) {
-			this.mState |= STATE_IN_AUDIO_CONVERSATION;
+			st |= STATE_IN_AUDIO_CONVERSATION;
 		} else {
-			this.mState &= (~STATE_IN_AUDIO_CONVERSATION);
+			st &= (~STATE_IN_AUDIO_CONVERSATION);
 		}
+		this.mState.setState(st);
+		this.mState.setUid(uid);
 	}
 
-	public void setVideoState(boolean flag) {
+	public void setVideoState(boolean flag, long uid) {
+		int st = this.mState.getState();
 		if (flag) {
-			this.mState |= STATE_IN_VIDEO_CONVERSATION;
+			st |= STATE_IN_VIDEO_CONVERSATION;
 		} else {
-			this.mState &= (~STATE_IN_VIDEO_CONVERSATION);
+			st &= (~STATE_IN_VIDEO_CONVERSATION);
 		}
+		this.mState.setState(st);
+		this.mState.setUid(uid);
 	}
 
-	public void setMeetingState(boolean flag) {
+	public void setMeetingState(boolean flag, long gid) {
+		int st = this.mState.getState();
 		if (flag) {
-			this.mState |= STATE_IN_MEETING_CONVERSATION;
+			st |= STATE_IN_MEETING_CONVERSATION;
 		} else {
-			this.mState &= (~STATE_IN_MEETING_CONVERSATION);
+			st &= (~STATE_IN_MEETING_CONVERSATION);
 		}
+		this.mState.setState(st);
+		this.mState.setGid(gid);
 	}
 
 	public boolean isInAudioCall() {
-		return (this.mState & STATE_IN_AUDIO_CONVERSATION) == STATE_IN_AUDIO_CONVERSATION;
+		int st = this.mState.getState();
+		return (st & STATE_IN_AUDIO_CONVERSATION) == STATE_IN_AUDIO_CONVERSATION;
 	}
 
 	public boolean isInVideoCall() {
-		return (this.mState & STATE_IN_VIDEO_CONVERSATION) == STATE_IN_VIDEO_CONVERSATION;
+		int st = this.mState.getState();
+		return (st & STATE_IN_VIDEO_CONVERSATION) == STATE_IN_VIDEO_CONVERSATION;
 	}
 
 	public boolean isInMeeting() {
-		return (this.mState & STATE_IN_MEETING_CONVERSATION) == STATE_IN_MEETING_CONVERSATION;
+		int st = this.mState.getState();
+		return (st & STATE_IN_MEETING_CONVERSATION) == STATE_IN_MEETING_CONVERSATION;
 	}
 	
+	public GlobalState getGlobalState() {
+		return new GlobalState(this.mState);
+	}
+
 	public Bitmap getUserAvatar(long id) {
 		Long key = Long.valueOf(id);
 		return mAvatarBmHolder.get(key);
 	}
 
+	
+	
 	/**
 	 * Use to update cache avatar
 	 */

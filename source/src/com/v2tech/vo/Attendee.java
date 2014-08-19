@@ -5,7 +5,7 @@ import java.util.List;
 
 import android.graphics.Bitmap;
 
-import com.v2tech.util.V2Log;
+import com.V2.jni.util.V2Log;
 
 /**
  * As conference's attendee object. <br>
@@ -153,6 +153,12 @@ public class Attendee implements Comparable<Attendee>{
 
 	public void setmDevices(List<UserDeviceConfig> mDevices) {
 		this.mDevices = mDevices;
+		if (this.mDevices == null) {
+			return;
+		}
+		for (UserDeviceConfig udc: mDevices) {
+			udc.setBelongsAttendee(this);
+		}
 	}
 
 	public boolean isSelf() {

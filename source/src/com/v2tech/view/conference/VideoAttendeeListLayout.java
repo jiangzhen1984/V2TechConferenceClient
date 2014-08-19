@@ -32,8 +32,8 @@ import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.V2.jni.util.V2Log;
 import com.v2tech.R;
-import com.v2tech.util.V2Log;
 import com.v2tech.vo.Attendee;
 import com.v2tech.vo.AttendeeMixedDevice;
 import com.v2tech.vo.Conference;
@@ -110,6 +110,14 @@ public class VideoAttendeeListLayout extends LinearLayout {
 					long id) {
 				if (listener != null) {
 					Wrapper wr = (Wrapper) view.getTag();
+					if (wr.udc!= null ) {
+						if (wr.udc.isShowing()) {
+							view.setBackgroundColor(Color.WHITE);
+						} else {
+							view.setBackgroundColor(getContext().getResources()
+									.getColor(R.color.attendee_select_bg));
+						}
+					}
 					listener.OnAttendeeClicked(wr.a, wr.udc);
 				}
 			}
