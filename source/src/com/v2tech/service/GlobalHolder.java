@@ -253,7 +253,6 @@ public class GlobalHolder {
 			mGroupHolder.put(Long.valueOf(g.getmGId()), g);
 
 			populateGroup(groupType, g, vg.childs);
-
 		}
 	}
 

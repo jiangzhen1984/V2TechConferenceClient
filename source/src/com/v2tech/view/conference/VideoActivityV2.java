@@ -196,7 +196,7 @@ public class VideoActivityV2 extends Activity {
 	private boolean mLocalHolderIsCreate = false;
 	private int currentWidth;
 	private boolean isStop;
-
+	
 	private int mVideoMaxCols = 2;
 
 	@Override
@@ -1461,7 +1461,6 @@ public class VideoActivityV2 extends Activity {
 		}
 		// if already opened attendee's video, switch action to close
 		if (udc.isShowing()) {
-
 			for (SurfaceViewW sw : mCurrentShowedSV) {
 				if (sw.udc == udc) {
 					sw.observer.close();
@@ -1495,6 +1494,7 @@ public class VideoActivityV2 extends Activity {
 			adjustVideoLayout();
 			// Request open device
 			sw.observer.open();
+
 			udc.setShowing(true);
 			return true;
 		}

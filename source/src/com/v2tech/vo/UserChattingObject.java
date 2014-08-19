@@ -31,6 +31,7 @@ public class UserChattingObject {
 					" UserChattingObject user can not be null");
 		}
 		this.groupdId = groupdId;
+
 		this.flag = flag;
 		this.flag |= SPEAKING;
 		this.mUser = user;

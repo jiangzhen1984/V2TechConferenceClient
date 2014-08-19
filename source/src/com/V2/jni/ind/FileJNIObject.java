@@ -30,7 +30,7 @@ public class FileJNIObject extends JNIObjectInd {
 		this.fileSize = fileSize;
 		this.mType = JNIIndType.FILE;
 		this.fileType = fileType;
-//		this.mRequestType = mRequestType;
+
 	}
 	
 	

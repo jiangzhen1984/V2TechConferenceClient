@@ -476,6 +476,8 @@ public class ChatService extends DeviceService {
 
 	}
 
+
+
 	public void suspendOrResumeAudio(boolean flag) {
 		if (flag) {
 			AudioRequest.getInstance().ResumePlayout();

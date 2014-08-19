@@ -44,6 +44,7 @@ import com.V2.jni.VideoRequest;
 import com.V2.jni.VideoRequestCallbackAdapter;
 import com.V2.jni.ind.AudioJNIObjectInd;
 import com.V2.jni.ind.FileJNIObject;
+import com.V2.jni.ind.SendingResultJNIObjectInd;
 import com.V2.jni.ind.V2Conference;
 import com.V2.jni.ind.V2Group;
 import com.V2.jni.ind.V2User;

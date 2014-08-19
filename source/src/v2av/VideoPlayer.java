@@ -2,6 +2,8 @@ package v2av;
 
 import java.nio.ByteBuffer;
 
+import com.V2.jni.util.V2Log;
+
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.Canvas;

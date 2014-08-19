@@ -17,9 +17,8 @@ public interface GroupRequestCallback {
 	 * To indicate group information current user belongs and owns.
 	 * 
 	 * @param groupType
-	 *            1:org 2: contacts group 3: crowd type 4: conference type
-	 * @param list
-	 *            group list
+	 *            1:org  2: contacts group 3: crowd type 4: conference type
+	 * @param list group list
 	 * 
 	 * @see com.v2tech.vo.Group#GroupType
 	 */

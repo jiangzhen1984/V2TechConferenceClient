@@ -1,6 +1,8 @@
 package com.v2tech.vo;
 
 import com.V2.jni.util.V2Log;
+import com.v2tech.vo.Group.GroupType;
+
 
 public class ConferenceConversation extends Conversation {
 
