@@ -20,9 +20,13 @@ public class MessageBuilder {
 
 	public static VMessage buildGroupTextMessage(long gid, User fromUser,
 			String text) {
+		String[] array = text.split("\n");
 		VMessage vm = new VMessage(gid, fromUser, null);
-		VMessageTextItem vti = new VMessageTextItem(vm, text);
-		vti.setNewLine(true);
+		for (int i = 0; i < array.length; i++) {
+			String str = array[i];
+			VMessageTextItem vti = new VMessageTextItem(vm, str);
+			vti.setNewLine(true);
+		}
 		return vm;
 	}
 

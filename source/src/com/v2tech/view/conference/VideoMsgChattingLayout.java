@@ -6,6 +6,7 @@ import java.util.List;
 import android.content.Context;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
@@ -16,6 +17,7 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 
 import com.v2tech.R;
+import com.v2tech.db.V2techSearchContentProvider;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.view.adapter.VMessageAdater;
 import com.v2tech.view.conversation.MessageBuilder;
@@ -35,7 +37,7 @@ public class VideoMsgChattingLayout extends LinearLayout {
 	private View mPinButton;
 	private List<CommonAdapterItemWrapper> messageArray;
 	private CommonAdapter adapter;
-
+	private Context mContext;
 	public interface ChattingListener {
 		public void requestSendMsg(VMessage vm);
 
@@ -49,10 +51,13 @@ public class VideoMsgChattingLayout extends LinearLayout {
 		initLayout();
 		initData();
 		this.conf = conf;
-		
+		mContext = context;
 	}
 
-
+	public View getmSendButton() {
+		return mSendButton;
+	}
+	
 	private void initLayout() {
 		View view = LayoutInflater.from(getContext()).inflate(
 				R.layout.video_msg_chatting_layout, null, false);
@@ -66,6 +71,21 @@ public class VideoMsgChattingLayout extends LinearLayout {
 
 		this.mMsgContainer = (ListView) view
 				.findViewById(R.id.video_msg_container);
+		this.mMsgContainer.setOnTouchListener(new OnTouchListener() {
+			
+			@Override
+			public boolean onTouch(View view, MotionEvent arg1) {
+				InputMethodManager imm = (InputMethodManager) mContext.getSystemService(Context.INPUT_METHOD_SERVICE);
+				imm.hideSoftInputFromWindow(mContentTV.getWindowToken(),
+						InputMethodManager.RESULT_UNCHANGED_SHOWN);
+				if (mMsgContainer == view) {
+					if (imm != null) {  
+				        imm.hideSoftInputFromWindow(mContentTV.getWindowToken(), 0);  
+				    }  
+				}
+				return false;
+			}
+		});
 		this.mContentTV = (EditText) view
 				.findViewById(R.id.video_msg_chatting_layout_msg_content);
 		this.mSendButton = view
@@ -226,6 +246,7 @@ public class VideoMsgChattingLayout extends LinearLayout {
 			VMessage vm = (VMessage) wr.getItemObject();
 			if (convertView == null) {
 				ConferenceMessageBodyView mv = new ConferenceMessageBodyView(getContext(), vm);
+				mv.setConf(conf);
 				convertView = mv;
 			} else {
 				((ConferenceMessageBodyView) convertView).updateView(vm);
@@ -233,4 +254,15 @@ public class VideoMsgChattingLayout extends LinearLayout {
 			return convertView;
 		}
 	};
+	
+//	@Override
+//	public boolean dispatchTouchEvent(MotionEvent ev) {
+//		    InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);  
+//		    if (imm != null) {  
+//		        imm.hideSoftInputFromWindow(v.getWindowToken(), 0);  
+//		    }  
+//		  V2techSearchContentProvider.closedDataBase();  
+//		return super.dispatchTouchEvent(ev);
+//	}
+	
 }

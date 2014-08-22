@@ -20,6 +20,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.provider.MediaStore;
 import android.support.v4.util.LruCache;
+import android.text.TextUtils;
 import android.view.Display;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -37,6 +38,7 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.v2tech.R;
 import com.v2tech.util.BitmapUtil;
@@ -73,7 +75,7 @@ public class ConversationSelectImage extends Activity {
 			if (key != null) {
 				if (lruCache != null) {
 					Bitmap bm = lruCache.remove(key);
-					if (bm != null) {
+					if (bm != null && !bm.isRecycled()) {
 						bm.recycle();
 						bm = null;
 					}
@@ -280,8 +282,21 @@ public class ConversationSelectImage extends Activity {
 
 			if (pictres.size() <= 0) {
 				V2Log.e(TAG, "error mFileLists size zero");
+				Toast.makeText(getApplicationContext(), "选择图片异常，请重新打开", Toast.LENGTH_SHORT).show();
+				finish();
 			}
-			final FileInfoBean fb = pictres.get(position);
+			
+			FileInfoBean fb = pictres.get(position);
+			if(TextUtils.isEmpty(fb.fileName)){
+				if(TextUtils.isEmpty(fb.filePath)){
+					holder.fileIcon.setImageResource(R.drawable.ic_launcher);
+					V2Log.e(TAG, "error that this file name is vaild!");
+					return convertView;
+				}
+				else{
+					fb.fileName = fb.filePath.substring(fb.filePath.lastIndexOf("/") + 1);
+				}
+			}
 			Bitmap bit = lruCache.get(fb.fileName);
 			if (bit == null || bit.isRecycled()) {
 

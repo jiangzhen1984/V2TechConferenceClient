@@ -16,9 +16,18 @@ public class ContactGroupView extends LinearLayout {
 	private Group mGroup;
 
 	private ImageView mGroupIndicatorIV;
+	public ImageView getmGroupIndicatorIV() {
+		return mGroupIndicatorIV;
+	}
+
 	private TextView mGroupNameTV;
 	private TextView mGroupStsTV;
 	private OnClickListener callback;
+
+	private String lastExpanded;
+	public String getLastExpanded() {
+		return lastExpanded;
+	}
 
 	public ContactGroupView(Context context, Group g,
 			OnClickListener callbackListener) {
@@ -68,15 +77,17 @@ public class ContactGroupView extends LinearLayout {
 	}
 
 	public void doExpandedOrCollapse() {
+		
 		if (mGroupIndicatorIV.getTag() == null
 				|| mGroupIndicatorIV.getTag().equals("collapse")) {
+			lastExpanded = (String) mGroupIndicatorIV.getTag();
 			mGroupIndicatorIV.setImageResource(R.drawable.arrow_down_gray);
 			mGroupIndicatorIV.setTag("expanded");
 		} else {
+			lastExpanded = (String) mGroupIndicatorIV.getTag();
 			mGroupIndicatorIV.setImageResource(R.drawable.arrow_right_gray);
 			mGroupIndicatorIV.setTag("collapse");
 		}
-
 	}
 
 	public void updateUserStatus() {

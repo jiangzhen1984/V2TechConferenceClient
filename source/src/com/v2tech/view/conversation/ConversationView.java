@@ -468,15 +468,16 @@ public class ConversationView extends Activity {
 			V2Log.d(TAG, "参数pos不合法 :" + pos);
 			return;
 		}
-		mMessagesContainer.post(new Runnable() {
-
-			@Override
-			public void run() {
-				mMessagesContainer.setSelection(pos);
-
-			}
-
-		});
+		mMessagesContainer.setSelection(pos);
+//		mMessagesContainer.post(new Runnable() {
+//
+//			@Override
+//			public void run() {
+//				mMessagesContainer.setSelection(pos);
+//
+//			}
+//
+//		});
 
 	}
 
@@ -1201,10 +1202,50 @@ public class ConversationView extends Activity {
 		}
 	};
 
+	private int flagCount = 0;
 	private TextWatcher mPasteWatcher = new TextWatcher() {
 
 		@Override
 		public void afterTextChanged(Editable edit) {
+			String[] split = edit.toString().split("/:");
+			for (String string : split) {
+				if(string.contains(":")){
+					num++;
+				}
+			}
+			if(num > 10 && split.length > 10){
+				Toast.makeText(mContext,
+						R.string.error_contact_message_face_too_much,
+						Toast.LENGTH_SHORT).show();
+				StringBuilder sb = new StringBuilder();
+				for (int i = 0; i < split.length; i++) {
+					
+					if(flagCount == 10){
+						flagCount=0;
+						break;
+					}
+					
+					if(split[i].contains(":")){
+						flagCount++;
+						if(flagCount == 10 && split[i].split(" ").length > 1){
+							sb.append("/:" + split[i].split(" ")[0]);
+						}
+						else
+							sb.append("/:" + split[i]);
+					}
+					else{
+						sb.append(split[i]);
+					}
+					
+				}
+				V2Log.e(TAG, "stringbuilder : " + sb.toString().trim());
+				edit.clear();
+				edit.append(sb.toString().trim());
+				mMessageET.setSelection(sb.toString().trim().length());
+				sb.delete(0, sb.length());
+			}
+			num = 0;
+			
 			mMessageET.removeTextChangedListener(this);
 			int start = -1, end = -1;
 			int index = 0;
@@ -1250,14 +1291,31 @@ public class ConversationView extends Activity {
 				int arg3) {
 		}
 
+		private int num;
 		@Override
 		public void onTextChanged(CharSequence arg0, int arg1, int arg2,
 				int arg3) {
-
+//			Editable edit = mMessageET.getText();
+//			String str = edit.toString() + " ";
+//			String str = arg0.toString() + " ";
+//			String[] len = str.split("((/:){1}(.){1}(:/){1})");
+//			String[] len = str.split("/:");
+//			if (len.length > 10) {
+//				Toast.makeText(mContext,
+//						R.string.error_contact_message_face_too_much,
+//						Toast.LENGTH_SHORT).show();
+//				StringBuilder sb = new StringBuilder();
+//				for (int i = 0; i < 10; i++) {
+//					sb.append(len[i]);
+//				}
+//				mMessageET.setText(sb.toString().trim());
+//				mMessageET.setSelection(sb.toString().trim().length());
+//				return;
+//			}
 		}
 
 	};
-
+	
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);

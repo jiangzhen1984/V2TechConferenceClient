@@ -19,6 +19,7 @@
             android:layout_height="wrap_content"
             android:textColor="@color/conference_msg_content_color"
             android:textSize="14sp"
+            android:layout_marginBottom="8dp"
             android:text="sender" />
     </LinearLayout>
     

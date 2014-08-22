@@ -76,16 +76,17 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 		mNickNameET = (EditText) findViewById(R.id.contact_user_detail_nick_name_et);
 		this.overridePendingTransition(R.animator.alpha_from_0_to_1,
 				R.animator.alpha_from_1_to_0);
-		
+
 		currentUser = GlobalHolder.getInstance().getCurrentUser();
-		List<Group> friendGroup = GlobalHolder.getInstance().getGroup(GroupType.CONTACT);
+		List<Group> friendGroup = GlobalHolder.getInstance().getGroup(
+				GroupType.CONTACT);
 		for (Group group : friendGroup) {
-			if(group.findUser(u, group)){
+			if (group.findUser(u, group)) {
 				isCanelFriend = true;
 			}
 		}
-		
-		if(isCanelFriend == true){
+
+		if (isCanelFriend == true) {
 			mAddContactButton.setVisibility(View.GONE);
 		}
 	}
@@ -151,7 +152,7 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 
 		mNickNameET.setText(u.getNickName());
 		mNickNameET.addTextChangedListener(tw);
-		
+
 		mNameTitleIV.setText(u.getName());
 		mAccountTV.setText(u.getAccount());
 		if (u.getGender() != null) {
@@ -169,15 +170,8 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 		} else {
 			mGendarTV.setText("");
 		}
-		
-		if(!TextUtils.isEmpty(u.getBirthdayStr())){
-			
-			mBirthdayTV.setText(u.getBirthdayStr());
-		}
-		else{
-			mBirthdayTV.setText("保密");
-		}
-		
+
+		mBirthdayTV.setText(u.getBirthdayStr());
 		mCellphoneTV.setText(u.getCellPhone());
 		mTelephoneTV.setText(u.getTelephone());
 		mTitleTV.setText(u.getTitle());

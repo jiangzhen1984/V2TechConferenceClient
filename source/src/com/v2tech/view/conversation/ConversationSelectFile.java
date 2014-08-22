@@ -20,6 +20,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.provider.MediaStore;
 import android.support.v4.util.LruCache;
+import android.text.TextUtils;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.View;
@@ -37,6 +38,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.v2tech.R;
 import com.v2tech.util.BitmapUtil;
@@ -576,8 +578,22 @@ public class ConversationSelectFile extends Activity {
 
 			if (mFileLists.size() <= 0) {
 				V2Log.e(TAG, "error mFileLists size zero");
+				Toast.makeText(getApplicationContext(), "选择图片异常，请重新打开", Toast.LENGTH_SHORT).show();
+				finish();
 			}
+			
 			FileInfoBean fb = mFileLists.get(position);
+			if(TextUtils.isEmpty(fb.fileName)){
+				if(TextUtils.isEmpty(fb.filePath)){
+					holder.fileIcon.setImageResource(R.drawable.ic_launcher);
+					V2Log.e(TAG, "error that this file name is vaild!");
+					return convertView;
+				}
+				else{
+					fb.fileName = fb.filePath.substring(fb.filePath.lastIndexOf("/") + 1);
+				}
+			}
+			
 			Bitmap bit = bitmapLru.get(fb.fileName);
 			if (bit == null || bit.isRecycled()) {
 

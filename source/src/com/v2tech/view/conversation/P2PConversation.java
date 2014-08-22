@@ -62,6 +62,7 @@ public class P2PConversation extends Activity implements
 
 	private static final String SURFACE_HOLDER_TAG_LOCAL = "local";
 	private static final String SURFACE_HOLDER_TAG_REMOTE = "remote";
+	public static final String TAG = "P2PConversation";
 
 	private Context mContext;
 	private ChatService chatService = new ChatService();
@@ -279,6 +280,7 @@ public class P2PConversation extends Activity implements
 			public void onCallStateChanged(int state, String incomingNumber) {
 				if (state == TelephonyManager.CALL_STATE_OFFHOOK
 						|| state == TelephonyManager.CALL_STATE_RINGING) {
+					V2Log.e(TAG, "the onCallStateChanged was called ....");
 					hangUp();
 				}
 			}
@@ -1211,6 +1213,7 @@ public class P2PConversation extends Activity implements
 				NetworkStateCode code = (NetworkStateCode) intent.getExtras()
 						.get("state");
 				if (code != NetworkStateCode.CONNECTED) {
+					V2Log.e(TAG, "JNI_BROADCAST_CONNECT_STATE_NOTIFICATION 调用了 HANG_UP_NOTIFICATION");
 					Message.obtain(mLocalHandler, HANG_UP_NOTIFICATION,
 							Integer.valueOf(HAND_UP_REASON_NO_NETWORK))
 							.sendToTarget();
@@ -1265,6 +1268,7 @@ public class P2PConversation extends Activity implements
 				break;
 			case HANG_UP_NOTIFICATION:
 				synchronized (mLocal) {
+					V2Log.e(TAG, "the HANG_UP_NOTIFICATION was called ....");
 					if (inProgress) {
 						break;
 					}
@@ -1281,6 +1285,7 @@ public class P2PConversation extends Activity implements
 				if (resp.getResult() == JNIResponse.Result.SUCCESS) {
 					RequestChatServiceResponse rcsr = (RequestChatServiceResponse) resp;
 					if (rcsr.getCode() == RequestChatServiceResponse.REJCTED) {
+						V2Log.e(TAG, "CALL_RESPONSE 调用了 HANG_UP_NOTIFICATION");
 						Message.obtain(this, HANG_UP_NOTIFICATION,
 								Integer.valueOf(HAND_UP_REASON_REMOTE_REJECT))
 								.sendToTarget();

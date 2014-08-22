@@ -62,6 +62,7 @@ import android.widget.Toast;
 
 import com.V2.jni.V2GlobalEnum;
 import com.v2tech.R;
+import com.v2tech.db.V2techSearchContentProvider;
 import com.v2tech.service.AsyncResult;
 import com.v2tech.service.ChatService;
 import com.v2tech.service.ConferencMessageSyncService;
@@ -70,6 +71,7 @@ import com.v2tech.service.DocumentService;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.service.Registrant;
 import com.v2tech.service.jni.PermissionUpdateIndication;
+import com.v2tech.util.DensityUtils;
 import com.v2tech.util.V2Log;
 import com.v2tech.view.JNIService;
 import com.v2tech.view.PublicIntent;
@@ -95,7 +97,7 @@ import com.v2tech.vo.V2Doc.Page;
 import com.v2tech.vo.V2ShapeMeta;
 import com.v2tech.vo.VMessage;
 
-public class VideoActivityV2 extends Activity {
+public class VideoActivityV2 extends Activity{
 
 	private static final int TAG_SUB_WINDOW_STATE_FIXED = 0x1;
 	private static final int TAG_SUB_WINDOW_STATE_FLOAT = 0x0;
@@ -213,6 +215,18 @@ public class VideoActivityV2 extends Activity {
 
 		this.mRootContainer = (RelativeLayout) findViewById(R.id.video_layout_root);
 		this.mContentLayoutMain = (FrameLayout) findViewById(R.id.in_meeting_content_main);
+		//用于隐藏输入法
+		mContentLayoutMain.setOnTouchListener(new OnTouchListener() { 
+			
+			@Override
+			public boolean onTouch(View v, MotionEvent event) {
+				InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);  
+			    if (imm != null && v != null) {  
+			        imm.hideSoftInputFromWindow(v.getWindowToken(), 0);  
+			    } 
+				return false;
+			}
+		});
 		this.mCurrentShowedSV = new ArrayList<SurfaceViewW>();
 
 		this.mVideoLayout = new RelativeLayout(this);
@@ -940,6 +954,7 @@ public class VideoActivityV2 extends Activity {
 				} else {
 					mPendingMessageList.add(vm);
 				}
+				V2Log.e(TAG, "JNI_BROADCAST_NEW_CONF_MESSAGE is coming");
 			} else if (JNIService.JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION
 					.equals(intent.getAction())) {
 				long confID = intent.getLongExtra("gid", 0);
@@ -2087,7 +2102,8 @@ public class VideoActivityV2 extends Activity {
 						RelativeLayout.LayoutParams.MATCH_PARENT));
 				TextView tv = new TextView(mContext);
 				tv.setText(at.getAttName());
-				tv.setMaxWidth(80);
+				int widthDP = DensityUtils.dip2px(mContext, 80);
+				tv.setMaxWidth(widthDP);
 				tv.setEllipsize(TruncateAt.END);
 				tv.setSingleLine();
 				tv.setBackgroundColor(Color.rgb(138, 138, 138));
@@ -2340,15 +2356,20 @@ public class VideoActivityV2 extends Activity {
 			}
 		}
 	}
-
-	@Override
-	public boolean dispatchTouchEvent(MotionEvent ev) {
-		View v = getCurrentFocus();
-		InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-		if (imm != null && v != null) {
-			imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
-		}
-		return super.dispatchTouchEvent(ev);
-	}
+	
+//	@Override
+//	public boolean dispatchTouchEvent(MotionEvent ev) {
+//		View v = getCurrentFocus(); 
+//		if(v == null){
+//			return super.dispatchTouchEvent(ev);
+//		}
+//		
+//	    InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);  
+//	    if (imm != null && v != null) {  
+//	        imm.hideSoftInputFromWindow(v.getWindowToken(), 0);  
+//	    }  
+//		V2techSearchContentProvider.closedDataBase();  
+//		return super.dispatchTouchEvent(ev);
+//	}
 
 }

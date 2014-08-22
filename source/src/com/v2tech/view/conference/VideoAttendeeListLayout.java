@@ -788,7 +788,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 
 			if (mAttendsSize.get(i).getType() != Attendee.TYPE_MIXED_VIDEO
 					&& (mAttendsSize.get(i).isJoined()
-							|| mAttendsSize.get(i).isChairMan() || mAttendsSize
+							 || mAttendsSize
 							.get(i).isSelf())) {
 				onLinePersons += 1;
 			}

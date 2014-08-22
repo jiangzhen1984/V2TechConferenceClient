@@ -32,6 +32,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.v2tech.R;
+import com.v2tech.db.V2techSearchContentProvider;
 import com.v2tech.util.Notificator;
 import com.v2tech.util.V2Log;
 import com.v2tech.view.widget.TitleBar;
@@ -555,9 +556,10 @@ public class MainActivity extends FragmentActivity implements
 	public boolean dispatchTouchEvent(MotionEvent ev) {
 		  View v = getCurrentFocus(); 
 		    InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);  
-		    if (imm != null) {  
+		    if (imm != null && v != null) {  
 		        imm.hideSoftInputFromWindow(v.getWindowToken(), 0);  
 		    }  
+		  V2techSearchContentProvider.closedDataBase();  
 		return super.dispatchTouchEvent(ev);
 	}
 

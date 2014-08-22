@@ -3,6 +3,7 @@ package com.v2tech.view.conference;
 import java.util.List;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
@@ -20,6 +21,8 @@ import android.widget.TextView;
 import com.v2tech.R;
 import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.V2Log;
+import com.v2tech.view.PublicIntent;
+import com.v2tech.vo.ConferenceGroup;
 import com.v2tech.vo.VMessage;
 import com.v2tech.vo.VMessageAbstractItem;
 import com.v2tech.vo.VMessageFaceItem;
@@ -29,14 +32,14 @@ import com.v2tech.vo.VMessageTextItem;
 public class ConferenceMessageBodyView extends LinearLayout {
 
 	private VMessage mMsg;
-
+	private ConferenceGroup conf;
 
 	private LinearLayout mContentContainer;
 	private View rootView;
 
 	private TextView senderTV;
 	private ImageView mImageIV;
-
+	private Context mContext;
 	private ClickListener callback;
 
 	public interface ClickListener {
@@ -46,11 +49,15 @@ public class ConferenceMessageBodyView extends LinearLayout {
 	public ConferenceMessageBodyView(Context context, VMessage m) {
 		super(context);
 		this.mMsg = m;
-
+		this.mContext = context;
 		rootView = LayoutInflater.from(context).inflate(
 				R.layout.conference_message_body, null, false);
 		initView();
 		initData();
+	}
+	
+	public void setConf(ConferenceGroup conf) {
+		this.conf = conf;
 	}
 
 	private void initView() {
@@ -72,11 +79,26 @@ public class ConferenceMessageBodyView extends LinearLayout {
 	private void initData() {
 		senderTV.setText(this.mMsg.getFromUser().getName() + "  "
 				+ mMsg.getDateTimeStr());
-		
 
 		TextView et = new TextView(this.getContext());
 		et.setBackgroundColor(Color.TRANSPARENT);
 		et.setSelected(false);
+		et.setClickable(true);
+		et.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				Intent i = new Intent();
+				i.addCategory(PublicIntent.DEFAULT_CATEGORY);
+				i.setAction(PublicIntent.START_VIDEO_IMAGE_GALLERY);
+				// type 0: is not group image view
+				// type 1: group image view
+				i.putExtra("cid", mMsg.getId());
+				i.putExtra("type", conf.getmGId() == 0 ? 0 : 1);
+				i.putExtra("gid", conf.getmGId());
+				mContext.startActivity(i);
+			}
+		});
 		LinearLayout.LayoutParams ll = new LinearLayout.LayoutParams(
 				LinearLayout.LayoutParams.WRAP_CONTENT,
 				LinearLayout.LayoutParams.WRAP_CONTENT);

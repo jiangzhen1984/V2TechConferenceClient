@@ -5,6 +5,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -36,6 +38,7 @@ import android.widget.Toast;
 
 import com.v2tech.R;
 import com.v2tech.db.ContentDescriptor;
+import com.v2tech.db.V2techSearchContentProvider;
 import com.v2tech.service.BitmapManager;
 import com.v2tech.service.ConferencMessageSyncService;
 import com.v2tech.service.ConferenceService;
@@ -245,40 +248,126 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher, C
 	public void onStop() {
 		super.onStop();
 	}
-
+	
+	private List<ScrollItem> searchList = null; 
+	private List<ScrollItem> searchCacheList = null; 
+	private List<ScrollItem> firstSearchCacheList = null; 
+	private int lastSize;
+	private boolean isShouldAdd;
+	private boolean isShouldQP; //是否需要启动全拼
 	@Override
 	public void afterTextChanged(Editable s) {
 		if (s != null && s.length() > 0) {
-			if (!mIsStartedSearch) {
-				mCacheItemList = this.mConvList;
+			
+			if(!mIsStartedSearch){
 				mIsStartedSearch = true;
+				searchList = new ArrayList<ScrollItem>();
+				searchCacheList = new ArrayList<ScrollItem>();
+				firstSearchCacheList = new ArrayList<ScrollItem>();
+				searchList.addAll(mItemList);
 			}
+			
+			int length = s.length();
+			if(length < lastSize){
+				searchList.clear();
+				searchList.addAll(mItemList);
+			}
+			lastSize = length;
+			StringBuilder sb = new StringBuilder();
+//			if(s.toString().length() > 1){ //搜字母查询
+				V2Log.e(TAG, "Editable :" + s.toString());
+				char[] charSimpleArray = s.toString().toCharArray();
+				for (int i = 0 ; i < charSimpleArray.length ; i++) {
+					if(isChineseWord(charSimpleArray[i])){
+						V2Log.e(TAG, charSimpleArray[i] + " is Chinese");
+						searchCacheList = getSearchList(searchList, String.valueOf(charSimpleArray[i]), i , true , true);
+					}
+					else{
+						V2Log.e(TAG, charSimpleArray[i] + " not Chinese");
+						searchCacheList = getSearchList(searchList, String.valueOf(charSimpleArray[i]), i , true , false);
+					}
+					
+					if(i == 0 && s.toString().length() == 1 && firstSearchCacheList.size() == 0){
+						firstSearchCacheList.addAll(searchCacheList);
+					}
+					
+					searchList.clear();
+					if(searchCacheList.size() > 0){
+						isShouldQP = false;
+						searchList.addAll(searchCacheList);
+						V2Log.e(TAG, "简拼找到结果 展示");
+					}
+					else{
+						isShouldQP = true;
+						searchCacheList.addAll(firstSearchCacheList);
+						V2Log.e(TAG, "简拼没有结果 开启全拼");
+					}
+				}
+//			}
+			
+//			if(s.toString().length() >= 5 && searchCacheList.size() > 0){  //如果长度大于5则不按首字母查询
+			if(isShouldQP){  //如果长度大于5则不按首字母查询
+				searchList.clear();
+				V2Log.e(TAG, "searchCacheList size :" + searchCacheList.size());
+				for (int i = 0; i < searchCacheList.size(); i++) {
+					V2Log.e(TAG, "searchList : " + searchCacheList.get(i).cov.getName() + "--StringBuilder : " + sb.toString());
+					char[] charArray = searchCacheList.get(i).cov.getName().toCharArray();
+					for (char c : charArray) {
+						String charStr = V2techSearchContentProvider.queryChineseToEnglish(mContext, "HZ = ?",
+								new String[]{String.valueOf(c)});
+						sb.append(charStr);
+					}
+					V2Log.e(TAG, "StringBuilder : " + sb.toString());
+					String material = sb.toString();
+					char[] targetChars = s.toString().toCharArray();
+					for (char c : targetChars) {
+						if(!material.contains(String.valueOf(c))){
+							isShouldAdd = true;
+							V2Log.e(TAG, "material not contains " + c);
+							break;
+						}
+						isShouldAdd = false;
+					}
+					
+					if(!isShouldAdd){
+						V2Log.e(TAG, "added ---------" + searchCacheList.get(i).cov.getName());
+						searchList.add(searchCacheList.get(i));
+					}
+					sb.delete(0, sb.length());
+				}
+			}
+			
+			V2Log.e(TAG, "get searchList size :" + searchList.size());
+			adapter.notifyDataSetChanged();
 		} else {
 			
-			mItemList.clear();
-			mItemList.addAll(mItemListCache);
-			mItemListCache = null;
+			V2techSearchContentProvider.closedDataBase();
 			if (mIsStartedSearch) {
-				mConvList = mCacheItemList;
-				adapter.notifyDataSetChanged();
+				firstSearchCacheList.clear();
+				searchList.clear();
+				searchList = null;
 				mIsStartedSearch = false;
+				adapter.notifyDataSetChanged();
 			}
 			return;
 		}
-		List<Conversation> newItemList = new ArrayList<Conversation>();
-		String searchKey = s == null ? "" : s.toString();
-		for (int i = 0; mCacheItemList != null && i < mCacheItemList.size(); i++) {
-			Conversation cov = mCacheItemList.get(i);
-			if (cov.getName() != null
-					&& cov.getName().contains(searchKey)) {
-				newItemList.add(cov);
-			} else if (cov.getMsg() != null
-					&& cov.getMsg().toString().contains(searchKey)) {
-				newItemList.add(cov);
-			}
-		}
-		mConvList = newItemList;
-		fillAdapter(mConvList , true);
+		
+//		String englishChar = V2techSearchContentProvider.queryChineseToEnglish(mContext, "HZ = ?",
+//				new String[]{String.valueOf(mChar)});
+//		List<Conversation> newItemList = new ArrayList<Conversation>();
+//		String searchKey = s == null ? "" : s.toString();
+//		for (int i = 0; mCacheItemList != null && i < mCacheItemList.size(); i++) {
+//			Conversation cov = mCacheItemList.get(i);
+//			if (cov.getName() != null
+//					&& cov.getName().contains(searchKey)) {
+//				newItemList.add(cov);
+//			} else if (cov.getMsg() != null
+//					&& cov.getMsg().toString().contains(searchKey)) {
+//				newItemList.add(cov);
+//			}
+//		}
+//		mConvList = newItemList;
+//		fillAdapter(mConvList , true);
 //		adapter.notifyDataSetChanged();
 	}
 
@@ -286,16 +375,107 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher, C
 	public void beforeTextChanged(CharSequence s, int start, int count,
 			int after) {
 
-		if(mItemListCache == null){
-			mItemListCache = new CopyOnWriteArrayList<ScrollItem>(); 
-			mItemListCache.addAll(mItemList);
-			mItemList.clear();
-		}
+//		if(mItemListCache == null){
+//			mItemListCache = new CopyOnWriteArrayList<ScrollItem>(); 
+//			mItemListCache.addAll(mItemList);
+//		}
 	}
 
 	@Override
 	public void onTextChanged(CharSequence s, int start, int before, int count) {
 
+	}
+	
+	
+	public boolean isChineseWord(char mChar){
+		Pattern pattern = Pattern.compile("[\\u4E00-\\u9FA5]"); //判断是否为汉字
+        Matcher matcher = pattern.matcher(String.valueOf(mChar));
+        return matcher.find();
+	}
+	
+	
+	
+	private String searchTarget;
+	/**
+	 * 根据 searchKey 获得搜索后的集合
+	 * @param mCacheItemList
+	 * @param searchKey
+	 * @return
+	 */
+	public List<ScrollItem> getSearchList(List<ScrollItem> mCacheItemList , String searchKey , int index ,
+			boolean isFirstSearch , boolean isChinese){
+		V2Log.e(TAG, "mCacheItemList :" + mCacheItemList.size() + "--searchKey :" + searchKey + "--index :" + index);
+		List<ScrollItem> tempList = new ArrayList<ScrollItem>();
+		if(searchKey == null || searchKey.length() < 0){
+			return tempList;
+		}
+		
+		for (int i = 0; mCacheItemList != null && i < mCacheItemList.size(); i++) {
+			ScrollItem scrollItem = mCacheItemList.get(i);
+			Conversation cov = mCacheItemList.get(i).cov;
+			if(cov.getName() == null){
+				continue;
+			}
+			else{
+				
+				//判断该消息人的名字，在index位置是否能取到字符
+				if(index >= cov.getName().length()){
+					continue ;
+				}
+				else{
+					
+					searchTarget = String.valueOf(cov.getName().charAt(index));
+					if(searchTarget == null){
+						continue;
+					}
+				}
+			}
+			
+			if(isFirstSearch && isChinese){ 
+				if(searchKey.contains(searchTarget))
+					tempList.add(scrollItem);
+			}
+			else if(isFirstSearch && !isChinese){
+				if(isChineseWord(cov.getName().charAt(index))){
+					
+					String englishChar = V2techSearchContentProvider.queryChineseToEnglish(mContext, "HZ = ?",
+							new String[]{searchTarget});
+					V2Log.e(TAG, "englishChar :" + englishChar);
+					if(englishChar == null)
+						continue;
+//					if(englishChar.contains(searchKey)){
+//						tempList.add(scrollItem);
+//					}
+					String[] split = englishChar.split(";");
+					for (String string : split) {
+						
+						int indexOf = string.indexOf(searchKey);
+						if(indexOf == 0){
+							tempList.add(scrollItem);
+							break;
+						}
+					}
+//					if(searchTarget.contains(searchKey)){
+				}
+				else{
+					V2Log.e(TAG, "searchTarget :" + searchTarget);
+					int indexOf = searchTarget.indexOf(searchKey);
+//					if(searchTarget.contains(searchKey)){
+					if(indexOf == 0){
+						tempList.add(scrollItem);
+					}
+				}
+			}
+			else if(!isFirstSearch){
+				if (cov.getName().contains(searchKey)) 
+					tempList.add(scrollItem);
+			}
+			//暂不要求消息内容
+//			else if (cov.getMsg() != null && cov.getMsg().toString().contains(searchKey)) {
+//				newItemList.add(cov);
+//			}
+		}
+		return tempList;
 	}
 
 	@Override
@@ -637,7 +817,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher, C
 			if (g != null) {
 				cb.quitConference(new Conference(id, g.getOwner()), null);
 			}
-		}
+		} 
 
 		Conversation cache = null;
 		// TODO if current tag is group, should send request to quit group
@@ -872,31 +1052,47 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher, C
 
 		@Override
 		public int getCount() {
-			if(mConvList.size() != mItemList.size()){
-				fillAdapter(mConvList, false);
+			if(mIsStartedSearch){
+				return searchList == null ? 0 : searchList.size();
 			}
-			return mConvList == null ? 0 : mConvList.size();
+			else{
+				if(mConvList.size() != mItemList.size()){
+					fillAdapter(mConvList, false);
+				}
+				return mConvList == null ? 0 : mConvList.size();
+			}
 		}
 
 		@Override
 		public Object getItem(int position) {
-			return mConvList.get(position);
+			if(mIsStartedSearch)
+				return searchList.get(position);
+			else
+				return mConvList.get(position);
 		}
 
 		@Override
 		public long getItemId(int position) {
-			return mConvList.get(position).getExtId();
+			if(mIsStartedSearch)
+				return searchList.get(position).cov.getExtId();
+			else
+				return mConvList.get(position).getExtId();
 		}
 
 		@Override
 		public View getView(int position, View convertView, ViewGroup parent) {
 			currentPosition = position;
-			if(currentPosition < mItemList.size()){
-				
-				return mItemList.get(position).gp;
+			if(mIsStartedSearch){
+				return searchList.get(position).gp;
 			}
 			else{
-				return convertView;
+				if(currentPosition < mItemList.size()){
+					
+					return mItemList.get(position).gp;
+				}
+				else{
+					return convertView;
+				}
 			}
 		}
 

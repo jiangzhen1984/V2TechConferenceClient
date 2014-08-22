@@ -151,11 +151,11 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 			Message.obtain(mHandler, FILL_CONTACTS_GROUP).sendToTarget();
 		}
 		
-		V2Log.e(TAG, "size :" + mItemList.size());
 		if (currentPos != -1) {
-			updateListStateRemove(currentPos, mItemList.get(currentPos));
-			updateListState(currentPos, mItemList.get(currentPos));
-			adapter.notifyDataSetChanged();
+			mItemList.get(currentPos).isExpanded = lastExpanded;
+			ContactGroupView contact = ((ContactGroupView) mItemList.get(currentPos).v);
+			contact.getmGroupIndicatorIV().setTag(contact.getLastExpanded());
+			contact.doExpandedOrCollapse();
 		}
 	}
 
@@ -211,7 +211,7 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 	}
 
 	private Object mLock = new Object();
-
+	private boolean lastExpanded;
 	class AsyncTaskLoader extends AsyncTask<Void, Void, Void> {
 
 		@Override
@@ -382,6 +382,7 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 		}
 
 		item.isExpanded = !item.isExpanded;
+		lastExpanded = item.isExpanded;
 		adapter.notifyDataSetChanged();
 	}
 
@@ -412,6 +413,7 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 	}
 
 	private void updateListState(int pos, ListItem item) {
+		
 		for (Group g : item.g.getChildGroup()) {
 			ListItem cache = new ListItem(g, g.getLevel());
 			mItemList.add(++pos, cache);
