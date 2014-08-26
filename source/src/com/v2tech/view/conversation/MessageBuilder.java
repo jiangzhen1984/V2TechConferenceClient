@@ -14,6 +14,7 @@ import com.v2tech.vo.VMessageAudioItem;
 import com.v2tech.vo.VMessageFaceItem;
 import com.v2tech.vo.VMessageFileItem;
 import com.v2tech.vo.VMessageImageItem;
+import com.v2tech.vo.VMessageLinkTextItem;
 import com.v2tech.vo.VMessageTextItem;
 
 public class MessageBuilder {
@@ -101,6 +102,9 @@ public class MessageBuilder {
 				content = ((VMessageFileItem) item).getFileName() + "|"
 						+ ((VMessageFileItem) item).getFilePath() + "|"
 						+ ((VMessageFileItem) item).getFileSize();
+			}else if (item.getType() == VMessageAbstractItem.ITEM_TYPE_LINK_TEXT) {
+				content = ((VMessageLinkTextItem) item).getText() + "|"
+						+ ((VMessageLinkTextItem) item).getUrl();
 			}
 
 			itemVal.put(ContentDescriptor.MessageItems.Cols.CONTENT, content);

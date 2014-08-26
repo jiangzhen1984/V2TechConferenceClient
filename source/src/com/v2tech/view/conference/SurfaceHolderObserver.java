@@ -13,16 +13,12 @@ public class SurfaceHolderObserver implements SurfaceHolder.Callback {
 
 	private final static int OPEN_DEVICE_DONE = 1;
 	private final static int CLOSE_DEVICE_DONE = 2;
-	
+
 	private DeviceService service;
 	private UserDeviceConfig udc;
 	private State state;
 	private boolean isCreate;
-	
-	
-	
-	
-	
+
 	public SurfaceHolderObserver(DeviceService service, UserDeviceConfig udc) {
 		super();
 		this.service = service;
@@ -30,38 +26,46 @@ public class SurfaceHolderObserver implements SurfaceHolder.Callback {
 		state = State.CLOSED;
 	}
 
-	
 	@Override
-	public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+	public void surfaceChanged(SurfaceHolder holder, int format, int width,
+			int height) {
 		isCreate = true;
-		if (state == State.CLOSED) {
-			state = State.SHOWING;
-			udc.getVp().SetSurface(holder);
-			service.requestOpenVideoDevice(udc, new Registrant(handler,OPEN_DEVICE_DONE, null));
-		}
 		udc.getVp().SetViewSize(width, height);
+		synchronized (state) {
+			if (state == State.CLOSED || state == State.CLOSING) {
+				state = State.SHOWING;
+				udc.getVp().SetSurface(holder);
+				service.requestOpenVideoDevice(udc, new Registrant(handler,
+						OPEN_DEVICE_DONE, null));
+			}
+		}
 	}
 
 	@Override
 	public void surfaceCreated(SurfaceHolder holder) {
 		isCreate = true;
-		if (state == State.CLOSED) {
-			state = State.SHOWING;
-			udc.getVp().SetSurface(holder);
-			service.requestOpenVideoDevice(udc, new Registrant(handler,OPEN_DEVICE_DONE, null));
+		synchronized (state) {
+			if (state == State.CLOSED || state == State.CLOSING) {
+				state = State.SHOWING;
+				udc.getVp().SetSurface(holder);
+				service.requestOpenVideoDevice(udc, new Registrant(handler,
+						OPEN_DEVICE_DONE, null));
+			}
 		}
 	}
 
 	@Override
 	public void surfaceDestroyed(SurfaceHolder holder) {
 		isCreate = false;
-		if (state == State.SHOWED || state == State.SHOWING) {
-			state = State.CLOSING;
-			service.requestCloseVideoDevice(udc, new Registrant(handler,CLOSE_DEVICE_DONE, null));
+		synchronized (state) {
+			if (state == State.SHOWED || state == State.SHOWING) {
+				state = State.CLOSING;
+				service.requestCloseVideoDevice(udc, new Registrant(handler,
+						CLOSE_DEVICE_DONE, null));
+			}
 		}
 	}
-	
-	
+
 	public void open() {
 		if (!isCreate) {
 			return;
@@ -69,31 +73,34 @@ public class SurfaceHolderObserver implements SurfaceHolder.Callback {
 		if (state == State.SHOWED || state == State.SHOWING) {
 			return;
 		}
-		service.requestOpenVideoDevice(udc, new Registrant(handler,OPEN_DEVICE_DONE, null));
+		synchronized (state) {
+			state = State.SHOWING;
+			service.requestOpenVideoDevice(udc, new Registrant(handler,
+					OPEN_DEVICE_DONE, null));
+		}
 	}
-	
+
 	public void close() {
 		if (state == State.CLOSED || state == State.CLOSING) {
 			return;
 		}
-		state = State.CLOSING;
-		service.requestCloseVideoDevice(udc, new Registrant(handler,CLOSE_DEVICE_DONE, null));
+		synchronized (state) {
+			state = State.CLOSING;
+			service.requestCloseVideoDevice(udc, new Registrant(handler,
+					CLOSE_DEVICE_DONE, null));
+		}
 	}
 
-	
-	
 	enum State {
-		SHOWED,SHOWING,CLOSED,CLOSING
+		SHOWED, SHOWING, CLOSED, CLOSING
 	}
-	
-	
-	
+
 	private Handler handler = new Handler() {
 
 		@Override
 		public void handleMessage(Message msg) {
-			JNIResponse.Result res =((JNIResponse)msg.obj).getResult();
-			switch(msg.what) {
+			JNIResponse.Result res = ((JNIResponse) msg.obj).getResult();
+			switch (msg.what) {
 			case OPEN_DEVICE_DONE:
 				if (res == JNIResponse.Result.SUCCESS) {
 					state = State.SHOWED;
@@ -106,10 +113,10 @@ public class SurfaceHolderObserver implements SurfaceHolder.Callback {
 					state = State.CLOSED;
 				}
 				break;
-			
+
 			}
 		}
-		
+
 	};
-	
+
 }

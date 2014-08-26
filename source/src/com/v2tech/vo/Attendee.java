@@ -24,8 +24,8 @@ public class Attendee implements Comparable<Attendee>{
 	private User user;
 	private List<UserDeviceConfig> mDevices;
 	private boolean isSelf;
-	private boolean isChairMan;
-	private boolean isJoined;
+	protected boolean isChairMan;
+	protected boolean isJoined;
 	private int mPermission;
 	
 	protected Attendee() {

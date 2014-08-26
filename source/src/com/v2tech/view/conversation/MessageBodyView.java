@@ -44,6 +44,7 @@ import com.v2tech.vo.VMessageAudioItem;
 import com.v2tech.vo.VMessageFaceItem;
 import com.v2tech.vo.VMessageFileItem;
 import com.v2tech.vo.VMessageImageItem;
+import com.v2tech.vo.VMessageLinkTextItem;
 import com.v2tech.vo.VMessageTextItem;
 
 public class MessageBodyView extends LinearLayout {
@@ -301,6 +302,8 @@ public class MessageBodyView extends LinearLayout {
 						.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 				et.setText(builder);
 				// AudioItem only has one item
+			} else if (item.getType() == VMessageAbstractItem.ITEM_TYPE_LINK_TEXT) {
+				et.append(((VMessageLinkTextItem) item).getText());
 			}
 
 			if (item.getState() == VMessageAbstractItem.STATE_SENT_FALIED) {

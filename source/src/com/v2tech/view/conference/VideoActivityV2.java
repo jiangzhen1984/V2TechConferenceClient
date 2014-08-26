@@ -94,7 +94,7 @@ import com.v2tech.vo.V2Doc.Page;
 import com.v2tech.vo.V2ShapeMeta;
 import com.v2tech.vo.VMessage;
 
-public class VideoActivityV2 extends Activity{
+public class VideoActivityV2 extends Activity {
 
 	private static final int TAG_SUB_WINDOW_STATE_FIXED = 0x1;
 	private static final int TAG_SUB_WINDOW_STATE_FLOAT = 0x0;
@@ -128,7 +128,7 @@ public class VideoActivityV2 extends Activity{
 	private static final int TAG_CLOSE_DEVICE = 0;
 
 	private static final int TAG_OPEN_DEVICE = 1;
-	
+
 	public static final String JNI_EVENT_VIDEO_CATEGORY = "com.v2tech.conf_video_event";
 	public static final String JNI_EVENT_VIDEO_CATEGORY_OPEN_VIDEO_EVENT_ACTION = "com.v2tech.conf_video_event.open_video_event";
 	private static final String TAG = "VideoActivityV2";
@@ -197,7 +197,7 @@ public class VideoActivityV2 extends Activity{
 	private boolean mLocalHolderIsCreate = false;
 	private int currentWidth;
 	private boolean isStop;
-	
+
 	private int mVideoMaxCols = 2;
 
 	@Override
@@ -211,15 +211,15 @@ public class VideoActivityV2 extends Activity{
 
 		this.mRootContainer = (RelativeLayout) findViewById(R.id.video_layout_root);
 		this.mContentLayoutMain = (FrameLayout) findViewById(R.id.in_meeting_content_main);
-		//用于隐藏输入法
-		mContentLayoutMain.setOnTouchListener(new OnTouchListener() { 
-			
+		// 用于隐藏输入法
+		mContentLayoutMain.setOnTouchListener(new OnTouchListener() {
+
 			@Override
 			public boolean onTouch(View v, MotionEvent event) {
-				InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);  
-			    if (imm != null && v != null) {  
-			        imm.hideSoftInputFromWindow(v.getWindowToken(), 0);  
-			    } 
+				InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+				if (imm != null && v != null) {
+					imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+				}
 				return false;
 			}
 		});
@@ -234,9 +234,9 @@ public class VideoActivityV2 extends Activity{
 		// setting button
 		this.mSettingIV = (ImageView) findViewById(R.id.in_meeting_setting_iv);
 		this.mSettingIV.setOnClickListener(mShowSettingListener);
-		//TODO hide for temp release
+		// TODO hide for temp release
 		this.mSettingIV.setVisibility(View.INVISIBLE);
-		
+
 		// request exit button
 		this.mQuitIV = (ImageView) findViewById(R.id.in_meeting_log_out_iv);
 		this.mQuitIV.setOnClickListener(mShowQuitWindowListener);
@@ -500,7 +500,8 @@ public class VideoActivityV2 extends Activity{
 	private View initDocLayout() {
 
 		if (mDocContainer == null) {
-			mDocContainer = new VideoDocLayout(this, mDocs, mCurrentActivateDocId);
+			mDocContainer = new VideoDocLayout(this, mDocs,
+					mCurrentActivateDocId);
 			mDocContainer.setListener(subViewListener);
 			Group g = GlobalHolder.getInstance().findGroupById(conf.getId());
 			if (g != null && g instanceof ConferenceGroup) {
@@ -1122,8 +1123,8 @@ public class VideoActivityV2 extends Activity{
 		fixedWidth -= fixedWidth % 16;
 		fixedHeight -= fixedHeight % 16;
 
-		marginTop =  Math.abs(containerH - fixedHeight * rows) / 2;
-		marginLeft =  Math.abs(containerW - fixedWidth * cols) / 2;
+		marginTop = Math.abs(containerH - fixedHeight * rows) / 2;
+		marginLeft = Math.abs(containerW - fixedWidth * cols) / 2;
 
 		int index = 0;
 		for (SurfaceViewW sw : mCurrentShowedSV) {
@@ -1132,8 +1133,8 @@ public class VideoActivityV2 extends Activity{
 					fixedWidth, fixedHeight);
 			int row = index / mVideoMaxCols;
 			int column = index % mVideoMaxCols;
-			p.leftMargin =  marginLeft + column * fixedWidth;
-			p.topMargin =  marginTop+ row * fixedHeight;
+			p.leftMargin = marginLeft + column * fixedWidth;
+			p.topMargin = marginTop + row * fixedHeight;
 			if (v != null) {
 				mVideoLayout.updateViewLayout(v, p);
 			} else {
@@ -1143,9 +1144,7 @@ public class VideoActivityV2 extends Activity{
 				}
 				mVideoLayout.addView(sw.getView(), p);
 			}
-			if (sw.udc.getVp() != null) {
-				sw.udc.getVp().SetViewSize(fixedWidth, fixedHeight);
-			}
+			
 			index++;
 		}
 
@@ -1330,7 +1329,7 @@ public class VideoActivityV2 extends Activity{
 
 	private void updateAllRemoteDevice(int tag) {
 		for (SurfaceViewW sw : this.mCurrentShowedSV) {
-			if (TAG_OPEN_DEVICE ==  tag) {
+			if (TAG_OPEN_DEVICE == tag) {
 				sw.observer.open();
 			} else {
 				sw.observer.close();
@@ -1377,7 +1376,7 @@ public class VideoActivityV2 extends Activity{
 		if (att == null) {
 			return;
 		}
-		
+
 		att.setJoined(true);
 		if (conf.getChairman() == att.getAttId()) {
 			att.setChairMan(true);
@@ -1389,7 +1388,6 @@ public class VideoActivityV2 extends Activity{
 					.getAttendeeDevice(att.getAttId());
 			att.setmDevices(ld);
 		}
-		
 
 		if (mAttendeeContainer != null) {
 			mAttendeeContainer.updateEnteredAttendee(att);
@@ -1455,7 +1453,7 @@ public class VideoActivityV2 extends Activity{
 		}
 		// if already opened attendee's video, switch action to close
 		if (udc.isShowing()) {
-			
+
 			for (SurfaceViewW sw : mCurrentShowedSV) {
 				if (sw.udc == udc) {
 					sw.observer.close();
@@ -1480,21 +1478,20 @@ public class VideoActivityV2 extends Activity{
 			udc.setSVHolder(new SurfaceView(this));
 			udc.setVp(vp);
 			SurfaceHolderObserver observer = new SurfaceHolderObserver(cs, udc);
-			SurfaceViewW sw = new SurfaceViewW(udc.getBelongsAttendee(),
-					udc, observer);
+			SurfaceViewW sw = new SurfaceViewW(udc.getBelongsAttendee(), udc,
+					observer);
 			mCurrentShowedSV.add(sw);
 
 			// Do adjust layout first, then request open device.
 			// otherwise can't show video
 			adjustVideoLayout();
-			//Request open device
+			// Request open device
 			sw.observer.open();
 			udc.setShowing(true);
 			return true;
 		}
 
 	}
-
 
 	/**
 	 * Update attendee state
@@ -1517,6 +1514,51 @@ public class VideoActivityV2 extends Activity{
 			return true;
 		} else {
 			return false;
+		}
+	}
+	
+	
+	/**
+	 * 
+	 * @param at
+	 * @param devices
+	 */
+	private void updateAttendeeDevice(Attendee at, List<UserDeviceConfig> devices) {
+		boolean layoutChanged = false;
+		List<UserDeviceConfig> currentAttUdevs = null;
+		if (at != null) {
+			currentAttUdevs = at.getmDevices();
+		}
+		for (UserDeviceConfig ud : devices) {
+			for (int i = 0; i < mCurrentShowedSV.size(); i++) {
+				SurfaceViewW svw = mCurrentShowedSV.get(i);
+				// If remote user disable local camera device which
+				// local user already opened
+				if (svw.udc.getDeviceID().equals(ud.getDeviceID())) {
+					if (!ud.isEnable()) {
+						layoutChanged = true;
+						svw.observer.close();
+						mCurrentShowedSV.remove(i);
+						mVideoLayout.removeView(svw.getView());
+						i--;
+					}
+
+				}
+			}
+
+			for (int i = 0; currentAttUdevs != null && i < currentAttUdevs.size(); i++) {
+				UserDeviceConfig cud = currentAttUdevs.get(i);
+				if (cud.getDeviceID().equals(ud.getDeviceID())) {
+					if (mAttendeeContainer != null) {
+						mAttendeeContainer.updateAttendeeDevice(at,
+								ud);
+					}
+				}
+			}
+		}
+		// adjust layout if we closed video
+		if (layoutChanged) {
+			adjustVideoLayout();
 		}
 	}
 
@@ -1560,7 +1602,7 @@ public class VideoActivityV2 extends Activity{
 		case DOC_PAGE_ACTIVITE_NOTIFICATION:
 			page = (V2Doc.Page) res.getResult();
 			docId = page.getDocId();
-			//Record current activate Id;
+			// Record current activate Id;
 			mCurrentActivateDocId = docId;
 			break;
 		case DOC_PAGE_CANVAS_NOTIFICATION:
@@ -1879,6 +1921,7 @@ public class VideoActivityV2 extends Activity{
 			}
 
 			OnAttendeeClicked(at, udc);
+			mAttendeeContainer.updateCurrentSelectedBg(true, at, udc);
 		}
 
 		@Override
@@ -1965,7 +2008,6 @@ public class VideoActivityV2 extends Activity{
 
 	}
 
-
 	class SurfaceViewW {
 
 		Attendee at;
@@ -1978,7 +2020,8 @@ public class VideoActivityV2 extends Activity{
 
 		}
 
-		public SurfaceViewW(Attendee at, UserDeviceConfig udc, SurfaceHolderObserver observer) {
+		public SurfaceViewW(Attendee at, UserDeviceConfig udc,
+				SurfaceHolderObserver observer) {
 			this.at = at;
 			this.udc = udc;
 			this.observer = observer;
@@ -2019,7 +2062,6 @@ public class VideoActivityV2 extends Activity{
 		}
 	}
 
-
 	class VideoHandler extends Handler {
 
 		@Override
@@ -2051,9 +2093,9 @@ public class VideoActivityV2 extends Activity{
 				break;
 			case GROUP_ADD_USER:
 				GroupUserObject ro1 = (GroupUserObject) msg.obj;
-				if(ro1.getmType() == GroupType.CONFERENCE.intValue()){ //CONFGROUP
-					Attendee a1 = new Attendee(GlobalHolder.getInstance().getUser(
-							ro1.getmUserId()));
+				if (ro1.getmType() == GroupType.CONFERENCE.intValue()) { // CONFGROUP
+					Attendee a1 = new Attendee(GlobalHolder.getInstance()
+							.getUser(ro1.getmUserId()));
 					mAttendeeList.add(a1);
 					if (mAttendeeContainer != null) {
 						mAttendeeContainer.addAttendee(a1);
@@ -2061,28 +2103,16 @@ public class VideoActivityV2 extends Activity{
 				}
 				break;
 			case ATTENDEE_DEVICE_LISTENER: {
-//				// TODO need to update user device when remote user removed
-//				// video device.
-//				List<UserDeviceConfig> list = (List<UserDeviceConfig>) (((AsyncResult) msg.obj)
-//						.getResult());
-//				for (UserDeviceConfig ud : list) {
-//					Attendee a = findAttendee(ud.getUserID());
-//					if (a == null) {
-//						continue;
-//					}
-//					a.addDevice(ud);
-//					// Update attendee device
-//					// if (mAttendeeContainer != null) {
-//					// V2Log.e(TAG, "ATTENDEE_DEVICE_LISTENER 方法调用了update---");
-//					// mAttendeeContainer.updateEnteredAttendee(a);
-//					// }
-//				}
-
+				// need to update user device when remote user disable device
+				Object[] obj = (Object[]) (((AsyncResult) msg.obj).getResult());
+				List<UserDeviceConfig> list = (List<UserDeviceConfig>) obj[1];
+				Long uid = (Long) obj[0];
+				Attendee at = findAttendee(uid);
+				updateAttendeeDevice(at, list);
 			}
 				break;
 			case ATTENDEE_LISTENER:
-				User ut = (User) (((AsyncResult) msg.obj)
-						.getResult());
+				User ut = (User) (((AsyncResult) msg.obj).getResult());
 				Attendee at = findAttendee(ut.getmUserId());
 				if (msg.arg1 == 1) {
 					doHandleNewUserEntered(at);
@@ -2092,12 +2122,11 @@ public class VideoActivityV2 extends Activity{
 				break;
 			case REQUEST_OPEN_OR_CLOSE_DEVICE:
 				if (msg.arg1 == TAG_CLOSE_DEVICE) {
-					cb.requestCloseVideoDevice(
-							(UserDeviceConfig) msg.obj, new Registrant(
-									mVideoHandler,
+					cb.requestCloseVideoDevice((UserDeviceConfig) msg.obj,
+							new Registrant(mVideoHandler,
 									REQUEST_CLOSE_DEVICE_RESPONSE, null));
 				} else if (msg.arg1 == TAG_OPEN_DEVICE) {
-					cb.requestOpenVideoDevice( (UserDeviceConfig) msg.obj,
+					cb.requestOpenVideoDevice((UserDeviceConfig) msg.obj,
 							new Registrant(mVideoHandler,
 									REQUEST_OPEN_DEVICE_RESPONSE, null));
 				}
@@ -2157,8 +2186,7 @@ public class VideoActivityV2 extends Activity{
 							.getResult());
 					AttendeeMixedDevice amd = new AttendeeMixedDevice(mv);
 					mAttendeeList.add(amd);
-					
-					
+
 					// Notify attendee list mixed video is created
 					if (mAttendeeContainer != null) {
 						V2Log.e(TAG, "VIDEO_MIX_NOTIFICATION 方法调用了update---");
@@ -2171,7 +2199,8 @@ public class VideoActivityV2 extends Activity{
 					MixVideo mv = (MixVideo) (((AsyncResult) msg.obj)
 							.getResult());
 					AttendeeMixedDevice amd = new AttendeeMixedDevice(mv);
-					//Remove from attendee list, because chairman closed mixed video device
+					// Remove from attendee list, because chairman closed mixed
+					// video device
 					mAttendeeList.remove(amd);
 					// Notify attendee list remove mixed video device
 					if (mAttendeeContainer != null) {
@@ -2201,20 +2230,21 @@ public class VideoActivityV2 extends Activity{
 			}
 		}
 	}
-	
-//	@Override
-//	public boolean dispatchTouchEvent(MotionEvent ev) {
-//		View v = getCurrentFocus(); 
-//		if(v == null){
-//			return super.dispatchTouchEvent(ev);
-//		}
-//		
-//	    InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);  
-//	    if (imm != null && v != null) {  
-//	        imm.hideSoftInputFromWindow(v.getWindowToken(), 0);  
-//	    }  
-//		V2techSearchContentProvider.closedDataBase();  
-//		return super.dispatchTouchEvent(ev);
-//	}
+
+	// @Override
+	// public boolean dispatchTouchEvent(MotionEvent ev) {
+	// View v = getCurrentFocus();
+	// if(v == null){
+	// return super.dispatchTouchEvent(ev);
+	// }
+	//
+	// InputMethodManager imm = (InputMethodManager)
+	// getSystemService(Context.INPUT_METHOD_SERVICE);
+	// if (imm != null && v != null) {
+	// imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+	// }
+	// V2techSearchContentProvider.closedDataBase();
+	// return super.dispatchTouchEvent(ev);
+	// }
 
 }

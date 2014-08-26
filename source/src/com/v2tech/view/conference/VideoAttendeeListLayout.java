@@ -110,7 +110,11 @@ public class VideoAttendeeListLayout extends LinearLayout {
 					long id) {
 				if (listener != null) {
 					Wrapper wr = (Wrapper) view.getTag();
-					if (wr.udc!= null ) {
+					if (!wr.udc.isEnable()) {
+						V2Log.i("User device config is disabled ");
+						return;
+					}
+					if (wr.udc != null) {
 						if (wr.udc.isShowing()) {
 							view.setBackgroundColor(Color.WHITE);
 						} else {
@@ -141,7 +145,8 @@ public class VideoAttendeeListLayout extends LinearLayout {
 
 	public void addNewAttendee(Attendee at) {
 		V2Log.d(TAG, "addNewAttendee 执行了");
-		if (at.getType() != Attendee.TYPE_MIXED_VIDEO && !TextUtils.isEmpty(at.getAttName())) {
+		if (at.getType() != Attendee.TYPE_MIXED_VIDEO
+				&& !TextUtils.isEmpty(at.getAttName())) {
 
 			mAttendsSize.add(at);
 			configAttendee();
@@ -266,6 +271,11 @@ public class VideoAttendeeListLayout extends LinearLayout {
 		if (at.getType() == Attendee.TYPE_MIXED_VIDEO) {
 			speaker.setVisibility(View.INVISIBLE);
 		}
+
+		if (udc != null && !udc.isEnable()
+				&& at.getType() == Attendee.TYPE_ATTENDEE && at.isSelf()) {
+			iv.setImageResource(R.drawable.camera_pressed);
+		}
 	}
 
 	private Attendee lastAttendee;
@@ -343,12 +353,39 @@ public class VideoAttendeeListLayout extends LinearLayout {
 				nameTV.setTextColor(getContext().getResources().getColor(
 						R.color.video_attendee_name_color_offline));
 
-				v.v.setBackgroundColor(Color.TRANSPARENT);
+				v.v.setBackgroundColor(Color.WHITE);
 
 			}
 		}
 		Collections.sort(mAttendsView);
 		adapter.notifyDataSetChanged();
+	}
+
+	/**
+	 */
+	public void updateAttendeeDevice(Attendee att, UserDeviceConfig udc) {
+		View atView = null;
+		synchronized (mAttendsView) {
+			for (ViewWrapper v : mAttendsView) {
+				Wrapper wr = (Wrapper) v.v.getTag();
+				if (wr.a.getAttId() == att.getAttId()) {
+					atView = v.v;
+					ImageView spIV = (ImageView) atView
+							.findViewById(R.id.video_attendee_device_camera_icon);
+					if (udc.isEnable()) {
+						spIV.setImageResource(R.drawable.camera);
+					} else {
+						spIV.setImageResource(R.drawable.camera_pressed);
+						atView.setBackgroundColor(Color.WHITE);
+					}
+
+					wr.udc.setShowing(false);
+					wr.udc.setEnable(udc.isEnable());
+					break;
+				}
+			}
+		}
+
 	}
 
 	/**
@@ -417,7 +454,8 @@ public class VideoAttendeeListLayout extends LinearLayout {
 	 */
 	public void addAttendee(Attendee at) {
 		V2Log.d(TAG, "addAttendee 执行了");
-		if (at.getType() != Attendee.TYPE_MIXED_VIDEO && !TextUtils.isEmpty(at.getAttName())) {
+		if (at.getType() != Attendee.TYPE_MIXED_VIDEO
+				&& !TextUtils.isEmpty(at.getAttName())) {
 
 			mAttendsSize.add(at);
 			configAttendee();
@@ -466,10 +504,10 @@ public class VideoAttendeeListLayout extends LinearLayout {
 				} else {
 					v.v.setBackgroundColor(Color.WHITE);
 				}
+				v.v.invalidate();
 				break;
 			}
 		}
-
 	}
 
 	private OnTouchListener mListViewOnTouchListener = new OnTouchListener() {
@@ -795,9 +833,8 @@ public class VideoAttendeeListLayout extends LinearLayout {
 		for (int i = 0; i < mAttendsSize.size(); i++) {
 
 			if (mAttendsSize.get(i).getType() != Attendee.TYPE_MIXED_VIDEO
-					&& (mAttendsSize.get(i).isJoined()
-							 || mAttendsSize
-							.get(i).isSelf())) {
+					&& (mAttendsSize.get(i).isJoined() || mAttendsSize.get(i)
+							.isSelf())) {
 				onLinePersons += 1;
 			}
 		}

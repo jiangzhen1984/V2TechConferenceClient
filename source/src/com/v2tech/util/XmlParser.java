@@ -33,6 +33,7 @@ import com.v2tech.vo.VMessageAbstractItem;
 import com.v2tech.vo.VMessageAudioItem;
 import com.v2tech.vo.VMessageFaceItem;
 import com.v2tech.vo.VMessageImageItem;
+import com.v2tech.vo.VMessageLinkTextItem;
 import com.v2tech.vo.VMessageTextItem;
 
 public class XmlParser {
@@ -77,6 +78,17 @@ public class XmlParser {
 						text = text.replaceAll("&amp;", "&");
 
 						va = new VMessageTextItem(vm, text);
+						va.setNewLine(isNewLine);
+					} else if (msgEl.getTagName().equals("TLinkTextChatItem")) {
+						String text = msgEl.getAttribute("Text");
+						String url = msgEl.getAttribute("URL");
+						text = text.replaceAll("&lt;", "<");
+						text = text.replaceAll("&gt;", ">");
+						text = text.replaceAll("&apos;", "'");
+						text = text.replaceAll("&quot;", "\"");
+						text = text.replaceAll("&amp;", "&");
+
+						va = new VMessageLinkTextItem(vm, text, url);
 						va.setNewLine(isNewLine);
 					} else if (msgEl.getTagName().equals("TSysFaceChatItem")) {
 						String fileName = msgEl.getAttribute("FileName");

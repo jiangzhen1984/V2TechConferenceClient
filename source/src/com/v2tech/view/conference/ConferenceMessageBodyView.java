@@ -27,6 +27,7 @@ import com.v2tech.vo.VMessage;
 import com.v2tech.vo.VMessageAbstractItem;
 import com.v2tech.vo.VMessageFaceItem;
 import com.v2tech.vo.VMessageImageItem;
+import com.v2tech.vo.VMessageLinkTextItem;
 import com.v2tech.vo.VMessageTextItem;
 
 public class ConferenceMessageBodyView extends LinearLayout {
@@ -55,7 +56,7 @@ public class ConferenceMessageBodyView extends LinearLayout {
 		initView();
 		initData();
 	}
-	
+
 	public void setConf(ConferenceGroup conf) {
 		this.conf = conf;
 	}
@@ -85,7 +86,7 @@ public class ConferenceMessageBodyView extends LinearLayout {
 		et.setSelected(false);
 		et.setClickable(true);
 		et.setOnClickListener(new OnClickListener() {
-			
+
 			@Override
 			public void onClick(View v) {
 				Intent i = new Intent();
@@ -145,12 +146,13 @@ public class ConferenceMessageBodyView extends LinearLayout {
 						.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 				et.setText(builder);
 
+			} else if (item.getType() == VMessageAbstractItem.ITEM_TYPE_LINK_TEXT) {
+				et.append(((VMessageLinkTextItem) item).getText());
 			}
 
 		}
 
 		mContentContainer.setTag(this.mMsg);
-
 
 	}
 
@@ -181,32 +183,31 @@ public class ConferenceMessageBodyView extends LinearLayout {
 		initData();
 	}
 
-	class LoadTask extends AsyncTask<ImageView, Void , ImageView[]> {
-
-		
+	class LoadTask extends AsyncTask<ImageView, Void, ImageView[]> {
 
 		@Override
 		protected ImageView[] doInBackground(ImageView... vms) {
-			//Only has one element
+			// Only has one element
 			for (ImageView vm : vms) {
-				((VMessageImageItem)vm.getTag()).getCompressedBitmap();
+				((VMessageImageItem) vm.getTag()).getCompressedBitmap();
 			}
 			return vms;
 		}
 
 		@Override
 		protected void onPostExecute(ImageView[] result) {
-			//Only has one element
+			// Only has one element
 			ImageView vm = result[0];
-			//If loaded vm is not same member's, means current view has changed message, ignore this result
-			VMessageImageItem item  =((VMessageImageItem)vm.getTag());
+			// If loaded vm is not same member's, means current view has changed
+			// message, ignore this result
+			VMessageImageItem item = ((VMessageImageItem) vm.getTag());
 			if (item.getVm() != mMsg) {
 				return;
 			}
 			Bitmap bm = item.getCompressedBitmap();
 			vm.setImageBitmap(bm);
 		}
-		
+
 	}
 
 }

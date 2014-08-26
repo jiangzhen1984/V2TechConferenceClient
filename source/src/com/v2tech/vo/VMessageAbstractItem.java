@@ -18,6 +18,8 @@ public abstract class VMessageAbstractItem {
 	
 	public static final int ITEM_TYPE_FILE = 6;
 	
+	public static final int ITEM_TYPE_LINK_TEXT = 7;
+	
 	
 	public static final int NEW_LINE_FLAG_VALUE = 1;
 	

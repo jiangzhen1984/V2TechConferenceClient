@@ -19,6 +19,7 @@ import com.v2tech.vo.VMessageAudioItem;
 import com.v2tech.vo.VMessageFaceItem;
 import com.v2tech.vo.VMessageFileItem;
 import com.v2tech.vo.VMessageImageItem;
+import com.v2tech.vo.VMessageLinkTextItem;
 import com.v2tech.vo.VMessageTextItem;
 
 public class MessageLoader {
@@ -343,6 +344,10 @@ public class MessageLoader {
 				((VMessageFileItem) vai).setFileName(fileName);
 
 			}
+				break;
+			case VMessageAbstractItem.ITEM_TYPE_LINK_TEXT:
+				String[] str = content.split("\\|");
+				vai = new VMessageLinkTextItem(vm, str[0], str[1]);
 				break;
 
 			}
