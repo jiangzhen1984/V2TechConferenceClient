@@ -3,18 +3,24 @@ package com.v2tech.view;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.util.HashMap;
 
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 
 import com.V2.jni.util.V2Log;
 import com.v2tech.R;
+import com.v2tech.db.ContentDescriptor;
+import com.v2tech.db.V2techSearchContentProvider;
+import com.v2tech.service.GlobalHolder;
 import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.SPUtil;
+import com.v2tech.vo.Conversation;
 
 public class StartupActivity extends Activity {
 
@@ -27,14 +33,32 @@ public class StartupActivity extends Activity {
 			finish();
 			return;
 		} 
+		}
 		setContentView(R.layout.load);
 		initDPI();
 		initSQLiteFile();
+		initSearchMap();
 		new LoaderThread().start();
+	}
+
+	private void initSearchMap() {
+		HashMap<String, String> allChinese = V2techSearchContentProvider
+				.queryAll(this);
+		if (allChinese == null) {
+			V2Log.e("loading dataBase data is fialed...");
+			return;
+		}
+		GlobalConfig.allChinese.putAll(allChinese);
+
+//		char[] words = new char[] { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h',
+//				'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't',
+//				'u', 'v', 'w', 's', 'y', 'z' };
+//		fo
 	}
 
 	private void initSQLiteFile() {
 		
+
 		try {
 			// 获得.db文件的绝对路径
 			String parent = getDatabasePath(DATABASE_FILENAME).getParent();
@@ -42,15 +66,15 @@ public class StartupActivity extends Activity {
 			// 如果目录不存在，创建这个目录
 			if (!dir.exists())
 				dir.mkdir();
-			String databaseFilename = getDatabasePath(DATABASE_FILENAME).getPath();
+			String databaseFilename = getDatabasePath(DATABASE_FILENAME)
+					.getPath();
 			// 目录中不存在 .db文件，则从res\raw目录中复制这个文件到该目录
 			if (!(new File(databaseFilename)).exists()) {
 				// 获得封装.db文件的InputStream对象
-				InputStream is = getResources()
-						.openRawResource(R.raw.hzpy);
-				if(is == null){
+				InputStream is = getResources().openRawResource(R.raw.hzpy);
+				if (is == null) {
 					V2Log.e("readed sqlite file failed... inputStream is null");
-					return ; 
+					return;
 				}
 				FileOutputStream fos = new FileOutputStream(databaseFilename);
 				byte[] buffer = new byte[1024];

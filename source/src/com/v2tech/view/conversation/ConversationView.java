@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.Date;
+import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
@@ -30,6 +32,7 @@ import android.text.Editable;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.text.format.DateUtils;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
@@ -1406,7 +1409,7 @@ public class ConversationView extends Activity {
 		}
 
 		VMessage vm = new VMessage(this.groupId, local, remote);
-
+		vm.setDate(new Date(System.currentTimeMillis()));
 		String[] array = content.split("\n");
 		for (int i = 0; i < array.length; i++) {
 			String str = array[i];

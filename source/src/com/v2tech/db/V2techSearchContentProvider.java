@@ -1,6 +1,7 @@
 package com.v2tech.db;
 
 import java.io.File;
+import java.util.HashMap;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -31,6 +32,28 @@ public class V2techSearchContentProvider {
 		else
 			cursor.close();
 			return null;
+	}
+	
+	public static HashMap<String , String> queryAll(Context mContext){
+		
+		if(dateBase == null || !dateBase.isOpen()){
+			init(mContext);
+		}
+		HashMap<String , String> tempMap = new HashMap<String , String>();
+		Cursor cursor = dateBase.query(table, columns, null, null, null, null, null);
+		if(cursor != null && cursor.getCount() > 0) {
+			while(cursor.moveToNext()){
+				
+				String chinese = cursor.getString(cursor.getColumnIndex("HZ"));
+				String english = cursor.getString(cursor.getColumnIndex("PY"));
+				tempMap.put(chinese, english);
+			}
+			cursor.close();
+			return tempMap;
+		}
+		else
+			cursor.close();
+		return null;
 	}
 	
 	public static void closedDataBase(){

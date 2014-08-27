@@ -1,5 +1,7 @@
 package com.v2tech.util;
 
+import java.util.HashMap;
+
 import android.content.Context;
 import android.util.DisplayMetrics;
 import android.util.SparseArray;
@@ -19,6 +21,8 @@ public class GlobalConfig {
 	public static double SCREEN_INCHES = 0;
 	
 	public static boolean isConversationOpen = false;
+	
+	public static HashMap<String, String> allChinese = new HashMap<String, String>();
 
 	public static int[] GLOBAL_FACE_ARRAY = new int[] { 0,R.drawable.face_1,
 			R.drawable.face_2, R.drawable.face_3, R.drawable.face_4,
@@ -38,7 +42,7 @@ public class GlobalConfig {
 			R.drawable.face_44, R.drawable.face_45};
 	
 	private static SparseArray<EmojiWraper> EMOJI_ARRAY = new SparseArray<EmojiWraper>();
-	
+
 	static {
 		String preFix = "/:";
 		String suffFix = ":/";

@@ -126,7 +126,7 @@ public class GroupLayout extends LinearLayout {
 				return;
 			}
 			CharSequence builder = MessageUtil.getMixedConversationContent(getContext(), vm);
-			mConv.setDate(vm.getDateTimeStr());
+			mConv.setDate(vm.getFullDateStr());
 			if (builder != null){
 				mConv.setMsg(builder);
 			}
@@ -151,7 +151,7 @@ public class GroupLayout extends LinearLayout {
 	}
 
 	public void updateContent(String content) {
-		mGroupOwnerTV.setText("创建人：" + content);
+		mGroupOwnerTV.setText("创建人:" + content);
 	}
 	
 	
