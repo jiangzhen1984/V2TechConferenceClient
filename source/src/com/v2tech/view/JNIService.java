@@ -7,7 +7,9 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import android.app.Service;
 import android.content.Context;
@@ -49,6 +51,7 @@ import com.V2.jni.ind.V2User;
 import com.V2.jni.ind.VideoJNIObjectInd;
 import com.V2.jni.util.V2Log;
 import com.v2tech.R;
+import com.v2tech.db.ContentDescriptor;
 import com.v2tech.service.BitmapManager;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.util.GlobalConfig;
@@ -59,6 +62,7 @@ import com.v2tech.view.bo.GroupUserObject;
 import com.v2tech.view.bo.UserAvatarObject;
 import com.v2tech.view.bo.UserStatusObject;
 import com.v2tech.view.conversation.MessageBuilder;
+import com.v2tech.view.conversation.MessageLoader;
 import com.v2tech.vo.ConferenceGroup;
 import com.v2tech.vo.CrowdGroup;
 import com.v2tech.vo.Group;
@@ -80,7 +84,7 @@ import com.v2tech.vo.VMessageImageItem;
  * 
  */
 public class JNIService extends Service {
-
+	private static final String TAG = "JNIService";
 	public static final String JNI_BROADCAST_CATEGROY = "com.v2tech.jni.broadcast";
 	public static final String JNI_BROADCAST_CONNECT_STATE_NOTIFICATION = "com.v2tech.jni.broadcast.connect_state_notification";
 	public static final String JNI_BROADCAST_USER_STATUS_NOTIFICATION = "com.v2tech.jni.broadcast.user_stauts_notification";
@@ -310,6 +314,13 @@ public class JNIService extends Service {
 							// Update logged user object.
 							GlobalHolder.getInstance().setCurrentUser(existU);
 						}
+						
+						UserStatusObject userStatusObject = onLineUsers.get(tu.getmUserId());
+						if(userStatusObject != null){
+							existU.updateStatus(User.Status.fromInt(userStatusObject.getStatus()));
+							existU.setDeviceType(User.DeviceType.fromInt(userStatusObject.getDeviceType()));
+						}
+						
 						if (g == null) {
 							V2Log.e(" didn't find group information  " + go.gId);
 						} else {
@@ -355,8 +366,16 @@ public class JNIService extends Service {
 				VMessage vm = (VMessage) msg.obj;
 				if (vm != null) {
 					String action = null;
+					long time = (((System.currentTimeMillis() - GlobalConfig.LOCAL_TIME) / 1000) + GlobalConfig.SERVER_TIME) * 1000;
+					vm.setDate(new Date(time));
 					MessageBuilder.saveMessage(mContext, vm);
-
+					Long id = MessageLoader.queryVMessageID(mContext, ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_ID + "=?",
+							new String[]{vm.getUUID()}, null);
+					if(id == null){
+						V2Log.e("the message :" + vm.getUUID() + " save in databases is failed ....");
+						return ;
+					}
+					vm.setId(id);
 					if (vm.getMsgCode() == V2GlobalEnum.REQUEST_TYPE_CONF) {
 						action = JNI_BROADCAST_NEW_CONF_MESSAGE;
 					} else {
@@ -413,6 +432,7 @@ public class JNIService extends Service {
 
 	}
 
+	private Map<Long , UserStatusObject> onLineUsers = new HashMap<Long , UserStatusObject>();
 	class ImRequestCB extends ImRequestCallbackAdapter {
 
 		private JNICallbackHandler mCallbackHandler;
@@ -473,7 +493,9 @@ public class JNIService extends Service {
 			if (u == null) {
 				V2Log.e("Can't update user status, user " + nUserID
 						+ "  isn't exist");
+				onLineUsers.put(nUserID, uso);
 			} else {
+				V2Log.e(TAG, "the " + u.getArra() + " user is updating state...." + nStatus);
 				u.updateStatus(User.Status.fromInt(nStatus));
 				u.setDeviceType(User.DeviceType.fromInt(type));
 			}
@@ -668,7 +690,7 @@ public class JNIService extends Service {
 
 		@Override
 		public void OnAudioChatInvite(AudioJNIObjectInd ind) {
-		
+
 			if (GlobalHolder.getInstance().isInVideoCall()) {
 				GlobalState state = GlobalHolder.getInstance().getGlobalState();
 				// if in video automatically accept audio.
@@ -678,9 +700,11 @@ public class JNIService extends Service {
 							ind.getGroupId(), ind.getFromUserId(),
 							V2GlobalEnum.REQUEST_TYPE_IM);
 				} else {
-					V2Log.i("Ignore audio call for others: " +ind.getFromUserId());
-					AudioRequest.getInstance().RefuseAudioChat(ind.getGroupId(),
-							ind.getFromUserId(), (int) ind.getRequestType());
+					V2Log.i("Ignore audio call for others: "
+							+ ind.getFromUserId());
+					AudioRequest.getInstance().RefuseAudioChat(
+							ind.getGroupId(), ind.getFromUserId(),
+							(int) ind.getRequestType());
 				}
 				return;
 			}
@@ -793,14 +817,14 @@ public class JNIService extends Service {
 			}
 
 			// Record image data meta
-			// VMessage cache = new VMessage(fromUser, toUser, new Date());
-			// cache.setMsgCode(nBusinessType);
-			// XmlParser.extraImageMetaFrom(cache, szXmlText);
-			// if (cache.getItems().size() > 0) {
-			// synchronized (cacheImageMeta) {
-			// cacheImageMeta.add(cache);
-			// }
-			// }
+			VMessage cache = new VMessage(fromUser, toUser, new Date());
+			cache.setMsgCode(nBusinessType);
+			XmlParser.extraImageMetaFrom(cache, szXmlText);
+			if (cache.getItems().size() > 0) {
+				synchronized (cacheImageMeta) {
+					cacheImageMeta.add(cache);
+				}
+			}
 
 			// Record audio data meta
 			VMessage cacheAudio = new VMessage(fromUser, toUser, new Date());
@@ -812,13 +836,18 @@ public class JNIService extends Service {
 				}
 			}
 
-			VMessage vm = XmlParser.parseForMessage(fromUser, toUser,
-					new Date(), szXmlText);
-			vm.setGroupId(nGroupID);
-			vm.setMsgCode(nBusinessType);
-			if (vm == null || vm.getItems().size() == 0) {
-				return;
-			}
+			// VMessage vm = XmlParser.parseForMessage(fromUser, toUser,
+			// new Date(), szXmlText);
+			String uuid = XmlParser.parseForMessageUUID(szXmlText);
+			long time = (((System.currentTimeMillis() - GlobalConfig.LOCAL_TIME) / 1000) + GlobalConfig.SERVER_TIME) * 1000;
+			VMessage vm = new VMessage(nGroupID, fromUser, toUser, uuid,
+					new Date(time), nBusinessType);
+			vm.setmXmlDatas(szXmlText);
+			// vm.setGroupId(nGroupID);
+			// vm.setMsgCode(nBusinessType);
+//			if (vm == null || vm.getItems().size() == 0) {
+//				return;
+//			}
 
 			if (vm.getImageItems().size() > 0) {
 				synchronized (cacheImageMeta) {

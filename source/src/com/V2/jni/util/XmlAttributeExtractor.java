@@ -16,6 +16,7 @@ import org.w3c.dom.NodeList;
 
 import com.V2.jni.ind.V2Group;
 import com.V2.jni.ind.V2User;
+import com.v2tech.util.GlobalConfig;
 
 public class XmlAttributeExtractor {
 
@@ -53,7 +54,8 @@ public class XmlAttributeExtractor {
 			}
 
 			String time = conferenceElement.getAttribute("starttime");
-			Date date = new Date(Long.parseLong(time) / 1000);
+			Long times = Long.valueOf(time) * 1000;
+			Date date = new Date(times);
 			String name = conferenceElement.getAttribute("subject");
 			String uid = conferenceElement.getAttribute("createuserid");
 			V2User user = null;

@@ -13,6 +13,7 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
@@ -42,10 +43,37 @@ public class XmlParser {
 
 	public XmlParser() {
 	}
+	
+	public static String parseForMessageUUID(String xml){
+		
+		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+		DocumentBuilder dBuilder;
+		InputStream is = null;
+		String uuid = null;
+		try {
+			dBuilder = dbFactory.newDocumentBuilder();
+			is = new ByteArrayInputStream(xml.getBytes("UTF-8"));
+			Document doc = dBuilder.parse(is);
 
-	public static VMessage parseForMessage(User from, User to, Date date,
-			String xml) {
-		VMessage vm = new VMessage(from, to, date);
+			doc.getDocumentElement().normalize();
+			NodeList ChatMsgData = doc.getElementsByTagName("TChatData");
+			if(ChatMsgData.getLength() <= 0){
+				return null;
+			}
+			Element chatElement = (Element)ChatMsgData.item(0);
+			uuid = chatElement.getAttribute("MessageID");
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+		return uuid;
+	}
+
+	public static VMessage parseForMessage(VMessage vm) {
+//		public static VMessage parseForMessage(User from, User to, Date date,
+//				String xml) {
+		String xml = vm.getmXmlDatas();
 		InputStream is = null;
 		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder dBuilder;

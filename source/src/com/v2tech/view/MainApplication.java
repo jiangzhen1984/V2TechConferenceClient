@@ -1,11 +1,15 @@
 package com.v2tech.view;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.ref.WeakReference;
+import java.math.BigInteger;
+import java.security.MessageDigest;
 import java.util.Vector;
 
 import net.sourceforge.pinyin4j.PinyinHelper;
@@ -19,6 +23,7 @@ import android.content.SharedPreferences.Editor;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.res.AssetManager;
 import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
@@ -35,6 +40,7 @@ import com.V2.jni.VideoMixerRequest;
 import com.V2.jni.VideoRequest;
 import com.V2.jni.WBRequest;
 import com.V2.jni.util.V2Log;
+import com.v2tech.R;
 import com.v2tech.util.CrashHandler;
 import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.LogcatThread;
@@ -44,7 +50,8 @@ import com.v2tech.view.conference.VideoActivityV2;
 public class MainApplication extends Application {
 
 	private Vector<WeakReference<Activity>> list = new Vector<WeakReference<Activity>>();
-
+	private final String DATABASE_FILENAME = "hzpy.db";
+	private boolean needCopy;
 	@Override
 	public void onCreate() {
 		super.onCreate();
@@ -111,7 +118,7 @@ public class MainApplication extends Application {
 		System.loadLibrary("event");
 		System.loadLibrary("v2vi");
 		System.loadLibrary("v2ve");
-		//System.loadLibrary("NetEvent");
+		// System.loadLibrary("NetEvent");
 		System.loadLibrary("v2client");
 
 		// Initialize native library
@@ -140,7 +147,60 @@ public class MainApplication extends Application {
 		}
 
 		initGlobalConfiguration();
+		initSQLiteFile();
+	}
 
+	private void initSQLiteFile() {
+
+		try {
+			// 获得.db文件的绝对路径
+			String parent = getDatabasePath(DATABASE_FILENAME).getParent();
+			File dir = new File(parent);
+			// 如果目录不存在，创建这个目录
+			if (!dir.exists())
+				dir.mkdir();
+			String databaseFilename = getDatabasePath(DATABASE_FILENAME)
+					.getPath();
+			File file = new File(databaseFilename);
+			// 目录中不存在 .db文件，则从res\raw目录中复制这个文件到该目录
+			if(file.exists()){
+				InputStream is = getResources().openRawResource(R.raw.hzpy);
+				if (is == null) {
+					V2Log.e("readed sqlite file failed... inputStream is null");
+					return;
+				}
+				String md5 = getFileMD5(is);
+				String currentMD5 = getFileMD5(new FileInputStream(file));
+				if(md5.equals(currentMD5))
+					needCopy = false; 
+				else
+					needCopy = true;
+			}
+			
+			if (!(file.exists()) || needCopy == true) {
+				// 获得封装.db文件的InputStream对象
+				InputStream is = getResources().openRawResource(R.raw.hzpy);
+				if (is == null) {
+					V2Log.e("readed sqlite file failed... inputStream is null");
+					return;
+				}
+				FileOutputStream fos = new FileOutputStream(databaseFilename);
+				byte[] buffer = new byte[1024];
+				int count = 0;
+				// 开始复制.db文件
+				while ((count = is.read(buffer)) != -1) {
+					fos.write(buffer, 0, count);
+				}
+				fos.close();
+				is.close();
+			}
+		} catch (Exception e) {
+			e.getStackTrace();
+			V2Log.e("loading HZPY.db SQListe");
+		}
+		finally{
+			needCopy = false;
+		}
 	}
 
 	private void initConfFile() {
@@ -338,7 +398,32 @@ public class MainApplication extends Application {
 				}
 			}
 		}
-
 	}
 
+	/**
+	 * 获取单个文件的MD5值！
+	 * 
+	 * @param file
+	 * @return
+	 */
+	private String getFileMD5(InputStream ips) {
+		if (ips == null) {
+			return null;
+		}
+		MessageDigest digest = null;
+		byte buffer[] = new byte[1024];
+		int len;
+		try {
+			digest = MessageDigest.getInstance("MD5");
+			while ((len = ips.read(buffer, 0, 1024)) != -1) {
+				digest.update(buffer, 0, len);
+			}
+			ips.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+		BigInteger bigInt = new BigInteger(1, digest.digest());
+		return bigInt.toString(16);
+	}
 }

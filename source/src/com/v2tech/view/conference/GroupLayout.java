@@ -11,6 +11,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.V2.jni.util.V2Log;
 import com.v2tech.R;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.util.MessageUtil;
@@ -82,7 +83,12 @@ public class GroupLayout extends LinearLayout {
 
 		mGroupNameTV.setText(this.mConv.getName());
 		mGroupOwnerTV.setText(mConv.getMsg()); 
-		mGroupDateTV.setText(mConv.getDate());
+		if(this.mConv.getType().equals(Conversation.TYPE_CONTACT)){
+			V2Log.e(TAG, mConv.getDateLong() + "------");
+			mGroupDateTV.setText(mConv.getDateLong());
+		}
+		else
+			mGroupDateTV.setText(mConv.getDate());
 		addView(view);
 	}
 
@@ -97,20 +103,26 @@ public class GroupLayout extends LinearLayout {
 			mNotificatorIV.setVisibility(View.GONE);
 		}
 
-		if (this.mConv instanceof ContactConversation) {
-			if (content != null) {
+//		if (this.mConv instanceof ContactConversation) {
+		if (this.mConv.getType().equals(Conversation.TYPE_CONTACT)) {
+			if (content != null) 
 				((ContactConversation) mConv).setMsg(content);
-			}
-			if (date != null) {
+			if (date != null) 
 				((ContactConversation) mConv).setDate(date);
-			}
+			
 		}
-		if (content != null) {
+		
+		if (content != null) 
 			mGroupOwnerTV.setText(content);
+		
+//		if (date != null) 
+//			mGroupDateTV.setText(date);
+		if(this.mConv.getType().equals(Conversation.TYPE_CONTACT)){
+			mGroupDateTV.setText(mConv.getDateLong());
+			V2Log.e(TAG, mConv.getDateLong());
 		}
-		if (date != null) {
+		else
 			mGroupDateTV.setText(date);
-		}
 	}
 
 	private Runnable queryMessageRunnable = new Runnable() {
@@ -158,7 +170,13 @@ public class GroupLayout extends LinearLayout {
 	public void update() {
 		mGroupNameTV.setText(this.mConv.getName());
 		mGroupOwnerTV.setText(mConv.getMsg());
-		mGroupDateTV.setText(mConv.getDate());
+//		mGroupDateTV.setText(mConv.getDate());
+		if(this.mConv.getType().equals(Conversation.TYPE_CONTACT)){
+			mGroupDateTV.setText(mConv.getDateLong());
+			V2Log.e(TAG, mConv.getDateLong() + "update---");
+		}
+		else
+			mGroupDateTV.setText(mConv.getDate());
 	}
 
 	public void updateIcon(Bitmap bitmap) {

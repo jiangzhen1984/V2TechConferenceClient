@@ -4,14 +4,20 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 
+import com.V2.jni.util.V2Log;
 import com.v2tech.db.ContentDescriptor;
+import com.v2tech.db.V2TechDBHelper;
+import com.v2tech.db.ContentDescriptor.HistoriesMessage;
 import com.v2tech.service.GlobalHolder;
+import com.v2tech.util.XmlParser;
 import com.v2tech.vo.User;
 import com.v2tech.vo.VMessage;
 import com.v2tech.vo.VMessageAbstractItem;
@@ -25,6 +31,32 @@ import com.v2tech.vo.VMessageTextItem;
 public class MessageLoader {
 
 	/**
+	 * 查询前要判断该用户的数据库是否存在，不存在则创建
+	 * @param context
+	 * @param uid2
+	 * @return
+	 */
+	public static boolean init(Context context , long uid2){
+		boolean result = isExistTable(context , "Histories_0_0_" + uid2);
+		ContentDescriptor.HistoriesMessage.PATH = "Histories_0_0_" + uid2;
+		ContentDescriptor.HistoriesMessage.NAME = "Histories_0_0_" + uid2;
+		ContentDescriptor.HistoriesMessage.CONTENT_URI = ContentDescriptor.BASE_URI.buildUpon()
+				.appendPath(ContentDescriptor.HistoriesMessage.PATH).build();
+		ContentDescriptor.URI_MATCHER.addURI(ContentDescriptor.AUTHORITY, HistoriesMessage.PATH, HistoriesMessage.TOKEN);
+		ContentDescriptor.URI_MATCHER.addURI(ContentDescriptor.AUTHORITY, HistoriesMessage.PATH + "/#", HistoriesMessage.TOKEN_WITH_ID);
+		ContentDescriptor.URI_MATCHER.addURI(ContentDescriptor.AUTHORITY, HistoriesMessage.PATH + "/page", HistoriesMessage.TOKEN_BY_PAGE);
+		
+		if(!result){
+			User user = GlobalHolder.getInstance().getUser(uid2);
+			if(user == null){
+				V2Log.e("the remote user is null , the uid2 is --" + uid2);
+				return false;
+			}
+			ContentDescriptor.execSQLCreate(context, "Histories_0_0_" + uid2);
+		}	
+		return true;
+	}
+	/**
 	 * Load all P2P message and order by date desc
 	 * 
 	 * @param context
@@ -36,6 +68,9 @@ public class MessageLoader {
 	public static List<VMessage> loadMessageByType(Context context, long uid1,
 			long uid2, int type) {
 
+		if(!init(context , uid2))
+			return null;
+		
 		String selection = "((" + ContentDescriptor.Messages.Cols.FROM_USER_ID
 				+ "=? and " + ContentDescriptor.Messages.Cols.TO_USER_ID
 				+ "=? ) or " + "("
@@ -64,10 +99,14 @@ public class MessageLoader {
 	}
 
 	public static VMessage loadMessageById(Context context, long msgId) {
-		String selection = ContentDescriptor.Messages.Cols.ID + "=? ";
-		String[] args = new String[] { msgId + "" };
-		String order = ContentDescriptor.Messages.Cols.SEND_TIME
+		
+		String selection = ContentDescriptor.HistoriesMessage.Cols.ID + "=? ";
+		String[] args = new String[] { msgId + ""};
+		String order = ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_SAVEDATE
 				+ " desc limit 1 offset 0 ";
+//		String selection = ContentDescriptor.Messages.Cols.ID + "=? ";
+//		String order = ContentDescriptor.Messages.Cols.SEND_TIME
+//				+ " desc limit 1 offset 0 ";
 		List<VMessage> list = queryMessage(context, selection, args, order,
 				VMessageAbstractItem.ITEM_TYPE_ALL);
 		if (list != null && list.size() > 0) {
@@ -85,12 +124,13 @@ public class MessageLoader {
 	 */
 	public static List<VMessage> loadGroupMessageByPage(Context context,
 			long groupId, int limit, int offset) {
-		String selection = ContentDescriptor.Messages.Cols.GROUP_ID + "=? ";
-		String[] args = new String[] { groupId + "" };
-		String order = ContentDescriptor.Messages.Cols.SEND_TIME
-				+ " desc limit " + limit + " offset  " + offset;
-		return queryMessage(context, selection, args, order,
-				VMessageAbstractItem.ITEM_TYPE_ALL);
+//		String selection = ContentDescriptor.Messages.Cols.GROUP_ID + "=? ";
+//		String[] args = new String[] { groupId + "" };
+//		String order = ContentDescriptor.Messages.Cols.SEND_TIME
+//				+ " desc limit " + limit + " offset  " + offset;
+//		return queryMessage(context, selection, args, order,
+//				VMessageAbstractItem.ITEM_TYPE_ALL);
+		return null;
 	}
 
 	/**
@@ -101,18 +141,28 @@ public class MessageLoader {
 	 */
 	public static List<VMessage> loadMessageByPage(Context context, long uid1,
 			long uid2, int limit, int offset) {
-		String selection = "((" + ContentDescriptor.Messages.Cols.FROM_USER_ID
-				+ "=? and " + ContentDescriptor.Messages.Cols.TO_USER_ID
+		if(!init(context , uid2))
+			return null;
+		
+		String selection = "((" + ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_FROM_USER_ID
+				+ "=? and " + ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_TO_USER_ID
 				+ "=? ) or " + "("
-				+ ContentDescriptor.Messages.Cols.FROM_USER_ID + "=? and "
-				+ ContentDescriptor.Messages.Cols.TO_USER_ID + "=? ))  and "
-				+ ContentDescriptor.Messages.Cols.GROUP_ID + "= 0 ";
-
+				+ ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_FROM_USER_ID + "=? and "
+				+ ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_TO_USER_ID + "=? ))  and "
+				+ ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_GROUP_TYPE + "= 0 ";
+		
+//		String selection = "((" + ContentDescriptor.Messages.Cols.FROM_USER_ID
+//				+ "=? and " + ContentDescriptor.Messages.Cols.TO_USER_ID
+//				+ "=? ) or " + "("
+//				+ ContentDescriptor.Messages.Cols.FROM_USER_ID + "=? and "
+//				+ ContentDescriptor.Messages.Cols.TO_USER_ID + "=? ))  and "
+//				+ ContentDescriptor.Messages.Cols.GROUP_ID + "= 0 ";
+//
 		String[] args = new String[] { uid1 + "", uid2 + "", uid2 + "",
 				uid1 + "" };
-
-		String order = ContentDescriptor.Messages.Cols.SEND_TIME + " desc , "
-				+ ContentDescriptor.Messages.Cols.ID + " desc limit " + limit
+//
+		String order = ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_SAVEDATE + " desc , "
+				+ ContentDescriptor.HistoriesMessage.Cols.ID + " desc limit " + limit
 				+ " offset  " + offset;
 		return queryMessage(context, selection, args, order,
 				VMessageAbstractItem.ITEM_TYPE_ALL);
@@ -125,34 +175,48 @@ public class MessageLoader {
 	 * @return
 	 */
 	public static VMessage getNewestGroupMessage(Context context, long groupId) {
-		String selection = ContentDescriptor.Messages.Cols.GROUP_ID + "=? ";
-		String[] args = new String[] { groupId + "" };
-		String order = ContentDescriptor.Messages.Cols.SEND_TIME
-				+ " desc limit 1 offset 0 ";
-		List<VMessage> list = queryMessage(context, selection, args, order,
-				VMessageAbstractItem.ITEM_TYPE_ALL);
-		if (list != null && list.size() > 0) {
-			return list.get(0);
-		} else {
-			return null;
-		}
+		
+//		String selection = ContentDescriptor.Messages.Cols.GROUP_ID + "=? ";
+//		String[] args = new String[] { groupId + "" };
+//		String order = ContentDescriptor.Messages.Cols.SEND_TIME
+//				+ " desc limit 1 offset 0 ";
+//		List<VMessage> list = queryMessage(context, selection, args, order,
+//				VMessageAbstractItem.ITEM_TYPE_ALL);
+//		if (list != null && list.size() > 0) {
+//			return list.get(0);
+//		} else {
+//			return null;
+//		}
+		return null;
 	}
 
 	public static VMessage getNewestMessage(Context context, long uid1,
 			long uid2) {
-		String selection = "((" + ContentDescriptor.Messages.Cols.FROM_USER_ID
-				+ "=? and " + ContentDescriptor.Messages.Cols.TO_USER_ID
+		if(!init(context , uid2))
+			return null;
+//		String selection = "((" + ContentDescriptor.Messages.Cols.FROM_USER_ID
+//				+ "=? and " + ContentDescriptor.Messages.Cols.TO_USER_ID
+//				+ "=? ) or " + "("
+//				+ ContentDescriptor.Messages.Cols.FROM_USER_ID + "=? and "
+//				+ ContentDescriptor.Messages.Cols.TO_USER_ID + "=? ))  and "
+//				+ ContentDescriptor.Messages.Cols.GROUP_ID + "= 0 ";
+		String selection = "((" + ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_FROM_USER_ID
+				+ "=? and " + ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_TO_USER_ID
 				+ "=? ) or " + "("
-				+ ContentDescriptor.Messages.Cols.FROM_USER_ID + "=? and "
-				+ ContentDescriptor.Messages.Cols.TO_USER_ID + "=? ))  and "
-				+ ContentDescriptor.Messages.Cols.GROUP_ID + "= 0 ";
+				+ ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_FROM_USER_ID + "=? and "
+				+ ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_TO_USER_ID + "=? ))  and "
+				+ ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_GROUP_TYPE + "= 0 ";
 
 		String[] args = new String[] { uid1 + "", uid2 + "", uid2 + "",
 				uid1 + "" };
 
-		String order = ContentDescriptor.Messages.Cols.SEND_TIME + " desc, "
-				+ ContentDescriptor.Messages.Cols.ID
+		String order = ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_SAVEDATE + " desc, "
+				+ ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_ID
 				+ " desc limit 1 offset 0 ";
+//		String order = ContentDescriptor.Messages.Cols.SEND_TIME + " desc, "
+//				+ ContentDescriptor.Messages.Cols.ID
+//				+ " desc limit 1 offset 0 ";
+		
 		List<VMessage> list = queryMessage(context, selection, args, order,
 				VMessageAbstractItem.ITEM_TYPE_ALL);
 		if (list != null && list.size() > 0) {
@@ -172,21 +236,33 @@ public class MessageLoader {
 	 */
 	public static List<VMessage> loadGroupMessageByType(Context context,
 			long gid, int type) {
-		String selection = ContentDescriptor.Messages.Cols.GROUP_ID + "=? ";
-		String[] args = new String[] { gid + "" };
-		String order = ContentDescriptor.Messages.Cols.SEND_TIME + " desc ";
-		return queryMessage(context, selection, args, order, type);
+//		String selection = ContentDescriptor.Messages.Cols.GROUP_ID + "=? ";
+//		String[] args = new String[] { gid + "" };
+//		String order = ContentDescriptor.Messages.Cols.SEND_TIME + " desc ";
+//		return queryMessage(context, selection, args, order, type);
+		return null;
 
+	}
+	
+	public static Long queryVMessageID(Context context , String selection, String[] args, String sortOrder){
+		
+		Cursor cursor = context.getContentResolver().query(ContentDescriptor.HistoriesMessage.CONTENT_URI,
+				new String[]{"_id"}, selection, args, sortOrder);
+		if(cursor != null && cursor.getCount() > 0 && cursor.moveToNext()){
+			
+			return cursor.getLong(cursor.getColumnIndex("_id"));
+		}
+		return null;
 	}
 
 	public static List<VMessage> queryMessage(Context context,
 			String selection, String[] args, String sortOrder, int itemType) {
 
 		Cursor mCur = context.getContentResolver().query(
-				ContentDescriptor.Messages.CONTENT_URI,
-				ContentDescriptor.Messages.Cols.ALL_CLOS, selection, args,
+				ContentDescriptor.HistoriesMessage.CONTENT_URI,
+				ContentDescriptor.HistoriesMessage.Cols.ALL_CLOS, selection, args,
 				sortOrder);
-
+		
 		List<VMessage> vimList = new ArrayList<VMessage>();
 		if (mCur.getCount() == 0) {
 			mCur.close();
@@ -194,8 +270,14 @@ public class MessageLoader {
 		}
 
 		while (mCur.moveToNext()) {
-			VMessage vm = extractMsg(mCur);
-			loadVMessageItem(context, vm, itemType);
+//			VMessage vm = extractMsg(mCur);
+			VMessage vm = XmlParser.parseForMessage(extractMsg(mCur));
+//			loadVMessageItem(context, vm, itemType);
+			if(vm == null){
+				V2Log.e("the parse VMessage get null........");
+				return vimList;
+			}
+			
 			if (vm.getItems().size() > 0) {
 				vimList.add(vm);
 			}
@@ -240,10 +322,10 @@ public class MessageLoader {
 		if (cur.isClosed()) {
 			throw new RuntimeException(" cursor is closed");
 		}
-		DateFormat dp = new SimpleDateFormat("yyyy-MM-dd HH:mm",
-				Locale.getDefault());
-		long user1Id = cur.getLong(1);
-		long user2Id = cur.getLong(3);
+//		long user1Id = cur.getLong(1);
+//		long user2Id = cur.getLong(3);
+		long user1Id = cur.getLong(cur.getColumnIndex(ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_FROM_USER_ID));
+		long user2Id = cur.getLong(cur.getColumnIndex(ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_TO_USER_ID));
 		User fromUser = GlobalHolder.getInstance().getUser(user1Id);
 		if (fromUser == null) {
 			fromUser = new User(user1Id);
@@ -254,27 +336,28 @@ public class MessageLoader {
 		}
 
 		int id = cur.getInt(0);
-		// message type
-		int type = cur.getInt(5);
-		// date time
-		String dateString = cur.getString(6);
-		// group id
-		long groupId = cur.getLong(8);
-		int state = cur.getInt(7);
-		String uuid = cur.getString(9);
-
+//		// message type
+		int type = cur.getInt(cur.getColumnIndex(ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_GROUP_TYPE));
+//		int type = cur.getInt(5);
+//		// date time
+		long dateString = cur.getLong(cur.getColumnIndex(ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_SAVEDATE));
+//		String dateString = cur.getString(6);
+//		// group id
+		long groupId = cur.getLong(cur.getColumnIndex(ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_GROUP_ID));
+//		long groupId = cur.getLong(8);
+		int state = cur.getInt(cur.getColumnIndex(ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_TRANSTATE));
+//		int state = cur.getInt(7);
+		// message id
+		String uuid = cur.getString(cur.getColumnIndex(ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_ID));
+//		String uuid = cur.getString(9);
+		String xml = cur.getString(cur.getColumnIndex(ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_CONTENT));
 		VMessage vm = new VMessage(groupId, fromUser, toUser, type);
 		vm.setId(id);
 		vm.setUUID(uuid);
 		vm.setState(state);
-		try {
-			vm.setDate(dp.parse(dateString));
-		} catch (ParseException e) {
-			e.printStackTrace();
-		}
-
+		vm.setmXmlDatas(xml);
+		vm.setDate(new Date(dateString));
 		return vm;
-
 	}
 
 	private static void loadVMessageItem(Context context, VMessage vm,
@@ -364,4 +447,28 @@ public class MessageLoader {
 		cur.close();
 	}
 
+	private static boolean isExistTable(Context context , String tabName){
+		SQLiteDatabase base = context.openOrCreateDatabase(V2TechDBHelper.DB_NAME , 0, null);
+		try {
+            String sql = "select count(*) as c from sqlite_master where type ='table' "
+            		+ "and name ='" + tabName.trim() + "' ";
+            Cursor cursor = base.rawQuery(sql, null);
+            if(cursor != null && cursor.getCount() > 0 && cursor.moveToNext()){
+                 int count = cursor.getInt(0);
+                 if(count > 0){
+                     return true;
+                 }
+             }
+		} 
+		catch (Exception e) {
+			V2Log.e("detection table " + tabName + " is failed..."); //检测失败
+			e.getStackTrace();
+		}  
+		finally{
+			if(base != null){
+				base.close();
+			}
+		}
+		return false;
+	}
 }

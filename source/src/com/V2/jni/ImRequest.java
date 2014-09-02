@@ -1,14 +1,18 @@
 package com.V2.jni;
 
 import java.lang.ref.WeakReference;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import android.content.Context;
 import android.util.Log;
 
 import com.V2.jni.util.V2Log;
+import com.v2tech.util.GlobalConfig;
 
 public class ImRequest {
 	public boolean loginResult;
@@ -92,6 +96,9 @@ public class ImRequest {
 	private void OnLogin(long nUserID, int nStatus, long serverTime, int nResult) {
 		V2Log.d("OnLogin --> " + nUserID + ": " + "-:" + nStatus + ":"
 				+ nResult);
+		GlobalConfig.SERVER_TIME = serverTime; 
+		GlobalConfig.LOCAL_TIME = System.currentTimeMillis();
+		V2Log.d("OnLogin --> get server time ：" + serverTime);
 		for (WeakReference<ImRequestCallback> wf : this.callbacks) {
 			Object obj = wf.get();
 			if (obj != null) {

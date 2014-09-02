@@ -34,6 +34,8 @@ public class VMessage {
 	protected User mToUser;
 
 	protected Date mDate;
+	
+	protected long mDateLong;
 
 	protected String mStrDateTime;
 
@@ -46,6 +48,8 @@ public class VMessage {
 	protected boolean isLocal;
 	
 	protected int mState;
+	
+	protected String mXmlDatas;
 
 	protected List<VMessageAbstractItem> itemList;
 
@@ -82,7 +86,23 @@ public class VMessage {
 
 		itemList = new ArrayList<VMessageAbstractItem>();
 	}
+	
+	public long getmDateLong() {
+		return mDate.getTime();
+	}
 
+	public void setmDateLong(long mDateLong) {
+		this.mDateLong = mDateLong;
+	}
+
+	public String getmXmlDatas() {
+		return mXmlDatas;
+	}
+
+	public void setmXmlDatas(String mXmlDatas) {
+		this.mXmlDatas = mXmlDatas;
+	}
+	
 	public void setMsgCode(int code) {
 		this.mMsgCode = code;
 	}

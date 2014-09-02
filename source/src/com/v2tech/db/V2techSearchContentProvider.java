@@ -9,7 +9,7 @@ import android.database.sqlite.SQLiteDatabase;
 
 public class V2techSearchContentProvider {
 
-	private final static String DATABASE_FILENAME = "HZPY.db";
+	private final static String DATABASE_FILENAME = "hzpy.db";
 	private static final String table = "HZToPY";
 	private static final String[] columns = new String[]{"HZ" , "PY"};
 	private static SQLiteDatabase dateBase; 

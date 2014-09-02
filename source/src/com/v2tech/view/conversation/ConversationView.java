@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Date;
 import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
@@ -1409,7 +1410,7 @@ public class ConversationView extends Activity {
 		}
 
 		VMessage vm = new VMessage(this.groupId, local, remote);
-		vm.setDate(new Date(System.currentTimeMillis()));
+//		vm.setDate(new Date(System.currentTimeMillis()));
 		String[] array = content.split("\n");
 		for (int i = 0; i < array.length; i++) {
 			String str = array[i];
@@ -1505,6 +1506,9 @@ public class ConversationView extends Activity {
 
 	private void sendMessageToRemote(VMessage vm) {
 		// // Save message
+		vm.setmXmlDatas(vm.toXml());
+		long time = (((System.currentTimeMillis() - GlobalConfig.LOCAL_TIME) / 1000) + GlobalConfig.SERVER_TIME) * 1000;
+		vm.setDate(new Date(time));
 		MessageBuilder.saveMessage(this, vm);
 
 		Message.obtain(lh, SEND_MESSAGE, vm).sendToTarget();
@@ -2100,8 +2104,8 @@ public class ConversationView extends Activity {
 			switch (msg.what) {
 			case LOAD_MESSAGE:
 				List<VMessage> array = loadMessages();
-				V2Log.d(TAG, "获取的消息数量" + array.size());
 				if (array != null) {
+					V2Log.d(TAG, "获取的消息数量" + array.size());
 					currentGetMessages = array;
 					for (int i = 0; i < array.size(); i++) {
 						if(messageAllID.get((int) array.get(i).getId()) != null){

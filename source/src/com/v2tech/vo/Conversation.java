@@ -18,6 +18,17 @@ public class Conversation {
 	protected long mExtId;
 
 	protected int readFlag;
+	
+	protected String dateLong;
+	
+	public String getDateLong() {
+		return dateLong;
+	}
+
+	public void setDateLong(String dateLong) {
+		this.dateLong = dateLong;
+	}
+
 
 	protected Conversation() {
 

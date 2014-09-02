@@ -36,6 +36,12 @@ public class VMessageImageItem extends VMessageAbstractItem {
 		this.extension = extension;
 		this.type = ITEM_TYPE_IMAGE;
 	}
+	
+	public VMessageImageItem(VMessage vm) {
+		super(vm);
+		this.type = ITEM_TYPE_IMAGE;
+	}
+
 
 	public String getFilePath() {
 		return filePath;
@@ -62,8 +68,6 @@ public class VMessageImageItem extends VMessageAbstractItem {
 		}
 		return extension;
 	}
-	
-	
 
 	public boolean isReceived() {
 		return isReceived;
@@ -77,7 +81,7 @@ public class VMessageImageItem extends VMessageAbstractItem {
 		int[] w = new int[2];
 		BitmapUtil.getFullBitmapBounds(this.filePath, w);
 		String str = " <TPictureChatItem NewLine=\"True\" AutoResize=\"True\" FileExt=\""
-				+ getExtension()
+				+ getFilePath()
 				+ "\" GUID=\""+uuid+"\" Height=\""
 				+ w[1]
 				+ "\" Width=\"" + w[0] + "\" />";

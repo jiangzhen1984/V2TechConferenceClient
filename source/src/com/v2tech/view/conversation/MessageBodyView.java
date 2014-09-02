@@ -256,6 +256,7 @@ public class MessageBodyView extends LinearLayout {
 		mContentContainer.setOnLongClickListener(messageLongClickListener);
 		et.setOnClickListener(imageMessageClickListener);
 		et.setBackgroundColor(Color.TRANSPARENT);
+		et.setOnLongClickListener(messageLongClickListener);
 		et.setSelected(false);
 		LinearLayout.LayoutParams ll = new LinearLayout.LayoutParams(
 				LinearLayout.LayoutParams.WRAP_CONTENT,

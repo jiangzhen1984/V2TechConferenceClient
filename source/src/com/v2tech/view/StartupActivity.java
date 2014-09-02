@@ -1,30 +1,19 @@
 package com.v2tech.view;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.InputStream;
 import java.util.HashMap;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.database.Cursor;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 
 import com.V2.jni.util.V2Log;
 import com.v2tech.R;
-import com.v2tech.db.ContentDescriptor;
 import com.v2tech.db.V2techSearchContentProvider;
-import com.v2tech.service.GlobalHolder;
 import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.SPUtil;
-import com.v2tech.vo.Conversation;
 
 public class StartupActivity extends Activity {
-
-	private final String DATABASE_FILENAME = "HZPY.db";
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -33,10 +22,8 @@ public class StartupActivity extends Activity {
 			finish();
 			return;
 		} 
-		}
 		setContentView(R.layout.load);
 		initDPI();
-		initSQLiteFile();
 		initSearchMap();
 		new LoaderThread().start();
 	}
@@ -54,42 +41,6 @@ public class StartupActivity extends Activity {
 //				'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't',
 //				'u', 'v', 'w', 's', 'y', 'z' };
 //		fo
-	}
-
-	private void initSQLiteFile() {
-		
-
-		try {
-			// 获得.db文件的绝对路径
-			String parent = getDatabasePath(DATABASE_FILENAME).getParent();
-			File dir = new File(parent);
-			// 如果目录不存在，创建这个目录
-			if (!dir.exists())
-				dir.mkdir();
-			String databaseFilename = getDatabasePath(DATABASE_FILENAME)
-					.getPath();
-			// 目录中不存在 .db文件，则从res\raw目录中复制这个文件到该目录
-			if (!(new File(databaseFilename)).exists()) {
-				// 获得封装.db文件的InputStream对象
-				InputStream is = getResources().openRawResource(R.raw.hzpy);
-				if (is == null) {
-					V2Log.e("readed sqlite file failed... inputStream is null");
-					return;
-				}
-				FileOutputStream fos = new FileOutputStream(databaseFilename);
-				byte[] buffer = new byte[1024];
-				int count = 0;
-				// 开始复制.db文件
-				while ((count = is.read(buffer)) != -1) {
-					fos.write(buffer, 0, count);
-				}
-				fos.close();
-				is.close();
-			}
-		} catch (Exception e) {
-			e.getStackTrace();
-			V2Log.e("loading HZPY.db SQListe");
-		}
 	}
 
 	private void forward() {
