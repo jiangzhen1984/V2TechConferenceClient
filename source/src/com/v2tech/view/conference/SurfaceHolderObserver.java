@@ -18,6 +18,7 @@ public class SurfaceHolderObserver implements SurfaceHolder.Callback {
 	private UserDeviceConfig udc;
 	private State state;
 	private boolean isCreate;
+	private boolean isValid;
 
 	public SurfaceHolderObserver(DeviceService service, UserDeviceConfig udc) {
 		super();
@@ -58,7 +59,7 @@ public class SurfaceHolderObserver implements SurfaceHolder.Callback {
 	public void surfaceDestroyed(SurfaceHolder holder) {
 		isCreate = false;
 		synchronized (state) {
-			if (state == State.SHOWED || state == State.SHOWING) {
+			if ((state == State.SHOWED || state == State.SHOWING) && !isValid) {
 				state = State.CLOSING;
 				service.requestCloseVideoDevice(udc, new Registrant(handler,
 						CLOSE_DEVICE_DONE, null));
@@ -90,6 +91,18 @@ public class SurfaceHolderObserver implements SurfaceHolder.Callback {
 					CLOSE_DEVICE_DONE, null));
 		}
 	}
+	
+	
+
+	public boolean isValid() {
+		return isValid;
+	}
+
+	public void setValid(boolean isValid) {
+		this.isValid = isValid;
+	}
+
+
 
 	enum State {
 		SHOWED, SHOWING, CLOSED, CLOSING

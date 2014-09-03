@@ -23,6 +23,7 @@ public class StartupActivity extends Activity {
 			return;
 		} 
 		setContentView(R.layout.load);
+		
 		initDPI();
 		initSearchMap();
 		new LoaderThread().start();

@@ -57,7 +57,12 @@ public class GroupRequest {
 	// ɾ��һ�����ѷ���
 	public native void delGroupUser(int groupType, long nGroupID, long nUserID);
 
-	// �޸ĺ��ѷ���
+	/**
+	 * 
+	 * @param groupType
+	 * @param nGroupID
+	 * @param sXml
+	 */
 	public native void modifyGroupInfo(int groupType, long nGroupID, String sXml);
 
 	/**

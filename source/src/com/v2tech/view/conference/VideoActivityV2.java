@@ -1330,8 +1330,10 @@ public class VideoActivityV2 extends Activity {
 	private void updateAllRemoteDevice(int tag) {
 		for (SurfaceViewW sw : this.mCurrentShowedSV) {
 			if (TAG_OPEN_DEVICE == tag) {
+				sw.observer.setValid(true);
 				sw.observer.open();
 			} else {
+				sw.observer.setValid(false);
 				sw.observer.close();
 			}
 		}

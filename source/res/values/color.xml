@@ -32,6 +32,11 @@
      
      <color name="title_color">#000000</color>
      
+     <color name="common_gray_color_c2">#c2c2c2</color>
+     
+     <color name="common_gray_color_c0">#c0c0c0</color>
+     <color name="common_gray_color_cd">#cdcdcf</color>
+     
      <color name="video_attendee_chair_man_name_color">#019648</color>
      <color name="video_attendee_name_color">#000000</color>
      <color name="video_attendee_name_color_offline">#c2c2c2</color>

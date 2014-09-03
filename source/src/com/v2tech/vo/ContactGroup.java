@@ -16,5 +16,10 @@ public class ContactGroup extends Group {
 			String mOwner, String createDate) {
 		super(mGId, mGroupType, mName, mOwner, createDate);
 	}
+	
+	
+	public String toXml() {
+		return null;
+	}
 
 }
