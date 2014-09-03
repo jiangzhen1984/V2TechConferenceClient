@@ -19,7 +19,7 @@ public class ContactGroup extends Group {
 	
 	
 	public String toXml() {
-		return null;
+		return "<friendgroup "+(this.mGId == 0? "" : "id=\""+mGId+"\"")+"  name=\""+this.mName+"\" />";
 	}
 
 }

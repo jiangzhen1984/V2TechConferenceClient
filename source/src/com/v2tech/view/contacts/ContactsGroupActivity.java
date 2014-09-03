@@ -6,12 +6,16 @@ import java.util.List;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnFocusChangeListener;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.BaseAdapter;
@@ -23,6 +27,10 @@ import android.widget.TextView;
 import com.v2tech.R;
 import com.v2tech.service.ContactsService;
 import com.v2tech.service.GlobalHolder;
+import com.v2tech.service.Registrant;
+import com.v2tech.service.jni.GroupServiceJNIResponse;
+import com.v2tech.service.jni.JNIResponse;
+import com.v2tech.view.PublicIntent;
 import com.v2tech.view.widget.CommonAdapter;
 import com.v2tech.view.widget.CommonAdapter.CommonAdapterItemWrapper;
 import com.v2tech.view.widget.CommonAdapter.ViewConvertListener;
@@ -31,6 +39,10 @@ import com.v2tech.vo.Group;
 import com.v2tech.vo.Group.GroupType;
 
 public class ContactsGroupActivity extends Activity {
+
+	private static final int CREATE_GROUP_DONE = 1;
+	private static final int UPDATE_GROUP_DONE = 2;
+	private static final int REMOVE_GROUP_DONE = 3;
 
 	private TextView mDialogTitleTV;
 	private EditText mGroupNameET;
@@ -62,6 +74,15 @@ public class ContactsGroupActivity extends Activity {
 		adapter = new CommonAdapter(mDataset, converter);
 		mListView.setAdapter(adapter);
 		mListView.setOnItemLongClickListener(mLongClickListener);
+	}
+
+	@Override
+	public void finish() {
+		Intent i = new Intent(
+				PublicIntent.BROADCAST_REQUEST_UPDATE_CONTACTS_GROUP);
+		i.addCategory(PublicIntent.DEFAULT_CATEGORY);
+		mContext.sendBroadcast(i);
+		super.finish();
 	}
 
 	private List<CommonAdapterItemWrapper> convert(List<Group> listGroup) {
@@ -102,6 +123,9 @@ public class ContactsGroupActivity extends Activity {
 			cancelB.setOnClickListener(new OnClickListener() {
 				@Override
 				public void onClick(View v) {
+					InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+					imm.hideSoftInputFromWindow(mGroupNameET.getWindowToken(),
+							0);
 					mDialog.dismiss();
 				}
 
@@ -111,15 +135,23 @@ public class ContactsGroupActivity extends Activity {
 			confirmButton.setOnClickListener(new OnClickListener() {
 				@Override
 				public void onClick(View v) {
+					InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+					imm.hideSoftInputFromWindow(mGroupNameET.getWindowToken(),
+							0);
+
 					if (mGroupNameET.getText().toString().isEmpty()) {
 						mGroupNameET.setError(mContext
 								.getText(R.string.activiy_contact_group_dialog_group_name_required));
 						return;
 					}
-					ContactGroup newGroup = new ContactGroup(0, mGroupNameET
-							.getText().toString());
-					updateGroup(newGroup, group == null ? OPT.CREATE
-							: OPT.UPDATE);
+					if (group == null) {
+						ContactGroup newGroup = new ContactGroup(0,
+								mGroupNameET.getText().toString());
+						updateGroup(newGroup, OPT.CREATE);
+					} else {
+						group.setName(mGroupNameET.getText().toString());
+						updateGroup(group, OPT.UPDATE);
+					}
 				}
 
 			});
@@ -146,11 +178,14 @@ public class ContactsGroupActivity extends Activity {
 
 	private void updateGroup(ContactGroup group, OPT opt) {
 		if (opt == OPT.CREATE) {
-			contactService.createGroup(group, null);
+			contactService.createGroup(group, new Registrant(mLocalHandler,
+					CREATE_GROUP_DONE, null));
 		} else if (opt == OPT.UPDATE) {
-			contactService.updateGroup(group, null);
+			contactService.updateGroup(group, new Registrant(mLocalHandler,
+					UPDATE_GROUP_DONE, null));
 		} else {
-			contactService.removeGroup(group, null);
+			contactService.removeGroup(group, new Registrant(mLocalHandler,
+					REMOVE_GROUP_DONE, null));
 		}
 	}
 
@@ -162,13 +197,21 @@ public class ContactsGroupActivity extends Activity {
 		}
 
 	};
-	
-	
+
 	private OnClickListener createGroupButtonClickListener = new OnClickListener() {
 
 		@Override
 		public void onClick(View view) {
 			showDialog(null);
+		}
+
+	};
+
+	private OnClickListener deleteGroupButtonClickListener = new OnClickListener() {
+
+		@Override
+		public void onClick(View view) {
+			updateGroup((ContactGroup) view.getTag(), OPT.DELETE);
 		}
 
 	};
@@ -215,7 +258,66 @@ public class ContactsGroupActivity extends Activity {
 			TextView tv = (TextView) view
 					.findViewById(R.id.contacts_group_item_name);
 			tv.setText(((Group) wr.getItemObject()).getName());
+			View v = view
+					.findViewById(R.id.contacts_group_item_adapter_delelte_button);
+			v.setTag(wr.getItemObject());
+			v.setOnClickListener(deleteGroupButtonClickListener);
 			return view;
+		}
+
+	};
+
+	private Handler mLocalHandler = new Handler() {
+
+		@Override
+		public void handleMessage(Message msg) {
+			JNIResponse res = (JNIResponse) msg.obj;
+			switch (msg.what) {
+			case CREATE_GROUP_DONE:
+				if (res.getResult() == JNIResponse.Result.SUCCESS) {
+					final Group g = ((GroupServiceJNIResponse) res).g;
+					mDataset.add(new CommonAdapterItemWrapper() {
+
+						@Override
+						public Object getItemObject() {
+							return g;
+						}
+
+						@Override
+						public long getItemLongId() {
+							return g.getmGId();
+						}
+
+						@Override
+						public View getView() {
+							return null;
+						}
+
+					});
+				}
+				break;
+			case UPDATE_GROUP_DONE:
+				break;
+			case REMOVE_GROUP_DONE:
+				if (res.getResult() == JNIResponse.Result.SUCCESS) {
+					for (int i = 0; i < mDataset.size(); i++) {
+						Group g = (Group) mDataset.get(i).getItemObject();
+						if (((GroupServiceJNIResponse) res).g.getmGId() == g
+								.getmGId()) {
+							mDataset.remove(i);
+							break;
+						}
+					}
+				}
+				break;
+
+			}
+			if (res.getResult() == JNIResponse.Result.SUCCESS) {
+				adapter.notifyDataSetChanged();
+			}
+			if (mDialog != null) {
+				mDialog.dismiss();
+			}
 		}
 
 	};

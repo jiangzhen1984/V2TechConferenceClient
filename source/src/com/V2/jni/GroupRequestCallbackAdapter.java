@@ -48,4 +48,11 @@ public abstract class GroupRequestCallbackAdapter implements
 
 	}
 
+	@Override
+	public void onAddGroupInfo(V2Group group) {
+		
+	}
+	
+	
+
 }

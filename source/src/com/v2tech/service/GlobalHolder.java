@@ -185,6 +185,8 @@ public class GlobalHolder {
 			mConfGroup.add(g);
 		} else if (gType == Group.GroupType.CHATING) {
 			this.mCrowdGroup.add(g);
+		} else if (gType == Group.GroupType.CONTACT) {
+			this.mContactsGroup.add(g);
 		}
 		mGroupHolder.put(Long.valueOf(g.getmGId()), g);
 	}
@@ -249,9 +251,7 @@ public class GlobalHolder {
 		case ORG:
 			return this.mOrgGroup;
 		case CONTACT:
-			List<Group> cl = new CopyOnWriteArrayList<Group>();
-			cl.addAll(this.mContactsGroup);
-			return cl;
+			return mContactsGroup;
 		case CHATING:
 			List<Group> ct = new CopyOnWriteArrayList<Group>();
 			ct.addAll(this.mCrowdGroup);
@@ -338,10 +338,22 @@ public class GlobalHolder {
 		g.addUserToGroup(u);
 	}
 
-	public boolean removeConferenceGroup(long gid) {
-		for (Group g : mConfGroup) {
+	public boolean removeGroup(GroupType gType, long gid) {
+		List<Group> list = null;
+		if (gType == GroupType.CONFERENCE) {
+			list = mConfGroup;
+		} else if (gType == GroupType.CONTACT) {
+			list = mContactsGroup;
+		}else if (gType == GroupType.CHATING) {
+			list = mCrowdGroup;
+		}else if (gType == GroupType.ORG) {
+			list = mOrgGroup;
+		}
+		for (int i = 0; i < list.size(); i++) {
+			Group g = list.get(i);
 			if (g.getmGId() == gid) {
-				mConfGroup.remove(g);
+				list.remove(g);
+				mGroupHolder.remove(Long.valueOf(gid));
 				return true;
 			}
 		}

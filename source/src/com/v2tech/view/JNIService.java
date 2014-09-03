@@ -35,7 +35,7 @@ import com.V2.jni.ConfRequestCallbackAdapter;
 import com.V2.jni.FileRequest;
 import com.V2.jni.FileRequestCallbackAdapter;
 import com.V2.jni.GroupRequest;
-import com.V2.jni.GroupRequestCallback;
+import com.V2.jni.GroupRequestCallbackAdapter;
 import com.V2.jni.ImRequest;
 import com.V2.jni.ImRequestCallback;
 import com.V2.jni.ImRequestCallbackAdapter;
@@ -536,7 +536,7 @@ public class JNIService extends Service {
 
 	}
 
-	class GroupRequestCB implements GroupRequestCallback {
+	class GroupRequestCB extends GroupRequestCallbackAdapter {
 		private static final String TAG = "GroupRequestCB";
 		private JNICallbackHandler mCallbackHandler;
 
@@ -608,7 +608,7 @@ public class JNIService extends Service {
 					gName = nGroupID + "";
 				}
 				boolean flag = GlobalHolder.getInstance()
-						.removeConferenceGroup(nGroupID);
+						.removeGroup(GroupType.CONFERENCE, nGroupID);
 				// If flag is true, mean current user dosn't remove this group
 				// should notify
 				// Otherwise this user removed this group should not notify

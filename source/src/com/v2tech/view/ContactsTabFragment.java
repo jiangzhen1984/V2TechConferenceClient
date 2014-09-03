@@ -181,6 +181,7 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 			intentFilter = new IntentFilter();
 			intentFilter.addAction(JNIService.JNI_BROADCAST_GROUP_NOTIFICATION);
 			intentFilter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
+			intentFilter.addCategory(PublicIntent.DEFAULT_CATEGORY);
 			intentFilter.addAction(JNIService.JNI_BROADCAST_GROUP_USER_ADDED);
 			intentFilter.addAction(JNIService.JNI_BROADCAST_GROUP_USER_REMOVED);
 			intentFilter
@@ -190,6 +191,10 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 
 			intentFilter
 					.addAction(JNIService.JNI_BROADCAST_USER_UPDATE_NAME_OR_SIGNATURE);
+			
+			if (flag == TAG_CONTACT) {
+				intentFilter.addAction(PublicIntent.BROADCAST_REQUEST_UPDATE_CONTACTS_GROUP);
+			}
 		}
 		return intentFilter;
 	}
@@ -221,7 +226,8 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 					return null;
 				}
 				mLoaded = true;
-				for (Group g : l) {
+				for (int i = 0; i < l.size(); i++) {
+					Group g = l.get(i);
 					ListItem li = new ListItem(g, g.getLevel());
 					mItemList.add(li);
 					iterateGroup(g);
@@ -327,6 +333,10 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 					Message.obtain(mHandler, UPDATE_GROUP_STATUS).sendToTarget();
 					adapter.notifyDataSetChanged();
 				}
+			// Contacts group is updated
+			} else if (PublicIntent.BROADCAST_REQUEST_UPDATE_CONTACTS_GROUP.equals(intent
+					.getAction())) {
+				adapter.notifyDataSetChanged();
 			}
 		}
 

@@ -50,6 +50,8 @@ public class PublicIntent {
 	// extra key: newGid : group id
 	// we can get conference object from GlobalHolder
 	public static final String BROADCAST_NEW_CONFERENCE_NOTIFICATION = "com.v2tech.jni.broadcast.new_conference_notification";
+	//Request update contacts group
+	public static final String BROADCAST_REQUEST_UPDATE_CONTACTS_GROUP = "com.v2tech.broadcast.update_contacts_group";
 	
 
 }

@@ -111,4 +111,11 @@ public interface GroupRequestCallback {
 	 * @param sXml
 	 */
 	public void OnAddGroupUserInfoCallback(int groupType, long nGroupID, String sXml);
+	
+	
+	/**
+	 * new group created call back
+	 * @param group
+	 */
+	public void onAddGroupInfo(V2Group group);
 }

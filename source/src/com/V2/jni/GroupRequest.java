@@ -240,21 +240,19 @@ public class GroupRequest {
 
 	private void OnAddGroupInfo(int groupType, long nParentID, long nGroupID,
 			String sXml) {
-		Log.e("ImRequest UI", "OnAddGroupInfo:: ����һ����" + groupType + ":"
+		V2Log.d("OnAddGroupInfo:: " + groupType + ":"
 				+ nParentID + ":" + nGroupID + ":" + sXml);
-
-		// <friendgroup id='312' name='byhy'/>
-		// InputStream in=new ByteArrayInputStream(sXml.getBytes());
-		// Group group=XmlParserUtils.parserAddGroup(in);
-		//
-		// // ƴװ��Ϣ
-		// CreateGroupMsgType createMsgType = new CreateGroupMsgType();
-		// createMsgType.setmGroup(group);
-		//
-		// Intent createIntent = new Intent(SplashActivity.IM);
-		// createIntent.putExtra("MsgType", MsgType.CREATE_GROUP);
-		// createIntent.putExtra("MSG", createMsgType);
-		// context.sendOrderedBroadcast(createIntent,null);
+		
+		String gid = XmlAttributeExtractor.extract(sXml, "id='", "'");
+		String name =  XmlAttributeExtractor.extract(sXml, "name='", "'");
+		V2Group vg = new V2Group(Long.parseLong(gid), name, V2Group.TYPE_CONTACTS_GROUP);
+		for (WeakReference<GroupRequestCallback> wrcb : callbacks) {
+			Object obj = wrcb.get();
+			if (obj != null) {
+				GroupRequestCallback callback = (GroupRequestCallback) obj;
+				callback.onAddGroupInfo(vg);
+			}
+		}
 	}
 
 	/**
