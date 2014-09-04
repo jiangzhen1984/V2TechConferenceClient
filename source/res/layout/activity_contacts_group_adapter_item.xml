@@ -11,12 +11,14 @@
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:layout_centerVertical="true"
-        android:paddingBottom="10dp"
-        android:paddingLeft="8dp"
-        android:paddingRight="15dp"
-        android:paddingTop="10dp"
-        android:text="@string/activiy_contact_group_title_button_done"
-        android:textColor="@color/button_text_color"
+        android:paddingBottom="5dp"
+        android:paddingLeft="12dp"
+        android:paddingRight="12dp"
+        android:paddingTop="5dp"
+        android:layout_margin="10dp"
+        android:background="@drawable/rounded_corners_contacts_group_delete_button"
+        android:text="@string/activiy_contact_group_item_button_delete"
+        android:textColor="@color/common_white_color"
         android:textSize="@dimen/common_item_text_size" />
 
     <ImageView

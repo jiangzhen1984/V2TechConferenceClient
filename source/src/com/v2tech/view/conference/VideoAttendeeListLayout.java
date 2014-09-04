@@ -110,7 +110,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 					long id) {
 				if (listener != null) {
 					Wrapper wr = (Wrapper) view.getTag();
-					if (!wr.udc.isEnable()) {
+					if (wr.udc == null || !wr.udc.isEnable()) {
 						V2Log.i("User device config is disabled ");
 						return;
 					}

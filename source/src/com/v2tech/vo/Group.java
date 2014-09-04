@@ -249,20 +249,20 @@ public class Group implements Comparable<Group>{
 		}
 	}
 
-	public boolean findUser(User u, Group g) {
+	public Group findUser(User u, Group g) {
 		for (User tu : g.getUsers()) {
 			if (tu.getmUserId() == u.getmUserId()) {
-				return true;
+				return g;
 			}
 		}
 		for (int i = 0; i< mChild.size(); i++) {
 			Group subG = mChild.get(i);
-			boolean flag = findUser(u, subG);
-			if (flag == true) {
-				return flag;
+			Group gg = findUser(u, subG);
+			if (gg != null) {
+				return gg;
 			}
 		}
-		return false;
+		return null;
 	}
 
 	public List<User> searchUser(String text) {

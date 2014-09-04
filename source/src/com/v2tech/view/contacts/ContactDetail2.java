@@ -4,11 +4,11 @@ import java.util.List;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.text.Editable;
-import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.MotionEvent;
 import android.view.View;
@@ -31,6 +31,8 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 
 	private static final int UPDATE_USER_INFO = 2;
 	private static final int UPDATE_USER_INFO_DONE = 3;
+	
+	private static final int REQUEST_UPDATE_GROUP_CODE = 100;
 
 	private Context mContext;
 
@@ -54,14 +56,17 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 	private TextView mSignTV;
 	private TextView mDeptTV;
 	private TextView mCompanyTV;
+	
 
 	private EditText mNickNameET;
-
-	private View mAddContactButton;
+	private TextView mGroupNameTV;
+	private TextView mAddContactButton;
+	private View mUpdateContactGroupButton;
 
 	private boolean isUpdating;
 	private User currentUser;
-	private boolean isCanelFriend;
+	private boolean isRelation;
+	private Group belongs;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -74,6 +79,10 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 		u = GlobalHolder.getInstance().getUser(mUid);
 
 		mNickNameET = (EditText) findViewById(R.id.contact_user_detail_nick_name_et);
+		
+		mUpdateContactGroupButton = findViewById(R.id.contact_detail_contact_group_item_ly);
+		mUpdateContactGroupButton.setOnClickListener(mUpdateContactGroupButtonListener);
+		
 		this.overridePendingTransition(R.animator.alpha_from_0_to_1,
 				R.animator.alpha_from_1_to_0);
 
@@ -81,13 +90,20 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 		List<Group> friendGroup = GlobalHolder.getInstance().getGroup(
 				GroupType.CONTACT);
 		for (Group group : friendGroup) {
-			if (group.findUser(u, group)) {
-				isCanelFriend = true;
+			if ((belongs = group.findUser(u, group)) != null) {
+				isRelation = true;
+				break;
 			}
 		}
 
-		if (isCanelFriend == true) {
-			mAddContactButton.setVisibility(View.GONE);
+		if (isRelation == true) {
+			mAddContactButton.setText(mContext.getText(R.string.contacts_user_detail_delete_friend));
+			mUpdateContactGroupButton.setVisibility(View.VISIBLE);
+			mGroupNameTV =(TextView)findViewById(R.id.detail_detail_2_group_name);
+			mGroupNameTV.setText(belongs.getName());
+		} else {
+			mAddContactButton.setText(mContext.getText(R.string.contacts_user_detail_add_friend));
+			mUpdateContactGroupButton.setVisibility(View.GONE);
 		}
 	}
 
@@ -129,7 +145,7 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 		mReturnButtonTV = (TextView) findViewById(R.id.contact_detail_2_return_button);
 		mReturnButtonTV.setOnClickListener(mReturnButtonListener);
 
-		mAddContactButton = findViewById(R.id.contact_user_detail_add_friend);
+		mAddContactButton = (TextView)findViewById(R.id.contact_user_detail_add_friend);
 
 		mAccountTV = (TextView) findViewById(R.id.contact_user_detail_account_tv);
 		mGendarTV = (TextView) findViewById(R.id.contact_user_detail_gender_tv);
@@ -213,6 +229,19 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 		@Override
 		public void onClick(View view) {
 			onBackPressed();
+		}
+
+	};
+	
+	private View.OnClickListener mUpdateContactGroupButtonListener = new OnClickListener() {
+
+		@Override
+		public void onClick(View view) {
+			Intent i = new Intent();
+			i.setClass(mContext, UpdateContactGroupActivity.class);
+			i.putExtra("uid", currentUser.getmUserId());
+			i.putExtra("gid", belongs.getmGId());
+			startActivityForResult(i, REQUEST_UPDATE_GROUP_CODE);
 		}
 
 	};

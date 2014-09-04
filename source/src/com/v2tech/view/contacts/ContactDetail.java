@@ -253,7 +253,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 		mSignTV = (TextView) findViewById(R.id.contact_user_detail_user_signature_tv);
 
 		mTVArr = new View[] { mItemsContainer, mCompanyTitleTV,
-				mContactButtonContainer, mMoreDetailButton, mSignTV };
+				mContactButtonContainer, mMoreDetailButton, mSignTV};
 
 		// view for self
 		mSelfItemsContainer = findViewById(R.id.contact_detail_self_items_ly);

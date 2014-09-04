@@ -90,11 +90,11 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="top"
-                    android:gravity="top"
-                    android:text="TextView"
-                    android:singleLine="true"
                     android:ellipsize="end"
+                    android:gravity="top"
                     android:maxWidth="@dimen/detail_detail_name_max_width"
+                    android:singleLine="true"
+                    android:text="TextView"
                     android:textColor="@color/common_item_text_color" />
 
                 <TextView
@@ -102,16 +102,14 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="bottom"
-                    android:gravity="bottom"
-                   android:singleLine="true"
                     android:ellipsize="end"
+                    android:gravity="bottom"
                     android:maxWidth="@dimen/detail_detail_name_max_width"
+                    android:singleLine="true"
                     android:text="TextView"
-                    
                     android:textColor="@color/common_item_text_color" />
             </LinearLayout>
 
- 
             <TextView
                 android:id="@+id/contact_user_detail_invite_video"
                 android:layout_width="wrap_content"
@@ -138,7 +136,6 @@
                 android:layout_marginRight="@dimen/button_gap_horizontal"
                 android:background="@drawable/button_bg"
                 android:gravity="center"
-				android:visibility="invisible"
                 android:paddingBottom="@dimen/detail_detail_2_button_padding_vertical"
                 android:paddingLeft="@dimen/button_padding_horizontal"
                 android:paddingRight="@dimen/button_padding_horizontal"
@@ -166,13 +163,14 @@
                     android:layout_marginLeft="@dimen/contact_detail_2_item_margin_left"
                     android:layout_marginRight="@dimen/contact_detail_2_item_margin_right"
                     android:background="@drawable/rounded_corners_of_contact_user_detail_outer"
-                    android:orientation="vertical" >
+                    android:orientation="vertical"
+                    >
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="1dp"
-                        android:layout_marginRight="1dp"  >
+                        android:layout_marginRight="1dp" >
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -247,7 +245,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="1dp"
-                        android:layout_marginRight="1dp"  >
+                        android:layout_marginRight="1dp" >
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -320,7 +318,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="1dp"
-                        android:layout_marginRight="1dp"  >
+                        android:layout_marginRight="1dp" >
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -400,7 +398,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="1dp"
-                        android:layout_marginRight="1dp"  >
+                        android:layout_marginRight="1dp" >
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -479,7 +477,7 @@
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                       android:layout_marginLeft="1dp"
+                        android:layout_marginLeft="1dp"
                         android:layout_marginRight="1dp" >
 
                         <TextView
@@ -549,6 +547,61 @@
                             android:textColor="@color/activiy_contact_detail_item_color"
                             android:textSize="@dimen/common_item_text_size" />
                     </LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/contact_detail_contact_group_item_ly"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/detail_detail_2_item_margin_bottom"
+                    android:layout_marginLeft="@dimen/contact_detail_2_item_margin_left"
+                    android:layout_marginRight="@dimen/contact_detail_2_item_margin_right"
+                    android:layout_marginTop="15dp"
+                    android:background="@drawable/rounded_corners_of_contact_user_detail_outer"
+                    android:orientation="vertical" >
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="1dp"
+                        android:layout_marginRight="1dp" >
+
+                        <TextView
+                            android:id="@+id/detail_detail_2_group_title"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="@dimen/detail_detail_2_item_margin_bottom"
+                            android:layout_marginLeft="@dimen/contact_detail_2_item_margin_horizontal"
+                            android:layout_marginRight="@dimen/contact_detail_2_item_margin_horizontal"
+                            android:layout_marginTop="@dimen/detail_detail_2_item_margin_top"
+                            android:padding="10dp"
+                            android:text="@string/contacts_user_detail_item_group"
+                            android:textColor="@color/activiy_contact_detail_item_color"
+                            android:textSize="@dimen/common_item_text_size" />
+
+                        <TextView
+                            android:id="@+id/detail_detail_2_group_name"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_centerVertical="true"
+                            android:layout_marginLeft="@dimen/contact_detail_2_item_margin_horizontal"
+                            android:layout_toRightOf="@+id/detail_detail_2_group_title"
+                            android:ellipsize="end"
+                            android:gravity="center_vertical"
+                            android:singleLine="true"
+                            android:text="TextView"
+                            android:textColor="@color/activiy_contact_detail_item_color"
+                            android:textSize="@dimen/common_item_text_size" />
+
+                        <ImageView
+                            android:id="@+id/contacts_group_arrow_right"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentRight="true"
+                            android:layout_centerVertical="true"
+                            android:paddingRight="@dimen/contacts_group_view_arrow_padding_left"
+                            android:src="@drawable/arrow_right_gray" />
+                    </RelativeLayout>
                 </LinearLayout>
             </LinearLayout>
         </ScrollView>

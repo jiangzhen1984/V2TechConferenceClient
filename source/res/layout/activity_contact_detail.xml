@@ -749,6 +749,7 @@
                             android:textSize="@dimen/common_item_text_size" />
                     </LinearLayout>
                 </LinearLayout>
+                
             </LinearLayout>
         </ScrollView>
 

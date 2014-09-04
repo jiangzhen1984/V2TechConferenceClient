@@ -3,6 +3,7 @@ package com.V2.jni;
 import java.util.List;
 
 import com.V2.jni.ind.V2Group;
+import com.V2.jni.ind.V2User;
 
 public abstract class GroupRequestCallbackAdapter implements
 		GroupRequestCallback {
@@ -52,6 +53,14 @@ public abstract class GroupRequestCallbackAdapter implements
 	public void onAddGroupInfo(V2Group group) {
 		
 	}
+
+	@Override
+	public void OnMoveUserToGroup(int groupType, V2Group srcGroup,
+			V2Group desGroup, V2User u) {
+		
+	}
+	
+	
 	
 	
 

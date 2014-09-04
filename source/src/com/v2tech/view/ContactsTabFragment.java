@@ -78,7 +78,6 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		getActivity().registerReceiver(receiver, getIntentFilter());
 		String tag = this.getArguments().getString("tag");
 		if (PublicIntent.TAG_ORG.equals(tag)) {
 			flag = TAG_ORG;
@@ -86,6 +85,7 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 			flag = TAG_CONTACT;
 		}
 
+		getActivity().registerReceiver(receiver, getIntentFilter());
 		mContext = getActivity();
 
 		BitmapManager.getInstance().registerBitmapChangedListener(
@@ -225,6 +225,7 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 				if (mLoaded == true || l.size() <= 0) {
 					return null;
 				}
+				mItemList.clear();
 				mLoaded = true;
 				for (int i = 0; i < l.size(); i++) {
 					Group g = l.get(i);
@@ -336,7 +337,8 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 			// Contacts group is updated
 			} else if (PublicIntent.BROADCAST_REQUEST_UPDATE_CONTACTS_GROUP.equals(intent
 					.getAction())) {
-				adapter.notifyDataSetChanged();
+				mLoaded = false;
+				fillContactsGroup();
 			}
 		}
 

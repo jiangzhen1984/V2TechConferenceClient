@@ -54,6 +54,8 @@ public class ContactsGroupActivity extends Activity {
 	private BaseAdapter adapter;
 
 	private ContactsService contactService = new ContactsService();
+	
+	private boolean changed;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -78,12 +80,20 @@ public class ContactsGroupActivity extends Activity {
 
 	@Override
 	public void finish() {
-		Intent i = new Intent(
-				PublicIntent.BROADCAST_REQUEST_UPDATE_CONTACTS_GROUP);
-		i.addCategory(PublicIntent.DEFAULT_CATEGORY);
-		mContext.sendBroadcast(i);
+		if (changed) {
+			Intent i = new Intent(
+					PublicIntent.BROADCAST_REQUEST_UPDATE_CONTACTS_GROUP);
+			i.addCategory(PublicIntent.DEFAULT_CATEGORY);
+			mContext.sendBroadcast(i);
+		}
 		super.finish();
 	}
+	
+	@Override
+	public void onBackPressed() {
+		super.onBackPressed();
+	}
+	
 
 	private List<CommonAdapterItemWrapper> convert(List<Group> listGroup) {
 		List<CommonAdapterItemWrapper> ds = new ArrayList<CommonAdapterItemWrapper>(
@@ -318,6 +328,8 @@ public class ContactsGroupActivity extends Activity {
 			if (mDialog != null) {
 				mDialog.dismiss();
 			}
+			
+			changed = true;
 		}
 
 	};

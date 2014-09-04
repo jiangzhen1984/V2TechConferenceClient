@@ -4,6 +4,8 @@
   
   <string name="activiy_contact_group_title_button_done">完成</string>
   
+  <string name="activiy_contact_group_item_button_delete">删除</string>
+  
   <string name="activiy_contact_group_button_confirm">确定</string>
   
   <string name="activiy_contact_group_button_cancel">取消</string>
@@ -15,5 +17,7 @@
   <string name="activiy_contact_group_dialog_title_update">编辑分组</string>
   
   <string name="activiy_contact_group_dialog_group_name_required">请输入好友分组的名字</string>
+  
+  <string name="activiy_contact_update_group_error_msg_in_progess">正在更新..请稍后</string>
   
 </resources>

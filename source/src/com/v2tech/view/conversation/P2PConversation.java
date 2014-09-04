@@ -1222,7 +1222,7 @@ public class P2PConversation extends Activity implements
 			} else if (Intent.ACTION_SCREEN_ON.equals(intent.getAction())) {
 			} else if (Intent.ACTION_SCREEN_OFF.equals(intent.getAction())) {
 				if (uad.isVideoType()
-						&& (!uad.isConnected() && uad.isIncoming())) {
+						&& (uad.isConnected() && uad.isIncoming())) {
 					closeLocalCamera();
 					if (uad.isConnected()) {
 						closeRemoteVideo();
@@ -1230,7 +1230,7 @@ public class P2PConversation extends Activity implements
 				}
 			} else if (Intent.ACTION_USER_PRESENT.equals(intent.getAction())) {
 				if (uad.isVideoType()
-						&& (!uad.isConnected() && uad.isIncoming())) {
+						&& (uad.isConnected() && uad.isIncoming())) {
 					openLocalCamera();
 					if (uad.isConnected()) {
 						openRemoteVideo();

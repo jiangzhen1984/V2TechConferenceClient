@@ -8,7 +8,9 @@ import android.os.Message;
 import android.util.SparseArray;
 
 import com.V2.jni.util.V2Log;
+import com.v2tech.service.jni.GroupServiceJNIResponse;
 import com.v2tech.service.jni.JNIResponse;
+import com.v2tech.service.jni.RequestConfCreateResponse;
 
 /**
  * Abstract handler.
@@ -72,6 +74,24 @@ public abstract class AbstractHandler extends Handler {
 		}
 	}
 
+	
+	protected boolean checkParamNull(Registrant caller, Object... objs) {
+		boolean flag = false;
+		for (Object obj : objs) {
+			if (obj == null) {
+				flag = true;
+				break;
+			}
+		}
+		if (flag && caller != null) {
+			sendResult(caller, 	new JNIResponse(
+					JNIResponse.Result.INCORRECT_PAR));
+			return false;
+		}
+		return true;
+	}
+	
+	
 	/**
 	 * 
 	 * @param key
@@ -162,9 +182,11 @@ public abstract class AbstractHandler extends Handler {
 	protected void unRegisterListener(int key, Handler h, int what, Object obj) {
 		List<Registrant> list = registrantHolder.get(key);
 		if (list != null) {
-			for (Registrant re : list) {
+			for (int i = 0; i < list.size(); i++) {
+				Registrant re = list.get(i);
 				if (re.getHandler() == h && what == re.getWhat()) {
 					list.remove(re);
+					break;
 				}
 			}
 		}

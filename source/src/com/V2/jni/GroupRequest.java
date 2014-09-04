@@ -8,6 +8,7 @@ import android.content.Context;
 import android.util.Log;
 
 import com.V2.jni.ind.V2Group;
+import com.V2.jni.ind.V2User;
 import com.V2.jni.util.V2Log;
 import com.V2.jni.util.XmlAttributeExtractor;
 
@@ -304,10 +305,6 @@ public class GroupRequest {
 				GroupRequestCallback callback = (GroupRequestCallback) obj;
 				callback.OnInviteJoinGroupCallback(groupType, groupInfo,
 						userInfo, additInfo);
-
-				V2Log.d("OnInviteJoinGroup::callback===================>"
-						+ groupType + ":" + groupInfo + ":" + userInfo + ":"
-						+ additInfo);
 			}
 		}
 
@@ -315,19 +312,16 @@ public class GroupRequest {
 
 	private void OnMoveUserToGroup(int groupType, long srcGroupID,
 			long dstGroupID, long nUserID) {
-		Log.e("ImRequest UI", "OnMoveUserToGroup:: " + groupType + ":"
+		V2Log.d("OnMoveUserToGroup:: " + groupType + ":"
 				+ srcGroupID + ":" + dstGroupID + ":" + nUserID);
-
-		// ƴװ��Ϣ
-		// MoveGroupMsgType moveMsgtype = new MoveGroupMsgType();
-		// moveMsgtype.setnDstGroupID(dstGroupID);
-		// moveMsgtype.setnDstUserID(dstGroupID);
-		//
-		// // ͨ��㲥������Ϣ��֪ͨ,������������˻���
-		// Intent moveIntent = new Intent(SplashActivity.IM);
-		// moveIntent.putExtra("MsgType", MsgType.MOVE_GROUP);
-		// moveIntent.putExtra("MSG", moveMsgtype);
-		// context.sendOrderedBroadcast(moveIntent,null);
+		for (WeakReference<GroupRequestCallback> wrcb : callbacks) {
+			Object obj = wrcb.get();
+			if (obj != null) {
+				GroupRequestCallback callback = (GroupRequestCallback) obj;
+				callback.OnMoveUserToGroup(groupType, new V2Group(srcGroupID, "", groupType),
+						new V2Group(dstGroupID, "", groupType), new V2User(nUserID));
+			}
+		}
 	}
 
 	private void OnRefuseInviteJoinGroup(int groupType, long nGroupID,
