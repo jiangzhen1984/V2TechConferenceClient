@@ -693,12 +693,14 @@ public class JNIService extends Service {
 
 			if (GlobalHolder.getInstance().isInVideoCall()) {
 				GlobalState state = GlobalHolder.getInstance().getGlobalState();
-				// if in video automatically accept audio.
+				// if in video automatically accept audio and user never accept audio call.
 				// because audio and video use different message
-				if (state.getUid() == ind.getFromUserId()) {
+				if (state.getUid() == ind.getFromUserId() && !state.isVoiceConnected()) {
 					AudioRequest.getInstance().AcceptAudioChat(
 							ind.getGroupId(), ind.getFromUserId(),
 							V2GlobalEnum.REQUEST_TYPE_IM);
+					//mark voice state to connected
+					 GlobalHolder.getInstance().setVoiceConnectedState(true);
 				} else {
 					V2Log.i("Ignore audio call for others: "
 							+ ind.getFromUserId());

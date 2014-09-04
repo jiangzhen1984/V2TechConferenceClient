@@ -317,6 +317,10 @@ public class P2PConversation extends Activity implements
 			GlobalHolder.getInstance().setAudioState(flag, uid);
 		} else if (uad.isVideoType()) {
 			GlobalHolder.getInstance().setVideoState(flag, uid);
+			//If clear video state, we must clear voice connect state too.
+			if (!flag) {
+				GlobalHolder.getInstance().setVoiceConnectedState(false);
+			}
 		}
 	}
 

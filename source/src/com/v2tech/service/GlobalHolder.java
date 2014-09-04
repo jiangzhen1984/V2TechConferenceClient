@@ -25,9 +25,6 @@ import com.v2tech.vo.UserDeviceConfig;
 
 public class GlobalHolder {
 
-	public static final int STATE_IN_AUDIO_CONVERSATION = 0x00001;
-	public static final int STATE_IN_VIDEO_CONVERSATION = 0x00002;
-	public static final int STATE_IN_MEETING_CONVERSATION = 0x00004;
 
 	private static GlobalHolder holder;
 
@@ -406,23 +403,35 @@ public class GlobalHolder {
 		list.addAll(udcList);
 	}
 
+	
+	/**
+	 * Set current app audio state, also set voice connected state
+	 * @param flag
+	 * @param uid
+	 */
 	public void setAudioState(boolean flag, long uid) {
 		int st = this.mState.getState();
 		if (flag) {
-			st |= STATE_IN_AUDIO_CONVERSATION;
+			st |= GlobalState.STATE_IN_AUDIO_CONVERSATION;
 		} else {
-			st &= (~STATE_IN_AUDIO_CONVERSATION);
+			st &= (~GlobalState.STATE_IN_AUDIO_CONVERSATION);
 		}
 		this.mState.setState(st);
 		this.mState.setUid(uid);
+		setVoiceConnectedState(flag);
 	}
 
+	/**
+	 * set cuurent app video state
+	 * @param flag
+	 * @param uid
+	 */
 	public void setVideoState(boolean flag, long uid) {
 		int st = this.mState.getState();
 		if (flag) {
-			st |= STATE_IN_VIDEO_CONVERSATION;
+			st |= GlobalState.STATE_IN_VIDEO_CONVERSATION;
 		} else {
-			st &= (~STATE_IN_VIDEO_CONVERSATION);
+			st &= (~GlobalState.STATE_IN_VIDEO_CONVERSATION);
 		}
 		this.mState.setState(st);
 		this.mState.setUid(uid);
@@ -431,27 +440,40 @@ public class GlobalHolder {
 	public void setMeetingState(boolean flag, long gid) {
 		int st = this.mState.getState();
 		if (flag) {
-			st |= STATE_IN_MEETING_CONVERSATION;
+			st |= GlobalState.STATE_IN_MEETING_CONVERSATION;
 		} else {
-			st &= (~STATE_IN_MEETING_CONVERSATION);
+			st &= (~GlobalState.STATE_IN_MEETING_CONVERSATION);
 		}
 		this.mState.setState(st);
 		this.mState.setGid(gid);
 	}
+	
+	
+	public void setVoiceConnectedState(boolean flag) {
+		int st = this.mState.getState();
+		if (flag) {
+			st |= GlobalState.STATE_IN_VOICE_CONNECTED;
+		} else {
+			st &= (~GlobalState.STATE_IN_VOICE_CONNECTED);
+		}
+		this.mState.setState(st);
+	}
+	
+	
+	public boolean isVoiceConnected() {
+		return this.mState.isVoiceConnected();
+	}
 
 	public boolean isInAudioCall() {
-		int st = this.mState.getState();
-		return (st & STATE_IN_AUDIO_CONVERSATION) == STATE_IN_AUDIO_CONVERSATION;
+		return this.mState.isInAudioCall();
 	}
 
 	public boolean isInVideoCall() {
-		int st = this.mState.getState();
-		return (st & STATE_IN_VIDEO_CONVERSATION) == STATE_IN_VIDEO_CONVERSATION;
+		return mState.isInVideoCall();
 	}
 
 	public boolean isInMeeting() {
-		int st = this.mState.getState();
-		return (st & STATE_IN_MEETING_CONVERSATION) == STATE_IN_MEETING_CONVERSATION;
+		return mState.isInMeeting();
 	}
 	
 	public GlobalState getGlobalState() {
