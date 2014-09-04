@@ -1057,6 +1057,8 @@ public class VideoActivityV2 extends Activity {
 		// Add default device
 		if (udc == null) {
 			udc = new UserDeviceConfig(atd.getAttId(), "", null);
+			//Make sure current user device is enable
+			udc.setEnable(true);
 			atd.addDevice(udc);
 		}
 
@@ -1218,6 +1220,7 @@ public class VideoActivityV2 extends Activity {
 				ConferencMessageSyncService.class));
 		// clear current meeting state
 		GlobalHolder.getInstance().setMeetingState(false, 0);
+		mVideoHandler = null;
 	}
 
 	@Override
@@ -1241,7 +1244,7 @@ public class VideoActivityV2 extends Activity {
 		AudioManager audioManager;
 		audioManager = (AudioManager) mContext
 				.getSystemService(Context.AUDIO_SERVICE);
-		audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
+		audioManager.setMode(AudioManager.MODE_NORMAL);
 		audioManager.setSpeakerphoneOn(flag);
 	}
 
@@ -2117,6 +2120,11 @@ public class VideoActivityV2 extends Activity {
 				User ut = (User) (((AsyncResult) msg.obj).getResult());
 				Attendee at = findAttendee(ut.getmUserId());
 				if (msg.arg1 == 1) {
+					//for non-register user construct temp attendee
+					if (at == null) {
+						at = new Attendee(ut);
+						mAttendeeList.add(at);
+					}
 					doHandleNewUserEntered(at);
 				} else {
 					doHandleUserExited(at);

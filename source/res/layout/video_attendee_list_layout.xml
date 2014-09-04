@@ -88,6 +88,7 @@
         android:id="@+id/video_attendee_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="#ffffff"
         android:layout_below="@id/LinearLayout3"
         android:cacheColorHint="#00000000"
         android:divider="@null" >

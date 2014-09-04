@@ -8,9 +8,7 @@ import android.os.Message;
 import android.util.SparseArray;
 
 import com.V2.jni.util.V2Log;
-import com.v2tech.service.jni.GroupServiceJNIResponse;
 import com.v2tech.service.jni.JNIResponse;
-import com.v2tech.service.jni.RequestConfCreateResponse;
 
 /**
  * Abstract handler.
@@ -143,7 +141,8 @@ public abstract class AbstractHandler extends Handler {
 			V2Log.i(this.getClass().getName() + "  : Notify listener: " + key
 					+ " " + arg1 + "  " + arg2 + "  " + obj);
 		}
-		for (Registrant re : list) {
+		for (int i = 0; i < list.size(); i++) {
+			Registrant re = list.get(i);
 			Handler h = re.getHandler();
 			if (h != null) {
 				Message.obtain(h, re.getWhat(), arg1, arg2,
@@ -186,7 +185,7 @@ public abstract class AbstractHandler extends Handler {
 				Registrant re = list.get(i);
 				if (re.getHandler() == h && what == re.getWhat()) {
 					list.remove(re);
-					break;
+					i--;
 				}
 			}
 		}

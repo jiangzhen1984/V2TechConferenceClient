@@ -20,9 +20,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.v2tech.R;
+import com.v2tech.service.ContactsService;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.service.Registrant;
 import com.v2tech.service.UserService;
+import com.v2tech.vo.ContactGroup;
 import com.v2tech.vo.Group;
 import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.User;
@@ -40,6 +42,7 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 	private User u;
 	private LocalHandler lh = new LocalHandler();
 	private UserService us = new UserService();
+	private ContactsService contactService = new ContactsService();
 
 	private View mReturnButtonTV;
 	private TextView mNameTitleIV;
@@ -96,15 +99,8 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 			}
 		}
 
-		if (isRelation == true) {
-			mAddContactButton.setText(mContext.getText(R.string.contacts_user_detail_delete_friend));
-			mUpdateContactGroupButton.setVisibility(View.VISIBLE);
-			mGroupNameTV =(TextView)findViewById(R.id.detail_detail_2_group_name);
-			mGroupNameTV.setText(belongs.getName());
-		} else {
-			mAddContactButton.setText(mContext.getText(R.string.contacts_user_detail_add_friend));
-			mUpdateContactGroupButton.setVisibility(View.GONE);
-		}
+		updateContactGroup();
+		
 	}
 
 	@Override
@@ -159,6 +155,21 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 		mDeptTV = (TextView) findViewById(R.id.contact_user_detail_department_tv);
 		mCompanyTV = (TextView) findViewById(R.id.contact_user_detail_company_tv);
 
+	}
+	
+	
+	private void updateContactGroup() {
+		if (isRelation == true) {
+			mAddContactButton.setText(mContext.getText(R.string.contacts_user_detail_delete_friend));
+			mUpdateContactGroupButton.setVisibility(View.VISIBLE);
+			mGroupNameTV =(TextView)findViewById(R.id.detail_detail_2_group_name);
+			mGroupNameTV.setText(belongs.getName());
+		} else {
+			mAddContactButton.setText(mContext.getText(R.string.contacts_user_detail_add_friend));
+			mUpdateContactGroupButton.setVisibility(View.GONE);
+		}
+		
+		mAddContactButton.setOnClickListener(mAddOrRemoveContactButton);
 	}
 
 	private void showUserInfo() {
@@ -232,6 +243,28 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 		}
 
 	};
+	
+	private View.OnClickListener mAddOrRemoveContactButton = new OnClickListener() {
+
+		@Override
+		public void onClick(View view) {
+			if (isRelation) {
+				contactService.updateUserGroup(null,(ContactGroup)belongs,  u, null);
+				isRelation = false;
+			} else {
+				List<Group> list = GlobalHolder.getInstance().getGroup(GroupType.CONTACT);
+				if (list != null && list.size() > 0) {
+					contactService.updateUserGroup((ContactGroup)list.get(0), null, u, null);
+					isRelation = true;
+					belongs = (ContactGroup)list.get(0);
+				}
+			}
+			updateContactGroup();
+		}
+
+	};
+	
+	
 	
 	private View.OnClickListener mUpdateContactGroupButtonListener = new OnClickListener() {
 

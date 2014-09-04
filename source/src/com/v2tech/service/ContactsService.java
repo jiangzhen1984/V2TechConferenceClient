@@ -98,23 +98,46 @@ public class ContactsService extends AbstractHandler {
 	}
 
 	/**
-	 * Update User to specific group and remove user from origin group
+	 * Update User to specific group and remove user from origin group.<br>
+	 * Add new contact if srcGroup is null.<br>
+	 * Remove contact if desGroup is null.<br>
 	 * 
-	 * @param group
+	 * @param desGroup
+	 *            if desGroup is null, remove contact from group
+	 * @param srcGroup
+	 *            if srcGroup is null, means add new contact to group
 	 * @param user
 	 * @param caller
 	 */
 	public void updateUserGroup(ContactGroup desGroup, ContactGroup srcGroup,
 			User user, Registrant caller) {
-		if (!checkParamNull(caller, new Object[] { srcGroup, desGroup, user })) {
+		if (!checkParamNull(caller, new Object[] { user })) {
 			return;
 		}
-		
-		
-		// Initialize time out message
-		initTimeoutMessage(UPDATE_CONTACT_BELONGS_GROUP, DEFAULT_TIME_OUT_SECS, caller);
-		GroupRequest.getInstance().moveUserToGroup(Group.GroupType.CONTACT.intValue(),
-				 desGroup.getmGId(),srcGroup.getmGId(), user.getmUserId());
+		// If srcGroup is null, means add new contact
+		if (srcGroup == null && desGroup != null) {
+			StringBuffer attendees = new StringBuffer();
+			attendees.append("<userlist> ");
+			attendees.append(" <user id='" + user.getmUserId() + " ' />");
+			attendees.append("</userlist>");
+			GroupRequest.getInstance().inviteJoinGroup(
+					GroupType.CONTACT.intValue(),
+					"<friendgroup id =\"" + desGroup.getmGId() + "\" />",
+					attendees.toString(), "");
+		// remove contact
+		} else if (desGroup == null && srcGroup != null) {
+			GroupRequest.getInstance().delGroupUser(
+					GroupType.CONTACT.intValue(), srcGroup.getmGId(),
+					user.getmUserId());
+		//move contact to other group
+		} else {
+			// Initialize time out message
+			initTimeoutMessage(UPDATE_CONTACT_BELONGS_GROUP,
+					DEFAULT_TIME_OUT_SECS, caller);
+			GroupRequest.getInstance().moveUserToGroup(
+					Group.GroupType.CONTACT.intValue(), srcGroup.getmGId(),
+					desGroup.getmGId(), user.getmUserId());
+		}
 	}
 
 	class GroupRequestCB extends GroupRequestCallbackAdapter {
@@ -181,14 +204,13 @@ public class ContactsService extends AbstractHandler {
 					.sendToTarget();
 
 		}
-		
-		
-		public  void OnMoveUserToGroup(int groupType,V2Group srcGroup,
+
+		public void OnMoveUserToGroup(int groupType, V2Group srcGroup,
 				V2Group desGroup, V2User u) {
 			JNIResponse jniRes = new GroupServiceJNIResponse(
 					GroupServiceJNIResponse.Result.SUCCESS);
-			Message.obtain(mCallbackHandler, UPDATE_CONTACT_BELONGS_GROUP, jniRes)
-					.sendToTarget();
+			Message.obtain(mCallbackHandler, UPDATE_CONTACT_BELONGS_GROUP,
+					jniRes).sendToTarget();
 		}
 
 	}

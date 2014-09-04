@@ -11,6 +11,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnFocusChangeListener;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RelativeLayout;
@@ -39,6 +40,7 @@ public class UpdateContactGroupActivity extends Activity {
 	private long originGroupId;
 	private long userId;
 	private RadioButton[] rbs;
+	private Toast mToast;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -110,6 +112,11 @@ public class UpdateContactGroupActivity extends Activity {
 					R.dimen.contact_detail_2_item_margin_horizontal);
 			rl.addView(rb, rightll);
 			rbs[i] = rb;
+
+			if (g.getmGId() == originGroupId) {
+				rb.setSelected(true);
+				rb.setChecked(true);
+			}
 		}
 	}
 
@@ -124,10 +131,14 @@ public class UpdateContactGroupActivity extends Activity {
 		public void onClick(View view) {
 			synchronized (state) {
 				if (state == STATE.UPDATING) {
-					Toast.makeText(
-							mContext,
-							R.string.activiy_contact_update_group_error_msg_in_progess,
-							Toast.LENGTH_SHORT).show();
+					if (mToast == null) {
+						mToast= Toast.makeText(
+								mContext,
+								R.string.activiy_contact_update_group_error_msg_in_progess,
+								Toast.LENGTH_SHORT);
+					}
+					mToast.cancel();
+					mToast.show();
 					return;
 				}
 				state = STATE.UPDATING;

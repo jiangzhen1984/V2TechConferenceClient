@@ -23,6 +23,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
 
@@ -34,7 +35,7 @@ import com.v2tech.view.bo.GroupUserObject;
 import com.v2tech.view.bo.UserStatusObject;
 import com.v2tech.view.contacts.ContactGroupView;
 import com.v2tech.view.contacts.ContactUserView;
-import com.v2tech.vo.CrowdGroup;
+import com.v2tech.view.contacts.ContactsGroupActivity;
 import com.v2tech.vo.Group;
 import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.User;
@@ -117,6 +118,9 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 			}
 
 		});
+		if (flag == TAG_CONTACT) {
+			mContactsContainer.setOnItemLongClickListener(mContactGroupManagementListener);
+		}
 		mContactsContainer.setDivider(null);
 
 		// TextView tv = (TextView) rootView.findViewById(R.id.fragment_title);
@@ -598,6 +602,20 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 				}
 			}
 		}
+	};
+	
+	private OnItemLongClickListener mContactGroupManagementListener = new OnItemLongClickListener() {
+
+		@Override
+		public boolean onItemLongClick(AdapterView<?> arg0, View arg1,
+				int arg2, long arg3) {
+			Intent i = new Intent();
+			i.setClass(mContext, ContactsGroupActivity.class);
+			i.addCategory(PublicIntent.DEFAULT_CATEGORY);
+			startActivity(i);
+			return true;
+		}
+		
 	};
 
 	class ListItem {

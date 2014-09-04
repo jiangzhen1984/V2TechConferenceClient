@@ -25,6 +25,7 @@ public class SurfaceHolderObserver implements SurfaceHolder.Callback {
 		this.service = service;
 		this.udc = udc;
 		state = State.CLOSED;
+		isValid = true;
 	}
 
 	@Override

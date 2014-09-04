@@ -35,7 +35,6 @@ import com.V2.jni.util.V2Log;
 import com.v2tech.R;
 import com.v2tech.db.V2techSearchContentProvider;
 import com.v2tech.util.Notificator;
-import com.v2tech.view.contacts.ContactsGroupActivity;
 import com.v2tech.view.widget.TitleBar;
 import com.v2tech.vo.Conference;
 import com.v2tech.vo.Conversation;
@@ -418,10 +417,6 @@ public class MainActivity extends FragmentActivity implements
 			}
 				break;
 			case R.drawable.conversation_call_button:
-				Intent i = new Intent();
-				i.setClass(mContext, ContactsGroupActivity.class);
-				i.addCategory(PublicIntent.DEFAULT_CATEGORY);
-				startActivity(i);
 				break;
 			case R.drawable.conversation_sms_button:
 				break;

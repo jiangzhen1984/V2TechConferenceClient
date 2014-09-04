@@ -82,13 +82,23 @@ public class GroupRequest {
 	public native void createGroup(int groupType, String groupInfo,
 			String userInfo);
 
-	// ������˼�����
-	/*
+	/**
+	 * 
+	 * @param groupType
+	 * @param groupInfo
+	 * @param userInfo
+	 * @param additInfo
 	 */
 	public native void inviteJoinGroup(int groupType, String groupInfo,
 			String userInfo, String additInfo);
 
-	// �ƶ����ѵ������
+	/**
+	 * 
+	 * @param groupType
+	 * @param srcGroupID
+	 * @param dstGroupID
+	 * @param nUserID
+	 */
 	public native void moveUserToGroup(int groupType, long srcGroupID,
 			long dstGroupID, long nUserID);
 
