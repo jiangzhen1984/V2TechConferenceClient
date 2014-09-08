@@ -1,8 +1,6 @@
 package com.v2tech.vo;
 
 import com.V2.jni.util.V2Log;
-import com.v2tech.vo.Group.GroupType;
-
 
 public class ConferenceConversation extends Conversation {
 
@@ -11,11 +9,12 @@ public class ConferenceConversation extends Conversation {
 
 	public ConferenceConversation(Group g) {
 		super();
-		this.g = g;
-		if (g != null) {
-			super.mExtId = g.getmGId();
-			super.mType = g.getGroupType() == GroupType.CONFERENCE ? TYPE_CONFERNECE : TYPE_GROUP;
+		if (g == null) {
+			throw new NullPointerException(" group is null");
 		}
+		this.g = g;
+		super.mExtId = g.getmGId();
+		super.mType = TYPE_CONFERNECE;
 	}
 
 	@Override
@@ -31,8 +30,8 @@ public class ConferenceConversation extends Conversation {
 		if (g != null) {
 			User u = g.getOwnerUser();
 			V2Log.e(TAG, "group name : " + g.getName());
-			//TODO need use localization
-			return u == null ? g.getOwner() + "" : "创建人:"+u.getName();
+			// TODO need use localization
+			return u == null ? "" : "创建人:" + u.getName();
 		}
 		return super.getMsg();
 	}
@@ -44,8 +43,7 @@ public class ConferenceConversation extends Conversation {
 		}
 		return super.getDate();
 	}
-	
-	
+
 	public Group getGroup() {
 		return g;
 	}

@@ -2,6 +2,7 @@ package com.v2tech.view.group;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -31,6 +32,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ScrollView;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.v2tech.R;
@@ -42,16 +44,18 @@ import com.v2tech.service.jni.JNIResponse;
 import com.v2tech.view.JNIService;
 import com.v2tech.view.PublicIntent;
 import com.v2tech.vo.CrowdGroup;
+import com.v2tech.vo.CrowdGroup.AuthType;
 import com.v2tech.vo.Group;
 import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.User;
 
-public class GroupCreateActivity extends Activity {
+public class CrowdCreateActivity extends Activity {
 
 	private static final int UPDATE_LIST_VIEW = 1;
 	private static final int UPDATE_ATTENDEES = 2;
 	private static final int UPDATE_SEARCHED_USER_LIST = 3;
 	private static final int CREATE_CROWD_RESPONSE = 4;
+	private static final int UPDATE_CROWD_RESPONSE = 5;
 
 	private static final int PAD_LAYOUT = 1;
 	private static final int PHONE_LAYOUT = 0;
@@ -65,9 +69,8 @@ public class GroupCreateActivity extends Activity {
 	private View mGroupConfirmButton;
 	private EditText mGroupTitleET;
 	private View mReturnButton;
-
+	private Spinner mRuleSpinner;
 	private LinearLayout mErrorNotificationLayout;
-
 	private LinearLayout mAttendeeContainer;
 
 	private View mScroller;
@@ -77,6 +80,8 @@ public class GroupCreateActivity extends Activity {
 	private List<ListItem> mItemList = new ArrayList<ListItem>();
 	private List<ListItem> mCacheItemList;
 	private List<Group> mGroupList;
+	private CrowdGroup crowd;
+	private CrowdGroupService cg = new CrowdGroupService();
 
 	// Used to save current selected user
 	private Set<User> mUserList = new HashSet<User>();
@@ -107,6 +112,8 @@ public class GroupCreateActivity extends Activity {
 		mGroupConfirmButton.setOnClickListener(confirmButtonListener);
 
 		mGroupTitleET = (EditText) findViewById(R.id.group_create_group_name);
+		mRuleSpinner = (Spinner) findViewById(R.id.group_create_group_rule);
+		mRuleSpinner.setSelection(0);
 
 		new LoadContactsAT().execute();
 
@@ -116,11 +123,14 @@ public class GroupCreateActivity extends Activity {
 		mScroller = findViewById(R.id.group_create_scroll_view);
 		mReturnButton = findViewById(R.id.group_create_return_button);
 		mReturnButton.setOnClickListener(mReturnListener);
+		loadCache();
 	}
 
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
+		//call clear to remove callback from JNI.
+		cg.clear();
 	}
 
 	@Override
@@ -146,7 +156,26 @@ public class GroupCreateActivity extends Activity {
 	public void onBackPressed() {
 		super.onBackPressed();
 		setResult(Activity.RESULT_CANCELED, null);
-		// finish();
+	}
+
+	/**
+	 * For invite new member action
+	 */
+	private void loadCache() {
+		crowd = (CrowdGroup) GlobalHolder.getInstance().getGroupById(
+				GroupType.CHATING, getIntent().getExtras().getLong("cid"));
+		if (crowd != null) {
+			mRuleSpinner.setEnabled(false);
+			if (crowd.getAuthType() == AuthType.ALLOW_ALL) {
+				mRuleSpinner.setSelection(0);
+			} else if (crowd.getAuthType() == AuthType.QULIFICATION) {
+				mRuleSpinner.setSelection(1);
+			} else if (crowd.getAuthType() == AuthType.NEVER) {
+				mRuleSpinner.setSelection(2);
+			}
+			mGroupTitleET.setEnabled(false);
+			mGroupTitleET.setText(crowd.getName());
+		}
 	}
 
 	// FIXME duplicate code should be merge with conference create and contacts
@@ -419,14 +448,31 @@ public class GroupCreateActivity extends Activity {
 				mGroupTitleET.requestFocus();
 				return;
 			}
-			// TODO set call back
-			CrowdGroupService cg = new CrowdGroupService();
-			CrowdGroup crowd = new CrowdGroup(0, mGroupTitleET.getText()
-					.toString());
-			crowd.addUserToGroup(mUserList);
-			cg.createGroup(crowd, new Registrant(mLocalHandler,
-					CREATE_CROWD_RESPONSE, crowd));
-			view.setEnabled(false);
+
+			
+			if (crowd != null) {
+				List<User> newMembers = new ArrayList<User>(mUserList);
+				cg.inviteMember(crowd,  newMembers, new Registrant(mLocalHandler,
+						UPDATE_CROWD_RESPONSE, crowd));
+			} else  {
+				CrowdGroup crowd = new CrowdGroup(0, mGroupTitleET.getText()
+						.toString(), GlobalHolder.getInstance().getCurrentUser(),
+						new Date());
+				crowd.addUserToGroup(mUserList);
+				int pos = mRuleSpinner.getSelectedItemPosition();
+				// Position match with R.array.crowd_rules
+				if (pos == 0) {
+					crowd.setAuthType(CrowdGroup.AuthType.ALLOW_ALL);
+				} else if (pos == 1) {
+					crowd.setAuthType(CrowdGroup.AuthType.QULIFICATION);
+				} else if (pos == 2) {
+					crowd.setAuthType(CrowdGroup.AuthType.NEVER);
+				}
+	
+				cg.createCrowdGroup(crowd, new Registrant(mLocalHandler,
+						CREATE_CROWD_RESPONSE, crowd));
+				view.setEnabled(false);
+			}
 		}
 
 	};
@@ -531,22 +577,28 @@ public class GroupCreateActivity extends Activity {
 				JNIResponse recr = (JNIResponse) msg.obj;
 				if (recr.getResult() == JNIResponse.Result.SUCCESS) {
 					CrowdGroup cg = (CrowdGroup) recr.callerObject;
-					long id = ((CreateCrowdResponse)recr).getGroupId();
+					long id = ((CreateCrowdResponse) recr).getGroupId();
 					cg.setGId(id);
-					//add group to global cache
-					GlobalHolder.getInstance().addGroupToList(GroupType.CHATING, cg);
-					//send broadcast to inform new crowd notification
+					// add group to global cache
+					GlobalHolder.getInstance().addGroupToList(
+							GroupType.CHATING, cg);
+					// send broadcast to inform new crowd notification
 					Intent i = new Intent();
 					i.setAction(PublicIntent.BROADCAST_NEW_CROWD_NOTIFICATION);
 					i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
 					i.putExtra("crowd", id);
 					mContext.sendBroadcast(i);
-					//finish current activity
+					// finish current activity
 					finish();
 				} else {
 					mErrorNotificationLayout.setVisibility(View.VISIBLE);
 				}
 			}
+				break;
+			case UPDATE_CROWD_RESPONSE:
+				crowd.addUserToGroup(mUserList);
+				// finish current activity
+				finish();
 				break;
 			}
 		}

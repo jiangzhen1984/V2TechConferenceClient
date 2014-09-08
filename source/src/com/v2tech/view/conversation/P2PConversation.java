@@ -689,6 +689,7 @@ public class P2PConversation extends Activity implements
 
 		mReverseCameraButton = findViewById(R.id.fragment_conversation_reverse_camera_button);
 		mReverseCameraButton.setVisibility(View.VISIBLE);
+		mReverseCameraButton.bringToFront();
 		mReverseCameraButton.setOnClickListener(surfaceViewListener);
 
 	}

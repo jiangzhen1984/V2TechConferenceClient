@@ -1,6 +1,7 @@
 package com.V2.jni;
 
 import java.lang.ref.WeakReference;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -17,10 +18,10 @@ public class GroupRequest {
 	public boolean loginResult;
 	private static GroupRequest mGroupRequest;
 
-	private List<WeakReference<GroupRequestCallback>> callbacks;
+	private List<WeakReference<GroupRequestCallback>> mCallbacks;
 
 	private GroupRequest(Context context) {
-		callbacks = new CopyOnWriteArrayList<WeakReference<GroupRequestCallback>>();
+		mCallbacks = new CopyOnWriteArrayList<WeakReference<GroupRequestCallback>>();
 	};
 
 	public static synchronized GroupRequest getInstance(Context context) {
@@ -49,10 +50,18 @@ public class GroupRequest {
 
 	public native void unInitialize();
 
-	// ɾ��һ�����ѷ���
+	/**
+	 * <ul>delete group. If groupType is {@link V2Group#TYPE_CROWD}, dismiss current crowd</ul>
+	 * @param groupType
+	 * @param nGroupID
+	 */
 	public native void delGroup(int groupType, long nGroupID);
 
-	// �뿪һ�����ѷ���
+	/**
+	 * <ul>quit from group if user is not administrator or creator</ul>
+	 * @param groupType {@link V2Group}
+	 * @param nGroupID
+	 */
 	public native void leaveGroup(int groupType, long nGroupID);
 
 	// ɾ��һ�����ѷ���
@@ -83,11 +92,24 @@ public class GroupRequest {
 			String userInfo);
 
 	/**
+	 * <ul>Invite user to join group.<ul>
+	 * <ul> If groupType is {@link V2Group#TYPE_CONF} <br>
+	 * groupInfo is :
+	 * {@code <conf canaudio="1" candataop="1" canvideo="1" conftype="0" haskey="0" 
+	 * id="0" key=""  layout="1" lockchat="0" lockconf="0" lockfiletrans="0"
+	 * mode="2"  pollingvideo="0"  subject="ss"  chairuserid='0'
+	 * chairnickname=''>  </conf>}
+	 * </ul>
 	 * 
-	 * @param groupType
-	 * @param groupInfo
-	 * @param userInfo
-	 * @param additInfo
+	 * <ul>
+	 * If groupType is {@link V2Group#TYPE_CROWD}<br>
+	 * groupInfo is:
+	 * {@code <crowd id="" name="" authtype="" size="" announcement=""  summary="" />}
+	 * </ul>
+	 * @param groupType {@code V2Group}
+	 * @param groupInfo group information
+	 * @param userInfo {@code <userlist><user id='1' /><user id='2' /></userlist>}
+	 * @param additInfo 
 	 */
 	public native void inviteJoinGroup(int groupType, String groupInfo,
 			String userInfo, String additInfo);
@@ -106,15 +128,31 @@ public class GroupRequest {
 
 	/**********************************************/
 
-	// �ܾ�����������Ⱥ
+	/**
+	 * 
+	 * @param groupType
+	 * @param nGroupID
+	 * @param nUserID
+	 * @param reason
+	 */
 	public native void refuseInviteJoinGroup(int groupType, long nGroupID,
 			long nUserID, String reason);
 
-	// �������Ⱥ
+	/**
+	 * 
+	 * @param groupType
+	 * @param sGroupInfo
+	 * @param sAdditInfo
+	 */
 	public native void applyJoinGroup(int groupType, String sGroupInfo,
 			String sAdditInfo);
 
-	// ���ܼ���Ⱥ
+	/**
+	 * 
+	 * @param groupType
+	 * @param sGroupInfo
+	 * @param nUserID
+	 */
 	public native void acceptApplyJoinGroup(int groupType, String sGroupInfo,
 			long nUserID);
 
@@ -133,9 +171,17 @@ public class GroupRequest {
 	 * @param t
 	 * @param nUserID
 	 */
-	public void OnAcceptInviteJoinGroup(int groupType, long groupId,
+	private void OnAcceptInviteJoinGroup(int groupType, long groupId,
 			long nUserID) {
-
+		V2Log.e("Group Request  OnAcceptInviteJoinGroup  ==>" + groupType + "   " + groupId
+				+ "  " + nUserID);
+		for (WeakReference<GroupRequestCallback> wrcb : mCallbacks) {
+			Object obj = wrcb.get();
+			if (obj != null) {
+				GroupRequestCallback callback = (GroupRequestCallback) obj;
+				callback.OnAcceptInviteJoinGroup(groupType, groupId, nUserID);
+			}
+		}
 	}
 
 	public void OnConfSyncOpenVideo(String str) {
@@ -197,8 +243,8 @@ public class GroupRequest {
 		} else if (groupType == V2Group.TYPE_ORG) {
 			list = XmlAttributeExtractor.parseOrgGroup(sXml);
 		}
-		for (int i = 0; i < this.callbacks.size(); i++) {
-			WeakReference<GroupRequestCallback> wrcb = this.callbacks.get(i);
+		for (int i = 0; i < this.mCallbacks.size(); i++) {
+			WeakReference<GroupRequestCallback> wrcb = this.mCallbacks.get(i);
 			Object obj = wrcb.get();
 			if (obj != null) {
 				GroupRequestCallback callback = (GroupRequestCallback) obj;
@@ -209,13 +255,23 @@ public class GroupRequest {
 	}
 
 	public void addCallback(GroupRequestCallback callback) {
-		this.callbacks.add(new WeakReference<GroupRequestCallback>(callback));
+		this.mCallbacks.add(new WeakReference<GroupRequestCallback>(callback));
 	}
+	
+	public void removeCallback(GroupRequestCallback callback) {
+		for (int i = 0; i < mCallbacks.size(); i++) {
+			if (mCallbacks.get(i).get() == callback) {
+				mCallbacks.remove(i);
+				break;
+			}
+		}
+	}
+	
 
 	private void OnGetGroupUserInfo(int groupType, long nGroupID, String sXml) {
 		V2Log.d("OnGetGroupUserInfo -> " + groupType + ":" + nGroupID + ":"
 				+ sXml);
-		for (WeakReference<GroupRequestCallback> wrcb : callbacks) {
+		for (WeakReference<GroupRequestCallback> wrcb : mCallbacks) {
 			Object obj = wrcb.get();
 			if (obj != null) {
 				GroupRequestCallback callback = (GroupRequestCallback) obj;
@@ -228,7 +284,7 @@ public class GroupRequest {
 	private void OnAddGroupUserInfo(int groupType, long nGroupID, String sXml) {
 		V2Log.d("OnAddGroupUserInfo ->" + groupType + ":" + nGroupID + ":"
 				+ sXml);
-		for (WeakReference<GroupRequestCallback> wrcb : callbacks) {
+		for (WeakReference<GroupRequestCallback> wrcb : mCallbacks) {
 			Object obj = wrcb.get();
 			if (obj != null) {
 				GroupRequestCallback callback = (GroupRequestCallback) obj;
@@ -240,7 +296,7 @@ public class GroupRequest {
 	private void OnDelGroupUser(int groupType, long nGroupID, long nUserID) {
 		V2Log.d("OnDelGroupUser -> " + groupType + ":" + nGroupID + ":"
 				+ nUserID);
-		for (WeakReference<GroupRequestCallback> wrcb : callbacks) {
+		for (WeakReference<GroupRequestCallback> wrcb : mCallbacks) {
 			Object obj = wrcb.get();
 			if (obj != null) {
 				GroupRequestCallback callback = (GroupRequestCallback) obj;
@@ -254,10 +310,10 @@ public class GroupRequest {
 		V2Log.d("OnAddGroupInfo:: " + groupType + ":"
 				+ nParentID + ":" + nGroupID + ":" + sXml);
 		
-		String gid = XmlAttributeExtractor.extract(sXml, "id='", "'");
-		String name =  XmlAttributeExtractor.extract(sXml, "name='", "'");
-		V2Group vg = new V2Group(Long.parseLong(gid), name, V2Group.TYPE_CONTACTS_GROUP);
-		for (WeakReference<GroupRequestCallback> wrcb : callbacks) {
+		String gid = XmlAttributeExtractor.extract(sXml, " id='", "'");
+		String name =  XmlAttributeExtractor.extract(sXml, " name='", "'");
+		V2Group vg = new V2Group(Long.parseLong(gid), name, groupType);
+		for (WeakReference<GroupRequestCallback> wrcb : mCallbacks) {
 			Object obj = wrcb.get();
 			if (obj != null) {
 				GroupRequestCallback callback = (GroupRequestCallback) obj;
@@ -276,7 +332,7 @@ public class GroupRequest {
 	private void OnModifyGroupInfo(int groupType, long nGroupID, String sXml) {
 		V2Log.d("OnModifyGroupInfo::-->" + groupType + ":" + nGroupID + ":"
 				+ sXml);
-		for (WeakReference<GroupRequestCallback> wrcb : callbacks) {
+		for (WeakReference<GroupRequestCallback> wrcb : mCallbacks) {
 			Object obj = wrcb.get();
 			if (obj != null) {
 				GroupRequestCallback callback = (GroupRequestCallback) obj;
@@ -296,7 +352,7 @@ public class GroupRequest {
 	private void OnDelGroup(int groupType, long nGroupID, boolean bMovetoRoot) {
 		V2Log.d("OnDelGroup::==>" + groupType + ":" + nGroupID + ":"
 				+ bMovetoRoot);
-		for (WeakReference<GroupRequestCallback> wrcb : callbacks) {
+		for (WeakReference<GroupRequestCallback> wrcb : mCallbacks) {
 			Object obj = wrcb.get();
 			if (obj != null) {
 				GroupRequestCallback callback = (GroupRequestCallback) obj;
@@ -309,12 +365,34 @@ public class GroupRequest {
 			String userInfo, String additInfo) {
 		V2Log.d("OnInviteJoinGroup::==>" + groupType + ":" + groupInfo + ":"
 				+ userInfo + ":" + additInfo);
-		for (WeakReference<GroupRequestCallback> wrcb : callbacks) {
+		String id = XmlAttributeExtractor.extract(groupInfo, " id='", "'");
+		V2Group group = new V2Group(Long.parseLong(id), groupType);
+		if (groupType == V2Group.TYPE_CONF) {
+			String name = XmlAttributeExtractor.extract(groupInfo, "subject='", "'");
+			String starttime = XmlAttributeExtractor.extract(groupInfo, "starttime='", "'");
+			String createuserid = XmlAttributeExtractor.extract(groupInfo, "createuserid='", "'");
+			group.name = name;
+			group.createTime = new Date(Long.parseLong(starttime) * 1000);
+			group.chairMan = new V2User(Long.valueOf(createuserid));
+			group.owner = new V2User(Long.valueOf(createuserid));
+			
+		} else if (groupType == V2Group.TYPE_CROWD) {
+			String createuserid = XmlAttributeExtractor.extract(userInfo, " id='", "'");
+			String auth = XmlAttributeExtractor.extract(groupInfo, "authtype='", "'");
+			String uname = XmlAttributeExtractor.extract(userInfo, "nickname='", "'");
+			String name = XmlAttributeExtractor.extract(groupInfo, "name='", "'");
+			group.name = name;
+			group.creator = new V2User(Long.valueOf(createuserid), uname);
+			if (auth != null) {
+				group.authType = Integer.parseInt(auth);
+			}
+		}
+		
+		for (WeakReference<GroupRequestCallback> wrcb : mCallbacks) {
 			Object obj = wrcb.get();
 			if (obj != null) {
 				GroupRequestCallback callback = (GroupRequestCallback) obj;
-				callback.OnInviteJoinGroupCallback(groupType, groupInfo,
-						userInfo, additInfo);
+				callback.OnInviteJoinGroupCallback(group);
 			}
 		}
 
@@ -324,7 +402,7 @@ public class GroupRequest {
 			long dstGroupID, long nUserID) {
 		V2Log.d("OnMoveUserToGroup:: " + groupType + ":"
 				+ srcGroupID + ":" + dstGroupID + ":" + nUserID);
-		for (WeakReference<GroupRequestCallback> wrcb : callbacks) {
+		for (WeakReference<GroupRequestCallback> wrcb : mCallbacks) {
 			Object obj = wrcb.get();
 			if (obj != null) {
 				GroupRequestCallback callback = (GroupRequestCallback) obj;

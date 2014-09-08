@@ -23,6 +23,10 @@ public class Conference implements Parcelable {
 	private long creator;
 	private long chairman;
 	private boolean isCanInvitation = true;
+	
+	public Conference(ConferenceGroup cg) {
+		this(cg.getmGId(), cg.getOwnerUser().getmUserId(), cg.getName(), cg.getCreateDate(), null, null);
+	}
 
 	public Conference(long id) {
 		this(id, 0, null, null, null, null);

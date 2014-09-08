@@ -140,15 +140,16 @@ public abstract class AbstractHandler extends Handler {
 		} else {
 			V2Log.i(this.getClass().getName() + "  : Notify listener: " + key
 					+ " " + arg1 + "  " + arg2 + "  " + obj);
-		}
-		for (int i = 0; i < list.size(); i++) {
-			Registrant re = list.get(i);
-			Handler h = re.getHandler();
-			if (h != null) {
-				Message.obtain(h, re.getWhat(), arg1, arg2,
-						new AsyncResult(re.getObject(), obj)).sendToTarget();
+			for (int i = 0; i < list.size(); i++) {
+				Registrant re = list.get(i);
+				Handler h = re.getHandler();
+				if (h != null) {
+					Message.obtain(h, re.getWhat(), arg1, arg2,
+							new AsyncResult(re.getObject(), obj)).sendToTarget();
+				}
 			}
 		}
+		
 	}
 	
 
@@ -175,6 +176,7 @@ public abstract class AbstractHandler extends Handler {
 			}
 			
 			pendingList.clear();
+			pendingObjectHolder.remove(key);
 		}
 	}
 
@@ -190,6 +192,11 @@ public abstract class AbstractHandler extends Handler {
 			}
 		}
 	}
+	
+	/**
+	 * Clear all callbacks from JNI interface
+	 */
+	public abstract void clear();
 
 	class Meta {
 		int mointorMessageID;

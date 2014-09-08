@@ -37,6 +37,15 @@ public class WBRequest {
 	public void addCallbacks(WBRequestCallback callback) {
 		mCallbacks.add(new WeakReference<WBRequestCallback>(callback));
 	}
+	
+	public void removeCallback(WBRequestCallback callback) {
+		for (int i = 0; i < mCallbacks.size(); i++) {
+			if (mCallbacks.get(i).get() == callback) {
+				mCallbacks.remove(i);
+				break;
+			}
+		}
+	}
 
 	public native boolean initialize(WBRequest request);
 

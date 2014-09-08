@@ -4,7 +4,6 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Handler;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
@@ -71,23 +70,20 @@ public class GroupLayout extends LinearLayout {
 			} else {
 				mGroupIV.setImageResource(R.drawable.avatar);
 			}
-		} else if (mConv.getType().equals(Conversation.TYPE_CONFERNECE)
-				) {
-			if ( ((ConferenceConversation) mConv).getGroup().getOwner() != GlobalHolder
-						.getInstance().getCurrentUserId())
-			mGroupIV.setImageResource(R.drawable.conference_icon);
-		}
-		else if(this.mConv.getType().equals(Conversation.TYPE_GROUP)) {
+		} else if (mConv.getType().equals(Conversation.TYPE_CONFERNECE)) {
+			if (((ConferenceConversation) mConv).getGroup().getOwnerUser()
+					.getmUserId() != GlobalHolder.getInstance()
+					.getCurrentUserId())
+				mGroupIV.setImageResource(R.drawable.conference_icon);
+		} else if (this.mConv.getType().equals(Conversation.TYPE_GROUP)) {
 			mGroupIV.setImageResource(R.drawable.chat_group_icon);
 		}
 
 		mGroupNameTV.setText(this.mConv.getName());
-		mGroupOwnerTV.setText(mConv.getMsg()); 
-		if(this.mConv.getType().equals(Conversation.TYPE_CONTACT)){
-			V2Log.e(TAG, mConv.getDateLong() + "------");
+		mGroupOwnerTV.setText(mConv.getMsg());
+		if (this.mConv.getType().equals(Conversation.TYPE_CONTACT)) {
 			mGroupDateTV.setText(mConv.getDateLong());
-		}
-		else
+		} else
 			mGroupDateTV.setText(mConv.getDate());
 		addView(view);
 	}
@@ -103,25 +99,24 @@ public class GroupLayout extends LinearLayout {
 			mNotificatorIV.setVisibility(View.GONE);
 		}
 
-//		if (this.mConv instanceof ContactConversation) {
+		// if (this.mConv instanceof ContactConversation) {
 		if (this.mConv.getType().equals(Conversation.TYPE_CONTACT)) {
-			if (content != null) 
+			if (content != null)
 				((ContactConversation) mConv).setMsg(content);
-			if (date != null) 
+			if (date != null)
 				((ContactConversation) mConv).setDate(date);
-			
+
 		}
-		
-		if (content != null) 
+
+		if (content != null)
 			mGroupOwnerTV.setText(content);
-		
-//		if (date != null) 
-//			mGroupDateTV.setText(date);
-		if(this.mConv.getType().equals(Conversation.TYPE_CONTACT)){
+
+		// if (date != null)
+		// mGroupDateTV.setText(date);
+		if (this.mConv.getType().equals(Conversation.TYPE_CONTACT)) {
 			mGroupDateTV.setText(mConv.getDateLong());
 			V2Log.e(TAG, mConv.getDateLong());
-		}
-		else
+		} else
 			mGroupDateTV.setText(date);
 	}
 
@@ -133,19 +128,22 @@ public class GroupLayout extends LinearLayout {
 			if (getContext() == null) {
 				return;
 			}
-			VMessage vm =MessageLoader.getNewestMessage(getContext(), GlobalHolder.getInstance().getCurrentUserId(), mConv.getExtId());
+			VMessage vm = MessageLoader.getNewestMessage(getContext(),
+					GlobalHolder.getInstance().getCurrentUserId(),
+					mConv.getExtId());
 			if (vm == null) {
 				return;
 			}
-			CharSequence builder = MessageUtil.getMixedConversationContent(getContext(), vm);
+			CharSequence builder = MessageUtil.getMixedConversationContent(
+					getContext(), vm);
 			mConv.setDate(vm.getFullDateStr());
-			if (builder != null){
+			if (builder != null) {
 				mConv.setMsg(builder);
 			}
 
-			//UPdate UI
+			// UPdate UI
 			update();
-			
+
 		}
 
 	};
@@ -165,17 +163,14 @@ public class GroupLayout extends LinearLayout {
 	public void updateContent(String content) {
 		mGroupOwnerTV.setText("创建人:" + content);
 	}
-	
-	
+
 	public void update() {
 		mGroupNameTV.setText(this.mConv.getName());
 		mGroupOwnerTV.setText(mConv.getMsg());
-//		mGroupDateTV.setText(mConv.getDate());
-		if(this.mConv.getType().equals(Conversation.TYPE_CONTACT)){
+		// mGroupDateTV.setText(mConv.getDate());
+		if (this.mConv.getType().equals(Conversation.TYPE_CONTACT)) {
 			mGroupDateTV.setText(mConv.getDateLong());
-			V2Log.e(TAG, mConv.getDateLong() + "update---");
-		}
-		else
+		} else
 			mGroupDateTV.setText(mConv.getDate());
 	}
 

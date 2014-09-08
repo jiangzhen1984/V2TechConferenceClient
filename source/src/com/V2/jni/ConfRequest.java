@@ -18,10 +18,10 @@ public class ConfRequest {
 
 	private static ConfRequest mConfRequest;
 
-	private List<WeakReference<ConfRequestCallback>> callbacks;
+	private List<WeakReference<ConfRequestCallback>> mCallbacks;
 
 	private ConfRequest(Context context) {
-		this.callbacks = new ArrayList<WeakReference<ConfRequestCallback>>();
+		this.mCallbacks = new ArrayList<WeakReference<ConfRequestCallback>>();
 	};
 
 	public static synchronized ConfRequest getInstance(Context context) {
@@ -43,7 +43,16 @@ public class ConfRequest {
 	}
 
 	public void addCallback(ConfRequestCallback callback) {
-		this.callbacks.add(new WeakReference<ConfRequestCallback>(callback));
+		this.mCallbacks.add(new WeakReference<ConfRequestCallback>(callback));
+	}
+	
+	public void removeCallback(ConfRequestCallback callback) {
+		for (int i = 0; i < this.mCallbacks.size(); i++) {
+			if (this.mCallbacks.get(i).get() == callback) {
+				this.mCallbacks.remove(i);
+				break;
+			}
+		}
 	}
 
 	private boolean isInConf = false;
@@ -84,8 +93,8 @@ public class ConfRequest {
 	 */
 	private void OnEnterConf(long nConfID, long nTime, String szConfData,
 			int nJoinResult) {
-		for (int i = 0; i < this.callbacks.size(); i++) {
-			WeakReference<ConfRequestCallback> we = this.callbacks.get(i);
+		for (int i = 0; i < this.mCallbacks.size(); i++) {
+			WeakReference<ConfRequestCallback> we = this.mCallbacks.get(i);
 			Object obj = we.get();
 			if (obj != null) {
 				ConfRequestCallback cb = (ConfRequestCallback) obj;
@@ -137,8 +146,8 @@ public class ConfRequest {
 		}
 		v2user.name = nickName;
 		
-		for (int i =0; i < this.callbacks.size(); i++) {
-			WeakReference<ConfRequestCallback> we  = this.callbacks.get(i);
+		for (int i =0; i < this.mCallbacks.size(); i++) {
+			WeakReference<ConfRequestCallback> we  = this.mCallbacks.get(i);
 			Object obj = we.get();
 			if (obj != null) {
 				ConfRequestCallback cb = (ConfRequestCallback) obj;
@@ -161,8 +170,8 @@ public class ConfRequest {
 	private void OnConfMemberExit(long nConfID, long nTime, long nUserID) {
 		V2Log.d("-->OnConfMemberExit " + nConfID + " " + nTime + " " + nUserID);
 
-		for (int i =0; i < this.callbacks.size(); i++) {
-			WeakReference<ConfRequestCallback> we  = this.callbacks.get(i);
+		for (int i =0; i < this.mCallbacks.size(); i++) {
+			WeakReference<ConfRequestCallback> we  = this.mCallbacks.get(i);
 			Object obj = we.get();
 			if (obj != null) {
 				ConfRequestCallback cb = (ConfRequestCallback) obj;
@@ -179,8 +188,8 @@ public class ConfRequest {
 	 */
 	private void OnKickConf(int nReason) {
 		V2Log.d("-->OnKickConf " + nReason);
-		for (int i =0; i < this.callbacks.size(); i++) {
-			WeakReference<ConfRequestCallback> we  = this.callbacks.get(i);
+		for (int i =0; i < this.mCallbacks.size(); i++) {
+			WeakReference<ConfRequestCallback> we  = this.mCallbacks.get(i);
 			Object obj = we.get();
 			if (obj != null) {
 				ConfRequestCallback cb = (ConfRequestCallback) obj;
@@ -193,8 +202,8 @@ public class ConfRequest {
 	private void OnGrantPermission(long userid, int type, int status) {
 		V2Log.d("OnGrantPermission " + userid + " type:" + type + " status:" + status);
 
-		for (int i =0; i < this.callbacks.size(); i++) {
-			WeakReference<ConfRequestCallback> we  = this.callbacks.get(i);
+		for (int i =0; i < this.mCallbacks.size(); i++) {
+			WeakReference<ConfRequestCallback> we  = this.mCallbacks.get(i);
 			Object obj = we.get();
 			if (obj != null) {
 				ConfRequestCallback cb = (ConfRequestCallback) obj;
@@ -238,8 +247,8 @@ public class ConfRequest {
 		
 		conf.creator =user;
 		
-		for (int i =0; i < this.callbacks.size(); i++) {
-			WeakReference<ConfRequestCallback> we  = this.callbacks.get(i);
+		for (int i =0; i < this.mCallbacks.size(); i++) {
+			WeakReference<ConfRequestCallback> we  = this.mCallbacks.get(i);
 			Object obj = we.get();
 			if (obj != null) {
 				ConfRequestCallback cb = (ConfRequestCallback) obj;

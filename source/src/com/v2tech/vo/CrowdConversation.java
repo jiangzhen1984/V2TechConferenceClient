@@ -13,9 +13,9 @@ public class CrowdConversation extends Conversation {
 		if (g == null) {
 			throw new NullPointerException(" group is null");
 		}
-		if (g.getGroupType() != GroupType.CHATING &&g.getGroupType() != GroupType.ORG ) {
+		if (g.getGroupType() != GroupType.CHATING) {
 			throw new IllegalArgumentException(" group type is not GroupType.CHATING or oupType.ORG ");
-		} 
+		}
 		this.g = g;
 		super.mExtId = g.getmGId();
 		super.mType = TYPE_GROUP;
@@ -61,7 +61,9 @@ public class CrowdConversation extends Conversation {
 		this.lastSendUser = lastSendUser;
 	}
 	
-	
+	public Group getGroup() {
+		return g;
+	}
 	
 	
 }

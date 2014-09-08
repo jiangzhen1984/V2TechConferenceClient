@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+    <RelativeLayout
+        android:id="@+id/RelativeLayout1"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="#ffffff" >
+
+        <TextView
+            android:id="@+id/crowd_content_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:paddingBottom="10dp"
+            android:paddingLeft="15dp"
+            android:paddingRight="8dp"
+            android:paddingTop="10dp"
+            android:text="@string/crowd_content_announce"
+            android:textColor="@color/button_text_color"
+            android:textSize="@dimen/common_item_text_size" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:ellipsize="end"
+            android:gravity="center"
+            android:singleLine="true"
+            android:text="@string/crowd_content_title"
+            android:textColor="@color/activiy_contact_detail_title_color"
+            android:textSize="@dimen/common_item_text_size" />
+
+        <TextView
+            android:id="@+id/crowd_content_update_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:paddingBottom="10dp"
+            android:paddingLeft="15dp"
+            android:paddingRight="8dp"
+            android:paddingTop="10dp"
+            android:text="@string/crowd_content_udpate_announce_button"
+            android:textColor="@color/button_text_color"
+            android:textSize="@dimen/common_item_text_size" />
+
+        <!-- Use translucent image to hold space -->
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="10dp"
+            android:paddingBottom="10dp"
+            android:paddingTop="10dp"
+            android:src="@drawable/translucent" />
+    </RelativeLayout>
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="1dp"
+        android:background="#c0c0c0"
+        android:orientation="vertical" >
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#f2f2f2"
+        android:orientation="vertical" >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/detail_detail_2_item_margin_bottom"
+            android:layout_marginLeft="@dimen/contact_detail_2_item_margin_left"
+            android:layout_marginRight="@dimen/contact_detail_2_item_margin_right"
+            android:layout_marginTop="25dp"
+            android:background="@drawable/rounded_corners_of_contact_user_detail_outer"
+            android:orientation="vertical" >
+
+            <EditText
+                android:id="@+id/crowd_content_et"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@null"
+                android:ems="10"
+                android:lines="10"
+                android:gravity="top|left"
+                android:padding="10dp"
+                android:textColor="@color/activiy_contact_detail_item_color"
+                android:maxLength="500" >
+
+            </EditText>
+        </LinearLayout>
+    </LinearLayout>
+
+</LinearLayout>

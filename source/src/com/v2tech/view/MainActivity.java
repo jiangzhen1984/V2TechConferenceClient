@@ -191,7 +191,7 @@ public class MainActivity extends FragmentActivity implements
 			tv.setText(items[i]);
 			tv.setPadding(10, 5, 5, 10);
 			//TODO gray disable button
-			if (i > 0) {
+			if (i > 1) {
 				tv.setTextColor(Color.rgb(198, 198, 198));
 			} else {
 				tv.setTextColor(Color.rgb(123, 123, 123));

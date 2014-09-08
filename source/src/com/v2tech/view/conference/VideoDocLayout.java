@@ -12,6 +12,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
+import android.graphics.Paint;
 import android.graphics.RectF;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Handler;
@@ -314,6 +315,9 @@ public class VideoDocLayout extends LinearLayout {
 		updatePageButton();
 	}
 
+	int width;
+	int height;
+	int sampl;
 	private void updateCurrentDocPage(V2Doc.Page p) {
 		if (p == null) {
 			return;
@@ -338,7 +342,7 @@ public class VideoDocLayout extends LinearLayout {
 				dest.right = 800;
 				dest.top = 0;
 				dest.bottom =600;
-				matrix.mapRect(dest, src);
+				matrix.mapRect(src, dest);
 				
 				container.removeAllViews();
 				TouchImageView iv = new TouchImageView(this.getContext());
@@ -369,6 +373,8 @@ public class VideoDocLayout extends LinearLayout {
 				src.right = ops.outWidth;
 				src.top = 0;
 				src.bottom = ops.outHeight;
+				width = (int)src.right;
+				height = (int)src.bottom;
 
 				ops.inJustDecodeBounds = false;
 				BitmapFactory.Options opsNew = new BitmapFactory.Options();
@@ -380,10 +386,13 @@ public class VideoDocLayout extends LinearLayout {
 					opsNew.inSampleSize = 1;
 				} else if (ops.outHeight < 1080 || ops.outWidth < 1920) {
 					opsNew.inSampleSize = 2;
+					sampl = 2;
 				} else if (ops.outHeight > 1080 || ops.outWidth > 1920) {
 					opsNew.inSampleSize = 2;
+					sampl = 2;
 				} else {
 					opsNew.inSampleSize = 2;
+					sampl = 2;
 				}
 
 				mCurrentBitMap = BitmapFactory.decodeFile(p.getFilePath(),
@@ -393,7 +402,10 @@ public class VideoDocLayout extends LinearLayout {
 				dest.right = opsNew.outWidth;
 				dest.top = (src.bottom - opsNew.outHeight) / 2;
 				dest.bottom = opsNew.outHeight;
+				matrix.postScale(opsNew.outWidth / src.right, opsNew.outHeight / src.bottom);
+				//matrix.setScale(src.right /dest.right  , src.bottom/dest.bottom ,  opsNew.outWidth /2 , opsNew.outHeight /2);
 				matrix.mapRect(dest, src);
+				//matrix.setRectToRect(src, dest, ScaleToFit.CENTER);
 
 				container.removeAllViews();
 				TouchImageView iv = new TouchImageView(this.getContext());
@@ -569,18 +581,28 @@ public class VideoDocLayout extends LinearLayout {
 			return;
 		}
 
-		//
-		Canvas ca = new Canvas(mCurrentBitMap);
-		ca.setMatrix(matrix);
+//		Bitmap source = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_4444);
+//		Canvas sourceCan = new Canvas(source);
+//		for (V2ShapeMeta meta : list) {
+//			meta.draw(sourceCan);
+//		}
+//		target.drawBitmap(source, matrix, new Paint());
+//		source.recycle();
+				
+		Canvas target = new Canvas(mCurrentBitMap);
+		target.concat(matrix);
 		for (V2ShapeMeta meta : list) {
-			meta.draw(ca);
+			meta.draw(target);
 		}
+		
 		container.postInvalidate();
 	}
 
 	public void cleanCache() {
 		container.removeAllViews();
 		if (this.mCurrentBitMap != null && !this.mCurrentBitMap.isRecycled()) {
+			Canvas ca = new Canvas(mCurrentBitMap);
+			ca.drawColor(Color.WHITE);
 			this.mCurrentBitMap.recycle();
 		}
 	}

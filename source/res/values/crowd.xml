@@ -1,0 +1,33 @@
+<resources>
+
+    <string name="crowd_invitation_accept_button_name">同意</string>
+    <string name="crowd_invitation_accept_notes">已同意该邀请</string>
+    <string name="crowd_invitation_reject_button_name">拒绝</string>
+    <string name="crowd_invitation_reject_notes">已拒绝该邀请</string>
+    <string name="crowd_invitation_titile">群邀请</string>
+    <string name="crowd_invitation_box_item_creator">创建人</string>
+    <string name="crowd_invitation_box_item_announcement">群公告</string>
+    <string name="crowd_invitation_box_item_brief">群简介</string>
+    <string name="crowd_invitation_box_item_member">群成员</string>
+    <string name="crowd_invitation_box_item_member_unit">人</string>
+    <string name="crowd_detail_title">群资料</string>
+    <string name="crowd_detail_qulification_rule">身份验证</string>
+    <string name="crowd_detail_qulification_rule_no_rule">允许任何人</string>
+    <string name="crowd_detail_qulification_rule_qulification">需要验证</string>
+    <string name="crowd_detail_qulification_rule_never">不允许任何人</string>
+    <string name="crowd_detail_qulification_quit_button">退出该群</string>
+    <string name="crowd_detail_qulification_dismiss_button">解散该群</string>
+    
+    <string name="crowd_detail_quit_confirm_title">确定退出该群吗?</string>
+    <string name="crowd_detail_dismiss_confirm_title">确定解散该群吗?</string>
+    
+    <string name="crowd_content_title">编辑</string>
+    <string name="crowd_content_announce">公告</string>
+    <string name="crowd_content_brief">简介</string>
+    <string name="crowd_content_udpate_announce_button">发布</string>
+    <string name="crowd_content_udpate_succeed">已更新</string>
+    <string name="conversations_detail">群组详情</string>
+    
+    
+
+</resources>

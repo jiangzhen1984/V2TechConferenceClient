@@ -1,12 +1,9 @@
 package com.V2.jni;
 
 import java.lang.ref.WeakReference;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
 import android.content.Context;
 import android.util.Log;
@@ -18,10 +15,10 @@ public class ImRequest {
 	public boolean loginResult;
 	private static ImRequest mImRequest;
 
-	private List<WeakReference<ImRequestCallback>> callbacks;
+	private List<WeakReference<ImRequestCallback>> mCallbacks;
 
 	private ImRequest(Context context) {
-		callbacks = new ArrayList<WeakReference<ImRequestCallback>>();
+		mCallbacks = new ArrayList<WeakReference<ImRequestCallback>>();
 	};
 
 	public static synchronized ImRequest getInstance(Context context) {
@@ -53,7 +50,16 @@ public class ImRequest {
 	 * @param callback
 	 */
 	public void addCallback(ImRequestCallback callback) {
-		this.callbacks.add(new WeakReference<ImRequestCallback>(callback));
+		this.mCallbacks.add(new WeakReference<ImRequestCallback>(callback));
+	}
+	
+	public void removeCallback(ImRequestCallback callback) {
+		for (int i = 0; i < mCallbacks.size(); i++) {
+			if (mCallbacks.get(i).get() == callback) {
+				this.mCallbacks.remove(i);
+				break;
+			}
+		}
 	}
 
 	public native boolean initialize(ImRequest request);
@@ -99,7 +105,7 @@ public class ImRequest {
 		GlobalConfig.SERVER_TIME = serverTime; 
 		GlobalConfig.LOCAL_TIME = System.currentTimeMillis();
 		V2Log.d("OnLogin --> get server time ：" + serverTime);
-		for (WeakReference<ImRequestCallback> wf : this.callbacks) {
+		for (WeakReference<ImRequestCallback> wf : this.mCallbacks) {
 			Object obj = wf.get();
 			if (obj != null) {
 				ImRequestCallback callback = (ImRequestCallback) obj;
@@ -119,7 +125,7 @@ public class ImRequest {
 	 */
 	private void OnLogout(int nType) {
 		V2Log.d("OnLogout::" + nType);
-		for (WeakReference<ImRequestCallback> wf : this.callbacks) {
+		for (WeakReference<ImRequestCallback> wf : this.mCallbacks) {
 			Object obj = wf.get();
 			if (obj != null) {
 				ImRequestCallback callback = (ImRequestCallback) obj;
@@ -154,7 +160,7 @@ public class ImRequest {
 	 * 
 	 */
 	private void OnUpdateBaseInfo(long nUserID, String updatexml) {
-		for (WeakReference<ImRequestCallback> wf : this.callbacks) {
+		for (WeakReference<ImRequestCallback> wf : this.mCallbacks) {
 			Object obj = wf.get();
 			if (obj != null) {
 				ImRequestCallback callback = (ImRequestCallback) obj;
@@ -195,7 +201,7 @@ public class ImRequest {
 		V2Log.d(" OnUserStatusUpdated--> nUserID:" + nUserID + "  nStatus:"
 				+ nStatus + " nType:" + nType + " szStatusDesc:" + szStatusDesc
 				+ "  " + new Date());
-		for (WeakReference<ImRequestCallback> wf : this.callbacks) {
+		for (WeakReference<ImRequestCallback> wf : this.mCallbacks) {
 			Object obj = wf.get();
 			if (obj != null) {
 				ImRequestCallback callback = (ImRequestCallback) obj;
@@ -221,7 +227,7 @@ public class ImRequest {
 	private void OnChangeAvatar(int nAvatarType, long nUserID, String AvatarName) {
 		V2Log.d("OnChangeAvatar--> nAvatarType:" + nAvatarType + "    nUserID:"
 				+ nUserID + " AvatarName:" + AvatarName);
-		for (WeakReference<ImRequestCallback> wf : this.callbacks) {
+		for (WeakReference<ImRequestCallback> wf : this.mCallbacks) {
 			Object obj = wf.get();
 			if (obj != null) {
 				ImRequestCallback callback = (ImRequestCallback) obj;
@@ -263,7 +269,7 @@ public class ImRequest {
 	private void OnModifyCommentName(long nUserId, String sCommmentName) {
 		V2Log.d("ImRequest UI --> OnModifyCommentName:: " + "nUserId:"
 				+ nUserId + "  sCommmentName" + sCommmentName);
-		for (WeakReference<ImRequestCallback> wf : this.callbacks) {
+		for (WeakReference<ImRequestCallback> wf : this.mCallbacks) {
 			Object obj = wf.get();
 			if (obj != null) {
 				ImRequestCallback callback = (ImRequestCallback) obj;
@@ -281,7 +287,7 @@ public class ImRequest {
 	 */
 	private void OnConnectResponse(int nResult) {
 		V2Log.d("OnConnectResponse::" + nResult);
-		for (WeakReference<ImRequestCallback> wf : this.callbacks) {
+		for (WeakReference<ImRequestCallback> wf : this.mCallbacks) {
 			Object obj = wf.get();
 			if (obj != null) {
 				ImRequestCallback callback = (ImRequestCallback) obj;
@@ -304,7 +310,7 @@ public class ImRequest {
 	private void OnCreateCrowd(String sCrowdXml, int nResult) {
 		V2Log.d("ImRequest UI -- > OnCreateCrowd  " + "sCrowdXml:" + sCrowdXml
 				+ "  nResult:" + nResult);
-		for (WeakReference<ImRequestCallback> wf : this.callbacks) {
+		for (WeakReference<ImRequestCallback> wf : this.mCallbacks) {
 			Object obj = wf.get();
 			if (obj != null) {
 				ImRequestCallback callback = (ImRequestCallback) obj;
@@ -313,10 +319,6 @@ public class ImRequest {
 		}
 	}
 
-	// 淇敼涓汉淇℃伅
-	/*
- * 
- */
 
 	// 鏇存敼绯荤粺澶村儚
 	public native void changeSystemAvatar(String szAvatarName);

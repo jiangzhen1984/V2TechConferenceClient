@@ -20,15 +20,13 @@ import com.V2.jni.util.V2Log;
  * @author 28851274
  * 
  */
-public class Group implements Comparable<Group>{
+public abstract class Group implements Comparable<Group> {
 
 	protected long mGId;
 
 	protected GroupType mGroupType;
 
 	protected String mName;
-
-	protected long mOwner;
 
 	protected User mOwnerUser;
 
@@ -74,12 +72,25 @@ public class Group implements Comparable<Group>{
 		}
 	}
 
-	public Group(long gId, GroupType groupType, String name) {
-		this(gId, groupType, name, 0, null);
-	}
+	/**
+	 * 
+	 * @param gId
+	 * @param groupType
+	 * @param name
+	 * @param owner
+	 * @param createDate
+	 */
+	protected Group(long gId, GroupType groupType, String name, User owner,
+			Date createDate) {
+		this.mGId = gId;
+		this.mGroupType = groupType;
+		this.mName = name;
+		this.mOwnerUser = owner;
+		this.mCreateDate = createDate;
+		users = new CopyOnWriteArraySet<User>();
+		mChild = new CopyOnWriteArrayList<Group>();
+		level = 1;
 
-	public Group(long gId, GroupType groupType, String name, long owner) {
-		this(gId, groupType, name, owner, null);
 	}
 
 	/**
@@ -90,36 +101,9 @@ public class Group implements Comparable<Group>{
 	 * @param owner
 	 * @param createDate
 	 */
-	public Group(long gId, GroupType groupType, String name, String owner,
-			String createDate) {
-		this.mGId = gId;
-		this.mGroupType = groupType;
-		this.mName = name;
-		if (owner != null) {
-			this.mOwner = Long.parseLong(owner);
-		}
+	protected Group(long gId, GroupType groupType, String name, User owner) {
+		this(gId, groupType, name, owner, new Date());
 
-		if (createDate != null && createDate.trim().length() > 0) {
-			this.mCreateDate = new Date(Long.parseLong(createDate) * 1000);
-		}
-
-		users = new CopyOnWriteArraySet<User>();
-		mChild = new CopyOnWriteArrayList<Group>();
-		level = 1;
-
-	}
-
-	public Group(long gId, GroupType groupType, String name, long owner,
-			Date createDate) {
-		this.mGId = gId;
-		this.mGroupType = groupType;
-		this.mName = name;
-		this.mOwner = owner;
-		this.mCreateDate = createDate;
-
-		users = new CopyOnWriteArraySet<User>();
-		mChild = new CopyOnWriteArrayList<Group>();
-		level = 1;
 	}
 
 	public long getmGId() {
@@ -144,14 +128,6 @@ public class Group implements Comparable<Group>{
 
 	public void setName(String mName) {
 		this.mName = mName;
-	}
-
-	public long getOwner() {
-		return mOwner;
-	}
-
-	public void setOwner(long mOwner) {
-		this.mOwner = mOwner;
 	}
 
 	public Date getCreateDate() {
@@ -199,8 +175,7 @@ public class Group implements Comparable<Group>{
 			this.users.addAll(u);
 		}
 	}
-	
-	
+
 	public void addUserToGroup(User u) {
 		if (u == null) {
 			V2Log.e(" Invalid user data");
@@ -211,16 +186,16 @@ public class Group implements Comparable<Group>{
 			u.addUserToGroup(this);
 		}
 	}
-	
+
 	public void removeUserFromGroup(User u) {
 		synchronized (mLock) {
 			this.users.remove(u);
 		}
 	}
-	
+
 	public void removeUserFromGroup(long uid) {
 		synchronized (mLock) {
-			//User object use id as identification
+			// User object use id as identification
 			User tmpUser = new User(uid);
 			users.remove(tmpUser);
 		}
@@ -228,6 +203,7 @@ public class Group implements Comparable<Group>{
 
 	/**
 	 * return copy collection
+	 * 
 	 * @return
 	 */
 	public List<User> getUsers() {
@@ -255,7 +231,7 @@ public class Group implements Comparable<Group>{
 				return g;
 			}
 		}
-		for (int i = 0; i< mChild.size(); i++) {
+		for (int i = 0; i < mChild.size(); i++) {
 			Group subG = mChild.get(i);
 			Group gg = findUser(u, subG);
 			if (gg != null) {
@@ -276,7 +252,8 @@ public class Group implements Comparable<Group>{
 			return;
 		}
 		for (User u : g.getUsers()) {
-			if ((u != null && u.getName() != null && u.getName().contains(text) )|| (u.getArra().equals(text))) {
+			if ((u != null && u.getName() != null && u.getName().contains(text))
+					|| (u.getArra().equals(text))) {
 				l.add(u);
 			}
 		}
@@ -288,7 +265,7 @@ public class Group implements Comparable<Group>{
 	public int getOnlineUserCount() {
 		Set<User> counter = new HashSet<User>();
 		this.populateUser(this, counter);
-		
+
 		int c = 0;
 		for (User u : counter) {
 			if (u.getmStatus() == User.Status.ONLINE
@@ -298,10 +275,9 @@ public class Group implements Comparable<Group>{
 				c++;
 			}
 		}
-		
+
 		return c;
 	}
-
 
 	public int getUserCount() {
 		Set<User> counter = new HashSet<User>();
@@ -313,12 +289,12 @@ public class Group implements Comparable<Group>{
 	}
 
 	private void populateUser(Group g, Set<User> counter) {
-				List<User> lu = g.getUsers();
-		for (int i =0; i < lu.size(); i++) {
+		List<User> lu = g.getUsers();
+		for (int i = 0; i < lu.size(); i++) {
 			counter.add(lu.get(i));
 		}
 		List<Group> sGs = g.getChildGroup();
-		for (int i =0; i< sGs.size(); i++) {
+		for (int i = 0; i < sGs.size(); i++) {
 			Group subG = sGs.get(i);
 			populateUser(subG, counter);
 		}
@@ -365,6 +341,5 @@ public class Group implements Comparable<Group>{
 	}
 
 	
-	
-
+	public abstract String toXml();
 }

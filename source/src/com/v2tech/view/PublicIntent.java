@@ -32,6 +32,8 @@ public class PublicIntent {
 	public static final String START_GROUP_CREATE_ACTIVITY = "com.v2tech.start_group_create_activity";
 
 	public static final String UPDATE_CONVERSATION = "com.v2tech.update_conversation";
+	
+	public static final String SHOW_CROWD_CONTENT_ACTIVITY ="com.v2tech.crowd_content_activity";
 
 	/**
 	 * extras key: obj  value: {@link com.v2tech.view.bo.ConversationNotificationObject}
@@ -52,6 +54,8 @@ public class PublicIntent {
 	public static final String BROADCAST_NEW_CONFERENCE_NOTIFICATION = "com.v2tech.jni.broadcast.new_conference_notification";
 	//Request update contacts group
 	public static final String BROADCAST_REQUEST_UPDATE_CONTACTS_GROUP = "com.v2tech.broadcast.update_contacts_group";
+	//Broadcast for crowd is deleted notification
+	public static final String BROADCAST_CROWD_DELETED_NOTIFICATION= "com.v2tech.broadcast.crowd_deleted_notification";
 	
 
 }

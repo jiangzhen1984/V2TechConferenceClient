@@ -114,15 +114,18 @@ public class VideoAttendeeListLayout extends LinearLayout {
 						V2Log.i("User device config is disabled ");
 						return;
 					}
+					
+					listener.OnAttendeeClicked(wr.a, wr.udc);
+					
 					if (wr.udc != null) {
-						if (wr.udc.isShowing()) {
+						if (!wr.udc.isShowing()) {
 							view.setBackgroundColor(Color.WHITE);
 						} else {
 							view.setBackgroundColor(getContext().getResources()
 									.getColor(R.color.attendee_select_bg));
 						}
 					}
-					listener.OnAttendeeClicked(wr.a, wr.udc);
+					
 				}
 			}
 

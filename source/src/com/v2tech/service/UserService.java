@@ -70,6 +70,15 @@ public class UserService extends AbstractHandler {
 					user.getNickName());
 		}
 	}
+	
+	
+
+	@Override
+	public void clear() {
+		ImRequest.getInstance().removeCallback(imCB);
+	}
+
+
 
 	class ImRequestCB extends ImRequestCallbackAdapter {
 

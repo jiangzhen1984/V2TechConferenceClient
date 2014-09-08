@@ -1,0 +1,451 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#ffffff"
+    android:orientation="vertical" >
+
+    <RelativeLayout
+        android:id="@+id/RelativeLayout1"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="#ffffff" >
+
+        <TextView
+            android:id="@+id/crowd_detail_return_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:paddingBottom="10dp"
+            android:paddingLeft="15dp"
+            android:paddingRight="8dp"
+            android:paddingTop="10dp"
+            android:text="@string/contacts_user_detail_return_button"
+            android:textColor="@color/button_text_color"
+            android:textSize="@dimen/common_item_text_size" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:ellipsize="end"
+            android:gravity="center"
+            android:singleLine="true"
+            android:text="@string/crowd_detail_title"
+            android:textColor="@color/activiy_contact_detail_title_color"
+            android:textSize="@dimen/common_item_text_size" />
+
+        <!-- Use translucent image to hold space -->
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="10dp"
+            android:paddingBottom="10dp"
+            android:paddingTop="10dp"
+            android:src="@drawable/translucent" />
+    </RelativeLayout>
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="1dp"
+        android:background="#c0c0c0"
+        android:orientation="vertical" >
+    </LinearLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#f2f2f2"
+            android:orientation="vertical" >
+
+            <RelativeLayout
+                android:id="@+id/relativeLayout2"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp" >
+
+                <ImageView
+                    android:id="@+id/imageView1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="@dimen/crowd_invitation_box_left_margin"
+                    android:src="@drawable/chat_group_icon" />
+
+                <TextView
+                    android:id="@+id/crowd_detail_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentTop="true"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginTop="5dp"
+                    android:layout_toRightOf="@+id/imageView1"
+                    android:ellipsize="end"
+                    android:gravity="top"
+                    android:maxWidth="@dimen/detail_detail_name_max_width"
+                    android:singleLine="true"
+                    android:text="TextView"
+                    android:textColor="@color/common_item_text_color" />
+            </RelativeLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/detail_detail_2_item_margin_bottom"
+                android:layout_marginLeft="@dimen/contact_detail_2_item_margin_left"
+                android:layout_marginRight="@dimen/contact_detail_2_item_margin_right"
+                android:layout_marginTop="25dp"
+                android:background="@drawable/rounded_corners_of_contact_user_detail_outer"
+                android:orientation="vertical" >
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="1dp"
+                    android:layout_marginRight="1dp" >
+
+                    <TextView
+                        android:id="@+id/crowd_detail_creator_tv"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:layout_marginBottom="@dimen/detail_detail_2_item_margin_bottom"
+                        android:layout_marginLeft="@dimen/contact_detail_2_item_margin_horizontal"
+                        android:layout_marginRight="@dimen/contact_detail_2_item_margin_horizontal"
+                        android:layout_marginTop="@dimen/detail_detail_2_item_margin_top"
+                        android:padding="10dp"
+                        android:text="@string/crowd_invitation_box_item_creator"
+                        android:textColor="@color/activiy_contact_detail_item_color"
+                        android:textSize="@dimen/common_item_text_size" />
+
+                    <TextView
+                        android:id="@+id/crowd_detail_creator"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:layout_marginBottom="@dimen/detail_detail_2_item_margin_bottom"
+                        android:layout_marginLeft="@dimen/contact_detail_2_item_margin_horizontal"
+                        android:layout_marginRight="@dimen/contact_detail_2_item_margin_horizontal"
+                        android:layout_marginTop="@dimen/detail_detail_2_item_margin_top"
+                        android:layout_toRightOf="@+id/crowd_detail_creator_tv"
+                        android:padding="10dp"
+                        android:text="@string/crowd_invitation_box_item_creator"
+                        android:textColor="@color/activiy_contact_detail_item_color"
+                        android:textSize="@dimen/common_item_text_size" />
+                </RelativeLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="#c0c0c0" >
+                </LinearLayout>
+
+                <RelativeLayout
+                    android:id="@+id/crowd_detail_announcement_button"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="1dp"
+                    android:layout_marginRight="1dp" >
+
+                    <TextView
+                        android:id="@+id/crowd_detail_announcement_tv"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:layout_marginBottom="@dimen/detail_detail_2_item_margin_bottom"
+                        android:layout_marginLeft="@dimen/contact_detail_2_item_margin_horizontal"
+                        android:layout_marginRight="@dimen/contact_detail_2_item_margin_horizontal"
+                        android:layout_marginTop="@dimen/detail_detail_2_item_margin_top"
+                        android:padding="10dp"
+                        android:text="@string/crowd_invitation_box_item_announcement"
+                        android:textColor="@color/activiy_contact_detail_item_color"
+                        android:textSize="@dimen/common_item_text_size" />
+
+                    <TextView
+                        android:id="@+id/crowd_detail_announcement"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:layout_marginBottom="@dimen/detail_detail_2_item_margin_bottom"
+                        android:layout_marginLeft="@dimen/contact_detail_2_item_margin_horizontal"
+                        android:layout_marginRight="@dimen/contact_detail_2_item_margin_horizontal"
+                        android:layout_marginTop="@dimen/detail_detail_2_item_margin_top"
+                        android:layout_toRightOf="@+id/crowd_detail_announcement_tv"
+                        android:padding="10dp"
+                        android:text="@string/crowd_invitation_box_item_announcement"
+                        android:textColor="@color/activiy_contact_detail_item_color"
+                        android:textSize="@dimen/common_item_text_size" />
+
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentRight="true"
+                        android:layout_centerVertical="true"
+                        android:layout_marginRight="@dimen/contact_detail_2_item_margin_horizontal"
+                        android:paddingLeft="@dimen/contacts_group_view_arrow_padding_left"
+                        android:src="@drawable/arrow_right_gray" />
+                </RelativeLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="#c0c0c0" >
+                </LinearLayout>
+
+                <RelativeLayout
+                    android:id="@+id/crowd_detail_brief_button"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="1dp"
+                    android:layout_marginRight="1dp" >
+
+                    <TextView
+                        android:id="@+id/crowd_detail_brief_tv"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:layout_marginBottom="@dimen/detail_detail_2_item_margin_bottom"
+                        android:layout_marginLeft="@dimen/contact_detail_2_item_margin_horizontal"
+                        android:layout_marginRight="@dimen/contact_detail_2_item_margin_horizontal"
+                        android:layout_marginTop="@dimen/detail_detail_2_item_margin_top"
+                        android:padding="10dp"
+                        android:text="@string/crowd_invitation_box_item_brief"
+                        android:textColor="@color/activiy_contact_detail_item_color"
+                        android:textSize="@dimen/common_item_text_size" />
+
+                    <TextView
+                        android:id="@+id/crowd_detail_brief"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:layout_marginBottom="@dimen/detail_detail_2_item_margin_bottom"
+                        android:layout_marginLeft="@dimen/contact_detail_2_item_margin_horizontal"
+                        android:layout_marginRight="@dimen/contact_detail_2_item_margin_horizontal"
+                        android:layout_marginTop="@dimen/detail_detail_2_item_margin_top"
+                        android:layout_toRightOf="@+id/crowd_detail_brief_tv"
+                        android:padding="10dp"
+                        android:text="@string/crowd_invitation_box_item_brief"
+                        android:textColor="@color/activiy_contact_detail_item_color"
+                        android:textSize="@dimen/common_item_text_size" />
+
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentRight="true"
+                        android:layout_centerVertical="true"
+                        android:layout_marginRight="@dimen/contact_detail_2_item_margin_horizontal"
+                        android:paddingLeft="@dimen/contacts_group_view_arrow_padding_left"
+                        android:src="@drawable/arrow_right_gray" />
+                </RelativeLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="#c0c0c0" >
+                </LinearLayout>
+
+                <RelativeLayout
+                    android:id="@+id/crowd_detail_invitation_members_button"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="1dp"
+                    android:layout_marginRight="1dp" >
+
+                    <TextView
+                        android:id="@+id/crowd_detail_members_tv"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:layout_marginBottom="@dimen/detail_detail_2_item_margin_bottom"
+                        android:layout_marginLeft="@dimen/contact_detail_2_item_margin_horizontal"
+                        android:layout_marginRight="@dimen/contact_detail_2_item_margin_horizontal"
+                        android:layout_marginTop="@dimen/detail_detail_2_item_margin_top"
+                        android:padding="10dp"
+                        android:text="@string/crowd_invitation_box_item_member"
+                        android:textColor="@color/activiy_contact_detail_item_color"
+                        android:textSize="@dimen/common_item_text_size" />
+
+                    <TextView
+                        android:id="@+id/crowd_detail_members"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:layout_marginBottom="@dimen/detail_detail_2_item_margin_bottom"
+                        android:layout_marginLeft="@dimen/contact_detail_2_item_margin_horizontal"
+                        android:layout_marginTop="@dimen/detail_detail_2_item_margin_top"
+                        android:layout_toRightOf="@+id/crowd_detail_members_tv"
+                        android:padding="10dp"
+                        android:textColor="@color/activiy_contact_detail_item_color"
+                        android:textSize="@dimen/common_item_text_size" />
+                    
+                    
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:layout_marginBottom="@dimen/detail_detail_2_item_margin_bottom"
+                        android:layout_marginRight="@dimen/contact_detail_2_item_margin_horizontal"
+                        android:layout_marginTop="@dimen/detail_detail_2_item_margin_top"
+                        android:layout_toRightOf="@+id/crowd_detail_members"
+                        android:text="@string/crowd_invitation_box_item_member_unit"
+                        android:textColor="@color/activiy_contact_detail_item_color"
+                        android:textSize="@dimen/common_item_text_size" />
+
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentRight="true"
+                        android:layout_centerVertical="true"
+                        android:layout_marginRight="@dimen/contact_detail_2_item_margin_horizontal"
+                        android:paddingLeft="@dimen/contacts_group_view_arrow_padding_left"
+                        android:src="@drawable/arrow_right_gray" />
+                </RelativeLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/crowd_detail_admistrator_box"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" >
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/detail_detail_2_item_margin_bottom"
+                    android:layout_marginLeft="@dimen/contact_detail_2_item_margin_left"
+                    android:layout_marginRight="@dimen/contact_detail_2_item_margin_right"
+                    android:layout_marginTop="25dp"
+                    android:orientation="vertical" >
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginRight="@dimen/contact_detail_2_item_margin_horizontal"
+                        android:layout_marginTop="@dimen/detail_detail_2_item_margin_top"
+                        android:padding="10dp"
+                        android:text="@string/crowd_detail_qulification_rule"
+                        android:textColor="@color/activiy_contact_detail_item_color"
+                        android:textSize="@dimen/common_item_text_size_20" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/detail_detail_2_item_margin_bottom"
+                    android:layout_marginLeft="@dimen/contact_detail_2_item_margin_left"
+                    android:layout_marginRight="@dimen/contact_detail_2_item_margin_right"
+                    android:background="@drawable/rounded_corners_of_contact_user_detail_outer"
+                    android:orientation="vertical" >
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="1dp"
+                        android:layout_marginRight="1dp" >
+
+                        <RadioGroup
+                            android:id="@+id/crowd_detail_radio_group"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content" >
+
+                            <RadioButton
+                                android:id="@+id/radio0"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginLeft="@dimen/contact_detail_2_item_margin_horizontal"
+                                android:layout_marginRight="@dimen/contact_detail_2_item_margin_horizontal"
+                                android:button="@null"
+                                android:checked="true"
+                                android:drawableRight="@android:drawable/btn_radio"
+                                android:padding="10dp"
+                                android:tag="0"
+                                android:text="@string/crowd_detail_qulification_rule_no_rule"
+                                android:textColor="@color/activiy_contact_detail_item_color"
+                                android:textSize="@dimen/common_item_text_size_20" />
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="1dp"
+                                android:background="#c0c0c0" >
+                            </LinearLayout>
+
+                            <RadioButton
+                                android:id="@+id/radio1"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginLeft="@dimen/contact_detail_2_item_margin_horizontal"
+                                android:layout_marginRight="@dimen/contact_detail_2_item_margin_horizontal"
+                                android:button="@null"
+                                android:drawableRight="@android:drawable/btn_radio"
+                                android:padding="10dp"
+                                android:tag="1"
+                                android:text="@string/crowd_detail_qulification_rule_qulification"
+                                android:textColor="@color/activiy_contact_detail_item_color"
+                                android:textSize="@dimen/common_item_text_size_20" />
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="1dp"
+                                android:background="#c0c0c0" >
+                            </LinearLayout>
+
+                            <RadioButton
+                                android:id="@+id/radio2"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginLeft="@dimen/contact_detail_2_item_margin_horizontal"
+                                android:layout_marginRight="@dimen/contact_detail_2_item_margin_horizontal"
+                                android:button="@null"
+                                android:drawableRight="@android:drawable/btn_radio"
+                                android:padding="10dp"
+                                android:tag="2"
+                                android:text="@string/crowd_detail_qulification_rule_never"
+                                android:textColor="@color/activiy_contact_detail_item_color"
+                                android:textSize="@dimen/common_item_text_size_20" />
+                        </RadioGroup>
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/detail_detail_2_item_margin_bottom"
+                android:layout_marginLeft="@dimen/contact_detail_2_item_margin_left"
+                android:layout_marginRight="@dimen/contact_detail_2_item_margin_right"
+                android:layout_marginTop="25dp"
+                android:background="@drawable/rounded_corners_of_contact_user_detail_outer"
+                android:orientation="vertical" >
+
+                <LinearLayout
+                    android:id="@+id/crowd_detail_button"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="1dp"
+                    android:layout_marginRight="1dp" >
+
+                    <TextView
+                        android:id="@+id/crowd_detail_button_text"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_marginBottom="@dimen/detail_detail_2_item_margin_bottom"
+                        android:layout_marginLeft="@dimen/contact_detail_2_item_margin_horizontal"
+                        android:layout_marginRight="@dimen/contact_detail_2_item_margin_horizontal"
+                        android:layout_marginTop="@dimen/detail_detail_2_item_margin_top"
+                        android:gravity="center"
+                        android:padding="10dp"
+                        android:text="@string/crowd_detail_qulification_quit_button"
+                        android:textColor="@color/common_item_text_color_red"
+                        android:textSize="@dimen/common_item_text_size_20" />
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
+
+</LinearLayout>

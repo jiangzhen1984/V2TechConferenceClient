@@ -14,10 +14,10 @@ import com.V2.jni.util.V2Log;
 public class VideoRequest {
 
 	private static VideoRequest mVideoRequest;
-	private List<WeakReference<VideoRequestCallback>> callback;
+	private List<WeakReference<VideoRequestCallback>> mCallbacks;
 
 	private VideoRequest(Context context) {
-		callback = new CopyOnWriteArrayList<WeakReference<VideoRequestCallback>>();
+		mCallbacks = new CopyOnWriteArrayList<WeakReference<VideoRequestCallback>>();
 	};
 
 	public static synchronized VideoRequest getInstance(Context context) {
@@ -42,7 +42,16 @@ public class VideoRequest {
 	}
 
 	public void addCallback(VideoRequestCallback callback) {
-		this.callback.add(new WeakReference<VideoRequestCallback>(callback));
+		this.mCallbacks.add(new WeakReference<VideoRequestCallback>(callback));
+	}
+	
+	public void removeCallback(VideoRequestCallback callback) {
+		for (int i = 0; i < mCallbacks.size(); i++) {
+			if (mCallbacks.get(i).get() == callback) {
+				mCallbacks.remove(i);
+				break;
+			}
+		}
 	}
 
 	public native boolean initialize(VideoRequest request);
@@ -145,7 +154,7 @@ public class VideoRequest {
 			int nFrameRate, int nBitRate) {
 		V2Log.d("OnSetCapParamDone " + szDevID + " " + nSizeIndex + " "
 				+ nFrameRate + " " + nBitRate);
-		for (WeakReference<VideoRequestCallback> wrCB : this.callback) {
+		for (WeakReference<VideoRequestCallback> wrCB : this.mCallbacks) {
 			Object obj = wrCB.get();
 			if (obj != null) {
 				VideoRequestCallback cb = (VideoRequestCallback) obj;
@@ -182,7 +191,7 @@ public class VideoRequest {
 	 */
 	private void OnRemoteUserVideoDevice(long uid, String szXmlData) {
 		V2Log.d("OnRemoteUserVideoDevice:---" + uid + " " + szXmlData);
-		for (WeakReference<VideoRequestCallback> wrCB : this.callback) {
+		for (WeakReference<VideoRequestCallback> wrCB : this.mCallbacks) {
 			Object obj = wrCB.get();
 			if (obj != null) {
 				VideoRequestCallback cb = (VideoRequestCallback) obj;
@@ -200,7 +209,7 @@ public class VideoRequest {
 	 */
 	private void OnVideoChatInvite(long nGroupID, int nBusinessType,
 			long nFromUserID, String szDeviceID) {
-		for (WeakReference<VideoRequestCallback> wrCB : this.callback) {
+		for (WeakReference<VideoRequestCallback> wrCB : this.mCallbacks) {
 			Object obj = wrCB.get();
 			if (obj != null) {
 				VideoRequestCallback cb = (VideoRequestCallback) obj;
@@ -225,7 +234,7 @@ public class VideoRequest {
 			long nFromUserID, String szDeviceID) {
 		V2Log.d("OnVideoChatAccepted " + nGroupID + " " + nBusinessType + " "
 				+ nFromUserID + " " + szDeviceID);
-		for (WeakReference<VideoRequestCallback> wrCB : this.callback) {
+		for (WeakReference<VideoRequestCallback> wrCB : this.mCallbacks) {
 			Object obj = wrCB.get();
 			if (obj != null) {
 				VideoRequestCallback cb = (VideoRequestCallback) obj;
@@ -246,7 +255,7 @@ public class VideoRequest {
 			long nFromUserID, String szDeviceID) {
 		V2Log.d("OnVideoChatRefused " + nGroupID + " " + nBusinessType + " "
 				+ nFromUserID + " " + szDeviceID);
-		for (WeakReference<VideoRequestCallback> wrCB : this.callback) {
+		for (WeakReference<VideoRequestCallback> wrCB : this.mCallbacks) {
 			Object obj = wrCB.get();
 			if (obj != null) {
 				VideoRequestCallback cb = (VideoRequestCallback) obj;
@@ -260,7 +269,7 @@ public class VideoRequest {
 			long nFromUserID, String szDeviceID) {
 		V2Log.d("OnVideoChatClosed " + nGroupID + " " + nBusinessType + " "
 				+ nFromUserID + " " + szDeviceID);
-		for (WeakReference<VideoRequestCallback> wrCB : this.callback) {
+		for (WeakReference<VideoRequestCallback> wrCB : this.mCallbacks) {
 			Object obj = wrCB.get();
 			if (obj != null) {
 				VideoRequestCallback cb = (VideoRequestCallback) obj;
@@ -274,7 +283,7 @@ public class VideoRequest {
 			long nFromUserID, String szDeviceID) {
 		V2Log.d("OnVideoChating " + nGroupID + " " + nBusinessType + " "
 				+ nFromUserID + " " + szDeviceID);
-		for (WeakReference<VideoRequestCallback> wrCB : this.callback) {
+		for (WeakReference<VideoRequestCallback> wrCB : this.mCallbacks) {
 			Object obj = wrCB.get();
 			if (obj != null) {
 				VideoRequestCallback cb = (VideoRequestCallback) obj;

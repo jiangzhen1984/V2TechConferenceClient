@@ -1215,6 +1215,10 @@ public class VideoActivityV2 extends Activity {
 
 			unbindService(mLocalServiceConnection);
 		}
+		//call clear function from all service
+		ds.clear();
+		cb.clear();
+		ds.clear();
 
 		mContext.stopService(new Intent(mContext,
 				ConferencMessageSyncService.class));
@@ -1588,14 +1592,18 @@ public class VideoActivityV2 extends Activity {
 			}
 		} else if (opt == DOC_CLOSED_NOTIFICATION) {
 			doc = (V2Doc) res.getResult();
-			mDocs.remove(doc.getId());
+			//Notice need to use cache document
+			// because cache document object is different from JNI's callback
+			doc = mDocs.remove(doc.getId());
 		}
 
 		String docId = null;
 		switch (opt) {
 		case NEW_DOC_NOTIFICATION:
-		case DOC_CLOSED_NOTIFICATION:
 			doc = (V2Doc) res.getResult();
+			docId = doc.getId();
+			break;
+		case DOC_CLOSED_NOTIFICATION:
 			docId = doc.getId();
 			break;
 		case DOC_PAGE_NOTIFICATION:
@@ -1633,7 +1641,9 @@ public class VideoActivityV2 extends Activity {
 			// update
 		} else if (NEW_DOC_NOTIFICATION == opt) {
 			V2Doc cache = mDocs.get(docId);
-			cache.updateDoc(doc);
+			if (cache != doc) {
+				cache.updateDoc(doc);
+			}
 		}
 
 		if (pageArray != null) {
@@ -1652,6 +1662,8 @@ public class VideoActivityV2 extends Activity {
 			} else {
 				page.addMeta(shape);
 			}
+		} else if (opt == DOC_PAGE_ACTIVITE_NOTIFICATION) {
+			doc.setActivatePageNo(page.getNo());
 		}
 
 		// Update UI
@@ -1926,7 +1938,9 @@ public class VideoActivityV2 extends Activity {
 			}
 
 			OnAttendeeClicked(at, udc);
-			mAttendeeContainer.updateCurrentSelectedBg(true, at, udc);
+			if (udc.isShowing()) {
+				mAttendeeContainer.updateCurrentSelectedBg(true, at, udc);
+			}
 		}
 
 		@Override

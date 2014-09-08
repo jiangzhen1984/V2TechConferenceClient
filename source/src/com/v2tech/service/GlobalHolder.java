@@ -25,7 +25,6 @@ import com.v2tech.vo.UserDeviceConfig;
 
 public class GlobalHolder {
 
-
 	private static GlobalHolder holder;
 
 	private User mCurrentUser;
@@ -119,6 +118,7 @@ public class GlobalHolder {
 				if (u.getBirthday() != null) {
 					cu.setBirthday(u.getBirthday());
 				}
+				cu.updateUser(false);
 				V2Log.i(" merge user information " + id + " " + cu.getName());
 				return cu;
 			}
@@ -134,7 +134,15 @@ public class GlobalHolder {
 
 	public User getUser(long id) {
 		Long key = Long.valueOf(id);
-		return mUserHolder.get(key);
+		synchronized (key) {
+			User tmp = mUserHolder.get(key);
+			if (tmp == null) {
+				tmp = new User(id);
+				mUserHolder.put(key, tmp);
+			}
+			return tmp;
+		}
+
 	}
 
 	/**
@@ -153,11 +161,17 @@ public class GlobalHolder {
 			}
 			Group g = null;
 			if (gType == GroupType.CHATING) {
-				g = new CrowdGroup(vg.id, vg.name, vg.owner.uid);
+				User owner = GlobalHolder.getInstance().getUser(vg.owner.uid);
+				g = new CrowdGroup(vg.id, vg.name, owner);
+				((CrowdGroup)g).setBrief(vg.brief);
+				((CrowdGroup)g).setAnnouncement(vg.announce);
 				mCrowdGroup.add(g);
 			} else if (gType == GroupType.CONFERENCE) {
-				g = new ConferenceGroup(vg.id, vg.name, vg.owner.uid,
-						vg.createTime);
+				User owner = GlobalHolder.getInstance().getUser(vg.owner.uid);
+				User chairMan = GlobalHolder.getInstance().getUser(
+						vg.chairMan.uid);
+				g = new ConferenceGroup(vg.id, vg.name, owner, vg.createTime,
+						chairMan);
 				mConfGroup.add(g);
 			} else if (gType == GroupType.ORG) {
 				g = new OrgGroup(vg.id, vg.name);
@@ -187,7 +201,6 @@ public class GlobalHolder {
 		}
 		mGroupHolder.put(Long.valueOf(g.getmGId()), g);
 	}
-	
 
 	public Group getGroupById(Group.GroupType gType, long gId) {
 		return mGroupHolder.get(Long.valueOf(gId));
@@ -200,14 +213,20 @@ public class GlobalHolder {
 			Group g = null;
 			if (cache != null) {
 				g = cache;
-				//Update new name
+				// Update new name
 				cache.setName(vg.name);
 			} else {
 				if (gType == GroupType.CHATING) {
-					g = new CrowdGroup(vg.id, vg.name, vg.owner.uid);
+					User owner = GlobalHolder.getInstance().getUser(
+							vg.owner.uid);
+					g = new CrowdGroup(vg.id, vg.name, owner);
 				} else if (gType == GroupType.CONFERENCE) {
-					g = new ConferenceGroup(vg.id, vg.name, vg.owner.uid,
-							vg.createTime);
+					User owner = GlobalHolder.getInstance().getUser(
+							vg.owner.uid);
+					User chairMan = GlobalHolder.getInstance().getUser(
+							vg.chairMan.uid);
+					g = new ConferenceGroup(vg.id, vg.name, owner,
+							vg.createTime, chairMan);
 				} else if (gType == GroupType.ORG) {
 					g = new OrgGroup(vg.id, vg.name);
 				} else if (gType == GroupType.CONTACT) {
@@ -216,12 +235,11 @@ public class GlobalHolder {
 					throw new RuntimeException(" Can not support this type");
 				}
 			}
-			
-			
+
 			parent.addGroupToGroup(g);
-			
+
 			mGroupHolder.put(Long.valueOf(g.getmGId()), g);
-			
+
 			populateGroup(gType, g, vg.childs);
 
 		}
@@ -316,14 +334,6 @@ public class GlobalHolder {
 			return;
 		}
 		g.addUserToGroup(uList);
-
-		// update reference for conference group
-		for (Group confG : mConfGroup) {
-			User u = getUser(confG.getOwner());
-			if (u != null) {
-				confG.setOwnerUser(u);
-			}
-		}
 	}
 
 	public void addUserToGroup(User u, long belongGID) {
@@ -341,9 +351,9 @@ public class GlobalHolder {
 			list = mConfGroup;
 		} else if (gType == GroupType.CONTACT) {
 			list = mContactsGroup;
-		}else if (gType == GroupType.CHATING) {
+		} else if (gType == GroupType.CHATING) {
 			list = mCrowdGroup;
-		}else if (gType == GroupType.ORG) {
+		} else if (gType == GroupType.ORG) {
 			list = mOrgGroup;
 		}
 		for (int i = 0; i < list.size(); i++) {
@@ -403,9 +413,9 @@ public class GlobalHolder {
 		list.addAll(udcList);
 	}
 
-	
 	/**
 	 * Set current app audio state, also set voice connected state
+	 * 
 	 * @param flag
 	 * @param uid
 	 */
@@ -423,6 +433,7 @@ public class GlobalHolder {
 
 	/**
 	 * set cuurent app video state
+	 * 
 	 * @param flag
 	 * @param uid
 	 */
@@ -447,8 +458,7 @@ public class GlobalHolder {
 		this.mState.setState(st);
 		this.mState.setGid(gid);
 	}
-	
-	
+
 	public void setVoiceConnectedState(boolean flag) {
 		int st = this.mState.getState();
 		if (flag) {
@@ -458,8 +468,7 @@ public class GlobalHolder {
 		}
 		this.mState.setState(st);
 	}
-	
-	
+
 	public boolean isVoiceConnected() {
 		return this.mState.isVoiceConnected();
 	}
@@ -475,7 +484,7 @@ public class GlobalHolder {
 	public boolean isInMeeting() {
 		return mState.isInMeeting();
 	}
-	
+
 	public GlobalState getGlobalState() {
 		return new GlobalState(this.mState);
 	}
@@ -485,8 +494,6 @@ public class GlobalHolder {
 		return mAvatarBmHolder.get(key);
 	}
 
-	
-	
 	/**
 	 * Use to update cache avatar
 	 */

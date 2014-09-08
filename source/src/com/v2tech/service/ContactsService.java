@@ -26,9 +26,11 @@ public class ContactsService extends AbstractHandler {
 
 	private long mWatingGid = 0;
 
+	private  GroupRequestCB crCB;
 	public ContactsService() {
 		super();
-		GroupRequest.getInstance().addCallback(new GroupRequestCB(this));
+		crCB =new GroupRequestCB(this);
+		GroupRequest.getInstance().addCallback(crCB);
 	}
 
 	/**
@@ -124,12 +126,12 @@ public class ContactsService extends AbstractHandler {
 					GroupType.CONTACT.intValue(),
 					"<friendgroup id =\"" + desGroup.getmGId() + "\" />",
 					attendees.toString(), "");
-		// remove contact
+			// remove contact
 		} else if (desGroup == null && srcGroup != null) {
 			GroupRequest.getInstance().delGroupUser(
 					GroupType.CONTACT.intValue(), srcGroup.getmGId(),
 					user.getmUserId());
-		//move contact to other group
+			// move contact to other group
 		} else {
 			// Initialize time out message
 			initTimeoutMessage(UPDATE_CONTACT_BELONGS_GROUP,
@@ -139,6 +141,15 @@ public class ContactsService extends AbstractHandler {
 					desGroup.getmGId(), user.getmUserId());
 		}
 	}
+	
+	
+
+	@Override
+	public void clear() {
+		GroupRequest.getInstance().removeCallback(crCB);
+	}
+
+
 
 	class GroupRequestCB extends GroupRequestCallbackAdapter {
 
@@ -196,12 +207,14 @@ public class ContactsService extends AbstractHandler {
 
 		@Override
 		public void onAddGroupInfo(V2Group group) {
-			Group g = new ContactGroup(group.id, group.name);
-			GlobalHolder.getInstance().addGroupToList(g.getGroupType(), g);
-			JNIResponse jniRes = new GroupServiceJNIResponse(
-					GroupServiceJNIResponse.Result.SUCCESS, g);
-			Message.obtain(mCallbackHandler, CREATE_CONTACTS_GROUP, jniRes)
-					.sendToTarget();
+			if (group.type == V2Group.TYPE_CONTACTS_GROUP) {
+				Group g = new ContactGroup(group.id, group.name);
+				GlobalHolder.getInstance().addGroupToList(g.getGroupType(), g);
+				JNIResponse jniRes = new GroupServiceJNIResponse(
+						GroupServiceJNIResponse.Result.SUCCESS, g);
+				Message.obtain(mCallbackHandler, CREATE_CONTACTS_GROUP, jniRes)
+						.sendToTarget();
+			}
 
 		}
 

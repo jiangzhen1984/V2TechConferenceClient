@@ -233,7 +233,7 @@ public class ConferenceService extends DeviceService {
 		StringBuffer attendees = new StringBuffer();
 		attendees.append("<userlist> ");
 		for (User at : list) {
-			attendees.append(" <user id='" + at.getmUserId() + " ' />");
+			attendees.append(" <user id='" + at.getmUserId() + "' />");
 		}
 		attendees.append("</userlist>");
 		GroupRequest.getInstance().inviteJoinGroup(
@@ -397,6 +397,16 @@ public class ConferenceService extends DeviceService {
 	
 	
 	
+
+	@Override
+	public void clear() {
+		super.clear();
+		VideoRequest.getInstance().removeCallback(videoCallback);
+		ConfRequest.getInstance().removeCallback(confCallback);
+		GroupRequest.getInstance().removeCallback(groupCallback);
+		VideoMixerRequest.getInstance().removeCallback(mrCallback);
+	}
+
 
 	@Override
 	protected void notifyListenerWithPending(int key, int arg1, int arg2,

@@ -538,10 +538,13 @@ public class XmlParser {
 						String[] str = pointsStr.split(" ");
 						int len = str.length / 4;
 						for (int index = 0; index < len; index += 4) {
-							earser.lineToLine(Integer.parseInt(str[index]),
-									Integer.parseInt(str[index + 2]),
-									Integer.parseInt(str[index + 3]),
-									Integer.parseInt(str[index + 3]));
+							earser.addPoint(Integer.parseInt(str[index]), Integer.parseInt(str[index + 1]));
+							earser.addPoint(Integer.parseInt(str[index +2]), Integer.parseInt(str[index + 3]));
+							
+//							earser.lineToLine(Integer.parseInt(str[index]),
+//									Integer.parseInt(str[index + 1]),
+//									Integer.parseInt(str[index + 2]),
+//									Integer.parseInt(str[index + 3]));
 						}
 					} else if (shapeE.getTagName().equals("Pen")) {
 

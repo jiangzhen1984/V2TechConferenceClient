@@ -84,9 +84,12 @@ public class XmlAttributeExtractor {
 				creator = new V2User(Long.parseLong(uid));
 			}
 
-			listCrowd.add(new V2Group(Long.parseLong(crowdElement
+			V2Group crowd = new V2Group(Long.parseLong(crowdElement
 					.getAttribute("id")), crowdElement.getAttribute("name"),
-					V2Group.TYPE_CROWD, creator));
+					V2Group.TYPE_CROWD, creator);
+			crowd.brief = crowdElement.getAttribute("summary");
+			crowd.announce = crowdElement.getAttribute("announcement");
+			listCrowd.add(crowd);
 		}
 
 		return listCrowd;

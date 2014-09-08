@@ -149,7 +149,6 @@ public class User implements Comparable<User> {
 
 	public User(long mUserId) {
 		this(mUserId, null, null, null);
-		isDirty = true;
 	}
 
 	public User(long mUserId, String name) {
@@ -170,6 +169,7 @@ public class User implements Comparable<User> {
 		isCurrentLoggedInUser = false;
 		this.mStatus = Status.OFFLINE;
 		initAbbr();
+		isDirty = true;
 	}
 
 	private void initAbbr() {
@@ -399,6 +399,10 @@ public class User implements Comparable<User> {
 
 	public boolean isDirty() {
 		return isDirty;
+	}
+	
+	public void updateUser(boolean dirty) {
+		this.isDirty = dirty;
 	}
 
 	public Group getFirstBelongsGroup() {

@@ -64,7 +64,7 @@ import com.v2tech.view.bo.UserStatusObject;
 import com.v2tech.view.conversation.MessageBuilder;
 import com.v2tech.view.conversation.MessageLoader;
 import com.v2tech.vo.ConferenceGroup;
-import com.v2tech.vo.CrowdGroup;
+import com.v2tech.vo.Crowd;
 import com.v2tech.vo.Group;
 import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.NetworkStateCode;
@@ -86,6 +86,7 @@ import com.v2tech.vo.VMessageImageItem;
 public class JNIService extends Service {
 	private static final String TAG = "JNIService";
 	public static final String JNI_BROADCAST_CATEGROY = "com.v2tech.jni.broadcast";
+	public static final String JNI_ACTIVITY_CATEGROY = "com.v2tech";
 	public static final String JNI_BROADCAST_CONNECT_STATE_NOTIFICATION = "com.v2tech.jni.broadcast.connect_state_notification";
 	public static final String JNI_BROADCAST_USER_STATUS_NOTIFICATION = "com.v2tech.jni.broadcast.user_stauts_notification";
 
@@ -106,6 +107,11 @@ public class JNIService extends Service {
 	public static final String JNI_BROADCAST_CONFERENCE_REMOVED = "com.v2tech.jni.broadcast.conference_removed";
 	public static final String JNI_BROADCAST_GROUP_USER_REMOVED = "com.v2tech.jni.broadcast.group_user_removed";
 	public static final String JNI_BROADCAST_GROUP_USER_ADDED = "com.v2tech.jni.broadcast.group_user_added";
+	
+	/**
+	 * Crowd invitation with key crowd
+	 */
+	public static final String JNI_BROADCAST_CROWD_INVATITION = "com.v2tech.jni.broadcast.crowd_invatition";
 
 	private boolean isDebug = true;
 
@@ -256,7 +262,6 @@ public class JNIService extends Service {
 	private static final int JNI_CONFERENCE_INVITATION = 61;
 	private static final int JNI_RECEIVED_MESSAGE = 91;
 	private static final int JNI_RECEIVED_VIDEO_INVITION = 92;
-	private static final int JNI_GROUP_INVITATION = 93;
 
 	class JNICallbackHandler extends Handler {
 
@@ -314,13 +319,16 @@ public class JNIService extends Service {
 							// Update logged user object.
 							GlobalHolder.getInstance().setCurrentUser(existU);
 						}
-						
-						UserStatusObject userStatusObject = onLineUsers.get(tu.getmUserId());
-						if(userStatusObject != null){
-							existU.updateStatus(User.Status.fromInt(userStatusObject.getStatus()));
-							existU.setDeviceType(User.DeviceType.fromInt(userStatusObject.getDeviceType()));
+
+						UserStatusObject userStatusObject = onLineUsers.get(tu
+								.getmUserId());
+						if (userStatusObject != null) {
+							existU.updateStatus(User.Status
+									.fromInt(userStatusObject.getStatus()));
+							existU.setDeviceType(User.DeviceType
+									.fromInt(userStatusObject.getDeviceType()));
 						}
-						
+
 						if (g == null) {
 							V2Log.e(" didn't find group information  " + go.gId);
 						} else {
@@ -369,11 +377,16 @@ public class JNIService extends Service {
 					long time = (((System.currentTimeMillis() - GlobalConfig.LOCAL_TIME) / 1000) + GlobalConfig.SERVER_TIME) * 1000;
 					vm.setDate(new Date(time));
 					MessageBuilder.saveMessage(mContext, vm);
-					Long id = MessageLoader.queryVMessageID(mContext, ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_ID + "=?",
-							new String[]{vm.getUUID()}, null);
-					if(id == null){
-						V2Log.e("the message :" + vm.getUUID() + " save in databases is failed ....");
-						return ;
+					Long id = MessageLoader
+							.queryVMessageID(
+									mContext,
+									ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_ID
+											+ "=?",
+									new String[] { vm.getUUID() }, null);
+					if (id == null) {
+						V2Log.e("the message :" + vm.getUUID()
+								+ " save in databases is failed ....");
+						return;
 					}
 					vm.setId(id);
 					if (vm.getMsgCode() == V2GlobalEnum.REQUEST_TYPE_CONF) {
@@ -404,14 +417,6 @@ public class JNIService extends Service {
 				iv.putExtra("device", vjoi.getDeviceId());
 				mContext.startActivity(iv);
 				break;
-			case JNI_GROUP_INVITATION:
-				long groupId = (Long) msg.obj;
-				Intent i = new Intent();
-				i.setAction(PublicIntent.BROADCAST_NEW_CROWD_NOTIFICATION);
-				i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
-				i.putExtra("crowd", groupId);
-				mContext.sendBroadcast(i);
-				break;
 
 			}
 
@@ -432,7 +437,8 @@ public class JNIService extends Service {
 
 	}
 
-	private Map<Long , UserStatusObject> onLineUsers = new HashMap<Long , UserStatusObject>();
+	private Map<Long, UserStatusObject> onLineUsers = new HashMap<Long, UserStatusObject>();
+
 	class ImRequestCB extends ImRequestCallbackAdapter {
 
 		private JNICallbackHandler mCallbackHandler;
@@ -495,7 +501,8 @@ public class JNIService extends Service {
 						+ "  isn't exist");
 				onLineUsers.put(nUserID, uso);
 			} else {
-				V2Log.e(TAG, "the " + u.getArra() + " user is updating state...." + nStatus);
+				V2Log.e(TAG, "the " + u.getArra()
+						+ " user is updating state...." + nStatus);
 				u.updateStatus(User.Status.fromInt(nStatus));
 				u.setDeviceType(User.DeviceType.fromInt(type));
 			}
@@ -569,28 +576,41 @@ public class JNIService extends Service {
 			}
 
 		}
+		
 
 		@Override
-		public void OnInviteJoinGroupCallback(int groupType, String groupInfo,
-				String userInfo, String additInfo) {
-			GroupType gType = GroupType.fromInt(groupType);
+		public void OnInviteJoinGroupCallback(V2Group group) {
+			if (group == null) {
+				V2Log.e(" invitation group is null");
+				return;
+			}
+			Group cache = 	GlobalHolder.getInstance().getGroupById(GroupType.fromInt(group.type), group.id);
+			if (cache != null) {
+				V2Log.e("Duplicated group invitation: "+ cache.getmGId() +"  "+ cache.getName());
+				return;
+			}
+			
+			GroupType gType = GroupType.fromInt(group.type);
 			if (gType == GroupType.CONFERENCE) {
-				Group g = ConferenceGroup
-						.parseConferenceGroupFromXML(groupInfo);
-				if (g != null) {
-					// Send message for synchronization
-					Message.obtain(mCallbackHandler, JNI_CONFERENCE_INVITATION,
-							g).sendToTarget();
-				}
+				User owner = GlobalHolder.getInstance().getUser(group.owner.uid);
+				User chairMan = GlobalHolder.getInstance().getUser(group.chairMan.uid);
+				ConferenceGroup g = new ConferenceGroup(group.id, group.name, owner, group.createTime, chairMan);
+				Message.obtain(mCallbackHandler, JNI_CONFERENCE_INVITATION, g)
+						.sendToTarget();
 			} else if (gType == GroupType.CHATING) {
-				// TODO just accept automatically
-				Group g = CrowdGroup.parseXml(groupInfo, userInfo);
-				GlobalHolder.getInstance().addGroupToList(GroupType.CHATING, g);
-				GroupRequest.getInstance().acceptInviteJoinGroup(groupType,
-						g.getmGId(),
-						GlobalHolder.getInstance().getCurrentUserId());
-				Message.obtain(mCallbackHandler, JNI_GROUP_INVITATION,
-						g.getmGId()).sendToTarget();
+				User owner = GlobalHolder.getInstance().getUser(group.creator.uid);
+				if (owner.isDirty()) {
+					owner.setName(group.creator.name);
+				}
+			
+				Crowd crowd = new Crowd(group.id, owner, group.name, group.brief);
+				
+				Intent i = new Intent(JNI_BROADCAST_CROWD_INVATITION);
+				i.addCategory(JNI_ACTIVITY_CATEGROY);
+				i.putExtra("crowd", crowd);
+				i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+				mContext.startActivity(i);
+				
 			}
 		}
 
@@ -607,8 +627,8 @@ public class JNIService extends Service {
 				} else {
 					gName = nGroupID + "";
 				}
-				boolean flag = GlobalHolder.getInstance()
-						.removeGroup(GroupType.CONFERENCE, nGroupID);
+				boolean flag = GlobalHolder.getInstance().removeGroup(
+						GroupType.CONFERENCE, nGroupID);
 				// If flag is true, mean current user dosn't remove this group
 				// should notify
 				// Otherwise this user removed this group should not notify
@@ -627,6 +647,13 @@ public class JNIService extends Service {
 													.getText(R.string.confs_is_deleted_notification),
 									1, PublicIntent.VIDEO_NOTIFICATION_ID);
 				}
+			} else if (groupType == GroupType.CHATING.intValue()) {
+				Intent i = new Intent();
+				i.setAction(PublicIntent.BROADCAST_CROWD_DELETED_NOTIFICATION);
+				i.addCategory(PublicIntent.DEFAULT_CATEGORY);
+				i.putExtra("crowd", nGroupID);
+				sendBroadcast(i);
+				
 			}
 		}
 
@@ -693,14 +720,16 @@ public class JNIService extends Service {
 
 			if (GlobalHolder.getInstance().isInVideoCall()) {
 				GlobalState state = GlobalHolder.getInstance().getGlobalState();
-				// if in video automatically accept audio and user never accept audio call.
+				// if in video automatically accept audio and user never accept
+				// audio call.
 				// because audio and video use different message
-				if (state.getUid() == ind.getFromUserId() && !state.isVoiceConnected()) {
+				if (state.getUid() == ind.getFromUserId()
+						&& !state.isVoiceConnected()) {
 					AudioRequest.getInstance().AcceptAudioChat(
 							ind.getGroupId(), ind.getFromUserId(),
 							V2GlobalEnum.REQUEST_TYPE_IM);
-					//mark voice state to connected
-					 GlobalHolder.getInstance().setVoiceConnectedState(true);
+					// mark voice state to connected
+					GlobalHolder.getInstance().setVoiceConnectedState(true);
 				} else {
 					V2Log.i("Ignore audio call for others: "
 							+ ind.getFromUserId());
@@ -781,8 +810,9 @@ public class JNIService extends Service {
 				return;
 			}
 
-			Group g = new ConferenceGroup(v2conf.cid, v2conf.name, user.uid,
-					v2conf.startTime);
+			User owner = GlobalHolder.getInstance().getUser(user.uid);
+			Group g = new ConferenceGroup(v2conf.cid, v2conf.name, owner,
+					v2conf.startTime, owner);
 			User u = GlobalHolder.getInstance().getUser(user.uid);
 			g.setOwnerUser(u);
 			GlobalHolder.getInstance().addGroupToList(
@@ -847,9 +877,9 @@ public class JNIService extends Service {
 			vm.setmXmlDatas(szXmlText);
 			// vm.setGroupId(nGroupID);
 			// vm.setMsgCode(nBusinessType);
-//			if (vm == null || vm.getItems().size() == 0) {
-//				return;
-//			}
+			// if (vm == null || vm.getItems().size() == 0) {
+			// return;
+			// }
 
 			if (vm.getImageItems().size() > 0) {
 				synchronized (cacheImageMeta) {

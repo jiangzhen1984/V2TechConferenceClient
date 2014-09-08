@@ -60,7 +60,7 @@ import com.v2tech.vo.Group;
 import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.User;
 
-public class ConferenceCreateActivity extends Activity{
+public class ConferenceCreateActivity extends Activity {
 
 	private static final int UPDATE_LIST_VIEW = 1;
 	private static final int UPDATE_ATTENDEES = 2;
@@ -111,7 +111,7 @@ public class ConferenceCreateActivity extends Activity{
 	private int landLayout = PAD_LAYOUT;
 
 	private long preSelectedUID;
-	
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -120,10 +120,9 @@ public class ConferenceCreateActivity extends Activity{
 		} else {
 			setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 		}
-		
 
 		setContentView(R.layout.activity_conference_create);
-		
+
 		mContext = this;
 		mContactsContainer = (ListView) findViewById(R.id.conf_create_contacts_list);
 		mContactsContainer.setOnItemClickListener(itemListener);
@@ -442,8 +441,8 @@ public class ConferenceCreateActivity extends Activity{
 			}
 
 			if (startFlag) {
-				//check current user belongs this group or not.
-				// User ListView current user level equals group level -1 
+				// check current user belongs this group or not.
+				// User ListView current user level equals group level -1
 				if (item.u != null && item.level == selectGroup.getLevel() - 1) {
 					((ContactUserView) item.v).updateChecked();
 				} else if (item.g != null
@@ -473,7 +472,7 @@ public class ConferenceCreateActivity extends Activity{
 				}
 			}
 			Message.obtain(mLocalHandler, UPDATE_ATTENDEES, flag, 0, u)
-			.sendToTarget();
+					.sendToTarget();
 		}
 
 	};
@@ -749,7 +748,8 @@ public class ConferenceCreateActivity extends Activity{
 			super();
 			this.u = u;
 			this.id = 0x03000000 | u.getmUserId();
-			this.v = new ContactUserView(mContext, u , level);;
+			this.v = new ContactUserView(mContext, u, level);
+			;
 			isExpanded = false;
 			this.level = level;
 		}
@@ -799,7 +799,7 @@ public class ConferenceCreateActivity extends Activity{
 				JNIResponse rccr = (JNIResponse) msg.obj;
 				if (rccr.getResult() != JNIResponse.Result.SUCCESS) {
 					mErrorNotificationLayout.setVisibility(View.VISIBLE);
-					if(mErrorMessageTV == null){
+					if (mErrorMessageTV == null) {
 						mErrorMessageTV = (TextView) findViewById(R.id.conference_create_error_notification_tv);
 					}
 					mErrorMessageTV
@@ -809,11 +809,7 @@ public class ConferenceCreateActivity extends Activity{
 				User currU = GlobalHolder.getInstance().getCurrentUser();
 				ConferenceGroup g = new ConferenceGroup(
 						((RequestConfCreateResponse) rccr).getConfId(),
-						GroupType.CONFERENCE, conf.getName(),
-						currU.getmUserId() + "", conf.getDate().getTime()
-								/ 1000 + "", currU.getmUserId());
-				g.setOwnerUser(currU);
-				g.setChairManUId(currU.getmUserId());
+						conf.getName(), currU, conf.getDate(), currU);
 				g.addUserToGroup(new ArrayList<User>(mAttendeeList));
 				GlobalHolder.getInstance().addGroupToList(GroupType.CONFERENCE,
 						g);
@@ -853,13 +849,11 @@ public class ConferenceCreateActivity extends Activity{
 
 	@Override
 	public boolean dispatchTouchEvent(MotionEvent ev) {
-	    View v = getCurrentFocus(); 
-	    InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);  
-	    if (imm != null) {  
-	        imm.hideSoftInputFromWindow(v.getWindowToken(), 0);  
-	    }  
-	    return super.dispatchTouchEvent(ev);
+		View v = getCurrentFocus();
+		InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+		if (imm != null) {
+			imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+		}
+		return super.dispatchTouchEvent(ev);
 	}
 }
-
-

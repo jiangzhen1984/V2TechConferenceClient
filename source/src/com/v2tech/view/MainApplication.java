@@ -23,7 +23,6 @@ import android.content.SharedPreferences.Editor;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.content.res.AssetManager;
 import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
@@ -47,6 +46,7 @@ import com.v2tech.util.LogcatThread;
 import com.v2tech.util.Notificator;
 import com.v2tech.view.conference.VideoActivityV2;
 
+@TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
 public class MainApplication extends Application {
 
 	private Vector<WeakReference<Activity>> list = new Vector<WeakReference<Activity>>();

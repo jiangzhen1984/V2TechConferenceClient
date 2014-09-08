@@ -130,5 +130,11 @@
     <!-- message voice dialog layout -->
     <dimen name="message_voice_dialog_width">220dp</dimen>
     <dimen name="message_voice_dialog_height">170dp</dimen>
-
+    
+    
+    <!-- crowd invitation activity  -->
+ <dimen name="crowd_invitation_box_left_margin">20dp</dimen>
+ <dimen name="crowd_invitation_box_right_margin">20dp</dimen>
+ <dimen name="crowd_invitation_button_padding_vertical">7dp</dimen>
+ <dimen name="crowd_invitation_button_padding_horizontal">15dp</dimen>
 </resources>

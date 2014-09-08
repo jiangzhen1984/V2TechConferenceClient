@@ -113,6 +113,17 @@ public class DocumentService extends AbstractHandler {
 			Object obj) {
 		unRegisterListener(KEY_PAGE_CANVAS_NOTIFY_LISTENER, h, what, obj);
 	}
+	
+	
+	
+
+	@Override
+	public void clear() {
+		WBRequest.getInstance().removeCallback(cb);
+	}
+
+
+
 
 	class WBRequestCallbackCB implements WBRequestCallback {
 

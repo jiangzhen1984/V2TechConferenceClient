@@ -2,6 +2,7 @@ package com.V2.jni.ind;
 
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class V2Group {
@@ -35,12 +36,25 @@ public class V2Group {
 	
 	public V2Group parent;
 	public Set<V2Group> childs = new HashSet<V2Group>();
+	public List<V2User> members;
 	
 	//for conference
 	public Date createTime;
 	public V2User chairMan;
 	
+	//for crowd 
+	public V2User creator;
+	public int authType;
+	public String brief;
+	public String announce;
 	
+	
+	
+	public V2Group(long id, int type) {
+		super();
+		this.id = id;
+		this.type = type;
+	}
 	
 	
 	public V2Group(long id, String name, int type) {

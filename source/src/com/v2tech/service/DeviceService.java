@@ -127,4 +127,11 @@ public class DeviceService extends AbstractHandler {
 				cc.getCameraIndex(), cc.getFrameRate(), cc.getBitRate());
 	}
 
+	@Override
+	public void clear() {
+		
+	}
+	
+	
+
 }

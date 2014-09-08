@@ -193,9 +193,9 @@
             android:id="@+id/fragment_conversation_reverse_camera_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
+            android:layout_alignRight="@+id/fragment_conversation_connected_video_local_surface"
+            android:layout_alignTop="@+id/fragment_conversation_connected_video_local_surface"
             android:layout_marginRight="@dimen/fragment_conversation_connected_local_surface_margin_right"
-            android:layout_alignTop="@+id/conversation_fragment_outing_video_card_container"
             android:src="@drawable/converse_camera_button"
              />
     </RelativeLayout>

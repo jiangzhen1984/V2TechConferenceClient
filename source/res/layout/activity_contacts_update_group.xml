@@ -32,8 +32,6 @@
             android:paddingTop="10dp"
             android:src="@drawable/contact_detail_button_selector"
             android:visibility="invisible" />
-
-
     </RelativeLayout>
 
     <LinearLayout
@@ -48,12 +46,11 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" >
 
-        <LinearLayout
+        <RadioGroup
             android:id="@+id/contact_update_group_list"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical" >
-        </LinearLayout>
+            android:layout_height="wrap_content" >
+        </RadioGroup>
     </ScrollView>
 
 </LinearLayout>

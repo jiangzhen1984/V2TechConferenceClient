@@ -8,4 +8,11 @@
    <string name="group_create_confirm">确定</string>
    <string name="error_group_title_required">会议名称不能为空!</string>
    <string name="error_create_group_failed_from_server_side">创建群失败</string>
+   
+   <string-array name="crowd_rules">
+       <item>允许任何人</item>
+       <item>需要验证</item>
+       <item>不允许任何人</item>
+   </string-array>
+   
 </resources>

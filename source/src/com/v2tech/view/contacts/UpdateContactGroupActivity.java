@@ -9,13 +9,10 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.view.View;
-import android.view.View.OnClickListener;
-import android.view.View.OnFocusChangeListener;
+import android.view.LayoutInflater;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
+import android.widget.RadioGroup;
 import android.widget.Toast;
 
 import com.v2tech.R;
@@ -32,14 +29,13 @@ public class UpdateContactGroupActivity extends Activity {
 	private static final int UPDATE_USER_GROUP_DONE = 1;
 
 	private Context mContext;
-	private LinearLayout mGroupListLy;
+	private RadioGroup mGroupListLy;
 	private ContactsService contactService = new ContactsService();
 
 	private STATE state = STATE.NONE;
 	private boolean changed;
 	private long originGroupId;
 	private long userId;
-	private RadioButton[] rbs;
 	private Toast mToast;
 
 	@Override
@@ -49,8 +45,10 @@ public class UpdateContactGroupActivity extends Activity {
 		userId = getIntent().getLongExtra("uid", 0);
 		mContext = this;
 		setContentView(R.layout.activity_contacts_update_group);
-		mGroupListLy = (LinearLayout) findViewById(R.id.contact_update_group_list);
+		mGroupListLy = (RadioGroup) findViewById(R.id.contact_update_group_list);
+		// build radio button first
 		buildList();
+		mGroupListLy.setOnCheckedChangeListener(mGroupChangedListener);
 		overridePendingTransition(R.animator.left_in, R.animator.left_out);
 	}
 
@@ -69,54 +67,31 @@ public class UpdateContactGroupActivity extends Activity {
 	private void buildList() {
 		List<Group> friendGroup = GlobalHolder.getInstance().getGroup(
 				GroupType.CONTACT);
-		rbs = new RadioButton[friendGroup.size()];
 		for (int i = 0; i < friendGroup.size(); i++) {
 			Group g = friendGroup.get(i);
-			RelativeLayout rl = new RelativeLayout(mContext);
-			mGroupListLy.addView(rl, new LinearLayout.LayoutParams(
+
+			RadioButton rb = (RadioButton) LayoutInflater.from(mContext)
+					.inflate(R.layout.common_radio_right, null);
+			rb.setText(g.getName());
+			rb.setTag(g);
+			rb.setTextColor(mContext.getResources().getColor(
+					R.color.activiy_contact_detail_item_color));
+			int margin = (int) mContext.getResources().getDimension(
+					R.dimen.contact_detail_2_item_margin_horizontal);
+			rb.setPadding(margin, 0, margin, 0);
+			LinearLayout.LayoutParams ll = new LinearLayout.LayoutParams(
 					LinearLayout.LayoutParams.MATCH_PARENT,
-					LinearLayout.LayoutParams.WRAP_CONTENT));
+					LinearLayout.LayoutParams.WRAP_CONTENT);
+			mGroupListLy.addView(rb, ll);
 
 			LinearLayout line = new LinearLayout(mContext);
 			line.setBackgroundColor(Color.rgb(206, 206, 206));
 			mGroupListLy.addView(line, new LinearLayout.LayoutParams(
 					LinearLayout.LayoutParams.MATCH_PARENT, 1));
-
-			TextView gName = new TextView(mContext);
-			gName.setTextColor(mContext.getResources().getColor(
-					R.color.activiy_contact_detail_item_color));
-			gName.setTextSize(14);
-			gName.setText(g.getName());
-			gName.setPadding(10, 10, 10, 10);
-
-			RelativeLayout.LayoutParams lefll = new RelativeLayout.LayoutParams(
-					RelativeLayout.LayoutParams.WRAP_CONTENT,
-					RelativeLayout.LayoutParams.WRAP_CONTENT);
-			lefll.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
-			lefll.addRule(RelativeLayout.CENTER_VERTICAL);
-			lefll.leftMargin = (int) mContext.getResources().getDimension(
-					R.dimen.contact_detail_2_item_margin_horizontal);
-			rl.addView(gName, lefll);
-
-			RadioButton rb = new RadioButton(mContext);
-			rb.setText(null);
-			rb.setTag(g);
-			rb.setOnClickListener(updateGroupClickListener);
-			rb.setSelected(g.getmGId() == originGroupId);
-			RelativeLayout.LayoutParams rightll = new RelativeLayout.LayoutParams(
-					RelativeLayout.LayoutParams.WRAP_CONTENT,
-					RelativeLayout.LayoutParams.WRAP_CONTENT);
-			rightll.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
-			rightll.addRule(RelativeLayout.CENTER_VERTICAL);
-			rightll.rightMargin = (int) mContext.getResources().getDimension(
-					R.dimen.contact_detail_2_item_margin_horizontal);
-			rl.addView(rb, rightll);
-			rbs[i] = rb;
-
 			if (g.getmGId() == originGroupId) {
-				rb.setSelected(true);
-				rb.setChecked(true);
+				rb.toggle();
 			}
+
 		}
 	}
 
@@ -125,44 +100,37 @@ public class UpdateContactGroupActivity extends Activity {
 		super.onBackPressed();
 	}
 
-	private OnClickListener updateGroupClickListener = new OnClickListener() {
+	private RadioGroup.OnCheckedChangeListener mGroupChangedListener = new RadioGroup.OnCheckedChangeListener() {
 
 		@Override
-		public void onClick(View view) {
+		public void onCheckedChanged(RadioGroup rg, int id) {
 			synchronized (state) {
 				if (state == STATE.UPDATING) {
 					if (mToast == null) {
-						mToast= Toast.makeText(
-								mContext,
-								R.string.activiy_contact_update_group_error_msg_in_progess,
-								Toast.LENGTH_SHORT);
+						mToast = Toast
+								.makeText(
+										mContext,
+										R.string.activiy_contact_update_group_error_msg_in_progess,
+										Toast.LENGTH_SHORT);
 					}
 					mToast.cancel();
 					mToast.show();
 					return;
 				}
 				state = STATE.UPDATING;
-				Group srcGroup = GlobalHolder.getInstance().getGroupById(
-						Group.GroupType.CONTACT, originGroupId);
-				Group desGroup = null;
-				for (int i = 0; i < rbs.length; i++) {
-					if (view == rbs[i] && !rbs[i].isSelected()) {
-						rbs[i].setSelected(true);
-						rbs[i].setChecked(true);
-						originGroupId = ((Group) rbs[i].getTag()).getmGId();
-						desGroup = GlobalHolder.getInstance().getGroupById(
-								Group.GroupType.CONTACT, originGroupId);
-					} else {
-						rbs[i].setSelected(false);
-						rbs[i].setChecked(false);
-					}
-				}
-
-				contactService.updateUserGroup((ContactGroup) desGroup,
-						(ContactGroup) srcGroup, GlobalHolder.getInstance()
-								.getUser(userId), new Registrant(mLocalHandler,
-								UPDATE_USER_GROUP_DONE, null));
 			}
+			Group srcGroup = GlobalHolder.getInstance().getGroupById(
+					Group.GroupType.CONTACT, originGroupId);
+			// update group id to new group
+			originGroupId = ((Group) rg.findViewById(id).getTag()).getmGId();
+			Group desGroup = GlobalHolder.getInstance().getGroupById(
+					Group.GroupType.CONTACT, originGroupId);
+
+			contactService.updateUserGroup((ContactGroup) desGroup,
+					(ContactGroup) srcGroup, GlobalHolder.getInstance()
+							.getUser(userId), new Registrant(mLocalHandler,
+							UPDATE_USER_GROUP_DONE, null));
+
 		}
 
 	};
@@ -173,7 +141,9 @@ public class UpdateContactGroupActivity extends Activity {
 		public void handleMessage(Message msg) {
 			switch (msg.what) {
 			case UPDATE_USER_GROUP_DONE:
-				state = STATE.NONE;
+				synchronized (state) {
+					state = STATE.NONE;
+				}
 				break;
 			}
 		}

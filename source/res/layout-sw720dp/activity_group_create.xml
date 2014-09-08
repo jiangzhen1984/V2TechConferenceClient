@@ -205,45 +205,6 @@
                     android:orientation="vertical" >
                 </LinearLayout>
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="10dp"
-                    android:orientation="horizontal"
-                    android:padding="1dp" >
-
-                    <TextView
-                        android:id="@+id/textView2"
-                         android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight=".2"
-                        android:layout_gravity="center"
-                        android:gravity="right|center_vertical"
-                        android:paddingRight="10dp"
-                        android:paddingLeft="20dp"
-                        android:text="@string/group_create_group_size"
-                        android:textSize="15sp" />
-
-                    <EditText
-                        android:id="@+id/conference_create_conf_start_time"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight=".8"
-                        android:layout_gravity="center"
-                        android:background="@null"
-                        android:ems="10"
-                        android:paddingBottom="5dp"
-                        android:paddingTop="5dp"
-                        android:inputType="datetime" >
-                    </EditText>
-                </LinearLayout>
-                
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:background="#cdcdcf"
-                    android:orientation="vertical" >
-                </LinearLayout>
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -253,7 +214,6 @@
                     android:padding="1dp" >
 
                     <TextView
-                        android:id="@+id/textView2"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight=".2"
@@ -264,18 +224,18 @@
                         android:text="@string/group_create_group_qualification"
                         android:textSize="15sp" />
 
-                    <EditText
-                        android:id="@+id/conference_create_conf_start_time"
+                    <Spinner
+                        android:id="@+id/group_create_group_rule"
                         android:layout_width="0dp"
-                        android:layout_height="wrap_content"
+                        android:layout_height="40dp"
                         android:layout_weight=".8"
-                        android:layout_gravity="center"
                         android:background="@null"
                         android:ems="10"
                         android:paddingBottom="5dp"
                         android:paddingTop="5dp"
-                        android:inputType="datetime" >
-                    </EditText>
+                        android:entries="@array/crowd_rules"
+                        />
+
                 </LinearLayout>
             </LinearLayout>
 
