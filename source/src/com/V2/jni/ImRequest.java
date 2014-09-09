@@ -201,7 +201,8 @@ public class ImRequest {
 		V2Log.d(" OnUserStatusUpdated--> nUserID:" + nUserID + "  nStatus:"
 				+ nStatus + " nType:" + nType + " szStatusDesc:" + szStatusDesc
 				+ "  " + new Date());
-		for (WeakReference<ImRequestCallback> wf : this.mCallbacks) {
+		for (int i = 0; i <mCallbacks.size(); i++) {
+			WeakReference<ImRequestCallback> wf = this.mCallbacks.get(i);
 			Object obj = wf.get();
 			if (obj != null) {
 				ImRequestCallback callback = (ImRequestCallback) obj;

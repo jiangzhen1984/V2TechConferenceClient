@@ -28,6 +28,10 @@
     <string name="crowd_content_udpate_succeed">已更新</string>
     <string name="conversations_detail">群组详情</string>
     
+    <string name="error_crowd_title_required">群组名称不能为空!</string>
+    
+    <string name="crowd_members_title">群成员</string>
+    <string name="crowd_members_invitation">添加</string>
     
 
 </resources>

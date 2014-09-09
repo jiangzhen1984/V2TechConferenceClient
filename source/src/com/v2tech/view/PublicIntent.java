@@ -30,10 +30,14 @@ public class PublicIntent {
 	public static final String START_SETTING_ACTIVITY = "com.v2tech.start_setting_activity";
 
 	public static final String START_GROUP_CREATE_ACTIVITY = "com.v2tech.start_group_create_activity";
+	
+	public static final String START_CROWD_MEMBERS_ACTIVITY = "com.v2tech.start_crowd_members_activity";
 
 	public static final String UPDATE_CONVERSATION = "com.v2tech.update_conversation";
 	
 	public static final String SHOW_CROWD_CONTENT_ACTIVITY ="com.v2tech.crowd_content_activity";
+	
+	public static final String SHOW_CROWD_DETAIL_ACTIVITY ="com.v2tech.crowd_detail_activity";
 
 	/**
 	 * extras key: obj  value: {@link com.v2tech.view.bo.ConversationNotificationObject}

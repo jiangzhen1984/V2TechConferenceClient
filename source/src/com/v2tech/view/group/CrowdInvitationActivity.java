@@ -28,6 +28,7 @@ public class CrowdInvitationActivity extends Activity {
 	private TextView mCreatorTV;
 	private TextView mBriefTV;
 	private TextView mMembersCountsTV;
+	private View mReturnButton;
 	private View mAcceptButton;
 	private View mDeclineButton;
 	private View mButtonLayout;
@@ -49,6 +50,8 @@ public class CrowdInvitationActivity extends Activity {
 		mAcceptButton.setOnClickListener(mAcceptButtonListener);
 		mDeclineButton =  findViewById(R.id.crowd_invitation_decline_button);
 		mDeclineButton.setOnClickListener(mDeclineButtonListener);
+		mReturnButton =  findViewById(R.id.crowd_invitation_return_button);
+		mReturnButton.setOnClickListener(mReturnButtonListener);
 		
 		mButtonLayout = findViewById(R.id.crowd_invitation_button_ly);
 		mNotesLayout = findViewById(R.id.crowd_invitation_notes_ly);
@@ -98,6 +101,16 @@ public class CrowdInvitationActivity extends Activity {
 		}
 		
 	};
+	
+	private OnClickListener mReturnButtonListener = new OnClickListener() {
+
+		@Override
+		public void onClick(View view) {
+			onBackPressed();
+		}
+		
+	};
+	
 	
 	
 	private Handler mLocalHandler = new Handler () {

@@ -238,6 +238,7 @@
             android:name="com.v2tech.view.group.CrowdDetailActivity"
             android:screenOrientation="nosensor" >
             <intent-filter>
+                <action  android:name="com.v2tech.crowd_detail_activity"/>
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="com.v2tech" />
             </intent-filter>
@@ -252,6 +253,17 @@
                 <category android:name="com.v2tech" />
             </intent-filter>
         </activity>
+          <activity
+            android:name="com.v2tech.view.group.CrowdMembersActivity"
+            android:screenOrientation="nosensor" >
+            <intent-filter>
+                <action android:name="com.v2tech.start_crowd_members_activity" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="com.v2tech" />
+            </intent-filter>
+        </activity>
+        
 
         <receiver android:name="com.v2tech.view.receiver.AvatarChangedReceiver" >
             <intent-filter>

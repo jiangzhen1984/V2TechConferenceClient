@@ -48,7 +48,7 @@ public class CrowdDetailActivity extends Activity {
 	private View mQuitButton;
 	private View mShowBriefButton;
 	private View mShowAnnounceButton;
-	private View mInvitationButton;
+	private View mShowMembersButton;
 	private View mReturnButton;
 	private TextView mButtonText;
 	private RadioGroup mRulesRD;
@@ -78,11 +78,11 @@ public class CrowdDetailActivity extends Activity {
 		mShowBriefButton.setOnClickListener(mContentButtonListener);
 		mShowAnnounceButton = findViewById(R.id.crowd_detail_announcement_button);
 		mShowAnnounceButton.setOnClickListener(mContentButtonListener);
-		mInvitationButton= findViewById(R.id.crowd_detail_invitation_members_button);
-		mInvitationButton.setOnClickListener(mInvitataionButtonListener);
+		mShowMembersButton= findViewById(R.id.crowd_detail_invitation_members_button);
+		mShowMembersButton.setOnClickListener(mShowMembersButtonListener);
 
 		crowd = (CrowdGroup) GlobalHolder.getInstance().getGroupById(
-				GroupType.CHATING, getIntent().getExtras().getLong("cid"));
+				GroupType.CHATING, getIntent().getLongExtra("cid", 0));
 
 		mNameTV.setText(crowd.getName());
 		mBriefTV.setText(crowd.getBrief());
@@ -267,14 +267,14 @@ public class CrowdDetailActivity extends Activity {
 
 	};
 	
-	private OnClickListener mInvitataionButtonListener = new  OnClickListener() {
+	private OnClickListener mShowMembersButtonListener = new  OnClickListener() {
 
 		@Override
 		public void onClick(View view) {
-			Intent i = new Intent(PublicIntent.START_GROUP_CREATE_ACTIVITY);
+			Intent i = new Intent(PublicIntent.START_CROWD_MEMBERS_ACTIVITY);
 			i.addCategory(PublicIntent.DEFAULT_CATEGORY);
 			i.putExtra("cid", crowd.getmGId());
-			startActivityForResult(i, TYPE_UPDATE_MEMBERS);
+			startActivity(i);
 		}
 
 	};

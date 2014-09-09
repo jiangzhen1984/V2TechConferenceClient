@@ -11,6 +11,22 @@
         android:layout_height="wrap_content"
         android:background="#ffffff" >
 
+        
+        <TextView
+            android:id="@+id/crowd_invitation_return_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="5dp"
+            android:gravity="center"
+            android:paddingBottom="5dp"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:paddingTop="5dp"
+            android:text="@string/contacts_user_detail_return_button"
+            android:textColor="@color/button_text_color"
+            android:textSize="@dimen/common_item_text_size" />
 
         <TextView
             android:layout_width="wrap_content"

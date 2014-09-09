@@ -97,7 +97,7 @@ public class CrowdCreateActivity extends Activity {
 			setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 		}
 
-		setContentView(R.layout.activity_group_create);
+		setContentView(R.layout.crowd_create_activity);
 		mContext = this;
 		mContactsContainer = (ListView) findViewById(R.id.group_create_contacts_list);
 		mContactsContainer.setOnItemClickListener(itemListener);
@@ -163,7 +163,7 @@ public class CrowdCreateActivity extends Activity {
 	 */
 	private void loadCache() {
 		crowd = (CrowdGroup) GlobalHolder.getInstance().getGroupById(
-				GroupType.CHATING, getIntent().getExtras().getLong("cid"));
+				GroupType.CHATING, getIntent().getLongExtra("cid", 0));
 		if (crowd != null) {
 			mRuleSpinner.setEnabled(false);
 			if (crowd.getAuthType() == AuthType.ALLOW_ALL) {
@@ -442,9 +442,9 @@ public class CrowdCreateActivity extends Activity {
 		@Override
 		public void onClick(View view) {
 			String title = mGroupTitleET.getText().toString();
-			if (title == null || title.length() == 0) {
+			if (title == null || title.trim().isEmpty()) {
 				mGroupTitleET
-						.setError(getString(R.string.error_conf_title_required));
+						.setError(getString(R.string.error_crowd_title_required));
 				mGroupTitleET.requestFocus();
 				return;
 			}
@@ -588,6 +588,13 @@ public class CrowdCreateActivity extends Activity {
 					i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
 					i.putExtra("crowd", id);
 					mContext.sendBroadcast(i);
+					
+					
+					Intent crowdIntent = new Intent(PublicIntent.SHOW_CROWD_DETAIL_ACTIVITY);
+					crowdIntent.addCategory(PublicIntent.DEFAULT_CATEGORY);
+					crowdIntent.putExtra("cid", id);
+					mContext.startActivity(crowdIntent);
+					
 					// finish current activity
 					finish();
 				} else {

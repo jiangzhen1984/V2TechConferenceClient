@@ -27,7 +27,8 @@
                 android:layout_marginBottom="8dp"
                 android:layout_marginTop="8dp"
                 android:text="@string/group_create_title"
-                android:textSize="25sp" />
+                 android:textColor="@color/activiy_contact_detail_title_color"
+                android:textSize="@dimen/common_item_text_size" />
 
             <TextView
                 android:id="@+id/group_create_confirm_button"
