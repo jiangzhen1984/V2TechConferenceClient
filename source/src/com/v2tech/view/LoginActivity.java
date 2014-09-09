@@ -5,6 +5,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -220,6 +221,20 @@ public class LoginActivity extends Activity {
 				});
 		mShowIpSettingButton = findViewById(R.id.show_setting);
 		mShowIpSettingButton.setOnClickListener(showIpSetting);
+		
+		findViewById(R.id.trail_button).setOnClickListener(new OnClickListener () {
+
+			@Override
+			public void onClick(View arg0) {
+				Intent intent = new Intent();
+		        intent.setAction("android.intent.action.VIEW");
+		        Uri content_url = Uri.parse("http://www.v2tech.com/support/bcregist.jsp");
+		        intent.setData(content_url);
+		        startActivity(intent);
+				
+			}
+			
+		});
 
 		loginView = findViewById(R.id.login_layout);
 		loginView.setVisibility(View.GONE);
@@ -300,8 +315,8 @@ public class LoginActivity extends Activity {
 			final EditText et = (EditText) dialog.findViewById(R.id.ip);
 			final EditText port = (EditText) dialog.findViewById(R.id.port);
 
-			et.setText(SPUtil.getConfigStrValue(mContext, "ip"));
-			port.setText(SPUtil.getConfigStrValue(mContext, "port"));
+			et.setText(SPUtil.getConfigStrValue(mContext, "ip") == null? "118.145.28.253" : SPUtil.getConfigStrValue(mContext, "ip"));
+			port.setText(SPUtil.getConfigStrValue(mContext, "port") == null?"5123":SPUtil.getConfigStrValue(mContext, "port"));
 
 			saveButton.setOnClickListener(new OnClickListener() {
 				@Override
@@ -396,7 +411,13 @@ public class LoginActivity extends Activity {
 	public void attemptLogin() {
 		String ip = SPUtil.getConfigStrValue(this, "ip");
 		String port = SPUtil.getConfigStrValue(this, "port");
-
+		if (ip == null || ip.isEmpty()) {
+			ip ="118.145.28.253";
+		}
+		if (port == null || port.isEmpty()) {
+			port ="5123";
+		}
+		
 		if (ip == null || ip.isEmpty() || port == null || port.isEmpty()) {
 			Toast.makeText(mContext, R.string.error_no_host_configuration,
 					Toast.LENGTH_SHORT).show();
