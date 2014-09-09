@@ -152,11 +152,25 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignBottom="@+id/show_setting"
-                    android:layout_alignParentRight="true"
+                    android:layout_toLeftOf="@+id/trail_button"
                     android:gravity="right|center_vertical"
                     android:paddingLeft="20dp"
-                    android:paddingRight="20dp"
+                    android:paddingRight="10dp"
                     android:text="@string/action_sign_in_register"
+                    android:textColor="@color/button_text_color"
+                    android:textSize="@dimen/login_box_text_size" />
+                
+                
+                <TextView
+                    android:id="@+id/trail_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBottom="@+id/show_setting"
+                    android:layout_alignParentRight="true"
+                    android:gravity="right|center_vertical"
+                    android:paddingLeft="10dp"
+                    android:paddingRight="20dp"
+                    android:text="试用"
                     android:textColor="@color/button_text_color"
                     android:textSize="@dimen/login_box_text_size" />
             </RelativeLayout>
