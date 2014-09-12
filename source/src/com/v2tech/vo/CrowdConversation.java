@@ -33,6 +33,11 @@ public class CrowdConversation extends Conversation {
 
 	@Override
 	public String getMsg() {
+		if (g != null) {
+			User u = g.getOwnerUser();
+			// TODO need use localization
+			return u == null ? "" : "创建人:" + u.getName();
+		}
 		return msg;
 	}
 

@@ -3,6 +3,7 @@ package com.v2tech.view.contacts;
 import java.util.List;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -14,6 +15,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -208,6 +210,42 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 		mCompanyTV.setText(u.getCompany());
 
 	}
+	
+	
+	private Dialog  mDialog = null;
+	private void showConfirmDialog() {
+		if (mDialog == null) {
+			mDialog = new Dialog(mContext);
+			mDialog.setContentView(R.layout.contacts_remove_confirmation_dialog);
+			Button confirmButton = (Button)mDialog.findViewById(R.id.contacts_group_confirm_button);
+			confirmButton.setOnClickListener(new OnClickListener() {
+
+				@Override
+				public void onClick(View view) {
+					//input null for remove contact
+					contactService.updateUserGroup(null,(ContactGroup)belongs,  u, null);
+					isRelation = false;
+					updateContactGroup();
+					mDialog.dismiss();
+				}
+				
+			});
+			Button cancelbutton = (Button)mDialog.findViewById(R.id.contacts_group_cancel_button);
+			cancelbutton.setOnClickListener(new OnClickListener() {
+
+				@Override
+				public void onClick(View arg0) {
+					mDialog.dismiss();
+				}
+				
+			});
+		}
+		
+		if (!mDialog.isShowing()) {
+			mDialog.show();
+		}
+		
+	}
 
 	private TextWatcher tw = new TextWatcher() {
 
@@ -244,13 +282,15 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 
 	};
 	
+	
+	
+	
 	private View.OnClickListener mAddOrRemoveContactButton = new OnClickListener() {
 
 		@Override
 		public void onClick(View view) {
 			if (isRelation) {
-				contactService.updateUserGroup(null,(ContactGroup)belongs,  u, null);
-				isRelation = false;
+				showConfirmDialog();
 			} else {
 				List<Group> list = GlobalHolder.getInstance().getGroup(GroupType.CONTACT);
 				if (list != null && list.size() > 0) {

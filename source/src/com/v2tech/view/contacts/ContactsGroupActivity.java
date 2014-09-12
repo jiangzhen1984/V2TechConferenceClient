@@ -128,44 +128,6 @@ public class ContactsGroupActivity extends Activity {
 			mDialog = new Dialog(this, R.style.ContactUserActionDialog);
 
 			mDialog.setContentView(R.layout.activity_contacts_group_dialog);
-			final Button cancelB = (Button) mDialog
-					.findViewById(R.id.contacts_group_cancel_button);
-			cancelB.setOnClickListener(new OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-					imm.hideSoftInputFromWindow(mGroupNameET.getWindowToken(),
-							0);
-					mDialog.dismiss();
-				}
-
-			});
-			final Button confirmButton = (Button) mDialog
-					.findViewById(R.id.contacts_group_confirm_button);
-			confirmButton.setOnClickListener(new OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-					imm.hideSoftInputFromWindow(mGroupNameET.getWindowToken(),
-							0);
-
-					if (mGroupNameET.getText().toString().isEmpty()) {
-						mGroupNameET.setError(mContext
-								.getText(R.string.activiy_contact_group_dialog_group_name_required));
-						return;
-					}
-					if (group == null) {
-						ContactGroup newGroup = new ContactGroup(0,
-								mGroupNameET.getText().toString());
-						updateGroup(newGroup, OPT.CREATE);
-					} else {
-						group.setName(mGroupNameET.getText().toString());
-						updateGroup(group, OPT.UPDATE);
-					}
-				}
-
-			});
-
 			mDialogTitleTV = (TextView) mDialog
 					.findViewById(R.id.contacts_group_title);
 			mGroupNameET = (EditText) mDialog
@@ -178,10 +140,52 @@ public class ContactsGroupActivity extends Activity {
 					.setText(R.string.activiy_contact_group_dialog_title_update);
 			mGroupNameET.setText(group.getName());
 		} else {
-			mGroupNameET.setText(R.string.activiy_contact_group_name_content);
+			//mGroupNameET.setText(R.string.activiy_contact_group_name_content);
 			mDialogTitleTV
 					.setText(R.string.activiy_contact_group_dialog_title_create);
 		}
+		
+		
+		final Button cancelB = (Button) mDialog
+				.findViewById(R.id.contacts_group_cancel_button);
+		cancelB.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+				imm.hideSoftInputFromWindow(mGroupNameET.getWindowToken(),
+						0);
+				mDialog.dismiss();
+			}
+
+		});
+		final Button confirmButton = (Button) mDialog
+				.findViewById(R.id.contacts_group_confirm_button);
+		confirmButton.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+				imm.hideSoftInputFromWindow(mGroupNameET.getWindowToken(),
+						0);
+
+				if (mGroupNameET.getText().toString().trim().isEmpty()) {
+					mGroupNameET.setError(mContext
+							.getText(R.string.activiy_contact_group_dialog_group_name_required));
+					return;
+				}
+				if (group == null) {
+					ContactGroup newGroup = new ContactGroup(0,
+							mGroupNameET.getText().toString());
+					updateGroup(newGroup, OPT.CREATE);
+				} else {
+					group.setName(mGroupNameET.getText().toString());
+					updateGroup(group, OPT.UPDATE);
+				}
+			}
+
+		});
+
+		
+		
 
 		mDialog.show();
 	}
@@ -271,7 +275,15 @@ public class ContactsGroupActivity extends Activity {
 			View v = view
 					.findViewById(R.id.contacts_group_item_adapter_delelte_button);
 			v.setTag(wr.getItemObject());
-			v.setOnClickListener(deleteGroupButtonClickListener);
+			if (((ContactGroup)wr.getItemObject()).isDefault()) {
+				v.setVisibility(View.INVISIBLE);
+				view.findViewById(R.id.contacts_group_delete_icon).setVisibility(View.INVISIBLE);
+			} else {
+				v.setVisibility(View.VISIBLE);;
+				v.setOnClickListener(deleteGroupButtonClickListener);
+				view.findViewById(R.id.contacts_group_delete_icon).setVisibility(View.VISIBLE);
+			}
+			
 			return view;
 		}
 

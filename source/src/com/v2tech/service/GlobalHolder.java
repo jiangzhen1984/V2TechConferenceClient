@@ -178,6 +178,9 @@ public class GlobalHolder {
 				mOrgGroup.add(g);
 			} else if (gType == GroupType.CONTACT) {
 				g = new ContactGroup(vg.id, vg.name);
+				if (vg.isDefault) {
+					((ContactGroup)g).setDefault(true);
+				}
 				mContactsGroup.add(g);
 			} else {
 				throw new RuntimeException(" Can not support this type");

@@ -48,6 +48,9 @@ public class V2Group {
 	public String brief;
 	public String announce;
 	
+	//for contact group
+	public boolean isDefault;
+	
 	
 	
 	public V2Group(long id, int type) {

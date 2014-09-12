@@ -175,7 +175,7 @@
                         android:id="@+id/textView1"
                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_weight=".2"
+                        android:layout_weight=".3"
                         android:layout_gravity="center"
                         android:gravity="right|center_vertical"
                         android:paddingLeft="20dp"
@@ -216,11 +216,11 @@
                     <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_weight=".2"
+                        android:layout_weight=".3"
                         android:layout_gravity="center"
                         android:gravity="right|center_vertical"
                         android:paddingRight="10dp"
-                        android:paddingLeft="20dp"
+                        android:paddingLeft="0dp"
                         android:text="@string/group_create_group_qualification"
                         android:textSize="15sp" />
 

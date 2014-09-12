@@ -22,7 +22,7 @@
         android:textSize="@dimen/common_item_text_size" />
 
     <ImageView
-        android:id="@+id/imageView1"
+        android:id="@+id/contacts_group_delete_icon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
@@ -36,7 +36,7 @@
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
         android:layout_marginLeft="10dp"
-        android:layout_toRightOf="@+id/imageView1"
+        android:layout_toRightOf="@+id/contacts_group_delete_icon"
         android:ellipsize="end"
         android:gravity="center"
         android:singleLine="true"

@@ -133,6 +133,12 @@ public class XmlAttributeExtractor {
 			group = new V2Group(
 					Long.parseLong(subGroupEl.getAttribute("id")),
 					subGroupEl.getAttribute("name"), type);
+			//If type is contact and is first item, means this group is default
+			if (type == V2Group.TYPE_CONTACTS_GROUP && j ==0) {
+				group.isDefault = true;
+				//TODO use localization
+				group.name ="我的好友";
+			}
 
 			if (parent == null) {
 				list.add(group);

@@ -586,7 +586,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 		for (Group g : list) {
 			Conversation cov = null;
 			if (g.getGroupType() == GroupType.CONFERENCE) {
-				cov  = new ConferenceConversation(g);
+				cov = new ConferenceConversation(g);
 			} else if (g.getGroupType() == GroupType.CHATING) {
 				cov = new CrowdConversation(g);
 			}
@@ -1337,14 +1337,19 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 					Message.obtain(mHandler, UPDATE_CONVERSATION, uao)
 							.sendToTarget();
 				}
-
+				// Update name of creator of conversation
 			} else if (JNIService.JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION
 					.equals(intent.getAction())) {
 				for (ScrollItem item : mItemList) {
-					// item.cov.getType().equals(Conversation.TYPE_CONFERNECE)
-					if (item.cov.getType().equals(Conversation.TYPE_GROUP)) {
-						Group g = ((CrowdConversation) item.cov)
-								.getGroup();
+					if (item.cov.getType().equals(Conversation.TYPE_GROUP)
+							|| item.cov.getType().equals(
+									Conversation.TYPE_CONFERNECE)) {
+						Group g = null;
+						if (item.cov instanceof  CrowdConversation) {
+							g = ((CrowdConversation) item.cov).getGroup();
+						} else if (item.cov instanceof  ConferenceConversation) {
+							g = ((ConferenceConversation) item.cov).getGroup();
+						}
 						((GroupLayout) item.gp).updateContent(g.getOwnerUser()
 								.getName());
 					} else if (item.cov.getType().equals(
