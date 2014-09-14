@@ -50,6 +50,7 @@
                 android:layout_gravity="center"
                 android:background="@null"
                 android:ems="10"
+                android:maxLength="30"
                 android:inputType="text"
                 android:paddingBottom="5dp"
                 android:paddingTop="5dp" >

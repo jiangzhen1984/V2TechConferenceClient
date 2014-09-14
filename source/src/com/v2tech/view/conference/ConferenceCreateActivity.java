@@ -39,7 +39,6 @@ import android.widget.EditText;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
@@ -54,6 +53,7 @@ import com.v2tech.util.SPUtil;
 import com.v2tech.view.PublicIntent;
 import com.v2tech.view.cus.DateTimePicker;
 import com.v2tech.view.cus.DateTimePicker.OnDateSetListener;
+import com.v2tech.view.widget.GroupListView;
 import com.v2tech.vo.Conference;
 import com.v2tech.vo.ConferenceGroup;
 import com.v2tech.vo.Group;
@@ -81,7 +81,10 @@ public class ConferenceCreateActivity extends Activity {
 	private LocalHandler mLocalHandler = new LocalHandler();
 
 	private EditText searchedTextET;
-	private ListView mContactsContainer;
+	//private ListView mContactsContainer;
+	
+	private com.v2tech.view.widget.GroupListView mGroupListView;
+	
 	private ContactsAdapter adapter = new ContactsAdapter();
 	private TextView mConfirmButton;
 	private EditText mConfTitleET;
@@ -124,9 +127,12 @@ public class ConferenceCreateActivity extends Activity {
 		setContentView(R.layout.activity_conference_create);
 
 		mContext = this;
-		mContactsContainer = (ListView) findViewById(R.id.conf_create_contacts_list);
-		mContactsContainer.setOnItemClickListener(itemListener);
-		mContactsContainer.setOnItemLongClickListener(itemLongClickListener);
+		
+		mGroupListView = (GroupListView) findViewById(R.id.conf_create_contacts_list);
+		mGroupListView.setShowedCheckedBox(true);
+		//mContactsContainer = (ListView) findViewById(R.id.conf_create_contacts_list);
+		//mContactsContainer.setOnItemClickListener(itemListener);
+		//mContactsContainer.setOnItemLongClickListener(itemLongClickListener);
 
 		mAttendeeContainer = (LinearLayout) findViewById(R.id.conference_attendee_container);
 		mAttendeeContainer.setGravity(Gravity.CENTER);
@@ -160,6 +166,7 @@ public class ConferenceCreateActivity extends Activity {
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
+		cs.clear();
 	}
 
 	@Override
@@ -481,26 +488,32 @@ public class ConferenceCreateActivity extends Activity {
 
 		@Override
 		public void afterTextChanged(Editable s) {
-			if (s != null && s.length() > 0) {
-				if (!mIsStartedSearch) {
-					mCacheItemList = mItemList;
-					mIsStartedSearch = true;
-				}
+//			if (s != null && s.length() > 0) {
+//				if (!mIsStartedSearch) {
+//					mCacheItemList = mItemList;
+//					mIsStartedSearch = true;
+//				}
+//			} else {
+//				if (mIsStartedSearch) {
+//					mItemList = mCacheItemList;
+//					adapter.notifyDataSetChanged();
+//					mIsStartedSearch = false;
+//				}
+//				return;
+//			}
+//			String str = s == null ? "" : s.toString();
+//			List<User> searchedUserList = new ArrayList<User>();
+//			for (Group g : mGroupList) {
+//				Group.searchUser(str, searchedUserList, g);
+//			}
+//			Message.obtain(mLocalHandler, UPDATE_SEARCHED_USER_LIST,
+//					searchedUserList).sendToTarget();
+			mGroupListView.setTextFilterEnabled(true);
+			if (s.toString().isEmpty()) {
+				mGroupListView.clearTextFilter();
 			} else {
-				if (mIsStartedSearch) {
-					mItemList = mCacheItemList;
-					adapter.notifyDataSetChanged();
-					mIsStartedSearch = false;
-				}
-				return;
+				mGroupListView.setFilterText(s.toString());
 			}
-			String str = s == null ? "" : s.toString();
-			List<User> searchedUserList = new ArrayList<User>();
-			for (Group g : mGroupList) {
-				Group.searchUser(str, searchedUserList, g);
-			}
-			Message.obtain(mLocalHandler, UPDATE_SEARCHED_USER_LIST,
-					searchedUserList).sendToTarget();
 		}
 
 		@Override
@@ -688,40 +701,48 @@ public class ConferenceCreateActivity extends Activity {
 
 	};
 
+	private List<Group> mList = new ArrayList<Group>();
 	class LoadContactsAT extends AsyncTask<Void, Void, Void> {
 
 		@Override
 		protected Void doInBackground(Void... params) {
 			mGroupList = GlobalHolder.getInstance().getGroup(GroupType.ORG);
-			if (mGroupList != null) {
-				for (Group g : mGroupList) {
-					mItemList.add(new ListItem(g, g.getLevel()));
-				}
-			}
+			
+			mList.addAll( GlobalHolder.getInstance().getGroup(GroupType.CONTACT));
+			mList.addAll( GlobalHolder.getInstance().getGroup(GroupType.ORG));
+			
+			
+//			if (mGroupList != null) {
+//				for (Group g : mGroupList) {
+//					mItemList.add(new ListItem(g, g.getLevel()));
+//				}
+//			}
 
-			doPreSelect();
+			//doPreSelect();
 			return null;
 		}
 
 		@Override
 		protected void onPostExecute(Void result) {
-			if (preSelectedUID > 0) {
-				ListItem item = null;
-				User preUser = GlobalHolder.getInstance().getUser(
-						preSelectedUID);
-				for (int j = 0; j < mItemList.size(); j++) {
-					item = mItemList.get(j);
-					if (item.u != null
-							&& preUser.getmUserId() == item.u.getmUserId()) {
-						mContactsContainer.performItemClick(item.v, j,
-								item.u.getmUserId());
-						break;
-					}
-				}
-			}
+			mGroupListView.setGroupList(mList);
+			
+//			if (preSelectedUID > 0) {
+//				ListItem item = null;
+//				User preUser = GlobalHolder.getInstance().getUser(
+//						preSelectedUID);
+//				for (int j = 0; j < mItemList.size(); j++) {
+//					item = mItemList.get(j);
+//					if (item.u != null
+//							&& preUser.getmUserId() == item.u.getmUserId()) {
+//						mContactsContainer.performItemClick(item.v, j,
+//								item.u.getmUserId());
+//						break;
+//					}
+//				}
+//			}
 
-			adapter.notifyDataSetChanged();
-			mContactsContainer.setAdapter(adapter);
+		//	adapter.notifyDataSetChanged();
+		//	mContactsContainer.setAdapter(adapter);
 		}
 
 	};

@@ -2,8 +2,6 @@ package v2av;
 
 import java.nio.ByteBuffer;
 
-import com.V2.jni.util.V2Log;
-
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.Canvas;
@@ -24,6 +22,7 @@ public class VideoPlayer {
 
 	private int mRotation = 0;
 	private int mBmpRotation = 0;
+	private boolean mIsSuspended;
 
 	private VideoDisplayMatrix mDisMatrix;
 
@@ -92,6 +91,16 @@ public class VideoPlayer {
 			mDisMatrix.setViewSize(w, h);
 			UpdateMatrix();
 		}
+	}
+	
+	
+
+	public boolean isSuspended() {
+		return mIsSuspended;
+	}
+
+	public void setSuspended(boolean spended) {
+		this.mIsSuspended = spended;
 	}
 
 	public void SetSurface(SurfaceHolder holder) {
@@ -197,6 +206,9 @@ public class VideoPlayer {
 	@SuppressWarnings("unused")
 	private void OnPlayVideo() {
 		if (mSurfaceH  == null || !mSurfaceH.getSurface().isValid()) {
+			return;
+		}
+		if (this.mIsSuspended) {
 			return;
 		}
 		mBitmap.copyPixelsFromBuffer(_playBuffer);

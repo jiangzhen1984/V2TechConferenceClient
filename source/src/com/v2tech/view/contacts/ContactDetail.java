@@ -353,6 +353,8 @@ public class ContactDetail extends Activity implements OnTouchListener {
 	}
 
 	private void startVoiceCall() {
+		//Update global audio state
+		GlobalHolder.getInstance().setAudioState(true, mUid);
 		Intent iv = new Intent();
 		iv.addCategory(PublicIntent.DEFAULT_CATEGORY);
 		iv.setAction(PublicIntent.START_P2P_CONVERSACTION_ACTIVITY);
@@ -364,6 +366,8 @@ public class ContactDetail extends Activity implements OnTouchListener {
 	}
 
 	private void startVideoCall() {
+		//Update global video state
+		GlobalHolder.getInstance().setVideoState(true, mUid);
 		Intent iv = new Intent();
 		iv.addCategory(PublicIntent.DEFAULT_CATEGORY);
 		iv.setAction(PublicIntent.START_P2P_CONVERSACTION_ACTIVITY);
@@ -371,13 +375,13 @@ public class ContactDetail extends Activity implements OnTouchListener {
 		iv.putExtra("uid", mUid);
 		iv.putExtra("is_coming_call", false);
 		iv.putExtra("voice", false);
-		List<UserDeviceConfig> list = GlobalHolder.getInstance()
-				.getAttendeeDevice(mUid);
-		if (list != null && list.size() > 0) {
-			iv.putExtra("device", list.get(0).getDeviceID());
+		UserDeviceConfig udc = GlobalHolder.getInstance().getUserDefaultDevice(mUid);
+		if (udc != null) {
+			iv.putExtra("device", udc.getDeviceID());
 		} else {
 			iv.putExtra("device", "");
 		}
+		
 		mContext.startActivity(iv);
 	}
 

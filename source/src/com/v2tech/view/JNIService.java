@@ -107,6 +107,7 @@ public class JNIService extends Service {
 	public static final String JNI_BROADCAST_CONFERENCE_REMOVED = "com.v2tech.jni.broadcast.conference_removed";
 	public static final String JNI_BROADCAST_GROUP_USER_REMOVED = "com.v2tech.jni.broadcast.group_user_removed";
 	public static final String JNI_BROADCAST_GROUP_USER_ADDED = "com.v2tech.jni.broadcast.group_user_added";
+	public static final String JNI_BROADCAST_VIDEO_CALL_CLOSED = "com.v2tech.jni.broadcast.video_call_closed";
 	
 	/**
 	 * Crowd invitation with key crowd
@@ -795,6 +796,31 @@ public class JNIService extends Service {
 					szXmlData);
 			GlobalHolder.getInstance().updateUserDevice(uid, ll);
 		}
+
+		@Override
+		/*
+		 * Use to user quickly pressed video call button more than one time
+		 * Because chat close event doesn't notify to activity.
+		 * P2PConversation doesn't start up yet.
+		 * @see com.V2.jni.VideoRequestCallbackAdapter#OnVideoChatClosed(com.V2.jni.ind.VideoJNIObjectInd)
+		 */
+		public void OnVideoChatClosed(VideoJNIObjectInd ind) {
+			super.OnVideoChatClosed(ind);
+			if (GlobalHolder.getInstance().isInMeeting()
+					|| GlobalHolder.getInstance().isInAudioCall()
+					|| GlobalHolder.getInstance().isInVideoCall()) {
+				return;
+			}
+			Intent i = new Intent(JNI_BROADCAST_VIDEO_CALL_CLOSED);
+			i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
+			i.putExtra("fromUserId", ind.getFromUserId());
+			i.putExtra("groupId", ind.getGroupId());
+			//Send sticky broadcast, make sure activity receive
+			mContext.sendStickyBroadcast(i);
+			
+		}
+		
+		
 
 	}
 

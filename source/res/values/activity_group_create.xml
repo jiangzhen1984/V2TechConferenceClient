@@ -1,6 +1,6 @@
 <resources>
 
-   <string name="group_create_title">创建群</string>
+   <string name="group_create_title">新建群组</string>
    <string name="group_create_group_name">群名称</string>
    <string name="group_create_group_size">群规模</string>
    <string name="group_create_group_qualification">验证类型</string>

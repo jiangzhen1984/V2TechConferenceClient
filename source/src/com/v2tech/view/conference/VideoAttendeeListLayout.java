@@ -381,7 +381,10 @@ public class VideoAttendeeListLayout extends LinearLayout {
 						spIV.setImageResource(R.drawable.camera_pressed);
 						atView.setBackgroundColor(Color.WHITE);
 					}
-
+					//If user doesn't exist video device before, update video device
+					if (wr.udc == null) {
+						wr.udc = udc;
+					}
 					wr.udc.setShowing(false);
 					wr.udc.setEnable(udc.isEnable());
 					break;

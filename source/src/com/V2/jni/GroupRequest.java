@@ -366,6 +366,10 @@ public class GroupRequest {
 		V2Log.d("OnInviteJoinGroup::==>" + groupType + ":" + groupInfo + ":"
 				+ userInfo + ":" + additInfo);
 		String id = XmlAttributeExtractor.extract(groupInfo, " id='", "'");
+		if (id == null || id.isEmpty()) {
+			V2Log.e(" Unknow group information:" + groupInfo);
+			return;
+		}
 		V2Group group = new V2Group(Long.parseLong(id), groupType);
 		if (groupType == V2Group.TYPE_CONF) {
 			String name = XmlAttributeExtractor.extract(groupInfo, "subject='", "'");

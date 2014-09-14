@@ -226,6 +226,8 @@ public class P2PConversation extends Activity implements
 
 		chatService.removeVideoChatConnectedistener(mLocalHandler,
 				VIDEO_CONECTED, null);
+		
+		chatService.clear();
 	}
 
 	@Override
@@ -877,6 +879,17 @@ public class P2PConversation extends Activity implements
 		filter.addAction(Intent.ACTION_USER_PRESENT);
 		filter.addAction(JNIService.JNI_BROADCAST_CONNECT_STATE_NOTIFICATION);
 		this.registerReceiver(receiver, filter);
+		
+		IntentFilter strickFliter = new IntentFilter();
+		strickFliter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
+		strickFliter.addAction(JNIService.JNI_BROADCAST_VIDEO_CALL_CLOSED);
+		Intent i = this.registerReceiver(null, strickFliter);
+		//means exist close broadcast, need to finish this activity
+		if (i != null) {
+			V2Log.i("hang up ");
+			removeStickyBroadcast(i);
+			hangUp();
+		}
 	}
 
 	private void quit() {
@@ -884,6 +897,8 @@ public class P2PConversation extends Activity implements
 	}
 
 	private void hangUp() {
+		// Stop ring tone
+		stopRingTone();
 		if (uad.isVideoType()) {
 			closeRemoteVideo();
 		}
@@ -928,7 +943,6 @@ public class P2PConversation extends Activity implements
 			// Remove timer
 			mLocalHandler.removeCallbacks(timeOutMonitor);
 			hangUp();
-			stopRingTone();
 		}
 
 	};
@@ -1048,7 +1062,7 @@ public class P2PConversation extends Activity implements
 			AudioManager audioManager;
 			audioManager = (AudioManager) mContext
 					.getSystemService(Context.AUDIO_SERVICE);
-			audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
+			audioManager.setMode(AudioManager.MODE_NORMAL);
 
 			int drawId = R.drawable.message_voice_lounder_pressed;
 			int color = R.color.fragment_conversation_connected_pressed_text_color;

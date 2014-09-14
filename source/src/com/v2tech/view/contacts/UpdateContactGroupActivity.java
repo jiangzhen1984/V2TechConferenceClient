@@ -144,6 +144,7 @@ public class UpdateContactGroupActivity extends Activity {
 				synchronized (state) {
 					state = STATE.NONE;
 				}
+				finish();
 				break;
 			}
 		}

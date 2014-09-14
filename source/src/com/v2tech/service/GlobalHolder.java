@@ -163,8 +163,8 @@ public class GlobalHolder {
 			if (gType == GroupType.CHATING) {
 				User owner = GlobalHolder.getInstance().getUser(vg.owner.uid);
 				g = new CrowdGroup(vg.id, vg.name, owner);
-				((CrowdGroup)g).setBrief(vg.brief);
-				((CrowdGroup)g).setAnnouncement(vg.announce);
+				((CrowdGroup) g).setBrief(vg.brief);
+				((CrowdGroup) g).setAnnouncement(vg.announce);
 				mCrowdGroup.add(g);
 			} else if (gType == GroupType.CONFERENCE) {
 				User owner = GlobalHolder.getInstance().getUser(vg.owner.uid);
@@ -179,7 +179,7 @@ public class GlobalHolder {
 			} else if (gType == GroupType.CONTACT) {
 				g = new ContactGroup(vg.id, vg.name);
 				if (vg.isDefault) {
-					((ContactGroup)g).setDefault(true);
+					((ContactGroup) g).setDefault(true);
 				}
 				mContactsGroup.add(g);
 			} else {
@@ -397,6 +397,22 @@ public class GlobalHolder {
 
 		return new ArrayList<UserDeviceConfig>(list);
 	}
+	
+	
+	public UserDeviceConfig getUserDefaultDevice(long uid) {
+		Set<UserDeviceConfig> list = mUserDeviceList.get(Long.valueOf(uid));
+		for (UserDeviceConfig udc : list) {
+			if (udc.isDefault()) {
+				return udc;
+			}
+		}
+		
+		if (list.size() > 0) {
+			V2Log.e("Not found default device, use first device !");
+			return list.iterator().next();
+		}
+		return null;
+	}
 
 	/**
 	 * Update user video device and clear existed user device first
@@ -423,15 +439,17 @@ public class GlobalHolder {
 	 * @param uid
 	 */
 	public void setAudioState(boolean flag, long uid) {
-		int st = this.mState.getState();
-		if (flag) {
-			st |= GlobalState.STATE_IN_AUDIO_CONVERSATION;
-		} else {
-			st &= (~GlobalState.STATE_IN_AUDIO_CONVERSATION);
+		synchronized (mState) {
+			int st = this.mState.getState();
+			if (flag) {
+				st |= GlobalState.STATE_IN_AUDIO_CONVERSATION;
+			} else {
+				st &= (~GlobalState.STATE_IN_AUDIO_CONVERSATION);
+			}
+			this.mState.setState(st);
+			this.mState.setUid(uid);
+			setVoiceConnectedState(flag);
 		}
-		this.mState.setState(st);
-		this.mState.setUid(uid);
-		setVoiceConnectedState(flag);
 	}
 
 	/**
@@ -441,51 +459,65 @@ public class GlobalHolder {
 	 * @param uid
 	 */
 	public void setVideoState(boolean flag, long uid) {
-		int st = this.mState.getState();
-		if (flag) {
-			st |= GlobalState.STATE_IN_VIDEO_CONVERSATION;
-		} else {
-			st &= (~GlobalState.STATE_IN_VIDEO_CONVERSATION);
+		synchronized (mState) {
+			int st = this.mState.getState();
+			if (flag) {
+				st |= GlobalState.STATE_IN_VIDEO_CONVERSATION;
+			} else {
+				st &= (~GlobalState.STATE_IN_VIDEO_CONVERSATION);
+			}
+			this.mState.setState(st);
+			this.mState.setUid(uid);
 		}
-		this.mState.setState(st);
-		this.mState.setUid(uid);
 	}
 
 	public void setMeetingState(boolean flag, long gid) {
-		int st = this.mState.getState();
-		if (flag) {
-			st |= GlobalState.STATE_IN_MEETING_CONVERSATION;
-		} else {
-			st &= (~GlobalState.STATE_IN_MEETING_CONVERSATION);
+		synchronized (mState) {
+			int st = this.mState.getState();
+			if (flag) {
+				st |= GlobalState.STATE_IN_MEETING_CONVERSATION;
+			} else {
+				st &= (~GlobalState.STATE_IN_MEETING_CONVERSATION);
+			}
+			this.mState.setState(st);
+			this.mState.setGid(gid);
 		}
-		this.mState.setState(st);
-		this.mState.setGid(gid);
 	}
 
 	public void setVoiceConnectedState(boolean flag) {
-		int st = this.mState.getState();
-		if (flag) {
-			st |= GlobalState.STATE_IN_VOICE_CONNECTED;
-		} else {
-			st &= (~GlobalState.STATE_IN_VOICE_CONNECTED);
+		synchronized (mState) {
+			int st = this.mState.getState();
+			if (flag) {
+				st |= GlobalState.STATE_IN_VOICE_CONNECTED;
+			} else {
+				st &= (~GlobalState.STATE_IN_VOICE_CONNECTED);
+			}
+			this.mState.setState(st);
 		}
-		this.mState.setState(st);
 	}
 
 	public boolean isVoiceConnected() {
-		return this.mState.isVoiceConnected();
+		synchronized (mState) {
+			return this.mState.isVoiceConnected();
+		}
 	}
 
 	public boolean isInAudioCall() {
-		return this.mState.isInAudioCall();
+		synchronized (mState) {
+			return this.mState.isInAudioCall();
+		}
 	}
 
 	public boolean isInVideoCall() {
-		return mState.isInVideoCall();
+		synchronized (mState) {
+			return mState.isInVideoCall();
+		}
 	}
 
 	public boolean isInMeeting() {
-		return mState.isInMeeting();
+		synchronized (mState) {
+			return mState.isInMeeting();
+		}
 	}
 
 	public GlobalState getGlobalState() {

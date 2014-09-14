@@ -733,10 +733,9 @@ public class ConversationView extends Activity {
 		iv.putExtra("uid", user2Id);
 		iv.putExtra("is_coming_call", false);
 		iv.putExtra("voice", false);
-		List<UserDeviceConfig> list = GlobalHolder.getInstance()
-				.getAttendeeDevice(user2Id);
-		if (list != null && list.size() > 0) {
-			iv.putExtra("device", list.get(0).getDeviceID());
+		UserDeviceConfig udc = GlobalHolder.getInstance().getUserDefaultDevice(user2Id);
+		if (udc != null) {
+			iv.putExtra("device", udc.getDeviceID());
 		} else {
 			iv.putExtra("device", "");
 		}

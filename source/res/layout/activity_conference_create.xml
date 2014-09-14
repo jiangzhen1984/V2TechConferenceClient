@@ -138,14 +138,14 @@
         android:layout_height="match_parent"
         android:background="#ffffff" >
 
-        <ListView
+        <com.v2tech.view.widget.GroupListView
             android:id="@+id/conf_create_contacts_list"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_above="@+id/conf_create_form"
             android:divider="@null"
             android:focusable="false" >
-        </ListView>
+        </com.v2tech.view.widget.GroupListView>
 
         <RelativeLayout
             android:id="@+id/conf_create_form"

@@ -155,7 +155,7 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 			Message.obtain(mHandler, FILL_CONTACTS_GROUP).sendToTarget();
 		}
 		
-		if (currentPos != -1) {
+		if (currentPos >=0 && currentPos < mItemList.size()) {
 			mItemList.get(currentPos).isExpanded = lastExpanded;
 			ContactGroupView contact = ((ContactGroupView) mItemList.get(currentPos).v);
 			contact.getmGroupIndicatorIV().setTag(contact.getLastExpanded());
@@ -403,8 +403,9 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 	}
 
 	private void updateListStateRemove(int pos, ListItem item) {
+		List<User> uList = item.g.getUsers();
 		if ((item.g.getChildGroup() == null || item.g.getChildGroup().size() <= 0)
-				&& (item.g.getUsers() == null || item.g.getUsers().size() <= 0)) {
+				&& (uList == null || uList.size() <= 0)) {
 			return;
 		}
 

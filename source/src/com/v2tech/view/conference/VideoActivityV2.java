@@ -367,7 +367,7 @@ public class VideoActivityV2 extends Activity {
 				.findGroupById(conf.getId());
 		// load conference attendee list
 		if (confGroup != null) {
-			List<User> l = new ArrayList<User>(confGroup.getUsers());
+			List<User> l = confGroup.getUsers();
 			for (User u : l) {
 				mAttendeeList.add(new Attendee(u));
 			}
@@ -955,7 +955,7 @@ public class VideoActivityV2 extends Activity {
 							conf.getId());
 					// load conference attendee list
 					if (confGroup != null) {
-						List<User> l = new ArrayList<User>(confGroup.getUsers());
+						List<User> l = confGroup.getUsers();
 						for (User u : l) {
 							Attendee at = new Attendee(u);
 							boolean bt = mAttendeeList.add(at);
@@ -2127,6 +2127,9 @@ public class VideoActivityV2 extends Activity {
 				List<UserDeviceConfig> list = (List<UserDeviceConfig>) obj[1];
 				Long uid = (Long) obj[0];
 				Attendee at = findAttendee(uid);
+				if (at.getmDevices() == null) {
+					at.setmDevices(list);
+				}
 				updateAttendeeDevice(at, list);
 			}
 				break;

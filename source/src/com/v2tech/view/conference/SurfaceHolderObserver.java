@@ -37,6 +37,7 @@ public class SurfaceHolderObserver implements SurfaceHolder.Callback {
 			if (state == State.CLOSED || state == State.CLOSING) {
 				state = State.SHOWING;
 				udc.getVp().SetSurface(holder);
+				updateDeviceState(false);
 				service.requestOpenVideoDevice(udc, new Registrant(handler,
 						OPEN_DEVICE_DONE, null));
 			}
@@ -50,6 +51,7 @@ public class SurfaceHolderObserver implements SurfaceHolder.Callback {
 			if (state == State.CLOSED || state == State.CLOSING) {
 				state = State.SHOWING;
 				udc.getVp().SetSurface(holder);
+				updateDeviceState(false);
 				service.requestOpenVideoDevice(udc, new Registrant(handler,
 						OPEN_DEVICE_DONE, null));
 			}
@@ -62,6 +64,7 @@ public class SurfaceHolderObserver implements SurfaceHolder.Callback {
 		synchronized (state) {
 			if ((state == State.SHOWED || state == State.SHOWING) && !isValid) {
 				state = State.CLOSING;
+				updateDeviceState(true);
 				service.requestCloseVideoDevice(udc, new Registrant(handler,
 						CLOSE_DEVICE_DONE, null));
 			}
@@ -77,6 +80,7 @@ public class SurfaceHolderObserver implements SurfaceHolder.Callback {
 		}
 		synchronized (state) {
 			state = State.SHOWING;
+			updateDeviceState(false);
 			service.requestOpenVideoDevice(udc, new Registrant(handler,
 					OPEN_DEVICE_DONE, null));
 		}
@@ -88,11 +92,18 @@ public class SurfaceHolderObserver implements SurfaceHolder.Callback {
 		}
 		synchronized (state) {
 			state = State.CLOSING;
+			updateDeviceState(true);
 			service.requestCloseVideoDevice(udc, new Registrant(handler,
 					CLOSE_DEVICE_DONE, null));
 		}
 	}
 	
+	
+	private void updateDeviceState(boolean suspend) {
+		if (udc.getVp()  != null) {
+			udc.getVp().setSuspended(suspend);
+		}
+	}
 	
 
 	public boolean isValid() {

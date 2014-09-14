@@ -213,6 +213,14 @@ public abstract class Group implements Comparable<Group> {
 	public List<Group> getChildGroup() {
 		return this.mChild;
 	}
+	
+	/**
+	 * Get sub group and user sum 
+	 * @return
+	 */
+	public int getSubSize() {
+		return this.mChild.size() + this.users.size();
+	}
 
 	public void addGroupToGroup(Group g) {
 		if (g == null) {
@@ -226,7 +234,8 @@ public abstract class Group implements Comparable<Group> {
 	}
 
 	public Group findUser(User u, Group g) {
-		for (User tu : g.getUsers()) {
+		List<User> list = g.getUsers();
+		for (User tu : list) {
 			if (tu.getmUserId() == u.getmUserId()) {
 				return g;
 			}
@@ -251,7 +260,8 @@ public abstract class Group implements Comparable<Group> {
 		if (l == null || g == null) {
 			return;
 		}
-		for (User u : g.getUsers()) {
+		List<User> list = g.getUsers();
+		for (User u : list) {
 			if ((u != null && u.getName() != null && u.getName().contains(text))
 					|| (u.getArra().equals(text))) {
 				l.add(u);

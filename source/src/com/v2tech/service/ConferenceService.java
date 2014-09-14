@@ -457,11 +457,11 @@ public class ConferenceService extends DeviceService {
 		@Override
 		public void OnConfMemberEnterCallback(long nConfID, long nTime,
 				V2User v2user) {
-			User user = GlobalHolder.getInstance().getUser(v2user.uid);
-			if (user == null && v2user.type == V2GlobalEnum.USER_ACCOUT_TYPE_NON_REGISTERED) {
+			User user = null;
+			if (v2user.type == V2GlobalEnum.USER_ACCOUT_TYPE_NON_REGISTERED) {
 				user = new User(v2user.uid, v2user.name);
 			} else {
-				V2Log.e("User is null but account type is not USER_ACCOUT_TYPE_NON_REGISTERED : "+ v2user.type );
+				user = GlobalHolder.getInstance().getUser(v2user.uid);
 			}
 			
 			if (user == null) {

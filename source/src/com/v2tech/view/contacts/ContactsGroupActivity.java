@@ -94,6 +94,14 @@ public class ContactsGroupActivity extends Activity {
 		super.onBackPressed();
 	}
 	
+	
+	
+
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		contactService.clear();
+	}
 
 	private List<CommonAdapterItemWrapper> convert(List<Group> listGroup) {
 		List<CommonAdapterItemWrapper> ds = new ArrayList<CommonAdapterItemWrapper>(
