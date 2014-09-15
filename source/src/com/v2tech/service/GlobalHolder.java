@@ -37,6 +37,8 @@ public class GlobalHolder {
 	private List<Group> mContactsGroup = new ArrayList<Group>();
 
 	private List<Group> mCrowdGroup = new ArrayList<Group>();
+	
+	public List<AddFriendHistorieNode> addFriendHistorieList=new ArrayList<AddFriendHistorieNode>();
 
 	private Map<Long, User> mUserHolder = new HashMap<Long, User>();
 	private Map<Long, Group> mGroupHolder = new HashMap<Long, Group>();
@@ -182,6 +184,7 @@ public class GlobalHolder {
 				if (vg.isDefault) {
 					((ContactGroup) g).setDefault(true);
 				}
+
 				mContactsGroup.add(g);
 			} else {
 				throw new RuntimeException(" Can not support this type");

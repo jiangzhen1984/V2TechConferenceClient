@@ -28,23 +28,16 @@ import com.v2tech.util.GlobalConfig;
 public abstract class Group implements Comparable<Group> {
 
 	protected long mGId;
-
 	protected GroupType mGroupType;
-
 	protected String mName;
 
+	protected long mOwner;
 	protected User mOwnerUser;
-
 	protected Date mCreateDate;
-
 	protected Group mParent;
-
 	protected List<Group> mChild;
-
 	protected Set<User> users;
-
 	protected int level;
-
 	private Object mLock = new Object();
 
 	public enum GroupType {
@@ -90,6 +83,7 @@ public abstract class Group implements Comparable<Group> {
 	 */
 	protected Group(long gId, GroupType groupType, String name, User owner,
 			Date createDate) {
+
 		this.mGId = gId;
 		this.mGroupType = groupType;
 		this.mName = name;
@@ -294,13 +288,11 @@ public abstract class Group implements Comparable<Group> {
 				c++;
 			}
 		}
-
 		return c;
 	}
 
 	public int getUserCount() {
 		Set<User> counter = new HashSet<User>();
-
 		populateUser(this, counter);
 		int count = counter.size();
 		counter.clear();

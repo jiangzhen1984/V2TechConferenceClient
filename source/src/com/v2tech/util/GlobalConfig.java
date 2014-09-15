@@ -68,7 +68,7 @@ public class GlobalConfig {
 	public static void saveLogoutFlag(Context context) {
 		SPUtil.putConfigIntValue(context, KEY_LOGGED_IN, 0);
 	}
-	
+	 
 	
 	public static String getEmojiStrByIndex(int index) {
 		if (index <=0 || index >= GLOBAL_FACE_ARRAY.length) {

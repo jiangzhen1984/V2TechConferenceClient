@@ -17,8 +17,9 @@ public interface GroupRequestCallback {
 	 * To indicate group information current user belongs and owns.
 	 * 
 	 * @param groupType
-	 *            1:org  2: contacts group 3: crowd type 4: conference type
-	 * @param list group list
+	 *            1:org 2: contacts group 3: crowd type 4: conference type
+	 * @param list
+	 *            group list
 	 * 
 	 * @see com.v2tech.vo.Group#GroupType
 	 */
@@ -37,7 +38,7 @@ public interface GroupRequestCallback {
 	 *            <ul>
 	 *            <br>
 	 *            <li>1: contact type
-	 *            {@link com.v2tech.vo.Group.GroupType#CONTACT}<br>
+	 *            {@link com.v2tech.vo.Group.GroupType#FRIGROUP}<br>
 	 *            </li>
 	 *            <li>4: conference type
 	 *            {@link com.v2tech.vo.Group.GroupType#CONFERENCE}<br>
@@ -81,6 +82,21 @@ public interface GroupRequestCallback {
 	 * @param group
 	 */
 	public void OnInviteJoinGroupCallback(V2Group group);
+
+
+	/**
+	 * FIXME update paramter to object
+	 * @comment-user:wenzl 2014年9月15日
+	 * @overview:
+	 *
+	 * @param groupType
+	 * @param nGroupID
+	 * @param nUserID
+	 * @param sxml
+	 * @return:
+	 */
+	public void OnRefuseInviteJoinGroup(int groupType, long nGroupID,
+			long nUserID, String sxml);
 
 	/**
 	 * 

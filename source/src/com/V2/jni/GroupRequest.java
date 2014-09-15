@@ -192,17 +192,6 @@ public class GroupRequest {
 	public native void refuseApplyJoinGroup(int groupType, String sGroupInfo,
 			long nUserID, String sReason);
 
-	/**
-	 * Add user to group
-	 * 
-	 * @param groupType
-	 *            4: conference
-	 * @param nGroupID
-	 * @param sXml
-	 */
-	public native void addGroupUserInfo(int groupType, long nGroupID,
-			String sXml);
-
 	public native void groupUploadFile(int groupType, long nGroupId, String sXml);
 
 	public native void delGroupFile(int groupType, long nGroupId, String sXml);
@@ -251,7 +240,6 @@ public class GroupRequest {
 				callback.OnGetGroupInfoCallback(groupType, list);
 			}
 		}
-
 	}
 
 	public void addCallback(GroupRequestCallback callback) {
@@ -402,6 +390,32 @@ public class GroupRequest {
 
 	}
 
+	private void OnRefuseInviteJoinGroup(int groupType, long nGroupID,
+			long nUserID, String sxml) {
+		V2Log.d("OnRefuseInviteJoinGroup ==>" + "groupType:" + groupType + ","
+				+ "nGroupID:" + nGroupID + "," + "nUserID:" + nUserID + ","
+				+ "sxml:" + sxml);
+
+		for (WeakReference<GroupRequestCallback> wrcb : mCallbacks) {
+			Object obj = wrcb.get();
+			if (obj != null) {
+				GroupRequestCallback callback = (GroupRequestCallback) obj;
+				callback.OnRefuseInviteJoinGroup(groupType, nGroupID, nUserID,
+						sxml);
+			}
+		}
+
+		// // ƴװ������Ϣ
+		// RefuseMsgType refuseMsgType = new RefuseMsgType();
+		// refuseMsgType.setReason(sxml);
+		// refuseMsgType.setUserBaseInfo(sxml);
+		//
+		// Intent addIntent = new Intent(SplashActivity.IM);
+		// addIntent.putExtra("MsgType", MsgType.REFUSE_ADD);
+		// addIntent.putExtra("MSG", refuseMsgType);
+		// context.sendOrderedBroadcast(addIntent,null);
+	}
+
 	private void OnMoveUserToGroup(int groupType, long srcGroupID,
 			long dstGroupID, long nUserID) {
 		V2Log.d("OnMoveUserToGroup:: " + groupType + ":"
@@ -416,22 +430,6 @@ public class GroupRequest {
 		}
 	}
 
-	private void OnRefuseInviteJoinGroup(int groupType, long nGroupID,
-			long nUserID, String sxml) {
-		Log.e("ImRequest UI", "OnRefuseInviteJoinGroup:: " + groupType + ":"
-				+ nGroupID + ":" + nUserID + ":" + sxml);
-
-		// // ƴװ������Ϣ
-		// RefuseMsgType refuseMsgType = new RefuseMsgType();
-		// refuseMsgType.setReason(sxml);
-		// refuseMsgType.setUserBaseInfo(sxml);
-		//
-		// Intent addIntent = new Intent(SplashActivity.IM);
-		// addIntent.putExtra("MsgType", MsgType.REFUSE_ADD);
-		// addIntent.putExtra("MSG", refuseMsgType);
-		// context.sendOrderedBroadcast(addIntent,null);
-	}
-
 	private void OnApplyJoinGroup(int groupType, long nGroupID,
 			String userInfo, String reason) {
 		Log.e("ImRequest UI", "OnApplyJoinGroup:: " + groupType + ":"
@@ -439,14 +437,14 @@ public class GroupRequest {
 	}
 
 	private void OnAcceptApplyJoinGroup(int groupType, String sXml) {
-		Log.e("ImRequest UI", "OnAcceptApplyJoinGroup:: " + groupType + ":"
-				+ sXml);
+		V2Log.d("OnAcceptApplyJoinGroup ==>" + "groupType:" + groupType + ","
+				+ "sXml:" + sXml);
 	}
 
 	private void OnRefuseApplyJoinGroup(int groupType, String sGroupInfo,
 			String reason) {
-		Log.e("ImRequest UI", "OnRefuseApplyJoinGroup::" + groupType + ":"
-				+ sGroupInfo + ":" + reason);
+		V2Log.d("OnRefuseApplyJoinGroup ==>" + "groupType:" + groupType + ","
+				+ "sGroupInfo:" + sGroupInfo + "," + "reason:" + reason);
 	}
 
 	/**

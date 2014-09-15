@@ -28,6 +28,18 @@ public class SettingTabFragment extends Fragment {
 				false);
 		mQuitButton = (TextView) v.findViewById(R.id.setting_quit_button);
 		mQuitButton.setOnClickListener(mQuitButtonListener);
+		
+		
+		v.findViewById(R.id.go_authentication).setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View arg0) {
+				Intent intent=new Intent(SettingTabFragment.this.getActivity(),SettingAuthenticationActivity.class);
+				SettingTabFragment.this.getActivity().startActivity(intent);
+			}
+		});;
+		
+		
 		return v;
 	}
 

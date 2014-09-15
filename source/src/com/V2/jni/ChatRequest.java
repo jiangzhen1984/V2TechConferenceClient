@@ -190,7 +190,6 @@ public class ChatRequest {
 			 ctL.add(new ChatText(eGroupType, nGroupID, nFromUserID,
 					 nToUserID, nTime, szSeqID, szXmlText));
 		}
-
 	}
 
 	/**

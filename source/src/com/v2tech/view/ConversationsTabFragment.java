@@ -32,6 +32,7 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -61,6 +62,7 @@ import com.v2tech.view.bo.ConversationNotificationObject;
 import com.v2tech.view.conference.GroupLayout;
 import com.v2tech.view.conference.VideoActivityV2;
 import com.v2tech.view.contacts.VoiceMessageActivity;
+import com.v2tech.view.contacts.add.MessageAuthenticationActivity;
 import com.v2tech.view.conversation.MessageLoader;
 import com.v2tech.view.group.CrowdDetailActivity;
 import com.v2tech.view.conversation.P2PConversation;
@@ -167,6 +169,14 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 			mConversationsListView.setOnItemClickListener(mItemClickListener);
 			mConversationsListView
 					.setOnItemLongClickListener(mItemLongClickListener);
+			
+			rootView.findViewById(R.id.yanzhengxiaoxi).setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View arg0) {
+					Intent i=new Intent(getActivity(),MessageAuthenticationActivity.class);
+					getActivity().startActivity(i);
+				}
+			});
 
 		}
 		return rootView;

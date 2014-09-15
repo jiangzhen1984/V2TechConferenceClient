@@ -143,6 +143,24 @@
                 android:text="@string/contacts_user_detail_add_friend"
                 android:textColor="@color/button_text_color"
                 android:textSize="@dimen/common_item_text_size" />
+
+            <TextView
+                android:id="@+id/contact_user_detail_delete_friend"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:layout_marginRight="@dimen/button_gap_horizontal"
+                android:background="@drawable/button_bg"
+                android:gravity="center"
+                android:paddingBottom="@dimen/detail_detail_2_button_padding_vertical"
+                android:paddingLeft="@dimen/button_padding_horizontal"
+                android:paddingRight="@dimen/button_padding_horizontal"
+                android:paddingTop="@dimen/detail_detail_2_button_padding_vertical"
+                android:text="删除好友"
+                android:textColor="#ff0000"
+                android:textSize="@dimen/common_item_text_size"
+                android:visibility="gone" />
         </RelativeLayout>
 
         <ScrollView

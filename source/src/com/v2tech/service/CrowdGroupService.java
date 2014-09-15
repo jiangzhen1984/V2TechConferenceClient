@@ -11,6 +11,8 @@ import com.V2.jni.ImRequest;
 import com.V2.jni.ImRequestCallbackAdapter;
 import com.V2.jni.ind.V2Group;
 import com.V2.jni.util.V2Log;
+import com.v2tech.service.ConferenceService.GroupRequestCB;
+import com.v2tech.service.UserService.ImRequestCB;
 import com.v2tech.service.jni.CreateCrowdResponse;
 import com.v2tech.service.jni.JNIResponse;
 import com.v2tech.vo.Crowd;
@@ -19,11 +21,21 @@ import com.v2tech.vo.Group;
 import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.User;
 
+//组别统一名称
+//1:部门, organizationGroup
+//2:好友组, contactGroup
+//3:群, crowdGroup
+//4:会议, conferenceGroup
+//5:讨论组,discussionGroup
 /**
  * Crowd group service, used to create crowd and remove crowd
  * 
  * @author 28851274
  * 
+ */
+/**
+ * @author wenzl
+ *
  */
 public class CrowdGroupService extends AbstractHandler {
 
@@ -215,6 +227,23 @@ public class CrowdGroupService extends AbstractHandler {
 		GroupRequest.getInstance().removeCallback(grCB);		
 	}
 
+	/**
+	 * FIXME add comment 
+	 * @comment-user:wenzl 2014年9月15日
+	 * @overview:
+	 *
+	 * @param group
+	 * @param caller
+	 * @return:
+	 */
+	public void createGroup(CrowdGroup group, Registrant caller) {
+		//对CREATE_GROUP_MESSAGE做超时处理，如果超时此消息不再通知上层。
+		this.initTimeoutMessage(CREATE_GROUP_MESSAGE, DEFAULT_TIME_OUT_SECS,
+				caller);
+		GroupRequest.getInstance().createGroup(
+				Group.GroupType.CHATING.intValue(), group.toXml(),
+				group.toGroupUserListXml());
+	}
 
 
 
@@ -297,6 +326,7 @@ public class CrowdGroupService extends AbstractHandler {
 			}
 		}
 
+
 	}
 
 	class ImRequestCB extends ImRequestCallbackAdapter {
@@ -304,6 +334,7 @@ public class CrowdGroupService extends AbstractHandler {
 		private Handler mCallbackHandler;
 
 		public ImRequestCB(Handler mCallbackHandler) {
+			
 			this.mCallbackHandler = mCallbackHandler;
 		}
 

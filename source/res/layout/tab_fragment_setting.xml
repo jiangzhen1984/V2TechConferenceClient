@@ -7,7 +7,7 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-         android:background="@color/confs_title_bg" >
+        android:background="@color/confs_title_bg" >
 
         <ImageView
             android:id="@+id/imageView1"
@@ -15,8 +15,8 @@
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
-            android:paddingTop="10dp"
             android:paddingBottom="10dp"
+            android:paddingTop="10dp"
             android:src="@drawable/translucent" />
 
         <LinearLayout
@@ -34,7 +34,6 @@
                 android:text="@string/setting_title"
                 android:textColor="#515151"
                 android:textSize="@dimen/common_item_text_size_20" />
-
         </LinearLayout>
     </RelativeLayout>
 
@@ -61,7 +60,48 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="8dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginRight="8dp"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/rounded_corners_of_setting_border"
+                android:orientation="vertical" >
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" >
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentLeft="true"
+                        android:paddingBottom="10dp"
+                        android:paddingLeft="25dp"
+                        android:paddingTop="10dp"
+                        android:text="身份验证"
+                        android:textColor="#000000"
+                        android:textSize="20sp" />
+
+                    <ImageView
+                        android:id="@+id/go_authentication"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentRight="true"
+                        android:layout_centerVertical="true"
+                        android:layout_marginBottom="@dimen/detail_detail_2_item_margin_bottom"
+                        android:layout_marginLeft="@dimen/contact_detail_2_item_margin_horizontal"
+                        android:layout_marginRight="@dimen/contact_detail_2_item_margin_horizontal"
+                        android:layout_marginTop="@dimen/detail_detail_2_item_margin_top"
+                        android:src="@drawable/arrow_right_gray" >
+                    </ImageView>
+                </RelativeLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="8dp"
+                android:layout_marginRight="8dp"
+                android:layout_marginTop="8dp"
                 android:background="@drawable/rounded_corners_of_setting_border"
                 android:orientation="vertical" >
 
@@ -74,9 +114,9 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_alignParentLeft="true"
+                        android:paddingBottom="10dp"
                         android:paddingLeft="25dp"
                         android:paddingTop="10dp"
-                        android:paddingBottom="10dp"
                         android:text="@string/setting_quit_application"
                         android:textColor="#ff0000"
                         android:textSize="20sp" />

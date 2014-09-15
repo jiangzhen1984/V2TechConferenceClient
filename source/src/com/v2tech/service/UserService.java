@@ -14,6 +14,8 @@ import com.v2tech.vo.User;
 
 public class UserService extends AbstractHandler {
 
+	//此处的消息类型只与AbstractHandler的REQUEST_TIME_OUT消息并列。
+	//与参数caller中的消息类型what完全没有关系，上层传什么消息what回调就是什么消息what
 	private static final int JNI_REQUEST_LOG_IN = 1;
 	private static final int JNI_REQUEST_UPDAE_USER = 2;
 
@@ -45,8 +47,7 @@ public class UserService extends AbstractHandler {
 
 	/**
 	 * Update user information. If updated user is logged user, can update all
-	 * information.<br>
-	 * otherwise only can update nick name.
+	 * information.otherwise only can update nick name.
 	 * 
 	 * @param user
 	 * @param caller

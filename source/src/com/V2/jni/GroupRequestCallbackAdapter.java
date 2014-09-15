@@ -29,6 +29,8 @@ public abstract class GroupRequestCallbackAdapter implements
 	public void OnInviteJoinGroupCallback(V2Group group) {
 
 	}
+	
+
 
 	@Override
 	public void OnDelGroupCallback(int groupType, long nGroupID,
@@ -64,6 +66,15 @@ public abstract class GroupRequestCallbackAdapter implements
 			long nUserID) {
 		
 	}
+
+	@Override
+	public void OnRefuseInviteJoinGroup(int groupType, long nGroupID,
+			long nUserID, String sxml) {
+		
+	}
+	
+	
+	
 	
 	
 	

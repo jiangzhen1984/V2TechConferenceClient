@@ -40,111 +40,32 @@ import com.v2tech.service.GlobalHolder;
  * 
  */
 public class User implements Comparable<User> {
-
-	public enum DeviceType {
-		CELL_PHONE(2), PC(1), UNKNOWN(-1);
-		private int code;
-
-		private DeviceType(int code) {
-			this.code = code;
-		}
-
-		public int toIntValue() {
-			return code;
-		}
-
-		public static DeviceType fromInt(int type) {
-			switch (type) {
-			case 2:
-				return CELL_PHONE;
-			case 1:
-				return PC;
-			default:
-				return UNKNOWN;
-			}
-		}
-	}
-
-	public enum Status {
-		LEAVE(2), BUSY(3), DO_NOT_DISTURB(4), HIDDEN(5), ONLINE(1), OFFLINE(0), UNKNOWN(
-				-1);
-		private int code;
-
-		private Status(int code) {
-			this.code = code;
-		}
-
-		public int toIntValue() {
-			return code;
-		}
-
-		public static Status fromInt(int status) {
-			switch (status) {
-			case 0:
-				return OFFLINE;
-			case 1:
-				return ONLINE;
-			case 2:
-				return LEAVE;
-			case 3:
-				return BUSY;
-			case 4:
-				return DO_NOT_DISTURB;
-			case 5:
-				return HIDDEN;
-			default:
-				return UNKNOWN;
-			}
-		}
-	}
-
 	private long mUserId;
-
+	private int authtype = 0;// 取值0允许任何人，1需要验证，2不允许任何人
 	private NetworkStateCode mResult;
-	
 	private DeviceType mType;
-
 	private Status mStatus;
-	
 	private String mAccount;
-
 	private String mName;
-
 	private String mEmail;
-
 	private String mSignature;
-
 	private String mAddress;
-
 	private String mCellPhone;
-
 	private String mCompany;
-
 	private String mDepartment;
-
 	private String mGender;
-
 	private Date mBirthday;
-
 	private String mTelephone;
-
 	private String mTitle;
-
 	private Set<Group> mBelongsGroup;
-
 	private boolean isCurrentLoggedInUser;
-
 	private String mAvatarPath;
-
 	private String abbra;
-	
 	private String mFax;
-	
 	private String mNickName;
-
 	private static HanyuPinyinOutputFormat format = new HanyuPinyinOutputFormat();
-	
-	//This value indicate this object is dirty, construct locally without any user information
+	// This value indicate this object is dirty, construct locally without any
+	// user information
 	private boolean isDirty;
 
 	public User(long mUserId) {
@@ -237,10 +158,11 @@ public class User implements Comparable<User> {
 	public String getSignature() {
 		return mSignature;
 	}
-	
+
 	public DeviceType getDeviceType() {
 		return mType;
 	}
+
 	public void setDeviceType(DeviceType type) {
 		this.mType = type;
 	}
@@ -359,20 +281,27 @@ public class User implements Comparable<User> {
 	public void updateStatus(Status mStatus) {
 		this.mStatus = mStatus;
 	}
-	
-	
+
 	public String getFax() {
 		return this.mFax;
 	}
-	
+
 	public void setFax(String fax) {
 		this.mFax = fax;
 	}
-	
+
+	public int getAuthtype() {
+		return this.authtype;
+	}
+
+	public void setAuthtype(int authtype) {
+		this.authtype = authtype;
+	}
+
 	public String getAccount() {
 		return this.mAccount;
 	}
-	
+
 	public void setAccount(String acc) {
 		this.mAccount = acc;
 	}
@@ -384,10 +313,6 @@ public class User implements Comparable<User> {
 		}
 		this.mBelongsGroup.add(g);
 	}
-	
-	
-	
-	
 
 	public String getNickName() {
 		return mNickName;
@@ -432,7 +357,7 @@ public class User implements Comparable<User> {
 		}
 		return avatar;
 	}
-	
+
 	public void setAvatarBitmap(Bitmap bm) {
 		this.avatar = bm;
 	}
@@ -500,7 +425,7 @@ public class User implements Comparable<User> {
 		DateFormat dp = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
 		String xml = "<user " + " address='"
 				+ (this.getAddress() == null ? "" : this.getAddress()) + "' "
-				+ "birthday='"
+				+ "authtype='" + this.getAuthtype() + "' " + "birthday='"
 				+ (this.mBirthday == null ? "" : dp.format(this.mBirthday))
 				+ "' " + "job='"
 				+ (this.getTitle() == null ? "" : this.getTitle()) + "' "
@@ -545,9 +470,8 @@ public class User implements Comparable<User> {
 				if (strId == null || strId.isEmpty()) {
 					continue;
 				}
-				User u = new User(Long.parseLong(strId),
-						getAttribute(element, "nickname"), getAttribute(
-								element, "email"),
+				User u = new User(Long.parseLong(strId), getAttribute(element,
+						"nickname"), getAttribute(element, "email"),
 						getAttribute(element, "sign"));
 				u.setTelephone(getAttribute(element, "telephone"));
 				u.setGender(getAttribute(element, "sex"));
@@ -600,6 +524,27 @@ public class User implements Comparable<User> {
 	 * @param xml
 	 * @return
 	 */
+	public static User fromXmlToUser(String xml) {
+		int uID;
+		String strID = extraAttri("id='", "'", xml);
+		if (strID == null) {
+			return null;
+		}
+		try {
+			uID = Integer.parseInt(strID);
+		} catch (NumberFormatException e) {
+			return null;
+		}
+
+		return fromXml(uID, xml);
+	}
+
+	/**
+	 * 
+	 * @param uID
+	 * @param xml
+	 * @return
+	 */
 	public static User fromXml(int uID, String xml) {
 		String nickName = extraAttri("nickname='", "'", xml);
 		String signature = extraAttri("sign='", "'", xml);
@@ -611,6 +556,7 @@ public class User implements Comparable<User> {
 		String email = extraAttri("email='", "'", xml);
 		String bir = extraAttri("birthday='", "'", xml);
 		String account = extraAttri("account='", "'", xml);
+		String authtype = extraAttri("authtype='", "'", xml);
 
 		DateFormat dp = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
 
@@ -623,6 +569,12 @@ public class User implements Comparable<User> {
 		u.setGender(gender);
 		u.setEmail(email);
 		u.setAccount(account);
+		if (authtype != null && authtype != "") {
+			u.setAuthtype(Integer.parseInt(authtype));
+		} else {
+			u.setAuthtype(0);
+		}
+
 		if (bir != null && bir.length() > 0) {
 			try {
 				u.setBirthday(dp.parse(bir));
@@ -643,6 +595,63 @@ public class User implements Comparable<User> {
 			return null;
 		}
 		return xml.substring(pos + startStr.length(), end);
+	}
+
+	public enum DeviceType {
+		CELL_PHONE(2), PC(1), UNKNOWN(-1);
+		private int code;
+
+		private DeviceType(int code) {
+			this.code = code;
+		}
+
+		public int toIntValue() {
+			return code;
+		}
+
+		public static DeviceType fromInt(int type) {
+			switch (type) {
+			case 2:
+				return CELL_PHONE;
+			case 1:
+				return PC;
+			default:
+				return UNKNOWN;
+			}
+		}
+	}
+
+	public enum Status {
+		LEAVE(2), BUSY(3), DO_NOT_DISTURB(4), HIDDEN(5), ONLINE(1), OFFLINE(0), UNKNOWN(
+				-1);
+		private int code;
+
+		private Status(int code) {
+			this.code = code;
+		}
+
+		public int toIntValue() {
+			return code;
+		}
+
+		public static Status fromInt(int status) {
+			switch (status) {
+			case 0:
+				return OFFLINE;
+			case 1:
+				return ONLINE;
+			case 2:
+				return LEAVE;
+			case 3:
+				return BUSY;
+			case 4:
+				return DO_NOT_DISTURB;
+			case 5:
+				return HIDDEN;
+			default:
+				return UNKNOWN;
+			}
+		}
 	}
 
 }

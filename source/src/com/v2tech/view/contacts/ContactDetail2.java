@@ -1,8 +1,13 @@
 package com.v2tech.view.contacts;
 
+import java.util.Iterator;
 import java.util.List;
 
 import android.app.Activity;
+<<<<<<< HEAD
+=======
+import android.app.ActivityManager;
+>>>>>>> 2670ca0... 1.增加好友
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
@@ -18,6 +23,7 @@ import android.view.View.OnTouchListener;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -27,6 +33,11 @@ import com.v2tech.service.GlobalHolder;
 import com.v2tech.service.Registrant;
 import com.v2tech.service.UserService;
 import com.v2tech.vo.ContactGroup;
+import com.v2tech.service.FriendGroupService;
+import com.v2tech.view.MainActivity;
+import com.v2tech.view.PublicIntent;
+import com.v2tech.view.contacts.add.AuthenticationActivity;
+import com.v2tech.vo.FriendGroup;
 import com.v2tech.vo.Group;
 import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.User;
@@ -41,7 +52,7 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 	private Context mContext;
 
 	private long mUid;
-	private User u;
+	private User detailUser;
 	private LocalHandler lh = new LocalHandler();
 	private UserService us = new UserService();
 	private ContactsService contactService = new ContactsService();
@@ -64,9 +75,9 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 	
 
 	private EditText mNickNameET;
-	private TextView mGroupNameTV;
-	private TextView mAddContactButton;
-	private View mUpdateContactGroupButton;
+
+	private View mAddContactButton;
+	private View mDeleteContactButton;
 
 	private boolean isUpdating;
 	private User currentUser;
@@ -78,10 +89,19 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 		super.onCreate(savedInstanceState);
 
 		this.setContentView(R.layout.activity_contact_detail_2);
-		mUid = this.getIntent().getLongExtra("uid", 0);
+		// 不同页面跳转过来
+		String fromActivity=this.getIntent().getStringExtra("fromActivity");
+		if((fromActivity!=null)&&(fromActivity.equals("MessageAuthenticationActivity"))){
+			//166是wenzl测试用
+			//mUid = this.getIntent().getLongExtra("remoteUserID", 0);
+			mUid=166;
+		}else{
+			mUid = this.getIntent().getLongExtra("uid", 0);
+		}
+
 		initView();
 		mContext = this;
-		u = GlobalHolder.getInstance().getUser(mUid);
+		detailUser = GlobalHolder.getInstance().getUser(mUid);
 
 		mNickNameET = (EditText) findViewById(R.id.contact_user_detail_nick_name_et);
 		
@@ -93,22 +113,27 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 
 		currentUser = GlobalHolder.getInstance().getCurrentUser();
 		List<Group> friendGroup = GlobalHolder.getInstance().getGroup(
-				GroupType.CONTACT.intValue());
+
+				GroupType.FRIGROUP);
 		for (Group group : friendGroup) {
-			if ((belongs = group.findUser(u, group)) != null) {
-				isRelation = true;
-				break;
+			if (group.findUser(detailUser, group)) {
+				isCanelFriend = true;
 			}
 		}
 
-		updateContactGroup();
-		
+		if (isCanelFriend == true) {
+			mAddContactButton.setVisibility(View.GONE);
+			mDeleteContactButton.setVisibility(View.VISIBLE);
+		} else {
+			mAddContactButton.setVisibility(View.VISIBLE);
+			mDeleteContactButton.setVisibility(View.GONE);
+		}
 	}
 
 	@Override
 	protected void onStart() {
 		super.onStart();
-		if (u != null) {
+		if (detailUser != null) {
 			showUserInfo();
 		}
 	}
@@ -145,6 +170,29 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 
 		mAddContactButton = (TextView)findViewById(R.id.contact_user_detail_add_friend);
 
+		mAddContactButton.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View arg0) {
+
+				// 加为好友
+				Intent i = new Intent(ContactDetail2.this,
+						AuthenticationActivity.class);
+				i.putExtra("uid", mUid);
+				ContactDetail2.this.startActivity(i);
+			}
+		});
+
+		mDeleteContactButton = findViewById(R.id.contact_user_detail_delete_friend);
+
+		mDeleteContactButton.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View arg0) {
+				showDeleteContactDialog();
+			}
+		});
+
 		mAccountTV = (TextView) findViewById(R.id.contact_user_detail_account_tv);
 		mGendarTV = (TextView) findViewById(R.id.contact_user_detail_gender_tv);
 		mBirthdayTV = (TextView) findViewById(R.id.contact_user_detail_birthday_tv);
@@ -174,24 +222,61 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 		mAddContactButton.setOnClickListener(mAddOrRemoveContactButton);
 	}
 
+	private void showDeleteContactDialog() {
+
+		final Dialog deleteContactDialog = new Dialog(ContactDetail2.this,
+				R.style.customDialog);
+		deleteContactDialog
+				.setContentView(R.layout.activity_contact_delete_contact_dialog);
+		Button cancelbut = (Button) deleteContactDialog
+				.findViewById(R.id.cancelbut);
+		Button okbut = (Button) deleteContactDialog.findViewById(R.id.okbut);
+		cancelbut.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				deleteContactDialog.dismiss();
+			}
+		});
+
+		okbut.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				// 删除好友
+				deleteContactDialog.dismiss();
+				new FriendGroupService().delFriendGroupUser(detailUser);
+				// 返回用户列表
+				Intent i = new Intent(ContactDetail2.this, MainActivity.class);
+				i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+				ContactDetail2.this.startActivity(i);
+			}
+		});
+
+		deleteContactDialog.show();
+
+		// ListView lv = (ListView)
+		// fileTransportDialog.findViewById(R.id.file_down_list);
+		// lv.setAdapter(fileDownAdapter);
+	}
+
 	private void showUserInfo() {
-		if (u.getAvatarBitmap() != null) {
-			mHeadIconIV.setImageBitmap(u.getAvatarBitmap());
+		if (detailUser.getAvatarBitmap() != null) {
+			mHeadIconIV.setImageBitmap(detailUser.getAvatarBitmap());
 		}
 
-		mNickNameET.setText(u.getNickName());
+		mNickNameET.setText(detailUser.getNickName());
 		mNickNameET.addTextChangedListener(tw);
 
-		mNameTitleIV.setText(u.getName());
-		mAccountTV.setText(u.getAccount());
-		if (u.getGender() != null) {
-			if (u.getGender().equals("0")) {
+		mNameTitleIV.setText(detailUser.getName());
+		mAccountTV.setText(detailUser.getAccount());
+		if (detailUser.getGender() != null) {
+			if (detailUser.getGender().equals("0")) {
 				mGendarTV.setText(mContext
 						.getText(R.string.contacts_user_detail_gender_priacy));
-			} else if (u.getGender().equals("1")) {
+			} else if (detailUser.getGender().equals("1")) {
 				mGendarTV.setText(mContext
 						.getText(R.string.contacts_user_detail_gender_male));
-			} else if (u.getGender().equals("2")) {
+			} else if (detailUser.getGender().equals("2")) {
 				mGendarTV.setText(mContext
 						.getText(R.string.contacts_user_detail_gender_female));
 			}
@@ -200,14 +285,14 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 			mGendarTV.setText("");
 		}
 
-		mBirthdayTV.setText(u.getBirthdayStr());
-		mCellphoneTV.setText(u.getCellPhone());
-		mTelephoneTV.setText(u.getTelephone());
-		mTitleTV.setText(u.getTitle());
-		mAddressTV.setText(u.getAddress());
-		mSignTV.setText(u.getSignature());
-		mDeptTV.setText(u.getDepartment());
-		mCompanyTV.setText(u.getCompany());
+		mBirthdayTV.setText(detailUser.getBirthdayStr());
+		mCellphoneTV.setText(detailUser.getCellPhone());
+		mTelephoneTV.setText(detailUser.getTelephone());
+		mTitleTV.setText(detailUser.getTitle());
+		mAddressTV.setText(detailUser.getAddress());
+		mSignTV.setText(detailUser.getSignature());
+		mDeptTV.setText(detailUser.getDepartment());
+		mCompanyTV.setText(detailUser.getCompany());
 
 	}
 	
@@ -320,7 +405,7 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 	};
 
 	private void gatherUserData() {
-		u.setNickName(mNickNameET.getText().toString());
+		detailUser.setNickName(mNickNameET.getText().toString());
 	}
 
 	class LocalHandler extends Handler {
@@ -330,8 +415,8 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 			switch (msg.what) {
 			case UPDATE_USER_INFO:
 				gatherUserData();
-				us.updateUser(u, new Registrant(this, UPDATE_USER_INFO_DONE,
-						null));
+				us.updateUser(detailUser, new Registrant(this,
+						UPDATE_USER_INFO_DONE, null));
 				break;
 			case UPDATE_USER_INFO_DONE:
 				if (mContext != null) {

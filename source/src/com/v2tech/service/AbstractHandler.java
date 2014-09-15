@@ -41,6 +41,7 @@ public abstract class AbstractHandler extends Handler {
 
 	private SparseArray<List<PendingObject>> pendingObjectHolder = new SparseArray<List<PendingObject>>();
 
+	//超时处理的消息
 	protected Message initTimeoutMessage(int mointorMessageID, long timeOutSec,
 			Registrant caller) {
 		// Create unique message object
@@ -98,6 +99,7 @@ public abstract class AbstractHandler extends Handler {
 	 * @param obj
 	 */
 	protected void notifyListener(int key, int arg1, int arg2, Object obj) {
+		//监听器是一个列表，可以增加多个监听者。
 		List<Registrant> list = registrantHolder.get(key);
 		if (list == null || list.size() <= 0) {
 			V2Log.i(this.getClass().getName() + "  : No listener: " + key
@@ -128,6 +130,7 @@ public abstract class AbstractHandler extends Handler {
 	protected void notifyListenerWithPending(int key, int arg1, int arg2, Object obj) {
 		List<Registrant> list = registrantHolder.get(key);
 		if (list == null || list.size() <= 0) {
+			//如果上层没有监听，就把消息缓存起来。再上层调用notifyListener时会把缓存的消息发出去。
 			List<PendingObject> pendingList = pendingObjectHolder.get(key);
 			if (pendingList == null) {
 				pendingList = new ArrayList<PendingObject>();
@@ -163,6 +166,7 @@ public abstract class AbstractHandler extends Handler {
 			Registrant re = new Registrant(h, what, obj);
 			list.add(re);
 
+			//把缓存的该种消息发出去。
 			List<PendingObject> pendingList = pendingObjectHolder.get(key);
 			if (pendingList == null || pendingList.size() <= 0) {
 
@@ -235,6 +239,7 @@ public abstract class AbstractHandler extends Handler {
 		V2Log.d(this.getClass().getName() + "   " + msg.what);
 		switch (msg.what) {
 		case REQUEST_TIME_OUT:
+			//返回上层超时，并把对应的监听者从列表中删除。
 			Integer key = Integer.valueOf(msg.arg1);
 			Meta meta = metaHolder.get(key);
 			if (meta != null && meta.caller != null) {

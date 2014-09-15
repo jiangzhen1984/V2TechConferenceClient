@@ -10,9 +10,12 @@ import java.io.OutputStream;
 import java.lang.ref.WeakReference;
 import java.math.BigInteger;
 import java.security.MessageDigest;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Vector;
 
 import net.sourceforge.pinyin4j.PinyinHelper;
+import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.Application;
@@ -46,6 +49,7 @@ import com.v2tech.util.LogcatThread;
 import com.v2tech.util.Notificator;
 import com.v2tech.util.StorageUtil;
 import com.v2tech.view.conference.VideoActivityV2;
+import com.v2tech.vo.AddFriendHistorieNode;
 
 @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
 public class MainApplication extends Application {
@@ -53,6 +57,7 @@ public class MainApplication extends Application {
 	private Vector<WeakReference<Activity>> list = new Vector<WeakReference<Activity>>();
 	private final String DATABASE_FILENAME = "hzpy.db";
 	private boolean needCopy;
+	
 	@Override
 	public void onCreate() {
 		super.onCreate();

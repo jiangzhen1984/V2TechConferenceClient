@@ -19,7 +19,6 @@ public final class ContentDescriptor {
 	public static final Uri BASE_URI = Uri.parse("content://" + AUTHORITY);
 
 	public static final UriMatcher URI_MATCHER = buildUriMatcher();
-	
 	public static final String BASE_OWNER_USER_ID = "OwnerUserID";
 	public static final String BASE_SAVEDATE = "SaveDate";
 
@@ -55,6 +54,7 @@ public final class ContentDescriptor {
 		
 		matcher.addURI(augura, HistoriesCrowd.PATH, HistoriesCrowd.TOKEN);
 		matcher.addURI(augura, HistoriesCrowd.PATH + "/#", HistoriesCrowd.TOKEN);
+
 
 		return matcher;
 	}
@@ -331,6 +331,10 @@ public final class ContentDescriptor {
 	
 	/**
 	 * 添加好友历史记录表
+=======
+	/**
+	 * ��Ӻ�����ʷ��¼��
+>>>>>>> 2670ca0... 1.增加好友
 	 * @author 
 	 *
 	 */

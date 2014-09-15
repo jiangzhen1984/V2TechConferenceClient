@@ -144,6 +144,7 @@ public class V2TechDBHelper extends SQLiteOpenHelper {
 		db.execSQL(HISTORIES_RECENT_MESSAGE_TABLE_CREATE_SQL);
 		db.execSQL(HISTORIES_ADD_FRIENT_TABLE_CREATE_SQL);
 		db.execSQL(HISTORIES_CROWD_TABLE_CREATE_SQL);
+
 	}
 
 	@Override

@@ -32,6 +32,7 @@
     <uses-permission android:name="android.permission.CALL_PHONE" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
     <supports-screens
         android:anyDensity="true"
         android:largeScreens="true"
@@ -77,6 +78,8 @@
             android:screenOrientation="nosensor"
             android:windowSoftInputMode="stateHidden|adjustUnspecified" >
         </activity>
+        <activity android:name="com.v2tech.view.contacts.add.MessageAuthenticationActivity" >
+        </activity>
         <activity
             android:name="com.v2tech.view.conference.VideoActivityV2"
             android:configChanges="keyboardHidden|orientation|screenSize"
@@ -99,6 +102,14 @@
                 <action android:name="android.intent.action.MAIN" >
                 </action>
             </intent-filter>
+        </activity>
+        <activity android:name="com.v2tech.view.contacts.add.AuthenticationActivity" >
+        </activity>
+        <activity android:name="com.v2tech.view.contacts.add.FriendManagementActivity" >
+        </activity>
+        <activity android:name="com.v2tech.view.contacts.add.SelectGroupActivity" >
+        </activity>
+        <activity android:name="com.v2tech.view.SettingAuthenticationActivity" >
         </activity>
         <activity
             android:name="com.v2tech.view.conversation.ConversationView"
@@ -181,6 +192,7 @@
         </activity>
         <activity
             android:name="com.v2tech.view.contacts.ContactDetail2"
+            android:launchMode="singleTop"
             android:screenOrientation="nosensor"
             android:windowSoftInputMode="stateHidden|adjustPan" >
         </activity>

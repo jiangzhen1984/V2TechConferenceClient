@@ -62,12 +62,14 @@ import com.v2tech.view.JNIService.JNICallbackHandler;
 import com.v2tech.view.bo.GroupUserObject;
 import com.v2tech.view.bo.UserAvatarObject;
 import com.v2tech.view.bo.UserStatusObject;
+import com.v2tech.view.contacts.add.AddFriendHistroysHandler;
 import com.v2tech.view.conversation.MessageBuilder;
 import com.v2tech.view.conversation.MessageLoader;
 import com.v2tech.vo.ConferenceGroup;
 import com.v2tech.vo.Crowd;
 import com.v2tech.vo.Group;
 import com.v2tech.vo.Group.GroupType;
+import com.v2tech.vo.AddFriendHistorieNode;
 import com.v2tech.vo.NetworkStateCode;
 import com.v2tech.vo.User;
 import com.v2tech.vo.UserDeviceConfig;
@@ -593,26 +595,58 @@ public class JNIService extends Service {
 			}
 			
 			GroupType gType = GroupType.fromInt(group.type);
-			if (gType == GroupType.CONFERENCE) {
-				User owner = GlobalHolder.getInstance().getUser(group.owner.uid);
-				User chairMan = GlobalHolder.getInstance().getUser(group.chairMan.uid);
-				ConferenceGroup g = new ConferenceGroup(group.id, group.name, owner, group.createTime, chairMan);
-				Message.obtain(mCallbackHandler, JNI_CONFERENCE_INVITATION, g)
-						.sendToTarget();
-			} else if (gType == GroupType.CHATING) {
-				User owner = GlobalHolder.getInstance().getUser(group.creator.uid);
-				if (owner.isDirty()) {
-					owner.setName(group.creator.name);
-				}
-			
-				Crowd crowd = new Crowd(group.id, owner, group.name, group.brief);
-				
-				Intent i = new Intent(JNI_BROADCAST_CROWD_INVATITION);
-				i.addCategory(JNI_ACTIVITY_CATEGROY);
-				i.putExtra("crowd", crowd);
-				i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-				mContext.startActivity(i);
-				
+			//if (gType == GroupType.CONFERENCE) {
+//<<<<<<< HEAD
+//				User owner = GlobalHolder.getInstance().getUser(group.owner.uid);
+//				User chairMan = GlobalHolder.getInstance().getUser(group.chairMan.uid);
+//				ConferenceGroup g = new ConferenceGroup(group.id, group.name, owner, group.createTime, chairMan);
+//				Message.obtain(mCallbackHandler, JNI_CONFERENCE_INVITATION, g)
+//						.sendToTarget();
+//			} else if (gType == GroupType.CHATING) {
+//				User owner = GlobalHolder.getInstance().getUser(group.creator.uid);
+//				if (owner.isDirty()) {
+//					owner.setName(group.creator.name);
+//				}
+//			
+//				Crowd crowd = new Crowd(group.id, owner, group.name, group.brief);
+//				
+//				Intent i = new Intent(JNI_BROADCAST_CROWD_INVATITION);
+//				i.addCategory(JNI_ACTIVITY_CATEGROY);
+//				i.putExtra("crowd", crowd);
+//				i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//				mContext.startActivity(i);
+//				
+//=======
+//				Group g = ConferenceGroup
+//						.parseConferenceGroupFromXML(groupInfo);
+//				if (g != null) {
+//					// Send message for synchronization
+//					Message.obtain(mCallbackHandler, JNI_CONFERENCE_INVITATION,
+//							g).sendToTarget();
+//				}
+//			} else if (gType == GroupType.CROWDGROUP) {
+//				// TODO just accept automatically
+//				Group g = CrowdGroup.parseXml(groupInfo, userInfo);
+//				GlobalHolder.getInstance().addGroupToList(GroupType.CROWDGROUP,
+//						g);
+//				GroupRequest.getInstance().acceptInviteJoinGroup(groupType,
+//						g.getmGId(),
+//						GlobalHolder.getInstance().getCurrentUserId());
+//				Message.obtain(mCallbackHandler, JNI_GROUP_INVITATION,
+//						g.getmGId()).sendToTarget();
+//			} else if (gType == GroupType.CONTACT) {
+//				AddFriendHistroysHandler.addMeNeedAuthentication(
+//						getApplicationContext(), userInfo, additInfo);
+//			}
+
+		}
+
+		@Override
+		public void OnRefuseInviteJoinGroup(int groupType, long nGroupID,
+				long nUserID, String sxml) {
+			GroupType gType = GroupType.fromInt(groupType);
+			if (gType == GroupType.CONTACT) {
+				AddFriendHistroysHandler.addOtherRefused(nUserID, sxml);
 			}
 		}
 
@@ -672,6 +706,7 @@ public class JNIService extends Service {
 			sendBroadcast(i);
 		}
 
+		// 增加好友成功时的回调
 		@Override
 		public void OnAddGroupUserInfoCallback(int groupType, long nGroupID,
 				String sXml) {
@@ -703,6 +738,15 @@ public class JNIService extends Service {
 			}
 
 			V2Log.e(TAG, "接收到新的好友：" + GlobalHolder.getInstance().getUser(uid));
+
+			GroupType gType = GroupType.fromInt(groupType);
+			if (gType == GroupType.CONTACT) {
+				AddFriendHistroysHandler.becomeFriendHanler(sXml);
+				
+				
+				
+			}
+
 			GlobalHolder.getInstance().addUserToGroup(
 					GlobalHolder.getInstance().getUser(uid), nGroupID);
 			GroupUserObject obj = new GroupUserObject(groupType, nGroupID, uid);
@@ -842,6 +886,7 @@ public class JNIService extends Service {
 			g.setOwnerUser(u);
 			GlobalHolder.getInstance().addGroupToList(
 					Group.GroupType.CONFERENCE.intValue(), g);
+
 
 			Intent i = new Intent();
 			i.setAction(JNIService.JNI_BROADCAST_CONFERENCE_INVATITION);

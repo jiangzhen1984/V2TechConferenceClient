@@ -25,9 +25,11 @@ import android.view.View.OnClickListener;
 import android.view.View.OnFocusChangeListener;
 import android.view.View.OnTouchListener;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.RadioGroup.OnCheckedChangeListener;
@@ -42,13 +44,15 @@ import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.SPUtil;
 import com.v2tech.view.PublicIntent;
 import com.v2tech.view.bo.ConversationNotificationObject;
+import com.v2tech.view.contacts.add.AuthenticationActivity;
+import com.v2tech.view.contacts.add.FriendManagementActivity;
 import com.v2tech.view.conversation.ConversationSelectFileEntry;
 import com.v2tech.vo.Conversation;
 import com.v2tech.vo.User;
 import com.v2tech.vo.UserDeviceConfig;
 
 public class ContactDetail extends Activity implements OnTouchListener {
-
+	// R.layout.activity_contact_detail
 	private static final int UPDATE_USER_INFO = 2;
 	private static final int UPDATE_USER_INFO_DONE = 3;
 
@@ -72,6 +76,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 	private TextView mAddressTV;
 	private TextView mFaxTV;
 	private TextView mEmailTV;
+	// R.id.contact_user_company
 	private TextView mCompanyTitleTV;
 	private TextView mSignTV;
 	private View[] mTVArr;
@@ -100,6 +105,21 @@ public class ContactDetail extends Activity implements OnTouchListener {
 	private View mSelfItemsContainer;
 	private EditText[] mETArr;
 
+	// R.id.authentication_message
+	private TextView tvAuthenticationMessage;
+	// R.id.authentication_message_layout
+	private LinearLayout llAuthenticationMessageLayout;
+	// R.id.access
+	private Button bAccess;
+	// R.id.refuse
+	private Button bRefuse;
+	// R.id.authentication_state
+	private TextView tvAuthenticationState;
+
+	private int state = -1;
+
+	String fromActivity;
+
 	private boolean isUpdating;
 	private boolean isPad;
 
@@ -109,15 +129,26 @@ public class ContactDetail extends Activity implements OnTouchListener {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
 		this.setContentView(R.layout.activity_contact_detail);
+		initView();
+		connectView();
+		bindViewEnvent();
+
 		Configuration configuration = getResources().getConfiguration();
-		if(configuration.smallestScreenWidthDp > 600){
+		if (configuration.smallestScreenWidthDp > 600) {
 			isPad = true;
 		}
-		mUid = this.getIntent().getLongExtra("uid", 0);
+		fromActivity = this.getIntent().getStringExtra("fromActivity");
+		if ((fromActivity != null)
+				&& (fromActivity.equals("MessageAuthenticationActivity"))) {
+			// 166是wenzl测试用
+			// mUid = this.getIntent().getLongExtra("remoteUserID", 0);
+			mUid = 166;
+		} else {
+			mUid = this.getIntent().getLongExtra("uid", 0);
+		}
+
 		fromPlace = this.getIntent().getStringExtra("fromPlace");
-		initView();
 		mContext = this;
 		View v = findViewById(R.id.contact_detail_main_layout);
 		v.setOnTouchListener(this);
@@ -128,6 +159,100 @@ public class ContactDetail extends Activity implements OnTouchListener {
 
 		this.overridePendingTransition(R.animator.alpha_from_0_to_1,
 				R.animator.alpha_from_1_to_0);
+		initViewShow();
+	}
+
+	private void connectView() {
+		tvAuthenticationMessage = (TextView) findViewById(R.id.authentication_message);
+		bAccess = (Button) findViewById(R.id.access);
+		bRefuse = (Button) findViewById(R.id.refuse);
+		tvAuthenticationState = (TextView) findViewById(R.id.authentication_state);
+		llAuthenticationMessageLayout=(LinearLayout) findViewById(R.id.authentication_message_layout);
+	}
+
+	private void bindViewEnvent() {
+		bAccess.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View arg0) {
+				Intent intent = new Intent(ContactDetail.this,
+						FriendManagementActivity.class);
+				intent.putExtra("remoteUserID", ContactDetail.this.getIntent()
+						.getLongExtra("remoteUserID", 0));
+				intent.putExtra("cause", "access_friend_authentication");
+				ContactDetail.this.startActivity(intent);
+			}
+		});
+
+		bRefuse.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View arg0) {
+				Intent intent = new Intent(ContactDetail.this,
+						AuthenticationActivity.class);
+				intent.putExtra("remoteUserID", ContactDetail.this.getIntent()
+						.getLongExtra("remoteUserID", 0));
+				intent.putExtra("cause", "refuse_friend_authentication");
+				ContactDetail.this.startActivity(intent);
+
+			}
+		});
+	}
+
+	private void initViewShow() {
+		if ((fromActivity != null)
+				&& (fromActivity.equals("MessageAuthenticationActivity"))) {
+			mMoreDetailButton.setVisibility(View.INVISIBLE);
+			llAuthenticationMessageLayout.setVisibility(View.VISIBLE);
+			tvAuthenticationMessage.setText(this.getIntent().getStringExtra(
+					"authenticationMessage"));
+			mCompanyTitleTV.setVisibility(View.INVISIBLE);
+			int state = this.getIntent().getIntExtra("state", -1);
+			switch (state) {
+			//别人加我：允许任何人：0已添加您为好友，需要验证：1未处理，2已同意，3已拒绝
+			//我加别人：允许认识人：4你们已成为了好友，需要验证：5等待对方验证，4被同意（你们已成为了好友），6拒绝了你为好友
+			case 0:// 0成为好友
+				bAccess.setVisibility(View.GONE);
+				bRefuse.setVisibility(View.GONE);
+				tvAuthenticationState.setVisibility(View.GONE);
+				break;
+			case 1:// 未处理
+				bAccess.setVisibility(View.VISIBLE);
+				bRefuse.setVisibility(View.VISIBLE);
+				tvAuthenticationState.setVisibility(View.GONE);
+				break;
+			case 2:// 已同意
+				bAccess.setVisibility(View.GONE);
+				bRefuse.setVisibility(View.GONE);
+				tvAuthenticationState.setVisibility(View.VISIBLE);
+				tvAuthenticationState.setText("已同意该申请");
+
+				break;
+			case 3:// 3已拒绝
+				bAccess.setVisibility(View.GONE);
+				bRefuse.setVisibility(View.GONE);
+				tvAuthenticationState.setVisibility(View.VISIBLE);
+				tvAuthenticationState.setText("已拒绝该申请");
+				break;
+			case 4:// 5被同意
+				bAccess.setVisibility(View.GONE);
+				bRefuse.setVisibility(View.GONE);
+				tvAuthenticationState.setVisibility(View.VISIBLE);
+				tvAuthenticationState.setVisibility(View.GONE);
+				break;
+			case 6:// 6被拒绝
+				bAccess.setVisibility(View.GONE);
+				bRefuse.setVisibility(View.GONE);
+				tvAuthenticationState.setVisibility(View.VISIBLE);
+				tvAuthenticationState.setText("拒绝你的好友申请");
+				break;
+			}
+
+		} else {
+			bAccess.setVisibility(View.GONE);
+			bRefuse.setVisibility(View.GONE);
+			mMoreDetailButton.setVisibility(View.VISIBLE);
+			llAuthenticationMessageLayout.setVisibility(View.GONE);
+		}
 	}
 
 	@Override
@@ -321,6 +446,28 @@ public class ContactDetail extends Activity implements OnTouchListener {
 				et.setVisibility(View.GONE);
 			}
 			for (View tv : mTVArr) {
+				if ((tv == mMoreDetailButton) || (tv == mCompanyTitleTV)) {
+					if ((fromActivity != null)
+							&& fromActivity
+									.equals("MessageAuthenticationActivity")) {
+
+						int state = this.getIntent().getIntExtra("state", -1);
+						switch (state) {
+						// 允许时候人时，0成为好友。需要验证时，被邀请，1未处理，2已同意，3已拒绝。邀请人，4等待验证，5被同意，6被拒绝。
+						case 0:// 0成为好友
+						case 5:// 5被同意
+							tv.setVisibility(View.VISIBLE);
+							break;
+						case 1:// 未处理
+						case 2:// 已同意
+						case 3:// 3已拒绝
+						case 6:// 6被拒绝
+							tv.setVisibility(View.GONE);
+							break;
+						}
+						continue;
+					}
+				}
 				tv.setVisibility(View.VISIBLE);
 			}
 			mSelfItemsContainer.setVisibility(View.GONE);
@@ -510,16 +657,17 @@ public class ContactDetail extends Activity implements OnTouchListener {
 					.getmStatus() == User.Status.HIDDEN);
 
 			if (offline) {
-				if(isPad){
-					Toast.makeText(getApplicationContext(), "对方目前不在线，无法语音通话", Toast.LENGTH_SHORT).show();
-				}
-				else{
+				if (isPad) {
+					Toast.makeText(getApplicationContext(), "对方目前不在线，无法语音通话",
+							Toast.LENGTH_SHORT).show();
+				} else {
 					if (phoneEmpty && mobileEmpty) {
 						Intent intent = new Intent();
 						intent.setAction(Intent.ACTION_DIAL); // android.intent.action.DIAL
 						startActivity(intent);
 					} else if (!phoneEmpty && !mobileEmpty) {
-						showCallDialog(u.getTelephone(), u.getCellPhone(), false);
+						showCallDialog(u.getTelephone(), u.getCellPhone(),
+								false);
 					} else {
 						Intent intent = new Intent();
 						intent.setAction(Intent.ACTION_CALL);
@@ -532,10 +680,9 @@ public class ContactDetail extends Activity implements OnTouchListener {
 					}
 				}
 			} else {
-				if(isPad){
+				if (isPad) {
 					startVoiceCall();
-				}
-				else{
+				} else {
 					if (phoneEmpty && mobileEmpty) {
 						showCallDialog(null, null, true);
 					} else if (!phoneEmpty || !mobileEmpty) {
@@ -554,11 +701,10 @@ public class ContactDetail extends Activity implements OnTouchListener {
 		@Override
 		public void onClick(View arg0) {
 
-			if ("ConversationView".equals(fromPlace)){
+			if ("ConversationView".equals(fromPlace)) {
 				setResult(0);
 				finish();
-			}
-			else
+			} else
 				returnConversationView(null);
 		}
 	};
@@ -725,6 +871,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 	}
 
 	private boolean isNeedDefault;
+
 	private void selectedRG(String genderVal) {
 		for (int i = 0; i < mGenderRG.getChildCount(); i++) {
 			RadioButton rg = (RadioButton) mGenderRG.getChildAt(i);
@@ -733,8 +880,8 @@ public class ContactDetail extends Activity implements OnTouchListener {
 				isNeedDefault = true;
 			}
 		}
-		
-		if(!isNeedDefault){
+
+		if (!isNeedDefault) {
 			RadioButton radioButton = (RadioButton) findViewById(R.id.radio2);
 			radioButton.setChecked(true);
 		}
