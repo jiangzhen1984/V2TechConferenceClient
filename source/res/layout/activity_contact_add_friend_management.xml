@@ -1,0 +1,172 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+    <RelativeLayout
+        android:id="@+id/RelativeLayout1"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="#ffffff" >
+
+        <TextView
+            android:id="@+id/contact_detail_return_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:paddingBottom="10dp"
+            android:paddingLeft="15dp"
+            android:paddingRight="8dp"
+            android:paddingTop="10dp"
+            android:text="身份验证"
+            android:textColor="@color/button_text_color"
+            android:textSize="@dimen/common_item_text_size" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:ellipsize="end"
+            android:gravity="center"
+            android:singleLine="true"
+            android:text="添加好友"
+            android:textColor="@color/activiy_contact_detail_title_color"
+            android:textSize="@dimen/common_item_text_size" />
+
+        <!-- 用它保持高度 -->
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="10dp"
+            android:layout_toLeftOf="@+id/contact_detail_2_next_button"
+            android:paddingBottom="10dp"
+            android:paddingTop="10dp"
+            android:src="@drawable/translucent" />
+
+        <TextView
+            android:id="@+id/right_text_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="10dp"
+            android:paddingBottom="10dp"
+            android:paddingLeft="15dp"
+            android:paddingRight="8dp"
+            android:paddingTop="10dp"
+            android:text="发送"
+            android:textColor="@color/button_text_color"
+            android:textSize="@dimen/common_item_text_size" />
+    </RelativeLayout>
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="1dp"
+        android:background="#cdcdcf"
+        android:orientation="vertical" >
+    </LinearLayout>
+
+    <ScrollView
+        android:id="@+id/scrollView1"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#f2f2f2" >
+
+        <LinearLayout
+            android:id="@+id/setting_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#f2f2f2"
+            android:orientation="vertical" >
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/rounded_corners_of_setting_border"
+                android:orientation="horizontal" >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/detail_detail_2_item_margin_bottom"
+                    android:layout_marginLeft="@dimen/contact_detail_2_item_margin_horizontal"
+                    android:layout_marginRight="@dimen/contact_detail_2_item_margin_horizontal"
+                    android:layout_marginTop="@dimen/detail_detail_2_item_margin_top"
+                    android:padding="5dp"
+                    android:text="备注"
+                    android:textColor="@color/activiy_contact_detail_item_color"
+                    android:textSize="@dimen/common_item_text_size" />
+
+                <EditText
+                    android:id="@+id/comment_name_et"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_weight="1"
+                    android:background="@null"
+                    android:ems="10"
+                    android:inputType="text"
+                    android:maxLength="30"
+                    android:text="华春雨"
+                    android:textColor="@color/activiy_contact_detail_item_color"
+                    android:textSize="@dimen/common_item_text_size" >
+                </EditText>
+            </LinearLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:layout_marginTop="5dp"
+                android:background="@drawable/rounded_corners_of_setting_border"
+                android:gravity="center_vertical" >
+
+                <TextView
+                    android:id="@+id/group_tv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginBottom="@dimen/detail_detail_2_item_margin_bottom"
+                    android:layout_marginLeft="@dimen/contact_detail_2_item_margin_horizontal"
+                    android:layout_marginRight="@dimen/contact_detail_2_item_margin_horizontal"
+                    android:layout_marginTop="@dimen/detail_detail_2_item_margin_top"
+                    android:padding="5dp"
+                    android:text="分组"
+                    android:textColor="@color/activiy_contact_detail_item_color"
+                    android:textSize="@dimen/common_item_text_size" />
+
+                <TextView
+                    android:id="@+id/contact_user_detail_account_tv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_toRightOf="@+id/group_tv"
+                    android:ellipsize="end"
+                    android:singleLine="true"
+                    android:text="Default"
+                    android:textColor="@color/activiy_contact_detail_item_color"
+                    android:textSize="@dimen/common_item_text_size" />
+
+                <ImageView
+                    android:id="@+id/select_group"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginBottom="@dimen/detail_detail_2_item_margin_bottom"
+                    android:layout_marginLeft="@dimen/contact_detail_2_item_margin_horizontal"
+                    android:layout_marginRight="@dimen/contact_detail_2_item_margin_horizontal"
+                    android:layout_marginTop="@dimen/detail_detail_2_item_margin_top"
+                    android:src="@drawable/arrow_right_gray" >
+                </ImageView>
+            </RelativeLayout>
+        </LinearLayout>
+    </ScrollView>
+
+</LinearLayout>

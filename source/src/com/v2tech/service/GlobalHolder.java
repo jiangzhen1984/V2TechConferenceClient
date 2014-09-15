@@ -15,6 +15,7 @@ import com.V2.jni.V2GlobalEnum;
 import com.V2.jni.ind.V2Group;
 import com.V2.jni.util.V2Log;
 import com.v2tech.util.GlobalState;
+import com.v2tech.vo.AddFriendHistorieNode;
 import com.v2tech.vo.ConferenceGroup;
 import com.v2tech.vo.ContactGroup;
 import com.v2tech.vo.CrowdGroup;

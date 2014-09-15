@@ -1,0 +1,140 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+    <RelativeLayout
+        android:id="@+id/RelativeLayout1"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="#ffffff" >
+
+        <TextView
+            android:id="@+id/setting_back"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:paddingBottom="10dp"
+            android:paddingLeft="15dp"
+            android:paddingRight="8dp"
+            android:paddingTop="10dp"
+            android:text="设置"
+            android:textColor="@color/button_text_color"
+            android:textSize="@dimen/common_item_text_size" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:ellipsize="end"
+            android:gravity="center"
+            android:singleLine="true"
+            android:text="身份验证"
+            android:textColor="@color/activiy_contact_detail_title_color"
+            android:textSize="@dimen/common_item_text_size" />
+
+        <!-- 用它保持高度 -->
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="10dp"
+            android:paddingBottom="10dp"
+            android:paddingTop="10dp"
+            android:src="@drawable/translucent" />
+    </RelativeLayout>
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="1dp"
+        android:background="#cdcdcf"
+        android:orientation="vertical" >
+    </LinearLayout>
+
+    <ScrollView
+        android:id="@+id/scrollView1"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#f2f2f2" >
+
+        <LinearLayout
+            android:id="@+id/setting_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#f2f2f2"
+            android:orientation="vertical" >
+
+            <RadioGroup
+                android:id="@+id/rg_authentication"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_marginLeft="15.0dip"
+                android:layout_marginRight="15.0dip"
+                android:layout_marginTop="16dip"
+                android:background="@drawable/shape_bg"
+                android:checkedButton="@+id/rb_allow_anybogy"
+                android:orientation="vertical" >
+
+                <RadioButton
+                    android:id="@+id/rb_allow_anybogy"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_marginBottom="@dimen/detail_detail_2_item_margin_bottom"
+                    android:layout_marginLeft="@dimen/contact_detail_2_item_margin_horizontal"
+                    android:layout_marginRight="@dimen/contact_detail_2_item_margin_horizontal"
+                    android:layout_marginTop="@dimen/detail_detail_2_item_margin_top"
+                    android:background="@null"
+                    android:button="@null"
+                    android:drawableRight="@drawable/radio_state"
+                    android:padding="10dp"
+                    android:text="允许任何人"
+                    android:textColor="#000000" />
+
+                <View
+                    android:layout_width="fill_parent"
+                    android:layout_height="0.5dp"
+                    android:background="#929292" />
+
+                <RadioButton
+                    android:id="@+id/rb_require_authorization"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_marginBottom="@dimen/detail_detail_2_item_margin_bottom"
+                    android:layout_marginLeft="@dimen/contact_detail_2_item_margin_horizontal"
+                    android:layout_marginRight="@dimen/contact_detail_2_item_margin_horizontal"
+                    android:layout_marginTop="@dimen/detail_detail_2_item_margin_top"
+                    android:background="@null"
+                    android:button="@null"
+                    android:drawableRight="@drawable/radio_state"
+                    android:padding="10dp"
+                    android:text="需要验证消息"
+                    android:textColor="#000000" />
+
+                <View
+                    android:layout_width="fill_parent"
+                    android:layout_height="0.5dp"
+                    android:background="#929292" />
+
+                <RadioButton
+                    android:id="@+id/rb_unallow_anybogy"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_marginBottom="@dimen/detail_detail_2_item_margin_bottom"
+                    android:layout_marginLeft="@dimen/contact_detail_2_item_margin_horizontal"
+                    android:layout_marginRight="@dimen/contact_detail_2_item_margin_horizontal"
+                    android:layout_marginTop="@dimen/detail_detail_2_item_margin_top"
+                    android:background="@null"
+                    android:button="@null"
+                    android:drawableRight="@drawable/radio_state"
+                    android:padding="10dp"
+                    android:text="不允许任何人"
+                    android:textColor="#000000" />
+            </RadioGroup>
+        </LinearLayout>
+    </ScrollView>
+
+</LinearLayout>

@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/contact_detail_main_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+    <RelativeLayout
+        android:id="@+id/RelativeLayout1"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="#ffffff" >
+
+        <TextView
+            android:id="@+id/contact_detail_return_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:paddingBottom="10dp"
+            android:paddingLeft="15dp"
+            android:paddingRight="8dp"
+            android:paddingTop="10dp"
+            android:text="@string/contacts_user_detail_return_button"
+            android:textColor="@color/button_text_color"
+            android:textSize="@dimen/common_item_text_size" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:ellipsize="end"
+            android:gravity="center"
+            android:singleLine="true"
+            android:text="身份验证"
+            android:textColor="@color/activiy_contact_detail_title_color"
+            android:textSize="@dimen/common_item_text_size" />
+
+        <!-- 用它保持高度 -->
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toLeftOf="@+id/contact_detail_next_button"
+            android:layout_marginRight="10dp"
+            android:paddingBottom="10dp"
+            android:paddingTop="10dp"
+            android:src="@drawable/translucent" />
+
+        <TextView
+            android:id="@+id/right_text_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="10dp"
+            android:paddingBottom="10dp"
+            android:paddingLeft="15dp"
+            android:paddingRight="8dp"
+            android:paddingTop="10dp"
+            android:text="下一步"
+            android:textColor="@color/button_text_color"
+            android:textSize="@dimen/common_item_text_size" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#f2f2f2"
+        android:orientation="vertical" >
+
+        <RelativeLayout
+            android:id="@+id/RelativeLayout2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true" >
+
+            <ImageView
+                android:id="@+id/contact_user_detail_head_icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="@dimen/button_padding_horizontal"
+                android:layout_marginTop="20dp"
+                android:src="@drawable/avatar" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBottom="@+id/contact_user_detail_head_icon"
+                android:layout_alignTop="@+id/contact_user_detail_head_icon"
+                android:layout_marginLeft="@dimen/detail_detail_signature_margin_left"
+                android:layout_toRightOf="@+id/contact_user_detail_head_icon"
+                android:orientation="vertical" >
+
+                <TextView
+                    android:id="@+id/contact_user_detail_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="top"
+                    android:ellipsize="end"
+                    android:gravity="top"
+                    android:maxWidth="@dimen/detail_detail_name_max_width"
+                    android:singleLine="true"
+                    android:text="TextView"
+                    android:textColor="@color/common_item_text_color" />
+
+                <TextView
+                    android:id="@+id/contact_user_detail_user_signature_tv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom"
+                    android:ellipsize="end"
+                    android:gravity="bottom"
+                    android:maxWidth="@dimen/detail_detail_name_max_width"
+                    android:singleLine="true"
+                    android:text="TextView"
+                    android:textColor="@color/common_item_text_color" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/contact_user_detail_invite_video"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginRight="@dimen/button_gap_horizontal"
+                android:background="@drawable/button_bg"
+                android:gravity="center"
+                android:paddingBottom="@dimen/detail_detail_2_button_padding_vertical"
+                android:paddingLeft="@dimen/button_padding_horizontal"
+                android:paddingRight="@dimen/button_padding_horizontal"
+                android:paddingTop="@dimen/detail_detail_2_button_padding_vertical"
+                android:text="@string/contacts_user_detail_invite_video"
+                android:textColor="@color/button_text_color"
+                android:textSize="@dimen/common_item_text_size_small"
+                android:visibility="gone" />
+        </RelativeLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/RelativeLayout2"
+            android:orientation="vertical" >
+            <!-- 添加填写备注的文本框 -->
+            <EditText
+                android:id="@+id/editText1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/contact_detail_2_item_margin_left"
+                android:layout_marginRight="@dimen/contact_detail_2_item_margin_right"
+                android:ems="10"
+                android:inputType="textMultiLine"
+                android:minLines="3" >
+
+                <requestFocus />
+            </EditText>
+        </LinearLayout>
+    </RelativeLayout>
+
+</LinearLayout>

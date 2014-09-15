@@ -4,10 +4,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import android.app.Activity;
-<<<<<<< HEAD
-=======
 import android.app.ActivityManager;
->>>>>>> 2670ca0... 1.增加好友
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
@@ -72,12 +69,14 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 	private TextView mSignTV;
 	private TextView mDeptTV;
 	private TextView mCompanyTV;
+	private TextView mGroupNameTV;
 	
 
 	private EditText mNickNameET;
 
-	private View mAddContactButton;
+	private TextView mAddContactButton;
 	private View mDeleteContactButton;
+	private View mUpdateContactGroupButton;
 
 	private boolean isUpdating;
 	private User currentUser;
@@ -113,15 +112,14 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 
 		currentUser = GlobalHolder.getInstance().getCurrentUser();
 		List<Group> friendGroup = GlobalHolder.getInstance().getGroup(
-
-				GroupType.FRIGROUP);
+				GroupType.CONTACT.intValue());
 		for (Group group : friendGroup) {
-			if (group.findUser(detailUser, group)) {
-				isCanelFriend = true;
+			if (group.findUser(detailUser, group) != null) {
+				isRelation = true;
 			}
 		}
 
-		if (isCanelFriend == true) {
+		if (isRelation == true) {
 			mAddContactButton.setVisibility(View.GONE);
 			mDeleteContactButton.setVisibility(View.VISIBLE);
 		} else {
@@ -308,7 +306,7 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 				@Override
 				public void onClick(View view) {
 					//input null for remove contact
-					contactService.updateUserGroup(null,(ContactGroup)belongs,  u, null);
+					contactService.updateUserGroup(null,(ContactGroup)belongs,  detailUser, null);
 					isRelation = false;
 					updateContactGroup();
 					mDialog.dismiss();
@@ -379,7 +377,7 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 			} else {
 				List<Group> list = GlobalHolder.getInstance().getGroup(GroupType.CONTACT.intValue());
 				if (list != null && list.size() > 0) {
-					contactService.updateUserGroup((ContactGroup)list.get(0), null, u, null);
+					contactService.updateUserGroup((ContactGroup)list.get(0), null, detailUser, null);
 					isRelation = true;
 					belongs = (ContactGroup)list.get(0);
 				}
