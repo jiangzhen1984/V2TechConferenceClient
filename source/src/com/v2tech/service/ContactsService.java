@@ -82,7 +82,7 @@ public class ContactsService extends AbstractHandler {
 
 		mWatingGid = group.getmGId();
 		List<Group> list = GlobalHolder.getInstance().getGroup(
-				Group.GroupType.CONTACT);
+				Group.GroupType.CONTACT.intValue());
 		// Update all users which belongs this group to root group
 		if (list.size() > 0) {
 			ContactGroup defaultGroup = (ContactGroup) list.get(0);
@@ -209,7 +209,7 @@ public class ContactsService extends AbstractHandler {
 		public void onAddGroupInfo(V2Group group) {
 			if (group.type == V2Group.TYPE_CONTACTS_GROUP) {
 				Group g = new ContactGroup(group.id, group.name);
-				GlobalHolder.getInstance().addGroupToList(g.getGroupType(), g);
+				GlobalHolder.getInstance().addGroupToList(g.getGroupType().intValue(), g);
 				JNIResponse jniRes = new GroupServiceJNIResponse(
 						GroupServiceJNIResponse.Result.SUCCESS, g);
 				Message.obtain(mCallbackHandler, CREATE_CONTACTS_GROUP, jniRes)

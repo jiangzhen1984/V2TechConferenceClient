@@ -155,11 +155,16 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 			Message.obtain(mHandler, FILL_CONTACTS_GROUP).sendToTarget();
 		}
 		
-		if (currentPos >=0 && currentPos < mItemList.size()) {
-			mItemList.get(currentPos).isExpanded = lastExpanded;
-			ContactGroupView contact = ((ContactGroupView) mItemList.get(currentPos).v);
-			contact.getmGroupIndicatorIV().setTag(contact.getLastExpanded());
-			contact.doExpandedOrCollapse();
+
+		if (currentPos != -1) {
+			View view = mItemList.get(currentPos).v;
+			if(view instanceof ContactGroupView){
+				mItemList.get(currentPos).isExpanded = lastExpanded;
+				ContactGroupView contact = ((ContactGroupView) view);
+				contact.getmGroupIndicatorIV().setTag(contact.getLastExpanded());
+				contact.doExpandedOrCollapse();
+			}
+
 		}
 	}
 
@@ -210,9 +215,9 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 			return;
 		}
 		if (flag == TAG_CONTACT) {
-			l = GlobalHolder.getInstance().getGroup(GroupType.CONTACT);
+			l = GlobalHolder.getInstance().getGroup(GroupType.CONTACT.intValue());
 		} else if (flag == TAG_ORG) {
-			l = GlobalHolder.getInstance().getGroup(GroupType.ORG);
+			l = GlobalHolder.getInstance().getGroup(GroupType.ORG.intValue());
 		}
 		if (l != null) {
 			new AsyncTaskLoader().execute();

@@ -1,19 +1,25 @@
 package com.v2tech.vo;
 
+import com.V2.jni.V2GlobalEnum;
+
 public class Conversation {
 
-	public static final String TYPE_CONFERNECE = "1";
+	public static final int TYPE_CONFERNECE = V2GlobalEnum.GROUP_TYPE_CONFERENCE;
 
-	public static final String TYPE_CONTACT = "2";
+	public static final int TYPE_CONTACT = V2GlobalEnum.GROUP_TYPE_USER;
 
-	public static final String TYPE_GROUP = "3";
+	public static final int TYPE_GROUP = V2GlobalEnum.GROUP_TYPE_DEPARTMENT;
+	
+	public static final int TYPE_VOICE_MESSAGE = 7;
+	
+	public static final int TYPE_VERIFICATION_MESSAGE = 8;
 
 	public static final int READ_FLAG_READ = 1;
 	public static final int READ_FLAG_UNREAD = 0;
 
 	private int mId;
 
-	protected String mType;
+	protected int mType;
 
 	protected long mExtId;
 
@@ -35,7 +41,7 @@ public class Conversation {
 	}
 	
 	
-	public Conversation(int mId, String mType, long mExtId, int readFlag) {
+	public Conversation(int mId, int mType, long mExtId, int readFlag) {
 		super();
 		this.mId = mId;
 		this.mType = mType;
@@ -43,11 +49,11 @@ public class Conversation {
 		this.readFlag = readFlag;
 	}
 
-	public Conversation(int mId, String mType, long mExtId) {
+	public Conversation(int mId, int mType, long mExtId) {
 		this(0, mType, mExtId, READ_FLAG_UNREAD);
 	}
 
-	public Conversation(String mType, long mExtId) {
+	public Conversation(int mType, long mExtId) {
 		this(0, mType, mExtId);
 	}
 
@@ -82,7 +88,7 @@ public class Conversation {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + (int) (mExtId ^ (mExtId >>> 32));
-		result = prime * result + ((mType == null) ? 0 : mType.hashCode());
+//		result = prime * result + ((mType == null) ? 0 : mType.hashCode());
 		return result;
 	}
 
@@ -97,11 +103,12 @@ public class Conversation {
 		Conversation other = (Conversation) obj;
 		if (mExtId != other.mExtId)
 			return false;
-		if (mType == null) {
-			if (other.mType != null)
-				return false;
-		} else if (!mType.equals(other.mType))
-			return false;
+//		if (mType == null) {
+//			if (other.mType != null)
+//				return false;
+//		}
+//		else if (!mType.equals(other.mType))
+//			return false;
 		return true;
 	}
 
@@ -113,11 +120,11 @@ public class Conversation {
 		this.mId = id;
 	}
 
-	public String getType() {
+	public int getType() {
 		return mType;
 	}
 
-	public void setType(String type) {
+	public void setType(int type) {
 		this.mType = type;
 	}
 

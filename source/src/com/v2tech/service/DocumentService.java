@@ -132,7 +132,7 @@ public class DocumentService extends AbstractHandler {
 				int nBusinessType, long nFromUserID, String szWBoardID,
 				int nWhiteIndex, String szFileName, int type) {
 			Group g = GlobalHolder.getInstance().getGroupById(
-					GroupType.CONFERENCE, nGroupID);
+					GroupType.CONFERENCE.intValue(), nGroupID);
 			User u = GlobalHolder.getInstance().getUser(nFromUserID);
 			int pos = szFileName.lastIndexOf("/");
 			if (pos == -1) {
@@ -181,7 +181,7 @@ public class DocumentService extends AbstractHandler {
 		public void OnWBoardClosedCallback(long nGroupID, int nBusinessType,
 				long nUserID, String szWBoardID) {
 			Group g = GlobalHolder.getInstance().getGroupById(
-					GroupType.CONFERENCE, nGroupID);
+					GroupType.CONFERENCE.intValue(), nGroupID);
 			User u = GlobalHolder.getInstance().getUser(nUserID);
 
 			notifyListenerWithPending(KEY_DOC_CLOSE_NOTIFY_LISTENER, 0, 0, new V2Doc(

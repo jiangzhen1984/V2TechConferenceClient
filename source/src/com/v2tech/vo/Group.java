@@ -12,7 +12,10 @@ import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CopyOnWriteArraySet;
 
+import com.V2.jni.V2GlobalEnum;
 import com.V2.jni.util.V2Log;
+import com.v2tech.service.GlobalHolder;
+import com.v2tech.util.GlobalConfig;
 
 /**
  * Group information
@@ -43,7 +46,10 @@ public abstract class Group implements Comparable<Group> {
 	private Object mLock = new Object();
 
 	public enum GroupType {
-		ORG(1), CONTACT(2), CHATING(3), CONFERENCE(4), UNKNOWN(-1);
+		ORG(V2GlobalEnum.GROUP_TYPE_DEPARTMENT), CONTACT(
+				V2GlobalEnum.GROUP_TYPE_CONTACT), CHATING(
+				V2GlobalEnum.GROUP_TYPE_CROWD), CONFERENCE(
+				V2GlobalEnum.GROUP_TYPE_CONFERENCE), UNKNOWN(-1);
 
 		private int type;
 
@@ -53,13 +59,13 @@ public abstract class Group implements Comparable<Group> {
 
 		public static GroupType fromInt(int code) {
 			switch (code) {
-			case 1:
+			case V2GlobalEnum.GROUP_TYPE_DEPARTMENT:
 				return ORG;
-			case 2:
+			case V2GlobalEnum.GROUP_TYPE_CONTACT:
 				return CONTACT;
-			case 3:
+			case V2GlobalEnum.GROUP_TYPE_CROWD:
 				return CHATING;
-			case 4:
+			case V2GlobalEnum.GROUP_TYPE_CONFERENCE:
 				return CONFERENCE;
 			default:
 				return UNKNOWN;
@@ -213,9 +219,10 @@ public abstract class Group implements Comparable<Group> {
 	public List<Group> getChildGroup() {
 		return this.mChild;
 	}
-	
+
 	/**
-	 * Get sub group and user sum 
+	 * Get sub group and user sum
+	 * 
 	 * @return
 	 */
 	public int getSubSize() {
@@ -350,6 +357,5 @@ public abstract class Group implements Comparable<Group> {
 		return 0;
 	}
 
-	
 	public abstract String toXml();
 }

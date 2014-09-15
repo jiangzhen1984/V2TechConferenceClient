@@ -44,7 +44,6 @@ import com.V2.jni.VideoRequest;
 import com.V2.jni.VideoRequestCallbackAdapter;
 import com.V2.jni.ind.AudioJNIObjectInd;
 import com.V2.jni.ind.FileJNIObject;
-import com.V2.jni.ind.SendingResultJNIObjectInd;
 import com.V2.jni.ind.V2Conference;
 import com.V2.jni.ind.V2Group;
 import com.V2.jni.ind.V2User;
@@ -58,6 +57,7 @@ import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.GlobalState;
 import com.v2tech.util.Notificator;
 import com.v2tech.util.XmlParser;
+import com.v2tech.view.JNIService.JNICallbackHandler;
 import com.v2tech.view.bo.GroupUserObject;
 import com.v2tech.view.bo.UserAvatarObject;
 import com.v2tech.view.bo.UserStatusObject;
@@ -299,7 +299,7 @@ public class JNIService extends Service {
 
 				if (gl != null && gl.size() > 0) {
 					GlobalHolder.getInstance().updateGroupList(
-							Group.GroupType.fromInt(msg.arg1), gl);
+							msg.arg1, gl);
 					Intent gi = new Intent(JNI_BROADCAST_GROUP_NOTIFICATION);
 					gi.putExtra("gtype", msg.arg1);
 					gi.addCategory(JNI_BROADCAST_CATEGROY);
@@ -352,7 +352,7 @@ public class JNIService extends Service {
 			case JNI_CONFERENCE_INVITATION:
 				Group g = (Group) msg.obj;
 				Group cache = GlobalHolder.getInstance().getGroupById(
-						GroupType.CONFERENCE, g.getmGId());
+						GroupType.CONFERENCE.intValue(), g.getmGId());
 				// conference already in cache list
 				if (cache != null && g.getmGId() != 0) {
 					V2Log.i("Current user conference in group:"
@@ -363,7 +363,7 @@ public class JNIService extends Service {
 						GroupType.CONFERENCE.intValue(), g.getmGId());
 				if (g != null) {
 					GlobalHolder.getInstance().addGroupToList(
-							GroupType.CONFERENCE, g);
+							GroupType.CONFERENCE.intValue(), g);
 					Intent i = new Intent();
 					i.setAction(JNIService.JNI_BROADCAST_CONFERENCE_INVATITION);
 					i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
@@ -383,7 +383,7 @@ public class JNIService extends Service {
 									mContext,
 									ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_ID
 											+ "=?",
-									new String[] { vm.getUUID() }, null);
+									new String[] { vm.getUUID() }, null, vm.getFromUser().getmUserId());
 					if (id == null) {
 						V2Log.e("the message :" + vm.getUUID()
 								+ " save in databases is failed ....");
@@ -585,7 +585,7 @@ public class JNIService extends Service {
 				V2Log.e(" invitation group is null");
 				return;
 			}
-			Group cache = 	GlobalHolder.getInstance().getGroupById(GroupType.fromInt(group.type), group.id);
+			Group cache = 	GlobalHolder.getInstance().getGroupById(group.type, group.id);
 			if (cache != null) {
 				V2Log.e("Duplicated group invitation: "+ cache.getmGId() +"  "+ cache.getName());
 				return;
@@ -622,7 +622,7 @@ public class JNIService extends Service {
 			if (groupType == Group.GroupType.CONFERENCE.intValue()) {
 				String gName = "";
 				Group rG = GlobalHolder.getInstance().getGroupById(
-						Group.GroupType.CONFERENCE, nGroupID);
+						Group.GroupType.CONFERENCE.intValue(), nGroupID);
 				if (rG != null) {
 					gName = rG.getName();
 				} else {
@@ -727,16 +727,14 @@ public class JNIService extends Service {
 				if (state.getUid() == ind.getFromUserId()
 						&& !state.isVoiceConnected()) {
 					AudioRequest.getInstance().AcceptAudioChat(
-							ind.getGroupId(), ind.getFromUserId(),
-							V2GlobalEnum.REQUEST_TYPE_IM);
+							ind.getSzSessionID(), ind.getFromUserId());
 					// mark voice state to connected
 					GlobalHolder.getInstance().setVoiceConnectedState(true);
 				} else {
 					V2Log.i("Ignore audio call for others: "
 							+ ind.getFromUserId());
 					AudioRequest.getInstance().RefuseAudioChat(
-							ind.getGroupId(), ind.getFromUserId(),
-							(int) ind.getRequestType());
+							ind.getSzSessionID(), ind.getFromUserId());
 				}
 				return;
 			}
@@ -745,8 +743,8 @@ public class JNIService extends Service {
 					|| GlobalHolder.getInstance().isInAudioCall()
 					|| GlobalHolder.getInstance().isInVideoCall()) {
 				V2Log.i("Ignore audio call ");
-				AudioRequest.getInstance().RefuseAudioChat(ind.getGroupId(),
-						ind.getFromUserId(), (int) ind.getRequestType());
+				AudioRequest.getInstance().RefuseAudioChat(ind.getSzSessionID(),
+						ind.getFromUserId());
 				return;
 			}
 
@@ -757,6 +755,7 @@ public class JNIService extends Service {
 			iv.putExtra("uid", ind.getFromUserId());
 			iv.putExtra("is_coming_call", true);
 			iv.putExtra("voice", true);
+			iv.putExtra("sessionID", ind.getSzSessionID());
 			mContext.startActivity(iv);
 
 		}
@@ -777,9 +776,8 @@ public class JNIService extends Service {
 					|| GlobalHolder.getInstance().isInAudioCall()
 					|| GlobalHolder.getInstance().isInVideoCall()) {
 				V2Log.i("Ignore video call ");
-				VideoRequest.getInstance().refuseVideoChat(ind.getGroupId(),
-						ind.getFromUserId(), ind.getDeviceId(),
-						ind.getRequestType());
+				VideoRequest.getInstance().refuseVideoChat(ind.getSzSessionID(),
+						ind.getFromUserId(), ind.getDeviceId());
 				return;
 			}
 			Message.obtain(mCallbackHandler, JNI_RECEIVED_VIDEO_INVITION, ind)
@@ -842,7 +840,7 @@ public class JNIService extends Service {
 			User u = GlobalHolder.getInstance().getUser(user.uid);
 			g.setOwnerUser(u);
 			GlobalHolder.getInstance().addGroupToList(
-					Group.GroupType.CONFERENCE, g);
+					Group.GroupType.CONFERENCE.intValue(), g);
 
 			Intent i = new Intent();
 			i.setAction(JNIService.JNI_BROADCAST_CONFERENCE_INVATITION);
@@ -859,14 +857,16 @@ public class JNIService extends Service {
 		}
 
 		@Override
-		public void OnRecvChatTextCallback(long nGroupID, int nBusinessType,
-				long nFromUserID, long nTime, String szXmlText) {
-			User toUser = GlobalHolder.getInstance().getCurrentUser();
+		public void OnRecvChatTextCallback(int eGroupType, long nGroupID,
+				long nFromUserID, long nToUserID, long nTime, String szSeqID,
+				String szXmlText) {
+			User toUser = GlobalHolder.getInstance().getUser(nToUserID);
 			User fromUser = GlobalHolder.getInstance().getUser(nFromUserID);
 			if (toUser == null) {
 				V2Log.w("No valid user object for receive message " + toUser
 						+ "  " + fromUser);
-				toUser = new User(GlobalHolder.getInstance().getCurrentUserId());
+//				toUser = new User(GlobalHolder.getInstance().getCurrentUserId());
+				toUser = new User(nToUserID);
 			}
 			if (fromUser == null) {
 				V2Log.w("No valid user object for receive message " + toUser
@@ -874,19 +874,24 @@ public class JNIService extends Service {
 				fromUser = new User(nFromUserID);
 			}
 
+			String uuid = XmlParser.parseForMessageUUID(szXmlText);
+			
 			// Record image data meta
-			VMessage cache = new VMessage(fromUser, toUser, new Date());
-			cache.setMsgCode(nBusinessType);
+			VMessage cache = new VMessage(eGroupType , nGroupID , fromUser, toUser, 
+					uuid , new Date(nTime * 1000));
+			cache.setmXmlDatas(szXmlText);
 			XmlParser.extraImageMetaFrom(cache, szXmlText);
 			if (cache.getItems().size() > 0) {
 				synchronized (cacheImageMeta) {
 					cacheImageMeta.add(cache);
+					return ;
 				}
 			}
 
 			// Record audio data meta
-			VMessage cacheAudio = new VMessage(fromUser, toUser, new Date());
-			cacheAudio.setMsgCode(nBusinessType);
+			VMessage cacheAudio = new VMessage(eGroupType , nGroupID , fromUser, toUser,  uuid , 
+					new Date(nTime * 1000));
+			cacheAudio.setmXmlDatas(szXmlText);
 			XmlParser.extraAudioMetaFrom(cacheAudio, szXmlText);
 			if (cacheAudio.getItems().size() > 0) {
 				synchronized (cacheAudioMeta) {
@@ -894,18 +899,18 @@ public class JNIService extends Service {
 				}
 			}
 
+//			long time = (((System.currentTimeMillis() - GlobalConfig.LOCAL_TIME) / 1000) + GlobalConfig.SERVER_TIME) * 1000;
 			// VMessage vm = XmlParser.parseForMessage(fromUser, toUser,
 			// new Date(), szXmlText);
-			String uuid = XmlParser.parseForMessageUUID(szXmlText);
-			long time = (((System.currentTimeMillis() - GlobalConfig.LOCAL_TIME) / 1000) + GlobalConfig.SERVER_TIME) * 1000;
-			VMessage vm = new VMessage(nGroupID, fromUser, toUser, uuid,
-					new Date(time), nBusinessType);
-			vm.setmXmlDatas(szXmlText);
 			// vm.setGroupId(nGroupID);
 			// vm.setMsgCode(nBusinessType);
 			// if (vm == null || vm.getItems().size() == 0) {
 			// return;
 			// }
+			
+			VMessage vm = new VMessage(eGroupType , nGroupID, fromUser, toUser, uuid,
+					new Date(nTime * 1000));
+			vm.setmXmlDatas(szXmlText);
 
 			if (vm.getImageItems().size() > 0) {
 				synchronized (cacheImageMeta) {
@@ -913,17 +918,39 @@ public class JNIService extends Service {
 				}
 				return;
 			}
-
 			Message.obtain(mCallbackHandler, JNI_RECEIVED_MESSAGE, vm)
 					.sendToTarget();
 		}
-
+		
 		@Override
-		public void OnRecvChatPictureCallback(long nGroupID, int nBusinessType,
-				long nFromUserID, long nTime, String nSeqId, byte[] pPicData) {
+		public void OnRecvChatBinary(int eGroupType, long nGroupID,
+				long nFromUserID, long nToUserID, long nTime, int binaryType,
+				String messageId, String binaryPath) {
+			
+			switch (binaryType) {
+				case GlobalConfig.MEDIA_TYPE_IMAGE:
+					handlerChatPictureCallback(eGroupType, nGroupID,
+							nFromUserID, nToUserID, nTime,
+							messageId, binaryPath);
+					break;
+				case GlobalConfig.MEDIA_TYPE_AUDIO:
+					handlerChatAudioCallback(eGroupType, nGroupID,
+							nFromUserID, nToUserID, nTime,
+							messageId, binaryPath);
+					break;
+				default:
+					break;
+			}
+		}
+		
+		
+		private void handlerChatPictureCallback(int eGroupType, long nGroupID,
+				long nFromUserID, long nToUserID, long nTime,
+				String messageId, String binaryPath){
+
 			boolean isCache = false;
 			VMessage vm = null;
-			String uuid = nSeqId;
+			String uuid = messageId;
 			synchronized (cacheImageMeta) {
 				for (VMessage v : cacheImageMeta) {
 					List<VMessageImageItem> items = v.getImageItems();
@@ -940,30 +967,8 @@ public class JNIService extends Service {
 							receivedCount++;
 							vm = v;
 
-							String filePath = GlobalConfig.getGlobalPicsPath()
-									+ "/" + vait.getUUID()
-									+ vait.getExtension();
+							String filePath = binaryPath;
 							vait.setFilePath(filePath);
-
-							File f = new File(filePath);
-							OutputStream os = null;
-							try {
-								os = new FileOutputStream(f);
-								os.write(pPicData, 0, pPicData.length);
-							} catch (FileNotFoundException e) {
-								e.printStackTrace();
-							} catch (IOException e) {
-								e.printStackTrace();
-							} finally {
-								if (os != null) {
-									try {
-										os.close();
-									} catch (IOException e) {
-										e.printStackTrace();
-									}
-								}
-							}
-
 							vait.setReceived(true);
 							continue;
 						}
@@ -977,20 +982,19 @@ public class JNIService extends Service {
 				}
 			}
 			if (isCache == false) {
-				V2Log.e(" Didn't receive image meta data: " + nSeqId);
+				V2Log.e(" Didn't receive image meta data: " + messageId);
 				return;
 			}
-
-			vm.setGroupId(nGroupID);
-
+			
+			vm.setReceiveMessageType(GlobalConfig.MEDIA_TYPE_IMAGE);
 			Message.obtain(mCallbackHandler, JNI_RECEIVED_MESSAGE, vm)
 					.sendToTarget();
+		
 		}
-
-		@Override
-		public void OnRecvChatAudio(long gid, int businessType,
-				long fromUserId, long timeStamp, String messageId,
-				String audioPath) {
+		
+		private void handlerChatAudioCallback(int eGroupType, long nGroupID,
+				long nFromUserID, long nToUserID, long nTime,
+				String messageId, String binaryPath){
 			VMessage vm = null;
 			synchronized (cacheAudioMeta) {
 				for (VMessage v : cacheAudioMeta) {
@@ -998,7 +1002,7 @@ public class JNIService extends Service {
 					for (int i = 0; i < list.size(); i++) {
 						VMessageAudioItem item = list.get(i);
 						if (item.getUuid().equals(messageId)) {
-							item.setAudioFilePath(audioPath);
+							item.setAudioFilePath(binaryPath);
 							item.setState(VMessageAbstractItem.STATE_UNREAD);
 							cacheAudioMeta.remove(item);
 							vm = v;
@@ -1009,32 +1013,16 @@ public class JNIService extends Service {
 						break;
 					}
 				}
-
 			}
 
 			if (vm != null) {
-				vm.setGroupId(gid);
 				Message.obtain(mCallbackHandler, JNI_RECEIVED_MESSAGE, vm)
 						.sendToTarget();
 			} else {
 				V2Log.e(" Didn't find audio item : " + messageId);
 			}
-
 		}
 
-		@Override
-		public void OnSendChatResult(SendingResultJNIObjectInd ind) {
-			if (ind.getRet() == SendingResultJNIObjectInd.Result.FAILED) {
-				MessageBuilder.updateVMessageItemToSentFalied(mContext,
-						ind.getUuid());
-				Intent i = new Intent();
-				i.setAction(JNIService.JNI_BROADCAST_MESSAGE_SENT_FAILED);
-				i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
-				i.putExtra("uuid", ind.getUuid());
-				sendBroadcast(i);
-			}
-
-		}
 
 	}
 
@@ -1054,9 +1042,9 @@ public class JNIService extends Service {
 			if (fromUser == null) {
 				fromUser = new User(file.fromUserId);
 			}
-
-			VMessage vm = new VMessage(file.groupId, fromUser, GlobalHolder
-					.getInstance().getCurrentUser());
+			//FIXME input date as null
+			VMessage vm = new VMessage(file.getRequestType(), 0, fromUser, GlobalHolder
+					.getInstance().getCurrentUser(), null);
 			int pos = file.fileName.lastIndexOf("/");
 			VMessageFileItem vfi = new VMessageFileItem(vm, file.fileId,
 					pos == -1 ? file.fileName

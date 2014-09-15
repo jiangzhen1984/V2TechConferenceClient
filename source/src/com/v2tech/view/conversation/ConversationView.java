@@ -68,6 +68,8 @@ import com.v2tech.service.GlobalHolder;
 import com.v2tech.service.Registrant;
 import com.v2tech.service.jni.FileTransStatusIndication;
 import com.v2tech.service.jni.FileTransStatusIndication.FileTransProgressStatusIndication;
+import com.v2tech.service.jni.JNIResponse.Result;
+import com.v2tech.service.jni.RequestSendMessageResponse;
 import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.MessageUtil;
 import com.v2tech.util.SPUtil;
@@ -322,7 +324,7 @@ public class ConversationView extends Activity {
 	@Override
 	protected void onStart() {
 		super.onStart();
-		
+
 		if (!mIsInited && !mLoadedAllMessages) {
 			android.os.Message m = android.os.Message.obtain(lh,
 					START_LOAD_MESSAGE);
@@ -446,9 +448,9 @@ public class ConversationView extends Activity {
 					1);
 		}
 		user1Id = GlobalHolder.getInstance().getCurrentUserId();
-		if (cov.getType().equals(Conversation.TYPE_CONTACT)) {
+		if (cov.getType() == Conversation.TYPE_CONTACT) {
 			user2Id = cov.getExtId();
-		} else if (cov.getType().equals(Conversation.TYPE_GROUP)) {
+		} else if (cov.getType() == Conversation.TYPE_GROUP) {
 			groupId = cov.getExtId();
 		}
 
@@ -470,15 +472,15 @@ public class ConversationView extends Activity {
 			return;
 		}
 		mMessagesContainer.setSelection(pos);
-//		mMessagesContainer.post(new Runnable() {
-//
-//			@Override
-//			public void run() {
-//				mMessagesContainer.setSelection(pos);
-//
-//			}
-//
-//		});
+		// mMessagesContainer.post(new Runnable() {
+		//
+		// @Override
+		// public void run() {
+		// mMessagesContainer.setSelection(pos);
+		//
+		// }
+		//
+		// });
 
 	}
 
@@ -589,13 +591,13 @@ public class ConversationView extends Activity {
 				tips = (TextView) mSpeakingLayout
 						.findViewById(R.id.message_voice_dialog_listening_container_tips);
 				if (duration > 50) {
-//					isBeginTimer = true;
-//					startCounter(tips);
-//					String str = mContext.getText(
-//							R.string.contact_message_tips_rest_seconds)
-//							.toString();
-//					str = str.replace("[]", (59 - duration) + "");
-//					tips.setText(str);
+					// isBeginTimer = true;
+					// startCounter(tips);
+					// String str = mContext.getText(
+					// R.string.contact_message_tips_rest_seconds)
+					// .toString();
+					// str = str.replace("[]", (59 - duration) + "");
+					// tips.setText(str);
 				} else {
 					tips.setText(R.string.contact_message_voice_dialog_text);
 				}
@@ -911,17 +913,16 @@ public class ConversationView extends Activity {
 					lastTime = 0;
 					if (voiceIsSentByTimer) {
 						mButtonRecordAudio
-						.setText(R.string.contact_message_button_send_audio_msg);
+								.setText(R.string.contact_message_button_send_audio_msg);
 						return false;
 					}
-					
-					if(mTimer != null){
+
+					if (mTimer != null) {
 						V2Log.d(TAG, "时间没到，手动停止，恢复原状");
 						mTimer.cancel();
 						count = 11;
 						mTimer = null;
-					}
-					else{
+					} else {
 						lh.removeCallbacks(mUpdateSurplusTime);
 					}
 
@@ -935,10 +936,10 @@ public class ConversationView extends Activity {
 					if (r.contains((int) event.getX(), (int) event.getY())
 							&& seconds > 1500) {
 						// send
-						VMessage vm = new VMessage(groupId, local, remote);
-
-						new VMessageAudioItem(vm, fileName,
-								(int) (seconds / 1000));
+						VMessage vm = MessageBuilder.buildAudioMessage(
+								cov.getType(), groupId, local, remote,
+								fileName, (int) (seconds / 1000));
+						vm.setReceiveMessageType(GlobalConfig.MEDIA_TYPE_AUDIO);
 						// Send message to server
 						sendMessageToRemote(vm);
 					} else {
@@ -986,13 +987,14 @@ public class ConversationView extends Activity {
 
 	};
 
-
 	private Runnable preparedRecoding = new Runnable() {
 		@Override
 		public void run() {
 
 			if (cannelRecoding == false) {
-				fileName = GlobalConfig.getGlobalAudioPath() + "/"
+				fileName = GlobalConfig.getGlobalAudioPath(GlobalHolder
+						.getInstance().getCurrentUser())
+						+ "/"
 						+ System.currentTimeMillis() + ".aac";
 				boolean resultReocrding = startReocrding(fileName);
 				if (resultReocrding) {
@@ -1014,24 +1016,24 @@ public class ConversationView extends Activity {
 			}
 		}
 	};
-	
+
 	private int count = 11;
 	private Timer mTimer;
 	private Runnable mUpdateSurplusTime = new Runnable() {
-		
+
 		@Override
 		public void run() {
 			V2Log.d(TAG, "entry surplus time ...");
 			mTimer = new Timer();
 			mTimer.schedule(new TimerTask() {
-	
+
 				@Override
 				public void run() {
-					
+
 					runOnUiThread(new Runnable() {
 
 						public void run() {
-							if(count == 0){
+							if (count == 0) {
 								V2Log.d(TAG, "time is over.");
 								mTimer.cancel();
 								count = 11;
@@ -1044,8 +1046,8 @@ public class ConversationView extends Activity {
 							count--;
 						}
 					});
-				} 
-			}, 0, 1000); 
+				}
+			}, 0, 1000);
 		}
 	};
 
@@ -1056,7 +1058,8 @@ public class ConversationView extends Activity {
 			voiceIsSentByTimer = true;
 			stopRecording();
 			// send
-			VMessage vm = new VMessage(groupId, local, remote);
+			VMessage vm = new VMessage(cov.getType(), groupId, local, remote,
+					new Date(GlobalConfig.getGlobalServerTime()));
 			int seconds = (int) ((System.currentTimeMillis() - starttime) / 1000) + 1;
 			VMessageAudioItem vai = new VMessageAudioItem(vm, fileName, seconds);
 			vai.setState(VMessageAbstractItem.STATE_NORMAL);
@@ -1209,34 +1212,32 @@ public class ConversationView extends Activity {
 		public void afterTextChanged(Editable edit) {
 			String[] split = edit.toString().split("/:");
 			for (String string : split) {
-				if(string.contains(":")){
+				if (string.contains(":")) {
 					num++;
 				}
 			}
-			if(num > 10 && split.length > 10){
+			if (num > 10 && split.length > 10) {
 				Toast.makeText(mContext,
 						R.string.error_contact_message_face_too_much,
 						Toast.LENGTH_SHORT).show();
 				StringBuilder sb = new StringBuilder();
 				for (int i = 0; i < split.length; i++) {
-					
-					if(flagCount == 10){
-						flagCount=0;
+
+					if (flagCount == 10) {
+						flagCount = 0;
 						break;
 					}
-					
-					if(split[i].contains(":")){
+
+					if (split[i].contains(":")) {
 						flagCount++;
-						if(flagCount == 10 && split[i].split(" ").length > 1){
+						if (flagCount == 10 && split[i].split(" ").length > 1) {
 							sb.append("/:" + split[i].split(" ")[0]);
-						}
-						else
+						} else
 							sb.append("/:" + split[i]);
-					}
-					else{
+					} else {
 						sb.append(split[i]);
 					}
-					
+
 				}
 				V2Log.e(TAG, "stringbuilder : " + sb.toString().trim());
 				edit.clear();
@@ -1245,7 +1246,7 @@ public class ConversationView extends Activity {
 				sb.delete(0, sb.length());
 			}
 			num = 0;
-			
+
 			mMessageET.removeTextChangedListener(this);
 			int start = -1, end = -1;
 			int index = 0;
@@ -1292,30 +1293,31 @@ public class ConversationView extends Activity {
 		}
 
 		private int num;
+
 		@Override
 		public void onTextChanged(CharSequence arg0, int arg1, int arg2,
 				int arg3) {
-//			Editable edit = mMessageET.getText();
-//			String str = edit.toString() + " ";
-//			String str = arg0.toString() + " ";
-//			String[] len = str.split("((/:){1}(.){1}(:/){1})");
-//			String[] len = str.split("/:");
-//			if (len.length > 10) {
-//				Toast.makeText(mContext,
-//						R.string.error_contact_message_face_too_much,
-//						Toast.LENGTH_SHORT).show();
-//				StringBuilder sb = new StringBuilder();
-//				for (int i = 0; i < 10; i++) {
-//					sb.append(len[i]);
-//				}
-//				mMessageET.setText(sb.toString().trim());
-//				mMessageET.setSelection(sb.toString().trim().length());
-//				return;
-//			}
+			// Editable edit = mMessageET.getText();
+			// String str = edit.toString() + " ";
+			// String str = arg0.toString() + " ";
+			// String[] len = str.split("((/:){1}(.){1}(:/){1})");
+			// String[] len = str.split("/:");
+			// if (len.length > 10) {
+			// Toast.makeText(mContext,
+			// R.string.error_contact_message_face_too_much,
+			// Toast.LENGTH_SHORT).show();
+			// StringBuilder sb = new StringBuilder();
+			// for (int i = 0; i < 10; i++) {
+			// sb.append(len[i]);
+			// }
+			// mMessageET.setText(sb.toString().trim());
+			// mMessageET.setSelection(sb.toString().trim().length());
+			// return;
+			// }
 		}
 
 	};
-	
+
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
@@ -1357,8 +1359,9 @@ public class ConversationView extends Activity {
 						Toast.LENGTH_SHORT).show();
 				return;
 			}
-			VMessage vim = MessageBuilder.buildImageMessage(local, remote,
-					filePath);
+			VMessage vim = MessageBuilder.buildImageMessage(cov.getType(),
+					groupId, local, remote, filePath);
+			vim.setReceiveMessageType(GlobalConfig.MEDIA_TYPE_IMAGE);
 			vim.setGroupId(groupId);
 			// Send message to server
 			sendMessageToRemote(vim);
@@ -1404,9 +1407,9 @@ public class ConversationView extends Activity {
 		if (remote == null) {
 			remote = new User(user2Id);
 		}
-
-		VMessage vm = new VMessage(this.groupId, local, remote);
-//		vm.setDate(new Date(System.currentTimeMillis()));
+		// 如果user2Id为0，则说明为群组聊天
+		VMessage vm = new VMessage(cov.getType(), this.groupId, local, remote,
+				new Date(GlobalConfig.getGlobalServerTime()));
 		String[] array = content.split("\n");
 		for (int i = 0; i < array.length; i++) {
 			String str = array[i];
@@ -1503,10 +1506,11 @@ public class ConversationView extends Activity {
 	private void sendMessageToRemote(VMessage vm) {
 		// // Save message
 		vm.setmXmlDatas(vm.toXml());
-		long time = (((System.currentTimeMillis() - GlobalConfig.LOCAL_TIME) / 1000) + GlobalConfig.SERVER_TIME) * 1000;
-		vm.setDate(new Date(time));
+		vm.setDate(new Date(GlobalConfig.getGlobalServerTime()));
+		
 		MessageBuilder.saveMessage(this, vm);
-
+		MessageBuilder.saveBinaryVMessage(this, vm);
+		
 		Message.obtain(lh, SEND_MESSAGE, vm).sendToTarget();
 		addMessageToContainer(vm);
 		// send notification
@@ -1630,19 +1634,18 @@ public class ConversationView extends Activity {
 
 		@Override
 		public void reSendMessageClicked(VMessage v) {
-//			v.setState(VMessage.STATE_UNREAD);
-//			List<VMessageAbstractItem> items = v.getItems();
-//			for (int i = 0; i < items.size(); i++) {
-//				VMessageAbstractItem item = items.get(i);
-//				if (item.getType() == VMessageAbstractItem.ITEM_TYPE_FILE) {
-//					item.setState(VMessageAbstractItem.STATE_FILE_SENDING);
-//				} else {
-//					item.setState(VMessageAbstractItem.STATE_NORMAL);
-//				}
-//			}
-//			Message.obtain(lh, SEND_MESSAGE, v).sendToTarget();
-			mChat.sendVMessage(v, new Registrant(lh,
-					SEND_MESSAGE_DONE, null));
+			// v.setState(VMessage.STATE_UNREAD);
+			// List<VMessageAbstractItem> items = v.getItems();
+			// for (int i = 0; i < items.size(); i++) {
+			// VMessageAbstractItem item = items.get(i);
+			// if (item.getType() == VMessageAbstractItem.ITEM_TYPE_FILE) {
+			// item.setState(VMessageAbstractItem.STATE_FILE_SENDING);
+			// } else {
+			// item.setState(VMessageAbstractItem.STATE_NORMAL);
+			// }
+			// }
+			// Message.obtain(lh, SEND_MESSAGE, v).sendToTarget();
+			mChat.sendVMessage(v, new Registrant(lh, SEND_MESSAGE_DONE, null));
 			notificateConversationUpdate();
 		}
 
@@ -1769,9 +1772,10 @@ public class ConversationView extends Activity {
 		List<VMessage> array = null;
 		if (this.groupId == 0) {
 			array = MessageLoader.loadMessageByPage(mContext, user1Id, user2Id,
-					BATCH_COUNT, offset);
+					BATCH_COUNT, offset , Conversation.TYPE_CONTACT);
 		} else if (this.groupId != 0) {
-			array = MessageLoader.loadGroupMessageByPage(mContext, groupId,
+			array = MessageLoader.loadGroupMessageByPage(mContext,
+					Long.valueOf(Conversation.TYPE_GROUP), groupId,
 					BATCH_COUNT, offset);
 		}
 
@@ -1786,18 +1790,18 @@ public class ConversationView extends Activity {
 
 	private boolean queryAndAddMessage(final int msgId) {
 
-		if(messageAllID.get(msgId) != null){
-			Log.e(TAG, "happen erupt , the message ：" + msgId + "  already save in messageArray!");
+		if (messageAllID.get(msgId) != null) {
+			Log.e(TAG, "happen erupt , the message ：" + msgId
+					+ "  already save in messageArray!");
 			return false;
 		}
-		
+
 		VMessage m = MessageLoader.loadMessageById(mContext, msgId);
 		if (m == null
 				|| (m.getFromUser().getmUserId() != this.user2Id && m
 						.getGroupId() == 0) || (m.getGroupId() != this.groupId)) {
-			return false; 
+			return false;
 		}
-		
 		MessageBodyView mv = new MessageBodyView(this, m, true);
 
 		messageArray.add(new VMessageAdater(m));
@@ -1825,9 +1829,9 @@ public class ConversationView extends Activity {
 			VMessageAdater va = (VMessageAdater) messageArray.get(i);
 			if (vm.getId() == ((VMessage) va.getItemObject()).getId()) {
 				messageArray.remove(i);
-				if(messageArray.size() < currentGetMessages.size() / 2){
-					android.os.Message.obtain(lh,
-							START_LOAD_MESSAGE).sendToTarget();
+				if (messageArray.size() < currentGetMessages.size() / 2) {
+					android.os.Message.obtain(lh, START_LOAD_MESSAGE)
+							.sendToTarget();
 					isLoading = false;
 					V2Log.e(TAG, "自动开始加载");
 				}
@@ -2018,13 +2022,17 @@ public class ConversationView extends Activity {
 				}
 				MessageBodyView mv = new MessageBodyView(mContext, vm, true);
 				mv.setCallback(listener);
-				if(vm.getFileItems().size() > 0){
-					VMessageFileItem vMessageFileItem = vm.getFileItems().get(0);
-					if(vMessageFileItem != null && vMessageFileItem.getState() == VMessageFileItem.STATE_FILE_SENDING){
-						mChat.sendVMessage(vMessageFileItem.getVm(), new Registrant(lh,
-								SEND_MESSAGE_DONE, null));
+				if (vm.getFileItems().size() > 0) {
+					VMessageFileItem vMessageFileItem = vm.getFileItems()
+							.get(0);
+					if (vMessageFileItem != null
+							&& vMessageFileItem.getState() == VMessageFileItem.STATE_FILE_SENDING) {
+						mChat.sendVMessage(vMessageFileItem.getVm(),
+								new Registrant(lh, SEND_MESSAGE_DONE, null));
 						notificateConversationUpdate();
-						V2Log.d(TAG, "the file :" + vMessageFileItem.getFileName() + " restart sending");
+						V2Log.d(TAG,
+								"the file :" + vMessageFileItem.getFileName()
+										+ " restart sending");
 					}
 				}
 				((VMessageAdater) wrapper).setView(mv);
@@ -2104,11 +2112,14 @@ public class ConversationView extends Activity {
 					V2Log.d(TAG, "获取的消息数量" + array.size());
 					currentGetMessages = array;
 					for (int i = 0; i < array.size(); i++) {
-						if(messageAllID.get((int) array.get(i).getId()) != null){
-							Log.e(TAG, "happen erupt , the message ：" + (int) array.get(i).getId() + "  already save in messageArray!");
+						if (messageAllID.get((int) array.get(i).getId()) != null) {
+							Log.e(TAG, "happen erupt , the message ："
+									+ (int) array.get(i).getId()
+									+ "  already save in messageArray!");
 							continue;
 						}
-						messageAllID.append((int) array.get(i).getId(), array.get(i));
+						messageAllID.append((int) array.get(i).getId(),
+								array.get(i));
 						messageArray.add(0, new VMessageAdater(array.get(i)));
 					}
 					V2Log.d(TAG, "当前消息集合大小" + messageArray.size());
@@ -2170,13 +2181,21 @@ public class ConversationView extends Activity {
 							((FileTransProgressStatusIndication) ind).nTranedSize);
 				} else if (ind.indType == FileTransStatusIndication.IND_TYPE_TRANS_ERR) {
 					updateFileTransErrorView(ind.uuid);
-					if(ind.errorCode == 415){
-						Toast.makeText(getApplicationContext(), "亲，不可以发送0大小的文件，抱歉...", Toast.LENGTH_SHORT).show();
+					if (ind.errorCode == 415) {
+						Toast.makeText(getApplicationContext(),
+								"亲，不可以发送0大小的文件，抱歉...", Toast.LENGTH_SHORT)
+								.show();
 					}
 				}
 				break;
+			case SEND_MESSAGE_DONE:
+				RequestSendMessageResponse code = (RequestSendMessageResponse) msg.obj;
+				int res = code.getResult().value();
+				if (res != Result.SUCCESS.value())
+					Toast.makeText(mContext, "消息发送失败", Toast.LENGTH_SHORT)
+							.show();
+				break;
 			}
-
 		}
 
 	}
@@ -2188,8 +2207,8 @@ public class ConversationView extends Activity {
 
 		if (!TextUtils.isEmpty(selectPath)) {
 
-			VMessage vim = MessageBuilder.buildFileMessage(local, remote,
-					selectPath, fileType);
+			VMessage vim = MessageBuilder.buildFileMessage(cov.getType(),
+					groupId, local, remote, selectPath, fileType);
 			VMessageFileItem vfi = vim.getFileItems().get(0);
 			vfi.setState(VMessageFileItem.STATE_FILE_SENDING);
 			sendMessageToRemote(vim);

@@ -16,9 +16,23 @@ public interface ChatRequestCallback {
 	 * @param nTime
 	 * @param szXmlText
 	 */
-	public void OnRecvChatTextCallback(long nGroupID, int nBusinessType,
-			long nFromUserID, long nTime, String szXmlText);
+	public void OnRecvChatTextCallback(int eGroupType, long nGroupID, long nFromUserID,
+			long nToUserID, long nTime, String szSeqID, String szXmlText);
 
+	/**
+	 * 
+	 * @param eGroupType
+	 * @param nGroupID
+	 * @param nFromUserID
+	 * @param nToUserID
+	 * @param nTime 发送时服务器的时间，用于确定离线消息的时间
+	 * @param messageId
+	 * @param binaryType
+	 * @param binaryPath
+	 */
+	public void OnRecvChatBinaryCallback(int eGroupType, long nGroupID,
+			long nFromUserID, long nToUserID, long nTime, String messageId,
+			int binaryType, String binaryPath);
 	
 	/**
 	 * <ul>Receive image data from server side.</ul>
@@ -30,7 +44,6 @@ public interface ChatRequestCallback {
 	 */
 	public void OnRecvChatPictureCallback(long nGroupID, int nBusinessType,
 			long nFromUserID, long nTime, String szSeqID, byte[] pPicData);
-	
 	
 	/**
 	 * <ul>Receive audio data from server side.</ul>
@@ -45,9 +58,24 @@ public interface ChatRequestCallback {
 			String audioPath);
 	
 	/**
+	 * <ul>Receive audio data or picture data from server side.</ul>
+	 * @param eGroupType
+	 * @param nGroupID
+	 * @param nFromUserID
+	 * @param nToUserID
+	 * @param nTime
+	 * @param binaryType
+	 * @param messageId
+	 * @param binaryPath
+	 */
+	public void OnRecvChatBinary(int eGroupType, long nGroupID, long nFromUserID,long nToUserID, long nTime, int binaryType, String messageId,
+			String binaryPath);
+	
+	/**
 	 * <ul>Send message result.</ul>
 	 * @param ind
 	 */
 	public void OnSendChatResult(SendingResultJNIObjectInd ind);
+
 
 }

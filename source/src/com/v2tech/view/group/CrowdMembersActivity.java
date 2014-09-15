@@ -56,7 +56,7 @@ public class CrowdMembersActivity extends Activity {
 		mReturnButton.setOnClickListener(mReturnListener);
 
 		crowd = (CrowdGroup) GlobalHolder.getInstance().getGroupById(
-				GroupType.CHATING, getIntent().getLongExtra("cid", 0));
+				GroupType.CHATING.intValue(), getIntent().getLongExtra("cid", 0));
 		mMembers = crowd.getUsers();
 		adapter = new MembersAdapter();
 		mMembersContainer.setAdapter(adapter);

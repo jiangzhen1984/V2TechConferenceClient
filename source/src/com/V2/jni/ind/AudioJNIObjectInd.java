@@ -10,26 +10,40 @@ package com.V2.jni.ind;
 public class AudioJNIObjectInd extends JNIObjectInd {
 
 	public AudioJNIObjectInd() {
-		this(0, 0, -1);
+		this(null, 0, -1);
 	}
 
-	
+	private String szSessionID;
 	private long mGroupId;
 	private long mFromUserId;
 	
-	public AudioJNIObjectInd(long groupId, long fromUserId, int requestType) {
-		this.mGroupId = groupId;
+	public AudioJNIObjectInd(String szSessionID, long fromUserId, int requestType) {
+		this.szSessionID = szSessionID;
 		this.mFromUserId = fromUserId;
 		this.mRequestType = requestType;
 		this.mType = JNIIndType.AUDIO;
 	}
-
-	public long getGroupId() {
-		return mGroupId;
+	
+	public AudioJNIObjectInd(String szSessionID, long fromUserId) {
+		this.szSessionID = szSessionID;
+		this.mFromUserId = fromUserId;
+		this.mType = JNIIndType.AUDIO;
 	}
 
-	public void setGroupId(long groupId) {
-		this.mGroupId = groupId;
+//	public long getGroupId() {
+//		return mGroupId;
+//	}
+//
+//	public void setGroupId(long groupId) {
+//		this.mGroupId = groupId;
+//	}
+	
+	public String getSzSessionID() {
+		return szSessionID;
+	}
+
+	public void setSzSessionID(String szSessionID) {
+		this.szSessionID = szSessionID;
 	}
 
 	public long getFromUserId() {

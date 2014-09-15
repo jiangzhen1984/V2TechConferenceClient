@@ -1,5 +1,7 @@
 package com.v2tech.view;
 
+import java.io.File;
+
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
@@ -45,6 +47,7 @@ import com.v2tech.service.jni.JNIResponse;
 import com.v2tech.service.jni.RequestLogInResponse;
 import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.SPUtil;
+import com.v2tech.vo.User;
 
 /**
  * Activity which displays a login screen to the user, offering registration as
@@ -532,7 +535,7 @@ public class LoginActivity extends Activity {
 			switch (msg.what) {
 			case LOG_IN_CALL_BACK:
 				isLoggingIn = false;
-				JNIResponse rlr = (JNIResponse) msg.obj;
+				JNIResponse rlr = (JNIResponse) msg.obj; 
 				if (rlr.getResult() == JNIResponse.Result.TIME_OUT) {
 					Toast.makeText(mContext, R.string.error_time_out,
 							Toast.LENGTH_LONG).show();
@@ -547,10 +550,17 @@ public class LoginActivity extends Activity {
 					Toast.makeText(mContext, R.string.error_connect_to_server,
 							Toast.LENGTH_LONG).show();
 				} else {
+					//为登陆用户创建个人资料文件夹
+					User user = ((RequestLogInResponse) rlr).getUser();
+					createPersonFolder(user);
+					//获取系统时间
+					GlobalConfig.SERVER_TIME = GlobalConfig.TIME_SERVER_TIME; 
+					GlobalConfig.LOCAL_TIME = System.currentTimeMillis();
+					V2Log.d("get server time ：" + GlobalConfig.SERVER_TIME);
 					// Save user info
 					saveUserConfig(mEmailView.getText().toString(), "");
 					GlobalHolder.getInstance().setCurrentUser(
-							((RequestLogInResponse) rlr).getUser());
+							user);
 					SPUtil.putConfigIntValue(mContext,
 							GlobalConfig.KEY_LOGGED_IN, 1);
 					mContext.startActivity(new Intent(mContext,
@@ -564,6 +574,35 @@ public class LoginActivity extends Activity {
 		}
 
 	};
+	
+	private void createPersonFolder(User user){
+		
+		File pa = new File(GlobalConfig.getGlobalUserAvatarPath(user));
+		if (!pa.exists()) {
+			boolean res = pa.mkdirs();
+			V2Log.i(" create avatar dir " + pa.getAbsolutePath() + "  " + res);
+		}
+		pa.setWritable(true);
+		pa.setReadable(true);
+
+		File image = new File(GlobalConfig.getGlobalPicsPath(user));
+		if (!image.exists()) {
+			boolean res = image.mkdirs();
+			V2Log.i(" create image dir " + image.getAbsolutePath() + "  " + res);
+		}
+		File audioPath = new File(GlobalConfig.getGlobalAudioPath(user));
+		if (!audioPath.exists()) {
+			boolean res = audioPath.mkdirs();
+			V2Log.i(" create audio dir " + audioPath.getAbsolutePath() + "  "
+					+ res);
+		}
+		File filePath = new File(GlobalConfig.getGlobalFilePath(user));
+		if (!filePath.exists()) {
+			boolean res = filePath.mkdirs();
+			V2Log.i(" create file dir " + filePath.getAbsolutePath() + "  "
+					+ res);
+		}
+	}
 
 	@Override
 	protected void onStart() {

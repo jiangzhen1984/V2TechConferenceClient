@@ -100,7 +100,7 @@ public class VideoMsgChattingLayout extends LinearLayout {
 						return;
 					}
 					String text = removeEmoji( mContentTV.getText().toString());
-					VMessage vm  = MessageBuilder.buildGroupTextMessage(conf.getmGId(), GlobalHolder.getInstance()
+					VMessage vm  = MessageBuilder.buildGroupTextMessage(conf.getGroupType().intValue() , conf.getmGId(), GlobalHolder.getInstance()
 							.getCurrentUser(), text);
 					addNewMessage(vm);
 					listener.requestSendMsg(vm);

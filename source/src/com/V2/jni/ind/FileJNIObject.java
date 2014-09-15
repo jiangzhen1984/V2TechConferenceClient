@@ -2,7 +2,7 @@ package com.V2.jni.ind;
 
 public class FileJNIObject extends JNIObjectInd {
 
-	public long groupId;
+//	public long groupId;
 	public String fileId;
 	public long fromUserId;
 	public String fileName;
@@ -23,14 +23,14 @@ public class FileJNIObject extends JNIObjectInd {
 	public FileJNIObject(int mRequestType, long groupId, String fileId, long fromUserId,
 			String fileName, long fileSize, int fileType) {
 		super();
-		this.groupId = groupId;
+//		this.groupId = groupId;
 		this.fileId = fileId;
 		this.fromUserId = fromUserId;
 		this.fileName = fileName;
 		this.fileSize = fileSize;
 		this.mType = JNIIndType.FILE;
 		this.fileType = fileType;
-		this.mRequestType = mRequestType;
+//		this.mRequestType = mRequestType;
 	}
 	
 	

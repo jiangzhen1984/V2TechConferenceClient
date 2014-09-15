@@ -83,7 +83,6 @@ import com.v2tech.vo.Conference;
 import com.v2tech.vo.ConferenceGroup;
 import com.v2tech.vo.ConferencePermission;
 import com.v2tech.vo.Group;
-import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.MixVideo;
 import com.v2tech.vo.NetworkStateCode;
 import com.v2tech.vo.PermissionState;
@@ -356,7 +355,7 @@ public class VideoActivityV2 extends Activity {
 		conf = (Conference) this.getIntent().getExtras().get("conf");
 
 		cg = (ConferenceGroup) GlobalHolder.getInstance().getGroupById(
-				GroupType.CONFERENCE, conf.getId());
+				V2GlobalEnum.GROUP_TYPE_CONFERENCE, conf.getId());
 		if (cg == null) {
 			V2Log.e(" doesn't receive group information  yet");
 			return;
@@ -2112,7 +2111,7 @@ public class VideoActivityV2 extends Activity {
 				break;
 			case GROUP_ADD_USER:
 				GroupUserObject ro1 = (GroupUserObject) msg.obj;
-				if (ro1.getmType() == GroupType.CONFERENCE.intValue()) { // CONFGROUP
+				if (ro1.getmType() == V2GlobalEnum.GROUP_TYPE_CONFERENCE) { // CONFGROUP
 					Attendee a1 = new Attendee(GlobalHolder.getInstance()
 							.getUser(ro1.getmUserId()));
 					mAttendeeList.add(a1);

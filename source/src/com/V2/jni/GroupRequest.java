@@ -449,4 +449,63 @@ public class GroupRequest {
 				+ sGroupInfo + ":" + reason);
 	}
 
+	/**
+	 * 会议中创建白板的回调
+	 * TODO implement 
+	 * @param eGroupType
+	 * @param nGroupID
+	 * @param szWBoardID
+	 * @param nWhiteIndex
+	 */
+	private void OnGroupCreateWBoard(int eGroupType, long nGroupID,
+			String szWBoardID, int nWhiteIndex) {
+		V2Log.e("GroupRequest UI", "OnGroupCreateWBoard ---> eGroupType :"
+				+ eGroupType + " | nGroupID: " + nGroupID + " | szWBoardID: "
+				+ szWBoardID + " | nWhiteIndex: " + nWhiteIndex);
+	};
+
+	/**
+	 * 文件重命名
+	 * TODO implement 
+	 * @param eGroupType
+	 * @param nGroupID
+	 * @param sFileID
+	 * @param sNewName
+	 */
+	private void OnRenameGroupFile(int eGroupType, long nGroupID,
+			String sFileID, String sNewName) {
+		V2Log.e("GroupRequest UI", "OnGroupCreateWBoard ---> eGroupType :"
+				+ eGroupType + " | nGroupID: " + nGroupID + " | sFileID: "
+				+ sFileID + " | sNewName: " + sNewName);
+	};
+
+	/**
+	 * 收到白板会话被关闭的回调 
+	 * TODO implement 
+	 * @param eGroupType
+	 * @param nGroupID
+	 * @param szWBoardID
+	 */
+	private void OnWBoardDestroy(int eGroupType, long nGroupID,
+			String szWBoardID) {
+		V2Log.e("GroupRequest UI", "OnGroupCreateWBoard ---> eGroupType :"
+				+ eGroupType + " | nGroupID: " + nGroupID + " | szWBoardID: "
+				+ szWBoardID);
+	};
+
+	/**
+	 * 会议中创建文档共享的回调 eWhiteShowType白板显示类型 
+	 * TODO implement 
+	 * @param eGroupType
+	 * @param nGroupID
+	 * @param szWBoardID
+	 * @param szFileName
+	 * @param eWhiteShowType
+	 */
+	private void OnGroupCreateDocShare(int eGroupType, long nGroupID,
+			String szWBoardID, String szFileName, int eWhiteShowType) {
+		V2Log.e("GroupRequest UI", "OnGroupCreateWBoard ---> eGroupType :"
+				+ eGroupType + " | nGroupID: " + nGroupID + " | szWBoardID: "
+				+ szWBoardID + " | szFileName: " + szFileName + " | eWhiteShowType: " + eWhiteShowType);
+	};
 }

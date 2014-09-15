@@ -7,6 +7,8 @@ import android.util.DisplayMetrics;
 import android.util.SparseArray;
 
 import com.v2tech.R;
+import com.v2tech.service.GlobalHolder;
+import com.v2tech.vo.User;
 
 public class GlobalConfig {
 
@@ -22,8 +24,12 @@ public class GlobalConfig {
 	
 	public static boolean isConversationOpen = false;
 	
+	public static long TIME_SERVER_TIME = 0;
 	public static long SERVER_TIME = 0;
 	public static long LOCAL_TIME = 0;
+	
+	public static final int MEDIA_TYPE_IMAGE = 2;
+	public static final int MEDIA_TYPE_AUDIO = 1;
 	
 	public static HashMap<String, String> allChinese = new HashMap<String, String>();
 
@@ -115,28 +121,35 @@ public class GlobalConfig {
 	
 	
 	public static String getGlobalPath() {
-		return StorageUtil.getAbsoluteSdcardPath()+"/.v2tech/";
+		return StorageUtil.getAbsoluteSdcardPath()+"/v2tech/";
+//		return StorageUtil.getAbsoluteSdcardPath()+"/.v2tech/";
 	}
 	
-	public static String getGlobalUserAvatarPath() {
-		return StorageUtil.getAbsoluteSdcardPath()+"/.v2tech/Users";
-	}
-	
-	
-	public static String getGlobalPicsPath() {
-		return StorageUtil.getAbsoluteSdcardPath()+"/.v2tech/pics";
+	public static String getGlobalUserAvatarPath(User user) {
+		return StorageUtil.getAbsoluteSdcardPath()+"/v2tech/Users/" + user.getmUserId() + "/avatars";
 	}
 	
 	
-	public static String getGlobalAudioPath() {
-		return StorageUtil.getAbsoluteSdcardPath()+"/.v2tech/audio";
-	}
-	
-	public static String getGlobalFilePath() {
-		return StorageUtil.getAbsoluteSdcardPath()+"/v2tech/file";
+	public static String getGlobalPicsPath(User user) {
+		return StorageUtil.getAbsoluteSdcardPath()+"/v2tech/Users/" + user.getmUserId() + "/Images";
 	}
 	
 	
+	public static String getGlobalAudioPath(User user) {
+		return StorageUtil.getAbsoluteSdcardPath()+"/v2tech/Users/" + user.getmUserId() + "/audios";
+	}
+	
+	public static String getGlobalFilePath(User user) {
+		return StorageUtil.getAbsoluteSdcardPath()+"/v2tech/Users/" + user.getmUserId() + "/files";
+	}
+	
+	public static long getGlobalServerTime(){
+		return (((System.currentTimeMillis() - GlobalConfig.LOCAL_TIME) / 1000) + GlobalConfig.SERVER_TIME) * 1000;
+	}
+	
+	public static String getGlobalDataBasePath(User user){
+		return StorageUtil.getAbsoluteSdcardPath()+"/v2tech/Users/" + user.getmUserId() + "/";
+	}
 	
 	static class EmojiWraper {
 		String emojiStr;

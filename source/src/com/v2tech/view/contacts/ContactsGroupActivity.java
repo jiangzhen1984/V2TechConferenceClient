@@ -71,7 +71,7 @@ public class ContactsGroupActivity extends Activity {
 		createGroupButton.setOnClickListener(createGroupButtonClickListener);
 
 		List<Group> listGroup = GlobalHolder.getInstance().getGroup(
-				GroupType.CONTACT);
+				GroupType.CONTACT.intValue());
 		mDataset = convert(listGroup);
 		adapter = new CommonAdapter(mDataset, converter);
 		mListView.setAdapter(adapter);

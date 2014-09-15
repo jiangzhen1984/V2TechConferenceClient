@@ -163,7 +163,7 @@ public class CrowdCreateActivity extends Activity {
 	 */
 	private void loadCache() {
 		crowd = (CrowdGroup) GlobalHolder.getInstance().getGroupById(
-				GroupType.CHATING, getIntent().getLongExtra("cid", 0));
+				GroupType.CHATING.intValue(), getIntent().getLongExtra("cid", 0));
 		if (crowd != null) {
 			mRuleSpinner.setEnabled(false);
 			if (crowd.getAuthType() == AuthType.ALLOW_ALL) {
@@ -490,7 +490,7 @@ public class CrowdCreateActivity extends Activity {
 
 		@Override
 		protected Void doInBackground(Void... params) {
-			mGroupList = GlobalHolder.getInstance().getGroup(GroupType.ORG);
+			mGroupList = GlobalHolder.getInstance().getGroup(GroupType.ORG.intValue());
 			if (mGroupList != null) {
 				for (Group g : mGroupList) {
 					mItemList.add(new ListItem(g, g.getLevel()));
@@ -579,10 +579,10 @@ public class CrowdCreateActivity extends Activity {
 					CrowdGroup cg = (CrowdGroup) recr.callerObject;
 					long id = ((CreateCrowdResponse) recr).getGroupId();
 					cg.setGId(id);
-					// add group to global cache
-					GlobalHolder.getInstance().addGroupToList(
-							GroupType.CHATING, cg);
-					// send broadcast to inform new crowd notification
+
+					//add group to global cache
+					GlobalHolder.getInstance().addGroupToList(GroupType.CHATING.intValue(), cg);
+					//send broadcast to inform new crowd notification
 					Intent i = new Intent();
 					i.setAction(PublicIntent.BROADCAST_NEW_CROWD_NOTIFICATION);
 					i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);

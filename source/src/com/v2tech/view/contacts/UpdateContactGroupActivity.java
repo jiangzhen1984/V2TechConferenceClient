@@ -66,7 +66,7 @@ public class UpdateContactGroupActivity extends Activity {
 
 	private void buildList() {
 		List<Group> friendGroup = GlobalHolder.getInstance().getGroup(
-				GroupType.CONTACT);
+				GroupType.CONTACT.intValue());
 		for (int i = 0; i < friendGroup.size(); i++) {
 			Group g = friendGroup.get(i);
 
@@ -120,11 +120,11 @@ public class UpdateContactGroupActivity extends Activity {
 				state = STATE.UPDATING;
 			}
 			Group srcGroup = GlobalHolder.getInstance().getGroupById(
-					Group.GroupType.CONTACT, originGroupId);
+					Group.GroupType.CONTACT.intValue(), originGroupId);
 			// update group id to new group
 			originGroupId = ((Group) rg.findViewById(id).getTag()).getmGId();
 			Group desGroup = GlobalHolder.getInstance().getGroupById(
-					Group.GroupType.CONTACT, originGroupId);
+					Group.GroupType.CONTACT.intValue(), originGroupId);
 
 			contactService.updateUserGroup((ContactGroup) desGroup,
 					(ContactGroup) srcGroup, GlobalHolder.getInstance()

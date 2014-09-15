@@ -88,7 +88,7 @@ public class VideoRequest {
 	 * @see V2ClientType#IM
 	 */
 	public native void openVideoDevice(int type, long nUserID,
-			String szDeviceID, VideoPlayer vp, int businessType);
+			String szDeviceID, VideoPlayer vp);
 
 	/**
 	 * FIXME update comment Request to close video device. This function no
@@ -120,7 +120,7 @@ public class VideoRequest {
 	 * @see V2ClientType#IM
 	 */
 	public native void closeVideoDevice(int type, long nUserID,
-			String szDeviceID, VideoPlayer vp, int businessType);
+			String szDeviceID, VideoPlayer vp);
 
 	/**
 	 * <ul>
@@ -207,18 +207,17 @@ public class VideoRequest {
 	 * @param nFromUserID
 	 * @param szDeviceID
 	 */
-	private void OnVideoChatInvite(long nGroupID, int nBusinessType,
-			long nFromUserID, String szDeviceID) {
+	private void OnVideoChatInvite(String szSessionID, long nFromUserID,
+			String szDeviceID) {
 		for (WeakReference<VideoRequestCallback> wrCB : this.mCallbacks) {
 			Object obj = wrCB.get();
 			if (obj != null) {
 				VideoRequestCallback cb = (VideoRequestCallback) obj;
-				cb.OnVideoChatInviteCallback(new VideoJNIObjectInd(nGroupID,
-						nFromUserID, szDeviceID, nBusinessType));
+				cb.OnVideoChatInviteCallback(new VideoJNIObjectInd(szSessionID,
+						nFromUserID, szDeviceID, 0));
 			}
 		}
-		V2Log.d("OnVideoChatInvite: nGroupID:" + nGroupID + "  nBusinessType:"
-				+ nBusinessType + " nFromUserID:" + nFromUserID
+		V2Log.d("OnVideoChatInvite: nGroupID:" + szSessionID + " nFromUserID:" + nFromUserID
 				+ "  szDeviceID:" + szDeviceID);
 
 	}
@@ -230,16 +229,16 @@ public class VideoRequest {
 	 * @param nFromuserID
 	 * @param szDeviceID
 	 */
-	private void OnVideoChatAccepted(long nGroupID, int nBusinessType,
-			long nFromUserID, String szDeviceID) {
-		V2Log.d("OnVideoChatAccepted " + nGroupID + " " + nBusinessType + " "
+	private void OnVideoChatAccepted(String szSessionID, long nFromUserID,
+			String szDeviceID) {
+		V2Log.d("OnVideoChatAccepted " + szSessionID + " "
 				+ nFromUserID + " " + szDeviceID);
 		for (WeakReference<VideoRequestCallback> wrCB : this.mCallbacks) {
 			Object obj = wrCB.get();
 			if (obj != null) {
 				VideoRequestCallback cb = (VideoRequestCallback) obj;
-				cb.OnVideoChatAccepted(new VideoJNIObjectInd(nGroupID,
-						nFromUserID, szDeviceID, nBusinessType));
+				cb.OnVideoChatAccepted(new VideoJNIObjectInd(szSessionID,
+						nFromUserID, szDeviceID, 0));
 			}
 		}
 	}
@@ -251,45 +250,45 @@ public class VideoRequest {
 	 * @param nFromUserID
 	 * @param szDeviceID
 	 */
-	private void OnVideoChatRefused(long nGroupID, int nBusinessType,
-			long nFromUserID, String szDeviceID) {
-		V2Log.d("OnVideoChatRefused " + nGroupID + " " + nBusinessType + " "
+	private void OnVideoChatRefused(String szSessionID, long nFromUserID,
+			String szDeviceID) {
+		V2Log.d("OnVideoChatRefused " + szSessionID + " "
 				+ nFromUserID + " " + szDeviceID);
 		for (WeakReference<VideoRequestCallback> wrCB : this.mCallbacks) {
 			Object obj = wrCB.get();
 			if (obj != null) {
 				VideoRequestCallback cb = (VideoRequestCallback) obj;
-				cb.OnVideoChatRefused(new VideoJNIObjectInd(nGroupID,
-						nFromUserID, szDeviceID, nBusinessType));
+				cb.OnVideoChatRefused(new VideoJNIObjectInd(szSessionID,
+						nFromUserID, szDeviceID, 0));
 			}
 		}
 	}
 
-	private void OnVideoChatClosed(long nGroupID, int nBusinessType,
-			long nFromUserID, String szDeviceID) {
-		V2Log.d("OnVideoChatClosed " + nGroupID + " " + nBusinessType + " "
+	private void OnVideoChatClosed(String szSessionID, long nFromUserID,
+			String szDeviceID) {
+		V2Log.d("OnVideoChatClosed " + szSessionID + " "
 				+ nFromUserID + " " + szDeviceID);
 		for (WeakReference<VideoRequestCallback> wrCB : this.mCallbacks) {
 			Object obj = wrCB.get();
 			if (obj != null) {
 				VideoRequestCallback cb = (VideoRequestCallback) obj;
-				cb.OnVideoChatClosed(new VideoJNIObjectInd(nGroupID,
-						nFromUserID, szDeviceID, nBusinessType));
+				cb.OnVideoChatClosed(new VideoJNIObjectInd(szSessionID,
+						nFromUserID, szDeviceID, 0));
 			}
 		}
 	}
 
-	private void OnVideoChating(long nGroupID, int nBusinessType,
-			long nFromUserID, String szDeviceID) {
-		V2Log.d("OnVideoChating " + nGroupID + " " + nBusinessType + " "
+	private void OnVideoChating(String szSessionID, long nFromUserID,
+			String szDeviceID) {
+		V2Log.d("OnVideoChating " + szSessionID  + " "
 				+ nFromUserID + " " + szDeviceID);
 		for (WeakReference<VideoRequestCallback> wrCB : this.mCallbacks) {
 			Object obj = wrCB.get();
 			if (obj != null) {
 				VideoRequestCallback cb = (VideoRequestCallback) obj;
-				cb.OnVideoChating(new VideoJNIObjectInd(nGroupID, nFromUserID,
-						szDeviceID, nBusinessType));
-				
+				cb.OnVideoChating(new VideoJNIObjectInd(szSessionID,
+						nFromUserID, szDeviceID, 0));
+
 			}
 		}
 	}
@@ -303,47 +302,43 @@ public class VideoRequest {
 	/**
 	 * Invite user to join video call
 	 * 
-	 * @param nGroupID
+	 * @param szSessionID
 	 * @param nToUserID
 	 * @param szDeviceID
-	 * @param businessType
 	 */
-	public native void inviteVideoChat(long nGroupID, long nToUserID,
-			String szDeviceID, int businessType);
+	public native void inviteVideoChat(String szSessionID, long nToUserID,
+			String szDeviceID);
 
 	/**
 	 * Accept video invitation
 	 * 
-	 * @param nGroupID
+	 * @param szSessionID
 	 * @param nToUserID
 	 * @param szDeviceID
-	 * @param businessType
 	 */
-	public native void acceptVideoChat(long nGroupID, long nToUserID,
-			String szDeviceID, int businessType);
+	public native void acceptVideoChat(String szSessionID, long nToUserID,
+			String szDeviceID);
 
 	/**
 	 * Reject video invitation call
 	 * 
-	 * @param nGroupID
+	 * @param szSessionID
 	 * @param nToUserID
 	 * @param szDeviceID
-	 * @param businessType
 	 */
-	public native void refuseVideoChat(long nGroupID, long nToUserID,
-			String szDeviceID, int businessType);
+	public native void refuseVideoChat(String szSessionID, long nToUserID,
+			String szDeviceID);
 
-	public native void cancelVideoChat(long nGroupID, long nToUserID,
-			String szDeviceID, int businessType);
+	public native void cancelVideoChat(String szSessionID, long nToUserID,
+			String szDeviceID);
 
 	/**
-	 * @param nGroupID
+	 * @param szSessionID
 	 * @param nToUserID
 	 * @param szDeviceID
-	 * @param businessType
 	 */
-	public native void closeVideoChat(long nGroupID, long nToUserID,
-			String szDeviceID, int businessType);
+	public native void closeVideoChat(String szSessionID, long nToUserID,
+			String szDeviceID);
 
 	// 閭�鍒汉鍚庡緱鍒板簲绛� OnVideoChatAccepted 0 2 1112627 1112627:Integrated
 	// Camera____2889200338

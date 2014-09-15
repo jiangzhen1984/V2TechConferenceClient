@@ -37,6 +37,7 @@ public class VMessageImageItem extends VMessageAbstractItem {
 		this.type = ITEM_TYPE_IMAGE;
 	}
 	
+	
 	public VMessageImageItem(VMessage vm) {
 		super(vm);
 		this.type = ITEM_TYPE_IMAGE;

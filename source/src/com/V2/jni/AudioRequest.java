@@ -71,8 +71,7 @@ public class AudioRequest {
 	 * @see V2GlobalEnum#REQUEST_TYPE_CONF
 	 * @see V2GlobalEnum#REQUEST_TYPE_IM
 	 */
-	public native void InviteAudioChat(long nGroupID, long nToUserID,
-			int businesstype);
+	public native void InviteAudioChat(String szSessionID, long nToUserID);
 
 	/**
 	 * Accept audio conversation
@@ -85,8 +84,7 @@ public class AudioRequest {
 	 * @see V2GlobalEnum#REQUEST_TYPE_CONF
 	 * @see V2GlobalEnum#REQUEST_TYPE_IM
 	 */
-	public native void AcceptAudioChat(long nGroupID, long nToUserID,
-			int businesstype);
+	public native void AcceptAudioChat(String szSessionID, long nToUserID);
 
 	/**
 	 * reject audio conversation
@@ -99,8 +97,7 @@ public class AudioRequest {
 	 * @see V2GlobalEnum#REQUEST_TYPE_CONF
 	 * @see V2GlobalEnum#REQUEST_TYPE_IM
 	 */
-	public native void RefuseAudioChat(long nGroupID, long nToUserID,
-			int businesstype);
+	public native void RefuseAudioChat(String szSessionID, long nToUserID);
 
 	/**
 	 * 
@@ -112,8 +109,7 @@ public class AudioRequest {
 	 * @see V2GlobalEnum#REQUEST_TYPE_CONF
 	 * @see V2GlobalEnum#REQUEST_TYPE_IM
 	 */
-	public native void CloseAudioChat(long nGroupID, long nToUserID,
-			int businesstype);
+	public native void CloseAudioChat(String szSessionID, long nToUserID);
 
 	/**
 	 * 
@@ -126,11 +122,9 @@ public class AudioRequest {
 	 * @see V2GlobalEnum#REQUEST_TYPE_CONF
 	 * @see V2GlobalEnum#REQUEST_TYPE_IM
 	 */
-	public native void MuteMic(long nGroupID, long nUserID, boolean bMute,
-			int businesstype);
+	public native void MuteMic(long nGroupID, long nUserID, boolean bMute);
 
-	public native void CancelAudioChat(long nGroupID, long nToUserID,
-			int businessType);
+	public native void CancelAudioChat(String szSessionID, long nToUserID);
 
 	
 	/**
@@ -141,70 +135,64 @@ public class AudioRequest {
 	public native void ResumePlayout();
 	
 	// �յ���Ƶͨ��������Ļص�
-	private void OnAudioChatInvite(long nGroupID, long nBusinessType,
-			long nFromUserID) {
-		V2Log.d("OnAudioChaInvite " + nGroupID + ":" + nBusinessType + ":"
+	private void OnAudioChatInvite(String szSessionID, long nFromUserID) {
+		V2Log.d("OnAudioChaInvite " + szSessionID + ":"
 				+ nFromUserID);
 		for (int i = 0; i < callbacks.size(); i++) {
 			WeakReference<AudioRequestCallback> wr = callbacks.get(i);
 			Object obj = wr.get();
 			if (obj != null) {
 				((AudioRequestCallback) obj)
-						.OnAudioChatInvite(new AudioJNIObjectInd(nGroupID,
-								nFromUserID, (int) nBusinessType));
+						.OnAudioChatInvite(new AudioJNIObjectInd(szSessionID,
+								nFromUserID));
 			}
 		}
 	}
 
-	private void OnAudioChatAccepted(long nGroupID, long nBusinessType,
-			long nFromUserID) {
-		V2Log.d("OnAudioChatAccepted " + nGroupID + ":" + nBusinessType + ":"
+	private void OnAudioChatAccepted(String szSessionID, long nFromUserID) {
+		V2Log.d("OnAudioChatAccepted " + szSessionID + ":"
 				+ nFromUserID);
 
 		for (int i = 0; i < callbacks.size(); i++) {
 			WeakReference<AudioRequestCallback> wr = callbacks.get(i);
 			Object obj = wr.get();
 			if (obj != null) {
-				((AudioRequestCallback) obj).OnAudioChatAccepted(new AudioJNIObjectInd(nGroupID,
-						nFromUserID, (int) nBusinessType));
+				((AudioRequestCallback) obj).OnAudioChatAccepted(new AudioJNIObjectInd(szSessionID,
+						nFromUserID));
 			}
 		}
 	}
 
 	// ��Ƶͨ�����뱻�Է��ܾ�Ļص�
-	private void OnAudioChatRefused(long nGroupID, long nBusinessType,
-			long nFromUserID) {
-		V2Log.d("OnAudioChatRefused " + nGroupID + ":" + nBusinessType + ":"
+	private void OnAudioChatRefused(String szSessionID, long nFromUserID) {
+		V2Log.d("OnAudioChatRefused " + szSessionID  + ":"
 				+ nFromUserID);
 		for (int i = 0; i < callbacks.size(); i++) {
 			WeakReference<AudioRequestCallback> wr = callbacks.get(i);
 			Object obj = wr.get();
 			if (obj != null) {
-				((AudioRequestCallback) obj).OnAudioChatRefused(new AudioJNIObjectInd(nGroupID,
-						nFromUserID, (int) nBusinessType));
+				((AudioRequestCallback) obj).OnAudioChatRefused(new AudioJNIObjectInd(szSessionID,
+						nFromUserID));
 			}
 		}
 	}
 
 	// ��Ƶͨ�����ر���ص�
-	private void OnAudioChatClosed(long nGroupID, long nBusinessType,
-			long nFromUserID) {
-		V2Log.d("OnAudioChatClosed " + nGroupID + ":" + nBusinessType + ":"
+	private void OnAudioChatClosed(String szSessionID, long nFromUserID) {
+		V2Log.d("OnAudioChatClosed " + szSessionID + ":"
 				+ nFromUserID);
 		for (int i = 0; i < callbacks.size(); i++) {
 			WeakReference<AudioRequestCallback> wr = callbacks.get(i);
 			Object obj = wr.get();
 			if (obj != null) {
-				((AudioRequestCallback) obj).OnAudioChatClosed(new AudioJNIObjectInd(nGroupID,
-						nFromUserID, (int) nBusinessType));
+				((AudioRequestCallback) obj).OnAudioChatClosed(new AudioJNIObjectInd(szSessionID,
+						nFromUserID));
 			}
 		}
 	}
 
 	// ��Ƶͨ��������
-	private void OnAudioChating(long nGroupID, long nBusinessType,
-			long nFromUserID) {
-		Log.e("ImRequest UI", "OnAudioChating " + nGroupID + ":"
-				+ nBusinessType + ":" + nFromUserID);
+	private void OnAudioChating(String szSessionID, long nFromUserID) {
+		Log.e("ImRequest UI", "OnAudioChating " + szSessionID + ":" + nFromUserID);
 	}
 }

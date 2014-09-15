@@ -54,8 +54,7 @@ public class DeviceService extends AbstractHandler {
 				+ userDevice.getVp());
 		VideoRequest.getInstance().openVideoDevice(
 				userDevice.getType().ordinal(), userDevice.getUserID(),
-				userDevice.getDeviceID(), userDevice.getVp(),
-				userDevice.getBusinessType());
+				userDevice.getDeviceID(), userDevice.getVp());
 		JNIResponse jniRes = new RequestOpenUserVideoDeviceResponse(
 				System.currentTimeMillis() / 1000,
 				RequestOpenUserVideoDeviceResponse.Result.SUCCESS);
@@ -93,8 +92,7 @@ public class DeviceService extends AbstractHandler {
 
 		VideoRequest.getInstance().closeVideoDevice(
 				userDevice.getType().ordinal(), userDevice.getUserID(),
-				userDevice.getDeviceID(), userDevice.getVp(),
-				userDevice.getBusinessType());
+				userDevice.getDeviceID(), userDevice.getVp());
 		JNIResponse jniRes = new RequestCloseUserVideoDeviceResponse(
 				System.currentTimeMillis() / 1000,
 				RequestCloseUserVideoDeviceResponse.Result.SUCCESS);

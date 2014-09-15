@@ -15,6 +15,7 @@ import android.view.View.OnClickListener;
 import android.widget.TextView;
 
 import com.v2tech.R;
+import com.v2tech.vo.Conversation;
 import com.v2tech.vo.VMessage;
 import com.v2tech.vo.VMessageImageItem;
 
@@ -81,7 +82,7 @@ public class ImageViewGallery extends FragmentActivity {
 	 */
 	private void loadImages(long groupId) {
 		List<VMessage> list = MessageLoader
-				.loadGroupImageMessage(this, groupId);
+				.loadGroupImageMessage(this, Long.valueOf(Conversation.TYPE_GROUP) , groupId);
 		populateImageMessage(list);
 	}
 

@@ -1,6 +1,7 @@
 package com.v2tech.view.conversation;
 
 import java.util.List;
+import java.util.UUID;
 
 import v2av.VideoCaptureDevInfo;
 import v2av.VideoPlayer;
@@ -15,12 +16,14 @@ import android.graphics.drawable.ColorDrawable;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.RingtoneManager;
+import android.nfc.Tag;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -46,10 +49,12 @@ import com.v2tech.vo.NetworkStateCode;
 import com.v2tech.vo.User;
 import com.v2tech.vo.UserChattingObject;
 import com.v2tech.vo.UserDeviceConfig;
+import com.v2tech.vo.VideoBean;
 
 public class P2PConversation extends Activity implements
 		VideoConversationListener {
 
+	public static final String TAG = "P2PConversation";
 	private static final int UPDATE_TIME = 1;
 	private static final int OPEN_REMOTE_VIDEO = 2;
 	private static final int QUIT = 3;
@@ -62,7 +67,8 @@ public class P2PConversation extends Activity implements
 
 	private static final String SURFACE_HOLDER_TAG_LOCAL = "local";
 	private static final String SURFACE_HOLDER_TAG_REMOTE = "remote";
-	public static final String TAG = "P2PConversation";
+	
+	public static final String P2P_BROADCAST_MEDIA_UPDATE = "com.v2tech.p2p.broadcast.media_update";
 
 	private Context mContext;
 	private ChatService chatService = new ChatService();
@@ -94,20 +100,31 @@ public class P2PConversation extends Activity implements
 	private boolean isOpenedRemote;
 	private boolean isStoped;
 	private boolean isOpenedLocal;
+	private boolean isTimeOut = false;
+	private VideoBean currentVideoBean;
+	private long startTime;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		mContext = this;
+		startTime = System.currentTimeMillis();
 		uad = buildObject();
 		initReceiver();
-
+		currentVideoBean = new VideoBean();
 		chatService.registerCancelledListener(mLocalHandler,
 				HANG_UP_NOTIFICATION, null);
 		chatService.registerVideoChatConnectedListener(mLocalHandler,
 				VIDEO_CONECTED, null);
 		if (uad.isIncoming()) {
+			currentVideoBean.mediaState = VideoBean.STATE_NO_ANSWER_CALL;
+			currentVideoBean.readSatate = VideoBean.READ_STATE_UNREAD;
+			currentVideoBean.formUserID = uad.getUser().getmUserId();
+			currentVideoBean.remoteUserID = uad.getUser().getmUserId();
+			currentVideoBean.toUserID = GlobalHolder.getInstance().getCurrentUserId();
 			if (uad.isAudioType()) {
+				currentVideoBean.mediaChatID = uad.getSzSessionID();
+				currentVideoBean.mediaType = VideoBean.TYPE_AUDIO;
 				setContentView(R.layout.fragment_conversation_incoming_audio_call);
 				mRejectButton = findViewById(R.id.conversation_fragment_voice_reject_button);
 				mAcceptButton = findViewById(R.id.conversation_fragment_voice_accept_button);
@@ -116,6 +133,8 @@ public class P2PConversation extends Activity implements
 					tv.setText(uad.getUser().getName());
 				}
 			} else if (uad.isVideoType()) {
+				currentVideoBean.mediaChatID = uad.getSzSessionID();
+				currentVideoBean.mediaType = VideoBean.TYPE_VIDEO;
 				setContentView(R.layout.fragment_conversation_incoming_video_call);
 				mRejectButton = findViewById(R.id.conversation_fragment_video_reject_button);
 				mAcceptButton = findViewById(R.id.conversation_fragment_video_accept_button);
@@ -133,9 +152,21 @@ public class P2PConversation extends Activity implements
 			// start time out monitor
 			mLocalHandler.postDelayed(timeOutMonitor, 1000 * 60);
 		} else {
+			String uuid = UUID.randomUUID().toString();
+			currentVideoBean.mediaState = VideoBean.STATE_ANSWER_CALL;
+			currentVideoBean.readSatate = VideoBean.READ_STATE_READED;
+			currentVideoBean.formUserID = GlobalHolder.getInstance().getCurrentUserId();
+			currentVideoBean.toUserID = uad.getUser().getmUserId();
+			currentVideoBean.remoteUserID = uad.getUser().getmUserId();
 			if (uad.isAudioType()) {
+				currentVideoBean.mediaType = VideoBean.TYPE_AUDIO;
+				uad.setSzSessionID("AudioChat" + uuid);
+				currentVideoBean.mediaChatID = "AudioChat" + uuid;
 				setContentView(R.layout.fragment_conversation_outing_audio);
 			} else if (uad.isVideoType()) {
+				currentVideoBean.mediaType = VideoBean.TYPE_VIDEO;
+				uad.setSzSessionID(uuid);
+				currentVideoBean.mediaChatID = uuid;
 				setContentView(R.layout.fragment_conversation_outing_video);
 			}
 
@@ -737,6 +768,7 @@ public class P2PConversation extends Activity implements
 				"is_coming_call");
 		boolean mIsVoiceCall = getIntent().getExtras().getBoolean("voice");
 		String deviceId = getIntent().getExtras().getString("device");
+		String sessionID = getIntent().getExtras().getString("sessionID");
 		User u = GlobalHolder.getInstance().getUser(uid);
 
 		int flag = mIsVoiceCall ? UserChattingObject.VOICE_CALL
@@ -747,6 +779,7 @@ public class P2PConversation extends Activity implements
 			flag |= UserChattingObject.OUTING_CALL;
 		}
 		uad = new UserChattingObject(u, flag, deviceId);
+		uad.setSzSessionID(sessionID);
 		return uad;
 	}
 
@@ -893,7 +926,20 @@ public class P2PConversation extends Activity implements
 	}
 
 	private void quit() {
+		Log.e(TAG , currentVideoBean.mediaChatID + "");
+		if(currentVideoBean.startDate == 0)
+			currentVideoBean.startDate = startTime;
+		MessageBuilder.saveMediaChatHistories(mContext, currentVideoBean);
+		sendUpdateBroadcast();
 		finish();
+	}
+
+	private void sendUpdateBroadcast() {
+		Intent intent = new Intent();
+		intent.setAction(P2P_BROADCAST_MEDIA_UPDATE);
+		intent.addCategory(PublicIntent.DEFAULT_CATEGORY);
+		intent.putExtra("remoteID", currentVideoBean.remoteUserID);
+		sendBroadcast(intent);
 	}
 
 	private void hangUp() {
@@ -981,6 +1027,9 @@ public class P2PConversation extends Activity implements
 				TextView nameTV = (TextView) findViewById(R.id.conversation_fragment_connected_name);
 				nameTV.setText(uad.getUser().getName());
 			}
+			currentVideoBean.startDate = System.currentTimeMillis();
+			currentVideoBean.mediaState = VideoBean.STATE_ANSWER_CALL;
+			currentVideoBean.readSatate = VideoBean.READ_STATE_READED;
 			// Start to time
 			Message.obtain(mLocalHandler, UPDATE_TIME).sendToTarget();
 		}
@@ -999,7 +1048,6 @@ public class P2PConversation extends Activity implements
 			mLocalHandler.removeCallbacks(timeOutMonitor);
 			// do not open local video
 			openRemoteVideo();
-
 			// Start to time
 			Message.obtain(mLocalHandler, UPDATE_TIME).sendToTarget();
 
@@ -1154,6 +1202,7 @@ public class P2PConversation extends Activity implements
 		public void run() {
 			chatService.cancelChattingCall(uad, null);
 			Message.obtain(mLocalHandler, HANG_UP_NOTIFICATION).sendToTarget();
+			isTimeOut = true;
 		}
 
 	};
@@ -1292,23 +1341,42 @@ public class P2PConversation extends Activity implements
 					if (inProgress) {
 						break;
 					}
+					
+					if(uad.isIncoming()){
+						if(isTimeOut)
+							currentVideoBean.readSatate = VideoBean.READ_STATE_UNREAD;
+						else{
+							currentVideoBean.readSatate = VideoBean.READ_STATE_READED;
+							if(currentVideoBean.startDate != 0)
+								currentVideoBean.endDate = System.currentTimeMillis();
+						}
+					}
+					else{
+						
+						if(currentVideoBean.startDate != 0)
+							currentVideoBean.endDate = System.currentTimeMillis();
+					}
 					inProgress = true;
 					Message timeoutMessage = Message.obtain(this, QUIT);
 					this.sendMessageDelayed(timeoutMessage, 2000);
 					disableAllButtons();
 					closeLocalCamera();
 				}
-
+				
 				break;
 			case CALL_RESPONSE:
 				JNIResponse resp = (JNIResponse) msg.obj;
 				if (resp.getResult() == JNIResponse.Result.SUCCESS) {
+					currentVideoBean.readSatate = VideoBean.READ_STATE_READED;
 					RequestChatServiceResponse rcsr = (RequestChatServiceResponse) resp;
 					if (rcsr.getCode() == RequestChatServiceResponse.REJCTED) {
 						V2Log.e(TAG, "CALL_RESPONSE 调用了 HANG_UP_NOTIFICATION");
-						Message.obtain(this, HANG_UP_NOTIFICATION,
-								Integer.valueOf(HAND_UP_REASON_REMOTE_REJECT))
+//						Message.obtain(this, HANG_UP_NOTIFICATION,
+//								Integer.valueOf(HAND_UP_REASON_REMOTE_REJECT))
+//								.sendToTarget();
+						Message.obtain(this, HANG_UP_NOTIFICATION)
 								.sendToTarget();
+						currentVideoBean.mediaState = VideoBean.STATE_NO_ANSWER_CALL;
 					} else if (rcsr.getCode() == RequestChatServiceResponse.ACCEPTED) {
 						uad.setConnected(true);
 						// Send audio invitation
@@ -1331,6 +1399,8 @@ public class P2PConversation extends Activity implements
 						// Start to time
 						Message.obtain(mLocalHandler, UPDATE_TIME)
 								.sendToTarget();
+						currentVideoBean.mediaState = VideoBean.STATE_ANSWER_CALL;
+						currentVideoBean.startDate = System.currentTimeMillis();
 						// Remove timer
 						mLocalHandler.removeCallbacks(timeOutMonitor);
 					} else {

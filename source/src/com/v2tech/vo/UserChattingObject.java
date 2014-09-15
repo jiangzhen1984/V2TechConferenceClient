@@ -10,27 +10,42 @@ public class UserChattingObject {
 	public static final int OUTING_CALL = 0x00;
 	public static final int SPEAKING = 0x100;
 	public static final int CONNECTED = 0x200;
-
+	private String szSessionID;
 	private int flag;
 	private User mUser;
 	private long groupdId;
 	UserDeviceConfig udc;
 
 	public UserChattingObject(User user, int flag) {
-		this(0, user, flag, "", null);
+		this(null, user, flag, "", null);
 	}
 
 	public UserChattingObject(User user, int flag, String deviceId) {
-		this(0, user, flag, deviceId, null);
+		this(null, user, flag, deviceId, null);
 	}
 
-	public UserChattingObject(long groupId, User user, int flag,
+	public UserChattingObject(long groupdId, User user, int flag,
 			String deviceId, VideoPlayer vp) {
 		if (user == null) {
 			throw new RuntimeException(
 					" UserChattingObject user can not be null");
 		}
-		this.groupdId = groupId;
+		this.groupdId = groupdId;
+		this.flag = flag;
+		this.flag |= SPEAKING;
+		this.mUser = user;
+		this.udc = new UserDeviceConfig(user.getmUserId(), deviceId, vp,
+				V2GlobalConstants.REQUEST_TYPE_IM,
+				UserDeviceConfig.UserDeviceConfigType.EVIDEODEVTYPE_CAMERA);
+	}
+	
+	public UserChattingObject(String szSessionID, User user, int flag,
+			String deviceId, VideoPlayer vp) {
+		if (user == null) {
+			throw new RuntimeException(
+					" UserChattingObject user can not be null");
+		}
+		this.szSessionID = szSessionID;
 		this.flag = flag;
 		this.flag |= SPEAKING;
 		this.mUser = user;
@@ -41,6 +56,14 @@ public class UserChattingObject {
 
 	public User getUser() {
 		return this.mUser;
+	}
+	
+	public String getSzSessionID() {
+		return szSessionID;
+	}
+
+	public void setSzSessionID(String szSessionID) {
+		this.szSessionID = szSessionID;
 	}
 
 	public long getGroupdId() {

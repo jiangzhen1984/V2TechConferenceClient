@@ -135,26 +135,26 @@ public class FileRequest {
 	 * 0:2:userid{AB2C7E63-1AA3-4688-BAD2-97920B155F43}:C:\Users\qiang\Desktop\old7
 	 * \libv2ve.so:359180:0
 	 */
-	private void OnFileTransInvite(long nGroupID, int nBusinessType,
-			long userid, String szFileID, String szFileName, long nFileBytes,
+	private void OnFileTransInvite(long userid, String szFileID, String szFileName, long nFileBytes,
 			int linetype) {
-		Log.e(TAG, "OnFileTransInvite--->" + nGroupID + ":" + nBusinessType
+		Log.e(TAG, "OnFileTransInvite---> + nGroupID  + nBusinessType"
 				+ ":" + userid + ":" + szFileID + ":" + szFileName + ":"
 				+ nFileBytes + ":" + linetype);
 		for (int i = 0; i < callbacks.size(); i++) {
 			WeakReference<FileRequestCallback> wrf = callbacks.get(i);
 			if (wrf != null && wrf.get() != null) {
+				//FIXME should update file request type once API add new parameters
 				((FileRequestCallback) wrf.get())
-						.OnFileTransInvite(new FileJNIObject(nBusinessType,
-								nGroupID,szFileID, userid,  szFileName,
+						.OnFileTransInvite(new FileJNIObject(V2GlobalEnum.GROUP_TYPE_USER,
+								0,szFileID, userid,  szFileName,
 								nFileBytes, linetype));
 			}
 		}
 	}
 
 	// 鏀跺埌鎴戠殑鏂囦欢浼犺緭閭�琚鏂规帴鍙楃殑鍥炶皟
-	private void OnFileTransAccepted(int nBusinessType, String szFileID) {
-		Log.e(TAG, "OnFileTransAccepted--->" + nBusinessType + ":" + szFileID);
+	private void OnFileTransAccepted(String szFileID) {
+		Log.e(TAG, "OnFileTransAccepted--->" + szFileID);
 
 		// //鎷艰淇℃伅
 		// FileTransAccepted_MsgType acceptMsgType=new

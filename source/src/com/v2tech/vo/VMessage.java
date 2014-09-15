@@ -39,7 +39,7 @@ public class VMessage {
 
 	protected String mStrDateTime;
 
-	protected int mMsgCode;
+	protected int mMsgCode;  //对应V2GlobalEnum中的groupType
 
 	protected String mUUID;
 
@@ -52,37 +52,49 @@ public class VMessage {
 	protected String mXmlDatas;
 
 	protected List<VMessageAbstractItem> itemList;
-
-	public VMessage(User fromUser, User toUser) {
-		this(0, fromUser, toUser, V2GlobalEnum.REQUEST_TYPE_IM);
-	}
 	
-	public VMessage(User fromUser, User toUser, Date date) {
-		this(0, fromUser, toUser, UUID.randomUUID().toString(), new Date(), V2GlobalEnum.REQUEST_TYPE_IM);
+	protected int receiveMessageType = -1;
+
+//	public VMessage(User fromUser, User toUser) {
+//		this(0, fromUser, toUser, V2GlobalEnum.REQUEST_TYPE_IM);
+//	}
+	
+//	public VMessage(User fromUser, User toUser, Date date) {
+//		this(0, fromUser, toUser, UUID.randomUUID().toString(), new Date(), V2GlobalEnum.REQUEST_TYPE_IM);
+//	}
+
+//	public VMessage(long groupId, User fromUser, User toUser) {
+//		this(groupId, fromUser, toUser, UUID.randomUUID().toString(),new Date(),
+//				 V2GlobalEnum.REQUEST_TYPE_IM);
+//	}
+
+//	public VMessage(User fromUser, User toUser, int type) {
+//		this(0, fromUser, toUser, type);
+//	}
+	
+	public int getReceiveMessageType() {
+		return receiveMessageType;
 	}
 
-
-	public VMessage(User fromUser, User toUser, int type) {
-		this(0, fromUser, toUser, type);
+	public void setReceiveMessageType(int receiveMessageType) {
+		this.receiveMessageType = receiveMessageType;
 	}
 
-	public VMessage(long groupId, User fromUser, User toUser, int type) {
-		this(groupId, fromUser, toUser, UUID.randomUUID().toString(), new Date(),type);
+	public VMessage(int groupType , long groupId, User fromUser , Date date) {
+		this(groupType, groupId, fromUser, null , UUID.randomUUID().toString(), date);
 	}
 
-	public VMessage(long groupId, User fromUser, User toUser) {
-		this(groupId, fromUser, toUser, UUID.randomUUID().toString(),new Date(),
-				 V2GlobalEnum.REQUEST_TYPE_IM);
+	public VMessage(int groupType , long groupId, User fromUser, User toUser, Date date) {
+		this(groupType, groupId, fromUser, toUser, UUID.randomUUID().toString(), date);
 	}
 
-	public VMessage(long groupId, User fromUser, User toUser, String uuid, Date date,
-			int type) {
+	public VMessage(int groupType , long groupId, User fromUser, User toUser, String uuid, Date date) {
 		this.mGroupId = groupId;
 		this.mFromUser = fromUser;
 		this.mToUser = toUser;
 		this.mDate = date ;
 		this.mUUID = uuid;
-		mMsgCode = type;
+		mMsgCode = groupType;
 
 		itemList = new ArrayList<VMessageAbstractItem>();
 	}

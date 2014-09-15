@@ -29,11 +29,11 @@ import android.widget.ListView;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
+import com.V2.jni.V2GlobalEnum;
 import com.v2tech.R;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.vo.Conference;
 import com.v2tech.vo.Group;
-import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.User;
 
 public class VideoInvitionAttendeeLayout extends LinearLayout {
@@ -433,7 +433,7 @@ public class VideoInvitionAttendeeLayout extends LinearLayout {
 
 		@Override
 		protected Void doInBackground(Void... params) {
-			mGroupList = GlobalHolder.getInstance().getGroup(GroupType.ORG);
+			mGroupList = GlobalHolder.getInstance().getGroup(V2GlobalEnum.GROUP_TYPE_DEPARTMENT);
 			if (mGroupList != null) {
 				for (Group g : mGroupList) {
 					mItemList.add(new ListItem(g, g.getLevel()));

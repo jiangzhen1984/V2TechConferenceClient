@@ -171,30 +171,36 @@ public class ChatService extends DeviceService {
 					return;
 				}
 				// If message items do not only contain audio message item
-				// then send text or image message
-				ChatRequest.getInstance().sendChatText(
+				// then send text message
+				ChatRequest.getInstance().sendTextMessage(
+						msg.getMsgCode(),
 						msg.getGroupId(),
 						msg.getToUser() == null ? 0 : msg.getToUser()
 								.getmUserId(), msg.getUUID(), msg.toXml(),
-						msg.getMsgCode());
+						msg.getAllTextContent().length());
 
+				// send image message
 				List<VMessageImageItem> imageItems = msg.getImageItems();
 				for (VMessageImageItem item : imageItems) {
-					byte[] data = item.loadImageData();
-					ChatRequest.getInstance().sendChatPicture(
+					// byte[] data = item.loadImageData();
+					ChatRequest.getInstance().sendBinaryMessage(
+							msg.getMsgCode(),
 							msg.getGroupId(),
 							msg.getToUser() == null ? 0 : msg.getToUser()
-									.getmUserId(), item.getUUID(), data,
-							data.length, msg.getMsgCode());
+									.getmUserId(), 2, item.getUUID(),
+							item.getFilePath(), 0);
 				}
 
+				// send aduio message
 				List<VMessageAudioItem> audioList = msg.getAudioItems();
 				for (int i = 0; audioList != null && i < audioList.size(); i++) {
-					ChatRequest.getInstance().sendChatAudio(msg.getGroupId(),
-							msg.getToUser().getmUserId(),
+					ChatRequest.getInstance().sendBinaryMessage(
+							msg.getMsgCode(),
+							msg.getGroupId(),
+							msg.getToUser() == null ? 0 : msg.getToUser()
+									.getmUserId(), 3,
 							audioList.get(i).getUuid(),
-							audioList.get(i).getAudioFilePath(),
-							msg.getMsgCode());
+							audioList.get(i).getAudioFilePath(), 0);
 				}
 
 				if (caller != null && caller.getHandler() != null) {
@@ -286,8 +292,10 @@ public class ChatService extends DeviceService {
 					vfi.getTransType());
 			break;
 		case OPERATION_START_DOWNLOAD:
-			FileRequest.getInstance().acceptFileTrans(vfi.getUuid(),
-					GlobalConfig.getGlobalFilePath() + "/" + vfi.getFileName());
+			FileRequest.getInstance().acceptFileTrans(
+					vfi.getUuid(),
+					GlobalConfig.getGlobalFilePath(GlobalHolder.getInstance()
+							.getCurrentUser()) + "/" + vfi.getFileName());
 		default:
 			break;
 
@@ -326,21 +334,18 @@ public class ChatService extends DeviceService {
 
 		if (ud.isAudioType()) {
 
-			AudioRequest.getInstance().InviteAudioChat(ud.getGroupdId(),
-					ud.getUser().getmUserId(), V2GlobalEnum.REQUEST_TYPE_IM);
+			AudioRequest.getInstance().InviteAudioChat(ud.getSzSessionID(),
+					ud.getUser().getmUserId());
 
 		} else if (ud.isVideoType()) {
 
 			// If connected, send audio message
 			if (ud.isConnected()) {
-				AudioRequest.getInstance()
-						.InviteAudioChat(ud.getGroupdId(),
-								ud.getUser().getmUserId(),
-								V2GlobalEnum.REQUEST_TYPE_IM);
+				AudioRequest.getInstance().InviteAudioChat(ud.getSzSessionID(),
+						ud.getUser().getmUserId());
 			} else {
-				VideoRequest.getInstance().inviteVideoChat(ud.getGroupdId(),
-						ud.getUser().getmUserId(), ud.getDeviceId(),
-						V2GlobalEnum.REQUEST_TYPE_IM);
+				VideoRequest.getInstance().inviteVideoChat(ud.getSzSessionID(),
+						ud.getUser().getmUserId(), ud.getDeviceId());
 			}
 
 		}
@@ -362,31 +367,23 @@ public class ChatService extends DeviceService {
 
 		if (ud.isAudioType()) {
 			if (ud.isConnected() || !ud.isIncoming()) {
-				AudioRequest.getInstance()
-						.CloseAudioChat(ud.getGroupdId(),
-								ud.getUser().getmUserId(),
-								V2GlobalEnum.REQUEST_TYPE_IM);
+				AudioRequest.getInstance().CloseAudioChat(ud.getSzSessionID(),
+						ud.getUser().getmUserId());
 			} else {
-				AudioRequest.getInstance()
-						.RefuseAudioChat(ud.getGroupdId(),
-								ud.getUser().getmUserId(),
-								V2GlobalEnum.REQUEST_TYPE_IM);
+				AudioRequest.getInstance().RefuseAudioChat(ud.getSzSessionID(),
+						ud.getUser().getmUserId());
 			}
 
 		} else if (ud.isVideoType()) {
 			if (ud.isConnected() || !ud.isIncoming()) {
-				VideoRequest.getInstance().closeVideoChat(ud.getGroupdId(),
-						ud.getUser().getmUserId(), ud.getDeviceId(),
-						V2GlobalEnum.REQUEST_TYPE_IM);
+				VideoRequest.getInstance().closeVideoChat(ud.getSzSessionID(),
+						ud.getUser().getmUserId(), ud.getDeviceId());
 
-				AudioRequest.getInstance()
-						.CloseAudioChat(ud.getGroupdId(),
-								ud.getUser().getmUserId(),
-								V2GlobalEnum.REQUEST_TYPE_IM);
+				AudioRequest.getInstance().CloseAudioChat(ud.getSzSessionID(),
+						ud.getUser().getmUserId());
 			} else {
-				VideoRequest.getInstance().refuseVideoChat(ud.getGroupdId(),
-						ud.getUser().getmUserId(), ud.getDeviceId(),
-						V2GlobalEnum.REQUEST_TYPE_IM);
+				VideoRequest.getInstance().refuseVideoChat(ud.getSzSessionID(),
+						ud.getUser().getmUserId(), ud.getDeviceId());
 			}
 		}
 
@@ -414,12 +411,11 @@ public class ChatService extends DeviceService {
 		}
 
 		if (ud.isAudioType()) {
-			AudioRequest.getInstance().AcceptAudioChat(ud.getGroupdId(),
-					ud.getUser().getmUserId(), V2GlobalEnum.REQUEST_TYPE_IM);
+			AudioRequest.getInstance().AcceptAudioChat(ud.getSzSessionID(),
+					ud.getUser().getmUserId());
 		} else if (ud.isVideoType()) {
-			VideoRequest.getInstance().acceptVideoChat(ud.getGroupdId(),
-					ud.getUser().getmUserId(), ud.getDeviceId(),
-					V2GlobalEnum.REQUEST_TYPE_IM);
+			VideoRequest.getInstance().acceptVideoChat(ud.getSzSessionID(),
+					ud.getUser().getmUserId(), ud.getDeviceId());
 		}
 		if (caller != null) {
 			JNIResponse resp = new RequestChatServiceResponse(
@@ -443,12 +439,11 @@ public class ChatService extends DeviceService {
 		}
 
 		if (ud.isAudioType()) {
-			AudioRequest.getInstance().RefuseAudioChat(ud.getGroupdId(),
-					ud.getUser().getmUserId(), V2GlobalEnum.REQUEST_TYPE_IM);
+			AudioRequest.getInstance().RefuseAudioChat(ud.getSzSessionID(),
+					ud.getUser().getmUserId());
 		} else if (ud.isVideoType()) {
-			VideoRequest.getInstance().refuseVideoChat(ud.getGroupdId(),
-					ud.getUser().getmUserId(), ud.getDeviceId(),
-					V2GlobalEnum.REQUEST_TYPE_IM);
+			VideoRequest.getInstance().refuseVideoChat(ud.getSzSessionID(),
+					ud.getUser().getmUserId(), ud.getDeviceId());
 		}
 		if (caller != null) {
 			JNIResponse resp = new RequestChatServiceResponse(
@@ -471,8 +466,7 @@ public class ChatService extends DeviceService {
 			return;
 		}
 		AudioRequest.getInstance().MuteMic(ud.getGroupdId(),
-				ud.getUser().getmUserId(), ud.isMute(),
-				V2GlobalEnum.REQUEST_TYPE_IM);
+				ud.getUser().getmUserId(), ud.isMute());
 
 		if (caller != null) {
 			JNIResponse resp = new RequestChatServiceResponse(
@@ -481,8 +475,6 @@ public class ChatService extends DeviceService {
 		}
 
 	}
-
-
 
 	public void suspendOrResumeAudio(boolean flag) {
 		if (flag) {
@@ -550,7 +542,7 @@ public class ChatService extends DeviceService {
 			if (mCaller != null) {
 				JNIResponse resp = new RequestChatServiceResponse(
 						RequestChatServiceResponse.REJCTED,
-						RequestChatServiceResponse.Result.SUCCESS);
+						RequestChatServiceResponse.Result.SUCCESS , ind.getFromUserId());
 				sendResult(mCaller, resp);
 				mCaller = null;
 				// Else means remote side is out and then cancel calling
@@ -575,7 +567,6 @@ public class ChatService extends DeviceService {
 
 	class FileRequestCB extends FileRequestCallbackAdapter {
 
-
 		@Override
 		public void OnFileTransProgress(String szFileID, long nBytesTransed,
 				int nTransType) {
@@ -594,9 +585,9 @@ public class ChatService extends DeviceService {
 		}
 
 		@Override
-		public void OnFileDownloadError(String sFileID , int t1) {
+		public void OnFileDownloadError(String sFileID, int t1) {
 			notifyListener(KEY_FILE_TRANS_STATUS_NOTIFICATION_LISTNER, 0, 0,
-					new FileTransErrorIndication(sFileID , t1));
+					new FileTransErrorIndication(sFileID, t1));
 
 		}
 

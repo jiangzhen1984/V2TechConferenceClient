@@ -7,12 +7,14 @@ import java.util.List;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.V2.jni.ind.V2Conference;
 import com.V2.jni.ind.V2User;
 import com.V2.jni.util.V2Log;
 import com.V2.jni.util.XmlAttributeExtractor;
+import com.v2tech.util.GlobalConfig;
 
 public class ConfRequest {
 
@@ -235,7 +237,12 @@ public class ConfRequest {
 		//String creator = XmlAttributeExtractor.extract(creatorXml, "createuserid='", "'");
 		conf.cid = Long.parseLong(confId);
 		conf.name = subject;
-		conf.startTime = new Date(Long.parseLong(startTime)/1000);
+		if(!TextUtils.isEmpty(startTime))
+			conf.startTime = new Date(Long.parseLong(startTime)/1000);
+		else{
+			V2Log.e("OnConfNotify : get startTime is null...");
+			conf.startTime = new Date(GlobalConfig.getGlobalServerTime());
+		}
 		
 		V2User user = new V2User();
 		String uid = XmlAttributeExtractor.extract(creatorXml, "id='", "'");

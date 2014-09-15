@@ -10,12 +10,18 @@ import android.net.Uri;
 public class V2techContentProvider extends ContentProvider {
 
 	public static final String AUTHORITY = "com.v2tech.bizcom";
-
+	private DataBaseContext context;
 	/*
 	 * Defines a handle to the database helper object. The MainDatabaseHelper
 	 * class is defined in a following snippet.
 	 */
 	private V2TechDBHelper mOpenHelper;
+	@Override
+	public boolean onCreate() {
+		context = new DataBaseContext(getContext());
+		mOpenHelper = new V2TechDBHelper(context);
+		return true;
+	}
 
 	@Override
 	public int delete(Uri uri, String selection, String[] selectionsArgs) {
@@ -147,12 +153,6 @@ public class V2techContentProvider extends ContentProvider {
 		}
 		getContext().getContentResolver().notifyChange(newUri, null);
 		return newUri;
-	}
-
-	@Override
-	public boolean onCreate() {
-		mOpenHelper = new V2TechDBHelper(getContext());
-		return true;
 	}
 
 	@Override

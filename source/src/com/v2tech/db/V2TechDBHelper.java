@@ -64,11 +64,12 @@ public class V2TechDBHelper extends SQLiteOpenHelper {
 			+ "  integer primary key AUTOINCREMENT,"
 			+ ContentDescriptor.HistoriesMedia.Cols.OWNER_USER_ID + " bigint,"
 			+ ContentDescriptor.HistoriesMedia.Cols.HISTORY_MEDIA_SAVEDATE + " bigint,"
-			+ ContentDescriptor.HistoriesMedia.Cols.HISTORY_MEDIA_CHAT_ID + " bigint,"
+			+ ContentDescriptor.HistoriesMedia.Cols.HISTORY_MEDIA_CHAT_ID + " nvarchar(4000),"
 			+ ContentDescriptor.HistoriesMedia.Cols.HISTORY_MEDIA_FROM_USER_ID + " bigint,"
 			+ ContentDescriptor.HistoriesMedia.Cols.HISTORY_MEDIA_TO_USER_ID+ " bigint, "
+			+ ContentDescriptor.HistoriesMedia.Cols.HISTORY_MEDIA_REMOTE_USER_ID+ " bigint, "
 			+ ContentDescriptor.HistoriesMedia.Cols.HISTORY_MEDIA_TYPE + " bigint, "
-			+ ContentDescriptor.HistoriesMedia.Cols.HISTORY_MEDIA_STATE + " binary, "
+			+ ContentDescriptor.HistoriesMedia.Cols.HISTORY_MEDIA_STATE + " bigint, "
 			+ ContentDescriptor.HistoriesMedia.Cols.HISTORY_MEDIA_START_DATE + " bigint,"
 			+ ContentDescriptor.HistoriesMedia.Cols.HISTORY_MEDIA_END_DATE + " bigint,"
 			+ ContentDescriptor.HistoriesMedia.Cols.HISTORY_MEDIA_READ_STATE + " bigint)";
@@ -96,6 +97,7 @@ public class V2TechDBHelper extends SQLiteOpenHelper {
 			+ ContentDescriptor.HistoriesAddFriends.Cols.OWNER_USER_ID + " bigint,"
 			+ ContentDescriptor.HistoriesAddFriends.Cols.HISTORY_FRIEND_SAVEDATE + " bigint,"
 			+ ContentDescriptor.HistoriesAddFriends.Cols.HISTORY_FRIEND_FROM_USER_ID + " bigint,"
+			+ ContentDescriptor.HistoriesAddFriends.Cols.HISTORY_FRIEND_AUTHTYPE + " bigint,"
 			+ ContentDescriptor.HistoriesAddFriends.Cols.HISTORY_FRIEND_TO_USER_ID+ " bigint, "
 			+ ContentDescriptor.HistoriesAddFriends.Cols.HISTORY_FRIEND_REMOTE_USER_ID+ " bigint, "
 			+ ContentDescriptor.HistoriesAddFriends.Cols.HISTORY_FRIEND_APPLY_REASON + " nvarchar(4000), "
@@ -110,6 +112,7 @@ public class V2TechDBHelper extends SQLiteOpenHelper {
 			+ ContentDescriptor.HistoriesCrowd.Cols.OWNER_USER_ID + " bigint,"
 			+ ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_SAVEDATE + " bigint,"
 			+ ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_ID + " bigint,"
+			+ ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_AUTHTYPE + " bigint,"
 			+ ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_FROM_USER_ID+ " bigint, "
 			+ ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_TO_USER_ID + " bigint, "
 			+ ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_REMOTE_USER_ID + " bigint, "
@@ -118,17 +121,17 @@ public class V2TechDBHelper extends SQLiteOpenHelper {
 			+ ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_STATE + " bigint ,"
 			+ ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_READ_STATE + " bigint)";
 	
-	public V2TechDBHelper(Context context, String name, CursorFactory factory,
+	public V2TechDBHelper(DataBaseContext context, String name, CursorFactory factory,
 			int version, DatabaseErrorHandler errorHandler) {
 		super(context, name, factory, version, errorHandler);
 	}
 
-	public V2TechDBHelper(Context context, String name, CursorFactory factory,
+	public V2TechDBHelper(DataBaseContext context, String name, CursorFactory factory,
 			int version) {
 		super(context, name, factory, version);
 	}
 
-	public V2TechDBHelper(Context context) {
+	public V2TechDBHelper(DataBaseContext context) {
 		super(context, DB_NAME, null, DATABASE_VERSION);
 	}
 

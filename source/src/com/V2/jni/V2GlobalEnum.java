@@ -8,10 +8,20 @@ public class V2GlobalEnum {
 	public static final int REQUEST_TYPE_CONF = 1;
 	
 	/**
-	 * Global request type for IM
+	 * Global request type for IM  
 	 */
 	public static final int REQUEST_TYPE_IM = 2;
 	
+	
+	/**
+	 * groupType 的分类
+	 */
+	public static final int GROUP_TYPE_USER = 0;
+	public static final int GROUP_TYPE_DEPARTMENT = 1;
+	public static final int GROUP_TYPE_CONTACT = 2;
+	public static final int GROUP_TYPE_CROWD = 3;
+	public static final int GROUP_TYPE_CONFERENCE = 4;
+	public static final int GROUP_TYPE_DISCUSSION = 5;
 	
 	/**
 	 * User state for on line

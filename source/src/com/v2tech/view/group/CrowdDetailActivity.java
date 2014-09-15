@@ -82,7 +82,7 @@ public class CrowdDetailActivity extends Activity {
 		mShowMembersButton.setOnClickListener(mShowMembersButtonListener);
 
 		crowd = (CrowdGroup) GlobalHolder.getInstance().getGroupById(
-				GroupType.CHATING, getIntent().getLongExtra("cid", 0));
+				GroupType.CHATING.intValue(), getIntent().getLongExtra("cid", 0));
 
 		mNameTV.setText(crowd.getName());
 		mBriefTV.setText(crowd.getBrief());

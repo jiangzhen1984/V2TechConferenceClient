@@ -9,16 +9,16 @@ public class ConversationNotificationObject implements Parcelable {
 
 	
 	private int cid;
-	private String type;
+	private int type;
 	private long extId; 
 	
 	public ConversationNotificationObject(Parcel in) {
 		cid = in.readInt();
-		type = in.readString();
+		type = in.readInt();
 		extId = in.readLong();
 	}
 	
-	public ConversationNotificationObject(String type, long extId) {
+	public ConversationNotificationObject(int type, long extId) {
 		this.type = type;
 		this.extId = extId;
 	}
@@ -40,7 +40,7 @@ public class ConversationNotificationObject implements Parcelable {
 	@Override
 	public void writeToParcel(Parcel par, int flag) {
 		par.writeInt(cid);
-		par.writeString(type);
+		par.writeInt(type);
 		par.writeLong(extId);
 	}
 
@@ -64,11 +64,11 @@ public class ConversationNotificationObject implements Parcelable {
 		this.cid = cid;
 	}
 
-	public String getType() {
+	public int getType() {
 		return type;
 	}
 
-	public void setType(String type) {
+	public void setType(int type) {
 		this.type = type;
 	}
 

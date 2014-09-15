@@ -2,6 +2,8 @@ package com.v2tech.vo;
 
 import java.util.Date;
 
+import com.V2.jni.V2GlobalEnum;
+
 public class ConferenceGroup extends Group {
 
 	private User mChairMan;
@@ -31,7 +33,7 @@ public class ConferenceGroup extends Group {
 		this.isCanInvitation = isCanInvitation;
 	}
 
-	
+
 	@Override
 	public int compareTo(Group g) {
 		if (g.getCreateDate() == null) {

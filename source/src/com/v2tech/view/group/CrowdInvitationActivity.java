@@ -69,7 +69,7 @@ public class CrowdInvitationActivity extends Activity {
 		CrowdGroup g = new CrowdGroup(crowd.getId(), crowd.getName(), crowd.getCreator(), null);
 		g.setBrief(crowd.getBrief());
 		g.setAnnouncement(crowd.getAnnounce());
-		GlobalHolder.getInstance().addGroupToList(GroupType.CHATING, g);
+		GlobalHolder.getInstance().addGroupToList(GroupType.CHATING.intValue(), g);
 		
 		Intent i = new Intent();
 		i.setAction(PublicIntent.BROADCAST_NEW_CROWD_NOTIFICATION);

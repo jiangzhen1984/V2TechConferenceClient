@@ -350,14 +350,14 @@ public class MainActivity extends FragmentActivity implements
 		V2Log.d("system destroyed v2tech");
 	}
 
-	public void updateNotificator(String type, boolean flag) {
+	public void updateNotificator(int type, boolean flag) {
 
 		View noticator = null;
-		if (type.equals(Conversation.TYPE_GROUP)) {
+		if (type == Conversation.TYPE_GROUP) {
 			noticator = mTabClasses[2].notificator;
-		} else if (type.equals(Conversation.TYPE_CONFERNECE)) {
+		} else if (type ==Conversation.TYPE_CONFERNECE) {
 			noticator = mTabClasses[3].notificator;
-		} else if (type.equals(Conversation.TYPE_CONTACT)) {
+		} else if (type ==Conversation.TYPE_CONTACT) {
 			noticator = mTabClasses[4].notificator;
 		}
 		
@@ -561,5 +561,6 @@ public class MainActivity extends FragmentActivity implements
 		  V2techSearchContentProvider.closedDataBase();  
 		return super.dispatchTouchEvent(ev);
 	}
+
 
 }

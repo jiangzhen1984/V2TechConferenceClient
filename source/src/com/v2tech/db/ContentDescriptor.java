@@ -7,6 +7,11 @@ import android.net.Uri;
 import android.provider.BaseColumns;
 import android.text.TextUtils;
 
+/**
+ * ChatFiles： TransState --传输状态 -3:等待接收，-2:正在传输, -1: 传输暂停, 0:传输成功, 其它值为传输失败  
+ * @author 
+ *
+ */
 public final class ContentDescriptor {
 
 	public static final String AUTHORITY = "com.v2tech.bizcom";
@@ -62,7 +67,9 @@ public final class ContentDescriptor {
 		if(TextUtils.isEmpty(tableName)){
 			return false;
 		}
-		SQLiteDatabase base = context.openOrCreateDatabase(V2TechDBHelper.DB_NAME , Context.MODE_WORLD_WRITEABLE | Context.MODE_WORLD_READABLE, null);
+		
+		DataBaseContext dbContext = new DataBaseContext(context);
+		SQLiteDatabase base = dbContext.openOrCreateDatabase(V2TechDBHelper.DB_NAME , Context.MODE_WORLD_WRITEABLE | Context.MODE_WORLD_READABLE, null);
 		String sql = " create table "
 				+ tableName + " ( "
 				+ ContentDescriptor.HistoriesMessage.Cols.ID
@@ -91,7 +98,7 @@ public final class ContentDescriptor {
 
 		public static String PATH = "";
 
-		public static String NAME = "";
+		public static String NAME = PATH;
 		
 		public static final int TOKEN = 1;
 
@@ -196,7 +203,7 @@ public final class ContentDescriptor {
 			public static final String HISTORY_AUDIO_ID = "AudioID";
 			public static final String HISTORY_AUDIO_PATH = "FileExt";
 			public static final String HISTORY_AUDIO_SEND_STATE = "TransState";
-//			public static final String HISTORY_AUDIO_READ_STATE = "ReadState";
+			public static final String HISTORY_AUDIO_READ_STATE = "ReadState";
 			public static final String HISTORY_AUDIO_SECOND = "AudioSeconds";
 			
 			public static final String[] ALL_CLOS = { ID, OWNER_USER_ID, HISTORY_AUDIO_SAVEDATE,HISTORY_AUDIO_GROUP_TYPE ,
@@ -309,6 +316,7 @@ public final class ContentDescriptor {
 			public static final String HISTORY_MEDIA_CHAT_ID = "MediaChatID";
 			public static final String HISTORY_MEDIA_FROM_USER_ID = "FromUserID";
 			public static final String HISTORY_MEDIA_TO_USER_ID = "ToUserID";
+			public static final String HISTORY_MEDIA_REMOTE_USER_ID = "RemoteUserID";
 			public static final String HISTORY_MEDIA_TYPE = "MediaType";
 			public static final String HISTORY_MEDIA_STATE = "MediaState";
 			public static final String HISTORY_MEDIA_START_DATE = "StartDate";
@@ -316,7 +324,7 @@ public final class ContentDescriptor {
 			public static final String HISTORY_MEDIA_READ_STATE = "ReadState";
 			
 			public static final String[] ALL_CLOS = { ID, OWNER_USER_ID, HISTORY_MEDIA_SAVEDATE,HISTORY_MEDIA_CHAT_ID,
-				HISTORY_MEDIA_FROM_USER_ID, HISTORY_MEDIA_TO_USER_ID, HISTORY_MEDIA_TYPE , HISTORY_MEDIA_STATE
+				HISTORY_MEDIA_FROM_USER_ID, HISTORY_MEDIA_TO_USER_ID, HISTORY_MEDIA_TYPE , HISTORY_MEDIA_STATE, HISTORY_MEDIA_REMOTE_USER_ID
 				, HISTORY_MEDIA_START_DATE , HISTORY_MEDIA_END_DATE ,HISTORY_MEDIA_READ_STATE};
 		}
 	}
@@ -345,6 +353,7 @@ public final class ContentDescriptor {
 			
 			public static String OWNER_USER_ID = BASE_OWNER_USER_ID;
 			public static String HISTORY_FRIEND_SAVEDATE = BASE_SAVEDATE;
+			public static String HISTORY_FRIEND_AUTHTYPE = "OwnerAuthType";
 			public static final String HISTORY_FRIEND_FROM_USER_ID = "FromUserID";
 			public static final String HISTORY_FRIEND_TO_USER_ID = "ToUserID";
 			public static final String HISTORY_FRIEND_REMOTE_USER_ID = "RemoteUserID";
@@ -353,7 +362,7 @@ public final class ContentDescriptor {
 			public static final String HISTORY_FRIEND_STATE = "AddState";
 			public static final String HISTORY_MEDIA_READ_STATE = "ReadState";
 			
-			public static final String[] ALL_CLOS = { ID, OWNER_USER_ID, HISTORY_FRIEND_SAVEDATE,
+			public static final String[] ALL_CLOS = { ID, OWNER_USER_ID, HISTORY_FRIEND_SAVEDATE,HISTORY_FRIEND_AUTHTYPE,
 				HISTORY_FRIEND_FROM_USER_ID, HISTORY_FRIEND_TO_USER_ID, HISTORY_FRIEND_REMOTE_USER_ID , HISTORY_FRIEND_APPLY_REASON , HISTORY_FRIEND_REFUSE_REASON , 
 				HISTORY_FRIEND_STATE , HISTORY_MEDIA_READ_STATE};
 		}
@@ -384,6 +393,7 @@ public final class ContentDescriptor {
 			public static String OWNER_USER_ID = BASE_OWNER_USER_ID;
 			public static String HISTORY_CROWD_SAVEDATE = BASE_SAVEDATE;
 			public static final String HISTORY_CROWD_ID = "CrowdID";
+			public static final String HISTORY_CROWD_AUTHTYPE = "CrowdAuthType";
 			public static final String HISTORY_CROWD_FROM_USER_ID = "FromUserID";
 			public static final String HISTORY_CROWD_REMOTE_USER_ID = "RemoteUserID";
 			public static final String HISTORY_CROWD_TO_USER_ID = "ToUserID";
@@ -392,7 +402,7 @@ public final class ContentDescriptor {
 			public static final String HISTORY_CROWD_STATE = "JoinState";
 			public static final String HISTORY_CROWD_READ_STATE = "ReadState";
 			
-			public static final String[] ALL_CLOS = { ID, OWNER_USER_ID, HISTORY_CROWD_SAVEDATE,
+			public static final String[] ALL_CLOS = { ID, OWNER_USER_ID, HISTORY_CROWD_SAVEDATE,HISTORY_CROWD_AUTHTYPE , 
 				HISTORY_CROWD_ID, HISTORY_CROWD_FROM_USER_ID, HISTORY_CROWD_REMOTE_USER_ID , HISTORY_CROWD_APPLY_REASON
 				, HISTORY_CROWD_REFUSE_REASON , HISTORY_CROWD_STATE ,HISTORY_CROWD_READ_STATE , HISTORY_CROWD_TO_USER_ID};
 		}

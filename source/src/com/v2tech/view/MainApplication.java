@@ -44,6 +44,7 @@ import com.v2tech.util.CrashHandler;
 import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.LogcatThread;
 import com.v2tech.util.Notificator;
+import com.v2tech.util.StorageUtil;
 import com.v2tech.view.conference.VideoActivityV2;
 
 @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
@@ -86,31 +87,31 @@ public class MainApplication extends Application {
 		}
 
 		String path = GlobalConfig.getGlobalPath();
-		File pa = new File(GlobalConfig.getGlobalUserAvatarPath());
-		if (!pa.exists()) {
-			boolean res = pa.mkdirs();
-			V2Log.i(" create avatar dir " + pa.getAbsolutePath() + "  " + res);
-		}
-		pa.setWritable(true);
-		pa.setReadable(true);
-
-		File image = new File(GlobalConfig.getGlobalPicsPath());
-		if (!image.exists()) {
-			boolean res = image.mkdirs();
-			V2Log.i(" create image dir " + image.getAbsolutePath() + "  " + res);
-		}
-		File audioPath = new File(GlobalConfig.getGlobalAudioPath());
-		if (!audioPath.exists()) {
-			boolean res = audioPath.mkdirs();
-			V2Log.i(" create audio dir " + audioPath.getAbsolutePath() + "  "
-					+ res);
-		}
-		File filePath = new File(GlobalConfig.getGlobalFilePath());
-		if (!filePath.exists()) {
-			boolean res = filePath.mkdirs();
-			V2Log.i(" create file dir " + filePath.getAbsolutePath() + "  "
-					+ res);
-		}
+//		File pa = new File(GlobalConfig.getGlobalUserAvatarPath());
+//		if (!pa.exists()) {
+//			boolean res = pa.mkdirs();
+//			V2Log.i(" create avatar dir " + pa.getAbsolutePath() + "  " + res);
+//		}
+//		pa.setWritable(true);
+//		pa.setReadable(true);
+//
+//		File image = new File(GlobalConfig.getGlobalPicsPath());
+//		if (!image.exists()) {
+//			boolean res = image.mkdirs();
+//			V2Log.i(" create image dir " + image.getAbsolutePath() + "  " + res);
+//		}
+//		File audioPath = new File(GlobalConfig.getGlobalAudioPath());
+//		if (!audioPath.exists()) {
+//			boolean res = audioPath.mkdirs();
+//			V2Log.i(" create audio dir " + audioPath.getAbsolutePath() + "  "
+//					+ res);
+//		}
+//		File filePath = new File(GlobalConfig.getGlobalFilePath());
+//		if (!filePath.exists()) {
+//			boolean res = filePath.mkdirs();
+//			V2Log.i(" create file dir " + filePath.getAbsolutePath() + "  "
+//					+ res);
+//		}
 
 		initConfFile();
 
@@ -205,9 +206,18 @@ public class MainApplication extends Application {
 
 	private void initConfFile() {
 		// Initialize global configuration file
-
-		File optionsFile = new File(GlobalConfig.getGlobalPath()
-				+ "/log_options.xml");
+		File path = new File(GlobalConfig.getGlobalPath());
+		if(!path.exists())
+			path.mkdir();
+		
+		File optionsFile = new File(path , "log_options.xml");
+		if(!optionsFile.exists()){
+			try {
+				optionsFile.createNewFile();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 		{
 			String content = "<xml><path>log</path><v2platform><outputdebugstring>0</outputdebugstring><level>5</level><basename>v2platform</basename><path>log</path><size>1024</size></v2platform></xml>";
 			OutputStream os = null;

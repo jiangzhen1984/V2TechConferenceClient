@@ -11,6 +11,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import android.graphics.Bitmap;
 
+import com.V2.jni.V2GlobalEnum;
 import com.V2.jni.ind.V2Group;
 import com.V2.jni.util.V2Log;
 import com.v2tech.util.GlobalState;
@@ -152,7 +153,7 @@ public class GlobalHolder {
 	 * @param list
 	 * 
 	 */
-	public void updateGroupList(Group.GroupType gType, List<V2Group> list) {
+	public void updateGroupList(int gType, List<V2Group> list) {
 
 		for (V2Group vg : list) {
 			Group cache = mGroupHolder.get(Long.valueOf(vg.id));
@@ -160,23 +161,23 @@ public class GlobalHolder {
 				continue;
 			}
 			Group g = null;
-			if (gType == GroupType.CHATING) {
+			if (gType == V2GlobalEnum.GROUP_TYPE_CROWD) {
 				User owner = GlobalHolder.getInstance().getUser(vg.owner.uid);
 				g = new CrowdGroup(vg.id, vg.name, owner);
 				((CrowdGroup) g).setBrief(vg.brief);
 				((CrowdGroup) g).setAnnouncement(vg.announce);
 				mCrowdGroup.add(g);
-			} else if (gType == GroupType.CONFERENCE) {
+			} else if (gType == V2GlobalEnum.GROUP_TYPE_CONFERENCE) {
 				User owner = GlobalHolder.getInstance().getUser(vg.owner.uid);
 				User chairMan = GlobalHolder.getInstance().getUser(
 						vg.chairMan.uid);
 				g = new ConferenceGroup(vg.id, vg.name, owner, vg.createTime,
 						chairMan);
 				mConfGroup.add(g);
-			} else if (gType == GroupType.ORG) {
+			} else if (gType == V2GlobalEnum.GROUP_TYPE_DEPARTMENT) {
 				g = new OrgGroup(vg.id, vg.name);
 				mOrgGroup.add(g);
-			} else if (gType == GroupType.CONTACT) {
+			} else if (gType == V2GlobalEnum.GROUP_TYPE_CONTACT) {
 				g = new ContactGroup(vg.id, vg.name);
 				if (vg.isDefault) {
 					((ContactGroup) g).setDefault(true);
@@ -193,23 +194,31 @@ public class GlobalHolder {
 
 	}
 
-	public void addGroupToList(Group.GroupType gType, Group g) {
-		if (gType == Group.GroupType.ORG) {
-		} else if (gType == Group.GroupType.CONFERENCE) {
+	public void addGroupToList(int groupType , Group g) {
+		if (groupType == V2GlobalEnum.GROUP_TYPE_DEPARTMENT) {
+		} else if (groupType == V2GlobalEnum.GROUP_TYPE_CONFERENCE) {
 			mConfGroup.add(g);
-		} else if (gType == Group.GroupType.CHATING) {
+		} else if (groupType == V2GlobalEnum.GROUP_TYPE_CROWD) {
 			this.mCrowdGroup.add(g);
-		} else if (gType == Group.GroupType.CONTACT) {
+		} else if (groupType == V2GlobalEnum.GROUP_TYPE_CONTACT) {
 			this.mContactsGroup.add(g);
 		}
 		mGroupHolder.put(Long.valueOf(g.getmGId()), g);
 	}
 
-	public Group getGroupById(Group.GroupType gType, long gId) {
+	/**
+	 * 
+	 * @param groupType 
+	 * @param gId
+	 * @return
+	 * 
+	 * {@see com.V2.jni.V2GlobalEnum}
+	 */
+	public Group getGroupById(int groupType, long gId) {
 		return mGroupHolder.get(Long.valueOf(gId));
 	}
 
-	private void populateGroup(GroupType gType, Group parent, Set<V2Group> list) {
+	private void populateGroup(int groupType , Group parent, Set<V2Group> list) {
 		for (V2Group vg : list) {
 			Group cache = mGroupHolder.get(Long.valueOf(vg.id));
 
@@ -219,20 +228,20 @@ public class GlobalHolder {
 				// Update new name
 				cache.setName(vg.name);
 			} else {
-				if (gType == GroupType.CHATING) {
+				if (groupType == V2GlobalEnum.GROUP_TYPE_CROWD) {
 					User owner = GlobalHolder.getInstance().getUser(
 							vg.owner.uid);
 					g = new CrowdGroup(vg.id, vg.name, owner);
-				} else if (gType == GroupType.CONFERENCE) {
+				} else if (groupType == V2GlobalEnum.GROUP_TYPE_CONFERENCE) {
 					User owner = GlobalHolder.getInstance().getUser(
 							vg.owner.uid);
 					User chairMan = GlobalHolder.getInstance().getUser(
 							vg.chairMan.uid);
 					g = new ConferenceGroup(vg.id, vg.name, owner,
 							vg.createTime, chairMan);
-				} else if (gType == GroupType.ORG) {
+				} else if (groupType == V2GlobalEnum.GROUP_TYPE_DEPARTMENT) {
 					g = new OrgGroup(vg.id, vg.name);
-				} else if (gType == GroupType.CONTACT) {
+				} else if (groupType == V2GlobalEnum.GROUP_TYPE_CONTACT) {
 					g = new ContactGroup(vg.id, vg.name);
 				} else {
 					throw new RuntimeException(" Can not support this type");
@@ -243,7 +252,7 @@ public class GlobalHolder {
 
 			mGroupHolder.put(Long.valueOf(g.getmGId()), g);
 
-			populateGroup(gType, g, vg.childs);
+			populateGroup(groupType, g, vg.childs);
 
 		}
 	}
@@ -264,17 +273,17 @@ public class GlobalHolder {
 	 * @return return null means server didn't send group information to
 	 *         service.
 	 */
-	public List<Group> getGroup(Group.GroupType gType) {
-		switch (gType) {
-		case ORG:
+	public List<Group> getGroup(int groupType) {
+		switch (groupType) {
+		case V2GlobalEnum.GROUP_TYPE_DEPARTMENT:
 			return this.mOrgGroup;
-		case CONTACT:
+		case V2GlobalEnum.GROUP_TYPE_CONTACT:
 			return mContactsGroup;
-		case CHATING:
+		case V2GlobalEnum.GROUP_TYPE_CROWD:
 			List<Group> ct = new CopyOnWriteArrayList<Group>();
 			ct.addAll(this.mCrowdGroup);
 			return ct;
-		case CONFERENCE:
+		case V2GlobalEnum.GROUP_TYPE_CONFERENCE:
 			List<Group> confL = new ArrayList<Group>();
 			confL.addAll(this.mConfGroup);
 			Collections.sort(confL);

@@ -706,10 +706,9 @@ public class ConferenceCreateActivity extends Activity {
 
 		@Override
 		protected Void doInBackground(Void... params) {
-			mGroupList = GlobalHolder.getInstance().getGroup(GroupType.ORG);
-			
-			mList.addAll( GlobalHolder.getInstance().getGroup(GroupType.CONTACT));
-			mList.addAll( GlobalHolder.getInstance().getGroup(GroupType.ORG));
+
+			mList.addAll( GlobalHolder.getInstance().getGroup(GroupType.CONTACT.intValue()));
+			mList.addAll( GlobalHolder.getInstance().getGroup(GroupType.ORG.intValue()));
 			
 			
 //			if (mGroupList != null) {
@@ -719,6 +718,7 @@ public class ConferenceCreateActivity extends Activity {
 //			}
 
 			//doPreSelect();
+
 			return null;
 		}
 
@@ -828,11 +828,18 @@ public class ConferenceCreateActivity extends Activity {
 					break;
 				}
 				User currU = GlobalHolder.getInstance().getCurrentUser();
-				ConferenceGroup g = new ConferenceGroup(
-						((RequestConfCreateResponse) rccr).getConfId(),
-						conf.getName(), currU, conf.getDate(), currU);
+				ConferenceGroup g  = null;//new ConferenceGroup(((RequestConfCreateResponse) rccr).getConfId(), 
+//				ConferenceGroup g = new ConferenceGroup(
+//						((RequestConfCreateResponse) rccr).getConfId(),
+//
+//						GroupType.CONFERENCE.intValue(), conf.getName(),
+//						currU.getmUserId() + "", conf.getDate().getTime()
+//								/ 1000 + "", currU.getmUserId());
+				g.setOwnerUser(currU);
+				
+
 				g.addUserToGroup(new ArrayList<User>(mAttendeeList));
-				GlobalHolder.getInstance().addGroupToList(GroupType.CONFERENCE,
+				GlobalHolder.getInstance().addGroupToList(GroupType.CONFERENCE.intValue(),
 						g);
 				Intent i = new Intent();
 				i.putExtra("newGid", g.getmGId());

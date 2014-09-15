@@ -19,6 +19,7 @@ public class RequestChatServiceResponse extends JNIResponse {
 	private long uid;
 	private long groupId;
 	private String deviceID;
+	private long fromUserID;
 
 	/**
 	 * This class is wrapper that wrap response of chat service
@@ -34,6 +35,12 @@ public class RequestChatServiceResponse extends JNIResponse {
 		super(result);
 		this.code = code;
 	}
+	
+	public RequestChatServiceResponse(int code, Result result , long fromUserID) {
+		super(result);
+		this.code = code;
+		this.fromUserID = fromUserID;
+	}
 
 	public RequestChatServiceResponse(int code, long uid, long groupId,
 			String deviceID, Result result) {
@@ -42,6 +49,14 @@ public class RequestChatServiceResponse extends JNIResponse {
 		this.groupId = groupId;
 		this.deviceID = deviceID;
 		this.code = code;
+	}
+	
+	public long getFromUserID() {
+		return fromUserID;
+	}
+
+	public void setFromUserID(long fromUserID) {
+		this.fromUserID = fromUserID;
 	}
 
 	public int getCode() {

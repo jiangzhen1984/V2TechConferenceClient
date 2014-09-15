@@ -105,11 +105,11 @@ public class ContactUserView extends LinearLayout {
 			mButtonIV.setVisibility(View.GONE);
 		}
 
-		this.setOnClickListener(new OnClickListener() {
+		contentContainer.setOnClickListener(new OnClickListener() {
 
 			@Override
 			public void onClick(View arg0) {
-				handle(4);
+				handle(ACTION_TYPE_VIEW_DETAIL);
 			}
 
 		});

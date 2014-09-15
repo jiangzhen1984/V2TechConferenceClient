@@ -45,7 +45,7 @@ public class CrowdContentUpdateActivity extends Activity {
 
 		mTitleTV = (TextView) findViewById(R.id.crowd_content_title);
 		crowd = (CrowdGroup) GlobalHolder.getInstance().getGroupById(
-				GroupType.CHATING, getIntent().getExtras().getLong("cid"));
+				GroupType.CHATING.intValue(), getIntent().getExtras().getLong("cid"));
 
 		mType = getIntent().getExtras().getInt("type");
 		updateView(mType);

@@ -127,6 +127,7 @@ public class XmlParser {
 						va.setNewLine(isNewLine);
 					} else if (msgEl.getTagName().equals("TPictureChatItem")) {
 
+						
 						String uuid = msgEl.getAttribute("GUID");
 						if (uuid == null) {
 							V2Log.e("Invalid uuid ");

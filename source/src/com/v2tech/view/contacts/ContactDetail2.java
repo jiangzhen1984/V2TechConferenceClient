@@ -93,7 +93,7 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 
 		currentUser = GlobalHolder.getInstance().getCurrentUser();
 		List<Group> friendGroup = GlobalHolder.getInstance().getGroup(
-				GroupType.CONTACT);
+				GroupType.CONTACT.intValue());
 		for (Group group : friendGroup) {
 			if ((belongs = group.findUser(u, group)) != null) {
 				isRelation = true;
@@ -292,7 +292,7 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 			if (isRelation) {
 				showConfirmDialog();
 			} else {
-				List<Group> list = GlobalHolder.getInstance().getGroup(GroupType.CONTACT);
+				List<Group> list = GlobalHolder.getInstance().getGroup(GroupType.CONTACT.intValue());
 				if (list != null && list.size() > 0) {
 					contactService.updateUserGroup((ContactGroup)list.get(0), null, u, null);
 					isRelation = true;
