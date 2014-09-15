@@ -43,13 +43,13 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 
 	private static final int UPDATE_USER_INFO = 2;
 	private static final int UPDATE_USER_INFO_DONE = 3;
-	
+
 	private static final int REQUEST_UPDATE_GROUP_CODE = 100;
 
 	private Context mContext;
 
 	private long mUid;
-	private User detailUser;
+	private User u;
 	private LocalHandler lh = new LocalHandler();
 	private UserService us = new UserService();
 	private ContactsService contactService = new ContactsService();
@@ -69,14 +69,12 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 	private TextView mSignTV;
 	private TextView mDeptTV;
 	private TextView mCompanyTV;
-	private TextView mGroupNameTV;
-	
 
 	private EditText mNickNameET;
-
+	private TextView mGroupNameTV;
 	private TextView mAddContactButton;
-	private View mDeleteContactButton;
 	private View mUpdateContactGroupButton;
+	private View mDeleteContactButton;
 
 	private boolean isUpdating;
 	private User currentUser;
@@ -89,24 +87,26 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 
 		this.setContentView(R.layout.activity_contact_detail_2);
 		// 不同页面跳转过来
-		String fromActivity=this.getIntent().getStringExtra("fromActivity");
-		if((fromActivity!=null)&&(fromActivity.equals("MessageAuthenticationActivity"))){
-			//166是wenzl测试用
-			//mUid = this.getIntent().getLongExtra("remoteUserID", 0);
-			mUid=166;
-		}else{
+		String fromActivity = this.getIntent().getStringExtra("fromActivity");
+		if ((fromActivity != null)
+				&& (fromActivity.equals("MessageAuthenticationActivity"))) {
+			// 166是wenzl测试用
+			// mUid = this.getIntent().getLongExtra("remoteUserID", 0);
+			mUid = 166;
+		} else {
 			mUid = this.getIntent().getLongExtra("uid", 0);
 		}
 
 		initView();
 		mContext = this;
-		detailUser = GlobalHolder.getInstance().getUser(mUid);
+		u = GlobalHolder.getInstance().getUser(mUid);
 
 		mNickNameET = (EditText) findViewById(R.id.contact_user_detail_nick_name_et);
-		
+
 		mUpdateContactGroupButton = findViewById(R.id.contact_detail_contact_group_item_ly);
-		mUpdateContactGroupButton.setOnClickListener(mUpdateContactGroupButtonListener);
-		
+		mUpdateContactGroupButton
+				.setOnClickListener(mUpdateContactGroupButtonListener);
+
 		this.overridePendingTransition(R.animator.alpha_from_0_to_1,
 				R.animator.alpha_from_1_to_0);
 
@@ -114,11 +114,13 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 		List<Group> friendGroup = GlobalHolder.getInstance().getGroup(
 				GroupType.CONTACT.intValue());
 		for (Group group : friendGroup) {
-			if (group.findUser(detailUser, group) != null) {
+			if ((belongs = group.findUser(u, group)) != null) {
 				isRelation = true;
+				break;
 			}
 		}
 
+		updateContactGroup();
 		if (isRelation == true) {
 			mAddContactButton.setVisibility(View.GONE);
 			mDeleteContactButton.setVisibility(View.VISIBLE);
@@ -131,7 +133,7 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 	@Override
 	protected void onStart() {
 		super.onStart();
-		if (detailUser != null) {
+		if (u != null) {
 			showUserInfo();
 		}
 	}
@@ -166,7 +168,7 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 		mReturnButtonTV = (TextView) findViewById(R.id.contact_detail_2_return_button);
 		mReturnButtonTV.setOnClickListener(mReturnButtonListener);
 
-		mAddContactButton = (TextView)findViewById(R.id.contact_user_detail_add_friend);
+		mAddContactButton = (TextView) findViewById(R.id.contact_user_detail_add_friend);
 
 		mAddContactButton.setOnClickListener(new OnClickListener() {
 
@@ -204,20 +206,15 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 		mCompanyTV = (TextView) findViewById(R.id.contact_user_detail_company_tv);
 
 	}
-	
-	
+
 	private void updateContactGroup() {
 		if (isRelation == true) {
-			mAddContactButton.setText(mContext.getText(R.string.contacts_user_detail_delete_friend));
 			mUpdateContactGroupButton.setVisibility(View.VISIBLE);
-			mGroupNameTV =(TextView)findViewById(R.id.detail_detail_2_group_name);
+			mGroupNameTV = (TextView) findViewById(R.id.detail_detail_2_group_name);
 			mGroupNameTV.setText(belongs.getName());
 		} else {
-			mAddContactButton.setText(mContext.getText(R.string.contacts_user_detail_add_friend));
 			mUpdateContactGroupButton.setVisibility(View.GONE);
 		}
-		
-		mAddContactButton.setOnClickListener(mAddOrRemoveContactButton);
 	}
 
 	private void showDeleteContactDialog() {
@@ -242,8 +239,7 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 			public void onClick(View v) {
 				// 删除好友
 				deleteContactDialog.dismiss();
-				new FriendGroupService().delFriendGroupUser(detailUser);
-				// 返回用户列表
+				new FriendGroupService().delFriendGroupUser(u);
 				Intent i = new Intent(ContactDetail2.this, MainActivity.class);
 				i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 				ContactDetail2.this.startActivity(i);
@@ -258,23 +254,23 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 	}
 
 	private void showUserInfo() {
-		if (detailUser.getAvatarBitmap() != null) {
-			mHeadIconIV.setImageBitmap(detailUser.getAvatarBitmap());
+		if (u.getAvatarBitmap() != null) {
+			mHeadIconIV.setImageBitmap(u.getAvatarBitmap());
 		}
 
-		mNickNameET.setText(detailUser.getNickName());
+		mNickNameET.setText(u.getNickName());
 		mNickNameET.addTextChangedListener(tw);
 
-		mNameTitleIV.setText(detailUser.getName());
-		mAccountTV.setText(detailUser.getAccount());
-		if (detailUser.getGender() != null) {
-			if (detailUser.getGender().equals("0")) {
+		mNameTitleIV.setText(u.getName());
+		mAccountTV.setText(u.getAccount());
+		if (u.getGender() != null) {
+			if (u.getGender().equals("0")) {
 				mGendarTV.setText(mContext
 						.getText(R.string.contacts_user_detail_gender_priacy));
-			} else if (detailUser.getGender().equals("1")) {
+			} else if (u.getGender().equals("1")) {
 				mGendarTV.setText(mContext
 						.getText(R.string.contacts_user_detail_gender_male));
-			} else if (detailUser.getGender().equals("2")) {
+			} else if (u.getGender().equals("2")) {
 				mGendarTV.setText(mContext
 						.getText(R.string.contacts_user_detail_gender_female));
 			}
@@ -283,51 +279,54 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 			mGendarTV.setText("");
 		}
 
-		mBirthdayTV.setText(detailUser.getBirthdayStr());
-		mCellphoneTV.setText(detailUser.getCellPhone());
-		mTelephoneTV.setText(detailUser.getTelephone());
-		mTitleTV.setText(detailUser.getTitle());
-		mAddressTV.setText(detailUser.getAddress());
-		mSignTV.setText(detailUser.getSignature());
-		mDeptTV.setText(detailUser.getDepartment());
-		mCompanyTV.setText(detailUser.getCompany());
+		mBirthdayTV.setText(u.getBirthdayStr());
+		mCellphoneTV.setText(u.getCellPhone());
+		mTelephoneTV.setText(u.getTelephone());
+		mTitleTV.setText(u.getTitle());
+		mAddressTV.setText(u.getAddress());
+		mSignTV.setText(u.getSignature());
+		mDeptTV.setText(u.getDepartment());
+		mCompanyTV.setText(u.getCompany());
 
 	}
-	
-	
-	private Dialog  mDialog = null;
+
+	private Dialog mDialog = null;
+
 	private void showConfirmDialog() {
 		if (mDialog == null) {
 			mDialog = new Dialog(mContext);
 			mDialog.setContentView(R.layout.contacts_remove_confirmation_dialog);
-			Button confirmButton = (Button)mDialog.findViewById(R.id.contacts_group_confirm_button);
+			Button confirmButton = (Button) mDialog
+					.findViewById(R.id.contacts_group_confirm_button);
 			confirmButton.setOnClickListener(new OnClickListener() {
 
 				@Override
 				public void onClick(View view) {
-					//input null for remove contact
-					contactService.updateUserGroup(null,(ContactGroup)belongs,  detailUser, null);
+					// input null for remove contact
+					contactService.updateUserGroup(null,
+							(ContactGroup) belongs, u, null);
 					isRelation = false;
 					updateContactGroup();
 					mDialog.dismiss();
 				}
-				
+
 			});
-			Button cancelbutton = (Button)mDialog.findViewById(R.id.contacts_group_cancel_button);
+			Button cancelbutton = (Button) mDialog
+					.findViewById(R.id.contacts_group_cancel_button);
 			cancelbutton.setOnClickListener(new OnClickListener() {
 
 				@Override
 				public void onClick(View arg0) {
 					mDialog.dismiss();
 				}
-				
+
 			});
 		}
-		
+
 		if (!mDialog.isShowing()) {
 			mDialog.show();
 		}
-		
+
 	}
 
 	private TextWatcher tw = new TextWatcher() {
@@ -364,10 +363,7 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 		}
 
 	};
-	
-	
-	
-	
+
 	private View.OnClickListener mAddOrRemoveContactButton = new OnClickListener() {
 
 		@Override
@@ -375,20 +371,20 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 			if (isRelation) {
 				showConfirmDialog();
 			} else {
-				List<Group> list = GlobalHolder.getInstance().getGroup(GroupType.CONTACT.intValue());
+				List<Group> list = GlobalHolder.getInstance().getGroup(
+						GroupType.CONTACT.intValue());
 				if (list != null && list.size() > 0) {
-					contactService.updateUserGroup((ContactGroup)list.get(0), null, detailUser, null);
+					contactService.updateUserGroup((ContactGroup) list.get(0),
+							null, u, null);
 					isRelation = true;
-					belongs = (ContactGroup)list.get(0);
+					belongs = (ContactGroup) list.get(0);
 				}
 			}
 			updateContactGroup();
 		}
 
 	};
-	
-	
-	
+
 	private View.OnClickListener mUpdateContactGroupButtonListener = new OnClickListener() {
 
 		@Override
@@ -403,7 +399,7 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 	};
 
 	private void gatherUserData() {
-		detailUser.setNickName(mNickNameET.getText().toString());
+		u.setNickName(mNickNameET.getText().toString());
 	}
 
 	class LocalHandler extends Handler {
@@ -413,8 +409,8 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 			switch (msg.what) {
 			case UPDATE_USER_INFO:
 				gatherUserData();
-				us.updateUser(detailUser, new Registrant(this,
-						UPDATE_USER_INFO_DONE, null));
+				us.updateUser(u, new Registrant(this, UPDATE_USER_INFO_DONE,
+						null));
 				break;
 			case UPDATE_USER_INFO_DONE:
 				if (mContext != null) {

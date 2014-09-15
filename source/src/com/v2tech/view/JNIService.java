@@ -60,6 +60,7 @@ import com.v2tech.view.contacts.add.AddFriendHistroysHandler;
 import com.v2tech.view.conversation.MessageBuilder;
 import com.v2tech.view.conversation.MessageLoader;
 import com.v2tech.vo.ConferenceGroup;
+import com.v2tech.vo.Crowd;
 import com.v2tech.vo.Group;
 import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.NetworkStateCode;
@@ -572,73 +573,51 @@ public class JNIService extends Service {
 			}
 
 		}
-		
 
 		@Override
-		public void OnInviteJoinGroupCallback(V2Group group) {
+		public void OnInviteJoinGroupCallback(V2Group group, String userInfo,
+				String additInfo) {
 			if (group == null) {
 				V2Log.e(" invitation group is null");
 				return;
 			}
-			Group cache = 	GlobalHolder.getInstance().getGroupById(group.type, group.id);
+			Group cache = GlobalHolder.getInstance().getGroupById(group.type,
+					group.id);
 			if (cache != null) {
-				V2Log.e("Duplicated group invitation: "+ cache.getmGId() +"  "+ cache.getName());
+				V2Log.e("Duplicated group invitation: " + cache.getmGId()
+						+ "  " + cache.getName());
 				return;
 			}
-			
+
 			GroupType gType = GroupType.fromInt(group.type);
-			//if (gType == GroupType.CONFERENCE) {
-//<<<<<<< HEAD
-//				User owner = GlobalHolder.getInstance().getUser(group.owner.uid);
-//				User chairMan = GlobalHolder.getInstance().getUser(group.chairMan.uid);
-//				ConferenceGroup g = new ConferenceGroup(group.id, group.name, owner, group.createTime, chairMan);
-//				Message.obtain(mCallbackHandler, JNI_CONFERENCE_INVITATION, g)
-//						.sendToTarget();
-//			} else if (gType == GroupType.CHATING) {
-//				User owner = GlobalHolder.getInstance().getUser(group.creator.uid);
-//				if (owner.isDirty()) {
-//					owner.setName(group.creator.name);
-//				}
-//			
-//				Crowd crowd = new Crowd(group.id, owner, group.name, group.brief);
-//				
-//				Intent i = new Intent(JNI_BROADCAST_CROWD_INVATITION);
-//				i.addCategory(JNI_ACTIVITY_CATEGROY);
-//				i.putExtra("crowd", crowd);
-//				i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//				mContext.startActivity(i);
-//				
-//=======
-//				Group g = ConferenceGroup
-//						.parseConferenceGroupFromXML(groupInfo);
-//				if (g != null) {
-//					// Send message for synchronization
-//					Message.obtain(mCallbackHandler, JNI_CONFERENCE_INVITATION,
-//							g).sendToTarget();
-//				}
-//			} else if (gType == GroupType.CROWDGROUP) {
-//				// TODO just accept automatically
-//				Group g = CrowdGroup.parseXml(groupInfo, userInfo);
-//				GlobalHolder.getInstance().addGroupToList(GroupType.CROWDGROUP,
-//						g);
-//				GroupRequest.getInstance().acceptInviteJoinGroup(groupType,
-//						g.getmGId(),
-//						GlobalHolder.getInstance().getCurrentUserId());
-//				Message.obtain(mCallbackHandler, JNI_GROUP_INVITATION,
-//						g.getmGId()).sendToTarget();
-//			} else if (gType == GroupType.CONTACT) {
-//				AddFriendHistroysHandler.addMeNeedAuthentication(
-//						getApplicationContext(), userInfo, additInfo);
-//			}
+			if (gType == GroupType.CONFERENCE) {
+				User owner = GlobalHolder.getInstance()
+						.getUser(group.owner.uid);
+				User chairMan = GlobalHolder.getInstance().getUser(
+						group.chairMan.uid);
+				ConferenceGroup g = new ConferenceGroup(group.id, group.name,
+						owner, group.createTime, chairMan);
+				Message.obtain(mCallbackHandler, JNI_CONFERENCE_INVITATION, g)
+						.sendToTarget();
+			} else if (gType == GroupType.CHATING) {
+				User owner = GlobalHolder.getInstance().getUser(
+						group.creator.uid);
+				if (owner.isDirty()) {
+					owner.setName(group.creator.name);
+				}
 
-		}
+				Crowd crowd = new Crowd(group.id, owner, group.name,
+						group.brief);
 
-		@Override
-		public void OnRefuseInviteJoinGroup(int groupType, long nGroupID,
-				long nUserID, String sxml) {
-			GroupType gType = GroupType.fromInt(groupType);
-			if (gType == GroupType.CONTACT) {
-				AddFriendHistroysHandler.addOtherRefused(nUserID, sxml);
+				Intent i = new Intent(JNI_BROADCAST_CROWD_INVATITION);
+				i.addCategory(JNI_ACTIVITY_CATEGROY);
+				i.putExtra("crowd", crowd);
+				i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+				mContext.startActivity(i);
+
+			} else if (gType == GroupType.CONTACT) {
+				AddFriendHistroysHandler.addMeNeedAuthentication(
+						getApplicationContext(), userInfo, additInfo);
 			}
 		}
 

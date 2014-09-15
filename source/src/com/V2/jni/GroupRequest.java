@@ -51,15 +51,23 @@ public class GroupRequest {
 	public native void unInitialize();
 
 	/**
-	 * <ul>delete group. If groupType is {@link V2Group#TYPE_CROWD}, dismiss current crowd</ul>
+	 * <ul>
+	 * delete group. If groupType is {@link V2Group#TYPE_CROWD}, dismiss current
+	 * crowd
+	 * </ul>
+	 * 
 	 * @param groupType
 	 * @param nGroupID
 	 */
 	public native void delGroup(int groupType, long nGroupID);
 
 	/**
-	 * <ul>quit from group if user is not administrator or creator</ul>
-	 * @param groupType {@link V2Group}
+	 * <ul>
+	 * quit from group if user is not administrator or creator
+	 * </ul>
+	 * 
+	 * @param groupType
+	 *            {@link V2Group}
 	 * @param nGroupID
 	 */
 	public native void leaveGroup(int groupType, long nGroupID);
@@ -92,8 +100,11 @@ public class GroupRequest {
 			String userInfo);
 
 	/**
-	 * <ul>Invite user to join group.<ul>
-	 * <ul> If groupType is {@link V2Group#TYPE_CONF} <br>
+	 * <ul>
+	 * Invite user to join group.
+	 * <ul>
+	 * <ul>
+	 * If groupType is {@link V2Group#TYPE_CONF} <br>
 	 * groupInfo is :
 	 * {@code <conf canaudio="1" candataop="1" canvideo="1" conftype="0" haskey="0" 
 	 * id="0" key=""  layout="1" lockchat="0" lockconf="0" lockfiletrans="0"
@@ -106,10 +117,14 @@ public class GroupRequest {
 	 * groupInfo is:
 	 * {@code <crowd id="" name="" authtype="" size="" announcement=""  summary="" />}
 	 * </ul>
-	 * @param groupType {@code V2Group}
-	 * @param groupInfo group information
-	 * @param userInfo {@code <userlist><user id='1' /><user id='2' /></userlist>}
-	 * @param additInfo 
+	 * 
+	 * @param groupType
+	 *            {@code V2Group}
+	 * @param groupInfo
+	 *            group information
+	 * @param userInfo
+	 *            {@code <userlist><user id='1' /><user id='2' /></userlist>}
+	 * @param additInfo
 	 */
 	public native void inviteJoinGroup(int groupType, String groupInfo,
 			String userInfo, String additInfo);
@@ -173,8 +188,8 @@ public class GroupRequest {
 	 */
 	private void OnAcceptInviteJoinGroup(int groupType, long groupId,
 			long nUserID) {
-		V2Log.e("Group Request  OnAcceptInviteJoinGroup  ==>" + groupType + "   " + groupId
-				+ "  " + nUserID);
+		V2Log.e("Group Request  OnAcceptInviteJoinGroup  ==>" + groupType
+				+ "   " + groupId + "  " + nUserID);
 		for (WeakReference<GroupRequestCallback> wrcb : mCallbacks) {
 			Object obj = wrcb.get();
 			if (obj != null) {
@@ -245,7 +260,7 @@ public class GroupRequest {
 	public void addCallback(GroupRequestCallback callback) {
 		this.mCallbacks.add(new WeakReference<GroupRequestCallback>(callback));
 	}
-	
+
 	public void removeCallback(GroupRequestCallback callback) {
 		for (int i = 0; i < mCallbacks.size(); i++) {
 			if (mCallbacks.get(i).get() == callback) {
@@ -254,7 +269,6 @@ public class GroupRequest {
 			}
 		}
 	}
-	
 
 	private void OnGetGroupUserInfo(int groupType, long nGroupID, String sXml) {
 		V2Log.d("OnGetGroupUserInfo -> " + groupType + ":" + nGroupID + ":"
@@ -295,11 +309,11 @@ public class GroupRequest {
 
 	private void OnAddGroupInfo(int groupType, long nParentID, long nGroupID,
 			String sXml) {
-		V2Log.d("OnAddGroupInfo:: " + groupType + ":"
-				+ nParentID + ":" + nGroupID + ":" + sXml);
-		
+		V2Log.d("OnAddGroupInfo:: " + groupType + ":" + nParentID + ":"
+				+ nGroupID + ":" + sXml);
+
 		String gid = XmlAttributeExtractor.extract(sXml, " id='", "'");
-		String name =  XmlAttributeExtractor.extract(sXml, " name='", "'");
+		String name = XmlAttributeExtractor.extract(sXml, " name='", "'");
 		V2Group vg = new V2Group(Long.parseLong(gid), name, groupType);
 		for (WeakReference<GroupRequestCallback> wrcb : mCallbacks) {
 			Object obj = wrcb.get();
@@ -360,31 +374,38 @@ public class GroupRequest {
 		}
 		V2Group group = new V2Group(Long.parseLong(id), groupType);
 		if (groupType == V2Group.TYPE_CONF) {
-			String name = XmlAttributeExtractor.extract(groupInfo, "subject='", "'");
-			String starttime = XmlAttributeExtractor.extract(groupInfo, "starttime='", "'");
-			String createuserid = XmlAttributeExtractor.extract(groupInfo, "createuserid='", "'");
+			String name = XmlAttributeExtractor.extract(groupInfo, "subject='",
+					"'");
+			String starttime = XmlAttributeExtractor.extract(groupInfo,
+					"starttime='", "'");
+			String createuserid = XmlAttributeExtractor.extract(groupInfo,
+					"createuserid='", "'");
 			group.name = name;
 			group.createTime = new Date(Long.parseLong(starttime) * 1000);
 			group.chairMan = new V2User(Long.valueOf(createuserid));
 			group.owner = new V2User(Long.valueOf(createuserid));
-			
+
 		} else if (groupType == V2Group.TYPE_CROWD) {
-			String createuserid = XmlAttributeExtractor.extract(userInfo, " id='", "'");
-			String auth = XmlAttributeExtractor.extract(groupInfo, "authtype='", "'");
-			String uname = XmlAttributeExtractor.extract(userInfo, "nickname='", "'");
-			String name = XmlAttributeExtractor.extract(groupInfo, "name='", "'");
+			String createuserid = XmlAttributeExtractor.extract(userInfo,
+					" id='", "'");
+			String auth = XmlAttributeExtractor.extract(groupInfo,
+					"authtype='", "'");
+			String uname = XmlAttributeExtractor.extract(userInfo,
+					"nickname='", "'");
+			String name = XmlAttributeExtractor.extract(groupInfo, "name='",
+					"'");
 			group.name = name;
 			group.creator = new V2User(Long.valueOf(createuserid), uname);
 			if (auth != null) {
 				group.authType = Integer.parseInt(auth);
 			}
 		}
-		
+
 		for (WeakReference<GroupRequestCallback> wrcb : mCallbacks) {
 			Object obj = wrcb.get();
 			if (obj != null) {
 				GroupRequestCallback callback = (GroupRequestCallback) obj;
-				callback.OnInviteJoinGroupCallback(group);
+				callback.OnInviteJoinGroupCallback(group, userInfo, additInfo);
 			}
 		}
 
@@ -418,14 +439,15 @@ public class GroupRequest {
 
 	private void OnMoveUserToGroup(int groupType, long srcGroupID,
 			long dstGroupID, long nUserID) {
-		V2Log.d("OnMoveUserToGroup:: " + groupType + ":"
-				+ srcGroupID + ":" + dstGroupID + ":" + nUserID);
+		V2Log.d("OnMoveUserToGroup:: " + groupType + ":" + srcGroupID + ":"
+				+ dstGroupID + ":" + nUserID);
 		for (WeakReference<GroupRequestCallback> wrcb : mCallbacks) {
 			Object obj = wrcb.get();
 			if (obj != null) {
 				GroupRequestCallback callback = (GroupRequestCallback) obj;
-				callback.OnMoveUserToGroup(groupType, new V2Group(srcGroupID, "", groupType),
-						new V2Group(dstGroupID, "", groupType), new V2User(nUserID));
+				callback.OnMoveUserToGroup(groupType, new V2Group(srcGroupID,
+						"", groupType), new V2Group(dstGroupID, "", groupType),
+						new V2User(nUserID));
 			}
 		}
 	}
@@ -448,8 +470,8 @@ public class GroupRequest {
 	}
 
 	/**
-	 * 会议中创建白板的回调
-	 * TODO implement 
+	 * 会议中创建白板的回调 TODO implement
+	 * 
 	 * @param eGroupType
 	 * @param nGroupID
 	 * @param szWBoardID
@@ -463,8 +485,8 @@ public class GroupRequest {
 	};
 
 	/**
-	 * 文件重命名
-	 * TODO implement 
+	 * 文件重命名 TODO implement
+	 * 
 	 * @param eGroupType
 	 * @param nGroupID
 	 * @param sFileID
@@ -478,8 +500,8 @@ public class GroupRequest {
 	};
 
 	/**
-	 * 收到白板会话被关闭的回调 
-	 * TODO implement 
+	 * 收到白板会话被关闭的回调 TODO implement
+	 * 
 	 * @param eGroupType
 	 * @param nGroupID
 	 * @param szWBoardID
@@ -492,8 +514,8 @@ public class GroupRequest {
 	};
 
 	/**
-	 * 会议中创建文档共享的回调 eWhiteShowType白板显示类型 
-	 * TODO implement 
+	 * 会议中创建文档共享的回调 eWhiteShowType白板显示类型 TODO implement
+	 * 
 	 * @param eGroupType
 	 * @param nGroupID
 	 * @param szWBoardID
@@ -504,6 +526,7 @@ public class GroupRequest {
 			String szWBoardID, String szFileName, int eWhiteShowType) {
 		V2Log.e("GroupRequest UI", "OnGroupCreateWBoard ---> eGroupType :"
 				+ eGroupType + " | nGroupID: " + nGroupID + " | szWBoardID: "
-				+ szWBoardID + " | szFileName: " + szFileName + " | eWhiteShowType: " + eWhiteShowType);
+				+ szWBoardID + " | szFileName: " + szFileName
+				+ " | eWhiteShowType: " + eWhiteShowType);
 	};
 }

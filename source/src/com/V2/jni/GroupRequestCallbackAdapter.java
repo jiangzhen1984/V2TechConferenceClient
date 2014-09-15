@@ -26,7 +26,8 @@ public abstract class GroupRequestCallbackAdapter implements
 	}
 
 	@Override
-	public void OnInviteJoinGroupCallback(V2Group group) {
+	public void OnInviteJoinGroupCallback(V2Group group, String userInfo,
+			String additInfo) {
 
 	}
 	

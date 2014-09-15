@@ -90,11 +90,11 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="top"
-                    android:ellipsize="end"
                     android:gravity="top"
-                    android:maxWidth="@dimen/detail_detail_name_max_width"
-                    android:singleLine="true"
                     android:text="TextView"
+                    android:singleLine="true"
+                    android:ellipsize="end"
+                    android:maxWidth="@dimen/detail_detail_name_max_width"
                     android:textColor="@color/common_item_text_color" />
 
                 <TextView
@@ -104,9 +104,9 @@
                     android:layout_gravity="bottom"
                     android:ellipsize="end"
                     android:gravity="bottom"
-                    android:maxWidth="@dimen/detail_detail_name_max_width"
                     android:singleLine="true"
                     android:text="TextView"
+                     android:maxWidth="@dimen/detail_detail_name_max_width"
                     android:textColor="@color/common_item_text_color" />
             </LinearLayout>
 

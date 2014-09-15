@@ -38,12 +38,12 @@ public class GlobalHolder {
 	private List<Group> mContactsGroup = new ArrayList<Group>();
 
 	private List<Group> mCrowdGroup = new ArrayList<Group>();
-	
-	public List<AddFriendHistorieNode> addFriendHistorieList=new ArrayList<AddFriendHistorieNode>();
 
 	private Map<Long, User> mUserHolder = new HashMap<Long, User>();
 	private Map<Long, Group> mGroupHolder = new HashMap<Long, Group>();
 	private Map<Long, String> mAvatarHolder = new HashMap<Long, String>();
+	
+	public List<AddFriendHistorieNode> addFriendHistorieList=new ArrayList<AddFriendHistorieNode>();
 
 	private Map<Long, Set<UserDeviceConfig>> mUserDeviceList = new HashMap<Long, Set<UserDeviceConfig>>();
 

@@ -81,22 +81,8 @@ public interface GroupRequestCallback {
 	 * 
 	 * @param group
 	 */
-	public void OnInviteJoinGroupCallback(V2Group group);
-
-
-	/**
-	 * FIXME update paramter to object
-	 * @comment-user:wenzl 2014年9月15日
-	 * @overview:
-	 *
-	 * @param groupType
-	 * @param nGroupID
-	 * @param nUserID
-	 * @param sxml
-	 * @return:
-	 */
-	public void OnRefuseInviteJoinGroup(int groupType, long nGroupID,
-			long nUserID, String sxml);
+	public void OnInviteJoinGroupCallback(V2Group group, String userInfo,
+			String additInfo);
 
 	/**
 	 * 
@@ -136,6 +122,7 @@ public interface GroupRequestCallback {
 
 	/**
 	 * update contact group callback
+	 * 
 	 * @param groupType
 	 * @param srcGroup
 	 * @param desGroup
@@ -143,16 +130,18 @@ public interface GroupRequestCallback {
 	 */
 	public void OnMoveUserToGroup(int groupType, V2Group srcGroup,
 			V2Group desGroup, V2User u);
-	
-	
-	
+
 	/**
 	 * Callback of accept join crowd invitation
+	 * 
 	 * @param groupType
 	 * @param groupId
 	 * @param nUserID
 	 */
 	public void OnAcceptInviteJoinGroup(int groupType, long groupId,
 			long nUserID);
+
+	void OnRefuseInviteJoinGroup(int groupType, long nGroupID, long nUserID,
+			String sxml);
 
 }

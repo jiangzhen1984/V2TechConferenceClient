@@ -1245,6 +1245,10 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 					startActivity(intent);
 				} else if (cov.getType() == Conversation.TYPE_VERIFICATION_MESSAGE) {
 
+					Intent intent = new Intent(mContext,
+							MessageAuthenticationActivity.class);
+					startActivity(intent);
+
 				} else {
 					startConversationView(cov);
 				}
