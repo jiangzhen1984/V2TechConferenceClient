@@ -14,6 +14,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -24,8 +25,11 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.RadioButton;
 import android.widget.TextView;
 
 public class MessageAuthenticationActivity extends Activity {
@@ -34,21 +38,59 @@ public class MessageAuthenticationActivity extends Activity {
 	private ListView lvMessageAuthentication;
 	// R.id.message_back
 	private TextView tvMessageBack;
-	
+	// R.id.rb_friend_authentication
+	private RadioButton rbFriendAuthentication;
+	// R.id.rb_group_authentication
+	private RadioButton rbGroupAuthentication;
+
 	private List<MessageAuthenticationData> messageAuthenticationDataList = new ArrayList<MessageAuthenticationActivity.MessageAuthenticationData>();
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.message_authentication);
-		tvMessageBack=(TextView)findViewById(R.id.message_back);
+		tvMessageBack = (TextView) findViewById(R.id.message_back);
 		tvMessageBack.setOnClickListener(new OnClickListener() {
-			
 			@Override
 			public void onClick(View arg0) {
 				onBackPressed();
 			}
 		});
+
+		rbFriendAuthentication = (RadioButton) findViewById(R.id.rb_friend_authentication);
+		rbFriendAuthentication
+				.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+					@Override
+					public void onCheckedChanged(CompoundButton arg0,
+							boolean arg1) {
+						if (arg1) {
+							rbFriendAuthentication.setTextColor(Color.rgb(255,
+									255, 255));
+						} else {
+							rbFriendAuthentication.setTextColor(getResources()
+									.getColor(R.color.button_text_color));
+						}
+
+					}
+				});
+
+		rbGroupAuthentication = (RadioButton) findViewById(R.id.rb_group_authentication);
+		rbGroupAuthentication
+				.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+					@Override
+					public void onCheckedChanged(CompoundButton arg0,
+							boolean arg1) {
+						if (arg1) {
+							rbGroupAuthentication.setTextColor(Color.rgb(255,
+									255, 255));
+						} else {
+							rbGroupAuthentication.setTextColor(getResources()
+									.getColor(R.color.button_text_color));
+						}
+
+					}
+				});
+
 		// 获得listview
 		lvMessageAuthentication = (ListView) findViewById(R.id.message_authentication);
 		// 生成数据
@@ -56,34 +98,35 @@ public class MessageAuthenticationActivity extends Activity {
 
 		Iterator<AddFriendHistorieNode> iterator = GlobalHolder.getInstance().addFriendHistorieList
 				.iterator();
-		
-//		String sql="select * from "+tableName;
-//		Cursor cr=AddFriendHistroysHandler.select(getApplicationContext(), sql, new String[]{});
+
+		// String sql="select * from "+tableName;
+		// Cursor cr=AddFriendHistroysHandler.select(getApplicationContext(),
+		// sql, new String[]{});
 
 		while (iterator.hasNext()) {
 			AddFriendHistorieNode tempNode = iterator.next();
-////			_id  integer primary key AUTOINCREMENT,0
-////			OwnerUserID bigint,1
-////			SaveDate bigint,2
-////			FromUserID bigint,3
-////			OwnerAuthType bigint,4
-////			ToUserID bigint, 5
-////			RemoteUserID bigint, 6
-////			ApplyReason nvarchar(4000),7 
-////			RefuseReason nvarchar(4000), 8
-////			AddState bigint ,9
-////			ReadState bigint);10
-//			tempNode.ownerUserID=cr.getLong(1);
-//			tempNode.saveDate=cr.getLong(2);
-//			tempNode.fromUserID=cr.getLong(3);
-//			tempNode.ownerAuthType=cr.getLong(4);
-//			tempNode.toUserID=cr.getLong(5);
-//			tempNode.remoteUserID=cr.getLong(6);
-//			tempNode.applyReason=cr.getString(7);
-//			tempNode.refuseReason=cr.getString(8);
-//			tempNode.addState=cr.getLong(9);
-//			tempNode.readState=cr.getLong(10);
-			
+			// // _id integer primary key AUTOINCREMENT,0
+			// // OwnerUserID bigint,1
+			// // SaveDate bigint,2
+			// // FromUserID bigint,3
+			// // OwnerAuthType bigint,4
+			// // ToUserID bigint, 5
+			// // RemoteUserID bigint, 6
+			// // ApplyReason nvarchar(4000),7
+			// // RefuseReason nvarchar(4000), 8
+			// // AddState bigint ,9
+			// // ReadState bigint);10
+			// tempNode.ownerUserID=cr.getLong(1);
+			// tempNode.saveDate=cr.getLong(2);
+			// tempNode.fromUserID=cr.getLong(3);
+			// tempNode.ownerAuthType=cr.getLong(4);
+			// tempNode.toUserID=cr.getLong(5);
+			// tempNode.remoteUserID=cr.getLong(6);
+			// tempNode.applyReason=cr.getString(7);
+			// tempNode.refuseReason=cr.getString(8);
+			// tempNode.addState=cr.getLong(9);
+			// tempNode.readState=cr.getLong(10);
+
 			MessageAuthenticationData tempData = new MessageAuthenticationData();
 			tempData.remoteUserID = tempNode.remoteUserID;
 			tempData.name = GlobalHolder.getInstance()

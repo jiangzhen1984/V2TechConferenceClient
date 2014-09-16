@@ -169,14 +169,6 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 			mConversationsListView.setOnItemClickListener(mItemClickListener);
 			mConversationsListView
 					.setOnItemLongClickListener(mItemLongClickListener);
-			
-			rootView.findViewById(R.id.yanzhengxiaoxi).setOnClickListener(new OnClickListener() {
-				@Override
-				public void onClick(View arg0) {
-					Intent i=new Intent(getActivity(),MessageAuthenticationActivity.class);
-					getActivity().startActivity(i);
-				}
-			});
 
 		}
 		return rootView;

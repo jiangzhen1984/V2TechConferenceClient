@@ -368,6 +368,8 @@ public class GroupRequest {
 		V2Log.d("OnInviteJoinGroup::==>" + groupType + ":" + groupInfo + ":"
 				+ userInfo + ":" + additInfo);
 		String id = XmlAttributeExtractor.extract(groupInfo, " id='", "'");
+		// String id ="30";
+		// groupInfo 常常为空影响了回调
 		if (id == null || id.isEmpty()) {
 			V2Log.e(" Unknow group information:" + groupInfo);
 			return;
