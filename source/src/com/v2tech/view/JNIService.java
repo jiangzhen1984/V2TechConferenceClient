@@ -81,6 +81,9 @@ import com.v2tech.vo.VMessageImageItem;
  */
 public class JNIService extends Service {
 	private static final String TAG = "JNIService";
+	public static final int BINARY_TYPE_AUDIO = 1;
+	public static final int BINARY_TYPE_IMAGE = 2;
+	
 	public static final String JNI_BROADCAST_CATEGROY = "com.v2tech.jni.broadcast";
 	public static final String JNI_ACTIVITY_CATEGROY = "com.v2tech";
 	public static final String JNI_BROADCAST_CONNECT_STATE_NOTIFICATION = "com.v2tech.jni.broadcast.connect_state_notification";
@@ -104,7 +107,7 @@ public class JNIService extends Service {
 	public static final String JNI_BROADCAST_GROUP_USER_REMOVED = "com.v2tech.jni.broadcast.group_user_removed";
 	public static final String JNI_BROADCAST_GROUP_USER_ADDED = "com.v2tech.jni.broadcast.group_user_added";
 	public static final String JNI_BROADCAST_VIDEO_CALL_CLOSED = "com.v2tech.jni.broadcast.video_call_closed";
-	
+
 	/**
 	 * Crowd invitation with key crowd
 	 */
@@ -294,8 +297,7 @@ public class JNIService extends Service {
 				List<V2Group> gl = (List<V2Group>) msg.obj;
 
 				if (gl != null && gl.size() > 0) {
-					GlobalHolder.getInstance().updateGroupList(
-							msg.arg1, gl);
+					GlobalHolder.getInstance().updateGroupList(msg.arg1, gl);
 					Intent gi = new Intent(JNI_BROADCAST_GROUP_NOTIFICATION);
 					gi.putExtra("gtype", msg.arg1);
 					gi.addCategory(JNI_BROADCAST_CATEGROY);
@@ -371,15 +373,15 @@ public class JNIService extends Service {
 				VMessage vm = (VMessage) msg.obj;
 				if (vm != null) {
 					String action = null;
-					long time = (((System.currentTimeMillis() - GlobalConfig.LOCAL_TIME) / 1000) + GlobalConfig.SERVER_TIME) * 1000;
-					vm.setDate(new Date(time));
+					MessageBuilder.saveBinaryVMessage(mContext, vm);
 					MessageBuilder.saveMessage(mContext, vm);
 					Long id = MessageLoader
 							.queryVMessageID(
 									mContext,
 									ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_ID
 											+ "=?",
-									new String[] { vm.getUUID() }, null, vm.getFromUser().getmUserId());
+									new String[] { vm.getUUID() }, null, vm
+											.getFromUser().getmUserId());
 					if (id == null) {
 						V2Log.e("the message :" + vm.getUUID()
 								+ " save in databases is failed ....");
@@ -409,6 +411,7 @@ public class JNIService extends Service {
 				iv.setAction(PublicIntent.START_P2P_CONVERSACTION_ACTIVITY);
 				iv.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 				iv.putExtra("uid", vjoi.getFromUserId());
+				iv.putExtra("sessionID", vjoi.getSzSessionID());
 				iv.putExtra("is_coming_call", true);
 				iv.putExtra("voice", false);
 				iv.putExtra("device", vjoi.getDeviceId());
@@ -445,7 +448,8 @@ public class JNIService extends Service {
 		}
 
 		@Override
-		public void OnLoginCallback(long nUserID, int nStatus, int nResult , long serverTime) {
+		public void OnLoginCallback(long nUserID, int nStatus, int nResult,
+				long serverTime) {
 		}
 
 		@Override
@@ -660,7 +664,7 @@ public class JNIService extends Service {
 				i.addCategory(PublicIntent.DEFAULT_CATEGORY);
 				i.putExtra("crowd", nGroupID);
 				sendBroadcast(i);
-				
+
 			}
 		}
 
@@ -713,9 +717,7 @@ public class JNIService extends Service {
 			GroupType gType = GroupType.fromInt(groupType);
 			if (gType == GroupType.CONTACT) {
 				AddFriendHistroysHandler.becomeFriendHanler(sXml);
-				
-				
-				
+
 			}
 
 			GlobalHolder.getInstance().addUserToGroup(
@@ -759,8 +761,8 @@ public class JNIService extends Service {
 					|| GlobalHolder.getInstance().isInAudioCall()
 					|| GlobalHolder.getInstance().isInVideoCall()) {
 				V2Log.i("Ignore audio call ");
-				AudioRequest.getInstance().RefuseAudioChat(ind.getSzSessionID(),
-						ind.getFromUserId());
+				AudioRequest.getInstance().RefuseAudioChat(
+						ind.getSzSessionID(), ind.getFromUserId());
 				return;
 			}
 
@@ -792,8 +794,9 @@ public class JNIService extends Service {
 					|| GlobalHolder.getInstance().isInAudioCall()
 					|| GlobalHolder.getInstance().isInVideoCall()) {
 				V2Log.i("Ignore video call ");
-				VideoRequest.getInstance().refuseVideoChat(ind.getSzSessionID(),
-						ind.getFromUserId(), ind.getDeviceId());
+				VideoRequest.getInstance().refuseVideoChat(
+						ind.getSzSessionID(), ind.getFromUserId(),
+						ind.getDeviceId());
 				return;
 			}
 			Message.obtain(mCallbackHandler, JNI_RECEIVED_VIDEO_INVITION, ind)
@@ -814,9 +817,12 @@ public class JNIService extends Service {
 		@Override
 		/*
 		 * Use to user quickly pressed video call button more than one time
-		 * Because chat close event doesn't notify to activity.
-		 * P2PConversation doesn't start up yet.
-		 * @see com.V2.jni.VideoRequestCallbackAdapter#OnVideoChatClosed(com.V2.jni.ind.VideoJNIObjectInd)
+		 * Because chat close event doesn't notify to activity. P2PConversation
+		 * doesn't start up yet.
+		 * 
+		 * @see
+		 * com.V2.jni.VideoRequestCallbackAdapter#OnVideoChatClosed(com.V2.jni
+		 * .ind.VideoJNIObjectInd)
 		 */
 		public void OnVideoChatClosed(VideoJNIObjectInd ind) {
 			super.OnVideoChatClosed(ind);
@@ -829,12 +835,10 @@ public class JNIService extends Service {
 			i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
 			i.putExtra("fromUserId", ind.getFromUserId());
 			i.putExtra("groupId", ind.getGroupId());
-			//Send sticky broadcast, make sure activity receive
+			// Send sticky broadcast, make sure activity receive
 			mContext.sendStickyBroadcast(i);
-			
+
 		}
-		
-		
 
 	}
 
@@ -857,7 +861,6 @@ public class JNIService extends Service {
 			g.setOwnerUser(u);
 			GlobalHolder.getInstance().addGroupToList(
 					Group.GroupType.CONFERENCE.intValue(), g);
-
 
 			Intent i = new Intent();
 			i.setAction(JNIService.JNI_BROADCAST_CONFERENCE_INVATITION);
@@ -882,7 +885,6 @@ public class JNIService extends Service {
 			if (toUser == null) {
 				V2Log.w("No valid user object for receive message " + toUser
 						+ "  " + fromUser);
-//				toUser = new User(GlobalHolder.getInstance().getCurrentUserId());
 				toUser = new User(nToUserID);
 			}
 			if (fromUser == null) {
@@ -892,41 +894,33 @@ public class JNIService extends Service {
 			}
 
 			String uuid = XmlParser.parseForMessageUUID(szXmlText);
-			
+
 			// Record image data meta
-			VMessage cache = new VMessage(eGroupType , nGroupID , fromUser, toUser, 
-					uuid , new Date(nTime * 1000));
+			VMessage cache = new VMessage(eGroupType, nGroupID, fromUser,
+					toUser, uuid, new Date(nTime * 1000));
 			cache.setmXmlDatas(szXmlText);
 			XmlParser.extraImageMetaFrom(cache, szXmlText);
 			if (cache.getItems().size() > 0) {
 				synchronized (cacheImageMeta) {
 					cacheImageMeta.add(cache);
-					return ;
+					return;
 				}
 			}
 
 			// Record audio data meta
-			VMessage cacheAudio = new VMessage(eGroupType , nGroupID , fromUser, toUser,  uuid , 
-					new Date(nTime * 1000));
+			VMessage cacheAudio = new VMessage(eGroupType, nGroupID, fromUser,
+					toUser, uuid, new Date(nTime * 1000));
 			cacheAudio.setmXmlDatas(szXmlText);
 			XmlParser.extraAudioMetaFrom(cacheAudio, szXmlText);
 			if (cacheAudio.getItems().size() > 0) {
 				synchronized (cacheAudioMeta) {
 					cacheAudioMeta.add(cacheAudio);
+					return;
 				}
 			}
 
-//			long time = (((System.currentTimeMillis() - GlobalConfig.LOCAL_TIME) / 1000) + GlobalConfig.SERVER_TIME) * 1000;
-			// VMessage vm = XmlParser.parseForMessage(fromUser, toUser,
-			// new Date(), szXmlText);
-			// vm.setGroupId(nGroupID);
-			// vm.setMsgCode(nBusinessType);
-			// if (vm == null || vm.getItems().size() == 0) {
-			// return;
-			// }
-			
-			VMessage vm = new VMessage(eGroupType , nGroupID, fromUser, toUser, uuid,
-					new Date(nTime * 1000));
+			VMessage vm = new VMessage(eGroupType, nGroupID, fromUser, toUser,
+					uuid, new Date(GlobalConfig.getGlobalServerTime()));
 			vm.setmXmlDatas(szXmlText);
 
 			if (vm.getImageItems().size() > 0) {
@@ -938,32 +932,29 @@ public class JNIService extends Service {
 			Message.obtain(mCallbackHandler, JNI_RECEIVED_MESSAGE, vm)
 					.sendToTarget();
 		}
-		
+
 		@Override
 		public void OnRecvChatBinary(int eGroupType, long nGroupID,
 				long nFromUserID, long nToUserID, long nTime, int binaryType,
 				String messageId, String binaryPath) {
-			
+
 			switch (binaryType) {
-				case GlobalConfig.MEDIA_TYPE_IMAGE:
-					handlerChatPictureCallback(eGroupType, nGroupID,
-							nFromUserID, nToUserID, nTime,
-							messageId, binaryPath);
-					break;
-				case GlobalConfig.MEDIA_TYPE_AUDIO:
-					handlerChatAudioCallback(eGroupType, nGroupID,
-							nFromUserID, nToUserID, nTime,
-							messageId, binaryPath);
-					break;
-				default:
-					break;
+			case BINARY_TYPE_IMAGE:
+				handlerChatPictureCallback(eGroupType, nGroupID, nFromUserID,
+						nToUserID, nTime, messageId, binaryPath);
+				break;
+			case BINARY_TYPE_AUDIO:
+				handlerChatAudioCallback(eGroupType, nGroupID, nFromUserID,
+						nToUserID, nTime, messageId, binaryPath);
+				break;
+			default:
+				break;
 			}
 		}
-		
-		
+
 		private void handlerChatPictureCallback(int eGroupType, long nGroupID,
-				long nFromUserID, long nToUserID, long nTime,
-				String messageId, String binaryPath){
+				long nFromUserID, long nToUserID, long nTime, String messageId,
+				String binaryPath) {
 
 			boolean isCache = false;
 			VMessage vm = null;
@@ -973,19 +964,18 @@ public class JNIService extends Service {
 					List<VMessageImageItem> items = v.getImageItems();
 					int receivedCount = 0;
 					for (int i = 0; i < items.size(); i++) {
-						VMessageImageItem vai = items.get(i);
 
-						VMessageImageItem vait = (VMessageImageItem) vai;
+						VMessageImageItem vait = (VMessageImageItem) items
+								.get(i);
 						if (vait.isReceived()) {
 							receivedCount++;
 							continue;
 						}
+
 						if (vait.getUUID().equals(uuid)) {
 							receivedCount++;
 							vm = v;
-
-							String filePath = binaryPath;
-							vait.setFilePath(filePath);
+							vait.setFilePath(binaryPath);
 							vait.setReceived(true);
 							continue;
 						}
@@ -1002,16 +992,15 @@ public class JNIService extends Service {
 				V2Log.e(" Didn't receive image meta data: " + messageId);
 				return;
 			}
-			
-			vm.setReceiveMessageType(GlobalConfig.MEDIA_TYPE_IMAGE);
+
 			Message.obtain(mCallbackHandler, JNI_RECEIVED_MESSAGE, vm)
 					.sendToTarget();
-		
+
 		}
-		
+
 		private void handlerChatAudioCallback(int eGroupType, long nGroupID,
-				long nFromUserID, long nToUserID, long nTime,
-				String messageId, String binaryPath){
+				long nFromUserID, long nToUserID, long nTime, String messageId,
+				String binaryPath) {
 			VMessage vm = null;
 			synchronized (cacheAudioMeta) {
 				for (VMessage v : cacheAudioMeta) {
@@ -1040,7 +1029,6 @@ public class JNIService extends Service {
 			}
 		}
 
-
 	}
 
 	class FileRequestCB extends FileRequestCallbackAdapter {
@@ -1059,9 +1047,9 @@ public class JNIService extends Service {
 			if (fromUser == null) {
 				fromUser = new User(file.fromUserId);
 			}
-			//FIXME input date as null
-			VMessage vm = new VMessage(file.getRequestType(), 0, fromUser, GlobalHolder
-					.getInstance().getCurrentUser(), null);
+			// FIXME input date as null
+			VMessage vm = new VMessage(file.getRequestType(), 0, fromUser,
+					GlobalHolder.getInstance().getCurrentUser(), null);
 			int pos = file.fileName.lastIndexOf("/");
 			VMessageFileItem vfi = new VMessageFileItem(vm, file.fileId,
 					pos == -1 ? file.fileName

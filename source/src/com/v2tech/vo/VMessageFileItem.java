@@ -71,6 +71,15 @@ public class VMessageFileItem extends VMessageAbstractItem {
 		this.uuid = uuid;
 		this.type = VMessageAbstractItem.ITEM_TYPE_FILE;
 	}
+	
+	public VMessageFileItem(VMessage vm , String fileID ,  long fileSize  , String filePath , int transType) {
+		super(vm);
+		this.uuid = fileID;
+		this.filePath = filePath;
+		this.fileSize = fileSize;
+		this.transType = transType;
+		this.type = VMessageAbstractItem.ITEM_TYPE_FILE;
+	}
 
 	public long getFileSize() {
 		return fileSize;

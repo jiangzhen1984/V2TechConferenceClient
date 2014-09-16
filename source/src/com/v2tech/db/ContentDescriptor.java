@@ -238,13 +238,14 @@ public final class ContentDescriptor {
 			public static String HISTORY_FILE_SAVEDATE = BASE_SAVEDATE;
 			public static final String HISTORY_FILE_FROM_USER_ID = "FromUserID";
 			public static final String HISTORY_FILE_TO_USER_ID = "ToUserID";
+			public static final String HISTORY_FILE_REMOTE_USER_ID = "RemoteUserID";
 			public static final String HISTORY_FILE_ID = "FileID";
 			public static final String HISTORY_FILE_PATH = "FileName";
 			public static final String HISTORY_FILE_SEND_STATE = "TransState";
 //			public static final String HISTORY_FILE_READ_STATE = "ReadState";
 			public static final String HISTORY_FILE_SIZE = "FileSize";
 			
-			public static final String[] ALL_CLOS = { ID, OWNER_USER_ID, HISTORY_FILE_SAVEDATE,
+			public static final String[] ALL_CLOS = { ID, OWNER_USER_ID, HISTORY_FILE_SAVEDATE,HISTORY_FILE_REMOTE_USER_ID,
 				HISTORY_FILE_FROM_USER_ID, HISTORY_FILE_TO_USER_ID, HISTORY_FILE_ID , HISTORY_FILE_PATH , 
 				HISTORY_FILE_SEND_STATE  , HISTORY_FILE_SIZE};
 		}
@@ -405,10 +406,11 @@ public final class ContentDescriptor {
 			public static final String HISTORY_CROWD_REFUSE_REASON = "RefuseReason";
 			public static final String HISTORY_CROWD_STATE = "JoinState";
 			public static final String HISTORY_CROWD_READ_STATE = "ReadState";
+			public static final String HISTORY_CROWD_BASE_INFO = "CrowdXml";
 			
 			public static final String[] ALL_CLOS = { ID, OWNER_USER_ID, HISTORY_CROWD_SAVEDATE,HISTORY_CROWD_AUTHTYPE , 
 				HISTORY_CROWD_ID, HISTORY_CROWD_FROM_USER_ID, HISTORY_CROWD_REMOTE_USER_ID , HISTORY_CROWD_APPLY_REASON
-				, HISTORY_CROWD_REFUSE_REASON , HISTORY_CROWD_STATE ,HISTORY_CROWD_READ_STATE , HISTORY_CROWD_TO_USER_ID};
+				, HISTORY_CROWD_REFUSE_REASON , HISTORY_CROWD_STATE ,HISTORY_CROWD_READ_STATE , HISTORY_CROWD_TO_USER_ID , HISTORY_CROWD_BASE_INFO};
 		}
 	}
 	

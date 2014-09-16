@@ -187,8 +187,13 @@ public class VoiceMessageActivity extends Activity {
 			public void onCheckedChanged(CompoundButton buttonView,
 					boolean isChecked) {
 
-				// TODO 全选
-				isSelectAll = isSelectAll == true ? false : true;
+				for (int i = 0; i < mListItem.size(); i++) {
+					mListItem.get(i).isCheck = isChecked;
+					deleteList.put(i, mListItem.get(i));
+				}
+//				for (AudioVideoMessageBean bean : mListItem) {
+//					bean.isCheck = isChecked;
+//				}
 				adapter.notifyDataSetChanged();
 			}
 		});

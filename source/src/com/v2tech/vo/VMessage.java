@@ -53,8 +53,6 @@ public class VMessage {
 
 	protected List<VMessageAbstractItem> itemList;
 	
-	protected int receiveMessageType = -1;
-
 //	public VMessage(User fromUser, User toUser) {
 //		this(0, fromUser, toUser, V2GlobalEnum.REQUEST_TYPE_IM);
 //	}
@@ -72,14 +70,6 @@ public class VMessage {
 //		this(0, fromUser, toUser, type);
 //	}
 	
-	public int getReceiveMessageType() {
-		return receiveMessageType;
-	}
-
-	public void setReceiveMessageType(int receiveMessageType) {
-		this.receiveMessageType = receiveMessageType;
-	}
-
 	public VMessage(int groupType , long groupId, User fromUser , Date date) {
 		this(groupType, groupId, fromUser, null , UUID.randomUUID().toString(), date);
 	}

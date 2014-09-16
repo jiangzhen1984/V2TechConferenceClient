@@ -118,6 +118,7 @@ public class V2TechDBHelper extends SQLiteOpenHelper {
 			+ ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_REMOTE_USER_ID + " bigint, "
 			+ ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_APPLY_REASON + " nvarchar(4000), "
 			+ ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_REFUSE_REASON + " nvarchar(4000) ,"
+			+ ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_BASE_INFO + " nvarchar(4000) ,"
 			+ ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_STATE + " bigint ,"
 			+ ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_READ_STATE + " bigint)";
 	

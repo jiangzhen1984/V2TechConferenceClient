@@ -7,6 +7,7 @@ import com.V2.jni.ImRequest;
 import com.V2.jni.ImRequestCallbackAdapter;
 import com.V2.jni.V2ClientType;
 import com.V2.jni.V2GlobalEnum;
+import com.V2.jni.util.V2Log;
 import com.v2tech.service.jni.JNIResponse;
 import com.v2tech.service.jni.RequestLogInResponse;
 import com.v2tech.service.jni.RequestUserUpdateResponse;
@@ -92,7 +93,10 @@ public class UserService extends AbstractHandler {
 
 		@Override
 		public void OnLoginCallback(long nUserID, int nStatus, int nResult , long serverTime) {
+			//获取系统时间
+			GlobalConfig.LOCAL_TIME = System.currentTimeMillis();
 			GlobalConfig.SERVER_TIME = serverTime;
+			V2Log.d("get server time ：" + GlobalConfig.SERVER_TIME);
 			RequestLogInResponse.Result res = RequestLogInResponse.Result
 					.fromInt(nResult);
 			Message m = Message.obtain(handler, JNI_REQUEST_LOG_IN,

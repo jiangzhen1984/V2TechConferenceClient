@@ -553,10 +553,6 @@ public class LoginActivity extends Activity {
 					//为登陆用户创建个人资料文件夹
 					User user = ((RequestLogInResponse) rlr).getUser();
 					createPersonFolder(user);
-					//获取系统时间
-					GlobalConfig.SERVER_TIME = GlobalConfig.TIME_SERVER_TIME; 
-					GlobalConfig.LOCAL_TIME = System.currentTimeMillis();
-					V2Log.d("get server time ：" + GlobalConfig.SERVER_TIME);
 					// Save user info
 					saveUserConfig(mEmailView.getText().toString(), "");
 					GlobalHolder.getInstance().setCurrentUser(

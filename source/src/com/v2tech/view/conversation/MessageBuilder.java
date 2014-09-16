@@ -14,6 +14,7 @@ import android.text.TextUtils;
 
 import com.V2.jni.util.V2Log;
 import com.v2tech.db.ContentDescriptor;
+import com.v2tech.db.DataBaseContext;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.util.GlobalConfig;
 import com.v2tech.vo.User;
@@ -84,11 +85,18 @@ public class MessageBuilder {
 		return vm;
 	}
 
+	/**
+	 * put the chat datas VMessage Object to DataBases
+	 * @param context
+	 * @param vm
+	 * @return
+	 */
 	public static Uri saveMessage(Context context, VMessage vm) {
 		if (vm == null || vm.getFromUser() == null || vm.getToUser() == null) {
 			return null;
 		}
 		
+		DataBaseContext mContext = new DataBaseContext(context);
 		int type = 0;
 		if(vm.getMsgCode() == 0 && vm.getGroupId() == 0l)
 			type = MessageLoader.CONTACT_TYPE;
@@ -138,13 +146,20 @@ public class MessageBuilder {
 		values.put(ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_SAVEDATE, vm
 				.getmDateLong());
 		values.put(ContentDescriptor.HistoriesMessage.Cols.OWNER_USER_ID, GlobalHolder.getInstance().getCurrentUserId());
-		Uri uri = context.getContentResolver().insert(
+		Uri uri = mContext.getContentResolver().insert(
 				ContentDescriptor.HistoriesMessage.CONTENT_URI, values);
 		return uri;
 	}
 	
+	/**
+	 * put the binary(image or record audio) datas VMessage Object to DataBases
+	 * @param context
+	 * @param vm
+	 * @return
+	 */
 	public static Uri saveBinaryVMessage(Context context, VMessage vm){
 		
+		DataBaseContext mContext = new DataBaseContext(context);
 		if (vm == null || vm.getFromUser() == null || vm.getToUser() == null) 
 			return null;
 		
@@ -162,70 +177,109 @@ public class MessageBuilder {
 				remote == 0 ? MessageLoader.CROWD_TYPE: MessageLoader.CONTACT_TYPE))
 			return null;
 		ContentValues values = new ContentValues();
-		switch (vm.getReceiveMessageType()) {
-			case GlobalConfig.MEDIA_TYPE_IMAGE:
-				List<VMessageImageItem> imageItems = vm.getImageItems();
-				for (VMessageImageItem vMessageImageItem : imageItems) {
-					values.put(ContentDescriptor.HistoriesGraphic.Cols.HISTORY_GRAPHIC_GROUP_TYPE, groupType);
-					values.put(ContentDescriptor.HistoriesGraphic.Cols.HISTORY_GRAPHIC_GROUP_ID, groupID);
-					values.put(ContentDescriptor.HistoriesGraphic.Cols.HISTORY_GRAPHIC_FROM_USER_ID, vm
-							.getFromUser().getmUserId());
-					if (vm.getToUser() != null) {
-						values.put(ContentDescriptor.HistoriesGraphic.Cols.HISTORY_GRAPHIC_TO_USER_ID, vm
-								.getToUser().getmUserId());
-						values.put(ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_REMOTE_USER_ID, vm
-								.getToUser().getmUserId());
-					}
-					values.put(ContentDescriptor.HistoriesGraphic.Cols.HISTORY_GRAPHIC_ID, vm
-							.getUUID());
-					values.put(ContentDescriptor.HistoriesGraphic.Cols.HISTORY_GRAPHIC_TRANSTATE, vm
-							.getState());
-					values.put(ContentDescriptor.HistoriesGraphic.Cols.HISTORY_GRAPHIC_SAVEDATE, vm
-							.getmDateLong());
-					values.put(ContentDescriptor.HistoriesGraphic.Cols.HISTORY_GRAPHIC_PATH, vMessageImageItem
-							.getFilePath());
-					values.put(ContentDescriptor.HistoriesGraphic.Cols.OWNER_USER_ID, GlobalHolder.getInstance().getCurrentUserId());
-					uri = context.getContentResolver().insert(
-							ContentDescriptor.HistoriesGraphic.CONTENT_URI, values);
-				}
-				break;
-			case GlobalConfig.MEDIA_TYPE_AUDIO:
-				List<VMessageAudioItem> audioItems = vm.getAudioItems();
-				for (VMessageAudioItem vMessageAudioItem : audioItems) {
-					values.put(ContentDescriptor.HistoriesAudios.Cols.HISTORY_AUDIO_GROUP_TYPE, groupType);
-					values.put(ContentDescriptor.HistoriesAudios.Cols.HISTORY_AUDIO_GROUP_ID, groupID);
-					values.put(ContentDescriptor.HistoriesAudios.Cols.HISTORY_AUDIO_FROM_USER_ID, vm
-							.getFromUser().getmUserId());
-					if (vm.getToUser() != null) {
-						values.put(ContentDescriptor.HistoriesAudios.Cols.HISTORY_AUDIO_TO_USER_ID, vm
-								.getToUser().getmUserId());
-						values.put(ContentDescriptor.HistoriesAudios.Cols.HISTORY_AUDIO_REMOTE_USER_ID, vm
-								.getToUser().getmUserId());
-					}
-					values.put(ContentDescriptor.HistoriesAudios.Cols.HISTORY_AUDIO_ID, vm
-							.getUUID());
-					values.put(ContentDescriptor.HistoriesAudios.Cols.HISTORY_AUDIO_SEND_STATE, vm
-							.getState());
-					values.put(ContentDescriptor.HistoriesAudios.Cols.HISTORY_AUDIO_SAVEDATE, vm
-							.getmDateLong());
-					values.put(ContentDescriptor.HistoriesAudios.Cols.HISTORY_AUDIO_PATH, vMessageAudioItem
-							.getAudioFilePath());
-					values.put(ContentDescriptor.HistoriesAudios.Cols.HISTORY_AUDIO_SECOND, vMessageAudioItem
-							.getSeconds());
-					values.put(ContentDescriptor.HistoriesAudios.Cols.OWNER_USER_ID, GlobalHolder.getInstance().getCurrentUserId());
-					uri = context.getContentResolver().insert(
-							ContentDescriptor.HistoriesAudios.CONTENT_URI, values);
-				}
-				break;
-			default:
-				break;
+		
+		List<VMessageImageItem> imageItems = vm.getImageItems();
+		for (VMessageImageItem vMessageImageItem : imageItems) {
+			values.put(ContentDescriptor.HistoriesGraphic.Cols.HISTORY_GRAPHIC_GROUP_TYPE, groupType);
+			values.put(ContentDescriptor.HistoriesGraphic.Cols.HISTORY_GRAPHIC_GROUP_ID, groupID);
+			values.put(ContentDescriptor.HistoriesGraphic.Cols.HISTORY_GRAPHIC_FROM_USER_ID, vm
+					.getFromUser().getmUserId());
+			if (vm.getToUser() != null) {
+				values.put(ContentDescriptor.HistoriesGraphic.Cols.HISTORY_GRAPHIC_TO_USER_ID, vm
+						.getToUser().getmUserId());
+				values.put(ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_REMOTE_USER_ID, vm
+						.getToUser().getmUserId());
+			}
+			values.put(ContentDescriptor.HistoriesGraphic.Cols.HISTORY_GRAPHIC_ID, vm
+					.getUUID());
+			values.put(ContentDescriptor.HistoriesGraphic.Cols.HISTORY_GRAPHIC_TRANSTATE, vm
+					.getState());
+			values.put(ContentDescriptor.HistoriesGraphic.Cols.HISTORY_GRAPHIC_SAVEDATE, vm
+					.getmDateLong());
+			values.put(ContentDescriptor.HistoriesGraphic.Cols.HISTORY_GRAPHIC_PATH, vMessageImageItem
+					.getFilePath());
+			values.put(ContentDescriptor.HistoriesGraphic.Cols.OWNER_USER_ID, GlobalHolder.getInstance().getCurrentUserId());
+			uri = mContext.getContentResolver().insert(
+					ContentDescriptor.HistoriesGraphic.CONTENT_URI, values);
+		}
+				
+		List<VMessageAudioItem> audioItems = vm.getAudioItems();
+		for (VMessageAudioItem vMessageAudioItem : audioItems) {
+			values.put(ContentDescriptor.HistoriesAudios.Cols.HISTORY_AUDIO_GROUP_TYPE, groupType);
+			values.put(ContentDescriptor.HistoriesAudios.Cols.HISTORY_AUDIO_GROUP_ID, groupID);
+			values.put(ContentDescriptor.HistoriesAudios.Cols.HISTORY_AUDIO_FROM_USER_ID, vm
+					.getFromUser().getmUserId());
+			if (vm.getToUser() != null) {
+				values.put(ContentDescriptor.HistoriesAudios.Cols.HISTORY_AUDIO_TO_USER_ID, vm
+						.getToUser().getmUserId());
+				values.put(ContentDescriptor.HistoriesAudios.Cols.HISTORY_AUDIO_REMOTE_USER_ID, vm
+						.getToUser().getmUserId());
+			}
+			values.put(ContentDescriptor.HistoriesAudios.Cols.HISTORY_AUDIO_ID, vm
+					.getUUID());
+			values.put(ContentDescriptor.HistoriesAudios.Cols.HISTORY_AUDIO_SEND_STATE, vm
+					.getState());
+			values.put(ContentDescriptor.HistoriesAudios.Cols.HISTORY_AUDIO_SAVEDATE, vm
+					.getmDateLong());
+			values.put(ContentDescriptor.HistoriesAudios.Cols.HISTORY_AUDIO_PATH, vMessageAudioItem
+					.getAudioFilePath());
+			values.put(ContentDescriptor.HistoriesAudios.Cols.HISTORY_AUDIO_SECOND, vMessageAudioItem
+					.getSeconds());
+			values.put(ContentDescriptor.HistoriesAudios.Cols.OWNER_USER_ID, GlobalHolder.getInstance().getCurrentUserId());
+			uri = mContext.getContentResolver().insert(
+					ContentDescriptor.HistoriesAudios.CONTENT_URI, values);
 		}
 		return uri;
 	}
 	
+	/**
+	 * put the file datas VMessage Object to DataBases
+	 * @param context
+	 * @param vm
+	 * @return
+	 */
+	public static Uri saveFileVMessage(Context context, VMessage vm){
+		
+		DataBaseContext mContext = new DataBaseContext(context);
+		if (vm == null || vm.getFromUser() == null || vm.getToUser() == null || vm.getFileItems().size() <= 0) 
+			return null;
+		
+		//确定远程用户
+		long remote = -1;
+		if(vm.getFromUser().getmUserId() == GlobalHolder.getInstance().getCurrentUserId())
+			remote = vm.getToUser().getmUserId();
+		else
+			remote = vm.getFromUser().getmUserId();
+		
+		Uri uri = null;
+		VMessageFileItem file = null;
+		for (int i = 0; i < vm.getFileItems().size(); i++) {
+			file = vm.getFileItems().get(i);
+			ContentValues values = new ContentValues();
+			values.put(ContentDescriptor.HistoriesFiles.Cols.OWNER_USER_ID, GlobalHolder.getInstance().getCurrentUserId());
+			values.put(ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_SAVEDATE, GlobalConfig.getGlobalServerTime());
+			values.put(ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_FROM_USER_ID, vm.getFromUser().getmUserId());
+			values.put(ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_TO_USER_ID, vm.getToUser().getmUserId());
+			values.put(ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_REMOTE_USER_ID, remote);
+			values.put(ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_ID, file.getUuid());
+			values.put(ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_PATH, file.getFilePath());
+			values.put(ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_SIZE, file.getFileSize());
+			values.put(ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_SEND_STATE, file.getState());
+			uri = mContext.getContentResolver().insert(
+					ContentDescriptor.HistoriesFiles.CONTENT_URI, values);
+			}
+		return uri;
+	}
 	
+	/**
+	 * put the media(audio or video) record datas VMessage Object to DataBases
+	 * @param context
+	 * @param vm
+	 * @return
+	 */
 	public static Uri saveMediaChatHistories(Context context , VideoBean bean){
 		
+		DataBaseContext mContext = new DataBaseContext(context);
 		if (bean == null || bean.formUserID == -1 || bean.toUserID == -1) 
 			return null;
 		
@@ -242,7 +296,7 @@ public class MessageBuilder {
 		values.put(ContentDescriptor.HistoriesMedia.Cols.HISTORY_MEDIA_START_DATE, bean.startDate);
 		values.put(ContentDescriptor.HistoriesMedia.Cols.HISTORY_MEDIA_END_DATE, bean.endDate);
 		values.put(ContentDescriptor.HistoriesMedia.Cols.HISTORY_MEDIA_READ_STATE, bean.readSatate);
-		uri = context.getContentResolver().insert(
+		uri = mContext.getContentResolver().insert(
 				ContentDescriptor.HistoriesMedia.CONTENT_URI, values);
 		return uri;
 	}

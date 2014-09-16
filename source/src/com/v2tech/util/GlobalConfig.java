@@ -24,12 +24,8 @@ public class GlobalConfig {
 	
 	public static boolean isConversationOpen = false;
 	
-	public static long TIME_SERVER_TIME = 0;
 	public static long SERVER_TIME = 0;
 	public static long LOCAL_TIME = 0;
-	
-	public static final int MEDIA_TYPE_IMAGE = 2;
-	public static final int MEDIA_TYPE_AUDIO = 1;
 	
 	public static HashMap<String, String> allChinese = new HashMap<String, String>();
 

@@ -45,7 +45,7 @@ public class ImageViewGallery extends FragmentActivity {
 		int type = getIntent().getIntExtra("type", 0);
 		if (type == 1) {
 			long gid = getIntent().getLongExtra("gid", 0);
-			loadImages(gid);
+			loadImages(gid); 
 		} else {
 			loadImages(getIntent().getLongExtra("uid1", 0), getIntent()
 					.getLongExtra("uid2", 0));

@@ -939,7 +939,6 @@ public class ConversationView extends Activity {
 						VMessage vm = MessageBuilder.buildAudioMessage(
 								cov.getType(), groupId, local, remote,
 								fileName, (int) (seconds / 1000));
-						vm.setReceiveMessageType(GlobalConfig.MEDIA_TYPE_AUDIO);
 						// Send message to server
 						sendMessageToRemote(vm);
 					} else {
@@ -1004,7 +1003,7 @@ public class ConversationView extends Activity {
 					// Start timer
 					lh.postDelayed(timeOutMonitor, 59 * 1000);
 					// start timer for prompt surplus time
-					lh.postDelayed(mUpdateSurplusTime, 8 * 1000);
+					lh.postDelayed(mUpdateSurplusTime, 48 * 1000);
 					starttime = System.currentTimeMillis();
 					voiceIsSentByTimer = false;
 					realRecoding = true;
@@ -1361,7 +1360,6 @@ public class ConversationView extends Activity {
 			}
 			VMessage vim = MessageBuilder.buildImageMessage(cov.getType(),
 					groupId, local, remote, filePath);
-			vim.setReceiveMessageType(GlobalConfig.MEDIA_TYPE_IMAGE);
 			vim.setGroupId(groupId);
 			// Send message to server
 			sendMessageToRemote(vim);
@@ -1509,6 +1507,7 @@ public class ConversationView extends Activity {
 		vm.setDate(new Date(GlobalConfig.getGlobalServerTime()));
 		
 		MessageBuilder.saveMessage(this, vm);
+		MessageBuilder.saveFileVMessage(this, vm);
 		MessageBuilder.saveBinaryVMessage(this, vm);
 		
 		Message.obtain(lh, SEND_MESSAGE, vm).sendToTarget();
