@@ -28,6 +28,12 @@
     <string name="specificItem_voice_watchDetail">查看</string>
     <string name="specificItem_voiceDetail_Title">通话详情</string>
     <string name="specificItem_voiceDetail_return">通话</string>
+    <string name="specificItem_voiceDetail_phoneHistories">通话历史</string>
+    <string name="specificItem_voiceDetail_clearHistories">清除全部</string>
+    <string name="specificItem_voice_returnBack">消息</string>
+    <string name="specificItem_voice_cannelOperator">取消</string>
+    <string name="specificItem_voice_deleteOperator">删除</string>
+    <string name="specificItem_voice_selectAll">全部</string>
     
 
 </resources>

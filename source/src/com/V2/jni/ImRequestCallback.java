@@ -15,8 +15,9 @@ public interface ImRequestCallback {
 	 * @param nUserID if succeed means user ID, otherwise 0
 	 * @param nStatus
 	 * @param nResult  0: succeed,  1: failed
+	 * @param serverTime  
 	 */
-	public void OnLoginCallback(long nUserID, int nStatus, int nResult);
+	public void OnLoginCallback(long nUserID, int nStatus, int nResult , long serverTime);
 	
 	
 	/**

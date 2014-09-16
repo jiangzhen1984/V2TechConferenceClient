@@ -3,7 +3,7 @@ package com.V2.jni;
 public abstract class ImRequestCallbackAdapter implements ImRequestCallback {
 
 	@Override
-	public void OnLoginCallback(long nUserID, int nStatus, int nResult) {
+	public void OnLoginCallback(long nUserID, int nStatus, int nResult , long serverTime) {
 
 	}
 

@@ -10,6 +10,7 @@ import com.V2.jni.V2GlobalEnum;
 import com.v2tech.service.jni.JNIResponse;
 import com.v2tech.service.jni.RequestLogInResponse;
 import com.v2tech.service.jni.RequestUserUpdateResponse;
+import com.v2tech.util.GlobalConfig;
 import com.v2tech.vo.User;
 
 public class UserService extends AbstractHandler {
@@ -90,7 +91,8 @@ public class UserService extends AbstractHandler {
 		}
 
 		@Override
-		public void OnLoginCallback(long nUserID, int nStatus, int nResult) {
+		public void OnLoginCallback(long nUserID, int nStatus, int nResult , long serverTime) {
+			GlobalConfig.SERVER_TIME = serverTime;
 			RequestLogInResponse.Result res = RequestLogInResponse.Result
 					.fromInt(nResult);
 			Message m = Message.obtain(handler, JNI_REQUEST_LOG_IN,

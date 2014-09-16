@@ -1,16 +1,13 @@
-<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#EFF0F2"
     android:orientation="vertical" >
-
     <RelativeLayout
-        android:id="@+id/linearLayout1"
+        android:id="@id/linearLayout1"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:background="@color/confs_title_bg" >
-
         <TextView
             android:id="@+id/specific_title_return"
             android:layout_width="wrap_content"
@@ -22,27 +19,25 @@
             android:paddingLeft="10dp"
             android:paddingRight="10dp"
             android:paddingTop="10dp"
-            android:text="消息"
+            android:text="@string/specificItem_voice_returnBack"
             android:textColor="#0060D3"
             android:textSize="18sp" />
-        
         <TextView
-            android:visibility="invisible"
-            android:clickable="false"
             android:id="@+id/specific_title_cannel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_centerVertical="true"
             android:layout_marginRight="5dp"
+            android:clickable="false"
             android:paddingBottom="10dp"
             android:paddingLeft="10dp"
             android:paddingRight="10dp"
             android:paddingTop="10dp"
-            android:text="取消"
+            android:text="@string/specificItem_voice_cannelOperator"
             android:textColor="#0060D3"
-            android:textSize="18sp" />
-
+            android:textSize="18sp"
+            android:visibility="invisible" />
         <TextView
             android:id="@+id/specific_voice_title_text"
             android:layout_width="wrap_content"
@@ -54,7 +49,6 @@
             android:text="@string/specificItem_voice_title"
             android:textColor="#000000"
             android:textSize="@dimen/common_item_text_size_20" />
-
         <ImageView
             android:id="@+id/title_bar_feature_more_button"
             android:layout_width="wrap_content"
@@ -68,9 +62,7 @@
             android:paddingTop="10dp"
             android:src="@drawable/title_bar_feature_more_button_selector"
             android:visibility="invisible" />
-
         <TextView
-            android:visibility="invisible"
             android:id="@+id/specific_title_deleteAll"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -81,53 +73,43 @@
             android:paddingLeft="10dp"
             android:paddingRight="10dp"
             android:paddingTop="10dp"
-            android:text="删除"
+            android:text="@string/specificItem_voice_deleteOperator"
             android:textColor="#0060D3"
-            android:textSize="18sp" />
+            android:textSize="18sp"
+            android:visibility="invisible" />
     </RelativeLayout>
-
     <RelativeLayout
         android:id="@+id/specific_voice_delete"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="#FFFFFF"
         android:visibility="gone" >
-
         <TextView
             android:layout_width="match_parent"
             android:layout_height="2.5dp"
             android:background="#EFF0F2" />
-
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
             android:layout_marginBottom="10dp"
-            android:layout_marginLeft="10dp"
+            android:layout_marginLeft="@dimen/specific_voice_message_margin_left"
             android:layout_marginTop="10dp"
-            android:text="全部"
+            android:text="@string/specificItem_voice_selectAll"
             android:textColor="#000000"
             android:textSize="18sp" />
-
         <CheckBox
             android:id="@+id/specific_voice_delete_all"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_marginBottom="10dp"
-            android:layout_marginRight="10dp"
+            android:layout_marginRight="@dimen/specific_voice_message_margin_right"
             android:layout_marginTop="10dp" />
     </RelativeLayout>
-
     <ListView
         android:id="@+id/specific_voice_listview"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:cacheColorHint="#00000000"
-        android:fadingEdge="none"
-        android:fastScrollEnabled="true"
-        android:scrollbarStyle="insideInset"
-        android:scrollingCache="false"
-        android:transcriptMode="normal" />
-
+        android:cacheColorHint="#00000000" />
 </LinearLayout>

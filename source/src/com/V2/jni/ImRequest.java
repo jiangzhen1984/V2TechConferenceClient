@@ -102,12 +102,12 @@ public class ImRequest {
 	private void OnLogin(long nUserID, int nStatus, long serverTime, int nResult) {
 		V2Log.d("OnLogin --> " + nUserID + ": " + "-:" + nStatus + ":"
 				+ nResult);
-		GlobalConfig.TIME_SERVER_TIME = serverTime; 
+//		GlobalConfig.TIME_SERVER_TIME = serverTime; 
 		for (WeakReference<ImRequestCallback> wf : this.mCallbacks) {
 			Object obj = wf.get(); 
 			if (obj != null) {
 				ImRequestCallback callback = (ImRequestCallback) obj;
-				callback.OnLoginCallback(nUserID, nStatus, nResult);
+				callback.OnLoginCallback(nUserID, nStatus, nResult , serverTime);
 			}
 		}
 	}

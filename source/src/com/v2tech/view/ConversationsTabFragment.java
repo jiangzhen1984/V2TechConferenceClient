@@ -1273,9 +1273,8 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 				item = new String[] {
 						mContext.getResources().getString(
 								R.string.conversations_delete_conversaion),
-								//FIXME  ADD RESOURCE mContext.getResources().getString(
-								//R.string.conversations_detail) 
-						""};
+								mContext.getResources().getString(
+										R.string.conversations_detail)};
 			}
 
 			final Conversation cov = mConvList.get(pos);
@@ -1690,8 +1689,10 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 
 	protected void updateUnreadVoiceConversation(boolean b) {
 		
-		if(voiceLayout == null)
+		if(voiceLayout == null){
 			Log.e(TAG, "update unread voice conversationing , the voiceLayout is null");
+			return ;
+		}
 		
 		voiceLayout.updateNotificator(b);
 	}

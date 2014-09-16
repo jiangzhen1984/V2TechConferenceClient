@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
+    android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:background="#FFFFFF" >
 
@@ -17,7 +17,7 @@
         android:layout_alignParentLeft="true"
         android:layout_centerVertical="true"
         android:layout_marginBottom="@dimen/conversation_view_margin"
-        android:layout_marginLeft="15dp"
+        android:layout_marginLeft="@dimen/specific_voice_message_margin_left"
         android:layout_marginRight="5dp"
         android:layout_marginTop="@dimen/conversation_view_margin" >
 
@@ -113,13 +113,13 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
             android:layout_marginLeft="10dp"
-            android:layout_marginRight="5dp"
             android:background="@drawable/button_bg"
             android:gravity="center"
             android:paddingBottom="5dp"
             android:paddingLeft="15dp"
             android:paddingRight="15dp"
             android:paddingTop="5dp"
+            android:layout_marginRight="@dimen/specific_voice_message_margin_right"
             android:text="@string/specificItem_voice_watchDetail"
             android:textColor="@color/button_text_color"
             android:textSize="16sp" />
@@ -130,7 +130,7 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="5dp"
             android:layout_marginLeft="12dp"
-            android:layout_marginRight="12dp"
+            android:layout_marginRight="@dimen/specific_voice_message_margin_right"
             android:layout_marginTop="5dp"
             android:clickable="false"
             android:visibility="gone"

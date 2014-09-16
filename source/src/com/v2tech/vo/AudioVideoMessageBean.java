@@ -32,6 +32,7 @@ public class AudioVideoMessageBean  implements Parcelable{
 	public int readState;
 	public int isCallOut; //是否是主动拨出去
 	public ArrayList<ChildMessageBean> mChildBeans = new ArrayList<ChildMessageBean>();
+	public boolean isCheck;
 	
 	public AudioVideoMessageBean(String name, long holdingTime,
 			long fromUserID, long toUserID, long remoteUserID, int callNumbers,

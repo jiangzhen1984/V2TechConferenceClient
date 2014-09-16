@@ -445,7 +445,7 @@ public class JNIService extends Service {
 		}
 
 		@Override
-		public void OnLoginCallback(long nUserID, int nStatus, int nResult) {
+		public void OnLoginCallback(long nUserID, int nStatus, int nResult , long serverTime) {
 		}
 
 		@Override

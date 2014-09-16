@@ -60,6 +60,8 @@ public class VoiceMessageActivity extends Activity {
 	private Context mContext;
 	private ViewHolder holder = null;
 	private VoiceReceiverBroadcast receiver;
+	private boolean isVisibile;
+	private boolean isSelectAll;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -98,23 +100,19 @@ public class VoiceMessageActivity extends Activity {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view,
 					int position, long id) {
-				ViewHolder holder = (ViewHolder) view.getTag();
-				if (holder.selected.isChecked()) {
-					holder.selected.setChecked(false);
-					deleteList.remove(position);
-				} else {
-					holder.selected.setChecked(true);
-					deleteList.put(position, mListItem.get(position));
-				}
 				
-				ContentValues values = new ContentValues();
-				values.put(ContentDescriptor.HistoriesMedia.Cols.HISTORY_MEDIA_READ_STATE , 1);
-				String where = ContentDescriptor.HistoriesMedia.Cols.HISTORY_MEDIA_READ_STATE + "= ?";
-				String[] selectionArgs = new String[]{ String.valueOf(0) };
-				DataBaseContext context = new DataBaseContext(VoiceMessageActivity.this);
-				context.getContentResolver().update(ContentDescriptor.HistoriesMedia.CONTENT_URI, 
-						values, where, selectionArgs);
-					
+				CheckBox selected = (CheckBox) view
+						.findViewById(R.id.specific_voice_check);
+				if(selected.isChecked()){
+					mListItem.get(position).isCheck = false;
+					selected.setChecked(false);
+					deleteList.remove(position);
+				}
+				else{
+					deleteList.put(position, mListItem.get(position));
+					mListItem.get(position).isCheck = true;
+					selected.setChecked(true);
+				}
 			}
 		});
 
@@ -131,6 +129,9 @@ public class VoiceMessageActivity extends Activity {
 
 				callBack.setVisibility(View.INVISIBLE);
 				callBack.setClickable(false);
+				
+				isVisibile = true;
+				adapter.notifyDataSetChanged();
 				return false;
 			}
 		});
@@ -146,6 +147,9 @@ public class VoiceMessageActivity extends Activity {
 
 				callBack.setVisibility(View.VISIBLE);
 				callBack.setClickable(true);
+				
+				isVisibile = false;
+				adapter.notifyDataSetChanged();
 			}
 		});
 
@@ -184,6 +188,8 @@ public class VoiceMessageActivity extends Activity {
 					boolean isChecked) {
 
 				// TODO 全选
+				isSelectAll = isSelectAll == true ? false : true;
+				adapter.notifyDataSetChanged();
 			}
 		});
 	}
@@ -316,6 +322,18 @@ public class VoiceMessageActivity extends Activity {
 							.setImageResource(R.drawable.vs_voice_listener);
 				}
 			}
+			
+			if(isVisibile)
+				holder.selected.setVisibility(View.VISIBLE);
+			else
+				holder.selected.setVisibility(View.GONE);
+			
+			if (mListItem.get(position).isCheck) {
+				holder.selected.setChecked(true);
+			} else {
+				holder.selected.setChecked(false);
+			}
+				
 			holder.watchDetail.setOnClickListener(new OnClickListener() {
 
 				@Override
@@ -331,6 +349,14 @@ public class VoiceMessageActivity extends Activity {
 
 					holder.notifyIcon.setVisibility(View.INVISIBLE);
 					bean.callNumbers = 0;
+					
+					ContentValues values = new ContentValues();
+					values.put(ContentDescriptor.HistoriesMedia.Cols.HISTORY_MEDIA_READ_STATE , 1);
+					String where = ContentDescriptor.HistoriesMedia.Cols.HISTORY_MEDIA_READ_STATE + "= ?";
+					String[] selectionArgs = new String[]{ String.valueOf(0) };
+					DataBaseContext context = new DataBaseContext(VoiceMessageActivity.this);
+					context.getContentResolver().update(ContentDescriptor.HistoriesMedia.CONTENT_URI, 
+							values, where, selectionArgs);
 					
 					finish();
 					mListItem = null;

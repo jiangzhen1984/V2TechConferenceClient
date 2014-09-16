@@ -137,4 +137,8 @@
  <dimen name="crowd_invitation_box_right_margin">20dp</dimen>
  <dimen name="crowd_invitation_button_padding_vertical">7dp</dimen>
  <dimen name="crowd_invitation_button_padding_horizontal">15dp</dimen>
+ 
+   <!-- specific voice item activity  -->
+ <dimen name="specific_voice_message_margin_right">15dp</dimen>
+ <dimen name="specific_voice_message_margin_left">15dp</dimen>
 </resources>
