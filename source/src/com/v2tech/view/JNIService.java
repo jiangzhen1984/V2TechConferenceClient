@@ -3,9 +3,7 @@ package com.v2tech.view;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import android.app.Service;
 import android.content.Context;
@@ -20,6 +18,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Parcelable;
+import android.support.v4.util.LongSparseArray;
 import android.widget.Toast;
 
 import com.V2.jni.AudioRequest;
@@ -437,7 +436,7 @@ public class JNIService extends Service {
 
 	}
 
-	private Map<Long, UserStatusObject> onLineUsers = new HashMap<Long, UserStatusObject>();
+	private LongSparseArray<UserStatusObject> onLineUsers = new LongSparseArray<UserStatusObject>();
 
 	class ImRequestCB extends ImRequestCallbackAdapter {
 
@@ -537,11 +536,6 @@ public class JNIService extends Service {
 			sendBroadcast(i);
 		}
 
-		@Override
-		public void OnCreateCrowdCallback(String sCrowdXml, int nResult) {
-
-		}
-
 	}
 
 	class GroupRequestCB extends GroupRequestCallbackAdapter {
@@ -579,8 +573,7 @@ public class JNIService extends Service {
 		}
 
 		@Override
-		public void OnInviteJoinGroupCallback(V2Group group, String userInfo,
-				String additInfo) {
+		public void OnInviteJoinGroupCallback(V2Group group) {
 			if (group == null) {
 				V2Log.e(" invitation group is null");
 				return;
@@ -619,12 +612,20 @@ public class JNIService extends Service {
 				i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 				mContext.startActivity(i);
 
-			} else if (gType == GroupType.CONTACT) {
+			} 
+		}
+		
+		
+
+		@Override
+		public void OnRequestCreateRelationCallback(V2User user,
+				String additInfo) {
+			User vUser = GlobalHolder.getInstance().getUser(user.uid);
 				AddFriendHistroysHandler.addMeNeedAuthentication(
-						getApplicationContext(), userInfo, additInfo);
-			}
+						getApplicationContext(), vUser, additInfo);
 		}
 
+		
 		@Override
 		public void OnDelGroupCallback(int groupType, long nGroupID,
 				boolean bMovetoRoot) {
@@ -711,8 +712,6 @@ public class JNIService extends Service {
 				V2Log.e("Incorrect user id  " + sXml);
 				return;
 			}
-
-			V2Log.e(TAG, "接收到新的好友：" + GlobalHolder.getInstance().getUser(uid));
 
 			GroupType gType = GroupType.fromInt(groupType);
 			if (gType == GroupType.CONTACT) {

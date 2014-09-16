@@ -367,15 +367,17 @@ public class GroupRequest {
 			String userInfo, String additInfo) {
 		V2Log.d("OnInviteJoinGroup::==>" + groupType + ":" + groupInfo + ":"
 				+ userInfo + ":" + additInfo);
-		String id = XmlAttributeExtractor.extract(groupInfo, " id='", "'");
-		// String id ="30";
-		// groupInfo 常常为空影响了回调
-		if (id == null || id.isEmpty()) {
-			V2Log.e(" Unknow group information:" + groupInfo);
-			return;
-		}
-		V2Group group = new V2Group(Long.parseLong(id), groupType);
+		
+		V2Group group = null;
+		V2User user = null;
+		
 		if (groupType == V2Group.TYPE_CONF) {
+			String id = XmlAttributeExtractor.extract(groupInfo, " id='", "'");
+			if (id == null || id.isEmpty()) {
+				V2Log.e(" Unknow group information:" + groupInfo);
+				return;
+			}
+			group = new V2Group(Long.parseLong(id), groupType);
 			String name = XmlAttributeExtractor.extract(groupInfo, "subject='",
 					"'");
 			String starttime = XmlAttributeExtractor.extract(groupInfo,
@@ -388,6 +390,12 @@ public class GroupRequest {
 			group.owner = new V2User(Long.valueOf(createuserid));
 
 		} else if (groupType == V2Group.TYPE_CROWD) {
+			String id = XmlAttributeExtractor.extract(groupInfo, " id='", "'");
+			if (id == null || id.isEmpty()) {
+				V2Log.e(" Unknow group information:" + groupInfo);
+				return;
+			}
+			group = new V2Group(Long.parseLong(id), groupType);
 			String createuserid = XmlAttributeExtractor.extract(userInfo,
 					" id='", "'");
 			String auth = XmlAttributeExtractor.extract(groupInfo,
@@ -401,13 +409,27 @@ public class GroupRequest {
 			if (auth != null) {
 				group.authType = Integer.parseInt(auth);
 			}
+		} else if (groupType == V2Group.TYPE_CONTACTS_GROUP) {
+			String id = XmlAttributeExtractor.extract(userInfo, " id='", "'");
+			if (id == null || id.isEmpty()) {
+				V2Log.e(" Unknow user information:" + userInfo);
+				return;
+			}
+			
+			user = new V2User(Long.parseLong(id));
+			String name = XmlAttributeExtractor.extract(userInfo, " nickname='", "'");
+			user.name = name;
 		}
 
 		for (WeakReference<GroupRequestCallback> wrcb : mCallbacks) {
 			Object obj = wrcb.get();
 			if (obj != null) {
 				GroupRequestCallback callback = (GroupRequestCallback) obj;
-				callback.OnInviteJoinGroupCallback(group, userInfo, additInfo);
+				if (groupType == V2Group.TYPE_CONTACTS_GROUP) {
+					callback.OnRequestCreateRelationCallback(user, additInfo);
+				} else {
+					callback.OnInviteJoinGroupCallback(group);
+				}
 			}
 		}
 

@@ -23,6 +23,7 @@ import com.v2tech.vo.VMessageAbstractItem;
 import com.v2tech.vo.VMessageAudioItem;
 import com.v2tech.vo.VMessageFileItem;
 import com.v2tech.vo.VMessageImageItem;
+import com.v2tech.vo.VMessageQualification;
 import com.v2tech.vo.VMessageTextItem;
 import com.v2tech.vo.VideoBean;
 
@@ -400,5 +401,28 @@ public class MessageBuilder {
 				}
 			}
 		}
+	}
+	
+	
+	/**
+	 * Save new qualification message to database, and fill id to msg object
+	 * @param context
+	 * @param msg
+	 * @return
+	 */
+	public static boolean saveQualicationMessage(Context context, VMessageQualification msg) {
+		return false;
+	}
+	
+	public static int updateQualicationMessage(Context context, VMessageQualification msg) {
+		return 0;
+	}
+	
+	public static List<VMessageQualification> queryQualMessageList(Context context, User user) {
+		return null;
+	}
+	
+	public static void deleteQualMessage(Context context, User user, VMessageQualification.Type type) {
+		
 	}
 }

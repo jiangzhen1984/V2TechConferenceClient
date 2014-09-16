@@ -5,6 +5,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.V2.jni.V2GlobalEnum;
+
 public class V2Group {
 	
 	
@@ -12,22 +14,22 @@ public class V2Group {
 	/**
 	 * Organization type
 	 */
-	public static final int TYPE_ORG = 1;
+	public static final int TYPE_ORG = V2GlobalEnum.GROUP_TYPE_DEPARTMENT;
 	
 	/**
 	 * Contacts group type
 	 */
-	public static final int TYPE_CONTACTS_GROUP = 2;
+	public static final int TYPE_CONTACTS_GROUP = V2GlobalEnum.GROUP_TYPE_CONTACT;
 	
 	/**
 	 * Crowd type
 	 */
-	public static final int TYPE_CROWD = 3;
+	public static final int TYPE_CROWD = V2GlobalEnum.GROUP_TYPE_CROWD;
 	
 	/**
 	 * Conference type
 	 */
-	public static final int TYPE_CONF = 4;
+	public static final int TYPE_CONF = V2GlobalEnum.GROUP_TYPE_CONFERENCE;
 	
 	public long id;
 	public String name;

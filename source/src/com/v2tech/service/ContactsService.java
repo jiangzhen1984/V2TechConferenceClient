@@ -17,6 +17,11 @@ import com.v2tech.vo.Group;
 import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.User;
 
+/**
+ * 
+ * @author jiangzhen
+ *
+ */
 public class ContactsService extends AbstractHandler {
 
 	private static final int CREATE_CONTACTS_GROUP = 10;

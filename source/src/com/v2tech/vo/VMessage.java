@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
-import com.V2.jni.V2GlobalEnum;
 import com.V2.jni.util.V2Log;
 import com.v2tech.service.GlobalHolder;
 
@@ -53,22 +52,6 @@ public class VMessage {
 
 	protected List<VMessageAbstractItem> itemList;
 	
-//	public VMessage(User fromUser, User toUser) {
-//		this(0, fromUser, toUser, V2GlobalEnum.REQUEST_TYPE_IM);
-//	}
-	
-//	public VMessage(User fromUser, User toUser, Date date) {
-//		this(0, fromUser, toUser, UUID.randomUUID().toString(), new Date(), V2GlobalEnum.REQUEST_TYPE_IM);
-//	}
-
-//	public VMessage(long groupId, User fromUser, User toUser) {
-//		this(groupId, fromUser, toUser, UUID.randomUUID().toString(),new Date(),
-//				 V2GlobalEnum.REQUEST_TYPE_IM);
-//	}
-
-//	public VMessage(User fromUser, User toUser, int type) {
-//		this(0, fromUser, toUser, type);
-//	}
 	
 	public VMessage(int groupType , long groupId, User fromUser , Date date) {
 		this(groupType, groupId, fromUser, null , UUID.randomUUID().toString(), date);

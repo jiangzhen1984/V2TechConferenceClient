@@ -37,13 +37,9 @@ public class AddFriendHistroysHandler {
 	// account='wenzl' authtype='1' bsystemavatar='1' email='' id='166'
 	// nickname='wenzl' sex='0'/>,additInfo:验证
 	public static void addMeNeedAuthentication(Context context,
-			String userInfo, String additInfo) {
+			User remoteUser, String additInfo) {
 		String sql = null;
-		if (userInfo == null) {
-			return;
-		}
-		// 解析出字段
-		User remoteUser = User.fromXmlToUser(userInfo);
+		
 		// 我加别人未处理的全删。
 		// 别人加我未处理的也全删。
 		Iterator<AddFriendHistorieNode> iterator = GlobalHolder.getInstance().addFriendHistorieList

@@ -11,8 +11,6 @@ import com.V2.jni.ImRequest;
 import com.V2.jni.ImRequestCallbackAdapter;
 import com.V2.jni.ind.V2Group;
 import com.V2.jni.util.V2Log;
-import com.v2tech.service.ConferenceService.GroupRequestCB;
-import com.v2tech.service.UserService.ImRequestCB;
 import com.v2tech.service.jni.CreateCrowdResponse;
 import com.v2tech.service.jni.JNIResponse;
 import com.v2tech.vo.Crowd;
@@ -32,10 +30,6 @@ import com.v2tech.vo.User;
  * 
  * @author 28851274
  * 
- */
-/**
- * @author wenzl
- *
  */
 public class CrowdGroupService extends AbstractHandler {
 
@@ -221,9 +215,7 @@ public class CrowdGroupService extends AbstractHandler {
 
 	@Override
 	public void clear() {
-		imCB = new ImRequestCB(this);
 		ImRequest.getInstance().removeCallback(imCB);
-		grCB = new GroupRequestCB(this);
 		GroupRequest.getInstance().removeCallback(grCB);		
 	}
 
