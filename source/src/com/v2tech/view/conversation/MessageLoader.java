@@ -169,7 +169,7 @@ public class MessageLoader {
 
 		String[] args = new String[] { uid1 + "", uid2 + "", uid2 + "",
 				uid1 + "" };
-		return queryMessage(context, selection, args, order, QueryType.UNKNOW);
+		return queryMessage(context, selection, args, order, type);
 
 	}
 	
@@ -188,20 +188,21 @@ public class MessageLoader {
 
 		VMessage newMessage = null;
 		switch (type) {
-		case IMAGE:
-			newMessage = loadImageMessageById(vm, context);
-			break;
-		case AUDIO:
-			newMessage = loadAudioMessageById(vm, context);
-			break;
-		case FILE:
-			break;
-		case UNKNOW:
-			newMessage = loadImageMessageById(vm, context);
-			newMessage = loadAudioMessageById(newMessage, context);
-			break;
-		default:
-			break;
+			case IMAGE:
+				newMessage = loadImageMessageById(vm, context);
+				break;
+			case AUDIO:
+				newMessage = loadAudioMessageById(vm, context);
+				break;
+			case FILE:
+				break;
+			case UNKNOW:
+				newMessage = loadImageMessageById(vm, context);
+				newMessage = loadAudioMessageById(newMessage, context);
+				newMessage = loadFileMessageById(newMessage, context);
+				break;
+			default:
+				break;
 		}
 		return newMessage;
 	}
@@ -529,6 +530,7 @@ public class MessageLoader {
 		}
 
 		while (mCur.moveToNext()) {
+			
 			VMessage vm = XmlParser.parseForMessage(extractMsg(mCur));
 			if (vm == null) {
 				V2Log.e("the parse VMessage get null........");
@@ -749,7 +751,7 @@ public class MessageLoader {
 		// + " desc limit 1 offset 0 ";
 
 		List<VMessage> list = queryMessage(context, selection, args, order,
-				null);
+				QueryType.UNKNOW);
 		if (list != null && list.size() > 0) {
 			return list.get(0);
 		} else {

@@ -14,6 +14,7 @@ import android.content.Context;
 import android.util.Log;
 
 import com.V2.jni.ind.FileJNIObject;
+import com.V2.jni.util.V2Log;
 
 public class FileRequest {
 
@@ -128,26 +129,26 @@ public class FileRequest {
 	public native void httpDownloadFile(String patch, String patch1,
 			String patch2, int i, int i1);
 
-	// 鏀跺埌浠栦汉鐨勬枃浠朵紶杈撻個璇风殑鍥炶皟
-	/*
-	 * OnFileTransInvite--->
-	 * 
-	 * 0:2:userid{AB2C7E63-1AA3-4688-BAD2-97920B155F43}:C:\Users\qiang\Desktop\old7
-	 * \libv2ve.so:359180:0
+	/**
+	 * Receive the Files from the others , but not contain group's files..
+	 * @param userid
+	 * @param szFileID
+	 * @param szFileName
+	 * @param nFileBytes
+	 * @param linetype Whether it is online transfer
 	 */
 	private void OnFileTransInvite(long userid, String szFileID, String szFileName, long nFileBytes,
 			int linetype) {
-		Log.e(TAG, "OnFileTransInvite---> + nGroupID  + nBusinessType"
-				+ ":" + userid + ":" + szFileID + ":" + szFileName + ":"
-				+ nFileBytes + ":" + linetype);
+		V2Log.e("FileTrans UI", "OnFileTransInvite ---> userid :"
+				+ userid + " | szFileID: " + szFileID + " | szFileName: "
+				+ szFileName + " | nFileBytes: " + nFileBytes);
 		for (int i = 0; i < callbacks.size(); i++) {
 			WeakReference<FileRequestCallback> wrf = callbacks.get(i);
 			if (wrf != null && wrf.get() != null) {
-				//FIXME should update file request type once API add new parameters
 				((FileRequestCallback) wrf.get())
-						.OnFileTransInvite(new FileJNIObject(V2GlobalEnum.GROUP_TYPE_USER,
-								0,szFileID, userid,  szFileName,
-								nFileBytes, linetype));
+						.OnFileTransInvite(new FileJNIObject(userid,
+								szFileID, szFileName,  nFileBytes,
+								linetype));
 			}
 		}
 	}

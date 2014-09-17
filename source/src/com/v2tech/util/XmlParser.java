@@ -74,6 +74,9 @@ public class XmlParser {
 //		public static VMessage parseForMessage(User from, User to, Date date,
 //				String xml) {
 		String xml = vm.getmXmlDatas();
+		if(xml == null)
+			return vm;
+		
 		InputStream is = null;
 		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder dBuilder;
@@ -125,19 +128,20 @@ public class XmlParser {
 								start));
 						va = new VMessageFaceItem(vm, index);
 						va.setNewLine(isNewLine);
-					} else if (msgEl.getTagName().equals("TPictureChatItem")) {
-
-						
-						String uuid = msgEl.getAttribute("GUID");
-						if (uuid == null) {
-							V2Log.e("Invalid uuid ");
-							continue;
-						}
-						VMessageImageItem vii = new VMessageImageItem(vm, uuid,
-								msgEl.getAttribute("FileExt"));
-						vii.setNewLine(isNewLine);
-
-					}
+					} 
+//					else if (msgEl.getTagName().equals("TPictureChatItem")) {
+//
+//						
+//						String uuid = msgEl.getAttribute("GUID");
+//						if (uuid == null) {
+//							V2Log.e("Invalid uuid ");
+//							continue;
+//						}
+//						VMessageImageItem vii = new VMessageImageItem(vm, uuid,
+//								msgEl.getAttribute("FileExt"));
+//						vii.setNewLine(isNewLine);
+//
+//					}
 
 				}
 			}

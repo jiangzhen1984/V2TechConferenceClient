@@ -7,15 +7,71 @@ public abstract class VMessageQualification {
 	
 	
 	public enum Type {
-		CROWD, CONTACT
+		CROWD(0), CONTACT(1);
+		
+		private int type;
+		private Type(int type){
+			this.type = type;
+		}
+		public static Type fromInt(int code) {
+			switch (code) {
+				case 0:
+					return CROWD;
+				case 1:
+					return CONTACT;
+			}
+			return null;
+		}
+		
+		public int intValue() {
+			return type;
+		}
 	}
 	
 	public enum ReadState {
-		UNREAD, READ,
+		UNREAD(0), READ(1);
+		
+		private int type;
+		private ReadState(int type){
+			this.type = type;
+		}
+		public static ReadState fromInt(int code) {
+			switch (code) {
+				case 0:
+					return UNREAD;
+				case 1:
+					return READ;
+			}
+			return null;
+		}
+		
+		public int intValue() {
+			return type;
+		}
 	}
 	
 	public enum QualificationState {
-		WAITING,ACCEPTED,REJECT
+		WAITING(0),ACCEPTED(1),REJECT(2);
+		
+		private int type;
+		private QualificationState(int type){
+			this.type = type;
+		}
+		public static QualificationState fromInt(int code) {
+			switch (code) {
+				case 0:
+					return WAITING;
+				case 1:
+					return ACCEPTED;
+				case 2:
+					return REJECT;
+			}
+			return null;
+		}
+		
+		public int intValue() {
+			return type;
+		}
 	}
 	
 	protected long mId;

@@ -373,6 +373,7 @@ public class JNIService extends Service {
 				if (vm != null) {
 					String action = null;
 					MessageBuilder.saveBinaryVMessage(mContext, vm);
+					MessageBuilder.saveFileVMessage(mContext, vm);
 					MessageBuilder.saveMessage(mContext, vm);
 					Long id = MessageLoader
 							.queryVMessageID(
@@ -1040,15 +1041,15 @@ public class JNIService extends Service {
 
 		@Override
 		public void OnFileTransInvite(FileJNIObject file) {
-			User fromUser = GlobalHolder.getInstance().getUser(file.fromUserId);
+			User fromUser = GlobalHolder.getInstance().getUser(file.fromUserid);
 			// If doesn't receive user information from server side,
 			// construct new user object
 			if (fromUser == null) {
-				fromUser = new User(file.fromUserId);
+				fromUser = new User(file.fromUserid);
 			}
 			// FIXME input date as null
-			VMessage vm = new VMessage(file.getRequestType(), 0, fromUser,
-					GlobalHolder.getInstance().getCurrentUser(), null);
+			VMessage vm = new VMessage(0, 0, fromUser,
+					GlobalHolder.getInstance().getCurrentUser(), file.fileId , new Date(GlobalConfig.getGlobalServerTime()));
 			int pos = file.fileName.lastIndexOf("/");
 			VMessageFileItem vfi = new VMessageFileItem(vm, file.fileId,
 					pos == -1 ? file.fileName

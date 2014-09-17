@@ -735,7 +735,8 @@ public class ConversationView extends Activity {
 		iv.putExtra("uid", user2Id);
 		iv.putExtra("is_coming_call", false);
 		iv.putExtra("voice", false);
-		UserDeviceConfig udc = GlobalHolder.getInstance().getUserDefaultDevice(user2Id);
+		UserDeviceConfig udc = GlobalHolder.getInstance().getUserDefaultDevice(
+				user2Id);
 		if (udc != null) {
 			iv.putExtra("device", udc.getDeviceID());
 		} else {
@@ -1505,11 +1506,11 @@ public class ConversationView extends Activity {
 		// // Save message
 		vm.setmXmlDatas(vm.toXml());
 		vm.setDate(new Date(GlobalConfig.getGlobalServerTime()));
-		
+
 		MessageBuilder.saveMessage(this, vm);
 		MessageBuilder.saveFileVMessage(this, vm);
 		MessageBuilder.saveBinaryVMessage(this, vm);
-		
+
 		Message.obtain(lh, SEND_MESSAGE, vm).sendToTarget();
 		addMessageToContainer(vm);
 		// send notification
@@ -1603,7 +1604,7 @@ public class ConversationView extends Activity {
 			i.setAction(PublicIntent.START_VIDEO_IMAGE_GALLERY);
 			i.putExtra("uid1", user1Id);
 			i.putExtra("uid2", user2Id);
-			i.putExtra("cid", v.getId());
+			i.putExtra("cid", v.getUUID());
 			// type 0: is not group image view
 			// type 1: group image view
 			i.putExtra("type", groupId == 0 ? 0 : 1);
@@ -1678,15 +1679,10 @@ public class ConversationView extends Activity {
 			if (vfi == null) {
 				return;
 			}
-			if (vfi.getState() == VMessageFileItem.STATE_FILE_DOWNLOADING) {
-				mChat.updateFileOperation(vfi,
-						FileOperationEnum.OPERATION_PAUSE_DOWNLOADING, null);
-				vfi.setState(VMessageFileItem.STATE_FILE_PAUSED_DOWNLOADING);
-			} else if (vfi.getState() == VMessageFileItem.STATE_FILE_SENDING) {
-				mChat.updateFileOperation(vfi,
-						FileOperationEnum.OPERATION_PAUSE_SENDING, null);
-				vfi.setState(VMessageFileItem.STATE_FILE_PAUSED_SENDING);
-			}
+
+			mChat.updateFileOperation(vfi,
+					FileOperationEnum.OPERATION_PAUSE_SENDING, null);
+			vfi.setState(VMessageFileItem.STATE_FILE_PAUSED_SENDING);
 
 		}
 
@@ -1697,15 +1693,9 @@ public class ConversationView extends Activity {
 				return;
 			}
 
-			if (vfi.getState() == VMessageFileItem.STATE_FILE_PAUSED_DOWNLOADING) {
-				mChat.updateFileOperation(vfi,
-						FileOperationEnum.OPERATION_RESUME_DOWNLOAD, null);
-				vfi.setState(VMessageFileItem.STATE_FILE_DOWNLOADING);
-			} else if (vfi.getState() == VMessageFileItem.STATE_FILE_PAUSED_SENDING) {
-				mChat.updateFileOperation(vfi,
-						FileOperationEnum.OPERATION_RESUME_SEND, null);
-				vfi.setState(VMessageFileItem.STATE_FILE_SENDING);
-			}
+			mChat.updateFileOperation(vfi,
+					FileOperationEnum.OPERATION_RESUME_SEND, null);
+			vfi.setState(VMessageFileItem.STATE_FILE_SENDING);
 
 		}
 
@@ -1771,7 +1761,7 @@ public class ConversationView extends Activity {
 		List<VMessage> array = null;
 		if (this.groupId == 0) {
 			array = MessageLoader.loadMessageByPage(mContext, user1Id, user2Id,
-					BATCH_COUNT, offset , Conversation.TYPE_CONTACT);
+					BATCH_COUNT, offset, Conversation.TYPE_CONTACT);
 		} else if (this.groupId != 0) {
 			array = MessageLoader.loadGroupMessageByPage(mContext,
 					Long.valueOf(Conversation.TYPE_GROUP), groupId,
@@ -1858,7 +1848,9 @@ public class ConversationView extends Activity {
 							vfi.setState(VMessageAbstractItem.STATE_FILE_DOWNLOADED);
 						}
 
-						MessageBuilder.updateVMessageItem(this, vfi);
+						int updates = MessageBuilder.updateVMessageItem(this,
+								vfi);
+						Log.e(TAG, "updates success : " + updates);
 					}
 
 					vfi.setDownloadedSize(tranedSize);
@@ -1891,7 +1883,10 @@ public class ConversationView extends Activity {
 					} else {
 						vfi.setState(VMessageFileItem.STATE_FILE_SENT_FALIED);
 					}
-					MessageBuilder.updateVMessageItem(this, vfi);
+
+					int updates = MessageBuilder
+							.updateVMessageItemToSentFalied(this, vfi);
+					Log.e(TAG, "updates success : " + updates);
 
 					((MessageBodyView) messageArray.get(i).getView())
 							.updateView(vfi);

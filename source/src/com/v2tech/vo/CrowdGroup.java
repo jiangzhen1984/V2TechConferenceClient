@@ -2,6 +2,8 @@ package com.v2tech.vo;
 
 import java.util.Date;
 
+import com.v2tech.vo.VMessageQualification.Type;
+
 
 public class CrowdGroup extends Group {
 	
@@ -75,7 +77,27 @@ public class CrowdGroup extends Group {
 	}
 	
 	public enum AuthType {
-		ALLOW_ALL,QULIFICATION,NEVER;
+		ALLOW_ALL(0),QULIFICATION(1),NEVER(2);
+		
+		private int type;
+		private AuthType(int type){
+			this.type = type;
+		}
+		public static AuthType fromInt(int code) {
+			switch (code) {
+				case 0:
+					return ALLOW_ALL;
+				case 1:
+					return QULIFICATION;
+				case 2:
+					return NEVER;
+			}
+			return null;
+		}
+		
+		public int intValue() {
+			return type;
+		}
 	}
 	
 }

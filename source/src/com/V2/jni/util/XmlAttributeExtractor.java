@@ -152,7 +152,7 @@ public class XmlAttributeExtractor {
 
 	}
 
-	private static Document buildDocument(String xml) {
+	public static Document buildDocument(String xml) {
 		if (xml == null || xml.isEmpty()) {
 			V2Log.e(" conference xml is null");
 			return null;
