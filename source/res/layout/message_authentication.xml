@@ -43,6 +43,21 @@
             android:paddingBottom="10dp"
             android:paddingTop="10dp"
             android:src="@drawable/translucent" />
+
+        <TextView
+            android:id="@+id/tv_complete_right"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="10dp"
+            android:paddingBottom="10dp"
+            android:paddingLeft="15dp"
+            android:paddingRight="8dp"
+            android:paddingTop="10dp"
+            android:text="完成"
+            android:textColor="@color/button_text_color"
+            android:textSize="@dimen/common_item_text_size" />
     </RelativeLayout>
 
     <LinearLayout
@@ -78,20 +93,20 @@
             android:layout_weight="1"
             android:background="@drawable/friend_authentication"
             android:button="@null"
-            android:textColor="#ffffff"
             android:gravity="center"
-            android:text="好友验证" />
+            android:text="好友验证"
+            android:textColor="#ffffff" />
 
         <RadioButton
             android:id="@+id/rb_group_authentication"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-             android:textColor="@color/button_text_color"
             android:background="@drawable/group_authentication"
             android:button="@null"
             android:gravity="center"
-            android:text="群验证" />
+            android:text="群验证"
+            android:textColor="@color/button_text_color" />
     </RadioGroup>
 
     <LinearLayout

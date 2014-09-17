@@ -1,10 +1,11 @@
 package com.v2tech.view.contacts.add;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import com.v2tech.R;
+import com.v2tech.db.DataBaseContext;
+import com.v2tech.db.V2TechDBHelper;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.view.contacts.ContactDetail;
 import com.v2tech.view.contacts.ContactDetail2;
@@ -14,19 +15,24 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.RadioButton;
@@ -38,10 +44,14 @@ public class MessageAuthenticationActivity extends Activity {
 	private ListView lvMessageAuthentication;
 	// R.id.message_back
 	private TextView tvMessageBack;
+	// R.id.tv_complete_right
+	private TextView tvCompleteRight;
 	// R.id.rb_friend_authentication
 	private RadioButton rbFriendAuthentication;
 	// R.id.rb_group_authentication
 	private RadioButton rbGroupAuthentication;
+
+	MessageAuthenticationListViewAdapter adapter;
 
 	private List<MessageAuthenticationData> messageAuthenticationDataList = new ArrayList<MessageAuthenticationActivity.MessageAuthenticationData>();
 
@@ -49,11 +59,24 @@ public class MessageAuthenticationActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.message_authentication);
+
 		tvMessageBack = (TextView) findViewById(R.id.message_back);
 		tvMessageBack.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View arg0) {
 				onBackPressed();
+			}
+		});
+
+		tvCompleteRight = (TextView) findViewById(R.id.tv_complete_right);
+		tvCompleteRight.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View arg0) {
+				adapter.isDeleteMode = false;
+				adapter.notifyDataSetChanged();
+				tvMessageBack.setVisibility(View.VISIBLE);
+				tvCompleteRight.setVisibility(View.INVISIBLE);
 			}
 		});
 
@@ -96,8 +119,6 @@ public class MessageAuthenticationActivity extends Activity {
 		// 生成数据
 		// 查数据库生成数据
 
-	
-
 		String sql = "select * from " + tableName;
 		Cursor cr = AddFriendHistroysHandler.select(getApplicationContext(),
 				sql, new String[] {});
@@ -127,48 +148,49 @@ public class MessageAuthenticationActivity extends Activity {
 				tempNode.addState = cr.getLong(9);
 				tempNode.readState = cr.getLong(10);
 
-			MessageAuthenticationData tempData = new MessageAuthenticationData();
-			tempData.remoteUserID = tempNode.remoteUserID;
-			tempData.name = GlobalHolder.getInstance()
-					.getUser(tempData.remoteUserID).getName();
+				MessageAuthenticationData tempData = new MessageAuthenticationData();
+				tempData.remoteUserID = tempNode.remoteUserID;
+				tempData.name = GlobalHolder.getInstance()
+						.getUser(tempData.remoteUserID).getName();
 
-			// 别人加我：允许任何人：0已添加您为好友，需要验证：1未处理，2已同意，3已拒绝
-			// 我加别人：允许认识人：4你们已成为了好友，需要验证：5等待对方验证，4被同意（你们已成为了好友），6拒绝了你为好友
-			if ((tempNode.fromUserID == tempNode.remoteUserID)
-					&& (tempNode.ownerAuthType == 0)) {// 别人加我允许任何人
-				tempData.state = 0;
-			} else if ((tempNode.fromUserID == tempNode.remoteUserID)
-					&& (tempNode.ownerAuthType == 1)
-					&& (tempNode.addState == 0)) {// 别人加我未处理
-				tempData.state = 1;
-				tempData.authenticationMessage = tempNode.applyReason;
-			} else if ((tempNode.fromUserID == tempNode.remoteUserID)
-					&& (tempNode.ownerAuthType == 1)
-					&& (tempNode.addState == 1)) {// 别人加我已同意
-				tempData.state = 2;
-				tempData.authenticationMessage = tempNode.applyReason;
-			} else if ((tempNode.fromUserID == tempNode.remoteUserID)
-					&& (tempNode.ownerAuthType == 1)
-					&& (tempNode.addState == 2)) {// 别人加我已拒绝
-				tempData.state = 3;
-				tempData.authenticationMessage = tempNode.refuseReason;
-			} else if ((tempNode.fromUserID == tempNode.ownerUserID)
-					&& (tempNode.addState == 0)) {// 我加别人等待验证
-				tempData.state = 5;
-			} else if ((tempNode.fromUserID == tempNode.ownerUserID)
-					&& (tempNode.addState == 1)) {// 我加别人已被同意或我加别人不需验证
-				tempData.state = 4;
-			} else if ((tempNode.fromUserID == tempNode.ownerUserID)
-					&& (tempNode.addState == 2)) {// 我加别人已被拒绝
-				tempData.state = 6;
-				tempData.authenticationMessage = tempNode.refuseReason;
-			}
-			messageAuthenticationDataList.add(tempData);
+				tempData.dbRecordIndex = cr.getLong(0);
+				// 别人加我：允许任何人：0已添加您为好友，需要验证：1未处理，2已同意，3已拒绝
+				// 我加别人：允许认识人：4你们已成为了好友，需要验证：5等待对方验证，4被同意（你们已成为了好友），6拒绝了你为好友
+				if ((tempNode.fromUserID == tempNode.remoteUserID)
+						&& (tempNode.ownerAuthType == 0)) {// 别人加我允许任何人
+					tempData.state = 0;
+				} else if ((tempNode.fromUserID == tempNode.remoteUserID)
+						&& (tempNode.ownerAuthType == 1)
+						&& (tempNode.addState == 0)) {// 别人加我未处理
+					tempData.state = 1;
+					tempData.authenticationMessage = tempNode.applyReason;
+				} else if ((tempNode.fromUserID == tempNode.remoteUserID)
+						&& (tempNode.ownerAuthType == 1)
+						&& (tempNode.addState == 1)) {// 别人加我已同意
+					tempData.state = 2;
+					tempData.authenticationMessage = tempNode.applyReason;
+				} else if ((tempNode.fromUserID == tempNode.remoteUserID)
+						&& (tempNode.ownerAuthType == 1)
+						&& (tempNode.addState == 2)) {// 别人加我已拒绝
+					tempData.state = 3;
+					tempData.authenticationMessage = tempNode.refuseReason;
+				} else if ((tempNode.fromUserID == tempNode.ownerUserID)
+						&& (tempNode.addState == 0)) {// 我加别人等待验证
+					tempData.state = 5;
+				} else if ((tempNode.fromUserID == tempNode.ownerUserID)
+						&& (tempNode.addState == 1)) {// 我加别人已被同意或我加别人不需验证
+					tempData.state = 4;
+				} else if ((tempNode.fromUserID == tempNode.ownerUserID)
+						&& (tempNode.addState == 2)) {// 我加别人已被拒绝
+					tempData.state = 6;
+					tempData.authenticationMessage = tempNode.refuseReason;
+				}
+				messageAuthenticationDataList.add(tempData);
 			} while (cr.moveToNext());
 		}
 		// 建立adapter
-		MessageAuthenticationListViewAdapter adapter = new MessageAuthenticationListViewAdapter(
-				this, R.layout.message_authentication_listview_item,
+		adapter = new MessageAuthenticationListViewAdapter(this,
+				R.layout.message_authentication_listview_item,
 				messageAuthenticationDataList);
 		// 设置adapter
 		lvMessageAuthentication.setAdapter(adapter);
@@ -210,18 +232,34 @@ public class MessageAuthenticationActivity extends Activity {
 					}
 				});
 
+		lvMessageAuthentication
+				.setOnItemLongClickListener(new OnItemLongClickListener() {
+
+					@Override
+					public boolean onItemLongClick(AdapterView<?> arg0,
+							View arg1, int arg2, long arg3) {
+						adapter.isDeleteMode = true;
+						adapter.notifyDataSetChanged();
+						tvMessageBack.setVisibility(View.INVISIBLE);
+						tvCompleteRight.setVisibility(View.VISIBLE);
+						return false;
+					}
+				});
+
+	}
+
+	@Override
+	public void onBackPressed() {
+		if (adapter.isDeleteMode) {
+			adapter.isDeleteMode = false;
+			adapter.notifyDataSetChanged();
+		} else {
+			super.onBackPressed();
+		}
 	}
 
 	class MessageAuthenticationData {
 		public MessageAuthenticationData() {
-		}
-
-		public MessageAuthenticationData(Drawable dheadImage, String name,
-				String authenticationMessage, int state) {
-			this.dheadImage = dheadImage;
-			this.name = name;
-			this.authenticationMessage = authenticationMessage;
-			this.state = state;
 		}
 
 		Drawable dheadImage;
@@ -229,9 +267,10 @@ public class MessageAuthenticationActivity extends Activity {
 		String authenticationMessage;
 		// 别人加我：允许任何人：0已添加您为好友，需要验证：1未处理，2已同意，3已拒绝
 		// 我加别人：允许认识人：4成为好友，需要验证：5等待验证，4被同意（成为好友），6被拒绝
-		int state;// 允许时候人时，我加被人：0成为好友。需要验证时，被邀请，1未处理，2已同意，3已拒绝。邀请人，4等待验证，5被同意(成为好友)，6被拒绝。允许时候人时：7别人加我(已添加您为好友)
-		// -----------------
+		int state;
 		long remoteUserID;
+		// 对应数据库中id
+		long dbRecordIndex;
 	}
 
 	// 验证消息adapter
@@ -242,6 +281,7 @@ public class MessageAuthenticationActivity extends Activity {
 		private List<MessageAuthenticationData> list;
 		private LayoutInflater layoutInflater;
 		private Context context;
+		public boolean isDeleteMode = false;
 
 		public MessageAuthenticationListViewAdapter(Context context,
 				int layoutId, List<MessageAuthenticationData> list) {
@@ -277,11 +317,17 @@ public class MessageAuthenticationActivity extends Activity {
 			Button bAccess;
 			// R.id.access_or_no
 			TextView tvAccessOrNo;
+			// R.id.b_suer_delete
+			Button bSuerDelete;
+			// R.id.ib_delete
+			ImageButton ibDelete;
+
 		}
 
 		@Override
 		public View getView(int arg0, View arg1, ViewGroup arg2) {
-			ViewTag viewTag;
+			final int position = arg0;
+			final ViewTag viewTag;
 			if (arg1 == null) {
 				arg1 = layoutInflater.inflate(layoutId, null);
 				viewTag = new ViewTag();
@@ -293,6 +339,10 @@ public class MessageAuthenticationActivity extends Activity {
 				viewTag.bAccess = (Button) arg1.findViewById(R.id.access);
 				viewTag.tvAccessOrNo = (TextView) arg1
 						.findViewById(R.id.access_or_no);
+				viewTag.ibDelete = (ImageButton) arg1
+						.findViewById(R.id.ib_delete);
+				viewTag.bSuerDelete = (Button) arg1
+						.findViewById(R.id.b_suer_delete);
 				arg1.setTag(viewTag);
 			} else {
 				viewTag = (ViewTag) arg1.getTag();
@@ -365,6 +415,43 @@ public class MessageAuthenticationActivity extends Activity {
 					context.startActivity(intent);
 				}
 			});
+
+			viewTag.ibDelete.setOnClickListener(new OnClickListener() {
+
+				@Override
+				public void onClick(View arg0) {
+					if (viewTag.bSuerDelete.getVisibility() == View.VISIBLE) {
+						viewTag.bSuerDelete.setVisibility(View.GONE);
+					} else {
+						viewTag.bSuerDelete.setVisibility(View.VISIBLE);
+					}
+					
+				}
+			});
+
+			viewTag.bSuerDelete.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View arg0) {
+					// 库中删除
+					String sql = "delete from " + tableName + " where _id="
+							+ list.get(position).dbRecordIndex;
+					V2TechDBHelper dbh = new V2TechDBHelper(
+							new DataBaseContext(getApplicationContext()));
+					SQLiteDatabase db = dbh.getWritableDatabase();
+					db.execSQL(sql);
+					// data中删除
+					list.remove(position);
+					MessageAuthenticationListViewAdapter.this
+							.notifyDataSetChanged();
+				}
+			});
+
+			viewTag.bSuerDelete.setVisibility(View.GONE);
+			if (isDeleteMode) {
+				viewTag.ibDelete.setVisibility(View.VISIBLE);
+			} else {
+				viewTag.ibDelete.setVisibility(View.GONE);
+			}
 
 			return arg1;
 		}
