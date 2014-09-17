@@ -83,7 +83,7 @@ public class JNIService extends Service {
 	private static final String TAG = "JNIService";
 	public static final int BINARY_TYPE_AUDIO = 1;
 	public static final int BINARY_TYPE_IMAGE = 2;
-	
+
 	public static final String JNI_BROADCAST_CATEGROY = "com.v2tech.jni.broadcast";
 	public static final String JNI_ACTIVITY_CATEGROY = "com.v2tech";
 	public static final String JNI_BROADCAST_CONNECT_STATE_NOTIFICATION = "com.v2tech.jni.broadcast.connect_state_notification";
@@ -585,15 +585,18 @@ public class JNIService extends Service {
 				V2Log.e(" invitation group is null");
 				return;
 			}
-			Group cache = GlobalHolder.getInstance().getGroupById(group.type,
-					group.id);
-			if (cache != null) {
-				V2Log.e("Duplicated group invitation: " + cache.getmGId()
-						+ "  " + cache.getName());
-				return;
-			}
 
 			GroupType gType = GroupType.fromInt(group.type);
+			if (gType != GroupType.CONTACT) {
+				Group cache = GlobalHolder.getInstance().getGroupById(
+						group.type, group.id);
+				if (cache != null) {
+					V2Log.e("Duplicated group invitation: " + cache.getmGId()
+							+ "  " + cache.getName());
+					return;
+				}
+			}
+
 			if (gType == GroupType.CONFERENCE) {
 				User owner = GlobalHolder.getInstance()
 						.getUser(group.owner.uid);
@@ -716,7 +719,8 @@ public class JNIService extends Service {
 
 			GroupType gType = GroupType.fromInt(groupType);
 			if (gType == GroupType.CONTACT) {
-				AddFriendHistroysHandler.becomeFriendHanler(sXml);
+				AddFriendHistroysHandler.becomeFriendHanler(
+						getApplicationContext(), sXml);
 
 			}
 
@@ -728,6 +732,18 @@ public class JNIService extends Service {
 			i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
 			i.putExtra("obj", obj);
 			sendBroadcast(i);
+		}
+
+		@Override
+		public void OnRefuseInviteJoinGroup(int groupType, long nGroupID,
+				long nUserID, String sxml) {
+
+			GroupType gType = GroupType.fromInt(groupType);
+			if (gType == GroupType.CONTACT) {
+				AddFriendHistroysHandler.addOtherRefused(
+						getApplicationContext(), nUserID, sxml);
+			}
+
 		}
 
 	}

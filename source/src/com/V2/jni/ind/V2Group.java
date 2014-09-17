@@ -52,6 +52,10 @@ public class V2Group {
 	public boolean isDefault;
 	
 	
+	public V2Group(int type) {
+		super();
+		this.type = type;
+	}
 	
 	public V2Group(long id, int type) {
 		super();

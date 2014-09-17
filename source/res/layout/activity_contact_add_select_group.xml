@@ -70,7 +70,7 @@
             android:layout_marginRight="@dimen/contact_detail_2_item_margin_horizontal"
             android:layout_marginTop="@dimen/detail_detail_2_item_margin_top"
             android:padding="10dp"
-            android:text="Default"
+            android:text="我的好友"
             android:textColor="@color/activiy_contact_detail_item_color"
             android:textSize="@dimen/common_item_text_size" />
 

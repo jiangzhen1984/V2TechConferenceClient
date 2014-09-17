@@ -91,8 +91,7 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 		if ((fromActivity != null)
 				&& (fromActivity.equals("MessageAuthenticationActivity"))) {
 			// 166是wenzl测试用
-			// mUid = this.getIntent().getLongExtra("remoteUserID", 0);
-			mUid = 166;
+			mUid = this.getIntent().getLongExtra("remoteUserID", 0);
 		} else {
 			mUid = this.getIntent().getLongExtra("uid", 0);
 		}

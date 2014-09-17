@@ -96,36 +96,36 @@ public class MessageAuthenticationActivity extends Activity {
 		// 生成数据
 		// 查数据库生成数据
 
-		Iterator<AddFriendHistorieNode> iterator = GlobalHolder.getInstance().addFriendHistorieList
-				.iterator();
+	
 
-		// String sql="select * from "+tableName;
-		// Cursor cr=AddFriendHistroysHandler.select(getApplicationContext(),
-		// sql, new String[]{});
+		String sql = "select * from " + tableName;
+		Cursor cr = AddFriendHistroysHandler.select(getApplicationContext(),
+				sql, new String[] {});
+		if (cr.moveToFirst()) {
+			do {
 
-		while (iterator.hasNext()) {
-			AddFriendHistorieNode tempNode = iterator.next();
-			// // _id integer primary key AUTOINCREMENT,0
-			// // OwnerUserID bigint,1
-			// // SaveDate bigint,2
-			// // FromUserID bigint,3
-			// // OwnerAuthType bigint,4
-			// // ToUserID bigint, 5
-			// // RemoteUserID bigint, 6
-			// // ApplyReason nvarchar(4000),7
-			// // RefuseReason nvarchar(4000), 8
-			// // AddState bigint ,9
-			// // ReadState bigint);10
-			// tempNode.ownerUserID=cr.getLong(1);
-			// tempNode.saveDate=cr.getLong(2);
-			// tempNode.fromUserID=cr.getLong(3);
-			// tempNode.ownerAuthType=cr.getLong(4);
-			// tempNode.toUserID=cr.getLong(5);
-			// tempNode.remoteUserID=cr.getLong(6);
-			// tempNode.applyReason=cr.getString(7);
-			// tempNode.refuseReason=cr.getString(8);
-			// tempNode.addState=cr.getLong(9);
-			// tempNode.readState=cr.getLong(10);
+				AddFriendHistorieNode tempNode = new AddFriendHistorieNode();
+				// _id integer primary key AUTOINCREMENT,0
+				// OwnerUserID bigint,1
+				// SaveDate bigint,2
+				// FromUserID bigint,3
+				// OwnerAuthType bigint,4
+				// ToUserID bigint, 5
+				// RemoteUserID bigint, 6
+				// ApplyReason nvarchar(4000),7
+				// RefuseReason nvarchar(4000), 8
+				// AddState bigint ,9
+				// ReadState bigint);10
+				tempNode.ownerUserID = cr.getLong(1);
+				tempNode.saveDate = cr.getLong(2);
+				tempNode.fromUserID = cr.getLong(3);
+				tempNode.ownerAuthType = cr.getLong(4);
+				tempNode.toUserID = cr.getLong(5);
+				tempNode.remoteUserID = cr.getLong(6);
+				tempNode.applyReason = cr.getString(7);
+				tempNode.refuseReason = cr.getString(8);
+				tempNode.addState = cr.getLong(9);
+				tempNode.readState = cr.getLong(10);
 
 			MessageAuthenticationData tempData = new MessageAuthenticationData();
 			tempData.remoteUserID = tempNode.remoteUserID;
@@ -164,8 +164,8 @@ public class MessageAuthenticationActivity extends Activity {
 				tempData.authenticationMessage = tempNode.refuseReason;
 			}
 			messageAuthenticationDataList.add(tempData);
+			} while (cr.moveToNext());
 		}
-
 		// 建立adapter
 		MessageAuthenticationListViewAdapter adapter = new MessageAuthenticationListViewAdapter(
 				this, R.layout.message_authentication_listview_item,

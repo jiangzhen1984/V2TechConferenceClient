@@ -141,9 +141,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 		fromActivity = this.getIntent().getStringExtra("fromActivity");
 		if ((fromActivity != null)
 				&& (fromActivity.equals("MessageAuthenticationActivity"))) {
-			// 166是wenzl测试用
-			// mUid = this.getIntent().getLongExtra("remoteUserID", 0);
-			mUid = 166;
+			mUid = this.getIntent().getLongExtra("remoteUserID", 0);
 		} else {
 			mUid = this.getIntent().getLongExtra("uid", 0);
 		}
@@ -167,7 +165,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 		bAccess = (Button) findViewById(R.id.access);
 		bRefuse = (Button) findViewById(R.id.refuse);
 		tvAuthenticationState = (TextView) findViewById(R.id.authentication_state);
-		llAuthenticationMessageLayout=(LinearLayout) findViewById(R.id.authentication_message_layout);
+		llAuthenticationMessageLayout = (LinearLayout) findViewById(R.id.authentication_message_layout);
 	}
 
 	private void bindViewEnvent() {
@@ -208,8 +206,8 @@ public class ContactDetail extends Activity implements OnTouchListener {
 			mCompanyTitleTV.setVisibility(View.INVISIBLE);
 			int state = this.getIntent().getIntExtra("state", -1);
 			switch (state) {
-			//别人加我：允许任何人：0已添加您为好友，需要验证：1未处理，2已同意，3已拒绝
-			//我加别人：允许认识人：4你们已成为了好友，需要验证：5等待对方验证，4被同意（你们已成为了好友），6拒绝了你为好友
+			// 别人加我：允许任何人：0已添加您为好友，需要验证：1未处理，2已同意，3已拒绝
+			// 我加别人：允许认识人：4你们已成为了好友，需要验证：5等待对方验证，4被同意（你们已成为了好友），6拒绝了你为好友
 			case 0:// 0成为好友
 				bAccess.setVisibility(View.GONE);
 				bRefuse.setVisibility(View.GONE);
@@ -378,7 +376,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 		mSignTV = (TextView) findViewById(R.id.contact_user_detail_user_signature_tv);
 
 		mTVArr = new View[] { mItemsContainer, mCompanyTitleTV,
-				mContactButtonContainer, mMoreDetailButton, mSignTV};
+				mContactButtonContainer, mMoreDetailButton, mSignTV };
 
 		// view for self
 		mSelfItemsContainer = findViewById(R.id.contact_detail_self_items_ly);
@@ -500,7 +498,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 	}
 
 	private void startVoiceCall() {
-		//Update global audio state
+		// Update global audio state
 		GlobalHolder.getInstance().setAudioState(true, mUid);
 		Intent iv = new Intent();
 		iv.addCategory(PublicIntent.DEFAULT_CATEGORY);
@@ -513,7 +511,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 	}
 
 	private void startVideoCall() {
-		//Update global video state
+		// Update global video state
 		GlobalHolder.getInstance().setVideoState(true, mUid);
 		Intent iv = new Intent();
 		iv.addCategory(PublicIntent.DEFAULT_CATEGORY);
@@ -522,13 +520,14 @@ public class ContactDetail extends Activity implements OnTouchListener {
 		iv.putExtra("uid", mUid);
 		iv.putExtra("is_coming_call", false);
 		iv.putExtra("voice", false);
-		UserDeviceConfig udc = GlobalHolder.getInstance().getUserDefaultDevice(mUid);
+		UserDeviceConfig udc = GlobalHolder.getInstance().getUserDefaultDevice(
+				mUid);
 		if (udc != null) {
 			iv.putExtra("device", udc.getDeviceID());
 		} else {
 			iv.putExtra("device", "");
 		}
-		
+
 		mContext.startActivity(iv);
 	}
 

@@ -1,10 +1,5 @@
 package com.v2tech.view.contacts.add;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
-import android.app.TabActivity;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -46,19 +41,9 @@ public class AddFriendHistroysHandler {
 		User remoteUser = User.fromXmlToUser(userInfo);
 		// 我加别人未处理的全删。
 		// 别人加我未处理的也全删。
-		Iterator<AddFriendHistorieNode> iterator = GlobalHolder.getInstance().addFriendHistorieList
-				.iterator();
-		while (iterator.hasNext()) {
-			AddFriendHistorieNode tempNode = iterator.next();
-			if ((remoteUser.getmUserId() == tempNode.remoteUserID)
-					&& (tempNode.addState == 0)) {
-				iterator.remove();
-			}
-		}
-
-		// sql = "delete from " + tableName + " where RemoteUserID="
-		// + remoteUser.getmUserId() + " and " + "AddState=0";
-		// del(context, sql);
+		sql = "delete from " + tableName + " where RemoteUserID="
+				+ remoteUser.getmUserId() + " and " + "AddState=0";
+		del(context, sql);
 
 		// 加一条别人加我的未处理记录
 		// 加入到数据库中
@@ -74,18 +59,27 @@ public class AddFriendHistroysHandler {
 		node.addState = 0;
 		node.readState = 0;
 		node.saveDate = System.currentTimeMillis() / 1000;
-		GlobalHolder.getInstance().addFriendHistorieList.add(node);
 
-		// sql = "insert into "
-		// + tableName
-		// +
-		// " (OwnerUserID,OwnerAuthType,RemoteUserID,FromUserID,ToUserID,ApplyReason,RefuseReason,AddState,SaveDate,ReadState) values("
-		// + node.ownerUserID + "," + node.ownerAuthType + ","
-		// + node.remoteUserID + "," + node.fromUserID + ","
-		// + node.toUserID + "," + node.applyReason + ","
-		// + node.refuseReason + "," + node.addState + "," + node.saveDate
-		// + "," + node.readState + ")";
-		// add(null, sql);
+		sql = "insert into "
+				+ tableName
+				+ " (OwnerUserID,OwnerAuthType,RemoteUserID,FromUserID,ToUserID,ApplyReason,RefuseReason,AddState,SaveDate,ReadState) values("
+				+ node.ownerUserID
+				+ ","
+				+ node.ownerAuthType
+				+ ","
+				+ node.remoteUserID
+				+ ","
+				+ node.fromUserID
+				+ ","
+				+ node.toUserID
+				+ ","
+				+ (node.applyReason == null || node.applyReason.equals("") ? "NULL"
+						: "'" + node.applyReason + "'")
+				+ ","
+				+ (node.refuseReason == null || node.refuseReason.equals("") ? "NULL"
+						: "'" + node.refuseReason + "'") + "," + node.addState
+				+ "," + node.saveDate + "," + node.readState + ")";
+		add(context, sql);
 
 	}
 
@@ -104,24 +98,14 @@ public class AddFriendHistroysHandler {
 	// nGroupID,long nUserID, String reason);
 	// 改（查别人加我未处理的）状态
 
-	public static void addMeRefuse(long remoteUserId, String refuseReason) {
+	public static void addMeRefuse(Context context, long remoteUserId,
+			String refuseReason) {
 		String sql = null;
 		// 查别人加我未处理的
-		Iterator<AddFriendHistorieNode> iterator = GlobalHolder.getInstance().addFriendHistorieList
-				.iterator();
-		while (iterator.hasNext()) {
-			AddFriendHistorieNode tempNode = iterator.next();
-			if ((remoteUserId == tempNode.fromUserID)
-					&& (tempNode.addState == 0)) {
-				tempNode.addState = 2;// 拒绝
-				tempNode.refuseReason = refuseReason;
-			}
-		}
-
-		// sql = "update " + tableName + " set AddState=2" + ",RefuseReason='"
-		// + refuseReason + "'" + " where FromUserID=" + remoteUserId
-		// + " and " + "AddState=0";
-		// update(null, sql);
+		sql = "update " + tableName + " set AddState=2" + ",RefuseReason='"
+				+ refuseReason + "'" + " where FromUserID=" + remoteUserId
+				+ " and " + "AddState=0";
+		update(context, sql);
 	}
 
 	// ====================================================================================
@@ -140,8 +124,9 @@ public class AddFriendHistroysHandler {
 	// sign=''telephone=''/>
 	// 查我加别人，有则改。
 	// 参看becomeFriendHanler---------------------------------------
-	public static void addOtherNoNeedAuthentication(User remoteUser) {
-		addOtherNeedAuthentication(remoteUser, null);
+	public static void addOtherNoNeedAuthentication(Context context,
+			User remoteUser) {
+		addOtherNeedAuthentication(context, remoteUser, null);
 	}
 
 	// 6
@@ -149,8 +134,8 @@ public class AddFriendHistroysHandler {
 	// 别人加我未处理的全删。
 	// 我加被人未处理的也全删。
 	// 加一条我加别人未处理记录
-	public static void addOtherNeedAuthentication(User remoteUser,
-			String applyReason) {
+	public static void addOtherNeedAuthentication(Context context,
+			User remoteUser, String applyReason) {
 		String sql = null;
 
 		if (remoteUser == null) {
@@ -159,19 +144,10 @@ public class AddFriendHistroysHandler {
 
 		// 我加别人未处理的全删。
 		// 别人加我未处理的也全删。
-		Iterator<AddFriendHistorieNode> iterator = GlobalHolder.getInstance().addFriendHistorieList
-				.iterator();
-		while (iterator.hasNext()) {
-			AddFriendHistorieNode tempNode = iterator.next();
-			if ((remoteUser.getmUserId() == tempNode.remoteUserID)
-					&& (tempNode.addState == 0)) {
-				iterator.remove();
-			}
-		}
 
-		// sql = "delete from " + tableName + " where RemoteUserID="
-		// + remoteUser.getmUserId() + " and " + "AddState=0";
-		// del(null, sql);
+		sql = "delete from " + tableName + " where RemoteUserID="
+				+ remoteUser.getmUserId() + " and " + "AddState=0";
+		del(context, sql);
 
 		// 加一条我加别人的未处理记录
 		// 加入到数据库中
@@ -187,18 +163,27 @@ public class AddFriendHistroysHandler {
 		node.addState = 0;
 		node.readState = 0;
 		node.saveDate = System.currentTimeMillis() / 1000;
-		GlobalHolder.getInstance().addFriendHistorieList.add(node);
 
-		// sql = "insert into "
-		// + tableName
-		// +
-		// " (OwnerUserID,OwnerAuthType,RemoteUserID,FromUserID,ToUserID,ApplyReason,RefuseReason,AddState,SaveDate,ReadState) values("
-		// + node.ownerUserID + "," + node.ownerAuthType + ","
-		// + node.remoteUserID + "," + node.fromUserID + ","
-		// + node.toUserID + "," + node.applyReason + ","
-		// + node.refuseReason + "," + node.addState + "," + node.saveDate
-		// + "," + node.readState + ")";
-		// add(null, sql);
+		sql = "insert into "
+				+ tableName
+				+ " (OwnerUserID,OwnerAuthType,RemoteUserID,FromUserID,ToUserID,ApplyReason,RefuseReason,AddState,SaveDate,ReadState) values("
+				+ node.ownerUserID
+				+ ","
+				+ node.ownerAuthType
+				+ ","
+				+ node.remoteUserID
+				+ ","
+				+ node.fromUserID
+				+ ","
+				+ node.toUserID
+				+ ","
+				+ (node.applyReason == null || node.applyReason.equals("") ? "NULL"
+						: "'" + node.applyReason + "'")
+				+ ","
+				+ (node.refuseReason == null || node.refuseReason.equals("") ? "NULL"
+						: "'" + node.refuseReason + "'") + "," + node.addState
+				+ "," + node.saveDate + "," + node.readState + ")";
+		add(context, sql);
 
 	}
 
@@ -215,20 +200,17 @@ public class AddFriendHistroysHandler {
 	// 我加别人需要验证被拒绝:
 	// OnRefuseInviteJoinGroup ==>groupType:2,nGroupID:0,nUserID:166,sxml:5555
 	// 改（查我加别人未处理的）状态
-	public static void addOtherRefused(long remoteUserId, String refuseReason) {
+	public static void addOtherRefused(Context context, long remoteUserId,
+			String refuseReason) {
+		String sql = null;
 		// 查我加别人未处理的
-		Iterator<AddFriendHistorieNode> iterator = GlobalHolder.getInstance().addFriendHistorieList
-				.iterator();
-		while (iterator.hasNext()) {
-			AddFriendHistorieNode tempNode = iterator.next();
-			if ((remoteUserId == tempNode.toUserID) && (tempNode.addState == 0)) {
-				tempNode.addState = 2;// 拒绝
-				tempNode.refuseReason = refuseReason;
-			}
-		}
+		sql = "update " + tableName + " set AddState=2" + ",RefuseReason='"
+				+ refuseReason + "'" + " where ToUserID=" + remoteUserId
+				+ " and " + "AddState=0";
+		update(context, sql);
 	}
 
-	public static void becomeFriendHanler(String userInfo) {
+	public static void becomeFriendHanler(Context context, String userInfo) {
 		String sql = null;
 		String[] sqlArgs = null;
 		Cursor cr = null;
@@ -239,72 +221,39 @@ public class AddFriendHistroysHandler {
 		User remoteUser = User.fromXmlToUser(userInfo);
 		boolean ret1 = false;
 		boolean ret2 = false;
-		Iterator<AddFriendHistorieNode> iterator = GlobalHolder.getInstance().addFriendHistorieList
-				.iterator();
-		while (iterator.hasNext()) {
-			AddFriendHistorieNode tempNode = iterator.next();
-			// 别人加我的记录未处理的最多只有一条
-			// 对应两种情况别人加我我不需验证，和需要验证并同意
-			if ((remoteUser.getmUserId() == tempNode.fromUserID)
-					&& (tempNode.addState == 0)) {
-				if (ret1 == false) {
-					ret1 = true;
-
-					if (tempNode.ownerAuthType == 0) {
-						iterator.remove();// 查别人加我，有验证为0则删
-					} else if (tempNode.ownerAuthType == 1) {
-						tempNode.addState = 1;// 查别人加我，有验证为1则改
-					} else {
-						iterator.remove();
-					}
-
-				} else {
-					iterator.remove();
-				}
-			}
-			// 我加别人的记录未处理的最多只有一条
-			// 对应两种情况我加别人别人不需验证，和需要验证并同意，一样的处理
-			if ((remoteUser.getmUserId() == tempNode.toUserID)
-					&& (tempNode.addState == 0)) {
-				if (ret2 == false) {
-					ret2 = true;
-					tempNode.addState = 1;// 查我加别人，有则改
-				} else {
-					iterator.remove();
-				}
-			}
+		// 别人加我的记录未处理的最多只有一条
+		// 对应两种情况别人加我我不需验证，和需要验证并同意
+		sql = "select * from " + tableName + " where RemoteUserID=?" + " and "
+				+ "AddState=0";
+		sqlArgs = new String[] { String.valueOf(remoteUser.getmUserId()) };
+		cr = select(context, sql, sqlArgs);
+		if (cr != null && cr.getCount() != 0) {
+			ret1 = true;
 		}
 
-		// sql = "select * from " + tableName + " where RemoteUserID=?" +
-		// " and "
-		// + "AddState=0";
-		// sqlArgs = new String[] { String.valueOf(remoteUser.getmUserId()) };
-		// cr = select(null, sql, sqlArgs);
-		// if (cr != null && cr.getCount() != 0) {
-		// ret1 = true;
-		// }
-		//
-		// sql = "delete from " + tableName + " where RemoteUserID="
-		// + remoteUser.getmUserId() + " and " + "AddState=0" + " and "
-		// + "(OwnerAuthType=0 or OwnerAuthType=2)";
-		// del(null, sql);
-		//
-		// sql = "update " + tableName + " set AddState=1"
-		// + " where RemoteUserID=" + remoteUser.getmUserId() + " and "
-		// + "AddState=0" + " and " + "OwnerAuthType=1";
-		// update(null, sql);
-		//
-		// sql = "select * from " + tableName + " where ToUserID=?" + " and "
-		// + "AddState=0";
-		// sqlArgs = new String[] { String.valueOf(remoteUser.getmUserId()) };
-		// cr = select(null, sql, sqlArgs);
-		// if (cr != null && cr.getCount() != 0) {
-		// ret2 = true;
-		// }
-		//
-		// sql = "update " + tableName + " set AddState=1" + " where ToUserID="
-		// + remoteUser.getmUserId() + " and " + "AddState=0";
-		// update(null, sql);
+		sql = "delete from " + tableName + " where RemoteUserID="
+				+ remoteUser.getmUserId() + " and " + "AddState=0" + " and "
+				+ "(OwnerAuthType=0 or OwnerAuthType=2)";
+		del(context, sql);
+
+		sql = "update " + tableName + " set AddState=1"
+				+ " where RemoteUserID=" + remoteUser.getmUserId() + " and "
+				+ "AddState=0" + " and " + "OwnerAuthType=1";
+		update(context, sql);
+
+		// 我加别人的记录未处理的最多只有一条
+		// 对应两种情况我加别人别人不需验证，和需要验证并同意，一样的处理
+		sql = "select * from " + tableName + " where ToUserID=?" + " and "
+				+ "AddState=0";
+		sqlArgs = new String[] { String.valueOf(remoteUser.getmUserId()) };
+		cr = select(context, sql, sqlArgs);
+		if (cr != null && cr.getCount() != 0) {
+			ret2 = true;
+		}
+
+		sql = "update " + tableName + " set AddState=1" + " where ToUserID="
+				+ remoteUser.getmUserId() + " and " + "AddState=0";
+		update(context, sql);
 
 		if ((ret1 == false) && (ret2 == false)) {
 			// 加一条别人加我为好友的记录
@@ -320,17 +269,27 @@ public class AddFriendHistroysHandler {
 			node.addState = 1;
 			node.readState = 0;
 			node.saveDate = System.currentTimeMillis() / 1000;
-			GlobalHolder.getInstance().addFriendHistorieList.add(node);
-			// sql = "insert into "
-			// + tableName
-			// +
-			// " (OwnerUserID,OwnerAuthType,RemoteUserID,FromUserID,ToUserID,ApplyReason,RefuseReason,AddState,SaveDate,ReadState) values("
-			// + node.ownerUserID + "," + node.ownerAuthType + ","
-			// + node.remoteUserID + "," + node.fromUserID + ","
-			// + node.toUserID + "," + node.applyReason + ","
-			// + node.refuseReason + "," + node.addState + "," + node.saveDate
-			// + "," + node.readState + ")";
-			// add(null, sql);
+			sql = "insert into "
+					+ tableName
+					+ " (OwnerUserID,OwnerAuthType,RemoteUserID,FromUserID,ToUserID,ApplyReason,RefuseReason,AddState,SaveDate,ReadState) values("
+					+ node.ownerUserID
+					+ ","
+					+ node.ownerAuthType
+					+ ","
+					+ node.remoteUserID
+					+ ","
+					+ node.fromUserID
+					+ ","
+					+ node.toUserID
+					+ ","
+					+ (node.applyReason == null || node.applyReason.equals("") ? "NULL"
+							: "'" + node.applyReason + "'")
+					+ ","
+					+ (node.refuseReason == null
+							|| node.refuseReason.equals("") ? "NULL" : "'"
+							+ node.refuseReason + "'") + "," + node.addState
+					+ "," + node.saveDate + "," + node.readState + ")";
+			add(context, sql);
 		}
 	}
 

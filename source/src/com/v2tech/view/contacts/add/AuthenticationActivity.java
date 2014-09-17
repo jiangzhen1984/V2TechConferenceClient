@@ -64,7 +64,7 @@ public class AuthenticationActivity extends Activity {
 					new FriendGroupService().refuseInviteJoinFriendGroup(30,
 							mUid, ((EditText) findViewById(R.id.editText1))
 									.getText().toString());
-					AddFriendHistroysHandler.addMeRefuse(mUid,
+					AddFriendHistroysHandler.addMeRefuse(getApplicationContext(),mUid,
 							((EditText) findViewById(R.id.editText1)).getText()
 									.toString());
 					// 实现越级跳

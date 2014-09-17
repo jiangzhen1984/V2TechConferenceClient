@@ -63,15 +63,16 @@ public class FriendManagementActivity extends Activity {
 				public void onClick(View arg0) {
 
 					if (detailUser.getAuthtype() == 0) {
-						AddFriendHistroysHandler
-								.addOtherNoNeedAuthentication(detailUser);
+						AddFriendHistroysHandler.addOtherNoNeedAuthentication(
+								getApplicationContext(), detailUser);
 						new FriendGroupService().AddFriendGroupUser(
 								new FriendGroup(30, ""), detailUser,
 								verificationInfo, commentNameET.getText()
 										.toString());
 					} else if (detailUser.getAuthtype() == 1) {
 						AddFriendHistroysHandler.addOtherNeedAuthentication(
-								detailUser, commentNameET.getText().toString());
+								getApplicationContext(), detailUser,
+								commentNameET.getText().toString());
 						new FriendGroupService().AddFriendGroupUser(
 								new FriendGroup(30, ""), detailUser,
 								verificationInfo, commentNameET.getText()

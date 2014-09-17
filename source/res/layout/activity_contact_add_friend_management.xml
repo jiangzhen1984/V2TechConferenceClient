@@ -149,7 +149,7 @@
                     android:layout_toRightOf="@+id/group_tv"
                     android:ellipsize="end"
                     android:singleLine="true"
-                    android:text="Default"
+                    android:text="我的好友"
                     android:textColor="@color/activiy_contact_detail_item_color"
                     android:textSize="@dimen/common_item_text_size" />
 
