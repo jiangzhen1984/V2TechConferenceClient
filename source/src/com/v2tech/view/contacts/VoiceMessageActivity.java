@@ -13,6 +13,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -36,6 +37,7 @@ import android.widget.Toast;
 import com.v2tech.R;
 import com.v2tech.db.ContentDescriptor;
 import com.v2tech.db.DataBaseContext;
+import com.v2tech.service.BitmapManager;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.util.DateUtil;
 import com.v2tech.view.PublicIntent;
@@ -43,6 +45,7 @@ import com.v2tech.view.conversation.MessageLoader;
 import com.v2tech.view.conversation.P2PConversation;
 import com.v2tech.vo.AudioVideoMessageBean;
 import com.v2tech.vo.AudioVideoMessageBean.ChildMessageBean;
+import com.v2tech.vo.User;
 import com.v2tech.vo.VideoBean;
 
 public class VoiceMessageActivity extends Activity {
@@ -61,7 +64,6 @@ public class VoiceMessageActivity extends Activity {
 	private ViewHolder holder = null;
 	private VoiceReceiverBroadcast receiver;
 	private boolean isVisibile;
-	private boolean isSelectAll;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -164,20 +166,18 @@ public class VoiceMessageActivity extends Activity {
 				for (Iterator<Entry<Integer, AudioVideoMessageBean>> i = deleteList
 						.entrySet().iterator(); i.hasNext();) {
 					Entry<Integer, AudioVideoMessageBean> entry = i.next();
-					mListItem.remove(entry.getKey());
+					mListItem.remove(entry.getValue());
 					AudioVideoMessageBean value = entry.getValue();
-					long remoteID = value.remoteUserID;
-
 					String where = ContentDescriptor.HistoriesMedia.Cols.HISTORY_MEDIA_REMOTE_USER_ID
 							+ " = ?";
-					String[] selectionArgs = new String[] { String
-							.valueOf(remoteID) };
+					String[] selectionArgs = new String[] { String.valueOf(value.remoteUserID) };
 					int delete = getContentResolver().delete(
 							ContentDescriptor.HistoriesMedia.CONTENT_URI,
 							where, selectionArgs);
 					if (delete == 0)
 						Log.e(TAG, "delete failed...");
 				}
+				adapter.notifyDataSetChanged();
 			}
 		});
 
@@ -191,9 +191,6 @@ public class VoiceMessageActivity extends Activity {
 					mListItem.get(i).isCheck = isChecked;
 					deleteList.put(i, mListItem.get(i));
 				}
-//				for (AudioVideoMessageBean bean : mListItem) {
-//					bean.isCheck = isChecked;
-//				}
 				adapter.notifyDataSetChanged();
 			}
 		});
@@ -211,6 +208,7 @@ public class VoiceMessageActivity extends Activity {
 	protected void onDestroy() {
 		super.onDestroy();
 		unregisterReceiver(receiver);
+		BitmapManager.getInstance().unRegisterBitmapChangedListener(bitmapChangedListener);
 	}
 
 	private void init() {
@@ -242,6 +240,8 @@ public class VoiceMessageActivity extends Activity {
 		}.execute();
 
 		deleteList = new HashMap<Integer, AudioVideoMessageBean>();
+		BitmapManager.getInstance().registerBitmapChangedListener(
+				this.bitmapChangedListener);
 	}
 
 	class VoiceBaseAdapter extends BaseAdapter {
@@ -266,7 +266,6 @@ public class VoiceMessageActivity extends Activity {
 		@Override
 		public View getView(final int position, View convertView, ViewGroup parent) {
 
-			holder = null;
 			if (convertView == null) {
 				holder = new ViewHolder();
 				convertView = View.inflate(VoiceMessageActivity.this,
@@ -292,6 +291,11 @@ public class VoiceMessageActivity extends Activity {
 				holder = (ViewHolder) convertView.getTag();
 
 			audioVideoMessageBean = mListItem.get(position);
+			User remoteUser = GlobalHolder.getInstance().getUser(audioVideoMessageBean.remoteUserID);
+			if (remoteUser.getAvatarBitmap() != null) 
+				holder.headIcon.setImageBitmap(remoteUser.getAvatarBitmap());
+			else
+				holder.headIcon.setImageResource(R.drawable.avatar);
 			holder.voiceName.setText(audioVideoMessageBean.name);
 			// 处理时间显示
 			if (audioVideoMessageBean.holdingTime >= 0) {
@@ -424,4 +428,17 @@ public class VoiceMessageActivity extends Activity {
 			}
 		}
 	}
+	
+	private BitmapManager.BitmapChangedListener bitmapChangedListener = new BitmapManager.BitmapChangedListener() {
+
+		@Override
+		public void notifyAvatarChanged(User user, Bitmap bm) {
+			for (AudioVideoMessageBean bean : mListItem) {
+				User remoteUser = GlobalHolder.getInstance().getUser(bean.remoteUserID);
+				if (remoteUser.getAvatarBitmap() != null) {
+					holder.headIcon.setImageBitmap(remoteUser.getAvatarBitmap());
+				}
+			}
+		}
+	};
 }

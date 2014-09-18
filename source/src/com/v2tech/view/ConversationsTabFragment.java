@@ -741,6 +741,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 		// 判断只有消息界面，才添加这两个特殊item
 		if (mCurrentTabFlag == Conversation.TYPE_CONTACT) {
 			initSpecificItem();
+			updateVoiceSpecificItemState();
 			showUnreadFriendAuthenticationRedFlag();
 		}
 
@@ -772,18 +773,31 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 		mItemList.add(new ScrollItem(verificationMessageItem,
 				verificationLayout));
 
+		voiceMessageItem.setReadFlag(Conversation.READ_FLAG_READ);
+		verificationMessageItem.setReadFlag(Conversation.READ_FLAG_READ);
+	}
+
+	private void updateVoiceSpecificItemState() {
+
+		boolean isShowFlag = false;
+		if (isHasUnreadMediaMessage())
+			isShowFlag = true;
+		else
+			isShowFlag = false;
+
 		VideoBean newestMediaMessage = MessageLoader
 				.getNewestMediaMessage(mContext);
 		if (newestMediaMessage != null && newestMediaMessage.startDate != 0) {
 
 			voiceLayout
-					.update(null, DateUtil
-							.getStringDate(newestMediaMessage.startDate), false);
+
+			.update("aaa",
+					DateUtil.getStringDate(newestMediaMessage.startDate),
+					isShowFlag);
+
+			if (newestMediaMessage.readSatate == AudioVideoMessageBean.STATE_UNREAD)
+				updateUnreadVoiceConversation(true);
 		}
-
-		if (isHasUnreadMediaMessage())
-			updateUnreadVoiceConversation(true);
-
 	}
 
 	/**
@@ -1229,7 +1243,8 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 		long lasttime;
 
 		@Override
-		public void onItemClick(AdapterView<?> adapter, View v, int pos, long id) {
+		public void onItemClick(AdapterView<?> adapters, View v, int pos,
+				long id) {
 			if (System.currentTimeMillis() - lasttime < 300) {
 				V2Log.w("Too short pressed");
 				return;
@@ -1250,12 +1265,26 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 					Intent intent = new Intent(mContext,
 							VoiceMessageActivity.class);
 					startActivity(intent);
+
+					ScrollItem scrollItem = mItemList
+							.get(currentMoveViewPosition);
+					mItemList.remove(currentMoveViewPosition);
+					mConvList.remove(currentMoveViewPosition);
+					mItemList.add(0, scrollItem);
+					mConvList.add(0, scrollItem.cov);
+					adapter.notifyDataSetChanged();
 				} else if (cov.getType() == Conversation.TYPE_VERIFICATION_MESSAGE) {
 
 					Intent intent = new Intent(mContext,
 							MessageAuthenticationActivity.class);
 					startActivity(intent);
-
+					ScrollItem scrollItem = mItemList
+							.get(currentMoveViewPosition);
+					mItemList.remove(currentMoveViewPosition);
+					mConvList.remove(currentMoveViewPosition);
+					mItemList.add(0, scrollItem);
+					mConvList.add(0, scrollItem.cov);
+					adapter.notifyDataSetChanged();
 				} else {
 					startConversationView(cov);
 				}
@@ -1499,15 +1528,15 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 						return;
 					}
 
-					if (newestMediaMessage.startDate != 0) {
-
-						voiceLayout.update(null, DateUtil
-								.getStringDate(newestMediaMessage.startDate),
-								false);
-					}
-
-					if (newestMediaMessage.readSatate == AudioVideoMessageBean.STATE_UNREAD)
-						updateUnreadVoiceConversation(true);
+					updateVoiceSpecificItemState();
+					// if (newestMediaMessage.startDate != 0) {
+					//
+					// voiceLayout
+					// .update(null,
+					// DateUtil.getStringDate(newestMediaMessage.startDate),
+					// true);
+					// }
+					// updateUnreadVoiceConversation(true);
 				}
 			}
 
@@ -1601,8 +1630,6 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 			} else if (action
 					.equals(JNIService.JNI_BROADCAST_FRIEND_AUTHENTICATION)) {
 				V2Log.e(TAG, "JNI_BROADCAST_FRIEND_AUTHENTICATIONE update..");
-				Toast.makeText(getActivity(), "收到了好友验证消息更新", Toast.LENGTH_SHORT)
-						.show();
 				showUnreadFriendAuthenticationRedFlag();
 			}
 		}
@@ -1784,6 +1811,10 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 		startActivity(i);
 	}
 
+	/**
+	 * 
+	 * @param b
+	 */
 	protected void updateUnreadVoiceConversation(boolean b) {
 
 		if (voiceLayout == null) {
@@ -1791,8 +1822,10 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 					"update unread voice conversationing , the voiceLayout is null");
 			return;
 		}
-
-		voiceLayout.updateNotificator(b);
+		// Update main activity to show or hide notificator
+		if (b)
+			this.notificationListener.updateNotificator(mCurrentTabFlag, true);
+		else
+			this.notificationListener.updateNotificator(mCurrentTabFlag, false);
 	}
-
 }

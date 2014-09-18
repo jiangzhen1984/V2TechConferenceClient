@@ -6,6 +6,11 @@ import com.V2.jni.GroupRequest;
 import com.v2tech.vo.Group;
 import com.v2tech.vo.User;
 
+/**
+ * @deprecated should use ContactsService
+ * @author jiangzhen
+ *
+ */
 public class FriendGroupService extends AbstractHandler {
 
 	public FriendGroupService() {

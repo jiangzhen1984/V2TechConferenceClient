@@ -368,51 +368,67 @@ public class GroupRequest {
 		V2Log.d("OnInviteJoinGroup::==>" + groupType + ":" + groupInfo + ":"
 				+ userInfo + ":" + additInfo);
 		V2Group group = null;
-		if (groupType != V2Group.TYPE_CONTACTS_GROUP) {
+		V2User user = null;
+		if (groupType == V2Group.TYPE_CONF) {
 			String id = XmlAttributeExtractor.extract(groupInfo, " id='", "'");
-			// String id ="30";
-			// groupInfo 常常为空影响了回调
+
 			if (id == null || id.isEmpty()) {
 				V2Log.e(" Unknow group information:" + groupInfo);
 				return;
 			}
 			group = new V2Group(Long.parseLong(id), groupType);
-			if (groupType == V2Group.TYPE_CONF) {
-				String name = XmlAttributeExtractor.extract(groupInfo,
-						"subject='", "'");
-				String starttime = XmlAttributeExtractor.extract(groupInfo,
-						"starttime='", "'");
-				String createuserid = XmlAttributeExtractor.extract(groupInfo,
-						"createuserid='", "'");
-				group.name = name;
-				group.createTime = new Date(Long.parseLong(starttime) * 1000);
-				group.chairMan = new V2User(Long.valueOf(createuserid));
-				group.owner = new V2User(Long.valueOf(createuserid));
+			String name = XmlAttributeExtractor.extract(groupInfo, "subject='",
+					"'");
+			String starttime = XmlAttributeExtractor.extract(groupInfo,
+					"starttime='", "'");
+			String createuserid = XmlAttributeExtractor.extract(groupInfo,
+					"createuserid='", "'");
+			group.name = name;
+			group.createTime = new Date(Long.parseLong(starttime) * 1000);
+			group.chairMan = new V2User(Long.valueOf(createuserid));
+			group.owner = new V2User(Long.valueOf(createuserid));
 
-			} else if (groupType == V2Group.TYPE_CROWD) {
-				String createuserid = XmlAttributeExtractor.extract(userInfo,
-						" id='", "'");
-				String auth = XmlAttributeExtractor.extract(groupInfo,
-						"authtype='", "'");
-				String uname = XmlAttributeExtractor.extract(userInfo,
-						"nickname='", "'");
-				String name = XmlAttributeExtractor.extract(groupInfo,
-						"name='", "'");
-				group.name = name;
-				group.creator = new V2User(Long.valueOf(createuserid), uname);
-				if (auth != null) {
-					group.authType = Integer.parseInt(auth);
-				}
+		} else if (groupType == V2Group.TYPE_CROWD) {
+			String id = XmlAttributeExtractor.extract(groupInfo, " id='", "'");
+			if (id == null || id.isEmpty()) {
+				V2Log.e(" Unknow group information:" + groupInfo);
+				return;
 			}
-		} else {
-			group = new V2Group(groupType);
+			group = new V2Group(Long.parseLong(id), groupType);
+			String createuserid = XmlAttributeExtractor.extract(userInfo,
+					" id='", "'");
+			String auth = XmlAttributeExtractor.extract(groupInfo,
+					"authtype='", "'");
+			String uname = XmlAttributeExtractor.extract(userInfo,
+					"nickname='", "'");
+			String name = XmlAttributeExtractor.extract(groupInfo, "name='",
+					"'");
+			group.name = name;
+			group.creator = new V2User(Long.valueOf(createuserid), uname);
+			if (auth != null) {
+				group.authType = Integer.parseInt(auth);
+			}
+		} else if (groupType == V2Group.TYPE_CONTACTS_GROUP) {
+			String id = XmlAttributeExtractor.extract(userInfo, " id='", "'");
+			if (id == null || id.isEmpty()) {
+				V2Log.e(" Unknow user information:" + userInfo);
+				return;
+			}
+			user = new V2User(Long.parseLong(id));
+			String name = XmlAttributeExtractor.extract(userInfo,
+					" nickname='", "'");
+			user.name = name;
 		}
 
 		for (WeakReference<GroupRequestCallback> wrcb : mCallbacks) {
 			Object obj = wrcb.get();
 			if (obj != null) {
 				GroupRequestCallback callback = (GroupRequestCallback) obj;
-				callback.OnInviteJoinGroupCallback(group, userInfo, additInfo);
+				if (groupType == V2Group.TYPE_CONTACTS_GROUP) {
+					callback.OnRequestCreateRelationCallback(user, additInfo);
+				} else {
+					callback.OnInviteJoinGroupCallback(group);
+				}
 			}
 		}
 

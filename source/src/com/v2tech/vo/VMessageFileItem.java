@@ -6,6 +6,9 @@ import java.text.DecimalFormat;
 import java.text.Format;
 import java.util.UUID;
 
+import com.v2tech.service.GlobalHolder;
+import com.v2tech.util.GlobalConfig;
+
 public class VMessageFileItem extends VMessageAbstractItem {
 
 	private String filePath;
@@ -78,6 +81,7 @@ public class VMessageFileItem extends VMessageAbstractItem {
 		this.filePath = filePath;
 		this.fileSize = fileSize;
 		this.transType = transType;
+		this.state = transType;
 		this.type = VMessageAbstractItem.ITEM_TYPE_FILE;
 	}
 
@@ -104,10 +108,16 @@ public class VMessageFileItem extends VMessageAbstractItem {
 	}
 
 	public String getFileName() {
+		if(fileName == null && filePath != null){
+			fileName = filePath.substring(filePath.lastIndexOf("/") + 1);
+		}
 		return fileName;
 	}
 
 	public String getFilePath() {
+		if(fileName != null && filePath == null){
+			filePath = GlobalConfig.getGlobalFilePath(GlobalHolder.getInstance().getCurrentUser()) + "/" + fileName;
+		}
 		return filePath;
 	}
 

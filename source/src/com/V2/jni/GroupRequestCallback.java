@@ -76,16 +76,25 @@ public interface GroupRequestCallback {
 	 */
 	public void OnModifyGroupInfoCallback(int groupType, long nGroupID,
 			String sXml);
+	
 
 	/**
-	 * 
-	 * @param group
+	 * Invite user join conference or crowd. 
+	 * @param group 
 	 */
-	public void OnInviteJoinGroupCallback(V2Group group, String userInfo,
+	public void OnInviteJoinGroupCallback(V2Group group);
+	
+	
+	/**
+	 * Add contact relation request.
+	 * @param user 
+	 * @param additInfo 
+	 */
+	public void OnRequestCreateRelationCallback(V2User user,
 			String additInfo);
 
 	/**
-	 * 
+	 * Callback of delete group
 	 * @param groupType
 	 * @param nGroupID
 	 * @param bMovetoRoot
@@ -105,7 +114,7 @@ public interface GroupRequestCallback {
 
 	/**
 	 * TODO add comment
-	 * 
+	 * @deprecated should use object instead of xml
 	 * @param groupType
 	 * @param nGroupID
 	 * @param sXml

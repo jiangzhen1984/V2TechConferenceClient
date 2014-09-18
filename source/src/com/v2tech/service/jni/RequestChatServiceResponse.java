@@ -17,6 +17,7 @@ public class RequestChatServiceResponse extends JNIResponse {
 	int code;
 
 	private long uid;
+	private String uuid;
 	private long groupId;
 	private String deviceID;
 	private long fromUserID;
@@ -87,4 +88,11 @@ public class RequestChatServiceResponse extends JNIResponse {
 		this.deviceID = deviceID;
 	}
 
+	public String getUuid() {
+		return uuid;
+	}
+
+	public void setUuid(String uuid) {
+		this.uuid = uuid;
+	}
 }

@@ -27,7 +27,8 @@ public abstract class VMessageAbstractItem {
 	public static final int STATE_NORMAL = 0;
 	
 	//Use to mark audio item
-	public static final int STATE_UNREAD = 1;
+	public static final int STATE_UNREAD = 0;
+	public static final int STATE_READED = 1;
 	
 	public static final int STATE_SENT_FALIED = 2;
 	

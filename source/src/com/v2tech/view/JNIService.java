@@ -3,9 +3,7 @@ package com.v2tech.view;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import android.app.Service;
 import android.content.Context;
@@ -20,6 +18,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Parcelable;
+import android.support.v4.util.LongSparseArray;
 import android.widget.Toast;
 
 import com.V2.jni.AudioRequest;
@@ -81,7 +80,7 @@ import com.v2tech.vo.VMessageImageItem;
  */
 public class JNIService extends Service {
 	private static final String TAG = "JNIService";
-	public static final int BINARY_TYPE_AUDIO = 1;
+	public static final int BINARY_TYPE_AUDIO = 3;
 	public static final int BINARY_TYPE_IMAGE = 2;
 
 	public static final String JNI_BROADCAST_CATEGROY = "com.v2tech.jni.broadcast";
@@ -375,6 +374,7 @@ public class JNIService extends Service {
 				if (vm != null) {
 					String action = null;
 					MessageBuilder.saveBinaryVMessage(mContext, vm);
+					MessageBuilder.saveFileVMessage(mContext, vm);
 					MessageBuilder.saveMessage(mContext, vm);
 					Long id = MessageLoader
 							.queryVMessageID(
@@ -438,7 +438,7 @@ public class JNIService extends Service {
 
 	}
 
-	private Map<Long, UserStatusObject> onLineUsers = new HashMap<Long, UserStatusObject>();
+	private LongSparseArray<UserStatusObject> onLineUsers = new LongSparseArray<UserStatusObject>();
 
 	class ImRequestCB extends ImRequestCallbackAdapter {
 
@@ -538,11 +538,6 @@ public class JNIService extends Service {
 			sendBroadcast(i);
 		}
 
-		@Override
-		public void OnCreateCrowdCallback(String sCrowdXml, int nResult) {
-
-		}
-
 	}
 
 	class GroupRequestCB extends GroupRequestCallbackAdapter {
@@ -580,8 +575,7 @@ public class JNIService extends Service {
 		}
 
 		@Override
-		public void OnInviteJoinGroupCallback(V2Group group, String userInfo,
-				String additInfo) {
+		public void OnInviteJoinGroupCallback(V2Group group) {
 			if (group == null) {
 				V2Log.e(" invitation group is null");
 				return;
@@ -623,17 +617,21 @@ public class JNIService extends Service {
 				i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 				mContext.startActivity(i);
 
-			} else if (gType == GroupType.CONTACT) {
-				AddFriendHistroysHandler.addMeNeedAuthentication(
-						getApplicationContext(), userInfo, additInfo);
-				
-				//temptag 20140917
-				Intent intent=new Intent();
-				intent.setAction(JNI_BROADCAST_FRIEND_AUTHENTICATION);
-				intent.addCategory(JNI_BROADCAST_CATEGROY);
-				sendBroadcast(intent);
-
 			}
+		}
+
+		@Override
+		public void OnRequestCreateRelationCallback(V2User user,
+				String additInfo) {
+			User vUser = GlobalHolder.getInstance().getUser(user.uid);
+			AddFriendHistroysHandler.addMeNeedAuthentication(
+					getApplicationContext(), vUser, additInfo);
+			// temptag 20140917
+			Intent intent = new Intent();
+			intent.setAction(JNI_BROADCAST_FRIEND_AUTHENTICATION);
+			intent.addCategory(JNI_BROADCAST_CATEGROY);
+			sendBroadcast(intent);
+
 		}
 
 		@Override
@@ -723,15 +721,13 @@ public class JNIService extends Service {
 				return;
 			}
 
-			V2Log.e(TAG, "接收到新的好友：" + GlobalHolder.getInstance().getUser(uid));
-
 			GroupType gType = GroupType.fromInt(groupType);
 			if (gType == GroupType.CONTACT) {
 				AddFriendHistroysHandler.becomeFriendHanler(
 						getApplicationContext(), sXml);
-				
-				//temptag 20140917
-				Intent intent=new Intent();
+
+				// temptag 20140917
+				Intent intent = new Intent();
 				intent.setAction(JNI_BROADCAST_FRIEND_AUTHENTICATION);
 				intent.addCategory(JNI_BROADCAST_CATEGROY);
 				sendBroadcast(intent);
@@ -756,8 +752,8 @@ public class JNIService extends Service {
 			if (gType == GroupType.CONTACT) {
 				AddFriendHistroysHandler.addOtherRefused(
 						getApplicationContext(), nUserID, sxml);
-				//temptag 20140917
-				Intent intent=new Intent();
+				// temptag 20140917
+				Intent intent = new Intent();
 				intent.setAction(JNI_BROADCAST_FRIEND_AUTHENTICATION);
 				intent.addCategory(JNI_BROADCAST_CATEGROY);
 				sendBroadcast(intent);
@@ -1076,15 +1072,16 @@ public class JNIService extends Service {
 
 		@Override
 		public void OnFileTransInvite(FileJNIObject file) {
-			User fromUser = GlobalHolder.getInstance().getUser(file.fromUserId);
+			User fromUser = GlobalHolder.getInstance().getUser(file.fromUserid);
 			// If doesn't receive user information from server side,
 			// construct new user object
 			if (fromUser == null) {
-				fromUser = new User(file.fromUserId);
+				fromUser = new User(file.fromUserid);
 			}
 			// FIXME input date as null
-			VMessage vm = new VMessage(file.getRequestType(), 0, fromUser,
-					GlobalHolder.getInstance().getCurrentUser(), null);
+			VMessage vm = new VMessage(0, 0, fromUser, GlobalHolder
+					.getInstance().getCurrentUser(), file.fileId, new Date(
+					GlobalConfig.getGlobalServerTime()));
 			int pos = file.fileName.lastIndexOf("/");
 			VMessageFileItem vfi = new VMessageFileItem(vm, file.fileId,
 					pos == -1 ? file.fileName

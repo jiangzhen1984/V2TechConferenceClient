@@ -40,7 +40,7 @@ public class V2TechDBHelper extends SQLiteOpenHelper {
 			+ ContentDescriptor.HistoriesAudios.Cols.HISTORY_AUDIO_REMOTE_USER_ID+ " bigint, "
 			+ ContentDescriptor.HistoriesAudios.Cols.HISTORY_AUDIO_ID + " nvarchar(4000), "
 			+ ContentDescriptor.HistoriesAudios.Cols.HISTORY_AUDIO_SEND_STATE + " bigint, "
-//			+ ContentDescriptor.HistoriesAudios.Cols.HISTORY_AUDIO_READ_STATE + " bigint, "
+			+ ContentDescriptor.HistoriesAudios.Cols.HISTORY_AUDIO_READ_STATE + " bigint, "
 			+ ContentDescriptor.HistoriesAudios.Cols.HISTORY_AUDIO_SECOND + " bigint, "
 			+ ContentDescriptor.HistoriesAudios.Cols.HISTORY_AUDIO_PATH + " nvarchar(4000))";
 
@@ -52,6 +52,7 @@ public class V2TechDBHelper extends SQLiteOpenHelper {
 			+ ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_SAVEDATE + " bigint,"
 			+ ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_FROM_USER_ID + " bigint,"
 			+ ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_TO_USER_ID+ " bigint, "
+			+ ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_REMOTE_USER_ID+ " bigint, "
 			+ ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_ID + " nvarchar(4000), "
 			+ ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_PATH + " nvarchar(4000), "
 			+ ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_SEND_STATE + " bigint, "

@@ -8,6 +8,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
@@ -24,6 +25,7 @@ import android.widget.Toast;
 
 import com.v2tech.R;
 import com.v2tech.db.ContentDescriptor;
+import com.v2tech.service.BitmapManager;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.util.DateUtil;
 import com.v2tech.view.PublicIntent;
@@ -45,6 +47,7 @@ public class VoiceMessageDetailActivity extends Activity implements
 	private TextView returnBack;
 	private TextView userName;
 	private TextView userRemark;
+	private ImageView userIcon;
 	private ListView mListView;
 	private ArrayList<ChildMessageBean> mListItem;
 	private ChildMessageBean childBean;
@@ -74,6 +77,7 @@ public class VoiceMessageDetailActivity extends Activity implements
 		returnBack = (TextView) findViewById(R.id.specific_title_return);
 		userName = (TextView) findViewById(R.id.specific_voiceDetail_name);
 		userRemark = (TextView) findViewById(R.id.specific_voiceDetail_remark);
+		userIcon = (ImageView) findViewById(R.id.specific_voice_headIcon);
 
 		returnBack.setOnClickListener(this);
 		clearRecord.setOnClickListener(this);
@@ -95,9 +99,16 @@ public class VoiceMessageDetailActivity extends Activity implements
 		if (remoteID == -1l)
 			Toast.makeText(getApplicationContext(), "获取用户信息失败", 0).show();
 
+		BitmapManager.getInstance().registerBitmapChangedListener(
+				this.bitmapChangedListener);
+		
 		User user = GlobalHolder.getInstance().getUser(remoteID);
 		userName.setText(user.getName());
 		userRemark.setText(user.getNickName());
+		User remoteUser = GlobalHolder.getInstance().getUser(remoteID);
+		if (remoteUser.getAvatarBitmap() != null) {
+			userIcon.setImageBitmap(remoteUser.getAvatarBitmap());
+		}
 
 		mListItem = getIntent().getParcelableArrayListExtra("messages");
 		adapter = new VoiceDetailBaseAdapter();
@@ -282,5 +293,16 @@ public class VoiceMessageDetailActivity extends Activity implements
 	protected void onDestroy() {
 		super.onDestroy();
 		unregisterReceiver(receiver);
+		BitmapManager.getInstance().unRegisterBitmapChangedListener(bitmapChangedListener);
 	}
+	
+	private BitmapManager.BitmapChangedListener bitmapChangedListener = new BitmapManager.BitmapChangedListener() {
+
+		@Override
+		public void notifyAvatarChanged(User user, Bitmap bm) {
+			if (user.getAvatarBitmap() != null) {
+				userIcon.setImageBitmap(user.getAvatarBitmap());
+			}
+		}
+	};
 }

@@ -115,26 +115,17 @@ public class GroupLayout extends LinearLayout {
 		} else {
 			mNotificatorIV.setVisibility(View.GONE);
 		}
-
-		// if (this.mConv instanceof ContactConversation) {
-		if (this.mConv.getType() == Conversation.TYPE_CONTACT) {
-			if (content != null)
-				((ContactConversation) mConv).setMsg(content);
-			if (date != null)
-				((ContactConversation) mConv).setDate(date);
-
-		}
-
 		if (content != null)
 			mGroupOwnerTV.setText(content);
 
-		// if (date != null)
-		// mGroupDateTV.setText(date);
-		if (this.mConv.getType() == Conversation.TYPE_CONTACT) {
-			mGroupDateTV.setText(mConv.getDateLong());
-			V2Log.e(TAG, mConv.getDateLong());
-		} else
-			mGroupDateTV.setText(date);
+		switch (mConv.getType()) {
+			case Conversation.TYPE_CONTACT:
+				mGroupDateTV.setText(mConv.getDateLong());
+				break;
+			default:
+				mGroupDateTV.setText(date);
+				break;
+		}
 	}
 
 	private Runnable queryMessageRunnable = new Runnable() {

@@ -24,13 +24,19 @@ public abstract class GroupRequestCallbackAdapter implements
 			String sXml) {
 
 	}
-
-	@Override
-	public void OnInviteJoinGroupCallback(V2Group group, String userInfo,
-			String additInfo) {
-
+	
+	
+	
+	public void OnInviteJoinGroupCallback(V2Group group){
+		
 	}
 	
+	
+
+	public void OnRequestCreateRelationCallback(V2User user,
+			String additInfo){
+		
+	}
 
 
 	@Override

@@ -145,6 +145,7 @@ public class User implements Comparable<User> {
 
 	public void setName(String mName) {
 		this.mName = mName;
+		initAbbr();
 	}
 
 	public String getmEmail() {

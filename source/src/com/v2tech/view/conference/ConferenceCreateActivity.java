@@ -13,8 +13,10 @@ import java.util.Set;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.os.AsyncTask;
@@ -50,10 +52,13 @@ import com.v2tech.service.Registrant;
 import com.v2tech.service.jni.JNIResponse;
 import com.v2tech.service.jni.RequestConfCreateResponse;
 import com.v2tech.util.SPUtil;
+import com.v2tech.view.JNIService;
 import com.v2tech.view.PublicIntent;
+import com.v2tech.view.bo.UserStatusObject;
 import com.v2tech.view.cus.DateTimePicker;
 import com.v2tech.view.cus.DateTimePicker.OnDateSetListener;
 import com.v2tech.view.widget.GroupListView;
+import com.v2tech.view.widget.GroupListView.Item;
 import com.v2tech.vo.Conference;
 import com.v2tech.vo.ConferenceGroup;
 import com.v2tech.vo.Group;
@@ -81,10 +86,10 @@ public class ConferenceCreateActivity extends Activity {
 	private LocalHandler mLocalHandler = new LocalHandler();
 
 	private EditText searchedTextET;
-	//private ListView mContactsContainer;
-	
+	// private ListView mContactsContainer;
+
 	private com.v2tech.view.widget.GroupListView mGroupListView;
-	
+
 	private ContactsAdapter adapter = new ContactsAdapter();
 	private TextView mConfirmButton;
 	private EditText mConfTitleET;
@@ -126,13 +131,18 @@ public class ConferenceCreateActivity extends Activity {
 
 		setContentView(R.layout.activity_conference_create);
 
+		initReceiver();
+
 		mContext = this;
-		
+
 		mGroupListView = (GroupListView) findViewById(R.id.conf_create_contacts_list);
 		mGroupListView.setShowedCheckedBox(true);
-		//mContactsContainer = (ListView) findViewById(R.id.conf_create_contacts_list);
-		//mContactsContainer.setOnItemClickListener(itemListener);
-		//mContactsContainer.setOnItemLongClickListener(itemLongClickListener);
+		mGroupListView.setTextFilterEnabled(true);
+		mGroupListView.setListener(listViewListener);
+		// mContactsContainer = (ListView)
+		// findViewById(R.id.conf_create_contacts_list);
+		// mContactsContainer.setOnItemClickListener(itemListener);
+		// mContactsContainer.setOnItemLongClickListener(itemLongClickListener);
 
 		mAttendeeContainer = (LinearLayout) findViewById(R.id.conference_attendee_container);
 		mAttendeeContainer.setGravity(Gravity.CENTER);
@@ -167,6 +177,7 @@ public class ConferenceCreateActivity extends Activity {
 	protected void onDestroy() {
 		super.onDestroy();
 		cs.clear();
+		this.unregisterReceiver(receiver);
 	}
 
 	@Override
@@ -466,20 +477,21 @@ public class ConferenceCreateActivity extends Activity {
 		@Override
 		public void onClick(View view) {
 			User u = (User) view.getTag();
-			int flag = 0;
-			for (int index = 0; index < mItemList.size(); index++) {
-				ListItem li = mItemList.get(index);
-				if (li.u != null && u.getmUserId() == li.u.getmUserId()) {
-					if (((ContactUserView) li.v).isChecked()) {
-						flag = OP_DEL_ALL_GROUP_USER;
-					} else {
-						flag = OP_ADD_ALL_GROUP_USER;
-					}
-					((ContactUserView) li.v).updateChecked();
-				}
-			}
-			Message.obtain(mLocalHandler, UPDATE_ATTENDEES, flag, 0, u)
-					.sendToTarget();
+			mGroupListView.updateCheckItem(u, false);
+			// int flag = 0;
+			// for (int index = 0; index < mItemList.size(); index++) {
+			// ListItem li = mItemList.get(index);
+			// if (li.u != null && u.getmUserId() == li.u.getmUserId()) {
+			// if (((ContactUserView) li.v).isChecked()) {
+			// flag = OP_DEL_ALL_GROUP_USER;
+			// } else {
+			// flag = OP_ADD_ALL_GROUP_USER;
+			// }
+			// ((ContactUserView) li.v).updateChecked();
+			// }
+			// }
+			Message.obtain(mLocalHandler, UPDATE_ATTENDEES,
+					OP_DEL_ALL_GROUP_USER, 0, u).sendToTarget();
 		}
 
 	};
@@ -488,27 +500,27 @@ public class ConferenceCreateActivity extends Activity {
 
 		@Override
 		public void afterTextChanged(Editable s) {
-//			if (s != null && s.length() > 0) {
-//				if (!mIsStartedSearch) {
-//					mCacheItemList = mItemList;
-//					mIsStartedSearch = true;
-//				}
-//			} else {
-//				if (mIsStartedSearch) {
-//					mItemList = mCacheItemList;
-//					adapter.notifyDataSetChanged();
-//					mIsStartedSearch = false;
-//				}
-//				return;
-//			}
-//			String str = s == null ? "" : s.toString();
-//			List<User> searchedUserList = new ArrayList<User>();
-//			for (Group g : mGroupList) {
-//				Group.searchUser(str, searchedUserList, g);
-//			}
-//			Message.obtain(mLocalHandler, UPDATE_SEARCHED_USER_LIST,
-//					searchedUserList).sendToTarget();
-			mGroupListView.setTextFilterEnabled(true);
+			// if (s != null && s.length() > 0) {
+			// if (!mIsStartedSearch) {
+			// mCacheItemList = mItemList;
+			// mIsStartedSearch = true;
+			// }
+			// } else {
+			// if (mIsStartedSearch) {
+			// mItemList = mCacheItemList;
+			// adapter.notifyDataSetChanged();
+			// mIsStartedSearch = false;
+			// }
+			// return;
+			// }
+			// String str = s == null ? "" : s.toString();
+			// List<User> searchedUserList = new ArrayList<User>();
+			// for (Group g : mGroupList) {
+			// Group.searchUser(str, searchedUserList, g);
+			// }
+			// Message.obtain(mLocalHandler, UPDATE_SEARCHED_USER_LIST,
+			// searchedUserList).sendToTarget();
+
 			if (s.toString().isEmpty()) {
 				mGroupListView.clearTextFilter();
 			} else {
@@ -526,6 +538,43 @@ public class ConferenceCreateActivity extends Activity {
 		public void onTextChanged(CharSequence s, int start, int before,
 				int count) {
 
+		}
+
+	};
+
+	private GroupListView.GroupListViewListener listViewListener = new GroupListView.GroupListViewListener() {
+
+		@Override
+		public void onItemClicked(AdapterView<?> parent, View view,
+				int position, long id, Item item) {
+			Object obj = item.getObject();
+			int flag = -1;
+			if (obj instanceof User) {
+				if (item.isChecked()) {
+					flag = OP_DEL_ALL_GROUP_USER;
+				} else {
+					flag = OP_ADD_ALL_GROUP_USER;
+				}
+				Message.obtain(mLocalHandler, UPDATE_ATTENDEES, flag, 0,
+						(User) obj).sendToTarget();
+				mGroupListView.updateCheckItem((User) obj, !item.isChecked());
+			}
+		}
+
+		@Override
+		public boolean onItemLongClick(AdapterView<?> parent, View view,
+				int position, long id, Item item) {
+			Object obj = item.getObject();
+			if (obj instanceof Group) {
+				Message.obtain(
+						mLocalHandler,
+						START_GROUP_SELECT,
+						!item.isChecked() ? OP_ADD_ALL_GROUP_USER
+								: OP_DEL_ALL_GROUP_USER, 0, (Group)obj)
+						.sendToTarget();
+				mGroupListView.updateCheckItem((Group)obj, !item.isChecked());
+			}
+			return true;
 		}
 
 	};
@@ -551,6 +600,33 @@ public class ConferenceCreateActivity extends Activity {
 		}
 
 	};
+
+	IntentFilter intentFilter;
+	LocalBroadcastReceiver receiver = new LocalBroadcastReceiver();
+
+	private void initReceiver() {
+		intentFilter = new IntentFilter();
+		intentFilter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
+		intentFilter.addCategory(PublicIntent.DEFAULT_CATEGORY);
+		intentFilter
+				.addAction(JNIService.JNI_BROADCAST_USER_STATUS_NOTIFICATION);
+		this.registerReceiver(receiver, intentFilter);
+	}
+
+	class LocalBroadcastReceiver extends BroadcastReceiver {
+
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			if (JNIService.JNI_BROADCAST_USER_STATUS_NOTIFICATION.equals(intent
+					.getAction())) {
+				UserStatusObject uso = (UserStatusObject) intent.getExtras()
+						.get("status");
+				User.Status us = User.Status.fromInt(uso.getStatus());
+				User user = GlobalHolder.getInstance().getUser(uso.getUid());
+				mGroupListView.updateUserStatus(user, us);
+			}
+		}
+	}
 
 	private OnItemClickListener itemListener = new OnItemClickListener() {
 
@@ -702,28 +778,31 @@ public class ConferenceCreateActivity extends Activity {
 	};
 
 	private List<Group> mList = new ArrayList<Group>();
+
 	class LoadContactsAT extends AsyncTask<Void, Void, Void> {
 
 		@Override
 		protected Void doInBackground(Void... params) {
-//			mGroupList = GlobalHolder.getInstance().getGroup(GroupType.PUBGROUP);
-//			if (mGroupList != null) {
-//				for (Group g : mGroupList) {
-//					mItemList.add(new ListItem(g, g.getLevel()));
-//				}
-//			}
+			// mGroupList =
+			// GlobalHolder.getInstance().getGroup(GroupType.PUBGROUP);
+			// if (mGroupList != null) {
+			// for (Group g : mGroupList) {
+			// mItemList.add(new ListItem(g, g.getLevel()));
+			// }
+			// }
 
-			mList.addAll( GlobalHolder.getInstance().getGroup(GroupType.CONTACT.intValue()));
-			mList.addAll( GlobalHolder.getInstance().getGroup(GroupType.ORG.intValue()));
-			
-			
-//			if (mGroupList != null) {
-//				for (Group g : mGroupList) {
-//					mItemList.add(new ListItem(g, g.getLevel()));
-//				}
-//			}
+			mList.addAll(GlobalHolder.getInstance().getGroup(
+					GroupType.CONTACT.intValue()));
+			mList.addAll(GlobalHolder.getInstance().getGroup(
+					GroupType.ORG.intValue()));
 
-			//doPreSelect();
+			// if (mGroupList != null) {
+			// for (Group g : mGroupList) {
+			// mItemList.add(new ListItem(g, g.getLevel()));
+			// }
+			// }
+
+			// doPreSelect();
 
 			return null;
 		}
@@ -731,24 +810,24 @@ public class ConferenceCreateActivity extends Activity {
 		@Override
 		protected void onPostExecute(Void result) {
 			mGroupListView.setGroupList(mList);
-			
-//			if (preSelectedUID > 0) {
-//				ListItem item = null;
-//				User preUser = GlobalHolder.getInstance().getUser(
-//						preSelectedUID);
-//				for (int j = 0; j < mItemList.size(); j++) {
-//					item = mItemList.get(j);
-//					if (item.u != null
-//							&& preUser.getmUserId() == item.u.getmUserId()) {
-//						mContactsContainer.performItemClick(item.v, j,
-//								item.u.getmUserId());
-//						break;
-//					}
-//				}
-//			}
 
-		//	adapter.notifyDataSetChanged();
-		//	mContactsContainer.setAdapter(adapter);
+			// if (preSelectedUID > 0) {
+			// ListItem item = null;
+			// User preUser = GlobalHolder.getInstance().getUser(
+			// preSelectedUID);
+			// for (int j = 0; j < mItemList.size(); j++) {
+			// item = mItemList.get(j);
+			// if (item.u != null
+			// && preUser.getmUserId() == item.u.getmUserId()) {
+			// mContactsContainer.performItemClick(item.v, j,
+			// item.u.getmUserId());
+			// break;
+			// }
+			// }
+			// }
+
+			// adapter.notifyDataSetChanged();
+			// mContactsContainer.setAdapter(adapter);
 		}
 
 	};
@@ -834,19 +913,20 @@ public class ConferenceCreateActivity extends Activity {
 					break;
 				}
 				User currU = GlobalHolder.getInstance().getCurrentUser();
-				ConferenceGroup g  = null;//new ConferenceGroup(((RequestConfCreateResponse) rccr).getConfId(), 
-//				ConferenceGroup g = new ConferenceGroup(
-//						((RequestConfCreateResponse) rccr).getConfId(),
-//
-//						GroupType.CONFERENCE.intValue(), conf.getName(),
-//						currU.getmUserId() + "", conf.getDate().getTime()
-//								/ 1000 + "", currU.getmUserId());
+				ConferenceGroup g = null;// new
+											// ConferenceGroup(((RequestConfCreateResponse)
+											// rccr).getConfId(),
+				// ConferenceGroup g = new ConferenceGroup(
+				// ((RequestConfCreateResponse) rccr).getConfId(),
+				//
+				// GroupType.CONFERENCE.intValue(), conf.getName(),
+				// currU.getmUserId() + "", conf.getDate().getTime()
+				// / 1000 + "", currU.getmUserId());
 				g.setOwnerUser(currU);
-				
 
 				g.addUserToGroup(new ArrayList<User>(mAttendeeList));
-				GlobalHolder.getInstance().addGroupToList(GroupType.CONFERENCE.intValue(),
-						g);
+				GlobalHolder.getInstance().addGroupToList(
+						GroupType.CONFERENCE.intValue(), g);
 				Intent i = new Intent();
 				i.putExtra("newGid", g.getmGId());
 				i.setAction(PublicIntent.BROADCAST_NEW_CONFERENCE_NOTIFICATION);
