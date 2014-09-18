@@ -107,6 +107,7 @@ public class JNIService extends Service {
 	public static final String JNI_BROADCAST_GROUP_USER_REMOVED = "com.v2tech.jni.broadcast.group_user_removed";
 	public static final String JNI_BROADCAST_GROUP_USER_ADDED = "com.v2tech.jni.broadcast.group_user_added";
 	public static final String JNI_BROADCAST_VIDEO_CALL_CLOSED = "com.v2tech.jni.broadcast.video_call_closed";
+	public static final String JNI_BROADCAST_FRIEND_AUTHENTICATION = "com.v2tech.jni.broadcast.friend_authentication";
 
 	/**
 	 * Crowd invitation with key crowd
@@ -625,6 +626,13 @@ public class JNIService extends Service {
 			} else if (gType == GroupType.CONTACT) {
 				AddFriendHistroysHandler.addMeNeedAuthentication(
 						getApplicationContext(), userInfo, additInfo);
+				
+				//temptag 20140917
+				Intent intent=new Intent();
+				intent.setAction(JNI_BROADCAST_FRIEND_AUTHENTICATION);
+				intent.addCategory(JNI_BROADCAST_CATEGROY);
+				sendBroadcast(intent);
+
 			}
 		}
 
@@ -721,6 +729,12 @@ public class JNIService extends Service {
 			if (gType == GroupType.CONTACT) {
 				AddFriendHistroysHandler.becomeFriendHanler(
 						getApplicationContext(), sXml);
+				
+				//temptag 20140917
+				Intent intent=new Intent();
+				intent.setAction(JNI_BROADCAST_FRIEND_AUTHENTICATION);
+				intent.addCategory(JNI_BROADCAST_CATEGROY);
+				sendBroadcast(intent);
 
 			}
 
@@ -742,6 +756,11 @@ public class JNIService extends Service {
 			if (gType == GroupType.CONTACT) {
 				AddFriendHistroysHandler.addOtherRefused(
 						getApplicationContext(), nUserID, sxml);
+				//temptag 20140917
+				Intent intent=new Intent();
+				intent.setAction(JNI_BROADCAST_FRIEND_AUTHENTICATION);
+				intent.addCategory(JNI_BROADCAST_CATEGROY);
+				sendBroadcast(intent);
 			}
 
 		}

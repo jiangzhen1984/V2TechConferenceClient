@@ -18,6 +18,7 @@ import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -79,6 +80,7 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		Log.i("wzl","ContactsTabFragment onCreate");
 		String tag = this.getArguments().getString("tag");
 		if (PublicIntent.TAG_ORG.equals(tag)) {
 			flag = TAG_ORG;
@@ -96,6 +98,7 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
+		Log.i("wzl","ContactsTabFragment onCreateView");
 		if (rootView != null) {
 			return rootView;
 		}

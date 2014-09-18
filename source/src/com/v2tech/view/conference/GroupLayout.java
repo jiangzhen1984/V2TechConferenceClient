@@ -18,6 +18,7 @@ import com.v2tech.view.conversation.MessageLoader;
 import com.v2tech.vo.ConferenceConversation;
 import com.v2tech.vo.ContactConversation;
 import com.v2tech.vo.Conversation;
+import com.v2tech.vo.ConversationFirendAuthentication;
 import com.v2tech.vo.CrowdConversation;
 import com.v2tech.vo.VMessage;
 
@@ -63,39 +64,40 @@ public class GroupLayout extends LinearLayout {
 				.findViewById(R.id.group_list_conference_notificator);
 		mNotificatorIV.bringToFront();
 
-
 		mGroupNameTV.setText(this.mConv.getName());
 		switch (mConv.getType()) {
-			case Conversation.TYPE_CONTACT:
-				hand.post(queryMessageRunnable);
-				Bitmap bm = ((ContactConversation) this.mConv).getAvatar();
-				if (bm != null) 
-					mGroupIV.setImageBitmap(bm);
-				 else 
-					mGroupIV.setImageResource(R.drawable.avatar);
-				break;
-			case Conversation.TYPE_CONFERNECE:
-				if ( ((ConferenceConversation) mConv).getGroup().getOwnerUser().getmUserId() != GlobalHolder
-				.getInstance().getCurrentUserId())
-					mGroupIV.setImageResource(R.drawable.conference_icon);
-				break;
-			case Conversation.TYPE_GROUP:
-				mGroupIV.setImageResource(R.drawable.chat_group_icon);
-				break;
-			case Conversation.TYPE_VOICE_MESSAGE:
-				mGroupIV.setImageResource(R.drawable.vs_message_voice);
-				mGroupNameTV.setText("语音消息");
-				break;
-			case Conversation.TYPE_VERIFICATION_MESSAGE:
-				mGroupIV.setImageResource(R.drawable.vs_message_verification);
-				mGroupNameTV.setText("验证消息");
-				break;
-			default:
-				throw new RuntimeException("the invalid conversation type :" + mConv.getType());
+		case Conversation.TYPE_CONTACT:
+			hand.post(queryMessageRunnable);
+			Bitmap bm = ((ContactConversation) this.mConv).getAvatar();
+			if (bm != null)
+				mGroupIV.setImageBitmap(bm);
+			else
+				mGroupIV.setImageResource(R.drawable.avatar);
+			break;
+		case Conversation.TYPE_CONFERNECE:
+			if (((ConferenceConversation) mConv).getGroup().getOwnerUser()
+					.getmUserId() != GlobalHolder.getInstance()
+					.getCurrentUserId())
+				mGroupIV.setImageResource(R.drawable.conference_icon);
+			break;
+		case Conversation.TYPE_GROUP:
+			mGroupIV.setImageResource(R.drawable.chat_group_icon);
+			break;
+		case Conversation.TYPE_VOICE_MESSAGE:
+			mGroupIV.setImageResource(R.drawable.vs_message_voice);
+			mGroupNameTV.setText("语音消息");
+			break;
+		case Conversation.TYPE_VERIFICATION_MESSAGE:
+			mGroupIV.setImageResource(R.drawable.vs_message_verification);
+			mGroupNameTV.setText("验证消息");
+			break;
+		default:
+			throw new RuntimeException("the invalid conversation type :"
+					+ mConv.getType());
 		}
-		
-		mGroupOwnerTV.setText(mConv.getMsg()); 
-		if(mConv.getType() == Conversation.TYPE_CONTACT){
+
+		mGroupOwnerTV.setText(mConv.getMsg());
+		if (mConv.getType() == Conversation.TYPE_CONTACT) {
 			V2Log.e(TAG, mConv.getDateLong() + "------");
 			mGroupDateTV.setText(mConv.getDateLong());
 		} else
@@ -114,10 +116,9 @@ public class GroupLayout extends LinearLayout {
 			mNotificatorIV.setVisibility(View.GONE);
 		}
 
-
-//		if (this.mConv instanceof ContactConversation) {
+		// if (this.mConv instanceof ContactConversation) {
 		if (this.mConv.getType() == Conversation.TYPE_CONTACT) {
-			if (content != null) 
+			if (content != null)
 				((ContactConversation) mConv).setMsg(content);
 			if (date != null)
 				((ContactConversation) mConv).setDate(date);
@@ -127,9 +128,9 @@ public class GroupLayout extends LinearLayout {
 		if (content != null)
 			mGroupOwnerTV.setText(content);
 
-//		if (date != null) 
-//			mGroupDateTV.setText(date);
-		if(this.mConv.getType() == Conversation.TYPE_CONTACT){
+		// if (date != null)
+		// mGroupDateTV.setText(date);
+		if (this.mConv.getType() == Conversation.TYPE_CONTACT) {
 			mGroupDateTV.setText(mConv.getDateLong());
 			V2Log.e(TAG, mConv.getDateLong());
 		} else
@@ -182,34 +183,38 @@ public class GroupLayout extends LinearLayout {
 
 	public void update() {
 		switch (mConv.getType()) {
-			case Conversation.TYPE_CONTACT:
-				ContactConversation contact = (ContactConversation)mConv;
-				mGroupNameTV.setText(contact.getName());
-				mGroupOwnerTV.setText(contact.getMsg());
-				mGroupDateTV.setText(contact.getDateLong());
-				break;
-			case Conversation.TYPE_GROUP:
-				CrowdConversation crowd = (CrowdConversation)mConv;
-				mGroupNameTV.setText(crowd.getName());
-				mGroupOwnerTV.setText(crowd.getMsg());
-				mGroupDateTV.setText(crowd.getDate());
-				break;
-			case Conversation.TYPE_CONFERNECE:
-				
-				break;
-	
-			default:
-				break;
+		case Conversation.TYPE_VERIFICATION_MESSAGE:
+			ConversationFirendAuthentication firend = (ConversationFirendAuthentication) mConv;
+			mGroupOwnerTV.setText(firend.getMsg());
+			break;
+		case Conversation.TYPE_CONTACT:
+			ContactConversation contact = (ContactConversation) mConv;
+			mGroupNameTV.setText(contact.getName());
+			mGroupOwnerTV.setText(contact.getMsg());
+			mGroupDateTV.setText(contact.getDateLong());
+			break;
+		case Conversation.TYPE_GROUP:
+			CrowdConversation crowd = (CrowdConversation) mConv;
+			mGroupNameTV.setText(crowd.getName());
+			mGroupOwnerTV.setText(crowd.getMsg());
+			mGroupDateTV.setText(crowd.getDate());
+			break;
+		case Conversation.TYPE_CONFERNECE:
+
+			break;
+
+		default:
+			break;
 		}
-//		mGroupNameTV.setText(this.mConv.getName());
-//		mGroupOwnerTV.setText(mConv.getMsg());
-////		mGroupDateTV.setText(mConv.getDate());
-//		if(this.mConv.getType() == Conversation.TYPE_CONTACT){
-//			mGroupDateTV.setText(mConv.getDateLong());
-//			V2Log.e(TAG, mConv.getDateLong() + "update---");
-//		}
-//		else
-//			mGroupDateTV.setText(mConv.getDate());
+		// mGroupNameTV.setText(this.mConv.getName());
+		// mGroupOwnerTV.setText(mConv.getMsg());
+		// // mGroupDateTV.setText(mConv.getDate());
+		// if(this.mConv.getType() == Conversation.TYPE_CONTACT){
+		// mGroupDateTV.setText(mConv.getDateLong());
+		// V2Log.e(TAG, mConv.getDateLong() + "update---");
+		// }
+		// else
+		// mGroupDateTV.setText(mConv.getDate());
 	}
 
 	public void updateIcon(Bitmap bitmap) {

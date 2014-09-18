@@ -56,6 +56,7 @@
             android:paddingRight="8dp"
             android:paddingTop="10dp"
             android:text="完成"
+            android:visibility="gone"
             android:textColor="@color/button_text_color"
             android:textSize="@dimen/common_item_text_size" />
     </RelativeLayout>

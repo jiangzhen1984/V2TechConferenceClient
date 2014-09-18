@@ -13,6 +13,7 @@ import java.util.regex.Pattern;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Notification.Action;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.ContentValues;
@@ -62,22 +63,26 @@ import com.v2tech.view.bo.ConversationNotificationObject;
 import com.v2tech.view.conference.GroupLayout;
 import com.v2tech.view.conference.VideoActivityV2;
 import com.v2tech.view.contacts.VoiceMessageActivity;
+import com.v2tech.view.contacts.add.AddFriendHistroysHandler;
 import com.v2tech.view.contacts.add.MessageAuthenticationActivity;
 import com.v2tech.view.conversation.MessageLoader;
 import com.v2tech.view.group.CrowdDetailActivity;
 import com.v2tech.view.conversation.P2PConversation;
+import com.v2tech.vo.AddFriendHistorieNode;
 import com.v2tech.vo.AudioVideoMessageBean;
 import com.v2tech.vo.Conference;
 import com.v2tech.vo.ConferenceConversation;
 import com.v2tech.vo.ConferenceGroup;
 import com.v2tech.vo.ContactConversation;
 import com.v2tech.vo.Conversation;
+import com.v2tech.vo.ConversationFirendAuthentication;
 import com.v2tech.vo.CrowdConversation;
 import com.v2tech.vo.Group;
 import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.User;
 import com.v2tech.vo.VMessage;
 import com.v2tech.vo.VideoBean;
+
 public class ConversationsTabFragment extends Fragment implements TextWatcher,
 		ConferenceListener {
 	private static final int FILL_CONFS_LIST = 2;
@@ -130,6 +135,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		Log.i("wzl", "ConversationsTabFragment onCreate");
 		String tag = this.getArguments().getString("tag");
 		if (PublicIntent.TAG_CONF.equals(tag)) {
 			mCurrentTabFlag = Conversation.TYPE_CONFERNECE;
@@ -158,7 +164,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
-
+		Log.i("wzl", "ConversationsTabFragment onCreateView");
 		if (rootView == null) {
 			rootView = inflater.inflate(R.layout.tab_fragment_conversations,
 					container, false);
@@ -254,6 +260,11 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 						.addAction(PublicIntent.REQUEST_UPDATE_CONVERSATION);
 			}
 
+			if (mCurrentTabFlag == Conversation.TYPE_CONTACT) {
+				intentFilter
+						.addAction(JNIService.JNI_BROADCAST_FRIEND_AUTHENTICATION);
+			}
+
 			if (mCurrentTabFlag == Conversation.TYPE_GROUP) {
 				intentFilter
 						.addAction(PublicIntent.BROADCAST_NEW_CROWD_NOTIFICATION);
@@ -307,7 +318,8 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 			StringBuilder sb = new StringBuilder();
 			V2Log.e(TAG, "Editable :" + s.toString());
 
-			char[] charSimpleArray = s.toString().toLowerCase(Locale.getDefault()).toCharArray();
+			char[] charSimpleArray = s.toString()
+					.toLowerCase(Locale.getDefault()).toCharArray();
 			if (charSimpleArray.length < 5) { // 搜字母查询
 				for (int i = startIndex; i < charSimpleArray.length; i++) {
 					if (isChineseWord(charSimpleArray[i])) {
@@ -522,7 +534,8 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 							}
 							// if(searchTarget.contains(searchKey)){
 						} else {
-							searchTarget = searchTarget.toLowerCase(Locale.getDefault());
+							searchTarget = searchTarget.toLowerCase(Locale
+									.getDefault());
 							V2Log.e(TAG, "searchTarget :" + searchTarget);
 							int indexOf = searchTarget.indexOf(searchKey);
 							// if(searchTarget.contains(searchKey)){
@@ -726,18 +739,21 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 			mItemList.add(new ScrollItem(cov, gp));
 		}
 		// 判断只有消息界面，才添加这两个特殊item
-		if (mCurrentTabFlag == Conversation.TYPE_CONTACT)
+		if (mCurrentTabFlag == Conversation.TYPE_CONTACT) {
 			initSpecificItem();
+			showUnreadFriendAuthenticationRedFlag();
+		}
 
 		if (isFresh) {
 			adapter.notifyDataSetChanged();
 		}
 	}
 
-
 	private boolean isExist;
 	private Conversation voiceMessageItem;
 	private GroupLayout voiceLayout;
+	private GroupLayout verificationLayout;
+	private Conversation verificationMessageItem;
 
 	private void initSpecificItem() {
 		if (isExist) {
@@ -745,13 +761,11 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 		}
 
 		isExist = true;
-		voiceMessageItem = new Conversation(
-				Conversation.TYPE_VOICE_MESSAGE, 0);
-		Conversation verificationMessageItem = new Conversation(
+		voiceMessageItem = new Conversation(Conversation.TYPE_VOICE_MESSAGE, 0);
+		verificationMessageItem = new ConversationFirendAuthentication(
 				Conversation.TYPE_VERIFICATION_MESSAGE, 0);
 		voiceLayout = new GroupLayout(mContext, voiceMessageItem);
-		GroupLayout verificationLayout = new GroupLayout(mContext,
-				verificationMessageItem);
+		verificationLayout = new GroupLayout(mContext, verificationMessageItem);
 		mConvList.add(voiceMessageItem);
 		mConvList.add(verificationMessageItem);
 		mItemList.add(new ScrollItem(voiceMessageItem, voiceLayout));
@@ -763,13 +777,13 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 		if (newestMediaMessage != null && newestMediaMessage.startDate != 0) {
 
 			voiceLayout
-					.update(null,
-							DateUtil.getStringDate(newestMediaMessage.startDate),
-							false);
+					.update(null, DateUtil
+							.getStringDate(newestMediaMessage.startDate), false);
 		}
 
 		if (isHasUnreadMediaMessage())
 			updateUnreadVoiceConversation(true);
+
 	}
 
 	/**
@@ -1075,7 +1089,8 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 					GroupType.CONFERENCE.intValue(), id);
 			// If group is null, means we have removed this conversaion
 			if (g != null) {
-				cb.quitConference(new Conference(id, g.getOwnerUser().getmUserId()), null);
+				cb.quitConference(new Conference(id, g.getOwnerUser()
+						.getmUserId()), null);
 			}
 		}
 
@@ -1249,8 +1264,8 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 			// update main activity notificator
 			cov.setReadFlag(Conversation.READ_FLAG_READ);
 			updateUnreadConversation(cov);
-			
-			//update voice phone state
+
+			// update voice phone state
 			updateUnreadVoiceConversation(false);
 		}
 	};
@@ -1273,8 +1288,8 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 				item = new String[] {
 						mContext.getResources().getString(
 								R.string.conversations_delete_conversaion),
-								mContext.getResources().getString(
-										R.string.conversations_detail)};
+						mContext.getResources().getString(
+								R.string.conversations_detail) };
 			}
 
 			final Conversation cov = mConvList.get(pos);
@@ -1285,7 +1300,9 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 							if (which == 0) {
 								if (mCurrentTabFlag == Conversation.TYPE_CONFERNECE) {
 									Group g = GlobalHolder.getInstance()
-											.getGroupById(GroupType.CONFERENCE.intValue(),
+											.getGroupById(
+													GroupType.CONFERENCE
+															.intValue(),
 													cov.getExtId());
 									// If group is null, means we have removed
 									// this conversaion
@@ -1459,39 +1476,41 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 					.getAction())) {
 				if (Conversation.TYPE_CONTACT == mCurrentTabFlag) {
 					long remoteID = intent.getLongExtra("remoteID", -1l);
-					if(remoteID == -1l){
+					if (remoteID == -1l) {
 						Log.e(TAG, "get remoteID is -1 ... update failed!!");
-						return ;
+						return;
 					}
-					
+
 					String selections = ContentDescriptor.HistoriesMedia.Cols.HISTORY_MEDIA_REMOTE_USER_ID
 							+ "= ? ";
-					String[] selectionArgs = new String[] { String.valueOf(remoteID) };
-					VideoBean newestMediaMessage = MessageLoader.getNewestMediaMessage(
-							mContext, selections, selectionArgs);
-					if(newestMediaMessage == null){
-						Log.e(TAG, "get newest remoteID "+ remoteID +" --> VideoBean is NULL ... update failed!!");
-						return ;
+					String[] selectionArgs = new String[] { String
+							.valueOf(remoteID) };
+					VideoBean newestMediaMessage = MessageLoader
+							.getNewestMediaMessage(mContext, selections,
+									selectionArgs);
+					if (newestMediaMessage == null) {
+						Log.e(TAG, "get newest remoteID " + remoteID
+								+ " --> VideoBean is NULL ... update failed!!");
+						return;
 					}
-					
-					if(voiceLayout == null || voiceMessageItem == null){
+
+					if (voiceLayout == null || voiceMessageItem == null) {
 						initSpecificItem();
-						return ;
+						return;
 					}
-					
+
 					if (newestMediaMessage.startDate != 0) {
-	
-						voiceLayout
-								.update(null,
-										DateUtil.getStringDate(newestMediaMessage.startDate),
-										false);
+
+						voiceLayout.update(null, DateUtil
+								.getStringDate(newestMediaMessage.startDate),
+								false);
 					}
-	
+
 					if (newestMediaMessage.readSatate == AudioVideoMessageBean.STATE_UNREAD)
 						updateUnreadVoiceConversation(true);
 				}
 			}
-			
+
 		}
 
 	}
@@ -1572,13 +1591,91 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			super.onReceive(context, intent);
-			if (JNIService.JNI_BROADCAST_NEW_MESSAGE.equals(intent.getAction())) {
+			String action = intent.getAction();
+			if (action.equals(JNIService.JNI_BROADCAST_NEW_MESSAGE)) {
 				boolean groupMessage = intent.getBooleanExtra("gm", false);
 				if (!groupMessage) {
 					V2Log.e(TAG, "JNI_BROADCAST_NEW_MESSAGE update..");
 					updateConversation(intent.getExtras().getLong("mid"));
 				}
+			} else if (action
+					.equals(JNIService.JNI_BROADCAST_FRIEND_AUTHENTICATION)) {
+				V2Log.e(TAG, "JNI_BROADCAST_FRIEND_AUTHENTICATIONE update..");
+				Toast.makeText(getActivity(), "收到了好友验证消息更新", Toast.LENGTH_SHORT)
+						.show();
+				showUnreadFriendAuthenticationRedFlag();
 			}
+		}
+	}
+
+	private void showUnreadFriendAuthenticationRedFlag() {
+
+		// 查出未读的第一条按时间顺序
+		String sql = "select * from " + AddFriendHistroysHandler.tableName
+				+ " where ReadState=0 order by SaveDate desc limit 1";
+		Cursor cr = AddFriendHistroysHandler.select(getActivity(), sql,
+				new String[] {});
+		if ((cr != null) && (cr.getCount() == 0)) {
+			return;
+		}
+		if (verificationLayout != null) {
+			verificationLayout.updateNotificator(true);
+			String msg = "";
+			if (verificationMessageItem != null) {
+				if (cr.moveToFirst()) {
+					AddFriendHistorieNode tempNode = new AddFriendHistorieNode();
+					// _id integer primary key AUTOINCREMENT,0
+					// OwnerUserID bigint,1
+					// SaveDate bigint,2
+					// FromUserID bigint,3
+					// OwnerAuthType bigint,4
+					// ToUserID bigint, 5
+					// RemoteUserID bigint, 6
+					// ApplyReason nvarchar(4000),7
+					// RefuseReason nvarchar(4000), 8
+					// AddState bigint ,9
+					// ReadState bigint);10
+					tempNode.ownerUserID = cr.getLong(1);
+					tempNode.saveDate = cr.getLong(2);
+					tempNode.fromUserID = cr.getLong(3);
+					tempNode.ownerAuthType = cr.getLong(4);
+					tempNode.toUserID = cr.getLong(5);
+					tempNode.remoteUserID = cr.getLong(6);
+					tempNode.applyReason = cr.getString(7);
+					tempNode.refuseReason = cr.getString(8);
+					tempNode.addState = cr.getLong(9);
+					tempNode.readState = cr.getLong(10);
+
+					String name = GlobalHolder.getInstance()
+							.getUser(tempNode.remoteUserID).getName();
+
+					// 别人加我：允许任何人：0已添加您为好友，需要验证：1未处理，2已同意，3已拒绝
+					// 我加别人：允许认识人：4你们已成为了好友，需要验证：5等待对方验证，4被同意（你们已成为了好友），6拒绝了你为好友
+					if ((tempNode.fromUserID == tempNode.remoteUserID)
+							&& (tempNode.ownerAuthType == 0)) {// 别人加我允许任何人
+						msg = name + "已经加你为好友";
+					} else if ((tempNode.fromUserID == tempNode.remoteUserID)
+							&& (tempNode.ownerAuthType == 1)
+							&& (tempNode.addState == 0)) {// 别人加我未处理
+						msg = name + "申请加你为好友";
+					} else if ((tempNode.fromUserID == tempNode.ownerUserID)
+							&& (tempNode.addState == 0)) {// 我加别人等待验证
+						msg = "申请加" + name + "为好友等待对方验证";
+					} else if ((tempNode.fromUserID == tempNode.ownerUserID)
+							&& (tempNode.addState == 1)) {// 我加别人已被同意或我加别人不需验证
+						msg = "你和" + name + "成为了好友";
+					} else if ((tempNode.fromUserID == tempNode.ownerUserID)
+							&& (tempNode.addState == 2)) {// 我加别人已被拒绝
+						msg = name + "拒绝你的好友请求";
+					}
+				}
+
+				verificationMessageItem.setMsg(msg);
+				verificationLayout.update();
+			}
+
+			notificationListener.updateNotificator(Conversation.TYPE_CONTACT,
+					true);
 		}
 	}
 
@@ -1688,12 +1785,13 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 	}
 
 	protected void updateUnreadVoiceConversation(boolean b) {
-		
-		if(voiceLayout == null){
-			Log.e(TAG, "update unread voice conversationing , the voiceLayout is null");
-			return ;
+
+		if (voiceLayout == null) {
+			Log.e(TAG,
+					"update unread voice conversationing , the voiceLayout is null");
+			return;
 		}
-		
+
 		voiceLayout.updateNotificator(b);
 	}
 

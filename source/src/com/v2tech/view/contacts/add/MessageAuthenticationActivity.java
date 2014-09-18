@@ -7,23 +7,24 @@ import com.v2tech.R;
 import com.v2tech.db.DataBaseContext;
 import com.v2tech.db.V2TechDBHelper;
 import com.v2tech.service.GlobalHolder;
+import com.v2tech.view.JNIService;
 import com.v2tech.view.contacts.ContactDetail;
 import com.v2tech.view.contacts.ContactDetail2;
 import com.v2tech.vo.AddFriendHistorieNode;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -52,6 +53,7 @@ public class MessageAuthenticationActivity extends Activity {
 	private RadioButton rbGroupAuthentication;
 
 	MessageAuthenticationListViewAdapter adapter;
+	FriendAuthenticationBroadcastReceiver friendAuthenticationBroadcastReceiver;
 
 	private List<MessageAuthenticationData> messageAuthenticationDataList = new ArrayList<MessageAuthenticationActivity.MessageAuthenticationData>();
 
@@ -119,10 +121,95 @@ public class MessageAuthenticationActivity extends Activity {
 		// 生成数据
 		// 查数据库生成数据
 
-		String sql = "select * from " + tableName;
+		getDataFromDB();
+		// 建立adapter
+		adapter = new MessageAuthenticationListViewAdapter(this,
+				R.layout.message_authentication_listview_item,
+				messageAuthenticationDataList);
+		// 设置adapter
+		lvMessageAuthentication.setAdapter(adapter);
+
+		lvMessageAuthentication
+				.setOnItemClickListener(new OnItemClickListener() {
+					@Override
+					public void onItemClick(AdapterView<?> parent, View view,
+							int position, long id) {
+						MessageAuthenticationData data = messageAuthenticationDataList
+								.get(position);
+						Intent intent = new Intent();
+						intent.putExtra("remoteUserID", data.remoteUserID);
+						intent.putExtra("authenticationMessage",
+								data.authenticationMessage);
+						intent.putExtra("state", data.state);
+						intent.putExtra("fromActivity",
+								"MessageAuthenticationActivity");
+						// 别人加我：允许任何人：0已添加您为好友，需要验证：1未处理，2已同意，3已拒绝
+						// 我加别人：允许认识人：4你们已成为了好友，需要验证：5等待对方验证，4被同意（你们已成为了好友），6拒绝了你为好友
+						switch (data.state) {
+						case 5:
+							intent.setClass(MessageAuthenticationActivity.this,
+									ContactDetail2.class);
+							break;
+						case 0:
+						case 1:
+						case 2:
+						case 3:
+						case 4:
+						case 6:
+							intent.setClass(MessageAuthenticationActivity.this,
+									ContactDetail.class);
+							break;
+						}
+
+						MessageAuthenticationActivity.this
+								.startActivity(intent);
+					}
+				});
+
+		lvMessageAuthentication
+				.setOnItemLongClickListener(new OnItemLongClickListener() {
+
+					@Override
+					public boolean onItemLongClick(AdapterView<?> arg0,
+							View arg1, int arg2, long arg3) {
+						if (adapter.isDeleteMode == false) {
+							adapter.isDeleteMode = true;
+							adapter.notifyDataSetChanged();
+							tvMessageBack.setVisibility(View.INVISIBLE);
+							tvCompleteRight.setVisibility(View.VISIBLE);
+						}
+						return false;
+					}
+				});
+		initReceiver();
+	}
+
+	void initReceiver() {
+		friendAuthenticationBroadcastReceiver = new FriendAuthenticationBroadcastReceiver();
+		IntentFilter intentFilter = new IntentFilter();
+		intentFilter.addAction(JNIService.JNI_BROADCAST_FRIEND_AUTHENTICATION);
+		intentFilter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
+		registerReceiver(friendAuthenticationBroadcastReceiver, intentFilter);
+
+	}
+
+	void unInitReceiver() {
+		if (friendAuthenticationBroadcastReceiver != null) {
+			unregisterReceiver(friendAuthenticationBroadcastReceiver);
+		}
+	}
+	@Override
+	protected void onDestroy() {
+		unInitReceiver();
+		super.onDestroy();
+	}
+
+	private void getDataFromDB() {
+		messageAuthenticationDataList.clear();
+		String sql = "select * from " + tableName + " order by SaveDate asc";
 		Cursor cr = AddFriendHistroysHandler.select(getApplicationContext(),
 				sql, new String[] {});
-		if (cr.moveToFirst()) {
+		if (cr.moveToLast()) {
 			do {
 
 				AddFriendHistorieNode tempNode = new AddFriendHistorieNode();
@@ -186,66 +273,8 @@ public class MessageAuthenticationActivity extends Activity {
 					tempData.authenticationMessage = tempNode.refuseReason;
 				}
 				messageAuthenticationDataList.add(tempData);
-			} while (cr.moveToNext());
+			} while (cr.moveToPrevious());
 		}
-		// 建立adapter
-		adapter = new MessageAuthenticationListViewAdapter(this,
-				R.layout.message_authentication_listview_item,
-				messageAuthenticationDataList);
-		// 设置adapter
-		lvMessageAuthentication.setAdapter(adapter);
-
-		lvMessageAuthentication
-				.setOnItemClickListener(new OnItemClickListener() {
-					@Override
-					public void onItemClick(AdapterView<?> parent, View view,
-							int position, long id) {
-						MessageAuthenticationData data = messageAuthenticationDataList
-								.get(position);
-						Intent intent = new Intent();
-						intent.putExtra("remoteUserID", data.remoteUserID);
-						intent.putExtra("authenticationMessage",
-								data.authenticationMessage);
-						intent.putExtra("state", data.state);
-						intent.putExtra("fromActivity",
-								"MessageAuthenticationActivity");
-						// 别人加我：允许任何人：0已添加您为好友，需要验证：1未处理，2已同意，3已拒绝
-						// 我加别人：允许认识人：4你们已成为了好友，需要验证：5等待对方验证，4被同意（你们已成为了好友），6拒绝了你为好友
-						switch (data.state) {
-						case 5:
-							intent.setClass(MessageAuthenticationActivity.this,
-									ContactDetail2.class);
-							break;
-						case 0:
-						case 1:
-						case 2:
-						case 3:
-						case 4:
-						case 6:
-							intent.setClass(MessageAuthenticationActivity.this,
-									ContactDetail.class);
-							break;
-						}
-
-						MessageAuthenticationActivity.this
-								.startActivity(intent);
-					}
-				});
-
-		lvMessageAuthentication
-				.setOnItemLongClickListener(new OnItemLongClickListener() {
-
-					@Override
-					public boolean onItemLongClick(AdapterView<?> arg0,
-							View arg1, int arg2, long arg3) {
-						adapter.isDeleteMode = true;
-						adapter.notifyDataSetChanged();
-						tvMessageBack.setVisibility(View.INVISIBLE);
-						tvCompleteRight.setVisibility(View.VISIBLE);
-						return false;
-					}
-				});
-
 	}
 
 	@Override
@@ -425,7 +454,6 @@ public class MessageAuthenticationActivity extends Activity {
 					} else {
 						viewTag.bSuerDelete.setVisibility(View.VISIBLE);
 					}
-					
 				}
 			});
 
@@ -449,11 +477,26 @@ public class MessageAuthenticationActivity extends Activity {
 			viewTag.bSuerDelete.setVisibility(View.GONE);
 			if (isDeleteMode) {
 				viewTag.ibDelete.setVisibility(View.VISIBLE);
+				viewTag.bAccess.setVisibility(View.GONE);
+				viewTag.tvAccessOrNo.setVisibility(View.GONE);
 			} else {
 				viewTag.ibDelete.setVisibility(View.GONE);
 			}
 
 			return arg1;
+		}
+
+	}
+
+	class FriendAuthenticationBroadcastReceiver extends BroadcastReceiver {
+
+		@Override
+		public void onReceive(Context arg0, Intent arg1) {
+			if (arg1.getAction().equals(
+					JNIService.JNI_BROADCAST_FRIEND_AUTHENTICATION)) {
+				getDataFromDB();
+				adapter.notifyDataSetChanged();
+			}
 		}
 
 	}
