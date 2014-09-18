@@ -80,7 +80,7 @@ import com.v2tech.vo.VMessageImageItem;
  */
 public class JNIService extends Service {
 	private static final String TAG = "JNIService";
-	public static final int BINARY_TYPE_AUDIO = 1;
+	public static final int BINARY_TYPE_AUDIO = 3;
 	public static final int BINARY_TYPE_IMAGE = 2;
 	
 	public static final String JNI_BROADCAST_CATEGROY = "com.v2tech.jni.broadcast";

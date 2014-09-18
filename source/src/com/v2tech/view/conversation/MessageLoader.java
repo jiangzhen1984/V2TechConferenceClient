@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -23,6 +24,7 @@ import com.v2tech.util.XmlParser;
 import com.v2tech.vo.AudioVideoMessageBean;
 import com.v2tech.vo.User;
 import com.v2tech.vo.VMessage;
+import com.v2tech.vo.VMessageAbstractItem;
 import com.v2tech.vo.VMessageAudioItem;
 import com.v2tech.vo.VMessageFileItem;
 import com.v2tech.vo.VMessageImageItem;
@@ -83,8 +85,7 @@ public class MessageLoader {
 
 	public static List<VMessage> loadMessage(Context context, long uid1,
 			long uid2) {
-		return loadMessageByType(context, uid1, uid2,
-				QueryType.UNKNOW);
+		return loadMessageByType(context, uid1, uid2, QueryType.UNKNOW);
 	}
 
 	/**
@@ -119,7 +120,7 @@ public class MessageLoader {
 				+ ContentDescriptor.HistoriesMessage.Cols.ID
 				+ " desc limit " + limit + " offset  " + offset;
 		List<VMessage> queryMessage = queryMessage(context, selection, args,
-				order,  QueryType.UNKNOW);
+				order, QueryType.UNKNOW);
 		return queryMessage;
 	}
 
@@ -130,7 +131,7 @@ public class MessageLoader {
 		String order = ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_SAVEDATE
 				+ " desc limit 1 offset 0 ";
 		List<VMessage> list = queryMessage(context, selection, args, order,
-				 QueryType.UNKNOW);
+				QueryType.UNKNOW);
 		if (list != null && list.size() > 0) {
 			return list.get(0);
 		} else {
@@ -172,15 +173,16 @@ public class MessageLoader {
 		return queryMessage(context, selection, args, order, type);
 
 	}
-	
-	interface Constants { 
-		 public static final int IMAGE = 1;
-		 public static final int AUDIO = 2;
-		 public static final int FILE = 3;
-		 public static final int UNKNOW = 4;
+
+	interface Constants {
+		public static final int IMAGE = 1;
+		public static final int AUDIO = 2;
+		public static final int FILE = 3;
+		public static final int UNKNOW = 4;
 	}
 
-	public static VMessage loadbinaryMessageById(VMessage vm, Context context , QueryType type) {
+	public static VMessage loadbinaryMessageById(VMessage vm, Context context,
+			QueryType type) {
 
 		if (vm == null) {
 			return null;
@@ -188,21 +190,21 @@ public class MessageLoader {
 
 		VMessage newMessage = null;
 		switch (type) {
-			case IMAGE:
-				newMessage = loadImageMessageById(vm, context);
-				break;
-			case AUDIO:
-				newMessage = loadAudioMessageById(vm, context);
-				break;
-			case FILE:
-				break;
-			case UNKNOW:
-				newMessage = loadImageMessageById(vm, context);
-				newMessage = loadAudioMessageById(newMessage, context);
-				newMessage = loadFileMessageById(newMessage, context);
-				break;
-			default:
-				break;
+		case IMAGE:
+			newMessage = loadImageMessageById(vm, context);
+			break;
+		case AUDIO:
+			newMessage = loadAudioMessageById(vm, context);
+			break;
+		case FILE:
+			break;
+		case UNKNOW:
+			newMessage = loadImageMessageById(vm, context);
+			newMessage = loadAudioMessageById(newMessage, context);
+			newMessage = loadFileMessageById(newMessage, context);
+			break;
+		default:
+			break;
 		}
 		return newMessage;
 	}
@@ -254,7 +256,9 @@ public class MessageLoader {
 		while (mCur.moveToNext()) {
 			String filePath = mCur.getString(mCur.getColumnIndex("FileExt"));
 			int seconds = mCur.getInt(mCur.getColumnIndex("AudioSeconds"));
-			new VMessageAudioItem(vm, filePath, seconds);
+			int readState = mCur.getInt(mCur.getColumnIndex("ReadState"));
+			VMessageAudioItem audio = new VMessageAudioItem(vm, filePath, seconds);
+			audio.setState(readState);
 		}
 		mCur.close();
 		return vm;
@@ -291,8 +295,7 @@ public class MessageLoader {
 
 	public static List<VMessage> loadImageMessage(Context context, long uid1,
 			long uid2) {
-		return loadMessageByType(context, uid1, uid2,
-				QueryType.IMAGE);
+		return loadMessageByType(context, uid1, uid2, QueryType.IMAGE);
 	}
 
 	public static List<AudioVideoMessageBean> loadAudioOrVideoHistoriesMessage(
@@ -448,14 +451,12 @@ public class MessageLoader {
 
 	public static List<VMessage> loadGroupMessage(Context context,
 			long groupType, long gid) {
-		return loadGroupMessageByType(context, groupType, gid,
-				QueryType.UNKNOW);
+		return loadGroupMessageByType(context, groupType, gid, QueryType.UNKNOW);
 	}
 
 	public static List<VMessage> loadGroupImageMessage(Context context,
 			long groupType, long gid) {
-		return loadGroupMessageByType(context, groupType, gid,
-				QueryType.IMAGE);
+		return loadGroupMessageByType(context, groupType, gid, QueryType.IMAGE);
 	}
 
 	/**
@@ -475,8 +476,7 @@ public class MessageLoader {
 		String[] args = new String[] { groupId + "" };
 		String order = ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_SAVEDATE
 				+ " desc limit " + limit + " offset  " + offset;
-		return queryMessage(context, selection, args, order,
-				 QueryType.UNKNOW);
+		return queryMessage(context, selection, args, order, QueryType.UNKNOW);
 	}
 
 	/**
@@ -484,7 +484,9 @@ public class MessageLoader {
 	 * 
 	 * @param context
 	 * @param gid
-	 * @param type : GlobalConfig.MEDIA_TYPE_FILE , GlobalConfig.MEDIA_TYPE_AUDIO , GlobalConfig.MEDIA_TYPE_IMAGE
+	 * @param type
+	 *            : GlobalConfig.MEDIA_TYPE_FILE , GlobalConfig.MEDIA_TYPE_AUDIO
+	 *            , GlobalConfig.MEDIA_TYPE_IMAGE
 	 * @return
 	 */
 	public static List<VMessage> loadGroupMessageByType(Context context,
@@ -496,7 +498,7 @@ public class MessageLoader {
 		String order = ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_SAVEDATE
 				+ " desc ";
 		String[] args = new String[] { gid + "" };
-		return queryMessage(context, selection, args, order,type);
+		return queryMessage(context, selection, args, order, type);
 	}
 
 	public static Long queryVMessageID(Context context, String selection,
@@ -530,14 +532,14 @@ public class MessageLoader {
 		}
 
 		while (mCur.moveToNext()) {
-			
+
 			VMessage vm = XmlParser.parseForMessage(extractMsg(mCur));
 			if (vm == null) {
 				V2Log.e("the parse VMessage get null........");
 				return vimList;
 			}
 
-			VMessage newMessage = loadbinaryMessageById(vm, mContext , type);
+			VMessage newMessage = loadbinaryMessageById(vm, mContext, type);
 			vimList.add(newMessage);
 		}
 		mCur.close();
@@ -546,20 +548,36 @@ public class MessageLoader {
 	}
 
 	public static int deleteMessage(Context context, VMessage vm) {
-		if (vm == null) {
-			return 0;
-		}
+		if (vm == null)
+			return -1;
 
-		int ret = context.getContentResolver().delete(
+		DataBaseContext mContext = new DataBaseContext(context);
+		int ret = mContext.getContentResolver().delete(
 				ContentDescriptor.HistoriesMessage.CONTENT_URI,
 				ContentDescriptor.HistoriesMessage.Cols.ID + "=?",
 				new String[] { vm.getId() + "" });
+		return ret;
+	}
 
-		// Delete message items
-		// context.getContentResolver().delete(
-		// ContentDescriptor.MessageItems.CONTENT_URI,
-		// ContentDescriptor.MessageItems.Cols.MSG_ID + "=?",
-		// new String[] { vm.getId() + "" });
+	/**
+	 * update the given audio message read state...
+	 * @param context
+	 * @param audioItem
+	 * @return
+	 */
+	public static int updateBinaryAudioState(Context context,
+			VMessage vm , VMessageAudioItem audioItem) {
+
+		if (audioItem == null)
+			return -1;
+
+		DataBaseContext mContext = new DataBaseContext(context);
+		ContentValues values = new ContentValues();
+		values.put(ContentDescriptor.HistoriesAudios.Cols.HISTORY_AUDIO_READ_STATE, audioItem.getState());
+		String where = ContentDescriptor.HistoriesAudios.Cols.HISTORY_AUDIO_ID + "= ?";
+		String[] selectionArgs = new String[]{ vm.getUUID() };
+		int ret = mContext.getContentResolver().update(ContentDescriptor.HistoriesAudios.CONTENT_URI, 
+				values, where, selectionArgs);
 		return ret;
 	}
 
@@ -834,8 +852,8 @@ public class MessageLoader {
 		}
 		return false;
 	}
-	
+
 	public enum QueryType {
-		IMAGE, AUDIO, FILE , CHATTING , UNKNOW;
+		IMAGE, AUDIO, FILE, CHATTING, UNKNOW;
 	}
 }

@@ -376,7 +376,7 @@ public class MessageBodyView extends LinearLayout {
 				} else {
 					callback.requestStopOtherAudio(mMsg);
 					callback.requestPlayAudio(view, mMsg, item);
-					updateUnreadFlag(false);
+					updateUnreadFlag(false , item);
 				}
 			}
 
@@ -601,12 +601,16 @@ public class MessageBodyView extends LinearLayout {
 		updateView(vm);
 	}
 
-	public void updateUnreadFlag(boolean flag) {
+	public void updateUnreadFlag(boolean flag , VMessageAudioItem item) {
 		if (!flag) {
+			item.setState(VMessageAbstractItem.STATE_READED);
 			this.unReadIcon.setVisibility(View.GONE);
 		} else {
+			item.setState(VMessageAbstractItem.STATE_UNREAD);
 			this.unReadIcon.setVisibility(View.VISIBLE);
 		}
+		
+		MessageLoader.updateBinaryAudioState(getContext(), mMsg , item);
 	}
 
 	public void updateFailedFlag(boolean flag) {

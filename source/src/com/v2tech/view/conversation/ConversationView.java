@@ -67,8 +67,10 @@ import com.v2tech.service.FileOperationEnum;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.service.Registrant;
 import com.v2tech.service.jni.FileTransStatusIndication;
+import com.v2tech.service.jni.JNIResponse;
 import com.v2tech.service.jni.FileTransStatusIndication.FileTransProgressStatusIndication;
 import com.v2tech.service.jni.JNIResponse.Result;
+import com.v2tech.service.jni.RequestChatServiceResponse;
 import com.v2tech.service.jni.RequestSendMessageResponse;
 import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.MessageUtil;
@@ -189,6 +191,8 @@ public class ConversationView extends Activity {
 	private View root;
 	private SparseArray<VMessage> messageAllID;
 	private List<VMessage> currentGetMessages;
+	private long lastMessageBodyShowTime = 0;
+	private long intervalTime = 15000;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -501,9 +505,10 @@ public class ConversationView extends Activity {
 				if (items.size() > 0
 						&& items.get(0).getState() == VMessageAbstractItem.STATE_UNREAD) {
 					this.scrollToPos(i);
-					listener.requestPlayAudio(null, vm, items.get(0));
-					((MessageBodyView) wrapper.getView())
-							.updateUnreadFlag(false);
+					VMessageAudioItem vMessageAudioItem = items.get(0);
+					listener.requestPlayAudio(null, vm, vMessageAudioItem);
+					((MessageBodyView) wrapper.getView()).updateUnreadFlag(
+							false, vMessageAudioItem);
 					((MessageBodyView) wrapper.getView()).startVoiceAnimation();
 					return true;
 				}
@@ -1173,10 +1178,6 @@ public class ConversationView extends Activity {
 				Intent intent = new Intent(ConversationView.this,
 						ConversationSelectFileEntry.class);
 				startActivityForResult(intent, RECEIVE_SELECTED_FILE);
-				// intent.putExtra("obj", cov);
-				// startActivity(intent);
-				// finishWork();
-				// finish();
 			} else {
 
 				Toast.makeText(mContext, "当前网络不可用，请稍候再试。", Toast.LENGTH_SHORT)
@@ -1555,6 +1556,8 @@ public class ConversationView extends Activity {
 
 		messageArray.add(new VMessageAdater(msg));
 		scrollToBottom();
+
+		judgeShouldShowTime(msg);
 		adapter.notifyDataSetChanged();
 	}
 
@@ -1618,34 +1621,22 @@ public class ConversationView extends Activity {
 				currentPlayed = vm;
 				V2Log.i(TAG, "currentPlayingAudio:--" + currentPlayed.getId());
 				startPlaying(vai.getAudioFilePath());
-				if (vai.getState() == VMessageAbstractItem.STATE_UNREAD) {
-					vai.setState(VMessageAbstractItem.STATE_NORMAL);
-					ContentValues cv = new ContentValues();
-					cv.put(ContentDescriptor.MessageItems.Cols.STATE,
-							vai.getState());
-					mContext.getContentResolver().update(
-							ContentDescriptor.MessageItems.CONTENT_URI, cv,
-							ContentDescriptor.MessageItems.Cols.ID + " = ? ",
-							new String[] { vai.getId() + "" });
-
-				}
 			}
 		}
 
 		@Override
 		public void reSendMessageClicked(VMessage v) {
-			// v.setState(VMessage.STATE_UNREAD);
-			// List<VMessageAbstractItem> items = v.getItems();
-			// for (int i = 0; i < items.size(); i++) {
-			// VMessageAbstractItem item = items.get(i);
-			// if (item.getType() == VMessageAbstractItem.ITEM_TYPE_FILE) {
-			// item.setState(VMessageAbstractItem.STATE_FILE_SENDING);
-			// } else {
-			// item.setState(VMessageAbstractItem.STATE_NORMAL);
-			// }
-			// }
-			// Message.obtain(lh, SEND_MESSAGE, v).sendToTarget();
-			mChat.sendVMessage(v, new Registrant(lh, SEND_MESSAGE_DONE, null));
+			v.setState(VMessage.STATE_UNREAD);
+			List<VMessageAbstractItem> items = v.getItems();
+			for (int i = 0; i < items.size(); i++) {
+				VMessageAbstractItem item = items.get(i);
+				if (item.getType() == VMessageAbstractItem.ITEM_TYPE_FILE) {
+					item.setState(VMessageAbstractItem.STATE_FILE_SENDING);
+				} else {
+					item.setState(VMessageAbstractItem.STATE_NORMAL);
+				}
+			}
+			Message.obtain(lh, SEND_MESSAGE, v).sendToTarget();
 			notificateConversationUpdate();
 		}
 
@@ -1791,8 +1782,8 @@ public class ConversationView extends Activity {
 						.getGroupId() == 0) || (m.getGroupId() != this.groupId)) {
 			return false;
 		}
-		MessageBodyView mv = new MessageBodyView(this, m, true);
-
+		judgeShouldShowTime(m);
+		MessageBodyView mv = new MessageBodyView(this, m, m.isShowTime());
 		messageArray.add(new VMessageAdater(m));
 		if (mv != null) {
 			if (!isStopped) {
@@ -1936,7 +1927,8 @@ public class ConversationView extends Activity {
 			}
 			VMessage vm = (VMessage) wr.getItemObject();
 			if (convertView == null) {
-				MessageBodyView mv = new MessageBodyView(mContext, vm, true);
+				MessageBodyView mv = new MessageBodyView(mContext, vm,
+						vm.isShowTime());
 				mv.setCallback(listener);
 				convertView = mv;
 			} else {
@@ -2014,15 +2006,16 @@ public class ConversationView extends Activity {
 
 					adapterFileIcon(fileItems);
 				}
-				MessageBodyView mv = new MessageBodyView(mContext, vm, true);
+				MessageBodyView mv = new MessageBodyView(mContext, vm,
+						vm.isShowTime());
 				mv.setCallback(listener);
 				if (vm.getFileItems().size() > 0) {
 					VMessageFileItem vMessageFileItem = vm.getFileItems()
 							.get(0);
 					if (vMessageFileItem != null
 							&& vMessageFileItem.getState() == VMessageFileItem.STATE_FILE_SENDING) {
-						mChat.sendVMessage(vMessageFileItem.getVm(),
-								new Registrant(lh, SEND_MESSAGE_DONE, null));
+						mChat.sendFileMessage(vm, new Registrant(lh,
+								SEND_MESSAGE_DONE, null));
 						notificateConversationUpdate();
 						V2Log.d(TAG,
 								"the file :" + vMessageFileItem.getFileName()
@@ -2104,6 +2097,20 @@ public class ConversationView extends Activity {
 				List<VMessage> array = loadMessages();
 				if (array != null) {
 					V2Log.d(TAG, "获取的消息数量" + array.size());
+					// 设置VMessage是否应该显示时间
+					for (int i = 0; i < array.size(); i++) {
+						long currentMessage = array.get(i).getmDateLong();
+
+						if (i + 1 == array.size()) {
+							array.get(i).setShowTime(true);
+							break;
+						}
+						long lastMessage = array.get(i + 1).getmDateLong();
+						if (currentMessage - lastMessage > intervalTime)
+							array.get(i).setShowTime(true);
+						else
+							array.get(i).setShowTime(false);
+					}
 					currentGetMessages = array;
 					for (int i = 0; i < array.size(); i++) {
 						if (messageAllID.get((int) array.get(i).getId()) != null) {
@@ -2183,11 +2190,24 @@ public class ConversationView extends Activity {
 				}
 				break;
 			case SEND_MESSAGE_DONE:
-				RequestSendMessageResponse code = (RequestSendMessageResponse) msg.obj;
-				int res = code.getResult().value();
-				if (res != Result.SUCCESS.value())
-					Toast.makeText(mContext, "消息发送失败", Toast.LENGTH_SHORT)
-							.show();
+				if (msg.obj instanceof RequestChatServiceResponse) {
+					RequestChatServiceResponse code = (RequestChatServiceResponse) msg.obj;
+					if (code.getCode() != RequestChatServiceResponse.ACCEPTED) {
+						V2Log.e(TAG,
+								"send file failed....get the return code is :"
+										+ code.getCode());
+						String uuid = code.getUuid();
+						if (uuid != null)
+							updateFileTransErrorView(uuid);
+					}
+				} else if (msg.obj instanceof RequestSendMessageResponse) {
+					RequestSendMessageResponse code = (RequestSendMessageResponse) msg.obj;
+					int res = code.getResult().value();
+					if (res != Result.SUCCESS.value())
+						V2Log.e(TAG,
+								"send chating failed....get the return code is :"
+										+ res);
+				}
 				break;
 			}
 		}
@@ -2250,6 +2270,15 @@ public class ConversationView extends Activity {
 			sendSelectedFile(mCheckedList.get(i).filePath,
 					mCheckedList.get(i).fileType);
 		}
+	}
+
+	private void judgeShouldShowTime(VMessage message) {
+
+		if (message.getmDateLong() - lastMessageBodyShowTime < intervalTime)
+			message.setShowTime(false);
+		else
+			message.setShowTime(true);
+		lastMessageBodyShowTime = message.getmDateLong();
 	}
 
 	@Override

@@ -215,7 +215,7 @@ public class ChatService extends DeviceService {
 		});
 	}
 
-	private void sendFileMessage(VMessage vm, Registrant caller) {
+	public void sendFileMessage(VMessage vm, Registrant caller) {
 		List<VMessageFileItem> items = vm.getFileItems();
 		if (items == null || items.size() <= 0) {
 			if (caller != null) {
@@ -239,8 +239,9 @@ public class ChatService extends DeviceService {
 		FileRequest.getInstance().inviteFileTrans(vm.getToUser().getmUserId(),
 				sb.toString(), V2GlobalEnum.FILE_TYPE_OFFLINE);
 
-		JNIResponse resp = new RequestChatServiceResponse(
+		RequestChatServiceResponse resp = new RequestChatServiceResponse(
 				RequestChatServiceResponse.Result.SUCCESS);
+		resp.setUuid(vm.getUUID());
 		sendResult(caller, resp);
 	}
 

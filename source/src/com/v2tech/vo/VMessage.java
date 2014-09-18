@@ -49,6 +49,16 @@ public class VMessage {
 	protected int mState;
 	
 	protected String mXmlDatas;
+	
+	protected boolean isShowTime;
+
+	public boolean isShowTime() {
+		return isShowTime;
+	}
+
+	public void setShowTime(boolean isShowTime) {
+		this.isShowTime = isShowTime;
+	}
 
 	protected List<VMessageAbstractItem> itemList;
 	

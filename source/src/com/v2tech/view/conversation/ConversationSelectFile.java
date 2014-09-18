@@ -55,6 +55,7 @@ public class ConversationSelectFile extends Activity {
 	protected static final int SCROLL_STATE_TOUCH_SCROLL = 2;
 	private static final int ITEM_CHECKED = 7;
 	private static final int ITEM_UNCHECKED = 8;
+	private static final int UPDATE_REMOVE = 9;
 	private String mCurrentPath = StorageUtil.getSdcardPath();
 	private TextView backButton;
 	private TextView finishButton;
@@ -89,6 +90,7 @@ public class ConversationSelectFile extends Activity {
 				imageAdapter = new ImageListAdapter();
 				filesGrid.setAdapter(imageAdapter);
 				break;
+			case UPDATE_REMOVE:
 			case NEW_BITMAP:
 				imageAdapter.notifyDataSetChanged();
 				break;
@@ -96,11 +98,12 @@ public class ConversationSelectFile extends Activity {
 				ViewHolder holder = (ViewHolder) ((Object[]) msg.obj)[0];
 				Bitmap bt = (Bitmap) ((Object[]) msg.obj)[1];
 				FileInfoBean fb = (FileInfoBean) ((Object[]) msg.obj)[2];
+				int position = (Integer) ((Object[]) msg.obj)[3];
 				if (!bt.isRecycled()) {
 					holder.fileIcon.setImageBitmap(bt);
 					bitmapMapping.put(bt, holder);
 				} else {
-					startLoadBitmap(holder, fb);
+					startLoadBitmap(holder, fb , position);
 				}
 				break;
 			case REMOVE_BITMAP:
@@ -599,7 +602,7 @@ public class ConversationSelectFile extends Activity {
 
 				if (isLoading != SCROLL_STATE_TOUCH_SCROLL && isLoading != 1){
 					// 开始加载图片
-					startLoadBitmap(holder, fb);
+					startLoadBitmap(holder, fb , position);
 				}
 				else
 					// 加载中显示的图片
@@ -622,7 +625,7 @@ public class ConversationSelectFile extends Activity {
 		}
 	}
 
-	public void startLoadBitmap(final ViewHolder holder, final FileInfoBean fb) {
+	public void startLoadBitmap(final ViewHolder holder, final FileInfoBean fb , final int position) {
 		service.execute(new Runnable() {
 
 			@Override
@@ -641,12 +644,14 @@ public class ConversationSelectFile extends Activity {
 					
 					if(bitmap == null || bitmap.isRecycled()){
 						V2Log.e(TAG, "get null when loading "+fb.fileName+" picture.");
+						mFileLists.remove(position);
+						Message.obtain(handler, UPDATE_REMOVE).sendToTarget();
 						return ;
 					}
 
 					bitmapLru.put(fb.fileName, bitmap);
 					Message.obtain(handler, UPDATE_BITMAP,
-							new Object[] { holder, bitmap, fb}).sendToTarget();
+							new Object[] { holder, bitmap, fb , position}).sendToTarget();
 				} catch (Exception e) {
 					e.printStackTrace();
 				}

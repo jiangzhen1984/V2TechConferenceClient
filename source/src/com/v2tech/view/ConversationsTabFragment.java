@@ -726,8 +726,10 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 			mItemList.add(new ScrollItem(cov, gp));
 		}
 		// 判断只有消息界面，才添加这两个特殊item
-		if (mCurrentTabFlag == Conversation.TYPE_CONTACT)
+		if (mCurrentTabFlag == Conversation.TYPE_CONTACT){
 			initSpecificItem();
+			updateVoiceSpecificItemState();
+		}
 
 		if (isFresh) {
 			adapter.notifyDataSetChanged();
@@ -757,19 +759,33 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 		mItemList.add(new ScrollItem(voiceMessageItem, voiceLayout));
 		mItemList.add(new ScrollItem(verificationMessageItem,
 				verificationLayout));
-
+		
+		voiceMessageItem.setReadFlag(Conversation.READ_FLAG_READ);
+		verificationMessageItem.setReadFlag(Conversation.READ_FLAG_READ);
+	}
+	
+	private void updateVoiceSpecificItemState(){
+		
+		boolean isShowFlag = false;
+		if (isHasUnreadMediaMessage())
+			isShowFlag = true;
+		else
+			isShowFlag = false;
+		
 		VideoBean newestMediaMessage = MessageLoader
 				.getNewestMediaMessage(mContext);
 		if (newestMediaMessage != null && newestMediaMessage.startDate != 0) {
 
 			voiceLayout
-					.update(null,
+					.update("aaa",
 							DateUtil.getStringDate(newestMediaMessage.startDate),
-							false);
+							isShowFlag);
+			
+			if (newestMediaMessage.readSatate == AudioVideoMessageBean.STATE_UNREAD)
+				updateUnreadVoiceConversation(true);
 		}
-
-		if (isHasUnreadMediaMessage())
-			updateUnreadVoiceConversation(true);
+		
+		
 	}
 
 	/**
@@ -1214,7 +1230,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 		long lasttime;
 
 		@Override
-		public void onItemClick(AdapterView<?> adapter, View v, int pos, long id) {
+		public void onItemClick(AdapterView<?> adapters, View v, int pos, long id) {
 			if (System.currentTimeMillis() - lasttime < 300) {
 				V2Log.w("Too short pressed");
 				return;
@@ -1235,12 +1251,24 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 					Intent intent = new Intent(mContext,
 							VoiceMessageActivity.class);
 					startActivity(intent);
+					
+					ScrollItem scrollItem = mItemList.get(currentMoveViewPosition);
+					mItemList.remove(currentMoveViewPosition);
+					mConvList.remove(currentMoveViewPosition);
+					mItemList.add(0, scrollItem);
+					mConvList.add(0, scrollItem.cov);
+					adapter.notifyDataSetChanged();
 				} else if (cov.getType() == Conversation.TYPE_VERIFICATION_MESSAGE) {
 
 					Intent intent = new Intent(mContext,
 							MessageAuthenticationActivity.class);
 					startActivity(intent);
-
+					ScrollItem scrollItem = mItemList.get(currentMoveViewPosition);
+					mItemList.remove(currentMoveViewPosition);
+					mConvList.remove(currentMoveViewPosition);
+					mItemList.add(0, scrollItem);
+					mConvList.add(0, scrollItem.cov);
+					adapter.notifyDataSetChanged();
 				} else {
 					startConversationView(cov);
 				}
@@ -1479,16 +1507,16 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 						return ;
 					}
 					
-					if (newestMediaMessage.startDate != 0) {
+					updateVoiceSpecificItemState();
+//					if (newestMediaMessage.startDate != 0) {
+//	
+//						voiceLayout
+//								.update(null,
+//										DateUtil.getStringDate(newestMediaMessage.startDate),
+//										true);
+//					}
+//					updateUnreadVoiceConversation(true);
 	
-						voiceLayout
-								.update(null,
-										DateUtil.getStringDate(newestMediaMessage.startDate),
-										false);
-					}
-	
-					if (newestMediaMessage.readSatate == AudioVideoMessageBean.STATE_UNREAD)
-						updateUnreadVoiceConversation(true);
 				}
 			}
 			
@@ -1687,14 +1715,20 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 		startActivity(i);
 	}
 
+	/**
+	 * 
+	 * @param b
+	 */
 	protected void updateUnreadVoiceConversation(boolean b) {
 		
 		if(voiceLayout == null){
 			Log.e(TAG, "update unread voice conversationing , the voiceLayout is null");
 			return ;
 		}
-		
-		voiceLayout.updateNotificator(b);
+		// Update main activity to show or hide notificator
+		if(b)
+			this.notificationListener.updateNotificator(mCurrentTabFlag, true);
+		else 
+			this.notificationListener.updateNotificator(mCurrentTabFlag, false);
 	}
-
 }
