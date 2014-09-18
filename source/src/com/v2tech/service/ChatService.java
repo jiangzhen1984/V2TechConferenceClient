@@ -17,6 +17,8 @@ import com.V2.jni.VideoRequestCallbackAdapter;
 import com.V2.jni.ind.AudioJNIObjectInd;
 import com.V2.jni.ind.VideoJNIObjectInd;
 import com.V2.jni.util.V2Log;
+import com.v2tech.service.jni.FileDownLoadErrorIndication;
+import com.v2tech.service.jni.FileTransCannelIndication;
 import com.v2tech.service.jni.FileTransStatusIndication.FileTransErrorIndication;
 import com.v2tech.service.jni.FileTransStatusIndication.FileTransProgressStatusIndication;
 import com.v2tech.service.jni.JNIResponse;
@@ -588,12 +590,24 @@ public class ChatService extends DeviceService {
 		}
 
 		@Override
-		public void OnFileDownloadError(String sFileID, int t1) {
+		public void OnFileDownloadError(String szFileID, int errorCode, int nTransType) {
 			notifyListener(KEY_FILE_TRANS_STATUS_NOTIFICATION_LISTNER, 0, 0,
-					new FileTransErrorIndication(sFileID, t1));
+					new FileDownLoadErrorIndication(szFileID, errorCode , nTransType));
 
 		}
 
+		@Override
+		public void OnFileTransError(String szFileID, int errorCode,
+				int nTransType) {
+			notifyListener(KEY_FILE_TRANS_STATUS_NOTIFICATION_LISTNER, 0, 0,
+					new FileTransErrorIndication(szFileID, errorCode , nTransType));
+		}
+
+		@Override
+		public void OnFileTransCancel(String szFileID) {
+			notifyListener(KEY_FILE_TRANS_STATUS_NOTIFICATION_LISTNER, 0, 0,
+					new FileTransCannelIndication(szFileID));
+		}
 	}
 
 }

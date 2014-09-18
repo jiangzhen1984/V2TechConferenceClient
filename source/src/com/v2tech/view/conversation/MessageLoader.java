@@ -554,8 +554,32 @@ public class MessageLoader {
 		DataBaseContext mContext = new DataBaseContext(context);
 		int ret = mContext.getContentResolver().delete(
 				ContentDescriptor.HistoriesMessage.CONTENT_URI,
-				ContentDescriptor.HistoriesMessage.Cols.ID + "=?",
-				new String[] { vm.getId() + "" });
+				ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_ID + "=?",
+				new String[] { String.valueOf(vm.getUUID()) });
+		
+		List<VMessageAudioItem> audioItems = vm.getAudioItems();
+		for (int i = 0; i < audioItems.size(); i++) {
+			mContext.getContentResolver().delete(
+					ContentDescriptor.HistoriesAudios.CONTENT_URI,
+					ContentDescriptor.HistoriesAudios.Cols.HISTORY_AUDIO_ID + "=?",
+					new String[] { String.valueOf(vm.getUUID()) });
+		}
+		
+		List<VMessageFileItem> fileItems = vm.getFileItems();
+		for (int i = 0; i < fileItems.size(); i++) {
+			mContext.getContentResolver().delete(
+					ContentDescriptor.HistoriesFiles.CONTENT_URI,
+					ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_ID + "=?",
+					new String[] { String.valueOf(vm.getUUID()) });
+		}
+		
+		List<VMessageImageItem> imageItems = vm.getImageItems();
+		for (int i = 0; i < imageItems.size(); i++) {
+			mContext.getContentResolver().delete(
+					ContentDescriptor.HistoriesGraphic.CONTENT_URI,
+					ContentDescriptor.HistoriesGraphic.Cols.HISTORY_GRAPHIC_ID + "=?",
+					new String[] { String.valueOf(vm.getUUID()) });
+		}
 		return ret;
 	}
 
@@ -577,6 +601,28 @@ public class MessageLoader {
 		String where = ContentDescriptor.HistoriesAudios.Cols.HISTORY_AUDIO_ID + "= ?";
 		String[] selectionArgs = new String[]{ vm.getUUID() };
 		int ret = mContext.getContentResolver().update(ContentDescriptor.HistoriesAudios.CONTENT_URI, 
+				values, where, selectionArgs);
+		return ret;
+	}
+	
+	/**
+	 * update the given audio message read state...
+	 * @param context
+	 * @param audioItem
+	 * @return
+	 */
+	public static int updateFileItemState(Context context,
+			VMessage vm , VMessageFileItem fileItem) {
+
+		if (fileItem == null)
+			return -1;
+
+		DataBaseContext mContext = new DataBaseContext(context);
+		ContentValues values = new ContentValues();
+		values.put(ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_SEND_STATE, fileItem.getState());
+		String where = ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_ID + "= ?";
+		String[] selectionArgs = new String[]{ vm.getUUID() };
+		int ret = mContext.getContentResolver().update(ContentDescriptor.HistoriesFiles.CONTENT_URI, 
 				values, where, selectionArgs);
 		return ret;
 	}

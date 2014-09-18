@@ -120,7 +120,7 @@ public class GroupLayout extends LinearLayout {
 
 		switch (mConv.getType()) {
 			case Conversation.TYPE_CONTACT:
-				mGroupDateTV.setText(mConv.getDateLong());
+				mGroupDateTV.setText(((ContactConversation)mConv).getDateLong());
 				break;
 			default:
 				mGroupDateTV.setText(date);

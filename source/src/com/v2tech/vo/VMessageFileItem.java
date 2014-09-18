@@ -4,7 +4,6 @@ import java.io.File;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.Format;
-import java.util.UUID;
 
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.util.GlobalConfig;
@@ -49,7 +48,7 @@ public class VMessageFileItem extends VMessageAbstractItem {
 			fileSize = f.length();
 		}
 		this.type = VMessageAbstractItem.ITEM_TYPE_FILE;
-		this.uuid = UUID.randomUUID().toString();
+		this.uuid = vm.getUUID();
 	}
 	
 	public VMessageFileItem(VMessage vm, String filePath , int fileType) {
@@ -64,7 +63,7 @@ public class VMessageFileItem extends VMessageAbstractItem {
 			fileSize = f.length();
 		}
 		this.type = VMessageAbstractItem.ITEM_TYPE_FILE;
-		this.uuid = UUID.randomUUID().toString();
+		this.uuid = vm.getUUID();
 		this.fileType = fileType;
 	}
 	

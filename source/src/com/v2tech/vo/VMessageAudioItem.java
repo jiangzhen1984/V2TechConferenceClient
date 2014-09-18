@@ -1,7 +1,5 @@
 package com.v2tech.vo;
 
-import java.util.UUID;
-
 import com.V2.jni.util.V2Log;
 
 public class VMessageAudioItem extends VMessageAbstractItem {
@@ -9,7 +7,6 @@ public class VMessageAudioItem extends VMessageAbstractItem {
 	private String extension;
 	private String audioFilePath;
 	private int seconds;
-	
 	private boolean isPlaying;
 	
 	
@@ -29,7 +26,7 @@ public class VMessageAudioItem extends VMessageAbstractItem {
 		this.type = ITEM_TYPE_AUDIO;
 		this.audioFilePath = audioFilePath;
 		this.seconds = seconds;
-		this.uuid = UUID.randomUUID().toString();
+		this.uuid = vm.getUUID();
 		if (this.audioFilePath != null && !this.audioFilePath.isEmpty()) {
 			int start = this.audioFilePath.lastIndexOf(".");
 			if (start != -1) {

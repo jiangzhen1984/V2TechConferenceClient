@@ -827,17 +827,22 @@ public class MessageBodyView extends LinearLayout {
 			if (callback != null) {
 				if (item.getState() == VMessageFileItem.STATE_FILE_UNDOWNLOAD) {
 					callback.requestDownloadFile(view, item.getVm(), item);
+					item.setState(VMessageFileItem.STATE_FILE_DOWNLOADING);
 				} else if (item.getState() == VMessageFileItem.STATE_FILE_SENDING) {
 					callback.requestPauseTransFile(view, item.getVm(), item);
+					item.setState(VMessageFileItem.STATE_FILE_PAUSED_SENDING);
 				} else if (item.getState() == VMessageFileItem.STATE_FILE_PAUSED_SENDING) {
 					callback.requestResumeTransFile(view, item.getVm(), item);
+					item.setState(VMessageFileItem.STATE_FILE_SENDING);
 				} else if (item.getState() == VMessageFileItem.STATE_FILE_DOWNLOADING) {
 					callback.requestPauseDownloadFile(view, item.getVm(), item);
+					item.setState(VMessageFileItem.STATE_FILE_PAUSED_DOWNLOADING);
 				} else if (item.getState() == VMessageFileItem.STATE_FILE_PAUSED_DOWNLOADING) {
 					callback.requestResumeDownloadFile(view, item.getVm(), item);
+					item.setState(VMessageFileItem.STATE_FILE_DOWNLOADING);
 				}
 			}
-
+			MessageLoader.updateFileItemState(getContext(), item.getVm(), item);
 			updateView(item);
 		}
 

@@ -5,7 +5,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.UUID;
 
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
@@ -27,7 +26,7 @@ public class VMessageImageItem extends VMessageAbstractItem {
 		super(vm);
 		this.filePath = filePath;
 		this.type = ITEM_TYPE_IMAGE;
-		this.uuid = UUID.randomUUID().toString();
+		this.uuid = vm.getUUID();
 	}
 
 	public VMessageImageItem(VMessage vm, String uuid, String extension) {

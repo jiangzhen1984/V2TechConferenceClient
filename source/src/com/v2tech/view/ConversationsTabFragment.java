@@ -790,11 +790,10 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 		if (newestMediaMessage != null && newestMediaMessage.startDate != 0) {
 
 			voiceLayout
-
-			.update("aaa",
-					DateUtil.getStringDate(newestMediaMessage.startDate),
-					isShowFlag);
-
+					.update(null,
+							DateUtil.getStringDate(newestMediaMessage.startDate),
+							isShowFlag);
+			
 			if (newestMediaMessage.readSatate == AudioVideoMessageBean.STATE_UNREAD)
 				updateUnreadVoiceConversation(true);
 		}
@@ -1529,14 +1528,6 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 					}
 
 					updateVoiceSpecificItemState();
-					// if (newestMediaMessage.startDate != 0) {
-					//
-					// voiceLayout
-					// .update(null,
-					// DateUtil.getStringDate(newestMediaMessage.startDate),
-					// true);
-					// }
-					// updateUnreadVoiceConversation(true);
 				}
 			}
 

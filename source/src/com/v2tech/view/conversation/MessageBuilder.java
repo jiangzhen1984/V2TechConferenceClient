@@ -18,8 +18,6 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.text.TextUtils;
 
-import com.V2.jni.ind.V2Group;
-import com.V2.jni.ind.V2User;
 import com.V2.jni.util.V2Log;
 import com.V2.jni.util.XmlAttributeExtractor;
 import com.v2tech.db.ContentDescriptor;
@@ -87,6 +85,7 @@ public class MessageBuilder {
 		VMessage vm = new VMessage(groupType, groupID, fromUser, toUser,
 				new Date(GlobalConfig.getGlobalServerTime()));
 		VMessageAudioItem item = new VMessageAudioItem(vm, audioPath, seconds);
+		item.setState(VMessageAbstractItem.STATE_READED);
 		return item.getVm();
 	}
 
@@ -422,25 +421,35 @@ public class MessageBuilder {
 	}
 
 	public static int updateVMessageItemToSentFalied(Context context,
-			VMessageAbstractItem item) {
+			VMessage vm) {
 		DataBaseContext mContext = new DataBaseContext(context);
 		ContentValues itemVal = new ContentValues();
 		int updates = 0;
-		switch (item.getType()) {
-		case VMessageAbstractItem.ITEM_TYPE_FILE:
-			VMessageFileItem fileItem = (VMessageFileItem) item;
-			itemVal.put(
-					ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_SEND_STATE,
-					VMessageAbstractItem.STATE_SENT_FALIED);
-			updates = mContext.getContentResolver().update(
-					ContentDescriptor.HistoriesFiles.CONTENT_URI,
-					itemVal,
-					ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_ID
-							+ "=?",
-					new String[] { String.valueOf(fileItem.getUuid()) });
-			break;
-		default:
-			break;
+		List<VMessageAbstractItem> items = vm.getItems();
+		for (VMessageAbstractItem item : items) {
+			switch (item.getType()) {
+			case VMessageAbstractItem.ITEM_TYPE_FILE:
+				if(vm.isLocal()){
+				itemVal.put(
+						ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_SEND_STATE,
+						VMessageAbstractItem.STATE_FILE_SENT_FALIED);
+				}
+				else{
+					itemVal.put(
+							ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_SEND_STATE,
+							VMessageAbstractItem.STATE_FILE_DOWNLOADED_FALIED);
+				}
+				
+				updates = mContext.getContentResolver().update(
+						ContentDescriptor.HistoriesFiles.CONTENT_URI,
+						itemVal,
+						ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_ID
+								+ "=?",
+						new String[] { String.valueOf(vm.getUUID()) });
+				break;
+			default:
+				break;
+			}
 		}
 		return updates;
 	}

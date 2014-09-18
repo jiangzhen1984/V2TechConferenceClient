@@ -1092,6 +1092,23 @@ public class JNIService extends Service {
 					.sendToTarget();
 		}
 
+		@Override
+		public void OnFileTransError(String szFileID, int errorCode,
+				int nTransType) {
+			
+		}
+
+		@Override
+		public void OnFileTransCancel(String szFileID) {
+			
+		}
+
+		@Override
+		public void OnFileDownloadError(String sFileID, int errorCode,
+				int nTransType) {
+			
+		}
+
 	}
 
 }

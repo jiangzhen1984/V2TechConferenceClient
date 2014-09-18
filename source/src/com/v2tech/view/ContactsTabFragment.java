@@ -439,8 +439,9 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 
 	private void updateListState(int pos, ListItem item) {
 		
-		for (Group g : item.g.getChildGroup()) {
-			ListItem cache = new ListItem(g, g.getLevel());
+		List<Group> childGroup = item.g.getChildGroup();
+		for (int i = childGroup.size() - 1; i >= 0; i--) {
+			ListItem cache = new ListItem(childGroup.get(i), childGroup.get(i).getLevel());
 			mItemList.add(++pos, cache);
 		}
 		List<User> sortList = new ArrayList<User>();
