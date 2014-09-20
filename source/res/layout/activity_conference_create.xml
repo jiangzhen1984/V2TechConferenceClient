@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/conference_create_rootview"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/conference_create_rootview"
     android:orientation="vertical"
     tools:context=".view.conference.ConferenceCreateActivity" >
 
@@ -104,9 +104,9 @@
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
                 android:layout_marginLeft="30dp"
-                android:focusableInTouchMode="true"
                 android:layout_marginRight="30dp"
                 android:background="@drawable/input_bg"
+                android:focusableInTouchMode="true"
                 android:inputType="text"
                 android:paddingLeft="45dp"
                 android:textColor="#000000"
@@ -122,7 +122,6 @@
                 android:layout_gravity="center_vertical"
                 android:padding="10dp"
                 android:src="@drawable/group_list_search_button" />
-
         </RelativeLayout>
     </LinearLayout>
 
@@ -133,25 +132,18 @@
         android:orientation="vertical" >
     </LinearLayout>
 
-    <RelativeLayout
+    <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="match_parent"
-        android:background="#ffffff" >
-
-        <com.v2tech.view.widget.GroupListView
-            android:id="@+id/conf_create_contacts_list"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_above="@+id/conf_create_form"
-            android:divider="@null"
-            android:focusable="false" >
-        </com.v2tech.view.widget.GroupListView>
+        android:background="#ffffff"
+        android:orientation="vertical" >
 
         <RelativeLayout
             android:id="@+id/conf_create_form"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true" >
+            android:background="#f2f2f2"
+            android:padding="10dp" >
 
             <LinearLayout
                 android:id="@+id/conf_create_text_box_ly"
@@ -187,9 +179,7 @@
                         android:inputType="text"
                         android:maxLength="64"
                         android:paddingBottom="5dp"
-                        android:paddingTop="5dp" >
-                        <requestFocus />
-                    </EditText>
+                        android:paddingTop="5dp" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -224,29 +214,37 @@
                         android:ems="10"
                         android:inputType="datetime"
                         android:paddingBottom="5dp"
-                        android:paddingTop="5dp" >
-                    </EditText>
+                        android:paddingTop="5dp" />
                 </LinearLayout>
             </LinearLayout>
-
-            <HorizontalScrollView
-                android:id="@+id/conf_create_scroll_view"
-                android:layout_width="match_parent"
-                android:layout_height="100dp"
-                android:layout_below="@+id/conf_create_text_box_ly"
-                android:layout_centerVertical="true"
-                android:layout_marginTop="10dp"
-                android:background="#f2f2f2" >
-
-                <LinearLayout
-                    android:id="@+id/conference_attendee_container"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:orientation="horizontal"
-                    android:tag="horizontal" >
-                </LinearLayout>
-            </HorizontalScrollView>
         </RelativeLayout>
-    </RelativeLayout>
+
+        <com.v2tech.view.widget.GroupListView
+            android:id="@+id/conf_create_contacts_list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@+id/conf_create_form"
+            android:layout_weight="1"
+            android:divider="@null"
+            android:focusable="false" >
+        </com.v2tech.view.widget.GroupListView>
+
+        <HorizontalScrollView
+            android:id="@+id/conf_create_scroll_view"
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:layout_below="@+id/conf_create_contacts_list"
+            android:layout_marginTop="10dp"
+            android:background="#f2f2f2" >
+
+            <LinearLayout
+                android:id="@+id/conference_attendee_container"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:orientation="horizontal"
+                android:tag="horizontal" >
+            </LinearLayout>
+        </HorizontalScrollView>
+    </LinearLayout>
 
 </LinearLayout>

@@ -8,8 +8,10 @@ import java.util.List;
 import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
@@ -42,6 +44,7 @@ import com.v2tech.service.Registrant;
 import com.v2tech.service.UserService;
 import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.SPUtil;
+import com.v2tech.view.JNIService;
 import com.v2tech.view.PublicIntent;
 import com.v2tech.view.bo.ConversationNotificationObject;
 import com.v2tech.view.contacts.add.AuthenticationActivity;
@@ -158,6 +161,14 @@ public class ContactDetail extends Activity implements OnTouchListener {
 		this.overridePendingTransition(R.animator.alpha_from_0_to_1,
 				R.animator.alpha_from_1_to_0);
 		initViewShow();
+
+		initBroadcastReceiver();
+	}
+
+	@Override
+	protected void onDestroy() {
+		uninitBroadcastReceiver();
+		super.onDestroy();
 	}
 
 	private void connectView() {
@@ -927,7 +938,46 @@ public class ContactDetail extends Activity implements OnTouchListener {
 				break;
 			}
 		}
+	}
+
+	private void initBroadcastReceiver() {
+		if (myBroadcastReceiver == null) {
+			myBroadcastReceiver = new MyBroadcastReceiver();
+			IntentFilter intentFilter = new IntentFilter();
+			intentFilter
+					.addAction(JNIService.JNI_BROADCAST_USER_UPDATE_NAME_OR_SIGNATURE);
+			intentFilter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
+			registerReceiver(myBroadcastReceiver, intentFilter);
+		}
 
 	}
 
+	private void uninitBroadcastReceiver() {
+		if (myBroadcastReceiver != null) {
+			unregisterReceiver(myBroadcastReceiver);
+			myBroadcastReceiver = null;
+		}
+	}
+
+	private MyBroadcastReceiver myBroadcastReceiver;
+
+	class MyBroadcastReceiver extends BroadcastReceiver {
+		@Override
+		public void onReceive(Context arg0, Intent arg1) {
+
+			if (arg1.getAction().equals(
+					JNIService.JNI_BROADCAST_USER_UPDATE_NAME_OR_SIGNATURE)) {
+				long uid = arg1.getLongExtra("uid", -1);
+				if (uid == -1) {
+					return;
+				}
+				if (uid == u.getmUserId()) {
+					showUserInfo();
+				}
+
+			}
+
+		}
+
+	}
 }

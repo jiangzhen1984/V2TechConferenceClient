@@ -6,8 +6,10 @@ import java.util.List;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.Dialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -30,7 +32,9 @@ import com.v2tech.service.GlobalHolder;
 import com.v2tech.service.Registrant;
 import com.v2tech.service.UserService;
 import com.v2tech.vo.ContactGroup;
+import com.v2tech.view.JNIService;
 import com.v2tech.view.MainActivity;
+import com.v2tech.view.contacts.ContactDetail.MyBroadcastReceiver;
 import com.v2tech.view.contacts.add.AuthenticationActivity;
 import com.v2tech.view.widget.MarqueeTextView;
 import com.v2tech.vo.Group;
@@ -125,6 +129,14 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 			mAddContactButton.setVisibility(View.VISIBLE);
 			mDeleteContactButton.setVisibility(View.GONE);
 		}
+
+		initBroadcastReceiver();
+	}
+
+	@Override
+	protected void onDestroy() {
+		uninitBroadcastReceiver();
+		super.onDestroy();
 	}
 
 	@Override
@@ -254,8 +266,10 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 		if (u.getAvatarBitmap() != null) {
 			mHeadIconIV.setImageBitmap(u.getAvatarBitmap());
 		}
+		if (!mNickNameET.getText().toString().equals(u.getNickName())) {
+			mNickNameET.setText(u.getNickName());
+		}
 
-		mNickNameET.setText(u.getNickName());
 		mNickNameET.addTextChangedListener(tw);
 
 		mNameTitleIV.setText(u.getName());
@@ -418,6 +432,47 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 				isUpdating = false;
 				break;
 			}
+		}
+
+	}
+
+	private void initBroadcastReceiver() {
+		if (myBroadcastReceiver == null) {
+			myBroadcastReceiver = new MyBroadcastReceiver();
+			IntentFilter intentFilter = new IntentFilter();
+			intentFilter
+					.addAction(JNIService.JNI_BROADCAST_USER_UPDATE_NAME_OR_SIGNATURE);
+			intentFilter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
+			registerReceiver(myBroadcastReceiver, intentFilter);
+		}
+
+	}
+
+	private void uninitBroadcastReceiver() {
+		if (myBroadcastReceiver != null) {
+			unregisterReceiver(myBroadcastReceiver);
+			myBroadcastReceiver = null;
+		}
+	}
+
+	private MyBroadcastReceiver myBroadcastReceiver;
+
+	class MyBroadcastReceiver extends BroadcastReceiver {
+		@Override
+		public void onReceive(Context arg0, Intent arg1) {
+
+			if (arg1.getAction().equals(
+					JNIService.JNI_BROADCAST_USER_UPDATE_NAME_OR_SIGNATURE)) {
+				long uid = arg1.getLongExtra("uid", -1);
+				if (uid == -1) {
+					return;
+				}
+				if (uid == u.getmUserId()) {
+					showUserInfo();
+				}
+
+			}
+
 		}
 
 	}
