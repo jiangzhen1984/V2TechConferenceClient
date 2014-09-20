@@ -775,6 +775,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 
 		voiceMessageItem.setReadFlag(Conversation.READ_FLAG_READ);
 		verificationMessageItem.setReadFlag(Conversation.READ_FLAG_READ);
+		
 	}
 
 	private void updateVoiceSpecificItemState() {

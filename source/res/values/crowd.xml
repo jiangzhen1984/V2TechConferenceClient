@@ -1,6 +1,8 @@
 <resources>
 
     <string name="crowd_invitation_accept_button_name">同意</string>
+    <string name="crowd_invitation_accepted">已同意</string>
+    <string name="crowd_invitation_rejected">已拒绝</string>
     <string name="crowd_invitation_accept_notes">已同意该邀请</string>
     <string name="crowd_invitation_reject_button_name">拒绝</string>
     <string name="crowd_invitation_reject_notes">已拒绝该邀请</string>
@@ -32,6 +34,9 @@
     
     <string name="crowd_members_title">群成员</string>
     <string name="crowd_members_invitation">添加</string>
+    
+    <string name="crowd_invitation_content">邀请您加入群</string>
+    <string name="crowd_applicant_content">申请加入群</string>
     
 
 </resources>

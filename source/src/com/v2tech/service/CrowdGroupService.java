@@ -38,6 +38,8 @@ public class CrowdGroupService extends AbstractHandler {
 	private static final int REFUSE_JOIN_CROWD = 0x0003;
 	private static final int UPDATE_CROWD = 0x0004;
 	private static final int QUIT_CROWD = 0x0005;
+	private static final int ACCEPT_APPLICATION_CROWD = 0x0006;
+	private static final int REFUSE_APPLICATION_CROWD = 0x0007;
 
 	private ImRequestCB imCB;
 	private GroupRequestCB grCB;
@@ -69,14 +71,63 @@ public class CrowdGroupService extends AbstractHandler {
 	}
 
 	/**
-	 * Accept join crowd invitation
+	 * Accept invitation
 	 * 
 	 * @param crowd
 	 * @param caller
 	 *            if input is null, ignore response Message. Response Message
 	 *            object is {@link com.v2tech.service.jni.JNIResponse}
 	 */
-	public void acceptJoinCrowd(Crowd crowd, Registrant caller) {
+	public void acceptApplication(CrowdGroup crowd, User applicant,
+			Registrant caller) {
+		if (!checkParamNull(caller, new Object[] { crowd,applicant })) {
+			return;
+		}
+
+		// FIXME concurrency problem, if user use one crowdgroupservice instance
+		// to
+		// accept mulit-application, then maybe call back will notify incorrect
+		initTimeoutMessage(ACCEPT_APPLICATION_CROWD, DEFAULT_TIME_OUT_SECS,
+				caller);
+
+		GroupRequest.getInstance().acceptApplyJoinGroup(
+				Group.GroupType.CHATING.intValue(), crowd.toXml(),
+				GlobalHolder.getInstance().getCurrentUserId());
+	}
+	
+	
+
+	/**
+	 * Decline applicant who want to join crowd
+	 * 
+	 * @param group
+	 */
+	public void refuseApplication(CrowdGroup crowd, User applicant,
+			String reason, Registrant caller) {
+		if (!checkParamNull(caller, new Object[] { crowd,applicant })) {
+			return;
+		}
+
+		// FIXME concurrency problem, if user use one crowdgroupservice instance
+		// to
+		// accept mulit-invitation, then maybe call back will notify incorrect
+		initTimeoutMessage(REFUSE_APPLICATION_CROWD, DEFAULT_TIME_OUT_SECS, caller);
+
+		GroupRequest.getInstance().refuseApplyJoinGroup(
+				Group.GroupType.CHATING.intValue(), crowd.toXml(),
+				applicant.getmUserId(), reason);
+	}
+	
+
+	/**
+	 * Accept invitation
+	 * 
+	 * @param crowd
+	 * @param caller
+	 *            if input is null, ignore response Message. Response Message
+	 *            object is {@link com.v2tech.service.jni.JNIResponse}
+	 */
+	public void acceptInvitation(Crowd crowd, Registrant caller) {
 		if (!checkParamNull(caller, new Object[] { crowd })) {
 			return;
 		}
@@ -101,7 +152,7 @@ public class CrowdGroupService extends AbstractHandler {
 	 * 
 	 * @param group
 	 */
-	public void refuseJoinCrowd(Crowd crowd, Registrant caller) {
+	public void refuseInvitation(Crowd crowd, Registrant caller) {
 		if (!checkParamNull(caller, new Object[] { crowd })) {
 			return;
 		}
@@ -121,6 +172,7 @@ public class CrowdGroupService extends AbstractHandler {
 				Group.GroupType.CHATING.intValue(), crowd.getId(),
 				GlobalHolder.getInstance().getCurrentUserId(), "");
 	}
+
 
 	/**
 	 * Update crowd data, like brief, announcement or member joined rules
@@ -172,10 +224,10 @@ public class CrowdGroupService extends AbstractHandler {
 		}
 	}
 
-	
 	/**
 	 * Invite new member to join crowd.<br>
 	 * Notice: call this API after crowd is created.
+	 * 
 	 * @param crowd
 	 * @param newMembers
 	 * @param caller
@@ -203,41 +255,37 @@ public class CrowdGroupService extends AbstractHandler {
 		GroupRequest.getInstance().inviteJoinGroup(
 				crowd.getGroupType().intValue(), crowd.toXml(),
 				members.toString(), "");
-		
+
 		if (caller != null) {
 			JNIResponse jniRes = new JNIResponse(JNIResponse.Result.SUCCESS);
 			sendResult(caller, jniRes);
 		}
 	}
-	
-	
-	
 
 	@Override
 	public void clearCalledBack() {
 		ImRequest.getInstance().removeCallback(imCB);
-		GroupRequest.getInstance().removeCallback(grCB);		
+		GroupRequest.getInstance().removeCallback(grCB);
 	}
 
 	/**
-	 * FIXME add comment 
+	 * FIXME add comment
+	 * 
 	 * @comment-user:wenzl 2014年9月15日
 	 * @overview:
-	 *
+	 * 
 	 * @param group
 	 * @param caller
 	 * @return:
 	 */
 	public void createGroup(CrowdGroup group, Registrant caller) {
-		//对CREATE_GROUP_MESSAGE做超时处理，如果超时此消息不再通知上层。
+		// 对CREATE_GROUP_MESSAGE做超时处理，如果超时此消息不再通知上层。
 		this.initTimeoutMessage(CREATE_GROUP_MESSAGE, DEFAULT_TIME_OUT_SECS,
 				caller);
 		GroupRequest.getInstance().createGroup(
 				Group.GroupType.CHATING.intValue(), group.toXml(),
 				group.toGroupUserListXml());
 	}
-
-
 
 	class GroupRequestCB extends GroupRequestCallbackAdapter {
 		private Handler mCallbackHandler;
@@ -318,7 +366,6 @@ public class CrowdGroupService extends AbstractHandler {
 			}
 		}
 
-
 	}
 
 	class ImRequestCB extends ImRequestCallbackAdapter {
@@ -326,7 +373,7 @@ public class CrowdGroupService extends AbstractHandler {
 		private Handler mCallbackHandler;
 
 		public ImRequestCB(Handler mCallbackHandler) {
-			
+
 			this.mCallbackHandler = mCallbackHandler;
 		}
 
