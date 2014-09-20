@@ -19,6 +19,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.Parcelable;
 import android.support.v4.util.LongSparseArray;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.V2.jni.AudioRequest;
@@ -278,7 +279,6 @@ public class JNIService extends Service {
 				break;
 			case JNI_UPDATE_USER_INFO:
 				User u = User.fromXml(msg.arg1, (String) msg.obj);
-
 				GlobalHolder.getInstance().putUser(u.getmUserId(), u);
 
 				Intent sigatureIntent = new Intent();
@@ -498,6 +498,12 @@ public class JNIService extends Service {
 				int nStatus, String szStatusDesc) {
 			UserStatusObject uso = new UserStatusObject(nUserID, type, nStatus);
 			User u = GlobalHolder.getInstance().getUser(nUserID);
+			if (u.getName() != null) {
+				if (u.getName().equals("zhao2")) {
+					Log.i("eee","nUserID"+nUserID+" "+u.toXml());
+				}
+			}
+			
 			if (u == null) {
 				V2Log.e("Can't update user status, user " + nUserID
 						+ "  isn't exist");
@@ -1095,18 +1101,18 @@ public class JNIService extends Service {
 		@Override
 		public void OnFileTransError(String szFileID, int errorCode,
 				int nTransType) {
-			
+
 		}
 
 		@Override
 		public void OnFileTransCancel(String szFileID) {
-			
+
 		}
 
 		@Override
 		public void OnFileDownloadError(String sFileID, int errorCode,
 				int nTransType) {
-			
+
 		}
 
 	}

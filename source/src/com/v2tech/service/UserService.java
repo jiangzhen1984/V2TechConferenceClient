@@ -77,7 +77,7 @@ public class UserService extends AbstractHandler {
 	
 
 	@Override
-	public void clear() {
+	public void clearCalledBack() {
 		ImRequest.getInstance().removeCallback(imCB);
 	}
 

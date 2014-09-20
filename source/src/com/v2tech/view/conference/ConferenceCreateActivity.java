@@ -176,7 +176,7 @@ public class ConferenceCreateActivity extends Activity {
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
-		cs.clear();
+		cs.clearCalledBack();
 		this.unregisterReceiver(receiver);
 	}
 

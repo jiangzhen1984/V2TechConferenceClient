@@ -1215,9 +1215,9 @@ public class VideoActivityV2 extends Activity {
 			unbindService(mLocalServiceConnection);
 		}
 		//call clear function from all service
-		ds.clear();
-		cb.clear();
-		ds.clear();
+		ds.clearCalledBack();
+		cb.clearCalledBack();
+		ds.clearCalledBack();
 
 		mContext.stopService(new Intent(mContext,
 				ConferencMessageSyncService.class));

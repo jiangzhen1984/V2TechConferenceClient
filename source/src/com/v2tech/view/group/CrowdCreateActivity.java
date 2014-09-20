@@ -130,7 +130,7 @@ public class CrowdCreateActivity extends Activity {
 	protected void onDestroy() {
 		super.onDestroy();
 		//call clear to remove callback from JNI.
-		cg.clear();
+		cg.clearCalledBack();
 	}
 
 	@Override

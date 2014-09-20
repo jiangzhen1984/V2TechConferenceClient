@@ -258,7 +258,7 @@ public class P2PConversation extends Activity implements
 		chatService.removeVideoChatConnectedistener(mLocalHandler,
 				VIDEO_CONECTED, null);
 		
-		chatService.clear();
+		chatService.clearCalledBack();
 	}
 
 	@Override

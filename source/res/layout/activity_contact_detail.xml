@@ -90,23 +90,23 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="top"
+                    android:ellipsize="marquee"
                     android:gravity="top"
-                    android:text="TextView"
-                    android:singleLine="true"
-                    android:ellipsize="end"
                     android:maxWidth="@dimen/detail_detail_name_max_width"
+                    android:singleLine="true"
+                    android:text="TextView"
                     android:textColor="@color/common_item_text_color" />
 
-                <TextView
+                <com.v2tech.view.widget.MarqueeTextView
                     android:id="@+id/contact_user_detail_user_signature_tv"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="bottom"
-                    android:ellipsize="end"
+                    android:ellipsize="marquee"
                     android:gravity="bottom"
+                    android:maxWidth="@dimen/detail_detail_name_max_width"
                     android:singleLine="true"
                     android:text="TextView"
-                     android:maxWidth="@dimen/detail_detail_name_max_width"
                     android:textColor="@color/common_item_text_color" />
             </LinearLayout>
 
@@ -821,7 +821,6 @@
                             android:textSize="@dimen/common_item_text_size" />
                     </LinearLayout>
                 </LinearLayout>
-                
             </LinearLayout>
         </ScrollView>
 

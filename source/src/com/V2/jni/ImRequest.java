@@ -52,7 +52,7 @@ public class ImRequest {
 	public void addCallback(ImRequestCallback callback) {
 		this.mCallbacks.add(new WeakReference<ImRequestCallback>(callback));
 	}
-	
+
 	public void removeCallback(ImRequestCallback callback) {
 		for (int i = 0; i < mCallbacks.size(); i++) {
 			if (mCallbacks.get(i).get() == callback) {
@@ -102,12 +102,12 @@ public class ImRequest {
 	private void OnLogin(long nUserID, int nStatus, long serverTime, int nResult) {
 		V2Log.d("OnLogin --> " + nUserID + ": " + "-:" + nStatus + ":"
 				+ nResult);
-//		GlobalConfig.TIME_SERVER_TIME = serverTime; 
+		// GlobalConfig.TIME_SERVER_TIME = serverTime;
 		for (WeakReference<ImRequestCallback> wf : this.mCallbacks) {
-			Object obj = wf.get(); 
+			Object obj = wf.get();
 			if (obj != null) {
 				ImRequestCallback callback = (ImRequestCallback) obj;
-				callback.OnLoginCallback(nUserID, nStatus, nResult , serverTime);
+				callback.OnLoginCallback(nUserID, nStatus, nResult, serverTime);
 			}
 		}
 	}
@@ -196,10 +196,12 @@ public class ImRequest {
 	 */
 	private void OnUserStatusUpdated(long nUserID, int nType, int nStatus,
 			String szStatusDesc) {
-		V2Log.d(" OnUserStatusUpdated--> nUserID:" + nUserID + "  nStatus:"
-				+ nStatus + " nType:" + nType + " szStatusDesc:" + szStatusDesc
-				+ "  " + new Date());
-		for (int i = 0; i <mCallbacks.size(); i++) {
+		if (nUserID == 113 || nUserID == 112) {
+			V2Log.d(" OnUserStatusUpdated--> nUserID:" + nUserID + "  nStatus:"
+					+ nStatus + " nType:" + nType + " szStatusDesc:"
+					+ szStatusDesc + "  " + new Date());
+		}
+		for (int i = 0; i < mCallbacks.size(); i++) {
 			WeakReference<ImRequestCallback> wf = this.mCallbacks.get(i);
 			Object obj = wf.get();
 			if (obj != null) {
@@ -279,9 +281,9 @@ public class ImRequest {
 
 	public native void updateMyStatus(int nStatus, String szStatusDesc);
 
-	
 	/**
 	 * Connection state callback
+	 * 
 	 * @param nResult
 	 */
 	private void OnConnectResponse(int nResult) {
@@ -295,8 +297,7 @@ public class ImRequest {
 		}
 
 	}
-	
-	
+
 	/**
 	 * Crowd created request call back<br>
 	 * 
@@ -317,7 +318,6 @@ public class ImRequest {
 			}
 		}
 	}
-
 
 	// 鏇存敼绯荤粺澶村儚
 	public native void changeSystemAvatar(String szAvatarName);
@@ -392,8 +392,6 @@ public class ImRequest {
 		Log.e("ImRequest UI", "OnServerFaild");
 	}
 
-
-
 	private void OnUpdateDownloadBegin(long filesize) {
 		Log.e("ImRequest UI", "OnUpdateDownloadBegin::" + filesize);
 	}
@@ -439,7 +437,6 @@ public class ImRequest {
 
 	private void OnGetGroupsInfoBegin() {
 	}
-
 
 	private boolean haslogin = false;
 

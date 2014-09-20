@@ -10,6 +10,7 @@ import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import android.graphics.Bitmap;
+import android.util.Log;
 
 import com.V2.jni.V2GlobalEnum;
 import com.V2.jni.ind.V2Group;
@@ -93,6 +94,17 @@ public class GlobalHolder {
 		if (u == null) {
 			return null;
 		}
+		
+		
+		if (u.getName() != null) {
+			Log.i("wzl", u.getName());
+			if (u.getName().equals("zhao2")
+					|| u.getName().equals("gzm")) {
+				Log.i("wzl", u.toXml());
+			}
+		}
+		
+		
 		synchronized (mUserLock) {
 			Long key = Long.valueOf(id);
 			User cu = mUserHolder.get(key);

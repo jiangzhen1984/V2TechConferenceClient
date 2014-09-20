@@ -399,8 +399,8 @@ public class ConferenceService extends DeviceService {
 	
 
 	@Override
-	public void clear() {
-		super.clear();
+	public void clearCalledBack() {
+		super.clearCalledBack();
 		VideoRequest.getInstance().removeCallback(videoCallback);
 		ConfRequest.getInstance().removeCallback(confCallback);
 		GroupRequest.getInstance().removeCallback(groupCallback);

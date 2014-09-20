@@ -126,7 +126,7 @@ public class DeviceService extends AbstractHandler {
 	}
 
 	@Override
-	public void clear() {
+	public void clearCalledBack() {
 		
 	}
 	

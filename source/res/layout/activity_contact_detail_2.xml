@@ -90,19 +90,22 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="top"
-                    android:ellipsize="end"
+                    android:ellipsize="marquee"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true"
                     android:gravity="top"
+                    android:marqueeRepeatLimit="marquee_forever"
                     android:maxWidth="@dimen/detail_detail_name_max_width"
                     android:singleLine="true"
                     android:text="TextView"
                     android:textColor="@color/common_item_text_color" />
 
-                <TextView
+                <com.v2tech.view.widget.MarqueeTextView
                     android:id="@+id/contact_user_detail_user_signature_tv"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="bottom"
-                    android:ellipsize="end"
+                    android:ellipsize="marquee"
                     android:gravity="bottom"
                     android:maxWidth="@dimen/detail_detail_name_max_width"
                     android:singleLine="true"
@@ -181,8 +184,7 @@
                     android:layout_marginLeft="@dimen/contact_detail_2_item_margin_left"
                     android:layout_marginRight="@dimen/contact_detail_2_item_margin_right"
                     android:background="@drawable/rounded_corners_of_contact_user_detail_outer"
-                    android:orientation="vertical"
-                    >
+                    android:orientation="vertical" >
 
                     <LinearLayout
                         android:layout_width="match_parent"

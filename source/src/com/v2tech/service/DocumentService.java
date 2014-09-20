@@ -118,7 +118,7 @@ public class DocumentService extends AbstractHandler {
 	
 
 	@Override
-	public void clear() {
+	public void clearCalledBack() {
 		WBRequest.getInstance().removeCallback(cb);
 	}
 

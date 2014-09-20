@@ -1,5 +1,6 @@
 package com.v2tech.service;
 
+import java.util.Iterator;
 import java.util.List;
 
 import android.os.Handler;
@@ -20,7 +21,7 @@ import com.v2tech.vo.User;
 /**
  * 
  * @author jiangzhen
- *
+ * 
  */
 public class ContactsService extends AbstractHandler {
 
@@ -31,11 +32,91 @@ public class ContactsService extends AbstractHandler {
 
 	private long mWatingGid = 0;
 
-	private  GroupRequestCB crCB;
+	private GroupRequestCB crCB;
+
 	public ContactsService() {
 		super();
-		crCB =new GroupRequestCB(this);
+		crCB = new GroupRequestCB(this);
 		GroupRequest.getInstance().addCallback(crCB);
+	}
+
+	/**
+	 * @comment-user:wenzl 2014年9月19日
+	 * @overview:
+	 *
+	 * @param contactGroup
+	 * @param user
+	 * @param additInfo
+	 * @param commentName
+	 * @return:
+	 */
+	public void addContact(Group contactGroup, User user, String additInfo,
+			String commentName) {
+
+		String groupInfo = "<friendgroup" + " id='" + contactGroup.getmGId()
+				+ "'/>";
+
+		String userInfo = "<userlist>" + "<user id='" + user.getmUserId() + "'"
+				+ " commentname='" + commentName + "'></user>" + "</userlist>";
+
+		GroupRequest.getInstance().inviteJoinGroup(
+				Group.GroupType.CONTACT.intValue(), groupInfo, userInfo,
+				additInfo);
+	}
+
+	/**
+	 * @comment-user:wenzl 2014年9月19日
+	 * @overview:删除联系人
+	 *
+	 * @param user
+	 * @return:
+	 */
+	public void delContact(User user) {
+		long nGroupID = -1;
+		Iterator<Group> iterator = user.getBelongsGroup().iterator();
+		boolean ret = false;
+		while (iterator.hasNext()) {
+			Group temp = iterator.next();
+			if (temp.getGroupType() == Group.GroupType.CONTACT) {
+				nGroupID = temp.getmGId();
+				ret = true;
+			}
+		}
+
+		if (!ret) {
+			return;
+		}
+
+		long nUserID = user.getmUserId();
+		GroupRequest.getInstance().delGroupUser(
+				Group.GroupType.CONTACT.intValue(), nGroupID, nUserID);
+	}
+
+	/**
+	 * @comment-user:wenzl 2014年9月19日
+	 * @overview:同意被加为联系人
+	 *
+	 * @param groupId
+	 * @param nUserID
+	 * @return:
+	 */
+	public void acceptAddedAsContact(long groupId, long nUserID) {
+		GroupRequest.getInstance().acceptInviteJoinGroup(
+				Group.GroupType.CONTACT.intValue(), groupId, nUserID);
+	}
+
+	/**
+	 * @comment-user:wenzl 2014年9月19日
+	 * @overview:拒绝被加为联系人
+	 *
+	 * @param nGroupID
+	 * @param nUserID
+	 * @param reason
+	 * @return:
+	 */
+	public void refuseAddedAsContact(long nGroupID, long nUserID, String reason) {
+		GroupRequest.getInstance().refuseInviteJoinGroup(
+				Group.GroupType.CONTACT.intValue(), nGroupID, nUserID, reason);
 	}
 
 	/**
@@ -146,15 +227,11 @@ public class ContactsService extends AbstractHandler {
 					desGroup.getmGId(), user.getmUserId());
 		}
 	}
-	
-	
 
 	@Override
-	public void clear() {
+	public void clearCalledBack() {
 		GroupRequest.getInstance().removeCallback(crCB);
 	}
-
-
 
 	class GroupRequestCB extends GroupRequestCallbackAdapter {
 
@@ -207,6 +284,7 @@ public class ContactsService extends AbstractHandler {
 			if (groupType != Group.GroupType.CONTACT.intValue()) {
 				return;
 			}
+			// 为什么要调，父类的不是什么都不执行的函数吗？
 			super.OnAddGroupUserInfoCallback(groupType, nGroupID, sXml);
 		}
 
@@ -214,7 +292,8 @@ public class ContactsService extends AbstractHandler {
 		public void onAddGroupInfo(V2Group group) {
 			if (group.type == V2Group.TYPE_CONTACTS_GROUP) {
 				Group g = new ContactGroup(group.id, group.name);
-				GlobalHolder.getInstance().addGroupToList(g.getGroupType().intValue(), g);
+				GlobalHolder.getInstance().addGroupToList(
+						g.getGroupType().intValue(), g);
 				JNIResponse jniRes = new GroupServiceJNIResponse(
 						GroupServiceJNIResponse.Result.SUCCESS, g);
 				Message.obtain(mCallbackHandler, CREATE_CONTACTS_GROUP, jniRes)

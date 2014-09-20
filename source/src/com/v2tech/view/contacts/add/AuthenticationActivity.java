@@ -1,11 +1,9 @@
 package com.v2tech.view.contacts.add;
 
 import com.v2tech.R;
-import com.v2tech.service.FriendGroupService;
+import com.v2tech.service.ContactsService;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.view.MainActivity;
-import com.v2tech.view.contacts.ContactDetail2;
-import com.v2tech.vo.FriendGroup;
 import com.v2tech.vo.User;
 
 import android.app.Activity;
@@ -21,6 +19,7 @@ public class AuthenticationActivity extends Activity {
 
 	long mUid;
 	User detailUser;
+	private ContactsService contactService = new ContactsService();
 
 	// 两个标题
 	private ImageView mHeadIconIV;
@@ -61,7 +60,7 @@ public class AuthenticationActivity extends Activity {
 				@Override
 				public void onClick(View arg0) {
 					// 拒绝加为好友
-					new FriendGroupService().refuseInviteJoinFriendGroup(30,
+					contactService.refuseAddedAsContact(30,
 							mUid, ((EditText) findViewById(R.id.editText1))
 									.getText().toString());
 					AddFriendHistroysHandler.addMeRefuse(getApplicationContext(),mUid,

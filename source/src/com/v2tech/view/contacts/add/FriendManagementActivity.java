@@ -1,7 +1,7 @@
 package com.v2tech.view.contacts.add;
 
 import com.v2tech.R;
-import com.v2tech.service.FriendGroupService;
+import com.v2tech.service.ContactsService;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.view.MainActivity;
 import com.v2tech.view.contacts.ContactDetail2;
@@ -13,7 +13,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
@@ -24,6 +23,7 @@ public class FriendManagementActivity extends Activity {
 	String verificationInfo;
 	EditText commentNameET;
 	String startedCause;
+	private ContactsService contactService = new ContactsService();
 	// R.id.right_text_view
 	private TextView tvRightTextView;
 
@@ -42,7 +42,7 @@ public class FriendManagementActivity extends Activity {
 				@Override
 				public void onClick(View arg0) {
 					// 同意加为好友,默认组为30
-					new FriendGroupService().acceptInviteJoinFriendGroup(30,
+					contactService.acceptAddedAsContact(30,
 							mUid);
 					// 实现越级跳
 					Intent i = new Intent(FriendManagementActivity.this,
@@ -65,7 +65,7 @@ public class FriendManagementActivity extends Activity {
 					if (detailUser.getAuthtype() == 0) {
 						AddFriendHistroysHandler.addOtherNoNeedAuthentication(
 								getApplicationContext(), detailUser);
-						new FriendGroupService().AddFriendGroupUser(
+						contactService.addContact(
 								new FriendGroup(30, ""), detailUser,
 								verificationInfo, commentNameET.getText()
 										.toString());
@@ -73,7 +73,7 @@ public class FriendManagementActivity extends Activity {
 						AddFriendHistroysHandler.addOtherNeedAuthentication(
 								getApplicationContext(), detailUser,
 								commentNameET.getText().toString());
-						new FriendGroupService().AddFriendGroupUser(
+						contactService.addContact(
 								new FriendGroup(30, ""), detailUser,
 								verificationInfo, commentNameET.getText()
 										.toString());

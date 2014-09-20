@@ -100,7 +100,7 @@ public class ContactsGroupActivity extends Activity {
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
-		contactService.clear();
+		contactService.clearCalledBack();
 	}
 
 	private List<CommonAdapterItemWrapper> convert(List<Group> listGroup) {

@@ -323,7 +323,7 @@ public class AddFriendHistroysHandler {
 	public static Cursor select(Context context, String sql, String[] sqlArgs) {
 		V2TechDBHelper dbHelper = new V2TechDBHelper(new DataBaseContext(
 				context));
-		SQLiteDatabase db = dbHelper.getWritableDatabase();
+		SQLiteDatabase db = dbHelper.getReadableDatabase();
 		if (db == null) {
 			return null;
 		}

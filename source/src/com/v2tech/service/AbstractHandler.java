@@ -200,7 +200,7 @@ public abstract class AbstractHandler extends Handler {
 	/**
 	 * Clear all callbacks from JNI interface
 	 */
-	public abstract void clear();
+	public abstract void clearCalledBack();
 
 	class Meta {
 		int mointorMessageID;

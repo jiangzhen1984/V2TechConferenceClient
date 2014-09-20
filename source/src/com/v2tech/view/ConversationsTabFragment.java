@@ -1634,8 +1634,16 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 		Cursor cr = AddFriendHistroysHandler.select(getActivity(), sql,
 				new String[] {});
 		if ((cr != null) && (cr.getCount() == 0)) {
+			sql = "select * from " + AddFriendHistroysHandler.tableName
+					+ " order by SaveDate desc limit 1";
+			cr = AddFriendHistroysHandler.select(getActivity(), sql,
+					new String[] {});
+		}
+
+		if ((cr != null) && (cr.getCount() == 0)) {
 			return;
 		}
+
 		if (verificationLayout != null) {
 			verificationLayout.updateNotificator(true);
 			String msg = "";

@@ -206,7 +206,11 @@ public class MessageAuthenticationActivity extends Activity {
 
 	private void getDataFromDB() {
 		messageAuthenticationDataList.clear();
-		String sql = "select * from " + tableName + " order by SaveDate asc";
+		//把所有的改为已读
+		String sql="update "+tableName+" set ReadState=1 where ReadState=0";
+		AddFriendHistroysHandler.update(getApplicationContext(), sql);
+		
+		sql = "select * from " + tableName + " order by SaveDate asc";
 		Cursor cr = AddFriendHistroysHandler.select(getApplicationContext(),
 				sql, new String[] {});
 		if (cr.moveToLast()) {
@@ -282,6 +286,8 @@ public class MessageAuthenticationActivity extends Activity {
 		if (adapter.isDeleteMode) {
 			adapter.isDeleteMode = false;
 			adapter.notifyDataSetChanged();
+			tvMessageBack.setVisibility(View.VISIBLE);
+			tvCompleteRight.setVisibility(View.INVISIBLE);
 		} else {
 			super.onBackPressed();
 		}

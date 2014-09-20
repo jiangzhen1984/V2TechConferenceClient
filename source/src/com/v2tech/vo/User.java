@@ -612,10 +612,12 @@ public class User implements Comparable<User> {
 
 		public static DeviceType fromInt(int type) {
 			switch (type) {
-			case 2:
-				return CELL_PHONE;
-			case 1:
+			case 1://pc
 				return PC;
+			case 2://安卓
+			case 3://IOS
+			case 4://sip,h323
+				return CELL_PHONE;
 			default:
 				return UNKNOWN;
 			}

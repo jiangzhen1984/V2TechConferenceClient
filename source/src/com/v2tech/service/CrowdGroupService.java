@@ -214,7 +214,7 @@ public class CrowdGroupService extends AbstractHandler {
 	
 
 	@Override
-	public void clear() {
+	public void clearCalledBack() {
 		ImRequest.getInstance().removeCallback(imCB);
 		GroupRequest.getInstance().removeCallback(grCB);		
 	}

@@ -17,10 +17,10 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
+import android.view.ViewGroup.MarginLayoutParams;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -30,11 +30,9 @@ import com.v2tech.service.GlobalHolder;
 import com.v2tech.service.Registrant;
 import com.v2tech.service.UserService;
 import com.v2tech.vo.ContactGroup;
-import com.v2tech.service.FriendGroupService;
 import com.v2tech.view.MainActivity;
-import com.v2tech.view.PublicIntent;
 import com.v2tech.view.contacts.add.AuthenticationActivity;
-import com.v2tech.vo.FriendGroup;
+import com.v2tech.view.widget.MarqueeTextView;
 import com.v2tech.vo.Group;
 import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.User;
@@ -66,7 +64,7 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 	private TextView mTelephoneTV;
 	private TextView mTitleTV;
 	private TextView mAddressTV;
-	private TextView mSignTV;
+	private MarqueeTextView mSignTV;
 	private TextView mDeptTV;
 	private TextView mCompanyTV;
 
@@ -200,7 +198,7 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 		mAddressTV = (TextView) findViewById(R.id.contact_user_detail_address_tv);
 		mCellphoneTV = (TextView) findViewById(R.id.contact_user_detail_cell_phone_tv);
 		mTelephoneTV = (TextView) findViewById(R.id.contact_user_detail_telephone_tv);
-		mSignTV = (TextView) findViewById(R.id.contact_user_detail_user_signature_tv);
+		mSignTV = (MarqueeTextView) findViewById(R.id.contact_user_detail_user_signature_tv);
 		mDeptTV = (TextView) findViewById(R.id.contact_user_detail_department_tv);
 		mCompanyTV = (TextView) findViewById(R.id.contact_user_detail_company_tv);
 
@@ -238,7 +236,7 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 			public void onClick(View v) {
 				// 删除好友
 				deleteContactDialog.dismiss();
-				new FriendGroupService().delFriendGroupUser(u);
+				contactService.delContact(u);
 				Intent i = new Intent(ContactDetail2.this, MainActivity.class);
 				i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 				ContactDetail2.this.startActivity(i);
