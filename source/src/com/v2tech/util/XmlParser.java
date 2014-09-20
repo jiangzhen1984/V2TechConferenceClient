@@ -19,6 +19,7 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import com.V2.jni.util.V2Log;
+import com.v2tech.service.GlobalHolder;
 import com.v2tech.vo.User;
 import com.v2tech.vo.V2Doc;
 import com.v2tech.vo.V2Doc.Page;
@@ -33,6 +34,7 @@ import com.v2tech.vo.VMessage;
 import com.v2tech.vo.VMessageAbstractItem;
 import com.v2tech.vo.VMessageAudioItem;
 import com.v2tech.vo.VMessageFaceItem;
+import com.v2tech.vo.VMessageFileItem;
 import com.v2tech.vo.VMessageImageItem;
 import com.v2tech.vo.VMessageLinkTextItem;
 import com.v2tech.vo.VMessageTextItem;
@@ -43,9 +45,9 @@ public class XmlParser {
 
 	public XmlParser() {
 	}
-	
-	public static String parseForMessageUUID(String xml){
-		
+
+	public static String parseForMessageUUID(String xml) {
+
 		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder dBuilder;
 		InputStream is = null;
@@ -57,13 +59,12 @@ public class XmlParser {
 
 			doc.getDocumentElement().normalize();
 			NodeList ChatMsgData = doc.getElementsByTagName("TChatData");
-			if(ChatMsgData.getLength() <= 0){
+			if (ChatMsgData.getLength() <= 0) {
 				return null;
 			}
-			Element chatElement = (Element)ChatMsgData.item(0);
+			Element chatElement = (Element) ChatMsgData.item(0);
 			uuid = chatElement.getAttribute("MessageID");
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 			return null;
 		}
@@ -71,12 +72,12 @@ public class XmlParser {
 	}
 
 	public static VMessage parseForMessage(VMessage vm) {
-//		public static VMessage parseForMessage(User from, User to, Date date,
-//				String xml) {
+		// public static VMessage parseForMessage(User from, User to, Date date,
+		// String xml) {
 		String xml = vm.getmXmlDatas();
-		if(xml == null)
+		if (xml == null)
 			return vm;
-		
+
 		InputStream is = null;
 		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder dBuilder;
@@ -128,21 +129,50 @@ public class XmlParser {
 								start));
 						va = new VMessageFaceItem(vm, index);
 						va.setNewLine(isNewLine);
-					} 
-//					else if (msgEl.getTagName().equals("TPictureChatItem")) {
-//
-//						
-//						String uuid = msgEl.getAttribute("GUID");
-//						if (uuid == null) {
-//							V2Log.e("Invalid uuid ");
-//							continue;
-//						}
-//						VMessageImageItem vii = new VMessageImageItem(vm, uuid,
-//								msgEl.getAttribute("FileExt"));
-//						vii.setNewLine(isNewLine);
-//
-//					}
+					} else if (msgEl.getTagName().equals("TPictureChatItem")) {
 
+						String uuid = msgEl.getAttribute("GUID");
+						if (uuid == null) {
+							V2Log.e("Invalid uuid ");
+							continue;
+						}
+						VMessageImageItem vii = new VMessageImageItem(vm, uuid,
+								msgEl.getAttribute("FileExt"));
+						vii.setNewLine(isNewLine);
+
+					} else if (msgEl.getTagName().equals("TAudioChatItem")) {
+
+						String uuid = msgEl.getAttribute("FileID");
+						if (uuid == null) {
+							V2Log.e("Invalid uuid ");
+							continue;
+						}
+						String fileExt = msgEl.getAttribute("FileExt");
+						String seconds = msgEl.getAttribute("Seconds");
+						String filePath = GlobalConfig
+								.getGlobalAudioPath(GlobalHolder.getInstance()
+										.getCurrentUser())
+								+ "/" + uuid + fileExt;
+						VMessageAudioItem vii = new VMessageAudioItem(vm, uuid,
+								fileExt, filePath, Integer.valueOf(seconds));
+						vii.setNewLine(isNewLine);
+
+					} else if (msgEl.getTagName().equals("TFileChatItem")) {
+
+						String uuid = msgEl.getAttribute("fileID");
+						if (uuid == null) {
+							V2Log.e("Invalid uuid ");
+							continue;
+						}
+						String filePath = msgEl.getAttribute("filePath");
+						String fileSize = msgEl.getAttribute("fileSize");
+						String transType = msgEl.getAttribute("transType");
+						VMessageFileItem vii = new VMessageFileItem(vm, uuid,
+								Long.valueOf(fileSize), filePath,
+								Integer.valueOf(transType));
+						vii.setNewLine(isNewLine);
+
+					}
 				}
 			}
 
@@ -220,9 +250,6 @@ public class XmlParser {
 		}
 
 	}
-
-	
-
 
 	public static V2Doc.PageArray parserDocPage(String docId, String xml) {
 		V2Doc.PageArray pr = new V2Doc.PageArray();
@@ -528,7 +555,7 @@ public class XmlParser {
 			for (int i = 0; i < nodeList.getLength(); i++) {
 				Element e = (Element) nodeList.item(i);
 				meta = new V2ShapeMeta(e.getAttribute("ID"));
-				
+
 				NodeList shapeDataList = e.getChildNodes();
 
 				V2ShapeEarser earser = new V2ShapeEarser();
@@ -543,13 +570,15 @@ public class XmlParser {
 						String[] str = pointsStr.split(" ");
 						int len = str.length / 4;
 						for (int index = 0; index < len; index += 4) {
-							earser.addPoint(Integer.parseInt(str[index]), Integer.parseInt(str[index + 1]));
-							earser.addPoint(Integer.parseInt(str[index +2]), Integer.parseInt(str[index + 3]));
-							
-//							earser.lineToLine(Integer.parseInt(str[index]),
-//									Integer.parseInt(str[index + 1]),
-//									Integer.parseInt(str[index + 2]),
-//									Integer.parseInt(str[index + 3]));
+							earser.addPoint(Integer.parseInt(str[index]),
+									Integer.parseInt(str[index + 1]));
+							earser.addPoint(Integer.parseInt(str[index + 2]),
+									Integer.parseInt(str[index + 3]));
+
+							// earser.lineToLine(Integer.parseInt(str[index]),
+							// Integer.parseInt(str[index + 1]),
+							// Integer.parseInt(str[index + 2]),
+							// Integer.parseInt(str[index + 3]));
 						}
 					} else if (shapeE.getTagName().equals("Pen")) {
 

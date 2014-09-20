@@ -28,6 +28,8 @@ public class ImageViewGallery extends FragmentActivity {
 	private List<ListItem> vimList;
 
 	private String initMid;
+	
+	private String currentImageID;
 
 	private int initPos;
 
@@ -42,6 +44,7 @@ public class ImageViewGallery extends FragmentActivity {
 
 		mImageViewPager = (ViewPager) findViewById(R.id.image_view_view_pager);
 		initMid = getIntent().getStringExtra("cid");
+		currentImageID = getIntent().getStringExtra("imageID");
 		int type = getIntent().getIntExtra("type", 0);
 		if (type == 1) {
 			long gid = getIntent().getLongExtra("gid", 0);
@@ -82,7 +85,7 @@ public class ImageViewGallery extends FragmentActivity {
 	 */
 	private void loadImages(long groupId) {
 		List<VMessage> list = MessageLoader
-				.loadGroupImageMessage(this, Long.valueOf(Conversation.TYPE_GROUP) , groupId);
+				.loadGroupImageMessage(this, Integer.valueOf(Conversation.TYPE_GROUP) , groupId);
 		populateImageMessage(list);
 	}
 
@@ -101,7 +104,7 @@ public class ImageViewGallery extends FragmentActivity {
 			List<VMessageImageItem> items = vm.getImageItems();
 			for (VMessageImageItem item : items) {
 				vimList.add(new ListItem(item));
-				if (vm.getUUID().equals(this.initMid)) {
+				if (item.getUuid().equals(currentImageID)) {
 					flag = true;
 				} 
 				if (!flag) {

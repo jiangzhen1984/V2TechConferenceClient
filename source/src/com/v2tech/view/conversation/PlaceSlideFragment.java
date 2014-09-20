@@ -1,6 +1,12 @@
 package com.v2tech.view.conversation;
 
 import android.app.Activity;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Rect;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -15,6 +21,8 @@ import com.v2tech.view.cus.TouchImageView;
 import com.v2tech.vo.VMessageImageItem;
 
 public class PlaceSlideFragment extends Fragment {
+	
+	private Bitmap mHoldPlaceBitmap;
 
 	private VMessageImageItem vim;
 
@@ -41,7 +49,20 @@ public class PlaceSlideFragment extends Fragment {
 		rlContainer = (RelativeLayout) v.findViewById(R.id.image_view_root);
 
 		final TouchImageView iv = new TouchImageView(this.getActivity());
-
+		
+		VMessageImageItem.Size si = vim.getFullBitmapSize();
+		int width =si.width;
+		int height =  si.height;
+		mHoldPlaceBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
+		iv.setImageBitmap(mHoldPlaceBitmap);
+		
+		
+		RelativeLayout.LayoutParams rl = new RelativeLayout.LayoutParams(
+				RelativeLayout.LayoutParams.MATCH_PARENT,
+				RelativeLayout.LayoutParams.MATCH_PARENT);
+		rl.addRule(RelativeLayout.CENTER_IN_PARENT);
+		rlContainer.addView(iv, rl);
+		
 		at = new AsyncTask<Void, Void, Void>() {
 
 			@Override
@@ -59,8 +80,12 @@ public class PlaceSlideFragment extends Fragment {
 				if (vim != null) {
 					if(vim.getFullQuantityBitmap() == null){
 						V2Log.e("ConversationView", "getFullQuantityBitmap is null");
+						return;
 					}
 					iv.setImageBitmap(vim.getFullQuantityBitmap());
+//					iv.resetZoom();
+//					iv.setImageDrawable(new BitmapDrawable(PlaceSlideFragment.this.getActivity().getResources(), vim.getFullQuantityBitmap()));
+//					
 				}
 			}
 
@@ -88,11 +113,6 @@ public class PlaceSlideFragment extends Fragment {
 
 		}.execute();
 
-		RelativeLayout.LayoutParams rl = new RelativeLayout.LayoutParams(
-				RelativeLayout.LayoutParams.MATCH_PARENT,
-				RelativeLayout.LayoutParams.MATCH_PARENT);
-		rl.addRule(RelativeLayout.CENTER_IN_PARENT);
-		rlContainer.addView(iv, rl);
 		return v;
 	}
 
@@ -117,6 +137,9 @@ public class PlaceSlideFragment extends Fragment {
 		at.cancel(true);
 		if (vim != null) {
 			vim.recycleFull();
+		}
+		if (mHoldPlaceBitmap != null) {
+			mHoldPlaceBitmap.recycle();
 		}
 		rlContainer.removeAllViews();
 	}

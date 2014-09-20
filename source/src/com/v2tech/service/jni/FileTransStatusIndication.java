@@ -7,6 +7,8 @@ public class FileTransStatusIndication extends JNIIndication {
 	public static final int IND_TYPE_DOWNLOAD_ERR = 3;
 	public static final int IND_TYPE_TRANS_CANNEL = 4;
 	
+	public static final int IND_TYPE_PROGRESS_TRANSING = 0;
+	public static final int IND_TYPE_PROGRESS_END = 1;
 	
 	public int indType;
 	public int nTransType;
@@ -35,11 +37,13 @@ public class FileTransStatusIndication extends JNIIndication {
 
 	public static class FileTransProgressStatusIndication extends FileTransStatusIndication {
 		public long nTranedSize;
+		public int progressType;
 
 		public FileTransProgressStatusIndication(int nTransType,
-				String uuid, long nTranedSize) {
+				String uuid, long nTranedSize , int progressType) {
 			super(IND_TYPE_PROGRESS, nTransType, uuid);
 			this.nTranedSize = nTranedSize;
+			this.progressType = progressType;
 		}
 	}
 	

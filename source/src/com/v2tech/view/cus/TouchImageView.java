@@ -1,5 +1,7 @@
 package com.v2tech.view.cus;
 
+import com.V2.jni.util.V2Log;
+
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -548,7 +550,6 @@ public class TouchImageView extends ImageView {
     	//
         float scaleX = (float) viewWidth / drawableWidth;
         float scaleY = (float) viewHeight / drawableHeight;
-        
         switch (mScaleType) {
         case CENTER:
         	scaleX = scaleY = 1;

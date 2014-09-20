@@ -1,5 +1,7 @@
 package com.v2tech.vo;
 
+import java.util.UUID;
+
 
 public class VMessageTextItem extends VMessageAbstractItem {
 
@@ -9,7 +11,7 @@ public class VMessageTextItem extends VMessageAbstractItem {
 		super(vm);
 		this.text = text;
 		this.type = ITEM_TYPE_TEXT;
-		this.uuid = vm.getUUID();
+		this.uuid = UUID.randomUUID().toString();
 	}
 
 	public String getText() {

@@ -13,7 +13,6 @@ import java.util.regex.Pattern;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.Notification.Action;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.ContentValues;
@@ -33,7 +32,6 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -66,8 +64,8 @@ import com.v2tech.view.contacts.VoiceMessageActivity;
 import com.v2tech.view.contacts.add.AddFriendHistroysHandler;
 import com.v2tech.view.contacts.add.MessageAuthenticationActivity;
 import com.v2tech.view.conversation.MessageLoader;
-import com.v2tech.view.group.CrowdDetailActivity;
 import com.v2tech.view.conversation.P2PConversation;
+import com.v2tech.view.group.CrowdDetailActivity;
 import com.v2tech.vo.AddFriendHistorieNode;
 import com.v2tech.vo.AudioVideoMessageBean;
 import com.v2tech.vo.Conference;
@@ -609,6 +607,8 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 
 		for (Group g : list) {
 			Conversation cov = null;
+			if(g.getName() == null)
+				V2Log.e(TAG, "the group name is null , group id is :" + g.getmGId());
 			if (g.getGroupType() == GroupType.CONFERENCE) {
 				cov = new ConferenceConversation(g);
 			} else if (g.getGroupType() == GroupType.CHATING) {
@@ -789,12 +789,11 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 		VideoBean newestMediaMessage = MessageLoader
 				.getNewestMediaMessage(mContext);
 		if (newestMediaMessage != null && newestMediaMessage.startDate != 0) {
+			String startDate = DateUtil
+					.getStringDate(newestMediaMessage.startDate);
+			voiceMessageItem.setDate(startDate);
+			voiceLayout.update(null, startDate, isShowFlag);
 
-			voiceLayout
-					.update(null,
-							DateUtil.getStringDate(newestMediaMessage.startDate),
-							isShowFlag);
-			
 			if (newestMediaMessage.readSatate == AudioVideoMessageBean.STATE_UNREAD)
 				updateUnreadVoiceConversation(true);
 		}
@@ -1471,21 +1470,30 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 				for (ScrollItem item : mItemList) {
 					if ((item.cov.getType() == Conversation.TYPE_CONFERNECE)
 							|| item.cov.getType() == Conversation.TYPE_GROUP) {
-						if (item.cov instanceof ConferenceConversation) {
-							Group g = ((ConferenceConversation) item.cov)
-									.getGroup();
-							User u = GlobalHolder.getInstance().getUser(
-									g.getOwnerUser().getmUserId());
-							if (u == null) {
-								continue;
-							}
-							V2Log.e(TAG,
-									"group user update :type:"
-											+ item.cov.getType() + "-- name:"
-											+ u.getName());
-							((GroupLayout) item.gp).updateContent(u.getName());
-							g.setOwnerUser(u);
+						
+						Group g = null;
+						String groupType = null;
+						switch (item.cov.getType()) {
+						case Conversation.TYPE_CONFERNECE:
+							g = ((ConferenceConversation) item.cov)
+							.getGroup();
+							groupType = "CONFERENCE";
+							break;
+						case Conversation.TYPE_GROUP:
+							g = ((CrowdConversation) item.cov)
+							.getGroup();
+							groupType = "CROWD";
+							break;
 						}
+						User u = GlobalHolder.getInstance().getUser(
+								g.getOwnerUser().getmUserId());
+						if (u == null) {
+							continue;
+						}
+						V2Log.e(TAG,
+								"update "+groupType+" group user name :"+ u.getName() + "group id is :" + g.getmGId());
+						((GroupLayout) item.gp).updateContent(u.getName());
+						g.setOwnerUser(u);
 					} else if (item.cov.getType() == Conversation.TYPE_CONTACT) {
 						User u = GlobalHolder.getInstance().getUser(
 								((ContactConversation) item.cov).getExtId());

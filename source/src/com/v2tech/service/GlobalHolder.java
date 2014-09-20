@@ -175,6 +175,10 @@ public class GlobalHolder {
 			if (cache != null) {
 				continue;
 			}
+			
+			if(vg.name == null)
+				V2Log.e("parse the group name is wroing...the group is :" + vg.id);
+				
 			Group g = null;
 			if (gType == V2GlobalEnum.GROUP_TYPE_CROWD) {
 				User owner = GlobalHolder.getInstance().getUser(vg.owner.uid);

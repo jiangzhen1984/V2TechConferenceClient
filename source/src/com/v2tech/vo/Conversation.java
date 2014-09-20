@@ -9,9 +9,9 @@ public class Conversation {
 	public static final int TYPE_CONTACT = V2GlobalEnum.GROUP_TYPE_USER;
 
 	public static final int TYPE_GROUP = V2GlobalEnum.GROUP_TYPE_DEPARTMENT;
-	
+
 	public static final int TYPE_VOICE_MESSAGE = 7;
-	
+
 	public static final int TYPE_VERIFICATION_MESSAGE = 8;
 	
 	public static final int TYPE_CROWD_VERIFICATION_MESSAGE = 9;
@@ -26,23 +26,16 @@ public class Conversation {
 	protected long mExtId;
 
 	protected int readFlag;
-	
+
+	protected String date;
+
 	protected String dateLong;
-	
-	public String getDateLong() {
-		return dateLong;
-	}
 
-	public void setDateLong(String dateLong) {
-		this.dateLong = dateLong;
-	}
-
+	protected CharSequence msg;
 
 	protected Conversation() {
-
 	}
-	
-	
+
 	public Conversation(int mId, int mType, long mExtId, int readFlag) {
 		super();
 		this.mId = mId;
@@ -59,22 +52,32 @@ public class Conversation {
 		this(0, mType, mExtId);
 	}
 
+	public String getDateLong() {
+		return dateLong;
+	}
+
+	public void setDateLong(String dateLong) {
+		this.dateLong = dateLong;
+	}
+
 	public String getName() {
 		return null;
 	}
 
 	public CharSequence getMsg() {
-		return null;
+		return msg;
 	}
 
 	public String getDate() {
-		return null;
+		return date;
 	}
 
 	public void setMsg(CharSequence msg) {
+		this.msg = msg;
 	}
 
 	public void setDate(String date) {
+		this.date = date;
 	}
 
 	public int getReadFlag() {
@@ -90,7 +93,7 @@ public class Conversation {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + (int) (mExtId ^ (mExtId >>> 32));
-//		result = prime * result + ((mType == null) ? 0 : mType.hashCode());
+		// result = prime * result + ((mType == null) ? 0 : mType.hashCode());
 		return result;
 	}
 
@@ -105,12 +108,12 @@ public class Conversation {
 		Conversation other = (Conversation) obj;
 		if (mExtId != other.mExtId)
 			return false;
-//		if (mType == null) {
-//			if (other.mType != null)
-//				return false;
-//		}
-//		else if (!mType.equals(other.mType))
-//			return false;
+		// if (mType == null) {
+		// if (other.mType != null)
+		// return false;
+		// }
+		// else if (!mType.equals(other.mType))
+		// return false;
 		return true;
 	}
 

@@ -90,6 +90,7 @@ import com.v2tech.vo.VMessageAbstractItem;
 import com.v2tech.vo.VMessageAudioItem;
 import com.v2tech.vo.VMessageFaceItem;
 import com.v2tech.vo.VMessageFileItem;
+import com.v2tech.vo.VMessageImageItem;
 import com.v2tech.vo.VMessageTextItem;
 
 public class ConversationView extends Activity {
@@ -1600,12 +1601,19 @@ public class ConversationView extends Activity {
 
 		@Override
 		public void onMessageClicked(VMessage v) {
+			List<VMessageImageItem> imageItems = v.getImageItems();
+			VMessageImageItem imageItem = null;
+			if(imageItems != null && imageItems.size() > 0){
+				imageItem = v.getImageItems().get(0);
+			}
 			Intent i = new Intent();
 			i.addCategory(PublicIntent.DEFAULT_CATEGORY);
 			i.setAction(PublicIntent.START_VIDEO_IMAGE_GALLERY);
 			i.putExtra("uid1", user1Id);
 			i.putExtra("uid2", user2Id);
 			i.putExtra("cid", v.getUUID());
+			if(imageItem != null)
+				i.putExtra("imageID", imageItem.getUuid());
 			// type 0: is not group image view
 			// type 1: group image view
 			i.putExtra("type", groupId == 0 ? 0 : 1);
@@ -1640,6 +1648,26 @@ public class ConversationView extends Activity {
 
 		@Override
 		public void requestDelMessage(VMessage v) {
+			List<VMessageAbstractItem> items = v.getItems();
+			for (int i = 0; i < items.size(); i++) {
+				VMessageAbstractItem item = items.get(i);
+				if (item.getType() == VMessageAbstractItem.ITEM_TYPE_FILE) {
+					VMessageFileItem vfi = (VMessageFileItem)item;
+					
+					switch (item.getState()) {
+					case VMessageAbstractItem.STATE_FILE_SENDING:
+						mChat.updateFileOperation(vfi,
+								FileOperationEnum.OPERATION_CANCEL_SENDING, null);
+						break;
+					case VMessageAbstractItem.STATE_FILE_DOWNLOADED:
+						mChat.updateFileOperation(vfi,
+								FileOperationEnum.OPERATION_CANCEL_DOWNLOADING, null);
+						break;
+					default:
+						break;
+					}
+				}
+			}
 			Message.obtain(lh, REQUEST_DEL_MESSAGE, v).sendToTarget();
 		}
 
@@ -1812,7 +1840,7 @@ public class ConversationView extends Activity {
 		return false;
 	}
 
-	private void updateFileProgressView(String uuid, long tranedSize) {
+	private void updateFileProgressView(String uuid, long tranedSize , int progressType) {
 		for (int i = 0; i < messageArray.size(); i++) {
 			VMessage vm = (VMessage) messageArray.get(i).getItemObject();
 			if (vm.getItems().size() > 0) {
@@ -1821,9 +1849,8 @@ public class ConversationView extends Activity {
 						&& item.getUuid().equals(uuid)) {
 					VMessageFileItem vfi = ((VMessageFileItem) item);
 
-					if (vfi.getFileSize() <= tranedSize) {
-						V2Log.e(TAG, "vfi.getFileSize() :" + vfi.getFileSize());
-						V2Log.e(TAG, "tranedSize :" + tranedSize);
+					switch (progressType) {
+					case FileTransStatusIndication.IND_TYPE_PROGRESS_END:
 						if (vfi.getState() == VMessageAbstractItem.STATE_FILE_SENDING) {
 							vfi.setState(VMessageAbstractItem.STATE_FILE_SENT);
 						} else if (vfi.getState() == VMessageAbstractItem.STATE_FILE_DOWNLOADING) {
@@ -1832,6 +1859,7 @@ public class ConversationView extends Activity {
 						int updates = MessageBuilder.updateVMessageItem(this,
 								vfi);
 						Log.e(TAG, "updates success : " + updates);
+						break;
 					}
 
 					vfi.setDownloadedSize(tranedSize);
@@ -2154,9 +2182,10 @@ public class ConversationView extends Activity {
 				FileTransStatusIndication ind = (FileTransStatusIndication) (((AsyncResult) msg.obj)
 						.getResult());
 				if (ind.indType == FileTransStatusIndication.IND_TYPE_PROGRESS) {
+					FileTransProgressStatusIndication progress = (FileTransProgressStatusIndication)ind;
 					updateFileProgressView(
 							ind.uuid,
-							((FileTransProgressStatusIndication) ind).nTranedSize);
+							((FileTransProgressStatusIndication) ind).nTranedSize , progress.progressType);
 				} else if (ind.indType == FileTransStatusIndication.IND_TYPE_TRANS_ERR) {
 
 					FileTransErrorIndication transError = (FileTransErrorIndication) ind;
@@ -2184,12 +2213,6 @@ public class ConversationView extends Activity {
 							}
 						}
 					}
-
-					if (transError.errorCode == 415) {
-						Toast.makeText(getApplicationContext(),
-								"亲，不可以发送0大小的文件，抱歉...", Toast.LENGTH_SHORT)
-								.show();
-					}
 				}
 				else if (ind.indType == FileTransStatusIndication.IND_TYPE_DOWNLOAD_ERR){
 					
@@ -2202,13 +2225,22 @@ public class ConversationView extends Activity {
 							if (item.getType() == VMessageAbstractItem.ITEM_TYPE_FILE
 									&& item.getUuid().equals(ind.uuid)) {
 								VMessageFileItem vfi = ((VMessageFileItem) item);
-								V2Log.e(TAG,
-										"when downloading the file --"
-												+ vfi.getFileName()
-												+ "-- , There is an error in the process of sending was happend...error code is :"
-												+ downLoadError.errorCode);
-								vfi.setDownloadedSize(0);
-								vfi.setState(VMessageFileItem.STATE_FILE_DOWNLOADED_FALIED);
+								if (downLoadError.errorCode == 415) {
+									Toast.makeText(getApplicationContext(),
+											"亲，不可以发送0大小的文件，抱歉...", Toast.LENGTH_SHORT)
+											.show();
+									vfi.setDownloadedSize(0);
+									vfi.setState(VMessageFileItem.STATE_FILE_SENT_FALIED);
+								}
+								else{
+									V2Log.e(TAG,
+											"when downloading the file --"
+													+ vfi.getFileName()
+													+ "-- , There is an error in the process of sending was happend...error code is :"
+													+ downLoadError.errorCode);
+									vfi.setDownloadedSize(0);
+									vfi.setState(VMessageFileItem.STATE_FILE_DOWNLOADED_FALIED);
+								}
 								int updates = MessageBuilder
 										.updateVMessageItemToSentFalied(
 												ConversationView.this, vm);

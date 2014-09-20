@@ -601,8 +601,13 @@ public class JNIService extends Service {
 			if (gType == GroupType.CONFERENCE) {
 				User owner = GlobalHolder.getInstance()
 						.getUser(group.owner.uid);
+				if(owner == null)
+					V2Log.e("get create conference man is null , owner id is :" + group.owner.uid);
 				User chairMan = GlobalHolder.getInstance().getUser(
 						group.chairMan.uid);
+				if(owner == null)
+					V2Log.e("get create conference man is null , chairMan id is :" + group.owner.uid);
+				
 				ConferenceGroup g = new ConferenceGroup(group.id, group.name,
 						owner, group.createTime, chairMan);
 				Message.obtain(mCallbackHandler, JNI_CONFERENCE_INVITATION, g)
@@ -1009,7 +1014,7 @@ public class JNIService extends Service {
 							continue;
 						}
 
-						if (vait.getUUID().equals(uuid)) {
+						if (vait.getUuid().equals(uuid)) {
 							receivedCount++;
 							vm = v;
 							vait.setFilePath(binaryPath);

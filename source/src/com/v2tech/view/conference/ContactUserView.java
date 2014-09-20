@@ -179,6 +179,10 @@ public class ContactUserView extends LinearLayout {
 		this.mCheckbox.setChecked(!this.mCheckbox.isChecked());
 	}
 	
+	public void setChecked(){
+		this.mCheckbox.setChecked(true);
+	}
+	
 	public boolean isChecked() {
 		return this.mCheckbox.isChecked();
 	}

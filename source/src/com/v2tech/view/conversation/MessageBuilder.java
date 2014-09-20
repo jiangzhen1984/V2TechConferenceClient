@@ -226,7 +226,7 @@ public class MessageBuilder {
 			}
 			values.put(
 					ContentDescriptor.HistoriesGraphic.Cols.HISTORY_GRAPHIC_ID,
-					vm.getUUID());
+					vMessageImageItem.getUuid());
 			values.put(
 					ContentDescriptor.HistoriesGraphic.Cols.HISTORY_GRAPHIC_TRANSTATE,
 					vm.getState());
@@ -262,7 +262,7 @@ public class MessageBuilder {
 						vm.getToUser().getmUserId());
 			}
 			values.put(ContentDescriptor.HistoriesAudios.Cols.HISTORY_AUDIO_ID,
-					vm.getUUID());
+					vMessageAudioItem.getUuid());
 			values.put(
 					ContentDescriptor.HistoriesAudios.Cols.HISTORY_AUDIO_SEND_STATE,
 					vm.getState());
@@ -328,7 +328,7 @@ public class MessageBuilder {
 					ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_REMOTE_USER_ID,
 					remote);
 			values.put(ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_ID,
-					vm.getUUID());
+					file.getUuid());
 			values.put(ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_PATH,
 					file.getFilePath());
 			values.put(ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_SIZE,
@@ -440,7 +440,7 @@ public class MessageBuilder {
 						itemVal,
 						ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_ID
 								+ "=?",
-						new String[] { String.valueOf(vm.getUUID()) });
+						new String[] { String.valueOf(item.getUuid()) });
 				break;
 			default:
 				break;

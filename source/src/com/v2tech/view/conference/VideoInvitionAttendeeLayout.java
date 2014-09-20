@@ -351,8 +351,12 @@ public class VideoInvitionAttendeeLayout extends LinearLayout {
 				if (mIsStartedSearch) {
 					mItemList = mCacheItemList;
 					for (ListItem ListItem : mItemList) {
-						updateItem(ListItem);
+						if(mAttendeeList.contains(ListItem.u))
+							((ContactUserView) ListItem.v).setChecked();
+						else
+							updateItem(ListItem);
 					}
+					
 					adapter.notifyDataSetChanged();
 					mIsStartedSearch = false;
 				}

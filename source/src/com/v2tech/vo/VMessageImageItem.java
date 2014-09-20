@@ -5,17 +5,19 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.UUID;
 
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
 
 import com.V2.jni.util.V2Log;
+import com.v2tech.service.GlobalHolder;
 import com.v2tech.util.BitmapUtil;
+import com.v2tech.util.GlobalConfig;
 
 public class VMessageImageItem extends VMessageAbstractItem {
 
-	private String uuid;
 	private String filePath;
 	private String extension;
 	private Bitmap mFullQualityBitmap = null;
@@ -26,7 +28,7 @@ public class VMessageImageItem extends VMessageAbstractItem {
 		super(vm);
 		this.filePath = filePath;
 		this.type = ITEM_TYPE_IMAGE;
-		this.uuid = vm.getUUID();
+		this.uuid = UUID.randomUUID().toString();
 	}
 
 	public VMessageImageItem(VMessage vm, String uuid, String extension) {
@@ -34,29 +36,25 @@ public class VMessageImageItem extends VMessageAbstractItem {
 		this.uuid = uuid;
 		this.extension = extension;
 		this.type = ITEM_TYPE_IMAGE;
+		this.filePath = getFilePath();
 	}
-	
 	
 	public VMessageImageItem(VMessage vm) {
 		super(vm);
 		this.type = ITEM_TYPE_IMAGE;
+		this.filePath = getFilePath();
 	}
 
 
 	public String getFilePath() {
+		if (filePath == null && extension != null)
+			return GlobalConfig.getGlobalPicsPath(GlobalHolder.getInstance()
+					.getCurrentUser()) + "/" + uuid + extension;
 		return filePath;
 	}
 
 	public void setFilePath(String filePath) {
 		this.filePath = filePath;
-	}
-
-	public String getUUID() {
-		return uuid;
-	}
-
-	public void setUUID(String uuid) {
-		this.uuid = uuid;
 	}
 
 	public String getExtension() {
@@ -79,7 +77,7 @@ public class VMessageImageItem extends VMessageAbstractItem {
 
 	public String toXmlItem() {
 		int[] w = new int[2];
-		BitmapUtil.getFullBitmapBounds(this.filePath, w);
+		BitmapUtil.getFullBitmapBounds(filePath, w);
 		String str = " <TPictureChatItem NewLine=\"True\" AutoResize=\"True\" FileExt=\""
 				+ getFilePath()
 				+ "\" GUID=\""+uuid+"\" Height=\""
@@ -131,6 +129,15 @@ public class VMessageImageItem extends VMessageAbstractItem {
 			mCompressedBitmap = BitmapUtil.getCompressedBitmap(this.filePath);
 		}
 		return mCompressedBitmap;
+	}
+	
+	public Size getFullBitmapSize() {
+		int[] w = new int[2];
+		BitmapUtil.getFullBitmapBounds(this.filePath, w);
+		Size s = new Size();
+		s.width = w[0];
+		s.height = w[1];
+		return s;
 	}
 
 	public synchronized Bitmap getFullQuantityBitmap() {

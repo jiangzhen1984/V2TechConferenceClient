@@ -654,8 +654,9 @@ public class ContactDetail extends Activity implements OnTouchListener {
 					|| u.getCellPhone().isEmpty();
 			boolean offline = (u.getmStatus() == User.Status.OFFLINE || u
 					.getmStatus() == User.Status.HIDDEN);
+			boolean localOffLine = !SPUtil.checkCurrentAviNetwork(mContext);
 
-			if (offline) {
+			if (offline || localOffLine) {
 				if (isPad) {
 					Toast.makeText(getApplicationContext(), "对方目前不在线，无法语音通话",
 							Toast.LENGTH_SHORT).show();
@@ -665,8 +666,33 @@ public class ContactDetail extends Activity implements OnTouchListener {
 						intent.setAction(Intent.ACTION_DIAL); // android.intent.action.DIAL
 						startActivity(intent);
 					} else if (!phoneEmpty && !mobileEmpty) {
-						showCallDialog(u.getTelephone(), u.getCellPhone(),
-								false);
+//						showCallDialog(u.getTelephone(), u.getCellPhone(),
+//								false);
+						//get telephone numbers and mobile numbers
+						String telephone = u.getTelephone();
+						String cellPhone = u.getCellPhone();
+						d = new Dialog(mContext, R.style.ContactUserDetailVoiceCallDialog);
+						d.setCancelable(true);
+						d.setCanceledOnTouchOutside(true);
+						d.setContentView(R.layout.contacts_user_detail_call_dialog_window);
+						//create two TextView View to show them
+						//telephone view
+						TextView tv = (TextView) d
+								.findViewById(R.id.contact_user_detail_call_dialog_1);
+						tv.setOnClickListener(itemClickListener);
+						tv.setText(telephone);
+						tv.setTag(telephone);
+						//mobile phone view
+						TextView tv1 = (TextView) d
+								.findViewById(R.id.contact_user_detail_call_dialog_2);
+						tv1.setOnClickListener(itemClickListener);
+						tv1.setText(cellPhone);
+						tv1.setTag(cellPhone);
+
+						if (tv1.getVisibility() == View.GONE) {
+							tv1.setVisibility(View.VISIBLE);
+						}
+						d.show();
 					} else {
 						Intent intent = new Intent();
 						intent.setAction(Intent.ACTION_CALL);

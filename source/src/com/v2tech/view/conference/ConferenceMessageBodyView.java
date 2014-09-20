@@ -42,6 +42,7 @@ public class ConferenceMessageBodyView extends LinearLayout {
 	private ImageView mImageIV;
 	private Context mContext;
 	private ClickListener callback;
+	private boolean isImageItem;
 
 	public interface ClickListener {
 		public void onMessageClicked(VMessage v);
@@ -55,6 +56,11 @@ public class ConferenceMessageBodyView extends LinearLayout {
 				R.layout.conference_message_body, null, false);
 		initView();
 		initData();
+		
+		if(m.getImageItems().size() > 0)
+			isImageItem = true;
+		else
+			isImageItem = false;
 	}
 
 	public void setConf(ConferenceGroup conf) {
@@ -89,15 +95,17 @@ public class ConferenceMessageBodyView extends LinearLayout {
 
 			@Override
 			public void onClick(View v) {
-				Intent i = new Intent();
-				i.addCategory(PublicIntent.DEFAULT_CATEGORY);
-				i.setAction(PublicIntent.START_VIDEO_IMAGE_GALLERY);
-				// type 0: is not group image view
-				// type 1: group image view
-				i.putExtra("cid", mMsg.getId());
-				i.putExtra("type", conf.getmGId() == 0 ? 0 : 1);
-				i.putExtra("gid", conf.getmGId());
-				mContext.startActivity(i);
+				if(isImageItem){
+					Intent i = new Intent();
+					i.addCategory(PublicIntent.DEFAULT_CATEGORY);
+					i.setAction(PublicIntent.START_VIDEO_IMAGE_GALLERY);
+					// type 0: is not group image view
+					// type 1: group image view
+					i.putExtra("cid", mMsg.getId());
+					i.putExtra("type", conf.getmGId() == 0 ? 0 : 1);
+					i.putExtra("gid", conf.getmGId());
+					mContext.startActivity(i);
+				}
 			}
 		});
 		LinearLayout.LayoutParams ll = new LinearLayout.LayoutParams(

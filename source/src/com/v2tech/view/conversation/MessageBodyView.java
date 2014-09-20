@@ -22,6 +22,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.view.ViewTreeObserver.OnDrawListener;
+import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.view.ViewTreeObserver.OnPreDrawListener;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -90,6 +92,8 @@ public class MessageBodyView extends LinearLayout {
 	private ClickListener callback;
 	private ImageView micIv;
 	private int width = 0;
+	private int popupWindowWidth;
+	private int popupWindowHeight;
 
 	public interface ClickListener {
 		public void onMessageClicked(VMessage v);
@@ -133,6 +137,7 @@ public class MessageBodyView extends LinearLayout {
 		this.localHandler = new Handler();
 		initView();
 		initData();
+		initPopupWindow();
 	}
 
 	private void initView() {
@@ -232,6 +237,48 @@ public class MessageBodyView extends LinearLayout {
 		populateMessage();
 
 	}
+	
+	private void initPopupWindow() {
+		LayoutInflater inflater = (LayoutInflater) getContext()
+				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		final View popWindow = inflater.inflate(
+				R.layout.message_selected_pop_up_window, null);
+		pw = new PopupWindow(popWindow, LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, true);
+		pw.setBackgroundDrawable(new ColorDrawable(
+				Color.TRANSPARENT));
+		pw.setFocusable(true);
+		pw.setTouchable(true);
+		pw.setOutsideTouchable(true);
+		ViewTreeObserver viewTreeObserver = popWindow.getViewTreeObserver();
+		viewTreeObserver.addOnPreDrawListener(new OnPreDrawListener() {
+			
+			@Override
+			public boolean onPreDraw() {
+				if(popupWindowWidth == 0)
+					popupWindowWidth = popWindow.getMeasuredWidth();
+				
+				if(popupWindowHeight == 0)
+					popupWindowHeight = popWindow.getMeasuredHeight();
+				V2Log.e(TAG, "addOnPreDrawListener 被回调");
+				return true;
+			}
+		});
+		TextView tvResend = (TextView) popWindow
+				.findViewById(R.id.contact_message_pop_up_item_resend);
+		tvResend.setOnClickListener(mResendButtonListener);
+
+		if (messageType == MESSAGE_TYPE_TEXT) {
+			TextView tv = (TextView) popWindow
+					.findViewById(R.id.contact_message_pop_up_item_copy);
+			tv.setVisibility(View.VISIBLE);
+			tv.setOnClickListener(mCopyButtonListener);
+		}
+
+		TextView deleteText = (TextView) popWindow
+				.findViewById(R.id.contact_message_pop_up_item_delete);
+		deleteText.setOnClickListener(mDeleteButtonListener);
+		pw.dismiss();
+	}
 
 	private void populateMessage() {
 		List<VMessageAudioItem> audioItems = mMsg.getAudioItems();
@@ -324,9 +371,12 @@ public class MessageBodyView extends LinearLayout {
 	 */
 	private void populateAudioMessage(List<VMessageAudioItem> audioItems) {
 		final VMessageAudioItem item = audioItems.get(0);
-		if (item.getState() == VMessageAbstractItem.STATE_UNREAD) {
+		if (item.getState() == VMessageAbstractItem.STATE_UNREAD) 
 			unReadIcon.setVisibility(View.VISIBLE);
-		} else if (item.getState() == VMessageAbstractItem.STATE_SENT_FALIED) {
+		else
+			unReadIcon.setVisibility(View.INVISIBLE);
+		
+		if (item.getState() == VMessageAbstractItem.STATE_SENT_FALIED) {
 			failedIcon.setVisibility(View.VISIBLE);
 		}
 
@@ -479,38 +529,6 @@ public class MessageBodyView extends LinearLayout {
 					return;
 				}
 
-				int width = DensityUtils.dip2px(getContext(), 180);
-				int height = DensityUtils.dip2px(getContext(), 80);
-				if (pw == null) {
-					LayoutInflater inflater = (LayoutInflater) getContext()
-							.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-					View popWindow = inflater.inflate(
-							R.layout.message_selected_pop_up_window, null);
-					// FIXME should not hard code 140 50
-					pw = new PopupWindow(popWindow, width, height, true);
-					pw.setBackgroundDrawable(new ColorDrawable(
-							Color.TRANSPARENT));
-					pw.setFocusable(true);
-					pw.setTouchable(true);
-					pw.setOutsideTouchable(true);
-
-					TextView tvResend = (TextView) popWindow
-							.findViewById(R.id.contact_message_pop_up_item_resend);
-					tvResend.setOnClickListener(mResendButtonListener);
-
-					if (messageType == MESSAGE_TYPE_TEXT) {
-						TextView tv = (TextView) popWindow
-								.findViewById(R.id.contact_message_pop_up_item_copy);
-						tv.setVisibility(View.VISIBLE);
-						tv.setOnClickListener(mCopyButtonListener);
-					}
-
-					TextView deleteText = (TextView) popWindow
-							.findViewById(R.id.contact_message_pop_up_item_delete);
-					deleteText.setOnClickListener(mDeleteButtonListener);
-
-				}
-
 				if (failedIcon.getVisibility() == View.INVISIBLE) {
 					pw.getContentView()
 							.findViewById(
@@ -523,25 +541,6 @@ public class MessageBodyView extends LinearLayout {
 								.setVisibility(View.VISIBLE);
 					}
 				} else {
-					// List<VMessageAbstractItem> items = mMsg.getItems();
-					// for (VMessageAbstractItem vMessageAbstractItem : items) {
-					// if(VMessageAbstractItem.ITEM_TYPE_TEXT ==
-					// vMessageAbstractItem.getType() ||
-					// VMessageAbstractItem.ITEM_TYPE_FACE ==
-					// vMessageAbstractItem.getType()){
-					// pw.getContentView()
-					// .findViewById(
-					// R.id.contact_message_pop_up_item_resend)
-					// .setVisibility(View.VISIBLE);
-					// }
-					// else{
-					//
-					// pw.getContentView()
-					// .findViewById(
-					// R.id.contact_message_pop_up_item_redownload)
-					// .setVisibility(View.VISIBLE);
-					// }
-					// }
 					if (mMsg.isLocal()) {
 						pw.getContentView()
 								.findViewById(
@@ -557,12 +556,11 @@ public class MessageBodyView extends LinearLayout {
 							.findViewById(R.id.contact_message_pop_up_item_copy)
 							.setVisibility(View.GONE);
 				}
-
 				int viewWidth = anchor.getMeasuredWidth();
-				// int viewHeight = anchor.getMeasuredHeight();
-				int offsetX = (viewWidth - width) / 2;
-				// int offsetY = (viewHeight + height);
-
+				int viewHeight = anchor.getMeasuredHeight();
+				int offsetX = (viewWidth - popupWindowWidth) / 2;
+				int offsetY = (viewHeight + popupWindowHeight);
+				
 				int[] location = new int[2];
 				anchor.getLocationInWindow(location);
 				// if (location[1] <= 0) {
@@ -571,7 +569,7 @@ public class MessageBodyView extends LinearLayout {
 				Rect r1 = new Rect();
 				anchor.getGlobalVisibleRect(r1);
 				int offsetXLocation = r1.left + offsetX;
-				int offsetYLocation = r1.top - (height / 2);
+				int offsetYLocation = r1.top - (offsetY / 2);
 				pw.showAtLocation((View) anchor.getParent(),
 						Gravity.NO_GRAVITY, offsetXLocation, offsetYLocation);
 				// } else {
@@ -745,6 +743,7 @@ public class MessageBodyView extends LinearLayout {
 			TextView view, ImageView actionButton) {
 		String strState = "";
 		boolean showProgressLayout = false;
+		actionButton.setVisibility(View.VISIBLE);
 		if (vfi.getState() == VMessageAbstractItem.STATE_FILE_DOWNLOADING) {
 			strState = getContext().getResources()
 					.getText(R.string.contact_message_file_item_downloading)
@@ -771,6 +770,7 @@ public class MessageBodyView extends LinearLayout {
 					.toString();
 			// Show failed icon
 			failedIcon.setVisibility(View.VISIBLE);
+			actionButton.setVisibility(View.GONE);
 		} else if (vfi.getState() == VMessageAbstractItem.STATE_FILE_DOWNLOADED_FALIED) {
 			strState = getContext()
 					.getResources()
@@ -778,6 +778,7 @@ public class MessageBodyView extends LinearLayout {
 					.toString();
 			// Show failed icon
 			failedIcon.setVisibility(View.VISIBLE);
+			actionButton.setVisibility(View.GONE);
 		} else if (vfi.getState() == VMessageAbstractItem.STATE_FILE_MISS_DOWNLOAD) {
 			strState = getContext().getResources()
 					.getText(R.string.contact_message_file_item_miss_download)
@@ -790,10 +791,12 @@ public class MessageBodyView extends LinearLayout {
 			strState = getContext().getResources()
 					.getText(R.string.contact_message_file_item_sent)
 					.toString();
+			actionButton.setVisibility(View.GONE);
 		} else if (vfi.getState() == VMessageAbstractItem.STATE_FILE_DOWNLOADED) {
 			strState = getContext().getResources()
 					.getText(R.string.contact_message_file_item_downloaded)
 					.toString();
+			actionButton.setVisibility(View.GONE);
 		}
 
 		view.setText(strState);

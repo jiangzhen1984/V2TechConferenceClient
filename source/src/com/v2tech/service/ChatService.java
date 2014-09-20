@@ -21,6 +21,7 @@ import com.v2tech.service.jni.FileDownLoadErrorIndication;
 import com.v2tech.service.jni.FileTransCannelIndication;
 import com.v2tech.service.jni.FileTransStatusIndication.FileTransErrorIndication;
 import com.v2tech.service.jni.FileTransStatusIndication.FileTransProgressStatusIndication;
+import com.v2tech.service.jni.FileTransStatusIndication;
 import com.v2tech.service.jni.JNIResponse;
 import com.v2tech.service.jni.RequestChatServiceResponse;
 import com.v2tech.service.jni.RequestSendMessageResponse;
@@ -189,7 +190,7 @@ public class ChatService extends DeviceService {
 							msg.getMsgCode(),
 							msg.getGroupId(),
 							msg.getToUser() == null ? 0 : msg.getToUser()
-									.getmUserId(), 2, item.getUUID(),
+									.getmUserId(), 2, item.getUuid(),
 							item.getFilePath(), 0);
 				}
 
@@ -577,7 +578,7 @@ public class ChatService extends DeviceService {
 				int nTransType) {
 			notifyListener(KEY_FILE_TRANS_STATUS_NOTIFICATION_LISTNER, 0, 0,
 					new FileTransProgressStatusIndication(nTransType, szFileID,
-							nBytesTransed));
+							nBytesTransed , FileTransStatusIndication.IND_TYPE_PROGRESS_TRANSING));
 
 		}
 
@@ -586,7 +587,7 @@ public class ChatService extends DeviceService {
 				long nFileSize, int nTransType) {
 			notifyListener(KEY_FILE_TRANS_STATUS_NOTIFICATION_LISTNER, 0, 0,
 					new FileTransProgressStatusIndication(nTransType, szFileID,
-							nFileSize));
+							nFileSize , FileTransStatusIndication.IND_TYPE_PROGRESS_END));
 		}
 
 		@Override

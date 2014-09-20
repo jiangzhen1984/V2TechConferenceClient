@@ -120,7 +120,9 @@ public class GroupLayout extends LinearLayout {
 
 		switch (mConv.getType()) {
 			case Conversation.TYPE_CONTACT:
-				mGroupDateTV.setText(((ContactConversation)mConv).getDateLong());
+				ContactConversation contact = (ContactConversation)mConv;
+				contact.setDateLong(date);
+				mGroupDateTV.setText(contact.getDateLong());
 				break;
 			default:
 				mGroupDateTV.setText(date);
@@ -197,15 +199,6 @@ public class GroupLayout extends LinearLayout {
 		default:
 			break;
 		}
-		// mGroupNameTV.setText(this.mConv.getName());
-		// mGroupOwnerTV.setText(mConv.getMsg());
-		// // mGroupDateTV.setText(mConv.getDate());
-		// if(this.mConv.getType() == Conversation.TYPE_CONTACT){
-		// mGroupDateTV.setText(mConv.getDateLong());
-		// V2Log.e(TAG, mConv.getDateLong() + "update---");
-		// }
-		// else
-		// mGroupDateTV.setText(mConv.getDate());
 	}
 
 	public void updateIcon(Bitmap bitmap) {

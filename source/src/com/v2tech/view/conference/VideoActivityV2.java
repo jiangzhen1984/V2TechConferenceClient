@@ -1875,10 +1875,10 @@ public class VideoActivityV2 extends Activity {
 
 		@Override
 		public void requestSendMsg(VMessage vm) {
-			vm.setGroupId(conf.getId());
-			vm.setToUser(new User(0));
-			vm.setFromUser(GlobalHolder.getInstance().getCurrentUser());
-			vm.setMsgCode(V2GlobalEnum.REQUEST_TYPE_CONF);
+//			vm.setGroupId(conf.getId());
+//			vm.setToUser(new User(0));
+//			vm.setFromUser(GlobalHolder.getInstance().getCurrentUser());
+//			vm.setMsgCode(V2GlobalEnum.GROUP_TYPE_CONFERENCE);
 			cs.sendVMessage(vm, null);
 
 		}
@@ -2126,10 +2126,12 @@ public class VideoActivityV2 extends Activity {
 				List<UserDeviceConfig> list = (List<UserDeviceConfig>) obj[1];
 				Long uid = (Long) obj[0];
 				Attendee at = findAttendee(uid);
-				if (at.getmDevices() == null) {
-					at.setmDevices(list);
+				if(at != null){
+					if (at.getmDevices() == null) {
+						at.setmDevices(list);
+					}
+					updateAttendeeDevice(at, list);
 				}
-				updateAttendeeDevice(at, list);
 			}
 				break;
 			case ATTENDEE_LISTENER:
