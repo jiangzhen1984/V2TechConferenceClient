@@ -468,7 +468,9 @@ public class MessageLoader {
 				return vimList;
 			}
 
-//			VMessage newMessage = loadbinaryMessageById(vm, mContext, type);
+			loadImageMessageById(vm, mContext);
+			loadAudioMessageById(vm, mContext);
+			loadFileMessageById(vm, mContext);
 			vimList.add(vm);
 		}
 		mCur.close();
@@ -826,144 +828,108 @@ public class MessageLoader {
 		return false;
 	}
 	
-//	private static VMessage loadbinaryMessageById(VMessage vm, Context context,
-//			QueryType type) {
-//
-//		if (vm == null) {
-//			return null;
-//		}
-//
-//		VMessage newMessage = null;
-//		switch (type) {
-//		case IMAGE:
-//			newMessage = loadImageMessageById(vm, context);
-//			break;
-//		case AUDIO:
-//			newMessage = loadAudioMessageById(vm, context);
-//			break;
-//		case FILE:
-//			break;
-//		case UNKNOW:
-//			newMessage = loadImageMessageById(vm, context);
-//			newMessage = loadAudioMessageById(newMessage, context);
-//			newMessage = loadFileMessageById(newMessage, context);
-//			break;
-//		default:
-//			break;
-//		}
-//		return newMessage;
-//	}
+	private static VMessage loadImageMessageById(VMessage vm, Context context) {
 
-//	private static VMessage loadImageMessageById(VMessage vm, Context context) {
-//
-//		List<VMessageImageItem> imageItems = vm.getImageItems();
-//		String selection = ContentDescriptor.HistoriesGraphic.Cols.HISTORY_GRAPHIC_ID
-//				+ "=? ";
-//		String sortOrder = ContentDescriptor.HistoriesGraphic.Cols.HISTORY_GRAPHIC_SAVEDATE
-//				+ " desc limit 1 offset 0 ";
-//		Uri uri = ContentDescriptor.HistoriesGraphic.CONTENT_URI;
-//		String[] projection = ContentDescriptor.HistoriesGraphic.Cols.ALL_CLOS;
-//		DataBaseContext mContext = new DataBaseContext(context);
-//		Cursor mCur = null;
-//		for (VMessageImageItem item : imageItems) {
-//			String[] selectionArgs = new String[] { item.getUuid()};
-//			mCur = mContext.getContentResolver().query(uri, projection,
-//					selection, selectionArgs, sortOrder);
-//			if (mCur.getCount() == 0) {
-//				V2Log.e("the loading VMessageImageItem --" + item.getUuid()
-//						+ "-- get null........");
-//				return vm;
-//			}
-//
-//			while (mCur.moveToNext()) {
-//				String imageID = mCur.getString(mCur.getColumnIndex(ContentDescriptor.HistoriesGraphic.Cols.HISTORY_GRAPHIC_ID));
-//				String imagePath = mCur.getString(mCur.getColumnIndex(ContentDescriptor.HistoriesGraphic.Cols.HISTORY_GRAPHIC_PATH));
-//				item.setUuid(imageID);
-//				item.setFilePath(imagePath);
-//			}
-//		}
-//		
-//		if(mCur != null)
-//			mCur.close();
-//		return vm;
-//	}
-//
-//	private static VMessage loadAudioMessageById(VMessage vm, Context context) {
-//
-//		List<VMessageAudioItem> audioItems = vm.getAudioItems();
-//		String selection = ContentDescriptor.HistoriesAudios.Cols.HISTORY_AUDIO_ID
-//				+ "=? ";
-//		String sortOrder = ContentDescriptor.HistoriesAudios.Cols.HISTORY_AUDIO_SAVEDATE
-//				+ " desc limit 1 offset 0 ";
-//		Uri uri = ContentDescriptor.HistoriesAudios.CONTENT_URI;
-//		String[] projection = ContentDescriptor.HistoriesAudios.Cols.ALL_CLOS;
-//		DataBaseContext mContext = new DataBaseContext(context);
-//		Cursor mCur = null;
-//		for (VMessageAudioItem item : audioItems) {
-//			String[] selectionArgs = new String[] { item.getUuid() };
-//			mCur = mContext.getContentResolver().query(uri, projection,
-//					selection, selectionArgs, sortOrder);
-//			if (mCur.getCount() == 0) {
-//				V2Log.e("the loading VMessageAudioItem --" + item.getUuid()
-//						+ "-- get null........");
-//				return vm;
-//			}
-//
-//			while (mCur.moveToNext()) {
-//				String uuid = mCur.getString(mCur.getColumnIndex(ContentDescriptor.HistoriesAudios.Cols.HISTORY_AUDIO_ID));
-//				String audioFilePath = mCur.getString(mCur.getColumnIndex(ContentDescriptor.HistoriesAudios.Cols.HISTORY_AUDIO_PATH));
-//				int seconds = mCur.getInt(mCur.getColumnIndex(ContentDescriptor.HistoriesAudios.Cols.HISTORY_AUDIO_SECOND));
-//				int readState = mCur.getInt(mCur.getColumnIndex(ContentDescriptor.HistoriesAudios.Cols.HISTORY_AUDIO_READ_STATE));
-//				String extension = null;
-//				if (audioFilePath != null && !audioFilePath.isEmpty()) {
-//					int start = audioFilePath.lastIndexOf(".");
-//					if (start != -1) {
-//						extension = audioFilePath.substring(start);
-//					}
-//				}
-//				item.setUuid(uuid);
-//				VMessageAudioItem audio = new VMessageAudioItem(vm, uuid, extension , audioFilePath , seconds);
-//				audio.setState(readState);
-//			}
-//		}
-//		
-//		if(mCur != null)
-//			mCur.close();
-//		return vm;
-//	}
-//
-//	private static VMessage loadFileMessageById(VMessage vm, Context context) {
-//
-//		List<VMessageFileItem> fileItems = vm.getFileItems();
-//		String selection = ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_ID
-//				+ "=? ";
-//		String sortOrder = ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_SAVEDATE
-//				+ " desc limit 1 offset 0 ";
-//		Uri uri = ContentDescriptor.HistoriesFiles.CONTENT_URI;
-//		String[] projection = ContentDescriptor.HistoriesFiles.Cols.ALL_CLOS;
-//		DataBaseContext mContext = new DataBaseContext(context);
-//		Cursor mCur = null;
-//		for (VMessageFileItem item : fileItems) {
-//			String[] selectionArgs = new String[] { item.getUuid() };
-//			mCur = mContext.getContentResolver().query(uri, projection,
-//					selection, selectionArgs, sortOrder);
-//			if (mCur.getCount() == 0) {
-//				V2Log.e("the loading VMessageFileItem --" + item.getUuid()
-//						+ "-- get null........");
-//				return vm;
-//			}
-//	
-//			while (mCur.moveToNext()) {
-//				String fileID = mCur.getString(mCur.getColumnIndex(ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_ID));
-//				long fileSize = mCur.getLong(mCur.getColumnIndex(ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_SIZE));
-//				String filePath = mCur.getString(mCur.getColumnIndex(ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_PATH));
-//				int fileTransState = mCur.getInt(mCur.getColumnIndex(ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_SEND_STATE));
-//				new VMessageFileItem(vm, fileID, fileSize, filePath, fileTransState);
-//			}
-//		}
-//		
-//		if(mCur != null)
-//			mCur.close();
-//		return vm;
-//	}
+		List<VMessageImageItem> imageItems = vm.getImageItems();
+		if(imageItems.size() <= 0)
+			return vm;
+		
+		String selection = ContentDescriptor.HistoriesGraphic.Cols.HISTORY_GRAPHIC_ID
+				+ "=? ";
+		String sortOrder = ContentDescriptor.HistoriesGraphic.Cols.HISTORY_GRAPHIC_SAVEDATE
+				+ " desc limit 1 offset 0 ";
+		Uri uri = ContentDescriptor.HistoriesGraphic.CONTENT_URI;
+		String[] projection = ContentDescriptor.HistoriesGraphic.Cols.ALL_CLOS;
+		DataBaseContext mContext = new DataBaseContext(context);
+		Cursor mCur = null;
+		for (VMessageImageItem item : imageItems) {
+			String[] selectionArgs = new String[] { item.getUuid()};
+			mCur = mContext.getContentResolver().query(uri, projection,
+					selection, selectionArgs, sortOrder);
+			if (mCur.getCount() == 0) {
+				V2Log.e("the loading VMessageImageItem --" + item.getUuid()
+						+ "-- get null........");
+				return vm;
+			}
+
+			while (mCur.moveToNext()) {
+				int transState = mCur.getInt(mCur.getColumnIndex(ContentDescriptor.HistoriesGraphic.Cols.HISTORY_GRAPHIC_TRANSTATE));
+				item.setState(transState);
+			}
+		}
+		
+		if(mCur != null)
+			mCur.close();
+		return vm;
+	}
+
+	private static VMessage loadAudioMessageById(VMessage vm, Context context) {
+
+		List<VMessageAudioItem> audioItems = vm.getAudioItems();
+		if(audioItems.size() <= 0)
+			return vm;
+		
+		String selection = ContentDescriptor.HistoriesAudios.Cols.HISTORY_AUDIO_ID
+				+ "=? ";
+		String sortOrder = ContentDescriptor.HistoriesAudios.Cols.HISTORY_AUDIO_SAVEDATE
+				+ " desc limit 1 offset 0 ";
+		Uri uri = ContentDescriptor.HistoriesAudios.CONTENT_URI;
+		String[] projection = ContentDescriptor.HistoriesAudios.Cols.ALL_CLOS;
+		DataBaseContext mContext = new DataBaseContext(context);
+		Cursor mCur = null;
+		for (VMessageAudioItem item : audioItems) {
+			String[] selectionArgs = new String[] { item.getUuid() };
+			mCur = mContext.getContentResolver().query(uri, projection,
+					selection, selectionArgs, sortOrder);
+			if (mCur.getCount() == 0) {
+				V2Log.e("the loading VMessageAudioItem --" + item.getUuid()
+						+ "-- get null........");
+				return vm;
+			}
+
+			while (mCur.moveToNext()) {
+				int readState = mCur.getInt(mCur.getColumnIndex(ContentDescriptor.HistoriesAudios.Cols.HISTORY_AUDIO_READ_STATE));
+				item.setState(readState);
+			}
+		}
+		
+		if(mCur != null)
+			mCur.close();
+		return vm;
+	}
+
+	private static VMessage loadFileMessageById(VMessage vm, Context context) {
+
+		List<VMessageFileItem> fileItems = vm.getFileItems();
+		if(fileItems.size() <= 0)
+			return vm;
+		
+		String selection = ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_ID
+				+ "=? ";
+		String sortOrder = ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_SAVEDATE
+				+ " desc limit 1 offset 0 ";
+		Uri uri = ContentDescriptor.HistoriesFiles.CONTENT_URI;
+		String[] projection = ContentDescriptor.HistoriesFiles.Cols.ALL_CLOS;
+		DataBaseContext mContext = new DataBaseContext(context);
+		Cursor mCur = null;
+		for (VMessageFileItem item : fileItems) {
+			String[] selectionArgs = new String[] { item.getUuid() };
+			mCur = mContext.getContentResolver().query(uri, projection,
+					selection, selectionArgs, sortOrder);
+			if (mCur.getCount() == 0) {
+				V2Log.e("the loading VMessageFileItem --" + item.getUuid()
+						+ "-- get null........");
+				return vm;
+			}
+	
+			while (mCur.moveToNext()) {
+				int fileTransState = mCur.getInt(mCur.getColumnIndex(ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_SEND_STATE));
+				item.setState(fileTransState);
+			}
+		}
+		
+		if(mCur != null)
+			mCur.close();
+		return vm;
+	}
 }

@@ -42,7 +42,7 @@ public class CrowdApplicantDetailActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.crowd_applicant_detail);
+//		setContentView(R.layout.crowd_applicant_detail);
 		mNameTV = (TextView) findViewById(R.id.crowd_invitation_name);
 		mCreatorTV = (TextView) findViewById(R.id.crowd_invitation_creator_tv);
 		mBriefTV = (TextView) findViewById(R.id.crowd_invitation_brief);
