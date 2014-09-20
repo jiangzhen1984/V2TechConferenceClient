@@ -13,6 +13,8 @@ public class Conversation {
 	public static final int TYPE_VOICE_MESSAGE = 7;
 	
 	public static final int TYPE_VERIFICATION_MESSAGE = 8;
+	
+	public static final int TYPE_CROWD_VERIFICATION_MESSAGE = 9;
 
 	public static final int READ_FLAG_READ = 1;
 	public static final int READ_FLAG_UNREAD = 0;

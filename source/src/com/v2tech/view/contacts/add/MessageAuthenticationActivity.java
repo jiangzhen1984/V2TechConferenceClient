@@ -10,6 +10,7 @@ import com.v2tech.service.GlobalHolder;
 import com.v2tech.view.JNIService;
 import com.v2tech.view.contacts.ContactDetail;
 import com.v2tech.view.contacts.ContactDetail2;
+import com.v2tech.view.conversation.QualificationMessageActivity;
 import com.v2tech.vo.AddFriendHistorieNode;
 
 import android.app.Activity;
@@ -105,13 +106,16 @@ public class MessageAuthenticationActivity extends Activity {
 					@Override
 					public void onCheckedChanged(CompoundButton arg0,
 							boolean arg1) {
-						if (arg1) {
-							rbGroupAuthentication.setTextColor(Color.rgb(255,
-									255, 255));
-						} else {
-							rbGroupAuthentication.setTextColor(getResources()
-									.getColor(R.color.button_text_color));
-						}
+//						if (arg1) {
+//							rbGroupAuthentication.setTextColor(Color.rgb(255,
+//									255, 255));
+//						} else {
+//							rbGroupAuthentication.setTextColor(getResources()
+//									.getColor(R.color.button_text_color));
+//						}
+						Intent i = new Intent();
+						i.setClass(MessageAuthenticationActivity.this, QualificationMessageActivity.class);
+						startActivity(i);
 
 					}
 				});

@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/confs_group_list_bg" >
+
+    <RelativeLayout
+        android:id="@+id/qualification_msg_adapter_item_left"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_centerVertical="true"
+        android:layout_marginBottom="@dimen/conversation_view_margin"
+        android:layout_marginLeft="15dp"
+        android:layout_marginRight="5dp"
+        android:layout_marginTop="@dimen/conversation_view_margin" >
+
+        <ImageView
+            android:id="@+id/qualification_msg_image_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/conference_icon_self" />
+
+        <ImageView
+            android:id="@+id/qualification_msg_notificator"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_alignRight="@+id/qualification_msg_image_view"
+            android:layout_marginRight="3dp"
+            android:layout_marginTop="3dp"
+            android:src="@drawable/red_nofificator"
+            android:visibility="invisible" />
+    </RelativeLayout>
+
+    <LinearLayout
+        android:id="@+id/group_list_conference_titlelayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/qualification_msg_adapter_item_left"
+        android:layout_marginLeft="30dp"
+        android:layout_toRightOf="@+id/qualification_msg_adapter_item_left"
+        android:orientation="vertical" >
+
+        <TextView
+            android:id="@+id/qualification_msg_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:gravity="left|top"
+            android:singleLine="true"
+            android:text="TextView"
+            android:textColor="@color/conversation_view_name_color"
+            android:textSize="@dimen/conversation_view_name_text_size" />
+
+        <TextView
+            android:id="@+id/qualification_msg_content"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/conversation_view_title_margin"
+            android:ellipsize="end"
+            android:gravity="left|bottom"
+            android:maxWidth="@dimen/conversation_view_text_max_width"
+            android:singleLine="true"
+            android:text="TextView"
+            android:textColor="@color/conversation_view_text_color"
+            android:textSize="@dimen/common_item_text_size_16" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:layout_marginRight="15dp"
+        android:orientation="vertical" >
+
+        <TextView
+            android:id="@+id/qualification_msg_res"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingRight="15dp"
+            android:text="TextView"
+            android:textColor="@color/common_item_text_color"
+            android:textSize="@dimen/common_item_text_size_16" />
+
+        <Button
+            android:id="@+id/qualification_msgconfirm_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/button_bg"
+            android:paddingBottom="5dp"
+            android:paddingLeft="20dp"
+            android:paddingRight="20dp"
+            android:paddingTop="5dp"
+            android:text="@string/crowd_invitation_accept_button_name"
+            android:textColor="@color/button_text_color"
+            android:textSize="@dimen/common_item_text_size_16" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="1dp"
+        android:layout_below="@+id/group_list_conference_titlelayout"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="3dp"
+        android:background="@color/confs_group_widget_separation_line"
+        android:orientation="vertical" >
+    </LinearLayout>
+
+</RelativeLayout>

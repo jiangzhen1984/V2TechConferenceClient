@@ -7,7 +7,7 @@ public abstract class VMessageQualification {
 	
 	
 	public enum Type {
-		CROWD(0), CONTACT(1);
+		CROWD_INVITATION(0), CROWD_APPLICATION(1), CONTACT(2);
 		
 		private int type;
 		private Type(int type){
@@ -16,8 +16,10 @@ public abstract class VMessageQualification {
 		public static Type fromInt(int code) {
 			switch (code) {
 				case 0:
-					return CROWD;
+					return CROWD_INVITATION;
 				case 1:
+					return CROWD_APPLICATION;
+				case 2:
 					return CONTACT;
 			}
 			return null;
@@ -76,9 +78,6 @@ public abstract class VMessageQualification {
 	
 	protected long mId;
 	protected Type mType;
-	protected User mInvitationUser;
-	protected User mBeInvitatonUser;
-	protected String mApplyReason;
 	protected String mRejectReason;
 	protected Date mTimestamp;
 	protected ReadState mReadState;
@@ -91,10 +90,11 @@ public abstract class VMessageQualification {
 	 * @param invitationUser
 	 * @param beInvitatonUser
 	 */
-	protected VMessageQualification(Type type, User invitationUser, User beInvitationUser) {
+	protected VMessageQualification(Type type) {
 		this.mType = type;
-		this.mInvitationUser = invitationUser;
-		this.mBeInvitatonUser = beInvitationUser;
+		this.mReadState = ReadState.UNREAD;
+		this.mQualState = QualificationState.WAITING;
+		
 	}
 
 	
@@ -109,38 +109,6 @@ public abstract class VMessageQualification {
 
 	public void setId(long id) {
 		this.mId = id;
-	}
-
-
-
-
-	public User getInvitationUser() {
-		return mInvitationUser;
-	}
-
-
-	public void setInvitationUser(User invitationUser) {
-		this.mInvitationUser = invitationUser;
-	}
-
-
-	public User getBeInvitatonUser() {
-		return mBeInvitatonUser;
-	}
-
-
-	public void setBeInvitatonUser(User beInvitatonUser) {
-		this.mBeInvitatonUser = beInvitatonUser;
-	}
-
-
-	public String getApplyReason() {
-		return mApplyReason;
-	}
-
-
-	public void setApplyReason(String applyReason) {
-		this.mApplyReason = applyReason;
 	}
 
 

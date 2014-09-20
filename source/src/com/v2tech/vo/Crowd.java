@@ -10,13 +10,10 @@ public class Crowd implements Parcelable {
 	private User creator;
 	private String brief;
 	private String announce;
-	
+
 	public Crowd(CrowdGroup cg) {
 		this(cg.getmGId(), cg.getOwnerUser(), cg.getName(), cg.getBrief());
 	}
-
-
-
 
 	public Crowd(long id, User creator, String name, String brief) {
 		this.id = id;
@@ -58,7 +55,6 @@ public class Crowd implements Parcelable {
 		par.writeString(brief);
 	}
 
-
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -84,59 +80,44 @@ public class Crowd implements Parcelable {
 	public String getName() {
 		return this.name;
 	}
-	
+
 	public void setName(String name) {
 		this.name = name;
 	}
-
-	
-	
 
 	public String getAnnounce() {
 		return announce;
 	}
 
-
-
-
 	public void setAnnounce(String announce) {
 		this.announce = announce;
 	}
-
-
-
 
 	public User getCreator() {
 		return creator;
 	}
 
-
-
-
 	public void setCreator(User creator) {
 		this.creator = creator;
 	}
-
-
-
 
 	public String getBrief() {
 		return brief;
 	}
 
-
-
-
 	public void setBrief(String brief) {
 		this.brief = brief;
 	}
-
-
-
 
 	public long getId() {
 		return this.id;
 	}
 
+	public String toXml() {
+		StringBuffer sb = new StringBuffer();
+		sb.append("<crowd id=\"" + this.id + "\" name=\"" + this.name
+				+ "\" />");
+		return sb.toString();
+	}
 
 }

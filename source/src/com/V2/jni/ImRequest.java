@@ -9,7 +9,6 @@ import android.content.Context;
 import android.util.Log;
 
 import com.V2.jni.util.V2Log;
-import com.v2tech.util.GlobalConfig;
 
 public class ImRequest {
 	public boolean loginResult;
