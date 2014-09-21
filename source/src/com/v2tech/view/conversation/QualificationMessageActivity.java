@@ -59,10 +59,10 @@ public class QualificationMessageActivity extends Activity {
 		mBackButton.setOnClickListener(mBackButtonListener);
 
 		mMessageListView = (ListView) findViewById(R.id.message_authentication);
-		mMessageListView.setOnItemClickListener(mItemClickLIstener);
 		mMessageList = new ArrayList<VMessageQualification>();
 		adapter = new MessageAdapter();
 		mMessageListView.setAdapter(adapter);
+		mMessageListView.setOnItemClickListener(mItemClickLIstener);
 		
 		crowdService = new CrowdGroupService();
 		loadMessage();
@@ -190,7 +190,7 @@ public class QualificationMessageActivity extends Activity {
 						.findViewById(R.id.qualification_msg_res);
 				item.mAcceptButton = convertView
 						.findViewById(R.id.qualification_msgconfirm_button);
-				item.mAcceptButton.setOnClickListener(mAcceptButtonListener);
+			//	item.mAcceptButton.setOnClickListener(mAcceptButtonListener);
 				convertView.setTag(item);
 			} else {
 				item = (ViewItem) convertView.getTag();

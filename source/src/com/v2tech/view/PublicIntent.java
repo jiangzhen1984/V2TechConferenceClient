@@ -32,6 +32,8 @@ public class PublicIntent {
 	public static final String START_GROUP_CREATE_ACTIVITY = "com.v2tech.start_group_create_activity";
 	
 	public static final String START_CROWD_MEMBERS_ACTIVITY = "com.v2tech.start_crowd_members_activity";
+	
+	public static final String START_CROWD_FILES_ACTIVITY = "com.v2tech.start_crowd_files_activity";
 
 	public static final String UPDATE_CONVERSATION = "com.v2tech.update_conversation";
 	

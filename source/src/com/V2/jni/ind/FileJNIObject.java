@@ -2,11 +2,14 @@ package com.V2.jni.ind;
 
 public class FileJNIObject extends JNIObjectInd {
 
-	public long fromUserid;
+	public V2User user;
 	public String fileId;
 	public String fileName;
 	public long fileSize;
 	public int fileType;
+	
+	//For crowd file type
+	public String url;
 	
 
 	/**
@@ -17,9 +20,9 @@ public class FileJNIObject extends JNIObjectInd {
 	 * @param nFileBytes
 	 * @param linetype 2: offline file  1: online file
 	 */
-	public FileJNIObject(long userid, String szFileID, String szFileName,
+	public FileJNIObject(V2User user, String szFileID, String szFileName,
 			long nFileBytes, int linetype) {
-		this.fromUserid = userid;
+		this.user = user;
 		this.fileId = szFileID;
 		this.fileName = szFileName;
 		this.fileSize = nFileBytes;

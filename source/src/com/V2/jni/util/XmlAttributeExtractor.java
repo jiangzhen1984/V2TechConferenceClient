@@ -14,6 +14,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
+import com.V2.jni.ind.FileJNIObject;
 import com.V2.jni.ind.V2Group;
 import com.V2.jni.ind.V2User;
 
@@ -83,10 +84,10 @@ public class XmlAttributeExtractor {
 				creator = new V2User(Long.parseLong(uid));
 			}
 
-			if(crowdElement.getAttribute("name") == null)
-				V2Log.e("parseCrowd the name is wroing...the group is :" + crowdElement
-						.getAttribute("id"));
-			
+			if (crowdElement.getAttribute("name") == null)
+				V2Log.e("parseCrowd the name is wroing...the group is :"
+						+ crowdElement.getAttribute("id"));
+
 			V2Group crowd = new V2Group(Long.parseLong(crowdElement
 					.getAttribute("id")), crowdElement.getAttribute("name"),
 					V2Group.TYPE_CROWD, creator);
@@ -103,12 +104,12 @@ public class XmlAttributeExtractor {
 		if (doc == null) {
 			return null;
 		}
-		if (doc.getChildNodes().getLength()<=0) {
+		if (doc.getChildNodes().getLength() <= 0) {
 			return null;
 		}
 		List<V2Group> list = new ArrayList<V2Group>();
-		iterateNodeList(V2Group.TYPE_CONTACTS_GROUP, null, doc.getChildNodes().item(0).getChildNodes(),
-				list);
+		iterateNodeList(V2Group.TYPE_CONTACTS_GROUP, null, doc.getChildNodes()
+				.item(0).getChildNodes(), list);
 		return list;
 	}
 
@@ -117,11 +118,12 @@ public class XmlAttributeExtractor {
 		if (doc == null) {
 			return null;
 		}
-		if (doc.getChildNodes().getLength()<=0) {
+		if (doc.getChildNodes().getLength() <= 0) {
 			return null;
 		}
 		List<V2Group> list = new ArrayList<V2Group>();
-		iterateNodeList(V2Group.TYPE_ORG, null, doc.getChildNodes().item(0).getChildNodes(), list);
+		iterateNodeList(V2Group.TYPE_ORG, null, doc.getChildNodes().item(0)
+				.getChildNodes(), list);
 
 		return list;
 	}
@@ -133,14 +135,13 @@ public class XmlAttributeExtractor {
 			Element subGroupEl = (Element) gList.item(j);
 			V2Group group = null;
 
-			group = new V2Group(
-					Long.parseLong(subGroupEl.getAttribute("id")),
+			group = new V2Group(Long.parseLong(subGroupEl.getAttribute("id")),
 					subGroupEl.getAttribute("name"), type);
-			//If type is contact and is first item, means this group is default
-			if (type == V2Group.TYPE_CONTACTS_GROUP && j ==0) {
+			// If type is contact and is first item, means this group is default
+			if (type == V2Group.TYPE_CONTACTS_GROUP && j == 0) {
 				group.isDefault = true;
-				//TODO use localization
-				group.name ="我的好友";
+				// TODO use localization
+				group.name = "我的好友";
 			}
 
 			if (parent == null) {
@@ -153,6 +154,40 @@ public class XmlAttributeExtractor {
 			iterateNodeList(type, group, subGroupEl.getChildNodes(), null);
 		}
 
+	}
+
+	public static List<FileJNIObject> parseFiles(String xml) {
+		Document doc = buildDocument(xml);
+		if (doc == null) {
+			return null;
+		}
+		if (doc.getChildNodes().getLength() <= 0) {
+			return null;
+		}
+
+		List<FileJNIObject> list = new ArrayList<FileJNIObject>();
+		NodeList nList = doc.getChildNodes().item(0).getChildNodes();
+		for (int j = 0; j < nList.getLength(); j++) {
+			Element el = (Element) nList.item(j);
+			// //<file encrypttype='1' id='C2A65B9B-63C7-4C9E-A8DD-F15F74ABA6CA'
+			// * name='83025aafa40f4bfb24fdb8d1034f78f0f7361801.gif'
+			// size='497236'
+			// * time='1411112464' uploader='11029' url=
+			// *
+			// 'http://192.168.0.38:8090/crowd/C2A65B9B-63C7-4C9E-A8DD-F15F74ABA6CA/C2A65B9B-63C7-4C9E-A8DD-F15F74ABA6CA/83025aafa40f4bfb24fdb8d1034f78f0f7361801.gif'/><
+			String id = el.getAttribute("id");
+			String name = el.getAttribute("name");
+			String uploader = el.getAttribute("uploader");
+			String url = el.getAttribute("url");
+			String size = el.getAttribute("size");
+			
+			FileJNIObject file = new FileJNIObject(new V2User(
+					Long.parseLong(uploader)), id, name, Long.parseLong(size),
+					1);
+			file.url = url;
+			list.add(file);
+		}
+		return list;
 	}
 
 	public static Document buildDocument(String xml) {

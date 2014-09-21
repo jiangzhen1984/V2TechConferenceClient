@@ -49,6 +49,7 @@ public class CrowdDetailActivity extends Activity {
 	private View mShowBriefButton;
 	private View mShowAnnounceButton;
 	private View mShowMembersButton;
+	private View mSHowFilesButton;
 	private View mReturnButton;
 	private TextView mButtonText;
 	private RadioGroup mRulesRD;
@@ -80,7 +81,9 @@ public class CrowdDetailActivity extends Activity {
 		mShowAnnounceButton.setOnClickListener(mContentButtonListener);
 		mShowMembersButton= findViewById(R.id.crowd_detail_invitation_members_button);
 		mShowMembersButton.setOnClickListener(mShowMembersButtonListener);
-
+		mSHowFilesButton = findViewById(R.id.crowd_detail_files_button);
+		mSHowFilesButton.setOnClickListener(mShowFilesButtonListener);
+		
 		crowd = (CrowdGroup) GlobalHolder.getInstance().getGroupById(
 				GroupType.CHATING.intValue(), getIntent().getLongExtra("cid", 0));
 
@@ -272,6 +275,19 @@ public class CrowdDetailActivity extends Activity {
 		@Override
 		public void onClick(View view) {
 			Intent i = new Intent(PublicIntent.START_CROWD_MEMBERS_ACTIVITY);
+			i.addCategory(PublicIntent.DEFAULT_CATEGORY);
+			i.putExtra("cid", crowd.getmGId());
+			startActivity(i);
+		}
+
+	};
+	
+	
+	private OnClickListener mShowFilesButtonListener = new  OnClickListener() {
+
+		@Override
+		public void onClick(View view) {
+			Intent i = new Intent(PublicIntent.START_CROWD_FILES_ACTIVITY);
 			i.addCategory(PublicIntent.DEFAULT_CATEGORY);
 			i.putExtra("cid", crowd.getmGId());
 			startActivity(i);

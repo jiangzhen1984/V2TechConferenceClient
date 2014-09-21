@@ -8,6 +8,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import android.content.Context;
 import android.util.Log;
 
+import com.V2.jni.ind.FileJNIObject;
 import com.V2.jni.ind.V2Group;
 import com.V2.jni.ind.V2User;
 import com.V2.jni.util.V2Log;
@@ -72,7 +73,12 @@ public class GroupRequest {
 	 */
 	public native void leaveGroup(int groupType, long nGroupID);
 
-	// ɾ��һ�����ѷ���
+	/**
+	 * Remove user from group
+	 * @param groupType
+	 * @param nGroupID
+	 * @param nUserID
+	 */
 	public native void delGroupUser(int groupType, long nGroupID, long nUserID);
 
 	/**
@@ -139,6 +145,11 @@ public class GroupRequest {
 	public native void moveUserToGroup(int groupType, long srcGroupID,
 			long dstGroupID, long nUserID);
 
+	/**
+	 * 
+	 * @param type
+	 * @param groupId
+	 */
 	public native void getGroupInfo(int type, long groupId);
 
 	/**********************************************/
@@ -154,6 +165,7 @@ public class GroupRequest {
 			long nUserID, String reason);
 
 	/**
+	 * send application of join group
 	 * 
 	 * @param groupType
 	 * @param sGroupInfo
@@ -163,6 +175,7 @@ public class GroupRequest {
 			String sAdditInfo);
 
 	/**
+	 * accept application of join group
 	 * 
 	 * @param groupType
 	 * @param sGroupInfo
@@ -172,6 +185,7 @@ public class GroupRequest {
 			long nUserID);
 
 	/**
+	 * accept invitation of join group
 	 * 
 	 * @param groupType
 	 * @param t
@@ -203,7 +217,14 @@ public class GroupRequest {
 
 	}
 
-	// �ܾ����Ⱥ
+	/**
+	 * Reject application of join group
+	 * 
+	 * @param groupType
+	 * @param sGroupInfo
+	 * @param nUserID
+	 * @param sReason
+	 */
 	public native void refuseApplyJoinGroup(int groupType, String sGroupInfo,
 			long nUserID, String sReason);
 
@@ -211,6 +232,12 @@ public class GroupRequest {
 
 	public native void delGroupFile(int groupType, long nGroupId, String sXml);
 
+	
+	/**
+	 * get group file list
+	 * @param groupType
+	 * @param nGroupId
+	 */
 	public native void getGroupFileInfo(int groupType, long nGroupId);
 
 	private void OnAddGroupFile(int type, long nGroupId, String sXml) {
@@ -223,9 +250,31 @@ public class GroupRequest {
 				+ "  " + sXml);
 	}
 
-	private void OnGetGroupFileInfo(int type, long nGroupId, String sXml) {
-		V2Log.e("Group Request  OnGetGroupFileInfo" + type + "   " + nGroupId
+	/**
+	 * <filelist><file encrypttype='1' id='C2A65B9B-63C7-4C9E-A8DD-F15F74ABA6CA'
+	 * name='83025aafa40f4bfb24fdb8d1034f78f0f7361801.gif' size='497236'
+	 * time='1411112464' uploader='11029' url=
+	 * 'http://192.168.0.38:8090/crowd/C2A65B9B-63C7-4C9E-A8DD-F15F74ABA6CA/C2A65B9B-63C7-4C9E-A8DD-F15F74ABA6CA/83025aafa40f4bfb24fdb8d1034f78f0f7361801.gif'/></filelist
+	 * >
+	 * 
+	 * @param type
+	 * @param nGroupId
+	 * @param sXml
+	 */
+	private void OnGetGroupFileInfo(int groupType, long nGroupId, String sXml) {
+		V2Log.e("Group Request  OnGetGroupFileInfo" + nGroupId
 				+ "  " + sXml);
+		List<FileJNIObject> list = XmlAttributeExtractor.parseFiles(sXml);
+		V2Group group = new V2Group(nGroupId, V2Group.TYPE_CROWD);
+		
+		for (int i =0; i < mCallbacks.size(); i++) {
+			WeakReference<GroupRequestCallback> wrcb = mCallbacks.get(i);
+			Object obj = wrcb.get();
+			if (obj != null) {
+				GroupRequestCallback callback = (GroupRequestCallback) obj;
+				callback.OnGetGroupFileInfo(group,list);
+			}
+		}
 	}
 
 	/**

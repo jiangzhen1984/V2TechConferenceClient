@@ -1097,11 +1097,11 @@ public class JNIService extends Service {
 
 		@Override
 		public void OnFileTransInvite(FileJNIObject file) {
-			User fromUser = GlobalHolder.getInstance().getUser(file.fromUserid);
+			User fromUser = GlobalHolder.getInstance().getUser(file.user.uid);
 			// If doesn't receive user information from server side,
 			// construct new user object
 			if (fromUser == null) {
-				fromUser = new User(file.fromUserid);
+				fromUser = new User(file.user.uid);
 			}
 			// FIXME input date as null
 			VMessage vm = new VMessage(0, 0, fromUser, GlobalHolder

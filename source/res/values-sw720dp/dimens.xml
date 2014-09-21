@@ -9,6 +9,8 @@
     <dimen name="button_padding_horizontal">25dp</dimen>
     <dimen name="button_padding_vertical">10dp</dimen>
     <dimen name="button_gap_horizontal">15dp</dimen>
+    <dimen name="common_margin_horizontal">35dp</dimen>
+    <dimen name="common_margin_verticial">35dp</dimen>
     <dimen name="contact_detail_2_item_margin_left">10dp</dimen>
     <dimen name="contact_detail_2_item_margin_right">10dp</dimen>
 

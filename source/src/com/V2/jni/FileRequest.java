@@ -14,6 +14,7 @@ import android.content.Context;
 import android.util.Log;
 
 import com.V2.jni.ind.FileJNIObject;
+import com.V2.jni.ind.V2User;
 import com.V2.jni.util.V2Log;
 
 public class FileRequest {
@@ -148,7 +149,7 @@ public class FileRequest {
 			WeakReference<FileRequestCallback> wrf = callbacks.get(i);
 			if (wrf != null && wrf.get() != null) {
 				((FileRequestCallback) wrf.get())
-						.OnFileTransInvite(new FileJNIObject(userid, szFileID,
+						.OnFileTransInvite(new FileJNIObject(new V2User(userid), szFileID,
 								szFileName, nFileBytes, linetype));
 			}
 		}
