@@ -4,7 +4,6 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -34,9 +33,6 @@ import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.AdapterView.OnItemLongClickListener;
-import android.widget.BaseAdapter;
 import android.widget.EditText;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
@@ -50,7 +46,6 @@ import com.v2tech.service.ConferenceService;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.service.Registrant;
 import com.v2tech.service.jni.JNIResponse;
-import com.v2tech.service.jni.RequestConfCreateResponse;
 import com.v2tech.util.SPUtil;
 import com.v2tech.view.JNIService;
 import com.v2tech.view.PublicIntent;
@@ -67,9 +62,7 @@ import com.v2tech.vo.User;
 
 public class ConferenceCreateActivity extends Activity {
 
-	private static final int UPDATE_LIST_VIEW = 1;
 	private static final int UPDATE_ATTENDEES = 2;
-	private static final int UPDATE_SEARCHED_USER_LIST = 3;
 	private static final int CREATE_CONFERENC_RESP = 4;
 	private static final int DO_PRE_SELECT = 5;
 	private static final int START_GROUP_SELECT = 6;
@@ -86,11 +79,9 @@ public class ConferenceCreateActivity extends Activity {
 	private LocalHandler mLocalHandler = new LocalHandler();
 
 	private EditText searchedTextET;
-	// private ListView mContactsContainer;
 
 	private com.v2tech.view.widget.GroupListView mGroupListView;
 
-	private ContactsAdapter adapter = new ContactsAdapter();
 	private TextView mConfirmButton;
 	private EditText mConfTitleET;
 	private EditText mConfStartTimeET;
@@ -103,11 +94,7 @@ public class ConferenceCreateActivity extends Activity {
 
 	private View mScroller;
 
-	private boolean mIsStartedSearch;
-
 	private List<ListItem> mItemList = new ArrayList<ListItem>();
-	private List<ListItem> mCacheItemList;
-	private List<Group> mGroupList;
 
 	// Used to save current selected user
 	private Set<User> mAttendeeList = new HashSet<User>();
@@ -139,10 +126,6 @@ public class ConferenceCreateActivity extends Activity {
 		mGroupListView.setShowedCheckedBox(true);
 		mGroupListView.setTextFilterEnabled(true);
 		mGroupListView.setListener(listViewListener);
-		// mContactsContainer = (ListView)
-		// findViewById(R.id.conf_create_contacts_list);
-		// mContactsContainer.setOnItemClickListener(itemListener);
-		// mContactsContainer.setOnItemLongClickListener(itemLongClickListener);
 
 		mAttendeeContainer = (LinearLayout) findViewById(R.id.conference_attendee_container);
 		mAttendeeContainer.setGravity(Gravity.CENTER);
@@ -205,54 +188,6 @@ public class ConferenceCreateActivity extends Activity {
 		// finish();
 	}
 
-	private void updateView(int pos) {
-		ListItem item = mItemList.get(pos);
-		if (item.g == null) {
-			return;
-		}
-		if (item.isExpanded == false) {
-			for (Group g : item.g.getChildGroup()) {
-				ListItem cache = new ListItem(g, g.getLevel());
-				mItemList.add(++pos, cache);
-			}
-			List<User> sortList = new ArrayList<User>();
-			sortList.addAll(item.g.getUsers());
-			Collections.sort(sortList);
-			for (User u : sortList) {
-				ListItem cache = new ListItem(u, item.g.getLevel() + 1);
-				mItemList.add(++pos, cache);
-				updateItem(cache);
-			}
-
-		} else {
-			if (item.g.getChildGroup().size() <= 0
-					&& item.g.getUsers().size() <= 0) {
-				return;
-			}
-
-			int startRemovePos = pos + 1;
-			int endRemovePos = pos;
-			for (int index = pos + 1; index < mItemList.size(); index++) {
-				ListItem li = mItemList.get(index);
-				if (li.g != null && li.g.getLevel() <= item.g.getLevel()) {
-					break;
-				}
-				if (li.u != null && li.level == item.g.getLevel()) {
-					break;
-				}
-				endRemovePos++;
-			}
-
-			while (startRemovePos <= endRemovePos
-					&& endRemovePos < mItemList.size()) {
-				mItemList.remove(startRemovePos);
-				endRemovePos--;
-			}
-		}
-
-		item.isExpanded = !item.isExpanded;
-		adapter.notifyDataSetChanged();
-	}
 
 	private void updateUserToAttendList(User u, int op) {
 		if (u == null) {
@@ -277,23 +212,9 @@ public class ConferenceCreateActivity extends Activity {
 				}
 			}
 		}
-		// mAttendeeContainer.removeAllViews();
-		// for (User tmpU : mAttendeeList) {
-		// addAttendee(tmpU);
-		// }
 	}
 
-	private void updateItem(ListItem it) {
-		if (it == null || it.u == null) {
-			return;
-		}
 
-		for (User u : mAttendeeList) {
-			if (it.u.getmUserId() == u.getmUserId()) {
-				((ContactUserView) it.v).updateChecked();
-			}
-		}
-	}
 
 	private void addAttendee(User u) {
 		if (u.isCurrentLoggedInUser()) {
@@ -377,59 +298,12 @@ public class ConferenceCreateActivity extends Activity {
 		return ll;
 	}
 
-	private void updateSearchedUserList(List<User> lu) {
-		mItemList = new ArrayList<ListItem>();
-		for (User u : lu) {
-			ListItem item = new ListItem(u, -1);
-			((ContactUserView) item.v).removePadding();
-			mItemList.add(item);
-			updateItem(item);
-		}
-		adapter.notifyDataSetChanged();
-	}
 
 	private void doPreSelect() {
 		User preUser = GlobalHolder.getInstance().getUser(preSelectedUID);
 		if (preUser == null) {
 			V2Log.e("Dose not find pre-selected user");
 			return;
-		}
-
-		List<Group> li = new ArrayList<Group>();
-		Group userGroup = null;
-		if (preUser.getBelongsGroup().size() > 0) {
-			userGroup = preUser.getBelongsGroup().iterator().next();
-		}
-		while (true) {
-			if (userGroup == null) {
-				break;
-			}
-			li.add(0, userGroup);
-			userGroup = userGroup.getParent();
-		}
-
-		for (int i = 0; i < li.size(); i++) {
-			Group g = li.get(i);
-			for (int j = 0; j < mItemList.size(); j++) {
-				ListItem item = mItemList.get(j);
-				if (item.g != null && g.getmGId() == item.g.getmGId()) {
-					item.isExpanded = true;
-					for (Group subGroup : item.g.getChildGroup()) {
-						ListItem cache = new ListItem(subGroup,
-								subGroup.getLevel());
-						mItemList.add(++j, cache);
-					}
-					List<User> sortList = new ArrayList<User>();
-					sortList.addAll(item.g.getUsers());
-					Collections.sort(sortList);
-					for (User u : sortList) {
-						ListItem cache = new ListItem(u, item.g.getLevel() + 1);
-						mItemList.add(++j, cache);
-					}
-
-					break;
-				}
-			}
 		}
 
 	}
@@ -478,18 +352,6 @@ public class ConferenceCreateActivity extends Activity {
 		public void onClick(View view) {
 			User u = (User) view.getTag();
 			mGroupListView.updateCheckItem(u, false);
-			// int flag = 0;
-			// for (int index = 0; index < mItemList.size(); index++) {
-			// ListItem li = mItemList.get(index);
-			// if (li.u != null && u.getmUserId() == li.u.getmUserId()) {
-			// if (((ContactUserView) li.v).isChecked()) {
-			// flag = OP_DEL_ALL_GROUP_USER;
-			// } else {
-			// flag = OP_ADD_ALL_GROUP_USER;
-			// }
-			// ((ContactUserView) li.v).updateChecked();
-			// }
-			// }
 			Message.obtain(mLocalHandler, UPDATE_ATTENDEES,
 					OP_DEL_ALL_GROUP_USER, 0, u).sendToTarget();
 		}
@@ -500,26 +362,6 @@ public class ConferenceCreateActivity extends Activity {
 
 		@Override
 		public void afterTextChanged(Editable s) {
-			// if (s != null && s.length() > 0) {
-			// if (!mIsStartedSearch) {
-			// mCacheItemList = mItemList;
-			// mIsStartedSearch = true;
-			// }
-			// } else {
-			// if (mIsStartedSearch) {
-			// mItemList = mCacheItemList;
-			// adapter.notifyDataSetChanged();
-			// mIsStartedSearch = false;
-			// }
-			// return;
-			// }
-			// String str = s == null ? "" : s.toString();
-			// List<User> searchedUserList = new ArrayList<User>();
-			// for (Group g : mGroupList) {
-			// Group.searchUser(str, searchedUserList, g);
-			// }
-			// Message.obtain(mLocalHandler, UPDATE_SEARCHED_USER_LIST,
-			// searchedUserList).sendToTarget();
 
 			if (s.toString().isEmpty()) {
 				mGroupListView.clearTextFilter();
@@ -579,27 +421,6 @@ public class ConferenceCreateActivity extends Activity {
 
 	};
 
-	private OnItemLongClickListener itemLongClickListener = new OnItemLongClickListener() {
-
-		@Override
-		public boolean onItemLongClick(AdapterView<?> parent, View view,
-				int pos, long id) {
-			ListItem item = mItemList.get(pos);
-			if (item.g != null) {
-				ContactGroupView cgv = ((ContactGroupView) mItemList.get(pos).v);
-				cgv.updateChecked();
-				Message.obtain(
-						mLocalHandler,
-						START_GROUP_SELECT,
-						cgv.isChecked() ? OP_ADD_ALL_GROUP_USER
-								: OP_DEL_ALL_GROUP_USER, 0, item.g)
-						.sendToTarget();
-				return true;
-			}
-			return false;
-		}
-
-	};
 
 	IntentFilter intentFilter;
 	LocalBroadcastReceiver receiver = new LocalBroadcastReceiver();
@@ -628,38 +449,6 @@ public class ConferenceCreateActivity extends Activity {
 		}
 	}
 
-	private OnItemClickListener itemListener = new OnItemClickListener() {
-
-		@Override
-		public void onItemClick(AdapterView<?> parent, View view, int pos,
-				long id) {
-			ListItem item = mItemList.get(pos);
-			if (item.g != null) {
-				((ContactGroupView) mItemList.get(pos).v)
-						.doExpandedOrCollapse();
-				Message.obtain(mLocalHandler, UPDATE_LIST_VIEW, pos, 0)
-						.sendToTarget();
-			} else {
-				ContactUserView cuv = (ContactUserView) view;
-				int flag = 0;
-				for (ListItem li : mItemList) {
-					if (li.u != null
-							&& li.u.getmUserId() == cuv.getUser().getmUserId()) {
-						if (((ContactUserView) li.v).isChecked()) {
-							flag = OP_DEL_ALL_GROUP_USER;
-						} else {
-							flag = OP_ADD_ALL_GROUP_USER;
-						}
-
-						((ContactUserView) li.v).updateChecked();
-					}
-				}
-				Message.obtain(mLocalHandler, UPDATE_ATTENDEES, flag, 0, item.u)
-						.sendToTarget();
-			}
-		}
-
-	};
 
 	private OnClickListener confirmButtonListener = new OnClickListener() {
 
@@ -783,26 +572,11 @@ public class ConferenceCreateActivity extends Activity {
 
 		@Override
 		protected Void doInBackground(Void... params) {
-			// mGroupList =
-			// GlobalHolder.getInstance().getGroup(GroupType.PUBGROUP);
-			// if (mGroupList != null) {
-			// for (Group g : mGroupList) {
-			// mItemList.add(new ListItem(g, g.getLevel()));
-			// }
-			// }
 
 			mList.addAll(GlobalHolder.getInstance().getGroup(
 					GroupType.CONTACT.intValue()));
 			mList.addAll(GlobalHolder.getInstance().getGroup(
 					GroupType.ORG.intValue()));
-
-			// if (mGroupList != null) {
-			// for (Group g : mGroupList) {
-			// mItemList.add(new ListItem(g, g.getLevel()));
-			// }
-			// }
-
-			// doPreSelect();
 
 			return null;
 		}
@@ -810,24 +584,6 @@ public class ConferenceCreateActivity extends Activity {
 		@Override
 		protected void onPostExecute(Void result) {
 			mGroupListView.setGroupList(mList);
-
-			// if (preSelectedUID > 0) {
-			// ListItem item = null;
-			// User preUser = GlobalHolder.getInstance().getUser(
-			// preSelectedUID);
-			// for (int j = 0; j < mItemList.size(); j++) {
-			// item = mItemList.get(j);
-			// if (item.u != null
-			// && preUser.getmUserId() == item.u.getmUserId()) {
-			// mContactsContainer.performItemClick(item.v, j,
-			// item.u.getmUserId());
-			// break;
-			// }
-			// }
-			// }
-
-			// adapter.notifyDataSetChanged();
-			// mContactsContainer.setAdapter(adapter);
 		}
 
 	};
@@ -862,44 +618,15 @@ public class ConferenceCreateActivity extends Activity {
 
 	}
 
-	class ContactsAdapter extends BaseAdapter {
 
-		@Override
-		public int getCount() {
-			return mItemList.size();
-		}
-
-		@Override
-		public Object getItem(int position) {
-			ListItem item = mItemList.get(position);
-			return item.g == null ? item.u : item.g;
-		}
-
-		@Override
-		public long getItemId(int position) {
-			return mItemList.get(position).id;
-		}
-
-		@Override
-		public View getView(int position, View convertView, ViewGroup parent) {
-			return mItemList.get(position).v;
-		}
-
-	}
 
 	class LocalHandler extends Handler {
 
 		@Override
 		public void handleMessage(Message msg) {
 			switch (msg.what) {
-			case UPDATE_LIST_VIEW:
-				updateView(msg.arg1);
-				break;
 			case UPDATE_ATTENDEES:
 				updateUserToAttendList((User) msg.obj, msg.arg1);
-				break;
-			case UPDATE_SEARCHED_USER_LIST:
-				updateSearchedUserList((List<User>) msg.obj);
 				break;
 			case CREATE_CONFERENC_RESP:
 				JNIResponse rccr = (JNIResponse) msg.obj;

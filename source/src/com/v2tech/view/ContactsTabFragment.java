@@ -1,10 +1,7 @@
 package com.v2tech.view;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -23,20 +20,15 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.AdapterView.OnItemLongClickListener;
-import android.widget.BaseAdapter;
-import android.widget.ListView;
 
-import com.V2.jni.util.V2Log;
 import com.v2tech.R;
 import com.v2tech.service.BitmapManager;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.view.bo.GroupUserObject;
 import com.v2tech.view.bo.UserStatusObject;
-import com.v2tech.view.contacts.ContactGroupView;
-import com.v2tech.view.contacts.ContactUserView;
 import com.v2tech.view.contacts.ContactsGroupActivity;
+import com.v2tech.view.widget.GroupListView;
+import com.v2tech.view.widget.GroupListView.Item;
 import com.v2tech.vo.Group;
 import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.User;
@@ -44,10 +36,8 @@ import com.v2tech.vo.User;
 public class ContactsTabFragment extends Fragment implements TextWatcher {
 
 	private static final int FILL_CONTACTS_GROUP = 2;
-	private static final int UPDATE_LIST_VIEW = 3;
 	private static final int UPDATE_GROUP_STATUS = 4;
 	private static final int UPDATE_USER_STATUS = 5;
-	private static final int UPDATE_SEARCHED_USER_LIST = 6;
 	private static final int UPDATE_USER_SIGN = 8;
 
 	private Context mContext;
@@ -55,38 +45,31 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 	private Tab1BroadcastReceiver receiver = new Tab1BroadcastReceiver();
 	private IntentFilter intentFilter;
 
-	private ListView mContactsContainer;
-
-	private ContactsAdapter adapter = new ContactsAdapter();
+	private GroupListView mContactsContainer;
+	private View rootView;
+	private List<Group> mGroupList;
 
 	private boolean mLoaded;
 
 	private ContactsHandler mHandler = new ContactsHandler();
-
-	private boolean mIsStartedSearch = false;
-
-	private List<ListItem> mItemList = new ArrayList<ListItem>();
-	private List<ListItem> mCacheItemList;
-
-	private View rootView;
 
 	private static final int TAG_ORG = 1;
 	private static final int TAG_CONTACT = 2;
 	public static final String TAG = "ContactsTabFragment";
 
 	private int flag;
-	private int currentPos = -1;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		Log.i("wzl","ContactsTabFragment onCreate");
 		String tag = this.getArguments().getString("tag");
 		if (PublicIntent.TAG_ORG.equals(tag)) {
 			flag = TAG_ORG;
 		} else if (PublicIntent.TAG_CONTACT.equals(tag)) {
 			flag = TAG_CONTACT;
 		}
+
+		mGroupList = new ArrayList<Group>();
 
 		getActivity().registerReceiver(receiver, getIntentFilter());
 		mContext = getActivity();
@@ -98,32 +81,19 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
-		Log.i("wzl","ContactsTabFragment onCreateView");
+		Log.i("wzl", "ContactsTabFragment onCreateView");
 		if (rootView != null) {
 			return rootView;
 		}
 		rootView = inflater.inflate(R.layout.tab_fragment_contacts, container,
 				false);
-		mContactsContainer = (ListView) rootView
+		mContactsContainer = (GroupListView) rootView
 				.findViewById(R.id.contacts_container);
-		mContactsContainer.setOnItemClickListener(new OnItemClickListener() {
 
-			@Override
-			public void onItemClick(AdapterView<?> arg0, View view, int pos,
-					long id) {
-				currentPos = pos;
-				if (mItemList.get(pos).g != null) {
-					((ContactGroupView) mItemList.get(pos).v)
-							.doExpandedOrCollapse();
-					Message.obtain(mHandler, UPDATE_LIST_VIEW, pos, 0)
-							.sendToTarget();
-				}
-			}
+		mContactsContainer.setListener(mListener);
+		mContactsContainer.setTextFilterEnabled(true);
 
-		});
-		if (flag == TAG_CONTACT) {
-			mContactsContainer.setOnItemLongClickListener(mContactGroupManagementListener);
-		}
+		
 		mContactsContainer.setDivider(null);
 
 		// TextView tv = (TextView) rootView.findViewById(R.id.fragment_title);
@@ -157,18 +127,6 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 		if (!mLoaded) {
 			Message.obtain(mHandler, FILL_CONTACTS_GROUP).sendToTarget();
 		}
-		
-
-		if (currentPos != -1) {
-			View view = mItemList.get(currentPos).v;
-			if(view instanceof ContactGroupView){
-				mItemList.get(currentPos).isExpanded = lastExpanded;
-				ContactGroupView contact = ((ContactGroupView) view);
-				contact.getmGroupIndicatorIV().setTag(contact.getLastExpanded());
-				contact.doExpandedOrCollapse();
-			}
-
-		}
 	}
 
 	@Override
@@ -179,12 +137,8 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 	@Override
 	public void setUserVisibleHint(boolean isVisibleToUser) {
 		super.setUserVisibleHint(isVisibleToUser);
-		// recover search result
-		if (!isVisibleToUser && mIsStartedSearch) {
-			mItemList = mCacheItemList;
-			adapter.notifyDataSetChanged();
-			mIsStartedSearch = false;
-			return;
+		if (mContactsContainer != null) {
+			mContactsContainer.clearTextFilter();
 		}
 	}
 
@@ -203,65 +157,49 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 
 			intentFilter
 					.addAction(JNIService.JNI_BROADCAST_USER_UPDATE_NAME_OR_SIGNATURE);
-			
+
 			if (flag == TAG_CONTACT) {
-				intentFilter.addAction(PublicIntent.BROADCAST_REQUEST_UPDATE_CONTACTS_GROUP);
+				intentFilter
+						.addAction(PublicIntent.BROADCAST_REQUEST_UPDATE_CONTACTS_GROUP);
 			}
 		}
 		return intentFilter;
 	}
 
-	List<Group> l;
-
 	private synchronized void fillContactsGroup() {
 		if (mLoaded) {
 			return;
 		}
-		if (flag == TAG_CONTACT) {
-			l = GlobalHolder.getInstance().getGroup(GroupType.CONTACT.intValue());
-		} else if (flag == TAG_ORG) {
-			l = GlobalHolder.getInstance().getGroup(GroupType.ORG.intValue());
-		}
-		if (l != null) {
-			new AsyncTaskLoader().execute();
-		}
+		new AsyncTaskLoader().execute();
 	}
 
 	private Object mLock = new Object();
-	private boolean lastExpanded;
+
 	class AsyncTaskLoader extends AsyncTask<Void, Void, Void> {
 
 		@Override
 		protected Void doInBackground(Void... params) {
 			synchronized (mLock) {
-				if (mLoaded == true || l.size() <= 0) {
+				if (mLoaded) {
 					return null;
 				}
-				mItemList.clear();
-				mLoaded = true;
-				for (int i = 0; i < l.size(); i++) {
-					Group g = l.get(i);
-					ListItem li = new ListItem(g, g.getLevel());
-					mItemList.add(li);
-					iterateGroup(g);
+				if (flag == TAG_CONTACT) {
+					mGroupList = GlobalHolder.getInstance().getGroup(
+							GroupType.CONTACT.intValue());
+				} else if (flag == TAG_ORG) {
+					mGroupList = GlobalHolder.getInstance().getGroup(
+							GroupType.ORG.intValue());
+				}
+				if (mGroupList != null && mGroupList.size() > 0) {
+					mLoaded = true;
 				}
 			}
 			return null;
 		}
 
-		private void iterateGroup(Group g) {
-			// for (User u : g.getUsers()) {
-			// ListItem liu = new ListItem(u, g.getLevel() + 1);
-			// }
-			// for (Group subG : g.getChildGroup()) {
-			// ListItem lisubg = new ListItem(subG, g.getLevel());
-			// }
-		}
-
 		@Override
 		protected void onPostExecute(Void result) {
-			mContactsContainer.setAdapter(adapter);
-			adapter.notifyDataSetChanged();
+			mContactsContainer.setGroupList(mGroupList);
 		}
 
 	}
@@ -291,64 +229,22 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 				// FIXME now just support contacts remove do not support
 				if (flag == TAG_CONTACT
 						&& guo.getmType() == Group.GroupType.CONTACT.intValue()) {
-					// Remove from user
-					for (int i = 0; i < l.size(); i++) {
-						Group gr = l.get(i);
-						gr.removeUserFromGroup(guo.getmUserId());
-					}
-					//
-					for (int i = 0; i < mItemList.size(); i++) {
-						ListItem item = mItemList.get(i);
-						if (item.u != null
-								&& item.u.getmUserId() == guo.getmUserId()) {
-							mItemList.remove(i);
-							// Do not break, because use exist in more than one
-							// groups
-							i--;
-						}
-					}
-					adapter.notifyDataSetChanged();
+					mContactsContainer.removeItem(GlobalHolder.getInstance()
+							.getUser(guo.getmUserId()));
+				}
 
-				}
-				// Update all group staticist information
-				for (ListItem item : mItemList) {
-					if (item.g != null) {
-						((ContactGroupView) item.v).updateUserStatus();
-					}
-				}
 			} else if (JNIService.JNI_BROADCAST_GROUP_USER_ADDED.equals(intent
 					.getAction())) {
 				GroupUserObject guo = (GroupUserObject) intent.getExtras().get(
 						"obj");
 				if (flag == TAG_CONTACT
 						&& guo.getmType() == Group.GroupType.CONTACT.intValue()) {
-					
-					// Update all group staticist information
-					for (int i = 0; i < mItemList.size(); i++) {
-						ListItem item = mItemList.get(i);
-						if(item.u != null){
-							
-							V2Log.e(TAG, "已存在的好友：" + GlobalHolder.getInstance().getUser(item.u.getmUserId()).getArra());
-						}
-						if (item.g != null) {
-							if (item.isExpanded
-									&& item.g.getmGId() == guo.getmGroupId()) {
-								// ADD user
-								User u = GlobalHolder.getInstance().getUser(
-										guo.getmUserId());
-								V2Log.e(TAG, "获取刚添加的好友 " + u.getArra());
-								mItemList.add(++i,
-										new ListItem(u, item.g.getLevel() + 1));
-								continue;
-							}
-						}
-					}
-					Message.obtain(mHandler, UPDATE_GROUP_STATUS).sendToTarget();
-					adapter.notifyDataSetChanged();
+					mContactsContainer.addUser(GlobalHolder.getInstance()
+							.getUser(guo.getmUserId()));
 				}
-			// Contacts group is updated
-			} else if (PublicIntent.BROADCAST_REQUEST_UPDATE_CONTACTS_GROUP.equals(intent
-					.getAction())) {
+				// Contacts group is updated
+			} else if (PublicIntent.BROADCAST_REQUEST_UPDATE_CONTACTS_GROUP
+					.equals(intent.getAction())) {
 				mLoaded = false;
 				fillContactsGroup();
 			}
@@ -358,28 +254,11 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 
 	@Override
 	public void afterTextChanged(Editable s) {
-		if (s != null && s.length() > 0) {
-			if (!mIsStartedSearch) {
-				mCacheItemList = mItemList;
-				mIsStartedSearch = true;
-			}
+		if (s.toString().isEmpty()) {
+			mContactsContainer.clearTextFilter();
 		} else {
-			if (mIsStartedSearch) {
-				mItemList = mCacheItemList;
-				adapter.notifyDataSetChanged();
-				mIsStartedSearch = false;
-			}
-			return;
-
+			mContactsContainer.setFilterText(s.toString());
 		}
-		String str = s == null ? "" : s.toString();
-		List<User> searchedUserList = new ArrayList<User>();
-		for (Group g : l) {
-			Group.searchUser(str, searchedUserList, g);
-		}
-
-		Message.obtain(mHandler, UPDATE_SEARCHED_USER_LIST, searchedUserList)
-				.sendToTarget();
 	}
 
 	@Override
@@ -393,298 +272,45 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 
 	}
 
-	private void updateView(int pos) {
-		ListItem item = mItemList.get(pos);
-		if (item.g == null) {
-			return;
-		}
-		if (item.isExpanded == false) {
-			updateListState(pos, item);
-
-		} else {
-			updateListStateRemove(pos, item);
-		}
-
-		item.isExpanded = !item.isExpanded;
-		lastExpanded = item.isExpanded;
-		adapter.notifyDataSetChanged();
-	}
-
-	private void updateListStateRemove(int pos, ListItem item) {
-		List<User> uList = item.g.getUsers();
-		if ((item.g.getChildGroup() == null || item.g.getChildGroup().size() <= 0)
-				&& (uList == null || uList.size() <= 0)) {
-			return;
-		}
-
-		int startRemovePos = pos + 1;
-		int endRemovePos = pos;
-		for (int index = pos + 1; index < mItemList.size(); index++) {
-			ListItem li = mItemList.get(index);
-			if (li.g != null && li.g.getLevel() <= item.g.getLevel()) {
-				break;
-			}
-			if (li.u != null && li.level == item.g.getLevel()) {
-				break;
-			}
-			endRemovePos++;
-		}
-		V2Log.i("Contacts collpse " + startRemovePos + "  " + endRemovePos);
-		while (startRemovePos <= endRemovePos
-				&& endRemovePos < mItemList.size()) {
-			mItemList.remove(startRemovePos);
-			endRemovePos--;
-		}
-	}
-
-	private void updateListState(int pos, ListItem item) {
-		
-		List<Group> childGroup = item.g.getChildGroup();
-		for (int i = childGroup.size() - 1; i >= 0; i--) {
-			ListItem cache = new ListItem(childGroup.get(i), childGroup.get(i).getLevel());
-			mItemList.add(++pos, cache);
-		}
-		List<User> sortList = new ArrayList<User>();
-		sortList.addAll(item.g.getUsers());
-		Collections.sort(sortList);
-		for (User u : sortList) {
-			ListItem cache = new ListItem(u, item.g.getLevel() + 1);
-			mItemList.add(++pos, cache);
-		}
-	}
-
-	private void updateUserStatus(long userId, User.DeviceType deiType,
-			User.Status newState) {
-		User u = GlobalHolder.getInstance().getUser(userId);
-		if (u == null) {
-			V2Log.w("No user found, returned");
-			return;
-		}
-		// User.Status oldState = u.getmStatus();
-
-		Set<Group> groupList = new HashSet<Group>();
-		// // Match user state---Notice we can't match, because JNI update user
-		// state before this.
-		// // if new state is online or leave or busy or do not disturb and old
-		// // state is hidden or off-line
-		// // we need to re-calculate group online staticist
-		// if (((oldState == User.Status.HIDDEN || oldState ==
-		// User.Status.OFFLINE) && (newState == User.Status.ONLINE
-		// || newState == User.Status.BUSY
-		// || newState == User.Status.LEAVE || newState ==
-		// User.Status.DO_NOT_DISTURB))
-		// || ((newState == User.Status.HIDDEN || newState ==
-		// User.Status.OFFLINE) && (oldState == User.Status.ONLINE
-		// || oldState == User.Status.BUSY
-		// || oldState == User.Status.LEAVE || oldState ==
-		// User.Status.DO_NOT_DISTURB))) {
-		Set<Group> gSet = u.getBelongsGroup();
-		for (Group tg : gSet) {
-			while (tg != null) {
-				groupList.add(tg);
-				tg = tg.getParent();
-			}
-		}
-
-		// }
-		for (ListItem li : mItemList) {
-			if (li.u != null && li.u.getmUserId() == userId) {
-				((ContactUserView) li.v).updateStatus(deiType, newState);
-			}
-			if (li.g != null) {
-				for (Group g : groupList) {
-					if (g.getmGId() == li.g.getmGId()) {
-						((ContactGroupView) li.v).updateUserStatus();
-					}
-				}
-			}
-		}
-	}
-
-	private synchronized void updateUserViewPostionV2(long userId,
-			User.Status newSt) {
-		V2Log.i(" Contacts update user status : " + userId + "  : " + newSt);
-		int startSortIndex = 0;
-		boolean foundUserView = false;
-		ListItem self = null;
-		for (int i = 0; i < mItemList.size(); i++) {
-			ListItem li = mItemList.get(i);
-			if (li.u != null && li.u.getmUserId() == userId) {
-				self = li;
-				foundUserView = true;
-				break;
-			}
-			startSortIndex++;
-		}
-		if (!foundUserView) {
-			return;
-		}
-
-		// Try to looking for position which start sort index.
-		//
-		while (startSortIndex >= 0) {
-			ListItem item = mItemList.get(startSortIndex);
-			if (item.g != null) {
-				break;
-			} else if (item.u != null && item.level != self.level) {
-				break;
-			}
-			if (startSortIndex == 0) {
-				V2Log.e(" Didn't find compatable position for sort");
-				return;
-			}
-			--startSortIndex;
-		}
-		mItemList.remove(self);
-
-		int pos = startSortIndex + 1;
-		for (startSortIndex += 1; startSortIndex < mItemList.size(); startSortIndex++, pos++) {
-			ListItem item = mItemList.get(startSortIndex);
-			if (item.g != null) {
-				break;
-			}
-			// if item is current user, always sort after current user
-			if (item.u.getmUserId() == GlobalHolder.getInstance()
-					.getCurrentUserId()) {
-				continue;
-			}
-			if (newSt == User.Status.ONLINE) {
-				if (item.u.getmStatus() == User.Status.ONLINE
-						&& item.u.compareTo(self.u) < 0) {
-					continue;
-				} else {
-					break;
-				}
-			} else if (newSt == User.Status.OFFLINE
-					|| newSt == User.Status.HIDDEN) {
-				if ((item.u.getmStatus() == User.Status.OFFLINE || item.u
-						.getmStatus() == User.Status.HIDDEN)
-						&& self.u.compareTo(item.u) > 0) {
-					continue;
-				} else if (item.u.getmStatus() != User.Status.OFFLINE
-						&& item.u.getmStatus() != User.Status.HIDDEN) {
-					continue;
-				} else {
-					break;
-				}
-			} else {
-				if (item.u.getmStatus() == User.Status.ONLINE) {
-					continue;
-				} else if (item.u.getmStatus() == User.Status.OFFLINE
-						|| item.u.getmStatus() == User.Status.HIDDEN) {
-					break;
-				} else if (item.u.compareTo(self.u) < 0) {
-					continue;
-				} else {
-					break;
-				}
-			}
-		}
-
-		V2Log.i(" Contacts update pos " + pos);
-		if (pos == mItemList.size()) {
-			mItemList.add(self);
-		} else {
-			mItemList.add(pos, self);
-		}
-
-		adapter.notifyDataSetChanged();
-	}
-
-	private void updateSearchedUserList(List<User> lu) {
-		Collections.sort(lu);
-		mItemList = new ArrayList<ListItem>();
-		for (User u : lu) {
-			ListItem item = new ListItem(u, -1);
-			((ContactUserView) item.v).removePadding();
-			mItemList.add(item);
-		}
-		adapter.notifyDataSetChanged();
-	}
-
 	private BitmapManager.BitmapChangedListener bitmapChangedListener = new BitmapManager.BitmapChangedListener() {
 
 		@Override
 		public void notifyAvatarChanged(User user, Bitmap bm) {
-			for (ListItem li : mItemList) {
-				if (li.u != null && li.u.getmUserId() == user.getmUserId()) {
-					((ContactUserView) li.v).updateAvatar(bm);
-				}
+			mContactsContainer.updateItem(user);
+		}
+	};
+
+	private GroupListView.GroupListViewListener mListener = new GroupListView.GroupListViewListener() {
+
+		@Override
+		public boolean onItemLongClick(AdapterView<?> parent, View view,
+				int position, long id, Item item) {
+			if (flag == TAG_CONTACT && item.getObject() instanceof Group) {
+				Intent i = new Intent();
+				i.setClass(mContext, ContactsGroupActivity.class);
+				i.addCategory(PublicIntent.DEFAULT_CATEGORY);
+				startActivity(i);
+				return true;
 			}
+			return false;
+		}
+
+		@Override
+		public void onItemClicked(AdapterView<?> parent, View view,
+				int position, long id, Item item) {
+			if (item.getObject() instanceof User) {
+				Intent i = new Intent(PublicIntent.SHOW_CONTACT_DETAIL_ACTIVITY);
+				i.addCategory(PublicIntent.DEFAULT_CATEGORY);
+				i.putExtra("uid", ((User)item.getObject()).getmUserId());
+				startActivity(i);
+			}
+
 		}
 	};
-	
-	private OnItemLongClickListener mContactGroupManagementListener = new OnItemLongClickListener() {
 
-		@Override
-		public boolean onItemLongClick(AdapterView<?> arg0, View arg1,
-				int arg2, long arg3) {
-			Intent i = new Intent();
-			i.setClass(mContext, ContactsGroupActivity.class);
-			i.addCategory(PublicIntent.DEFAULT_CATEGORY);
-			startActivity(i);
-			return true;
-		}
-		
-	};
 
-	class ListItem {
-		long id;
-		Group g;
-		User u;
-		View v;
-		boolean isExpanded;
-		int level;
-
-		public ListItem(Group g, int level) {
-			super();
-			this.g = g;
-			this.id = 0x02000000 | g.getmGId();
-			this.v = new ContactGroupView(getActivity(), g, null);
-			isExpanded = false;
-			this.level = level;
-		}
-
-		public ListItem(User u, int level) {
-			super();
-			this.u = u;
-			this.id = 0x03000000 | u.getmUserId();
-			this.v = new ContactUserView(getActivity(), u);
-			((ContactUserView) this.v).setPaddingT((level - 1) * 35,
-					this.v.getTop(), this.v.getRight(), this.v.getBottom());
-			isExpanded = false;
-			this.level = level;
-		}
-
-	}
-
-	class ContactsAdapter extends BaseAdapter {
-
-		@Override
-		public int getCount() {
-			return mItemList == null ? 0 : mItemList.size();
-		}
-
-		@Override
-		public Object getItem(int position) {
-			ListItem item = mItemList.get(position);
-			return item.g == null ? item.u : item.g;
-		}
-
-		@Override
-		public long getItemId(int position) {
-			return mItemList.get(position).id;
-		}
-
-		@Override
-		public View getView(int position, View convertView, ViewGroup parent) {
-			return mItemList.get(position).v;
-		}
-
-	}
 
 	class ContactsHandler extends Handler {
-
 
 		@Override
 		public void handleMessage(Message msg) {
@@ -692,42 +318,21 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 			case FILL_CONTACTS_GROUP:
 				fillContactsGroup();
 				break;
-			case UPDATE_LIST_VIEW:
-				updateView(msg.arg1);
-				break;
 			case UPDATE_GROUP_STATUS:
-				if (mItemList == null) {
-					V2Log.d(" handle message UPDATE_GROUP_STATUS");
-				}
-				for (ListItem li : mItemList) {
-					if (li.g != null) {
-						((ContactGroupView) li.v).updateUserStatus();
-					}
-				}
 				break;
 			case UPDATE_USER_STATUS:
 				UserStatusObject uso = (UserStatusObject) msg.obj;
-				updateUserStatus(uso.getUid(),
-						User.DeviceType.fromInt(uso.getDeviceType()),
-						User.Status.fromInt(uso.getStatus()));
-
-				// FIXME update all users in all groups
-				updateUserViewPostionV2(uso.getUid(),
-						User.Status.fromInt(uso.getStatus()));
-				break;
-			case UPDATE_SEARCHED_USER_LIST:
-				updateSearchedUserList((List<User>) msg.obj);
+				User.Status us = User.Status.fromInt(uso.getStatus());
+				User user = GlobalHolder.getInstance().getUser(uso.getUid());
+				mContactsContainer.updateUserStatus(user, us);
 				break;
 			case UPDATE_USER_SIGN:
 				Long uid = (Long) msg.obj;
-				for (ListItem li : mItemList) {
-					if (li.u != null && li.u.getmUserId() == uid) {
-						((ContactUserView) li.v).updateSign();
-					}
-				}
+				mContactsContainer.updateItem(GlobalHolder.getInstance()
+						.getUser(uid));
 				break;
 			}
-			
+
 		}
 
 	}

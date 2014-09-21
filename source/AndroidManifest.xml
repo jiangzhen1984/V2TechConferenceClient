@@ -112,6 +112,10 @@
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" >
                 </action>
+                <action android:name="com.v2tech.contact_detail_activity" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="com.v2tech" />
             </intent-filter>
         </activity>
         <activity

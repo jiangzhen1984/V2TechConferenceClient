@@ -12,6 +12,7 @@ import android.graphics.PorterDuff;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.util.LongSparseArray;
+import android.text.TextUtils.TruncateAt;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,6 +24,7 @@ import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -50,6 +52,7 @@ public class GroupListView extends ListView {
 	private LongSparseArray<Item> mItemMap;
 	private LongSparseArray<Set<Item>> mUserItemListMap;
 	private LongSparseArray<LongSparseArray<Item>> mGroupItemUserMap;
+	private boolean mIsInFilter;
 
 	public GroupListView(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
@@ -125,6 +128,7 @@ public class GroupListView extends ListView {
 
 	/**
 	 * Update user's checked status of item
+	 * 
 	 * @param u
 	 * @param flag
 	 */
@@ -135,10 +139,10 @@ public class GroupListView extends ListView {
 		updateCheckItemWithoutNotification(u, flag);
 		adapter.notifyDataSetChanged();
 	}
-	
-	
+
 	/**
 	 * Update all group's checked status of item
+	 * 
 	 * @param group
 	 * @param flag
 	 */
@@ -150,6 +154,41 @@ public class GroupListView extends ListView {
 		adapter.notifyDataSetChanged();
 	}
 	
+	
+	/**
+	 * Remote list view item according user 
+	 * @param user
+	 */
+	public void removeItem(User user) {
+		if (user == null) {
+			return;
+		}
+		for (int i=0; i < mFilterList.size(); i++) {
+			Item item = mFilterList.get(i);
+			if (item.getId() == user.getmUserId()) {
+				mFilterList.remove(i);
+				i--;
+			}
+		}
+		
+		mUserItemListMap.remove(user.getmUserId());
+		Set<Group> gSet = user.getBelongsGroup();
+		for (Group g : gSet) {
+			LongSparseArray<Item> map = mGroupItemUserMap.get(g.getmGId());
+			map.remove(user.getmUserId());
+		}
+		adapter.notifyDataSetChanged();
+	}
+	
+	public void addUser(User user) {
+		adapter.notifyDataSetChanged();
+	}
+	
+	public void updateItem(User user) {
+		//FIXME optimze for avatar
+		adapter.notifyDataSetChanged();
+	}
+
 	private void updateCheckItemWithoutNotification(User u, boolean flag) {
 		Set<Item> list = mUserItemListMap.get(u.getmUserId());
 		if (list == null || list.size() <= 0) {
@@ -159,7 +198,7 @@ public class GroupListView extends ListView {
 			item.setChecked(flag);
 		}
 	}
-	
+
 	private void updateCheckItemWithoutNotification(Group group, boolean flag) {
 		Item item = mItemMap.get(group.getmGId());
 		item.setChecked(flag);
@@ -168,11 +207,10 @@ public class GroupListView extends ListView {
 			updateCheckItem(u, flag);
 		}
 		List<Group> subGroupList = group.getChildGroup();
-		for (int i=0; i < subGroupList.size(); i++) {
+		for (int i = 0; i < subGroupList.size(); i++) {
 			updateCheckItemWithoutNotification(subGroupList.get(i), flag);
 		}
 	}
-	
 
 	private boolean updateUserStatus(GroupItem gitem, int index, User user,
 			User.Status newSt) {
@@ -316,9 +354,18 @@ public class GroupListView extends ListView {
 
 		return item;
 	}
+	
+	
+
+	@Override
+	public void setFilterText(String filterText) {
+		mIsInFilter = true;
+		super.setFilterText(filterText);
+	}
 
 	@Override
 	public void clearTextFilter() {
+		mIsInFilter = false;
 		super.clearTextFilter();
 	}
 
@@ -334,9 +381,17 @@ public class GroupListView extends ListView {
 	public void setOnItemLongClickListener(OnItemLongClickListener listener) {
 		if (listener != mItemLongClickListener) {
 			throw new RuntimeException(
-					"Can not set others item listeners User setListener instead");
+					"Can not set others item listeners Use setListener instead");
 		}
 		super.setOnItemLongClickListener(listener);
+	}
+
+	@Override
+	public void setAdapter(ListAdapter adapter) {
+		if (this.adapter != adapter) {
+			throw new RuntimeException("Do not permit set adatper");
+		}
+		super.setAdapter(adapter);
 	}
 
 	private void collapse(GroupItem item, int pos) {
@@ -472,7 +527,7 @@ public class GroupListView extends ListView {
 				view = (GroupListViewAdapterItem) convertView;
 			}
 
-			view.update(mFilterList.get(position));
+			view.update(mFilterList.get(position), !mIsInFilter);
 			return convertView;
 		}
 
@@ -691,7 +746,7 @@ public class GroupListView extends ListView {
 					LinearLayout.LayoutParams.WRAP_CONTENT));
 		}
 
-		public void update(Item item) {
+		public void update(Item item, boolean paddingFlag) {
 			if (item == null) {
 				return;
 			}
@@ -703,14 +758,22 @@ public class GroupListView extends ListView {
 				updateGroupItem();
 				View groupRoot = mRoot.findViewById(R.id.group_view_root);
 				groupRoot.setVisibility(View.VISIBLE);
-				groupRoot.setPadding((item.getLevel() - 1) * 35, 0, 0, 0);
+				if (paddingFlag) {
+					groupRoot.setPadding((item.getLevel() - 1) * 35, 0, 0, 0);
+				} else {
+					groupRoot.setPadding(35, 0, 0, 0);
+				}
 				mRoot.findViewById(R.id.user_view_root)
 						.setVisibility(View.GONE);
 			} else {
 				updateUserItem();
 				View userRoot = mRoot.findViewById(R.id.user_view_root);
 				userRoot.setVisibility(View.VISIBLE);
-				userRoot.setPadding((item.getLevel() - 1) * 35, 0, 0, 0);
+				if (paddingFlag) {
+					userRoot.setPadding((item.getLevel() - 1) * 35, 0, 0, 0);
+				} else {
+					userRoot.setPadding(35, 0, 0, 0);
+				}
 
 				mRoot.findViewById(R.id.group_view_root).setVisibility(
 						View.GONE);
@@ -730,10 +793,25 @@ public class GroupListView extends ListView {
 					.findViewById(R.id.user_name);
 			TextView mUserSignatureTV = (TextView) mRoot
 					.findViewById(R.id.user_signature);
-
-			mUserNameTV.setText(u.getName());
 			mUserSignatureTV.setText(u.getSignature() == null ? "" : u
 					.getSignature());
+			int[] nameLo = new int[2];
+			mUserSignatureTV.getLocationInWindow(nameLo);
+			int maxWidth = 0;
+			if (mCb != null) {
+				int[] cbL = new int[2];
+				mCb.getLocationInWindow(cbL);
+				maxWidth = cbL[0] - nameLo[0] - 80;
+			} else {
+				maxWidth = this.getWidth() - nameLo[0] - 80;
+			}
+
+			mUserSignatureTV.setMaxWidth(maxWidth);
+			mUserSignatureTV.setSingleLine(true);
+			mUserSignatureTV.setEllipsize(TruncateAt.END);
+
+			mUserNameTV.setText(u.getName());
+
 			updateStatus(u.getDeviceType(), u.getmStatus());
 			if (mCBFlag) {
 				mCb = (CheckBox) mRoot.findViewById(R.id.user_check_view);

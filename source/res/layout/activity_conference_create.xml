@@ -222,9 +222,8 @@
         <com.v2tech.view.widget.GroupListView
             android:id="@+id/conf_create_contacts_list"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="0dp"
             android:layout_below="@+id/conf_create_form"
-            android:layout_weight="1"
             android:divider="@null"
             android:focusable="false" >
         </com.v2tech.view.widget.GroupListView>

@@ -211,8 +211,6 @@ public class CrowdMembersActivity extends Activity {
 			
 			
 			
-			
-			
 			//Add delete button
 			mDeleteButtonTV = new TextView(mContext);
 			mDeleteButtonTV.setText(R.string.crowd_members_delete);
@@ -220,7 +218,6 @@ public class CrowdMembersActivity extends Activity {
 			mDeleteButtonTV.setTextColor(Color.WHITE);
 			mDeleteButtonTV.setBackgroundResource(R.drawable.rounded_crowd_members_delete_button);
 			mDeleteButtonTV.setPadding(10, 5, 5, 10);
-			mDeleteButtonTV.setGravity(Gravity.RIGHT|Gravity.CENTER_VERTICAL);
 			mDeleteButtonTV.setOnClickListener(new OnClickListener() {
 
 				@Override

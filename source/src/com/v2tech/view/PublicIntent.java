@@ -40,6 +40,8 @@ public class PublicIntent {
 	public static final String SHOW_CROWD_CONTENT_ACTIVITY ="com.v2tech.crowd_content_activity";
 	
 	public static final String SHOW_CROWD_DETAIL_ACTIVITY ="com.v2tech.crowd_detail_activity";
+	
+	public static final String SHOW_CONTACT_DETAIL_ACTIVITY ="com.v2tech.contact_detail_activity";
 
 	/**
 	 * extras key: obj  value: {@link com.v2tech.view.bo.ConversationNotificationObject}

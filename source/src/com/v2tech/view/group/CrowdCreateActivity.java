@@ -1,7 +1,6 @@
 package com.v2tech.view.group;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -22,15 +21,11 @@ import android.text.TextWatcher;
 import android.view.Gravity;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.BaseAdapter;
 import android.widget.EditText;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -43,6 +38,8 @@ import com.v2tech.service.jni.CreateCrowdResponse;
 import com.v2tech.service.jni.JNIResponse;
 import com.v2tech.view.JNIService;
 import com.v2tech.view.PublicIntent;
+import com.v2tech.view.widget.GroupListView;
+import com.v2tech.view.widget.GroupListView.Item;
 import com.v2tech.vo.CrowdGroup;
 import com.v2tech.vo.CrowdGroup.AuthType;
 import com.v2tech.vo.Group;
@@ -51,9 +48,7 @@ import com.v2tech.vo.User;
 
 public class CrowdCreateActivity extends Activity {
 
-	private static final int UPDATE_LIST_VIEW = 1;
 	private static final int UPDATE_ATTENDEES = 2;
-	private static final int UPDATE_SEARCHED_USER_LIST = 3;
 	private static final int CREATE_CROWD_RESPONSE = 4;
 	private static final int UPDATE_CROWD_RESPONSE = 5;
 
@@ -64,8 +59,8 @@ public class CrowdCreateActivity extends Activity {
 	private LocalHandler mLocalHandler = new LocalHandler();
 
 	private EditText searchedTextET;
-	private ListView mContactsContainer;
-	private ContactsAdapter adapter = new ContactsAdapter();
+	private GroupListView mContactsContainer;
+	
 	private View mGroupConfirmButton;
 	private EditText mGroupTitleET;
 	private View mReturnButton;
@@ -75,10 +70,6 @@ public class CrowdCreateActivity extends Activity {
 
 	private View mScroller;
 
-	private boolean mIsStartedSearch;
-
-	private List<ListItem> mItemList = new ArrayList<ListItem>();
-	private List<ListItem> mCacheItemList;
 	private List<Group> mGroupList;
 	private CrowdGroup crowd;
 	private CrowdGroupService cg = new CrowdGroupService();
@@ -96,12 +87,14 @@ public class CrowdCreateActivity extends Activity {
 		} else {
 			setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 		}
-
 		setContentView(R.layout.crowd_create_activity);
+		mGroupList = new ArrayList<Group>();
 		mContext = this;
-		mContactsContainer = (ListView) findViewById(R.id.group_create_contacts_list);
-		mContactsContainer.setOnItemClickListener(itemListener);
-		mContactsContainer.setAdapter(adapter);
+		mContactsContainer = (GroupListView) findViewById(R.id.group_create_contacts_list);
+		mContactsContainer.setListener(listViewListener);
+		mContactsContainer.setShowedCheckedBox(true);
+		mContactsContainer.setTextFilterEnabled(true);
+		
 
 		mAttendeeContainer = (LinearLayout) findViewById(R.id.group_member_container);
 		mAttendeeContainer.setGravity(Gravity.CENTER);
@@ -178,56 +171,7 @@ public class CrowdCreateActivity extends Activity {
 		}
 	}
 
-	// FIXME duplicate code should be merge with conference create and contacts
-	// tab fragment
-	private void updateView(int pos) {
-		ListItem item = mItemList.get(pos);
-		if (item.g == null) {
-			return;
-		}
-		if (item.isExpanded == false) {
-			for (Group g : item.g.getChildGroup()) {
-				ListItem cache = new ListItem(g, g.getLevel());
-				mItemList.add(++pos, cache);
-			}
-			List<User> sortList = new ArrayList<User>();
-			sortList.addAll(item.g.getUsers());
-			Collections.sort(sortList);
-			for (User u : sortList) {
-				ListItem cache = new ListItem(u, item.g.getLevel() + 1);
-				mItemList.add(++pos, cache);
-				updateItem(cache);
-			}
-
-		} else {
-			if (item.g.getChildGroup().size() <= 0
-					&& item.g.getUsers().size() <= 0) {
-				return;
-			}
-
-			int startRemovePos = pos + 1;
-			int endRemovePos = pos;
-			for (int index = pos + 1; index < mItemList.size(); index++) {
-				ListItem li = mItemList.get(index);
-				if (li.g != null && li.g.getLevel() <= item.g.getLevel()) {
-					break;
-				}
-				if (li.u != null && li.level == item.g.getLevel()) {
-					break;
-				}
-				endRemovePos++;
-			}
-
-			while (startRemovePos <= endRemovePos
-					&& endRemovePos < mItemList.size()) {
-				mItemList.remove(startRemovePos);
-				endRemovePos--;
-			}
-		}
-
-		item.isExpanded = !item.isExpanded;
-		adapter.notifyDataSetChanged();
-	}
+	
 
 	private void updateUserToAttendList(final User u) {
 		if (u == null) {
@@ -257,17 +201,6 @@ public class CrowdCreateActivity extends Activity {
 		}
 	}
 
-	private void updateItem(ListItem it) {
-		if (it == null || it.u == null) {
-			return;
-		}
-
-		for (User u : mUserList) {
-			if (it.u.getmUserId() == u.getmUserId()) {
-				((ContactUserView) it.v).updateChecked();
-			}
-		}
-	}
 
 	private void addAttendee(User u) {
 		if (u.isCurrentLoggedInUser()) {
@@ -344,16 +277,6 @@ public class CrowdCreateActivity extends Activity {
 		return ll;
 	}
 
-	private void updateSearchedUserList(List<User> lu) {
-		mItemList = new ArrayList<ListItem>();
-		for (User u : lu) {
-			ListItem item = new ListItem(u, -1);
-			((ContactUserView) item.v).removePadding();
-			mItemList.add(item);
-			updateItem(item);
-		}
-		adapter.notifyDataSetChanged();
-	}
 
 	private OnClickListener removeAttendeeListener = new OnClickListener() {
 
@@ -361,12 +284,7 @@ public class CrowdCreateActivity extends Activity {
 		public void onClick(View view) {
 			User u = (User) view.getTag();
 			Message.obtain(mLocalHandler, UPDATE_ATTENDEES, u).sendToTarget();
-			for (int index = 0; index < mItemList.size(); index++) {
-				ListItem li = mItemList.get(index);
-				if (li.u != null && u.getmUserId() == li.u.getmUserId()) {
-					((ContactUserView) li.v).updateChecked();
-				}
-			}
+			mContactsContainer.updateCheckItem(u, false);
 		}
 
 	};
@@ -375,26 +293,11 @@ public class CrowdCreateActivity extends Activity {
 
 		@Override
 		public void afterTextChanged(Editable s) {
-			if (s != null && s.length() > 0) {
-				if (!mIsStartedSearch) {
-					mCacheItemList = mItemList;
-					mIsStartedSearch = true;
-				}
+			if (s.toString().isEmpty()) {
+				mContactsContainer.clearTextFilter();
 			} else {
-				if (mIsStartedSearch) {
-					mItemList = mCacheItemList;
-					adapter.notifyDataSetChanged();
-					mIsStartedSearch = false;
-				}
-				return;
+				mContactsContainer.setFilterText(s.toString());
 			}
-			String str = s == null ? "" : s.toString();
-			List<User> searchedUserList = new ArrayList<User>();
-			for (Group g : mGroupList) {
-				Group.searchUser(str, searchedUserList, g);
-			}
-			Message.obtain(mLocalHandler, UPDATE_SEARCHED_USER_LIST,
-					searchedUserList).sendToTarget();
 		}
 
 		@Override
@@ -411,31 +314,28 @@ public class CrowdCreateActivity extends Activity {
 
 	};
 
-	private OnItemClickListener itemListener = new OnItemClickListener() {
-
+	
+	
+	private GroupListView.GroupListViewListener listViewListener = new GroupListView.GroupListViewListener() {
+		
 		@Override
-		public void onItemClick(AdapterView<?> parent, View view, int pos,
-				long id) {
-			ListItem item = mItemList.get(pos);
-			if (item.g != null) {
-				((ContactGroupView) mItemList.get(pos).v)
-						.doExpandedOrCollapse();
-				Message.obtain(mLocalHandler, UPDATE_LIST_VIEW, pos, 0)
-						.sendToTarget();
-			} else {
-				ContactUserView cuv = (ContactUserView) view;
-				for (ListItem li : mItemList) {
-					if (li.u != null
-							&& li.u.getmUserId() == cuv.getUser().getmUserId()) {
-						((ContactUserView) li.v).updateChecked();
-					}
-				}
-				Message.obtain(mLocalHandler, UPDATE_ATTENDEES, item.u)
-						.sendToTarget();
+		public boolean onItemLongClick(AdapterView<?> parent, View view,
+				int position, long id, Item item) {
+			return false;
+		}
+		
+		@Override
+		public void onItemClicked(AdapterView<?> parent, View view, int position,
+				long id, Item item) {
+			Object obj = item.getObject();
+			if (obj instanceof User) {
+				mContactsContainer.updateCheckItem((User)obj, !item.isChecked());
+				Message.obtain(mLocalHandler, UPDATE_ATTENDEES, (User)obj)
+				.sendToTarget();
 			}
 		}
-
 	};
+
 
 	private OnClickListener confirmButtonListener = new OnClickListener() {
 
@@ -490,88 +390,27 @@ public class CrowdCreateActivity extends Activity {
 
 		@Override
 		protected Void doInBackground(Void... params) {
-			mGroupList = GlobalHolder.getInstance().getGroup(GroupType.ORG.intValue());
-			if (mGroupList != null) {
-				for (Group g : mGroupList) {
-					mItemList.add(new ListItem(g, g.getLevel()));
-				}
-			}
+			mGroupList.clear();
+			mGroupList.addAll(GlobalHolder.getInstance().getGroup(GroupType.CONTACT.intValue()));
+			mGroupList.addAll(GlobalHolder.getInstance().getGroup(GroupType.ORG.intValue()));
 			return null;
 		}
 
 		@Override
 		protected void onPostExecute(Void result) {
-			adapter.notifyDataSetChanged();
+			mContactsContainer.setGroupList(mGroupList);
 		}
 
 	};
 
-	class ListItem {
-		long id;
-		Group g;
-		User u;
-		View v;
-		boolean isExpanded;
-		int level;
-
-		public ListItem(Group g, int level) {
-			super();
-			this.g = g;
-			this.id = 0x02000000 | g.getmGId();
-			this.v = new ContactGroupView(mContext, g, null);
-			isExpanded = false;
-			this.level = level;
-		}
-
-		public ListItem(User u, int level) {
-			super();
-			this.u = u;
-			this.id = 0x03000000 | u.getmUserId();
-			this.v = new ContactUserView(mContext, u);
-			isExpanded = false;
-			this.level = level;
-		}
-
-	}
-
-	class ContactsAdapter extends BaseAdapter {
-
-		@Override
-		public int getCount() {
-			return mItemList.size();
-		}
-
-		@Override
-		public Object getItem(int position) {
-			ListItem item = mItemList.get(position);
-			return item.g == null ? item.u : item.g;
-		}
-
-		@Override
-		public long getItemId(int position) {
-			return mItemList.get(position).id;
-		}
-
-		@Override
-		public View getView(int position, View convertView, ViewGroup parent) {
-			return mItemList.get(position).v;
-		}
-
-	}
 
 	class LocalHandler extends Handler {
 
 		@Override
 		public void handleMessage(Message msg) {
 			switch (msg.what) {
-			case UPDATE_LIST_VIEW:
-				updateView(msg.arg1);
-				break;
 			case UPDATE_ATTENDEES:
 				updateUserToAttendList((User) msg.obj);
-				break;
-			case UPDATE_SEARCHED_USER_LIST:
-				updateSearchedUserList((List<User>) msg.obj);
 				break;
 			case CREATE_CROWD_RESPONSE: {
 				JNIResponse recr = (JNIResponse) msg.obj;
