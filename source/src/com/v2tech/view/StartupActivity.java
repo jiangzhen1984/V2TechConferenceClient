@@ -24,7 +24,6 @@ public class StartupActivity extends Activity {
 		} 
 		setContentView(R.layout.load);
 		
-		initDPI();
 		initSearchMap();
 		new LoaderThread().start();
 	}
@@ -53,19 +52,6 @@ public class StartupActivity extends Activity {
 			startActivity(new Intent(this, LoginActivity.class));
 		}
 		finish();
-	}
-
-	private void initDPI() {
-		DisplayMetrics metrics = new DisplayMetrics();
-
-		getWindowManager().getDefaultDisplay().getMetrics(metrics);
-		GlobalConfig.GLOBAL_DPI = metrics.densityDpi;
-		V2Log.i("Init user device DPI: " + GlobalConfig.GLOBAL_DPI);
-		DisplayMetrics dm = new DisplayMetrics();
-		getWindowManager().getDefaultDisplay().getMetrics(dm);
-		double x = Math.pow(dm.widthPixels / dm.xdpi, 2);
-		double y = Math.pow(dm.heightPixels / dm.ydpi, 2);
-		GlobalConfig.SCREEN_INCHES = Math.sqrt(x + y);
 	}
 
 	class LoaderThread extends Thread {

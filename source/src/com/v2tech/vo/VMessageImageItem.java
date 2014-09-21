@@ -79,7 +79,7 @@ public class VMessageImageItem extends VMessageAbstractItem {
 		int[] w = new int[2];
 		BitmapUtil.getFullBitmapBounds(filePath, w);
 		String str = " <TPictureChatItem NewLine=\"True\" AutoResize=\"True\" FileExt=\""
-				+ getFilePath()
+				+ getExtension()
 				+ "\" GUID=\""+uuid+"\" Height=\""
 				+ w[1]
 				+ "\" Width=\"" + w[0] + "\" />";

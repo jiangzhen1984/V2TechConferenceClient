@@ -49,6 +49,7 @@ import com.v2tech.db.V2techSearchContentProvider;
 import com.v2tech.service.BitmapManager;
 import com.v2tech.service.ConferencMessageSyncService;
 import com.v2tech.service.ConferenceService;
+import com.v2tech.service.CrowdGroupService;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.service.Registrant;
 import com.v2tech.service.jni.JNIResponse;
@@ -75,6 +76,7 @@ import com.v2tech.vo.ContactConversation;
 import com.v2tech.vo.Conversation;
 import com.v2tech.vo.ConversationFirendAuthentication;
 import com.v2tech.vo.CrowdConversation;
+import com.v2tech.vo.CrowdGroup;
 import com.v2tech.vo.Group;
 import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.User;
@@ -120,6 +122,8 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 	private ConversationsAdapter adapter = new ConversationsAdapter();
 
 	private ConferenceService cb;
+	
+	private CrowdGroupService crowdService;
 
 	private int mCurrentTabFlag;
 
@@ -142,6 +146,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 			mCurrentTabFlag = Conversation.TYPE_CONTACT;
 		} else if (PublicIntent.TAG_GROUP.equals(tag)) {
 			mCurrentTabFlag = Conversation.TYPE_GROUP;
+			crowdService = new CrowdGroupService();
 		}
 		mContext = getActivity();
 
@@ -302,6 +307,9 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 		if (s != null && s.length() > 0) {
 
 			if (!mIsStartedSearch) {
+				searchList.clear();
+				lastSize = 0;
+				startIndex = 0;
 				mIsStartedSearch = true;
 				searchList.addAll(mItemList);
 			}
@@ -607,8 +615,9 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 
 		for (Group g : list) {
 			Conversation cov = null;
-			if(g.getName() == null)
-				V2Log.e(TAG, "the group name is null , group id is :" + g.getmGId());
+			if (g.getName() == null)
+				V2Log.e(TAG,
+						"the group name is null , group id is :" + g.getmGId());
 			if (g.getGroupType() == GroupType.CONFERENCE) {
 				cov = new ConferenceConversation(g);
 			} else if (g.getGroupType() == GroupType.CHATING) {
@@ -775,7 +784,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 
 		voiceMessageItem.setReadFlag(Conversation.READ_FLAG_READ);
 		verificationMessageItem.setReadFlag(Conversation.READ_FLAG_READ);
-		
+
 	}
 
 	private void updateVoiceSpecificItemState() {
@@ -1097,14 +1106,6 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 									+ "=? and "
 									+ ContentDescriptor.RecentHistoriesMessage.Cols.HISTORY_RECENT_MESSAGE_GROUP_TYPE
 									+ "=?", new String[] { id + "", type + "" });
-		} else if (this.mCurrentTabFlag == Conversation.TYPE_CONFERNECE) {
-			Group g = GlobalHolder.getInstance().getGroupById(
-					GroupType.CONFERENCE.intValue(), id);
-			// If group is null, means we have removed this conversaion
-			if (g != null) {
-				cb.quitConference(new Conference(id, g.getOwnerUser()
-						.getmUserId()), null);
-			}
 		}
 
 		Conversation cache = null;
@@ -1326,7 +1327,8 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 					new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog, int which) {
 							if (which == 0) {
-								if (mCurrentTabFlag == Conversation.TYPE_CONFERNECE) {
+								switch (mCurrentTabFlag) {
+								case Conversation.TYPE_CONFERNECE:
 									Group g = GlobalHolder.getInstance()
 											.getGroupById(
 													GroupType.CONFERENCE
@@ -1341,8 +1343,18 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 																.getmUserId()),
 												null);
 									}
+									break;
+								case Conversation.TYPE_GROUP:
+									CrowdGroup crowd = (CrowdGroup) GlobalHolder.getInstance()
+									.getGroupById(
+											GroupType.CHATING
+													.intValue(),
+											cov.getExtId());
+									if (crowdService != null) {
+										crowdService.quitCrowd(crowd, null);
+									}
+									break;
 								}
-
 								removeConversation(cov.getExtId(),
 										cov.getType());
 							} else {
@@ -1470,18 +1482,16 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 				for (ScrollItem item : mItemList) {
 					if ((item.cov.getType() == Conversation.TYPE_CONFERNECE)
 							|| item.cov.getType() == Conversation.TYPE_GROUP) {
-						
+
 						Group g = null;
 						String groupType = null;
 						switch (item.cov.getType()) {
 						case Conversation.TYPE_CONFERNECE:
-							g = ((ConferenceConversation) item.cov)
-							.getGroup();
+							g = ((ConferenceConversation) item.cov).getGroup();
 							groupType = "CONFERENCE";
 							break;
 						case Conversation.TYPE_GROUP:
-							g = ((CrowdConversation) item.cov)
-							.getGroup();
+							g = ((CrowdConversation) item.cov).getGroup();
 							groupType = "CROWD";
 							break;
 						}
@@ -1490,8 +1500,9 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 						if (u == null) {
 							continue;
 						}
-						V2Log.e(TAG,
-								"update "+groupType+" group user name :"+ u.getName() + "group id is :" + g.getmGId());
+						V2Log.e(TAG, "update " + groupType
+								+ " group user name :" + u.getName()
+								+ "group id is :" + g.getmGId());
 						((GroupLayout) item.gp).updateContent(u.getName());
 						g.setOwnerUser(u);
 					} else if (item.cov.getType() == Conversation.TYPE_CONTACT) {

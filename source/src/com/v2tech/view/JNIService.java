@@ -40,6 +40,7 @@ import com.V2.jni.VideoRequest;
 import com.V2.jni.VideoRequestCallbackAdapter;
 import com.V2.jni.ind.AudioJNIObjectInd;
 import com.V2.jni.ind.FileJNIObject;
+import com.V2.jni.ind.SendingResultJNIObjectInd;
 import com.V2.jni.ind.V2Conference;
 import com.V2.jni.ind.V2Group;
 import com.V2.jni.ind.V2User;
@@ -991,6 +992,19 @@ public class JNIService extends Service {
 				break;
 			default:
 				break;
+			}
+		}
+		
+		@Override
+		public void OnSendChatResult(SendingResultJNIObjectInd ind) {
+			super.OnSendChatResult(ind);
+			if(ind.getRet() == SendingResultJNIObjectInd.Result.FAILED){
+				Intent i = new Intent();
+				i.setAction(JNIService.JNI_BROADCAST_MESSAGE_SENT_FAILED);
+				i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
+				i.putExtra("uuid",ind.getUuid());
+				i.putExtra("errorCode",ind.getErrorCode());
+				sendBroadcast(i);
 			}
 		}
 
