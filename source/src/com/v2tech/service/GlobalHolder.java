@@ -95,16 +95,6 @@ public class GlobalHolder {
 			return null;
 		}
 		
-		
-		if (u.getName() != null) {
-			Log.i("wzl", u.getName());
-			if (u.getName().equals("zhao2")
-					|| u.getName().equals("gzm")) {
-				Log.i("wzl", u.toXml());
-			}
-		}
-		
-		
 		synchronized (mUserLock) {
 			Long key = Long.valueOf(id);
 			User cu = mUserHolder.get(key);

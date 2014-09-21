@@ -62,7 +62,7 @@ import com.v2tech.view.conference.GroupLayout;
 import com.v2tech.view.conference.VideoActivityV2;
 import com.v2tech.view.contacts.VoiceMessageActivity;
 import com.v2tech.view.contacts.add.AddFriendHistroysHandler;
-import com.v2tech.view.contacts.add.MessageAuthenticationActivity;
+import com.v2tech.view.conversation.MessageAuthenticationActivity;
 import com.v2tech.view.conversation.MessageLoader;
 import com.v2tech.view.conversation.P2PConversation;
 import com.v2tech.view.group.CrowdDetailActivity;
