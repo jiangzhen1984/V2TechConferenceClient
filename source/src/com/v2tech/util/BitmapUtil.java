@@ -46,11 +46,11 @@ public class BitmapUtil {
 
 	public static Bitmap getCompressedBitmap(String file) {
 		if (file == null) {
-			return null;
+			throw new NullPointerException(" file is null");
 		}
 		File f = new File(file);
 		if (!f.exists()) {
-			return null;
+			throw new RuntimeException(" file is no exists :" + file);
 		}
 
 		BitmapFactory.Options options = new BitmapFactory.Options();

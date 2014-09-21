@@ -7,10 +7,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
+import java.util.UUID;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -68,19 +65,22 @@ public class MessageBuilder {
 
 	public static VMessage buildImageMessage(int groupType, long groupID,
 			User fromUser, User toUser, String imagePath) {
-		File newFile = copyBinaryData(MESSAGE_TYPE_IMAGE, imagePath);
+		String uuid = UUID.randomUUID().toString();
+		File newFile = copyBinaryData(MESSAGE_TYPE_IMAGE, imagePath , uuid);
 		if (newFile == null)
 			return null;
 		imagePath = newFile.getAbsolutePath();
 		VMessage vm = new VMessage(groupType, groupID, fromUser, toUser,
 				new Date(GlobalConfig.getGlobalServerTime()));
 		VMessageImageItem item = new VMessageImageItem(vm, imagePath);
+		item.setUuid(uuid);
 		return item.getVm();
 	}
 
 	public static VMessage buildAudioMessage(int groupType, long groupID,
 			User fromUser, User toUser, String audioPath, int seconds) {
-		File newFile = copyBinaryData(MESSAGE_TYPE_AUDIO, audioPath);
+		String uuid = UUID.randomUUID().toString();
+		File newFile = copyBinaryData(MESSAGE_TYPE_AUDIO, audioPath , uuid);
 		if (newFile == null)
 			return null;
 		audioPath = newFile.getAbsolutePath();
@@ -88,18 +88,21 @@ public class MessageBuilder {
 				new Date(GlobalConfig.getGlobalServerTime()));
 		VMessageAudioItem item = new VMessageAudioItem(vm, audioPath, seconds);
 		item.setState(VMessageAbstractItem.STATE_READED);
+		item.setUuid(uuid);
 		return item.getVm();
 	}
 
 	public static VMessage buildFileMessage(int groupType, long groupID,
 			User fromUser, User toUser, String filePath, int fileType) {
-		File newFile = copyBinaryData(MESSAGE_TYPE_FILE, filePath);
+		String uuid = UUID.randomUUID().toString();
+		File newFile = copyBinaryData(MESSAGE_TYPE_FILE, filePath , uuid);
 		if (newFile == null)
 			return null;
 		filePath = newFile.getAbsolutePath();
 		VMessage vm = new VMessage(groupType, groupID, fromUser, toUser,
 				new Date(GlobalConfig.getGlobalServerTime()));
-		new VMessageFileItem(vm, filePath, fileType);
+		VMessageFileItem item = new VMessageFileItem(vm, filePath, fileType);
+		item.setUuid(uuid);
 		return vm;
 	}
 
@@ -242,7 +245,7 @@ public class MessageBuilder {
 					vm.getmDateLong());
 			values.put(
 					ContentDescriptor.HistoriesGraphic.Cols.HISTORY_GRAPHIC_PATH,
-					vMessageImageItem.getFilePath());
+					vMessageImageItem.getExtension());
 			values.put(ContentDescriptor.HistoriesGraphic.Cols.OWNER_USER_ID,
 					GlobalHolder.getInstance().getCurrentUserId());
 			uri = mContext.getContentResolver().insert(
@@ -462,7 +465,7 @@ public class MessageBuilder {
 	 * @param filePath
 	 * @return
 	 */
-	private static File copyBinaryData(int type, String filePath) {
+	private static File copyBinaryData(int type, String filePath , String uuid) {
 
 		if (TextUtils.isEmpty(filePath))
 			return null;
@@ -480,16 +483,16 @@ public class MessageBuilder {
 			User user = GlobalHolder.getInstance().getCurrentUser();
 			switch (type) {
 			case MESSAGE_TYPE_IMAGE:
-				desFile = new File(GlobalConfig.getGlobalPicsPath(user) + "/"
-						+ fileName);
+				desFile = new File(GlobalConfig.getGlobalPicsPath(user) + "/" + uuid 
+						+ fileName.substring(fileName.lastIndexOf(".")) + 1);
 				break;
 			case MESSAGE_TYPE_AUDIO:
-				desFile = new File(GlobalConfig.getGlobalAudioPath(user) + "/"
-						+ fileName);
+				desFile = new File(GlobalConfig.getGlobalAudioPath(user) + "/" + uuid 
+						+ fileName.substring(fileName.lastIndexOf(".")) + 1);
 				break;
 			case MESSAGE_TYPE_FILE:
-				desFile = new File(GlobalConfig.getGlobalFilePath(user) + "/"
-						+ fileName);
+				desFile = new File(GlobalConfig.getGlobalFilePath(user) + "/" + uuid 
+						+ fileName.substring(fileName.lastIndexOf(".")) + 1);
 				break;
 			default:
 				throw new RuntimeException(

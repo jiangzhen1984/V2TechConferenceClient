@@ -115,9 +115,13 @@ public class MessageLoader {
 	}
 
 	/**
-	 * 
+	 * 分页加载聊天消息数据
 	 * @param context
-	 * @param groupId
+	 * @param uid1
+	 * @param uid2
+	 * @param limit
+	 * @param offset
+	 * @param groupType
 	 * @return
 	 */
 	public static List<VMessage> loadMessageByPage(Context context, long uid1,
@@ -165,6 +169,13 @@ public class MessageLoader {
 		}
 	}
 
+	/**
+	 * 根据指定用户id，加载出所有图片
+	 * @param context
+	 * @param uid1
+	 * @param uid2
+	 * @return
+	 */
 	public static List<VMessage> loadImageMessage(Context context, long uid1,
 			long uid2) {
 		List<VMessage> imageItems = new ArrayList<VMessage>();
@@ -233,6 +244,13 @@ public class MessageLoader {
 		return imageItems;
 	}
 
+	/**
+	 * 根据用户id，加载音频或视频通信记录
+	 * @param context
+	 * @param uid
+	 * @param meidaType
+	 * @return
+	 */
 	public static List<AudioVideoMessageBean> loadAudioOrVideoHistoriesMessage(
 			Context context, long uid, int meidaType) {
 
@@ -457,7 +475,10 @@ public class MessageLoader {
 	/**
 	 * 
 	 * @param context
+	 * @param groupType
 	 * @param groupId
+	 * @param limit
+	 * @param offset
 	 * @return
 	 */
 	public static List<VMessage> loadGroupMessageByPage(Context context,
@@ -525,6 +546,12 @@ public class MessageLoader {
 
 	}
 
+	/**
+	 * delete the VMessage 
+	 * @param context
+	 * @param vm
+	 * @return
+	 */
 	public static int deleteMessage(Context context, VMessage vm) {
 		if (vm == null)
 			return -1;
@@ -566,9 +593,8 @@ public class MessageLoader {
 
 	/**
 	 * update the given audio message read state...
-	 * 
 	 * @param context
-	 * @param audioItem
+	 * @param vm
 	 * @return
 	 */
 	public static int updateChatMessageState(Context context, VMessage vm) {
@@ -592,8 +618,8 @@ public class MessageLoader {
 
 	/**
 	 * update the given audio message read state...
-	 * 
 	 * @param context
+	 * @param vm
 	 * @param audioItem
 	 * @return
 	 */
@@ -619,9 +645,9 @@ public class MessageLoader {
 
 	/**
 	 * update the given audio message read state...
-	 * 
 	 * @param context
-	 * @param audioItem
+	 * @param vm
+	 * @param fileItem
 	 * @return
 	 */
 	public static int updateFileItemState(Context context, VMessage vm,
@@ -736,6 +762,13 @@ public class MessageLoader {
 		return getNewestMediaMessage(context, null, null);
 	}
 
+	/**
+	 * 根据传入的查询条件，获取最新的通信消息对象(音频或视频通信)
+	 * @param context
+	 * @param selection
+	 * @param selectionArgs
+	 * @return
+	 */
 	public static VideoBean getNewestMediaMessage(Context context,
 			String selection, String[] selectionArgs) {
 
@@ -772,7 +805,7 @@ public class MessageLoader {
 	}
 
 	/**
-	 * 
+	 * 根据传入的group的type和id，查询数据库，获取最新的VMessage对象，群组
 	 * @param context
 	 * @param groupId
 	 * @return
@@ -795,6 +828,11 @@ public class MessageLoader {
 		}
 	}
 
+	/**
+	 * 根据传入的id，查询数据库，获取最新的VMessage对象
+	 * @param cur
+	 * @return
+	 */
 	public static VMessage getNewestMessage(Context context, long uid1,
 			long uid2) {
 		if (!init(context, 0, 0, uid2, CONTACT_TYPE))
@@ -838,6 +876,11 @@ public class MessageLoader {
 		}
 	}
 
+	/**
+	 * 根据传入的Cursor对象，构造一个VMessage对象
+	 * @param cur
+	 * @return
+	 */
 	private static VMessage extractMsg(Cursor cur) {
 		if (cur.isClosed()) {
 			throw new RuntimeException(" cursor is closed");
@@ -889,6 +932,12 @@ public class MessageLoader {
 		return vm;
 	}
 
+	/**
+	 * 根据传入的表名，判断当前数据库中是否存在该表
+	 * @param context
+	 * @param tabName 表名
+	 * @return
+	 */
 	private static boolean isExistTable(Context context, String tabName) {
 		DataBaseContext mContext = new DataBaseContext(context);
 		SQLiteDatabase base = mContext.openOrCreateDatabase(
@@ -914,6 +963,12 @@ public class MessageLoader {
 		return false;
 	}
 
+	/**
+	 * 根据传入的VMessage对象，查询数据库，向其填充VMessageImageItem对象。
+	 * @param vm
+	 * @param context
+	 * @return
+	 */
 	private static VMessage loadImageMessageById(VMessage vm, Context context) {
 
 		List<VMessageImageItem> imageItems = vm.getImageItems();
@@ -951,6 +1006,12 @@ public class MessageLoader {
 		return vm;
 	}
 
+	/**
+	 * 根据传入的VMessage对象，查询数据库，向其填充VMessageAudioItem对象。
+	 * @param vm
+	 * @param context
+	 * @return
+	 */
 	private static VMessage loadAudioMessageById(VMessage vm, Context context) {
 
 		List<VMessageAudioItem> audioItems = vm.getAudioItems();
@@ -988,6 +1049,12 @@ public class MessageLoader {
 		return vm;
 	}
 
+	/**
+	 * 根据传入的VMessage对象，查询数据库，向其填充VMessageFileItem对象。
+	 * @param vm
+	 * @param context
+	 * @return
+	 */
 	private static VMessage loadFileMessageById(VMessage vm, Context context) {
 
 		List<VMessageFileItem> fileItems = vm.getFileItems();
