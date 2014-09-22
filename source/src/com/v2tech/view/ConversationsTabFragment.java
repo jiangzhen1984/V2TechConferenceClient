@@ -446,7 +446,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 
 		// if(mItemListCache == null){
 		// mItemListCache = new CopyOnWriteArrayList<ScrollItem>();
-		// mItemListCache.addAll(mItemList);
+//		 mItemListCache.addAll(mItemList);
 		// }
 	}
 

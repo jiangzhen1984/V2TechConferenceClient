@@ -180,24 +180,29 @@
             android:textColor="@color/fragment_conversation_title_text_color"
             android:textSize="@dimen/fragment_conversation_connected_title_text_text_size" />
 
-        <SurfaceView
-            android:id="@+id/fragment_conversation_connected_video_local_surface"
-            android:layout_width="@dimen/fragment_conversation_connected_local_video_layout_width"
-            android:layout_height="@dimen/fragment_conversation_connected_local_video_layout_height"
-            android:layout_above="@+id/fragment_conversation_connected_video_button_container"
-            android:layout_alignParentRight="true"
-            android:layout_marginBottom="@dimen/fragment_conversation_connected_local_surface_margin_bottom"
-            android:layout_marginRight="@dimen/fragment_conversation_connected_local_surface_margin_right" />
-
-        <ImageView
-            android:id="@+id/fragment_conversation_reverse_camera_button"
+        <RelativeLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignRight="@+id/fragment_conversation_connected_video_local_surface"
-            android:layout_alignTop="@+id/fragment_conversation_connected_video_local_surface"
-            android:layout_marginRight="@dimen/fragment_conversation_connected_local_surface_margin_right"
-            android:src="@drawable/converse_camera_button"
-             />
+            android:layout_above="@+id/fragment_conversation_connected_video_button_container"
+            android:layout_alignParentRight="true" >
+
+            <SurfaceView
+                android:id="@+id/fragment_conversation_connected_video_local_surface"
+                android:layout_width="@dimen/fragment_conversation_connected_local_video_layout_width"
+                android:layout_height="@dimen/fragment_conversation_connected_local_video_layout_height"
+                android:layout_marginBottom="@dimen/fragment_conversation_connected_local_surface_margin_bottom"
+                android:layout_marginRight="@dimen/fragment_conversation_connected_local_surface_margin_right"
+                android:background="@drawable/local_video_bg" />
+
+            <ImageView
+                android:id="@+id/fragment_conversation_reverse_camera_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignRight="@+id/fragment_conversation_connected_video_local_surface"
+                android:layout_alignTop="@+id/fragment_conversation_connected_video_local_surface"
+                android:layout_margin="@dimen/fragment_conversation_connected_local_surface_margin_right"
+                android:src="@drawable/converse_camera_button" />
+        </RelativeLayout>
     </RelativeLayout>
 
 </RelativeLayout>

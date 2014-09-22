@@ -67,7 +67,7 @@ public class P2PConversation extends Activity implements
 
 	private static final String SURFACE_HOLDER_TAG_LOCAL = "local";
 	private static final String SURFACE_HOLDER_TAG_REMOTE = "remote";
-	
+
 	public static final String P2P_BROADCAST_MEDIA_UPDATE = "com.v2tech.p2p.broadcast.media_update";
 
 	private Context mContext;
@@ -95,6 +95,8 @@ public class P2PConversation extends Activity implements
 	private SurfaceView mLcalSurface;
 	private SurfaceView mRemoteSurface;
 
+	private boolean mlocalSurfaceCreated = false;
+
 	private MediaPlayer mPlayer;
 
 	private boolean isOpenedRemote;
@@ -121,7 +123,8 @@ public class P2PConversation extends Activity implements
 			currentVideoBean.readSatate = VideoBean.READ_STATE_UNREAD;
 			currentVideoBean.formUserID = uad.getUser().getmUserId();
 			currentVideoBean.remoteUserID = uad.getUser().getmUserId();
-			currentVideoBean.toUserID = GlobalHolder.getInstance().getCurrentUserId();
+			currentVideoBean.toUserID = GlobalHolder.getInstance()
+					.getCurrentUserId();
 			if (uad.isAudioType()) {
 				currentVideoBean.mediaChatID = uad.getSzSessionID();
 				currentVideoBean.mediaType = VideoBean.TYPE_AUDIO;
@@ -155,7 +158,8 @@ public class P2PConversation extends Activity implements
 			String uuid = UUID.randomUUID().toString();
 			currentVideoBean.mediaState = VideoBean.STATE_ANSWER_CALL;
 			currentVideoBean.readSatate = VideoBean.READ_STATE_READED;
-			currentVideoBean.formUserID = GlobalHolder.getInstance().getCurrentUserId();
+			currentVideoBean.formUserID = GlobalHolder.getInstance()
+					.getCurrentUserId();
 			currentVideoBean.toUserID = uad.getUser().getmUserId();
 			currentVideoBean.remoteUserID = uad.getUser().getmUserId();
 			if (uad.isAudioType()) {
@@ -257,7 +261,7 @@ public class P2PConversation extends Activity implements
 
 		chatService.removeVideoChatConnectedistener(mLocalHandler,
 				VIDEO_CONECTED, null);
-		
+
 		chatService.clearCalledBack();
 	}
 
@@ -276,8 +280,8 @@ public class P2PConversation extends Activity implements
 				+ getSurfaceHolder(SURFACE_HOLDER_TAG_LOCAL));
 		VideoRecorder.VideoPreviewSurfaceHolder = getSurfaceHolder(SURFACE_HOLDER_TAG_LOCAL);
 		VideoCaptureDevInfo.CreateVideoCaptureDevInfo()
-		.updateCameraOrientation(Surface.ROTATION_270);
-		
+				.updateCameraOrientation(Surface.ROTATION_270);
+
 		UserChattingObject selfUCD = new UserChattingObject(GlobalHolder
 				.getInstance().getCurrentUser(), 0, "");
 		chatService.requestOpenVideoDevice(selfUCD.getUdc(), null);
@@ -285,11 +289,14 @@ public class P2PConversation extends Activity implements
 
 	@Override
 	public void reverseLocalCamera() {
+		closeLocalCamera();
 		boolean flag = VideoCaptureDevInfo.CreateVideoCaptureDevInfo()
 				.reverseCamera();
 		if (flag) {
-			chatService.updateCameraParameters(new CameraConfiguration(""), null);
+			chatService.updateCameraParameters(new CameraConfiguration(""),
+					null);
 		}
+		openLocalCamera();
 	}
 
 	@Override
@@ -345,12 +352,12 @@ public class P2PConversation extends Activity implements
 	}
 
 	private void setGlobalState(boolean flag) {
-		long uid =flag? uad.getUser().getmUserId() : 0;
+		long uid = flag ? uad.getUser().getmUserId() : 0;
 		if (uad.isAudioType()) {
 			GlobalHolder.getInstance().setAudioState(flag, uid);
 		} else if (uad.isVideoType()) {
 			GlobalHolder.getInstance().setVideoState(flag, uid);
-			//If clear video state, we must clear voice connect state too.
+			// If clear video state, we must clear voice connect state too.
 			if (!flag) {
 				GlobalHolder.getInstance().setVoiceConnectedState(false);
 			}
@@ -623,9 +630,14 @@ public class P2PConversation extends Activity implements
 			mLcalSurface = (SurfaceView) findViewById(R.id.fragment_conversation_connected_video_local_surface);
 			mRemoteSurface = (SurfaceView) findViewById(R.id.fragment_conversation_connected_video_remote_surface);
 		} else if (uad.isVideoType() && !uad.isIncoming()) {
-			mRemoteSurface = (SurfaceView) findViewById(R.id.fragment_conversation_connected_video_local_surface);
-			mLcalSurface = (SurfaceView) findViewById(R.id.fragment_conversation_connected_video_remote_surface);
+			mRemoteSurface = (SurfaceView) findViewById(R.id.fragment_conversation_connected_video_remote_surface);
+			mLcalSurface = (SurfaceView) findViewById(R.id.fragment_conversation_connected_video_local_surface);
+			bianda();
+		}
 
+		if (mRemoteSurface != null) {
+			mRemoteSurface.setTag(SURFACE_HOLDER_TAG_REMOTE);
+			mRemoteSurface.getHolder().addCallback(mRemoteVideoHolder);
 		}
 
 		if (mLcalSurface != null) {
@@ -633,10 +645,6 @@ public class P2PConversation extends Activity implements
 			mLcalSurface.setZOrderMediaOverlay(true);
 			mLcalSurface.bringToFront();
 			mLcalSurface.getHolder().addCallback(mLocalCameraHolder);
-		}
-		if (mRemoteSurface != null) {
-			mRemoteSurface.setTag(SURFACE_HOLDER_TAG_REMOTE);
-			mRemoteSurface.getHolder().addCallback(mRemoteVideoHolder);
 		}
 
 		if (uad.isAudioType()) {
@@ -808,13 +816,13 @@ public class P2PConversation extends Activity implements
 			return;
 		}
 		if (!isOpenedLocal) {
-			mLocalHandler.postDelayed(new Runnable()  {
+			mLocalHandler.postDelayed(new Runnable() {
 
 				@Override
 				public void run() {
 					openRemoteVideo();
 				}
-				
+
 			}, 1000);
 		}
 		VideoPlayer vp = uad.getVp();
@@ -846,6 +854,20 @@ public class P2PConversation extends Activity implements
 		isOpenedRemote = false;
 	}
 
+	ViewGroup.LayoutParams smallP=null;
+	void bianda(){
+		ViewGroup.LayoutParams backLP = mRemoteSurface.getLayoutParams();
+		smallP = mLcalSurface.getLayoutParams();
+		mLcalSurface.setLayoutParams(backLP);
+		mLcalSurface.setBackgroundResource(0);
+	}
+	
+	void bianxiao(){
+		mLcalSurface.setLayoutParams(smallP);
+		mLcalSurface.setBackgroundResource(R.drawable.local_video_bg);
+	}
+	
+	
 	private void exchangeSurfaceHolder() {
 		ViewGroup.LayoutParams backLP = mRemoteSurface.getLayoutParams();
 		ViewGroup.LayoutParams smallP = mLcalSurface.getLayoutParams();
@@ -870,8 +892,8 @@ public class P2PConversation extends Activity implements
 			mRemoteSurface.setOnClickListener(null);
 		}
 
-		mLcalSurface.setLayoutParams(backLP);
-		mRemoteSurface.setLayoutParams(smallP);
+		mLcalSurface.setLayoutParams(smallP);
+		mRemoteSurface.setLayoutParams(backLP);
 
 		bringButtonsToFront();
 
@@ -881,15 +903,15 @@ public class P2PConversation extends Activity implements
 
 	private void bringButtonsToFront() {
 		if (mTimerTV != null) {
-			mTimerTV.bringToFront();
+			 mTimerTV.bringToFront();
 		}
 		View v = findViewById(R.id.conversation_fragment_connected_title_text);
 		if (v != null) {
-			v.bringToFront();
+			 v.bringToFront();
 		}
 		v = findViewById(R.id.fragment_conversation_connected_video_button_container);
 		if (v != null) {
-			v.bringToFront();
+			 v.bringToFront();
 		}
 
 		if (mReverseCameraButton != null) {
@@ -898,7 +920,7 @@ public class P2PConversation extends Activity implements
 
 		v = findViewById(R.id.conversation_fragment_outing_video_card_container);
 		if (v != null) {
-			v.bringToFront();
+			 v.bringToFront();
 		}
 	}
 
@@ -912,12 +934,12 @@ public class P2PConversation extends Activity implements
 		filter.addAction(Intent.ACTION_USER_PRESENT);
 		filter.addAction(JNIService.JNI_BROADCAST_CONNECT_STATE_NOTIFICATION);
 		this.registerReceiver(receiver, filter);
-		
+
 		IntentFilter strickFliter = new IntentFilter();
 		strickFliter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
 		strickFliter.addAction(JNIService.JNI_BROADCAST_VIDEO_CALL_CLOSED);
 		Intent i = this.registerReceiver(null, strickFliter);
-		//means exist close broadcast, need to finish this activity
+		// means exist close broadcast, need to finish this activity
 		if (i != null) {
 			V2Log.i("hang up ");
 			removeStickyBroadcast(i);
@@ -926,8 +948,8 @@ public class P2PConversation extends Activity implements
 	}
 
 	private void quit() {
-		Log.e(TAG , currentVideoBean.mediaChatID + "");
-		if(currentVideoBean.startDate == 0)
+		Log.e(TAG, currentVideoBean.mediaChatID + "");
+		if (currentVideoBean.startDate == 0)
 			currentVideoBean.startDate = startTime;
 		MessageBuilder.saveMediaChatHistories(mContext, currentVideoBean);
 		sendUpdateBroadcast();
@@ -1066,8 +1088,10 @@ public class P2PConversation extends Activity implements
 
 			if (mLcalSurface.getVisibility() == View.GONE) {
 				mLcalSurface.setVisibility(View.VISIBLE);
+				mReverseCameraButton.setVisibility(View.VISIBLE);
 			} else {
 				mLcalSurface.setVisibility(View.GONE);
+				mReverseCameraButton.setVisibility(View.GONE);
 			}
 
 			int drawId = R.drawable.conversation_connected_camera_button_pressed;
@@ -1260,12 +1284,16 @@ public class P2PConversation extends Activity implements
 			// when conversation is connected or during outing call
 			if (uad.isConnected() || (!uad.isConnected() && !uad.isIncoming())) {
 				V2Log.e("Create new holder " + holder);
+				Log.i("wzl", "打开本地");
+				closeLocalCamera();
 				openLocalCamera();
 			}
+			mlocalSurfaceCreated = true;
 		}
 
 		@Override
 		public void surfaceDestroyed(SurfaceHolder holder) {
+			mlocalSurfaceCreated = false;
 			if (isOpenedLocal) {
 				closeLocalCamera();
 			}
@@ -1282,7 +1310,8 @@ public class P2PConversation extends Activity implements
 				NetworkStateCode code = (NetworkStateCode) intent.getExtras()
 						.get("state");
 				if (code != NetworkStateCode.CONNECTED) {
-					V2Log.e(TAG, "JNI_BROADCAST_CONNECT_STATE_NOTIFICATION 调用了 HANG_UP_NOTIFICATION");
+					V2Log.e(TAG,
+							"JNI_BROADCAST_CONNECT_STATE_NOTIFICATION 调用了 HANG_UP_NOTIFICATION");
 					Message.obtain(mLocalHandler, HANG_UP_NOTIFICATION,
 							Integer.valueOf(HAND_UP_REASON_NO_NETWORK))
 							.sendToTarget();
@@ -1341,20 +1370,21 @@ public class P2PConversation extends Activity implements
 					if (inProgress) {
 						break;
 					}
-					
-					if(uad.isIncoming()){
-						if(isTimeOut)
+
+					if (uad.isIncoming()) {
+						if (isTimeOut)
 							currentVideoBean.readSatate = VideoBean.READ_STATE_UNREAD;
-						else{
+						else {
 							currentVideoBean.readSatate = VideoBean.READ_STATE_READED;
-							if(currentVideoBean.startDate != 0)
-								currentVideoBean.endDate = System.currentTimeMillis();
+							if (currentVideoBean.startDate != 0)
+								currentVideoBean.endDate = System
+										.currentTimeMillis();
 						}
-					}
-					else{
-						
-						if(currentVideoBean.startDate != 0)
-							currentVideoBean.endDate = System.currentTimeMillis();
+					} else {
+
+						if (currentVideoBean.startDate != 0)
+							currentVideoBean.endDate = System
+									.currentTimeMillis();
 					}
 					inProgress = true;
 					Message timeoutMessage = Message.obtain(this, QUIT);
@@ -1362,7 +1392,7 @@ public class P2PConversation extends Activity implements
 					disableAllButtons();
 					closeLocalCamera();
 				}
-				
+
 				break;
 			case CALL_RESPONSE:
 				JNIResponse resp = (JNIResponse) msg.obj;
@@ -1371,16 +1401,17 @@ public class P2PConversation extends Activity implements
 					RequestChatServiceResponse rcsr = (RequestChatServiceResponse) resp;
 					if (rcsr.getCode() == RequestChatServiceResponse.REJCTED) {
 						V2Log.e(TAG, "CALL_RESPONSE 调用了 HANG_UP_NOTIFICATION");
-//						Message.obtain(this, HANG_UP_NOTIFICATION,
-//								Integer.valueOf(HAND_UP_REASON_REMOTE_REJECT))
-//								.sendToTarget();
+						// Message.obtain(this, HANG_UP_NOTIFICATION,
+						// Integer.valueOf(HAND_UP_REASON_REMOTE_REJECT))
+						// .sendToTarget();
 						Message.obtain(this, HANG_UP_NOTIFICATION)
 								.sendToTarget();
 						currentVideoBean.mediaState = VideoBean.STATE_NO_ANSWER_CALL;
 					} else if (rcsr.getCode() == RequestChatServiceResponse.ACCEPTED) {
 						uad.setConnected(true);
 						// Send audio invitation
-						// Do not need to modify any values. because this API will handler this case
+						// Do not need to modify any values. because this API
+						// will handler this case
 						chatService.inviteUserChat(uad, null);
 						// Notice do not open remote video at here
 						// because we must open remote video after get video
@@ -1388,7 +1419,8 @@ public class P2PConversation extends Activity implements
 						if (uad.isVideoType()) {
 							uad.setDeviceId(rcsr.getDeviceID());
 							if (!uad.isIncoming()) {
-								exchangeSurfaceHolder();
+//								exchangeSurfaceHolder();
+								bianxiao();
 							}
 							// openRemoteVideo();
 							// updateViewForVideoAcceptance();

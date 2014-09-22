@@ -118,8 +118,6 @@ public abstract class AbstractHandler extends Handler {
 		}
 	}
 	
-	
-	
 	/**
 	 * 
 	 * @param key
@@ -155,7 +153,6 @@ public abstract class AbstractHandler extends Handler {
 		
 	}
 	
-
 	protected void registerListener(int key, Handler h, int what, Object obj) {
 		synchronized (pendingObjectHolder) {
 			List<Registrant> list = registrantHolder.get(key);
