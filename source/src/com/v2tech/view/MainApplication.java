@@ -30,6 +30,8 @@ import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.DisplayMetrics;
+import android.view.WindowManager;
 
 import com.V2.jni.AudioRequest;
 import com.V2.jni.ChatRequest;
@@ -154,6 +156,7 @@ public class MainApplication extends Application {
 
 		initGlobalConfiguration();
 		initSQLiteFile();
+		initDPI();
 	}
 
 	private void initSQLiteFile() {
@@ -268,6 +271,19 @@ public class MainApplication extends Application {
 			}
 		}
 
+	}
+	
+	private void initDPI() {
+		DisplayMetrics metrics = new DisplayMetrics();
+		WindowManager manager = (WindowManager) this.getApplicationContext().getSystemService(Context.WINDOW_SERVICE);
+		manager.getDefaultDisplay().getMetrics(metrics);
+		GlobalConfig.GLOBAL_DPI = metrics.densityDpi;
+		V2Log.i("Init user device DPI: " + GlobalConfig.GLOBAL_DPI);
+		DisplayMetrics dm = new DisplayMetrics();
+		manager.getDefaultDisplay().getMetrics(dm);
+		double x = Math.pow(dm.widthPixels / dm.xdpi, 2);
+		double y = Math.pow(dm.heightPixels / dm.ydpi, 2);
+		GlobalConfig.SCREEN_INCHES = Math.sqrt(x + y);
 	}
 
 	@Override

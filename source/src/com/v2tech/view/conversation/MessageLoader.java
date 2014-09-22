@@ -84,6 +84,7 @@ public class MessageLoader {
 
 	/**
 	 * 加载指定用户之间所有通信数据
+	 * 
 	 * @param context
 	 * @param uid1
 	 * @param uid2
@@ -114,9 +115,13 @@ public class MessageLoader {
 	}
 
 	/**
-	 * 
+	 * 分页加载聊天消息数据
 	 * @param context
-	 * @param groupId
+	 * @param uid1
+	 * @param uid2
+	 * @param limit
+	 * @param offset
+	 * @param groupType
 	 * @return
 	 */
 	public static List<VMessage> loadMessageByPage(Context context, long uid1,
@@ -137,8 +142,9 @@ public class MessageLoader {
 				+ ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_GROUP_TYPE
 				+ "= ?";
 
-		String[] args = new String[] { uid1 + "", uid2 + "", uid2 + "",
-				uid1 + "", groupType + "" };
+		String[] args = new String[] { String.valueOf(uid1),
+				String.valueOf(uid2), String.valueOf(uid2),
+				String.valueOf(uid1) , String.valueOf(groupType)};
 
 		String order = ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_SAVEDATE
 				+ " desc , "
@@ -163,6 +169,13 @@ public class MessageLoader {
 		}
 	}
 
+	/**
+	 * 根据指定用户id，加载出所有图片
+	 * @param context
+	 * @param uid1
+	 * @param uid2
+	 * @return
+	 */
 	public static List<VMessage> loadImageMessage(Context context, long uid1,
 			long uid2) {
 		List<VMessage> imageItems = new ArrayList<VMessage>();
@@ -170,25 +183,52 @@ public class MessageLoader {
 				+ " desc";
 		Uri uri = ContentDescriptor.HistoriesGraphic.CONTENT_URI;
 		String[] projection = ContentDescriptor.HistoriesGraphic.Cols.ALL_CLOS;
+		String selection = "(("
+				+ ContentDescriptor.HistoriesGraphic.Cols.HISTORY_GRAPHIC_FROM_USER_ID
+				+ "=? and "
+				+ ContentDescriptor.HistoriesGraphic.Cols.HISTORY_GRAPHIC_TO_USER_ID
+				+ "=? ) or "
+				+ "("
+				+ ContentDescriptor.HistoriesGraphic.Cols.HISTORY_GRAPHIC_FROM_USER_ID
+				+ "=? and "
+				+ ContentDescriptor.HistoriesGraphic.Cols.HISTORY_GRAPHIC_TO_USER_ID
+				+ "=? ))  and "
+				+ ContentDescriptor.HistoriesGraphic.Cols.HISTORY_GRAPHIC_GROUP_TYPE
+				+ "= 0";
+		String[] args = new String[] { String.valueOf(uid1),
+				String.valueOf(uid2), String.valueOf(uid2),
+				String.valueOf(uid1) };
 		DataBaseContext mContext = new DataBaseContext(context);
 		Cursor mCur = mContext.getContentResolver().query(uri, projection,
-				null, null, sortOrder);
-		if (mCur.getCount() == 0) 
+				selection, args, sortOrder);
+		if (mCur.getCount() == 0)
 			return imageItems;
-		
+
 		VMessageImageItem item = null;
 		VMessage current = null;
 		while (mCur.moveToNext()) {
-			int groupType = mCur.getInt(mCur.getColumnIndex(ContentDescriptor.HistoriesGraphic.Cols.HISTORY_GRAPHIC_GROUP_TYPE));
-			long groupID = mCur.getLong(mCur.getColumnIndex(ContentDescriptor.HistoriesGraphic.Cols.HISTORY_GRAPHIC_GROUP_ID));
-			long fromUserID = mCur.getLong(mCur.getColumnIndex(ContentDescriptor.HistoriesGraphic.Cols.HISTORY_GRAPHIC_FROM_USER_ID));
-			long date = mCur.getLong(mCur.getColumnIndex(ContentDescriptor.HistoriesGraphic.Cols.HISTORY_GRAPHIC_SAVEDATE));
-			String imageID = mCur.getString(mCur.getColumnIndex(ContentDescriptor.HistoriesGraphic.Cols.HISTORY_GRAPHIC_ID));
-			String imagePath = mCur.getString(mCur.getColumnIndex(ContentDescriptor.HistoriesGraphic.Cols.HISTORY_GRAPHIC_PATH));
-			User fromUser = GlobalHolder.getInstance().getUser(
-					fromUserID);
+			int groupType = mCur
+					.getInt(mCur
+							.getColumnIndex(ContentDescriptor.HistoriesGraphic.Cols.HISTORY_GRAPHIC_GROUP_TYPE));
+			long groupID = mCur
+					.getLong(mCur
+							.getColumnIndex(ContentDescriptor.HistoriesGraphic.Cols.HISTORY_GRAPHIC_GROUP_ID));
+			long fromUserID = mCur
+					.getLong(mCur
+							.getColumnIndex(ContentDescriptor.HistoriesGraphic.Cols.HISTORY_GRAPHIC_FROM_USER_ID));
+			long date = mCur
+					.getLong(mCur
+							.getColumnIndex(ContentDescriptor.HistoriesGraphic.Cols.HISTORY_GRAPHIC_SAVEDATE));
+			String imageID = mCur
+					.getString(mCur
+							.getColumnIndex(ContentDescriptor.HistoriesGraphic.Cols.HISTORY_GRAPHIC_ID));
+			String imagePath = mCur
+					.getString(mCur
+							.getColumnIndex(ContentDescriptor.HistoriesGraphic.Cols.HISTORY_GRAPHIC_PATH));
+			User fromUser = GlobalHolder.getInstance().getUser(fromUserID);
 			if (fromUser == null) {
-				V2Log.e("get null when loadImageMessage get fromUser :" + fromUserID);
+				V2Log.e("get null when loadImageMessage get fromUser :"
+						+ fromUserID);
 				continue;
 			}
 			current = new VMessage(groupType, groupID, fromUser, new Date(date));
@@ -198,12 +238,19 @@ public class MessageLoader {
 			item.setFilePath(imagePath);
 			imageItems.add(current);
 		}
-		
-		if(mCur != null)
+
+		if (mCur != null)
 			mCur.close();
 		return imageItems;
 	}
 
+	/**
+	 * 根据用户id，加载音频或视频通信记录
+	 * @param context
+	 * @param uid
+	 * @param meidaType
+	 * @return
+	 */
 	public static List<AudioVideoMessageBean> loadAudioOrVideoHistoriesMessage(
 			Context context, long uid, int meidaType) {
 
@@ -372,30 +419,45 @@ public class MessageLoader {
 		List<VMessage> imageItems = new ArrayList<VMessage>();
 		String sortOrder = ContentDescriptor.HistoriesGraphic.Cols.HISTORY_GRAPHIC_SAVEDATE
 				+ " desc";
-		String where = ContentDescriptor.HistoriesGraphic.Cols.HISTORY_GRAPHIC_GROUP_TYPE + "=? and " +
-				ContentDescriptor.HistoriesGraphic.Cols.HISTORY_GRAPHIC_GROUP_ID + "= ?";
-		String[] args = new String[]{String.valueOf(type) , String.valueOf(gid)};
+		String where = ContentDescriptor.HistoriesGraphic.Cols.HISTORY_GRAPHIC_GROUP_TYPE
+				+ "=? and "
+				+ ContentDescriptor.HistoriesGraphic.Cols.HISTORY_GRAPHIC_GROUP_ID
+				+ "= ?";
+		String[] args = new String[] { String.valueOf(type),
+				String.valueOf(gid) };
 		Uri uri = ContentDescriptor.HistoriesGraphic.CONTENT_URI;
 		String[] projection = ContentDescriptor.HistoriesGraphic.Cols.ALL_CLOS;
 		DataBaseContext mContext = new DataBaseContext(context);
 		Cursor mCur = mContext.getContentResolver().query(uri, projection,
 				where, args, sortOrder);
-		if (mCur.getCount() == 0) 
+		if (mCur.getCount() == 0)
 			return imageItems;
-		
+
 		VMessageImageItem item = null;
 		VMessage current = null;
 		while (mCur.moveToNext()) {
-			int groupType = mCur.getInt(mCur.getColumnIndex(ContentDescriptor.HistoriesGraphic.Cols.HISTORY_GRAPHIC_GROUP_TYPE));
-			long groupID = mCur.getLong(mCur.getColumnIndex(ContentDescriptor.HistoriesGraphic.Cols.HISTORY_GRAPHIC_GROUP_ID));
-			long fromUserID = mCur.getLong(mCur.getColumnIndex(ContentDescriptor.HistoriesGraphic.Cols.HISTORY_GRAPHIC_FROM_USER_ID));
-			long date = mCur.getLong(mCur.getColumnIndex(ContentDescriptor.HistoriesGraphic.Cols.HISTORY_GRAPHIC_SAVEDATE));
-			String imageID = mCur.getString(mCur.getColumnIndex(ContentDescriptor.HistoriesGraphic.Cols.HISTORY_GRAPHIC_ID));
-			String imagePath = mCur.getString(mCur.getColumnIndex(ContentDescriptor.HistoriesGraphic.Cols.HISTORY_GRAPHIC_PATH));
-			User fromUser = GlobalHolder.getInstance().getUser(
-					fromUserID);
+			int groupType = mCur
+					.getInt(mCur
+							.getColumnIndex(ContentDescriptor.HistoriesGraphic.Cols.HISTORY_GRAPHIC_GROUP_TYPE));
+			long groupID = mCur
+					.getLong(mCur
+							.getColumnIndex(ContentDescriptor.HistoriesGraphic.Cols.HISTORY_GRAPHIC_GROUP_ID));
+			long fromUserID = mCur
+					.getLong(mCur
+							.getColumnIndex(ContentDescriptor.HistoriesGraphic.Cols.HISTORY_GRAPHIC_FROM_USER_ID));
+			long date = mCur
+					.getLong(mCur
+							.getColumnIndex(ContentDescriptor.HistoriesGraphic.Cols.HISTORY_GRAPHIC_SAVEDATE));
+			String imageID = mCur
+					.getString(mCur
+							.getColumnIndex(ContentDescriptor.HistoriesGraphic.Cols.HISTORY_GRAPHIC_ID));
+			String imagePath = mCur
+					.getString(mCur
+							.getColumnIndex(ContentDescriptor.HistoriesGraphic.Cols.HISTORY_GRAPHIC_PATH));
+			User fromUser = GlobalHolder.getInstance().getUser(fromUserID);
 			if (fromUser == null) {
-				V2Log.e("get null when loadImageMessage get fromUser :" + fromUserID);
+				V2Log.e("get null when loadImageMessage get fromUser :"
+						+ fromUserID);
 				continue;
 			}
 			current = new VMessage(groupType, groupID, fromUser, new Date(date));
@@ -404,8 +466,8 @@ public class MessageLoader {
 			item.setFilePath(imagePath);
 			imageItems.add(current);
 		}
-		
-		if(mCur != null)
+
+		if (mCur != null)
 			mCur.close();
 		return imageItems;
 	}
@@ -413,7 +475,10 @@ public class MessageLoader {
 	/**
 	 * 
 	 * @param context
+	 * @param groupType
 	 * @param groupId
+	 * @param limit
+	 * @param offset
 	 * @return
 	 */
 	public static List<VMessage> loadGroupMessageByPage(Context context,
@@ -422,9 +487,12 @@ public class MessageLoader {
 		if (!init(context, groupType, groupId, 0, CROWD_TYPE))
 			return null;
 
-		String selection = ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_GROUP_ID
-				+ "=? ";
-		String[] args = new String[] { groupId + "" };
+		String selection = ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_GROUP_TYPE
+				+ "=? and "
+				+ ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_GROUP_ID
+				+ "= ?";
+		String[] args = new String[] { String.valueOf(groupType),
+				String.valueOf(groupId) };
 		String order = ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_SAVEDATE
 				+ " desc limit " + limit + " offset  " + offset;
 		return queryMessage(context, selection, args, order);
@@ -478,6 +546,12 @@ public class MessageLoader {
 
 	}
 
+	/**
+	 * delete the VMessage 
+	 * @param context
+	 * @param vm
+	 * @return
+	 */
 	public static int deleteMessage(Context context, VMessage vm) {
 		if (vm == null)
 			return -1;
@@ -485,30 +559,33 @@ public class MessageLoader {
 		DataBaseContext mContext = new DataBaseContext(context);
 		int ret = mContext.getContentResolver().delete(
 				ContentDescriptor.HistoriesMessage.CONTENT_URI,
-				ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_ID + "=?",
-				new String[] { String.valueOf(vm.getUUID()) });
-		
+				ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_ID
+						+ "=?", new String[] { String.valueOf(vm.getUUID()) });
+
 		List<VMessageAudioItem> audioItems = vm.getAudioItems();
 		for (int i = 0; i < audioItems.size(); i++) {
 			mContext.getContentResolver().delete(
 					ContentDescriptor.HistoriesAudios.CONTENT_URI,
-					ContentDescriptor.HistoriesAudios.Cols.HISTORY_AUDIO_ID + "=?",
+					ContentDescriptor.HistoriesAudios.Cols.HISTORY_AUDIO_ID
+							+ "=?",
 					new String[] { String.valueOf(vm.getUUID()) });
 		}
-		
+
 		List<VMessageFileItem> fileItems = vm.getFileItems();
 		for (int i = 0; i < fileItems.size(); i++) {
 			mContext.getContentResolver().delete(
 					ContentDescriptor.HistoriesFiles.CONTENT_URI,
-					ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_ID + "=?",
+					ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_ID
+							+ "=?",
 					new String[] { String.valueOf(vm.getUUID()) });
 		}
-		
+
 		List<VMessageImageItem> imageItems = vm.getImageItems();
 		for (int i = 0; i < imageItems.size(); i++) {
 			mContext.getContentResolver().delete(
 					ContentDescriptor.HistoriesGraphic.CONTENT_URI,
-					ContentDescriptor.HistoriesGraphic.Cols.HISTORY_GRAPHIC_ID + "=?",
+					ContentDescriptor.HistoriesGraphic.Cols.HISTORY_GRAPHIC_ID
+							+ "=?",
 					new String[] { String.valueOf(vm.getUUID()) });
 		}
 		return ret;
@@ -517,44 +594,79 @@ public class MessageLoader {
 	/**
 	 * update the given audio message read state...
 	 * @param context
+	 * @param vm
+	 * @return
+	 */
+	public static int updateChatMessageState(Context context, VMessage vm) {
+
+		if (vm == null)
+			return -1;
+
+		DataBaseContext mContext = new DataBaseContext(context);
+		ContentValues values = new ContentValues();
+		values.put(
+				ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_TRANSTATE,
+				vm.getState());
+		String where = ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_ID
+				+ "= ?";
+		String[] selectionArgs = new String[] { vm.getUUID() };
+		int ret = mContext.getContentResolver().update(
+				ContentDescriptor.HistoriesMessage.CONTENT_URI, values, where,
+				selectionArgs);
+		return ret;
+	}
+
+	/**
+	 * update the given audio message read state...
+	 * @param context
+	 * @param vm
 	 * @param audioItem
 	 * @return
 	 */
-	public static int updateBinaryAudioState(Context context,
-			VMessage vm , VMessageAudioItem audioItem) {
+	public static int updateBinaryAudioState(Context context, VMessage vm,
+			VMessageAudioItem audioItem) {
 
 		if (audioItem == null)
 			return -1;
 
 		DataBaseContext mContext = new DataBaseContext(context);
 		ContentValues values = new ContentValues();
-		values.put(ContentDescriptor.HistoriesAudios.Cols.HISTORY_AUDIO_READ_STATE, audioItem.getState());
-		String where = ContentDescriptor.HistoriesAudios.Cols.HISTORY_AUDIO_ID + "= ?";
-		String[] selectionArgs = new String[]{ audioItem.getUuid() };
-		int ret = mContext.getContentResolver().update(ContentDescriptor.HistoriesAudios.CONTENT_URI, 
-				values, where, selectionArgs);
+		values.put(
+				ContentDescriptor.HistoriesAudios.Cols.HISTORY_AUDIO_READ_STATE,
+				audioItem.getState());
+		String where = ContentDescriptor.HistoriesAudios.Cols.HISTORY_AUDIO_ID
+				+ "= ?";
+		String[] selectionArgs = new String[] { audioItem.getUuid() };
+		int ret = mContext.getContentResolver().update(
+				ContentDescriptor.HistoriesAudios.CONTENT_URI, values, where,
+				selectionArgs);
 		return ret;
 	}
-	
+
 	/**
 	 * update the given audio message read state...
 	 * @param context
-	 * @param audioItem
+	 * @param vm
+	 * @param fileItem
 	 * @return
 	 */
-	public static int updateFileItemState(Context context,
-			VMessage vm , VMessageFileItem fileItem) {
+	public static int updateFileItemState(Context context, VMessage vm,
+			VMessageFileItem fileItem) {
 
 		if (fileItem == null)
 			return -1;
 
 		DataBaseContext mContext = new DataBaseContext(context);
 		ContentValues values = new ContentValues();
-		values.put(ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_SEND_STATE, fileItem.getState());
-		String where = ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_ID + "= ?";
-		String[] selectionArgs = new String[]{ vm.getUUID() };
-		int ret = mContext.getContentResolver().update(ContentDescriptor.HistoriesFiles.CONTENT_URI, 
-				values, where, selectionArgs);
+		values.put(
+				ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_SEND_STATE,
+				fileItem.getState());
+		String where = ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_ID
+				+ "= ?";
+		String[] selectionArgs = new String[] { vm.getUUID() };
+		int ret = mContext.getContentResolver().update(
+				ContentDescriptor.HistoriesFiles.CONTENT_URI, values, where,
+				selectionArgs);
 		return ret;
 	}
 
@@ -650,6 +762,13 @@ public class MessageLoader {
 		return getNewestMediaMessage(context, null, null);
 	}
 
+	/**
+	 * 根据传入的查询条件，获取最新的通信消息对象(音频或视频通信)
+	 * @param context
+	 * @param selection
+	 * @param selectionArgs
+	 * @return
+	 */
 	public static VideoBean getNewestMediaMessage(Context context,
 			String selection, String[] selectionArgs) {
 
@@ -686,7 +805,7 @@ public class MessageLoader {
 	}
 
 	/**
-	 * 
+	 * 根据传入的group的type和id，查询数据库，获取最新的VMessage对象，群组
 	 * @param context
 	 * @param groupId
 	 * @return
@@ -709,6 +828,11 @@ public class MessageLoader {
 		}
 	}
 
+	/**
+	 * 根据传入的id，查询数据库，获取最新的VMessage对象
+	 * @param cur
+	 * @return
+	 */
 	public static VMessage getNewestMessage(Context context, long uid1,
 			long uid2) {
 		if (!init(context, 0, 0, uid2, CONTACT_TYPE))
@@ -752,6 +876,11 @@ public class MessageLoader {
 		}
 	}
 
+	/**
+	 * 根据传入的Cursor对象，构造一个VMessage对象
+	 * @param cur
+	 * @return
+	 */
 	private static VMessage extractMsg(Cursor cur) {
 		if (cur.isClosed()) {
 			throw new RuntimeException(" cursor is closed");
@@ -803,6 +932,12 @@ public class MessageLoader {
 		return vm;
 	}
 
+	/**
+	 * 根据传入的表名，判断当前数据库中是否存在该表
+	 * @param context
+	 * @param tabName 表名
+	 * @return
+	 */
 	private static boolean isExistTable(Context context, String tabName) {
 		DataBaseContext mContext = new DataBaseContext(context);
 		SQLiteDatabase base = mContext.openOrCreateDatabase(
@@ -827,13 +962,19 @@ public class MessageLoader {
 		}
 		return false;
 	}
-	
+
+	/**
+	 * 根据传入的VMessage对象，查询数据库，向其填充VMessageImageItem对象。
+	 * @param vm
+	 * @param context
+	 * @return
+	 */
 	private static VMessage loadImageMessageById(VMessage vm, Context context) {
 
 		List<VMessageImageItem> imageItems = vm.getImageItems();
-		if(imageItems.size() <= 0)
+		if (imageItems.size() <= 0)
 			return vm;
-		
+
 		String selection = ContentDescriptor.HistoriesGraphic.Cols.HISTORY_GRAPHIC_ID
 				+ "=? ";
 		String sortOrder = ContentDescriptor.HistoriesGraphic.Cols.HISTORY_GRAPHIC_SAVEDATE
@@ -843,7 +984,7 @@ public class MessageLoader {
 		DataBaseContext mContext = new DataBaseContext(context);
 		Cursor mCur = null;
 		for (VMessageImageItem item : imageItems) {
-			String[] selectionArgs = new String[] { item.getUuid()};
+			String[] selectionArgs = new String[] { item.getUuid() };
 			mCur = mContext.getContentResolver().query(uri, projection,
 					selection, selectionArgs, sortOrder);
 			if (mCur.getCount() == 0) {
@@ -853,22 +994,30 @@ public class MessageLoader {
 			}
 
 			while (mCur.moveToNext()) {
-				int transState = mCur.getInt(mCur.getColumnIndex(ContentDescriptor.HistoriesGraphic.Cols.HISTORY_GRAPHIC_TRANSTATE));
+				int transState = mCur
+						.getInt(mCur
+								.getColumnIndex(ContentDescriptor.HistoriesGraphic.Cols.HISTORY_GRAPHIC_TRANSTATE));
 				item.setState(transState);
 			}
 		}
-		
-		if(mCur != null)
+
+		if (mCur != null)
 			mCur.close();
 		return vm;
 	}
 
+	/**
+	 * 根据传入的VMessage对象，查询数据库，向其填充VMessageAudioItem对象。
+	 * @param vm
+	 * @param context
+	 * @return
+	 */
 	private static VMessage loadAudioMessageById(VMessage vm, Context context) {
 
 		List<VMessageAudioItem> audioItems = vm.getAudioItems();
-		if(audioItems.size() <= 0)
+		if (audioItems.size() <= 0)
 			return vm;
-		
+
 		String selection = ContentDescriptor.HistoriesAudios.Cols.HISTORY_AUDIO_ID
 				+ "=? ";
 		String sortOrder = ContentDescriptor.HistoriesAudios.Cols.HISTORY_AUDIO_SAVEDATE
@@ -888,22 +1037,30 @@ public class MessageLoader {
 			}
 
 			while (mCur.moveToNext()) {
-				int readState = mCur.getInt(mCur.getColumnIndex(ContentDescriptor.HistoriesAudios.Cols.HISTORY_AUDIO_READ_STATE));
+				int readState = mCur
+						.getInt(mCur
+								.getColumnIndex(ContentDescriptor.HistoriesAudios.Cols.HISTORY_AUDIO_READ_STATE));
 				item.setState(readState);
 			}
 		}
-		
-		if(mCur != null)
+
+		if (mCur != null)
 			mCur.close();
 		return vm;
 	}
 
+	/**
+	 * 根据传入的VMessage对象，查询数据库，向其填充VMessageFileItem对象。
+	 * @param vm
+	 * @param context
+	 * @return
+	 */
 	private static VMessage loadFileMessageById(VMessage vm, Context context) {
 
 		List<VMessageFileItem> fileItems = vm.getFileItems();
-		if(fileItems.size() <= 0)
+		if (fileItems.size() <= 0)
 			return vm;
-		
+
 		String selection = ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_ID
 				+ "=? ";
 		String sortOrder = ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_SAVEDATE
@@ -921,14 +1078,16 @@ public class MessageLoader {
 						+ "-- get null........");
 				return vm;
 			}
-	
+
 			while (mCur.moveToNext()) {
-				int fileTransState = mCur.getInt(mCur.getColumnIndex(ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_SEND_STATE));
+				int fileTransState = mCur
+						.getInt(mCur
+								.getColumnIndex(ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_SEND_STATE));
 				item.setState(fileTransState);
 			}
 		}
-		
-		if(mCur != null)
+
+		if (mCur != null)
 			mCur.close();
 		return vm;
 	}

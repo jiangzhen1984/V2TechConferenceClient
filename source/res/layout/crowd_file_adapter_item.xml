@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical" >
+
+    <RelativeLayout
+        android:id="@+id/contact_user_view_root"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/conversation_view_margin"
+        android:layout_marginTop="@dimen/conversation_view_margin" >
+
+        <RelativeLayout
+            android:id="@+id/crowd_file_icon_container"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
+            android:layout_marginBottom="@dimen/conversation_view_margin"
+            android:layout_marginLeft="@dimen/common_margin_horizontal"
+            android:layout_marginTop="@dimen/conversation_view_margin" >
+
+            <ImageView
+                android:id="@+id/crowd_file_icon"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:layout_centerInParent="true"
+                android:src="@drawable/selectfile_type_pdf" />
+        </RelativeLayout>
+
+        <TextView
+            android:id="@+id/crowd_file_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignTop="@+id/crowd_file_icon_container"
+            android:layout_marginLeft="@dimen/common_margin_horizontal"
+            android:layout_marginRight="10dp"
+            android:layout_toRightOf="@+id/crowd_file_icon_container"
+            android:ellipsize="end"
+            android:maxWidth="@dimen/contacts_user_view_text_max_width"
+            android:singleLine="true"
+            android:text="TextView"
+            android:textColor="@color/contacts_user_view_item_color_offline"
+            android:textSize="@dimen/common_item_text_size" />
+
+        <TextView
+            android:id="@+id/crowd_file_size"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/crowd_file_icon_container"
+            android:layout_marginLeft="@dimen/common_margin_horizontal"
+            android:layout_toRightOf="@+id/crowd_file_icon_container"
+            android:ellipsize="end"
+            android:singleLine="true"
+            android:text="TextView"
+            android:textColor="@color/common_item_text_color"
+            android:textSize="@dimen/common_item_text_size" />
+
+        <TextView
+            android:id="@+id/crowd_file_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="@dimen/button_gap_horizontal"
+            android:background="@drawable/button_bg"
+            android:gravity="center"
+            android:paddingBottom="@dimen/button_padding_vertical"
+            android:paddingLeft="@dimen/button_padding_horizontal"
+            android:paddingRight="@dimen/button_padding_horizontal"
+            android:paddingTop="@dimen/button_padding_vertical"
+            android:text="@string/crowd_files_button_name_download"
+            android:textColor="@color/button_text_color"
+            android:textSize="@dimen/common_item_text_size" />
+        
+        
+        
+        
+        <TextView
+            android:id="@+id/crowd_file_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="@dimen/button_gap_horizontal"
+            android:gravity="center"
+            android:paddingBottom="@dimen/button_padding_vertical"
+            android:paddingLeft="@dimen/button_padding_horizontal"
+            android:paddingRight="@dimen/button_padding_horizontal"
+            android:paddingTop="@dimen/button_padding_vertical"
+            android:text="@string/crowd_files_button_name_download"
+            android:textSize="@dimen/common_item_text_size" />
+        
+        
+    </RelativeLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical" >
+
+        <TextView
+            android:id="@+id/file_volcity"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/common_margin_horizontal"
+            android:paddingBottom="@dimen/button_padding_vertical"
+            android:paddingTop="@dimen/button_padding_vertical"
+            android:text="200.0K/3.2M"
+            android:textColor="@color/file_download_prgress_color" />
+
+        <LinearLayout
+            android:id="@+id/file_download_progress_state_ly"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/message_file_progress_bg"
+            android:orientation="horizontal" >
+
+            <LinearLayout
+                android:id="@+id/ile_download_progress_state"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/message_file_progress"
+                android:orientation="horizontal" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/contact_group_view_line"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#f2f2f2"
+        android:orientation="horizontal" >
+    </LinearLayout>
+
+</LinearLayout>

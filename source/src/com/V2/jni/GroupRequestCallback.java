@@ -2,6 +2,7 @@ package com.V2.jni;
 
 import java.util.List;
 
+import com.V2.jni.ind.FileJNIObject;
 import com.V2.jni.ind.V2Group;
 import com.V2.jni.ind.V2User;
 
@@ -150,7 +151,24 @@ public interface GroupRequestCallback {
 	public void OnAcceptInviteJoinGroup(int groupType, long groupId,
 			long nUserID);
 
-	void OnRefuseInviteJoinGroup(int groupType, long nGroupID, long nUserID,
+	
+	/**
+	 * @deprecated should handle xml
+	 * @param groupType
+	 * @param nGroupID
+	 * @param nUserID
+	 * @param sxml
+	 */
+	public void OnRefuseInviteJoinGroup(int groupType, long nGroupID, long nUserID,
 			String sxml);
+	
+	/**
+	 * call back for get group file list
+	 * @param group
+	 * @param list
+	 * 
+	 * @see GroupRequest#getGroupFileInfo(int, long)
+	 */
+	public void OnGetGroupFileInfo(V2Group group, List<FileJNIObject> list);
 
 }

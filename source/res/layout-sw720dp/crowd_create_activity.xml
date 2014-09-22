@@ -133,14 +133,14 @@
         android:background="#ffffff"
         android:orientation="horizontal" >
 
-        <ListView
+        <com.v2tech.view.widget.GroupListView
             android:id="@+id/group_create_contacts_list"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight=".5"
             android:divider="@null"
             android:focusable="false" >
-        </ListView>
+        </com.v2tech.view.widget.GroupListView>
 
         <LinearLayout
             android:layout_width="1dp"

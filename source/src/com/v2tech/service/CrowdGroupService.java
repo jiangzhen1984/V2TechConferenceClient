@@ -1,5 +1,6 @@
 package com.v2tech.service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import android.os.Handler;
@@ -9,15 +10,19 @@ import com.V2.jni.GroupRequest;
 import com.V2.jni.GroupRequestCallbackAdapter;
 import com.V2.jni.ImRequest;
 import com.V2.jni.ImRequestCallbackAdapter;
+import com.V2.jni.ind.FileJNIObject;
 import com.V2.jni.ind.V2Group;
 import com.V2.jni.util.V2Log;
 import com.v2tech.service.jni.CreateCrowdResponse;
 import com.v2tech.service.jni.JNIResponse;
+import com.v2tech.service.jni.RequestFetchGroupFilesResponse;
 import com.v2tech.vo.Crowd;
 import com.v2tech.vo.CrowdGroup;
 import com.v2tech.vo.Group;
 import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.User;
+import com.v2tech.vo.VCrowdFile;
+import com.v2tech.vo.VFile;
 
 //组别统一名称
 //1:部门, organizationGroup
@@ -40,6 +45,7 @@ public class CrowdGroupService extends AbstractHandler {
 	private static final int QUIT_CROWD = 0x0005;
 	private static final int ACCEPT_APPLICATION_CROWD = 0x0006;
 	private static final int REFUSE_APPLICATION_CROWD = 0x0007;
+	private static final int FETCH_FILES_CROWD = 0x0008;
 
 	private ImRequestCB imCB;
 	private GroupRequestCB grCB;
@@ -80,7 +86,7 @@ public class CrowdGroupService extends AbstractHandler {
 	 */
 	public void acceptApplication(CrowdGroup crowd, User applicant,
 			Registrant caller) {
-		if (!checkParamNull(caller, new Object[] { crowd,applicant })) {
+		if (!checkParamNull(caller, new Object[] { crowd, applicant })) {
 			return;
 		}
 
@@ -94,8 +100,6 @@ public class CrowdGroupService extends AbstractHandler {
 				Group.GroupType.CHATING.intValue(), crowd.toXml(),
 				GlobalHolder.getInstance().getCurrentUserId());
 	}
-	
-	
 
 	/**
 	 * Decline applicant who want to join crowd
@@ -104,20 +108,20 @@ public class CrowdGroupService extends AbstractHandler {
 	 */
 	public void refuseApplication(CrowdGroup crowd, User applicant,
 			String reason, Registrant caller) {
-		if (!checkParamNull(caller, new Object[] { crowd,applicant })) {
+		if (!checkParamNull(caller, new Object[] { crowd, applicant })) {
 			return;
 		}
 
 		// FIXME concurrency problem, if user use one crowdgroupservice instance
 		// to
 		// accept mulit-invitation, then maybe call back will notify incorrect
-		initTimeoutMessage(REFUSE_APPLICATION_CROWD, DEFAULT_TIME_OUT_SECS, caller);
+		initTimeoutMessage(REFUSE_APPLICATION_CROWD, DEFAULT_TIME_OUT_SECS,
+				caller);
 
 		GroupRequest.getInstance().refuseApplyJoinGroup(
 				Group.GroupType.CHATING.intValue(), crowd.toXml(),
 				applicant.getmUserId(), reason);
 	}
-	
 
 	/**
 	 * Accept invitation
@@ -172,7 +176,6 @@ public class CrowdGroupService extends AbstractHandler {
 				Group.GroupType.CHATING.intValue(), crowd.getId(),
 				GlobalHolder.getInstance().getCurrentUserId(), "");
 	}
-
 
 	/**
 	 * Update crowd data, like brief, announcement or member joined rules
@@ -261,6 +264,19 @@ public class CrowdGroupService extends AbstractHandler {
 			sendResult(caller, jniRes);
 		}
 	}
+	
+	/**
+	 * Remove member from crowd
+	 * @param crowd
+	 * @param user
+	 * @param caller
+	 */
+	public void removeMember(CrowdGroup crowd, User member, Registrant caller) {
+		if (!checkParamNull(caller, new Object[] { crowd, member })) {
+			return;
+		}
+		GroupRequest.getInstance().delGroupUser(crowd.getGroupType().intValue(), crowd.getmGId(), member.getmUserId());
+	}
 
 	@Override
 	public void clearCalledBack() {
@@ -285,6 +301,31 @@ public class CrowdGroupService extends AbstractHandler {
 		GroupRequest.getInstance().createGroup(
 				Group.GroupType.CHATING.intValue(), group.toXml(),
 				group.toGroupUserListXml());
+	}
+
+	/**
+	 * fetch files from server
+	 * 
+	 * @param crowd
+	 * @param caller
+	 *            return List<VFile>
+	 */
+	public void fetchGroupFiles(CrowdGroup crowd, Registrant caller) {
+		if (!checkParamNull(caller, new Object[] { crowd })) {
+			return;
+		}
+
+		if (mPendingCrowdId > 0) {
+			super.sendResult(caller, new JNIResponse(JNIResponse.Result.FAILED));
+			return;
+		}
+		mPendingCrowdId = crowd.getmGId();
+
+		this.initTimeoutMessage(FETCH_FILES_CROWD, DEFAULT_TIME_OUT_SECS,
+				caller);
+		GroupRequest.getInstance().getGroupFileInfo(
+				GroupType.CHATING.intValue(), crowd.getmGId());
+
 	}
 
 	class GroupRequestCB extends GroupRequestCallbackAdapter {
@@ -364,6 +405,39 @@ public class CrowdGroupService extends AbstractHandler {
 				Message.obtain(mCallbackHandler, QUIT_CROWD, jniRes)
 						.sendToTarget();
 			}
+		}
+
+		@Override
+		public void OnGetGroupFileInfo(V2Group group, List<FileJNIObject> list) {
+			if (group.type == GroupType.CHATING.intValue()
+					&& group.id == mPendingCrowdId) {
+				mPendingCrowdId = 0;
+				List<VCrowdFile> vfList = null;
+				if (list == null) {
+					vfList = new ArrayList<VCrowdFile>(0);
+				} else {
+					vfList = new ArrayList<VCrowdFile>(list.size());
+				}
+				for (FileJNIObject f : list) {
+					VCrowdFile vcf = new VCrowdFile();
+					vcf.setCrowd((CrowdGroup) GlobalHolder.getInstance()
+							.getGroupById(GroupType.CHATING.intValue(),
+									group.id));
+					
+					vcf.setId(f.fileId);
+					vcf.setName(f.fileName);
+					vcf.setSize(f.fileSize);
+					vcf.setUrl(f.url);
+					vcf.setUploader(GlobalHolder.getInstance().getUser(f.user.uid));
+					vfList.add(vcf);
+				}
+				RequestFetchGroupFilesResponse jniRes = new RequestFetchGroupFilesResponse(
+						JNIResponse.Result.SUCCESS);
+				jniRes.setList(vfList);
+				Message.obtain(mCallbackHandler, FETCH_FILES_CROWD, jniRes)
+						.sendToTarget();
+			}
+
 		}
 
 	}

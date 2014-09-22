@@ -7,13 +7,17 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.net.Uri;
 import android.text.TextUtils;
 
+import com.V2.jni.ind.V2Group;
 import com.V2.jni.util.V2Log;
+import com.V2.jni.util.XmlAttributeExtractor;
 import com.v2tech.db.ContentDescriptor;
 import com.v2tech.db.DataBaseContext;
 import com.v2tech.service.GlobalHolder;
@@ -61,19 +65,22 @@ public class MessageBuilder {
 
 	public static VMessage buildImageMessage(int groupType, long groupID,
 			User fromUser, User toUser, String imagePath) {
-		File newFile = copyBinaryData(MESSAGE_TYPE_IMAGE, imagePath);
+		String uuid = UUID.randomUUID().toString();
+		File newFile = copyBinaryData(MESSAGE_TYPE_IMAGE, imagePath , uuid);
 		if (newFile == null)
 			return null;
 		imagePath = newFile.getAbsolutePath();
 		VMessage vm = new VMessage(groupType, groupID, fromUser, toUser,
 				new Date(GlobalConfig.getGlobalServerTime()));
 		VMessageImageItem item = new VMessageImageItem(vm, imagePath);
+		item.setUuid(uuid);
 		return item.getVm();
 	}
 
 	public static VMessage buildAudioMessage(int groupType, long groupID,
 			User fromUser, User toUser, String audioPath, int seconds) {
-		File newFile = copyBinaryData(MESSAGE_TYPE_AUDIO, audioPath);
+		String uuid = UUID.randomUUID().toString();
+		File newFile = copyBinaryData(MESSAGE_TYPE_AUDIO, audioPath , uuid);
 		if (newFile == null)
 			return null;
 		audioPath = newFile.getAbsolutePath();
@@ -81,18 +88,21 @@ public class MessageBuilder {
 				new Date(GlobalConfig.getGlobalServerTime()));
 		VMessageAudioItem item = new VMessageAudioItem(vm, audioPath, seconds);
 		item.setState(VMessageAbstractItem.STATE_READED);
+		item.setUuid(uuid);
 		return item.getVm();
 	}
 
 	public static VMessage buildFileMessage(int groupType, long groupID,
 			User fromUser, User toUser, String filePath, int fileType) {
-		File newFile = copyBinaryData(MESSAGE_TYPE_FILE, filePath);
+		String uuid = UUID.randomUUID().toString();
+		File newFile = copyBinaryData(MESSAGE_TYPE_FILE, filePath , uuid);
 		if (newFile == null)
 			return null;
 		filePath = newFile.getAbsolutePath();
 		VMessage vm = new VMessage(groupType, groupID, fromUser, toUser,
 				new Date(GlobalConfig.getGlobalServerTime()));
-		new VMessageFileItem(vm, filePath, fileType);
+		VMessageFileItem item = new VMessageFileItem(vm, filePath, fileType);
+		item.setUuid(uuid);
 		return vm;
 	}
 
@@ -235,7 +245,7 @@ public class MessageBuilder {
 					vm.getmDateLong());
 			values.put(
 					ContentDescriptor.HistoriesGraphic.Cols.HISTORY_GRAPHIC_PATH,
-					vMessageImageItem.getFilePath());
+					vMessageImageItem.getExtension());
 			values.put(ContentDescriptor.HistoriesGraphic.Cols.OWNER_USER_ID,
 					GlobalHolder.getInstance().getCurrentUserId());
 			uri = mContext.getContentResolver().insert(
@@ -455,7 +465,7 @@ public class MessageBuilder {
 	 * @param filePath
 	 * @return
 	 */
-	private static File copyBinaryData(int type, String filePath) {
+	private static File copyBinaryData(int type, String filePath , String uuid) {
 
 		if (TextUtils.isEmpty(filePath))
 			return null;
@@ -473,16 +483,16 @@ public class MessageBuilder {
 			User user = GlobalHolder.getInstance().getCurrentUser();
 			switch (type) {
 			case MESSAGE_TYPE_IMAGE:
-				desFile = new File(GlobalConfig.getGlobalPicsPath(user) + "/"
-						+ fileName);
+				desFile = new File(GlobalConfig.getGlobalPicsPath(user) + "/" + uuid 
+						+ fileName.substring(fileName.lastIndexOf(".")) + 1);
 				break;
 			case MESSAGE_TYPE_AUDIO:
-				desFile = new File(GlobalConfig.getGlobalAudioPath(user) + "/"
-						+ fileName);
+				desFile = new File(GlobalConfig.getGlobalAudioPath(user) + "/" + uuid 
+						+ fileName.substring(fileName.lastIndexOf(".")) + 1);
 				break;
 			case MESSAGE_TYPE_FILE:
-				desFile = new File(GlobalConfig.getGlobalFilePath(user) + "/"
-						+ fileName);
+				desFile = new File(GlobalConfig.getGlobalFilePath(user) + "/" + uuid 
+						+ fileName.substring(fileName.lastIndexOf(".")) + 1);
 				break;
 			default:
 				throw new RuntimeException(
@@ -536,61 +546,87 @@ public class MessageBuilder {
 	 */
 	public static boolean saveQualicationMessage(Context context,
 			VMessageQualification msg) {
-//		DataBaseContext mContext = new DataBaseContext(context);
-//		if (msg == null || msg.getInvitationUser().getmUserId() == -1
-//				|| msg.getBeInvitatonUser().getmUserId() == -1) {
-//			V2Log.e("To store failed...please check the given VMessageQualification Object in the databases");
-//			return false;
-//		}
-//		// 确定远程用户
-//		long remote = -1;
-//		if (msg.getInvitationUser().getmUserId() == GlobalHolder.getInstance()
-//				.getCurrentUserId())
-//			remote = msg.getBeInvitatonUser().getmUserId();
-//		else
-//			remote = msg.getInvitationUser().getmUserId();
-//		ContentValues values = new ContentValues();
-//		switch (msg.getType()) {
-//		case CONTACT:
-//			break;
-//		case CROWD:
-//			VMessageQualificationInvatationCrowd crowdMsg = (VMessageQualificationInvatationCrowd) msg;
-//			values.put(ContentDescriptor.HistoriesCrowd.Cols.OWNER_USER_ID,
-//					GlobalHolder.getInstance().getCurrentUserId());
-//			values.put(
-//					ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_SAVEDATE,
-//					GlobalConfig.getGlobalServerTime());
-//			values.put(
-//					ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_FROM_USER_ID,
-//					crowdMsg.getInvitationUser().getmUserId());
-//			values.put(
-//					ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_TO_USER_ID,
-//					crowdMsg.getBeInvitatonUser().getmUserId());
-//			values.put(
-//					ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_REMOTE_USER_ID,
-//					remote);
-//			values.put(
-//					ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_APPLY_REASON,
-//					crowdMsg.getApplyReason());
-//			values.put(
-//					ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_REFUSE_REASON,
-//					crowdMsg.getRejectReason());
-//			values.put(
-//					ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_READ_STATE,
-//					crowdMsg.getReadState().intValue());
-//			values.put(
-//					ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_STATE,
-//					crowdMsg.getQualState().intValue());
-//			values.put(
-//					ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_AUTHTYPE,
-//					crowdMsg.getmCrowdGroup().getAuthType().intValue());
-//			values.put(
-//					ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_BASE_INFO,
-//					crowdMsg.getmCrowdGroup().toXml());
-//			mContext.getContentResolver().insert(
-//					ContentDescriptor.HistoriesCrowd.CONTENT_URI, values);
-//			return true;
-//		}
+		if (msg == null) {
+			V2Log.e("To store failed...please check the given VMessageQualification Object in the databases");
+			return false;
+		}
+		DataBaseContext mContext = new DataBaseContext(context);
+		ContentValues values = new ContentValues();
+		values.put(ContentDescriptor.HistoriesCrowd.Cols.OWNER_USER_ID,
+				GlobalHolder.getInstance().getCurrentUserId());
+		values.put(
+				ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_SAVEDATE,
+				GlobalConfig.getGlobalServerTime());
+		switch (msg.getType()) {
+		case CROWD_INVITATION:
+			VMessageQualificationInvitationCrowd crowdInviteMsg = (VMessageQualificationInvitationCrowd) msg;
+			values.put(
+					ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_FROM_USER_ID,
+					crowdInviteMsg.getInvitationUser().getmUserId());
+			values.put(
+					ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_TO_USER_ID,
+					crowdInviteMsg.getBeInvitatonUser().getmUserId());
+			values.put(
+					ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_REMOTE_USER_ID,
+					crowdInviteMsg.getBeInvitatonUser().getmUserId());
+			values.put(
+					ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_APPLY_REASON,
+					"");
+			values.put(
+					ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_REFUSE_REASON,
+					crowdInviteMsg.getRejectReason());
+			values.put(
+					ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_READ_STATE,
+					crowdInviteMsg.getReadState().intValue());
+			values.put(
+					ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_STATE,
+					crowdInviteMsg.getQualState().intValue());
+			values.put(
+					ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_AUTHTYPE,
+					crowdInviteMsg.getCrowdGroup().getAuthType().intValue());
+			values.put(
+					ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_BASE_INFO,
+					crowdInviteMsg.getCrowdGroup().toXml());
+			mContext.getContentResolver().insert(
+					ContentDescriptor.HistoriesCrowd.CONTENT_URI, values);
+			return true;
+		case CROWD_APPLICATION:
+			VMessageQualificationApplicationCrowd crowdApplyMsg = (VMessageQualificationApplicationCrowd) msg;
+			values.put(
+					ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_FROM_USER_ID,
+					GlobalHolder.getInstance().getCurrentUserId());
+			values.put(
+					ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_TO_USER_ID,
+					crowdApplyMsg.getApplicant().getmUserId());
+			values.put(
+					ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_REMOTE_USER_ID,
+					crowdApplyMsg.getApplicant().getmUserId());
+			values.put(
+					ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_APPLY_REASON,
+					crowdApplyMsg.getApplyReason());
+			values.put(
+					ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_REFUSE_REASON,
+					crowdApplyMsg.getRejectReason());
+			values.put(
+					ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_READ_STATE,
+					crowdApplyMsg.getReadState().intValue());
+			values.put(
+					ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_STATE,
+					crowdApplyMsg.getQualState().intValue());
+			values.put(
+					ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_AUTHTYPE,
+					crowdApplyMsg.getCrowdGroup().getAuthType().intValue());
+			values.put(
+					ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_BASE_INFO,
+					crowdApplyMsg.getCrowdGroup().toXml());
+			mContext.getContentResolver().insert(
+					ContentDescriptor.HistoriesCrowd.CONTENT_URI, values);
+			return true;
+		case CONTACT:
+			break;
+		default:
+			throw new RuntimeException("invalid VMessageQualification enum type.. please check the type");
+		}
 		return false;
 	}
 
@@ -603,40 +639,71 @@ public class MessageBuilder {
 	 */
 	public static int updateQualicationMessage(Context context,
 			VMessageQualification msg) {
-//		DataBaseContext mContext = new DataBaseContext(context);
-//		if (msg == null || msg.getInvitationUser().getmUserId() == -1
-//				|| msg.getBeInvitatonUser().getmUserId() == -1) {
-//			V2Log.e("To update failed...please check the given VMessageQualification Object in the databases");
-//			return -1;
-//		}
-//		ContentValues values = new ContentValues();
-//		switch (msg.getType()) {
-//		case CONTACT:
-//			break;
-//		case CROWD:
-//			VMessageQualificationInvatationCrowd crowdMsg = (VMessageQualificationInvatationCrowd) msg;
-//			values.put(
-//					ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_READ_STATE,
-//					crowdMsg.getReadState().intValue());
-//			values.put(
-//					ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_STATE,
-//					crowdMsg.getQualState().intValue());
-//			values.put(
-//					ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_AUTHTYPE,
-//					crowdMsg.getmCrowdGroup().getAuthType().intValue());
-//			values.put(
-//					ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_BASE_INFO,
-//					crowdMsg.getmCrowdGroup().toXml());
-//			String where = ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_ID
-//					+ " = ?";
-//			String[] selectionArgs = new String[] { String.valueOf(crowdMsg
-//					.getmCrowdGroup().getmGId()) };
-//			int updates = mContext.getContentResolver().update(
-//					ContentDescriptor.HistoriesCrowd.CONTENT_URI, values,
-//					where, selectionArgs);
-//			return updates;
-//		}
-		return -1;
+		if (msg == null) {
+			V2Log.e("To store failed...please check the given VMessageQualification Object in the databases");
+			return -1;
+		}
+		DataBaseContext mContext = new DataBaseContext(context);
+		ContentValues values = new ContentValues();
+		String[] selectionArgs = null;
+		switch (msg.getType()) {
+		case CROWD_INVITATION:
+			VMessageQualificationInvitationCrowd crowdInviteMsg = (VMessageQualificationInvitationCrowd) msg;
+			values.put(
+					ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_APPLY_REASON,
+					"");
+			values.put(
+					ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_REFUSE_REASON,
+					crowdInviteMsg.getRejectReason());
+			values.put(
+					ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_READ_STATE,
+					crowdInviteMsg.getReadState().intValue());
+			values.put(
+					ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_STATE,
+					crowdInviteMsg.getQualState().intValue());
+			values.put(
+					ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_AUTHTYPE,
+					crowdInviteMsg.getCrowdGroup().getAuthType().intValue());
+			values.put(
+					ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_BASE_INFO,
+					crowdInviteMsg.getCrowdGroup().toXml());
+			selectionArgs = new String[] { String.valueOf(crowdInviteMsg
+					.getCrowdGroup().getmGId()) };
+			break;
+		case CROWD_APPLICATION:
+			VMessageQualificationApplicationCrowd crowdApplyMsg = (VMessageQualificationApplicationCrowd) msg;
+			values.put(
+					ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_APPLY_REASON,
+					crowdApplyMsg.getApplyReason());
+			values.put(
+					ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_REFUSE_REASON,
+					crowdApplyMsg.getRejectReason());
+			values.put(
+					ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_READ_STATE,
+					crowdApplyMsg.getReadState().intValue());
+			values.put(
+					ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_STATE,
+					crowdApplyMsg.getQualState().intValue());
+			values.put(
+					ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_AUTHTYPE,
+					crowdApplyMsg.getCrowdGroup().getAuthType().intValue());
+			values.put(
+					ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_BASE_INFO,
+					crowdApplyMsg.getCrowdGroup().toXml());
+			selectionArgs = new String[] { String.valueOf(crowdApplyMsg
+					.getCrowdGroup().getmGId()) };
+			break;
+		case CONTACT:
+			break;
+		default:
+			throw new RuntimeException("invalid VMessageQualification enum type.. please check the type");
+		}
+		String where = ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_ID
+				+ " = ?";
+		int updates = mContext.getContentResolver().update(
+				ContentDescriptor.HistoriesCrowd.CONTENT_URI, values,
+				where, selectionArgs);
+		return updates;
 	}
 
 	/**
@@ -648,89 +715,79 @@ public class MessageBuilder {
 	 */
 	public static List<VMessageQualification> queryQualMessageList(
 			Context context, User user) {
+		DataBaseContext mContext = new DataBaseContext(context);
+		if (user == null) {
+			V2Log.e("To query failed...please check the given User Object");
+			return null;
+		}
+
 		List<VMessageQualification> list = new ArrayList<VMessageQualification>();
-		list.add(new VMessageQualificationApplicationCrowd(new CrowdGroup(900, "sdfs", new User(15, "aa")), new User(100, "1")));
-		list.add(new VMessageQualificationApplicationCrowd(new CrowdGroup(900, "sdfs", new User(15, "aa")), new User(101, "2")));
-		list.add(new VMessageQualificationApplicationCrowd(new CrowdGroup(900, "sdfs", new User(15, "aa")), new User(102, "3")));
-		list.add(new VMessageQualificationApplicationCrowd(new CrowdGroup(900, "sdfs", new User(15, "aa")), new User(103, "4")));
-		list.add(new VMessageQualificationInvitationCrowd(new CrowdGroup(900, "sdfs", new User(15, "aa")), new User(104, "4")));
-		list.add(new VMessageQualificationInvitationCrowd(new CrowdGroup(900, "sdfs", new User(15, "aa")), new User(105, "5")));
-		list.add(new VMessageQualificationInvitationCrowd(new CrowdGroup(900, "sdfs", new User(15, "aa")), new User(106, "6")));
-		list.add(new VMessageQualificationInvitationCrowd(new CrowdGroup(900, "sdfs", new User(15, "aa")), new User(107, "7")));
-		list.add(new VMessageQualificationInvitationCrowd(new CrowdGroup(900, "sdfs", new User(15, "aa")), new User(107, "7")));
-		list.add(new VMessageQualificationInvitationCrowd(new CrowdGroup(900, "sdfs", new User(15, "aa")), new User(107, "7")));
-		list.add(new VMessageQualificationInvitationCrowd(new CrowdGroup(900, "sdfs", new User(15, "aa")), new User(107, "7")));
-		
-		
-		
-		
-		
-		
-//		DataBaseContext mContext = new DataBaseContext(context);
-//		if (user == null) {
-//			V2Log.e("To query failed...please check the given User Object");
-//			return null;
-//		}
-//
-//		List<VMessageQualification> list = new ArrayList<VMessageQualification>();
-//		String selection = ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_FROM_USER_ID
-//				+ "= ? or "
-//				+ ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_TO_USER_ID
-//				+ "= ?";
-//		String[] selectionArgs = new String[] {
-//				String.valueOf(user.getmUserId()),
-//				String.valueOf(user.getmUserId()) };
-//		String sortOrder = ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_SAVEDATE
-//				+ " desc";
-//		Cursor cursor = mContext.getContentResolver().query(
-//				ContentDescriptor.HistoriesCrowd.CONTENT_URI,
-//				ContentDescriptor.HistoriesCrowd.Cols.ALL_CLOS, selection,
-//				selectionArgs, sortOrder);
-//
-//		if (cursor == null || cursor.getCount() <= 0)
-//			return null;
-//		VMessageQualificationInvatationCrowd crowd = null;
-//		CrowdGroup group = null;
-//		while (cursor.moveToNext()) {
-//
-//			long crowdGroupID = cursor
-//					.getLong(cursor.getColumnIndex("CrowdID"));
-//			long fromUserID = cursor.getLong(cursor
-//					.getColumnIndex("FromUserID"));
-//			long toUserID = cursor.getLong(cursor.getColumnIndex("ToUserID"));
-//			long saveDate = cursor.getLong(cursor.getColumnIndex("SaveDate"));
-//			int authType = cursor
-//					.getInt(cursor.getColumnIndex("CrowdAuthType"));
-//			int joinState = cursor.getInt(cursor.getColumnIndex("JoinState"));
-//			int readState = cursor.getInt(cursor.getColumnIndex("ReadState"));
-//			String applyReason = cursor.getString(cursor
-//					.getColumnIndex("ApplyReason"));
-//			String refuseReason = cursor.getString(cursor
-//					.getColumnIndex("RefuseReason"));
-//			String xml = cursor.getString(cursor.getColumnIndex("CrowdXml"));
-//
-//			Document doc = XmlAttributeExtractor.buildDocument(xml);
-//			NodeList crowdList = doc.getElementsByTagName("crowd");
-//			Element crowdElement = (Element) crowdList.item(0);
-//			String name = crowdElement.getAttribute("name");
-//			group = new CrowdGroup(crowdGroupID, name, GlobalHolder
-//					.getInstance().getCurrentUser(), new Date(saveDate));
-//			group.setBrief(crowdElement.getAttribute("summary"));
-//			group.setAnnouncement(crowdElement.getAttribute("announcement"));
-//			group.setAuthType(CrowdGroup.AuthType.fromInt(authType));
-//			crowd = new VMessageQualificationInvatationCrowd(group, GlobalHolder
-//					.getInstance().getUser(fromUserID), GlobalHolder
-//					.getInstance().getUser(toUserID));
-//			crowd.setApplyReason(applyReason);
-//			crowd.setRejectReason(refuseReason);
-//			crowd.setQualState(VMessageQualification.QualificationState
-//					.fromInt(joinState));
-//			crowd.setReadState(VMessageQualification.ReadState
-//					.fromInt(readState));
-//			list.add(crowd);
-//		}
-//		cursor.close();
-//		return list;
+		String selection = ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_FROM_USER_ID
+				+ "= ? or "
+				+ ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_TO_USER_ID
+				+ "= ?";
+		String[] selectionArgs = new String[] {
+				String.valueOf(user.getmUserId()),
+				String.valueOf(user.getmUserId()) };
+		String sortOrder = ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_SAVEDATE
+				+ " desc";
+		Cursor cursor = mContext.getContentResolver().query(
+				ContentDescriptor.HistoriesCrowd.CONTENT_URI,
+				ContentDescriptor.HistoriesCrowd.Cols.ALL_CLOS, selection,
+				selectionArgs, sortOrder);
+
+		if (cursor == null || cursor.getCount() <= 0)
+			return null;
+		CrowdGroup group = null;
+		while (cursor.moveToNext()) {
+
+			String xml = cursor.getString(cursor.getColumnIndex("CrowdXml"));
+			V2Group v2Group = XmlAttributeExtractor.parseCrowd(xml).get(0);
+			if(v2Group == null || v2Group.creator == null){
+				V2Log.e("pase the CrowdXml failed..");
+				continue;
+			}
+			
+			long crowdGroupID = cursor
+					.getLong(cursor.getColumnIndex("CrowdID"));
+			long saveDate = cursor.getLong(cursor.getColumnIndex("SaveDate"));
+			int authType = cursor
+					.getInt(cursor.getColumnIndex("CrowdAuthType"));
+			int joinState = cursor.getInt(cursor.getColumnIndex("JoinState"));
+			int readState = cursor.getInt(cursor.getColumnIndex("ReadState"));
+			String applyReason = cursor.getString(cursor
+					.getColumnIndex("ApplyReason"));
+			String refuseReason = cursor.getString(cursor
+					.getColumnIndex("RefuseReason"));
+			group = new CrowdGroup(crowdGroupID, v2Group.name, GlobalHolder.getInstance().getUser(v2Group.owner.uid) , new Date(saveDate));
+			group.setBrief(v2Group.brief);
+			group.setAnnouncement(v2Group.announce);
+			group.setAuthType(CrowdGroup.AuthType.fromInt(authType));
+				
+			long fromUserID = cursor.getLong(cursor
+					.getColumnIndex("FromUserID"));
+			long toUserID = cursor.getLong(cursor.getColumnIndex("ToUserID"));
+			if(v2Group.creator.uid == fromUserID){
+				VMessageQualificationInvitationCrowd inviteCrowd = new VMessageQualificationInvitationCrowd(group , GlobalHolder.getInstance().getUser(toUserID));
+				inviteCrowd.setRejectReason(refuseReason);
+				inviteCrowd.setQualState(VMessageQualification.QualificationState
+						.fromInt(joinState));
+				inviteCrowd.setReadState(VMessageQualification.ReadState
+						.fromInt(readState));
+				list.add(inviteCrowd);
+			}
+			else{
+				VMessageQualificationApplicationCrowd applyCrowd = new VMessageQualificationApplicationCrowd(group , GlobalHolder.getInstance().getUser(fromUserID));
+				applyCrowd.setApplyReason(applyReason);
+				applyCrowd.setRejectReason(refuseReason);
+				applyCrowd.setQualState(VMessageQualification.QualificationState
+						.fromInt(joinState));
+				applyCrowd.setReadState(VMessageQualification.ReadState
+						.fromInt(readState));
+				list.add(applyCrowd);
+			}
+		}
+		cursor.close();
 		return list;
 	}
 
@@ -741,19 +798,17 @@ public class MessageBuilder {
 	 * @param user
 	 * @param type
 	 */
-	public static void deleteQualMessage(Context context, User user,
-			VMessageQualification.Type type) {
-//		DataBaseContext mContext = new DataBaseContext(context);
-//		if (user == null || type == null) {
-//			V2Log.e("To delete failed...please check the given user Object or type in the databases");
-//			return ;
-//		}
-//		
-//		String where = ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_REMOTE_USER_ID
-//				+ " = ?";
-//		String[] selectionArgs = new String[] { String.valueOf(user.getmUserId())};
-//		mContext.getContentResolver().delete(
-//				ContentDescriptor.HistoriesCrowd.CONTENT_URI, 
-//				where, selectionArgs);
+	public static void deleteQualMessage(Context context, User user) {
+		if (user == null) {
+			V2Log.e("To delete failed...please check the given user Object or type in the databases");
+			return ;
+		}
+		DataBaseContext mContext = new DataBaseContext(context);
+		String where = ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_REMOTE_USER_ID
+				+ " = ?";
+		String[] selectionArgs = new String[] { String.valueOf(user.getmUserId())};
+		mContext.getContentResolver().delete(
+				ContentDescriptor.HistoriesCrowd.CONTENT_URI, 
+				where, selectionArgs);
 	}
 }

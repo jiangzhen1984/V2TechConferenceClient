@@ -244,8 +244,6 @@ public class MessageBodyView extends LinearLayout {
 		final View popWindow = inflater.inflate(
 				R.layout.message_selected_pop_up_window, null);
 		pw = new PopupWindow(popWindow, LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, true);
-		pw.setBackgroundDrawable(new ColorDrawable(
-				Color.TRANSPARENT));
 		pw.setFocusable(true);
 		pw.setTouchable(true);
 		pw.setOutsideTouchable(true);
@@ -277,6 +275,8 @@ public class MessageBodyView extends LinearLayout {
 		TextView deleteText = (TextView) popWindow
 				.findViewById(R.id.contact_message_pop_up_item_delete);
 		deleteText.setOnClickListener(mDeleteButtonListener);
+		pw.showAtLocation(this,
+				Gravity.NO_GRAVITY, 0, 0);
 		pw.dismiss();
 	}
 
@@ -529,6 +529,8 @@ public class MessageBodyView extends LinearLayout {
 					return;
 				}
 
+				pw.setBackgroundDrawable(new ColorDrawable(
+						Color.TRANSPARENT));
 				if (failedIcon.getVisibility() == View.INVISIBLE) {
 					pw.getContentView()
 							.findViewById(
@@ -617,6 +619,7 @@ public class MessageBodyView extends LinearLayout {
 		} else {
 			this.failedIcon.setVisibility(View.VISIBLE);
 		}
+		MessageLoader.updateChatMessageState(getContext(), mMsg);
 	}
 
 	public void startVoiceAnimation() {

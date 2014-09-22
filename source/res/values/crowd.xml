@@ -10,6 +10,7 @@
     <string name="crowd_invitation_box_item_creator">创建人</string>
     <string name="crowd_invitation_box_item_announcement">群公告</string>
     <string name="crowd_invitation_box_item_brief">群简介</string>
+    <string name="crowd_invitation_box_item_files">群文件</string>
     <string name="crowd_invitation_box_item_member">群成员</string>
     <string name="crowd_invitation_box_item_member_unit">人</string>
     <string name="crowd_detail_title">群资料</string>
@@ -34,9 +35,20 @@
     
     <string name="crowd_members_title">群成员</string>
     <string name="crowd_members_invitation">添加</string>
+    <string name="crowd_members_delete">删除</string>
     
     <string name="crowd_invitation_content">邀请您加入群</string>
     <string name="crowd_applicant_content">申请加入群</string>
     
+    <string name="crowd_files_return_button">返回</string>
+    <string name="crowd_files_title">群文件</string>
+    <string name="crowd_files_title_upload">上传</string>
+    <string name="crowd_files_button_name_download">下载</string>
+    <string name="crowd_files_button_name_pause">暂停</string>
+    <string name="crowd_files_button_name_resume">继续</string>
+    <string name="crowd_files_button_name_redownload">重新下载</string>
+    <string name="crowd_files_name_downloaded">已下载</string>
+    <string name="crowd_files_name_uploaded">已上传</string>
+    <string name="crowd_files_title_uploaded">上传文件</string>
 
 </resources>

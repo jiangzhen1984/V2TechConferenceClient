@@ -136,9 +136,15 @@ public class XmlParser {
 							V2Log.e("Invalid uuid ");
 							continue;
 						}
+						String fileExt = msgEl.getAttribute("FileExt");
+						String filePath = GlobalConfig
+								.getGlobalAudioPath(GlobalHolder.getInstance()
+										.getCurrentUser())
+								+ "/" + uuid + fileExt;
 						VMessageImageItem vii = new VMessageImageItem(vm, uuid,
 								msgEl.getAttribute("FileExt"));
 						vii.setNewLine(isNewLine);
+						vii.setFilePath(filePath);
 
 					} else if (msgEl.getTagName().equals("TAudioChatItem")) {
 
