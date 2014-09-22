@@ -46,6 +46,7 @@ import com.v2tech.service.ConferenceService;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.service.Registrant;
 import com.v2tech.service.jni.JNIResponse;
+import com.v2tech.service.jni.RequestConfCreateResponse;
 import com.v2tech.util.SPUtil;
 import com.v2tech.view.JNIService;
 import com.v2tech.view.PublicIntent;
@@ -93,8 +94,6 @@ public class ConferenceCreateActivity extends Activity {
 	private LinearLayout mAttendeeContainer;
 
 	private View mScroller;
-
-	private List<ListItem> mItemList = new ArrayList<ListItem>();
 
 	// Used to save current selected user
 	private Set<User> mAttendeeList = new HashSet<User>();
@@ -188,7 +187,6 @@ public class ConferenceCreateActivity extends Activity {
 		// finish();
 	}
 
-
 	private void updateUserToAttendList(User u, int op) {
 		if (u == null) {
 			return;
@@ -213,8 +211,6 @@ public class ConferenceCreateActivity extends Activity {
 			}
 		}
 	}
-
-
 
 	private void addAttendee(User u) {
 		if (u.isCurrentLoggedInUser()) {
@@ -298,7 +294,6 @@ public class ConferenceCreateActivity extends Activity {
 		return ll;
 	}
 
-
 	private void doPreSelect() {
 		User preUser = GlobalHolder.getInstance().getUser(preSelectedUID);
 		if (preUser == null) {
@@ -323,27 +318,6 @@ public class ConferenceCreateActivity extends Activity {
 				removeAttendee(list.get(i));
 			}
 		}
-
-		boolean startFlag = false;
-		for (int i = 0; i < mItemList.size(); i++) {
-			ListItem item = mItemList.get(i);
-			if (item.g != null && item.g.getmGId() == selectGroup.getmGId()) {
-				startFlag = true;
-				continue;
-			}
-
-			if (startFlag) {
-				// check current user belongs this group or not.
-				// User ListView current user level equals group level -1
-				if (item.u != null && item.level == selectGroup.getLevel() - 1) {
-					((ContactUserView) item.v).updateChecked();
-				} else if (item.g != null
-						&& item.g.getParent() == selectGroup.getParent()) {
-					startFlag = false;
-				}
-			}
-		}
-
 	}
 
 	private OnClickListener removeAttendeeListener = new OnClickListener() {
@@ -412,15 +386,14 @@ public class ConferenceCreateActivity extends Activity {
 						mLocalHandler,
 						START_GROUP_SELECT,
 						!item.isChecked() ? OP_ADD_ALL_GROUP_USER
-								: OP_DEL_ALL_GROUP_USER, 0, (Group)obj)
+								: OP_DEL_ALL_GROUP_USER, 0, (Group) obj)
 						.sendToTarget();
-				mGroupListView.updateCheckItem((Group)obj, !item.isChecked());
+				mGroupListView.updateCheckItem((Group) obj, !item.isChecked());
 			}
 			return true;
 		}
 
 	};
-
 
 	IntentFilter intentFilter;
 	LocalBroadcastReceiver receiver = new LocalBroadcastReceiver();
@@ -448,7 +421,6 @@ public class ConferenceCreateActivity extends Activity {
 			}
 		}
 	}
-
 
 	private OnClickListener confirmButtonListener = new OnClickListener() {
 
@@ -588,36 +560,6 @@ public class ConferenceCreateActivity extends Activity {
 
 	};
 
-	class ListItem {
-		long id;
-		Group g;
-		User u;
-		View v;
-		boolean isExpanded;
-		int level;
-
-		public ListItem(Group g, int level) {
-			super();
-			this.g = g;
-			this.id = 0x02000000 | g.getmGId();
-			this.v = new ContactGroupView(mContext, g, null,
-					mGroupCheckBoxListener);
-			isExpanded = false;
-			this.level = level;
-		}
-
-		public ListItem(User u, int level) {
-			super();
-			this.u = u;
-			this.id = 0x03000000 | u.getmUserId();
-			this.v = new ContactUserView(mContext, u, level);
-			;
-			isExpanded = false;
-			this.level = level;
-		}
-
-	}
-
 
 
 	class LocalHandler extends Handler {
@@ -639,17 +581,12 @@ public class ConferenceCreateActivity extends Activity {
 							.setText(R.string.error_create_conference_failed_from_server_side);
 					break;
 				}
-				User currU = GlobalHolder.getInstance().getCurrentUser();
-				ConferenceGroup g = null;// new
-											// ConferenceGroup(((RequestConfCreateResponse)
-											// rccr).getConfId(),
-				// ConferenceGroup g = new ConferenceGroup(
-				// ((RequestConfCreateResponse) rccr).getConfId(),
-				//
-				// GroupType.CONFERENCE.intValue(), conf.getName(),
-				// currU.getmUserId() + "", conf.getDate().getTime()
-				// / 1000 + "", currU.getmUserId());
-				g.setOwnerUser(currU);
+
+				RequestConfCreateResponse rc = (RequestConfCreateResponse) rccr;
+				ConferenceGroup g = new ConferenceGroup(rc.getConfId(),
+						conf.getName(), GlobalHolder.getInstance()
+								.getCurrentUser(), new Date(), GlobalHolder.getInstance()
+								.getCurrentUser());
 
 				g.addUserToGroup(new ArrayList<User>(mAttendeeList));
 				GlobalHolder.getInstance().addGroupToList(
@@ -685,7 +622,6 @@ public class ConferenceCreateActivity extends Activity {
 				break;
 			}
 		}
-
 	}
 
 	@Override

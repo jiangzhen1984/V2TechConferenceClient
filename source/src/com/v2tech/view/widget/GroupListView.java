@@ -28,6 +28,7 @@ import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.V2.jni.util.V2Log;
 import com.v2tech.R;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.vo.Group;
@@ -272,9 +273,11 @@ public class GroupListView extends ListView {
 			while (start < end) {
 				pos = start;
 				Item item = mFilterList.get(start++);
-				User u = null;
-				if(item instanceof UserItem)
-					u = (User) ((UserItem) item).getObject();
+				if (item instanceof GroupItem) {
+					V2Log.e("=======" + ((Group)item.getObject()).getName());
+					continue;
+				}
+				User u = (User) ((UserItem) item).getObject();
 				// if item is current user, always sort after current user
 				if (u == null || u.getmUserId() == GlobalHolder.getInstance()
 						.getCurrentUserId()) {

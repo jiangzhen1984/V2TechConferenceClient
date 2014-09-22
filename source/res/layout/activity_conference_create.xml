@@ -132,11 +132,11 @@
         android:orientation="vertical" >
     </LinearLayout>
 
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="fill_parent"
         android:layout_height="match_parent"
         android:background="#ffffff"
-        android:orientation="vertical" >
+         >
 
         <RelativeLayout
             android:id="@+id/conf_create_form"
@@ -219,21 +219,16 @@
             </LinearLayout>
         </RelativeLayout>
 
-        <com.v2tech.view.widget.GroupListView
-            android:id="@+id/conf_create_contacts_list"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_below="@+id/conf_create_form"
-            android:divider="@null"
-            android:focusable="false" >
-        </com.v2tech.view.widget.GroupListView>
+     
+        
+           
 
         <HorizontalScrollView
             android:id="@+id/conf_create_scroll_view"
             android:layout_width="match_parent"
             android:layout_height="100dp"
-            android:layout_below="@+id/conf_create_contacts_list"
             android:layout_marginTop="10dp"
+            android:layout_alignParentBottom="true"
             android:background="#f2f2f2" >
 
             <LinearLayout
@@ -244,6 +239,17 @@
                 android:tag="horizontal" >
             </LinearLayout>
         </HorizontalScrollView>
-    </LinearLayout>
+        <com.v2tech.view.widget.GroupListView
+            android:id="@+id/conf_create_contacts_list"
+            android:layout_width="match_parent"
+            android:layout_height="fill_parent"
+            
+            android:layout_above="@+id/conf_create_scroll_view"
+            android:layout_below="@+id/conf_create_form"
+            android:divider="@null"
+            android:focusable="false" >
+        </com.v2tech.view.widget.GroupListView>
+        
+    </RelativeLayout>
 
 </LinearLayout>
