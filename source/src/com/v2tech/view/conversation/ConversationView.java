@@ -254,7 +254,7 @@ public class ConversationView extends Activity {
 
 		mButtonRecordAudio = (Button) findViewById(R.id.message_button_audio_record);
 		mButtonRecordAudio.setOnTouchListener(mButtonHolderListener);
-		
+
 		mButtonCreateMetting = findViewById(R.id.contact_message_create_metting_button_layout);
 		mButtonCreateMetting.setOnClickListener(mButtonCreateMettingListener);
 
@@ -283,8 +283,7 @@ public class ConversationView extends Activity {
 			mAudioCallButton.setVisibility(View.GONE);
 			mShowContactDetailButton.setVisibility(View.INVISIBLE);
 			mButtonCreateMetting.setVisibility(View.VISIBLE);
-		}
-		else{
+		} else {
 			mButtonCreateMetting.setVisibility(View.GONE);
 		}
 
@@ -345,7 +344,7 @@ public class ConversationView extends Activity {
 			lh.sendMessageDelayed(m, 500);
 		}
 
-		if(currentConversationViewType == Conversation.TYPE_CONTACT)
+		if (currentConversationViewType == Conversation.TYPE_CONTACT)
 			mUserTitleTV.setText(remote.getName());
 		else
 			mUserTitleTV.setText(crowdGroup.getName());
@@ -486,8 +485,8 @@ public class ConversationView extends Activity {
 		} else if (cov.getType() == Conversation.TYPE_GROUP) {
 			currentConversationViewType = Conversation.TYPE_GROUP;
 			groupId = cov.getExtId();
-			crowdGroup = (CrowdGroup) GlobalHolder.getInstance()
-					.getGroupById(V2GlobalEnum.GROUP_TYPE_CROWD, groupId);
+			crowdGroup = (CrowdGroup) GlobalHolder.getInstance().getGroupById(
+					V2GlobalEnum.GROUP_TYPE_CROWD, groupId);
 		}
 	}
 
@@ -501,6 +500,7 @@ public class ConversationView extends Activity {
 			return;
 		}
 		mMessagesContainer.setSelection(pos);
+		// 次为了解决setSelection无效的问题，虽然能解决，但会造成界面卡顿。直接setSelection而不notifyDataSetChanged即可
 		// mMessagesContainer.post(new Runnable() {
 		//
 		// @Override
@@ -593,6 +593,9 @@ public class ConversationView extends Activity {
 			mButtonRecordAudio
 					.setText(R.string.contact_message_button_send_audio_msg);
 		} else {
+			tips = (TextView) mSpeakingLayout
+					.findViewById(R.id.message_voice_dialog_listening_container_tips);
+			tips.setText(R.string.contact_message_voice_dialog_text);
 			root.setVisibility(View.VISIBLE);
 			mVoiceDialog.show();
 			updateCancelSendVoiceMsgNotification(VOICE_DIALOG_FLAG_RECORDING);
@@ -617,20 +620,9 @@ public class ConversationView extends Activity {
 		} else if (flag == VOICE_DIALOG_FLAG_RECORDING) {
 			if (mSpeakingLayout != null) {
 				mSpeakingLayout.setVisibility(View.VISIBLE);
-				int duration = (int) (System.currentTimeMillis() - starttime) / 1000;
-				tips = (TextView) mSpeakingLayout
-						.findViewById(R.id.message_voice_dialog_listening_container_tips);
-				if (duration > 50) {
-					// isBeginTimer = true;
-					// startCounter(tips);
-					// String str = mContext.getText(
-					// R.string.contact_message_tips_rest_seconds)
-					// .toString();
-					// str = str.replace("[]", (59 - duration) + "");
-					// tips.setText(str);
-				} else {
-					tips.setText(R.string.contact_message_voice_dialog_text);
-				}
+//				tips = (TextView) mSpeakingLayout
+//						.findViewById(R.id.message_voice_dialog_listening_container_tips);
+//				tips.setText(R.string.contact_message_voice_dialog_text);
 
 			}
 			if (mPreparedCancelLayout != null) {
@@ -1028,7 +1020,6 @@ public class ConversationView extends Activity {
 						+ System.currentTimeMillis() + ".aac";
 				boolean resultReocrding = startReocrding(fileName);
 				if (resultReocrding) {
-
 					// Start update db for voice
 					lh.postDelayed(mUpdateMicStatusTimer, 200);
 					// Start timer
@@ -1088,11 +1079,9 @@ public class ConversationView extends Activity {
 			voiceIsSentByTimer = true;
 			stopRecording();
 			// send
-			VMessage vm = new VMessage(cov.getType(), groupId, local, remote,
-					new Date(GlobalConfig.getGlobalServerTime()));
 			int seconds = (int) ((System.currentTimeMillis() - starttime) / 1000) + 1;
-			VMessageAudioItem vai = new VMessageAudioItem(vm, fileName, seconds);
-			vai.setState(VMessageAbstractItem.STATE_NORMAL);
+			VMessage vm = MessageBuilder.buildAudioMessage(cov.getType(),
+					groupId, local, remote, fileName, (int) (seconds / 1000));
 			// Send message to server
 			sendMessageToRemote(vm);
 
@@ -1230,14 +1219,12 @@ public class ConversationView extends Activity {
 			startVoiceCall();
 		}
 	};
-	
+
 	private View.OnClickListener mButtonCreateMettingListener = new View.OnClickListener() {
 		@Override
 		public void onClick(View arg0) {
-			Intent i = new Intent(
-					PublicIntent.START_CONFERENCE_CREATE_ACTIVITY);
+			Intent i = new Intent(PublicIntent.START_CONFERENCE_CREATE_ACTIVITY);
 			i.addCategory(PublicIntent.DEFAULT_CATEGORY);
-//			startActivityForResult(i, SUB_ACTIVITY_CODE_CREATE_CONF);
 			startActivity(i);
 		}
 	};
@@ -2182,7 +2169,6 @@ public class ConversationView extends Activity {
 				break;
 			case END_LOAD_MESSAGE:
 				V2Log.d(TAG, "currentItemPos:--" + currentItemPos);
-				adapter.notifyDataSetChanged();
 				scrollToPos(currentItemPos);
 				isLoading = false;
 				break;
@@ -2253,13 +2239,26 @@ public class ConversationView extends Activity {
 							if (item.getType() == VMessageAbstractItem.ITEM_TYPE_FILE
 									&& item.getUuid().equals(ind.uuid)) {
 								VMessageFileItem vfi = ((VMessageFileItem) item);
-								if (downLoadError.errorCode == 415) {
-									Toast.makeText(getApplicationContext(),
-											"亲，不可以发送0大小的文件，抱歉...",
-											Toast.LENGTH_SHORT).show();
-									vfi.setDownloadedSize(0);
-									vfi.setState(VMessageFileItem.STATE_FILE_SENT_FALIED);
-								} else {
+								switch (downLoadError.nTransType) {
+								case FileDownLoadErrorIndication.TYPE_SEND:
+									if (downLoadError.errorCode == 415) {
+										Toast.makeText(getApplicationContext(),
+												"亲，不可以发送0大小的文件，抱歉...",
+												Toast.LENGTH_SHORT).show();
+										vfi.setDownloadedSize(0);
+										vfi.setState(VMessageFileItem.STATE_FILE_SENT_FALIED);
+									}
+									else{
+										V2Log.e(TAG,
+												"when sending the file --"
+														+ vfi.getFileName()
+														+ "-- , There is an error in the process of sending was happend...error code is :"
+														+ downLoadError.errorCode);
+										vfi.setDownloadedSize(0);
+										vfi.setState(VMessageFileItem.STATE_FILE_SENT_FALIED);
+									}
+									break;
+								case FileDownLoadErrorIndication.TYPE_DOWNLOAD:
 									V2Log.e(TAG,
 											"when downloading the file --"
 													+ vfi.getFileName()
@@ -2267,6 +2266,9 @@ public class ConversationView extends Activity {
 													+ downLoadError.errorCode);
 									vfi.setDownloadedSize(0);
 									vfi.setState(VMessageFileItem.STATE_FILE_DOWNLOADED_FALIED);
+									break;
+								default:
+									break;
 								}
 								int updates = MessageBuilder
 										.updateVMessageItemToSentFalied(
@@ -2334,16 +2336,14 @@ public class ConversationView extends Activity {
 	/**
 	 * get selected file path to send remote.
 	 */
-	public void sendSelectedFile(String selectPath, int fileType) {
+	public void sendSelectedFile(FileInfoBean bean) {
 
-		if (!TextUtils.isEmpty(selectPath)) {
+		if (bean == null || TextUtils.isEmpty(bean.filePath))
+			return;
 
-			VMessage vim = MessageBuilder.buildFileMessage(cov.getType(),
-					groupId, local, remote, selectPath, fileType);
-			VMessageFileItem vfi = vim.getFileItems().get(0);
-			vfi.setState(VMessageFileItem.STATE_FILE_SENDING);
-			sendMessageToRemote(vim);
-		}
+		VMessage vim = MessageBuilder.buildFileMessage(cov.getType(), groupId,
+				local, remote, bean);
+		sendMessageToRemote(vim);
 	}
 
 	public void adapterFileIcon(List<VMessageFileItem> fileItems) {
@@ -2384,8 +2384,7 @@ public class ConversationView extends Activity {
 
 		for (int i = 0; i < mCheckedList.size(); i++) {
 
-			sendSelectedFile(mCheckedList.get(i).filePath,
-					mCheckedList.get(i).fileType);
+			sendSelectedFile(mCheckedList.get(i));
 		}
 	}
 

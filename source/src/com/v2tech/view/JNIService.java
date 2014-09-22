@@ -377,13 +377,7 @@ public class JNIService extends Service {
 					MessageBuilder.saveBinaryVMessage(mContext, vm);
 					MessageBuilder.saveFileVMessage(mContext, vm);
 					MessageBuilder.saveMessage(mContext, vm);
-					Long id = MessageLoader
-							.queryVMessageID(
-									mContext,
-									ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_ID
-											+ "=?",
-									new String[] { vm.getUUID() }, null, vm
-											.getFromUser().getmUserId());
+					Long id = MessageLoader.queryVMessageID(mContext, vm);
 					if (id == null) {
 						V2Log.e("the message :" + vm.getUUID()
 								+ " save in databases is failed ....");
@@ -501,10 +495,10 @@ public class JNIService extends Service {
 			User u = GlobalHolder.getInstance().getUser(nUserID);
 			if (u.getName() != null) {
 				if (u.getName().equals("zhao2")) {
-					Log.i("eee","nUserID"+nUserID+" "+u.toXml());
+					Log.i("eee", "nUserID" + nUserID + " " + u.toXml());
 				}
 			}
-			
+
 			if (u == null) {
 				V2Log.e("Can't update user status, user " + nUserID
 						+ "  isn't exist");
@@ -602,13 +596,15 @@ public class JNIService extends Service {
 			if (gType == GroupType.CONFERENCE) {
 				User owner = GlobalHolder.getInstance()
 						.getUser(group.owner.uid);
-				if(owner == null)
-					V2Log.e("get create conference man is null , owner id is :" + group.owner.uid);
+				if (owner == null)
+					V2Log.e("get create conference man is null , owner id is :"
+							+ group.owner.uid);
 				User chairMan = GlobalHolder.getInstance().getUser(
 						group.chairMan.uid);
-				if(owner == null)
-					V2Log.e("get create conference man is null , chairMan id is :" + group.owner.uid);
-				
+				if (owner == null)
+					V2Log.e("get create conference man is null , chairMan id is :"
+							+ group.owner.uid);
+
 				ConferenceGroup g = new ConferenceGroup(group.id, group.name,
 						owner, group.createTime, chairMan);
 				Message.obtain(mCallbackHandler, JNI_CONFERENCE_INVITATION, g)
@@ -994,16 +990,16 @@ public class JNIService extends Service {
 				break;
 			}
 		}
-		
+
 		@Override
 		public void OnSendChatResult(SendingResultJNIObjectInd ind) {
 			super.OnSendChatResult(ind);
-			if(ind.getRet() == SendingResultJNIObjectInd.Result.FAILED){
+			if (ind.getRet() == SendingResultJNIObjectInd.Result.FAILED) {
 				Intent i = new Intent();
 				i.setAction(JNIService.JNI_BROADCAST_MESSAGE_SENT_FAILED);
 				i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
-				i.putExtra("uuid",ind.getUuid());
-				i.putExtra("errorCode",ind.getErrorCode());
+				i.putExtra("uuid", ind.getUuid());
+				i.putExtra("errorCode", ind.getErrorCode());
 				sendBroadcast(i);
 			}
 		}
@@ -1105,15 +1101,10 @@ public class JNIService extends Service {
 			}
 			// FIXME input date as null
 			VMessage vm = new VMessage(0, 0, fromUser, GlobalHolder
-					.getInstance().getCurrentUser(), file.fileId, new Date(
+					.getInstance().getCurrentUser(), new Date(
 					GlobalConfig.getGlobalServerTime()));
-			int pos = file.fileName.lastIndexOf("/");
-			VMessageFileItem vfi = new VMessageFileItem(vm, file.fileId,
-					pos == -1 ? file.fileName
-							: file.fileName.substring(pos + 1));
+			VMessageFileItem vfi = new VMessageFileItem(vm, file.fileId, file.fileSize , file.fileName , file.fileType);
 			vfi.setState(VMessageFileItem.STATE_FILE_UNDOWNLOAD);
-			vfi.setFileSize(file.fileSize);
-			vfi.setFilePath(vfi.getFilePath());
 			vm.setmXmlDatas(vm.toXml());
 			Message.obtain(mCallbackHandler, JNI_RECEIVED_MESSAGE, vm)
 					.sendToTarget();

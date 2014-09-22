@@ -14,6 +14,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 
+import com.V2.jni.V2GlobalEnum;
 import com.V2.jni.util.V2Log;
 import com.v2tech.db.ContentDescriptor;
 import com.v2tech.db.ContentDescriptor.HistoriesMessage;
@@ -47,7 +48,7 @@ public class MessageLoader {
 		String name = "";
 		switch (type) {
 		case CROWD_TYPE:
-			name = "Histories_" + groupType + "_" + groupID + "_" + uid2;
+			name = "Histories_" + groupType + "_" + groupID + "_0";
 			break;
 		case CONTACT_TYPE:
 			name = "Histories_0_0_" + uid2;
@@ -116,6 +117,7 @@ public class MessageLoader {
 
 	/**
 	 * 分页加载聊天消息数据
+	 * 
 	 * @param context
 	 * @param uid1
 	 * @param uid2
@@ -144,7 +146,7 @@ public class MessageLoader {
 
 		String[] args = new String[] { String.valueOf(uid1),
 				String.valueOf(uid2), String.valueOf(uid2),
-				String.valueOf(uid1) , String.valueOf(groupType)};
+				String.valueOf(uid1), String.valueOf(groupType) };
 
 		String order = ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_SAVEDATE
 				+ " desc , "
@@ -171,6 +173,7 @@ public class MessageLoader {
 
 	/**
 	 * 根据指定用户id，加载出所有图片
+	 * 
 	 * @param context
 	 * @param uid1
 	 * @param uid2
@@ -246,6 +249,7 @@ public class MessageLoader {
 
 	/**
 	 * 根据用户id，加载音频或视频通信记录
+	 * 
 	 * @param context
 	 * @param uid
 	 * @param meidaType
@@ -498,15 +502,26 @@ public class MessageLoader {
 		return queryMessage(context, selection, args, order);
 	}
 
-	public static Long queryVMessageID(Context context, String selection,
-			String[] args, String sortOrder, long remoteID) {
+	public static Long queryVMessageID(Context context, VMessage vm) {
 
-		if (!init(context, 0, 0, remoteID, CONTACT_TYPE))
+		if (vm == null)
+			return -1l;
+
+		if (!init(
+				context,
+				vm.getMsgCode(),
+				vm.getGroupId(),
+				vm.getFromUser().getmUserId(),
+				vm.getMsgCode() == V2GlobalEnum.GROUP_TYPE_USER ? MessageLoader.CONTACT_TYPE
+						: MessageLoader.CROWD_TYPE)) 
 			return null;
 
+		String selection = ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_ID
+				+ "=?";
+		String[] args = new String[] { vm.getUUID() };
 		Cursor cursor = context.getContentResolver().query(
 				ContentDescriptor.HistoriesMessage.CONTENT_URI,
-				new String[] { "_id" }, selection, args, sortOrder);
+				new String[] { "_id" }, selection, args, null);
 		if (cursor != null && cursor.getCount() > 0 && cursor.moveToNext()) {
 
 			return cursor.getLong(cursor.getColumnIndex("_id"));
@@ -547,7 +562,8 @@ public class MessageLoader {
 	}
 
 	/**
-	 * delete the VMessage 
+	 * delete the VMessage
+	 * 
 	 * @param context
 	 * @param vm
 	 * @return
@@ -593,6 +609,7 @@ public class MessageLoader {
 
 	/**
 	 * update the given audio message read state...
+	 * 
 	 * @param context
 	 * @param vm
 	 * @return
@@ -618,6 +635,7 @@ public class MessageLoader {
 
 	/**
 	 * update the given audio message read state...
+	 * 
 	 * @param context
 	 * @param vm
 	 * @param audioItem
@@ -645,6 +663,7 @@ public class MessageLoader {
 
 	/**
 	 * update the given audio message read state...
+	 * 
 	 * @param context
 	 * @param vm
 	 * @param fileItem
@@ -764,6 +783,7 @@ public class MessageLoader {
 
 	/**
 	 * 根据传入的查询条件，获取最新的通信消息对象(音频或视频通信)
+	 * 
 	 * @param context
 	 * @param selection
 	 * @param selectionArgs
@@ -806,6 +826,7 @@ public class MessageLoader {
 
 	/**
 	 * 根据传入的group的type和id，查询数据库，获取最新的VMessage对象，群组
+	 * 
 	 * @param context
 	 * @param groupId
 	 * @return
@@ -830,6 +851,7 @@ public class MessageLoader {
 
 	/**
 	 * 根据传入的id，查询数据库，获取最新的VMessage对象
+	 * 
 	 * @param cur
 	 * @return
 	 */
@@ -837,13 +859,6 @@ public class MessageLoader {
 			long uid2) {
 		if (!init(context, 0, 0, uid2, CONTACT_TYPE))
 			return null;
-		// String selection = "((" +
-		// ContentDescriptor.Messages.Cols.FROM_USER_ID
-		// + "=? and " + ContentDescriptor.Messages.Cols.TO_USER_ID
-		// + "=? ) or " + "("
-		// + ContentDescriptor.Messages.Cols.FROM_USER_ID + "=? and "
-		// + ContentDescriptor.Messages.Cols.TO_USER_ID + "=? ))  and "
-		// + ContentDescriptor.Messages.Cols.GROUP_ID + "= 0 ";
 		String selection = "(("
 				+ ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_FROM_USER_ID
 				+ "=? and "
@@ -864,9 +879,6 @@ public class MessageLoader {
 				+ " desc, "
 				+ ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_ID
 				+ " desc limit 1 offset 0 ";
-		// String order = ContentDescriptor.Messages.Cols.SEND_TIME + " desc, "
-		// + ContentDescriptor.Messages.Cols.ID
-		// + " desc limit 1 offset 0 ";
 
 		List<VMessage> list = queryMessage(context, selection, args, order);
 		if (list != null && list.size() > 0) {
@@ -878,6 +890,7 @@ public class MessageLoader {
 
 	/**
 	 * 根据传入的Cursor对象，构造一个VMessage对象
+	 * 
 	 * @param cur
 	 * @return
 	 */
@@ -934,8 +947,10 @@ public class MessageLoader {
 
 	/**
 	 * 根据传入的表名，判断当前数据库中是否存在该表
+	 * 
 	 * @param context
-	 * @param tabName 表名
+	 * @param tabName
+	 *            表名
 	 * @return
 	 */
 	private static boolean isExistTable(Context context, String tabName) {
@@ -965,6 +980,7 @@ public class MessageLoader {
 
 	/**
 	 * 根据传入的VMessage对象，查询数据库，向其填充VMessageImageItem对象。
+	 * 
 	 * @param vm
 	 * @param context
 	 * @return
@@ -1012,6 +1028,7 @@ public class MessageLoader {
 
 	/**
 	 * 根据传入的VMessage对象，查询数据库，向其填充VMessageAudioItem对象。
+	 * 
 	 * @param vm
 	 * @param context
 	 * @return
@@ -1059,6 +1076,7 @@ public class MessageLoader {
 
 	/**
 	 * 根据传入的VMessage对象，查询数据库，向其填充VMessageFileItem对象。
+	 * 
 	 * @param vm
 	 * @param context
 	 * @return

@@ -8,7 +8,7 @@ public class Conversation {
 
 	public static final int TYPE_CONTACT = V2GlobalEnum.GROUP_TYPE_USER;
 
-	public static final int TYPE_GROUP = V2GlobalEnum.GROUP_TYPE_DEPARTMENT;
+	public static final int TYPE_GROUP = V2GlobalEnum.GROUP_TYPE_CROWD;
 
 	public static final int TYPE_VOICE_MESSAGE = 7;
 
@@ -30,6 +30,8 @@ public class Conversation {
 	protected String date;
 
 	protected String dateLong;
+	
+	protected String name;
 
 	protected CharSequence msg;
 
@@ -61,7 +63,7 @@ public class Conversation {
 	}
 
 	public String getName() {
-		return null;
+		return name;
 	}
 
 	public CharSequence getMsg() {
@@ -70,6 +72,10 @@ public class Conversation {
 
 	public String getDate() {
 		return date;
+	}
+	
+	public void setName(String name) {
+		this.name = name;
 	}
 
 	public void setMsg(CharSequence msg) {

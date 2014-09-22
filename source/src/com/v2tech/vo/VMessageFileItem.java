@@ -117,7 +117,7 @@ public class VMessageFileItem extends VMessageAbstractItem {
 	public String getFilePath() {
 		if (fileName != null && filePath == null) {
 			filePath = GlobalConfig.getGlobalFilePath(GlobalHolder
-					.getInstance().getCurrentUser()) + "/" + uuid + fileName.substring(fileName.lastIndexOf(".") + 1);
+					.getInstance().getCurrentUser()) + "/" + uuid + fileName.substring(fileName.lastIndexOf("."));
 		}
 		return filePath;
 	}

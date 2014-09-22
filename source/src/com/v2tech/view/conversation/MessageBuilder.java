@@ -39,7 +39,6 @@ public class MessageBuilder {
 
 	private static final int MESSAGE_TYPE_IMAGE = 0;
 	private static final int MESSAGE_TYPE_AUDIO = 1;
-	private static final int MESSAGE_TYPE_FILE = 2;
 
 	public static VMessage buildGroupTextMessage(int groupType, long gid,
 			User fromUser, String text) {
@@ -66,7 +65,7 @@ public class MessageBuilder {
 	public static VMessage buildImageMessage(int groupType, long groupID,
 			User fromUser, User toUser, String imagePath) {
 		String uuid = UUID.randomUUID().toString();
-		File newFile = copyBinaryData(MESSAGE_TYPE_IMAGE, imagePath , uuid);
+		File newFile = copyBinaryData(MESSAGE_TYPE_IMAGE, imagePath, uuid);
 		if (newFile == null)
 			return null;
 		imagePath = newFile.getAbsolutePath();
@@ -80,7 +79,7 @@ public class MessageBuilder {
 	public static VMessage buildAudioMessage(int groupType, long groupID,
 			User fromUser, User toUser, String audioPath, int seconds) {
 		String uuid = UUID.randomUUID().toString();
-		File newFile = copyBinaryData(MESSAGE_TYPE_AUDIO, audioPath , uuid);
+		File newFile = copyBinaryData(MESSAGE_TYPE_AUDIO, audioPath, uuid);
 		if (newFile == null)
 			return null;
 		audioPath = newFile.getAbsolutePath();
@@ -93,17 +92,13 @@ public class MessageBuilder {
 	}
 
 	public static VMessage buildFileMessage(int groupType, long groupID,
-			User fromUser, User toUser, String filePath, int fileType) {
+			User fromUser, User toUser, FileInfoBean bean) {
 		String uuid = UUID.randomUUID().toString();
-		File newFile = copyBinaryData(MESSAGE_TYPE_FILE, filePath , uuid);
-		if (newFile == null)
-			return null;
-		filePath = newFile.getAbsolutePath();
 		VMessage vm = new VMessage(groupType, groupID, fromUser, toUser,
 				new Date(GlobalConfig.getGlobalServerTime()));
-		VMessageFileItem item = new VMessageFileItem(vm, filePath, fileType);
-		item.setUuid(uuid);
-		return vm;
+		VMessageFileItem item = new VMessageFileItem(vm, uuid, bean.fileSize , bean.filePath , bean.fileType);
+		item.setState(VMessageFileItem.STATE_FILE_SENDING);
+		return item.getVm();
 	}
 
 	/**
@@ -114,39 +109,27 @@ public class MessageBuilder {
 	 * @return
 	 */
 	public static Uri saveMessage(Context context, VMessage vm) {
-		if (vm == null || vm.getFromUser() == null || vm.getToUser() == null) {
-			return null;
-		}
+		if (vm == null)
+			throw new NullPointerException("the given VMessage object is null");
 
 		DataBaseContext mContext = new DataBaseContext(context);
 		int type = 0;
-		if (vm.getMsgCode() == 0 && vm.getGroupId() == 0l)
-			type = MessageLoader.CONTACT_TYPE;
-		else
-			type = MessageLoader.CROWD_TYPE;
-
-		long remoteID = 0;
-		if (vm.getFromUser().getmUserId() == vm.getFromUser().getmUserId())
-			remoteID = vm.getToUser().getmUserId();
-		else
-			remoteID = vm.getFromUser().getmUserId();
-
-		if (!MessageLoader.init(context, 0, 0, remoteID, type))
-			return null;
-
 		// 确定远程用户
 		long remote = -1;
-		if (vm.getFromUser().getmUserId() == GlobalHolder.getInstance()
-				.getCurrentUserId())
-			remote = vm.getToUser().getmUserId();
-		else
-			remote = vm.getFromUser().getmUserId();
+		if (vm.getMsgCode() == 0 && vm.getGroupId() == 0l) {
+			type = MessageLoader.CONTACT_TYPE;
+			if (vm.getFromUser().getmUserId() == GlobalHolder.getInstance()
+					.getCurrentUserId())
+				remote = vm.getToUser().getmUserId();
+			else
+				remote = vm.getFromUser().getmUserId();
+		} else
+			type = MessageLoader.CROWD_TYPE;
+
 		// 判断数据库是否存在
 		long groupType = vm.getMsgCode();
 		long groupID = vm.getGroupId();
-		if (!MessageLoader.init(context, groupType, groupID, remote,
-				remote == 0 ? MessageLoader.CROWD_TYPE
-						: MessageLoader.CONTACT_TYPE))
+		if (!MessageLoader.init(context, groupType, groupID, remote, type))
 			return null;
 		// 直接将xml存入数据库中，方便以后扩展。
 		ContentValues values = new ContentValues();
@@ -163,10 +146,10 @@ public class MessageBuilder {
 			values.put(
 					ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_TO_USER_ID,
 					vm.getToUser().getmUserId());
-			values.put(
-					ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_REMOTE_USER_ID,
-					vm.getToUser().getmUserId());
 		}
+		values.put(
+				ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_REMOTE_USER_ID,
+				remote);
 		values.put(ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_ID,
 				vm.getUUID());
 		values.put(
@@ -195,23 +178,26 @@ public class MessageBuilder {
 	public static Uri saveBinaryVMessage(Context context, VMessage vm) {
 
 		DataBaseContext mContext = new DataBaseContext(context);
-		if (vm == null || vm.getFromUser() == null || vm.getToUser() == null)
-			return null;
+		if (vm == null)
+			throw new NullPointerException("the given VMessage object is null");
 
 		Uri uri = null;
+		int type = 0;
 		// 确定远程用户
 		long remote = -1;
-		if (vm.getFromUser().getmUserId() == GlobalHolder.getInstance()
-				.getCurrentUserId())
-			remote = vm.getToUser().getmUserId();
-		else
-			remote = vm.getFromUser().getmUserId();
+		if (vm.getMsgCode() == 0 && vm.getGroupId() == 0l) {
+			type = MessageLoader.CONTACT_TYPE;
+			if (vm.getFromUser().getmUserId() == GlobalHolder.getInstance()
+					.getCurrentUserId())
+				remote = vm.getToUser().getmUserId();
+			else
+				remote = vm.getFromUser().getmUserId();
+		} else
+			type = MessageLoader.CROWD_TYPE;
 
 		long groupType = vm.getMsgCode();
 		long groupID = vm.getGroupId();
-		if (!MessageLoader.init(context, groupType, groupID, remote,
-				remote == 0 ? MessageLoader.CROWD_TYPE
-						: MessageLoader.CONTACT_TYPE))
+		if (!MessageLoader.init(context, groupType, groupID, remote, type))
 			return null;
 		ContentValues values = new ContentValues();
 
@@ -306,18 +292,22 @@ public class MessageBuilder {
 	public static Uri saveFileVMessage(Context context, VMessage vm) {
 
 		DataBaseContext mContext = new DataBaseContext(context);
-		if (vm == null || vm.getFromUser() == null || vm.getToUser() == null
-				|| vm.getFileItems().size() <= 0)
-			return null;
+		if (vm == null)
+			throw new NullPointerException(
+					"the given VMessage object is null");
 
+		if(vm.getFileItems().size() <= 0)
+			return null;
+		
 		// 确定远程用户
 		long remote = -1;
-		if (vm.getFromUser().getmUserId() == GlobalHolder.getInstance()
-				.getCurrentUserId())
-			remote = vm.getToUser().getmUserId();
-		else
-			remote = vm.getFromUser().getmUserId();
-
+		if (vm.getMsgCode() == 0 && vm.getGroupId() == 0l) {
+			if (vm.getFromUser().getmUserId() == GlobalHolder.getInstance()
+					.getCurrentUserId())
+				remote = vm.getToUser().getmUserId();
+			else
+				remote = vm.getFromUser().getmUserId();
+		}
 		Uri uri = null;
 		VMessageFileItem file = null;
 		for (int i = 0; i < vm.getFileItems().size(); i++) {
@@ -331,9 +321,11 @@ public class MessageBuilder {
 			values.put(
 					ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_FROM_USER_ID,
 					vm.getFromUser().getmUserId());
-			values.put(
-					ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_TO_USER_ID,
-					vm.getToUser().getmUserId());
+			if (vm.getToUser() != null) {
+				values.put(
+						ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_TO_USER_ID,
+						vm.getToUser().getmUserId());
+			}
 			values.put(
 					ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_REMOTE_USER_ID,
 					remote);
@@ -362,8 +354,8 @@ public class MessageBuilder {
 	public static Uri saveMediaChatHistories(Context context, VideoBean bean) {
 
 		DataBaseContext mContext = new DataBaseContext(context);
-		if (bean == null || bean.formUserID == -1 || bean.toUserID == -1)
-			return null;
+		if (bean == null)
+			throw new NullPointerException("the given VideoBean object is null");
 
 		Uri uri = null;
 		ContentValues values = new ContentValues();
@@ -434,17 +426,16 @@ public class MessageBuilder {
 		for (VMessageAbstractItem item : items) {
 			switch (item.getType()) {
 			case VMessageAbstractItem.ITEM_TYPE_FILE:
-				if(vm.isLocal()){
-				itemVal.put(
-						ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_SEND_STATE,
-						VMessageAbstractItem.STATE_FILE_SENT_FALIED);
-				}
-				else{
+				if (vm.isLocal()) {
+					itemVal.put(
+							ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_SEND_STATE,
+							VMessageAbstractItem.STATE_FILE_SENT_FALIED);
+				} else {
 					itemVal.put(
 							ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_SEND_STATE,
 							VMessageAbstractItem.STATE_FILE_DOWNLOADED_FALIED);
 				}
-				
+
 				updates = mContext.getContentResolver().update(
 						ContentDescriptor.HistoriesFiles.CONTENT_URI,
 						itemVal,
@@ -465,7 +456,7 @@ public class MessageBuilder {
 	 * @param filePath
 	 * @return
 	 */
-	private static File copyBinaryData(int type, String filePath , String uuid) {
+	private static File copyBinaryData(int type, String filePath, String uuid) {
 
 		if (TextUtils.isEmpty(filePath))
 			return null;
@@ -483,16 +474,12 @@ public class MessageBuilder {
 			User user = GlobalHolder.getInstance().getCurrentUser();
 			switch (type) {
 			case MESSAGE_TYPE_IMAGE:
-				desFile = new File(GlobalConfig.getGlobalPicsPath(user) + "/" + uuid 
-						+ fileName.substring(fileName.lastIndexOf(".")));
+				desFile = new File(GlobalConfig.getGlobalPicsPath(user) + "/"
+						+ uuid + fileName.substring(fileName.lastIndexOf(".")));
 				break;
 			case MESSAGE_TYPE_AUDIO:
-				desFile = new File(GlobalConfig.getGlobalAudioPath(user) + "/" + uuid 
-						+ fileName.substring(fileName.lastIndexOf(".")));
-				break;
-			case MESSAGE_TYPE_FILE:
-				desFile = new File(GlobalConfig.getGlobalFilePath(user) + "/" + uuid 
-						+ fileName.substring(fileName.lastIndexOf(".")));
+				desFile = new File(GlobalConfig.getGlobalAudioPath(user) + "/"
+						+ uuid + fileName.substring(fileName.lastIndexOf(".")));
 				break;
 			default:
 				throw new RuntimeException(
@@ -625,7 +612,8 @@ public class MessageBuilder {
 		case CONTACT:
 			break;
 		default:
-			throw new RuntimeException("invalid VMessageQualification enum type.. please check the type");
+			throw new RuntimeException(
+					"invalid VMessageQualification enum type.. please check the type");
 		}
 		return false;
 	}
@@ -696,13 +684,14 @@ public class MessageBuilder {
 		case CONTACT:
 			break;
 		default:
-			throw new RuntimeException("invalid VMessageQualification enum type.. please check the type");
+			throw new RuntimeException(
+					"invalid VMessageQualification enum type.. please check the type");
 		}
 		String where = ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_ID
 				+ " = ?";
 		int updates = mContext.getContentResolver().update(
-				ContentDescriptor.HistoriesCrowd.CONTENT_URI, values,
-				where, selectionArgs);
+				ContentDescriptor.HistoriesCrowd.CONTENT_URI, values, where,
+				selectionArgs);
 		return updates;
 	}
 
@@ -743,11 +732,11 @@ public class MessageBuilder {
 
 			String xml = cursor.getString(cursor.getColumnIndex("CrowdXml"));
 			V2Group v2Group = XmlAttributeExtractor.parseCrowd(xml).get(0);
-			if(v2Group == null || v2Group.creator == null){
+			if (v2Group == null || v2Group.creator == null) {
 				V2Log.e("pase the CrowdXml failed..");
 				continue;
 			}
-			
+
 			long crowdGroupID = cursor
 					.getLong(cursor.getColumnIndex("CrowdID"));
 			long saveDate = cursor.getLong(cursor.getColumnIndex("SaveDate"));
@@ -759,29 +748,34 @@ public class MessageBuilder {
 					.getColumnIndex("ApplyReason"));
 			String refuseReason = cursor.getString(cursor
 					.getColumnIndex("RefuseReason"));
-			group = new CrowdGroup(crowdGroupID, v2Group.name, GlobalHolder.getInstance().getUser(v2Group.owner.uid) , new Date(saveDate));
+			group = new CrowdGroup(crowdGroupID, v2Group.name, GlobalHolder
+					.getInstance().getUser(v2Group.owner.uid), new Date(
+					saveDate));
 			group.setBrief(v2Group.brief);
 			group.setAnnouncement(v2Group.announce);
 			group.setAuthType(CrowdGroup.AuthType.fromInt(authType));
-				
+
 			long fromUserID = cursor.getLong(cursor
 					.getColumnIndex("FromUserID"));
 			long toUserID = cursor.getLong(cursor.getColumnIndex("ToUserID"));
-			if(v2Group.creator.uid == fromUserID){
-				VMessageQualificationInvitationCrowd inviteCrowd = new VMessageQualificationInvitationCrowd(group , GlobalHolder.getInstance().getUser(toUserID));
+			if (v2Group.creator.uid == fromUserID) {
+				VMessageQualificationInvitationCrowd inviteCrowd = new VMessageQualificationInvitationCrowd(
+						group, GlobalHolder.getInstance().getUser(toUserID));
 				inviteCrowd.setRejectReason(refuseReason);
-				inviteCrowd.setQualState(VMessageQualification.QualificationState
-						.fromInt(joinState));
+				inviteCrowd
+						.setQualState(VMessageQualification.QualificationState
+								.fromInt(joinState));
 				inviteCrowd.setReadState(VMessageQualification.ReadState
 						.fromInt(readState));
 				list.add(inviteCrowd);
-			}
-			else{
-				VMessageQualificationApplicationCrowd applyCrowd = new VMessageQualificationApplicationCrowd(group , GlobalHolder.getInstance().getUser(fromUserID));
+			} else {
+				VMessageQualificationApplicationCrowd applyCrowd = new VMessageQualificationApplicationCrowd(
+						group, GlobalHolder.getInstance().getUser(fromUserID));
 				applyCrowd.setApplyReason(applyReason);
 				applyCrowd.setRejectReason(refuseReason);
-				applyCrowd.setQualState(VMessageQualification.QualificationState
-						.fromInt(joinState));
+				applyCrowd
+						.setQualState(VMessageQualification.QualificationState
+								.fromInt(joinState));
 				applyCrowd.setReadState(VMessageQualification.ReadState
 						.fromInt(readState));
 				list.add(applyCrowd);
@@ -801,14 +795,15 @@ public class MessageBuilder {
 	public static void deleteQualMessage(Context context, User user) {
 		if (user == null) {
 			V2Log.e("To delete failed...please check the given user Object or type in the databases");
-			return ;
+			return;
 		}
 		DataBaseContext mContext = new DataBaseContext(context);
 		String where = ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_REMOTE_USER_ID
 				+ " = ?";
-		String[] selectionArgs = new String[] { String.valueOf(user.getmUserId())};
+		String[] selectionArgs = new String[] { String.valueOf(user
+				.getmUserId()) };
 		mContext.getContentResolver().delete(
-				ContentDescriptor.HistoriesCrowd.CONTENT_URI, 
-				where, selectionArgs);
+				ContentDescriptor.HistoriesCrowd.CONTENT_URI, where,
+				selectionArgs);
 	}
 }

@@ -64,9 +64,9 @@ public class GroupLayout extends LinearLayout {
 				.findViewById(R.id.group_list_conference_notificator);
 		mNotificatorIV.bringToFront();
 
-		mGroupNameTV.setText(this.mConv.getName());
 		switch (mConv.getType()) {
 		case Conversation.TYPE_CONTACT:
+			mGroupNameTV.setText(((ContactConversation)mConv).getName());
 			hand.post(queryMessageRunnable);
 			Bitmap bm = ((ContactConversation) this.mConv).getAvatar();
 			if (bm != null)
@@ -75,12 +75,14 @@ public class GroupLayout extends LinearLayout {
 				mGroupIV.setImageResource(R.drawable.avatar);
 			break;
 		case Conversation.TYPE_CONFERNECE:
+			mGroupNameTV.setText(((ConferenceConversation)mConv).getName());
 			if (((ConferenceConversation) mConv).getGroup().getOwnerUser()
 					.getmUserId() != GlobalHolder.getInstance()
 					.getCurrentUserId())
 				mGroupIV.setImageResource(R.drawable.conference_icon);
 			break;
 		case Conversation.TYPE_GROUP:
+			mGroupNameTV.setText(((CrowdConversation)mConv).getName());
 			mGroupIV.setImageResource(R.drawable.chat_group_icon);
 			break;
 		case Conversation.TYPE_VOICE_MESSAGE:

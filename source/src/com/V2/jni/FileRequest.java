@@ -240,6 +240,12 @@ public class FileRequest {
 		}
 	}
 
+	/**
+	 * 暂不用
+	 * @param szFileID
+	 * @param errorCode
+	 * @param nTransType
+	 */
 	private void OnFileTransError(String szFileID, int errorCode, int nTransType) {
 		V2Log.e(TAG, "OnFileTransError ---> szFileID :" + szFileID
 				+ " | errorCode: " + errorCode + " | nTransType: " + nTransType);
@@ -263,7 +269,12 @@ public class FileRequest {
 		}
 	}
 
-	// 鏂囦欢浼犺緭澶辫触
+	/**
+	 * 当发送文件或下载文件出错时，会回调该函数
+	 * @param sFileID
+	 * @param errorCode
+	 * @param nTransType 1 send 2 download
+	 */
 	private void OnFileDownloadError(String sFileID, int errorCode, int nTransType) {
 		V2Log.e(TAG, "OnFileDownloadError ---> szFileID :" + sFileID
 				+ " | errorCode: " + errorCode + " | nTransType: " + nTransType);

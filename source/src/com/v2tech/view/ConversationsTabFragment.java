@@ -28,6 +28,7 @@ import android.os.Message;
 import android.os.SystemClock;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -678,7 +679,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 
 			@Override
 			public void run() {
-				SystemClock.sleep(1500);
+				SystemClock.sleep(3000);
 				Cursor mCur = getActivity()
 						.getContentResolver()
 						.query(ContentDescriptor.RecentHistoriesMessage.CONTENT_URI,
@@ -695,16 +696,8 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 										+ " desc");
 
 				while (mCur.moveToNext()) {
-					Conversation cov = extractConversation(mCur);
+					ContactConversation cov = extractConversation(mCur);
 					if (cov.getType() == mCurrentTabFlag) {
-						VMessage vm = MessageLoader.getNewestMessage(mContext,
-								GlobalHolder.getInstance().getCurrentUserId(),
-								cov.getExtId());
-						if (vm != null) {
-							CharSequence newMessage = MessageUtil
-									.getMixedConversationContent(mContext, vm);
-							cov.setMsg(newMessage);
-						}
 						mConvList.add(cov);
 					}
 				}
@@ -718,19 +711,23 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 
 	}
 
-	private Conversation extractConversation(Cursor cur) {
+	private ContactConversation extractConversation(Cursor cur) {
 		long extId = cur.getLong(cur.getColumnIndex("RemoteUserID"));
 		int readState = cur.getInt(cur.getColumnIndex("ReadState"));
 		User u = GlobalHolder.getInstance().getUser(extId);
 		if (u == null) {
+			V2Log.e(TAG, "extractConversation , get user is null , id is :" + extId);
 			u = new User(extId);
 		}
-		Conversation cov = new ContactConversation(u);
+		ContactConversation cov = new ContactConversation(u);
 		VMessage vm = MessageLoader.getNewestMessage(mContext, GlobalHolder
 				.getInstance().getCurrentUserId(), extId);
 		if (vm != null) {
 			cov.setDate(vm.getDateTimeStr());
 			cov.setDateLong(String.valueOf(vm.getmDateLong()));
+			CharSequence newMessage = MessageUtil
+					.getMixedConversationContent(mContext, vm);
+			cov.setMsg(newMessage);
 		}
 		cov.setReadFlag(readState);
 		return cov;
@@ -1007,8 +1004,11 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 		 * 代表已存在，仅需要展示
 		 */
 		if (foundFlag) {
-			existedCov.setMsg(MessageUtil.getMixedConversationContent(mContext,
-					vm));
+			String mixedContent = MessageUtil.getMixedConversationContent(mContext,
+					vm).toString();
+			if(TextUtils.isEmpty(mixedContent))
+				V2Log.e(TAG, "get mixed content is null , VMessage id is :" + vm.getId());
+			existedCov.setMsg(mixedContent);
 			existedCov.setReadFlag(Conversation.READ_FLAG_UNREAD);
 			existedCov.setDateLong(String.valueOf(vm.getmDateLong()));
 		} else {

@@ -670,6 +670,9 @@ public class ConversationSelectFile extends Activity {
 
 	private void reutrnResult(int resultCode) {
 
+		boolean flag = checkEmptyFile();
+		if(!flag)
+			return ;
 		Intent intent = new Intent();
 		intent.putParcelableArrayListExtra("checkedFiles", mCheckedList);
 		setResult(resultCode, intent);
@@ -680,6 +683,25 @@ public class ConversationSelectFile extends Activity {
 			mFolderLists.clear();
 		}
 		finish();
+	}
+	
+	private boolean checkEmptyFile(){
+		
+		for (int i = 0; i < mCheckedList.size(); i++) {
+			
+			FileInfoBean fileInfoBean = mCheckedList.get(i);
+			if(fileInfoBean.fileSize <= 0){
+				
+				CreateHintDialog(fileInfoBean.fileName);
+				return false;
+			}
+		}
+		return true;
+	}
+
+	private void CreateHintDialog(String fileName) {
+		
+		
 	}
 
 	public void adapterFileIcon(String fileName, ViewHolder holder,
