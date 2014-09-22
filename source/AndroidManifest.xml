@@ -189,7 +189,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.v2tech.view.contacts.add.MessageAuthenticationActivity"
+            android:name="com.v2tech.view.conversation.MessageAuthenticationActivity"
             android:screenOrientation="nosensor"
             android:windowSoftInputMode="stateHidden|adjustPan" >
         </activity>

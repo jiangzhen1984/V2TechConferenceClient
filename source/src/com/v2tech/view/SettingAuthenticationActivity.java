@@ -23,7 +23,6 @@ public class SettingAuthenticationActivity extends Activity {
 		public void handleMessage(android.os.Message msg) {
 			switch (msg.what) {
 			case UPDATEUSER_CALLBACK:
-				Log.i("wzl", "updateUser返回");
 				break;
 			}
 		};
@@ -59,7 +58,6 @@ public class SettingAuthenticationActivity extends Activity {
 
 	@Override
 	public void onBackPressed() {
-		Log.i("wzl", "返回");
 		int authtype = 0;
 		switch (rgAutentication.getCheckedRadioButtonId()) {
 		case R.id.rb_allow_anybogy:// 允许任何人
