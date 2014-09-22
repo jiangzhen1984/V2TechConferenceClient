@@ -193,7 +193,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:gravity="center"
-                        android:text="表情"
+                        android:text="@string/contact_message_expression"
                         android:textSize="@dimen/activity_contact_iconDescription_text"
                         android:textColor="#000000" />
                 </LinearLayout>
@@ -213,7 +213,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:gravity="center"
-                        android:text="图片"
+                        android:text="@string/contact_message_send_image"
                         android:textSize="@dimen/activity_contact_iconDescription_text"
                         android:textColor="#000000" />
                 </LinearLayout>
@@ -233,7 +233,28 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:gravity="center"
-                        android:text="文件"
+                        android:text="@string/contact_message_send_file"
+                        android:textSize="@dimen/activity_contact_iconDescription_text"
+                        android:textColor="#000000" />
+                </LinearLayout>
+                <LinearLayout
+                    android:id="@+id/contact_message_create_metting_button_layout"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_toRightOf="@+id/contact_message_send_file_button_layout"
+                    android:orientation="vertical"
+                    android:visibility="gone"
+                    android:padding="15dp" >
+                    <ImageView
+                        android:id="@+id/contact_message_create_metting_button"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/contact_detail_conf_button" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:text="@string/contact_message_create_metting"
                         android:textSize="@dimen/activity_contact_iconDescription_text"
                         android:textColor="#000000" />
                 </LinearLayout>
@@ -253,7 +274,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:gravity="center"
-                        android:text="视频"
+                        android:text="@string/contact_message_video_call"
                         android:textSize="@dimen/activity_contact_iconDescription_text"
                         android:textColor="#000000" />
                 </LinearLayout>
@@ -273,7 +294,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:gravity="center"
-                        android:text="语音"
+                        android:text="@string/contact_message_audio_call"
                         android:textSize="@dimen/activity_contact_iconDescription_text"
                         android:textColor="#000000" />
                 </LinearLayout>

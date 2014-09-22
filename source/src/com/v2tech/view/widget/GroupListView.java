@@ -272,9 +272,11 @@ public class GroupListView extends ListView {
 			while (start < end) {
 				pos = start;
 				Item item = mFilterList.get(start++);
-				User u = (User) ((UserItem) item).getObject();
+				User u = null;
+				if(item instanceof UserItem)
+					u = (User) ((UserItem) item).getObject();
 				// if item is current user, always sort after current user
-				if (u.getmUserId() == GlobalHolder.getInstance()
+				if (u == null || u.getmUserId() == GlobalHolder.getInstance()
 						.getCurrentUserId()) {
 					continue;
 				}

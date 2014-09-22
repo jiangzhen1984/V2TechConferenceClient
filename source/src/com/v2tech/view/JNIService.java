@@ -1113,6 +1113,8 @@ public class JNIService extends Service {
 							: file.fileName.substring(pos + 1));
 			vfi.setState(VMessageFileItem.STATE_FILE_UNDOWNLOAD);
 			vfi.setFileSize(file.fileSize);
+			vfi.setFilePath(vfi.getFilePath());
+			vm.setmXmlDatas(vm.toXml());
 			Message.obtain(mCallbackHandler, JNI_RECEIVED_MESSAGE, vm)
 					.sendToTarget();
 		}

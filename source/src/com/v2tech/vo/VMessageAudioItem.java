@@ -22,6 +22,14 @@ public class VMessageAudioItem extends VMessageAbstractItem {
 		this.seconds = seconds;
 		this.type = ITEM_TYPE_AUDIO;
 	}
+	
+	public VMessageAudioItem(VMessage vm, String uuid, String extension, int seconds) {
+		super(vm);
+		this.uuid = uuid;
+		this.extension = extension;
+		this.seconds = seconds;
+		this.type = ITEM_TYPE_AUDIO;
+	}
 
 	public VMessageAudioItem(VMessage vm, String audioFilePath, int seconds) {
 		super(vm);

@@ -997,7 +997,11 @@ public class MessageLoader {
 				int transState = mCur
 						.getInt(mCur
 								.getColumnIndex(ContentDescriptor.HistoriesGraphic.Cols.HISTORY_GRAPHIC_TRANSTATE));
+				String filePath = mCur
+						.getString(mCur
+								.getColumnIndex(ContentDescriptor.HistoriesGraphic.Cols.HISTORY_GRAPHIC_PATH));
 				item.setState(transState);
+				item.setFilePath(filePath);
 			}
 		}
 
@@ -1040,7 +1044,11 @@ public class MessageLoader {
 				int readState = mCur
 						.getInt(mCur
 								.getColumnIndex(ContentDescriptor.HistoriesAudios.Cols.HISTORY_AUDIO_READ_STATE));
+				String filePath = mCur
+						.getString(mCur
+								.getColumnIndex(ContentDescriptor.HistoriesAudios.Cols.HISTORY_AUDIO_PATH));
 				item.setState(readState);
+				item.setAudioFilePath(filePath);
 			}
 		}
 

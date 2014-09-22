@@ -531,18 +531,14 @@ public class MessageBodyView extends LinearLayout {
 
 				pw.setBackgroundDrawable(new ColorDrawable(
 						Color.TRANSPARENT));
-				if (failedIcon.getVisibility() == View.INVISIBLE) {
+				if (messageType == MESSAGE_TYPE_TEXT) {
 					pw.getContentView()
 							.findViewById(
-									R.id.contact_message_pop_up_item_resend)
-							.setVisibility(View.GONE);
-					if (messageType == MESSAGE_TYPE_TEXT) {
-						pw.getContentView()
-								.findViewById(
-										R.id.contact_message_pop_up_item_copy)
-								.setVisibility(View.VISIBLE);
-					}
-				} else {
+									R.id.contact_message_pop_up_item_copy)
+							.setVisibility(View.VISIBLE);
+				}
+				
+				if (failedIcon.getVisibility() == View.VISIBLE) {
 					if (mMsg.isLocal()) {
 						pw.getContentView()
 								.findViewById(
@@ -554,9 +550,6 @@ public class MessageBodyView extends LinearLayout {
 										R.id.contact_message_pop_up_item_redownload)
 								.setVisibility(View.VISIBLE);
 					}
-					pw.getContentView()
-							.findViewById(R.id.contact_message_pop_up_item_copy)
-							.setVisibility(View.GONE);
 				}
 				int viewWidth = anchor.getMeasuredWidth();
 				int viewHeight = anchor.getMeasuredHeight();
@@ -786,10 +779,12 @@ public class MessageBodyView extends LinearLayout {
 			strState = getContext().getResources()
 					.getText(R.string.contact_message_file_item_miss_download)
 					.toString();
+			actionButton.setVisibility(View.GONE);
 		} else if (vfi.getState() == VMessageAbstractItem.STATE_FILE_UNDOWNLOAD) {
 			strState = getContext().getResources()
 					.getText(R.string.contact_message_file_item_miss_download)
 					.toString();
+			actionButton.setVisibility(View.GONE);
 		} else if (vfi.getState() == VMessageAbstractItem.STATE_FILE_SENT) {
 			strState = getContext().getResources()
 					.getText(R.string.contact_message_file_item_sent)

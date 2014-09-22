@@ -85,7 +85,6 @@ import com.v2tech.view.widget.CommonAdapter;
 import com.v2tech.view.widget.CommonAdapter.CommonAdapterItemWrapper;
 import com.v2tech.vo.Conversation;
 import com.v2tech.vo.CrowdGroup;
-import com.v2tech.vo.Group;
 import com.v2tech.vo.User;
 import com.v2tech.vo.UserDeviceConfig;
 import com.v2tech.vo.VMessage;
@@ -110,7 +109,6 @@ public class ConversationView extends Activity {
 
 	private final int BATCH_COUNT = 10;
 	private static final int SELECT_PICTURE_CODE = 100;
-	private static final int FILE_SELECT_CODE = 101;
 
 	private static final int VOICE_DIALOG_FLAG_RECORDING = 1;
 	private static final int VOICE_DIALOG_FLAG_CANCEL = 2;
@@ -157,6 +155,7 @@ public class ConversationView extends Activity {
 	private View mSelectFileButtonIV;
 	private View mVideoCallButton;
 	private View mAudioCallButton;
+	private View mButtonCreateMetting;
 
 	private ImageView mAudioSpeakerIV;
 
@@ -255,6 +254,9 @@ public class ConversationView extends Activity {
 
 		mButtonRecordAudio = (Button) findViewById(R.id.message_button_audio_record);
 		mButtonRecordAudio.setOnTouchListener(mButtonHolderListener);
+		
+		mButtonCreateMetting = findViewById(R.id.contact_message_create_metting_button_layout);
+		mButtonCreateMetting.setOnClickListener(mButtonCreateMettingListener);
 
 		mAdditionFeatureContainer = findViewById(R.id.contact_message_sub_feature_ly);
 
@@ -277,11 +279,13 @@ public class ConversationView extends Activity {
 		initExtraObject(savedInstanceState);
 		// TODO for group conversation
 		if (groupId > 0) {
-			mSelectFileButtonIV.setVisibility(View.INVISIBLE);
-			mVideoCallButton.setVisibility(View.INVISIBLE);
-			mAudioCallButton.setVisibility(View.INVISIBLE);
-			mAudioSpeakerIV.setVisibility(View.INVISIBLE);
+			mVideoCallButton.setVisibility(View.GONE);
+			mAudioCallButton.setVisibility(View.GONE);
 			mShowContactDetailButton.setVisibility(View.INVISIBLE);
+			mButtonCreateMetting.setVisibility(View.VISIBLE);
+		}
+		else{
+			mButtonCreateMetting.setVisibility(View.GONE);
 		}
 
 		// Register listener for avatar changed
@@ -1224,6 +1228,17 @@ public class ConversationView extends Activity {
 		@Override
 		public void onClick(View arg0) {
 			startVoiceCall();
+		}
+	};
+	
+	private View.OnClickListener mButtonCreateMettingListener = new View.OnClickListener() {
+		@Override
+		public void onClick(View arg0) {
+			Intent i = new Intent(
+					PublicIntent.START_CONFERENCE_CREATE_ACTIVITY);
+			i.addCategory(PublicIntent.DEFAULT_CATEGORY);
+//			startActivityForResult(i, SUB_ACTIVITY_CODE_CREATE_CONF);
+			startActivity(i);
 		}
 	};
 

@@ -245,7 +245,7 @@ public class MessageBuilder {
 					vm.getmDateLong());
 			values.put(
 					ContentDescriptor.HistoriesGraphic.Cols.HISTORY_GRAPHIC_PATH,
-					vMessageImageItem.getExtension());
+					vMessageImageItem.getFilePath());
 			values.put(ContentDescriptor.HistoriesGraphic.Cols.OWNER_USER_ID,
 					GlobalHolder.getInstance().getCurrentUserId());
 			uri = mContext.getContentResolver().insert(
@@ -484,15 +484,15 @@ public class MessageBuilder {
 			switch (type) {
 			case MESSAGE_TYPE_IMAGE:
 				desFile = new File(GlobalConfig.getGlobalPicsPath(user) + "/" + uuid 
-						+ fileName.substring(fileName.lastIndexOf(".")) + 1);
+						+ fileName.substring(fileName.lastIndexOf(".")));
 				break;
 			case MESSAGE_TYPE_AUDIO:
 				desFile = new File(GlobalConfig.getGlobalAudioPath(user) + "/" + uuid 
-						+ fileName.substring(fileName.lastIndexOf(".")) + 1);
+						+ fileName.substring(fileName.lastIndexOf(".")));
 				break;
 			case MESSAGE_TYPE_FILE:
 				desFile = new File(GlobalConfig.getGlobalFilePath(user) + "/" + uuid 
-						+ fileName.substring(fileName.lastIndexOf(".")) + 1);
+						+ fileName.substring(fileName.lastIndexOf(".")));
 				break;
 			default:
 				throw new RuntimeException(

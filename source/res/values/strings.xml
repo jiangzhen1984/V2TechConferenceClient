@@ -34,6 +34,12 @@
     <string name="specificItem_voice_cannelOperator">取消</string>
     <string name="specificItem_voice_deleteOperator">删除</string>
     <string name="specificItem_voice_selectAll">全部</string>
+    <string name="contact_message_audio_call">语音</string>
+    <string name="contact_message_video_call">视频</string>
+    <string name="contact_message_create_metting">建会</string>
+    <string name="contact_message_send_file">文件</string>
+    <string name="contact_message_send_image">图片</string>
+    <string name="contact_message_expression">表情</string>
     
 
 </resources>

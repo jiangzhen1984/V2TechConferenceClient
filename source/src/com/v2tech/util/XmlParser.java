@@ -136,15 +136,9 @@ public class XmlParser {
 							V2Log.e("Invalid uuid ");
 							continue;
 						}
-						String fileExt = msgEl.getAttribute("FileExt");
-						String filePath = GlobalConfig
-								.getGlobalAudioPath(GlobalHolder.getInstance()
-										.getCurrentUser())
-								+ "/" + uuid + fileExt;
 						VMessageImageItem vii = new VMessageImageItem(vm, uuid,
 								msgEl.getAttribute("FileExt"));
 						vii.setNewLine(isNewLine);
-						vii.setFilePath(filePath);
 
 					} else if (msgEl.getTagName().equals("TAudioChatItem")) {
 
@@ -155,12 +149,8 @@ public class XmlParser {
 						}
 						String fileExt = msgEl.getAttribute("FileExt");
 						String seconds = msgEl.getAttribute("Seconds");
-						String filePath = GlobalConfig
-								.getGlobalAudioPath(GlobalHolder.getInstance()
-										.getCurrentUser())
-								+ "/" + uuid + fileExt;
 						VMessageAudioItem vii = new VMessageAudioItem(vm, uuid,
-								fileExt, filePath, Integer.valueOf(seconds));
+								fileExt, Integer.valueOf(seconds));
 						vii.setNewLine(isNewLine);
 
 					} else if (msgEl.getTagName().equals("TFileChatItem")) {
