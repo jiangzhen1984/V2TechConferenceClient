@@ -32,6 +32,7 @@ import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -55,7 +56,6 @@ import com.v2tech.service.GlobalHolder;
 import com.v2tech.service.Registrant;
 import com.v2tech.service.jni.JNIResponse;
 import com.v2tech.service.jni.RequestEnterConfResponse;
-import com.v2tech.util.ArrayUtils;
 import com.v2tech.util.DateUtil;
 import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.MessageUtil;
@@ -132,7 +132,6 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 	private int currentPosition;
 
 	private int currentMoveViewPosition;
-	private boolean updateConversation;
 	private long lastDateTime = 0;
 	private long lastExitId;
 
@@ -697,7 +696,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 				if(verificationMessageItem.getDate() != null)
 					verificationDate = Long.valueOf(verificationMessageItem.getDate());
 				if(voiceMessageItem.getDate() != null)
-					voiceMessageDate = Long.valueOf(voiceMessageItem.getDateLong());
+					voiceMessageDate = Long.valueOf(voiceMessageItem.getDate());
 				if(verificationDate > voiceMessageDate){
 					firstAdd = verificationMessageItem;
 					secondAdd = voiceMessageItem;
@@ -723,10 +722,9 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 
 				while (mCur.moveToNext()) {
 					long date = 0;
-					String saveDate = mCur.getString(mCur.getColumnIndex("SaveDate"));
-					if(saveDate != null)
-						date = Long.valueOf(saveDate);
 					ContactConversation cov = extractConversation(mCur);
+					if(!TextUtils.isEmpty(cov.getDateLong()))
+						date = Long.valueOf(cov.getDateLong());
 					if (cov.getType() == mCurrentTabFlag) {
 							
 						if(isVoiceSpecificAdd == false && firstAdd.getDate() != null && Long.valueOf(firstAdd.getDateLong()) > date){
@@ -773,7 +771,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 		return cov;
 	}
 
-	private void fillAdapter(List<Conversation> list, boolean isFresh) {
+	private void fillAdapter(List<Conversation> list, boolean isFresh) { 
 		mItemList.clear();
 		for (int i = 0; i < list.size(); i++) {
 			Conversation cov = list.get(i);
@@ -891,7 +889,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 	}
 
 	private void updateConversation(int groupType, long groupID) {
-		Log.d(TAG, "updateConversation two param calling...");
+		Log.d(TAG, "update Conversation two param calling...");
 		if (!isLoadedCov) {
 			this.loadConversation();
 		}
@@ -910,15 +908,6 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 
 		if (foundFlag) {
 
-//			VMessage vm = null;
-//			if (groupType == Conversation.TYPE_GROUP) {
-//				vm = MessageLoader.getNewestGroupMessage(mContext,
-//						Long.valueOf(Conversation.TYPE_GROUP), groupID);
-//			} else if (groupType == Conversation.TYPE_CONTACT) {
-//				vm = MessageLoader.getNewestMessage(mContext, GlobalHolder
-//						.getInstance().getCurrentUserId(), existedCov
-//						.getExtId());
-//			}
 			if (groupType == Conversation.TYPE_CONTACT) {
 				VMessage vm = MessageLoader.getNewestMessage(mContext, GlobalHolder
 						.getInstance().getCurrentUserId(), existedCov
@@ -933,7 +922,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 						mContext, vm);
 				existedCov.setMsg(newMessage);
 				existedCov.setDate(vm.getFullDateStr());
-				existedCov.setDateLong(String.valueOf(lastDateTime));
+				existedCov.setDateLong(String.valueOf(vm.getmDateLong()));
 	
 				V2Log.e(TAG, "VMessage :" + vm.getDate().getTime());
 				V2Log.e(TAG, "lastDateTime : " + lastDateTime);
@@ -946,27 +935,6 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 					mConvList.add(0, scrollItem.cov);
 					adapter.notifyDataSetChanged();
 				}
-				
-//				if (groupType == Conversation.TYPE_CONTACT) {
-//					if (lastExitId != groupID
-//							|| vm.getDate().getTime() == lastDateTime) {
-//						updateConversation = false;
-//					}
-//					lastDateTime = vm.getDate().getTime();
-//					existedCov.setDate(vm.getFullDateStr());
-//					existedCov.setDateLong(String.valueOf(lastDateTime));
-//				}
-//				lastExitId = groupID;
-	
-//				if (updateConversation) {
-//					ScrollItem scrollItem = mItemList.get(currentMoveViewPosition);
-//					mItemList.remove(currentMoveViewPosition);
-//					mConvList.remove(currentMoveViewPosition);
-//					mItemList.add(0, scrollItem);
-//					mConvList.add(0, scrollItem.cov);
-//					adapter.notifyDataSetChanged();
-//					updateConversation = false;
-//				}
 			}
 			existedCov.setReadFlag(Conversation.READ_FLAG_READ);
 			// Update view
@@ -1047,7 +1015,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 	 * @param msgId
 	 */
 	private void updateConversation(long msgId) {
-		Log.d(TAG, "updateConversation calling...");
+		Log.d(TAG, "update Conversation msgId calling...");
 		if (!isLoadedCov) {
 			this.loadConversation();
 		}
@@ -1088,8 +1056,8 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 		if (foundFlag) {
 			
 			if(mCurrentTabFlag == Conversation.TYPE_CONTACT){
-				String mixedContent = MessageUtil.getMixedConversationContent(mContext,
-						vm).toString();
+				CharSequence mixedContent = MessageUtil.getMixedConversationContent(mContext,
+						vm);
 				if(TextUtils.isEmpty(mixedContent))
 					V2Log.e(TAG, "get mixed content is null , VMessage id is :" + vm.getId());
 				existedCov.setMsg(mixedContent);
@@ -1878,7 +1846,6 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 				break;
 			case UPDATE_CONVERSATION:
 				ConversationNotificationObject uno = (ConversationNotificationObject) msg.obj;
-				updateConversation = true;
 				updateConversation(uno.getType(), uno.getExtId());
 				break;
 			case UPDATE_SEARCHED_LIST:
@@ -1957,4 +1924,5 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 		else
 			this.notificationListener.updateNotificator(mCurrentTabFlag, false);
 	}
+	
 }

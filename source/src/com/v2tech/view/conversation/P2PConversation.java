@@ -168,7 +168,7 @@ public class P2PConversation extends Activity implements
 			mRejectButton.setOnClickListener(rejectListener);
 			mAcceptButton.setOnClickListener(acceptListener);
 			if (mAudioOnlyButton != null) {
-				mAudioOnlyButton.setOnClickListener(acceptVoicOnlyListener);
+				mAudioOnlyButton.setOnClickListener(acceptVoicOnlyListener); 
 			}
 			// start time out monitor
 			mLocalHandler.postDelayed(timeOutMonitor, 1000 * 60);
@@ -1441,14 +1441,14 @@ public class P2PConversation extends Activity implements
 					}
 
 					if (uad.isIncoming()) {
-						if (isTimeOut)
+//						if (isTimeOut)
 							currentVideoBean.readSatate = VideoBean.READ_STATE_UNREAD;
-						else {
-							currentVideoBean.readSatate = VideoBean.READ_STATE_READED;
+//						else {
+//							currentVideoBean.readSatate = VideoBean.READ_STATE_READED;
 							if (currentVideoBean.startDate != 0)
 								currentVideoBean.endDate = System
 										.currentTimeMillis();
-						}
+//						}
 					} else {
 
 						if (currentVideoBean.startDate != 0)

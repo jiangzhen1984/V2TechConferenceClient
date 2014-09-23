@@ -16,25 +16,6 @@ public class ContactConversation extends Conversation {
 	private String dateLong;
 	
 	public String getDateLong() {
-		if(dateLong != null){
-			long longDate = Long.valueOf(dateLong);
-			Date dates = new Date(longDate);
-			SimpleDateFormat format = null;
-			if(DateUtils.isToday(longDate)){
-				format = new SimpleDateFormat("HH:mm:ss");
-				return format.format(dates.getTime());
-			}
-			
-			Calendar cale = Calendar.getInstance();
-			cale.setTime(dates);
-			Calendar currentCale = Calendar.getInstance();
-			int days = cale.get(Calendar.DAY_OF_MONTH);
-			int currentCaleDays = currentCale.get(Calendar.DAY_OF_MONTH);
-			if(currentCaleDays - 1 == days){
-				format = new SimpleDateFormat("HH:mm:ss");
-				return "昨天  " + format.format(dates);
-			}
-		}
 		return dateLong;
 	}
 
@@ -67,6 +48,25 @@ public class ContactConversation extends Conversation {
 
 	@Override
 	public String getDate() {
+		if(dateLong != null){
+			long longDate = Long.valueOf(dateLong);
+			Date dates = new Date(longDate);
+			SimpleDateFormat format = null;
+			if(DateUtils.isToday(longDate)){
+				format = new SimpleDateFormat("HH:mm:ss");
+				return format.format(dates.getTime());
+			}
+			
+			Calendar cale = Calendar.getInstance();
+			cale.setTime(dates);
+			Calendar currentCale = Calendar.getInstance();
+			int days = cale.get(Calendar.DAY_OF_MONTH);
+			int currentCaleDays = currentCale.get(Calendar.DAY_OF_MONTH);
+			if(currentCaleDays - 1 == days){
+				format = new SimpleDateFormat("HH:mm:ss");
+				return "昨天  " + format.format(dates);
+			}
+		}
 		return date;
 	}
 	

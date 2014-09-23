@@ -284,7 +284,7 @@ public class VoiceMessageDetailActivity extends Activity implements
 			else
 				newChild.childISCallOut = AudioVideoMessageBean.STATE_CALL_OUT;
 
-			mListItem.add(newChild);
+			mListItem.add(0 , newChild);
 			adapter.notifyDataSetChanged();
 		}
 	}

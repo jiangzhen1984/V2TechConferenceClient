@@ -99,11 +99,11 @@ public class GroupLayout extends LinearLayout {
 		}
 
 		mGroupOwnerTV.setText(mConv.getMsg());
-		if (mConv.getType() == Conversation.TYPE_CONTACT) {
-			V2Log.e(TAG, mConv.getDateLong() + "------");
-			mGroupDateTV.setText(mConv.getDateLong());
-		} else
-			mGroupDateTV.setText(mConv.getDate());
+//		if (mConv.getType() == Conversation.TYPE_CONTACT) {
+//			V2Log.e(TAG, mConv.getDateLong() + "------");
+//			mGroupDateTV.setText(mConv.getDateLong());
+//		} else
+		mGroupDateTV.setText(mConv.getDate());
 		addView(view);
 	}
 
@@ -124,7 +124,7 @@ public class GroupLayout extends LinearLayout {
 			case Conversation.TYPE_CONTACT:
 				ContactConversation contact = (ContactConversation)mConv;
 				contact.setDateLong(date);
-				mGroupDateTV.setText(contact.getDateLong());
+				mGroupDateTV.setText(contact.getDate());
 				break;
 			default:
 				mGroupDateTV.setText(date);
@@ -186,7 +186,7 @@ public class GroupLayout extends LinearLayout {
 			ContactConversation contact = (ContactConversation) mConv;
 			mGroupNameTV.setText(contact.getName());
 			mGroupOwnerTV.setText(contact.getMsg());
-			mGroupDateTV.setText(contact.getDateLong());
+			mGroupDateTV.setText(contact.getDate());
 			break;
 		case Conversation.TYPE_GROUP:
 			CrowdConversation crowd = (CrowdConversation) mConv;

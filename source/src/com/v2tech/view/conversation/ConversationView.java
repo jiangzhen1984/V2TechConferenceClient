@@ -142,8 +142,6 @@ public class ConversationView extends Activity {
 
 	private EditText mMessageET;
 
-	private ImageView mLoadingImg;
-
 	private TextView mUserTitleTV;
 
 	private ImageView mMoreFeatureIV;
@@ -197,7 +195,8 @@ public class ConversationView extends Activity {
 	private SparseArray<VMessage> messageAllID;
 	private List<VMessage> currentGetMessages;
 	private long lastMessageBodyShowTime = 0;
-	private long intervalTime = 15000;
+	private long intervalTime = 15000; //显示消息时间状态的间隔时间
+	private UpdateFileStateInterface updateFIle; 
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -283,6 +282,10 @@ public class ConversationView extends Activity {
 				avatarChangedListener);
 
 		IntentFilter filter = new IntentFilter();
+		// Application quit broadcast
+		filter.addAction(PublicIntent.FINISH_APPLICATION);
+		filter.addCategory(PublicIntent.DEFAULT_CATEGORY);
+		// receiver the new message broadcast
 		filter.addAction(JNIService.JNI_BROADCAST_NEW_MESSAGE);
 		filter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
 		filter.addAction(JNIService.JNI_BROADCAST_MESSAGE_SENT_FAILED);
@@ -291,7 +294,7 @@ public class ConversationView extends Activity {
 
 		mChat.registerFileTransStatusListener(this.lh, FILE_STATUS_LISTENER,
 				null);
-		notificateConversationUpdate();
+//		notificateConversationUpdate();
 
 		// Start animation
 		this.overridePendingTransition(R.animator.nonam_scale_center_0_100,
@@ -346,6 +349,7 @@ public class ConversationView extends Activity {
 		cannelRecoding = false;
 		mButtonRecordAudio
 				.setText(R.string.contact_message_button_send_audio_msg);
+		
 	}
 
 	@Override
@@ -480,7 +484,7 @@ public class ConversationView extends Activity {
 			mShowContactDetailButton.setVisibility(View.INVISIBLE);
 			mButtonCreateMetting.setVisibility(View.VISIBLE);
 			mUserTitleTV.setText(crowdGroup.getName());
-		} else if(cov.getType() == V2GlobalEnum.GROUP_TYPE_DEPARTMENT){
+		} else if (cov.getType() == V2GlobalEnum.GROUP_TYPE_DEPARTMENT) {
 			currentConversationViewType = V2GlobalEnum.GROUP_TYPE_DEPARTMENT;
 			mVideoCallButton.setVisibility(View.GONE);
 			mAudioCallButton.setVisibility(View.GONE);
@@ -619,9 +623,9 @@ public class ConversationView extends Activity {
 		} else if (flag == VOICE_DIALOG_FLAG_RECORDING) {
 			if (mSpeakingLayout != null) {
 				mSpeakingLayout.setVisibility(View.VISIBLE);
-//				tips = (TextView) mSpeakingLayout
-//						.findViewById(R.id.message_voice_dialog_listening_container_tips);
-//				tips.setText(R.string.contact_message_voice_dialog_text);
+				// tips = (TextView) mSpeakingLayout
+				// .findViewById(R.id.message_voice_dialog_listening_container_tips);
+				// tips.setText(R.string.contact_message_voice_dialog_text);
 
 			}
 			if (mPreparedCancelLayout != null) {
@@ -1870,9 +1874,9 @@ public class ConversationView extends Activity {
 						} else if (vfi.getState() == VMessageAbstractItem.STATE_FILE_DOWNLOADING) {
 							vfi.setState(VMessageAbstractItem.STATE_FILE_DOWNLOADED);
 						}
-//						int updates = MessageBuilder.updateVMessageItem(this,
-//								vfi);
-//						Log.e(TAG, "updates success : " + updates);
+						// int updates = MessageBuilder.updateVMessageItem(this,
+						// vfi);
+						// Log.e(TAG, "updates success : " + updates);
 						break;
 					}
 
@@ -2096,6 +2100,30 @@ public class ConversationView extends Activity {
 					}
 
 				}
+			} else if (PublicIntent.FINISH_APPLICATION.equals(intent
+					.getAction())) {
+				for (int i = 0; i < messageArray.size(); i++) {
+					VMessage vm = (VMessage) messageArray.get(i)
+							.getItemObject();
+					if (vm.getFileItems().size() > 0) {
+						List<VMessageFileItem> fileItems = vm.getFileItems();
+						for (int j = 0; j < fileItems.size(); j++) {
+							VMessageFileItem item = fileItems.get(j);
+							switch (item.getState()) {
+							case VMessageAbstractItem.STATE_FILE_DOWNLOADING:
+								item.setState(VMessageFileItem.STATE_FILE_DOWNLOADED_FALIED);
+								break;
+							case VMessageAbstractItem.STATE_FILE_SENDING:
+								item.setState(VMessageFileItem.STATE_FILE_SENT_FALIED);
+								break;
+							default:
+								break;
+							}
+							MessageBuilder.updateVMessageItemToSentFalied(
+									ConversationView.this, vm);
+						}
+					}
+				}
 			}
 		}
 
@@ -2244,8 +2272,7 @@ public class ConversationView extends Activity {
 												Toast.LENGTH_SHORT).show();
 										vfi.setDownloadedSize(0);
 										vfi.setState(VMessageFileItem.STATE_FILE_SENT_FALIED);
-									}
-									else{
+									} else {
 										V2Log.e(TAG,
 												"when sending the file --"
 														+ vfi.getFileName()
@@ -2267,10 +2294,6 @@ public class ConversationView extends Activity {
 								default:
 									break;
 								}
-//								int updates = MessageBuilder
-//										.updateVMessageItemToSentFalied(
-//												ConversationView.this, vm);
-//								Log.e(TAG, "updates success : " + updates);
 								((MessageBodyView) messageArray.get(i)
 										.getView()).updateView(vfi);
 							}
@@ -2385,6 +2408,10 @@ public class ConversationView extends Activity {
 		}
 	}
 
+	/**
+	 * 用于判断指定的消息VMessage对象是否应该显示时间状态
+	 * @param message
+	 */
 	private void judgeShouldShowTime(VMessage message) {
 
 		if (message.getmDateLong() - lastMessageBodyShowTime < intervalTime)
@@ -2393,13 +2420,21 @@ public class ConversationView extends Activity {
 			message.setShowTime(true);
 		lastMessageBodyShowTime = message.getmDateLong();
 	}
-
-	@Override
-	protected void onNewIntent(Intent intent) {
-		Log.d(TAG, "onNewIntent entry...");
-		super.onNewIntent(intent);
+	
+	/**
+	 * 用于程序退出时更新文件状态
+	 * @author 
+	 *
+	 */
+	interface UpdateFileStateInterface{
+		
+		public void updateFileState();
 	}
-
+	
+	public void setUpdateFIle(UpdateFileStateInterface updateFIle) {
+		this.updateFIle = updateFIle;
+	}
+	
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);

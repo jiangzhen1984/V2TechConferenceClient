@@ -716,16 +716,13 @@ public class ConversationSelectFile extends Activity {
 		}
 		
 		final Dialog dialog = new Dialog(this, R.style.IpSettingDialog);
-		dialog.setContentView(R.layout.ip_setting);	
+		dialog.setContentView(R.layout.activity_selectfile_emptydialog);	
 		Button cancelButton = (Button) dialog
-				.findViewById(R.id.ip_setting_cancel);
+				.findViewById(R.id.ws_selectFile_empty_cannel);
 		Button saveButton = (Button) dialog
-				.findViewById(R.id.ip_setting_save);
-		TextView fileView = (TextView) dialog.findViewById(R.id.ws_select_file_layout);
-		LinearLayout setting = (LinearLayout) dialog.findViewById(R.id.ws_ip_setting_layout);
+				.findViewById(R.id.ws_selectFile_empty_confirm);
+		TextView fileView = (TextView) dialog.findViewById(R.id.ws_selectFile_empty_hintLayout);
 		
-		fileView.setVisibility(View.VISIBLE);
-		setting.setVisibility(View.GONE);
 		saveButton.setText("确定");
 		fileView.setText(fileName + "为空文件，无法发送，请重新选择。");
 		

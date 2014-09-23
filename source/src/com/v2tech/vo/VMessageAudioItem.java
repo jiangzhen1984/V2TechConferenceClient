@@ -72,9 +72,10 @@ public class VMessageAudioItem extends VMessageAbstractItem {
 	/**
 	 */
 	public String toXmlItem() {
-		if (vm.getToUser() == null) {
-			V2Log.e(" audo message item to xml failed no to user");
-			return "";
+		long userID = 0;
+		//if toUser is null , mean group no user
+		if (vm.getToUser() != null) { 
+			userID = vm.getToUser().getmUserId();
 		}
 		if (vm.getFromUser() == null) {
 			V2Log.e(" audo message item to xml failed no from user");
@@ -82,7 +83,7 @@ public class VMessageAudioItem extends VMessageAbstractItem {
 		}
 		String xml = "<TAudioChatItem NewLine=\"True\" FileExt=\"" + extension
 				+ "\" FileID=\"" + uuid + "\" RecvUserID=\""
-				+ vm.getToUser().getmUserId() + "\" Seconds=\"" + seconds
+				+ userID + "\" Seconds=\"" + seconds
 				+ "\" SendUserID=\"" + vm.getFromUser().getmUserId() + "\"/>";
 		return xml;
 	}

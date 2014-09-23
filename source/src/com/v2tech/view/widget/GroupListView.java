@@ -429,7 +429,7 @@ public class GroupListView extends ListView {
 		Group g = (Group) item.getObject();
 		List<Group> subGroupList = g.getChildGroup();
 		// DO not user for(Group g:list) concurrency problem
-		for (int i = 0; i < subGroupList.size(); i++) {
+		for (int i = subGroupList.size() - 1; i >=0; i--) {
 			Group subG = subGroupList.get(i);
 			if (mFilterList.size() == pos + 1) {
 				mFilterList.add(getItem(subG));
