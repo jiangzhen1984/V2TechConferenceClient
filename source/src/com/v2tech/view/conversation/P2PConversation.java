@@ -4,25 +4,31 @@ import java.util.List;
 import java.util.UUID;
 
 import v2av.VideoCaptureDevInfo;
+import v2av.VideoCaptureDevInfo.VideoCaptureDevice;
 import v2av.VideoPlayer;
 import v2av.VideoRecorder;
+import v2av.VideoSize;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Camera;
 import android.graphics.drawable.ColorDrawable;
+import android.hardware.Camera.Size;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.RingtoneManager;
 import android.nfc.Tag;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Surface;
 import android.view.SurfaceHolder;
@@ -33,6 +39,7 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.V2.jni.util.V2Log;
@@ -95,9 +102,14 @@ public class P2PConversation extends Activity implements
 	private SurfaceView mLcalSurface;
 	private SurfaceView mRemoteSurface;
 
+	// R.id.fragment_conversation_connected_video_local_layout
+	private RelativeLayout mLcalSurfaceLayout;
+
 	private boolean mlocalSurfaceCreated = false;
 
 	private MediaPlayer mPlayer;
+
+	private int displayRotation = 0;
 
 	private boolean isOpenedRemote;
 	private boolean isStoped;
@@ -106,9 +118,15 @@ public class P2PConversation extends Activity implements
 	private VideoBean currentVideoBean;
 	private long startTime;
 
+	private VideoSize defaultCameraCaptureSize = new VideoSize(176, 144);
+	private boolean displayWidthIsLonger = false;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		displayWidthIsLonger = verifyDisplayWidthIsLonger();
+		displayRotation = getDisplayRotation();
+
 		mContext = this;
 		startTime = System.currentTimeMillis();
 		uad = buildObject();
@@ -204,6 +222,30 @@ public class P2PConversation extends Activity implements
 
 	}
 
+	public boolean verifyDisplayWidthIsLonger() {
+		DisplayMetrics displayMetrics = new DisplayMetrics();
+		getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+		return displayMetrics.widthPixels > displayMetrics.heightPixels;
+	}
+
+	private int getDisplayRotation() {
+		if (Build.VERSION.SDK_INT > 7) {
+			int rotation = getWindowManager().getDefaultDisplay().getRotation();
+			switch (rotation) {
+			case Surface.ROTATION_0:
+				return 0;
+			case Surface.ROTATION_90:
+				return 90;
+			case Surface.ROTATION_180:
+				return 180;
+			case Surface.ROTATION_270:
+				return 270;
+			}
+		}
+
+		return 0;
+	}
+
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
@@ -276,12 +318,13 @@ public class P2PConversation extends Activity implements
 			return;
 		}
 		isOpenedLocal = true;
-		V2Log.e("    open local holder"
+		V2Log.e("open local holder"
 				+ getSurfaceHolder(SURFACE_HOLDER_TAG_LOCAL));
 		VideoRecorder.VideoPreviewSurfaceHolder = getSurfaceHolder(SURFACE_HOLDER_TAG_LOCAL);
+		VideoRecorder.DisplayRotation = displayRotation;
 		VideoCaptureDevInfo.CreateVideoCaptureDevInfo()
-				.updateCameraOrientation(Surface.ROTATION_270);
-
+				.SetCapParams(defaultCameraCaptureSize.width,
+						defaultCameraCaptureSize.height);
 		UserChattingObject selfUCD = new UserChattingObject(GlobalHolder
 				.getInstance().getCurrentUser(), 0, "");
 		chatService.requestOpenVideoDevice(selfUCD.getUdc(), null);
@@ -297,6 +340,14 @@ public class P2PConversation extends Activity implements
 					null);
 		}
 		openLocalCamera();
+	}
+
+	public VideoSize getCurrentCameraCaptureSureSize() {
+		VideoCaptureDevice cameraDevice = VideoCaptureDevInfo
+				.CreateVideoCaptureDevInfo().GetCurrDevice();
+		return cameraDevice.GetSrcSizeByEncSize(defaultCameraCaptureSize.width,
+				defaultCameraCaptureSize.height);
+
 	}
 
 	@Override
@@ -509,7 +560,7 @@ public class P2PConversation extends Activity implements
 			muteButtonImage
 					.setImageResource(R.drawable.conversation_connected_mute_button_gray);
 		}
-
+		// ---------------
 		// For audio Button
 		View audioSpeakerButton = findViewById(R.id.conversation_fragment_connected_speaker_button);
 		if (audioSpeakerButton != null) {
@@ -557,7 +608,7 @@ public class P2PConversation extends Activity implements
 			audioHangUpButtonImage
 					.setImageResource(R.drawable.conversation_connected_hang_up_button_gray);
 		}
-
+		// --------
 		ImageView audioMuteButtonImage = (ImageView) findViewById(R.id.conversation_fragment_connected_audio_mute_image);
 		if (audioMuteButtonImage != null) {
 			audioMuteButtonImage
@@ -582,7 +633,7 @@ public class P2PConversation extends Activity implements
 					.setBackgroundResource(R.drawable.conversation_framgent_gray_button_bg_pressed);
 			((TextView) mRejectButton).setTextColor(grayColor);
 		}
-
+		// ---------------
 		if (mAcceptButton != null) {
 			mAcceptButton
 					.setBackgroundResource(R.drawable.conversation_framgent_gray_button_bg_pressed);
@@ -628,11 +679,17 @@ public class P2PConversation extends Activity implements
 
 		if (uad.isVideoType() && uad.isIncoming() && uad.isConnected()) {
 			mLcalSurface = (SurfaceView) findViewById(R.id.fragment_conversation_connected_video_local_surface);
+			mLcalSurfaceLayout = (RelativeLayout) findViewById(R.id.fragment_conversation_connected_video_local_layout);
 			mRemoteSurface = (SurfaceView) findViewById(R.id.fragment_conversation_connected_video_remote_surface);
+			ViewGroup.LayoutParams localLp = mLcalSurfaceLayout
+					.getLayoutParams();
+			adjustLocalVideoLyoutParams(localLp);
+
 		} else if (uad.isVideoType() && !uad.isIncoming()) {
 			mRemoteSurface = (SurfaceView) findViewById(R.id.fragment_conversation_connected_video_remote_surface);
 			mLcalSurface = (SurfaceView) findViewById(R.id.fragment_conversation_connected_video_local_surface);
-			bianda();
+			mLcalSurfaceLayout = (RelativeLayout) findViewById(R.id.fragment_conversation_connected_video_local_layout);
+			callOutLocalSurfaceChangeBig();
 		}
 
 		if (mRemoteSurface != null) {
@@ -698,6 +755,18 @@ public class P2PConversation extends Activity implements
 			}
 		}
 
+	}
+
+	private void adjustLocalVideoLyoutParams(ViewGroup.LayoutParams localLp) {
+		if (localLp != null) {
+			VideoSize size = getCurrentCameraCaptureSureSize();
+			if (displayWidthIsLonger) {
+				localLp.height = localLp.width * size.height / size.width;
+			} else {
+				localLp.height = localLp.width * size.width / size.height;
+			}
+			mLcalSurfaceLayout.setLayoutParams(localLp);
+		}
 	}
 
 	private void updateViewForVideoAcceptance() {
@@ -825,10 +894,10 @@ public class P2PConversation extends Activity implements
 
 			}, 1000);
 		}
+		VideoPlayer.DisplayRotation = displayRotation;
 		VideoPlayer vp = uad.getVp();
 		if (vp == null) {
 			vp = new VideoPlayer();
-			vp.SetRotation(270);
 			uad.setVp(vp);
 		}
 		if (uad.getDeviceId() == null || uad.getDeviceId().isEmpty()) {
@@ -854,20 +923,20 @@ public class P2PConversation extends Activity implements
 		isOpenedRemote = false;
 	}
 
-	ViewGroup.LayoutParams smallP=null;
-	void bianda(){
+	ViewGroup.LayoutParams smallP = null;
+
+	private void callOutLocalSurfaceChangeBig() {
 		ViewGroup.LayoutParams backLP = mRemoteSurface.getLayoutParams();
-		smallP = mLcalSurface.getLayoutParams();
-		mLcalSurface.setLayoutParams(backLP);
+		smallP = mLcalSurfaceLayout.getLayoutParams();
+		mLcalSurfaceLayout.setLayoutParams(backLP);
 		mLcalSurface.setBackgroundResource(0);
 	}
-	
-	void bianxiao(){
-		mLcalSurface.setLayoutParams(smallP);
+
+	private void callOutLocalSurfaceChangeSmall() {
+		adjustLocalVideoLyoutParams(smallP);
 		mLcalSurface.setBackgroundResource(R.drawable.local_video_bg);
 	}
-	
-	
+
 	private void exchangeSurfaceHolder() {
 		ViewGroup.LayoutParams backLP = mRemoteSurface.getLayoutParams();
 		ViewGroup.LayoutParams smallP = mLcalSurface.getLayoutParams();
@@ -903,15 +972,15 @@ public class P2PConversation extends Activity implements
 
 	private void bringButtonsToFront() {
 		if (mTimerTV != null) {
-			 mTimerTV.bringToFront();
+			mTimerTV.bringToFront();
 		}
 		View v = findViewById(R.id.conversation_fragment_connected_title_text);
 		if (v != null) {
-			 v.bringToFront();
+			v.bringToFront();
 		}
 		v = findViewById(R.id.fragment_conversation_connected_video_button_container);
 		if (v != null) {
-			 v.bringToFront();
+			v.bringToFront();
 		}
 
 		if (mReverseCameraButton != null) {
@@ -920,7 +989,7 @@ public class P2PConversation extends Activity implements
 
 		v = findViewById(R.id.conversation_fragment_outing_video_card_container);
 		if (v != null) {
-			 v.bringToFront();
+			v.bringToFront();
 		}
 	}
 
@@ -1389,6 +1458,7 @@ public class P2PConversation extends Activity implements
 					inProgress = true;
 					Message timeoutMessage = Message.obtain(this, QUIT);
 					this.sendMessageDelayed(timeoutMessage, 2000);
+					// temptag09221
 					disableAllButtons();
 					closeLocalCamera();
 				}
@@ -1419,8 +1489,8 @@ public class P2PConversation extends Activity implements
 						if (uad.isVideoType()) {
 							uad.setDeviceId(rcsr.getDeviceID());
 							if (!uad.isIncoming()) {
-//								exchangeSurfaceHolder();
-								bianxiao();
+								// exchangeSurfaceHolder();
+								callOutLocalSurfaceChangeSmall();
 							}
 							// openRemoteVideo();
 							// updateViewForVideoAcceptance();

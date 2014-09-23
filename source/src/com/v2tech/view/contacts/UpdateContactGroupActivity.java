@@ -9,6 +9,7 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
@@ -27,6 +28,8 @@ import com.v2tech.vo.Group.GroupType;
 public class UpdateContactGroupActivity extends Activity {
 
 	private static final int UPDATE_USER_GROUP_DONE = 1;
+	public static final int SELECT_GROUP_RESPONSE_CODE_DONE = 0;
+	public static final int SELECT_GROUP_RESPONSE_CODE_CANCEL = 1;
 
 	private Context mContext;
 	private RadioGroup mGroupListLy;
@@ -37,12 +40,15 @@ public class UpdateContactGroupActivity extends Activity {
 	private long originGroupId;
 	private long userId;
 	private Toast mToast;
+	// 值为"addFriend"时是从加好友跳转而来，其他值为更改分组跳转而来。
+	private String from;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		originGroupId = getIntent().getLongExtra("gid", 0);
 		userId = getIntent().getLongExtra("uid", 0);
+		from = getIntent().getStringExtra("from");
 		mContext = this;
 		setContentView(R.layout.activity_contacts_update_group);
 		mGroupListLy = (RadioGroup) findViewById(R.id.contact_update_group_list);
@@ -50,18 +56,6 @@ public class UpdateContactGroupActivity extends Activity {
 		buildList();
 		mGroupListLy.setOnCheckedChangeListener(mGroupChangedListener);
 		overridePendingTransition(R.animator.left_in, R.animator.left_out);
-	}
-
-	@Override
-	public void finish() {
-		if (changed) {
-			Intent i = new Intent(
-					PublicIntent.BROADCAST_REQUEST_UPDATE_CONTACTS_GROUP);
-			i.addCategory(PublicIntent.DEFAULT_CATEGORY);
-			mContext.sendBroadcast(i);
-		}
-		super.finish();
-		overridePendingTransition(R.animator.right_in, R.animator.right_out);
 	}
 
 	private void buildList() {
@@ -79,6 +73,12 @@ public class UpdateContactGroupActivity extends Activity {
 			int margin = (int) mContext.getResources().getDimension(
 					R.dimen.contact_detail_2_item_margin_horizontal);
 			rb.setPadding(margin, 0, margin, 0);
+
+			rb.setId((int) g.getmGId());
+
+			long id = rb.getId();
+
+			Log.i("wzl", "id:" + id);
 			LinearLayout.LayoutParams ll = new LinearLayout.LayoutParams(
 					LinearLayout.LayoutParams.MATCH_PARENT,
 					LinearLayout.LayoutParams.WRAP_CONTENT);
@@ -91,12 +91,36 @@ public class UpdateContactGroupActivity extends Activity {
 			if (g.getmGId() == originGroupId) {
 				rb.toggle();
 			}
+		}
 
+		if ((from != null) && from.equals("addFriend")) {
+			int i1 = (int) getIntent().getLongExtra("groupID", -1);
+			if (i1 != -1) {
+				mGroupListLy.check(i1);
+			}
 		}
 	}
 
 	@Override
+	public void finish() {
+		if ((from != null) && from.equals("addFriend")) {
+		} else {
+			if (changed) {
+				Intent i = new Intent(
+						PublicIntent.BROADCAST_REQUEST_UPDATE_CONTACTS_GROUP);
+				i.addCategory(PublicIntent.DEFAULT_CATEGORY);
+				mContext.sendBroadcast(i);
+			}
+		}
+		super.finish();
+		overridePendingTransition(R.animator.right_in, R.animator.right_out);
+	}
+
+	@Override
 	public void onBackPressed() {
+		if ((from != null) && from.equals("addFriend")) {
+			setResult(SELECT_GROUP_RESPONSE_CODE_CANCEL, null);
+		}
 		super.onBackPressed();
 	}
 
@@ -104,33 +128,45 @@ public class UpdateContactGroupActivity extends Activity {
 
 		@Override
 		public void onCheckedChanged(RadioGroup rg, int id) {
-			synchronized (state) {
-				if (state == STATE.UPDATING) {
-					if (mToast == null) {
-						mToast = Toast
-								.makeText(
-										mContext,
-										R.string.activiy_contact_update_group_error_msg_in_progess,
-										Toast.LENGTH_SHORT);
+			if ((from != null) && from.equals("addFriend")) {
+
+				RadioButton rb = (RadioButton) rg.findViewById(id);
+				Group group = (Group) rb.getTag();
+				Intent intent = new Intent();
+				intent.putExtra("groupName", group.getName());
+				intent.putExtra("groupID", group.getmGId());
+				setResult(SELECT_GROUP_RESPONSE_CODE_DONE, intent);
+				finish();
+			} else {
+				synchronized (state) {
+					if (state == STATE.UPDATING) {
+						if (mToast == null) {
+							mToast = Toast
+									.makeText(
+											mContext,
+											R.string.activiy_contact_update_group_error_msg_in_progess,
+											Toast.LENGTH_SHORT);
+						}
+						mToast.cancel();
+						mToast.show();
+						return;
 					}
-					mToast.cancel();
-					mToast.show();
-					return;
+					state = STATE.UPDATING;
 				}
-				state = STATE.UPDATING;
+				Group srcGroup = GlobalHolder.getInstance().getGroupById(
+						Group.GroupType.CONTACT.intValue(), originGroupId);
+				// update group id to new group
+				originGroupId = ((Group) rg.findViewById(id).getTag())
+						.getmGId();
+				Group desGroup = GlobalHolder.getInstance().getGroupById(
+						Group.GroupType.CONTACT.intValue(), originGroupId);
+
+				contactService.updateUserGroup((ContactGroup) desGroup,
+						(ContactGroup) srcGroup, GlobalHolder.getInstance()
+								.getUser(userId), new Registrant(mLocalHandler,
+								UPDATE_USER_GROUP_DONE, null));
+
 			}
-			Group srcGroup = GlobalHolder.getInstance().getGroupById(
-					Group.GroupType.CONTACT.intValue(), originGroupId);
-			// update group id to new group
-			originGroupId = ((Group) rg.findViewById(id).getTag()).getmGId();
-			Group desGroup = GlobalHolder.getInstance().getGroupById(
-					Group.GroupType.CONTACT.intValue(), originGroupId);
-
-			contactService.updateUserGroup((ContactGroup) desGroup,
-					(ContactGroup) srcGroup, GlobalHolder.getInstance()
-							.getUser(userId), new Registrant(mLocalHandler,
-							UPDATE_USER_GROUP_DONE, null));
-
 		}
 
 	};
@@ -139,13 +175,16 @@ public class UpdateContactGroupActivity extends Activity {
 
 		@Override
 		public void handleMessage(Message msg) {
-			switch (msg.what) {
-			case UPDATE_USER_GROUP_DONE:
-				synchronized (state) {
-					state = STATE.NONE;
+			if ((from != null) && from.equals("addFriend")) {
+			} else {
+				switch (msg.what) {
+				case UPDATE_USER_GROUP_DONE:
+					synchronized (state) {
+						state = STATE.NONE;
+					}
+					finish();
+					break;
 				}
-				finish();
-				break;
 			}
 		}
 

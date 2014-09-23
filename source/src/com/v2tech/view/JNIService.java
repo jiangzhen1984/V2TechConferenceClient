@@ -493,12 +493,6 @@ public class JNIService extends Service {
 				int nStatus, String szStatusDesc) {
 			UserStatusObject uso = new UserStatusObject(nUserID, type, nStatus);
 			User u = GlobalHolder.getInstance().getUser(nUserID);
-			if (u.getName() != null) {
-				if (u.getName().equals("zhao2")) {
-					Log.i("eee", "nUserID" + nUserID + " " + u.toXml());
-				}
-			}
-
 			if (u == null) {
 				V2Log.e("Can't update user status, user " + nUserID
 						+ "  isn't exist");

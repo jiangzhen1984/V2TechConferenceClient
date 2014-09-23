@@ -1,10 +1,8 @@
 package com.v2tech.view.contacts;
 
-import java.util.Iterator;
 import java.util.List;
 
 import android.app.Activity;
-import android.app.ActivityManager;
 import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -19,7 +17,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
-import android.view.ViewGroup.MarginLayoutParams;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -34,7 +31,6 @@ import com.v2tech.service.UserService;
 import com.v2tech.vo.ContactGroup;
 import com.v2tech.view.JNIService;
 import com.v2tech.view.MainActivity;
-import com.v2tech.view.contacts.ContactDetail.MyBroadcastReceiver;
 import com.v2tech.view.contacts.add.AuthenticationActivity;
 import com.v2tech.view.widget.MarqueeTextView;
 import com.v2tech.vo.Group;
@@ -92,7 +88,6 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 		String fromActivity = this.getIntent().getStringExtra("fromActivity");
 		if ((fromActivity != null)
 				&& (fromActivity.equals("MessageAuthenticationActivity"))) {
-			// 166是wenzl测试用
 			mUid = this.getIntent().getLongExtra("remoteUserID", 0);
 		} else {
 			mUid = this.getIntent().getLongExtra("uid", 0);
@@ -407,6 +402,20 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 			startActivityForResult(i, REQUEST_UPDATE_GROUP_CODE);
 		}
 
+	};
+	
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		if (requestCode == REQUEST_UPDATE_GROUP_CODE) {
+			if (resultCode == UpdateContactGroupActivity.SELECT_GROUP_RESPONSE_CODE_DONE) {
+				if (data != null) {
+//					selectGroupName = data.getStringExtra("groupName");
+//					selectGroupID = data.getLongExtra("groupID", 0);
+//					tvGroupName.setText(selectGroupName);
+				}
+			}else if(resultCode == UpdateContactGroupActivity.SELECT_GROUP_RESPONSE_CODE_CANCEL){	
+			}
+		}
+		
 	};
 
 	private void gatherUserData() {

@@ -291,7 +291,7 @@ public class MessageAuthenticationActivity extends Activity {
 		crowdService.clearCalledBack();
 		super.onDestroy();
 	}
-	
+
 	private void loadFriendMessage() {
 		messageAuthenticationDataList.clear();
 		// 把所有的改为已读
