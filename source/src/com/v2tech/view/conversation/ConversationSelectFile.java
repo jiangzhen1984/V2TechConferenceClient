@@ -8,6 +8,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -32,6 +33,7 @@ import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.GridView;
 import android.widget.ImageView;
@@ -80,6 +82,8 @@ public class ConversationSelectFile extends Activity {
 	private String type;
 	private int mScreenHeight;
 	private int mScreenWidth;
+	private Dialog mDialog;
+	private boolean isSended;
 	private Handler handler = new Handler() {
 
 		public void handleMessage(Message msg) {
@@ -266,7 +270,10 @@ public class ConversationSelectFile extends Activity {
 
 			@Override
 			public void onClick(View v) {
-				reutrnResult(3);
+				if(!isSended)
+					reutrnResult(3);
+				else
+					V2Log.e(TAG, "已经开始发送，不能再点了");
 			}
 		});
 
@@ -669,10 +676,12 @@ public class ConversationSelectFile extends Activity {
 	}
 
 	private void reutrnResult(int resultCode) {
-
-		boolean flag = checkEmptyFile();
-		if(!flag)
-			return ;
+		isSended = true;
+		if(resultCode == 3){
+			boolean flag = checkEmptyFile();
+			if(!flag)
+				return ;
+		}
 		Intent intent = new Intent();
 		intent.putParcelableArrayListExtra("checkedFiles", mCheckedList);
 		setResult(resultCode, intent);
@@ -701,7 +710,53 @@ public class ConversationSelectFile extends Activity {
 
 	private void CreateHintDialog(String fileName) {
 		
+		if (mDialog != null) {
+			mDialog.show();
+			return;
+		}
 		
+		final Dialog dialog = new Dialog(this, R.style.IpSettingDialog);
+		dialog.setContentView(R.layout.ip_setting);	
+		Button cancelButton = (Button) dialog
+				.findViewById(R.id.ip_setting_cancel);
+		Button saveButton = (Button) dialog
+				.findViewById(R.id.ip_setting_save);
+		TextView fileView = (TextView) dialog.findViewById(R.id.ws_select_file_layout);
+		LinearLayout setting = (LinearLayout) dialog.findViewById(R.id.ws_ip_setting_layout);
+		
+		fileView.setVisibility(View.VISIBLE);
+		setting.setVisibility(View.GONE);
+		saveButton.setText("确定");
+		fileView.setText(fileName + "为空文件，无法发送，请重新选择。");
+		
+		cancelButton.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				isSended = false;
+				dialog.dismiss();
+			}
+		});
+		
+		saveButton.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				
+				isSended = false;
+				mCheckedList.clear();
+				mCheckedNameList.clear();
+				updateFileItems(mCurrentPath);
+				selectedFileSize.setText("已选0.0K");
+				sendButton.setText("发送( 0 )");
+				changeSendUnable();
+				adapter.notifyDataSetChanged();
+				dialog.dismiss();
+			}
+		});
+		
+		mDialog = dialog;
+		mDialog.show();
 	}
 
 	public void adapterFileIcon(String fileName, ViewHolder holder,

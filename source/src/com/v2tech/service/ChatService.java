@@ -2,14 +2,17 @@ package com.v2tech.service;
 
 import java.util.List;
 
+import android.content.Context;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.util.Log;
 
 import com.V2.jni.AudioRequest;
 import com.V2.jni.AudioRequestCallback;
 import com.V2.jni.ChatRequest;
 import com.V2.jni.FileRequest;
 import com.V2.jni.FileRequestCallbackAdapter;
+import com.V2.jni.GroupRequest;
 import com.V2.jni.V2GlobalEnum;
 import com.V2.jni.VideoRequest;
 import com.V2.jni.VideoRequestCallback;
@@ -19,15 +22,17 @@ import com.V2.jni.ind.VideoJNIObjectInd;
 import com.V2.jni.util.V2Log;
 import com.v2tech.service.jni.FileDownLoadErrorIndication;
 import com.v2tech.service.jni.FileTransCannelIndication;
+import com.v2tech.service.jni.FileTransStatusIndication;
 import com.v2tech.service.jni.FileTransStatusIndication.FileTransErrorIndication;
 import com.v2tech.service.jni.FileTransStatusIndication.FileTransProgressStatusIndication;
-import com.v2tech.service.jni.FileTransStatusIndication;
 import com.v2tech.service.jni.JNIResponse;
 import com.v2tech.service.jni.RequestChatServiceResponse;
 import com.v2tech.service.jni.RequestSendMessageResponse;
 import com.v2tech.util.GlobalConfig;
+import com.v2tech.view.conversation.MessageBuilder;
 import com.v2tech.vo.UserChattingObject;
 import com.v2tech.vo.VMessage;
+import com.v2tech.vo.VMessageAbstractItem;
 import com.v2tech.vo.VMessageAudioItem;
 import com.v2tech.vo.VMessageFileItem;
 import com.v2tech.vo.VMessageImageItem;
@@ -231,17 +236,17 @@ public class ChatService extends DeviceService {
 			return;
 		}
 
-		StringBuilder sb = new StringBuilder();
 		for (VMessageFileItem item : items) {
-			sb.append(
-					"<file id=\"" + item.getUuid() + "\" name=\""
-							+ item.getFilePath() + "\" encrypttype=\"0\"  />")
-					.append("\n");
+			if (vm.getToUser() == null) {
+				GroupRequest.getInstance().groupUploadFile(vm.getMsgCode(),
+						vm.getGroupId(), item.toXmlItem());
+			} else {
+				FileRequest.getInstance().inviteFileTrans(
+						vm.getToUser().getmUserId(), item.toXmlItem(),
+						V2GlobalEnum.FILE_TYPE_OFFLINE);
+			}
+
 		}
-
-		FileRequest.getInstance().inviteFileTrans(vm.getToUser().getmUserId(),
-				sb.toString(), V2GlobalEnum.FILE_TYPE_OFFLINE);
-
 		RequestChatServiceResponse resp = new RequestChatServiceResponse(
 				RequestChatServiceResponse.Result.SUCCESS);
 		resp.setUuid(vm.getUUID());
@@ -480,8 +485,6 @@ public class ChatService extends DeviceService {
 
 	}
 
-
-
 	public void suspendOrResumeAudio(boolean flag) {
 		if (flag) {
 			AudioRequest.getInstance().ResumePlayout();
@@ -548,7 +551,8 @@ public class ChatService extends DeviceService {
 			if (mCaller != null) {
 				JNIResponse resp = new RequestChatServiceResponse(
 						RequestChatServiceResponse.REJCTED,
-						RequestChatServiceResponse.Result.SUCCESS , ind.getFromUserId());
+						RequestChatServiceResponse.Result.SUCCESS,
+						ind.getFromUserId());
 				sendResult(mCaller, resp);
 				mCaller = null;
 				// Else means remote side is out and then cancel calling
@@ -576,24 +580,57 @@ public class ChatService extends DeviceService {
 		@Override
 		public void OnFileTransProgress(String szFileID, long nBytesTransed,
 				int nTransType) {
-			notifyListener(KEY_FILE_TRANS_STATUS_NOTIFICATION_LISTNER, 0, 0,
-					new FileTransProgressStatusIndication(nTransType, szFileID,
-							nBytesTransed , FileTransStatusIndication.IND_TYPE_PROGRESS_TRANSING));
+			notifyListener(
+					KEY_FILE_TRANS_STATUS_NOTIFICATION_LISTNER,
+					0,
+					0,
+					new FileTransProgressStatusIndication(
+							nTransType,
+							szFileID,
+							nBytesTransed,
+							FileTransStatusIndication.IND_TYPE_PROGRESS_TRANSING));
 
 		}
 
 		@Override
 		public void OnFileTransEnd(String szFileID, String szFileName,
-				long nFileSize, int nTransType) {
+				long nFileSize, int nTransType , Context context) {
+			VMessage vm = new VMessage(0, 0, null, null);
+			VMessageFileItem item = new VMessageFileItem(vm, null);
+			item.setUuid(szFileID);
+			if(nTransType == FileDownLoadErrorIndication.TYPE_SEND)
+				item.setState(VMessageAbstractItem.STATE_FILE_SENT);
+			else
+				item.setState(VMessageAbstractItem.STATE_FILE_DOWNLOADED);
+			int updates = MessageBuilder.updateVMessageItem(context,
+					item);
+			Log.e(TAG, "OnFileTransEnd updates success : " + updates);
+			vm = null;
+			item = null;
 			notifyListener(KEY_FILE_TRANS_STATUS_NOTIFICATION_LISTNER, 0, 0,
 					new FileTransProgressStatusIndication(nTransType, szFileID,
-							nFileSize , FileTransStatusIndication.IND_TYPE_PROGRESS_END));
+							nFileSize,
+							FileTransStatusIndication.IND_TYPE_PROGRESS_END));
 		}
 
 		@Override
-		public void OnFileDownloadError(String szFileID, int errorCode, int nTransType) {
+		public void OnFileDownloadError(String szFileID, int errorCode,
+				int nTransType , Context context) {
+			VMessage vm = new VMessage(0, 0, null, null);
+			VMessageFileItem item = new VMessageFileItem(vm, null);
+			item.setUuid(szFileID);
+			if(nTransType == FileDownLoadErrorIndication.TYPE_SEND)
+				item.setState(VMessageAbstractItem.STATE_FILE_SENT_FALIED);
+			else
+				item.setState(VMessageAbstractItem.STATE_FILE_DOWNLOADED_FALIED);
+			int updates = MessageBuilder.updateVMessageItem(context,
+					item);
+			Log.e(TAG, "OnFileTransEnd updates success : " + updates);
+			vm = null;
+			item = null;
 			notifyListener(KEY_FILE_TRANS_STATUS_NOTIFICATION_LISTNER, 0, 0,
-					new FileDownLoadErrorIndication(szFileID, errorCode , nTransType));
+					new FileDownLoadErrorIndication(szFileID, errorCode,
+							nTransType));
 
 		}
 
@@ -601,7 +638,8 @@ public class ChatService extends DeviceService {
 		public void OnFileTransError(String szFileID, int errorCode,
 				int nTransType) {
 			notifyListener(KEY_FILE_TRANS_STATUS_NOTIFICATION_LISTNER, 0, 0,
-					new FileTransErrorIndication(szFileID, errorCode , nTransType));
+					new FileTransErrorIndication(szFileID, errorCode,
+							nTransType));
 		}
 
 		@Override

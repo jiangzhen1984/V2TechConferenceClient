@@ -1123,7 +1123,7 @@ public class JNIService extends Service {
 
 		@Override
 		public void OnFileDownloadError(String sFileID, int errorCode,
-				int nTransType) {
+				int nTransType , Context context) {
 
 		}
 

@@ -8,6 +8,7 @@ import java.util.UUID;
 
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.util.GlobalConfig;
+import com.v2tech.util.SPUtil;
 
 public class VMessageFileItem extends VMessageAbstractItem {
 
@@ -132,11 +133,21 @@ public class VMessageFileItem extends VMessageAbstractItem {
 
 	@Override
 	public String toXmlItem() {
+		
+		if(filePath == null)
+			fileName = getFilePath();
+		
 		StringBuilder sb = new StringBuilder();
+//		String url = "http://" + GlobalConfig.GLOBAL_IP_ADDRESS + ":" + 
+//				GlobalConfig.GLOBAL_PORT + "/crowd/" + uuid + "/" + fileName;
+//		sb.append(
+//				"<filelist><file encrypttype=\"0\" id=\"" + uuid + "\" name=\"" + fileName
+//				+ "\" size=\"" + fileSize + "\" time=\""
+//				+ GlobalConfig.getGlobalServerTime() + "\" uploader=\"" + GlobalHolder.getInstance().getCurrentUserId()
+//				+ "\" url=\"" + url + "\" /></filelist>").append("\n");
 		sb.append(
-				"<TFileChatItem fileID=\"" + uuid + "\" filePath=\"" + filePath
-						+ "\" fileSize=\"" + fileSize + "\" transType=\""
-						+ transType + "\" encrypttype=\"0\"  />").append("\n");
+				"<file id=\"" + uuid + "\" name=\"" + filePath
+				+ "\" />").append("\n");
 		return sb.toString();
 	}
 

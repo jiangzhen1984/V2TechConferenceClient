@@ -276,17 +276,8 @@ public class ConversationView extends Activity {
 			}
 			backEndHandler = new BackendHandler(thread.getLooper());
 		}
-		initExtraObject(savedInstanceState);
 		// TODO for group conversation
-		if (groupId > 0) {
-			mVideoCallButton.setVisibility(View.GONE);
-			mAudioCallButton.setVisibility(View.GONE);
-			mShowContactDetailButton.setVisibility(View.INVISIBLE);
-			mButtonCreateMetting.setVisibility(View.VISIBLE);
-		} else {
-			mButtonCreateMetting.setVisibility(View.GONE);
-		}
-
+		initExtraObject(savedInstanceState);
 		// Register listener for avatar changed
 		BitmapManager.getInstance().registerBitmapChangedListener(
 				avatarChangedListener);
@@ -343,11 +334,6 @@ public class ConversationView extends Activity {
 					START_LOAD_MESSAGE);
 			lh.sendMessageDelayed(m, 500);
 		}
-
-		if (currentConversationViewType == Conversation.TYPE_CONTACT)
-			mUserTitleTV.setText(remote.getName());
-		else
-			mUserTitleTV.setText(crowdGroup.getName());
 
 		NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 		// mId allows you to update the notification later on.
@@ -476,17 +462,30 @@ public class ConversationView extends Activity {
 		user1Id = GlobalHolder.getInstance().getCurrentUserId();
 		local = GlobalHolder.getInstance().getUser(user1Id);
 		if (cov.getType() == Conversation.TYPE_CONTACT) {
-			currentConversationViewType = Conversation.TYPE_CONTACT;
+			currentConversationViewType = V2GlobalEnum.GROUP_TYPE_USER;
 			user2Id = cov.getExtId();
 			remote = GlobalHolder.getInstance().getUser(user2Id);
 			if (remote == null) {
 				remote = new User(user2Id);
 			}
+			mButtonCreateMetting.setVisibility(View.GONE);
+			mUserTitleTV.setText(remote.getName());
 		} else if (cov.getType() == Conversation.TYPE_GROUP) {
-			currentConversationViewType = Conversation.TYPE_GROUP;
+			currentConversationViewType = V2GlobalEnum.GROUP_TYPE_CROWD;
 			groupId = cov.getExtId();
 			crowdGroup = (CrowdGroup) GlobalHolder.getInstance().getGroupById(
 					V2GlobalEnum.GROUP_TYPE_CROWD, groupId);
+			mVideoCallButton.setVisibility(View.GONE);
+			mAudioCallButton.setVisibility(View.GONE);
+			mShowContactDetailButton.setVisibility(View.INVISIBLE);
+			mButtonCreateMetting.setVisibility(View.VISIBLE);
+			mUserTitleTV.setText(crowdGroup.getName());
+		} else if(cov.getType() == V2GlobalEnum.GROUP_TYPE_DEPARTMENT){
+			currentConversationViewType = V2GlobalEnum.GROUP_TYPE_DEPARTMENT;
+			mVideoCallButton.setVisibility(View.GONE);
+			mAudioCallButton.setVisibility(View.GONE);
+			mShowContactDetailButton.setVisibility(View.INVISIBLE);
+			mButtonCreateMetting.setVisibility(View.VISIBLE);
 		}
 	}
 
@@ -1871,9 +1870,9 @@ public class ConversationView extends Activity {
 						} else if (vfi.getState() == VMessageAbstractItem.STATE_FILE_DOWNLOADING) {
 							vfi.setState(VMessageAbstractItem.STATE_FILE_DOWNLOADED);
 						}
-						int updates = MessageBuilder.updateVMessageItem(this,
-								vfi);
-						Log.e(TAG, "updates success : " + updates);
+//						int updates = MessageBuilder.updateVMessageItem(this,
+//								vfi);
+//						Log.e(TAG, "updates success : " + updates);
 						break;
 					}
 
@@ -2075,7 +2074,6 @@ public class ConversationView extends Activity {
 						if (mdv != null) {
 							mdv.updateFailedFlag(true);
 						}
-						// TODO update database
 						break;
 					}
 					List<VMessageAbstractItem> items = vm.getItems();
@@ -2090,7 +2088,6 @@ public class ConversationView extends Activity {
 							MessageBodyView mdv = ((MessageBodyView) messageArray
 									.get(i).getView());
 							if (mdv != null) {
-								// TODO update database
 								mdv.updateFailedFlag(true);
 							}
 							break;
@@ -2270,10 +2267,10 @@ public class ConversationView extends Activity {
 								default:
 									break;
 								}
-								int updates = MessageBuilder
-										.updateVMessageItemToSentFalied(
-												ConversationView.this, vm);
-								Log.e(TAG, "updates success : " + updates);
+//								int updates = MessageBuilder
+//										.updateVMessageItemToSentFalied(
+//												ConversationView.this, vm);
+//								Log.e(TAG, "updates success : " + updates);
 								((MessageBodyView) messageArray.get(i)
 										.getView()).updateView(vfi);
 							}

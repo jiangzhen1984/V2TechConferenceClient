@@ -1109,7 +1109,15 @@ public class MessageLoader {
 				int fileTransState = mCur
 						.getInt(mCur
 								.getColumnIndex(ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_SEND_STATE));
+				int fileSize = mCur
+						.getInt(mCur
+								.getColumnIndex(ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_SIZE));
+				int state = mCur
+						.getInt(mCur
+								.getColumnIndex(ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_SEND_STATE));
 				item.setState(fileTransState);
+				item.setFileSize(fileSize);
+				item.setState(state);
 			}
 		}
 

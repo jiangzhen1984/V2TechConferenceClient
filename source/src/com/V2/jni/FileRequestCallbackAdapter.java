@@ -1,5 +1,7 @@
 package com.V2.jni;
 
+import android.content.Context;
+
 import com.V2.jni.ind.FileJNIObject;
 
 public abstract class FileRequestCallbackAdapter implements FileRequestCallback {
@@ -17,7 +19,7 @@ public abstract class FileRequestCallbackAdapter implements FileRequestCallback 
 
 	@Override
 	public void OnFileTransEnd(String szFileID, String szFileName,
-			long nFileSize, int nTransType) {
+			long nFileSize, int nTransType , Context context) {
 
 	}
 
@@ -33,7 +35,7 @@ public abstract class FileRequestCallbackAdapter implements FileRequestCallback 
 
 	@Override
 	public void OnFileDownloadError(String sFileID, int errorCode,
-			int nTransType) {
+			int nTransType , Context context) {
 		
 	}
 

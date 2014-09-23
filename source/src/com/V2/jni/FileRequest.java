@@ -235,7 +235,7 @@ public class FileRequest {
 			WeakReference<FileRequestCallback> wrf = callbacks.get(i);
 			if (wrf != null && wrf.get() != null) {
 				((FileRequestCallback) wrf.get()).OnFileTransEnd(szFileID,
-						szFileName, nFileSize, nTransType);
+						szFileName, nFileSize, nTransType , context);
 			}
 		}
 	}
@@ -282,7 +282,7 @@ public class FileRequest {
 			WeakReference<FileRequestCallback> wrf = callbacks.get(i);
 			if (wrf != null && wrf.get() != null) {
 				((FileRequestCallback) wrf.get()).OnFileDownloadError(sFileID,
-						errorCode , nTransType);
+						errorCode , nTransType , context);
 			}
 		}
 	}

@@ -4,7 +4,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -13,14 +12,11 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import com.V2.jni.util.V2Log;
-import com.v2tech.service.GlobalHolder;
-import com.v2tech.vo.User;
 import com.v2tech.vo.V2Doc;
 import com.v2tech.vo.V2Doc.Page;
 import com.v2tech.vo.V2Shape;
@@ -153,21 +149,18 @@ public class XmlParser {
 								fileExt, Integer.valueOf(seconds));
 						vii.setNewLine(isNewLine);
 
-					} else if (msgEl.getTagName().equals("TFileChatItem")) {
-
-						String uuid = msgEl.getAttribute("fileID");
+					} else if (msgEl.getTagName().equals("file")) {
+						String uuid = msgEl.getAttribute("id");
 						if (uuid == null) {
 							V2Log.e("Invalid uuid ");
 							continue;
 						}
-						String filePath = msgEl.getAttribute("filePath");
-						String fileSize = msgEl.getAttribute("fileSize");
-						String transType = msgEl.getAttribute("transType");
-						VMessageFileItem vii = new VMessageFileItem(vm, uuid,
-								Long.valueOf(fileSize), filePath,
-								Integer.valueOf(transType));
+						
+						String filePath = msgEl.getAttribute("name");
+						String fileName = filePath.substring(filePath.lastIndexOf("/") + 1);
+						VMessageFileItem vii = new VMessageFileItem(vm, uuid,fileName);
+						vii.setFilePath(vii.getFilePath());
 						vii.setNewLine(isNewLine);
-
 					}
 				}
 			}

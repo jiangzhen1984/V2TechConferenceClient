@@ -1,5 +1,7 @@
 package com.V2.jni;
 
+import android.content.Context;
+
 import com.V2.jni.ind.FileJNIObject;
 
 public interface FileRequestCallback {
@@ -36,7 +38,7 @@ public interface FileRequestCallback {
 	 * @param nTransType
 	 */
 	public void OnFileTransEnd(String szFileID, String szFileName,
-			long nFileSize, int nTransType);
+			long nFileSize, int nTransType , Context context);
 
 	/**
 	 * 
@@ -50,5 +52,5 @@ public interface FileRequestCallback {
 	 * @param t1
 	 *            错误代码
 	 */
-	public void OnFileDownloadError(String sFileID,int errorCode, int nTransType);
+	public void OnFileDownloadError(String sFileID,int errorCode, int nTransType , Context context);
 }
