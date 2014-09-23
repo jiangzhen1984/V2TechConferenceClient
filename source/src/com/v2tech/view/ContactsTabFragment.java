@@ -2,6 +2,7 @@ package com.v2tech.view;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -229,8 +230,21 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 				// FIXME now just support contacts remove do not support
 				if (flag == TAG_CONTACT
 						&& guo.getmType() == Group.GroupType.CONTACT.intValue()) {
-					mContactsContainer.removeItem(GlobalHolder.getInstance()
-							.getUser(guo.getmUserId()));
+					User user = GlobalHolder.getInstance()
+					.getUser(guo.getmUserId());
+					
+					if (user == null) {
+						return;
+					}
+					//Remove user from contact group
+					Set<Group> groups = user.getBelongsGroup();
+					for(Group gg : groups) {
+						if (gg.getGroupType() == GroupType.CONTACT) {
+							gg.removeUserFromGroup(user);
+						}
+					}
+					
+					mContactsContainer.removeItem(user);
 				}
 
 			} else if (JNIService.JNI_BROADCAST_GROUP_USER_ADDED.equals(intent

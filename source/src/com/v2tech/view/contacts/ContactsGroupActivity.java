@@ -148,6 +148,7 @@ public class ContactsGroupActivity extends Activity {
 					.setText(R.string.activiy_contact_group_dialog_title_update);
 			mGroupNameET.setText(group.getName());
 		} else {
+			mGroupNameET.setText("");
 			//mGroupNameET.setText(R.string.activiy_contact_group_name_content);
 			mDialogTitleTV
 					.setText(R.string.activiy_contact_group_dialog_title_create);

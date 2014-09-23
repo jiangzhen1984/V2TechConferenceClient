@@ -334,6 +334,8 @@ public class GlobalHolder {
 		Group g = this.findGroupById(gid);
 		if (g != null) {
 			g.removeUserFromGroup(uid);
+		} else {
+			
 		}
 	}
 

@@ -176,7 +176,9 @@ public class GroupListView extends ListView {
 		Set<Group> gSet = user.getBelongsGroup();
 		for (Group g : gSet) {
 			LongSparseArray<Item> map = mGroupItemUserMap.get(g.getmGId());
-			map.remove(user.getmUserId());
+			if (map != null) {
+				map.remove(user.getmUserId());
+			}
 		}
 		adapter.notifyDataSetChanged();
 	}
@@ -219,7 +221,7 @@ public class GroupListView extends ListView {
 		int start = index;
 		int end = ((Group) gitem.getObject()).getSubSize();
 
-		while (start <= end) {
+		while (start <= end && mFilterList.size() > start) {
 			Item item = mFilterList.get(start);
 			Item endItem = mFilterList.get(end);
 
@@ -233,7 +235,7 @@ public class GroupListView extends ListView {
 				if (((GroupItem) item).isExpaned) {
 					GroupItem subGroupItem = (GroupItem) item;
 					end += ((Group) subGroupItem.getObject()).getSubSize();
-					updateUserStatus(subGroupItem, start, user, newSt);
+					updateUserStatus(subGroupItem, start + 1, user, newSt);
 					start += ((Group) subGroupItem.getObject()).getSubSize();
 				}
 				start++;
@@ -249,7 +251,7 @@ public class GroupListView extends ListView {
 				if (((GroupItem) endItem).isExpaned) {
 					GroupItem subGroupItem = (GroupItem) endItem;
 					end += ((Group) subGroupItem.getObject()).getSubSize();
-					updateUserStatus(subGroupItem, start, user, newSt);
+					updateUserStatus(subGroupItem, start + 1, user, newSt);
 					start += ((Group) subGroupItem.getObject()).getSubSize();
 				}
 				start++;
