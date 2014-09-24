@@ -79,6 +79,9 @@ public class ContactDetail extends Activity implements OnTouchListener {
 	private TextView mAddressTV;
 	private TextView mFaxTV;
 	private TextView mEmailTV;
+	// R.id.tv_title
+	private TextView tvTitle;
+	
 	// R.id.contact_user_company
 	private TextView mCompanyTitleTV;
 	private TextView mSignTV;
@@ -145,10 +148,13 @@ public class ContactDetail extends Activity implements OnTouchListener {
 		if ((fromActivity != null)
 				&& (fromActivity.equals("MessageAuthenticationActivity"))) {
 			mUid = this.getIntent().getLongExtra("remoteUserID", 0);
+			tvTitle.setText("好友申请");
 		} else {
 			mUid = this.getIntent().getLongExtra("uid", 0);
+			tvTitle.setText("个人资料");
 		}
 
+		
 		fromPlace = this.getIntent().getStringExtra("fromPlace");
 		mContext = this;
 		View v = findViewById(R.id.contact_detail_main_layout);
@@ -177,6 +183,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 		bRefuse = (Button) findViewById(R.id.refuse);
 		tvAuthenticationState = (TextView) findViewById(R.id.authentication_state);
 		llAuthenticationMessageLayout = (LinearLayout) findViewById(R.id.authentication_message_layout);
+		tvTitle = (TextView) findViewById(R.id.tv_title);
 	}
 
 	private void bindViewEnvent() {

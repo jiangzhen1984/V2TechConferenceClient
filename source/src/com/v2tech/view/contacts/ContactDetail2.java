@@ -56,6 +56,7 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 	private TextView mNameTitleIV;
 	private ImageView mHeadIconIV;
 
+
 	// view definition for non-self
 	private TextView mAccountTV;
 	private TextView mGendarTV;
@@ -94,6 +95,11 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 		}
 
 		initView();
+		connectView();
+		bindViewEnvent();
+
+
+
 		mContext = this;
 		u = GlobalHolder.getInstance().getUser(mUid);
 
@@ -115,17 +121,16 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 				break;
 			}
 		}
-
 		updateContactGroup();
-		if (isRelation == true) {
-			mAddContactButton.setVisibility(View.GONE);
-			mDeleteContactButton.setVisibility(View.VISIBLE);
-		} else {
-			mAddContactButton.setVisibility(View.VISIBLE);
-			mDeleteContactButton.setVisibility(View.GONE);
-		}
-
 		initBroadcastReceiver();
+	}
+
+	private void connectView() {
+		
+	}
+
+	private void bindViewEnvent() {
+
 	}
 
 	@Override
@@ -216,8 +221,12 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 			mUpdateContactGroupButton.setVisibility(View.VISIBLE);
 			mGroupNameTV = (TextView) findViewById(R.id.detail_detail_2_group_name);
 			mGroupNameTV.setText(belongs.getName());
+			mAddContactButton.setVisibility(View.GONE);
+			mDeleteContactButton.setVisibility(View.VISIBLE);
 		} else {
 			mUpdateContactGroupButton.setVisibility(View.GONE);
+			mAddContactButton.setVisibility(View.VISIBLE);
+			mDeleteContactButton.setVisibility(View.GONE);
 		}
 	}
 
@@ -403,19 +412,19 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 		}
 
 	};
-	
+
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if (requestCode == REQUEST_UPDATE_GROUP_CODE) {
 			if (resultCode == UpdateContactGroupActivity.SELECT_GROUP_RESPONSE_CODE_DONE) {
 				if (data != null) {
-//					selectGroupName = data.getStringExtra("groupName");
-//					selectGroupID = data.getLongExtra("groupID", 0);
-//					tvGroupName.setText(selectGroupName);
+					// selectGroupName = data.getStringExtra("groupName");
+					// selectGroupID = data.getLongExtra("groupID", 0);
+					// tvGroupName.setText(selectGroupName);
 				}
-			}else if(resultCode == UpdateContactGroupActivity.SELECT_GROUP_RESPONSE_CODE_CANCEL){	
+			} else if (resultCode == UpdateContactGroupActivity.SELECT_GROUP_RESPONSE_CODE_CANCEL) {
 			}
 		}
-		
+
 	};
 
 	private void gatherUserData() {
@@ -451,7 +460,9 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 			IntentFilter intentFilter = new IntentFilter();
 			intentFilter
 					.addAction(JNIService.JNI_BROADCAST_USER_UPDATE_NAME_OR_SIGNATURE);
+			intentFilter.addAction(JNIService.JNI_BROADCAST_FRIEND_ADDED);
 			intentFilter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
+
 			registerReceiver(myBroadcastReceiver, intentFilter);
 		}
 
@@ -469,15 +480,28 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 	class MyBroadcastReceiver extends BroadcastReceiver {
 		@Override
 		public void onReceive(Context arg0, Intent arg1) {
-
-			if (arg1.getAction().equals(
-					JNIService.JNI_BROADCAST_USER_UPDATE_NAME_OR_SIGNATURE)) {
+			String action = arg1.getAction();
+			if (action
+					.equals(JNIService.JNI_BROADCAST_USER_UPDATE_NAME_OR_SIGNATURE)) {
 				long uid = arg1.getLongExtra("uid", -1);
 				if (uid == -1) {
 					return;
 				}
 				if (uid == u.getmUserId()) {
 					showUserInfo();
+				}
+
+			} else if (action.equals(JNIService.JNI_BROADCAST_FRIEND_ADDED)) {
+				long uid = arg1.getLongExtra("uid", -1);
+				if (uid == -1) {
+					return;
+				}
+
+				if (uid == u.getmUserId()) {
+					isRelation = true;
+					updateContactGroup();
+					Toast.makeText(ContactDetail2.this, "添加成功",
+							Toast.LENGTH_SHORT).show();
 				}
 
 			}

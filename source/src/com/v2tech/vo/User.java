@@ -481,6 +481,7 @@ public class User implements Comparable<User> {
 				u.setTitle(getAttribute(element, "job"));
 				u.setAccount(getAttribute(element, "account"));
 				u.setNickName(getAttribute(element, "commentname"));
+				u.setAuthtype(Integer.valueOf(getAttribute(element,"authtype")));
 				try {
 					String bir = element.getAttribute("birthday");
 					if (bir != null && !bir.equals("")) {

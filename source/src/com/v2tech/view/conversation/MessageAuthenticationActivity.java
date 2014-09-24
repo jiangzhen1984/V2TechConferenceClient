@@ -273,7 +273,7 @@ public class MessageAuthenticationActivity extends Activity {
 	void initReceiver() {
 		friendAuthenticationBroadcastReceiver = new FriendAuthenticationBroadcastReceiver();
 		IntentFilter intentFilter = new IntentFilter();
-		intentFilter.addAction(JNIService.JNI_BROADCAST_FRIEND_AUTHENTICATION);
+		intentFilter.addAction(JNIService.JNI_BROADCAST_FRIEND_ADDED);
 		intentFilter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
 		registerReceiver(friendAuthenticationBroadcastReceiver, intentFilter);
 
@@ -725,7 +725,7 @@ public class MessageAuthenticationActivity extends Activity {
 		@Override
 		public void onReceive(Context arg0, Intent arg1) {
 			if (arg1.getAction().equals(
-					JNIService.JNI_BROADCAST_FRIEND_AUTHENTICATION)) {
+					JNIService.JNI_BROADCAST_FRIEND_ADDED)) {
 				loadFriendMessage();
 				firendAdapter.notifyDataSetChanged();
 			}

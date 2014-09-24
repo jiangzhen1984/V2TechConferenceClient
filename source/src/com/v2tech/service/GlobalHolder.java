@@ -120,6 +120,7 @@ public class GlobalHolder {
 				if (u.getBirthday() != null) {
 					cu.setBirthday(u.getBirthday());
 				}
+				cu.setAuthtype(u.getAuthtype());
 				cu.updateUser(false);
 				V2Log.i(" merge user information " + id + " " + cu.getName());
 				return cu;

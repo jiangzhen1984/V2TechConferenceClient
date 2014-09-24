@@ -266,7 +266,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 
 			if (mCurrentTabFlag == Conversation.TYPE_CONTACT) {
 				intentFilter
-						.addAction(JNIService.JNI_BROADCAST_FRIEND_AUTHENTICATION);
+						.addAction(JNIService.JNI_BROADCAST_FRIEND_ADDED);
 			}
 
 			if (mCurrentTabFlag == Conversation.TYPE_GROUP) {
@@ -1714,7 +1714,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 					updateConversation(intent.getExtras().getLong("mid"));
 				}
 			} else if (action
-					.equals(JNIService.JNI_BROADCAST_FRIEND_AUTHENTICATION)) {
+					.equals(JNIService.JNI_BROADCAST_FRIEND_ADDED)) {
 				V2Log.e(TAG, "JNI_BROADCAST_FRIEND_AUTHENTICATIONE update..");
 				showUnreadFriendAuthenticationRedFlag();
 			}

@@ -21,6 +21,7 @@ import android.view.View.OnClickListener;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class FriendManagementActivity extends Activity {
 	private static final int SELECT_GROUP_REQUEST_CODE = 0;
@@ -145,7 +146,8 @@ public class FriendManagementActivity extends Activity {
 								detailUser, verificationInfo, commentNameET
 										.getText().toString());
 					} else if (detailUser.getAuthtype() == 2) {
-						// 不让任何人加为好友
+						// 不让任何人加为好
+						Toast.makeText(FriendManagementActivity.this, "对方不允许加为好友", Toast.LENGTH_SHORT).show();
 					}
 
 					// 实现越级跳

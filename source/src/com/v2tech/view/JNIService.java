@@ -108,7 +108,7 @@ public class JNIService extends Service {
 	public static final String JNI_BROADCAST_GROUP_USER_REMOVED = "com.v2tech.jni.broadcast.group_user_removed";
 	public static final String JNI_BROADCAST_GROUP_USER_ADDED = "com.v2tech.jni.broadcast.group_user_added";
 	public static final String JNI_BROADCAST_VIDEO_CALL_CLOSED = "com.v2tech.jni.broadcast.video_call_closed";
-	public static final String JNI_BROADCAST_FRIEND_AUTHENTICATION = "com.v2tech.jni.broadcast.friend_authentication";
+	public static final String JNI_BROADCAST_FRIEND_ADDED = "com.v2tech.jni.broadcast.friend_authentication";
 
 	/**
 	 * Crowd invitation with key crowd
@@ -630,7 +630,7 @@ public class JNIService extends Service {
 					getApplicationContext(), vUser, additInfo);
 			// temptag 20140917
 			Intent intent = new Intent();
-			intent.setAction(JNI_BROADCAST_FRIEND_AUTHENTICATION);
+			intent.setAction(JNI_BROADCAST_FRIEND_ADDED);
 			intent.addCategory(JNI_BROADCAST_CATEGROY);
 			sendBroadcast(intent);
 
@@ -730,8 +730,10 @@ public class JNIService extends Service {
 
 				// temptag 20140917
 				Intent intent = new Intent();
-				intent.setAction(JNI_BROADCAST_FRIEND_AUTHENTICATION);
+				intent.setAction(JNI_BROADCAST_FRIEND_ADDED);
 				intent.addCategory(JNI_BROADCAST_CATEGROY);
+				intent.putExtra("uid", uid);
+				intent.putExtra("gid", nGroupID);
 				sendBroadcast(intent);
 
 			}
@@ -756,7 +758,7 @@ public class JNIService extends Service {
 						getApplicationContext(), nUserID, sxml);
 				// temptag 20140917
 				Intent intent = new Intent();
-				intent.setAction(JNI_BROADCAST_FRIEND_AUTHENTICATION);
+				intent.setAction(JNI_BROADCAST_FRIEND_ADDED);
 				intent.addCategory(JNI_BROADCAST_CATEGROY);
 				sendBroadcast(intent);
 			}
