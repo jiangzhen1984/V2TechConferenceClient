@@ -46,6 +46,7 @@ import com.v2tech.view.conversation.P2PConversation;
 import com.v2tech.vo.AudioVideoMessageBean;
 import com.v2tech.vo.AudioVideoMessageBean.ChildMessageBean;
 import com.v2tech.vo.User;
+import com.v2tech.vo.UserDeviceConfig;
 import com.v2tech.vo.VideoBean;
 
 public class VoiceMessageActivity extends Activity {
@@ -64,6 +65,7 @@ public class VoiceMessageActivity extends Activity {
 	private ViewHolder holder = null;
 	private VoiceReceiverBroadcast receiver;
 	private boolean isVisibile;
+	private boolean isEditing;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -103,17 +105,44 @@ public class VoiceMessageActivity extends Activity {
 			public void onItemClick(AdapterView<?> parent, View view,
 					int position, long id) {
 				
-				CheckBox selected = (CheckBox) view
-						.findViewById(R.id.specific_voice_check);
-				if(selected.isChecked()){
-					mListItem.get(position).isCheck = false;
-					selected.setChecked(false);
-					deleteList.remove(position);
+				if(isEditing){
+					CheckBox selected = (CheckBox) view
+							.findViewById(R.id.specific_voice_check);
+					if(selected.isChecked()){
+						mListItem.get(position).isCheck = false;
+						selected.setChecked(false);
+						deleteList.remove(position);
+					}
+					else{
+						deleteList.put(position, mListItem.get(position));
+						mListItem.get(position).isCheck = true;
+						selected.setChecked(true);
+					}
 				}
 				else{
-					deleteList.put(position, mListItem.get(position));
-					mListItem.get(position).isCheck = true;
-					selected.setChecked(true);
+					
+					Intent intent = new Intent();
+					intent.addCategory(PublicIntent.DEFAULT_CATEGORY);
+					intent.setAction(PublicIntent.START_P2P_CONVERSACTION_ACTIVITY);
+					AudioVideoMessageBean audioVideoMessageBean = mListItem.get(position);
+					if (audioVideoMessageBean.mediaType == AudioVideoMessageBean.TYPE_AUDIO){
+						intent.putExtra("uid", audioVideoMessageBean.remoteUserID);
+						intent.putExtra("is_coming_call", false);
+						intent.putExtra("voice", true);
+					}
+					else{
+						intent.putExtra("uid", audioVideoMessageBean.remoteUserID);
+						intent.putExtra("is_coming_call", false);
+						intent.putExtra("voice", false);
+						List<UserDeviceConfig> list = GlobalHolder.getInstance()
+								.getAttendeeDevice(audioVideoMessageBean.remoteUserID);
+						if (list != null && list.size() > 0) {
+							intent.putExtra("device", list.get(0).getDeviceID());
+						} else {
+							intent.putExtra("device", "");
+						}
+					}
+					startActivity(intent);
 				}
 			}
 		});
@@ -123,7 +152,7 @@ public class VoiceMessageActivity extends Activity {
 			@Override
 			public boolean onItemLongClick(AdapterView<?> parent, View view,
 					int position, long id) {
-
+				isEditing = true;
 				deleteLayout.setVisibility(View.VISIBLE);
 				deleteOperator.setVisibility(View.VISIBLE);
 				cannelOperator.setVisibility(View.VISIBLE);
@@ -142,6 +171,7 @@ public class VoiceMessageActivity extends Activity {
 
 			@Override
 			public void onClick(View v) {
+				isEditing = false;
 				deleteLayout.setVisibility(View.GONE);
 				deleteOperator.setVisibility(View.INVISIBLE);
 				cannelOperator.setVisibility(View.INVISIBLE);

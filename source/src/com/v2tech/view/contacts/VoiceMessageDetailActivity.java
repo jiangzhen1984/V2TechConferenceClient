@@ -104,7 +104,7 @@ public class VoiceMessageDetailActivity extends Activity implements
 		
 		User user = GlobalHolder.getInstance().getUser(remoteID);
 		userName.setText(user.getName());
-		userRemark.setText(user.getNickName());
+		userRemark.setText(user.getSignature());
 		User remoteUser = GlobalHolder.getInstance().getUser(remoteID);
 		if (remoteUser.getAvatarBitmap() != null) {
 			userIcon.setImageBitmap(remoteUser.getAvatarBitmap());
@@ -224,7 +224,6 @@ public class VoiceMessageDetailActivity extends Activity implements
 			Intent iv = new Intent();
 			iv.addCategory(PublicIntent.DEFAULT_CATEGORY);
 			iv.setAction(PublicIntent.START_P2P_CONVERSACTION_ACTIVITY);
-			iv.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 			iv.putExtra("uid", remoteID);
 			iv.putExtra("is_coming_call", false);
 			iv.putExtra("voice", false);

@@ -22,6 +22,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 
+import com.V2.jni.V2GlobalEnum;
 import com.v2tech.R;
 import com.v2tech.service.BitmapManager;
 import com.v2tech.service.GlobalHolder;
@@ -54,8 +55,8 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 
 	private ContactsHandler mHandler = new ContactsHandler();
 
-	private static final int TAG_ORG = 1;
-	private static final int TAG_CONTACT = 2;
+	private static final int TAG_ORG = V2GlobalEnum.GROUP_TYPE_DEPARTMENT;
+	private static final int TAG_CONTACT = V2GlobalEnum.GROUP_TYPE_CONTACT;
 	public static final String TAG = "ContactsTabFragment";
 
 	private int flag;
@@ -93,7 +94,7 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 
 		mContactsContainer.setListener(mListener);
 		mContactsContainer.setTextFilterEnabled(true);
-
+		mContactsContainer.setCurrentListViewType(flag);
 		
 		mContactsContainer.setDivider(null);
 
