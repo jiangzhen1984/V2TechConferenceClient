@@ -694,9 +694,9 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 				long verificationDate = 0;
 				long voiceMessageDate = 0;
 				if(verificationMessageItem.getDate() != null)
-					verificationDate = Long.valueOf(verificationMessageItem.getDate());
+					verificationDate = Long.valueOf(verificationMessageItem.getDateLong());
 				if(voiceMessageItem.getDate() != null)
-					voiceMessageDate = Long.valueOf(voiceMessageItem.getDate());
+					voiceMessageDate = Long.valueOf(voiceMessageItem.getDateLong());
 				if(verificationDate > voiceMessageDate){
 					firstAdd = verificationMessageItem;
 					secondAdd = voiceMessageItem;
