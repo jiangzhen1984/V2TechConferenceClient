@@ -1307,7 +1307,11 @@ public class VideoActivityV2 extends Activity {
 	 * resume.
 	 */
 	private void suspendOrResume(boolean resume) {
+		AudioManager audioManager;
+		audioManager = (AudioManager) mContext
+				.getSystemService(Context.AUDIO_SERVICE);
 
+		audioManager.setMode(AudioManager.MODE_NORMAL);
 		if (resume) {
 
 			updateAllRemoteDevice(TAG_OPEN_DEVICE);
@@ -1321,6 +1325,9 @@ public class VideoActivityV2 extends Activity {
 			updateSpeakerState(isSpeaking);
 			// Resume audio
 			cb.updateAudio(true);
+			
+			audioManager.setSpeakerphoneOn(true);
+			
 
 		} else {
 			updateAllRemoteDevice(TAG_CLOSE_DEVICE);
@@ -1330,6 +1337,7 @@ public class VideoActivityV2 extends Activity {
 			mVideoLayout.removeAllViews();
 			// suspend audio
 			cb.updateAudio(false);
+			audioManager.setSpeakerphoneOn(false);
 		}
 	}
 
