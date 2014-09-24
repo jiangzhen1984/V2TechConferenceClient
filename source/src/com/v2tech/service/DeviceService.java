@@ -10,6 +10,7 @@ import com.v2tech.service.jni.RequestConfCreateResponse;
 import com.v2tech.service.jni.RequestOpenUserVideoDeviceResponse;
 import com.v2tech.service.jni.RequestUpdateCameraParametersResponse;
 import com.v2tech.vo.CameraConfiguration;
+import com.v2tech.vo.Group;
 import com.v2tech.vo.UserDeviceConfig;
 
 /**
@@ -52,10 +53,9 @@ public class DeviceService extends AbstractHandler {
 		V2Log.i(" request open video   UID:" + userDevice.getUserID()
 				+ " deviceid:" + userDevice.getDeviceID() + "   videoplayer:"
 				+ userDevice.getVp());
-		VideoRequest.getInstance().openVideoDevice(userDevice.getGroupType(),
-				userDevice.getGroupID(), userDevice.getType().ordinal(),
-				userDevice.getUserID(), userDevice.getDeviceID(),
-				userDevice.getVp());
+		VideoRequest.getInstance().openVideoDevice(0, 0,
+				userDevice.getType().ordinal(), userDevice.getUserID(),
+				userDevice.getDeviceID(), userDevice.getVp());
 		JNIResponse jniRes = new RequestOpenUserVideoDeviceResponse(
 				System.currentTimeMillis() / 1000,
 				RequestOpenUserVideoDeviceResponse.Result.SUCCESS);
@@ -91,10 +91,9 @@ public class DeviceService extends AbstractHandler {
 		initTimeoutMessage(JNI_REQUEST_CLOSE_VIDEO, DEFAULT_TIME_OUT_SECS,
 				caller);
 
-		VideoRequest.getInstance().closeVideoDevice(userDevice.getGroupType(),
-				userDevice.getGroupID(), userDevice.getType().ordinal(),
-				userDevice.getUserID(), userDevice.getDeviceID(),
-				userDevice.getVp());
+		VideoRequest.getInstance().closeVideoDevice(0, 0, 
+				userDevice.getType().ordinal(), userDevice.getUserID(),
+				userDevice.getDeviceID(), userDevice.getVp());
 		JNIResponse jniRes = new RequestCloseUserVideoDeviceResponse(
 				System.currentTimeMillis() / 1000,
 				RequestCloseUserVideoDeviceResponse.Result.SUCCESS);
@@ -103,6 +102,89 @@ public class DeviceService extends AbstractHandler {
 		Message res = Message.obtain(this, JNI_REQUEST_CLOSE_VIDEO, jniRes);
 		this.sendMessageDelayed(res, 300);
 	}
+	
+	
+	
+	/**
+	 * User request to open video device.
+	 * 
+	 * @param group If user not IM, use this
+	 * @param userDevice
+	 *            {@link UserDeviceConfig} if want to open local video,
+	 *            {@link UserDeviceConfig#getVp()} should be null and
+	 *            {@link UserDeviceConfig#getDeviceID()} should be ""
+	 * @param caller
+	 *            if input is null, ignore response Message.object is
+	 *            {@link com.v2tech.service.jni.RequestOpenUserVideoDeviceResponse}
+	 * 
+	 * @see UserDeviceConfig
+	 */
+	public void requestOpenVideoDevice(Group group, UserDeviceConfig userDevice,
+			Registrant caller) {
+		if (userDevice == null) {
+			JNIResponse jniRes = new RequestOpenUserVideoDeviceResponse(0,
+					RequestConfCreateResponse.Result.INCORRECT_PAR);
+			sendResult(caller, jniRes);
+			return;
+		}
+		initTimeoutMessage(JNI_REQUEST_OPEN_VIDEO, DEFAULT_TIME_OUT_SECS,
+				caller);
+		V2Log.i(" request open video   UID:" + userDevice.getUserID()
+				+ " deviceid:" + userDevice.getDeviceID() + "   videoplayer:"
+				+ userDevice.getVp());
+		VideoRequest.getInstance().openVideoDevice(group.getGroupType().intValue(), group.getmGId(), 
+				userDevice.getType().ordinal(), userDevice.getUserID(),
+				userDevice.getDeviceID(), userDevice.getVp());
+		JNIResponse jniRes = new RequestOpenUserVideoDeviceResponse(
+				System.currentTimeMillis() / 1000,
+				RequestOpenUserVideoDeviceResponse.Result.SUCCESS);
+
+		// send delayed message for that make sure send response after JNI
+		Message res = Message.obtain(this, JNI_REQUEST_OPEN_VIDEO, jniRes);
+		this.sendMessageDelayed(res, 300);
+
+	}
+
+	/**
+	 * User request to close video device.
+	 * 
+	 * @param group if user not for IM, use this API
+	 * 
+	 * @param userDevice
+	 *            {@link UserDeviceConfig} if want to open local video,
+	 *            {@link UserDeviceConfig#getVp()} should be null and
+	 *            {@link UserDeviceConfig#getDeviceID()} should be ""
+	 * @param caller
+	 *            if input is null, ignore response Message.object is
+	 *            {@link com.v2tech.service.jni.RequestCloseUserVideoDeviceResponse}
+	 * 
+	 * @see UserDeviceConfig
+	 */
+	public void requestCloseVideoDevice(Group group, UserDeviceConfig userDevice,
+			Registrant caller) {
+		if (userDevice == null) {
+			JNIResponse jniRes = new RequestCloseUserVideoDeviceResponse(
+					System.currentTimeMillis() / 1000,
+					RequestCloseUserVideoDeviceResponse.Result.INCORRECT_PAR);
+			sendResult(caller, jniRes);
+			return;
+		}
+		initTimeoutMessage(JNI_REQUEST_CLOSE_VIDEO, DEFAULT_TIME_OUT_SECS,
+				caller);
+
+		VideoRequest.getInstance().closeVideoDevice(group.getGroupType().intValue(), group.getmGId(), 
+				userDevice.getType().ordinal(), userDevice.getUserID(),
+				userDevice.getDeviceID(), userDevice.getVp());
+		JNIResponse jniRes = new RequestCloseUserVideoDeviceResponse(
+				System.currentTimeMillis() / 1000,
+				RequestCloseUserVideoDeviceResponse.Result.SUCCESS);
+
+		// send delayed message for that make sure send response after JNI
+		Message res = Message.obtain(this, JNI_REQUEST_CLOSE_VIDEO, jniRes);
+		this.sendMessageDelayed(res, 300);
+	}
+	
+	
 
 	/**
 	 * Update current user's camera. Including front-side or back-side camera

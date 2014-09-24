@@ -75,6 +75,7 @@ public class GroupRequest {
 
 	/**
 	 * Remove user from group
+	 * 
 	 * @param groupType
 	 * @param nGroupID
 	 * @param nUserID
@@ -261,9 +262,9 @@ public class GroupRequest {
 
 	public native void delGroupFile(int groupType, long nGroupId, String sXml);
 
-	
 	/**
 	 * get group file list
+	 * 
 	 * @param groupType
 	 * @param nGroupId
 	 */
@@ -318,25 +319,24 @@ public class GroupRequest {
 	 * <filelist><file encrypttype='1' id='C2A65B9B-63C7-4C9E-A8DD-F15F74ABA6CA'
 	 * name='83025aafa40f4bfb24fdb8d1034f78f0f7361801.gif' size='497236'
 	 * time='1411112464' uploader='11029' url=
-	 * 'http://192.168.0.38:8090/crowd/C2A65B9B-63C7-4C9E-A8DD-F15F74ABA6CA/C2A65B9B-63C7-4C9E-A8DD-F15F74ABA6CA/83025aafa40f4bfb24fdb8d1034f78f0f7361801.gif'/></filelist
-	 * >
+	 * 'http://192.168.0.38:8090/crowd/C2A65B9B-63C7-4C9E-A8DD-F15F74ABA6CA/C2A65B9B-63C7-4C9E-A8DD-F15F74ABA6CA/83025aafa40f4bfb24fdb8d1034f78f0f7361801.gif'/></filelis
+	 * t >
 	 * 
 	 * @param type
 	 * @param nGroupId
 	 * @param sXml
 	 */
 	private void OnGetGroupFileInfo(int groupType, long nGroupId, String sXml) {
-		V2Log.e("Group Request  OnGetGroupFileInfo" + nGroupId
-				+ "  " + sXml);
+		V2Log.e("Group Request  OnGetGroupFileInfo" + nGroupId + "  " + sXml);
 		List<FileJNIObject> list = XmlAttributeExtractor.parseFiles(sXml);
 		V2Group group = new V2Group(nGroupId, V2Group.TYPE_CROWD);
-		
-		for (int i =0; i < mCallbacks.size(); i++) {
+
+		for (int i = 0; i < mCallbacks.size(); i++) {
 			WeakReference<GroupRequestCallback> wrcb = mCallbacks.get(i);
 			Object obj = wrcb.get();
 			if (obj != null) {
 				GroupRequestCallback callback = (GroupRequestCallback) obj;
-				callback.OnGetGroupFileInfo(group,list);
+				callback.OnGetGroupFileInfo(group, list);
 			}
 		}
 	}
@@ -620,6 +620,7 @@ public class GroupRequest {
 				+ szWBoardID + " | nWhiteIndex: " + nWhiteIndex);
 	};
 
+
 	/**
 	 * 文件重命名 TODO implement
 	 * 
@@ -635,6 +636,10 @@ public class GroupRequest {
 				+ sFileID + " | sNewName: " + sNewName);
 	};
 
+	
+	
+
+	
 	/**
 	 * 收到白板会话被关闭的回调 TODO implement
 	 * 

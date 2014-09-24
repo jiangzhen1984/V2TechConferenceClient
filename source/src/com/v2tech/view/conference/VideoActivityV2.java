@@ -1484,7 +1484,7 @@ public class VideoActivityV2 extends Activity {
 			VideoPlayer vp = new VideoPlayer();
 			udc.setSVHolder(new SurfaceView(this));
 			udc.setVp(vp);
-			SurfaceHolderObserver observer = new SurfaceHolderObserver(cs, udc);
+			SurfaceHolderObserver observer = new SurfaceHolderObserver(cg, cs, udc);
 			SurfaceViewW sw = new SurfaceViewW(udc.getBelongsAttendee(), udc,
 					observer);
 			mCurrentShowedSV.add(sw);
@@ -2150,11 +2150,11 @@ public class VideoActivityV2 extends Activity {
 				break;
 			case REQUEST_OPEN_OR_CLOSE_DEVICE:
 				if (msg.arg1 == TAG_CLOSE_DEVICE) {
-					cb.requestCloseVideoDevice((UserDeviceConfig) msg.obj,
+					cb.requestCloseVideoDevice(cg, (UserDeviceConfig) msg.obj,
 							new Registrant(mVideoHandler,
 									REQUEST_CLOSE_DEVICE_RESPONSE, null));
 				} else if (msg.arg1 == TAG_OPEN_DEVICE) {
-					cb.requestOpenVideoDevice((UserDeviceConfig) msg.obj,
+					cb.requestOpenVideoDevice(cg, (UserDeviceConfig) msg.obj,
 							new Registrant(mVideoHandler,
 									REQUEST_OPEN_DEVICE_RESPONSE, null));
 				}

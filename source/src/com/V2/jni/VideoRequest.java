@@ -44,7 +44,7 @@ public class VideoRequest {
 	public void addCallback(VideoRequestCallback callback) {
 		this.mCallbacks.add(new WeakReference<VideoRequestCallback>(callback));
 	}
-	
+
 	public void removeCallback(VideoRequestCallback callback) {
 		for (int i = 0; i < mCallbacks.size(); i++) {
 			if (mCallbacks.get(i).get() == callback) {
@@ -58,68 +58,61 @@ public class VideoRequest {
 
 	public native void unInitialize();
 
+
+
 	/**
 	 * Request to open video device include remote user and self.
 	 * 
-	 * @param type
-	 * <br>
-	 *            1: camera<br>
-	 *            2: <br>
-	 *            3: file <br>
-	 *            4: mixed video device<br>
-	 * @param nUserID
-	 *            user id
-	 * @param szDeviceID
-	 *            user device ID. If open local user camera device, user ""
+	 * @param groupType
 	 * 
+	 *            {@link V2GlobalEnum#GROUP_TYPE_USER} <br/>
+	 *            {@link V2GlobalEnum# GROUP_TYPE_DEPARTMENT} <br/>
+	 *            {@link V2GlobalEnum#GROUP_TYPE_CONTACT} <br/>
+	 *            {@link V2GlobalEnum#GROUP_TYPE_CROWD } <br/>
+	 *            {@link V2GlobalEnum#GROUP_TYPE_CONFERENCE} conference <br/>
+	 *            {@link V2GlobalEnum#GROUP_TYPE_DISCUSSION} <br/>
+	 * 
+	 * @param nGroupID   0 for IM
+	 * @param type
+	 *            type of request<br> 
+	 *            {@link V2GlobalEnum#REQUEST_TYPE_CONF} for conference<br>
+	 *            {@link V2GlobalEnum#REQUEST_TYPE_IM}  for P2P<br>
+	 * 
+	 * @param nUserID
+	 * @param szDeviceID
 	 * @param vp
 	 *            if open local device, input null. Otherwise
 	 *            {@link VideoPlayer}
-	 * @param businessType
-	 *            type of request
-	 * 
-	 * @see V2GlobalEnum#REQUEST_TYPE_CONF
-	 * @see V2GlobalEnum#REQUEST_TYPE_IM
-	 * 
-	 * 
-	 * @see {@link #OnRemoteUserVideoDevice(String)}
-	 * @see VideoPlayer
-	 * @see V2ClientType#CONF
-	 * @see V2ClientType#IM
 	 */
-	public native void openVideoDevice(int eGroupType , long nGroupID , int type, long nUserID,
-			String szDeviceID, VideoPlayer vp);
+	public native void openVideoDevice(int groupType, long nGroupID, int type,
+			long nUserID, String szDeviceID, VideoPlayer vp);
 
 	/**
-	 * FIXME update comment Request to close video device. This function no
-	 * callback call<br>
+	 * Request to close video device.
 	 * 
+	 * 
+	 * @param groupType
+	 * 
+	 *            {@link V2GlobalEnum#GROUP_TYPE_USER} <br/>
+	 *            {@link V2GlobalEnum# GROUP_TYPE_DEPARTMENT} <br/>
+	 *            {@link V2GlobalEnum#GROUP_TYPE_CONTACT} <br/>
+	 *            {@link V2GlobalEnum#GROUP_TYPE_CROWD } <br/>
+	 *            {@link V2GlobalEnum#GROUP_TYPE_CONFERENCE} conference <br/>
+	 *            {@link V2GlobalEnum#GROUP_TYPE_DISCUSSION} <br/>
+	 * 
+	 * @param nGroupID   0 for IM
 	 * @param type
-	 * <br>
-	 *            1: camera<br>
-	 *            2: <br>
-	 *            3: file <br>
-	 *            4: mixed video device<br>
+	 *            type of request<br> 
+	 *            {@link V2GlobalEnum#REQUEST_TYPE_CONF} for conference<br>
+	 *            {@link V2GlobalEnum#REQUEST_TYPE_IM}  for P2P<br>
+	 * 
 	 * @param nUserID
-	 *            user id
 	 * @param szDeviceID
-	 *            user device ID. If open local user camera device, user ""
-	 * 
 	 * @param vp
-	 *            if open local device, input null. Otherwise input
+	 *            if open local device, input null. Otherwise
 	 *            {@link VideoPlayer}
-	 * @param businessType (Deprecated)
-	 *            type of request (Now , eGroupType and nGroupID instead of businessType)
-	 * 
-	 * @see V2GlobalEnum#REQUEST_TYPE_CONF
-	 * @see V2GlobalEnum#REQUEST_TYPE_IM
-	 * 
-	 * @see {@link #OnRemoteUserVideoDevice(String)}
-	 * @see VideoPlayer
-	 * @see V2ClientType#CONF
-	 * @see V2ClientType#IM
 	 */
-	public native void closeVideoDevice(int eGroupType , long nGroupID , int type, long nUserID,
+	public native void closeVideoDevice(int groupType, long nGroupID,int type, long nUserID,
 			String szDeviceID, VideoPlayer vp);
 
 	/**
@@ -217,8 +210,8 @@ public class VideoRequest {
 						nFromUserID, szDeviceID, 0));
 			}
 		}
-		V2Log.d("OnVideoChatInvite: nGroupID:" + szSessionID + " nFromUserID:" + nFromUserID
-				+ "  szDeviceID:" + szDeviceID);
+		V2Log.d("OnVideoChatInvite: nGroupID:" + szSessionID + " nFromUserID:"
+				+ nFromUserID + "  szDeviceID:" + szDeviceID);
 
 	}
 
@@ -231,8 +224,8 @@ public class VideoRequest {
 	 */
 	private void OnVideoChatAccepted(String szSessionID, long nFromUserID,
 			String szDeviceID) {
-		V2Log.d("OnVideoChatAccepted " + szSessionID + " "
-				+ nFromUserID + " " + szDeviceID);
+		V2Log.d("OnVideoChatAccepted " + szSessionID + " " + nFromUserID + " "
+				+ szDeviceID);
 		for (WeakReference<VideoRequestCallback> wrCB : this.mCallbacks) {
 			Object obj = wrCB.get();
 			if (obj != null) {
@@ -252,8 +245,8 @@ public class VideoRequest {
 	 */
 	private void OnVideoChatRefused(String szSessionID, long nFromUserID,
 			String szDeviceID) {
-		V2Log.d("OnVideoChatRefused " + szSessionID + " "
-				+ nFromUserID + " " + szDeviceID);
+		V2Log.d("OnVideoChatRefused " + szSessionID + " " + nFromUserID + " "
+				+ szDeviceID);
 		for (WeakReference<VideoRequestCallback> wrCB : this.mCallbacks) {
 			Object obj = wrCB.get();
 			if (obj != null) {
@@ -266,8 +259,8 @@ public class VideoRequest {
 
 	private void OnVideoChatClosed(String szSessionID, long nFromUserID,
 			String szDeviceID) {
-		V2Log.d("OnVideoChatClosed " + szSessionID + " "
-				+ nFromUserID + " " + szDeviceID);
+		V2Log.d("OnVideoChatClosed " + szSessionID + " " + nFromUserID + " "
+				+ szDeviceID);
 		for (WeakReference<VideoRequestCallback> wrCB : this.mCallbacks) {
 			Object obj = wrCB.get();
 			if (obj != null) {
@@ -280,8 +273,8 @@ public class VideoRequest {
 
 	private void OnVideoChating(String szSessionID, long nFromUserID,
 			String szDeviceID) {
-		V2Log.d("OnVideoChating " + szSessionID  + " "
-				+ nFromUserID + " " + szDeviceID);
+		V2Log.d("OnVideoChating " + szSessionID + " " + nFromUserID + " "
+				+ szDeviceID);
 		for (WeakReference<VideoRequestCallback> wrCB : this.mCallbacks) {
 			Object obj = wrCB.get();
 			if (obj != null) {

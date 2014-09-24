@@ -7,6 +7,7 @@ import android.view.SurfaceHolder;
 import com.v2tech.service.DeviceService;
 import com.v2tech.service.Registrant;
 import com.v2tech.service.jni.JNIResponse;
+import com.v2tech.vo.Group;
 import com.v2tech.vo.UserDeviceConfig;
 
 public class SurfaceHolderObserver implements SurfaceHolder.Callback {
@@ -16,12 +17,15 @@ public class SurfaceHolderObserver implements SurfaceHolder.Callback {
 
 	private DeviceService service;
 	private UserDeviceConfig udc;
+	//TODO this observer should not care this 
+	private Group g; 
 	private State state;
 	private boolean isCreate;
 	private boolean isValid;
 
-	public SurfaceHolderObserver(DeviceService service, UserDeviceConfig udc) {
+	public SurfaceHolderObserver(Group g, DeviceService service, UserDeviceConfig udc) {
 		super();
+		this.g = g;
 		this.service = service;
 		this.udc = udc;
 		state = State.CLOSED;
@@ -38,7 +42,7 @@ public class SurfaceHolderObserver implements SurfaceHolder.Callback {
 				state = State.SHOWING;
 				udc.getVp().SetSurface(holder);
 				updateDeviceState(false);
-				service.requestOpenVideoDevice(udc, new Registrant(handler,
+				service.requestOpenVideoDevice(g, udc, new Registrant(handler,
 						OPEN_DEVICE_DONE, null));
 			}
 		}
@@ -52,7 +56,7 @@ public class SurfaceHolderObserver implements SurfaceHolder.Callback {
 				state = State.SHOWING;
 				udc.getVp().SetSurface(holder);
 				updateDeviceState(false);
-				service.requestOpenVideoDevice(udc, new Registrant(handler,
+				service.requestOpenVideoDevice(g, udc, new Registrant(handler,
 						OPEN_DEVICE_DONE, null));
 			}
 		}
@@ -65,7 +69,7 @@ public class SurfaceHolderObserver implements SurfaceHolder.Callback {
 			if ((state == State.SHOWED || state == State.SHOWING) && !isValid) {
 				state = State.CLOSING;
 				updateDeviceState(true);
-				service.requestCloseVideoDevice(udc, new Registrant(handler,
+				service.requestCloseVideoDevice(g, udc, new Registrant(handler,
 						CLOSE_DEVICE_DONE, null));
 			}
 		}
@@ -81,7 +85,7 @@ public class SurfaceHolderObserver implements SurfaceHolder.Callback {
 		synchronized (state) {
 			state = State.SHOWING;
 			updateDeviceState(false);
-			service.requestOpenVideoDevice(udc, new Registrant(handler,
+			service.requestOpenVideoDevice(g, udc, new Registrant(handler,
 					OPEN_DEVICE_DONE, null));
 		}
 	}
@@ -93,7 +97,7 @@ public class SurfaceHolderObserver implements SurfaceHolder.Callback {
 		synchronized (state) {
 			state = State.CLOSING;
 			updateDeviceState(true);
-			service.requestCloseVideoDevice(udc, new Registrant(handler,
+			service.requestCloseVideoDevice(g, udc, new Registrant(handler,
 					CLOSE_DEVICE_DONE, null));
 		}
 	}
