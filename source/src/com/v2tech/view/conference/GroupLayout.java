@@ -87,7 +87,7 @@ public class GroupLayout extends LinearLayout {
 			break;
 		case Conversation.TYPE_VOICE_MESSAGE:
 			mGroupIV.setImageResource(R.drawable.vs_message_voice);
-			mGroupNameTV.setText("语音消息");
+			mGroupNameTV.setText("通话消息");
 			break;
 		case Conversation.TYPE_VERIFICATION_MESSAGE:
 			mGroupIV.setImageResource(R.drawable.vs_message_verification);
@@ -99,10 +99,6 @@ public class GroupLayout extends LinearLayout {
 		}
 
 		mGroupOwnerTV.setText(mConv.getMsg());
-//		if (mConv.getType() == Conversation.TYPE_CONTACT) {
-//			V2Log.e(TAG, mConv.getDateLong() + "------");
-//			mGroupDateTV.setText(mConv.getDateLong());
-//		} else
 		mGroupDateTV.setText(mConv.getDate());
 		addView(view);
 	}
@@ -181,6 +177,7 @@ public class GroupLayout extends LinearLayout {
 		case Conversation.TYPE_VERIFICATION_MESSAGE:
 			ConversationFirendAuthentication firend = (ConversationFirendAuthentication) mConv;
 			mGroupOwnerTV.setText(firend.getMsg());
+			mGroupDateTV.setText(firend.getDate());
 			break;
 		case Conversation.TYPE_CONTACT:
 			ContactConversation contact = (ContactConversation) mConv;

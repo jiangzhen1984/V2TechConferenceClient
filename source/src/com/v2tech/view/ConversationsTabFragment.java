@@ -697,10 +697,10 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 				Conversation secondAdd = null;
 				long verificationDate = 0;
 				long voiceMessageDate = 0;
-				if (verificationMessageItem.getDate() != null)
+				if (verificationMessageItem.getDateLong() != null)
 					verificationDate = Long.valueOf(verificationMessageItem
 							.getDateLong());
-				if (voiceMessageItem.getDate() != null)
+				if (voiceMessageItem.getDateLong() != null)
 					voiceMessageDate = Long.valueOf(voiceMessageItem
 							.getDateLong());
 				if (verificationDate > voiceMessageDate) {
@@ -745,7 +745,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 
 						if (isVerificationSpecificAdd == false
 								&& secondAdd.getDate() != null
-								&& Long.valueOf(secondAdd.getDate()) > date) {
+								&& Long.valueOf(secondAdd.getDateLong()) > date) {
 							mConvList.add(secondAdd);
 							isVerificationSpecificAdd = true;
 						}
@@ -823,6 +823,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 			}
 		}
 
+		showUnreadFriendAuthenticationRedFlag();
 		if (isFresh) {
 			adapter.notifyDataSetChanged();
 		}
@@ -1764,6 +1765,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 			verificationLayout.updateNotificator(true);
 			String msg = "";
 			String date = "";
+			String dateLong = "";
 			if (verificationMessageItem != null) {
 				if (cr.moveToFirst()) {
 					AddFriendHistorieNode tempNode = new AddFriendHistorieNode();
@@ -1811,11 +1813,13 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 							&& (tempNode.addState == 2)) {// 我加别人已被拒绝
 						msg = name + "拒绝你的好友请求";
 					}
-					date = String.valueOf(tempNode.saveDate);
+					date = DateUtil
+							.getStringDate(tempNode.saveDate * 1000);
+					dateLong = String.valueOf(tempNode.saveDate * 1000);
 				}
-
 				verificationMessageItem.setMsg(msg);
 				verificationMessageItem.setDate(date);
+				verificationMessageItem.setDateLong(dateLong);
 				verificationLayout.update();
 			}
 
