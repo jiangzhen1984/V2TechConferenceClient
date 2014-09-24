@@ -34,6 +34,8 @@ public class Conversation {
 	protected String name;
 
 	protected CharSequence msg;
+	
+	protected boolean isFirst;
 
 	protected Conversation() {
 	}
@@ -145,6 +147,14 @@ public class Conversation {
 
 	public void setExtId(long extId) {
 		this.mExtId = extId;
+	}
+	
+	public boolean isFirst() {
+		return isFirst;
+	}
+
+	public void setFirst(boolean isFirst) {
+		this.isFirst = isFirst;
 	}
 
 }

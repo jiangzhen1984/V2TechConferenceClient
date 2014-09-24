@@ -193,7 +193,36 @@ public class GroupRequest {
 	 */
 	public native void acceptInviteJoinGroup(int groupType, long groupId,
 			long nUserID);
-
+	
+	/**
+	 * 创建白板
+	 * @param groupType
+	 * @param groupId
+	 * @param nWhiteIndex
+	 */
+	public native void groupCreateWBoard(int groupType, long groupId,
+			int nWhiteIndex);
+	
+	/**
+	 * 销毁白板
+	 * @param groupType
+	 * @param groupId
+	 * @param nWhiteIndex
+	 */
+	public native void groupDestroyWBoard(long groupId,
+			String szMediaID);
+	
+	/**
+	 * 创建会议文档共享
+	 * @param eGroupType
+	 * @param nGroupID
+	 * @param sFileName
+	 * @param eWhiteShowType 类型
+	 * @param bStorePersonalSpace 文档信息是否要保存到服务器上
+	 */
+	public native void groupCreateDocShare(int eGroupType, long nGroupID, String sFileName,
+			int eWhiteShowType, boolean bStorePersonalSpace);
+	
 	/**
 	 * 
 	 * @param groupType
@@ -239,7 +268,11 @@ public class GroupRequest {
 	 * @param nGroupId
 	 */
 	public native void getGroupFileInfo(int groupType, long nGroupId);
-
+	
+	
+	public native void renameGroupFile(int eGroupType, long nGroupID,
+			String sFileID, String sNewName);
+	
 	private void OnAddGroupFile(int type, long nGroupId, String sXml) {
 		V2Log.e("Group Request  OnAddGroupFile" + type + "   " + nGroupId
 				+ "  " + sXml);
@@ -249,6 +282,37 @@ public class GroupRequest {
 		V2Log.e("Group Request  OnDelGroupFile" + type + "   " + nGroupId
 				+ "  " + sXml);
 	}
+	
+	/**
+	 * 组中应用程序共享
+	 * @param eGroupType
+	 * @param nGroupID
+	 * @param sMediaID
+	 * @param nPid
+	 * @param type
+	 */
+	public native void groupCreateAppShare(int eGroupType, long nGroupID, String sMediaID, int nPid, int type);
+	
+	/**
+	 * 组中关闭程序共享 
+	 * @param eGroupType
+	 * @param nGroupID
+	 * @param sMediaID
+	 */
+	public native void groupDestroyAppShare(int eGroupType, long nGroupID, String sMediaID);
+	
+	/**
+	 * 创建个人空间的文档共享 
+	 * @param eGroupType
+	 * @param nGroupID
+	 * @param sFileID
+	 * @param sFileName
+	 * @param nFileSize
+	 * @param nPageCount
+	 * @param sDownUrl
+	 */
+	public native void groupCreatePersonalSpaceDoc(int eGroupType,long nGroupID, String sFileID, String sFileName, 
+	long nFileSize, int nPageCount, String sDownUrl);
 
 	/**
 	 * <filelist><file encrypttype='1' id='C2A65B9B-63C7-4C9E-A8DD-F15F74ABA6CA'
@@ -601,4 +665,5 @@ public class GroupRequest {
 				+ szWBoardID + " | szFileName: " + szFileName
 				+ " | eWhiteShowType: " + eWhiteShowType);
 	};
+	
 }

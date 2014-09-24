@@ -13,7 +13,7 @@ public class AttendeeMixedDevice extends Attendee {
 			MixVideo.MixVideoDevice[] uds = mv.getUdcs();
 			udcs = new UserDeviceConfig[uds.length];
 			for (int i = 0; i < uds.length; i++) {
-				udcs[i] = new UserDeviceConfig(
+				udcs[i] = new UserDeviceConfig(0 , 0 , 
 						0,
 						mv.getId(),
 						null,

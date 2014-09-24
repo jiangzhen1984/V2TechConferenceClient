@@ -52,9 +52,10 @@ public class DeviceService extends AbstractHandler {
 		V2Log.i(" request open video   UID:" + userDevice.getUserID()
 				+ " deviceid:" + userDevice.getDeviceID() + "   videoplayer:"
 				+ userDevice.getVp());
-		VideoRequest.getInstance().openVideoDevice(
-				userDevice.getType().ordinal(), userDevice.getUserID(),
-				userDevice.getDeviceID(), userDevice.getVp());
+		VideoRequest.getInstance().openVideoDevice(userDevice.getGroupType(),
+				userDevice.getGroupID(), userDevice.getType().ordinal(),
+				userDevice.getUserID(), userDevice.getDeviceID(),
+				userDevice.getVp());
 		JNIResponse jniRes = new RequestOpenUserVideoDeviceResponse(
 				System.currentTimeMillis() / 1000,
 				RequestOpenUserVideoDeviceResponse.Result.SUCCESS);
@@ -90,9 +91,10 @@ public class DeviceService extends AbstractHandler {
 		initTimeoutMessage(JNI_REQUEST_CLOSE_VIDEO, DEFAULT_TIME_OUT_SECS,
 				caller);
 
-		VideoRequest.getInstance().closeVideoDevice(
-				userDevice.getType().ordinal(), userDevice.getUserID(),
-				userDevice.getDeviceID(), userDevice.getVp());
+		VideoRequest.getInstance().closeVideoDevice(userDevice.getGroupType(),
+				userDevice.getGroupID(), userDevice.getType().ordinal(),
+				userDevice.getUserID(), userDevice.getDeviceID(),
+				userDevice.getVp());
 		JNIResponse jniRes = new RequestCloseUserVideoDeviceResponse(
 				System.currentTimeMillis() / 1000,
 				RequestCloseUserVideoDeviceResponse.Result.SUCCESS);
@@ -127,9 +129,7 @@ public class DeviceService extends AbstractHandler {
 
 	@Override
 	public void clearCalledBack() {
-		
+
 	}
-	
-	
 
 }

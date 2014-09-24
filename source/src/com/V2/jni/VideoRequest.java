@@ -87,7 +87,7 @@ public class VideoRequest {
 	 * @see V2ClientType#CONF
 	 * @see V2ClientType#IM
 	 */
-	public native void openVideoDevice(int type, long nUserID,
+	public native void openVideoDevice(int eGroupType , long nGroupID , int type, long nUserID,
 			String szDeviceID, VideoPlayer vp);
 
 	/**
@@ -108,8 +108,8 @@ public class VideoRequest {
 	 * @param vp
 	 *            if open local device, input null. Otherwise input
 	 *            {@link VideoPlayer}
-	 * @param businessType
-	 *            type of request
+	 * @param businessType (Deprecated)
+	 *            type of request (Now , eGroupType and nGroupID instead of businessType)
 	 * 
 	 * @see V2GlobalEnum#REQUEST_TYPE_CONF
 	 * @see V2GlobalEnum#REQUEST_TYPE_IM
@@ -119,7 +119,7 @@ public class VideoRequest {
 	 * @see V2ClientType#CONF
 	 * @see V2ClientType#IM
 	 */
-	public native void closeVideoDevice(int type, long nUserID,
+	public native void closeVideoDevice(int eGroupType , long nGroupID , int type, long nUserID,
 			String szDeviceID, VideoPlayer vp);
 
 	/**

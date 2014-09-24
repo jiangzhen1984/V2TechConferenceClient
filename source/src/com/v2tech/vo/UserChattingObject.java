@@ -35,7 +35,7 @@ public class UserChattingObject {
 		this.flag = flag;
 		this.flag |= SPEAKING;
 		this.mUser = user;
-		this.udc = new UserDeviceConfig(user.getmUserId(), deviceId, vp,
+		this.udc = new UserDeviceConfig(0 , 0 , user.getmUserId(), deviceId, vp,
 				V2GlobalConstants.REQUEST_TYPE_IM,
 				UserDeviceConfig.UserDeviceConfigType.EVIDEODEVTYPE_CAMERA);
 	}
@@ -50,7 +50,7 @@ public class UserChattingObject {
 		this.flag = flag;
 		this.flag |= SPEAKING;
 		this.mUser = user;
-		this.udc = new UserDeviceConfig(user.getmUserId(), deviceId, vp,
+		this.udc = new UserDeviceConfig(0 , 0 , user.getmUserId(), deviceId, vp,
 				V2GlobalConstants.REQUEST_TYPE_IM,
 				UserDeviceConfig.UserDeviceConfigType.EVIDEODEVTYPE_CAMERA);
 	}

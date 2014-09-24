@@ -858,7 +858,7 @@ public class VideoActivityV2 extends Activity {
 								REQUEST_OPEN_OR_CLOSE_DEVICE,
 								0,
 								0,
-								new UserDeviceConfig(GlobalHolder.getInstance()
+								new UserDeviceConfig(V2GlobalEnum.GROUP_TYPE_CONFERENCE, conf.getId() , GlobalHolder.getInstance()
 										.getCurrentUserId(), "", null))
 								.sendToTarget();
 						//
@@ -1055,7 +1055,7 @@ public class VideoActivityV2 extends Activity {
 		udc = atd.getDefaultDevice();
 		// Add default device
 		if (udc == null) {
-			udc = new UserDeviceConfig(atd.getAttId(), "", null);
+			udc = new UserDeviceConfig(V2GlobalEnum.GROUP_TYPE_CONFERENCE, conf.getId() ,atd.getAttId(), "", null);
 			//Make sure current user device is enable
 			udc.setEnable(true);
 			atd.addDevice(udc);
@@ -1082,7 +1082,7 @@ public class VideoActivityV2 extends Activity {
 				REQUEST_OPEN_OR_CLOSE_DEVICE,
 				0,
 				0,
-				new UserDeviceConfig(GlobalHolder.getInstance()
+				new UserDeviceConfig(V2GlobalEnum.GROUP_TYPE_CONFERENCE, conf.getId() ,GlobalHolder.getInstance()
 						.getCurrentUserId(), "", null)).sendToTarget();
 	}
 

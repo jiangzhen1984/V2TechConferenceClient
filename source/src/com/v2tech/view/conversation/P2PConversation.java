@@ -49,6 +49,7 @@ import com.v2tech.service.GlobalHolder;
 import com.v2tech.service.Registrant;
 import com.v2tech.service.jni.JNIResponse;
 import com.v2tech.service.jni.RequestChatServiceResponse;
+import com.v2tech.util.GlobalConfig;
 import com.v2tech.view.JNIService;
 import com.v2tech.view.PublicIntent;
 import com.v2tech.vo.CameraConfiguration;
@@ -128,7 +129,7 @@ public class P2PConversation extends Activity implements
 		displayRotation = getDisplayRotation();
 
 		mContext = this;
-		startTime = System.currentTimeMillis();
+		startTime = GlobalConfig.getGlobalServerTime();
 		uad = buildObject();
 		initReceiver();
 		currentVideoBean = new VideoBean();
@@ -1118,7 +1119,7 @@ public class P2PConversation extends Activity implements
 				TextView nameTV = (TextView) findViewById(R.id.conversation_fragment_connected_name);
 				nameTV.setText(uad.getUser().getName());
 			}
-			currentVideoBean.startDate = System.currentTimeMillis();
+			currentVideoBean.startDate = GlobalConfig.getGlobalServerTime();
 			currentVideoBean.mediaState = VideoBean.STATE_ANSWER_CALL;
 			currentVideoBean.readSatate = VideoBean.READ_STATE_READED;
 			// Start to time
@@ -1502,7 +1503,7 @@ public class P2PConversation extends Activity implements
 						Message.obtain(mLocalHandler, UPDATE_TIME)
 								.sendToTarget();
 						currentVideoBean.mediaState = VideoBean.STATE_ANSWER_CALL;
-						currentVideoBean.startDate = System.currentTimeMillis();
+						currentVideoBean.startDate = GlobalConfig.getGlobalServerTime();
 						// Remove timer
 						mLocalHandler.removeCallbacks(timeOutMonitor);
 					} else {

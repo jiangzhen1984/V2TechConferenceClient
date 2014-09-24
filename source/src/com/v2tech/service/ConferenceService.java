@@ -597,7 +597,7 @@ public class ConferenceService extends DeviceService {
 		@Override
 		public void OnAddVideoMixerCallback(String sMediaId, long nDstUserId,
 				String sDstDevId, int pos) {
-			UserDeviceConfig udc = new UserDeviceConfig(nDstUserId, sDstDevId,
+			UserDeviceConfig udc = new UserDeviceConfig(0 , 0 , nDstUserId, sDstDevId,
 					null);
 			MixVideo mix = new MixVideo(sMediaId);
 			notifyListenerWithPending(KEY_MIXED_VIDEO_LISTNER, 3, 0,
@@ -607,7 +607,7 @@ public class ConferenceService extends DeviceService {
 		@Override
 		public void OnDelVideoMixerCallback(String sMediaId, long nDstUserId,
 				String sDstDevId) {
-			UserDeviceConfig udc = new UserDeviceConfig(nDstUserId, sDstDevId,
+			UserDeviceConfig udc = new UserDeviceConfig(0 , 0 , nDstUserId, sDstDevId,
 					null);
 			MixVideo mix = new MixVideo(sMediaId);
 			notifyListenerWithPending(KEY_MIXED_VIDEO_LISTNER, 4, 0,
