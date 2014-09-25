@@ -277,7 +277,7 @@ public class VoiceMessageDetailActivity extends Activity implements
 			newChild.childHoldingTime = newestMediaMessage.endDate
 					- newestMediaMessage.startDate;
 			newChild.childSaveDate = newestMediaMessage.startDate;
-			if (newestMediaMessage.remoteUserID == GlobalHolder.getInstance()
+			if (newestMediaMessage.formUserID != GlobalHolder.getInstance()
 					.getCurrentUserId())
 				newChild.childISCallOut = AudioVideoMessageBean.STATE_CALL_IN;
 			else
@@ -299,8 +299,9 @@ public class VoiceMessageDetailActivity extends Activity implements
 
 		@Override
 		public void notifyAvatarChanged(User user, Bitmap bm) {
-			if (user.getAvatarBitmap() != null) {
-				userIcon.setImageBitmap(user.getAvatarBitmap());
+			Bitmap avatarBitmap = user.getAvatarBitmap();
+			if (avatarBitmap != null && !avatarBitmap.isRecycled()) {
+				userIcon.setImageBitmap(avatarBitmap);
 			}
 		}
 	};

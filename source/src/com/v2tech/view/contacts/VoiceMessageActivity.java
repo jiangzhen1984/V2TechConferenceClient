@@ -17,6 +17,7 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -159,6 +160,7 @@ public class VoiceMessageActivity extends Activity {
 				cannelOperator.setClickable(true);
 
 				callBack.setVisibility(View.INVISIBLE);
+				
 				callBack.setClickable(false);
 				
 				isVisibile = true;
@@ -314,8 +316,8 @@ public class VoiceMessageActivity extends Activity {
 						.findViewById(R.id.specific_voice_headIcon);
 				holder.selected = (CheckBox) convertView
 						.findViewById(R.id.specific_voice_check);
-				holder.notifyIcon = (ImageView) convertView
-						.findViewById(R.id.group_list_conference_notificator);
+//				holder.notifyIcon = (ImageView) convertView
+//						.findViewById(R.id.group_list_conference_notificator);
 				convertView.setTag(holder);
 			} else
 				holder = (ViewHolder) convertView.getTag();
@@ -328,14 +330,31 @@ public class VoiceMessageActivity extends Activity {
 				holder.headIcon.setImageResource(R.drawable.avatar);
 			holder.voiceName.setText(audioVideoMessageBean.name);
 			// 处理时间显示
-			if (audioVideoMessageBean.holdingTime >= 0) {
-				String time = DateUtil
-						.getDates(audioVideoMessageBean.holdingTime);
+//			if (audioVideoMessageBean.holdingTime >= 0) {
+//				String time = DateUtil
+//						.getDates(audioVideoMessageBean.holdingTime);
+//				if (audioVideoMessageBean.mediaType == AudioVideoMessageBean.TYPE_AUDIO)
+//					holder.voiceHoldingTime.setText("[音频] " + time);
+//				else
+//					holder.voiceHoldingTime.setText("[视频] " + time);
+//			} else {
+//				if (audioVideoMessageBean.mediaType == AudioVideoMessageBean.TYPE_AUDIO)
+//					holder.voiceHoldingTime.setText("[音频] ");
+//				else
+//					holder.voiceHoldingTime.setText("[视频] ");
+//			}
+			String time = null;
+			ChildMessageBean childMessageBean = audioVideoMessageBean.mChildBeans.get(0);
+			if (childMessageBean != null) 
+				time = DateUtil
+						.getStringDate(childMessageBean.childSaveDate);
+			if(!TextUtils.isEmpty(time)){
 				if (audioVideoMessageBean.mediaType == AudioVideoMessageBean.TYPE_AUDIO)
 					holder.voiceHoldingTime.setText("[音频] " + time);
 				else
 					holder.voiceHoldingTime.setText("[视频] " + time);
-			} else {
+			} 
+			else{
 				if (audioVideoMessageBean.mediaType == AudioVideoMessageBean.TYPE_AUDIO)
 					holder.voiceHoldingTime.setText("[音频] ");
 				else
@@ -362,10 +381,14 @@ public class VoiceMessageActivity extends Activity {
 				}
 			}
 			
-			if(isVisibile)
+			if(isVisibile){
 				holder.selected.setVisibility(View.VISIBLE);
-			else
+				holder.watchDetail.setVisibility(View.INVISIBLE);
+			}
+			else{
 				holder.selected.setVisibility(View.GONE);
+				holder.watchDetail.setVisibility(View.VISIBLE);
+			}
 			
 			if (mListItem.get(position).isCheck) {
 				holder.selected.setChecked(true);
@@ -386,7 +409,7 @@ public class VoiceMessageActivity extends Activity {
 					intent.putExtra("remoteUserID", bean.remoteUserID);
 					startActivity(intent);
 
-					holder.notifyIcon.setVisibility(View.INVISIBLE);
+//					holder.notifyIcon.setVisibility(View.INVISIBLE);
 					bean.callNumbers = 0;
 					
 					ContentValues values = new ContentValues();
@@ -415,9 +438,10 @@ public class VoiceMessageActivity extends Activity {
 		public ImageView directionIcon;
 		public ImageView headIcon;
 		public CheckBox selected;
-		public ImageView notifyIcon;
+//		public ImageView notifyIcon;
 	}
 
+	private boolean isFresh;
 	class VoiceReceiverBroadcast extends BroadcastReceiver {
 
 		@Override
@@ -439,7 +463,7 @@ public class VoiceMessageActivity extends Activity {
 						+ " --> VideoBean is NULL ... update failed!!");
 				return;
 			}
-
+			ChildMessageBean childBean = new ChildMessageBean();
 			for (AudioVideoMessageBean target : mListItem) {
 				if (target.remoteUserID == remoteID) {
 					target.holdingTime = newestMediaMessage.endDate
@@ -450,12 +474,54 @@ public class VoiceMessageActivity extends Activity {
 					if (target.readState == AudioVideoMessageBean.STATE_UNREAD) {
 
 						target.callNumbers += 1;
-						holder.notifyIcon.setVisibility(View.VISIBLE);
+//						holder.notifyIcon.setVisibility(View.VISIBLE);
 					}
+					
+					childBean.childMediaType = target.mediaType;
+					childBean.childISCallOut = target.isCallOut;
+					childBean.childHoldingTime = target.holdingTime;
+					childBean.childSaveDate = newestMediaMessage.startDate;
+					childBean.childReadState = target.readState;
+					childBean.childMediaState = target.mediaType;
+					target.mChildBeans.add(0 , childBean);
 					adapter.notifyDataSetChanged();
+					isFresh = true;
 					return;
 				}
 			}
+			
+			if(isFresh == false){
+				AudioVideoMessageBean bean = new AudioVideoMessageBean();
+				if (newestMediaMessage.formUserID != GlobalHolder.getInstance()
+						.getCurrentUserId())
+					bean.isCallOut = AudioVideoMessageBean.STATE_CALL_IN;
+				else
+					bean.isCallOut = AudioVideoMessageBean.STATE_CALL_OUT;
+				
+				if (newestMediaMessage.readSatate == AudioVideoMessageBean.STATE_UNREAD) {
+					bean.callNumbers += 1;
+				}
+				bean.name = GlobalHolder.getInstance().getUser(newestMediaMessage.remoteUserID).getName();
+				bean.fromUserID = newestMediaMessage.formUserID;
+				bean.toUserID = newestMediaMessage.toUserID;
+				bean.remoteUserID = newestMediaMessage.remoteUserID;
+				bean.readState = newestMediaMessage.readSatate;
+				bean.mediaType = newestMediaMessage.mediaType;
+				bean.holdingTime = newestMediaMessage.endDate - newestMediaMessage.startDate;
+				mListItem.add(0 , bean);
+				
+				childBean.childMediaType = bean.mediaType;
+				childBean.childISCallOut = bean.isCallOut;
+				childBean.childHoldingTime = bean.holdingTime;
+				childBean.childSaveDate = newestMediaMessage.startDate;
+				childBean.childReadState = bean.readState;
+				childBean.childMediaState = bean.mediaType;
+				bean.mChildBeans.add(0 , childBean);
+				
+				isFresh = true;
+				adapter.notifyDataSetChanged();
+			}
+				
 		}
 	}
 	
@@ -465,8 +531,9 @@ public class VoiceMessageActivity extends Activity {
 		public void notifyAvatarChanged(User user, Bitmap bm) {
 			for (AudioVideoMessageBean bean : mListItem) {
 				User remoteUser = GlobalHolder.getInstance().getUser(bean.remoteUserID);
-				if (remoteUser.getAvatarBitmap() != null) {
-					holder.headIcon.setImageBitmap(remoteUser.getAvatarBitmap());
+				Bitmap avatarBitmap = remoteUser.getAvatarBitmap();
+				if (avatarBitmap != null && !avatarBitmap.isRecycled()) {
+					holder.headIcon.setImageBitmap(avatarBitmap);
 				}
 			}
 		}

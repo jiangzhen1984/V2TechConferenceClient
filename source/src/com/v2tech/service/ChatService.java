@@ -324,6 +324,11 @@ public class ChatService extends DeviceService {
 	 */
 	public void inviteUserChat(UserChattingObject ud, Registrant caller) {
 		JNIResponse resp = null;
+		//FIXME In order to compatible with the huawei x1 7.0 
+		if(GlobalConfig.isVideoConversationOpen == true){
+			return ;
+		}
+		GlobalConfig.isVideoConversationOpen = true;
 		if (mCaller != null) {
 			V2Log.e(" audio call is on going");
 			resp = new RequestChatServiceResponse(

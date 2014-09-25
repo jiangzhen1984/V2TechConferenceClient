@@ -81,6 +81,7 @@ import com.v2tech.view.PublicIntent;
 import com.v2tech.view.adapter.VMessageAdater;
 import com.v2tech.view.bo.ConversationNotificationObject;
 import com.v2tech.view.contacts.ContactDetail;
+import com.v2tech.view.group.CrowdDetailActivity;
 import com.v2tech.view.widget.CommonAdapter;
 import com.v2tech.view.widget.CommonAdapter.CommonAdapterItemWrapper;
 import com.v2tech.vo.Conversation;
@@ -158,6 +159,7 @@ public class ConversationView extends Activity {
 	private ImageView mAudioSpeakerIV;
 
 	private View mShowContactDetailButton;
+	private View mShowCrowdDetailButton;
 
 	private Button mButtonRecordAudio;
 
@@ -223,6 +225,9 @@ public class ConversationView extends Activity {
 
 		mShowContactDetailButton = findViewById(R.id.contact_detail_button);
 		mShowContactDetailButton.setOnClickListener(mShowContactDetailListener);
+		
+		mShowCrowdDetailButton = findViewById(R.id.contact_crowd_detail_button);
+		mShowCrowdDetailButton.setOnClickListener(mShowCrowdDetailListener);
 
 		mMessageET = (EditText) findViewById(R.id.message_text);
 		mMessageET.addTextChangedListener(mPasteWatcher);
@@ -481,8 +486,10 @@ public class ConversationView extends Activity {
 					V2GlobalEnum.GROUP_TYPE_CROWD, groupId);
 			mVideoCallButton.setVisibility(View.GONE);
 			mAudioCallButton.setVisibility(View.GONE);
+			mShowContactDetailButton.setVisibility(View.GONE);
 			mShowContactDetailButton.setVisibility(View.INVISIBLE);
 			mButtonCreateMetting.setVisibility(View.VISIBLE);
+			mShowCrowdDetailButton.setVisibility(View.VISIBLE);
 			mUserTitleTV.setText(crowdGroup.getName());
 		} else if (cov.getType() == V2GlobalEnum.GROUP_TYPE_DEPARTMENT) {
 			currentConversationViewType = V2GlobalEnum.GROUP_TYPE_DEPARTMENT;
@@ -1949,6 +1956,17 @@ public class ConversationView extends Activity {
 			i.putExtra("fromPlace", "ConversationView");
 			i.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
 			startActivityForResult(i, RECEIVE_SELECTED_FILE);
+		}
+
+	};
+	
+	private OnClickListener mShowCrowdDetailListener = new OnClickListener() {
+
+		@Override
+		public void onClick(View view) {
+			Intent i = new Intent(mContext, CrowdDetailActivity.class);
+			i.putExtra("cid",  cov.getExtId());
+			startActivity(i);
 		}
 
 	};

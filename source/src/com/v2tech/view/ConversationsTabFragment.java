@@ -675,6 +675,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 	 */
 	private boolean isVoiceSpecificAdd;
 	private boolean isVerificationSpecificAdd;
+	private boolean isNoEmpty;
 
 	private synchronized void loadConversation() {
 		if (isLoadedCov) {
@@ -683,37 +684,56 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 
 		// 判断只有消息界面，才添加这两个特殊item
 		if (mCurrentTabFlag == Conversation.TYPE_CONTACT) {
-			initSpecificItem();
-			updateVoiceSpecificItemState();
-			showUnreadFriendAuthenticationRedFlag();
+			//init voice or video item
+			VideoBean newestMediaMessage = MessageLoader
+					.getNewestMediaMessage(mContext);
+			if(newestMediaMessage != null){
+				initVoiceItem();
+				updateVoiceSpecificItemState();
+			}
+			//init add friend verification item
+			String sql = "select * from " + AddFriendHistroysHandler.tableName
+					+ " order by SaveDate desc limit 1";
+			Cursor cursor = AddFriendHistroysHandler.select(getActivity(), sql,
+					new String[] {});
+			if(cursor != null && cursor.getCount() > 0){
+				initVerificationItem();
+				showUnreadFriendAuthenticationRedFlag();
+			}
 		}
 		new Thread(new Runnable() {
 
 			@Override
 			public void run() {
-
-				SystemClock.sleep(3000);
-				Conversation firstAdd = null;
-				Conversation secondAdd = null;
-				long verificationDate = 0;
-				long voiceMessageDate = 0;
-				if (verificationMessageItem.getDateLong() != null)
-					verificationDate = Long.valueOf(verificationMessageItem
-							.getDateLong());
-				if (voiceMessageItem.getDateLong() != null)
-					voiceMessageDate = Long.valueOf(voiceMessageItem
-							.getDateLong());
-				if (verificationDate > voiceMessageDate) {
-					verificationMessageItem.setFirst(true);
-					voiceMessageItem.setFirst(false);
-					firstAdd = verificationMessageItem;
-					secondAdd = voiceMessageItem;
-				} else {
-					verificationMessageItem.setFirst(false);
-					voiceMessageItem.setFirst(true);
-					firstAdd = voiceMessageItem;
-					secondAdd = verificationMessageItem;
-				}
+				
+					SystemClock.sleep(3000);
+					Conversation firstAdd = null;
+					Conversation secondAdd = null;
+					long verificationDate = 0;
+					long voiceMessageDate = 0;
+					if (mCurrentTabFlag == Conversation.TYPE_CONTACT) {
+						if (verificationMessageItem != null && verificationMessageItem.getDateLong() != null)
+							verificationDate = Long.valueOf(verificationMessageItem
+									.getDateLong());
+						if (voiceMessageItem != null && voiceMessageItem.getDateLong() != null)
+							voiceMessageDate = Long.valueOf(voiceMessageItem
+									.getDateLong());
+						
+						if(verificationMessageItem != null && voiceMessageItem != null){
+							isNoEmpty = true;
+							if (verificationDate > voiceMessageDate) {
+								verificationMessageItem.setFirst(true);
+								voiceMessageItem.setFirst(false);
+								firstAdd = verificationMessageItem;
+								secondAdd = voiceMessageItem;
+							} else {
+								verificationMessageItem.setFirst(false);
+								voiceMessageItem.setFirst(true);
+								firstAdd = voiceMessageItem;
+								secondAdd = verificationMessageItem;
+							}
+						}
+					}
 				Cursor mCur = getActivity()
 						.getContentResolver()
 						.query(ContentDescriptor.RecentHistoriesMessage.CONTENT_URI,
@@ -734,39 +754,71 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 					ContactConversation cov = extractConversation(mCur);
 					if (!TextUtils.isEmpty(cov.getDateLong()))
 						date = Long.valueOf(cov.getDateLong());
-					if (cov.getType() == mCurrentTabFlag) {
-
-						if (isVoiceSpecificAdd == false
-								&& firstAdd.getDate() != null
-								&& Long.valueOf(firstAdd.getDateLong()) > date) {
-							mConvList.add(firstAdd);
-							isVoiceSpecificAdd = true;
+					//只有会话界面需要添加这两个特殊item
+					if (mCurrentTabFlag == Conversation.TYPE_CONTACT) {
+						//如果两个特殊item都不为空，走if语句
+						if(verificationMessageItem != null && voiceMessageItem != null){
+							if (firstAdd != null && isVoiceSpecificAdd == false
+									&& firstAdd.getDate() != null
+									&& Long.valueOf(firstAdd.getDateLong()) > date) {
+								mConvList.add(firstAdd);
+								isVoiceSpecificAdd = true;
+							}
+	
+							if (secondAdd != null && isVerificationSpecificAdd == false
+									&& secondAdd.getDate() != null
+									&& Long.valueOf(secondAdd.getDateLong()) > date) {
+								mConvList.add(secondAdd);
+								isVerificationSpecificAdd = true;
+							}
 						}
-
-						if (isVerificationSpecificAdd == false
-								&& secondAdd.getDate() != null
-								&& Long.valueOf(secondAdd.getDateLong()) > date) {
-							mConvList.add(secondAdd);
-							isVerificationSpecificAdd = true;
+						else{ //如果两个特殊item都为空，或其中一个可能为空，则走else语句
+							//如果voiceMessageItem不为null，则进行比较
+							if (voiceMessageItem != null && isVoiceSpecificAdd == false
+									&& voiceMessageItem.getDateLong() != null
+									&& Long.valueOf(voiceMessageItem.getDateLong()) > date) {
+								mConvList.add(firstAdd);
+								isVoiceSpecificAdd = true;
+							}
+							//同理如果verificationMessageItem不为null，则进行比较
+							if (verificationMessageItem != null && isVerificationSpecificAdd == false
+									&& verificationMessageItem.getDateLong() != null
+									&& Long.valueOf(verificationMessageItem.getDateLong()) > date) {
+								mConvList.add(verificationMessageItem);
+								isVerificationSpecificAdd = true;
+							}
 						}
-						mConvList.add(cov);
 					}
+					mConvList.add(cov);
 				}
 				mCur.close();
-
-				if (voiceMessageItem.isFirst()) {
-					if (isVoiceSpecificAdd == false)
-						mConvList.add(voiceMessageItem);
-
-					if (isVerificationSpecificAdd == false)
-						mConvList.add(verificationMessageItem);
-				} else {
-					if (isVerificationSpecificAdd == false)
-						mConvList.add(verificationMessageItem);
-					if (isVoiceSpecificAdd == false)
-						mConvList.add(voiceMessageItem);
+				if (mCurrentTabFlag == Conversation.TYPE_CONTACT) {
+					if(isNoEmpty){
+						//两种添加顺序
+						if (voiceMessageItem.isFirst()) {
+							if (isVoiceSpecificAdd == false)
+								mConvList.add(voiceMessageItem);
+		
+							if (isVerificationSpecificAdd == false)
+								mConvList.add(verificationMessageItem);
+						} 
+						else{
+							if (isVerificationSpecificAdd == false)
+								mConvList.add(verificationMessageItem);
+							if (isVoiceSpecificAdd == false)
+								mConvList.add(voiceMessageItem);
+						}
+					}
+					else{
+						if (voiceMessageItem != null) {
+							if (isVoiceSpecificAdd == false)
+								mConvList.add(voiceMessageItem);
+		
+							if (verificationMessageItem != null)
+								mConvList.add(verificationMessageItem);
+						} 
+					}
 				}
-
 				isLoadedCov = true;
 				Message.obtain(mHandler, UPDATE_CONVERSATION_MESSAGE)
 						.sendToTarget();
@@ -823,7 +875,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 			}
 		}
 
-		showUnreadFriendAuthenticationRedFlag();
+//		showUnreadFriendAuthenticationRedFlag();
 		if (isFresh) {
 			adapter.notifyDataSetChanged();
 		}
@@ -835,22 +887,25 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 	private GroupLayout verificationLayout;
 	private Conversation verificationMessageItem;
 
-	private void initSpecificItem() {
+	private void initVoiceItem() {
 		if (isExist) {
 			return;
 		}
-
 		isExist = true;
 		voiceMessageItem = new Conversation(Conversation.TYPE_VOICE_MESSAGE, 0);
 		voiceLayout = new GroupLayout(mContext, voiceMessageItem);
-
+		voiceMessageItem.setReadFlag(Conversation.READ_FLAG_READ);
+	}
+	
+	private void initVerificationItem(){
+		if (isExist) {
+			return;
+		}
+		isExist = true;
 		verificationMessageItem = new ConversationFirendAuthentication(
 				Conversation.TYPE_VERIFICATION_MESSAGE, 0);
 		verificationLayout = new GroupLayout(mContext, verificationMessageItem);
-
-		voiceMessageItem.setReadFlag(Conversation.READ_FLAG_READ);
 		verificationMessageItem.setReadFlag(Conversation.READ_FLAG_READ);
-
 	}
 
 	private void updateVoiceSpecificItemState() {
@@ -964,8 +1019,8 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 						GlobalHolder.getInstance().getCurrentUserId(),
 						existedCov.getExtId());
 				insertNewMessage(vm, groupID);
-				this.mConvList.add(existedCov);
 				viewLayout = new GroupLayout(mContext, existedCov);
+				mConvList.add(0 , existedCov);
 				mItemList.add(0 , new ScrollItem(existedCov, viewLayout));
 				adapter.notifyDataSetChanged();
 			}
@@ -1107,7 +1162,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 				// 添加到ListView中
 				viewLayout = new GroupLayout(mContext, existedCov);
 				insertNewMessage(vm, extId);
-				this.mConvList.add(existedCov);
+				mConvList.add(0, existedCov);
 				mItemList.add(0, new ScrollItem(existedCov, viewLayout));
 				adapter.notifyDataSetChanged();
 				break;
@@ -1634,10 +1689,9 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 						return;
 					}
 
-					if (voiceLayout == null || voiceMessageItem == null) {
-						initSpecificItem();
-						return;
-					}
+					if (voiceLayout == null || voiceMessageItem == null) 
+						initVoiceItem();
+					
 					updateVoiceSpecificItemState();
 
 					mItemList.remove(voiceItem);
@@ -1738,6 +1792,12 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 			} else if (action
 					.equals(JNIService.JNI_BROADCAST_FRIEND_ADDED)) {
 				V2Log.e(TAG, "JNI_BROADCAST_FRIEND_AUTHENTICATIONE update..");
+				
+				if (verificationLayout == null || verificationMessageItem == null) 
+					initVerificationItem();
+				
+				updateVoiceSpecificItemState();
+				
 				showUnreadFriendAuthenticationRedFlag();
 			}
 		}

@@ -27,6 +27,8 @@ public class GlobalConfig {
 	public static long SERVER_TIME = 0;
 	public static long LOCAL_TIME = 0;
 	
+	public static boolean isVideoConversationOpen = false; //In order to compatible with the huawei x1 7.0 
+	
 	public static HashMap<String, String> allChinese = new HashMap<String, String>();
 
 	public static int[] GLOBAL_FACE_ARRAY = new int[] { 0,R.drawable.face_1,

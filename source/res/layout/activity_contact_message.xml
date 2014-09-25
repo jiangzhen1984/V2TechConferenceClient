@@ -48,6 +48,17 @@
             android:paddingBottom="10dp"
             android:paddingTop="10dp"
             android:src="@drawable/contact_detail_button_selector" />
+         <ImageView
+            android:id="@+id/contact_crowd_detail_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="10dp"
+            android:visibility="gone"
+            android:paddingBottom="10dp"
+            android:paddingTop="10dp"
+            android:src="@drawable/qun" />
     </RelativeLayout>
     <LinearLayout
         android:id="@+id/linearLayout2"

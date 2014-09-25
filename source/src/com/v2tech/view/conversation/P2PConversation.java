@@ -14,13 +14,10 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.graphics.Camera;
 import android.graphics.drawable.ColorDrawable;
-import android.hardware.Camera.Size;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.RingtoneManager;
-import android.nfc.Tag;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -115,7 +112,6 @@ public class P2PConversation extends Activity implements
 	private boolean isOpenedRemote;
 	private boolean isStoped;
 	private boolean isOpenedLocal;
-	private boolean isTimeOut = false;
 	private VideoBean currentVideoBean;
 	private long startTime;
 
@@ -125,6 +121,7 @@ public class P2PConversation extends Activity implements
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		
 		displayWidthIsLonger = verifyDisplayWidthIsLonger();
 		displayRotation = getDisplayRotation();
 
@@ -1011,7 +1008,7 @@ public class P2PConversation extends Activity implements
 		Intent i = this.registerReceiver(null, strickFliter);
 		// means exist close broadcast, need to finish this activity
 		if (i != null) {
-			V2Log.i("hang up ");
+			V2Log.e(TAG , "initReceiver invoking ..hangUp() ");
 			removeStickyBroadcast(i);
 			hangUp();
 		}
@@ -1023,6 +1020,7 @@ public class P2PConversation extends Activity implements
 			currentVideoBean.startDate = startTime;
 		MessageBuilder.saveMediaChatHistories(mContext, currentVideoBean);
 		sendUpdateBroadcast();
+		GlobalConfig.isVideoConversationOpen = false;
 		finish();
 	}
 
@@ -1042,6 +1040,7 @@ public class P2PConversation extends Activity implements
 		}
 		closeLocalCamera();
 		chatService.cancelChattingCall(uad, null);
+		V2Log.e(TAG, "the hangUp() invoking HANG_UP_NOTIFICATION");
 		Message.obtain(mLocalHandler, HANG_UP_NOTIFICATION).sendToTarget();
 	}
 
@@ -1120,6 +1119,7 @@ public class P2PConversation extends Activity implements
 				nameTV.setText(uad.getUser().getName());
 			}
 			currentVideoBean.startDate = GlobalConfig.getGlobalServerTime();
+			V2Log.e(TAG, "get startDate is :" + currentVideoBean.startDate);
 			currentVideoBean.mediaState = VideoBean.STATE_ANSWER_CALL;
 			currentVideoBean.readSatate = VideoBean.READ_STATE_READED;
 			// Start to time
@@ -1295,8 +1295,8 @@ public class P2PConversation extends Activity implements
 		@Override
 		public void run() {
 			chatService.cancelChattingCall(uad, null);
+			V2Log.e(TAG, "the timeOutMonitor invoking HANG_UP_NOTIFICATION");
 			Message.obtain(mLocalHandler, HANG_UP_NOTIFICATION).sendToTarget();
-			isTimeOut = true;
 		}
 
 	};
@@ -1441,21 +1441,13 @@ public class P2PConversation extends Activity implements
 						break;
 					}
 
-					if (uad.isIncoming()) {
-//						if (isTimeOut)
-							currentVideoBean.readSatate = VideoBean.READ_STATE_UNREAD;
-//						else {
-//							currentVideoBean.readSatate = VideoBean.READ_STATE_READED;
-							if (currentVideoBean.startDate != 0)
-								currentVideoBean.endDate = System
-										.currentTimeMillis();
-//						}
-					} else {
-
-						if (currentVideoBean.startDate != 0)
-							currentVideoBean.endDate = System
-									.currentTimeMillis();
-					}
+					if (uad.isIncoming()) 
+						currentVideoBean.readSatate = VideoBean.READ_STATE_UNREAD;
+					
+					if (currentVideoBean.startDate != 0)
+						currentVideoBean.endDate = GlobalConfig.getGlobalServerTime();
+					
+					V2Log.e(TAG, "get endDate is :" + currentVideoBean.endDate);
 					inProgress = true;
 					Message timeoutMessage = Message.obtain(this, QUIT);
 					this.sendMessageDelayed(timeoutMessage, 2000);
@@ -1472,9 +1464,6 @@ public class P2PConversation extends Activity implements
 					RequestChatServiceResponse rcsr = (RequestChatServiceResponse) resp;
 					if (rcsr.getCode() == RequestChatServiceResponse.REJCTED) {
 						V2Log.e(TAG, "CALL_RESPONSE 调用了 HANG_UP_NOTIFICATION");
-						// Message.obtain(this, HANG_UP_NOTIFICATION,
-						// Integer.valueOf(HAND_UP_REASON_REMOTE_REJECT))
-						// .sendToTarget();
 						Message.obtain(this, HANG_UP_NOTIFICATION)
 								.sendToTarget();
 						currentVideoBean.mediaState = VideoBean.STATE_NO_ANSWER_CALL;
@@ -1504,6 +1493,7 @@ public class P2PConversation extends Activity implements
 								.sendToTarget();
 						currentVideoBean.mediaState = VideoBean.STATE_ANSWER_CALL;
 						currentVideoBean.startDate = GlobalConfig.getGlobalServerTime();
+						V2Log.e(TAG, "get startDate is :" + currentVideoBean.startDate);
 						// Remove timer
 						mLocalHandler.removeCallbacks(timeOutMonitor);
 					} else {

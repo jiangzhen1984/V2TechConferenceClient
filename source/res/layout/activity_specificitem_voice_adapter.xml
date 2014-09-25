@@ -27,7 +27,7 @@
             android:layout_height="wrap_content"
             android:src="@drawable/avatar" />
 
-        <ImageView
+        <!-- <ImageView
             android:id="@+id/group_list_conference_notificator"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -35,7 +35,7 @@
             android:layout_marginRight="3dp"
             android:layout_marginTop="3dp"
             android:src="@drawable/red_nofificator"
-            android:visibility="invisible" />
+            android:visibility="invisible" /> -->
     </RelativeLayout>
 
     <LinearLayout
@@ -93,7 +93,6 @@
                 android:layout_height="wrap_content"
                 android:ellipsize="end"
                 android:gravity="center_vertical"
-                android:maxWidth="@dimen/conversation_view_text_max_width"
                 android:singleLine="true"
                 android:textColor="@color/conversation_view_text_color"
                 android:textSize="@dimen/common_item_text_size_16" />
