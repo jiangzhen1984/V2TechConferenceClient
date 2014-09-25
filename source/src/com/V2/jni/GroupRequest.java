@@ -194,36 +194,40 @@ public class GroupRequest {
 	 */
 	public native void acceptInviteJoinGroup(int groupType, long groupId,
 			long nUserID);
-	
+
 	/**
 	 * 创建白板
+	 * 
 	 * @param groupType
 	 * @param groupId
 	 * @param nWhiteIndex
 	 */
 	public native void groupCreateWBoard(int groupType, long groupId,
 			int nWhiteIndex);
-	
+
 	/**
 	 * 销毁白板
+	 * 
 	 * @param groupType
 	 * @param groupId
 	 * @param nWhiteIndex
 	 */
-	public native void groupDestroyWBoard(long groupId,
-			String szMediaID);
-	
+	public native void groupDestroyWBoard(long groupId, String szMediaID);
+
 	/**
 	 * 创建会议文档共享
+	 * 
 	 * @param eGroupType
 	 * @param nGroupID
 	 * @param sFileName
-	 * @param eWhiteShowType 类型
-	 * @param bStorePersonalSpace 文档信息是否要保存到服务器上
+	 * @param eWhiteShowType
+	 *            类型
+	 * @param bStorePersonalSpace
+	 *            文档信息是否要保存到服务器上
 	 */
-	public native void groupCreateDocShare(int eGroupType, long nGroupID, String sFileName,
-			int eWhiteShowType, boolean bStorePersonalSpace);
-	
+	public native void groupCreateDocShare(int eGroupType, long nGroupID,
+			String sFileName, int eWhiteShowType, boolean bStorePersonalSpace);
+
 	/**
 	 * 
 	 * @param groupType
@@ -269,11 +273,10 @@ public class GroupRequest {
 	 * @param nGroupId
 	 */
 	public native void getGroupFileInfo(int groupType, long nGroupId);
-	
-	
+
 	public native void renameGroupFile(int eGroupType, long nGroupID,
 			String sFileID, String sNewName);
-	
+
 	private void OnAddGroupFile(int type, long nGroupId, String sXml) {
 		V2Log.e("Group Request  OnAddGroupFile" + type + "   " + nGroupId
 				+ "  " + sXml);
@@ -283,27 +286,32 @@ public class GroupRequest {
 		V2Log.e("Group Request  OnDelGroupFile" + type + "   " + nGroupId
 				+ "  " + sXml);
 	}
-	
+
 	/**
 	 * 组中应用程序共享
+	 * 
 	 * @param eGroupType
 	 * @param nGroupID
 	 * @param sMediaID
 	 * @param nPid
 	 * @param type
 	 */
-	public native void groupCreateAppShare(int eGroupType, long nGroupID, String sMediaID, int nPid, int type);
-	
+	public native void groupCreateAppShare(int eGroupType, long nGroupID,
+			String sMediaID, int nPid, int type);
+
 	/**
-	 * 组中关闭程序共享 
+	 * 组中关闭程序共享
+	 * 
 	 * @param eGroupType
 	 * @param nGroupID
 	 * @param sMediaID
 	 */
-	public native void groupDestroyAppShare(int eGroupType, long nGroupID, String sMediaID);
-	
+	public native void groupDestroyAppShare(int eGroupType, long nGroupID,
+			String sMediaID);
+
 	/**
-	 * 创建个人空间的文档共享 
+	 * 创建个人空间的文档共享
+	 * 
 	 * @param eGroupType
 	 * @param nGroupID
 	 * @param sFileID
@@ -312,8 +320,9 @@ public class GroupRequest {
 	 * @param nPageCount
 	 * @param sDownUrl
 	 */
-	public native void groupCreatePersonalSpaceDoc(int eGroupType,long nGroupID, String sFileID, String sFileName, 
-	long nFileSize, int nPageCount, String sDownUrl);
+	public native void groupCreatePersonalSpaceDoc(int eGroupType,
+			long nGroupID, String sFileID, String sFileName, long nFileSize,
+			int nPageCount, String sDownUrl);
 
 	/**
 	 * <filelist><file encrypttype='1' id='C2A65B9B-63C7-4C9E-A8DD-F15F74ABA6CA'
@@ -349,7 +358,8 @@ public class GroupRequest {
 	 * @param sXml
 	 */
 	private void OnGetGroupInfo(int groupType, String sXml) {
-		V2Log.d("OnGetGroupInfo::" + groupType + ":" + sXml);
+		V2Log.d("OnGetGroupInfo==>" + "groupType:" + groupType + "," + "sXml:"
+				+ sXml);
 		List<V2Group> list = null;
 		if (groupType == V2Group.TYPE_CONF) {
 			list = XmlAttributeExtractor.parseConference(sXml);
@@ -383,9 +393,24 @@ public class GroupRequest {
 		}
 	}
 
+	/**
+	 * @comment-user:wenzl 2014年9月25日
+	 * @overview:
+	 * 
+	 * @param groupType
+	 * @param nGroupID
+	 * @param sXml
+	 *            <xml><user account='wenzl1' address='地址' authtype='1'
+	 *            birthday='1997-12-30' bsystemavatar='1'
+	 *            email='youxiang@qww.com' fax='22222'
+	 *            homepage='http://wenzongliang.com' id='130' job='职务'
+	 *            mobile='18610297182' nickname='显示名称' privacy='0' sex='1'
+	 *            sign='签名' telephone='03702561038'/></xml>
+	 * @return:
+	 */
 	private void OnGetGroupUserInfo(int groupType, long nGroupID, String sXml) {
-		V2Log.d("OnGetGroupUserInfo -> " + groupType + ":" + nGroupID + ":"
-				+ sXml);
+		V2Log.d("OnGetGroupUserInfo==>" + "groupType:" + groupType + ","
+				+ "nGroupID:" + nGroupID + "," + "sXml:" + sXml);
 		for (WeakReference<GroupRequestCallback> wrcb : mCallbacks) {
 			Object obj = wrcb.get();
 			if (obj != null) {
@@ -670,5 +695,5 @@ public class GroupRequest {
 				+ szWBoardID + " | szFileName: " + szFileName
 				+ " | eWhiteShowType: " + eWhiteShowType);
 	};
-	
+
 }

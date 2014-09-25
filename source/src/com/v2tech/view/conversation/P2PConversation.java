@@ -698,7 +698,6 @@ public class P2PConversation extends Activity implements
 		if (mLcalSurface != null) {
 			mLcalSurface.setTag(SURFACE_HOLDER_TAG_LOCAL);
 			mLcalSurface.setZOrderMediaOverlay(true);
-			mLcalSurface.bringToFront();
 			mLcalSurface.getHolder().addCallback(mLocalCameraHolder);
 		}
 

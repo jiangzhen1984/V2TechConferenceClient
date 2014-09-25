@@ -231,13 +231,13 @@ public class MessageAuthenticationActivity extends Activity {
 
 	private void changeMessageAuthenticationListView() {
 		if (isFriendAuthentication) {
-			loadFriendMessage();
 			if (firendAdapter == null) {
 				firendAdapter = new FriendMessageAdapter(this,
 						R.layout.message_authentication_listview_item,
 						messageAuthenticationDataList);
 			}
 			lvMessageAuthentication.setAdapter(firendAdapter);
+			loadFriendMessage();
 		} else {
 			mMessageList = new ArrayList<VMessageQualification>();
 			groupAdapter = new GroupMessageAdapter();
@@ -293,81 +293,97 @@ public class MessageAuthenticationActivity extends Activity {
 	}
 
 	private void loadFriendMessage() {
-		messageAuthenticationDataList.clear();
-		// 把所有的改为已读
-		String sql = "update " + tableName
-				+ " set ReadState=1 where ReadState=0";
-		AddFriendHistroysHandler.update(getApplicationContext(), sql);
+		new AsyncTask<Void, Void, Void>() {
 
-		sql = "select * from " + tableName + " order by SaveDate asc";
-		Cursor cr = AddFriendHistroysHandler.select(getApplicationContext(),
-				sql, new String[] {});
-		if (cr.moveToLast()) {
-			do {
+			@Override
+			protected Void doInBackground(Void... arg0) {
+				messageAuthenticationDataList.clear();
+				// 把所有的改为已读
+				String sql = "update " + tableName
+						+ " set ReadState=1 where ReadState=0";
+				AddFriendHistroysHandler.update(getApplicationContext(), sql);
 
-				AddFriendHistorieNode tempNode = new AddFriendHistorieNode();
-				// _id integer primary key AUTOINCREMENT,0
-				// OwnerUserID bigint,1
-				// SaveDate bigint,2
-				// FromUserID bigint,3
-				// OwnerAuthType bigint,4
-				// ToUserID bigint, 5
-				// RemoteUserID bigint, 6
-				// ApplyReason nvarchar(4000),7
-				// RefuseReason nvarchar(4000), 8
-				// AddState bigint ,9
-				// ReadState bigint);10
-				tempNode.ownerUserID = cr.getLong(1);
-				tempNode.saveDate = cr.getLong(2);
-				tempNode.fromUserID = cr.getLong(3);
-				tempNode.ownerAuthType = cr.getLong(4);
-				tempNode.toUserID = cr.getLong(5);
-				tempNode.remoteUserID = cr.getLong(6);
-				tempNode.applyReason = cr.getString(7);
-				tempNode.refuseReason = cr.getString(8);
-				tempNode.addState = cr.getLong(9);
-				tempNode.readState = cr.getLong(10);
+				sql = "select * from " + tableName + " order by SaveDate asc";
+				Cursor cr = AddFriendHistroysHandler.select(
+						getApplicationContext(), sql, new String[] {});
+				if (cr.moveToLast()) {
+					do {
 
-				MessageAuthenticationData tempData = new MessageAuthenticationData();
-				tempData.remoteUserID = tempNode.remoteUserID;
-				tempData.name = GlobalHolder.getInstance()
-						.getUser(tempData.remoteUserID).getName();
+						AddFriendHistorieNode tempNode = new AddFriendHistorieNode();
+						// _id integer primary key AUTOINCREMENT,0
+						// OwnerUserID bigint,1
+						// SaveDate bigint,2
+						// FromUserID bigint,3
+						// OwnerAuthType bigint,4
+						// ToUserID bigint, 5
+						// RemoteUserID bigint, 6
+						// ApplyReason nvarchar(4000),7
+						// RefuseReason nvarchar(4000), 8
+						// AddState bigint ,9
+						// ReadState bigint);10
+						tempNode.ownerUserID = cr.getLong(1);
+						tempNode.saveDate = cr.getLong(2);
+						tempNode.fromUserID = cr.getLong(3);
+						tempNode.ownerAuthType = cr.getLong(4);
+						tempNode.toUserID = cr.getLong(5);
+						tempNode.remoteUserID = cr.getLong(6);
+						tempNode.applyReason = cr.getString(7);
+						tempNode.refuseReason = cr.getString(8);
+						tempNode.addState = cr.getLong(9);
+						tempNode.readState = cr.getLong(10);
 
-				tempData.dbRecordIndex = cr.getLong(0);
-				// 别人加我：允许任何人：0已添加您为好友，需要验证：1未处理，2已同意，3已拒绝
-				// 我加别人：允许认识人：4你们已成为了好友，需要验证：5等待对方验证，4被同意（你们已成为了好友），6拒绝了你为好友
-				if ((tempNode.fromUserID == tempNode.remoteUserID)
-						&& (tempNode.ownerAuthType == 0)) {// 别人加我允许任何人
-					tempData.state = 0;
-				} else if ((tempNode.fromUserID == tempNode.remoteUserID)
-						&& (tempNode.ownerAuthType == 1)
-						&& (tempNode.addState == 0)) {// 别人加我未处理
-					tempData.state = 1;
-					tempData.authenticationMessage = tempNode.applyReason;
-				} else if ((tempNode.fromUserID == tempNode.remoteUserID)
-						&& (tempNode.ownerAuthType == 1)
-						&& (tempNode.addState == 1)) {// 别人加我已同意
-					tempData.state = 2;
-					tempData.authenticationMessage = tempNode.applyReason;
-				} else if ((tempNode.fromUserID == tempNode.remoteUserID)
-						&& (tempNode.ownerAuthType == 1)
-						&& (tempNode.addState == 2)) {// 别人加我已拒绝
-					tempData.state = 3;
-					tempData.authenticationMessage = tempNode.refuseReason;
-				} else if ((tempNode.fromUserID == tempNode.ownerUserID)
-						&& (tempNode.addState == 0)) {// 我加别人等待验证
-					tempData.state = 5;
-				} else if ((tempNode.fromUserID == tempNode.ownerUserID)
-						&& (tempNode.addState == 1)) {// 我加别人已被同意或我加别人不需验证
-					tempData.state = 4;
-				} else if ((tempNode.fromUserID == tempNode.ownerUserID)
-						&& (tempNode.addState == 2)) {// 我加别人已被拒绝
-					tempData.state = 6;
-					tempData.authenticationMessage = tempNode.refuseReason;
+						MessageAuthenticationData tempData = new MessageAuthenticationData();
+						tempData.remoteUserID = tempNode.remoteUserID;
+						tempData.name = GlobalHolder.getInstance()
+								.getUser(tempData.remoteUserID).getName();
+
+						tempData.dbRecordIndex = cr.getLong(0);
+						// 别人加我：允许任何人：0已添加您为好友，需要验证：1未处理，2已同意，3已拒绝
+						// 我加别人：允许认识人：4你们已成为了好友，需要验证：5等待对方验证，4被同意（你们已成为了好友），6拒绝了你为好友
+						if ((tempNode.fromUserID == tempNode.remoteUserID)
+								&& (tempNode.ownerAuthType == 0)) {// 别人加我允许任何人
+							tempData.state = 0;
+						} else if ((tempNode.fromUserID == tempNode.remoteUserID)
+								&& (tempNode.ownerAuthType == 1)
+								&& (tempNode.addState == 0)) {// 别人加我未处理
+							tempData.state = 1;
+							tempData.authenticationMessage = tempNode.applyReason;
+						} else if ((tempNode.fromUserID == tempNode.remoteUserID)
+								&& (tempNode.ownerAuthType == 1)
+								&& (tempNode.addState == 1)) {// 别人加我已同意
+							tempData.state = 2;
+							tempData.authenticationMessage = tempNode.applyReason;
+						} else if ((tempNode.fromUserID == tempNode.remoteUserID)
+								&& (tempNode.ownerAuthType == 1)
+								&& (tempNode.addState == 2)) {// 别人加我已拒绝
+							tempData.state = 3;
+							tempData.authenticationMessage = tempNode.refuseReason;
+						} else if ((tempNode.fromUserID == tempNode.ownerUserID)
+								&& (tempNode.addState == 0)) {// 我加别人等待验证
+							tempData.state = 5;
+						} else if ((tempNode.fromUserID == tempNode.ownerUserID)
+								&& (tempNode.addState == 1)) {// 我加别人已被同意或我加别人不需验证
+							tempData.state = 4;
+						} else if ((tempNode.fromUserID == tempNode.ownerUserID)
+								&& (tempNode.addState == 2)) {// 我加别人已被拒绝
+							tempData.state = 6;
+							tempData.authenticationMessage = tempNode.refuseReason;
+						}
+						messageAuthenticationDataList.add(tempData);
+					} while (cr.moveToPrevious());
 				}
-				messageAuthenticationDataList.add(tempData);
-			} while (cr.moveToPrevious());
-		}
+				cr.close();
+				firendAdapter.notifyDataSetChanged();
+				return null;
+			}
+
+			@Override
+			protected void onPostExecute(Void result) {
+
+			}
+
+		}.execute();
+
 	}
 
 	@Override
@@ -724,8 +740,7 @@ public class MessageAuthenticationActivity extends Activity {
 
 		@Override
 		public void onReceive(Context arg0, Intent arg1) {
-			if (arg1.getAction().equals(
-					JNIService.JNI_BROADCAST_FRIEND_ADDED)) {
+			if (arg1.getAction().equals(JNIService.JNI_BROADCAST_FRIEND_ADDED)) {
 				loadFriendMessage();
 				firendAdapter.notifyDataSetChanged();
 			}

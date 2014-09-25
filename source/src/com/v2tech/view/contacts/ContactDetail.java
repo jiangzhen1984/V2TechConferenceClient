@@ -58,21 +58,24 @@ public class ContactDetail extends Activity implements OnTouchListener {
 	// R.layout.activity_contact_detail
 	private static final int UPDATE_USER_INFO = 2;
 	private static final int UPDATE_USER_INFO_DONE = 3;
-
 	private static final int FILE_SELECT_CODE = 100;
 
-	private Context mContext;
-
-	private long mUid;
-	private User u;
-	private LocalHandler lh = new LocalHandler();
-	private UserService us = new UserService();
-
+	
 	private View mReturnButtonTV;
 	private TextView mNameTitleIV;
 	private ImageView mHeadIconIV;
 
 	// view definition for non-self
+	// R.id.authentication_message_layout
+	private LinearLayout llAuthenticationMessageLayout;
+	// R.id.authentication_message
+	private TextView tvAuthenticationMessage;
+	// R.id.access
+	private Button bAccess;
+	// R.id.refuse
+	private Button bRefuse;
+	// R.id.authentication_state
+	private TextView tvAuthenticationState;
 	private TextView mCellphoneTV;
 	private TextView mTelephoneTV;
 	private TextView mTitleTV;
@@ -81,7 +84,6 @@ public class ContactDetail extends Activity implements OnTouchListener {
 	private TextView mEmailTV;
 	// R.id.tv_title
 	private TextView tvTitle;
-	
 	// R.id.contact_user_company
 	private TextView mCompanyTitleTV;
 	private TextView mSignTV;
@@ -96,6 +98,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 	private View mVideoCallButton;
 	private View mSendSmsButton;
 	private View mSendFilesButton;
+	// end view definition for non-self
 
 	// view for self
 	private EditText mSignature;
@@ -110,25 +113,17 @@ public class ContactDetail extends Activity implements OnTouchListener {
 	private TextView mCompanySelfTV;
 	private View mSelfItemsContainer;
 	private EditText[] mETArr;
+	// end view for self
 
-	// R.id.authentication_message
-	private TextView tvAuthenticationMessage;
-	// R.id.authentication_message_layout
-	private LinearLayout llAuthenticationMessageLayout;
-	// R.id.access
-	private Button bAccess;
-	// R.id.refuse
-	private Button bRefuse;
-	// R.id.authentication_state
-	private TextView tvAuthenticationState;
-
+	private Context mContext;
+	private long mUid;
+	private User u;
+	private LocalHandler lh = new LocalHandler();
+	private UserService us = new UserService();
 	private int state = -1;
-
-	String fromActivity;
-
+	private String fromActivity;
 	private boolean isUpdating;
 	private boolean isPad;
-
 	private Date bir;
 	private String fromPlace;
 
@@ -154,7 +149,6 @@ public class ContactDetail extends Activity implements OnTouchListener {
 			tvTitle.setText("个人资料");
 		}
 
-		
 		fromPlace = this.getIntent().getStringExtra("fromPlace");
 		mContext = this;
 		View v = findViewById(R.id.contact_detail_main_layout);
@@ -427,7 +421,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 			}
 			mSelfItemsContainer.setVisibility(View.VISIBLE);
 			mGenderRG.setVisibility(View.VISIBLE);
-			selectedRG(u.getGender());
+			selectedRG(u.getSex());
 			mGenderRG.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 				@Override
 				public void onCheckedChanged(RadioGroup rg, int id) {
@@ -440,9 +434,9 @@ public class ContactDetail extends Activity implements OnTouchListener {
 			mAccountTV.setText(u.getAccount());
 			mSignature.setText(u.getSignature());
 			mBirthdayET.setText(u.getBirthdayStr());
-			mCellphoneET.setText(u.getCellPhone());
+			mCellphoneET.setText(u.getMobile());
 			mTelephoneET.setText(u.getTelephone());
-			mTitleET.setText(u.getTitle());
+			mTitleET.setText(u.getJob());
 			mAddressET.setText(u.getAddress());
 			mDepartmentSelfTV.setText(u.getDepartment());
 			mCompanySelfTV.setText(u.getCompany());
@@ -489,9 +483,9 @@ public class ContactDetail extends Activity implements OnTouchListener {
 			mSelfItemsContainer.setVisibility(View.GONE);
 			mGenderRG.setVisibility(View.GONE);
 
-			mCellphoneTV.setText(u.getCellPhone());
+			mCellphoneTV.setText(u.getMobile());
 			mTelephoneTV.setText(u.getTelephone());
-			mTitleTV.setText(u.getTitle());
+			mTitleTV.setText(u.getJob());
 			mAddressTV.setText(u.getAddress());
 			mCompanyTitleTV.setText(u.getCompany());
 			mFaxTV.setText(u.getFax());
@@ -668,8 +662,8 @@ public class ContactDetail extends Activity implements OnTouchListener {
 		public void onClick(View arg0) {
 			boolean phoneEmpty = u.getTelephone() == null
 					|| u.getTelephone().isEmpty();
-			boolean mobileEmpty = u.getCellPhone() == null
-					|| u.getCellPhone().isEmpty();
+			boolean mobileEmpty = u.getMobile() == null
+					|| u.getMobile().isEmpty();
 			boolean offline = (u.getmStatus() == User.Status.OFFLINE || u
 					.getmStatus() == User.Status.HIDDEN);
 			boolean localOffLine = !SPUtil.checkCurrentAviNetwork(mContext);
@@ -684,23 +678,24 @@ public class ContactDetail extends Activity implements OnTouchListener {
 						intent.setAction(Intent.ACTION_DIAL); // android.intent.action.DIAL
 						startActivity(intent);
 					} else if (!phoneEmpty && !mobileEmpty) {
-//						showCallDialog(u.getTelephone(), u.getCellPhone(),
-//								false);
-						//get telephone numbers and mobile numbers
+						// showCallDialog(u.getTelephone(), u.getCellPhone(),
+						// false);
+						// get telephone numbers and mobile numbers
 						String telephone = u.getTelephone();
-						String cellPhone = u.getCellPhone();
-						d = new Dialog(mContext, R.style.ContactUserDetailVoiceCallDialog);
+						String cellPhone = u.getMobile();
+						d = new Dialog(mContext,
+								R.style.ContactUserDetailVoiceCallDialog);
 						d.setCancelable(true);
 						d.setCanceledOnTouchOutside(true);
 						d.setContentView(R.layout.contacts_user_detail_call_dialog_window);
-						//create two TextView View to show them
-						//telephone view
+						// create two TextView View to show them
+						// telephone view
 						TextView tv = (TextView) d
 								.findViewById(R.id.contact_user_detail_call_dialog_1);
 						tv.setOnClickListener(itemClickListener);
 						tv.setText(telephone);
 						tv.setTag(telephone);
-						//mobile phone view
+						// mobile phone view
 						TextView tv1 = (TextView) d
 								.findViewById(R.id.contact_user_detail_call_dialog_2);
 						tv1.setOnClickListener(itemClickListener);
@@ -717,7 +712,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 						if (!phoneEmpty) {
 							intent.setData(Uri.parse("tel:" + u.getTelephone()));
 						} else {
-							intent.setData(Uri.parse("tel:" + u.getCellPhone()));
+							intent.setData(Uri.parse("tel:" + u.getMobile()));
 						}
 						startActivity(intent);
 					}
@@ -729,9 +724,9 @@ public class ContactDetail extends Activity implements OnTouchListener {
 					if (phoneEmpty && mobileEmpty) {
 						showCallDialog(null, null, true);
 					} else if (!phoneEmpty || !mobileEmpty) {
-						showCallDialog(u.getTelephone(), u.getCellPhone(), true);
+						showCallDialog(u.getTelephone(), u.getMobile(), true);
 					} else {
-						showCallDialog(u.getTelephone(), u.getCellPhone(), true);
+						showCallDialog(u.getTelephone(), u.getMobile(), true);
 					}
 				}
 			}
@@ -781,8 +776,8 @@ public class ContactDetail extends Activity implements OnTouchListener {
 		@Override
 		public void onClick(View arg0) {
 			Intent smsIntent = new Intent(Intent.ACTION_VIEW);
-			if (u.getCellPhone() != null && !u.getCellPhone().isEmpty()) {
-				smsIntent.putExtra("address", u.getCellPhone());
+			if (u.getMobile() != null && !u.getMobile().isEmpty()) {
+				smsIntent.putExtra("address", u.getMobile());
 			} else {
 				smsIntent.putExtra("address", "");
 			}
@@ -894,11 +889,11 @@ public class ContactDetail extends Activity implements OnTouchListener {
 	private void gatherUserData() {
 		if (u.getmUserId() == GlobalHolder.getInstance().getCurrentUserId()) {
 			u.setSignature(mSignature.getText().toString());
-			u.setGender(getRadioValue());
+			u.setSex(getRadioValue());
 			u.setBirthday(bir);
-			u.setCellPhone(mCellphoneET.getText().toString());
+			u.setMobile(mCellphoneET.getText().toString());
 			u.setTelephone(mTelephoneET.getText().toString());
-			u.setTitle(mTitleET.getText().toString());
+			u.setJob(mTitleET.getText().toString());
 			u.setAddress(mAddressET.getText().toString());
 		}
 	}

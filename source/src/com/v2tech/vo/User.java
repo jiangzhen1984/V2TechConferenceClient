@@ -39,30 +39,46 @@ import com.v2tech.service.GlobalHolder;
  * @author 28851274
  * 
  */
+
 public class User implements Comparable<User> {
+
+	// Server transfer fields
+	// 通过OnGetGroupUserInfo传来
+	// 登录用的帐号字符串
+	private String mAccount;
+	private String mAddress;
+	private int mAuthtype = 0;// 取值0允许任何人，1需要验证，2不允许任何人
+	private Date mBirthday;
+	// bsystemavatar='1'
+	private String mEmail;
+	private String mFax;
+	// homepage='http://wenzongliang.com'
 	private long mUserId;
-	private int authtype = 0;// 取值0允许任何人，1需要验证，2不允许任何人
+	private String mJob;
+	private String mMobile;
+	// 登录后显示的昵称
+	private String mNickName;
+	// privacy='0'
+	private String mSex;
+	private String mSignature;
+	private String mTelephone;
+
+	// group
+	private String mCompany;
+	private String mDepartment;
+	// end Server transfer fields
+
+	// custom fields
+	private boolean isCurrentLoggedInUser;
 	private NetworkStateCode mResult;
 	private DeviceType mType;
 	private Status mStatus;
-	private String mAccount;
 	private String mName;
-	private String mEmail;
-	private String mSignature;
-	private String mAddress;
-	private String mCellPhone;
-	private String mCompany;
-	private String mDepartment;
-	private String mGender;
-	private Date mBirthday;
-	private String mTelephone;
-	private String mTitle;
+
 	private Set<Group> mBelongsGroup;
-	private boolean isCurrentLoggedInUser;
 	private String mAvatarPath;
 	private String abbra;
-	private String mFax;
-	private String mNickName;
+
 	private static HanyuPinyinOutputFormat format = new HanyuPinyinOutputFormat();
 	// This value indicate this object is dirty, construct locally without any
 	// user information
@@ -188,12 +204,12 @@ public class User implements Comparable<User> {
 		this.mAddress = mAddress;
 	}
 
-	public String getCellPhone() {
-		return mCellPhone;
+	public String getMobile() {
+		return mMobile;
 	}
 
-	public void setCellPhone(String mCellPhone) {
-		this.mCellPhone = mCellPhone;
+	public void setMobile(String mCellPhone) {
+		this.mMobile = mCellPhone;
 	}
 
 	public String getCompany() {
@@ -230,12 +246,12 @@ public class User implements Comparable<User> {
 		this.mDepartment = mDepartment;
 	}
 
-	public String getGender() {
-		return mGender;
+	public String getSex() {
+		return mSex;
 	}
 
-	public void setGender(String mGender) {
-		this.mGender = mGender;
+	public void setSex(String mGender) {
+		this.mSex = mGender;
 	}
 
 	public Date getBirthday() {
@@ -263,12 +279,12 @@ public class User implements Comparable<User> {
 		this.mTelephone = mTelephone;
 	}
 
-	public String getTitle() {
-		return mTitle;
+	public String getJob() {
+		return mJob;
 	}
 
-	public void setTitle(String mTitle) {
-		this.mTitle = mTitle;
+	public void setJob(String mJob) {
+		this.mJob = mJob;
 	}
 
 	public Status getmStatus() {
@@ -292,11 +308,11 @@ public class User implements Comparable<User> {
 	}
 
 	public int getAuthtype() {
-		return this.authtype;
+		return this.mAuthtype;
 	}
 
 	public void setAuthtype(int authtype) {
-		this.authtype = authtype;
+		this.mAuthtype = authtype;
 	}
 
 	public String getAccount() {
@@ -326,7 +342,7 @@ public class User implements Comparable<User> {
 	public boolean isDirty() {
 		return isDirty;
 	}
-	
+
 	public void updateUser(boolean dirty) {
 		this.isDirty = dirty;
 	}
@@ -428,14 +444,13 @@ public class User implements Comparable<User> {
 				+ (this.getAddress() == null ? "" : this.getAddress()) + "' "
 				+ "authtype='" + this.getAuthtype() + "' " + "birthday='"
 				+ (this.mBirthday == null ? "" : dp.format(this.mBirthday))
-				+ "' " + "job='"
-				+ (this.getTitle() == null ? "" : this.getTitle()) + "' "
-				+ "mobile='"
-				+ (this.getCellPhone() == null ? "" : this.getCellPhone())
-				+ "' " + "nickname='"
-				+ (this.getName() == null ? "" : this.getName()) + "'  "
-				+ "sex='" + (this.getGender() == null ? "" : this.getGender())
-				+ "'  " + "sign='"
+				+ "' " + "job='" + (this.getJob() == null ? "" : this.getJob())
+				+ "' " + "mobile='"
+				+ (this.getMobile() == null ? "" : this.getMobile()) + "' "
+				+ "nickname='" + (this.getName() == null ? "" : this.getName())
+				+ "'  " + "sex='"
+				+ (this.getSex() == null ? "" : this.getSex()) + "'  "
+				+ "sign='"
 				+ (this.getSignature() == null ? "" : this.getSignature())
 				+ "' " + "telephone='"
 				+ (this.getTelephone() == null ? "" : this.getTelephone())
@@ -446,6 +461,12 @@ public class User implements Comparable<User> {
 	/**
 	 * 
 	 * @param xml
+	 *            <xml><user account='wenzl1' address='地址' authtype='1'
+	 *            birthday='1997-12-30' bsystemavatar='1'
+	 *            email='youxiang@qww.com' fax='22222'
+	 *            homepage='http://wenzongliang.com' id='130' job='职务'
+	 *            mobile='18610297182' nickname='显示名称' privacy='0' sex='1'
+	 *            sign='签名' telephone='03702561038'/></xml>
 	 * @return
 	 */
 	public static List<User> fromXml(String xml) {
@@ -460,9 +481,7 @@ public class User implements Comparable<User> {
 			dBuilder = dbFactory.newDocumentBuilder();
 			is = new ByteArrayInputStream(xml.getBytes("UTF-8"));
 			Document doc = dBuilder.parse(is);
-
 			doc.getDocumentElement().normalize();
-
 			NodeList gList = doc.getElementsByTagName("user");
 			Element element;
 			for (int i = 0; i < gList.getLength(); i++) {
@@ -471,33 +490,33 @@ public class User implements Comparable<User> {
 				if (strId == null || strId.isEmpty()) {
 					continue;
 				}
-				User u = new User(Long.parseLong(strId), getAttribute(element,
-						"nickname"), getAttribute(element, "email"),
-						getAttribute(element, "sign"));
-				l.add(u);
-				
-				u.setTelephone(getAttribute(element, "telephone"));
-				u.setGender(getAttribute(element, "sex"));
-				u.setAddress(getAttribute(element, "address"));
-				u.setCellPhone(getAttribute(element, "mobile"));
-				u.setTitle(getAttribute(element, "job"));
-				u.setAccount(getAttribute(element, "account"));
+
+				User u = new User(Long.parseLong(strId));
+
+				u.setName(getAttribute(element, "nickname"));
 				u.setNickName(getAttribute(element, "commentname"));
-				String authType = getAttribute(element,"authtype");
+
+				u.setAccount(getAttribute(element, "account"));
+				u.setSignature(getAttribute(element, "sign"));
+				u.setSex(getAttribute(element, "sex"));
+				u.setTelephone(getAttribute(element, "telephone"));
+				u.setMobile(getAttribute(element, "mobile"));
+
+				u.setFax(getAttribute(element, "fax"));
+				u.setJob(getAttribute(element, "job"));
+
+				u.setEmail(getAttribute(element, "email"));
+				u.setAddress(getAttribute(element, "address"));
+
+				String authType = getAttribute(element, "authtype");
 				if (authType == null) {
-					u.setAuthtype(1);
+					u.setAuthtype(0);
 				} else {
 					u.setAuthtype(Integer.parseInt(authType));
 				}
-				try {
-					String bir = element.getAttribute("birthday");
-					if (bir != null && !bir.equals("")) {
-						u.setBirthday(dp.parse(bir));
-					}
-				} catch (ParseException e) {
-					e.printStackTrace();
-				}
-			
+
+				l.add(u);
+
 			}
 
 		} catch (ParserConfigurationException e) {
@@ -571,11 +590,11 @@ public class User implements Comparable<User> {
 
 		User u = new User(uID, nickName);
 		u.setSignature(signature);
-		u.setTitle(job);
+		u.setJob(job);
 		u.setTelephone(telephone);
-		u.setCellPhone(mobile);
+		u.setMobile(mobile);
 		u.setAddress(address);
-		u.setGender(gender);
+		u.setSex(gender);
 		u.setEmail(email);
 		u.setAccount(account);
 		if (authtype != null && authtype != "") {
@@ -620,11 +639,11 @@ public class User implements Comparable<User> {
 
 		public static DeviceType fromInt(int type) {
 			switch (type) {
-			case 1://pc
+			case 1:// pc
 				return PC;
-			case 2://安卓
-			case 3://IOS
-			case 4://sip,h323
+			case 2:// 安卓
+			case 3:// IOS
+			case 4:// sip,h323
 				return CELL_PHONE;
 			default:
 				return UNKNOWN;

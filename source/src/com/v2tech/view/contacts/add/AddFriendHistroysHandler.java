@@ -226,7 +226,8 @@ public class AddFriendHistroysHandler {
 		if (cr != null && cr.getCount() != 0) {
 			ret1 = true;
 		}
-
+		cr.close();
+		
 		sql = "delete from " + tableName + " where RemoteUserID="
 				+ remoteUser.getmUserId() + " and " + "AddState=0" + " and "
 				+ "(OwnerAuthType=0 or OwnerAuthType=2)";
@@ -246,7 +247,8 @@ public class AddFriendHistroysHandler {
 		if (cr != null && cr.getCount() != 0) {
 			ret2 = true;
 		}
-
+		cr.close();
+		
 		sql = "update " + tableName + " set AddState=1" + " where ToUserID="
 				+ remoteUser.getmUserId() + " and " + "AddState=0";
 		update(context, sql);
@@ -316,7 +318,6 @@ public class AddFriendHistroysHandler {
 		if (db == null) {
 			return;
 		}
-
 		db.execSQL(sql);
 	}
 
@@ -327,8 +328,6 @@ public class AddFriendHistroysHandler {
 		if (db == null) {
 			return null;
 		}
-
 		return db.rawQuery(sql, sqlArgs);
 	}
-
 }

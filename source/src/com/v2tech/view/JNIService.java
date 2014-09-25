@@ -613,11 +613,11 @@ public class JNIService extends Service {
 				Crowd crowd = new Crowd(group.id, owner, group.name,
 						group.brief);
 
-				Intent i = new Intent(JNI_BROADCAST_CROWD_INVATITION);
-				i.addCategory(JNI_ACTIVITY_CATEGROY);
-				i.putExtra("crowd", crowd);
-				i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-				mContext.startActivity(i);
+//				Intent i = new Intent(JNI_BROADCAST_CROWD_INVATITION);
+//				i.addCategory(JNI_ACTIVITY_CATEGROY);
+//				i.putExtra("crowd", crowd);
+//				i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//				mContext.startActivity(i);
 
 			}
 		}
@@ -628,7 +628,6 @@ public class JNIService extends Service {
 			User vUser = GlobalHolder.getInstance().getUser(user.uid);
 			AddFriendHistroysHandler.addMeNeedAuthentication(
 					getApplicationContext(), vUser, additInfo);
-			// temptag 20140917
 			Intent intent = new Intent();
 			intent.setAction(JNI_BROADCAST_FRIEND_ADDED);
 			intent.addCategory(JNI_BROADCAST_CATEGROY);
@@ -727,8 +726,11 @@ public class JNIService extends Service {
 			if (gType == GroupType.CONTACT) {
 				AddFriendHistroysHandler.becomeFriendHanler(
 						getApplicationContext(), sXml);
-
-				// temptag 20140917
+				
+				//获得用户uid
+				//更新备注
+				
+				
 				Intent intent = new Intent();
 				intent.setAction(JNI_BROADCAST_FRIEND_ADDED);
 				intent.addCategory(JNI_BROADCAST_CATEGROY);

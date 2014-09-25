@@ -1823,11 +1823,13 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 		if ((cr != null) && (cr.getCount() == 0)) {
 			sql = "select * from " + AddFriendHistroysHandler.tableName
 					+ " order by SaveDate desc limit 1";
+			cr.close();
 			cr = AddFriendHistroysHandler.select(getActivity(), sql,
 					new String[] {});
 		}
 
 		if ((cr != null) && (cr.getCount() == 0)) {
+			cr.close();
 			return;
 		}
 
@@ -1886,6 +1888,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 					date = DateUtil.getStringDate(tempNode.saveDate * 1000);
 					dateLong = String.valueOf(tempNode.saveDate * 1000);
 				}
+				cr.close();
 				verificationMessageItem.setMsg(msg);
 				verificationMessageItem.setDate(date);
 				verificationMessageItem.setDateLong(dateLong);

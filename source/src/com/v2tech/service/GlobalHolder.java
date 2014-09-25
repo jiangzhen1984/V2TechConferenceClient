@@ -95,37 +95,48 @@ public class GlobalHolder {
 			Long key = Long.valueOf(id);
 			User cu = mUserHolder.get(key);
 			if (cu != null) {
-				if (u.getSignature() != null) {
-					cu.setSignature(u.getSignature());
-				}
-				if (u.getName() != null) {
-					cu.setName(u.getName());
-				}
-				if (u.getGender() != null) {
-					cu.setGender(u.getGender());
-				}
-
-				if (u.getTelephone() != null) {
-					cu.setTelephone(u.getTelephone());
-				}
-				if (u.getCellPhone() != null) {
-					cu.setCellPhone(u.getCellPhone());
-				}
+				
 				if (u.getAddress() != null) {
 					cu.setAddress(u.getAddress());
+				}
+				cu.setAuthtype(u.getAuthtype());
+				if (u.getBirthday() != null) {
+					cu.setBirthday(u.getBirthday());
+				}
+				if(u.getmEmail()!=null){
+					cu.setEmail(u.getmEmail());
+				}
+				if(u.getFax()!=null){
+					cu.setFax(u.getFax());
+				}
+				if(u.getJob()!=null){
+					cu.setJob(u.getJob());
+				}
+				if (u.getMobile() != null) {
+					cu.setMobile(u.getMobile());
 				}
 				if (u.getNickName() != null) {
 					cu.setNickName(u.getNickName());
 				}
-				if (u.getBirthday() != null) {
-					cu.setBirthday(u.getBirthday());
+				if (u.getSex() != null) {
+					cu.setSex(u.getSex());
 				}
-				cu.setAuthtype(u.getAuthtype());
+				if (u.getSignature() != null) {
+					cu.setSignature(u.getSignature());
+				}
+				if (u.getTelephone() != null) {
+					cu.setTelephone(u.getTelephone());
+				}
+				if (u.getName() != null) {
+					cu.setName(u.getName());
+				}
 				cu.updateUser(false);
 				V2Log.i(" merge user information " + id + " " + cu.getName());
 				return cu;
 			}
+			
 			mUserHolder.put(key, u);
+			
 			Bitmap avatar = mAvatarBmHolder.get(key);
 			if (avatar != null) {
 				u.setAvatarBitmap(avatar);

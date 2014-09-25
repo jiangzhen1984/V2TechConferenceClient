@@ -117,7 +117,6 @@ public class FriendManagementActivity extends Activity {
 			tvRightTextView.setOnClickListener(new OnClickListener() {
 				@Override
 				public void onClick(View arg0) {
-					// 同意加为好友,默认组为30
 					contactService.acceptAddedAsContact(selectGroupID, mUid);
 					// 实现越级跳
 					Intent i = new Intent(FriendManagementActivity.this,

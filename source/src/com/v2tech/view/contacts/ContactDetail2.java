@@ -23,6 +23,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.V2.jni.V2GlobalEnum;
 import com.v2tech.R;
 import com.v2tech.service.ContactsService;
 import com.v2tech.service.GlobalHolder;
@@ -55,7 +56,6 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 	private View mReturnButtonTV;
 	private TextView mNameTitleIV;
 	private ImageView mHeadIconIV;
-
 
 	// view definition for non-self
 	private TextView mAccountTV;
@@ -98,8 +98,6 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 		connectView();
 		bindViewEnvent();
 
-
-
 		mContext = this;
 		u = GlobalHolder.getInstance().getUser(mUid);
 
@@ -126,7 +124,7 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 	}
 
 	private void connectView() {
-		
+
 	}
 
 	private void bindViewEnvent() {
@@ -278,14 +276,14 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 
 		mNameTitleIV.setText(u.getName());
 		mAccountTV.setText(u.getAccount());
-		if (u.getGender() != null) {
-			if (u.getGender().equals("0")) {
+		if (u.getSex() != null) {
+			if (u.getSex().equals("0")) {
 				mGendarTV.setText(mContext
 						.getText(R.string.contacts_user_detail_gender_priacy));
-			} else if (u.getGender().equals("1")) {
+			} else if (u.getSex().equals("1")) {
 				mGendarTV.setText(mContext
 						.getText(R.string.contacts_user_detail_gender_male));
-			} else if (u.getGender().equals("2")) {
+			} else if (u.getSex().equals("2")) {
 				mGendarTV.setText(mContext
 						.getText(R.string.contacts_user_detail_gender_female));
 			}
@@ -295,9 +293,9 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 		}
 
 		mBirthdayTV.setText(u.getBirthdayStr());
-		mCellphoneTV.setText(u.getCellPhone());
+		mCellphoneTV.setText(u.getMobile());
 		mTelephoneTV.setText(u.getTelephone());
-		mTitleTV.setText(u.getTitle());
+		mTitleTV.setText(u.getJob());
 		mAddressTV.setText(u.getAddress());
 		mSignTV.setText(u.getSignature());
 		mDeptTV.setText(u.getDepartment());
@@ -499,6 +497,14 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 
 				if (uid == u.getmUserId()) {
 					isRelation = true;
+					long gid = arg1.getLongExtra("gid", -1);
+					if (gid == -1) {
+						return;
+					}
+					if ((belongs = GlobalHolder.getInstance().getGroupById(
+							V2GlobalEnum.GROUP_TYPE_CONTACT, gid)) == null) {
+						return;
+					}
 					updateContactGroup();
 					Toast.makeText(ContactDetail2.this, "添加成功",
 							Toast.LENGTH_SHORT).show();
