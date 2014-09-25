@@ -1223,6 +1223,8 @@ public class VideoActivityV2 extends Activity {
 				ConferencMessageSyncService.class));
 		// clear current meeting state
 		GlobalHolder.getInstance().setMeetingState(false, 0);
+		// clear messages
+		MessageLoader.deleteGroupMessage(mContext, V2GlobalEnum.GROUP_TYPE_CONFERENCE , conf.getId());
 		mVideoHandler = null;
 	}
 

@@ -219,9 +219,17 @@ public class VoiceMessageActivity extends Activity {
 			public void onCheckedChanged(CompoundButton buttonView,
 					boolean isChecked) {
 
-				for (int i = 0; i < mListItem.size(); i++) {
-					mListItem.get(i).isCheck = isChecked;
-					deleteList.put(i, mListItem.get(i));
+				if(isChecked){
+					for (int i = 0; i < mListItem.size(); i++) {
+						mListItem.get(i).isCheck = isChecked;
+						deleteList.put(i, mListItem.get(i));
+					}
+				}
+				else{
+					for (int i = 0; i < mListItem.size(); i++) {
+						mListItem.get(i).isCheck = isChecked;
+						deleteList.remove(i);
+					}
 				}
 				adapter.notifyDataSetChanged();
 			}

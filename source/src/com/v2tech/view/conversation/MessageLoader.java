@@ -34,6 +34,7 @@ public class MessageLoader {
 
 	public static final int CONTACT_TYPE = -5;
 	public static final int CROWD_TYPE = -6;
+	private static final String TAG = "MessageLoader";
 
 	/**
 	 * 查询前要判断该用户的数据库是否存在，不存在则创建
@@ -513,7 +514,7 @@ public class MessageLoader {
 				vm.getGroupId(),
 				vm.getFromUser().getmUserId(),
 				vm.getMsgCode() == V2GlobalEnum.GROUP_TYPE_USER ? MessageLoader.CONTACT_TYPE
-						: MessageLoader.CROWD_TYPE)) 
+						: MessageLoader.CROWD_TYPE))
 			return null;
 
 		String selection = ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_ID
@@ -608,6 +609,34 @@ public class MessageLoader {
 	}
 
 	/**
+	 * delete the VMessage
+	 * 
+	 * @param context
+	 * @param vm
+	 * @return
+	 */
+	public static void deleteGroupMessage(Context context, int groupType,
+			long groupID) {
+
+		DataBaseContext mContext = new DataBaseContext(context);
+		String where = ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_GROUP_TYPE
+				+ "= ? and "
+				+ ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_GROUP_ID
+				+ "= ?";
+		mContext.getContentResolver().delete(
+				ContentDescriptor.HistoriesMessage.CONTENT_URI,
+				where,
+				new String[] { String.valueOf(groupType),
+						String.valueOf(groupID) });
+
+		mContext.getContentResolver().delete(
+				ContentDescriptor.HistoriesGraphic.CONTENT_URI,
+				where,
+				new String[] { String.valueOf(groupType),
+						String.valueOf(groupID) });
+	}
+
+	/**
 	 * update the given audio message read state...
 	 * 
 	 * @param context
@@ -685,6 +714,43 @@ public class MessageLoader {
 		String[] selectionArgs = new String[] { vm.getUUID() };
 		int ret = mContext.getContentResolver().update(
 				ContentDescriptor.HistoriesFiles.CONTENT_URI, values, where,
+				selectionArgs);
+		return ret;
+	}
+	
+	/**
+	 * 
+	 * @param context
+	 * @param msgID
+	 * @return
+	 */
+	public static int updateRecentState(Context context, long msgID) {
+
+		VMessage vm = MessageLoader.loadMessageById(context, msgID);
+		if(vm == null){
+			V2Log.e(TAG , "update Recent table database is failed ... msgID is :" + msgID);
+			return -1;
+		}
+			
+		DataBaseContext mContext = new DataBaseContext(context);
+		ContentValues values = new ContentValues();
+		values.put(
+				ContentDescriptor.RecentHistoriesMessage.Cols.HISTORY_RECENT_MESSAGE_CONTENT,
+				vm.getmXmlDatas());
+		values.put(
+				ContentDescriptor.RecentHistoriesMessage.Cols.HISTORY_RECENT_MESSAGE_SAVEDATE,
+				vm.getDate().getTime());
+		String where = ContentDescriptor.RecentHistoriesMessage.Cols.HISTORY_RECENT_MESSAGE_GROUP_TYPE
+				+ "= ? and " + ContentDescriptor.RecentHistoriesMessage.Cols.HISTORY_RECENT_MESSAGE_USER_TYPE_ID
+				+ "= ? and " + ContentDescriptor.RecentHistoriesMessage.Cols.HISTORY_RECENT_MESSAGE_REMOTE_USER_ID + "= ?";
+		long remoteID = 0;
+		if(vm.getFromUser().getmUserId() == GlobalHolder.getInstance().getCurrentUserId())
+			remoteID = vm.getToUser().getmUserId();
+		else
+			remoteID = vm.getFromUser().getmUserId();
+		String[] selectionArgs = new String[] { String.valueOf(vm.getMsgCode()) , String.valueOf(vm.getGroupId()) , String.valueOf(remoteID) };
+		int ret = mContext.getContentResolver().update(
+				ContentDescriptor.RecentHistoriesMessage.CONTENT_URI, values, where,
 				selectionArgs);
 		return ret;
 	}

@@ -14,8 +14,8 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.TextView;
 
+import com.V2.jni.V2GlobalEnum;
 import com.v2tech.R;
-import com.v2tech.vo.Conversation;
 import com.v2tech.vo.VMessage;
 import com.v2tech.vo.VMessageImageItem;
 
@@ -27,7 +27,7 @@ public class ImageViewGallery extends FragmentActivity {
 
 	private List<ListItem> vimList;
 
-	private String initMid;
+//	private String initMid;
 	
 	private String currentImageID;
 
@@ -43,17 +43,25 @@ public class ImageViewGallery extends FragmentActivity {
 		setContentView(R.layout.activity_image_view_gallery);
 
 		mImageViewPager = (ViewPager) findViewById(R.id.image_view_view_pager);
-		initMid = getIntent().getStringExtra("cid");
+//		initMid = getIntent().getStringExtra("cid");
 		currentImageID = getIntent().getStringExtra("imageID");
 		int type = getIntent().getIntExtra("type", 0);
-		if (type == 1) {
-			long gid = getIntent().getLongExtra("gid", 0);
-			loadImages(gid); 
-		} else {
-			loadImages(getIntent().getLongExtra("uid1", 0), getIntent()
+		switch (type) {
+		case V2GlobalEnum.GROUP_TYPE_USER:
+			loadUserImages(getIntent().getLongExtra("uid1", 0), getIntent()
 					.getLongExtra("uid2", 0));
+			break;
+		case V2GlobalEnum.GROUP_TYPE_CONFERENCE:
+			long conferenceID = getIntent().getLongExtra("gid", 0);
+			loadConferenceImages(conferenceID);
+			break;
+		case V2GlobalEnum.GROUP_TYPE_CROWD:
+			long gid = getIntent().getLongExtra("gid", 0);
+			loadCrowdImages(gid); 
+			break;
+		default:
+			throw new RuntimeException("The given group type is error , please check it :" + type);
 		}
-
 		mTitle = (TextView) findViewById(R.id.image_galley_title);
 		mReturnButton = findViewById(R.id.image_galley_detail_return_button);
 		mReturnButton.setOnClickListener(new OnClickListener() {
@@ -83,15 +91,21 @@ public class ImageViewGallery extends FragmentActivity {
 	 * 
 	 * @param groupId
 	 */
-	private void loadImages(long groupId) {
+	private void loadCrowdImages(long groupId) {
 		List<VMessage> list = MessageLoader
-				.loadGroupImageMessage(this, Integer.valueOf(Conversation.TYPE_GROUP) , groupId);
+				.loadGroupImageMessage(this, Integer.valueOf(V2GlobalEnum.GROUP_TYPE_CROWD) , groupId);
 		populateImageMessage(list);
 	}
 
-	private void loadImages(long user1Id, long user2Id) {
+	private void loadUserImages(long user1Id, long user2Id) {
 		List<VMessage> list = MessageLoader.loadImageMessage(this, user1Id,
 				user2Id);
+		populateImageMessage(list);
+	}
+	
+	private void loadConferenceImages(long groupId) {
+		List<VMessage> list = MessageLoader
+				.loadGroupImageMessage(this, Integer.valueOf(V2GlobalEnum.GROUP_TYPE_CONFERENCE) , groupId);
 		populateImageMessage(list);
 	}
 

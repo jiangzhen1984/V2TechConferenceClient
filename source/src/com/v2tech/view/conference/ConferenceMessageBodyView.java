@@ -56,11 +56,6 @@ public class ConferenceMessageBodyView extends LinearLayout {
 				R.layout.conference_message_body, null, false);
 		initView();
 		initData();
-		
-		if(m.getImageItems().size() > 0)
-			isImageItem = true;
-		else
-			isImageItem = false;
 	}
 
 	public void setConf(ConferenceGroup conf) {
@@ -96,13 +91,22 @@ public class ConferenceMessageBodyView extends LinearLayout {
 			@Override
 			public void onClick(View v) {
 				if(isImageItem){
+					
+					List<VMessageImageItem> imageItems = mMsg.getImageItems();
+					VMessageImageItem imageItem = null;
+					if (imageItems != null && imageItems.size() > 0) {
+						imageItem = mMsg.getImageItems().get(0);
+					}
+					
 					Intent i = new Intent();
 					i.addCategory(PublicIntent.DEFAULT_CATEGORY);
 					i.setAction(PublicIntent.START_VIDEO_IMAGE_GALLERY);
+					if (imageItem != null)
+						i.putExtra("imageID", imageItem.getUuid());
 					// type 0: is not group image view
 					// type 1: group image view
 					i.putExtra("cid", mMsg.getId());
-					i.putExtra("type", conf.getmGId() == 0 ? 0 : 1);
+					i.putExtra("type", conf.getGroupType().intValue());
 					i.putExtra("gid", conf.getmGId());
 					mContext.startActivity(i);
 				}
@@ -140,7 +144,7 @@ public class ConferenceMessageBodyView extends LinearLayout {
 						.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 				et.setText(builder);
 			} else if (item.getType() == VMessageAbstractItem.ITEM_TYPE_IMAGE) {
-
+				isImageItem = true;
 				Drawable dr = new BitmapDrawable(this.getContext()
 						.getResources(),
 						((VMessageImageItem) item).getCompressedBitmap());

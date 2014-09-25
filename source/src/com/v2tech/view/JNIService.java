@@ -384,7 +384,7 @@ public class JNIService extends Service {
 						return;
 					}
 					vm.setId(id);
-					if (vm.getMsgCode() == V2GlobalEnum.REQUEST_TYPE_CONF) {
+					if (vm.getMsgCode() == V2GlobalEnum.GROUP_TYPE_CONFERENCE) {
 						action = JNI_BROADCAST_NEW_CONF_MESSAGE;
 					} else {
 						action = JNI_BROADCAST_NEW_MESSAGE;

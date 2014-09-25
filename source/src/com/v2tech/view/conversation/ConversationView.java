@@ -1638,7 +1638,7 @@ public class ConversationView extends Activity {
 				i.putExtra("imageID", imageItem.getUuid());
 			// type 0: is not group image view
 			// type 1: group image view
-			i.putExtra("type", groupId == 0 ? 0 : 1);
+			i.putExtra("type", currentConversationViewType);
 			i.putExtra("gid", groupId);
 			mContext.startActivity(i);
 		}
