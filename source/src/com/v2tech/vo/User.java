@@ -474,6 +474,8 @@ public class User implements Comparable<User> {
 				User u = new User(Long.parseLong(strId), getAttribute(element,
 						"nickname"), getAttribute(element, "email"),
 						getAttribute(element, "sign"));
+				l.add(u);
+				
 				u.setTelephone(getAttribute(element, "telephone"));
 				u.setGender(getAttribute(element, "sex"));
 				u.setAddress(getAttribute(element, "address"));
@@ -481,7 +483,12 @@ public class User implements Comparable<User> {
 				u.setTitle(getAttribute(element, "job"));
 				u.setAccount(getAttribute(element, "account"));
 				u.setNickName(getAttribute(element, "commentname"));
-				u.setAuthtype(Integer.valueOf(getAttribute(element,"authtype")));
+				String authType = getAttribute(element,"authtype");
+				if (authType == null) {
+					u.setAuthtype(1);
+				} else {
+					u.setAuthtype(Integer.parseInt(authType));
+				}
 				try {
 					String bir = element.getAttribute("birthday");
 					if (bir != null && !bir.equals("")) {
@@ -490,7 +497,7 @@ public class User implements Comparable<User> {
 				} catch (ParseException e) {
 					e.printStackTrace();
 				}
-				l.add(u);
+			
 			}
 
 		} catch (ParserConfigurationException e) {
