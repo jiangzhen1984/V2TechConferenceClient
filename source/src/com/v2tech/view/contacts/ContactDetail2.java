@@ -406,7 +406,7 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 		public void onClick(View view) {
 			Intent i = new Intent();
 			i.setClass(mContext, UpdateContactGroupActivity.class);
-			i.putExtra("uid", currentUser.getmUserId());
+			i.putExtra("uid", u.getmUserId());
 			i.putExtra("gid", belongs.getmGId());
 			startActivityForResult(i, REQUEST_UPDATE_GROUP_CODE);
 		}
