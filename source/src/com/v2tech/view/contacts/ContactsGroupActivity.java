@@ -17,6 +17,7 @@ import android.view.View.OnFocusChangeListener;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.BaseAdapter;
 import android.widget.Button;
@@ -75,7 +76,7 @@ public class ContactsGroupActivity extends Activity {
 		mDataset = convert(listGroup);
 		adapter = new CommonAdapter(mDataset, converter);
 		mListView.setAdapter(adapter);
-		mListView.setOnItemLongClickListener(mLongClickListener);
+		mListView.setOnItemClickListener(mClickListener);
 	}
 
 	@Override
@@ -257,13 +258,12 @@ public class ContactsGroupActivity extends Activity {
 
 	};
 
-	private OnItemLongClickListener mLongClickListener = new OnItemLongClickListener() {
+	private OnItemClickListener mClickListener = new OnItemClickListener() {
 
 		@Override
-		public boolean onItemLongClick(AdapterView<?> adapter, View view,
+		public void onItemClick(AdapterView<?> adapter, View view,
 				int pos, long id) {
 			showDialog((ContactGroup) mDataset.get(pos).getItemObject());
-			return true;
 		}
 
 	};

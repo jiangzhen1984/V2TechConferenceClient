@@ -232,7 +232,7 @@ public class GroupListView extends ListView {
 		int start = index;
 		int end = ((Group) gitem.getObject()).getSubSize();
 
-		while (start <= end && mFilterList.size() > start) {
+		while (start < end && mFilterList.size() > start) {
 			Item item = mFilterList.get(start);
 			Item endItem = mFilterList.get(end);
 

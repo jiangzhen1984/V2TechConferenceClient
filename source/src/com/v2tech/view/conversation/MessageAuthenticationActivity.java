@@ -83,8 +83,13 @@ public class MessageAuthenticationActivity extends Activity {
 		connectView();
 		bindViewEnvent();
 		crowdService = new CrowdGroupService();
-		changeMessageAuthenticationListView();
 		initReceiver();
+	}
+
+	@Override
+	protected void onStart() {
+		changeMessageAuthenticationListView();
+		super.onStart();
 	}
 
 	private void connectView() {
@@ -240,7 +245,9 @@ public class MessageAuthenticationActivity extends Activity {
 			loadFriendMessage();
 		} else {
 			mMessageList = new ArrayList<VMessageQualification>();
-			groupAdapter = new GroupMessageAdapter();
+			if (groupAdapter == null) {
+				groupAdapter = new GroupMessageAdapter();
+			}
 			lvMessageAuthentication.setAdapter(groupAdapter);
 			loadGroupMessage();
 		}
@@ -373,13 +380,14 @@ public class MessageAuthenticationActivity extends Activity {
 					} while (cr.moveToPrevious());
 				}
 				cr.close();
-				firendAdapter.notifyDataSetChanged();
 				return null;
 			}
 
 			@Override
 			protected void onPostExecute(Void result) {
-
+				if (firendAdapter != null) {
+					firendAdapter.notifyDataSetChanged();
+				}
 			}
 
 		}.execute();
@@ -742,7 +750,6 @@ public class MessageAuthenticationActivity extends Activity {
 		public void onReceive(Context arg0, Intent arg1) {
 			if (arg1.getAction().equals(JNIService.JNI_BROADCAST_FRIEND_ADDED)) {
 				loadFriendMessage();
-				firendAdapter.notifyDataSetChanged();
 			}
 		}
 

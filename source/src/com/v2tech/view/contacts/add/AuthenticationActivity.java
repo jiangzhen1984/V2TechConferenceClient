@@ -4,6 +4,7 @@ import com.v2tech.R;
 import com.v2tech.service.ContactsService;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.view.MainActivity;
+import com.v2tech.view.conversation.MessageAuthenticationActivity;
 import com.v2tech.vo.User;
 
 import android.app.Activity;
@@ -101,7 +102,7 @@ public class AuthenticationActivity extends Activity {
 									.toString());
 					// 实现越级跳
 					Intent i = new Intent(AuthenticationActivity.this,
-							MainActivity.class);
+							MessageAuthenticationActivity.class);
 					i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 					startActivity(i);
 				}

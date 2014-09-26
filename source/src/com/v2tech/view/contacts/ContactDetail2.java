@@ -33,6 +33,7 @@ import com.v2tech.vo.ContactGroup;
 import com.v2tech.view.JNIService;
 import com.v2tech.view.MainActivity;
 import com.v2tech.view.contacts.add.AuthenticationActivity;
+import com.v2tech.view.contacts.add.FriendManagementActivity;
 import com.v2tech.view.widget.MarqueeTextView;
 import com.v2tech.vo.Group;
 import com.v2tech.vo.Group.GroupType;
@@ -181,12 +182,31 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 
 			@Override
 			public void onClick(View arg0) {
-
 				// 加为好友
-				Intent i = new Intent(ContactDetail2.this,
-						AuthenticationActivity.class);
-				i.putExtra("uid", mUid);
-				ContactDetail2.this.startActivity(i);
+				Intent i = new Intent();
+				switch (u.getAuthtype()) {
+				case 0:
+					i.setClass(ContactDetail2.this,
+							FriendManagementActivity.class);
+					i.putExtra("uid", mUid);
+					ContactDetail2.this.startActivity(i);
+					break;
+				case 1:
+					i.setClass(ContactDetail2.this,
+							AuthenticationActivity.class);
+					i.putExtra("uid", mUid);
+					ContactDetail2.this.startActivity(i);
+					break;
+				case 2:
+					Toast.makeText(ContactDetail2.this, "对方不允许加为好友",
+							Toast.LENGTH_SHORT).show();
+					break;
+				default:
+					Toast.makeText(ContactDetail2.this, "对方不允许加为好友",
+							Toast.LENGTH_SHORT).show();
+					break;
+				}
+
 			}
 		});
 
@@ -268,11 +288,11 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 		if (u.getAvatarBitmap() != null) {
 			mHeadIconIV.setImageBitmap(u.getAvatarBitmap());
 		}
+
+		mNickNameET.addTextChangedListener(tw);
 		if (!mNickNameET.getText().toString().equals(u.getNickName())) {
 			mNickNameET.setText(u.getNickName());
 		}
-
-		mNickNameET.addTextChangedListener(tw);
 
 		mNameTitleIV.setText(u.getName());
 		mAccountTV.setText(u.getAccount());
@@ -440,11 +460,11 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 						null));
 				break;
 			case UPDATE_USER_INFO_DONE:
-				if (mContext != null) {
-					Toast.makeText(mContext,
-							R.string.contacts_user_detail_nick_name_updated,
-							Toast.LENGTH_SHORT).show();
-				}
+				// if (mContext != null) {
+				// Toast.makeText(mContext,
+				// R.string.contacts_user_detail_nick_name_updated,
+				// Toast.LENGTH_SHORT).show();
+				// }
 				isUpdating = false;
 				break;
 			}

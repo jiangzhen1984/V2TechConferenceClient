@@ -12,6 +12,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
@@ -76,7 +77,7 @@ import com.v2tech.vo.ConferenceConversation;
 import com.v2tech.vo.ConferenceGroup;
 import com.v2tech.vo.ContactConversation;
 import com.v2tech.vo.Conversation;
-import com.v2tech.vo.ConversationFirendAuthentication;
+import com.v2tech.vo.ConversationFirendAuthenticationData;
 import com.v2tech.vo.CrowdConversation;
 import com.v2tech.vo.CrowdGroup;
 import com.v2tech.vo.Group;
@@ -285,6 +286,9 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 	@Override
 	public void onStart() {
 		super.onStart();
+		if (mCurrentTabFlag == Conversation.TYPE_CONTACT) {
+			showUnreadFriendAuthenticationRedFlag();
+		}
 	}
 
 	@Override
@@ -704,35 +708,36 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 
 			@Override
 			public void run() {
-				//FIXME don't sleep Thread
+				// FIXME don't sleep Thread
 				SystemClock.sleep(3000);
 				Conversation firstAdd = null;
 				Conversation secondAdd = null;
 				long verificationDate = 0;
 				long voiceMessageDate = 0;
 				if (mCurrentTabFlag == Conversation.TYPE_CONTACT) {
-					if (verificationMessageItem != null
-							&& verificationMessageItem.getDateLong() != null)
-						verificationDate = Long.valueOf(verificationMessageItem
-								.getDateLong());
+					if (verificationMessageItemData != null
+							&& verificationMessageItemData.getDateLong() != null)
+						verificationDate = Long
+								.valueOf(verificationMessageItemData
+										.getDateLong());
 					if (voiceMessageItem != null
 							&& voiceMessageItem.getDateLong() != null)
 						voiceMessageDate = Long.valueOf(voiceMessageItem
 								.getDateLong());
 
-					if (verificationMessageItem != null
+					if (verificationMessageItemData != null
 							&& voiceMessageItem != null) {
 						isNoEmpty = true;
 						if (verificationDate > voiceMessageDate) {
-							verificationMessageItem.setFirst(true);
+							verificationMessageItemData.setFirst(true);
 							voiceMessageItem.setFirst(false);
-							firstAdd = verificationMessageItem;
+							firstAdd = verificationMessageItemData;
 							secondAdd = voiceMessageItem;
 						} else {
-							verificationMessageItem.setFirst(false);
+							verificationMessageItemData.setFirst(false);
 							voiceMessageItem.setFirst(true);
 							firstAdd = voiceMessageItem;
-							secondAdd = verificationMessageItem;
+							secondAdd = verificationMessageItemData;
 						}
 					}
 				}
@@ -759,7 +764,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 					// 只有会话界面需要添加这两个特殊item
 					if (mCurrentTabFlag == Conversation.TYPE_CONTACT) {
 						// 如果两个特殊item都不为空，走if语句
-						if (verificationMessageItem != null
+						if (verificationMessageItemData != null
 								&& voiceMessageItem != null) {
 							if (firstAdd != null
 									&& isVoiceSpecificAdd == false
@@ -787,12 +792,13 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 								isVoiceSpecificAdd = true;
 							}
 							// 同理如果verificationMessageItem不为null，则进行比较
-							if (verificationMessageItem != null
+							if (verificationMessageItemData != null
 									&& isVerificationSpecificAdd == false
-									&& verificationMessageItem.getDateLong() != null
-									&& Long.valueOf(verificationMessageItem
+									&& verificationMessageItemData
+											.getDateLong() != null
+									&& Long.valueOf(verificationMessageItemData
 											.getDateLong()) > date) {
-								mConvList.add(verificationMessageItem);
+								mConvList.add(verificationMessageItemData);
 								isVerificationSpecificAdd = true;
 							}
 						}
@@ -808,10 +814,10 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 								mConvList.add(voiceMessageItem);
 
 							if (isVerificationSpecificAdd == false)
-								mConvList.add(verificationMessageItem);
+								mConvList.add(verificationMessageItemData);
 						} else {
 							if (isVerificationSpecificAdd == false)
-								mConvList.add(verificationMessageItem);
+								mConvList.add(verificationMessageItemData);
 							if (isVoiceSpecificAdd == false)
 								mConvList.add(voiceMessageItem);
 						}
@@ -820,8 +826,8 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 							if (isVoiceSpecificAdd == false)
 								mConvList.add(voiceMessageItem);
 
-							if (verificationMessageItem != null)
-								mConvList.add(verificationMessageItem);
+							if (verificationMessageItemData != null)
+								mConvList.add(verificationMessageItemData);
 						}
 					}
 				}
@@ -860,11 +866,13 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 		mItemList.clear();
 		for (int i = 0; i < list.size(); i++) {
 			Conversation cov = list.get(i);
-			if(cov == null){
-				V2Log.e(TAG, "when fillAdapter , get null Conversation , index :" + i);
+			if (cov == null) {
+				V2Log.e(TAG,
+						"when fillAdapter , get null Conversation , index :"
+								+ i);
 				continue;
 			}
-			
+
 			switch (cov.getType()) {
 			case Conversation.TYPE_VERIFICATION_MESSAGE:
 				mItemList.add(verificationItem);
@@ -892,8 +900,8 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 	private boolean isExist;
 	private Conversation voiceMessageItem;
 	private GroupLayout voiceLayout;
-	private GroupLayout verificationLayout;
-	private Conversation verificationMessageItem;
+	private GroupLayout verificationMessageItemLayout;
+	private Conversation verificationMessageItemData;
 
 	private void initVoiceItem() {
 		if (isExist) {
@@ -911,12 +919,13 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 			return;
 		}
 		isExist = true;
-		verificationMessageItem = new ConversationFirendAuthentication(
+		verificationMessageItemData = new ConversationFirendAuthenticationData(
 				Conversation.TYPE_VERIFICATION_MESSAGE, 0);
-		verificationLayout = new GroupLayout(mContext, verificationMessageItem);
-		verificationMessageItem.setReadFlag(Conversation.READ_FLAG_READ);
-		verificationItem = new ScrollItem(verificationMessageItem,
-				verificationLayout);
+		verificationMessageItemLayout = new GroupLayout(mContext,
+				verificationMessageItemData);
+		verificationMessageItemData.setReadFlag(Conversation.READ_FLAG_READ);
+		verificationItem = new ScrollItem(verificationMessageItemData,
+				verificationMessageItemLayout);
 	}
 
 	private void updateVoiceSpecificItemState() {
@@ -1797,13 +1806,14 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 				if (!groupMessage) {
 					V2Log.e(TAG, "JNI_BROADCAST_NEW_MESSAGE update..");
 					updateConversation(intent.getExtras().getLong("mid"));
-					MessageLoader.updateRecentState(mContext , intent.getExtras().getLong("mid"));
+					MessageLoader.updateRecentState(mContext, intent
+							.getExtras().getLong("mid"));
 				}
 			} else if (action.equals(JNIService.JNI_BROADCAST_FRIEND_ADDED)) {
 				V2Log.e(TAG, "JNI_BROADCAST_FRIEND_AUTHENTICATIONE update..");
 
-				if (verificationLayout == null
-						|| verificationMessageItem == null)
+				if (verificationMessageItemLayout == null
+						|| verificationMessageItemData == null)
 					initVerificationItem();
 
 				updateVoiceSpecificItemState();
@@ -1815,30 +1825,40 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 
 	private void showUnreadFriendAuthenticationRedFlag() {
 
+		// ActivityManager activityManager=(ActivityManager)
+		// getActivity().getSystemService(Activity.ACTIVITY_SERVICE);
+		//
+		// if(activityManager.getRunningTasks(1).get(0).topActivity.equals());
+
+		boolean hasUnread = false;
 		// 查出未读的第一条按时间顺序
 		String sql = "select * from " + AddFriendHistroysHandler.tableName
 				+ " where ReadState=0 order by SaveDate desc limit 1";
 		Cursor cr = AddFriendHistroysHandler.select(getActivity(), sql,
 				new String[] {});
 		if ((cr != null) && (cr.getCount() == 0)) {
-			sql = "select * from " + AddFriendHistroysHandler.tableName
-					+ " order by SaveDate desc limit 1";
 			cr.close();
-			cr = AddFriendHistroysHandler.select(getActivity(), sql,
-					new String[] {});
+			hasUnread = false;
+		} else {
+			hasUnread = true;
 		}
+
+		sql = "select * from " + AddFriendHistroysHandler.tableName
+				+ " order by SaveDate desc limit 1";
+		cr = AddFriendHistroysHandler.select(getActivity(), sql,
+				new String[] {});
 
 		if ((cr != null) && (cr.getCount() == 0)) {
 			cr.close();
 			return;
 		}
 
-		if (verificationLayout != null) {
-			verificationLayout.updateNotificator(true);
+		if (verificationMessageItemLayout != null) {
+			verificationMessageItemLayout.updateNotificator(hasUnread);
 			String msg = "";
 			String date = "";
 			String dateLong = "";
-			if (verificationMessageItem != null) {
+			if (verificationMessageItemData != null) {
 				if (cr.moveToFirst()) {
 					AddFriendHistorieNode tempNode = new AddFriendHistorieNode();
 					// _id integer primary key AUTOINCREMENT,0
@@ -1870,10 +1890,9 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 					// 我加别人：允许认识人：4你们已成为了好友，需要验证：5等待对方验证，4被同意（你们已成为了好友），6拒绝了你为好友
 					if ((tempNode.fromUserID == tempNode.remoteUserID)
 							&& (tempNode.ownerAuthType == 0)) {// 别人加我允许任何人
-						msg = name + "已经加你为好友";
+						msg = name + "已添加你为好友";
 					} else if ((tempNode.fromUserID == tempNode.remoteUserID)
-							&& (tempNode.ownerAuthType == 1)
-							&& (tempNode.addState == 0)) {// 别人加我未处理
+							&& (tempNode.ownerAuthType == 1)) {// 别人加我不管我有没有处理
 						msg = name + "申请加你为好友";
 					} else if ((tempNode.fromUserID == tempNode.ownerUserID)
 							&& (tempNode.addState == 0)) {// 我加别人等待验证
@@ -1889,14 +1908,14 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 					dateLong = String.valueOf(tempNode.saveDate * 1000);
 				}
 				cr.close();
-				verificationMessageItem.setMsg(msg);
-				verificationMessageItem.setDate(date);
-				verificationMessageItem.setDateLong(dateLong);
-				verificationLayout.update();
+				verificationMessageItemData.setMsg(msg);
+				verificationMessageItemData.setDate(date);
+				verificationMessageItemData.setDateLong(dateLong);
+				verificationMessageItemLayout.update();
 			}
 
 			notificationListener.updateNotificator(Conversation.TYPE_CONTACT,
-					true);
+					hasUnread);
 		}
 	}
 

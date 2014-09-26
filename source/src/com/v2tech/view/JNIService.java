@@ -310,7 +310,7 @@ public class JNIService extends Service {
 				GroupUserInfoOrig go = (GroupUserInfoOrig) msg.obj;
 				if (go != null && go.xml != null) {
 					List<User> lu = User.fromXml(go.xml);
-					Group g = GlobalHolder.getInstance().findGroupById(go.gId);
+					Group group = GlobalHolder.getInstance().findGroupById(go.gId);
 					for (User tu : lu) {
 						User existU = GlobalHolder.getInstance().putUser(
 								tu.getmUserId(), tu);
@@ -329,14 +329,14 @@ public class JNIService extends Service {
 									.fromInt(userStatusObject.getDeviceType()));
 						}
 
-						if (g == null) {
+						if (group == null) {
 							V2Log.e(" didn't find group information  " + go.gId);
 						} else {
-							g.addUserToGroup(existU);
+							group.addUserToGroup(existU);
 						}
 					}
 					V2Log.w("  group:" + go.gId + "  user size:" + lu.size()
-							+ "  " + g);
+							+ "  " + group);
 					Intent i = new Intent(
 							JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION);
 					i.addCategory(JNI_BROADCAST_CATEGROY);

@@ -1,9 +1,9 @@
 package com.v2tech.vo;
 
-public class ConversationFirendAuthentication extends Conversation{
+public class ConversationFirendAuthenticationData extends Conversation{
 	
 	private CharSequence msg;
-	public ConversationFirendAuthentication(int mType, long mExtId){
+	public ConversationFirendAuthenticationData(int mType, long mExtId){
 		super(mType,mExtId);
 	}
 

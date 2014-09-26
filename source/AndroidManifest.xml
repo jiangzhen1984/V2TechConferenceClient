@@ -208,6 +208,7 @@
         </activity>
         <activity
             android:name="com.v2tech.view.conversation.MessageAuthenticationActivity"
+            android:launchMode="singleTop"
             android:screenOrientation="nosensor"
             android:windowSoftInputMode="stateHidden|adjustPan" >
         </activity>

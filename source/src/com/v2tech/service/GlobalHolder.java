@@ -131,7 +131,6 @@ public class GlobalHolder {
 					cu.setName(u.getName());
 				}
 				cu.updateUser(false);
-				V2Log.i(" merge user information " + id + " " + cu.getName());
 				return cu;
 			}
 			

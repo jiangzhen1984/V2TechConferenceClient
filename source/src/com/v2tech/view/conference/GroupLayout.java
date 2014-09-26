@@ -18,7 +18,7 @@ import com.v2tech.view.conversation.MessageLoader;
 import com.v2tech.vo.ConferenceConversation;
 import com.v2tech.vo.ContactConversation;
 import com.v2tech.vo.Conversation;
-import com.v2tech.vo.ConversationFirendAuthentication;
+import com.v2tech.vo.ConversationFirendAuthenticationData;
 import com.v2tech.vo.CrowdConversation;
 import com.v2tech.vo.VMessage;
 
@@ -175,7 +175,7 @@ public class GroupLayout extends LinearLayout {
 	public void update() {
 		switch (mConv.getType()) {
 		case Conversation.TYPE_VERIFICATION_MESSAGE:
-			ConversationFirendAuthentication firend = (ConversationFirendAuthentication) mConv;
+			ConversationFirendAuthenticationData firend = (ConversationFirendAuthenticationData) mConv;
 			mGroupOwnerTV.setText(firend.getMsg());
 			mGroupDateTV.setText(firend.getDate());
 			break;

@@ -53,6 +53,8 @@
         android:layout_height="wrap_content"
         android:layout_alignTop="@+id/group_list_conference_image_view_rl"
         android:layout_marginLeft="30dp"
+        android:layout_marginRight="30dp"
+        android:layout_toLeftOf="@+id/fl_rightLayout"
         android:layout_toRightOf="@+id/group_list_conference_image_view_rl"
         android:orientation="vertical" >
 
@@ -74,49 +76,50 @@
             android:layout_marginTop="@dimen/conversation_view_title_margin"
             android:ellipsize="end"
             android:gravity="left|bottom"
-            android:maxWidth="@dimen/conversation_view_text_max_width"
             android:singleLine="true"
-            android:text="TextView"
+            android:text="TextVi我是单身宿舍打扫打扫打扫打扫滴答滴答滴答滴答的打扫ew"
             android:textColor="@color/conversation_view_text_color"
             android:textSize="@dimen/common_item_text_size_16" />
     </LinearLayout>
 
-    <Button
-        android:id="@+id/access"
+    <FrameLayout
+        android:id="@+id/fl_rightLayout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
-        android:layout_centerVertical="true"
-        android:layout_marginRight="15dp"
-        android:background="@drawable/button_bg"
-        android:focusable="false"
-        android:text="同意"
-        android:textColor="@color/button_text_color"
-        android:visibility="gone" />
+        android:layout_centerVertical="true" >
 
-    <TextView
-        android:id="@+id/access_or_no"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_centerVertical="true"
-        android:layout_marginRight="15dp"
-        android:paddingRight="15dp"
-        android:text="TextView"
-        android:textSize="@dimen/common_item_text_size_16" />
+        <Button
+            android:id="@+id/access"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="15dp"
+            android:background="@drawable/button_bg"
+            android:focusable="false"
+            android:text="同意"
+            android:textColor="@color/button_text_color"
+            android:visibility="gone" />
 
-    <Button
-        android:id="@+id/b_suer_delete"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_centerVertical="true"
-        android:layout_marginRight="15dp"
-        android:background="@drawable/button_bg_red"
-        android:focusable="false"
-        android:text="删除"
-        android:textColor="@color/common_white_color"
-        android:visibility="gone" />
+        <TextView
+            android:id="@+id/access_or_no"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="15dp"
+            android:paddingRight="15dp"
+            android:text="TextView"
+            android:textSize="@dimen/common_item_text_size_16" />
+
+        <Button
+            android:id="@+id/b_suer_delete"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="15dp"
+            android:background="@drawable/button_bg_red"
+            android:focusable="false"
+            android:text="删除"
+            android:textColor="@color/common_white_color"
+            android:visibility="gone" />
+    </FrameLayout>
 
     <LinearLayout
         android:layout_width="fill_parent"

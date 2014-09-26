@@ -8,6 +8,7 @@ import com.v2tech.service.GlobalHolder;
 import com.v2tech.view.MainActivity;
 import com.v2tech.view.contacts.ContactDetail2;
 import com.v2tech.view.contacts.UpdateContactGroupActivity;
+import com.v2tech.view.conversation.MessageAuthenticationActivity;
 import com.v2tech.vo.FriendGroup;
 import com.v2tech.vo.Group;
 import com.v2tech.vo.User;
@@ -29,7 +30,7 @@ public class FriendManagementActivity extends Activity {
 	// for control
 	// R.id.right_text_view
 	private TextView tvRightTextView;
-	// R.id.contact_detail_return_button
+	// R.id.tv_back
 	private TextView tvBack;
 	// R.id.select_group
 	private RelativeLayout rlSelectGroup;
@@ -61,11 +62,16 @@ public class FriendManagementActivity extends Activity {
 		if ((startedCause != null)
 				&& startedCause.equals("access_friend_authentication")) {
 			mUid = this.getIntent().getLongExtra("remoteUserID", 0);
+			tvRightTextView.setText("完成");
+			tvBack.setText("返回");
 		} else {
 			mUid = this.getIntent().getLongExtra("uid", 0);
-			verificationInfo = this.getIntent()
-					.getCharSequenceExtra("verificationInfo").toString();
+			verificationInfo = this.getIntent().getStringExtra(
+					"verificationInfo");
+			tvRightTextView.setText("发送");
+			tvBack.setText("身份验证");
 		}
+
 		detailUser = GlobalHolder.getInstance().getUser(mUid);
 		commentNameET.setText(detailUser.getName());
 		tvGroupName.setText(selectGroupName);
@@ -74,17 +80,9 @@ public class FriendManagementActivity extends Activity {
 
 	private void connectView() {
 		tvRightTextView = (TextView) findViewById(R.id.right_text_view);
-		tvBack = (TextView) findViewById(R.id.contact_detail_return_button);
+		tvBack = (TextView) findViewById(R.id.tv_back);
 		rlSelectGroup = (RelativeLayout) findViewById(R.id.select_group);
 		commentNameET = (EditText) findViewById(R.id.comment_name_et);
-		if ((startedCause != null)
-				&& startedCause.equals("access_friend_authentication")) {
-			tvRightTextView.setText("完成");
-		} else {
-			// 发送
-			tvRightTextView.setText("发送");
-		}
-
 		tvGroupName = (TextView) findViewById(R.id.tv_group_name);
 	}
 
@@ -113,14 +111,14 @@ public class FriendManagementActivity extends Activity {
 
 		if ((startedCause != null)
 				&& startedCause.equals("access_friend_authentication")) {
-			
+
 			tvRightTextView.setOnClickListener(new OnClickListener() {
 				@Override
 				public void onClick(View arg0) {
 					contactService.acceptAddedAsContact(selectGroupID, mUid);
 					// 实现越级跳
 					Intent i = new Intent(FriendManagementActivity.this,
-							MainActivity.class);
+							MessageAuthenticationActivity.class);
 					i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 					startActivity(i);
 				}
@@ -134,19 +132,21 @@ public class FriendManagementActivity extends Activity {
 					if (detailUser.getAuthtype() == 0) {
 						AddFriendHistroysHandler.addOtherNoNeedAuthentication(
 								getApplicationContext(), detailUser);
-						contactService.addContact(new FriendGroup(selectGroupID, ""),
-								detailUser, verificationInfo, commentNameET
-										.getText().toString());
+						contactService.addContact(new FriendGroup(
+								selectGroupID, ""), detailUser, "",
+								commentNameET.getText().toString());
 					} else if (detailUser.getAuthtype() == 1) {
 						AddFriendHistroysHandler.addOtherNeedAuthentication(
 								getApplicationContext(), detailUser,
 								commentNameET.getText().toString());
-						contactService.addContact(new FriendGroup(selectGroupID, ""),
-								detailUser, verificationInfo, commentNameET
-										.getText().toString());
+						contactService.addContact(new FriendGroup(
+								selectGroupID, ""), detailUser,
+								verificationInfo, commentNameET.getText()
+										.toString());
 					} else if (detailUser.getAuthtype() == 2) {
 						// 不让任何人加为好
-						Toast.makeText(FriendManagementActivity.this, "对方不允许加为好友", Toast.LENGTH_SHORT).show();
+						Toast.makeText(FriendManagementActivity.this,
+								"对方不允许加为好友", Toast.LENGTH_SHORT).show();
 					}
 
 					// 实现越级跳
@@ -170,7 +170,7 @@ public class FriendManagementActivity extends Activity {
 					selectGroupID = data.getLongExtra("groupID", 0);
 					tvGroupName.setText(selectGroupName);
 				}
-			}else if(resultCode == UpdateContactGroupActivity.SELECT_GROUP_RESPONSE_CODE_CANCEL){	
+			} else if (resultCode == UpdateContactGroupActivity.SELECT_GROUP_RESPONSE_CODE_CANCEL) {
 			}
 		}
 

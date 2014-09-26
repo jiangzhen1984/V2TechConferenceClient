@@ -60,7 +60,6 @@ public class ContactDetail extends Activity implements OnTouchListener {
 	private static final int UPDATE_USER_INFO_DONE = 3;
 	private static final int FILE_SELECT_CODE = 100;
 
-	
 	private View mReturnButtonTV;
 	private TextView mNameTitleIV;
 	private ImageView mHeadIconIV;
@@ -143,7 +142,12 @@ public class ContactDetail extends Activity implements OnTouchListener {
 		if ((fromActivity != null)
 				&& (fromActivity.equals("MessageAuthenticationActivity"))) {
 			mUid = this.getIntent().getLongExtra("remoteUserID", 0);
-			tvTitle.setText("好友申请");
+			state = this.getIntent().getIntExtra("state", -1);
+			if (state == 4) {
+				tvTitle.setText("个人资料");
+			} else {
+				tvTitle.setText("好友申请");
+			}
 		} else {
 			mUid = this.getIntent().getLongExtra("uid", 0);
 			tvTitle.setText("个人资料");
