@@ -33,6 +33,7 @@ import android.widget.TabHost.TabContentFactory;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.V2.jni.V2GlobalEnum;
 import com.V2.jni.util.V2Log;
 import com.v2tech.R;
 import com.v2tech.db.V2techSearchContentProvider;
@@ -369,7 +370,7 @@ public class MainActivity extends FragmentActivity implements
 	public void updateNotificator(int type, boolean flag) {
 
 		View noticator = null;
-		if (type == Conversation.TYPE_GROUP) {
+		if (type == Conversation.TYPE_GROUP || type == V2GlobalEnum.GROUP_TYPE_DEPARTMENT) {
 			noticator = mTabClasses[2].notificator;
 		} else if (type ==Conversation.TYPE_CONFERNECE) {
 			noticator = mTabClasses[3].notificator;

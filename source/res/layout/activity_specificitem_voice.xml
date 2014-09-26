@@ -111,5 +111,7 @@
         android:id="@+id/specific_voice_listview"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="#FFFFFF"
+        android:divider="@null" 
         android:cacheColorHint="#00000000" />
 </LinearLayout>

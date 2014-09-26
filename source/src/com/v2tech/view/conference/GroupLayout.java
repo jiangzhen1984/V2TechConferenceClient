@@ -10,7 +10,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.V2.jni.util.V2Log;
+import com.V2.jni.V2GlobalEnum;
 import com.v2tech.R;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.util.MessageUtil;
@@ -66,7 +66,6 @@ public class GroupLayout extends LinearLayout {
 
 		switch (mConv.getType()) {
 		case Conversation.TYPE_CONTACT:
-			mGroupNameTV.setText(((ContactConversation)mConv).getName());
 			hand.post(queryMessageRunnable);
 			Bitmap bm = ((ContactConversation) this.mConv).getAvatar();
 			if (bm != null)
@@ -75,29 +74,27 @@ public class GroupLayout extends LinearLayout {
 				mGroupIV.setImageResource(R.drawable.avatar);
 			break;
 		case Conversation.TYPE_CONFERNECE:
-			mGroupNameTV.setText(((ConferenceConversation)mConv).getName());
 			if (((ConferenceConversation) mConv).getGroup().getOwnerUser()
 					.getmUserId() != GlobalHolder.getInstance()
 					.getCurrentUserId())
 				mGroupIV.setImageResource(R.drawable.conference_icon);
 			break;
 		case Conversation.TYPE_GROUP:
-			mGroupNameTV.setText(((CrowdConversation)mConv).getName());
+		case V2GlobalEnum.GROUP_TYPE_DEPARTMENT:
 			mGroupIV.setImageResource(R.drawable.chat_group_icon);
 			break;
 		case Conversation.TYPE_VOICE_MESSAGE:
 			mGroupIV.setImageResource(R.drawable.vs_message_voice);
-			mGroupNameTV.setText("通话消息");
 			break;
 		case Conversation.TYPE_VERIFICATION_MESSAGE:
 			mGroupIV.setImageResource(R.drawable.vs_message_verification);
-			mGroupNameTV.setText("验证消息");
 			break;
 		default:
 			throw new RuntimeException("the invalid conversation type :"
 					+ mConv.getType());
 		}
 
+		mGroupNameTV.setText(mConv.getName());
 		mGroupOwnerTV.setText(mConv.getMsg());
 		mGroupDateTV.setText(mConv.getDate());
 		addView(view);
@@ -173,31 +170,10 @@ public class GroupLayout extends LinearLayout {
 	}
 
 	public void update() {
-		switch (mConv.getType()) {
-		case Conversation.TYPE_VERIFICATION_MESSAGE:
-			ConversationFirendAuthenticationData firend = (ConversationFirendAuthenticationData) mConv;
-			mGroupOwnerTV.setText(firend.getMsg());
-			mGroupDateTV.setText(firend.getDate());
-			break;
-		case Conversation.TYPE_CONTACT:
-			ContactConversation contact = (ContactConversation) mConv;
-			mGroupNameTV.setText(contact.getName());
-			mGroupOwnerTV.setText(contact.getMsg());
-			mGroupDateTV.setText(contact.getDate());
-			break;
-		case Conversation.TYPE_GROUP:
-			CrowdConversation crowd = (CrowdConversation) mConv;
-			mGroupNameTV.setText(crowd.getName());
-			mGroupOwnerTV.setText(crowd.getMsg());
-			mGroupDateTV.setText(crowd.getDate());
-			break;
-		case Conversation.TYPE_CONFERNECE:
-
-			break;
-
-		default:
-			break;
-		}
+		
+		mGroupNameTV.setText(mConv.getName());
+		mGroupOwnerTV.setText(mConv.getMsg());
+		mGroupDateTV.setText(mConv.getDate());
 	}
 
 	public void updateIcon(Bitmap bitmap) {

@@ -86,7 +86,9 @@ import com.v2tech.view.widget.CommonAdapter;
 import com.v2tech.view.widget.CommonAdapter.CommonAdapterItemWrapper;
 import com.v2tech.vo.Conversation;
 import com.v2tech.vo.CrowdGroup;
+import com.v2tech.vo.DepartmentConversation;
 import com.v2tech.vo.FileInfoBean;
+import com.v2tech.vo.OrgGroup;
 import com.v2tech.vo.User;
 import com.v2tech.vo.UserDeviceConfig;
 import com.v2tech.vo.VMessage;
@@ -174,6 +176,7 @@ public class ConversationView extends Activity {
 	private User local;
 	private User remote;
 	private CrowdGroup crowdGroup;
+	private OrgGroup departmentGroup;
 	private int currentConversationViewType;
 
 	private ListView mMessagesContainer;
@@ -199,14 +202,13 @@ public class ConversationView extends Activity {
 	private List<VMessage> currentGetMessages;
 	private long lastMessageBodyShowTime = 0;
 	private long intervalTime = 15000; //显示消息时间状态的间隔时间
-	private UpdateFileStateInterface updateFIle; 
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		mContext = this;
 
-		setContentView(R.layout.activity_contact_message);
+		setContentView(R.layout.activity_contact_message); 
 
 		GlobalConfig.isConversationOpen = true;
 
@@ -297,7 +299,7 @@ public class ConversationView extends Activity {
 
 		mChat.registerFileTransStatusListener(this.lh, FILE_STATUS_LISTENER,
 				null);
-//		notificateConversationUpdate();
+		notificateConversationUpdate(false);
 
 		// Start animation
 		this.overridePendingTransition(R.animator.nonam_scale_center_0_100,
@@ -492,10 +494,14 @@ public class ConversationView extends Activity {
 			mUserTitleTV.setText(crowdGroup.getName());
 		} else if (cov.getType() == V2GlobalEnum.GROUP_TYPE_DEPARTMENT) {
 			currentConversationViewType = V2GlobalEnum.GROUP_TYPE_DEPARTMENT;
+			groupId = cov.getExtId();
+			departmentGroup = (OrgGroup) GlobalHolder.getInstance().getGroupById(
+					V2GlobalEnum.GROUP_TYPE_DEPARTMENT, groupId);
 			mVideoCallButton.setVisibility(View.GONE);
 			mAudioCallButton.setVisibility(View.GONE);
 			mShowContactDetailButton.setVisibility(View.INVISIBLE);
 			mButtonCreateMetting.setVisibility(View.VISIBLE);
+			mUserTitleTV.setText(departmentGroup.getName());
 		}
 	}
 
@@ -1535,7 +1541,7 @@ public class ConversationView extends Activity {
 		Message.obtain(lh, SEND_MESSAGE, vm).sendToTarget();
 		addMessageToContainer(vm);
 		// send notification
-		notificateConversationUpdate();
+		notificateConversationUpdate(true);
 	}
 
 	// FIXME optimize code
@@ -1555,7 +1561,7 @@ public class ConversationView extends Activity {
 		return new String(copy, 0, j);
 	}
 
-	private void notificateConversationUpdate() {
+	private void notificateConversationUpdate(boolean isFresh) {
 		Intent i = new Intent(PublicIntent.REQUEST_UPDATE_CONVERSATION);
 		i.addCategory(PublicIntent.DEFAULT_CATEGORY);
 		ConversationNotificationObject obj = null;
@@ -1567,6 +1573,7 @@ public class ConversationView extends Activity {
 					groupId);
 		}
 		i.putExtra("obj", obj);
+		i.putExtra("isFresh", isFresh);
 		mContext.sendBroadcast(i);
 	}
 
@@ -1664,7 +1671,7 @@ public class ConversationView extends Activity {
 				}
 			}
 			Message.obtain(lh, SEND_MESSAGE, v).sendToTarget();
-			notificateConversationUpdate();
+			notificateConversationUpdate(true);
 		}
 
 		@Override
@@ -1790,13 +1797,23 @@ public class ConversationView extends Activity {
 	private List<VMessage> loadMessages() {
 
 		List<VMessage> array = null;
-		if (this.groupId == 0) {
+		switch (currentConversationViewType) {
+		case V2GlobalEnum.GROUP_TYPE_USER:
 			array = MessageLoader.loadMessageByPage(mContext, user1Id, user2Id,
 					BATCH_COUNT, offset, Conversation.TYPE_CONTACT);
-		} else if (this.groupId != 0) {
+			break;
+		case V2GlobalEnum.GROUP_TYPE_CROWD:
 			array = MessageLoader.loadGroupMessageByPage(mContext,
 					Long.valueOf(Conversation.TYPE_GROUP), groupId,
 					BATCH_COUNT, offset);
+			break;
+		case V2GlobalEnum.GROUP_TYPE_DEPARTMENT:
+			array = MessageLoader.loadGroupMessageByPage(mContext,
+					Long.valueOf(V2GlobalEnum.GROUP_TYPE_DEPARTMENT), groupId,
+					BATCH_COUNT, offset);
+			break;
+		default:
+			break;
 		}
 
 		if (array != null) {
@@ -1893,7 +1910,7 @@ public class ConversationView extends Activity {
 
 						mv.updateView(vfi);
 					} else {
-						notificateConversationUpdate();
+						notificateConversationUpdate(true);
 					}
 				}
 			}
@@ -2208,7 +2225,7 @@ public class ConversationView extends Activity {
 				MessageLoader.deleteMessage(mContext, (VMessage) msg.obj);
 				adapter.notifyDataSetChanged();
 				// Update conversation
-				notificateConversationUpdate();
+				notificateConversationUpdate(true);
 				break;
 			case FILE_STATUS_LISTENER:
 				FileTransStatusIndication ind = (FileTransStatusIndication) (((AsyncResult) msg.obj)
@@ -2388,19 +2405,6 @@ public class ConversationView extends Activity {
 		lastMessageBodyShowTime = message.getmDateLong();
 	}
 	
-	/**
-	 * 用于程序退出时更新文件状态
-	 * @author 
-	 *
-	 */
-	interface UpdateFileStateInterface{
-		
-		public void updateFileState();
-	}
-	
-	public void setUpdateFIle(UpdateFileStateInterface updateFIle) {
-		this.updateFIle = updateFIle;
-	}
 	
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {

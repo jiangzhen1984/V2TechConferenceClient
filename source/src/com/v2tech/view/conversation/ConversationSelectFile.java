@@ -316,6 +316,7 @@ public class ConversationSelectFile extends Activity {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view,
 					int position, long id) {
+				
 				notifyListChange(view, position);
 				imageAdapter.notifyDataSetChanged();
 			}
@@ -864,6 +865,7 @@ public class ConversationSelectFile extends Activity {
 
 		// 判断当前item被选择的状态
 		if (button.isChecked()) {
+			
 			button.setChecked(false);
 			bean.isCheck = ITEM_UNCHECKED;
 			for (int i = 0; i < mCheckedList.size(); i++) {
@@ -877,6 +879,12 @@ public class ConversationSelectFile extends Activity {
 				changeSendUnable();
 			}
 		} else {
+			
+			if(mCheckedList.size() > 9 && !"image".equals(type)){
+				Toast.makeText(getApplicationContext(), "发送文件个数已达上限，一次性只能发送10个文件", Toast.LENGTH_LONG).show();
+				return ;
+			}
+			
 			// 如果当前item没有被选中，则进一步判断一下当前mCheckedList长度是否为0，如果为0则变为可点击
 			if (mCheckedList.size() == 0) {
 

@@ -67,6 +67,7 @@ public class VoiceMessageActivity extends Activity {
 	private VoiceReceiverBroadcast receiver;
 	private boolean isVisibile;
 	private boolean isEditing;
+	private boolean isExecuteSelectAll = true;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -107,6 +108,7 @@ public class VoiceMessageActivity extends Activity {
 					int position, long id) {
 				
 				if(isEditing){
+					
 					CheckBox selected = (CheckBox) view
 							.findViewById(R.id.specific_voice_check);
 					if(selected.isChecked()){
@@ -119,6 +121,14 @@ public class VoiceMessageActivity extends Activity {
 						mListItem.get(position).isCheck = true;
 						selected.setChecked(true);
 					}
+					
+					if(deleteList.size() == mListItem.size())
+						selectedAll.setChecked(true);
+					else{
+						isExecuteSelectAll = false;
+						selectedAll.setChecked(false);
+					}
+					
 				}
 				else{
 					
@@ -232,19 +242,32 @@ public class VoiceMessageActivity extends Activity {
 			public void onCheckedChanged(CompoundButton buttonView,
 					boolean isChecked) {
 
-				if(isChecked){
-					for (int i = 0; i < mListItem.size(); i++) {
-						mListItem.get(i).isCheck = isChecked;
-						deleteList.put(i, mListItem.get(i));
+				if(isExecuteSelectAll){
+					if(isChecked){
+						for (int i = 0; i < mListItem.size(); i++) {
+							mListItem.get(i).isCheck = isChecked;
+							deleteList.put(i, mListItem.get(i));
+						}
 					}
+					else{
+						for (int i = 0; i < mListItem.size(); i++) {
+							mListItem.get(i).isCheck = isChecked;
+							deleteList.remove(i);
+						}
+					}
+					adapter.notifyDataSetChanged();
 				}
 				else{
-					for (int i = 0; i < mListItem.size(); i++) {
-						mListItem.get(i).isCheck = isChecked;
-						deleteList.remove(i);
+					
+					if(isChecked == true){
+						for (int i = 0; i < mListItem.size(); i++) {
+							mListItem.get(i).isCheck = isChecked;
+							deleteList.put(i, mListItem.get(i));
+						}
+						adapter.notifyDataSetChanged();
 					}
+					isExecuteSelectAll = true;
 				}
-				adapter.notifyDataSetChanged();
 			}
 		});
 	}
@@ -396,15 +419,14 @@ public class VoiceMessageActivity extends Activity {
 				} else {
 					holder.unreadNumber.setVisibility(View.GONE);
 				}
+				
+				if(audioVideoMessageBean.meidaState == VideoBean.STATE_NO_ANSWER_CALL)
+					holder.directionIcon
+					.setImageResource(R.drawable.vs_voice_nolistener);
+				else
+					holder.directionIcon
+					.setImageResource(R.drawable.vs_voice_listener);
 			}
-			
-			if(audioVideoMessageBean.meidaState == VideoBean.STATE_NO_ANSWER_CALL)
-				holder.directionIcon
-				.setImageResource(R.drawable.vs_voice_nolistener);
-			else
-				holder.directionIcon
-				.setImageResource(R.drawable.vs_voice_listener);
-			
 			
 			if(isVisibile){
 				holder.selected.setVisibility(View.VISIBLE);

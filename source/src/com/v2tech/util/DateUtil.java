@@ -43,4 +43,16 @@ public class DateUtil {
 				+ (minute < 10 ? "0" + minute : minute) + ":"
 				+ (second < 10 ? "0" + second : second);
 	}
+	
+	/**
+	 * get standard date time , like 2014-09-01 14:20:22
+	 * @return
+	 */
+	public static String getStandardDate(Date date){
+		
+		if(date == null)
+			throw new RuntimeException("Given date object is null...");
+		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		return format.format(date.getTime());
+	} 
 }

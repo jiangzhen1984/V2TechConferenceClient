@@ -165,6 +165,7 @@
                 android:background="#FFFFFF"
                 android:cacheColorHint="#00000000"
                 android:fadingEdge="none"
+                android:divider="@null" 
                 android:fastScrollEnabled="true"
                 android:paddingTop="@dimen/conversation_view_margin"
                 android:scrollbarStyle="insideInset"

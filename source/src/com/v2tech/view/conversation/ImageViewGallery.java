@@ -27,8 +27,6 @@ public class ImageViewGallery extends FragmentActivity {
 
 	private List<ListItem> vimList;
 
-//	private String initMid;
-	
 	private String currentImageID;
 
 	private int initPos;
@@ -43,7 +41,6 @@ public class ImageViewGallery extends FragmentActivity {
 		setContentView(R.layout.activity_image_view_gallery);
 
 		mImageViewPager = (ViewPager) findViewById(R.id.image_view_view_pager);
-//		initMid = getIntent().getStringExtra("cid");
 		currentImageID = getIntent().getStringExtra("imageID");
 		int type = getIntent().getIntExtra("type", 0);
 		switch (type) {
@@ -58,6 +55,10 @@ public class ImageViewGallery extends FragmentActivity {
 		case V2GlobalEnum.GROUP_TYPE_CROWD:
 			long gid = getIntent().getLongExtra("gid", 0);
 			loadCrowdImages(gid); 
+			break;
+		case V2GlobalEnum.GROUP_TYPE_DEPARTMENT:
+			long departmentID = getIntent().getLongExtra("gid", 0);
+			loadDepartmentImages(departmentID); 
 			break;
 		default:
 			throw new RuntimeException("The given group type is error , please check it :" + type);
@@ -106,6 +107,12 @@ public class ImageViewGallery extends FragmentActivity {
 	private void loadConferenceImages(long groupId) {
 		List<VMessage> list = MessageLoader
 				.loadGroupImageMessage(this, Integer.valueOf(V2GlobalEnum.GROUP_TYPE_CONFERENCE) , groupId);
+		populateImageMessage(list);
+	}
+	
+	private void loadDepartmentImages(long groupId) {
+		List<VMessage> list = MessageLoader
+				.loadGroupImageMessage(this, Integer.valueOf(V2GlobalEnum.GROUP_TYPE_DEPARTMENT) , groupId);
 		populateImageMessage(list);
 	}
 

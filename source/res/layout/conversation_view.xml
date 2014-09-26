@@ -37,7 +37,9 @@
         android:id="@+id/group_list_conference_titlelayout"
         android:layout_alignTop="@+id/group_list_conference_image_view_rl"
         android:layout_marginLeft="30dp"
+        android:layout_marginRight="30dp"
         android:layout_toRightOf="@+id/group_list_conference_image_view_rl"
+        android:layout_toLeftOf="@+id/gourp_list_conference_create_time_tv"
         android:layout_width="wrap_content"
         android:orientation="vertical"
         android:layout_height="wrap_content">
@@ -60,7 +62,7 @@
         android:ellipsize="end"
         android:gravity="left|bottom"
         android:singleLine="true"
-        android:text="TextView"
+        android:text="TextViewaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
         android:textColor="@color/conversation_view_text_color"
         android:maxWidth="@dimen/conversation_view_text_max_width"
         android:textSize="@dimen/common_item_text_size_16" />

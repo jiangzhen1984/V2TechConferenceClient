@@ -292,7 +292,7 @@ public class MessageAuthenticationActivity extends Activity {
 		intentFilter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
 		intentFilter.addAction(JNIService.JNI_BROADCAST_NEW_QUALIFICATION_MESSAGE);
 		intentFilter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
-		registerReceiver(friendAuthenticationBroadcastReceiver, intentFilter);
+		registerReceiver(mCrowdAuthenticationBroadcastReceiver, intentFilter);
 
 	}
 
