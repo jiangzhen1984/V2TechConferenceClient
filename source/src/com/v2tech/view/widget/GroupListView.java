@@ -508,6 +508,15 @@ public class GroupListView extends ListView {
 		}
 
 	};
+	
+	private OnClickListener mCheckBoxListener = new OnClickListener() {
+
+		@Override
+		public void onClick(View v) {
+			V2Log.e("vvvvvv:"+v);
+		}
+		
+	};
 
 	private static final int UPDATE_USER_STATUS = 1;
 	private Handler mLocalHandler = new Handler() {
@@ -838,6 +847,7 @@ public class GroupListView extends ListView {
 				mCb = (CheckBox) mRoot.findViewById(R.id.user_check_view);
 				mCb.setVisibility(View.VISIBLE);
 				mCb.setChecked(mItem.isChecked());
+				mCb.setOnClickListener(null);
 			} else {
 				mRoot.findViewById(R.id.user_check_view).setVisibility(
 						View.GONE);
@@ -864,6 +874,7 @@ public class GroupListView extends ListView {
 				mCb = (CheckBox) mRoot.findViewById(R.id.group_view_ck);
 				mCb.setVisibility(View.VISIBLE);
 				mCb.setChecked(mItem.isChecked());
+				mCb.setOnClickListener(mCheckBoxListener);
 			} else {
 				mRoot.findViewById(R.id.group_view_ck).setVisibility(View.GONE);
 			}

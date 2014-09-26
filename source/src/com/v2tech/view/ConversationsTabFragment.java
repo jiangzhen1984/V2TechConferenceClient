@@ -270,6 +270,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 
 			if (mCurrentTabFlag == Conversation.TYPE_CONTACT) {
 				intentFilter.addAction(JNIService.JNI_BROADCAST_FRIEND_ADDED);
+				intentFilter.addAction(JNIService.JNI_BROADCAST_NEW_QUALIFICATION_MESSAGE);
 			}
 
 			if (mCurrentTabFlag == Conversation.TYPE_GROUP) {
@@ -1819,6 +1820,9 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 				updateVoiceSpecificItemState();
 
 				showUnreadFriendAuthenticationRedFlag();
+			} else if (JNIService.JNI_BROADCAST_NEW_QUALIFICATION_MESSAGE.equals(intent.getAction())) {
+				//If this can receive this broadcast, means MessageAuthenticationActivity doesn't show, we need to show red icon
+				updateUnreadVoiceConversation(true);
 			}
 		}
 	}

@@ -65,6 +65,7 @@ public class MessageAuthenticationActivity extends Activity {
 	FriendMessageAdapter firendAdapter;
 	private GroupMessageAdapter groupAdapter;
 	FriendAuthenticationBroadcastReceiver friendAuthenticationBroadcastReceiver;
+	private CrowdAuthenticationBroadcastReceiver mCrowdAuthenticationBroadcastReceiver;
 
 	private boolean isFriendAuthentication = true;
 
@@ -282,6 +283,15 @@ public class MessageAuthenticationActivity extends Activity {
 		IntentFilter intentFilter = new IntentFilter();
 		intentFilter.addAction(JNIService.JNI_BROADCAST_FRIEND_ADDED);
 		intentFilter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
+		
+		registerReceiver(friendAuthenticationBroadcastReceiver, intentFilter);
+		
+		
+		mCrowdAuthenticationBroadcastReceiver = new CrowdAuthenticationBroadcastReceiver();
+		intentFilter = new IntentFilter();
+		intentFilter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
+		intentFilter.addAction(JNIService.JNI_BROADCAST_NEW_QUALIFICATION_MESSAGE);
+		intentFilter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
 		registerReceiver(friendAuthenticationBroadcastReceiver, intentFilter);
 
 	}
@@ -289,6 +299,9 @@ public class MessageAuthenticationActivity extends Activity {
 	void unInitReceiver() {
 		if (friendAuthenticationBroadcastReceiver != null) {
 			unregisterReceiver(friendAuthenticationBroadcastReceiver);
+		}
+		if (mCrowdAuthenticationBroadcastReceiver != null) {
+			unregisterReceiver(mCrowdAuthenticationBroadcastReceiver);
 		}
 	}
 
@@ -744,6 +757,18 @@ public class MessageAuthenticationActivity extends Activity {
 
 	}
 
+	
+	class CrowdAuthenticationBroadcastReceiver extends BroadcastReceiver {
+		
+		@Override
+		public void onReceive(Context arg0, Intent arg1) {
+			if (JNIService.JNI_BROADCAST_NEW_QUALIFICATION_MESSAGE.equals(arg1.getAction())) {
+				groupAdapter.notifyDataSetChanged();
+				//Cancel next broadcast
+				this.abortBroadcast();
+			}
+		}
+	}
 	class FriendAuthenticationBroadcastReceiver extends BroadcastReceiver {
 
 		@Override

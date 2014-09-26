@@ -11,6 +11,8 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
@@ -42,6 +44,7 @@ public class UpdateContactGroupActivity extends Activity {
 	private Toast mToast;
 	// 值为"addFriend"时是从加好友跳转而来，其他值为更改分组跳转而来。
 	private String from;
+	private View mReturnButton;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -52,6 +55,8 @@ public class UpdateContactGroupActivity extends Activity {
 		mContext = this;
 		setContentView(R.layout.activity_contacts_update_group);
 		mGroupListLy = (RadioGroup) findViewById(R.id.contact_update_group_list);
+		mReturnButton = findViewById(R.id.contact_update_return_button);
+		mReturnButton.setOnClickListener(mReturnButtonListener);
 		// build radio button first
 		buildList();
 		mGroupListLy.setOnCheckedChangeListener(mGroupChangedListener);
@@ -115,6 +120,14 @@ public class UpdateContactGroupActivity extends Activity {
 		super.finish();
 		overridePendingTransition(R.animator.right_in, R.animator.right_out);
 	}
+	
+	
+
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		contactService.clearCalledBack();
+	}
 
 	@Override
 	public void onBackPressed() {
@@ -123,6 +136,15 @@ public class UpdateContactGroupActivity extends Activity {
 		}
 		super.onBackPressed();
 	}
+	
+	private OnClickListener mReturnButtonListener = new OnClickListener() {
+
+		@Override
+		public void onClick(View v) {
+			onBackPressed();
+		}
+		
+	};
 
 	private RadioGroup.OnCheckedChangeListener mGroupChangedListener = new RadioGroup.OnCheckedChangeListener() {
 

@@ -50,6 +50,10 @@
                 android:layout_alignParentLeft="true"
                 android:layout_centerVertical="true"
                 android:layout_marginLeft="15dp"
+                 android:paddingBottom="10dp"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp"
+                android:paddingTop="10dp"
                 android:text="@string/crowd_files_return_button"
                 android:textColor="@color/conf_create_button_color" />
         </RelativeLayout>

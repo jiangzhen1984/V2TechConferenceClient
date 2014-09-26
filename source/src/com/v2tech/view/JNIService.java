@@ -19,7 +19,6 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.Parcelable;
 import android.support.v4.util.LongSparseArray;
-import android.util.Log;
 import android.widget.Toast;
 
 import com.V2.jni.AudioRequest;
@@ -47,7 +46,6 @@ import com.V2.jni.ind.V2User;
 import com.V2.jni.ind.VideoJNIObjectInd;
 import com.V2.jni.util.V2Log;
 import com.v2tech.R;
-import com.v2tech.db.ContentDescriptor;
 import com.v2tech.service.BitmapManager;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.util.GlobalConfig;
@@ -62,6 +60,7 @@ import com.v2tech.view.conversation.MessageBuilder;
 import com.v2tech.view.conversation.MessageLoader;
 import com.v2tech.vo.ConferenceGroup;
 import com.v2tech.vo.Crowd;
+import com.v2tech.vo.CrowdGroup;
 import com.v2tech.vo.Group;
 import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.NetworkStateCode;
@@ -72,6 +71,7 @@ import com.v2tech.vo.VMessageAbstractItem;
 import com.v2tech.vo.VMessageAudioItem;
 import com.v2tech.vo.VMessageFileItem;
 import com.v2tech.vo.VMessageImageItem;
+import com.v2tech.vo.VMessageQualificationInvitationCrowd;
 
 /**
  * This service is used to wrap JNI call.<br>
@@ -109,6 +109,7 @@ public class JNIService extends Service {
 	public static final String JNI_BROADCAST_GROUP_USER_ADDED = "com.v2tech.jni.broadcast.group_user_added";
 	public static final String JNI_BROADCAST_VIDEO_CALL_CLOSED = "com.v2tech.jni.broadcast.video_call_closed";
 	public static final String JNI_BROADCAST_FRIEND_ADDED = "com.v2tech.jni.broadcast.friend_authentication";
+	public static final String JNI_BROADCAST_NEW_QUALIFICATION_MESSAGE = "com.v2tech.jni.broadcast.new.qualification_message";
 
 	/**
 	 * Crowd invitation with key crowd
@@ -610,14 +611,17 @@ public class JNIService extends Service {
 					owner.setName(group.creator.name);
 				}
 
-				Crowd crowd = new Crowd(group.id, owner, group.name,
-						group.brief);
-
-//				Intent i = new Intent(JNI_BROADCAST_CROWD_INVATITION);
-//				i.addCategory(JNI_ACTIVITY_CATEGROY);
-//				i.putExtra("crowd", crowd);
-//				i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//				mContext.startActivity(i);
+				
+				//Save message to database
+				VMessageQualificationInvitationCrowd crowdMsg = new VMessageQualificationInvitationCrowd(
+						new CrowdGroup(group.id, group.name, owner),
+						GlobalHolder.getInstance().getCurrentUser());
+				MessageBuilder.saveQualicationMessage(mContext, crowdMsg);
+				//Send broadcast
+				Intent i = new Intent(JNI_BROADCAST_NEW_QUALIFICATION_MESSAGE);
+				i.addCategory(JNI_ACTIVITY_CATEGROY);
+				i.putExtra("msgId", crowdMsg.getId());
+				mContext.sendOrderedBroadcast(i, null);
 
 			}
 		}
@@ -1101,7 +1105,8 @@ public class JNIService extends Service {
 			VMessage vm = new VMessage(0, 0, fromUser, GlobalHolder
 					.getInstance().getCurrentUser(), new Date(
 					GlobalConfig.getGlobalServerTime()));
-			VMessageFileItem vfi = new VMessageFileItem(vm, file.fileId, file.fileSize , file.fileName , file.fileType);
+			VMessageFileItem vfi = new VMessageFileItem(vm, file.fileId,
+					file.fileSize, file.fileName, file.fileType);
 			vfi.setState(VMessageFileItem.STATE_FILE_UNDOWNLOAD);
 			vm.setmXmlDatas(vm.toXml());
 			Message.obtain(mCallbackHandler, JNI_RECEIVED_MESSAGE, vm)
@@ -1121,7 +1126,7 @@ public class JNIService extends Service {
 
 		@Override
 		public void OnFileDownloadError(String sFileID, int errorCode,
-				int nTransType , Context context) {
+				int nTransType, Context context) {
 
 		}
 
