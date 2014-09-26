@@ -127,8 +127,16 @@ public class FileRequest {
 
 	public native void pauseHttpRecvFile(String szFileID, int type);
 
-	public native void httpDownloadFile(String patch, String patch1,
-			String patch2, int i, int i1);
+	/**
+	 * 下载失败，重新下载时调用
+	 * @param url
+	 * @param sfileid
+	 * @param sDownDir
+	 * @param encrypttype
+	 * @param businessType 填1即可
+	 */
+	public native void httpDownloadFile(String url, String sfileid,
+			String sDownDir, int encrypttype, int businessType);
 
 	/**
 	 * Receive the Files from the others , but not contain group's files..
@@ -241,7 +249,7 @@ public class FileRequest {
 	}
 
 	/**
-	 * 暂不用
+	 * 当发送文件或下载文件出错时，会回调该函数
 	 * @param szFileID
 	 * @param errorCode
 	 * @param nTransType
@@ -270,7 +278,7 @@ public class FileRequest {
 	}
 
 	/**
-	 * 当发送文件或下载文件出错时，会回调该函数
+	 * 弃用
 	 * @param sFileID
 	 * @param errorCode
 	 * @param nTransType 1 send 2 download

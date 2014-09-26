@@ -711,7 +711,7 @@ public class MessageLoader {
 				fileItem.getState());
 		String where = ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_ID
 				+ "= ?";
-		String[] selectionArgs = new String[] { vm.getUUID() };
+		String[] selectionArgs = new String[] { fileItem.getUuid() };
 		int ret = mContext.getContentResolver().update(
 				ContentDescriptor.HistoriesFiles.CONTENT_URI, values, where,
 				selectionArgs);

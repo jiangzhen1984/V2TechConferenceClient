@@ -13,6 +13,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.v2tech.R;
+import com.v2tech.vo.FileInfoBean;
 
 public class ConversationSelectFileEntry extends Activity implements OnClickListener{
 

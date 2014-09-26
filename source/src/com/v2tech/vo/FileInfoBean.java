@@ -1,4 +1,4 @@
-package com.v2tech.view.conversation;
+package com.v2tech.vo;
 
 import android.os.Parcel;
 import android.os.Parcelable;

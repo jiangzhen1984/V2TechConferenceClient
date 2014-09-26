@@ -261,6 +261,10 @@ public class MessageBodyView extends LinearLayout {
 		TextView tvResend = (TextView) popWindow
 				.findViewById(R.id.contact_message_pop_up_item_resend);
 		tvResend.setOnClickListener(mResendButtonListener);
+		
+		TextView tvReDownload = (TextView) popWindow
+				.findViewById(R.id.contact_message_pop_up_item_redownload);
+		tvReDownload.setOnClickListener(mResendButtonListener);
 
 		if (messageType == MESSAGE_TYPE_TEXT) {
 			TextView tv = (TextView) popWindow
@@ -917,10 +921,10 @@ public class MessageBodyView extends LinearLayout {
 								&& mMsg.getItems().get(0).getType() == VMessageFileItem.ITEM_TYPE_FILE) {
 							VMessageFileItem fileItem = (VMessageFileItem) mMsg
 									.getItems().get(0);
-							if (fileItem.getState() != VMessageAbstractItem.STATE_FILE_SENDING) {
-								callback.requestDownloadFile(fileRootView, mMsg,
-										fileItem);
-							}
+							callback.requestDownloadFile(fileRootView, mMsg,
+									fileItem);
+							fileItem.setState(VMessageAbstractItem.STATE_FILE_DOWNLOADING);
+							updateFailedFlag(false);
 							updateFileItemView(fileItem, fileRootView);
 						}
 					}
@@ -933,7 +937,7 @@ public class MessageBodyView extends LinearLayout {
 		}
 
 	};
-
+	
 	class LoadTask extends AsyncTask<ImageView, Void, ImageView[]> {
 
 		@Override

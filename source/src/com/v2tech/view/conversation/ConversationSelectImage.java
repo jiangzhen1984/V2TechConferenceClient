@@ -40,6 +40,7 @@ import android.widget.Toast;
 import com.V2.jni.util.V2Log;
 import com.v2tech.R;
 import com.v2tech.util.BitmapUtil;
+import com.v2tech.vo.FileInfoBean;
 
 public class ConversationSelectImage extends Activity {
 

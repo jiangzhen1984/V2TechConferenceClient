@@ -192,8 +192,10 @@ public class VoiceMessageActivity extends Activity {
 			@Override
 			public void onClick(View v) {
 
-				if (deleteList.size() <= 0)
+				if (deleteList.size() <= 0){
+					Toast.makeText(mContext, "请选择要删除的对象", Toast.LENGTH_SHORT).show();
 					return;
+				}
 
 				for (Iterator<Entry<Integer, AudioVideoMessageBean>> i = deleteList
 						.entrySet().iterator(); i.hasNext();) {
@@ -209,6 +211,17 @@ public class VoiceMessageActivity extends Activity {
 					if (delete == 0)
 						Log.e(TAG, "delete failed...");
 				}
+				
+				isEditing = false;
+				deleteLayout.setVisibility(View.GONE);
+				deleteOperator.setVisibility(View.INVISIBLE);
+				cannelOperator.setVisibility(View.INVISIBLE);
+				cannelOperator.setClickable(false);
+
+				callBack.setVisibility(View.VISIBLE);
+				callBack.setClickable(true);
+				
+				isVisibile = false;
 				adapter.notifyDataSetChanged();
 			}
 		});
@@ -376,18 +389,22 @@ public class VoiceMessageActivity extends Activity {
 				// 处理未读数量与字体颜色
 				if (audioVideoMessageBean.readState == AudioVideoMessageBean.STATE_UNREAD) {
 					holder.unreadNumber.setVisibility(View.VISIBLE);
-					holder.directionIcon
-							.setImageResource(R.drawable.vs_voice_nolistener);
 					holder.voiceName.setTextColor(Color.RED);
 					holder.unreadNumber.setText(" ( "
 							+ audioVideoMessageBean.callNumbers + " )");
 					holder.unreadNumber.setTextColor(Color.RED);
 				} else {
 					holder.unreadNumber.setVisibility(View.GONE);
-					holder.directionIcon
-							.setImageResource(R.drawable.vs_voice_listener);
 				}
 			}
+			
+			if(audioVideoMessageBean.meidaState == VideoBean.STATE_NO_ANSWER_CALL)
+				holder.directionIcon
+				.setImageResource(R.drawable.vs_voice_nolistener);
+			else
+				holder.directionIcon
+				.setImageResource(R.drawable.vs_voice_listener);
+			
 			
 			if(isVisibile){
 				holder.selected.setVisibility(View.VISIBLE);

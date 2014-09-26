@@ -1,5 +1,6 @@
 package com.v2tech.view;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
@@ -36,13 +37,21 @@ import com.V2.jni.util.V2Log;
 import com.v2tech.R;
 import com.v2tech.db.V2techSearchContentProvider;
 import com.v2tech.util.Notificator;
+import com.v2tech.view.conversation.ConversationUpdateFileState;
+import com.v2tech.view.conversation.ConversationView;
+import com.v2tech.view.conversation.MessageBuilder;
+import com.v2tech.view.conversation.ConversationUpdateFileState.FileStateInterface;
+import com.v2tech.view.widget.CommonAdapter.CommonAdapterItemWrapper;
 import com.v2tech.view.widget.TitleBar;
 import com.v2tech.vo.Conference;
 import com.v2tech.vo.Conversation;
 import com.v2tech.vo.NetworkStateCode;
+import com.v2tech.vo.VMessage;
+import com.v2tech.vo.VMessageAbstractItem;
+import com.v2tech.vo.VMessageFileItem;
 
 public class MainActivity extends FragmentActivity implements
-		NotificationListener {
+		NotificationListener , FileStateInterface{
 
 	private Context mContext;
 	private boolean exitedFlag = false;
@@ -54,11 +63,14 @@ public class MainActivity extends FragmentActivity implements
 	private PagerAdapter mPagerAdapter;
 	
 	private ConferenceListener mConfListener;
+	
+	private List<CommonAdapterItemWrapper> messageArray;
 
 	private static final int SUB_ACTIVITY_CODE_CREATE_CONF = 100;
 
 	public static final String SERVICE_BOUNDED_EVENT = "com.v2tech.SERVICE_BOUNDED_EVENT";
 	public static final String SERVICE_UNBOUNDED_EVENT = "com.v2tech.SERVICE_UNBOUNDED_EVENT";
+	private static final String TAG = "MainActivity";
 
 	private int[] imgs = new int[] { R.drawable.conversation_video_button,
 			R.drawable.conversation_group_button,
@@ -161,6 +173,8 @@ public class MainActivity extends FragmentActivity implements
 		initReceiver();
 		// Start animation
 		this.overridePendingTransition(R.animator.left_in, R.animator.left_out);
+		ConversationUpdateFileState.getInstance().setFileStateInterface(this);
+		messageArray = new ArrayList<CommonAdapterItemWrapper>();
 		V2Log.d(" main onCreate ");
 	}
 
@@ -514,6 +528,8 @@ public class MainActivity extends FragmentActivity implements
 			String action = intent.getAction();
 			if (PublicIntent.FINISH_APPLICATION.equals(action)) {
 				exitedFlag = true;
+				//把会话中所有发送或下载的文件，状态更新到数据库
+				executeUpdateFileState();
 				requestQuit();
 			} else if (JNIService.JNI_BROADCAST_CONNECT_STATE_NOTIFICATION
 					.equals(action)) {
@@ -564,5 +580,44 @@ public class MainActivity extends FragmentActivity implements
 		return super.dispatchTouchEvent(ev);
 	}
 
+	@Override
+	public void updateFileState(List<CommonAdapterItemWrapper> messageArray) {
+		this.messageArray.addAll(messageArray);
+	}
+	
+	public void executeUpdateFileState(){
+		
+		if(messageArray == null){
+			V2Log.e(TAG, "executeUpdateFileState is failed ... because messageArray is null");
+			return ;
+		}
+			
+		for (int i = 0; i < messageArray.size(); i++) {
+			VMessage vm = (VMessage) messageArray.get(i)
+					.getItemObject();
+			if (vm.getFileItems().size() > 0) {
+				List<VMessageFileItem> fileItems = vm.getFileItems();
+				for (int j = 0; j < fileItems.size(); j++) {
+					VMessageFileItem item = fileItems.get(j);
+					switch (item.getState()) {
+					case VMessageAbstractItem.STATE_FILE_DOWNLOADING:
+					case VMessageAbstractItem.STATE_FILE_PAUSED_DOWNLOADING:
+						item.setState(VMessageFileItem.STATE_FILE_DOWNLOADED_FALIED);
+						MessageBuilder.updateVMessageItemToSentFalied(
+								mContext, vm);
+						break;
+					case VMessageAbstractItem.STATE_FILE_SENDING:
+					case VMessageAbstractItem.STATE_FILE_PAUSED_SENDING:
+						item.setState(VMessageFileItem.STATE_FILE_SENT_FALIED);
+						MessageBuilder.updateVMessageItemToSentFalied(
+								mContext, vm);
+						break;
+					default:
+						break;
+					}
+				}
+			}
+		}
+	}
 
 }

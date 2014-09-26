@@ -704,7 +704,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 
 			@Override
 			public void run() {
-
+				//FIXME don't sleep Thread
 				SystemClock.sleep(3000);
 				Conversation firstAdd = null;
 				Conversation secondAdd = null;

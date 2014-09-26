@@ -9,6 +9,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -23,6 +24,7 @@ import com.v2tech.db.DataBaseContext;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.util.GlobalConfig;
 import com.v2tech.vo.CrowdGroup;
+import com.v2tech.vo.FileInfoBean;
 import com.v2tech.vo.User;
 import com.v2tech.vo.VMessage;
 import com.v2tech.vo.VMessageAbstractItem;
@@ -531,11 +533,11 @@ public class MessageBuilder {
 	 * @param msg
 	 * @return
 	 */
-	public static boolean saveQualicationMessage(Context context,
+	public static Uri saveQualicationMessage(Context context,
 			VMessageQualification msg) {
 		if (msg == null) {
 			V2Log.e("To store failed...please check the given VMessageQualification Object in the databases");
-			return false;
+			return null;
 		}
 		DataBaseContext mContext = new DataBaseContext(context);
 		ContentValues values = new ContentValues();
@@ -544,6 +546,7 @@ public class MessageBuilder {
 		values.put(
 				ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_SAVEDATE,
 				GlobalConfig.getGlobalServerTime());
+		Uri uri = null;
 		switch (msg.getType()) {
 		case CROWD_INVITATION:
 			VMessageQualificationInvitationCrowd crowdInviteMsg = (VMessageQualificationInvitationCrowd) msg;
@@ -574,9 +577,9 @@ public class MessageBuilder {
 			values.put(
 					ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_BASE_INFO,
 					crowdInviteMsg.getCrowdGroup().toXml());
-			mContext.getContentResolver().insert(
+			uri = mContext.getContentResolver().insert(
 					ContentDescriptor.HistoriesCrowd.CONTENT_URI, values);
-			return true;
+			return uri;
 		case CROWD_APPLICATION:
 			VMessageQualificationApplicationCrowd crowdApplyMsg = (VMessageQualificationApplicationCrowd) msg;
 			values.put(
@@ -606,16 +609,17 @@ public class MessageBuilder {
 			values.put(
 					ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_BASE_INFO,
 					crowdApplyMsg.getCrowdGroup().toXml());
-			mContext.getContentResolver().insert(
+			uri = mContext.getContentResolver().insert(
 					ContentDescriptor.HistoriesCrowd.CONTENT_URI, values);
-			return true;
+			crowdApplyMsg.setId(ContentUris.parseId(uri));	 
+			return uri;
 		case CONTACT:
 			break;
 		default:
 			throw new RuntimeException(
 					"invalid VMessageQualification enum type.. please check the type");
 		}
-		return false;
+		return uri;
 	}
 
 	/**
