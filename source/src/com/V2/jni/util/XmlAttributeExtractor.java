@@ -180,6 +180,10 @@ public class XmlAttributeExtractor {
 			String uploader = el.getAttribute("uploader");
 			String url = el.getAttribute("url");
 			String size = el.getAttribute("size");
+			int index = name.lastIndexOf("/");
+			if (index != -1) {
+				name = name.substring(index);
+			}
 			
 			FileJNIObject file = new FileJNIObject(new V2User(
 					Long.parseLong(uploader)), id, name, Long.parseLong(size),

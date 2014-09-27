@@ -43,7 +43,7 @@ public class CrowdConversation extends Conversation {
 
 	@Override
 	public String getDate() {
-		return date;
+		return "";
 	}
 	
 	public void setMsg(String msg) {

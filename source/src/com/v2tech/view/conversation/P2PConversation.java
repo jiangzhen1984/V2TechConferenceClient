@@ -211,6 +211,8 @@ public class P2PConversation extends Activity implements
 				// Update mute button to disable
 				setMuteButtonDisable(true);
 			}
+			//Start waiting voice
+			playRingToneOuting();
 		}
 
 		// initialize phone state listener
@@ -388,6 +390,20 @@ public class P2PConversation extends Activity implements
 
 	}
 
+	
+
+	private void playRingToneOuting() {
+		mPlayer = MediaPlayer.create(mContext, R.raw.outing_ring_tone_1);
+		mPlayer.setLooping(true);
+		mPlayer.start();
+	}
+	
+	private void  stopRingToneOuting() {
+		if (mPlayer != null) {
+			mPlayer.release();
+		}
+	}
+	
 	private void playRingToneIncoming() {
 		mPlayer = MediaPlayer.create(mContext,
 				RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE));
@@ -1499,7 +1515,8 @@ public class P2PConversation extends Activity implements
 						V2Log.e(" indicator is null can not open audio UI ");
 					}
 				}
-
+				//Stop waiting voice
+				stopRingToneOuting();
 				break;
 
 			case VIDEO_CONECTED:

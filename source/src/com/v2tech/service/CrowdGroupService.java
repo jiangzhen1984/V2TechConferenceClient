@@ -3,26 +3,31 @@ package com.v2tech.service;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
 
+import com.V2.jni.FileRequest;
+import com.V2.jni.FileRequestCallbackAdapter;
 import com.V2.jni.GroupRequest;
 import com.V2.jni.GroupRequestCallbackAdapter;
 import com.V2.jni.ImRequest;
 import com.V2.jni.ImRequestCallbackAdapter;
 import com.V2.jni.ind.FileJNIObject;
 import com.V2.jni.ind.V2Group;
-import com.V2.jni.util.V2Log;
 import com.v2tech.service.jni.CreateCrowdResponse;
+import com.v2tech.service.jni.FileTransStatusIndication;
+import com.v2tech.service.jni.FileTransStatusIndication.FileTransErrorIndication;
+import com.v2tech.service.jni.FileTransStatusIndication.FileTransProgressStatusIndication;
 import com.v2tech.service.jni.JNIResponse;
 import com.v2tech.service.jni.RequestFetchGroupFilesResponse;
+import com.v2tech.util.GlobalConfig;
 import com.v2tech.vo.Crowd;
 import com.v2tech.vo.CrowdGroup;
 import com.v2tech.vo.Group;
 import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.User;
 import com.v2tech.vo.VCrowdFile;
-import com.v2tech.vo.VFile;
 
 //组别统一名称
 //1:部门, organizationGroup
@@ -47,8 +52,12 @@ public class CrowdGroupService extends AbstractHandler {
 	private static final int REFUSE_APPLICATION_CROWD = 0x0007;
 	private static final int FETCH_FILES_CROWD = 0x0008;
 
+	private static final int KEY_CANCELLED_LISTNER = 1;
+	private static final int KEY_FILE_TRANS_STATUS_NOTIFICATION_LISTNER = 2;
+
 	private ImRequestCB imCB;
 	private GroupRequestCB grCB;
+	private FileRequestCB frCB;
 	private long mPendingCrowdId;
 
 	public CrowdGroupService() {
@@ -56,6 +65,8 @@ public class CrowdGroupService extends AbstractHandler {
 		ImRequest.getInstance().addCallback(imCB);
 		grCB = new GroupRequestCB(this);
 		GroupRequest.getInstance().addCallback(grCB);
+		frCB = new FileRequestCB(this);
+		FileRequest.getInstance().addCallback(frCB);
 	}
 
 	/**
@@ -264,9 +275,10 @@ public class CrowdGroupService extends AbstractHandler {
 			sendResult(caller, jniRes);
 		}
 	}
-	
+
 	/**
 	 * Remove member from crowd
+	 * 
 	 * @param crowd
 	 * @param user
 	 * @param caller
@@ -275,13 +287,16 @@ public class CrowdGroupService extends AbstractHandler {
 		if (!checkParamNull(caller, new Object[] { crowd, member })) {
 			return;
 		}
-		GroupRequest.getInstance().delGroupUser(crowd.getGroupType().intValue(), crowd.getmGId(), member.getmUserId());
+		GroupRequest.getInstance().delGroupUser(
+				crowd.getGroupType().intValue(), crowd.getmGId(),
+				member.getmUserId());
 	}
 
 	@Override
 	public void clearCalledBack() {
 		ImRequest.getInstance().removeCallback(imCB);
 		GroupRequest.getInstance().removeCallback(grCB);
+		FileRequest.getInstance().removeCallback(frCB);
 	}
 
 	/**
@@ -325,6 +340,66 @@ public class CrowdGroupService extends AbstractHandler {
 				caller);
 		GroupRequest.getInstance().getGroupFileInfo(
 				GroupType.CHATING.intValue(), crowd.getmGId());
+
+	}
+
+	/**
+	 * 
+	 * @param vf
+	 * @param opt
+	 *            {@link FileOperationEnum}
+	 * @param caller
+	 */
+	public void handleCrowdFile(VCrowdFile vf, FileOperationEnum opt,
+			Registrant caller) {
+		if (!checkParamNull(caller, new Object[] { vf })) {
+			return;
+		}
+
+		switch (opt) {
+		case OPERATION_START_DOWNLOAD:
+			FileRequest.getInstance().httpDownloadFile(vf.getUrl(), vf.getId(),
+					vf.getPath(), 0, 1);
+			break;
+		case OPERATION_CANCEL_DOWNLOADING:
+			FileRequest.getInstance().cancelRecvFile(vf.getId(), 1);
+			break;
+		case OPERATION_CANCEL_SENDING:
+			FileRequest.getInstance().cancelSendFile(vf.getId(), 1);
+			break;
+		case OPERATION_PAUSE_DOWNLOADING:
+			FileRequest.getInstance().pauseHttpRecvFile(vf.getId(), 1);
+			break;
+		case OPERATION_PAUSE_SENDING:
+			FileRequest.getInstance().pauseSendFile(vf.getId(), 1);
+			break;
+		case OPERATION_RESUME_DOWNLOAD:
+			FileRequest.getInstance().resumeHttpRecvFile(vf.getId(), 1);
+			break;
+		case OPERATION_RESUME_SEND:
+			FileRequest.getInstance().resumeSendFile(vf.getId(), 1);
+			break;
+		case OPERATION_START_SEND:
+			break;
+		default:
+			break;
+		}
+	}
+
+	/**
+	 * Register listener for file transport status
+	 * 
+	 * @param msg
+	 */
+	public void registerFileTransStatusListener(Handler h, int what, Object obj) {
+		registerListener(KEY_FILE_TRANS_STATUS_NOTIFICATION_LISTNER, h, what,
+				obj);
+	}
+
+	public void removeRegisterFileTransStatusListener(Handler h, int what,
+			Object obj) {
+		unRegisterListener(KEY_FILE_TRANS_STATUS_NOTIFICATION_LISTNER, h, what,
+				obj);
 
 	}
 
@@ -423,12 +498,15 @@ public class CrowdGroupService extends AbstractHandler {
 					vcf.setCrowd((CrowdGroup) GlobalHolder.getInstance()
 							.getGroupById(GroupType.CHATING.intValue(),
 									group.id));
-					
+
 					vcf.setId(f.fileId);
 					vcf.setName(f.fileName);
 					vcf.setSize(f.fileSize);
 					vcf.setUrl(f.url);
-					vcf.setUploader(GlobalHolder.getInstance().getUser(f.user.uid));
+					vcf.setUploader(GlobalHolder.getInstance().getUser(
+							f.user.uid));
+					vcf.setPath(GlobalConfig.getGlobalPath() + "/files/"
+							+ group.id + "/" + f.fileName);
 					vfList.add(vcf);
 				}
 				RequestFetchGroupFilesResponse jniRes = new RequestFetchGroupFilesResponse(
@@ -438,6 +516,51 @@ public class CrowdGroupService extends AbstractHandler {
 						.sendToTarget();
 			}
 
+		}
+
+	}
+
+	class FileRequestCB extends FileRequestCallbackAdapter {
+
+		public FileRequestCB(Handler mCallbackHandler) {
+		}
+
+		@Override
+		public void OnFileTransProgress(String szFileID, long nBytesTransed,
+				int nTransType) {
+			notifyListener(
+					KEY_FILE_TRANS_STATUS_NOTIFICATION_LISTNER,
+					0,
+					0,
+					new FileTransProgressStatusIndication(
+							nTransType,
+							szFileID,
+							nBytesTransed,
+							FileTransStatusIndication.IND_TYPE_PROGRESS_TRANSING));
+		}
+
+		@Override
+		public void OnFileTransEnd(String szFileID, String szFileName,
+				long nFileSize, int nTransType, Context context) {
+			notifyListener(
+					KEY_FILE_TRANS_STATUS_NOTIFICATION_LISTNER,
+					0,
+					0,
+					new FileTransProgressStatusIndication(
+							nTransType,
+							szFileID,
+							nFileSize,
+							FileTransStatusIndication.IND_TYPE_PROGRESS_TRANSING));
+
+		}
+
+		@Override
+		public void OnFileTransError(String szFileID, int errorCode,
+				int nTransType) {
+
+			notifyListener(KEY_FILE_TRANS_STATUS_NOTIFICATION_LISTNER, 0, 0,
+					new FileTransErrorIndication(szFileID, errorCode,
+							nTransType));
 		}
 
 	}
@@ -452,20 +575,11 @@ public class CrowdGroupService extends AbstractHandler {
 		}
 
 		@Override
-		public void OnCreateCrowdCallback(String sCrowdXml, int nResult) {
-			if (sCrowdXml == null || sCrowdXml.isEmpty()) {
+		public void OnCreateCrowdCallback(V2Group crowd, int nResult) {
+			if (crowd == null) {
 				return;
 			}
-			int start = sCrowdXml.indexOf("id='");
-			int end = sCrowdXml.indexOf("'", start + 4);
-			long id = 0;
-			if (start != -1 && end != -1) {
-				id = Long.parseLong(sCrowdXml.substring(start + 4, end));
-			} else {
-				V2Log.e("unmalformed crow response " + sCrowdXml);
-				return;
-			}
-			JNIResponse jniRes = new CreateCrowdResponse(id,
+			JNIResponse jniRes = new CreateCrowdResponse(crowd.id,
 					CreateCrowdResponse.Result.SUCCESS);
 			Message.obtain(mCallbackHandler, CREATE_GROUP_MESSAGE, jniRes)
 					.sendToTarget();

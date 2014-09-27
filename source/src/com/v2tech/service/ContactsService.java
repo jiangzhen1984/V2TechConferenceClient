@@ -174,9 +174,13 @@ public class ContactsService extends AbstractHandler {
 			ContactGroup defaultGroup = (ContactGroup) list.get(0);
 			List<User> userList = group.getUsers();
 			for (int i = 0; i < userList.size(); i++) {
+				User user = userList.get(i);
 				GroupRequest.getInstance().moveUserToGroup(
 						group.getGroupType().intValue(), group.getmGId(),
-						defaultGroup.getmGId(), userList.get(i).getmUserId());
+						defaultGroup.getmGId(), user.getmUserId());
+				group.removeUserFromGroup(user);
+				defaultGroup.addUserToGroup(user);
+				
 			}
 		}
 		// Initialize time out message
@@ -225,6 +229,9 @@ public class ContactsService extends AbstractHandler {
 			GroupRequest.getInstance().moveUserToGroup(
 					Group.GroupType.CONTACT.intValue(), srcGroup.getmGId(),
 					desGroup.getmGId(), user.getmUserId());
+			//Update cache
+			srcGroup.removeUserFromGroup(user);
+			desGroup.addUserToGroup(user);
 		}
 	}
 

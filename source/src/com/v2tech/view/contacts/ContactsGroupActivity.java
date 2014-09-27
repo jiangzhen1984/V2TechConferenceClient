@@ -106,9 +106,12 @@ public class ContactsGroupActivity extends Activity {
 
 	private List<CommonAdapterItemWrapper> convert(List<Group> listGroup) {
 		List<CommonAdapterItemWrapper> ds = new ArrayList<CommonAdapterItemWrapper>(
-				listGroup.size());
+				listGroup.size() - 1);
 		for (int i = 0; i < listGroup.size(); i++) {
 			final Group g = listGroup.get(i);
+			if (((ContactGroup)g).isDefault()) {
+				continue;
+			}
 			ds.add(new CommonAdapterItemWrapper() {
 
 				@Override

@@ -98,7 +98,7 @@ public class GroupListView extends ListView {
 		mFilterList = mBaseList;
 		adapter.notifyDataSetChanged();
 	}
-	
+
 	public int getCurrentListViewType() {
 		return currentListViewType;
 	}
@@ -130,12 +130,14 @@ public class GroupListView extends ListView {
 		for (int i = 0; i < mFilterList.size(); i++) {
 			Item item = mFilterList.get(i);
 			if (item instanceof GroupItem && ((GroupItem) item).isExpaned) {
-				sort = updateUserStatus(((GroupItem) item), i + 1, user, us);
+				int end = calculateGroupEnd(((GroupItem) item).mGroup, i+ 1);
+				sort = updateUserStatus(((GroupItem) item), i + 1, end, user, us);
 			}
 		}
-		if (sort) {
+		//Should always update status, because group need update statist information
+		//if (sort) {
 			adapter.notifyDataSetChanged();
-		}
+	//	}
 	}
 
 	/**
@@ -165,24 +167,24 @@ public class GroupListView extends ListView {
 		updateCheckItemWithoutNotification(group, flag);
 		adapter.notifyDataSetChanged();
 	}
-	
-	
+
 	/**
-	 * Remote list view item according user 
+	 * Remote list view item according user
+	 * 
 	 * @param user
 	 */
 	public void removeItem(User user) {
 		if (user == null) {
 			return;
 		}
-		for (int i=0; i < mFilterList.size(); i++) {
+		for (int i = 0; i < mFilterList.size(); i++) {
 			Item item = mFilterList.get(i);
 			if (item.getId() == user.getmUserId()) {
 				mFilterList.remove(i);
 				i--;
 			}
 		}
-		
+
 		mUserItemListMap.remove(user.getmUserId());
 		Set<Group> gSet = user.getBelongsGroup();
 		for (Group g : gSet) {
@@ -193,14 +195,98 @@ public class GroupListView extends ListView {
 		}
 		adapter.notifyDataSetChanged();
 	}
-	
-	public void addUser(User user) {
+
+	/**
+	 * Add new user to group
+	 * 
+	 * @param group
+	 * @param user
+	 */
+	public void addUser(Group group, User user) {
+		if (group == null || user == null) {
+			V2Log.e(" incorrect group:" + group + " or user: " + user);
+			return;
+		}
+
+		for (int i = 0; i < mFilterList.size(); i++) {
+			Item item = mFilterList.get(i);
+			Object obj = item.getObject();
+			if (obj == group) {
+				if (((GroupItem) item).isExpaned) {
+					// Calculate group end position
+					int end = calculateGroupEnd((Group) obj, i);
+					int pos = calculateIndex(i, end, user,
+							user.getmStatus());
+					if (pos != -1) {
+						Item userItem = this.getItem(group, user);
+						if (pos == mFilterList.size()) {
+							mFilterList.add(userItem);
+						} else {
+							mFilterList.add(pos, userItem);
+						}
+						break;
+					}
+				}
+			}
+		}
+
 		adapter.notifyDataSetChanged();
 	}
-	
+
 	public void updateItem(User user) {
-		//FIXME optimze for avatar
+		// FIXME optimze for avatar
 		adapter.notifyDataSetChanged();
+	}
+
+	public void notifiyDataSetChanged() {
+		adapter.notifyDataSetInvalidated();
+	}
+
+	/**
+	 * Update User group
+	 * 
+	 * @param user
+	 * @param src
+	 *            from group
+	 * @param dest
+	 *            to group
+	 */
+	public void updateUserGroup(User user, Group src, Group dest) {
+		if (user == null) {
+			V2Log.e("Incorrect paramters: user is null");
+			return;
+		}
+		int removeIndex = -1;
+		boolean found = false;
+		boolean insert = false;
+		for (int i = 0; i < mFilterList.size(); i++) {
+			Item item = mFilterList.get(i);
+			Object obj = item.getObject();
+			if (!found && obj == src && ((GroupItem) item).isExpaned) {
+				found = true;
+			}
+
+			if (dest == obj && ((GroupItem) item).isExpaned) {
+				insert = true;
+			}
+
+			// If found source group and user, then remove from source group
+			if (found && obj == user) {
+				removeIndex = i;
+			}
+
+			if (removeIndex != -1 && insert) {
+				break;
+			}
+
+		}
+
+		if (removeIndex != -1) {
+			mFilterList.remove(removeIndex);
+		}
+		if (insert) {
+			addUser(dest, user);
+		}
 	}
 
 	private void updateCheckItemWithoutNotification(User u, boolean flag) {
@@ -215,7 +301,9 @@ public class GroupListView extends ListView {
 
 	private void updateCheckItemWithoutNotification(Group group, boolean flag) {
 		Item item = mItemMap.get(group.getmGId());
-		item.setChecked(flag);
+		if (item != null) {
+			item.setChecked(flag);
+		}
 		List<User> list = group.getUsers();
 		for (User u : list) {
 			updateCheckItem(u, flag);
@@ -226,13 +314,13 @@ public class GroupListView extends ListView {
 		}
 	}
 
-	private boolean updateUserStatus(GroupItem gitem, int index, User user,
+	private boolean updateUserStatus(GroupItem gitem, int index, int gend, User user,
 			User.Status newSt) {
 		int pos = -1;
 		int start = index;
-		int end = ((Group) gitem.getObject()).getSubSize();
+		int end = gend;
 
-		while (start < end && mFilterList.size() > start) {
+		while (start <= end && mFilterList.size() > start) {
 			Item item = mFilterList.get(start);
 			Item endItem = mFilterList.get(end);
 
@@ -245,9 +333,9 @@ public class GroupListView extends ListView {
 				// If sub group is expended, we should update end position
 				if (((GroupItem) item).isExpaned) {
 					GroupItem subGroupItem = (GroupItem) item;
-					end += ((Group) subGroupItem.getObject()).getSubSize();
-					updateUserStatus(subGroupItem, start + 1, user, newSt);
-					start += ((Group) subGroupItem.getObject()).getSubSize();
+					int subGroupEndIndex = calculateGroupEnd(subGroupItem.mGroup, start);
+					updateUserStatus(subGroupItem, start + 1, subGroupEndIndex, user, newSt);
+					start += subGroupEndIndex;
 				}
 				start++;
 			}
@@ -261,9 +349,9 @@ public class GroupListView extends ListView {
 				// If sub group is expended, we should update end position
 				if (((GroupItem) endItem).isExpaned) {
 					GroupItem subGroupItem = (GroupItem) endItem;
-					end += ((Group) subGroupItem.getObject()).getSubSize();
-					updateUserStatus(subGroupItem, start + 1, user, newSt);
-					start += ((Group) subGroupItem.getObject()).getSubSize();
+					int subGroupEndIndex = calculateGroupEnd(subGroupItem.mGroup, start);
+					updateUserStatus(subGroupItem, start + 1, subGroupEndIndex, user, newSt);
+					start += subGroupEndIndex;
 				}
 				start++;
 			}
@@ -279,65 +367,129 @@ public class GroupListView extends ListView {
 		if (pos != -1) {
 			// Reset start and end position
 			start = index;
-			end = ((Group) gitem.getObject()).getSubSize() - 1;
+			end = gend;
 			// remove current status
 			Item origin = mFilterList.remove(pos);
 
-			while (start < end) {
-				pos = start;
-				Item item = mFilterList.get(start++);
-				if (item instanceof GroupItem) {
-					V2Log.e("=======" + ((Group)item.getObject()).getName());
-					continue;
-				}
-				User u = (User) ((UserItem) item).getObject();
-				// if item is current user, always sort after current user
-				if (u == null || u.getmUserId() == GlobalHolder.getInstance()
-						.getCurrentUserId()) {
-					continue;
-				}
-				if (newSt == User.Status.ONLINE) {
-					if (u.getmStatus() == User.Status.ONLINE
-							&& u.compareTo(user) < 0) {
-						continue;
-					} else {
-						break;
-					}
-				} else if (newSt == User.Status.OFFLINE
-						|| newSt == User.Status.HIDDEN) {
-					if ((u.getmStatus() == User.Status.OFFLINE || u
-							.getmStatus() == User.Status.HIDDEN)
-							&& user.compareTo(u) > 0) {
-						continue;
-					} else if (u.getmStatus() != User.Status.OFFLINE
-							&& u.getmStatus() != User.Status.HIDDEN) {
-						continue;
-					} else {
-						break;
-					}
+			pos = calculateIndex(start, end, user, newSt);
+			if (pos != -1) {
+				if (pos == mFilterList.size()) {
+					mFilterList.add(origin);
 				} else {
-					if (u.getmStatus() == User.Status.ONLINE) {
-						continue;
-					} else if (u.getmStatus() == User.Status.OFFLINE
-							|| u.getmStatus() == User.Status.HIDDEN) {
-						break;
-					} else if (u.compareTo(user) < 0) {
-						continue;
-					} else {
-						break;
-					}
+					mFilterList.add(pos, origin);
 				}
-			}
-
-			if (pos == mFilterList.size()) {
-				mFilterList.add(origin);
-			} else {
-				mFilterList.add(pos, origin);
 			}
 
 			return true;
 		}
 		return false;
+	}
+
+	/**
+	 * Calculate end index of current group
+	 * 
+	 * @param group
+	 * @param startIndex
+	 *            current group index in list
+	 * @return the last index of child position, if group child size is 0, return current group index
+	 */
+	private int calculateGroupEnd(Group group, int startIndex) {
+		if (startIndex >= mFilterList.size()) {
+			return -1;
+		}
+
+		if (startIndex == mFilterList.size()) {
+			return mFilterList.size();
+		} else if (mFilterList.size() == 1) {
+			return mFilterList.size();
+		}
+
+		int pos = -1;
+		while (startIndex < mFilterList.size()) {
+			Item item = mFilterList.get(startIndex);
+			Object obj = item.getObject();
+			if (startIndex + 1 == mFilterList.size()) {
+				pos = startIndex;
+				break;
+			} else if ((obj instanceof Group && group.getLevel() == ((Group) obj)
+					.getLevel())) {
+				pos = startIndex + 1;
+				break;
+			}
+			startIndex++;
+		}
+		return pos;
+	}
+
+	/**
+	 * Calculate user comfortable position which in list
+	 * 
+	 * @param start
+	 *            start index which belongs group
+	 * @param end
+	 *            end index which  belongs group
+	 * @param user
+	 * @param ust
+	 * @return
+	 */
+	private int calculateIndex(int start, int end, User user, User.Status ust) {
+		int pos = -1;
+		if (start < 0 || start > mFilterList.size() || end > mFilterList.size()) {
+			return -1;
+		}
+
+		// If start equal list size, return position of end group
+		if (start == mFilterList.size() && end == mFilterList.size()) {
+			return start;
+		} else if (start == end) {
+			return end + 1;
+		}
+
+		while (start <= end) {
+			pos = start;
+			Item item = mFilterList.get(start++);
+			if (item instanceof GroupItem) {
+				continue;
+			}
+			User u = (User) ((UserItem) item).getObject();
+			// if item is current user, always sort after current user
+			if (u == null
+					|| u.getmUserId() == GlobalHolder.getInstance()
+							.getCurrentUserId()) {
+				continue;
+			}
+			if (ust == User.Status.ONLINE) {
+				if (u.getmStatus() == User.Status.ONLINE
+						&& u.compareTo(user) < 0) {
+					continue;
+				} else {
+					break;
+				}
+			} else if (ust == User.Status.OFFLINE || ust == User.Status.HIDDEN) {
+				if ((u.getmStatus() == User.Status.OFFLINE || u.getmStatus() == User.Status.HIDDEN)
+						&& user.compareTo(u) > 0) {
+					continue;
+				} else if (u.getmStatus() != User.Status.OFFLINE
+						&& u.getmStatus() != User.Status.HIDDEN) {
+					continue;
+				} else {
+					break;
+				}
+			} else {
+				if (u.getmStatus() == User.Status.ONLINE) {
+					continue;
+				} else if (u.getmStatus() == User.Status.OFFLINE
+						|| u.getmStatus() == User.Status.HIDDEN) {
+					break;
+				} else if (u.compareTo(user) < 0) {
+					continue;
+				} else {
+					break;
+				}
+			}
+		}
+
+		return pos;
 	}
 
 	private Item getItem(Group g) {
@@ -372,8 +524,6 @@ public class GroupListView extends ListView {
 
 		return item;
 	}
-	
-	
 
 	@Override
 	public void setFilterText(String filterText) {
@@ -440,7 +590,7 @@ public class GroupListView extends ListView {
 		Group g = (Group) item.getObject();
 		List<Group> subGroupList = g.getChildGroup();
 		// DO not user for(Group g:list) concurrency problem
-		for (int i = subGroupList.size() - 1; i >=0; i--) {
+		for (int i = subGroupList.size() - 1; i >= 0; i--) {
 			Group subG = subGroupList.get(i);
 			if (mFilterList.size() == pos + 1) {
 				mFilterList.add(getItem(subG));
@@ -508,14 +658,16 @@ public class GroupListView extends ListView {
 		}
 
 	};
-	
+
 	private OnClickListener mCheckBoxListener = new OnClickListener() {
 
 		@Override
 		public void onClick(View v) {
-			V2Log.e("vvvvvv:"+v);
+			if (mListener != null) {
+				mListener.onCheckboxClicked(v, (Item) v.getTag());
+			}
 		}
-		
+
 	};
 
 	private static final int UPDATE_USER_STATUS = 1;
@@ -635,6 +787,8 @@ public class GroupListView extends ListView {
 
 		public boolean onItemLongClick(AdapterView<?> parent, View view,
 				int position, long id, Item item);
+
+		public void onCheckboxClicked(View view, Item item);
 	}
 
 	public interface Item extends Comparable<Item> {
@@ -790,6 +944,7 @@ public class GroupListView extends ListView {
 				} else {
 					groupRoot.setPadding(35, 0, 0, 0);
 				}
+				groupRoot.invalidate();
 				mRoot.findViewById(R.id.user_view_root)
 						.setVisibility(View.GONE);
 			} else {
@@ -804,6 +959,11 @@ public class GroupListView extends ListView {
 
 				mRoot.findViewById(R.id.group_view_root).setVisibility(
 						View.GONE);
+			}
+
+			// Update checkbox tag
+			if (mCb != null) {
+				mCb.setTag(item);
 			}
 		}
 
@@ -837,7 +997,8 @@ public class GroupListView extends ListView {
 			mUserSignatureTV.setSingleLine(true);
 			mUserSignatureTV.setEllipsize(TruncateAt.END);
 
-			if(currentListViewType == V2GlobalEnum.GROUP_TYPE_CONTACT && !TextUtils.isEmpty(u.getNickName()))
+			if (currentListViewType == V2GlobalEnum.GROUP_TYPE_CONTACT
+					&& !TextUtils.isEmpty(u.getNickName()))
 				mUserNameTV.setText(u.getNickName());
 			else
 				mUserNameTV.setText(u.getName());
@@ -847,7 +1008,7 @@ public class GroupListView extends ListView {
 				mCb = (CheckBox) mRoot.findViewById(R.id.user_check_view);
 				mCb.setVisibility(View.VISIBLE);
 				mCb.setChecked(mItem.isChecked());
-				mCb.setOnClickListener(null);
+				mCb.setOnClickListener(mCheckBoxListener);
 			} else {
 				mRoot.findViewById(R.id.user_check_view).setVisibility(
 						View.GONE);
@@ -934,8 +1095,10 @@ public class GroupListView extends ListView {
 
 		public void updateUserStatus() {
 			Group g = ((Group) ((GroupItem) mItem).getObject());
-			((TextView) mRoot.findViewById(R.id.group_online_statist))
-					.setText(g.getOnlineUserCount() + " / " + g.getUserCount());
+			TextView tv = ((TextView) mRoot
+					.findViewById(R.id.group_online_statist));
+			tv.setText(g.getOnlineUserCount() + " / " + g.getUserCount());
+			tv.invalidate();
 		}
 
 	}

@@ -110,6 +110,15 @@ public class ChatService extends DeviceService {
 		backEnd.start();
 		thread = new Handler(backEnd.getLooper());
 	}
+	
+	
+	@Override
+	public void clearCalledBack() {
+		AudioRequest.getInstance().removeCallback(callback);
+		VideoRequest.getInstance().removeCallback(videoCallback);
+		FileRequest.getInstance().removeCallback(fileCallback);
+	}
+
 
 	/**
 	 * Register listener for out conference by kick.

@@ -14,7 +14,11 @@ public class VFile {
 	protected User uploader;
 
 	public enum State {
-		DOWNLOADED, DOWNLOADING, DOWNLOAD_PAUSE, UPLOADED, UPLOADING, UPLOAD_PAUSE
+		UNKNOWN,DOWNLOADED, DOWNLOADING, DOWNLOAD_PAUSE, UPLOADED, UPLOADING, UPLOAD_PAUSE,DOWNLOAD_FAILED,UPLOAD_FAILED
+	}
+	
+	public VFile() {
+		this.state = State.UNKNOWN;
 	}
 
 	public String getId() {

@@ -22,6 +22,7 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
@@ -60,7 +61,7 @@ public class CrowdCreateActivity extends Activity {
 
 	private EditText searchedTextET;
 	private GroupListView mContactsContainer;
-	
+
 	private View mGroupConfirmButton;
 	private EditText mGroupTitleET;
 	private View mReturnButton;
@@ -94,7 +95,6 @@ public class CrowdCreateActivity extends Activity {
 		mContactsContainer.setListener(listViewListener);
 		mContactsContainer.setShowedCheckedBox(true);
 		mContactsContainer.setTextFilterEnabled(true);
-		
 
 		mAttendeeContainer = (LinearLayout) findViewById(R.id.group_member_container);
 		mAttendeeContainer.setGravity(Gravity.CENTER);
@@ -122,7 +122,7 @@ public class CrowdCreateActivity extends Activity {
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
-		//call clear to remove callback from JNI.
+		// call clear to remove callback from JNI.
 		cg.clearCalledBack();
 	}
 
@@ -156,7 +156,8 @@ public class CrowdCreateActivity extends Activity {
 	 */
 	private void loadCache() {
 		crowd = (CrowdGroup) GlobalHolder.getInstance().getGroupById(
-				GroupType.CHATING.intValue(), getIntent().getLongExtra("cid", 0));
+				GroupType.CHATING.intValue(),
+				getIntent().getLongExtra("cid", 0));
 		if (crowd != null) {
 			mRuleSpinner.setEnabled(false);
 			if (crowd.getAuthType() == AuthType.ALLOW_ALL) {
@@ -170,8 +171,6 @@ public class CrowdCreateActivity extends Activity {
 			mGroupTitleET.setText(crowd.getName());
 		}
 	}
-
-	
 
 	private void updateUserToAttendList(final User u) {
 		if (u == null) {
@@ -200,7 +199,6 @@ public class CrowdCreateActivity extends Activity {
 			addAttendee(tmpU);
 		}
 	}
-
 
 	private void addAttendee(User u) {
 		if (u.isCurrentLoggedInUser()) {
@@ -277,7 +275,6 @@ public class CrowdCreateActivity extends Activity {
 		return ll;
 	}
 
-
 	private OnClickListener removeAttendeeListener = new OnClickListener() {
 
 		@Override
@@ -314,28 +311,32 @@ public class CrowdCreateActivity extends Activity {
 
 	};
 
-	
-	
 	private GroupListView.GroupListViewListener listViewListener = new GroupListView.GroupListViewListener() {
-		
+
 		@Override
 		public boolean onItemLongClick(AdapterView<?> parent, View view,
 				int position, long id, Item item) {
 			return false;
 		}
-		
+
 		@Override
-		public void onItemClicked(AdapterView<?> parent, View view, int position,
-				long id, Item item) {
+		public void onItemClicked(AdapterView<?> parent, View view,
+				int position, long id, Item item) {
+			
+		}
+
+		public void onCheckboxClicked(View view, Item item) {
+			CheckBox cb = (CheckBox)view;
 			Object obj = item.getObject();
 			if (obj instanceof User) {
-				mContactsContainer.updateCheckItem((User)obj, !item.isChecked());
-				Message.obtain(mLocalHandler, UPDATE_ATTENDEES, (User)obj)
-				.sendToTarget();
+				mContactsContainer.updateCheckItem((User) obj,
+						cb.isChecked());
+				Message.obtain(mLocalHandler, UPDATE_ATTENDEES, (User) obj)
+						.sendToTarget();
 			}
 		}
-	};
 
+	};
 
 	private OnClickListener confirmButtonListener = new OnClickListener() {
 
@@ -349,15 +350,14 @@ public class CrowdCreateActivity extends Activity {
 				return;
 			}
 
-			
 			if (crowd != null) {
 				List<User> newMembers = new ArrayList<User>(mUserList);
-				cg.inviteMember(crowd,  newMembers, new Registrant(mLocalHandler,
-						UPDATE_CROWD_RESPONSE, crowd));
-			} else  {
+				cg.inviteMember(crowd, newMembers, new Registrant(
+						mLocalHandler, UPDATE_CROWD_RESPONSE, crowd));
+			} else {
 				CrowdGroup crowd = new CrowdGroup(0, mGroupTitleET.getText()
-						.toString(), GlobalHolder.getInstance().getCurrentUser(),
-						new Date());
+						.toString(), GlobalHolder.getInstance()
+						.getCurrentUser(), new Date());
 				crowd.addUserToGroup(mUserList);
 				int pos = mRuleSpinner.getSelectedItemPosition();
 				// Position match with R.array.crowd_rules
@@ -368,7 +368,7 @@ public class CrowdCreateActivity extends Activity {
 				} else if (pos == 2) {
 					crowd.setAuthType(CrowdGroup.AuthType.NEVER);
 				}
-	
+
 				cg.createCrowdGroup(crowd, new Registrant(mLocalHandler,
 						CREATE_CROWD_RESPONSE, crowd));
 				view.setEnabled(false);
@@ -391,8 +391,10 @@ public class CrowdCreateActivity extends Activity {
 		@Override
 		protected Void doInBackground(Void... params) {
 			mGroupList.clear();
-			mGroupList.addAll(GlobalHolder.getInstance().getGroup(GroupType.CONTACT.intValue()));
-			mGroupList.addAll(GlobalHolder.getInstance().getGroup(GroupType.ORG.intValue()));
+			mGroupList.addAll(GlobalHolder.getInstance().getGroup(
+					GroupType.CONTACT.intValue()));
+			mGroupList.addAll(GlobalHolder.getInstance().getGroup(
+					GroupType.ORG.intValue()));
 			return null;
 		}
 
@@ -402,7 +404,6 @@ public class CrowdCreateActivity extends Activity {
 		}
 
 	};
-
 
 	class LocalHandler extends Handler {
 
@@ -418,22 +419,24 @@ public class CrowdCreateActivity extends Activity {
 					CrowdGroup cg = (CrowdGroup) recr.callerObject;
 					long id = ((CreateCrowdResponse) recr).getGroupId();
 					cg.setGId(id);
+					cg.setCreateDate(new Date());
 
-					//add group to global cache
-					GlobalHolder.getInstance().addGroupToList(GroupType.CHATING.intValue(), cg);
-					//send broadcast to inform new crowd notification
+					// add group to global cache
+					GlobalHolder.getInstance().addGroupToList(
+							GroupType.CHATING.intValue(), cg);
+					// send broadcast to inform new crowd notification
 					Intent i = new Intent();
 					i.setAction(PublicIntent.BROADCAST_NEW_CROWD_NOTIFICATION);
 					i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
 					i.putExtra("crowd", id);
 					mContext.sendBroadcast(i);
-					
-					
-					Intent crowdIntent = new Intent(PublicIntent.SHOW_CROWD_DETAIL_ACTIVITY);
+
+					Intent crowdIntent = new Intent(
+							PublicIntent.SHOW_CROWD_DETAIL_ACTIVITY);
 					crowdIntent.addCategory(PublicIntent.DEFAULT_CATEGORY);
 					crowdIntent.putExtra("cid", id);
 					mContext.startActivity(crowdIntent);
-					
+
 					// finish current activity
 					finish();
 				} else {

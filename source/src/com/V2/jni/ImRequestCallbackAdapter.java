@@ -1,5 +1,7 @@
 package com.V2.jni;
 
+import com.V2.jni.ind.V2Group;
+
 public abstract class ImRequestCallbackAdapter implements ImRequestCallback {
 
 	@Override
@@ -40,7 +42,7 @@ public abstract class ImRequestCallbackAdapter implements ImRequestCallback {
 	}
 
 	@Override
-	public void OnCreateCrowdCallback(String sCrowdXml, int nResult) {
+	public void OnCreateCrowdCallback(V2Group crowd, int nResult) {
 
 	}
 

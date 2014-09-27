@@ -6,9 +6,12 @@ import java.util.Date;
 import java.util.List;
 
 import android.content.Context;
+import android.text.TextUtils;
 import android.util.Log;
 
+import com.V2.jni.ind.V2Group;
 import com.V2.jni.util.V2Log;
+import com.V2.jni.util.XmlAttributeExtractor;
 
 public class ImRequest {
 	public boolean loginResult;
@@ -310,11 +313,23 @@ public class ImRequest {
 	private void OnCreateCrowd(String sCrowdXml, int nResult) {
 		V2Log.d("ImRequest UI -- > OnCreateCrowd  " + "sCrowdXml:" + sCrowdXml
 				+ "  nResult:" + nResult);
+		String id = XmlAttributeExtractor.extract(sCrowdXml, " id='", "'");
+		String name = XmlAttributeExtractor.extract(sCrowdXml, " name='", "'");
+		
+		V2Group crowd = null;
+		if (!TextUtils.isEmpty(id)) {
+			 crowd = new V2Group(Long.parseLong(id), name, V2Group.TYPE_CROWD);
+		} else {
+			V2Log.e(" Incorrect crowd id");
+			return;
+		}
+		
+		
 		for (WeakReference<ImRequestCallback> wf : this.mCallbacks) {
 			Object obj = wf.get();
 			if (obj != null) {
 				ImRequestCallback callback = (ImRequestCallback) obj;
-				callback.OnCreateCrowdCallback(sCrowdXml, nResult);
+				callback.OnCreateCrowdCallback(crowd, nResult);
 			}
 		}
 	}

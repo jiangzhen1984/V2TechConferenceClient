@@ -177,6 +177,9 @@
                         android:layout_marginTop="@dimen/detail_detail_2_item_margin_top"
                         android:layout_toRightOf="@+id/crowd_detail_announcement_tv"
                         android:padding="10dp"
+                        android:singleLine="true"
+                        android:ellipsize="end"
+                        android:maxWidth="@dimen/crowd_summary_max_width"
                         android:text="@string/crowd_invitation_box_item_announcement"
                         android:textColor="@color/activiy_contact_detail_item_color"
                         android:textSize="@dimen/common_item_text_size" />
@@ -229,6 +232,9 @@
                         android:layout_marginTop="@dimen/detail_detail_2_item_margin_top"
                         android:layout_toRightOf="@+id/crowd_detail_brief_tv"
                         android:padding="10dp"
+                        android:singleLine="true"
+                        android:ellipsize="end"
+                        android:maxWidth="@dimen/crowd_summary_max_width"
                         android:text="@string/crowd_invitation_box_item_brief"
                         android:textColor="@color/activiy_contact_detail_item_color"
                         android:textSize="@dimen/common_item_text_size" />

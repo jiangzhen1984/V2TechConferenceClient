@@ -428,6 +428,9 @@ public class GlobalHolder {
 	
 	public UserDeviceConfig getUserDefaultDevice(long uid) {
 		Set<UserDeviceConfig> list = mUserDeviceList.get(Long.valueOf(uid));
+		if (list == null) {
+			return null;
+		}
 		for (UserDeviceConfig udc : list) {
 			if (udc.isDefault()) {
 				return udc;

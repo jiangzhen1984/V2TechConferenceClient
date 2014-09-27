@@ -1,5 +1,7 @@
 package com.V2.jni;
 
+import com.V2.jni.ind.V2Group;
+
 
 /**
  * 
@@ -81,8 +83,8 @@ public interface ImRequestCallback {
 	
 	/**
 	 * 
-	 * @param sCrowdXml
+	 * @param crowd
 	 * @param nResult
 	 */
-	public void OnCreateCrowdCallback(String sCrowdXml, int nResult);
+	public void OnCreateCrowdCallback(V2Group crowd, int nResult);
 }

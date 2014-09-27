@@ -15,6 +15,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -95,7 +96,7 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 		mContactsContainer.setListener(mListener);
 		mContactsContainer.setTextFilterEnabled(true);
 		mContactsContainer.setCurrentListViewType(flag);
-		
+
 		mContactsContainer.setDivider(null);
 
 		// TextView tv = (TextView) rootView.findViewById(R.id.fragment_title);
@@ -163,6 +164,8 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 			if (flag == TAG_CONTACT) {
 				intentFilter
 						.addAction(PublicIntent.BROADCAST_REQUEST_UPDATE_CONTACTS_GROUP);
+				intentFilter
+						.addAction(PublicIntent.BROADCAST_CONTACT_GROUP_UPDATED_NOTIFICATION);
 			}
 		}
 		return intentFilter;
@@ -231,20 +234,20 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 				// FIXME now just support contacts remove do not support
 				if (flag == TAG_CONTACT
 						&& guo.getmType() == Group.GroupType.CONTACT.intValue()) {
-					User user = GlobalHolder.getInstance()
-					.getUser(guo.getmUserId());
-					
+					User user = GlobalHolder.getInstance().getUser(
+							guo.getmUserId());
+
 					if (user == null) {
 						return;
 					}
-					//Remove user from contact group
+					// Remove user from contact group
 					Set<Group> groups = user.getBelongsGroup();
-					for(Group gg : groups) {
+					for (Group gg : groups) {
 						if (gg.getGroupType() == GroupType.CONTACT) {
 							gg.removeUserFromGroup(user);
 						}
 					}
-					
+
 					mContactsContainer.removeItem(user);
 				}
 
@@ -254,14 +257,29 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 						"obj");
 				if (flag == TAG_CONTACT
 						&& guo.getmType() == Group.GroupType.CONTACT.intValue()) {
-					mContactsContainer.addUser(GlobalHolder.getInstance()
-							.getUser(guo.getmUserId()));
+					mContactsContainer.addUser(
+							GlobalHolder.getInstance().getGroupById(
+									GroupType.CONTACT.intValue(),
+									guo.getmGroupId()), GlobalHolder
+									.getInstance().getUser(guo.getmUserId()));
 				}
 				// Contacts group is updated
 			} else if (PublicIntent.BROADCAST_REQUEST_UPDATE_CONTACTS_GROUP
 					.equals(intent.getAction())) {
 				mLoaded = false;
 				fillContactsGroup();
+			} else if (PublicIntent.BROADCAST_CONTACT_GROUP_UPDATED_NOTIFICATION
+					.equals(intent.getAction())) {
+
+				long uid = intent.getLongExtra("userId", 0);
+				long srcGroupId = intent.getLongExtra("srcGroupId", 0);
+				long destGroupId = intent.getLongExtra("destGroupId", 0);
+				User u = GlobalHolder.getInstance().getUser(uid);
+				Group src = GlobalHolder.getInstance().getGroupById(
+						GroupType.CONTACT.intValue(), srcGroupId);
+				Group dest = GlobalHolder.getInstance().getGroupById(
+						GroupType.CONTACT.intValue(), destGroupId);
+				mContactsContainer.updateUserGroup(u, src, dest);
 			}
 		}
 
@@ -269,8 +287,10 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 
 	@Override
 	public void afterTextChanged(Editable s) {
-		if (s.toString().isEmpty()) {
-			mContactsContainer.clearTextFilter();
+		if (TextUtils.isEmpty(s.toString())) {
+			if (!TextUtils.isEmpty(mContactsContainer.getTextFilter())) {
+				mContactsContainer.clearTextFilter();
+			}
 		} else {
 			mContactsContainer.setFilterText(s.toString());
 		}
@@ -316,14 +336,16 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 			if (item.getObject() instanceof User) {
 				Intent i = new Intent(PublicIntent.SHOW_CONTACT_DETAIL_ACTIVITY);
 				i.addCategory(PublicIntent.DEFAULT_CATEGORY);
-				i.putExtra("uid", ((User)item.getObject()).getmUserId());
+				i.putExtra("uid", ((User) item.getObject()).getmUserId());
 				startActivity(i);
 			}
 
 		}
+
+		public void onCheckboxClicked(View view, Item item) {
+
+		}
 	};
-
-
 
 	class ContactsHandler extends Handler {
 
@@ -334,6 +356,8 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 				fillContactsGroup();
 				break;
 			case UPDATE_GROUP_STATUS:
+				//Just notify group statist information
+				mContactsContainer.notifiyDataSetChanged();
 				break;
 			case UPDATE_USER_STATUS:
 				UserStatusObject uso = (UserStatusObject) msg.obj;

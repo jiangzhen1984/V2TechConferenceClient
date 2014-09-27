@@ -1,7 +1,9 @@
 package com.v2tech.vo;
 
-import com.V2.jni.V2GlobalEnum;
 import com.v2tech.util.DateUtil;
+import java.util.Date;
+
+import com.V2.jni.V2GlobalEnum;
 import com.v2tech.vo.Group.GroupType;
 
 public class DepartmentConversation extends Conversation {

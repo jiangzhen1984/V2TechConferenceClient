@@ -143,4 +143,10 @@
    <!-- specific voice item activity  -->
  <dimen name="specific_voice_message_margin_right">15dp</dimen>
  <dimen name="specific_voice_message_margin_left">15dp</dimen>
+ 
+ <!-- crowd_detail_activity  -->
+	<dimen name="crowd_summary_max_width">250dp</dimen>
+	
+	 <!-- crowd file activity -->
+    <dimen name="crowd_file_activity_file_name_max_width">200dp</dimen>
 </resources>

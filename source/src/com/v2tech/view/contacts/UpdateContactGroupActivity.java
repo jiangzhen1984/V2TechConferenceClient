@@ -22,10 +22,12 @@ import com.v2tech.R;
 import com.v2tech.service.ContactsService;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.service.Registrant;
+import com.v2tech.service.jni.GroupServiceJNIResponse;
 import com.v2tech.view.PublicIntent;
 import com.v2tech.vo.ContactGroup;
 import com.v2tech.vo.Group;
 import com.v2tech.vo.Group.GroupType;
+import com.v2tech.vo.User;
 
 public class UpdateContactGroupActivity extends Activity {
 
@@ -183,10 +185,11 @@ public class UpdateContactGroupActivity extends Activity {
 				Group desGroup = GlobalHolder.getInstance().getGroupById(
 						Group.GroupType.CONTACT.intValue(), originGroupId);
 
+				User user = GlobalHolder.getInstance()
+						.getUser(userId);
 				contactService.updateUserGroup((ContactGroup) desGroup,
-						(ContactGroup) srcGroup, GlobalHolder.getInstance()
-								.getUser(userId), new Registrant(mLocalHandler,
-								UPDATE_USER_GROUP_DONE, null));
+						(ContactGroup) srcGroup, user, new Registrant(mLocalHandler,
+								UPDATE_USER_GROUP_DONE, new LocalObject(user, srcGroup, desGroup)));
 
 			}
 		}
@@ -204,6 +207,15 @@ public class UpdateContactGroupActivity extends Activity {
 					synchronized (state) {
 						state = STATE.NONE;
 					}
+					LocalObject lo = (LocalObject) ((GroupServiceJNIResponse)msg.obj).callerObject;
+					//Send broadcast for indicate contact group update
+					Intent i = new Intent(PublicIntent.BROADCAST_CONTACT_GROUP_UPDATED_NOTIFICATION);
+					i.addCategory(PublicIntent.DEFAULT_CATEGORY);
+					i.putExtra("userId", lo.user.getmUserId());
+					i.putExtra("srcGroupId", lo.src.getmGId());
+					i.putExtra("destGroupId", lo.dest.getmGId());
+					
+					mContext.sendBroadcast(i);
 					finish();
 					break;
 				}
@@ -211,6 +223,20 @@ public class UpdateContactGroupActivity extends Activity {
 		}
 
 	};
+	
+	class LocalObject {
+		User user;
+		Group src;
+		Group dest;
+		
+		public LocalObject(User user, Group src, Group dest) {
+			super();
+			this.user = user;
+			this.src = src;
+			this.dest = dest;
+		}
+		
+	}
 
 	enum STATE {
 		NONE, UPDATING

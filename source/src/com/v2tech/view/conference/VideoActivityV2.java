@@ -347,6 +347,7 @@ public class VideoActivityV2 extends Activity {
 		filter.addAction(PublicIntent.PREPARE_FINISH_APPLICATION);
 		filter.addCategory(PublicIntent.DEFAULT_CATEGORY);
 		filter.addAction(JNIService.JNI_BROADCAST_USER_STATUS_NOTIFICATION);
+		filter.addAction(JNIService.JNI_BROADCAST_CONNECT_STATE_NOTIFICATION);
 		mContext.registerReceiver(mConfUserChangeReceiver, filter);
 
 	}
@@ -979,9 +980,11 @@ public class VideoActivityV2 extends Activity {
 
 			} else if (JNIService.JNI_BROADCAST_CONNECT_STATE_NOTIFICATION
 					.equals(intent.getAction())) {
-				// TODO show dialog
 				NetworkStateCode code = (NetworkStateCode) intent.getExtras()
 						.get("state");
+				if (code == NetworkStateCode.CONNECTED_ERROR) {
+					finish();
+				}
 			} else if (JNIService.JNI_BROADCAST_USER_STATUS_NOTIFICATION
 					.equals(intent.getAction())) {
 				long uid = intent.getExtras().getLong("uid");
@@ -1003,7 +1006,6 @@ public class VideoActivityV2 extends Activity {
 			} else if (PublicIntent.PREPARE_FINISH_APPLICATION.equals(intent
 					.getAction())) {
 				// Listen quit request to make sure close all device
-				quit();
 				finish();
 			}
 
@@ -1224,7 +1226,7 @@ public class VideoActivityV2 extends Activity {
 		// clear current meeting state
 		GlobalHolder.getInstance().setMeetingState(false, 0);
 		// clear messages
-		MessageLoader.deleteGroupMessage(mContext, V2GlobalEnum.GROUP_TYPE_CONFERENCE , conf.getId());
+	//	MessageLoader.deleteGroupMessage(mContext, V2GlobalEnum.GROUP_TYPE_CONFERENCE , conf.getId());
 		mVideoHandler = null;
 	}
 
@@ -1273,9 +1275,6 @@ public class VideoActivityV2 extends Activity {
 				@Override
 				public void onClick(View v) {
 					d.dismiss();
-					Intent i = new Intent();
-					i.putExtra("gid", conf.getId());
-					setResult(0, i);
 					finish();
 				}
 
@@ -1359,6 +1358,10 @@ public class VideoActivityV2 extends Activity {
 	 * user quit conference, however positive or negative
 	 */
 	private void quit() {
+		Intent i = new Intent();
+		i.putExtra("gid", conf.getId());
+		setResult(0, i);
+		
 		// if bound, then conference service is initialized. Otherwise not.
 		if (mServiceBound) {
 			updateAllRemoteDevice(TAG_CLOSE_DEVICE);
@@ -2244,9 +2247,17 @@ public class VideoActivityV2 extends Activity {
 					if (mAttendeeContainer != null) {
 						mAttendeeContainer.updateExitedAttendee(amd);
 					}
+					UserDeviceConfig mixedUDC = amd.getDefaultDevice();
 					// Close opened mixed video
-					if (amd.getDefaultDevice().isShowing()) {
-						showOrCloseAttendeeVideo(amd.getDefaultDevice());
+					for (SurfaceViewW sw : mCurrentShowedSV) {
+						if (sw.udc.getDeviceID().equals(mixedUDC.getDeviceID())) {
+							sw.observer.close();
+							mCurrentShowedSV.remove(sw);
+							mVideoLayout.removeView(sw.getView());
+							sw.rl.removeAllViews();
+							adjustVideoLayout();
+							break;
+						}
 					}
 
 					// add mixed video device

@@ -1,6 +1,5 @@
 package com.v2tech.view;
 
-
 public class PublicIntent {
 
 	public static final String TAG_CONTACT = "contacts";
@@ -30,40 +29,47 @@ public class PublicIntent {
 	public static final String START_SETTING_ACTIVITY = "com.v2tech.start_setting_activity";
 
 	public static final String START_GROUP_CREATE_ACTIVITY = "com.v2tech.start_group_create_activity";
-	
+
 	public static final String START_CROWD_MEMBERS_ACTIVITY = "com.v2tech.start_crowd_members_activity";
-	
+
 	public static final String START_CROWD_FILES_ACTIVITY = "com.v2tech.start_crowd_files_activity";
 
 	public static final String UPDATE_CONVERSATION = "com.v2tech.update_conversation";
-	
-	public static final String SHOW_CROWD_CONTENT_ACTIVITY ="com.v2tech.crowd_content_activity";
-	
-	public static final String SHOW_CROWD_DETAIL_ACTIVITY ="com.v2tech.crowd_detail_activity";
-	
-	public static final String SHOW_CONTACT_DETAIL_ACTIVITY ="com.v2tech.contact_detail_activity";
+
+	public static final String SHOW_CROWD_CONTENT_ACTIVITY = "com.v2tech.crowd_content_activity";
+
+	public static final String SHOW_CROWD_DETAIL_ACTIVITY = "com.v2tech.crowd_detail_activity";
+
+	public static final String SHOW_CONTACT_DETAIL_ACTIVITY = "com.v2tech.contact_detail_activity";
 
 	/**
-	 * extras key: obj  value: {@link com.v2tech.view.bo.ConversationNotificationObject}
+	 * extras key: obj value:
+	 * {@link com.v2tech.view.bo.ConversationNotificationObject}
 	 */
 	public static final String REQUEST_UPDATE_CONVERSATION = "com.v2tech.request_update_conversation";
 
 	public static final String FINISH_APPLICATION = "com.v2tech.finish_application";
 
 	public static final String PREPARE_FINISH_APPLICATION = "com.v2tech.prepare_finish_application";
-	
-	
-	//===========================Broadcast not for start activity
-	//broadcast for new crowd notification, if user created to user is invited
+
+	// ===========================Broadcast not for start activity
+	// broadcast for new crowd notification, if user created to user is invited
 	public static final String BROADCAST_NEW_CROWD_NOTIFICATION = "com.v2tech.jni.broadcast.new_crowd_notification";
-	//Broadcaset for new conference. This is only use conference is created by self
+	// Broadcaset for new conference. This is only use conference is created by
+	// self
 	// extra key: newGid : group id
 	// we can get conference object from GlobalHolder
 	public static final String BROADCAST_NEW_CONFERENCE_NOTIFICATION = "com.v2tech.jni.broadcast.new_conference_notification";
-	//Request update contacts group
+	// Request update contacts group
 	public static final String BROADCAST_REQUEST_UPDATE_CONTACTS_GROUP = "com.v2tech.broadcast.update_contacts_group";
-	//Broadcast for crowd is deleted notification
-	public static final String BROADCAST_CROWD_DELETED_NOTIFICATION= "com.v2tech.broadcast.crowd_deleted_notification";
-	
+	// Broadcast for crowd is deleted notification
+	public static final String BROADCAST_CROWD_DELETED_NOTIFICATION = "com.v2tech.broadcast.crowd_deleted_notification";
+	/**
+	 * Broadcast for contact group updated 
+	 * key: userId 
+	 * key: srcGroupId 
+	 * key: destGroupId
+	 */
+	public static final String BROADCAST_CONTACT_GROUP_UPDATED_NOTIFICATION = "com.v2tech.broadcast.contact_group_notification";
 
 }

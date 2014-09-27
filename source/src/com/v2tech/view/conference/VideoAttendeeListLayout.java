@@ -161,7 +161,6 @@ public class VideoAttendeeListLayout extends LinearLayout {
 	}
 
 	public void setAttendsList(Set<Attendee> l) {
-		V2Log.d(TAG, "setAttendsList 执行了");
 		mAttendsView = new ArrayList<ViewWrapper>();
 		mAttendsSize = new ArrayList<Attendee>(l);
 		configAttendee();

@@ -67,6 +67,7 @@ public final class ContentDescriptor {
 		matcher.addURI(augura, HistoriesCrowd.PATH, HistoriesCrowd.TOKEN);
 		matcher.addURI(augura, HistoriesCrowd.PATH + "/#",
 				HistoriesCrowd.TOKEN_WITH_ID);
+		matcher.addURI(augura, HistoriesGraphic.PATH, HistoriesGraphic.TOKEN);
 
 		return matcher;
 	}

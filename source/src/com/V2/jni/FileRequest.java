@@ -26,11 +26,11 @@ public class FileRequest {
 	private static FileRequest mFileRequest;
 	private String TAG = "FileRequest UI";
 
-	private List<WeakReference<FileRequestCallback>> callbacks;
+	private List<WeakReference<FileRequestCallback>> mCallbacks;
 
 	private FileRequest(Context context) {
 		this.context = context;
-		callbacks = new ArrayList<WeakReference<FileRequestCallback>>();
+		mCallbacks = new ArrayList<WeakReference<FileRequestCallback>>();
 	}
 
 	public static synchronized FileRequest getInstance(Context context) {
@@ -47,7 +47,17 @@ public class FileRequest {
 	}
 
 	public void addCallback(FileRequestCallback callback) {
-		this.callbacks.add(new WeakReference<FileRequestCallback>(callback));
+		this.mCallbacks.add(new WeakReference<FileRequestCallback>(callback));
+	}
+	
+	
+	public void removeCallback(FileRequestCallback callback) {
+		for (int i = 0; i < mCallbacks.size(); i++) {
+			if (mCallbacks.get(i).get() == callback) {
+				mCallbacks.remove(i);
+				break;
+			}
+		}
 	}
 
 	public native boolean initialize(FileRequest request);
@@ -94,24 +104,10 @@ public class FileRequest {
 	 */
 	public native void cancelRecvFile(String szFileID, int type);
 
-	// 涓嬭浇鏂囦欢
-	public native void downLoadFile(long nGroupID, String szFileID,
-			String szPathName, int businesstype);
 
 	// 鍒犻櫎鏂囦欢
 	public native void delFile(String szFileID, int businesstype);
 
-	// 鍙栨秷缇ょ粍鏂囦欢浼犺緭
-	public native void cancelGroupFile(String szFileID, int type,
-			int businesstype);
-
-	// 缇ょ粍鏂囦欢缁紶
-	public native void resumeGroupFile(String szFileID, int type,
-			int businesstype);
-
-	// 缇ょ粍鏂囦欢鏆傚仠浼犺緭
-	public native void pauseGroupFile(String szFileID, int type,
-			int businesstype);
 
 	public native void cancelSendFile(String szFileID, int type);
 
@@ -131,12 +127,12 @@ public class FileRequest {
 	 * 下载失败，重新下载时调用
 	 * @param url
 	 * @param sfileid
-	 * @param sDownDir
+	 * @param filePath
 	 * @param encrypttype
 	 * @param businessType 填1即可
 	 */
 	public native void httpDownloadFile(String url, String sfileid,
-			String sDownDir, int encrypttype, int businessType);
+			String filePath, int encrypttype, int businessType);
 
 	/**
 	 * Receive the Files from the others , but not contain group's files..
@@ -153,8 +149,8 @@ public class FileRequest {
 		V2Log.e("FileTrans UI", "OnFileTransInvite ---> userid :" + userid
 				+ " | szFileID: " + szFileID + " | szFileName: " + szFileName
 				+ " | nFileBytes: " + nFileBytes);
-		for (int i = 0; i < callbacks.size(); i++) {
-			WeakReference<FileRequestCallback> wrf = callbacks.get(i);
+		for (int i = 0; i < mCallbacks.size(); i++) {
+			WeakReference<FileRequestCallback> wrf = mCallbacks.get(i);
 			if (wrf != null && wrf.get() != null) {
 				((FileRequestCallback) wrf.get())
 						.OnFileTransInvite(new FileJNIObject(new V2User(userid), szFileID,
@@ -218,8 +214,8 @@ public class FileRequest {
 				+ " | nBytesTransed: " + nBytesTransed + " | nTransType: "
 				+ nTransType);
 
-		for (int i = 0; i < callbacks.size(); i++) {
-			WeakReference<FileRequestCallback> wrf = callbacks.get(i);
+		for (int i = 0; i < mCallbacks.size(); i++) {
+			WeakReference<FileRequestCallback> wrf = mCallbacks.get(i);
 			if (wrf != null && wrf.get() != null) {
 				((FileRequestCallback) wrf.get()).OnFileTransProgress(szFileID,
 						nBytesTransed, nTransType);
@@ -239,8 +235,8 @@ public class FileRequest {
 		V2Log.e(TAG, "OnFileTransEnd ---> szFileID :" + szFileID
 				+ " | szFileName: " + szFileName + " | nFileSize: " + nFileSize
 				+ " | nTransType: " + nTransType + " | tr: " + tr);
-		for (int i = 0; i < callbacks.size(); i++) {
-			WeakReference<FileRequestCallback> wrf = callbacks.get(i);
+		for (int i = 0; i < mCallbacks.size(); i++) {
+			WeakReference<FileRequestCallback> wrf = mCallbacks.get(i);
 			if (wrf != null && wrf.get() != null) {
 				((FileRequestCallback) wrf.get()).OnFileTransEnd(szFileID,
 						szFileName, nFileSize, nTransType , context);
@@ -257,8 +253,8 @@ public class FileRequest {
 	private void OnFileTransError(String szFileID, int errorCode, int nTransType) {
 		V2Log.e(TAG, "OnFileTransError ---> szFileID :" + szFileID
 				+ " | errorCode: " + errorCode + " | nTransType: " + nTransType);
-		for (int i = 0; i < callbacks.size(); i++) {
-			WeakReference<FileRequestCallback> wrf = callbacks.get(i);
+		for (int i = 0; i < mCallbacks.size(); i++) {
+			WeakReference<FileRequestCallback> wrf = mCallbacks.get(i);
 			if (wrf != null && wrf.get() != null) {
 				((FileRequestCallback) wrf.get()).OnFileTransError(szFileID,
 						errorCode, nTransType);
@@ -269,8 +265,8 @@ public class FileRequest {
 	// 鏀跺埌瀵规柟鍙栨秷鏂囦欢浼犺緭鍥炶皟
 	private void OnFileTransCancel(String szFileID) {
 		V2Log.e(TAG, "OnFileTransCancel ---> szFileID :" + szFileID);
-		for (int i = 0; i < callbacks.size(); i++) {
-			WeakReference<FileRequestCallback> wrf = callbacks.get(i);
+		for (int i = 0; i < mCallbacks.size(); i++) {
+			WeakReference<FileRequestCallback> wrf = mCallbacks.get(i);
 			if (wrf != null && wrf.get() != null) {
 				((FileRequestCallback) wrf.get()).OnFileTransCancel(szFileID);
 			}
@@ -286,8 +282,8 @@ public class FileRequest {
 	private void OnFileDownloadError(String sFileID, int errorCode, int nTransType) {
 		V2Log.e(TAG, "OnFileDownloadError ---> szFileID :" + sFileID
 				+ " | errorCode: " + errorCode + " | nTransType: " + nTransType);
-		for (int i = 0; i < callbacks.size(); i++) {
-			WeakReference<FileRequestCallback> wrf = callbacks.get(i);
+		for (int i = 0; i < mCallbacks.size(); i++) {
+			WeakReference<FileRequestCallback> wrf = mCallbacks.get(i);
 			if (wrf != null && wrf.get() != null) {
 				((FileRequestCallback) wrf.get()).OnFileDownloadError(sFileID,
 						errorCode , nTransType , context);

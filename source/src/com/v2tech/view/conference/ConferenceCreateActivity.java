@@ -33,6 +33,7 @@ import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
@@ -363,34 +364,39 @@ public class ConferenceCreateActivity extends Activity {
 		@Override
 		public void onItemClicked(AdapterView<?> parent, View view,
 				int position, long id, Item item) {
-			Object obj = item.getObject();
-			int flag = -1;
-			if (obj instanceof User) {
-				if (item.isChecked()) {
-					flag = OP_DEL_ALL_GROUP_USER;
-				} else {
-					flag = OP_ADD_ALL_GROUP_USER;
-				}
-				Message.obtain(mLocalHandler, UPDATE_ATTENDEES, flag, 0,
-						(User) obj).sendToTarget();
-				mGroupListView.updateCheckItem((User) obj, !item.isChecked());
-			}
+
 		}
 
 		@Override
 		public boolean onItemLongClick(AdapterView<?> parent, View view,
 				int position, long id, Item item) {
 			Object obj = item.getObject();
-			if (obj instanceof Group) {
+
+			return true;
+		}
+
+		public void onCheckboxClicked(View view, Item item) {
+			CheckBox cb = (CheckBox) view;
+			int flag = -1;
+			Object obj = item.getObject();
+			if (obj instanceof User) {
+				if (!cb.isChecked()) {
+					flag = OP_DEL_ALL_GROUP_USER;
+				} else {
+					flag = OP_ADD_ALL_GROUP_USER;
+				}
+				Message.obtain(mLocalHandler, UPDATE_ATTENDEES, flag, 0,
+						(User) obj).sendToTarget();
+				mGroupListView.updateCheckItem((User) obj, cb.isChecked());
+			} else if (obj instanceof Group) {
 				Message.obtain(
 						mLocalHandler,
 						START_GROUP_SELECT,
-						!item.isChecked() ? OP_ADD_ALL_GROUP_USER
+						!cb.isChecked() ? OP_ADD_ALL_GROUP_USER
 								: OP_DEL_ALL_GROUP_USER, 0, (Group) obj)
 						.sendToTarget();
-				mGroupListView.updateCheckItem((Group) obj, !item.isChecked());
+				mGroupListView.updateCheckItem((Group) obj, cb.isChecked());
 			}
-			return true;
 		}
 
 	};
@@ -560,8 +566,6 @@ public class ConferenceCreateActivity extends Activity {
 
 	};
 
-
-
 	class LocalHandler extends Handler {
 
 		@Override
@@ -585,8 +589,8 @@ public class ConferenceCreateActivity extends Activity {
 				RequestConfCreateResponse rc = (RequestConfCreateResponse) rccr;
 				ConferenceGroup g = new ConferenceGroup(rc.getConfId(),
 						conf.getName(), GlobalHolder.getInstance()
-								.getCurrentUser(), new Date(), GlobalHolder.getInstance()
-								.getCurrentUser());
+								.getCurrentUser(), new Date(), GlobalHolder
+								.getInstance().getCurrentUser());
 
 				g.addUserToGroup(new ArrayList<User>(mAttendeeList));
 				GlobalHolder.getInstance().addGroupToList(
