@@ -11,11 +11,13 @@ public class ConversationNotificationObject implements Parcelable {
 	private int cid;
 	private int type;
 	private long extId; 
+	private long msgID;
 	
 	public ConversationNotificationObject(Parcel in) {
 		cid = in.readInt();
 		type = in.readInt();
 		extId = in.readLong();
+		msgID = in.readLong();
 	}
 	
 	public ConversationNotificationObject(int type, long extId) {
@@ -42,6 +44,7 @@ public class ConversationNotificationObject implements Parcelable {
 		par.writeInt(cid);
 		par.writeInt(type);
 		par.writeLong(extId);
+		par.writeLong(msgID);
 	}
 
 	
@@ -80,7 +83,13 @@ public class ConversationNotificationObject implements Parcelable {
 		this.extId = extId;
 	}
 	
-	
+	public long getMsgID() {
+		return msgID;
+	}
+
+	public void setMsgID(long msgID) {
+		this.msgID = msgID;
+	}
 	
 	
 }

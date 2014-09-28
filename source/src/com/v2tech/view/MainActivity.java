@@ -1,5 +1,6 @@
 package com.v2tech.view;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
@@ -37,11 +38,12 @@ import com.V2.jni.V2GlobalEnum;
 import com.V2.jni.util.V2Log;
 import com.v2tech.R;
 import com.v2tech.db.V2techSearchContentProvider;
+import com.v2tech.service.ChatService;
+import com.v2tech.service.FileOperationEnum;
 import com.v2tech.util.Notificator;
 import com.v2tech.view.conversation.ConversationUpdateFileState;
-import com.v2tech.view.conversation.ConversationView;
-import com.v2tech.view.conversation.MessageBuilder;
 import com.v2tech.view.conversation.ConversationUpdateFileState.FileStateInterface;
+import com.v2tech.view.conversation.MessageBuilder;
 import com.v2tech.view.widget.CommonAdapter.CommonAdapterItemWrapper;
 import com.v2tech.view.widget.TitleBar;
 import com.v2tech.vo.Conference;
@@ -593,6 +595,7 @@ public class MainActivity extends FragmentActivity implements
 			return ;
 		}
 			
+		ChatService mChat = new ChatService();
 		for (int i = 0; i < messageArray.size(); i++) {
 			VMessage vm = (VMessage) messageArray.get(i)
 					.getItemObject();
@@ -606,12 +609,18 @@ public class MainActivity extends FragmentActivity implements
 						item.setState(VMessageFileItem.STATE_FILE_DOWNLOADED_FALIED);
 						MessageBuilder.updateVMessageItemToSentFalied(
 								mContext, vm);
+						mChat.updateFileOperation(item,
+								FileOperationEnum.OPERATION_CANCEL_DOWNLOADING,
+								null);
 						break;
 					case VMessageAbstractItem.STATE_FILE_SENDING:
 					case VMessageAbstractItem.STATE_FILE_PAUSED_SENDING:
 						item.setState(VMessageFileItem.STATE_FILE_SENT_FALIED);
 						MessageBuilder.updateVMessageItemToSentFalied(
 								mContext, vm);
+						mChat.updateFileOperation(item,
+								FileOperationEnum.OPERATION_CANCEL_SENDING,
+								null);
 						break;
 					default:
 						break;

@@ -196,7 +196,7 @@ public class VideoActivityV2 extends Activity {
 	private boolean mLocalHolderIsCreate = false;
 	private int currentWidth;
 	private boolean isStop;
-	
+
 	private int mVideoMaxCols = 2;
 
 	@Override
@@ -859,8 +859,11 @@ public class VideoActivityV2 extends Activity {
 								REQUEST_OPEN_OR_CLOSE_DEVICE,
 								0,
 								0,
-								new UserDeviceConfig(V2GlobalEnum.GROUP_TYPE_CONFERENCE, conf.getId() , GlobalHolder.getInstance()
-										.getCurrentUserId(), "", null))
+								new UserDeviceConfig(
+										V2GlobalEnum.GROUP_TYPE_CONFERENCE,
+										conf.getId(), GlobalHolder
+												.getInstance()
+												.getCurrentUserId(), "", null))
 								.sendToTarget();
 						//
 
@@ -940,7 +943,9 @@ public class VideoActivityV2 extends Activity {
 			} else if (JNIService.JNI_BROADCAST_NEW_CONF_MESSAGE.equals(intent
 					.getAction())) {
 				long mid = intent.getLongExtra("mid", 0);
-				VMessage vm = MessageLoader.loadMessageById(mContext, mid);
+				VMessage vm = MessageLoader.loadGroupMessageById(mContext,
+						V2GlobalEnum.GROUP_TYPE_CONFERENCE,
+						intent.getLongExtra("groupID", 0), mid);
 				if (mMessageContainer != null) {
 					mMessageContainer.addNewMessage(vm);
 				} else {
@@ -1057,8 +1062,9 @@ public class VideoActivityV2 extends Activity {
 		udc = atd.getDefaultDevice();
 		// Add default device
 		if (udc == null) {
-			udc = new UserDeviceConfig(V2GlobalEnum.GROUP_TYPE_CONFERENCE, conf.getId() ,atd.getAttId(), "", null);
-			//Make sure current user device is enable
+			udc = new UserDeviceConfig(V2GlobalEnum.GROUP_TYPE_CONFERENCE,
+					conf.getId(), atd.getAttId(), "", null);
+			// Make sure current user device is enable
 			udc.setEnable(true);
 			atd.addDevice(udc);
 		}
@@ -1084,8 +1090,10 @@ public class VideoActivityV2 extends Activity {
 				REQUEST_OPEN_OR_CLOSE_DEVICE,
 				0,
 				0,
-				new UserDeviceConfig(V2GlobalEnum.GROUP_TYPE_CONFERENCE, conf.getId() ,GlobalHolder.getInstance()
-						.getCurrentUserId(), "", null)).sendToTarget();
+				new UserDeviceConfig(V2GlobalEnum.GROUP_TYPE_CONFERENCE, conf
+						.getId(),
+						GlobalHolder.getInstance().getCurrentUserId(), "", null))
+				.sendToTarget();
 	}
 
 	private void adjustVideoLayout() {
@@ -1147,7 +1155,7 @@ public class VideoActivityV2 extends Activity {
 				}
 				mVideoLayout.addView(sw.getView(), p);
 			}
-			
+
 			index++;
 		}
 
@@ -1216,7 +1224,7 @@ public class VideoActivityV2 extends Activity {
 
 			unbindService(mLocalServiceConnection);
 		}
-		//call clear function from all service
+		// call clear function from all service
 		ds.clearCalledBack();
 		cb.clearCalledBack();
 		ds.clearCalledBack();
@@ -1226,7 +1234,8 @@ public class VideoActivityV2 extends Activity {
 		// clear current meeting state
 		GlobalHolder.getInstance().setMeetingState(false, 0);
 		// clear messages
-	//	MessageLoader.deleteGroupMessage(mContext, V2GlobalEnum.GROUP_TYPE_CONFERENCE , conf.getId());
+		// MessageLoader.deleteGroupMessage(mContext,
+		// V2GlobalEnum.GROUP_TYPE_CONFERENCE , conf.getId());
 		mVideoHandler = null;
 	}
 
@@ -1326,9 +1335,8 @@ public class VideoActivityV2 extends Activity {
 			updateSpeakerState(isSpeaking);
 			// Resume audio
 			cb.updateAudio(true);
-			
+
 			audioManager.setSpeakerphoneOn(true);
-			
 
 		} else {
 			updateAllRemoteDevice(TAG_CLOSE_DEVICE);
@@ -1361,7 +1369,7 @@ public class VideoActivityV2 extends Activity {
 		Intent i = new Intent();
 		i.putExtra("gid", conf.getId());
 		setResult(0, i);
-		
+
 		// if bound, then conference service is initialized. Otherwise not.
 		if (mServiceBound) {
 			updateAllRemoteDevice(TAG_CLOSE_DEVICE);
@@ -1497,7 +1505,8 @@ public class VideoActivityV2 extends Activity {
 			VideoPlayer vp = new VideoPlayer();
 			udc.setSVHolder(new SurfaceView(this));
 			udc.setVp(vp);
-			SurfaceHolderObserver observer = new SurfaceHolderObserver(cg, cs, udc);
+			SurfaceHolderObserver observer = new SurfaceHolderObserver(cg, cs,
+					udc);
 			SurfaceViewW sw = new SurfaceViewW(udc.getBelongsAttendee(), udc,
 					observer);
 			mCurrentShowedSV.add(sw);
@@ -1537,14 +1546,14 @@ public class VideoActivityV2 extends Activity {
 			return false;
 		}
 	}
-	
-	
+
 	/**
 	 * 
 	 * @param at
 	 * @param devices
 	 */
-	private void updateAttendeeDevice(Attendee at, List<UserDeviceConfig> devices) {
+	private void updateAttendeeDevice(Attendee at,
+			List<UserDeviceConfig> devices) {
 		boolean layoutChanged = false;
 		List<UserDeviceConfig> currentAttUdevs = null;
 		if (at != null) {
@@ -1567,12 +1576,12 @@ public class VideoActivityV2 extends Activity {
 				}
 			}
 
-			for (int i = 0; currentAttUdevs != null && i < currentAttUdevs.size(); i++) {
+			for (int i = 0; currentAttUdevs != null
+					&& i < currentAttUdevs.size(); i++) {
 				UserDeviceConfig cud = currentAttUdevs.get(i);
 				if (cud.getDeviceID().equals(ud.getDeviceID())) {
 					if (mAttendeeContainer != null) {
-						mAttendeeContainer.updateAttendeeDevice(at,
-								ud);
+						mAttendeeContainer.updateAttendeeDevice(at, ud);
 					}
 				}
 			}
@@ -1604,7 +1613,7 @@ public class VideoActivityV2 extends Activity {
 			}
 		} else if (opt == DOC_CLOSED_NOTIFICATION) {
 			doc = (V2Doc) res.getResult();
-			//Notice need to use cache document
+			// Notice need to use cache document
 			// because cache document object is different from JNI's callback
 			doc = mDocs.remove(doc.getId());
 		}
@@ -1888,10 +1897,10 @@ public class VideoActivityV2 extends Activity {
 
 		@Override
 		public void requestSendMsg(VMessage vm) {
-//			vm.setGroupId(conf.getId());
-//			vm.setToUser(new User(0));
-//			vm.setFromUser(GlobalHolder.getInstance().getCurrentUser());
-//			vm.setMsgCode(V2GlobalEnum.GROUP_TYPE_CONFERENCE);
+			// vm.setGroupId(conf.getId());
+			// vm.setToUser(new User(0));
+			// vm.setFromUser(GlobalHolder.getInstance().getCurrentUser());
+			// vm.setMsgCode(V2GlobalEnum.GROUP_TYPE_CONFERENCE);
 			cs.sendVMessage(vm, null);
 
 		}
@@ -2139,7 +2148,7 @@ public class VideoActivityV2 extends Activity {
 				List<UserDeviceConfig> list = (List<UserDeviceConfig>) obj[1];
 				Long uid = (Long) obj[0];
 				Attendee at = findAttendee(uid);
-				if(at != null){
+				if (at != null) {
 					if (at.getmDevices() == null) {
 						at.setmDevices(list);
 					}
@@ -2151,7 +2160,7 @@ public class VideoActivityV2 extends Activity {
 				User ut = (User) (((AsyncResult) msg.obj).getResult());
 				Attendee at = findAttendee(ut.getmUserId());
 				if (msg.arg1 == 1) {
-					//for non-register user construct temp attendee
+					// for non-register user construct temp attendee
 					if (at == null) {
 						at = new Attendee(ut);
 						mAttendeeList.add(at);

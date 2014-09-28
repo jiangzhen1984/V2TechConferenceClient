@@ -1,7 +1,9 @@
 package com.v2tech.view.conversation;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Date;
@@ -9,11 +11,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.UUID;
 
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -59,6 +63,8 @@ import com.spoledge.aacplayer.ArrayDecoder;
 import com.spoledge.aacplayer.Decoder;
 import com.spoledge.aacplayer.PlayerCallback;
 import com.v2tech.R;
+import com.v2tech.db.ContentDescriptor;
+import com.v2tech.db.DataBaseContext;
 import com.v2tech.service.AsyncResult;
 import com.v2tech.service.BitmapManager;
 import com.v2tech.service.ChatService;
@@ -201,14 +207,14 @@ public class ConversationView extends Activity {
 	private SparseArray<VMessage> messageAllID;
 	private List<VMessage> currentGetMessages;
 	private long lastMessageBodyShowTime = 0;
-	private long intervalTime = 15000; //显示消息时间状态的间隔时间
+	private long intervalTime = 15000; // 显示消息时间状态的间隔时间
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		mContext = this;
 
-		setContentView(R.layout.activity_contact_message); 
+		setContentView(R.layout.activity_contact_message);
 
 		GlobalConfig.isConversationOpen = true;
 
@@ -228,7 +234,7 @@ public class ConversationView extends Activity {
 
 		mShowContactDetailButton = findViewById(R.id.contact_detail_button);
 		mShowContactDetailButton.setOnClickListener(mShowContactDetailListener);
-		
+
 		mShowCrowdDetailButton = findViewById(R.id.contact_crowd_detail_button);
 		mShowCrowdDetailButton.setOnClickListener(mShowCrowdDetailListener);
 
@@ -288,7 +294,7 @@ public class ConversationView extends Activity {
 		// Register listener for avatar changed
 		BitmapManager.getInstance().registerBitmapChangedListener(
 				avatarChangedListener);
-		
+
 		IntentFilter filter = new IntentFilter();
 		// receiver the new message broadcast
 		filter.addAction(JNIService.JNI_BROADCAST_NEW_MESSAGE);
@@ -299,8 +305,7 @@ public class ConversationView extends Activity {
 
 		mChat.registerFileTransStatusListener(this.lh, FILE_STATUS_LISTENER,
 				null);
-		notificateConversationUpdate(false);
-
+		notificateConversationUpdate(false, cov.getExtId());
 		// Start animation
 		this.overridePendingTransition(R.animator.nonam_scale_center_0_100,
 				R.animator.nonam_scale_null);
@@ -354,7 +359,7 @@ public class ConversationView extends Activity {
 		cannelRecoding = false;
 		mButtonRecordAudio
 				.setText(R.string.contact_message_button_send_audio_msg);
-		
+
 	}
 
 	@Override
@@ -402,16 +407,6 @@ public class ConversationView extends Activity {
 				mVoiceDialog.dismiss();
 			}
 		}
-
-		// for (int i = 0; i < sendingFiles.size(); i++) {
-		//
-		// VMessageFileItem vMessageFileItem = sendingFiles.get(i);
-		// mChat.updateFileOperation(vMessageFileItem,
-		// FileOperationEnum.OPERATION_PAUSE_SENDING, null);
-		// vMessageFileItem.setState(VMessageFileItem.STATE_FILE_PAUSED_SENDING);
-		// MessageLoader.updateFileItemState(mContext, vMessageFileItem.getVm(),
-		// vMessageFileItem);
-		// }
 	}
 
 	@Override
@@ -495,8 +490,8 @@ public class ConversationView extends Activity {
 		} else if (cov.getType() == V2GlobalEnum.GROUP_TYPE_DEPARTMENT) {
 			currentConversationViewType = V2GlobalEnum.GROUP_TYPE_DEPARTMENT;
 			groupId = cov.getExtId();
-			departmentGroup = (OrgGroup) GlobalHolder.getInstance().getGroupById(
-					V2GlobalEnum.GROUP_TYPE_DEPARTMENT, groupId);
+			departmentGroup = (OrgGroup) GlobalHolder.getInstance()
+					.getGroupById(V2GlobalEnum.GROUP_TYPE_DEPARTMENT, groupId);
 			mVideoCallButton.setVisibility(View.GONE);
 			mAudioCallButton.setVisibility(View.GONE);
 			mShowContactDetailButton.setVisibility(View.INVISIBLE);
@@ -1400,7 +1395,6 @@ public class ConversationView extends Activity {
 			}
 			VMessage vim = MessageBuilder.buildImageMessage(cov.getType(),
 					groupId, local, remote, filePath);
-			vim.setGroupId(groupId);
 			// Send message to server
 			sendMessageToRemote(vim);
 		} else if (requestCode == RECEIVE_SELECTED_FILE) {
@@ -1541,7 +1535,7 @@ public class ConversationView extends Activity {
 		Message.obtain(lh, SEND_MESSAGE, vm).sendToTarget();
 		addMessageToContainer(vm);
 		// send notification
-		notificateConversationUpdate(true);
+		notificateConversationUpdate(true, vm.getId());
 	}
 
 	// FIXME optimize code
@@ -1561,7 +1555,7 @@ public class ConversationView extends Activity {
 		return new String(copy, 0, j);
 	}
 
-	private void notificateConversationUpdate(boolean isFresh) {
+	private void notificateConversationUpdate(boolean isFresh, long msgID) {
 		Intent i = new Intent(PublicIntent.REQUEST_UPDATE_CONVERSATION);
 		i.addCategory(PublicIntent.DEFAULT_CATEGORY);
 		ConversationNotificationObject obj = null;
@@ -1572,6 +1566,7 @@ public class ConversationView extends Activity {
 			obj = new ConversationNotificationObject(Conversation.TYPE_GROUP,
 					groupId);
 		}
+		obj.setMsgID(msgID);
 		i.putExtra("obj", obj);
 		i.putExtra("isFresh", isFresh);
 		mContext.sendBroadcast(i);
@@ -1670,8 +1665,9 @@ public class ConversationView extends Activity {
 					item.setState(VMessageAbstractItem.STATE_NORMAL);
 				}
 			}
+
 			Message.obtain(lh, SEND_MESSAGE, v).sendToTarget();
-			notificateConversationUpdate(true);
+			notificateConversationUpdate(true, v.getId());
 		}
 
 		@Override
@@ -1833,7 +1829,12 @@ public class ConversationView extends Activity {
 			return false;
 		}
 
-		VMessage m = MessageLoader.loadMessageById(mContext, msgId);
+		VMessage m = null;
+		if (currentConversationViewType == V2GlobalEnum.GROUP_TYPE_USER)
+			m = MessageLoader.loadUserMessageById(mContext, user2Id, msgId);
+		else
+			m = MessageLoader.loadGroupMessageById(mContext,
+					currentConversationViewType, groupId, msgId);
 		if (m == null
 				|| (m.getFromUser().getmUserId() != this.user2Id && m
 						.getGroupId() == 0) || (m.getGroupId() != this.groupId)) {
@@ -1910,7 +1911,7 @@ public class ConversationView extends Activity {
 
 						mv.updateView(vfi);
 					} else {
-						notificateConversationUpdate(true);
+						notificateConversationUpdate(true, vm.getId());
 					}
 				}
 			}
@@ -1975,13 +1976,13 @@ public class ConversationView extends Activity {
 		}
 
 	};
-	
+
 	private OnClickListener mShowCrowdDetailListener = new OnClickListener() {
 
 		@Override
 		public void onClick(View view) {
 			Intent i = new Intent(mContext, CrowdDetailActivity.class);
-			i.putExtra("cid",  cov.getExtId());
+			i.putExtra("cid", cov.getExtId());
 			startActivity(i);
 		}
 
@@ -2134,7 +2135,7 @@ public class ConversationView extends Activity {
 					}
 
 				}
-			} 
+			}
 		}
 
 	}
@@ -2221,11 +2222,12 @@ public class ConversationView extends Activity {
 				}
 				break;
 			case REQUEST_DEL_MESSAGE:
-				removeMessage((VMessage) msg.obj);
-				MessageLoader.deleteMessage(mContext, (VMessage) msg.obj);
+				VMessage message = (VMessage) msg.obj;
+				removeMessage(message);
+				MessageLoader.deleteMessage(mContext, message);
 				adapter.notifyDataSetChanged();
 				// Update conversation
-				notificateConversationUpdate(true);
+				notificateConversationUpdate(true, message.getId());
 				break;
 			case FILE_STATUS_LISTENER:
 				FileTransStatusIndication ind = (FileTransStatusIndication) (((AsyncResult) msg.obj)
@@ -2238,7 +2240,7 @@ public class ConversationView extends Activity {
 							progress.progressType);
 				} else if (ind.indType == FileTransStatusIndication.IND_TYPE_DOWNLOAD_ERR) {
 				} else if (ind.indType == FileTransStatusIndication.IND_TYPE_TRANS_ERR) {
-					
+
 					FileTransErrorIndication transError = (FileTransErrorIndication) ind;
 					for (int i = 0; i < messageArray.size(); i++) {
 						VMessage vm = (VMessage) messageArray.get(i)
@@ -2394,6 +2396,7 @@ public class ConversationView extends Activity {
 
 	/**
 	 * 用于判断指定的消息VMessage对象是否应该显示时间状态
+	 * 
 	 * @param message
 	 */
 	private void judgeShouldShowTime(VMessage message) {
@@ -2404,8 +2407,7 @@ public class ConversationView extends Activity {
 			message.setShowTime(true);
 		lastMessageBodyShowTime = message.getmDateLong();
 	}
-	
-	
+
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);

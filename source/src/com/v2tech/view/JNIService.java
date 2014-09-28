@@ -395,6 +395,9 @@ public class JNIService extends Service {
 					Intent ii = new Intent(action);
 					ii.addCategory(JNI_BROADCAST_CATEGROY);
 					ii.putExtra("mid", vm.getId());
+					ii.putExtra("groupID", vm.getGroupId());
+					ii.putExtra("groupType", vm.getMsgCode());
+					ii.putExtra("remoteUserID", vm.getFromUser().getmUserId());
 					ii.putExtra("gm", vm.getGroupId() != 0);
 					// Send ordered broadcast, make sure conversationview
 					// receive message first

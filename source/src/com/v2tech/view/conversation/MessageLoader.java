@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.UUID;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -23,6 +24,7 @@ import com.v2tech.db.V2TechDBHelper;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.util.XmlParser;
 import com.v2tech.vo.AudioVideoMessageBean;
+import com.v2tech.vo.Conversation;
 import com.v2tech.vo.User;
 import com.v2tech.vo.VMessage;
 import com.v2tech.vo.VMessageAudioItem;
@@ -158,7 +160,24 @@ public class MessageLoader {
 		return queryMessage;
 	}
 
-	public static VMessage loadMessageById(Context context, long msgId) {
+	/**
+	 * according given VMessage ID , get VMessage Object
+	 * 
+	 * @param context
+	 * @param msgId
+	 * @return
+	 */
+	public static VMessage loadMessageById(Context context, int groupType,
+			long groupID, long remoteID, long msgId) {
+
+		int type = -1;
+		if (groupType == 0)
+			type = CONTACT_TYPE;
+		else
+			type = CROWD_TYPE;
+
+		if (!init(context, groupType, groupID, remoteID, type))
+			return null;
 
 		String selection = ContentDescriptor.HistoriesMessage.Cols.ID + "=? ";
 		String[] args = new String[] { msgId + "" };
@@ -170,6 +189,34 @@ public class MessageLoader {
 		} else {
 			return null;
 		}
+	}
+
+	/**
+	 * loading user to user chating messages
+	 * 
+	 * @param context
+	 * @param remoteID
+	 * @param msgId
+	 * @return
+	 */
+	public static VMessage loadUserMessageById(Context context, long remoteID,
+			long msgId) {
+
+		return loadMessageById(context, 0, 0, remoteID, msgId);
+	}
+
+	/**
+	 * loading crowd chating messages
+	 * 
+	 * @param context
+	 * @param remoteID
+	 * @param msgId
+	 * @return
+	 */
+	public static VMessage loadGroupMessageById(Context context, int groupType,
+			long groupID, long msgId) {
+
+		return loadMessageById(context, groupType, groupID, 0, msgId);
 	}
 
 	/**
@@ -709,48 +756,13 @@ public class MessageLoader {
 		values.put(
 				ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_SEND_STATE,
 				fileItem.getState());
+		values.put(ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_ID,
+				fileItem.getUuid());
 		String where = ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_ID
 				+ "= ?";
 		String[] selectionArgs = new String[] { fileItem.getUuid() };
 		int ret = mContext.getContentResolver().update(
 				ContentDescriptor.HistoriesFiles.CONTENT_URI, values, where,
-				selectionArgs);
-		return ret;
-	}
-	
-	/**
-	 * 
-	 * @param context
-	 * @param msgID
-	 * @return
-	 */
-	public static int updateRecentState(Context context, long msgID) {
-
-		VMessage vm = MessageLoader.loadMessageById(context, msgID);
-		if(vm == null){
-			V2Log.e(TAG , "update Recent table database is failed ... msgID is :" + msgID);
-			return -1;
-		}
-			
-		DataBaseContext mContext = new DataBaseContext(context);
-		ContentValues values = new ContentValues();
-		values.put(
-				ContentDescriptor.RecentHistoriesMessage.Cols.HISTORY_RECENT_MESSAGE_CONTENT,
-				vm.getmXmlDatas());
-		values.put(
-				ContentDescriptor.RecentHistoriesMessage.Cols.HISTORY_RECENT_MESSAGE_SAVEDATE,
-				vm.getDate().getTime());
-		String where = ContentDescriptor.RecentHistoriesMessage.Cols.HISTORY_RECENT_MESSAGE_GROUP_TYPE
-				+ "= ? and " + ContentDescriptor.RecentHistoriesMessage.Cols.HISTORY_RECENT_MESSAGE_USER_TYPE_ID
-				+ "= ? and " + ContentDescriptor.RecentHistoriesMessage.Cols.HISTORY_RECENT_MESSAGE_REMOTE_USER_ID + "= ?";
-		long remoteID = 0;
-		if(vm.getFromUser().getmUserId() == GlobalHolder.getInstance().getCurrentUserId())
-			remoteID = vm.getToUser().getmUserId();
-		else
-			remoteID = vm.getFromUser().getmUserId();
-		String[] selectionArgs = new String[] { String.valueOf(vm.getMsgCode()) , String.valueOf(vm.getGroupId()) , String.valueOf(remoteID) };
-		int ret = mContext.getContentResolver().update(
-				ContentDescriptor.RecentHistoriesMessage.CONTENT_URI, values, where,
 				selectionArgs);
 		return ret;
 	}
@@ -953,6 +965,25 @@ public class MessageLoader {
 			return null;
 		}
 	}
+
+//	public static VMessageFileItem getFileMessageById(Context context,
+//			VMessageFileItem item) {
+//
+//		String selection = ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_ID
+//				+ "= ?";
+//		String[] selectionArgs = new String[] { item.getUuid() };
+//		Cursor cursor = context.getContentResolver().query(
+//				ContentDescriptor.HistoriesFiles.CONTENT_URI, null, selection,
+//				selectionArgs, null);
+//		if (cursor != null && cursor.moveToFirst()) {
+//
+//			String filePath = cursor
+//					.getString(cursor
+//							.getColumnIndex(ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_PATH));
+//			item.setFilePath(filePath);
+//		}
+//		return item;
+//	}
 
 	/**
 	 * 根据传入的Cursor对象，构造一个VMessage对象
@@ -1181,9 +1212,13 @@ public class MessageLoader {
 				int state = mCur
 						.getInt(mCur
 								.getColumnIndex(ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_SEND_STATE));
+				String path = mCur
+						.getString(mCur
+								.getColumnIndex(ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_PATH));
 				item.setState(fileTransState);
 				item.setFileSize(fileSize);
 				item.setState(state);
+				item.setFilePath(path);
 			}
 		}
 

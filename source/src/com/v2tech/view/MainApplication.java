@@ -409,6 +409,8 @@ public class MainApplication extends Application {
 					Notificator.udpateApplicationNotification(
 							getApplicationContext(), false, null);
 				}
+				
+				Notificator.cancelAllSystemNotification(getApplicationContext());
 			}
 		}
 

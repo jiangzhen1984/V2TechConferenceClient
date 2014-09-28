@@ -9,6 +9,8 @@ public class Conversation {
 	public static final int TYPE_CONTACT = V2GlobalEnum.GROUP_TYPE_USER;
 
 	public static final int TYPE_GROUP = V2GlobalEnum.GROUP_TYPE_CROWD;
+	
+	public static final int TYPE_DEPARTMENT = V2GlobalEnum.GROUP_TYPE_DEPARTMENT;
 
 	public static final int TYPE_VOICE_MESSAGE = 7;
 

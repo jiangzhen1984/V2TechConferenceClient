@@ -92,7 +92,7 @@ public class MessageBuilder {
 		item.setUuid(uuid);
 		return item.getVm();
 	}
-
+ 
 	public static VMessage buildFileMessage(int groupType, long groupID,
 			User fromUser, User toUser, FileInfoBean bean) {
 		String uuid = UUID.randomUUID().toString();
@@ -167,6 +167,7 @@ public class MessageBuilder {
 				GlobalHolder.getInstance().getCurrentUserId());
 		Uri uri = mContext.getContentResolver().insert(
 				ContentDescriptor.HistoriesMessage.CONTENT_URI, values);
+		vm.setId(ContentUris.parseId(uri));	 
 		return uri;
 	}
 

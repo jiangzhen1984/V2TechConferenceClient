@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.text.TextUtils;
@@ -11,8 +12,10 @@ import android.text.TextUtils;
 import com.V2.jni.V2GlobalEnum;
 import com.V2.jni.util.V2Log;
 import com.v2tech.db.ContentDescriptor;
+import com.v2tech.db.DataBaseContext;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.util.MessageUtil;
+import com.v2tech.util.Notificator;
 import com.v2tech.view.conversation.MessageLoader;
 import com.v2tech.vo.ContactConversation;
 import com.v2tech.vo.Conversation;
@@ -29,6 +32,76 @@ public class ConversationProvider {
 	private static boolean isVoiceSpecificAdd;
 	private static boolean isVerificationSpecificAdd;
 
+	
+	/**
+	 * 向数据库插入新的消息对象
+	 * 
+	 * @param vm
+	 * @param extId
+	 */
+	public static void saveConversation(Context mContext , VMessage vm) {
+
+		if (vm == null)
+			return;
+
+		long remoteID = 0;
+		int readState = 0;
+		switch (vm.getMsgCode()) {
+		case V2GlobalEnum.GROUP_TYPE_USER:
+			if (vm.getFromUser() == null || vm.getToUser() == null)
+				return;
+
+			if (vm.getFromUser().getmUserId() == GlobalHolder.getInstance()
+					.getCurrentUserId()) {
+				remoteID = vm.getToUser().getmUserId();
+				readState = Conversation.READ_FLAG_READ;
+			} else {
+				remoteID = vm.getFromUser().getmUserId();
+				readState = Conversation.READ_FLAG_UNREAD;
+			}
+			break;
+		default:
+			break;
+		}
+		ContentValues conCv = new ContentValues();
+		conCv.put(
+				ContentDescriptor.RecentHistoriesMessage.Cols.HISTORY_RECENT_MESSAGE_FROM_USER_ID,
+				vm.getFromUser().getmUserId());
+		conCv.put(
+				ContentDescriptor.RecentHistoriesMessage.Cols.HISTORY_RECENT_MESSAGE_REMOTE_USER_ID,
+				remoteID);
+		conCv.put(
+				ContentDescriptor.RecentHistoriesMessage.Cols.HISTORY_RECENT_MESSAGE_GROUP_TYPE,
+				vm.getMsgCode());
+		conCv.put(
+				ContentDescriptor.RecentHistoriesMessage.Cols.HISTORY_RECENT_MESSAGE_READ_STATE,
+				readState);
+		conCv.put(ContentDescriptor.RecentHistoriesMessage.Cols.OWNER_USER_ID,
+				GlobalHolder.getInstance().getCurrentUserId());
+		conCv.put(
+				ContentDescriptor.RecentHistoriesMessage.Cols.HISTORY_RECENT_MESSAGE_TO_USER_ID,
+				vm.getToUser().getmUserId());
+		conCv.put(
+				ContentDescriptor.RecentHistoriesMessage.Cols.HISTORY_RECENT_MESSAGE_USER_TYPE_ID,
+				vm.getGroupId());
+		conCv.put(
+				ContentDescriptor.RecentHistoriesMessage.Cols.HISTORY_RECENT_MESSAGE_CONTENT,
+				vm.getmXmlDatas());
+		conCv.put(
+				ContentDescriptor.RecentHistoriesMessage.Cols.HISTORY_RECENT_MESSAGE_ID,
+				vm.getUUID());
+		conCv.put(
+				ContentDescriptor.RecentHistoriesMessage.Cols.HISTORY_RECENT_MESSAGE_SAVEDATE,
+				vm.getmDateLong());
+		mContext.getContentResolver().insert(
+				ContentDescriptor.RecentHistoriesMessage.CONTENT_URI, conCv);
+	}
+	
+	/**
+	 * loading the department conversation
+	 * @param mContext
+	 * @return
+	 */
 	public static List<DepartmentConversation> loadDepartConversation(Context mContext) {
 
 		List<DepartmentConversation> lists = new ArrayList<DepartmentConversation>();
@@ -69,6 +142,15 @@ public class ConversationProvider {
 		return lists;
 	}
 
+	/**
+	 * Depending on the type of organization, query the database fill the specified collection
+	 * @param mContext
+	 * @param mConvList
+	 * @param mCurrentTabFlag
+	 * @param verificationMessageItemData
+	 * @param voiceMessageItem
+	 * @return
+	 */
 	public static List<Conversation> loadUserConversation(Context mContext,
 			List<Conversation> mConvList, final int mCurrentTabFlag,
 			Conversation verificationMessageItemData,
@@ -185,7 +267,78 @@ public class ConversationProvider {
 		}
 		return mConvList;
 	}
+	
+	/**
+	 * remove user or department conversation from databases
+	 * @param mContext
+	 * @param cov
+	 */
+	public static void deleteConversation(Context mContext , Conversation cov){
+		
+		if(cov == null)
+			return ;
+			
+		String where = "";
+		switch (cov.getType()) {
+		case Conversation.TYPE_CONTACT:
+			where = ContentDescriptor.RecentHistoriesMessage.Cols.HISTORY_RECENT_MESSAGE_REMOTE_USER_ID
+					+ "=? and "
+					+ ContentDescriptor.RecentHistoriesMessage.Cols.HISTORY_RECENT_MESSAGE_GROUP_TYPE
+					+ "=?";
+			break;
+		case Conversation.TYPE_DEPARTMENT:
+			where = ContentDescriptor.RecentHistoriesMessage.Cols.HISTORY_RECENT_MESSAGE_USER_TYPE_ID
+			+ "=? and "
+			+ ContentDescriptor.RecentHistoriesMessage.Cols.HISTORY_RECENT_MESSAGE_GROUP_TYPE
+			+ "=?";
+			break;
+		}
+		mContext.getContentResolver()
+		.delete(ContentDescriptor.RecentHistoriesMessage.CONTENT_URI,
+				where, new String[] { String.valueOf(cov.getExtId()), String.valueOf(cov.getType()) });
+	}
+	
+	/**
+	 * update conversation state
+	 * @param context
+	 * @param msgID
+	 * @return
+	 */
+	public static int updateConversationToDatabase(Context context, Conversation cov , int ret) {
 
+		if (cov == null)
+			return -1;
+		
+		String where = "";
+		String[] selectionArgs = null;
+		switch (cov.getType()) {
+		case Conversation.TYPE_CONTACT:
+			where = ContentDescriptor.RecentHistoriesMessage.Cols.HISTORY_RECENT_MESSAGE_REMOTE_USER_ID
+			+ "= ?";
+			selectionArgs = new String[] { String.valueOf(cov.getExtId()) };
+			break;
+		default:
+			where = ContentDescriptor.RecentHistoriesMessage.Cols.HISTORY_RECENT_MESSAGE_GROUP_TYPE
+					+ "= ? and " + ContentDescriptor.RecentHistoriesMessage.Cols.HISTORY_RECENT_MESSAGE_USER_TYPE_ID + "= ?";
+			selectionArgs = new String[] { String.valueOf(cov.getType()) , String.valueOf(cov.getExtId()) };
+			break;
+		}
+		
+		DataBaseContext mContext = new DataBaseContext(context);
+		ContentValues values = new ContentValues();
+		values.put(ContentDescriptor.RecentHistoriesMessage.Cols.HISTORY_RECENT_MESSAGE_READ_STATE,
+				ret);
+		return mContext.getContentResolver().update(
+				ContentDescriptor.RecentHistoriesMessage.CONTENT_URI, values, where,
+				selectionArgs);
+	}
+
+	/**
+	 * Depending on the Cursor Object to extract the Conversation Object.
+	 * @param mContext
+	 * @param cur
+	 * @return
+	 */
 	private static ContactConversation extractContactConversation(
 			Context mContext, Cursor cur) {
 		long extId = cur.getLong(cur.getColumnIndex("RemoteUserID"));

@@ -1,13 +1,16 @@
 package com.v2tech.util;
 
 import java.util.HashMap;
+import java.util.List;
 
+import android.app.ActivityManager;
+import android.app.ActivityManager.RunningTaskInfo;
+import android.content.ComponentName;
 import android.content.Context;
 import android.util.DisplayMetrics;
 import android.util.SparseArray;
 
 import com.v2tech.R;
-import com.v2tech.service.GlobalHolder;
 import com.v2tech.vo.User;
 
 public class GlobalConfig {
@@ -21,17 +24,19 @@ public class GlobalConfig {
 	public static String GLOBAL_VERSION_NAME = "1.3.0.1";
 
 	public static double SCREEN_INCHES = 0;
-	
+
 	public static boolean isConversationOpen = false;
-	
+
 	public static long SERVER_TIME = 0;
 	public static long LOCAL_TIME = 0;
-	
-	public static boolean isVideoConversationOpen = false; //In order to compatible with the huawei x1 7.0 
-	
+
+	public static boolean isVideoConversationOpen = false; // In order to
+															// compatible with
+															// the huawei x1 7.0
+
 	public static HashMap<String, String> allChinese = new HashMap<String, String>();
 
-	public static int[] GLOBAL_FACE_ARRAY = new int[] { 0,R.drawable.face_1,
+	public static int[] GLOBAL_FACE_ARRAY = new int[] { 0, R.drawable.face_1,
 			R.drawable.face_2, R.drawable.face_3, R.drawable.face_4,
 			R.drawable.face_5, R.drawable.face_6, R.drawable.face_7,
 			R.drawable.face_8, R.drawable.face_9, R.drawable.face_10,
@@ -46,30 +51,30 @@ public class GlobalConfig {
 			R.drawable.face_35, R.drawable.face_36, R.drawable.face_37,
 			R.drawable.face_38, R.drawable.face_39, R.drawable.face_40,
 			R.drawable.face_41, R.drawable.face_42, R.drawable.face_43,
-			R.drawable.face_44, R.drawable.face_45};
-	
+			R.drawable.face_44, R.drawable.face_45 };
+
 	private static SparseArray<EmojiWraper> EMOJI_ARRAY = new SparseArray<EmojiWraper>();
 
 	static {
 		String preFix = "/:";
 		String suffFix = ":/";
 		for (int i = 1; i < GLOBAL_FACE_ARRAY.length; i++) {
-			char c = (char)i;
+			char c = (char) i;
 			if (c == '\n') {
 				c += 100;
 			}
 			c += 100;
-			EMOJI_ARRAY.put(GLOBAL_FACE_ARRAY[i], new EmojiWraper(preFix + c+ suffFix,GLOBAL_FACE_ARRAY[i]));
+			EMOJI_ARRAY.put(GLOBAL_FACE_ARRAY[i], new EmojiWraper(preFix + c
+					+ suffFix, GLOBAL_FACE_ARRAY[i]));
 		}
 	}
 
 	public static void saveLogoutFlag(Context context) {
 		SPUtil.putConfigIntValue(context, KEY_LOGGED_IN, 0);
 	}
-	 
-	
+
 	public static String getEmojiStrByIndex(int index) {
-		if (index <=0 || index >= GLOBAL_FACE_ARRAY.length) {
+		if (index <= 0 || index >= GLOBAL_FACE_ARRAY.length) {
 			return null;
 		}
 		EmojiWraper wrapper = EMOJI_ARRAY.get(GLOBAL_FACE_ARRAY[index]);
@@ -78,8 +83,7 @@ public class GlobalConfig {
 		}
 		return null;
 	}
-	
-	
+
 	public static int getDrawableIdByEmoji(String str) {
 		for (int i = 1; i < GLOBAL_FACE_ARRAY.length; i++) {
 			EmojiWraper wrapper = EMOJI_ARRAY.get(GLOBAL_FACE_ARRAY[i]);
@@ -92,8 +96,7 @@ public class GlobalConfig {
 		}
 		return -1;
 	}
-	
-	
+
 	public static int getDrawableIndexByEmoji(String str) {
 		for (int i = 1; i < GLOBAL_FACE_ARRAY.length; i++) {
 			EmojiWraper wrapper = EMOJI_ARRAY.get(GLOBAL_FACE_ARRAY[i]);
@@ -106,8 +109,7 @@ public class GlobalConfig {
 		}
 		return -1;
 	}
-	
-	
+
 	public static String getEmojiStr(int id) {
 		EmojiWraper wrapper = EMOJI_ARRAY.get(id);
 		if (wrapper != null) {
@@ -115,49 +117,69 @@ public class GlobalConfig {
 		}
 		return null;
 	}
-	
-	
-	
+
 	public static String getGlobalPath() {
-		return StorageUtil.getAbsoluteSdcardPath()+"/v2tech/";
-//		return StorageUtil.getAbsoluteSdcardPath()+"/.v2tech/";
+		return StorageUtil.getAbsoluteSdcardPath() + "/v2tech/";
+		// return StorageUtil.getAbsoluteSdcardPath()+"/.v2tech/";
 	}
-	
+
 	public static String getGlobalUserAvatarPath(User user) {
-		return StorageUtil.getAbsoluteSdcardPath()+"/v2tech/Users/" + user.getmUserId() + "/avatars";
+		return StorageUtil.getAbsoluteSdcardPath() + "/v2tech/Users/"
+				+ user.getmUserId() + "/avatars";
 	}
-	
-	
+
 	public static String getGlobalPicsPath(User user) {
-		return StorageUtil.getAbsoluteSdcardPath()+"/v2tech/Users/" + user.getmUserId() + "/Images";
+		return StorageUtil.getAbsoluteSdcardPath() + "/v2tech/Users/"
+				+ user.getmUserId() + "/Images";
 	}
-	
-	
+
 	public static String getGlobalAudioPath(User user) {
-		return StorageUtil.getAbsoluteSdcardPath()+"/v2tech/Users/" + user.getmUserId() + "/audios";
+		return StorageUtil.getAbsoluteSdcardPath() + "/v2tech/Users/"
+				+ user.getmUserId() + "/audios";
 	}
-	
+
 	public static String getGlobalFilePath(User user) {
-		return StorageUtil.getAbsoluteSdcardPath()+"/v2tech/Users/" + user.getmUserId() + "/files";
+		return StorageUtil.getAbsoluteSdcardPath() + "/v2tech/Users/"
+				+ user.getmUserId() + "/files";
 	}
-	
-	public static long getGlobalServerTime(){
+
+	public static long getGlobalServerTime() {
 		return (((System.currentTimeMillis() - GlobalConfig.LOCAL_TIME) / 1000) + GlobalConfig.SERVER_TIME) * 1000;
 	}
-	
-	public static String getGlobalDataBasePath(User user){
-		return StorageUtil.getAbsoluteSdcardPath()+"/v2tech/Users/" + user.getmUserId() + "/";
+
+	public static String getGlobalDataBasePath(User user) {
+		return StorageUtil.getAbsoluteSdcardPath() + "/v2tech/Users/"
+				+ user.getmUserId() + "/";
 	}
-	
+
 	static class EmojiWraper {
 		String emojiStr;
 		int id;
-		
+
 		public EmojiWraper(String emojiStr, int id) {
 			super();
 			this.emojiStr = emojiStr;
 			this.id = id;
 		}
-		
+
+	}
+
+	/**
+	 * 判断当前应用程序是在后台还是在前台
+	 * 
+	 * @param context
+	 * @return true is background , false is Foreground
+	 */
+	public static boolean isApplicationBackground(Context context) {
+		ActivityManager am = (ActivityManager) context
+				.getSystemService(Context.ACTIVITY_SERVICE);
+		List<RunningTaskInfo> tasks = am.getRunningTasks(1);
+		if (!tasks.isEmpty()) {
+			ComponentName topActivity = tasks.get(0).topActivity;
+			if (!topActivity.getPackageName().equals(context.getPackageName())) {
+				return true;
+			}
+		}
+		return false;
 	}
 }

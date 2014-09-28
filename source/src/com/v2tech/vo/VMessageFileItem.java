@@ -154,7 +154,7 @@ public class VMessageFileItem extends VMessageAbstractItem {
 	public float getProgress() {
 		return progress;
 	}
-
+	
 	public void setProgress(float progress) {
 		this.progress = progress;
 	}
@@ -210,7 +210,10 @@ public class VMessageFileItem extends VMessageAbstractItem {
 		BigDecimal kilobyte = new BigDecimal(1024);
 		returnValue = filesize.divide(kilobyte, 2, BigDecimal.ROUND_UP)
 				.floatValue();
-		return (returnValue + "  KB ");
+		if (returnValue > 1)
+			return (returnValue + "KB");
+		else
+			return (totalSpace + "B");
 	}
 
 	public void setSpeed(float speed) {
