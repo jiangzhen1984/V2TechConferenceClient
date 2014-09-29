@@ -11,6 +11,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.v2tech.service.GlobalHolder;
+import com.v2tech.util.HeartCharacterProcessing;
 
 public class Conference implements Parcelable {
 
@@ -23,9 +24,10 @@ public class Conference implements Parcelable {
 	private long creator;
 	private long chairman;
 	private boolean isCanInvitation = true;
-	
+
 	public Conference(ConferenceGroup cg) {
-		this(cg.getmGId(), cg.getOwnerUser().getmUserId(), cg.getName(), cg.getCreateDate(), null, null);
+		this(cg.getmGId(), cg.getOwnerUser().getmUserId(), cg.getName(), cg
+				.getCreateDate(), null, null);
 	}
 
 	public Conference(long id) {
@@ -128,7 +130,7 @@ public class Conference implements Parcelable {
 	public String getName() {
 		return this.name;
 	}
-	
+
 	public void setName(String name) {
 		this.name = name;
 	}
@@ -159,7 +161,7 @@ public class Conference implements Parcelable {
 	public void setCreator(long creator) {
 		this.creator = creator;
 	}
-	
+
 	public void setStartTime(String startTime) {
 		this.startTime = startTime;
 	}
@@ -202,13 +204,14 @@ public class Conference implements Parcelable {
 				.append(" id=\"0\" key=\"\" layout=\"1\" lockchat=\"0\" lockconf=\"0\" lockfiletrans=\"0\" mode=\"2\" pollingvideo=\"0\" ")
 				.append(" syncdesktop=\"0\" syncdocument=\"1\" syncvideo=\"0\" ")
 				.append("subject=\"")
-				.append(this.name)
+				.append(HeartCharacterProcessing.convert(this.name))
 				.append("\" ")
 				.append("chairuserid=\"")
 				.append(GlobalHolder.getInstance().getCurrentUserId())
 				.append("\" ")
 				.append("chairnickname=\"")
-				.append(loggedUser == null ? "" : loggedUser.getName())
+				.append(loggedUser == null ? "" : HeartCharacterProcessing
+						.convert(loggedUser.getName()))
 				.append("\"  starttime=\"" + getDate().getTime() / 1000
 						+ "\" >").append("</conf>");
 		return sb.toString();
@@ -220,7 +223,9 @@ public class Conference implements Parcelable {
 		sb.append("<xml>");
 		for (User u : this.invitedList) {
 			sb.append("<user id=\"").append(u.getmUserId()).append("\" ")
-					.append("nickname=\"").append(u.getName()).append("\"/>");
+					.append("nickname=\"")
+					.append(HeartCharacterProcessing.convert(u.getName()))
+					.append("\"/>");
 		}
 
 		sb.append("</xml>");
@@ -262,7 +267,7 @@ public class Conference implements Parcelable {
 				id = Long.valueOf(str.substring(start + 5, end));
 			}
 		}
-		
+
 		start = str.indexOf(" id='");
 		if (start != -1) {
 			int end = str.indexOf("'", start + 5);
@@ -270,7 +275,7 @@ public class Conference implements Parcelable {
 				id = Long.valueOf(str.substring(start + 5, end));
 			}
 		}
-		
+
 		start = str.indexOf(" subject='");
 		if (start != -1) {
 			int end = str.indexOf("'", start + 10);
@@ -278,7 +283,7 @@ public class Conference implements Parcelable {
 				subject = str.substring(start + 10, end);
 			}
 		}
-		
+
 		Conference conf = new Conference(id);
 		conf.setChairman(chairman);
 		conf.setCreator(createor);

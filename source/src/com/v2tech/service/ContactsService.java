@@ -13,6 +13,7 @@ import com.V2.jni.ind.V2User;
 import com.v2tech.service.jni.GroupServiceJNIResponse;
 import com.v2tech.service.jni.JNIResponse;
 import com.v2tech.service.jni.RequestConfCreateResponse;
+import com.v2tech.util.HeartCharacterProcessing;
 import com.v2tech.vo.ContactGroup;
 import com.v2tech.vo.Group;
 import com.v2tech.vo.Group.GroupType;
@@ -53,6 +54,9 @@ public class ContactsService extends AbstractHandler {
 	public void addContact(Group contactGroup, User user, String additInfo,
 			String commentName) {
 
+		additInfo=HeartCharacterProcessing.convert(additInfo);
+		commentName=HeartCharacterProcessing.convert(commentName);
+		
 		String groupInfo = "<friendgroup" + " id='" + contactGroup.getmGId()
 				+ "'/>";
 
@@ -115,6 +119,7 @@ public class ContactsService extends AbstractHandler {
 	 * @return:
 	 */
 	public void refuseAddedAsContact(long nGroupID, long nUserID, String reason) {
+		reason=HeartCharacterProcessing.convert(reason);
 		GroupRequest.getInstance().refuseInviteJoinGroup(
 				Group.GroupType.CONTACT.intValue(), nGroupID, nUserID, reason);
 	}

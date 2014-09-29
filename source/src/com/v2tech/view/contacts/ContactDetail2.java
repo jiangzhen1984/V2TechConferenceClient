@@ -478,7 +478,7 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 			IntentFilter intentFilter = new IntentFilter();
 			intentFilter
 					.addAction(JNIService.JNI_BROADCAST_USER_UPDATE_NAME_OR_SIGNATURE);
-			intentFilter.addAction(JNIService.JNI_BROADCAST_FRIEND_ADDED);
+			intentFilter.addAction(JNIService.JNI_BROADCAST_FRIEND_AUTHENTICATION);
 			intentFilter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
 
 			registerReceiver(myBroadcastReceiver, intentFilter);
@@ -509,7 +509,7 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 					showUserInfo();
 				}
 
-			} else if (action.equals(JNIService.JNI_BROADCAST_FRIEND_ADDED)) {
+			} else if (action.equals(JNIService.JNI_BROADCAST_FRIEND_AUTHENTICATION)) {
 				long uid = arg1.getLongExtra("uid", -1);
 				if (uid == -1) {
 					return;

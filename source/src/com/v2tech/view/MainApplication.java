@@ -18,7 +18,9 @@ import net.sourceforge.pinyin4j.PinyinHelper;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.Application;
+import android.app.ActivityManager.RunningTaskInfo;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -59,7 +61,7 @@ public class MainApplication extends Application {
 	private Vector<WeakReference<Activity>> list = new Vector<WeakReference<Activity>>();
 	private final String DATABASE_FILENAME = "hzpy.db";
 	private boolean needCopy;
-	
+
 	@Override
 	public void onCreate() {
 		super.onCreate();
@@ -94,31 +96,31 @@ public class MainApplication extends Application {
 		}
 
 		String path = GlobalConfig.getGlobalPath();
-//		File pa = new File(GlobalConfig.getGlobalUserAvatarPath());
-//		if (!pa.exists()) {
-//			boolean res = pa.mkdirs();
-//			V2Log.i(" create avatar dir " + pa.getAbsolutePath() + "  " + res);
-//		}
-//		pa.setWritable(true);
-//		pa.setReadable(true);
-//
-//		File image = new File(GlobalConfig.getGlobalPicsPath());
-//		if (!image.exists()) {
-//			boolean res = image.mkdirs();
-//			V2Log.i(" create image dir " + image.getAbsolutePath() + "  " + res);
-//		}
-//		File audioPath = new File(GlobalConfig.getGlobalAudioPath());
-//		if (!audioPath.exists()) {
-//			boolean res = audioPath.mkdirs();
-//			V2Log.i(" create audio dir " + audioPath.getAbsolutePath() + "  "
-//					+ res);
-//		}
-//		File filePath = new File(GlobalConfig.getGlobalFilePath());
-//		if (!filePath.exists()) {
-//			boolean res = filePath.mkdirs();
-//			V2Log.i(" create file dir " + filePath.getAbsolutePath() + "  "
-//					+ res);
-//		}
+		// File pa = new File(GlobalConfig.getGlobalUserAvatarPath());
+		// if (!pa.exists()) {
+		// boolean res = pa.mkdirs();
+		// V2Log.i(" create avatar dir " + pa.getAbsolutePath() + "  " + res);
+		// }
+		// pa.setWritable(true);
+		// pa.setReadable(true);
+		//
+		// File image = new File(GlobalConfig.getGlobalPicsPath());
+		// if (!image.exists()) {
+		// boolean res = image.mkdirs();
+		// V2Log.i(" create image dir " + image.getAbsolutePath() + "  " + res);
+		// }
+		// File audioPath = new File(GlobalConfig.getGlobalAudioPath());
+		// if (!audioPath.exists()) {
+		// boolean res = audioPath.mkdirs();
+		// V2Log.i(" create audio dir " + audioPath.getAbsolutePath() + "  "
+		// + res);
+		// }
+		// File filePath = new File(GlobalConfig.getGlobalFilePath());
+		// if (!filePath.exists()) {
+		// boolean res = filePath.mkdirs();
+		// V2Log.i(" create file dir " + filePath.getAbsolutePath() + "  "
+		// + res);
+		// }
 
 		initConfFile();
 
@@ -172,7 +174,7 @@ public class MainApplication extends Application {
 					.getPath();
 			File file = new File(databaseFilename);
 			// 目录中不存在 .db文件，则从res\raw目录中复制这个文件到该目录
-			if(file.exists()){
+			if (file.exists()) {
 				InputStream is = getResources().openRawResource(R.raw.hzpy);
 				if (is == null) {
 					V2Log.e("readed sqlite file failed... inputStream is null");
@@ -180,12 +182,12 @@ public class MainApplication extends Application {
 				}
 				String md5 = getFileMD5(is);
 				String currentMD5 = getFileMD5(new FileInputStream(file));
-				if(md5.equals(currentMD5))
-					needCopy = false; 
+				if (md5.equals(currentMD5))
+					needCopy = false;
 				else
 					needCopy = true;
 			}
-			
+
 			if (!(file.exists()) || needCopy == true) {
 				// 获得封装.db文件的InputStream对象
 				InputStream is = getResources().openRawResource(R.raw.hzpy);
@@ -206,8 +208,7 @@ public class MainApplication extends Application {
 		} catch (Exception e) {
 			e.getStackTrace();
 			V2Log.e("loading HZPY.db SQListe");
-		}
-		finally{
+		} finally {
 			needCopy = false;
 		}
 	}
@@ -215,11 +216,11 @@ public class MainApplication extends Application {
 	private void initConfFile() {
 		// Initialize global configuration file
 		File path = new File(GlobalConfig.getGlobalPath());
-		if(!path.exists())
+		if (!path.exists())
 			path.mkdir();
-		
-		File optionsFile = new File(path , "log_options.xml");
-		if(!optionsFile.exists()){
+
+		File optionsFile = new File(path, "log_options.xml");
+		if (!optionsFile.exists()) {
 			try {
 				optionsFile.createNewFile();
 			} catch (IOException e) {
@@ -272,10 +273,11 @@ public class MainApplication extends Application {
 		}
 
 	}
-	
+
 	private void initDPI() {
 		DisplayMetrics metrics = new DisplayMetrics();
-		WindowManager manager = (WindowManager) this.getApplicationContext().getSystemService(Context.WINDOW_SERVICE);
+		WindowManager manager = (WindowManager) this.getApplicationContext()
+				.getSystemService(Context.WINDOW_SERVICE);
 		manager.getDefaultDisplay().getMetrics(metrics);
 		GlobalConfig.GLOBAL_DPI = metrics.densityDpi;
 		V2Log.i("Init user device DPI: " + GlobalConfig.GLOBAL_DPI);
@@ -430,6 +432,31 @@ public class MainApplication extends Application {
 							getApplicationContext(), true, i);
 				}
 			}
+		}
+	}
+
+	public boolean theAppIsRunningBackground() {
+
+		String theAppPackageName = getPackageName();
+		String currentRuningPackageName = null;
+
+		ActivityManager activityManager = (ActivityManager) getSystemService(Activity.ACTIVITY_SERVICE);
+		List<RunningTaskInfo> listRunningTaskInfo = activityManager
+				.getRunningTasks(1);
+		if ((listRunningTaskInfo != null) && listRunningTaskInfo.size() > 0) {
+			currentRuningPackageName = listRunningTaskInfo.get(0).topActivity
+					.getPackageName();
+
+		}
+
+		if ((theAppPackageName == null) || (currentRuningPackageName == null)) {
+			return false;
+		}
+
+		if (currentRuningPackageName.equals(theAppPackageName)) {
+			return false;
+		} else {
+			return true;
 		}
 	}
 

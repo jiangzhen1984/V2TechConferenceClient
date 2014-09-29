@@ -5,6 +5,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import android.app.Activity;
+import android.app.ActivityManager;
+import android.app.ActivityManager.RunningTaskInfo;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -108,7 +111,7 @@ public class JNIService extends Service {
 	public static final String JNI_BROADCAST_GROUP_USER_REMOVED = "com.v2tech.jni.broadcast.group_user_removed";
 	public static final String JNI_BROADCAST_GROUP_USER_ADDED = "com.v2tech.jni.broadcast.group_user_added";
 	public static final String JNI_BROADCAST_VIDEO_CALL_CLOSED = "com.v2tech.jni.broadcast.video_call_closed";
-	public static final String JNI_BROADCAST_FRIEND_ADDED = "com.v2tech.jni.broadcast.friend_authentication";
+	public static final String JNI_BROADCAST_FRIEND_AUTHENTICATION = "com.v2tech.jni.broadcast.friend_authentication";
 	public static final String JNI_BROADCAST_NEW_QUALIFICATION_MESSAGE = "com.v2tech.jni.broadcast.new.qualification_message";
 
 	/**
@@ -311,7 +314,8 @@ public class JNIService extends Service {
 				GroupUserInfoOrig go = (GroupUserInfoOrig) msg.obj;
 				if (go != null && go.xml != null) {
 					List<User> lu = User.fromXml(go.xml);
-					Group group = GlobalHolder.getInstance().findGroupById(go.gId);
+					Group group = GlobalHolder.getInstance().findGroupById(
+							go.gId);
 					for (User tu : lu) {
 						User existU = GlobalHolder.getInstance().putUser(
 								tu.getmUserId(), tu);
@@ -636,7 +640,7 @@ public class JNIService extends Service {
 			AddFriendHistroysHandler.addMeNeedAuthentication(
 					getApplicationContext(), vUser, additInfo);
 			Intent intent = new Intent();
-			intent.setAction(JNI_BROADCAST_FRIEND_ADDED);
+			intent.setAction(JNI_BROADCAST_FRIEND_AUTHENTICATION);
 			intent.addCategory(JNI_BROADCAST_CATEGROY);
 			sendBroadcast(intent);
 
@@ -733,13 +737,12 @@ public class JNIService extends Service {
 			if (gType == GroupType.CONTACT) {
 				AddFriendHistroysHandler.becomeFriendHanler(
 						getApplicationContext(), sXml);
-				
-				//获得用户uid
-				//更新备注
-				
-				
+
+				// 获得用户uid
+				// 更新备注
+
 				Intent intent = new Intent();
-				intent.setAction(JNI_BROADCAST_FRIEND_ADDED);
+				intent.setAction(JNI_BROADCAST_FRIEND_AUTHENTICATION);
 				intent.addCategory(JNI_BROADCAST_CATEGROY);
 				intent.putExtra("uid", uid);
 				intent.putExtra("gid", nGroupID);
@@ -767,7 +770,7 @@ public class JNIService extends Service {
 						getApplicationContext(), nUserID, sxml);
 				// temptag 20140917
 				Intent intent = new Intent();
-				intent.setAction(JNI_BROADCAST_FRIEND_ADDED);
+				intent.setAction(JNI_BROADCAST_FRIEND_AUTHENTICATION);
 				intent.addCategory(JNI_BROADCAST_CATEGROY);
 				sendBroadcast(intent);
 			}

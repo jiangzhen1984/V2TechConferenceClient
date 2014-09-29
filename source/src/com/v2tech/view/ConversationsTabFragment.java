@@ -12,6 +12,9 @@ import java.util.regex.Pattern;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.ContentValues;
@@ -266,7 +269,8 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 			}
 
 			if (mCurrentTabFlag == Conversation.TYPE_CONTACT) {
-				intentFilter.addAction(JNIService.JNI_BROADCAST_FRIEND_ADDED);
+				intentFilter
+						.addAction(JNIService.JNI_BROADCAST_FRIEND_AUTHENTICATION);
 				intentFilter
 						.addAction(JNIService.JNI_BROADCAST_NEW_QUALIFICATION_MESSAGE);
 			}
@@ -286,7 +290,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 	public void onStart() {
 		super.onStart();
 		if (mCurrentTabFlag == Conversation.TYPE_CONTACT) {
-			showUnreadFriendAuthenticationRedFlag();
+			showUnreadFriendAuthentication();
 		}
 	}
 
@@ -708,7 +712,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 					new String[] {});
 			if (cursor != null && cursor.getCount() > 0) {
 				initVerificationItem();
-				showUnreadFriendAuthenticationRedFlag();
+				showUnreadFriendAuthentication();
 			}
 		}
 		new Thread(new Runnable() {
@@ -758,7 +762,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 			}
 		}
 
-		showUnreadFriendAuthenticationRedFlag();
+		showUnreadFriendAuthentication();
 		if (isFresh) {
 			adapter.notifyDataSetChanged();
 		}
@@ -1645,13 +1649,40 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 							intent.getExtras().getLong("remoteUserID"), intent
 									.getExtras().getLong("mid"));
 				}
-			} else if (action.equals(JNIService.JNI_BROADCAST_FRIEND_ADDED)) {
+			} else if (action
+					.equals(JNIService.JNI_BROADCAST_FRIEND_AUTHENTICATION)) {
 				V2Log.e(TAG, "JNI_BROADCAST_FRIEND_AUTHENTICATIONE update..");
 
 				if (verificationMessageItemLayout == null
 						|| verificationMessageItemData == null)
 					initVerificationItem();
-				showUnreadFriendAuthenticationRedFlag();
+				String msg = showUnreadFriendAuthentication();
+				if (msg == null) {
+					return;
+				}
+
+				if (((MainApplication) getActivity().getApplication())
+						.theAppIsRunningBackground()) {
+					// 发通知
+					Intent i = new Intent(getActivity(),
+							MessageAuthenticationActivity.class);
+					i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+							| Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+					PendingIntent pendingIntent = PendingIntent.getActivity(
+							getActivity(), 0, i, 0);
+
+					Notification notification = new Notification.Builder(
+							getActivity()).setSmallIcon(R.drawable.ic_launcher)
+							.setContentTitle("通知").setContentText(msg)
+							.setAutoCancel(true).setTicker(msg)
+							.setWhen(System.currentTimeMillis())
+							.setContentIntent(pendingIntent).getNotification();
+					((NotificationManager) getActivity().getSystemService(
+							Activity.NOTIFICATION_SERVICE)).notify(0,
+							notification);
+
+				}
 			} else if (JNIService.JNI_BROADCAST_NEW_QUALIFICATION_MESSAGE
 					.equals(intent.getAction())) {
 				// If this can receive this broadcast, means
@@ -1662,7 +1693,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 		}
 	}
 
-	private void showUnreadFriendAuthenticationRedFlag() {
+	private String showUnreadFriendAuthentication() {
 
 		// ActivityManager activityManager=(ActivityManager)
 		// getActivity().getSystemService(Activity.ACTIVITY_SERVICE);
@@ -1689,73 +1720,75 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 
 		if ((cr != null) && (cr.getCount() == 0)) {
 			cr.close();
-			return;
+			return null;
 		}
+
+		String msg = "";
+		String date = "";
+		String dateLong = "";
+
+		if (cr.moveToFirst()) {
+			AddFriendHistorieNode tempNode = new AddFriendHistorieNode();
+			// _id integer primary key AUTOINCREMENT,0
+			// OwnerUserID bigint,1
+			// SaveDate bigint,2
+			// FromUserID bigint,3
+			// OwnerAuthType bigint,4
+			// ToUserID bigint, 5
+			// RemoteUserID bigint, 6
+			// ApplyReason nvarchar(4000),7
+			// RefuseReason nvarchar(4000), 8
+			// AddState bigint ,9
+			// ReadState bigint);10
+			tempNode.ownerUserID = cr.getLong(1);
+			tempNode.saveDate = cr.getLong(2);
+			tempNode.fromUserID = cr.getLong(3);
+			tempNode.ownerAuthType = cr.getLong(4);
+			tempNode.toUserID = cr.getLong(5);
+			tempNode.remoteUserID = cr.getLong(6);
+			tempNode.applyReason = cr.getString(7);
+			tempNode.refuseReason = cr.getString(8);
+			tempNode.addState = cr.getLong(9);
+			tempNode.readState = cr.getLong(10);
+
+			String name = GlobalHolder.getInstance()
+					.getUser(tempNode.remoteUserID).getName();
+
+			// 别人加我：允许任何人：0已添加您为好友，需要验证：1未处理，2已同意，3已拒绝
+			// 我加别人：允许认识人：4你们已成为了好友，需要验证：5等待对方验证，4被同意（你们已成为了好友），6拒绝了你为好友
+			if ((tempNode.fromUserID == tempNode.remoteUserID)
+					&& (tempNode.ownerAuthType == 0)) {// 别人加我允许任何人
+				msg = name + "已添加你为好友";
+			} else if ((tempNode.fromUserID == tempNode.remoteUserID)
+					&& (tempNode.ownerAuthType == 1)) {// 别人加我不管我有没有处理
+				msg = name + "申请加你为好友";
+			} else if ((tempNode.fromUserID == tempNode.ownerUserID)
+					&& (tempNode.addState == 0)) {// 我加别人等待验证
+				msg = "申请加" + name + "为好友等待对方验证";
+			} else if ((tempNode.fromUserID == tempNode.ownerUserID)
+					&& (tempNode.addState == 1)) {// 我加别人已被同意或我加别人不需验证
+				msg = "你和" + name + "成为了好友";
+			} else if ((tempNode.fromUserID == tempNode.ownerUserID)
+					&& (tempNode.addState == 2)) {// 我加别人已被拒绝
+				msg = name + "拒绝你的好友请求";
+			}
+			date = DateUtil.getStringDate(tempNode.saveDate * 1000);
+			dateLong = String.valueOf(tempNode.saveDate * 1000);
+		}
+		cr.close();
 
 		if (verificationMessageItemLayout != null) {
 			verificationMessageItemLayout.updateNotificator(hasUnread);
-			String msg = "";
-			String date = "";
-			String dateLong = "";
 			if (verificationMessageItemData != null) {
-				if (cr.moveToFirst()) {
-					AddFriendHistorieNode tempNode = new AddFriendHistorieNode();
-					// _id integer primary key AUTOINCREMENT,0
-					// OwnerUserID bigint,1
-					// SaveDate bigint,2
-					// FromUserID bigint,3
-					// OwnerAuthType bigint,4
-					// ToUserID bigint, 5
-					// RemoteUserID bigint, 6
-					// ApplyReason nvarchar(4000),7
-					// RefuseReason nvarchar(4000), 8
-					// AddState bigint ,9
-					// ReadState bigint);10
-					tempNode.ownerUserID = cr.getLong(1);
-					tempNode.saveDate = cr.getLong(2);
-					tempNode.fromUserID = cr.getLong(3);
-					tempNode.ownerAuthType = cr.getLong(4);
-					tempNode.toUserID = cr.getLong(5);
-					tempNode.remoteUserID = cr.getLong(6);
-					tempNode.applyReason = cr.getString(7);
-					tempNode.refuseReason = cr.getString(8);
-					tempNode.addState = cr.getLong(9);
-					tempNode.readState = cr.getLong(10);
-
-					String name = GlobalHolder.getInstance()
-							.getUser(tempNode.remoteUserID).getName();
-
-					// 别人加我：允许任何人：0已添加您为好友，需要验证：1未处理，2已同意，3已拒绝
-					// 我加别人：允许认识人：4你们已成为了好友，需要验证：5等待对方验证，4被同意（你们已成为了好友），6拒绝了你为好友
-					if ((tempNode.fromUserID == tempNode.remoteUserID)
-							&& (tempNode.ownerAuthType == 0)) {// 别人加我允许任何人
-						msg = name + "已添加你为好友";
-					} else if ((tempNode.fromUserID == tempNode.remoteUserID)
-							&& (tempNode.ownerAuthType == 1)) {// 别人加我不管我有没有处理
-						msg = name + "申请加你为好友";
-					} else if ((tempNode.fromUserID == tempNode.ownerUserID)
-							&& (tempNode.addState == 0)) {// 我加别人等待验证
-						msg = "申请加" + name + "为好友等待对方验证";
-					} else if ((tempNode.fromUserID == tempNode.ownerUserID)
-							&& (tempNode.addState == 1)) {// 我加别人已被同意或我加别人不需验证
-						msg = "你和" + name + "成为了好友";
-					} else if ((tempNode.fromUserID == tempNode.ownerUserID)
-							&& (tempNode.addState == 2)) {// 我加别人已被拒绝
-						msg = name + "拒绝你的好友请求";
-					}
-					date = DateUtil.getStringDate(tempNode.saveDate * 1000);
-					dateLong = String.valueOf(tempNode.saveDate * 1000);
-				}
-				cr.close();
 				verificationMessageItemData.setMsg(msg);
 				verificationMessageItemData.setDate(date);
 				verificationMessageItemData.setDateLong(dateLong);
 				verificationMessageItemLayout.update();
 			}
-
 			notificationListener.updateNotificator(Conversation.TYPE_CONTACT,
 					hasUnread);
 		}
+		return msg;
 	}
 
 	class LocalHandler extends Handler {

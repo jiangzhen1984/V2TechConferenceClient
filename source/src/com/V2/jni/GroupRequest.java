@@ -13,6 +13,7 @@ import com.V2.jni.ind.V2Group;
 import com.V2.jni.ind.V2User;
 import com.V2.jni.util.V2Log;
 import com.V2.jni.util.XmlAttributeExtractor;
+import com.v2tech.util.HeartCharacterProcessing;
 
 public class GroupRequest {
 
@@ -328,8 +329,8 @@ public class GroupRequest {
 	 * <filelist><file encrypttype='1' id='C2A65B9B-63C7-4C9E-A8DD-F15F74ABA6CA'
 	 * name='83025aafa40f4bfb24fdb8d1034f78f0f7361801.gif' size='497236'
 	 * time='1411112464' uploader='11029' url=
-	 * 'http://192.168.0.38:8090/crowd/C2A65B9B-63C7-4C9E-A8DD-F15F74ABA6CA/C2A65B9B-63C7-4C9E-A8DD-F15F74ABA6CA/83025aafa40f4bfb24fdb8d1034f78f0f7361801.gif'/></filelis
-	 * t >
+	 * 'http://192.168.0.38:8090/crowd/C2A65B9B-63C7-4C9E-A8DD-F15F74ABA6CA/C2A65B9B-63C7-4C9E-A8DD-F15F74ABA6CA/83025aafa40f4bfb24fdb8d1034f78f0f7361801.gif'/></fil
+	 * e l i s t >
 	 * 
 	 * @param type
 	 * @param nGroupId
@@ -517,6 +518,7 @@ public class GroupRequest {
 			group = new V2Group(Long.parseLong(id), groupType);
 			String name = XmlAttributeExtractor.extract(groupInfo, "subject='",
 					"'");
+			name = HeartCharacterProcessing.reverse(name);
 			String starttime = XmlAttributeExtractor.extract(groupInfo,
 					"starttime='", "'");
 			String createuserid = XmlAttributeExtractor.extract(groupInfo,
@@ -539,8 +541,10 @@ public class GroupRequest {
 					"authtype='", "'");
 			String uname = XmlAttributeExtractor.extract(userInfo,
 					"nickname='", "'");
+			uname = HeartCharacterProcessing.reverse(uname);
 			String name = XmlAttributeExtractor.extract(groupInfo, "name='",
 					"'");
+			name = HeartCharacterProcessing.reverse(name);
 			group.name = name;
 			group.creator = new V2User(Long.valueOf(createuserid), uname);
 			if (auth != null) {
@@ -555,6 +559,7 @@ public class GroupRequest {
 			user = new V2User(Long.parseLong(id));
 			String name = XmlAttributeExtractor.extract(userInfo,
 					" nickname='", "'");
+			name = HeartCharacterProcessing.reverse(name);
 			user.name = name;
 		}
 
@@ -645,7 +650,6 @@ public class GroupRequest {
 				+ szWBoardID + " | nWhiteIndex: " + nWhiteIndex);
 	};
 
-
 	/**
 	 * 文件重命名 TODO implement
 	 * 
@@ -661,10 +665,6 @@ public class GroupRequest {
 				+ sFileID + " | sNewName: " + sNewName);
 	};
 
-	
-	
-
-	
 	/**
 	 * 收到白板会话被关闭的回调 TODO implement
 	 * 
