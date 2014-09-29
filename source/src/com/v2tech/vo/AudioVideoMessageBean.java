@@ -6,7 +6,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.widget.ImageView;
 
-public class AudioVideoMessageBean  implements Parcelable{
+public class AudioVideoMessageBean  implements Parcelable , Comparable<AudioVideoMessageBean>{
 
 	public static final int TYPE_AUDIO = 0;
 	public static final int TYPE_VIDEO = 1;
@@ -139,4 +139,17 @@ public class AudioVideoMessageBean  implements Parcelable{
 					parcel.readInt(), parcel.readInt(), parcel.readInt() , parcel.readInt() , parcel.readInt());
 		}
 	};
+
+	@Override
+	public int compareTo(AudioVideoMessageBean another) {
+		if(mChildBeans.size() <=0 || another.mChildBeans.size() <= 0)
+			return 0;
+		
+		ChildMessageBean loaclChild = mChildBeans.get(0);
+		ChildMessageBean childMessageBean = another.mChildBeans.get(0);
+		if (loaclChild.childSaveDate > childMessageBean.childSaveDate) 
+			return -1;
+		else
+			return 1;
+	}
 }

@@ -3,15 +3,14 @@ package com.v2tech.db;
 import java.io.File;
 import java.io.IOException;
 
-import com.V2.jni.util.V2Log;
-import com.v2tech.service.GlobalHolder;
-import com.v2tech.util.GlobalConfig;
-
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.database.DatabaseErrorHandler;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
+
+import com.V2.jni.util.V2Log;
+import com.v2tech.util.GlobalConfig;
 
 /**
  * 用于支持对存储在SD卡上的数据库的访问
@@ -48,8 +47,7 @@ public class DataBaseContext extends ContextWrapper {
 		} else {// 如果存在
 				// 获取指定的用户数据库路径
 				// 判断目录是否存在，不存在则创建该目录
-			String dbDir = GlobalConfig.getGlobalDataBasePath(GlobalHolder
-					.getInstance().getCurrentUser());
+			String dbDir = GlobalConfig.DATABASE_PATH;
 			File dirFile = new File(dbDir);
 			if (!dirFile.exists())
 				dirFile.mkdirs();

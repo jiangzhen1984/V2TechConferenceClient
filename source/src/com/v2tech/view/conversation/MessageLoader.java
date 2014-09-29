@@ -339,8 +339,7 @@ public class MessageLoader {
 
 			String[] args = new String[] { String.valueOf(uid),
 					String.valueOf(uid) };
-			String sortOrder = ContentDescriptor.HistoriesMedia.Cols.HISTORY_MEDIA_START_DATE
-					+ " desc";
+			String sortOrder = ContentDescriptor.HistoriesMedia.Cols.HISTORY_MEDIA_SAVEDATE + " desc";
 			Cursor mCur = context.getContentResolver().query(
 					ContentDescriptor.HistoriesMedia.CONTENT_URI,
 					ContentDescriptor.HistoriesMedia.Cols.ALL_CLOS, selection,

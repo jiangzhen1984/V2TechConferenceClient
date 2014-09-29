@@ -776,6 +776,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 
 	private void initVoiceItem() {
 		voiceMessageItem = new Conversation(Conversation.TYPE_VOICE_MESSAGE, 0);
+		voiceMessageItem.setExtId(-1);
 		voiceMessageItem.setName("通话消息");
 		voiceLayout = new GroupLayout(mContext, voiceMessageItem);
 		voiceMessageItem.setReadFlag(Conversation.READ_FLAG_READ);
@@ -785,6 +786,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 	private void initVerificationItem() {
 		verificationMessageItemData = new ConversationFirendAuthenticationData(
 				Conversation.TYPE_VERIFICATION_MESSAGE, 0);
+		verificationMessageItemData.setExtId(-2);
 		verificationMessageItemData.setName("验证消息");
 		verificationMessageItemLayout = new GroupLayout(mContext,
 				verificationMessageItemData);
@@ -1058,8 +1060,12 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 		for (int i = 0; i < mConvList.size(); i++) {
 			if (mConvList.get(i).getExtId() == id) {
 				mItemList.remove(i);
-				ConversationProvider.deleteConversation(mContext,
-						mConvList.get(i));
+				Conversation conversation = mConvList.get(i);
+				if(conversation.getType() != Conversation.TYPE_VOICE_MESSAGE &&
+						conversation.getType() != Conversation.TYPE_VERIFICATION_MESSAGE){
+					ConversationProvider.deleteConversation(mContext,
+							mConvList.get(i));
+				}
 				cache = mConvList.remove(i);
 				break;
 			}
@@ -1438,6 +1444,8 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 						if(scroll.cov.getExtId() == uao.getExtId()){
 							GroupLayout layout = (GroupLayout) scroll.gp;
 							layout.updateNotificator(false);
+							ConversationProvider.updateConversationToDatabase(mContext, scroll.cov,
+									 Conversation.READ_FLAG_READ);
 						}
 					}
 					return ;
@@ -1681,8 +1689,12 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 					((NotificationManager) getActivity().getSystemService(
 							Activity.NOTIFICATION_SERVICE)).notify(0,
 							notification);
-
 				}
+				mItemList.remove(verificationItem);
+				mConvList.remove(verificationMessageItemData);
+				mItemList.add(0, verificationItem);
+				mConvList.add(0, verificationItem.cov);
+				adapter.notifyDataSetChanged();
 			} else if (JNIService.JNI_BROADCAST_NEW_QUALIFICATION_MESSAGE
 					.equals(intent.getAction())) {
 				// If this can receive this broadcast, means
@@ -1787,6 +1799,12 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 			}
 			notificationListener.updateNotificator(Conversation.TYPE_CONTACT,
 					hasUnread);
+			
+//			mItemList.remove(verificationItem);
+//			mConvList.remove(verificationMessageItemData);
+//			mItemList.add(0, verificationItem);
+//			mConvList.add(0, verificationItem.cov);
+//			adapter.notifyDataSetChanged();
 		}
 		return msg;
 	}

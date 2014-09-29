@@ -33,6 +33,7 @@ public class GlobalConfig {
 	public static boolean isVideoConversationOpen = false; // In order to
 															// compatible with
 															// the huawei x1 7.0
+	public static String DATABASE_PATH = "";
 
 	public static HashMap<String, String> allChinese = new HashMap<String, String>();
 
@@ -145,11 +146,6 @@ public class GlobalConfig {
 
 	public static long getGlobalServerTime() {
 		return (((System.currentTimeMillis() - GlobalConfig.LOCAL_TIME) / 1000) + GlobalConfig.SERVER_TIME) * 1000;
-	}
-
-	public static String getGlobalDataBasePath(User user) {
-		return StorageUtil.getAbsoluteSdcardPath() + "/v2tech/Users/"
-				+ user.getmUserId() + "/";
 	}
 
 	static class EmojiWraper {

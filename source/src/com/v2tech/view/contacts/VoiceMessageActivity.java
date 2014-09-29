@@ -1,6 +1,8 @@
 package com.v2tech.view.contacts;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -40,6 +42,7 @@ import com.v2tech.db.ContentDescriptor;
 import com.v2tech.db.DataBaseContext;
 import com.v2tech.service.BitmapManager;
 import com.v2tech.service.GlobalHolder;
+import com.v2tech.util.ArrayUtils;
 import com.v2tech.util.DateUtil;
 import com.v2tech.view.PublicIntent;
 import com.v2tech.view.conversation.MessageLoader;
@@ -308,6 +311,8 @@ public class VoiceMessageActivity extends Activity {
 							.show();
 					return;
 				}
+				
+				Collections.sort(result);
 				mListItem = result;
 				adapter = new VoiceBaseAdapter();
 				mVoicesList.setAdapter(adapter);

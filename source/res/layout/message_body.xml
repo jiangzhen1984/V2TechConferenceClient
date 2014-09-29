@@ -46,6 +46,7 @@
                             android:layout_height="wrap_content"
                             android:layout_centerVertical="true"
                             android:layout_marginLeft="10dp"
+                            android:layout_marginRight="-1dp"
                             android:layout_toRightOf="@+id/conversation_message_body_icon_left"
                             android:src="@drawable/message_body_left_arrow_selector" />
                     </RelativeLayout>
@@ -73,16 +74,15 @@
                             android:text="24&apos;&apos;" />
                         <ImageView
                             android:id="@+id/message_body_failed_item_left"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginLeft="10dp"
-                            android:visibility="invisible"
+                            android:layout_width="10dp"
+                            android:layout_height="10dp"
+                            android:layout_marginLeft="5dp"
                             android:src="@drawable/message_sent_failed_icon" />
                         <ImageView
                             android:id="@+id/message_body_unread_icon_left"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginLeft="10dp"
+                            android:layout_marginLeft="5dp"
                             android:src="@drawable/voice_message_unread_icon"
                             android:visibility="gone" />
                     </LinearLayout>

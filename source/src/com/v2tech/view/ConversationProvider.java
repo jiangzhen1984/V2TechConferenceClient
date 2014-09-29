@@ -259,8 +259,10 @@ public class ConversationProvider {
 				if (voiceMessageItem != null) {
 					if (isVoiceSpecificAdd == false)
 						mConvList.add(voiceMessageItem);
+				}
 
-					if (verificationMessageItemData != null)
+				if (verificationMessageItemData != null){
+					if (isVerificationSpecificAdd == false)
 						mConvList.add(verificationMessageItemData);
 				}
 			}

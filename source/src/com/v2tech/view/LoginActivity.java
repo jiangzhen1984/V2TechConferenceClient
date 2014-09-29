@@ -47,6 +47,7 @@ import com.v2tech.service.jni.JNIResponse;
 import com.v2tech.service.jni.RequestLogInResponse;
 import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.SPUtil;
+import com.v2tech.util.StorageUtil;
 import com.v2tech.vo.User;
 
 /**
@@ -553,6 +554,9 @@ public class LoginActivity extends Activity {
 					//为登陆用户创建个人资料文件夹
 					User user = ((RequestLogInResponse) rlr).getUser();
 					createPersonFolder(user);
+					// 获取登陆用户自己的数据库路径
+					GlobalConfig.DATABASE_PATH = StorageUtil.getAbsoluteSdcardPath() + "/v2tech/Users/"
+					+ user.getmUserId() + "/";
 					// Save user info
 					saveUserConfig(mEmailView.getText().toString(), "");
 					GlobalHolder.getInstance().setCurrentUser(
