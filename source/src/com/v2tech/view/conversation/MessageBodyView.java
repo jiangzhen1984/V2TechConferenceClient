@@ -19,6 +19,7 @@ import android.text.SpannableStringBuilder;
 import android.text.style.ImageSpan;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
@@ -82,7 +83,6 @@ public class MessageBodyView extends LinearLayout {
 
 	private Handler localHandler;
 	private Runnable popupWindowListener = null;
-	private PopupWindow pw;
 
 	private long lastUpdateTime;
 
@@ -91,6 +91,8 @@ public class MessageBodyView extends LinearLayout {
 	private int width = 0;
 	private int popupWindowWidth;
 	private int popupWindowHeight;
+	private PopupWindow pw;
+	private View popWindow;
 
 	public interface ClickListener {
 		public void onMessageClicked(VMessage v);
@@ -234,34 +236,36 @@ public class MessageBodyView extends LinearLayout {
 		populateMessage();
 
 	}
-	
+
 	private void initPopupWindow() {
 		LayoutInflater inflater = (LayoutInflater) getContext()
 				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		final View popWindow = inflater.inflate(
+		popWindow = (ViewGroup) inflater.inflate(
 				R.layout.message_selected_pop_up_window, null);
-		pw = new PopupWindow(popWindow, LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, true);
+		pw = new PopupWindow(popWindow, LayoutParams.WRAP_CONTENT,
+				LayoutParams.WRAP_CONTENT, true);
 		pw.setFocusable(true);
 		pw.setTouchable(true);
 		pw.setOutsideTouchable(true);
-		ViewTreeObserver viewTreeObserver = popWindow.getViewTreeObserver();
-		viewTreeObserver.addOnPreDrawListener(new OnPreDrawListener() {
-			
-			@Override
-			public boolean onPreDraw() {
-				if(popupWindowWidth == 0)
-					popupWindowWidth = popWindow.getMeasuredWidth();
-				
-				if(popupWindowHeight == 0)
-					popupWindowHeight = popWindow.getMeasuredHeight();
-				V2Log.e(TAG, "addOnPreDrawListener 被回调");
-				return true;
-			}
-		});
+		// ViewTreeObserver viewTreeObserver =
+		// popupContent.getViewTreeObserver();
+		// viewTreeObserver.addOnPreDrawListener(new OnPreDrawListener() {
+		//
+		// @Override
+		// public boolean onPreDraw() {
+		// if(popupWindowWidth == 0)
+		// popupWindowWidth = popupContent.getMeasuredWidth();
+		//
+		// if(popupWindowHeight == 0)
+		// popupWindowHeight = popupContent.getMeasuredHeight();
+		// V2Log.e(TAG, "addOnPreDrawListener 被回调");
+		// return true;
+		// }
+		// });
 		TextView tvResend = (TextView) popWindow
 				.findViewById(R.id.contact_message_pop_up_item_resend);
 		tvResend.setOnClickListener(mResendButtonListener);
-		
+
 		TextView tvReDownload = (TextView) popWindow
 				.findViewById(R.id.contact_message_pop_up_item_redownload);
 		tvReDownload.setOnClickListener(mResendButtonListener);
@@ -276,9 +280,22 @@ public class MessageBodyView extends LinearLayout {
 		TextView deleteText = (TextView) popWindow
 				.findViewById(R.id.contact_message_pop_up_item_delete);
 		deleteText.setOnClickListener(mDeleteButtonListener);
-		pw.showAtLocation(this,
-				Gravity.NO_GRAVITY, 0, 0);
-		pw.dismiss();
+	}
+
+	@Override
+	public boolean onTouchEvent(MotionEvent event) {
+		V2Log.d(TAG, "aaaaaaaaaa");
+		return super.onTouchEvent(event);
+	}
+
+	@Override
+	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+		super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+
+		ViewGroup viewGroup = (ViewGroup) popWindow;
+		viewGroup.measure(widthMeasureSpec, heightMeasureSpec);
+		popupWindowHeight = viewGroup.getChildAt(0).getMeasuredHeight();
+		popupWindowWidth = viewGroup.getChildAt(0).getMeasuredWidth();
 	}
 
 	private void populateMessage() {
@@ -315,7 +332,7 @@ public class MessageBodyView extends LinearLayout {
 			VMessageAbstractItem item = items.get(i);
 			// Add new layout for new line
 			if (item.isNewLine() && et.length() != 0) {
-				et.append("\n"); 
+				et.append("\n");
 			}
 			if (item.getType() == VMessageAbstractItem.ITEM_TYPE_TEXT) {
 				et.append(((VMessageTextItem) item).getText());
@@ -372,11 +389,11 @@ public class MessageBodyView extends LinearLayout {
 	 */
 	private void populateAudioMessage(List<VMessageAudioItem> audioItems) {
 		final VMessageAudioItem item = audioItems.get(0);
-		if (item.getState() == VMessageAbstractItem.STATE_UNREAD) 
+		if (item.getState() == VMessageAbstractItem.STATE_UNREAD)
 			unReadIcon.setVisibility(View.VISIBLE);
 		else
 			unReadIcon.setVisibility(View.INVISIBLE);
-		
+
 		if (item.getState() == VMessageAbstractItem.STATE_SENT_FALIED) {
 			failedIcon.setVisibility(View.VISIBLE);
 		}
@@ -427,7 +444,7 @@ public class MessageBodyView extends LinearLayout {
 				} else {
 					callback.requestStopOtherAudio(mMsg);
 					callback.requestPlayAudio(view, mMsg, item);
-					updateUnreadFlag(false , item);
+					updateUnreadFlag(false, item);
 				}
 			}
 
@@ -530,15 +547,13 @@ public class MessageBodyView extends LinearLayout {
 					return;
 				}
 
-				pw.setBackgroundDrawable(new ColorDrawable(
-						Color.TRANSPARENT));
+				pw.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
 				if (messageType == MESSAGE_TYPE_TEXT) {
 					pw.getContentView()
-							.findViewById(
-									R.id.contact_message_pop_up_item_copy)
+							.findViewById(R.id.contact_message_pop_up_item_copy)
 							.setVisibility(View.VISIBLE);
 				}
-				
+
 				if (failedIcon.getVisibility() == View.VISIBLE) {
 					if (mMsg.isLocal()) {
 						pw.getContentView()
@@ -552,11 +567,12 @@ public class MessageBodyView extends LinearLayout {
 								.setVisibility(View.VISIBLE);
 					}
 				}
+
 				int viewWidth = anchor.getMeasuredWidth();
 				int viewHeight = anchor.getMeasuredHeight();
 				int offsetX = (viewWidth - popupWindowWidth) / 2;
 				int offsetY = (viewHeight + popupWindowHeight);
-				
+
 				int[] location = new int[2];
 				anchor.getLocationInWindow(location);
 				// if (location[1] <= 0) {
@@ -595,7 +611,7 @@ public class MessageBodyView extends LinearLayout {
 		updateView(vm);
 	}
 
-	public void updateUnreadFlag(boolean flag , VMessageAudioItem item) {
+	public void updateUnreadFlag(boolean flag, VMessageAudioItem item) {
 		if (!flag) {
 			item.setState(VMessageAbstractItem.STATE_READED);
 			this.unReadIcon.setVisibility(View.GONE);
@@ -603,8 +619,8 @@ public class MessageBodyView extends LinearLayout {
 			item.setState(VMessageAbstractItem.STATE_UNREAD);
 			this.unReadIcon.setVisibility(View.VISIBLE);
 		}
-		
-		MessageLoader.updateBinaryAudioState(getContext(), mMsg , item);
+
+		MessageLoader.updateBinaryAudioState(getContext(), mMsg, item);
 	}
 
 	public void updateFailedFlag(boolean flag) {
@@ -710,20 +726,20 @@ public class MessageBodyView extends LinearLayout {
 					.findViewById(R.id.message_body_file_item_progress_state_ly);
 			ViewTreeObserver viewTreeObserver = progressC.getViewTreeObserver();
 			viewTreeObserver.addOnPreDrawListener(new OnPreDrawListener() {
-				
+
 				@Override
 				public boolean onPreDraw() {
-					if(width == 0){
+					if (width == 0) {
 						width = progressC.getMeasuredWidth();
 						V2Log.d(TAG, "total width：" + width);
 					}
 					return true;
 				}
 			});
-//			progressC.measure(View.MeasureSpec.makeMeasureSpec(0,
-//					View.MeasureSpec.UNSPECIFIED), View.MeasureSpec
-//					.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
-//			width = progressC.getMeasuredWidth();
+			// progressC.measure(View.MeasureSpec.makeMeasureSpec(0,
+			// View.MeasureSpec.UNSPECIFIED), View.MeasureSpec
+			// .makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
+			// width = progressC.getMeasuredWidth();
 			View iv = rootView
 					.findViewById(R.id.message_body_file_item_progress_state);
 			android.view.ViewGroup.LayoutParams params = iv.getLayoutParams();
@@ -913,10 +929,9 @@ public class MessageBodyView extends LinearLayout {
 					View fileRootView = mContentContainer.getChildAt(0);
 					failedIcon.setVisibility(View.INVISIBLE);
 
-					if(mMsg.isLocal()){
+					if (mMsg.isLocal()) {
 						callback.reSendMessageClicked(mMsg);
-					}
-					else{
+					} else {
 						if (mMsg.getItems().size() > 0
 								&& mMsg.getItems().get(0).getType() == VMessageFileItem.ITEM_TYPE_FILE) {
 							VMessageFileItem fileItem = (VMessageFileItem) mMsg
@@ -937,7 +952,7 @@ public class MessageBodyView extends LinearLayout {
 		}
 
 	};
-	
+
 	class LoadTask extends AsyncTask<ImageView, Void, ImageView[]> {
 
 		@Override

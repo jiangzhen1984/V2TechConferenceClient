@@ -37,7 +37,9 @@ public class Conversation {
 
 	protected CharSequence msg;
 	
-	protected boolean isFirst;
+	protected boolean isFirst;  //this field created for specific item voiceItem or verificationItem
+	
+	protected boolean isAddedItem; //this field created for specific item voiceItem or verificationItem
 
 	protected Conversation() {
 	}
@@ -157,6 +159,14 @@ public class Conversation {
 
 	public void setFirst(boolean isFirst) {
 		this.isFirst = isFirst;
+	}
+	
+	public boolean isAddedItem() {
+		return isAddedItem;
+	}
+
+	public void setAddedItem(boolean isAddedItem) {
+		this.isAddedItem = isAddedItem;
 	}
 
 }

@@ -327,8 +327,6 @@ public class VoiceMessageActivity extends Activity {
 
 	class VoiceBaseAdapter extends BaseAdapter {
 
-		private AudioVideoMessageBean audioVideoMessageBean;
-
 		@Override
 		public int getCount() {
 			return mListItem.size();
@@ -371,7 +369,7 @@ public class VoiceMessageActivity extends Activity {
 			} else
 				holder = (ViewHolder) convertView.getTag();
 
-			audioVideoMessageBean = mListItem.get(position);
+			final AudioVideoMessageBean audioVideoMessageBean = mListItem.get(position);
 			User remoteUser = GlobalHolder.getInstance().getUser(audioVideoMessageBean.remoteUserID);
 			if (remoteUser.getAvatarBitmap() != null) 
 				holder.headIcon.setImageBitmap(remoteUser.getAvatarBitmap());
@@ -466,8 +464,9 @@ public class VoiceMessageActivity extends Activity {
 					
 					ContentValues values = new ContentValues();
 					values.put(ContentDescriptor.HistoriesMedia.Cols.HISTORY_MEDIA_READ_STATE , 1);
-					String where = ContentDescriptor.HistoriesMedia.Cols.HISTORY_MEDIA_READ_STATE + "= ?";
-					String[] selectionArgs = new String[]{ String.valueOf(0) };
+					String where = ContentDescriptor.HistoriesMedia.Cols.HISTORY_MEDIA_READ_STATE + "= ? and " +
+							ContentDescriptor.HistoriesMedia.Cols.HISTORY_MEDIA_REMOTE_USER_ID + "= ?";
+					String[] selectionArgs = new String[]{ String.valueOf(0) , String.valueOf(audioVideoMessageBean.remoteUserID)};
 					DataBaseContext context = new DataBaseContext(VoiceMessageActivity.this);
 					context.getContentResolver().update(ContentDescriptor.HistoriesMedia.CONTENT_URI, 
 							values, where, selectionArgs);

@@ -29,9 +29,6 @@ import com.v2tech.vo.Group.GroupType;
 public class ConversationProvider {
 
 	private static boolean isNoEmpty;
-	private static boolean isVoiceSpecificAdd;
-	private static boolean isVerificationSpecificAdd;
-
 	
 	/**
 	 * 向数据库插入新的消息对象
@@ -156,8 +153,8 @@ public class ConversationProvider {
 			Conversation verificationMessageItemData,
 			Conversation voiceMessageItem) {
 
-		Conversation firstAdd = null;
-		Conversation secondAdd = null;
+//		Conversation firstAdd = null;
+//		Conversation secondAdd = null;
 		long verificationDate = 0;
 		long voiceMessageDate = 0;
 		if (mCurrentTabFlag == Conversation.TYPE_CONTACT) {
@@ -173,14 +170,12 @@ public class ConversationProvider {
 				isNoEmpty = true;
 				if (verificationDate > voiceMessageDate) {
 					verificationMessageItemData.setFirst(true);
-					voiceMessageItem.setFirst(false);
-					firstAdd = verificationMessageItemData;
-					secondAdd = voiceMessageItem;
+//					firstAdd = verificationMessageItemData;
+//					secondAdd = voiceMessageItem;
 				} else {
-					verificationMessageItemData.setFirst(false);
 					voiceMessageItem.setFirst(true);
-					firstAdd = voiceMessageItem;
-					secondAdd = verificationMessageItemData;
+//					firstAdd = voiceMessageItem;
+//					secondAdd = verificationMessageItemData;
 				}
 			}
 		}
@@ -204,40 +199,63 @@ public class ConversationProvider {
 				// 如果两个特殊item都不为空，走if语句
 				if (verificationMessageItemData != null
 						&& voiceMessageItem != null) {
-					if (firstAdd != null && firstAdd.getDate() != null
-							&& Long.valueOf(firstAdd.getDateLong()) > date) {
-						mConvList.add(firstAdd);
-						if(firstAdd.getType() == Conversation.TYPE_VOICE_MESSAGE)
-							isVoiceSpecificAdd = true;
-						else
-							isVerificationSpecificAdd = true;
+					if(verificationMessageItemData.isFirst()){
+						if(verificationDate > date && !verificationMessageItemData.isAddedItem()){
+							mConvList.add(verificationMessageItemData);
+							verificationMessageItemData.setAddedItem(true);
+						}
+						
+						if(voiceMessageDate > date && !voiceMessageItem.isAddedItem()){
+							mConvList.add(voiceMessageItem);
+							voiceMessageItem.setAddedItem(true);
+						}
 					}
-
-					if (secondAdd != null&& secondAdd.getDate() != null
-							&& Long.valueOf(secondAdd.getDateLong()) > date) {
-						mConvList.add(secondAdd);
-						if(firstAdd.getType() == Conversation.TYPE_VOICE_MESSAGE)
-							isVoiceSpecificAdd = true;
-						else
-							isVerificationSpecificAdd = true;
+					else{
+						if(voiceMessageDate > date && !voiceMessageItem.isAddedItem()){
+							mConvList.add(voiceMessageItem);
+							voiceMessageItem.setAddedItem(true);
+						}
+						
+						if(verificationDate > date && !verificationMessageItemData.isAddedItem()){
+							mConvList.add(verificationMessageItemData);
+							verificationMessageItemData.setAddedItem(true);
+						}
 					}
+					
+//					if (firstAdd != null && firstAdd.getDate() != null
+//							&& Long.valueOf(firstAdd.getDateLong()) > date && !firstAdd.isAddedItem()) {
+//						mConvList.add(firstAdd);
+//						firstAdd.setAddedItem(true);
+////						if(firstAdd.getType() == Conversation.TYPE_VOICE_MESSAGE)
+////							isVoiceSpecificAdd = true;
+////						else
+////							isVerificationSpecificAdd = true;
+//					}
+//
+//					if (secondAdd != null&& secondAdd.getDate() != null
+//							&& Long.valueOf(secondAdd.getDateLong()) > date && !secondAdd.isAddedItem()) {
+//						mConvList.add(secondAdd);
+//						secondAdd.setAddedItem(true);
+////						if(firstAdd.getType() == Conversation.TYPE_VOICE_MESSAGE)
+////							isVoiceSpecificAdd = true;
+////						else
+////							isVerificationSpecificAdd = true;
+//					}
 				} else { // 如果两个特殊item都为空，或其中一个可能为空，则走else语句
 							// 如果voiceMessageItem不为null，则进行比较
 					if (voiceMessageItem != null
-							&& isVoiceSpecificAdd == false
-							&& voiceMessageItem.getDateLong() != null
-							&& Long.valueOf(voiceMessageItem.getDateLong()) > date) {
+							&& voiceMessageItem.isAddedItem() == false
+							&& verificationDate > date) {
 						mConvList.add(voiceMessageItem);
-						isVoiceSpecificAdd = true;
+						voiceMessageItem.setAddedItem(true);
 					}
 					// 同理如果verificationMessageItem不为null，则进行比较
 					if (verificationMessageItemData != null
-							&& isVerificationSpecificAdd == false
-							&& verificationMessageItemData.getDateLong() != null
+							&& verificationMessageItemData.isAddedItem() == false
 							&& Long.valueOf(verificationMessageItemData
 									.getDateLong()) > date) {
 						mConvList.add(verificationMessageItemData);
-						isVerificationSpecificAdd = true;
+						verificationMessageItemData.setAddedItem(true);
 					}
 				}
 			}
@@ -248,25 +266,25 @@ public class ConversationProvider {
 			if (isNoEmpty) {
 				// 两种添加顺序
 				if (voiceMessageItem.isFirst()) {
-					if (isVoiceSpecificAdd == false)
+					if (voiceMessageItem.isAddedItem() == false)
 						mConvList.add(voiceMessageItem);
 
-					if (isVerificationSpecificAdd == false)
+					if (verificationMessageItemData.isAddedItem() == false)
 						mConvList.add(verificationMessageItemData);
 				} else {
-					if (isVerificationSpecificAdd == false)
+					if (verificationMessageItemData.isAddedItem() == false)
 						mConvList.add(verificationMessageItemData);
-					if (isVoiceSpecificAdd == false)
+					if (voiceMessageItem.isAddedItem() == false)
 						mConvList.add(voiceMessageItem);
 				}
 			} else {
 				if (voiceMessageItem != null) {
-					if (isVoiceSpecificAdd == false)
+					if (voiceMessageItem.isAddedItem() == false)
 						mConvList.add(voiceMessageItem);
 				}
 
 				if (verificationMessageItemData != null){
-					if (isVerificationSpecificAdd == false)
+					if (verificationMessageItemData.isAddedItem() == false)
 						mConvList.add(verificationMessageItemData);
 				}
 			}

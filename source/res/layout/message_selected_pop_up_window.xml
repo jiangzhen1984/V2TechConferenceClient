@@ -3,7 +3,7 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content" >
     <LinearLayout
-        android:id="@+id/LinearLayout1"
+        android:id="@+id/message_selected_pop_up_window_content"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
@@ -53,7 +53,7 @@
         android:id="@+id/message_selected_pop_up_arrow"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/LinearLayout1"
+        android:layout_below="@+id/message_selected_pop_up_window_content"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="@dimen/message_selected_pop_up_window"
         android:src="@drawable/message_selected_pop_up_arrow" />

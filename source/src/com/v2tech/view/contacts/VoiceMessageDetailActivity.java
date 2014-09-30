@@ -254,11 +254,14 @@ public class VoiceMessageDetailActivity extends Activity implements
 		@Override
 		public void onReceive(Context context, Intent intent) {
 
-			long remoteID = intent.getLongExtra("remoteID", -1l);
+			long receiveRemoteID = intent.getLongExtra("remoteID", -1l);
 			if (remoteID == -1l) {
 				Log.e(TAG, "get remoteID is -1 ... update failed!!");
 				return;
 			}
+			
+			if(remoteID != receiveRemoteID)
+				return;
 
 			String selections = ContentDescriptor.HistoriesMedia.Cols.HISTORY_MEDIA_REMOTE_USER_ID
 					+ "= ? ";

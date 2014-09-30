@@ -967,7 +967,7 @@ public class JNIService extends Service {
 			}
 
 			VMessage vm = new VMessage(eGroupType, nGroupID, fromUser, toUser,
-					uuid, new Date(GlobalConfig.getGlobalServerTime()));
+					uuid, new Date(nTime * 1000));
 			vm.setmXmlDatas(szXmlText);
 
 			if (vm.getImageItems().size() > 0) {

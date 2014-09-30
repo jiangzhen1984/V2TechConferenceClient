@@ -799,9 +799,7 @@ public class ConversationView extends Activity {
 					}
 				}
 			});
-			V2Log.i(TAG, "设置当前audio正在播放标识 true：" + currentPlayed.getId()
-					+ "currentPlayed集合长度："
-					+ currentPlayed.getAudioItems().size());
+			V2Log.i(TAG, "更改正在播放的audioItem标识为true , id is ：" + currentPlayed.getId());
 		}
 
 		@Override
@@ -1035,9 +1033,9 @@ public class ConversationView extends Activity {
 					// Start update db for voice
 					lh.postDelayed(mUpdateMicStatusTimer, 200);
 					// Start timer
-					lh.postDelayed(timeOutMonitor, 59 * 1000);
+					lh.postDelayed(timeOutMonitor, 19 * 1000);
 					// start timer for prompt surplus time
-					lh.postDelayed(mUpdateSurplusTime, 48 * 1000);
+					lh.postDelayed(mUpdateSurplusTime, 8 * 1000);
 					starttime = System.currentTimeMillis();
 					voiceIsSentByTimer = false;
 					realRecoding = true;
@@ -1092,8 +1090,10 @@ public class ConversationView extends Activity {
 			stopRecording();
 			// send
 			int seconds = (int) ((System.currentTimeMillis() - starttime) / 1000) + 1;
+//			VMessage vm = MessageBuilder.buildAudioMessage(cov.getType(),
+//					groupId, local, remote, fileName, (int) (seconds / 1000));
 			VMessage vm = MessageBuilder.buildAudioMessage(cov.getType(),
-					groupId, local, remote, fileName, (int) (seconds / 1000));
+					groupId, local, remote, fileName, 20);
 			// Send message to server
 			sendMessageToRemote(vm);
 
@@ -1665,7 +1665,7 @@ public class ConversationView extends Activity {
 		public void requestPlayAudio(View v, VMessage vm, VMessageAudioItem vai) {
 			if (vai != null && vai.getAudioFilePath() != null) {
 				currentPlayed = vm;
-				V2Log.i(TAG, "currentPlayingAudio:--" + currentPlayed.getId());
+				V2Log.i(TAG, "start play , currentPlayingAudio id is : " + currentPlayed.getId());
 				startPlaying(vai.getAudioFilePath());
 			}
 		}
@@ -1716,7 +1716,7 @@ public class ConversationView extends Activity {
 
 		@Override
 		public void requestStopAudio(View v, VMessage vm, VMessageAudioItem vai) {
-			V2Log.i(TAG, "当前正在播放的音频item：" + vai.getId() + "停止");
+			V2Log.i(TAG, "request current playing audioItem 停止 , id is ：" + vai.getId());
 			vai.setPlaying(false);
 			stopPlaying();
 		}

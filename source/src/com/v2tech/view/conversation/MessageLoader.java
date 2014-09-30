@@ -339,7 +339,8 @@ public class MessageLoader {
 
 			String[] args = new String[] { String.valueOf(uid),
 					String.valueOf(uid) };
-			String sortOrder = ContentDescriptor.HistoriesMedia.Cols.HISTORY_MEDIA_SAVEDATE + " desc";
+			String sortOrder = ContentDescriptor.HistoriesMedia.Cols.HISTORY_MEDIA_SAVEDATE
+					+ " desc";
 			Cursor mCur = context.getContentResolver().query(
 					ContentDescriptor.HistoriesMedia.CONTENT_URI,
 					ContentDescriptor.HistoriesMedia.Cols.ALL_CLOS, selection,
@@ -965,24 +966,24 @@ public class MessageLoader {
 		}
 	}
 
-//	public static VMessageFileItem getFileMessageById(Context context,
-//			VMessageFileItem item) {
-//
-//		String selection = ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_ID
-//				+ "= ?";
-//		String[] selectionArgs = new String[] { item.getUuid() };
-//		Cursor cursor = context.getContentResolver().query(
-//				ContentDescriptor.HistoriesFiles.CONTENT_URI, null, selection,
-//				selectionArgs, null);
-//		if (cursor != null && cursor.moveToFirst()) {
-//
-//			String filePath = cursor
-//					.getString(cursor
-//							.getColumnIndex(ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_PATH));
-//			item.setFilePath(filePath);
-//		}
-//		return item;
-//	}
+	// public static VMessageFileItem getFileMessageById(Context context,
+	// VMessageFileItem item) {
+	//
+	// String selection = ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_ID
+	// + "= ?";
+	// String[] selectionArgs = new String[] { item.getUuid() };
+	// Cursor cursor = context.getContentResolver().query(
+	// ContentDescriptor.HistoriesFiles.CONTENT_URI, null, selection,
+	// selectionArgs, null);
+	// if (cursor != null && cursor.moveToFirst()) {
+	//
+	// String filePath = cursor
+	// .getString(cursor
+	// .getColumnIndex(ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_PATH));
+	// item.setFilePath(filePath);
+	// }
+	// return item;
+	// }
 
 	/**
 	 * 根据传入的Cursor对象，构造一个VMessage对象
@@ -1049,13 +1050,11 @@ public class MessageLoader {
 	 *            表名
 	 * @return
 	 */
-	private static boolean isExistTable(Context context, String tabName) {
+	private static synchronized boolean isExistTable(Context context,
+			String tabName) {
 		DataBaseContext mContext = new DataBaseContext(context);
 		SQLiteDatabase base = null;
-		synchronized (MessageLoader.class) {
-			base = mContext.openOrCreateDatabase(
-					V2TechDBHelper.DB_NAME, 0, null);
-		}
+		base = mContext.openOrCreateDatabase(V2TechDBHelper.DB_NAME, 0, null);
 		try {
 			String sql = "select count(*) as c from sqlite_master where type ='table' "
 					+ "and name ='" + tabName.trim() + "' ";
