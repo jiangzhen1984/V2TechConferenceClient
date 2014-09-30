@@ -429,7 +429,7 @@ public class ConversationSelectImage extends Activity {
 			public void run() {
 				try {
 
-					Bitmap bitmap = BitmapUtil.loadAvatarFromPath(fb.filePath);
+					Bitmap bitmap = BitmapUtil.getCompressedBitmap(fb.filePath);
 					if (fb.fileName == null && bitmap != null) {
 						if (!bitmap.isRecycled()) {  
 							bitmap.recycle();

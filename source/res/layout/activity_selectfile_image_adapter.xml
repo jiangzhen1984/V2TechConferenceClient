@@ -20,8 +20,8 @@
             android:layout_marginTop="@dimen/conversation_view_margin" >
             <ImageView
                  android:id="@+id/ws_selectFile_iamge_icon"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="70dp"
+                android:layout_height="70dp"
                 android:layout_centerInParent="true"
                 android:src="@drawable/avatar" />
         </RelativeLayout>

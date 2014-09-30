@@ -117,6 +117,7 @@ public class P2PConversation extends Activity implements
 
 	private VideoSize defaultCameraCaptureSize = new VideoSize(176, 144);
 	private boolean displayWidthIsLonger = false;
+	private boolean isRejected;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -1094,6 +1095,7 @@ public class P2PConversation extends Activity implements
 			chatService.refuseChatting(uad, null);
 			// Remove timer
 			mLocalHandler.removeCallbacks(timeOutMonitor);
+			isRejected = true;
 			hangUp();
 		}
 
@@ -1300,6 +1302,7 @@ public class P2PConversation extends Activity implements
 
 		@Override
 		public void onClick(View view) {
+			isRejected = true;
 			hangUp();
 		}
 
@@ -1456,8 +1459,10 @@ public class P2PConversation extends Activity implements
 						break;
 					}
 
-					if (uad.isIncoming()) 
+					if (uad.isIncoming() && isRejected == false) 
 						currentVideoBean.readSatate = VideoBean.READ_STATE_UNREAD;
+					else
+						currentVideoBean.readSatate = VideoBean.READ_STATE_READED;
 					
 					if (currentVideoBean.startDate != 0)
 						currentVideoBean.endDate = GlobalConfig.getGlobalServerTime();

@@ -204,18 +204,22 @@ public class ConversationProvider {
 				// 如果两个特殊item都不为空，走if语句
 				if (verificationMessageItemData != null
 						&& voiceMessageItem != null) {
-					if (firstAdd != null && isVoiceSpecificAdd == false
-							&& firstAdd.getDate() != null
+					if (firstAdd != null && firstAdd.getDate() != null
 							&& Long.valueOf(firstAdd.getDateLong()) > date) {
 						mConvList.add(firstAdd);
-						isVoiceSpecificAdd = true;
+						if(firstAdd.getType() == Conversation.TYPE_VOICE_MESSAGE)
+							isVoiceSpecificAdd = true;
+						else
+							isVerificationSpecificAdd = true;
 					}
 
-					if (secondAdd != null && isVerificationSpecificAdd == false
-							&& secondAdd.getDate() != null
+					if (secondAdd != null&& secondAdd.getDate() != null
 							&& Long.valueOf(secondAdd.getDateLong()) > date) {
 						mConvList.add(secondAdd);
-						isVerificationSpecificAdd = true;
+						if(firstAdd.getType() == Conversation.TYPE_VOICE_MESSAGE)
+							isVoiceSpecificAdd = true;
+						else
+							isVerificationSpecificAdd = true;
 					}
 				} else { // 如果两个特殊item都为空，或其中一个可能为空，则走else语句
 							// 如果voiceMessageItem不为null，则进行比较

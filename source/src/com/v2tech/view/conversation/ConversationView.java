@@ -423,6 +423,8 @@ public class ConversationView extends Activity {
 		this.unregisterReceiver(receiver);
 		GlobalConfig.isConversationOpen = false;
 		ConversationUpdateFileState.getInstance().executeUpdate(messageArray);
+		if (messageArray.size() <= 0)
+			notificateConversationUpdate(false, cov.getExtId(), true);
 		finishWork();
 	}
 
@@ -494,7 +496,14 @@ public class ConversationView extends Activity {
 	}
 
 	private void scrollToBottom() {
-		scrollToPos(messageArray.size() - 1);
+		mMessagesContainer.post(new Runnable() {
+
+			@Override
+			public void run() {
+				mMessagesContainer.setSelection(messageArray.size() - 1);
+			}
+
+		});
 	}
 
 	private void scrollToPos(final int pos) {
@@ -1548,7 +1557,17 @@ public class ConversationView extends Activity {
 		return new String(copy, 0, j);
 	}
 
-	private void notificateConversationUpdate(boolean isFresh, long msgID) {
+	/**
+	 * 通知ConversationTabFragment 更新会话列表
+	 * 
+	 * @param isFresh
+	 *            false msgID为null，但需要刷新会话列表；ture 正常刷新
+	 * @param msgID
+	 *            最新消息ID
+	 */
+	private void notificateConversationUpdate(boolean isFresh, long msgID,
+			boolean isDeleteConversation) {
+
 		Intent i = new Intent(PublicIntent.REQUEST_UPDATE_CONVERSATION);
 		i.addCategory(PublicIntent.DEFAULT_CATEGORY);
 		ConversationNotificationObject obj = null;
@@ -1562,7 +1581,12 @@ public class ConversationView extends Activity {
 		obj.setMsgID(msgID);
 		i.putExtra("obj", obj);
 		i.putExtra("isFresh", isFresh);
+		i.putExtra("isDelete", isDeleteConversation);
 		mContext.sendBroadcast(i);
+	}
+
+	private void notificateConversationUpdate(boolean isFresh, long msgID) {
+		notificateConversationUpdate(isFresh, msgID, false);
 	}
 
 	private void addMessageToContainer(VMessage msg) {

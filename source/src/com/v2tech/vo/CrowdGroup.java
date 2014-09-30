@@ -72,7 +72,7 @@ public class CrowdGroup extends Group {
 		StringBuffer sb = new StringBuffer();
 		sb.append("<crowd id=\""+this.mGId+"\" name=\"" + this.mName + "\" authtype=\""
 				+ mAuthType.ordinal() + "\" size=\"" + mCapcity
-				+ "\" announcement=\""+(mAnnouncement == null? "" : mAnnouncement)+"\" summary=\""+(mBrief == null? "" : mBrief)+"\" />");
+				+ "\" announcement=\""+(mAnnouncement == null? "" : mAnnouncement)+"\" summary=\""+(mBrief == null? "" : mBrief)+"\" creatoruserid=\""+(mOwnerUser == null? "" : mOwnerUser.getmUserId())+"\"/>");
 		return sb.toString();
 	}
 	

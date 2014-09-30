@@ -1051,8 +1051,11 @@ public class MessageLoader {
 	 */
 	private static boolean isExistTable(Context context, String tabName) {
 		DataBaseContext mContext = new DataBaseContext(context);
-		SQLiteDatabase base = mContext.openOrCreateDatabase(
-				V2TechDBHelper.DB_NAME, 0, null);
+		SQLiteDatabase base = null;
+		synchronized (MessageLoader.class) {
+			base = mContext.openOrCreateDatabase(
+					V2TechDBHelper.DB_NAME, 0, null);
+		}
 		try {
 			String sql = "select count(*) as c from sqlite_master where type ='table' "
 					+ "and name ='" + tabName.trim() + "' ";

@@ -93,6 +93,7 @@ public class XmlAttributeExtractor {
 					V2Group.TYPE_CROWD, creator);
 			crowd.brief = crowdElement.getAttribute("summary");
 			crowd.announce = crowdElement.getAttribute("announcement");
+			crowd.creator = creator;
 			listCrowd.add(crowd);
 		}
 

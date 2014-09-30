@@ -447,6 +447,8 @@ public class GroupListView extends ListView {
 
 		while (start <= end) {
 			pos = start;
+			if(start + 1 == mFilterList.size())
+				break;
 			Item item = mFilterList.get(start++);
 			if (item instanceof GroupItem) {
 				continue;
