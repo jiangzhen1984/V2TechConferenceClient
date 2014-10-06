@@ -51,9 +51,11 @@ public class CrowdGroupService extends AbstractHandler {
 	private static final int ACCEPT_APPLICATION_CROWD = 0x0006;
 	private static final int REFUSE_APPLICATION_CROWD = 0x0007;
 	private static final int FETCH_FILES_CROWD = 0x0008;
+	private static final int REMOVE_FILES_CROWD = 0x0009;
 
 	private static final int KEY_CANCELLED_LISTNER = 1;
 	private static final int KEY_FILE_TRANS_STATUS_NOTIFICATION_LISTNER = 2;
+	private static final int KEY_FILE_REMOVED_NOTIFICATION_LISTNER = 3;
 
 	private ImRequestCB imCB;
 	private GroupRequestCB grCB;
@@ -186,6 +188,9 @@ public class CrowdGroupService extends AbstractHandler {
 		GroupRequest.getInstance().refuseInviteJoinGroup(
 				Group.GroupType.CHATING.intValue(), crowd.getId(),
 				GlobalHolder.getInstance().getCurrentUserId(), "");
+
+		mPendingCrowdId = 0;
+		sendResult(caller, new JNIResponse(JNIResponse.Result.SUCCESS));
 	}
 
 	/**
@@ -344,6 +349,44 @@ public class CrowdGroupService extends AbstractHandler {
 	}
 
 	/**
+	 * Remove files from crowd.
+	 * 
+	 * @param crowd
+	 * @param files
+	 * @param caller
+	 */
+	public void removeGroupFiles(CrowdGroup crowd, List<VCrowdFile> files,
+			Registrant caller) {
+		if (!checkParamNull(caller, new Object[] { crowd, files })) {
+			return;
+		}
+		if (files.size() <= 0) {
+			JNIResponse jniRes = new JNIResponse(JNIResponse.Result.SUCCESS);
+			super.sendResult(caller, jniRes);
+			return;
+		}
+
+		if (mPendingCrowdId > 0) {
+			super.sendResult(caller, new JNIResponse(JNIResponse.Result.FAILED));
+			return;
+		}
+		mPendingCrowdId = crowd.getmGId();
+
+		this.initTimeoutMessage(REMOVE_FILES_CROWD, DEFAULT_TIME_OUT_SECS,
+				caller);
+		StringBuffer sb = new StringBuffer();
+		sb.append("<filelist>");
+		for (VCrowdFile f : files) {
+			sb.append("<file  id='" + f.getId() + "'  size='"+f.getSize()+"' uploader='"+f.getUploader().getmUserId()+"' />");
+		}
+		sb.append("</filelist>");
+
+		GroupRequest.getInstance()
+				.delGroupFile(crowd.getGroupType().intValue(), crowd.getmGId(),
+						sb.toString());
+	}
+
+	/**
 	 * 
 	 * @param vf
 	 * @param opt
@@ -396,11 +439,29 @@ public class CrowdGroupService extends AbstractHandler {
 				obj);
 	}
 
-	public void removeRegisterFileTransStatusListener(Handler h, int what,
+	public void unRegisterFileTransStatusListener(Handler h, int what,
 			Object obj) {
 		unRegisterListener(KEY_FILE_TRANS_STATUS_NOTIFICATION_LISTNER, h, what,
 				obj);
+	}
 
+	/**
+	 * Register listener for group file is removed.<br>
+	 * Notice: If current user send remove file command by
+	 * {@link #removeGroupFiles(CrowdGroup, List, Registrant)}, will not
+	 * notification
+	 * 
+	 * @param h
+	 * @param what
+	 * @param obj
+	 */
+	public void registerFileRemovedNotification(Handler h, int what, Object obj) {
+		registerListener(KEY_FILE_REMOVED_NOTIFICATION_LISTNER, h, what, obj);
+	}
+
+	public void unRegisterFileRemovedNotification(Handler h, int what,
+			Object obj) {
+		unRegisterListener(KEY_FILE_REMOVED_NOTIFICATION_LISTNER, h, what, obj);
 	}
 
 	class GroupRequestCB extends GroupRequestCallbackAdapter {
@@ -487,35 +548,58 @@ public class CrowdGroupService extends AbstractHandler {
 			if (group.type == GroupType.CHATING.intValue()
 					&& group.id == mPendingCrowdId) {
 				mPendingCrowdId = 0;
-				List<VCrowdFile> vfList = null;
-				if (list == null) {
-					vfList = new ArrayList<VCrowdFile>(0);
-				} else {
-					vfList = new ArrayList<VCrowdFile>(list.size());
-				}
-				for (FileJNIObject f : list) {
-					VCrowdFile vcf = new VCrowdFile();
-					vcf.setCrowd((CrowdGroup) GlobalHolder.getInstance()
-							.getGroupById(GroupType.CHATING.intValue(),
-									group.id));
 
-					vcf.setId(f.fileId);
-					vcf.setName(f.fileName);
-					vcf.setSize(f.fileSize);
-					vcf.setUrl(f.url);
-					vcf.setUploader(GlobalHolder.getInstance().getUser(
-							f.user.uid));
-					vcf.setPath(GlobalConfig.getGlobalPath() + "/files/"
-							+ group.id + "/" + f.fileName);
-					vfList.add(vcf);
-				}
 				RequestFetchGroupFilesResponse jniRes = new RequestFetchGroupFilesResponse(
 						JNIResponse.Result.SUCCESS);
-				jniRes.setList(vfList);
+				jniRes.setList(convertList(group, list));
 				Message.obtain(mCallbackHandler, FETCH_FILES_CROWD, jniRes)
 						.sendToTarget();
 			}
 
+		}
+
+		@Override
+		public void OnDelGroupFile(V2Group group, List<FileJNIObject> list) {
+			if (group.type == GroupType.CHATING.intValue()) {
+				RequestFetchGroupFilesResponse jniRes = new RequestFetchGroupFilesResponse(
+						JNIResponse.Result.SUCCESS);
+				jniRes.setList(convertList(group, list));
+				//If user requested, send message
+				if (group.id == mPendingCrowdId) {
+					mPendingCrowdId = 0;
+
+					Message.obtain(mCallbackHandler, REMOVE_FILES_CROWD, jniRes)
+							.sendToTarget();
+					//If this request is not user requested, send notification
+				} else if (mPendingCrowdId == 0) {
+					notifyListener(KEY_FILE_REMOVED_NOTIFICATION_LISTNER, 0, 0, jniRes);
+				}
+			}
+		}
+
+		private List<VCrowdFile> convertList(V2Group group,
+				List<FileJNIObject> list) {
+			List<VCrowdFile> vfList = null;
+			if (list == null) {
+				vfList = new ArrayList<VCrowdFile>(0);
+			} else {
+				vfList = new ArrayList<VCrowdFile>(list.size());
+			}
+			for (FileJNIObject f : list) {
+				VCrowdFile vcf = new VCrowdFile();
+				vcf.setCrowd((CrowdGroup) GlobalHolder.getInstance()
+						.getGroupById(GroupType.CHATING.intValue(), group.id));
+
+				vcf.setId(f.fileId);
+				vcf.setName(f.fileName);
+				vcf.setSize(f.fileSize);
+				vcf.setUrl(f.url);
+				vcf.setUploader(GlobalHolder.getInstance().getUser(f.user.uid));
+				vcf.setPath(GlobalConfig.getGlobalPath() + "/files/" + group.id
+						+ "/" + f.fileName);
+				vfList.add(vcf);
+			}
+			return vfList;
 		}
 
 	}

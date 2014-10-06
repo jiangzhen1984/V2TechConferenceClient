@@ -294,6 +294,7 @@ public class ConversationView extends Activity {
 		filter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
 		filter.addAction(JNIService.JNI_BROADCAST_MESSAGE_SENT_FAILED);
 		filter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
+		filter.addAction(JNIService.JNI_BROADCAST_KICED_CROWD);
 		registerReceiver(receiver, filter);
 
 		mChat.registerFileTransStatusListener(this.lh, FILE_STATUS_LISTENER,
@@ -2151,6 +2152,12 @@ public class ConversationView extends Activity {
 
 					}
 
+				}
+			//handler kicked event
+			} else if (intent.getAction().equals(JNIService.JNI_BROADCAST_KICED_CROWD)) {
+				long crowdId = intent.getLongExtra("crowd", 0);
+				if (crowdId == groupId) {
+					finish();
 				}
 			}
 		}

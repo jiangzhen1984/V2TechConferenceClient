@@ -2,7 +2,10 @@ package com.v2tech.view.group;
 
 import android.app.Activity;
 import android.app.Dialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -19,6 +22,7 @@ import com.v2tech.R;
 import com.v2tech.service.CrowdGroupService;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.service.Registrant;
+import com.v2tech.view.JNIService;
 import com.v2tech.view.PublicIntent;
 import com.v2tech.vo.CrowdGroup;
 import com.v2tech.vo.Group.GroupType;
@@ -57,6 +61,7 @@ public class CrowdDetailActivity extends Activity {
 	private CrowdGroup crowd;
 	private CrowdGroupService service = new CrowdGroupService();
 	private State mState = State.NONE;
+	private LocalReceiver localReceiver;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -104,7 +109,7 @@ public class CrowdDetailActivity extends Activity {
 		mMembersCountsTV.setText(crowd.getUsers().size()+"");
 		initRules();
 		mRulesRD.setOnCheckedChangeListener(mRulesChangedListener);
-
+		initReceiver();
 	}
 	
 	
@@ -123,7 +128,27 @@ public class CrowdDetailActivity extends Activity {
 	}
 
 
+	
 
+
+
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		this.unregisterReceiver(localReceiver);
+		service.clearCalledBack();
+	}
+
+
+
+
+	private void initReceiver() {
+		localReceiver = new LocalReceiver(); 
+		IntentFilter filter = new IntentFilter();
+		filter.addAction(JNIService.JNI_BROADCAST_KICED_CROWD);
+		filter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
+		this.registerReceiver(localReceiver, filter);
+	}
 
 
 	private void initRules() {
@@ -194,6 +219,15 @@ public class CrowdDetailActivity extends Activity {
 		i.addCategory(PublicIntent.DEFAULT_CATEGORY);
 		i.putExtra("crowd", crowd.getmGId());
 		this.sendBroadcast(i);
+		
+		
+		Intent quit = new Intent(PublicIntent.BROADCAST_CROWD_QUIT_NOTIFICATION);
+		quit.addCategory(PublicIntent.DEFAULT_CATEGORY);
+		quit.putExtra("userId", crowd.getmGId());
+		quit.putExtra("groupId", GlobalHolder.getInstance().getCurrentUserId());
+		quit.putExtra("kicked",false);
+		sendBroadcast(quit);
+		
 		finish();
 	}
 
@@ -322,6 +356,22 @@ public class CrowdDetailActivity extends Activity {
 
 	enum State {
 		NONE, PENDING;
+	}
+	
+	
+	class LocalReceiver extends BroadcastReceiver {
+
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			if (intent.getAction().equals(JNIService.JNI_BROADCAST_KICED_CROWD)) {
+				long crowdId = intent.getLongExtra("crowd", 0);
+				if (crowdId == crowd.getmGId()) {
+					finish();
+				}
+			}
+			
+		}
+		
 	}
 
 }

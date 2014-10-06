@@ -170,5 +170,16 @@ public interface GroupRequestCallback {
 	 * @see GroupRequest#getGroupFileInfo(int, long)
 	 */
 	public void OnGetGroupFileInfo(V2Group group, List<FileJNIObject> list);
+	
+	
+	
+	/**
+	 * call back for removed group file list
+	 * @param group
+	 * @param list
+	 * 
+	 * @see GroupRequest#delGroupFile(int, long, String)
+	 */
+	public void OnDelGroupFile(V2Group group, List<FileJNIObject> list);
 
 }

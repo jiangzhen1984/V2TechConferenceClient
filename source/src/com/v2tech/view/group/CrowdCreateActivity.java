@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Set;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -15,6 +16,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.v4.util.LongSparseArray;
 import android.text.Editable;
 import android.text.TextUtils.TruncateAt;
 import android.text.TextWatcher;
@@ -52,9 +54,17 @@ public class CrowdCreateActivity extends Activity {
 	private static final int UPDATE_ATTENDEES = 2;
 	private static final int CREATE_CROWD_RESPONSE = 4;
 	private static final int UPDATE_CROWD_RESPONSE = 5;
+	private static final int START_GROUP_SELECT = 6;
+	private static final int DOING_SELECT_GROUP = 7;
+	private static final int END_GROUP_SELECT = 8;
+	
+	
+	private static final int OP_ADD_ALL_GROUP_USER = 1;
+	private static final int OP_DEL_ALL_GROUP_USER = 0;
 
 	private static final int PAD_LAYOUT = 1;
 	private static final int PHONE_LAYOUT = 0;
+	
 
 	private Context mContext;
 	private LocalHandler mLocalHandler = new LocalHandler();
@@ -77,6 +87,7 @@ public class CrowdCreateActivity extends Activity {
 
 	// Used to save current selected user
 	private Set<User> mUserList = new HashSet<User>();
+	private LongSparseArray<View> mSelectedUserViews = new LongSparseArray<View>();
 
 	private int landLayout = PAD_LAYOUT;
 
@@ -194,10 +205,15 @@ public class CrowdCreateActivity extends Activity {
 	}
 
 	private void removeAttendee(User u) {
-		mAttendeeContainer.removeAllViews();
-		for (User tmpU : mUserList) {
-			addAttendee(tmpU);
+		
+		//Add to cache
+		View v = mSelectedUserViews.get(u.getmUserId());
+		if (v != null) {
+			mAttendeeContainer.removeView(v);
+			mUserList.remove(u);
+			mSelectedUserViews.remove(u.getmUserId());
 		}
+
 	}
 
 	private void addAttendee(User u) {
@@ -214,6 +230,9 @@ public class CrowdCreateActivity extends Activity {
 		} else {
 			v = getAttendeeView(u);
 		}
+		//Add to cache
+		mSelectedUserViews.put(u.getmUserId(), v);
+		
 		mAttendeeContainer.addView(v);
 
 		if (mAttendeeContainer.getChildCount() > 0) {
@@ -232,6 +251,24 @@ public class CrowdCreateActivity extends Activity {
 				}
 
 			}, 100L);
+		}
+	}
+	
+	
+	private ProgressDialog mWaitingDialog;
+
+	private void selectGroup(Group selectGroup, boolean addOrRemove) {
+		List<Group> subGroups = selectGroup.getChildGroup();
+		for (int i = 0; i < subGroups.size(); i++) {
+			selectGroup(subGroups.get(i), addOrRemove);
+		}
+		List<User> list = selectGroup.getUsers();
+		for (int i = 0; i < list.size(); i++) {
+			if (addOrRemove) {
+				addAttendee(list.get(i));
+			} else {
+				removeAttendee(list.get(i));
+			}
 		}
 	}
 
@@ -333,6 +370,14 @@ public class CrowdCreateActivity extends Activity {
 						cb.isChecked());
 				Message.obtain(mLocalHandler, UPDATE_ATTENDEES, (User) obj)
 						.sendToTarget();
+			} else if (obj instanceof Group) {
+				Message.obtain(
+						mLocalHandler,
+						START_GROUP_SELECT,
+						cb.isChecked() ? OP_ADD_ALL_GROUP_USER
+								: OP_DEL_ALL_GROUP_USER, 0, (Group) obj)
+						.sendToTarget();
+				mContactsContainer.updateCheckItem((Group) obj, cb.isChecked());
 			}
 		}
 
@@ -448,6 +493,26 @@ public class CrowdCreateActivity extends Activity {
 				crowd.addUserToGroup(mUserList);
 				// finish current activity
 				finish();
+				break;
+				
+			case START_GROUP_SELECT: {
+				mWaitingDialog = ProgressDialog.show(
+						mContext,
+						"",
+						mContext.getResources().getString(
+								R.string.notification_watiing_process), true);
+				Message.obtain(this, DOING_SELECT_GROUP, msg.arg1, msg.arg2,
+						msg.obj).sendToTarget();
+				break;
+			}
+			case DOING_SELECT_GROUP:
+				selectGroup((Group) msg.obj,
+						msg.arg1 == OP_ADD_ALL_GROUP_USER ? true : false);
+				Message.obtain(this, END_GROUP_SELECT).sendToTarget();
+				break;
+			case END_GROUP_SELECT:
+				mWaitingDialog.dismiss();
+				mWaitingDialog = null;
 				break;
 			}
 		}

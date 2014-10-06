@@ -2,13 +2,16 @@ package com.v2tech.view.group;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -16,6 +19,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.BaseAdapter;
 import android.widget.Filter;
 import android.widget.Filterable;
@@ -31,10 +36,11 @@ import com.v2tech.service.FileOperationEnum;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.service.Registrant;
 import com.v2tech.service.jni.FileTransStatusIndication;
+import com.v2tech.service.jni.FileTransStatusIndication.FileTransProgressStatusIndication;
 import com.v2tech.service.jni.JNIResponse;
 import com.v2tech.service.jni.RequestFetchGroupFilesResponse;
-import com.v2tech.service.jni.FileTransStatusIndication.FileTransProgressStatusIndication;
 import com.v2tech.util.GlobalConfig;
+import com.v2tech.view.JNIService;
 import com.v2tech.vo.CrowdGroup;
 import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.VCrowdFile;
@@ -47,6 +53,14 @@ public class CrowdFilesActivity extends Activity {
 	private static final int OPERATE_FILE = 1;
 
 	private static final int FILE_TRANS_NOTIFICATION = 2;
+
+	private static final int FILE_REMOVE_NOTIFICATION = 3;
+
+	private static final int FILE_REMOVE_DONE = 4;
+
+	private static final int SHOW_DELETE_BUTTON_FLAG = 1;
+
+	private static final int HIDE_DELETE_BUTTON_FLAG = 0;
 
 	private static final int REQUEST_CODE = 100;
 
@@ -61,9 +75,11 @@ public class CrowdFilesActivity extends Activity {
 	private View mShowUploadedFileButton;
 	private TextView mTitle;
 	private boolean showUploaded;
+	private boolean isInDeleteMode;
 
 	private CrowdGroupService service;
 	private CrowdGroup crowd;
+	private LocalReceiver localReceiver;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -88,8 +104,12 @@ public class CrowdFilesActivity extends Activity {
 		// register file transport listener
 		service.registerFileTransStatusListener(mLocalHandler,
 				FILE_TRANS_NOTIFICATION, null);
+		// register file removed listener
+		service.registerFileRemovedNotification(mLocalHandler,
+				FILE_REMOVE_NOTIFICATION, null);
 		adapter = new FileListAdapter();
 		mListView.setAdapter(adapter);
+		mListView.setOnItemLongClickListener(mDeleteModeListener);
 		overridePendingTransition(R.animator.left_in, R.animator.left_out);
 
 		crowd = (CrowdGroup) GlobalHolder.getInstance().getGroupById(
@@ -97,6 +117,7 @@ public class CrowdFilesActivity extends Activity {
 				getIntent().getLongExtra("cid", 0));
 
 		loadFiles();
+		initReceiver();
 	}
 
 	@Override
@@ -113,9 +134,31 @@ public class CrowdFilesActivity extends Activity {
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
-		service.removeRegisterFileTransStatusListener(mLocalHandler,
+		service.unRegisterFileTransStatusListener(mLocalHandler,
 				FILE_TRANS_NOTIFICATION, null);
+		service.unRegisterFileRemovedNotification(mLocalHandler,
+				FILE_REMOVE_NOTIFICATION, null);
+
 		service.clearCalledBack();
+		this.unregisterReceiver(localReceiver);
+	}
+
+	@Override
+	public void onBackPressed() {
+		if (isInDeleteMode) {
+			isInDeleteMode = false;
+			adapter.notifyDataSetChanged();
+			return;
+		}
+		super.onBackPressed();
+	}
+	
+	private void initReceiver() {
+		localReceiver = new LocalReceiver(); 
+		IntentFilter filter = new IntentFilter();
+		filter.addAction(JNIService.JNI_BROADCAST_KICED_CROWD);
+		filter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
+		this.registerReceiver(localReceiver, filter);
 	}
 
 	private void loadFiles() {
@@ -160,6 +203,8 @@ public class CrowdFilesActivity extends Activity {
 						f.setState(VCrowdFile.State.DOWNLOADED);
 					}
 				}
+			} else {
+				f.setState(VCrowdFile.State.UNKNOWN);
 			}
 		}
 
@@ -190,6 +235,37 @@ public class CrowdFilesActivity extends Activity {
 
 	}
 
+	/**
+	 * Handle file removed notification
+	 * 
+	 * @param files
+	 */
+	private void handleFileRemovedEvent(List<VCrowdFile> files) {
+		for (int i = 0; i < mFiles.size(); i++) {
+			for (VCrowdFile r : files) {
+				if (mFiles.get(i).getId().equals(r.getId())) {
+					mFiles.remove(i);
+					i--;
+					continue;
+				}
+			}
+		}
+		adapter.notifyDataSetChanged();
+	}
+
+	private void handleFileRemovedEvent(VCrowdFile file) {
+		if (file == null) {
+			return;
+		}
+		for (int i = 0; i < mFiles.size(); i++) {
+			if (mFiles.get(i).getId().equals(file.getId())) {
+				mFiles.remove(i);
+				break;
+			}
+		}
+		adapter.notifyDataSetChanged();
+	}
+
 	private OnClickListener mBackButtonListener = new OnClickListener() {
 
 		@Override
@@ -217,6 +293,22 @@ public class CrowdFilesActivity extends Activity {
 
 	};
 
+	private OnItemLongClickListener mDeleteModeListener = new OnItemLongClickListener() {
+
+		@Override
+		public boolean onItemLongClick(AdapterView<?> parent, View view,
+				int position, long id) {
+			if (isInDeleteMode) {
+				return false;
+			} else {
+				isInDeleteMode = true;
+				adapter.notifyDataSetChanged();
+				return true;
+			}
+		}
+
+	};
+
 	private Handler mLocalHandler = new Handler() {
 
 		@Override
@@ -238,14 +330,48 @@ public class CrowdFilesActivity extends Activity {
 						.getResult());
 				handleFileTransNotification(ind);
 				break;
+			case FILE_REMOVE_NOTIFICATION:
+				JNIResponse jni = (JNIResponse) msg.obj;
+				if (jni.getResult() == JNIResponse.Result.SUCCESS) {
+					handleFileRemovedEvent(((RequestFetchGroupFilesResponse) msg.obj)
+							.getList());
+				}
+				break;
+			case FILE_REMOVE_DONE:
+				break;
 			}
 		}
 
 	};
+	
+	
+	
+	class LocalReceiver extends BroadcastReceiver {
+
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			if (intent.getAction().equals(JNIService.JNI_BROADCAST_KICED_CROWD)) {
+				long crowdId = intent.getLongExtra("crowd", 0);
+				if (crowdId == crowd.getmGId()) {
+					for (VCrowdFile f : mFiles) {
+						if (f.getState() == VFile.State.DOWNLOADING) {
+							service.handleCrowdFile(f, FileOperationEnum.OPERATION_CANCEL_DOWNLOADING, null);
+						} else if (f.getState() == VFile.State.UPLOADING) {
+							service.handleCrowdFile(f, FileOperationEnum.OPERATION_CANCEL_SENDING, null);
+						}
+					}
+					finish();
+				}
+			}
+			
+		}
+		
+	}
 
 	class FileListAdapter extends BaseAdapter implements Filterable {
 
 		class ViewItem {
+			ImageView mFileDeleteModeButton;
 			ImageView mFileIcon;
 			TextView mFileName;
 			TextView mFileSize;
@@ -253,8 +379,22 @@ public class CrowdFilesActivity extends Activity {
 			TextView mFileText;
 			TextView mVelocity;
 			ImageView mProgress;
+			TextView mFileProgress;
 			View mProgressParent;
 			ImageView mFailedIcon;
+			TextView mFileDeleteButton;
+		}
+
+		class Tag {
+			VCrowdFile vf;
+			ViewItem item;
+
+			public Tag(VCrowdFile vf, ViewItem item) {
+				super();
+				this.vf = vf;
+				this.item = item;
+			}
+
 		}
 
 		private LayoutInflater layoutInflater;
@@ -297,11 +437,26 @@ public class CrowdFilesActivity extends Activity {
 
 		@Override
 		public View getView(int position, View convertView, ViewGroup parent) {
+			VCrowdFile file = null;
+			if (showUploaded) {
+				file = mUploadedFiles.get(position);
+			} else {
+				file = mFiles.get(position);
+			}
+
 			ViewItem item = null;
+			Tag tag = null;
 			if (convertView == null) {
 				convertView = layoutInflater.inflate(
 						R.layout.crowd_file_adapter_item, null);
 				item = new ViewItem();
+				tag = new Tag(file, item);
+				item.mFileDeleteModeButton = (ImageView) convertView
+						.findViewById(R.id.crowd_file_delete_left_button);
+				item.mFileDeleteModeButton.setTag(tag);
+				item.mFileDeleteModeButton
+						.setOnClickListener(mDeleteModeButtonListener);
+
 				item.mFileIcon = (ImageView) convertView
 						.findViewById(R.id.crowd_file_icon);
 				item.mFileName = (TextView) convertView
@@ -315,6 +470,8 @@ public class CrowdFilesActivity extends Activity {
 						.findViewById(R.id.crowd_file_text);
 				item.mVelocity = (TextView) convertView
 						.findViewById(R.id.file_velocity);
+				item.mFileProgress = (TextView) convertView
+						.findViewById(R.id.file_process_percent);
 
 				item.mProgressParent = convertView
 						.findViewById(R.id.file_download_progress_state_ly);
@@ -322,42 +479,51 @@ public class CrowdFilesActivity extends Activity {
 						.findViewById(R.id.ile_download_progress_state);
 				item.mFailedIcon = (ImageView) convertView
 						.findViewById(R.id.crowd_file_failed_icon);
+				item.mFileDeleteButton = (TextView) convertView
+						.findViewById(R.id.crowd_file_delete_button);
+				item.mFileDeleteButton.setTag(tag);
+				item.mFileDeleteButton.setOnClickListener(mDeleteButtonListener);
 
 				item.mFailedIcon.setOnClickListener(mFailIconListener);
 				item.mFileButton.setOnClickListener(mButtonListener);
-				convertView.setTag(item);
+				convertView.setTag(tag);
 			} else {
-				item = (ViewItem) convertView.getTag();
+				tag = (Tag) convertView.getTag();
+				item = tag.item;
+				tag.vf = file;
 			}
-			VCrowdFile file = null;
-			if (showUploaded) {
-				file = mUploadedFiles.get(position);
-			} else {
-				file = mFiles.get(position);
-			}
-			updateViewItem(file, item);
+
+			updateViewItem(tag);
 
 			return convertView;
 		}
 
-		private void updateViewItem(VCrowdFile file, ViewItem item) {
+		private void updateViewItem(Tag tag) {
+			VCrowdFile file = tag.vf;
+			ViewItem item = tag.item;
 			item.mFileName.setText(file.getName());
 			item.mFileSize.setText(file.getFileSizeStr());
 			item.mFileButton.setTag(file);
 			item.mFailedIcon.setTag(file);
+			VFile.State fs = file.getState();
 
-			if (file.getUploader() == GlobalHolder.getInstance()
-					.getCurrentUser()) {
-				item.mFileButton.setVisibility(View.GONE);
-				item.mFailedIcon.setVisibility(View.GONE);
-				return;
+			// TODO show uploading item
+			if (showUploaded) {
+
 			}
 
-			VFile.State fs = file.getState();
+			if (isInDeleteMode) {
+				item.mFileDeleteModeButton.setVisibility(View.VISIBLE);
+			} else {
+				item.mFileDeleteModeButton.setVisibility(View.GONE);
+				// Record flag for show delete button
+				file.setFlag(HIDE_DELETE_BUTTON_FLAG);
+			}
+
 			switch (fs) {
 			case UNKNOWN:
 				item.mFileButton
-				.setText(R.string.crowd_files_button_name_download);
+						.setText(R.string.crowd_files_button_name_download);
 				item.mFailedIcon.setVisibility(View.GONE);
 				item.mFileText.setVisibility(View.GONE);
 				item.mFileButton.setVisibility(View.VISIBLE);
@@ -385,7 +551,7 @@ public class CrowdFilesActivity extends Activity {
 								: R.string.crowd_files_name_uploaded);
 				item.mFileText.setVisibility(View.VISIBLE);
 				item.mFileButton.setVisibility(View.GONE);
-				item.mVelocity.setVisibility(View.GONE);
+				item.mFileProgress.setVisibility(View.GONE);
 				item.mFailedIcon.setVisibility(View.GONE);
 				break;
 			case DOWNLOAD_FAILED:
@@ -398,16 +564,24 @@ public class CrowdFilesActivity extends Activity {
 				break;
 			}
 
-	
-			if (fs == VFile.State.DOWNLOADING
-					|| file.getState() == VFile.State.UPLOADING) {
-				item.mVelocity.setVisibility(View.VISIBLE);
-				// TODO calculate velocity
-				item.mVelocity.setText("/" + file.getFileSizeStr());
+			if (file.getFlag() == SHOW_DELETE_BUTTON_FLAG) {
+				item.mFileDeleteButton.setVisibility(View.VISIBLE);
+				item.mFailedIcon.setVisibility(View.GONE);
+				item.mFileText.setVisibility(View.GONE);
+				item.mFileButton.setVisibility(View.GONE);
+			} else {
+				item.mFileDeleteButton.setVisibility(View.GONE);
 			}
 
 			if (fs == VFile.State.DOWNLOADING
-					|| fs == VFile.State.UPLOADING) {
+					|| file.getState() == VFile.State.UPLOADING) {
+				item.mFileProgress.setVisibility(View.VISIBLE);
+				item.mFileProgress.setText(file.getProceedSizeStr() + "/"
+						+ file.getFileSizeStr());
+				item.mVelocity.setText(file.getSpeedStr() + "/S");
+			}
+
+			if (fs == VFile.State.DOWNLOADING || fs == VFile.State.UPLOADING) {
 				float percent = (float) ((double) file.getProceedSize() / (double) file
 						.getSize());
 				updateProgress(item, percent);
@@ -421,18 +595,47 @@ public class CrowdFilesActivity extends Activity {
 			vl.width = (int) (width * percent);
 			item.mProgress.setLayoutParams(vl);
 		}
-		
+
 		private OnClickListener mFailIconListener = new OnClickListener() {
 
 			@Override
 			public void onClick(View v) {
 				VCrowdFile file = (VCrowdFile) v.getTag();
 				file.setState(VFile.State.DOWNLOADING);
+				file.setStartTime(new Date());
 				service.handleCrowdFile(file,
 						FileOperationEnum.OPERATION_START_DOWNLOAD, null);
 				adapter.notifyDataSetChanged();
 			}
-			
+
+		};
+
+		private OnClickListener mDeleteModeButtonListener = new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				Tag tag = (Tag) v.getTag();
+				ViewItem item = tag.item;
+				item.mFileDeleteButton.setVisibility(View.VISIBLE);
+				item.mFailedIcon.setVisibility(View.GONE);
+				item.mFileButton.setVisibility(View.GONE);
+				item.mFileText.setVisibility(View.GONE);
+				tag.vf.setFlag(SHOW_DELETE_BUTTON_FLAG);
+			}
+
+		};
+
+		private OnClickListener mDeleteButtonListener = new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				Tag tag = (Tag) v.getTag();
+				List<VCrowdFile> list = new ArrayList<VCrowdFile>();
+				list.add(tag.vf);
+				service.removeGroupFiles(crowd, list , null);
+				handleFileRemovedEvent(tag.vf);
+			}
+
 		};
 
 		private OnClickListener mButtonListener = new OnClickListener() {
@@ -443,6 +646,7 @@ public class CrowdFilesActivity extends Activity {
 				if (file.getState() == VFile.State.UNKNOWN
 						|| file.getState() == VFile.State.DOWNLOAD_FAILED) {
 					file.setState(VFile.State.DOWNLOADING);
+					file.setStartTime(new Date());
 					((TextView) v)
 							.setText(R.string.crowd_files_button_name_pause);
 					service.handleCrowdFile(file,

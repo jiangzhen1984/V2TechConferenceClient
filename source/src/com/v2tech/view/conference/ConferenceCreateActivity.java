@@ -392,7 +392,7 @@ public class ConferenceCreateActivity extends Activity {
 				Message.obtain(
 						mLocalHandler,
 						START_GROUP_SELECT,
-						!cb.isChecked() ? OP_ADD_ALL_GROUP_USER
+						cb.isChecked() ? OP_ADD_ALL_GROUP_USER
 								: OP_DEL_ALL_GROUP_USER, 0, (Group) obj)
 						.sendToTarget();
 				mGroupListView.updateCheckItem((Group) obj, cb.isChecked());

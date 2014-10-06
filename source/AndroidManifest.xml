@@ -281,7 +281,8 @@
         </activity>
         <activity
             android:name="com.v2tech.view.group.CrowdContentUpdateActivity"
-            android:screenOrientation="nosensor" >
+            android:screenOrientation="nosensor"
+             android:windowSoftInputMode="stateHidden|adjustPan"  >
             <intent-filter>
                 <action android:name="com.v2tech.crowd_content_activity" />
 
@@ -338,6 +339,16 @@
                 <category android:name="com.v2tech" />
             </intent-filter>
         </receiver>
+        
+        <receiver android:name="com.v2tech.view.receiver.CrowdQuitReceiver" >
+            <intent-filter>
+                <action android:name="com.v2tech.broadcast.crowd_quit_notification" />
+
+                <category android:name="com.v2tech.jni.broadcast" />
+                <category android:name="com.v2tech" />
+            </intent-filter>
+        </receiver>
+        
     </application>
 
 </manifest>

@@ -279,6 +279,8 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 						.addAction(PublicIntent.BROADCAST_NEW_CROWD_NOTIFICATION);
 				intentFilter
 						.addAction(PublicIntent.BROADCAST_CROWD_DELETED_NOTIFICATION);
+				intentFilter.addAction(JNIService.JNI_BROADCAST_NEW_CROWD);
+				intentFilter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
 			}
 		}
 
@@ -710,10 +712,10 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 					+ " order by SaveDate desc limit 1";
 			Cursor cursor = AddFriendHistroysHandler.select(getActivity(), sql,
 					new String[] {});
-			if (cursor != null && cursor.getCount() > 0) {
+			//if (cursor != null && cursor.getCount() > 0) {
 				initVerificationItem();
 				showUnreadFriendAuthentication();
-			}
+			//}
 		}
 		new Thread(new Runnable() {
 
@@ -1611,7 +1613,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 		public void onReceive(Context context, Intent intent) {
 			super.onReceive(context, intent);
 			if (PublicIntent.BROADCAST_NEW_CROWD_NOTIFICATION.equals(intent
-					.getAction())) {
+					.getAction()) || JNIService.JNI_BROADCAST_NEW_CROWD.equals(intent.getAction())) {
 				long gid = intent.getLongExtra("crowd", 0);
 				Group g = GlobalHolder.getInstance().getGroupById(
 						GroupType.CHATING.intValue(), gid);

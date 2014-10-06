@@ -1,6 +1,10 @@
 package com.v2tech.view.group;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -14,6 +18,7 @@ import com.v2tech.R;
 import com.v2tech.service.CrowdGroupService;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.service.Registrant;
+import com.v2tech.view.JNIService;
 import com.v2tech.vo.CrowdGroup;
 import com.v2tech.vo.Group.GroupType;
 
@@ -24,32 +29,40 @@ public class CrowdContentUpdateActivity extends Activity {
 
 	private final static int REQUEST_UPDATE_CROWD_DONE = 1;
 
-	private EditText mContentTV;
-	private TextView mTitleTV;
+	private EditText mContentET;
+	private TextView mContentTitle;
+	private TextView mReturnButton;
 
-	private View mUpdateButton;
+	private TextView mUpdateButton;
 
 	private CrowdGroup crowd;
 	private CrowdGroupService service = new CrowdGroupService();
 	private State mState = State.NONE;
+	private boolean inEditMode;
 	private int mType;
+	private LocalReceiver localReceiver;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.crowd_content_activity);
 
-		mContentTV = (EditText) findViewById(R.id.crowd_content_et);
-		mUpdateButton = findViewById(R.id.crowd_content_update_button);
+		mContentET = (EditText) findViewById(R.id.crowd_content_et);
+		mContentTitle = (TextView) findViewById(R.id.crowd_content_title);
+		
+		mUpdateButton = (TextView)findViewById(R.id.crowd_content_update_button);
 		mUpdateButton.setOnClickListener(mUpdateButtonListener);
 
-		mTitleTV = (TextView) findViewById(R.id.crowd_content_title);
+		mReturnButton = (TextView) findViewById(R.id.crowd_return_button);
+		mReturnButton.setOnClickListener(mReturnButtonListener);
+		
 		crowd = (CrowdGroup) GlobalHolder.getInstance().getGroupById(
 				GroupType.CHATING.intValue(), getIntent().getExtras().getLong("cid"));
 
 		mType = getIntent().getExtras().getInt("type");
-		updateView(mType);
+		updateView(mType, inEditMode);
 		overridePendingTransition(R.animator.left_in, R.animator.left_out);
+		initReceiver();
 	}
 
 	@Override
@@ -58,36 +71,113 @@ public class CrowdContentUpdateActivity extends Activity {
 		overridePendingTransition(R.animator.right_in, R.animator.right_out);
 	}
 
-	private void updateView(int type) {
-		if (type == UPDATE_TYPE_BRIEF) {
-			mContentTV.setText(crowd.getBrief());
-			mTitleTV.setText(R.string.crowd_content_brief);
-		} else if (type == UPDATE_TYPE_ANNOUNCEMENT) {
-			mContentTV.setText(crowd.getAnnouncement());
-			mTitleTV.setText(R.string.crowd_content_announce);
+	
+	
+	
+	
+	@Override
+	public void onBackPressed() {
+		if (inEditMode) {
+			inEditMode = false;
+			updateView(mType, inEditMode);
+		} else {
+			super.onBackPressed();
 		}
 	}
+	
+	
+
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		service.clearCalledBack();
+		this.unregisterReceiver(localReceiver);
+	}
+	
+	
+	
+	private void initReceiver() {
+		localReceiver = new LocalReceiver(); 
+		IntentFilter filter = new IntentFilter();
+		filter.addAction(JNIService.JNI_BROADCAST_KICED_CROWD);
+		filter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
+		this.registerReceiver(localReceiver, filter);
+	}
+
+
+	private void updateView(int type, boolean editMode) {
+		if (editMode) {
+			mUpdateButton.setText(R.string.crowd_content_udpate_announce_button);
+			mContentTitle.setText(R.string.crowd_content_title);
+			mContentET.setEnabled(true);
+			mContentET.requestFocus();
+		} else {
+			mContentET.setEnabled(false);
+			mUpdateButton.setText(R.string.crowd_content_title);
+			if (type == UPDATE_TYPE_BRIEF) {
+				mContentET.setText(crowd.getBrief());
+				mContentTitle.setText(R.string.crowd_content_brief);
+			} else if (type == UPDATE_TYPE_ANNOUNCEMENT) {
+				mContentET.setText(crowd.getAnnouncement());
+				mContentTitle.setText(R.string.crowd_content_announce);
+			}
+		}
+		
+	}
+	
+	
+	class LocalReceiver extends BroadcastReceiver {
+
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			if (intent.getAction().equals(JNIService.JNI_BROADCAST_KICED_CROWD)) {
+				long crowdId = intent.getLongExtra("crowd", 0);
+				if (crowdId == crowd.getmGId()) {
+					finish();
+				}
+			}
+			
+		}
+		
+	}
+	
+	
+	private OnClickListener mReturnButtonListener = new OnClickListener() {
+
+		@Override
+		public void onClick(View v) {
+			onBackPressed();
+			
+		}
+		
+	};
 
 	private OnClickListener mUpdateButtonListener = new OnClickListener() {
 
 		@Override
 		public void onClick(View view) {
-			synchronized (mState) {
-				if (mState == State.PENDING) {
-					return;
+			if (!inEditMode) {
+				inEditMode = true;
+				updateView(mType, inEditMode);
+			} else {
+				synchronized (mState) {
+					if (mState == State.PENDING) {
+						return;
+					}
+					mState = State.PENDING;
 				}
-				mState = State.PENDING;
+				if (mType == UPDATE_TYPE_BRIEF) {
+					crowd.setBrief(mContentET.getText().toString());
+				} else if (mType == UPDATE_TYPE_ANNOUNCEMENT) {
+					crowd.setAnnouncement(mContentET.getText().toString());
+				}
+				service.updateCrowd(crowd, new Registrant(mLocalHandler,
+						REQUEST_UPDATE_CROWD_DONE, null));
 			}
-			if (mType == UPDATE_TYPE_BRIEF) {
-				crowd.setBrief(mContentTV.getText().toString());
-			} else if (mType == UPDATE_TYPE_ANNOUNCEMENT) {
-				crowd.setAnnouncement(mContentTV.getText().toString());
-			}
-			service.updateCrowd(crowd, new Registrant(mLocalHandler,
-					REQUEST_UPDATE_CROWD_DONE, null));
 		}
 
 	};
+	
 
 	private Handler mLocalHandler = new Handler() {
 
@@ -102,7 +192,9 @@ public class CrowdContentUpdateActivity extends Activity {
 						R.string.crowd_content_udpate_succeed,
 						Toast.LENGTH_SHORT).show();
 				setResult(mType, null);
-				finish();
+				inEditMode = false;
+				updateView(mType, inEditMode);
+				//finish();
 				break;
 			}
 		}

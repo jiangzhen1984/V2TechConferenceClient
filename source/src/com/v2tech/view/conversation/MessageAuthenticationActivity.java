@@ -20,6 +20,8 @@ import com.v2tech.vo.CrowdGroup;
 import com.v2tech.vo.VMessageQualification;
 import com.v2tech.vo.VMessageQualificationApplicationCrowd;
 import com.v2tech.vo.VMessageQualificationInvitationCrowd;
+import com.v2tech.vo.VMessageQualification.QualificationState;
+import com.v2tech.vo.VMessageQualification.ReadState;
 
 import android.app.Activity;
 import android.content.BroadcastReceiver;
@@ -49,6 +51,12 @@ import android.widget.ListView;
 import android.widget.RadioButton;
 import android.widget.TextView;
 
+/**
+ * FIXME should combine two types of message, use one adapter for two.
+ * 
+ * @author jiangzhen
+ * 
+ */
 public class MessageAuthenticationActivity extends Activity {
 	public static final String tableName = "AddFriendHistories";
 	// R.id.message_authentication
@@ -193,10 +201,11 @@ public class MessageAuthenticationActivity extends Activity {
 							if (msg.getType() == VMessageQualification.Type.CROWD_INVITATION) {
 								VMessageQualificationInvitationCrowd imsg = (VMessageQualificationInvitationCrowd) msg;
 
-								Crowd crowd = new Crowd(imsg.getId(), imsg
-										.getCrowdGroup().getOwnerUser(), imsg
-										.getCrowdGroup().getName(), imsg
-										.getCrowdGroup().getBrief());
+								Crowd crowd = new Crowd(imsg.getCrowdGroup()
+										.getmGId(), imsg.getCrowdGroup()
+										.getOwnerUser(), imsg.getCrowdGroup()
+										.getName(), imsg.getCrowdGroup()
+										.getBrief());
 								Intent i = new Intent(
 										JNIService.JNI_BROADCAST_CROWD_INVATITION);
 								i.addCategory(JNIService.JNI_ACTIVITY_CATEGROY);
@@ -235,6 +244,9 @@ public class MessageAuthenticationActivity extends Activity {
 
 	}
 
+	/**
+	 * FIXME optimze code
+	 */
 	private void changeMessageAuthenticationListView() {
 		if (isFriendAuthentication) {
 			if (firendAdapter == null) {
@@ -283,14 +295,14 @@ public class MessageAuthenticationActivity extends Activity {
 		IntentFilter intentFilter = new IntentFilter();
 		intentFilter.addAction(JNIService.JNI_BROADCAST_FRIEND_AUTHENTICATION);
 		intentFilter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
-		
+
 		registerReceiver(friendAuthenticationBroadcastReceiver, intentFilter);
-		
-		
+
 		mCrowdAuthenticationBroadcastReceiver = new CrowdAuthenticationBroadcastReceiver();
 		intentFilter = new IntentFilter();
 		intentFilter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
-		intentFilter.addAction(JNIService.JNI_BROADCAST_NEW_QUALIFICATION_MESSAGE);
+		intentFilter
+				.addAction(JNIService.JNI_BROADCAST_NEW_QUALIFICATION_MESSAGE);
 		intentFilter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
 		registerReceiver(mCrowdAuthenticationBroadcastReceiver, intentFilter);
 
@@ -683,7 +695,9 @@ public class MessageAuthenticationActivity extends Activity {
 		}
 
 		private void updateViewItem(VMessageQualification msg, ViewItem item) {
-
+			if (msg == null || item == null) {
+				return;
+			}
 			AcceptedButtonTag tag = null;
 			if (item.mAcceptButton.getTag() == null) {
 				tag = new AcceptedButtonTag();
@@ -745,35 +759,49 @@ public class MessageAuthenticationActivity extends Activity {
 					Crowd crowd = new Crowd(cg.getmGId(), cg.getOwnerUser(),
 							cg.getName(), cg.getBrief());
 					crowdService.acceptInvitation(crowd, null);
+
 				} else if (tag.msg.getType() == VMessageQualification.Type.CROWD_APPLICATION) {
 					VMessageQualificationApplicationCrowd vqac = ((VMessageQualificationApplicationCrowd) tag.msg);
 					crowdService.acceptApplication(vqac.getCrowdGroup(),
 							vqac.getApplicant(), null);
 				}
 				updateViewItem(tag.msg, tag.item);
+
+				// Update message state to database;
+				tag.msg.setQualState(QualificationState.ACCEPTED);
+				tag.msg.setReadState(ReadState.READ);
+				MessageBuilder.updateQualicationMessage(mContext, tag.msg);
 			}
 
 		};
 
 	}
 
-	
 	class CrowdAuthenticationBroadcastReceiver extends BroadcastReceiver {
-		
+
 		@Override
-		public void onReceive(Context arg0, Intent arg1) {
-			if (JNIService.JNI_BROADCAST_NEW_QUALIFICATION_MESSAGE.equals(arg1.getAction())) {
-				groupAdapter.notifyDataSetChanged();
-				//Cancel next broadcast
+		public void onReceive(Context arg0, Intent intent) {
+			if (JNIService.JNI_BROADCAST_NEW_QUALIFICATION_MESSAGE
+					.equals(intent.getAction())) {
+				long msgId = intent.getLongExtra("msgId", 0);
+				VMessageQualification msg = MessageBuilder
+						.queryQualMessageById(mContext, msgId);
+				if (msg != null) {
+					mMessageList.add(0, msg);
+					groupAdapter.notifyDataSetChanged();
+				}
+				// Cancel next broadcast
 				this.abortBroadcast();
 			}
 		}
 	}
+
 	class FriendAuthenticationBroadcastReceiver extends BroadcastReceiver {
 
 		@Override
 		public void onReceive(Context arg0, Intent arg1) {
-			if (arg1.getAction().equals(JNIService.JNI_BROADCAST_FRIEND_AUTHENTICATION)) {
+			if (arg1.getAction().equals(
+					JNIService.JNI_BROADCAST_FRIEND_AUTHENTICATION)) {
 				loadFriendMessage();
 			}
 		}

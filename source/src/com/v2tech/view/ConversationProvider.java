@@ -250,7 +250,9 @@ public class ConversationProvider {
 						voiceMessageItem.setAddedItem(true);
 					}
 					// 同理如果verificationMessageItem不为null，则进行比较
-					if (verificationMessageItemData != null
+					//FIXME just skip exception 
+					if (verificationMessageItemData != null && verificationMessageItemData
+							.getDateLong() != null 
 							&& verificationMessageItemData.isAddedItem() == false
 							&& Long.valueOf(verificationMessageItemData
 									.getDateLong()) > date) {

@@ -1,5 +1,7 @@
 <resources>
 
+    <string name="crowd_return_button">返回</string>
+    
     <string name="crowd_invitation_accept_button_name">同意</string>
     <string name="crowd_invitation_accepted">已同意</string>
     <string name="crowd_invitation_rejected">已拒绝</string>

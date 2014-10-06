@@ -11,11 +11,20 @@
         android:layout_marginBottom="@dimen/conversation_view_margin"
         android:layout_marginTop="@dimen/conversation_view_margin" >
 
+        <ImageView
+            android:id="@+id/crowd_file_delete_left_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_centerInParent="true"
+            android:src="@drawable/crowd_file_delete_left_button"
+            android:visibility="gone" />
+
         <RelativeLayout
             android:id="@+id/crowd_file_icon_container"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
+            android:layout_alignLeft="@+id/crowd_file_delete_left_button"
             android:layout_centerVertical="true"
             android:layout_marginBottom="@dimen/conversation_view_margin"
             android:layout_marginLeft="@dimen/common_margin_horizontal"
@@ -73,8 +82,23 @@
             android:text="@string/crowd_files_button_name_download"
             android:textColor="@color/button_text_color"
             android:textSize="@dimen/common_item_text_size" />
-        
-        
+
+        <TextView
+            android:id="@+id/crowd_file_delete_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="@dimen/button_gap_horizontal"
+            android:background="@drawable/rounded_corners_contacts_group_delete_button"
+            android:paddingBottom="@dimen/button_padding_vertical"
+            android:paddingLeft="@dimen/button_padding_horizontal"
+            android:paddingRight="@dimen/button_padding_horizontal"
+            android:paddingTop="@dimen/button_padding_vertical"
+            android:text="@string/activiy_contact_group_item_button_delete"
+            android:textColor="@color/common_white_color"
+            android:textSize="@dimen/common_item_text_size" />
+
         <TextView
             android:id="@+id/crowd_file_text"
             android:layout_width="wrap_content"
@@ -89,9 +113,8 @@
             android:paddingTop="@dimen/button_padding_vertical"
             android:text="@string/crowd_files_button_name_download"
             android:textSize="@dimen/common_item_text_size" />
-        
-        
-         <ImageView
+
+        <ImageView
             android:id="@+id/crowd_file_failed_icon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -102,10 +125,7 @@
             android:paddingLeft="@dimen/button_padding_horizontal"
             android:paddingRight="@dimen/button_padding_horizontal"
             android:paddingTop="@dimen/button_padding_vertical"
-            android:src="@drawable/message_sent_failed_icon"
-             />
-        
-        
+            android:src="@drawable/message_sent_failed_icon" />
     </RelativeLayout>
 
     <LinearLayout
@@ -113,15 +133,36 @@
         android:layout_height="wrap_content"
         android:orientation="vertical" >
 
-        <TextView
-            android:id="@+id/file_velocity"
-            android:layout_width="wrap_content"
+        <RelativeLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/conversation_view_margin"
             android:layout_marginLeft="@dimen/common_margin_horizontal"
-            android:paddingBottom="@dimen/button_padding_vertical"
-            android:paddingTop="@dimen/button_padding_vertical"
-            android:text="200.0K/3.2M"
-            android:textColor="@color/file_download_prgress_color" />
+            android:layout_marginRight="@dimen/common_margin_horizontal"
+            android:layout_marginTop="@dimen/conversation_view_margin" >
+
+            <TextView
+                android:id="@+id/file_process_percent"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_centerVertical="true"
+                android:paddingBottom="@dimen/button_padding_vertical"
+                android:paddingTop="@dimen/button_padding_vertical"
+                android:text="200.0K/3.2M"
+                android:textColor="@color/file_download_prgress_color" />
+
+            <TextView
+                android:id="@+id/file_velocity"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:paddingBottom="@dimen/button_padding_vertical"
+                android:paddingTop="@dimen/button_padding_vertical"
+                android:text="0K/S"
+                android:textColor="@color/file_download_prgress_color" />
+        </RelativeLayout>
 
         <LinearLayout
             android:id="@+id/file_download_progress_state_ly"

@@ -5,9 +5,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import android.app.Activity;
-import android.app.ActivityManager;
-import android.app.ActivityManager.RunningTaskInfo;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -62,7 +59,6 @@ import com.v2tech.view.contacts.add.AddFriendHistroysHandler;
 import com.v2tech.view.conversation.MessageBuilder;
 import com.v2tech.view.conversation.MessageLoader;
 import com.v2tech.vo.ConferenceGroup;
-import com.v2tech.vo.Crowd;
 import com.v2tech.vo.CrowdGroup;
 import com.v2tech.vo.Group;
 import com.v2tech.vo.Group.GroupType;
@@ -74,6 +70,7 @@ import com.v2tech.vo.VMessageAbstractItem;
 import com.v2tech.vo.VMessageAudioItem;
 import com.v2tech.vo.VMessageFileItem;
 import com.v2tech.vo.VMessageImageItem;
+import com.v2tech.vo.VMessageQualification;
 import com.v2tech.vo.VMessageQualificationInvitationCrowd;
 
 /**
@@ -109,10 +106,18 @@ public class JNIService extends Service {
 	public static final String JNI_BROADCAST_CONFERENCE_INVATITION = "com.v2tech.jni.broadcast.conference_invatition_new";
 	public static final String JNI_BROADCAST_CONFERENCE_REMOVED = "com.v2tech.jni.broadcast.conference_removed";
 	public static final String JNI_BROADCAST_GROUP_USER_REMOVED = "com.v2tech.jni.broadcast.group_user_removed";
+	/**
+	 * key crowd : crowdId
+	 */
+	public static final String JNI_BROADCAST_NEW_CROWD = "com.v2tech.jni.broadcast.new_crowd";
 	public static final String JNI_BROADCAST_GROUP_USER_ADDED = "com.v2tech.jni.broadcast.group_user_added";
 	public static final String JNI_BROADCAST_VIDEO_CALL_CLOSED = "com.v2tech.jni.broadcast.video_call_closed";
 	public static final String JNI_BROADCAST_FRIEND_AUTHENTICATION = "com.v2tech.jni.broadcast.friend_authentication";
 	public static final String JNI_BROADCAST_NEW_QUALIFICATION_MESSAGE = "com.v2tech.jni.broadcast.new.qualification_message";
+	/**
+	 * Current user kicked by crowd master
+	 */
+	public static final String JNI_BROADCAST_KICED_CROWD = "com.v2tech.jni.broadcast.kick_crowd";
 
 	/**
 	 * Crowd invitation with key crowd
@@ -576,6 +581,32 @@ public class JNIService extends Service {
 			}
 
 		}
+		
+		
+
+		@Override
+		public void onAddGroupInfo(V2Group group) {
+			if (group == null || group.creator == null) {
+				return;
+			}
+			super.onAddGroupInfo(group);
+			GroupType gType = GroupType.fromInt(group.type);
+			if (gType == GroupType.CHATING) {
+				CrowdGroup cg = new CrowdGroup(group.id, group.name, GlobalHolder.getInstance().getUser(group.creator.uid));
+				cg.setBrief(group.brief);
+				cg.setAnnouncement(group.announce);
+				cg.setCreateDate(group.createTime);
+				GlobalHolder.getInstance().addGroupToList(gType.intValue(), cg);
+				
+				// Send broadcast
+				Intent i = new Intent(
+						JNI_BROADCAST_NEW_CROWD);
+				i.addCategory(JNI_BROADCAST_CATEGROY);
+				i.putExtra("crowd", cg.getmGId());
+				mContext.sendBroadcast(i);
+			}
+			
+		}
 
 		@Override
 		public void OnInviteJoinGroupCallback(V2Group group) {
@@ -585,15 +616,6 @@ public class JNIService extends Service {
 			}
 
 			GroupType gType = GroupType.fromInt(group.type);
-			if (gType != GroupType.CONTACT) {
-				Group cache = GlobalHolder.getInstance().getGroupById(
-						group.type, group.id);
-				if (cache != null) {
-					V2Log.e("Duplicated group invitation: " + cache.getmGId()
-							+ "  " + cache.getName());
-					return;
-				}
-			}
 
 			if (gType == GroupType.CONFERENCE) {
 				User owner = GlobalHolder.getInstance()
@@ -618,18 +640,44 @@ public class JNIService extends Service {
 					owner.setName(group.creator.name);
 				}
 
+				boolean sendBroadcastFlag = true;
+				CrowdGroup cg = new CrowdGroup(group.id, group.name, owner);
+				VMessageQualification crowdMsg = MessageBuilder
+						.queryQualMessageByCrowdId(mContext, GlobalHolder
+								.getInstance().getCurrentUser(), cg);
+				if (crowdMsg != null) {
+					if (crowdMsg.getQualState() != VMessageQualification.QualificationState.WAITING) {
+						crowdMsg.setReadState(VMessageQualification.ReadState.UNREAD);
+						crowdMsg.setQualState(VMessageQualification.QualificationState.WAITING);
+						MessageBuilder.updateQualicationMessage(mContext,
+								crowdMsg);
+					} else {
+						//send flag to false, means do not send broadcast
+						sendBroadcastFlag = false;
+						V2Log.i("igonre crowd invitation database exist same record "
+								+ group.id);
+					}
+				} else {
+					// Save message to database
+					crowdMsg = new VMessageQualificationInvitationCrowd(
+							cg, GlobalHolder.getInstance().getCurrentUser());
+					Uri uri = MessageBuilder.saveQualicationMessage(mContext,
+							crowdMsg);
+					if (uri != null) {
+						crowdMsg.setId(Long.parseLong(uri.getLastPathSegment()));
+					}
+				}
 				
-				//Save message to database
-				VMessageQualificationInvitationCrowd crowdMsg = new VMessageQualificationInvitationCrowd(
-						new CrowdGroup(group.id, group.name, owner),
-						GlobalHolder.getInstance().getCurrentUser());
-				MessageBuilder.saveQualicationMessage(mContext, crowdMsg);
-				//Send broadcast
-				Intent i = new Intent(JNI_BROADCAST_NEW_QUALIFICATION_MESSAGE);
-				i.addCategory(JNI_ACTIVITY_CATEGROY);
-				i.putExtra("msgId", crowdMsg.getId());
-				mContext.sendOrderedBroadcast(i, null);
+				if (sendBroadcastFlag && crowdMsg != null && crowdMsg.getId() > 0) {
+					// Send broadcast
+					Intent i = new Intent(
+							JNI_BROADCAST_NEW_QUALIFICATION_MESSAGE);
+					i.addCategory(JNI_BROADCAST_CATEGROY);
+					i.putExtra("msgId", crowdMsg.getId());
+					mContext.sendOrderedBroadcast(i, null);
+				}
 
+			} else if (gType == GroupType.CONTACT) {
 			}
 		}
 
@@ -700,6 +748,15 @@ public class JNIService extends Service {
 			i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
 			i.putExtra("obj", obj);
 			sendBroadcast(i);
+			
+			if (nUserID == GlobalHolder.getInstance().getCurrentUserId() && groupType == GroupType.CHATING.intValue()) {
+				Intent kick = new Intent();
+				kick.setAction(JNI_BROADCAST_KICED_CROWD);
+				kick.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
+				i.putExtra("crowd", nGroupID);
+				sendBroadcast(kick);
+			}
+			
 		}
 
 		// 增加好友成功时的回调

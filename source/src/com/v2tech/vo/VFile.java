@@ -2,6 +2,7 @@ package com.v2tech.vo;
 
 import java.text.DecimalFormat;
 import java.text.Format;
+import java.util.Date;
 
 public class VFile {
 
@@ -12,6 +13,8 @@ public class VFile {
 	protected long proceedSize;
 	protected String name;
 	protected User uploader;
+	protected Date startTime;
+	protected int flag;
 
 	public enum State {
 		UNKNOWN,DOWNLOADED, DOWNLOADING, DOWNLOAD_PAUSE, UPLOADED, UPLOADING, UPLOAD_PAUSE,DOWNLOAD_FAILED,UPLOAD_FAILED
@@ -56,6 +59,20 @@ public class VFile {
 	public long getProceedSize() {
 		return proceedSize;
 	}
+	
+	public String getProceedSizeStr() {
+		Format df = new DecimalFormat("#.0");
+
+		if (proceedSize >= 1073741824) {
+			return (df.format((double) proceedSize / (double) 1073741824)) + "G";
+		} else if (proceedSize >= 1048576) {
+			return (df.format((double) proceedSize / (double) 1048576)) + "M";
+		} else if (proceedSize >= 1024) {
+			return (df.format((double) proceedSize / (double) 1024)) + "K";
+		} else {
+			return proceedSize + "B";
+		}
+	}
 
 	public void setProceedSize(long proceedSize) {
 		this.proceedSize = proceedSize;
@@ -68,6 +85,27 @@ public class VFile {
 		}
 			
 	}
+	
+	public String getSpeedStr() {
+		if (startTime == null) {
+			startTime = new Date();
+			return "";
+		}
+		long speed = proceedSize / (System.currentTimeMillis() - startTime.getTime()) / 1000;
+		
+		Format df = new DecimalFormat("#.0");
+
+		if (speed >= 1073741824) {
+			return (df.format((double) speed / (double) 1073741824)) + "G";
+		} else if (speed >= 1048576) {
+			return (df.format((double) speed / (double) 1048576)) + "M";
+		} else if (speed >= 1024) {
+			return (df.format((double) speed / (double) 1024)) + "K";
+		} else {
+			return speed + "B";
+		}
+	}
+	
 	
 	public String getFileSizeStr() {
 		Format df = new DecimalFormat("#.0");
@@ -98,6 +136,24 @@ public class VFile {
 	public void setUploader(User uploader) {
 		this.uploader = uploader;
 	}
+
+	public Date getStartTime() {
+		return startTime;
+	}
+
+	public void setStartTime(Date startTime) {
+		this.startTime = startTime;
+	}
+
+	public int getFlag() {
+		return flag;
+	}
+
+	public void setFlag(int flag) {
+		this.flag = flag;
+	}
+	
+	
 	
 	
 

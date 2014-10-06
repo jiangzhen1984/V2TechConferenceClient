@@ -45,7 +45,8 @@
                 android:paddingRight="10dp"
                 android:paddingTop="10dp"
                 android:text="@string/crowd_files_return_button"
-                android:textColor="@color/conf_create_button_color" />
+                android:textColor="@color/conf_create_button_color"
+                android:textSize="@dimen/common_item_text_size"  />
          
     </RelativeLayout>
 

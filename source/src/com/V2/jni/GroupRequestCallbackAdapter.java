@@ -85,6 +85,11 @@ public abstract class GroupRequestCallbackAdapter implements
 	public void OnGetGroupFileInfo(V2Group group, List<FileJNIObject> list) {
 		
 	}
+
+	@Override
+	public void OnDelGroupFile(V2Group group, List<FileJNIObject> list) {
+		
+	}
 	
 	
 	

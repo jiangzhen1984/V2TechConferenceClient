@@ -11,7 +11,7 @@
         android:background="#ffffff" >
 
         <TextView
-            android:id="@+id/crowd_content_title"
+            android:id="@+id/crowd_return_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
@@ -19,11 +19,12 @@
             android:paddingLeft="15dp"
             android:paddingRight="8dp"
             android:paddingTop="10dp"
-            android:text="@string/crowd_content_announce"
+            android:text="@string/crowd_return_button"
             android:textColor="@color/button_text_color"
             android:textSize="@dimen/common_item_text_size" />
 
         <TextView
+              android:id="@+id/crowd_content_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
@@ -86,6 +87,7 @@
                 android:id="@+id/crowd_content_et"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:enabled="false"
                 android:background="@null"
                 android:ems="10"
                 android:lines="10"

@@ -53,7 +53,11 @@ public class PublicIntent {
 	public static final String PREPARE_FINISH_APPLICATION = "com.v2tech.prepare_finish_application";
 
 	// ===========================Broadcast not for start activity
-	// broadcast for new crowd notification, if user created to user is invited
+	// 
+	/**
+	 * broadcast for new crowd notification, if user created to user is invited<br>
+	 * key : crowd : crowd id 
+	 */
 	public static final String BROADCAST_NEW_CROWD_NOTIFICATION = "com.v2tech.jni.broadcast.new_crowd_notification";
 	// Broadcaset for new conference. This is only use conference is created by
 	// self
@@ -71,5 +75,14 @@ public class PublicIntent {
 	 * key: destGroupId
 	 */
 	public static final String BROADCAST_CONTACT_GROUP_UPDATED_NOTIFICATION = "com.v2tech.broadcast.contact_group_notification";
+	
+	/**
+	 * Broadcast for user quit crowd
+	 * key: userId 
+	 * key: groupId 
+	 * key: kicked boolean false means quit by self, true crowd owner kicked 
+	 */
+	public static final String BROADCAST_CROWD_QUIT_NOTIFICATION = "com.v2tech.broadcast.crowd_quit_notification";
+
 
 }

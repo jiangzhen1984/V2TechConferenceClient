@@ -265,6 +265,18 @@ public class GroupRequest {
 
 	public native void groupUploadFile(int groupType, long nGroupId, String sXml);
 
+	
+	/**
+	 * Delete group files<br>
+	 *  {@code <filelist><file encrypttype='1' id='C2A65B9B-63C7-4C9E-A8DD-F15F74ABA6CA'
+	 * name='83025aafa40f4bfb24fdb8d1034f78f0f7361801.gif' size='497236'
+	 * time='1411112464' uploader='11029' url=
+	 * 'http://192.168.0.38:8090/crowd/C2A65B9B-63C7-4C9E-A8DD-F15F74ABA6CA/C2A65B9B-63C7-4C9E-A8DD-F15F74ABA6CA/83025aafa40f4bfb24fdb8d1034f78f0f7361801.gif'/></fil
+	 * e l i s t > }
+	 * @param groupType
+	 * @param nGroupId
+	 * @param sXml
+	 */
 	public native void delGroupFile(int groupType, long nGroupId, String sXml);
 
 	/**
@@ -283,9 +295,28 @@ public class GroupRequest {
 				+ "  " + sXml);
 	}
 
+	
+	/**
+	 * 
+	 * @param type
+	 * @param nGroupId
+	 * @param sXml
+	 */
 	private void OnDelGroupFile(int type, long nGroupId, String sXml) {
 		V2Log.e("Group Request  OnDelGroupFile" + type + "   " + nGroupId
 				+ "  " + sXml);
+		
+		List<FileJNIObject> list = XmlAttributeExtractor.parseFiles(sXml);
+		V2Group group = new V2Group(nGroupId, type);
+
+		for (int i = 0; i < mCallbacks.size(); i++) {
+			WeakReference<GroupRequestCallback> wrcb = mCallbacks.get(i);
+			Object obj = wrcb.get();
+			if (obj != null) {
+				GroupRequestCallback callback = (GroupRequestCallback) obj;
+				callback.OnDelGroupFile(group, list);
+			}
+		}
 	}
 
 	/**
@@ -339,7 +370,7 @@ public class GroupRequest {
 	private void OnGetGroupFileInfo(int groupType, long nGroupId, String sXml) {
 		V2Log.e("Group Request  OnGetGroupFileInfo" + nGroupId + "  " + sXml);
 		List<FileJNIObject> list = XmlAttributeExtractor.parseFiles(sXml);
-		V2Group group = new V2Group(nGroupId, V2Group.TYPE_CROWD);
+		V2Group group = new V2Group(nGroupId, groupType);
 
 		for (int i = 0; i < mCallbacks.size(); i++) {
 			WeakReference<GroupRequestCallback> wrcb = mCallbacks.get(i);
@@ -577,6 +608,14 @@ public class GroupRequest {
 
 	}
 
+	/**
+	 * @deprecated
+	 * this funcation never be called
+	 * @param groupType
+	 * @param nGroupID
+	 * @param nUserID
+	 * @param sxml
+	 */
 	private void OnRefuseInviteJoinGroup(int groupType, long nGroupID,
 			long nUserID, String sxml) {
 		V2Log.d("OnRefuseInviteJoinGroup ==>" + "groupType:" + groupType + ","

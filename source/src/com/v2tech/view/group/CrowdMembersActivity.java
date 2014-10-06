@@ -3,8 +3,10 @@ package com.v2tech.view.group;
 import java.util.List;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.Gravity;
@@ -24,6 +26,7 @@ import android.widget.TextView;
 import com.v2tech.R;
 import com.v2tech.service.CrowdGroupService;
 import com.v2tech.service.GlobalHolder;
+import com.v2tech.view.JNIService;
 import com.v2tech.view.PublicIntent;
 import com.v2tech.vo.CrowdGroup;
 import com.v2tech.vo.Group.GroupType;
@@ -43,6 +46,7 @@ public class CrowdMembersActivity extends Activity {
 	
 	private boolean isInDeleteMode;
 	private CrowdGroupService service;
+	private LocalReceiver localReceiver;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -68,11 +72,16 @@ public class CrowdMembersActivity extends Activity {
 		mMembersContainer.setAdapter(adapter);
 		overridePendingTransition(R.animator.left_in, R.animator.left_out);
 		service = new CrowdGroupService();
+		if (crowd.getOwnerUser().getmUserId() != GlobalHolder.getInstance().getCurrentUserId()) {
+			mInvitationButton.setVisibility(View.INVISIBLE);
+		}
+		initReceiver();
 	}
 
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
+		this.unregisterReceiver(localReceiver);
 		service.clearCalledBack();
 	}
 
@@ -102,6 +111,18 @@ public class CrowdMembersActivity extends Activity {
 		overridePendingTransition(R.animator.right_in, R.animator.right_out);
 	}
 
+	
+	private void initReceiver() {
+		localReceiver = new LocalReceiver(); 
+		IntentFilter filter = new IntentFilter();
+		filter.addAction(JNIService.JNI_BROADCAST_KICED_CROWD);
+		filter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
+		this.registerReceiver(localReceiver, filter);
+	}
+
+	
+	
+	
 	private OnItemClickListener itemListener = new OnItemClickListener() {
 
 		@Override
@@ -151,6 +172,23 @@ public class CrowdMembersActivity extends Activity {
 		}
 
 	};
+	
+	
+	class LocalReceiver extends BroadcastReceiver {
+
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			if (intent.getAction().equals(JNIService.JNI_BROADCAST_KICED_CROWD)) {
+				long crowdId = intent.getLongExtra("crowd", 0);
+				if (crowdId == crowd.getmGId()) {
+					finish();
+				}
+			}
+			
+		}
+		
+	}
+	
 
 	class MemberView extends LinearLayout {
 
@@ -222,6 +260,7 @@ public class CrowdMembersActivity extends Activity {
 
 				@Override
 				public void onClick(View v) {
+					v.setVisibility(View.GONE);
 					service.removeMember(crowd, mUser, null);
 					mMembers.remove(mUser);
 					adapter.notifyDataSetChanged();
@@ -244,12 +283,14 @@ public class CrowdMembersActivity extends Activity {
 		
 		public void update(User user) {
 			if (isInDeleteMode) {
-				mDeleteIV.setVisibility(View.VISIBLE);
+				if (this.mUser.getmUserId() != crowd.getOwnerUser().getmUserId()) {
+					mDeleteIV.setVisibility(View.VISIBLE);
+				}
 			} else {
 				mDeleteIV.setVisibility(View.GONE);
 				mDeleteButtonTV.setVisibility(View.GONE);
 			}
-			if ( this.mUser == user) {
+			if (this.mUser == user) {
 				return;
 			}
 			this.mUser = user;
