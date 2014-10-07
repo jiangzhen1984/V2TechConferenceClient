@@ -283,7 +283,7 @@ public class CrowdGroupService extends AbstractHandler {
 
 	/**
 	 * Remove member from crowd
-	 * 
+	 *
 	 * @param crowd
 	 * @param user
 	 * @param caller
@@ -429,11 +429,12 @@ public class CrowdGroupService extends AbstractHandler {
 		}
 	}
 
-	/**
-	 * Register listener for file transport status
-	 * 
-	 * @param msg
-	 */
+    /**
+     * Register listener for file transport status
+     * @param h
+     * @param what
+     * @param obj
+     */
 	public void registerFileTransStatusListener(Handler h, int what, Object obj) {
 		registerListener(KEY_FILE_TRANS_STATUS_NOTIFICATION_LISTNER, h, what,
 				obj);

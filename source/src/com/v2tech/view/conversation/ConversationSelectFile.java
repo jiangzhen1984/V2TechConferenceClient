@@ -172,6 +172,8 @@ public class ConversationSelectFile extends Activity {
 		// 获取Intent携带的数据
 		Intent intent = getIntent();
 		mCheckedList = intent.getParcelableArrayListExtra("checkedFiles");
+		if(mCheckedList == null)
+			mCheckedList = new ArrayList<FileInfoBean>();
 		type = intent.getStringExtra("type");
 		// 创建初始对象
 		mCheckedNameList = new ArrayList<String>();
@@ -215,7 +217,17 @@ public class ConversationSelectFile extends Activity {
 			updateFileItems(mCurrentPath);
 			adapter = new FileListAdapter();
 			filesList.setAdapter(adapter);
-		}
+		} else if("crowdFile".equals(type)){
+
+            titleText.setText("上传文件");
+            filesGrid.setVisibility(View.GONE);
+            backButton.setVisibility(View.INVISIBLE);
+            filesList.setVisibility(View.VISIBLE);
+
+            updateFileItems(mCurrentPath);
+            adapter = new FileListAdapter();
+            filesList.setAdapter(adapter);
+        }
 
 	}
 
@@ -246,19 +258,21 @@ public class ConversationSelectFile extends Activity {
 
 			@Override
 			public void onClick(View v) {
+				
 				V2Log.d(TAG, "当前文件路径：" + mCurrentPath);
 				if (StorageUtil.getSdcardPath()
 						.equals(mCurrentPath.substring(0,
 								mCurrentPath.lastIndexOf("/")))) {
 					backButton.setText("返回");
+					 if("crowdFile".equals(type) && backButton.getVisibility() == View.VISIBLE) 
+	                     backButton.setVisibility(View.INVISIBLE);
 				}
-
+				
 				if (StorageUtil.getSdcardPath().equals(mCurrentPath)) {
-
-					// 如果已经是顶级路径，则结束掉当前界面
-					reutrnResult(1);
-					return;
-				}
+                    // 如果已经是顶级路径，则结束掉当前界面
+                    reutrnResult(1);
+                    return;
+                }
 				File file = new File(mCurrentPath);
 				mCurrentPath = file.getParent();
 				updateFileItems(file.getParent());
@@ -300,6 +314,8 @@ public class ConversationSelectFile extends Activity {
 
 				} else { // position小于文件夹集合mFolderLists的长度，则就是文件夹
 
+                    if("crowdFile".equals(type) && backButton.getVisibility() == View.INVISIBLE)
+                        backButton.setVisibility(View.VISIBLE);
 					FileInfoBean bean = mFolderLists.get(position);
 					backButton.setText("上一级");
 					mCurrentPath = bean.filePath;

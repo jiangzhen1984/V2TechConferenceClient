@@ -92,7 +92,7 @@ public class MessageBodyView extends LinearLayout {
 	private int popupWindowWidth;
 	private int popupWindowHeight;
 	private PopupWindow pw;
-	private View popWindow;
+	private RelativeLayout popWindow;
 
 	public interface ClickListener {
 		public void onMessageClicked(VMessage v);
@@ -121,10 +121,6 @@ public class MessageBodyView extends LinearLayout {
 				VMessageFileItem vfi);
 
 		public void requestStopOtherAudio(VMessage vm);
-	}
-
-	public MessageBodyView(Context context, VMessage m) {
-		this(context, m, false);
 	}
 
 	public MessageBodyView(Context context, VMessage m, boolean isShowTime) {
@@ -240,7 +236,7 @@ public class MessageBodyView extends LinearLayout {
 	private void initPopupWindow() {
 		LayoutInflater inflater = (LayoutInflater) getContext()
 				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		popWindow = (ViewGroup) inflater.inflate(
+		popWindow = (RelativeLayout) inflater.inflate(
 				R.layout.message_selected_pop_up_window, null);
 		pw = new PopupWindow(popWindow, LayoutParams.WRAP_CONTENT,
 				LayoutParams.WRAP_CONTENT, true);
@@ -292,10 +288,9 @@ public class MessageBodyView extends LinearLayout {
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
 		super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 
-		ViewGroup viewGroup = (ViewGroup) popWindow;
-		viewGroup.measure(widthMeasureSpec, heightMeasureSpec);
-		popupWindowHeight = viewGroup.getChildAt(0).getMeasuredHeight();
-		popupWindowWidth = viewGroup.getChildAt(0).getMeasuredWidth();
+        popWindow.getChildAt(0).measure(MeasureSpec.UNSPECIFIED , MeasureSpec.UNSPECIFIED);
+		popupWindowHeight = popWindow.getChildAt(0).getMeasuredHeight();
+		popupWindowWidth = popWindow.getChildAt(0).getMeasuredWidth();
 	}
 
 	private void populateMessage() {

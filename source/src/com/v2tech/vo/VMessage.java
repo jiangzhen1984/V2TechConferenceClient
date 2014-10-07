@@ -1,5 +1,11 @@
 package com.v2tech.vo;
 
+import android.content.Context;
+import android.graphics.drawable.Drawable;
+import android.text.Spannable;
+import android.text.SpannableStringBuilder;
+import android.text.style.ImageSpan;
+
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -10,6 +16,7 @@ import java.util.UUID;
 
 import com.V2.jni.util.V2Log;
 import com.v2tech.service.GlobalHolder;
+import com.v2tech.util.GlobalConfig;
 
 public class VMessage {
 	
@@ -245,7 +252,8 @@ public class VMessage {
 		return this.itemList;
 	}
 	
-	
+
+
 	
 	public String getAllTextContent() {
 		StringBuilder sb = new StringBuilder();
@@ -255,12 +263,26 @@ public class VMessage {
 					sb.append("\n");
 				}
 				sb.append(((VMessageTextItem)item).getText());
-			}
+			} else if (item.getType() == VMessageAbstractItem.ITEM_TYPE_FACE) {
+                sb.append("[表情]");
+            }
 		}
 		return sb.toString();
 	}
-	
-	
+
+    public String getTextContent() {
+
+        StringBuilder sb = new StringBuilder();
+        for (VMessageAbstractItem item : itemList) {
+            if (item.getType() == VMessageAbstractItem.ITEM_TYPE_TEXT) {
+                if (item.isNewLine() && sb.length() != 0) {
+                    sb.append("\n");
+                }
+                sb.append(((VMessageTextItem)item).getText());
+            }
+        }
+        return sb.toString();
+    }
 	
 	public void recycleAllImageMessage() {
 		for (VMessageAbstractItem item : itemList) {

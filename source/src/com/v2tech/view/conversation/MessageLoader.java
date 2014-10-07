@@ -1,14 +1,5 @@
 package com.v2tech.view.conversation;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.UUID;
-
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -24,13 +15,20 @@ import com.v2tech.db.V2TechDBHelper;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.util.XmlParser;
 import com.v2tech.vo.AudioVideoMessageBean;
-import com.v2tech.vo.Conversation;
 import com.v2tech.vo.User;
 import com.v2tech.vo.VMessage;
 import com.v2tech.vo.VMessageAudioItem;
 import com.v2tech.vo.VMessageFileItem;
 import com.v2tech.vo.VMessageImageItem;
 import com.v2tech.vo.VideoBean;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.Set;
 
 public class MessageLoader {
 
@@ -48,7 +46,7 @@ public class MessageLoader {
 	public static boolean init(Context context, long groupType, long groupID,
 			long uid2, int type) {
 
-		String name = "";
+		String name;
 		switch (type) {
 		case CROWD_TYPE:
 			name = "Histories_" + groupType + "_" + groupID + "_0";
@@ -155,9 +153,8 @@ public class MessageLoader {
 				+ " desc , "
 				+ ContentDescriptor.HistoriesMessage.Cols.ID
 				+ " desc limit " + limit + " offset  " + offset;
-		List<VMessage> queryMessage = queryMessage(context, selection, args,
+        return queryMessage(context, selection, args,
 				order);
-		return queryMessage;
 	}
 
 	/**
@@ -170,7 +167,7 @@ public class MessageLoader {
 	public static VMessage loadMessageById(Context context, int groupType,
 			long groupID, long remoteID, long msgId) {
 
-		int type = -1;
+		int type;
 		if (groupType == 0)
 			type = CONTACT_TYPE;
 		else
@@ -205,14 +202,14 @@ public class MessageLoader {
 		return loadMessageById(context, 0, 0, remoteID, msgId);
 	}
 
-	/**
-	 * loading crowd chating messages
-	 * 
-	 * @param context
-	 * @param remoteID
-	 * @param msgId
-	 * @return
-	 */
+    /**
+     * loading crowd chating messages
+     * @param context
+     * @param groupType
+     * @param groupID
+     * @param msgId
+     * @return
+     */
 	public static VMessage loadGroupMessageById(Context context, int groupType,
 			long groupID, long msgId) {
 
@@ -252,11 +249,17 @@ public class MessageLoader {
 		DataBaseContext mContext = new DataBaseContext(context);
 		Cursor mCur = mContext.getContentResolver().query(uri, projection,
 				selection, args, sortOrder);
-		if (mCur.getCount() == 0)
-			return imageItems;
 
-		VMessageImageItem item = null;
-		VMessage current = null;
+        if(mCur == null)
+            return imageItems;
+
+		if (mCur.getCount() <= 0){
+            mCur.close();
+            return imageItems;
+        }
+
+		VMessageImageItem item;
+		VMessage current;
 		while (mCur.moveToNext()) {
 			int groupType = mCur
 					.getInt(mCur
@@ -290,8 +293,7 @@ public class MessageLoader {
 			imageItems.add(current);
 		}
 
-		if (mCur != null)
-			mCur.close();
+		mCur.close();
 		return imageItems;
 	}
 
@@ -306,10 +308,10 @@ public class MessageLoader {
 	public static List<AudioVideoMessageBean> loadAudioOrVideoHistoriesMessage(
 			Context context, long uid, int meidaType) {
 
-		HashMap<Long, AudioVideoMessageBean> tempList = null;
-		List<AudioVideoMessageBean> targetList = null;
+		HashMap<Long, AudioVideoMessageBean> tempList = new HashMap<Long, AudioVideoMessageBean>();
+		List<AudioVideoMessageBean> targetList =  new ArrayList<AudioVideoMessageBean>();
 		try {
-			String selection = "";
+			String selection;
 			switch (meidaType) {
 			case AudioVideoMessageBean.TYPE_AUDIO:
 				selection = (ContentDescriptor.HistoriesMedia.Cols.HISTORY_MEDIA_FROM_USER_ID
@@ -345,77 +347,83 @@ public class MessageLoader {
 					ContentDescriptor.HistoriesMedia.CONTENT_URI,
 					ContentDescriptor.HistoriesMedia.Cols.ALL_CLOS, selection,
 					args, sortOrder);
-			if (mCur != null) {
-				long currentID = GlobalHolder.getInstance().getCurrentUserId();
-				tempList = new HashMap<Long, AudioVideoMessageBean>();
-				targetList = new ArrayList<AudioVideoMessageBean>();
-				AudioVideoMessageBean currentMedia = null;
-				AudioVideoMessageBean.ChildMessageBean currentChildMedia = null;
-				int isCallOut = -1; // 主动呼叫还是被动 0 主动 1 被动
-				while (mCur.moveToNext()) {
-					currentChildMedia = new AudioVideoMessageBean.ChildMessageBean();
-					int types = mCur
-							.getInt(mCur
-									.getColumnIndex(ContentDescriptor.HistoriesMedia.Cols.HISTORY_MEDIA_TYPE));
-					int readState = mCur
-							.getInt(mCur
-									.getColumnIndex(ContentDescriptor.HistoriesMedia.Cols.HISTORY_MEDIA_READ_STATE));
-					long startDate = mCur
-							.getLong(mCur
-									.getColumnIndex(ContentDescriptor.HistoriesMedia.Cols.HISTORY_MEDIA_START_DATE));
-					long endDate = mCur
-							.getLong(mCur
-									.getColumnIndex(ContentDescriptor.HistoriesMedia.Cols.HISTORY_MEDIA_END_DATE));
-					long formID = mCur
-							.getLong(mCur
-									.getColumnIndex(ContentDescriptor.HistoriesMedia.Cols.HISTORY_MEDIA_FROM_USER_ID));
-					long toID = mCur
-							.getLong(mCur
-									.getColumnIndex(ContentDescriptor.HistoriesMedia.Cols.HISTORY_MEDIA_TO_USER_ID));
-					long remoteID = mCur
-							.getLong(mCur
-									.getColumnIndex(ContentDescriptor.HistoriesMedia.Cols.HISTORY_MEDIA_REMOTE_USER_ID));
-					int mediaState = mCur
-							.getInt(mCur
-									.getColumnIndex(ContentDescriptor.HistoriesMedia.Cols.HISTORY_MEDIA_STATE));
-					if (currentID == formID)
-						isCallOut = AudioVideoMessageBean.STATE_CALL_OUT;
-					else
-						isCallOut = AudioVideoMessageBean.STATE_CALL_IN;
 
-					User remoteUser = GlobalHolder.getInstance().getUser(
-							remoteID);
-					if (remoteUser == null) {
-						V2Log.e("get null when get remote user :" + remoteID);
-						continue;
-					}
+            if (mCur == null)
+                return targetList;
 
-					currentMedia = tempList.get(remoteID);
-					if (currentMedia == null) {
-						AudioVideoMessageBean tempMedia = new AudioVideoMessageBean();
-						tempMedia.name = remoteUser.getName();
-						tempMedia.isCallOut = isCallOut;
-						tempMedia.fromUserID = formID;
-						tempMedia.toUserID = toID;
-						tempMedia.remoteUserID = remoteID;
-						tempMedia.readState = readState;
-						tempList.put(remoteID, tempMedia);
-						currentMedia = tempMedia;
-					}
+            if (mCur.getCount() <= 0){
+                mCur.close();
+                return targetList;
+            }
 
-					currentChildMedia.childMediaType = types;
-					currentChildMedia.childISCallOut = isCallOut;
-					currentChildMedia.childHoldingTime = endDate - startDate;
-					currentChildMedia.childSaveDate = startDate;
-					currentChildMedia.childReadState = readState;
-					currentChildMedia.childMediaState = mediaState;
-					currentMedia.mChildBeans.add(currentChildMedia);
-					// 判断该条消息是否未读，更改未读消息数量
-					if (readState == AudioVideoMessageBean.STATE_UNREAD) {
-						currentMedia.callNumbers += 1;
-					}
-				}
-			}
+            long currentID = GlobalHolder.getInstance().getCurrentUserId();
+            AudioVideoMessageBean currentMedia;
+            AudioVideoMessageBean.ChildMessageBean currentChildMedia;
+            int isCallOut; // 主动呼叫还是被动 0 主动 1 被动
+            while (mCur.moveToNext()) {
+                currentChildMedia = new AudioVideoMessageBean.ChildMessageBean();
+                int types = mCur
+                        .getInt(mCur
+                                .getColumnIndex(ContentDescriptor.HistoriesMedia.Cols.HISTORY_MEDIA_TYPE));
+                int readState = mCur
+                        .getInt(mCur
+                                .getColumnIndex(ContentDescriptor.HistoriesMedia.Cols.HISTORY_MEDIA_READ_STATE));
+                long startDate = mCur
+                        .getLong(mCur
+                                .getColumnIndex(ContentDescriptor.HistoriesMedia.Cols.HISTORY_MEDIA_START_DATE));
+                long endDate = mCur
+                        .getLong(mCur
+                                .getColumnIndex(ContentDescriptor.HistoriesMedia.Cols.HISTORY_MEDIA_END_DATE));
+                long formID = mCur
+                        .getLong(mCur
+                                .getColumnIndex(ContentDescriptor.HistoriesMedia.Cols.HISTORY_MEDIA_FROM_USER_ID));
+                long toID = mCur
+                        .getLong(mCur
+                                .getColumnIndex(ContentDescriptor.HistoriesMedia.Cols.HISTORY_MEDIA_TO_USER_ID));
+                long remoteID = mCur
+                        .getLong(mCur
+                                .getColumnIndex(ContentDescriptor.HistoriesMedia.Cols.HISTORY_MEDIA_REMOTE_USER_ID));
+                int mediaState = mCur
+                        .getInt(mCur
+                                .getColumnIndex(ContentDescriptor.HistoriesMedia.Cols.HISTORY_MEDIA_STATE));
+                if (currentID == formID)
+                    isCallOut = AudioVideoMessageBean.STATE_CALL_OUT;
+                else
+                    isCallOut = AudioVideoMessageBean.STATE_CALL_IN;
+
+                User remoteUser = GlobalHolder.getInstance().getUser(
+                        remoteID);
+                if (remoteUser == null) {
+                    V2Log.e("get null when get remote user :" + remoteID);
+                    continue;
+                }
+
+                currentMedia = tempList.get(remoteID);
+                if (currentMedia == null) {
+                    AudioVideoMessageBean tempMedia = new AudioVideoMessageBean();
+                    tempMedia.name = remoteUser.getName();
+                    tempMedia.isCallOut = isCallOut;
+                    tempMedia.fromUserID = formID;
+                    tempMedia.toUserID = toID;
+                    tempMedia.remoteUserID = remoteID;
+                    tempMedia.readState = readState;
+                    tempList.put(remoteID, tempMedia);
+                    currentMedia = tempMedia;
+                }
+
+                currentChildMedia.childMediaType = types;
+                currentChildMedia.childISCallOut = isCallOut;
+                currentChildMedia.childHoldingTime = endDate - startDate;
+                currentChildMedia.childSaveDate = startDate;
+                currentChildMedia.childReadState = readState;
+                currentChildMedia.childMediaState = mediaState;
+                currentMedia.mChildBeans.add(currentChildMedia);
+                // 判断该条消息是否未读，更改未读消息数量
+                if (readState == AudioVideoMessageBean.STATE_UNREAD) {
+                    currentMedia.callNumbers += 1;
+                }
+            }
+
 			mCur.close();
 			Set<Entry<Long, AudioVideoMessageBean>> entrySet = tempList
 					.entrySet();
@@ -482,11 +490,18 @@ public class MessageLoader {
 		DataBaseContext mContext = new DataBaseContext(context);
 		Cursor mCur = mContext.getContentResolver().query(uri, projection,
 				where, args, sortOrder);
-		if (mCur.getCount() == 0)
-			return imageItems;
 
-		VMessageImageItem item = null;
-		VMessage current = null;
+        if (mCur == null){
+            return imageItems;
+        }
+
+		if (mCur.getCount() <= 0){
+            mCur.close();
+            return imageItems;
+        }
+
+		VMessageImageItem item;
+		VMessage current;
 		while (mCur.moveToNext()) {
 			int groupType = mCur
 					.getInt(mCur
@@ -518,9 +533,7 @@ public class MessageLoader {
 			item.setFilePath(imagePath);
 			imageItems.add(current);
 		}
-
-		if (mCur != null)
-			mCur.close();
+		mCur.close();
 		return imageItems;
 	}
 
@@ -632,7 +645,7 @@ public class MessageLoader {
 					ContentDescriptor.HistoriesAudios.CONTENT_URI,
 					ContentDescriptor.HistoriesAudios.Cols.HISTORY_AUDIO_ID
 							+ "=?",
-					new String[] { String.valueOf(vm.getUUID()) });
+					new String[] { String.valueOf(audioItems.get(i).getUuid()) });
 		}
 
 		List<VMessageFileItem> fileItems = vm.getFileItems();
@@ -641,7 +654,7 @@ public class MessageLoader {
 					ContentDescriptor.HistoriesFiles.CONTENT_URI,
 					ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_ID
 							+ "=?",
-					new String[] { String.valueOf(vm.getUUID()) });
+					new String[] { String.valueOf(fileItems.get(i).getUuid()) });
 		}
 
 		List<VMessageImageItem> imageItems = vm.getImageItems();
@@ -650,37 +663,9 @@ public class MessageLoader {
 					ContentDescriptor.HistoriesGraphic.CONTENT_URI,
 					ContentDescriptor.HistoriesGraphic.Cols.HISTORY_GRAPHIC_ID
 							+ "=?",
-					new String[] { String.valueOf(vm.getUUID()) });
+					new String[] { String.valueOf(imageItems.get(i).getUuid()) });
 		}
 		return ret;
-	}
-
-	/**
-	 * delete the VMessage
-	 * 
-	 * @param context
-	 * @param vm
-	 * @return
-	 */
-	public static void deleteGroupMessage(Context context, int groupType,
-			long groupID) {
-
-		DataBaseContext mContext = new DataBaseContext(context);
-		String where = ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_GROUP_TYPE
-				+ "= ? and "
-				+ ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_GROUP_ID
-				+ "= ?";
-		mContext.getContentResolver().delete(
-				ContentDescriptor.HistoriesMessage.CONTENT_URI,
-				where,
-				new String[] { String.valueOf(groupType),
-						String.valueOf(groupID) });
-
-		mContext.getContentResolver().delete(
-				ContentDescriptor.HistoriesGraphic.CONTENT_URI,
-				where,
-				new String[] { String.valueOf(groupType),
-						String.valueOf(groupID) });
 	}
 
 	/**
@@ -703,10 +688,9 @@ public class MessageLoader {
 		String where = ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_ID
 				+ "= ?";
 		String[] selectionArgs = new String[] { vm.getUUID() };
-		int ret = mContext.getContentResolver().update(
+        return mContext.getContentResolver().update(
 				ContentDescriptor.HistoriesMessage.CONTENT_URI, values, where,
 				selectionArgs);
-		return ret;
 	}
 
 	/**
@@ -731,10 +715,9 @@ public class MessageLoader {
 		String where = ContentDescriptor.HistoriesAudios.Cols.HISTORY_AUDIO_ID
 				+ "= ?";
 		String[] selectionArgs = new String[] { audioItem.getUuid() };
-		int ret = mContext.getContentResolver().update(
+        return mContext.getContentResolver().update(
 				ContentDescriptor.HistoriesAudios.CONTENT_URI, values, where,
 				selectionArgs);
-		return ret;
 	}
 
 	/**
@@ -761,10 +744,9 @@ public class MessageLoader {
 		String where = ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_ID
 				+ "= ?";
 		String[] selectionArgs = new String[] { fileItem.getUuid() };
-		int ret = mContext.getContentResolver().update(
+        return mContext.getContentResolver().update(
 				ContentDescriptor.HistoriesFiles.CONTENT_URI, values, where,
 				selectionArgs);
-		return ret;
 	}
 
 	// private static void loadVMessageItem(Context context, VMessage vm,
@@ -881,10 +863,13 @@ public class MessageLoader {
 				ContentDescriptor.HistoriesMedia.Cols.ALL_CLOS, selection,
 				selectionArgs, order);
 
-		if (mCur == null || mCur.getCount() <= 0) {
-			mCur.close();
+		if (mCur == null)
 			return null;
-		}
+
+        if(mCur.getCount() <= 0){
+            mCur.close();
+            return null;
+        }
 
 		mCur.moveToNext();
 		VideoBean bean = new VideoBean();
@@ -927,12 +912,13 @@ public class MessageLoader {
 		}
 	}
 
-	/**
-	 * 根据传入的id，查询数据库，获取最新的VMessage对象
-	 * 
-	 * @param cur
-	 * @return
-	 */
+    /**
+     * 根据传入的id，查询数据库，获取最新的VMessage对象
+     * @param context
+     * @param uid1
+     * @param uid2
+     * @return
+     */
 	public static VMessage getNewestMessage(Context context, long uid1,
 			long uid2) {
 		if (!init(context, 0, 0, uid2, CONTACT_TYPE))
@@ -1053,7 +1039,7 @@ public class MessageLoader {
 	private static synchronized boolean isExistTable(Context context,
 			String tabName) {
 		DataBaseContext mContext = new DataBaseContext(context);
-		SQLiteDatabase base = null;
+		SQLiteDatabase base;
 		base = mContext.openOrCreateDatabase(V2TechDBHelper.DB_NAME, 0, null);
 		try {
 			String sql = "select count(*) as c from sqlite_master where type ='table' "

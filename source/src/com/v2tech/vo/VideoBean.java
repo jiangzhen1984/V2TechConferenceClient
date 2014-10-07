@@ -16,18 +16,6 @@ import com.v2tech.service.GlobalHolder;
  */
 public class VideoBean {
 
-	public static final int TYPE_AUDIO = 0;
-	public static final int TYPE_VIDEO = 1;
-	
-	public static final int READ_STATE_UNREAD = 0;
-	public static final int READ_STATE_READED = 1;
-	
-	public static final int STATE_NO_ANSWER_CALL = 0;
-	public static final int STATE_ANSWER_CALL = 1;
-	
-	public static final int STATE_CALL_OUT = 0;
-	public static final int STATE_CALL_IN = 1;
-	
 	public VideoBean(){
 		
 		ownerID = GlobalHolder.getInstance().getCurrentUserId();

@@ -8,6 +8,7 @@ import android.content.ContextWrapper;
 import android.database.DatabaseErrorHandler;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
+import android.text.TextUtils;
 
 import com.V2.jni.util.V2Log;
 import com.v2tech.util.GlobalConfig;
@@ -29,13 +30,11 @@ public class DataBaseContext extends ContextWrapper {
 		super(base);
 	}
 
-	/**
-	 * 获得数据库路径，如果不存在，则创建对象对象
-	 * 
-	 * @param name
-	 * @param mode
-	 * @param factory
-	 */
+    /**
+     * 获得数据库路径，如果不存在，则创建对象对象
+     * @param name
+     * @return
+     */
 	@Override
 	public File getDatabasePath(String name) {
 		// 判断是否存在sd卡
@@ -43,10 +42,13 @@ public class DataBaseContext extends ContextWrapper {
 				.equals(android.os.Environment.getExternalStorageState());
 		if (!sdExist) {// 如果不存在,
 			V2Log.e(TAG, "创建数据库失败，SD卡不存在，请加载SD卡");
-			return null;
+            throw new RuntimeException("创建数据库失败，SD卡不存在，请加载SD卡");
 		} else {// 如果存在
 				// 获取指定的用户数据库路径
 				// 判断目录是否存在，不存在则创建该目录
+            if(TextUtils.isEmpty(GlobalConfig.DATABASE_PATH))
+                throw new RuntimeException("没有获取登录用户信息，创建数据库失败.");
+
 			String dbDir = GlobalConfig.DATABASE_PATH;
 			File dirFile = new File(dbDir);
 			if (!dirFile.exists())
@@ -83,9 +85,8 @@ public class DataBaseContext extends ContextWrapper {
 			File file = getDatabasePath(name);
 			if (file == null)
 				throw new RuntimeException("创建数据库失败");
-			SQLiteDatabase result = SQLiteDatabase.openOrCreateDatabase(file,
+            return SQLiteDatabase.openOrCreateDatabase(file,
 					null);
-			return result;
 		}
 	}
 
@@ -107,9 +108,8 @@ public class DataBaseContext extends ContextWrapper {
 			File file = getDatabasePath(name);
 			if (file == null)
 				throw new RuntimeException("创建数据库失败");
-			SQLiteDatabase result = SQLiteDatabase.openOrCreateDatabase(file,
+            return SQLiteDatabase.openOrCreateDatabase(file,
 					null);
-			return result;
 		}
 	}
 }

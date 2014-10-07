@@ -5,6 +5,7 @@ import java.util.List;
 
 import android.app.Activity;
 import android.content.BroadcastReceiver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -25,14 +26,17 @@ import android.widget.Toast;
 
 import com.v2tech.R;
 import com.v2tech.db.ContentDescriptor;
+import com.v2tech.db.DataBaseContext;
 import com.v2tech.service.BitmapManager;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.util.DateUtil;
 import com.v2tech.view.PublicIntent;
+import com.v2tech.view.bo.ConversationNotificationObject;
 import com.v2tech.view.conversation.MessageLoader;
 import com.v2tech.view.conversation.P2PConversation;
 import com.v2tech.vo.AudioVideoMessageBean;
 import com.v2tech.vo.AudioVideoMessageBean.ChildMessageBean;
+import com.v2tech.vo.Conversation;
 import com.v2tech.vo.User;
 import com.v2tech.vo.UserDeviceConfig;
 import com.v2tech.vo.VideoBean;
@@ -54,11 +58,13 @@ public class VoiceMessageDetailActivity extends Activity implements
 	private VoiceDetailBaseAdapter adapter;
 	private long remoteID;
 	private VoiceDetailReceiverBroadcast receiver;
+	private Context mContext;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_specifitem_voicedetail);
+		mContext = this;
 		findview();
 		initReceiver();
 		init();
@@ -97,7 +103,7 @@ public class VoiceMessageDetailActivity extends Activity implements
 
 		remoteID = getIntent().getLongExtra("remoteUserID", -1l);
 		if (remoteID == -1l)
-			Toast.makeText(getApplicationContext(), "获取用户信息失败", 0).show();
+			Toast.makeText(getApplicationContext(), "获取用户信息失败", Toast.LENGTH_SHORT).show();
 
 		BitmapManager.getInstance().registerBitmapChangedListener(
 				this.bitmapChangedListener);
@@ -163,17 +169,17 @@ public class VoiceMessageDetailActivity extends Activity implements
 						.setImageResource(R.drawable.vs_voice_callout);
 				holder.state.setTextColor(Color.BLUE);
 				holder.holdTime.setTextColor(Color.BLUE);
-				if (childBean.childMediaType == VideoBean.TYPE_AUDIO)
+				if (childBean.childMediaType == AudioVideoMessageBean.TYPE_AUDIO)
 					holder.state.setText("[音频]已拨出");
 				else
 					holder.state.setText("[视频]已拨出");
 			} else {
-				if (childBean.childMediaState == VideoBean.STATE_ANSWER_CALL) {
+				if (childBean.childMediaState == AudioVideoMessageBean.STATE_CALL_OUT) {
 					holder.directionIcon
 							.setImageResource(R.drawable.vs_voice_listener);
 					holder.state.setTextColor(Color.GREEN);
 					holder.holdTime.setTextColor(Color.GREEN);
-					if (childBean.childMediaType == VideoBean.TYPE_AUDIO)
+					if (childBean.childMediaType == AudioVideoMessageBean.TYPE_AUDIO)
 						holder.state.setText("[音频]已接听");
 					else
 						holder.state.setText("[视频]已接听");
@@ -182,7 +188,7 @@ public class VoiceMessageDetailActivity extends Activity implements
 							.setImageResource(R.drawable.vs_voice_nolistener);
 					holder.state.setTextColor(Color.RED);
 					holder.holdTime.setTextColor(Color.RED);
-					if (childBean.childMediaType == VideoBean.TYPE_AUDIO)
+					if (childBean.childMediaType == AudioVideoMessageBean.TYPE_AUDIO)
 						holder.state.setText("[音频]未接听");
 					else
 						holder.state.setText("[视频]未接听");
@@ -217,7 +223,7 @@ public class VoiceMessageDetailActivity extends Activity implements
 					+ "= ?";
 			String[] selectionArgs = new String[] { String.valueOf(remoteID) };
 			int result = getContentResolver().delete(url, where, selectionArgs);
-			Toast.makeText(getApplicationContext(), "本次共删除" + result + "条记录", 0)
+			Toast.makeText(getApplicationContext(), "本次共删除" + result + "条记录", Toast.LENGTH_SHORT)
 					.show();
 			break;
 		case R.id.specific_voiceDetail_video_call_bottom_button:
@@ -288,6 +294,27 @@ public class VoiceMessageDetailActivity extends Activity implements
 
 			mListItem.add(0 , newChild);
 			adapter.notifyDataSetChanged();
+			
+			//update conversation state
+			Intent i = new Intent(PublicIntent.REQUEST_UPDATE_CONVERSATION);
+	        i.addCategory(PublicIntent.DEFAULT_CATEGORY);
+	    	ConversationNotificationObject obj = new ConversationNotificationObject(Conversation.TYPE_CONTACT,
+	    			-1);
+	        obj.setMsgID(0);
+	        i.putExtra("obj", obj);
+	        i.putExtra("isFresh", false);
+	        i.putExtra("isDelete", false);
+	        mContext.sendBroadcast(i);	
+	        
+	        //update database state
+	        ContentValues values = new ContentValues();
+			values.put(ContentDescriptor.HistoriesMedia.Cols.HISTORY_MEDIA_READ_STATE , AudioVideoMessageBean.STATE_READED);
+			String where = ContentDescriptor.HistoriesMedia.Cols.HISTORY_MEDIA_READ_STATE + "= ? and " +
+					ContentDescriptor.HistoriesMedia.Cols.HISTORY_MEDIA_REMOTE_USER_ID + "= ?";
+			String[] args = new String[]{ String.valueOf(0) , String.valueOf(remoteID)};
+			DataBaseContext con = new DataBaseContext(VoiceMessageDetailActivity.this);
+			con.getContentResolver().update(ContentDescriptor.HistoriesMedia.CONTENT_URI, 
+					values, where, args);
 		}
 	}
 	

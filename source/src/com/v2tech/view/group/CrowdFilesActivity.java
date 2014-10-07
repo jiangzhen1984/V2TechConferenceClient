@@ -41,7 +41,9 @@ import com.v2tech.service.jni.JNIResponse;
 import com.v2tech.service.jni.RequestFetchGroupFilesResponse;
 import com.v2tech.util.GlobalConfig;
 import com.v2tech.view.JNIService;
+import com.v2tech.view.conversation.ConversationSelectFile;
 import com.v2tech.vo.CrowdGroup;
+import com.v2tech.vo.FileInfoBean;
 import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.VCrowdFile;
 import com.v2tech.vo.VFile;
@@ -64,9 +66,12 @@ public class CrowdFilesActivity extends Activity {
 
 	private static final int REQUEST_CODE = 100;
 
+	private static final int RECEIVE_SELECTED_FILE = 200;
+
 	private Map<String, VCrowdFile> mFileMap;
 	private List<VCrowdFile> mFiles;
 	private List<VCrowdFile> mUploadedFiles;
+    private ArrayList<FileInfoBean> mCheckedList;
 
 	private Context mContext;
 	private ListView mListView;
@@ -129,6 +134,12 @@ public class CrowdFilesActivity extends Activity {
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == RECEIVE_SELECTED_FILE) {
+            if (data != null) {
+                mCheckedList = data.getParcelableArrayListExtra("checkedFiles");
+                V2Log.e("get checked files size is :" + mCheckedList.size());
+            }
+        }
 	}
 
 	@Override
@@ -286,9 +297,12 @@ public class CrowdFilesActivity extends Activity {
 		@Override
 		public void onClick(View v) {
 			showUploaded = true;
-			mTitle.setText(R.string.crowd_files_title_uploaded);
-			mShowUploadedFileButton.setVisibility(View.GONE);
-			adapter.notifyDataSetChanged();
+//			mTitle.setText(R.string.crowd_files_title_uploaded);
+//			mShowUploadedFileButton.setVisibility(View.GONE);
+//			adapter.notifyDataSetChanged();
+			Intent intent = new Intent(mContext , ConversationSelectFile.class);
+            intent.putExtra("type" , "crowdFile");
+            startActivityForResult(intent , RECEIVE_SELECTED_FILE);
 		}
 
 	};

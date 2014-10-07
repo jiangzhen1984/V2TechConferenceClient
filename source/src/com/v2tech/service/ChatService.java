@@ -120,11 +120,12 @@ public class ChatService extends DeviceService {
 	}
 
 
-	/**
-	 * Register listener for out conference by kick.
-	 * 
-	 * @param msg
-	 */
+    /**
+     * Register listener for out conference by kick.
+     * @param h
+     * @param what
+     * @param obj
+     */
 	public void registerCancelledListener(Handler h, int what, Object obj) {
 		registerListener(KEY_CANCELLED_LISTNER, h, what, obj);
 	}
@@ -134,12 +135,13 @@ public class ChatService extends DeviceService {
 
 	}
 
-	/**
-	 * Register listener for video connected, after this notification. can open
-	 * remote video device
-	 * 
-	 * @param msg
-	 */
+    /**
+     * Register listener for video connected, after this notification. can open
+     * remote video device
+     * @param h
+     * @param what
+     * @param obj
+     */
 	public void registerVideoChatConnectedListener(Handler h, int what,
 			Object obj) {
 		registerListener(KEY_VIDEO_CONNECTED, h, what, obj);
@@ -150,11 +152,12 @@ public class ChatService extends DeviceService {
 
 	}
 
-	/**
-	 * Register listener for out conference by kick.
-	 * 
-	 * @param msg
-	 */
+    /**
+     * Register listener for out conference by kick.
+     * @param h
+     * @param what
+     * @param obj
+     */
 	public void registerFileTransStatusListener(Handler h, int what, Object obj) {
 		registerListener(KEY_FILE_TRANS_STATUS_NOTIFICATION_LISTNER, h, what,
 				obj);
@@ -194,7 +197,7 @@ public class ChatService extends DeviceService {
 						msg.getGroupId(),
 						msg.getToUser() == null ? 0 : msg.getToUser()
 								.getmUserId(), msg.getUUID(), msg.toXml(),
-						msg.getAllTextContent().length());
+						msg.getTextContent().length());
 
 				// send image message
 				List<VMessageImageItem> imageItems = msg.getImageItems();

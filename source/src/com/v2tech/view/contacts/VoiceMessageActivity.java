@@ -1,7 +1,6 @@
 package com.v2tech.view.contacts;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -42,13 +41,14 @@ import com.v2tech.db.ContentDescriptor;
 import com.v2tech.db.DataBaseContext;
 import com.v2tech.service.BitmapManager;
 import com.v2tech.service.GlobalHolder;
-import com.v2tech.util.ArrayUtils;
 import com.v2tech.util.DateUtil;
 import com.v2tech.view.PublicIntent;
+import com.v2tech.view.bo.ConversationNotificationObject;
 import com.v2tech.view.conversation.MessageLoader;
 import com.v2tech.view.conversation.P2PConversation;
 import com.v2tech.vo.AudioVideoMessageBean;
 import com.v2tech.vo.AudioVideoMessageBean.ChildMessageBean;
+import com.v2tech.vo.Conversation;
 import com.v2tech.vo.User;
 import com.v2tech.vo.UserDeviceConfig;
 import com.v2tech.vo.VideoBean;
@@ -157,6 +157,8 @@ public class VoiceMessageActivity extends Activity {
 						}
 					}
 					startActivity(intent);
+					//update conversation state
+					updateConversationState();
 				}
 			}
 		});
@@ -408,9 +410,13 @@ public class VoiceMessageActivity extends Activity {
 					holder.voiceHoldingTime.setText("[视频] ");
 			}
 			// 处理图标
-			if (audioVideoMessageBean.isCallOut == AudioVideoMessageBean.STATE_CALL_OUT)
+			if (audioVideoMessageBean.isCallOut == AudioVideoMessageBean.STATE_CALL_OUT){
 				holder.directionIcon
 						.setImageResource(R.drawable.vs_voice_callout);
+				holder.voiceName.setTextColor(Color.BLACK);
+				holder.unreadNumber.setVisibility(View.GONE);
+				audioVideoMessageBean.callNumbers = 0;
+			}
 			else {
 				// 处理未读数量与字体颜色
 				if (audioVideoMessageBean.readState == AudioVideoMessageBean.STATE_UNREAD) {
@@ -420,10 +426,12 @@ public class VoiceMessageActivity extends Activity {
 							+ audioVideoMessageBean.callNumbers + " )");
 					holder.unreadNumber.setTextColor(Color.RED);
 				} else {
+					holder.voiceName.setTextColor(Color.BLACK);
 					holder.unreadNumber.setVisibility(View.GONE);
+					audioVideoMessageBean.callNumbers = 0;
 				}
 				
-				if(audioVideoMessageBean.meidaState == VideoBean.STATE_NO_ANSWER_CALL)
+				if(audioVideoMessageBean.meidaState == AudioVideoMessageBean.STATE_CALL_IN)
 					holder.directionIcon
 					.setImageResource(R.drawable.vs_voice_nolistener);
 				else
@@ -463,13 +471,15 @@ public class VoiceMessageActivity extends Activity {
 					bean.callNumbers = 0;
 					
 					ContentValues values = new ContentValues();
-					values.put(ContentDescriptor.HistoriesMedia.Cols.HISTORY_MEDIA_READ_STATE , 1);
+					values.put(ContentDescriptor.HistoriesMedia.Cols.HISTORY_MEDIA_READ_STATE , AudioVideoMessageBean.STATE_READED);
 					String where = ContentDescriptor.HistoriesMedia.Cols.HISTORY_MEDIA_READ_STATE + "= ? and " +
 							ContentDescriptor.HistoriesMedia.Cols.HISTORY_MEDIA_REMOTE_USER_ID + "= ?";
 					String[] selectionArgs = new String[]{ String.valueOf(0) , String.valueOf(audioVideoMessageBean.remoteUserID)};
 					DataBaseContext context = new DataBaseContext(VoiceMessageActivity.this);
 					context.getContentResolver().update(ContentDescriptor.HistoriesMedia.CONTENT_URI, 
 							values, where, selectionArgs);
+					
+					updateConversationState();
 					
 					finish();
 					mListItem = null;
@@ -522,6 +532,10 @@ public class VoiceMessageActivity extends Activity {
 					target.mediaType = newestMediaMessage.mediaType;
 					target.meidaState = newestMediaMessage.mediaState;
 					target.readState = newestMediaMessage.readSatate;
+					if (GlobalHolder.getInstance().getCurrentUserId() == newestMediaMessage.formUserID)
+						target.isCallOut = AudioVideoMessageBean.STATE_CALL_OUT;
+	                else
+	                	target.isCallOut = AudioVideoMessageBean.STATE_CALL_IN;
 					if (target.readState == AudioVideoMessageBean.STATE_UNREAD) {
 
 						target.callNumbers += 1;
@@ -533,7 +547,7 @@ public class VoiceMessageActivity extends Activity {
 					childBean.childHoldingTime = target.holdingTime;
 					childBean.childSaveDate = newestMediaMessage.startDate;
 					childBean.childReadState = target.readState;
-					childBean.childMediaState = target.mediaType;
+					childBean.childMediaState = target.meidaState;
 					target.mChildBeans.add(0 , childBean);
 					adapter.notifyDataSetChanged();
 					isFresh = true;
@@ -541,7 +555,7 @@ public class VoiceMessageActivity extends Activity {
 				}
 			}
 			
-			if(isFresh == false){
+			if(!isFresh){
 				AudioVideoMessageBean bean = new AudioVideoMessageBean();
 				if (newestMediaMessage.formUserID != GlobalHolder.getInstance()
 						.getCurrentUserId())
@@ -575,6 +589,20 @@ public class VoiceMessageActivity extends Activity {
 				
 		}
 	}
+	
+	private void updateConversationState(){
+		
+		Intent i = new Intent(PublicIntent.REQUEST_UPDATE_CONVERSATION);
+        i.addCategory(PublicIntent.DEFAULT_CATEGORY);
+    	ConversationNotificationObject obj = new ConversationNotificationObject(Conversation.TYPE_CONTACT,
+    			-1);
+        obj.setMsgID(0);
+        i.putExtra("obj", obj);
+        i.putExtra("isFresh", false);
+        i.putExtra("isDelete", false);
+        mContext.sendBroadcast(i);	
+	}	
+	
 	
 	private BitmapManager.BitmapChangedListener bitmapChangedListener = new BitmapManager.BitmapChangedListener() {
 
