@@ -174,6 +174,7 @@ public class P2PConversation extends Activity implements
 			mLocalHandler.postDelayed(timeOutMonitor, 1000 * 60);
 		} else {
 			String uuid = UUID.randomUUID().toString();
+			V2Log.e(TAG, "发起一个新的音视频邀请 , 等待回应中.... 此次通信的uuid ：" + uuid);
 			currentVideoBean.mediaState = AudioVideoMessageBean.STATE_ANSWER_CALL;
 			currentVideoBean.readSatate = AudioVideoMessageBean.STATE_READED;
 			currentVideoBean.formUserID = GlobalHolder.getInstance()
@@ -1032,7 +1033,6 @@ public class P2PConversation extends Activity implements
 	}
 
 	private void quit() {
-		Log.e(TAG, currentVideoBean.mediaChatID + "");
 		if (currentVideoBean.startDate == 0)
 			currentVideoBean.startDate = startTime;
 		MessageBuilder.saveMediaChatHistories(mContext, currentVideoBean);
@@ -1468,7 +1468,6 @@ public class P2PConversation extends Activity implements
 					if (currentVideoBean.startDate != 0)
 						currentVideoBean.endDate = GlobalConfig.getGlobalServerTime();
 					
-					V2Log.e(TAG, "get endDate is :" + currentVideoBean.endDate);
 					inProgress = true;
 					Message timeoutMessage = Message.obtain(this, QUIT);
 					this.sendMessageDelayed(timeoutMessage, 2000);
@@ -1484,11 +1483,12 @@ public class P2PConversation extends Activity implements
 					currentVideoBean.readSatate = AudioVideoMessageBean.STATE_READED;
 					RequestChatServiceResponse rcsr = (RequestChatServiceResponse) resp;
 					if (rcsr.getCode() == RequestChatServiceResponse.REJCTED) {
-						V2Log.e(TAG, "CALL_RESPONSE 调用了 HANG_UP_NOTIFICATION");
+						V2Log.e(TAG, "收到远端回复 , 对方拒绝了音视频的邀请.... 此次通信的uuid ：" + currentVideoBean.mediaChatID);
 						Message.obtain(this, HANG_UP_NOTIFICATION)
 								.sendToTarget();
 						currentVideoBean.mediaState = AudioVideoMessageBean.STATE_NO_ANSWER_CALL;
 					} else if (rcsr.getCode() == RequestChatServiceResponse.ACCEPTED) {
+						V2Log.e(TAG, "收到远端回复 , 对方接受了音视频的邀请.... 此次通信的uuid ：" + rcsr.getUid());
 						uad.setConnected(true);
 						// Send audio invitation
 						// Do not need to modify any values. because this API

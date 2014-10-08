@@ -596,6 +596,7 @@ public class JNIService extends Service {
 				cg.setBrief(group.brief);
 				cg.setAnnouncement(group.announce);
 				cg.setCreateDate(group.createTime);
+				cg.getOwnerUser().setName(group.creator.name);
 				GlobalHolder.getInstance().addGroupToList(gType.intValue(), cg);
 				
 				// Send broadcast

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import android.content.Context;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.V2.jni.ind.FileJNIObject;
@@ -13,7 +14,9 @@ import com.V2.jni.ind.V2Group;
 import com.V2.jni.ind.V2User;
 import com.V2.jni.util.V2Log;
 import com.V2.jni.util.XmlAttributeExtractor;
+import com.v2tech.service.GlobalHolder;
 import com.v2tech.util.HeartCharacterProcessing;
+import com.v2tech.vo.User;
 
 public class GroupRequest {
 
@@ -484,7 +487,14 @@ public class GroupRequest {
 
 		String gid = XmlAttributeExtractor.extract(sXml, " id='", "'");
 		String name = XmlAttributeExtractor.extract(sXml, " name='", "'");
+		String createUesrID = XmlAttributeExtractor.extract(sXml, " creatoruserid='", "'");
 		V2Group vg = new V2Group(Long.parseLong(gid), name, groupType);
+		if (gid != null && !gid.isEmpty() && !TextUtils.isEmpty(createUesrID)) {
+			User createUser = GlobalHolder.getInstance().getUser(Long.valueOf(createUesrID));
+			if(createUser != null)
+				vg.creator = new V2User(createUser.getmUserId() , createUser.getName());
+		}
+		
 		for (WeakReference<GroupRequestCallback> wrcb : mCallbacks) {
 			Object obj = wrcb.get();
 			if (obj != null) {

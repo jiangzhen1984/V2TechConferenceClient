@@ -315,8 +315,7 @@ public class ChatService extends DeviceService {
 		case OPERATION_START_DOWNLOAD:
 			FileRequest.getInstance().acceptFileTrans(
 					vfi.getUuid(),
-					GlobalConfig.getGlobalFilePath(GlobalHolder.getInstance()
-							.getCurrentUser()) + "/" + vfi.getFileName());
+					GlobalConfig.getGlobalFilePath() + "/" + vfi.getFileName());
 		default:
 			break;
 
@@ -558,6 +557,7 @@ public class ChatService extends DeviceService {
 				JNIResponse resp = new RequestChatServiceResponse(
 						RequestChatServiceResponse.ACCEPTED,
 						RequestChatServiceResponse.Result.SUCCESS);
+				
 				sendResult(mCaller, resp);
 				mCaller = null;
 			}

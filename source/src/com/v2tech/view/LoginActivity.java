@@ -84,6 +84,8 @@ public class LoginActivity extends Activity {
 
 	private View loginView;
 	private Boolean isLoggingIn = false;
+	
+	private final String TAG = "LoginActivity";
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -551,12 +553,12 @@ public class LoginActivity extends Activity {
 					Toast.makeText(mContext, R.string.error_connect_to_server,
 							Toast.LENGTH_LONG).show();
 				} else {
-					//为登陆用户创建个人资料文件夹
+					//获取到登陆用户对象
 					User user = ((RequestLogInResponse) rlr).getUser();
+					if(user == null)
+						throw new RuntimeException("登陆异常，没有获取到登陆用户的id");
+					//为登陆用户创建个人资料文件夹
 					createPersonFolder(user);
-					// 获取登陆用户自己的数据库路径
-					GlobalConfig.DATABASE_PATH = StorageUtil.getAbsoluteSdcardPath() + "/v2tech/Users/"
-					+ user.getmUserId() + "/";
 					// Save user info
 					saveUserConfig(mEmailView.getText().toString(), "");
 					GlobalHolder.getInstance().setCurrentUser(
@@ -577,26 +579,26 @@ public class LoginActivity extends Activity {
 	
 	private void createPersonFolder(User user){
 		
-		File pa = new File(GlobalConfig.getGlobalUserAvatarPath(user));
+		GlobalConfig.LOGIN_USER_ID = String.valueOf(user.getmUserId());
+		
+		File pa = new File(GlobalConfig.getGlobalUserAvatarPath());
 		if (!pa.exists()) {
 			boolean res = pa.mkdirs();
 			V2Log.i(" create avatar dir " + pa.getAbsolutePath() + "  " + res);
 		}
-		pa.setWritable(true);
-		pa.setReadable(true);
 
-		File image = new File(GlobalConfig.getGlobalPicsPath(user));
+		File image = new File(GlobalConfig.getGlobalPicsPath());
 		if (!image.exists()) {
 			boolean res = image.mkdirs();
 			V2Log.i(" create image dir " + image.getAbsolutePath() + "  " + res);
 		}
-		File audioPath = new File(GlobalConfig.getGlobalAudioPath(user));
+		File audioPath = new File(GlobalConfig.getGlobalAudioPath());
 		if (!audioPath.exists()) {
 			boolean res = audioPath.mkdirs();
 			V2Log.i(" create audio dir " + audioPath.getAbsolutePath() + "  "
 					+ res);
 		}
-		File filePath = new File(GlobalConfig.getGlobalFilePath(user));
+		File filePath = new File(GlobalConfig.getGlobalFilePath());
 		if (!filePath.exists()) {
 			boolean res = filePath.mkdirs();
 			V2Log.i(" create file dir " + filePath.getAbsolutePath() + "  "

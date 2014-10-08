@@ -525,8 +525,10 @@ public class VoiceMessageActivity extends Activity {
 				return;
 			}
 			ChildMessageBean childBean = new ChildMessageBean();
-			for (AudioVideoMessageBean target : mListItem) {
+			for(int i = 0 ; i < mListItem.size() ; i++) {
+				AudioVideoMessageBean target = mListItem.get(i);
 				if (target.remoteUserID == remoteID) {
+					int position = i;
 					target.holdingTime = newestMediaMessage.endDate
 							- newestMediaMessage.startDate;
 					target.mediaType = newestMediaMessage.mediaType;
@@ -549,6 +551,8 @@ public class VoiceMessageActivity extends Activity {
 					childBean.childReadState = target.readState;
 					childBean.childMediaState = target.meidaState;
 					target.mChildBeans.add(0 , childBean);
+					mListItem.remove(position);
+					mListItem.add(0, target);
 					adapter.notifyDataSetChanged();
 					isFresh = true;
 					return;
@@ -592,15 +596,25 @@ public class VoiceMessageActivity extends Activity {
 	
 	private void updateConversationState(){
 		
-		Intent i = new Intent(PublicIntent.REQUEST_UPDATE_CONVERSATION);
-        i.addCategory(PublicIntent.DEFAULT_CATEGORY);
-    	ConversationNotificationObject obj = new ConversationNotificationObject(Conversation.TYPE_CONTACT,
-    			-1);
-        obj.setMsgID(0);
-        i.putExtra("obj", obj);
-        i.putExtra("isFresh", false);
-        i.putExtra("isDelete", false);
-        mContext.sendBroadcast(i);	
+		boolean isBroadcast = true;
+		for (AudioVideoMessageBean bean : mListItem) {
+			if(bean.callNumbers > 0){
+				isBroadcast = false;
+				break;
+			}
+		}
+		
+		if(isBroadcast){
+			Intent i = new Intent(PublicIntent.REQUEST_UPDATE_CONVERSATION);
+	        i.addCategory(PublicIntent.DEFAULT_CATEGORY);
+	    	ConversationNotificationObject obj = new ConversationNotificationObject(Conversation.TYPE_CONTACT,
+	    			-1);
+	        obj.setMsgID(0);
+	        i.putExtra("obj", obj);
+	        i.putExtra("isFresh", false);
+	        i.putExtra("isDelete", false);
+	        mContext.sendBroadcast(i);	
+		}
 	}	
 	
 	

@@ -8,7 +8,6 @@ import android.content.ContextWrapper;
 import android.database.DatabaseErrorHandler;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
-import android.text.TextUtils;
 
 import com.V2.jni.util.V2Log;
 import com.v2tech.util.GlobalConfig;
@@ -37,38 +36,26 @@ public class DataBaseContext extends ContextWrapper {
      */
 	@Override
 	public File getDatabasePath(String name) {
-		// 判断是否存在sd卡
-		boolean sdExist = android.os.Environment.MEDIA_MOUNTED
-				.equals(android.os.Environment.getExternalStorageState());
-		if (!sdExist) {// 如果不存在,
-			V2Log.e(TAG, "创建数据库失败，SD卡不存在，请加载SD卡");
-            throw new RuntimeException("创建数据库失败，SD卡不存在，请加载SD卡");
-		} else {// 如果存在
-				// 获取指定的用户数据库路径
-				// 判断目录是否存在，不存在则创建该目录
-            if(TextUtils.isEmpty(GlobalConfig.DATABASE_PATH))
-                throw new RuntimeException("没有获取登录用户信息，创建数据库失败.");
 
-			String dbDir = GlobalConfig.DATABASE_PATH;
-			File dirFile = new File(dbDir);
-			if (!dirFile.exists())
-				dirFile.mkdirs();
-			String dbPath = dbDir + name;// 数据库路径
-			// 数据库文件是否创建成功
-			// 判断文件是否存在，不存在则创建该文件
-			File dbFile = new File(dbPath);
-			if (!dbFile.exists()) {
-				try {
-					dbFile.createNewFile();// 创建文件
-					dbFile.canRead();
-					dbFile.canWrite();
-				} catch (IOException e) {
-					V2Log.e(TAG, "the createNewFile was failed.....");
-					e.printStackTrace();
-				}
+		String dbDir = GlobalConfig.getGlobalDataBasePath();
+		File dirFile = new File(dbDir);
+		if (!dirFile.exists())
+			dirFile.mkdirs();
+		String dbPath = dbDir + "/" + name;// 数据库路径
+		// 数据库文件是否创建成功
+		// 判断文件是否存在，不存在则创建该文件
+		File dbFile = new File(dbPath);
+		if (!dbFile.exists()) {
+			try {
+				dbFile.createNewFile();// 创建文件
+				dbFile.canRead();
+				dbFile.canWrite();
+			} catch (IOException e) {
+				V2Log.e(TAG, "the createNewFile was failed.....");
+				e.printStackTrace();
 			}
-			return dbFile;
 		}
+		return dbFile;
 	}
 
 	/**

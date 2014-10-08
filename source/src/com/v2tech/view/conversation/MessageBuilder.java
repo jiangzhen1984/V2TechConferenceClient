@@ -23,6 +23,7 @@ import com.v2tech.db.ContentDescriptor;
 import com.v2tech.db.ContentDescriptor.HistoriesCrowd;
 import com.v2tech.db.DataBaseContext;
 import com.v2tech.service.GlobalHolder;
+import com.v2tech.util.DateUtil;
 import com.v2tech.util.GlobalConfig;
 import com.v2tech.vo.CrowdGroup;
 import com.v2tech.vo.FileInfoBean;
@@ -478,11 +479,11 @@ public class MessageBuilder {
 			User user = GlobalHolder.getInstance().getCurrentUser();
 			switch (type) {
 			case MESSAGE_TYPE_IMAGE:
-				desFile = new File(GlobalConfig.getGlobalPicsPath(user) + "/"
+				desFile = new File(GlobalConfig.getGlobalPicsPath() + "/"
 						+ uuid + fileName.substring(fileName.lastIndexOf(".")));
 				break;
 			case MESSAGE_TYPE_AUDIO:
-				desFile = new File(GlobalConfig.getGlobalAudioPath(user) + "/"
+				desFile = new File(GlobalConfig.getGlobalAudioPath() + "/"
 						+ uuid + fileName.substring(fileName.lastIndexOf(".")));
 				break;
 			default:
@@ -832,7 +833,7 @@ public class MessageBuilder {
 	
 	
 	
-	private static VMessageQualification extraMsgFromCursor(Cursor cursor) {
+	public static VMessageQualification extraMsgFromCursor(Cursor cursor) {
 		String xml = cursor.getString(cursor.getColumnIndex("CrowdXml"));
 		V2Group v2Group = XmlAttributeExtractor.parseCrowd(xml).get(0);
 		if (v2Group == null || v2Group.creator == null) {
@@ -876,6 +877,7 @@ public class MessageBuilder {
 			inviteCrowd.setReadState(VMessageQualification.ReadState
 					.fromInt(readState));
 			inviteCrowd.setId(mid);
+			inviteCrowd.setmTimestamp(new Date(saveDate));
 			return inviteCrowd;
 		} else {
 			VMessageQualificationApplicationCrowd applyCrowd = new VMessageQualificationApplicationCrowd(
@@ -888,6 +890,7 @@ public class MessageBuilder {
 			applyCrowd.setReadState(VMessageQualification.ReadState
 					.fromInt(readState));
 			applyCrowd.setId(mid);
+			applyCrowd.setmTimestamp(new Date(saveDate));
 			return applyCrowd;
 		}
 	}

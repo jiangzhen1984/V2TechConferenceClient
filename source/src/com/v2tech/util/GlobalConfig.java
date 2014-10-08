@@ -11,7 +11,6 @@ import android.util.DisplayMetrics;
 import android.util.SparseArray;
 
 import com.v2tech.R;
-import com.v2tech.vo.User;
 
 public class GlobalConfig {
 
@@ -33,7 +32,11 @@ public class GlobalConfig {
 	public static boolean isVideoConversationOpen = false; // In order to
 															// compatible with
 															// the huawei x1 7.0
-	public static String DATABASE_PATH = "";
+	public static String DEFAULT_GLOBLE_PATH = "";
+	
+	public static String SDCARD_GLOBLE_PATH = "";
+	
+	public static String LOGIN_USER_ID = "";
 
 	public static HashMap<String, String> allChinese = new HashMap<String, String>();
 
@@ -120,28 +123,45 @@ public class GlobalConfig {
 	}
 
 	public static String getGlobalPath() {
-		return StorageUtil.getAbsoluteSdcardPath() + "/v2tech/";
-		// return StorageUtil.getAbsoluteSdcardPath()+"/.v2tech/";
+		boolean sdExist = android.os.Environment.MEDIA_MOUNTED
+				.equals(android.os.Environment.getExternalStorageState());
+		if (!sdExist) {// 如果不存在,
+			// --data/data/com.v2tech
+		    return DEFAULT_GLOBLE_PATH;
+		} else {
+			// --mnt/sdcard
+			return SDCARD_GLOBLE_PATH;
+		}
+		
+	}
+	
+	public static String getGlobalStorePath() {
+		return getGlobalPath() + "/v2tech";
+		// return getGlobalPath()+"/.v2tech/";
 	}
 
-	public static String getGlobalUserAvatarPath(User user) {
-		return StorageUtil.getAbsoluteSdcardPath() + "/v2tech/Users/"
-				+ user.getmUserId() + "/avatars";
+	public static String getGlobalUserAvatarPath() {
+		return getGlobalStorePath() + "/Users/"
+				+ LOGIN_USER_ID + "/avatars";
 	}
 
-	public static String getGlobalPicsPath(User user) {
-		return StorageUtil.getAbsoluteSdcardPath() + "/v2tech/Users/"
-				+ user.getmUserId() + "/Images";
+	public static String getGlobalPicsPath() {
+		return getGlobalStorePath() + "/Users/"
+				+ LOGIN_USER_ID + "/Images";
 	}
 
-	public static String getGlobalAudioPath(User user) {
-		return StorageUtil.getAbsoluteSdcardPath() + "/v2tech/Users/"
-				+ user.getmUserId() + "/audios";
+	public static String getGlobalAudioPath() {
+		return getGlobalStorePath() + "/Users/"
+				+ LOGIN_USER_ID + "/audios";
 	}
 
-	public static String getGlobalFilePath(User user) {
-		return StorageUtil.getAbsoluteSdcardPath() + "/v2tech/Users/"
-				+ user.getmUserId() + "/files";
+	public static String getGlobalFilePath() {
+		return getGlobalStorePath() + "/Users/"
+				+ LOGIN_USER_ID + "/files";
+	}
+	
+	public static String getGlobalDataBasePath() {
+		return getGlobalPath() + "/v2tech/Users/" + LOGIN_USER_ID;
 	}
 
 	public static long getGlobalServerTime() {

@@ -10,17 +10,15 @@ import java.io.OutputStream;
 import java.lang.ref.WeakReference;
 import java.math.BigInteger;
 import java.security.MessageDigest;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
 import net.sourceforge.pinyin4j.PinyinHelper;
-import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.ActivityManager;
-import android.app.Application;
 import android.app.ActivityManager.RunningTaskInfo;
+import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -53,11 +51,11 @@ import com.v2tech.util.LogcatThread;
 import com.v2tech.util.Notificator;
 import com.v2tech.util.StorageUtil;
 import com.v2tech.view.conference.VideoActivityV2;
-import com.v2tech.vo.AddFriendHistorieNode;
 
 @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
 public class MainApplication extends Application {
 
+	private static final String TAG = "MainApplication";
 	private Vector<WeakReference<Activity>> list = new Vector<WeakReference<Activity>>();
 	private final String DATABASE_FILENAME = "hzpy.db";
 	private boolean needCopy;
@@ -95,33 +93,8 @@ public class MainApplication extends Application {
 			}.start();
 		}
 
-		String path = GlobalConfig.getGlobalPath();
-		// File pa = new File(GlobalConfig.getGlobalUserAvatarPath());
-		// if (!pa.exists()) {
-		// boolean res = pa.mkdirs();
-		// V2Log.i(" create avatar dir " + pa.getAbsolutePath() + "  " + res);
-		// }
-		// pa.setWritable(true);
-		// pa.setReadable(true);
-		//
-		// File image = new File(GlobalConfig.getGlobalPicsPath());
-		// if (!image.exists()) {
-		// boolean res = image.mkdirs();
-		// V2Log.i(" create image dir " + image.getAbsolutePath() + "  " + res);
-		// }
-		// File audioPath = new File(GlobalConfig.getGlobalAudioPath());
-		// if (!audioPath.exists()) {
-		// boolean res = audioPath.mkdirs();
-		// V2Log.i(" create audio dir " + audioPath.getAbsolutePath() + "  "
-		// + res);
-		// }
-		// File filePath = new File(GlobalConfig.getGlobalFilePath());
-		// if (!filePath.exists()) {
-		// boolean res = filePath.mkdirs();
-		// V2Log.i(" create file dir " + filePath.getAbsolutePath() + "  "
-		// + res);
-		// }
-
+		initGloblePath();
+		String path = GlobalConfig.getGlobalStorePath();
 		initConfFile();
 
 		// Load native library
@@ -161,6 +134,26 @@ public class MainApplication extends Application {
 		initDPI();
 	}
 
+	/**
+	 * 初始化程序数据存储目录
+	 */
+	private void initGloblePath() {
+		//程序启动时检测SD卡状态
+		boolean sdExist = android.os.Environment.MEDIA_MOUNTED
+				.equals(android.os.Environment.getExternalStorageState());
+		if (!sdExist) {// 如果不存在,
+			// --data/data/com.v2tech
+			GlobalConfig.DEFAULT_GLOBLE_PATH = getApplicationContext().getFilesDir().getParent();
+			V2Log.d(TAG, "SD卡状态异常，数据存储到手机内存中 , 存储路径为：" + GlobalConfig.DEFAULT_GLOBLE_PATH);
+		} else {
+			GlobalConfig.SDCARD_GLOBLE_PATH = StorageUtil.getAbsoluteSdcardPath();
+			V2Log.d(TAG, "SD卡状态正常，数据存储到SD卡内存中 , 存储路径为：" + GlobalConfig.SDCARD_GLOBLE_PATH);
+		}
+	}
+
+	/**
+	 * 初始化搜索用到的hzpy.db文件
+	 */
 	private void initSQLiteFile() {
 
 		try {

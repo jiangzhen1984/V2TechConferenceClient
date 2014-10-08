@@ -1,6 +1,7 @@
 package com.v2tech.vo;
 
 import com.V2.jni.V2GlobalEnum;
+import com.v2tech.util.DateUtil;
 
 public class Conversation {
 
@@ -77,7 +78,10 @@ public class Conversation {
 	}
 
 	public String getDate() {
-		return date;
+		if(dateLong != null)
+			return DateUtil.getStringDate(Long.valueOf(dateLong));
+		else
+			return date;
 	}
 	
 	public void setName(String name) {

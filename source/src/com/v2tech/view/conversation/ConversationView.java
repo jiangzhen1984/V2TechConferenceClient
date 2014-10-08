@@ -294,6 +294,7 @@ public class ConversationView extends Activity {
 		filter.addAction(JNIService.JNI_BROADCAST_NEW_MESSAGE);
 		filter.addAction(JNIService.JNI_BROADCAST_MESSAGE_SENT_FAILED);
         filter.addAction(PublicIntent.BROADCAST_CROWD_DELETED_NOTIFICATION);
+        filter.addAction(PublicIntent.BROADCAST_CROWD_QUIT_NOTIFICATION);
 		filter.addAction(JNIService.JNI_BROADCAST_KICED_CROWD);
 		registerReceiver(receiver, filter);
 
@@ -1056,8 +1057,7 @@ public class ConversationView extends Activity {
 		public void run() {
 
 			if (!cannelRecoding) {
-				fileName = GlobalConfig.getGlobalAudioPath(GlobalHolder
-						.getInstance().getCurrentUser())
+				fileName = GlobalConfig.getGlobalAudioPath()
 						+ "/"
 						+ System.currentTimeMillis() + ".aac";
 				boolean resultReocrding = startReocrding(fileName);
@@ -2201,8 +2201,10 @@ public class ConversationView extends Activity {
 				if (crowdId == groupId) {
 					finish();
 				}
-			} else if (PublicIntent.BROADCAST_CROWD_DELETED_NOTIFICATION
-                    .equals(intent.getAction())) {
+			} else if ((PublicIntent.BROADCAST_CROWD_DELETED_NOTIFICATION
+                    .equals(intent.getAction())) || (PublicIntent.BROADCAST_CROWD_QUIT_NOTIFICATION
+                    .equals(intent.getAction()))) {
+				finish();
 				onBackPressed();
             }
 		}

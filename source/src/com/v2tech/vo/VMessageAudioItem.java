@@ -48,8 +48,7 @@ public class VMessageAudioItem extends VMessageAbstractItem {
 
 	public String getAudioFilePath() {
 		if (audioFilePath == null && extension != null)
-			return GlobalConfig.getGlobalAudioPath(GlobalHolder.getInstance()
-					.getCurrentUser()) + "/" + uuid + extension;
+			return GlobalConfig.getGlobalAudioPath() + "/" + uuid + extension;
 		return audioFilePath;
 	}
 

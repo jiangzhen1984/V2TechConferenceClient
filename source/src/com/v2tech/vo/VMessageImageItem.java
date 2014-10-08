@@ -48,8 +48,7 @@ public class VMessageImageItem extends VMessageAbstractItem {
 
 	public String getFilePath() {
 		if (filePath == null && extension != null)
-			return GlobalConfig.getGlobalPicsPath(GlobalHolder.getInstance()
-					.getCurrentUser()) + "/" + uuid + extension;
+			return GlobalConfig.getGlobalPicsPath() + "/" + uuid + extension;
 		return filePath;
 	}
 

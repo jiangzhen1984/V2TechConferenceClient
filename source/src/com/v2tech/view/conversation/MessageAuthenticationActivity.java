@@ -521,6 +521,8 @@ public class MessageAuthenticationActivity extends Activity {
 				viewTag = (ViewTag) arg1.getTag();
 			}
 
+			if(arg0 >= list.size())
+				return arg1;
 			final MessageAuthenticationData data = list.get(arg0);
 
 			// viewTag.ivHeadImage.setImageDrawable(data.dheadImage);

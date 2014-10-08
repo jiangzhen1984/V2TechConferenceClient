@@ -20,6 +20,7 @@ import com.v2tech.vo.VMessage;
 import com.v2tech.vo.VMessageAudioItem;
 import com.v2tech.vo.VMessageFileItem;
 import com.v2tech.vo.VMessageImageItem;
+import com.v2tech.vo.VMessageQualification;
 import com.v2tech.vo.VideoBean;
 
 import java.util.ArrayList;
@@ -836,6 +837,39 @@ public class MessageLoader {
 	// cur.close();
 	// }
 
+	public static VMessageQualification getNewestCrowdVerificationMessage(Context context , User user) {
+		
+		DataBaseContext mContext = new DataBaseContext(context);
+		if (user == null) {
+			V2Log.e("To query failed...please check the given User Object");
+			return null;
+		}
+
+		VMessageQualification message = null;
+		String selection = ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_FROM_USER_ID
+				+ "= ? or "
+				+ ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_TO_USER_ID
+				+ "= ?";
+		String[] selectionArgs = new String[] {
+				String.valueOf(user.getmUserId()),
+				String.valueOf(user.getmUserId()) };
+		String sortOrder = ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_SAVEDATE
+				+ " desc limit 1 offset 0 ";
+		Cursor cursor = mContext.getContentResolver().query(
+				ContentDescriptor.HistoriesCrowd.CONTENT_URI,
+				ContentDescriptor.HistoriesCrowd.Cols.ALL_CLOS, selection,
+				selectionArgs, sortOrder);
+
+		if (cursor == null || cursor.getCount() <= 0)
+			return null;
+		
+		while (cursor.moveToNext()) {
+			message = MessageBuilder.extraMsgFromCursor(cursor);
+		}
+		cursor.close();
+		return message;
+	}
+	
 	public static VideoBean getNewestMediaMessage(Context context) {
 
 		return getNewestMediaMessage(context, null, null);

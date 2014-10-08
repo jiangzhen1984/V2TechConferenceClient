@@ -80,6 +80,7 @@ public abstract class VMessageQualification {
 	protected Type mType;
 	protected String mRejectReason;
 	protected Date mTimestamp;
+
 	protected ReadState mReadState;
 	protected QualificationState mQualState;
 	
@@ -105,7 +106,9 @@ public abstract class VMessageQualification {
 	}
 
 
-
+	public Date getmTimestamp() {
+		return mTimestamp;
+	}
 
 	public void setId(long id) {
 		this.mId = id;
@@ -127,7 +130,9 @@ public abstract class VMessageQualification {
 		return mType;
 	}
 
-
+	public void setmTimestamp(Date mTimestamp) {
+		this.mTimestamp = mTimestamp;
+	}
 
 
 	public ReadState getReadState() {
