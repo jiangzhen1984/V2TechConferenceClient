@@ -32,6 +32,7 @@ import android.graphics.Bitmap;
 
 import com.V2.jni.util.V2Log;
 import com.v2tech.service.GlobalHolder;
+import com.v2tech.util.HeartCharacterProcessing;
 
 /**
  * User information
@@ -62,6 +63,7 @@ public class User implements Comparable<User> {
 	private String mSex;
 	private String mSignature;
 	private String mTelephone;
+	private String mCommentname;
 
 	// group
 	private String mCompany;
@@ -147,6 +149,14 @@ public class User implements Comparable<User> {
 		this.mUserId = mUserId;
 	}
 
+	public void setmCommentname(String mCommentname ){
+		this.mCommentname=mCommentname;
+	}
+	
+	public String getmCommentname(){
+		return this.mCommentname;
+	}
+	
 	public NetworkStateCode getmResult() {
 		return mResult;
 	}
@@ -584,8 +594,9 @@ public class User implements Comparable<User> {
 		String email = extraAttri("email='", "'", xml);
 		String bir = extraAttri("birthday='", "'", xml);
 		String account = extraAttri("account='", "'", xml);
+		String fax = extraAttri("fax='", "'", xml);
+		String commentname = extraAttri("commentname='", "'", xml);
 		String authtype = extraAttri("authtype='", "'", xml);
-
 		DateFormat dp = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
 
 		User u = new User(uID, nickName);
@@ -596,6 +607,8 @@ public class User implements Comparable<User> {
 		u.setAddress(address);
 		u.setSex(gender);
 		u.setEmail(email);
+		u.setFax(fax);
+		u.setmCommentname(commentname);
 		u.setAccount(account);
 		if (authtype != null && authtype != "") {
 			u.setAuthtype(Integer.parseInt(authtype));
@@ -622,7 +635,8 @@ public class User implements Comparable<User> {
 		if (end == -1) {
 			return null;
 		}
-		return xml.substring(pos + startStr.length(), end);
+		return HeartCharacterProcessing.reverse(xml.substring(
+				pos + startStr.length(), end));
 	}
 
 	public enum DeviceType {

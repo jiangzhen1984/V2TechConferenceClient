@@ -50,6 +50,7 @@ import com.v2tech.service.BitmapManager;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.GlobalState;
+import com.v2tech.util.HeartCharacterProcessing;
 import com.v2tech.util.Notificator;
 import com.v2tech.util.XmlParser;
 import com.v2tech.view.bo.GroupUserObject;
@@ -252,6 +253,13 @@ public class JNIService extends Service {
 	}
 
 	private void broadcastNetworkState(NetworkStateCode code) {
+
+		if (code != NetworkStateCode.CONNECTED) {
+			((MainApplication) getApplication()).netWordIsConnected = false;
+		} else {
+			((MainApplication) getApplication()).netWordIsConnected = true;
+		}
+
 		Intent i = new Intent();
 		i.setAction(JNI_BROADCAST_CONNECT_STATE_NOTIFICATION);
 		i.addCategory(JNI_BROADCAST_CATEGROY);
@@ -581,8 +589,6 @@ public class JNIService extends Service {
 			}
 
 		}
-		
-		
 
 		@Override
 		public void onAddGroupInfo(V2Group group) {
@@ -592,21 +598,21 @@ public class JNIService extends Service {
 			super.onAddGroupInfo(group);
 			GroupType gType = GroupType.fromInt(group.type);
 			if (gType == GroupType.CHATING) {
-				CrowdGroup cg = new CrowdGroup(group.id, group.name, GlobalHolder.getInstance().getUser(group.creator.uid));
+				CrowdGroup cg = new CrowdGroup(group.id, group.name,
+						GlobalHolder.getInstance().getUser(group.creator.uid));
 				cg.setBrief(group.brief);
 				cg.setAnnouncement(group.announce);
 				cg.setCreateDate(group.createTime);
 				cg.getOwnerUser().setName(group.creator.name);
 				GlobalHolder.getInstance().addGroupToList(gType.intValue(), cg);
-				
+
 				// Send broadcast
-				Intent i = new Intent(
-						JNI_BROADCAST_NEW_CROWD);
+				Intent i = new Intent(JNI_BROADCAST_NEW_CROWD);
 				i.addCategory(JNI_BROADCAST_CATEGROY);
 				i.putExtra("crowd", cg.getmGId());
 				mContext.sendBroadcast(i);
 			}
-			
+
 		}
 
 		@Override
@@ -653,23 +659,24 @@ public class JNIService extends Service {
 						MessageBuilder.updateQualicationMessage(mContext,
 								crowdMsg);
 					} else {
-						//send flag to false, means do not send broadcast
+						// send flag to false, means do not send broadcast
 						sendBroadcastFlag = false;
 						V2Log.i("igonre crowd invitation database exist same record "
 								+ group.id);
 					}
 				} else {
 					// Save message to database
-					crowdMsg = new VMessageQualificationInvitationCrowd(
-							cg, GlobalHolder.getInstance().getCurrentUser());
+					crowdMsg = new VMessageQualificationInvitationCrowd(cg,
+							GlobalHolder.getInstance().getCurrentUser());
 					Uri uri = MessageBuilder.saveQualicationMessage(mContext,
 							crowdMsg);
 					if (uri != null) {
 						crowdMsg.setId(Long.parseLong(uri.getLastPathSegment()));
 					}
 				}
-				
-				if (sendBroadcastFlag && crowdMsg != null && crowdMsg.getId() > 0) {
+
+				if (sendBroadcastFlag && crowdMsg != null
+						&& crowdMsg.getId() > 0) {
 					// Send broadcast
 					Intent i = new Intent(
 							JNI_BROADCAST_NEW_QUALIFICATION_MESSAGE);
@@ -677,7 +684,6 @@ public class JNIService extends Service {
 					i.putExtra("msgId", crowdMsg.getId());
 					mContext.sendOrderedBroadcast(i, null);
 				}
-
 			} else if (gType == GroupType.CONTACT) {
 			}
 		}
@@ -749,15 +755,16 @@ public class JNIService extends Service {
 			i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
 			i.putExtra("obj", obj);
 			sendBroadcast(i);
-			
-			if (nUserID == GlobalHolder.getInstance().getCurrentUserId() && groupType == GroupType.CHATING.intValue()) {
+
+			if (nUserID == GlobalHolder.getInstance().getCurrentUserId()
+					&& groupType == GroupType.CHATING.intValue()) {
 				Intent kick = new Intent();
 				kick.setAction(JNI_BROADCAST_KICED_CROWD);
 				kick.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
 				i.putExtra("crowd", nGroupID);
 				sendBroadcast(kick);
 			}
-			
+
 		}
 
 		// 增加好友成功时的回调
@@ -769,35 +776,21 @@ public class JNIService extends Service {
 				return;
 			}
 
-			int start = -1;
-			int end = -1;
-			try {
+			User remoteUser = User.fromXmlToUser(sXml);
 
-				start = sXml.indexOf("id='");
-				end = sXml.indexOf("'", start + 4);
-			} catch (NullPointerException e) {
+			GlobalHolder.getInstance().putUser(remoteUser.getmUserId(),
+					remoteUser);
 
-				V2Log.e(TAG, "occur a null exception with:" + e.getStackTrace());
-				V2Log.e(TAG, "Incorrect user xml: " + sXml);
-				return;
-			}
-
-			String uidStr = sXml.substring(start + 4, end);
-			long uid = 0;
-			try {
-				uid = Long.parseLong(uidStr);
-			} catch (NumberFormatException e) {
-				V2Log.e("Incorrect user id  " + sXml);
-				return;
-			}
-
+			long uid = remoteUser.getmUserId();
 			GroupType gType = GroupType.fromInt(groupType);
 			if (gType == GroupType.CONTACT) {
 				AddFriendHistroysHandler.becomeFriendHanler(
 						getApplicationContext(), sXml);
+				User user = GlobalHolder.getInstance().getUser(uid);
 
-				// 获得用户uid
-				// 更新备注
+				if (remoteUser.getmCommentname() != null) {
+					user.setNickName(remoteUser.getmCommentname());
+				}
 
 				Intent intent = new Intent();
 				intent.setAction(JNI_BROADCAST_FRIEND_AUTHENTICATION);

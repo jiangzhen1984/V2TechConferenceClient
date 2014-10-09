@@ -32,6 +32,7 @@ import com.v2tech.service.UserService;
 import com.v2tech.vo.ContactGroup;
 import com.v2tech.view.JNIService;
 import com.v2tech.view.MainActivity;
+import com.v2tech.view.bo.GroupUserObject;
 import com.v2tech.view.contacts.add.AuthenticationActivity;
 import com.v2tech.view.contacts.add.FriendManagementActivity;
 import com.v2tech.view.widget.MarqueeTextView;
@@ -478,7 +479,9 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 			IntentFilter intentFilter = new IntentFilter();
 			intentFilter
 					.addAction(JNIService.JNI_BROADCAST_USER_UPDATE_NAME_OR_SIGNATURE);
-			intentFilter.addAction(JNIService.JNI_BROADCAST_FRIEND_AUTHENTICATION);
+			intentFilter
+					.addAction(JNIService.JNI_BROADCAST_FRIEND_AUTHENTICATION);
+			intentFilter.addAction(JNIService.JNI_BROADCAST_GROUP_USER_REMOVED);
 			intentFilter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
 
 			registerReceiver(myBroadcastReceiver, intentFilter);
@@ -509,14 +512,14 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 					showUserInfo();
 				}
 
-			} else if (action.equals(JNIService.JNI_BROADCAST_FRIEND_AUTHENTICATION)) {
+			} else if (action
+					.equals(JNIService.JNI_BROADCAST_FRIEND_AUTHENTICATION)) {
 				long uid = arg1.getLongExtra("uid", -1);
 				if (uid == -1) {
 					return;
 				}
-
 				if (uid == u.getmUserId()) {
-					isRelation = true;
+
 					long gid = arg1.getLongExtra("gid", -1);
 					if (gid == -1) {
 						return;
@@ -525,11 +528,24 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 							V2GlobalEnum.GROUP_TYPE_CONTACT, gid)) == null) {
 						return;
 					}
+					isRelation = true;
 					updateContactGroup();
 					Toast.makeText(ContactDetail2.this, "添加成功",
 							Toast.LENGTH_SHORT).show();
 				}
+			} else if (action
+					.equals(JNIService.JNI_BROADCAST_GROUP_USER_REMOVED)) {
 
+				GroupUserObject obj = arg1.getParcelableExtra("obj");
+				if (obj.getmUserId() != u.getmUserId()) {
+					return;
+				}
+
+				if (obj.getmType() == GroupType.CONTACT.intValue()) {
+					belongs=null;
+					isRelation = false;
+					updateContactGroup();
+				}
 			}
 
 		}

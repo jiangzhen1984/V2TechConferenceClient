@@ -445,7 +445,7 @@ public class GroupListView extends ListView {
 			return end + 1;
 		}
 
-		while (start <= end) {
+		while (start < end) {
 			pos = start;
 			if(start + 1 == mFilterList.size())
 				break;

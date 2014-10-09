@@ -6,6 +6,7 @@ import com.v2tech.R;
 import com.v2tech.service.ContactsService;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.view.MainActivity;
+import com.v2tech.view.MainApplication;
 import com.v2tech.view.contacts.ContactDetail2;
 import com.v2tech.view.contacts.UpdateContactGroupActivity;
 import com.v2tech.view.conversation.MessageAuthenticationActivity;
@@ -111,7 +112,7 @@ public class FriendManagementActivity extends Activity {
 
 		if ((startedCause != null)
 				&& startedCause.equals("access_friend_authentication")) {
-
+			// 完成
 			tvRightTextView.setOnClickListener(new OnClickListener() {
 				@Override
 				public void onClick(View arg0) {
@@ -129,24 +130,36 @@ public class FriendManagementActivity extends Activity {
 				@Override
 				public void onClick(View arg0) {
 
-					if (detailUser.getAuthtype() == 0) {
-						AddFriendHistroysHandler.addOtherNoNeedAuthentication(
-								getApplicationContext(), detailUser);
-						contactService.addContact(new FriendGroup(
-								selectGroupID, ""), detailUser, "",
-								commentNameET.getText().toString());
-					} else if (detailUser.getAuthtype() == 1) {
-						AddFriendHistroysHandler.addOtherNeedAuthentication(
-								getApplicationContext(), detailUser,
-								commentNameET.getText().toString());
-						contactService.addContact(new FriendGroup(
-								selectGroupID, ""), detailUser,
-								verificationInfo, commentNameET.getText()
-										.toString());
-					} else if (detailUser.getAuthtype() == 2) {
-						// 不让任何人加为好
+					if (((MainApplication) getApplication()).netWordIsConnected) {
+						if (detailUser.getAuthtype() == 0) {
+							AddFriendHistroysHandler
+									.addOtherNoNeedAuthentication(
+											getApplicationContext(), detailUser);
+							contactService.addContact(new FriendGroup(
+									selectGroupID, ""), detailUser, "",
+									commentNameET.getText().toString());
+							Toast.makeText(FriendManagementActivity.this,
+									"您的好友申请发送成功", Toast.LENGTH_SHORT).show();
+						} else if (detailUser.getAuthtype() == 1) {
+							AddFriendHistroysHandler
+									.addOtherNeedAuthentication(
+											getApplicationContext(),
+											detailUser, commentNameET.getText()
+													.toString());
+							contactService.addContact(new FriendGroup(
+									selectGroupID, ""), detailUser,
+									verificationInfo, commentNameET.getText()
+											.toString());
+							Toast.makeText(FriendManagementActivity.this,
+									"您的好友申请发送成功", Toast.LENGTH_SHORT).show();
+						} else if (detailUser.getAuthtype() == 2) {
+							// 不让任何人加为好
+							Toast.makeText(FriendManagementActivity.this,
+									"对方不允许加为好友", Toast.LENGTH_SHORT).show();
+						}
+					} else {
 						Toast.makeText(FriendManagementActivity.this,
-								"对方不允许加为好友", Toast.LENGTH_SHORT).show();
+								"您的好友申请发送失败", Toast.LENGTH_SHORT).show();
 					}
 
 					// 实现越级跳

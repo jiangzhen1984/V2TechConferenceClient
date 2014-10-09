@@ -217,7 +217,7 @@
                     android:background="@drawable/rounded_corners_of_contact_user_detail_outer"
                     android:orientation="vertical"
                     android:paddingBottom="15dp"
-                    android:visibility="visible" >
+                    android:visibility="gone" >
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -605,7 +605,7 @@
                     android:layout_marginRight="@dimen/contact_detail_2_item_margin_right"
                     android:background="@drawable/rounded_corners_of_contact_user_detail_outer"
                     android:orientation="vertical"
-                    android:visibility="gone" >
+                    android:visibility="visible" >
 
                     <LinearLayout
                         android:layout_width="match_parent"
