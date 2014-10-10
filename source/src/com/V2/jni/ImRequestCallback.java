@@ -1,6 +1,9 @@
 package com.V2.jni;
 
+import java.util.List;
+
 import com.V2.jni.ind.V2Group;
+import com.V2.jni.ind.V2User;
 
 
 /**
@@ -87,4 +90,18 @@ public interface ImRequestCallback {
 	 * @param nResult
 	 */
 	public void OnCreateCrowdCallback(V2Group crowd, int nResult);
+	
+	
+	/**
+	 * 
+	 * @param list
+	 */
+	public void OnSearchCrowdCallback(List<V2Group> list);
+	
+	
+	/**
+	 * 
+	 * @param list
+	 */
+	public void OnSearchUserCallback(List<V2User> list);
 }

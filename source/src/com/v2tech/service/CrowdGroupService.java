@@ -283,7 +283,7 @@ public class CrowdGroupService extends AbstractHandler {
 
 	/**
 	 * Remove member from crowd
-	 *
+	 * 
 	 * @param crowd
 	 * @param user
 	 * @param caller
@@ -377,7 +377,8 @@ public class CrowdGroupService extends AbstractHandler {
 		StringBuffer sb = new StringBuffer();
 		sb.append("<filelist>");
 		for (VCrowdFile f : files) {
-			sb.append("<file  id='" + f.getId() + "'  size='"+f.getSize()+"' uploader='"+f.getUploader().getmUserId()+"' />");
+			sb.append("<file  id='" + f.getId() + "'  size='" + f.getSize()
+					+ "' uploader='" + f.getUploader().getmUserId() + "' />");
 		}
 		sb.append("</filelist>");
 
@@ -429,12 +430,14 @@ public class CrowdGroupService extends AbstractHandler {
 		}
 	}
 
-    /**
-     * Register listener for file transport status
-     * @param h
-     * @param what
-     * @param obj
-     */
+
+	/**
+	 * Register listener for file transport status
+	 * 
+	 * @param h
+	 * @param what
+	 * @param obj
+	 */
 	public void registerFileTransStatusListener(Handler h, int what, Object obj) {
 		registerListener(KEY_FILE_TRANS_STATUS_NOTIFICATION_LISTNER, h, what,
 				obj);
@@ -565,15 +568,16 @@ public class CrowdGroupService extends AbstractHandler {
 				RequestFetchGroupFilesResponse jniRes = new RequestFetchGroupFilesResponse(
 						JNIResponse.Result.SUCCESS);
 				jniRes.setList(convertList(group, list));
-				//If user requested, send message
+				// If user requested, send message
 				if (group.id == mPendingCrowdId) {
 					mPendingCrowdId = 0;
 
 					Message.obtain(mCallbackHandler, REMOVE_FILES_CROWD, jniRes)
 							.sendToTarget();
-					//If this request is not user requested, send notification
+					// If this request is not user requested, send notification
 				} else if (mPendingCrowdId == 0) {
-					notifyListener(KEY_FILE_REMOVED_NOTIFICATION_LISTNER, 0, 0, jniRes);
+					notifyListener(KEY_FILE_REMOVED_NOTIFICATION_LISTNER, 0, 0,
+							jniRes);
 				}
 			}
 		}

@@ -150,4 +150,9 @@
 	
 	 <!-- crowd file activity -->
     <dimen name="crowd_file_activity_file_name_max_width">200dp</dimen>
+    
+    <dimen name="search_activity_left_margin">30dp</dimen>
+    
+    <dimen name="search_activity_top_margin_20">20dp</dimen>
+    <dimen name="search_activity_top_margin_5">5dp</dimen>
 </resources>

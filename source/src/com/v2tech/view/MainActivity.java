@@ -77,6 +77,8 @@ public class MainActivity extends FragmentActivity implements
 
 	private int[] imgs = new int[] { R.drawable.conversation_video_button,
 			R.drawable.conversation_group_button,
+			R.drawable.conversation_seach_crowd_button,
+			R.drawable.conversation_seach_member_button,
 			R.drawable.conversation_call_button,
 			R.drawable.conversation_sms_button,
 			R.drawable.conversation_email_button,
@@ -85,6 +87,8 @@ public class MainActivity extends FragmentActivity implements
 	private int[] items = new int[] {
 			R.string.conversation_popup_menu_video_call_button,
 			R.string.conversation_popup_menu_group_create_button,
+			R.string.conversation_popup_menu_crowd_search_button,
+			R.string.conversation_popup_menu_member_search_button,
 			R.string.conversation_popup_menu_call_button,
 			R.string.conversation_popup_menu_sms_call_button,
 			R.string.conversation_popup_menu_email_button,
@@ -210,7 +214,7 @@ public class MainActivity extends FragmentActivity implements
 			tv.setText(items[i]);
 			tv.setPadding(10, 5, 5, 10);
 			//TODO gray disable button
-			if (i > 1) {
+			if (i > 3) {
 				tv.setTextColor(Color.rgb(198, 198, 198));
 			} else {
 				tv.setTextColor(Color.rgb(123, 123, 123));
@@ -428,11 +432,30 @@ public class MainActivity extends FragmentActivity implements
 			}
 
 			case R.drawable.conversation_video_button: {
-
 				Intent i = new Intent(
 						PublicIntent.START_CONFERENCE_CREATE_ACTIVITY);
 				i.addCategory(PublicIntent.DEFAULT_CATEGORY);
 				startActivityForResult(i, SUB_ACTIVITY_CODE_CREATE_CONF);
+			}
+				break;
+			case R.drawable.conversation_seach_crowd_button: {
+				Intent i = new Intent(
+						PublicIntent.START_SEARCH_ACTIVITY);
+				i.addCategory(PublicIntent.DEFAULT_CATEGORY);
+				//For crowd search
+				i.putExtra("type", 0);
+				startActivity(i);
+			}
+				break;
+				
+			case R.drawable.conversation_seach_member_button:
+			{
+				Intent i = new Intent(
+						PublicIntent.START_SEARCH_ACTIVITY);
+				i.addCategory(PublicIntent.DEFAULT_CATEGORY);
+				//For member search
+				i.putExtra("type", 1);
+				startActivity(i);
 			}
 				break;
 			case R.drawable.conversation_call_button:

@@ -36,6 +36,34 @@ public class XmlAttributeExtractor {
 		}
 		return str.substring(start + len, end);
 	}
+	
+	
+	/**
+	 * 
+	 * @param xml
+	 * @param tag
+	 * @return
+	 */
+	public static List<V2User> parseUserList(String xml, String tag) {
+		Document doc = buildDocument(xml);
+		List<V2User> listUser = new ArrayList<V2User>();
+		NodeList userNodeList = doc.getElementsByTagName(tag);
+		Element userElement;
+
+		for (int i = 0; i < userNodeList.getLength(); i++) {
+			userElement = (Element) userNodeList.item(i);
+			V2User user = null;
+			String uid = userElement.getAttribute("id");
+			if (uid != null && !uid.isEmpty()) {
+				user = new V2User(Long.parseLong(uid));
+				String name = userElement.getAttribute("nickname");
+				user.name = name;
+				listUser.add(user);
+			}
+		}
+
+		return listUser;
+	}
 
 	public static List<V2Group> parseConference(String xml) {
 		Document doc = buildDocument(xml);

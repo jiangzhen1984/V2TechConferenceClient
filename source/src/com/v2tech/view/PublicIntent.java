@@ -41,6 +41,18 @@ public class PublicIntent {
 	public static final String SHOW_CROWD_DETAIL_ACTIVITY = "com.v2tech.crowd_detail_activity";
 
 	public static final String SHOW_CONTACT_DETAIL_ACTIVITY = "com.v2tech.contact_detail_activity";
+	
+	/**
+	 * key : crowd : object of crowd
+	 */
+	public static final String SHOW_CROWD_APPLICATION_ACTIVITY = "com.v2tech.crowd_application_activity";
+	
+	/**
+	 * Start searching activity
+	 * key : type 0 crowd   1: member
+	 */
+	public static final String START_SEARCH_ACTIVITY = "com.v2tech.start_search_activity";
+	
 
 	/**
 	 * extras key: obj value:

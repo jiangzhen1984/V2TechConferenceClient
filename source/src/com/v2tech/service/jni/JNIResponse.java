@@ -46,7 +46,7 @@ public class JNIResponse {
 
 	public Object callerObject;
 	
-	
+	public Object resObj;
 	
 	
 	public JNIResponse(Result res) {

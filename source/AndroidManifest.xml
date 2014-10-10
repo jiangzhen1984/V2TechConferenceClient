@@ -270,6 +270,18 @@
             </intent-filter>
         </activity>
         <activity
+            android:name="com.v2tech.view.group.CrowdApplicationActivity"
+            android:screenOrientation="nosensor" >
+            <intent-filter>
+                <action android:name="com.v2tech.crowd_application_activity" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="com.v2tech" />
+            </intent-filter>
+        </activity>
+        
+        
+        <activity
             android:name="com.v2tech.view.group.CrowdDetailActivity"
             android:screenOrientation="nosensor" >
             <intent-filter>
@@ -330,6 +342,25 @@
             android:screenOrientation="nosensor"
             android:windowSoftInputMode="stateHidden|adjustPan" >
         </activity>
+        
+        
+        <activity
+            android:name="com.v2tech.view.search.SearchActivity"
+            android:screenOrientation="nosensor" >
+            <intent-filter>
+                <action android:name="com.v2tech.start_search_activity" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="com.v2tech" />
+            </intent-filter>
+        </activity>
+        
+        <activity
+            android:name="com.v2tech.view.search.SearchedResultActivity"
+            android:screenOrientation="nosensor" >
+        </activity>
+        
+        
 
         <receiver android:name="com.v2tech.view.receiver.AvatarChangedReceiver" >
             <intent-filter>

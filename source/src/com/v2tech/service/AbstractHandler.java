@@ -73,7 +73,12 @@ public abstract class AbstractHandler extends Handler {
 		}
 	}
 
-	
+	/**
+	 * check parameters. Send incorrect response to caller
+	 * @param caller
+	 * @param objs
+	 * @return false means parameter is null otherwise true
+	 */
 	protected boolean checkParamNull(Registrant caller, Object... objs) {
 		boolean flag = false;
 		for (Object obj : objs) {

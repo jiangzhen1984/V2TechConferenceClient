@@ -10,6 +10,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.V2.jni.ind.V2Group;
+import com.V2.jni.ind.V2User;
 import com.V2.jni.util.V2Log;
 import com.V2.jni.util.XmlAttributeExtractor;
 
@@ -160,7 +161,8 @@ public class ImRequest {
 	 * 
 	 */
 	private void OnUpdateBaseInfo(long nUserID, String updatexml) {
-		V2Log.d("ImRequest.OnUpdateBaseInfo==>"+"nUserID:"+nUserID+","+"updatexml:"+updatexml);
+		V2Log.d("ImRequest.OnUpdateBaseInfo==>" + "nUserID:" + nUserID + ","
+				+ "updatexml:" + updatexml);
 		for (WeakReference<ImRequestCallback> wf : this.mCallbacks) {
 			Object obj = wf.get();
 			if (obj != null) {
@@ -315,16 +317,15 @@ public class ImRequest {
 				+ "  nResult:" + nResult);
 		String id = XmlAttributeExtractor.extract(sCrowdXml, " id='", "'");
 		String name = XmlAttributeExtractor.extract(sCrowdXml, " name='", "'");
-		
+
 		V2Group crowd = null;
 		if (!TextUtils.isEmpty(id)) {
-			 crowd = new V2Group(Long.parseLong(id), name, V2Group.TYPE_CROWD);
+			crowd = new V2Group(Long.parseLong(id), name, V2Group.TYPE_CROWD);
 		} else {
 			V2Log.e(" Incorrect crowd id");
 			return;
 		}
-		
-		
+
 		for (WeakReference<ImRequestCallback> wf : this.mCallbacks) {
 			Object obj = wf.get();
 			if (obj != null) {
@@ -344,9 +345,23 @@ public class ImRequest {
 
 	public native void onStopUpdate();
 
+	/**
+	 * Search member
+	 * 
+	 * @param szUnsharpName
+	 * @param nStartNum
+	 * @param nSearchNum
+	 */
 	public native void searchMember(String szUnsharpName, int nStartNum,
 			int nSearchNum);
 
+	/**
+	 * Search crowd
+	 * 
+	 * @param szUnsharpName
+	 * @param nStartNum
+	 * @param nSearchNum
+	 */
 	public native void searchCrowd(String szUnsharpName, int nStartNum,
 			int nSearchNum);
 
@@ -354,18 +369,26 @@ public class ImRequest {
 
 	public native void getCrowdFileInfo(long nCrowdId);
 
+	/**
+	 * 10-10 16:14:00.197: E/ImRequest UI(24208):
+	 * OnGetSearchMember:<userlist><user account='test1095' authtype='0'
+	 * birthday='2000-01-01' bsystemavatar='1' id='130' nickname='test1095'
+	 * privacy='0'/><user account='test5' authtype='0' birthday='2000-01-01'
+	 * bsystemavatar='1' id='1286' nickname='test5' privacy='0'/></userlist>
+	 * 
+	 * @param xmlinfo
+	 */
 	private void OnGetSearchMember(String xmlinfo) {
 		Log.e("ImRequest UI", "OnGetSearchMember:" + xmlinfo);
-		// List<NYXUser> searchUsers = XmlParserUtils
-		// .parserSearchUsers(new ByteArrayInputStream(xmlinfo.getBytes()));
-		// // 鎷艰娑堟伅
-		// SearchMsgType searchMsgType = new SearchMsgType();
-		// searchMsgType.setSearchUsers(searchUsers);
-		//
-		// Intent addIntent = new Intent(SplashActivity.IM);
-		// addIntent.putExtra("MsgType", MsgType.SEARCH);
-		// addIntent.putExtra("MSG", searchMsgType);
-		// context.sendOrderedBroadcast(addIntent,null);
+		List<V2User> list = XmlAttributeExtractor.parseUserList(xmlinfo, "user");
+		for (int i = 0; i <this.mCallbacks.size(); i++) {
+			WeakReference<ImRequestCallback> wf = this.mCallbacks.get(i);
+			Object obj = wf.get();
+			if (obj != null) {
+				ImRequestCallback callback = (ImRequestCallback) obj;
+				callback.OnSearchUserCallback(list);
+			}
+		}
 	}
 
 	private void OnUserPrivacyUpdated(long nUserID, int nPrivacy) {
@@ -386,17 +409,6 @@ public class ImRequest {
 	private void OnMoveFriendsToGroup(long nDstUserID, long nDstGroupID) {
 		Log.e("ImRequest UI", "OnMoveFriendsToGroup" + nDstUserID + ":"
 				+ nDstGroupID);
-
-		// // 鎷艰娑堟伅
-		// MoveGroupMsgType moveMsgtype = new MoveGroupMsgType();
-		// moveMsgtype.setnDstGroupID(nDstGroupID);
-		// moveMsgtype.setnDstUserID(nDstUserID);
-		//
-		// // 閫氳繃骞挎挱鍙戦�娑堟伅鏉ラ�鐭�鏇存柊鏈�繎杩炵画浜虹敾闈�
-		// Intent moveIntent = new Intent(SplashActivity.IM);
-		// moveIntent.putExtra("MsgType", MsgType.MOVE_GROUP);
-		// moveIntent.putExtra("MSG", moveMsgtype);
-		// context.sendOrderedBroadcast(moveIntent,null);
 	}
 
 	private void OnHaveUpdateNotify(String updatefilepath, String updatetext) {
@@ -425,8 +437,40 @@ public class ImRequest {
 		Log.e("ImRequest UI", "OnKickCrowd:" + nCrowdId);
 	}
 
+	/**
+	 * 10-10 16:12:06.997: E/ImRequest UI(24208):
+	 * OnSearchCrowd::<crowdlist><crowd announcement='' authtype='1'
+	 * creatornickname='zhao1' creatoruserid='14' id='44' name='13269997886'
+	 * size='500' summary=''/><crowd announcement='' authtype='0'
+	 * creatornickname='test3' creatoruserid='1290' id='481' name='1' size='0'
+	 * summary=''/><crowd announcement='' authtype='0' creatornickname='test3'
+	 * creatoruserid='1290' id='491' name='11' size='0' summary=''/><crowd
+	 * announcement='' authtype='0' creatornickname='test3' creatoruserid='1290'
+	 * id='492' name='12' size='0' summary=''/><crowd announcement=''
+	 * authtype='0' creatornickname='long3' creatoruserid='11749' id='4123'
+	 * name='long1' size='500' summary=''/><crowd announcement='' authtype='0'
+	 * creatornickname='test1' creatoruserid='1246' id='4138' name='111'
+	 * size='500' summary=''/><crowd
+	 * announcement='idsfiposdaippafsjgjlkfdsjglfdkjKjjjjjjjj' authtype='1'
+	 * creatornickname='zhao2' creatoruserid='15' id='4139' name='43214321432'
+	 * size='500' summary=
+	 * 'idsfiposdaippafsjgjlkfdsjglfdkjKjjjjjjjjafdsafsdafdsafdsafdsafds43214321443243212121'/><crow
+	 * d announcement='' authtype='0' creatornickname='zhao2' creatoruserid='15'
+	 * id='4141' name='432143214' size='500' summary=''/></crowdlist>
+	 * 
+	 * @param InfoXml
+	 */
 	private void OnSearchCrowd(String InfoXml) {
 		Log.e("ImRequest UI", "OnSearchCrowd::" + InfoXml);
+		List<V2Group> list = XmlAttributeExtractor.parseCrowd(InfoXml);
+		for (int i = 0; i <this.mCallbacks.size(); i++) {
+			WeakReference<ImRequestCallback> wf = this.mCallbacks.get(i);
+			Object obj = wf.get();
+			if (obj != null) {
+				ImRequestCallback callback = (ImRequestCallback) obj;
+				callback.OnSearchCrowdCallback(list);
+			}
+		}
 	}
 
 	private void Oncrowdfile(long nCrowdId, String InfoXml) {
