@@ -10,6 +10,7 @@ public class Crowd implements Parcelable {
 	private User creator;
 	private String brief;
 	private String announce;
+	private int auth;
 
 	public Crowd(CrowdGroup cg) {
 		this(cg.getmGId(), cg.getOwnerUser(), cg.getName(), cg.getBrief());
@@ -20,6 +21,7 @@ public class Crowd implements Parcelable {
 		this.creator = creator;
 		this.name = name;
 		this.brief = brief;
+		this.auth = 0;
 	}
 
 	public Crowd(Parcel par) {
@@ -29,6 +31,10 @@ public class Crowd implements Parcelable {
 		String uname = par.readString();
 		creator = new User(uid, uname);
 		brief = par.readString();
+		if (brief == null) {
+			brief = "";
+		}
+		auth = par.readInt();
 	}
 
 	public static final Parcelable.Creator<Crowd> CREATOR = new Parcelable.Creator<Crowd>() {
@@ -53,6 +59,7 @@ public class Crowd implements Parcelable {
 		par.writeLong(creator.getmUserId());
 		par.writeString(creator.getName());
 		par.writeString(brief);
+		par.writeInt(auth);
 	}
 
 	@Override
@@ -113,10 +120,20 @@ public class Crowd implements Parcelable {
 		return this.id;
 	}
 
+	public int getAuth() {
+		return auth;
+	}
+
+	public void setAuth(int auth) {
+		this.auth = auth;
+	}
+
 	public String toXml() {
 		StringBuffer sb = new StringBuffer();
 		sb.append("<crowd id=\"" + this.id + "\" name=\"" + this.name
-				+ "\" />");
+				+ "\" authtype='" + this.auth + "' creatoruserid='"
+				+ this.creator.getmUserId() + "' summary='" + this.brief
+				+ "' />");
 		return sb.toString();
 	}
 

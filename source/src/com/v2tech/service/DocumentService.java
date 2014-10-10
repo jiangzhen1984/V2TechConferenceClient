@@ -42,7 +42,7 @@ public class DocumentService extends AbstractHandler {
 	}
 
 	/**
-	 * 
+	 * Register listener for new document notification
 	 * @param h
 	 * @param what
 	 * @param obj
@@ -52,7 +52,7 @@ public class DocumentService extends AbstractHandler {
 	}
 
 	/**
-	 * 
+	 *  unRegister listener for new document notification
 	 * @param h
 	 * @param what
 	 * @param obj
@@ -61,41 +61,95 @@ public class DocumentService extends AbstractHandler {
 		unRegisterListener(KEY_NEW_DOC_LISTENER, h, what, obj);
 	}
 
+	/**
+	 *  Register listener for  document page updated notification
+	 * @param h
+	 * @param what
+	 * @param obj
+	 */
 	public void registerDocPageNotification(Handler h, int what, Object obj) {
 		registerListener(KEY_DOC_PAGE_NOTIFY_LISTENER, h, what, obj);
 	}
 
+	/**
+	 *  unRegister listener for  document page updated notification
+	 * @param h
+	 * @param what
+	 * @param obj
+	 */
 	public void unRegisterDocPageNotification(Handler h, int what, Object obj) {
 		unRegisterListener(KEY_DOC_PAGE_NOTIFY_LISTENER, h, what, obj);
 	}
 
+	/**
+	 *  Register listener for  document page activate notification
+	 * @param h
+	 * @param what
+	 * @param obj
+	 */
 	public void registerdocPageActiveNotification(Handler h, int what,
 			Object obj) {
 		registerListener(KEY_PAGE_ACTIVE_NOTIFY_LISTENER, h, what, obj);
 	}
 
+	/**
+	 * unRegister listener for  document page activate notification
+	 * @param h
+	 * @param what
+	 * @param obj
+	 */
 	public void unRegisterdocPageActiveNotification(Handler h, int what,
 			Object obj) {
 		unRegisterListener(KEY_PAGE_ACTIVE_NOTIFY_LISTENER, h, what, obj);
 	}
 
+	/**
+	 * Register listener for  document activation notification
+	 * @param h
+	 * @param what
+	 * @param obj
+	 */
 	public void registerDocDisplayNotification(Handler h, int what, Object obj) {
 		registerListener(KEY_DOC_DISPLAY_NOTIFY_LISTENER, h, what, obj);
 	}
 
+	/**
+	 * unRegister listener for  document page activation notification
+	 * @param h
+	 * @param what
+	 * @param obj
+	 */
 	public void unRegisterDocDisplayNotification(Handler h, int what, Object obj) {
 		unRegisterListener(KEY_DOC_DISPLAY_NOTIFY_LISTENER, h, what, obj);
 	}
 
+	/**
+	 * Register listener for  document add new page  notification
+	 * @param h
+	 * @param what
+	 * @param obj
+	 */
 	public void registerDocPageAddedNotification(Handler h, int what, Object obj) {
 		registerListener(KEY_DOC_PAGE_ADD_NOTIFY_LISTENER, h, what, obj);
 	}
 
+	/**
+	 * unRegister listener for  document add new page  notification
+	 * @param h
+	 * @param what
+	 * @param obj
+	 */
 	public void unRegisterDocPageAddedNotification(Handler h, int what,
 			Object obj) {
 		unRegisterListener(KEY_DOC_PAGE_ADD_NOTIFY_LISTENER, h, what, obj);
 	}
 
+	/**
+	 *  Register listener for  document closed  notification
+	 * @param h
+	 * @param what
+	 * @param obj
+	 */
 	public void registerDocClosedNotification(Handler h, int what, Object obj) {
 		registerListener(KEY_DOC_CLOSE_NOTIFY_LISTENER, h, what, obj);
 	}

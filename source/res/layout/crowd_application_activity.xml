@@ -11,9 +11,8 @@
         android:layout_height="wrap_content"
         android:background="#ffffff" >
 
-        
         <TextView
-            android:id="@+id/crowd_invitation_return_button"
+            android:id="@+id/crowd_application_return_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
@@ -25,6 +24,24 @@
             android:paddingRight="10dp"
             android:paddingTop="5dp"
             android:text="@string/contacts_user_detail_return_button"
+            android:textColor="@color/button_text_color"
+            android:textSize="@dimen/common_item_text_size" />
+        
+        
+        
+        <TextView
+            android:id="@+id/crowd_application_send_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="5dp"
+            android:gravity="center"
+            android:paddingBottom="5dp"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:paddingTop="5dp"
+            android:text="@string/crowd_application_send_button"
             android:textColor="@color/button_text_color"
             android:textSize="@dimen/common_item_text_size" />
 
@@ -78,7 +95,7 @@
                 android:src="@drawable/chat_group_icon" />
 
             <TextView
-                android:id="@+id/crowd_invitation_name"
+                android:id="@+id/crowd_application_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentTop="true"
@@ -93,13 +110,12 @@
                 android:textColor="@color/common_item_text_color" />
 
             <LinearLayout
+                android:id="@+id/crowd_application_button_ly"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"
-                android:layout_marginRight="@dimen/crowd_invitation_box_right_margin"
-                android:id="@+id/crowd_invitation_button_ly" >
-
+                android:layout_marginRight="@dimen/crowd_invitation_box_right_margin" >
 
                 <TextView
                     android:id="@+id/crowd_application_button"
@@ -116,19 +132,18 @@
                     android:textColor="@color/button_text_color"
                     android:textSize="@dimen/common_item_text_size" />
             </LinearLayout>
-            
-            
+
             <LinearLayout
+                android:id="@+id/crowd_application_notes_ly"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"
                 android:layout_marginRight="@dimen/crowd_invitation_box_right_margin"
-                android:id="@+id/crowd_invitation_notes_ly"
-				android:visibility="gone">
+                android:visibility="gone" >
 
                 <TextView
-                    android:id="@+id/crowd_invitation_notes"
+                    android:id="@+id/crowd_application_notes"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
@@ -138,14 +153,14 @@
                     android:paddingLeft="@dimen/crowd_invitation_button_padding_horizontal"
                     android:paddingRight="@dimen/crowd_invitation_button_padding_horizontal"
                     android:paddingTop="@dimen/crowd_invitation_button_padding_vertical"
-                    android:text="@string/crowd_invitation_accept_notes"
+                    android:text="@string/crowd_application_applyed"
                     android:textColor="@color/common_item_text_color"
                     android:textSize="@dimen/common_item_text_size" />
             </LinearLayout>
-            
         </RelativeLayout>
 
         <LinearLayout
+            android:id="@+id/crowd_application_item_ly"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="@dimen/detail_detail_2_item_margin_bottom"
@@ -261,6 +276,38 @@
                     android:text="@string/crowd_invitation_box_item_creator"
                     android:textColor="@color/activiy_contact_detail_item_color"
                     android:textSize="@dimen/common_item_text_size" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/crowd_application_message_ly"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#f2f2f2"
+            android:orientation="vertical" >
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/detail_detail_2_item_margin_bottom"
+                android:layout_marginLeft="@dimen/contact_detail_2_item_margin_left"
+                android:layout_marginRight="@dimen/contact_detail_2_item_margin_right"
+                android:layout_marginTop="25dp"
+                android:background="@drawable/rounded_corners_of_contact_user_detail_outer"
+                android:orientation="vertical" >
+
+                <EditText
+                    android:id="@+id/crowd_application_message_et"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@null"
+                    android:ems="10"
+                    android:gravity="top|left"
+                    android:lines="10"
+                    android:maxLength="500"
+                    android:padding="10dp"
+                    android:textColor="@color/activiy_contact_detail_item_color" >
+                </EditText>
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>

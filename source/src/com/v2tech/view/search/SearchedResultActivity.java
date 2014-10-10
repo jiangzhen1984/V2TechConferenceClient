@@ -4,6 +4,7 @@ import java.util.List;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -19,7 +20,14 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.v2tech.R;
+import com.v2tech.service.GlobalHolder;
+import com.v2tech.view.PublicIntent;
+import com.v2tech.vo.Crowd;
+import com.v2tech.vo.CrowdGroup;
+import com.v2tech.vo.Group;
+import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.SearchedResult;
+import com.v2tech.vo.User;
 
 public class SearchedResultActivity extends Activity {
 
@@ -86,7 +94,35 @@ public class SearchedResultActivity extends Activity {
 				long id) {
 			SearchedResult.SearchedResultItem item = mList.get(position);
 			if (item.mType == SearchedResult.Type.CROWD) {
-				//CrowdApplicationActivity
+				long cid = item.id;
+				Intent i = new Intent();
+				CrowdGroup crowd = (CrowdGroup)GlobalHolder.getInstance().getGroupById(GroupType.CHATING.intValue(), cid);
+				if (crowd == null) {
+					i.setAction(PublicIntent.SHOW_CROWD_APPLICATION_ACTIVITY);
+					User u = new User(item.creator, item.creatorName);
+					Crowd cr = new Crowd(item.id, u, item.name, item.brief);
+					cr.setAuth(item.authType);
+					i.putExtra("crowd", cr);
+				} else {
+					i.putExtra("cid", crowd.getmGId());
+					i.setAction(PublicIntent.SHOW_CROWD_DETAIL_ACTIVITY);
+				}
+				i.addCategory(PublicIntent.DEFAULT_CATEGORY);
+				startActivity(i);
+			} else if (item.mType == SearchedResult.Type.USER) {
+				List<Group> contactsList = GlobalHolder.getInstance().getGroup(GroupType.CONTACT.intValue());
+				User u = new User(item.id);
+				for (int i = 0; i < contactsList.size(); i++) {
+					Group g = contactsList.get(i);
+					if (g.findUser(u, g) != null) {
+						Intent intent = new Intent(PublicIntent.SHOW_CONTACT_DETAIL_ACTIVITY);
+						intent.addCategory(PublicIntent.DEFAULT_CATEGORY);
+						intent.putExtra("uid", u.getmUserId());
+						startActivity(intent);
+						return;
+					}
+				}
+				//TODO means doesn't find any relation 
 			}
 		}
 		

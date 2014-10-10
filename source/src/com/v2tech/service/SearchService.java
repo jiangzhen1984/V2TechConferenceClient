@@ -11,6 +11,7 @@ import com.V2.jni.ind.V2Group;
 import com.V2.jni.ind.V2User;
 import com.v2tech.service.jni.JNIResponse;
 import com.v2tech.vo.SearchedResult;
+import com.v2tech.vo.User;
 
 /**
  * Used to search
@@ -78,7 +79,8 @@ public class SearchService extends AbstractHandler {
 		public void OnSearchCrowdCallback(List<V2Group> list) {
 			SearchedResult result = new SearchedResult();
 			for (V2Group g : list) {
-				result.addItem(SearchedResult.Type.CROWD, g.id, g.name);
+				User creator = new User(g.creator.uid, g.creator.name);
+				result.addCrowdItem(g.id, g.name, creator, g.brief, g.authType);
 			}
 			JNIResponse jniRES = new JNIResponse(JNIResponse.Result.SUCCESS);
 			jniRES.resObj = result;
@@ -92,7 +94,7 @@ public class SearchService extends AbstractHandler {
 		public void OnSearchUserCallback(List<V2User> list) {
 			SearchedResult result = new SearchedResult();
 			for (V2User u : list) {
-				result.addItem(SearchedResult.Type.CROWD, u.uid, u.name);
+				result.addItem(SearchedResult.Type.USER, u.uid, u.name);
 			}
 			JNIResponse jniRES = new JNIResponse(JNIResponse.Result.SUCCESS);
 			jniRES.resObj = result;

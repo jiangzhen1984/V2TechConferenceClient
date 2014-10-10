@@ -2,8 +2,6 @@ package com.v2tech.vo;
 
 import java.util.Date;
 
-import com.v2tech.vo.VMessageQualification.Type;
-
 
 public class CrowdGroup extends Group {
 	

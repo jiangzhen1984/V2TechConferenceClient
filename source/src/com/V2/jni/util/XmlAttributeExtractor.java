@@ -36,8 +36,7 @@ public class XmlAttributeExtractor {
 		}
 		return str.substring(start + len, end);
 	}
-	
-	
+
 	/**
 	 * 
 	 * @param xml
@@ -109,7 +108,8 @@ public class XmlAttributeExtractor {
 			V2User creator = null;
 			String uid = crowdElement.getAttribute("creatoruserid");
 			if (uid != null && !uid.isEmpty()) {
-				creator = new V2User(Long.parseLong(uid));
+				creator = new V2User(Long.parseLong(uid),
+						crowdElement.getAttribute("creatornickname"));
 			}
 
 			if (crowdElement.getAttribute("name") == null)
@@ -122,6 +122,8 @@ public class XmlAttributeExtractor {
 			crowd.brief = crowdElement.getAttribute("summary");
 			crowd.announce = crowdElement.getAttribute("announcement");
 			crowd.creator = creator;
+			String authType = crowdElement.getAttribute("authtype");
+			crowd.authType = authType == null ? 0 : Integer.parseInt(authType);
 			listCrowd.add(crowd);
 		}
 
@@ -213,7 +215,7 @@ public class XmlAttributeExtractor {
 			if (index != -1) {
 				name = name.substring(index);
 			}
-			
+
 			FileJNIObject file = new FileJNIObject(new V2User(
 					Long.parseLong(uploader)), id, name, Long.parseLong(size),
 					1);

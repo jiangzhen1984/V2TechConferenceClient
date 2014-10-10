@@ -50,7 +50,6 @@ import com.v2tech.service.BitmapManager;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.GlobalState;
-import com.v2tech.util.HeartCharacterProcessing;
 import com.v2tech.util.Notificator;
 import com.v2tech.util.XmlParser;
 import com.v2tech.view.bo.GroupUserObject;
@@ -595,15 +594,9 @@ public class JNIService extends Service {
 			if (group == null || group.creator == null) {
 				return;
 			}
-			super.onAddGroupInfo(group);
 			GroupType gType = GroupType.fromInt(group.type);
 			if (gType == GroupType.CHATING) {
-				CrowdGroup cg = new CrowdGroup(group.id, group.name,
-						GlobalHolder.getInstance().getUser(group.creator.uid));
-				cg.setBrief(group.brief);
-				cg.setAnnouncement(group.announce);
-				cg.setCreateDate(group.createTime);
-				cg.getOwnerUser().setName(group.creator.name);
+				CrowdGroup cg = convertCrowd(group);
 				GlobalHolder.getInstance().addGroupToList(gType.intValue(), cg);
 
 				// Send broadcast
@@ -613,6 +606,34 @@ public class JNIService extends Service {
 				mContext.sendBroadcast(i);
 			}
 
+		}
+		
+		
+
+		@Override
+		public void OnAcceptApplyJoinGroup(V2Group group) {
+			GroupType gType = GroupType.fromInt(group.type);
+			if (gType == GroupType.CHATING) {
+				CrowdGroup cg = convertCrowd(group);
+				GlobalHolder.getInstance().addGroupToList(gType.intValue(), cg);
+
+				// Send broadcast
+				Intent i = new Intent(JNI_BROADCAST_NEW_CROWD);
+				i.addCategory(JNI_BROADCAST_CATEGROY);
+				i.putExtra("crowd", cg.getmGId());
+				mContext.sendBroadcast(i);
+			}
+
+		}
+		
+		private CrowdGroup convertCrowd(V2Group group)  {
+			CrowdGroup cg = new CrowdGroup(group.id, group.name,
+					GlobalHolder.getInstance().getUser(group.creator.uid));
+			cg.setBrief(group.brief);
+			cg.setAnnouncement(group.announce);
+			cg.setCreateDate(group.createTime);
+			cg.getOwnerUser().setName(group.creator.name);
+			return cg;
 		}
 
 		@Override

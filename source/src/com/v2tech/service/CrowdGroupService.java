@@ -45,13 +45,13 @@ public class CrowdGroupService extends AbstractHandler {
 
 	private static final int CREATE_GROUP_MESSAGE = 0x0001;
 	private static final int ACCEPT_JOIN_CROWD = 0x0002;
-	private static final int REFUSE_JOIN_CROWD = 0x0003;
 	private static final int UPDATE_CROWD = 0x0004;
 	private static final int QUIT_CROWD = 0x0005;
 	private static final int ACCEPT_APPLICATION_CROWD = 0x0006;
 	private static final int REFUSE_APPLICATION_CROWD = 0x0007;
 	private static final int FETCH_FILES_CROWD = 0x0008;
 	private static final int REMOVE_FILES_CROWD = 0x0009;
+
 
 	private static final int KEY_CANCELLED_LISTNER = 1;
 	private static final int KEY_FILE_TRANS_STATUS_NOTIFICATION_LISTNER = 2;
@@ -183,12 +183,33 @@ public class CrowdGroupService extends AbstractHandler {
 		// FIXME concurrency problem, if user use one crowdgroupservice instance
 		// to
 		// accept mulit-invitation, then maybe call back will notify incorrect
-		initTimeoutMessage(REFUSE_JOIN_CROWD, DEFAULT_TIME_OUT_SECS, caller);
 
 		GroupRequest.getInstance().refuseInviteJoinGroup(
 				Group.GroupType.CHATING.intValue(), crowd.getId(),
 				GlobalHolder.getInstance().getCurrentUserId(), "");
 
+		mPendingCrowdId = 0;
+		sendResult(caller, new JNIResponse(JNIResponse.Result.SUCCESS));
+	}
+
+	/**
+	 * Apply join crowd
+	 * @param crowd
+	 * @param additional
+	 * @param caller
+	 */
+	public void applyCrowd(Crowd crowd, String additional, Registrant caller) {
+		if (!checkParamNull(caller, new Object[] { crowd, additional })) {
+			return;
+		}
+
+		if (mPendingCrowdId > 0) {
+			super.sendResult(caller, new JNIResponse(JNIResponse.Result.FAILED));
+			return;
+		}
+		mPendingCrowdId = crowd.getId();
+		GroupRequest.getInstance().applyJoinGroup(
+				Group.GroupType.CHATING.intValue(), crowd.toXml(), additional);
 		mPendingCrowdId = 0;
 		sendResult(caller, new JNIResponse(JNIResponse.Result.SUCCESS));
 	}
@@ -429,7 +450,6 @@ public class CrowdGroupService extends AbstractHandler {
 			break;
 		}
 	}
-
 
 	/**
 	 * Register listener for file transport status

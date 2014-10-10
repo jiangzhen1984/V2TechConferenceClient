@@ -150,6 +150,14 @@ public interface GroupRequestCallback {
 	 */
 	public void OnAcceptInviteJoinGroup(int groupType, long groupId,
 			long nUserID);
+	
+	
+	/**
+	 * Callback of accept apply join crowd invitation
+	 * 
+	 * @param group
+	 */
+	public void OnAcceptApplyJoinGroup(V2Group group);
 
 	
 	/**
