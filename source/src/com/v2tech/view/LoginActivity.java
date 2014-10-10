@@ -577,6 +577,10 @@ public class LoginActivity extends Activity {
 
 	};
 	
+	/**
+	 * 创建登陆用户存储数据的文件夹
+	 * @param user
+	 */
 	private void createPersonFolder(User user){
 		
 		GlobalConfig.LOGIN_USER_ID = String.valueOf(user.getmUserId());

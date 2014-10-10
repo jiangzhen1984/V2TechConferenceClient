@@ -82,16 +82,11 @@ public class MessageBuilder {
 
 	public static VMessage buildAudioMessage(int groupType, long groupID,
 			User fromUser, User toUser, String audioPath, int seconds) {
-		String uuid = UUID.randomUUID().toString();
-		File newFile = copyBinaryData(MESSAGE_TYPE_AUDIO, audioPath, uuid);
-		if (newFile == null)
-			return null;
-		audioPath = newFile.getAbsolutePath();
 		VMessage vm = new VMessage(groupType, groupID, fromUser, toUser,
 				new Date(GlobalConfig.getGlobalServerTime()));
 		VMessageAudioItem item = new VMessageAudioItem(vm, audioPath, seconds);
 		item.setState(VMessageAbstractItem.STATE_READED);
-		item.setUuid(uuid);
+		item.setUuid(audioPath.substring(audioPath.lastIndexOf("/") + 1 , audioPath.lastIndexOf(".")));
 		return item.getVm();
 	}
 
@@ -476,7 +471,6 @@ public class MessageBuilder {
 		FileOutputStream fos = null;
 		try {
 			fis = new FileInputStream(srcFile);
-			User user = GlobalHolder.getInstance().getCurrentUser();
 			switch (type) {
 			case MESSAGE_TYPE_IMAGE:
 				desFile = new File(GlobalConfig.getGlobalPicsPath() + "/"

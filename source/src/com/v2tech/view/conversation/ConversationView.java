@@ -9,18 +9,22 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.UUID;
 
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnKeyListener;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.media.MediaRecorder;
+import android.media.MediaRecorder.OnErrorListener;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -32,6 +36,7 @@ import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.util.SparseArray;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -45,9 +50,12 @@ import android.widget.AbsListView.OnScrollListener;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
+import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -179,6 +187,7 @@ public class ConversationView extends Activity {
 	private ListView mMessagesContainer;
 
 	private LinearLayout mFaceLayout;
+	private RelativeLayout mToolLayout;
 
 	private MessageAdapter adapter;
 
@@ -192,13 +201,13 @@ public class ConversationView extends Activity {
 
 	private ConversationNotificationObject cov = null;
 
-	private Bundle bundle; //onCreate的savedInstanceState..
-	private View root; //createVideoDialog的View
+	private Bundle bundle; // onCreate的savedInstanceState..
+	private View root; // createVideoDialog的View
 	private SparseArray<VMessage> messageAllID;
 	private List<VMessage> currentGetMessages;
 	private long lastMessageBodyShowTime = 0;
 	private long intervalTime = 15000; // 显示消息时间状态的间隔时间
-    private boolean isReLoading = false; //用于onNewIntent判断是否需要重新加载界面聊天数据
+	private boolean isReLoading = false; // 用于onNewIntent判断是否需要重新加载界面聊天数据
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -267,6 +276,7 @@ public class ConversationView extends Activity {
 		mUserTitleTV = (TextView) findViewById(R.id.message_user_title);
 
 		mFaceLayout = (LinearLayout) findViewById(R.id.contact_message_face_item_ly);
+		mToolLayout = (RelativeLayout) findViewById(R.id.contact_message_sub_feature_ly_inner);
 
 		HandlerThread thread = new HandlerThread("back-end");
 		thread.start();
@@ -293,8 +303,8 @@ public class ConversationView extends Activity {
 		filter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
 		filter.addAction(JNIService.JNI_BROADCAST_NEW_MESSAGE);
 		filter.addAction(JNIService.JNI_BROADCAST_MESSAGE_SENT_FAILED);
-        filter.addAction(PublicIntent.BROADCAST_CROWD_DELETED_NOTIFICATION);
-        filter.addAction(PublicIntent.BROADCAST_CROWD_QUIT_NOTIFICATION);
+		filter.addAction(PublicIntent.BROADCAST_CROWD_DELETED_NOTIFICATION);
+		filter.addAction(PublicIntent.BROADCAST_CROWD_QUIT_NOTIFICATION);
 		filter.addAction(JNIService.JNI_BROADCAST_KICED_CROWD);
 		registerReceiver(receiver, filter);
 
@@ -328,14 +338,27 @@ public class ConversationView extends Activity {
 				.findViewById(R.id.message_voice_dialog_cancel_container);
 		mWarningLayout = root
 				.findViewById(R.id.message_voice_dialog_warning_container);
-		mVoiceDialog.setCancelable(false);
+		mVoiceDialog.setCancelable(true);
+		mVoiceDialog.setCanceledOnTouchOutside(false);
+		mVoiceDialog.setOwnerActivity(this);
+		mVoiceDialog.setOnKeyListener(new OnKeyListener(){
+
+			@Override
+			public boolean onKey(DialogInterface arg0, int arg1, KeyEvent arg2) {
+				if (arg1 == KeyEvent.KEYCODE_BACK){
+					breakRecording();
+	                return true;
+				}
+				return false;
+			}
+        });
 		root.setVisibility(View.INVISIBLE);
 	}
 
-    @Override
+	@Override
 	protected void onStart() {
 		super.onStart();
-        V2Log.e(TAG , "entry onStart....");
+		V2Log.e(TAG, "entry onStart....");
 		if (!mIsInited && !mLoadedAllMessages) {
 			android.os.Message m = android.os.Message.obtain(lh,
 					START_LOAD_MESSAGE);
@@ -366,32 +389,23 @@ public class ConversationView extends Activity {
 	}
 
 	@Override
+	protected void onPause() {
+		super.onPause();
+		V2Log.e(TAG, "entry onPause");
+	}
+	
+	@Override
 	public void onBackPressed() {
 		super.onBackPressed();
+		V2Log.e(TAG, "entry onBackPressed");
 	}
 
 	@Override
 	protected void onStop() {
 		super.onStop();
-        Log.e(TAG, "entry onStop....");
+		Log.e(TAG, "entry onStop....");
 		isStopped = true;
-		voiceIsSentByTimer = true;
-		if (mRecorder != null) {
-
-			stopRecording();
-			starttime = 0;
-			if (fileName != null) {
-				File f = new File(fileName);
-				f.deleteOnExit();
-				fileName = null;
-			}
-			lh.removeCallbacks(mUpdateMicStatusTimer);
-			lh.removeCallbacks(timeOutMonitor);
-			// Hide voice dialog
-			if (mVoiceDialog != null && mVoiceDialog.isShowing()) {
-				mVoiceDialog.dismiss();
-			}
-		}
+		breakRecording();
 	}
 
 	@Override
@@ -412,11 +426,12 @@ public class ConversationView extends Activity {
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
-        V2Log.e(TAG , "entry onDestroy....");
+		V2Log.e(TAG, "entry onDestroy....");
 		this.unregisterReceiver(receiver);
 		GlobalConfig.isConversationOpen = false;
 		ConversationUpdateFileState.getInstance().executeUpdate(messageArray);
-		if (messageArray.size() <= 0 && currentConversationViewType == V2GlobalEnum.GROUP_TYPE_USER)
+		if (messageArray.size() <= 0
+				&& currentConversationViewType == V2GlobalEnum.GROUP_TYPE_USER)
 			notificateConversationUpdate(false, cov.getExtId(), true);
 		finishWork();
 	}
@@ -424,7 +439,6 @@ public class ConversationView extends Activity {
 	private void finishWork() {
 		BitmapManager.getInstance().unRegisterBitmapChangedListener(
 				avatarChangedListener);
-
 		stopPlaying();
 		releasePlayer();
 		cleanCache();
@@ -433,35 +447,36 @@ public class ConversationView extends Activity {
 				FILE_STATUS_LISTENER, null);
 	}
 
-    @Override
-    protected void onNewIntent(Intent intent) {
-        super.onNewIntent(intent);
-        V2Log.e(TAG , "entry onNewIntent....");
-        ConversationNotificationObject tempCov = intent.getParcelableExtra("obj");
-        if (tempCov != null)
-                cov = tempCov;
-        else
-            cov = new ConversationNotificationObject(Conversation.TYPE_CONTACT,
-                    1);
-        if(!isReLoading){
-            V2Log.e(TAG, "entry onNewIntent , reloading chating datas...");
-            user2Id = 0;
-            groupId = 0;
-            remote = null;
-            initConversationInfos();
-            mIsInited = false;
-            mLoadedAllMessages = false;
-            currentItemPos = 0;
-            offset = 0;
-            notificateConversationUpdate(false, cov.getExtId(), false);
-        }
-    }
+	@Override
+	protected void onNewIntent(Intent intent) {
+		super.onNewIntent(intent);
+		V2Log.e(TAG, "entry onNewIntent....");
+		ConversationNotificationObject tempCov = intent
+				.getParcelableExtra("obj");
+		if (tempCov != null)
+			cov = tempCov;
+		else
+			cov = new ConversationNotificationObject(Conversation.TYPE_CONTACT,
+					1);
+		if (!isReLoading) {
+			V2Log.e(TAG, "entry onNewIntent , reloading chating datas...");
+			user2Id = 0;
+			groupId = 0;
+			remote = null;
+			initConversationInfos();
+			mIsInited = false;
+			mLoadedAllMessages = false;
+			currentItemPos = 0;
+			offset = 0;
+			notificateConversationUpdate(false, cov.getExtId(), false);
+		}
+	}
 
-    private void initExtraObject(Bundle savedInstanceState) {
+	private void initExtraObject(Bundle savedInstanceState) {
 
 		if (savedInstanceState != null)
 			bundle = savedInstanceState.getBundle("saveBundle");
-		 else
+		else
 			bundle = this.getIntent().getExtras();
 
 		if (bundle != null) {
@@ -473,53 +488,53 @@ public class ConversationView extends Activity {
 			cov = new ConversationNotificationObject(Conversation.TYPE_CONTACT,
 					1);
 		}
-        messageAllID = new SparseArray<VMessage>();
+		messageAllID = new SparseArray<VMessage>();
 		initConversationInfos();
 	}
 
-    private void initConversationInfos(){
-        messageArray.clear();
-        messageAllID.clear();
-        user1Id = GlobalHolder.getInstance().getCurrentUserId();
-        local = GlobalHolder.getInstance().getUser(user1Id);
-        if (cov.getType() == Conversation.TYPE_CONTACT) {
-            currentConversationViewType = V2GlobalEnum.GROUP_TYPE_USER;
-            user2Id = cov.getExtId();
-            remote = GlobalHolder.getInstance().getUser(user2Id);
-            if (remote == null) {
-                remote = new User(user2Id);
-            }
-            mButtonCreateMetting.setVisibility(View.GONE);
-            mUserTitleTV.setText(remote.getName());
-            mVideoCallButton.setVisibility(View.VISIBLE);
-            mAudioCallButton.setVisibility(View.VISIBLE);
-            mShowContactDetailButton.setVisibility(View.VISIBLE);
-            mButtonCreateMetting.setVisibility(View.GONE);
-            mShowCrowdDetailButton.setVisibility(View.GONE);
-            mButtonCreateMetting.setVisibility(View.GONE);
-        } else if (cov.getType() == Conversation.TYPE_GROUP) {
-            currentConversationViewType = V2GlobalEnum.GROUP_TYPE_CROWD;
-            groupId = cov.getExtId();
-            CrowdGroup crowdGroup = (CrowdGroup) GlobalHolder.getInstance().getGroupById(
-                    V2GlobalEnum.GROUP_TYPE_CROWD, groupId);
-            mVideoCallButton.setVisibility(View.GONE);
-            mAudioCallButton.setVisibility(View.GONE);
-            mShowContactDetailButton.setVisibility(View.GONE);
-            mButtonCreateMetting.setVisibility(View.VISIBLE);
-            mShowCrowdDetailButton.setVisibility(View.VISIBLE);
-            mUserTitleTV.setText(crowdGroup.getName());
-        } else if (cov.getType() == V2GlobalEnum.GROUP_TYPE_DEPARTMENT) {
-            currentConversationViewType = V2GlobalEnum.GROUP_TYPE_DEPARTMENT;
-            groupId = cov.getExtId();
-            OrgGroup departmentGroup = (OrgGroup) GlobalHolder.getInstance()
-                    .getGroupById(V2GlobalEnum.GROUP_TYPE_DEPARTMENT, groupId);
-            mVideoCallButton.setVisibility(View.GONE);
-            mAudioCallButton.setVisibility(View.GONE);
-            mShowContactDetailButton.setVisibility(View.GONE);
-            mButtonCreateMetting.setVisibility(View.VISIBLE);
-            mUserTitleTV.setText(departmentGroup.getName());
-        }
-    }
+	private void initConversationInfos() {
+		messageArray.clear();
+		messageAllID.clear();
+		user1Id = GlobalHolder.getInstance().getCurrentUserId();
+		local = GlobalHolder.getInstance().getUser(user1Id);
+		if (cov.getType() == Conversation.TYPE_CONTACT) {
+			currentConversationViewType = V2GlobalEnum.GROUP_TYPE_USER;
+			user2Id = cov.getExtId();
+			remote = GlobalHolder.getInstance().getUser(user2Id);
+			if (remote == null) {
+				remote = new User(user2Id);
+			}
+			mButtonCreateMetting.setVisibility(View.GONE);
+			mUserTitleTV.setText(remote.getName());
+			mVideoCallButton.setVisibility(View.VISIBLE);
+			mAudioCallButton.setVisibility(View.VISIBLE);
+			mShowContactDetailButton.setVisibility(View.VISIBLE);
+			mButtonCreateMetting.setVisibility(View.GONE);
+			mShowCrowdDetailButton.setVisibility(View.GONE);
+			mButtonCreateMetting.setVisibility(View.GONE);
+		} else if (cov.getType() == Conversation.TYPE_GROUP) {
+			currentConversationViewType = V2GlobalEnum.GROUP_TYPE_CROWD;
+			groupId = cov.getExtId();
+			CrowdGroup crowdGroup = (CrowdGroup) GlobalHolder.getInstance()
+					.getGroupById(V2GlobalEnum.GROUP_TYPE_CROWD, groupId);
+			mVideoCallButton.setVisibility(View.GONE);
+			mAudioCallButton.setVisibility(View.GONE);
+			mShowContactDetailButton.setVisibility(View.GONE);
+			mButtonCreateMetting.setVisibility(View.VISIBLE);
+			mShowCrowdDetailButton.setVisibility(View.VISIBLE);
+			mUserTitleTV.setText(crowdGroup.getName());
+		} else if (cov.getType() == V2GlobalEnum.GROUP_TYPE_DEPARTMENT) {
+			currentConversationViewType = V2GlobalEnum.GROUP_TYPE_DEPARTMENT;
+			groupId = cov.getExtId();
+			OrgGroup departmentGroup = (OrgGroup) GlobalHolder.getInstance()
+					.getGroupById(V2GlobalEnum.GROUP_TYPE_DEPARTMENT, groupId);
+			mVideoCallButton.setVisibility(View.GONE);
+			mAudioCallButton.setVisibility(View.GONE);
+			mShowContactDetailButton.setVisibility(View.GONE);
+			mButtonCreateMetting.setVisibility(View.VISIBLE);
+			mUserTitleTV.setText(departmentGroup.getName());
+		}
+	}
 
 	private void scrollToBottom() {
 		mMessagesContainer.post(new Runnable() {
@@ -722,11 +737,10 @@ public class ConversationView extends Activity {
 	private boolean startReocrding(String filePath) {
 
 		mRecorder = new MediaRecorder();
-		mRecorder.reset();
 		mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
 		mRecorder.setOutputFormat(MediaRecorder.OutputFormat.AAC_ADTS);
-		mRecorder.setOutputFile(filePath);
 		mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
+		mRecorder.setOutputFile(filePath);
 		mRecorder.setMaxDuration(60000);
 		mRecorder.setAudioSamplingRate(44100);
 		mRecorder.setAudioChannels(2);
@@ -744,7 +758,8 @@ public class ConversationView extends Activity {
 	}
 
 	private void stopRecording() {
-		// mRecorder.stop();
+		mRecorder.stop();
+		mRecorder.reset();
 		mRecorder.release();
 		mRecorder = null;
 	}
@@ -825,7 +840,8 @@ public class ConversationView extends Activity {
 					}
 				}
 			});
-			V2Log.i(TAG, "更改正在播放的audioItem标识为true , id is ：" + currentPlayed.getId());
+			V2Log.i(TAG,
+					"更改正在播放的audioItem标识为true , id is ：" + currentPlayed.getId());
 		}
 
 		@Override
@@ -931,19 +947,19 @@ public class ConversationView extends Activity {
 
 	};
 
-	private boolean voiceIsSentByTimer;
 	private String fileName = null;
-	private long starttime = 0;
-	private long lastTime = 0;
+	private long starttime = 0; //记录真正开始录音时的开始时间
+	private long lastTime = 0; //记录每次录音时的当前时间(毫秒值) ， 用于判断用户点击录音的频率
 	private boolean realRecoding;
 	private boolean cannelRecoding;
-    private boolean timeOutRecording;
+	private boolean timeOutRecording;
 	private OnTouchListener mButtonHolderListener = new OnTouchListener() {
 
 		@Override
 		public boolean onTouch(View view, MotionEvent event) {
-
-			if (event.getAction() == MotionEvent.ACTION_DOWN) {
+			// FIXME fix the show
+			switch (event.getAction()) {
+			case MotionEvent.ACTION_DOWN:
 				cannelRecoding = false;
 				showOrCloseVoiceDialog();
 				stopCurrentAudioPlaying();
@@ -954,7 +970,8 @@ public class ConversationView extends Activity {
 					Log.d(TAG, "间隔太短，取消录音");
 				}
 				lastTime = currentTime;
-			} else if (event.getAction() == MotionEvent.ACTION_MOVE) {
+				break;
+			case MotionEvent.ACTION_MOVE:
 				Rect r = new Rect();
 				view.getDrawingRect(r);
 				// check if touch position out of button than cancel send voice
@@ -964,42 +981,36 @@ public class ConversationView extends Activity {
 				} else {
 					updateCancelSendVoiceMsgNotification(VOICE_DIALOG_FLAG_CANCEL);
 				}
-
-			} else if (event.getAction() == MotionEvent.ACTION_UP) {
-
-                if(timeOutRecording) {
-                    V2Log.d(TAG, "触发timeout计时器，屏蔽UP事件一次");
-                    mButtonRecordAudio
-                            .setText(R.string.contact_message_button_send_audio_msg);
-                    timeOutRecording = false;
-                    return false;
-                }
-
+				break;
+			case MotionEvent.ACTION_UP:
+				//audio message send by 计时器
+				if (timeOutRecording) {
+					V2Log.d(TAG, "audio message send by 计时器，ignore the up event once");
+					mButtonRecordAudio
+							.setText(R.string.contact_message_button_send_audio_msg);
+					timeOutRecording = false;
+					return false;
+				}
+				//entry normal process , stop recording state 进入正常结束流程 
 				if (realRecoding) {
-					lastTime = 0;
-					if (voiceIsSentByTimer) {
-						mButtonRecordAudio
-								.setText(R.string.contact_message_button_send_audio_msg);
-						return false;
-					}
-
-					if (mTimer != null) {
-						V2Log.d(TAG, "时间没到，手动停止，恢复原状");
-						mTimer.cancel();
-						count = 11;
-						mTimer = null;
-					} else {
-						lh.removeCallbacks(mUpdateSurplusTime);
-					}
-
-					long seconds = (System.currentTimeMillis() - starttime);
+					//stop recording 
 					stopRecording();
-					Rect r = new Rect();
-					view.getDrawingRect(r);
-					// check if touch position out of button than cancel send
-					// voice
-					// message
-					if (r.contains((int) event.getX(), (int) event.getY())
+					//计算录音时间
+					long seconds = (System.currentTimeMillis() - starttime);
+					//recover all flag 复原标记位
+					lastTime = 0;
+					starttime = 0;
+					realRecoding = false;
+					// Remove timer
+					lh.removeCallbacks(mUpdateMicStatusTimer);
+					lh.removeCallbacks(timeOutMonitor);
+					//recover button show state
+					mButtonRecordAudio
+							.setText(R.string.contact_message_button_send_audio_msg);
+					// check if touch position out of button than cancel send voice message
+					Rect rect = new Rect();
+					view.getDrawingRect(rect);
+					if (rect.contains((int) event.getX(), (int) event.getY())
 							&& seconds > 1500) {
 						// send
 						VMessage vm = MessageBuilder.buildAudioMessage(
@@ -1008,7 +1019,6 @@ public class ConversationView extends Activity {
 						// Send message to server
 						sendMessageToRemote(vm);
 					} else {
-
 						if (seconds < 1500) {
 							updateCancelSendVoiceMsgNotification(VOICE_DIALOG_FLAG_WARING_FOR_TIME_TOO_SHORT);
 						} else {
@@ -1016,10 +1026,10 @@ public class ConversationView extends Activity {
 									R.string.contact_message_message_cancelled,
 									Toast.LENGTH_SHORT).show();
 						}
+						//delete audio file
 						File f = new File(fileName);
-						f.deleteOnExit();
+						f.delete();
 					}
-					starttime = 0;
 					fileName = null;
 					if (seconds < 1500) {
 						// Send delay message for close dialog
@@ -1033,19 +1043,24 @@ public class ConversationView extends Activity {
 					} else {
 						showOrCloseVoiceDialog();
 					}
-					// Remove timer
-					lh.removeCallbacks(mUpdateMicStatusTimer);
-					lh.removeCallbacks(timeOutMonitor);
-					mButtonRecordAudio
-							.setText(R.string.contact_message_button_send_audio_msg);
-					realRecoding = false;
-				} else {
+					
+					if (mTimer != null) {
+						V2Log.d(TAG, "时间没到，手动停止，恢复原状");
+						mTimer.cancel();
+						count = 11;
+						mTimer = null;
+					} else {
+						lh.removeCallbacks(mUpdateSurplusTime);
+					}
+					
+				} else { //beacuse click too much quick , stop recording..
 					cannelRecoding = true;
 					Log.d(TAG, "由于间隔太短，显示short对话框");
 					lh.removeCallbacks(preparedRecoding);
 					updateCancelSendVoiceMsgNotification(VOICE_DIALOG_FLAG_WARING_FOR_TIME_TOO_SHORT);
 					showOrCloseVoiceDialog();
 				}
+				break;
 			}
 			return false;
 		}
@@ -1057,9 +1072,8 @@ public class ConversationView extends Activity {
 		public void run() {
 
 			if (!cannelRecoding) {
-				fileName = GlobalConfig.getGlobalAudioPath()
-						+ "/"
-						+ System.currentTimeMillis() + ".aac";
+				fileName = GlobalConfig.getGlobalAudioPath() + "/"
+						+ UUID.randomUUID().toString() + ".aac";
 				boolean resultReocrding = startReocrding(fileName);
 				if (resultReocrding) {
 					// Start update db for voice
@@ -1069,11 +1083,10 @@ public class ConversationView extends Activity {
 					// start timer for prompt surplus time
 					lh.postDelayed(mUpdateSurplusTime, 48 * 1000);
 					starttime = System.currentTimeMillis();
-					voiceIsSentByTimer = false;
 					realRecoding = true;
 				} else {
 					File f = new File(fileName);
-					f.deleteOnExit();
+					f.delete();
 					fileName = null;
 				}
 			}
@@ -1118,11 +1131,10 @@ public class ConversationView extends Activity {
 
 		@Override
 		public void run() {
-			voiceIsSentByTimer = true;
 			stopRecording();
 			// send
-            timeOutRecording = true;
-            realRecoding = false;
+			timeOutRecording = true;
+			realRecoding = false;
 			VMessage vm = MessageBuilder.buildAudioMessage(cov.getType(),
 					groupId, local, remote, fileName, 60);
 			// Send message to server
@@ -1135,6 +1147,30 @@ public class ConversationView extends Activity {
 			showOrCloseVoiceDialog();
 		}
 	};
+	
+	/**
+	 * 异常终止录音
+	 */
+	private void breakRecording(){
+		
+		if (mRecorder != null) {
+
+			lastTime = 0;
+			starttime = 0;
+			realRecoding = false;
+			// Hide voice dialog
+			showOrCloseVoiceDialog();
+			stopRecording();
+			starttime = 0;
+			if (fileName != null) {
+				File f = new File(fileName);
+				f.delete();
+				fileName = null;
+			}
+			lh.removeCallbacks(mUpdateMicStatusTimer);
+			lh.removeCallbacks(timeOutMonitor);
+		}
+	}
 
 	private OnClickListener moreFeatureButtonListenr = new OnClickListener() {
 
@@ -1157,6 +1193,8 @@ public class ConversationView extends Activity {
 				mMoreFeatureIV.setImageResource(R.drawable.message_plus);
 				mMoreFeatureIV.setTag("plus");
 				mAdditionFeatureContainer.setVisibility(View.GONE);
+				mToolLayout.setVisibility(View.VISIBLE);
+				mFaceLayout.setVisibility(View.GONE);
 			}
 		}
 
@@ -1189,11 +1227,14 @@ public class ConversationView extends Activity {
 					ImageView iv = new ImageView(mContext);
 					iv.setImageResource(GlobalConfig.GLOBAL_FACE_ARRAY[i]);
 					iv.setTag(i + "");
+					iv.setPadding(20, 10, 0, 10);
+					iv.setScaleType(ScaleType.FIT_XY);
 					iv.setOnClickListener(mFaceSelectListener);
 					mFaceLayout.addView(iv);
 				}
 			}
 			if (mFaceLayout.getVisibility() == View.GONE) {
+				mToolLayout.setVisibility(View.INVISIBLE);
 				mFaceLayout.setVisibility(View.VISIBLE);
 			} else {
 				mFaceLayout.setVisibility(View.GONE);
@@ -1297,7 +1338,7 @@ public class ConversationView extends Activity {
 
 					if (split[i].contains(":")) {
 						flagCount++;
-                        sb.append("/:");
+						sb.append("/:");
 						if (flagCount == 10 && split[i].split(" ").length > 1) {
 							sb.append(split[i].split(" ")[0]);
 						} else
@@ -1589,33 +1630,33 @@ public class ConversationView extends Activity {
 		notificateConversationUpdate(isFresh, msgID, false);
 	}
 
-    /**
-     * 通知ConversationTabFragment 更新会话列表
-     *
-     * @param isFresh
-     *            false msgID为null，但需要刷新会话列表；ture 正常刷新
-     * @param msgID
-     *            最新消息ID
-     */
-    private void notificateConversationUpdate(boolean isFresh, long msgID,
-                                              boolean isDeleteConversation) {
+	/**
+	 * 通知ConversationTabFragment 更新会话列表
+	 * 
+	 * @param isFresh
+	 *            false msgID为null，但需要刷新会话列表；ture 正常刷新
+	 * @param msgID
+	 *            最新消息ID
+	 */
+	private void notificateConversationUpdate(boolean isFresh, long msgID,
+			boolean isDeleteConversation) {
 
-        Intent i = new Intent(PublicIntent.REQUEST_UPDATE_CONVERSATION);
-        i.addCategory(PublicIntent.DEFAULT_CATEGORY);
-        ConversationNotificationObject obj;
-        if (groupId == 0) {
-            obj = new ConversationNotificationObject(Conversation.TYPE_CONTACT,
-                    user2Id);
-        } else {
-            obj = new ConversationNotificationObject(Conversation.TYPE_GROUP,
-                    groupId);
-        }
-        obj.setMsgID(msgID);
-        i.putExtra("obj", obj);
-        i.putExtra("isFresh", isFresh);
-        i.putExtra("isDelete", isDeleteConversation);
-        mContext.sendBroadcast(i);
-    }
+		Intent i = new Intent(PublicIntent.REQUEST_UPDATE_CONVERSATION);
+		i.addCategory(PublicIntent.DEFAULT_CATEGORY);
+		ConversationNotificationObject obj;
+		if (groupId == 0) {
+			obj = new ConversationNotificationObject(Conversation.TYPE_CONTACT,
+					user2Id);
+		} else {
+			obj = new ConversationNotificationObject(Conversation.TYPE_GROUP,
+					groupId);
+		}
+		obj.setMsgID(msgID);
+		i.putExtra("obj", obj);
+		i.putExtra("isFresh", isFresh);
+		i.putExtra("isDelete", isDeleteConversation);
+		mContext.sendBroadcast(i);
+	}
 
 	private void addMessageToContainer(VMessage msg) {
 		// make offset
@@ -1693,7 +1734,8 @@ public class ConversationView extends Activity {
 		public void requestPlayAudio(View v, VMessage vm, VMessageAudioItem vai) {
 			if (vai != null && vai.getAudioFilePath() != null) {
 				currentPlayed = vm;
-				V2Log.i(TAG, "start play , currentPlayingAudio id is : " + currentPlayed.getId());
+				V2Log.i(TAG, "start play , currentPlayingAudio id is : "
+						+ currentPlayed.getId());
 				startPlaying(vai.getAudioFilePath());
 			}
 		}
@@ -1744,7 +1786,9 @@ public class ConversationView extends Activity {
 
 		@Override
 		public void requestStopAudio(View v, VMessage vm, VMessageAudioItem vai) {
-			V2Log.i(TAG, "request current playing audioItem 停止 , id is ：" + vai.getId());
+			V2Log.i(TAG,
+					"request current playing audioItem 停止 , id is ："
+							+ vai.getId());
 			vai.setPlaying(false);
 			stopPlaying();
 		}
@@ -1844,13 +1888,13 @@ public class ConversationView extends Activity {
 					BATCH_COUNT, offset, Conversation.TYPE_CONTACT);
 			break;
 		case V2GlobalEnum.GROUP_TYPE_CROWD:
-			array = MessageLoader.loadGroupMessageByPage(mContext,Conversation.TYPE_GROUP, groupId,
-					BATCH_COUNT, offset);
+			array = MessageLoader.loadGroupMessageByPage(mContext,
+					Conversation.TYPE_GROUP, groupId, BATCH_COUNT, offset);
 			break;
 		case V2GlobalEnum.GROUP_TYPE_DEPARTMENT:
 			array = MessageLoader.loadGroupMessageByPage(mContext,
-					V2GlobalEnum.GROUP_TYPE_DEPARTMENT, groupId,
-					BATCH_COUNT, offset);
+					V2GlobalEnum.GROUP_TYPE_DEPARTMENT, groupId, BATCH_COUNT,
+					offset);
 			break;
 		default:
 			break;
@@ -1886,13 +1930,13 @@ public class ConversationView extends Activity {
 		}
 		judgeShouldShowTime(m);
 		MessageBodyView mv = new MessageBodyView(this, m, m.isShowTime());
-        VMessageAdater adater = new VMessageAdater(m);
-        adater.setView(mv);
+		VMessageAdater adater = new VMessageAdater(m);
+		adater.setView(mv);
 		messageArray.add(adater);
-        if (!isStopped)
-            this.scrollToBottom();
-        else
-            pending = true;
+		if (!isStopped)
+			this.scrollToBottom();
+		else
+			pending = true;
 
 		return true;
 	}
@@ -2131,35 +2175,35 @@ public class ConversationView extends Activity {
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			if (JNIService.JNI_BROADCAST_NEW_MESSAGE.equals(intent.getAction())) {
-                int groupType = intent.getIntExtra("groupType" , -1);
-                long groupID = intent.getLongExtra("groupID", -1l);
-                long remoteID = intent.getLongExtra("remoteUserID" , -1l);
-                if(currentConversationViewType == groupType){
-                    switch (currentConversationViewType){
-                        case V2GlobalEnum.GROUP_TYPE_CROWD:
-                        case V2GlobalEnum.GROUP_TYPE_DEPARTMENT:
-                            isReLoading = groupID == groupId;
-                            break;
-                        case V2GlobalEnum.GROUP_TYPE_USER:
-                            isReLoading = remoteID == user2Id;
-                            break;
-                    }
-                }
-                else
-                    isReLoading = false;
-                //用于onNewIntent判断是否需要重新加载界面聊天数据，以及是否阻断广播 , true 后台
-                boolean isAppBack = GlobalConfig.isApplicationBackground(mContext);
-                if(isReLoading) {
-                    boolean result = queryAndAddMessage((int) intent.getExtras()
-                            .getLong("mid"));
-                    if (result) {
-                        offset += 1;
-                        if(!isAppBack) {
-                            // abort send down broadcast
-                            this.abortBroadcast();
-                        }
-                    }
-                }
+				int groupType = intent.getIntExtra("groupType", -1);
+				long groupID = intent.getLongExtra("groupID", -1l);
+				long remoteID = intent.getLongExtra("remoteUserID", -1l);
+				if (currentConversationViewType == groupType) {
+					switch (currentConversationViewType) {
+					case V2GlobalEnum.GROUP_TYPE_CROWD:
+					case V2GlobalEnum.GROUP_TYPE_DEPARTMENT:
+						isReLoading = groupID == groupId;
+						break;
+					case V2GlobalEnum.GROUP_TYPE_USER:
+						isReLoading = remoteID == user2Id;
+						break;
+					}
+				} else
+					isReLoading = false;
+				// 用于onNewIntent判断是否需要重新加载界面聊天数据，以及是否阻断广播 , true 后台
+				boolean isAppBack = GlobalConfig
+						.isApplicationBackground(mContext);
+				if (isReLoading) {
+					boolean result = queryAndAddMessage((int) intent
+							.getExtras().getLong("mid"));
+					if (result) {
+						offset += 1;
+						if (!isAppBack) {
+							// abort send down broadcast
+							this.abortBroadcast();
+						}
+					}
+				}
 			} else if (JNIService.JNI_BROADCAST_MESSAGE_SENT_FAILED
 					.equals(intent.getAction())) {
 				String uuid = intent.getExtras().getString("uuid");
@@ -2195,18 +2239,20 @@ public class ConversationView extends Activity {
 					}
 
 				}
-			//handler kicked event
-			} else if (intent.getAction().equals(JNIService.JNI_BROADCAST_KICED_CROWD)) {
+				// handler kicked event
+			} else if (intent.getAction().equals(
+					JNIService.JNI_BROADCAST_KICED_CROWD)) {
 				long crowdId = intent.getLongExtra("crowd", 0);
 				if (crowdId == groupId) {
 					finish();
 				}
 			} else if ((PublicIntent.BROADCAST_CROWD_DELETED_NOTIFICATION
-                    .equals(intent.getAction())) || (PublicIntent.BROADCAST_CROWD_QUIT_NOTIFICATION
-                    .equals(intent.getAction()))) {
+					.equals(intent.getAction()))
+					|| (PublicIntent.BROADCAST_CROWD_QUIT_NOTIFICATION
+							.equals(intent.getAction()))) {
 				finish();
 				onBackPressed();
-            }
+			}
 		}
 
 	}

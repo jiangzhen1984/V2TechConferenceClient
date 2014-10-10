@@ -310,7 +310,8 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 			}
 
 		} else {
-			mGendarTV.setText("");
+			mGendarTV.setText(mContext
+					.getText(R.string.contacts_user_detail_gender_priacy));
 		}
 
 		mBirthdayTV.setText(u.getBirthdayStr());

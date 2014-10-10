@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
     android:id="@+id/container_fragment"
+    android:layout_width="match_parent"
     android:layout_height="match_parent" >
     <RelativeLayout
         android:id="@+id/RelativeLayout1"
@@ -48,17 +48,17 @@
             android:paddingBottom="10dp"
             android:paddingTop="10dp"
             android:src="@drawable/contact_detail_button_selector" />
-         <ImageView
+        <ImageView
             android:id="@+id/contact_crowd_detail_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
             android:layout_marginRight="10dp"
-            android:visibility="gone"
             android:paddingBottom="10dp"
             android:paddingTop="10dp"
-            android:src="@drawable/qun" />
+            android:src="@drawable/qun"
+            android:visibility="gone" />
     </RelativeLayout>
     <LinearLayout
         android:id="@+id/linearLayout2"
@@ -78,9 +78,9 @@
             android:id="@+id/conversation_message_list"
             android:layout_width="match_parent"
             android:layout_height="fill_parent"
+            android:cacheColorHint="#00000000"
             android:clickable="false"
             android:divider="@null"
-            android:cacheColorHint="#00000000"
             android:fadingEdge="none"
             android:focusable="false"
             android:focusableInTouchMode="false"
@@ -169,19 +169,16 @@
                     android:textSize="12sp" />
             </LinearLayout>
         </RelativeLayout>
-        <LinearLayout
+        <FrameLayout
             android:id="@+id/contact_message_sub_feature_ly"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="#ffffff"
-            android:orientation="vertical"
-            android:visibility="gone"
-             >
+            android:background="#f2f2f2"
+            android:visibility="gone" >
             <RelativeLayout
                 android:id="@+id/contact_message_sub_feature_ly_inner"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="#f2f2f2" >
+                android:layout_height="wrap_content" >
                 <LinearLayout
                     android:layout_width="fill_parent"
                     android:layout_height="1dp"
@@ -205,8 +202,8 @@
                         android:layout_height="wrap_content"
                         android:gravity="center"
                         android:text="@string/contact_message_expression"
-                        android:textSize="@dimen/activity_contact_iconDescription_text"
-                        android:textColor="#000000" />
+                        android:textColor="#000000"
+                        android:textSize="@dimen/activity_contact_iconDescription_text" />
                 </LinearLayout>
                 <LinearLayout
                     android:id="@+id/contact_message_send_image_button_layout"
@@ -225,8 +222,8 @@
                         android:layout_height="wrap_content"
                         android:gravity="center"
                         android:text="@string/contact_message_send_image"
-                        android:textSize="@dimen/activity_contact_iconDescription_text"
-                        android:textColor="#000000" />
+                        android:textColor="#000000"
+                        android:textSize="@dimen/activity_contact_iconDescription_text" />
                 </LinearLayout>
                 <LinearLayout
                     android:id="@+id/contact_message_send_file_button_layout"
@@ -245,8 +242,8 @@
                         android:layout_height="wrap_content"
                         android:gravity="center"
                         android:text="@string/contact_message_send_file"
-                        android:textSize="@dimen/activity_contact_iconDescription_text"
-                        android:textColor="#000000" />
+                        android:textColor="#000000"
+                        android:textSize="@dimen/activity_contact_iconDescription_text" />
                 </LinearLayout>
                 <LinearLayout
                     android:id="@+id/contact_message_create_metting_button_layout"
@@ -254,8 +251,8 @@
                     android:layout_height="wrap_content"
                     android:layout_toRightOf="@+id/contact_message_send_file_button_layout"
                     android:orientation="vertical"
-                    android:visibility="gone"
-                    android:padding="15dp" >
+                    android:padding="15dp"
+                    android:visibility="gone" >
                     <ImageView
                         android:id="@+id/contact_message_create_metting_button"
                         android:layout_width="match_parent"
@@ -266,8 +263,8 @@
                         android:layout_height="wrap_content"
                         android:gravity="center"
                         android:text="@string/contact_message_create_metting"
-                        android:textSize="@dimen/activity_contact_iconDescription_text"
-                        android:textColor="#000000" />
+                        android:textColor="#000000"
+                        android:textSize="@dimen/activity_contact_iconDescription_text" />
                 </LinearLayout>
                 <LinearLayout
                     android:id="@+id/contact_message_video_call_button_layout"
@@ -286,8 +283,8 @@
                         android:layout_height="wrap_content"
                         android:gravity="center"
                         android:text="@string/contact_message_video_call"
-                        android:textSize="@dimen/activity_contact_iconDescription_text"
-                        android:textColor="#000000" />
+                        android:textColor="#000000"
+                        android:textSize="@dimen/activity_contact_iconDescription_text" />
                 </LinearLayout>
                 <LinearLayout
                     android:id="@+id/contact_message_audio_call_button_layout"
@@ -306,22 +303,23 @@
                         android:layout_height="wrap_content"
                         android:gravity="center"
                         android:text="@string/contact_message_audio_call"
-                        android:textSize="@dimen/activity_contact_iconDescription_text"
-                        android:textColor="#000000" />
+                        android:textColor="#000000"
+                        android:textSize="@dimen/activity_contact_iconDescription_text" />
                 </LinearLayout>
             </RelativeLayout>
             <HorizontalScrollView
-                android:id="@+id/horizontalScrollView1"
+                android:id="@+id/contact_message_sub_feature_ly_horizontalScrollView"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" >
+                android:layout_height="match_parent" >
                 <LinearLayout
                     android:id="@+id/contact_message_face_item_ly"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
+                    android:gravity="center_vertical"
                     android:orientation="horizontal"
                     android:visibility="gone" >
                 </LinearLayout>
             </HorizontalScrollView>
-        </LinearLayout>
+        </FrameLayout>
     </LinearLayout>
 </RelativeLayout>
