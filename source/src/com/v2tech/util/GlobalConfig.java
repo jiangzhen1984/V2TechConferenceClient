@@ -156,7 +156,7 @@ public class GlobalConfig {
 	}
 	
 	public static String getGlobalDataBasePath() {
-		return getGlobalPath() + "/v2tech/Users/" + LOGIN_USER_ID;
+		return getGlobalPath() + "/Users/" + LOGIN_USER_ID;
 	}
 
 	public static long getGlobalServerTime() {
