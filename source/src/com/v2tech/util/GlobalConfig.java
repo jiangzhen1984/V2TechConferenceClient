@@ -127,36 +127,31 @@ public class GlobalConfig {
 				.equals(android.os.Environment.getExternalStorageState());
 		if (!sdExist) {// 如果不存在,
 			// --data/data/com.v2tech
-		    return DEFAULT_GLOBLE_PATH;
+		    return DEFAULT_GLOBLE_PATH + "/v2tech";
 		} else {
 			// --mnt/sdcard
-			return SDCARD_GLOBLE_PATH;
+			return SDCARD_GLOBLE_PATH + "/v2tech";
 		}
-		
-	}
-	
-	public static String getGlobalStorePath() {
-		return getGlobalPath() + "/v2tech";
 		// return getGlobalPath()+"/.v2tech/";
 	}
-
+	
 	public static String getGlobalUserAvatarPath() {
-		return getGlobalStorePath() + "/Users/"
+		return getGlobalPath() + "/Users/"
 				+ LOGIN_USER_ID + "/avatars";
 	}
 
 	public static String getGlobalPicsPath() {
-		return getGlobalStorePath() + "/Users/"
+		return getGlobalPath() + "/Users/"
 				+ LOGIN_USER_ID + "/Images";
 	}
 
 	public static String getGlobalAudioPath() {
-		return getGlobalStorePath() + "/Users/"
+		return getGlobalPath() + "/Users/"
 				+ LOGIN_USER_ID + "/audios";
 	}
 
 	public static String getGlobalFilePath() {
-		return getGlobalStorePath() + "/Users/"
+		return getGlobalPath() + "/Users/"
 				+ LOGIN_USER_ID + "/files";
 	}
 	

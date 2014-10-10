@@ -96,7 +96,7 @@ public class MainApplication extends Application {
 		}
 
 		initGloblePath();
-		String path = GlobalConfig.getGlobalStorePath();
+		String path = GlobalConfig.getGlobalPath();
 		initConfFile();
 
 		// Load native library
