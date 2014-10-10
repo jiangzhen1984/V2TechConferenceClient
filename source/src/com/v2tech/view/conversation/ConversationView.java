@@ -1621,7 +1621,7 @@ public class ConversationView extends Activity {
 						lastEnd = matcher.end(0);
 					}
 					
-					if(firstMather != true && strTextContent.length() != lastEnd){
+					if(strTextContent.length() != lastEnd){
 						String lastText = strTextContent.substring(lastEnd, strTextContent.length());
 						VMessageTextItem vti = new VMessageTextItem(vm,
 								lastText);
