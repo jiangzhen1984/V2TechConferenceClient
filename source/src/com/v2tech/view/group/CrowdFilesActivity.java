@@ -42,11 +42,13 @@ import com.v2tech.service.jni.RequestFetchGroupFilesResponse;
 import com.v2tech.util.GlobalConfig;
 import com.v2tech.view.JNIService;
 import com.v2tech.view.conversation.ConversationSelectFile;
+import com.v2tech.view.conversation.MessageLoader;
 import com.v2tech.vo.CrowdGroup;
 import com.v2tech.vo.FileInfoBean;
 import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.VCrowdFile;
 import com.v2tech.vo.VFile;
+import com.v2tech.vo.VMessageFileItem;
 
 public class CrowdFilesActivity extends Activity {
 
@@ -71,7 +73,7 @@ public class CrowdFilesActivity extends Activity {
 	private Map<String, VCrowdFile> mFileMap;
 	private List<VCrowdFile> mFiles;
 	private List<VCrowdFile> mUploadedFiles;
-    private ArrayList<FileInfoBean> mCheckedList;
+	private ArrayList<FileInfoBean> mCheckedList;
 
 	private Context mContext;
 	private ListView mListView;
@@ -134,12 +136,12 @@ public class CrowdFilesActivity extends Activity {
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == RECEIVE_SELECTED_FILE) {
-            if (data != null) {
-                mCheckedList = data.getParcelableArrayListExtra("checkedFiles");
-                V2Log.e("get checked files size is :" + mCheckedList.size());
-            }
-        }
+		if (requestCode == RECEIVE_SELECTED_FILE) {
+			if (data != null) {
+				mCheckedList = data.getParcelableArrayListExtra("checkedFiles");
+				V2Log.e("get checked files size is :" + mCheckedList.size());
+			}
+		}
 	}
 
 	@Override
@@ -163,9 +165,9 @@ public class CrowdFilesActivity extends Activity {
 		}
 		super.onBackPressed();
 	}
-	
+
 	private void initReceiver() {
-		localReceiver = new LocalReceiver(); 
+		localReceiver = new LocalReceiver();
 		IntentFilter filter = new IntentFilter();
 		filter.addAction(JNIService.JNI_BROADCAST_KICED_CROWD);
 		filter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
@@ -177,6 +179,14 @@ public class CrowdFilesActivity extends Activity {
 			V2Log.e("Unknow crowd");
 			return;
 		}
+
+		// loading upLoading files from database;
+		List<VCrowdFile> fileItems = MessageLoader
+				.loadGroupUpLoadingFileMessage(mContext, crowd.getGroupType()
+						.intValue(), crowd.getmGId() , crowd);
+		if(fileItems != null && fileItems.size() > 0)		
+			mUploadedFiles.addAll(fileItems);
+		
 		service.fetchGroupFiles(crowd, new Registrant(mLocalHandler,
 				FETCH_FILES_DONE, null));
 	}
@@ -297,12 +307,12 @@ public class CrowdFilesActivity extends Activity {
 		@Override
 		public void onClick(View v) {
 			showUploaded = true;
-//			mTitle.setText(R.string.crowd_files_title_uploaded);
-//			mShowUploadedFileButton.setVisibility(View.GONE);
-//			adapter.notifyDataSetChanged();
-			Intent intent = new Intent(mContext , ConversationSelectFile.class);
-            intent.putExtra("type" , "crowdFile");
-            startActivityForResult(intent , RECEIVE_SELECTED_FILE);
+//			 mTitle.setText(R.string.crowd_files_title_uploaded);
+//			 mShowUploadedFileButton.setVisibility(View.GONE);
+//			 adapter.notifyDataSetChanged();
+			Intent intent = new Intent(mContext, ConversationSelectFile.class);
+			intent.putExtra("type", "crowdFile");
+			startActivityForResult(intent, RECEIVE_SELECTED_FILE);
 		}
 
 	};
@@ -357,9 +367,7 @@ public class CrowdFilesActivity extends Activity {
 		}
 
 	};
-	
-	
-	
+
 	class LocalReceiver extends BroadcastReceiver {
 
 		@Override
@@ -369,17 +377,22 @@ public class CrowdFilesActivity extends Activity {
 				if (crowdId == crowd.getmGId()) {
 					for (VCrowdFile f : mFiles) {
 						if (f.getState() == VFile.State.DOWNLOADING) {
-							service.handleCrowdFile(f, FileOperationEnum.OPERATION_CANCEL_DOWNLOADING, null);
+							service.handleCrowdFile(
+									f,
+									FileOperationEnum.OPERATION_CANCEL_DOWNLOADING,
+									null);
 						} else if (f.getState() == VFile.State.UPLOADING) {
-							service.handleCrowdFile(f, FileOperationEnum.OPERATION_CANCEL_SENDING, null);
+							service.handleCrowdFile(f,
+									FileOperationEnum.OPERATION_CANCEL_SENDING,
+									null);
 						}
 					}
 					finish();
 				}
 			}
-			
+
 		}
-		
+
 	}
 
 	class FileListAdapter extends BaseAdapter implements Filterable {
@@ -496,7 +509,8 @@ public class CrowdFilesActivity extends Activity {
 				item.mFileDeleteButton = (TextView) convertView
 						.findViewById(R.id.crowd_file_delete_button);
 				item.mFileDeleteButton.setTag(tag);
-				item.mFileDeleteButton.setOnClickListener(mDeleteButtonListener);
+				item.mFileDeleteButton
+						.setOnClickListener(mDeleteButtonListener);
 
 				item.mFailedIcon.setOnClickListener(mFailIconListener);
 				item.mFileButton.setOnClickListener(mButtonListener);
@@ -646,7 +660,7 @@ public class CrowdFilesActivity extends Activity {
 				Tag tag = (Tag) v.getTag();
 				List<VCrowdFile> list = new ArrayList<VCrowdFile>();
 				list.add(tag.vf);
-				service.removeGroupFiles(crowd, list , null);
+				service.removeGroupFiles(crowd, list, null);
 				handleFileRemovedEvent(tag.vf);
 			}
 

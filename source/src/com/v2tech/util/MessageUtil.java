@@ -10,6 +10,7 @@ import com.v2tech.R;
 import com.v2tech.vo.VMessage;
 import com.v2tech.vo.VMessageAbstractItem;
 import com.v2tech.vo.VMessageFaceItem;
+import com.v2tech.vo.VMessageLinkTextItem;
 import com.v2tech.vo.VMessageTextItem;
 
 public class MessageUtil {
@@ -40,11 +41,19 @@ public class MessageUtil {
 			return builder;
 		}
 		
+		// If no text and face item, now means send picture
+		if (vm.getImageItems().size() > 0) {
+			builder.append(context.getResources().getText(
+					R.string.conversation_display_item_pic));
+			return builder;
+		}
 		
 		for (int i = 0; i < vm.getItems().size(); i++) {
 			VMessageAbstractItem item = vm.getItems().get(i);
 			if (item.getType() == VMessageAbstractItem.ITEM_TYPE_TEXT) {
 				builder.append(((VMessageTextItem) item).getText()).append(" ");
+			} else if (item.getType() == VMessageAbstractItem.ITEM_TYPE_LINK_TEXT) {
+				builder.append(((VMessageLinkTextItem) item).getText()).append(" ");
 			} else if (item.getType() == VMessageAbstractItem.ITEM_TYPE_FACE) {
 				Drawable dr = context
 						.getResources()
@@ -54,15 +63,7 @@ public class MessageUtil {
 				appendSpan(builder, dr, ((VMessageFaceItem) item).getIndex());
 			}
 		}
-
-		// If no text and face item, now means send picture
-		if (builder.length() <= 0) {
-			builder.append(context.getResources().getText(
-					R.string.conversation_display_item_pic));
-		}
-
 		return builder;
-
 	}
 
 	/**

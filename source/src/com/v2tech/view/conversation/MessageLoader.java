@@ -15,13 +15,16 @@ import com.v2tech.db.V2TechDBHelper;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.util.XmlParser;
 import com.v2tech.vo.AudioVideoMessageBean;
+import com.v2tech.vo.CrowdGroup;
 import com.v2tech.vo.User;
+import com.v2tech.vo.VCrowdFile;
 import com.v2tech.vo.VMessage;
 import com.v2tech.vo.VMessageAudioItem;
 import com.v2tech.vo.VMessageFileItem;
 import com.v2tech.vo.VMessageImageItem;
 import com.v2tech.vo.VMessageQualification;
 import com.v2tech.vo.VideoBean;
+import com.v2tech.vo.VFile.State;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -463,6 +466,13 @@ public class MessageLoader {
 
 	// ****************************群组操作**************************************************
 
+	/**
+	 * 查询指定群组的所有聊天消息记录
+	 * @param context
+	 * @param groupType
+	 * @param gid
+	 * @return
+	 */
 	public static List<VMessage> loadGroupMessage(Context context,
 			long groupType, long gid) {
 		if (!init(context, groupType, gid, 0, CROWD_TYPE))
@@ -475,6 +485,13 @@ public class MessageLoader {
 		return queryMessage(context, selection, args, order);
 	}
 
+	/**
+	 * 查询指定群组中聊天收发的所有图片
+	 * @param context
+	 * @param type
+	 * @param gid
+	 * @return
+	 */
 	public static List<VMessage> loadGroupImageMessage(Context context,
 			int type, long gid) {
 		List<VMessage> imageItems = new ArrayList<VMessage>();
@@ -537,14 +554,91 @@ public class MessageLoader {
 		mCur.close();
 		return imageItems;
 	}
+	
+	/**
+	 * 查询指定群组中聊天中，正在上传的群文件集合
+	 * @param context
+	 * @param type
+	 * @param gid
+	 * @return
+	 */
+	public static List<VCrowdFile> loadGroupUpLoadingFileMessage(Context context,
+			int type, long gid , CrowdGroup crowd) {
+		
+		DataBaseContext mContext = new DataBaseContext(context);
+		List<VCrowdFile> fileItems = new ArrayList<VCrowdFile>();
+		String sortOrder = ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_SAVEDATE
+				+ " desc";
+		String where = ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_GROUP_TYPE
+				+ "=? and "
+				+ ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_GROUP_ID
+				+ "= ?";
+		String[] args = new String[] { String.valueOf(type),
+				String.valueOf(gid) };
+		Cursor mCur = mContext.getContentResolver().query(
+				ContentDescriptor.HistoriesMessage.CONTENT_URI,
+				ContentDescriptor.HistoriesMessage.Cols.ALL_CLOS, where,
+				args, sortOrder);
+
+		if (mCur == null || mCur.getCount() == 0) {
+			mCur.close();
+			return fileItems;
+		}
+
+		VCrowdFile crowdFile;
+		while (mCur.moveToNext()) {
+
+			VMessage extract = extractMsg(mCur);
+			if (extract == null) {
+				V2Log.d("The extract VMessage from Cursor failed...get null , id is : " + mCur.getInt(0));
+				continue;
+			}
+			
+			VMessage vm = XmlParser.parseForMessage(extract);
+			if (vm == null) {
+				V2Log.d("The parse VMessage from failed...get null , id is : " + mCur.getInt(0));
+				continue;
+			}
+
+//			protected String id;
+//			protected String path;
+//			protected long size;
+//			protected State state;
+//			protected long proceedSize;
+//			protected String name;
+//			protected User uploader;
+//			protected Date startTime;
+//			protected int flag;
+			boolean flag = loadFileMessageById(vm, mContext);
+			if(flag){
+				for (VMessageFileItem vMessageFileItem : vm.getFileItems()) {
+					if(vMessageFileItem.getState() == VMessageFileItem.STATE_FILE_SENDING){
+						crowdFile = new VCrowdFile();
+						crowdFile.setId(vMessageFileItem.getUuid());
+						crowdFile.setPath(vMessageFileItem.getFilePath());
+						crowdFile.setSize(vMessageFileItem.getFileSize());
+						crowdFile.setName(vMessageFileItem.getFileName());
+						crowdFile.setState(VCrowdFile.State.UPLOADING);
+						crowdFile.setProceedSize((long) vMessageFileItem.getProgress());
+						crowdFile.setUploader(vm.getFromUser());
+						crowdFile.setStartTime(vm.getDate());
+						crowdFile.setCrowd(crowd);
+						fileItems.add(crowdFile);
+					}
+				}
+			}
+		}
+		mCur.close();
+		return fileItems;
+	}
 
 	/**
-	 * 
+	 * 分页查询指定群组的聊天消息
 	 * @param context
 	 * @param groupType
 	 * @param groupId
 	 * @param limit
-	 * @param offset
+	 * @param offset 
 	 * @return
 	 */
 	public static List<VMessage> loadGroupMessageByPage(Context context,
@@ -564,6 +658,12 @@ public class MessageLoader {
 		return queryMessage(context, selection, args, order);
 	}
 
+	/**
+	 * 根据传入VMessage消息对象，查询其数据库的ID值
+	 * @param context
+	 * @param vm
+	 * @return
+	 */
 	public static Long queryVMessageID(Context context, VMessage vm) {
 
 		if (vm == null)
@@ -591,6 +691,14 @@ public class MessageLoader {
 		return null;
 	}
 
+	/**
+	 * 根据传入条件，查询聊天消息记录
+	 * @param context
+	 * @param selection
+	 * @param args
+	 * @param sortOrder
+	 * @return
+	 */
 	public static List<VMessage> queryMessage(Context context,
 			String selection, String[] args, String sortOrder) {
 		DataBaseContext mContext = new DataBaseContext(context);
@@ -607,10 +715,16 @@ public class MessageLoader {
 
 		while (mCur.moveToNext()) {
 
-			VMessage vm = XmlParser.parseForMessage(extractMsg(mCur));
+			VMessage extract = extractMsg(mCur);
+			if (extract == null) {
+				V2Log.d("The extract VMessage from Cursor failed...get null , id is : " + mCur.getInt(0));
+				continue;
+			}
+			
+			VMessage vm = XmlParser.parseForMessage(extract);
 			if (vm == null) {
-				V2Log.e("the parse VMessage get null........");
-				return vimList;
+				V2Log.d("The parse VMessage from failed...get null , id is : " + mCur.getInt(0));
+				continue;
 			}
 
 			loadImageMessageById(vm, mContext);
@@ -620,7 +734,6 @@ public class MessageLoader {
 		}
 		mCur.close();
 		return vimList;
-
 	}
 
 	/**
@@ -1199,11 +1312,11 @@ public class MessageLoader {
 	 * @param context
 	 * @return
 	 */
-	private static VMessage loadFileMessageById(VMessage vm, Context context) {
+	private static boolean loadFileMessageById(VMessage vm, Context context) {
 
 		List<VMessageFileItem> fileItems = vm.getFileItems();
 		if (fileItems.size() <= 0)
-			return vm;
+			return false;
 
 		String selection = ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_ID
 				+ "=? ";
@@ -1220,7 +1333,7 @@ public class MessageLoader {
 			if (mCur.getCount() == 0) {
 				V2Log.e("the loading VMessageFileItem --" + item.getUuid()
 						+ "-- get null........");
-				return vm;
+				return false;
 			}
 
 			while (mCur.moveToNext()) {
@@ -1245,6 +1358,6 @@ public class MessageLoader {
 
 		if (mCur != null)
 			mCur.close();
-		return vm;
+		return true;
 	}
 }

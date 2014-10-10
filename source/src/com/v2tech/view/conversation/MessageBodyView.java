@@ -1,6 +1,8 @@
 package com.v2tech.view.conversation;
 
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import android.content.ClipData;
 import android.content.ClipboardManager;
@@ -229,8 +231,13 @@ public class MessageBodyView extends LinearLayout {
 			mHeadIcon.setImageBitmap(mMsg.getFromUser().getAvatarBitmap());
 		}
 
+		initListener();
 		populateMessage();
 
+	}
+
+	private void initListener() {
+		mContentContainer.setOnLongClickListener(messageLongClickListener);		
 	}
 
 	private void initPopupWindow() {
@@ -313,7 +320,6 @@ public class MessageBodyView extends LinearLayout {
 		}
 
 		TextView et = new TextView(this.getContext());
-		mContentContainer.setOnLongClickListener(messageLongClickListener);
 		et.setOnClickListener(imageMessageClickListener);
 		et.setBackgroundColor(Color.TRANSPARENT);
 		et.setOnLongClickListener(messageLongClickListener);
@@ -881,6 +887,11 @@ public class MessageBodyView extends LinearLayout {
 						callback.requestPlayAudio(anchor, mMsg, audioItem);
 						audioItem.setPlaying(true);
 					}
+				}
+				
+				List<VMessageLinkTextItem> linkItems = mMsg.getLinkItems();
+				if (linkItems != null && linkItems.size() > 0) {
+					callback.onMessageClicked(mMsg);
 				}
 			}
 		}

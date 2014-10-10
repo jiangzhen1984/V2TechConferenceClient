@@ -4,12 +4,15 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import android.app.Activity;
 import android.app.Dialog;
@@ -24,7 +27,7 @@ import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.media.MediaRecorder;
-import android.media.MediaRecorder.OnErrorListener;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -45,12 +48,12 @@ import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.inputmethod.InputMethodManager;
+import android.webkit.URLUtil;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout;
@@ -104,6 +107,7 @@ import com.v2tech.vo.VMessageAudioItem;
 import com.v2tech.vo.VMessageFaceItem;
 import com.v2tech.vo.VMessageFileItem;
 import com.v2tech.vo.VMessageImageItem;
+import com.v2tech.vo.VMessageLinkTextItem;
 import com.v2tech.vo.VMessageTextItem;
 
 public class ConversationView extends Activity {
@@ -341,17 +345,17 @@ public class ConversationView extends Activity {
 		mVoiceDialog.setCancelable(true);
 		mVoiceDialog.setCanceledOnTouchOutside(false);
 		mVoiceDialog.setOwnerActivity(this);
-		mVoiceDialog.setOnKeyListener(new OnKeyListener(){
+		mVoiceDialog.setOnKeyListener(new OnKeyListener() {
 
 			@Override
 			public boolean onKey(DialogInterface arg0, int arg1, KeyEvent arg2) {
-				if (arg1 == KeyEvent.KEYCODE_BACK){
+				if (arg1 == KeyEvent.KEYCODE_BACK) {
 					breakRecording();
-	                return true;
+					return true;
 				}
 				return false;
 			}
-        });
+		});
 		root.setVisibility(View.INVISIBLE);
 	}
 
@@ -391,19 +395,19 @@ public class ConversationView extends Activity {
 	@Override
 	protected void onPause() {
 		super.onPause();
-		V2Log.e(TAG, "entry onPause");
+		V2Log.d(TAG, "entry onPause");
 	}
-	
+
 	@Override
 	public void onBackPressed() {
 		super.onBackPressed();
-		V2Log.e(TAG, "entry onBackPressed");
+		V2Log.d(TAG, "entry onBackPressed");
 	}
 
 	@Override
 	protected void onStop() {
 		super.onStop();
-		Log.e(TAG, "entry onStop....");
+		Log.d(TAG, "entry onStop....");
 		isStopped = true;
 		breakRecording();
 	}
@@ -753,6 +757,9 @@ public class ConversationView extends Activity {
 		} catch (IllegalStateException e) {
 			V2Log.e(" can not prepare media recorder ");
 			return false;
+		} catch (Exception e) {
+			V2Log.e("error , can not prepare media recorder ");
+			return false;
 		}
 		return true;
 	}
@@ -948,8 +955,8 @@ public class ConversationView extends Activity {
 	};
 
 	private String fileName = null;
-	private long starttime = 0; //记录真正开始录音时的开始时间
-	private long lastTime = 0; //记录每次录音时的当前时间(毫秒值) ， 用于判断用户点击录音的频率
+	private long starttime = 0; // 记录真正开始录音时的开始时间
+	private long lastTime = 0; // 记录每次录音时的当前时间(毫秒值) ， 用于判断用户点击录音的频率
 	private boolean realRecoding;
 	private boolean cannelRecoding;
 	private boolean timeOutRecording;
@@ -983,31 +990,33 @@ public class ConversationView extends Activity {
 				}
 				break;
 			case MotionEvent.ACTION_UP:
-				//audio message send by 计时器
+				// audio message send by 计时器
 				if (timeOutRecording) {
-					V2Log.d(TAG, "audio message send by 计时器，ignore the up event once");
+					V2Log.d(TAG,
+							"audio message send by 计时器，ignore the up event once");
 					mButtonRecordAudio
 							.setText(R.string.contact_message_button_send_audio_msg);
 					timeOutRecording = false;
 					return false;
 				}
-				//entry normal process , stop recording state 进入正常结束流程 
+				// entry normal process , stop recording state 进入正常结束流程
 				if (realRecoding) {
-					//stop recording 
+					// stop recording
 					stopRecording();
-					//计算录音时间
+					// 计算录音时间
 					long seconds = (System.currentTimeMillis() - starttime);
-					//recover all flag 复原标记位
+					// recover all flag 复原标记位
 					lastTime = 0;
 					starttime = 0;
 					realRecoding = false;
 					// Remove timer
 					lh.removeCallbacks(mUpdateMicStatusTimer);
 					lh.removeCallbacks(timeOutMonitor);
-					//recover button show state
+					// recover button show state
 					mButtonRecordAudio
 							.setText(R.string.contact_message_button_send_audio_msg);
-					// check if touch position out of button than cancel send voice message
+					// check if touch position out of button than cancel send
+					// voice message
 					Rect rect = new Rect();
 					view.getDrawingRect(rect);
 					if (rect.contains((int) event.getX(), (int) event.getY())
@@ -1026,7 +1035,7 @@ public class ConversationView extends Activity {
 									R.string.contact_message_message_cancelled,
 									Toast.LENGTH_SHORT).show();
 						}
-						//delete audio file
+						// delete audio file
 						File f = new File(fileName);
 						f.delete();
 					}
@@ -1043,7 +1052,7 @@ public class ConversationView extends Activity {
 					} else {
 						showOrCloseVoiceDialog();
 					}
-					
+
 					if (mTimer != null) {
 						V2Log.d(TAG, "时间没到，手动停止，恢复原状");
 						mTimer.cancel();
@@ -1052,8 +1061,8 @@ public class ConversationView extends Activity {
 					} else {
 						lh.removeCallbacks(mUpdateSurplusTime);
 					}
-					
-				} else { //beacuse click too much quick , stop recording..
+
+				} else { // beacuse click too much quick , stop recording..
 					cannelRecoding = true;
 					Log.d(TAG, "由于间隔太短，显示short对话框");
 					lh.removeCallbacks(preparedRecoding);
@@ -1147,13 +1156,13 @@ public class ConversationView extends Activity {
 			showOrCloseVoiceDialog();
 		}
 	};
-	
+
 	/**
 	 * 异常终止录音
 	 */
-	private void breakRecording(){
-		
-		if (mRecorder != null) {
+	private void breakRecording() {
+
+		if (mRecorder != null && realRecoding == true) {
 
 			lastTime = 0;
 			starttime = 0;
@@ -1526,6 +1535,8 @@ public class ConversationView extends Activity {
 
 			int emojiStart = -1, end, strStart = 0;
 			int index = 0;
+			Pattern pattern = Pattern
+					.compile("(http://|ftp://|https://|www\\.){1}[^\u4e00-\u9fa5\\s]*?\\.(com|net|cn|me|tw|fr|html){1}(/[^\u4e00-\u9fa5\\s]*){0,1}");
 			while (index < str.length()) {
 				if (str.charAt(index) == '/' && index < len - 1
 						&& str.charAt(index + 1) == ':') {
@@ -1568,26 +1579,61 @@ public class ConversationView extends Activity {
 						index = end - 1;
 						strStart = end;
 						emojiStart = -1;
-
 					}
 				}
 
+				int lastStart = 0;
+				int lastEnd = 0;
+				boolean firstMather = true;
 				// check if exist last string
 				if (index == len - 1 && strStart <= index) {
 					String strTextContent = str.substring(strStart, len);
-					VMessageTextItem vti = new VMessageTextItem(vm,
-							strTextContent);
-					// If strStart is 0 means string at new line
-					if (strStart == 0) {
-						vti.setNewLine(true);
+					Matcher matcher = pattern.matcher(strTextContent);
+					while(matcher.find()){
+						String url = matcher.group(0);
+						V2Log.e(TAG, "从文本内容检测到网址：" + url);
+						//检测网址前面是否有文本内容
+						if(firstMather == true){
+							firstMather = false;
+							if(matcher.start(0) != strStart){
+								
+								VMessageTextItem vti = new VMessageTextItem(vm,
+										strTextContent.substring(strStart, matcher.start(0)));
+								// If strStart is 0 means string at new line
+								if (strStart == 0) {
+									vti.setNewLine(true);
+								}
+							}
+							new VMessageLinkTextItem(vm,
+									url , url);
+						}
+						else{
+							if(matcher.start(0) != lastEnd){
+								VMessageTextItem vti = new VMessageTextItem(vm,
+										strTextContent.substring(matcher.end(0) + 1, lastStart));
+								// If strStart is 0 means string at new line
+								if (matcher.end(0) + 1 == 0) {
+									vti.setNewLine(true);
+								}
+							}
+						}
+						lastStart = matcher.start(0);
+						lastEnd = matcher.end(0);
 					}
-
+					
+					if(firstMather != true && strTextContent.length() != lastEnd){
+						String lastText = strTextContent.substring(lastEnd, strTextContent.length());
+						VMessageTextItem vti = new VMessageTextItem(vm,
+								lastText);
+						// If strStart is 0 means string at new line
+						if (lastEnd == 0) {
+							vti.setNewLine(true);
+						}
+					}
 					strStart = index;
 				}
-
 				index++;
 			}
-
 		}
 		mMessageET.setText("");
 		// Send message to server
@@ -1714,20 +1760,32 @@ public class ConversationView extends Activity {
 			VMessageImageItem imageItem = null;
 			if (imageItems != null && imageItems.size() > 0) {
 				imageItem = v.getImageItems().get(0);
+				Intent i = new Intent();
+				i.addCategory(PublicIntent.DEFAULT_CATEGORY);
+				i.setAction(PublicIntent.START_VIDEO_IMAGE_GALLERY);
+				i.putExtra("uid1", user1Id);
+				i.putExtra("uid2", user2Id);
+				i.putExtra("cid", v.getUUID());
+				if (imageItem != null)
+					i.putExtra("imageID", imageItem.getUuid());
+				// type 0: is not group image view
+				// type 1: group image view
+				i.putExtra("type", currentConversationViewType);
+				i.putExtra("gid", groupId);
+				mContext.startActivity(i);
+				imageItem = null;
 			}
-			Intent i = new Intent();
-			i.addCategory(PublicIntent.DEFAULT_CATEGORY);
-			i.setAction(PublicIntent.START_VIDEO_IMAGE_GALLERY);
-			i.putExtra("uid1", user1Id);
-			i.putExtra("uid2", user2Id);
-			i.putExtra("cid", v.getUUID());
-			if (imageItem != null)
-				i.putExtra("imageID", imageItem.getUuid());
-			// type 0: is not group image view
-			// type 1: group image view
-			i.putExtra("type", currentConversationViewType);
-			i.putExtra("gid", groupId);
-			mContext.startActivity(i);
+			
+			List<VMessageLinkTextItem> linkItems = v.getLinkItems();
+			VMessageLinkTextItem linkItem = null;
+			if (linkItems != null && linkItems.size() > 0) {
+				linkItem = v.getLinkItems().get(0);
+				Intent intent = new Intent();
+		        intent.setAction("android.intent.action.VIEW");
+		        Uri content_url = Uri.parse(linkItem.getUrl());
+		        intent.setData(content_url);
+		        startActivity(intent);
+			}
 		}
 
 		@Override
@@ -2100,7 +2158,8 @@ public class ConversationView extends Activity {
 				return;
 			}
 			if (user.getmUserId() == local.getmUserId()
-					|| user.getmUserId() == remote.getmUserId()) {
+					|| (remote != null && user.getmUserId() == remote
+							.getmUserId())) {
 				for (int i = 0; i < messageArray.size(); i++) {
 					MessageBodyView mdv = (MessageBodyView) messageArray.get(i)
 							.getView();

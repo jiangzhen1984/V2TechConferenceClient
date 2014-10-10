@@ -147,8 +147,6 @@ public class ConversationProvider {
 			Conversation verificationMessageItemData,
 			Conversation voiceMessageItem) {
 
-//		Conversation firstAdd = null;
-//		Conversation secondAdd = null;
 		long verificationDate = 0;
 		long voiceMessageDate = 0;
 		if (mCurrentTabFlag == Conversation.TYPE_CONTACT) {
@@ -319,6 +317,10 @@ public class ConversationProvider {
 		
 		DataBaseContext mContext = new DataBaseContext(context);
 		ContentValues values = new ContentValues();
+		if(!TextUtils.isEmpty(cov.getDateLong())){
+			values.put(ContentDescriptor.RecentHistoriesMessage.Cols.HISTORY_RECENT_MESSAGE_SAVEDATE,
+					cov.getDateLong());
+		}
 		values.put(ContentDescriptor.RecentHistoriesMessage.Cols.HISTORY_RECENT_MESSAGE_READ_STATE,
 				ret);
 		return mContext.getContentResolver().update(

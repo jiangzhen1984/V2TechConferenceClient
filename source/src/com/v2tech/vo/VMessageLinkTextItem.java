@@ -25,6 +25,8 @@ public class VMessageLinkTextItem extends VMessageAbstractItem {
 	
 
 	public String getUrl() {
+		if(url.startsWith("www"))
+			return "http://" + url;
 		return url;
 	}
 

@@ -206,6 +206,16 @@ public class VMessage {
 		return fileItems;
 	}
 	
+	public List<VMessageLinkTextItem>  getLinkItems() {
+		List<VMessageLinkTextItem> linkItems = new ArrayList<VMessageLinkTextItem>();
+		for (VMessageAbstractItem item : itemList) {
+			if (item.getType() == VMessageAbstractItem.ITEM_TYPE_LINK_TEXT) {
+				linkItems.add((VMessageLinkTextItem)item);
+			}
+		}
+		return linkItems;
+	}
+	
 
 	public String getUUID() {
 		return mUUID;

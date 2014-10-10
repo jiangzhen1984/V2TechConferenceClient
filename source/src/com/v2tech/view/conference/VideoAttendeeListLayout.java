@@ -336,6 +336,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 			if (wr.a.getAttId() == at.getAttId()) {
 				// If attendee type is mixed video, remove destroyed mixed video
 				if (wr.a.getType() == Attendee.TYPE_MIXED_VIDEO) {
+					V2Log.d(TAG, "successful remove 混合视频");
 					mAttendsView.remove(v);
 					onLineDevices -= 1;
 					break;

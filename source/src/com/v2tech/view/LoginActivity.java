@@ -47,7 +47,6 @@ import com.v2tech.service.jni.JNIResponse;
 import com.v2tech.service.jni.RequestLogInResponse;
 import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.SPUtil;
-import com.v2tech.util.StorageUtil;
 import com.v2tech.vo.User;
 
 /**

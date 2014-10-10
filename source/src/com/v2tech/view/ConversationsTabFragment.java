@@ -17,7 +17,6 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -72,7 +71,6 @@ import com.v2tech.view.conversation.MessageLoader;
 import com.v2tech.view.conversation.P2PConversation;
 import com.v2tech.view.group.CrowdDetailActivity;
 import com.v2tech.vo.AddFriendHistorieNode;
-import com.v2tech.vo.AudioVideoMessageBean;
 import com.v2tech.vo.Conference;
 import com.v2tech.vo.ConferenceConversation;
 import com.v2tech.vo.ConferenceGroup;
@@ -201,26 +199,11 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 	}
 
 	@Override
-	public void onDetach() {
-		super.onDetach();
-		mItemList.clear();
-	}
-
-	@Override
-	public void onPause() {
-		super.onPause();
-	}
-
-	@Override
 	public void onDestroy() {
 		super.onDestroy();
 		getActivity().unregisterReceiver(receiver);
-		if (mItemList != null) {
-			mItemList.clear();
-		}
-		if (mCacheItemList != null) {
-			mCacheItemList.clear();
-		}
+		mItemList= null;
+		mCacheItemList= null;
 		BitmapManager.getInstance().unRegisterBitmapChangedListener(
 				this.bitmapChangedListener);
 	}
@@ -304,7 +287,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 		searchList.clear();
 		mIsStartedSearch = false;
 		startIndex = 0;
-		adapter.notifyDataSetChanged();
+//		adapter.notifyDataSetChanged();
 		super.onStop();
 	}
 
@@ -315,7 +298,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 	private boolean isShouldAdd;
 	private boolean isShouldQP; // 是否需要启动全拼
 	private int startIndex = 0;
-
+	private boolean isBreak; // 用于跳出getSearchList函数中的二级循环
 	@Override
 	public void afterTextChanged(Editable s) {
 		if (s != null && s.length() > 0) {
@@ -464,11 +447,6 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 	@Override
 	public void beforeTextChanged(CharSequence s, int start, int count,
 			int after) {
-
-		// if(mItemListCache == null){
-		// mItemListCache = new CopyOnWriteArrayList<ScrollItem>();
-		// mItemListCache.addAll(mItemList);
-		// }
 	}
 
 	@Override
@@ -476,13 +454,16 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 
 	}
 
+	/**
+	 * 判断给定的字符是否为汉字
+	 * @param mChar
+	 * @return
+	 */
 	public boolean isChineseWord(char mChar) {
 		Pattern pattern = Pattern.compile("[\\u4E00-\\u9FA5]"); // 判断是否为汉字
 		Matcher matcher = pattern.matcher(String.valueOf(mChar));
 		return matcher.find();
 	}
-
-	private boolean isBreak;
 
 	/**
 	 * 根据 searchKey 获得搜索后的集合
@@ -675,10 +656,20 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 			return;
 		}
 
-		this.mConvList.add(0, cov);
-		GroupLayout gp = new GroupLayout(this.getActivity(), cov);
-		gp.updateNotificator(flag);
-		mItemList.add(0, new ScrollItem(cov, gp));
+		boolean isAdd = true;
+		for (Conversation conversation : mConvList) {
+			if(conversation.getExtId() == cov.getExtId()){
+				isAdd = false;
+				break;
+			}
+		}
+		
+		if(isAdd == true){
+			this.mConvList.add(0, cov);
+			GroupLayout gp = new GroupLayout(this.getActivity(), cov);
+			mItemList.add(0, new ScrollItem(cov, gp));
+			gp.updateNotificator(flag);
+		}
 		this.adapter.notifyDataSetChanged();
 
 		if (flag) {
@@ -693,11 +684,11 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 		}
 	}
 
+	
+	private List<Conversation> tempList;
 	/**
 	 * Load local conversation list
 	 */
-	private List<Conversation> tempList;
-
 	private synchronized void loadUserConversation() {
 		if (isLoadedCov) {
 			return;
@@ -735,7 +726,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 				synchronized (ConversationsTabFragment.class) {
 					tempList = new ArrayList<Conversation>();
 					tempList = ConversationProvider.loadUserConversation(
-							mContext, mConvList, mCurrentTabFlag,
+							mContext, tempList, mCurrentTabFlag,
 							verificationMessageItemData, voiceMessageItem);
 					isLoadedCov = true;
 				}
@@ -814,17 +805,17 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 				break;
 			}
 		}
-
-		showUnreadFriendAuthentication();
 		adapter.notifyDataSetChanged();
 	}
 
-	// private boolean isExist;
 	private Conversation voiceMessageItem;
 	private GroupLayout voiceLayout;
 	private GroupLayout verificationMessageItemLayout;
 	private Conversation verificationMessageItemData;
 
+	/**
+	 * 初始化通话消息item对象
+	 */
 	private void initVoiceItem() {
 		voiceMessageItem = new Conversation(Conversation.TYPE_VOICE_MESSAGE, 0);
 		voiceMessageItem.setExtId(-1);
@@ -834,6 +825,9 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 		voiceItem = new ScrollItem(voiceMessageItem, voiceLayout);
 	}
 
+	/**
+	 * 初始化验证消息item对象
+	 */
 	private void initVerificationItem() {
 		verificationMessageItemData = new ConversationFirendAuthenticationData(
 				Conversation.TYPE_VERIFICATION_MESSAGE, 0);
@@ -1084,13 +1078,13 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 	}
 
 	private void updateUnreadConversation(Conversation cov) {
-		boolean flag;
+//		boolean flag;
 		int ret;
 		if (cov.getReadFlag() == Conversation.READ_FLAG_READ) {
-			flag = mUnreadConvList.remove(cov);
+			mUnreadConvList.remove(cov);
 			ret = Conversation.READ_FLAG_READ;
 		} else {
-			flag = mUnreadConvList.add(cov);
+			mUnreadConvList.add(cov);
 			ret = Conversation.READ_FLAG_UNREAD;
 		}
 		// Update main activity to show or hide notificator
@@ -1099,15 +1093,10 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 		} else {
 			this.notificationListener.updateNotificator(mCurrentTabFlag, false);
 		}
-
-		ContentValues ct = new ContentValues();
-		ct.put(ContentDescriptor.RecentHistoriesMessage.Cols.HISTORY_RECENT_MESSAGE_READ_STATE,
-				ret);
-
 		// If flag is true, means we updated unread list, then we need to update
 		// database
-		if (flag)
-			ConversationProvider.updateConversationToDatabase(mContext, cov,
+		// update conversation date and flag to database
+		ConversationProvider.updateConversationToDatabase(mContext, cov,
 					ret);
 	}
 
@@ -1294,26 +1283,11 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 					Intent intent = new Intent(mContext,
 							VoiceMessageActivity.class);
 					startActivity(intent);
-
-					// ScrollItem scrollItem = mItemList
-					// .get(currentMoveViewPosition);
-					// mItemList.remove(currentMoveViewPosition);
-					// mConvList.remove(currentMoveViewPosition);
-					// mItemList.add(0, scrollItem);
-					// mConvList.add(0, scrollItem.cov);
-					// adapter.notifyDataSetChanged();
 				} else if (cov.getType() == Conversation.TYPE_VERIFICATION_MESSAGE) {
 
 					Intent intent = new Intent(mContext,
 							MessageAuthenticationActivity.class);
 					startActivity(intent);
-					// ScrollItem scrollItem = mItemList
-					// .get(currentMoveViewPosition);
-					// mItemList.remove(currentMoveViewPosition);
-					// mConvList.remove(currentMoveViewPosition);
-					// mItemList.add(0, scrollItem);
-					// mConvList.add(0, scrollItem.cov);
-					// adapter.notifyDataSetChanged();
 				} else {
 					startConversationView(cov);
 				}
@@ -2137,6 +2111,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 				}
 				break;
 			case UPDATE_CONVERSATION_MESSAGE:
+				mConvList = tempList;
 				fillAdapter(tempList);
 				break;
 			}

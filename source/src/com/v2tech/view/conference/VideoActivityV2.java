@@ -2165,8 +2165,10 @@ public class VideoActivityV2 extends Activity {
 						at = new Attendee(ut);
 						mAttendeeList.add(at);
 					}
+					V2Log.d(TAG, "Successful receiver the 参会人加入的回调");
 					doHandleNewUserEntered(at);
 				} else {
+					V2Log.d(TAG, "Successful receiver the 参会人退出的回调");
 					doHandleUserExited(at);
 				}
 				break;
@@ -2239,7 +2241,7 @@ public class VideoActivityV2 extends Activity {
 
 					// Notify attendee list mixed video is created
 					if (mAttendeeContainer != null) {
-						V2Log.e(TAG, "VIDEO_MIX_NOTIFICATION 方法调用了update---");
+						V2Log.e(TAG, "VIDEO_MIX_NOTIFICATION 被调用 , 成功添加混合视频  update---");
 						mAttendeeContainer.updateEnteredAttendee(amd);
 					}
 
