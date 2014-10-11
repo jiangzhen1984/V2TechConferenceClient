@@ -1,5 +1,7 @@
 <resources>
 
+  <string name="activiy_contact_group_update_title">分组管理</string>
+    
   <string name="activiy_contact_group_title">移至分组</string>
   
   <string name="activiy_contact_group_title_button_done">完成</string>
@@ -7,6 +9,8 @@
   <string name="activiy_contact_group_item_button_delete">删除</string>
   
   <string name="activiy_contact_group_button_confirm">确定</string>
+  
+  <string name="activiy_contact_group_add_hint">请输入分组名</string>
   
   <string name="activiy_contact_group_button_cancel">取消</string>
   

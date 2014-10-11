@@ -36,11 +36,11 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/imq_l1"
             android:layout_centerHorizontal="true"
-            android:layout_marginTop="15dp"
             android:layout_marginBottom="15dp"
+            android:layout_marginTop="15dp"
             android:background="@drawable/rounded_corners_create_conf_box_bg"
             android:focusable="true"
-                android:focusableInTouchMode="true"
+            android:focusableInTouchMode="true"
             android:padding="1dp" >
 
             <EditText
@@ -50,8 +50,9 @@
                 android:layout_gravity="center"
                 android:background="@null"
                 android:ems="10"
-                android:maxLength="30"
+                android:hint="@string/activiy_contact_group_add_hint"
                 android:inputType="text"
+                android:maxLength="30"
                 android:paddingBottom="5dp"
                 android:paddingTop="5dp" >
             </EditText>

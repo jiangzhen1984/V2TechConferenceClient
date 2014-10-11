@@ -12,7 +12,6 @@ import android.graphics.PorterDuff;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.util.LongSparseArray;
-import android.text.TextUtils;
 import android.text.TextUtils.TruncateAt;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
@@ -29,7 +28,6 @@ import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.V2.jni.V2GlobalEnum;
 import com.V2.jni.util.V2Log;
 import com.v2tech.R;
 import com.v2tech.service.GlobalHolder;
@@ -56,7 +54,6 @@ public class GroupListView extends ListView {
 	private LongSparseArray<Set<Item>> mUserItemListMap;
 	private LongSparseArray<LongSparseArray<Item>> mGroupItemUserMap;
 	private boolean mIsInFilter;
-	private int currentListViewType;
 
 	public GroupListView(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
@@ -99,14 +96,11 @@ public class GroupListView extends ListView {
 		adapter.notifyDataSetChanged();
 	}
 
-	public int getCurrentListViewType() {
-		return currentListViewType;
-	}
 
-	public void setCurrentListViewType(int currentListViewType) {
-		this.currentListViewType = currentListViewType;
-	}
-
+	/**
+	 * set flag to show or hide item check box view
+	 * @param flag true for show, false for hide
+	 */
 	public void setShowedCheckedBox(boolean flag) {
 		mCBFlag = flag;
 	}
@@ -286,6 +280,8 @@ public class GroupListView extends ListView {
 		}
 		if (insert) {
 			addUser(dest, user);
+		} else {
+			adapter.notifyDataSetChanged();
 		}
 	}
 
@@ -999,11 +995,7 @@ public class GroupListView extends ListView {
 			mUserSignatureTV.setSingleLine(true);
 			mUserSignatureTV.setEllipsize(TruncateAt.END);
 
-			if (currentListViewType == V2GlobalEnum.GROUP_TYPE_CONTACT
-					&& !TextUtils.isEmpty(u.getNickName()))
-				mUserNameTV.setText(u.getNickName());
-			else
-				mUserNameTV.setText(u.getName());
+			mUserNameTV.setText(u.getName());
 
 			updateStatus(u.getDeviceType(), u.getmStatus());
 			if (mCBFlag) {

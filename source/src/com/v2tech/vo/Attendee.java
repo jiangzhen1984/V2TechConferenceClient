@@ -205,13 +205,26 @@ public class Attendee implements Comparable<Attendee>{
 	}
 	
 	public void setSpeakingState(boolean state) {
-		if (state) {
+		if (!state) {
 			mPermission &= (~CONFERENCE_PERMISSION_SPEAKING);
 		} else {
 			mPermission |= CONFERENCE_PERMISSION_SPEAKING;
 		}
 	}
+	
+	public boolean isControl() {
+		return (mPermission & CONFERENCE_PERMISSION_CONTROL) == CONFERENCE_PERMISSION_CONTROL;
+	}
+	
+	public void setControlState(boolean state) {
+		if (!state) {
+			mPermission &= (~CONFERENCE_PERMISSION_CONTROL);
+		} else {
+			mPermission |= CONFERENCE_PERMISSION_CONTROL;
+		}
+	}
 
+	
 
 
 	@Override

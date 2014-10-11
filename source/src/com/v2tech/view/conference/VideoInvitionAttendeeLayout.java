@@ -1,7 +1,6 @@
 package com.v2tech.view.conference;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -12,35 +11,32 @@ import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Message;
 import android.text.Editable;
+import android.text.TextUtils;
 import android.text.TextUtils.TruncateAt;
 import android.text.TextWatcher;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.BaseAdapter;
 import android.widget.EditText;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
-import com.V2.jni.V2GlobalEnum;
 import com.v2tech.R;
 import com.v2tech.service.GlobalHolder;
+import com.v2tech.view.widget.GroupListView;
+import com.v2tech.view.widget.GroupListView.Item;
 import com.v2tech.vo.Conference;
 import com.v2tech.vo.Group;
+import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.User;
 
 public class VideoInvitionAttendeeLayout extends LinearLayout {
 
-	private static final int UPDATE_LIST_VIEW = 1;
 	private static final int UPDATE_ATTENDEES = 2;
-	private static final int UPDATE_SEARCHED_USER_LIST = 3;
 
 	private static final int PAD_LAYOUT = 1;
 	private static final int PHONE_LAYOUT = 0;
@@ -49,8 +45,8 @@ public class VideoInvitionAttendeeLayout extends LinearLayout {
 	private LocalHandler mLocalHandler = new LocalHandler();
 
 	private EditText searchedTextET;
-	private ListView mContactsContainer;
-	private ContactsAdapter adapter = new ContactsAdapter();
+	//private ListView mContactsContainer;
+	private GroupListView mGroupListView;
 	private EditText mConfTitleET;
 	private EditText mConfStartTimeET;
 	private View mInvitionButton;
@@ -61,12 +57,9 @@ public class VideoInvitionAttendeeLayout extends LinearLayout {
 
 	private View mScroller;
 
-	private boolean mIsStartedSearch;
 
-	private List<ListItem> mItemList = new ArrayList<ListItem>();
-	private List<ListItem> mCacheItemList;
 	private List<Group> mGroupList;
-
+	
 	// Used to save current selected user
 	private Set<User> mAttendeeList = new HashSet<User>();
 
@@ -83,6 +76,7 @@ public class VideoInvitionAttendeeLayout extends LinearLayout {
 	public VideoInvitionAttendeeLayout(Context context, Conference conf) {
 		super(context);
 		this.conf = conf;
+		mGroupList = new ArrayList<Group>();
 		initLayout();
 	}
 
@@ -91,10 +85,11 @@ public class VideoInvitionAttendeeLayout extends LinearLayout {
 		View view = LayoutInflater.from(getContext()).inflate(
 				R.layout.video_invition_attendee_layout, null, false);
 
-		mContactsContainer = (ListView) view
+		mGroupListView = (GroupListView) view
 				.findViewById(R.id.conf_create_contacts_list);
-		mContactsContainer.setOnItemClickListener(itemListener);
-		mContactsContainer.setAdapter(adapter);
+		mGroupListView.setShowedCheckedBox(true);
+		mGroupListView.setTextFilterEnabled(true);
+		mGroupListView.setListener(mListener);
 
 		mAttendeeContainer = (LinearLayout) view
 				.findViewById(R.id.conference_attendee_container);
@@ -142,54 +137,7 @@ public class VideoInvitionAttendeeLayout extends LinearLayout {
 		return screenSize == Configuration.SCREENLAYOUT_SIZE_XLARGE;
 	}
 
-	private void updateView(int pos) {
-		ListItem item = mItemList.get(pos);
-		if (item.g == null) {
-			return;
-		}
-		if (item.isExpanded == false) {
-			for (Group g : item.g.getChildGroup()) {
-				ListItem cache = new ListItem(g, g.getLevel());
-				mItemList.add(++pos, cache);
-			}
-			List<User> sortList = new ArrayList<User>();
-			sortList.addAll(item.g.getUsers());
-			Collections.sort(sortList);
-			for (User u : sortList) {
-				ListItem cache = new ListItem(u, item.g.getLevel() + 1);
-				mItemList.add(++pos, cache);
-				updateItem(cache);
-			}
 
-		} else {
-			if (item.g.getChildGroup().size() <= 0
-					&& item.g.getUsers().size() <= 0) {
-				return;
-			}
-
-			int startRemovePos = pos + 1;
-			int endRemovePos = pos;
-			for (int index = pos + 1; index < mItemList.size(); index++) {
-				ListItem li = mItemList.get(index);
-				if (li.g != null && li.g.getLevel() <= item.g.getLevel()) {
-					break;
-				}
-				if (li.u != null && li.level == item.g.getLevel()) {
-					break;
-				}
-				endRemovePos++;
-			}
-
-			while (startRemovePos <= endRemovePos
-					&& endRemovePos < mItemList.size()) {
-				mItemList.remove(startRemovePos);
-				endRemovePos--;
-			}
-		}
-
-		item.isExpanded = !item.isExpanded;
-		adapter.notifyDataSetChanged();
-	}
 
 	private void updateUserToAttendList(final User u) {
 		if (u == null) {
@@ -219,17 +167,7 @@ public class VideoInvitionAttendeeLayout extends LinearLayout {
 		}
 	}
 
-	private void updateItem(ListItem it) {
-		if (it == null || it.u == null) {
-			return;
-		}
 
-		for (User u : mAttendeeList) {
-			if (it.u.getmUserId() == u.getmUserId()) {
-				((ContactUserView) it.v).updateChecked();
-			}
-		}
-	}
 
 	private void addAttendee(User u) {
 		if (u.isCurrentLoggedInUser()) {
@@ -311,16 +249,7 @@ public class VideoInvitionAttendeeLayout extends LinearLayout {
 		return ll;
 	}
 
-	private void updateSearchedUserList(List<User> lu) {
-		mItemList = new ArrayList<ListItem>();
-		for (User u : lu) {
-			ListItem item = new ListItem(u, -1);
-			((ContactUserView) item.v).removePadding();
-			mItemList.add(item);
-			updateItem(item);
-		}
-		adapter.notifyDataSetChanged();
-	}
+	
 
 	private OnClickListener removeAttendeeListener = new OnClickListener() {
 
@@ -328,12 +257,7 @@ public class VideoInvitionAttendeeLayout extends LinearLayout {
 		public void onClick(View view) {
 			User u = (User) view.getTag();
 			Message.obtain(mLocalHandler, UPDATE_ATTENDEES, u).sendToTarget();
-			for (int index = 0; index < mItemList.size(); index++) {
-				ListItem li = mItemList.get(index);
-				if (li.u != null && u.getmUserId() == li.u.getmUserId()) {
-					((ContactUserView) li.v).updateChecked();
-				}
-			}
+			mGroupListView.updateCheckItem(u, false);
 		}
 
 	};
@@ -342,33 +266,13 @@ public class VideoInvitionAttendeeLayout extends LinearLayout {
 
 		@Override
 		public void afterTextChanged(Editable s) {
-			if (s != null && s.length() > 0) {
-				if (!mIsStartedSearch) {
-					mCacheItemList = mItemList;
-					mIsStartedSearch = true;
+			if (TextUtils.isEmpty(s.toString())) {
+				if (!TextUtils.isEmpty(mGroupListView.getTextFilter())) {
+					mGroupListView.clearTextFilter();
 				}
 			} else {
-				if (mIsStartedSearch) {
-					mItemList = mCacheItemList;
-					for (ListItem ListItem : mItemList) {
-						if(mAttendeeList.contains(ListItem.u))
-							((ContactUserView) ListItem.v).setChecked();
-						else
-							updateItem(ListItem);
-					}
-					
-					adapter.notifyDataSetChanged();
-					mIsStartedSearch = false;
-				}
-				return;
+				mGroupListView.setFilterText(s.toString());
 			}
-			String str = s == null ? "" : s.toString();
-			List<User> searchedUserList = new ArrayList<User>();
-			for (Group g : mGroupList) {
-				Group.searchUser(str, searchedUserList, g);
-			}
-			Message.obtain(mLocalHandler, UPDATE_SEARCHED_USER_LIST,
-					searchedUserList).sendToTarget();
 		}
 
 		@Override
@@ -384,32 +288,41 @@ public class VideoInvitionAttendeeLayout extends LinearLayout {
 		}
 
 	};
-
-	private OnItemClickListener itemListener = new OnItemClickListener() {
+	
+	
+	
+	private GroupListView.GroupListViewListener mListener = new GroupListView.GroupListViewListener() {
 
 		@Override
-		public void onItemClick(AdapterView<?> parent, View view, int pos,
-				long id) {
-			ListItem item = mItemList.get(pos);
-			if (item.g != null) {
-				((ContactGroupView) mItemList.get(pos).v)
-						.doExpandedOrCollapse();
-				Message.obtain(mLocalHandler, UPDATE_LIST_VIEW, pos, 0)
-						.sendToTarget();
-			} else {
-				ContactUserView cuv = (ContactUserView) view;
-				for (ListItem li : mItemList) {
-					if (li.u != null
-							&& li.u.getmUserId() == cuv.getUser().getmUserId()) {
-						((ContactUserView) li.v).updateChecked();
-					}
-				}
-				Message.obtain(mLocalHandler, UPDATE_ATTENDEES, item.u)
-						.sendToTarget();
-			}
+		public boolean onItemLongClick(AdapterView<?> parent, View view,
+				int position, long id, Item item) {
+			return false;
 		}
 
+		@Override
+		public void onItemClicked(AdapterView<?> parent, View view,
+				int position, long id, Item item) {
+			Object obj = item.getObject();
+			if (obj instanceof User) {
+				Message.obtain(mLocalHandler, UPDATE_ATTENDEES, (User)obj)
+				.sendToTarget();
+				mGroupListView.updateCheckItem((User)obj, !item.isChecked());
+			}
+
+		}
+
+		public void onCheckboxClicked(View view, Item item) {
+			Object obj = item.getObject();
+			if (obj instanceof User) {
+				Message.obtain(mLocalHandler, UPDATE_ATTENDEES, (User)obj)
+				.sendToTarget();
+				mGroupListView.updateCheckItem((User)obj, !item.isChecked());
+			}
+		}
 	};
+	
+
+
 
 	private OnClickListener confirmButtonListener = new OnClickListener() {
 
@@ -423,12 +336,6 @@ public class VideoInvitionAttendeeLayout extends LinearLayout {
 			// Clean
 			mAttendeeContainer.removeAllViews();
 			mAttendeeList.clear();
-			for (ListItem li : mItemList) {
-				if (li.u != null && ((ContactUserView) li.v).isChecked()) {
-					((ContactUserView) li.v).updateChecked();
-				}
-			}
-
 		}
 
 	};
@@ -437,89 +344,33 @@ public class VideoInvitionAttendeeLayout extends LinearLayout {
 
 		@Override
 		protected Void doInBackground(Void... params) {
-			mGroupList = GlobalHolder.getInstance().getGroup(V2GlobalEnum.GROUP_TYPE_DEPARTMENT);
-			if (mGroupList != null) {
-				for (Group g : mGroupList) {
-					mItemList.add(new ListItem(g, g.getLevel()));
-				}
-			}
+			mGroupList.clear();
+			mGroupList.addAll(GlobalHolder.getInstance().getGroup(
+						GroupType.CONTACT.intValue()));
+			mGroupList.addAll(GlobalHolder.getInstance().getGroup(
+					GroupType.ORG.intValue()));
+			
 			return null;
 		}
 
 		@Override
 		protected void onPostExecute(Void result) {
-			adapter.notifyDataSetChanged();
+			mGroupListView.setGroupList(mGroupList);
 		}
 
 	};
 
-	class ListItem {
-		long id;
-		Group g;
-		User u;
-		View v;
-		boolean isExpanded;
-		int level;
 
-		public ListItem(Group g, int level) {
-			super();
-			this.g = g;
-			this.id = 0x02000000 | g.getmGId();
-			this.v = new ContactGroupView(mContext, g, null);
-			isExpanded = false;
-			this.level = level;
-		}
 
-		public ListItem(User u, int level) {
-			super();
-			this.u = u;
-			this.id = 0x03000000 | u.getmUserId();
-			this.v = new ContactUserView(mContext, u);
-			isExpanded = false;
-			this.level = level;
-		}
-
-	}
-
-	class ContactsAdapter extends BaseAdapter {
-
-		@Override
-		public int getCount() {
-			return mItemList.size();
-		}
-
-		@Override
-		public Object getItem(int position) {
-			ListItem item = mItemList.get(position);
-			return item.g == null ? item.u : item.g;
-		}
-
-		@Override
-		public long getItemId(int position) {
-			return mItemList.get(position).id;
-		}
-
-		@Override
-		public View getView(int position, View convertView, ViewGroup parent) {
-			
-			return mItemList.get(position).v;
-		}
-
-	}
+	
 
 	class LocalHandler extends Handler {
 
 		@Override
 		public void handleMessage(Message msg) {
 			switch (msg.what) {
-			case UPDATE_LIST_VIEW:
-				updateView(msg.arg1);
-				break;
 			case UPDATE_ATTENDEES:
 				updateUserToAttendList((User) msg.obj);
-				break;
-			case UPDATE_SEARCHED_USER_LIST:
-				updateSearchedUserList((List<User>) msg.obj);
 				break;
 			}
 		}

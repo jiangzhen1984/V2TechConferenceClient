@@ -14,6 +14,8 @@ import android.content.Context;
 import android.util.Log;
 
 import com.V2.jni.ind.FileJNIObject;
+import com.V2.jni.ind.GroupFileJNIObject;
+import com.V2.jni.ind.V2Group;
 import com.V2.jni.ind.V2User;
 import com.V2.jni.util.V2Log;
 
@@ -188,11 +190,33 @@ public class FileRequest {
 				+ nFileBytes);
 	}
 
-	// 閫氱煡鍒犻櫎涓婁紶鐨勬枃浠�
+	/**
+	 * 
+	 * @param nGroupID
+	 * @param nBusinessType
+	 * @param szFileID
+	 */
 	private void OnFileTransNotifyDel(long nGroupID, int nBusinessType,
 			String szFileID) {
 		Log.e(TAG, "OnFileTransNotifyDel--->" + nGroupID + ":" + nBusinessType
 				+ ":" + szFileID);
+		
+		FileJNIObject file = null;
+		if (nGroupID > 0) {
+			//Use default type 
+			V2Group group = new V2Group(nGroupID, V2Group.TYPE_CROWD);
+			file = new GroupFileJNIObject(group,  szFileID); 
+		} else {
+			file = new FileJNIObject(null, szFileID, "", 0, 0); 
+		}
+		
+		
+		for (int i = 0; i < mCallbacks.size(); i++) {
+			WeakReference<FileRequestCallback> wrf = mCallbacks.get(i);
+			if (wrf != null && wrf.get() != null) {
+				((FileRequestCallback) wrf.get()).OnFileDeleted(file);
+			}
+		}
 	}
 
 	// 鏀跺埌鏂囦欢浼犺緭寮�鐨勫洖璋�
@@ -239,7 +263,7 @@ public class FileRequest {
 			WeakReference<FileRequestCallback> wrf = mCallbacks.get(i);
 			if (wrf != null && wrf.get() != null) {
 				((FileRequestCallback) wrf.get()).OnFileTransEnd(szFileID,
-						szFileName, nFileSize, nTransType , context);
+						szFileName, nFileSize, nTransType);
 			}
 		}
 	}
@@ -286,7 +310,7 @@ public class FileRequest {
 			WeakReference<FileRequestCallback> wrf = mCallbacks.get(i);
 			if (wrf != null && wrf.get() != null) {
 				((FileRequestCallback) wrf.get()).OnFileDownloadError(sFileID,
-						errorCode , nTransType , context);
+						errorCode , nTransType );
 			}
 		}
 	}

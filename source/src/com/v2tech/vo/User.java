@@ -245,9 +245,14 @@ public class User implements Comparable<User> {
 	}
 
 	public String getDepartment() {
-		// FIXM me
-		if (this.getFirstBelongsGroup() != null) {
-			mDepartment = this.getFirstBelongsGroup().getName();
+		//FIXME first group is real department
+		Group g = this.getFirstBelongsGroup();
+		if (g != null) {
+			if (g.getParent() == null) {
+				mDepartment = "";
+			} else {
+				mDepartment = g.getName();
+			}
 		}
 		return mDepartment;
 	}

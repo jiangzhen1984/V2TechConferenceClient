@@ -50,7 +50,7 @@
                 android:layout_alignParentLeft="true"
                 android:layout_centerVertical="true"
                 android:layout_marginLeft="15dp"
-                android:text="@string/crowd_detail_title"
+                android:text="@string/crowd_detail_return_button"
                 android:textColor="@color/conf_create_button_color" />
         </RelativeLayout>
 

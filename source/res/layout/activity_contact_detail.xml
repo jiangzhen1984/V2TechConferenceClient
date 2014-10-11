@@ -96,6 +96,7 @@
                     android:maxWidth="@dimen/detail_detail_name_max_width"
                     android:singleLine="true"
                     android:text="TextView"
+                    android:textSize="@dimen/common_item_text_size_16"
                     android:textColor="@color/common_item_text_color" />
 
                 <com.v2tech.view.widget.MarqueeTextView

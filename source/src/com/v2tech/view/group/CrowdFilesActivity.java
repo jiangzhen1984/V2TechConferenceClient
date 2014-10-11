@@ -79,7 +79,7 @@ public class CrowdFilesActivity extends Activity {
 	private ListView mListView;
 	private FileListAdapter adapter;
 	private View mReturnButton;
-	private View mShowUploadedFileButton;
+	private TextView mShowUploadedFileButton;
 	private TextView mTitle;
 	private boolean showUploaded;
 	private boolean isInDeleteMode;
@@ -99,7 +99,7 @@ public class CrowdFilesActivity extends Activity {
 
 		mReturnButton = findViewById(R.id.crowd_members_return_button);
 		mReturnButton.setOnClickListener(mBackButtonListener);
-		mShowUploadedFileButton = findViewById(R.id.crowd_files_uploaded_file_button);
+		mShowUploadedFileButton = (TextView) findViewById(R.id.crowd_files_uploaded_file_button);
 		mShowUploadedFileButton
 				.setOnClickListener(mShowUploadedFileButtonListener);
 
@@ -161,6 +161,8 @@ public class CrowdFilesActivity extends Activity {
 		if (isInDeleteMode) {
 			isInDeleteMode = false;
 			adapter.notifyDataSetChanged();
+			// set cancel button text to upload text
+			mShowUploadedFileButton.setText(R.string.crowd_files_title_upload);
 			return;
 		}
 		super.onBackPressed();
@@ -180,13 +182,13 @@ public class CrowdFilesActivity extends Activity {
 			return;
 		}
 
-		// loading upLoading files from database;
+//		// loading upLoading files from database;
 		List<VCrowdFile> fileItems = MessageLoader
 				.loadGroupUpLoadingFileMessage(mContext, crowd.getGroupType()
-						.intValue(), crowd.getmGId() , crowd);
-		if(fileItems != null && fileItems.size() > 0)		
+						.intValue(), crowd.getmGId(), crowd);
+		if (fileItems != null && fileItems.size() > 0)
 			mUploadedFiles.addAll(fileItems);
-		
+
 		service.fetchGroupFiles(crowd, new Registrant(mLocalHandler,
 				FETCH_FILES_DONE, null));
 	}
@@ -306,13 +308,22 @@ public class CrowdFilesActivity extends Activity {
 
 		@Override
 		public void onClick(View v) {
-			showUploaded = true;
-//			 mTitle.setText(R.string.crowd_files_title_uploaded);
-//			 mShowUploadedFileButton.setVisibility(View.GONE);
-//			 adapter.notifyDataSetChanged();
-			Intent intent = new Intent(mContext, ConversationSelectFile.class);
-			intent.putExtra("type", "crowdFile");
-			startActivityForResult(intent, RECEIVE_SELECTED_FILE);
+			if (isInDeleteMode) {
+				// set cancel button text to upload text
+				mShowUploadedFileButton
+						.setText(R.string.crowd_files_title_upload);
+				isInDeleteMode = false;
+				adapter.notifyDataSetChanged();
+			} else {
+				showUploaded = true;
+				// mTitle.setText(R.string.crowd_files_title_uploaded);
+				// mShowUploadedFileButton.setVisibility(View.GONE);
+				// adapter.notifyDataSetChanged();
+				Intent intent = new Intent(mContext,
+						ConversationSelectFile.class);
+				intent.putExtra("type", "crowdFile");
+				startActivityForResult(intent, RECEIVE_SELECTED_FILE);
+			}
 		}
 
 	};
@@ -327,6 +338,9 @@ public class CrowdFilesActivity extends Activity {
 			} else {
 				isInDeleteMode = true;
 				adapter.notifyDataSetChanged();
+				// update upload button text to cancel
+				mShowUploadedFileButton
+						.setText(R.string.crowd_files_title_cancel_button);
 				return true;
 			}
 		}

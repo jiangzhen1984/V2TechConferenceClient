@@ -95,7 +95,6 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 
 		mContactsContainer.setListener(mListener);
 		mContactsContainer.setTextFilterEnabled(true);
-		mContactsContainer.setCurrentListViewType(flag);
 
 		mContactsContainer.setDivider(null);
 

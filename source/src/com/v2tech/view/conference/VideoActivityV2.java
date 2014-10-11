@@ -483,8 +483,8 @@ public class VideoActivityV2 extends Activity {
 							.getCurrentUser());
 					mAttendeeList.add(pa);
 				}
-				mAttendeeContainer.updateAttendeeSpeakingState(pa,
-						ConferencePermission.SPEAKING, PermissionState.GRANTED);
+				pa.setSpeakingState(true);
+				mAttendeeContainer.updateAttendeeSpeakingState(pa);
 			}
 			// Update pending attendee state
 			for (PermissionUpdateIndication ind : mPendingPermissionUpdateList) {
@@ -959,15 +959,19 @@ public class VideoActivityV2 extends Activity {
 					Group confGroup = GlobalHolder.getInstance().findGroupById(
 							conf.getId());
 					// load conference attendee list
+					List<Attendee> list = new ArrayList<Attendee>();
 					if (confGroup != null) {
 						List<User> l = confGroup.getUsers();
 						for (User u : l) {
 							Attendee at = new Attendee(u);
 							boolean bt = mAttendeeList.add(at);
-							if (bt && mAttendeeContainer != null) {
-								mAttendeeContainer.addNewAttendee(at);
+							if (bt) {
+								list.add(at);
 							}
 						}
+					}
+					if (mAttendeeContainer != null) {
+					mAttendeeContainer.addNewAttendee(list);
 					}
 				}
 
@@ -1538,9 +1542,12 @@ public class VideoActivityV2 extends Activity {
 		}
 
 		if (pa != null && mAttendeeContainer != null) {
-			mAttendeeContainer.updateAttendeeSpeakingState(pa,
-					ConferencePermission.fromInt(ind.getType()),
-					PermissionState.fromInt(ind.getState()));
+			ConferencePermission cp = ConferencePermission.fromInt(ind.getType());
+			PermissionState ps = PermissionState.fromInt(ind.getState());
+			if (cp == ConferencePermission.SPEAKING && ps == PermissionState.GRANTED) {
+				pa.setSpeakingState(true);
+			}
+			mAttendeeContainer.updateAttendeeSpeakingState(pa);
 			return true;
 		} else {
 			return false;
@@ -2138,7 +2145,7 @@ public class VideoActivityV2 extends Activity {
 							.getUser(ro1.getmUserId()));
 					mAttendeeList.add(a1);
 					if (mAttendeeContainer != null) {
-						mAttendeeContainer.addAttendee(a1);
+						mAttendeeContainer.addNewAttendee(a1);
 					}
 				}
 				break;

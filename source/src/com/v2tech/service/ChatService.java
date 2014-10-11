@@ -2,10 +2,8 @@ package com.v2tech.service;
 
 import java.util.List;
 
-import android.content.Context;
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.util.Log;
 
 import com.V2.jni.AudioRequest;
 import com.V2.jni.AudioRequestCallback;
@@ -29,10 +27,8 @@ import com.v2tech.service.jni.JNIResponse;
 import com.v2tech.service.jni.RequestChatServiceResponse;
 import com.v2tech.service.jni.RequestSendMessageResponse;
 import com.v2tech.util.GlobalConfig;
-import com.v2tech.view.conversation.MessageBuilder;
 import com.v2tech.vo.UserChattingObject;
 import com.v2tech.vo.VMessage;
-import com.v2tech.vo.VMessageAbstractItem;
 import com.v2tech.vo.VMessageAudioItem;
 import com.v2tech.vo.VMessageFileItem;
 import com.v2tech.vo.VMessageImageItem;
@@ -611,19 +607,7 @@ public class ChatService extends DeviceService {
 
 		@Override
 		public void OnFileTransEnd(String szFileID, String szFileName,
-				long nFileSize, int nTransType , Context context) {
-			VMessage vm = new VMessage(0, 0, null, null);
-			VMessageFileItem item = new VMessageFileItem(vm, null);
-			item.setUuid(szFileID);
-			if(nTransType == FileDownLoadErrorIndication.TYPE_SEND)
-				item.setState(VMessageAbstractItem.STATE_FILE_SENT);
-			else
-				item.setState(VMessageAbstractItem.STATE_FILE_DOWNLOADED);
-			int updates = MessageBuilder.updateVMessageItem(context,
-					item);
-			Log.e(TAG, "OnFileTransEnd updates success : " + updates);
-			vm = null;
-			item = null;
+				long nFileSize, int nTransType ) {
 			notifyListener(KEY_FILE_TRANS_STATUS_NOTIFICATION_LISTNER, 0, 0,
 					new FileTransProgressStatusIndication(nTransType, szFileID,
 							nFileSize,
@@ -632,19 +616,7 @@ public class ChatService extends DeviceService {
 
 		@Override
 		public void OnFileDownloadError(String szFileID, int errorCode,
-				int nTransType , Context context) {
-			VMessage vm = new VMessage(0, 0, null, null);
-			VMessageFileItem item = new VMessageFileItem(vm, null);
-			item.setUuid(szFileID);
-			if(nTransType == FileDownLoadErrorIndication.TYPE_SEND)
-				item.setState(VMessageAbstractItem.STATE_FILE_SENT_FALIED);
-			else
-				item.setState(VMessageAbstractItem.STATE_FILE_DOWNLOADED_FALIED);
-			int updates = MessageBuilder.updateVMessageItem(context,
-					item);
-			Log.e(TAG, "OnFileTransEnd updates success : " + updates);
-			vm = null;
-			item = null;
+				int nTransType) {
 			notifyListener(KEY_FILE_TRANS_STATUS_NOTIFICATION_LISTNER, 0, 0,
 					new FileDownLoadErrorIndication(szFileID, errorCode,
 							nTransType));
@@ -664,6 +636,8 @@ public class ChatService extends DeviceService {
 			notifyListener(KEY_FILE_TRANS_STATUS_NOTIFICATION_LISTNER, 0, 0,
 					new FileTransCannelIndication(szFileID));
 		}
+		
+		
 	}
 
 }

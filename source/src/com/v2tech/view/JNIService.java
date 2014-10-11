@@ -19,6 +19,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.Parcelable;
 import android.support.v4.util.LongSparseArray;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.V2.jni.AudioRequest;
@@ -48,6 +49,9 @@ import com.V2.jni.util.V2Log;
 import com.v2tech.R;
 import com.v2tech.service.BitmapManager;
 import com.v2tech.service.GlobalHolder;
+import com.v2tech.service.jni.FileDownLoadErrorIndication;
+import com.v2tech.service.jni.FileTransStatusIndication;
+import com.v2tech.service.jni.FileTransStatusIndication.FileTransProgressStatusIndication;
 import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.GlobalState;
 import com.v2tech.util.Notificator;
@@ -162,7 +166,7 @@ public class JNIService extends Service {
 		super.onCreate();
 		mContext = this;
 
-		HandlerThread callback = new HandlerThread("callback");
+		HandlerThread callback = new HandlerThread("JNI-Callbck");
 		callback.start();
 		synchronized (callback) {
 			while (!callback.isAlive()) {
@@ -1191,23 +1195,50 @@ public class JNIService extends Service {
 					.sendToTarget();
 		}
 
+		
+		
 		@Override
-		public void OnFileTransError(String szFileID, int errorCode,
+		public void OnFileTransEnd(String szFileID, String szFileName,
+				long nFileSize, int nTransType ) {
+			VMessage vm = new VMessage(0, 0, null, null);
+			VMessageFileItem item = new VMessageFileItem(vm, null);
+			item.setUuid(szFileID);
+			if(nTransType == FileDownLoadErrorIndication.TYPE_SEND)
+				item.setState(VMessageAbstractItem.STATE_FILE_SENT);
+			else
+				item.setState(VMessageAbstractItem.STATE_FILE_DOWNLOADED);
+			int updates = MessageBuilder.updateVMessageItem(mContext,
+					item);
+			Log.e(TAG, "OnFileTransEnd updates success : " + updates);
+			vm = null;
+			item = null;
+			
+		}
+		
+		
+		
+		@Override
+		public void OnFileDownloadError(String szFileID, int errorCode,
 				int nTransType) {
-
-		}
-
-		@Override
-		public void OnFileTransCancel(String szFileID) {
-
-		}
-
-		@Override
-		public void OnFileDownloadError(String sFileID, int errorCode,
-				int nTransType, Context context) {
-
+			VMessage vm = new VMessage(0, 0, null, null);
+			VMessageFileItem item = new VMessageFileItem(vm, null);
+			item.setUuid(szFileID);
+			if(nTransType == FileDownLoadErrorIndication.TYPE_SEND)
+				item.setState(VMessageAbstractItem.STATE_FILE_SENT_FALIED);
+			else
+				item.setState(VMessageAbstractItem.STATE_FILE_DOWNLOADED_FALIED);
+			int updates = MessageBuilder.updateVMessageItem(mContext,
+					item);
+			Log.e(TAG, "OnFileTransEnd updates success : " + updates);
+			vm = null;
+			item = null;
 		}
 
 	}
+	
+	
+	
+	
+	
 
 }

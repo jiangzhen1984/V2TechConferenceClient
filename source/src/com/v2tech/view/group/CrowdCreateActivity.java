@@ -469,6 +469,8 @@ public class CrowdCreateActivity extends Activity {
 					// add group to global cache
 					GlobalHolder.getInstance().addGroupToList(
 							GroupType.CHATING.intValue(), cg);
+					//Add self to list
+					cg.addUserToGroup(GlobalHolder.getInstance().getCurrentUser());
 					// send broadcast to inform new crowd notification
 					Intent i = new Intent();
 					i.setAction(PublicIntent.BROADCAST_NEW_CROWD_NOTIFICATION);

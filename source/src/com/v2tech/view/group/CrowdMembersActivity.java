@@ -38,7 +38,7 @@ public class CrowdMembersActivity extends Activity {
 
 	private ListView mMembersContainer;
 	private MembersAdapter adapter;
-	private View mInvitationButton;
+	private TextView mInvitationButton;
 	private View mReturnButton;
 
 	private List<User> mMembers;
@@ -143,6 +143,7 @@ public class CrowdMembersActivity extends Activity {
 			}
 			if (!isInDeleteMode) {
 				isInDeleteMode = true;
+				mInvitationButton.setText(R.string.crowd_members_deletion_mode_quit_button);
 				adapter.notifyDataSetChanged();
 				return true;
 			}
@@ -156,10 +157,17 @@ public class CrowdMembersActivity extends Activity {
 
 		@Override
 		public void onClick(View view) {
-			Intent i = new Intent(PublicIntent.START_GROUP_CREATE_ACTIVITY);
-			i.addCategory(PublicIntent.DEFAULT_CATEGORY);
-			i.putExtra("cid", crowd.getmGId());
-			startActivity(i);
+			if (isInDeleteMode) {
+				isInDeleteMode = false;
+				mInvitationButton.setText(R.string.crowd_members_invitation);
+				adapter.notifyDataSetChanged();
+				
+			} else {
+				Intent i = new Intent(PublicIntent.START_GROUP_CREATE_ACTIVITY);
+				i.addCategory(PublicIntent.DEFAULT_CATEGORY);
+				i.putExtra("cid", crowd.getmGId());
+				startActivity(i);
+			}
 		}
 
 	};

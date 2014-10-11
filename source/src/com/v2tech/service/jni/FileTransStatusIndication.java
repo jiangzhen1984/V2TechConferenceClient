@@ -6,6 +6,7 @@ public class FileTransStatusIndication extends JNIIndication {
 	public static final int IND_TYPE_TRANS_ERR = 2;
 	public static final int IND_TYPE_DOWNLOAD_ERR = 3;
 	public static final int IND_TYPE_TRANS_CANNEL = 4;
+	public static final int IND_TYPE_FILE_DELETE = 5;
 	
 	public static final int IND_TYPE_PROGRESS_TRANSING = 0;
 	public static final int IND_TYPE_PROGRESS_END = 1;
@@ -51,6 +52,15 @@ public class FileTransStatusIndication extends JNIIndication {
 
 		public FileTransErrorIndication(String uuid , int errorCode ,  int nTransType) {
 			super(IND_TYPE_TRANS_ERR, nTransType, uuid , errorCode);
+		}
+		
+	}
+	
+	
+	public static class FileDeletedIndication extends FileTransStatusIndication {
+
+		public FileDeletedIndication(String uuid , int errorCode ,  int nTransType) {
+			super(IND_TYPE_FILE_DELETE, nTransType, uuid , errorCode);
 		}
 		
 	}

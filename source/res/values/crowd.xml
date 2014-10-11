@@ -16,6 +16,7 @@
     <string name="crowd_invitation_box_item_member">群成员</string>
     <string name="crowd_invitation_box_item_member_unit">人</string>
     <string name="crowd_detail_title">群资料</string>
+    <string name="crowd_detail_return_button">返回</string>
     <string name="crowd_detail_qulification_rule">身份验证</string>
     <string name="crowd_detail_qulification_rule_no_rule">允许任何人</string>
     <string name="crowd_detail_qulification_rule_qulification">需要验证</string>
@@ -37,6 +38,7 @@
     
     <string name="crowd_members_title">群成员</string>
     <string name="crowd_members_invitation">添加</string>
+    <string name="crowd_members_deletion_mode_quit_button">完成</string>
     <string name="crowd_members_delete">删除</string>
     
     <string name="crowd_invitation_content">邀请您加入群</string>
@@ -45,6 +47,7 @@
     <string name="crowd_files_return_button">返回</string>
     <string name="crowd_files_title">群文件</string>
     <string name="crowd_files_title_upload">上传</string>
+    <string name="crowd_files_title_cancel_button">取消</string>
     <string name="crowd_files_button_name_download">下载</string>
     <string name="crowd_files_button_name_pause">暂停</string>
     <string name="crowd_files_button_name_resume">继续</string>

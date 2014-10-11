@@ -3,7 +3,6 @@ package com.v2tech.service;
 import java.util.ArrayList;
 import java.util.List;
 
-import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
 
@@ -14,6 +13,7 @@ import com.V2.jni.GroupRequestCallbackAdapter;
 import com.V2.jni.ImRequest;
 import com.V2.jni.ImRequestCallbackAdapter;
 import com.V2.jni.ind.FileJNIObject;
+import com.V2.jni.ind.GroupFileJNIObject;
 import com.V2.jni.ind.V2Group;
 import com.v2tech.service.jni.CreateCrowdResponse;
 import com.v2tech.service.jni.FileTransStatusIndication;
@@ -51,7 +51,6 @@ public class CrowdGroupService extends AbstractHandler {
 	private static final int REFUSE_APPLICATION_CROWD = 0x0007;
 	private static final int FETCH_FILES_CROWD = 0x0008;
 	private static final int REMOVE_FILES_CROWD = 0x0009;
-
 
 	private static final int KEY_CANCELLED_LISTNER = 1;
 	private static final int KEY_FILE_TRANS_STATUS_NOTIFICATION_LISTNER = 2;
@@ -194,6 +193,7 @@ public class CrowdGroupService extends AbstractHandler {
 
 	/**
 	 * Apply join crowd
+	 * 
 	 * @param crowd
 	 * @param additional
 	 * @param caller
@@ -585,6 +585,7 @@ public class CrowdGroupService extends AbstractHandler {
 		@Override
 		public void OnDelGroupFile(V2Group group, List<FileJNIObject> list) {
 			if (group.type == GroupType.CHATING.intValue()) {
+				// Use fetch group file object as result
 				RequestFetchGroupFilesResponse jniRes = new RequestFetchGroupFilesResponse(
 						JNIResponse.Result.SUCCESS);
 				jniRes.setList(convertList(group, list));
@@ -650,7 +651,7 @@ public class CrowdGroupService extends AbstractHandler {
 
 		@Override
 		public void OnFileTransEnd(String szFileID, String szFileName,
-				long nFileSize, int nTransType, Context context) {
+				long nFileSize, int nTransType) {
 			notifyListener(
 					KEY_FILE_TRANS_STATUS_NOTIFICATION_LISTNER,
 					0,
@@ -670,6 +671,27 @@ public class CrowdGroupService extends AbstractHandler {
 			notifyListener(KEY_FILE_TRANS_STATUS_NOTIFICATION_LISTNER, 0, 0,
 					new FileTransErrorIndication(szFileID, errorCode,
 							nTransType));
+		}
+
+		@Override
+		public void OnFileDeleted(FileJNIObject file) {
+			if (file instanceof GroupFileJNIObject) {
+				GroupFileJNIObject gfile = (GroupFileJNIObject) file;
+
+				RequestFetchGroupFilesResponse jniRes = new RequestFetchGroupFilesResponse(
+						JNIResponse.Result.SUCCESS);
+				List<VCrowdFile> list = new ArrayList<VCrowdFile>(1);
+				
+				VCrowdFile vcf = new VCrowdFile();
+				vcf.setCrowd((CrowdGroup)GlobalHolder.getInstance().getGroupById(GroupType.CHATING.intValue(), gfile.group.id));
+				vcf.setId(gfile.fileId);
+				list.add(vcf);
+				
+				jniRes.setList(list);
+				
+				notifyListener(KEY_FILE_REMOVED_NOTIFICATION_LISTNER, 0, 0,
+						jniRes);
+			}
 		}
 
 	}

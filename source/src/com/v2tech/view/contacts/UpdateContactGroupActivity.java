@@ -216,6 +216,14 @@ public class UpdateContactGroupActivity extends Activity {
 					i.putExtra("destGroupId", lo.dest.getmGId());
 					
 					mContext.sendBroadcast(i);
+					
+					//Set result to parent
+					Intent intent = new Intent();
+					Group g = GlobalHolder.getInstance().getGroupById(GroupType.CONTACT.intValue(), lo.dest.getmGId());
+					intent.putExtra("groupName", g.getName());
+					intent.putExtra("groupID", lo.dest.getmGId());
+					setResult(SELECT_GROUP_RESPONSE_CODE_DONE, intent);
+					
 					finish();
 					break;
 				}

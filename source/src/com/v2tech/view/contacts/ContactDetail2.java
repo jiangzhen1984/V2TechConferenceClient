@@ -437,9 +437,10 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 		if (requestCode == REQUEST_UPDATE_GROUP_CODE) {
 			if (resultCode == UpdateContactGroupActivity.SELECT_GROUP_RESPONSE_CODE_DONE) {
 				if (data != null) {
-					// selectGroupName = data.getStringExtra("groupName");
-					// selectGroupID = data.getLongExtra("groupID", 0);
-					// tvGroupName.setText(selectGroupName);
+					 String selectGroupName = data.getStringExtra("groupName");
+					 long selectGroupID = data.getLongExtra("groupID", 0);
+					 belongs = GlobalHolder.getInstance().getGroupById(selectGroupID);
+					 mGroupNameTV.setText(selectGroupName);
 				}
 			} else if (resultCode == UpdateContactGroupActivity.SELECT_GROUP_RESPONSE_CODE_CANCEL) {
 			}

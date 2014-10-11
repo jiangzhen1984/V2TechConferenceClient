@@ -66,7 +66,7 @@
         android:layout_height="fill_parent"
         android:background="#ffffff"
         android:orientation="horizontal" >
-        <ListView
+        <com.v2tech.view.widget.GroupListView
             android:id="@+id/conf_create_contacts_list"
             android:layout_width="0dp"
             android:layout_height="match_parent"
@@ -78,7 +78,7 @@
             android:fadingEdge="none"
             android:focusable="false"
             android:scrollingCache="false">
-        </ListView>
+        </com.v2tech.view.widget.GroupListView>
         <LinearLayout
             android:layout_width="1dp"
             android:layout_height="match_parent"

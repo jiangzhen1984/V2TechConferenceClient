@@ -234,6 +234,18 @@ public class GlobalHolder {
 	public Group getGroupById(int groupType, long gId) {
 		return mGroupHolder.get(Long.valueOf(gId));
 	}
+	
+	/**
+	 * 
+	 * @param groupType 
+	 * @param gId
+	 * @return
+	 * 
+	 * {@see com.V2.jni.V2GlobalEnum}
+	 */
+	public Group getGroupById(long gId) {
+		return mGroupHolder.get(Long.valueOf(gId));
+	}
 
 	private void populateGroup(int groupType , Group parent, Set<V2Group> list) {
 		for (V2Group vg : list) {
