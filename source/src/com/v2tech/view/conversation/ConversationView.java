@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
 import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +19,7 @@ import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.DialogInterface.OnDismissListener;
 import android.content.DialogInterface.OnKeyListener;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -48,7 +48,6 @@ import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.inputmethod.InputMethodManager;
-import android.webkit.URLUtil;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.BaseAdapter;
@@ -356,6 +355,14 @@ public class ConversationView extends Activity {
 				return false;
 			}
 		});
+		mVoiceDialog.setOnDismissListener(new OnDismissListener() {
+			
+			@Override
+			public void onDismiss(DialogInterface dialog) {
+				mButtonRecordAudio
+				.setText(R.string.contact_message_button_send_audio_msg);
+			}
+		});
 		root.setVisibility(View.INVISIBLE);
 	}
 
@@ -373,14 +380,13 @@ public class ConversationView extends Activity {
 		// mId allows you to update the notification later on.
 		mNotificationManager.cancel(PublicIntent.MESSAGE_NOTIFICATION_ID);
 		isStopped = false;
-
+		//recover record all flag
 		starttime = 0;
 		lastTime = 0;
 		realRecoding = false;
 		cannelRecoding = false;
 		mButtonRecordAudio
 				.setText(R.string.contact_message_button_send_audio_msg);
-
 	}
 
 	@Override
@@ -434,8 +440,8 @@ public class ConversationView extends Activity {
 		this.unregisterReceiver(receiver);
 		GlobalConfig.isConversationOpen = false;
 		ConversationUpdateFileState.getInstance().executeUpdate(messageArray);
-		if (messageArray.size() <= 0
-				&& currentConversationViewType == V2GlobalEnum.GROUP_TYPE_USER)
+		if (currentConversationViewType == V2GlobalEnum.GROUP_TYPE_USER && 
+				MessageLoader.getNewestMessage(mContext, user1Id, user2Id) == null)
 			notificateConversationUpdate(false, cov.getExtId(), true);
 		finishWork();
 	}
@@ -644,7 +650,6 @@ public class ConversationView extends Activity {
 	}
 
 	private void showOrCloseVoiceDialog() {
-
 		if (mVoiceDialog.isShowing()) {
 			mVoiceDialog.dismiss();
 			mButtonRecordAudio
@@ -653,8 +658,8 @@ public class ConversationView extends Activity {
 			tips = (TextView) mSpeakingLayout
 					.findViewById(R.id.message_voice_dialog_listening_container_tips);
 			tips.setText(R.string.contact_message_voice_dialog_text);
-			root.setVisibility(View.VISIBLE);
 			mVoiceDialog.show();
+			root.setVisibility(View.VISIBLE);
 			updateCancelSendVoiceMsgNotification(VOICE_DIALOG_FLAG_RECORDING);
 		}
 	}
@@ -765,7 +770,7 @@ public class ConversationView extends Activity {
 	}
 
 	private void stopRecording() {
-		mRecorder.stop();
+//		mRecorder.stop();
 		mRecorder.reset();
 		mRecorder.release();
 		mRecorder = null;
@@ -960,6 +965,7 @@ public class ConversationView extends Activity {
 	private boolean realRecoding;
 	private boolean cannelRecoding;
 	private boolean timeOutRecording;
+	private boolean breakRecord;
 	private OnTouchListener mButtonHolderListener = new OnTouchListener() {
 
 		@Override
@@ -1063,11 +1069,16 @@ public class ConversationView extends Activity {
 					}
 
 				} else { // beacuse click too much quick , stop recording..
-					cannelRecoding = true;
-					Log.d(TAG, "由于间隔太短，显示short对话框");
-					lh.removeCallbacks(preparedRecoding);
-					updateCancelSendVoiceMsgNotification(VOICE_DIALOG_FLAG_WARING_FOR_TIME_TOO_SHORT);
-					showOrCloseVoiceDialog();
+					//此判断是为了防止对话框叠加
+					if(!breakRecord){ 
+						cannelRecoding = true;
+						Log.d(TAG, "由于间隔太短，显示short对话框");
+						lh.removeCallbacks(preparedRecoding);
+						updateCancelSendVoiceMsgNotification(VOICE_DIALOG_FLAG_WARING_FOR_TIME_TOO_SHORT);
+						showOrCloseVoiceDialog();
+					}
+					else
+						breakRecord = false;
 				}
 				break;
 			}
@@ -1081,23 +1092,20 @@ public class ConversationView extends Activity {
 		public void run() {
 
 			if (!cannelRecoding) {
+				realRecoding = true;
 				fileName = GlobalConfig.getGlobalAudioPath() + "/"
 						+ UUID.randomUUID().toString() + ".aac";
 				boolean resultReocrding = startReocrding(fileName);
 				if (resultReocrding) {
+					starttime = System.currentTimeMillis();
 					// Start update db for voice
 					lh.postDelayed(mUpdateMicStatusTimer, 200);
 					// Start timer
 					lh.postDelayed(timeOutMonitor, 59 * 1000);
 					// start timer for prompt surplus time
 					lh.postDelayed(mUpdateSurplusTime, 48 * 1000);
-					starttime = System.currentTimeMillis();
-					realRecoding = true;
-				} else {
-					File f = new File(fileName);
-					f.delete();
-					fileName = null;
-				}
+				} else 
+					breakRecording();
 			}
 		}
 	};
@@ -1163,7 +1171,7 @@ public class ConversationView extends Activity {
 	private void breakRecording() {
 
 		if (mRecorder != null && realRecoding == true) {
-
+			breakRecord = true;
 			lastTime = 0;
 			starttime = 0;
 			realRecoding = false;
@@ -2310,7 +2318,6 @@ public class ConversationView extends Activity {
 					|| (PublicIntent.BROADCAST_CROWD_QUIT_NOTIFICATION
 							.equals(intent.getAction()))) {
 				finish();
-				onBackPressed();
 			}
 		}
 
@@ -2589,5 +2596,4 @@ public class ConversationView extends Activity {
 		super.onSaveInstanceState(outState);
 		outState.putBundle("saveBundle", bundle);
 	}
-
 }

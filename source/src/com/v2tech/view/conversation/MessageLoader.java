@@ -1,5 +1,13 @@
 package com.v2tech.view.conversation;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.Set;
+
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -24,15 +32,6 @@ import com.v2tech.vo.VMessageFileItem;
 import com.v2tech.vo.VMessageImageItem;
 import com.v2tech.vo.VMessageQualification;
 import com.v2tech.vo.VideoBean;
-import com.v2tech.vo.VFile.State;
-
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.Set;
 
 public class MessageLoader {
 
@@ -157,8 +156,7 @@ public class MessageLoader {
 				+ " desc , "
 				+ ContentDescriptor.HistoriesMessage.Cols.ID
 				+ " desc limit " + limit + " offset  " + offset;
-        return queryMessage(context, selection, args,
-				order);
+		return queryMessage(context, selection, args, order);
 	}
 
 	/**
@@ -206,14 +204,15 @@ public class MessageLoader {
 		return loadMessageById(context, 0, 0, remoteID, msgId);
 	}
 
-    /**
-     * loading crowd chating messages
-     * @param context
-     * @param groupType
-     * @param groupID
-     * @param msgId
-     * @return
-     */
+	/**
+	 * loading crowd chating messages
+	 * 
+	 * @param context
+	 * @param groupType
+	 * @param groupID
+	 * @param msgId
+	 * @return
+	 */
 	public static VMessage loadGroupMessageById(Context context, int groupType,
 			long groupID, long msgId) {
 
@@ -254,13 +253,13 @@ public class MessageLoader {
 		Cursor mCur = mContext.getContentResolver().query(uri, projection,
 				selection, args, sortOrder);
 
-        if(mCur == null)
-            return imageItems;
+		if (mCur == null)
+			return imageItems;
 
-		if (mCur.getCount() <= 0){
-            mCur.close();
-            return imageItems;
-        }
+		if (mCur.getCount() <= 0) {
+			mCur.close();
+			return imageItems;
+		}
 
 		VMessageImageItem item;
 		VMessage current;
@@ -313,7 +312,7 @@ public class MessageLoader {
 			Context context, long uid, int meidaType) {
 
 		HashMap<Long, AudioVideoMessageBean> tempList = new HashMap<Long, AudioVideoMessageBean>();
-		List<AudioVideoMessageBean> targetList =  new ArrayList<AudioVideoMessageBean>();
+		List<AudioVideoMessageBean> targetList = new ArrayList<AudioVideoMessageBean>();
 		try {
 			String selection;
 			switch (meidaType) {
@@ -352,81 +351,80 @@ public class MessageLoader {
 					ContentDescriptor.HistoriesMedia.Cols.ALL_CLOS, selection,
 					args, sortOrder);
 
-            if (mCur == null)
-                return targetList;
+			if (mCur == null)
+				return targetList;
 
-            if (mCur.getCount() <= 0){
-                mCur.close();
-                return targetList;
-            }
+			if (mCur.getCount() <= 0) {
+				mCur.close();
+				return targetList;
+			}
 
-            long currentID = GlobalHolder.getInstance().getCurrentUserId();
-            AudioVideoMessageBean currentMedia;
-            AudioVideoMessageBean.ChildMessageBean currentChildMedia;
-            int isCallOut; // 主动呼叫还是被动 0 主动 1 被动
-            while (mCur.moveToNext()) {
-                currentChildMedia = new AudioVideoMessageBean.ChildMessageBean();
-                int types = mCur
-                        .getInt(mCur
-                                .getColumnIndex(ContentDescriptor.HistoriesMedia.Cols.HISTORY_MEDIA_TYPE));
-                int readState = mCur
-                        .getInt(mCur
-                                .getColumnIndex(ContentDescriptor.HistoriesMedia.Cols.HISTORY_MEDIA_READ_STATE));
-                long startDate = mCur
-                        .getLong(mCur
-                                .getColumnIndex(ContentDescriptor.HistoriesMedia.Cols.HISTORY_MEDIA_START_DATE));
-                long endDate = mCur
-                        .getLong(mCur
-                                .getColumnIndex(ContentDescriptor.HistoriesMedia.Cols.HISTORY_MEDIA_END_DATE));
-                long formID = mCur
-                        .getLong(mCur
-                                .getColumnIndex(ContentDescriptor.HistoriesMedia.Cols.HISTORY_MEDIA_FROM_USER_ID));
-                long toID = mCur
-                        .getLong(mCur
-                                .getColumnIndex(ContentDescriptor.HistoriesMedia.Cols.HISTORY_MEDIA_TO_USER_ID));
-                long remoteID = mCur
-                        .getLong(mCur
-                                .getColumnIndex(ContentDescriptor.HistoriesMedia.Cols.HISTORY_MEDIA_REMOTE_USER_ID));
-                int mediaState = mCur
-                        .getInt(mCur
-                                .getColumnIndex(ContentDescriptor.HistoriesMedia.Cols.HISTORY_MEDIA_STATE));
-                if (currentID == formID)
-                    isCallOut = AudioVideoMessageBean.STATE_CALL_OUT;
-                else
-                    isCallOut = AudioVideoMessageBean.STATE_CALL_IN;
+			long currentID = GlobalHolder.getInstance().getCurrentUserId();
+			AudioVideoMessageBean currentMedia;
+			AudioVideoMessageBean.ChildMessageBean currentChildMedia;
+			int isCallOut; // 主动呼叫还是被动 0 主动 1 被动
+			while (mCur.moveToNext()) {
+				currentChildMedia = new AudioVideoMessageBean.ChildMessageBean();
+				int types = mCur
+						.getInt(mCur
+								.getColumnIndex(ContentDescriptor.HistoriesMedia.Cols.HISTORY_MEDIA_TYPE));
+				int readState = mCur
+						.getInt(mCur
+								.getColumnIndex(ContentDescriptor.HistoriesMedia.Cols.HISTORY_MEDIA_READ_STATE));
+				long startDate = mCur
+						.getLong(mCur
+								.getColumnIndex(ContentDescriptor.HistoriesMedia.Cols.HISTORY_MEDIA_START_DATE));
+				long endDate = mCur
+						.getLong(mCur
+								.getColumnIndex(ContentDescriptor.HistoriesMedia.Cols.HISTORY_MEDIA_END_DATE));
+				long formID = mCur
+						.getLong(mCur
+								.getColumnIndex(ContentDescriptor.HistoriesMedia.Cols.HISTORY_MEDIA_FROM_USER_ID));
+				long toID = mCur
+						.getLong(mCur
+								.getColumnIndex(ContentDescriptor.HistoriesMedia.Cols.HISTORY_MEDIA_TO_USER_ID));
+				long remoteID = mCur
+						.getLong(mCur
+								.getColumnIndex(ContentDescriptor.HistoriesMedia.Cols.HISTORY_MEDIA_REMOTE_USER_ID));
+				int mediaState = mCur
+						.getInt(mCur
+								.getColumnIndex(ContentDescriptor.HistoriesMedia.Cols.HISTORY_MEDIA_STATE));
+				if (currentID == formID)
+					isCallOut = AudioVideoMessageBean.STATE_CALL_OUT;
+				else
+					isCallOut = AudioVideoMessageBean.STATE_CALL_IN;
 
-                User remoteUser = GlobalHolder.getInstance().getUser(
-                        remoteID);
-                if (remoteUser == null) {
-                    V2Log.e("get null when get remote user :" + remoteID);
-                    continue;
-                }
+				User remoteUser = GlobalHolder.getInstance().getUser(remoteID);
+				if (remoteUser == null) {
+					V2Log.e("get null when get remote user :" + remoteID);
+					continue;
+				}
 
-                currentMedia = tempList.get(remoteID);
-                if (currentMedia == null) {
-                    AudioVideoMessageBean tempMedia = new AudioVideoMessageBean();
-                    tempMedia.name = remoteUser.getName();
-                    tempMedia.isCallOut = isCallOut;
-                    tempMedia.fromUserID = formID;
-                    tempMedia.toUserID = toID;
-                    tempMedia.remoteUserID = remoteID;
-                    tempMedia.readState = readState;
-                    tempList.put(remoteID, tempMedia);
-                    currentMedia = tempMedia;
-                }
+				currentMedia = tempList.get(remoteID);
+				if (currentMedia == null) {
+					AudioVideoMessageBean tempMedia = new AudioVideoMessageBean();
+					tempMedia.name = remoteUser.getName();
+					tempMedia.isCallOut = isCallOut;
+					tempMedia.fromUserID = formID;
+					tempMedia.toUserID = toID;
+					tempMedia.remoteUserID = remoteID;
+					tempMedia.readState = readState;
+					tempList.put(remoteID, tempMedia);
+					currentMedia = tempMedia;
+				}
 
-                currentChildMedia.childMediaType = types;
-                currentChildMedia.childISCallOut = isCallOut;
-                currentChildMedia.childHoldingTime = endDate - startDate;
-                currentChildMedia.childSaveDate = startDate;
-                currentChildMedia.childReadState = readState;
-                currentChildMedia.childMediaState = mediaState;
-                currentMedia.mChildBeans.add(currentChildMedia);
-                // 判断该条消息是否未读，更改未读消息数量
-                if (readState == AudioVideoMessageBean.STATE_UNREAD) {
-                    currentMedia.callNumbers += 1;
-                }
-            }
+				currentChildMedia.childMediaType = types;
+				currentChildMedia.childISCallOut = isCallOut;
+				currentChildMedia.childHoldingTime = endDate - startDate;
+				currentChildMedia.childSaveDate = startDate;
+				currentChildMedia.childReadState = readState;
+				currentChildMedia.childMediaState = mediaState;
+				currentMedia.mChildBeans.add(currentChildMedia);
+				// 判断该条消息是否未读，更改未读消息数量
+				if (readState == AudioVideoMessageBean.STATE_UNREAD) {
+					currentMedia.callNumbers += 1;
+				}
+			}
 
 			mCur.close();
 			Set<Entry<Long, AudioVideoMessageBean>> entrySet = tempList
@@ -468,6 +466,7 @@ public class MessageLoader {
 
 	/**
 	 * 查询指定群组的所有聊天消息记录
+	 * 
 	 * @param context
 	 * @param groupType
 	 * @param gid
@@ -487,6 +486,7 @@ public class MessageLoader {
 
 	/**
 	 * 查询指定群组中聊天收发的所有图片
+	 * 
 	 * @param context
 	 * @param type
 	 * @param gid
@@ -494,6 +494,8 @@ public class MessageLoader {
 	 */
 	public static List<VMessage> loadGroupImageMessage(Context context,
 			int type, long gid) {
+		if (!init(context, type, gid, 0, CROWD_TYPE))
+			return null;
 		List<VMessage> imageItems = new ArrayList<VMessage>();
 		String sortOrder = ContentDescriptor.HistoriesGraphic.Cols.HISTORY_GRAPHIC_SAVEDATE
 				+ " desc";
@@ -509,14 +511,14 @@ public class MessageLoader {
 		Cursor mCur = mContext.getContentResolver().query(uri, projection,
 				where, args, sortOrder);
 
-        if (mCur == null){
-            return imageItems;
-        }
+		if (mCur == null) {
+			return imageItems;
+		}
 
-		if (mCur.getCount() <= 0){
-            mCur.close();
-            return imageItems;
-        }
+		if (mCur.getCount() <= 0) {
+			mCur.close();
+			return imageItems;
+		}
 
 		VMessageImageItem item;
 		VMessage current;
@@ -554,19 +556,26 @@ public class MessageLoader {
 		mCur.close();
 		return imageItems;
 	}
-	
+
 	/**
 	 * 查询指定群组中聊天中，正在上传的群文件集合
+	 * 
 	 * @param context
 	 * @param type
 	 * @param gid
 	 * @return
 	 */
-	public static List<VCrowdFile> loadGroupUpLoadingFileMessage(Context context,
-			int type, long gid , CrowdGroup crowd) {
+	public static List<VCrowdFile> loadGroupUpLoadingFileMessage(
+			Context context, int type, long gid, CrowdGroup crowd) {
 		
 		DataBaseContext mContext = new DataBaseContext(context);
 		List<VCrowdFile> fileItems = new ArrayList<VCrowdFile>();
+		if (!init(context, type, gid, 0, CROWD_TYPE)){
+			V2Log.d(TAG, "create database fialed...groupType : " + type + "  groupID : "
+					+ gid);
+			return fileItems;
+		}
+		
 		String sortOrder = ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_SAVEDATE
 				+ " desc";
 		String where = ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_GROUP_TYPE
@@ -577,8 +586,8 @@ public class MessageLoader {
 				String.valueOf(gid) };
 		Cursor mCur = mContext.getContentResolver().query(
 				ContentDescriptor.HistoriesMessage.CONTENT_URI,
-				ContentDescriptor.HistoriesMessage.Cols.ALL_CLOS, where,
-				args, sortOrder);
+				ContentDescriptor.HistoriesMessage.Cols.ALL_CLOS, where, args,
+				sortOrder);
 
 		if (mCur == null || mCur.getCount() == 0) {
 			mCur.close();
@@ -590,36 +599,39 @@ public class MessageLoader {
 
 			VMessage extract = extractMsg(mCur);
 			if (extract == null) {
-				V2Log.d("The extract VMessage from Cursor failed...get null , id is : " + mCur.getInt(0));
-				continue;
-			}
-			
-			VMessage vm = XmlParser.parseForMessage(extract);
-			if (vm == null) {
-				V2Log.d("The parse VMessage from failed...get null , id is : " + mCur.getInt(0));
+				V2Log.d("The extract VMessage from Cursor failed...get null , id is : "
+						+ mCur.getInt(0));
 				continue;
 			}
 
-//			protected String id;
-//			protected String path;
-//			protected long size;
-//			protected State state;
-//			protected long proceedSize;
-//			protected String name;
-//			protected User uploader;
-//			protected Date startTime;
-//			protected int flag;
+			VMessage vm = XmlParser.parseForMessage(extract);
+			if (vm == null) {
+				V2Log.d("The parse VMessage from failed...get null , id is : "
+						+ mCur.getInt(0));
+				continue;
+			}
+
+			// protected String id;
+			// protected String path;
+			// protected long size;
+			// protected State state;
+			// protected long proceedSize;
+			// protected String name;
+			// protected User uploader;
+			// protected Date startTime;
+			// protected int flag;
 			boolean flag = loadFileMessageById(vm, mContext);
-			if(flag){
+			if (flag) {
 				for (VMessageFileItem vMessageFileItem : vm.getFileItems()) {
-					if(vMessageFileItem.getState() == VMessageFileItem.STATE_FILE_SENDING){
+					if (vMessageFileItem.getState() == VMessageFileItem.STATE_FILE_SENDING) {
 						crowdFile = new VCrowdFile();
 						crowdFile.setId(vMessageFileItem.getUuid());
 						crowdFile.setPath(vMessageFileItem.getFilePath());
 						crowdFile.setSize(vMessageFileItem.getFileSize());
 						crowdFile.setName(vMessageFileItem.getFileName());
 						crowdFile.setState(VCrowdFile.State.UPLOADING);
-						crowdFile.setProceedSize((long) vMessageFileItem.getProgress());
+						crowdFile.setProceedSize((long) vMessageFileItem
+								.getProgress());
 						crowdFile.setUploader(vm.getFromUser());
 						crowdFile.setStartTime(vm.getDate());
 						crowdFile.setCrowd(crowd);
@@ -634,11 +646,12 @@ public class MessageLoader {
 
 	/**
 	 * 分页查询指定群组的聊天消息
+	 * 
 	 * @param context
 	 * @param groupType
 	 * @param groupId
 	 * @param limit
-	 * @param offset 
+	 * @param offset
 	 * @return
 	 */
 	public static List<VMessage> loadGroupMessageByPage(Context context,
@@ -660,6 +673,7 @@ public class MessageLoader {
 
 	/**
 	 * 根据传入VMessage消息对象，查询其数据库的ID值
+	 * 
 	 * @param context
 	 * @param vm
 	 * @return
@@ -693,6 +707,7 @@ public class MessageLoader {
 
 	/**
 	 * 根据传入条件，查询聊天消息记录
+	 * 
 	 * @param context
 	 * @param selection
 	 * @param args
@@ -717,13 +732,15 @@ public class MessageLoader {
 
 			VMessage extract = extractMsg(mCur);
 			if (extract == null) {
-				V2Log.d("The extract VMessage from Cursor failed...get null , id is : " + mCur.getInt(0));
+				V2Log.d("The extract VMessage from Cursor failed...get null , id is : "
+						+ mCur.getInt(0));
 				continue;
 			}
-			
+
 			VMessage vm = XmlParser.parseForMessage(extract);
 			if (vm == null) {
-				V2Log.d("The parse VMessage from failed...get null , id is : " + mCur.getInt(0));
+				V2Log.d("The parse VMessage from failed...get null , id is : "
+						+ mCur.getInt(0));
 				continue;
 			}
 
@@ -755,31 +772,125 @@ public class MessageLoader {
 
 		List<VMessageAudioItem> audioItems = vm.getAudioItems();
 		for (int i = 0; i < audioItems.size(); i++) {
-			mContext.getContentResolver().delete(
-					ContentDescriptor.HistoriesAudios.CONTENT_URI,
-					ContentDescriptor.HistoriesAudios.Cols.HISTORY_AUDIO_ID
-							+ "=?",
-					new String[] { String.valueOf(audioItems.get(i).getUuid()) });
+			mContext.getContentResolver()
+					.delete(ContentDescriptor.HistoriesAudios.CONTENT_URI,
+							ContentDescriptor.HistoriesAudios.Cols.HISTORY_AUDIO_ID
+									+ "=?",
+							new String[] { String.valueOf(audioItems.get(i)
+									.getUuid()) });
 		}
 
 		List<VMessageFileItem> fileItems = vm.getFileItems();
 		for (int i = 0; i < fileItems.size(); i++) {
-			mContext.getContentResolver().delete(
-					ContentDescriptor.HistoriesFiles.CONTENT_URI,
-					ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_ID
-							+ "=?",
-					new String[] { String.valueOf(fileItems.get(i).getUuid()) });
+			mContext.getContentResolver()
+					.delete(ContentDescriptor.HistoriesFiles.CONTENT_URI,
+							ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_ID
+									+ "=?",
+							new String[] { String.valueOf(fileItems.get(i)
+									.getUuid()) });
 		}
 
 		List<VMessageImageItem> imageItems = vm.getImageItems();
 		for (int i = 0; i < imageItems.size(); i++) {
-			mContext.getContentResolver().delete(
-					ContentDescriptor.HistoriesGraphic.CONTENT_URI,
-					ContentDescriptor.HistoriesGraphic.Cols.HISTORY_GRAPHIC_ID
-							+ "=?",
-					new String[] { String.valueOf(imageItems.get(i).getUuid()) });
+			mContext.getContentResolver()
+					.delete(ContentDescriptor.HistoriesGraphic.CONTENT_URI,
+							ContentDescriptor.HistoriesGraphic.Cols.HISTORY_GRAPHIC_ID
+									+ "=?",
+							new String[] { String.valueOf(imageItems.get(i)
+									.getUuid()) });
 		}
 		return ret;
+	}
+
+	/**
+	 * delete all messages , according given args..
+	 * 
+	 * @param context
+	 * @param groupType
+	 * @param groupID
+	 * @param userID
+	 * @return
+	 */
+	public static void deleteMessageByID(Context context, int groupType,
+			long groupID, long userID) {
+
+		DataBaseContext mContext = new DataBaseContext(context);
+		String sql = "drop table if exists " + ContentDescriptor.HistoriesMessage.NAME;
+		V2TechDBHelper dbHelper = new V2TechDBHelper(mContext);
+		SQLiteDatabase db = dbHelper.getReadableDatabase();
+		if (db != null && db.isOpen()) 
+			db.execSQL(sql);
+		else
+			V2Log.d(TAG, "May delete HistoriesMessage failed...groupType : " + groupType + "  groupID : "
+					+ groupID + "  userID : " + userID);
+		
+		if(isExistTable(context , ContentDescriptor.HistoriesMessage.NAME))
+			V2Log.d(TAG, "May delete HistoriesMessage failed...groupType : " + groupType + "  groupID : "
+					+ groupID + "  userID : " + userID);
+		//删除其他信息
+		String audioCondition = ContentDescriptor.HistoriesAudios.Cols.HISTORY_AUDIO_GROUP_TYPE
+				+ "= ? and "
+				+ ContentDescriptor.HistoriesAudios.Cols.HISTORY_AUDIO_GROUP_ID
+				+ "= ? and "
+				+ ContentDescriptor.HistoriesAudios.Cols.HISTORY_AUDIO_REMOTE_USER_ID
+				+ "= ?";
+		String imageCondition = ContentDescriptor.HistoriesGraphic.Cols.HISTORY_GRAPHIC_GROUP_TYPE
+				+ "= ? and "
+				+ ContentDescriptor.HistoriesGraphic.Cols.HISTORY_GRAPHIC_GROUP_ID
+				+ "= ? and "
+				+ ContentDescriptor.HistoriesGraphic.Cols.HISTORY_GRAPHIC_REMOTE_USER_ID
+				+ "= ?";
+		String fileCondition = ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_REMOTE_USER_ID
+				+ "= ?";
+		String[] tables = new String[]{ContentDescriptor.HistoriesAudios.CONTENT_URI.toString()
+				,ContentDescriptor.HistoriesGraphic.CONTENT_URI.toString()};
+		String[] conditions = new String[] {audioCondition,
+				imageCondition };
+		String[] names = new String[] {"audioCondition",
+				"imageCondition" };
+		String[] args = new String[] { String.valueOf(groupType),
+				String.valueOf(groupID), String.valueOf(userID) };
+
+		for (int i = 0; i < conditions.length; i++) {
+			int ret = mContext.getContentResolver().delete(
+					Uri.parse(tables[i]),
+					conditions[i], args);
+			if (ret <= 0)
+				V2Log.d(TAG, "May delete " + names[i]
+						+ " failed...groupType : " + groupType + "  groupID : "
+						+ groupID + "  userID : " + userID);
+		}
+
+		//删除文件
+		String[] fileArgs;
+		if (groupType == V2GlobalEnum.GROUP_TYPE_USER)
+			fileArgs = new String[] { String.valueOf(userID) };
+		else
+			fileArgs = new String[] { String.valueOf(groupID) };
+
+		int ret = mContext.getContentResolver().delete(
+				ContentDescriptor.HistoriesFiles.CONTENT_URI, fileCondition,
+				fileArgs);
+		if (ret <= 0)
+			V2Log.d(TAG, "May delete fileConditions failed...groupType : "
+					+ groupType + "  groupID : " + groupID + "  userID : " + userID);
+	}
+	
+	/**
+	 * according crowd group id , delete all verification message..
+	 * @param context
+	 * @param groupID
+	 */
+	public static void deleteCrowdVerificationMessage(Context context ,
+			long groupID) {
+		
+		DataBaseContext mContext = new DataBaseContext(context);
+		int ret = mContext.getContentResolver().delete(
+				ContentDescriptor.HistoriesCrowd.CONTENT_URI,
+				ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_ID
+						+ "=?", new String[] { String.valueOf(groupID) });
+		if(ret <= 0)
+			V2Log.d(TAG, "May delete CrowdVerificationMessage failed...groupID : " + groupID);
 	}
 
 	/**
@@ -802,7 +913,7 @@ public class MessageLoader {
 		String where = ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_ID
 				+ "= ?";
 		String[] selectionArgs = new String[] { vm.getUUID() };
-        return mContext.getContentResolver().update(
+		return mContext.getContentResolver().update(
 				ContentDescriptor.HistoriesMessage.CONTENT_URI, values, where,
 				selectionArgs);
 	}
@@ -829,7 +940,7 @@ public class MessageLoader {
 		String where = ContentDescriptor.HistoriesAudios.Cols.HISTORY_AUDIO_ID
 				+ "= ?";
 		String[] selectionArgs = new String[] { audioItem.getUuid() };
-        return mContext.getContentResolver().update(
+		return mContext.getContentResolver().update(
 				ContentDescriptor.HistoriesAudios.CONTENT_URI, values, where,
 				selectionArgs);
 	}
@@ -858,7 +969,7 @@ public class MessageLoader {
 		String where = ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_ID
 				+ "= ?";
 		String[] selectionArgs = new String[] { fileItem.getUuid() };
-        return mContext.getContentResolver().update(
+		return mContext.getContentResolver().update(
 				ContentDescriptor.HistoriesFiles.CONTENT_URI, values, where,
 				selectionArgs);
 	}
@@ -950,8 +1061,9 @@ public class MessageLoader {
 	// cur.close();
 	// }
 
-	public static VMessageQualification getNewestCrowdVerificationMessage(Context context , User user) {
-		
+	public static VMessageQualification getNewestCrowdVerificationMessage(
+			Context context, User user) {
+
 		DataBaseContext mContext = new DataBaseContext(context);
 		if (user == null) {
 			V2Log.e("To query failed...please check the given User Object");
@@ -975,14 +1087,14 @@ public class MessageLoader {
 
 		if (cursor == null || cursor.getCount() <= 0)
 			return null;
-		
+
 		while (cursor.moveToNext()) {
 			message = MessageBuilder.extraMsgFromCursor(cursor);
 		}
 		cursor.close();
 		return message;
 	}
-	
+
 	public static VideoBean getNewestMediaMessage(Context context) {
 
 		return getNewestMediaMessage(context, null, null);
@@ -1013,10 +1125,10 @@ public class MessageLoader {
 		if (mCur == null)
 			return null;
 
-        if(mCur.getCount() <= 0){
-            mCur.close();
-            return null;
-        }
+		if (mCur.getCount() <= 0) {
+			mCur.close();
+			return null;
+		}
 
 		mCur.moveToNext();
 		VideoBean bean = new VideoBean();
@@ -1059,13 +1171,14 @@ public class MessageLoader {
 		}
 	}
 
-    /**
-     * 根据传入的id，查询数据库，获取最新的VMessage对象
-     * @param context
-     * @param uid1
-     * @param uid2
-     * @return
-     */
+	/**
+	 * 根据传入的id，查询数据库，获取最新的VMessage对象
+	 * 
+	 * @param context
+	 * @param uid1
+	 * @param uid2
+	 * @return
+	 */
 	public static VMessage getNewestMessage(Context context, long uid1,
 			long uid2) {
 		if (!init(context, 0, 0, uid2, CONTACT_TYPE))

@@ -1684,6 +1684,10 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 					.equals(intent.getAction())) {
 				long cid = intent.getLongExtra("crowd", 0);
 				removeConversation(cid);
+				//clear the crowd group all chat database messges
+				MessageLoader.deleteMessageByID(context, mCurrentTabFlag , cid , -1);
+				//clear the crowd group all verification database messges
+				MessageLoader.deleteCrowdVerificationMessage(context, cid);
 			}
 		}
 	}

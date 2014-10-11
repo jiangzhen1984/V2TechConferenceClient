@@ -293,9 +293,16 @@ public class GroupRequest {
 	public native void renameGroupFile(int eGroupType, long nGroupID,
 			String sFileID, String sNewName);
 
-	private void OnAddGroupFile(int type, long nGroupId, String sXml) {
-		V2Log.e("Group Request  OnAddGroupFile" + type + "   " + nGroupId
-				+ "  " + sXml);
+	/**
+	 * 
+	 * @param eGroupType
+	 * @param nGroupId
+	 * @param sXml
+	 */
+	private void OnAddGroupFile(int eGroupType, long nGroupId, String sXml) {
+		V2Log.d("GroupRequest UI", "OnAddGroupFile ---> eGroupType :"
+				+ eGroupType + " | nGroupId: " + nGroupId + " | sXml: "
+				+ sXml);
 	}
 
 	/**
@@ -305,7 +312,7 @@ public class GroupRequest {
 	 * @param sXml
 	 */
 	private void OnDelGroupFile(int type, long nGroupId, String sXml) {
-		V2Log.e("Group Request  OnDelGroupFile" + type + "   " + nGroupId
+		V2Log.e("GroupRequest  OnDelGroupFile" + type + "   " + nGroupId
 				+ "  " + sXml);
 
 		List<FileJNIObject> list = XmlAttributeExtractor.parseFiles(sXml);

@@ -26,7 +26,7 @@ public class CrowdConversation extends Conversation {
 	@Override
 	public String getName() {
 		if (g != null) {
-			return g.getOwnerUser().getName();
+			return g.getName();
 		}
 		return super.getName();
 	}

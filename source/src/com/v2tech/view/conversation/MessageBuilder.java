@@ -16,6 +16,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.text.TextUtils;
 
+import com.V2.jni.V2GlobalEnum;
 import com.V2.jni.ind.V2Group;
 import com.V2.jni.util.V2Log;
 import com.V2.jni.util.XmlAttributeExtractor;
@@ -23,7 +24,6 @@ import com.v2tech.db.ContentDescriptor;
 import com.v2tech.db.ContentDescriptor.HistoriesCrowd;
 import com.v2tech.db.DataBaseContext;
 import com.v2tech.service.GlobalHolder;
-import com.v2tech.util.DateUtil;
 import com.v2tech.util.GlobalConfig;
 import com.v2tech.vo.CrowdGroup;
 import com.v2tech.vo.FileInfoBean;
@@ -217,10 +217,10 @@ public class MessageBuilder {
 				values.put(
 						ContentDescriptor.HistoriesGraphic.Cols.HISTORY_GRAPHIC_TO_USER_ID,
 						vm.getToUser().getmUserId());
-				values.put(
-						ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_REMOTE_USER_ID,
-						vm.getToUser().getmUserId());
 			}
+			values.put(
+					ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_REMOTE_USER_ID,
+					remote);
 			values.put(
 					ContentDescriptor.HistoriesGraphic.Cols.HISTORY_GRAPHIC_ID,
 					vMessageImageItem.getUuid());
@@ -254,10 +254,10 @@ public class MessageBuilder {
 				values.put(
 						ContentDescriptor.HistoriesAudios.Cols.HISTORY_AUDIO_TO_USER_ID,
 						vm.getToUser().getmUserId());
-				values.put(
-						ContentDescriptor.HistoriesAudios.Cols.HISTORY_AUDIO_REMOTE_USER_ID,
-						vm.getToUser().getmUserId());
 			}
+			values.put(
+					ContentDescriptor.HistoriesAudios.Cols.HISTORY_AUDIO_REMOTE_USER_ID,
+					remote);
 			values.put(ContentDescriptor.HistoriesAudios.Cols.HISTORY_AUDIO_ID,
 					vMessageAudioItem.getUuid());
 			values.put(
@@ -301,12 +301,20 @@ public class MessageBuilder {
 
 		// 确定远程用户
 		long remote = -1;
-		if (vm.getMsgCode() == 0 && vm.getGroupId() == 0l) {
+		switch (vm.getMsgCode()) {
+		case V2GlobalEnum.GROUP_TYPE_USER:
 			if (vm.getFromUser().getmUserId() == GlobalHolder.getInstance()
 					.getCurrentUserId())
 				remote = vm.getToUser().getmUserId();
 			else
 				remote = vm.getFromUser().getmUserId();
+			break;
+		case V2GlobalEnum.GROUP_TYPE_DEPARTMENT:
+		case V2GlobalEnum.GROUP_TYPE_CROWD:
+			remote = vm.getGroupId();
+			break;
+		default:
+			break;
 		}
 		Uri uri = null;
 		VMessageFileItem file = null;

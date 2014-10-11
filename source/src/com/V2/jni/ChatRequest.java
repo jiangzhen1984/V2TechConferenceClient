@@ -178,7 +178,7 @@ public class ChatRequest {
 	 */
 	private void OnRecvText(int eGroupType, long nGroupID, long nFromUserID,
 			long nToUserID, long nTime, String szSeqID, String szXmlText) {
-		V2Log.e("ChatRequest UI", "OnRecvChatText ---> eGroupType :"
+		V2Log.d("ChatRequest UI", "OnRecvChatText ---> eGroupType :"
 				+ eGroupType + " | nGroupID: " + nGroupID + " | nFromUserID: "
 				+ nFromUserID + " | nToUserID: " + nToUserID + " | nTime: "
 				+ nTime + " | szSeqID: " + szSeqID + " | szXmlText: "
@@ -207,7 +207,7 @@ public class ChatRequest {
 	private void OnRecvBinary(int eGroupType, long nGroupID, long nFromUserID,
 			long nToUserID, long nTime, int binaryType, String messageId,
 			String binaryPath) {
-		V2Log.e("ChatRequest UI", "OnRecvChatBinary ---> eGroupType :"
+		V2Log.d("ChatRequest UI", "OnRecvChatBinary ---> eGroupType :"
 				+ eGroupType + " | nGroupID: " + nGroupID + " | nFromUserID: "
 				+ nFromUserID + " | nToUserID: " + nToUserID + " | nTime: "
 				+ nTime + " | binaryType: " + binaryType + " | messageId: "
@@ -232,7 +232,7 @@ public class ChatRequest {
 	 */
 	private void OnSendTextResult(int eGroupType, long nGroupID,
 			long nFromUserID, long nToUserID, String sSeqID, int nResult) {
-		V2Log.e("ChatRequest UI", "OnSendChatResult ---> eGroupType :"
+		V2Log.d("ChatRequest UI", "OnSendChatResult ---> eGroupType :"
 				+ eGroupType + " | nGroupID: " + nGroupID + " | nFromUserID: "
 				+ nFromUserID + " | nToUserID: " + nToUserID + " | sSeqID: "
 				+ sSeqID + " | nResult: " + nResult);
@@ -251,7 +251,7 @@ public class ChatRequest {
 	private void OnSendBinaryResult(int eGroupType, long nGroupID,
 			long nFromUserID, long nToUserID, int mediaType,String sSeqID,
 			int nResult) {
-		V2Log.e("ChatRequest UI", "OnSendBinaryResult ---> eGroupType :"
+		V2Log.d("ChatRequest UI", "OnSendBinaryResult ---> eGroupType :"
 				+ eGroupType + " | nGroupID: " + nGroupID + " | nFromUserID: "
 				+ nFromUserID + " | nToUserID: " + nToUserID + " | mediaType: "
 				+ mediaType + " | sSeqID: " + sSeqID + " | nResult: " + nResult);
