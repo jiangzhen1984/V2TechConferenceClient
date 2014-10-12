@@ -3,7 +3,7 @@
     package="com.v2tech"
     android:sharedUserLabel="@string/app_name"
     android:versionCode="2"
-    android:versionName="4.0.0.7" >
+    android:versionName="4.0.0.8" >
 
     <uses-sdk
         android:minSdkVersion="14"
@@ -59,6 +59,8 @@
         <service android:name="com.v2tech.view.JNIService" >
         </service>
         <service android:name="com.v2tech.service.ConferencMessageSyncService" >
+        </service>
+         <service android:name="com.v2tech.view.conversation.FileService" >
         </service>
 
         <provider

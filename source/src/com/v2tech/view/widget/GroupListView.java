@@ -96,10 +96,11 @@ public class GroupListView extends ListView {
 		adapter.notifyDataSetChanged();
 	}
 
-
 	/**
 	 * set flag to show or hide item check box view
-	 * @param flag true for show, false for hide
+	 * 
+	 * @param flag
+	 *            true for show, false for hide
 	 */
 	public void setShowedCheckedBox(boolean flag) {
 		mCBFlag = flag;
@@ -124,14 +125,16 @@ public class GroupListView extends ListView {
 		for (int i = 0; i < mFilterList.size(); i++) {
 			Item item = mFilterList.get(i);
 			if (item instanceof GroupItem && ((GroupItem) item).isExpaned) {
-				int end = calculateGroupEnd(((GroupItem) item).mGroup, i+ 1);
-				sort = updateUserStatus(((GroupItem) item), i + 1, end, user, us);
+				int end = calculateGroupEnd(((GroupItem) item).mGroup, i + 1);
+				sort = updateUserStatus(((GroupItem) item), i + 1, end, user,
+						us);
 			}
 		}
-		//Should always update status, because group need update statist information
-		//if (sort) {
-			adapter.notifyDataSetChanged();
-	//	}
+		// Should always update status, because group need update statist
+		// information
+		// if (sort) {
+		adapter.notifyDataSetChanged();
+		// }
 	}
 
 	/**
@@ -209,8 +212,7 @@ public class GroupListView extends ListView {
 				if (((GroupItem) item).isExpaned) {
 					// Calculate group end position
 					int end = calculateGroupEnd((Group) obj, i);
-					int pos = calculateIndex(i, end, user,
-							user.getmStatus());
+					int pos = calculateIndex(i, end, user, user.getmStatus());
 					if (pos != -1) {
 						Item userItem = this.getItem(group, user);
 						if (pos == mFilterList.size()) {
@@ -310,8 +312,8 @@ public class GroupListView extends ListView {
 		}
 	}
 
-	private boolean updateUserStatus(GroupItem gitem, int index, int gend, User user,
-			User.Status newSt) {
+	private boolean updateUserStatus(GroupItem gitem, int index, int gend,
+			User user, User.Status newSt) {
 		int pos = -1;
 		int start = index;
 		int end = gend;
@@ -329,8 +331,10 @@ public class GroupListView extends ListView {
 				// If sub group is expended, we should update end position
 				if (((GroupItem) item).isExpaned) {
 					GroupItem subGroupItem = (GroupItem) item;
-					int subGroupEndIndex = calculateGroupEnd(subGroupItem.mGroup, start);
-					updateUserStatus(subGroupItem, start + 1, subGroupEndIndex, user, newSt);
+					int subGroupEndIndex = calculateGroupEnd(
+							subGroupItem.mGroup, start);
+					updateUserStatus(subGroupItem, start + 1, subGroupEndIndex,
+							user, newSt);
 					start += subGroupEndIndex;
 				}
 				start++;
@@ -345,8 +349,10 @@ public class GroupListView extends ListView {
 				// If sub group is expended, we should update end position
 				if (((GroupItem) endItem).isExpaned) {
 					GroupItem subGroupItem = (GroupItem) endItem;
-					int subGroupEndIndex = calculateGroupEnd(subGroupItem.mGroup, start);
-					updateUserStatus(subGroupItem, start + 1, subGroupEndIndex, user, newSt);
+					int subGroupEndIndex = calculateGroupEnd(
+							subGroupItem.mGroup, start);
+					updateUserStatus(subGroupItem, start + 1, subGroupEndIndex,
+							user, newSt);
 					start += subGroupEndIndex;
 				}
 				start++;
@@ -387,7 +393,8 @@ public class GroupListView extends ListView {
 	 * @param group
 	 * @param startIndex
 	 *            current group index in list
-	 * @return the last index of child position, if group child size is 0, return current group index
+	 * @return the last index of child position, if group child size is 0,
+	 *         return current group index
 	 */
 	private int calculateGroupEnd(Group group, int startIndex) {
 		if (startIndex >= mFilterList.size()) {
@@ -400,18 +407,16 @@ public class GroupListView extends ListView {
 			return mFilterList.size();
 		}
 
-		int pos = -1;
+		int pos = startIndex;
 		while (startIndex < mFilterList.size()) {
 			Item item = mFilterList.get(startIndex);
 			Object obj = item.getObject();
-			if (startIndex + 1 == mFilterList.size()) {
-				pos = startIndex;
-				break;
-			} else if ((obj instanceof Group && group.getLevel() == ((Group) obj)
+			if ((obj instanceof Group && group.getLevel() == ((Group) obj)
 					.getLevel())) {
-				pos = startIndex + 1;
 				break;
 			}
+			pos = startIndex;
+
 			startIndex++;
 		}
 		return pos;
@@ -423,7 +428,7 @@ public class GroupListView extends ListView {
 	 * @param start
 	 *            start index which belongs group
 	 * @param end
-	 *            end index which  belongs group
+	 *            end index which belongs group
 	 * @param user
 	 * @param ust
 	 * @return
@@ -441,9 +446,9 @@ public class GroupListView extends ListView {
 			return end + 1;
 		}
 
-		while (start < end) {
+		while (start <= end) {
 			pos = start;
-			if(start + 1 == mFilterList.size())
+			if (start + 1 == mFilterList.size())
 				break;
 			Item item = mFilterList.get(start++);
 			if (item instanceof GroupItem) {

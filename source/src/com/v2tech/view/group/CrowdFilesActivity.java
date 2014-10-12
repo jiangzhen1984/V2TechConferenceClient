@@ -189,6 +189,10 @@ public class CrowdFilesActivity extends Activity {
 		if (fileItems != null && fileItems.size() > 0)
 			mUploadedFiles.addAll(fileItems);
 
+		for (VCrowdFile f : mUploadedFiles) {
+			mFileMap.put(f.getId(), f);
+		}
+			
 		service.fetchGroupFiles(crowd, new Registrant(mLocalHandler,
 				FETCH_FILES_DONE, null));
 	}
@@ -316,13 +320,13 @@ public class CrowdFilesActivity extends Activity {
 				adapter.notifyDataSetChanged();
 			} else {
 				showUploaded = true;
-				// mTitle.setText(R.string.crowd_files_title_uploaded);
-				// mShowUploadedFileButton.setVisibility(View.GONE);
-				// adapter.notifyDataSetChanged();
-				Intent intent = new Intent(mContext,
-						ConversationSelectFile.class);
-				intent.putExtra("type", "crowdFile");
-				startActivityForResult(intent, RECEIVE_SELECTED_FILE);
+				 mTitle.setText(R.string.crowd_files_title_uploaded);
+				 mShowUploadedFileButton.setVisibility(View.GONE);
+				 adapter.notifyDataSetChanged();
+//				Intent intent = new Intent(mContext,
+//						ConversationSelectFile.class);
+//				intent.putExtra("type", "crowdFile");
+//				startActivityForResult(intent, RECEIVE_SELECTED_FILE);
 			}
 		}
 

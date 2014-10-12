@@ -36,8 +36,6 @@ import com.V2.jni.util.V2Log;
 import com.v2tech.R;
 import com.v2tech.vo.Attendee;
 import com.v2tech.vo.Conference;
-import com.v2tech.vo.ConferencePermission;
-import com.v2tech.vo.PermissionState;
 import com.v2tech.vo.UserDeviceConfig;
 
 public class VideoAttendeeListLayout extends LinearLayout {
@@ -327,7 +325,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 			int i = 0;
 			int deviceIndex = 1;
 			do {
-				if (dList == null) {
+				if (dList == null || dList.size() <= 0) {
 					mList.add(new Wrapper(at, null, DEFAULT_DEVICE_FLAG));
 				} else {
 					mList.add(new Wrapper(at, dList.get(i),
@@ -352,6 +350,29 @@ public class VideoAttendeeListLayout extends LinearLayout {
 				"updateEnteredAttendee 执行了" + at.getAttName() + "---"
 						+ at.isJoined());
 		at.setJoined(true);
+		List<UserDeviceConfig> dList = at.getmDevices();
+		int index = 0;
+		if (mList.size() > 0) {
+			for (int i =0; i < mList.size(); i++) {
+				Wrapper wr = mList.get(i);
+				if (wr.a.getAttId() == at.getAttId()) {
+					wr.udc = dList.get(0);
+					wr.sortFlag = DEFAULT_DEVICE_FLAG;
+					index = i;
+					break;
+				}
+			}
+		}
+		for (int i = 1; i < dList.size(); i++) {
+			if (index + 1 == mList.size() -1) {
+				mList.add(new Wrapper(at, dList.get(i), i));
+			} else {
+				mList.add(index + 1, new Wrapper(at, dList.get(i), i));
+			}
+			index++;
+			
+		}
+		
 		configAttendee(at);
 		// TODO update device count and mixed video
 
@@ -367,6 +388,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 
 		at.setmDevices(null);
 		at.setJoined(false);
+		at.setSpeakingState(false);
 		configAttendee(at);
 		boolean found = false;
 		for (int i = 0; i < mList.size(); i++) {
@@ -387,44 +409,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 			onLinePersons--;
 			updateStatist();
 		}
-		// if (mAttendsView == null) {
-		// return;
-		// }
-		//
-		// if (at.getType() != Attendee.TYPE_MIXED_VIDEO) {
-		//
-		// configAttendee();
-		// }
-		// for (int i = 0; i < mAttendsView.size(); i++) {
-		// ViewWrapper v = mAttendsView.get(i);
-		// Wrapper wr = (Wrapper) v.v.getTag();
-		// if (wr.a.getAttId() == at.getAttId()) {
-		// // If attendee type is mixed video, remove destroyed mixed video
-		// if (wr.a.getType() == Attendee.TYPE_MIXED_VIDEO) {
-		// V2Log.d(TAG, "successful remove 混合视频");
-		// mAttendsView.remove(v);
-		// onLineDevices -= 1;
-		// break;
-		// }
-		// wr.a.setJoined(false);
-		// ImageView cameraIV2 = (ImageView) v.v
-		// .findViewById(R.id.video_attendee_device_camera_icon);
-		// cameraIV2.setImageResource(R.drawable.camera_pressed);
-		//
-		// ImageView spIV = (ImageView) v.v
-		// .findViewById(R.id.video_attendee_device_speaker_icon);
-		// spIV.setImageResource(R.drawable.conf_speaker);
-		//
-		// // set offline color
-		// TextView nameTV = (TextView) v.v
-		// .findViewById(R.id.video_attendee_device_name);
-		// nameTV.setTextColor(getContext().getResources().getColor(
-		// R.color.video_attendee_name_color_offline));
-		//
-		// v.v.setBackgroundColor(Color.WHITE);
-		//
-		// }
-		// }
+		
 		Collections.sort(mList);
 		adapter.notifyDataSetChanged();
 	}
