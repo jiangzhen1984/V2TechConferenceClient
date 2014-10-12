@@ -51,6 +51,8 @@ public class GlobalHolder {
 	private Map<Long, Bitmap> mAvatarBmHolder = new HashMap<Long, Bitmap>();
 
 	private GlobalState mState = new GlobalState();
+	
+	private List<String> dataBaseTableCacheName = new ArrayList<String>();
 
 	public static synchronized GlobalHolder getInstance() {
 		if (holder == null) {
@@ -569,6 +571,14 @@ public class GlobalHolder {
 	public Bitmap getUserAvatar(long id) {
 		Long key = Long.valueOf(id);
 		return mAvatarBmHolder.get(key);
+	}
+	
+	public List<String> getDataBaseTableCacheName() {
+		return dataBaseTableCacheName;
+	}
+
+	public void setDataBaseTableCacheName(List<String> dataBaseTableCacheName) {
+		this.dataBaseTableCacheName = dataBaseTableCacheName;
 	}
 
 	/**

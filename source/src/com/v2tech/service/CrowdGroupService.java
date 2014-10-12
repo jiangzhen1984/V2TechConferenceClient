@@ -628,6 +628,9 @@ public class CrowdGroupService extends AbstractHandler {
 			return vfList;
 		}
 
+		@Override
+		public void OnAddGroupFile(V2Group group, List<FileJNIObject> list) {
+		}
 	}
 
 	class FileRequestCB extends FileRequestCallbackAdapter {

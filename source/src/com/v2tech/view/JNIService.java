@@ -118,6 +118,7 @@ public class JNIService extends Service {
 	public static final String JNI_BROADCAST_VIDEO_CALL_CLOSED = "com.v2tech.jni.broadcast.video_call_closed";
 	public static final String JNI_BROADCAST_FRIEND_AUTHENTICATION = "com.v2tech.jni.broadcast.friend_authentication";
 	public static final String JNI_BROADCAST_NEW_QUALIFICATION_MESSAGE = "com.v2tech.jni.broadcast.new.qualification_message";
+	public static final String BROADCAST_CROWD_NEW_UPLOAD_FILE_NOTIFICATION = "com.v2tech.jni.broadcast.new.upload_crowd_file_message";
 	/**
 	 * Current user kicked by crowd master
 	 */
@@ -853,6 +854,18 @@ public class JNIService extends Service {
 
 		}
 
+		@Override
+		public void OnAddGroupFile(V2Group group, List<FileJNIObject> list) {
+			if (list == null || list.size() <= 0 || group == null) {
+				V2Log.e("OnAddGroupFile : May receive new group files failed.. get empty collection");
+				return;
+			}
+			Intent intent = new Intent();
+			intent.setAction(BROADCAST_CROWD_NEW_UPLOAD_FILE_NOTIFICATION);
+			intent.addCategory(JNI_BROADCAST_CATEGROY);
+			intent.putParcelableArrayListExtra("fileJniObjects", new ArrayList<FileJNIObject>(list));
+			sendBroadcast(intent);
+		}
 	}
 
 	class AudioRequestCB extends AudioRequestCallbackAdapter {

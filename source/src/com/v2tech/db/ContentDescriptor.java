@@ -83,36 +83,48 @@ public final class ContentDescriptor {
 		}
 
 		DataBaseContext dbContext = new DataBaseContext(context);
-		SQLiteDatabase base = dbContext.openOrCreateDatabase(
-				V2TechDBHelper.DB_NAME, Context.MODE_WORLD_WRITEABLE
-						| Context.MODE_WORLD_READABLE, null);
-		String sql = " create table "
-				+ tableName
-				+ " ( "
-				+ ContentDescriptor.HistoriesMessage.Cols.ID
-				+ " integer primary key AUTOINCREMENT,"
-				+ ContentDescriptor.HistoriesMessage.Cols.OWNER_USER_ID
-				+ " bigint,"
-				+ ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_GROUP_TYPE
-				+ " bigint,"
-				+ ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_GROUP_ID
-				+ " bigint,"
-				+ ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_REMOTE_USER_ID
-				+ " bigint,"
-				+ ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_FROM_USER_ID
-				+ " bigint,"
-				+ ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_TO_USER_ID
-				+ " bigint,"
-				+ ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_ID
-				+ " nvarchar(4000),"
-				+ ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_CONTENT
-				+ " binary,"
-				+ ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_SAVEDATE
-				+ " bignit,"
-				+ ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_TRANSTATE
-				+ " bignit)";
-		base.execSQL(sql);
-		base.close();
+		SQLiteDatabase base = null;
+		try{
+			V2TechDBHelper helper = new V2TechDBHelper(dbContext);
+			helper.getReadableDatabase();
+			base = dbContext.openOrCreateDatabase(
+					V2TechDBHelper.DB_NAME, Context.MODE_WORLD_WRITEABLE
+							| Context.MODE_WORLD_READABLE, null);
+			String sql = " create table "
+					+ tableName
+					+ " ( "
+					+ ContentDescriptor.HistoriesMessage.Cols.ID
+					+ " integer primary key AUTOINCREMENT,"
+					+ ContentDescriptor.HistoriesMessage.Cols.OWNER_USER_ID
+					+ " bigint,"
+					+ ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_GROUP_TYPE
+					+ " bigint,"
+					+ ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_GROUP_ID
+					+ " bigint,"
+					+ ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_REMOTE_USER_ID
+					+ " bigint,"
+					+ ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_FROM_USER_ID
+					+ " bigint,"
+					+ ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_TO_USER_ID
+					+ " bigint,"
+					+ ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_ID
+					+ " nvarchar(4000),"
+					+ ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_CONTENT
+					+ " binary,"
+					+ ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_SAVEDATE
+					+ " bignit,"
+					+ ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_TRANSTATE
+					+ " bignit)";
+			base.execSQL(sql);
+		}
+		catch(Exception e){
+			e.getStackTrace();
+			return false;
+		}
+		finally{
+			if(base != null)
+				base.close();
+		}
 		return true;
 	}
 

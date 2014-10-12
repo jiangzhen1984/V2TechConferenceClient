@@ -187,6 +187,15 @@ public class XmlAttributeExtractor {
 
 	}
 
+	/**
+	 * <file encrypttype='1' id='C2A65B9B-63C7-4C9E-A8DD-F15F74ABA6CA'
+	 * name='83025aafa40f4bfb24fdb8d1034f78f0f7361801.gif'
+	 * size='497236'
+	 * time='1411112464' uploader='11029'
+	 * url='http://192.168.0.38:8090/crowd/C2A65B9B-63C7-4C9E-A8DD-F15F74ABA6CA/
+	 * C2A65B9B-63C7-4C9E-A8DD-F15F74ABA6CA/83025aafa40f4bfb24fdb8d1034f78f0f7361801.gif'/>
+	 * @param xml
+	 */
 	public static List<FileJNIObject> parseFiles(String xml) {
 		Document doc = buildDocument(xml);
 		if (doc == null) {
@@ -198,31 +207,40 @@ public class XmlAttributeExtractor {
 
 		List<FileJNIObject> list = new ArrayList<FileJNIObject>();
 		NodeList nList = doc.getChildNodes().item(0).getChildNodes();
-		for (int j = 0; j < nList.getLength(); j++) {
-			Element el = (Element) nList.item(j);
-			// //<file encrypttype='1' id='C2A65B9B-63C7-4C9E-A8DD-F15F74ABA6CA'
-			// * name='83025aafa40f4bfb24fdb8d1034f78f0f7361801.gif'
-			// size='497236'
-			// * time='1411112464' uploader='11029' url=
-			// *
-			// 'http://192.168.0.38:8090/crowd/C2A65B9B-63C7-4C9E-A8DD-F15F74ABA6CA/C2A65B9B-63C7-4C9E-A8DD-F15F74ABA6CA/83025aafa40f4bfb24fdb8d1034f78f0f7361801.gif'/><
-			String id = el.getAttribute("id");
-			String name = el.getAttribute("name");
-			String uploader = el.getAttribute("uploader");
-			String url = el.getAttribute("url");
-			String size = el.getAttribute("size");
-			int index = name.lastIndexOf("/");
-			if (index != -1) {
-				name = name.substring(index);
+		if(nList.getLength() <= 0){
+			Element el = (Element) doc.getChildNodes().item(0);
+			buildUploadFiles(list, el);
+		}
+		else{
+			for (int j = 0; j < nList.getLength(); j++) {
+				Element el = (Element) nList.item(j);
+				buildUploadFiles(list, el);
 			}
-
-			FileJNIObject file = new FileJNIObject(new V2User(
-					Long.parseLong(uploader)), id, name, Long.parseLong(size),
-					1);
-			file.url = url;
-			list.add(file);
 		}
 		return list;
+	}
+
+	/**
+	 * build upload file Object
+	 * @param list
+	 * @param el
+	 */
+	private static void buildUploadFiles(List<FileJNIObject> list, Element el) {
+		String id = el.getAttribute("id");
+		String name = el.getAttribute("name");
+		String uploader = el.getAttribute("uploader");
+		String url = el.getAttribute("url");
+		String size = el.getAttribute("size");
+		int index = name.lastIndexOf("/");
+		if (index != -1) {
+			name = name.substring(index);
+		}
+
+		FileJNIObject file = new FileJNIObject(new V2User(
+				Long.parseLong(uploader)), id, name, Long.parseLong(size),
+				1);
+		file.url = url;
+		list.add(file);
 	}
 
 	public static Document buildDocument(String xml) {

@@ -15,6 +15,8 @@ import com.V2.jni.VideoMixerRequest;
 import com.V2.jni.VideoMixerRequestCallback;
 import com.V2.jni.VideoRequest;
 import com.V2.jni.VideoRequestCallbackAdapter;
+import com.V2.jni.ind.FileJNIObject;
+import com.V2.jni.ind.V2Group;
 import com.V2.jni.ind.V2User;
 import com.V2.jni.util.V2Log;
 import com.v2tech.service.jni.JNIIndication;
@@ -567,7 +569,10 @@ public class ConferenceService extends DeviceService {
 			}
 		}
 
-
+		@Override
+		public void OnAddGroupFile(V2Group group, List<FileJNIObject> list) {
+			
+		}
 	}
 
 	class MixerRequestCB implements VideoMixerRequestCallback {

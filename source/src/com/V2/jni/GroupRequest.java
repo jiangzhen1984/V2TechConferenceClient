@@ -303,6 +303,17 @@ public class GroupRequest {
 		V2Log.d("GroupRequest UI", "OnAddGroupFile ---> eGroupType :"
 				+ eGroupType + " | nGroupId: " + nGroupId + " | sXml: "
 				+ sXml);
+		List<FileJNIObject> list = XmlAttributeExtractor.parseFiles(sXml);
+		V2Group group = new V2Group(nGroupId, eGroupType);
+
+		for (int i = 0; i < mCallbacks.size(); i++) {
+			WeakReference<GroupRequestCallback> wrcb = mCallbacks.get(i);
+			Object obj = wrcb.get();
+			if (obj != null) {
+				GroupRequestCallback callback = (GroupRequestCallback) obj;
+				callback.OnAddGroupFile(group, list);
+			}
+		}
 	}
 
 	/**

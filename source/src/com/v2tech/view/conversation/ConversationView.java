@@ -62,6 +62,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.V2.jni.V2GlobalEnum;
+import com.V2.jni.ind.FileJNIObject;
 import com.V2.jni.util.V2Log;
 import com.spoledge.aacplayer.AACPlayer;
 import com.spoledge.aacplayer.ArrayAACPlayer;
@@ -308,6 +309,7 @@ public class ConversationView extends Activity {
 		filter.addAction(JNIService.JNI_BROADCAST_MESSAGE_SENT_FAILED);
 		filter.addAction(PublicIntent.BROADCAST_CROWD_DELETED_NOTIFICATION);
 		filter.addAction(PublicIntent.BROADCAST_CROWD_QUIT_NOTIFICATION);
+		filter.addAction(JNIService.BROADCAST_CROWD_NEW_UPLOAD_FILE_NOTIFICATION);
 		filter.addAction(JNIService.JNI_BROADCAST_KICED_CROWD);
 		registerReceiver(receiver, filter);
 
@@ -943,6 +945,8 @@ public class ConversationView extends Activity {
 									.setImageResource(R.drawable.message_plus);
 							mMoreFeatureIV.setTag("plus");
 							mAdditionFeatureContainer.setVisibility(View.GONE);
+							mToolLayout.setVisibility(View.VISIBLE);
+							mFaceLayout.setVisibility(View.GONE);
 						}
 					}
 
@@ -971,6 +975,7 @@ public class ConversationView extends Activity {
 		@Override
 		public boolean onTouch(View view, MotionEvent event) {
 			// FIXME fix the show
+			V2Log.d(TAG, event.getAction() +"");
 			switch (event.getAction()) {
 			case MotionEvent.ACTION_DOWN:
 				cannelRecoding = false;
@@ -979,12 +984,14 @@ public class ConversationView extends Activity {
 				long currentTime = System.currentTimeMillis();
 				Log.e(TAG, (currentTime - lastTime) + "");
 				lh.postDelayed(preparedRecoding, 250);
+//				lh.postDelayed(initTouchTimeOut, 600);
 				if (currentTime - lastTime < 250) {
-					Log.d(TAG, "间隔太短，取消录音");
+					V2Log.d(TAG, "间隔太短，取消录音");
 				}
 				lastTime = currentTime;
 				break;
 			case MotionEvent.ACTION_MOVE:
+//				lh.removeCallbacks(initTouchTimeOut);
 				Rect r = new Rect();
 				view.getDrawingRect(r);
 				// check if touch position out of button than cancel send voice
@@ -995,6 +1002,7 @@ public class ConversationView extends Activity {
 					updateCancelSendVoiceMsgNotification(VOICE_DIALOG_FLAG_CANCEL);
 				}
 				break;
+			case MotionEvent.ACTION_CANCEL:
 			case MotionEvent.ACTION_UP:
 				// audio message send by 计时器
 				if (timeOutRecording) {
@@ -1003,7 +1011,7 @@ public class ConversationView extends Activity {
 					mButtonRecordAudio
 							.setText(R.string.contact_message_button_send_audio_msg);
 					timeOutRecording = false;
-					return false;
+					return true;
 				}
 				// entry normal process , stop recording state 进入正常结束流程
 				if (realRecoding) {
@@ -1082,9 +1090,8 @@ public class ConversationView extends Activity {
 				}
 				break;
 			}
-			return false;
+			return true;
 		}
-
 	};
 
 	private Runnable preparedRecoding = new Runnable() {
@@ -1162,6 +1169,14 @@ public class ConversationView extends Activity {
 			lh.removeCallbacks(mUpdateMicStatusTimer);
 			lh.removeCallbacks(mUpdateSurplusTime);
 			showOrCloseVoiceDialog();
+		}
+	};
+	
+	private Runnable initTouchTimeOut = new Runnable() {
+		@Override
+		public void run() {
+
+			breakRecording();
 		}
 	};
 
@@ -1522,6 +1537,7 @@ public class ConversationView extends Activity {
 	private void doSendMessage() {
 		String content = mMessageET.getEditableText().toString();
 		if (content == null || content.equals("")) {
+			Toast.makeText(mContext, "聊天信息不能为空", Toast.LENGTH_SHORT).show();
 			return;
 		}
 		content = removeEmoji(content);
@@ -1647,8 +1663,12 @@ public class ConversationView extends Activity {
 		// Send message to server
 		sendMessageToRemote(vm);
 	}
-
+	
 	private void sendMessageToRemote(VMessage vm) {
+		sendMessageToRemote(vm , true);
+	}
+
+	private void sendMessageToRemote(VMessage vm , boolean isFresh) {
 		// // Save message
 		vm.setmXmlDatas(vm.toXml());
 		vm.setDate(new Date(GlobalConfig.getGlobalServerTime()));
@@ -1660,7 +1680,7 @@ public class ConversationView extends Activity {
 		Message.obtain(lh, SEND_MESSAGE, vm).sendToTarget();
 		addMessageToContainer(vm);
 		// send notification
-		notificateConversationUpdate(true, vm.getId());
+		notificateConversationUpdate(isFresh, vm.getId());
 	}
 
 	// FIXME optimize code
@@ -2318,6 +2338,31 @@ public class ConversationView extends Activity {
 					|| (PublicIntent.BROADCAST_CROWD_QUIT_NOTIFICATION
 							.equals(intent.getAction()))) {
 				finish();
+			} else if ((JNIService.BROADCAST_CROWD_NEW_UPLOAD_FILE_NOTIFICATION
+				.equals(intent.getAction()))) {
+				
+				ArrayList<FileJNIObject> list = intent.getParcelableArrayListExtra("fileJniObjects");
+				if (list == null || list.size() <= 0) {
+					V2Log.e("ConversationView : May receive new group files failed.. get empty collection");
+					return;
+				}
+				//自己上传文件不提示
+				if(list.get(0).user.uid == user1Id)
+					return ;
+				User user = GlobalHolder.getInstance().getUser(list.get(0).user.uid);
+				StringBuilder sb = new StringBuilder();
+				VMessage vm = new VMessage(cov.getType(), groupId, user, null,
+						new Date(GlobalConfig.getGlobalServerTime()));
+				sb.append("上传了");
+				for (int j = 0; j < list.size(); j++) {
+					if(j + 1 !=  list.size())
+						sb.append(list.get(j).fileName).append(" , ");
+					else
+						sb.append(list.get(j).fileName);
+				}
+				VMessageAbstractItem vai = new VMessageTextItem(vm, sb.toString());
+				vai.setNewLine(true);
+				sendMessageToRemote(vm , false);
 			}
 		}
 

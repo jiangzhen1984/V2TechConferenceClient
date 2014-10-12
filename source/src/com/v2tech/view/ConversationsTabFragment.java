@@ -71,6 +71,7 @@ import com.v2tech.view.conversation.MessageLoader;
 import com.v2tech.view.conversation.P2PConversation;
 import com.v2tech.view.group.CrowdDetailActivity;
 import com.v2tech.vo.AddFriendHistorieNode;
+import com.v2tech.vo.AudioVideoMessageBean;
 import com.v2tech.vo.Conference;
 import com.v2tech.vo.ConferenceConversation;
 import com.v2tech.vo.ConferenceGroup;
@@ -202,8 +203,8 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 	public void onDestroy() {
 		super.onDestroy();
 		getActivity().unregisterReceiver(receiver);
-		mItemList= null;
-		mCacheItemList= null;
+		mItemList = null;
+		mCacheItemList = null;
 		BitmapManager.getInstance().unRegisterBitmapChangedListener(
 				this.bitmapChangedListener);
 	}
@@ -287,7 +288,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 		searchList.clear();
 		mIsStartedSearch = false;
 		startIndex = 0;
-//		adapter.notifyDataSetChanged();
+		// adapter.notifyDataSetChanged();
 		super.onStop();
 	}
 
@@ -299,6 +300,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 	private boolean isShouldQP; // 是否需要启动全拼
 	private int startIndex = 0;
 	private boolean isBreak; // 用于跳出getSearchList函数中的二级循环
+
 	@Override
 	public void afterTextChanged(Editable s) {
 		if (s != null && s.length() > 0) {
@@ -456,6 +458,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 
 	/**
 	 * 判断给定的字符是否为汉字
+	 * 
 	 * @param mChar
 	 * @return
 	 */
@@ -658,13 +661,13 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 
 		boolean isAdd = true;
 		for (Conversation conversation : mConvList) {
-			if(conversation.getExtId() == cov.getExtId()){
+			if (conversation.getExtId() == cov.getExtId()) {
 				isAdd = false;
 				break;
 			}
 		}
-		
-		if(isAdd == true){
+
+		if (isAdd == true) {
 			this.mConvList.add(0, cov);
 			GroupLayout gp = new GroupLayout(this.getActivity(), cov);
 			mItemList.add(0, new ScrollItem(cov, gp));
@@ -684,8 +687,8 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 		}
 	}
 
-	
 	private List<Conversation> tempList;
+
 	/**
 	 * Load local conversation list
 	 */
@@ -857,17 +860,21 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 					.valueOf(newestMediaMessage.startDate));
 
 			if (isFromDatabase) {
-//				boolean isShowFlag;
-//				if (isHasUnreadMediaMessage())
-//					isShowFlag = true;
-//				else
-//					isShowFlag = false;
+				// boolean isShowFlag;
+				// if (isHasUnreadMediaMessage())
+				// isShowFlag = true;
+				// else
+				// isShowFlag = false;
 				voiceLayout.update(null, startDate, false);
-//				if (newestMediaMessage.readSatate == AudioVideoMessageBean.STATE_UNREAD)
-//					updateUnreadVoiceConversation(true);
-			} else{
-				voiceLayout.update(null, startDate, true);
-				updateUnreadVoiceConversation(true);
+				// if (newestMediaMessage.readSatate ==
+				// AudioVideoMessageBean.STATE_UNREAD)
+				// updateUnreadVoiceConversation(true);
+			} else {
+				if (newestMediaMessage.readSatate == AudioVideoMessageBean.STATE_UNREAD) {
+					voiceLayout.update(null, startDate, true);
+					updateUnreadVoiceConversation(true);
+				} else
+					voiceLayout.update(null, startDate, false);
 			}
 		}
 	}
@@ -1078,7 +1085,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 	}
 
 	private void updateUnreadConversation(Conversation cov) {
-//		boolean flag;
+		// boolean flag;
 		int ret;
 		if (cov.getReadFlag() == Conversation.READ_FLAG_READ) {
 			mUnreadConvList.remove(cov);
@@ -1096,8 +1103,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 		// If flag is true, means we updated unread list, then we need to update
 		// database
 		// update conversation date and flag to database
-		ConversationProvider.updateConversationToDatabase(mContext, cov,
-					ret);
+		ConversationProvider.updateConversationToDatabase(mContext, cov, ret);
 	}
 
 	/**
@@ -1684,9 +1690,10 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 					.equals(intent.getAction())) {
 				long cid = intent.getLongExtra("crowd", 0);
 				removeConversation(cid);
-				//clear the crowd group all chat database messges
-				MessageLoader.deleteMessageByID(context, mCurrentTabFlag , cid , -1);
-				//clear the crowd group all verification database messges
+				// clear the crowd group all chat database messges
+				MessageLoader.deleteMessageByID(context, mCurrentTabFlag, cid,
+						-1);
+				// clear the crowd group all verification database messges
 				MessageLoader.deleteCrowdVerificationMessage(context, cid);
 			}
 		}

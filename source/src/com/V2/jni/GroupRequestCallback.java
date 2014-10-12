@@ -189,5 +189,12 @@ public interface GroupRequestCallback {
 	 * @see GroupRequest#delGroupFile(int, long, String)
 	 */
 	public void OnDelGroupFile(V2Group group, List<FileJNIObject> list);
+	
+	/**
+	 * call back when other user upload new group file 
+	 * @param group
+	 * @param list
+	 */
+	public void OnAddGroupFile(V2Group group, List<FileJNIObject> list);
 
 }

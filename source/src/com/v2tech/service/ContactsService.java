@@ -8,6 +8,7 @@ import android.os.Message;
 
 import com.V2.jni.GroupRequest;
 import com.V2.jni.GroupRequestCallbackAdapter;
+import com.V2.jni.ind.FileJNIObject;
 import com.V2.jni.ind.V2Group;
 import com.V2.jni.ind.V2User;
 import com.v2tech.service.jni.GroupServiceJNIResponse;
@@ -322,6 +323,10 @@ public class ContactsService extends AbstractHandler {
 					jniRes).sendToTarget();
 		}
 
+		@Override
+		public void OnAddGroupFile(V2Group group, List<FileJNIObject> list) {
+			
+		}
 	}
 
 }
