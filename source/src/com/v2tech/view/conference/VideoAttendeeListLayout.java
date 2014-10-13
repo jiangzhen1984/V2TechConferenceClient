@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 
 import android.content.Context;
+import android.database.DataSetObserver;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -26,6 +27,8 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
 import android.widget.EditText;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -53,8 +56,8 @@ public class VideoAttendeeListLayout extends LinearLayout {
 	private ListView mAttendeeContainer;
 
 	private List<Wrapper> mList;
+	private List<Wrapper> mFilterList;
 
-	private boolean mIsStartedSearch;
 	private EditText mSearchET;
 
 	private View mPinButton;
@@ -64,7 +67,6 @@ public class VideoAttendeeListLayout extends LinearLayout {
 
 	private int onLinePersons = 0;
 	private int mAttendeeCount = 0;
-	private boolean initAttendPersons;
 
 	public interface VideoAttendeeActionListener {
 
@@ -83,6 +85,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 		super(context);
 		this.conf = conf;
 		mList = new ArrayList<Wrapper>();
+		mFilterList = mList;
 		initLayout();
 	}
 
@@ -100,6 +103,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 		mPinButton.setOnClickListener(mRequestFixedListener);
 
 		mAttendeeContainer.setAdapter(adapter);
+		mAttendeeContainer.setTextFilterEnabled(true);
 		mAttendeeContainer.setOnItemClickListener(new OnItemClickListener() {
 
 			@Override
@@ -141,36 +145,37 @@ public class VideoAttendeeListLayout extends LinearLayout {
 		this.listener = listener;
 	}
 
+	/**
+	 * Add new attendee to list
+	 * 
+	 * @param at
+	 */
 	public void addNewAttendee(Attendee at) {
 		if (at == null) {
 			return;
 		}
-		V2Log.d(TAG, "addNewAttendee 执行了");
-		if (at.getType() != Attendee.TYPE_MIXED_VIDEO
-				&& !TextUtils.isEmpty(at.getAttName())) {
-			configAttendee(at);
-		}
-		List<UserDeviceConfig> dList = at.getmDevices();
-		int i = 0;
-		int deviceIndex = 1;
-		do {
-			if (dList == null) {
-				mList.add(new Wrapper(at, null, DEFAULT_DEVICE_FLAG));
-			} else {
-				mList.add(new Wrapper(at, dList.get(i),
-						i == 0 ? DEFAULT_DEVICE_FLAG : deviceIndex++));
-			}
-			i++;
-		} while (dList != null && i < dList.size());
-
+		List<Attendee> list = new ArrayList<Attendee>(1);
+		list.add(at);
+		addAttendeeWithoutNotification(list);
 		Collections.sort(mList);
 		adapter.notifyDataSetChanged();
 	}
 
+	/**
+	 * Add new attendee list to current list
+	 * 
+	 * @param atList
+	 */
 	public void addNewAttendee(List<Attendee> atList) {
 		if (atList == null) {
 			return;
 		}
+		addAttendeeWithoutNotification(atList);
+		Collections.sort(mList);
+		adapter.notifyDataSetChanged();
+	}
+
+	private void addAttendeeWithoutNotification(List<Attendee> atList) {
 		for (int index = 0; index < atList.size(); index++) {
 			Attendee at = atList.get(index);
 			if (at.getType() != Attendee.TYPE_MIXED_VIDEO
@@ -190,8 +195,6 @@ public class VideoAttendeeListLayout extends LinearLayout {
 				i++;
 			} while (dList != null && i < dList.size());
 		}
-		Collections.sort(mList);
-		adapter.notifyDataSetChanged();
 	}
 
 	private View buildAttendeeView(Wrapper wr) {
@@ -244,21 +247,23 @@ public class VideoAttendeeListLayout extends LinearLayout {
 		}
 
 		// Set text color and camera icon
-		setStyle(wr.a, wr.udc, nameTV, cameraIV, spIV);
+		setStyle(wr, nameTV, cameraIV, spIV);
 	}
 
 	/**
 	 * 
-	 * @param at
-	 * @param udc
+	 * @param wr
 	 * @param name
 	 * @param iv
 	 *            camera imave view
 	 * @param speaker
 	 *            speaker image view
 	 */
-	private void setStyle(Attendee at, UserDeviceConfig udc, TextView name,
+	private void setStyle(Wrapper wr, TextView name,
 			ImageView iv, ImageView speaker) {
+		Attendee at = wr.a;
+		UserDeviceConfig udc = wr.udc;
+		
 		if (at.isChairMan() || conf.getChairman() == at.getAttId()) {
 
 			if (at.isSelf() || at.isJoined()) {
@@ -296,7 +301,8 @@ public class VideoAttendeeListLayout extends LinearLayout {
 			iv.setImageResource(R.drawable.camera_pressed);
 		}
 
-		if (at.getType() == Attendee.TYPE_MIXED_VIDEO) {
+		//If attaendee is mixed video or is not default flag, then hide speaker
+		if (at.getType() == Attendee.TYPE_MIXED_VIDEO || wr.sortFlag != DEFAULT_DEVICE_FLAG) {
 			speaker.setVisibility(View.INVISIBLE);
 		}
 
@@ -353,7 +359,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 		List<UserDeviceConfig> dList = at.getmDevices();
 		int index = 0;
 		if (mList.size() > 0) {
-			for (int i =0; i < mList.size(); i++) {
+			for (int i = 0; i < mList.size(); i++) {
 				Wrapper wr = mList.get(i);
 				if (wr.a.getAttId() == at.getAttId()) {
 					wr.udc = dList.get(0);
@@ -364,15 +370,15 @@ public class VideoAttendeeListLayout extends LinearLayout {
 			}
 		}
 		for (int i = 1; i < dList.size(); i++) {
-			if (index + 1 == mList.size() -1) {
+			if (index + 1 == mList.size() - 1) {
 				mList.add(new Wrapper(at, dList.get(i), i));
 			} else {
 				mList.add(index + 1, new Wrapper(at, dList.get(i), i));
 			}
 			index++;
-			
+
 		}
-		
+
 		configAttendee(at);
 		// TODO update device count and mixed video
 
@@ -409,7 +415,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 			onLinePersons--;
 			updateStatist();
 		}
-		
+
 		Collections.sort(mList);
 		adapter.notifyDataSetChanged();
 	}
@@ -421,31 +427,6 @@ public class VideoAttendeeListLayout extends LinearLayout {
 	 * @param udc
 	 */
 	public void updateAttendeeDevice(Attendee att, UserDeviceConfig udc) {
-		// View atView = null;
-		// synchronized (mAttendsView) {
-		// for (ViewWrapper v : mAttendsView) {
-		// Wrapper wr = (Wrapper) v.v.getTag();
-		// if (wr.a.getAttId() == att.getAttId()) {
-		// atView = v.v;
-		// ImageView spIV = (ImageView) atView
-		// .findViewById(R.id.video_attendee_device_camera_icon);
-		// if (udc.isEnable()) {
-		// spIV.setImageResource(R.drawable.camera);
-		// } else {
-		// spIV.setImageResource(R.drawable.camera_pressed);
-		// atView.setBackgroundColor(Color.WHITE);
-		// }
-		// // If user doesn't exist video device before, update video
-		// // device
-		// if (wr.udc == null) {
-		// wr.udc = udc;
-		// }
-		// wr.udc.setShowing(false);
-		// wr.udc.setEnable(udc.isEnable());
-		// break;
-		// }
-		// }
-		// }
 
 		for (int i = 0; i < mList.size(); i++) {
 			Wrapper wr = mList.get(i);
@@ -682,36 +663,11 @@ public class VideoAttendeeListLayout extends LinearLayout {
 
 		@Override
 		public void afterTextChanged(Editable et) {
-			// String str = et.toString().trim();
-			// if (str.length() > 0) {
-			// if (!mIsStartedSearch) {
-			// mCachedAttendsView = mAttendsView;
-			// mIsStartedSearch = true;
-			// }
-			// } else {
-			// mAttendsView = mCachedAttendsView;
-			// adapter.notifyDataSetChanged();
-			// mIsStartedSearch = false;
-			// return;
-			// }
-			// List<ViewWrapper> searchedViewList = new
-			// ArrayList<ViewWrapper>();
-			// for (int i = 0; mCachedAttendsView != null
-			// && i < mCachedAttendsView.size(); i++) {
-			// ViewWrapper v = mCachedAttendsView.get(i);
-			// Wrapper w = (Wrapper) v.v.getTag();
-			// if (w.a.getAttName() == null || w.a.getAbbraName() == null) {
-			// V2Log.w("Attendee name: " + w.a.getAttName() + "  arrba:"
-			// + w.a.getAbbraName());
-			// continue;
-			// }
-			// if (w.a.getAttName().contains(str)
-			// || w.a.getAbbraName().contains(str)) {
-			// searchedViewList.add(v);
-			// }
-			// }
-			// mAttendsView = searchedViewList;
-			adapter.notifyDataSetChanged();
+			if (TextUtils.isEmpty(et)) {
+				mAttendeeContainer.clearTextFilter();
+			} else { 
+				mAttendeeContainer.setFilterText(et.toString());
+			}
 		}
 
 		@Override
@@ -728,16 +684,23 @@ public class VideoAttendeeListLayout extends LinearLayout {
 
 	};
 
-	class AttendeesAdapter extends BaseAdapter {
+	class AttendeesAdapter extends BaseAdapter implements Filterable {
+
+		private LocalFilter filter;
+
+		public AttendeesAdapter() {
+			super();
+			filter = new LocalFilter();
+		}
 
 		@Override
 		public int getCount() {
-			return mList.size();
+			return mFilterList.size();
 		}
 
 		@Override
 		public Object getItem(int position) {
-			return mList.get(position);
+			return mFilterList.get(position);
 		}
 
 		@Override
@@ -748,12 +711,82 @@ public class VideoAttendeeListLayout extends LinearLayout {
 		@Override
 		public View getView(int position, View convertView, ViewGroup parent) {
 			if (convertView == null) {
-				convertView = buildAttendeeView(mList.get(position));
+				convertView = buildAttendeeView(mFilterList.get(position));
 			} else {
-				updateView(mList.get(position), convertView);
+				updateView(mFilterList.get(position), convertView);
 			}
 			return convertView;
 		}
+
+		public Filter getFilter() {
+			return filter;
+		}
+
+	}
+	
+	
+	class LocalDataObserver extends DataSetObserver {
+
+		@Override
+		public void onChanged() {
+			super.onChanged();
+			if (TextUtils.isEmpty(mAttendeeContainer.getTextFilter())) {
+				mFilterList = mList;
+			}
+		}
+
+		@Override
+		public void onInvalidated() {
+			super.onInvalidated();
+		}
+		
+	}
+
+	class LocalFilter extends Filter {
+
+		@Override
+		protected FilterResults performFiltering(CharSequence constraint) {
+			FilterResults fr = new FilterResults();
+			List<Wrapper> list = null;
+			if (constraint == null || constraint.toString().isEmpty()) {
+				list = mList;
+			} else {
+				list = new ArrayList<Wrapper>();
+				for (int i = 0; i < mList.size(); i++) {
+					Wrapper wr = mList.get(i);
+					if (wr.a.getAbbraName().contains(constraint.toString())
+							|| wr.a.getAttName()
+									.contains(constraint.toString())) {
+						list.add(wr);
+					}
+				}
+				Collections.sort(list);
+			}
+
+			fr.values = list;
+			fr.count = list.size();
+			return fr;
+		}
+
+		@Override
+		protected void publishResults(CharSequence constraint,
+				FilterResults results) {
+			if (results.values != null) {
+				if (TextUtils.isEmpty(constraint)) {
+					
+				}
+				mFilterList = (List<Wrapper>) results.values;
+				adapter.notifyDataSetChanged();
+			} else {
+				// TODO toast search error
+			}
+		}
+
+		@Override
+		public CharSequence convertResultToString(Object resultValue) {
+			return super.convertResultToString(resultValue);
+		}
+
 
 	}
 

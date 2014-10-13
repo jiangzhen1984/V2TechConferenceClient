@@ -403,7 +403,6 @@ public class CrowdCreateActivity extends Activity {
 				CrowdGroup crowd = new CrowdGroup(0, mGroupTitleET.getText()
 						.toString(), GlobalHolder.getInstance()
 						.getCurrentUser(), new Date());
-				crowd.addUserToGroup(mUserList);
 				int pos = mRuleSpinner.getSelectedItemPosition();
 				// Position match with R.array.crowd_rules
 				if (pos == 0) {
@@ -414,7 +413,9 @@ public class CrowdCreateActivity extends Activity {
 					crowd.setAuthType(CrowdGroup.AuthType.NEVER);
 				}
 
-				cg.createCrowdGroup(crowd, new Registrant(mLocalHandler,
+				List<User> userList = new ArrayList<User>(mUserList);
+				//Do not add userList to crowd, because this just invitation.
+				cg.createCrowdGroup(crowd, userList, new Registrant(mLocalHandler,
 						CREATE_CROWD_RESPONSE, crowd));
 				view.setEnabled(false);
 			}

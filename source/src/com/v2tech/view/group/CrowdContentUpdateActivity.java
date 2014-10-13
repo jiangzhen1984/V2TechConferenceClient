@@ -14,6 +14,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.V2.jni.util.V2Log;
 import com.v2tech.R;
 import com.v2tech.service.CrowdGroupService;
 import com.v2tech.service.GlobalHolder;
@@ -41,6 +42,7 @@ public class CrowdContentUpdateActivity extends Activity {
 	private boolean inEditMode;
 	private int mType;
 	private LocalReceiver localReceiver;
+	private Toast mToast;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -49,15 +51,22 @@ public class CrowdContentUpdateActivity extends Activity {
 
 		mContentET = (EditText) findViewById(R.id.crowd_content_et);
 		mContentTitle = (TextView) findViewById(R.id.crowd_content_title);
-		
-		mUpdateButton = (TextView)findViewById(R.id.crowd_content_update_button);
+
+		mUpdateButton = (TextView) findViewById(R.id.crowd_content_update_button);
 		mUpdateButton.setOnClickListener(mUpdateButtonListener);
 
 		mReturnButton = (TextView) findViewById(R.id.crowd_return_button);
 		mReturnButton.setOnClickListener(mReturnButtonListener);
-		
+
 		crowd = (CrowdGroup) GlobalHolder.getInstance().getGroupById(
-				GroupType.CHATING.intValue(), getIntent().getExtras().getLong("cid"));
+				GroupType.CHATING.intValue(),
+				getIntent().getExtras().getLong("cid"));
+
+		if (crowd == null
+				|| GlobalHolder.getInstance().getCurrentUserId() != crowd
+						.getOwnerUser().getmUserId()) {
+			mUpdateButton.setVisibility(View.GONE);
+		}
 
 		mType = getIntent().getExtras().getInt("type");
 		updateView(mType, inEditMode);
@@ -71,10 +80,6 @@ public class CrowdContentUpdateActivity extends Activity {
 		overridePendingTransition(R.animator.right_in, R.animator.right_out);
 	}
 
-	
-	
-	
-	
 	@Override
 	public void onBackPressed() {
 		if (inEditMode) {
@@ -84,8 +89,6 @@ public class CrowdContentUpdateActivity extends Activity {
 			super.onBackPressed();
 		}
 	}
-	
-	
 
 	@Override
 	protected void onDestroy() {
@@ -93,21 +96,19 @@ public class CrowdContentUpdateActivity extends Activity {
 		service.clearCalledBack();
 		this.unregisterReceiver(localReceiver);
 	}
-	
-	
-	
+
 	private void initReceiver() {
-		localReceiver = new LocalReceiver(); 
+		localReceiver = new LocalReceiver();
 		IntentFilter filter = new IntentFilter();
 		filter.addAction(JNIService.JNI_BROADCAST_KICED_CROWD);
 		filter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
 		this.registerReceiver(localReceiver, filter);
 	}
 
-
 	private void updateView(int type, boolean editMode) {
 		if (editMode) {
-			mUpdateButton.setText(R.string.crowd_content_udpate_announce_button);
+			mUpdateButton
+					.setText(R.string.crowd_content_udpate_announce_button);
 			mContentTitle.setText(R.string.crowd_content_title);
 			mContentET.setEnabled(true);
 			mContentET.requestFocus();
@@ -122,10 +123,9 @@ public class CrowdContentUpdateActivity extends Activity {
 				mContentTitle.setText(R.string.crowd_content_announce);
 			}
 		}
-		
+
 	}
-	
-	
+
 	class LocalReceiver extends BroadcastReceiver {
 
 		@Override
@@ -136,20 +136,19 @@ public class CrowdContentUpdateActivity extends Activity {
 					finish();
 				}
 			}
-			
+
 		}
-		
+
 	}
-	
-	
+
 	private OnClickListener mReturnButtonListener = new OnClickListener() {
 
 		@Override
 		public void onClick(View v) {
 			onBackPressed();
-			
+
 		}
-		
+
 	};
 
 	private OnClickListener mUpdateButtonListener = new OnClickListener() {
@@ -161,11 +160,13 @@ public class CrowdContentUpdateActivity extends Activity {
 				updateView(mType, inEditMode);
 			} else {
 				synchronized (mState) {
+					V2Log.e("==============3====================" + mState);
 					if (mState == State.PENDING) {
 						return;
 					}
 					mState = State.PENDING;
 				}
+				V2Log.e("======================2============" + mState);
 				if (mType == UPDATE_TYPE_BRIEF) {
 					crowd.setBrief(mContentET.getText().toString());
 				} else if (mType == UPDATE_TYPE_ANNOUNCEMENT) {
@@ -177,7 +178,6 @@ public class CrowdContentUpdateActivity extends Activity {
 		}
 
 	};
-	
 
 	private Handler mLocalHandler = new Handler() {
 
@@ -188,13 +188,18 @@ public class CrowdContentUpdateActivity extends Activity {
 				synchronized (mState) {
 					mState = State.NONE;
 				}
-				Toast.makeText(CrowdContentUpdateActivity.this,
+				if (mToast != null) {
+					mToast.cancel();
+				}
+
+				mToast = Toast.makeText(CrowdContentUpdateActivity.this,
 						R.string.crowd_content_udpate_succeed,
-						Toast.LENGTH_SHORT).show();
+						Toast.LENGTH_SHORT);
+				mToast.show();
 				setResult(mType, null);
 				inEditMode = false;
 				updateView(mType, inEditMode);
-				//finish();
+				// finish();
 				break;
 			}
 		}

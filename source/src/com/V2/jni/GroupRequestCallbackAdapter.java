@@ -21,8 +21,7 @@ public abstract class GroupRequestCallbackAdapter implements
 	}
 
 	@Override
-	public void OnModifyGroupInfoCallback(int groupType, long nGroupID,
-			String sXml) {
+	public void OnModifyGroupInfoCallback(V2Group group) {
 
 	}
 	

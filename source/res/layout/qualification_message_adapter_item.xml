@@ -14,11 +14,26 @@
         android:layout_marginLeft="15dp"
         android:layout_marginRight="5dp"
         android:layout_marginTop="@dimen/conversation_view_margin" >
+        
+        
+        <ImageView
+            android:id="@+id/qualification_msg_delete_left_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="5dp"
+            android:layout_marginRight="5dp"
+            android:layout_alignParentLeft="true"
+            android:layout_centerInParent="true"
+            android:src="@drawable/crowd_file_delete_left_button"
+             />
+        
 
         <ImageView
             android:id="@+id/qualification_msg_image_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_toRightOf="@+id/qualification_msg_delete_left_button"
+            android:layout_centerInParent="true"
             android:src="@drawable/conference_icon_self" />
 
         <ImageView
@@ -96,6 +111,23 @@
             android:text="@string/crowd_invitation_accept_button_name"
             android:textColor="@color/button_text_color"
             android:textSize="@dimen/common_item_text_size_16" />
+        
+        
+         <TextView
+            android:id="@+id/qualification_msg_delete_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="@dimen/button_gap_horizontal"
+            android:background="@drawable/rounded_corners_contacts_group_delete_button"
+            android:paddingBottom="@dimen/button_padding_vertical"
+            android:paddingLeft="@dimen/button_padding_horizontal"
+            android:paddingRight="@dimen/button_padding_horizontal"
+            android:paddingTop="@dimen/button_padding_vertical"
+            android:text="@string/activiy_contact_group_item_button_delete"
+            android:textColor="@color/common_white_color"
+            android:textSize="@dimen/common_item_text_size" />
+        
+        
     </LinearLayout>
 
     <LinearLayout

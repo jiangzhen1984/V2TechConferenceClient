@@ -27,7 +27,8 @@
                 android:layout_marginBottom="8dp"
                 android:layout_marginTop="8dp"
                 android:text="@string/group_create_title"
-                android:textSize="25sp" />
+                android:textColor="@color/activiy_contact_detail_title_color"
+                android:textSize="@dimen/common_item_text_size" />
 
             <TextView
                 android:id="@+id/group_create_confirm_button"
@@ -36,11 +37,11 @@
                 android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"
                 android:paddingBottom="10dp"
-                android:paddingLeft="30dp"
-                android:paddingRight="30dp"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp"
                 android:paddingTop="10dp"
                 android:text="@string/group_create_confirm"
-                android:textColor="@color/conf_create_button_color" />
+                android:textColor="@color/common_confirm_button_color" />
 
             <TextView
                 android:id="@+id/group_create_return_button"
@@ -49,8 +50,12 @@
                 android:layout_alignParentLeft="true"
                 android:layout_centerVertical="true"
                 android:layout_marginLeft="25dp"
+                android:paddingBottom="10dp"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp"
+                android:paddingTop="10dp"
                 android:text="@string/group_create_cancel"
-                android:textColor="@color/conf_create_button_color" />
+                android:textColor="@color/common_return_button_color" />
         </RelativeLayout>
 
         <LinearLayout
@@ -175,8 +180,8 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
-                        android:layout_weight=".3"
-                        android:gravity="right|center_vertical"
+                        android:layout_weight=".2"
+                        android:gravity="left|center_vertical"
                         android:paddingLeft="20dp"
                         android:paddingRight="10dp"
                         android:text="@string/group_create_group_name"
@@ -217,8 +222,8 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
-                        android:layout_weight=".3"
-                        android:gravity="right|center_vertical"
+                        android:layout_weight=".2"
+                        android:gravity="left|center_vertical"
                         android:paddingLeft="0dp"
                         android:paddingRight="10dp"
                         android:text="@string/group_create_group_qualification"

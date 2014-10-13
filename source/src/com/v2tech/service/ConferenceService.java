@@ -547,19 +547,20 @@ public class ConferenceService extends DeviceService {
 
 
 		@Override
-		public void OnModifyGroupInfoCallback(int groupType, long nGroupID,
-				String sXml) {
-			if (groupType == Group.GroupType.CONFERENCE.intValue()) {
+		public void OnModifyGroupInfoCallback(V2Group group) {
+			if (group == null) {
+				return;
+			}
+			if (group.type == Group.GroupType.CONFERENCE.intValue()) {
 				ConferenceGroup cache = (ConferenceGroup) GlobalHolder
-						.getInstance().findGroupById(nGroupID);
+						.getInstance().findGroupById(group.id);
 
 				// if doesn't find matched group, mean this is new group
 				if (cache == null) {
 
 				} else {
-					int flag = ConferenceGroup.extraAttrFromXml(cache, sXml);
 
-					if ((flag & ConferenceGroup.EXTRA_FLAG_SYNC) == ConferenceGroup.EXTRA_FLAG_SYNC) {
+					if (group.isSync) {
 						notifyListenerWithPending(KEY_SYNC_LISTNER,
 								(cache.isSyn() ? 1 : 0), 0, null);
 					}

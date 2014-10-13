@@ -293,6 +293,8 @@ public class CrowdMembersActivity extends Activity {
 			if (isInDeleteMode) {
 				if (this.mUser.getmUserId() != crowd.getOwnerUser().getmUserId()) {
 					mDeleteIV.setVisibility(View.VISIBLE);
+				} else {
+					mDeleteIV.setVisibility(View.GONE);
 				}
 			} else {
 				mDeleteIV.setVisibility(View.GONE);

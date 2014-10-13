@@ -104,6 +104,7 @@ public class JNIService extends Service {
 	public static final String JNI_BROADCAST_USER_UPDATE_NAME_OR_SIGNATURE = "com.v2tech.jni.broadcast.user_update_sigature";
 	public static final String JNI_BROADCAST_GROUP_NOTIFICATION = "com.v2tech.jni.broadcast.group_geted";
 	public static final String JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION = "com.v2tech.jni.broadcast.group_user_updated";
+	public static final String JNI_BROADCAST_GROUP_UPDATED = "com.v2tech.jni.broadcast.group_updated";
 	public static final String JNI_BROADCAST_NEW_MESSAGE = "com.v2tech.jni.broadcast.new.message";
 	public static final String JNI_BROADCAST_MESSAGE_SENT_FAILED = "com.v2tech.jni.broadcast.message_sent_failed";
 	public static final String JNI_BROADCAST_NEW_CONF_MESSAGE = "com.v2tech.jni.broadcast.new.conf.message";
@@ -586,11 +587,25 @@ public class JNIService extends Service {
 		}
 
 		@Override
-		public void OnModifyGroupInfoCallback(int groupType, long nGroupID,
-				String sXml) {
-			if (groupType == GroupType.CONFERENCE.intValue()) {
-
+		public void OnModifyGroupInfoCallback(V2Group group) {
+			if (group == null) {
+				return;
 			}
+			if (group.type == GroupType.CONFERENCE.intValue()) {
+
+			} else if (group.type == GroupType.CHATING.intValue()) {
+				CrowdGroup cg = (CrowdGroup)GlobalHolder.getInstance().getGroupById(group.id);
+				cg.setAnnouncement(group.announce);
+				cg.setBrief(group.brief);
+				cg.setAuthType(CrowdGroup.AuthType.fromInt(group.authType));
+			}
+			
+			// Send broadcast
+			Intent i = new Intent(JNI_BROADCAST_GROUP_UPDATED);
+			i.addCategory(JNI_BROADCAST_CATEGROY);
+			i.putExtra("gid", group.id);
+			mContext.sendBroadcast(i);
+			
 
 		}
 

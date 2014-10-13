@@ -146,6 +146,7 @@ public class CrowdDetailActivity extends Activity {
 		localReceiver = new LocalReceiver(); 
 		IntentFilter filter = new IntentFilter();
 		filter.addAction(JNIService.JNI_BROADCAST_KICED_CROWD);
+		filter.addAction(JNIService.JNI_BROADCAST_GROUP_UPDATED);
 		filter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
 		this.registerReceiver(localReceiver, filter);
 	}
@@ -367,6 +368,15 @@ public class CrowdDetailActivity extends Activity {
 				long crowdId = intent.getLongExtra("crowd", 0);
 				if (crowdId == crowd.getmGId()) {
 					finish();
+				}
+			} else if (intent.getAction().equals(JNIService.JNI_BROADCAST_GROUP_UPDATED)) {
+				long crowdId = intent.getLongExtra("gid", 0);
+				//Update content
+				if (crowdId == crowd.getmGId()) {
+					initRules();
+					mBriefTV.setText(crowd.getBrief());
+					mAnouncementTV.setText(crowd.getAnnouncement());
+					mMembersCountsTV.setText(crowd.getUsers().size()+"");
 				}
 			}
 			

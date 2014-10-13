@@ -301,8 +301,7 @@ public class GroupRequest {
 	 */
 	private void OnAddGroupFile(int eGroupType, long nGroupId, String sXml) {
 		V2Log.d("GroupRequest UI", "OnAddGroupFile ---> eGroupType :"
-				+ eGroupType + " | nGroupId: " + nGroupId + " | sXml: "
-				+ sXml);
+				+ eGroupType + " | nGroupId: " + nGroupId + " | sXml: " + sXml);
 		List<FileJNIObject> list = XmlAttributeExtractor.parseFiles(sXml);
 		V2Group group = new V2Group(nGroupId, eGroupType);
 
@@ -323,8 +322,8 @@ public class GroupRequest {
 	 * @param sXml
 	 */
 	private void OnDelGroupFile(int type, long nGroupId, String sXml) {
-		V2Log.e("GroupRequest  OnDelGroupFile" + type + "   " + nGroupId
-				+ "  " + sXml);
+		V2Log.e("GroupRequest  OnDelGroupFile" + type + "   " + nGroupId + "  "
+				+ sXml);
 
 		List<FileJNIObject> list = XmlAttributeExtractor.parseFiles(sXml);
 		V2Group group = new V2Group(nGroupId, type);
@@ -380,8 +379,8 @@ public class GroupRequest {
 	 * <filelist><file encrypttype='1' id='C2A65B9B-63C7-4C9E-A8DD-F15F74ABA6CA'
 	 * name='83025aafa40f4bfb24fdb8d1034f78f0f7361801.gif' size='497236'
 	 * time='1411112464' uploader='11029' url=
-	 * 'http://192.168.0.38:8090/crowd/C2A65B9B-63C7-4C9E-A8DD-F15F74ABA6CA/C2A65B9B-63C7-4C9E-A8DD-F15F74ABA6CA/83025aafa40f4bfb24fdb8d1034f78f0f7361801.gif'/></fi
-	 * l e l i s t >
+	 * 'http://192.168.0.38:8090/crowd/C2A65B9B-63C7-4C9E-A8DD-F15F74ABA6CA/C2A65B9B-63C7-4C9E-A8DD-F15F74ABA6CA/83025aafa40f4bfb24fdb8d1034f78f0f7361801.gif'/></f
+	 * i l e l i s t >
 	 * 
 	 * @param type
 	 * @param nGroupId
@@ -527,6 +526,10 @@ public class GroupRequest {
 	/**
 	 * TODO to be implement comment
 	 * 
+	 * OnModifyGroupInfo::-->3:4174:<crowd id="4174" name="u1" authtype="0"
+	 * size="0" announcement="hhhh zahjhhjj" summary="njhhjjbhjjj"
+	 * creatoruserid="1287"/>
+	 * 
 	 * @param groupType
 	 * @param nGroupID
 	 * @param sXml
@@ -534,11 +537,33 @@ public class GroupRequest {
 	private void OnModifyGroupInfo(int groupType, long nGroupID, String sXml) {
 		V2Log.d("OnModifyGroupInfo::-->" + groupType + ":" + nGroupID + ":"
 				+ sXml);
+		String id = XmlAttributeExtractor.extract(sXml, " id=\"", "\"");
+		V2Group group = new V2Group(Long.parseLong(id), groupType);
+		if (groupType == V2GlobalEnum.GROUP_TYPE_CROWD) {
+			String name = XmlAttributeExtractor.extract(sXml, " name=\"", "\"");
+			String announcement = XmlAttributeExtractor.extract(sXml,
+					" announcement=\"", "\"");
+			String summary = XmlAttributeExtractor.extract(sXml, " summary=\"",
+					"\"");
+			String authtype = XmlAttributeExtractor.extract(sXml,
+					" authtype=\"", "\"");
+			group.name = name;
+			group.announce = announcement;
+			group.brief = summary;
+			group.authType = Integer.parseInt(authtype);
+
+		} else if (groupType == V2GlobalEnum.GROUP_TYPE_CONFERENCE) {
+			String sync = XmlAttributeExtractor.extract(sXml, " syncdesktop=\"", "\"");
+			if ("1".equalsIgnoreCase(sync.trim())) {
+				group.isSync = true;
+			}
+		}
+		
 		for (WeakReference<GroupRequestCallback> wrcb : mCallbacks) {
 			Object obj = wrcb.get();
 			if (obj != null) {
 				GroupRequestCallback callback = (GroupRequestCallback) obj;
-				callback.OnModifyGroupInfoCallback(groupType, nGroupID, sXml);
+				callback.OnModifyGroupInfoCallback(group);
 			}
 		}
 
@@ -703,27 +728,30 @@ public class GroupRequest {
 	private void OnAcceptApplyJoinGroup(int groupType, String sXml) {
 		V2Log.d("OnAcceptApplyJoinGroup ==>" + "groupType:" + groupType + ","
 				+ "sXml:" + sXml);
-		
+
 		String name = XmlAttributeExtractor.extract(sXml, "name='", "'");
 		String id = XmlAttributeExtractor.extract(sXml, "id='", "'");
 		V2Group g = new V2Group(Long.parseLong(id), name, groupType);
-		
+
 		String summary = XmlAttributeExtractor.extract(sXml, "summary='", "'");
-		String announcement = XmlAttributeExtractor.extract(sXml, "announcement='", "'");
-		String authtype = XmlAttributeExtractor.extract(sXml, "authtype='", "'");
+		String announcement = XmlAttributeExtractor.extract(sXml,
+				"announcement='", "'");
+		String authtype = XmlAttributeExtractor
+				.extract(sXml, "authtype='", "'");
 		g.announce = announcement;
 		g.brief = summary;
 		if (authtype != null) {
 			g.authType = Integer.parseInt(authtype);
 		}
-		String creatoruserid = XmlAttributeExtractor.extract(sXml, "creatoruserid='", "'");
+		String creatoruserid = XmlAttributeExtractor.extract(sXml,
+				"creatoruserid='", "'");
 		if (creatoruserid != null) {
 			V2User u = new V2User();
 			u.uid = Long.parseLong(creatoruserid);
 			g.owner = u;
 			g.creator = u;
 		}
-		
+
 		for (int i = 0; i < mCallbacks.size(); i++) {
 			WeakReference<GroupRequestCallback> wrcb = mCallbacks.get(i);
 			Object obj = wrcb.get();

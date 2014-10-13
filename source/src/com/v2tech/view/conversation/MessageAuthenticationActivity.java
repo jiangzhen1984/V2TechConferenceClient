@@ -76,13 +76,14 @@ public class MessageAuthenticationActivity extends Activity {
 	private CrowdAuthenticationBroadcastReceiver mCrowdAuthenticationBroadcastReceiver;
 
 	private boolean isFriendAuthentication = true;
+	private boolean isGroupInDeleteMode = false;
 
 	private CrowdGroupService crowdService;
 
 	private Context mContext;
 
 	private List<MessageAuthenticationData> messageAuthenticationDataList = new ArrayList<MessageAuthenticationActivity.MessageAuthenticationData>();
-	private List<VMessageQualification> mMessageList;
+	private List<ListItemWrapper> mMessageList;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -196,8 +197,8 @@ public class MessageAuthenticationActivity extends Activity {
 							MessageAuthenticationActivity.this
 									.startActivity(intent);
 						} else {
-							VMessageQualification msg = mMessageList
-									.get(position);
+							VMessageQualification msg = (VMessageQualification)mMessageList
+									.get(position).obj;
 							if (msg.getType() == VMessageQualification.Type.CROWD_INVITATION) {
 								VMessageQualificationInvitationCrowd imsg = (VMessageQualificationInvitationCrowd) msg;
 
@@ -229,7 +230,7 @@ public class MessageAuthenticationActivity extends Activity {
 
 					@Override
 					public boolean onItemLongClick(AdapterView<?> arg0,
-							View arg1, int arg2, long arg3) {
+							View view, int position, long arg3) {
 						if (isFriendAuthentication) {
 							if (firendAdapter.isDeleteMode == false) {
 								firendAdapter.isDeleteMode = true;
@@ -237,6 +238,12 @@ public class MessageAuthenticationActivity extends Activity {
 								tvMessageBack.setVisibility(View.INVISIBLE);
 								tvCompleteRight.setVisibility(View.VISIBLE);
 							}
+						} else {
+							isGroupInDeleteMode = true;
+							//Group item 
+							mMessageList.get(position).showLeftDeleteButton = true;
+							groupAdapter.notifyDataSetChanged();
+							return true;
 						}
 						return false;
 					}
@@ -257,7 +264,8 @@ public class MessageAuthenticationActivity extends Activity {
 			lvMessageAuthentication.setAdapter(firendAdapter);
 			loadFriendMessage();
 		} else {
-			mMessageList = new ArrayList<VMessageQualification>();
+			mMessageList = new ArrayList<ListItemWrapper>();
+
 			if (groupAdapter == null) {
 				groupAdapter = new GroupMessageAdapter();
 			}
@@ -275,8 +283,8 @@ public class MessageAuthenticationActivity extends Activity {
 				List<VMessageQualification> list = MessageBuilder
 						.queryQualMessageList(mContext, GlobalHolder
 								.getInstance().getCurrentUser());
-				if (list != null && list.size() > 0) {
-					mMessageList.addAll(list);
+				for (int i = 0; i < list.size(); i++) {
+					mMessageList.add(new ListItemWrapper(list.get(i)));
 				}
 
 				return null;
@@ -426,6 +434,9 @@ public class MessageAuthenticationActivity extends Activity {
 			firendAdapter.notifyDataSetChanged();
 			tvMessageBack.setVisibility(View.VISIBLE);
 			tvCompleteRight.setVisibility(View.INVISIBLE);
+		} else if (isGroupInDeleteMode && !isFriendAuthentication){
+			isGroupInDeleteMode = false;
+			this.groupAdapter.notifyDataSetChanged();
 		} else {
 			super.onBackPressed();
 		}
@@ -521,7 +532,7 @@ public class MessageAuthenticationActivity extends Activity {
 				viewTag = (ViewTag) arg1.getTag();
 			}
 
-			if(arg0 >= list.size())
+			if (arg0 >= list.size())
 				return arg1;
 			final MessageAuthenticationData data = list.get(arg0);
 
@@ -633,19 +644,40 @@ public class MessageAuthenticationActivity extends Activity {
 
 	}
 
+	class ListItemWrapper {
+		Object obj;
+		boolean showLeftDeleteButton;
+		boolean showDeleteButton;
+
+		public ListItemWrapper(Object obj, boolean showLeftDeleteButton,
+				boolean showDeleteButton) {
+			super();
+			this.obj = obj;
+			this.showLeftDeleteButton = showLeftDeleteButton;
+			this.showDeleteButton = showDeleteButton;
+		}
+
+		public ListItemWrapper(Object obj) {
+			this(obj, false, false);
+		}
+
+	}
+
 	class GroupMessageAdapter extends BaseAdapter {
 
 		class ViewItem {
+			View mDeleteHintButton;
 			ImageView mMsgBanneriv;
 			TextView mNameTV;
 			TextView mContentTV;
 			TextView mRes;
 			View mAcceptButton;
+			View mDeleteButton;
 		}
 
 		class AcceptedButtonTag {
 			ViewItem item;
-			VMessageQualification msg;
+			ListItemWrapper wrapper;
 		}
 
 		private LayoutInflater layoutInflater;
@@ -666,7 +698,8 @@ public class MessageAuthenticationActivity extends Activity {
 
 		@Override
 		public long getItemId(int position) {
-			return mMessageList.get(position).getId();
+			return ((VMessageQualification) mMessageList.get(position).obj)
+					.getId();
 		}
 
 		@Override
@@ -676,6 +709,10 @@ public class MessageAuthenticationActivity extends Activity {
 				convertView = layoutInflater.inflate(
 						R.layout.qualification_message_adapter_item, null);
 				item = new ViewItem();
+				item.mDeleteHintButton = convertView
+						.findViewById(R.id.qualification_msg_delete_left_button);
+				item.mDeleteHintButton.setOnClickListener(mDeleteLeftButtonListener);
+				
 				item.mMsgBanneriv = (ImageView) convertView
 						.findViewById(R.id.qualification_msg_image_view);
 				item.mNameTV = (TextView) convertView
@@ -687,6 +724,9 @@ public class MessageAuthenticationActivity extends Activity {
 				item.mAcceptButton = convertView
 						.findViewById(R.id.qualification_msgconfirm_button);
 				item.mAcceptButton.setOnClickListener(mAcceptButtonListener);
+				item.mDeleteButton = convertView
+						.findViewById(R.id.qualification_msg_delete_button);
+				item.mDeleteButton.setOnClickListener(mDeleteButtonListener);
 				convertView.setTag(item);
 			} else {
 				item = (ViewItem) convertView.getTag();
@@ -696,8 +736,8 @@ public class MessageAuthenticationActivity extends Activity {
 			return convertView;
 		}
 
-		private void updateViewItem(VMessageQualification msg, ViewItem item) {
-			if (msg == null || item == null) {
+		private void updateViewItem(ListItemWrapper wrapper, ViewItem item) {
+			if (wrapper == null || wrapper.obj == null || item == null) {
 				return;
 			}
 			AcceptedButtonTag tag = null;
@@ -707,8 +747,12 @@ public class MessageAuthenticationActivity extends Activity {
 			} else {
 				tag = (AcceptedButtonTag) item.mAcceptButton.getTag();
 			}
+			VMessageQualification msg = (VMessageQualification) wrapper.obj;
 			tag.item = item;
-			tag.msg = msg;
+			tag.wrapper = wrapper;
+			
+			item.mDeleteButton.setTag(wrapper);
+			item.mDeleteHintButton.setTag(wrapper);
 
 			// to be invited
 			if (msg.getType() == VMessageQualification.Type.CROWD_INVITATION) {
@@ -733,46 +777,98 @@ public class MessageAuthenticationActivity extends Activity {
 
 			}
 
-			if (msg.getQualState() == VMessageQualification.QualificationState.WAITING) {
-				item.mRes.setVisibility(View.GONE);
-				item.mAcceptButton.setVisibility(View.VISIBLE);
+			if (wrapper.showLeftDeleteButton && isGroupInDeleteMode) {
+				item.mDeleteHintButton.setVisibility(View.VISIBLE);
+			} else {
+				item.mDeleteHintButton.setVisibility(View.GONE);
+			}
 
-			} else if (msg.getQualState() == VMessageQualification.QualificationState.ACCEPTED) {
-				item.mRes.setVisibility(View.VISIBLE);
+			//Show delete button and hide commoand button
+			if (wrapper.showDeleteButton && isGroupInDeleteMode) {
+				item.mDeleteButton.setVisibility(View.VISIBLE);
+				item.mRes.setVisibility(View.GONE);
 				item.mAcceptButton.setVisibility(View.GONE);
-				item.mRes.setText(R.string.crowd_invitation_accepted);
-			} else if (msg.getQualState() == VMessageQualification.QualificationState.REJECT) {
-				item.mRes.setVisibility(View.VISIBLE);
-				item.mAcceptButton.setVisibility(View.GONE);
-				item.mRes.setText(R.string.crowd_invitation_rejected);
+			} else {
+				item.mDeleteButton.setVisibility(View.GONE);
+
+				if (msg.getQualState() == VMessageQualification.QualificationState.WAITING) {
+					item.mRes.setVisibility(View.GONE);
+					item.mAcceptButton.setVisibility(View.VISIBLE);
+
+				} else if (msg.getQualState() == VMessageQualification.QualificationState.ACCEPTED) {
+					item.mRes.setVisibility(View.VISIBLE);
+					item.mAcceptButton.setVisibility(View.GONE);
+					item.mRes.setText(R.string.crowd_invitation_accepted);
+				} else if (msg.getQualState() == VMessageQualification.QualificationState.REJECT) {
+					item.mRes.setVisibility(View.VISIBLE);
+					item.mAcceptButton.setVisibility(View.GONE);
+					item.mRes.setText(R.string.crowd_invitation_rejected);
+				}
 			}
 		}
+		
+		
+		private  OnClickListener mDeleteLeftButtonListener = new OnClickListener() {
 
+			@Override
+			public void onClick(View v) {
+				ListItemWrapper wrapper = (ListItemWrapper) v.getTag();
+				wrapper.showDeleteButton = true;
+				groupAdapter.notifyDataSetChanged();
+			}
+			
+		};
+
+		private  OnClickListener mDeleteButtonListener = new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				ListItemWrapper wrapper = (ListItemWrapper) v.getTag();
+				if (wrapper == null) {
+					//TODO show error toast
+					return;
+				}
+				VMessageQualification msg = (VMessageQualification)wrapper.obj;
+				for (int i = 0; i < mMessageList.size(); i++) {
+					if (msg.getId() == ((VMessageQualification)mMessageList.get(i).obj).getId()) {
+						mMessageList.remove(i);
+						break;
+					}
+				}
+				//TODO delete message
+				//remove from list
+				groupAdapter.notifyDataSetChanged();
+			}
+			
+		};
+		
 		private OnClickListener mAcceptButtonListener = new OnClickListener() {
 
 			@Override
 			public void onClick(View v) {
 				AcceptedButtonTag tag = (AcceptedButtonTag) v.getTag();
-				tag.msg.setQualState(VMessageQualification.QualificationState.ACCEPTED);
+				VMessageQualification msg = (VMessageQualification) tag.wrapper.obj;
+				
+				msg.setQualState(VMessageQualification.QualificationState.ACCEPTED);
 
-				if (tag.msg.getType() == VMessageQualification.Type.CROWD_INVITATION) {
-					CrowdGroup cg = ((VMessageQualificationInvitationCrowd) tag.msg)
+				if (msg.getType() == VMessageQualification.Type.CROWD_INVITATION) {
+					CrowdGroup cg = ((VMessageQualificationInvitationCrowd) msg)
 							.getCrowdGroup();
 					Crowd crowd = new Crowd(cg.getmGId(), cg.getOwnerUser(),
 							cg.getName(), cg.getBrief());
 					crowdService.acceptInvitation(crowd, null);
 
-				} else if (tag.msg.getType() == VMessageQualification.Type.CROWD_APPLICATION) {
-					VMessageQualificationApplicationCrowd vqac = ((VMessageQualificationApplicationCrowd) tag.msg);
+				} else if (msg.getType() == VMessageQualification.Type.CROWD_APPLICATION) {
+					VMessageQualificationApplicationCrowd vqac = ((VMessageQualificationApplicationCrowd) msg);
 					crowdService.acceptApplication(vqac.getCrowdGroup(),
 							vqac.getApplicant(), null);
 				}
-				updateViewItem(tag.msg, tag.item);
+				updateViewItem(tag.wrapper, tag.item);
 
 				// Update message state to database;
-				tag.msg.setQualState(QualificationState.ACCEPTED);
-				tag.msg.setReadState(ReadState.READ);
-				MessageBuilder.updateQualicationMessage(mContext, tag.msg);
+				msg.setQualState(QualificationState.ACCEPTED);
+				msg.setReadState(ReadState.READ);
+				MessageBuilder.updateQualicationMessage(mContext, msg);
 			}
 
 		};
@@ -789,7 +885,7 @@ public class MessageAuthenticationActivity extends Activity {
 				VMessageQualification msg = MessageBuilder
 						.queryQualMessageById(mContext, msgId);
 				if (msg != null) {
-					mMessageList.add(0, msg);
+					mMessageList.add(0, new ListItemWrapper(msg));
 					groupAdapter.notifyDataSetChanged();
 				}
 				// Cancel next broadcast

@@ -43,6 +43,7 @@ public class V2Group {
 	//for conference
 	public Date createTime;
 	public V2User chairMan;
+	public boolean isSync;
 	
 	//for crowd 
 	public V2User creator;

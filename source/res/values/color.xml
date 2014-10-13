@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <color name="common_return_button_color">#057aff</color>
+     <color name="common_confirm_button_color">#057aff</color>
+    
     <color name="common_black">#000000</color>
     <color name="text_tab_selected">#007aff</color>
     <color name="text_tab_unselected">#8c8c8c</color>

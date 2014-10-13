@@ -2,12 +2,12 @@ package com.v2tech.view.widget;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.database.DataSetObserver;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.View.MeasureSpec;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListAdapter;
@@ -56,6 +56,8 @@ public class HorizontalListView extends AdapterView<ListAdapter> {
 
 	ListAdapter mAdapter;
 
+	private DataSetObserver mDataSetObserver;
+
 	public HorizontalListView(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
 	}
@@ -75,7 +77,15 @@ public class HorizontalListView extends AdapterView<ListAdapter> {
 
 	@Override
 	public void setAdapter(ListAdapter adapter) {
+		if (mAdapter != null && mDataSetObserver != null) {
+			mAdapter.unregisterDataSetObserver(mDataSetObserver);
+		}
 		mAdapter = adapter;
+		if (mAdapter != null) {
+			mDataSetObserver = new AdapterDataSetObserver();
+			mAdapter.registerDataSetObserver(mDataSetObserver);
+		}
+
 		requestLayout();
 	}
 
@@ -91,6 +101,7 @@ public class HorizontalListView extends AdapterView<ListAdapter> {
 
 	int mLastX = 0;
 	int mOffsetX = 0;
+
 	@Override
 	public boolean onTouchEvent(MotionEvent ev) {
 		int type = ev.getAction();
@@ -99,7 +110,7 @@ public class HorizontalListView extends AdapterView<ListAdapter> {
 			mLastX = (int) ev.getX();
 			break;
 		case MotionEvent.ACTION_MOVE:
-			mOffsetX = (int)ev.getX() - mLastX;
+			mOffsetX = (int) ev.getX() - mLastX;
 			break;
 		}
 		this.offsetLeftAndRight(mOffsetX);
@@ -107,32 +118,9 @@ public class HorizontalListView extends AdapterView<ListAdapter> {
 		return true;
 	}
 
-	
-	  // used for temporary calculations.
-    private final Rect mTempRect = new Rect();
-    
-	@SuppressLint("NewApi")
+
 	@Override
 	protected void dispatchDraw(Canvas canvas) {
-	
-//		int count = getChildCount();
-//		int lastLeft = 0;
-//		Paint mDividerPaint = new Paint();
-//		for (int i =0; i < count; i++)  {
-//			View child = this.getChildAt(i);
-//			Rect bounds = mTempRect;
-//			bounds.top = this.getTop();
-//			bounds.bottom = this.getBottom();
-//			bounds.left = lastLeft;
-//			if (child.getMeasuredWidth() <= 0) {
-//				child.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
-//			}
-//			bounds.right = bounds.left + child.getMeasuredWidth();
-//			lastLeft += bounds.right;
-//			child.setLeft(bounds.left);
-//			child.setRight(bounds.right);
-//			canvas.drawRect(bounds, mDividerPaint);
-//		}
 		super.dispatchDraw(canvas);
 	}
 
@@ -162,9 +150,10 @@ public class HorizontalListView extends AdapterView<ListAdapter> {
 			if (child.getMeasuredWidth() <= 0) {
 				child.measure(right, top);
 				childWidth = child.getMeasuredWidth();
-				
-			} 
-			child.layout(left + childWidth * i, top, left + childWidth * (i +1) ,bottom);
+
+			}
+			child.layout(left + childWidth * i, top, left + childWidth
+					* (i + 1), bottom);
 		}
 		invalidate();
 		loaded = true;
@@ -189,6 +178,21 @@ public class HorizontalListView extends AdapterView<ListAdapter> {
 		}
 		setMeasuredDimension(widthSize, heightSize);
 
+	}
+	
+	
+
+	class AdapterDataSetObserver extends DataSetObserver {
+		@Override
+		public void onChanged() {
+			super.onChanged();
+
+		}
+
+		@Override
+		public void onInvalidated() {
+			super.onInvalidated();
+		}
 	}
 
 }

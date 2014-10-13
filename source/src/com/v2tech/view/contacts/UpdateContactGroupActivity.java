@@ -16,6 +16,7 @@ import android.view.View.OnClickListener;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.v2tech.R;
@@ -46,7 +47,7 @@ public class UpdateContactGroupActivity extends Activity {
 	private Toast mToast;
 	// 值为"addFriend"时是从加好友跳转而来，其他值为更改分组跳转而来。
 	private String from;
-	private View mReturnButton;
+	private TextView mReturnButton;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -57,7 +58,7 @@ public class UpdateContactGroupActivity extends Activity {
 		mContext = this;
 		setContentView(R.layout.activity_contacts_update_group);
 		mGroupListLy = (RadioGroup) findViewById(R.id.contact_update_group_list);
-		mReturnButton = findViewById(R.id.contact_update_return_button);
+		mReturnButton = (TextView)findViewById(R.id.contact_update_return_button);
 		mReturnButton.setOnClickListener(mReturnButtonListener);
 		// build radio button first
 		buildList();
@@ -66,6 +67,7 @@ public class UpdateContactGroupActivity extends Activity {
 	}
 
 	private void buildList() {
+		
 		List<Group> friendGroup = GlobalHolder.getInstance().getGroup(
 				GroupType.CONTACT.intValue());
 		for (int i = 0; i < friendGroup.size(); i++) {
@@ -74,6 +76,7 @@ public class UpdateContactGroupActivity extends Activity {
 			RadioButton rb = (RadioButton) LayoutInflater.from(mContext)
 					.inflate(R.layout.common_radio_right, null);
 			rb.setText(g.getName());
+			rb.setTextSize(14);
 			rb.setTag(g);
 			rb.setTextColor(mContext.getResources().getColor(
 					R.color.activiy_contact_detail_item_color));

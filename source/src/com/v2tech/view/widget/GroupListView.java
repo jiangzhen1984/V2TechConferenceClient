@@ -579,7 +579,6 @@ public class GroupListView extends ListView {
 				break;
 			}
 		}
-		adapter.notifyDataSetChanged();
 	}
 
 	/**
@@ -589,18 +588,23 @@ public class GroupListView extends ListView {
 	 * @param pos
 	 *            position of want to expand group
 	 */
-	private void expand(GroupItem item, int pos) {
+	private int expand(GroupItem item, int pos) {
 		Group g = (Group) item.getObject();
 		List<Group> subGroupList = g.getChildGroup();
 		// DO not user for(Group g:list) concurrency problem
 		for (int i = subGroupList.size() - 1; i >= 0; i--) {
 			Group subG = subGroupList.get(i);
+			GroupItem groupItem = (GroupItem)getItem(subG);
 			if (mFilterList.size() == pos + 1) {
-				mFilterList.add(getItem(subG));
+				
+				mFilterList.add(groupItem);
 			} else {
-				mFilterList.add(pos + 1, getItem(subG));
+				mFilterList.add(pos + 1, groupItem);
 			}
 			pos++;
+			if (groupItem.isExpaned()) {
+				pos = expand(groupItem, pos);
+			}
 		}
 
 		List<User> list = g.getUsers();
@@ -614,7 +618,7 @@ public class GroupListView extends ListView {
 			}
 			pos++;
 		}
-		adapter.notifyDataSetChanged();
+		return pos;
 	}
 
 	private OnItemClickListener mItemClickedListener = new OnItemClickListener() {
@@ -631,6 +635,7 @@ public class GroupListView extends ListView {
 					expand((GroupItem) item, position);
 					((GroupItem) item).isExpaned = true;
 				}
+				adapter.notifyDataSetChanged();
 			}
 			if (mListener != null) {
 				mListener.onItemClicked(parent, view, position, id, item);

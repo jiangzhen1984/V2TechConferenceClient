@@ -255,13 +255,12 @@ public class ContactsService extends AbstractHandler {
 		}
 
 		@Override
-		public void OnModifyGroupInfoCallback(int groupType, long nGroupID,
-				String sXml) {
-			if (groupType != Group.GroupType.CONTACT.intValue()) {
+		public void OnModifyGroupInfoCallback(V2Group group) {
+			if (group == null || group.type != Group.GroupType.CONTACT.intValue()) {
 				return;
 			}
 			// If equals, means we are waiting for modified response
-			if (nGroupID == mWatingGid) {
+			if (group.id == mWatingGid) {
 				JNIResponse jniRes = new GroupServiceJNIResponse(
 						RequestConfCreateResponse.Result.SUCCESS);
 				Message.obtain(mCallbackHandler, UPDATE_CONTACTS_GROUP, jniRes)

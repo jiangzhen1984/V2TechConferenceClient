@@ -75,11 +75,12 @@ public class CrowdGroupService extends AbstractHandler {
 	 * send by caller.
 	 * 
 	 * @param crowd
+	 * @param invationUserList be invite user list
 	 * @param caller
 	 *            if input is null, ignore response Message. Response Message
 	 *            object is {@link com.v2tech.service.jni.CreateCrowdResponse}
 	 */
-	public void createCrowdGroup(CrowdGroup crowd, Registrant caller) {
+	public void createCrowdGroup(CrowdGroup crowd, List<User> invationUserList, Registrant caller) {
 		this.initTimeoutMessage(CREATE_GROUP_MESSAGE, DEFAULT_TIME_OUT_SECS,
 				caller);
 		GroupRequest.getInstance().createGroup(
@@ -508,10 +509,12 @@ public class CrowdGroupService extends AbstractHandler {
 		}
 
 		@Override
-		public void OnModifyGroupInfoCallback(int groupType, long nGroupID,
-				String sXml) {
-			if (groupType == GroupType.CHATING.intValue()
-					&& nGroupID == mPendingCrowdId) {
+		public void OnModifyGroupInfoCallback(V2Group group) {
+			if (group == null) {
+				return;
+			}
+			if (group.type == GroupType.CHATING.intValue()
+					&& group.id == mPendingCrowdId) {
 				mPendingCrowdId = 0;
 				JNIResponse jniRes = new JNIResponse(JNIResponse.Result.SUCCESS);
 				Message.obtain(mCallbackHandler, UPDATE_CROWD, jniRes)
