@@ -1,5 +1,7 @@
 package com.v2tech.view.conversation;
 
+import java.sql.Date;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -10,10 +12,18 @@ import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.text.TextUtils;
 
 import com.V2.jni.FileRequest;
 import com.V2.jni.FileRequestCallbackAdapter;
-import com.v2tech.vo.VFile;
+import com.V2.jni.GroupRequest;
+import com.V2.jni.V2GlobalEnum;
+import com.V2.jni.util.V2Log;
+import com.v2tech.service.GlobalHolder;
+import com.v2tech.util.GlobalConfig;
+import com.v2tech.vo.FileInfoBean;
+import com.v2tech.vo.VMessage;
+import com.v2tech.vo.VMessageFileItem;
 
 /**
  * Use to upload file and update uploading status to database
@@ -29,7 +39,7 @@ public class FileService extends Service {
 
 	private static final int UPDATE_FILE_STATE = 1;
 	private static final int START_UPLOAD_FILE = 2;
-	private Map<String, VFile> mMoniterMap = new HashMap<String, VFile>();
+	private Map<String, VMessageFileItem> mMoniterMap = new HashMap<String, VMessageFileItem>();
 
 	private FileRequestCB frCB;
 	private HandlerThread backThread;
@@ -55,12 +65,16 @@ public class FileService extends Service {
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		String fileId = intent.getStringExtra("uuid");
-		String filePath = intent.getStringExtra("filePath");
+//		String fileId = intent.getStringExtra("uuid");
+//		String filePath = intent.getStringExtra("filePath");
+		ArrayList<FileInfoBean> mCheckedList = intent.getParcelableArrayListExtra("checkedFiles");
 		long gid = intent.getLongExtra("gid", 0);
+		if(mCheckedList == null || mCheckedList.size() <= 0 || gid == 0){
+			V2Log.e("上传文件错误，没有得到要上传的文件集合，或群组id有误");
+			return -1;
+		}
 
-		Message.obtain(mLocalHandler, START_UPLOAD_FILE,
-				new LocalFileObject(fileId, filePath, gid)).sendToTarget();
+		Message.obtain(mLocalHandler, START_UPLOAD_FILE, new LocalFileObject(mCheckedList , gid)).sendToTarget();
 		return super.onStartCommand(intent, flags, startId);
 	}
 
@@ -69,10 +83,16 @@ public class FileService extends Service {
 		return null;
 	}
 
-	// TODO update file state to database
+	/**
+	 * update file state to database
+	 * @param uuid VMessageFileItem --> uuid
+	 * @param st VMessageFileItem uploading state
+	 */
 	private void updateFile(String uuid, FileState st) {
-		mMoniterMap.remove(uuid);
 		//Update database
+		MessageLoader.updateFileItemState(this, mMoniterMap.get(uuid));
+		//remove cache
+		mMoniterMap.remove(uuid);
 		if (mMoniterMap.isEmpty()) {
 			this.stopSelf();
 		}
@@ -128,14 +148,14 @@ public class FileService extends Service {
 	}
 
 	class LocalFileObject {
-		String uuid;
-		String filePath;
+		ArrayList<FileInfoBean> mCheckedList;
+//		String uuid;
+//		String filePath;
 		long gid;
 
-		public LocalFileObject(String uuid, String filePath, long gid) {
+		public LocalFileObject(ArrayList<FileInfoBean> mCheckedList, long gid) {
 			super();
-			this.uuid = uuid;
-			this.filePath = filePath;
+			this.mCheckedList = mCheckedList;
 			this.gid = gid;
 		}
 
@@ -156,11 +176,25 @@ public class FileService extends Service {
 				break;
 			case START_UPLOAD_FILE:
 				LocalFileObject lfo = (LocalFileObject) msg.obj;
-				// TODO query file object from database
-				// TODO put to map
-				// mMoniterMap.put(lfo.uuid, file);
-
-				// TODO upload P2P or upload group file
+				for (FileInfoBean bean : lfo.mCheckedList) {
+					if (bean == null || TextUtils.isEmpty(bean.filePath)){
+						V2Log.e("send upload file failed , beacuse FileInfoBean is null or filePath is empty");
+						continue;
+					}
+					//build VMessage Object and save in database.
+					VMessage vm = MessageBuilder.buildFileMessage(V2GlobalEnum.GROUP_TYPE_CROWD, lfo.gid,
+							GlobalHolder.getInstance().getCurrentUser(), null, bean);
+					VMessageFileItem item = vm.getFileItems().get(0);
+					vm.setmXmlDatas(vm.toXml());
+					vm.setDate(new Date(GlobalConfig.getGlobalServerTime()));
+					MessageBuilder.saveMessage(FileService.this, vm);
+					MessageBuilder.saveFileVMessage(FileService.this, vm);
+					//put to map
+					mMoniterMap.put(item.getUuid(), item);
+					//upload P2P or upload group file
+					GroupRequest.getInstance().groupUploadFile(vm.getMsgCode(),
+							vm.getGroupId(), item.toXmlItem());
+				}
 				break;
 			}
 		}

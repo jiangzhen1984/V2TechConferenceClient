@@ -10,13 +10,13 @@ import java.util.UUID;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
+import android.os.Parcelable;
 
 import com.V2.jni.util.V2Log;
-import com.v2tech.service.GlobalHolder;
 import com.v2tech.util.BitmapUtil;
 import com.v2tech.util.GlobalConfig;
 
-public class VMessageImageItem extends VMessageAbstractItem {
+public class VMessageImageItem extends VMessageAbstractItem{
 
 	private String filePath;
 	private String extension;
@@ -44,7 +44,6 @@ public class VMessageImageItem extends VMessageAbstractItem {
 		this.type = ITEM_TYPE_IMAGE;
 		this.filePath = getFilePath();
 	}
-
 
 	public String getFilePath() {
 		if (filePath == null && extension != null)
@@ -185,5 +184,4 @@ public class VMessageImageItem extends VMessageAbstractItem {
 		public int width;
 		public int height;
 	}
-
 }

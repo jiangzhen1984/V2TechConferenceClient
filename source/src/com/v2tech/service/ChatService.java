@@ -84,6 +84,7 @@ public class ChatService extends DeviceService {
 	private static final int KEY_CANCELLED_LISTNER = 1;
 	private static final int KEY_FILE_TRANS_STATUS_NOTIFICATION_LISTNER = 2;
 	private static final int KEY_VIDEO_CONNECTED = 3;
+	private static final int KEY_P2P_CALL_RESPONSE = 4;
 
 	private static final String TAG = "ChatService";
 
@@ -163,6 +164,17 @@ public class ChatService extends DeviceService {
 			Object obj) {
 		unRegisterListener(KEY_FILE_TRANS_STATUS_NOTIFICATION_LISTNER, h, what,
 				obj);
+
+	}
+	
+	
+	public void registerP2PCallResponseListener(Handler h, int what,
+			Object obj) {
+		registerListener(KEY_P2P_CALL_RESPONSE, h, what, obj);
+	}
+
+	public void removeP2PCallResponseListener(Handler h, int what, Object obj) {
+		unRegisterListener(KEY_P2P_CALL_RESPONSE, h, what, obj);
 
 	}
 
@@ -332,10 +344,10 @@ public class ChatService extends DeviceService {
 	public void inviteUserChat(UserChattingObject ud, Registrant caller) {
 		JNIResponse resp = null;
 		//FIXME In order to compatible with the huawei x1 7.0 
-		if(GlobalConfig.isVideoConversationOpen == true){
-			return ;
-		}
-		GlobalConfig.isVideoConversationOpen = true;
+//		if(GlobalConfig.isVideoConversationOpen == true){
+//			return ;
+//		}
+//		GlobalConfig.isVideoConversationOpen = true;
 		if (mCaller != null) {
 			V2Log.e(" audio call is on going");
 			resp = new RequestChatServiceResponse(
@@ -509,26 +521,32 @@ public class ChatService extends DeviceService {
 
 		@Override
 		public void OnVideoChatAccepted(VideoJNIObjectInd ind) {
+			RequestChatServiceResponse resp = new RequestChatServiceResponse(
+					RequestChatServiceResponse.ACCEPTED,
+					ind.getFromUserId(), ind.getGroupId(),
+					ind.getDeviceId(),
+					RequestChatServiceResponse.Result.SUCCESS);
+			resp.setUuid(ind.getSzSessionID());
+			resp.setDeviceID(ind.getDeviceId());
 			if (mCaller != null) {
-				JNIResponse resp = new RequestChatServiceResponse(
-						RequestChatServiceResponse.ACCEPTED,
-						ind.getFromUserId(), ind.getGroupId(),
-						ind.getDeviceId(),
-						RequestChatServiceResponse.Result.SUCCESS);
 				sendResult(mCaller, resp);
 				mCaller = null;
 			}
+			else
+				notifyListener(KEY_P2P_CALL_RESPONSE, 0, 0, resp);
 		}
 
 		@Override
 		public void OnVideoChatRefused(VideoJNIObjectInd ind) {
+			JNIResponse resp = new RequestChatServiceResponse(
+					RequestChatServiceResponse.REJCTED,
+					RequestChatServiceResponse.Result.SUCCESS);
 			if (mCaller != null) {
-				JNIResponse resp = new RequestChatServiceResponse(
-						RequestChatServiceResponse.REJCTED,
-						RequestChatServiceResponse.Result.SUCCESS);
 				sendResult(mCaller, resp);
 				mCaller = null;
 			}
+			else
+				notifyListener(KEY_P2P_CALL_RESPONSE, 0, 0, resp);
 		}
 
 		@Override
@@ -549,29 +567,31 @@ public class ChatService extends DeviceService {
 
 		@Override
 		public void OnAudioChatAccepted(AudioJNIObjectInd ind) {
+			RequestChatServiceResponse resp = new RequestChatServiceResponse(
+					RequestChatServiceResponse.ACCEPTED,
+					RequestChatServiceResponse.Result.SUCCESS);
+			resp.setUuid(ind.getSzSessionID());
 			if (mCaller != null) {
-				JNIResponse resp = new RequestChatServiceResponse(
-						RequestChatServiceResponse.ACCEPTED,
-						RequestChatServiceResponse.Result.SUCCESS);
-				
 				sendResult(mCaller, resp);
 				mCaller = null;
 			}
+			else
+				notifyListener(KEY_P2P_CALL_RESPONSE, 0, 0, resp);
 		}
 
 		@Override
 		public void OnAudioChatRefused(AudioJNIObjectInd ind) {
+			JNIResponse resp = new RequestChatServiceResponse(
+					RequestChatServiceResponse.REJCTED,
+					RequestChatServiceResponse.Result.SUCCESS,
+					ind.getFromUserId());
 			if (mCaller != null) {
-				JNIResponse resp = new RequestChatServiceResponse(
-						RequestChatServiceResponse.REJCTED,
-						RequestChatServiceResponse.Result.SUCCESS,
-						ind.getFromUserId());
 				sendResult(mCaller, resp);
 				mCaller = null;
 				// Else means remote side is out and then cancel calling
-			} else {
-				notifyListener(KEY_CANCELLED_LISTNER, 0, 0, null);
-			}
+			} else
+				notifyListener(KEY_P2P_CALL_RESPONSE, 0, 0, resp);
+			
 
 		}
 

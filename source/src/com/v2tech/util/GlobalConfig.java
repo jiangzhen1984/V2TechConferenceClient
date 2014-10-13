@@ -29,9 +29,6 @@ public class GlobalConfig {
 	public static long SERVER_TIME = 0;
 	public static long LOCAL_TIME = 0;
 
-	public static boolean isVideoConversationOpen = false; // In order to
-															// compatible with
-															// the huawei x1 7.0
 	public static String DEFAULT_GLOBLE_PATH = "";
 	
 	public static String SDCARD_GLOBLE_PATH = "";

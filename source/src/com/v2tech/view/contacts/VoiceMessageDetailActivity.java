@@ -120,6 +120,15 @@ public class VoiceMessageDetailActivity extends Activity implements
 		adapter = new VoiceDetailBaseAdapter();
 		mListView.setAdapter(adapter);
 	}
+	
+	@Override
+	public void onBackPressed() {
+		super.onBackPressed();
+		Intent intent = new Intent(mContext,
+				VoiceMessageActivity.class);
+		startActivity(intent);
+		finish();
+	}
 
 	class VoiceDetailBaseAdapter extends BaseAdapter {
 

@@ -46,7 +46,7 @@ public class MessageLoader {
 	 * @param uid2
 	 * @return
 	 */
-	public static boolean init(Context context, long groupType, long groupID,
+	public static boolean isTableExist(Context context, long groupType, long groupID,
 			long uid2, int type) {
 
 		String name;
@@ -58,9 +58,9 @@ public class MessageLoader {
 			name = "Histories_0_0_" + uid2;
 			break;
 		default:
-			throw new RuntimeException("create database fialed...");
+			throw new RuntimeException("create database fialed... type is : " + type);
 		}
-		boolean result = isExistTable(context, name);
+		//init dataBase path
 		ContentDescriptor.HistoriesMessage.PATH = name;
 		ContentDescriptor.HistoriesMessage.NAME = name;
 		ContentDescriptor.URI_MATCHER.addURI(ContentDescriptor.AUTHORITY,
@@ -73,16 +73,18 @@ public class MessageLoader {
 		ContentDescriptor.HistoriesMessage.CONTENT_URI = ContentDescriptor.BASE_URI
 				.buildUpon()
 				.appendPath(ContentDescriptor.HistoriesMessage.PATH).build();
-		if (!result) {
-			// if(type == CONTACT_TYPE){
-			//
-			// User user = GlobalHolder.getInstance().getUser(uid2);
-			// if(user == null){
-			// V2Log.e("the remote user is null , the uid2 is --" + uid2);
-			// return false;
-			// }
-			// }
-			ContentDescriptor.execSQLCreate(context, name);
+		List<String> cacheNames = GlobalHolder.getInstance().getDataBaseTableCacheName();
+		if(!cacheNames.contains(name)){
+			//创建表
+			boolean isCreate = ContentDescriptor.execSQLCreate(context, name);
+			if(isCreate){
+				GlobalHolder.getInstance().getDataBaseTableCacheName().add(name);
+				return true;
+			}
+			else{
+				V2Log.d(TAG, "create database fialed... name is : " + name);
+				return false;
+			}
 		}
 		return true;
 	}
@@ -97,7 +99,7 @@ public class MessageLoader {
 	 */
 	public static List<VMessage> loadMessage(Context context, long uid1,
 			long uid2) {
-		if (!init(context, 0, 0, uid2, CONTACT_TYPE))
+		if (!isTableExist(context, 0, 0, uid2, CONTACT_TYPE))
 			return null;
 		String selection = "(("
 				+ ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_FROM_USER_ID
@@ -132,7 +134,7 @@ public class MessageLoader {
 	 */
 	public static List<VMessage> loadMessageByPage(Context context, long uid1,
 			long uid2, int limit, int offset, int groupType) {
-		if (!init(context, 0, 0, uid2, CONTACT_TYPE))
+		if (!isTableExist(context, 0, 0, uid2, CONTACT_TYPE))
 			return null;
 
 		String selection = "(("
@@ -175,7 +177,7 @@ public class MessageLoader {
 		else
 			type = CROWD_TYPE;
 
-		if (!init(context, groupType, groupID, remoteID, type))
+		if (!isTableExist(context, groupType, groupID, remoteID, type))
 			return null;
 
 		String selection = ContentDescriptor.HistoriesMessage.Cols.ID + "=? ";
@@ -474,7 +476,7 @@ public class MessageLoader {
 	 */
 	public static List<VMessage> loadGroupMessage(Context context,
 			long groupType, long gid) {
-		if (!init(context, groupType, gid, 0, CROWD_TYPE))
+		if (!isTableExist(context, groupType, gid, 0, CROWD_TYPE))
 			return null;
 		String selection = ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_GROUP_ID
 				+ "=? ";
@@ -494,7 +496,7 @@ public class MessageLoader {
 	 */
 	public static List<VMessage> loadGroupImageMessage(Context context,
 			int type, long gid) {
-		if (!init(context, type, gid, 0, CROWD_TYPE))
+		if (!isTableExist(context, type, gid, 0, CROWD_TYPE))
 			return null;
 		List<VMessage> imageItems = new ArrayList<VMessage>();
 		String sortOrder = ContentDescriptor.HistoriesGraphic.Cols.HISTORY_GRAPHIC_SAVEDATE
@@ -570,7 +572,7 @@ public class MessageLoader {
 		
 		DataBaseContext mContext = new DataBaseContext(context);
 		List<VCrowdFile> fileItems = new ArrayList<VCrowdFile>();
-		if (!init(context, type, gid, 0, CROWD_TYPE)){
+		if (!isTableExist(context, type, gid, 0, CROWD_TYPE)){
 			V2Log.d(TAG, "create database fialed...groupType : " + type + "  groupID : "
 					+ gid);
 			return fileItems;
@@ -657,7 +659,7 @@ public class MessageLoader {
 	public static List<VMessage> loadGroupMessageByPage(Context context,
 			long groupType, long groupId, int limit, int offset) {
 
-		if (!init(context, groupType, groupId, 0, CROWD_TYPE))
+		if (!isTableExist(context, groupType, groupId, 0, CROWD_TYPE))
 			return null;
 
 		String selection = ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_GROUP_TYPE
@@ -683,7 +685,7 @@ public class MessageLoader {
 		if (vm == null)
 			return -1l;
 
-		if (!init(
+		if (!isTableExist(
 				context,
 				vm.getMsgCode(),
 				vm.getGroupId(),
@@ -953,7 +955,7 @@ public class MessageLoader {
 	 * @param fileItem
 	 * @return
 	 */
-	public static int updateFileItemState(Context context, VMessage vm,
+	public static int updateFileItemState(Context context,
 			VMessageFileItem fileItem) {
 
 		if (fileItem == null)
@@ -1156,7 +1158,7 @@ public class MessageLoader {
 	public static VMessage getNewestGroupMessage(Context context,
 			long groupType, long groupId) {
 
-		if (!init(context, groupType, groupId, 0, CROWD_TYPE))
+		if (!isTableExist(context, groupType, groupId, 0, CROWD_TYPE))
 			return null;
 		String selection = ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_GROUP_ID
 				+ "=? ";
@@ -1181,7 +1183,7 @@ public class MessageLoader {
 	 */
 	public static VMessage getNewestMessage(Context context, long uid1,
 			long uid2) {
-		if (!init(context, 0, 0, uid2, CONTACT_TYPE))
+		if (!isTableExist(context, 0, 0, uid2, CONTACT_TYPE))
 			return null;
 		String selection = "(("
 				+ ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_FROM_USER_ID
@@ -1286,40 +1288,6 @@ public class MessageLoader {
 		vm.setState(state);
 		vm.setmXmlDatas(xml);
 		return vm;
-	}
-
-	/**
-	 * 根据传入的表名，判断当前数据库中是否存在该表
-	 * 
-	 * @param context
-	 * @param tabName
-	 *            表名
-	 * @return
-	 */
-	private static synchronized boolean isExistTable(Context context,
-			String tabName) {
-		DataBaseContext mContext = new DataBaseContext(context);
-		SQLiteDatabase base;
-		base = mContext.openOrCreateDatabase(V2TechDBHelper.DB_NAME, 0, null);
-		try {
-			String sql = "select count(*) as c from sqlite_master where type ='table' "
-					+ "and name ='" + tabName.trim() + "' ";
-			Cursor cursor = base.rawQuery(sql, null);
-			if (cursor != null && cursor.getCount() > 0 && cursor.moveToNext()) {
-				int count = cursor.getInt(0);
-				if (count > 0) {
-					return true;
-				}
-			}
-		} catch (Exception e) {
-			V2Log.e("detection table " + tabName + " is failed..."); // 检测失败
-			e.getStackTrace();
-		} finally {
-			if (base != null) {
-				base.close();
-			}
-		}
-		return false;
 	}
 
 	/**
@@ -1473,4 +1441,39 @@ public class MessageLoader {
 			mCur.close();
 		return true;
 	}
+	
+	/**
+	 * 根据传入的表名，判断当前数据库中是否存在该表
+	 * 
+	 * @param context
+	 * @param tabName
+	 *            表名
+	 * @return
+	 */
+	private static synchronized boolean isExistTable(Context context,
+			String tabName) {
+		DataBaseContext mContext = new DataBaseContext(context);
+		SQLiteDatabase base;
+		base = mContext.openOrCreateDatabase(V2TechDBHelper.DB_NAME, 0, null);
+		try {
+			String sql = "select count(*) as c from sqlite_master where type ='table' "
+					+ "and name ='" + tabName.trim() + "' ";
+			Cursor cursor = base.rawQuery(sql, null);
+			if (cursor != null && cursor.getCount() > 0 && cursor.moveToNext()) {
+				int count = cursor.getInt(0);
+				if (count > 0) {
+					return true;
+				}
+			}
+		} catch (Exception e) {
+			V2Log.e("detection table " + tabName + " is failed..."); // 检测失败
+			e.getStackTrace();
+		} finally {
+			if (base != null) {
+				base.close();
+			}
+		}
+		return false;
+	}
+
 }

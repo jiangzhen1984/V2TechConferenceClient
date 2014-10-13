@@ -1,11 +1,14 @@
 package com.v2tech.view;
 
 import java.io.File;
+import java.util.List;
 
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
@@ -40,6 +43,8 @@ import android.widget.Toast;
 import com.V2.jni.ConfigRequest;
 import com.V2.jni.util.V2Log;
 import com.v2tech.R;
+import com.v2tech.db.DataBaseContext;
+import com.v2tech.db.V2TechDBHelper;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.service.Registrant;
 import com.v2tech.service.UserService;
@@ -566,6 +571,8 @@ public class LoginActivity extends Activity {
 							GlobalConfig.KEY_LOGGED_IN, 1);
 					mContext.startActivity(new Intent(mContext,
 							MainActivity.class));
+					//init all database table names;
+					initDataBaseTableCacheNames();
 					finish();
 				}
 
@@ -575,6 +582,29 @@ public class LoginActivity extends Activity {
 		}
 
 	};
+	
+	/**
+	 * 初始化获取数据库中所有表
+	 */
+	private void initDataBaseTableCacheNames() {
+		DataBaseContext mContext = new DataBaseContext(getApplicationContext());
+		V2TechDBHelper mOpenHelper = new V2TechDBHelper(mContext);
+		SQLiteDatabase dataBase = mOpenHelper.getReadableDatabase();
+		Cursor cursor = dataBase.rawQuery("select name as c from sqlite_master where type ='table'",
+				null);
+		if (cursor != null) {
+			List<String> dataBaseTableCacheName = GlobalHolder.getInstance()
+					.getDataBaseTableCacheName();
+			while (cursor.moveToNext()) {
+				// 遍历出表名
+				String name = cursor.getString(0);
+				V2Log.d(TAG , "iteration DataBase table name : " + name);
+				dataBaseTableCacheName.add(name);
+			}
+		} else
+			throw new RuntimeException(
+					"init DataBase table names failed.. get null , please check");
+	}
 	
 	/**
 	 * 创建登陆用户存储数据的文件夹

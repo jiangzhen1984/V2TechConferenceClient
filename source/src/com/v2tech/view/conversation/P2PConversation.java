@@ -41,6 +41,7 @@ import android.widget.TextView;
 
 import com.V2.jni.util.V2Log;
 import com.v2tech.R;
+import com.v2tech.service.AsyncResult;
 import com.v2tech.service.ChatService;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.service.Registrant;
@@ -119,6 +120,7 @@ public class P2PConversation extends Activity implements
 	private VideoSize defaultCameraCaptureSize = new VideoSize(176, 144);
 	private boolean displayWidthIsLonger = false;
 	private boolean isRejected;
+	private Registrant registrant;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -129,13 +131,37 @@ public class P2PConversation extends Activity implements
 
 		mContext = this;
 		startTime = GlobalConfig.getGlobalServerTime();
-		uad = buildObject();
+		String uuid = null;
+		RetaionObject data = (RetaionObject) getLastNonConfigurationInstance();
+	    if (data == null){ 
+	        uad = buildObject();    
+		    registrant = new Registrant(mLocalHandler,
+					CALL_RESPONSE, null);
+		    currentVideoBean = new VideoBean();
+		    uuid = UUID.randomUUID().toString();
+		    if(!uad.isIncoming()){
+		    	if(uad.isAudioType()){
+		    		uuid = "AudioChat" + uuid;
+		    		currentVideoBean.mediaChatID = uuid;
+		    	}
+		    	else
+		    		currentVideoBean.mediaChatID = uuid;
+		    }
+	    }
+	    else{
+	    	mLocalHandler = data.handler;
+	    	uad = data.uad;
+	    	registrant = data.registrant;
+	    	currentVideoBean = data.currentVideoBean;
+	    	uuid = currentVideoBean.mediaChatID;
+	    }
 		initReceiver();
-		currentVideoBean = new VideoBean();
 		chatService.registerCancelledListener(mLocalHandler,
 				HANG_UP_NOTIFICATION, null);
 		chatService.registerVideoChatConnectedListener(mLocalHandler,
 				VIDEO_CONECTED, null);
+		chatService.registerP2PCallResponseListener(mLocalHandler,
+				CALL_RESPONSE, null);
 		if (uad.isIncoming()) {
 			currentVideoBean.mediaState = AudioVideoMessageBean.STATE_NO_ANSWER_CALL;
 			currentVideoBean.readSatate = AudioVideoMessageBean.STATE_UNREAD;
@@ -173,7 +199,6 @@ public class P2PConversation extends Activity implements
 			// start time out monitor
 			mLocalHandler.postDelayed(timeOutMonitor, 1000 * 60);
 		} else {
-			String uuid = UUID.randomUUID().toString();
 			V2Log.e(TAG, "发起一个新的音视频邀请 , 等待回应中.... 此次通信的uuid ：" + uuid);
 			currentVideoBean.mediaState = AudioVideoMessageBean.STATE_ANSWER_CALL;
 			currentVideoBean.readSatate = AudioVideoMessageBean.STATE_READED;
@@ -183,13 +208,11 @@ public class P2PConversation extends Activity implements
 			currentVideoBean.remoteUserID = uad.getUser().getmUserId();
 			if (uad.isAudioType()) {
 				currentVideoBean.mediaType = AudioVideoMessageBean.TYPE_AUDIO;
-				uad.setSzSessionID("AudioChat" + uuid);
-				currentVideoBean.mediaChatID = "AudioChat" + uuid;
+				uad.setSzSessionID(uuid);
 				setContentView(R.layout.fragment_conversation_outing_audio);
 			} else if (uad.isVideoType()) {
 				currentVideoBean.mediaType = AudioVideoMessageBean.TYPE_VIDEO;
 				uad.setSzSessionID(uuid);
-				currentVideoBean.mediaChatID = uuid;
 				setContentView(R.layout.fragment_conversation_outing_video);
 			}
 
@@ -200,8 +223,7 @@ public class P2PConversation extends Activity implements
 		initViews();
 
 		if (!uad.isIncoming()) {
-			chatService.inviteUserChat(uad, new Registrant(mLocalHandler,
-					CALL_RESPONSE, null));
+			chatService.inviteUserChat(uad, registrant);
 			if (uad.isVideoType()) {
 				// Update view
 				TextView tv = (TextView) findViewById(R.id.conversation_fragment_connected_title_text);
@@ -306,10 +328,33 @@ public class P2PConversation extends Activity implements
 
 		chatService.removeVideoChatConnectedistener(mLocalHandler,
 				VIDEO_CONECTED, null);
+		
+		chatService.removeP2PCallResponseListener(mLocalHandler,
+				CALL_RESPONSE, null);
 
 		chatService.clearCalledBack();
 	}
-
+	
+	@Override
+	public Object onRetainNonConfigurationInstance() {
+		return new RetaionObject(mLocalHandler , uad , registrant, currentVideoBean);
+	}
+	
+	
+	class RetaionObject{
+		
+		public RetaionObject(LocalHandler handler , UserChattingObject uad , Registrant registrant , VideoBean currentVideoBean){
+			this.handler = handler;
+			this.uad = uad;
+			this.registrant = registrant;
+			this.currentVideoBean = currentVideoBean;
+		}
+		public LocalHandler handler;
+		public UserChattingObject uad;
+		public Registrant registrant;
+		public VideoBean currentVideoBean;
+		
+	}
 	@Override
 	public void openLocalCamera() {
 		if (isStoped) {
@@ -1037,7 +1082,7 @@ public class P2PConversation extends Activity implements
 			currentVideoBean.startDate = startTime;
 		MessageBuilder.saveMediaChatHistories(mContext, currentVideoBean);
 		sendUpdateBroadcast();
-		GlobalConfig.isVideoConversationOpen = false;
+//		GlobalConfig.isVideoConversationOpen = false;
 		finish();
 	}
 
@@ -1478,7 +1523,11 @@ public class P2PConversation extends Activity implements
 
 				break;
 			case CALL_RESPONSE:
-				JNIResponse resp = (JNIResponse) msg.obj;
+				JNIResponse resp = null;
+				if(msg.obj instanceof JNIResponse)
+					resp = (JNIResponse) msg.obj;
+				else
+					resp = (JNIResponse) ((AsyncResult)msg.obj).getResult();
 				if (resp.getResult() == JNIResponse.Result.SUCCESS) {
 					currentVideoBean.readSatate = AudioVideoMessageBean.STATE_READED;
 					RequestChatServiceResponse rcsr = (RequestChatServiceResponse) resp;
@@ -1488,7 +1537,7 @@ public class P2PConversation extends Activity implements
 								.sendToTarget();
 						currentVideoBean.mediaState = AudioVideoMessageBean.STATE_NO_ANSWER_CALL;
 					} else if (rcsr.getCode() == RequestChatServiceResponse.ACCEPTED) {
-						V2Log.e(TAG, "收到远端回复 , 对方接受了音视频的邀请.... 此次通信的uuid ：" + rcsr.getUid());
+						V2Log.e(TAG, "收到远端回复 , 对方接受了音视频的邀请.... 此次通信的uuid ：" + rcsr.getUuid());
 						uad.setConnected(true);
 						// Send audio invitation
 						// Do not need to modify any values. because this API

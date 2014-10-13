@@ -1,8 +1,6 @@
 package com.v2tech.view.conversation;
 
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import android.content.ClipData;
 import android.content.ClipboardManager;
@@ -440,12 +438,14 @@ public class MessageBodyView extends LinearLayout {
 
 			@Override
 			public void onClick(View view) {
-				if (item.isPlaying()) {
-					callback.requestStopAudio(view, mMsg, item);
-				} else {
-					callback.requestStopOtherAudio(mMsg);
-					callback.requestPlayAudio(view, mMsg, item);
-					updateUnreadFlag(false, item);
+				if(item != null){
+					if (item.isPlaying()) {
+						callback.requestStopAudio(view, mMsg, item);
+					} else {
+						callback.requestStopOtherAudio(mMsg);
+						callback.requestPlayAudio(view, mMsg, item);
+						updateUnreadFlag(false, item);
+					}
 				}
 			}
 
@@ -861,7 +861,7 @@ public class MessageBodyView extends LinearLayout {
 					item.setState(VMessageFileItem.STATE_FILE_DOWNLOADING);
 				}
 			}
-			MessageLoader.updateFileItemState(getContext(), item.getVm(), item);
+			MessageLoader.updateFileItemState(getContext(), item);
 			updateView(item);
 		}
 

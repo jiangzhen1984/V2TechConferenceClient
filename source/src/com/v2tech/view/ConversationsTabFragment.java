@@ -758,9 +758,10 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 					new String[] {});
 			if ((cursor != null && cursor.moveToNext())
 					&& nestQualification != null) {
-				if (nestQualification.getmTimestamp().getTime() > cursor
-						.getLong(cursor
-								.getColumnIndex(ContentDescriptor.HistoriesAddFriends.Cols.HISTORY_FRIEND_SAVEDATE)))
+				long addFriendTime = cursor
+				.getLong(cursor
+						.getColumnIndex(ContentDescriptor.HistoriesAddFriends.Cols.HISTORY_FRIEND_SAVEDATE));
+				if (nestQualification.getmTimestamp().getTime() > addFriendTime * 1000)
 					return VERIFICATION_TYPE_CROWD;
 				else
 					return VERIFICATION_TYPE_FRIEND;
@@ -1906,7 +1907,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 		String msg = "";
 		String date = "";
 		String dateLong = "";
-
+		User user = null;
 		if (cr.moveToFirst()) {
 			AddFriendHistorieNode tempNode = new AddFriendHistorieNode();
 			// _id integer primary key AUTOINCREMENT,0
@@ -1931,8 +1932,9 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 			tempNode.addState = cr.getLong(9);
 			tempNode.readState = cr.getLong(10);
 
-			String name = GlobalHolder.getInstance()
-					.getUser(tempNode.remoteUserID).getName();
+			user = GlobalHolder.getInstance()
+					.getUser(tempNode.remoteUserID);
+			String name = user.getName();
 
 			// 别人加我：允许任何人：0已添加您为好友，需要验证：1未处理，2已同意，3已拒绝
 			// 我加别人：允许认识人：4你们已成为了好友，需要验证：5等待对方验证，4被同意（你们已成为了好友），6拒绝了你为好友
@@ -1963,6 +1965,8 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 				verificationMessageItemData.setMsg(msg);
 				verificationMessageItemData.setDate(date);
 				verificationMessageItemData.setDateLong(dateLong);
+				((ConversationFirendAuthenticationData) verificationMessageItemData)
+				.setUser(user);
 				verificationMessageItemLayout.update();
 			}
 			notificationListener.updateNotificator(Conversation.TYPE_CONTACT,

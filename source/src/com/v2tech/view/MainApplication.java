@@ -27,6 +27,8 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -45,6 +47,9 @@ import com.V2.jni.VideoRequest;
 import com.V2.jni.WBRequest;
 import com.V2.jni.util.V2Log;
 import com.v2tech.R;
+import com.v2tech.db.DataBaseContext;
+import com.v2tech.db.V2TechDBHelper;
+import com.v2tech.service.GlobalHolder;
 import com.v2tech.util.CrashHandler;
 import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.LogcatThread;
@@ -60,8 +65,8 @@ public class MainApplication extends Application {
 	private final String DATABASE_FILENAME = "hzpy.db";
 	private boolean needCopy;
 
-	public boolean netWordIsConnected=false;
-	
+	public boolean netWordIsConnected = false;
+
 	@Override
 	public void onCreate() {
 		super.onCreate();
@@ -131,25 +136,30 @@ public class MainApplication extends Application {
 			this.registerActivityLifecycleCallbacks(new LocalActivityLifecycleCallBack());
 		}
 
-		initGlobalConfiguration();
 		initSQLiteFile();
 		initDPI();
 	}
+
+	
 
 	/**
 	 * 初始化程序数据存储目录
 	 */
 	private void initGloblePath() {
-		//程序启动时检测SD卡状态
+		// 程序启动时检测SD卡状态
 		boolean sdExist = android.os.Environment.MEDIA_MOUNTED
 				.equals(android.os.Environment.getExternalStorageState());
 		if (!sdExist) {// 如果不存在,
 			// --data/data/com.v2tech
-			GlobalConfig.DEFAULT_GLOBLE_PATH = getApplicationContext().getFilesDir().getParent();
-			V2Log.d(TAG, "SD卡状态异常，数据存储到手机内存中 , 存储路径为：" + GlobalConfig.DEFAULT_GLOBLE_PATH);
+			GlobalConfig.DEFAULT_GLOBLE_PATH = getApplicationContext()
+					.getFilesDir().getParent();
+			V2Log.d(TAG, "SD卡状态异常，数据存储到手机内存中 , 存储路径为："
+					+ GlobalConfig.DEFAULT_GLOBLE_PATH);
 		} else {
-			GlobalConfig.SDCARD_GLOBLE_PATH = StorageUtil.getAbsoluteSdcardPath();
-			V2Log.d(TAG, "SD卡状态正常，数据存储到SD卡内存中 , 存储路径为：" + GlobalConfig.SDCARD_GLOBLE_PATH);
+			GlobalConfig.SDCARD_GLOBLE_PATH = StorageUtil
+					.getAbsoluteSdcardPath();
+			V2Log.d(TAG, "SD卡状态正常，数据存储到SD卡内存中 , 存储路径为："
+					+ GlobalConfig.SDCARD_GLOBLE_PATH);
 		}
 	}
 
@@ -406,8 +416,9 @@ public class MainApplication extends Application {
 					Notificator.udpateApplicationNotification(
 							getApplicationContext(), false, null);
 				}
-				
-				Notificator.cancelAllSystemNotification(getApplicationContext());
+
+				Notificator
+						.cancelAllSystemNotification(getApplicationContext());
 			}
 		}
 

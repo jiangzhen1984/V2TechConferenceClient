@@ -12,6 +12,7 @@ import android.graphics.PorterDuff;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.util.LongSparseArray;
+import android.text.TextUtils;
 import android.text.TextUtils.TruncateAt;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
@@ -1005,7 +1006,10 @@ public class GroupListView extends ListView {
 			mUserSignatureTV.setSingleLine(true);
 			mUserSignatureTV.setEllipsize(TruncateAt.END);
 
-			mUserNameTV.setText(u.getName());
+			if(!TextUtils.isEmpty(u.getNickName()))
+				mUserNameTV.setText(u.getNickName());
+			else
+				mUserNameTV.setText(u.getName());
 
 			updateStatus(u.getDeviceType(), u.getmStatus());
 			if (mCBFlag) {

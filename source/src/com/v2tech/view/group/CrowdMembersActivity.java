@@ -226,7 +226,7 @@ public class CrowdMembersActivity extends Activity {
 			
 			//Add delete icon
 			mDeleteIV = new ImageView(mContext);
-			mDeleteIV.setImageResource(R.drawable.busy);
+			mDeleteIV.setImageResource(R.drawable.contacts_group_item_icon);
 			mDeleteIV.setVisibility(View.GONE);
 			mDeleteIV.setOnClickListener(new OnClickListener() {
 

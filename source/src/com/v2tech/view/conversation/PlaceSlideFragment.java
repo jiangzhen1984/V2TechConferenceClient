@@ -1,6 +1,7 @@
 package com.v2tech.view.conversation;
 
 import android.app.Activity;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -18,10 +19,12 @@ import android.widget.RelativeLayout;
 import com.V2.jni.util.V2Log;
 import com.v2tech.R;
 import com.v2tech.view.cus.TouchImageView;
+import com.v2tech.vo.VMessage;
 import com.v2tech.vo.VMessageImageItem;
 
 public class PlaceSlideFragment extends Fragment {
 	
+
 	private Bitmap mHoldPlaceBitmap;
 
 	private VMessageImageItem vim;
@@ -49,12 +52,17 @@ public class PlaceSlideFragment extends Fragment {
 		rlContainer = (RelativeLayout) v.findViewById(R.id.image_view_root);
 
 		final TouchImageView iv = new TouchImageView(this.getActivity());
-		
-		VMessageImageItem.Size si = vim.getFullBitmapSize();
-		int width =si.width;
-		int height =  si.height;
-		mHoldPlaceBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
-		iv.setImageBitmap(mHoldPlaceBitmap);
+		if(vim == null){
+			Bundle arguments = getArguments();
+			vim = new VMessageImageItem(new VMessage(0, 0, null, null), arguments.getString("filePath"));
+		}
+		else{
+			VMessageImageItem.Size si = vim.getFullBitmapSize();
+			int width =si.width;
+			int height =  si.height;
+			mHoldPlaceBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
+			iv.setImageBitmap(mHoldPlaceBitmap);
+		}
 		
 		
 		RelativeLayout.LayoutParams rl = new RelativeLayout.LayoutParams(
@@ -171,5 +179,4 @@ public class PlaceSlideFragment extends Fragment {
 			rlContainer.removeAllViews();
 		}
 	}
-
 }

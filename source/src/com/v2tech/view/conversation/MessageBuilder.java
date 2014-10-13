@@ -129,7 +129,7 @@ public class MessageBuilder {
 		// 判断数据库是否存在
 		long groupType = vm.getMsgCode();
 		long groupID = vm.getGroupId();
-		if (!MessageLoader.init(context, groupType, groupID, remote, type))
+		if (!MessageLoader.isTableExist(context, groupType, groupID, remote, type))
 			return null;
 		// 直接将xml存入数据库中，方便以后扩展。
 		ContentValues values = new ContentValues();
@@ -198,7 +198,7 @@ public class MessageBuilder {
 
 		long groupType = vm.getMsgCode();
 		long groupID = vm.getGroupId();
-		if (!MessageLoader.init(context, groupType, groupID, remote, type))
+		if (!MessageLoader.isTableExist(context, groupType, groupID, remote, type))
 			return null;
 		ContentValues values = new ContentValues();
 
@@ -834,7 +834,11 @@ public class MessageBuilder {
 	}
 	
 	
-	
+	/**
+	 * according Cursor Object , extract VMessageQualification Object.
+	 * @param cursor
+	 * @return
+	 */
 	public static VMessageQualification extraMsgFromCursor(Cursor cursor) {
 		String xml = cursor.getString(cursor.getColumnIndex("CrowdXml"));
 		V2Group v2Group = XmlAttributeExtractor.parseCrowd(xml).get(0);
@@ -898,11 +902,29 @@ public class MessageBuilder {
 	}
 
 	/**
-	 * Delete a qualification message
-	 * 
+	 * Delete a qualification message by VMessageQualification Object id
+	 * @param context
+	 * @param id
+	 * @return
+	 */
+	public static boolean deleteQualMessage(Context context, long id) {
+		DataBaseContext mContext = new DataBaseContext(context);
+		String where = ContentDescriptor.HistoriesCrowd.Cols.ID
+				+ " = ?";
+		String[] selectionArgs = new String[] { String.valueOf(id) };
+		int ret = mContext.getContentResolver().delete(
+				ContentDescriptor.HistoriesCrowd.CONTENT_URI, where,
+				selectionArgs);
+		if(ret >= 0)
+			return true;
+		else
+			return false;
+	}
+	
+	/**
+	 * Delete a qualification message by User Object
 	 * @param context
 	 * @param user
-	 * @param type
 	 */
 	public static void deleteQualMessage(Context context, User user) {
 		if (user == null) {

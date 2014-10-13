@@ -183,7 +183,10 @@ public class ImageViewGallery extends FragmentActivity {
 			super();
 			this.vm = vm;
 			frg = new PlaceSlideFragment();
+			Bundle bundle = new Bundle();
+			bundle.putString("filePath", vm.getFilePath());
 			frg.setMessage(vm);
+			frg.setArguments(bundle);
 			// frg.setBitmap(vm.getFullQuantityBitmap());
 		}
 
