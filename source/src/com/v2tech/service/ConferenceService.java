@@ -88,11 +88,11 @@ public class ConferenceService extends DeviceService {
 	private MixerRequestCB mrCallback;
 
 	private boolean mFlag = false;
+
 	public ConferenceService() {
 		this(false);
 	}
-	
-	
+
 	public ConferenceService(boolean flag) {
 		super();
 		videoCallback = new VideoRequestCB(this);
@@ -251,8 +251,6 @@ public class ConferenceService extends DeviceService {
 		this.sendMessageDelayed(res, 300);
 	}
 
-
-
 	/**
 	 * User request speak permission on the conference.
 	 * 
@@ -305,10 +303,11 @@ public class ConferenceService extends DeviceService {
 		this.sendMessageDelayed(res, 300);
 	}
 
-
 	/**
 	 * Pause or resume audio.
-	 * @param flag true for resume false for suspend
+	 * 
+	 * @param flag
+	 *            true for resume false for suspend
 	 */
 	public void updateAudio(boolean flag) {
 		if (flag) {
@@ -316,9 +315,8 @@ public class ConferenceService extends DeviceService {
 		} else {
 			AudioRequest.getInstance().PausePlayout();
 		}
-		
-	}
 
+	}
 
 	/**
 	 * Register listener for out conference by kick.
@@ -396,9 +394,6 @@ public class ConferenceService extends DeviceService {
 	public void unRegisterVideoMixerListener(Handler h, int what, Object obj) {
 		unRegisterListener(KEY_MIXED_VIDEO_LISTNER, h, what, obj);
 	}
-	
-	
-	
 
 	@Override
 	public void clearCalledBack() {
@@ -408,7 +403,6 @@ public class ConferenceService extends DeviceService {
 		GroupRequest.getInstance().removeCallback(groupCallback);
 		VideoMixerRequest.getInstance().removeCallback(mrCallback);
 	}
-
 
 	@Override
 	protected void notifyListenerWithPending(int key, int arg1, int arg2,
@@ -420,10 +414,7 @@ public class ConferenceService extends DeviceService {
 		}
 	}
 
-
-
-
-	class ConfRequestCB extends  ConfRequestCallbackAdapter {
+	class ConfRequestCB extends ConfRequestCallbackAdapter {
 
 		private Handler mCallbackHandler;
 
@@ -455,7 +446,6 @@ public class ConferenceService extends DeviceService {
 					.sendToTarget();
 		}
 
-
 		@Override
 		public void OnConfMemberEnterCallback(long nConfID, long nTime,
 				V2User v2user) {
@@ -465,12 +455,12 @@ public class ConferenceService extends DeviceService {
 			} else {
 				user = GlobalHolder.getInstance().getUser(v2user.uid);
 			}
-			
+
 			if (user == null) {
 				V2Log.e("User is null can not dispatch notification");
 				return;
 			}
-			
+
 			notifyListenerWithPending(KEY_ATTENDEE_STATUS_LISTNER, 1, 0, user);
 		}
 
@@ -479,7 +469,7 @@ public class ConferenceService extends DeviceService {
 				long nUserID) {
 
 			User u = GlobalHolder.getInstance().getUser(nUserID);
-			//For quick logged in User.
+			// For quick logged in User.
 			if (u == null) {
 				u = new User(nUserID);
 			}
@@ -496,7 +486,8 @@ public class ConferenceService extends DeviceService {
 		public void OnGrantPermissionCallback(long userid, int type, int status) {
 			JNIIndication jniInd = new PermissionUpdateIndication(userid, type,
 					status);
-			notifyListenerWithPending(KEY_PERMISSION_CHANGED_LISTNER, 0, 0, jniInd);
+			notifyListenerWithPending(KEY_PERMISSION_CHANGED_LISTNER, 0, 0,
+					jniInd);
 		}
 
 	}
@@ -515,13 +506,12 @@ public class ConferenceService extends DeviceService {
 				V2Log.e(" No avaiable user device configuration");
 				return;
 			}
-			List<UserDeviceConfig> ll = UserDeviceConfig
-					.parseFromXml(uid, szXmlData);
+			List<UserDeviceConfig> ll = UserDeviceConfig.parseFromXml(uid,
+					szXmlData);
 
-			notifyListenerWithPending(KEY_ATTENDEE_DEVICE_LISTNER, 0, 0, new Object[]{Long.valueOf(uid), ll});
+			notifyListenerWithPending(KEY_ATTENDEE_DEVICE_LISTNER, 0, 0,
+					new Object[] { Long.valueOf(uid), ll });
 		}
-
-		
 
 		@Override
 		public void OnSetCapParamDone(String szDevID, int nSizeIndex,
@@ -534,17 +524,12 @@ public class ConferenceService extends DeviceService {
 
 		}
 
-		
-
 	}
 
 	class GroupRequestCB extends GroupRequestCallbackAdapter {
 
-
 		public GroupRequestCB(Handler mCallbackHandler) {
 		}
-
-
 
 		@Override
 		public void OnModifyGroupInfoCallback(V2Group group) {
@@ -559,11 +544,9 @@ public class ConferenceService extends DeviceService {
 				if (cache == null) {
 
 				} else {
-
-					if (group.isSync) {
+					cache.setSyn(group.isSync);
 						notifyListenerWithPending(KEY_SYNC_LISTNER,
 								(cache.isSyn() ? 1 : 0), 0, null);
-					}
 
 				}
 
@@ -572,12 +555,11 @@ public class ConferenceService extends DeviceService {
 
 		@Override
 		public void OnAddGroupFile(V2Group group, List<FileJNIObject> list) {
-			
+
 		}
 	}
 
 	class MixerRequestCB implements VideoMixerRequestCallback {
-
 
 		public MixerRequestCB(Handler mCallbackHandler) {
 		}
@@ -589,22 +571,22 @@ public class ConferenceService extends DeviceService {
 				V2Log.e(" OnCreateVideoMixerCallback -- > unlmatform parameter sMediaId is null ");
 				return;
 			}
-			notifyListenerWithPending(KEY_MIXED_VIDEO_LISTNER, 1, 0, new MixVideo(
-					sMediaId, MixVideo.LayoutType.fromInt(layout), width,
-					height));
+			notifyListenerWithPending(KEY_MIXED_VIDEO_LISTNER, 1, 0,
+					new MixVideo(sMediaId, MixVideo.LayoutType.fromInt(layout),
+							width, height));
 		}
 
 		@Override
 		public void OnDestroyVideoMixerCallback(String sMediaId) {
-			notifyListenerWithPending(KEY_MIXED_VIDEO_LISTNER, 2, 0, new MixVideo(
-					sMediaId, MixVideo.LayoutType.UNKOWN));
+			notifyListenerWithPending(KEY_MIXED_VIDEO_LISTNER, 2, 0,
+					new MixVideo(sMediaId, MixVideo.LayoutType.UNKOWN));
 		}
 
 		@Override
 		public void OnAddVideoMixerCallback(String sMediaId, long nDstUserId,
 				String sDstDevId, int pos) {
-			UserDeviceConfig udc = new UserDeviceConfig(0 , 0 , nDstUserId, sDstDevId,
-					null);
+			UserDeviceConfig udc = new UserDeviceConfig(0, 0, nDstUserId,
+					sDstDevId, null);
 			MixVideo mix = new MixVideo(sMediaId);
 			notifyListenerWithPending(KEY_MIXED_VIDEO_LISTNER, 3, 0,
 					mix.createMixVideoDevice(pos, sMediaId, udc));
@@ -613,8 +595,8 @@ public class ConferenceService extends DeviceService {
 		@Override
 		public void OnDelVideoMixerCallback(String sMediaId, long nDstUserId,
 				String sDstDevId) {
-			UserDeviceConfig udc = new UserDeviceConfig(0 , 0 , nDstUserId, sDstDevId,
-					null);
+			UserDeviceConfig udc = new UserDeviceConfig(0, 0, nDstUserId,
+					sDstDevId, null);
 			MixVideo mix = new MixVideo(sMediaId);
 			notifyListenerWithPending(KEY_MIXED_VIDEO_LISTNER, 4, 0,
 					mix.createMixVideoDevice(-1, sMediaId, udc));

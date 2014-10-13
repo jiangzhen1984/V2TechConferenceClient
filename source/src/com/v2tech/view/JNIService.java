@@ -50,8 +50,6 @@ import com.v2tech.R;
 import com.v2tech.service.BitmapManager;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.service.jni.FileDownLoadErrorIndication;
-import com.v2tech.service.jni.FileTransStatusIndication;
-import com.v2tech.service.jni.FileTransStatusIndication.FileTransProgressStatusIndication;
 import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.GlobalState;
 import com.v2tech.util.Notificator;
@@ -122,6 +120,7 @@ public class JNIService extends Service {
 	public static final String BROADCAST_CROWD_NEW_UPLOAD_FILE_NOTIFICATION = "com.v2tech.jni.broadcast.new.upload_crowd_file_message";
 	/**
 	 * Current user kicked by crowd master
+	 * key crowd : crowdId
 	 */
 	public static final String JNI_BROADCAST_KICED_CROWD = "com.v2tech.jni.broadcast.kick_crowd";
 
@@ -558,6 +557,16 @@ public class JNIService extends Service {
 			i.putExtra("avatar", new UserAvatarObject(nUserID, AvatarName));
 			sendBroadcast(i);
 		}
+		
+		
+		
+		public void OnKickCrowd(long nCrowdId, long nAdminId) {
+			Intent kick = new Intent();
+			kick.setAction(JNI_BROADCAST_KICED_CROWD);
+			kick.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
+			kick.putExtra("crowd", nCrowdId);
+			sendBroadcast(kick);
+		}
 
 	}
 
@@ -796,16 +805,6 @@ public class JNIService extends Service {
 			i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
 			i.putExtra("obj", obj);
 			sendBroadcast(i);
-
-			if (nUserID == GlobalHolder.getInstance().getCurrentUserId()
-					&& groupType == GroupType.CHATING.intValue()) {
-				Intent kick = new Intent();
-				kick.setAction(JNI_BROADCAST_KICED_CROWD);
-				kick.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
-				i.putExtra("crowd", nGroupID);
-				sendBroadcast(kick);
-			}
-
 		}
 
 		// 增加好友成功时的回调

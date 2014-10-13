@@ -28,7 +28,7 @@ public class CrowdApplicantDetailActivity extends Activity {
 	private TextView mNameTV;
 	private TextView mCreatorTV;
 	private TextView mBriefTV;
-	private TextView mMembersCountsTV;
+	
 	private View mReturnButton;
 	private View mAcceptButton;
 	private View mDeclineButton;
@@ -47,7 +47,7 @@ public class CrowdApplicantDetailActivity extends Activity {
 		mNameTV = (TextView) findViewById(R.id.crowd_invitation_name);
 		mCreatorTV = (TextView) findViewById(R.id.crowd_invitation_creator_tv);
 		mBriefTV = (TextView) findViewById(R.id.crowd_invitation_brief);
-		mMembersCountsTV = (TextView) findViewById(R.id.crowd_invitation_members);
+		
 		mAcceptButton = findViewById(R.id.crowd_invitation_accept_button);
 		mAcceptButton.setOnClickListener(mAcceptButtonListener);
 		mDeclineButton = findViewById(R.id.crowd_invitation_decline_button);

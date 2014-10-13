@@ -1,5 +1,8 @@
 package com.v2tech.vo;
 
+import java.util.ArrayList;
+import java.util.List;
+
 
 public class AttendeeMixedDevice extends Attendee {
 
@@ -40,6 +43,17 @@ public class AttendeeMixedDevice extends Attendee {
 			return udcs[0];
 		}
 		return null;
+	}
+	
+	
+
+	@Override
+	public List<UserDeviceConfig> getmDevices() {
+		List<UserDeviceConfig> l = new ArrayList<UserDeviceConfig>();
+		if (udcs.length > 0) {
+			l.add(udcs[0]);
+		}
+		return l;
 	}
 
 	@Override

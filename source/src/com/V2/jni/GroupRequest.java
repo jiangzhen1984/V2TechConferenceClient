@@ -537,8 +537,7 @@ public class GroupRequest {
 	private void OnModifyGroupInfo(int groupType, long nGroupID, String sXml) {
 		V2Log.d("OnModifyGroupInfo::-->" + groupType + ":" + nGroupID + ":"
 				+ sXml);
-		String id = XmlAttributeExtractor.extract(sXml, " id=\"", "\"");
-		V2Group group = new V2Group(Long.parseLong(id), groupType);
+		V2Group group = new V2Group(nGroupID, groupType);
 		if (groupType == V2GlobalEnum.GROUP_TYPE_CROWD) {
 			String name = XmlAttributeExtractor.extract(sXml, " name=\"", "\"");
 			String announcement = XmlAttributeExtractor.extract(sXml,
@@ -553,8 +552,12 @@ public class GroupRequest {
 			group.authType = Integer.parseInt(authtype);
 
 		} else if (groupType == V2GlobalEnum.GROUP_TYPE_CONFERENCE) {
-			String sync = XmlAttributeExtractor.extract(sXml, " syncdesktop=\"", "\"");
-			if ("1".equalsIgnoreCase(sync.trim())) {
+			String sync = XmlAttributeExtractor.extract(sXml, " syncdesktop='", "'");
+			if (sync == null || "".equals(sync)) {
+				V2Log.e("Now only support syncdesktop attribute, doens't find such attirbute ");
+				return;
+			}
+			if ("1".equalsIgnoreCase(sync)) {
 				group.isSync = true;
 			}
 		}

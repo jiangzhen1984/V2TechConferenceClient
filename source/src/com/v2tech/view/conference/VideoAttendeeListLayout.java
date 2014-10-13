@@ -259,11 +259,11 @@ public class VideoAttendeeListLayout extends LinearLayout {
 	 * @param speaker
 	 *            speaker image view
 	 */
-	private void setStyle(Wrapper wr, TextView name,
-			ImageView iv, ImageView speaker) {
+	private void setStyle(Wrapper wr, TextView name, ImageView iv,
+			ImageView speaker) {
 		Attendee at = wr.a;
 		UserDeviceConfig udc = wr.udc;
-		
+
 		if (at.isChairMan() || conf.getChairman() == at.getAttId()) {
 
 			if (at.isSelf() || at.isJoined()) {
@@ -301,8 +301,9 @@ public class VideoAttendeeListLayout extends LinearLayout {
 			iv.setImageResource(R.drawable.camera_pressed);
 		}
 
-		//If attaendee is mixed video or is not default flag, then hide speaker
-		if (at.getType() == Attendee.TYPE_MIXED_VIDEO || wr.sortFlag != DEFAULT_DEVICE_FLAG) {
+		// If attaendee is mixed video or is not default flag, then hide speaker
+		if (at.getType() == Attendee.TYPE_MIXED_VIDEO
+				|| wr.sortFlag != DEFAULT_DEVICE_FLAG) {
 			speaker.setVisibility(View.INVISIBLE);
 		}
 
@@ -352,31 +353,32 @@ public class VideoAttendeeListLayout extends LinearLayout {
 			return;
 		}
 
-		V2Log.d(TAG,
-				"updateEnteredAttendee 执行了" + at.getAttName() + "---"
-						+ at.isJoined());
 		at.setJoined(true);
 		List<UserDeviceConfig> dList = at.getmDevices();
-		int index = 0;
-		if (mList.size() > 0) {
-			for (int i = 0; i < mList.size(); i++) {
-				Wrapper wr = mList.get(i);
-				if (wr.a.getAttId() == at.getAttId()) {
-					wr.udc = dList.get(0);
-					wr.sortFlag = DEFAULT_DEVICE_FLAG;
-					index = i;
-					break;
+		if (at.getType() == Attendee.TYPE_MIXED_VIDEO) {
+			mList.add(new Wrapper(at, dList.get(0), DEFAULT_DEVICE_FLAG));
+		} else {
+			int index = 0;
+			if (mList.size() > 0 && dList != null && dList.size() > 0) {
+				for (int i = 0; i < mList.size(); i++) {
+					Wrapper wr = mList.get(i);
+					if (wr.a.getAttId() == at.getAttId()) {
+						wr.udc = dList.get(0);
+						wr.sortFlag = DEFAULT_DEVICE_FLAG;
+						index = i;
+						break;
+					}
 				}
 			}
-		}
-		for (int i = 1; i < dList.size(); i++) {
-			if (index + 1 == mList.size() - 1) {
-				mList.add(new Wrapper(at, dList.get(i), i));
-			} else {
-				mList.add(index + 1, new Wrapper(at, dList.get(i), i));
-			}
-			index++;
+			for (int i = 1; i < dList.size(); i++) {
+				if (index + 1 == mList.size() - 1) {
+					mList.add(new Wrapper(at, dList.get(i), i));
+				} else {
+					mList.add(index + 1, new Wrapper(at, dList.get(i), i));
+				}
+				index++;
 
+			}
 		}
 
 		configAttendee(at);
@@ -401,7 +403,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 			Wrapper wr = mList.get(i);
 			// Remove attendee devices, leave one device item
 			if (wr.a.getAttId() == at.getAttId()) {
-				if (found) {
+				if (found || wr.a.getType() == Attendee.TYPE_MIXED_VIDEO) {
 					mList.remove(i--);
 					continue;
 				} else {
@@ -411,7 +413,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 		}
 
 		// Update on line count
-		if (at.getType() == Attendee.TYPE_MIXED_VIDEO) {
+		if (at.getType() != Attendee.TYPE_MIXED_VIDEO) {
 			onLinePersons--;
 			updateStatist();
 		}
@@ -665,7 +667,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 		public void afterTextChanged(Editable et) {
 			if (TextUtils.isEmpty(et)) {
 				mAttendeeContainer.clearTextFilter();
-			} else { 
+			} else {
 				mAttendeeContainer.setFilterText(et.toString());
 			}
 		}
@@ -723,8 +725,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 		}
 
 	}
-	
-	
+
 	class LocalDataObserver extends DataSetObserver {
 
 		@Override
@@ -739,7 +740,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 		public void onInvalidated() {
 			super.onInvalidated();
 		}
-		
+
 	}
 
 	class LocalFilter extends Filter {
@@ -773,7 +774,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 				FilterResults results) {
 			if (results.values != null) {
 				if (TextUtils.isEmpty(constraint)) {
-					
+
 				}
 				mFilterList = (List<Wrapper>) results.values;
 				adapter.notifyDataSetChanged();
@@ -786,7 +787,6 @@ public class VideoAttendeeListLayout extends LinearLayout {
 		public CharSequence convertResultToString(Object resultValue) {
 			return super.convertResultToString(resultValue);
 		}
-
 
 	}
 

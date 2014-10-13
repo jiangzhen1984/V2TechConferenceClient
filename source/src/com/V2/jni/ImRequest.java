@@ -435,6 +435,14 @@ public class ImRequest {
 
 	private void OnKickCrowd(long nCrowdId, long nAdminId) {
 		Log.e("ImRequest UI", "OnKickCrowd:" + nCrowdId);
+		for (int i = 0; i <this.mCallbacks.size(); i++) {
+			WeakReference<ImRequestCallback> wf = this.mCallbacks.get(i);
+			Object obj = wf.get();
+			if (obj != null) {
+				ImRequestCallback callback = (ImRequestCallback) obj;
+				callback.OnKickCrowd(nCrowdId, nAdminId);
+			}
+		}
 	}
 
 	/**

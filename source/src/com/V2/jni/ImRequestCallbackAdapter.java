@@ -60,5 +60,10 @@ public abstract class ImRequestCallbackAdapter implements ImRequestCallback {
 	}
 
 	
+
+	public void OnKickCrowd(long nCrowdId, long nAdminId){
+		
+	}
+	
 	
 }

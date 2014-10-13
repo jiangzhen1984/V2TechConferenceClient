@@ -269,6 +269,8 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 						.addAction(PublicIntent.BROADCAST_NEW_CROWD_NOTIFICATION);
 				intentFilter
 						.addAction(PublicIntent.BROADCAST_CROWD_DELETED_NOTIFICATION);
+				intentFilter.addAction(
+							JNIService.JNI_BROADCAST_KICED_CROWD);
 				intentFilter.addAction(JNIService.JNI_BROADCAST_NEW_CROWD);
 				intentFilter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
 			}
@@ -759,8 +761,8 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 			if ((cursor != null && cursor.moveToNext())
 					&& nestQualification != null) {
 				long addFriendTime = cursor
-				.getLong(cursor
-						.getColumnIndex(ContentDescriptor.HistoriesAddFriends.Cols.HISTORY_FRIEND_SAVEDATE));
+						.getLong(cursor
+								.getColumnIndex(ContentDescriptor.HistoriesAddFriends.Cols.HISTORY_FRIEND_SAVEDATE));
 				if (nestQualification.getmTimestamp().getTime() > addFriendTime * 1000)
 					return VERIFICATION_TYPE_CROWD;
 				else
@@ -1688,7 +1690,9 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 							intent.getLongExtra("groupID", -1));
 				}
 			} else if (PublicIntent.BROADCAST_CROWD_DELETED_NOTIFICATION
-					.equals(intent.getAction())) {
+					.equals(intent.getAction())
+					|| intent.getAction().equals(
+							JNIService.JNI_BROADCAST_KICED_CROWD)) {
 				long cid = intent.getLongExtra("crowd", 0);
 				removeConversation(cid);
 				// clear the crowd group all chat database messges
@@ -1932,8 +1936,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 			tempNode.addState = cr.getLong(9);
 			tempNode.readState = cr.getLong(10);
 
-			user = GlobalHolder.getInstance()
-					.getUser(tempNode.remoteUserID);
+			user = GlobalHolder.getInstance().getUser(tempNode.remoteUserID);
 			String name = user.getName();
 
 			// 别人加我：允许任何人：0已添加您为好友，需要验证：1未处理，2已同意，3已拒绝
@@ -1966,7 +1969,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 				verificationMessageItemData.setDate(date);
 				verificationMessageItemData.setDateLong(dateLong);
 				((ConversationFirendAuthenticationData) verificationMessageItemData)
-				.setUser(user);
+						.setUser(user);
 				verificationMessageItemLayout.update();
 			}
 			notificationListener.updateNotificator(Conversation.TYPE_CONTACT,

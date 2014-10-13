@@ -9,6 +9,7 @@
     <string name="crowd_invitation_reject_button_name">拒绝</string>
     <string name="crowd_invitation_reject_notes">已拒绝该邀请</string>
     <string name="crowd_invitation_titile">群邀请</string>
+    <string name="crowd_invitation_top_bar_right_button">发消息</string>
     <string name="crowd_invitation_box_item_creator">创建人</string>
     <string name="crowd_invitation_box_item_announcement">群公告</string>
     <string name="crowd_invitation_box_item_brief">群简介</string>

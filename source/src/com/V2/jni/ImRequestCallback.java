@@ -104,4 +104,12 @@ public interface ImRequestCallback {
 	 * @param list
 	 */
 	public void OnSearchUserCallback(List<V2User> list);
+	
+	
+	/**
+	 * Current user is kick off by crowd's master
+	 * @param nCrowdId
+	 * @param nAdminId
+	 */
+	public void OnKickCrowd(long nCrowdId, long nAdminId);
 }

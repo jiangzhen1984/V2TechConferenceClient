@@ -38,6 +38,23 @@
             android:text="@string/crowd_invitation_titile"
             android:textColor="@color/activiy_contact_detail_title_color"
             android:textSize="@dimen/common_item_text_size" />
+        
+        
+        <TextView
+            android:id="@+id/crowd_invitation_send_msg_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="5dp"
+            android:gravity="center"
+            android:paddingBottom="5dp"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:paddingTop="5dp"
+            android:text="@string/crowd_invitation_top_bar_right_button"
+            android:textColor="@color/button_text_color"
+            android:textSize="@dimen/common_item_text_size" />
 
         <!-- Use translucent image to hold space -->
 
@@ -169,6 +186,44 @@
             android:layout_marginTop="25dp"
             android:background="@drawable/rounded_corners_of_contact_user_detail_outer"
             android:orientation="vertical" >
+            
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="1dp"
+                android:layout_marginRight="1dp" >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/detail_detail_2_item_margin_bottom"
+                    android:layout_marginLeft="@dimen/contact_detail_2_item_margin_horizontal"
+                    android:layout_marginRight="@dimen/contact_detail_2_item_margin_horizontal"
+                    android:layout_marginTop="@dimen/detail_detail_2_item_margin_top"
+                    android:padding="10dp"
+                    android:text="@string/crowd_application_item_no"
+                    android:textColor="@color/activiy_contact_detail_item_color"
+                    android:textSize="@dimen/common_item_text_size" />
+
+                <TextView
+                    android:id="@+id/crowd_invitation_crowd_no"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/detail_detail_2_item_margin_bottom"
+                    android:layout_marginLeft="@dimen/contact_detail_2_item_margin_horizontal"
+                    android:layout_marginRight="@dimen/contact_detail_2_item_margin_horizontal"
+                    android:layout_marginTop="@dimen/detail_detail_2_item_margin_top"
+                    android:padding="10dp"
+                    android:text="@string/crowd_application_item_no"
+                    android:textColor="@color/activiy_contact_detail_item_color"
+                    android:textSize="@dimen/common_item_text_size" />
+            </LinearLayout>
+            
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#c0c0c0" >
+            </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -235,7 +290,7 @@
                     android:layout_marginRight="@dimen/contact_detail_2_item_margin_horizontal"
                     android:layout_marginTop="@dimen/detail_detail_2_item_margin_top"
                     android:padding="10dp"
-                    android:text="@string/crowd_invitation_box_item_member"
+                    android:text="@string/crowd_invitation_box_item_brief"
                     android:textColor="@color/activiy_contact_detail_item_color"
                     android:textSize="@dimen/common_item_text_size" />
             </LinearLayout>
@@ -260,12 +315,12 @@
                     android:layout_marginRight="@dimen/contact_detail_2_item_margin_horizontal"
                     android:layout_marginTop="@dimen/detail_detail_2_item_margin_top"
                     android:padding="10dp"
-                    android:text="@string/crowd_invitation_box_item_creator"
+                    android:text="@string/crowd_invitation_box_item_announcement"
                     android:textColor="@color/activiy_contact_detail_item_color"
                     android:textSize="@dimen/common_item_text_size" />
 
                 <TextView
-                    android:id="@+id/crowd_invitation_members"
+                    android:id="@+id/crowd_invitation_announcement"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="@dimen/detail_detail_2_item_margin_bottom"
@@ -273,7 +328,7 @@
                     android:layout_marginRight="@dimen/contact_detail_2_item_margin_horizontal"
                     android:layout_marginTop="@dimen/detail_detail_2_item_margin_top"
                     android:padding="10dp"
-                    android:text="@string/crowd_invitation_box_item_creator"
+                    android:text="@string/crowd_invitation_box_item_announcement"
                     android:textColor="@color/activiy_contact_detail_item_color"
                     android:textSize="@dimen/common_item_text_size" />
             </LinearLayout>

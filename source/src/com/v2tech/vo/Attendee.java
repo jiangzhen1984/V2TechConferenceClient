@@ -22,7 +22,7 @@ public class Attendee implements Comparable<Attendee>{
 	public final static int  TYPE_MIXED_VIDEO = 2;
 
 	private User user;
-	private List<UserDeviceConfig> mDevices;
+	protected List<UserDeviceConfig> mDevices;
 	private boolean isSelf;
 	protected boolean isChairMan;
 	protected boolean isJoined;
