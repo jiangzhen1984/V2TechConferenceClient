@@ -310,7 +310,7 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 
 		@Override
 		public void notifyAvatarChanged(User user, Bitmap bm) {
-			mContactsContainer.updateItem(user);
+			mContactsContainer.updateUser(user);
 		}
 	};
 
@@ -366,7 +366,7 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 				break;
 			case UPDATE_USER_SIGN:
 				Long uid = (Long) msg.obj;
-				mContactsContainer.updateItem(GlobalHolder.getInstance()
+				mContactsContainer.updateUser(GlobalHolder.getInstance()
 						.getUser(uid));
 				break;
 			}

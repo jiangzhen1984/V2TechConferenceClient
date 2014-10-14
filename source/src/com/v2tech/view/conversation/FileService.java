@@ -69,12 +69,11 @@ public class FileService extends Service {
 //		String filePath = intent.getStringExtra("filePath");
 		ArrayList<FileInfoBean> mCheckedList = intent.getParcelableArrayListExtra("checkedFiles");
 		long gid = intent.getLongExtra("gid", 0);
-		if(mCheckedList == null || mCheckedList.size() <= 0 || gid == 0){
-			V2Log.e("上传文件错误，没有得到要上传的文件集合，或群组id有误");
-			return -1;
+		if (mCheckedList != null && mCheckedList.size() > 0) {
+			Message.obtain(mLocalHandler, START_UPLOAD_FILE, new LocalFileObject(mCheckedList , gid)).sendToTarget();
+		} else {
+			canQuit();
 		}
-
-		Message.obtain(mLocalHandler, START_UPLOAD_FILE, new LocalFileObject(mCheckedList , gid)).sendToTarget();
 		return super.onStartCommand(intent, flags, startId);
 	}
 
@@ -93,9 +92,19 @@ public class FileService extends Service {
 		MessageLoader.updateFileItemState(this, mMoniterMap.get(uuid));
 		//remove cache
 		mMoniterMap.remove(uuid);
+		canQuit();
+	}
+	
+	
+	private boolean canQuit() {
 		if (mMoniterMap.isEmpty()) {
+			backThread.quit();
 			this.stopSelf();
+			return true;
+		} else {
+			return false;
 		}
+		
 	}
 
 	class FileRequestCB extends FileRequestCallbackAdapter {

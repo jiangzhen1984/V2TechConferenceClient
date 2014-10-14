@@ -106,6 +106,7 @@ public class ConferenceCreateActivity extends Activity {
 	private int landLayout = PAD_LAYOUT;
 
 	private long preSelectedUID;
+	private long preSelectedGroupId;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -153,6 +154,14 @@ public class ConferenceCreateActivity extends Activity {
 
 		mErrorMessageTV = (TextView) findViewById(R.id.conference_create_error_notification_tv);
 		preSelectedUID = getIntent().getLongExtra("uid", 0);
+
+		preSelectedUID = getIntent().getLongExtra("uid", 0);
+		preSelectedGroupId = getIntent().getLongExtra("gid", 0);
+		if (preSelectedUID > 0 || preSelectedGroupId > 0) {
+			Message msg = Message.obtain(mLocalHandler, DO_PRE_SELECT);
+			//TODO optimze code, if doesn't load group list yet, need to wait
+			mLocalHandler.sendMessageDelayed(msg, 300);
+		}
 
 	}
 
@@ -297,9 +306,18 @@ public class ConferenceCreateActivity extends Activity {
 
 	private void doPreSelect() {
 		User preUser = GlobalHolder.getInstance().getUser(preSelectedUID);
-		if (preUser == null) {
-			V2Log.e("Dose not find pre-selected user");
-			return;
+		if (preUser != null) {
+			Message.obtain(mLocalHandler, UPDATE_ATTENDEES,
+					OP_ADD_ALL_GROUP_USER, 0, preUser).sendToTarget();
+			mGroupListView.selectUser(preUser);
+		}
+
+		Group preGroup = GlobalHolder.getInstance().getGroupById(
+				preSelectedGroupId);
+		if (preGroup != null) {
+			mGroupListView.selectUser(preGroup.getUsers());
+			Message.obtain(mLocalHandler, START_GROUP_SELECT,
+					OP_ADD_ALL_GROUP_USER, 0, preGroup).sendToTarget();
 		}
 
 	}
@@ -313,10 +331,14 @@ public class ConferenceCreateActivity extends Activity {
 		}
 		List<User> list = selectGroup.getUsers();
 		for (int i = 0; i < list.size(); i++) {
+			User  u = list.get(i);
+			if (u.getmUserId() == GlobalHolder.getInstance().getCurrentUserId()) {
+				continue;
+			}
 			if (addOrRemove) {
-				addAttendee(list.get(i));
+				addAttendee(u);
 			} else {
-				removeAttendee(list.get(i));
+				removeAttendee(u);
 			}
 		}
 	}

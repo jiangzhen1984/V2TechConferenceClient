@@ -397,7 +397,6 @@ public class VideoAttendeeListLayout extends LinearLayout {
 		at.setmDevices(null);
 		at.setJoined(false);
 		at.setSpeakingState(false);
-		configAttendee(at);
 		boolean found = false;
 		for (int i = 0; i < mList.size(); i++) {
 			Wrapper wr = mList.get(i);
@@ -854,7 +853,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 			return;
 		}
 		if (at.getType() != Attendee.TYPE_MIXED_VIDEO) {
-			mAttendeeCount++;
+				mAttendeeCount++;
 			if ((at.isJoined() || at.isSelf())) {
 				onLinePersons++;
 			}
@@ -866,4 +865,5 @@ public class VideoAttendeeListLayout extends LinearLayout {
 	private void updateStatist() {
 		attendPersons.setText(onLinePersons + "/" + (mAttendeeCount));
 	}
+
 }

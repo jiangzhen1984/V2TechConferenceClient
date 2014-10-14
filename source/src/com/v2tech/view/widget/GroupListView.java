@@ -9,8 +9,6 @@ import java.util.Set;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
-import android.os.Handler;
-import android.os.Message;
 import android.support.v4.util.LongSparseArray;
 import android.text.TextUtils;
 import android.text.TextUtils.TruncateAt;
@@ -18,6 +16,7 @@ import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.CheckBox;
@@ -51,8 +50,24 @@ public class GroupListView extends ListView {
 	private LocalFilter filter;
 	private boolean mCBFlag;
 	private GroupListViewListener mListener;
+	private OnScrollListener mOutScrollListener;
+
+	private int mFirstVisibleIndex;
+	private int mLastVisibleIndex;
+
+	/**
+	 * Use to record group item. key group id
+	 */
 	private LongSparseArray<Item> mItemMap;
+
+	/**
+	 * Use to record all same user items. key: user id
+	 */
 	private LongSparseArray<Set<Item>> mUserItemListMap;
+
+	/**
+	 * Use to record all user items which belongs to same group. key : group id
+	 */
 	private LongSparseArray<LongSparseArray<Item>> mGroupItemUserMap;
 	private boolean mIsInFilter;
 
@@ -84,6 +99,7 @@ public class GroupListView extends ListView {
 		this.setAdapter(adapter);
 		this.setOnItemClickListener(mItemClickedListener);
 		this.setOnItemLongClickListener(mItemLongClickListener);
+		this.setOnScrollListener(mLocalScrollListener);
 	}
 
 	public void setGroupList(List<Group> list) {
@@ -127,7 +143,7 @@ public class GroupListView extends ListView {
 			Item item = mFilterList.get(i);
 			if (item instanceof GroupItem && ((GroupItem) item).isExpaned) {
 				int end = calculateGroupEnd(((GroupItem) item).mGroup, i + 1);
-				sort = updateUserStatus(((GroupItem) item), i + 1, end, user,
+				sort = updateUserPosition(((GroupItem) item), i + 1, end, user,
 						us);
 			}
 		}
@@ -209,29 +225,22 @@ public class GroupListView extends ListView {
 		for (int i = 0; i < mFilterList.size(); i++) {
 			Item item = mFilterList.get(i);
 			Object obj = item.getObject();
-			if (obj == group) {
-				if (((GroupItem) item).isExpaned) {
-					// Calculate group end position
-					int end = calculateGroupEnd((Group) obj, i);
-					int pos = calculateIndex(i, end, user, user.getmStatus());
-					if (pos != -1) {
-						Item userItem = this.getItem(group, user);
-						if (pos == mFilterList.size()) {
-							mFilterList.add(userItem);
-						} else {
-							mFilterList.add(pos, userItem);
-						}
-						break;
+			if (obj == group && ((GroupItem) item).isExpaned) {
+				// Calculate group end position
+				int end = calculateGroupEnd((Group) obj, i);
+				int pos = calculateIndex(i, end, user, user.getmStatus());
+				if (pos != -1) {
+					Item userItem = this.getItem(group, user);
+					if (pos == mFilterList.size()) {
+						mFilterList.add(userItem);
+					} else {
+						mFilterList.add(pos, userItem);
 					}
+					break;
 				}
 			}
 		}
 
-		adapter.notifyDataSetChanged();
-	}
-
-	public void updateItem(User user) {
-		// FIXME optimze for avatar
 		adapter.notifyDataSetChanged();
 	}
 
@@ -288,6 +297,58 @@ public class GroupListView extends ListView {
 		}
 	}
 
+	public void selectUser(User user) {
+		if (user == null) {
+			return;
+		}
+		Set<Group> groupList = user.getBelongsGroup();
+		for (Group g : groupList) {
+			Item item = getItem(g, user);
+			item.setChecked(true);
+		}
+		adapter.notifyDataSetChanged();
+	}
+
+	
+	public void selectUser(List<User> userList) {
+		if (userList == null) {
+			return;
+		}
+		for (User user : userList) {
+			Set<Group> groupList = user.getBelongsGroup();
+			for (Group g : groupList) {
+				Item item = getItem(g, user);
+				item.setChecked(true);
+			}
+		}
+		adapter.notifyDataSetChanged();
+	}
+
+	public void selectGroup(Group group) {
+		if (group == null) {
+			return;
+		}
+		Item item = getItem(group);
+		item.setChecked(true);
+		adapter.notifyDataSetChanged();
+	}
+
+	/**
+	 * Use to update user signature or avatar
+	 * 
+	 * @param user
+	 */
+	public void updateUser(User user) {
+		// FIXME optimze for avatar
+		adapter.notifyDataSetChanged();
+	}
+
+	/**
+	 * Update user item check status according to flag
+	 * 
+	 * @param u
+	 * @param flag
+	 */
 	private void updateCheckItemWithoutNotification(User u, boolean flag) {
 		Set<Item> list = mUserItemListMap.get(u.getmUserId());
 		if (list == null || list.size() <= 0) {
@@ -298,6 +359,12 @@ public class GroupListView extends ListView {
 		}
 	}
 
+	/**
+	 * Update group item check status according to flag
+	 * 
+	 * @param group
+	 * @param flag
+	 */
 	private void updateCheckItemWithoutNotification(Group group, boolean flag) {
 		Item item = mItemMap.get(group.getmGId());
 		if (item != null) {
@@ -313,10 +380,23 @@ public class GroupListView extends ListView {
 		}
 	}
 
-	private boolean updateUserStatus(GroupItem gitem, int index, int gend,
+	/**
+	 * Update user position according to new user status
+	 * 
+	 * @param gitem
+	 *            group item which user belongs and expanded
+	 * @param index
+	 *            first child position of group
+	 * @param gend
+	 *            group end position
+	 * @param user
+	 * @param newSt
+	 * @return
+	 */
+	private boolean updateUserPosition(GroupItem gitem, int gstart, int gend,
 			User user, User.Status newSt) {
 		int pos = -1;
-		int start = index;
+		int start = gstart;
 		int end = gend;
 
 		while (start <= end && mFilterList.size() > start) {
@@ -334,8 +414,8 @@ public class GroupListView extends ListView {
 					GroupItem subGroupItem = (GroupItem) item;
 					int subGroupEndIndex = calculateGroupEnd(
 							subGroupItem.mGroup, start);
-					updateUserStatus(subGroupItem, start + 1, subGroupEndIndex,
-							user, newSt);
+					updateUserPosition(subGroupItem, start + 1,
+							subGroupEndIndex, user, newSt);
 					start += subGroupEndIndex;
 				}
 				start++;
@@ -352,8 +432,8 @@ public class GroupListView extends ListView {
 					GroupItem subGroupItem = (GroupItem) endItem;
 					int subGroupEndIndex = calculateGroupEnd(
 							subGroupItem.mGroup, start);
-					updateUserStatus(subGroupItem, start + 1, subGroupEndIndex,
-							user, newSt);
+					updateUserPosition(subGroupItem, start + 1,
+							subGroupEndIndex, user, newSt);
 					start += subGroupEndIndex;
 				}
 				start++;
@@ -369,7 +449,7 @@ public class GroupListView extends ListView {
 		// Update user new position;
 		if (pos != -1) {
 			// Reset start and end position
-			start = index;
+			start = gstart;
 			end = gend;
 			// remove current status
 			Item origin = mFilterList.remove(pos);
@@ -500,6 +580,11 @@ public class GroupListView extends ListView {
 		Item item = mItemMap.get(g.getmGId());
 		if (item == null) {
 			item = new GroupItem(g);
+			Group parent = g.getParent();
+			if (parent != null) {
+				Item itemParent = mItemMap.get(parent.getmGId());
+				item.setChecked(itemParent.isChecked());
+			}
 			mItemMap.put(g.getmGId(), item);
 		}
 		return item;
@@ -508,14 +593,18 @@ public class GroupListView extends ListView {
 	/**
 	 */
 	private Item getItem(Group g, User u) {
+		Item groupItem = getItem(g);
+
 		LongSparseArray<Item> map = mGroupItemUserMap.get(g.getmGId());
 		if (map == null) {
 			map = new LongSparseArray<Item>();
-			mGroupItemUserMap.put(u.getmUserId(), map);
+			mGroupItemUserMap.put(g.getmGId(), map);
 		}
 		Item item = map.get(u.getmUserId());
 		if (item == null) {
 			item = new UserItem(u, g.getLevel() + 1);
+			// Update check status according group status.
+			item.setChecked(groupItem.isChecked());
 			map.put(u.getmUserId(), item);
 
 			Set<Item> itemList = mUserItemListMap.get(u.getmUserId());
@@ -566,6 +655,21 @@ public class GroupListView extends ListView {
 		super.setAdapter(adapter);
 	}
 
+	@Override
+	public void setOnScrollListener(OnScrollListener l) {
+		if (l != this.mLocalScrollListener) {
+			mOutScrollListener = l;
+		} else {
+			super.setOnScrollListener(l);
+		}
+	}
+
+	/**
+	 * collapse current expanded group
+	 * 
+	 * @param item
+	 * @param pos
+	 */
 	private void collapse(GroupItem item, int pos) {
 		int level = item.getLevel();
 		int start = pos;
@@ -595,9 +699,9 @@ public class GroupListView extends ListView {
 		// DO not user for(Group g:list) concurrency problem
 		for (int i = subGroupList.size() - 1; i >= 0; i--) {
 			Group subG = subGroupList.get(i);
-			GroupItem groupItem = (GroupItem)getItem(subG);
+			GroupItem groupItem = (GroupItem) getItem(subG);
 			if (mFilterList.size() == pos + 1) {
-				
+
 				mFilterList.add(groupItem);
 			} else {
 				mFilterList.add(pos + 1, groupItem);
@@ -644,6 +748,7 @@ public class GroupListView extends ListView {
 					((GroupListViewAdapterItem) view).updateCheckBox();
 				}
 			}
+
 		}
 
 	};
@@ -672,21 +777,42 @@ public class GroupListView extends ListView {
 
 		@Override
 		public void onClick(View v) {
+			Item item = (Item) v.getTag();
 			if (mListener != null) {
-				mListener.onCheckboxClicked(v, (Item) v.getTag());
+				mListener.onCheckboxClicked(v, item);
 			}
 		}
 
 	};
 
-	private static final int UPDATE_USER_STATUS = 1;
-	private Handler mLocalHandler = new Handler() {
+	/**
+	 * 
+	 */
+	private OnScrollListener mLocalScrollListener = new OnScrollListener() {
 
 		@Override
-		public void handleMessage(Message msg) {
+		public void onScrollStateChanged(AbsListView view, int scrollState) {
+			if (mOutScrollListener != null) {
+				mOutScrollListener.onScrollStateChanged(view, scrollState);
+			}
+		}
+
+		@Override
+		public void onScroll(AbsListView view, int firstVisibleItem,
+				int visibleItemCount, int totalItemCount) {
+			if (mOutScrollListener != null) {
+				mOutScrollListener.onScroll(view, firstVisibleItem,
+						visibleItemCount, totalItemCount);
+			}
+
+			mFirstVisibleIndex = firstVisibleItem;
+			mLastVisibleIndex = mFirstVisibleIndex + visibleItemCount;
+
 		}
 
 	};
+
+
 
 	class LocalAdapter extends BaseAdapter implements Filterable {
 
@@ -957,7 +1083,7 @@ public class GroupListView extends ListView {
 				mRoot.findViewById(R.id.user_view_root)
 						.setVisibility(View.GONE);
 			} else {
-				updateUserItem();
+				
 				View userRoot = mRoot.findViewById(R.id.user_view_root);
 				userRoot.setVisibility(View.VISIBLE);
 				if (paddingFlag) {
@@ -965,7 +1091,7 @@ public class GroupListView extends ListView {
 				} else {
 					userRoot.setPadding(35, 0, 0, 0);
 				}
-
+				updateUserItem();
 				mRoot.findViewById(R.id.group_view_root).setVisibility(
 						View.GONE);
 			}
@@ -993,20 +1119,10 @@ public class GroupListView extends ListView {
 					.getSignature());
 			int[] nameLo = new int[2];
 			mUserSignatureTV.getLocationInWindow(nameLo);
-			int maxWidth = 0;
-			if (mCb != null) {
-				int[] cbL = new int[2];
-				mCb.getLocationInWindow(cbL);
-				maxWidth = cbL[0] - nameLo[0] - 80;
-			} else {
-				maxWidth = this.getWidth() - nameLo[0] - 80;
-			}
-
-			mUserSignatureTV.setMaxWidth(maxWidth);
 			mUserSignatureTV.setSingleLine(true);
 			mUserSignatureTV.setEllipsize(TruncateAt.END);
 
-			if(!TextUtils.isEmpty(u.getNickName()))
+			if (!TextUtils.isEmpty(u.getNickName()))
 				mUserNameTV.setText(u.getNickName());
 			else
 				mUserNameTV.setText(u.getName());
@@ -1017,9 +1133,18 @@ public class GroupListView extends ListView {
 				mCb.setVisibility(View.VISIBLE);
 				mCb.setChecked(mItem.isChecked());
 				mCb.setOnClickListener(mCheckBoxListener);
+				
+				int maxWidth = 0;
+				int[] cbL = new int[2];
+				mCb.getLocationInWindow(cbL);
+				maxWidth = cbL[0] - nameLo[0] - 35;
+				mUserSignatureTV.setMaxWidth(maxWidth);
+				
 			} else {
 				mRoot.findViewById(R.id.user_check_view).setVisibility(
 						View.GONE);
+				int maxWidth = this.getWidth() - nameLo[0] - 35;
+				mUserSignatureTV.setMaxWidth(maxWidth);
 			}
 
 		}

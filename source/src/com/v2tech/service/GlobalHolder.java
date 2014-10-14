@@ -93,6 +93,9 @@ public class GlobalHolder {
 	private Object mUserLock = new Object();
 
 	public User putUser(long id, User u) {
+		if (id <= 0  || u == null) {
+			return null;
+		}
 		synchronized (mUserLock) {
 			Long key = Long.valueOf(id);
 			User cu = mUserHolder.get(key);
@@ -148,6 +151,9 @@ public class GlobalHolder {
 	}
 
 	public User getUser(long id) {
+		if (id <= 0) {
+			return null;
+		}
 		Long key = Long.valueOf(id);
 		synchronized (key) {
 			User tmp = mUserHolder.get(key);

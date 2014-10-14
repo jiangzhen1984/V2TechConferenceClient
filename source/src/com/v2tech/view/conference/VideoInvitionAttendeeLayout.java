@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.os.AsyncTask;
@@ -18,6 +19,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
@@ -37,6 +39,9 @@ import com.v2tech.vo.User;
 public class VideoInvitionAttendeeLayout extends LinearLayout {
 
 	private static final int UPDATE_ATTENDEES = 2;
+	private static final int START_GROUP_SELECT = 6;
+	private static final int DOING_SELECT_GROUP = 7;
+	private static final int END_GROUP_SELECT = 8;
 
 	private static final int PAD_LAYOUT = 1;
 	private static final int PHONE_LAYOUT = 0;
@@ -312,11 +317,20 @@ public class VideoInvitionAttendeeLayout extends LinearLayout {
 		}
 
 		public void onCheckboxClicked(View view, Item item) {
+			CheckBox cb = (CheckBox)view;
 			Object obj = item.getObject();
 			if (obj instanceof User) {
 				Message.obtain(mLocalHandler, UPDATE_ATTENDEES, (User)obj)
 				.sendToTarget();
 				mGroupListView.updateCheckItem((User)obj, !item.isChecked());
+			} else {
+				Message.obtain(
+						mLocalHandler,
+						START_GROUP_SELECT,
+						cb.isChecked() ? 1
+								: 2, 0, (Group) obj)
+						.sendToTarget();
+				mGroupListView.updateCheckItem((Group)obj, !item.isChecked());
 			}
 		}
 	};
@@ -361,7 +375,22 @@ public class VideoInvitionAttendeeLayout extends LinearLayout {
 	};
 
 
-
+	private ProgressDialog mWaitingDialog;
+	
+	private void selectGroup(Group selectGroup, boolean addOrRemove) {
+		List<Group> subGroups = selectGroup.getChildGroup();
+		for (int i = 0; i < subGroups.size(); i++) {
+			selectGroup(subGroups.get(i), addOrRemove);
+		}
+		List<User> list = selectGroup.getUsers();
+		for (int i = 0; i < list.size(); i++) {
+			if (addOrRemove) {
+				addAttendee(list.get(i));
+			} else {
+				removeAttendee(list.get(i));
+			}
+		}
+	}
 	
 
 	class LocalHandler extends Handler {
@@ -371,6 +400,25 @@ public class VideoInvitionAttendeeLayout extends LinearLayout {
 			switch (msg.what) {
 			case UPDATE_ATTENDEES:
 				updateUserToAttendList((User) msg.obj);
+				break;
+			case START_GROUP_SELECT: {
+				mWaitingDialog = ProgressDialog.show(
+						mContext,
+						"",
+						mContext.getResources().getString(
+								R.string.notification_watiing_process), true);
+				Message.obtain(this, DOING_SELECT_GROUP, msg.arg1, msg.arg2,
+						msg.obj).sendToTarget();
+				break;
+			}
+			case DOING_SELECT_GROUP:
+				selectGroup((Group) msg.obj,
+						msg.arg1 == 1 ? true : false);
+				Message.obtain(this, END_GROUP_SELECT).sendToTarget();
+				break;
+			case END_GROUP_SELECT:
+				mWaitingDialog.dismiss();
+				mWaitingDialog = null;
 				break;
 			}
 		}

@@ -825,9 +825,9 @@ public class MessageAuthenticationActivity extends Activity {
 			public void onClick(View v) {
 				ListItemWrapper wrapper = (ListItemWrapper) v.getTag();
 				if (wrapper == null) {
-					//TODO show error toast
 					return;
 				}
+				//remove from list
 				VMessageQualification msg = (VMessageQualification)wrapper.obj;
 				for (int i = 0; i < mMessageList.size(); i++) {
 					if (msg.getId() == ((VMessageQualification)mMessageList.get(i).obj).getId()) {
@@ -835,8 +835,9 @@ public class MessageAuthenticationActivity extends Activity {
 						break;
 					}
 				}
-				//TODO delete message
-				//remove from list
+				//delete message from database
+				MessageBuilder.deleteQualMessage(mContext, msg.getId());
+				
 				groupAdapter.notifyDataSetChanged();
 			}
 			

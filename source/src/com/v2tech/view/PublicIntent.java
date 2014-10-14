@@ -22,6 +22,11 @@ public class PublicIntent {
 
 	public static final String START_VIDEO_IMAGE_GALLERY = "com.v2tech.image_gallery";
 
+	/**
+	 * Start conference create activity<br>
+	 * key uid: pre-selected user id
+	 * key gid: pre-selected group id
+	 */
 	public static final String START_CONFERENCE_CREATE_ACTIVITY = "com.v2tech.start_conference_create_activity";
 
 	public static final String START_ABOUT_ACTIVITY = "com.v2tech.start_about_activity";

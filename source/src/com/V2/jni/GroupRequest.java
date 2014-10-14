@@ -549,7 +549,11 @@ public class GroupRequest {
 			group.name = name;
 			group.announce = announcement;
 			group.brief = summary;
-			group.authType = Integer.parseInt(authtype);
+			if (authtype != null) {
+				group.authType = Integer.parseInt(authtype);
+			} else {
+				V2Log.e("No found authtype attrbitue, use 0 as default");
+			}
 
 		} else if (groupType == V2GlobalEnum.GROUP_TYPE_CONFERENCE) {
 			String sync = XmlAttributeExtractor.extract(sXml, " syncdesktop='", "'");

@@ -1346,6 +1346,7 @@ public class ConversationView extends Activity {
 		public void onClick(View arg0) {
 			Intent i = new Intent(PublicIntent.START_CONFERENCE_CREATE_ACTIVITY);
 			i.addCategory(PublicIntent.DEFAULT_CATEGORY);
+			i.putExtra("gid", groupId);
 			startActivity(i);
 		}
 	};
