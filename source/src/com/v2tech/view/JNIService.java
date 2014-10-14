@@ -877,6 +877,7 @@ public class JNIService extends Service {
 			Intent intent = new Intent();
 			intent.setAction(BROADCAST_CROWD_NEW_UPLOAD_FILE_NOTIFICATION);
 			intent.addCategory(JNI_BROADCAST_CATEGROY);
+			intent.putExtra("groupID", group.id);
 			intent.putParcelableArrayListExtra("fileJniObjects", new ArrayList<FileJNIObject>(list));
 			sendBroadcast(intent);
 		}

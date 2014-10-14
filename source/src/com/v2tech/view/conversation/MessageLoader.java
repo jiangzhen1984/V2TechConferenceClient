@@ -21,6 +21,7 @@ import com.v2tech.db.ContentDescriptor.HistoriesMessage;
 import com.v2tech.db.DataBaseContext;
 import com.v2tech.db.V2TechDBHelper;
 import com.v2tech.service.GlobalHolder;
+import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.XmlParser;
 import com.v2tech.vo.AudioVideoMessageBean;
 import com.v2tech.vo.CrowdGroup;
@@ -817,18 +818,29 @@ public class MessageLoader {
 			long groupID, long userID) {
 
 		DataBaseContext mContext = new DataBaseContext(context);
-		String sql = "drop table if exists " + ContentDescriptor.HistoriesMessage.NAME;
-		V2TechDBHelper dbHelper = new V2TechDBHelper(mContext);
-		SQLiteDatabase db = dbHelper.getReadableDatabase();
-		if (db != null && db.isOpen()) 
-			db.execSQL(sql);
-		else
-			V2Log.d(TAG, "May delete HistoriesMessage failed...groupType : " + groupType + "  groupID : "
+		List<String> tableNames = GlobalHolder.getInstance().getDataBaseTableCacheName();
+		String sql = "";
+		try{
+			if(tableNames.contains(ContentDescriptor.HistoriesMessage.NAME))
+				sql = "drop table " + ContentDescriptor.HistoriesMessage.NAME;
+			else{
+				V2Log.e(TAG, "drop table failed...table no exists , name is : " + ContentDescriptor.HistoriesMessage.NAME);
+				return ;
+			}
+			V2TechDBHelper dbHelper = new V2TechDBHelper(mContext);
+			SQLiteDatabase db = dbHelper.getReadableDatabase();
+			if (db != null && db.isOpen()) 
+				db.execSQL(sql);
+			else
+				V2Log.d(TAG, "May delete HistoriesMessage failed...DataBase state not normal...groupType : " + groupType + "  groupID : "
+						+ groupID + "  userID : " + userID);
+			}
+		catch(Exception e){
+			V2Log.d(TAG, e.getStackTrace() + "");
+			V2Log.d(TAG, "May delete HistoriesMessage failed...have exception...groupType : " + groupType + "  groupID : "
 					+ groupID + "  userID : " + userID);
-		
-		if(isExistTable(context , ContentDescriptor.HistoriesMessage.NAME))
-			V2Log.d(TAG, "May delete HistoriesMessage failed...groupType : " + groupType + "  groupID : "
-					+ groupID + "  userID : " + userID);
+			return ;
+		}
 		//删除其他信息
 		String audioCondition = ContentDescriptor.HistoriesAudios.Cols.HISTORY_AUDIO_GROUP_TYPE
 				+ "= ? and "

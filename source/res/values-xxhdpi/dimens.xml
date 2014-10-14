@@ -107,12 +107,13 @@
     <dimen name="message_body_file_item_progress_layout_margin_top">10dp</dimen>
     <dimen name="message_body_file_item_progress_layout_margin_bottom">10dp</dimen>
     <dimen name="message_body_file_item_progress_action_button_margin_left">10dp</dimen>
+    <dimen name="message_body_failed_size">16dp</dimen>
     
     
         <!-- message voice dialog layout -->
     <dimen name="message_voice_dialog_width">230dp</dimen>
     <dimen name="message_voice_dialog_height">180dp</dimen>
     
-     <dimen name="message_selected_pop_up_window">-11dp</dimen>
+     <dimen name="message_selected_pop_up_window">-4dp</dimen>
 
 </resources>

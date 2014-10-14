@@ -1,5 +1,6 @@
 package com.v2tech.vo;
 
+import com.v2tech.util.DateUtil;
 import com.v2tech.vo.Group.GroupType;
 
 public class CrowdConversation extends Conversation {
@@ -7,7 +8,6 @@ public class CrowdConversation extends Conversation {
 	private Group g;
 	private User lastSendUser;
 	private String msg;
-	private String date;
 
 	public CrowdConversation(Group g) {
 		if (g == null) {
@@ -43,7 +43,18 @@ public class CrowdConversation extends Conversation {
 
 	@Override
 	public String getDate() {
-		return "";
+		if(dateLong != null){
+			return DateUtil.getStringDate(Long.valueOf(dateLong));
+		}
+		return super.getDate();
+	}
+	
+	@Override
+	public String getDateLong() {
+		if (dateLong != null) {
+			return dateLong;
+		}
+		return super.getDateLong();
 	}
 	
 	public void setMsg(String msg) {

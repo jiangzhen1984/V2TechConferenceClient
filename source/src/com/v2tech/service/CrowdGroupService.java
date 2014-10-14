@@ -611,9 +611,11 @@ public class CrowdGroupService extends AbstractHandler {
 			List<VCrowdFile> vfList = null;
 			if (list == null) {
 				vfList = new ArrayList<VCrowdFile>(0);
+				return vfList;
 			} else {
 				vfList = new ArrayList<VCrowdFile>(list.size());
 			}
+			
 			for (FileJNIObject f : list) {
 				VCrowdFile vcf = new VCrowdFile();
 				vcf.setCrowd((CrowdGroup) GlobalHolder.getInstance()

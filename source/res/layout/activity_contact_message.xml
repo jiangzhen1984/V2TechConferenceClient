@@ -59,6 +59,16 @@
             android:paddingTop="10dp"
             android:src="@drawable/qun"
             android:visibility="gone" />
+        
+        <!-- Use translucent image to hold space -->
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="10dp"
+            android:paddingBottom="10dp"
+            android:paddingTop="10dp"
+            android:src="@drawable/translucent" />
     </RelativeLayout>
     <LinearLayout
         android:id="@+id/linearLayout2"

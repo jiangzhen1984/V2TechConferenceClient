@@ -1349,6 +1349,7 @@ public class P2PConversation extends Activity implements
 		@Override
 		public void onClick(View view) {
 			isRejected = true;
+			mLocalHandler.removeCallbacks(timeOutMonitor);
 			hangUp();
 		}
 

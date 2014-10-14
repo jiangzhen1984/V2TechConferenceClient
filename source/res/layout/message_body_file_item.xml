@@ -56,6 +56,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
+        android:gravity="center"
         android:layout_alignRight="@+id/message_body_file_item_state"
         android:layout_below="@+id/message_body_file_item_file_size"
         android:layout_marginBottom="@dimen/message_body_file_item_progress_layout_margin_bottom"

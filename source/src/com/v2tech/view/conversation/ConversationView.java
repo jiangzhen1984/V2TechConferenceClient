@@ -211,7 +211,8 @@ public class ConversationView extends Activity {
 	private List<VMessage> currentGetMessages;
 	private long lastMessageBodyShowTime = 0;
 	private long intervalTime = 15000; // 显示消息时间状态的间隔时间
-	private boolean isReLoading = false; // 用于onNewIntent判断是否需要重新加载界面聊天数据
+	private boolean isReLoading; // 用于onNewIntent判断是否需要重新加载界面聊天数据
+	private boolean sendFile; //用于从个人信息中传递过来的文件，只发送一次
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -219,11 +220,59 @@ public class ConversationView extends Activity {
 		mContext = this;
 
 		setContentView(R.layout.activity_contact_message);
-
 		GlobalConfig.isConversationOpen = true;
-
 		lh = new LocalHandler();
+		initModuleAndListener();
+		HandlerThread thread = new HandlerThread("back-end");
+		thread.start();
+		synchronized (thread) {
+			while (!thread.isAlive()) {
+				try {
+					Thread.sleep(100);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+			backEndHandler = new BackendHandler(thread.getLooper());
+		}
+		// TODO for group conversation
+		initExtraObject(savedInstanceState);
+		initBroadcast();
+		// Register listener for avatar changed
+		BitmapManager.getInstance().registerBitmapChangedListener(
+				avatarChangedListener);
+		mChat.registerFileTransStatusListener(this.lh, FILE_STATUS_LISTENER,
+				null);
+		notificateConversationUpdate(false, cov.getExtId());
+		// Start animation
+		this.overridePendingTransition(R.animator.nonam_scale_center_0_100,
+				R.animator.nonam_scale_null);
+		// initalize vioce function that showing dialog
+		createVideoDialog();
+	}
 
+	/**
+	 * 注册广播
+	 */
+	private void initBroadcast() {
+		IntentFilter filter = new IntentFilter();
+		// receiver the new message broadcast
+		filter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
+		filter.addCategory(PublicIntent.DEFAULT_CATEGORY);
+		filter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
+		filter.addAction(JNIService.JNI_BROADCAST_NEW_MESSAGE);
+		filter.addAction(JNIService.JNI_BROADCAST_MESSAGE_SENT_FAILED);
+		filter.addAction(PublicIntent.BROADCAST_CROWD_DELETED_NOTIFICATION);
+		filter.addAction(PublicIntent.BROADCAST_CROWD_QUIT_NOTIFICATION);
+		filter.addAction(JNIService.BROADCAST_CROWD_NEW_UPLOAD_FILE_NOTIFICATION);
+		filter.addAction(JNIService.JNI_BROADCAST_KICED_CROWD);
+		registerReceiver(receiver, filter);		
+	}
+
+	/**
+	 * 初始化控件与监听器
+	 */
+	private void initModuleAndListener() {
 		mMessagesContainer = (ListView) findViewById(R.id.conversation_message_list);
 		adapter = new MessageAdapter();
 		mMessagesContainer.setAdapter(adapter);
@@ -281,46 +330,17 @@ public class ConversationView extends Activity {
 
 		mFaceLayout = (LinearLayout) findViewById(R.id.contact_message_face_item_ly);
 		mToolLayout = (RelativeLayout) findViewById(R.id.contact_message_sub_feature_ly_inner);
+	}
 
-		HandlerThread thread = new HandlerThread("back-end");
-		thread.start();
-		synchronized (thread) {
-			while (!thread.isAlive()) {
-				try {
-					Thread.sleep(100);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-			}
-			backEndHandler = new BackendHandler(thread.getLooper());
-		}
-		// TODO for group conversation
-		initExtraObject(savedInstanceState);
-		// Register listener for avatar changed
-		BitmapManager.getInstance().registerBitmapChangedListener(
-				avatarChangedListener);
-
-		IntentFilter filter = new IntentFilter();
-		// receiver the new message broadcast
-		filter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
-		filter.addCategory(PublicIntent.DEFAULT_CATEGORY);
-		filter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
-		filter.addAction(JNIService.JNI_BROADCAST_NEW_MESSAGE);
-		filter.addAction(JNIService.JNI_BROADCAST_MESSAGE_SENT_FAILED);
-		filter.addAction(PublicIntent.BROADCAST_CROWD_DELETED_NOTIFICATION);
-		filter.addAction(PublicIntent.BROADCAST_CROWD_QUIT_NOTIFICATION);
-		filter.addAction(JNIService.BROADCAST_CROWD_NEW_UPLOAD_FILE_NOTIFICATION);
-		filter.addAction(JNIService.JNI_BROADCAST_KICED_CROWD);
-		registerReceiver(receiver, filter);
-
-		mChat.registerFileTransStatusListener(this.lh, FILE_STATUS_LISTENER,
-				null);
-		notificateConversationUpdate(false, cov.getExtId());
-		// Start animation
-		this.overridePendingTransition(R.animator.nonam_scale_center_0_100,
-				R.animator.nonam_scale_null);
-		// initalize vioce function that showing dialog
-		createVideoDialog();
+	/**
+	 * 用于接收从个人信息传递过来的文件
+	 */
+	private void initSendFile() {
+		mCheckedList = this.getIntent().getParcelableArrayListExtra(
+				"checkedFiles");
+		if (mCheckedList != null && mCheckedList.size() > 0) {
+			startSendMoreFile();
+		}		
 	}
 
 	private Dialog mVoiceDialog = null;
@@ -328,7 +348,9 @@ public class ConversationView extends Activity {
 	private View mSpeakingLayout;
 	private View mPreparedCancelLayout;
 	private View mWarningLayout;
-
+	/**
+	 * 初始化录音留言对话框
+	 */
 	public void createVideoDialog() {
 		mVoiceDialog = new Dialog(mContext, R.style.MessageVoiceDialog);
 		mVoiceDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -2368,12 +2390,13 @@ public class ConversationView extends Activity {
 				if(currentConversationViewType == V2GlobalEnum.GROUP_TYPE_CROWD){
 					ArrayList<FileJNIObject> list = intent
 							.getParcelableArrayListExtra("fileJniObjects");
-					if (list == null || list.size() <= 0) {
+					long groupID = intent.getLongExtra("groupID", -1l);
+					if (list == null || list.size() <= 0 || groupID == -1l) {
 						V2Log.e("ConversationView : May receive new group files failed.. get empty collection");
 						return;
 					}
 					// 自己上传文件不提示
-					if (list.get(0).user.uid == user1Id)
+					if (list.get(0).user.uid == user1Id || groupID != groupId)
 						return;
 					User user = GlobalHolder.getInstance().getUser(
 							list.get(0).user.uid);
@@ -2464,6 +2487,11 @@ public class ConversationView extends Activity {
 				V2Log.d(TAG, "currentItemPos:--" + currentItemPos);
 				scrollToPos(currentItemPos);
 				isLoading = false;
+				//处理从个人信息传递过来的文件
+				if(!sendFile){
+					sendFile = true;
+					initSendFile();
+				}
 				break;
 			case SEND_MESSAGE:
 				mChat.sendVMessage((VMessage) msg.obj, new Registrant(this,

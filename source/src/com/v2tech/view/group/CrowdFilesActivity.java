@@ -182,7 +182,7 @@ public class CrowdFilesActivity extends Activity {
 			return;
 		}
 
-//		// loading upLoading files from database;
+		// loading upLoading files from database;
 		List<VCrowdFile> fileItems = MessageLoader
 				.loadGroupUpLoadingFileMessage(mContext, crowd.getGroupType()
 						.intValue(), crowd.getmGId(), crowd);

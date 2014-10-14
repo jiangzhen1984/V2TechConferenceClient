@@ -4,13 +4,11 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical" >
-
     <RelativeLayout
         android:id="@+id/RelativeLayout1"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:background="#ffffff" >
-
         <TextView
             android:id="@+id/contact_detail_2_return_button"
             android:layout_width="wrap_content"
@@ -23,9 +21,7 @@
             android:text="@string/contacts_user_detail_return_button"
             android:textColor="@color/button_text_color"
             android:textSize="@dimen/common_item_text_size" />
-
         <TextView
-
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
@@ -35,9 +31,7 @@
             android:text="@string/contacts_detail_title"
             android:textColor="@color/activiy_contact_detail_title_color"
             android:textSize="@dimen/common_item_text_size" />
-
         <!-- Use translucent image to hold space -->
-
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -47,26 +41,22 @@
             android:paddingTop="10dp"
             android:src="@drawable/translucent" />
     </RelativeLayout>
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:background="#cfcfcf"
         android:orientation="vertical" >
     </LinearLayout>
-
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="#f2f2f2"
         android:orientation="vertical" >
-
         <RelativeLayout
             android:id="@+id/RelativeLayout2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true" >
-
             <ImageView
                 android:id="@+id/contact_user_detail_head_icon"
                 android:layout_width="wrap_content"
@@ -76,109 +66,92 @@
                 android:layout_marginLeft="@dimen/button_padding_horizontal"
                 android:layout_marginTop="20dp"
                 android:src="@drawable/avatar" />
-
-            <LinearLayout
+            <RelativeLayout
+                android:id="@+id/contact_user_detail_title_layout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignBottom="@+id/contact_user_detail_head_icon"
                 android:layout_alignTop="@+id/contact_user_detail_head_icon"
+                android:layout_centerVertical="true"
                 android:layout_marginLeft="@dimen/detail_detail_signature_margin_left"
-                android:layout_toRightOf="@+id/contact_user_detail_head_icon"
-                android:orientation="vertical" >
-
+                android:layout_marginRight="@dimen/detail_detail_signature_margin_left"
+                android:layout_toLeftOf="@+id/contact_user_detail_button_layout"
+                android:layout_toRightOf="@+id/contact_user_detail_head_icon" >
                 <TextView
                     android:id="@+id/contact_user_detail_title"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="top"
+                    android:layout_alignParentTop="true"
                     android:ellipsize="marquee"
                     android:focusable="true"
                     android:focusableInTouchMode="true"
-                    android:gravity="top"
                     android:marqueeRepeatLimit="marquee_forever"
                     android:maxWidth="@dimen/detail_detail_name_max_width"
                     android:singleLine="true"
                     android:text="TextView"
-                    android:textSize="@dimen/common_item_text_size_16"
-                    android:textColor="@color/common_item_text_color" />
-
+                    android:textColor="@color/activiy_contact_detail_item_color"
+                    android:textSize="@dimen/common_item_text_size" />
                 <com.v2tech.view.widget.MarqueeTextView
                     android:id="@+id/contact_user_detail_user_signature_tv"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="bottom"
+                    android:layout_alignParentBottom="true"
                     android:ellipsize="marquee"
-                    android:gravity="bottom"
-                    android:maxWidth="@dimen/detail_detail_name_max_width"
                     android:singleLine="true"
                     android:text="TextView"
                     android:textColor="@color/common_item_text_color" />
-            </LinearLayout>
-
-            <TextView
-                android:id="@+id/contact_user_detail_invite_video"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
-                android:layout_marginRight="@dimen/button_gap_horizontal"
-                android:background="@drawable/button_bg"
-                android:gravity="center"
-                android:paddingBottom="@dimen/detail_detail_2_button_padding_vertical"
-                android:paddingLeft="@dimen/button_padding_horizontal"
-                android:paddingRight="@dimen/button_padding_horizontal"
-                android:paddingTop="@dimen/detail_detail_2_button_padding_vertical"
-                android:text="@string/contacts_user_detail_invite_video"
-                android:textColor="@color/button_text_color"
-                android:textSize="@dimen/common_item_text_size_small"
-                android:visibility="gone" />
-
-            <TextView
-                android:id="@+id/contact_user_detail_add_friend"
+            </RelativeLayout>
+            <RelativeLayout
+                android:id="@+id/contact_user_detail_button_layout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"
                 android:layout_marginRight="@dimen/button_gap_horizontal"
-                android:background="@drawable/button_bg"
-                android:gravity="center"
                 android:paddingBottom="@dimen/detail_detail_2_button_padding_vertical"
                 android:paddingLeft="@dimen/button_padding_horizontal"
                 android:paddingRight="@dimen/button_padding_horizontal"
-                android:paddingTop="@dimen/detail_detail_2_button_padding_vertical"
-                android:text="@string/contacts_user_detail_add_friend"
-                android:textColor="@color/button_text_color"
-                android:textSize="@dimen/common_item_text_size" />
-
-            <TextView
-                android:id="@+id/contact_user_detail_delete_friend"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentRight="true"
-                android:layout_centerVertical="true"
-                android:layout_marginRight="@dimen/button_gap_horizontal"
-                android:background="@drawable/button_bg"
-                android:gravity="center"
-                android:paddingBottom="@dimen/detail_detail_2_button_padding_vertical"
-                android:paddingLeft="@dimen/button_padding_horizontal"
-                android:paddingRight="@dimen/button_padding_horizontal"
-                android:paddingTop="@dimen/detail_detail_2_button_padding_vertical"
-                android:text="删除好友"
-                android:textColor="#ff0000"
-                android:textSize="@dimen/common_item_text_size"
-                android:visibility="gone" />
+                android:paddingTop="@dimen/detail_detail_2_button_padding_vertical" >
+                <TextView
+                    android:id="@+id/contact_user_detail_invite_video"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/button_bg"
+                    android:gravity="center"
+                    android:text="@string/contacts_user_detail_invite_video"
+                    android:textColor="@color/button_text_color"
+                    android:textSize="@dimen/common_item_text_size_small"
+                    android:visibility="gone" />
+                <TextView
+                    android:id="@+id/contact_user_detail_add_friend"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/button_bg"
+                    android:gravity="center"
+                    android:text="@string/contacts_user_detail_add_friend"
+                    android:textColor="@color/button_text_color"
+                    android:textSize="@dimen/common_item_text_size" />
+                <TextView
+                    android:id="@+id/contact_user_detail_delete_friend"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/button_bg"
+                    android:gravity="center"
+                    android:text="删除好友"
+                    android:textColor="#ff0000"
+                    android:textSize="@dimen/common_item_text_size"
+                    android:visibility="gone" />
+            </RelativeLayout>
         </RelativeLayout>
-
         <ScrollView
             android:id="@+id/contact_detail_scroll_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@+id/RelativeLayout2" >
-
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical" >
-
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -187,13 +160,11 @@
                     android:layout_marginRight="@dimen/contact_detail_2_item_margin_right"
                     android:background="@drawable/rounded_corners_of_contact_user_detail_outer"
                     android:orientation="vertical" >
-
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="1dp"
                         android:layout_marginRight="1dp" >
-
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -205,7 +176,6 @@
                             android:text="@string/contacts_user_detail_item_nick_name"
                             android:textColor="@color/activiy_contact_detail_item_color"
                             android:textSize="@dimen/common_item_text_size" />
-
                         <EditText
                             android:id="@+id/contact_user_detail_nick_name_et"
                             android:layout_width="0dp"
@@ -216,22 +186,19 @@
                             android:ems="10"
                             android:inputType="text"
                             android:maxLength="30"
-                            android:textColor="@color/activiy_contact_detail_item_color" >
+                            android:textColor="@color/activiy_contact_detail_item_content_color" >
                         </EditText>
                     </LinearLayout>
-
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
                         android:background="#c0c0c0" >
                     </LinearLayout>
-
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="1dp"
                         android:layout_marginRight="1dp" >
-
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -243,7 +210,6 @@
                             android:text="@string/contacts_user_detail_item_account"
                             android:textColor="@color/activiy_contact_detail_item_color"
                             android:textSize="@dimen/common_item_text_size" />
-
                         <TextView
                             android:id="@+id/contact_user_detail_account_tv"
                             android:layout_width="wrap_content"
@@ -253,22 +219,19 @@
                             android:gravity="center_vertical"
                             android:singleLine="true"
                             android:text="account"
-                            android:textColor="@color/activiy_contact_detail_item_color"
+                            android:textColor="@color/activiy_contact_detail_item_content_color"
                             android:textSize="@dimen/common_item_text_size" />
                     </LinearLayout>
-
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
                         android:background="#c0c0c0" >
                     </LinearLayout>
-
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="1dp"
                         android:layout_marginRight="1dp" >
-
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -280,7 +243,6 @@
                             android:text="@string/contacts_user_detail_item_gender"
                             android:textColor="@color/activiy_contact_detail_item_color"
                             android:textSize="@dimen/common_item_text_size" />
-
                         <TextView
                             android:id="@+id/contact_user_detail_gender_tv"
                             android:layout_width="wrap_content"
@@ -289,22 +251,19 @@
                             android:ellipsize="end"
                             android:singleLine="true"
                             android:text="gender"
-                            android:textColor="@color/activiy_contact_detail_item_color"
+                            android:textColor="@color/activiy_contact_detail_item_content_color"
                             android:textSize="@dimen/common_item_text_size" />
                     </LinearLayout>
-
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
                         android:background="#c0c0c0" >
                     </LinearLayout>
-
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="1dp"
                         android:layout_marginRight="1dp" >
-
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -316,7 +275,6 @@
                             android:text="@string/contacts_user_detail_item_birdthday"
                             android:textColor="@color/activiy_contact_detail_item_color"
                             android:textSize="@dimen/common_item_text_size" />
-
                         <TextView
                             android:id="@+id/contact_user_detail_birthday_tv"
                             android:layout_width="wrap_content"
@@ -326,22 +284,19 @@
                             android:layout_marginTop="@dimen/detail_detail_2_item_margin_top"
                             android:gravity="center_vertical"
                             android:text="birthday"
-                            android:textColor="@color/activiy_contact_detail_item_color"
+                            android:textColor="@color/activiy_contact_detail_item_content_color"
                             android:textSize="@dimen/common_item_text_size" />
                     </LinearLayout>
-
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
                         android:background="#c0c0c0" >
                     </LinearLayout>
-
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="1dp"
                         android:layout_marginRight="1dp" >
-
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -353,7 +308,6 @@
                             android:text="@string/contacts_user_detail_item_cell_phone"
                             android:textColor="@color/activiy_contact_detail_item_color"
                             android:textSize="@dimen/common_item_text_size" />
-
                         <TextView
                             android:id="@+id/contact_user_detail_cell_phone_tv"
                             android:layout_width="wrap_content"
@@ -366,22 +320,19 @@
                             android:gravity="center_vertical"
                             android:singleLine="true"
                             android:text="Cell phone"
-                            android:textColor="@color/activiy_contact_detail_item_color"
+                            android:textColor="@color/activiy_contact_detail_item_content_color"
                             android:textSize="@dimen/common_item_text_size" />
                     </LinearLayout>
-
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
                         android:background="#c0c0c0" >
                     </LinearLayout>
-
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="1dp"
                         android:layout_marginRight="1dp" >
-
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -393,7 +344,6 @@
                             android:text="@string/contacts_user_detail_item_telephone"
                             android:textColor="@color/activiy_contact_detail_item_color"
                             android:textSize="@dimen/common_item_text_size" />
-
                         <TextView
                             android:id="@+id/contact_user_detail_telephone_tv"
                             android:layout_width="wrap_content"
@@ -406,22 +356,19 @@
                             android:gravity="center_vertical"
                             android:singleLine="true"
                             android:text="TextView"
-                            android:textColor="@color/activiy_contact_detail_item_color"
+                            android:textColor="@color/activiy_contact_detail_item_content_color"
                             android:textSize="@dimen/common_item_text_size" />
                     </LinearLayout>
-
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
                         android:background="#c0c0c0" >
                     </LinearLayout>
-
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="1dp"
                         android:layout_marginRight="1dp" >
-
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -433,7 +380,6 @@
                             android:text="@string/contacts_user_detail_item_company"
                             android:textColor="@color/activiy_contact_detail_item_color"
                             android:textSize="@dimen/common_item_text_size" />
-
                         <TextView
                             android:id="@+id/contact_user_detail_company_tv"
                             android:layout_width="wrap_content"
@@ -446,22 +392,19 @@
                             android:gravity="center_vertical"
                             android:singleLine="true"
                             android:text="TextView"
-                            android:textColor="@color/activiy_contact_detail_item_color"
+                            android:textColor="@color/activiy_contact_detail_item_content_color"
                             android:textSize="@dimen/common_item_text_size" />
                     </LinearLayout>
-
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
                         android:background="#c0c0c0" >
                     </LinearLayout>
-
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="1dp"
                         android:layout_marginRight="1dp" >
-
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -473,7 +416,6 @@
                             android:text="@string/contacts_user_detail_item_department"
                             android:textColor="@color/activiy_contact_detail_item_color"
                             android:textSize="@dimen/common_item_text_size" />
-
                         <TextView
                             android:id="@+id/contact_user_detail_department_tv"
                             android:layout_width="wrap_content"
@@ -486,22 +428,19 @@
                             android:gravity="center_vertical"
                             android:singleLine="true"
                             android:text="TextView"
-                            android:textColor="@color/activiy_contact_detail_item_color"
+                            android:textColor="@color/activiy_contact_detail_item_content_color"
                             android:textSize="@dimen/common_item_text_size" />
                     </LinearLayout>
-
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
                         android:background="#c0c0c0" >
                     </LinearLayout>
-
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="1dp"
                         android:layout_marginRight="1dp" >
-
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -513,7 +452,6 @@
                             android:text="@string/contacts_user_detail_item_title"
                             android:textColor="@color/activiy_contact_detail_item_color"
                             android:textSize="@dimen/common_item_text_size" />
-
                         <TextView
                             android:id="@+id/contact_user_detail_title_tv"
                             android:layout_width="wrap_content"
@@ -526,22 +464,19 @@
                             android:gravity="center_vertical"
                             android:singleLine="true"
                             android:text="TextView"
-                            android:textColor="@color/activiy_contact_detail_item_color"
+                            android:textColor="@color/activiy_contact_detail_item_content_color"
                             android:textSize="@dimen/common_item_text_size" />
                     </LinearLayout>
-
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
                         android:background="#c0c0c0" >
                     </LinearLayout>
-
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="1dp"
                         android:layout_marginRight="1dp" >
-
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -553,7 +488,6 @@
                             android:text="@string/contacts_user_detail_item_address"
                             android:textColor="@color/activiy_contact_detail_item_color"
                             android:textSize="@dimen/common_item_text_size" />
-
                         <TextView
                             android:id="@+id/contact_user_detail_address_tv"
                             android:layout_width="wrap_content"
@@ -566,11 +500,10 @@
                             android:gravity="center_vertical"
                             android:singleLine="true"
                             android:text="TextView"
-                            android:textColor="@color/activiy_contact_detail_item_color"
+                            android:textColor="@color/activiy_contact_detail_item_content_color"
                             android:textSize="@dimen/common_item_text_size" />
                     </LinearLayout>
                 </LinearLayout>
-
                 <LinearLayout
                     android:id="@+id/contact_detail_contact_group_item_ly"
                     android:layout_width="match_parent"
@@ -581,13 +514,11 @@
                     android:layout_marginTop="15dp"
                     android:background="@drawable/rounded_corners_of_contact_user_detail_outer"
                     android:orientation="vertical" >
-
                     <RelativeLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="1dp"
                         android:layout_marginRight="1dp" >
-
                         <TextView
                             android:id="@+id/detail_detail_2_group_title"
                             android:layout_width="wrap_content"
@@ -600,7 +531,6 @@
                             android:text="@string/contacts_user_detail_item_group"
                             android:textColor="@color/activiy_contact_detail_item_color"
                             android:textSize="@dimen/common_item_text_size" />
-
                         <TextView
                             android:id="@+id/detail_detail_2_group_name"
                             android:layout_width="wrap_content"
@@ -612,9 +542,8 @@
                             android:gravity="center_vertical"
                             android:singleLine="true"
                             android:text="TextView"
-                            android:textColor="@color/activiy_contact_detail_item_color"
+                            android:textColor="@color/activiy_contact_detail_item_content_color"
                             android:textSize="@dimen/common_item_text_size" />
-
                         <ImageView
                             android:id="@+id/contacts_group_arrow_right"
                             android:layout_width="wrap_content"
@@ -628,5 +557,4 @@
             </LinearLayout>
         </ScrollView>
     </RelativeLayout>
-
 </LinearLayout>

@@ -16,6 +16,8 @@ import android.os.AsyncTask;
 import android.os.Handler;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
+import android.text.style.BackgroundColorSpan;
+import android.text.style.ForegroundColorSpan;
 import android.text.style.ImageSpan;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -368,7 +370,10 @@ public class MessageBodyView extends LinearLayout {
 				et.setText(builder);
 				// AudioItem only has one item
 			} else if (item.getType() == VMessageAbstractItem.ITEM_TYPE_LINK_TEXT) {
-				et.append(((VMessageLinkTextItem) item).getText());
+				String linkText = ((VMessageLinkTextItem) item).getText();
+				SpannableStringBuilder style=new SpannableStringBuilder(((VMessageLinkTextItem) item).getText()); 
+				style.setSpan(new ForegroundColorSpan(Color.BLUE),0 ,linkText.length() ,Spannable.SPAN_EXCLUSIVE_EXCLUSIVE); 
+				et.append(style);
 			}
 
 			if (item.getState() == VMessageAbstractItem.STATE_SENT_FALIED) {

@@ -590,20 +590,35 @@ public class LoginActivity extends Activity {
 		DataBaseContext mContext = new DataBaseContext(getApplicationContext());
 		V2TechDBHelper mOpenHelper = new V2TechDBHelper(mContext);
 		SQLiteDatabase dataBase = mOpenHelper.getReadableDatabase();
-		Cursor cursor = dataBase.rawQuery("select name as c from sqlite_master where type ='table'",
-				null);
-		if (cursor != null) {
-			List<String> dataBaseTableCacheName = GlobalHolder.getInstance()
-					.getDataBaseTableCacheName();
-			while (cursor.moveToNext()) {
-				// 遍历出表名
-				String name = cursor.getString(0);
-				V2Log.d(TAG , "iteration DataBase table name : " + name);
-				dataBaseTableCacheName.add(name);
-			}
-		} else
+		Cursor cursor = null;
+		try{
+			cursor = dataBase.rawQuery("select name as c from sqlite_master where type ='table'",
+					null);
+			if (cursor != null) {
+				List<String> dataBaseTableCacheName = GlobalHolder.getInstance()
+						.getDataBaseTableCacheName();
+				while (cursor.moveToNext()) {
+					// 遍历出表名
+					String name = cursor.getString(0);
+					V2Log.d(TAG , "iteration DataBase table name : " + name);
+					dataBaseTableCacheName.add(name);
+				}
+			} else
+				throw new RuntimeException(
+						"init DataBase table names failed.. get null , please check");
+		}
+		catch(Exception e){
 			throw new RuntimeException(
-					"init DataBase table names failed.. get null , please check");
+					"init DataBase table names failed.. get null , please check" + e.getStackTrace());
+		}
+		finally{
+			if(cursor != null)
+				cursor.close();
+			
+			if(dataBase != null){
+				dataBase.close();
+			}
+		}
 	}
 	
 	/**

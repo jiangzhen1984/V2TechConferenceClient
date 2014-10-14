@@ -11,10 +11,13 @@ import android.text.TextUtils;
 import com.V2.jni.V2GlobalEnum;
 import com.V2.jni.util.V2Log;
 import com.v2tech.service.GlobalHolder;
+import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.MessageUtil;
 import com.v2tech.view.conversation.MessageLoader;
 import com.v2tech.vo.ContactConversation;
 import com.v2tech.vo.Conversation;
+import com.v2tech.vo.CrowdConversation;
+import com.v2tech.vo.CrowdGroup;
 import com.v2tech.vo.DepartmentConversation;
 import com.v2tech.vo.Group;
 import com.v2tech.vo.OrgGroup;
@@ -143,13 +146,13 @@ public class ConversationProvider {
 	 * @return
 	 */
 	public static List<Conversation> loadUserConversation(Context mContext,
-			List<Conversation> mConvList, final int mCurrentTabFlag,
+			List<Conversation> mConvList,
 			Conversation verificationMessageItemData,
 			Conversation voiceMessageItem) {
 
 		long verificationDate = 0;
 		long voiceMessageDate = 0;
-		if (mCurrentTabFlag == Conversation.TYPE_CONTACT) {
+//		if (mCurrentTabFlag == Conversation.TYPE_CONTACT) {
 			if (verificationMessageItemData != null
 					&& verificationMessageItemData.getDateLong() != null)
 				verificationDate = Long.valueOf(verificationMessageItemData
@@ -165,24 +168,24 @@ public class ConversationProvider {
 				else 
 					voiceMessageItem.setFirst(true);
 			}
-		}
+//		}
 		Cursor mCur = mContext
 				.getContentResolver()
 				.query(ContentDescriptor.RecentHistoriesMessage.CONTENT_URI,
 						ContentDescriptor.RecentHistoriesMessage.Cols.ALL_CLOS,
 						ContentDescriptor.RecentHistoriesMessage.Cols.HISTORY_RECENT_MESSAGE_GROUP_TYPE
-								+ "=?",
-						new String[] { String.valueOf(mCurrentTabFlag) },
+								+ "= ? or " + ContentDescriptor.RecentHistoriesMessage.Cols.HISTORY_RECENT_MESSAGE_GROUP_TYPE + "= ?",
+						new String[] { String.valueOf(V2GlobalEnum.GROUP_TYPE_USER) , String.valueOf(V2GlobalEnum.GROUP_TYPE_CROWD)},
 						ContentDescriptor.RecentHistoriesMessage.Cols.HISTORY_RECENT_MESSAGE_SAVEDATE
 								+ " desc");
 
 		while (mCur.moveToNext()) {
 			long date = 0;
-			ContactConversation cov = extractContactConversation(mContext, mCur);
+			Conversation cov = extractConversation(mContext, mCur);
 			if (!TextUtils.isEmpty(cov.getDateLong()))
 				date = Long.valueOf(cov.getDateLong());
 			// 只有会话界面需要添加这两个特殊item
-			if (mCurrentTabFlag == Conversation.TYPE_CONTACT) {
+//			if (mCurrentTabFlag == Conversation.TYPE_CONTACT) {
 				// 如果两个特殊item都不为空，走if语句
 				if (verificationMessageItemData != null
 						&& voiceMessageItem != null) {
@@ -224,11 +227,11 @@ public class ConversationProvider {
 						verificationMessageItemData.setAddedItem(true);
 					}
 				}
-			}
+//			}
 			mConvList.add(cov);
 		}
 		mCur.close();
-		if (mCurrentTabFlag == Conversation.TYPE_CONTACT) {
+//		if (mCurrentTabFlag == Conversation.TYPE_CONTACT) {
 			if (isNoEmpty) {
 				// 两种添加顺序
 				if (voiceMessageItem.isFirst()) {
@@ -254,7 +257,7 @@ public class ConversationProvider {
 						mConvList.add(verificationMessageItemData);
 				}
 			}
-		}
+//		}
 		return mConvList;
 	}
 	
@@ -334,26 +337,50 @@ public class ConversationProvider {
 	 * @param cur
 	 * @return
 	 */
-	private static ContactConversation extractContactConversation(
+	private static Conversation extractConversation(
 			Context mContext, Cursor cur) {
-		long extId = cur.getLong(cur.getColumnIndex("RemoteUserID"));
-		int readState = cur.getInt(cur.getColumnIndex("ReadState"));
-		User u = GlobalHolder.getInstance().getUser(extId);
-		if (u == null) {
-			V2Log.e("extractConversation , get user is null , id is :" + extId);
-			u = new User(extId);
+		
+		Conversation cov = null;
+		VMessage vm = null;
+		int groupType = cur.getInt(cur.getColumnIndex("GroupType"));
+		switch (groupType) {
+		case V2GlobalEnum.GROUP_TYPE_CROWD:
+			long groupID = cur.getLong(cur.getColumnIndex("GroupID"));
+			Group crowdGroup = GlobalHolder.getInstance().getGroupById(groupType, groupID);
+			if(crowdGroup == null){
+				V2Log.e("ConversationProvider:extractConversation ---> get crowdGroup is null , id is :" + groupID);
+				crowdGroup = new CrowdGroup(groupID, null, null);
+			}
+			cov = new CrowdConversation(crowdGroup);
+			vm = MessageLoader.getNewestGroupMessage(mContext, groupType, groupID);
+			if(vm == null)
+				V2Log.e("ConversationProvider:extractConversation ---> get Newest VMessage is null , update failed , id is :" + groupID);
+			break;
+		case V2GlobalEnum.GROUP_TYPE_USER:
+			long extId = cur.getLong(cur.getColumnIndex("RemoteUserID"));
+			User u = GlobalHolder.getInstance().getUser(extId);
+			if (u == null) {
+				V2Log.e("ConversationProvider:extractConversation ---> get user is null , id is :" + extId);
+				u = new User(extId);
+			}
+			cov = new ContactConversation(u);
+			vm = MessageLoader.getNewestMessage(mContext, GlobalHolder
+					.getInstance().getCurrentUserId(), extId);
+			if(vm == null)
+				V2Log.e("ConversationProvider:extractConversation ---> get Newest VMessage is null , update failed , id is :" + extId);
+			break;
+		default:
+			throw new RuntimeException("ConversationProvider:extractConversation ---> invalid groupType : " + groupType);
 		}
-		ContactConversation cov = new ContactConversation(u);
-		VMessage vm = MessageLoader.getNewestMessage(mContext, GlobalHolder
-				.getInstance().getCurrentUserId(), extId);
+		int readState = cur.getInt(cur.getColumnIndex("ReadState"));
 		if (vm != null) {
 			cov.setDate(vm.getDateTimeStr());
 			cov.setDateLong(String.valueOf(vm.getmDateLong()));
 			CharSequence newMessage = MessageUtil.getMixedConversationContent(
 					mContext, vm);
 			cov.setMsg(newMessage);
+			cov.setReadFlag(readState);
 		}
-		cov.setReadFlag(readState);
 		return cov;
 	}
 }

@@ -23,13 +23,13 @@ import com.v2tech.service.GlobalHolder;
 import com.v2tech.util.GlobalConfig;
 import com.v2tech.vo.FileInfoBean;
 import com.v2tech.vo.VMessage;
+import com.v2tech.vo.VMessageAbstractItem;
 import com.v2tech.vo.VMessageFileItem;
 
 /**
  * Use to upload file and update uploading status to database
  * <ul>
- * intent key:  uuid  : file's uuid</br>
- * intent key:  filePath  : file's local path</br>
+ * intent key:  checkedFiles  : need to upload collection of files , FileInfoBean Object</br>
  * intent key:  gid  : if upload file to group, input group id</br>
  * </ul>
  * @author jiangzhen
@@ -65,9 +65,7 @@ public class FileService extends Service {
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-//		String fileId = intent.getStringExtra("uuid");
-//		String filePath = intent.getStringExtra("filePath");
-		ArrayList<FileInfoBean> mCheckedList = intent.getParcelableArrayListExtra("checkedFiles");
+		ArrayList<FileInfoBean> mCheckedList = intent.getParcelableArrayListExtra("uploads");
 		long gid = intent.getLongExtra("gid", 0);
 		if (mCheckedList != null && mCheckedList.size() > 0) {
 			Message.obtain(mLocalHandler, START_UPLOAD_FILE, new LocalFileObject(mCheckedList , gid)).sendToTarget();
@@ -88,8 +86,20 @@ public class FileService extends Service {
 	 * @param st VMessageFileItem uploading state
 	 */
 	private void updateFile(String uuid, FileState st) {
+		VMessageFileItem vMessageFileItem = mMoniterMap.get(uuid);
+		switch (st) {
+		case DONE:
+			vMessageFileItem.setState(VMessageAbstractItem.STATE_FILE_SENT);
+			break;
+		case ERROR:
+			vMessageFileItem.setState(VMessageAbstractItem.STATE_FILE_SENT_FALIED);
+			break;
+		case CANCEL:
+			vMessageFileItem.setState(VMessageAbstractItem.STATE_FILE_SENDER_CANCEL);
+			break;
+		}
 		//Update database
-		MessageLoader.updateFileItemState(this, mMoniterMap.get(uuid));
+		MessageLoader.updateFileItemState(this, vMessageFileItem);
 		//remove cache
 		mMoniterMap.remove(uuid);
 		canQuit();
@@ -158,8 +168,6 @@ public class FileService extends Service {
 
 	class LocalFileObject {
 		ArrayList<FileInfoBean> mCheckedList;
-//		String uuid;
-//		String filePath;
 		long gid;
 
 		public LocalFileObject(ArrayList<FileInfoBean> mCheckedList, long gid) {
@@ -187,7 +195,7 @@ public class FileService extends Service {
 				LocalFileObject lfo = (LocalFileObject) msg.obj;
 				for (FileInfoBean bean : lfo.mCheckedList) {
 					if (bean == null || TextUtils.isEmpty(bean.filePath)){
-						V2Log.e("send upload file failed , beacuse FileInfoBean is null or filePath is empty");
+						V2Log.e("FileService START_UPLOAD_FILE ---> send upload file failed , beacuse FileInfoBean is null or filePath is empty");
 						continue;
 					}
 					//build VMessage Object and save in database.

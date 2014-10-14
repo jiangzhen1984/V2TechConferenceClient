@@ -18,6 +18,9 @@
      <color name="activiy_contact_detail_title_color">#000000</color>
      <color name="contacts_group_item_color">#444444</color>
      <color name="activiy_contact_detail_item_color">#444444</color>
+     <color name="activiy_contact_detail_item_content_color">#444444</color>
+     <color name="activiy_contact_item_color">#444444</color>
+     <color name="activiy_contact_item_content_color">#444444</color>
      
     
      <color name="contacts_user_view_item_color">#444444</color>

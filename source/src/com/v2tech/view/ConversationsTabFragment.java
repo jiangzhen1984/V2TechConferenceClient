@@ -118,6 +118,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 	private LocalHandler mHandler = new LocalHandler();
 
 	private boolean isLoadedCov = false;
+	private boolean isDepartmentLoaded = false;
 
 	private View rootView;
 
@@ -269,8 +270,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 						.addAction(PublicIntent.BROADCAST_NEW_CROWD_NOTIFICATION);
 				intentFilter
 						.addAction(PublicIntent.BROADCAST_CROWD_DELETED_NOTIFICATION);
-				intentFilter.addAction(
-							JNIService.JNI_BROADCAST_KICED_CROWD);
+				intentFilter.addAction(JNIService.JNI_BROADCAST_KICED_CROWD);
 				intentFilter.addAction(JNIService.JNI_BROADCAST_NEW_CROWD);
 				intentFilter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
 			}
@@ -605,22 +605,28 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 
 	private void populateConversation(List<Group> list) {
 		isLoadedCov = true;
+
+		if (!isDepartmentLoaded
+				&& mCurrentTabFlag == V2GlobalEnum.GROUP_TYPE_CROWD) {
+			isDepartmentLoaded = true;
+			// loading department conversation
+			List<DepartmentConversation> departs = ConversationProvider
+					.loadDepartConversation(mContext);
+			if (departs.size() <= 0)
+				V2Log.e(TAG, " Load depart group list failed...null");
+			else {
+				for (DepartmentConversation cons : departs) {
+					mConvList.add(cons);
+					V2Log.e(TAG, " Successfully Load depart group , id is : "
+							+ cons.getExtId());
+				}
+			}
+		}
+
 		if (list == null || list.size() <= 0) {
 			V2Log.w(" group list is null");
 			return;
 		}
-
-		// loading department conversation
-		// if (mCurrentTabFlag == V2GlobalEnum.GROUP_TYPE_CROWD) {
-		// List<DepartmentConversation> departs = ConversationProvider
-		// .loadDepartConversation(mContext);
-		// if (departs.size() == 0)
-		// V2Log.e(TAG,
-		// "populateConversation load departs list is null...");
-		// for (DepartmentConversation cons : departs) {
-		// this.mConvList.add(cons);
-		// }
-		// }
 
 		for (Group g : list) {
 			Conversation cov;
@@ -731,8 +737,8 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 				synchronized (ConversationsTabFragment.class) {
 					tempList = new ArrayList<Conversation>();
 					tempList = ConversationProvider.loadUserConversation(
-							mContext, tempList, mCurrentTabFlag,
-							verificationMessageItemData, voiceMessageItem);
+							mContext, tempList, verificationMessageItemData,
+							voiceMessageItem);
 					isLoadedCov = true;
 				}
 				Message.obtain(mHandler, UPDATE_CONVERSATION_MESSAGE)
@@ -911,16 +917,22 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 	 * @param groupID
 	 */
 	private void updateGroupConversation(int groupType, long groupID) {
-		Log.d(TAG, "update Conversation two param calling...");
-		if (!isLoadedCov) {
+		Log.d(TAG, "update Group Conversation calling...");
+		if (!isLoadedCov && mCurrentTabFlag == V2GlobalEnum.GROUP_TYPE_USER) {
 			this.loadUserConversation();
+		}
+		
+		if(groupType == V2GlobalEnum.GROUP_TYPE_DISCUSSION){
+			V2Log.e(TAG, "讨论组不接受");
+			return ;
 		}
 
 		VMessage vm = MessageLoader.getNewestGroupMessage(mContext, groupType,
 				groupID);
 		if (vm == null) {
-			V2Log.e("update group conversation failed.. Didn't find message "
-					+ groupID);
+			V2Log.e(TAG,
+					"update group conversation failed.. Didn't find message "
+							+ groupID);
 			return;
 		}
 
@@ -939,29 +951,74 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 		}
 
 		if (foundFlag) {
-			if (groupType == Conversation.TYPE_DEPARTMENT) {
 
-				Group department = GlobalHolder.getInstance().getGroupById(
-						groupType, groupID);
-				if (department != null) {
-					existedCov.setName(department.getName());
-					existedCov.setReadFlag(Conversation.READ_FLAG_READ);
+			Group group = GlobalHolder.getInstance().getGroupById(groupType,
+					groupID);
+			switch (mCurrentTabFlag) {
+			case V2GlobalEnum.GROUP_TYPE_USER:
+				if (group != null)
+					existedCov.setName(group.getName());
+				existedCov.setDate(vm.getDateTimeStr());
+				existedCov.setDateLong(String.valueOf(vm.getmDateLong()));
+				CharSequence newMessage = MessageUtil
+						.getMixedConversationContent(mContext, vm);
+				existedCov.setMsg(newMessage);
+				break;
+			case V2GlobalEnum.GROUP_TYPE_CROWD:
+				if (groupType == Conversation.TYPE_DEPARTMENT) {
+
+					if (group != null) {
+						existedCov.setName(group.getName());
+						existedCov.setReadFlag(Conversation.READ_FLAG_READ);
+					}
 				}
+				break;
+			default:
+				throw new RuntimeException(
+						"updateGroupConversation ---> invalid mCurrentTabFlag : "
+								+ mCurrentTabFlag);
 			}
 		} else {
 
-			switch (groupType) {
-			case V2GlobalEnum.GROUP_TYPE_DEPARTMENT:
-				Group department = GlobalHolder.getInstance().findGroupById(
-						groupID);
-				if (department == null) {
-					return;
+			switch (mCurrentTabFlag) {
+			case V2GlobalEnum.GROUP_TYPE_USER:
+				Group crowdGroup = GlobalHolder.getInstance().getGroupById(
+						groupType, groupID);
+				if (crowdGroup == null) {
+					V2Log.e(TAG,
+							"updateGroupConversation ---> get crowdGroup is null , id is :"
+									+ groupID);
+					crowdGroup = new CrowdGroup(groupID, null, null);
 				}
-				existedCov = new DepartmentConversation(department);
-				ConversationProvider.saveConversation(mContext, vm);
+				existedCov = new CrowdConversation(crowdGroup);
+				vm = MessageLoader.getNewestGroupMessage(mContext, groupType,
+						groupID);
+				if (vm != null) {
+					existedCov.setDate(vm.getDateTimeStr());
+					existedCov.setDateLong(String.valueOf(vm.getmDateLong()));
+					CharSequence newMessage = MessageUtil
+							.getMixedConversationContent(mContext, vm);
+					existedCov.setMsg(newMessage);
+					existedCov.setReadFlag(Conversation.READ_FLAG_UNREAD);
+				} else
+					V2Log.e(TAG,
+							"updateGroupConversation ---> get newest VMessage is null , update failed");
+				break;
+			case V2GlobalEnum.GROUP_TYPE_CROWD:
+				if (groupType == Conversation.TYPE_DEPARTMENT) {
+					Group department = GlobalHolder.getInstance()
+							.findGroupById(groupID);
+					if (department == null) {
+						return;
+					}
+					existedCov = new DepartmentConversation(department);
+					ConversationProvider.saveConversation(mContext, vm);
+				}
 				break;
 			default:
-				break;
+				throw new RuntimeException(
+						"updateGroupConversation ---> invalid mCurrentTabFlag : "
+								+ mCurrentTabFlag);
 			}
 			// 添加到ListView中
 			viewLayout = new GroupLayout(mContext, existedCov);
@@ -1125,7 +1182,12 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 					if (conversation.getType() != Conversation.TYPE_VOICE_MESSAGE
 							&& conversation.getType() != Conversation.TYPE_VERIFICATION_MESSAGE) {
 						ConversationProvider.deleteConversation(mContext,
-								mConvList.get(i));
+								conversation);
+					}
+				} else if (mCurrentTabFlag == V2GlobalEnum.GROUP_TYPE_CROWD) {
+					if (conversation.getType() == V2GlobalEnum.GROUP_TYPE_DEPARTMENT) {
+						ConversationProvider.deleteConversation(mContext,
+								conversation);
 					}
 				}
 				cache = mConvList.remove(i);
@@ -1510,10 +1572,14 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 					}
 					return;
 				}
-				if (mCurrentTabFlag == uao.getType()) {
+				//消息界面中，现在也要刷新群组聊天消息
+				if (mCurrentTabFlag == uao.getType()
+						|| (mCurrentTabFlag == V2GlobalEnum.GROUP_TYPE_USER && uao
+								.getType() == V2GlobalEnum.GROUP_TYPE_CROWD)) {
 					Message.obtain(mHandler, UPDATE_CONVERSATION, uao)
 							.sendToTarget();
 				}
+
 				// Update name of creator of conversation
 			} else if (JNIService.JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION
 					.equals(intent.getAction())) {
@@ -2038,21 +2104,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 				} else if (mCurrentTabFlag == Conversation.TYPE_GROUP) {
 					List<Group> gl = GlobalHolder.getInstance().getGroup(
 							Group.GroupType.CHATING.intValue());
-					if ((gl == null || gl.size() <= 0) && !isLoadedCov) {
-						// loading department conversation
-						List<DepartmentConversation> departs = ConversationProvider
-								.loadDepartConversation(mContext);
-						if (departs.size() == 0)
-							V2Log.e(TAG,
-									" FILL_CONFS_LIST load departs list is null...");
-						for (DepartmentConversation cons : departs) {
-							mConvList.add(cons);
-						}
-						fillAdapter(mConvList);
-						return;
-					}
-
-					if (!isLoadedCov) {
+					if (gl != null && gl.size() > 0 && !isLoadedCov) {
 						populateConversation(gl);
 					}
 				}
