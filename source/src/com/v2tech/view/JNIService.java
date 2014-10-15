@@ -699,6 +699,8 @@ public class JNIService extends Service {
 
 				boolean sendBroadcastFlag = true;
 				CrowdGroup cg = new CrowdGroup(group.id, group.name, owner);
+				cg.setAuthType(CrowdGroup.AuthType.fromInt(group.authType));
+				
 				VMessageQualification crowdMsg = MessageBuilder
 						.queryQualMessageByCrowdId(mContext, GlobalHolder
 								.getInstance().getCurrentUser(), cg);

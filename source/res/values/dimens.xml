@@ -14,7 +14,11 @@
     <dimen name="button_gap_horizontal">10dp</dimen>
     <dimen name="contact_detail_2_item_margin_left">5dp</dimen>
     <dimen name="contact_detail_2_item_margin_right">5dp</dimen>
-
+    
+    <!-- conversation view fragment  -->
+ 	<dimen name="text_margin_left">15dp</dimen>
+ 	<dimen name="date_time_max_width">130dp</dimen>
+ 
     <!-- login activity -->
     <dimen name="login_box_text_size">16sp</dimen>
     <dimen name="login_box_padding">10sp</dimen>

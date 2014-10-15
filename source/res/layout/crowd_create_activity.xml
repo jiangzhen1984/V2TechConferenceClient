@@ -178,7 +178,9 @@
                     android:inputType="text"
                     android:maxLength="50"
                     android:paddingBottom="5dp"
-                    android:paddingTop="5dp" >
+                    android:paddingTop="5dp"
+                    android:nextFocusForward="@null"
+                    android:nextFocusDown="@null" >
                      <requestFocus />
                 </EditText>
             </LinearLayout>

@@ -83,9 +83,16 @@ public class CrowdGroupService extends AbstractHandler {
 	public void createCrowdGroup(CrowdGroup crowd, List<User> invationUserList, Registrant caller) {
 		this.initTimeoutMessage(CREATE_GROUP_MESSAGE, DEFAULT_TIME_OUT_SECS,
 				caller);
+		StringBuffer sb = new StringBuffer();
+		sb.append("<userlist>");
+		for (User u : invationUserList) {
+			sb.append(" <user id=\"" + u.getmUserId() + "\" />");
+		}
+		sb.append("</userlist>");
+		
 		GroupRequest.getInstance().createGroup(
 				Group.GroupType.CHATING.intValue(), crowd.toXml(),
-				crowd.toGroupUserListXml());
+				sb.toString());
 
 	}
 
@@ -166,10 +173,10 @@ public class CrowdGroupService extends AbstractHandler {
 
 	/**
 	 * Decline join crowd invitation
-	 * 
+	 * @param reason
 	 * @param group
 	 */
-	public void refuseInvitation(Crowd crowd, Registrant caller) {
+	public void refuseInvitation(Crowd crowd, String reason, Registrant caller) {
 		if (!checkParamNull(caller, new Object[] { crowd })) {
 			return;
 		}
@@ -186,7 +193,7 @@ public class CrowdGroupService extends AbstractHandler {
 
 		GroupRequest.getInstance().refuseInviteJoinGroup(
 				Group.GroupType.CHATING.intValue(), crowd.getId(),
-				GlobalHolder.getInstance().getCurrentUserId(), "");
+				GlobalHolder.getInstance().getCurrentUserId(), reason == null?"":reason);
 
 		mPendingCrowdId = 0;
 		sendResult(caller, new JNIResponse(JNIResponse.Result.SUCCESS));

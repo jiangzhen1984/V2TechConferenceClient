@@ -8,6 +8,9 @@ import android.os.Handler;
 import android.os.Message;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import com.v2tech.R;
@@ -21,6 +24,7 @@ import com.v2tech.view.conversation.MessageBuilder;
 import com.v2tech.vo.Crowd;
 import com.v2tech.vo.CrowdConversation;
 import com.v2tech.vo.CrowdGroup;
+import com.v2tech.vo.CrowdGroup.AuthType;
 import com.v2tech.vo.Group;
 import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.VMessageQualification;
@@ -35,14 +39,17 @@ public class CrowdInvitationActivity extends Activity {
 	private TextView mCreatorTV;
 	private TextView mBriefTV;
 	private TextView mAnnounceTV;
-	
+
 	private View mReturnButton;
 	private View mAcceptButton;
 	private View mDeclineButton;
 	private View mButtonLayout;
 	private View mNotesLayout;
-	private View mSendMsgButton;
+	private TextView mSendMsgButton;
 	private TextView mNotesTV;
+	private EditText mReasonET;
+	private View mRejectResasonLayout;
+	private View mBoxLy;
 
 	private Context mContext;
 
@@ -50,46 +57,52 @@ public class CrowdInvitationActivity extends Activity {
 	private CrowdGroupService service = new CrowdGroupService();
 	private VMessageQualification vq;
 	private State mState = State.DONE;
+	private boolean isInRejectReasonMode = false;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		mContext = this;
-		
+
 		setContentView(R.layout.crowd_invitation_activity);
 		mNameTV = (TextView) findViewById(R.id.crowd_invitation_name);
 		mNoTV = (TextView) findViewById(R.id.crowd_invitation_crowd_no);
 		mCreatorTV = (TextView) findViewById(R.id.crowd_invitation_creator_tv);
 		mBriefTV = (TextView) findViewById(R.id.crowd_invitation_brief);
 		mAnnounceTV = (TextView) findViewById(R.id.crowd_invitation_announcement);
-		
-		
+
 		mAcceptButton = findViewById(R.id.crowd_invitation_accept_button);
 		mAcceptButton.setOnClickListener(mAcceptButtonListener);
 		mDeclineButton = findViewById(R.id.crowd_invitation_decline_button);
 		mDeclineButton.setOnClickListener(mDeclineButtonListener);
 		mReturnButton = findViewById(R.id.crowd_invitation_return_button);
 		mReturnButton.setOnClickListener(mReturnButtonListener);
-		mSendMsgButton= findViewById(R.id.crowd_invitation_send_msg_button);
+		mSendMsgButton = (TextView) findViewById(R.id.crowd_invitation_send_msg_button);
 		mSendMsgButton.setOnClickListener(mSendMsgButtonListener);
-		
+
 		mButtonLayout = findViewById(R.id.crowd_invitation_button_ly);
 		mNotesLayout = findViewById(R.id.crowd_invitation_notes_ly);
 		mNotesTV = (TextView) findViewById(R.id.crowd_invitation_notes);
 
+		mRejectResasonLayout = findViewById(R.id.crowd_content_reject_reason_ly);
+		mBoxLy = findViewById(R.id.crowd_invitation_box_ly);
+		mReasonET = (EditText)findViewById(R.id.crowd_content_reject_reason_et);
+
 		crowd = (Crowd) getIntent().getExtras().get("crowd");
-		mNoTV.setText(crowd.getId()+"");
+		mNoTV.setText(crowd.getId() + "");
 		mNameTV.setText(crowd.getName());
 		mBriefTV.setText(crowd.getBrief());
 		mCreatorTV.setText(crowd.getCreator().getName());
 		mAnnounceTV.setText(crowd.getAnnounce());
-		
+
 		CrowdGroup g = new CrowdGroup(crowd.getId(), crowd.getName(),
 				crowd.getCreator(), null);
+		g.setAuthType(AuthType.fromInt(crowd.getAuth()));
 		vq = MessageBuilder.queryQualMessageByCrowdId(mContext, GlobalHolder
 				.getInstance().getCurrentUser(), g);
-		updateView();
+		updateView(false);
 
+		mRejectResasonLayout.setVisibility(View.GONE);
 
 	}
 
@@ -111,7 +124,7 @@ public class CrowdInvitationActivity extends Activity {
 		vq.setQualState(VMessageQualification.QualificationState.ACCEPTED);
 		MessageBuilder.updateQualicationMessage(mContext, vq);
 
-		updateView();
+		updateView(false);
 	}
 
 	private void handleDeclineDone() {
@@ -120,23 +133,60 @@ public class CrowdInvitationActivity extends Activity {
 		vq.setReadState(VMessageQualification.ReadState.READ);
 		vq.setQualState(VMessageQualification.QualificationState.REJECT);
 		MessageBuilder.updateQualicationMessage(mContext, vq);
-		updateView();
+		updateView(false);
 	}
 
-	private void updateView() {
-		if (vq.getQualState() == VMessageQualification.QualificationState.ACCEPTED) {
-			mButtonLayout.setVisibility(View.GONE);
-			mNotesLayout.setVisibility(View.VISIBLE);
+	private void updateView(boolean isInReject) {
+		// view screen changed for rejection
+
+		if (isInReject) {
+			mBoxLy.setVisibility(View.GONE);
+			mRejectResasonLayout.setVisibility(View.VISIBLE);
 			mSendMsgButton.setVisibility(View.VISIBLE);
-			mNotesTV.setText(R.string.crowd_invitation_accept_notes);
-		} else if (vq.getQualState() == VMessageQualification.QualificationState.REJECT) {
+			mSendMsgButton
+					.setText(R.string.crowd_invitation_reject_button_done);
 			mButtonLayout.setVisibility(View.GONE);
-			mNotesLayout.setVisibility(View.VISIBLE);
-			mSendMsgButton.setVisibility(View.VISIBLE);
-			mNotesTV.setText(R.string.crowd_invitation_reject_notes);
 		} else {
-			mSendMsgButton.setVisibility(View.GONE);
+			if (vq.getQualState() == VMessageQualification.QualificationState.ACCEPTED) {
+				mButtonLayout.setVisibility(View.GONE);
+				mNotesLayout.setVisibility(View.VISIBLE);
+				mSendMsgButton.setVisibility(View.VISIBLE);
+				mNotesTV.setText(R.string.crowd_invitation_accept_notes);
+			} else if (vq.getQualState() == VMessageQualification.QualificationState.REJECT) {
+				mButtonLayout.setVisibility(View.GONE);
+				mNotesLayout.setVisibility(View.VISIBLE);
+				mSendMsgButton.setVisibility(View.GONE);
+				mNotesTV.setText(R.string.crowd_invitation_reject_notes);
+			} else {
+				mSendMsgButton.setVisibility(View.GONE);
+				mButtonLayout.setVisibility(View.VISIBLE);
+			}
+			mSendMsgButton
+					.setText(R.string.crowd_invitation_top_bar_right_button);
+			mBoxLy.setVisibility(View.VISIBLE);
+			mRejectResasonLayout.setVisibility(View.GONE);
 		}
+
+		if (isInRejectReasonMode != isInReject) {
+			if (isInReject) {
+				Animation out = AnimationUtils.loadAnimation(mContext,
+						R.animator.left_in);
+				mRejectResasonLayout.startAnimation(out);
+				Animation in = AnimationUtils.loadAnimation(mContext,
+						R.animator.left_out);
+				mBoxLy.startAnimation(in);
+			} else {
+				Animation out = AnimationUtils.loadAnimation(mContext,
+						R.animator.right_in);
+				mBoxLy.startAnimation(out);
+				Animation in = AnimationUtils.loadAnimation(mContext,
+						R.animator.right_out);
+				mRejectResasonLayout.startAnimation(in);
+			}
+
+			isInRejectReasonMode = isInReject;
+		}
+
 	}
 
 	private OnClickListener mAcceptButtonListener = new OnClickListener() {
@@ -159,13 +209,8 @@ public class CrowdInvitationActivity extends Activity {
 
 		@Override
 		public void onClick(View view) {
-			synchronized (mState) {
-				if (mState == State.UPDATING) {
-					return;
-				}
-				mState = State.UPDATING;
-				service.refuseInvitation(crowd, new Registrant(mLocalHandler,
-						REFUSE_INVITATION_DONE, null));
+			if (!isInRejectReasonMode) {
+				updateView(!isInRejectReasonMode);
 			}
 		}
 
@@ -175,22 +220,39 @@ public class CrowdInvitationActivity extends Activity {
 
 		@Override
 		public void onClick(View view) {
+			if (isInRejectReasonMode) {
+				updateView(!isInRejectReasonMode);
+				return;
+			}
 			onBackPressed();
 		}
 
 	};
-	
-	
+
 	private OnClickListener mSendMsgButtonListener = new OnClickListener() {
 
 		@Override
 		public void onClick(View view) {
-			Group group = GlobalHolder.getInstance().getGroupById(crowd.getId());
-			Intent i = new Intent(PublicIntent.START_CONVERSACTION_ACTIVITY);
-			i.addCategory(PublicIntent.DEFAULT_CATEGORY);
-			i.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-			i.putExtra("obj", new ConversationNotificationObject(new CrowdConversation(group)));
-			startActivity(i);
+			if (isInRejectReasonMode) {
+				synchronized (mState) {
+					if (mState == State.UPDATING) {
+						return;
+					}
+					mState = State.UPDATING;
+					service.refuseInvitation(crowd, mReasonET.getEditableText().toString(), new Registrant(
+							mLocalHandler, REFUSE_INVITATION_DONE, null));
+				}
+				return;
+			} else {
+				Group group = GlobalHolder.getInstance().getGroupById(
+						crowd.getId());
+				Intent i = new Intent(PublicIntent.START_CONVERSACTION_ACTIVITY);
+				i.addCategory(PublicIntent.DEFAULT_CATEGORY);
+				i.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+				i.putExtra("obj", new ConversationNotificationObject(
+						new CrowdConversation(group)));
+				startActivity(i);
+			}
 		}
 
 	};

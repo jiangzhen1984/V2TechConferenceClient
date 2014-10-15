@@ -428,6 +428,7 @@ public class CrowdFilesActivity extends Activity {
 			View mProgressParent;
 			ImageView mFailedIcon;
 			TextView mFileDeleteButton;
+			View mProgressLayout;
 		}
 
 		class Tag {
@@ -532,6 +533,9 @@ public class CrowdFilesActivity extends Activity {
 
 				item.mFailedIcon.setOnClickListener(mFailIconListener);
 				item.mFileButton.setOnClickListener(mButtonListener);
+				
+				item.mProgressLayout = convertView
+						.findViewById(R.id.crowd_file_item_progrss_ly);
 				convertView.setTag(tag);
 			} else {
 				tag = (Tag) convertView.getTag();
@@ -573,6 +577,7 @@ public class CrowdFilesActivity extends Activity {
 				item.mFailedIcon.setVisibility(View.GONE);
 				item.mFileText.setVisibility(View.GONE);
 				item.mFileButton.setVisibility(View.VISIBLE);
+				item.mProgressLayout.setVisibility(View.GONE);
 				break;
 			case UPLOADING:
 			case DOWNLOADING:
@@ -581,6 +586,7 @@ public class CrowdFilesActivity extends Activity {
 				item.mFileButton.setVisibility(View.VISIBLE);
 				item.mFailedIcon.setVisibility(View.GONE);
 				item.mFileText.setVisibility(View.GONE);
+				item.mProgressLayout.setVisibility(View.VISIBLE);
 				break;
 			case UPLOAD_PAUSE:
 			case DOWNLOAD_PAUSE:
@@ -589,6 +595,7 @@ public class CrowdFilesActivity extends Activity {
 				item.mFailedIcon.setVisibility(View.GONE);
 				item.mFileText.setVisibility(View.GONE);
 				item.mFileButton.setVisibility(View.VISIBLE);
+				item.mProgressLayout.setVisibility(View.VISIBLE);
 				break;
 			case DOWNLOADED:
 			case UPLOADED:
@@ -599,12 +606,14 @@ public class CrowdFilesActivity extends Activity {
 				item.mFileButton.setVisibility(View.GONE);
 				item.mFileProgress.setVisibility(View.GONE);
 				item.mFailedIcon.setVisibility(View.GONE);
+				item.mProgressLayout.setVisibility(View.GONE);
 				break;
 			case DOWNLOAD_FAILED:
 			case UPLOAD_FAILED:
 				item.mFailedIcon.setVisibility(View.VISIBLE);
 				item.mFileButton.setVisibility(View.GONE);
 				item.mFileText.setVisibility(View.GONE);
+				item.mProgressLayout.setVisibility(View.GONE);
 				break;
 			default:
 				break;

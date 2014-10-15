@@ -11,7 +11,6 @@
         android:layout_height="wrap_content"
         android:background="#ffffff" >
 
-        
         <TextView
             android:id="@+id/crowd_invitation_return_button"
             android:layout_width="wrap_content"
@@ -38,8 +37,7 @@
             android:text="@string/crowd_invitation_titile"
             android:textColor="@color/activiy_contact_detail_title_color"
             android:textSize="@dimen/common_item_text_size" />
-        
-        
+
         <TextView
             android:id="@+id/crowd_invitation_send_msg_button"
             android:layout_width="wrap_content"
@@ -110,12 +108,12 @@
                 android:textColor="@color/common_item_text_color" />
 
             <LinearLayout
+                android:id="@+id/crowd_invitation_button_ly"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"
-                android:layout_marginRight="@dimen/crowd_invitation_box_right_margin"
-                android:id="@+id/crowd_invitation_button_ly" >
+                android:layout_marginRight="@dimen/crowd_invitation_box_right_margin" >
 
                 <TextView
                     android:id="@+id/crowd_invitation_accept_button"
@@ -148,16 +146,15 @@
                     android:textColor="@color/button_text_color"
                     android:textSize="@dimen/common_item_text_size" />
             </LinearLayout>
-            
-            
+
             <LinearLayout
+                android:id="@+id/crowd_invitation_notes_ly"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"
                 android:layout_marginRight="@dimen/crowd_invitation_box_right_margin"
-                android:id="@+id/crowd_invitation_notes_ly"
-				android:visibility="gone">
+                android:visibility="gone" >
 
                 <TextView
                     android:id="@+id/crowd_invitation_notes"
@@ -174,10 +171,39 @@
                     android:textColor="@color/common_item_text_color"
                     android:textSize="@dimen/common_item_text_size" />
             </LinearLayout>
-            
         </RelativeLayout>
 
+  
+
+            <LinearLayout
+                android:id="@+id/crowd_content_reject_reason_ly"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/detail_detail_2_item_margin_bottom"
+                android:layout_marginLeft="@dimen/contact_detail_2_item_margin_left"
+                android:layout_marginRight="@dimen/contact_detail_2_item_margin_right"
+                android:layout_marginTop="25dp"
+                android:background="@drawable/rounded_corners_of_contact_user_detail_outer"
+                android:orientation="vertical" >
+
+                <EditText
+                    android:id="@+id/crowd_content_reject_reason_et"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@null"
+                    android:ems="10"
+                    android:enabled="true"
+                    android:gravity="top|left"
+                    android:lines="3"
+                    android:maxLength="500"
+                    android:padding="10dp"
+                    android:hint="@string/crowd_invitation_reject_hints"
+                    android:textColor="@color/activiy_contact_detail_item_color" >
+                </EditText>
+            </LinearLayout>
+
         <LinearLayout
+            android:id="@+id/crowd_invitation_box_ly"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="@dimen/detail_detail_2_item_margin_bottom"
@@ -186,7 +212,7 @@
             android:layout_marginTop="25dp"
             android:background="@drawable/rounded_corners_of_contact_user_detail_outer"
             android:orientation="vertical" >
-            
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -218,7 +244,7 @@
                     android:textColor="@color/activiy_contact_detail_item_color"
                     android:textSize="@dimen/common_item_text_size" />
             </LinearLayout>
-            
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="1dp"

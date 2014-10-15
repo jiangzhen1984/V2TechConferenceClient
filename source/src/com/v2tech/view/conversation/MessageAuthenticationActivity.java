@@ -3,26 +3,6 @@ package com.v2tech.view.conversation;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.v2tech.R;
-import com.v2tech.db.DataBaseContext;
-import com.v2tech.db.V2TechDBHelper;
-import com.v2tech.service.CrowdGroupService;
-import com.v2tech.service.GlobalHolder;
-import com.v2tech.view.JNIService;
-import com.v2tech.view.contacts.ContactDetail;
-import com.v2tech.view.contacts.ContactDetail2;
-import com.v2tech.view.contacts.add.AddFriendHistroysHandler;
-import com.v2tech.view.contacts.add.FriendManagementActivity;
-import com.v2tech.view.group.CrowdApplicantDetailActivity;
-import com.v2tech.vo.AddFriendHistorieNode;
-import com.v2tech.vo.Crowd;
-import com.v2tech.vo.CrowdGroup;
-import com.v2tech.vo.VMessageQualification;
-import com.v2tech.vo.VMessageQualificationApplicationCrowd;
-import com.v2tech.vo.VMessageQualificationInvitationCrowd;
-import com.v2tech.vo.VMessageQualification.QualificationState;
-import com.v2tech.vo.VMessageQualification.ReadState;
-
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -34,6 +14,8 @@ import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -51,6 +33,30 @@ import android.widget.ListView;
 import android.widget.RadioButton;
 import android.widget.TextView;
 
+import com.v2tech.R;
+import com.v2tech.db.DataBaseContext;
+import com.v2tech.db.V2TechDBHelper;
+import com.v2tech.service.CrowdGroupService;
+import com.v2tech.service.GlobalHolder;
+import com.v2tech.service.Registrant;
+import com.v2tech.service.jni.JNIResponse;
+import com.v2tech.view.JNIService;
+import com.v2tech.view.PublicIntent;
+import com.v2tech.view.contacts.ContactDetail;
+import com.v2tech.view.contacts.ContactDetail2;
+import com.v2tech.view.contacts.add.AddFriendHistroysHandler;
+import com.v2tech.view.contacts.add.FriendManagementActivity;
+import com.v2tech.view.group.CrowdApplicantDetailActivity;
+import com.v2tech.vo.AddFriendHistorieNode;
+import com.v2tech.vo.Crowd;
+import com.v2tech.vo.CrowdGroup;
+import com.v2tech.vo.Group.GroupType;
+import com.v2tech.vo.VMessageQualification;
+import com.v2tech.vo.VMessageQualification.QualificationState;
+import com.v2tech.vo.VMessageQualification.ReadState;
+import com.v2tech.vo.VMessageQualificationApplicationCrowd;
+import com.v2tech.vo.VMessageQualificationInvitationCrowd;
+
 /**
  * FIXME should combine two types of message, use one adapter for two.
  * 
@@ -58,6 +64,10 @@ import android.widget.TextView;
  * 
  */
 public class MessageAuthenticationActivity extends Activity {
+	
+	
+	private final static int ACCEPT_INVITATION_DONE = 1;
+	
 	public static final String tableName = "AddFriendHistories";
 	// R.id.message_authentication
 	private ListView lvMessageAuthentication;
@@ -121,10 +131,19 @@ public class MessageAuthenticationActivity extends Activity {
 
 			@Override
 			public void onClick(View arg0) {
-				firendAdapter.isDeleteMode = false;
-				firendAdapter.notifyDataSetChanged();
-				tvMessageBack.setVisibility(View.VISIBLE);
-				tvCompleteRight.setVisibility(View.INVISIBLE);
+				if (isGroupInDeleteMode) {
+					isGroupInDeleteMode = false;
+					tvCompleteRight.setVisibility(View.GONE);
+					rbGroupAuthentication.setEnabled(true);
+					rbFriendAuthentication.setEnabled(true);
+					
+					groupAdapter.notifyDataSetChanged();
+				} else {
+					firendAdapter.isDeleteMode = false;
+					firendAdapter.notifyDataSetChanged();
+					tvMessageBack.setVisibility(View.VISIBLE);
+					tvCompleteRight.setVisibility(View.INVISIBLE);
+				}
 			}
 		});
 		rbFriendAuthentication
@@ -207,6 +226,7 @@ public class MessageAuthenticationActivity extends Activity {
 										.getOwnerUser(), imsg.getCrowdGroup()
 										.getName(), imsg.getCrowdGroup()
 										.getBrief());
+								crowd.setAuth(imsg.getCrowdGroup().getAuthType().intValue());
 								Intent i = new Intent(
 										JNIService.JNI_BROADCAST_CROWD_INVATITION);
 								i.addCategory(JNIService.JNI_ACTIVITY_CATEGROY);
@@ -242,7 +262,10 @@ public class MessageAuthenticationActivity extends Activity {
 							isGroupInDeleteMode = true;
 							//Group item 
 							mMessageList.get(position).showLeftDeleteButton = true;
+							tvCompleteRight.setVisibility(View.VISIBLE);
 							groupAdapter.notifyDataSetChanged();
+							rbGroupAuthentication.setEnabled(false);
+							rbFriendAuthentication.setEnabled(false);
 							return true;
 						}
 						return false;
@@ -436,6 +459,9 @@ public class MessageAuthenticationActivity extends Activity {
 			tvCompleteRight.setVisibility(View.INVISIBLE);
 		} else if (isGroupInDeleteMode && !isFriendAuthentication){
 			isGroupInDeleteMode = false;
+			rbGroupAuthentication.setEnabled(true);
+			rbFriendAuthentication.setEnabled(true);
+			tvCompleteRight.setVisibility(View.INVISIBLE);
 			this.groupAdapter.notifyDataSetChanged();
 		} else {
 			super.onBackPressed();
@@ -732,7 +758,8 @@ public class MessageAuthenticationActivity extends Activity {
 				item = (ViewItem) convertView.getTag();
 			}
 			updateViewItem(mMessageList.get(position), item);
-
+			convertView.invalidate();
+			
 			return convertView;
 		}
 
@@ -777,10 +804,11 @@ public class MessageAuthenticationActivity extends Activity {
 
 			}
 
-			if (wrapper.showLeftDeleteButton && isGroupInDeleteMode) {
+			if (isGroupInDeleteMode) {
 				item.mDeleteHintButton.setVisibility(View.VISIBLE);
 			} else {
 				item.mDeleteHintButton.setVisibility(View.GONE);
+				wrapper.showDeleteButton = false;
 			}
 
 			//Show delete button and hide commoand button
@@ -857,7 +885,7 @@ public class MessageAuthenticationActivity extends Activity {
 							.getCrowdGroup();
 					Crowd crowd = new Crowd(cg.getmGId(), cg.getOwnerUser(),
 							cg.getName(), cg.getBrief());
-					crowdService.acceptInvitation(crowd, null);
+					crowdService.acceptInvitation(crowd, new Registrant(mLocalHandler, ACCEPT_INVITATION_DONE, cg));
 
 				} else if (msg.getType() == VMessageQualification.Type.CROWD_APPLICATION) {
 					VMessageQualificationApplicationCrowd vqac = ((VMessageQualificationApplicationCrowd) msg);
@@ -875,6 +903,30 @@ public class MessageAuthenticationActivity extends Activity {
 		};
 
 	}
+	
+	
+	private void handleAcceptDone(CrowdGroup cg) {
+		if (cg == null) {
+			return;
+		}
+		VMessageQualification vq = MessageBuilder.queryQualMessageByCrowdId(mContext, GlobalHolder
+				.getInstance().getCurrentUser(), cg);
+		
+		GlobalHolder.getInstance().addGroupToList(GroupType.CHATING.intValue(),
+				cg);
+		
+		Intent i = new Intent();
+		i.setAction(PublicIntent.BROADCAST_NEW_CROWD_NOTIFICATION);
+		i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
+		i.putExtra("crowd", cg.getmGId());
+		sendBroadcast(i);
+
+		vq.setReadState(VMessageQualification.ReadState.READ);
+		vq.setQualState(VMessageQualification.QualificationState.ACCEPTED);
+		MessageBuilder.updateQualicationMessage(mContext, vq);
+
+	}
+	
 
 	class CrowdAuthenticationBroadcastReceiver extends BroadcastReceiver {
 
@@ -906,5 +958,20 @@ public class MessageAuthenticationActivity extends Activity {
 		}
 
 	}
+	
+	
+	private Handler mLocalHandler = new Handler() {
+
+		@Override
+		public void handleMessage(Message msg) {
+			switch (msg.what) {
+			case ACCEPT_INVITATION_DONE:
+				JNIResponse jni =(JNIResponse) msg.obj;
+				handleAcceptDone((CrowdGroup) jni.callerObject);
+				break;
+			}
+		}
+
+	};
 
 }
