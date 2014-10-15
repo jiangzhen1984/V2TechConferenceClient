@@ -104,6 +104,7 @@
                 android:gravity="top"
                 android:maxWidth="@dimen/detail_detail_name_max_width"
                 android:singleLine="true"
+                android:textSize="@dimen/common_item_text_size"
                 android:text="TextView"
                 android:textColor="@color/common_item_text_color" />
 

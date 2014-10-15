@@ -181,12 +181,11 @@ public class GroupRequest {
 
 	/**
 	 * accept application of join group
-	 * 
 	 * @param groupType
-	 * @param sGroupInfo
+	 * @param nGroupID
 	 * @param nUserID
 	 */
-	public native void acceptApplyJoinGroup(int groupType, String sGroupInfo,
+	public native void acceptApplyJoinGroup(int groupType, long nGroupID,
 			long nUserID);
 
 	/**
@@ -240,7 +239,7 @@ public class GroupRequest {
 	 */
 	private void OnAcceptInviteJoinGroup(int groupType, long groupId,
 			long nUserID) {
-		V2Log.e("Group Request  OnAcceptInviteJoinGroup  ==>" + groupType
+		V2Log.d("Group Request  OnAcceptInviteJoinGroup  ==>" + groupType
 				+ "   " + groupId + "  " + nUserID);
 		for (WeakReference<GroupRequestCallback> wrcb : mCallbacks) {
 			Object obj = wrcb.get();
@@ -263,10 +262,25 @@ public class GroupRequest {
 	 * @param nUserID
 	 * @param sReason
 	 */
-	public native void refuseApplyJoinGroup(int groupType, String sGroupInfo,
+	public native void refuseApplyJoinGroup(int groupType, long nGroupId,
 			long nUserID, String sReason);
 
+	/**
+	 * Upload group file
+	 * @param groupType
+	 * @param nGroupId
+	 * @param sXml
+	 */
 	public native void groupUploadFile(int groupType, long nGroupId, String sXml);
+	
+	/**
+	 * Upload existing files on server to group 从服务器已有的文件上传到组中
+	 * @param groupType
+	 * @param nGroupId
+	 * @param sFileID
+	 * @param sFileInfo
+	 */
+	public native void groupUploadFileFromServer(int groupType, long nGroupId, String sFileID , String sFileInfo);
 
 	/**
 	 * Delete group files<br>
@@ -293,6 +307,14 @@ public class GroupRequest {
 	public native void renameGroupFile(int eGroupType, long nGroupID,
 			String sFileID, String sNewName);
 
+	/**
+	 * search group 搜索组
+	 * @param eGroupType
+	 * @param szUnsharpName
+	 * @param nStartNum
+	 * @param nSearchNum
+	 */
+	public native void SearchGroup(int eGroupType, String szUnsharpName, int nStartNum, int nSearchNum);
 	/**
 	 * 
 	 * @param eGroupType
@@ -595,6 +617,13 @@ public class GroupRequest {
 		}
 	}
 
+	/**
+	 * The CallBack that invited join group from other
+	 * @param groupType
+	 * @param groupInfo
+	 * @param userInfo
+	 * @param additInfo
+	 */
 	private void OnInviteJoinGroup(int groupType, String groupInfo,
 			String userInfo, String additInfo) {
 		V2Log.d("OnInviteJoinGroup::==>" + groupType + ":" + groupInfo + ":"
@@ -634,7 +663,8 @@ public class GroupRequest {
 					"authtype='", "'");
 			String uname = XmlAttributeExtractor.extract(userInfo,
 					"nickname='", "'");
-			uname = HeartCharacterProcessing.reverse(uname);
+			if(!TextUtils.isEmpty(uname))
+				uname = HeartCharacterProcessing.reverse(uname);
 			String name = XmlAttributeExtractor.extract(groupInfo, "name='",
 					"'");
 			name = HeartCharacterProcessing.reverse(name);
@@ -769,11 +799,29 @@ public class GroupRequest {
 		}
 	}
 
+	/**
+	 * The CallBack that refuse apply for join group 拒绝申请加入群回调
+	 * @param groupType
+	 * @param sGroupInfo
+	 * @param reason
+	 */
 	private void OnRefuseApplyJoinGroup(int groupType, String sGroupInfo,
 			String reason) {
-		V2Log.d("OnRefuseApplyJoinGroup ==>" + "groupType:" + groupType + ","
+		V2Log.e("OnRefuseApplyJoinGroup ==>" + "groupType:" + groupType + ","
 				+ "sGroupInfo:" + sGroupInfo + "," + "reason:" + reason);
 	}
+	
+	/**
+	 * The CallBack that join group failed 加入群失败（如群已经被删除等）
+	 * @param eGroupType
+	 * @param nGroupID
+	 * @param nErrorNo
+	 */
+	private void OnJoinGroupError(int eGroupType, long nGroupID, int nErrorNo){
+		V2Log.e("GroupRequest UI", "OnJoinGroupError ---> eGroupType :"
+				+ eGroupType + " | nGroupID: " + nGroupID + " | nErrorNo: "
+				+ nErrorNo);
+	};
 
 	/**
 	 * 会议中创建白板的回调 TODO implement
@@ -835,5 +883,27 @@ public class GroupRequest {
 				+ szWBoardID + " | szFileName: " + szFileName
 				+ " | eWhiteShowType: " + eWhiteShowType);
 	};
-
+	
+	
+	/**
+	 * the CallBack after invoked search group  搜索群组回调
+	 * @param eGroupType
+	 * @param InfoXml
+	 */
+	private void onSearchGroup(int eGroupType, String InfoXml){
+		V2Log.e("GroupRequest UI", "onSearchGroup ---> eGroupType :"
+				+ eGroupType + " | InfoXml: " + InfoXml);
+	}
+	
+	
+	/**
+	 * administrator was removed from group by himself administrator 管理员把自己从组中请出
+	 * @param eGroupType
+	 * @param nGroupID
+	 * @param nUserID
+	 */
+	private void OnKickGroupUser(int eGroupType, long nGroupID, long nUserID){
+		V2Log.e("GroupRequest UI", "OnKickGroupUser ---> eGroupType :"
+				+ eGroupType + " | nGroupID: " + nGroupID + " | nUserID: " + nUserID);
+	}
 }

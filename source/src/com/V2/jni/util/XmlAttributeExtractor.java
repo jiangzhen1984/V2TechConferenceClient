@@ -14,6 +14,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
+import android.text.TextUtils;
+
 import com.V2.jni.ind.FileJNIObject;
 import com.V2.jni.ind.V2Group;
 import com.V2.jni.ind.V2User;
@@ -112,6 +114,12 @@ public class XmlAttributeExtractor {
 						crowdElement.getAttribute("creatornickname"));
 			}
 
+			String id = crowdElement.getAttribute("id");
+			if(TextUtils.isEmpty(id)){
+				V2Log.e("parseCrowd the id is wroing...break");
+				continue;
+			}
+			
 			if (crowdElement.getAttribute("name") == null)
 				V2Log.e("parseCrowd the name is wroing...the group is :"
 						+ crowdElement.getAttribute("id"));

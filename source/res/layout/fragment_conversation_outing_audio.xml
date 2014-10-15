@@ -126,9 +126,8 @@
                         android:layout_height="wrap_content"
                         android:gravity="center"
                         android:src="@drawable/conversation_connected_cancel_button" />
-
                     <TextView
-                         android:id="@+id/conversation_fragment_connected_audio_hang_up_button_text"
+                        android:id="@+id/conversation_fragment_connected_audio_hang_up_button_text"
                         android:layout_width="fill_parent"
                         android:layout_height="wrap_content"
                         android:gravity="center"

@@ -108,6 +108,9 @@ public class GlobalHolder {
 				if (u.getBirthday() != null) {
 					cu.setBirthday(u.getBirthday());
 				}
+				if (u.getmStringBirthday() != null) {
+					cu.setmStringBirthday(u.getmStringBirthday());
+				}
 				if(u.getmEmail()!=null){
 					cu.setEmail(u.getmEmail());
 				}

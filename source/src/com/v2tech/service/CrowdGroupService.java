@@ -117,7 +117,7 @@ public class CrowdGroupService extends AbstractHandler {
 				caller);
 
 		GroupRequest.getInstance().acceptApplyJoinGroup(
-				Group.GroupType.CHATING.intValue(), crowd.toXml(),
+				Group.GroupType.CHATING.intValue(), crowd.getmGId(),
 				GlobalHolder.getInstance().getCurrentUserId());
 	}
 
@@ -139,7 +139,7 @@ public class CrowdGroupService extends AbstractHandler {
 				caller);
 
 		GroupRequest.getInstance().refuseApplyJoinGroup(
-				Group.GroupType.CHATING.intValue(), crowd.toXml(),
+				Group.GroupType.CHATING.intValue(), crowd.getmGId(),
 				applicant.getmUserId(), reason);
 	}
 

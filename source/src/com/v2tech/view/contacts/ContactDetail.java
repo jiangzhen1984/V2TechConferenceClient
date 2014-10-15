@@ -264,6 +264,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 		} else {
 			bAccess.setVisibility(View.GONE);
 			bRefuse.setVisibility(View.GONE);
+			mCompanyTitleTV.setVisibility(View.VISIBLE);
 			mMoreDetailButton.setVisibility(View.VISIBLE);
 			llAuthenticationMessageLayout.setVisibility(View.GONE);
 		}

@@ -712,7 +712,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 					.getNewestMediaMessage(mContext);
 			if (newestMediaMessage != null) {
 				initVoiceItem();
-				updateVoiceSpecificItemState(true);
+				updateVoiceSpecificItemState(true , newestMediaMessage);
 			}
 			// init add friend verification item
 			switch (isHaveVerificationMessage()) {
@@ -857,10 +857,8 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 	 * 
 	 * @param isFromDatabase
 	 */
-	private void updateVoiceSpecificItemState(boolean isFromDatabase) {
+	private void updateVoiceSpecificItemState(boolean isFromDatabase , VideoBean newestMediaMessage) {
 
-		VideoBean newestMediaMessage = MessageLoader
-				.getNewestMediaMessage(mContext);
 		if (newestMediaMessage != null && newestMediaMessage.startDate != 0) {
 			String startDate = DateUtil
 					.getStringDate(newestMediaMessage.startDate);
@@ -1714,7 +1712,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 					if (voiceLayout == null || voiceMessageItem == null)
 						initVoiceItem();
 
-					updateVoiceSpecificItemState(false);
+					updateVoiceSpecificItemState(false , newestMediaMessage);
 
 					mItemList.remove(voiceItem);
 					mConvList.remove(voiceMessageItem);

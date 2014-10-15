@@ -826,8 +826,9 @@ public class MessageBuilder {
 			return null;
 		
 		while (cursor.moveToNext()) {
-			list.add(extraMsgFromCursor(cursor));
-			
+			VMessageQualification qualification = extraMsgFromCursor(cursor);
+			if(qualification != null)
+				list.add(qualification);
 		}
 		cursor.close();
 		return list;
@@ -841,9 +842,14 @@ public class MessageBuilder {
 	 */
 	public static VMessageQualification extraMsgFromCursor(Cursor cursor) {
 		String xml = cursor.getString(cursor.getColumnIndex("CrowdXml"));
+		if(TextUtils.isEmpty(xml)){
+			V2Log.e("MessageBuilder extraMsgFromCursor -->pase the CrowdXml failed.. XML is null");
+			return null;
+		}
+		
 		V2Group v2Group = XmlAttributeExtractor.parseCrowd(xml).get(0);
 		if (v2Group == null || v2Group.creator == null) {
-			V2Log.e("pase the CrowdXml failed..");
+			V2Log.e("MessageBuilder extraMsgFromCursor --> pase the CrowdXml failed..v2Group or v2Group.createor is null");
 			return null;
 		}
 		

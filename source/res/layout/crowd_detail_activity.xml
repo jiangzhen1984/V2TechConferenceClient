@@ -90,6 +90,7 @@
                     android:maxWidth="@dimen/detail_detail_name_max_width"
                     android:singleLine="true"
                     android:text="TextView"
+                    android:textSize="@dimen/common_item_text_size"
                     android:textColor="@color/activiy_contact_detail_item_color" />
             </RelativeLayout>
 
@@ -413,7 +414,7 @@
                                 android:tag="0"
                                 android:text="@string/crowd_detail_qulification_rule_no_rule"
                                 android:textColor="@color/activiy_contact_detail_item_color"
-                                android:textSize="@dimen/common_item_text_size_16" />
+                                android:textSize="@dimen/common_item_text_size_20" />
 
                             <LinearLayout
                                 android:layout_width="match_parent"
@@ -433,7 +434,7 @@
                                 android:tag="1"
                                 android:text="@string/crowd_detail_qulification_rule_qulification"
                                 android:textColor="@color/activiy_contact_detail_item_color"
-                                android:textSize="@dimen/common_item_text_size_16" />
+                                android:textSize="@dimen/common_item_text_size_20" />
 
                             <LinearLayout
                                 android:layout_width="match_parent"
@@ -453,7 +454,7 @@
                                 android:tag="2"
                                 android:text="@string/crowd_detail_qulification_rule_never"
                                 android:textColor="@color/activiy_contact_detail_item_color"
-                                android:textSize="@dimen/common_item_text_size_16" />
+                                android:textSize="@dimen/common_item_text_size_20" />
                         </RadioGroup>
                     </LinearLayout>
                 </LinearLayout>

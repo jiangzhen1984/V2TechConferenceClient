@@ -50,6 +50,7 @@ public class User implements Comparable<User> {
 	private String mAddress;
 	private int mAuthtype = 0;// 取值0允许任何人，1需要验证，2不允许任何人
 	private Date mBirthday;
+	private String mStringBirthday;
 	// bsystemavatar='1'
 	private String mEmail;
 	private String mFax;
@@ -278,10 +279,18 @@ public class User implements Comparable<User> {
 			DateFormat sd = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
 			return sd.format(mBirthday);
 		} else {
-			return "";
+			return mStringBirthday;
 		}
 	}
+	
+	public String getmStringBirthday() {
+		return mStringBirthday;
+	}
 
+	public void setmStringBirthday(String mStringBirthday) {
+		this.mStringBirthday = mStringBirthday;
+	}
+	
 	public void setBirthday(Date mBirthday) {
 		this.mBirthday = mBirthday;
 	}
@@ -522,7 +531,8 @@ public class User implements Comparable<User> {
 
 				u.setEmail(getAttribute(element, "email"));
 				u.setAddress(getAttribute(element, "address"));
-
+				u.setmStringBirthday(getAttribute(element , "birthday"));
+				
 				String authType = getAttribute(element, "authtype");
 				if (authType == null) {
 					u.setAuthtype(0);

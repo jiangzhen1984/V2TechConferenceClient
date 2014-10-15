@@ -86,7 +86,6 @@
                     android:focusable="true"
                     android:focusableInTouchMode="true"
                     android:marqueeRepeatLimit="marquee_forever"
-                    android:maxWidth="@dimen/detail_detail_name_max_width"
                     android:singleLine="true"
                     android:text="TextView"
                     android:textColor="@color/activiy_contact_detail_item_color"
@@ -97,6 +96,7 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentBottom="true"
                     android:ellipsize="marquee"
+                    android:marqueeRepeatLimit="marquee_forever"
                     android:singleLine="true"
                     android:text="TextView"
                     android:textColor="@color/common_item_text_color" />

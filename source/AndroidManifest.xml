@@ -142,6 +142,7 @@
         <activity
             android:name="com.v2tech.view.conversation.P2PConversation"
             android:launchMode="singleTop"
+            android:configChanges="orientation|screenSize"
             android:screenOrientation="nosensor" >
             <intent-filter>
                 <action android:name="com.v2tech.start_p2p_conversation_activity" />
