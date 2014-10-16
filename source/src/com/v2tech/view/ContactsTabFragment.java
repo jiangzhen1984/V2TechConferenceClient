@@ -9,6 +9,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.Rect;
+import android.graphics.drawable.ColorDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -18,10 +21,16 @@ import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.LinearLayout.LayoutParams;
+import android.widget.PopupWindow;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.V2.jni.V2GlobalEnum;
 import com.v2tech.R;
@@ -133,7 +142,7 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 
 	@Override
 	public void onStop() {
-		mLoaded=false;
+		mLoaded = false;
 		super.onStop();
 	}
 
@@ -284,6 +293,79 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 
 	}
 
+	
+	
+	
+	private PopupWindow mPopup;
+	
+	private void initPopupWindow() {
+		LayoutInflater inflater = (LayoutInflater) this.getActivity()
+				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		RelativeLayout popWindow = (RelativeLayout) inflater.inflate(
+				R.layout.pop_up_window_group_list_view, null);
+		mPopup = new PopupWindow(popWindow, LayoutParams.WRAP_CONTENT,
+				LayoutParams.WRAP_CONTENT, true);
+		mPopup.setFocusable(true);
+		mPopup.setTouchable(true);
+		mPopup.setOutsideTouchable(true);
+		TextView tvItem = (TextView) popWindow
+				.findViewById(R.id.pop_up_window_item);
+	
+		tvItem.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				
+				Intent i = new Intent();
+				i.setClass(mContext, ContactsGroupActivity.class);
+				i.addCategory(PublicIntent.DEFAULT_CATEGORY);
+				startActivity(i);
+				
+				mPopup.dismiss();
+			}
+			
+		});
+		
+	}
+	
+	
+	private void showPopupWindow(final View anchor) {
+
+		if (!anchor.isShown()) {
+			return;
+		}
+		
+		if (this.mPopup == null) {
+			initPopupWindow();
+		}
+		
+		if (mPopup.getContentView().getWidth() <= 0) {
+			mPopup.getContentView().measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
+		}
+		int popupWindowWidth = mPopup.getContentView().getMeasuredWidth();
+		int popupWindowHeight = mPopup.getContentView().getMeasuredHeight();
+		
+		
+		mPopup.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+		
+		int viewWidth = anchor.getMeasuredWidth();
+		int viewHeight = anchor.getMeasuredHeight();
+		int offsetX = (viewWidth - popupWindowWidth) / 2;
+		int offsetY = (viewHeight + popupWindowHeight);
+
+		int[] location = new int[2];
+		anchor.getLocationInWindow(location);
+		// if (location[1] <= 0) {
+		Rect r = new Rect();
+		anchor.getDrawingRect(r);
+		Rect r1 = new Rect();
+		anchor.getGlobalVisibleRect(r1);
+		int offsetXLocation = r1.left + offsetX;
+		int offsetYLocation = r1.top - (offsetY / 2);
+		mPopup.showAtLocation((View) anchor.getParent(), Gravity.NO_GRAVITY,
+				offsetXLocation, offsetYLocation);
+	}
+
 	@Override
 	public void afterTextChanged(Editable s) {
 		if (TextUtils.isEmpty(s.toString()) && mContactsContainer != null) {
@@ -320,10 +402,7 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 		public boolean onItemLongClick(AdapterView<?> parent, View view,
 				int position, long id, Item item) {
 			if (flag == TAG_CONTACT && item.getObject() instanceof Group) {
-				Intent i = new Intent();
-				i.setClass(mContext, ContactsGroupActivity.class);
-				i.addCategory(PublicIntent.DEFAULT_CATEGORY);
-				startActivity(i);
+				showPopupWindow(view);
 				return true;
 			}
 			return false;
@@ -354,7 +433,7 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 				fillContactsGroup();
 				break;
 			case UPDATE_GROUP_STATUS:
-				//Just notify group statist information
+				// Just notify group statist information
 				mContactsContainer.notifiyDataSetChanged();
 				break;
 			case UPDATE_USER_STATUS:

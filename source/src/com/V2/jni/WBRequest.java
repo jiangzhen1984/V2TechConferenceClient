@@ -177,6 +177,19 @@ public class WBRequest {
 			}
 		}
 	}
+	
+	
+	private void OnWBoardDetroy(int groupType, long nGroupID,
+			String szWBoardID) {
+		Log.e("WBRequest UI", "OnWBoardDetroy " + nGroupID + " "
+				+ groupType + " " + szWBoardID);
+		for (WeakReference<WBRequestCallback> wr : mCallbacks) {
+			if (wr != null && wr.get() != null) {
+				wr.get().OnWBoardClosedCallback(nGroupID, 0, 0,
+						szWBoardID);
+			}
+		}
+	}
 
 	private void OnRecvChangeWBoardData(String szWBoardID, int nPageID,
 			String szDataID, String szData) {

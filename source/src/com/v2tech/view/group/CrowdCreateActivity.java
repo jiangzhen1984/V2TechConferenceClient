@@ -220,7 +220,10 @@ public class CrowdCreateActivity extends Activity {
 		if (u.isCurrentLoggedInUser()) {
 			return;
 		}
-		mUserList.add(u);
+		boolean ret = mUserList.add(u);
+		if (!ret) {
+			return;
+		}
 
 		View v = null;
 		if (landLayout == PAD_LAYOUT) {

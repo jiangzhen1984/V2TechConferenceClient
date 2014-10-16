@@ -6,6 +6,9 @@
     <string name="contact_message_copy_message">已复制</string>
     <string name="contact_message_pop_up_item_copy">复制</string>
     <string name="contact_message_pop_up_item_del">删除</string>
+    <string name="contact_message_pop_up_item_contact_management">分组管理</string>
+    <string name="contact_message_pop_up_item_crowd_management">群组管理</string>
+    
     <string name="contact_message_pop_up_item_resend">重新发送</string>
     <string name="contact_message_pop_up_item_redownload">重新下载</string>
     <string name="error_contact_messag_invalid_user_id">错误的用户id</string>

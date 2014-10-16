@@ -433,7 +433,7 @@ public class CrowdGroupService extends AbstractHandler {
 					vf.getPath(), 0, 1);
 			break;
 		case OPERATION_CANCEL_DOWNLOADING:
-			FileRequest.getInstance().cancelRecvFile(vf.getId(), 1);
+			FileRequest.getInstance().cancelHttpRecvFile(vf.getId(), 1);
 			break;
 		case OPERATION_CANCEL_SENDING:
 			FileRequest.getInstance().cancelSendFile(vf.getId(), 1);

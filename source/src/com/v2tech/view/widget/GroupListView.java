@@ -297,6 +297,10 @@ public class GroupListView extends ListView {
 		}
 	}
 
+	/**
+	 * 
+	 * @param user
+	 */
 	public void selectUser(User user) {
 		if (user == null) {
 			return;
@@ -342,7 +346,8 @@ public class GroupListView extends ListView {
 		// FIXME optimze for avatar
 		adapter.notifyDataSetChanged();
 	}
-
+	
+	
 	/**
 	 * Update user item check status according to flag
 	 * 

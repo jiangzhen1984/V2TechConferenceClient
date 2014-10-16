@@ -180,7 +180,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 			Attendee at = atList.get(index);
 			if (at.getType() != Attendee.TYPE_MIXED_VIDEO
 					&& !TextUtils.isEmpty(at.getAttName())) {
-				configAttendee(at);
+				configAttendee(at, true);
 			}
 			List<UserDeviceConfig> dList = at.getmDevices();
 			int i = 0;
@@ -341,7 +341,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 				i++;
 			} while (dList != null && i < dList.size());
 
-			configAttendee(at);
+			configAttendee(at, true);
 
 		}
 		Collections.sort(mList);
@@ -381,7 +381,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 			}
 		}
 
-		configAttendee(at);
+		configAttendee(at, false);
 		// TODO update device count and mixed video
 
 		Collections.sort(mList);
@@ -463,7 +463,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 	 * @param at
 	 */
 	public void removeAttendee(Attendee at) {
-		configAttendee(at);
+		//TODO update attendee count
 		for (int i = 0; i < mList.size(); i++) {
 			Wrapper wr = mList.get(i);
 			// Remove attendee devices, leave one device item
@@ -848,12 +848,14 @@ public class VideoAttendeeListLayout extends LinearLayout {
 		}
 	}
 
-	private void configAttendee(Attendee at) {
+	private void configAttendee(Attendee at, boolean isNew) {
 		if (at == null) {
 			return;
 		}
 		if (at.getType() != Attendee.TYPE_MIXED_VIDEO) {
-				mAttendeeCount++;
+				if (isNew) {
+					mAttendeeCount++;
+				}
 			if ((at.isJoined() || at.isSelf())) {
 				onLinePersons++;
 			}

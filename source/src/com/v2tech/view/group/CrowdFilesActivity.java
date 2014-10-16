@@ -27,6 +27,7 @@ import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.V2.jni.util.V2Log;
 import com.v2tech.R;
@@ -48,6 +49,7 @@ import com.v2tech.vo.FileInfoBean;
 import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.VCrowdFile;
 import com.v2tech.vo.VFile;
+import com.v2tech.vo.VFile.State;
 import com.v2tech.vo.VMessageFileItem;
 
 public class CrowdFilesActivity extends Activity {
@@ -192,7 +194,7 @@ public class CrowdFilesActivity extends Activity {
 		for (VCrowdFile f : mUploadedFiles) {
 			mFileMap.put(f.getId(), f);
 		}
-			
+
 		service.fetchGroupFiles(crowd, new Registrant(mLocalHandler,
 				FETCH_FILES_DONE, null));
 	}
@@ -273,6 +275,14 @@ public class CrowdFilesActivity extends Activity {
 				if (mFiles.get(i).getId().equals(r.getId())) {
 					mFiles.remove(i);
 					i--;
+					V2Log.e(r.getState()+"");
+					service.handleCrowdFile(r,
+							FileOperationEnum.OPERATION_CANCEL_DOWNLOADING,
+							null);
+					Toast.makeText(mContext,
+							R.string.crowd_files_deleted_notification,
+							Toast.LENGTH_SHORT).show();
+
 					continue;
 				}
 			}
@@ -287,6 +297,11 @@ public class CrowdFilesActivity extends Activity {
 		for (int i = 0; i < mFiles.size(); i++) {
 			if (mFiles.get(i).getId().equals(file.getId())) {
 				mFiles.remove(i);
+				if (file.getState() == VCrowdFile.State.DOWNLOADING) {
+					service.handleCrowdFile(file,
+							FileOperationEnum.OPERATION_CANCEL_DOWNLOADING,
+							null);
+				}
 				break;
 			}
 		}
@@ -320,13 +335,13 @@ public class CrowdFilesActivity extends Activity {
 				adapter.notifyDataSetChanged();
 			} else {
 				showUploaded = true;
-				 mTitle.setText(R.string.crowd_files_title_uploaded);
-				 mShowUploadedFileButton.setVisibility(View.GONE);
-				 adapter.notifyDataSetChanged();
-//				Intent intent = new Intent(mContext,
-//						ConversationSelectFile.class);
-//				intent.putExtra("type", "crowdFile");
-//				startActivityForResult(intent, RECEIVE_SELECTED_FILE);
+				mTitle.setText(R.string.crowd_files_title_uploaded);
+				mShowUploadedFileButton.setVisibility(View.GONE);
+				adapter.notifyDataSetChanged();
+				// Intent intent = new Intent(mContext,
+				// ConversationSelectFile.class);
+				// intent.putExtra("type", "crowdFile");
+				// startActivityForResult(intent, RECEIVE_SELECTED_FILE);
 			}
 		}
 
@@ -373,9 +388,10 @@ public class CrowdFilesActivity extends Activity {
 				handleFileTransNotification(ind);
 				break;
 			case FILE_REMOVE_NOTIFICATION:
-				JNIResponse jni = (JNIResponse) msg.obj;
+				JNIResponse jni = (JNIResponse) ((AsyncResult) msg.obj)
+						.getResult();
 				if (jni.getResult() == JNIResponse.Result.SUCCESS) {
-					handleFileRemovedEvent(((RequestFetchGroupFilesResponse) msg.obj)
+					handleFileRemovedEvent(((RequestFetchGroupFilesResponse) jni)
 							.getList());
 				}
 				break;
@@ -533,7 +549,7 @@ public class CrowdFilesActivity extends Activity {
 
 				item.mFailedIcon.setOnClickListener(mFailIconListener);
 				item.mFileButton.setOnClickListener(mButtonListener);
-				
+
 				item.mProgressLayout = convertView
 						.findViewById(R.id.crowd_file_item_progrss_ly);
 				convertView.setTag(tag);

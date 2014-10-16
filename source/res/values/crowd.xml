@@ -58,6 +58,8 @@
     <string name="crowd_files_name_downloaded">已下载</string>
     <string name="crowd_files_name_uploaded">已上传</string>
     <string name="crowd_files_title_uploaded">上传文件</string>
+    <string name="crowd_files_deleted_notification">该文件已被删除！ 同时该文件被删除</string>
+    
     
     
     <string name="crowd_application_button_name">申请</string>

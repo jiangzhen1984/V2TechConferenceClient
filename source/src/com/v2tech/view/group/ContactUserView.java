@@ -80,17 +80,17 @@ public class ContactUserView extends LinearLayout {
 		mStatusIV = (ImageView) view.findViewById(R.id.contact_user_status_iv);
 		updateStatus(u.getmStatus());
 
-		this.setPadding((u.getFirstBelongsGroup() == null ? 2 : u
-				.getFirstBelongsGroup().getLevel() + 1) * 5, this
-				.getPaddingTop(), this.getPaddingRight(), this
-				.getPaddingRight());
+//		this.setPadding((u.getFirstBelongsGroup() == null ? 2 : u
+//				.getFirstBelongsGroup().getLevel() + 1) * 5, this
+//				.getPaddingTop(), this.getPaddingRight(), this
+//				.getPaddingRight());
 
-		padding = (u.getFirstBelongsGroup() == null ? 2 : u
-				.getFirstBelongsGroup().getLevel() + 1) * 35;
-
-		contentContainer.setPadding(padding, contentContainer.getPaddingTop(),
-				contentContainer.getPaddingRight(),
-				contentContainer.getPaddingRight());
+//		padding = (u.getFirstBelongsGroup() == null ? 2 : u
+//				.getFirstBelongsGroup().getLevel() + 1) * 35;
+//
+//		contentContainer.setPadding(padding, contentContainer.getPaddingTop(),
+//				contentContainer.getPaddingRight(),
+//				contentContainer.getPaddingRight());
 
 		this.addView(view, new LinearLayout.LayoutParams(
 				LinearLayout.LayoutParams.MATCH_PARENT,

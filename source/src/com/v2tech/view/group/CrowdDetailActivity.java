@@ -24,6 +24,7 @@ import com.v2tech.service.GlobalHolder;
 import com.v2tech.service.Registrant;
 import com.v2tech.view.JNIService;
 import com.v2tech.view.PublicIntent;
+import com.v2tech.view.bo.GroupUserObject;
 import com.v2tech.vo.CrowdGroup;
 import com.v2tech.vo.Group.GroupType;
 
@@ -147,6 +148,7 @@ public class CrowdDetailActivity extends Activity {
 		IntentFilter filter = new IntentFilter();
 		filter.addAction(JNIService.JNI_BROADCAST_KICED_CROWD);
 		filter.addAction(JNIService.JNI_BROADCAST_GROUP_UPDATED);
+		filter.addAction(JNIService.JNI_BROADCAST_GROUP_USER_ADDED);
 		filter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
 		this.registerReceiver(localReceiver, filter);
 	}
@@ -312,7 +314,7 @@ public class CrowdDetailActivity extends Activity {
 			Intent i = new Intent(PublicIntent.START_CROWD_MEMBERS_ACTIVITY);
 			i.addCategory(PublicIntent.DEFAULT_CATEGORY);
 			i.putExtra("cid", crowd.getmGId());
-			startActivity(i);
+			startActivityForResult(i, TYPE_UPDATE_MEMBERS);
 		}
 
 	};
@@ -376,6 +378,11 @@ public class CrowdDetailActivity extends Activity {
 					initRules();
 					mBriefTV.setText(crowd.getBrief());
 					mAnouncementTV.setText(crowd.getAnnouncement());
+					mMembersCountsTV.setText(crowd.getUsers().size()+"");
+				}
+			} else if (intent.getAction().equals(JNIService.JNI_BROADCAST_GROUP_USER_ADDED)) {
+				GroupUserObject guo = (GroupUserObject)intent.getExtras().get("obj");
+				if (guo.getmGroupId() == crowd.getmGId()) {
 					mMembersCountsTV.setText(crowd.getUsers().size()+"");
 				}
 			}

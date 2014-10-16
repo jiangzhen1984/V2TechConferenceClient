@@ -312,13 +312,11 @@ public class ChatService extends DeviceService {
 					vfi.getTransType());
 			break;
 		case OPERATION_CANCEL_SENDING:
-			FileRequest.getInstance().cancelSendFile(vfi.getUuid(),
-					vfi.getTransType());
+			FileRequest.getInstance().cancelSendFile(vfi.getUuid(), vfi.getTransType());
 			V2Log.e(TAG, "cannel sending file");
 			break;
 		case OPERATION_CANCEL_DOWNLOADING:
-			FileRequest.getInstance().cancelRecvFile(vfi.getUuid(),
-					vfi.getTransType());
+			FileRequest.getInstance().cancelRecvFile(vfi.getUuid(), vfi.getTransType());
 			break;
 		case OPERATION_START_DOWNLOAD:
 			FileRequest.getInstance().acceptFileTrans(
