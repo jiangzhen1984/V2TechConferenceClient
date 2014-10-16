@@ -80,7 +80,7 @@ public class FileRequest {
 			int linetype);
 
 	/**
-	 * TODO add comments
+	 * Accept file transfer invition from other 接受对方的文件传输邀请
 	 * 
 	 * @param szFileID
 	 * @param szSavePath
@@ -88,42 +88,53 @@ public class FileRequest {
 	public native void acceptFileTrans(String szFileID, String szSavePath);
 
 	/**
-	 * TODO add comments
+	 * Refuse file transfer invition from other 拒绝接收文件
 	 * 
 	 * @param szFileID
 	 */
 	public native void refuseFileTrans(String szFileID);
 
 	/**
-	 * 
+	 * Cancel file transfer invition 取消文件传输邀请
+	 * @param fileid
+	 */
+	public native void cancelFileInvite(String fileid);
+	
+	/**
+	 * Cancel receiving file 取消接收文件
 	 * @param szFileID
 	 */
-	public native void cancelFileTrans(String szFileID);
+	public native void cancelRecvFile(String szFileID);
 
 	/**
-	 * 
+	 * Cancel sending file 取消发送文件
 	 * @param szFileID
 	 */
-	public native void cancelRecvFile(String szFileID, int type);
+	public native void cancelSendFile(String szFileID);
+	
+	/**
+	 * 文件续传
+	 * @param szFileID
+	 */
+	public native void resumeSendFile(String szFileID);
 
+	/**
+	 * 文件暂停传输
+	 * @param szFileID
+	 */
+	public native void pauseSendFile(String szFileID);
 
-	// 鍒犻櫎鏂囦欢
-	public native void delFile(String szFileID, int businesstype);
+	/**
+	 * http文件续传接收
+	 * @param szFileID
+	 */
+	public native void resumeHttpRecvFile(String szFileID);
 
-
-	public native void cancelSendFile(String szFileID, int type);
-
-	public native void cancelP2PRecvFile(String szFileID, int type);
-
-	public native void cancelHttpRecvFile(String szFileID, int type);
-
-	public native void resumeSendFile(String szFileID, int type);
-
-	public native void pauseSendFile(String szFileID, int type);
-
-	public native void resumeHttpRecvFile(String szFileID, int type);
-
-	public native void pauseHttpRecvFile(String szFileID, int type);
+	/**
+	 * http暂停文件接收
+	 * @param szFileID
+	 */
+	public native void pauseHttpRecvFile(String szFileID);
 
 	/**
 	 * 下载失败，重新下载时调用
@@ -134,7 +145,7 @@ public class FileRequest {
 	 * @param businessType 填1即可
 	 */
 	public native void httpDownloadFile(String url, String sfileid,
-			String filePath, int encrypttype, int businessType);
+			String filePath, int encrypttype);
 
 	/**
 	 * Receive the Files from the others , but not contain group's files..
@@ -161,7 +172,10 @@ public class FileRequest {
 		}
 	}
 
-	// 鏀跺埌鎴戠殑鏂囦欢浼犺緭閭�琚鏂规帴鍙楃殑鍥炶皟
+	/**
+	 * 收到我的文件传输邀请被对方接受的回调
+	 * @param szFileID
+	 */
 	private void OnFileTransAccepted(String szFileID) {
 		Log.e(TAG, "OnFileTransAccepted--->" + szFileID);
 
@@ -176,18 +190,12 @@ public class FileRequest {
 		// context.sendBroadcast(intent);
 	}
 
-	// 瀵规柟鎷掔粷鎺ユ敹鏂囦欢鍥炶皟
+	/**
+	 * 对方拒绝接收文件回调
+	 * @param szFileID
+	 */
 	private void OnFileTransRefuse(String szFileID) {
 		Log.e(TAG, "OnFileTransRefuse--->" + szFileID);
-	}
-
-	// 鏀跺埌浠栦汉缁欐垜涓婁紶鐨勬枃浠剁殑閫氱煡鐨勫洖璋�
-	private void OnFileTransNotify(long nGroupID, int nBusinessType,
-			long nFromUserID, String szFileID, String szFileName,
-			long nFileBytes) {
-		Log.e(TAG, "OnFileTransNotify--->" + nGroupID + ":" + nBusinessType
-				+ ":" + nFromUserID + ":" + szFileID + ":" + szFileName + ":"
-				+ nFileBytes);
 	}
 
 	/**
@@ -219,7 +227,12 @@ public class FileRequest {
 		}
 	}
 
-	// 鏀跺埌鏂囦欢浼犺緭寮�鐨勫洖璋�
+	/**
+	 * The callback will call when begain send or download file
+	 * @param szFileID
+	 * @param nTransType
+	 * @param nFileSize
+	 */
 	private void OnFileTransBegin(String szFileID, int nTransType,
 			long nFileSize) {
 		Log.e(TAG, "OnFileTransBegin--->" + szFileID + ":" + nTransType + ":"
@@ -227,7 +240,7 @@ public class FileRequest {
 	}
 
 	/**
-	 * 
+	 * The callback will call when currently sending or downloading file 
 	 * @param szFileID
 	 * @param nBytesTransed
 	 * @param nTransType
@@ -248,7 +261,7 @@ public class FileRequest {
 	}
 
 	/**
-	 * 
+	 * The callback will call when finish send or download file 
 	 * @param szFileID
 	 * @param szFileName
 	 * @param nFileSize
@@ -269,7 +282,7 @@ public class FileRequest {
 	}
 
 	/**
-	 * 当发送文件或下载文件出错时，会回调该函数
+	 * The callback will call when sending or downlaoding file have a mistake 当发送文件或下载文件出错时，会回调该函数
 	 * @param szFileID
 	 * @param errorCode
 	 * @param nTransType
@@ -286,7 +299,10 @@ public class FileRequest {
 		}
 	}
 
-	// 鏀跺埌瀵规柟鍙栨秷鏂囦欢浼犺緭鍥炶皟
+	/**
+	 * Received the callback that cancel transfer file when downloading the fle 收到对方取消文件传输回调
+	 * @param szFileID
+	 */
 	private void OnFileTransCancel(String szFileID) {
 		V2Log.e(TAG, "OnFileTransCancel ---> szFileID :" + szFileID);
 		for (int i = 0; i < mCallbacks.size(); i++) {

@@ -280,6 +280,7 @@ public class ConversationProvider {
 					+ "=?";
 			break;
 		case Conversation.TYPE_DEPARTMENT:
+		case Conversation.TYPE_GROUP:
 			where = ContentDescriptor.RecentHistoriesMessage.Cols.HISTORY_RECENT_MESSAGE_USER_TYPE_ID
 			+ "=? and "
 			+ ContentDescriptor.RecentHistoriesMessage.Cols.HISTORY_RECENT_MESSAGE_GROUP_TYPE

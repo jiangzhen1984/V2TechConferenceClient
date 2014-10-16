@@ -332,7 +332,7 @@ public class MessageAuthenticationActivity extends Activity {
 		IntentFilter intentFilter = new IntentFilter();
 		intentFilter.addAction(JNIService.JNI_BROADCAST_FRIEND_AUTHENTICATION);
 		intentFilter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
-
+		intentFilter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
 		registerReceiver(friendAuthenticationBroadcastReceiver, intentFilter);
 
 		mCrowdAuthenticationBroadcastReceiver = new CrowdAuthenticationBroadcastReceiver();

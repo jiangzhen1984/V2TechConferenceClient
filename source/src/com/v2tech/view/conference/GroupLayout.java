@@ -4,10 +4,12 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Handler;
 import android.util.AttributeSet;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.V2.jni.V2GlobalEnum;
@@ -25,7 +27,7 @@ import com.v2tech.vo.VMessage;
 public class GroupLayout extends LinearLayout {
 
 	private static final String TAG = "GroupLayout";
-
+	
 	private Conversation mConv;
 
 	private ImageView mGroupIV;
@@ -33,9 +35,11 @@ public class GroupLayout extends LinearLayout {
 	private TextView mGroupOwnerTV;
 	private TextView mGroupDateTV;
 	private ImageView mNotificatorIV;
+	private TextView mChatGroupNameTV;
+	private RelativeLayout mChatGroupLayout;
 
 	private Handler hand = new Handler();
-
+	
 	public GroupLayout(Context context, AttributeSet attrs, Conversation group) {
 		super(context, attrs);
 		this.mConv = group;
@@ -62,6 +66,11 @@ public class GroupLayout extends LinearLayout {
 				.findViewById(R.id.gourp_list_conference_create_time_tv);
 		mNotificatorIV = (ImageView) view
 				.findViewById(R.id.group_list_conference_notificator);
+		
+		mChatGroupNameTV = (TextView) view
+				.findViewById(R.id.group_list_chat_title_tv);
+		mChatGroupLayout = (RelativeLayout) view
+				.findViewById(R.id.group_list_conference_title_layout);
 		mNotificatorIV.bringToFront();
 
 		switch (mConv.getType()) {
@@ -79,8 +88,10 @@ public class GroupLayout extends LinearLayout {
 					.getCurrentUserId())
 				mGroupIV.setImageResource(R.drawable.conference_icon);
 			break;
-		case Conversation.TYPE_GROUP:
 		case V2GlobalEnum.GROUP_TYPE_DEPARTMENT:
+			mGroupIV.setImageResource(R.drawable.chat_group_icon);
+			break;
+		case Conversation.TYPE_GROUP:
 			mGroupIV.setImageResource(R.drawable.chat_group_icon);
 			break;
 		case Conversation.TYPE_VOICE_MESSAGE:
@@ -95,6 +106,7 @@ public class GroupLayout extends LinearLayout {
 		}
 
 		mGroupNameTV.setText(mConv.getName());
+		mChatGroupNameTV.setText(mConv.getName());
 		mGroupOwnerTV.setText(mConv.getMsg());
 		mGroupDateTV.setText(mConv.getDate());
 		addView(view);
@@ -163,6 +175,7 @@ public class GroupLayout extends LinearLayout {
 
 	public void updateGroupOwner(String name) {
 		mGroupNameTV.setText(name);
+		mChatGroupNameTV.setText(name);
 	}
 
 	public void updateContent(String content) {
@@ -172,6 +185,7 @@ public class GroupLayout extends LinearLayout {
 	public void update() {
 		
 		mGroupNameTV.setText(mConv.getName());
+		mChatGroupNameTV.setText(mConv.getName());
 		mGroupOwnerTV.setText(mConv.getMsg());
 		mGroupDateTV.setText(mConv.getDate());
 	}
@@ -182,6 +196,13 @@ public class GroupLayout extends LinearLayout {
 		} else {
 			mGroupIV.setImageResource(R.drawable.avatar);
 		}
+	}
+	
+	public void updateCrowdLayout(){
+		
+		mChatGroupNameTV.setVisibility(View.VISIBLE);
+		mChatGroupLayout.setVisibility(View.GONE);
+		mGroupDateTV.setVisibility(View.GONE);
 	}
 
 }

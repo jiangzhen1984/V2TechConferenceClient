@@ -1,11 +1,5 @@
 package com.v2tech.vo;
 
-import android.content.Context;
-import android.graphics.drawable.Drawable;
-import android.text.Spannable;
-import android.text.SpannableStringBuilder;
-import android.text.style.ImageSpan;
-
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -16,12 +10,13 @@ import java.util.UUID;
 
 import com.V2.jni.util.V2Log;
 import com.v2tech.service.GlobalHolder;
-import com.v2tech.util.GlobalConfig;
 
 public class VMessage {
 	
 	
 	public static final int STATE_UNREAD = 0 ;
+	public static final int STATE_READED = 1 ;
+	
 	public static final int STATE_SENT_FAILED = 1 ;
 
 	private static DateFormat sfF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss",
@@ -58,17 +53,10 @@ public class VMessage {
 	protected String mXmlDatas;
 	
 	protected boolean isShowTime;
-
-	public boolean isShowTime() {
-		return isShowTime;
-	}
-
-	public void setShowTime(boolean isShowTime) {
-		this.isShowTime = isShowTime;
-	}
+	
+	protected int readState;
 
 	protected List<VMessageAbstractItem> itemList;
-	
 	
 	public VMessage(int groupType , long groupId, User fromUser , Date date) {
 		this(groupType, groupId, fromUser, null , UUID.randomUUID().toString(), date);
@@ -85,6 +73,7 @@ public class VMessage {
 		this.mDate = date ;
 		this.mUUID = uuid;
 		mMsgCode = groupType;
+		readState = STATE_READED;
 
 		itemList = new ArrayList<VMessageAbstractItem>();
 	}
@@ -160,6 +149,22 @@ public class VMessage {
 
 	public void setUUID(String UUID) {
 		this.mUUID = UUID;
+	}
+	
+	public int isReadState() {
+		return readState;
+	}
+
+	public void setReadState(int readState) {
+		this.readState = readState;
+	}
+
+	public boolean isShowTime() {
+		return isShowTime;
+	}
+
+	public void setShowTime(boolean isShowTime) {
+		this.isShowTime = isShowTime;
 	}
 
 	public boolean isLocal() {

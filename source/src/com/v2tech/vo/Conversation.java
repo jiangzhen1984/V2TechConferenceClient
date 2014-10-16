@@ -1,9 +1,11 @@
 package com.v2tech.vo;
 
+import android.text.TextUtils;
+
 import com.V2.jni.V2GlobalEnum;
 import com.v2tech.util.DateUtil;
 
-public class Conversation {
+public class Conversation implements Comparable<Conversation>{
 
 	public static final int TYPE_CONFERNECE = V2GlobalEnum.GROUP_TYPE_CONFERENCE;
 
@@ -171,6 +173,19 @@ public class Conversation {
 
 	public void setAddedItem(boolean isAddedItem) {
 		this.isAddedItem = isAddedItem;
+	}
+
+	@Override
+	public int compareTo(Conversation another) {
+		if(another == null)
+			return 1;
+		if(TextUtils.isEmpty(dateLong) || TextUtils.isEmpty(another.getDateLong()))
+			return -1;
+		
+		if(Long.valueOf(dateLong) < Long.valueOf(another.getDateLong()))
+			return 1;
+		else
+			return -1;
 	}
 
 }

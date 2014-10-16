@@ -7,7 +7,7 @@ public class CrowdConversation extends Conversation {
 	
 	private Group g;
 	private User lastSendUser;
-	private String msg;
+	private boolean showContact;
 
 	public CrowdConversation(Group g) {
 		if (g == null) {
@@ -32,21 +32,33 @@ public class CrowdConversation extends Conversation {
 	}
 
 	@Override
-	public String getMsg() {
-		if (g != null) {
-			User u = g.getOwnerUser();
-			// TODO need use localization
-			return u == null ? "" : "创建人:" + u.getName();
+	public CharSequence getMsg() {
+		if(showContact)
+			return msg;
+		else{
+			if (g != null) {
+				User u = g.getOwnerUser();
+				// TODO need use localization
+				return u == null ? "" : "创建人:" + u.getName();
+			}
+			return msg;
 		}
-		return msg;
 	}
 
 	@Override
 	public String getDate() {
-		if(dateLong != null){
-			return DateUtil.getStringDate(Long.valueOf(dateLong));
+		if(showContact){
+			if(dateLong != null){
+				return DateUtil.getStringDate(Long.valueOf(dateLong));
+			}
+			return super.getDate();
 		}
-		return super.getDate();
+		else{
+			if (g != null) {
+				return g.getStrCreateDate();
+			}
+			return super.getDate();
+		}
 	}
 	
 	@Override
@@ -81,5 +93,20 @@ public class CrowdConversation extends Conversation {
 		return g;
 	}
 	
+	public boolean isShowContact() {
+		return showContact;
+	}
+
+	public void setShowContact(boolean showContact) {
+		this.showContact = showContact;
+	}
+	
+	public Group getG() {
+		return g;
+	}
+
+	public void setG(Group g) {
+		this.g = g;
+	}
 	
 }

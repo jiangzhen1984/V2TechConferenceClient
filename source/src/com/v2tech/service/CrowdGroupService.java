@@ -13,6 +13,8 @@ import com.V2.jni.GroupRequestCallbackAdapter;
 import com.V2.jni.ind.FileJNIObject;
 import com.V2.jni.ind.GroupFileJNIObject;
 import com.V2.jni.ind.V2Group;
+import com.V2.jni.ind.V2User;
+import com.V2.jni.util.V2Log;
 import com.v2tech.service.jni.CreateCrowdResponse;
 import com.v2tech.service.jni.FileTransStatusIndication;
 import com.v2tech.service.jni.FileTransStatusIndication.FileTransErrorIndication;
@@ -78,7 +80,7 @@ public class CrowdGroupService extends AbstractHandler {
 	 */
 	public void createCrowdGroup(CrowdGroup crowd, List<User> invationUserList,
 			Registrant caller) {
-		this.initTimeoutMessage(CREATE_GROUP_MESSAGE, DEFAULT_TIME_OUT_SECS,
+		this.initTimeoutMessage(ACCEPT_JOIN_CROWD, DEFAULT_TIME_OUT_SECS,
 				caller);
 		StringBuffer sb = new StringBuffer();
 		sb.append("<userlist>");
@@ -430,25 +432,25 @@ public class CrowdGroupService extends AbstractHandler {
 		switch (opt) {
 		case OPERATION_START_DOWNLOAD:
 			FileRequest.getInstance().httpDownloadFile(vf.getUrl(), vf.getId(),
-					vf.getPath(), 0, 1);
+					vf.getPath(), 0);
 			break;
 		case OPERATION_CANCEL_DOWNLOADING:
-			FileRequest.getInstance().cancelHttpRecvFile(vf.getId(), 1);
+			FileRequest.getInstance().cancelRecvFile(vf.getId());
 			break;
 		case OPERATION_CANCEL_SENDING:
-			FileRequest.getInstance().cancelSendFile(vf.getId(), 1);
+			FileRequest.getInstance().cancelSendFile(vf.getId());
 			break;
 		case OPERATION_PAUSE_DOWNLOADING:
-			FileRequest.getInstance().pauseHttpRecvFile(vf.getId(), 1);
+			FileRequest.getInstance().pauseHttpRecvFile(vf.getId());
 			break;
 		case OPERATION_PAUSE_SENDING:
-			FileRequest.getInstance().pauseSendFile(vf.getId(), 1);
+			FileRequest.getInstance().pauseSendFile(vf.getId());
 			break;
 		case OPERATION_RESUME_DOWNLOAD:
-			FileRequest.getInstance().resumeHttpRecvFile(vf.getId(), 1);
+			FileRequest.getInstance().resumeHttpRecvFile(vf.getId());
 			break;
 		case OPERATION_RESUME_SEND:
-			FileRequest.getInstance().resumeSendFile(vf.getId(), 1);
+			FileRequest.getInstance().resumeSendFile(vf.getId());
 			break;
 		case OPERATION_START_SEND:
 			break;
@@ -548,19 +550,32 @@ public class CrowdGroupService extends AbstractHandler {
 		 * ind.V2Group)
 		 */
 		public void onAddGroupInfo(V2Group group) {
-			if (group.type == V2Group.TYPE_CROWD) {
-				if (mPendingCrowdId == group.id) {
-					mPendingCrowdId = 0;
-					JNIResponse jniRes = new JNIResponse(
-							CreateCrowdResponse.Result.SUCCESS);
-					Message.obtain(mCallbackHandler, ACCEPT_JOIN_CROWD, jniRes)
-							.sendToTarget();
-				} else {
-					JNIResponse jniRes = new CreateCrowdResponse(group.id,
-							CreateCrowdResponse.Result.SUCCESS);
-					Message.obtain(mCallbackHandler, CREATE_GROUP_MESSAGE,
-							jniRes).sendToTarget();
+			if (group.type == V2Group.TYPE_CROWD && mPendingCrowdId == group.id) {
+				mPendingCrowdId = 0;
+				JNIResponse jniRes = new JNIResponse(
+						CreateCrowdResponse.Result.SUCCESS);
+				
+				Message.obtain(mCallbackHandler, ACCEPT_JOIN_CROWD, jniRes)
+						.sendToTarget();
+			}
+			else if(group.type == V2Group.TYPE_CROWD){
+				V2Log.e("CrowdGroupService onAddGroupInfo invoke");
+				JNIResponse jniRes = new JNIResponse(
+						CreateCrowdResponse.Result.SUCCESS);
+				
+				if(group != null && group.creator != null){
+					V2User creator = group.creator;
+					CrowdGroup crowd = new CrowdGroup(group.id, group.name,
+							new User(creator.uid, creator.name), group.createTime);
+					jniRes.callerObject = crowd;
 				}
+				else{
+					V2Log.e("CrowdGroupService onAddGroupInfo ---> get V2Group Object is null");
+					return ;
+				}
+				
+				Message.obtain(mCallbackHandler, ACCEPT_JOIN_CROWD, jniRes)
+				.sendToTarget();
 			}
 		}
 

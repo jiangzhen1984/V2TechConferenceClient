@@ -296,27 +296,22 @@ public class ChatService extends DeviceService {
 
 		switch (opt) {
 		case OPERATION_PAUSE_SENDING:
-			FileRequest.getInstance().pauseSendFile(vfi.getUuid(),
-					vfi.getTransType());
+			FileRequest.getInstance().pauseSendFile(vfi.getUuid());
 			break;
 		case OPERATION_RESUME_SEND:
-			FileRequest.getInstance().resumeSendFile(vfi.getUuid(),
-					vfi.getTransType());
+			FileRequest.getInstance().resumeSendFile(vfi.getUuid());
 			break;
 		case OPERATION_PAUSE_DOWNLOADING:
-			FileRequest.getInstance().pauseHttpRecvFile(vfi.getUuid(),
-					vfi.getTransType());
+			FileRequest.getInstance().pauseHttpRecvFile(vfi.getUuid());
 			break;
 		case OPERATION_RESUME_DOWNLOAD:
-			FileRequest.getInstance().resumeHttpRecvFile(vfi.getUuid(),
-					vfi.getTransType());
+			FileRequest.getInstance().resumeHttpRecvFile(vfi.getUuid());
 			break;
 		case OPERATION_CANCEL_SENDING:
-			FileRequest.getInstance().cancelSendFile(vfi.getUuid(), vfi.getTransType());
-			V2Log.e(TAG, "cannel sending file");
+			FileRequest.getInstance().cancelSendFile(vfi.getUuid());
 			break;
 		case OPERATION_CANCEL_DOWNLOADING:
-			FileRequest.getInstance().cancelRecvFile(vfi.getUuid(), vfi.getTransType());
+			FileRequest.getInstance().cancelRecvFile(vfi.getUuid());
 			break;
 		case OPERATION_START_DOWNLOAD:
 			FileRequest.getInstance().acceptFileTrans(
@@ -341,11 +336,6 @@ public class ChatService extends DeviceService {
 	 */
 	public void inviteUserChat(UserChattingObject ud, Registrant caller) {
 		JNIResponse resp = null;
-		//FIXME In order to compatible with the huawei x1 7.0 
-//		if(GlobalConfig.isVideoConversationOpen == true){
-//			return ;
-//		}
-//		GlobalConfig.isVideoConversationOpen = true;
 		if (mCaller != null) {
 			V2Log.e(" audio call is on going");
 			resp = new RequestChatServiceResponse(

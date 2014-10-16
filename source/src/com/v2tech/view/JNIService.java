@@ -396,6 +396,7 @@ public class JNIService extends Service {
 				VMessage vm = (VMessage) msg.obj;
 				if (vm != null) {
 					String action = null;
+					vm.setReadState(VMessage.STATE_UNREAD);
 					MessageBuilder.saveBinaryVMessage(mContext, vm);
 					MessageBuilder.saveFileVMessage(mContext, vm);
 					MessageBuilder.saveMessage(mContext, vm);
@@ -620,20 +621,20 @@ public class JNIService extends Service {
 
 		@Override
 		public void onAddGroupInfo(V2Group group) {
-			if (group == null || group.creator == null) {
-				return;
-			}
-			GroupType gType = GroupType.fromInt(group.type);
-			if (gType == GroupType.CHATING) {
-				CrowdGroup cg = convertCrowd(group);
-				GlobalHolder.getInstance().addGroupToList(gType.intValue(), cg);
-
-				// Send broadcast
-				Intent i = new Intent(JNI_BROADCAST_NEW_CROWD);
-				i.addCategory(JNI_BROADCAST_CATEGROY);
-				i.putExtra("crowd", cg.getmGId());
-				mContext.sendBroadcast(i);
-			}
+//			if (group == null || group.creator == null) {
+//				return;
+//			}
+//			GroupType gType = GroupType.fromInt(group.type);
+//			if (gType == GroupType.CHATING) {
+//				CrowdGroup cg = convertCrowd(group);
+//				GlobalHolder.getInstance().addGroupToList(gType.intValue(), cg);
+//
+//				// Send broadcast
+//				Intent i = new Intent(JNI_BROADCAST_NEW_CROWD);
+//				i.addCategory(JNI_BROADCAST_CATEGROY);
+//				i.putExtra("crowd", cg.getmGId());
+//				mContext.sendBroadcast(i);
+//			}
 
 		}
 		
@@ -720,6 +721,7 @@ public class JNIService extends Service {
 					// Save message to database
 					crowdMsg = new VMessageQualificationInvitationCrowd(cg,
 							GlobalHolder.getInstance().getCurrentUser());
+					crowdMsg.setReadState(VMessageQualification.ReadState.UNREAD);
 					Uri uri = MessageBuilder.saveQualicationMessage(mContext,
 							crowdMsg);
 					if (uri != null) {

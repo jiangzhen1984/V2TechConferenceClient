@@ -3,7 +3,6 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@color/confs_group_list_bg" >
-
     <RelativeLayout
         android:id="@+id/group_list_conference_image_view_rl"
         android:layout_width="wrap_content"
@@ -14,13 +13,11 @@
         android:layout_marginLeft="15dp"
         android:layout_marginRight="5dp"
         android:layout_marginTop="@dimen/conversation_view_margin" >
-
         <ImageView
             android:id="@+id/group_list_conference_image_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/conference_icon_self" />
-
         <ImageView
             android:id="@+id/group_list_conference_notificator"
             android:layout_width="wrap_content"
@@ -32,12 +29,44 @@
             android:src="@drawable/red_nofificator"
             android:visibility="invisible" />
     </RelativeLayout>
-
-    <TextView
-        android:id="@+id/group_list_conference_title_tv"
+    <RelativeLayout
+        android:id="@+id/group_list_conference_title_layout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/group_list_conference_image_view_rl"
         android:layout_alignTop="@+id/group_list_conference_image_view_rl"
+        android:layout_marginLeft="@dimen/text_margin_left"
+        android:layout_toRightOf="@+id/group_list_conference_image_view_rl" >
+        <TextView
+            android:id="@+id/group_list_conference_title_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:ellipsize="end"
+            android:gravity="left|top"
+            android:singleLine="true"
+            android:text="TextView"
+            android:textColor="@color/conversation_view_name_color"
+            android:textSize="@dimen/conversation_view_name_text_size" />
+        <TextView
+            android:id="@+id/group_list_conference_owner_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_below="@+id/group_list_conference_title_tv"
+            android:ellipsize="end"
+            android:gravity="left|bottom"
+            android:maxWidth="@dimen/conversation_view_text_max_width"
+            android:singleLine="true"
+            android:text="TextViewaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+            android:textColor="@color/conversation_view_text_color"
+            android:textSize="@dimen/common_item_text_size_16" />
+    </RelativeLayout>
+    <TextView
+        android:id="@+id/group_list_chat_title_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
         android:layout_marginLeft="@dimen/text_margin_left"
         android:layout_toRightOf="@+id/group_list_conference_image_view_rl"
         android:ellipsize="end"
@@ -45,40 +74,23 @@
         android:singleLine="true"
         android:text="TextView"
         android:textColor="@color/conversation_view_name_color"
-        android:textSize="@dimen/conversation_view_name_text_size" />
-
-    <TextView
-        android:id="@+id/group_list_conference_owner_tv"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/group_list_conference_image_view_rl"
-        android:layout_marginLeft="@dimen/text_margin_left"
-        android:layout_marginTop="@dimen/conversation_view_title_margin"
-        android:layout_toRightOf="@+id/group_list_conference_image_view_rl"
-        android:ellipsize="end"
-        android:gravity="left|bottom"
-        android:maxWidth="@dimen/conversation_view_text_max_width"
-        android:singleLine="true"
-        android:text="TextViewaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-        android:textColor="@color/conversation_view_text_color"
-        android:textSize="@dimen/common_item_text_size_16" />
-
+        android:textSize="@dimen/conversation_view_name_text_size"
+        android:visibility="gone" />
     <TextView
         android:id="@+id/gourp_list_conference_create_time_tv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/group_list_conference_owner_tv"
+        android:layout_alignBottom="@+id/group_list_conference_image_view_rl"
         android:layout_alignParentRight="true"
-        android:layout_marginRight="15dp"
         android:layout_marginLeft="@dimen/text_margin_left"
-        android:paddingRight="15dp"
+        android:layout_marginRight="15dp"
         android:ellipsize="end"
         android:maxWidth="@dimen/date_time_max_width"
+        android:paddingRight="15dp"
         android:singleLine="true"
         android:text="00:00"
         android:textColor="@color/common_item_text_color"
         android:textSize="@dimen/common_item_text_size_16" />
-
     <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="1dp"
@@ -88,5 +100,4 @@
         android:background="@color/confs_group_widget_separation_line"
         android:orientation="vertical" >
     </LinearLayout>
-
 </RelativeLayout>

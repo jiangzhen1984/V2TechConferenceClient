@@ -271,6 +271,10 @@ public class VideoAttendeeListLayout extends LinearLayout {
 				name.setTextColor(getContext().getResources().getColor(
 						R.color.video_attendee_chair_man_name_color));
 			}
+			else{
+				name.setTextColor(getContext().getResources().getColor(
+						R.color.video_attendee_name_color_offline));
+			}
 		} else if (at.isSelf()) {
 			name.setTypeface(null, Typeface.BOLD);
 			name.setTextColor(getContext().getResources().getColor(
@@ -348,6 +352,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 		adapter.notifyDataSetChanged();
 	}
 
+	private boolean newAttendee;
 	public void updateEnteredAttendee(Attendee at) {
 		if (at == null) {
 			return;
@@ -372,16 +377,25 @@ public class VideoAttendeeListLayout extends LinearLayout {
 			}
 			for (int i = 1; i < dList.size(); i++) {
 				if (index + 1 == mList.size() - 1) {
+					newAttendee = true;
 					mList.add(new Wrapper(at, dList.get(i), i));
 				} else {
 					mList.add(index + 1, new Wrapper(at, dList.get(i), i));
 				}
+				newAttendee = true;
 				index++;
-
 			}
 		}
 
-		configAttendee(at, false);
+		//configAttendee(at);
+		if (at.getType() != Attendee.TYPE_MIXED_VIDEO && newAttendee == true) {
+			mAttendeeCount++;
+			newAttendee = false;
+			if ((at.isJoined() || at.isSelf())) {
+				onLinePersons++;
+			}
+		}
+		updateStatist();
 		// TODO update device count and mixed video
 
 		Collections.sort(mList);
@@ -852,10 +866,11 @@ public class VideoAttendeeListLayout extends LinearLayout {
 		if (at == null) {
 			return;
 		}
-		if (at.getType() != Attendee.TYPE_MIXED_VIDEO) {
+		if (at.getType() != Attendee.TYPE_MIXED_VIDEO && newAttendee == true) {
 				if (isNew) {
 					mAttendeeCount++;
 				}
+				newAttendee = false;
 			if ((at.isJoined() || at.isSelf())) {
 				onLinePersons++;
 			}
