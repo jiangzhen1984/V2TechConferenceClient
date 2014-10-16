@@ -228,13 +228,13 @@ public class AddFriendHistroysHandler {
 		}
 		cr.close();
 		
-		sql = "delete from " + tableName + " where RemoteUserID="
+		sql = "delete from " + tableName + " where FromUserID="
 				+ remoteUser.getmUserId() + " and " + "AddState=0" + " and "
 				+ "(OwnerAuthType=0 or OwnerAuthType=2)";
 		del(context, sql);
 
 		sql = "update " + tableName + " set AddState=1"
-				+ " where RemoteUserID=" + remoteUser.getmUserId() + " and "
+				+ " where FromUserID=" + remoteUser.getmUserId() + " and "
 				+ "AddState=0" + " and " + "OwnerAuthType=1";
 		update(context, sql);
 

@@ -145,6 +145,8 @@ public class ContactDetail extends Activity implements OnTouchListener {
 			state = this.getIntent().getIntExtra("state", -1);
 			if (state == 4) {
 				tvTitle.setText("个人资料");
+			} else if (state == 6) {
+				tvTitle.setText("验证通知");
 			} else {
 				tvTitle.setText("好友申请");
 			}

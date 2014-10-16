@@ -416,7 +416,6 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 			adapter.notifyDataSetChanged();
 			startIndex++;
 		} else {
-
 			V2techSearchContentProvider.closedDataBase();
 			if (mIsStartedSearch) {
 				firstSearchCacheList.clear();

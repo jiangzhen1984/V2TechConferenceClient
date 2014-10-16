@@ -20,7 +20,7 @@
   
   <string name="activiy_contact_group_dialog_title_update">编辑分组</string>
   
-  <string name="activiy_contact_group_dialog_group_name_required">请输入好友分组的名字</string>
+  <string name="activiy_contact_group_dialog_group_name_required">分组名不能为空，请重新输入</string>
   
   <string name="activiy_contact_update_group_error_msg_in_progess">正在更新..请稍后</string>
   

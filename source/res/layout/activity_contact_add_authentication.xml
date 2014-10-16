@@ -12,7 +12,7 @@
         android:background="#ffffff" >
 
         <TextView
-            android:id="@+id/contact_detail_return_button"
+            android:id="@+id/tv_left"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"

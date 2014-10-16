@@ -23,6 +23,8 @@ public class AuthenticationActivity extends Activity {
 	private TextView mNameTitleIV;
 	// contact_user_detail_title
 	private TextView mSignTV;
+	// R.id.tv_left
+	private TextView tvLeft;
 	// R.id.right_text_view
 	private TextView tvRightTextView;
 	// R.id.tv_title
@@ -45,10 +47,12 @@ public class AuthenticationActivity extends Activity {
 		if ((startedCause != null)
 				&& startedCause.equals("refuse_friend_authentication")) {
 			mUid = this.getIntent().getLongExtra("remoteUserID", 0);
+			tvLeft.setText("返回");
 			tvTitle.setText("拒绝理由");
 			etInput.setHint("请输入拒绝理由");
 		} else {
 			mUid = this.getIntent().getLongExtra("uid", 0);
+			tvLeft.setText("个人资料");
 			tvTitle.setText("身份验证");
 			etInput.setHint("请输入验证信息");
 
@@ -62,6 +66,7 @@ public class AuthenticationActivity extends Activity {
 	}
 
 	private void connectView() {
+		tvLeft = (TextView) findViewById(R.id.tv_left);
 		tvRightTextView = (TextView) findViewById(R.id.right_text_view);
 		mHeadIconIV = (ImageView) findViewById(R.id.contact_user_detail_head_icon);
 		mNameTitleIV = (TextView) findViewById(R.id.contact_user_detail_title);
@@ -81,13 +86,12 @@ public class AuthenticationActivity extends Activity {
 
 	private void bindViewEnvent() {
 		// 返回
-		findViewById(R.id.contact_detail_return_button).setOnClickListener(
-				new OnClickListener() {
-					@Override
-					public void onClick(View arg0) {
-						onBackPressed();
-					}
-				});
+		tvLeft.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View arg0) {
+				onBackPressed();
+			}
+		});
 
 		if ((startedCause != null)
 				&& startedCause.equals("refuse_friend_authentication")) {

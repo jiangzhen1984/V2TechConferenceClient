@@ -133,6 +133,7 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 
 	@Override
 	public void onStop() {
+		mLoaded=false;
 		super.onStop();
 	}
 
@@ -269,7 +270,6 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 				fillContactsGroup();
 			} else if (PublicIntent.BROADCAST_CONTACT_GROUP_UPDATED_NOTIFICATION
 					.equals(intent.getAction())) {
-
 				long uid = intent.getLongExtra("userId", 0);
 				long srcGroupId = intent.getLongExtra("srcGroupId", 0);
 				long destGroupId = intent.getLongExtra("destGroupId", 0);
@@ -338,7 +338,6 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 				i.putExtra("uid", ((User) item.getObject()).getmUserId());
 				startActivity(i);
 			}
-
 		}
 
 		public void onCheckboxClicked(View view, Item item) {

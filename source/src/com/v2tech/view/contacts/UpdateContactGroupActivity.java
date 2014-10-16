@@ -60,6 +60,12 @@ public class UpdateContactGroupActivity extends Activity {
 		mGroupListLy = (RadioGroup) findViewById(R.id.contact_update_group_list);
 		mReturnButton = (TextView)findViewById(R.id.contact_update_return_button);
 		mReturnButton.setOnClickListener(mReturnButtonListener);
+		
+		if(from!=null&&from.equals("addFriend")){
+			((TextView)mReturnButton).setText("添加好友");
+		}else{
+			((TextView)mReturnButton).setText("返回");
+		}
 		// build radio button first
 		buildList();
 		mGroupListLy.setOnCheckedChangeListener(mGroupChangedListener);
@@ -88,7 +94,6 @@ public class UpdateContactGroupActivity extends Activity {
 
 			long id = rb.getId();
 
-			Log.i("wzl", "id:" + id);
 			LinearLayout.LayoutParams ll = new LinearLayout.LayoutParams(
 					LinearLayout.LayoutParams.MATCH_PARENT,
 					LinearLayout.LayoutParams.WRAP_CONTENT);
