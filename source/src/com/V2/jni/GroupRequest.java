@@ -518,6 +518,16 @@ public class GroupRequest {
 		}
 	}
 
+	
+	/**
+	 * <ul>
+	 * Crowd: {@code <crowd authtype='0' id='44' name='hhh mjj ' size='100'/>}
+	 * </ul>
+	 * @param groupType
+	 * @param nParentID
+	 * @param nGroupID
+	 * @param sXml
+	 */
 	private void OnAddGroupInfo(int groupType, long nParentID, long nGroupID,
 			String sXml) {
 		V2Log.d("OnAddGroupInfo:: " + groupType + ":" + nParentID + ":"

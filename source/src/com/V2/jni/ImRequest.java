@@ -303,37 +303,7 @@ public class ImRequest {
 
 	}
 
-	/**
-	 * Crowd created request call back<br>
-	 * 
-	 * @see {@link ImRequestCallback#OnCreateCrowdCallback(String, int)}
-	 * @param sCrowdXml
-	 *            {@code <crowd authtype='0' id='44' name='hhh mjj ' size='100'/>}
-	 * @param nResult
-	 *            0: successfully
-	 */
-	private void OnCreateCrowd(String sCrowdXml, int nResult) {
-		V2Log.d("ImRequest UI -- > OnCreateCrowd  " + "sCrowdXml:" + sCrowdXml
-				+ "  nResult:" + nResult);
-		String id = XmlAttributeExtractor.extract(sCrowdXml, " id='", "'");
-		String name = XmlAttributeExtractor.extract(sCrowdXml, " name='", "'");
-
-		V2Group crowd = null;
-		if (!TextUtils.isEmpty(id)) {
-			crowd = new V2Group(Long.parseLong(id), name, V2Group.TYPE_CROWD);
-		} else {
-			V2Log.e(" Incorrect crowd id");
-			return;
-		}
-
-		for (WeakReference<ImRequestCallback> wf : this.mCallbacks) {
-			Object obj = wf.get();
-			if (obj != null) {
-				ImRequestCallback callback = (ImRequestCallback) obj;
-				callback.OnCreateCrowdCallback(crowd, nResult);
-			}
-		}
-	}
+	
 
 	// 鏇存敼绯荤粺澶村儚
 	public native void changeSystemAvatar(String szAvatarName);

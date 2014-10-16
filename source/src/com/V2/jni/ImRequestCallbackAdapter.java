@@ -44,10 +44,6 @@ public abstract class ImRequestCallbackAdapter implements ImRequestCallback {
 
 	}
 
-	@Override
-	public void OnCreateCrowdCallback(V2Group crowd, int nResult) {
-
-	}
 
 	@Override
 	public void OnSearchCrowdCallback(List<V2Group> list) {

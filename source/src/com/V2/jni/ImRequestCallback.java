@@ -84,13 +84,6 @@ public interface ImRequestCallback {
 	public void OnModifyCommentNameCallback(long nUserId, String sCommmentName);
 	
 	
-	/**
-	 * 
-	 * @param crowd
-	 * @param nResult
-	 */
-	public void OnCreateCrowdCallback(V2Group crowd, int nResult);
-	
 	
 	/**
 	 * 

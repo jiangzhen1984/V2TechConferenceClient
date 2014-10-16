@@ -10,8 +10,6 @@ import com.V2.jni.FileRequest;
 import com.V2.jni.FileRequestCallbackAdapter;
 import com.V2.jni.GroupRequest;
 import com.V2.jni.GroupRequestCallbackAdapter;
-import com.V2.jni.ImRequest;
-import com.V2.jni.ImRequestCallbackAdapter;
 import com.V2.jni.ind.FileJNIObject;
 import com.V2.jni.ind.GroupFileJNIObject;
 import com.V2.jni.ind.V2Group;
@@ -56,14 +54,11 @@ public class CrowdGroupService extends AbstractHandler {
 	private static final int KEY_FILE_TRANS_STATUS_NOTIFICATION_LISTNER = 2;
 	private static final int KEY_FILE_REMOVED_NOTIFICATION_LISTNER = 3;
 
-	private ImRequestCB imCB;
 	private GroupRequestCB grCB;
 	private FileRequestCB frCB;
 	private long mPendingCrowdId;
 
 	public CrowdGroupService() {
-		imCB = new ImRequestCB(this);
-		ImRequest.getInstance().addCallback(imCB);
 		grCB = new GroupRequestCB(this);
 		GroupRequest.getInstance().addCallback(grCB);
 		frCB = new FileRequestCB(this);
@@ -75,12 +70,14 @@ public class CrowdGroupService extends AbstractHandler {
 	 * send by caller.
 	 * 
 	 * @param crowd
-	 * @param invationUserList be invite user list
+	 * @param invationUserList
+	 *            be invite user list
 	 * @param caller
 	 *            if input is null, ignore response Message. Response Message
 	 *            object is {@link com.v2tech.service.jni.CreateCrowdResponse}
 	 */
-	public void createCrowdGroup(CrowdGroup crowd, List<User> invationUserList, Registrant caller) {
+	public void createCrowdGroup(CrowdGroup crowd, List<User> invationUserList,
+			Registrant caller) {
 		this.initTimeoutMessage(CREATE_GROUP_MESSAGE, DEFAULT_TIME_OUT_SECS,
 				caller);
 		StringBuffer sb = new StringBuffer();
@@ -89,7 +86,7 @@ public class CrowdGroupService extends AbstractHandler {
 			sb.append(" <user id=\"" + u.getmUserId() + "\" />");
 		}
 		sb.append("</userlist>");
-		
+
 		GroupRequest.getInstance().createGroup(
 				Group.GroupType.CHATING.intValue(), crowd.toXml(),
 				sb.toString());
@@ -173,6 +170,7 @@ public class CrowdGroupService extends AbstractHandler {
 
 	/**
 	 * Decline join crowd invitation
+	 * 
 	 * @param reason
 	 * @param group
 	 */
@@ -193,7 +191,8 @@ public class CrowdGroupService extends AbstractHandler {
 
 		GroupRequest.getInstance().refuseInviteJoinGroup(
 				Group.GroupType.CHATING.intValue(), crowd.getId(),
-				GlobalHolder.getInstance().getCurrentUserId(), reason == null?"":reason);
+				GlobalHolder.getInstance().getCurrentUserId(),
+				reason == null ? "" : reason);
 
 		mPendingCrowdId = 0;
 		sendResult(caller, new JNIResponse(JNIResponse.Result.SUCCESS));
@@ -328,7 +327,6 @@ public class CrowdGroupService extends AbstractHandler {
 
 	@Override
 	public void clearCalledBack() {
-		ImRequest.getInstance().removeCallback(imCB);
 		GroupRequest.getInstance().removeCallback(grCB);
 		FileRequest.getInstance().removeCallback(frCB);
 	}
@@ -550,12 +548,19 @@ public class CrowdGroupService extends AbstractHandler {
 		 * ind.V2Group)
 		 */
 		public void onAddGroupInfo(V2Group group) {
-			if (group.type == V2Group.TYPE_CROWD && mPendingCrowdId == group.id) {
-				mPendingCrowdId = 0;
-				JNIResponse jniRes = new JNIResponse(
-						CreateCrowdResponse.Result.SUCCESS);
-				Message.obtain(mCallbackHandler, ACCEPT_JOIN_CROWD, jniRes)
-						.sendToTarget();
+			if (group.type == V2Group.TYPE_CROWD) {
+				if (mPendingCrowdId == group.id) {
+					mPendingCrowdId = 0;
+					JNIResponse jniRes = new JNIResponse(
+							CreateCrowdResponse.Result.SUCCESS);
+					Message.obtain(mCallbackHandler, ACCEPT_JOIN_CROWD, jniRes)
+							.sendToTarget();
+				} else {
+					JNIResponse jniRes = new CreateCrowdResponse(group.id,
+							CreateCrowdResponse.Result.SUCCESS);
+					Message.obtain(mCallbackHandler, CREATE_GROUP_MESSAGE,
+							jniRes).sendToTarget();
+				}
 			}
 		}
 
@@ -622,7 +627,7 @@ public class CrowdGroupService extends AbstractHandler {
 			} else {
 				vfList = new ArrayList<VCrowdFile>(list.size());
 			}
-			
+
 			for (FileJNIObject f : list) {
 				VCrowdFile vcf = new VCrowdFile();
 				vcf.setCrowd((CrowdGroup) GlobalHolder.getInstance()
@@ -696,14 +701,16 @@ public class CrowdGroupService extends AbstractHandler {
 				RequestFetchGroupFilesResponse jniRes = new RequestFetchGroupFilesResponse(
 						JNIResponse.Result.SUCCESS);
 				List<VCrowdFile> list = new ArrayList<VCrowdFile>(1);
-				
+
 				VCrowdFile vcf = new VCrowdFile();
-				vcf.setCrowd((CrowdGroup)GlobalHolder.getInstance().getGroupById(GroupType.CHATING.intValue(), gfile.group.id));
+				vcf.setCrowd((CrowdGroup) GlobalHolder.getInstance()
+						.getGroupById(GroupType.CHATING.intValue(),
+								gfile.group.id));
 				vcf.setId(gfile.fileId);
 				list.add(vcf);
-				
+
 				jniRes.setList(list);
-				
+
 				notifyListener(KEY_FILE_REMOVED_NOTIFICATION_LISTNER, 0, 0,
 						jniRes);
 			}
@@ -711,25 +718,4 @@ public class CrowdGroupService extends AbstractHandler {
 
 	}
 
-	class ImRequestCB extends ImRequestCallbackAdapter {
-
-		private Handler mCallbackHandler;
-
-		public ImRequestCB(Handler mCallbackHandler) {
-
-			this.mCallbackHandler = mCallbackHandler;
-		}
-
-		@Override
-		public void OnCreateCrowdCallback(V2Group crowd, int nResult) {
-			if (crowd == null) {
-				return;
-			}
-			JNIResponse jniRes = new CreateCrowdResponse(crowd.id,
-					CreateCrowdResponse.Result.SUCCESS);
-			Message.obtain(mCallbackHandler, CREATE_GROUP_MESSAGE, jniRes)
-					.sendToTarget();
-		}
-
-	}
 }
