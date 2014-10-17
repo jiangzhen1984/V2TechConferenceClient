@@ -166,6 +166,7 @@ public class CrowdMembersActivity extends Activity {
 				Intent i = new Intent(PublicIntent.START_GROUP_CREATE_ACTIVITY);
 				i.addCategory(PublicIntent.DEFAULT_CATEGORY);
 				i.putExtra("cid", crowd.getmGId());
+				i.putExtra("mode", true);
 				startActivity(i);
 			}
 		}

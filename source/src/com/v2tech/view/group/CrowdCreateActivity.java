@@ -49,6 +49,12 @@ import com.v2tech.vo.Group;
 import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.User;
 
+/**
+ * Intent parameters:<br>
+ * mode :  true means in invitation mode, otherwise in create mode
+ * @author 28851274
+ *
+ */
 public class CrowdCreateActivity extends Activity {
 
 	private static final int UPDATE_ATTENDEES = 2;
@@ -90,6 +96,8 @@ public class CrowdCreateActivity extends Activity {
 	private LongSparseArray<View> mSelectedUserViews = new LongSparseArray<View>();
 
 	private int landLayout = PAD_LAYOUT;
+	
+	private boolean isInInvitationMode = false;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -129,6 +137,13 @@ public class CrowdCreateActivity extends Activity {
 		mReturnButton = findViewById(R.id.group_create_return_button);
 		mReturnButton.setOnClickListener(mReturnListener);
 		loadCache();
+		
+		isInInvitationMode = getIntent().getBooleanExtra("mode", false);
+		if (isInInvitationMode) {
+			findViewById(R.id.group_create_input_box).setVisibility(View.GONE);;
+			((TextView)findViewById(R.id.crowd_title)).setText(R.string.group_invitation_title);
+		}
+		
 	}
 
 	@Override
