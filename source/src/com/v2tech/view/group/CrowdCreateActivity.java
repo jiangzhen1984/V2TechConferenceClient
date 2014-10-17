@@ -52,7 +52,7 @@ import com.v2tech.vo.User;
 public class CrowdCreateActivity extends Activity {
 
 	private static final int UPDATE_ATTENDEES = 2;
-	private static final int ACCEPT_JOIN_CROWD = 4;
+	private static final int CREATE_GROUP_MESSAGE = 4;
 	private static final int UPDATE_CROWD_RESPONSE = 5;
 	private static final int START_GROUP_SELECT = 6;
 	private static final int DOING_SELECT_GROUP = 7;
@@ -178,6 +178,7 @@ public class CrowdCreateActivity extends Activity {
 			} else if (crowd.getAuthType() == AuthType.NEVER) {
 				mRuleSpinner.setSelection(2);
 			}
+			mGroupTitleET.setEnabled(false);
 			mGroupTitleET.setText(crowd.getName());
 		}
 	}
@@ -418,7 +419,7 @@ public class CrowdCreateActivity extends Activity {
 				List<User> userList = new ArrayList<User>(mUserList);
 				//Do not add userList to crowd, because this just invitation.
 				cg.createCrowdGroup(crowd, userList, new Registrant(mLocalHandler,
-						ACCEPT_JOIN_CROWD, crowd));
+						CREATE_GROUP_MESSAGE, crowd));
 				view.setEnabled(false);
 			}
 		}
@@ -461,14 +462,13 @@ public class CrowdCreateActivity extends Activity {
 			case UPDATE_ATTENDEES:
 				updateUserToAttendList((User) msg.obj);
 				break;
-			case ACCEPT_JOIN_CROWD: {
+			case CREATE_GROUP_MESSAGE: {
 				JNIResponse recr = (JNIResponse) msg.obj;
 				if (recr.getResult() == JNIResponse.Result.SUCCESS) {
 					CrowdGroup cg = (CrowdGroup) recr.callerObject;
-//					long id = ((CreateCrowdResponse) recr).getGroupId();
-					long id = cg.getmGId();
-//					cg.setGId(id);
-//					cg.setCreateDate(new Date());
+					long id = ((CreateCrowdResponse) recr).getGroupId();
+					cg.setGId(id);
+					cg.setCreateDate(new Date());
 
 					// add group to global cache
 					GlobalHolder.getInstance().addGroupToList(

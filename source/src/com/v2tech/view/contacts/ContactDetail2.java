@@ -20,6 +20,7 @@ import android.view.View.OnTouchListener;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -70,6 +71,8 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 	private MarqueeTextView mSignTV;
 	private TextView mDeptTV;
 	private TextView mCompanyTV;
+	private LinearLayout mSignTVLayout;
+	private LinearLayout mSignTVLine;
 
 	private EditText mNickNameET;
 	private TextView mGroupNameTV;
@@ -232,6 +235,8 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 		mSignTV = (MarqueeTextView) findViewById(R.id.contact_user_detail_user_signature_tv);
 		mDeptTV = (TextView) findViewById(R.id.contact_user_detail_department_tv);
 		mCompanyTV = (TextView) findViewById(R.id.contact_user_detail_company_tv);
+		mSignTVLayout = (LinearLayout) findViewById(R.id.contact_user_detail_nick_name_et_linearlayout);
+		mSignTVLine = (LinearLayout) findViewById(R.id.contact_user_detail_nick_name_et_belowline);
 
 	}
 
@@ -246,6 +251,8 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 			mUpdateContactGroupButton.setVisibility(View.GONE);
 			mAddContactButton.setVisibility(View.VISIBLE);
 			mDeleteContactButton.setVisibility(View.GONE);
+			mSignTVLayout.setVisibility(View.GONE);
+			mSignTVLine.setVisibility(View.GONE);
 		}
 	}
 

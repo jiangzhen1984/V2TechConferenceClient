@@ -13,8 +13,6 @@ import com.V2.jni.GroupRequestCallbackAdapter;
 import com.V2.jni.ind.FileJNIObject;
 import com.V2.jni.ind.GroupFileJNIObject;
 import com.V2.jni.ind.V2Group;
-import com.V2.jni.ind.V2User;
-import com.V2.jni.util.V2Log;
 import com.v2tech.service.jni.CreateCrowdResponse;
 import com.v2tech.service.jni.FileTransStatusIndication;
 import com.v2tech.service.jni.FileTransStatusIndication.FileTransErrorIndication;
@@ -80,7 +78,7 @@ public class CrowdGroupService extends AbstractHandler {
 	 */
 	public void createCrowdGroup(CrowdGroup crowd, List<User> invationUserList,
 			Registrant caller) {
-		this.initTimeoutMessage(ACCEPT_JOIN_CROWD, DEFAULT_TIME_OUT_SECS,
+		this.initTimeoutMessage(CREATE_GROUP_MESSAGE, DEFAULT_TIME_OUT_SECS,
 				caller);
 		StringBuffer sb = new StringBuffer();
 		sb.append("<userlist>");
@@ -550,33 +548,21 @@ public class CrowdGroupService extends AbstractHandler {
 		 * ind.V2Group)
 		 */
 		public void onAddGroupInfo(V2Group group) {
-			if (group.type == V2Group.TYPE_CROWD && mPendingCrowdId == group.id) {
-				mPendingCrowdId = 0;
-				JNIResponse jniRes = new JNIResponse(
-						CreateCrowdResponse.Result.SUCCESS);
-				
-				Message.obtain(mCallbackHandler, ACCEPT_JOIN_CROWD, jniRes)
-						.sendToTarget();
-			}
-			else if(group.type == V2Group.TYPE_CROWD){
-				V2Log.e("CrowdGroupService onAddGroupInfo invoke");
-				JNIResponse jniRes = new JNIResponse(
-						CreateCrowdResponse.Result.SUCCESS);
-				
-				if(group != null && group.creator != null){
-					V2User creator = group.creator;
-					CrowdGroup crowd = new CrowdGroup(group.id, group.name,
-							new User(creator.uid, creator.name), group.createTime);
-					jniRes.callerObject = crowd;
+			if (group.type == V2Group.TYPE_CROWD) {
+				if (mPendingCrowdId == group.id) {
+					mPendingCrowdId = 0;
+					JNIResponse jniRes = new JNIResponse(
+							CreateCrowdResponse.Result.SUCCESS);
+					Message.obtain(mCallbackHandler, ACCEPT_JOIN_CROWD, jniRes)
+							.sendToTarget();
+				} else {
+					JNIResponse jniRes = new CreateCrowdResponse(group.id,
+							CreateCrowdResponse.Result.SUCCESS);
+					Message.obtain(mCallbackHandler, CREATE_GROUP_MESSAGE,
+							jniRes).sendToTarget();
 				}
-				else{
-					V2Log.e("CrowdGroupService onAddGroupInfo ---> get V2Group Object is null");
-					return ;
-				}
-				
-				Message.obtain(mCallbackHandler, ACCEPT_JOIN_CROWD, jniRes)
-				.sendToTarget();
 			}
+
 		}
 
 		/*

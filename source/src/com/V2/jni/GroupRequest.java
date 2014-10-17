@@ -314,7 +314,7 @@ public class GroupRequest {
 	 * @param nStartNum
 	 * @param nSearchNum
 	 */
-	public native void SearchGroup(int eGroupType, String szUnsharpName, int nStartNum, int nSearchNum);
+	public native void searchGroup(int eGroupType, String szUnsharpName, int nStartNum, int nSearchNum);
 	/**
 	 * 
 	 * @param eGroupType
@@ -810,7 +810,7 @@ public class GroupRequest {
 	}
 
 	/**
-	 * The CallBack that refuse apply for join group 拒绝申请加入群回调
+	 * The CallBack that refuse apply for join group 拒绝申请加入群回调 TODO implement
 	 * @param groupType
 	 * @param sGroupInfo
 	 * @param reason
@@ -822,7 +822,7 @@ public class GroupRequest {
 	}
 	
 	/**
-	 * The CallBack that join group failed 加入群失败（如群已经被删除等）
+	 * The CallBack that join group failed 加入群失败（如群已经被删除等）TODO implement
 	 * @param eGroupType
 	 * @param nGroupID
 	 * @param nErrorNo
@@ -856,7 +856,7 @@ public class GroupRequest {
 	 * @param sFileID
 	 * @param sNewName
 	 */
-	private void OnRenameGroupFile(int eGroupType, long nGroupID,
+	private void OnRenameGroupFile(int eGroupType, long nGroupID, 
 			String sFileID, String sNewName) {
 		V2Log.e("GroupRequest UI", "OnGroupCreateWBoard ---> eGroupType :"
 				+ eGroupType + " | nGroupID: " + nGroupID + " | sFileID: "
@@ -896,18 +896,18 @@ public class GroupRequest {
 	
 	
 	/**
-	 * the CallBack after invoked search group  搜索群组回调
+	 * the CallBack after invoked search group  搜索群组回调 TODO implement
 	 * @param eGroupType
 	 * @param InfoXml
 	 */
-	private void onSearchGroup(int eGroupType, String InfoXml){
+	private void OnSearchGroup(int eGroupType, String InfoXml){
 		V2Log.e("GroupRequest UI", "onSearchGroup ---> eGroupType :"
 				+ eGroupType + " | InfoXml: " + InfoXml);
 	}
 	
 	
 	/**
-	 * administrator was removed from group by himself administrator 管理员把自己从组中请出
+	 * administrator was removed from group by himself administrator 管理员把自己从组中请出 TODO implement
 	 * @param eGroupType
 	 * @param nGroupID
 	 * @param nUserID

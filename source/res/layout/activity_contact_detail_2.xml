@@ -161,6 +161,7 @@
                     android:background="@drawable/rounded_corners_of_contact_user_detail_outer"
                     android:orientation="vertical" >
                     <LinearLayout
+                        android:id="@+id/contact_user_detail_nick_name_et_linearlayout"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="1dp"
@@ -190,8 +191,10 @@
                         </EditText>
                     </LinearLayout>
                     <LinearLayout
+                        android:id="@+id/contact_user_detail_nick_name_et_belowline"
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
+                        android:orientation="horizontal"
                         android:background="#c0c0c0" >
                     </LinearLayout>
                     <LinearLayout

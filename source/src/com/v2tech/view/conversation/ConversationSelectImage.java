@@ -1,5 +1,7 @@
 package com.v2tech.view.conversation;
 
+import java.text.DecimalFormat;
+import java.text.Format;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.ExecutorService;
@@ -250,10 +252,16 @@ public class ConversationSelectImage extends Activity {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view,
 					int position, long id) {
-				Intent intent = new Intent();
-				intent.putExtra("checkedImage", pictures.get(position).filePath);
-				setResult(100, intent);
-				finish();
+				int size = (int) (pictures.get(position).fileSize / (double) 1048576); 
+				if(size > 3){
+					Toast.makeText(getApplicationContext(), "图片大小超过了3m无法发送", Toast.LENGTH_SHORT).show();
+				}
+				else{
+					Intent intent = new Intent();
+					intent.putExtra("checkedImage", pictures.get(position).filePath);
+					setResult(100, intent);
+					finish();
+				}
 			}
 		});
 		
