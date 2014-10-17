@@ -198,6 +198,7 @@
                         android:inputType="text"
                         android:maxLength="50"
                         android:paddingBottom="5dp"
+                        android:hint="@string/crowd_create_name_input_hint"
                         android:paddingTop="5dp" >
 
                         <requestFocus />
