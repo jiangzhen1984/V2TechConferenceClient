@@ -33,6 +33,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.V2.jni.V2GlobalEnum;
 import com.V2.jni.util.V2Log;
 import com.v2tech.R;
 import com.v2tech.service.GlobalHolder;
@@ -237,7 +238,7 @@ public class MessageBodyView extends LinearLayout {
 	}
 
 	private void initListener() {
-		mContentContainer.setOnLongClickListener(messageLongClickListener);		
+		mContentContainer.setOnLongClickListener(messageLongClickListener);
 	}
 
 	private void initPopupWindow() {
@@ -287,7 +288,7 @@ public class MessageBodyView extends LinearLayout {
 
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
-		V2Log.d(TAG, "aaaaaaaaaa");
+		V2Log.d(TAG, "onTouchEvent invoking");
 		return super.onTouchEvent(event);
 	}
 
@@ -295,7 +296,8 @@ public class MessageBodyView extends LinearLayout {
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
 		super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 
-        popWindow.getChildAt(0).measure(MeasureSpec.UNSPECIFIED , MeasureSpec.UNSPECIFIED);
+		popWindow.getChildAt(0).measure(MeasureSpec.UNSPECIFIED,
+				MeasureSpec.UNSPECIFIED);
 		popupWindowHeight = popWindow.getChildAt(0).getMeasuredHeight();
 		popupWindowWidth = popWindow.getChildAt(0).getMeasuredWidth();
 	}
@@ -371,8 +373,10 @@ public class MessageBodyView extends LinearLayout {
 				// AudioItem only has one item
 			} else if (item.getType() == VMessageAbstractItem.ITEM_TYPE_LINK_TEXT) {
 				String linkText = ((VMessageLinkTextItem) item).getText();
-				SpannableStringBuilder style=new SpannableStringBuilder(((VMessageLinkTextItem) item).getText()); 
-				style.setSpan(new ForegroundColorSpan(Color.BLUE),0 ,linkText.length() ,Spannable.SPAN_EXCLUSIVE_EXCLUSIVE); 
+				SpannableStringBuilder style = new SpannableStringBuilder(
+						((VMessageLinkTextItem) item).getText());
+				style.setSpan(new ForegroundColorSpan(Color.BLUE), 0,
+						linkText.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 				et.append(style);
 			}
 
@@ -443,7 +447,7 @@ public class MessageBodyView extends LinearLayout {
 
 			@Override
 			public void onClick(View view) {
-				if(item != null){
+				if (item != null) {
 					if (item.isPlaying()) {
 						callback.requestStopAudio(view, mMsg, item);
 					} else {
@@ -770,9 +774,15 @@ public class MessageBodyView extends LinearLayout {
 			actionButton.setImageResource(R.drawable.message_file_pause_button);
 			showProgressLayout = true;
 		} else if (vfi.getState() == VMessageAbstractItem.STATE_FILE_SENDING) {
-			strState = getContext().getResources()
-					.getText(R.string.contact_message_file_item_sending)
-					.toString();
+			// 区分上传与发送
+			if (vfi.getVm().getMsgCode() == V2GlobalEnum.GROUP_TYPE_CROWD)
+				strState = getContext().getResources()
+						.getText(R.string.contact_message_file_item_uploading)
+						.toString();
+			else
+				strState = getContext().getResources()
+						.getText(R.string.contact_message_file_item_sending)
+						.toString();
 			actionButton.setImageResource(R.drawable.message_file_pause_button);
 			showProgressLayout = true;
 		} else if (vfi.getState() == VMessageAbstractItem.STATE_FILE_PAUSED_SENDING
@@ -791,10 +801,19 @@ public class MessageBodyView extends LinearLayout {
 			failedIcon.setVisibility(View.VISIBLE);
 			actionButton.setVisibility(View.GONE);
 		} else if (vfi.getState() == VMessageAbstractItem.STATE_FILE_DOWNLOADED_FALIED) {
-			strState = getContext()
-					.getResources()
-					.getText(R.string.contact_message_file_item_download_failed)
-					.toString();
+			// 区分上传与发送
+			if (vfi.getVm().getMsgCode() == V2GlobalEnum.GROUP_TYPE_CROWD)
+				strState = getContext()
+						.getResources()
+						.getText(
+								R.string.contact_message_file_item_upload_failed)
+						.toString();
+			else
+				strState = getContext()
+						.getResources()
+						.getText(
+								R.string.contact_message_file_item_download_failed)
+						.toString();
 			// Show failed icon
 			failedIcon.setVisibility(View.VISIBLE);
 			actionButton.setVisibility(View.GONE);
@@ -809,9 +828,15 @@ public class MessageBodyView extends LinearLayout {
 					.toString();
 			actionButton.setVisibility(View.GONE);
 		} else if (vfi.getState() == VMessageAbstractItem.STATE_FILE_SENT) {
-			strState = getContext().getResources()
-					.getText(R.string.contact_message_file_item_sent)
-					.toString();
+			// 区分上传与发送
+			if (vfi.getVm().getMsgCode() == V2GlobalEnum.GROUP_TYPE_CROWD)
+				strState = getContext().getResources()
+						.getText(R.string.contact_message_file_item_uploaded)
+						.toString();
+			else
+				strState = getContext().getResources()
+						.getText(R.string.contact_message_file_item_sent)
+						.toString();
 			actionButton.setVisibility(View.GONE);
 		} else if (vfi.getState() == VMessageAbstractItem.STATE_FILE_DOWNLOADED) {
 			strState = getContext().getResources()
@@ -893,7 +918,7 @@ public class MessageBodyView extends LinearLayout {
 						audioItem.setPlaying(true);
 					}
 				}
-				
+
 				List<VMessageLinkTextItem> linkItems = mMsg.getLinkItems();
 				if (linkItems != null && linkItems.size() > 0) {
 					callback.onMessageClicked(mMsg);

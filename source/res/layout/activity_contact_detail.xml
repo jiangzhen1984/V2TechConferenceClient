@@ -77,7 +77,6 @@
                 android:layout_centerVertical="true"
                 android:layout_marginLeft="@dimen/detail_detail_signature_margin_left"
                 android:layout_marginRight="@dimen/detail_detail_signature_margin_left"
-                android:layout_toLeftOf="@+id/contact_user_detail_head_company"
                 android:layout_toRightOf="@+id/contact_user_detail_head_icon" >
                 <TextView
                     android:id="@+id/contact_user_detail_title"
@@ -85,10 +84,10 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentTop="true"
                     android:ellipsize="marquee"
+                    android:singleLine="true"
                     android:focusable="true"
                     android:focusableInTouchMode="true"
                     android:marqueeRepeatLimit="marquee_forever"
-                    android:singleLine="true"
                     android:text="TextView"
                     android:textColor="@color/activiy_contact_item_color"
                     android:textSize="@dimen/common_item_text_size" />
@@ -107,12 +106,14 @@
                 android:id="@+id/contact_user_detail_head_company"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentRight="true"
-                android:layout_centerVertical="true" >
+                android:layout_centerVertical="true"
+                android:layout_toRightOf="@+id/contact_user_detail_head_name" >
                 <TextView
                     android:id="@+id/contact_user_company"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
                     android:layout_marginRight="10dp"
                     android:text="Company"
                     android:textColor="@color/common_item_text_color"
@@ -121,6 +122,8 @@
                     android:id="@+id/authentication_state"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
                     android:layout_marginRight="40dp"
                     android:text="验证状态"
                     android:textColor="@color/common_item_text_color"
@@ -130,6 +133,7 @@
                     android:id="@+id/access"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
                     android:layout_marginRight="10dp"
                     android:layout_toLeftOf="@+id/refuse"
                     android:background="@drawable/button_bg"
@@ -140,6 +144,8 @@
                     android:id="@+id/refuse"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
                     android:layout_marginRight="40dp"
                     android:background="@drawable/button_bg"
                     android:text="拒绝"

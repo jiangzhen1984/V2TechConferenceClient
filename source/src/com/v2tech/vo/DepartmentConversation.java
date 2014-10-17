@@ -1,6 +1,7 @@
 package com.v2tech.vo;
 
 import com.v2tech.util.DateUtil;
+
 import java.util.Date;
 
 import com.V2.jni.V2GlobalEnum;
@@ -10,6 +11,7 @@ public class DepartmentConversation extends Conversation {
 
 	private Group departmentGroup;
 	private User lastSendUser;
+	private boolean showContact;
 
 	public DepartmentConversation(Group departmentGroup) {
 		if (departmentGroup == null)
@@ -34,21 +36,33 @@ public class DepartmentConversation extends Conversation {
 
 	@Override
 	public CharSequence getMsg() {
-		if (departmentGroup != null) {
-			User u = departmentGroup.getOwnerUser();
-			// TODO need use localization
-			return u == null ? "" : "创建人:" + u.getName();
+		if(showContact)
+			return msg;
+		else{
+			if (departmentGroup != null) {
+				User u = departmentGroup.getOwnerUser();
+				// TODO need use localization
+				return u == null ? "" : "创建人:" + u.getName();
+			}
+			return msg;
 		}
-		return msg;
 	}
 	
 
 	@Override
 	public String getDate() {
-		if (departmentGroup != null && departmentGroup.getCreateDate() != null) {
-			return DateUtil.getStandardDate(departmentGroup.getCreateDate());
+		if(showContact){
+			if(dateLong != null){
+				return DateUtil.getStringDate(Long.valueOf(dateLong));
+			}
+			return super.getDate();
 		}
-		return super.getDate();
+		else{
+			if (departmentGroup != null && departmentGroup.getCreateDate() != null) {
+				return departmentGroup.getStrCreateDate();
+			}
+			return super.getDate();
+		}
 	}
 
 	public User getLastSendUser() {
@@ -65,5 +79,13 @@ public class DepartmentConversation extends Conversation {
 
 	public void setDepartmentGroup(Group departmentGroup) {
 		this.departmentGroup = departmentGroup;
+	}
+	
+	public boolean isShowContact() {
+		return showContact;
+	}
+
+	public void setShowContact(boolean showContact) {
+		this.showContact = showContact;
 	}
 }

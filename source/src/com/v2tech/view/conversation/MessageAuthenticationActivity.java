@@ -307,15 +307,16 @@ public class MessageAuthenticationActivity extends Activity {
 				List<VMessageQualification> list = MessageBuilder
 						.queryQualMessageList(mContext, GlobalHolder
 								.getInstance().getCurrentUser());
-				for (int i = 0; i < list.size(); i++) {
-					VMessageQualification qualification = list.get(i);
-					V2Log.e("MessageAuthenticationActivity loadGroupMessage --> load group message type :"
-							+ qualification.getType().intValue()
-							+ " id is : "
-							+ qualification.getId());
-					mMessageList.add(new ListItemWrapper(qualification));
+				if(list != null){
+					for (int i = 0; i < list.size(); i++) {
+						VMessageQualification qualification = list.get(i);
+						V2Log.e("MessageAuthenticationActivity loadGroupMessage --> load group message type :"
+								+ qualification.getType().intValue()
+								+ " id is : "
+								+ qualification.getId());
+						mMessageList.add(new ListItemWrapper(qualification));
+					}
 				}
-
 				return null;
 			}
 
