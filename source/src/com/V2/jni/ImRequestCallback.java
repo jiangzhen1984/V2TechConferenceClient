@@ -2,7 +2,6 @@ package com.V2.jni;
 
 import java.util.List;
 
-import com.V2.jni.ind.V2Group;
 import com.V2.jni.ind.V2User;
 
 
@@ -89,20 +88,7 @@ public interface ImRequestCallback {
 	 * 
 	 * @param list
 	 */
-	public void OnSearchCrowdCallback(List<V2Group> list);
-	
-	
-	/**
-	 * 
-	 * @param list
-	 */
 	public void OnSearchUserCallback(List<V2User> list);
 	
-	
-	/**
-	 * Current user is kick off by crowd's master
-	 * @param nCrowdId
-	 * @param nAdminId
-	 */
-	public void OnKickCrowd(long nCrowdId, long nAdminId);
+
 }

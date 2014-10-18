@@ -235,10 +235,16 @@ public class MessageAuthenticationActivity extends Activity {
 								i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 								mContext.startActivity(i);
 							} else if (msg.getType() == VMessageQualification.Type.CROWD_APPLICATION) {
+								VMessageQualificationApplicationCrowd amsg = (VMessageQualificationApplicationCrowd) msg;
 								Intent i = new Intent();
 								i.setClass(MessageAuthenticationActivity.this,
 										CrowdApplicantDetailActivity.class);
 								i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+								i.putExtra("cid", amsg.getCrowdGroup()
+										.getmGId());
+								i.putExtra("aid", amsg.getApplicant()
+										.getmUserId());
+								i.putExtra("mid", amsg.getId());
 								mContext.startActivity(i);
 
 							}
@@ -307,13 +313,12 @@ public class MessageAuthenticationActivity extends Activity {
 				List<VMessageQualification> list = MessageBuilder
 						.queryQualMessageList(mContext, GlobalHolder
 								.getInstance().getCurrentUser());
-				if(list != null){
+				if (list != null) {
 					for (int i = 0; i < list.size(); i++) {
 						VMessageQualification qualification = list.get(i);
 						V2Log.e("MessageAuthenticationActivity loadGroupMessage --> load group message type :"
 								+ qualification.getType().intValue()
-								+ " id is : "
-								+ qualification.getId());
+								+ " id is : " + qualification.getId());
 						mMessageList.add(new ListItemWrapper(qualification));
 					}
 				}
@@ -812,7 +817,8 @@ public class MessageAuthenticationActivity extends Activity {
 				}
 				item.mNameTV.setText(vqac.getApplicant().getName());
 				item.mContentTV.setText(mContext
-						.getText(R.string.crowd_applicant_content));
+						.getText(R.string.crowd_applicant_content)
+						+ vqac.getCrowdGroup().getName());
 
 			}
 
@@ -895,6 +901,11 @@ public class MessageAuthenticationActivity extends Activity {
 				if (msg.getType() == VMessageQualification.Type.CROWD_INVITATION) {
 					CrowdGroup cg = ((VMessageQualificationInvitationCrowd) msg)
 							.getCrowdGroup();
+					// Add crowd group to cache, we can't handle this after done
+					// because group information come before done event.
+					GlobalHolder.getInstance().addGroupToList(
+							GroupType.CHATING.intValue(), cg);
+
 					Crowd crowd = new Crowd(cg.getmGId(), cg.getOwnerUser(),
 							cg.getName(), cg.getBrief());
 					crowdService.acceptInvitation(crowd, new Registrant(
@@ -923,9 +934,6 @@ public class MessageAuthenticationActivity extends Activity {
 		}
 		VMessageQualification vq = MessageBuilder.queryQualMessageByCrowdId(
 				mContext, GlobalHolder.getInstance().getCurrentUser(), cg);
-
-		GlobalHolder.getInstance().addGroupToList(GroupType.CHATING.intValue(),
-				cg);
 
 		Intent i = new Intent();
 		i.setAction(PublicIntent.BROADCAST_NEW_CROWD_NOTIFICATION);

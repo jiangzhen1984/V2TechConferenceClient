@@ -288,7 +288,15 @@ public class V2Doc {
 		return pageArray.getPageSize();
 	}
 
+	/**
+	 * Get page according page number.
+	 * @param no from 1 start
+	 * @return
+	 */
 	public Page getPage(int no) {
+		if (no <= 0 || no > pageArray.getPageSize()) {
+			throw new IndexOutOfBoundsException("Page no is incorrect ");
+		}
 		return pageArray.getPage(no);
 	}
 	/**

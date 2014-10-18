@@ -138,6 +138,15 @@ public interface GroupRequestCallback {
 	 * @param group
 	 */
 	public void OnAcceptApplyJoinGroup(V2Group group);
+	
+	
+
+	/**
+	 * Callback of  apply join crowd 
+	 * 
+	 * @param group
+	 */
+	public void OnApplyJoinGroup(V2Group group, V2User user, String reason);
 
 	
 	/**
@@ -176,5 +185,24 @@ public interface GroupRequestCallback {
 	 * @param list
 	 */
 	public void OnAddGroupFile(V2Group group, List<FileJNIObject> list);
+	
+	
+
+	
+	/**
+	 * Call back function which search group
+	 * @param list
+	 * @see GroupRequest#searchGroup(int, String, int, int)
+	 */
+	public void OnSearchCrowdCallback(List<V2Group> list);
+	
+	
+	/**
+	 * Callback function which current user was kicked by crowd owner
+	 * @param groupType
+	 * @param groupId
+	 * @param nUserId should always same with current logged in user
+	 */
+	public void OnKickGroupUser(int groupType, long groupId, long nUserId);
 
 }

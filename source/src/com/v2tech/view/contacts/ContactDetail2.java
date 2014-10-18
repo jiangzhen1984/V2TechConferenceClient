@@ -119,7 +119,7 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 		List<Group> friendGroup = GlobalHolder.getInstance().getGroup(
 				GroupType.CONTACT.intValue());
 		for (Group group : friendGroup) {
-			if ((belongs = group.findUser(u, group)) != null) {
+			if ((belongs = group.findUser(u)) != null) {
 				isRelation = true;
 				break;
 			}

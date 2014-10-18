@@ -95,8 +95,25 @@ public abstract class GroupRequestCallbackAdapter implements
 		
 	}
 	
+
+	public void OnApplyJoinGroup(V2Group group, V2User user, String reason) {
+		
+	}
 	
 	
+	public void OnSearchCrowdCallback(List<V2Group> list) {
+		
+	}
+
+	@Override
+	public void OnAddGroupFile(V2Group group, List<FileJNIObject> list) {
+		
+	}
+
+	@Override
+	public void OnKickGroupUser(int groupType, long groupId, long nUserId) {
+		
+	}
 	
 	
 	

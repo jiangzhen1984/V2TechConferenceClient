@@ -13,6 +13,8 @@ import com.V2.jni.GroupRequestCallbackAdapter;
 import com.V2.jni.ind.FileJNIObject;
 import com.V2.jni.ind.GroupFileJNIObject;
 import com.V2.jni.ind.V2Group;
+import com.V2.jni.ind.V2User;
+import com.V2.jni.util.V2Log;
 import com.v2tech.service.jni.CreateCrowdResponse;
 import com.v2tech.service.jni.FileTransStatusIndication;
 import com.v2tech.service.jni.FileTransStatusIndication.FileTransErrorIndication;
@@ -23,6 +25,7 @@ import com.v2tech.util.GlobalConfig;
 import com.v2tech.vo.Crowd;
 import com.v2tech.vo.CrowdGroup;
 import com.v2tech.vo.Group;
+import com.v2tech.vo.VMessageQualification;
 import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.User;
 import com.v2tech.vo.VCrowdFile;
@@ -53,6 +56,7 @@ public class CrowdGroupService extends AbstractHandler {
 	private static final int KEY_CANCELLED_LISTNER = 1;
 	private static final int KEY_FILE_TRANS_STATUS_NOTIFICATION_LISTNER = 2;
 	private static final int KEY_FILE_REMOVED_NOTIFICATION_LISTNER = 3;
+	private static final int KEY_FILE_NEW_NOTIFICATION_LISTNER = 4;
 
 	private GroupRequestCB grCB;
 	private FileRequestCB frCB;
@@ -216,7 +220,8 @@ public class CrowdGroupService extends AbstractHandler {
 		}
 		mPendingCrowdId = crowd.getId();
 		GroupRequest.getInstance().applyJoinGroup(
-				Group.GroupType.CHATING.intValue(), crowd.toXml(), additional);
+				Group.GroupType.CHATING.intValue(), crowd.toXml(),
+				additional == null ? "" : additional);
 		mPendingCrowdId = 0;
 		sendResult(caller, new JNIResponse(JNIResponse.Result.SUCCESS));
 	}
@@ -401,17 +406,12 @@ public class CrowdGroupService extends AbstractHandler {
 
 		this.initTimeoutMessage(REMOVE_FILES_CROWD, DEFAULT_TIME_OUT_SECS,
 				caller);
-		StringBuffer sb = new StringBuffer();
-		sb.append("<filelist>");
 		for (VCrowdFile f : files) {
-			sb.append("<file  id='" + f.getId() + "'  size='" + f.getSize()
-					+ "' uploader='" + f.getUploader().getmUserId() + "' />");
+			GroupRequest.getInstance().delGroupFile(
+					crowd.getGroupType().intValue(), crowd.getmGId(),
+					f.getId());
 		}
-		sb.append("</filelist>");
 
-		GroupRequest.getInstance()
-				.delGroupFile(crowd.getGroupType().intValue(), crowd.getmGId(),
-						sb.toString());
 	}
 
 	/**
@@ -450,7 +450,11 @@ public class CrowdGroupService extends AbstractHandler {
 		case OPERATION_RESUME_SEND:
 			FileRequest.getInstance().resumeSendFile(vf.getId());
 			break;
-		case OPERATION_START_SEND:
+		case OPERATION_START_SEND: {
+			GroupRequest.getInstance().groupUploadFile(
+					vf.getCrowd().getGroupType().intValue(),
+					vf.getCrowd().getmGId(), vf.toXml());
+		}
 			break;
 		default:
 			break;
@@ -494,6 +498,21 @@ public class CrowdGroupService extends AbstractHandler {
 		unRegisterListener(KEY_FILE_REMOVED_NOTIFICATION_LISTNER, h, what, obj);
 	}
 
+	/**
+	 * Register listener for group new file notification.<br>
+	 * 
+	 * @param h
+	 * @param what
+	 * @param obj
+	 */
+	public void registerNewFileNotification(Handler h, int what, Object obj) {
+		registerListener(KEY_FILE_NEW_NOTIFICATION_LISTNER, h, what, obj);
+	}
+
+	public void unRegisterNewFileNotification(Handler h, int what, Object obj) {
+		unRegisterListener(KEY_FILE_NEW_NOTIFICATION_LISTNER, h, what, obj);
+	}
+
 	class GroupRequestCB extends GroupRequestCallbackAdapter {
 		private Handler mCallbackHandler;
 
@@ -511,6 +530,15 @@ public class CrowdGroupService extends AbstractHandler {
 					CreateCrowdResponse.Result.SUCCESS);
 			Message.obtain(mCallbackHandler, ACCEPT_JOIN_CROWD, jniRes)
 					.sendToTarget();
+		}
+
+		@Override
+		public void OnAcceptApplyJoinGroup(V2Group group) {
+			JNIResponse jniRes = new JNIResponse(
+					CreateCrowdResponse.Result.SUCCESS);
+			Message.obtain(mCallbackHandler, ACCEPT_APPLICATION_CROWD, jniRes)
+					.sendToTarget();
+
 		}
 
 		@Override
@@ -638,7 +666,11 @@ public class CrowdGroupService extends AbstractHandler {
 				vcf.setName(f.fileName);
 				vcf.setSize(f.fileSize);
 				vcf.setUrl(f.url);
-				vcf.setUploader(GlobalHolder.getInstance().getUser(f.user.uid));
+				// If event is removed file, then user is null
+				if (f.user != null) {
+					vcf.setUploader(GlobalHolder.getInstance().getUser(
+							f.user.uid));
+				}
 				vcf.setPath(GlobalConfig.getGlobalPath() + "/files/" + group.id
 						+ "/" + f.fileName);
 				vfList.add(vcf);
@@ -648,6 +680,12 @@ public class CrowdGroupService extends AbstractHandler {
 
 		@Override
 		public void OnAddGroupFile(V2Group group, List<FileJNIObject> list) {
+			// Use fetch group file object as result
+			RequestFetchGroupFilesResponse jniRes = new RequestFetchGroupFilesResponse(
+					JNIResponse.Result.SUCCESS);
+			jniRes.setList(convertList(group, list));
+			notifyListener(KEY_FILE_NEW_NOTIFICATION_LISTNER, 0, 0, jniRes);
+
 		}
 	}
 

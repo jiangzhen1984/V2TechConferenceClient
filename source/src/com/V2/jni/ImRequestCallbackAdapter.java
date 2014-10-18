@@ -2,7 +2,6 @@ package com.V2.jni;
 
 import java.util.List;
 
-import com.V2.jni.ind.V2Group;
 import com.V2.jni.ind.V2User;
 
 public abstract class ImRequestCallbackAdapter implements ImRequestCallback {
@@ -46,20 +45,10 @@ public abstract class ImRequestCallbackAdapter implements ImRequestCallback {
 
 
 	@Override
-	public void OnSearchCrowdCallback(List<V2Group> list) {
-		
-	}
-
-	@Override
 	public void OnSearchUserCallback(List<V2User> list) {
 		
 	}
 
-	
-
-	public void OnKickCrowd(long nCrowdId, long nAdminId){
-		
-	}
 	
 	
 }

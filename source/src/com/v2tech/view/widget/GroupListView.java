@@ -43,14 +43,53 @@ import com.v2tech.vo.User;
 public class GroupListView extends ListView {
 
 	private Context mContext;
+
+	/**
+	 * This list hold all group data and use to search
+	 */
 	private List<Group> mGroupList;
+
+	/**
+	 * This list use to hold origin data.<br>
+	 * Once use clear searched text, we use this list recover origin list First
+	 * time to show list, this list is same with mFilterList. If use input
+	 * searched, then use mFilterList to show seached list
+	 */
 	private List<Item> mBaseList;
+
+	/**
+	 * This list use to display current list collection. First time this is same
+	 * with mBaseList. But use input searched text, then this list is searched
+	 * text.
+	 */
 	private List<Item> mFilterList;
+
 	private LocalAdapter adapter;
+
+	/**
+	 * Searched filter
+	 */
 	private LocalFilter filter;
+
+	/**
+	 * Flag to indicate show check box or not
+	 */
 	private boolean mCBFlag;
+
+	/**
+	 * To holder outer listener
+	 */
 	private GroupListViewListener mListener;
+
+	/**
+	 * 
+	 */
 	private OnScrollListener mOutScrollListener;
+
+	/**
+	 * Flag to indicate doesn't show current logged in User
+	 */
+	private boolean mIgnoreCurrentUser;
 
 	private int mFirstVisibleIndex;
 	private int mLastVisibleIndex;
@@ -69,6 +108,7 @@ public class GroupListView extends ListView {
 	 * Use to record all user items which belongs to same group. key : group id
 	 */
 	private LongSparseArray<LongSparseArray<Item>> mGroupItemUserMap;
+
 	private boolean mIsInFilter;
 
 	public GroupListView(Context context, AttributeSet attrs, int defStyle) {
@@ -121,6 +161,15 @@ public class GroupListView extends ListView {
 	 */
 	public void setShowedCheckedBox(boolean flag) {
 		mCBFlag = flag;
+	}
+
+	/**
+	 * Set flag to hide current logged user or not
+	 * 
+	 * @param flag
+	 */
+	public void setIgnoreCurrentUser(boolean flag) {
+		this.mIgnoreCurrentUser = flag;
 	}
 
 	public GroupListViewListener getListener() {
@@ -313,7 +362,6 @@ public class GroupListView extends ListView {
 		adapter.notifyDataSetChanged();
 	}
 
-	
 	public void selectUser(List<User> userList) {
 		if (userList == null) {
 			return;
@@ -346,8 +394,7 @@ public class GroupListView extends ListView {
 		// FIXME optimze for avatar
 		adapter.notifyDataSetChanged();
 	}
-	
-	
+
 	/**
 	 * Update user item check status according to flag
 	 * 
@@ -721,6 +768,13 @@ public class GroupListView extends ListView {
 		Collections.sort(list);
 		for (int i = 0; i < list.size(); i++) {
 			User u = list.get(i);
+			// check ignore current logged use flag
+			if (mIgnoreCurrentUser
+					&& u.getmUserId() == GlobalHolder.getInstance()
+							.getCurrentUserId()) {
+				continue;
+			}
+
 			if (mFilterList.size() == pos + 1) {
 				mFilterList.add(getItem(g, u));
 			} else {
@@ -816,8 +870,6 @@ public class GroupListView extends ListView {
 		}
 
 	};
-
-
 
 	class LocalAdapter extends BaseAdapter implements Filterable {
 
@@ -921,6 +973,12 @@ public class GroupListView extends ListView {
 
 	}
 
+	/**
+	 * Item response Listener
+	 * 
+	 * @author jiangzhen
+	 * 
+	 */
 	public interface GroupListViewListener {
 		public void onItemClicked(AdapterView<?> parent, View view,
 				int position, long id, Item item);
@@ -948,6 +1006,8 @@ public class GroupListView extends ListView {
 		private Group mGroup;
 		private boolean isExpaned;
 		private boolean isChecked;
+		private boolean searchedCurrentUser;
+		private boolean existCurrentUser;
 
 		public GroupItem(Group group) {
 			this.mGroup = group;
@@ -989,6 +1049,22 @@ public class GroupListView extends ListView {
 		@Override
 		public void setChecked(boolean flag) {
 			isChecked = flag;
+		}
+
+		public boolean isSearchedCurrentUser() {
+			return searchedCurrentUser;
+		}
+
+		public void setSearchedCurrentUser(boolean searchedCurrentUser) {
+			this.searchedCurrentUser = searchedCurrentUser;
+		}
+
+		public boolean isExistCurrentUser() {
+			return existCurrentUser;
+		}
+
+		public void setExistCurrentUser(boolean existCurrentUser) {
+			this.existCurrentUser = existCurrentUser;
 		}
 
 	}
@@ -1088,7 +1164,7 @@ public class GroupListView extends ListView {
 				mRoot.findViewById(R.id.user_view_root)
 						.setVisibility(View.GONE);
 			} else {
-				
+
 				View userRoot = mRoot.findViewById(R.id.user_view_root);
 				userRoot.setVisibility(View.VISIBLE);
 				if (paddingFlag) {
@@ -1138,13 +1214,13 @@ public class GroupListView extends ListView {
 				mCb.setVisibility(View.VISIBLE);
 				mCb.setChecked(mItem.isChecked());
 				mCb.setOnClickListener(mCheckBoxListener);
-				
+
 				int maxWidth = 0;
 				int[] cbL = new int[2];
 				mCb.getLocationInWindow(cbL);
 				maxWidth = cbL[0] - nameLo[0] - 35;
 				mUserSignatureTV.setMaxWidth(maxWidth);
-				
+
 			} else {
 				mRoot.findViewById(R.id.user_check_view).setVisibility(
 						View.GONE);
@@ -1232,13 +1308,39 @@ public class GroupListView extends ListView {
 		}
 
 		public void updateUserStatus() {
-			Group g = ((Group) ((GroupItem) mItem).getObject());
+			GroupItem gi = ((GroupItem) mItem);
+			Group g = ((Group) gi.getObject());
 			TextView tv = ((TextView) mRoot
 					.findViewById(R.id.group_online_statist));
-			tv.setText(g.getOnlineUserCount() + " / " + g.getUserCount());
+			int count = g.getUserCount();
+			int onlineCount = 0;
+			Set<User> sets = g.getOnlineUserSet();
+			for (User u : sets) {
+				if ((u.getmStatus() == User.Status.ONLINE
+						|| u.getmStatus() == User.Status.BUSY
+						|| u.getmStatus() == User.Status.DO_NOT_DISTURB || u
+						.getmStatus() == User.Status.LEAVE)
+						&& ((!mIgnoreCurrentUser || (mIgnoreCurrentUser && u
+								.getmUserId() != GlobalHolder.getInstance()
+								.getCurrentUserId())))) {
+					onlineCount++;
+				}
+			}
+
+			if (!gi.searchedCurrentUser && mIgnoreCurrentUser) {
+				if (g.findUser(GlobalHolder.getInstance().getCurrentUser()) != null) {
+					gi.existCurrentUser = true;
+				}
+
+				gi.searchedCurrentUser = true;
+			}
+
+			tv.setText(onlineCount
+					+ " / "
+					+ ((mIgnoreCurrentUser && gi.existCurrentUser) ? count - 1
+							: count));
 			tv.invalidate();
 		}
-
 	}
 
 }

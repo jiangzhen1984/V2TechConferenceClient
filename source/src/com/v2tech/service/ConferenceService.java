@@ -553,10 +553,6 @@ public class ConferenceService extends DeviceService {
 			}
 		}
 
-		@Override
-		public void OnAddGroupFile(V2Group group, List<FileJNIObject> list) {
-
-		}
 	}
 
 	class MixerRequestCB implements VideoMixerRequestCallback {

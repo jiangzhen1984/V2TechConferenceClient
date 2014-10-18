@@ -127,6 +127,7 @@ public class ConferenceCreateActivity extends Activity {
 		mGroupListView.setShowedCheckedBox(true);
 		mGroupListView.setTextFilterEnabled(true);
 		mGroupListView.setListener(listViewListener);
+		mGroupListView.setIgnoreCurrentUser(true);
 
 		mAttendeeContainer = (LinearLayout) findViewById(R.id.conference_attendee_container);
 		mAttendeeContainer.setGravity(Gravity.CENTER);

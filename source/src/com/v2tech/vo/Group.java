@@ -236,21 +236,39 @@ public abstract class Group implements Comparable<Group> {
 		}
 	}
 
-	public Group findUser(User u, Group g) {
-		List<User> list = g.getUsers();
+	/**
+	 * Find use in current group and childs group.<br>
+	 * If find and return first belongs group.
+	 * @param u
+	 * @return
+	 */
+	public Group findUser(User u) {
+		if (u == null) {
+			return null;
+		}
+		return internalSearchUser(null, u);
+	}
+	
+	public Group internalSearchUser(Group g, User user) {
+		if (g == null) {
+			g = this;
+		}
+		List<User> list = this.getUsers();
 		for (User tu : list) {
-			if (tu.getmUserId() == u.getmUserId()) {
+			if (tu.getmUserId() == user.getmUserId()) {
 				return g;
 			}
 		}
-		for (int i = 0; i < mChild.size(); i++) {
-			Group subG = mChild.get(i);
-			Group gg = findUser(u, subG);
+		List<Group> subGroups = g.getChildGroup();
+		for (int i = 0; i < subGroups.size(); i++) {
+			Group subG = subGroups.get(i);
+			Group gg = internalSearchUser(subG, user);
 			if (gg != null) {
 				return gg;
 			}
 		}
 		return null;
+		
 	}
 
 	public List<User> searchUser(String text) {
@@ -276,6 +294,7 @@ public abstract class Group implements Comparable<Group> {
 	}
 
 	public int getOnlineUserCount() {
+		//FIXME should optimze data structure
 		Set<User> counter = new HashSet<User>();
 		this.populateUser(this, counter);
 
@@ -289,6 +308,13 @@ public abstract class Group implements Comparable<Group> {
 			}
 		}
 		return c;
+	}
+	
+	
+	public Set<User> getOnlineUserSet() {
+		Set<User> counter = new HashSet<User>();
+		this.populateUser(this, counter);
+		return counter;
 	}
 
 	public int getUserCount() {

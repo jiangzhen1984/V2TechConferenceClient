@@ -6,10 +6,8 @@ import java.util.Date;
 import java.util.List;
 
 import android.content.Context;
-import android.text.TextUtils;
 import android.util.Log;
 
-import com.V2.jni.ind.V2Group;
 import com.V2.jni.ind.V2User;
 import com.V2.jni.util.V2Log;
 import com.V2.jni.util.XmlAttributeExtractor;
@@ -403,53 +401,6 @@ public class ImRequest {
 		Log.e("ImRequest UI", "OnUpdateDownloadEnd:" + error);
 	}
 
-	private void OnKickCrowd(long nCrowdId, long nAdminId) {
-		Log.e("ImRequest UI", "OnKickCrowd:" + nCrowdId);
-		for (int i = 0; i <this.mCallbacks.size(); i++) {
-			WeakReference<ImRequestCallback> wf = this.mCallbacks.get(i);
-			Object obj = wf.get();
-			if (obj != null) {
-				ImRequestCallback callback = (ImRequestCallback) obj;
-				callback.OnKickCrowd(nCrowdId, nAdminId);
-			}
-		}
-	}
-
-	/**
-	 * 10-10 16:12:06.997: E/ImRequest UI(24208):
-	 * OnSearchCrowd::<crowdlist><crowd announcement='' authtype='1'
-	 * creatornickname='zhao1' creatoruserid='14' id='44' name='13269997886'
-	 * size='500' summary=''/><crowd announcement='' authtype='0'
-	 * creatornickname='test3' creatoruserid='1290' id='481' name='1' size='0'
-	 * summary=''/><crowd announcement='' authtype='0' creatornickname='test3'
-	 * creatoruserid='1290' id='491' name='11' size='0' summary=''/><crowd
-	 * announcement='' authtype='0' creatornickname='test3' creatoruserid='1290'
-	 * id='492' name='12' size='0' summary=''/><crowd announcement=''
-	 * authtype='0' creatornickname='long3' creatoruserid='11749' id='4123'
-	 * name='long1' size='500' summary=''/><crowd announcement='' authtype='0'
-	 * creatornickname='test1' creatoruserid='1246' id='4138' name='111'
-	 * size='500' summary=''/><crowd
-	 * announcement='idsfiposdaippafsjgjlkfdsjglfdkjKjjjjjjjj' authtype='1'
-	 * creatornickname='zhao2' creatoruserid='15' id='4139' name='43214321432'
-	 * size='500' summary=
-	 * 'idsfiposdaippafsjgjlkfdsjglfdkjKjjjjjjjjafdsafsdafdsafdsafdsafds43214321443243212121'/><crow
-	 * d announcement='' authtype='0' creatornickname='zhao2' creatoruserid='15'
-	 * id='4141' name='432143214' size='500' summary=''/></crowdlist>
-	 * 
-	 * @param InfoXml
-	 */
-	private void OnSearchCrowd(String InfoXml) {
-		Log.e("ImRequest UI", "OnSearchCrowd::" + InfoXml);
-		List<V2Group> list = XmlAttributeExtractor.parseCrowd(InfoXml);
-		for (int i = 0; i <this.mCallbacks.size(); i++) {
-			WeakReference<ImRequestCallback> wf = this.mCallbacks.get(i);
-			Object obj = wf.get();
-			if (obj != null) {
-				ImRequestCallback callback = (ImRequestCallback) obj;
-				callback.OnSearchCrowdCallback(list);
-			}
-		}
-	}
 
 	private void Oncrowdfile(long nCrowdId, String InfoXml) {
 		Log.e("ImRequest UI", "Oncrowdfile:" + nCrowdId);

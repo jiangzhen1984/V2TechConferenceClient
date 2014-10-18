@@ -22,6 +22,8 @@ import com.V2.jni.ind.V2User;
 
 public class XmlAttributeExtractor {
 
+	
+	
 	public static String extract(String str, String startStr, String endStr) {
 		if (startStr == null || endStr == null || startStr.isEmpty()
 				|| endStr.isEmpty()) {
@@ -37,6 +39,34 @@ public class XmlAttributeExtractor {
 			return null;
 		}
 		return str.substring(start + len, end);
+	}
+	
+	/**
+	 * <crowd announcement='ss' authtype='0' creatoruserid='12176' id='423' name='ccc' size='500' summary='bb'/>
+
+	 * @param str
+	 * @param startStr   just input creatoruserid 
+	 * @return
+	 */
+	public static String extractAttribute(String str, String attribute) {
+		if (str == null || attribute == null || attribute.isEmpty()
+				) {
+			return null;
+		}
+		String key =" "+ attribute;
+		int start = str.indexOf(key);
+		if (start == -1) {
+			return null;
+		}
+		int len = key.length()+ 2;
+		int end = str.indexOf(" ", start + len);
+		if (end == -1) {
+			end = str.indexOf("/", start + len);
+			if (end  == -1) {
+				return null;
+			}
+		}
+		return str.substring(start + len, end - 1);
 	}
 
 	/**

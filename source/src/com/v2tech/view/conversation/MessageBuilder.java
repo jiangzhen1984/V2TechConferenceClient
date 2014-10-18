@@ -86,7 +86,8 @@ public class MessageBuilder {
 				new Date(GlobalConfig.getGlobalServerTime()));
 		VMessageAudioItem item = new VMessageAudioItem(vm, audioPath, seconds);
 		item.setState(VMessageAbstractItem.STATE_READED);
-		item.setUuid(audioPath.substring(audioPath.lastIndexOf("/") + 1 , audioPath.lastIndexOf(".")));
+		item.setUuid(audioPath.substring(audioPath.lastIndexOf("/") + 1,
+				audioPath.lastIndexOf(".")));
 		return item.getVm();
 	}
 
@@ -129,7 +130,8 @@ public class MessageBuilder {
 		// 判断数据库是否存在
 		long groupType = vm.getMsgCode();
 		long groupID = vm.getGroupId();
-		if (!MessageLoader.isTableExist(context, groupType, groupID, remote, type))
+		if (!MessageLoader.isTableExist(context, groupType, groupID, remote,
+				type))
 			return null;
 		// 直接将xml存入数据库中，方便以后扩展。
 		ContentValues values = new ContentValues();
@@ -198,7 +200,8 @@ public class MessageBuilder {
 
 		long groupType = vm.getMsgCode();
 		long groupID = vm.getGroupId();
-		if (!MessageLoader.isTableExist(context, groupType, groupID, remote, type))
+		if (!MessageLoader.isTableExist(context, groupType, groupID, remote,
+				type))
 			return null;
 		ContentValues values = new ContentValues();
 
@@ -591,10 +594,10 @@ public class MessageBuilder {
 			VMessageQualificationApplicationCrowd crowdApplyMsg = (VMessageQualificationApplicationCrowd) msg;
 			values.put(
 					ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_FROM_USER_ID,
-					GlobalHolder.getInstance().getCurrentUserId());
+					crowdApplyMsg.getApplicant().getmUserId());
 			values.put(
 					ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_TO_USER_ID,
-					crowdApplyMsg.getApplicant().getmUserId());
+					GlobalHolder.getInstance().getCurrentUserId());
 			values.put(
 					ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_REMOTE_USER_ID,
 					crowdApplyMsg.getApplicant().getmUserId());
@@ -616,6 +619,8 @@ public class MessageBuilder {
 			values.put(
 					ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_BASE_INFO,
 					crowdApplyMsg.getCrowdGroup().toXml());
+			values.put(ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_ID,
+					crowdApplyMsg.getCrowdGroup().getmGId());
 			uri = mContext.getContentResolver().insert(
 					ContentDescriptor.HistoriesCrowd.CONTENT_URI, values);
 			crowdApplyMsg.setId(ContentUris.parseId(uri));
@@ -705,9 +710,7 @@ public class MessageBuilder {
 				selectionArgs);
 		return updates;
 	}
-	
-	
-	
+
 	/**
 	 * Query qualification message by crowd group id and user id
 	 * 
@@ -716,15 +719,14 @@ public class MessageBuilder {
 	 * @param cg
 	 * @return
 	 */
-	public static VMessageQualification queryQualMessageById(
-			Context context, long id) {
+	public static VMessageQualification queryQualMessageById(Context context,
+			long id) {
 
 		DataBaseContext mContext = new DataBaseContext(context);
-		
 
-		String selection = ""
-				+ ContentDescriptor.HistoriesCrowd.Cols.ID+" = ? ";
-		String[] selectionArgs = new String[] {id+""};
+		String selection = "" + ContentDescriptor.HistoriesCrowd.Cols.ID
+				+ " = ? ";
+		String[] selectionArgs = new String[] { id + "" };
 		String sortOrder = ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_SAVEDATE
 				+ " desc";
 		Cursor cursor = mContext.getContentResolver().query(
@@ -736,15 +738,13 @@ public class MessageBuilder {
 			return null;
 		VMessageQualification msg = null;
 		if (cursor.moveToNext()) {
-			msg  =extraMsgFromCursor(cursor);
+			msg = extraMsgFromCursor(cursor);
 		}
 		cursor.close();
 
 		return msg;
 
 	}
-	
-	
 
 	/**
 	 * Query qualification message by crowd group id and user id
@@ -784,7 +784,7 @@ public class MessageBuilder {
 			return null;
 		VMessageQualification msg = null;
 		if (cursor.moveToNext()) {
-			msg  =extraMsgFromCursor(cursor);
+			msg = extraMsgFromCursor(cursor);
 		}
 		cursor.close();
 
@@ -824,68 +824,68 @@ public class MessageBuilder {
 
 		if (cursor == null || cursor.getCount() <= 0)
 			return null;
-		
+
 		while (cursor.moveToNext()) {
 			VMessageQualification qualification = extraMsgFromCursor(cursor);
-			if(qualification != null)
+			if (qualification != null)
 				list.add(qualification);
 		}
 		cursor.close();
 		return list;
 	}
-	
-	
+
 	/**
 	 * according Cursor Object , extract VMessageQualification Object.
+	 * 
 	 * @param cursor
 	 * @return
 	 */
 	public static VMessageQualification extraMsgFromCursor(Cursor cursor) {
 		String xml = cursor.getString(cursor.getColumnIndex("CrowdXml"));
-		if(TextUtils.isEmpty(xml)){
+		if (TextUtils.isEmpty(xml)) {
 			V2Log.e("MessageBuilder extraMsgFromCursor -->pase the CrowdXml failed.. XML is null");
 			return null;
 		}
-		
+
 		V2Group v2Group = XmlAttributeExtractor.parseCrowd(xml).get(0);
 		if (v2Group == null || v2Group.creator == null) {
 			V2Log.e("MessageBuilder extraMsgFromCursor --> pase the CrowdXml failed..v2Group or v2Group.createor is null");
 			return null;
 		}
-		
+
 		CrowdGroup group = null;
-		
+
 		long mid = cursor
 				.getLong(cursor.getColumnIndex(HistoriesCrowd.Cols.ID));
 
-		long crowdGroupID = cursor
-				.getLong(cursor.getColumnIndex("CrowdID"));
+		long crowdGroupID = cursor.getLong(cursor.getColumnIndex("CrowdID"));
 		long saveDate = cursor.getLong(cursor.getColumnIndex("SaveDate"));
-		int authType = cursor
-				.getInt(cursor.getColumnIndex("CrowdAuthType"));
+		int authType = cursor.getInt(cursor.getColumnIndex("CrowdAuthType"));
 		int joinState = cursor.getInt(cursor.getColumnIndex("JoinState"));
 		int readState = cursor.getInt(cursor.getColumnIndex("ReadState"));
 		String applyReason = cursor.getString(cursor
 				.getColumnIndex("ApplyReason"));
 		String refuseReason = cursor.getString(cursor
 				.getColumnIndex("RefuseReason"));
-		group = new CrowdGroup(crowdGroupID, v2Group.name, GlobalHolder
-				.getInstance().getUser(v2Group.owner.uid), new Date(
-				saveDate));
+		group = (CrowdGroup) GlobalHolder.getInstance().getGroupById(
+				crowdGroupID);
+		if (group == null) {
+			group = new CrowdGroup(crowdGroupID, v2Group.name, GlobalHolder
+					.getInstance().getUser(v2Group.owner.uid), new Date(
+					saveDate));
+		}
 		group.setBrief(v2Group.brief);
 		group.setAnnouncement(v2Group.announce);
 		group.setAuthType(CrowdGroup.AuthType.fromInt(authType));
 
-		long fromUserID = cursor.getLong(cursor
-				.getColumnIndex("FromUserID"));
+		long fromUserID = cursor.getLong(cursor.getColumnIndex("FromUserID"));
 		long toUserID = cursor.getLong(cursor.getColumnIndex("ToUserID"));
 		if (v2Group.creator.uid == fromUserID) {
 			VMessageQualificationInvitationCrowd inviteCrowd = new VMessageQualificationInvitationCrowd(
 					group, GlobalHolder.getInstance().getUser(toUserID));
 			inviteCrowd.setRejectReason(refuseReason);
-			inviteCrowd
-					.setQualState(VMessageQualification.QualificationState
-							.fromInt(joinState));
+			inviteCrowd.setQualState(VMessageQualification.QualificationState
+					.fromInt(joinState));
 			inviteCrowd.setReadState(VMessageQualification.ReadState
 					.fromInt(readState));
 			inviteCrowd.setId(mid);
@@ -896,9 +896,8 @@ public class MessageBuilder {
 					group, GlobalHolder.getInstance().getUser(fromUserID));
 			applyCrowd.setApplyReason(applyReason);
 			applyCrowd.setRejectReason(refuseReason);
-			applyCrowd
-					.setQualState(VMessageQualification.QualificationState
-							.fromInt(joinState));
+			applyCrowd.setQualState(VMessageQualification.QualificationState
+					.fromInt(joinState));
 			applyCrowd.setReadState(VMessageQualification.ReadState
 					.fromInt(readState));
 			applyCrowd.setId(mid);
@@ -909,26 +908,27 @@ public class MessageBuilder {
 
 	/**
 	 * Delete a qualification message by VMessageQualification Object id
+	 * 
 	 * @param context
 	 * @param id
 	 * @return
 	 */
 	public static boolean deleteQualMessage(Context context, long id) {
 		DataBaseContext mContext = new DataBaseContext(context);
-		String where = ContentDescriptor.HistoriesCrowd.Cols.ID
-				+ " = ?";
+		String where = ContentDescriptor.HistoriesCrowd.Cols.ID + " = ?";
 		String[] selectionArgs = new String[] { String.valueOf(id) };
 		int ret = mContext.getContentResolver().delete(
 				ContentDescriptor.HistoriesCrowd.CONTENT_URI, where,
 				selectionArgs);
-		if(ret >= 0)
+		if (ret >= 0)
 			return true;
 		else
 			return false;
 	}
-	
+
 	/**
 	 * Delete a qualification message by User Object
+	 * 
 	 * @param context
 	 * @param user
 	 */

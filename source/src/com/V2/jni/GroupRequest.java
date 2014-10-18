@@ -1,13 +1,13 @@
 package com.V2.jni;
 
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import android.content.Context;
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.V2.jni.ind.FileJNIObject;
 import com.V2.jni.ind.V2Group;
@@ -181,6 +181,7 @@ public class GroupRequest {
 
 	/**
 	 * accept application of join group
+	 * 
 	 * @param groupType
 	 * @param nGroupID
 	 * @param nUserID
@@ -267,34 +268,34 @@ public class GroupRequest {
 
 	/**
 	 * Upload group file
+	 * 
 	 * @param groupType
 	 * @param nGroupId
 	 * @param sXml
+	 *            {@code <file encrypttype='1' id='C2A65B9B-63C7-4C9E-A8DD-F15F74ABA6CA'
+	 * name='83025aafa40f4bfb24fdb8d1034f78f0f7361801.gif' size='497236'
+	 * time='1411112464' uploader='11029' />}
 	 */
 	public native void groupUploadFile(int groupType, long nGroupId, String sXml);
-	
+
 	/**
 	 * Upload existing files on server to group 从服务器已有的文件上传到组中
+	 * 
 	 * @param groupType
 	 * @param nGroupId
 	 * @param sFileID
 	 * @param sFileInfo
 	 */
-	public native void groupUploadFileFromServer(int groupType, long nGroupId, String sFileID , String sFileInfo);
+	public native void groupUploadFileFromServer(int groupType, long nGroupId,
+			String sFileID, String sFileInfo);
 
 	/**
 	 * Delete group files<br>
-	 * {@code <filelist><file encrypttype='1' id='C2A65B9B-63C7-4C9E-A8DD-F15F74ABA6CA'
-	 * name='83025aafa40f4bfb24fdb8d1034f78f0f7361801.gif' size='497236'
-	 * time='1411112464' uploader='11029' url=
-	 * 'http://192.168.0.38:8090/crowd/C2A65B9B-63C7-4C9E-A8DD-F15F74ABA6CA/C2A65B9B-63C7-4C9E-A8DD-F15F74ABA6CA/83025aafa40f4bfb24fdb8d1034f78f0f7361801.gif'/></fil
-	 * e l i s t > }
-	 * 
-	 * @param groupType
+	 * @param groupType 
 	 * @param nGroupId
-	 * @param sXml
+	 * @param fileId  files' UUID
 	 */
-	public native void delGroupFile(int groupType, long nGroupId, String sXml);
+	public native void delGroupFile(int groupType, long nGroupId, String fileId);
 
 	/**
 	 * get group file list
@@ -309,12 +310,15 @@ public class GroupRequest {
 
 	/**
 	 * search group 搜索组
+	 * 
 	 * @param eGroupType
 	 * @param szUnsharpName
 	 * @param nStartNum
 	 * @param nSearchNum
 	 */
-	public native void searchGroup(int eGroupType, String szUnsharpName, int nStartNum, int nSearchNum);
+	public native void searchGroup(int eGroupType, String szUnsharpName,
+			int nStartNum, int nSearchNum);
+
 	/**
 	 * 
 	 * @param eGroupType
@@ -341,13 +345,14 @@ public class GroupRequest {
 	 * 
 	 * @param type
 	 * @param nGroupId
-	 * @param sXml
+	 * @param fileId
 	 */
-	private void OnDelGroupFile(int type, long nGroupId, String sXml) {
+	private void OnDelGroupFile(int type, long nGroupId, String fileId) {
 		V2Log.e("GroupRequest  OnDelGroupFile" + type + "   " + nGroupId + "  "
-				+ sXml);
+				+ fileId);
 
-		List<FileJNIObject> list = XmlAttributeExtractor.parseFiles(sXml);
+		List<FileJNIObject> list = new ArrayList<FileJNIObject>();
+		list.add(new FileJNIObject(null, fileId, null, 0, 0));
 		V2Group group = new V2Group(nGroupId, type);
 
 		for (int i = 0; i < mCallbacks.size(); i++) {
@@ -401,8 +406,8 @@ public class GroupRequest {
 	 * <filelist><file encrypttype='1' id='C2A65B9B-63C7-4C9E-A8DD-F15F74ABA6CA'
 	 * name='83025aafa40f4bfb24fdb8d1034f78f0f7361801.gif' size='497236'
 	 * time='1411112464' uploader='11029' url=
-	 * 'http://192.168.0.38:8090/crowd/C2A65B9B-63C7-4C9E-A8DD-F15F74ABA6CA/C2A65B9B-63C7-4C9E-A8DD-F15F74ABA6CA/83025aafa40f4bfb24fdb8d1034f78f0f7361801.gif'/></f
-	 * i l e l i s t >
+	 * 'http://192.168.0.38:8090/crowd/C2A65B9B-63C7-4C9E-A8DD-F15F74ABA6CA/C2A65B9B-63C7-4C9E-A8DD-F15F74ABA6CA/83025aafa40f4bfb24fdb8d1034f78f0f7361801.gif'/
+	 * > < / f i l e l i s t >
 	 * 
 	 * @param type
 	 * @param nGroupId
@@ -518,11 +523,11 @@ public class GroupRequest {
 		}
 	}
 
-	
 	/**
 	 * <ul>
 	 * Crowd: {@code <crowd authtype='0' id='44' name='hhh mjj ' size='100'/>}
 	 * </ul>
+	 * 
 	 * @param groupType
 	 * @param nParentID
 	 * @param nGroupID
@@ -571,13 +576,13 @@ public class GroupRequest {
 				+ sXml);
 		V2Group group = new V2Group(nGroupID, groupType);
 		if (groupType == V2GlobalEnum.GROUP_TYPE_CROWD) {
-			String name = XmlAttributeExtractor.extract(sXml, " name=\"", "\"");
-			String announcement = XmlAttributeExtractor.extract(sXml,
-					" announcement=\"", "\"");
-			String summary = XmlAttributeExtractor.extract(sXml, " summary=\"",
-					"\"");
-			String authtype = XmlAttributeExtractor.extract(sXml,
-					" authtype=\"", "\"");
+			String name = XmlAttributeExtractor.extractAttribute(sXml, "name");
+			String announcement = XmlAttributeExtractor.extractAttribute(sXml,
+					"announcement");
+			String summary = XmlAttributeExtractor.extractAttribute(sXml,
+					"summary");
+			String authtype = XmlAttributeExtractor.extractAttribute(sXml,
+					"authtype");
 			group.name = name;
 			group.announce = announcement;
 			group.brief = summary;
@@ -588,7 +593,8 @@ public class GroupRequest {
 			}
 
 		} else if (groupType == V2GlobalEnum.GROUP_TYPE_CONFERENCE) {
-			String sync = XmlAttributeExtractor.extract(sXml, " syncdesktop='", "'");
+			String sync = XmlAttributeExtractor.extract(sXml, " syncdesktop='",
+					"'");
 			if (sync == null || "".equals(sync)) {
 				V2Log.e("Now only support syncdesktop attribute, doens't find such attirbute ");
 				return;
@@ -597,7 +603,7 @@ public class GroupRequest {
 				group.isSync = true;
 			}
 		}
-		
+
 		for (WeakReference<GroupRequestCallback> wrcb : mCallbacks) {
 			Object obj = wrcb.get();
 			if (obj != null) {
@@ -629,6 +635,7 @@ public class GroupRequest {
 
 	/**
 	 * The CallBack that invited join group from other
+	 * 
 	 * @param groupType
 	 * @param groupInfo
 	 * @param userInfo
@@ -673,7 +680,7 @@ public class GroupRequest {
 					"authtype='", "'");
 			String uname = XmlAttributeExtractor.extract(userInfo,
 					"nickname='", "'");
-			if(!TextUtils.isEmpty(uname))
+			if (!TextUtils.isEmpty(uname))
 				uname = HeartCharacterProcessing.reverse(uname);
 			String name = XmlAttributeExtractor.extract(groupInfo, "name='",
 					"'");
@@ -758,10 +765,36 @@ public class GroupRequest {
 		}
 	}
 
+	/**
+	 * 10-18 16:45:50.096: E/ImRequest UI(31807): OnApplyJoinGroup:: 3:431:<user
+	 * account='bbb' accounttype='1' bsystemavatar='1' id='12176' nickname='bbb'
+	 * uetype='1'/>:nnn
+	 * 
+	 * @param groupType
+	 * @param nGroupID
+	 * @param userInfo
+	 * @param reason
+	 */
 	private void OnApplyJoinGroup(int groupType, long nGroupID,
 			String userInfo, String reason) {
-		Log.e("ImRequest UI", "OnApplyJoinGroup:: " + groupType + ":"
-				+ nGroupID + ":" + userInfo + ":" + reason);
+		V2Log.d("OnApplyJoinGroup:: " + groupType + ":" + nGroupID + ":"
+				+ userInfo + ":" + reason);
+		String id = XmlAttributeExtractor.extractAttribute(userInfo, "id");
+		String nickname = XmlAttributeExtractor.extractAttribute(userInfo,
+				"nickname");
+		if (id == null || id.trim().isEmpty()) {
+			return;
+		}
+		V2Group vg = new V2Group(nGroupID, groupType);
+		V2User vu = new V2User(Long.parseLong(id), nickname);
+
+		for (WeakReference<GroupRequestCallback> wrcb : mCallbacks) {
+			Object obj = wrcb.get();
+			if (obj != null) {
+				GroupRequestCallback callback = (GroupRequestCallback) obj;
+				callback.OnApplyJoinGroup(vg, vu, reason);
+			}
+		}
 	}
 
 	/**
@@ -811,6 +844,7 @@ public class GroupRequest {
 
 	/**
 	 * The CallBack that refuse apply for join group 拒绝申请加入群回调 TODO implement
+	 * 
 	 * @param groupType
 	 * @param sGroupInfo
 	 * @param reason
@@ -820,14 +854,15 @@ public class GroupRequest {
 		V2Log.e("OnRefuseApplyJoinGroup ==>" + "groupType:" + groupType + ","
 				+ "sGroupInfo:" + sGroupInfo + "," + "reason:" + reason);
 	}
-	
+
 	/**
 	 * The CallBack that join group failed 加入群失败（如群已经被删除等）TODO implement
+	 * 
 	 * @param eGroupType
 	 * @param nGroupID
 	 * @param nErrorNo
 	 */
-	private void OnJoinGroupError(int eGroupType, long nGroupID, int nErrorNo){
+	private void OnJoinGroupError(int eGroupType, long nGroupID, int nErrorNo) {
 		V2Log.e("GroupRequest UI", "OnJoinGroupError ---> eGroupType :"
 				+ eGroupType + " | nGroupID: " + nGroupID + " | nErrorNo: "
 				+ nErrorNo);
@@ -849,14 +884,14 @@ public class GroupRequest {
 	};
 
 	/**
-	 * 文件重命名 TODO implement
+	 * 文件重命名
 	 * 
 	 * @param eGroupType
 	 * @param nGroupID
 	 * @param sFileID
 	 * @param sNewName
 	 */
-	private void OnRenameGroupFile(int eGroupType, long nGroupID, 
+	private void OnRenameGroupFile(int eGroupType, long nGroupID,
 			String sFileID, String sNewName) {
 		V2Log.e("GroupRequest UI", "OnGroupCreateWBoard ---> eGroupType :"
 				+ eGroupType + " | nGroupID: " + nGroupID + " | sFileID: "
@@ -864,7 +899,7 @@ public class GroupRequest {
 	};
 
 	/**
-	 * 收到白板会话被关闭的回调 TODO implement
+	 * 收到白板会话被关闭的回调
 	 * 
 	 * @param eGroupType
 	 * @param nGroupID
@@ -878,7 +913,7 @@ public class GroupRequest {
 	};
 
 	/**
-	 * 会议中创建文档共享的回调 eWhiteShowType白板显示类型 TODO implement
+	 * 会议中创建文档共享的回调 eWhiteShowType白板显示类型
 	 * 
 	 * @param eGroupType
 	 * @param nGroupID
@@ -893,27 +928,49 @@ public class GroupRequest {
 				+ szWBoardID + " | szFileName: " + szFileName
 				+ " | eWhiteShowType: " + eWhiteShowType);
 	};
-	
-	
+
 	/**
-	 * the CallBack after invoked search group  搜索群组回调 TODO implement
+	 * the CallBack after invoked search group 搜索群组回调
+	 * {@code <crowdlist> <crowd announcement='' authtype='1'
+	 * creatornickname='zhao1' creatoruserid='14' id='44' name='13269997886'
+	 * size='500' summary=''/></crowdlist> }
+	 * 
 	 * @param eGroupType
 	 * @param InfoXml
 	 */
-	private void OnSearchGroup(int eGroupType, String InfoXml){
+	private void OnSearchGroup(int eGroupType, String InfoXml) {
 		V2Log.e("GroupRequest UI", "onSearchGroup ---> eGroupType :"
 				+ eGroupType + " | InfoXml: " + InfoXml);
+		List<V2Group> list = XmlAttributeExtractor.parseCrowd(InfoXml);
+		for (int i = 0; i < this.mCallbacks.size(); i++) {
+			WeakReference<GroupRequestCallback> wf = this.mCallbacks.get(i);
+			Object obj = wf.get();
+			if (obj != null) {
+				GroupRequestCallback callback = (GroupRequestCallback) obj;
+				callback.OnSearchCrowdCallback(list);
+			}
+		}
 	}
-	
-	
+
 	/**
-	 * administrator was removed from group by himself administrator 管理员把自己从组中请出 TODO implement
+	 * administrator was removed from group by himself administrator 管理员把自己从组中请出
+	 * 
 	 * @param eGroupType
 	 * @param nGroupID
 	 * @param nUserID
 	 */
-	private void OnKickGroupUser(int eGroupType, long nGroupID, long nUserID){
+	private void OnKickGroupUser(int eGroupType, long nGroupID, long nUserID) {
 		V2Log.e("GroupRequest UI", "OnKickGroupUser ---> eGroupType :"
-				+ eGroupType + " | nGroupID: " + nGroupID + " | nUserID: " + nUserID);
+				+ eGroupType + " | nGroupID: " + nGroupID + " | nUserID: "
+				+ nUserID);
+
+		for (int i = 0; i < this.mCallbacks.size(); i++) {
+			WeakReference<GroupRequestCallback> wf = this.mCallbacks.get(i);
+			Object obj = wf.get();
+			if (obj != null) {
+				GroupRequestCallback callback = (GroupRequestCallback) obj;
+				callback.OnKickGroupUser(eGroupType, nGroupID, nUserID);
+			}
+		}
 	}
 }

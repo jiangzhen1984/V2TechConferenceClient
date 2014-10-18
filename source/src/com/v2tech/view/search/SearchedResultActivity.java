@@ -114,7 +114,7 @@ public class SearchedResultActivity extends Activity {
 				User u = new User(item.id);
 				for (int i = 0; i < contactsList.size(); i++) {
 					Group g = contactsList.get(i);
-					if (g.findUser(u, g) != null) {
+					if (g.findUser(u) != null) {
 						Intent intent = new Intent(PublicIntent.SHOW_CONTACT_DETAIL_ACTIVITY);
 						intent.addCategory(PublicIntent.DEFAULT_CATEGORY);
 						intent.putExtra("uid", u.getmUserId());

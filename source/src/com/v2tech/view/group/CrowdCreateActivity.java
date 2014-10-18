@@ -106,6 +106,7 @@ public class CrowdCreateActivity extends Activity {
 		mContactsContainer.setListener(listViewListener);
 		mContactsContainer.setShowedCheckedBox(true);
 		mContactsContainer.setTextFilterEnabled(true);
+		mContactsContainer.setIgnoreCurrentUser(true);
 
 		mAttendeeContainer = (LinearLayout) findViewById(R.id.group_member_container);
 		mAttendeeContainer.setGravity(Gravity.CENTER);

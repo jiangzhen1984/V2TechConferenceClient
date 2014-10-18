@@ -50,6 +50,7 @@ public class CrowdInvitationActivity extends Activity {
 	private EditText mReasonET;
 	private View mRejectResasonLayout;
 	private View mBoxLy;
+	private View mAcceptedLy;
 
 	private Context mContext;
 
@@ -83,6 +84,8 @@ public class CrowdInvitationActivity extends Activity {
 		mButtonLayout = findViewById(R.id.crowd_invitation_button_ly);
 		mNotesLayout = findViewById(R.id.crowd_invitation_notes_ly);
 		mNotesTV = (TextView) findViewById(R.id.crowd_invitation_notes);
+		mAcceptedLy =  findViewById(R.id.crowd_invitation_accepted_ly);
+		
 
 		mRejectResasonLayout = findViewById(R.id.crowd_content_reject_reason_ly);
 		mBoxLy = findViewById(R.id.crowd_invitation_box_ly);
@@ -152,14 +155,17 @@ public class CrowdInvitationActivity extends Activity {
 				mNotesLayout.setVisibility(View.VISIBLE);
 				mSendMsgButton.setVisibility(View.VISIBLE);
 				mNotesTV.setText(R.string.crowd_invitation_accept_notes);
+				mAcceptedLy.setVisibility(View.VISIBLE);
 			} else if (vq.getQualState() == VMessageQualification.QualificationState.REJECT) {
 				mButtonLayout.setVisibility(View.GONE);
 				mNotesLayout.setVisibility(View.VISIBLE);
 				mSendMsgButton.setVisibility(View.GONE);
 				mNotesTV.setText(R.string.crowd_invitation_reject_notes);
+				mAcceptedLy.setVisibility(View.GONE);
 			} else {
 				mSendMsgButton.setVisibility(View.GONE);
 				mButtonLayout.setVisibility(View.VISIBLE);
+				mAcceptedLy.setVisibility(View.GONE);
 			}
 			mSendMsgButton
 					.setText(R.string.crowd_invitation_top_bar_right_button);

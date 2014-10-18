@@ -1,7 +1,6 @@
 package com.v2tech.view.group;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -13,30 +12,37 @@ import com.v2tech.R;
 import com.v2tech.service.CrowdGroupService;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.service.Registrant;
-import com.v2tech.view.JNIService;
-import com.v2tech.view.PublicIntent;
-import com.v2tech.vo.Crowd;
+import com.v2tech.view.conversation.MessageBuilder;
 import com.v2tech.vo.CrowdGroup;
-import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.User;
+import com.v2tech.vo.VMessageQualification;
+import com.v2tech.vo.VMessageQualificationApplicationCrowd;
 
+/**
+ * Intent key:<br>
+ * cid: user applyed crowd Id<br>
+ * aid: applicant user id<br>
+ * mid: applicantion message id<br>
+ * @author jiangzhen
+ *
+ */
 public class CrowdApplicantDetailActivity extends Activity {
 
 	private final static int ACCEPT_INVITATION_DONE = 1;
 	private final static int REFUSE_INVITATION_DONE = 2;
 
-	private TextView mNameTV;
-	private TextView mCreatorTV;
-	private TextView mBriefTV;
-	
 	private View mReturnButton;
 	private View mAcceptButton;
 	private View mDeclineButton;
+
 	private View mButtonLayout;
 	private View mNotesLayout;
+
 	private TextView mNotesTV;
 
-	private Crowd crowd;
+	private CrowdGroup crowd;
+	private User applicant;
+	private VMessageQualificationApplicationCrowd msg;
 	private CrowdGroupService service = new CrowdGroupService();
 
 	@Override
@@ -44,56 +50,60 @@ public class CrowdApplicantDetailActivity extends Activity {
 		super.onCreate(savedInstanceState);
 
 		setContentView(R.layout.crowd_applicant_detail);
-		mNameTV = (TextView) findViewById(R.id.crowd_invitation_name);
-		mCreatorTV = (TextView) findViewById(R.id.crowd_invitation_creator_tv);
-		mBriefTV = (TextView) findViewById(R.id.crowd_invitation_brief);
-		
-		mAcceptButton = findViewById(R.id.crowd_invitation_accept_button);
+
+		mAcceptButton = findViewById(R.id.crowd_application_accept_button);
 		mAcceptButton.setOnClickListener(mAcceptButtonListener);
-		mDeclineButton = findViewById(R.id.crowd_invitation_decline_button);
+		mDeclineButton = findViewById(R.id.crowd_application_decline_button);
 		mDeclineButton.setOnClickListener(mDeclineButtonListener);
-		mReturnButton = findViewById(R.id.crowd_invitation_return_button);
+		mReturnButton = findViewById(R.id.crowd_applicant_return_button);
 		mReturnButton.setOnClickListener(mReturnButtonListener);
 
-		mButtonLayout = findViewById(R.id.crowd_invitation_button_ly);
-		mNotesLayout = findViewById(R.id.crowd_invitation_notes_ly);
-		mNotesTV = (TextView) findViewById(R.id.crowd_invitation_notes);
+		mButtonLayout = findViewById(R.id.crowd_application_button_ly);
+		mNotesLayout = findViewById(R.id.crowd_application_notes_ly);
+		mNotesTV = (TextView) findViewById(R.id.crowd_application_notes);
 
-		crowd = (Crowd) getIntent().getExtras().get("crowd");
-		mNameTV.setText(crowd.getName());
-		mBriefTV.setText(crowd.getBrief());
-		mCreatorTV.setText(crowd.getCreator().getName());
+		long crowdId = getIntent().getLongExtra("cid", 0);
+		long applicationId = getIntent().getLongExtra("aid", 0);
+		long mid = getIntent().getLongExtra("mid", 0);
+		
+		crowd = (CrowdGroup) GlobalHolder.getInstance().getGroupById(crowdId);
+		applicant = GlobalHolder.getInstance().getUser(applicationId);
+		msg = (VMessageQualificationApplicationCrowd)MessageBuilder.queryQualMessageById(this, mid);
+		if (applicant != null) {
+			updateView();
+		} else {
+			throw new RuntimeException("Can not get applicant information");
+		}
+		
+		msg.setReadState(VMessageQualification.ReadState.READ);
+		MessageBuilder.updateQualicationMessage(this, msg);
+	}
 
+	private void updateView() {
+		((TextView)findViewById(R.id.crowd_applicant_name)).setText(applicant.getName());
+		((TextView)findViewById(R.id.crowd_applicant_signature)).setText(applicant.getSignature());		
+		((TextView)findViewById(R.id.contact_user_detail_title_tv)).setText(applicant.getJob());
+		((TextView)findViewById(R.id.contact_user_detail_address_tv)).setText(applicant.getAddress());
+		((TextView)findViewById(R.id.contact_user_detail_email_tv)).setText(applicant.getmEmail());
+		((TextView)findViewById(R.id.contact_user_detail_cell_phone_tv)).setText(applicant.getMobile());
+		((TextView)findViewById(R.id.contact_user_detail_telephone_tv)).setText(applicant.getTelephone());
+		((TextView)findViewById(R.id.contact_user_detail_fax_tv)).setText(applicant.getFax());
+		((TextView)findViewById(R.id.crowd_application_additional_msg)).setText(msg.getApplyReason());
 	}
 
 	private void handleAcceptDone() {
-		CrowdGroup g = new CrowdGroup(crowd.getId(), crowd.getName(),
-				crowd.getCreator(), null);
-		g.setBrief(crowd.getBrief());
-		g.setAnnouncement(crowd.getAnnounce());
-		GlobalHolder.getInstance().addGroupToList(GroupType.CHATING.intValue(),
-				g);
-
-		Intent i = new Intent();
-		i.setAction(PublicIntent.BROADCAST_NEW_CROWD_NOTIFICATION);
-		i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
-		i.putExtra("crowd", crowd.getId());
-		sendBroadcast(i);
+		crowd.addUserToGroup(applicant);
 	}
 
 	private OnClickListener mAcceptButtonListener = new OnClickListener() {
 
 		@Override
 		public void onClick(View view) {
-			// TODO get user
-			service.acceptApplication((CrowdGroup)
-					GlobalHolder.getInstance().getGroupById(
-							GroupType.CHATING.intValue(), crowd.getId()),
-					new User(1), new Registrant(mLocalHandler,
-							ACCEPT_INVITATION_DONE, null));
+			service.acceptApplication(crowd, applicant, new Registrant(
+					mLocalHandler, ACCEPT_INVITATION_DONE, null));
 			mButtonLayout.setVisibility(View.GONE);
 			mNotesLayout.setVisibility(View.VISIBLE);
-			mNotesTV.setText(R.string.crowd_invitation_accept_notes);
+			mNotesTV.setText(R.string.crowd_application_accepted);
 		}
 
 	};
@@ -102,15 +112,11 @@ public class CrowdApplicantDetailActivity extends Activity {
 
 		@Override
 		public void onClick(View view) {
-			// TODO get user and reason
-			service.refuseApplication((CrowdGroup)
-					GlobalHolder.getInstance().getGroupById(
-							GroupType.CHATING.intValue(), crowd.getId()),
-					new User(1), "", new Registrant(mLocalHandler,
-							REFUSE_INVITATION_DONE, null));
+			service.refuseApplication(crowd, applicant, "", new Registrant(
+					mLocalHandler, REFUSE_INVITATION_DONE, null));
 			mButtonLayout.setVisibility(View.GONE);
 			mNotesLayout.setVisibility(View.VISIBLE);
-			mNotesTV.setText(R.string.crowd_invitation_reject_notes);
+			mNotesTV.setText(R.string.crowd_application_accepted);
 		}
 
 	};

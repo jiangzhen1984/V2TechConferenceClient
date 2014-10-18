@@ -59,6 +59,8 @@
     <string name="crowd_files_name_uploaded">已上传</string>
     <string name="crowd_files_title_uploaded">上传文件</string>
     <string name="crowd_files_deleted_notification">该文件已被删除！ 同时该文件被删除</string>
+    <string name="crowd_files_delete_file_no_rights_notification">你无法删除其他人上传的文件!</string>
+    <string name="crowd_files_delete_file_no_rights_for_uploading_notification">请先暂停，在删除文件!</string>
     
     
     
@@ -69,6 +71,13 @@
     <string name="crowd_application_brief">群简介</string>
     <string name="crowd_application_applyed">已申请</string>
     <string name="crowd_application_send_button">发送</string>
+    
+    
+    <string name="crowd_applicant_title">群申请</string>
+    <string name="crowd_application_accept_button_name">同意</string>
+    <string name="crowd_application_accepted">已同意该申请</string>
+    <string name="crowd_application_reject_button_name">拒绝</string>
+    <string name="crowd_application_rejected">已拒绝该申请</string>
     
 
 </resources>

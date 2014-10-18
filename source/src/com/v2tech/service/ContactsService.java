@@ -322,10 +322,6 @@ public class ContactsService extends AbstractHandler {
 					jniRes).sendToTarget();
 		}
 
-		@Override
-		public void OnAddGroupFile(V2Group group, List<FileJNIObject> list) {
-			
-		}
 	}
 
 }

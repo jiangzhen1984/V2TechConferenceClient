@@ -73,6 +73,7 @@ import com.v2tech.vo.VMessageAudioItem;
 import com.v2tech.vo.VMessageFileItem;
 import com.v2tech.vo.VMessageImageItem;
 import com.v2tech.vo.VMessageQualification;
+import com.v2tech.vo.VMessageQualificationApplicationCrowd;
 import com.v2tech.vo.VMessageQualificationInvitationCrowd;
 
 /**
@@ -119,8 +120,7 @@ public class JNIService extends Service {
 	public static final String JNI_BROADCAST_NEW_QUALIFICATION_MESSAGE = "com.v2tech.jni.broadcast.new.qualification_message";
 	public static final String BROADCAST_CROWD_NEW_UPLOAD_FILE_NOTIFICATION = "com.v2tech.jni.broadcast.new.upload_crowd_file_message";
 	/**
-	 * Current user kicked by crowd master
-	 * key crowd : crowdId
+	 * Current user kicked by crowd master key crowd : crowdId
 	 */
 	public static final String JNI_BROADCAST_KICED_CROWD = "com.v2tech.jni.broadcast.kick_crowd";
 
@@ -558,16 +558,6 @@ public class JNIService extends Service {
 			i.putExtra("avatar", new UserAvatarObject(nUserID, AvatarName));
 			sendBroadcast(i);
 		}
-		
-		
-		
-		public void OnKickCrowd(long nCrowdId, long nAdminId) {
-			Intent kick = new Intent();
-			kick.setAction(JNI_BROADCAST_KICED_CROWD);
-			kick.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
-			kick.putExtra("crowd", nCrowdId);
-			sendBroadcast(kick);
-		}
 
 	}
 
@@ -604,66 +594,56 @@ public class JNIService extends Service {
 			if (group.type == GroupType.CONFERENCE.intValue()) {
 
 			} else if (group.type == GroupType.CHATING.intValue()) {
-				CrowdGroup cg = (CrowdGroup)GlobalHolder.getInstance().getGroupById(group.id);
+				CrowdGroup cg = (CrowdGroup) GlobalHolder.getInstance()
+						.getGroupById(group.id);
 				cg.setAnnouncement(group.announce);
 				cg.setBrief(group.brief);
 				cg.setAuthType(CrowdGroup.AuthType.fromInt(group.authType));
 			}
-			
+
 			// Send broadcast
 			Intent i = new Intent(JNI_BROADCAST_GROUP_UPDATED);
 			i.addCategory(JNI_BROADCAST_CATEGROY);
 			i.putExtra("gid", group.id);
 			mContext.sendBroadcast(i);
-			
 
 		}
 
 		@Override
 		public void onAddGroupInfo(V2Group group) {
-//			if (group == null || group.creator == null) {
-//				return;
-//			}
-//			GroupType gType = GroupType.fromInt(group.type);
-//			if (gType == GroupType.CHATING) {
-//				CrowdGroup cg = convertCrowd(group);
-//				GlobalHolder.getInstance().addGroupToList(gType.intValue(), cg);
-//
-//				// Send broadcast
-//				Intent i = new Intent(JNI_BROADCAST_NEW_CROWD);
-//				i.addCategory(JNI_BROADCAST_CATEGROY);
-//				i.putExtra("crowd", cg.getmGId());
-//				mContext.sendBroadcast(i);
-//			}
+			// if (group == null || group.creator == null) {
+			// return;
+			// }
+			// GroupType gType = GroupType.fromInt(group.type);
+			// if (gType == GroupType.CHATING) {
+			// CrowdGroup cg = convertCrowd(group);
+			// GlobalHolder.getInstance().addGroupToList(gType.intValue(), cg);
+			//
+			// // Send broadcast
+			// Intent i = new Intent(JNI_BROADCAST_NEW_CROWD);
+			// i.addCategory(JNI_BROADCAST_CATEGROY);
+			// i.putExtra("crowd", cg.getmGId());
+			// mContext.sendBroadcast(i);
+			// }
 
 		}
-		
-		
+
+
 
 		@Override
-		public void OnAcceptApplyJoinGroup(V2Group group) {
-			GroupType gType = GroupType.fromInt(group.type);
-			if (gType == GroupType.CHATING) {
-				CrowdGroup cg = convertCrowd(group);
-				GlobalHolder.getInstance().addGroupToList(gType.intValue(), cg);
-
-				// Send broadcast
-				Intent i = new Intent(JNI_BROADCAST_NEW_CROWD);
-				i.addCategory(JNI_BROADCAST_CATEGROY);
-				i.putExtra("crowd", cg.getmGId());
-				mContext.sendBroadcast(i);
+		public void OnApplyJoinGroup(V2Group group, V2User user, String reason) {
+			if (group == null || user == null) {
+				return;
 			}
+			CrowdGroup cg = (CrowdGroup) GlobalHolder.getInstance()
+					.getGroupById(group.id);
+			User u = GlobalHolder.getInstance().getUser(user.uid);
+			if (cg == null || u == null) {
+				return;
+			}
+			checkMessageAndSendBroadcast(
+					VMessageQualification.Type.CROWD_APPLICATION, cg, u, reason);
 
-		}
-		
-		private CrowdGroup convertCrowd(V2Group group)  {
-			CrowdGroup cg = new CrowdGroup(group.id, group.name,
-					GlobalHolder.getInstance().getUser(group.creator.uid));
-			cg.setBrief(group.brief);
-			cg.setAnnouncement(group.announce);
-			cg.setCreateDate(group.createTime);
-			cg.getOwnerUser().setName(group.creator.name);
-			return cg;
 		}
 
 		@Override
@@ -698,48 +678,59 @@ public class JNIService extends Service {
 					owner.setName(group.creator.name);
 				}
 
-				boolean sendBroadcastFlag = true;
 				CrowdGroup cg = new CrowdGroup(group.id, group.name, owner);
 				cg.setAuthType(CrowdGroup.AuthType.fromInt(group.authType));
-				
-				VMessageQualification crowdMsg = MessageBuilder
-						.queryQualMessageByCrowdId(mContext, GlobalHolder
-								.getInstance().getCurrentUser(), cg);
-				if (crowdMsg != null) {
-					if (crowdMsg.getQualState() != VMessageQualification.QualificationState.WAITING) {
-						crowdMsg.setReadState(VMessageQualification.ReadState.UNREAD);
-						crowdMsg.setQualState(VMessageQualification.QualificationState.WAITING);
-						MessageBuilder.updateQualicationMessage(mContext,
-								crowdMsg);
-					} else {
-						// send flag to false, means do not send broadcast
-						sendBroadcastFlag = false;
-						V2Log.i("igonre crowd invitation database exist same record "
-								+ group.id);
-					}
-				} else {
-					// Save message to database
-					crowdMsg = new VMessageQualificationInvitationCrowd(cg,
-							GlobalHolder.getInstance().getCurrentUser());
-					crowdMsg.setReadState(VMessageQualification.ReadState.UNREAD);
-					Uri uri = MessageBuilder.saveQualicationMessage(mContext,
-							crowdMsg);
-					if (uri != null) {
-						crowdMsg.setId(Long.parseLong(uri.getLastPathSegment()));
-					}
-				}
 
-				if (sendBroadcastFlag && crowdMsg != null
-						&& crowdMsg.getId() > 0) {
-					// Send broadcast
-					Intent i = new Intent(
-							JNI_BROADCAST_NEW_QUALIFICATION_MESSAGE);
-					i.addCategory(JNI_BROADCAST_CATEGROY);
-					i.putExtra("msgId", crowdMsg.getId());
-					mContext.sendOrderedBroadcast(i, null);
-				}
+				checkMessageAndSendBroadcast(
+						VMessageQualification.Type.CROWD_INVITATION, cg,
+						GlobalHolder.getInstance().getCurrentUser(), null);
+
 			} else if (gType == GroupType.CONTACT) {
 			}
+		}
+
+		private VMessageQualification checkMessageAndSendBroadcast(
+				VMessageQualification.Type type, CrowdGroup g, User user, String reason) {
+			boolean sendBroadcast = true;
+			VMessageQualification crowdMsg = MessageBuilder
+					.queryQualMessageByCrowdId(mContext, user, g);
+			if (crowdMsg != null) {
+				if (crowdMsg.getQualState() != VMessageQualification.QualificationState.WAITING) {
+					crowdMsg.setReadState(VMessageQualification.ReadState.UNREAD);
+					crowdMsg.setQualState(VMessageQualification.QualificationState.WAITING);
+					MessageBuilder.updateQualicationMessage(mContext, crowdMsg);
+				} else {
+					sendBroadcast = false;
+				}
+			} else {
+				// Save message to database
+				if (type == VMessageQualification.Type.CROWD_APPLICATION) {
+					crowdMsg = new VMessageQualificationApplicationCrowd(g,
+							user);
+					((VMessageQualificationApplicationCrowd)crowdMsg).setApplyReason(reason);
+				} else if (type == VMessageQualification.Type.CROWD_INVITATION) {
+					crowdMsg = new VMessageQualificationInvitationCrowd(g,
+							GlobalHolder.getInstance().getCurrentUser());
+				} else {
+					throw new RuntimeException("Unkown type");
+				}
+				crowdMsg.setReadState(VMessageQualification.ReadState.UNREAD);
+				Uri uri = MessageBuilder.saveQualicationMessage(mContext,
+						crowdMsg);
+				if (uri != null) {
+					crowdMsg.setId(Long.parseLong(uri.getLastPathSegment()));
+				}
+			}
+
+			if (sendBroadcast && crowdMsg != null && crowdMsg.getId() > 0) {
+				// Send broadcast
+				Intent i = new Intent(JNI_BROADCAST_NEW_QUALIFICATION_MESSAGE);
+				i.addCategory(JNI_BROADCAST_CATEGROY);
+				i.putExtra("msgId", crowdMsg.getId());
+				mContext.sendOrderedBroadcast(i, null);
+			}
+
+			return crowdMsg;
 		}
 
 		@Override
@@ -882,8 +873,19 @@ public class JNIService extends Service {
 			intent.setAction(BROADCAST_CROWD_NEW_UPLOAD_FILE_NOTIFICATION);
 			intent.addCategory(JNI_BROADCAST_CATEGROY);
 			intent.putExtra("groupID", group.id);
-			intent.putParcelableArrayListExtra("fileJniObjects", new ArrayList<FileJNIObject>(list));
+			intent.putParcelableArrayListExtra("fileJniObjects",
+					new ArrayList<FileJNIObject>(list));
 			sendBroadcast(intent);
+		}
+
+		@Override
+		public void OnKickGroupUser(int groupType, long groupId, long nUserId) {
+			Intent kick = new Intent();
+			kick.setAction(JNI_BROADCAST_KICED_CROWD);
+			kick.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
+			kick.putExtra("crowd", groupId);
+			kick.putExtra("userId", nUserId);
+			sendBroadcast(kick);
 		}
 	}
 
@@ -1227,50 +1229,39 @@ public class JNIService extends Service {
 					.sendToTarget();
 		}
 
-		
-		
 		@Override
 		public void OnFileTransEnd(String szFileID, String szFileName,
-				long nFileSize, int nTransType ) {
+				long nFileSize, int nTransType) {
 			VMessage vm = new VMessage(0, 0, null, null);
 			VMessageFileItem item = new VMessageFileItem(vm, null);
 			item.setUuid(szFileID);
-			if(nTransType == FileDownLoadErrorIndication.TYPE_SEND)
+			if (nTransType == FileDownLoadErrorIndication.TYPE_SEND)
 				item.setState(VMessageAbstractItem.STATE_FILE_SENT);
 			else
 				item.setState(VMessageAbstractItem.STATE_FILE_DOWNLOADED);
-			int updates = MessageBuilder.updateVMessageItem(mContext,
-					item);
+			int updates = MessageBuilder.updateVMessageItem(mContext, item);
 			Log.e(TAG, "OnFileTransEnd updates success : " + updates);
 			vm = null;
 			item = null;
-			
+
 		}
-		
-		
-		
+
 		@Override
 		public void OnFileDownloadError(String szFileID, int errorCode,
 				int nTransType) {
 			VMessage vm = new VMessage(0, 0, null, null);
 			VMessageFileItem item = new VMessageFileItem(vm, null);
 			item.setUuid(szFileID);
-			if(nTransType == FileDownLoadErrorIndication.TYPE_SEND)
+			if (nTransType == FileDownLoadErrorIndication.TYPE_SEND)
 				item.setState(VMessageAbstractItem.STATE_FILE_SENT_FALIED);
 			else
 				item.setState(VMessageAbstractItem.STATE_FILE_DOWNLOADED_FALIED);
-			int updates = MessageBuilder.updateVMessageItem(mContext,
-					item);
+			int updates = MessageBuilder.updateVMessageItem(mContext, item);
 			Log.e(TAG, "OnFileTransEnd updates success : " + updates);
 			vm = null;
 			item = null;
 		}
 
 	}
-	
-	
-	
-	
-	
 
 }

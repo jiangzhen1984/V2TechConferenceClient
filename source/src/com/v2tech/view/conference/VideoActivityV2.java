@@ -26,10 +26,12 @@ import android.graphics.ImageFormat;
 import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.media.AudioManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.text.TextUtils;
 import android.text.TextUtils.TruncateAt;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
@@ -307,10 +309,10 @@ public class VideoActivityV2 extends Activity {
 
 		if (mServiceBound) {
 			suspendOrResume(true);
+		} else {
+			// Set audio use speaker phone
+			updateAudioSpeaker(true);
 		}
-
-		// Set audio use speaker phone
-		updateAudioSpeaker(true);
 		NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 		// mId allows you to update the notification later on.
 		mNotificationManager.cancel(PublicIntent.VIDEO_NOTIFICATION_ID);
@@ -1173,8 +1175,9 @@ public class VideoActivityV2 extends Activity {
 		getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 		if (mServiceBound) {
 			suspendOrResume(false);
+		} else {
+			updateAudioSpeaker(false);
 		}
-		updateAudioSpeaker(false);
 		isStop = true;
 	}
 
@@ -1321,11 +1324,6 @@ public class VideoActivityV2 extends Activity {
 	 * resume.
 	 */
 	private void suspendOrResume(boolean resume) {
-		AudioManager audioManager;
-		audioManager = (AudioManager) mContext
-				.getSystemService(Context.AUDIO_SERVICE);
-
-		audioManager.setMode(AudioManager.MODE_NORMAL);
 		if (resume) {
 
 			updateAllRemoteDevice(TAG_OPEN_DEVICE);
@@ -1340,7 +1338,6 @@ public class VideoActivityV2 extends Activity {
 			// Resume audio
 			cb.updateAudio(true);
 
-			audioManager.setSpeakerphoneOn(true);
 
 		} else {
 			updateAllRemoteDevice(TAG_CLOSE_DEVICE);
@@ -1350,8 +1347,8 @@ public class VideoActivityV2 extends Activity {
 			mVideoLayout.removeAllViews();
 			// suspend audio
 			cb.updateAudio(false);
-			audioManager.setSpeakerphoneOn(false);
 		}
+		updateAudioSpeaker(resume);
 	}
 
 	private void updateAllRemoteDevice(int tag) {
@@ -1693,6 +1690,17 @@ public class VideoActivityV2 extends Activity {
 		} else if (opt == DOC_PAGE_ACTIVITE_NOTIFICATION) {
 			doc.setActivatePageNo(page.getNo());
 		}
+		
+		//Update doc name, if shared document is picture
+		//we receive event from doc display, doc invitation will be skipped, So doc name will be null
+		if (TextUtils.isEmpty(doc.getDocName())) {
+			if (doc.getPageSize() > 0) {
+				Page p = doc.getPage(1);
+				String name  = Uri.parse(p.getFilePath()).getLastPathSegment();
+				doc.setDocName(name);
+			}
+		}
+		
 
 		// Update UI
 		if (mDocContainer != null) {
