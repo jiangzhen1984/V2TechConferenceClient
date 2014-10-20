@@ -1709,12 +1709,22 @@ public class ConversationView extends Activity {
 		// Send message to server
 		sendMessageToRemote(vm);
 	}
-
+	
 	private void sendMessageToRemote(VMessage vm) {
-		sendMessageToRemote(vm, true);
+		sendMessageToRemote(vm, true , true);
+	}
+	
+	private void sendMessageToRemote(VMessage vm , boolean sendRemote){
+		sendMessageToRemote(vm, true , sendRemote);
 	}
 
-	private void sendMessageToRemote(VMessage vm, boolean isFresh) {
+	/**
+	 * send chat message to remote
+	 * @param vm 
+	 * @param isFresh 是否通知ConversationTabFragment更新
+	 * @param sendRemote 是否发送至远端
+	 */
+	private void sendMessageToRemote(VMessage vm, boolean isFresh , boolean sendRemote) {
 		// // Save message
 		vm.setmXmlDatas(vm.toXml());
 		vm.setDate(new Date(GlobalConfig.getGlobalServerTime()));
@@ -1722,14 +1732,14 @@ public class ConversationView extends Activity {
 		MessageBuilder.saveMessage(this, vm);
 		MessageBuilder.saveFileVMessage(this, vm);
 		MessageBuilder.saveBinaryVMessage(this, vm);
-
-		Message.obtain(lh, SEND_MESSAGE, vm).sendToTarget();
-		if(currentConversationViewType != V2GlobalEnum.GROUP_TYPE_CROWD)
-			addMessageToContainer(vm);
+		
+		if(sendRemote)
+			Message.obtain(lh, SEND_MESSAGE, vm).sendToTarget();
+		addMessageToContainer(vm);
 		// send notification
 		notificateConversationUpdate(isFresh, vm.getId());
 	}
-
+	
 	/**
 	 * FIXME optimize code
 	 * 去除IOS自带表情
@@ -2416,22 +2426,18 @@ public class ConversationView extends Activity {
 					// 自己上传文件不提示
 					if (list.get(0).user.uid == user1Id || groupID != groupId)
 						return;
-					User user = GlobalHolder.getInstance().getUser(
-							list.get(0).user.uid);
-					StringBuilder sb = new StringBuilder();
-					VMessage vm = new VMessage(cov.getType(), groupId, user,
-							null, new Date(GlobalConfig.getGlobalServerTime()));
-					sb.append("上传了");
-					for (int j = 0; j < list.size(); j++) {
-						if (j + 1 != list.size())
-							sb.append(list.get(j).fileName).append(" , ");
-						else
-							sb.append(list.get(j).fileName);
+					for (FileJNIObject fileJNIObject : list) {
+						User user = GlobalHolder.getInstance().getUser(
+								list.get(0).user.uid);
+						VMessage vm = new VMessage(cov.getType(), groupId, user,
+								null, new Date(GlobalConfig.getGlobalServerTime()));
+						VMessageFileItem item = new VMessageFileItem(vm,
+								fileJNIObject.fileName , fileJNIObject.fileType);
+						item.setFileSize(fileJNIObject.fileSize);
+						item.setUuid(fileJNIObject.fileId);
+						item.setState(VMessageFileItem.STATE_FILE_SENT);
+						sendMessageToRemote(vm, false);
 					}
-					VMessageAbstractItem vai = new VMessageTextItem(vm,
-							sb.toString());
-					vai.setNewLine(true);
-					sendMessageToRemote(vm, false);
 				}
 			}
 		}

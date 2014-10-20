@@ -247,6 +247,8 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 			mGroupNameTV.setText(belongs.getName());
 			mAddContactButton.setVisibility(View.GONE);
 			mDeleteContactButton.setVisibility(View.VISIBLE);
+			mSignTVLayout.setVisibility(View.VISIBLE);
+			mSignTVLine.setVisibility(View.VISIBLE);
 		} else {
 			mUpdateContactGroupButton.setVisibility(View.GONE);
 			mAddContactButton.setVisibility(View.VISIBLE);

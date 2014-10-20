@@ -566,7 +566,7 @@ public class MessageBuilder {
 					crowdInviteMsg.getBeInvitatonUser().getmUserId());
 			values.put(
 					ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_REMOTE_USER_ID,
-					crowdInviteMsg.getBeInvitatonUser().getmUserId());
+					crowdInviteMsg.getInvitationUser().getmUserId());
 			values.put(
 					ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_APPLY_REASON,
 					"");

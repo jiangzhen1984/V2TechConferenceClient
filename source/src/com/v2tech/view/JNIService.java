@@ -869,6 +869,23 @@ public class JNIService extends Service {
 				V2Log.e("OnAddGroupFile : May receive new group files failed.. get empty collection");
 				return;
 			}
+			
+			for (FileJNIObject fileJNIObject : list) {
+				User user = GlobalHolder.getInstance().getUser(
+						list.get(0).user.uid);
+				VMessage vm = new VMessage(V2GlobalEnum.GROUP_TYPE_CROWD, group.id, user,
+						null, new Date(GlobalConfig.getGlobalServerTime()));
+				VMessageFileItem item = new VMessageFileItem(vm,
+						fileJNIObject.fileName , fileJNIObject.fileType);
+				item.setFileSize(fileJNIObject.fileSize);
+				item.setUuid(fileJNIObject.fileId);
+				item.setState(VMessageFileItem.STATE_FILE_SENT);
+				//save to database
+				vm.setmXmlDatas(vm.toXml());
+				MessageBuilder.saveMessage(mContext, vm);
+				MessageBuilder.saveFileVMessage(mContext, vm);
+			}
+			
 			Intent intent = new Intent();
 			intent.setAction(BROADCAST_CROWD_NEW_UPLOAD_FILE_NOTIFICATION);
 			intent.addCategory(JNI_BROADCAST_CATEGROY);

@@ -266,6 +266,8 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 						.addAction(JNIService.JNI_BROADCAST_FRIEND_AUTHENTICATION);
 				intentFilter
 						.addAction(JNIService.JNI_BROADCAST_NEW_QUALIFICATION_MESSAGE);
+				intentFilter
+						.addAction(JNIService.BROADCAST_CROWD_NEW_UPLOAD_FILE_NOTIFICATION);
 			}
 
 			if (mCurrentTabFlag == Conversation.TYPE_GROUP) {
@@ -273,7 +275,6 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 						.addAction(PublicIntent.BROADCAST_NEW_CROWD_NOTIFICATION);
 				intentFilter.addAction(JNIService.JNI_BROADCAST_KICED_CROWD);
 				intentFilter.addAction(JNIService.JNI_BROADCAST_NEW_CROWD);
-				intentFilter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
 			}
 		}
 
@@ -1860,6 +1861,17 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 				} else {
 					V2Log.e("Can not get crowd :" + gid);
 				}
+			} else if (PublicIntent.BROADCAST_CROWD_DELETED_NOTIFICATION
+					.equals(intent.getAction())
+					|| intent.getAction().equals(
+							JNIService.JNI_BROADCAST_KICED_CROWD)) {
+				long cid = intent.getLongExtra("crowd", 0);
+				removeConversation(cid);
+				// clear the crowd group all chat database messges
+				MessageLoader.deleteMessageByID(context, mCurrentTabFlag, cid,
+						-1);
+				// clear the crowd group all verification database messges
+				MessageLoader.deleteCrowdVerificationMessage(context, cid);
 			}
 			// else if (JNIService.JNI_BROADCAST_NEW_MESSAGE.equals(intent
 			// .getAction())) {
@@ -1872,18 +1884,6 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 			// intent.getLongExtra("groupID", -1));
 			// }
 			// }
-			else if (PublicIntent.BROADCAST_CROWD_DELETED_NOTIFICATION
-					.equals(intent.getAction())
-					|| intent.getAction().equals(
-							JNIService.JNI_BROADCAST_KICED_CROWD)) {
-				long cid = intent.getLongExtra("crowd", 0);
-				removeConversation(cid);
-				// clear the crowd group all chat database messges
-				MessageLoader.deleteMessageByID(context, mCurrentTabFlag, cid,
-						-1);
-				// clear the crowd group all verification database messges
-				MessageLoader.deleteCrowdVerificationMessage(context, cid);
-			}
 		}
 	}
 
@@ -2056,6 +2056,16 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 						-1);
 				// clear the crowd group all verification database messges
 				MessageLoader.deleteCrowdVerificationMessage(context, cid);
+			} else if ((JNIService.BROADCAST_CROWD_NEW_UPLOAD_FILE_NOTIFICATION
+					.equals(intent.getAction()))) {
+				long groupID = intent.getLongExtra("groupID", -1l);
+				if (groupID == -1l) {
+					V2Log.e(TAG,
+							"May receive new group upload files failed.. get empty collection");
+					return;
+				}
+
+				updateGroupConversation(V2GlobalEnum.GROUP_TYPE_CROWD, groupID);
 			}
 		}
 	}
