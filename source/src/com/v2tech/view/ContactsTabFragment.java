@@ -142,7 +142,6 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 
 	@Override
 	public void onStop() {
-		mLoaded = false;
 		super.onStop();
 	}
 

@@ -816,9 +816,9 @@ public class MessageAuthenticationActivity extends Activity {
 					item.mMsgBanneriv.setImageResource(R.drawable.avatar);
 				}
 				item.mNameTV.setText(vqac.getApplicant().getName());
-				item.mContentTV.setText(mContext
+				item.mContentTV.setText(vqac.getCrowdGroup().getName() + mContext
 						.getText(R.string.crowd_applicant_content)
-						+ vqac.getCrowdGroup().getName());
+						);
 
 			}
 

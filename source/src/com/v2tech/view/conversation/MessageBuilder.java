@@ -561,9 +561,11 @@ public class MessageBuilder {
 			values.put(
 					ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_FROM_USER_ID,
 					crowdInviteMsg.getInvitationUser().getmUserId());
-			values.put(
-					ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_TO_USER_ID,
-					crowdInviteMsg.getBeInvitatonUser().getmUserId());
+			if(crowdInviteMsg.getBeInvitatonUser() != null){
+				values.put(
+						ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_TO_USER_ID,
+						crowdInviteMsg.getBeInvitatonUser().getmUserId());
+			}
 			values.put(
 					ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_REMOTE_USER_ID,
 					crowdInviteMsg.getInvitationUser().getmUserId());

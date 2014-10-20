@@ -34,6 +34,7 @@ import android.os.Message;
 import android.text.TextUtils;
 import android.text.TextUtils.TruncateAt;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -495,7 +496,10 @@ public class VideoActivityV2 extends Activity {
 			mPendingPermissionUpdateList.clear();
 
 		}
-
+		else{
+			mAttendeeContainer.updateStatist();
+			return mAttendeeContainer;
+		}
 		return mAttendeeContainer;
 	}
 
@@ -1696,8 +1700,10 @@ public class VideoActivityV2 extends Activity {
 		if (TextUtils.isEmpty(doc.getDocName())) {
 			if (doc.getPageSize() > 0) {
 				Page p = doc.getPage(1);
-				String name  = Uri.parse(p.getFilePath()).getLastPathSegment();
-				doc.setDocName(name);
+				if(!TextUtils.isEmpty(p.getFilePath())){
+					String name  = Uri.parse(p.getFilePath()).getLastPathSegment();
+					doc.setDocName(name);
+				}
 			}
 		}
 		
@@ -2036,7 +2042,6 @@ public class VideoActivityV2 extends Activity {
 		public void requestDocViewFillParent(View v) {
 			requestSubViewFillScreen();
 			adjustContentLayout();
-
 		}
 
 		@Override
@@ -2248,6 +2253,7 @@ public class VideoActivityV2 extends Activity {
 
 			case VIDEO_MIX_NOTIFICATION:
 				// create mixed video
+				V2Log.e(TAG , "successful receive mix video callback. type is : "+ msg.arg1);
 				if (msg.arg1 == 1) {
 					MixVideo mv = (MixVideo) (((AsyncResult) msg.obj)
 							.getResult());
@@ -2271,6 +2277,7 @@ public class VideoActivityV2 extends Activity {
 					mAttendeeList.remove(amd);
 					// Notify attendee list remove mixed video device
 					if (mAttendeeContainer != null) {
+						V2Log.e(TAG, "VIDEO_MIX_NOTIFICATION 被调用 , 成功移除混合视频  update---");
 						mAttendeeContainer.updateExitedAttendee(amd);
 					}
 					UserDeviceConfig mixedUDC = amd.getDefaultDevice();

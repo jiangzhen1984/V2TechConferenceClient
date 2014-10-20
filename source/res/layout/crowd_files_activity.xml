@@ -36,6 +36,7 @@
                 android:paddingLeft="10dp"
                 android:paddingRight="10dp"
                 android:paddingTop="10dp"
+                android:textSize="@dimen/common_item_text_size" 
                 android:text="@string/crowd_files_title_upload"
                 android:textColor="@color/conf_create_button_color" />
             <TextView
@@ -50,6 +51,7 @@
                 android:paddingRight="10dp"
                 android:paddingTop="10dp"
                 android:text="@string/crowd_files_return_button"
+                android:textSize="@dimen/common_item_text_size" 
                 android:textColor="@color/conf_create_button_color" />
             
             <!-- Use translucent image to hold space -->

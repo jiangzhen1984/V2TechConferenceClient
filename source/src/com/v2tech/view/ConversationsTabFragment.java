@@ -51,7 +51,6 @@ import com.v2tech.db.V2techSearchContentProvider;
 import com.v2tech.service.BitmapManager;
 import com.v2tech.service.ConferencMessageSyncService;
 import com.v2tech.service.ConferenceService;
-import com.v2tech.service.CrowdGroupService;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.service.Registrant;
 import com.v2tech.service.jni.JNIResponse;
@@ -88,6 +87,7 @@ import com.v2tech.vo.User;
 import com.v2tech.vo.VMessage;
 import com.v2tech.vo.VMessageAbstractItem;
 import com.v2tech.vo.VMessageQualification;
+import com.v2tech.vo.VMessageQualificationApplicationCrowd;
 import com.v2tech.vo.VMessageQualificationInvitationCrowd;
 import com.v2tech.vo.VideoBean;
 
@@ -120,7 +120,6 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 	private LocalHandler mHandler = new LocalHandler();
 
 	private boolean isLoadedCov = false;
-	private boolean isDepartmentLoaded = false;
 
 	private View rootView;
 
@@ -134,8 +133,6 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 	private ConversationsAdapter adapter = new ConversationsAdapter();
 
 	private ConferenceService cb;
-
-	private CrowdGroupService crowdService;
 
 	private int mCurrentTabFlag;
 
@@ -156,7 +153,6 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 			mCurrentTabFlag = Conversation.TYPE_CONTACT;
 		} else if (PublicIntent.TAG_GROUP.equals(tag)) {
 			mCurrentTabFlag = Conversation.TYPE_GROUP;
-			crowdService = new CrowdGroupService();
 		}
 		mContext = getActivity();
 
@@ -2227,9 +2223,13 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 							.setUser(invitation.getInvitationUser());
 					break;
 				case CROWD_APPLICATION:
-					content = mContext
+					VMessageQualificationApplicationCrowd apply = (VMessageQualificationApplicationCrowd) nestQualification;
+					User applicant = apply.getApplicant();
+					content = applicant.getName() + mContext
 							.getText(R.string.crowd_applicant_content)
 							.toString();
+					((ConversationFirendAuthenticationData) verificationMessageItemData)
+					.setUser(applicant);
 					break;
 				default:
 					break;
@@ -2264,11 +2264,10 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 						populateConversation(gl);
 				} else if (mCurrentTabFlag == Conversation.TYPE_GROUP) {
 					List<Group> groupList = new ArrayList<Group>();
-					List<Group> organizationGroup = GlobalHolder.getInstance()
-							.getGroup(Group.GroupType.ORG.intValue());
-					if (organizationGroup.size() > 0)
-						groupList.addAll(organizationGroup);
-
+//					List<Group> organizationGroup = GlobalHolder.getInstance()
+//							.getGroup(Group.GroupType.ORG.intValue());
+//					if (organizationGroup.size() > 0)
+//						groupList.addAll(organizationGroup);
 					List<Group> chatGroup = GlobalHolder.getInstance()
 							.getGroup(Group.GroupType.CHATING.intValue());
 					if (chatGroup.size() > 0)

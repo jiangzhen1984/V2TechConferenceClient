@@ -185,16 +185,17 @@ public class GroupRequest {
 	 * @param groupType
 	 * @param nGroupID
 	 * @param nUserID
+	 * 			the userID of User that apply join group
 	 */
 	public native void acceptApplyJoinGroup(int groupType, long nGroupID,
 			long nUserID);
 
 	/**
 	 * accept invitation of join group
-	 * 
 	 * @param groupType
-	 * @param t
+	 * @param groupId
 	 * @param nUserID
+	 * 			the userID of Group's creator , No was Invited userID 群主用户的id
 	 */
 	public native void acceptInviteJoinGroup(int groupType, long groupId,
 			long nUserID);

@@ -265,16 +265,12 @@ public class VideoAttendeeListLayout extends LinearLayout {
 		UserDeviceConfig udc = wr.udc;
 
 		if (at.isChairMan() || conf.getChairman() == at.getAttId()) {
-
-			if (at.isSelf() || at.isJoined()) {
-
+			if (at.isSelf() || at.isJoined())
 				name.setTextColor(getContext().getResources().getColor(
 						R.color.video_attendee_chair_man_name_color));
-			}
-			else{
+			else
 				name.setTextColor(getContext().getResources().getColor(
 						R.color.video_attendee_name_color_offline));
-			}
 		} else if (at.isSelf()) {
 			name.setTypeface(null, Typeface.BOLD);
 			name.setTextColor(getContext().getResources().getColor(
@@ -295,9 +291,10 @@ public class VideoAttendeeListLayout extends LinearLayout {
 			iv.setImageResource(R.drawable.camera);
 		} else if (at.isJoined()) {
 			if (at.getType() != Attendee.TYPE_MIXED_VIDEO) {
-				if (udc != null) {
+				if (udc != null) 
 					iv.setImageResource(R.drawable.camera);
-				}
+				else
+					iv.setImageResource(R.drawable.camera_pressed);
 			} else {
 				iv.setImageResource(R.drawable.mixed_video_camera);
 			}
@@ -353,6 +350,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 	}
 
 	private boolean newAttendee;
+
 	public void updateEnteredAttendee(Attendee at) {
 		if (at == null) {
 			return;
@@ -387,10 +385,13 @@ public class VideoAttendeeListLayout extends LinearLayout {
 			}
 		}
 
-		//configAttendee(at);
-		if (at.getType() != Attendee.TYPE_MIXED_VIDEO && newAttendee == true) {
-			mAttendeeCount++;
-			newAttendee = false;
+		// configAttendee(at);
+		if (at.getType() != Attendee.TYPE_MIXED_VIDEO) {
+			if (newAttendee) {
+				mAttendeeCount++;
+				newAttendee = false;
+			}
+
 			if ((at.isJoined() || at.isSelf())) {
 				onLinePersons++;
 			}
@@ -477,7 +478,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 	 * @param at
 	 */
 	public void removeAttendee(Attendee at) {
-		//TODO update attendee count
+		// TODO update attendee count
 		for (int i = 0; i < mList.size(); i++) {
 			Wrapper wr = mList.get(i);
 			// Remove attendee devices, leave one device item
@@ -866,11 +867,8 @@ public class VideoAttendeeListLayout extends LinearLayout {
 		if (at == null) {
 			return;
 		}
-		if (at.getType() != Attendee.TYPE_MIXED_VIDEO && newAttendee == true) {
-				if (isNew) {
-					mAttendeeCount++;
-				}
-				newAttendee = false;
+		if (at.getType() != Attendee.TYPE_MIXED_VIDEO && isNew) {
+			mAttendeeCount++;
 			if ((at.isJoined() || at.isSelf())) {
 				onLinePersons++;
 			}
@@ -879,8 +877,9 @@ public class VideoAttendeeListLayout extends LinearLayout {
 
 	}
 
-	private void updateStatist() {
+	public void updateStatist() {
 		attendPersons.setText(onLinePersons + "/" + (mAttendeeCount));
+		adapter.notifyDataSetChanged();
 	}
 
 }

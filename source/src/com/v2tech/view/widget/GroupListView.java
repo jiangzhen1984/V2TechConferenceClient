@@ -283,7 +283,10 @@ public class GroupListView extends ListView {
 					if (pos == mFilterList.size()) {
 						mFilterList.add(userItem);
 					} else {
-						mFilterList.add(pos, userItem);
+						if(pos == 0 && mFilterList.size() == 1)
+							mFilterList.add(pos + 1, userItem);
+						else
+							mFilterList.add(pos, userItem);
 					}
 					break;
 				}
