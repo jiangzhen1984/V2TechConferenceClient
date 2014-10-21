@@ -58,6 +58,7 @@ public class CrowdDetailActivity extends Activity {
 	private View mReturnButton;
 	private TextView mButtonText;
 	private RadioGroup mRulesRD;
+	private View mNewFileNotificator;
 
 	private CrowdGroup crowd;
 	private CrowdGroupService service = new CrowdGroupService();
@@ -90,6 +91,8 @@ public class CrowdDetailActivity extends Activity {
 		mSHowFilesButton = findViewById(R.id.crowd_detail_files_button);
 		mSHowFilesButton.setOnClickListener(mShowFilesButtonListener);
 		
+		mNewFileNotificator = findViewById(R.id.crowd_detail_new_file_notificator);
+		
 		crowd = (CrowdGroup) GlobalHolder.getInstance().getGroupById(
 				GroupType.CHATING.intValue(), getIntent().getLongExtra("cid", 0));
 
@@ -108,9 +111,12 @@ public class CrowdDetailActivity extends Activity {
 		}
 		
 		mMembersCountsTV.setText(crowd.getUsers().size()+"");
+		
+		
 		initRules();
 		mRulesRD.setOnCheckedChangeListener(mRulesChangedListener);
 		initReceiver();
+		updateGroupFileNotificator();
 	}
 	
 	
@@ -141,6 +147,14 @@ public class CrowdDetailActivity extends Activity {
 	}
 
 
+	
+	private void updateGroupFileNotificator() {
+		if (crowd.getNewFileCount() > 0) {
+			mNewFileNotificator.setVisibility(View.VISIBLE);
+		} else {
+			mNewFileNotificator.setVisibility(View.GONE);
+		}
+	}
 
 
 	private void initReceiver() {
@@ -149,6 +163,7 @@ public class CrowdDetailActivity extends Activity {
 		filter.addAction(JNIService.JNI_BROADCAST_KICED_CROWD);
 		filter.addAction(JNIService.JNI_BROADCAST_GROUP_UPDATED);
 		filter.addAction(JNIService.JNI_BROADCAST_GROUP_USER_ADDED);
+		filter.addAction(JNIService.BROADCAST_CROWD_NEW_UPLOAD_FILE_NOTIFICATION);
 		filter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
 		this.registerReceiver(localReceiver, filter);
 	}
@@ -384,6 +399,11 @@ public class CrowdDetailActivity extends Activity {
 				GroupUserObject guo = (GroupUserObject)intent.getExtras().get("obj");
 				if (guo.getmGroupId() == crowd.getmGId()) {
 					mMembersCountsTV.setText(crowd.getUsers().size()+"");
+				}
+			} else if (intent.getAction().equals(JNIService.BROADCAST_CROWD_NEW_UPLOAD_FILE_NOTIFICATION)) {
+				long crowdId = intent.getLongExtra("gid", 0);
+				if (crowdId == crowd.getmGId()) {
+					updateGroupFileNotificator();
 				}
 			}
 			

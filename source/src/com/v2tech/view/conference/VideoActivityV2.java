@@ -1700,7 +1700,8 @@ public class VideoActivityV2 extends Activity {
 		if (TextUtils.isEmpty(doc.getDocName())) {
 			if (doc.getPageSize() > 0) {
 				Page p = doc.getPage(1);
-				if(!TextUtils.isEmpty(p.getFilePath())){
+				//FIXME page file path should never be null
+				if (p.getFilePath() != null) {
 					String name  = Uri.parse(p.getFilePath()).getLastPathSegment();
 					doc.setDocName(name);
 				}

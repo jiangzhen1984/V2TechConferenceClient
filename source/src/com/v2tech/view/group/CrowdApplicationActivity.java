@@ -72,7 +72,7 @@ public class CrowdApplicationActivity extends Activity {
 		mNameTV.setText(crowd.getName());
 		mBriefTV.setText(crowd.getBrief());
 		mCreatorTV.setText(crowd.getCreator().getName());
-		mNoTV.setText(crowd.getId() + "");
+		mNoTV.setText(String.valueOf(crowd.getId()).substring(1));
 
 		CrowdGroup g = new CrowdGroup(crowd.getId(), crowd.getName(),
 				crowd.getCreator(), null);

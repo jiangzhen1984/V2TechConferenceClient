@@ -1,11 +1,6 @@
 package com.V2.jni;
 
-//import com.xinlan.im.bean.msgtype.FileTransAccepted_MsgType;
-//import com.xinlan.im.bean.msgtype.InvitedMsgType;
-//import com.xinlan.im.bean.msgtype.MsgType;
-//import com.xinlan.im.ui.SplashActivity;
-//import com.xinlan.im.ui.chat.FileDownloadActivity;
-//import com.xinlan.im.utils.Constant;
+
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,6 +14,11 @@ import com.V2.jni.ind.V2Group;
 import com.V2.jni.ind.V2User;
 import com.V2.jni.util.V2Log;
 
+/**
+ * 
+ * @author 28851274
+ *
+ */
 public class FileRequest {
 
 	public static final int BT_CONF = 1;

@@ -13,6 +13,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Configuration;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -39,6 +40,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.v2tech.R;
+import com.v2tech.service.BitmapManager;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.service.Registrant;
 import com.v2tech.service.UserService;
@@ -169,12 +171,15 @@ public class ContactDetail extends Activity implements OnTouchListener {
 		initViewShow();
 
 		initBroadcastReceiver();
+		
+		BitmapManager.getInstance().registerBitmapChangedListener(mAvatarChangedListener);
 	}
 
 	@Override
 	protected void onDestroy() {
 		uninitBroadcastReceiver();
 		super.onDestroy();
+		BitmapManager.getInstance().unRegisterLastBitmapChangedListener(mAvatarChangedListener);
 	}
 
 	private void connectView() {
@@ -635,6 +640,18 @@ public class ContactDetail extends Activity implements OnTouchListener {
 			}
 		}
 
+	};
+	
+	
+	private BitmapManager.BitmapChangedListener mAvatarChangedListener = new BitmapManager.BitmapChangedListener() {
+
+		@Override
+		public void notifyAvatarChanged(User user, Bitmap bm) {
+			if (user.getmUserId() == u.getmUserId()) {
+				mHeadIconIV.setImageBitmap(bm);
+			}
+		}
+		
 	};
 
 	private TextWatcher tw = new TextWatcher() {

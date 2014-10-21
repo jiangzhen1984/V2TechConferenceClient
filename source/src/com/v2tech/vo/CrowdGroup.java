@@ -9,6 +9,7 @@ public class CrowdGroup extends Group {
 	private int mCapcity;
 	private String mAnnouncement;
 	private String mBrief;
+	private int mNewFileCount;
 	
 
 	public CrowdGroup(long mGId, String mName, User mOwner, Date createDate) {
@@ -63,6 +64,22 @@ public class CrowdGroup extends Group {
 		}
 		sb.append("</userlist>");
 		return sb.toString();
+	}
+	
+	public int getNewFileCount() {
+		return mNewFileCount;
+	}
+	
+	public void resetNewFileCount() {
+		mNewFileCount = 0;
+	}
+	
+	public void addNewFileNum() {
+		mNewFileCount ++;
+	}
+	
+	public void addNewFileNum(int num) {
+		mNewFileCount+= num;
 	}
 
 	@Override

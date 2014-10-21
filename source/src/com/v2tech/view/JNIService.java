@@ -97,7 +97,8 @@ public class JNIService extends Service {
 	 * Notify user avatar changed, notice please do not listen this broadcast if
 	 * you are UI. Use
 	 * {@link BitmapManager#registerBitmapChangedListener(com.v2tech.service.BitmapManager.BitmapChangedListener)}
-	 * to listener bitmap change if you are UI.
+	 * to listener bitmap change if you are UI.<br>
+	 * key avatar : #UserAvatarObject
 	 */
 	public static final String JNI_BROADCAST_USER_AVATAR_CHANGED_NOTIFICATION = "com.v2tech.jni.broadcast.user_avatar_notification";
 	public static final String JNI_BROADCAST_USER_UPDATE_NAME_OR_SIGNATURE = "com.v2tech.jni.broadcast.user_update_sigature";
@@ -869,6 +870,12 @@ public class JNIService extends Service {
 				V2Log.e("OnAddGroupFile : May receive new group files failed.. get empty collection");
 				return;
 			}
+			if (group.type == V2GlobalEnum.GROUP_TYPE_CROWD) {
+				CrowdGroup cg = (CrowdGroup) GlobalHolder.getInstance().getGroupById(group.id);
+				if (cg != null) {
+					cg.addNewFileNum(list.size());
+				}
+			}
 			
 			for (FileJNIObject fileJNIObject : list) {
 				User user = GlobalHolder.getInstance().getUser(
@@ -892,7 +899,8 @@ public class JNIService extends Service {
 			intent.putExtra("groupID", group.id);
 			intent.putParcelableArrayListExtra("fileJniObjects",
 					new ArrayList<FileJNIObject>(list));
-			sendBroadcast(intent);
+			//Make sure Crowd file activity receive this event first
+			sendOrderedBroadcast(intent, null);
 		}
 
 		@Override

@@ -343,8 +343,17 @@
                         android:textColor="@color/activiy_contact_detail_item_color"
                         android:textSize="@dimen/common_item_text_size" />
 
+                     <ImageView
+                         android:id="@+id/crowd_detail_new_file_notificator"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_toLeftOf="@+id/crowd_detail_file_right_arrow_icon"
+                        android:layout_centerVertical="true"
+                        android:src="@drawable/red_nofificator" />
 
                     <ImageView
+                        
+                        android:id="@+id/crowd_detail_file_right_arrow_icon"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_alignParentRight="true"

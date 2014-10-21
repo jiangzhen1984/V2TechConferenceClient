@@ -65,7 +65,14 @@ public class VideoAttendeeListLayout extends LinearLayout {
 
 	private AttendeesAdapter adapter = new AttendeesAdapter();
 
+	/**
+	 * Online attendee count without mixed device
+	 */
 	private int onLinePersons = 0;
+	
+	/**
+	 * All attendee count without mixed device
+	 */
 	private int mAttendeeCount = 0;
 
 	public interface VideoAttendeeActionListener {
@@ -349,8 +356,6 @@ public class VideoAttendeeListLayout extends LinearLayout {
 		adapter.notifyDataSetChanged();
 	}
 
-	private boolean newAttendee;
-
 	public void updateEnteredAttendee(Attendee at) {
 		if (at == null) {
 			return;
@@ -375,27 +380,16 @@ public class VideoAttendeeListLayout extends LinearLayout {
 			}
 			for (int i = 1; i < dList.size(); i++) {
 				if (index + 1 == mList.size() - 1) {
-					newAttendee = true;
 					mList.add(new Wrapper(at, dList.get(i), i));
 				} else {
 					mList.add(index + 1, new Wrapper(at, dList.get(i), i));
 				}
-				newAttendee = true;
 				index++;
 			}
 		}
 
-		// configAttendee(at);
-		if (at.getType() != Attendee.TYPE_MIXED_VIDEO) {
-			if (newAttendee) {
-				mAttendeeCount++;
-				newAttendee = false;
-			}
-
-			if ((at.isJoined() || at.isSelf())) {
-				onLinePersons++;
-			}
-		}
+		configAttendee(at, false);
+	
 		updateStatist();
 		// TODO update device count and mixed video
 
@@ -867,8 +861,10 @@ public class VideoAttendeeListLayout extends LinearLayout {
 		if (at == null) {
 			return;
 		}
-		if (at.getType() != Attendee.TYPE_MIXED_VIDEO && isNew) {
-			mAttendeeCount++;
+		if (at.getType() != Attendee.TYPE_MIXED_VIDEO) {
+				if (isNew) {
+					mAttendeeCount++;
+				}
 			if ((at.isJoined() || at.isSelf())) {
 				onLinePersons++;
 			}

@@ -84,12 +84,14 @@ public class CrowdFilesActivity extends Activity {
 	private View mReturnButton;
 	private TextView mShowUploadedFileButton;
 	private TextView mTitle;
+	private ImageView mUploadingFileNotificationIcon;
 	private boolean showUploaded;
 	private boolean isInDeleteMode;
 
 	private CrowdGroupService service;
 	private CrowdGroup crowd;
 	private LocalReceiver localReceiver;
+	private NewFileMonitorReceiver mNewFileMonitorReceiver;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -99,7 +101,8 @@ public class CrowdFilesActivity extends Activity {
 		mListView = (ListView) findViewById(R.id.crowd_files_list);
 		mListView.setTextFilterEnabled(true);
 		mTitle = (TextView) findViewById(R.id.crowd_files_title);
-
+		mUploadingFileNotificationIcon  = (ImageView) findViewById(R.id.crowd_file_upload_icon);
+		mUploadingFileNotificationIcon.setOnClickListener(mShowUPloadingFileListener);
 		mReturnButton = findViewById(R.id.crowd_members_return_button);
 		mReturnButton.setOnClickListener(mBackButtonListener);
 		mShowUploadedFileButton = (TextView) findViewById(R.id.crowd_files_uploaded_file_button);
@@ -129,7 +132,8 @@ public class CrowdFilesActivity extends Activity {
 		crowd = (CrowdGroup) GlobalHolder.getInstance().getGroupById(
 				GroupType.CHATING.intValue(),
 				getIntent().getLongExtra("cid", 0));
-
+		//Reset crowd new file  count to 0
+		crowd.resetNewFileCount();
 		loadFiles();
 		initReceiver();
 	}
@@ -165,6 +169,7 @@ public class CrowdFilesActivity extends Activity {
 					//Update screen to uploading UI
 					showUploaded = true;
 					mTitle.setText(R.string.crowd_files_title_uploaded);
+					mUploadingFileNotificationIcon.setVisibility(View.GONE);
 					mShowUploadedFileButton.setVisibility(View.GONE);
 					adapter.notifyDataSetChanged();
 				}
@@ -184,6 +189,7 @@ public class CrowdFilesActivity extends Activity {
 				NEW_FILE_NOTIFICATION, null);
 		service.clearCalledBack();
 		this.unregisterReceiver(localReceiver);
+		this.unregisterReceiver(mNewFileMonitorReceiver);
 	}
 
 	@Override
@@ -198,6 +204,12 @@ public class CrowdFilesActivity extends Activity {
 			showUploaded = false;
 			mTitle.setText(R.string.crowd_files_title_uploaded);
 			mShowUploadedFileButton.setVisibility(View.VISIBLE);
+			mUploadingFileNotificationIcon.setVisibility(View.VISIBLE);
+			if (mUploadedFiles.size() > 0) {
+				mUploadingFileNotificationIcon.setImageResource(R.drawable.crowd_file_icon_notification);
+			} else {
+				mUploadingFileNotificationIcon.setImageResource(R.drawable.crowd_file_icon);
+			}
 			adapter.notifyDataSetChanged();
 			return;
 		}
@@ -214,6 +226,13 @@ public class CrowdFilesActivity extends Activity {
 		filter.addAction(JNIService.JNI_BROADCAST_KICED_CROWD);
 		filter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
 		this.registerReceiver(localReceiver, filter);
+		
+		mNewFileMonitorReceiver = new NewFileMonitorReceiver();
+		filter = new IntentFilter();
+		filter.addAction(JNIService.BROADCAST_CROWD_NEW_UPLOAD_FILE_NOTIFICATION);
+		filter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
+		filter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
+		this.registerReceiver(mNewFileMonitorReceiver, filter);
 	}
 
 	private void loadFiles() {
@@ -288,6 +307,13 @@ public class CrowdFilesActivity extends Activity {
 		if (ind.indType == FileTransStatusIndication.IND_TYPE_PROGRESS) {
 			FileTransProgressStatusIndication progress = (FileTransProgressStatusIndication) ind;
 			file.setProceedSize(progress.nTranedSize);
+			if (file.getProceedSize() == file.getSize() && file.getUploader().getmUserId() == GlobalHolder.getInstance().getCurrentUserId()) {
+				this.mUploadedFiles.remove(file);
+				if (this.mUploadedFiles.size() <=0) {
+					mUploadingFileNotificationIcon.setImageResource(R.drawable.crowd_file_icon);
+				}
+			}
+			
 		} else if (ind.indType == FileTransStatusIndication.IND_TYPE_DOWNLOAD_ERR) {
 			file.setState(VFile.State.DOWNLOAD_FAILED);
 		} else if (ind.indType == FileTransStatusIndication.IND_TYPE_TRANS_ERR) {
@@ -360,6 +386,21 @@ public class CrowdFilesActivity extends Activity {
 		}
 
 	};
+	
+	private OnClickListener mShowUPloadingFileListener = new OnClickListener() {
+
+		@Override
+		public void onClick(View v) {
+			//Update screen to uploading UI
+			showUploaded = true;
+			mTitle.setText(R.string.crowd_files_title_uploaded);
+			mUploadingFileNotificationIcon.setVisibility(View.GONE);
+			mShowUploadedFileButton.setVisibility(View.GONE);
+			adapter.notifyDataSetChanged();
+		}
+
+	};
+	
 
 	private OnClickListener mShowUploadedFileButtonListener = new OnClickListener() {
 
@@ -468,6 +509,24 @@ public class CrowdFilesActivity extends Activity {
 						}
 					}
 					finish();
+				}
+			}
+
+		}
+
+	}
+	
+	
+	
+	
+	class NewFileMonitorReceiver extends BroadcastReceiver {
+
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			if (intent.getAction().equals(JNIService.BROADCAST_CROWD_NEW_UPLOAD_FILE_NOTIFICATION)) {
+				long crowdId = intent.getLongExtra("crowd", 0);
+				if (crowdId == crowd.getmGId()) {
+					crowd.resetNewFileCount();
 				}
 			}
 
