@@ -15,6 +15,8 @@ import com.v2tech.vo.V2ImageDoc;
 import com.v2tech.vo.V2ShapeMeta;
 
 /**
+ * Use to handle document business.<br>
+ * 
  * @author jiangzhen
  * 
  */
