@@ -153,9 +153,9 @@ public class XmlAttributeExtractor {
 			if (crowdElement.getAttribute("name") == null)
 				V2Log.e("parseCrowd the name is wroing...the group is :"
 						+ crowdElement.getAttribute("id"));
-
-			V2Group crowd = new V2Group(Long.parseLong(crowdElement
-					.getAttribute("id")), crowdElement.getAttribute("name"),
+			long gid = Long.parseLong(crowdElement
+					.getAttribute("id"));
+			V2Group crowd = new V2Group(gid, crowdElement.getAttribute("name"),
 					V2Group.TYPE_CROWD, creator);
 			crowd.brief = crowdElement.getAttribute("summary");
 			crowd.announce = crowdElement.getAttribute("announcement");

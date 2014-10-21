@@ -9,7 +9,9 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import android.content.Context;
 import android.text.TextUtils;
 
+import com.V2.jni.GroupRequestCallback.DocOpt;
 import com.V2.jni.ind.FileJNIObject;
+import com.V2.jni.ind.V2Document;
 import com.V2.jni.ind.V2Group;
 import com.V2.jni.ind.V2User;
 import com.V2.jni.util.V2Log;
@@ -882,6 +884,21 @@ public class GroupRequest {
 		V2Log.e("GroupRequest UI", "OnGroupCreateWBoard ---> eGroupType :"
 				+ eGroupType + " | nGroupID: " + nGroupID + " | szWBoardID: "
 				+ szWBoardID + " | nWhiteIndex: " + nWhiteIndex);
+		V2Document v2doc = new V2Document();
+		v2doc.mId = szWBoardID;
+		v2doc.mIndex = nWhiteIndex;
+		V2Group v2group = new V2Group(nGroupID, eGroupType);
+		v2doc.mGroup = v2group;
+		v2doc.mType = V2Document.Type.BLANK_BOARD;
+		
+		for (int i = 0; i < mCallbacks.size(); i++) {
+			WeakReference<GroupRequestCallback> wrcb = mCallbacks.get(i);
+			Object obj = wrcb.get();
+			if (obj != null) {
+				GroupRequestCallback callback = (GroupRequestCallback) obj;
+				callback.OnGroupWBoardNotification(v2doc, GroupRequestCallback.DocOpt.CREATE);
+			}
+		}
 	};
 
 	/**
@@ -894,7 +911,7 @@ public class GroupRequest {
 	 */
 	private void OnRenameGroupFile(int eGroupType, long nGroupID,
 			String sFileID, String sNewName) {
-		V2Log.e("GroupRequest UI", "OnGroupCreateWBoard ---> eGroupType :"
+		V2Log.e("GroupRequest UI", "OnRenameGroupFile ---> eGroupType :"
 				+ eGroupType + " | nGroupID: " + nGroupID + " | sFileID: "
 				+ sFileID + " | sNewName: " + sNewName);
 	};
@@ -908,9 +925,24 @@ public class GroupRequest {
 	 */
 	private void OnWBoardDestroy(int eGroupType, long nGroupID,
 			String szWBoardID) {
-		V2Log.e("GroupRequest UI", "OnGroupCreateWBoard ---> eGroupType :"
+		V2Log.e("GroupRequest UI", "OnWBoardDestroy ---> eGroupType :"
 				+ eGroupType + " | nGroupID: " + nGroupID + " | szWBoardID: "
 				+ szWBoardID);
+		
+		V2Document v2doc = new V2Document();
+		v2doc.mId = szWBoardID;
+		V2Group v2group = new V2Group(nGroupID, eGroupType);
+		v2doc.mGroup = v2group;
+		v2doc.mType = V2Document.Type.BLANK_BOARD;
+		
+		for (int i = 0; i < mCallbacks.size(); i++) {
+			WeakReference<GroupRequestCallback> wrcb = mCallbacks.get(i);
+			Object obj = wrcb.get();
+			if (obj != null) {
+				GroupRequestCallback callback = (GroupRequestCallback) obj;
+				callback.OnGroupWBoardNotification(v2doc, GroupRequestCallback.DocOpt.DESTROY);
+			}
+		}
 	};
 
 	/**
@@ -924,10 +956,26 @@ public class GroupRequest {
 	 */
 	private void OnGroupCreateDocShare(int eGroupType, long nGroupID,
 			String szWBoardID, String szFileName, int eWhiteShowType) {
-		V2Log.e("GroupRequest UI", "OnGroupCreateWBoard ---> eGroupType :"
+		V2Log.e("GroupRequest UI", "OnGroupCreateDocShare ---> eGroupType :"
 				+ eGroupType + " | nGroupID: " + nGroupID + " | szWBoardID: "
 				+ szWBoardID + " | szFileName: " + szFileName
 				+ " | eWhiteShowType: " + eWhiteShowType);
+		
+		V2Document v2doc = new V2Document();
+		v2doc.mId = szWBoardID;
+		V2Group v2group = new V2Group(nGroupID, eGroupType);
+		v2doc.mGroup = v2group;
+		v2doc.mType = V2Document.Type.DOCUMENT;
+		v2doc.mFileName = szFileName;
+		
+		for (int i = 0; i < mCallbacks.size(); i++) {
+			WeakReference<GroupRequestCallback> wrcb = mCallbacks.get(i);
+			Object obj = wrcb.get();
+			if (obj != null) {
+				GroupRequestCallback callback = (GroupRequestCallback) obj;
+				callback.OnGroupWBoardNotification(v2doc, GroupRequestCallback.DocOpt.CREATE);
+			}
+		}
 	};
 
 	/**

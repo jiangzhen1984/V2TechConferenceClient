@@ -26,15 +26,12 @@ import android.graphics.ImageFormat;
 import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.media.AudioManager;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
-import android.text.TextUtils;
 import android.text.TextUtils.TruncateAt;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -1693,19 +1690,6 @@ public class VideoActivityV2 extends Activity {
 			}
 		} else if (opt == DOC_PAGE_ACTIVITE_NOTIFICATION) {
 			doc.setActivatePageNo(page.getNo());
-		}
-		
-		//Update doc name, if shared document is picture
-		//we receive event from doc display, doc invitation will be skipped, So doc name will be null
-		if (TextUtils.isEmpty(doc.getDocName())) {
-			if (doc.getPageSize() > 0) {
-				Page p = doc.getPage(1);
-				//FIXME page file path should never be null
-				if (p.getFilePath() != null) {
-					String name  = Uri.parse(p.getFilePath()).getLastPathSegment();
-					doc.setDocName(name);
-				}
-			}
 		}
 		
 

@@ -2,8 +2,11 @@ package com.v2tech.service;
 
 import android.os.Handler;
 
+import com.V2.jni.GroupRequest;
+import com.V2.jni.GroupRequestCallbackAdapter;
 import com.V2.jni.WBRequest;
 import com.V2.jni.WBRequestCallback;
+import com.V2.jni.ind.V2Document;
 import com.V2.jni.util.V2Log;
 import com.v2tech.util.XmlParser;
 import com.v2tech.vo.Group;
@@ -37,10 +40,13 @@ public class DocumentService extends AbstractHandler {
 	private static final int KEY_PAGE_CANVAS_NOTIFY_LISTENER = 57;
 
 	private WBRequestCallbackCB cb;
+	private GroupRequestCallbackCB grCB;
 
 	public DocumentService() {
 		cb = new WBRequestCallbackCB();
 		WBRequest.getInstance().addCallbacks(cb);
+		grCB = new GroupRequestCallbackCB();
+		GroupRequest.getInstance().addCallback(grCB);
 	}
 
 	/**
@@ -176,9 +182,63 @@ public class DocumentService extends AbstractHandler {
 	@Override
 	public void clearCalledBack() {
 		WBRequest.getInstance().removeCallback(cb);
+		GroupRequest.getInstance().removeCallback(grCB);
 	}
 
 
+	
+	class GroupRequestCallbackCB extends GroupRequestCallbackAdapter {
+		
+		
+		
+		@Override
+		public void OnGroupWBoardNotification(V2Document doc, DocOpt opt) {
+			if (doc == null) {
+				return;
+			}
+			Group g = GlobalHolder.getInstance().getGroupById(
+					GroupType.CONFERENCE.intValue(), doc.mGroup.id);
+			switch(opt) {
+			case CREATE: {
+				V2Doc v2doc = null;
+				//Blank board
+				if (doc.mType == V2Document.Type.BLANK_BOARD) {
+					v2doc =  new V2BlankBoardDoc(
+							doc.mId, "Blank board" + doc.mIndex, g, 0,null);
+					
+				} else {
+					String name = doc.mFileName;
+					int pos = doc.mFileName.lastIndexOf("/");
+					if (pos == -1) {
+						pos = doc.mFileName.lastIndexOf("\\");
+						if (pos != -1) {
+							name = doc.mFileName.substring(pos + 1);
+						}
+					}
+					v2doc =  new V2ImageDoc(
+							doc.mId, name, g, 0, null);
+				}
+				notifyListenerWithPending(KEY_NEW_DOC_LISTENER, 0, 0,v2doc);
+			}
+				break;
+			case DESTROY: {
+				notifyListenerWithPending(KEY_DOC_CLOSE_NOTIFY_LISTENER, 0, 0, new V2Doc(
+						doc.mId, "", g, 0, null));
+			}
+				break;
+			case RENAME:
+				break;
+			default:
+				break;
+			
+			}
+		}
+
+
+		
+		
+	}
+	
 
 
 	class WBRequestCallbackCB implements WBRequestCallback {

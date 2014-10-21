@@ -5,7 +5,7 @@ package com.V2.jni;
 public interface WBRequestCallback {
 	
 	/**
-	 * FIXME add comment
+	 * @deprecated Use {@link GroupRequestCallback#OnGroupCreateWBoard(int, long, String, int)} insteadof
 	 * @param nGroupID
 	 * @param nBusinessType
 	 * @param nFromUserID

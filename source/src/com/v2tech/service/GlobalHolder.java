@@ -10,7 +10,6 @@ import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import android.graphics.Bitmap;
-import android.util.Log;
 
 import com.V2.jni.V2GlobalEnum;
 import com.V2.jni.ind.V2Group;
@@ -215,6 +214,7 @@ public class GlobalHolder {
 				throw new RuntimeException(" Can not support this type");
 			}
 
+
 			mGroupHolder.put(Long.valueOf(g.getmGId()), g);
 
 			populateGroup(gType, g, vg.childs);
@@ -289,7 +289,6 @@ public class GlobalHolder {
 			}
 
 			parent.addGroupToGroup(g);
-
 			mGroupHolder.put(Long.valueOf(g.getmGId()), g);
 
 			populateGroup(groupType, g, vg.childs);

@@ -875,10 +875,11 @@ public class MessageBuilder {
 			group = new CrowdGroup(crowdGroupID, v2Group.name, GlobalHolder
 					.getInstance().getUser(v2Group.owner.uid), new Date(
 					saveDate));
-		}
-		group.setBrief(v2Group.brief);
-		group.setAnnouncement(v2Group.announce);
-		group.setAuthType(CrowdGroup.AuthType.fromInt(authType));
+			group.setBrief(v2Group.brief);
+			group.setAnnouncement(v2Group.announce);
+			group.setAuthType(CrowdGroup.AuthType.fromInt(authType));
+		} 
+	
 
 		long fromUserID = cursor.getLong(cursor.getColumnIndex("FromUserID"));
 		long toUserID = cursor.getLong(cursor.getColumnIndex("ToUserID"));

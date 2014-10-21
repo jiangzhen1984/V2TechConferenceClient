@@ -3,6 +3,7 @@ package com.V2.jni;
 import java.util.List;
 
 import com.V2.jni.ind.FileJNIObject;
+import com.V2.jni.ind.V2Document;
 import com.V2.jni.ind.V2Group;
 import com.V2.jni.ind.V2User;
 
@@ -114,7 +115,12 @@ public abstract class GroupRequestCallbackAdapter implements
 	public void OnKickGroupUser(int groupType, long groupId, long nUserId) {
 		
 	}
-	
+
+	@Override
+	public void OnGroupWBoardNotification(V2Document doc, DocOpt opt) {
+		
+	}
+
 	
 	
 	

@@ -3,6 +3,7 @@ package com.V2.jni;
 import java.util.List;
 
 import com.V2.jni.ind.FileJNIObject;
+import com.V2.jni.ind.V2Document;
 import com.V2.jni.ind.V2Group;
 import com.V2.jni.ind.V2User;
 
@@ -204,5 +205,17 @@ public interface GroupRequestCallback {
 	 * @param nUserId should always same with current logged in user
 	 */
 	public void OnKickGroupUser(int groupType, long groupId, long nUserId);
+	
+	
+	/**
+	 * 
+	 * @param doc
+	 */
+	public void OnGroupWBoardNotification(V2Document doc, DocOpt opt);
+	
+	
+	public enum DocOpt {
+		CREATE, RENAME, DESTROY
+	}
 
 }
