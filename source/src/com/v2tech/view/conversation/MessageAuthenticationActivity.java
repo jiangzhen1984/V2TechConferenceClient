@@ -173,6 +173,15 @@ public class MessageAuthenticationActivity extends Activity {
 							rbFriendAuthentication.setTextColor(getResources()
 									.getColor(R.color.button_text_color));
 							isFriendAuthentication = false;
+
+							// 退出好友验证消息的编辑模式
+							if (firendAdapter.isDeleteMode) {
+								firendAdapter.isDeleteMode = false;
+								firendAdapter.notifyDataSetChanged();
+								tvMessageBack.setVisibility(View.VISIBLE);
+								tvCompleteRight.setVisibility(View.INVISIBLE);
+							}
+
 							changeMessageAuthenticationListView();
 						}
 					}

@@ -40,7 +40,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginRight="10dp"
-            android:layout_toLeftOf="@+id/contact_detail_2_next_button"
+            android:layout_toLeftOf="@+id/right_text_view"
             android:paddingBottom="10dp"
             android:paddingTop="10dp"
             android:src="@drawable/translucent" />
@@ -125,8 +125,7 @@
                 android:layout_marginLeft="10dp"
                 android:layout_marginRight="10dp"
                 android:layout_marginTop="10dp"
-                android:background="@drawable/rounded_corners_of_setting_border"
-                 >
+                android:background="@drawable/rounded_corners_of_setting_border" >
 
                 <TextView
                     android:id="@+id/group_tv"
@@ -142,9 +141,6 @@
                     android:textColor="@color/activiy_contact_detail_item_color"
                     android:textSize="@dimen/common_item_text_size" />
 
-    
-                
-                
                 <TextView
                     android:id="@+id/tv_group_name"
                     android:layout_width="wrap_content"
