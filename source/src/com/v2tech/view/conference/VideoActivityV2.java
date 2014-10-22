@@ -1118,8 +1118,8 @@ public class VideoActivityV2 extends Activity {
 		mVideoLayout.getDrawingRect(outR);
 		int[] po = new int[2];
 		mVideoLayout.getLocationInWindow(po);
-		mVideoLayout.measure(View.MeasureSpec.UNSPECIFIED,
-				View.MeasureSpec.UNSPECIFIED);
+		mVideoLayout.measure(View.MeasureSpec.EXACTLY,
+				View.MeasureSpec.EXACTLY);
 		// First extra from layout parameter. Because if doc layout request
 		// fixed position,
 		// will set layout width parameter. At here measure doesn't work with
@@ -1137,7 +1137,7 @@ public class VideoActivityV2 extends Activity {
 		}
 
 		int fixedWidth = normalW;
-		int fixedHeight = normalH;
+		int fixedHeight = normalH; 
 		fixedWidth -= fixedWidth % 16;
 		fixedHeight -= fixedHeight % 16;
 

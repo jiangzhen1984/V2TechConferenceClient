@@ -3,6 +3,7 @@ package com.v2tech.view.group;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -33,6 +34,8 @@ import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.V2.jni.V2GlobalEnum;
+import com.V2.jni.util.V2Log;
 import com.v2tech.R;
 import com.v2tech.service.CrowdGroupService;
 import com.v2tech.service.GlobalHolder;
@@ -415,6 +418,18 @@ public class CrowdCreateActivity extends Activity {
 			}
 
 			if (crowd != null) {
+				List<User> users = crowd.getUsers();
+				Iterator<User> iterator = mUserList.iterator();
+				while (iterator.hasNext()) {
+					User checkUser = iterator.next();
+					for (User user : users) {
+						if(user.getmUserId() == checkUser.getmUserId()){
+							mUserList.remove(checkUser);
+							break;
+						}
+					}
+				}
+				
 				List<User> newMembers = new ArrayList<User>(mUserList);
 				cg.inviteMember(crowd, newMembers, new Registrant(
 						mLocalHandler, UPDATE_CROWD_RESPONSE, crowd));

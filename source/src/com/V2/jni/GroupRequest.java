@@ -683,8 +683,7 @@ public class GroupRequest {
 					"authtype='", "'");
 			String uname = XmlAttributeExtractor.extract(userInfo,
 					"nickname='", "'");
-			if (!TextUtils.isEmpty(uname))
-				uname = HeartCharacterProcessing.reverse(uname);
+			uname = HeartCharacterProcessing.reverse(uname);
 			String name = XmlAttributeExtractor.extract(groupInfo, "name='",
 					"'");
 			name = HeartCharacterProcessing.reverse(name);

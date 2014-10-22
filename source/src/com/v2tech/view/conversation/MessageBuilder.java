@@ -94,6 +94,7 @@ public class MessageBuilder {
 	public static VMessage buildFileMessage(int groupType, long groupID,
 			User fromUser, User toUser, FileInfoBean bean) {
 		String uuid = UUID.randomUUID().toString();
+		bean.fileUUID = uuid;
 		VMessage vm = new VMessage(groupType, groupID, fromUser, toUser,
 				new Date(GlobalConfig.getGlobalServerTime()));
 		VMessageFileItem item = new VMessageFileItem(vm, uuid, bean.fileSize,

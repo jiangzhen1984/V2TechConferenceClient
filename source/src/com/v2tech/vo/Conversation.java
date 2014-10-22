@@ -177,10 +177,14 @@ public class Conversation implements Comparable<Conversation>{
 
 	@Override
 	public int compareTo(Conversation another) {
-		if(another == null)
-			return 1;
-		if(TextUtils.isEmpty(dateLong) || TextUtils.isEmpty(another.getDateLong()))
+		boolean localDate = TextUtils.isEmpty(dateLong);
+		boolean remoteDate = TextUtils.isEmpty(another.getDateLong());
+		if(localDate && remoteDate)
+			return 0;
+		else if(!localDate && remoteDate)
 			return -1;
+		else if(localDate && !remoteDate)
+			return 1;
 		
 		if(Long.valueOf(dateLong) < Long.valueOf(another.getDateLong()))
 			return 1;

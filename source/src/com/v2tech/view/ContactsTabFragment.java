@@ -338,8 +338,8 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 			initPopupWindow();
 		}
 		
-		if (mPopup.getContentView().getWidth() <= 0) {
-			mPopup.getContentView().measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
+		if (mPopup.getContentView().getWidth() <= 0 && mPopup.getContentView() != null) {
+			mPopup.getContentView().measure(View.MeasureSpec.EXACTLY, View.MeasureSpec.EXACTLY);
 		}
 		int popupWindowWidth = mPopup.getContentView().getMeasuredWidth();
 		int popupWindowHeight = mPopup.getContentView().getMeasuredHeight();

@@ -1544,16 +1544,35 @@ public class ConversationView extends Activity {
 
 				switch (currentConversationViewType) {
 				case V2GlobalEnum.GROUP_TYPE_CROWD:
+					
+					for (FileInfoBean bean : mCheckedList) {
+						if (bean == null || TextUtils.isEmpty(bean.filePath))
+							continue;
+						
+						VMessage vm = MessageBuilder.buildFileMessage(cov.getType(), groupId,
+								local, remote, bean);
+						
+						// // Save message
+						vm.setmXmlDatas(vm.toXml());
+						vm.setDate(new Date(GlobalConfig.getGlobalServerTime()));
+
+						MessageBuilder.saveMessage(this, vm);
+						MessageBuilder.saveFileVMessage(this, vm);
+						
+						addMessageToContainer(vm);
+						// send notification
+						notificateConversationUpdate(true, vm.getId());
+					}
+					
 					Intent intent = new Intent(this, FileService.class);
 					intent.putExtra("gid", groupId);
 					intent.putParcelableArrayListExtra("uploads", mCheckedList);
 					startService(intent);
 					break;
-				}
-				
-				if (mCheckedList != null && mCheckedList.size() > 0) {
-					startSendMoreFile();
-					mCheckedList = null;
+				case V2GlobalEnum.GROUP_TYPE_USER:
+						startSendMoreFile();
+						mCheckedList = null;
+					break;
 				}
 			}
 		}
@@ -1711,20 +1730,16 @@ public class ConversationView extends Activity {
 	}
 	
 	private void sendMessageToRemote(VMessage vm) {
-		sendMessageToRemote(vm, true , true);
+		sendMessageToRemote(vm, true);
 	}
 	
-	private void sendMessageToRemote(VMessage vm , boolean sendRemote){
-		sendMessageToRemote(vm, true , sendRemote);
-	}
 
 	/**
 	 * send chat message to remote
 	 * @param vm 
 	 * @param isFresh 是否通知ConversationTabFragment更新
-	 * @param sendRemote 是否发送至远端
 	 */
-	private void sendMessageToRemote(VMessage vm, boolean isFresh , boolean sendRemote) {
+	private void sendMessageToRemote(VMessage vm, boolean isFresh) {
 		// // Save message
 		vm.setmXmlDatas(vm.toXml());
 		vm.setDate(new Date(GlobalConfig.getGlobalServerTime()));
@@ -1733,8 +1748,7 @@ public class ConversationView extends Activity {
 		MessageBuilder.saveFileVMessage(this, vm);
 		MessageBuilder.saveBinaryVMessage(this, vm);
 		
-		if(sendRemote)
-			Message.obtain(lh, SEND_MESSAGE, vm).sendToTarget();
+		Message.obtain(lh, SEND_MESSAGE, vm).sendToTarget();
 		addMessageToContainer(vm);
 		// send notification
 		notificateConversationUpdate(isFresh, vm.getId());
@@ -2436,7 +2450,9 @@ public class ConversationView extends Activity {
 						item.setFileSize(fileJNIObject.fileSize);
 						item.setUuid(fileJNIObject.fileId);
 						item.setState(VMessageFileItem.STATE_FILE_SENT);
-						sendMessageToRemote(vm, false);
+						addMessageToContainer(vm);
+						// send notification
+						notificateConversationUpdate(true, vm.getId());
 					}
 				}
 			}

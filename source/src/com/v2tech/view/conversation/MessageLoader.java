@@ -28,6 +28,7 @@ import com.v2tech.vo.CrowdGroup;
 import com.v2tech.vo.User;
 import com.v2tech.vo.VCrowdFile;
 import com.v2tech.vo.VMessage;
+import com.v2tech.vo.VMessageAbstractItem;
 import com.v2tech.vo.VMessageAudioItem;
 import com.v2tech.vo.VMessageFileItem;
 import com.v2tech.vo.VMessageImageItem;
@@ -672,6 +673,45 @@ public class MessageLoader {
 		String order = ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_SAVEDATE
 				+ " desc limit " + limit + " offset  " + offset;
 		return queryMessage(context, selection, args, order);
+	}
+	
+	/**
+	 * query the given VMessageAbstractItem Object is exist.
+	 * @param context
+	 * @param vm
+	 * @return ture is exist , false no exist
+	 */
+	public static boolean queryVMessageItemByID(Context context, VMessageAbstractItem vm) {
+		if(vm == null)
+			throw new RuntimeException("MessageLoader queryVMessageItemByID ---> the VMessageAbstractItem Object is null");
+		
+		DataBaseContext mContext = new DataBaseContext(context);
+		String selection = "";
+		Uri uri;
+		Cursor cursor = null;
+		switch (vm.getType()) {
+		case VMessageAbstractItem.ITEM_TYPE_FILE:
+			selection = ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_ID
+			+ "=?";
+			uri = ContentDescriptor.HistoriesFiles.CONTENT_URI;
+			break;
+		default:
+			throw new RuntimeException("MessageLoader queryVMessageItemByID ---> invalid VMessageAbstractItem Type ... current type is : " + vm.getType());	
+		}
+		
+		try{
+			String[] args = new String[] { vm.getUuid() };
+			cursor = mContext.getContentResolver().query(
+					uri,
+					null, selection, args, null);
+			if (cursor != null && cursor.getCount() > 0) 
+				return true;
+			else
+				return false;
+		}finally{
+			if(cursor != null)
+				cursor.close();
+		}
 	}
 
 	/**

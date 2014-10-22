@@ -195,7 +195,7 @@
                 android:gravity="top|left"
                 android:hint="@string/crowd_invitation_reject_hints"
                 android:lines="3"
-                android:maxLength="500"
+                android:maxLength="30"
                 android:padding="10dp"
                 android:textColor="@color/activiy_contact_detail_item_color" >
             </EditText>

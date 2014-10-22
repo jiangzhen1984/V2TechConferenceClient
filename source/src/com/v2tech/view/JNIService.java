@@ -629,8 +629,6 @@ public class JNIService extends Service {
 
 		}
 
-
-
 		@Override
 		public void OnApplyJoinGroup(V2Group group, V2User user, String reason) {
 			if (group == null || user == null) {
@@ -691,7 +689,8 @@ public class JNIService extends Service {
 		}
 
 		private VMessageQualification checkMessageAndSendBroadcast(
-				VMessageQualification.Type type, CrowdGroup g, User user, String reason) {
+				VMessageQualification.Type type, CrowdGroup g, User user,
+				String reason) {
 			boolean sendBroadcast = true;
 			VMessageQualification crowdMsg = MessageBuilder
 					.queryQualMessageByCrowdId(mContext, user, g);
@@ -708,7 +707,8 @@ public class JNIService extends Service {
 				if (type == VMessageQualification.Type.CROWD_APPLICATION) {
 					crowdMsg = new VMessageQualificationApplicationCrowd(g,
 							user);
-					((VMessageQualificationApplicationCrowd)crowdMsg).setApplyReason(reason);
+					((VMessageQualificationApplicationCrowd) crowdMsg)
+							.setApplyReason(reason);
 				} else if (type == VMessageQualification.Type.CROWD_INVITATION) {
 					crowdMsg = new VMessageQualificationInvitationCrowd(g,
 							GlobalHolder.getInstance().getCurrentUser());
@@ -880,19 +880,20 @@ public class JNIService extends Service {
 			for (FileJNIObject fileJNIObject : list) {
 				User user = GlobalHolder.getInstance().getUser(
 						list.get(0).user.uid);
-				VMessage vm = new VMessage(V2GlobalEnum.GROUP_TYPE_CROWD, group.id, user,
-						null, new Date(GlobalConfig.getGlobalServerTime()));
+				VMessage vm = new VMessage(V2GlobalEnum.GROUP_TYPE_CROWD,
+						group.id, user, null, new Date(
+								GlobalConfig.getGlobalServerTime()));
 				VMessageFileItem item = new VMessageFileItem(vm,
-						fileJNIObject.fileName , fileJNIObject.fileType);
+						fileJNIObject.fileId, fileJNIObject.fileName);
 				item.setFileSize(fileJNIObject.fileSize);
-				item.setUuid(fileJNIObject.fileId);
+				item.setFileType(fileJNIObject.fileType);
 				item.setState(VMessageFileItem.STATE_FILE_SENT);
-				//save to database
+				// save to database
 				vm.setmXmlDatas(vm.toXml());
 				MessageBuilder.saveMessage(mContext, vm);
 				MessageBuilder.saveFileVMessage(mContext, vm);
 			}
-			
+
 			Intent intent = new Intent();
 			intent.setAction(BROADCAST_CROWD_NEW_UPLOAD_FILE_NOTIFICATION);
 			intent.addCategory(JNI_BROADCAST_CATEGROY);

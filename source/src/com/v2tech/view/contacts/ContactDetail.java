@@ -457,6 +457,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 				et.setVisibility(View.VISIBLE);
 				et.addTextChangedListener(tw);
 				et.setOnFocusChangeListener(hidenKeyboardListener);
+				et.setSelection(et.length());
 			}
 			mBirthdayET.setVisibility(View.VISIBLE);
 

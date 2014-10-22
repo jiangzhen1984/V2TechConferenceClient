@@ -250,6 +250,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 						.addAction(PublicIntent.BROADCAST_NEW_CONFERENCE_NOTIFICATION);
 			} else {
 				// intentFilter.addAction(JNIService.JNI_BROADCAST_NEW_MESSAGE);
+				intentFilter.addAction(JNIService.JNI_BROADCAST_KICED_CROWD);
 				intentFilter
 						.addAction(PublicIntent.REQUEST_UPDATE_CONVERSATION);
 				intentFilter
@@ -269,7 +270,6 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 			if (mCurrentTabFlag == Conversation.TYPE_GROUP) {
 				intentFilter
 						.addAction(PublicIntent.BROADCAST_NEW_CROWD_NOTIFICATION);
-				intentFilter.addAction(JNIService.JNI_BROADCAST_KICED_CROWD);
 				intentFilter.addAction(JNIService.JNI_BROADCAST_NEW_CROWD);
 			}
 		}
@@ -2044,7 +2044,9 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 					}
 				}
 			} else if (PublicIntent.BROADCAST_CROWD_DELETED_NOTIFICATION
-					.equals(intent.getAction())) {
+					.equals(intent.getAction())
+					|| intent.getAction().equals(
+							JNIService.JNI_BROADCAST_KICED_CROWD))  {
 				long cid = intent.getLongExtra("crowd", 0);
 				removeConversation(cid);
 				// clear the crowd group all chat database messges

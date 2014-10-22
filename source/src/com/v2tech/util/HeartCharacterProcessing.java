@@ -1,5 +1,7 @@
 package com.v2tech.util;
 
+import android.text.TextUtils;
+
 public class HeartCharacterProcessing {
 
 	public static String convert(String str) {
@@ -54,15 +56,17 @@ public class HeartCharacterProcessing {
 	}
 
 	public static String reverse(String str) {
-
-		str = str.replace("&lt;", "<");
-		str = str.replace("&gt;", ">");
-		str = str.replace("&#x0D;", "0xD");
-		str = str.replace("&#x0A;", "0xA");
-		str = str.replace("&#x09;", "0x9");
-		str = str.replace("&amp;", "&");
-		str = str.replace("&apos;", "'");
-		str = str.replace("&quot;", "\"");
+		
+		if (!TextUtils.isEmpty(str)){
+			str = str.replace("&lt;", "<");
+			str = str.replace("&gt;", ">");
+			str = str.replace("&#x0D;", "0xD");
+			str = str.replace("&#x0A;", "0xA");
+			str = str.replace("&#x09;", "0x9");
+			str = str.replace("&amp;", "&");
+			str = str.replace("&apos;", "'");
+			str = str.replace("&quot;", "\"");
+		}
 
 		return str;
 	}

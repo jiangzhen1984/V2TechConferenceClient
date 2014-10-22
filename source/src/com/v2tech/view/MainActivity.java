@@ -40,6 +40,7 @@ import com.v2tech.R;
 import com.v2tech.db.V2techSearchContentProvider;
 import com.v2tech.service.ChatService;
 import com.v2tech.service.FileOperationEnum;
+import com.v2tech.util.DensityUtils;
 import com.v2tech.util.Notificator;
 import com.v2tech.view.conversation.ConversationUpdateFileState;
 import com.v2tech.view.conversation.ConversationUpdateFileState.FileStateInterface;
@@ -202,7 +203,8 @@ public class MainActivity extends FragmentActivity implements
 
 			ImageView iv = new ImageView(mContext);
 			iv.setImageResource(imgs[i]);
-			iv.setPadding(10, 5, 5, 10);
+			int padding = DensityUtils.dip2px(mContext, 5);
+			iv.setPadding(padding, padding / 2, padding, padding / 2);
 			LinearLayout.LayoutParams ivLL = new LinearLayout.LayoutParams(0,
 					LinearLayout.LayoutParams.WRAP_CONTENT);
 			ivLL.gravity = Gravity.RIGHT;
@@ -212,7 +214,7 @@ public class MainActivity extends FragmentActivity implements
 
 			TextView tv = new TextView(mContext);
 			tv.setText(items[i]);
-			tv.setPadding(10, 5, 5, 10);
+			tv.setPadding(padding, padding / 2, padding, padding / 2);
 			//TODO gray disable button
 			if (i > 3) {
 				tv.setTextColor(Color.rgb(198, 198, 198));

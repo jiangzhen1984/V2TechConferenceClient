@@ -742,7 +742,7 @@ public class VideoDocLayout extends LinearLayout {
 					if (container.getChildCount() > 0) {
 						TouchImageView tiv = (TouchImageView) container
 								.getChildAt(0);
-						tiv.setZoom(0.5F);
+						tiv.setZoom(1F);
 					}
 				}
 			}

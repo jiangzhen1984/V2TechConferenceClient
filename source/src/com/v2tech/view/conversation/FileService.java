@@ -199,13 +199,10 @@ public class FileService extends Service {
 						continue;
 					}
 					//build VMessage Object and save in database.
-					VMessage vm = MessageBuilder.buildFileMessage(V2GlobalEnum.GROUP_TYPE_CROWD, lfo.gid,
-							GlobalHolder.getInstance().getCurrentUser(), null, bean);
-					VMessageFileItem item = vm.getFileItems().get(0);
-					vm.setmXmlDatas(vm.toXml());
-					vm.setDate(new Date(GlobalConfig.getGlobalServerTime()));
-					MessageBuilder.saveMessage(FileService.this, vm);
-					MessageBuilder.saveFileVMessage(FileService.this, vm);
+					VMessage vm = new VMessage(V2GlobalEnum.GROUP_TYPE_CROWD, lfo.gid, GlobalHolder.getInstance().getCurrentUser(), null,
+							new Date(GlobalConfig.getGlobalServerTime())); 
+					VMessageFileItem item = new VMessageFileItem(vm, bean.filePath);
+					item.setUuid(bean.fileUUID);
 					//put to map
 					mMoniterMap.put(item.getUuid(), item);
 					//upload P2P or upload group file
