@@ -968,7 +968,7 @@ public class MessageAuthenticationActivity extends Activity {
 				long msgId = intent.getLongExtra("msgId", 0);
 				VMessageQualification msg = MessageBuilder
 						.queryQualMessageById(mContext, msgId);
-				if (msg != null) {
+				if (msg != null && mMessageList != null) {
 					mMessageList.add(0, new ListItemWrapper(msg));
 					groupAdapter.notifyDataSetChanged();
 				}

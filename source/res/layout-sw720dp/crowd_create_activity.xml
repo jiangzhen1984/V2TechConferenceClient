@@ -244,21 +244,15 @@
                 </LinearLayout>
             </LinearLayout>
 
-            <ScrollView
-                android:id="@+id/group_create_scroll_view"
+            <ListView
+                android:id="@+id/crowd_create_list_view"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_margin="15dp"
-                android:background="@drawable/rounded_corners_create_conf_box_bg" >
+                android:background="@drawable/rounded_corners_create_conf_box_bg"
+                android:tag="vertical" >
 
-                <LinearLayout
-                    android:id="@+id/group_member_container"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical"
-                    android:tag="vertical" >
-                </LinearLayout>
-            </ScrollView>
+            </ListView>
         </LinearLayout>
     </LinearLayout>
 

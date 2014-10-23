@@ -78,19 +78,8 @@ public class ContactUserView extends LinearLayout {
 			mCheckbox.setVisibility(View.INVISIBLE);
 		}
 		mStatusIV = (ImageView) view.findViewById(R.id.contact_user_status_iv);
+		mStatusIV.setVisibility(View.GONE);
 		updateStatus(u.getmStatus());
-
-//		this.setPadding((u.getFirstBelongsGroup() == null ? 2 : u
-//				.getFirstBelongsGroup().getLevel() + 1) * 5, this
-//				.getPaddingTop(), this.getPaddingRight(), this
-//				.getPaddingRight());
-
-//		padding = (u.getFirstBelongsGroup() == null ? 2 : u
-//				.getFirstBelongsGroup().getLevel() + 1) * 35;
-//
-//		contentContainer.setPadding(padding, contentContainer.getPaddingTop(),
-//				contentContainer.getPaddingRight(),
-//				contentContainer.getPaddingRight());
 
 		this.addView(view, new LinearLayout.LayoutParams(
 				LinearLayout.LayoutParams.MATCH_PARENT,
@@ -162,4 +151,14 @@ public class ContactUserView extends LinearLayout {
 		return this.mCheckbox.isChecked();
 	}
 
+	public ImageView getmPhotoIV() {
+		return mPhotoIV;
+	}
+
+	public TextView getmUserNameTV() {
+		return mUserNameTV;
+	}
+
+	
+	
 }

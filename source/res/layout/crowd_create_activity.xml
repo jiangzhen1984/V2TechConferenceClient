@@ -260,19 +260,13 @@
                 android:orientation="vertical" >
             </LinearLayout>
 
-            <HorizontalScrollView
-                android:id="@+id/group_create_scroll_view"
+            <com.v2tech.view.widget.HorizontalListView
+                android:id="@+id/crowd_create_list_view"
                 android:layout_width="match_parent"
-                android:layout_height="80dp" >
+                android:layout_height="80dp"
+                android:tag="horizontal" >
 
-                <LinearLayout
-                    android:id="@+id/group_member_container"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:orientation="horizontal"
-                    android:tag="horizontal" >
-                </LinearLayout>
-            </HorizontalScrollView>
+            </com.v2tech.view.widget.HorizontalListView>
         </LinearLayout>
     </RelativeLayout>
 

@@ -135,11 +135,23 @@ public class VideoRecorder {
 		if (mCamera == null) {
 			return -1;
 		}
-		Camera.Parameters para = mCamera.getParameters();
-		Size s = para.getPreviewSize();
+		Size s = null;
+		// for MANUFACTURER=Teclast BRAND=MID HOST=droid07-szto cache runtimeexception
+		try {
+			Camera.Parameters para = mCamera.getParameters();
+			s = para.getPreviewSize();
+		} catch (RuntimeException e) {
+			
+		}
 
-		mSrcWidth = s.width;
-		mSrcHeight = s.height;
+		if (s == null) {
+			mSrcWidth = 1920;
+			mSrcHeight = 1080;
+			
+		} else {
+			mSrcWidth = s.width;
+			mSrcHeight = s.height;
+		}
 
 		return 0;
 	}

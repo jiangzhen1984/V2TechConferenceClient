@@ -37,7 +37,7 @@
                 android:layout_centerVertical="true"
                 android:layout_marginLeft="5dp"
                 android:layout_toRightOf="@+id/crowd_files_title"
-                android:src="@drawable/crowd_file_icon" />
+                android:src="@drawable/crowd_file_icon_notification" />
 
             <TextView
                 android:id="@+id/crowd_files_uploaded_file_button"

@@ -11,6 +11,7 @@
     <string name="crowd_invitation_reject_hints">请输入拒绝理由</string>
     <string name="crowd_invitation_reject_button_done">完成</string>
     <string name="crowd_invitation_titile">群邀请</string>
+    <string name="crowd_invitation_reject_titile">拒绝理由</string>
     <string name="crowd_invitation_top_bar_right_button">发消息</string>
     <string name="crowd_invitation_box_item_creator">创建人</string>
     <string name="crowd_invitation_box_item_announcement">群公告</string>
@@ -61,6 +62,7 @@
     <string name="crowd_files_deleted_notification">该文件已被删除！ 同时该文件被删除</string>
     <string name="crowd_files_delete_file_no_rights_notification">你无法删除其他人上传的文件!</string>
     <string name="crowd_files_delete_file_no_rights_for_uploading_notification">请先暂停，在删除文件!</string>
+    <string name="crowd_files_resume_uploading_failed">请先先退出删除模式!</string>
     
     
     

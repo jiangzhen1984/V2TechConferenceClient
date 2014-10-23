@@ -51,6 +51,7 @@ public class CrowdInvitationActivity extends Activity {
 	private View mRejectResasonLayout;
 	private View mBoxLy;
 	private View mAcceptedLy;
+	private TextView mTitle;
 
 	private Context mContext;
 
@@ -71,7 +72,8 @@ public class CrowdInvitationActivity extends Activity {
 		mCreatorTV = (TextView) findViewById(R.id.crowd_invitation_creator_tv);
 		mBriefTV = (TextView) findViewById(R.id.crowd_invitation_brief);
 		mAnnounceTV = (TextView) findViewById(R.id.crowd_invitation_announcement);
-
+		mTitle = (TextView) findViewById(R.id.crowd_invitation_title);
+		
 		mAcceptButton = findViewById(R.id.crowd_invitation_accept_button);
 		mAcceptButton.setOnClickListener(mAcceptButtonListener);
 		mDeclineButton = findViewById(R.id.crowd_invitation_decline_button);
@@ -92,7 +94,7 @@ public class CrowdInvitationActivity extends Activity {
 		mReasonET = (EditText)findViewById(R.id.crowd_content_reject_reason_et);
 
 		crowd = (Crowd) getIntent().getExtras().get("crowd");
-		mNoTV.setText(crowd.getId() + "");
+		mNoTV.setText(String.valueOf(crowd.getId()).substring(1));
 		mNameTV.setText(crowd.getName());
 		mBriefTV.setText(crowd.getBrief());
 		mCreatorTV.setText(crowd.getCreator().getName());
@@ -149,7 +151,9 @@ public class CrowdInvitationActivity extends Activity {
 			mSendMsgButton
 					.setText(R.string.crowd_invitation_reject_button_done);
 			mButtonLayout.setVisibility(View.GONE);
+			mTitle.setText(R.string.crowd_invitation_reject_titile);
 		} else {
+			mTitle.setText(R.string.crowd_invitation_titile);
 			if (vq.getQualState() == VMessageQualification.QualificationState.ACCEPTED) {
 				mButtonLayout.setVisibility(View.GONE);
 				mNotesLayout.setVisibility(View.VISIBLE);

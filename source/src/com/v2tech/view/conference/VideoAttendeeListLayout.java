@@ -397,7 +397,6 @@ public class VideoAttendeeListLayout extends LinearLayout {
 			updateStatist();
 		}
 
-		// TODO update device count and mixed video
 		Collections.sort(mList);
 		adapter.notifyDataSetChanged();
 	}
@@ -806,6 +805,8 @@ public class VideoAttendeeListLayout extends LinearLayout {
 	class Wrapper implements Comparable<Wrapper> {
 		Attendee a;
 		UserDeviceConfig udc;
+		//Use to sort.
+		//we can remove view if sortFlag is DEFAULT_DEVICE_FLAG
 		int sortFlag;
 
 		public Wrapper(Attendee a, UserDeviceConfig udc, int sortFlag) {

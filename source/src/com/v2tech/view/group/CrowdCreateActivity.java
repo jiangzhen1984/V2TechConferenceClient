@@ -17,25 +17,23 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.support.v4.util.LongSparseArray;
 import android.text.Editable;
 import android.text.TextUtils.TruncateAt;
 import android.text.TextWatcher;
 import android.view.Gravity;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.BaseAdapter;
 import android.widget.CheckBox;
 import android.widget.EditText;
-import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import com.V2.jni.V2GlobalEnum;
-import com.V2.jni.util.V2Log;
 import com.v2tech.R;
 import com.v2tech.service.CrowdGroupService;
 import com.v2tech.service.GlobalHolder;
@@ -77,18 +75,17 @@ public class CrowdCreateActivity extends Activity {
 
 	private Context mContext;
 	private LocalHandler mLocalHandler = new LocalHandler();
+	private LocalAdapter mAdapter = new LocalAdapter();
 
 	private EditText searchedTextET;
 	private GroupListView mContactsContainer;
+	private AdapterView mAttendeeContainer;
 
 	private View mGroupConfirmButton;
 	private EditText mGroupTitleET;
 	private View mReturnButton;
 	private Spinner mRuleSpinner;
 	private LinearLayout mErrorNotificationLayout;
-	private LinearLayout mAttendeeContainer;
-
-	private View mScroller;
 
 	private List<Group> mGroupList;
 	private CrowdGroup crowd;
@@ -96,7 +93,7 @@ public class CrowdCreateActivity extends Activity {
 
 	// Used to save current selected user
 	private Set<User> mUserList = new HashSet<User>();
-	private LongSparseArray<View> mSelectedUserViews = new LongSparseArray<View>();
+	private List<User> mUserListArray = new ArrayList<User>();
 
 	private int landLayout = PAD_LAYOUT;
 	
@@ -111,6 +108,7 @@ public class CrowdCreateActivity extends Activity {
 			setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 		}
 		setContentView(R.layout.crowd_create_activity);
+				
 		mGroupList = new ArrayList<Group>();
 		mContext = this;
 		mContactsContainer = (GroupListView) findViewById(R.id.group_create_contacts_list);
@@ -119,8 +117,11 @@ public class CrowdCreateActivity extends Activity {
 		mContactsContainer.setTextFilterEnabled(true);
 		mContactsContainer.setIgnoreCurrentUser(true);
 
-		mAttendeeContainer = (LinearLayout) findViewById(R.id.group_member_container);
-		mAttendeeContainer.setGravity(Gravity.CENTER);
+		
+
+		mAttendeeContainer = (AdapterView) findViewById(R.id.crowd_create_list_view);
+		mAttendeeContainer.setOnItemClickListener(mItemClickedListener);
+		mAttendeeContainer.setAdapter(mAdapter);
 		landLayout = mAttendeeContainer.getTag().equals("vertical") ? PAD_LAYOUT
 				: PHONE_LAYOUT;
 
@@ -136,7 +137,6 @@ public class CrowdCreateActivity extends Activity {
 		searchedTextET = (EditText) findViewById(R.id.contacts_search);
 
 		mErrorNotificationLayout = (LinearLayout) findViewById(R.id.group_create_error_notification);
-		mScroller = findViewById(R.id.group_create_scroll_view);
 		mReturnButton = findViewById(R.id.group_create_return_button);
 		mReturnButton.setOnClickListener(mReturnListener);
 		loadCache();
@@ -224,15 +224,9 @@ public class CrowdCreateActivity extends Activity {
 	}
 
 	private void removeAttendee(User u) {
-		
-		//Add to cache
-		View v = mSelectedUserViews.get(u.getmUserId());
-		if (v != null) {
-			mAttendeeContainer.removeView(v);
-			mUserList.remove(u);
-			mSelectedUserViews.remove(u.getmUserId());
-		}
-
+		mUserList.remove(u);
+		this.mUserListArray.remove(u);
+		mAdapter.notifyDataSetChanged();
 	}
 
 	private void addAttendee(User u) {
@@ -243,37 +237,9 @@ public class CrowdCreateActivity extends Activity {
 		if (!ret) {
 			return;
 		}
-
-		View v = null;
-		if (landLayout == PAD_LAYOUT) {
-			v = new ContactUserView(this, u, false);
-			v.setTag(u);
-			v.setOnClickListener(removeAttendeeListener);
-		} else {
-			v = getAttendeeView(u);
-		}
-		//Add to cache
-		mSelectedUserViews.put(u.getmUserId(), v);
 		
-		mAttendeeContainer.addView(v);
-
-		if (mAttendeeContainer.getChildCount() > 0) {
-			mScroller.postDelayed(new Runnable() {
-				@Override
-				public void run() {
-					View child = mAttendeeContainer
-							.getChildAt(mAttendeeContainer.getChildCount() - 1);
-					if (landLayout == PAD_LAYOUT) {
-						((ScrollView) mScroller).scrollTo(child.getRight(),
-								child.getBottom());
-					} else {
-						((HorizontalScrollView) mScroller).scrollTo(
-								child.getRight(), child.getBottom());
-					}
-				}
-
-			}, 100L);
-		}
+		this.mUserListArray.add(u);
+		mAdapter.notifyDataSetChanged();
 	}
 	
 	
@@ -294,55 +260,19 @@ public class CrowdCreateActivity extends Activity {
 		}
 	}
 
-	/**
-	 * Use to add scroll view
-	 * 
-	 * @param u
-	 * @return
-	 */
-	private View getAttendeeView(final User u) {
-		final LinearLayout ll = new LinearLayout(mContext);
-		ll.setOrientation(LinearLayout.VERTICAL);
-		ll.setGravity(Gravity.CENTER);
 
-		ImageView iv = new ImageView(mContext);
-		if (u.getAvatarBitmap() != null) {
-			iv.setImageBitmap(u.getAvatarBitmap());
-		} else {
-			iv.setImageResource(R.drawable.avatar);
-		}
-		ll.addView(iv, new LinearLayout.LayoutParams(
-				LinearLayout.LayoutParams.WRAP_CONTENT,
-				LinearLayout.LayoutParams.WRAP_CONTENT));
 
-		TextView tv = new TextView(mContext);
-		tv.setText(u.getName());
-		tv.setEllipsize(TruncateAt.END);
-		tv.setSingleLine(true);
-		tv.setTextSize(8);
-		ll.setTag(u.getmUserId() + "");
-		ll.addView(tv, new LinearLayout.LayoutParams(
-				LinearLayout.LayoutParams.WRAP_CONTENT,
-				LinearLayout.LayoutParams.WRAP_CONTENT));
-		ll.setPadding(5, 5, 5, 5);
-		if (u.isCurrentLoggedInUser()) {
-			return ll;
-		}
-		ll.setTag(u);
-		ll.setOnClickListener(removeAttendeeListener);
-
-		return ll;
-	}
-
-	private OnClickListener removeAttendeeListener = new OnClickListener() {
+	
+	private OnItemClickListener mItemClickedListener = new OnItemClickListener() {
 
 		@Override
-		public void onClick(View view) {
-			User u = (User) view.getTag();
-			Message.obtain(mLocalHandler, UPDATE_ATTENDEES, u).sendToTarget();
-			mContactsContainer.updateCheckItem(u, false);
+		public void onItemClick(AdapterView<?> parent, View view, int position,
+				long id) {
+			User user = mUserListArray.get(position);
+			mContactsContainer.updateCheckItem(user, false);
+			Message.obtain(mLocalHandler, UPDATE_ATTENDEES, user).sendToTarget();
 		}
-
+		
 	};
 
 	private TextWatcher textChangedListener = new TextWatcher() {
@@ -484,6 +414,100 @@ public class CrowdCreateActivity extends Activity {
 		}
 
 	};
+	
+	
+	
+	class LocalAdapter extends BaseAdapter {
+		
+		class ViewTag {
+			ImageView headIcon;
+			TextView name;
+		}
+
+		@Override
+		public int getCount() {
+			return mUserListArray.size();
+		}
+
+		@Override
+		public Object getItem(int position) {
+			return mUserListArray.get(position);
+		}
+
+		@Override
+		public long getItemId(int position) {
+			return mUserListArray.get(position).getmUserId();
+		}
+
+		@Override
+		public View getView(int position, View convertView, ViewGroup parent) {
+			ViewTag tag = null;
+			User user = mUserListArray.get(position);
+			if (convertView == null) {
+				tag = new ViewTag();
+				
+				if (landLayout == PAD_LAYOUT) {
+					convertView = new ContactUserView(mContext, user, false);
+					tag.headIcon = ((ContactUserView)convertView).getmPhotoIV();
+					tag.name = ((ContactUserView)convertView).getmUserNameTV();
+				} else {
+					convertView = getAttendeeView(tag, user);
+				}
+				convertView.setTag(tag);
+				
+			} else {
+				tag = (ViewTag)convertView.getTag();
+			}
+			
+			updateView(tag, user);
+			return convertView;
+		}
+		
+		
+		private void updateView(ViewTag tag, User user) {
+			 
+			if (user.getAvatarBitmap() != null) {
+				tag.headIcon.setImageBitmap(user.getAvatarBitmap());
+			} else {
+				tag.headIcon.setImageResource(R.drawable.avatar);
+			}
+			
+			tag.name.setText(user.getName());
+		}
+		
+		
+		
+		private View getAttendeeView(ViewTag tag, final User u) {
+			final LinearLayout ll = new LinearLayout(mContext);
+			ll.setOrientation(LinearLayout.VERTICAL);
+			ll.setGravity(Gravity.CENTER);
+
+			ImageView iv = new ImageView(mContext);
+			tag.headIcon = iv;
+			if (u.getAvatarBitmap() != null) {
+				iv.setImageBitmap(u.getAvatarBitmap());
+			} else {
+				iv.setImageResource(R.drawable.avatar);
+			}
+			ll.addView(iv, new LinearLayout.LayoutParams(
+					LinearLayout.LayoutParams.WRAP_CONTENT,
+					LinearLayout.LayoutParams.WRAP_CONTENT));
+
+			TextView tv = new TextView(mContext);
+			tag.name = tv;
+			
+			tv.setText(u.getName());
+			tv.setEllipsize(TruncateAt.END);
+			tv.setSingleLine(true);
+			tv.setTextSize(8);
+			tv.setMaxWidth(80);
+			ll.addView(tv, new LinearLayout.LayoutParams(
+					LinearLayout.LayoutParams.WRAP_CONTENT,
+					LinearLayout.LayoutParams.WRAP_CONTENT));
+			ll.setPadding(5, 5, 5, 5);
+			return ll;
+		}
+	}
 
 	class LocalHandler extends Handler {
 
