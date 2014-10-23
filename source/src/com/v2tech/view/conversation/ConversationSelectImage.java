@@ -260,7 +260,7 @@ public class ConversationSelectImage extends Activity {
 					Intent intent = new Intent();
 					intent.putExtra("checkedImage", pictures.get(position).filePath);
 					setResult(100, intent);
-					finish();
+					onBackPressed();
 				}
 			}
 		});

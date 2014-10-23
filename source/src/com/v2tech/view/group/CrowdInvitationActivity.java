@@ -34,6 +34,7 @@ public class CrowdInvitationActivity extends Activity {
 	private final static int ACCEPT_INVITATION_DONE = 1;
 	private final static int REFUSE_INVITATION_DONE = 2;
 
+	private TextView mTitleName;
 	private TextView mNameTV;
 	private TextView mNoTV;
 	private TextView mCreatorTV;
@@ -67,6 +68,7 @@ public class CrowdInvitationActivity extends Activity {
 		mContext = this;
 
 		setContentView(R.layout.crowd_invitation_activity);
+		mTitleName = (TextView) findViewById(R.id.crowd_invitation_title_text);
 		mNameTV = (TextView) findViewById(R.id.crowd_invitation_name);
 		mNoTV = (TextView) findViewById(R.id.crowd_invitation_crowd_no);
 		mCreatorTV = (TextView) findViewById(R.id.crowd_invitation_creator_tv);
@@ -151,9 +153,9 @@ public class CrowdInvitationActivity extends Activity {
 			mSendMsgButton
 					.setText(R.string.crowd_invitation_reject_button_done);
 			mButtonLayout.setVisibility(View.GONE);
-			mTitle.setText(R.string.crowd_invitation_reject_titile);
+			mTitleName.setText(R.string.crowd_invitation_reject_titile);
 		} else {
-			mTitle.setText(R.string.crowd_invitation_titile);
+			mTitleName.setText(R.string.crowd_invitation_titile);
 			if (vq.getQualState() == VMessageQualification.QualificationState.ACCEPTED) {
 				mButtonLayout.setVisibility(View.GONE);
 				mNotesLayout.setVisibility(View.VISIBLE);

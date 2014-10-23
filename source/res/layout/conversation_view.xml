@@ -7,16 +7,17 @@
         android:id="@+id/group_list_conference_image_view_rl"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/group_list_conference_title_layout"
         android:layout_alignParentLeft="true"
+        android:layout_alignTop="@+id/group_list_conference_title_layout"
         android:layout_centerVertical="true"
-        android:layout_marginBottom="@dimen/conversation_view_margin"
+        android:gravity="center_vertical"
         android:layout_marginLeft="15dp"
-        android:layout_marginRight="5dp"
-        android:layout_marginTop="@dimen/conversation_view_margin" >
+        android:layout_marginRight="5dp" >
         <ImageView
             android:id="@+id/group_list_conference_image_view"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:src="@drawable/conference_icon_self" />
         <ImageView
             android:id="@+id/group_list_conference_notificator"
@@ -33,9 +34,10 @@
         android:id="@+id/group_list_conference_title_layout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/group_list_conference_image_view_rl"
-        android:layout_alignTop="@+id/group_list_conference_image_view_rl"
+        android:layout_centerVertical="true"
+        android:layout_marginBottom="@dimen/conversation_view_margin"
         android:layout_marginLeft="@dimen/text_margin_left"
+        android:layout_marginTop="@dimen/conversation_view_margin"
         android:layout_toRightOf="@+id/group_list_conference_image_view_rl" >
         <TextView
             android:id="@+id/group_list_conference_title_tv"
@@ -52,8 +54,8 @@
             android:id="@+id/group_list_conference_owner_tv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
             android:layout_below="@+id/group_list_conference_title_tv"
+            android:layout_marginTop="10dp"
             android:ellipsize="end"
             android:gravity="left|bottom"
             android:maxWidth="@dimen/conversation_view_text_max_width"
@@ -80,14 +82,16 @@
         android:id="@+id/gourp_list_conference_create_time_tv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/group_list_conference_image_view_rl"
+        android:layout_alignBottom="@+id/group_list_conference_title_layout"
         android:layout_alignParentRight="true"
         android:layout_marginLeft="@dimen/text_margin_left"
         android:layout_marginRight="15dp"
         android:ellipsize="end"
+        android:gravity="bottom"
         android:maxWidth="@dimen/date_time_max_width"
         android:paddingRight="15dp"
         android:singleLine="true"
+        android:layout_marginBottom="-2dp"
         android:text="00:00"
         android:textColor="@color/common_item_text_color"
         android:textSize="@dimen/common_item_text_size_16" />

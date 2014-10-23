@@ -9,7 +9,7 @@ import android.text.TextUtils;
 
 /**
  * ChatFiles： TransState --传输状态 -3:等待接收，-2:正在传输, -1: 传输暂停, 0:传输成功, 其它值为传输失败
- * 
+ * ReadState: 0 未读 ，1 已读
  * @author
  * 
  */

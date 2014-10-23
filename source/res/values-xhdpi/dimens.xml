@@ -8,7 +8,7 @@
     <dimen name="common_item_text_size_16">14sp</dimen>
     <dimen name="common_item_text_size_small">10sp</dimen>
     <dimen name="button_padding_horizontal">15dp</dimen>
-    <dimen name="button_padding_vertical">10dp</dimen>
+    <dimen name="button_padding_vertical">8dp</dimen>
     <dimen name="button_gap_horizontal">10dp</dimen>
     <dimen name="contact_detail_2_item_margin_left">5dp</dimen>
     <dimen name="contact_detail_2_item_margin_right">5dp</dimen>
@@ -107,16 +107,18 @@
     
     
     
-    <!-- message voice dialog layout -->
+        <!-- message voice dialog layout -->
     <dimen name="message_voice_dialog_width">230dp</dimen>
     <dimen name="message_voice_dialog_height">180dp</dimen>
-
-	 <dimen name="message_selected_pop_up_window">-6dp</dimen>
-	 <dimen name="message_body_file_item_progress_layout_margin_right">300dp</dimen>
-	 <dimen name="message_body_file_item_file_name_text_size">7sp</dimen>
-	 <dimen name="message_body_failed_size">25dp</dimen>
+    
+        <!-- message body view layout -->
+    <dimen name="message_body_view_item_bubble_space">-1.5dp</dimen>  <!-- 气泡间隙，三角与内容之间 -->
+	<dimen name="message_selected_pop_up_window">-6dp</dimen>
+	<dimen name="message_body_file_item_progress_layout_margin_right">300dp</dimen>
+	<dimen name="message_body_file_item_file_name_text_size">7sp</dimen>
+	<dimen name="message_body_failed_size">25dp</dimen>
 	 
-	  <!-- specific voice item activity  -->
-	 <dimen name="specific_voice_message_margin_right">15dp</dimen>
-	 <dimen name="specific_voice_message_margin_left">15dp</dimen>
+	   <!-- specific voice item activity  -->
+	<dimen name="specific_voice_message_margin_right">15dp</dimen>
+	<dimen name="specific_voice_message_margin_left">15dp</dimen>
 </resources>

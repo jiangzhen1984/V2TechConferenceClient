@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical" >
+    <RelativeLayout
+        android:id="@+id/common_layout_iconLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_alignBottom="@+id/common_content_layout"
+        android:layout_alignTop="@+id/common_content_layout" >
+        <ImageView
+            android:id="@+id/common_layout_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:src="@drawable/selectfile_type_pdf" />
+        <ImageView
+            android:id="@+id/common_layout_notificator"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_alignRight="@+id/common_layout_icon"
+            android:layout_marginRight="3dp"
+            android:layout_marginTop="3dp"
+            android:src="@drawable/red_nofificator"
+            android:visibility="invisible" />
+    </RelativeLayout>
+    <RelativeLayout
+        android:id="@+id/common_content_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="@dimen/common_margin_horizontal"
+        android:layout_marginRight="10dp"
+        android:layout_toRightOf="@+id/common_layout_iconLayout" >
+        <TextView
+            android:id="@+id/common_layout_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:ellipsize="end"
+            android:maxWidth="@dimen/crowd_file_activity_file_name_max_width"
+            android:singleLine="true"
+            android:text="name"
+            android:textColor="@color/contacts_user_view_item_color_offline"
+            android:textSize="@dimen/conversation_view_name_text_size" />
+        <TextView
+            android:id="@+id/common_layout_other"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/common_layout_name"
+            android:layout_marginTop="10dp"
+            android:ellipsize="end"
+            android:gravity="bottom"
+            android:singleLine="true"
+            android:text="other"
+            android:maxWidth="@dimen/conversation_view_text_max_width"
+            android:textColor="@color/common_item_text_color"
+            android:textSize="@dimen/conversation_view_name_text_size" />
+    </RelativeLayout>
+</RelativeLayout>

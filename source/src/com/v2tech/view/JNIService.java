@@ -412,7 +412,8 @@ public class JNIService extends Service {
 						action = JNI_BROADCAST_NEW_CONF_MESSAGE;
 					} else {
 						action = JNI_BROADCAST_NEW_MESSAGE;
-						sendNotification();
+						if(vm.getMsgCode() != V2GlobalEnum.GROUP_TYPE_DISCUSSION)
+							sendNotification();
 					}
 
 					Intent ii = new Intent(action);
@@ -743,7 +744,7 @@ public class JNIService extends Service {
 			Intent intent = new Intent();
 			intent.setAction(JNI_BROADCAST_FRIEND_AUTHENTICATION);
 			intent.addCategory(JNI_BROADCAST_CATEGROY);
-			sendBroadcast(intent);
+			sendOrderedBroadcast(intent , null);
 
 		}
 
@@ -833,7 +834,7 @@ public class JNIService extends Service {
 				intent.addCategory(JNI_BROADCAST_CATEGROY);
 				intent.putExtra("uid", uid);
 				intent.putExtra("gid", nGroupID);
-				sendBroadcast(intent);
+				sendOrderedBroadcast(intent , null);
 
 			}
 
@@ -859,7 +860,7 @@ public class JNIService extends Service {
 				Intent intent = new Intent();
 				intent.setAction(JNI_BROADCAST_FRIEND_AUTHENTICATION);
 				intent.addCategory(JNI_BROADCAST_CATEGROY);
-				sendBroadcast(intent);
+				sendOrderedBroadcast(intent , null);
 			}
 
 		}
@@ -878,8 +879,12 @@ public class JNIService extends Service {
 			}
 			
 			for (FileJNIObject fileJNIObject : list) {
+				long uploadUserID = fileJNIObject.user.uid;
+				//自己上传不提示
+				if(GlobalHolder.getInstance().getCurrentUserId() == uploadUserID)
+					continue ;
 				User user = GlobalHolder.getInstance().getUser(
-						list.get(0).user.uid);
+						uploadUserID);
 				VMessage vm = new VMessage(V2GlobalEnum.GROUP_TYPE_CROWD,
 						group.id, user, null, new Date(
 								GlobalConfig.getGlobalServerTime()));

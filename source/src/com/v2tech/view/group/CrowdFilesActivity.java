@@ -170,7 +170,7 @@ public class CrowdFilesActivity extends Activity {
 					}
 					//Update screen to uploading UI
 					showUploaded = true;
-					mTitle.setText(R.string.crowd_files_title_uploaded);
+					mTitle.setText(R.string.crowd_files_title_uploading);
 					mUploadingFileNotificationIcon.setVisibility(View.GONE);
 					mShowUploadedFileButton.setVisibility(View.GONE);
 					adapter.notifyDataSetChanged();
@@ -422,7 +422,7 @@ public class CrowdFilesActivity extends Activity {
 		public void onClick(View v) {
 			//Update screen to uploading UI
 			showUploaded = true;
-			mTitle.setText(R.string.crowd_files_title_uploaded);
+			mTitle.setText(R.string.crowd_files_title_uploading);
 			mUploadingFileNotificationIcon.setVisibility(View.GONE);
 			mShowUploadedFileButton.setVisibility(View.GONE);
 			adapter.notifyDataSetChanged();
@@ -442,10 +442,6 @@ public class CrowdFilesActivity extends Activity {
 				isInDeleteMode = false;
 				adapter.notifyDataSetChanged();
 			} else {
-//				showUploaded = true;
-//				mTitle.setText(R.string.crowd_files_title_uploaded);
-//				mShowUploadedFileButton.setVisibility(View.GONE);
-//				adapter.notifyDataSetChanged();
 				 Intent intent = new Intent(mContext,
 				 ConversationSelectFile.class);
 				 intent.putExtra("type", "crowdFile");
@@ -656,11 +652,11 @@ public class CrowdFilesActivity extends Activity {
 						.setOnClickListener(mDeleteModeButtonListener);
 
 				item.mFileIcon = (ImageView) convertView
-						.findViewById(R.id.crowd_file_icon);
+						.findViewById(R.id.common_layout_icon);
 				item.mFileName = (TextView) convertView
-						.findViewById(R.id.crowd_file_name);
+						.findViewById(R.id.common_layout_name);
 				item.mFileSize = (TextView) convertView
-						.findViewById(R.id.crowd_file_size);
+						.findViewById(R.id.common_layout_other);
 				item.mFileButton = (TextView) convertView
 						.findViewById(R.id.crowd_file_button);
 

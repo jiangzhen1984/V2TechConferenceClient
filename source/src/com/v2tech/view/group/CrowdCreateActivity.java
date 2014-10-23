@@ -13,18 +13,23 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.text.Editable;
+import android.text.Spannable;
+import android.text.SpannableStringBuilder;
 import android.text.TextUtils.TruncateAt;
+import android.text.style.ForegroundColorSpan;
 import android.text.TextWatcher;
 import android.view.Gravity;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
 import android.widget.CheckBox;
@@ -45,6 +50,7 @@ import com.v2tech.view.PublicIntent;
 import com.v2tech.view.widget.GroupListView;
 import com.v2tech.view.widget.GroupListView.Item;
 import com.v2tech.vo.CrowdGroup;
+import com.v2tech.vo.VMessageLinkTextItem;
 import com.v2tech.vo.CrowdGroup.AuthType;
 import com.v2tech.vo.Group;
 import com.v2tech.vo.Group.GroupType;
@@ -81,9 +87,10 @@ public class CrowdCreateActivity extends Activity {
 	private GroupListView mContactsContainer;
 	private AdapterView mAttendeeContainer;
 
-	private View mGroupConfirmButton;
+	private TextView mGroupTitle;
+	private TextView mGroupConfirmButton;
+	private TextView mReturnButton;
 	private EditText mGroupTitleET;
-	private View mReturnButton;
 	private Spinner mRuleSpinner;
 	private LinearLayout mErrorNotificationLayout;
 
@@ -125,11 +132,28 @@ public class CrowdCreateActivity extends Activity {
 		landLayout = mAttendeeContainer.getTag().equals("vertical") ? PAD_LAYOUT
 				: PHONE_LAYOUT;
 
-		mGroupConfirmButton = (TextView) findViewById(R.id.group_create_confirm_button);
+		mGroupTitle = (TextView) findViewById(R.id.ws_common_activity_title_content);
+		mGroupTitle.setText(R.string.crowd_create_activity_title);
+		
+		mGroupConfirmButton = (TextView) findViewById(R.id.ws_common_activity_title_right_button);
+		mGroupConfirmButton.setText(R.string.common_confirm_name);
 		mGroupConfirmButton.setOnClickListener(confirmButtonListener);
-
+		//设置自定义颜色的hint提示文字
 		mGroupTitleET = (EditText) findViewById(R.id.group_create_group_name);
+		String hint = getResources().getString(R.string.crowd_create_name_input_hint);
+		SpannableStringBuilder style = new SpannableStringBuilder(hint);
+		style.setSpan(new ForegroundColorSpan(Color.rgb(194, 194, 194)), 0,  //common_gray_color_c2
+				hint.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+		mGroupTitleET.setHint(style);
+		//设置自定义颜色和大小的Spinner提示文字
 		mRuleSpinner = (Spinner) findViewById(R.id.group_create_group_rule);
+		ArrayAdapter<String> adapter = new ArrayAdapter<String>(mContext, R.layout.crowd_create_activity_spinner_item);
+		String level[] = getResources().getStringArray(R.array.crowd_rules);
+		for (int i = 0; i < level.length; i++) {
+			adapter.add(level[i]);
+		}
+		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		mRuleSpinner.setAdapter(adapter);
 		mRuleSpinner.setSelection(0);
 
 		new LoadContactsAT().execute();
@@ -137,14 +161,15 @@ public class CrowdCreateActivity extends Activity {
 		searchedTextET = (EditText) findViewById(R.id.contacts_search);
 
 		mErrorNotificationLayout = (LinearLayout) findViewById(R.id.group_create_error_notification);
-		mReturnButton = findViewById(R.id.group_create_return_button);
+		mReturnButton = (TextView) findViewById(R.id.ws_common_activity_title_left_button);
+		mReturnButton.setText(R.string.common_return_name);
 		mReturnButton.setOnClickListener(mReturnListener);
 		loadCache();
 		
 		isInInvitationMode = getIntent().getBooleanExtra("mode", false);
 		if (isInInvitationMode) {
 			findViewById(R.id.group_create_input_box).setVisibility(View.GONE);;
-			((TextView)findViewById(R.id.crowd_title)).setText(R.string.group_invitation_title);
+			mGroupTitle.setText(R.string.group_invitation_title);
 		}
 		
 	}

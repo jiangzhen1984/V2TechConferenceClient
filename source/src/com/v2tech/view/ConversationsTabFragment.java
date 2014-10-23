@@ -138,6 +138,8 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 
 	private int currentPosition;
 
+	private boolean showAuthenticationNotification;
+
 	private ScrollItem verificationItem;
 	private ScrollItem voiceItem;
 
@@ -252,8 +254,6 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 				// intentFilter.addAction(JNIService.JNI_BROADCAST_NEW_MESSAGE);
 				intentFilter.addAction(JNIService.JNI_BROADCAST_KICED_CROWD);
 				intentFilter
-						.addAction(PublicIntent.REQUEST_UPDATE_CONVERSATION);
-				intentFilter
 						.addAction(PublicIntent.BROADCAST_CROWD_DELETED_NOTIFICATION);
 			}
 
@@ -265,6 +265,8 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 						.addAction(JNIService.JNI_BROADCAST_NEW_QUALIFICATION_MESSAGE);
 				intentFilter
 						.addAction(JNIService.BROADCAST_CROWD_NEW_UPLOAD_FILE_NOTIFICATION);
+				intentFilter
+						.addAction(PublicIntent.REQUEST_UPDATE_CONVERSATION);
 			}
 
 			if (mCurrentTabFlag == Conversation.TYPE_GROUP) {
@@ -1418,7 +1420,10 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 
 					Intent intent = new Intent(mContext,
 							MessageAuthenticationActivity.class);
+					intent.putExtra("showNotification",
+							showAuthenticationNotification);
 					startActivity(intent);
+					showAuthenticationNotification = false;
 				} else {
 					startConversationView(cov);
 				}
@@ -1603,39 +1608,31 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 				ConversationNotificationObject uao = (ConversationNotificationObject) intent
 						.getExtras().get("obj");
 				boolean isFresh = intent.getBooleanExtra("isFresh", true);
-				boolean isNeedDelete = intent
-						.getBooleanExtra("isDelete", false);
-
+				boolean isNeedDelete = intent.getBooleanExtra("isDelete",
+						false);
+				// delete Empty message conversation
 				if (isNeedDelete) {
-
 					removeConversation(uao.getExtId());
 					return;
 				}
 
 				if (!isFresh) {
-
 					for (ScrollItem scroll : mItemList) {
 						if (scroll.cov.getExtId() == uao.getExtId()) {
 							GroupLayout layout = (GroupLayout) scroll.gp;
 							layout.updateNotificator(false);
 							notificationListener.updateNotificator(
 									mCurrentTabFlag, false);
-							ConversationProvider.updateConversationToDatabase(
-									mContext, scroll.cov,
-									Conversation.READ_FLAG_READ);
+							ConversationProvider
+									.updateConversationToDatabase(mContext,
+											scroll.cov,
+											Conversation.READ_FLAG_READ);
 						}
 					}
 					return;
 				}
-				// 消息界面中，现在也要刷新群组聊天消息
-				if (mCurrentTabFlag == uao.getType()
-						|| (mCurrentTabFlag == V2GlobalEnum.GROUP_TYPE_USER && (uao
-								.getType() == V2GlobalEnum.GROUP_TYPE_CROWD || uao
-								.getType() == V2GlobalEnum.GROUP_TYPE_DEPARTMENT))) {
-					Message.obtain(mHandler, UPDATE_CONVERSATION, uao)
-							.sendToTarget();
-				}
-
+				Message.obtain(mHandler, UPDATE_CONVERSATION, uao)
+						.sendToTarget();
 				// Update name of creator of conversation
 			} else if (JNIService.JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION
 					.equals(intent.getAction())) {
@@ -2034,6 +2031,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 					if (msg.getReadState() == VMessageQualification.ReadState.UNREAD) {
 						notificationListener.updateNotificator(
 								Conversation.TYPE_CONTACT, true);
+						showAuthenticationNotification = true;
 						notificationListener.updateNotificator(mCurrentTabFlag,
 								true);
 					} else {
@@ -2046,7 +2044,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 			} else if (PublicIntent.BROADCAST_CROWD_DELETED_NOTIFICATION
 					.equals(intent.getAction())
 					|| intent.getAction().equals(
-							JNIService.JNI_BROADCAST_KICED_CROWD))  {
+							JNIService.JNI_BROADCAST_KICED_CROWD)) {
 				long cid = intent.getLongExtra("crowd", 0);
 				removeConversation(cid);
 				// clear the crowd group all chat database messges
@@ -2227,11 +2225,12 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 				case CROWD_APPLICATION:
 					VMessageQualificationApplicationCrowd apply = (VMessageQualificationApplicationCrowd) nestQualification;
 					User applicant = apply.getApplicant();
-					content = applicant.getName() + mContext
-							.getText(R.string.crowd_applicant_content)
-							.toString();
+					content = applicant.getName()
+							+ mContext
+									.getText(R.string.crowd_applicant_content)
+									.toString();
 					((ConversationFirendAuthenticationData) verificationMessageItemData)
-					.setUser(applicant);
+							.setUser(applicant);
 					break;
 				default:
 					break;
@@ -2247,9 +2246,16 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 				}
 				verificationMessageItemLayout.update();
 			}
-			notificationListener.updateNotificator(Conversation.TYPE_CONTACT,
-					nestQualification.getReadState().intValue() == 0 ? true
-							: false);
+
+			if (nestQualification.getReadState().intValue() == Conversation.READ_FLAG_UNREAD) {
+				notificationListener.updateNotificator(
+						Conversation.TYPE_CONTACT, true);
+				showAuthenticationNotification = true;
+			} else {
+				notificationListener.updateNotificator(
+						Conversation.TYPE_CONTACT, false);
+				showAuthenticationNotification = false;
+			}
 		}
 	}
 
@@ -2266,10 +2272,11 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 						populateConversation(gl);
 				} else if (mCurrentTabFlag == Conversation.TYPE_GROUP) {
 					List<Group> groupList = new ArrayList<Group>();
-//					List<Group> organizationGroup = GlobalHolder.getInstance()
-//							.getGroup(Group.GroupType.ORG.intValue());
-//					if (organizationGroup.size() > 0)
-//						groupList.addAll(organizationGroup);
+					// List<Group> organizationGroup =
+					// GlobalHolder.getInstance()
+					// .getGroup(Group.GroupType.ORG.intValue());
+					// if (organizationGroup.size() > 0)
+					// groupList.addAll(organizationGroup);
 					List<Group> chatGroup = GlobalHolder.getInstance()
 							.getGroup(Group.GroupType.CHATING.intValue());
 					if (chatGroup.size() > 0)

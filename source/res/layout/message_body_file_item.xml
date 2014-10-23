@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
+    android:layout_gravity="center_vertical"
     android:layout_height="wrap_content" >
     <LinearLayout
         android:id="@+id/message_body_file_item_width_base"
@@ -9,12 +10,13 @@
         android:orientation="horizontal" >
     </LinearLayout>
     <ImageView
+        android:layout_marginLeft="@dimen/message_body_file_item_progress_layout_margin_left"
         android:id="@+id/message_body_file_item_icon_ly"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/message_body_file_item_width_base"
         android:layout_alignTop="@+id/message_body_file_item_width_base"
-        android:background="@null" />
+        android:background="@drawable/selectfile_type_pdf" />
     <TextView
         android:id="@+id/message_body_file_item_file_name"
         android:layout_width="wrap_content"
@@ -32,8 +34,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/message_body_file_item_file_name"
-        android:layout_below="@+id/message_body_file_item_file_name"
-        android:layout_marginTop="@dimen/message_body_file_item_file_size_margin_top"
+        android:layout_alignBottom="@+id/message_body_file_item_icon_ly"
         android:text="3.2M"
         android:textSize="@dimen/message_body_file_item_file_size_text_size" />
     <TextView
@@ -56,6 +57,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
+        android:id="@+id/message_body_file_item_progress_layout"
         android:gravity="center"
         android:layout_alignRight="@+id/message_body_file_item_state"
         android:layout_below="@+id/message_body_file_item_file_size"
@@ -64,7 +66,6 @@
         android:layout_marginTop="@dimen/message_body_file_item_progress_layout_margin_top" >
         <RelativeLayout
             android:layout_weight="1"
-            android:id="@+id/message_body_file_item_progress_layout"
             android:layout_gravity="center_vertical"
             android:layout_width="0dp"
             android:layout_height="wrap_content" >

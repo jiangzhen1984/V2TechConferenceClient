@@ -30,36 +30,46 @@
                 android:layout_alignParentLeft="true"
                 android:shrinkColumns="1" >
                 <TableRow>
-                    <RelativeLayout
+                    <ImageView
+                        android:id="@+id/conversation_message_body_icon_left"
                         android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="10dp"
+                        android:src="@drawable/avatar" />
+                    <FrameLayout
+                        android:layout_width="wrap_content"
+                        android:layout_gravity="center_vertical"
                         android:layout_height="wrap_content" >
-                        <ImageView
-                            android:id="@+id/conversation_message_body_icon_left"
+                        <RelativeLayout
                             android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_centerVertical="true"
-                            android:layout_marginLeft="10dp"
-                            android:src="@drawable/avatar" />
+                            android:layout_height="wrap_content" >
+                            <ImageView
+                                android:id="@+id/message_body_arrow_lefe_false"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_centerVertical="true"
+                                android:layout_marginLeft="10dp"
+                                android:src="@drawable/message_body_left_arrow_selector" />
+                            <LinearLayout
+                                android:id="@+id/messag_body_content_ly_left"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center_vertical"
+                                android:layout_marginLeft="@dimen/message_body_view_item_bubble_space"
+                                android:layout_marginRight="10dp"
+                                android:layout_toRightOf="@+id/message_body_arrow_lefe_false"
+                                android:background="@drawable/message_body_left_bg_selector"
+                                android:orientation="vertical" >
+                            </LinearLayout>
+                        </RelativeLayout>
                         <ImageView
                             android:id="@+id/message_body_arrow_left"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_centerVertical="true"
+                            android:layout_gravity="center_vertical"
                             android:layout_marginLeft="10dp"
-                            android:layout_marginRight="-1dp"
-                            android:layout_toRightOf="@+id/conversation_message_body_icon_left"
                             android:src="@drawable/message_body_left_arrow_selector" />
-                    </RelativeLayout>
-                    <LinearLayout
-                        android:id="@+id/messag_body_content_ly_left"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:layout_marginLeft="-1dp"
-                        android:layout_marginRight="10dp"
-                        android:background="@drawable/message_body_left_bg_selector"
-                        android:orientation="vertical" >
-                    </LinearLayout>
+                    </FrameLayout>
                     <RelativeLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -77,8 +87,8 @@
                             android:layout_height="@dimen/message_body_failed_size"
                             android:layout_centerVertical="true"
                             android:layout_toRightOf="@+id/message_body_video_item_second_left"
-                            android:visibility="gone"
-                            android:src="@drawable/message_sent_failed_icon" />
+                            android:src="@drawable/message_sent_failed_icon"
+                            android:visibility="gone" />
                         <ImageView
                             android:id="@+id/message_body_unread_icon_left"
                             android:layout_width="@dimen/message_body_failed_size"
@@ -129,8 +139,8 @@
                             android:layout_width="@dimen/message_body_failed_size"
                             android:layout_height="@dimen/message_body_failed_size"
                             android:layout_centerVertical="true"
-                            android:visibility="gone"
-                            android:src="@drawable/message_sent_failed_icon" />
+                            android:src="@drawable/message_sent_failed_icon"
+                            android:visibility="gone" />
                         <ImageView
                             android:id="@+id/message_body_unread_icon_right"
                             android:layout_width="@dimen/message_body_failed_size"

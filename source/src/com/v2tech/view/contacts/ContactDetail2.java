@@ -105,7 +105,7 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 
 		mContext = this;
 		u = GlobalHolder.getInstance().getUser(mUid);
-
+		
 		mNickNameET = (EditText) findViewById(R.id.contact_user_detail_nick_name_et);
 
 		mUpdateContactGroupButton = findViewById(R.id.contact_detail_contact_group_item_ly);
@@ -148,6 +148,14 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 		if (u != null) {
 			showUserInfo();
 		}
+	}
+	
+	@Override
+	protected void onNewIntent(Intent intent) {
+		super.onNewIntent(intent);
+		String receiveNickName = intent.getStringExtra("nickName");
+		if (u != null) 
+			u.setNickName(receiveNickName);
 	}
 
 	@Override

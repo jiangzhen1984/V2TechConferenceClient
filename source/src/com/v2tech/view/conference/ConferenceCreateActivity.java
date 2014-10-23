@@ -85,9 +85,9 @@ public class ConferenceCreateActivity extends Activity {
 	private com.v2tech.view.widget.GroupListView mGroupListView;
 
 	private TextView mConfirmButton;
+	private TextView mReturnButton;
 	private EditText mConfTitleET;
 	private EditText mConfStartTimeET;
-	private View mReturnButton;
 	private TextView mErrorMessageTV;
 
 	private LinearLayout mErrorNotificationLayout;
@@ -134,7 +134,12 @@ public class ConferenceCreateActivity extends Activity {
 		landLayout = mAttendeeContainer.getTag().equals("vertical") ? PAD_LAYOUT
 				: PHONE_LAYOUT;
 
-		mConfirmButton = (TextView) findViewById(R.id.conference_create_confirm_button);
+		
+		TextView titleContent = (TextView) findViewById(R.id.ws_common_activity_title_content);
+		titleContent.setText(R.string.conference_create_title);
+		
+		mConfirmButton = (TextView) findViewById(R.id.ws_common_activity_title_right_button);
+		mConfirmButton.setText(R.string.conference_create_confirm);
 		mConfirmButton.setOnClickListener(confirmButtonListener);
 
 		mConfTitleET = (EditText) findViewById(R.id.conference_create_conf_name);
@@ -150,7 +155,8 @@ public class ConferenceCreateActivity extends Activity {
 
 		mErrorNotificationLayout = (LinearLayout) findViewById(R.id.conference_create_error_notification);
 		mScroller = findViewById(R.id.conf_create_scroll_view);
-		mReturnButton = findViewById(R.id.conference_create_return_button);
+		mReturnButton = (TextView) findViewById(R.id.ws_common_activity_title_left_button);
+		mReturnButton.setText(R.string.conference_create_cancel);
 		mReturnButton.setOnClickListener(mReturnListener);
 
 		mErrorMessageTV = (TextView) findViewById(R.id.conference_create_error_notification_tv);

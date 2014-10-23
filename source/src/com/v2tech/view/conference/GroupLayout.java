@@ -201,8 +201,8 @@ public class GroupLayout extends LinearLayout {
 	public void updateCrowdLayout(){
 		
 		mChatGroupNameTV.setVisibility(View.VISIBLE);
-		mChatGroupLayout.setVisibility(View.GONE);
-		mGroupDateTV.setVisibility(View.GONE);
+		mChatGroupLayout.setVisibility(View.INVISIBLE);
+		mGroupDateTV.setVisibility(View.INVISIBLE);
 	}
 
 }

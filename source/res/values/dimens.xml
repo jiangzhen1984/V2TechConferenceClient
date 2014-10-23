@@ -133,6 +133,8 @@
     <dimen name="message_body_file_item_progress_action_button_margin_left">10dp</dimen>
     <dimen name="message_body_file_width">150dp</dimen>
     <dimen name="message_body_failed_size">16dp</dimen>
+    <!-- message body view layout -->
+    <dimen name="message_body_view_item_bubble_space">-3dp</dimen>  <!-- 气泡间隙，三角与内容之间 -->
 
     <!-- message voice dialog layout -->
     <dimen name="message_voice_dialog_width">220dp</dimen>

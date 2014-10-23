@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.graphics.Bitmap;
+import android.text.TextUtils;
 
 import com.V2.jni.util.V2Log;
 
@@ -131,7 +132,11 @@ public class Attendee implements Comparable<Attendee>{
 	
 	public String getAttName() {
 		if (user != null) {
-			return user.getName();
+			if(!TextUtils.isEmpty(user.getNickName()))
+				return user.getNickName();
+			else
+				return user.getName();
+				
 		}
 		return null;
 	}

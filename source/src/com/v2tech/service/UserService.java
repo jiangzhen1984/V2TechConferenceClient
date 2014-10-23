@@ -2,6 +2,7 @@ package com.v2tech.service;
 
 import android.os.Handler;
 import android.os.Message;
+import android.text.TextUtils;
 
 import com.V2.jni.ImRequest;
 import com.V2.jni.ImRequestCallbackAdapter;
@@ -69,8 +70,9 @@ public class UserService extends AbstractHandler {
 		if (user.getmUserId() == GlobalHolder.getInstance().getCurrentUserId()) {
 			ImRequest.getInstance().modifyBaseInfo(user.toXml());
 		} else {
-			ImRequest.getInstance().modifyCommentName(user.getmUserId(),
-					user.getNickName());
+			if(!TextUtils.isEmpty(user.getNickName()))
+				ImRequest.getInstance().modifyCommentName(user.getmUserId(),
+						user.getNickName());
 		}
 	}
 	

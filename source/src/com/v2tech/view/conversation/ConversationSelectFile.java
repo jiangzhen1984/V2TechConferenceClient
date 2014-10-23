@@ -544,7 +544,6 @@ public class ConversationSelectFile extends Activity {
 				holder.fileFolderName.setText(mFileLists.get(position
 						- mFolderLists.size()).fileName);
 			} else {
-
 				holder.fileIcon.setImageResource(R.drawable.selectfile_folder);
 				holder.fileFolderName
 						.setText(mFolderLists.get(position).fileName);
@@ -709,7 +708,7 @@ public class ConversationSelectFile extends Activity {
 
 			mFolderLists.clear();
 		}
-		finish();
+		onBackPressed();
 	}
 	
 	private boolean checkEmptyFile(){
@@ -896,7 +895,7 @@ public class ConversationSelectFile extends Activity {
 			}
 		} else {
 			
-			if(mCheckedList.size() > 9 && !"image".equals(type)){
+			if(mCheckedList.size() > 9){
 				Toast.makeText(getApplicationContext(), "发送文件个数已达上限，一次性只能发送10个文件", Toast.LENGTH_LONG).show();
 				return ;
 			}

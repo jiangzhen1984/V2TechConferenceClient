@@ -43,12 +43,14 @@ import com.v2tech.service.Registrant;
 import com.v2tech.service.jni.JNIResponse;
 import com.v2tech.view.JNIService;
 import com.v2tech.view.PublicIntent;
+import com.v2tech.view.bo.ConversationNotificationObject;
 import com.v2tech.view.contacts.ContactDetail;
 import com.v2tech.view.contacts.ContactDetail2;
 import com.v2tech.view.contacts.add.AddFriendHistroysHandler;
 import com.v2tech.view.contacts.add.FriendManagementActivity;
 import com.v2tech.view.group.CrowdApplicantDetailActivity;
 import com.v2tech.vo.AddFriendHistorieNode;
+import com.v2tech.vo.Conversation;
 import com.v2tech.vo.Crowd;
 import com.v2tech.vo.CrowdGroup;
 import com.v2tech.vo.Group.GroupType;
@@ -67,6 +69,8 @@ import com.v2tech.vo.VMessageQualificationInvitationCrowd;
 public class MessageAuthenticationActivity extends Activity {
 
 	private final static int ACCEPT_INVITATION_DONE = 1;
+	private final static int PROMPT_TYPE_FRIEND = 2;
+	private final static int PROMPT_TYPE_GROUP = 3;
 
 	public static final String tableName = "AddFriendHistories";
 	// R.id.message_authentication
@@ -80,6 +84,9 @@ public class MessageAuthenticationActivity extends Activity {
 	// R.id.rb_group_authentication
 	private RadioButton rbGroupAuthentication;
 
+	private ImageView ivFriendAuthenticationPrompt;
+	private ImageView ivGroupAuthenticationPrompt;
+
 	FriendMessageAdapter firendAdapter;
 	private GroupMessageAdapter groupAdapter;
 	FriendAuthenticationBroadcastReceiver friendAuthenticationBroadcastReceiver;
@@ -87,6 +94,7 @@ public class MessageAuthenticationActivity extends Activity {
 
 	private boolean isFriendAuthentication = true;
 	private boolean isGroupInDeleteMode = false;
+	private int currentRadioType; // 当前所在的是哪个RadioButton界面
 
 	private CrowdGroupService crowdService;
 
@@ -104,6 +112,11 @@ public class MessageAuthenticationActivity extends Activity {
 		bindViewEnvent();
 		crowdService = new CrowdGroupService();
 		initReceiver();
+		currentRadioType = PROMPT_TYPE_FRIEND;
+		boolean showNotification = getIntent().getBooleanExtra(
+				"showNotification", false);
+		if (showNotification)
+			updateTabPrompt(PROMPT_TYPE_GROUP, true);
 	}
 
 	@Override
@@ -118,6 +131,8 @@ public class MessageAuthenticationActivity extends Activity {
 		rbFriendAuthentication = (RadioButton) findViewById(R.id.rb_friend_authentication);
 		rbGroupAuthentication = (RadioButton) findViewById(R.id.rb_group_authentication);
 		lvMessageAuthentication = (ListView) findViewById(R.id.message_authentication);
+		ivFriendAuthenticationPrompt = (ImageView) findViewById(R.id.rb_friend_authentication_prompt);
+		ivGroupAuthenticationPrompt = (ImageView) findViewById(R.id.rb_group_authentication_prompt);
 	}
 
 	private void bindViewEnvent() {
@@ -152,12 +167,14 @@ public class MessageAuthenticationActivity extends Activity {
 					public void onCheckedChanged(CompoundButton arg0,
 							boolean arg1) {
 						if (arg1) {
+							currentRadioType = PROMPT_TYPE_FRIEND;
 							rbFriendAuthentication.setTextColor(Color.rgb(255,
 									255, 255));
 							rbGroupAuthentication.setTextColor(getResources()
 									.getColor(R.color.button_text_color));
 							isFriendAuthentication = true;
 							changeMessageAuthenticationListView();
+							updateTabPrompt(PROMPT_TYPE_FRIEND, false);
 						}
 
 					}
@@ -168,6 +185,7 @@ public class MessageAuthenticationActivity extends Activity {
 					public void onCheckedChanged(CompoundButton arg0,
 							boolean arg1) {
 						if (arg1) {
+							currentRadioType = PROMPT_TYPE_GROUP;
 							rbGroupAuthentication.setTextColor(Color.rgb(255,
 									255, 255));
 							rbFriendAuthentication.setTextColor(getResources()
@@ -183,6 +201,9 @@ public class MessageAuthenticationActivity extends Activity {
 							}
 
 							changeMessageAuthenticationListView();
+							updateTabPrompt(PROMPT_TYPE_GROUP, false);
+							MessageLoader
+									.updateGroupVerificationReadState(mContext);
 						}
 					}
 				});
@@ -325,7 +346,7 @@ public class MessageAuthenticationActivity extends Activity {
 				if (list == null) {
 					return null;
 				}
-				
+
 				for (int i = 0; i < list.size(); i++) {
 					VMessageQualification qualification = list.get(i);
 					V2Log.e("MessageAuthenticationActivity loadGroupMessage --> load group message type :"
@@ -343,6 +364,24 @@ public class MessageAuthenticationActivity extends Activity {
 			}
 
 		}.execute();
+	}
+
+	private void updateTabPrompt(int type, boolean showPrompt) {
+
+		switch (type) {
+		case PROMPT_TYPE_FRIEND:
+			if (showPrompt)
+				ivFriendAuthenticationPrompt.setVisibility(View.VISIBLE);
+			else
+				ivFriendAuthenticationPrompt.setVisibility(View.INVISIBLE);
+			break;
+		case PROMPT_TYPE_GROUP:
+			if (showPrompt)
+				ivGroupAuthenticationPrompt.setVisibility(View.VISIBLE);
+			else
+				ivGroupAuthenticationPrompt.setVisibility(View.INVISIBLE);
+			break;
+		}
 	}
 
 	void initReceiver() {
@@ -376,7 +415,49 @@ public class MessageAuthenticationActivity extends Activity {
 	protected void onDestroy() {
 		unInitReceiver();
 		crowdService.clearCalledBack();
+		checkVerificationMessage();
 		super.onDestroy();
+	}
+
+	private void checkVerificationMessage() {
+		Cursor cursor = null;
+		try {
+			VMessageQualification nestQualification = MessageLoader
+					.getNewestCrowdVerificationMessage(mContext, GlobalHolder
+							.getInstance().getCurrentUser());
+			String sql = "select * from " + AddFriendHistroysHandler.tableName
+					+ " order by SaveDate desc limit 1";
+			cursor = AddFriendHistroysHandler.select(mContext, sql,
+					new String[] {});
+			if ((cursor == null || !cursor.moveToNext())
+					&& nestQualification == null) {
+				notificateConversationUpdate();
+			}
+		} finally {
+			if (cursor != null)
+				cursor.close();
+		}
+	}
+	
+	
+	/**
+	 * 通知ConversationTabFragment 更新会话列表
+	 * 
+	 * @param isFresh
+	 *            false msgID为null，但需要刷新会话列表；ture 正常刷新
+	 * @param msgID
+	 *            最新消息ID
+	 */
+	private void notificateConversationUpdate() {
+
+		Intent i = new Intent(PublicIntent.REQUEST_UPDATE_CONVERSATION);
+		i.addCategory(PublicIntent.DEFAULT_CATEGORY);
+		ConversationNotificationObject obj = new ConversationNotificationObject(Conversation.TYPE_CONTACT,
+					-2);
+		i.putExtra("obj", obj);
+		i.putExtra("isFresh", false);
+		i.putExtra("isDelete", true);
+		mContext.sendBroadcast(i);
 	}
 
 	private void loadFriendMessage() {
@@ -828,9 +909,8 @@ public class MessageAuthenticationActivity extends Activity {
 					item.mMsgBanneriv.setImageResource(R.drawable.avatar);
 				}
 				item.mNameTV.setText(vqac.getApplicant().getName());
-				item.mContentTV.setText(vqac.getCrowdGroup().getName() + mContext
-						.getText(R.string.crowd_applicant_content)
-						);
+				item.mContentTV.setText(vqac.getCrowdGroup().getName()
+						+ mContext.getText(R.string.crowd_applicant_content));
 
 			}
 
@@ -971,6 +1051,9 @@ public class MessageAuthenticationActivity extends Activity {
 				if (msg != null && mMessageList != null) {
 					mMessageList.add(0, new ListItemWrapper(msg));
 					groupAdapter.notifyDataSetChanged();
+					// 当用户在当前界面时，就不显示红点了
+					if (currentRadioType != PROMPT_TYPE_GROUP)
+						updateTabPrompt(PROMPT_TYPE_GROUP, true);
 				}
 				// Cancel next broadcast
 				this.abortBroadcast();
@@ -985,7 +1068,11 @@ public class MessageAuthenticationActivity extends Activity {
 			if (arg1.getAction().equals(
 					JNIService.JNI_BROADCAST_FRIEND_AUTHENTICATION)) {
 				loadFriendMessage();
+				if (currentRadioType != PROMPT_TYPE_FRIEND)
+					updateTabPrompt(PROMPT_TYPE_FRIEND, true);
 			}
+			// Cancel next broadcast
+			this.abortBroadcast();
 		}
 
 	}

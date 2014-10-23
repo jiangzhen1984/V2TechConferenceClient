@@ -66,10 +66,20 @@ public class TitleBar {
 				.findViewById(R.id.title_bar_notification);
 		networkNotificationView.setVisibility(View.GONE);
 		plusButton = this.rootContainer
-				.findViewById(R.id.title_bar_plus_button);
+				.findViewById(R.id.ws_common_mainActivity_title_plus);
+		plusButton.setVisibility(View.VISIBLE);
 		plusButton.setOnClickListener(mPlusButtonListener);
+
+		this.rootContainer.findViewById(
+				R.id.ws_common_activity_title_left_button).setVisibility(
+				View.GONE);
+		this.rootContainer.findViewById(
+				R.id.ws_common_activity_title_right_button).setVisibility(
+				View.GONE);
+
 		moreButton = this.rootContainer
-				.findViewById(R.id.title_bar_feature_more_button);
+				.findViewById(R.id.ws_common_mainActivity_title_feature_more_button);
+		moreButton.setVisibility(View.VISIBLE);
 		moreButton.setOnClickListener(mMoreButtonListener);
 		searchEdit = (EditText) this.rootContainer
 				.findViewById(R.id.search_edit);
@@ -78,13 +88,13 @@ public class TitleBar {
 
 	public void updateTitle(String title) {
 		TextView tv = (TextView) rootContainer
-				.findViewById(R.id.fragment_title);
+				.findViewById(R.id.ws_common_activity_title_content);
 		tv.setText(title);
 	}
 
 	public void updateTitle(int resId) {
 		TextView tv = (TextView) rootContainer
-				.findViewById(R.id.fragment_title);
+				.findViewById(R.id.ws_common_activity_title_content);
 		tv.setText(resId);
 	}
 
@@ -171,12 +181,12 @@ public class TitleBar {
 			plusWindow.dismiss();
 		}
 	}
-	
-	
+
 	public void requestHidenSoftKeyboard() {
-		InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
-		imm.hideSoftInputFromWindow(
-				searchEdit.getWindowToken(), InputMethodManager.RESULT_UNCHANGED_SHOWN);
+		InputMethodManager imm = (InputMethodManager) context
+				.getSystemService(Context.INPUT_METHOD_SERVICE);
+		imm.hideSoftInputFromWindow(searchEdit.getWindowToken(),
+				InputMethodManager.RESULT_UNCHANGED_SHOWN);
 	}
 
 	private OnClickListener plusItemClickListener = new OnClickListener() {

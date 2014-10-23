@@ -28,7 +28,7 @@
             android:textSize="@dimen/common_item_text_size" />
 
         <TextView
-            android:id="@+id/crowd_invitation_title"
+            android:id="@+id/crowd_invitation_title_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
@@ -106,7 +106,7 @@
                 android:maxWidth="@dimen/detail_detail_name_max_width"
                 android:singleLine="true"
                 android:text="TextView"
-                android:textColor="@color/common_item_text_color"
+                android:textColor="@color/common_item_text_color_black"
                 android:textSize="@dimen/common_item_text_size" />
 
             <LinearLayout

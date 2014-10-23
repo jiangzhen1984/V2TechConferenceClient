@@ -27,8 +27,6 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -47,9 +45,6 @@ import com.V2.jni.VideoRequest;
 import com.V2.jni.WBRequest;
 import com.V2.jni.util.V2Log;
 import com.v2tech.R;
-import com.v2tech.db.DataBaseContext;
-import com.v2tech.db.V2TechDBHelper;
-import com.v2tech.service.GlobalHolder;
 import com.v2tech.util.CrashHandler;
 import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.LogcatThread;
@@ -371,21 +366,26 @@ public class MainApplication extends Application {
 			} else {
 				activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 			}
-
-			list.add(new WeakReference<Activity>(activity));
+			V2Log.d(TAG, "add new activity.. : " + activity);
+			list.add(0 , new WeakReference<Activity>(activity));
 		}
 
 		@Override
 		public void onActivityDestroyed(Activity activity) {
+			boolean flag = false;
 			for (int i = 0; i < list.size(); i++) {
 				WeakReference<Activity> w = list.get(i);
 				Object obj = w.get();
 				if (obj != null && ((Activity) obj) == activity) {
 					list.remove(i--);
-				} else {
-					list.remove(i--);
+					flag = true;
+					V2Log.d(TAG, "find target activity : " + activity + " --remove it..");
 				}
 			}
+			
+			if(!flag)
+				V2Log.d(TAG, "no find the target activity : " + activity + " -- remove failed");
+			V2Log.d(TAG, "集合中还剩下 : " + list.size() + " 个activity ");
 		}
 
 		@Override

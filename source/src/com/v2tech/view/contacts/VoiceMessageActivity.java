@@ -98,9 +98,7 @@ public class VoiceMessageActivity extends Activity {
 
 			@Override
 			public void onClick(View v) {
-				mListItem = null;
-				deleteList = null;
-				finish();
+				onBackPressed();
 			}
 		});
 
@@ -287,9 +285,13 @@ public class VoiceMessageActivity extends Activity {
 	
 	@Override
 	protected void onDestroy() {
-		super.onDestroy();
 		unregisterReceiver(receiver);
 		BitmapManager.getInstance().unRegisterBitmapChangedListener(bitmapChangedListener);
+		if(mListItem.size() <= 0)
+			notificateConversationUpdate();
+		mListItem = null;
+		deleteList = null;
+		super.onDestroy();
 	}
 
 	private void init() {
@@ -325,6 +327,26 @@ public class VoiceMessageActivity extends Activity {
 		deleteList = new HashMap<Integer, AudioVideoMessageBean>();
 		BitmapManager.getInstance().registerBitmapChangedListener(
 				this.bitmapChangedListener);
+	}
+	
+	/**
+	 * 通知ConversationTabFragment 更新会话列表
+	 * 
+	 * @param isFresh
+	 *            false msgID为null，但需要刷新会话列表；ture 正常刷新
+	 * @param msgID
+	 *            最新消息ID
+	 */
+	private void notificateConversationUpdate() {
+
+		Intent i = new Intent(PublicIntent.REQUEST_UPDATE_CONVERSATION);
+		i.addCategory(PublicIntent.DEFAULT_CATEGORY);
+		ConversationNotificationObject obj = new ConversationNotificationObject(Conversation.TYPE_CONTACT,
+					-1);
+		i.putExtra("obj", obj);
+		i.putExtra("isFresh", false);
+		i.putExtra("isDelete", true);
+		mContext.sendBroadcast(i);
 	}
 
 	class VoiceBaseAdapter extends BaseAdapter {
@@ -481,7 +503,7 @@ public class VoiceMessageActivity extends Activity {
 					
 					updateConversationState();
 					
-					finish();
+					onBackPressed();
 					mListItem = null;
 					deleteList = null;
 				}

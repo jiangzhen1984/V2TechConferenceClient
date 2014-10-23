@@ -1027,6 +1027,30 @@ public class MessageLoader {
 				ContentDescriptor.HistoriesFiles.CONTENT_URI, values, where,
 				selectionArgs);
 	}
+	
+	/**
+	 * 更新群邀请或申请的记录的已读和未读状态
+	 * @param context
+	 * @return
+	 */
+	public static int updateGroupVerificationReadState(Context context) {
+
+		User currentUser = GlobalHolder.getInstance().getCurrentUser();
+		if (currentUser == null)
+			return -1;
+
+		DataBaseContext mContext = new DataBaseContext(context);
+		ContentValues values = new ContentValues();
+		values.put(
+				ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_READ_STATE,
+				1);
+		String where = ContentDescriptor.HistoriesCrowd.Cols.OWNER_USER_ID
+				+ "= ?";
+		String[] selectionArgs = new String[] { String.valueOf(currentUser.getmUserId()) };
+		return mContext.getContentResolver().update(
+				ContentDescriptor.HistoriesCrowd.CONTENT_URI, values, where,
+				selectionArgs);
+	}
 
 	// private static void loadVMessageItem(Context context, VMessage vm,
 	// int msgType) {

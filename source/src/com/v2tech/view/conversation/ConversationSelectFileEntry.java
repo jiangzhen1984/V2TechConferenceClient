@@ -75,13 +75,13 @@ public class ConversationSelectFileEntry extends Activity implements OnClickList
 			case R.id.selectfile_back:
 				setResult(1000);
 				mCheckedList.clear();
-				finish();
+				onBackPressed();
 				break;
 			case R.id.selectfile_message_send:
 				Intent sendIntent = new Intent();
 				sendIntent.putParcelableArrayListExtra("checkedFiles", mCheckedList);
 				setResult(1000 , sendIntent);
-				finish();
+				onBackPressed();
 			default:
 				break;
 		}
@@ -120,14 +120,14 @@ public class ConversationSelectFileEntry extends Activity implements OnClickList
 				break;
 			case CANCEL:
 				setResult(1000);
-				finish();
+				onBackPressed();
 				break;
 			case SEND_SELECT_FILE:
 				mCheckedList = data.getParcelableArrayListExtra("checkedFiles");
 				Intent sendIntent = new Intent();
 				sendIntent.putParcelableArrayListExtra("checkedFiles", mCheckedList);
 				setResult(1000 , sendIntent);
-				finish();
+				onBackPressed();
 				break;
 			default:
 				break;

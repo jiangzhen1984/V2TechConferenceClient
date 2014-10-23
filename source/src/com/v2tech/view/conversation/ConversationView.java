@@ -469,8 +469,9 @@ public class ConversationView extends Activity {
 		this.unregisterReceiver(receiver);
 		GlobalConfig.isConversationOpen = false;
 		ConversationUpdateFileState.getInstance().executeUpdate(messageArray);
-		if (currentConversationViewType == V2GlobalEnum.GROUP_TYPE_USER
-				&& MessageLoader.getNewestMessage(mContext, user1Id, user2Id) == null)
+//		if (currentConversationViewType == V2GlobalEnum.GROUP_TYPE_USER
+//				&& MessageLoader.getNewestMessage(mContext, user1Id, user2Id) == null)
+		if (messageArray.size() <= 0)
 			notificateConversationUpdate(false, cov.getExtId(), true);
 		finishWork();
 	}
@@ -545,8 +546,12 @@ public class ConversationView extends Activity {
 			if (remote == null) {
 				remote = new User(user2Id);
 			}
+			
+			if(!TextUtils.isEmpty(remote.getNickName()))
+				mUserTitleTV.setText(remote.getNickName());
+			else
+				mUserTitleTV.setText(remote.getName());
 			mButtonCreateMetting.setVisibility(View.GONE);
-			mUserTitleTV.setText(remote.getName());
 			mVideoCallButton.setVisibility(View.VISIBLE);
 			mAudioCallButton.setVisibility(View.VISIBLE);
 			mShowContactDetailButton.setVisibility(View.VISIBLE);
@@ -572,6 +577,7 @@ public class ConversationView extends Activity {
 			mVideoCallButton.setVisibility(View.GONE);
 			mAudioCallButton.setVisibility(View.GONE);
 			mShowContactDetailButton.setVisibility(View.GONE);
+			mSelectFileButtonIV.setVisibility(View.GONE);
 			mButtonCreateMetting.setVisibility(View.VISIBLE);
 			mUserTitleTV.setText(departmentGroup.getName());
 		}

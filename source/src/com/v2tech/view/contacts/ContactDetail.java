@@ -455,7 +455,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 
 			for (EditText et : mETArr) {
 				et.setVisibility(View.VISIBLE);
-				et.addTextChangedListener(tw);
+//				et.addTextChangedListener(tw);
 				et.setOnFocusChangeListener(hidenKeyboardListener);
 				et.setSelection(et.length());
 			}
@@ -851,6 +851,8 @@ public class ContactDetail extends Activity implements OnTouchListener {
 				InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 				imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
 			}
+			Message m = Message.obtain(lh, UPDATE_USER_INFO);
+			lh.sendMessage(m);
 			onBackPressed();
 		}
 

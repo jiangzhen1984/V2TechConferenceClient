@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/confs_title_bg" >
+    <TextView
+        android:id="@+id/ws_common_activity_title_content"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:layout_gravity="center"
+        android:layout_marginBottom="8dp"
+        android:layout_marginTop="8dp"
+        android:text="title_content"
+        android:textColor="@color/title_color"
+        android:textSize="@dimen/common_item_text_size" />
+    <TextView
+        android:id="@+id/ws_common_activity_title_right_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:padding="15dp"
+        android:text="right_textview"
+        android:textColor="@color/conf_create_button_color"
+        android:textSize="@dimen/common_item_text_size" />
+    <TextView
+        android:id="@+id/ws_common_activity_title_left_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_centerVertical="true"
+        android:padding="15dp"
+        android:text="left_textview"
+        android:textColor="@color/conf_create_button_color"
+        android:textSize="@dimen/common_item_text_size" />
+    <!-- MainActivity plus -->
+    <ImageView
+        android:id="@+id/ws_common_mainActivity_title_plus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_marginRight="10dp"
+        android:layout_toLeftOf="@+id/ws_common_mainActivity_title_feature_more_button"
+        android:paddingBottom="10dp"
+        android:paddingLeft="10dp"
+        android:paddingTop="10dp"
+        android:src="@drawable/title_bar_plus_button_selector"
+        android:visibility="gone" />
+    <ImageView
+        android:id="@+id/ws_common_mainActivity_title_feature_more_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:layout_marginRight="5dp"
+        android:paddingBottom="10dp"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:paddingTop="10dp"
+        android:visibility="gone"
+        android:src="@drawable/title_bar_feature_more_button_selector" />
+    <!-- Use translucent image to hold space -->
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:paddingBottom="10dp"
+        android:paddingTop="10dp"
+        android:src="@drawable/translucent"
+        android:visibility="invisible" />
+    <!--  -->
+</RelativeLayout>

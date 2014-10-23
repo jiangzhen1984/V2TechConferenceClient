@@ -68,5 +68,13 @@
         <item name="android:drawableRight">@android:drawable/btn_radio</item>
         <item name="android:button">@null</item>
     </style>
-
+    
+    <style name="Common_title_height_imageView">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginRight">10dp</item>
+        <item name="android:paddingBottom">10dp</item>
+        <item name="android:paddingTop">10dp</item>
+        <item name="android:src">@drawable/translucent</item>
+    </style>
 </resources>

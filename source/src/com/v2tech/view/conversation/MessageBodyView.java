@@ -489,6 +489,7 @@ public class MessageBodyView extends LinearLayout {
 		fileRootView.setOnLongClickListener(messageLongClickListener);
 
 		fileRootView.setTag(item);
+		mContentContainer.setGravity(Gravity.CENTER_VERTICAL);
 		mContentContainer.addView(fileRootView, new LinearLayout.LayoutParams(
 				LinearLayout.LayoutParams.WRAP_CONTENT,
 				LinearLayout.LayoutParams.WRAP_CONTENT));
@@ -639,7 +640,6 @@ public class MessageBodyView extends LinearLayout {
 		} else {
 			this.failedIcon.setVisibility(View.VISIBLE);
 		}
-		MessageLoader.updateChatMessageState(getContext(), mMsg);
 	}
 
 	public void startVoiceAnimation() {
@@ -979,6 +979,7 @@ public class MessageBodyView extends LinearLayout {
 							updateFileItemView(fileItem, fileRootView);
 						}
 					}
+					MessageLoader.updateChatMessageState(getContext(), mMsg);
 				}
 			} else {
 				Toast.makeText(getContext(), "网络连接不可用，请稍候再试",

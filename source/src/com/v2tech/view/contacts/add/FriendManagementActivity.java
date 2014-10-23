@@ -164,6 +164,7 @@ public class FriendManagementActivity extends Activity {
 					// 实现越级跳
 					Intent i = new Intent(FriendManagementActivity.this,
 							ContactDetail2.class);
+					i.putExtra("nickName", commentNameET.getText().toString());
 					i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 					startActivity(i);
 				}
