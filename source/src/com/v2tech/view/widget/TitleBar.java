@@ -72,7 +72,7 @@ public class TitleBar {
 
 		this.rootContainer.findViewById(
 				R.id.ws_common_activity_title_left_button).setVisibility(
-				View.GONE);
+				View.INVISIBLE);
 		this.rootContainer.findViewById(
 				R.id.ws_common_activity_title_right_button).setVisibility(
 				View.GONE);

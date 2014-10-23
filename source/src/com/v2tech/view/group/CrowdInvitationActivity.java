@@ -52,7 +52,6 @@ public class CrowdInvitationActivity extends Activity {
 	private View mRejectResasonLayout;
 	private View mBoxLy;
 	private View mAcceptedLy;
-	private TextView mTitle;
 
 	private Context mContext;
 
@@ -74,7 +73,6 @@ public class CrowdInvitationActivity extends Activity {
 		mCreatorTV = (TextView) findViewById(R.id.crowd_invitation_creator_tv);
 		mBriefTV = (TextView) findViewById(R.id.crowd_invitation_brief);
 		mAnnounceTV = (TextView) findViewById(R.id.crowd_invitation_announcement);
-		mTitle = (TextView) findViewById(R.id.crowd_invitation_title);
 		
 		mAcceptButton = findViewById(R.id.crowd_invitation_accept_button);
 		mAcceptButton.setOnClickListener(mAcceptButtonListener);
