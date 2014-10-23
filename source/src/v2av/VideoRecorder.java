@@ -31,6 +31,8 @@ public class VideoRecorder {
 	// private int mCameraRotation;
 	// private boolean mbMirror;
 	private int framecount;
+	
+	private int cameraRotation;
 
 	private VideoEncoder mEncoder = null;
 
@@ -91,12 +93,26 @@ public class VideoRecorder {
 
 	@SuppressWarnings("unused")
 	private int GetRecordWidth() {
-		return mVideoWidth;
+		if (cameraRotation == 90 || cameraRotation == 270)
+		{
+			return mVideoHeight;
+		}
+		else
+		{
+			return mVideoWidth;
+		}
 	}
 
 	@SuppressWarnings("unused")
 	private int GetRecordHeight() {
-		return mVideoHeight;
+		if (cameraRotation == 90 || cameraRotation == 270)
+		{
+			return mVideoWidth;
+		}
+		else
+		{
+			return mVideoHeight;
+		}
 	}
 
 	@SuppressWarnings("unused")
@@ -136,6 +152,11 @@ public class VideoRecorder {
 	@SuppressWarnings("unused")
 	private int GetPreviewHeight() {
 		return mSrcHeight;
+	}
+	
+	@SuppressWarnings("unused")
+	private int GetRotation() {
+		return cameraRotation;
 	}
 
 	@SuppressWarnings("unused")
@@ -317,20 +338,32 @@ public class VideoRecorder {
 		Camera.Parameters para = mCamera.getParameters();
 		para.setPreviewSize(mSrcWidth, mSrcHeight);
 		Log.i("wzl","设置width："+mSrcWidth+" height:"+mSrcHeight);
-		para.setPreviewFrameRate(mFrameRate);
+		//para.setPreviewFrameRate(mSelectedFrameRate);
 		para.setPreviewFormat(mPreviewFormat);
 		mCamera.setParameters(para);
 
-		int result;
 		if (device.frontCameraType == FrontFacingCameraType.Android23) {
-			result = (device.orientation + DisplayRotation) % 360;
-			result = (360 - result) % 360; // compensate the mirror
+			cameraRotation = (device.orientation + DisplayRotation) % 360;
+			cameraRotation = (360 - cameraRotation) % 360; // compensate the mirror
+			
+			mCamera.setDisplayOrientation(cameraRotation);
+			
+			if (cameraRotation == 90)
+			{
+				cameraRotation = 270;
+			} 
+			else if (cameraRotation == 270)
+			{
+				cameraRotation = 90;
+			}
 		} else {
 			// back-facing
-			result = (device.orientation - DisplayRotation + 360) % 360;
+			cameraRotation = (device.orientation - DisplayRotation + 360) % 360;
+			
+			mCamera.setDisplayOrientation(cameraRotation);
 		}
 
-		mCamera.setDisplayOrientation(result);
+		//mCamera.setDisplayOrientation(cameraRotation);
 
 		return true;
 	}

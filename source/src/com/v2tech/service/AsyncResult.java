@@ -12,8 +12,6 @@ public class AsyncResult {
 		this.result = result;
 	}
 	
-	
-
 	public AsyncResult(Object userObject, Object result, Exception exception) {
 		super();
 		this.userObject = userObject;

@@ -65,7 +65,7 @@
             android:ellipsize="end"
             android:gravity="left|top"
             android:singleLine="true"
-            android:text="TextView"
+            android:text="TextView11111111111111111"
             android:textColor="@color/conversation_view_name_color"
             android:textSize="@dimen/conversation_view_name_text_size" />
 
