@@ -607,9 +607,6 @@ public class ConferenceCreateActivity extends Activity {
 				JNIResponse rccr = (JNIResponse) msg.obj;
 				if (rccr.getResult() != JNIResponse.Result.SUCCESS) {
 					mErrorNotificationLayout.setVisibility(View.VISIBLE);
-					if (mErrorMessageTV == null) {
-						mErrorMessageTV = (TextView) findViewById(R.id.conference_create_error_notification_tv);
-					}
 					mErrorMessageTV
 							.setText(R.string.error_create_conference_failed_from_server_side);
 					break;
