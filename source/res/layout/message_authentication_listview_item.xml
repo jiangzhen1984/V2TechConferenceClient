@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -54,7 +54,7 @@
         android:layout_alignTop="@+id/group_list_conference_image_view_rl"
         android:layout_marginLeft="30dp"
         android:layout_marginRight="30dp"
-        android:layout_toLeftOf="@+id/fl_rightLayout"
+        android:layout_toLeftOf="@+id/ll_rightLayout"
         android:layout_toRightOf="@+id/group_list_conference_image_view_rl"
         android:orientation="vertical" >
 
@@ -65,7 +65,7 @@
             android:ellipsize="end"
             android:gravity="left|top"
             android:singleLine="true"
-            android:text="TextView11111111111111111"
+            android:text="TextView11111111111111133333333333333333333333333333333333333333333333333333333333333333333333333333333333311"
             android:textColor="@color/conversation_view_name_color"
             android:textSize="@dimen/conversation_view_name_text_size" />
 
@@ -77,37 +77,45 @@
             android:ellipsize="end"
             android:gravity="left|bottom"
             android:singleLine="true"
-            android:text="TextVi我是单身宿舍打扫打扫打扫打扫滴答滴答滴答滴答的打扫ew"
+            android:text="TextVi"
             android:textColor="@color/conversation_view_text_color"
             android:textSize="@dimen/common_item_text_size_16" />
     </LinearLayout>
 
-    <FrameLayout
-        android:id="@+id/fl_rightLayout"
+    <LinearLayout
+        android:id="@+id/ll_rightLayout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
-        android:layout_centerVertical="true" >
+        android:layout_centerVertical="true"
+        android:orientation="horizontal" >
 
-        <Button
-            android:id="@+id/access"
+        <FrameLayout
+            android:id="@+id/fl_rightLayout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginRight="15dp"
-            android:background="@drawable/button_bg"
-            android:focusable="false"
-            android:text="同意"
-            android:textColor="@color/button_text_color"
-            android:visibility="gone" />
+            android:layout_gravity="center_vertical"
+            android:layout_marginRight="15dp" >
 
-        <TextView
-            android:id="@+id/access_or_no"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginRight="15dp"
-            android:paddingRight="15dp"
-            android:text="TextView"
-            android:textSize="@dimen/common_item_text_size_16" />
+            <Button
+                android:id="@+id/access"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/button_bg"
+                android:focusable="false"
+                android:text="同意"
+                android:textColor="@color/button_text_color"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/access_or_no"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingRight="15dp"
+                android:text="TextView"
+                android:textSize="@dimen/common_item_text_size_16" />
+
+        </FrameLayout>
 
         <Button
             android:id="@+id/b_suer_delete"
@@ -118,8 +126,9 @@
             android:focusable="false"
             android:text="删除"
             android:textColor="@color/common_white_color"
-            android:visibility="gone" />
-    </FrameLayout>
+            android:visibility="visible" />
+
+    </LinearLayout>
 
     <LinearLayout
         android:layout_width="fill_parent"

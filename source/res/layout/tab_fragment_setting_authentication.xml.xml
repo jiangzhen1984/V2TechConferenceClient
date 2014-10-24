@@ -69,9 +69,9 @@
                 android:id="@+id/rg_authentication"
                 android:layout_width="fill_parent"
                 android:layout_height="fill_parent"
-                android:layout_marginLeft="15.0dip"
+                android:layout_marginLeft="15dp"
                 android:layout_marginRight="15.0dip"
-                android:layout_marginTop="16dip"
+                android:layout_marginTop="15dp"
                 android:background="@drawable/shape_bg"
                 android:checkedButton="@+id/rb_allow_anybogy"
                 android:orientation="vertical" >
@@ -81,14 +81,11 @@
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:layout_alignParentRight="true"
-                    android:layout_marginBottom="@dimen/detail_detail_2_item_margin_bottom"
-                    android:layout_marginLeft="@dimen/contact_detail_2_item_margin_horizontal"
-                    android:layout_marginRight="@dimen/contact_detail_2_item_margin_horizontal"
-                    android:layout_marginTop="@dimen/detail_detail_2_item_margin_top"
                     android:background="@null"
                     android:button="@null"
-                    android:drawableRight="@drawable/radio_state"
-                    android:padding="10dp"
+                    android:drawableRight="@android:drawable/btn_radio"
+                    android:paddingLeft="10dp"
+                    android:paddingRight="10dp"
                     android:text="允许任何人"
                     android:textColor="#000000" />
 
@@ -102,14 +99,11 @@
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:layout_alignParentRight="true"
-                    android:layout_marginBottom="@dimen/detail_detail_2_item_margin_bottom"
-                    android:layout_marginLeft="@dimen/contact_detail_2_item_margin_horizontal"
-                    android:layout_marginRight="@dimen/contact_detail_2_item_margin_horizontal"
-                    android:layout_marginTop="@dimen/detail_detail_2_item_margin_top"
                     android:background="@null"
                     android:button="@null"
-                    android:drawableRight="@drawable/radio_state"
-                    android:padding="10dp"
+                    android:drawableRight="@android:drawable/btn_radio"
+                    android:paddingLeft="10dp"
+                    android:paddingRight="10dp"
                     android:text="需要验证消息"
                     android:textColor="#000000" />
 
@@ -123,16 +117,14 @@
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:layout_alignParentRight="true"
-                    android:layout_marginBottom="@dimen/detail_detail_2_item_margin_bottom"
-                    android:layout_marginLeft="@dimen/contact_detail_2_item_margin_horizontal"
-                    android:layout_marginRight="@dimen/contact_detail_2_item_margin_horizontal"
-                    android:layout_marginTop="@dimen/detail_detail_2_item_margin_top"
                     android:background="@null"
                     android:button="@null"
-                    android:drawableRight="@drawable/radio_state"
-                    android:padding="10dp"
+                    android:drawableRight="@android:drawable/btn_radio"
+                    android:paddingLeft="10dp"
+                    android:paddingRight="10dp"
                     android:text="不允许任何人"
                     android:textColor="#000000" />
+
             </RadioGroup>
         </LinearLayout>
     </ScrollView>

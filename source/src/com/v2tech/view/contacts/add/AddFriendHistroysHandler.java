@@ -35,10 +35,15 @@ public class AddFriendHistroysHandler {
 			User remoteUser, String additInfo) {
 		String sql = null;
 		
-		// 我加别人未处理的全删。
-		// 别人加我未处理的也全删。
+//		// 我加别人未处理的全删。
+//		// 别人加我未处理的也全删。
+//		sql = "delete from " + tableName + " where RemoteUserID="
+//				+ remoteUser.getmUserId() + " and " + "AddState=0";
+		
+		// 我加别人已未处理的全删。
+		// 别人加我已未处理的也全删。
 		sql = "delete from " + tableName + " where RemoteUserID="
-				+ remoteUser.getmUserId() + " and " + "AddState=0";
+				+ remoteUser.getmUserId();
 		del(context, sql);
 
 		// 加一条别人加我的未处理记录
@@ -127,8 +132,8 @@ public class AddFriendHistroysHandler {
 
 	// 6
 	// 我加别人需要验证：
-	// 别人加我未处理的全删。
-	// 我加被人未处理的也全删。
+	// 我加别人已未处理的全删。
+	// 别人加我已未处理的也全删。
 	// 加一条我加别人未处理记录
 	public static void addOtherNeedAuthentication(Context context,
 			User remoteUser, String applyReason) {
@@ -138,11 +143,18 @@ public class AddFriendHistroysHandler {
 			return;
 		}
 
-		// 我加别人未处理的全删。
-		// 别人加我未处理的也全删。
+//		// 我加别人未处理的全删。
+//		// 别人加我未处理的也全删。
+//
+//		sql = "delete from " + tableName + " where RemoteUserID="
+//				+ remoteUser.getmUserId() + " and " + "AddState=0";
+		// 我加别人已未处理的全删。
+		// 别人加我已未处理的也全删。
 
 		sql = "delete from " + tableName + " where RemoteUserID="
-				+ remoteUser.getmUserId() + " and " + "AddState=0";
+				+ remoteUser.getmUserId();
+		
+		
 		del(context, sql);
 
 		// 加一条我加别人的未处理记录

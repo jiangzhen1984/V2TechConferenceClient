@@ -93,6 +93,8 @@ public class MessageAuthenticationActivity extends Activity {
 	private CrowdAuthenticationBroadcastReceiver mCrowdAuthenticationBroadcastReceiver;
 
 	private boolean isFriendAuthentication = true;
+
+	private boolean isFriendInDeleteMode = false;
 	private boolean isGroupInDeleteMode = false;
 	private int currentRadioType; // 当前所在的是哪个RadioButton界面
 
@@ -146,19 +148,7 @@ public class MessageAuthenticationActivity extends Activity {
 
 			@Override
 			public void onClick(View arg0) {
-				if (isGroupInDeleteMode) {
-					isGroupInDeleteMode = false;
-					tvCompleteRight.setVisibility(View.GONE);
-					rbGroupAuthentication.setEnabled(true);
-					rbFriendAuthentication.setEnabled(true);
-
-					groupAdapter.notifyDataSetChanged();
-				} else {
-					firendAdapter.isDeleteMode = false;
-					firendAdapter.notifyDataSetChanged();
-					tvMessageBack.setVisibility(View.VISIBLE);
-					tvCompleteRight.setVisibility(View.INVISIBLE);
-				}
+				exitDeleteMode();
 			}
 		});
 		rbFriendAuthentication
@@ -191,15 +181,6 @@ public class MessageAuthenticationActivity extends Activity {
 							rbFriendAuthentication.setTextColor(getResources()
 									.getColor(R.color.button_text_color));
 							isFriendAuthentication = false;
-
-							// 退出好友验证消息的编辑模式
-							if (firendAdapter.isDeleteMode) {
-								firendAdapter.isDeleteMode = false;
-								firendAdapter.notifyDataSetChanged();
-								tvMessageBack.setVisibility(View.VISIBLE);
-								tvCompleteRight.setVisibility(View.INVISIBLE);
-							}
-
 							changeMessageAuthenticationListView();
 							updateTabPrompt(PROMPT_TYPE_GROUP, false);
 							MessageLoader
@@ -288,26 +269,54 @@ public class MessageAuthenticationActivity extends Activity {
 					@Override
 					public boolean onItemLongClick(AdapterView<?> arg0,
 							View view, int position, long arg3) {
-						if (isFriendAuthentication) {
-							if (firendAdapter.isDeleteMode == false) {
-								firendAdapter.isDeleteMode = true;
-								firendAdapter.notifyDataSetChanged();
-								tvMessageBack.setVisibility(View.INVISIBLE);
-								tvCompleteRight.setVisibility(View.VISIBLE);
-							}
-						} else {
-							isGroupInDeleteMode = true;
-							// Group item
-							mMessageList.get(position).showLeftDeleteButton = true;
-							tvCompleteRight.setVisibility(View.VISIBLE);
-							groupAdapter.notifyDataSetChanged();
-							rbGroupAuthentication.setEnabled(false);
-							rbFriendAuthentication.setEnabled(false);
+						if (!isFriendInDeleteMode || !isGroupInDeleteMode) {
+							enternDeleteMode(position);
 							return true;
 						}
 						return false;
 					}
+
 				});
+
+	}
+
+	private void enternDeleteMode(int position) {
+		if (isFriendAuthentication && !isFriendInDeleteMode) {
+			isFriendInDeleteMode = true;
+			firendAdapter.notifyDataSetChanged();
+			tvMessageBack.setVisibility(View.INVISIBLE);
+			tvCompleteRight.setVisibility(View.VISIBLE);
+			rbGroupAuthentication.setEnabled(false);
+			rbFriendAuthentication.setEnabled(false);
+		}
+
+		if (!isFriendAuthentication && !isGroupInDeleteMode) {
+			isGroupInDeleteMode = true;
+			mMessageList.get(position).showLeftDeleteButton = true;
+			tvCompleteRight.setVisibility(View.VISIBLE);
+			groupAdapter.notifyDataSetChanged();
+			rbGroupAuthentication.setEnabled(false);
+			rbFriendAuthentication.setEnabled(false);
+		}
+	}
+
+	private void exitDeleteMode() {
+		if (isFriendAuthentication && isFriendInDeleteMode) {
+			isFriendInDeleteMode = false;
+			firendAdapter.notifyDataSetChanged();
+			tvMessageBack.setVisibility(View.VISIBLE);
+			tvCompleteRight.setVisibility(View.INVISIBLE);
+			rbGroupAuthentication.setEnabled(true);
+			rbFriendAuthentication.setEnabled(true);
+		}
+
+		if (!isFriendAuthentication && isGroupInDeleteMode) {
+			isGroupInDeleteMode = false;
+			tvCompleteRight.setVisibility(View.GONE);
+			groupAdapter.notifyDataSetChanged();
+			rbGroupAuthentication.setEnabled(true);
+			rbFriendAuthentication.setEnabled(true);
+		}
 
 	}
 
@@ -561,20 +570,12 @@ public class MessageAuthenticationActivity extends Activity {
 
 	@Override
 	public void onBackPressed() {
-		if (firendAdapter.isDeleteMode) {
-			firendAdapter.isDeleteMode = false;
-			firendAdapter.notifyDataSetChanged();
-			tvMessageBack.setVisibility(View.VISIBLE);
-			tvCompleteRight.setVisibility(View.INVISIBLE);
-		} else if (isGroupInDeleteMode && !isFriendAuthentication) {
-			isGroupInDeleteMode = false;
-			rbGroupAuthentication.setEnabled(true);
-			rbFriendAuthentication.setEnabled(true);
-			tvCompleteRight.setVisibility(View.INVISIBLE);
-			this.groupAdapter.notifyDataSetChanged();
+		if (isFriendInDeleteMode || isGroupInDeleteMode) {
+			exitDeleteMode();
 		} else {
 			super.onBackPressed();
 		}
+
 	}
 
 	class MessageAuthenticationData {
@@ -600,7 +601,6 @@ public class MessageAuthenticationActivity extends Activity {
 		private List<MessageAuthenticationData> list;
 		private LayoutInflater layoutInflater;
 		private Context context;
-		public boolean isDeleteMode = false;
 
 		public FriendMessageAdapter(Context context, int layoutId,
 				List<MessageAuthenticationData> list) {
@@ -766,12 +766,14 @@ public class MessageAuthenticationActivity extends Activity {
 			});
 
 			viewTag.bSuerDelete.setVisibility(View.GONE);
-			if (isDeleteMode) {
+			if (isFriendInDeleteMode) {
 				viewTag.ibDelete.setVisibility(View.VISIBLE);
-				viewTag.bAccess.setVisibility(View.GONE);
-				viewTag.tvAccessOrNo.setVisibility(View.GONE);
+//				viewTag.bAccess.setVisibility(View.GONE);
+//				viewTag.tvAccessOrNo.setVisibility(View.GONE);
+				viewTag.bAccess.setEnabled(false);
 			} else {
 				viewTag.ibDelete.setVisibility(View.GONE);
+				viewTag.bAccess.setEnabled(true);
 			}
 
 			return arg1;
