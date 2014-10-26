@@ -267,6 +267,8 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 						.addAction(JNIService.BROADCAST_CROWD_NEW_UPLOAD_FILE_NOTIFICATION);
 				intentFilter
 						.addAction(PublicIntent.REQUEST_UPDATE_CONVERSATION);
+				intentFilter
+				.addAction(PublicIntent.BROADCAST_USER_COMMENT_NAME_NOTIFICATION);
 			}
 
 			if (mCurrentTabFlag == Conversation.TYPE_GROUP) {
@@ -2062,6 +2064,24 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 				}
 
 				updateGroupConversation(V2GlobalEnum.GROUP_TYPE_CROWD, groupID);
+			} else if(PublicIntent.BROADCAST_USER_COMMENT_NAME_NOTIFICATION
+					.equals(intent.getAction())){
+				Long uid = intent.getLongExtra("modifiedUser", -1);
+				if(uid == -1l){
+					V2Log.e("ConversationsTabFragment BROADCAST_USER_COMMENT_NAME_NOTIFICATION ---> update user comment name failed , get id is -1");
+					return ;
+				}
+					
+				for (int i = 0; i < mConvList.size(); i++) {
+					Conversation conversation = mConvList.get(i);
+					if(conversation.getType() == V2GlobalEnum.GROUP_TYPE_CONTACT){
+						ContactConversation con = (ContactConversation) conversation;
+						if(con.getUserID() == uid){
+							((GroupLayout)mItemList.get(i).gp).update();
+							adapter.notifyDataSetChanged();
+						}
+					}
+				}
 			}
 		}
 	}

@@ -3,7 +3,6 @@ package com.v2tech.view.contacts;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
 
 import android.app.Activity;
 import android.app.DatePickerDialog;
@@ -970,6 +969,11 @@ public class ContactDetail extends Activity implements OnTouchListener {
 				isUpdating = false;
 				break;
 			case UPDATE_USER_INFO_DONE:
+				Intent intent = new Intent();
+				intent.setAction(PublicIntent.BROADCAST_USER_COMMENT_NAME_NOTIFICATION);
+				intent.addCategory(PublicIntent.DEFAULT_CATEGORY);
+				intent.putExtra("modifiedUser", u.getmUserId());
+				sendBroadcast(intent);
 				break;
 			}
 		}

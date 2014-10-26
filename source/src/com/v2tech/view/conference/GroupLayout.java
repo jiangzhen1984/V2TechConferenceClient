@@ -1,5 +1,7 @@
 package com.v2tech.view.conference;
 
+import java.util.List;
+
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Handler;
@@ -13,15 +15,19 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.V2.jni.V2GlobalEnum;
+import com.V2.jni.util.V2Log;
 import com.v2tech.R;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.util.MessageUtil;
 import com.v2tech.view.conversation.MessageLoader;
 import com.v2tech.vo.ConferenceConversation;
 import com.v2tech.vo.ContactConversation;
+import com.v2tech.vo.ContactGroup;
 import com.v2tech.vo.Conversation;
 import com.v2tech.vo.ConversationFirendAuthenticationData;
 import com.v2tech.vo.CrowdConversation;
+import com.v2tech.vo.Group;
+import com.v2tech.vo.User;
 import com.v2tech.vo.VMessage;
 
 public class GroupLayout extends LinearLayout {
@@ -105,11 +111,48 @@ public class GroupLayout extends LinearLayout {
 					+ mConv.getType());
 		}
 
-		mGroupNameTV.setText(mConv.getName());
+		updateName();
 		mChatGroupNameTV.setText(mConv.getName());
 		mGroupOwnerTV.setText(mConv.getMsg());
 		mGroupDateTV.setText(mConv.getDate());
 		addView(view);
+	}
+	
+	private void updateName() {
+		
+		if(mConv.getType() == Conversation.TYPE_CONTACT){
+			boolean isFriend = false;
+			ContactConversation con = (ContactConversation) mConv;
+			User currentUser = con.getU();
+			long currentUserID = con.getUserID();
+			if(currentUserID != -1){
+				List<Group> friendGroup = GlobalHolder.getInstance().getGroup(V2GlobalEnum.GROUP_TYPE_CONTACT);
+				if(friendGroup.size() >= 0){
+					for (Group friend : friendGroup) {
+						List<User> users = friend.getUsers();
+						for (User user : users) {
+							if(currentUserID == user.getmUserId()){
+								isFriend = true;
+								break;
+							}
+						}
+						
+						if(isFriend)
+							break;
+					}
+					
+					if(isFriend && currentUser != null)
+						mGroupNameTV.setText(currentUser.getNickName());
+					else
+						mGroupNameTV.setText(mConv.getName());
+				}
+			}
+			else{
+				V2Log.e(TAG, "updateName ---> get current user id of the conversation -1 , please check conversation user is exist");
+			}
+		}
+		else
+			mGroupNameTV.setText(mConv.getName());
 	}
 
 	public long getGroupId() {
@@ -184,7 +227,7 @@ public class GroupLayout extends LinearLayout {
 
 	public void update() {
 		
-		mGroupNameTV.setText(mConv.getName());
+		updateName();
 		mChatGroupNameTV.setText(mConv.getName());
 		mGroupOwnerTV.setText(mConv.getMsg());
 		mGroupDateTV.setText(mConv.getDate());

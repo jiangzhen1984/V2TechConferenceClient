@@ -33,6 +33,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.V2.jni.V2GlobalEnum;
+import com.V2.jni.util.V2Log;
 import com.v2tech.R;
 import com.v2tech.service.BitmapManager;
 import com.v2tech.service.GlobalHolder;
@@ -165,6 +166,9 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 					.addAction(JNIService.JNI_BROADCAST_USER_STATUS_NOTIFICATION);
 			intentFilter
 					.addAction(JNIService.JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION);
+			intentFilter
+				.addAction(PublicIntent.BROADCAST_USER_COMMENT_NAME_NOTIFICATION);
+			
 
 			intentFilter
 					.addAction(JNIService.JNI_BROADCAST_USER_UPDATE_NAME_OR_SIGNATURE);
@@ -287,6 +291,16 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 				Group dest = GlobalHolder.getInstance().getGroupById(
 						GroupType.CONTACT.intValue(), destGroupId);
 				mContactsContainer.updateUserGroup(u, src, dest);
+			} else if(PublicIntent.BROADCAST_USER_COMMENT_NAME_NOTIFICATION
+					.equals(intent.getAction())){
+				Long uid = intent.getLongExtra("modifiedUser", -1);
+				if(uid == -1l){
+					V2Log.e("ContactsTabFragment BROADCAST_USER_COMMENT_NAME_NOTIFICATION ---> update user comment name failed , get id is -1");
+					return ;
+				}
+					
+				mContactsContainer.updateUser(GlobalHolder.getInstance()
+						.getUser(uid));
 			}
 		}
 

@@ -76,6 +76,12 @@ public class PublicIntent {
 	 * key : crowd : crowd id 
 	 */
 	public static final String BROADCAST_NEW_CROWD_NOTIFICATION = "com.v2tech.jni.broadcast.new_crowd_notification";
+	
+	/**
+	 * Broadcast for user update the comment name
+	 * key: no
+	 */
+	public static final String BROADCAST_USER_COMMENT_NAME_NOTIFICATION = "com.v2tech.broadcast.user_comment_name_notification";
 	// Broadcaset for new conference. This is only use conference is created by
 	// self
 	// extra key: newGid : group id

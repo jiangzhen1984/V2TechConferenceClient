@@ -85,8 +85,6 @@ public final class ContentDescriptor {
 		DataBaseContext dbContext = new DataBaseContext(context);
 		SQLiteDatabase base = null;
 		try{
-			V2TechDBHelper helper = new V2TechDBHelper(dbContext);
-			helper.getReadableDatabase();
 			base = dbContext.openOrCreateDatabase(
 					V2TechDBHelper.DB_NAME, Context.MODE_WORLD_WRITEABLE
 							| Context.MODE_WORLD_READABLE, null);

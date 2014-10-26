@@ -27,6 +27,8 @@ import com.v2tech.vo.CrowdGroup;
 import com.v2tech.vo.CrowdGroup.AuthType;
 import com.v2tech.vo.Group;
 import com.v2tech.vo.Group.GroupType;
+import com.v2tech.vo.VMessageQualification.QualificationState;
+import com.v2tech.vo.VMessageQualification.ReadState;
 import com.v2tech.vo.VMessageQualification;
 
 public class CrowdInvitationActivity extends Activity {
@@ -222,6 +224,11 @@ public class CrowdInvitationActivity extends Activity {
 			if (!isInRejectReasonMode) {
 				updateView(!isInRejectReasonMode);
 			}
+			
+			// Update message state to database;
+			vq.setQualState(QualificationState.REJECT);
+			vq.setReadState(ReadState.READ);
+			MessageBuilder.updateQualicationMessage(mContext, vq);
 		}
 
 	};

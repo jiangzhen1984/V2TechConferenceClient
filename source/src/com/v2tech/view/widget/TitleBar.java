@@ -6,6 +6,7 @@ import java.util.List;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.text.TextWatcher;
@@ -26,6 +27,7 @@ import android.widget.TextView;
 
 import com.v2tech.R;
 import com.v2tech.service.GlobalHolder;
+import com.v2tech.util.DensityUtils;
 import com.v2tech.view.PublicIntent;
 import com.v2tech.view.contacts.ContactDetail;
 import com.v2tech.vo.NetworkStateCode;
@@ -43,6 +45,7 @@ public class TitleBar {
 	private View moreButton;
 	private TitleBarMenuItemClickListener listener;
 	private EditText searchEdit;
+	private int padding;
 
 	private List<Wrapper> additionList;
 	private List<Wrapper> normalList;
@@ -83,7 +86,14 @@ public class TitleBar {
 		moreButton.setOnClickListener(mMoreButtonListener);
 		searchEdit = (EditText) this.rootContainer
 				.findViewById(R.id.search_edit);
-
+		
+		// Initialise popupWindow padding
+		Configuration conf = context.getResources().getConfiguration();
+		if (conf.smallestScreenWidthDp >= 600) {
+			padding = DensityUtils.dip2px(context, 2);
+		} else {
+			padding = DensityUtils.dip2px(context, 20);
+		}
 	}
 
 	public void updateTitle(String title) {
@@ -117,7 +127,8 @@ public class TitleBar {
 
 			ImageView iv = new ImageView(context);
 			iv.setImageResource(imgs[i]);
-			iv.setPadding(10, 5, 5, 10);
+//			iv.setPadding(10, 5, 5, 10);
+			iv.setPadding(10, padding, 5, padding);
 			LinearLayout.LayoutParams ivLL = new LinearLayout.LayoutParams(0,
 					LinearLayout.LayoutParams.WRAP_CONTENT);
 			ivLL.gravity = Gravity.RIGHT;
@@ -127,7 +138,8 @@ public class TitleBar {
 
 			TextView tv = new TextView(context);
 			tv.setText(items[i]);
-			tv.setPadding(10, 15, 5, 15);
+//			tv.setPadding(10, 15, 5, 15);
+			tv.setPadding(10, padding, 5, padding);
 			tv.setTextColor(Color.rgb(123, 123, 123));
 			LinearLayout.LayoutParams tvLL = new LinearLayout.LayoutParams(0,
 					LinearLayout.LayoutParams.WRAP_CONTENT);
@@ -242,7 +254,7 @@ public class TitleBar {
 						LinearLayout.LayoutParams.WRAP_CONTENT);
 				lp.rightMargin = 20;
 				for (int i = 0; i < additionList.size(); i++) {
-					additionList.get(i).v.setPadding(0, 15, 15, 15);
+					additionList.get(i).v.setPadding(0, padding, 15, padding);
 					itemContainer.addView(additionList.get(i).v, lp);
 
 					if (i != additionList.size() - 1) {

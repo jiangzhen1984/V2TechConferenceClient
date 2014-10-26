@@ -38,6 +38,7 @@
         android:layout_marginBottom="@dimen/conversation_view_margin"
         android:layout_marginLeft="@dimen/text_margin_left"
         android:layout_marginTop="@dimen/conversation_view_margin"
+        android:layout_toLeftOf="@+id/gourp_list_conference_create_time_tv"
         android:layout_toRightOf="@+id/group_list_conference_image_view_rl" >
         <TextView
             android:id="@+id/group_list_conference_title_tv"
@@ -58,9 +59,8 @@
             android:layout_marginTop="10dp"
             android:ellipsize="end"
             android:gravity="left|bottom"
-            android:maxWidth="@dimen/conversation_view_text_max_width"
             android:singleLine="true"
-            android:text="TextViewaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+            android:text="TextViewaaaaaaaaaaaaaaaaa"
             android:textColor="@color/conversation_view_text_color"
             android:textSize="@dimen/common_item_text_size_16" />
     </RelativeLayout>

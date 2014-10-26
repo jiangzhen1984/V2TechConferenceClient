@@ -9,6 +9,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
@@ -42,6 +44,7 @@ import com.v2tech.service.ChatService;
 import com.v2tech.service.FileOperationEnum;
 import com.v2tech.util.DensityUtils;
 import com.v2tech.util.Notificator;
+import com.v2tech.view.conference.VideoActivityV2;
 import com.v2tech.view.conversation.ConversationUpdateFileState;
 import com.v2tech.view.conversation.ConversationUpdateFileState.FileStateInterface;
 import com.v2tech.view.conversation.MessageBuilder;
@@ -59,6 +62,7 @@ public class MainActivity extends FragmentActivity implements
 
 	private Context mContext;
 	private boolean exitedFlag = false;
+	private int padding;
 
 	private TitleBar titleBar;
 	private EditText searchEdit;
@@ -157,6 +161,7 @@ public class MainActivity extends FragmentActivity implements
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		Log.i("wzl","MainActivity onCreate");
+		
 		// Inflate the layout
 		setContentView(R.layout.activity_main);
 		// Initialise the TabHost
@@ -203,8 +208,7 @@ public class MainActivity extends FragmentActivity implements
 
 			ImageView iv = new ImageView(mContext);
 			iv.setImageResource(imgs[i]);
-			int padding = DensityUtils.dip2px(mContext, 5);
-			iv.setPadding(padding, padding / 2, padding, padding / 2);
+			iv.setPadding(5, 5, 5, 5);
 			LinearLayout.LayoutParams ivLL = new LinearLayout.LayoutParams(0,
 					LinearLayout.LayoutParams.WRAP_CONTENT);
 			ivLL.gravity = Gravity.RIGHT;
@@ -214,7 +218,7 @@ public class MainActivity extends FragmentActivity implements
 
 			TextView tv = new TextView(mContext);
 			tv.setText(items[i]);
-			tv.setPadding(padding, padding / 2, padding, padding / 2);
+			tv.setPadding(5, 5, 5, 5);
 			//TODO gray disable button
 			if (i > 3) {
 				tv.setTextColor(Color.rgb(198, 198, 198));

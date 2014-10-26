@@ -4,59 +4,85 @@
     android:layout_height="wrap_content"
     android:orientation="vertical" >
     <RelativeLayout
-        android:id="@+id/common_layout_iconLayout"
+        android:id="@+id/ws_common_conversation_layout_iconLayout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
-        android:layout_alignBottom="@+id/common_content_layout"
-        android:layout_alignTop="@+id/common_content_layout" >
+        android:layout_alignBottom="@+id/ws_common_conversation_layout_contentLayout"
+        android:layout_alignTop="@+id/ws_common_conversation_layout_contentLayout"
+        android:layout_centerVertical="true" >
         <ImageView
-            android:id="@+id/common_layout_icon"
+            android:id="@+id/ws_common_conversation_layout_icon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
+            android:layout_marginBottom="@dimen/conversation_view_margin"
+            android:layout_marginTop="@dimen/conversation_view_margin"
             android:src="@drawable/selectfile_type_pdf" />
         <ImageView
-            android:id="@+id/common_layout_notificator"
+            android:id="@+id/ws_common_conversation_layout_notificator"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_alignRight="@+id/common_layout_icon"
-            android:layout_marginRight="3dp"
-            android:layout_marginTop="3dp"
+            android:layout_alignRight="@+id/ws_common_conversation_layout_icon"
+            android:layout_alignTop="@+id/ws_common_conversation_layout_icon"
+            android:layout_marginRight="@dimen/conversation_view_notification_margin"
+            android:layout_marginTop="2dp"
             android:src="@drawable/red_nofificator"
             android:visibility="invisible" />
     </RelativeLayout>
     <RelativeLayout
-        android:id="@+id/common_content_layout"
+        android:id="@+id/ws_common_conversation_layout_contentLayout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
         android:layout_marginLeft="@dimen/common_margin_horizontal"
         android:layout_marginRight="10dp"
-        android:layout_toRightOf="@+id/common_layout_iconLayout" >
+        android:layout_toRightOf="@+id/ws_common_conversation_layout_iconLayout" >
         <TextView
-            android:id="@+id/common_layout_name"
+            android:id="@+id/ws_common_conversation_layout_topContent"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
             android:ellipsize="end"
-            android:maxWidth="@dimen/crowd_file_activity_file_name_max_width"
             android:singleLine="true"
             android:text="name"
             android:textColor="@color/contacts_user_view_item_color_offline"
             android:textSize="@dimen/conversation_view_name_text_size" />
+        <!-- VoiceMessageActivity.java -->
         <TextView
-            android:id="@+id/common_layout_other"
+            android:id="@+id/ws_specific_voice_unreadNumber"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/common_layout_name"
+            android:layout_alignParentTop="true"
+            android:layout_marginLeft="6dp"
+            android:layout_toRightOf="@+id/ws_common_conversation_layout_topContent"
+            android:singleLine="true"
+            android:text="( 0 )"
+            android:textColor="@color/contacts_user_view_item_color_offline"
+            android:textSize="@dimen/conversation_view_name_text_size"
+            android:visibility="gone" />
+        <ImageView
+            android:id="@+id/ws_specific_voice_direction_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/ws_common_conversation_layout_belowContent"
+            android:layout_below="@+id/ws_common_conversation_layout_topContent"
+            android:layout_marginRight="6dp"
             android:layout_marginTop="10dp"
+            android:singleLine="true"
+            android:visibility="gone"
+            android:src="@drawable/vs_voice_callout" />
+        <!-- VoiceMessageActivity.java -->
+        <TextView
+            android:id="@+id/ws_common_conversation_layout_belowContent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/ws_common_conversation_layout_topContent"
+            android:layout_marginTop="12dp"
+            android:layout_toRightOf="@+id/ws_specific_voice_direction_icon"
             android:ellipsize="end"
             android:gravity="bottom"
             android:singleLine="true"
             android:text="other"
-            android:maxWidth="@dimen/conversation_view_text_max_width"
             android:textColor="@color/common_item_text_color"
             android:textSize="@dimen/conversation_view_name_text_size" />
     </RelativeLayout>

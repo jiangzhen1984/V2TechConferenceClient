@@ -209,9 +209,14 @@ public class P2PConversation extends Activity implements
 					CALL_RESPONSE, null));
 			if (uad.isVideoType()) {
 				// Update view
-				TextView tv = (TextView) findViewById(R.id.conversation_fragment_connected_title_text);
-				tv.setText(tv.getText().toString()
-						.replace("[]", uad.getUser().getName()));
+				if(uad.getUser() != null){
+					String name = uad.getUser().getName();
+					if(name != null){
+						TextView tv = (TextView) findViewById(R.id.conversation_fragment_connected_title_text);
+						tv.setText(tv.getText().toString()
+								.replace("[]", name));
+					}
+				}
 			} else {
 				mTimerTV.setText(R.string.conversation_waiting);
 				TextView nameTV = (TextView) findViewById(R.id.conversation_fragment_connected_name);
@@ -886,6 +891,8 @@ public class P2PConversation extends Activity implements
 		String deviceId = getIntent().getExtras().getString("device");
 		String sessionID = getIntent().getExtras().getString("sessionID");
 		User u = GlobalHolder.getInstance().getUser(uid);
+		if(u == null)
+			V2Log.e(TAG, "get P2P chat remote user failed... user id is : " + uid);
 
 		int flag = mIsVoiceCall ? UserChattingObject.VOICE_CALL
 				: UserChattingObject.VIDEO_CALL;

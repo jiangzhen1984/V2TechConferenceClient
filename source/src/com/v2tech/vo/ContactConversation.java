@@ -1,27 +1,25 @@
 package com.v2tech.vo;
 
-
 import android.graphics.Bitmap;
 
 import com.v2tech.util.DateUtil;
 
 public class ContactConversation extends Conversation {
-	
+
 	private User u;
 
 	public void setDateLong(String dateLong) {
 		this.dateLong = dateLong;
 	}
-	
+
 	public ContactConversation(User u) {
 		super();
 		this.u = u;
 		if (u != null) {
-			this.mExtId =u.getmUserId();
+			this.mExtId = u.getmUserId();
 			this.mType = TYPE_CONTACT;
 		}
 	}
-	
 
 	@Override
 	public String getName() {
@@ -41,12 +39,12 @@ public class ContactConversation extends Conversation {
 
 	@Override
 	public String getDate() {
-		if(dateLong != null){
+		if (dateLong != null) {
 			return DateUtil.getStringDate(Long.valueOf(dateLong));
 		}
 		return super.getDate();
 	}
-	
+
 	@Override
 	public String getDateLong() {
 		if (dateLong != null) {
@@ -54,15 +52,15 @@ public class ContactConversation extends Conversation {
 		}
 		return super.getDateLong();
 	}
-	
+
 	public void setMsg(CharSequence msg) {
 		this.msg = msg;
 	}
-	
+
 	public void setDate(String date) {
 		this.date = date;
 	}
-	
+
 	public Bitmap getAvatar() {
 		if (u != null) {
 			return u.getAvatarBitmap();
@@ -70,11 +68,20 @@ public class ContactConversation extends Conversation {
 			return null;
 		}
 	}
-	
+
 	public void updateUser(User u) {
 		this.u = u;
 	}
-	
-	
-	
+
+	public long getUserID() {
+		if (u != null)
+			return u.getmUserId();
+		else
+			return -1;
+	}
+
+	public User getU() {
+		return u;
+	}
+
 }

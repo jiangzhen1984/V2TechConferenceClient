@@ -111,7 +111,7 @@ public class VoiceMessageActivity extends Activity {
 				if(isEditing){
 					
 					CheckBox selected = (CheckBox) view
-							.findViewById(R.id.specific_voice_check);
+							.findViewById(R.id.ws_specific_voice_check);
 					if(selected.isChecked()){
 						mListItem.get(position).isCheck = false;
 						selected.setChecked(false);
@@ -374,19 +374,22 @@ public class VoiceMessageActivity extends Activity {
 				convertView = View.inflate(VoiceMessageActivity.this,
 						R.layout.activity_specificitem_voice_adapter, null);
 				holder.voiceName = (TextView) convertView
-						.findViewById(R.id.specific_voice_name);
+						.findViewById(R.id.ws_common_conversation_layout_topContent);
 				holder.unreadNumber = (TextView) convertView
-						.findViewById(R.id.specific_voice_unreadNumber);
+						.findViewById(R.id.ws_specific_voice_unreadNumber);
 				holder.watchDetail = (TextView) convertView
 						.findViewById(R.id.specific_voice_watchDetail);
 				holder.voiceHoldingTime = (TextView) convertView
-						.findViewById(R.id.specific_voice_times);
+						.findViewById(R.id.ws_common_conversation_layout_belowContent);
 				holder.directionIcon = (ImageView) convertView
-						.findViewById(R.id.specific_voice_direction_icon);
+						.findViewById(R.id.ws_specific_voice_direction_icon);
 				holder.headIcon = (ImageView) convertView
-						.findViewById(R.id.specific_voice_headIcon);
+						.findViewById(R.id.ws_common_conversation_layout_icon);
 				holder.selected = (CheckBox) convertView
-						.findViewById(R.id.specific_voice_check);
+						.findViewById(R.id.ws_specific_voice_check);
+				
+				holder.unreadNumber.setVisibility(View.VISIBLE);
+				holder.directionIcon.setVisibility(View.VISIBLE);
 //				holder.notifyIcon = (ImageView) convertView
 //						.findViewById(R.id.group_list_conference_notificator);
 				convertView.setTag(holder);
@@ -504,8 +507,6 @@ public class VoiceMessageActivity extends Activity {
 					updateConversationState();
 					
 					onBackPressed();
-					mListItem = null;
-					deleteList = null;
 				}
 			});
 			return convertView;

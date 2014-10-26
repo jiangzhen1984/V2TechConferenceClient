@@ -327,7 +327,7 @@ public class MessageBodyView extends LinearLayout {
 		et.setOnLongClickListener(messageLongClickListener);
 		et.setSelected(false);
 		LinearLayout.LayoutParams ll = new LinearLayout.LayoutParams(
-				LinearLayout.LayoutParams.WRAP_CONTENT,
+				LinearLayout.LayoutParams.MATCH_PARENT,
 				LinearLayout.LayoutParams.WRAP_CONTENT);
 		mContentContainer.addView(et, ll);
 		List<VMessageAbstractItem> items = mMsg.getItems();
@@ -436,6 +436,7 @@ public class MessageBodyView extends LinearLayout {
 
 		} else {
 			micIvLy.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+			micIvLy.addRule(RelativeLayout.CENTER_IN_PARENT);
 			micIv.setImageResource(R.drawable.voice_message_mic_icon_selector);
 			audioRoot.addView(micIv, micIvLy);
 
@@ -461,7 +462,6 @@ public class MessageBodyView extends LinearLayout {
 		});
 
 		audioRoot.setOnLongClickListener(messageLongClickListener);
-
 		mContentContainer.addView(audioRoot, new LinearLayout.LayoutParams(
 				LinearLayout.LayoutParams.WRAP_CONTENT,
 				LinearLayout.LayoutParams.WRAP_CONTENT));

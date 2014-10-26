@@ -192,7 +192,7 @@ public class CrowdGroupService extends AbstractHandler {
 
 		GroupRequest.getInstance().refuseInviteJoinGroup(
 				Group.GroupType.CHATING.intValue(), crowd.getId(),
-				GlobalHolder.getInstance().getCurrentUserId(),
+				crowd.getCreator().getmUserId(),
 				reason == null ? "" : reason);
 
 		mPendingCrowdId = 0;

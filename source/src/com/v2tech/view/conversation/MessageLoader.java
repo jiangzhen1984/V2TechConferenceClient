@@ -62,33 +62,39 @@ public class MessageLoader {
 		default:
 			throw new RuntimeException("create database fialed... type is : " + type);
 		}
-		//init dataBase path
-		ContentDescriptor.HistoriesMessage.PATH = name;
-		ContentDescriptor.HistoriesMessage.NAME = name;
-		ContentDescriptor.URI_MATCHER.addURI(ContentDescriptor.AUTHORITY,
-				HistoriesMessage.PATH, HistoriesMessage.TOKEN);
-		ContentDescriptor.URI_MATCHER.addURI(ContentDescriptor.AUTHORITY,
-				HistoriesMessage.PATH + "/#", HistoriesMessage.TOKEN_WITH_ID);
-		ContentDescriptor.URI_MATCHER
-				.addURI(ContentDescriptor.AUTHORITY, HistoriesMessage.PATH
-						+ "/page", HistoriesMessage.TOKEN_BY_PAGE);
-		ContentDescriptor.HistoriesMessage.CONTENT_URI = ContentDescriptor.BASE_URI
-				.buildUpon()
-				.appendPath(ContentDescriptor.HistoriesMessage.PATH).build();
+		
 		List<String> cacheNames = GlobalHolder.getInstance().getDataBaseTableCacheName();
+		boolean flag = true;
 		if(!cacheNames.contains(name)){
 			//创建表
 			boolean isCreate = ContentDescriptor.execSQLCreate(context, name);
 			if(isCreate){
 				GlobalHolder.getInstance().getDataBaseTableCacheName().add(name);
-				return true;
+				flag = true;
 			}
 			else{
 				V2Log.d(TAG, "create database fialed... name is : " + name);
-				return false;
+				flag = false;
 			}
 		}
-		return true;
+		
+		//init dataBase path
+		if(flag){
+			ContentDescriptor.HistoriesMessage.PATH = name;
+			ContentDescriptor.HistoriesMessage.NAME = name;
+			ContentDescriptor.URI_MATCHER.addURI(ContentDescriptor.AUTHORITY,
+					HistoriesMessage.PATH, HistoriesMessage.TOKEN);
+			ContentDescriptor.URI_MATCHER.addURI(ContentDescriptor.AUTHORITY,
+					HistoriesMessage.PATH + "/#", HistoriesMessage.TOKEN_WITH_ID);
+			ContentDescriptor.URI_MATCHER
+					.addURI(ContentDescriptor.AUTHORITY, HistoriesMessage.PATH
+							+ "/page", HistoriesMessage.TOKEN_BY_PAGE);
+			ContentDescriptor.HistoriesMessage.CONTENT_URI = ContentDescriptor.BASE_URI
+					.buildUpon()
+					.appendPath(ContentDescriptor.HistoriesMessage.PATH).build();
+		}
+		
+		return flag;
 	}
 
 	/**
@@ -861,8 +867,10 @@ public class MessageLoader {
 		List<String> tableNames = GlobalHolder.getInstance().getDataBaseTableCacheName();
 		String sql = "";
 		try{
-			if(tableNames.contains(ContentDescriptor.HistoriesMessage.NAME))
+			if(tableNames.contains(ContentDescriptor.HistoriesMessage.NAME)){
+				tableNames.remove(ContentDescriptor.HistoriesMessage.NAME);
 				sql = "drop table " + ContentDescriptor.HistoriesMessage.NAME;
+			}
 			else{
 				V2Log.e(TAG, "drop table failed...table no exists , name is : " + ContentDescriptor.HistoriesMessage.NAME);
 				return ;

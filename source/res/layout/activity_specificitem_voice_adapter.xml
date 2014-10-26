@@ -3,128 +3,44 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:background="#FFFFFF" >
-
     <TextView
         android:layout_width="match_parent"
         android:layout_height="1.5dp"
         android:layout_marginBottom="@dimen/conversation_view_margin"
         android:background="#EFF0F2" />
-
     <RelativeLayout
-        android:id="@+id/group_list_conference_image_view_rl"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_centerVertical="true"
-        android:layout_marginBottom="@dimen/conversation_view_margin"
-        android:layout_marginLeft="@dimen/specific_voice_message_margin_left"
-        android:layout_marginRight="5dp"
-        android:layout_marginTop="@dimen/conversation_view_margin" >
-
-        <ImageView
-            android:id="@+id/specific_voice_headIcon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/avatar" />
-
-        <!-- <ImageView
-            android:id="@+id/group_list_conference_notificator"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_marginRight="3dp"
-            android:layout_marginTop="3dp"
-            android:src="@drawable/red_nofificator"
-            android:visibility="invisible" /> -->
+        android:layout_marginLeft="@dimen/text_margin_left"
+        android:layout_marginRight="@dimen/text_margin_left"
+        android:layout_toLeftOf="@+id/LinearLayout1" >
+        <include layout="@layout/common_conversation_layout" />
     </RelativeLayout>
-
     <LinearLayout
-        android:id="@+id/group_list_conference_titlelayout"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignTop="@+id/group_list_conference_image_view_rl"
-        android:layout_marginLeft="10dp"
-        android:layout_toRightOf="@+id/group_list_conference_image_view_rl"
-        android:orientation="vertical" >
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal" >
-
-            <TextView
-                android:id="@+id/specific_voice_name"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:ellipsize="end"
-                android:gravity="left|top"
-                android:singleLine="true"
-                android:text="王晓峰"
-                android:textColor="@color/conversation_view_name_color"
-                android:textSize="@dimen/conversation_view_name_text_size" />
-
-            <TextView
-                android:id="@+id/specific_voice_unreadNumber"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:singleLine="true"
-                android:text=""
-                android:textColor="@color/conversation_view_name_color"
-                android:textSize="@dimen/conversation_view_name_text_size" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:layout_marginTop="@dimen/conversation_view_title_margin"
-            android:orientation="horizontal" >
-
-            <ImageView
-                android:id="@+id/specific_voice_direction_icon"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginRight="5dp"
-                android:src="@drawable/vs_voice_callout" />
-
-            <TextView
-                android:id="@+id/specific_voice_times"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:ellipsize="end"
-                android:gravity="center_vertical"
-                android:singleLine="true"
-                android:textColor="@color/conversation_view_text_color"
-                android:textSize="@dimen/common_item_text_size_16" />
-        </LinearLayout>
-    </LinearLayout>
-
-    <LinearLayout
+        android:id="@+id/LinearLayout1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:layout_centerVertical="true"
         android:orientation="horizontal" >
-
         <TextView
             android:id="@+id/specific_voice_watchDetail"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
             android:layout_marginLeft="10dp"
+            android:layout_marginRight="@dimen/specific_voice_message_margin_right"
             android:background="@drawable/button_bg"
             android:gravity="center"
             android:paddingBottom="5dp"
             android:paddingLeft="15dp"
             android:paddingRight="15dp"
             android:paddingTop="5dp"
-            android:layout_marginRight="@dimen/specific_voice_message_margin_right"
             android:text="@string/specificItem_voice_watchDetail"
             android:textColor="@color/button_text_color"
             android:textSize="16sp" />
-
         <CheckBox
-            android:id="@+id/specific_voice_check"
+            android:id="@+id/ws_specific_voice_check"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="5dp"
@@ -132,8 +48,7 @@
             android:layout_marginRight="@dimen/specific_voice_message_margin_right"
             android:layout_marginTop="5dp"
             android:clickable="false"
-            android:visibility="gone"
-            android:focusable="false" />
+            android:focusable="false"
+            android:visibility="gone" />
     </LinearLayout>
-
 </RelativeLayout>
