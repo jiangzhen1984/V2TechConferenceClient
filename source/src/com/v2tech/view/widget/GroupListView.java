@@ -1206,8 +1206,13 @@ public class GroupListView extends ListView {
 			mUserSignatureTV.setSingleLine(true);
 			mUserSignatureTV.setEllipsize(TruncateAt.END);
 
-			if (!TextUtils.isEmpty(u.getNickName()))
-				mUserNameTV.setText(u.getNickName());
+			boolean isFriend = GlobalHolder.getInstance().isFriend(u);
+			if(isFriend){
+				if (!TextUtils.isEmpty(u.getNickName()))
+					mUserNameTV.setText(u.getNickName());
+				else
+					mUserNameTV.setText(u.getName());
+			}
 			else
 				mUserNameTV.setText(u.getName());
 

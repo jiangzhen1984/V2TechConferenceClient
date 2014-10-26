@@ -61,7 +61,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 	private static final int UPDATE_USER_INFO_DONE = 3;
 	private static final int FILE_SELECT_CODE = 100;
 
-	private View mReturnButtonTV;
+	private TextView mReturnButtonTV;
 	private TextView mNameTitleIV;
 	private ImageView mHeadIconIV;
 
@@ -182,7 +182,8 @@ public class ContactDetail extends Activity implements OnTouchListener {
 		bRefuse = (Button) findViewById(R.id.refuse);
 		tvAuthenticationState = (TextView) findViewById(R.id.authentication_state);
 		llAuthenticationMessageLayout = (LinearLayout) findViewById(R.id.authentication_message_layout);
-		tvTitle = (TextView) findViewById(R.id.tv_title);
+		tvTitle = (TextView) findViewById(R.id.ws_common_activity_title_content);
+		tvTitle.setText(R.string.contacts_detail_title);
 	}
 
 	private void bindViewEnvent() {
@@ -380,10 +381,13 @@ public class ContactDetail extends Activity implements OnTouchListener {
 		mHeadIconIV = (ImageView) findViewById(R.id.contact_user_detail_head_icon);
 		mNameTitleIV = (TextView) findViewById(R.id.contact_user_detail_title);
 
-		mReturnButtonTV = (TextView) findViewById(R.id.contact_detail_return_button);
+		mReturnButtonTV = (TextView) findViewById(R.id.ws_common_activity_title_left_button);
+		mReturnButtonTV.setText(R.string.common_return_name);
 		mReturnButtonTV.setOnClickListener(mReturnButtonListener);
+		
+		findViewById(R.id.ws_common_activity_title_right_button).setVisibility(View.INVISIBLE);;
 
-		mMoreDetailButton = findViewById(R.id.contact_user_detail_2);
+		mMoreDetailButton = findViewById(R.id.ws_common_comtactDetail_title_feature_more_button);
 		mMoreDetailButton.setOnClickListener(mMoreDetailListener);
 
 		// view definition for non-self

@@ -2,11 +2,12 @@ package com.v2tech.util;
 
 import java.io.File;
 
-import com.V2.jni.util.V2Log;
-
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.DisplayMetrics;
+
+import com.V2.jni.util.V2Log;
 
 public class BitmapUtil {
 
@@ -98,6 +99,25 @@ public class BitmapUtil {
 		BitmapFactory.decodeFile(file, options);
 		r[0] = options.outWidth;
 		r[1] = options.outHeight;
+	}
+	
+	public static Bitmap getSizeBitmap(Context context , String file) {
+		if (file == null) {
+			throw new NullPointerException(" file is null");
+		}
+		File f = new File(file);
+		if (!f.exists()) {
+			throw new RuntimeException(" file is no exists :" + file);
+		}
+
+		BitmapFactory.Options options = new BitmapFactory.Options();
+		options.inInputShareable = true;// 。当系统内存不够时候图片自动被回收
+		options.inPurgeable = true;
+		DensityUtils.dip2px(context, 100);
+		options.outHeight = DensityUtils.dip2px(context, 100);
+		options.outWidth = DensityUtils.dip2px(context, 100);
+		Bitmap bp = BitmapFactory.decodeFile(file, options);
+		return bp;
 	}
 
 }

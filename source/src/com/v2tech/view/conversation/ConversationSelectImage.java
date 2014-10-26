@@ -1,7 +1,5 @@
 package com.v2tech.view.conversation;
 
-import java.text.DecimalFormat;
-import java.text.Format;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.ExecutorService;
@@ -9,6 +7,7 @@ import java.util.concurrent.Executors;
 
 import android.app.Activity;
 import android.content.ContentResolver;
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.database.Cursor;
@@ -52,6 +51,7 @@ public class ConversationSelectImage extends Activity {
 	private static final int UPDATE_BITMAP = 3;
 	protected static final int SCAN_SDCARD = 4;
 	private RelativeLayout buttomTitle;
+	private LinearLayout buttomDivider;
 	private LinearLayout loading;
 	private TextView backButton;
 	private TextView finishButton;
@@ -62,7 +62,9 @@ public class ConversationSelectImage extends Activity {
 	private ImageClassifyAdapter classifyAdapter;
 	private ArrayList<String> pictresClassify;
 	private ArrayList<FileInfoBean> pictures;
+	private Context mContext;
 	private boolean isBack;
+	private boolean isClassify = true;
 	private HashMap<String, ArrayList<FileInfoBean>> listMap;
 	private String[][] selectArgs = {{String.valueOf(MediaStore.Images.Media.INTERNAL_CONTENT_URI) , "image/png"} ,
 			{String.valueOf(MediaStore.Images.Media.INTERNAL_CONTENT_URI) , "image/jpeg"} ,
@@ -126,14 +128,20 @@ public class ConversationSelectImage extends Activity {
 		findview();
 		init();
 		setListener();
+		mContext = this;
 	}
 
 	private void findview() {
 
-		backButton = (TextView) findViewById(R.id.selectfile_back);
-		finishButton = (TextView) findViewById(R.id.selectfile_finish);
-		title = (TextView) findViewById(R.id.selectfile_title);
+		title = (TextView) findViewById(R.id.ws_common_activity_title_content);
+		title.setText(R.string.conversation_select_image_file_title);
+		backButton = (TextView) findViewById(R.id.ws_common_activity_title_left_button);
+		backButton.setText(R.string.common_return_name);
+		finishButton = (TextView) findViewById(R.id.ws_common_activity_title_right_button);
+		finishButton.setText(R.string.conversation_select_file_cannel);
+		
 		buttomTitle = (RelativeLayout) findViewById(R.id.activity_selectfile_buttom);
+		buttomDivider = (LinearLayout) findViewById(R.id.ws_selectFile_buttom_divider);
 		gridViews = (GridView) findViewById(R.id.selectfile_gridview);
 		listViews = (ListView) findViewById(R.id.selectfile_lsitview);
 		loading = (LinearLayout) findViewById(R.id.selectfile_loading);
@@ -145,7 +153,8 @@ public class ConversationSelectImage extends Activity {
 		listViews.setVisibility(View.VISIBLE);
 		gridViews.setVisibility(View.GONE);
 		finishButton.setVisibility(View.INVISIBLE);
-		buttomTitle.setVisibility(View.INVISIBLE);
+		buttomTitle.setVisibility(View.GONE);
+		buttomDivider.setVisibility(View.GONE);
 		service = Executors.newCachedThreadPool();
 		pictresClassify = new ArrayList<String>();
 		pictures = new ArrayList<FileInfoBean>();
@@ -220,6 +229,7 @@ public class ConversationSelectImage extends Activity {
 					gridViews.setVisibility(View.GONE);
 					classifyAdapter = new ImageClassifyAdapter();
 					listViews.setAdapter(classifyAdapter);
+					isClassify = true;
 					isBack = false;
 				}
 				else{
@@ -270,6 +280,7 @@ public class ConversationSelectImage extends Activity {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view,
 					int position, long id) {
+				isClassify = false;
 				String classifyName = pictresClassify.get(position);
 				pictures = listMap.get(classifyName);
 				listViews.setVisibility(View.GONE);
@@ -437,7 +448,12 @@ public class ConversationSelectImage extends Activity {
 			public void run() {
 				try {
 
-					Bitmap bitmap = BitmapUtil.getCompressedBitmap(fb.filePath);
+					Bitmap bitmap = null;
+					if(isClassify)
+						bitmap = BitmapUtil.getSizeBitmap(mContext , fb.filePath);
+					else
+						bitmap = BitmapUtil.getCompressedBitmap(fb.filePath);
+						
 					if (fb.fileName == null && bitmap != null) {
 						if (!bitmap.isRecycled()) {  
 							bitmap.recycle();

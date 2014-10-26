@@ -111,10 +111,6 @@ public class JNIService extends Service {
 	public static final String JNI_BROADCAST_CONFERENCE_INVATITION = "com.v2tech.jni.broadcast.conference_invatition_new";
 	public static final String JNI_BROADCAST_CONFERENCE_REMOVED = "com.v2tech.jni.broadcast.conference_removed";
 	public static final String JNI_BROADCAST_GROUP_USER_REMOVED = "com.v2tech.jni.broadcast.group_user_removed";
-	/**
-	 * key crowd : crowdId
-	 */
-	public static final String JNI_BROADCAST_NEW_CROWD = "com.v2tech.jni.broadcast.new_crowd";
 	public static final String JNI_BROADCAST_GROUP_USER_ADDED = "com.v2tech.jni.broadcast.group_user_added";
 	public static final String JNI_BROADCAST_VIDEO_CALL_CLOSED = "com.v2tech.jni.broadcast.video_call_closed";
 	public static final String JNI_BROADCAST_FRIEND_AUTHENTICATION = "com.v2tech.jni.broadcast.friend_authentication";
@@ -700,11 +696,10 @@ public class JNIService extends Service {
 				if (crowdMsg.getQualState() != VMessageQualification.QualificationState.WAITING) {
 					crowdMsg.setReadState(VMessageQualification.ReadState.UNREAD);
 					crowdMsg.setQualState(VMessageQualification.QualificationState.WAITING);
-					crowdMsg.setmTimestamp(new Date());
-					MessageBuilder.updateQualicationMessage(mContext, crowdMsg);
 				} else {
 					sendBroadcast = false;
 				}
+				MessageBuilder.updateQualicationMessage(mContext, crowdMsg);
 			} else {
 				// Save message to database
 				if (type == VMessageQualification.Type.CROWD_APPLICATION) {

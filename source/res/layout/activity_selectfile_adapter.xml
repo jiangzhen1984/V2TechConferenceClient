@@ -8,9 +8,9 @@
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
         android:layout_marginLeft="20dp"
+        android:background="@null"
         android:paddingBottom="10dp"
-        android:paddingTop="10dp"
-        android:background="@null" />
+        android:paddingTop="10dp" />
     <TextView
         android:id="@+id/selectfile_adapter_folderName"
         android:layout_width="wrap_content"
@@ -25,6 +25,7 @@
         android:textColor="@color/conversation_selectfile_adapter_word"
         android:textSize="@dimen/select_file_adapter_size" />
     <FrameLayout
+        android:id="@+id/framelayout1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
@@ -40,10 +41,15 @@
             style="@style/GraySquareCheckbox"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:focusable="false"
             android:checked="false"
             android:clickable="false"
+            android:focusable="false"
             android:paddingRight="20dp"
             android:visibility="gone" />
     </FrameLayout>
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="1dp"
+        android:background="@color/common_gray_color_c2" >
+    </TextView>
 </RelativeLayout>

@@ -4,12 +4,10 @@
     android:layout_height="match_parent"
     android:background="#F5F0F0"
     android:orientation="vertical" >
-
     <RelativeLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:background="#ffffff" >
-
         <TextView
             android:id="@+id/selectfile_back"
             android:layout_width="wrap_content"
@@ -22,7 +20,6 @@
             android:text="@string/contacts_user_detail_return_button"
             android:textColor="@color/button_text_color"
             android:textSize="@dimen/common_item_text_size" />
-
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -33,92 +30,95 @@
             android:text="@string/tab_selectfile_name"
             android:textColor="@color/activiy_contact_detail_title_color"
             android:textSize="@dimen/common_item_text_size" />
-        
         <ImageView
             android:id="@+id/contact_detail_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_marginLeft="30dp"
             android:layout_marginRight="10dp"
             android:paddingBottom="10dp"
-            android:layout_marginLeft="30dp"
-            android:layout_alignParentRight="true"
-            android:visibility="invisible"
             android:paddingTop="10dp"
-            android:src="@drawable/contact_detail_button_selector" />
+            android:src="@drawable/contact_detail_button_selector"
+            android:visibility="invisible" />
     </RelativeLayout>
-
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/common_gray_color_c2" />
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
         android:orientation="vertical" >
-
-        <RelativeLayout
-            android:id="@+id/selectfile_entry_image"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="@dimen/select_file_entry_interval"
-            android:layout_marginRight="@dimen/select_file_entry_interval"
-            android:layout_marginTop="@dimen/select_file_entry_interval"
-            android:background="#FFFFFF"
-            android:clickable="true" >
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
-                android:paddingLeft="20dp"
-                android:text="图片"
-                android:textColor="#000000"
-                android:textSize="@dimen/select_file_adapter_size" />
-
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentRight="true"
-                android:padding="10dp"
-                android:src="@drawable/arrow_right_gray" />
-        </RelativeLayout>
-
         <LinearLayout
-            android:layout_width="fill_parent"
-            android:layout_height="1dp"
-            android:layout_marginLeft="@dimen/select_file_entry_interval"
-            android:layout_marginRight="@dimen/select_file_entry_interval"
-            android:background="#cdcdcf"
-            android:orientation="vertical" >
-        </LinearLayout>
-
-        <RelativeLayout
-            android:id="@+id/selectfile_entry_file"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/select_file_entry_interval"
             android:layout_marginLeft="@dimen/select_file_entry_interval"
             android:layout_marginRight="@dimen/select_file_entry_interval"
-            android:background="#FFFFFF"
-            android:clickable="true" >
-
-            <TextView
+            android:background="@drawable/rounded_corners_of_contact_user_detail_outer"
+            android:orientation="vertical" >
+            <RelativeLayout
+                android:id="@+id/selectfile_entry_image"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
-                android:paddingLeft="20dp"
-                android:text="文件"
-                android:textColor="#000000"
-                android:textSize="@dimen/select_file_adapter_size" />
-
-            <ImageView
+                android:layout_marginLeft="@dimen/select_file_entry_interval"
+                android:layout_marginRight="@dimen/select_file_entry_interval"
+                android:background="#FFFFFF"
+                android:clickable="true" >
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="@dimen/select_file_entry_interval"
+                    android:text="图片"
+                    android:textColor="#000000"
+                    android:textSize="@dimen/select_file_adapter_size" />
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:padding="10dp"
+                    android:src="@drawable/arrow_right_gray" />
+            </RelativeLayout>
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="1dp"
+                android:background="@color/common_gray_color_c2"
+                android:orientation="vertical" >
+            </LinearLayout>
+            <RelativeLayout
+                android:id="@+id/selectfile_entry_file"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentRight="true"
-                android:padding="10dp"
-                android:src="@drawable/arrow_right_gray" />
-        </RelativeLayout>
+                android:layout_marginLeft="@dimen/select_file_entry_interval"
+                android:layout_marginRight="@dimen/select_file_entry_interval"
+                android:background="#FFFFFF"
+                android:clickable="true" >
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:text="文件"
+                    android:layout_marginLeft="@dimen/select_file_entry_interval"
+                    android:textColor="#000000"
+                    android:textSize="@dimen/select_file_adapter_size" />
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:padding="10dp"
+                    android:src="@drawable/arrow_right_gray" />
+            </RelativeLayout>
+        </LinearLayout>
     </LinearLayout>
-
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/common_gray_color_c2" />
     <include
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         layout="@layout/activity_selectfile_buttontitle" />
-
 </LinearLayout>

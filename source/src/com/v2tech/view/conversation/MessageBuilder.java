@@ -708,6 +708,9 @@ public class MessageBuilder {
 		}
 		String where = ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_ID
 				+ " = ?";
+		values.put(
+				ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_SAVEDATE,
+				GlobalConfig.getGlobalServerTime());
 		int updates = mContext.getContentResolver().update(
 				ContentDescriptor.HistoriesCrowd.CONTENT_URI, values, where,
 				selectionArgs);

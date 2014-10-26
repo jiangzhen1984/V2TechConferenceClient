@@ -5,6 +5,7 @@ import java.util.List;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Handler;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -121,34 +122,18 @@ public class GroupLayout extends LinearLayout {
 	private void updateName() {
 		
 		if(mConv.getType() == Conversation.TYPE_CONTACT){
-			boolean isFriend = false;
 			ContactConversation con = (ContactConversation) mConv;
 			User currentUser = con.getU();
-			long currentUserID = con.getUserID();
-			if(currentUserID != -1){
-				List<Group> friendGroup = GlobalHolder.getInstance().getGroup(V2GlobalEnum.GROUP_TYPE_CONTACT);
-				if(friendGroup.size() >= 0){
-					for (Group friend : friendGroup) {
-						List<User> users = friend.getUsers();
-						for (User user : users) {
-							if(currentUserID == user.getmUserId()){
-								isFriend = true;
-								break;
-							}
-						}
-						
-						if(isFriend)
-							break;
-					}
-					
-					if(isFriend && currentUser != null)
-						mGroupNameTV.setText(currentUser.getNickName());
-					else
-						mGroupNameTV.setText(mConv.getName());
-				}
+			if(currentUser != null && con.getUserID() != -1){
+				boolean isFriend = GlobalHolder.getInstance().isFriend(currentUser);
+				String nickName = currentUser.getNickName();
+				if(isFriend && !TextUtils.isEmpty(nickName))
+					mGroupNameTV.setText(nickName);
+				else
+					mGroupNameTV.setText(mConv.getName());
 			}
 			else{
-				V2Log.e(TAG, "updateName ---> get current user id of the conversation -1 , please check conversation user is exist");
+				V2Log.e(TAG, "updateName ---> get current user is null or id is -1 , please check conversation user is exist");
 			}
 		}
 		else

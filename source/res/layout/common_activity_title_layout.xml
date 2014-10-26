@@ -34,7 +34,7 @@
         android:text="left_textview"
         android:textColor="@color/conf_create_button_color"
         android:textSize="@dimen/common_item_text_size" />
-    <!-- MainActivity plus -->
+    <!-- MainActivity -->
     <ImageView
         android:id="@+id/ws_common_mainActivity_title_plus"
         android:layout_width="wrap_content"
@@ -58,8 +58,20 @@
         android:paddingLeft="10dp"
         android:paddingRight="10dp"
         android:paddingTop="10dp"
-        android:visibility="gone"
-        android:src="@drawable/title_bar_feature_more_button_selector" />
+        android:src="@drawable/title_bar_feature_more_button_selector"
+        android:visibility="gone" />
+    <!-- ContactDetail -->
+    <ImageView
+        android:id="@+id/ws_common_comtactDetail_title_feature_more_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:layout_marginRight="10dp"
+        android:paddingBottom="10dp"
+        android:paddingTop="10dp"
+        android:visibility="invisible"
+        android:src="@drawable/contact_detail_2_button_selector" />
     <!-- Use translucent image to hold space -->
     <ImageView
         android:layout_width="wrap_content"

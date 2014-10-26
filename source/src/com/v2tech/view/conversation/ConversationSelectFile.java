@@ -150,12 +150,15 @@ public class ConversationSelectFile extends Activity {
 
 	private void findview() {
 
-		titleText = (TextView) findViewById(R.id.selectfile_title);
+		titleText = (TextView) findViewById(R.id.ws_common_activity_title_content);
+		titleText.setText(R.string.conversation_select_file_title);
+		backButton = (TextView) findViewById(R.id.ws_common_activity_title_left_button);
+		backButton.setText(R.string.common_return_name);
+		finishButton = (TextView) findViewById(R.id.ws_common_activity_title_right_button);
+		finishButton.setText(R.string.conversation_select_file_cannel);
 		selectedFileSize = (TextView) findViewById(R.id.selectfile_entry_size);
 		sendButton = (TextView) findViewById(R.id.selectfile_message_send);
 		sendButton.setBackgroundResource(R.drawable.button_bg_noable);
-		backButton = (TextView) findViewById(R.id.selectfile_back);
-		finishButton = (TextView) findViewById(R.id.selectfile_finish);
 		loading = (LinearLayout) findViewById(R.id.selectfile_loading);
 
 		filesGrid = (GridView) findViewById(R.id.selectfile_gridview);

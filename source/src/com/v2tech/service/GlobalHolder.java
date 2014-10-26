@@ -571,6 +571,28 @@ public class GlobalHolder {
 			return mState.isInMeeting();
 		}
 	}
+	
+	public boolean isFriend(User user){
+		
+		if(user == null){
+			V2Log.e("GlobalHolder isFriend ---> get user is null , please check conversation user is exist");
+			return false;
+		}
+		
+		long currentUserID = user.getmUserId();
+		List<Group> friendGroup = GlobalHolder.getInstance().getGroup(V2GlobalEnum.GROUP_TYPE_CONTACT);
+		if(friendGroup.size() >= 0){
+			for (Group friend : friendGroup) {
+				List<User> users = friend.getUsers();
+				for (User friendUser : users) {
+					if(currentUserID == friendUser.getmUserId()){
+						return true;
+					}
+				}
+			}
+		}
+		return false;
+	}
 
 	public GlobalState getGlobalState() {
 		return new GlobalState(this.mState);

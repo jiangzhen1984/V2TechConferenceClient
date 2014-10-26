@@ -261,6 +261,10 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 					}
 
 					mContactsContainer.removeItem(user);
+				} else{
+					//update user name
+					mContactsContainer.updateUser(GlobalHolder.getInstance()
+							.getUser(guo.getmUserId()));
 				}
 
 			} else if (JNIService.JNI_BROADCAST_GROUP_USER_ADDED.equals(intent

@@ -78,9 +78,9 @@
                 android:id="@+id/rb_friend_authentication"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:background="@drawable/friend_authentication"
                 android:button="@null"
-                android:layout_weight="1"
                 android:gravity="center"
                 android:text="好友验证"
                 android:textColor="#ffffff" />
@@ -88,19 +88,24 @@
                 android:id="@+id/rb_group_authentication"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:background="@drawable/group_authentication"
                 android:button="@null"
-                android:layout_weight="1"
                 android:gravity="center"
                 android:text="群验证"
                 android:textColor="@color/button_text_color" />
         </RadioGroup>
-         <RelativeLayout
+        <LinearLayout
             android:layout_width="fill_parent"
-            android:paddingLeft="21dp"
-            android:paddingTop="16dp"
-            android:paddingRight="21dp"
-            android:layout_height="wrap_content" >
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="21dp"
+            android:layout_marginRight="21dp"
+            android:gravity="right"
+            android:paddingTop="16dp" >
+            <RelativeLayout 
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1">
             <ImageView
                 android:id="@+id/rb_friend_authentication_prompt"
                 android:layout_width="wrap_content"
@@ -108,6 +113,11 @@
                 android:layout_alignParentRight="true"
                 android:src="@drawable/red_nofificator"
                 android:visibility="invisible" />
+            </RelativeLayout>
+            <RelativeLayout 
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1">
             <ImageView
                 android:id="@+id/rb_group_authentication_prompt"
                 android:layout_width="wrap_content"
@@ -115,7 +125,8 @@
                 android:layout_alignParentRight="true"
                 android:src="@drawable/red_nofificator"
                 android:visibility="invisible" />
-        </RelativeLayout>
+            </RelativeLayout>
+        </LinearLayout>
     </FrameLayout>
     <LinearLayout
         android:id="@+id/LinearLayout2"

@@ -29,9 +29,6 @@
     <string name="login_title_copyright">版权所有&#0169;北京威速科技有限公司 保留所有权</string>
     <string name="login_user_name">请输入BizCom用户名</string>
     
-    <string name="common_confirm_name">确定</string>
-    <string name="common_return_name">返回</string>
-    
     <color name="logo_background">#ffffff</color>
     <color name="setting_outer_bg">#b8c9d4</color>
     <color name="setting_inner_bg">#ffffff</color>

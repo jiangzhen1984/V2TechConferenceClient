@@ -93,7 +93,7 @@ public class MessageAuthenticationActivity extends Activity {
 	FriendAuthenticationBroadcastReceiver friendAuthenticationBroadcastReceiver;
 	private CrowdAuthenticationBroadcastReceiver mCrowdAuthenticationBroadcastReceiver;
 
-	private boolean isFriendAuthentication = true;
+	private boolean isFriendAuthentication;
 
 	private boolean isFriendInDeleteMode = false;
 	private boolean isGroupInDeleteMode = false;
@@ -116,15 +116,28 @@ public class MessageAuthenticationActivity extends Activity {
 		crowdService = new CrowdGroupService();
 		initReceiver();
 		currentRadioType = PROMPT_TYPE_FRIEND;
-		boolean showNotification = getIntent().getBooleanExtra(
-				"showNotification", false);
-		if (showNotification)
+		
+		isFriendAuthentication = getIntent().getBooleanExtra(
+				"isFriendActivity", true);
+		if(isFriendAuthentication)
+			changeMessageAuthenticationListView();
+		else
+			rbGroupAuthentication.setChecked(true);
+		
+		boolean showCrwodNotification = getIntent().getBooleanExtra(
+				"isCrowdShowNotification", false);
+		if (showCrwodNotification && isFriendAuthentication)
 			updateTabPrompt(PROMPT_TYPE_GROUP, true);
+			
+		boolean showFriendNotification = getIntent().getBooleanExtra(
+				"isFriendShowNotification", false);
+		if (showFriendNotification && !isFriendAuthentication)
+			updateTabPrompt(PROMPT_TYPE_FRIEND, true);
+		
 	}
 
 	@Override
 	protected void onStart() {
-		changeMessageAuthenticationListView();
 		super.onStart();
 	}
 
@@ -338,6 +351,7 @@ public class MessageAuthenticationActivity extends Activity {
 			lvMessageAuthentication.setAdapter(firendAdapter);
 			loadFriendMessage();
 		} else {
+			
 			mMessageList = new ArrayList<ListItemWrapper>();
 
 			if (groupAdapter == null) {
