@@ -152,6 +152,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical" >
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -159,7 +160,9 @@
                     android:layout_marginLeft="@dimen/contact_detail_2_item_margin_left"
                     android:layout_marginRight="@dimen/contact_detail_2_item_margin_right"
                     android:background="@drawable/rounded_corners_of_contact_user_detail_outer"
-                    android:orientation="vertical" >
+                    android:orientation="vertical"
+                    android:visibility="visible" >
+
                     <LinearLayout
                         android:id="@+id/contact_user_detail_nick_name_et_linearlayout"
                         android:layout_width="match_parent"
@@ -522,10 +525,13 @@
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="1dp"
                         android:layout_marginRight="1dp" >
+
                         <TextView
                             android:id="@+id/detail_detail_2_group_title"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_centerHorizontal="false"
+                            android:layout_centerVertical="true"
                             android:layout_marginBottom="@dimen/detail_detail_2_item_margin_bottom"
                             android:layout_marginLeft="@dimen/contact_detail_2_item_margin_horizontal"
                             android:layout_marginRight="@dimen/contact_detail_2_item_margin_horizontal"
@@ -534,6 +540,7 @@
                             android:text="@string/contacts_user_detail_item_group"
                             android:textColor="@color/activiy_contact_detail_item_color"
                             android:textSize="@dimen/common_item_text_size" />
+
                         <TextView
                             android:id="@+id/detail_detail_2_group_name"
                             android:layout_width="wrap_content"

@@ -144,14 +144,6 @@ public class ContactDetail extends Activity implements OnTouchListener {
 		if ((fromActivity != null)
 				&& (fromActivity.equals("MessageAuthenticationActivity"))) {
 			mUid = this.getIntent().getLongExtra("remoteUserID", 0);
-			state = this.getIntent().getIntExtra("state", -1);
-			if (state == 4) {
-				tvTitle.setText("个人资料");
-			} else if (state == 6) {
-				tvTitle.setText("验证通知");
-			} else {
-				tvTitle.setText("好友申请");
-			}
 		} else {
 			mUid = this.getIntent().getLongExtra("uid", 0);
 			tvTitle.setText("个人资料");
@@ -171,15 +163,17 @@ public class ContactDetail extends Activity implements OnTouchListener {
 		initViewShow();
 
 		initBroadcastReceiver();
-		
-		BitmapManager.getInstance().registerBitmapChangedListener(mAvatarChangedListener);
+
+		BitmapManager.getInstance().registerBitmapChangedListener(
+				mAvatarChangedListener);
 	}
 
 	@Override
 	protected void onDestroy() {
 		uninitBroadcastReceiver();
 		super.onDestroy();
-		BitmapManager.getInstance().unRegisterLastBitmapChangedListener(mAvatarChangedListener);
+		BitmapManager.getInstance().unRegisterLastBitmapChangedListener(
+				mAvatarChangedListener);
 	}
 
 	private void connectView() {
@@ -235,36 +229,47 @@ public class ContactDetail extends Activity implements OnTouchListener {
 				bAccess.setVisibility(View.GONE);
 				bRefuse.setVisibility(View.GONE);
 				tvAuthenticationState.setVisibility(View.GONE);
+				tvTitle.setText("个人资料");
+				llAuthenticationMessageLayout.setVisibility(View.GONE);
 				break;
 			case 1:// 未处理
 				bAccess.setVisibility(View.VISIBLE);
 				bRefuse.setVisibility(View.VISIBLE);
 				tvAuthenticationState.setVisibility(View.GONE);
+				tvTitle.setText("好友申请");
+				llAuthenticationMessageLayout.setVisibility(View.VISIBLE);
 				break;
 			case 2:// 已同意
 				bAccess.setVisibility(View.GONE);
 				bRefuse.setVisibility(View.GONE);
 				tvAuthenticationState.setVisibility(View.VISIBLE);
 				tvAuthenticationState.setText("已同意该申请");
-
+				tvTitle.setText("好友申请");
+				llAuthenticationMessageLayout.setVisibility(View.VISIBLE);
 				break;
 			case 3:// 3已拒绝
 				bAccess.setVisibility(View.GONE);
 				bRefuse.setVisibility(View.GONE);
 				tvAuthenticationState.setVisibility(View.VISIBLE);
 				tvAuthenticationState.setText("已拒绝该申请");
+				tvTitle.setText("好友申请");
+				llAuthenticationMessageLayout.setVisibility(View.VISIBLE);
 				break;
 			case 4:// 5被同意
 				bAccess.setVisibility(View.GONE);
 				bRefuse.setVisibility(View.GONE);
-				tvAuthenticationState.setVisibility(View.VISIBLE);
-				tvAuthenticationState.setVisibility(View.GONE);
+				mCompanyTitleTV.setVisibility(View.VISIBLE);
+				mMoreDetailButton.setVisibility(View.VISIBLE);
+				llAuthenticationMessageLayout.setVisibility(View.GONE);
+				tvTitle.setText("个人资料");
 				break;
 			case 6:// 6被拒绝
 				bAccess.setVisibility(View.GONE);
 				bRefuse.setVisibility(View.GONE);
 				tvAuthenticationState.setVisibility(View.VISIBLE);
 				tvAuthenticationState.setText("拒绝你的好友申请");
+				tvTitle.setText("验证通知");
+				((View)tvAuthenticationMessage.getParent()).setVisibility(View.VISIBLE);
 				break;
 			}
 
@@ -275,6 +280,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 			mMoreDetailButton.setVisibility(View.VISIBLE);
 			llAuthenticationMessageLayout.setVisibility(View.GONE);
 		}
+
 	}
 
 	@Override
@@ -455,7 +461,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 
 			for (EditText et : mETArr) {
 				et.setVisibility(View.VISIBLE);
-//				et.addTextChangedListener(tw);
+				// et.addTextChangedListener(tw);
 				et.setOnFocusChangeListener(hidenKeyboardListener);
 				et.setSelection(et.length());
 			}
@@ -642,8 +648,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 		}
 
 	};
-	
-	
+
 	private BitmapManager.BitmapChangedListener mAvatarChangedListener = new BitmapManager.BitmapChangedListener() {
 
 		@Override
@@ -652,7 +657,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 				mHeadIconIV.setImageBitmap(bm);
 			}
 		}
-		
+
 	};
 
 	private TextWatcher tw = new TextWatcher() {

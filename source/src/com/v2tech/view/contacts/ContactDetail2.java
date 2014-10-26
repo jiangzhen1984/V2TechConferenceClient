@@ -33,6 +33,7 @@ import com.v2tech.service.UserService;
 import com.v2tech.vo.ContactGroup;
 import com.v2tech.view.JNIService;
 import com.v2tech.view.MainActivity;
+import com.v2tech.view.MainApplication;
 import com.v2tech.view.bo.GroupUserObject;
 import com.v2tech.view.contacts.add.AuthenticationActivity;
 import com.v2tech.view.contacts.add.FriendManagementActivity;
@@ -105,7 +106,7 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 
 		mContext = this;
 		u = GlobalHolder.getInstance().getUser(mUid);
-		
+
 		mNickNameET = (EditText) findViewById(R.id.contact_user_detail_nick_name_et);
 
 		mUpdateContactGroupButton = findViewById(R.id.contact_detail_contact_group_item_ly);
@@ -149,12 +150,12 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 			showUserInfo();
 		}
 	}
-	
+
 	@Override
 	protected void onNewIntent(Intent intent) {
 		super.onNewIntent(intent);
 		String receiveNickName = intent.getStringExtra("nickName");
-		if (u != null) 
+		if (u != null)
 			u.setNickName(receiveNickName);
 	}
 
@@ -228,7 +229,13 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 
 			@Override
 			public void onClick(View arg0) {
-				showDeleteContactDialog();
+
+				if (((MainApplication) getApplication()).netWordIsConnected) {
+					showDeleteContactDialog();
+				} else {
+					Toast.makeText(ContactDetail2.this, "无法连接到服务器，请确认网络连接",
+							Toast.LENGTH_SHORT).show();
+				}
 			}
 		});
 
@@ -454,10 +461,11 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 		if (requestCode == REQUEST_UPDATE_GROUP_CODE) {
 			if (resultCode == UpdateContactGroupActivity.SELECT_GROUP_RESPONSE_CODE_DONE) {
 				if (data != null) {
-					 String selectGroupName = data.getStringExtra("groupName");
-					 long selectGroupID = data.getLongExtra("groupID", 0);
-					 belongs = GlobalHolder.getInstance().getGroupById(selectGroupID);
-					 mGroupNameTV.setText(selectGroupName);
+					String selectGroupName = data.getStringExtra("groupName");
+					long selectGroupID = data.getLongExtra("groupID", 0);
+					belongs = GlobalHolder.getInstance().getGroupById(
+							selectGroupID);
+					mGroupNameTV.setText(selectGroupName);
 				}
 			} else if (resultCode == UpdateContactGroupActivity.SELECT_GROUP_RESPONSE_CODE_CANCEL) {
 			}
@@ -561,7 +569,7 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 				}
 
 				if (obj.getmType() == GroupType.CONTACT.intValue()) {
-					belongs=null;
+					belongs = null;
 					isRelation = false;
 					updateContactGroup();
 				}

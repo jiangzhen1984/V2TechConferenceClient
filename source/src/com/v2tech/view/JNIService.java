@@ -686,6 +686,7 @@ public class JNIService extends Service {
 						GlobalHolder.getInstance().getCurrentUser(), null);
 
 			} else if (gType == GroupType.CONTACT) {
+				
 			}
 		}
 
@@ -823,6 +824,7 @@ public class JNIService extends Service {
 			if (gType == GroupType.CONTACT) {
 				AddFriendHistroysHandler.becomeFriendHanler(
 						getApplicationContext(), sXml);
+				
 				User user = GlobalHolder.getInstance().getUser(uid);
 
 				if (remoteUser.getmCommentname() != null) {

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>  
-<RadioButton   
-    xmlns:android="http://schemas.android.com/apk/res/android"  
-    style="@style/RightRadioStyle"  
-    android:layout_width="wrap_content"  
+<RadioButton xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/RightRadioStyle"
+    android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    >  
+    android:text="分组"
+    android:textSize="@dimen/common_item_text_size" >
       
 </RadioButton>  

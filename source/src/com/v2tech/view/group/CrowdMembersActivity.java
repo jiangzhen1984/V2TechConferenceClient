@@ -43,7 +43,7 @@ public class CrowdMembersActivity extends Activity {
 
 	private List<User> mMembers;
 	private CrowdGroup crowd;
-	
+
 	private boolean isInDeleteMode;
 	private CrowdGroupService service;
 	private LocalReceiver localReceiver;
@@ -57,7 +57,6 @@ public class CrowdMembersActivity extends Activity {
 		mMembersContainer = (ListView) findViewById(R.id.crowd_members_list);
 		mMembersContainer.setOnItemClickListener(itemListener);
 		mMembersContainer.setOnItemLongClickListener(itemLongListener);
-		
 
 		mInvitationButton = (TextView) findViewById(R.id.crowd_members_invitation_button);
 		mInvitationButton.setOnClickListener(mInvitationButtonListener);
@@ -66,13 +65,15 @@ public class CrowdMembersActivity extends Activity {
 		mReturnButton.setOnClickListener(mReturnListener);
 
 		crowd = (CrowdGroup) GlobalHolder.getInstance().getGroupById(
-				GroupType.CHATING.intValue(), getIntent().getLongExtra("cid", 0));
+				GroupType.CHATING.intValue(),
+				getIntent().getLongExtra("cid", 0));
 		mMembers = crowd.getUsers();
 		adapter = new MembersAdapter();
 		mMembersContainer.setAdapter(adapter);
 		overridePendingTransition(R.animator.left_in, R.animator.left_out);
 		service = new CrowdGroupService();
-		if (crowd.getOwnerUser().getmUserId() != GlobalHolder.getInstance().getCurrentUserId()) {
+		if (crowd.getOwnerUser().getmUserId() != GlobalHolder.getInstance()
+				.getCurrentUserId()) {
 			mInvitationButton.setVisibility(View.INVISIBLE);
 		}
 		initReceiver();
@@ -104,46 +105,44 @@ public class CrowdMembersActivity extends Activity {
 		}
 		super.onBackPressed();
 	}
-	
+
 	@Override
 	public void finish() {
 		super.finish();
 		overridePendingTransition(R.animator.right_in, R.animator.right_out);
 	}
 
-	
 	private void initReceiver() {
-		localReceiver = new LocalReceiver(); 
+		localReceiver = new LocalReceiver();
 		IntentFilter filter = new IntentFilter();
 		filter.addAction(JNIService.JNI_BROADCAST_KICED_CROWD);
 		filter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
 		this.registerReceiver(localReceiver, filter);
 	}
 
-	
-	
-	
 	private OnItemClickListener itemListener = new OnItemClickListener() {
 
 		@Override
 		public void onItemClick(AdapterView<?> parent, View view, int pos,
 				long id) {
-			
+
 		}
 
 	};
-	
+
 	private OnItemLongClickListener itemLongListener = new OnItemLongClickListener() {
 
 		@Override
-		public boolean onItemLongClick(AdapterView<?> parent, View view, int pos,
-				long id) {
-			if (crowd.getOwnerUser().getmUserId() != GlobalHolder.getInstance().getCurrentUserId()) {
+		public boolean onItemLongClick(AdapterView<?> parent, View view,
+				int pos, long id) {
+			if (crowd.getOwnerUser().getmUserId() != GlobalHolder.getInstance()
+					.getCurrentUserId()) {
 				return false;
 			}
 			if (!isInDeleteMode) {
 				isInDeleteMode = true;
-				mInvitationButton.setText(R.string.crowd_members_deletion_mode_quit_button);
+				mInvitationButton
+						.setText(R.string.crowd_members_deletion_mode_quit_button);
 				adapter.notifyDataSetChanged();
 				return true;
 			}
@@ -151,7 +150,6 @@ public class CrowdMembersActivity extends Activity {
 		}
 
 	};
-	
 
 	private OnClickListener mInvitationButtonListener = new OnClickListener() {
 
@@ -161,7 +159,7 @@ public class CrowdMembersActivity extends Activity {
 				isInDeleteMode = false;
 				mInvitationButton.setText(R.string.crowd_members_invitation);
 				adapter.notifyDataSetChanged();
-				
+
 			} else {
 				Intent i = new Intent(PublicIntent.START_GROUP_CREATE_ACTIVITY);
 				i.addCategory(PublicIntent.DEFAULT_CATEGORY);
@@ -181,8 +179,7 @@ public class CrowdMembersActivity extends Activity {
 		}
 
 	};
-	
-	
+
 	class LocalReceiver extends BroadcastReceiver {
 
 		@Override
@@ -193,17 +190,16 @@ public class CrowdMembersActivity extends Activity {
 					finish();
 				}
 			}
-			
+
 		}
-		
+
 	}
-	
 
 	class MemberView extends LinearLayout {
 
 		private ImageView mDeleteIV;
 		private ImageView mPhotoIV;
-		private TextView  mNameTV;
+		private TextView mNameTV;
 		private TextView mDeleteButtonTV;
 		private User mUser;
 
@@ -213,19 +209,19 @@ public class CrowdMembersActivity extends Activity {
 			this.setOrientation(LinearLayout.VERTICAL);
 			LinearLayout line = new LinearLayout(context);
 			line.setOrientation(LinearLayout.HORIZONTAL);
-			
-			
+
 			LinearLayout.LayoutParams lineRL = new LinearLayout.LayoutParams(
 					RelativeLayout.LayoutParams.WRAP_CONTENT,
 					RelativeLayout.LayoutParams.WRAP_CONTENT);
-			int margin = (int)context.getResources().getDimension(R.dimen.conversation_view_margin);
+			int margin = (int) context.getResources().getDimension(
+					R.dimen.conversation_view_margin);
 			lineRL.leftMargin = margin;
 			lineRL.rightMargin = margin;
 			lineRL.topMargin = margin;
 			lineRL.bottomMargin = margin;
 			lineRL.gravity = Gravity.CENTER_VERTICAL;
-			
-			//Add delete icon
+
+			// Add delete icon
 			mDeleteIV = new ImageView(mContext);
 			mDeleteIV.setImageResource(R.drawable.contacts_group_item_icon);
 			mDeleteIV.setVisibility(View.GONE);
@@ -235,12 +231,10 @@ public class CrowdMembersActivity extends Activity {
 				public void onClick(View v) {
 					mDeleteButtonTV.setVisibility(View.VISIBLE);
 				}
-				
+
 			});
 			line.addView(mDeleteIV, lineRL);
-			
-			
-			
+
 			mPhotoIV = new ImageView(context);
 			if (user.getAvatarBitmap() != null) {
 				mPhotoIV.setImageBitmap(user.getAvatarBitmap());
@@ -248,23 +242,22 @@ public class CrowdMembersActivity extends Activity {
 				mPhotoIV.setImageResource(R.drawable.avatar);
 			}
 			line.addView(mPhotoIV, lineRL);
-			
-			
+
 			mNameTV = new TextView(context);
 			mNameTV.setText(user.getName());
-			mNameTV.setTextColor(context.getResources().getColor(R.color.contacts_user_view_item_color_offline));
-			
+			mNameTV.setTextColor(context.getResources().getColor(
+					R.color.contacts_user_view_item_color_offline));
+
 			line.addView(mNameTV, lineRL);
-			
-			
-			
-			//Add delete button
+
+			// Add delete button
 			mDeleteButtonTV = new TextView(mContext);
 			mDeleteButtonTV.setText(R.string.crowd_members_delete);
 			mDeleteButtonTV.setVisibility(View.GONE);
 			mDeleteButtonTV.setTextColor(Color.WHITE);
-			mDeleteButtonTV.setBackgroundResource(R.drawable.rounded_crowd_members_delete_button);
-			mDeleteButtonTV.setPadding(10, 5, 5, 10);
+			mDeleteButtonTV
+					.setBackgroundResource(R.drawable.rounded_crowd_members_delete_button);
+			mDeleteButtonTV.setPadding(20, 10, 20, 10);
 			mDeleteButtonTV.setOnClickListener(new OnClickListener() {
 
 				@Override
@@ -274,11 +267,23 @@ public class CrowdMembersActivity extends Activity {
 					mMembers.remove(mUser);
 					adapter.notifyDataSetChanged();
 				}
-				
+
 			});
-			line.addView(mDeleteButtonTV, new LinearLayout.LayoutParams(
-					RelativeLayout.LayoutParams.MATCH_PARENT,
-					RelativeLayout.LayoutParams.WRAP_CONTENT));
+
+			RelativeLayout.LayoutParams mDeleteButtonTVLP = new RelativeLayout.LayoutParams(
+					RelativeLayout.LayoutParams.WRAP_CONTENT,
+					RelativeLayout.LayoutParams.WRAP_CONTENT);
+
+			mDeleteButtonTVLP.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+			mDeleteButtonTVLP.addRule(RelativeLayout.CENTER_VERTICAL);
+			mDeleteButtonTVLP.rightMargin=margin;
+			
+			RelativeLayout mDeleteButtonTVRL = new RelativeLayout(context);
+			mDeleteButtonTVRL.addView(mDeleteButtonTV, mDeleteButtonTVLP);
+
+			line.addView(mDeleteButtonTVRL, new LinearLayout.LayoutParams(
+					LinearLayout.LayoutParams.MATCH_PARENT,
+					LinearLayout.LayoutParams.MATCH_PARENT));
 
 			this.addView(line, new LinearLayout.LayoutParams(
 					LinearLayout.LayoutParams.MATCH_PARENT,
@@ -289,10 +294,11 @@ public class CrowdMembersActivity extends Activity {
 			this.addView(lineBottom, new LinearLayout.LayoutParams(
 					LinearLayout.LayoutParams.MATCH_PARENT, 2));
 		}
-		
+
 		public void update(User user) {
 			if (isInDeleteMode) {
-				if (this.mUser.getmUserId() != crowd.getOwnerUser().getmUserId()) {
+				if (this.mUser.getmUserId() != crowd.getOwnerUser()
+						.getmUserId()) {
 					mDeleteIV.setVisibility(View.VISIBLE);
 				} else {
 					mDeleteIV.setVisibility(View.GONE);
@@ -305,7 +311,7 @@ public class CrowdMembersActivity extends Activity {
 				return;
 			}
 			this.mUser = user;
-			
+
 			mNameTV.setText(user.getName());
 			if (user.getAvatarBitmap() != null) {
 				mPhotoIV.setImageBitmap(user.getAvatarBitmap());
@@ -332,7 +338,7 @@ public class CrowdMembersActivity extends Activity {
 		public long getItemId(int position) {
 			return mMembers.get(position).getmUserId();
 		}
-		
+
 		public int getViewTypeCount() {
 			return 1;
 		}
@@ -342,7 +348,7 @@ public class CrowdMembersActivity extends Activity {
 			if (convertView == null) {
 				convertView = new MemberView(mContext, mMembers.get(position));
 			} else {
-				((MemberView)convertView).update(mMembers.get(position));
+				((MemberView) convertView).update(mMembers.get(position));
 			}
 			return convertView;
 		}

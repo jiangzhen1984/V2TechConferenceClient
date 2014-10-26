@@ -82,7 +82,6 @@ public class UpdateContactGroupActivity extends Activity {
 			RadioButton rb = (RadioButton) LayoutInflater.from(mContext)
 					.inflate(R.layout.common_radio_right, null);
 			rb.setText(g.getName());
-			rb.setTextSize(14);
 			rb.setTag(g);
 			rb.setTextColor(mContext.getResources().getColor(
 					R.color.activiy_contact_detail_item_color));

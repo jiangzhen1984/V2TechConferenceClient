@@ -19,6 +19,8 @@ public class SettingTabFragment extends Fragment {
 	private TextView mQuitButton;
 	// R.id.rl_authentication
 	private RelativeLayout rlAuthentication;
+	// R.id.setting_back
+	private TextView tvSettingBack;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -40,10 +42,20 @@ public class SettingTabFragment extends Fragment {
 				.findViewById(R.id.setting_quit_button);
 		rlAuthentication = (RelativeLayout) contentVeiw
 				.findViewById(R.id.rl_authentication);
+		tvSettingBack = (TextView) contentVeiw.findViewById(R.id.setting_back);
 
 	}
 
 	private void bindViewEnvent() {
+
+		tvSettingBack.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				SettingTabFragment.this.getActivity().onBackPressed();
+			}
+		});
+
 		mQuitButton.setOnClickListener(new OnClickListener() {
 
 			@Override
