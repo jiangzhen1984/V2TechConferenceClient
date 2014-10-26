@@ -563,11 +563,11 @@ public class XmlParser {
 									Integer.parseInt(str[index + 1]));
 							earser.addPoint(Integer.parseInt(str[index + 2]),
 									Integer.parseInt(str[index + 3]));
-
-							// earser.lineToLine(Integer.parseInt(str[index]),
-							// Integer.parseInt(str[index + 1]),
-							// Integer.parseInt(str[index + 2]),
-							// Integer.parseInt(str[index + 3]));
+//
+//							 earser.lineToLine(Integer.parseInt(str[index]),
+//							 Integer.parseInt(str[index + 1]),
+//							 Integer.parseInt(str[index + 2]),
+//							 Integer.parseInt(str[index + 3]));
 						}
 					} else if (shapeE.getTagName().equals("Pen")) {
 

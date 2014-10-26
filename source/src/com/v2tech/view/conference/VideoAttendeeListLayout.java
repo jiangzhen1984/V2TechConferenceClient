@@ -34,6 +34,7 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.V2.jni.util.V2Log;
 import com.v2tech.R;
@@ -69,7 +70,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 	 * Online attendee count without mixed device
 	 */
 	private int onLinePersons = 0;
-	
+
 	/**
 	 * All attendee count without mixed device
 	 */
@@ -120,6 +121,9 @@ public class VideoAttendeeListLayout extends LinearLayout {
 					Wrapper wr = (Wrapper) view.getTag();
 					if (wr.udc == null || !wr.udc.isEnable()) {
 						V2Log.i("User device config is disabled ");
+						Toast.makeText(getContext(),
+								R.string.error_open_device_disable,
+								Toast.LENGTH_SHORT).show();
 						return;
 					}
 
@@ -298,7 +302,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 			iv.setImageResource(R.drawable.camera);
 		} else if (at.isJoined()) {
 			if (at.getType() != Attendee.TYPE_MIXED_VIDEO) {
-				if (udc != null) 
+				if (udc != null)
 					iv.setImageResource(R.drawable.camera);
 				else
 					iv.setImageResource(R.drawable.camera_pressed);
@@ -361,7 +365,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 			return;
 		}
 
-		at.setJoined(true);	
+		at.setJoined(true);
 		List<UserDeviceConfig> dList = at.getmDevices();
 		if (at.getType() == Attendee.TYPE_MIXED_VIDEO) {
 			mList.add(new Wrapper(at, dList.get(0), DEFAULT_DEVICE_FLAG));
@@ -388,8 +392,8 @@ public class VideoAttendeeListLayout extends LinearLayout {
 				index++;
 				isNew = true;
 			}
-			
-			if(isNew)
+
+			if (isNew)
 				mAttendeeCount++;
 			if ((at.isJoined() || at.isSelf())) {
 				onLinePersons++;
@@ -455,6 +459,51 @@ public class VideoAttendeeListLayout extends LinearLayout {
 				}
 			}
 		}
+		adapter.notifyDataSetChanged();
+
+	}
+
+	/**
+	 * reset attendee devices
+	 * 
+	 * @param att
+	 * @param list
+	 */
+	public void resetAttendeeDevices(Attendee att, List<UserDeviceConfig> list) {
+		Wrapper defaultWrapper = null;
+		int index = -1;
+		// Remove exists devices
+		for (int i = 0; i < mList.size(); i++) {
+			Wrapper wr = mList.get(i);
+			// Remove attendee devices, leave one device item
+			if (wr.a.getAttId() == att.getAttId()) {
+				if (wr.udc.isDefault()) {
+					wr.udc = null;
+					defaultWrapper = wr;
+					index = i;
+				} else {
+					mList.remove(i--);
+				}
+			}
+		}
+
+		if (defaultWrapper == null) {
+			V2Log.e("Error no default device ");
+			return;
+		}
+
+		for (int i = 0; i < list.size(); i++) {
+			UserDeviceConfig udc = list.get(i);
+			if (udc.getBelongsAttendee() == null) {
+				udc.setBelongsAttendee(att);
+			}
+			if (udc.isDefault()) {
+				defaultWrapper.udc = udc;
+			} else if (!udc.isDefault()) {
+				mList.add(++index, new Wrapper(defaultWrapper.a, udc, 1));
+			}
+		}
+		//FIXME update status for already devices
 		adapter.notifyDataSetChanged();
 
 	}
@@ -805,8 +854,8 @@ public class VideoAttendeeListLayout extends LinearLayout {
 	class Wrapper implements Comparable<Wrapper> {
 		Attendee a;
 		UserDeviceConfig udc;
-		//Use to sort.
-		//we can remove view if sortFlag is DEFAULT_DEVICE_FLAG
+		// Use to sort.
+		// we can remove view if sortFlag is DEFAULT_DEVICE_FLAG
 		int sortFlag;
 
 		public Wrapper(Attendee a, UserDeviceConfig udc, int sortFlag) {

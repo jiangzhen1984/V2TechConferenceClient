@@ -171,6 +171,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 	@Override
 	protected void onDestroy() {
 		uninitBroadcastReceiver();
+		us.clearCalledBack();
 		super.onDestroy();
 		BitmapManager.getInstance().unRegisterLastBitmapChangedListener(
 				mAvatarChangedListener);

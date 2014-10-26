@@ -55,8 +55,9 @@ public class ContactsGroupActivity extends Activity {
 	private BaseAdapter adapter;
 
 	private ContactsService contactService = new ContactsService();
-	
+
 	private boolean changed;
+	private boolean inDeleteMode;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -77,6 +78,7 @@ public class ContactsGroupActivity extends Activity {
 		adapter = new CommonAdapter(mDataset, converter);
 		mListView.setAdapter(adapter);
 		mListView.setOnItemClickListener(mClickListener);
+		mListView.setOnItemLongClickListener(mLongClickListener);
 	}
 
 	@Override
@@ -89,14 +91,16 @@ public class ContactsGroupActivity extends Activity {
 		}
 		super.finish();
 	}
-	
+
 	@Override
 	public void onBackPressed() {
+		if (inDeleteMode) {
+			inDeleteMode = false;
+			adapter.notifyDataSetChanged();
+			return;
+		}
 		super.onBackPressed();
 	}
-	
-	
-	
 
 	@Override
 	protected void onDestroy() {
@@ -109,27 +113,10 @@ public class ContactsGroupActivity extends Activity {
 				listGroup.size() - 1);
 		for (int i = 0; i < listGroup.size(); i++) {
 			final Group g = listGroup.get(i);
-			if (((ContactGroup)g).isDefault()) {
+			if (((ContactGroup) g).isDefault()) {
 				continue;
 			}
-			ds.add(new CommonAdapterItemWrapper() {
-
-				@Override
-				public Object getItemObject() {
-					return g;
-				}
-
-				@Override
-				public long getItemLongId() {
-					return g.getmGId();
-				}
-
-				@Override
-				public View getView() {
-					return null;
-				}
-
-			});
+			ds.add(new LocalItemWrapper(g, false));
 		}
 		return ds;
 	}
@@ -153,20 +140,18 @@ public class ContactsGroupActivity extends Activity {
 			mGroupNameET.setText(group.getName());
 		} else {
 			mGroupNameET.setText("");
-			//mGroupNameET.setText(R.string.activiy_contact_group_name_content);
+			// mGroupNameET.setText(R.string.activiy_contact_group_name_content);
 			mDialogTitleTV
 					.setText(R.string.activiy_contact_group_dialog_title_create);
 		}
-		
-		
+
 		final Button cancelB = (Button) mDialog
 				.findViewById(R.id.contacts_group_cancel_button);
 		cancelB.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-				imm.hideSoftInputFromWindow(mGroupNameET.getWindowToken(),
-						0);
+				imm.hideSoftInputFromWindow(mGroupNameET.getWindowToken(), 0);
 				mDialog.dismiss();
 			}
 
@@ -177,8 +162,7 @@ public class ContactsGroupActivity extends Activity {
 			@Override
 			public void onClick(View v) {
 				InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-				imm.hideSoftInputFromWindow(mGroupNameET.getWindowToken(),
-						0);
+				imm.hideSoftInputFromWindow(mGroupNameET.getWindowToken(), 0);
 
 				if (mGroupNameET.getText().toString().trim().isEmpty()) {
 					mGroupNameET.setError(mContext
@@ -186,8 +170,8 @@ public class ContactsGroupActivity extends Activity {
 					return;
 				}
 				if (group == null) {
-					ContactGroup newGroup = new ContactGroup(0,
-							mGroupNameET.getText().toString());
+					ContactGroup newGroup = new ContactGroup(0, mGroupNameET
+							.getText().toString());
 					updateGroup(newGroup, OPT.CREATE);
 				} else {
 					group.setName(mGroupNameET.getText().toString());
@@ -196,9 +180,6 @@ public class ContactsGroupActivity extends Activity {
 			}
 
 		});
-
-		
-		
 
 		mDialog.show();
 	}
@@ -264,9 +245,24 @@ public class ContactsGroupActivity extends Activity {
 	private OnItemClickListener mClickListener = new OnItemClickListener() {
 
 		@Override
-		public void onItemClick(AdapterView<?> adapter, View view,
-				int pos, long id) {
+		public void onItemClick(AdapterView<?> adapter, View view, int pos,
+				long id) {
 			showDialog((ContactGroup) mDataset.get(pos).getItemObject());
+		}
+
+	};
+
+	private OnItemLongClickListener mLongClickListener = new OnItemLongClickListener() {
+
+		@Override
+		public boolean onItemLongClick(AdapterView<?> parent, View view,
+				int position, long id) {
+			if (!inDeleteMode) {
+				inDeleteMode = true;
+				adapter.notifyDataSetChanged();
+				return true;
+			}
+			return true;
 		}
 
 	};
@@ -276,6 +272,7 @@ public class ContactsGroupActivity extends Activity {
 		@Override
 		public View converView(CommonAdapterItemWrapper wr, View view,
 				ViewGroup vg) {
+			LocalItemWrapper liw= (LocalItemWrapper) wr;
 			if (view == null) {
 				view = LayoutInflater.from(mContext).inflate(
 						R.layout.activity_contacts_group_adapter_item, null,
@@ -283,19 +280,46 @@ public class ContactsGroupActivity extends Activity {
 			}
 			TextView tv = (TextView) view
 					.findViewById(R.id.contacts_group_item_name);
-			tv.setText(((Group) wr.getItemObject()).getName());
+			tv.setText(((Group) liw.getItemObject()).getName());
 			View v = view
 					.findViewById(R.id.contacts_group_item_adapter_delelte_button);
 			v.setTag(wr.getItemObject());
-			if (((ContactGroup)wr.getItemObject()).isDefault()) {
+			View deleteModeView = view
+					.findViewById(R.id.contacts_group_delete_icon);
+			deleteModeView.setTag(liw);
+			deleteModeView.setOnClickListener(new OnClickListener () {
+
+				@Override
+				public void onClick(View v) {
+					LocalItemWrapper liw = (LocalItemWrapper)v.getTag();
+					liw.setShowDeleteButton(true);
+					adapter.notifyDataSetChanged();
+				}
+				
+			});
+
+			if (((ContactGroup) wr.getItemObject()).isDefault()) {
 				v.setVisibility(View.INVISIBLE);
-				view.findViewById(R.id.contacts_group_delete_icon).setVisibility(View.INVISIBLE);
+				deleteModeView.setVisibility(View.INVISIBLE);
 			} else {
-				v.setVisibility(View.VISIBLE);;
+				v.setVisibility(View.VISIBLE);
 				v.setOnClickListener(deleteGroupButtonClickListener);
-				view.findViewById(R.id.contacts_group_delete_icon).setVisibility(View.VISIBLE);
+				deleteModeView.setVisibility(View.VISIBLE);
 			}
-			
+
+			if (inDeleteMode) {
+				deleteModeView.setVisibility(View.VISIBLE);
+				if (liw.showDeleteButton) {
+					v.setVisibility(View.VISIBLE);
+				} else {
+					v.setVisibility(View.GONE);
+				}
+			} else {
+				deleteModeView.setVisibility(View.INVISIBLE);
+				v.setVisibility(View.GONE);
+			}
+
+
 			return view;
 		}
 
@@ -310,24 +334,7 @@ public class ContactsGroupActivity extends Activity {
 			case CREATE_GROUP_DONE:
 				if (res.getResult() == JNIResponse.Result.SUCCESS) {
 					final Group g = ((GroupServiceJNIResponse) res).g;
-					mDataset.add(new CommonAdapterItemWrapper() {
-
-						@Override
-						public Object getItemObject() {
-							return g;
-						}
-
-						@Override
-						public long getItemLongId() {
-							return g.getmGId();
-						}
-
-						@Override
-						public View getView() {
-							return null;
-						}
-
-					});
+					mDataset.add(new LocalItemWrapper(g, false));
 				}
 				break;
 			case UPDATE_GROUP_DONE:
@@ -352,11 +359,55 @@ public class ContactsGroupActivity extends Activity {
 			if (mDialog != null) {
 				mDialog.dismiss();
 			}
-			
+
 			changed = true;
 		}
 
 	};
+
+	class LocalItemWrapper implements CommonAdapterItemWrapper {
+
+		private Group g;
+		private boolean showDeleteButton;
+
+		public LocalItemWrapper(Group g, boolean showDeleteButton) {
+			super();
+			this.g = g;
+			this.showDeleteButton = showDeleteButton;
+		}
+
+		@Override
+		public Object getItemObject() {
+			return g;
+		}
+
+		@Override
+		public long getItemLongId() {
+			return g.getmGId();
+		}
+
+		@Override
+		public View getView() {
+			return null;
+		}
+
+		public Group getG() {
+			return g;
+		}
+
+		public void setG(Group g) {
+			this.g = g;
+		}
+
+		public boolean isShowDeleteButton() {
+			return showDeleteButton;
+		}
+
+		public void setShowDeleteButton(boolean showDeleteButton) {
+			this.showDeleteButton = showDeleteButton;
+		}
+
+	}
 
 	enum OPT {
 		CREATE, UPDATE, DELETE;

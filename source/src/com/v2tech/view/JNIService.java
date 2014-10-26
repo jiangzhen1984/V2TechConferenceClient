@@ -700,6 +700,7 @@ public class JNIService extends Service {
 				if (crowdMsg.getQualState() != VMessageQualification.QualificationState.WAITING) {
 					crowdMsg.setReadState(VMessageQualification.ReadState.UNREAD);
 					crowdMsg.setQualState(VMessageQualification.QualificationState.WAITING);
+					crowdMsg.setmTimestamp(new Date());
 					MessageBuilder.updateQualicationMessage(mContext, crowdMsg);
 				} else {
 					sendBroadcast = false;
@@ -717,6 +718,8 @@ public class JNIService extends Service {
 				} else {
 					throw new RuntimeException("Unkown type");
 				}
+				
+				crowdMsg.setmTimestamp(new Date());
 				crowdMsg.setReadState(VMessageQualification.ReadState.UNREAD);
 				Uri uri = MessageBuilder.saveQualicationMessage(mContext,
 						crowdMsg);

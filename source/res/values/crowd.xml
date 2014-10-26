@@ -67,6 +67,7 @@
     <string name="crowd_files_resume_uploading_failed">请先先退出删除模式!</string>
     
     
+    <string name="crowd_message_deletion_mode_quit_required">请先先退出删除模式!</string>
     
     <string name="crowd_application_button_name">申请</string>
     <string name="crowd_application_title">群资料</string>

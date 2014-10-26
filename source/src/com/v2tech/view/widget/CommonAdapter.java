@@ -38,7 +38,7 @@ public class CommonAdapter extends BaseAdapter {
 	
 	public CommonAdapter(List<CommonAdapterItemWrapper> dataset,
 			ViewConvertListener listener) {
-		this(dataset, listener, 10);
+		this(dataset, listener, 1);
 	}
 	
 	

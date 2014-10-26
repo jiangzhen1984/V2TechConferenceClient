@@ -367,7 +367,10 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 
 	@Override
 	public void afterTextChanged(Editable s) {
-		if (TextUtils.isEmpty(s.toString()) && mContactsContainer != null) {
+		if (mContactsContainer == null) {
+			return;
+		}
+		if (TextUtils.isEmpty(s.toString())) {
 			if (!TextUtils.isEmpty(mContactsContainer.getTextFilter())) {
 				mContactsContainer.clearTextFilter();
 			}

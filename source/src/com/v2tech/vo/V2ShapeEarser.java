@@ -5,9 +5,11 @@ import java.util.List;
 
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PorterDuff;
-import android.graphics.Region;
+import android.graphics.PorterDuffXfermode;
+import android.graphics.Rect;
 
 public class V2ShapeEarser extends V2Shape {
 
@@ -43,26 +45,17 @@ public class V2ShapeEarser extends V2Shape {
 		if (canvas == null) {
 			throw new NullPointerException(" canvas is null ");
 		}
-//		Paint paint = new Paint();
-//		paint.setAntiAlias(true);
-//		paint.setDither(true);
-//		paint.setColor(0xFFFF0000);
-//		paint.setStyle(Paint.Style.STROKE);
-//		paint.setStrokeJoin(Paint.Join.ROUND);
-//		    paint.setStrokeCap(Paint.Cap.ROUND);
-//		    paint.setStrokeWidth(20);
-//		    paint.setXfermode(new PorterDuffXfermode(
-//		            PorterDuff.Mode.CLEAR));
-////		// canvas.drawPath(p, paint);
-//		for (int i = 0; i < l.size(); i+=2) {
-//			Bitmap bm = Bitmap.createBitmap(12, 12, Bitmap.Config.ALPHA_8);
-//			bm.eraseColor(Color.TRANSPARENT);
-//			canvas.drawBitmap(bm, l.get(i), l.get(i+1), paint);
-//			bm.recycle();
-//		}
-//	//	canvas.drawPath(p, paint);
-		canvas.clipPath(p, Region.Op.XOR);
-		canvas.drawColor(Color.TRANSPARENT,  PorterDuff.Mode.CLEAR);
+		Paint paint = new Paint();
+		paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
+		//canvas.drawPath(p, paint);
+		float[] fr = new float[l.size()];
+		for (int i = 0; i < fr.length; i += 2) {
+			fr[0] = l.get(i);
+			
+			canvas.drawRect(new Rect((int) fr[0] - 10, (int) fr[1] - 10,
+					(int) fr[0] + 10, (int) fr[0] + 10), paint);
+		}
+
 	}
 
 }

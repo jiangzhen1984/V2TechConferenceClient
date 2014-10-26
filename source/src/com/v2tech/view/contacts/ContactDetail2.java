@@ -140,6 +140,7 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 	@Override
 	protected void onDestroy() {
 		uninitBroadcastReceiver();
+		contactService.clearCalledBack();
 		super.onDestroy();
 	}
 

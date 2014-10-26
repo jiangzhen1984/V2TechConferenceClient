@@ -43,6 +43,8 @@ public class ConferencMessageSyncService extends Service {
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
+		docService.clearCalledBack();
+		conferenceService.clearCalledBack();
 		conferenceService = null;
 		docService = null;
 	}

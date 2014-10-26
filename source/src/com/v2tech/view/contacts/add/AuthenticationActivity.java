@@ -64,6 +64,18 @@ public class AuthenticationActivity extends Activity {
 		mNameTitleIV.setText(detailUser.getName());
 		mSignTV.setText(detailUser.getSignature());
 	}
+	
+	
+	
+
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		contactService.clearCalledBack();
+	}
+
+
+
 
 	private void connectView() {
 		tvLeft = (TextView) findViewById(R.id.tv_left);

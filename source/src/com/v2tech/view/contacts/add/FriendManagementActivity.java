@@ -78,6 +78,16 @@ public class FriendManagementActivity extends Activity {
 		tvGroupName.setText(selectGroupName);
 
 	}
+	
+	
+
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		contactService.clearCalledBack();
+	}
+
+
 
 	private void connectView() {
 		tvRightTextView = (TextView) findViewById(R.id.right_text_view);

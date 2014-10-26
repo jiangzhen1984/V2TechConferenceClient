@@ -32,6 +32,7 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.RadioButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.V2.jni.util.V2Log;
 import com.v2tech.R;
@@ -227,6 +228,10 @@ public class MessageAuthenticationActivity extends Activity {
 							MessageAuthenticationActivity.this
 									.startActivity(intent);
 						} else {
+							if (isGroupInDeleteMode) {
+								Toast.makeText(mContext, R.string.crowd_message_deletion_mode_quit_required, Toast.LENGTH_SHORT).show();
+								return;
+							}
 							VMessageQualification msg = (VMessageQualification) mMessageList
 									.get(position).obj;
 							if (msg.getType() == VMessageQualification.Type.CROWD_INVITATION) {

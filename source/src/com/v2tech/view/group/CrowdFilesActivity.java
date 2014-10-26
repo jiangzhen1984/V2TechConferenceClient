@@ -169,10 +169,8 @@ public class CrowdFilesActivity extends Activity {
 						mFileMap.put(vf.getId(), vf);
 					}
 					//Update screen to uploading UI
-					showUploaded = true;
-					mTitle.setText(R.string.crowd_files_title_uploading);
-					mUploadingFileNotificationIcon.setVisibility(View.GONE);
-					mShowUploadedFileButton.setVisibility(View.GONE);
+					mUploadingFileNotificationIcon.setVisibility(View.VISIBLE);
+					mUploadingFileNotificationIcon.setImageResource(R.drawable.crowd_file_icon_notification);
 					adapter.notifyDataSetChanged();
 				}
 			}

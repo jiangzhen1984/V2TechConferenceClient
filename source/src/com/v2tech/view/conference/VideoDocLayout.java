@@ -1,6 +1,7 @@
 package com.v2tech.view.conference;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -8,11 +9,15 @@ import java.util.Map.Entry;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
+import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Handler;
@@ -42,7 +47,20 @@ public class VideoDocLayout extends LinearLayout {
 
 	private Map<String, V2Doc> mDocs;
 
-	private Bitmap mCurrentBitMap;
+	/**
+	 * Use to draw image backgroud
+	 */
+	private Bitmap mBackgroundBitMap;
+
+	/**
+	 * Use to draw all shapes
+	 */
+	private Bitmap mShapeBitmap;
+
+	/**
+	 * Use to show in image view
+	 */
+	private Bitmap mImageViewBitmap;
 
 	private Matrix matrix;
 
@@ -92,6 +110,8 @@ public class VideoDocLayout extends LinearLayout {
 			updateCurrentDoc(defaultDoc);
 		}
 	}
+	
+	
 
 	private void initLayout() {
 		View view = LayoutInflater.from(getContext()).inflate(
@@ -120,6 +140,16 @@ public class VideoDocLayout extends LinearLayout {
 		rootView = this;
 
 	}
+
+	
+	
+	@Override
+	protected void onDetachedFromWindow() {
+		super.onDetachedFromWindow();
+		cleanCache();
+	}
+
+
 
 	private void showPopUpWindow(View anchor) {
 		if (mDocs.isEmpty()) {
@@ -218,6 +248,12 @@ public class VideoDocLayout extends LinearLayout {
 
 	}
 
+	/**
+	 * Close document and remove document from list<br>
+	 * If document is current document, will destroy bitmap
+	 * 
+	 * @param d
+	 */
 	public void closeDoc(V2Doc d) {
 		if (d == null) {
 			V2Log.e(" closed Doc is null");
@@ -323,14 +359,14 @@ public class VideoDocLayout extends LinearLayout {
 		if (p == null) {
 			return;
 		}
+		// recycle shape bitmap
+		recycleBitmap(mShapeBitmap);
+		// recycle image bitmap
+		recycleBitmap(mBackgroundBitMap);
 
 		// FIXME optimze code
 		if (this.mCurrentDoc.getDocType() == V2Doc.DOC_TYPE_BLANK_BOARD) {
-			if (mCurrentBitMap != null) {
-				mCurrentBitMap.recycle();
-				mCurrentBitMap = null;
-			}
-			mCurrentBitMap = Bitmap.createBitmap(800, 600,
+			mShapeBitmap = Bitmap.createBitmap(800, 600,
 					Bitmap.Config.ARGB_8888);
 			matrix = new Matrix();
 			RectF src = new RectF();
@@ -345,10 +381,11 @@ public class VideoDocLayout extends LinearLayout {
 			dest.top = 0;
 			dest.bottom = 600;
 			matrix.mapRect(src, dest);
-
 			container.removeAllViews();
 			TouchImageView iv = new TouchImageView(this.getContext());
-			iv.setImageBitmap(mCurrentBitMap);
+			// Merge bitmap
+			mergeBitmapToImage(mBackgroundBitMap, mShapeBitmap);
+			iv.setImageBitmap(mImageViewBitmap);
 			container.addView(iv, new FrameLayout.LayoutParams(
 					FrameLayout.LayoutParams.MATCH_PARENT,
 					FrameLayout.LayoutParams.MATCH_PARENT));
@@ -360,10 +397,6 @@ public class VideoDocLayout extends LinearLayout {
 		if (p.getFilePath() != null) {
 			File f = new File(p.getFilePath());
 			if (f.exists()) {
-				if (mCurrentBitMap != null && !mCurrentBitMap.isRecycled()) {
-					mCurrentBitMap.recycle();
-					mCurrentBitMap = null;
-				}
 				matrix = new Matrix();
 				RectF src = new RectF();
 				RectF dest = new RectF();
@@ -397,7 +430,7 @@ public class VideoDocLayout extends LinearLayout {
 					sampl = 2;
 				}
 
-				mCurrentBitMap = BitmapFactory.decodeFile(p.getFilePath(),
+				mBackgroundBitMap = BitmapFactory.decodeFile(p.getFilePath(),
 						opsNew);
 
 				dest.left = (src.right - opsNew.outWidth) / 2;
@@ -414,7 +447,9 @@ public class VideoDocLayout extends LinearLayout {
 
 				container.removeAllViews();
 				TouchImageView iv = new TouchImageView(this.getContext());
-				iv.setImageBitmap(mCurrentBitMap);
+				// Merge bitmap
+				mergeBitmapToImage(mBackgroundBitMap, mShapeBitmap);
+				iv.setImageBitmap(mImageViewBitmap);
 				container.addView(iv, new FrameLayout.LayoutParams(
 						FrameLayout.LayoutParams.MATCH_PARENT,
 						FrameLayout.LayoutParams.MATCH_PARENT));
@@ -436,6 +471,49 @@ public class VideoDocLayout extends LinearLayout {
 
 	public void setListener(DocListener listener) {
 		this.listener = listener;
+	}
+
+	/**
+	 * Merge bitmaps to image view bitmap
+	 * 
+	 * @param shareDocBm
+	 * @param shapesBm
+	 */
+	private void mergeBitmapToImage(Bitmap shareDocBm, Bitmap shapesBm) {
+		if (mImageViewBitmap == null || mImageViewBitmap.isRecycled()) {
+			if (shareDocBm != null && !shareDocBm.isRecycled()) {
+				mImageViewBitmap = Bitmap.createBitmap(shareDocBm.getWidth(),
+						shareDocBm.getHeight(), Config.ARGB_8888);
+			} else if (shapesBm != null && !shapesBm.isRecycled()) {
+				mImageViewBitmap = Bitmap.createBitmap(shapesBm.getWidth(),
+						shapesBm.getHeight(), Config.ARGB_8888);
+			} else {
+				V2Log.e(" No available bitmap");
+				return;
+			}
+		}
+
+		Canvas target = new Canvas(mImageViewBitmap);
+		Paint paint = new Paint();
+		paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
+		target.drawRect(new Rect(0, 0, mImageViewBitmap.getWidth(),
+				mImageViewBitmap.getHeight()), paint);
+
+		Paint p = new Paint();
+		if (shareDocBm != null && !shareDocBm.isRecycled()) {
+			target.drawBitmap(shareDocBm, 0, 0, p);
+		}
+
+		if (shapesBm != null && !shapesBm.isRecycled()) {
+			target.drawBitmap(shapesBm, 0, 0, p);
+		}
+	}
+
+	private void recycleBitmap(Bitmap bm) {
+		if (bm != null && !bm.isRecycled()) {
+			bm.recycle();
+			bm = null;
+		}
 	}
 
 	/**
@@ -490,6 +568,11 @@ public class VideoDocLayout extends LinearLayout {
 				.setImageResource(R.drawable.video_doc_full_screen_button_selector);
 	}
 
+	/**
+	 * Add new document to list
+	 * 
+	 * @param doc
+	 */
 	public void addDoc(V2Doc doc) {
 		if (!mDocs.containsKey(doc.getId())) {
 			mDocs.put(doc.getId(), doc);
@@ -497,6 +580,9 @@ public class VideoDocLayout extends LinearLayout {
 		}
 	}
 
+	/**
+	 * Update page information according current document
+	 */
 	public void updateLayoutPageInformation() {
 		if (mCurrentDoc == null) {
 			mDocPageTV.setText("0/0");
@@ -506,6 +592,9 @@ public class VideoDocLayout extends LinearLayout {
 		}
 	}
 
+	/**
+	 * Update page button enable/disable according to current document
+	 */
 	public void updatePageButton() {
 		if (mCurrentDoc == null || mSyncStatus) {
 			mPrePageButton
@@ -562,6 +651,27 @@ public class VideoDocLayout extends LinearLayout {
 	 * @param pageNo
 	 * @param list
 	 */
+	public void drawShape(String docId, int pageNo, V2ShapeMeta shape) {
+		if (this.mCurrentDoc == null || this.mCurrentPage == null
+				|| docId == null) {
+			return;
+		}
+		if (!docId.equals(this.mCurrentDoc.getId())
+				|| pageNo != this.mCurrentPage.getNo()) {
+			return;
+		}
+		List<V2ShapeMeta> list = new ArrayList<V2ShapeMeta>();
+		list.add(shape);
+		drawShape(list);
+	}
+
+	/**
+	 * According to docId and pageNo draw shape
+	 * 
+	 * @param docId
+	 * @param pageNo
+	 * @param list
+	 */
 	public void drawShape(String docId, int pageNo, List<V2ShapeMeta> list) {
 		if (this.mCurrentDoc == null || this.mCurrentPage == null
 				|| docId == null) {
@@ -579,36 +689,40 @@ public class VideoDocLayout extends LinearLayout {
 			V2Log.w(" shape list is null");
 			return;
 		}
-		if (this.mCurrentBitMap == null || this.mCurrentBitMap.isRecycled()) {
-			V2Log.w(" Doesn't support blank bitmap yet");
-			return;
+
+		if (mShapeBitmap == null || mShapeBitmap.isRecycled()) {
+			mShapeBitmap = Bitmap.createBitmap(mBackgroundBitMap.getWidth(),
+					mBackgroundBitMap.getHeight(), Config.ARGB_8888);
 		}
 
-		// Bitmap source = Bitmap.createBitmap(width, height,
-		// Bitmap.Config.ARGB_4444);
-		// Canvas sourceCan = new Canvas(source);
-		// for (V2ShapeMeta meta : list) {
-		// meta.draw(sourceCan);
-		// }
-		// target.drawBitmap(source, matrix, new Paint());
-		// source.recycle();
-
-		Canvas target = new Canvas(mCurrentBitMap);
-		target.concat(matrix);
+		Canvas cv = new Canvas(mShapeBitmap);
+		// target.concat(matrix);
 		for (V2ShapeMeta meta : list) {
-			meta.draw(target);
+			meta.draw(cv);
 		}
+
+		mergeBitmapToImage(mBackgroundBitMap, mShapeBitmap);
 
 		container.postInvalidate();
 	}
 
+	
+	/**
+	 */
 	public void cleanCache() {
 		container.removeAllViews();
-		if (this.mCurrentBitMap != null && !this.mCurrentBitMap.isRecycled()) {
-			Canvas ca = new Canvas(mCurrentBitMap);
+
+		if (this.mImageViewBitmap != null
+				&& !this.mImageViewBitmap.isRecycled()) {
+			Canvas ca = new Canvas(mImageViewBitmap);
 			ca.drawColor(Color.WHITE);
-			this.mCurrentBitMap.recycle();
+			this.mImageViewBitmap.recycle();
 		}
+
+		// recycle shape bitmap
+		recycleBitmap(mShapeBitmap);
+		// recycle image bitmap
+		recycleBitmap(mBackgroundBitMap);
 	}
 
 	public boolean isFullScreenSize() {

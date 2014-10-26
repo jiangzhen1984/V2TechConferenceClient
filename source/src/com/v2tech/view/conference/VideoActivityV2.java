@@ -195,8 +195,6 @@ public class VideoActivityV2 extends Activity {
 
 	private boolean mServiceBound = false;
 	private boolean mLocalHolderIsCreate = false;
-	private int currentWidth;
-	private boolean isStop;
 
 	private int mVideoMaxCols = 2;
 
@@ -349,6 +347,10 @@ public class VideoActivityV2 extends Activity {
 		filter.addCategory(PublicIntent.DEFAULT_CATEGORY);
 		filter.addAction(JNIService.JNI_BROADCAST_USER_STATUS_NOTIFICATION);
 		filter.addAction(JNIService.JNI_BROADCAST_CONNECT_STATE_NOTIFICATION);
+		
+		filter.addAction(Intent.ACTION_SCREEN_OFF);
+		filter.addAction(Intent.ACTION_USER_PRESENT);
+		
 		mContext.registerReceiver(mConfUserChangeReceiver, filter);
 
 	}
@@ -548,15 +550,9 @@ public class VideoActivityV2 extends Activity {
 						View.MeasureSpec.UNSPECIFIED);
 			}
 
-			if (isStop) {
+			
 
-				width = currentWidth;
-				isStop = false;
-			} else {
-
-				width = mContentLayoutMain.getMeasuredWidth();
-				currentWidth = width;
-			}
+			width = mContentLayoutMain.getMeasuredWidth();
 			height = mContentLayoutMain.getMeasuredHeight();
 			int flag = getSubViewWindowState();
 			// If sub window request full screen
@@ -1020,6 +1016,10 @@ public class VideoActivityV2 extends Activity {
 					.getAction())) {
 				// Listen quit request to make sure close all device
 				finish();
+			} else if (Intent.ACTION_SCREEN_OFF.equals(intent.getAction())) {
+				
+			} else if (Intent.ACTION_USER_PRESENT.equals(intent.getAction())) {
+				
 			}
 
 		}
@@ -1087,9 +1087,7 @@ public class VideoActivityV2 extends Activity {
 		//		.updateCameraOrientation(Surface.ROTATION_0);
 		VideoRecorder.DisplayRotation = getDisplayRotation();
 
-		Message m = Message.obtain(mVideoHandler, REQUEST_OPEN_OR_CLOSE_DEVICE,
-				1, 0, udc);
-		mVideoHandler.sendMessage(m);
+		openLocalCamera();
 		udc.setShowing(true);
 	}
 	
@@ -1111,11 +1109,26 @@ public class VideoActivityV2 extends Activity {
 		return 0;
 	}
 
+	
+	
 	private void closeLocalCamera() {
 		Message.obtain(
 				mVideoHandler,
 				REQUEST_OPEN_OR_CLOSE_DEVICE,
 				0,
+				0,
+				new UserDeviceConfig(V2GlobalEnum.GROUP_TYPE_CONFERENCE, conf
+						.getId(),
+						GlobalHolder.getInstance().getCurrentUserId(), "", null))
+				.sendToTarget();
+	}
+	
+	
+	private void openLocalCamera() {
+		Message.obtain(
+				mVideoHandler,
+				REQUEST_OPEN_OR_CLOSE_DEVICE,
+				1,
 				0,
 				new UserDeviceConfig(V2GlobalEnum.GROUP_TYPE_CONFERENCE, conf
 						.getId(),
@@ -1199,7 +1212,6 @@ public class VideoActivityV2 extends Activity {
 		} else {
 			updateAudioSpeaker(false);
 		}
-		isStop = true;
 	}
 
 	@Override
@@ -1255,7 +1267,7 @@ public class VideoActivityV2 extends Activity {
 		// call clear function from all service
 		ds.clearCalledBack();
 		cb.clearCalledBack();
-		ds.clearCalledBack();
+		cs.clearCalledBack();
 
 		mContext.stopService(new Intent(mContext,
 				ConferencMessageSyncService.class));
@@ -1358,6 +1370,9 @@ public class VideoActivityV2 extends Activity {
 			updateSpeakerState(isSpeaking);
 			// Resume audio
 			cb.updateAudio(true);
+			
+			// close local camera
+			openLocalCamera();
 
 
 		} else {
@@ -1368,6 +1383,9 @@ public class VideoActivityV2 extends Activity {
 			mVideoLayout.removeAllViews();
 			// suspend audio
 			cb.updateAudio(false);
+			
+			// close local camera
+			closeLocalCamera();
 		}
 		updateAudioSpeaker(resume);
 	}
@@ -1580,11 +1598,9 @@ public class VideoActivityV2 extends Activity {
 	private void updateAttendeeDevice(Attendee at,
 			List<UserDeviceConfig> devices) {
 		boolean layoutChanged = false;
-		List<UserDeviceConfig> currentAttUdevs = null;
-		if (at != null) {
-			currentAttUdevs = at.getmDevices();
-		}
-		for (UserDeviceConfig ud : devices) {
+		
+		for (int j =0; j < devices.size(); j++) {
+			UserDeviceConfig ud = devices.get(j);
 			for (int i = 0; i < mCurrentShowedSV.size(); i++) {
 				SurfaceViewW svw = mCurrentShowedSV.get(i);
 				// If remote user disable local camera device which
@@ -1596,19 +1612,17 @@ public class VideoActivityV2 extends Activity {
 						mCurrentShowedSV.remove(i);
 						mVideoLayout.removeView(svw.getView());
 						i--;
+					} else {
+						//Update already opened device
+						devices.set(j, svw.udc);
 					}
 
 				}
 			}
 
-			for (int i = 0; currentAttUdevs != null
-					&& i < currentAttUdevs.size(); i++) {
-				UserDeviceConfig cud = currentAttUdevs.get(i);
-				if (cud.getDeviceID().equals(ud.getDeviceID())) {
-					if (mAttendeeContainer != null) {
-						mAttendeeContainer.updateAttendeeDevice(at, ud);
-					}
-				}
+
+			if (mAttendeeContainer != null) {
+				mAttendeeContainer.resetAttendeeDevices(at, devices);
 			}
 		}
 		// adjust layout if we closed video
@@ -1733,8 +1747,7 @@ public class VideoActivityV2 extends Activity {
 				mDocContainer.updateCurrentDoc(doc);
 				break;
 			case DOC_PAGE_CANVAS_NOTIFICATION:
-				mDocContainer.drawShape(page.getDocId(), page.getNo(),
-						page.getVsMeta());
+				mDocContainer.drawShape(page.getDocId(), page.getNo(), shape);
 				break;
 			}
 			;

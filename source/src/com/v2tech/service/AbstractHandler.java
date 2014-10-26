@@ -141,7 +141,7 @@ public abstract class AbstractHandler extends Handler {
 			}
 			pendingList.add(new PendingObject(key, arg1, arg2, obj));
 			V2Log.i(this.getClass().getName() + "  : pend obj for " + key
-					+ "  " + pendingList.size() + "   " + pendingObjectHolder);
+					+ "  " + pendingList.size() + "   " + pendingObjectHolder.size());
 			return;
 		} else {
 			V2Log.i(this.getClass().getName() + "  : Notify listener: " + key
