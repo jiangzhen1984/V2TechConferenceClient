@@ -33,7 +33,7 @@ import com.v2tech.util.DateUtil;
 import com.v2tech.view.PublicIntent;
 import com.v2tech.view.bo.ConversationNotificationObject;
 import com.v2tech.view.conversation.MessageLoader;
-import com.v2tech.view.conversation.P2PConversation;
+import com.v2tech.view.conversation.ConversationP2PAVActivity;
 import com.v2tech.vo.AudioVideoMessageBean;
 import com.v2tech.vo.AudioVideoMessageBean.ChildMessageBean;
 import com.v2tech.vo.Conversation;
@@ -94,7 +94,7 @@ public class VoiceMessageDetailActivity extends Activity implements
 	private void initReceiver() {
 		receiver = new VoiceDetailReceiverBroadcast();
 		IntentFilter intentFilter = new IntentFilter();
-		intentFilter.addAction(P2PConversation.P2P_BROADCAST_MEDIA_UPDATE);
+		intentFilter.addAction(ConversationP2PAVActivity.P2P_BROADCAST_MEDIA_UPDATE);
 		intentFilter.addCategory(PublicIntent.DEFAULT_CATEGORY);
 		registerReceiver(receiver, intentFilter);
 	}

@@ -68,7 +68,7 @@ import com.v2tech.view.contacts.add.AddFriendHistroysHandler;
 import com.v2tech.view.conversation.MessageAuthenticationActivity;
 import com.v2tech.view.conversation.MessageBuilder;
 import com.v2tech.view.conversation.MessageLoader;
-import com.v2tech.view.conversation.P2PConversation;
+import com.v2tech.view.conversation.ConversationP2PAVActivity;
 import com.v2tech.view.group.CrowdDetailActivity;
 import com.v2tech.vo.AddFriendHistorieNode;
 import com.v2tech.vo.AudioVideoMessageBean;
@@ -238,7 +238,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 			intentFilter.setPriority(IntentFilter.SYSTEM_LOW_PRIORITY);
 			intentFilter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
 			intentFilter.addCategory(PublicIntent.DEFAULT_CATEGORY);
-			intentFilter.addAction(P2PConversation.P2P_BROADCAST_MEDIA_UPDATE);
+			intentFilter.addAction(ConversationP2PAVActivity.P2P_BROADCAST_MEDIA_UPDATE);
 			intentFilter.addAction(JNIService.JNI_BROADCAST_GROUP_NOTIFICATION);
 			intentFilter
 					.addAction(JNIService.JNI_BROADCAST_USER_UPDATE_NAME_OR_SIGNATURE);
@@ -1836,7 +1836,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 					Message.obtain(mHandler, UPDATE_USER_SIGN,
 							intent.getExtras().get("uid")).sendToTarget();
 				}
-			} else if (P2PConversation.P2P_BROADCAST_MEDIA_UPDATE.equals(intent
+			} else if (ConversationP2PAVActivity.P2P_BROADCAST_MEDIA_UPDATE.equals(intent
 					.getAction())) {
 				if (Conversation.TYPE_CONTACT == mCurrentTabFlag) {
 					long remoteID = intent.getLongExtra("remoteID", -1l);

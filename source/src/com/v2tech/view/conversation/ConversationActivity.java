@@ -111,7 +111,7 @@ import com.v2tech.vo.VMessageImageItem;
 import com.v2tech.vo.VMessageLinkTextItem;
 import com.v2tech.vo.VMessageTextItem;
 
-public class ConversationView extends Activity {
+public class ConversationActivity extends Activity {
 
 	private final int START_LOAD_MESSAGE = 1;
 	private final int LOAD_MESSAGE = 2;
@@ -1280,7 +1280,7 @@ public class ConversationView extends Activity {
 			// startActivityForResult(
 			// Intent.createChooser(intent, "Select Picture"),
 			// SELECT_PICTURE_CODE);
-			Intent intent = new Intent(ConversationView.this,
+			Intent intent = new Intent(ConversationActivity.this,
 					ConversationSelectImage.class);
 			startActivityForResult(intent, SELECT_PICTURE_CODE);
 		}
@@ -1343,7 +1343,7 @@ public class ConversationView extends Activity {
 		@Override
 		public void onClick(View arg0) {
 			if (SPUtil.checkCurrentAviNetwork(mContext)) {
-				Intent intent = new Intent(ConversationView.this,
+				Intent intent = new Intent(ConversationActivity.this,
 						ConversationSelectFileEntry.class);
 				startActivityForResult(intent, RECEIVE_SELECTED_FILE);
 			} else {

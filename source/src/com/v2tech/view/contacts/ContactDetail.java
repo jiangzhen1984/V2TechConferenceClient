@@ -126,6 +126,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 	private boolean isPad;
 	private Date bir;
 	private String fromPlace;
+	private boolean mVideoCallButtonEnable = true;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -270,7 +271,8 @@ public class ContactDetail extends Activity implements OnTouchListener {
 				tvAuthenticationState.setVisibility(View.VISIBLE);
 				tvAuthenticationState.setText("拒绝你的好友申请");
 				tvTitle.setText("验证通知");
-				((View)tvAuthenticationMessage.getParent()).setVisibility(View.VISIBLE);
+				((View) tvAuthenticationMessage.getParent())
+						.setVisibility(View.VISIBLE);
 				break;
 			}
 
@@ -802,7 +804,17 @@ public class ContactDetail extends Activity implements OnTouchListener {
 						Toast.LENGTH_SHORT).show();
 				return;
 			}
-			startVideoCall();
+			if (mVideoCallButtonEnable) {
+				mVideoCallButtonEnable=false;
+				startVideoCall();
+			}
+			lh.postDelayed(new Runnable() {
+
+				@Override
+				public void run() {
+					mVideoCallButtonEnable=true;
+				}
+			}, 1000);
 		}
 	};
 
