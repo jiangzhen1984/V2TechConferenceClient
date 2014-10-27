@@ -1,6 +1,5 @@
 package com.v2tech.view.conversation;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -1030,6 +1029,10 @@ public class MessageAuthenticationActivity extends Activity {
 
 			@Override
 			public void onClick(View v) {
+				if (isGroupInDeleteMode) {
+					Toast.makeText(mContext, R.string.crowd_message_deletion_mode_quit_required, Toast.LENGTH_SHORT).show();
+					return;
+				}
 				AcceptedButtonTag tag = (AcceptedButtonTag) v.getTag();
 				VMessageQualification msg = (VMessageQualification) tag.wrapper.obj;
 
