@@ -50,9 +50,9 @@ public class SearchService extends AbstractHandler {
 		}
 
 		initTimeoutMessage(SEARCH, DEFAULT_TIME_OUT_SECS, caller);
-
+		int startNo = (par.mPageNo - 1) * par.mPageSize;
 		if (par.mType == Type.CROWD) {
-			int startNo = (par.mPageNo - 1) * par.mPageSize;
+			
 			int gType = 0;
 			if (par.mType == Type.CROWD) {
 				gType = GroupType.CHATING.intValue();
@@ -62,9 +62,8 @@ public class SearchService extends AbstractHandler {
 			GroupRequest.getInstance().searchGroup(gType, par.text, startNo,
 					par.mPageSize);
 		} else if (par.mType == Type.MEMBER) {
-			int startNo = par.mPageNo * par.mPageSize;
 			ImRequest.getInstance().searchMember(par.text,
-					startNo == 0 ? 1 : startNo, par.mPageSize);
+					startNo, par.mPageSize);
 		}
 	}
 

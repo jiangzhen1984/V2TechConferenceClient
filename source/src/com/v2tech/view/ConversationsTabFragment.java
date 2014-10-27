@@ -2285,6 +2285,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 				switch (nestQualification.getType()) {
 				case CROWD_INVITATION:
 					VMessageQualificationInvitationCrowd invitation = (VMessageQualificationInvitationCrowd) nestQualification;
+					
 					content = invitation.getInvitationUser().getName()
 							+ mContext
 									.getText(R.string.crowd_invitation_content);

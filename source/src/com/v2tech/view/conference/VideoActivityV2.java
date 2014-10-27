@@ -20,7 +20,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
-import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.ImageFormat;
 import android.graphics.Rect;
@@ -72,6 +72,7 @@ import com.v2tech.service.GlobalHolder;
 import com.v2tech.service.Registrant;
 import com.v2tech.service.jni.PermissionUpdateIndication;
 import com.v2tech.util.DensityUtils;
+import com.v2tech.util.GlobalState;
 import com.v2tech.view.JNIService;
 import com.v2tech.view.PublicIntent;
 import com.v2tech.view.bo.GroupUserObject;
@@ -197,11 +198,13 @@ public class VideoActivityV2 extends Activity {
 	private boolean mLocalHolderIsCreate = false;
 
 	private int mVideoMaxCols = 2;
+	
+	private int mContentWidth = -1;
+	private int mContentHeight = -1;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 		setContentView(R.layout.activity_in_metting);
 		mContext = this;
 		dm = new DisplayMetrics();
@@ -331,6 +334,16 @@ public class VideoActivityV2 extends Activity {
 					.replace("[]", conf.getName()));
 		}
 
+	}
+	
+	
+
+	@Override
+	public void onConfigurationChanged(Configuration newConfig) {
+		super.onConfigurationChanged(newConfig);
+		mContentLayoutMain.measure(View.MeasureSpec.EXACTLY, View.MeasureSpec.EXACTLY);
+		this.mContentWidth = -1;
+		this.mContentHeight = -1;
 	}
 
 	private void initConfsListener() {
@@ -529,7 +542,7 @@ public class VideoActivityV2 extends Activity {
 	}
 
 	private void adjustContentLayout() {
-		int width = 0, height = 0;
+		int width, height;
 		int marginLeft = 0;
 
 		// Calculate offset
@@ -545,22 +558,28 @@ public class VideoActivityV2 extends Activity {
 
 			FrameLayout.LayoutParams fl = (FrameLayout.LayoutParams) mSubWindowLayout
 					.getLayoutParams();
-			if (mContentLayoutMain.getMeasuredWidth() == 0) {
+			if (mContentLayoutMain.getMeasuredWidth() == 0 || mContentWidth == -1 || mContentHeight == -1) {
 				mContentLayoutMain.measure(View.MeasureSpec.UNSPECIFIED,
 						View.MeasureSpec.UNSPECIFIED);
 			}
 
+			if (mContentWidth == -1) {
+				mContentWidth = mContentLayoutMain.getWidth();
+			}
+			if (mContentHeight == -1) {
+				mContentHeight = mContentLayoutMain.getHeight();
+			}
 			
-
-			width = mContentLayoutMain.getMeasuredWidth();
-			height = mContentLayoutMain.getMeasuredHeight();
+			
 			int flag = getSubViewWindowState();
 			// If sub window request full screen
 			if ((flag & TAG_SUB_WINDOW_STATE_FULL_SCRREN) == TAG_SUB_WINDOW_STATE_FULL_SCRREN) {
-				width = (width - marginLeft);
+				width = (mContentWidth - marginLeft);
 			} else {
-				width = (width - marginLeft) / 2;
+				width = (mContentWidth - marginLeft) / 2;
 			}
+			
+			height = mContentHeight;
 
 			if (fl == null) {
 				fl = new FrameLayout.LayoutParams(width, height);
@@ -578,10 +597,11 @@ public class VideoActivityV2 extends Activity {
 			}
 		}
 
+		//Update width and height for video layout
 		FrameLayout.LayoutParams fl = (FrameLayout.LayoutParams) mVideoLayout
 				.getLayoutParams();
-		width = mContentLayoutMain.getMeasuredWidth() - marginLeft;
-		height = mContentLayoutMain.getMeasuredHeight();
+		width = mContentWidth - marginLeft;
+		height = mContentHeight;
 		if (fl == null) {
 			fl = new FrameLayout.LayoutParams(width, height);
 		}
@@ -1296,12 +1316,25 @@ public class VideoActivityV2 extends Activity {
 		super.onRestoreInstanceState(savedInstanceState);
 	}
 
+	
+	/**
+	 * Update speaker flag according headset state
+	 * @param flag true means start, false means on stop
+	 */
 	private void updateAudioSpeaker(boolean flag) {
 		AudioManager audioManager;
 		audioManager = (AudioManager) mContext
 				.getSystemService(Context.AUDIO_SERVICE);
 		audioManager.setMode(AudioManager.MODE_NORMAL);
-		audioManager.setSpeakerphoneOn(flag);
+		
+		GlobalState gs = GlobalHolder.getInstance().getGlobalState();
+		if (gs.isBluetoothHeadsetPluged() || gs.isWiredHeadsetPluged()) {
+			audioManager.setSpeakerphoneOn(false);
+		} else {
+			audioManager.setSpeakerphoneOn(true);
+		}
+			
+		
 	}
 
 	private void showQuitDialog(String content) {
@@ -1361,7 +1394,9 @@ public class VideoActivityV2 extends Activity {
 
 			updateAllRemoteDevice(TAG_OPEN_DEVICE);
 
+			
 			adjustVideoLayout();
+			
 
 			// Send speaking status
 			doApplyOrReleaseSpeak(isSpeaking);

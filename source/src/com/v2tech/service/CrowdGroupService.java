@@ -79,8 +79,6 @@ public class CrowdGroupService extends AbstractHandler {
 	 */
 	public void createCrowdGroup(CrowdGroup crowd, List<User> invationUserList,
 			Registrant caller) {
-		this.initTimeoutMessage(CREATE_GROUP_MESSAGE, DEFAULT_TIME_OUT_SECS,
-				caller);
 		StringBuffer sb = new StringBuffer();
 		sb.append("<userlist>");
 		for (User u : invationUserList) {
@@ -88,6 +86,8 @@ public class CrowdGroupService extends AbstractHandler {
 		}
 		sb.append("</userlist>");
 
+		this.initTimeoutMessage(CREATE_GROUP_MESSAGE, DEFAULT_TIME_OUT_SECS,
+				caller);
 		GroupRequest.getInstance().createGroup(
 				Group.GroupType.CHATING.intValue(), crowd.toXml(),
 				sb.toString());
@@ -333,24 +333,7 @@ public class CrowdGroupService extends AbstractHandler {
 		FileRequest.getInstance().removeCallback(frCB);
 	}
 
-	/**
-	 * FIXME add comment
-	 * 
-	 * @comment-user:wenzl 2014年9月15日
-	 * @overview:
-	 * 
-	 * @param group
-	 * @param caller
-	 * @return:
-	 */
-	public void createGroup(CrowdGroup group, Registrant caller) {
-		// 对CREATE_GROUP_MESSAGE做超时处理，如果超时此消息不再通知上层。
-		this.initTimeoutMessage(CREATE_GROUP_MESSAGE, DEFAULT_TIME_OUT_SECS,
-				caller);
-		GroupRequest.getInstance().createGroup(
-				Group.GroupType.CHATING.intValue(), group.toXml(),
-				group.toGroupUserListXml());
-	}
+
 
 	/**
 	 * fetch files from server

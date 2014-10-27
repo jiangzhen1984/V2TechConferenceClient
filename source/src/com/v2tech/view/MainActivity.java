@@ -1,6 +1,5 @@
 package com.v2tech.view;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
@@ -21,7 +20,6 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -48,6 +46,7 @@ import com.v2tech.view.conference.VideoActivityV2;
 import com.v2tech.view.conversation.ConversationUpdateFileState;
 import com.v2tech.view.conversation.ConversationUpdateFileState.FileStateInterface;
 import com.v2tech.view.conversation.MessageBuilder;
+import com.v2tech.view.receiver.HeadSetPlugReceiver;
 import com.v2tech.view.widget.CommonAdapter.CommonAdapterItemWrapper;
 import com.v2tech.view.widget.TitleBar;
 import com.v2tech.vo.Conference;
@@ -73,6 +72,8 @@ public class MainActivity extends FragmentActivity implements
 	private ConferenceListener mConfListener;
 	
 	private List<CommonAdapterItemWrapper> messageArray;
+	
+	private HeadSetPlugReceiver localReceiver = new HeadSetPlugReceiver();
 
 	private static final int SUB_ACTIVITY_CODE_CREATE_CONF = 100;
 
@@ -160,8 +161,6 @@ public class MainActivity extends FragmentActivity implements
 	 */
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		Log.i("wzl","MainActivity onCreate");
-		
 		// Inflate the layout
 		setContentView(R.layout.activity_main);
 		// Initialise the TabHost
@@ -188,7 +187,6 @@ public class MainActivity extends FragmentActivity implements
 		this.overridePendingTransition(R.animator.left_in, R.animator.left_out);
 		ConversationUpdateFileState.getInstance().setFileStateInterface(this);
 		messageArray = new ArrayList<CommonAdapterItemWrapper>();
-		V2Log.d(" main onCreate ");
 	}
 
 	/**
@@ -311,6 +309,14 @@ public class MainActivity extends FragmentActivity implements
 		filter.addAction(PublicIntent.FINISH_APPLICATION);
 		filter.addAction(JNIService.JNI_BROADCAST_CONNECT_STATE_NOTIFICATION);
 		mContext.registerReceiver(receiver, filter);
+		
+		//Register listener for headset
+		IntentFilter filterHeadSet = new IntentFilter();
+		filterHeadSet.addAction(Intent.ACTION_HEADSET_PLUG);
+		Intent result = mContext.registerReceiver(localReceiver, filterHeadSet);
+		if (result != null) {
+			localReceiver.onReceive(this, result);
+		}
 	}
 
 	@Override
@@ -370,6 +376,8 @@ public class MainActivity extends FragmentActivity implements
 	protected void onDestroy() {
 		super.onDestroy();
 		mContext.unregisterReceiver(receiver);
+		//unregister for headset
+		mContext.unregisterReceiver(localReceiver);
 		mContext.stopService(new Intent(this.getApplicationContext(),
 				JNIService.class));
 		//Just for user remove application from recent task list

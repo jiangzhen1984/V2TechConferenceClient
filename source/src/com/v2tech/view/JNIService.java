@@ -470,6 +470,8 @@ public class JNIService extends Service {
 		@Override
 		public void OnLoginCallback(long nUserID, int nStatus, int nResult,
 				long serverTime) {
+			//Just request current logged in user information
+			ImRequest.getInstance().getUserBaseInfo(nUserID);
 		}
 
 		@Override
@@ -686,6 +688,14 @@ public class JNIService extends Service {
 			}
 		}
 
+		/**
+		 * 
+		 * @param type
+		 * @param g
+		 * @param user
+		 * @param reason
+		 * @return
+		 */
 		private VMessageQualification checkMessageAndSendBroadcast(
 				VMessageQualification.Type type, CrowdGroup g, User user,
 				String reason) {

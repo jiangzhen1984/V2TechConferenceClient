@@ -57,7 +57,7 @@ public class ContactsGroupActivity extends Activity {
 	private ContactsService contactService = new ContactsService();
 
 	private boolean changed;
-	private boolean inDeleteMode;
+	private boolean inDeleteMode = true;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -94,11 +94,6 @@ public class ContactsGroupActivity extends Activity {
 
 	@Override
 	public void onBackPressed() {
-		if (inDeleteMode) {
-			inDeleteMode = false;
-			adapter.notifyDataSetChanged();
-			return;
-		}
 		super.onBackPressed();
 	}
 

@@ -477,7 +477,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 			Wrapper wr = mList.get(i);
 			// Remove attendee devices, leave one device item
 			if (wr.a.getAttId() == att.getAttId()) {
-				if (wr.udc.isDefault()) {
+				if (wr.sortFlag == DEFAULT_DEVICE_FLAG) {
 					wr.udc = null;
 					defaultWrapper = wr;
 					index = i;

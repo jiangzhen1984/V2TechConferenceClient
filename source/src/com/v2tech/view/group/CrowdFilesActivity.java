@@ -320,9 +320,8 @@ public class CrowdFilesActivity extends Activity {
 					&& file.getUploader().getmUserId() == GlobalHolder
 							.getInstance().getCurrentUserId()) {
 				this.mUploadedFiles.remove(file);
-				if (this.mUploadedFiles.size() <= 0) {
-					mUploadingFileNotificationIcon
-							.setImageResource(R.drawable.crowd_file_icon);
+				if (this.mUploadedFiles.size() <=0) {
+					mUploadingFileNotificationIcon.setVisibility(View.GONE);
 				}
 			}
 

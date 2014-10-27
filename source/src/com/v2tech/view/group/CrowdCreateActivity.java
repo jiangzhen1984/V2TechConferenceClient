@@ -138,14 +138,14 @@ public class CrowdCreateActivity extends Activity {
 		mGroupConfirmButton = (TextView) findViewById(R.id.ws_common_activity_title_right_button);
 		mGroupConfirmButton.setText(R.string.common_confirm_name);
 		mGroupConfirmButton.setOnClickListener(confirmButtonListener);
-		//ÉèÖÃ×Ô¶¨ÒåÑÕÉ«µÄhintÌáÊ¾ÎÄ×Ö
+		//ï¿½ï¿½ï¿½ï¿½ï¿½Ô¶ï¿½ï¿½ï¿½ï¿½ï¿½É«ï¿½ï¿½hintï¿½ï¿½Ê¾ï¿½ï¿½ï¿½ï¿½
 		mGroupTitleET = (EditText) findViewById(R.id.group_create_group_name);
 		String hint = getResources().getString(R.string.crowd_create_name_input_hint);
 		SpannableStringBuilder style = new SpannableStringBuilder(hint);
 		style.setSpan(new ForegroundColorSpan(Color.rgb(194, 194, 194)), 0,  //common_gray_color_c2
 				hint.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 		mGroupTitleET.setHint(style);
-		//ÉèÖÃ×Ô¶¨ÒåÑÕÉ«ºÍ´óÐ¡µÄSpinnerÌáÊ¾ÎÄ×Ö
+		//ï¿½ï¿½ï¿½ï¿½ï¿½Ô¶ï¿½ï¿½ï¿½ï¿½ï¿½É«ï¿½Í´ï¿½Ð¡ï¿½ï¿½Spinnerï¿½ï¿½Ê¾ï¿½ï¿½ï¿½ï¿½
 		mRuleSpinner = (Spinner) findViewById(R.id.group_create_group_rule);
 		ArrayAdapter<String> adapter = new ArrayAdapter<String>(mContext, R.layout.crowd_create_activity_spinner_item);
 		String level[] = getResources().getStringArray(R.array.crowd_rules);
@@ -359,6 +359,9 @@ public class CrowdCreateActivity extends Activity {
 		}
 
 	};
+	
+	
+	private ProgressDialog mCreateWaitingDialog;
 
 	private OnClickListener confirmButtonListener = new OnClickListener() {
 
@@ -403,6 +406,15 @@ public class CrowdCreateActivity extends Activity {
 				}
 
 				List<User> userList = new ArrayList<User>(mUserList);
+				if (mCreateWaitingDialog != null && mCreateWaitingDialog.isShowing()) {
+					mCreateWaitingDialog.dismiss();
+				}
+				mCreateWaitingDialog = ProgressDialog.show(
+						mContext,
+						"",
+						mContext.getResources().getString(
+								R.string.notification_watiing_process), true);
+				
 				//Do not add userList to crowd, because this just invitation.
 				cg.createCrowdGroup(crowd, userList, new Registrant(mLocalHandler,
 						CREATE_GROUP_MESSAGE, crowd));
@@ -543,6 +555,7 @@ public class CrowdCreateActivity extends Activity {
 				updateUserToAttendList((User) msg.obj);
 				break;
 			case CREATE_GROUP_MESSAGE: {
+				mCreateWaitingDialog.dismiss();
 				JNIResponse recr = (JNIResponse) msg.obj;
 				if (recr.getResult() == JNIResponse.Result.SUCCESS) {
 					CrowdGroup cg = (CrowdGroup) recr.callerObject;
@@ -567,7 +580,7 @@ public class CrowdCreateActivity extends Activity {
 					crowdIntent.addCategory(PublicIntent.DEFAULT_CATEGORY);
 					crowdIntent.putExtra("cid", id);
 					mContext.startActivity(crowdIntent);
-
+					
 					// finish current activity
 					finish();
 				} else {

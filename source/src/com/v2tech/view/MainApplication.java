@@ -8,13 +8,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.ref.WeakReference;
-import java.math.BigInteger;
-import java.security.MessageDigest;
 import java.util.List;
 import java.util.Vector;
 
 import net.sourceforge.pinyin4j.PinyinHelper;
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningTaskInfo;
@@ -45,6 +42,7 @@ import com.V2.jni.VideoRequest;
 import com.V2.jni.WBRequest;
 import com.V2.jni.util.V2Log;
 import com.v2tech.R;
+import com.v2tech.util.AlgorithmUtil;
 import com.v2tech.util.CrashHandler;
 import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.LogcatThread;
@@ -52,7 +50,6 @@ import com.v2tech.util.Notificator;
 import com.v2tech.util.StorageUtil;
 import com.v2tech.view.conference.VideoActivityV2;
 
-@TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
 public class MainApplication extends Application {
 
 	private static final String TAG = "MainApplication";
@@ -180,8 +177,8 @@ public class MainApplication extends Application {
 					V2Log.e("readed sqlite file failed... inputStream is null");
 					return;
 				}
-				String md5 = getFileMD5(is);
-				String currentMD5 = getFileMD5(new FileInputStream(file));
+				String md5 = AlgorithmUtil.getFileMD5(is);
+				String currentMD5 = AlgorithmUtil.getFileMD5(new FileInputStream(file));
 				if (md5.equals(currentMD5))
 					needCopy = false;
 				else
@@ -311,21 +308,12 @@ public class MainApplication extends Application {
 		V2Log.e("=================== low memeory :");
 	}
 
-	@TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
 	@Override
 	public void onTrimMemory(int level) {
 		super.onTrimMemory(level);
 		V2Log.e("=================== trim memeory :" + level);
 	}
 
-	private void initGlobalConfiguration() {
-		Configuration conf = getResources().getConfiguration();
-		if (conf.smallestScreenWidthDp >= 600) {
-			conf.orientation = Configuration.ORIENTATION_LANDSCAPE;
-		} else {
-			conf.orientation = Configuration.ORIENTATION_PORTRAIT;
-		}
-	}
 
 	public void requestQuit() {
 		for (int i = 0; i < list.size(); i++) {
@@ -350,7 +338,6 @@ public class MainApplication extends Application {
 		}, 1000);
 	}
 
-	@TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
 	class LocalActivityLifecycleCallBack implements ActivityLifecycleCallbacks {
 
 		private Object mLock = new Object();
@@ -466,30 +453,5 @@ public class MainApplication extends Application {
 		}
 	}
 
-	/**
-	 * 获取单个文件的MD5值！
-	 * 
-	 * @param file
-	 * @return
-	 */
-	private String getFileMD5(InputStream ips) {
-		if (ips == null) {
-			return null;
-		}
-		MessageDigest digest = null;
-		byte buffer[] = new byte[1024];
-		int len;
-		try {
-			digest = MessageDigest.getInstance("MD5");
-			while ((len = ips.read(buffer, 0, 1024)) != -1) {
-				digest.update(buffer, 0, len);
-			}
-			ips.close();
-		} catch (Exception e) {
-			e.printStackTrace();
-			return null;
-		}
-		BigInteger bigInt = new BigInteger(1, digest.digest());
-		return bigInt.toString(16);
-	}
+
 }

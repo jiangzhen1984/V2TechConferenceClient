@@ -99,6 +99,8 @@ public class GlobalHolder {
 			Long key = Long.valueOf(id);
 			User cu = mUserHolder.get(key);
 			if (cu != null) {
+				//Update user property for received user information
+				cu.updateUser(false);
 				
 				if (u.getAddress() != null) {
 					cu.setAddress(u.getAddress());
@@ -140,7 +142,8 @@ public class GlobalHolder {
 				cu.updateUser(false);
 				return cu;
 			}
-			
+			//Update user property for received user information
+			u.updateUser(false);
 			mUserHolder.put(key, u);
 			
 			Bitmap avatar = mAvatarBmHolder.get(key);
@@ -152,6 +155,14 @@ public class GlobalHolder {
 		return u;
 	}
 
+	/**
+	 * Get user object according user ID<br>
+	 * If id is negative, will return null.<br>
+	 * Otherwise user never return null. If application doesn't receive user information from server.<br>
+	 * User property is dirty {@link User#isDirty()}
+	 * @param id
+	 * @return
+	 */
 	public User getUser(long id) {
 		if (id <= 0) {
 			return null;
