@@ -13,7 +13,8 @@
    
    <string name="search_title_result">查找结果</string>
    
-   <string name="search_result_toast_no_entry">未找到符合条件</string>
+   <string name="search_result_toast_no_member_entry">未找到符合条件的用户</string>
+   <string name="search_result_toast_no_crowd_entry">未找到符合条件的群</string>
    <string name="search_result_toast_error">搜索失败</string>
 
 </resources>

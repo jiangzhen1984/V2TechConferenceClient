@@ -157,7 +157,14 @@ public class SearchActivity extends Activity {
 				if (jni.getResult() == JNIResponse.Result.SUCCESS) {
 					SearchedResult result = (SearchedResult)jni.resObj;
 					if (result.getList().size() <= 0) {
-						showToast(R.string.search_result_toast_no_entry);
+						switch (mType) {
+						case CROWD:
+							showToast(R.string.search_result_toast_no_crowd_entry);
+							break;
+						case MEMBER:
+							showToast(R.string.search_result_toast_no_member_entry);
+							break;
+						}
 					} else {
 						Intent i = new Intent();
 						i.setClass(getApplicationContext(), SearchedResultActivity.class);
