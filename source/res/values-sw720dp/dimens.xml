@@ -132,4 +132,6 @@
 	  <!-- crowd_detail_activity  -->
 	<dimen name="crowd_summary_max_width">600dp</dimen>
 	
+	 <!-- common_conversation_layout -->
+    <dimen name="common_conversation_layout_margin_top">15dp</dimen>
 </resources>

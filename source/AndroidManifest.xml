@@ -3,7 +3,7 @@
     package="com.v2tech"
     android:sharedUserLabel="@string/app_name"
     android:versionCode="2"
-    android:versionName="4.0.0.14" >
+    android:versionName="4.0.0.15" >
 
     <uses-sdk
         android:minSdkVersion="14"
@@ -274,6 +274,7 @@
         </activity>
         <activity
             android:name="com.v2tech.view.group.CrowdApplicationActivity"
+            android:configChanges="orientation|screenSize"
             android:screenOrientation="nosensor" >
             <intent-filter>
                 <action android:name="com.v2tech.crowd_application_activity" />
@@ -328,6 +329,7 @@
         <activity
             android:name="com.v2tech.view.contacts.VoiceMessageActivity"
             android:screenOrientation="nosensor"
+            android:configChanges="orientation|screenSize"
             android:windowSoftInputMode="stateHidden|adjustPan" >
         </activity>
         <activity

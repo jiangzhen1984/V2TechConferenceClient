@@ -122,4 +122,7 @@
 	   <!-- specific voice item activity  -->
 	<dimen name="specific_voice_message_margin_right">15dp</dimen>
 	<dimen name="specific_voice_message_margin_left">15dp</dimen>
+	
+	<!-- common_conversation_layout -->
+    <dimen name="common_conversation_layout_margin_top">15dp</dimen>
 </resources>

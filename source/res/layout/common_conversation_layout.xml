@@ -17,6 +17,7 @@
             android:layout_centerInParent="true"
             android:layout_marginBottom="@dimen/conversation_view_margin"
             android:layout_marginTop="@dimen/conversation_view_margin"
+            android:clickable="false"
             android:src="@drawable/selectfile_type_pdf" />
         <ImageView
             android:id="@+id/ws_common_conversation_layout_notificator"
@@ -76,8 +77,9 @@
             android:id="@+id/ws_common_conversation_layout_belowContent"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_alignParentTop="false"
             android:layout_below="@+id/ws_common_conversation_layout_topContent"
-            android:layout_marginTop="12dp"
+            android:layout_marginTop="@dimen/common_conversation_layout_margin_top"
             android:layout_toRightOf="@+id/ws_specific_voice_direction_icon"
             android:ellipsize="end"
             android:gravity="bottom"

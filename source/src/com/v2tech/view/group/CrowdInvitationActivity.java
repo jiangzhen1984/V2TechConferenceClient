@@ -20,6 +20,7 @@ import com.v2tech.service.Registrant;
 import com.v2tech.view.JNIService;
 import com.v2tech.view.PublicIntent;
 import com.v2tech.view.bo.ConversationNotificationObject;
+import com.v2tech.view.conversation.MessageAuthenticationActivity;
 import com.v2tech.view.conversation.MessageBuilder;
 import com.v2tech.vo.Crowd;
 import com.v2tech.vo.CrowdConversation;
@@ -62,6 +63,7 @@ public class CrowdInvitationActivity extends Activity {
 	private VMessageQualification vq;
 	private State mState = State.DONE;
 	private boolean isInRejectReasonMode = false;
+	private boolean isReturnData;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -139,6 +141,7 @@ public class CrowdInvitationActivity extends Activity {
 				crowd.getCreator(), null);
 		vq.setReadState(VMessageQualification.ReadState.READ);
 		vq.setQualState(VMessageQualification.QualificationState.REJECT);
+		// Update message state to database;
 		MessageBuilder.updateQualicationMessage(mContext, vq);
 		updateView(false);
 	}
@@ -224,11 +227,6 @@ public class CrowdInvitationActivity extends Activity {
 			if (!isInRejectReasonMode) {
 				updateView(!isInRejectReasonMode);
 			}
-			
-			// Update message state to database;
-			vq.setQualState(QualificationState.REJECT);
-			vq.setReadState(ReadState.READ);
-			MessageBuilder.updateQualicationMessage(mContext, vq);
 		}
 
 	};
@@ -240,6 +238,14 @@ public class CrowdInvitationActivity extends Activity {
 			if (isInRejectReasonMode) {
 				updateView(!isInRejectReasonMode);
 				return;
+			}
+			
+			if(isReturnData){
+				Intent intent = new Intent(CrowdInvitationActivity.this,
+						MessageAuthenticationActivity.class);
+				intent.putExtra("qualificationID", vq.getId());
+				intent.putExtra("qualState", vq.getQualState());
+				setResult(4 , intent);
 			}
 			onBackPressed();
 		}
@@ -278,6 +284,7 @@ public class CrowdInvitationActivity extends Activity {
 
 		@Override
 		public void handleMessage(Message msg) {
+			isReturnData = true;
 			synchronized (mState) {
 				mState = State.DONE;
 			}

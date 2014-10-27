@@ -111,6 +111,8 @@
     <dimen name="message_body_file_item_progress_action_button_margin_left">10dp</dimen>
     <dimen name="message_body_failed_size">30dp</dimen>
     
+    <!-- common_conversation_layout -->
+    <dimen name="common_conversation_layout_margin_top">15dp</dimen>
     
         <!-- message voice dialog layout -->
     <dimen name="message_voice_dialog_width">230dp</dimen>

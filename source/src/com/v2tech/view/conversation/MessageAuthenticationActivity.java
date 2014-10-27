@@ -1,5 +1,6 @@
 package com.v2tech.view.conversation;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -72,6 +73,7 @@ public class MessageAuthenticationActivity extends Activity {
 	private final static int ACCEPT_INVITATION_DONE = 1;
 	private final static int PROMPT_TYPE_FRIEND = 2;
 	private final static int PROMPT_TYPE_GROUP = 3;
+	private final static int AUTHENTICATION_RESULT = 4;
 
 	public static final String tableName = "AddFriendHistories";
 	// R.id.message_authentication
@@ -261,8 +263,7 @@ public class MessageAuthenticationActivity extends Activity {
 										JNIService.JNI_BROADCAST_CROWD_INVATITION);
 								i.addCategory(JNIService.JNI_ACTIVITY_CATEGROY);
 								i.putExtra("crowd", crowd);
-								i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-								mContext.startActivity(i);
+								startActivityForResult(i, AUTHENTICATION_RESULT);
 							} else if (msg.getType() == VMessageQualification.Type.CROWD_APPLICATION) {
 								VMessageQualificationApplicationCrowd amsg = (VMessageQualificationApplicationCrowd) msg;
 								Intent i = new Intent();
@@ -436,6 +437,29 @@ public class MessageAuthenticationActivity extends Activity {
 		}
 		if (mCrowdAuthenticationBroadcastReceiver != null) {
 			unregisterReceiver(mCrowdAuthenticationBroadcastReceiver);
+		}
+	}
+	
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+		switch (resultCode) {
+		case AUTHENTICATION_RESULT:
+			if(data != null){
+				long id = data.getLongExtra("qualificationID", -1l);
+				QualificationState state = (QualificationState) data.getSerializableExtra("qualState");
+				if(id != -1l){
+					for (ListItemWrapper wrapper : mMessageList) {
+						VMessageQualification message = (VMessageQualification) wrapper.obj;
+						if(message.getId() == id){
+							message.setQualState(state);
+							groupAdapter.notifyDataSetChanged();
+							break;
+						}
+					}
+				}
+			}
+			break;
 		}
 	}
 

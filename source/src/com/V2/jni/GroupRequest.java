@@ -165,7 +165,8 @@ public class GroupRequest {
 	 * 
 	 * @param groupType
 	 * @param nGroupID
-	 * @param nUserID
+	 * @param nUserID 
+	 * 			the creator user id of crowd group , not current login user id
 	 * @param reason
 	 */
 	public native void refuseInviteJoinGroup(int groupType, long nGroupID,
@@ -178,7 +179,7 @@ public class GroupRequest {
 	 * @param sGroupInfo
 	 * @param sAdditInfo
 	 */
-	public native void applyJoinGroup(int groupType, String sGroupInfo,
+	public native void applyJoinGroup(int groupType, long nGroupID,
 			String sAdditInfo);
 
 	/**

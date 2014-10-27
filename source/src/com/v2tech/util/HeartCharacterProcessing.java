@@ -1,5 +1,7 @@
 package com.v2tech.util;
 
+import com.V2.jni.util.V2Log;
+
 import android.text.TextUtils;
 
 public class HeartCharacterProcessing {
@@ -66,9 +68,12 @@ public class HeartCharacterProcessing {
 			str = str.replace("&amp;", "&");
 			str = str.replace("&apos;", "'");
 			str = str.replace("&quot;", "\"");
+			return str;
 		}
-
-		return str;
+		else{
+			V2Log.e("HeartCharacterProcessing : reverse failed...the given String is --" + str);
+			return "";
+		}
 	}
 
 }

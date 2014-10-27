@@ -901,7 +901,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 			} else {
 				if (newestMediaMessage.readSatate == AudioVideoMessageBean.STATE_UNREAD) {
 					voiceLayout.update(null, startDate, true);
-					updateUnreadVoiceConversation(true);
+					notificationListener.updateNotificator(mCurrentTabFlag, true);
 				} else
 					voiceLayout.update(null, startDate, false);
 			}
@@ -1473,7 +1473,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 			updateUnreadConversation(cov);
 
 			// update voice phone state
-			updateUnreadVoiceConversation(false);
+			notificationListener.updateNotificator(mCurrentTabFlag, false);
 		}
 	};
 
@@ -1683,27 +1683,22 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 					switch (item.cov.getType()) {
 					case Conversation.TYPE_VERIFICATION_MESSAGE:
 						ConversationFirendAuthenticationData verification = ((ConversationFirendAuthenticationData) item.cov);
-						if (verification.getUser() != null) {
-							if (TextUtils.isEmpty(verification.getUser()
-									.getName())) {
-								User inviUser = GlobalHolder.getInstance()
-										.getUser(
-												verification.getUser()
-														.getmUserId());
-								if (inviUser != null)
-									verification.setUser(inviUser);
-							}
-
-							verification
-									.setMsg(verification.getUser().getName()
-											+ mContext
-													.getText(R.string.crowd_invitation_content));
-							verificationMessageItemLayout.update();
-							adapter.notifyDataSetChanged();
-							V2Log.d(TAG,
-									"Successfully updated verification the user infos , user name is :"
-											+ verification.getUser().getName());
-						}
+						User inviUser = GlobalHolder.getInstance()
+								.getUser(
+										verification.getUser()
+												.getmUserId());
+						if (inviUser != null)
+							verification.setUser(inviUser);
+						
+						verification
+								.setMsg(verification.getUser().getName()
+										+ mContext
+												.getText(R.string.crowd_invitation_content));
+						verificationMessageItemLayout.update();
+						adapter.notifyDataSetChanged();
+//							V2Log.d(TAG,
+//									"Successfully updated verification the user infos , user name is :"
+//											+ verification.getUser().getName());
 						break;
 					case Conversation.TYPE_CONTACT:
 						ContactConversation contact = ((ContactConversation) item.cov);
@@ -2444,24 +2439,5 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 		i.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
 		i.putExtra("obj", new ConversationNotificationObject(cov));
 		startActivity(i);
-	}
-
-	/**
-	 * Update main activity to show or hide notificator
-	 * 
-	 * @param b
-	 */
-	private void updateUnreadVoiceConversation(boolean b) {
-
-		if (voiceLayout == null) {
-			Log.e(TAG,
-					"update unread voice conversationing , the voiceLayout is null");
-			return;
-		}
-		// Update main activity to show or hide notificator
-		if (b)
-			this.notificationListener.updateNotificator(mCurrentTabFlag, true);
-		else
-			this.notificationListener.updateNotificator(mCurrentTabFlag, false);
 	}
 }

@@ -1,13 +1,10 @@
 package com.v2tech.view.conference;
 
-import java.util.List;
-
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Handler;
 import android.text.TextUtils;
 import android.util.AttributeSet;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
@@ -23,11 +20,7 @@ import com.v2tech.util.MessageUtil;
 import com.v2tech.view.conversation.MessageLoader;
 import com.v2tech.vo.ConferenceConversation;
 import com.v2tech.vo.ContactConversation;
-import com.v2tech.vo.ContactGroup;
 import com.v2tech.vo.Conversation;
-import com.v2tech.vo.ConversationFirendAuthenticationData;
-import com.v2tech.vo.CrowdConversation;
-import com.v2tech.vo.Group;
 import com.v2tech.vo.User;
 import com.v2tech.vo.VMessage;
 

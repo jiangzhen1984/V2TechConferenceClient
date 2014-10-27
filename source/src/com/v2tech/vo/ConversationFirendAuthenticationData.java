@@ -1,38 +1,24 @@
 package com.v2tech.vo;
 
 
-public class ConversationFirendAuthenticationData extends Conversation{
-	
-	private CharSequence msg;
+public class ConversationFirendAuthenticationData extends Conversation {
+
 	private User user;
 	private VerificationMessageType messageType;
 
-	public ConversationFirendAuthenticationData(int mType, long mExtId){
-		super(mType,mExtId);
+	public ConversationFirendAuthenticationData(int mType, long mExtId) {
+		super(mType, mExtId);
 		messageType = VerificationMessageType.CONTACT_TYPE;
 	}
 
-
-	
-	public CharSequence getMsg() {
-		return msg;
-	}
-
-
-	public void setMsg(CharSequence msg) {
-		this.msg=msg;
-	}
-	
-	
 	public User getUser() {
 		return user;
 	}
 
-
 	public void setUser(User user) {
 		this.user = user;
 	}
-	
+
 	public VerificationMessageType getMessageType() {
 		return messageType;
 	}
@@ -41,9 +27,8 @@ public class ConversationFirendAuthenticationData extends Conversation{
 		this.messageType = messageType;
 	}
 
-	
 	public enum VerificationMessageType {
-		CROWD_TYPE(0), CONTACT_TYPE(1) , UNKNOWN(2);
+		CROWD_TYPE(0), CONTACT_TYPE(1), UNKNOWN(2);
 
 		private int type;
 

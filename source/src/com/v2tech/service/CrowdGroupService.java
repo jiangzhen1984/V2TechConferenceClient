@@ -217,7 +217,7 @@ public class CrowdGroupService extends AbstractHandler {
 		}
 		mPendingCrowdId = crowd.getId();
 		GroupRequest.getInstance().applyJoinGroup(
-				Group.GroupType.CHATING.intValue(), crowd.toXml(),
+				Group.GroupType.CHATING.intValue(), crowd.getId(),
 				additional == null ? "" : additional);
 		mPendingCrowdId = 0;
 		sendResult(caller, new JNIResponse(JNIResponse.Result.SUCCESS));

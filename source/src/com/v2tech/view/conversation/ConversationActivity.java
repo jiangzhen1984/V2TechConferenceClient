@@ -99,6 +99,7 @@ import com.v2tech.view.widget.CommonAdapter.CommonAdapterItemWrapper;
 import com.v2tech.vo.Conversation;
 import com.v2tech.vo.CrowdGroup;
 import com.v2tech.vo.FileInfoBean;
+import com.v2tech.vo.NetworkStateCode;
 import com.v2tech.vo.OrgGroup;
 import com.v2tech.vo.User;
 import com.v2tech.vo.UserDeviceConfig;
@@ -129,7 +130,7 @@ public class ConversationActivity extends Activity {
 	private static final int VOICE_DIALOG_FLAG_RECORDING = 1;
 	private static final int VOICE_DIALOG_FLAG_CANCEL = 2;
 	private static final int VOICE_DIALOG_FLAG_WARING_FOR_TIME_TOO_SHORT = 3;
-	private static final String TAG = "ConversationView";
+	private static final String TAG = "ConversationActivity";
 	protected static final int RECEIVE_SELECTED_FILE = 1000;
 
 	private int offset = 0;
@@ -210,7 +211,6 @@ public class ConversationActivity extends Activity {
 	private Bundle bundle; // onCreate的savedInstanceState..
 	private View root; // createVideoDialog的View
 	private SparseArray<VMessage> messageAllID;
-	private List<VMessage> currentGetMessages;
 	private long lastMessageBodyShowTime = 0;
 	private long intervalTime = 15000; // 显示消息时间状态的间隔时间
 	private boolean isReLoading; // 用于onNewIntent判断是否需要重新加载界面聊天数据
@@ -270,6 +270,7 @@ public class ConversationActivity extends Activity {
 		filter.addAction(PublicIntent.BROADCAST_CROWD_QUIT_NOTIFICATION);
 		filter.addAction(JNIService.BROADCAST_CROWD_NEW_UPLOAD_FILE_NOTIFICATION);
 		filter.addAction(JNIService.JNI_BROADCAST_KICED_CROWD);
+		filter.addAction(JNIService.JNI_BROADCAST_CONNECT_STATE_NOTIFICATION);
 		registerReceiver(receiver, filter);
 	}
 
@@ -469,11 +470,33 @@ public class ConversationActivity extends Activity {
 		this.unregisterReceiver(receiver);
 		GlobalConfig.isConversationOpen = false;
 		ConversationUpdateFileState.getInstance().executeUpdate(messageArray);
-//		if (currentConversationViewType == V2GlobalEnum.GROUP_TYPE_USER
-//				&& MessageLoader.getNewestMessage(mContext, user1Id, user2Id) == null)
-		if (messageArray.size() <= 0)
-			notificateConversationUpdate(false, cov.getExtId(), true);
+		checkMessageEmpty();
 		finishWork();
+	}
+
+	private void checkMessageEmpty() {
+		
+		boolean isDelete = false;
+		ConversationNotificationObject obj = null;
+		if (currentConversationViewType == V2GlobalEnum.GROUP_TYPE_USER){
+			isDelete = MessageLoader.getNewestMessage(mContext, user1Id, user2Id) == null ? true : false;
+			obj = new ConversationNotificationObject(Conversation.TYPE_CONTACT,
+					user2Id);
+		}
+		else if(currentConversationViewType == V2GlobalEnum.GROUP_TYPE_CROWD){
+			isDelete = MessageLoader.getNewestGroupMessage(mContext, V2GlobalEnum.GROUP_TYPE_CROWD, groupId) == null ? true : false;
+			obj = new ConversationNotificationObject(Conversation.TYPE_CONTACT,
+					groupId);
+		}
+		
+		if(isDelete){
+			Intent i = new Intent(PublicIntent.REQUEST_UPDATE_CONVERSATION);
+			i.addCategory(PublicIntent.DEFAULT_CATEGORY);
+			i.putExtra("obj", obj);
+			i.putExtra("isFresh", false);
+			i.putExtra("isDelete", true);
+			mContext.sendBroadcast(i);
+		}
 	}
 
 	private void finishWork() {
@@ -2129,14 +2152,11 @@ public class ConversationActivity extends Activity {
 			VMessageAdater va = (VMessageAdater) messageArray.get(i);
 			if (vm.getId() == ((VMessage) va.getItemObject()).getId()) {
 				messageArray.remove(i);
-				if (messageArray.size() < currentGetMessages.size() / 2) {
-					android.os.Message.obtain(lh, START_LOAD_MESSAGE)
-							.sendToTarget();
-					isLoading = false;
-					V2Log.e(TAG, "自动开始加载");
-				}
+				List<VMessage> messagePages = MessageLoader.loadGroupMessageByPage(mContext,
+						Conversation.TYPE_GROUP, groupId, 1, messageArray.size());
+				if(messagePages != null && messagePages.size() >= 0)
+					messageArray.add(0 , new VMessageAdater(messagePages.get(0)));
 				V2Log.d(TAG, "现在集合长度：" + messageArray.size());
-				V2Log.d(TAG, "总集合长度：" + currentGetMessages.size());
 				return true;
 			}
 		}
@@ -2461,6 +2481,13 @@ public class ConversationActivity extends Activity {
 						notificateConversationUpdate(true, vm.getId());
 					}
 				}
+			} else if (intent.getAction().equals(
+					JNIService.JNI_BROADCAST_CONNECT_STATE_NOTIFICATION)) {
+				NetworkStateCode code = (NetworkStateCode) intent.getExtras()
+						.get("state");
+				if (code != NetworkStateCode.CONNECTED) {
+					
+				}
 			}
 		}
 
@@ -2493,7 +2520,6 @@ public class ConversationActivity extends Activity {
 						else
 							array.get(i).setShowTime(false);
 					}
-					currentGetMessages = array;
 					for (int i = 0; i < array.size(); i++) {
 						if (messageAllID.get((int) array.get(i).getId()) != null) {
 							Log.e(TAG, "happen erupt , the message ："
@@ -2558,7 +2584,7 @@ public class ConversationActivity extends Activity {
 				MessageLoader.deleteMessage(mContext, message);
 				adapter.notifyDataSetChanged();
 				// Update conversation
-				notificateConversationUpdate(true, message.getId());
+				notificateConversationUpdate(false, message.getId());
 				break;
 			case FILE_STATUS_LISTENER:
 				FileTransStatusIndication ind = (FileTransStatusIndication) (((AsyncResult) msg.obj)

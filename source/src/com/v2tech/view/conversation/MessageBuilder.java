@@ -877,8 +877,7 @@ public class MessageBuilder {
 				crowdGroupID);
 		if (group == null) {
 			group = new CrowdGroup(crowdGroupID, v2Group.name, GlobalHolder
-					.getInstance().getUser(v2Group.owner.uid), new Date(
-					saveDate));
+					.getInstance().getUser(v2Group.owner.uid), new Date());
 			group.setBrief(v2Group.brief);
 			group.setAnnouncement(v2Group.announce);
 			group.setAuthType(CrowdGroup.AuthType.fromInt(authType));

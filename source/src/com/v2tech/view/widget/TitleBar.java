@@ -92,7 +92,7 @@ public class TitleBar {
 		if (conf.smallestScreenWidthDp >= 600) {
 			padding = DensityUtils.dip2px(context, 2);
 		} else {
-			padding = DensityUtils.dip2px(context, 20);
+			padding = DensityUtils.dip2px(context, 12);
 		}
 	}
 
