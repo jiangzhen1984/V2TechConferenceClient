@@ -21,8 +21,10 @@ import com.v2tech.db.ContentDescriptor.HistoriesMessage;
 import com.v2tech.db.DataBaseContext;
 import com.v2tech.db.V2TechDBHelper;
 import com.v2tech.service.GlobalHolder;
+import com.v2tech.util.DateUtil;
 import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.XmlParser;
+import com.v2tech.vo.AddFriendHistorieNode;
 import com.v2tech.vo.AudioVideoMessageBean;
 import com.v2tech.vo.CrowdGroup;
 import com.v2tech.vo.User;
@@ -812,6 +814,29 @@ public class MessageLoader {
 	public static int deleteMessage(Context context, VMessage vm) {
 		if (vm == null)
 			return -1;
+		
+		long remoteID = 0;
+		if(vm.getMsgCode() == V2GlobalEnum.GROUP_TYPE_USER){
+			
+			if(vm.getFromUser() == null || vm.getToUser() == null){
+				V2Log.e(TAG, "delete user to user chat message failed.. beacuse fromUser or toUser is null");
+				return -1;
+			}
+			
+			if(vm.getFromUser().getmUserId() == GlobalHolder.getInstance().getCurrentUserId())
+				remoteID = vm.getToUser().getmUserId();
+			else
+				remoteID = vm.getFromUser().getmUserId();
+		}
+		
+		if (!isTableExist(
+				context,
+				vm.getMsgCode(),
+				vm.getGroupId(),
+				remoteID,
+				vm.getMsgCode() == V2GlobalEnum.GROUP_TYPE_USER ? MessageLoader.CONTACT_TYPE
+						: MessageLoader.CROWD_TYPE))
+			return -1;
 
 		DataBaseContext mContext = new DataBaseContext(context);
 		int ret = mContext.getContentResolver().delete(
@@ -1059,6 +1084,31 @@ public class MessageLoader {
 				ContentDescriptor.HistoriesCrowd.CONTENT_URI, values, where,
 				selectionArgs);
 	}
+	
+	/**
+	 * 更新群加好友的记录的已读和未读状态
+	 * @param context
+	 * @return
+	 */
+	public static int updateFriendVerificationReadState(Context context) {
+
+		User currentUser = GlobalHolder.getInstance().getCurrentUser();
+		if (currentUser == null)
+			return -1;
+
+		DataBaseContext mContext = new DataBaseContext(context);
+		ContentValues values = new ContentValues();
+		values.put(
+				ContentDescriptor.HistoriesAddFriends.Cols.HISTORY_MEDIA_READ_STATE,
+				1);
+		String where = ContentDescriptor.HistoriesAddFriends.Cols.OWNER_USER_ID
+				+ "= ?";
+		String[] selectionArgs = new String[] { String.valueOf(currentUser.getmUserId()) };
+		return mContext.getContentResolver().update(
+				ContentDescriptor.HistoriesAddFriends.CONTENT_URI, values, where,
+				selectionArgs);
+	}
+
 
 	// private static void loadVMessageItem(Context context, VMessage vm,
 	// int msgType) {
@@ -1146,7 +1196,72 @@ public class MessageLoader {
 	//
 	// cur.close();
 	// }
+	
+	
+	public static AddFriendHistorieNode getNewestFriendVerificationMessage(
+			Context context, User user) {
+		
+		DataBaseContext mContext = new DataBaseContext(context);
+		if (user == null) {
+			V2Log.e("To query failed...please check the given User Object");
+			return null;
+		}
+		
+		String selection = ContentDescriptor.HistoriesAddFriends.Cols.HISTORY_FRIEND_FROM_USER_ID
+				+ "= ? or "
+				+ ContentDescriptor.HistoriesAddFriends.Cols.HISTORY_FRIEND_TO_USER_ID
+				+ "= ?";
+		String[] selectionArgs = new String[] {
+				String.valueOf(user.getmUserId()),
+				String.valueOf(user.getmUserId()) };
+		String sortOrder = ContentDescriptor.HistoriesAddFriends.Cols.HISTORY_FRIEND_SAVEDATE
+				+ " desc limit 1 offset 0 ";
+		Cursor cr = mContext.getContentResolver().query(
+				ContentDescriptor.HistoriesAddFriends.CONTENT_URI,
+				ContentDescriptor.HistoriesAddFriends.Cols.ALL_CLOS, selection,
+				selectionArgs, sortOrder);
+		
+		if (cr == null)
+			return null;
+		
+		if(cr.getCount() <= 0){
+			cr.close();
+			return null;
+		}
 
+		AddFriendHistorieNode tempNode = new AddFriendHistorieNode();
+		while (cr.moveToNext()) {
+			// _id integer primary key AUTOINCREMENT,0
+			// OwnerUserID bigint,1
+			// SaveDate bigint,2
+			// FromUserID bigint,3
+			// OwnerAuthType bigint,4
+			// ToUserID bigint, 5
+			// RemoteUserID bigint, 6
+			// ApplyReason nvarchar(4000),7
+			// RefuseReason nvarchar(4000), 8
+			// AddState bigint ,9
+			// ReadState bigint);10
+			tempNode.ownerUserID = cr.getLong(1);
+			tempNode.saveDate = cr.getLong(2);
+			tempNode.fromUserID = cr.getLong(3);
+			tempNode.ownerAuthType = cr.getLong(4);
+			tempNode.toUserID = cr.getLong(5);
+			tempNode.remoteUserID = cr.getLong(6);
+			tempNode.applyReason = cr.getString(7);
+			tempNode.refuseReason = cr.getString(8);
+			tempNode.addState = cr.getLong(9);
+			tempNode.readState = cr.getLong(10);
+		}
+		cr.close();
+		return tempNode;
+	}
+	/**
+	 * 
+	 * @param context
+	 * @param user
+	 * @return
+	 */
 	public static VMessageQualification getNewestCrowdVerificationMessage(
 			Context context, User user) {
 

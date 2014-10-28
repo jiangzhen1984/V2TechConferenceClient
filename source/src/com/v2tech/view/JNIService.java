@@ -821,9 +821,9 @@ public class JNIService extends Service {
 				V2Log.e("Incorrect user xml ");
 				return;
 			}
-
+			
 			User remoteUser = User.fromXmlToUser(sXml);
-
+			
 			GlobalHolder.getInstance().putUser(remoteUser.getmUserId(),
 					remoteUser);
 
@@ -850,6 +850,10 @@ public class JNIService extends Service {
 
 			GlobalHolder.getInstance().addUserToGroup(
 					GlobalHolder.getInstance().getUser(uid), nGroupID);
+			
+			//get user base infos
+			ImRequest.getInstance().getUserBaseInfo(remoteUser.getmUserId());
+			
 			GroupUserObject obj = new GroupUserObject(groupType, nGroupID, uid);
 			Intent i = new Intent();
 			i.setAction(JNIService.JNI_BROADCAST_GROUP_USER_ADDED);

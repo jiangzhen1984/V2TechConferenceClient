@@ -208,7 +208,6 @@ public class ConversationActivity extends Activity {
 
 	private ConversationNotificationObject cov = null;
 
-	private Bundle bundle; // onCreate的savedInstanceState..
 	private View root; // createVideoDialog的View
 	private SparseArray<VMessage> messageAllID;
 	private long lastMessageBodyShowTime = 0;
@@ -238,7 +237,7 @@ public class ConversationActivity extends Activity {
 			backEndHandler = new BackendHandler(thread.getLooper());
 		}
 		// TODO for group conversation
-		initExtraObject(savedInstanceState);
+		initExtraObject();
 		initBroadcast();
 		// Register listener for avatar changed
 		BitmapManager.getInstance().registerBitmapChangedListener(
@@ -537,22 +536,21 @@ public class ConversationActivity extends Activity {
 		}
 	}
 
-	private void initExtraObject(Bundle savedInstanceState) {
+	private void initExtraObject() {
 
-		if (savedInstanceState != null)
-			bundle = savedInstanceState.getBundle("saveBundle");
-		else
-			bundle = this.getIntent().getExtras();
-
+		Bundle bundle = this.getIntent().getExtras();
 		if (bundle != null) {
 			cov = (ConversationNotificationObject) bundle.get("obj");
-			if (cov == null) {
+			if (cov == null)
 				cov = getIntent().getParcelableExtra("obj");
-			}
-		} else {
+		} 
+			
+		if (bundle == null || cov == null){
+			V2Log.e(TAG, "start activity was woring , please check given ConversationNotificationObject");
 			cov = new ConversationNotificationObject(Conversation.TYPE_CONTACT,
 					1);
 		}
+		
 		messageAllID = new SparseArray<VMessage>();
 		initConversationInfos();
 	}
@@ -2152,9 +2150,10 @@ public class ConversationActivity extends Activity {
 			VMessageAdater va = (VMessageAdater) messageArray.get(i);
 			if (vm.getId() == ((VMessage) va.getItemObject()).getId()) {
 				messageArray.remove(i);
+				MessageLoader.deleteMessage(mContext, vm);
 				List<VMessage> messagePages = MessageLoader.loadGroupMessageByPage(mContext,
 						Conversation.TYPE_GROUP, groupId, 1, messageArray.size());
-				if(messagePages != null && messagePages.size() >= 0)
+				if(messagePages != null && messagePages.size() > 0)
 					messageArray.add(0 , new VMessageAdater(messagePages.get(0)));
 				V2Log.d(TAG, "现在集合长度：" + messageArray.size());
 				return true;
@@ -2227,6 +2226,47 @@ public class ConversationActivity extends Activity {
 				}
 			}
 		}
+	}
+	
+	/**
+	 * update all sending or downloading file state to failed..
+	 */
+	public void executeUpdateFileState(){
+		
+		if(messageArray == null){
+			V2Log.e(TAG, "executeUpdateFileState is failed ... because messageArray is null");
+			return ;
+		}
+			
+		for (int i = 0; i < messageArray.size(); i++) {
+			VMessage vm = (VMessage) messageArray.get(i)
+					.getItemObject();
+			if (vm.getFileItems().size() > 0) {
+				List<VMessageFileItem> fileItems = vm.getFileItems();
+				for (int j = 0; j < fileItems.size(); j++) {
+					VMessageFileItem item = fileItems.get(j);
+					switch (item.getState()) {
+					case VMessageAbstractItem.STATE_FILE_DOWNLOADING:
+					case VMessageAbstractItem.STATE_FILE_PAUSED_DOWNLOADING:
+						item.setState(VMessageFileItem.STATE_FILE_DOWNLOADED_FALIED);
+						MessageBuilder.updateVMessageItemToSentFalied(
+								mContext, vm);
+						break;
+					case VMessageAbstractItem.STATE_FILE_SENDING:
+					case VMessageAbstractItem.STATE_FILE_PAUSED_SENDING:
+						item.setState(VMessageFileItem.STATE_FILE_SENT_FALIED);
+						MessageBuilder.updateVMessageItemToSentFalied(
+								mContext, vm);
+						break;
+					default:
+						break;
+					}
+					((MessageBodyView) messageArray.get(i)
+							.getView()).updateView(item);
+				}
+			}
+		}
+		adapter.notifyDataSetChanged();
 	}
 
 	private OnTouchListener mHiddenOnTouchListener = new OnTouchListener() {
@@ -2486,7 +2526,7 @@ public class ConversationActivity extends Activity {
 				NetworkStateCode code = (NetworkStateCode) intent.getExtras()
 						.get("state");
 				if (code != NetworkStateCode.CONNECTED) {
-					
+					executeUpdateFileState();
 				}
 			}
 		}
@@ -2581,7 +2621,6 @@ public class ConversationActivity extends Activity {
 			case REQUEST_DEL_MESSAGE:
 				VMessage message = (VMessage) msg.obj;
 				removeMessage(message);
-				MessageLoader.deleteMessage(mContext, message);
 				adapter.notifyDataSetChanged();
 				// Update conversation
 				notificateConversationUpdate(false, message.getId());
@@ -2768,9 +2807,4 @@ public class ConversationActivity extends Activity {
 		lastMessageBodyShowTime = message.getmDateLong();
 	}
 
-	@Override
-	protected void onSaveInstanceState(Bundle outState) {
-		super.onSaveInstanceState(outState);
-		outState.putBundle("saveBundle", bundle);
-	}
 }

@@ -503,6 +503,12 @@ public class GroupRequest {
 
 	}
 
+	/**
+	 * 10-28 10:21:14.740: D/V2TECH(4636): OnAddGroupUserInfo ->1:61111:<user id='11112131'/>
+	 * @param groupType
+	 * @param nGroupID
+	 * @param sXml
+	 */
 	private void OnAddGroupUserInfo(int groupType, long nGroupID, String sXml) {
 		V2Log.d("OnAddGroupUserInfo ->" + groupType + ":" + nGroupID + ":"
 				+ sXml);

@@ -38,47 +38,56 @@
         android:layout_marginLeft="@dimen/common_margin_horizontal"
         android:layout_marginRight="10dp"
         android:layout_toRightOf="@+id/ws_common_conversation_layout_iconLayout" >
-        <TextView
-            android:id="@+id/ws_common_conversation_layout_topContent"
+        <LinearLayout
+            android:id="@+id/ws_common_conversation_layout_topLayout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:ellipsize="end"
-            android:singleLine="true"
-            android:text="name"
-            android:textColor="@color/contacts_user_view_item_color_offline"
-            android:textSize="@dimen/conversation_view_name_text_size" />
+            android:orientation="horizontal"
+            android:weightSum="1" >
+            <TextView
+                android:id="@+id/ws_common_conversation_layout_topContent"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.9999999"
+                android:ellipsize="end"
+                android:gravity="bottom"
+                android:singleLine="true"
+                android:text="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+                android:textColor="@color/contacts_user_view_item_color_offline"
+                android:textSize="@dimen/conversation_view_name_text_size" />
+            <!-- VoiceMessageActivity.java -->
+            <TextView
+                android:id="@+id/ws_specific_voice_unreadNumber"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="6dp"
+                android:layout_weight="0.0000001"
+                android:singleLine="true"
+                android:text="( 0 )"
+                android:textColor="@color/contacts_user_view_item_color_offline"
+                android:textSize="@dimen/conversation_view_name_text_size"
+                android:visibility="gone" />
+            <!-- VoiceMessageActivity.java -->
+        </LinearLayout>
         <!-- VoiceMessageActivity.java -->
-        <TextView
-            android:id="@+id/ws_specific_voice_unreadNumber"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_marginLeft="6dp"
-            android:layout_toRightOf="@+id/ws_common_conversation_layout_topContent"
-            android:singleLine="true"
-            android:text="( 0 )"
-            android:textColor="@color/contacts_user_view_item_color_offline"
-            android:textSize="@dimen/conversation_view_name_text_size"
-            android:visibility="gone" />
         <ImageView
             android:id="@+id/ws_specific_voice_direction_icon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignBottom="@+id/ws_common_conversation_layout_belowContent"
-            android:layout_below="@+id/ws_common_conversation_layout_topContent"
+            android:layout_below="@+id/ws_common_conversation_layout_topLayout"
             android:layout_marginRight="6dp"
             android:layout_marginTop="10dp"
             android:singleLine="true"
-            android:visibility="gone"
-            android:src="@drawable/vs_voice_callout" />
+            android:src="@drawable/vs_voice_callout"
+            android:visibility="gone" />
         <!-- VoiceMessageActivity.java -->
         <TextView
             android:id="@+id/ws_common_conversation_layout_belowContent"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="false"
-            android:layout_below="@+id/ws_common_conversation_layout_topContent"
+            android:layout_below="@+id/ws_common_conversation_layout_topLayout"
             android:layout_marginTop="@dimen/common_conversation_layout_margin_top"
             android:layout_toRightOf="@+id/ws_specific_voice_direction_icon"
             android:ellipsize="end"

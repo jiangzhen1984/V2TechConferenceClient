@@ -721,12 +721,13 @@ public class MessageBodyView extends LinearLayout {
 
 			TextView speed = (TextView) rootView
 					.findViewById(R.id.message_body_file_item_progress_speed);
+			V2Log.e(TAG, "lastUpdateTime : " + lastUpdateTime);
 			if (lastUpdateTime == 0 || vfi.getSpeed() == 0) {
 				vfi.setSpeed(100.0F);
 				lastUpdateTime = System.currentTimeMillis();
 			} else {
-				long sec = (System.currentTimeMillis() - lastUpdateTime) / 1000;
-				vfi.setSpeed(sec == 0 ? 0 : (vfi.getDownloadedSize() / sec));
+				long sec = (System.currentTimeMillis() - lastUpdateTime);
+				vfi.setSpeed(sec == 0 ? 0 : ((vfi.getDownloadedSize() / sec) * 1000));
 			}
 			speed.setText(vfi.getSpeedStr());
 			float percent = (float) ((double) vfi.getDownloadedSize() / (double) vfi
@@ -766,7 +767,10 @@ public class MessageBodyView extends LinearLayout {
 			TextView view, ImageView actionButton) {
 		String strState = "";
 		boolean showProgressLayout = false;
-		actionButton.setVisibility(View.VISIBLE);
+		if (vfi.getVm().getMsgCode() == V2GlobalEnum.GROUP_TYPE_CROWD)
+			actionButton.setVisibility(View.GONE);
+		else
+			actionButton.setVisibility(View.VISIBLE);
 		if (vfi.getState() == VMessageAbstractItem.STATE_FILE_DOWNLOADING) {
 			strState = getContext().getResources()
 					.getText(R.string.contact_message_file_item_downloading)

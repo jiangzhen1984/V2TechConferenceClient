@@ -65,12 +65,14 @@ public class FileService extends Service {
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		ArrayList<FileInfoBean> mCheckedList = intent.getParcelableArrayListExtra("uploads");
-		long gid = intent.getLongExtra("gid", 0);
-		if (mCheckedList != null && mCheckedList.size() > 0) {
-			Message.obtain(mLocalHandler, START_UPLOAD_FILE, new LocalFileObject(mCheckedList , gid)).sendToTarget();
-		} else {
-			canQuit();
+		if(intent != null){
+			ArrayList<FileInfoBean> mCheckedList = intent.getParcelableArrayListExtra("uploads");
+			long gid = intent.getLongExtra("gid", 0);
+			if (mCheckedList != null && mCheckedList.size() > 0) {
+				Message.obtain(mLocalHandler, START_UPLOAD_FILE, new LocalFileObject(mCheckedList , gid)).sendToTarget();
+			} else {
+				canQuit();
+			}
 		}
 		return super.onStartCommand(intent, flags, startId);
 	}

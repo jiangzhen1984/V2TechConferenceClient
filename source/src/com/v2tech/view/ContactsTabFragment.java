@@ -278,6 +278,12 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 									GroupType.CONTACT.intValue(),
 									guo.getmGroupId()), GlobalHolder
 									.getInstance().getUser(guo.getmUserId()));
+				} else if(flag == TAG_ORG && guo.getmType() == Group.GroupType.ORG.intValue()) {
+					mContactsContainer.addUser(
+							GlobalHolder.getInstance().getGroupById(
+									GroupType.ORG.intValue(),
+									guo.getmGroupId()), GlobalHolder
+									.getInstance().getUser(guo.getmUserId()));
 				}
 				// Contacts group is updated
 			} else if (PublicIntent.BROADCAST_REQUEST_UPDATE_CONTACTS_GROUP

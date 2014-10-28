@@ -110,18 +110,23 @@ public class SearchedResultActivity extends Activity {
 				i.addCategory(PublicIntent.DEFAULT_CATEGORY);
 				startActivity(i);
 			} else if (item.mType == SearchedResult.Type.USER) {
-				List<Group> contactsList = GlobalHolder.getInstance().getGroup(GroupType.CONTACT.intValue());
-				User u = new User(item.id);
-				for (int i = 0; i < contactsList.size(); i++) {
-					Group g = contactsList.get(i);
-					if (g.findUser(u) != null) {
-						Intent intent = new Intent(PublicIntent.SHOW_CONTACT_DETAIL_ACTIVITY);
-						intent.addCategory(PublicIntent.DEFAULT_CATEGORY);
-						intent.putExtra("uid", u.getmUserId());
-						startActivity(intent);
-						return;
-					}
-				}
+				Intent intent = new Intent(PublicIntent.SHOW_CONTACT_DETAIL_ACTIVITY);
+				intent.addCategory(PublicIntent.DEFAULT_CATEGORY);
+				intent.putExtra("uid", item.id);
+				startActivity(intent);
+				
+//				List<Group> contactsList = GlobalHolder.getInstance().getGroup(GroupType.CONTACT.intValue());
+//				User u = new User(item.id);
+//				for (int i = 0; i < contactsList.size(); i++) {
+//					Group g = contactsList.get(i);
+//					if (g.findUser(u) != null) {
+//						Intent intent = new Intent(PublicIntent.SHOW_CONTACT_DETAIL_ACTIVITY);
+//						intent.addCategory(PublicIntent.DEFAULT_CATEGORY);
+//						intent.putExtra("uid", u.getmUserId());
+//						startActivity(intent);
+//						return;
+//					}
+//				}
 				//TODO means doesn't find any relation 
 			}
 		}

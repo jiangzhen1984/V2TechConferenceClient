@@ -91,7 +91,7 @@ public class VFile {
 			startTime = new Date();
 			return "";
 		}
-		long speed = proceedSize / (System.currentTimeMillis() - startTime.getTime()) / 1000;
+		long speed = (proceedSize / (System.currentTimeMillis() - startTime.getTime())) * 1000;
 		
 		Format df = new DecimalFormat("#.0");
 

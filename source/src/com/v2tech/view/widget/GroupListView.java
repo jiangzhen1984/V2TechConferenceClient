@@ -549,6 +549,7 @@ public class GroupListView extends ListView {
 			Object obj = item.getObject();
 			if ((obj instanceof Group && group.getLevel() == ((Group) obj)
 					.getLevel())) {
+				pos = mFilterList.size() - startIndex;
 				break;
 			}
 			pos = startIndex;

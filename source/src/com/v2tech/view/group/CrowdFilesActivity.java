@@ -572,6 +572,11 @@ public class CrowdFilesActivity extends Activity {
 				if (newFileni.getResult() == JNIResponse.Result.SUCCESS) {
 					handleNewFileEvent(((RequestFetchGroupFilesResponse) newFileni)
 							.getList());
+					if(mUploadedFiles.size() <= 0){
+						mUploadingFileNotificationIcon.setVisibility(View.GONE);
+						mUploadingFileNotificationIcon
+								.setImageResource(R.drawable.crowd_file_icon_notification);	
+					}
 				}
 				break;
 			}
@@ -971,6 +976,8 @@ public class CrowdFilesActivity extends Activity {
 					service.handleCrowdFile(file,
 							FileOperationEnum.OPERATION_RESUME_SEND, null);
 				}
+				
+				adapter.notifyDataSetChanged();
 			}
 
 		};

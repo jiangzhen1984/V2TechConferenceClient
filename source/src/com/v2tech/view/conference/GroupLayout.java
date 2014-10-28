@@ -219,11 +219,11 @@ public class GroupLayout extends LinearLayout {
 		}
 	}
 	
-	public void updateCrowdLayout(){
-		
-		mChatGroupNameTV.setVisibility(View.VISIBLE);
-		mChatGroupLayout.setVisibility(View.INVISIBLE);
-		mGroupDateTV.setVisibility(View.INVISIBLE);
-	}
+//	public void updateCrowdLayout(){
+//		
+//		mChatGroupNameTV.setVisibility(View.VISIBLE);
+//		mChatGroupLayout.setVisibility(View.INVISIBLE);
+//		mGroupDateTV.setVisibility(View.INVISIBLE);
+//	}
 
 }
