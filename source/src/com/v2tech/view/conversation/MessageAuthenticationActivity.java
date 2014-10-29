@@ -117,24 +117,24 @@ public class MessageAuthenticationActivity extends Activity {
 		crowdService = new CrowdGroupService();
 		initReceiver();
 		currentRadioType = PROMPT_TYPE_FRIEND;
-		
+
 		isFriendAuthentication = getIntent().getBooleanExtra(
 				"isFriendActivity", true);
-		if(isFriendAuthentication)
+		if (isFriendAuthentication)
 			changeMessageAuthenticationListView();
 		else
 			rbGroupAuthentication.setChecked(true);
-		
+
 		boolean showCrwodNotification = getIntent().getBooleanExtra(
 				"isCrowdShowNotification", false);
 		if (showCrwodNotification && isFriendAuthentication)
 			updateTabPrompt(PROMPT_TYPE_GROUP, true);
-			
+
 		boolean showFriendNotification = getIntent().getBooleanExtra(
 				"isFriendShowNotification", false);
 		if (showFriendNotification && !isFriendAuthentication)
 			updateTabPrompt(PROMPT_TYPE_FRIEND, true);
-		
+
 	}
 
 	@Override
@@ -243,7 +243,10 @@ public class MessageAuthenticationActivity extends Activity {
 									.startActivity(intent);
 						} else {
 							if (isGroupInDeleteMode) {
-								Toast.makeText(mContext, R.string.crowd_message_deletion_mode_quit_required, Toast.LENGTH_SHORT).show();
+								Toast.makeText(
+										mContext,
+										R.string.crowd_message_deletion_mode_quit_required,
+										Toast.LENGTH_SHORT).show();
 								return;
 							}
 							VMessageQualification msg = (VMessageQualification) mMessageList
@@ -351,7 +354,7 @@ public class MessageAuthenticationActivity extends Activity {
 			lvMessageAuthentication.setAdapter(firendAdapter);
 			loadFriendMessage();
 		} else {
-			
+
 			mMessageList = new ArrayList<ListItemWrapper>();
 
 			if (groupAdapter == null) {
@@ -438,19 +441,20 @@ public class MessageAuthenticationActivity extends Activity {
 			unregisterReceiver(mCrowdAuthenticationBroadcastReceiver);
 		}
 	}
-	
+
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
 		switch (resultCode) {
 		case AUTHENTICATION_RESULT:
-			if(data != null){
+			if (data != null) {
 				long id = data.getLongExtra("qualificationID", -1l);
-				QualificationState state = (QualificationState) data.getSerializableExtra("qualState");
-				if(id != -1l){
+				QualificationState state = (QualificationState) data
+						.getSerializableExtra("qualState");
+				if (id != -1l) {
 					for (ListItemWrapper wrapper : mMessageList) {
 						VMessageQualification message = (VMessageQualification) wrapper.obj;
-						if(message.getId() == id){
+						if (message.getId() == id) {
 							message.setQualState(state);
 							groupAdapter.notifyDataSetChanged();
 							break;
@@ -489,8 +493,7 @@ public class MessageAuthenticationActivity extends Activity {
 				cursor.close();
 		}
 	}
-	
-	
+
 	/**
 	 * 通知ConversationTabFragment 更新会话列表
 	 * 
@@ -503,8 +506,8 @@ public class MessageAuthenticationActivity extends Activity {
 
 		Intent i = new Intent(PublicIntent.REQUEST_UPDATE_CONVERSATION);
 		i.addCategory(PublicIntent.DEFAULT_CATEGORY);
-		ConversationNotificationObject obj = new ConversationNotificationObject(Conversation.TYPE_CONTACT,
-					-2);
+		ConversationNotificationObject obj = new ConversationNotificationObject(
+				Conversation.TYPE_CONTACT, -2);
 		i.putExtra("obj", obj);
 		i.putExtra("isFresh", false);
 		i.putExtra("isDelete", true);
@@ -810,8 +813,8 @@ public class MessageAuthenticationActivity extends Activity {
 			viewTag.bSuerDelete.setVisibility(View.GONE);
 			if (isFriendInDeleteMode) {
 				viewTag.ibDelete.setVisibility(View.VISIBLE);
-//				viewTag.bAccess.setVisibility(View.GONE);
-//				viewTag.tvAccessOrNo.setVisibility(View.GONE);
+				// viewTag.bAccess.setVisibility(View.GONE);
+				// viewTag.tvAccessOrNo.setVisibility(View.GONE);
 				viewTag.bAccess.setEnabled(false);
 			} else {
 				viewTag.ibDelete.setVisibility(View.GONE);
@@ -993,13 +996,13 @@ public class MessageAuthenticationActivity extends Activity {
 
 			@Override
 			public void onClick(View v) {
-				
+
 				ListItemWrapper wrapper = (ListItemWrapper) v.getTag();
-				if(wrapper.showDeleteButton)
+				if (wrapper.showDeleteButton)
 					wrapper.showDeleteButton = false;
 				else
 					wrapper.showDeleteButton = true;
-				
+
 				v.setTag(wrapper);
 				groupAdapter.notifyDataSetChanged();
 			}
@@ -1036,7 +1039,9 @@ public class MessageAuthenticationActivity extends Activity {
 			@Override
 			public void onClick(View v) {
 				if (isGroupInDeleteMode) {
-					Toast.makeText(mContext, R.string.crowd_message_deletion_mode_quit_required, Toast.LENGTH_SHORT).show();
+					Toast.makeText(mContext,
+							R.string.crowd_message_deletion_mode_quit_required,
+							Toast.LENGTH_SHORT).show();
 					return;
 				}
 				AcceptedButtonTag tag = (AcceptedButtonTag) v.getTag();
@@ -1102,8 +1107,23 @@ public class MessageAuthenticationActivity extends Activity {
 				long msgId = intent.getLongExtra("msgId", 0);
 				VMessageQualification msg = MessageBuilder
 						.queryQualMessageById(mContext, msgId);
+				boolean isAdd = true;
+				ListItemWrapper removedWrapper = null;
 				if (msg != null && mMessageList != null) {
+
+					for (ListItemWrapper wrapper : mMessageList) {
+						VMessageQualification message = (VMessageQualification) wrapper.obj;
+						if (message.getId() == msg.getId()) {
+							removedWrapper = wrapper;
+							isAdd = false;
+							break;
+						}
+					}
+
+					if (!isAdd)
+						mMessageList.remove(removedWrapper);
 					mMessageList.add(0, new ListItemWrapper(msg));
+
 					groupAdapter.notifyDataSetChanged();
 					// 当用户在当前界面时，就不显示红点了
 					if (currentRadioType != PROMPT_TYPE_GROUP)

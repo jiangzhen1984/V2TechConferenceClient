@@ -5,6 +5,7 @@ public class ConversationFirendAuthenticationData extends Conversation {
 
 	private User user;
 	private VerificationMessageType messageType;
+	private String crowdVerificationContent = null;
 
 	public ConversationFirendAuthenticationData(int mType, long mExtId) {
 		super(mType, mExtId);
@@ -25,6 +26,14 @@ public class ConversationFirendAuthenticationData extends Conversation {
 
 	public void setMessageType(VerificationMessageType messageType) {
 		this.messageType = messageType;
+	}
+	
+	public String getCrowdVerificationContent() {
+		return crowdVerificationContent;
+	}
+
+	public void setCrowdVerificationContent(String crowdVerificationContent) {
+		this.crowdVerificationContent = crowdVerificationContent;
 	}
 
 	public enum VerificationMessageType {

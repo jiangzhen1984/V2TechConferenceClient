@@ -124,6 +124,7 @@ public class AACEncoder implements V2Encoder {
 			format.setInteger(MediaFormat.KEY_BIT_RATE, BIT_RATE);
 			format.setInteger(MediaFormat.KEY_AAC_PROFILE,
 					MediaCodecInfo.CodecProfileLevel.AACObjectLC);
+			format.setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, 65536);
 			mEncoder.configure(format, null, null,
 					MediaCodec.CONFIGURE_FLAG_ENCODE);
 		}
@@ -210,7 +211,6 @@ public class AACEncoder implements V2Encoder {
 				if (inputBufferIndex >= 0) {
 					inputBuffer = inputBuffers[inputBufferIndex];
 					inputBuffer.clear();
-
 					inputBuffer.put(audioBuffer);
 
 					mEncoder.queueInputBuffer(inputBufferIndex, 0,

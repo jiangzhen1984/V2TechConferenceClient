@@ -311,7 +311,7 @@ public class XmlAttributeExtractor {
 				Long.parseLong(uploader)), id, name, Long.parseLong(size),
 				1);
 		file.url = url;
-		list.add(file);
+		list.add(0 , file);
 	}
 
 	public static Document buildDocument(String xml) {

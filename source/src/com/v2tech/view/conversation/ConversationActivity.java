@@ -1049,7 +1049,6 @@ public class ConversationActivity extends Activity {
 
 		@Override
 		public boolean onTouch(View view, MotionEvent event) {
-			V2Log.d(TAG, event.getAction() + "");
 			switch (event.getAction()) {
 			case MotionEvent.ACTION_DOWN:
 				cannelRecoding = false;
@@ -2167,7 +2166,10 @@ public class ConversationActivity extends Activity {
 		}
 		for (int i = 0; i < messageArray.size(); i++) {
 			VMessageAdater va = (VMessageAdater) messageArray.get(i);
-			if (vm.getId() == ((VMessage) va.getItemObject()).getId()) {
+			VMessage message = (VMessage) va.getItemObject();
+			if (vm.getId() == message.getId()) {
+				if(message.getImageItems().size() >= 0)
+					va.setView(null);
 				messageArray.remove(i);
 				MessageLoader.deleteMessage(mContext, vm);
 				List<VMessage> messagePages = MessageLoader.loadGroupMessageByPage(mContext,

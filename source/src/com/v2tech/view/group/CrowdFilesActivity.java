@@ -379,7 +379,9 @@ public class CrowdFilesActivity extends Activity {
 	 * @param files
 	 */
 	private void handleNewFileEvent(List<VCrowdFile> files) {
-		mFiles.addAll(files);
+		for (VCrowdFile vCrowdFile : files) {
+			mFiles.add(0 , vCrowdFile);
+		}
 		adapter.notifyDataSetChanged();
 	}
 

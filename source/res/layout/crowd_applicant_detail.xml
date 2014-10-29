@@ -98,7 +98,7 @@
                     android:maxWidth="@dimen/detail_detail_name_max_width"
                     android:singleLine="true"
                     android:text="TextView"
-                    android:textColor="@color/common_item_text_color" />
+                    android:textColor="@color/common_black" />
 
                 <com.v2tech.view.widget.MarqueeTextView
                     android:id="@+id/crowd_applicant_signature"

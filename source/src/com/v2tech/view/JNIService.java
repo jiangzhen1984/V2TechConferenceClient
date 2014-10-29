@@ -699,16 +699,16 @@ public class JNIService extends Service {
 		private VMessageQualification checkMessageAndSendBroadcast(
 				VMessageQualification.Type type, CrowdGroup g, User user,
 				String reason) {
-			boolean sendBroadcast = true;
+//			boolean sendBroadcast = true;
 			VMessageQualification crowdMsg = MessageBuilder
 					.queryQualMessageByCrowdId(mContext, user, g);
 			if (crowdMsg != null) {
 				if (crowdMsg.getQualState() != VMessageQualification.QualificationState.WAITING) {
 					crowdMsg.setReadState(VMessageQualification.ReadState.UNREAD);
 					crowdMsg.setQualState(VMessageQualification.QualificationState.WAITING);
-				} else {
-					sendBroadcast = false;
-				}
+				} 
+//				else
+//					sendBroadcast = false;
 				MessageBuilder.updateQualicationMessage(mContext, crowdMsg);
 			} else {
 				// Save message to database
@@ -733,7 +733,7 @@ public class JNIService extends Service {
 				}
 			}
 
-			if (sendBroadcast && crowdMsg != null && crowdMsg.getId() > 0) {
+			if (crowdMsg != null && crowdMsg.getId() > 0) {
 				// Send broadcast
 				Intent i = new Intent(JNI_BROADCAST_NEW_QUALIFICATION_MESSAGE);
 				i.addCategory(JNI_BROADCAST_CATEGROY);

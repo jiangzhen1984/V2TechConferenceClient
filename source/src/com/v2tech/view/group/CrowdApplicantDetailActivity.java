@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.text.TextUtils;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.TextView;
@@ -88,7 +89,11 @@ public class CrowdApplicantDetailActivity extends Activity {
 		((TextView)findViewById(R.id.contact_user_detail_cell_phone_tv)).setText(applicant.getMobile());
 		((TextView)findViewById(R.id.contact_user_detail_telephone_tv)).setText(applicant.getTelephone());
 		((TextView)findViewById(R.id.contact_user_detail_fax_tv)).setText(applicant.getFax());
-		((TextView)findViewById(R.id.crowd_application_additional_msg)).setText(msg.getApplyReason());
+		
+		if(TextUtils.isEmpty(msg.getApplyReason()))
+			((TextView)findViewById(R.id.crowd_application_additional_msg)).setText("附加消息: 无");
+		else
+			((TextView)findViewById(R.id.crowd_application_additional_msg)).setText("附加消息: " + msg.getApplyReason());
 	}
 
 	private void handleAcceptDone() {
