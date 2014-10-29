@@ -385,7 +385,6 @@
                 <category android:name="com.v2tech" />
             </intent-filter>
         </receiver>
-        
     </application>
 
 </manifest>

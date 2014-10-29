@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Color;
+import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
@@ -57,7 +58,6 @@ public class MainActivity extends FragmentActivity implements
 
 	private Context mContext;
 	private boolean exitedFlag = false;
-	private int padding;
 
 	private TitleBar titleBar;
 	private EditText searchEdit;
@@ -318,7 +318,6 @@ public class MainActivity extends FragmentActivity implements
 	@Override
 	protected void onStart() {
 		super.onStart();
-		V2Log.d(" main onStart ");
 	}
 	
 	
@@ -335,7 +334,6 @@ public class MainActivity extends FragmentActivity implements
 	@Override
 	protected void onStop() {
 		super.onStop();
-		V2Log.d(" main onStop ");
 	}
 
 	@Override
@@ -365,9 +363,8 @@ public class MainActivity extends FragmentActivity implements
 			}, 2500);
 		}
 	}
-
-
-
+	
+	
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();

@@ -8,6 +8,8 @@ import android.os.Handler;
 import android.os.Message;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -30,6 +32,7 @@ public class CrowdApplicationActivity extends Activity {
 
 	private final static int APPLY_DONE = 1;
 
+	private TextView mTitleTV;
 	private TextView mNameTV;
 	private TextView mCreatorTV;
 	private TextView mBriefTV;
@@ -50,6 +53,8 @@ public class CrowdApplicationActivity extends Activity {
 	private VMessageQualification vq;
 	private State mState = State.DONE;
 	private boolean isInApplicationMode;
+	
+	private boolean disableAuth;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -57,6 +62,7 @@ public class CrowdApplicationActivity extends Activity {
 		mContext = this;
 
 		setContentView(R.layout.crowd_application_activity);
+		mTitleTV = (TextView) findViewById(R.id.crowd_application_title);
 		mNameTV = (TextView) findViewById(R.id.crowd_application_name);
 		mCreatorTV = (TextView) findViewById(R.id.crowd_application_item_creator);
 		mBriefTV = (TextView) findViewById(R.id.crowd_application_brief);
@@ -75,6 +81,9 @@ public class CrowdApplicationActivity extends Activity {
 		mReturnButton.setOnClickListener(mReturnButtonListener);
 
 		crowd = (Crowd) getIntent().getExtras().get("crowd");
+		
+		disableAuth = getIntent().getBooleanExtra("authdisable", false);
+		
 		mNameTV.setText(crowd.getName());
 		mBriefTV.setText(crowd.getBrief());
 		mCreatorTV.setText(crowd.getCreator().getName());
@@ -112,11 +121,29 @@ public class CrowdApplicationActivity extends Activity {
 			mMessageLy.setVisibility(View.VISIBLE);
 			mItemLy.setVisibility(View.GONE);
 			mApplicationButton.setVisibility(View.GONE);
+			mTitleTV.setText(R.string.crowd_application_qualification);
+			
+			Animation out = AnimationUtils.loadAnimation(mContext,
+					R.animator.left_in);
+			mMessageLy.startAnimation(out);
+			Animation in = AnimationUtils.loadAnimation(mContext,
+					R.animator.left_out);
+			mItemLy.startAnimation(in);
+			
+			
 		} else {
 			mSendButton.setVisibility(View.GONE);
 			mMessageLy.setVisibility(View.GONE);
 			mItemLy.setVisibility(View.VISIBLE);
 			mApplicationButton.setVisibility(View.VISIBLE);
+			mTitleTV.setText(R.string.crowd_application_title);
+			
+			Animation out = AnimationUtils.loadAnimation(mContext,
+					R.animator.right_in);
+			mItemLy.startAnimation(out);
+			Animation in = AnimationUtils.loadAnimation(mContext,
+					R.animator.right_out);
+			mMessageLy.startAnimation(in);
 		}
 	}
 
@@ -128,14 +155,20 @@ public class CrowdApplicationActivity extends Activity {
 				if (mState == State.APPLYING) {
 					return;
 				}
-				if (crowd.getAuth() == CrowdGroup.AuthType.ALLOW_ALL.intValue()) {
+				if (disableAuth) {
 					mState = State.APPLYING;
 					service.applyCrowd(crowd, "", new Registrant(mLocalHandler,
 							APPLY_DONE, null));
-				} else if (crowd.getAuth() == CrowdGroup.AuthType.QULIFICATION
-						.intValue()) {
-					isInApplicationMode = true;
-					updateView();
+				} else {
+					if (crowd.getAuth() == CrowdGroup.AuthType.ALLOW_ALL.intValue()) {
+						mState = State.APPLYING;
+						service.applyCrowd(crowd, "", new Registrant(mLocalHandler,
+								APPLY_DONE, null));
+					} else if (crowd.getAuth() == CrowdGroup.AuthType.QULIFICATION
+							.intValue()) {
+						isInApplicationMode = true;
+						updateView();
+					}
 				}
 			}
 		}

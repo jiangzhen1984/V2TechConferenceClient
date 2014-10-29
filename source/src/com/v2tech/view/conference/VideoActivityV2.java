@@ -198,7 +198,7 @@ public class VideoActivityV2 extends Activity {
 	private boolean mLocalHolderIsCreate = false;
 
 	private int mVideoMaxCols = 2;
-	
+
 	private int mContentWidth = -1;
 	private int mContentHeight = -1;
 
@@ -335,16 +335,19 @@ public class VideoActivityV2 extends Activity {
 		}
 
 	}
-	
-	
 
 	@Override
 	public void onConfigurationChanged(Configuration newConfig) {
 		super.onConfigurationChanged(newConfig);
-		mContentLayoutMain.measure(View.MeasureSpec.EXACTLY, View.MeasureSpec.EXACTLY);
+		mContentLayoutMain.measure(View.MeasureSpec.EXACTLY,
+				View.MeasureSpec.EXACTLY);
 		this.mContentWidth = -1;
 		this.mContentHeight = -1;
 	}
+	
+	
+	
+
 
 	private void initConfsListener() {
 		IntentFilter filter = new IntentFilter();
@@ -360,10 +363,10 @@ public class VideoActivityV2 extends Activity {
 		filter.addCategory(PublicIntent.DEFAULT_CATEGORY);
 		filter.addAction(JNIService.JNI_BROADCAST_USER_STATUS_NOTIFICATION);
 		filter.addAction(JNIService.JNI_BROADCAST_CONNECT_STATE_NOTIFICATION);
-		
+
 		filter.addAction(Intent.ACTION_SCREEN_OFF);
 		filter.addAction(Intent.ACTION_USER_PRESENT);
-		
+
 		mContext.registerReceiver(mConfUserChangeReceiver, filter);
 
 	}
@@ -508,8 +511,7 @@ public class VideoActivityV2 extends Activity {
 			}
 			mPendingPermissionUpdateList.clear();
 
-		}
-		else{
+		} else {
 			mAttendeeContainer.updateStatist();
 			return mAttendeeContainer;
 		}
@@ -558,7 +560,8 @@ public class VideoActivityV2 extends Activity {
 
 			FrameLayout.LayoutParams fl = (FrameLayout.LayoutParams) mSubWindowLayout
 					.getLayoutParams();
-			if (mContentLayoutMain.getMeasuredWidth() == 0 || mContentWidth == -1 || mContentHeight == -1) {
+			if (mContentLayoutMain.getMeasuredWidth() == 0
+					|| mContentWidth == -1 || mContentHeight == -1) {
 				mContentLayoutMain.measure(View.MeasureSpec.UNSPECIFIED,
 						View.MeasureSpec.UNSPECIFIED);
 			}
@@ -569,8 +572,7 @@ public class VideoActivityV2 extends Activity {
 			if (mContentHeight == -1) {
 				mContentHeight = mContentLayoutMain.getHeight();
 			}
-			
-			
+
 			int flag = getSubViewWindowState();
 			// If sub window request full screen
 			if ((flag & TAG_SUB_WINDOW_STATE_FULL_SCRREN) == TAG_SUB_WINDOW_STATE_FULL_SCRREN) {
@@ -578,7 +580,7 @@ public class VideoActivityV2 extends Activity {
 			} else {
 				width = (mContentWidth - marginLeft) / 2;
 			}
-			
+
 			height = mContentHeight;
 
 			if (fl == null) {
@@ -597,7 +599,7 @@ public class VideoActivityV2 extends Activity {
 			}
 		}
 
-		//Update width and height for video layout
+		// Update width and height for video layout
 		FrameLayout.LayoutParams fl = (FrameLayout.LayoutParams) mVideoLayout
 				.getLayoutParams();
 		width = mContentWidth - marginLeft;
@@ -991,7 +993,7 @@ public class VideoActivityV2 extends Activity {
 						}
 					}
 					if (mAttendeeContainer != null) {
-					mAttendeeContainer.addNewAttendee(list);
+						mAttendeeContainer.addNewAttendee(list);
 					}
 				}
 
@@ -1037,9 +1039,9 @@ public class VideoActivityV2 extends Activity {
 				// Listen quit request to make sure close all device
 				finish();
 			} else if (Intent.ACTION_SCREEN_OFF.equals(intent.getAction())) {
-				
+
 			} else if (Intent.ACTION_USER_PRESENT.equals(intent.getAction())) {
-				
+
 			}
 
 		}
@@ -1103,14 +1105,14 @@ public class VideoActivityV2 extends Activity {
 		VideoRecorder.VideoPreviewSurfaceHolder = udc.getSVHolder().getHolder();
 		VideoRecorder.VideoPreviewSurfaceHolder
 				.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
-		//VideoCaptureDevInfo.CreateVideoCaptureDevInfo()
-		//		.updateCameraOrientation(Surface.ROTATION_0);
+		// VideoCaptureDevInfo.CreateVideoCaptureDevInfo()
+		// .updateCameraOrientation(Surface.ROTATION_0);
 		VideoRecorder.DisplayRotation = getDisplayRotation();
 
 		openLocalCamera();
 		udc.setShowing(true);
 	}
-	
+
 	private int getDisplayRotation() {
 		if (Build.VERSION.SDK_INT > 7) {
 			int rotation = getWindowManager().getDefaultDisplay().getRotation();
@@ -1129,8 +1131,6 @@ public class VideoActivityV2 extends Activity {
 		return 0;
 	}
 
-	
-	
 	private void closeLocalCamera() {
 		Message.obtain(
 				mVideoHandler,
@@ -1142,8 +1142,7 @@ public class VideoActivityV2 extends Activity {
 						GlobalHolder.getInstance().getCurrentUserId(), "", null))
 				.sendToTarget();
 	}
-	
-	
+
 	private void openLocalCamera() {
 		Message.obtain(
 				mVideoHandler,
@@ -1171,8 +1170,8 @@ public class VideoActivityV2 extends Activity {
 		mVideoLayout.getDrawingRect(outR);
 		int[] po = new int[2];
 		mVideoLayout.getLocationInWindow(po);
-		mVideoLayout.measure(View.MeasureSpec.EXACTLY,
-				View.MeasureSpec.EXACTLY);
+		mVideoLayout
+				.measure(View.MeasureSpec.EXACTLY, View.MeasureSpec.EXACTLY);
 		// First extra from layout parameter. Because if doc layout request
 		// fixed position,
 		// will set layout width parameter. At here measure doesn't work with
@@ -1190,7 +1189,7 @@ public class VideoActivityV2 extends Activity {
 		}
 
 		int fixedWidth = normalW;
-		int fixedHeight = normalH; 
+		int fixedHeight = normalH;
 		fixedWidth -= fixedWidth % 16;
 		fixedHeight -= fixedHeight % 16;
 
@@ -1316,25 +1315,25 @@ public class VideoActivityV2 extends Activity {
 		super.onRestoreInstanceState(savedInstanceState);
 	}
 
-	
 	/**
 	 * Update speaker flag according headset state
-	 * @param flag true means start, false means on stop
+	 * 
+	 * @param flag
+	 *            true means start, false means on stop
 	 */
 	private void updateAudioSpeaker(boolean flag) {
 		AudioManager audioManager;
 		audioManager = (AudioManager) mContext
 				.getSystemService(Context.AUDIO_SERVICE);
-		audioManager.setMode(AudioManager.MODE_NORMAL);
-		
+		audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
+
 		GlobalState gs = GlobalHolder.getInstance().getGlobalState();
 		if (gs.isBluetoothHeadsetPluged() || gs.isWiredHeadsetPluged()) {
 			audioManager.setSpeakerphoneOn(false);
 		} else {
 			audioManager.setSpeakerphoneOn(true);
 		}
-			
-		
+
 	}
 
 	private void showQuitDialog(String content) {
@@ -1394,9 +1393,7 @@ public class VideoActivityV2 extends Activity {
 
 			updateAllRemoteDevice(TAG_OPEN_DEVICE);
 
-			
 			adjustVideoLayout();
-			
 
 			// Send speaking status
 			doApplyOrReleaseSpeak(isSpeaking);
@@ -1405,10 +1402,9 @@ public class VideoActivityV2 extends Activity {
 			updateSpeakerState(isSpeaking);
 			// Resume audio
 			cb.updateAudio(true);
-			
+
 			// close local camera
 			openLocalCamera();
-
 
 		} else {
 			updateAllRemoteDevice(TAG_CLOSE_DEVICE);
@@ -1418,7 +1414,7 @@ public class VideoActivityV2 extends Activity {
 			mVideoLayout.removeAllViews();
 			// suspend audio
 			cb.updateAudio(false);
-			
+
 			// close local camera
 			closeLocalCamera();
 		}
@@ -1613,9 +1609,11 @@ public class VideoActivityV2 extends Activity {
 		}
 
 		if (pa != null && mAttendeeContainer != null) {
-			ConferencePermission cp = ConferencePermission.fromInt(ind.getType());
+			ConferencePermission cp = ConferencePermission.fromInt(ind
+					.getType());
 			PermissionState ps = PermissionState.fromInt(ind.getState());
-			if (cp == ConferencePermission.SPEAKING && ps == PermissionState.GRANTED) {
+			if (cp == ConferencePermission.SPEAKING
+					&& ps == PermissionState.GRANTED) {
 				pa.setSpeakingState(true);
 			}
 			mAttendeeContainer.updateAttendeeSpeakingState(pa);
@@ -1633,11 +1631,15 @@ public class VideoActivityV2 extends Activity {
 	private void updateAttendeeDevice(Attendee at,
 			List<UserDeviceConfig> devices) {
 		boolean layoutChanged = false;
-		
-		for (int j =0; j < devices.size(); j++) {
-			UserDeviceConfig ud = devices.get(j);
-			for (int i = 0; i < mCurrentShowedSV.size(); i++) {
-				SurfaceViewW svw = mCurrentShowedSV.get(i);
+
+		for (int i = 0; i < mCurrentShowedSV.size(); i++) {
+			SurfaceViewW svw = mCurrentShowedSV.get(i);
+			if (at.getAttId() != svw.at.getAttId()) {
+				continue;
+			}
+
+			for (int j = 0; j < devices.size(); j++) {
+				UserDeviceConfig ud = devices.get(j);
 				// If remote user disable local camera device which
 				// local user already opened
 				if (svw.udc.getDeviceID().equals(ud.getDeviceID())) {
@@ -1648,17 +1650,18 @@ public class VideoActivityV2 extends Activity {
 						mVideoLayout.removeView(svw.getView());
 						i--;
 					} else {
-						//Update already opened device
+						// Update already opened device
 						devices.set(j, svw.udc);
 					}
-
 				}
+				
 			}
 
+		}
+		
 
-			if (mAttendeeContainer != null) {
-				mAttendeeContainer.resetAttendeeDevices(at, devices);
-			}
+		if (mAttendeeContainer != null) {
+			mAttendeeContainer.resetAttendeeDevices(at, devices);
 		}
 		// adjust layout if we closed video
 		if (layoutChanged) {
@@ -1760,7 +1763,6 @@ public class VideoActivityV2 extends Activity {
 		} else if (opt == DOC_PAGE_ACTIVITE_NOTIFICATION) {
 			doc.setActivatePageNo(page.getNo());
 		}
-		
 
 		// Update UI
 		if (mDocContainer != null) {
@@ -2306,7 +2308,9 @@ public class VideoActivityV2 extends Activity {
 
 			case VIDEO_MIX_NOTIFICATION:
 				// create mixed video
-				V2Log.e(TAG , "successful receive mix video callback. type is : "+ msg.arg1);
+				V2Log.e(TAG,
+						"successful receive mix video callback. type is : "
+								+ msg.arg1);
 				if (msg.arg1 == 1) {
 					MixVideo mv = (MixVideo) (((AsyncResult) msg.obj)
 							.getResult());
@@ -2315,7 +2319,8 @@ public class VideoActivityV2 extends Activity {
 
 					// Notify attendee list mixed video is created
 					if (mAttendeeContainer != null) {
-						V2Log.e(TAG, "VIDEO_MIX_NOTIFICATION 被调用 , 成功添加混合视频  update---");
+						V2Log.e(TAG,
+								"VIDEO_MIX_NOTIFICATION 被调用 , 成功添加混合视频  update---");
 						mAttendeeContainer.updateEnteredAttendee(amd);
 					}
 
@@ -2330,7 +2335,8 @@ public class VideoActivityV2 extends Activity {
 					mAttendeeList.remove(amd);
 					// Notify attendee list remove mixed video device
 					if (mAttendeeContainer != null) {
-						V2Log.e(TAG, "VIDEO_MIX_NOTIFICATION 被调用 , 成功移除混合视频  update---");
+						V2Log.e(TAG,
+								"VIDEO_MIX_NOTIFICATION 被调用 , 成功移除混合视频  update---");
 						mAttendeeContainer.updateExitedAttendee(amd);
 					}
 					UserDeviceConfig mixedUDC = amd.getDefaultDevice();

@@ -72,6 +72,7 @@
     
     <string name="crowd_application_button_name">申请</string>
     <string name="crowd_application_title">群资料</string>
+    <string name="crowd_application_qualification">身份验证</string>
     <string name="crowd_application_item_no">群号码</string>
     <string name="crowd_application_item_creator">创建人</string>
     <string name="crowd_application_brief">群简介</string>

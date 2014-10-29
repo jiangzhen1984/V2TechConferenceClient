@@ -394,12 +394,11 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 		if (mContactsContainer == null) {
 			return;
 		}
-		if (TextUtils.isEmpty(s.toString())) {
-			if (!TextUtils.isEmpty(mContactsContainer.getTextFilter())) {
-				mContactsContainer.clearTextFilter();
-			}
+		String str = s.toString();
+		if (TextUtils.isEmpty(str)) {
+			mContactsContainer.clearTextFilter();
 		} else {
-			mContactsContainer.setFilterText(s.toString());
+			mContactsContainer.setFilterText(str);
 		}
 	}
 

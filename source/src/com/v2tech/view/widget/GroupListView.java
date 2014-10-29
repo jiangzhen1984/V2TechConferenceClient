@@ -696,17 +696,27 @@ public class GroupListView extends ListView {
 	@Override
 	public void setFilterText(String filterText) {
 		if (TextUtils.isEmpty(filterText)) {
-			mIsInFilter = false;
+			clearTextFilter();
 		} else {
-			mIsInFilter = true;
+			if (this.isTextFilterEnabled()) {
+				mIsInFilter = true;
+				if (this.adapter instanceof Filterable) {
+					Filter filter = ((Filterable)this.adapter).getFilter();
+					filter.filter(filterText);
+				}
+			}
 		}
-		super.setFilterText(filterText);
 	}
 
 	@Override
 	public void clearTextFilter() {
-		mIsInFilter = false;
-		super.clearTextFilter();
+		if (this.isTextFilterEnabled() && mIsInFilter) {
+			mIsInFilter = false;
+			if (this.adapter instanceof Filterable) {
+				Filter filter = ((Filterable)this.adapter).getFilter();
+				filter.filter("");
+			}
+		}
 	}
 
 	public void setOnItemClickListener(OnItemClickListener listener) {

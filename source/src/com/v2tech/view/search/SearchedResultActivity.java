@@ -24,7 +24,6 @@ import com.v2tech.service.GlobalHolder;
 import com.v2tech.view.PublicIntent;
 import com.v2tech.vo.Crowd;
 import com.v2tech.vo.CrowdGroup;
-import com.v2tech.vo.Group;
 import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.SearchedResult;
 import com.v2tech.vo.User;
@@ -103,6 +102,8 @@ public class SearchedResultActivity extends Activity {
 					Crowd cr = new Crowd(item.id, u, item.name, item.brief);
 					cr.setAuth(item.authType);
 					i.putExtra("crowd", cr);
+					//set disable authentication
+					i.putExtra("authdisable", false);
 				} else {
 					i.putExtra("cid", crowd.getmGId());
 					i.setAction(PublicIntent.SHOW_CROWD_DETAIL_ACTIVITY);

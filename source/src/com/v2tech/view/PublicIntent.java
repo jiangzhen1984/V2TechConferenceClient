@@ -49,6 +49,7 @@ public class PublicIntent {
 	
 	/**
 	 * key : crowd : object of crowd
+	 * key : authdisable : disable crowd authentication even through crowd need authentication
 	 */
 	public static final String SHOW_CROWD_APPLICATION_ACTIVITY = "com.v2tech.crowd_application_activity";
 	

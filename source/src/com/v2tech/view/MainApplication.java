@@ -24,6 +24,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
+import android.media.AudioManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -347,6 +348,7 @@ public class MainApplication extends Application {
 		public void onActivityCreated(Activity activity,
 				Bundle savedInstanceState) {
 			Configuration conf = getResources().getConfiguration();
+			activity.setVolumeControlStream(AudioManager.STREAM_MUSIC);
 			if (conf.smallestScreenWidthDp >= 600
 					|| activity instanceof VideoActivityV2) {
 				activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
@@ -369,7 +371,7 @@ public class MainApplication extends Application {
 					V2Log.d(TAG, "find target activity : " + activity + " --remove it..");
 				}
 			}
-			
+		//	activity.setVolumeControlStream(AudioManager.USE_DEFAULT_STREAM_TYPE);
 			if(!flag)
 				V2Log.d(TAG, "no find the target activity : " + activity + " -- remove failed");
 			V2Log.d(TAG, "集合中还剩下 : " + list.size() + " 个activity ");
