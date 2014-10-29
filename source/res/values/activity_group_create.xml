@@ -10,6 +10,7 @@
    <string name="error_create_group_failed_from_server_side">创建群失败</string>
    <string name="crowd_create_name_input_hint">请输入群名称</string>
    <string name="group_invitation_title">添加成员</string>
+   <string name="group_upload_hint_text">上传已完成</string>
    
    
    

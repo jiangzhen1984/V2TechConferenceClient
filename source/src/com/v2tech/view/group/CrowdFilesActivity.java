@@ -26,6 +26,7 @@ import android.widget.BaseAdapter;
 import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -80,6 +81,7 @@ public class CrowdFilesActivity extends Activity {
 	private ArrayList<FileInfoBean> mCheckedList;
 
 	private Context mContext;
+	private LinearLayout mUploadFinish;
 	private ListView mListView;
 	private FileListAdapter adapter;
 	private View mReturnButton;
@@ -101,6 +103,8 @@ public class CrowdFilesActivity extends Activity {
 		mContext = this;
 		setContentView(R.layout.crowd_files_activity);
 		currentLoginUserID = GlobalHolder.getInstance().getCurrentUserId();
+		
+		mUploadFinish = (LinearLayout) findViewById(R.id.crowd_files_uploaded_hint);
 		mListView = (ListView) findViewById(R.id.crowd_files_list);
 		mListView.setTextFilterEnabled(true);
 		mTitle = (TextView) findViewById(R.id.crowd_files_title);
@@ -178,8 +182,7 @@ public class CrowdFilesActivity extends Activity {
 					// Update screen to uploading UI
 					// showUploaded = true;
 					// mShowUploadedFileButton.setVisibility(View.GONE);
-					mUploadingFileNotificationIcon.setVisibility(View.VISIBLE);
-					mUploadingFileNotificationIcon.setImageResource(R.drawable.crowd_file_icon_notification);
+					adapterUploadShow();
 					adapter.notifyDataSetChanged();
 				}
 			}
@@ -216,15 +219,7 @@ public class CrowdFilesActivity extends Activity {
 			showUploaded = false;
 			mTitle.setText(R.string.crowd_files_title);
 			mShowUploadedFileButton.setVisibility(View.VISIBLE);
-			if (mUploadedFiles.size() > 0) {
-				mUploadingFileNotificationIcon.setVisibility(View.VISIBLE);
-				mUploadingFileNotificationIcon
-						.setImageResource(R.drawable.crowd_file_icon_notification);
-			} else {
-				mUploadingFileNotificationIcon.setVisibility(View.GONE);
-				mUploadingFileNotificationIcon
-						.setImageResource(R.drawable.crowd_file_icon_notification);
-			}
+			adapterUploadShow();
 			adapter.notifyDataSetChanged();
 			return;
 		}
@@ -324,9 +319,7 @@ public class CrowdFilesActivity extends Activity {
 					&& file.getUploader().getmUserId() == GlobalHolder
 							.getInstance().getCurrentUserId()) {
 				this.mUploadedFiles.remove(file);
-				if (this.mUploadedFiles.size() <=0) {
-					mUploadingFileNotificationIcon.setVisibility(View.GONE);
-				}
+				adapterUploadShow();
 			}
 
 		} else if (ind.indType == FileTransStatusIndication.IND_TYPE_DOWNLOAD_ERR) {
@@ -412,6 +405,27 @@ public class CrowdFilesActivity extends Activity {
 		}
 		adapter.notifyDataSetChanged();
 	}
+	
+	/**
+	 * adapter upload show style
+	 */
+	private void adapterUploadShow(){
+		
+		if(showUploaded){
+			mUploadingFileNotificationIcon.setVisibility(View.INVISIBLE);
+			if(mUploadedFiles.size() <= 0)
+				mUploadFinish.setVisibility(View.VISIBLE);
+			else
+				mUploadFinish.setVisibility(View.INVISIBLE);
+		}
+		else{
+			mUploadFinish.setVisibility(View.INVISIBLE);
+			if(mUploadedFiles.size() > 0)
+				mUploadingFileNotificationIcon.setVisibility(View.VISIBLE);
+			else
+				mUploadingFileNotificationIcon.setVisibility(View.INVISIBLE);
+		}
+	}
 
 	/**
 	 * matching the crowd file type for show the icon
@@ -491,8 +505,8 @@ public class CrowdFilesActivity extends Activity {
 			// Update screen to uploading UI
 			showUploaded = true;
 			mTitle.setText(R.string.crowd_files_title_uploading);
-			mUploadingFileNotificationIcon.setVisibility(View.GONE);
 			mShowUploadedFileButton.setVisibility(View.GONE);
+			adapterUploadShow();
 			adapter.notifyDataSetChanged();
 		}
 
@@ -576,11 +590,7 @@ public class CrowdFilesActivity extends Activity {
 				if (newFileni.getResult() == JNIResponse.Result.SUCCESS) {
 					handleNewFileEvent(((RequestFetchGroupFilesResponse) newFileni)
 							.getList());
-					if(mUploadedFiles.size() <= 0){
-						mUploadingFileNotificationIcon.setVisibility(View.GONE);
-						mUploadingFileNotificationIcon
-								.setImageResource(R.drawable.crowd_file_icon_notification);	
-					}
+					adapterUploadShow();
 				}
 				break;
 			}
