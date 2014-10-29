@@ -322,11 +322,6 @@ public class ContactsService extends AbstractHandler {
 					jniRes).sendToTarget();
 		}
 
-		@Override
-		public void OnRefuseApplyJoinGroup(V2Group parseSingleCrowd,
-				String reason) {
-			
-		}
 
 	}
 

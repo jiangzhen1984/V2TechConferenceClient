@@ -115,11 +115,6 @@ public class SearchService extends AbstractHandler {
 			Message.obtain(mCallbackHandler, SEARCH, jniRES).sendToTarget();
 		}
 
-		@Override
-		public void OnRefuseApplyJoinGroup(V2Group parseSingleCrowd,
-				String reason) {
-			
-		}
 
 	}
 

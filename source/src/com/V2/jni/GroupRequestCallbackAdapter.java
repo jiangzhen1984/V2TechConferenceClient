@@ -122,6 +122,13 @@ public abstract class GroupRequestCallbackAdapter implements
 	}
 
 	
+
+	@Override
+	public void OnRefuseApplyJoinGroup(V2Group parseSingleCrowd,
+			String reason) {
+		
+	}
+
 	
 	
 
