@@ -12,13 +12,14 @@ import com.V2.jni.util.V2Log;
 import com.v2tech.service.jni.JNIResponse;
 import com.v2tech.service.jni.RequestLogInResponse;
 import com.v2tech.service.jni.RequestUserUpdateResponse;
+import com.v2tech.util.EscapedcharactersProcessing;
 import com.v2tech.util.GlobalConfig;
 import com.v2tech.vo.User;
 
 public class UserService extends AbstractHandler {
 
-	//此处的消息类型只与AbstractHandler的REQUEST_TIME_OUT消息并列。
-	//与参数caller中的消息类型what完全没有关系，上层传什么消息what回调就是什么消息what
+	// 此处的消息类型只与AbstractHandler的REQUEST_TIME_OUT消息并列。
+	// 与参数caller中的消息类型what完全没有关系，上层传什么消息what回调就是什么消息what
 	private static final int JNI_REQUEST_LOG_IN = 1;
 	private static final int JNI_REQUEST_UPDAE_USER = 2;
 
@@ -31,7 +32,8 @@ public class UserService extends AbstractHandler {
 	}
 
 	/**
-	 * Asynchronous login function. After login, will call post message to your handler
+	 * Asynchronous login function. After login, will call post message to your
+	 * handler
 	 * 
 	 * 
 	 * @param mail
@@ -42,8 +44,7 @@ public class UserService extends AbstractHandler {
 	 *            callback message Message.obj is {@link AsynResult}
 	 */
 	public void login(String mail, String passwd, Registrant caller) {
-		initTimeoutMessage(JNI_REQUEST_LOG_IN, DEFAULT_TIME_OUT_SECS,
-				caller);
+		initTimeoutMessage(JNI_REQUEST_LOG_IN, DEFAULT_TIME_OUT_SECS, caller);
 		ImRequest.getInstance().login(mail, passwd,
 				V2GlobalEnum.USER_STATUS_ONLINE, V2ClientType.ANDROID, false);
 	}
@@ -70,20 +71,19 @@ public class UserService extends AbstractHandler {
 		if (user.getmUserId() == GlobalHolder.getInstance().getCurrentUserId()) {
 			ImRequest.getInstance().modifyBaseInfo(user.toXml());
 		} else {
-			if(!TextUtils.isEmpty(user.getNickName()))
-				ImRequest.getInstance().modifyCommentName(user.getmUserId(),
-						user.getNickName());
+			if (!TextUtils.isEmpty(user.getNickName()))
+				ImRequest.getInstance()
+						.modifyCommentName(
+								user.getmUserId(),
+								EscapedcharactersProcessing.convert(user
+										.getNickName()));
 		}
 	}
-	
-	
 
 	@Override
 	public void clearCalledBack() {
 		ImRequest.getInstance().removeCallback(imCB);
 	}
-
-
 
 	class ImRequestCB extends ImRequestCallbackAdapter {
 
@@ -94,8 +94,9 @@ public class UserService extends AbstractHandler {
 		}
 
 		@Override
-		public void OnLoginCallback(long nUserID, int nStatus, int nResult , long serverTime) {
-			//获取系统时间
+		public void OnLoginCallback(long nUserID, int nStatus, int nResult,
+				long serverTime) {
+			// 获取系统时间
 			GlobalConfig.LOCAL_TIME = System.currentTimeMillis();
 			GlobalConfig.SERVER_TIME = serverTime;
 			V2Log.d("get server time ：" + GlobalConfig.SERVER_TIME);
@@ -105,8 +106,6 @@ public class UserService extends AbstractHandler {
 					new RequestLogInResponse(new User(nUserID), res));
 			handler.dispatchMessage(m);
 		}
-
-		
 
 		@Override
 		public void OnConnectResponseCallback(int nResult) {
@@ -118,13 +117,15 @@ public class UserService extends AbstractHandler {
 				handler.dispatchMessage(m);
 			}
 		}
-		
+
 		@Override
 		public void OnModifyCommentNameCallback(long nUserId,
 				String sCommmentName) {
 			User u = GlobalHolder.getInstance().getUser(nUserId);
-			Message m = Message.obtain(handler, JNI_REQUEST_UPDAE_USER,
-					new RequestUserUpdateResponse(u, JNIResponse.Result.SUCCESS));
+			Message m = Message
+					.obtain(handler, JNI_REQUEST_UPDAE_USER,
+							new RequestUserUpdateResponse(u,
+									JNIResponse.Result.SUCCESS));
 			handler.dispatchMessage(m);
 		}
 

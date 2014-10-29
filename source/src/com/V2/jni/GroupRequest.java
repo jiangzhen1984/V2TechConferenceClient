@@ -17,7 +17,7 @@ import com.V2.jni.ind.V2User;
 import com.V2.jni.util.V2Log;
 import com.V2.jni.util.XmlAttributeExtractor;
 import com.v2tech.service.GlobalHolder;
-import com.v2tech.util.HeartCharacterProcessing;
+import com.v2tech.util.EscapedcharactersProcessing;
 import com.v2tech.vo.User;
 
 public class GroupRequest {
@@ -667,7 +667,7 @@ public class GroupRequest {
 			group = new V2Group(Long.parseLong(id), groupType);
 			String name = XmlAttributeExtractor.extract(groupInfo, "subject='",
 					"'");
-			name = HeartCharacterProcessing.reverse(name);
+			name = EscapedcharactersProcessing.reverse(name);
 			String starttime = XmlAttributeExtractor.extract(groupInfo,
 					"starttime='", "'");
 			String createuserid = XmlAttributeExtractor.extract(groupInfo,
@@ -690,10 +690,10 @@ public class GroupRequest {
 					"authtype='", "'");
 			String uname = XmlAttributeExtractor.extract(userInfo,
 					"nickname='", "'");
-			uname = HeartCharacterProcessing.reverse(uname);
+			uname = EscapedcharactersProcessing.reverse(uname);
 			String name = XmlAttributeExtractor.extract(groupInfo, "name='",
 					"'");
-			name = HeartCharacterProcessing.reverse(name);
+			name = EscapedcharactersProcessing.reverse(name);
 			group.name = name;
 			group.creator = new V2User(Long.valueOf(createuserid), uname);
 			if (auth != null) {
@@ -708,7 +708,7 @@ public class GroupRequest {
 			user = new V2User(Long.parseLong(id));
 			String name = XmlAttributeExtractor.extract(userInfo,
 					" nickname='", "'");
-			name = HeartCharacterProcessing.reverse(name);
+			name = EscapedcharactersProcessing.reverse(name);
 			user.name = name;
 		}
 

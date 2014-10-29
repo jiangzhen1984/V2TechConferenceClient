@@ -4,7 +4,7 @@ import com.V2.jni.util.V2Log;
 
 import android.text.TextUtils;
 
-public class HeartCharacterProcessing {
+public class EscapedcharactersProcessing {
 
 	public static String convert(String str) {
 		if (str == null) {

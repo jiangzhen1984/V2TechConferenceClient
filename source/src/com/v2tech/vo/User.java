@@ -32,7 +32,7 @@ import android.graphics.Bitmap;
 
 import com.V2.jni.util.V2Log;
 import com.v2tech.service.GlobalHolder;
-import com.v2tech.util.HeartCharacterProcessing;
+import com.v2tech.util.EscapedcharactersProcessing;
 
 /**
  * User information
@@ -150,14 +150,14 @@ public class User implements Comparable<User> {
 		this.mUserId = mUserId;
 	}
 
-	public void setmCommentname(String mCommentname ){
-		this.mCommentname=mCommentname;
+	public void setmCommentname(String mCommentname) {
+		this.mCommentname = mCommentname;
 	}
-	
-	public String getmCommentname(){
+
+	public String getmCommentname() {
 		return this.mCommentname;
 	}
-	
+
 	public NetworkStateCode getmResult() {
 		return mResult;
 	}
@@ -246,7 +246,7 @@ public class User implements Comparable<User> {
 	}
 
 	public String getDepartment() {
-		//FIXME first group is real department
+		// FIXME first group is real department
 		Group g = this.getFirstBelongsGroup();
 		if (g != null) {
 			if (g.getParent() == null) {
@@ -282,7 +282,7 @@ public class User implements Comparable<User> {
 			return mStringBirthday;
 		}
 	}
-	
+
 	public String getmStringBirthday() {
 		return mStringBirthday;
 	}
@@ -290,7 +290,7 @@ public class User implements Comparable<User> {
 	public void setmStringBirthday(String mStringBirthday) {
 		this.mStringBirthday = mStringBirthday;
 	}
-	
+
 	public void setBirthday(Date mBirthday) {
 		this.mBirthday = mBirthday;
 	}
@@ -465,18 +465,33 @@ public class User implements Comparable<User> {
 	public String toXml() {
 		DateFormat dp = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
 		String xml = "<user " + " address='"
-				+ (this.getAddress() == null ? "" : this.getAddress()) + "' "
-				+ "authtype='" + this.getAuthtype() + "' " + "birthday='"
+				+ (this.getAddress() == null ? "" : EscapedcharactersProcessing
+						.convert(this.getAddress()))
+				+ "' "
+				+ "authtype='"
+				+ this.getAuthtype()
+				+ "' "
+				+ "birthday='"
 				+ (this.mBirthday == null ? "" : dp.format(this.mBirthday))
-				+ "' " + "job='" + (this.getJob() == null ? "" : this.getJob())
-				+ "' " + "mobile='"
-				+ (this.getMobile() == null ? "" : this.getMobile()) + "' "
-				+ "nickname='" + (this.getName() == null ? "" : this.getName())
-				+ "'  " + "sex='"
-				+ (this.getSex() == null ? "" : this.getSex()) + "'  "
+				+ "' "
+				+ "job='"
+				+ (this.getJob() == null ? "" : this.getJob())
+				+ "' "
+				+ "mobile='"
+				+ (this.getMobile() == null ? "" : EscapedcharactersProcessing
+						.convert(this.getMobile()))
+				+ "' "
+				+ "nickname='"
+				+ (this.getName() == null ? "" : EscapedcharactersProcessing
+						.convert(this.getName()))
+				+ "'  "
+				+ "sex='"
+				+ (this.getSex() == null ? "" : this.getSex())
+				+ "'  "
 				+ "sign='"
-				+ (this.getSignature() == null ? "" : this.getSignature())
-				+ "' " + "telephone='"
+				+ (this.getSignature() == null ? ""
+						: EscapedcharactersProcessing.convert(this
+								.getSignature())) + "' " + "telephone='"
 				+ (this.getTelephone() == null ? "" : this.getTelephone())
 				+ "'> " + "<videolist/> </user> ";
 		return xml;
@@ -531,8 +546,8 @@ public class User implements Comparable<User> {
 
 				u.setEmail(getAttribute(element, "email"));
 				u.setAddress(getAttribute(element, "address"));
-				u.setmStringBirthday(getAttribute(element , "birthday"));
-				
+				u.setmStringBirthday(getAttribute(element, "birthday"));
+
 				String authType = getAttribute(element, "authtype");
 				if (authType == null) {
 					u.setAuthtype(0);
@@ -650,7 +665,7 @@ public class User implements Comparable<User> {
 		if (end == -1) {
 			return null;
 		}
-		return HeartCharacterProcessing.reverse(xml.substring(
+		return EscapedcharactersProcessing.reverse(xml.substring(
 				pos + startStr.length(), end));
 	}
 

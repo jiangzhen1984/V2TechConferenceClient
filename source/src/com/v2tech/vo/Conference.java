@@ -11,7 +11,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.v2tech.service.GlobalHolder;
-import com.v2tech.util.HeartCharacterProcessing;
+import com.v2tech.util.EscapedcharactersProcessing;
 
 public class Conference implements Parcelable {
 
@@ -204,13 +204,13 @@ public class Conference implements Parcelable {
 				.append(" id=\"0\" key=\"\" layout=\"1\" lockchat=\"0\" lockconf=\"0\" lockfiletrans=\"0\" mode=\"2\" pollingvideo=\"0\" ")
 				.append(" syncdesktop=\"0\" syncdocument=\"1\" syncvideo=\"0\" ")
 				.append("subject=\"")
-				.append(HeartCharacterProcessing.convert(this.name))
+				.append(EscapedcharactersProcessing.convert(this.name))
 				.append("\" ")
 				.append("chairuserid=\"")
 				.append(GlobalHolder.getInstance().getCurrentUserId())
 				.append("\" ")
 				.append("chairnickname=\"")
-				.append(loggedUser == null ? "" : HeartCharacterProcessing
+				.append(loggedUser == null ? "" : EscapedcharactersProcessing
 						.convert(loggedUser.getName()))
 				.append("\"  starttime=\"" + getDate().getTime() / 1000
 						+ "\" >").append("</conf>");
@@ -224,7 +224,7 @@ public class Conference implements Parcelable {
 		for (User u : this.invitedList) {
 			sb.append("<user id=\"").append(u.getmUserId()).append("\" ")
 					.append("nickname=\"")
-					.append(HeartCharacterProcessing.convert(u.getName()))
+					.append(EscapedcharactersProcessing.convert(u.getName()))
 					.append("\"/>");
 		}
 

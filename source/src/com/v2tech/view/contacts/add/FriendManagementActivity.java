@@ -78,16 +78,12 @@ public class FriendManagementActivity extends Activity {
 		tvGroupName.setText(selectGroupName);
 
 	}
-	
-	
 
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
 		contactService.clearCalledBack();
 	}
-
-
 
 	private void connectView() {
 		tvRightTextView = (TextView) findViewById(R.id.right_text_view);
@@ -148,13 +144,13 @@ public class FriendManagementActivity extends Activity {
 							contactService.addContact(new FriendGroup(
 									selectGroupID, ""), detailUser, "",
 									commentNameET.getText().toString());
-							Toast.makeText(FriendManagementActivity.this,
-									"您的好友申请发送成功", Toast.LENGTH_SHORT).show();
+							// Toast.makeText(FriendManagementActivity.this,
+							// "您的好友申请发送成功", Toast.LENGTH_SHORT).show();
 						} else if (detailUser.getAuthtype() == 1) {
 							AddFriendHistroysHandler
 									.addOtherNeedAuthentication(
 											getApplicationContext(),
-											detailUser,verificationInfo);
+											detailUser, verificationInfo);
 							contactService.addContact(new FriendGroup(
 									selectGroupID, ""), detailUser,
 									verificationInfo, commentNameET.getText()
