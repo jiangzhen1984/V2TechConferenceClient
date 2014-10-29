@@ -520,6 +520,15 @@ public class CrowdGroupService extends AbstractHandler {
 					.sendToTarget();
 
 		}
+		
+		@Override
+		public void OnRefuseApplyJoinGroup(V2Group parseSingleCrowd,
+				String reason) {
+			JNIResponse jniRes = new JNIResponse(
+					CreateCrowdResponse.Result.FAILED);
+			Message.obtain(mCallbackHandler, REFUSE_APPLICATION_CROWD, jniRes)
+					.sendToTarget();
+		}
 
 		@Override
 		public void OnModifyGroupInfoCallback(V2Group group) {
@@ -664,6 +673,7 @@ public class CrowdGroupService extends AbstractHandler {
 			notifyListener(KEY_FILE_NEW_NOTIFICATION_LISTNER, 0, 0, jniRes);
 
 		}
+
 	}
 
 	class FileRequestCB extends FileRequestCallbackAdapter {

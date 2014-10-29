@@ -7,6 +7,7 @@ import com.V2.jni.GroupRequestCallbackAdapter;
 import com.V2.jni.WBRequest;
 import com.V2.jni.WBRequestCallback;
 import com.V2.jni.ind.V2Document;
+import com.V2.jni.ind.V2Group;
 import com.V2.jni.util.V2Log;
 import com.v2tech.util.XmlParser;
 import com.v2tech.vo.Group;
@@ -232,6 +233,12 @@ public class DocumentService extends AbstractHandler {
 				break;
 			
 			}
+		}
+
+		@Override
+		public void OnRefuseApplyJoinGroup(V2Group parseSingleCrowd,
+				String reason) {
+			
 		}
 
 

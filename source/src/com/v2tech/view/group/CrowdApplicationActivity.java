@@ -2,6 +2,7 @@ package com.v2tech.view.group;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -15,10 +16,15 @@ import com.v2tech.R;
 import com.v2tech.service.CrowdGroupService;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.service.Registrant;
+import com.v2tech.service.jni.JNIResponse;
+import com.v2tech.service.jni.JNIResponse.Result;
+import com.v2tech.view.JNIService;
+import com.v2tech.view.PublicIntent;
 import com.v2tech.view.conversation.MessageBuilder;
 import com.v2tech.vo.Crowd;
 import com.v2tech.vo.CrowdGroup;
 import com.v2tech.vo.VMessageQualification;
+import com.v2tech.vo.Group.GroupType;
 
 public class CrowdApplicationActivity extends Activity {
 
@@ -174,6 +180,30 @@ public class CrowdApplicationActivity extends Activity {
 			}
 			switch (msg.what) {
 			case APPLY_DONE:
+				JNIResponse response = (JNIResponse) msg.obj;
+				if(response.getResult() == Result.SUCCESS){
+					CrowdGroup g = new CrowdGroup(crowd.getId(), crowd.getName(),
+							crowd.getCreator(), null);
+					g.setBrief(crowd.getBrief());
+					g.setAnnouncement(crowd.getAnnounce());
+					GlobalHolder.getInstance().addGroupToList(GroupType.CHATING.intValue(),
+							g);
+
+					Intent i = new Intent();
+					i.setAction(PublicIntent.BROADCAST_NEW_CROWD_NOTIFICATION);
+					i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
+					i.putExtra("crowd", crowd.getId());
+					sendBroadcast(i);
+
+					if(vq != null){
+						vq.setReadState(VMessageQualification.ReadState.READ);
+						vq.setQualState(VMessageQualification.QualificationState.ACCEPTED);
+						MessageBuilder.updateQualicationMessage(mContext, vq);
+					}
+				}
+				else if(response.getResult() == Result.FAILED){
+					
+				}
 				handleApplyDone();
 				break;
 			}

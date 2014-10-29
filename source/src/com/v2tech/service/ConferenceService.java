@@ -552,6 +552,12 @@ public class ConferenceService extends DeviceService {
 			}
 		}
 
+		@Override
+		public void OnRefuseApplyJoinGroup(V2Group parseSingleCrowd,
+				String reason) {
+			
+		}
+
 	}
 
 	class MixerRequestCB implements VideoMixerRequestCallback {

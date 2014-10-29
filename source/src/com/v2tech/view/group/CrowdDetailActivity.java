@@ -339,10 +339,14 @@ public class CrowdDetailActivity extends Activity {
 
 		@Override
 		public void onClick(View view) {
+			
 			Intent i = new Intent(PublicIntent.START_CROWD_FILES_ACTIVITY);
 			i.addCategory(PublicIntent.DEFAULT_CATEGORY);
 			i.putExtra("cid", crowd.getmGId());
 			startActivity(i);
+			
+			crowd.resetNewFileCount();
+			updateGroupFileNotificator();
 		}
 
 	};
@@ -401,7 +405,7 @@ public class CrowdDetailActivity extends Activity {
 					mMembersCountsTV.setText(crowd.getUsers().size()+"");
 				}
 			} else if (intent.getAction().equals(JNIService.BROADCAST_CROWD_NEW_UPLOAD_FILE_NOTIFICATION)) {
-				long crowdId = intent.getLongExtra("gid", 0);
+				long crowdId = intent.getLongExtra("groupID", 0);
 				if (crowdId == crowd.getmGId()) {
 					updateGroupFileNotificator();
 				}

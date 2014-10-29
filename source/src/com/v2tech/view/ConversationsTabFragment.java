@@ -717,7 +717,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 		}
 
 		if (isAdd) {
-			V2Log.d(TAG, "Successfully add a new conversation , type is : "
+			V2Log.d(TAG, "addConversation -- Successfully add a new conversation , type is : "
 					+ cov.getType() + " and id is : " + cov.getExtId()
 					+ " and name is : " + cov.getName());
 			this.mConvList.add(0, cov);
@@ -773,7 +773,10 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 				initVerificationItem();
 				((ConversationFirendAuthenticationData) verificationMessageItemData)
 						.setMessageType(ConversationFirendAuthenticationData.VerificationMessageType.CROWD_TYPE);
-				showCrowdAuthentication();
+				VMessageQualification nestQualification = MessageLoader
+						.getNewestCrowdVerificationMessage(mContext, GlobalHolder
+								.getInstance().getCurrentUser());
+				updateCrwodVerificationConversation(nestQualification);
 				break;
 			default:
 				break;
@@ -1360,8 +1363,18 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 			verification.setUser(invitation.getInvitationUser());
 			break;
 		case CROWD_APPLICATION:
-			content = mContext.getText(R.string.crowd_applicant_content)
-					.toString();
+			String applyName = null;
+			VMessageQualificationApplicationCrowd apply = (VMessageQualificationApplicationCrowd) msg;
+			if (TextUtils.isEmpty(apply.getApplicant().getName())) {
+				User user = GlobalHolder.getInstance().getUser(
+						apply.getApplicant().getmUserId());
+				if (user != null)
+					applyName = user.getName();
+			} else
+				applyName = apply.getApplicant().getName();
+			content = applyName
+					+ mContext.getText(R.string.crowd_applicant_content);
+			verification.setUser(apply.getApplicant());
 			break;
 		default:
 			break;
@@ -1901,10 +1914,11 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 							if (inviUser != null)
 								verification.setUser(inviUser);
 
-							verification
-									.setMsg(verification.getUser().getName()
-											+ mContext
-													.getText(R.string.crowd_invitation_content));
+							String content = verification.getMsg().toString();
+							if(content.contains("null")){
+								verification
+										.setMsg(content.replace("null", verification.getUser().getName()));
+							}
 							verificationMessageItemLayout.update();
 							adapter.notifyDataSetChanged();
 							V2Log.d(TAG,
@@ -2422,63 +2436,6 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 					hasUnread);
 		}
 		return msg;
-	}
-
-	private void showCrowdAuthentication() {
-
-		VMessageQualification nestQualification = MessageLoader
-				.getNewestCrowdVerificationMessage(mContext, GlobalHolder
-						.getInstance().getCurrentUser());
-		if (verificationMessageItemLayout != null) {
-			verificationMessageItemLayout.updateNotificator(nestQualification
-					.getReadState().intValue() == 0 ? true : false);
-			if (verificationMessageItemData != null) {
-				String content = "";
-				switch (nestQualification.getType()) {
-				case CROWD_INVITATION:
-					VMessageQualificationInvitationCrowd invitation = (VMessageQualificationInvitationCrowd) nestQualification;
-
-					content = invitation.getInvitationUser().getName()
-							+ mContext
-									.getText(R.string.crowd_invitation_content);
-					((ConversationFirendAuthenticationData) verificationMessageItemData)
-							.setUser(invitation.getInvitationUser());
-					break;
-				case CROWD_APPLICATION:
-					VMessageQualificationApplicationCrowd apply = (VMessageQualificationApplicationCrowd) nestQualification;
-					User applicant = apply.getApplicant();
-					content = applicant.getName()
-							+ mContext
-									.getText(R.string.crowd_applicant_content)
-									.toString();
-					((ConversationFirendAuthenticationData) verificationMessageItemData)
-							.setUser(applicant);
-					break;
-				default:
-					break;
-				}
-				verificationMessageItemData.setMsg(content);
-				if (nestQualification.getmTimestamp() != null) {
-					verificationMessageItemData
-							.setDate(DateUtil.getStandardDate(nestQualification
-									.getmTimestamp()));
-					verificationMessageItemData.setDateLong(String
-							.valueOf(nestQualification.getmTimestamp()
-									.getTime()));
-				}
-				verificationMessageItemLayout.update();
-			}
-
-			if (nestQualification.getReadState().intValue() == Conversation.READ_FLAG_UNREAD) {
-				notificationListener.updateNotificator(
-						Conversation.TYPE_CONTACT, true);
-				showAuthenticationNotification = true;
-			} else {
-				notificationListener.updateNotificator(
-						Conversation.TYPE_CONTACT, false);
-				showAuthenticationNotification = false;
-			}
-		}
 	}
 
 	class LocalHandler extends Handler {

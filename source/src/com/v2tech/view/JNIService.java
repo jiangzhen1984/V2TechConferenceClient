@@ -932,6 +932,11 @@ public class JNIService extends Service {
 			kick.putExtra("userId", nUserId);
 			sendBroadcast(kick);
 		}
+
+		@Override
+		public void OnRefuseApplyJoinGroup(V2Group parseSingleCrowd,
+				String reason) {
+		}
 	}
 
 	class AudioRequestCB extends AudioRequestCallbackAdapter {

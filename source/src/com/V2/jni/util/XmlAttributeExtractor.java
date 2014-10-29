@@ -16,6 +16,7 @@ import org.w3c.dom.NodeList;
 
 import android.text.TextUtils;
 
+import com.V2.jni.V2GlobalEnum;
 import com.V2.jni.ind.FileJNIObject;
 import com.V2.jni.ind.V2Group;
 import com.V2.jni.ind.V2User;
@@ -127,6 +128,38 @@ public class XmlAttributeExtractor {
 					new V2User(cid)));
 		}
 		return listConf;
+	}
+	
+	public static V2Group parseSingleCrowd(String sXml){
+		
+		if(TextUtils.isEmpty(sXml)){
+			V2Log.e("XmlAttributeExtractor parseSingleCrowd --> parse failed , given xml is null");
+			return null;
+		}
+		
+		String name = XmlAttributeExtractor.extract(sXml, "name='", "'");
+		String id = XmlAttributeExtractor.extract(sXml, "id='", "'");
+		V2Group g = new V2Group(Long.parseLong(id), name, V2GlobalEnum.GROUP_TYPE_CROWD);
+
+		String summary = XmlAttributeExtractor.extract(sXml, "summary='", "'");
+		String announcement = XmlAttributeExtractor.extract(sXml,
+				"announcement='", "'");
+		String authtype = XmlAttributeExtractor
+				.extract(sXml, "authtype='", "'");
+		g.announce = announcement;
+		g.brief = summary;
+		if (authtype != null) {
+			g.authType = Integer.parseInt(authtype);
+		}
+		String creatoruserid = XmlAttributeExtractor.extract(sXml,
+				"creatoruserid='", "'");
+		if (creatoruserid != null) {
+			V2User u = new V2User();
+			u.uid = Long.parseLong(creatoruserid);
+			g.owner = u;
+			g.creator = u;
+		}
+		return g;
 	}
 
 	public static List<V2Group> parseCrowd(String xml) {

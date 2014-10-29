@@ -817,50 +817,44 @@ public class GroupRequest {
 		V2Log.d("OnAcceptApplyJoinGroup ==>" + "groupType:" + groupType + ","
 				+ "sXml:" + sXml);
 
-		String name = XmlAttributeExtractor.extract(sXml, "name='", "'");
-		String id = XmlAttributeExtractor.extract(sXml, "id='", "'");
-		V2Group g = new V2Group(Long.parseLong(id), name, groupType);
-
-		String summary = XmlAttributeExtractor.extract(sXml, "summary='", "'");
-		String announcement = XmlAttributeExtractor.extract(sXml,
-				"announcement='", "'");
-		String authtype = XmlAttributeExtractor
-				.extract(sXml, "authtype='", "'");
-		g.announce = announcement;
-		g.brief = summary;
-		if (authtype != null) {
-			g.authType = Integer.parseInt(authtype);
-		}
-		String creatoruserid = XmlAttributeExtractor.extract(sXml,
-				"creatoruserid='", "'");
-		if (creatoruserid != null) {
-			V2User u = new V2User();
-			u.uid = Long.parseLong(creatoruserid);
-			g.owner = u;
-			g.creator = u;
-		}
-
+		V2Group parseSingleCrowd = XmlAttributeExtractor.parseSingleCrowd(sXml);
+		if(parseSingleCrowd == null)
+			return ;
+		
 		for (int i = 0; i < mCallbacks.size(); i++) {
 			WeakReference<GroupRequestCallback> wrcb = mCallbacks.get(i);
 			Object obj = wrcb.get();
 			if (obj != null) {
 				GroupRequestCallback callback = (GroupRequestCallback) obj;
-				callback.OnAcceptApplyJoinGroup(g);
+				callback.OnAcceptApplyJoinGroup(parseSingleCrowd);
 			}
 		}
 	}
 
 	/**
-	 * The CallBack that refuse apply for join group 拒绝申请加入群回调 TODO implement
+	 * The CallBack that refuse apply for join group 拒绝申请加入群回调 
 	 * 
 	 * @param groupType
 	 * @param sGroupInfo
 	 * @param reason
 	 */
-	private void OnRefuseApplyJoinGroup(int groupType, String sGroupInfo,
+	private void OnRefuseApplyJoinGroup(int groupType, String sXml,
 			String reason) {
-		V2Log.e("OnRefuseApplyJoinGroup ==>" + "groupType:" + groupType + ","
-				+ "sGroupInfo:" + sGroupInfo + "," + "reason:" + reason);
+		V2Log.d("OnRefuseApplyJoinGroup ==>" + "groupType:" + groupType + ","
+				+ "sXml:" + sXml + "," + "reason:" + reason);
+		
+		V2Group parseSingleCrowd = XmlAttributeExtractor.parseSingleCrowd(sXml);
+		if(parseSingleCrowd == null)
+			return ;
+		
+		for (int i = 0; i < mCallbacks.size(); i++) {
+			WeakReference<GroupRequestCallback> wrcb = mCallbacks.get(i);
+			Object obj = wrcb.get();
+			if (obj != null) {
+				GroupRequestCallback callback = (GroupRequestCallback) obj;
+				callback.OnRefuseApplyJoinGroup(parseSingleCrowd , reason);
+			}
+		}
 	}
 
 	/**

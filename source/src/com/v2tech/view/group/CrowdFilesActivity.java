@@ -621,7 +621,7 @@ public class CrowdFilesActivity extends Activity {
 		public void onReceive(Context context, Intent intent) {
 			if (intent.getAction().equals(
 					JNIService.BROADCAST_CROWD_NEW_UPLOAD_FILE_NOTIFICATION)) {
-				long crowdId = intent.getLongExtra("crowd", 0);
+				long crowdId = intent.getLongExtra("groupID", 0);
 				if (crowdId == crowd.getmGId()) {
 					crowd.resetNewFileCount();
 				}

@@ -952,8 +952,8 @@ public class MessageAuthenticationActivity extends Activity {
 				} else {
 					item.mMsgBanneriv.setImageResource(R.drawable.avatar);
 				}
-				item.mNameTV.setText(vqac.getApplicant().getName());
-				item.mContentTV.setText(vqac.getCrowdGroup().getName()
+				item.mNameTV.setText(vqac.getCrowdGroup().getName());
+				item.mContentTV.setText(vqac.getApplicant().getName()
 						+ mContext.getText(R.string.crowd_applicant_content));
 
 			}
@@ -993,8 +993,14 @@ public class MessageAuthenticationActivity extends Activity {
 
 			@Override
 			public void onClick(View v) {
+				
 				ListItemWrapper wrapper = (ListItemWrapper) v.getTag();
-				wrapper.showDeleteButton = true;
+				if(wrapper.showDeleteButton)
+					wrapper.showDeleteButton = false;
+				else
+					wrapper.showDeleteButton = true;
+				
+				v.setTag(wrapper);
 				groupAdapter.notifyDataSetChanged();
 			}
 

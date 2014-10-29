@@ -141,7 +141,12 @@ public interface GroupRequestCallback {
 	public void OnAcceptApplyJoinGroup(V2Group group);
 	
 	
-
+	/**
+	 * Callback of refuse apply join crowd invitation
+	 * @param parseSingleCrowd
+	 * @param reason
+	 */
+	public void OnRefuseApplyJoinGroup(V2Group parseSingleCrowd, String reason);
 	/**
 	 * Callback of  apply join crowd 
 	 * 
