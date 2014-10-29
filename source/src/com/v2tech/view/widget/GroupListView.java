@@ -693,7 +693,11 @@ public class GroupListView extends ListView {
 
 	@Override
 	public void setFilterText(String filterText) {
-		mIsInFilter = true;
+		if (TextUtils.isEmpty(filterText)) {
+			mIsInFilter = false;
+		} else {
+			mIsInFilter = true;
+		}
 		super.setFilterText(filterText);
 	}
 
@@ -1181,6 +1185,7 @@ public class GroupListView extends ListView {
 				groupRoot.setVisibility(View.VISIBLE);
 				if (paddingFlag) {
 					groupRoot.setPadding((item.getLevel() - 1) * 35, 0, 0, 0);
+				//For show search result
 				} else {
 					groupRoot.setPadding(35, 0, 0, 0);
 				}
@@ -1193,6 +1198,7 @@ public class GroupListView extends ListView {
 				userRoot.setVisibility(View.VISIBLE);
 				if (paddingFlag) {
 					userRoot.setPadding((item.getLevel() - 1) * 35, 0, 0, 0);
+				//For show search result
 				} else {
 					userRoot.setPadding(35, 0, 0, 0);
 				}

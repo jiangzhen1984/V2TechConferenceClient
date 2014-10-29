@@ -2382,10 +2382,7 @@ public class ConversationActivity extends Activity {
 
 	private Runnable mUpdateMicStatusTimer = new Runnable() {
 		public void run() {
-			int ratio = mRecorder.getMaxAmplitude() / 600;
-			int db = 0;// 分贝
-			if (ratio > 1)
-				db = (int) (20 * Math.log10(ratio));
+			int db = (int)mAacEncoder.getDB();
 			updateVoiceVolume(db / 4);
 
 			lh.postDelayed(mUpdateMicStatusTimer, 200);

@@ -696,7 +696,7 @@ public class CrowdGroupService extends AbstractHandler {
 							nTransType,
 							szFileID,
 							nFileSize,
-							FileTransStatusIndication.IND_TYPE_PROGRESS_TRANSING));
+							FileTransStatusIndication.IND_TYPE_PROGRESS_END));
 
 		}
 

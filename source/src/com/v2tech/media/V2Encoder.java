@@ -19,8 +19,18 @@ public interface V2Encoder {
 	public void stop();
 	
 	
+	/**
+	 * Get current state
+	 * @return
+	 * @see V2EncoderState
+	 */
 	public V2EncoderState getState();
 	
+	/**
+	 * Return current frame's db
+	 * @return
+	 */
+	public double getDB();
 	
 	
 	public enum V2EncoderState {

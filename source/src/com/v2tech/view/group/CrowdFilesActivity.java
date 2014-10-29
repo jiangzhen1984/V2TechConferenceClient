@@ -315,7 +315,11 @@ public class CrowdFilesActivity extends Activity {
 		}
 		if (ind.indType == FileTransStatusIndication.IND_TYPE_PROGRESS) {
 			FileTransProgressStatusIndication progress = (FileTransProgressStatusIndication) ind;
-			file.setProceedSize(progress.nTranedSize);
+			if (progress.progressType == FileTransStatusIndication.IND_TYPE_PROGRESS_END) {
+				file.setProceedSize(file.getSize());
+			} else {
+				file.setProceedSize(progress.nTranedSize);
+			}
 			if (file.getProceedSize() == file.getSize()
 					&& file.getUploader().getmUserId() == GlobalHolder
 							.getInstance().getCurrentUserId()) {
@@ -935,6 +939,14 @@ public class CrowdFilesActivity extends Activity {
 
 			@Override
 			public void onClick(View v) {
+				if (isInDeleteMode) {
+					Toast.makeText(
+							mContext,
+							R.string.crowd_files_in_deletion_failed,
+							Toast.LENGTH_SHORT).show();
+					return;
+					
+				}
 				VCrowdFile file = (VCrowdFile) v.getTag();
 				if (file.getState() == VFile.State.UNKNOWN
 						|| file.getState() == VFile.State.DOWNLOAD_FAILED) {

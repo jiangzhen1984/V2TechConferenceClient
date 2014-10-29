@@ -17,7 +17,7 @@ public class SurfaceHolderObserver implements SurfaceHolder.Callback {
 
 	private DeviceService service;
 	private UserDeviceConfig udc;
-	//TODO this observer should not care this 
+	//FIXME this observer should not care this 
 	private Group g; 
 	private State state;
 	private boolean isCreate;

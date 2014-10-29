@@ -9,7 +9,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import android.content.Context;
 import android.text.TextUtils;
 
-import com.V2.jni.GroupRequestCallback.DocOpt;
 import com.V2.jni.ind.FileJNIObject;
 import com.V2.jni.ind.V2Document;
 import com.V2.jni.ind.V2Group;

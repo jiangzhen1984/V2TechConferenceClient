@@ -65,6 +65,7 @@
     <string name="crowd_files_delete_file_no_rights_notification">你无法删除其他人上传的文件!</string>
     <string name="crowd_files_delete_file_no_rights_for_uploading_notification">请先暂停，在删除文件!</string>
     <string name="crowd_files_resume_uploading_failed">请先先退出删除模式!</string>
+    <string name="crowd_files_in_deletion_failed">请先先退出删除模式!</string>
     
     
     <string name="crowd_message_deletion_mode_quit_required">请先先退出删除模式!</string>

@@ -51,6 +51,7 @@ import com.v2tech.db.V2techSearchContentProvider;
 import com.v2tech.service.BitmapManager;
 import com.v2tech.service.ConferencMessageSyncService;
 import com.v2tech.service.ConferenceService;
+import com.v2tech.service.CrowdGroupService;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.service.Registrant;
 import com.v2tech.service.jni.JNIResponse;
@@ -65,10 +66,10 @@ import com.v2tech.view.conference.GroupLayout;
 import com.v2tech.view.conference.VideoActivityV2;
 import com.v2tech.view.contacts.VoiceMessageActivity;
 import com.v2tech.view.contacts.add.AddFriendHistroysHandler;
+import com.v2tech.view.conversation.ConversationP2PAVActivity;
 import com.v2tech.view.conversation.MessageAuthenticationActivity;
 import com.v2tech.view.conversation.MessageBuilder;
 import com.v2tech.view.conversation.MessageLoader;
-import com.v2tech.view.conversation.ConversationP2PAVActivity;
 import com.v2tech.view.group.CrowdDetailActivity;
 import com.v2tech.vo.AddFriendHistorieNode;
 import com.v2tech.vo.AudioVideoMessageBean;
@@ -1666,7 +1667,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 		@Override
 		public boolean onItemLongClick(AdapterView<?> adapter, View v, int pos,
 				long id) {
-
+			final Conversation cov = mConvList.get(pos);
 			String[] item;
 			if (mCurrentTabFlag == Conversation.TYPE_CONFERNECE) {
 				item = new String[] { mContext.getResources().getString(
@@ -1676,14 +1677,27 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 						R.string.conversations_delete_conversaion) };
 				// Conversation.TYPE_GROUP
 			} else {
-				item = new String[] {
-				// mContext.getResources().getString(
-				// R.string.conversations_delete_conversaion),
-				mContext.getResources()
-						.getString(R.string.conversations_detail) };
+				CrowdGroup cg = (CrowdGroup) GlobalHolder.getInstance()
+						.getGroupById(GroupType.CHATING.intValue(),
+								cov.getExtId());
+				if (cg.getOwnerUser().getmUserId() == GlobalHolder
+						.getInstance().getCurrentUserId()) {
+					item = new String[] {
+							mContext.getResources().getString(
+									R.string.conversations_detail),
+							mContext.getResources()
+									.getString(
+											R.string.crowd_detail_qulification_dismiss_button) };
+				} else {
+					item = new String[] {
+							mContext.getResources().getString(
+									R.string.conversations_detail),
+							mContext.getResources()
+									.getString(
+											R.string.crowd_detail_qulification_quit_button) };
+				}
 			}
 
-			final Conversation cov = mConvList.get(pos);
 			AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
 			builder.setTitle(cov.getName()).setItems(item,
 					new DialogInterface.OnClickListener() {
@@ -1714,6 +1728,20 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 											CrowdDetailActivity.class);
 									crowdIntent.putExtra("cid", cov.getExtId());
 									mContext.startActivity(crowdIntent);
+								}
+							} else if (which == 1) {
+								switch (mCurrentTabFlag) {
+								case Conversation.TYPE_GROUP:
+									CrowdGroup cg = (CrowdGroup) GlobalHolder.getInstance()
+									.getGroupById(GroupType.CHATING.intValue(),
+											cov.getExtId());
+									removeConversation(cov.getExtId());
+									CrowdGroupService cgs = new CrowdGroupService();
+									cgs.quitCrowd(cg, null);
+									cgs.clearCalledBack();
+									break;
+								default:
+									break;
 								}
 							}
 							// else {
