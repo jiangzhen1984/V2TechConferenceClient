@@ -80,6 +80,8 @@ public class ChatService extends DeviceService {
 	private Registrant mCaller;
 
 	private Handler thread;
+	
+	private HandlerThread backEndThread;
 
 	private static final int KEY_CANCELLED_LISTNER = 1;
 	private static final int KEY_FILE_TRANS_STATUS_NOTIFICATION_LISTNER = 2;
@@ -103,9 +105,9 @@ public class ChatService extends DeviceService {
 		fileCallback = new FileRequestCB();
 		FileRequest.getInstance().addCallback(fileCallback);
 
-		HandlerThread backEnd = new HandlerThread("back-end");
-		backEnd.start();
-		thread = new Handler(backEnd.getLooper());
+		backEndThread = new HandlerThread("back-end");
+		backEndThread.start();
+		thread = new Handler(backEndThread.getLooper());
 	}
 	
 	
@@ -114,6 +116,7 @@ public class ChatService extends DeviceService {
 		AudioRequest.getInstance().removeCallback(callback);
 		VideoRequest.getInstance().removeCallback(videoCallback);
 		FileRequest.getInstance().removeCallback(fileCallback);
+		backEndThread.quit();
 	}
 
 

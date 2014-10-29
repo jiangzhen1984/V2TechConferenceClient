@@ -100,7 +100,8 @@ public class GroupListView extends ListView {
 	private LongSparseArray<Item> mItemMap;
 
 	/**
-	 * Use to record all same user items. key: user id
+	 * Use to record all same user items. key: user id<br>
+	 * One user can belong to different group
 	 */
 	private LongSparseArray<Set<Item>> mUserItemListMap;
 
@@ -109,6 +110,9 @@ public class GroupListView extends ListView {
 	 */
 	private LongSparseArray<LongSparseArray<Item>> mGroupItemUserMap;
 
+	/**
+	 * Use to indicate current data set is filtered or not
+	 */
 	private boolean mIsInFilter;
 
 	public GroupListView(Context context, AttributeSet attrs, int defStyle) {
@@ -176,6 +180,10 @@ public class GroupListView extends ListView {
 		return mListener;
 	}
 
+	/**
+	 * Set item listener
+	 * @param listener
+	 */
 	public void setListener(GroupListViewListener listener) {
 		this.mListener = listener;
 	}
@@ -350,7 +358,7 @@ public class GroupListView extends ListView {
 	}
 
 	/**
-	 * 
+	 * Mark user as selected, and call {@link Item#isChecked()} will return true 
 	 * @param user
 	 */
 	public void selectUser(User user) {
@@ -365,6 +373,10 @@ public class GroupListView extends ListView {
 		adapter.notifyDataSetChanged();
 	}
 
+	/**
+	 * Mark user list as selected, and call {@link Item#isChecked()} will return true 
+	 * @param userList
+	 */
 	public void selectUser(List<User> userList) {
 		if (userList == null) {
 			return;
@@ -379,6 +391,11 @@ public class GroupListView extends ListView {
 		adapter.notifyDataSetChanged();
 	}
 
+	/**
+	 * Mark group as selected, and call {@link Item#isChecked()} will return true.<br>
+	 * Users belong this group will mark, unless you expand this group.  
+	 * @param group
+	 */
 	public void selectGroup(Group group) {
 		if (group == null) {
 			return;
@@ -789,6 +806,9 @@ public class GroupListView extends ListView {
 		return pos;
 	}
 
+	/**
+	 * Local item clicked listener
+	 */
 	private OnItemClickListener mItemClickedListener = new OnItemClickListener() {
 
 		@Override
