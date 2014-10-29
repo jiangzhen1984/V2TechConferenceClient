@@ -564,8 +564,9 @@ public class GroupListView extends ListView {
 		while (startIndex < mFilterList.size()) {
 			Item item = mFilterList.get(startIndex);
 			Object obj = item.getObject();
+			//If current item is group and group level same and is not self, then group end is this item index - 1
 			if ((obj instanceof Group && group.getLevel() == ((Group) obj)
-					.getLevel())) {
+					.getLevel()) && obj != group) {
 				pos = mFilterList.size() - startIndex;
 				break;
 			}
@@ -680,13 +681,14 @@ public class GroupListView extends ListView {
 			item.setChecked(groupItem.isChecked());
 			map.put(u.getmUserId(), item);
 
-			Set<Item> itemList = mUserItemListMap.get(u.getmUserId());
-			if (itemList == null) {
-				itemList = new HashSet<Item>();
-				mUserItemListMap.put(u.getmUserId(), itemList);
-			}
-			itemList.add(item);
 		}
+		
+		Set<Item> itemList = mUserItemListMap.get(u.getmUserId());
+		if (itemList == null) {
+			itemList = new HashSet<Item>();
+			mUserItemListMap.put(u.getmUserId(), itemList);
+		}
+		itemList.add(item);
 
 		return item;
 	}

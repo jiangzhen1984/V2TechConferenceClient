@@ -585,7 +585,7 @@ public class VideoDocLayout extends LinearLayout {
 	 */
 	public void updateLayoutPageInformation() {
 		if (mCurrentDoc == null) {
-			mDocPageTV.setText("0/0");
+			mDocPageTV.setText("");
 		} else {
 			mDocPageTV.setText(mCurrentDoc.getActivatePageNo() + "/"
 					+ mCurrentDoc.getPageSize());
