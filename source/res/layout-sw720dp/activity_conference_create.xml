@@ -82,7 +82,6 @@
             android:divider="@null"
             android:fadingEdge="none"
             android:focusable="false"
-            android:listSelector="#00000000"
             android:scrollingCache="false" >
         </com.v2tech.view.widget.GroupListView>
         <LinearLayout

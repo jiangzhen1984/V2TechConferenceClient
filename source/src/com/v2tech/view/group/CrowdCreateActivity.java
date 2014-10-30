@@ -343,10 +343,17 @@ public class CrowdCreateActivity extends Activity {
 			CheckBox cb = (CheckBox)view;
 			Object obj = item.getObject();
 			if (obj instanceof User) {
+				User user = (User) obj;
 				mContactsContainer.updateCheckItem((User) obj,
 						cb.isChecked());
 				Message.obtain(mLocalHandler, UPDATE_ATTENDEES, (User) obj)
 						.sendToTarget();
+				
+				Set<Group> belongsGroup = user.getBelongsGroup();
+				for (Group group : belongsGroup) {
+					List<User> users = group.getUsers();
+					mContactsContainer.checkBelongGroupAllChecked(group , users);
+				}
 			} else if (obj instanceof Group) {
 				Message.obtain(
 						mLocalHandler,

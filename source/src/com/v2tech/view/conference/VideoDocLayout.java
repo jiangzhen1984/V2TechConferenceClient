@@ -21,6 +21,7 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Handler;
+import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -394,7 +395,7 @@ public class VideoDocLayout extends LinearLayout {
 			return;
 		}
 
-		if (p.getFilePath() != null) {
+		if (!TextUtils.isEmpty(p.getFilePath())) {
 			File f = new File(p.getFilePath());
 			if (f.exists()) {
 				matrix = new Matrix();
@@ -432,7 +433,7 @@ public class VideoDocLayout extends LinearLayout {
 
 				mBackgroundBitMap = BitmapFactory.decodeFile(p.getFilePath(),
 						opsNew);
-
+				
 				dest.left = (src.right - opsNew.outWidth) / 2;
 				dest.right = opsNew.outWidth;
 				dest.top = (src.bottom - opsNew.outHeight) / 2;
@@ -464,8 +465,11 @@ public class VideoDocLayout extends LinearLayout {
 					}
 
 				}, 1000);
-				V2Log.e(" doc file doesn't exist " + f.getAbsolutePath());
+				V2Log.e("VideoDocLayout drawShape --> doc file doesn't exist :" + f.getAbsolutePath());
 			}
+		}
+		else{
+			V2Log.e("VideoDocLayout drawShape --> doc file doesn't exist :" + p.getFilePath());
 		}
 	}
 
@@ -689,7 +693,12 @@ public class VideoDocLayout extends LinearLayout {
 			V2Log.w(" shape list is null");
 			return;
 		}
-
+		
+		if(mBackgroundBitMap == null){
+			V2Log.e("VideoDocLayout drawShape --> mBackgroundBitMap is null");
+			return ;
+		}
+		
 		if (mShapeBitmap == null || mShapeBitmap.isRecycled()) {
 			mShapeBitmap = Bitmap.createBitmap(mBackgroundBitMap.getWidth(),
 					mBackgroundBitMap.getHeight(), Config.ARGB_8888);

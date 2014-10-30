@@ -38,12 +38,12 @@
                         android:src="@drawable/avatar" />
                     <FrameLayout
                         android:layout_width="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:layout_height="wrap_content" >
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical" >
                         <RelativeLayout
                             android:layout_width="wrap_content"
-                            android:layout_marginRight="10dp"
-                            android:layout_height="wrap_content" >
+                            android:layout_height="wrap_content"
+                            android:layout_marginRight="10dp" >
                             <ImageView
                                 android:id="@+id/message_body_arrow_lefe_false"
                                 android:layout_width="wrap_content"
@@ -169,8 +169,8 @@
                     </LinearLayout>
                     <RelativeLayout
                         android:layout_width="wrap_content"
-                        android:layout_marginRight="10dp"
-                        android:layout_height="wrap_content" >
+                        android:layout_height="wrap_content"
+                        android:layout_marginRight="10dp" >
                         <ImageView
                             android:id="@+id/message_body_arrow_right"
                             android:layout_width="wrap_content"

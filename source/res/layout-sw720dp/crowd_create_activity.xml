@@ -182,6 +182,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_margin="15dp"
+                android:divider="#f2f2f2"
                 android:background="@drawable/rounded_corners_create_conf_box_bg"
                 android:tag="vertical" >
             </ListView>

@@ -530,7 +530,8 @@ public class VideoActivityV2 extends Activity {
 			}
 
 		}
-
+		else
+			mDocContainer.updateCurrentDoc();
 		return mDocContainer;
 	}
 

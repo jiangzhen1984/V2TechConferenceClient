@@ -156,7 +156,7 @@ public class ConversationActivity extends Activity {
 
 	private Context mContext;
 
-	private TextView mSendButtonTV;
+	private View mSendButtonTV;
 
 	private TextView mReturnButtonTV;
 
@@ -291,7 +291,7 @@ public class ConversationActivity extends Activity {
 		// mMessagesContainer
 		// .setTranscriptMode(ListView.TRANSCRIPT_MODE_ALWAYS_SCROLL);
 
-		mSendButtonTV = (TextView) findViewById(R.id.message_send);
+		mSendButtonTV = findViewById(R.id.message_send);
 		// mSendButtonTV.setOnClickListener(sendMessageListener);
 		mSendButtonTV.setOnTouchListener(sendMessageButtonListener);
 

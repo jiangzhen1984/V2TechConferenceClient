@@ -6,6 +6,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -414,9 +415,17 @@ public class ConferenceCreateActivity extends Activity {
 				} else {
 					flag = OP_ADD_ALL_GROUP_USER;
 				}
+				
+				User user = (User) obj;
 				Message.obtain(mLocalHandler, UPDATE_ATTENDEES, flag, 0,
-						(User) obj).sendToTarget();
-				mGroupListView.updateCheckItem((User) obj, cb.isChecked());
+						user).sendToTarget();
+				mGroupListView.updateCheckItem(user, cb.isChecked());
+				
+				Set<Group> belongsGroup = user.getBelongsGroup();
+				for (Group group : belongsGroup) {
+					List<User> users = group.getUsers();
+					mGroupListView.checkBelongGroupAllChecked(group , users);
+				}
 			} else if (obj instanceof Group) {
 				Message.obtain(
 						mLocalHandler,

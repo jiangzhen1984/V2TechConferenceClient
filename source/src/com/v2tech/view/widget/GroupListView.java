@@ -224,6 +224,37 @@ public class GroupListView extends ListView {
 		updateCheckItemWithoutNotification(u, flag);
 		adapter.notifyDataSetChanged();
 	}
+	
+	/**
+	 * if all users were checek in a group , the group item checkBox should was checked..
+	 * @param group
+	 * @param list
+	 */
+	public void checkBelongGroupAllChecked(Group group , List<User> list){
+		int count = 0;
+		for (User u : list) {
+			Set<Item> items = mUserItemListMap.get(u.getmUserId());
+			if (items == null || items.size() <= 0) {
+				continue;
+			}
+			
+			for (Item item : items) {
+				if(item.isChecked()){
+					count = count + 1;
+					break;
+				}
+			}
+		}
+		
+		Item item = mItemMap.get(group.getmGId());
+		if (item != null) {
+			if(count == list.size())
+				item.setChecked(true);
+			else
+				item.setChecked(false);
+		}
+		adapter.notifyDataSetChanged();
+	}
 
 	/**
 	 * Update all group's checked status of item

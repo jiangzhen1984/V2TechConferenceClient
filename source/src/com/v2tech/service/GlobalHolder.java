@@ -199,11 +199,20 @@ public class GlobalHolder {
 				
 			Group g = null;
 			if (gType == V2GlobalEnum.GROUP_TYPE_CROWD) {
-				User owner = GlobalHolder.getInstance().getUser(vg.owner.uid);
-				g = new CrowdGroup(vg.id, vg.name, owner);
-				((CrowdGroup) g).setBrief(vg.brief);
-				((CrowdGroup) g).setAnnouncement(vg.announce);
-				mCrowdGroup.add(g);
+				boolean flag = true;
+				for (Group group : mCrowdGroup) {
+					if(group.getmGId() == vg.id){
+						flag = false;
+					}
+				}
+				
+				if(flag){
+					User owner = GlobalHolder.getInstance().getUser(vg.owner.uid);
+					g = new CrowdGroup(vg.id, vg.name, owner);
+					((CrowdGroup) g).setBrief(vg.brief);
+					((CrowdGroup) g).setAnnouncement(vg.announce);
+					mCrowdGroup.add(g);
+				}
 			} else if (gType == V2GlobalEnum.GROUP_TYPE_CONFERENCE) {
 				User owner = GlobalHolder.getInstance().getUser(vg.owner.uid);
 				User chairMan = GlobalHolder.getInstance().getUser(

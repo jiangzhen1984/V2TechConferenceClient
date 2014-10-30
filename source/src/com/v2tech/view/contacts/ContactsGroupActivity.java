@@ -287,7 +287,10 @@ public class ContactsGroupActivity extends Activity {
 				@Override
 				public void onClick(View v) {
 					LocalItemWrapper liw = (LocalItemWrapper)v.getTag();
-					liw.setShowDeleteButton(true);
+					if(liw.isShowDeleteButton())
+						liw.setShowDeleteButton(false);
+					else
+						liw.setShowDeleteButton(true);
 					adapter.notifyDataSetChanged();
 				}
 				
@@ -307,11 +310,11 @@ public class ContactsGroupActivity extends Activity {
 				if (liw.showDeleteButton) {
 					v.setVisibility(View.VISIBLE);
 				} else {
-					v.setVisibility(View.GONE);
+					v.setVisibility(View.INVISIBLE);
 				}
 			} else {
 				deleteModeView.setVisibility(View.INVISIBLE);
-				v.setVisibility(View.GONE);
+				v.setVisibility(View.INVISIBLE);
 			}
 
 

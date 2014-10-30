@@ -724,9 +724,8 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 							+ " and name is : " + cov.getName());
 			this.mConvList.add(0, cov);
 			GroupLayout gp = new GroupLayout(this.getActivity(), cov);
-			// if (mCurrentTabFlag == V2GlobalEnum.GROUP_TYPE_CROWD) {
-			// gp.updateCrowdLayout();
-			// }
+			if (mCurrentTabFlag == V2GlobalEnum.GROUP_TYPE_CROWD) 
+				gp.updateCrowdLayout();
 			mItemList.add(0, new ScrollItem(cov, gp));
 			gp.updateNotificator(flag);
 		}
@@ -869,8 +868,8 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 				GroupLayout gp = new GroupLayout(mContext, cov);
 				// use message layout that show newest chat content and date ,
 				// so need hide them
-				// if (mCurrentTabFlag == V2GlobalEnum.GROUP_TYPE_CROWD)
-				// gp.updateCrowdLayout();
+				if (mCurrentTabFlag == V2GlobalEnum.GROUP_TYPE_CROWD)
+					gp.updateCrowdLayout();
 
 				if (cov.getReadFlag() == Conversation.READ_FLAG_UNREAD) {
 					gp.updateNotificator(true);
@@ -1101,7 +1100,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 				viewLayout = new GroupLayout(mContext, existedCov);
 				// }
 				break;
-			// case V2GlobalEnum.GROUP_TYPE_CROWD:
+			 case V2GlobalEnum.GROUP_TYPE_CROWD:
 			// if (groupType == Conversation.TYPE_DEPARTMENT) {
 			// Group department = GlobalHolder.getInstance()
 			// .findGroupById(groupID);
@@ -1110,14 +1109,14 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 			// }
 			// existedCov = new DepartmentConversation(department);
 			// ConversationProvider.saveConversation(mContext, vm);
-			// viewLayout = new GroupLayout(mContext, existedCov);
-			// viewLayout.updateCrowdLayout();
+			 viewLayout = new GroupLayout(mContext, existedCov);
+			 viewLayout.updateCrowdLayout();
 			// }
-			// break;
-			// default:
-			// throw new RuntimeException(
-			// "updateGroupConversation ---> invalid mCurrentTabFlag : "
-			// + mCurrentTabFlag);
+			 break;
+			 default:
+			 throw new RuntimeException(
+			 "updateGroupConversation ---> invalid mCurrentTabFlag : "
+			 + mCurrentTabFlag);
 			}
 
 			if (existedCov != null) {
@@ -1417,12 +1416,13 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 						Conversation.TYPE_CONTACT, false);
 				verificationMessageItemLayout.updateNotificator(false);
 			}
-		} else {
+		} 
+//		else {
 			// notificationListener.updateNotificator(Conversation.TYPE_CONTACT,
 			// false);
-			verificationMessageItemLayout.updateNotificator(false);
-		}
-
+//			verificationMessageItemLayout.updateNotificator(false);
+//		}
+		adapter.notifyDataSetChanged();
 		Collections.sort(mConvList);
 		Collections.sort(mItemList);
 	}
@@ -1455,7 +1455,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 	 * @param id
 	 */
 	protected void removeConversation(long id) {
-
+		
 		Conversation cache = null;
 		for (int i = 0; i < mConvList.size(); i++) {
 			if (mConvList.get(i).getExtId() == id) {
@@ -1466,21 +1466,21 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 							&& conversation.getType() != Conversation.TYPE_VERIFICATION_MESSAGE) {
 						ConversationProvider.deleteConversation(mContext,
 								conversation);
-						V2Log.e(TAG, " GROUP_TYPE_USER mCurrentTabFlag :"
-								+ mCurrentTabFlag);
+						V2Log.d(TAG, " Successfully remove contact conversation , id is : " + id);
 					}
-				} else if (mCurrentTabFlag == V2GlobalEnum.GROUP_TYPE_CROWD) {
-					ConversationProvider.deleteConversation(mContext,
-							conversation);
-					V2Log.e(TAG, "GROUP_TYPE_CROWD mCurrentTabFlag :"
-							+ mCurrentTabFlag);
-				}
+				} 
+				//Now , Department conversation is not show in crowd interface.
+//				else if (mCurrentTabFlag == V2GlobalEnum.GROUP_TYPE_CROWD) {
+					//For delete Department Conversation in Crowd Interface
+//					ConversationProvider.deleteConversation(mContext,
+//							conversation);
+//					V2Log.d(TAG, " Successfully remove crowd conversation , id is : " + id);
+//				}
 				cache = mConvList.remove(i);
 				break;
 			}
 		}
 		if (cache != null) {
-			V2Log.e(TAG, "cache mCurrentTabFlag :" + mCurrentTabFlag);
 			adapter.notifyDataSetChanged();
 			// Set removed conversation state to readed
 			cache.setReadFlag(Conversation.READ_FLAG_READ);
@@ -2144,8 +2144,13 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 					.equals(intent.getAction())
 					|| intent.getAction().equals(
 							JNIService.JNI_BROADCAST_KICED_CROWD)) {
-				long cid = intent.getLongExtra("crowd", 0);
+				long cid = intent.getLongExtra("crowd", -1l);
+				if(cid == -1l){
+					V2Log.e(TAG, "Received the broadcast to quit the crowd group , but crowd id is wroing... ");
+					return ;
+				}
 				removeConversation(cid);
+				GlobalHolder.getInstance().removeGroup(GroupType.CHATING, cid);
 				// clear the crowd group all chat database messges
 				MessageLoader.deleteMessageByID(context, mCurrentTabFlag, cid,
 						-1);
@@ -2274,7 +2279,12 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 					.equals(intent.getAction())
 					|| intent.getAction().equals(
 							JNIService.JNI_BROADCAST_KICED_CROWD)) {
-				long cid = intent.getLongExtra("crowd", 0);
+				long cid = intent.getLongExtra("crowd", -1l);
+				if(cid == -1l){
+					V2Log.e(TAG, "Received the broadcast to quit the crowd group , but crowd id is wroing... ");
+					return ;
+				}
+				
 				removeConversation(cid);
 				// clear the crowd group all chat database messges
 				MessageLoader.deleteMessageByID(context, mCurrentTabFlag, cid,

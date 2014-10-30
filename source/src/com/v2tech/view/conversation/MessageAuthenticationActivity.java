@@ -380,7 +380,7 @@ public class MessageAuthenticationActivity extends Activity {
 
 				for (int i = 0; i < list.size(); i++) {
 					VMessageQualification qualification = list.get(i);
-					V2Log.e("MessageAuthenticationActivity loadGroupMessage --> load group message type :"
+					V2Log.d("MessageAuthenticationActivity loadGroupMessage --> load group message type :"
 							+ qualification.getType().intValue()
 							+ " id is : "
 							+ qualification.getId());
