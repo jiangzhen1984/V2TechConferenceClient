@@ -20,7 +20,7 @@ public class AACPlayer implements V2Decoder {
 
 	/**
 	 * Current channel configuration e which parse from audio resource<br>
-	 * AudioFormat.CHANNEL_IN_MONO, AudioFormat.CHANNEL_IN_STEREO;
+	 * AudioFormat.CHANNEL_OUT_MONO, AudioFormat.CHANNEL_OUT_STEREO;
 	 */
 	private int mChannel;
 
@@ -111,10 +111,10 @@ public class AACPlayer implements V2Decoder {
 			mSampleRate = format.getInteger(MediaFormat.KEY_SAMPLE_RATE);
 			// Get channel count
 			int channel = format.getInteger(MediaFormat.KEY_CHANNEL_COUNT);
-			mChannel = channel <= 2 ? AudioFormat.CHANNEL_IN_MONO
-					: AudioFormat.CHANNEL_IN_STEREO;
+			mChannel = channel == 1? AudioFormat.CHANNEL_OUT_MONO
+					: AudioFormat.CHANNEL_OUT_STEREO;
 			// Get duration of audio
-			mDurationUS = format.getInteger(MediaFormat.KEY_DURATION);
+			mDurationUS = format.getLong(MediaFormat.KEY_DURATION);
 
 		} else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
 			throw new RuntimeException(" Doesn't support on lower 4.1 version");
@@ -124,7 +124,7 @@ public class AACPlayer implements V2Decoder {
 
 		// FIXME always use ENCODING_PCM_16BIT
 		mMinBufferSize = AudioTrack.getMinBufferSize(mSampleRate, mChannel,
-				AudioFormat.ENCODING_PCM_16BIT);
+				AudioFormat.ENCODING_PCM_8BIT);
 		if (mMinBufferSize == AudioTrack.ERROR_BAD_VALUE) {
 			throw new RuntimeException(
 					" Doesn't support this configuration : [" + mSampleRate
@@ -281,7 +281,7 @@ public class AACPlayer implements V2Decoder {
 				} else if (outputBufferIndex == MediaCodec.INFO_OUTPUT_BUFFERS_CHANGED) {
 					// no needed to handle if API level >= 21 and
 					// using getOutputBuffer(int)
-					outputBuffers = mDecoder.getOutputBuffers();
+					//outputBuffers = mDecoder.getOutputBuffers();
 				} else if (outputBufferIndex == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED) {
 					// Subsequent data will conform to new format.
 					// can ignore if API level >= 21 and using

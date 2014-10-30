@@ -164,8 +164,16 @@ public class AACEncoder implements V2Encoder {
 				return;
 			}
 			mIsRecording = false;
-			mLocalRecorderThread.interrupt();
 		}
+		while (mLocalRecorderThread.isAlive()) {
+			try {
+				Thread.sleep(200);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+		mEncoder.stop();
+		mRecorder.stop();
 
 	}
 	
@@ -174,6 +182,19 @@ public class AACEncoder implements V2Encoder {
 
 	@Override
 	public void release() {
+		synchronized (mLock) {
+			mIsRecording = false ;
+			updateLocalState(MediaState.RELEASED);
+		}
+		
+		while (mLocalRecorderThread.isAlive()) {
+			try {
+				Thread.sleep(200);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+		
 		if (mEncoder != null) {
 			mEncoder.release();
 		}
@@ -181,10 +202,7 @@ public class AACEncoder implements V2Encoder {
 		if (mRecorder != null) {
 			mRecorder.release();
 		}
-		synchronized (mLock) {
-			mIsRecording = false ;
-			updateLocalState(MediaState.RELEASED);
-		}
+		
 	}
 
 	@Override
@@ -301,7 +319,7 @@ public class AACEncoder implements V2Encoder {
 			mEncoder.stop();
 			mRecorder.stop();
 
-			updateLocalState(MediaState.NORMAL);
+			updateLocalState(MediaState.STOPPED);
 
 			try {
 				writer.close();

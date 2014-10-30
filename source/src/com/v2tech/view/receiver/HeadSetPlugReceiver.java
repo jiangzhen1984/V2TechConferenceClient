@@ -20,15 +20,10 @@ public class HeadSetPlugReceiver extends BroadcastReceiver {
 			AudioManager  am = (AudioManager)context.getSystemService(Context.AUDIO_SERVICE);
 			//If wired headset unpluged
 			if (state == 0) {
-				if (gs.isInAudioCall() || gs.isInVideoCall() || gs.isInMeeting()) {
-					am.setSpeakerphoneOn(true);
-				}
-				
-				gs.setWiredHeadsetState(false);
+				GlobalHolder.getInstance().setWiredHeadsetState(false);
 			//If wired headset pluged
 			} else if (state == 1){
-				am.setSpeakerphoneOn(false);
-				gs.setWiredHeadsetState(true);
+				GlobalHolder.getInstance().setWiredHeadsetState(true);
 				
 			}
 		}

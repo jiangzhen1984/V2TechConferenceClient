@@ -201,6 +201,8 @@ public class VideoActivityV2 extends Activity {
 
 	private int mContentWidth = -1;
 	private int mContentHeight = -1;
+	
+	private AudioManager audioManager;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -300,6 +302,9 @@ public class VideoActivityV2 extends Activity {
 
 		bindService(new Intent(mContext, ConferencMessageSyncService.class),
 				mLocalServiceConnection, Context.BIND_AUTO_CREATE);
+		
+		audioManager = (AudioManager) mContext
+				.getSystemService(Context.AUDIO_SERVICE);
 
 	}
 
@@ -1297,6 +1302,8 @@ public class VideoActivityV2 extends Activity {
 		// MessageLoader.deleteGroupMessage(mContext,
 		// V2GlobalEnum.GROUP_TYPE_CONFERENCE , conf.getId());
 		mVideoHandler = null;
+		
+		audioManager.setMode(AudioManager.MODE_NORMAL);
 	}
 
 	@Override
@@ -1323,9 +1330,6 @@ public class VideoActivityV2 extends Activity {
 	 *            true means start, false means on stop
 	 */
 	private void updateAudioSpeaker(boolean flag) {
-		AudioManager audioManager;
-		audioManager = (AudioManager) mContext
-				.getSystemService(Context.AUDIO_SERVICE);
 		audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
 
 		GlobalState gs = GlobalHolder.getInstance().getGlobalState();

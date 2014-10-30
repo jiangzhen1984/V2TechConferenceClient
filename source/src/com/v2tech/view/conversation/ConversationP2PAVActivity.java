@@ -147,6 +147,10 @@ public class ConversationP2PAVActivity extends Activity implements
 		// 记录开始通话时间
 		startTime = GlobalConfig.getGlobalServerTime();
 		String uuid = UUID.randomUUID().toString();
+		audioManager = (AudioManager) mContext
+				.getSystemService(Context.AUDIO_SERVICE);
+		audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
+		
 		currentVideoBean = new VideoBean();
 		if (uad.isIncoming()) {
 			currentVideoBean.mediaState = AudioVideoMessageBean.STATE_NO_ANSWER_CALL;
@@ -330,6 +334,7 @@ public class ConversationP2PAVActivity extends Activity implements
 				null);
 
 		chatService.clearCalledBack();
+		audioManager.setMode(AudioManager.MODE_NORMAL);
 	}
 
 	@Override
@@ -1259,23 +1264,18 @@ public class ConversationP2PAVActivity extends Activity implements
 		// temptag 10261
 		@Override
 		public void onClick(View view) {
-			if (audioManager == null) {
-				audioManager = (AudioManager) mContext
-						.getSystemService(Context.AUDIO_SERVICE);
-			}
-			audioManager.setMode(AudioManager.MODE_NORMAL);
 			int drawId = R.drawable.message_voice_lounder_pressed;
 			int color = R.color.fragment_conversation_connected_pressed_text_color;
 
 			//Use HeadSetPlugReceiver handle setSpeakerphoneOn
 			// If wired headset or bluetooth headset connected, speaker should doesn't work
 			if (view.getTag() == null || view.getTag().equals("earphone")) {
-			//	audioManager.setSpeakerphoneOn(true);
+				audioManager.setSpeakerphoneOn(true);
 				view.setTag("speakerphone");
 				drawId = R.drawable.message_voice_lounder_pressed;
 				color = R.color.fragment_conversation_connected_pressed_text_color;
 			} else {
-			//	audioManager.setSpeakerphoneOn(false);
+				audioManager.setSpeakerphoneOn(false);
 				view.setTag("earphone");
 				drawId = R.drawable.message_voice_lounder;
 				color = R.color.fragment_conversation_connected_gray_text_color;

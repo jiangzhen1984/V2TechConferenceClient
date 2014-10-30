@@ -64,13 +64,13 @@ import android.widget.Toast;
 import com.V2.jni.V2GlobalEnum;
 import com.V2.jni.ind.FileJNIObject;
 import com.V2.jni.util.V2Log;
-import com.spoledge.aacplayer.AACPlayer;
 import com.spoledge.aacplayer.ArrayAACPlayer;
 import com.spoledge.aacplayer.ArrayDecoder;
 import com.spoledge.aacplayer.Decoder;
 import com.spoledge.aacplayer.PlayerCallback;
 import com.v2tech.R;
 import com.v2tech.media.AACEncoder;
+import com.v2tech.media.AACPlayer;
 import com.v2tech.media.MediaState;
 import com.v2tech.media.V2Encoder;
 import com.v2tech.service.AsyncResult;
@@ -674,16 +674,13 @@ public class ConversationActivity extends Activity {
 
 	private synchronized boolean startPlaying(String fileName) {
 
-		mAACPlayer = new ArrayAACPlayer(
-				ArrayDecoder.create(Decoder.DECODER_FAAD2), mAACPlayerCallback,
-				AACPlayer.DEFAULT_AUDIO_BUFFER_CAPACITY_MS,
-				AACPlayer.DEFAULT_DECODE_BUFFER_CAPACITY_MS);
+		mAACPlayer = new AACPlayer(fileName);
 		try {
 			if (currentPlayedStream != null) {
 				currentPlayedStream.close();
 			}
 			// currentPlayedStream = new FileInputStream(new File(fileName));
-			mAACPlayer.playAsync(fileName);
+			mAACPlayer.play();
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (Exception e) {
@@ -708,7 +705,7 @@ public class ConversationActivity extends Activity {
 
 	private void releasePlayer() {
 		if (mAACPlayer != null) {
-			mAACPlayer.stop();
+			mAACPlayer.release();
 			mAACPlayer = null;
 		}
 	}

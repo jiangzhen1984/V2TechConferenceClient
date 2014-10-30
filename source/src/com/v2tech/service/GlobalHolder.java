@@ -614,8 +614,32 @@ public class GlobalHolder {
 		return false;
 	}
 
+	/**
+	 * Get current application state copy
+	 * @return
+	 */
 	public GlobalState getGlobalState() {
 		return new GlobalState(this.mState);
+	}
+	
+	/**
+	 * Set bluetooth headset matched or not
+	 * @param flag
+	 */
+	public void setBluetoothHeadset(boolean flag) {
+		synchronized (mState) {
+			mState.setBluetoothHeadset(flag);
+		}
+	}
+	
+	/**
+	 * Set wired headset state
+	 * @param flag
+	 */
+	public void setWiredHeadsetState(boolean flag) {
+		synchronized (mState) {
+			mState.setWiredHeadsetState(flag);
+		}
 	}
 
 	public Bitmap getUserAvatar(long id) {
