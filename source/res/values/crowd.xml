@@ -15,6 +15,7 @@
     <string name="crowd_invitation_reject_titile">拒绝理由</string>
     <string name="crowd_invitation_top_bar_right_button">发消息</string>
     <string name="crowd_invitation_box_item_creator">创建人</string>
+    <string name="crowd_invitation_box_item_no">群号码</string>
     <string name="crowd_invitation_box_item_announcement">群公告</string>
     <string name="crowd_invitation_box_item_brief">群简介</string>
     <string name="crowd_invitation_box_item_files">群文件</string>

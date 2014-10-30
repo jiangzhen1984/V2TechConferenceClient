@@ -16,8 +16,8 @@ import android.media.MediaRecorder.AudioSource;
 import android.os.Build;
 
 /**
- * AAC encoder.
- * 
+ * AAC encode and output to file or stream. <br>
+ * FIXME only support android version greater than 4.04
  * @author jiangzhen
  * 
  */
@@ -30,6 +30,8 @@ public class AACEncoder implements V2Encoder {
 	private static final int CHANNEL = 1;
 
 	private static final int AAC_HEADER_LENGTH = 7;
+	
+	private static final int MAX_INPUT_BUFFER_SIZE = 65536;
 
 	private OutputStream writer;
 
@@ -68,7 +70,10 @@ public class AACEncoder implements V2Encoder {
 	/**
 	 * Current state
 	 */
-	private V2EncoderState mState = V2EncoderState.NORMAL;
+	private MediaState mState = MediaState.NORMAL;
+	
+	
+	private ErrorCallback mLocalCallback;
 
 	/**
 	 * 
@@ -113,20 +118,24 @@ public class AACEncoder implements V2Encoder {
 		mRecorder = new AudioRecord(AudioSource.MIC, SAMPLE_RATE,
 				AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT,
 				mBufferSize);
-
+ 
 		mEncoder = MediaCodec.createEncoderByType("audio/mp4a-latm");
 		MediaFormat format = new MediaFormat();
 
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
 			format.setString(MediaFormat.KEY_MIME, "audio/mp4a-latm");
 			format.setInteger(MediaFormat.KEY_CHANNEL_COUNT, CHANNEL);
 			format.setInteger(MediaFormat.KEY_SAMPLE_RATE, SAMPLE_RATE);
 			format.setInteger(MediaFormat.KEY_BIT_RATE, BIT_RATE);
 			format.setInteger(MediaFormat.KEY_AAC_PROFILE,
 					MediaCodecInfo.CodecProfileLevel.AACObjectLC);
-			format.setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, 65536);
+			format.setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, MAX_INPUT_BUFFER_SIZE);
 			mEncoder.configure(format, null, null,
 					MediaCodec.CONFIGURE_FLAG_ENCODE);
+		} else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+			throw new RuntimeException(" Doesn't support on lower 4.1 version");
+		} else {
+			throw new RuntimeException(" Doesn't support on lower 4.1 version");
 		}
 	}
 
@@ -136,7 +145,11 @@ public class AACEncoder implements V2Encoder {
 			if (mIsRecording) {
 				return;
 			}
-			mState = V2EncoderState.RECORDING;
+			
+			if (mState == MediaState.RELEASED) {
+				throw new RuntimeException("encoder has released!");
+			}
+			mState = MediaState.RECORDING;
 			mIsRecording = true;
 			mLocalRecorderThread.start();
 		}
@@ -146,7 +159,7 @@ public class AACEncoder implements V2Encoder {
 	@Override
 	public void stop() {
 		synchronized (mLock) {
-			mState = V2EncoderState.STOPPED;
+			updateLocalState(MediaState.STOPPED);
 			if (!mIsRecording) {
 				return;
 			}
@@ -155,9 +168,27 @@ public class AACEncoder implements V2Encoder {
 		}
 
 	}
+	
+	
+	
 
 	@Override
-	public V2EncoderState getState() {
+	public void release() {
+		if (mEncoder != null) {
+			mEncoder.release();
+		}
+		
+		if (mRecorder != null) {
+			mRecorder.release();
+		}
+		synchronized (mLock) {
+			mIsRecording = false ;
+			updateLocalState(MediaState.RELEASED);
+		}
+	}
+
+	@Override
+	public MediaState getState() {
 		return mState;
 	}
 	
@@ -166,6 +197,24 @@ public class AACEncoder implements V2Encoder {
 	public double getDB() {
 		return mDB;
 	}
+	
+	
+	
+
+	@Override
+	public void setErrorCallback(ErrorCallback callback) {
+		this.mLocalCallback = callback;
+	}
+
+
+	
+	private void updateLocalState(MediaState state) {
+		mState = state;
+		if (mLocalCallback != null && (state == MediaState.ERROR || state == MediaState.OUTPUT_ERROR)) {
+			mLocalCallback.onError(state);
+		}
+	}
+
 
 	private Thread mLocalRecorderThread = new Thread() {
 
@@ -189,7 +238,7 @@ public class AACEncoder implements V2Encoder {
 			try {
 				writer = new FileOutputStream(mOutputFile);
 			} catch (FileNotFoundException e) {
-				mState = V2EncoderState.OUTPUT_ERROR;
+				updateLocalState(MediaState.OUTPUT_ERROR);
 				return;
 			}
 
@@ -198,7 +247,7 @@ public class AACEncoder implements V2Encoder {
 			while (mIsRecording) {
 				read = mRecorder.read(audioBuffer, 0, mBufferSize);
 				if (read <= 0) {
-					mState = V2EncoderState.ERROR;
+					updateLocalState(MediaState.ERROR);
 					mIsRecording = false;
 					break;
 				}
@@ -236,7 +285,7 @@ public class AACEncoder implements V2Encoder {
 						writer.write(outData, 0, outData.length);
 					} catch (IOException e) {
 						e.printStackTrace();
-						mState = V2EncoderState.OUTPUT_ERROR;
+						updateLocalState(MediaState.OUTPUT_ERROR);
 						mIsRecording = false;
 						break;
 					}
@@ -252,12 +301,12 @@ public class AACEncoder implements V2Encoder {
 			mEncoder.stop();
 			mRecorder.stop();
 
-			mState = V2EncoderState.NORMAL;
+			updateLocalState(MediaState.NORMAL);
 
 			try {
 				writer.close();
 			} catch (IOException e) {
-				mState = V2EncoderState.OUTPUT_ERROR;
+				updateLocalState(MediaState.OUTPUT_ERROR);
 				e.printStackTrace();
 			}
 

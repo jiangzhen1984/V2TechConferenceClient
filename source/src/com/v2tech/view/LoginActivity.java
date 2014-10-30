@@ -261,6 +261,14 @@ public class LoginActivity extends Activity {
 		// tabBlockHolderAnimation.setInterpolator(new BounceInterpolator());
 		loginView.startAnimation(tabBlockHolderAnimation);
 	}
+	
+	
+
+	@Override
+	protected void onPause() {
+		// TODO Auto-generated method stub
+		super.onPause();
+	}
 
 	private TextWatcher userNameTextWAtcher = new TextWatcher() {
 

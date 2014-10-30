@@ -103,6 +103,49 @@
                 android:layout_marginTop="25dp"
                 android:background="@drawable/rounded_corners_of_contact_user_detail_outer"
                 android:orientation="vertical" >
+                
+                
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="1dp"
+                    android:layout_marginRight="1dp" >
+
+                    <TextView
+                        android:id="@+id/crowd_detail_no_tv"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:layout_marginBottom="@dimen/detail_detail_2_item_margin_bottom"
+                        android:layout_marginLeft="@dimen/contact_detail_2_item_margin_horizontal"
+                        android:layout_marginRight="@dimen/contact_detail_2_item_margin_horizontal"
+                        android:layout_marginTop="@dimen/detail_detail_2_item_margin_top"
+                        android:padding="10dp"
+                        android:text="@string/crowd_invitation_box_item_no"
+                        android:textColor="@color/activiy_contact_detail_item_color"
+                        android:textSize="@dimen/common_item_text_size" />
+
+                    <TextView
+                        android:id="@+id/crowd_detail_no"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:layout_marginBottom="@dimen/detail_detail_2_item_margin_bottom"
+                        android:layout_marginLeft="@dimen/contact_detail_2_item_margin_horizontal"
+                        android:layout_marginRight="@dimen/contact_detail_2_item_margin_horizontal"
+                        android:layout_marginTop="@dimen/detail_detail_2_item_margin_top"
+                        android:layout_toRightOf="@+id/crowd_detail_no_tv"
+                        android:padding="10dp"
+                        android:text="@string/crowd_invitation_box_item_no"
+                        android:textColor="@color/activiy_contact_detail_item_color"
+                        android:textSize="@dimen/common_item_text_size" />
+                </RelativeLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="#c0c0c0" >
+                </LinearLayout>
 
                 <RelativeLayout
                     android:layout_width="match_parent"

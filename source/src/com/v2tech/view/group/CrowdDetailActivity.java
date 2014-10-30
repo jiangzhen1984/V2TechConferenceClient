@@ -42,6 +42,7 @@ public class CrowdDetailActivity extends Activity {
 	private final static int REQUEST_UPDATE_CROWD_DONE = 1;
 	private final static int REQUEST_QUIT_CROWD_DONE = 2;
 
+	private TextView mNoTV;
 	private TextView mNameTV;
 	private TextView mCreatorTV;
 	private TextView mBriefTV;
@@ -69,6 +70,8 @@ public class CrowdDetailActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.crowd_detail_activity);
+		
+		mNoTV = (TextView) findViewById(R.id.crowd_detail_no);
 		mNameTV = (TextView) findViewById(R.id.crowd_detail_name);
 		mCreatorTV = (TextView) findViewById(R.id.crowd_detail_creator);
 		mBriefTV = (TextView) findViewById(R.id.crowd_detail_brief);
@@ -96,6 +99,8 @@ public class CrowdDetailActivity extends Activity {
 		crowd = (CrowdGroup) GlobalHolder.getInstance().getGroupById(
 				GroupType.CHATING.intValue(), getIntent().getLongExtra("cid", 0));
 
+		String cid  = String.valueOf(crowd.getmGId());
+		mNoTV.setText(cid.length() > 4 ? cid.substring(4) : cid.substring(1));
 		mNameTV.setText(crowd.getName());
 		mBriefTV.setText(crowd.getBrief());
 		mCreatorTV.setText(crowd.getOwnerUser().getName());

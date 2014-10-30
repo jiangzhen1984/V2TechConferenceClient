@@ -1,7 +1,9 @@
 package com.v2tech.media;
 
 /**
- * Use to define Audio or Video encode operation.
+ * Use to define Audio or Video encode operation.<br>
+ * @see AACEncoder
+ * 
  * @author jiangzhen
  *
  */
@@ -14,17 +16,23 @@ public interface V2Encoder {
 	
 	
 	/**
-	 * Stop recording.
+	 * Stop recording.<br>
 	 */
 	public void stop();
 	
 	
 	/**
+	 * Release all resource. <br>
+	 * If you don't want to record any more, you should call this.<br>
+	 */
+	public void release();
+	
+	/**
 	 * Get current state
 	 * @return
-	 * @see V2EncoderState
+	 * @see MediaState
 	 */
-	public V2EncoderState getState();
+	public MediaState getState();
 	
 	/**
 	 * Return current frame's db
@@ -33,7 +41,10 @@ public interface V2Encoder {
 	public double getDB();
 	
 	
-	public enum V2EncoderState {
-		NORMAL, INITIALIZED, RECORDING, STOPPED, OUTPUT_ERROR, ERROR
-	}
+	/**
+	 * Set error callback
+	 * @param callback
+	 */
+	public void setErrorCallback(ErrorCallback callback);
+	
 }

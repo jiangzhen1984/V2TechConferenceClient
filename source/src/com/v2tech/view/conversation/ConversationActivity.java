@@ -71,6 +71,7 @@ import com.spoledge.aacplayer.Decoder;
 import com.spoledge.aacplayer.PlayerCallback;
 import com.v2tech.R;
 import com.v2tech.media.AACEncoder;
+import com.v2tech.media.MediaState;
 import com.v2tech.media.V2Encoder;
 import com.v2tech.service.AsyncResult;
 import com.v2tech.service.BitmapManager;
@@ -840,11 +841,12 @@ public class ConversationActivity extends Activity {
 	private void stopRecording() {
 		mAacEncoder.stop();
 		//FIXME should delay some millicseconds 
-		if (mAacEncoder.getState() != V2Encoder.V2EncoderState.NORMAL
-				&& mAacEncoder.getState() != V2Encoder.V2EncoderState.STOPPED) {
+		if (mAacEncoder.getState() != MediaState.NORMAL
+				&& mAacEncoder.getState() != MediaState.STOPPED) {
 			V2Log.e("=========recording file error " +mAacEncoder.getState());
 			
 		}
+		mAacEncoder.release();
 		/*
 		// mRecorder.stop();
 		mRecorder.reset();
