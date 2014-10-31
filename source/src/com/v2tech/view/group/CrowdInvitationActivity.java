@@ -98,7 +98,8 @@ public class CrowdInvitationActivity extends Activity {
 		mReasonET = (EditText)findViewById(R.id.crowd_content_reject_reason_et);
 
 		crowd = (Crowd) getIntent().getExtras().get("crowd");
-		mNoTV.setText(String.valueOf(crowd.getId()).substring(1));
+		String cid  = String.valueOf(crowd.getId());
+		mNoTV.setText(cid.length() > 4 ? cid.substring(4) : cid.substring(1));
 		mNameTV.setText(crowd.getName());
 		mBriefTV.setText(crowd.getBrief());
 		mCreatorTV.setText(crowd.getCreator().getName());

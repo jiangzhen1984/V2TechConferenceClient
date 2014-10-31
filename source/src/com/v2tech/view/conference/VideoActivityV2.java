@@ -1304,6 +1304,7 @@ public class VideoActivityV2 extends Activity {
 		mVideoHandler = null;
 		
 		audioManager.setMode(AudioManager.MODE_NORMAL);
+		audioManager.setSpeakerphoneOn(false);
 	}
 
 	@Override

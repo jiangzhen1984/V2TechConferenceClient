@@ -89,7 +89,7 @@ public class TitleBar {
 		
 		// Initialise popupWindow padding
 		Configuration conf = context.getResources().getConfiguration();
-		if (conf.smallestScreenWidthDp >= 600) {
+		if (conf.orientation == Configuration.ORIENTATION_LANDSCAPE || conf.densityDpi <= 240) {
 			padding = DensityUtils.dip2px(context, 2);
 		} else {
 			padding = DensityUtils.dip2px(context, 12);
@@ -150,7 +150,7 @@ public class TitleBar {
 			ll.setOnClickListener(plusItemClickListener);
 
 			ll.setId(imgs[i]);
-			ll.setPadding(0, 10, 15, 10);
+			ll.setPadding(0, padding, 15, padding);
 			LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
 					LinearLayout.LayoutParams.MATCH_PARENT,
 					LinearLayout.LayoutParams.WRAP_CONTENT);

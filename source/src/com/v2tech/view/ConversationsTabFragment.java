@@ -1533,6 +1533,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 
 	}
 
+	private Object mLock = new Object();
 	private ProgressDialog mWaitingDialog;
 
 	private void requestJoinConf(long gid) {
@@ -1540,12 +1541,18 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 			V2Log.e("Already in meeting " + currentEntered.getId());
 			return;
 		}
-		mWaitingDialog = ProgressDialog.show(
-				mContext,
-				"",
-				mContext.getResources().getString(
-						R.string.requesting_enter_conference), true);
-		Message.obtain(this.mHandler, REQUEST_ENTER_CONF, gid).sendToTarget();
+		synchronized (mLock) {
+			//When request join conference response, mWaitingDialog will be null
+			if (mWaitingDialog != null) {
+				return;
+			}
+			mWaitingDialog = ProgressDialog.show(
+					mContext,
+					"",
+					mContext.getResources().getString(
+							R.string.requesting_enter_conference), true);
+			Message.obtain(this.mHandler, REQUEST_ENTER_CONF, gid).sendToTarget();
+		}
 
 	}
 
@@ -1719,15 +1726,15 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 				if (cg.getOwnerUser().getmUserId() == GlobalHolder
 						.getInstance().getCurrentUserId()) {
 					item = new String[] {
-							mContext.getResources().getString(
-									R.string.conversations_detail),
+//							mContext.getResources().getString(
+//									R.string.conversations_detail),
 							mContext.getResources()
 									.getString(
 											R.string.crowd_detail_qulification_dismiss_button) };
 				} else {
 					item = new String[] {
-							mContext.getResources().getString(
-									R.string.conversations_detail),
+//							mContext.getResources().getString(
+//									R.string.conversations_detail),
 							mContext.getResources()
 									.getString(
 											R.string.crowd_detail_qulification_quit_button) };
@@ -1759,11 +1766,21 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 									removeConversation(cov.getExtId());
 									break;
 								case Conversation.TYPE_GROUP:
-									Intent crowdIntent = new Intent();
-									crowdIntent.setClass(mContext,
-											CrowdDetailActivity.class);
-									crowdIntent.putExtra("cid", cov.getExtId());
-									mContext.startActivity(crowdIntent);
+//									Intent crowdIntent = new Intent();
+//									crowdIntent.setClass(mContext,
+//											CrowdDetailActivity.class);
+//									crowdIntent.putExtra("cid", cov.getExtId());
+//									mContext.startActivity(crowdIntent);
+									
+									CrowdGroup cg = (CrowdGroup) GlobalHolder
+									.getInstance().getGroupById(
+											GroupType.CHATING
+													.intValue(),
+											cov.getExtId());
+									removeConversation(cov.getExtId());
+									CrowdGroupService cgs = new CrowdGroupService();
+									cgs.quitCrowd(cg, null);
+									cgs.clearCalledBack();
 								}
 							} else if (which == 1) {
 								switch (mCurrentTabFlag) {
@@ -2548,6 +2565,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 			case REQUEST_ENTER_CONF_RESPONSE:
 				if (mWaitingDialog != null && mWaitingDialog.isShowing()) {
 					mWaitingDialog.dismiss();
+					mWaitingDialog = null;
 
 				}
 				JNIResponse recr = (JNIResponse) msg.obj;

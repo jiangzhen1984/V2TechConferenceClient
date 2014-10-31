@@ -708,8 +708,19 @@ public class GroupListView extends ListView {
 		Item item = map.get(u.getmUserId());
 		if (item == null) {
 			item = new UserItem(u, g.getLevel() + 1);
+			//Initialize user item check status.
+			//If exist one group checked, then user item should be checked
+			boolean checked = false;
+			Set<Group> parents = u.getBelongsGroup();
+			for (Group parent : parents) {
+				Item parentItem =  getItem(parent);
+				if (parentItem.isChecked()) {
+					checked = true;
+					break;
+				}
+			}
 			// Update check status according group status.
-			item.setChecked(groupItem.isChecked());
+			item.setChecked(checked);
 			map.put(u.getmUserId(), item);
 
 		}
