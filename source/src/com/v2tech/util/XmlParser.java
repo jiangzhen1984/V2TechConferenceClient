@@ -43,7 +43,8 @@ public class XmlParser {
 	}
 
 	public static String parseForMessageUUID(String xml) {
-
+		
+		xml = removeEmoji(xml);
 		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder dBuilder;
 		InputStream is = null;
@@ -99,6 +100,7 @@ public class XmlParser {
 					VMessageAbstractItem va = null;
 					if (msgEl.getTagName().equals("TTextChatItem")) {
 						String text = msgEl.getAttribute("Text");
+						text = removeEmoji(text);
 						text = text.replaceAll("&lt;", "<");
 						text = text.replaceAll("&gt;", ">");
 						text = text.replaceAll("&apos;", "'");
@@ -171,6 +173,22 @@ public class XmlParser {
 		}
 
 		return vm;
+	}
+	
+	private static String removeEmoji(String content) {
+		byte[] bys = new byte[] { -16, -97 };
+		byte[] bc = content.getBytes();
+		byte[] copy = new byte[bc.length];
+		int j = 0;
+		for (int i = 0; i < bc.length; i++) {
+			if (i < bc.length - 2 && bys[0] == bc[i] && bys[1] == bc[i + 1]) {
+				i += 3;
+				continue;
+			}
+			copy[j] = bc[i];
+			j++;
+		}
+		return new String(copy, 0, j);
 	}
 
 	public static void extraImageMetaFrom(VMessage vm, String xml) {

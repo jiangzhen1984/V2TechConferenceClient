@@ -38,7 +38,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
-import android.widget.Toast;
 
 import com.V2.jni.ConfigRequest;
 import com.V2.jni.util.V2Log;
@@ -52,6 +51,7 @@ import com.v2tech.service.jni.JNIResponse;
 import com.v2tech.service.jni.RequestLogInResponse;
 import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.SPUtil;
+import com.v2tech.util.V2Toast;
 import com.v2tech.vo.User;
 
 /**
@@ -337,13 +337,13 @@ public class LoginActivity extends Activity {
 						return;
 					}
 					if (!saveHostConfig(ets, portStr5)) {
-						Toast.makeText(mContext,
+						V2Toast.makeText(mContext,
 								R.string.error_save_host_config,
-								Toast.LENGTH_LONG).show();
+								V2Toast.LENGTH_LONG).show();
 					} else {
-						Toast.makeText(mContext,
+						V2Toast.makeText(mContext,
 								R.string.succeed_save_host_config,
-								Toast.LENGTH_LONG).show();
+								V2Toast.LENGTH_LONG).show();
 					}
 					dialog.dismiss();
 				}
@@ -416,8 +416,8 @@ public class LoginActivity extends Activity {
 		String port = SPUtil.getConfigStrValue(this, "port");
 
 		if (ip == null || ip.isEmpty() || port == null || port.isEmpty()) {
-			Toast.makeText(mContext, R.string.error_no_host_configuration,
-					Toast.LENGTH_SHORT).show();
+			V2Toast.makeText(mContext, R.string.error_no_host_configuration,
+					V2Toast.LENGTH_SHORT).show();
 			mShowIpSettingButton.performClick();
 			return;
 		}
@@ -552,18 +552,18 @@ public class LoginActivity extends Activity {
 				isLoggingIn = false;
 				JNIResponse rlr = (JNIResponse) msg.obj; 
 				if (rlr.getResult() == JNIResponse.Result.TIME_OUT) {
-					Toast.makeText(mContext, R.string.error_time_out,
-							Toast.LENGTH_LONG).show();
+					V2Toast.makeText(mContext, R.string.error_time_out,
+							V2Toast.LENGTH_LONG).show();
 				} else if (rlr.getResult() == JNIResponse.Result.FAILED) {
 					mPasswordView
 							.setError(getString(R.string.error_incorrect_password));
 					mPasswordView.requestFocus();
 				} else if (rlr.getResult() == JNIResponse.Result.CONNECT_ERROR) {
-					Toast.makeText(mContext, R.string.error_connect_to_server,
-							Toast.LENGTH_LONG).show();
+					V2Toast.makeText(mContext, R.string.error_connect_to_server,
+							V2Toast.LENGTH_LONG).show();
 				} else if (rlr.getResult() == JNIResponse.Result.SERVER_REJECT) {
-					Toast.makeText(mContext, R.string.error_connect_to_server,
-							Toast.LENGTH_LONG).show();
+					V2Toast.makeText(mContext, R.string.error_connect_to_server,
+							V2Toast.LENGTH_LONG).show();
 				} else {
 					//获取到登陆用户对象
 					User user = ((RequestLogInResponse) rlr).getUser();

@@ -1,5 +1,5 @@
-package com.v2tech.view.conversation;
 
+package com.v2tech.view.conversation;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -2145,6 +2145,7 @@ public class ConversationActivity extends Activity {
 						.getGroupId() == 0) || (m.getGroupId() != this.groupId)) {
 			return false;
 		}
+		
 		judgeShouldShowTime(m);
 		MessageBodyView mv = new MessageBodyView(this, m, m.isShowTime());
 		mv.setCallback(listener);
@@ -2281,6 +2282,8 @@ public class ConversationActivity extends Activity {
 					default:
 						break;
 					}
+					
+					if(!isStopped)
 					((MessageBodyView) messageArray.get(i)
 							.getView()).updateView(item);
 				}
@@ -2695,6 +2698,8 @@ public class ConversationActivity extends Activity {
 								default:
 									break;
 								}
+								
+								if(!isStopped)
 								((MessageBodyView) messageArray.get(i)
 										.getView()).updateView(vfi);
 							}

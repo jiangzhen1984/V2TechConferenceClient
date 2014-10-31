@@ -14,11 +14,30 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
+            android:layout_weight="1"
             android:gravity="center"
             android:padding="10dp"
+            android:text="@string/contact_message_pop_up_item_contact_management" />
+        <TextView
+            android:id="@+id/pop_up_window_quit_crowd_item"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
             android:layout_weight="1"
-            android:text="@string/contact_message_pop_up_item_contact_management"
-             />
+            android:gravity="center"
+            android:padding="10dp"
+            android:text="@string/crowd_detail_qulification_quit_button"
+            android:visibility="gone" />
+        <TextView
+            android:id="@+id/pop_up_window_dissolution_crowd_item"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:padding="10dp"
+            android:text="@string/crowd_detail_qulification_dismiss_button"
+            android:visibility="gone" />
     </LinearLayout>
     <ImageView
         android:id="@+id/pop_up_arrow"

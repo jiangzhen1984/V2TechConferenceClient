@@ -955,9 +955,8 @@ public class MessageAuthenticationActivity extends Activity {
 				} else {
 					item.mMsgBanneriv.setImageResource(R.drawable.avatar);
 				}
-				item.mNameTV.setText(vqac.getCrowdGroup().getName());
-				item.mContentTV.setText(vqac.getApplicant().getName()
-						+ mContext.getText(R.string.crowd_applicant_content));
+				item.mNameTV.setText(vqac.getApplicant().getName());
+				item.mContentTV.setText("申请加入" + vqac.getCrowdGroup().getName() + "群");
 
 			}
 

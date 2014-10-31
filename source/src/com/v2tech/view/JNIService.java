@@ -408,7 +408,7 @@ public class JNIService extends Service {
 						action = JNI_BROADCAST_NEW_CONF_MESSAGE;
 					} else {
 						action = JNI_BROADCAST_NEW_MESSAGE;
-						if(vm.getMsgCode() != V2GlobalEnum.GROUP_TYPE_DISCUSSION)
+						if (vm.getMsgCode() != V2GlobalEnum.GROUP_TYPE_DISCUSSION)
 							sendNotification();
 					}
 
@@ -470,7 +470,7 @@ public class JNIService extends Service {
 		@Override
 		public void OnLoginCallback(long nUserID, int nStatus, int nResult,
 				long serverTime) {
-			//Just request current logged in user information
+			// Just request current logged in user information
 			ImRequest.getInstance().getUserBaseInfo(nUserID);
 		}
 
@@ -684,7 +684,7 @@ public class JNIService extends Service {
 						GlobalHolder.getInstance().getCurrentUser(), null);
 
 			} else if (gType == GroupType.CONTACT) {
-				
+
 			}
 		}
 
@@ -699,16 +699,16 @@ public class JNIService extends Service {
 		private VMessageQualification checkMessageAndSendBroadcast(
 				VMessageQualification.Type type, CrowdGroup g, User user,
 				String reason) {
-//			boolean sendBroadcast = true;
+			// boolean sendBroadcast = true;
 			VMessageQualification crowdMsg = MessageBuilder
 					.queryQualMessageByCrowdId(mContext, user, g);
 			if (crowdMsg != null) {
 				if (crowdMsg.getQualState() != VMessageQualification.QualificationState.WAITING) {
 					crowdMsg.setReadState(VMessageQualification.ReadState.UNREAD);
 					crowdMsg.setQualState(VMessageQualification.QualificationState.WAITING);
-				} 
-//				else
-//					sendBroadcast = false;
+				}
+				// else
+				// sendBroadcast = false;
 				MessageBuilder.updateQualicationMessage(mContext, crowdMsg);
 			} else {
 				// Save message to database
@@ -723,7 +723,7 @@ public class JNIService extends Service {
 				} else {
 					throw new RuntimeException("Unkown type");
 				}
-				
+
 				crowdMsg.setmTimestamp(new Date());
 				crowdMsg.setReadState(VMessageQualification.ReadState.UNREAD);
 				Uri uri = MessageBuilder.saveQualicationMessage(mContext,
@@ -753,7 +753,7 @@ public class JNIService extends Service {
 			Intent intent = new Intent();
 			intent.setAction(JNI_BROADCAST_FRIEND_AUTHENTICATION);
 			intent.addCategory(JNI_BROADCAST_CATEGROY);
-			sendOrderedBroadcast(intent , null);
+			sendOrderedBroadcast(intent, null);
 
 		}
 
@@ -781,6 +781,11 @@ public class JNIService extends Service {
 					i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
 					i.putExtra("gid", nGroupID);
 					sendBroadcast(i);
+
+					Intent intent = new Intent(mContext , MainActivity.class);
+//					intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+					intent.addCategory(PublicIntent.DEFAULT_CATEGORY);
+					intent.putExtra("initFragment", 3);
 					Notificator
 							.updateSystemNotification(
 									mContext,
@@ -788,7 +793,8 @@ public class JNIService extends Service {
 									gName
 											+ mContext
 													.getText(R.string.confs_is_deleted_notification),
-									1, PublicIntent.VIDEO_NOTIFICATION_ID);
+									1, intent,
+									PublicIntent.VIDEO_NOTIFICATION_ID);
 				}
 			} else if (groupType == GroupType.CHATING.intValue()) {
 				Intent i = new Intent();
@@ -821,9 +827,9 @@ public class JNIService extends Service {
 				V2Log.e("Incorrect user xml ");
 				return;
 			}
-			
+
 			User remoteUser = User.fromXmlToUser(sXml);
-			
+
 			GlobalHolder.getInstance().putUser(remoteUser.getmUserId(),
 					remoteUser);
 
@@ -832,7 +838,7 @@ public class JNIService extends Service {
 			if (gType == GroupType.CONTACT) {
 				AddFriendHistroysHandler.becomeFriendHanler(
 						getApplicationContext(), sXml);
-				
+
 				User user = GlobalHolder.getInstance().getUser(uid);
 
 				if (remoteUser.getmCommentname() != null) {
@@ -844,16 +850,16 @@ public class JNIService extends Service {
 				intent.addCategory(JNI_BROADCAST_CATEGROY);
 				intent.putExtra("uid", uid);
 				intent.putExtra("gid", nGroupID);
-				sendOrderedBroadcast(intent , null);
+				sendOrderedBroadcast(intent, null);
 
 			}
 
 			GlobalHolder.getInstance().addUserToGroup(
 					GlobalHolder.getInstance().getUser(uid), nGroupID);
-			
-			//get user base infos
+
+			// get user base infos
 			ImRequest.getInstance().getUserBaseInfo(remoteUser.getmUserId());
-			
+
 			GroupUserObject obj = new GroupUserObject(groupType, nGroupID, uid);
 			Intent i = new Intent();
 			i.setAction(JNIService.JNI_BROADCAST_GROUP_USER_ADDED);
@@ -874,7 +880,7 @@ public class JNIService extends Service {
 				Intent intent = new Intent();
 				intent.setAction(JNI_BROADCAST_FRIEND_AUTHENTICATION);
 				intent.addCategory(JNI_BROADCAST_CATEGROY);
-				sendOrderedBroadcast(intent , null);
+				sendOrderedBroadcast(intent, null);
 			}
 
 		}
@@ -886,19 +892,19 @@ public class JNIService extends Service {
 				return;
 			}
 			if (group.type == V2GlobalEnum.GROUP_TYPE_CROWD) {
-				CrowdGroup cg = (CrowdGroup) GlobalHolder.getInstance().getGroupById(group.id);
+				CrowdGroup cg = (CrowdGroup) GlobalHolder.getInstance()
+						.getGroupById(group.id);
 				if (cg != null) {
 					cg.addNewFileNum(list.size());
 				}
 			}
-			
+
 			for (FileJNIObject fileJNIObject : list) {
 				long uploadUserID = fileJNIObject.user.uid;
-				//自己上传不提示
-				if(GlobalHolder.getInstance().getCurrentUserId() == uploadUserID)
-					continue ;
-				User user = GlobalHolder.getInstance().getUser(
-						uploadUserID);
+				// 自己上传不提示
+				if (GlobalHolder.getInstance().getCurrentUserId() == uploadUserID)
+					continue;
+				User user = GlobalHolder.getInstance().getUser(uploadUserID);
 				VMessage vm = new VMessage(V2GlobalEnum.GROUP_TYPE_CROWD,
 						group.id, user, null, new Date(
 								GlobalConfig.getGlobalServerTime()));
@@ -919,7 +925,7 @@ public class JNIService extends Service {
 			intent.putExtra("groupID", group.id);
 			intent.putParcelableArrayListExtra("fileJniObjects",
 					new ArrayList<FileJNIObject>(list));
-			//Make sure Crowd file activity receive this event first
+			// Make sure Crowd file activity receive this event first
 			sendOrderedBroadcast(intent, null);
 		}
 
@@ -1139,7 +1145,7 @@ public class JNIService extends Service {
 			Message.obtain(mCallbackHandler, JNI_RECEIVED_MESSAGE, vm)
 					.sendToTarget();
 		}
-
+		
 		@Override
 		public void OnRecvChatBinary(int eGroupType, long nGroupID,
 				long nFromUserID, long nToUserID, long nTime, int binaryType,

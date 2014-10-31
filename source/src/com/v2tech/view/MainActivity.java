@@ -176,8 +176,9 @@ public class MainActivity extends FragmentActivity implements
 			mTabHost.setCurrentTabByTag(savedInstanceState.getString("tab"));
 		}
 
+		int index = getIntent().getIntExtra("initFragment", 0);
 		// Intialise ViewPager
-		this.intialiseViewPager();
+		this.intialiseViewPager(index);
 		initReceiver();
 		// Start animation
 		this.overridePendingTransition(R.animator.left_in, R.animator.left_out);
@@ -235,7 +236,7 @@ public class MainActivity extends FragmentActivity implements
 	/**
 	 * Initialise ViewPager
 	 */
-	private void intialiseViewPager() {
+	private void intialiseViewPager(int index) {
 
 		List<Fragment> fragments = new Vector<Fragment>();
 
@@ -256,7 +257,7 @@ public class MainActivity extends FragmentActivity implements
 		this.mViewPager.setAdapter(this.mPagerAdapter);
 		this.mViewPager.setOnPageChangeListener(pageChangeListener);
 		this.mViewPager.setOffscreenPageLimit(5);
-		this.mViewPager.setCurrentItem(0);
+		this.mViewPager.setCurrentItem(index);
 	}
 
 	/**

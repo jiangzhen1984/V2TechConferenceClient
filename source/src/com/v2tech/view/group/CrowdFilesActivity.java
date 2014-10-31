@@ -43,12 +43,14 @@ import com.v2tech.service.jni.FileTransStatusIndication.FileTransProgressStatusI
 import com.v2tech.service.jni.JNIResponse;
 import com.v2tech.service.jni.RequestFetchGroupFilesResponse;
 import com.v2tech.util.GlobalConfig;
+import com.v2tech.util.V2Toast;
 import com.v2tech.view.JNIService;
 import com.v2tech.view.conversation.ConversationSelectFile;
 import com.v2tech.view.conversation.MessageLoader;
 import com.v2tech.view.group.CrowdFilesActivity.FileListAdapter.ViewItem;
 import com.v2tech.vo.CrowdGroup;
 import com.v2tech.vo.FileInfoBean;
+import com.v2tech.vo.NetworkStateCode;
 import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.VCrowdFile;
 import com.v2tech.vo.VFile;
@@ -85,6 +87,7 @@ public class CrowdFilesActivity extends Activity {
 	private ListView mListView;
 	private FileListAdapter adapter;
 	private View mReturnButton;
+	private View mCannelButton;
 	private TextView mShowUploadedFileButton;
 	private TextView mTitle;
 	private ImageView mUploadingFileNotificationIcon;
@@ -103,7 +106,7 @@ public class CrowdFilesActivity extends Activity {
 		mContext = this;
 		setContentView(R.layout.crowd_files_activity);
 		currentLoginUserID = GlobalHolder.getInstance().getCurrentUserId();
-		
+
 		mUploadFinish = (LinearLayout) findViewById(R.id.crowd_files_uploaded_hint);
 		mListView = (ListView) findViewById(R.id.crowd_files_list);
 		mListView.setTextFilterEnabled(true);
@@ -115,6 +118,10 @@ public class CrowdFilesActivity extends Activity {
 
 		mReturnButton = findViewById(R.id.crowd_members_return_button);
 		mReturnButton.setOnClickListener(mBackButtonListener);
+
+		mCannelButton = findViewById(R.id.crowd_files_uploaded_cancel_button);
+		mCannelButton.setOnClickListener(mCannelButtonListener);
+
 		mShowUploadedFileButton = (TextView) findViewById(R.id.crowd_files_uploaded_file_button);
 		mShowUploadedFileButton
 				.setOnClickListener(mShowUploadedFileButtonListener);
@@ -230,6 +237,7 @@ public class CrowdFilesActivity extends Activity {
 		localReceiver = new LocalReceiver();
 		IntentFilter filter = new IntentFilter();
 		filter.addAction(JNIService.JNI_BROADCAST_KICED_CROWD);
+		filter.addAction(JNIService.JNI_BROADCAST_CONNECT_STATE_NOTIFICATION);
 		filter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
 		this.registerReceiver(localReceiver, filter);
 
@@ -338,20 +346,15 @@ public class CrowdFilesActivity extends Activity {
 	 * @param files
 	 */
 	private void handleFileRemovedEvent(List<VCrowdFile> files) {
-		for (int i = 0; i < mFiles.size(); i++) {
-			for (VCrowdFile r : files) {
-				if (mFiles.get(i).getId().equals(r.getId())) {
-					mFiles.remove(i);
-					i--;
-					V2Log.e(r.getState() + "");
-					service.handleCrowdFile(r,
+		for (VCrowdFile removedFile : files) {
+			for (int i = 0; i < mFiles.size(); i++) {
+				if (mFiles.get(i).getId().equals(removedFile.getId())) {
+					VCrowdFile file = mFiles.get(i);
+					service.handleCrowdFile(file,
 							FileOperationEnum.OPERATION_CANCEL_DOWNLOADING,
 							null);
-					Toast.makeText(mContext,
-							R.string.crowd_files_deleted_notification,
-							Toast.LENGTH_SHORT).show();
-
-					continue;
+					file.setState(VFile.State.REMOVED);
+					break;
 				}
 			}
 		}
@@ -380,7 +383,7 @@ public class CrowdFilesActivity extends Activity {
 	 */
 	private void handleNewFileEvent(List<VCrowdFile> files) {
 		for (VCrowdFile vCrowdFile : files) {
-			mFiles.add(0 , vCrowdFile);
+			mFiles.add(0, vCrowdFile);
 		}
 		adapter.notifyDataSetChanged();
 	}
@@ -407,22 +410,21 @@ public class CrowdFilesActivity extends Activity {
 		}
 		adapter.notifyDataSetChanged();
 	}
-	
+
 	/**
 	 * adapter upload show style
 	 */
-	private void adapterUploadShow(){
-		
-		if(showUploaded){
+	private void adapterUploadShow() {
+
+		if (showUploaded) {
 			mUploadingFileNotificationIcon.setVisibility(View.INVISIBLE);
-			if(mUploadedFiles.size() <= 0)
+			if (mUploadedFiles.size() <= 0)
 				mUploadFinish.setVisibility(View.VISIBLE);
 			else
 				mUploadFinish.setVisibility(View.INVISIBLE);
-		}
-		else{
+		} else {
 			mUploadFinish.setVisibility(View.INVISIBLE);
-			if(mUploadedFiles.size() > 0)
+			if (mUploadedFiles.size() > 0)
 				mUploadingFileNotificationIcon.setVisibility(View.VISIBLE);
 			else
 				mUploadingFileNotificationIcon.setVisibility(View.INVISIBLE);
@@ -500,6 +502,22 @@ public class CrowdFilesActivity extends Activity {
 
 	};
 
+	private OnClickListener mCannelButtonListener = new OnClickListener() {
+
+		@Override
+		public void onClick(View v) {
+			if (isInDeleteMode) {
+				isInDeleteMode = false;
+				// resume all uploading files
+				suspendOrResumeUploadingFiles(false);
+				adapter.notifyDataSetChanged();
+				mCannelButton.setVisibility(View.INVISIBLE);
+				return;
+			}
+		}
+
+	};
+
 	private OnClickListener mShowUPloadingFileListener = new OnClickListener() {
 
 		@Override
@@ -540,8 +558,14 @@ public class CrowdFilesActivity extends Activity {
 		public boolean onItemLongClick(AdapterView<?> parent, View view,
 				int position, long id) {
 			if (isInDeleteMode) {
+				if (showUploaded) {
+					mCannelButton.setVisibility(View.VISIBLE);
+				}
 				return false;
 			} else {
+				if (showUploaded) {
+					mCannelButton.setVisibility(View.INVISIBLE);
+				}
 				isInDeleteMode = true;
 				// Pause all uploading files
 				suspendOrResumeUploadingFiles(true);
@@ -620,6 +644,16 @@ public class CrowdFilesActivity extends Activity {
 						}
 					}
 					finish();
+				}
+			} else if (intent.getAction().equals(
+					JNIService.JNI_BROADCAST_CONNECT_STATE_NOTIFICATION)) {
+				NetworkStateCode code = (NetworkStateCode) intent.getExtras()
+						.get("state");
+				if (code != NetworkStateCode.CONNECTED) {
+					for (VCrowdFile file : mUploadedFiles) {
+						file.setState(VFile.State.UPLOAD_FAILED);
+					}
+					adapter.notifyDataSetChanged();
 				}
 			}
 
@@ -800,8 +834,8 @@ public class CrowdFilesActivity extends Activity {
 				// Record flag for show delete button
 				file.setFlag(HIDE_DELETE_BUTTON_FLAG);
 			}
-			
-			adapterFileIcon(file.getName() , item);
+
+			adapterFileIcon(file.getName(), item);
 
 			switch (fs) {
 			case UNKNOWN:
@@ -843,6 +877,7 @@ public class CrowdFilesActivity extends Activity {
 				break;
 			case DOWNLOAD_FAILED:
 			case UPLOAD_FAILED:
+			case REMOVED:
 				item.mFailedIcon.setVisibility(View.VISIBLE);
 				item.mFileButton.setVisibility(View.GONE);
 				item.mFileText.setVisibility(View.GONE);
@@ -889,10 +924,26 @@ public class CrowdFilesActivity extends Activity {
 			@Override
 			public void onClick(View v) {
 				VCrowdFile file = (VCrowdFile) v.getTag();
-				file.setState(VFile.State.DOWNLOADING);
-				file.setStartTime(new Date());
-				service.handleCrowdFile(file,
-						FileOperationEnum.OPERATION_START_DOWNLOAD, null);
+				if (file.getState() == VFile.State.REMOVED) {
+					mFiles.remove(file);
+					V2Toast.makeText(mContext,
+							R.string.crowd_files_deleted_notification,
+							Toast.LENGTH_SHORT).show();
+				} else {
+					if (file.getState() == VFile.State.DOWNLOAD_FAILED) {
+						file.setState(VFile.State.DOWNLOADING);
+						file.setStartTime(new Date());
+						service.handleCrowdFile(file,
+								FileOperationEnum.OPERATION_START_DOWNLOAD,
+								null);
+					} else if (file.getState() == VFile.State.UPLOAD_FAILED) {
+						file.setState(VFile.State.UPLOADING);
+						file.setStartTime(new Date());
+						service.handleCrowdFile(file,
+								FileOperationEnum.OPERATION_START_SEND, null);
+					}
+
+				}
 				adapter.notifyDataSetChanged();
 			}
 
@@ -952,12 +1003,11 @@ public class CrowdFilesActivity extends Activity {
 			@Override
 			public void onClick(View v) {
 				if (isInDeleteMode) {
-					Toast.makeText(
-							mContext,
+					Toast.makeText(mContext,
 							R.string.crowd_files_in_deletion_failed,
 							Toast.LENGTH_SHORT).show();
 					return;
-					
+
 				}
 				VCrowdFile file = (VCrowdFile) v.getTag();
 				if (file.getState() == VFile.State.UNKNOWN
@@ -1000,7 +1050,7 @@ public class CrowdFilesActivity extends Activity {
 					service.handleCrowdFile(file,
 							FileOperationEnum.OPERATION_RESUME_SEND, null);
 				}
-				
+
 				adapter.notifyDataSetChanged();
 			}
 
