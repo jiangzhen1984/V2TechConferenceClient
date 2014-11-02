@@ -64,14 +64,12 @@ import android.widget.Toast;
 import com.V2.jni.V2GlobalEnum;
 import com.V2.jni.ind.FileJNIObject;
 import com.V2.jni.util.V2Log;
+import com.spoledge.aacplayer.AACPlayer;
 import com.spoledge.aacplayer.ArrayAACPlayer;
 import com.spoledge.aacplayer.ArrayDecoder;
 import com.spoledge.aacplayer.Decoder;
 import com.spoledge.aacplayer.PlayerCallback;
 import com.v2tech.R;
-import com.v2tech.media.AACEncoder;
-import com.v2tech.media.AACPlayer;
-import com.v2tech.media.MediaState;
 import com.v2tech.media.V2Encoder;
 import com.v2tech.service.AsyncResult;
 import com.v2tech.service.BitmapManager;
@@ -183,7 +181,7 @@ public class ConversationActivity extends Activity {
 	private Button mButtonRecordAudio;
 
 	private MediaRecorder mRecorder = null;
-	private AACPlayer mAACPlayer = null;
+	private ArrayAACPlayer mAACPlayer = null;
 	
 	//Use local AAC encoder;
 	private V2Encoder mAacEncoder;
@@ -674,18 +672,37 @@ public class ConversationActivity extends Activity {
 
 	private synchronized boolean startPlaying(String fileName) {
 
-		mAACPlayer = new AACPlayer(fileName);
+//		mAACPlayer = new AACPlayer(fileName);
+//		try {
+//			if (currentPlayedStream != null) {
+//				currentPlayedStream.close();
+//			}
+//			// currentPlayedStream = new FileInputStream(new File(fileName));
+//			mAACPlayer.play();
+//		} catch (FileNotFoundException e) {
+//			e.printStackTrace();
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+		
+		
+		mAACPlayer = new ArrayAACPlayer(
+				ArrayDecoder.create(Decoder.DECODER_FAAD2), mAACPlayerCallback,
+				AACPlayer.DEFAULT_AUDIO_BUFFER_CAPACITY_MS,
+				AACPlayer.DEFAULT_DECODE_BUFFER_CAPACITY_MS);
 		try {
 			if (currentPlayedStream != null) {
 				currentPlayedStream.close();
 			}
 			// currentPlayedStream = new FileInputStream(new File(fileName));
-			mAACPlayer.play();
+			mAACPlayer.playAsync(fileName);
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		
+		
 		return true;
 	}
 
@@ -705,7 +722,8 @@ public class ConversationActivity extends Activity {
 
 	private void releasePlayer() {
 		if (mAACPlayer != null) {
-			mAACPlayer.release();
+			//mAACPlayer.release();
+			mAACPlayer.stop();
 			mAACPlayer = null;
 		}
 	}
@@ -806,10 +824,10 @@ public class ConversationActivity extends Activity {
 	 */
 	private boolean startReocrding(String filePath) {
 
-		mAacEncoder = new AACEncoder(filePath);
-		mAacEncoder.start();
-		return true;
-		/*
+//		mAacEncoder = new AACEncoder(filePath);
+//		mAacEncoder.start();
+//		return true;
+		
 		mRecorder = new MediaRecorder();
 		mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
 		mRecorder.setOutputFormat(MediaRecorder.OutputFormat.AAC_ADTS);
@@ -832,24 +850,24 @@ public class ConversationActivity extends Activity {
 			return false;
 		}
 		return true;
-		*/
+		
 	}
 
 	private void stopRecording() {
-		mAacEncoder.stop();
-		//FIXME should delay some millicseconds 
-		if (mAacEncoder.getState() != MediaState.NORMAL
-				&& mAacEncoder.getState() != MediaState.STOPPED) {
-			V2Log.e("=========recording file error " +mAacEncoder.getState());
-			
-		}
-		mAacEncoder.release();
-		/*
-		// mRecorder.stop();
+//		mAacEncoder.stop();
+//		//FIXME should delay some millicseconds 
+//		if (mAacEncoder.getState() != MediaState.NORMAL
+//				&& mAacEncoder.getState() != MediaState.STOPPED) {
+//			V2Log.e("=========recording file error " +mAacEncoder.getState());
+//			
+//		}
+//		mAacEncoder.release();
+		
+		mRecorder.stop();
 		mRecorder.reset();
 		mRecorder.release();
 		mRecorder = null;
-		*/
+		
 	}
 
 	private void cleanRangeBitmapCache(int before, int after) {
@@ -2386,7 +2404,12 @@ public class ConversationActivity extends Activity {
 
 	private Runnable mUpdateMicStatusTimer = new Runnable() {
 		public void run() {
-			int db = (int)mAacEncoder.getDB();
+			  int ratio = mRecorder.getMaxAmplitude() / 600;
+			int db = 0;// 分贝
+			if (ratio > 1)
+				db = (int) (20 * Math.log10(ratio));
+
+//			int db = (int)mAacEncoder.getDB();
 			updateVoiceVolume(db / 4);
 
 			lh.postDelayed(mUpdateMicStatusTimer, 200);

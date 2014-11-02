@@ -23,7 +23,7 @@ import android.os.Build;
  */
 public class AACEncoder implements V2Encoder {
 
-	private static final int SAMPLE_RATE = 44100;
+	private static final int SAMPLE_RATE = 16000;
 
 	private static final int BIT_RATE = 64000;
 
@@ -130,6 +130,8 @@ public class AACEncoder implements V2Encoder {
 			format.setInteger(MediaFormat.KEY_AAC_PROFILE,
 					MediaCodecInfo.CodecProfileLevel.AACObjectLC);
 			format.setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, MAX_INPUT_BUFFER_SIZE);
+			//format.setInteger(MediaFormat.KEY_IS_ADTS, 1);
+			format.setInteger(MediaFormat.KEY_CHANNEL_MASK, AudioFormat.CHANNEL_IN_MONO);
 			mEncoder.configure(format, null, null,
 					MediaCodec.CONFIGURE_FLAG_ENCODE);
 		} else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
@@ -343,15 +345,14 @@ public class AACEncoder implements V2Encoder {
 						+ data.length);
 			}
 
-			int profile = 2; // AAC LC
-			int freqIdx = 4; // 44.1KHz
-			int chanCfg = 2; // CPE
+			int profile = MediaCodecInfo.CodecProfileLevel.AACObjectLC; // AAC LC
+			int freqIdx = 8; // 16000KHz
 
 			// fill in ADTS data
 			data[0] = (byte) 0xFF;
 			data[1] = (byte) 0xF9;
-			data[2] = (byte) (((profile - 1) << 6) + (freqIdx << 2) + (chanCfg >> 2));
-			data[3] = (byte) (((chanCfg & 3) << 6) + (data.length >> 11));
+			data[2] = (byte) (((profile - 1) << 6) + (freqIdx << 2) + (CHANNEL >> 2));
+			data[3] = (byte) (((CHANNEL) << 6) + (data.length >> 11));
 			data[4] = (byte) ((data.length & 0x7FF) >> 3);
 			data[5] = (byte) (((data.length & 7) << 5) + 0x1F);
 			data[6] = (byte) 0xFC;
