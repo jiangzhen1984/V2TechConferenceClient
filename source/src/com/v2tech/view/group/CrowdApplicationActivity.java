@@ -164,7 +164,7 @@ public class CrowdApplicationActivity extends Activity {
 				} else {
 					if (crowd.getAuth() == CrowdGroup.AuthType.ALLOW_ALL.intValue()) {
 						mState = State.APPLYING;
-						service.applyCrowd(crowd, "", new Registrant(mLocalHandler,
+						service.applyCrowd(crowd, "", new MessageListener(mLocalHandler,
 								APPLY_DONE, null));
 					} else if (crowd.getAuth() == CrowdGroup.AuthType.QULIFICATION
 							.intValue()) {
