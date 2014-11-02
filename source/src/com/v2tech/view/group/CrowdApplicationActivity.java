@@ -17,7 +17,7 @@ import android.widget.TextView;
 import com.v2tech.R;
 import com.v2tech.service.CrowdGroupService;
 import com.v2tech.service.GlobalHolder;
-import com.v2tech.service.Registrant;
+import com.v2tech.service.MessageListener;
 import com.v2tech.service.jni.JNIResponse;
 import com.v2tech.service.jni.JNIResponse.Result;
 import com.v2tech.view.JNIService;
@@ -159,7 +159,7 @@ public class CrowdApplicationActivity extends Activity {
 				}
 				if (disableAuth) {
 					mState = State.APPLYING;
-					service.applyCrowd(crowd, "", new Registrant(mLocalHandler,
+					service.applyCrowd(crowd, "", new MessageListener(mLocalHandler,
 							APPLY_DONE, null));
 				} else {
 					if (crowd.getAuth() == CrowdGroup.AuthType.ALLOW_ALL.intValue()) {
@@ -188,7 +188,7 @@ public class CrowdApplicationActivity extends Activity {
 				}
 				mState = State.APPLYING;
 				service.applyCrowd(crowd, mApplicationMessage.getText()
-						.toString(), new Registrant(mLocalHandler, APPLY_DONE,
+						.toString(), new MessageListener(mLocalHandler, APPLY_DONE,
 						null));
 				isInApplicationMode = false;
 				updateView();

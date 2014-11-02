@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
@@ -40,8 +41,10 @@ import com.v2tech.db.DataBaseContext;
 import com.v2tech.db.V2TechDBHelper;
 import com.v2tech.service.CrowdGroupService;
 import com.v2tech.service.GlobalHolder;
-import com.v2tech.service.Registrant;
+import com.v2tech.service.MessageListener;
+import com.v2tech.service.BitmapManager.BitmapChangedListener;
 import com.v2tech.service.jni.JNIResponse;
+import com.v2tech.util.BitmapUtil;
 import com.v2tech.view.JNIService;
 import com.v2tech.view.PublicIntent;
 import com.v2tech.view.bo.ConversationNotificationObject;
@@ -55,6 +58,7 @@ import com.v2tech.vo.Conversation;
 import com.v2tech.vo.Crowd;
 import com.v2tech.vo.CrowdGroup;
 import com.v2tech.vo.Group.GroupType;
+import com.v2tech.vo.User;
 import com.v2tech.vo.VMessageQualification;
 import com.v2tech.vo.VMessageQualification.QualificationState;
 import com.v2tech.vo.VMessageQualification.ReadState;
@@ -89,13 +93,15 @@ public class MessageAuthenticationActivity extends Activity {
 	private ImageView ivFriendAuthenticationPrompt;
 	private ImageView ivGroupAuthenticationPrompt;
 
-	FriendMessageAdapter firendAdapter;
+	private FriendMessageAdapter firendAdapter;
 	private GroupMessageAdapter groupAdapter;
-	FriendAuthenticationBroadcastReceiver friendAuthenticationBroadcastReceiver;
+	private List<FriendMAData> friendMADataList = new ArrayList<FriendMAData>();
+	private List<ListItemWrapper> mMessageList;
+
+	private FriendAuthenticationBroadcastReceiver friendAuthenticationBroadcastReceiver;
 	private CrowdAuthenticationBroadcastReceiver mCrowdAuthenticationBroadcastReceiver;
 
 	private boolean isFriendAuthentication;
-
 	private boolean isFriendInDeleteMode = false;
 	private boolean isGroupInDeleteMode = false;
 	private int currentRadioType; // 当前所在的是哪个RadioButton界面
@@ -103,9 +109,6 @@ public class MessageAuthenticationActivity extends Activity {
 	private CrowdGroupService crowdService;
 
 	private Context mContext;
-
-	private List<MessageAuthenticationData> messageAuthenticationDataList = new ArrayList<MessageAuthenticationActivity.MessageAuthenticationData>();
-	private List<ListItemWrapper> mMessageList;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -210,8 +213,7 @@ public class MessageAuthenticationActivity extends Activity {
 					public void onItemClick(AdapterView<?> parent, View view,
 							int position, long id) {
 						if (isFriendAuthentication) {
-							MessageAuthenticationData data = messageAuthenticationDataList
-									.get(position);
+							FriendMAData data = friendMADataList.get(position);
 							Intent intent = new Intent();
 							intent.putExtra("remoteUserID", data.remoteUserID);
 							intent.putExtra("authenticationMessage",
@@ -346,9 +348,7 @@ public class MessageAuthenticationActivity extends Activity {
 	private void changeMessageAuthenticationListView() {
 		if (isFriendAuthentication) {
 			if (firendAdapter == null) {
-				firendAdapter = new FriendMessageAdapter(this,
-						R.layout.message_authentication_listview_item,
-						messageAuthenticationDataList);
+				firendAdapter = new FriendMessageAdapter(this, friendMADataList);
 			}
 			lvMessageAuthentication.setAdapter(firendAdapter);
 			loadFriendMessage();
@@ -515,7 +515,7 @@ public class MessageAuthenticationActivity extends Activity {
 
 	private void loadFriendMessage() {
 		new AsyncTask<Void, Void, Void>() {
-			List<MessageAuthenticationData> tempMessageAuthenticationDataList = new ArrayList<MessageAuthenticationData>();
+			List<FriendMAData> tempMessageAuthenticationDataList = new ArrayList<FriendMAData>();
 
 			@Override
 			protected Void doInBackground(Void... arg0) {
@@ -554,10 +554,13 @@ public class MessageAuthenticationActivity extends Activity {
 						tempNode.addState = cr.getLong(9);
 						tempNode.readState = cr.getLong(10);
 
-						MessageAuthenticationData tempData = new MessageAuthenticationData();
+						FriendMAData tempData = new FriendMAData();
+
 						tempData.remoteUserID = tempNode.remoteUserID;
-						tempData.name = GlobalHolder.getInstance()
-								.getUser(tempData.remoteUserID).getName();
+						User user = GlobalHolder.getInstance().getUser(
+								tempData.remoteUserID);
+						tempData.dheadImage = user.getAvatarBitmap();
+						tempData.name = user.getName();
 
 						tempData.dbRecordIndex = cr.getLong(0);
 						// 别人加我：允许任何人：0已添加您为好友，需要验证：1未处理，2已同意，3已拒绝
@@ -601,9 +604,8 @@ public class MessageAuthenticationActivity extends Activity {
 			@Override
 			protected void onPostExecute(Void result) {
 				if (firendAdapter != null) {
-					messageAuthenticationDataList.clear();
-					messageAuthenticationDataList
-							.addAll(tempMessageAuthenticationDataList);
+					friendMADataList.clear();
+					friendMADataList.addAll(tempMessageAuthenticationDataList);
 					firendAdapter.notifyDataSetChanged();
 				}
 			}
@@ -622,11 +624,11 @@ public class MessageAuthenticationActivity extends Activity {
 
 	}
 
-	class MessageAuthenticationData {
-		public MessageAuthenticationData() {
+	class FriendMAData {
+		public FriendMAData() {
 		}
 
-		Drawable dheadImage;
+		Bitmap dheadImage;
 		String name;
 		String authenticationMessage;
 		// 别人加我：允许任何人：0已添加您为好友，需要验证：1未处理，2已同意，3已拒绝
@@ -639,17 +641,30 @@ public class MessageAuthenticationActivity extends Activity {
 
 	// 验证消息adapter
 	class FriendMessageAdapter extends BaseAdapter {
-		// R.layout.message_authentication_listview_item
-		// MessageAuthenticationData
-		private int layoutId;
-		private List<MessageAuthenticationData> list;
+		class ViewTag {
+			// R.id.head_image
+			ImageView ivHeadImage;
+			// R.id.name
+			TextView tvName;
+			// R.id.authentication_message
+			TextView tvAuthenticationMessage;
+			// R.id.access
+			Button bAccess;
+			// R.id.access_or_no
+			TextView tvAccessOrNo;
+			// R.id.b_suer_delete
+			Button bSuerDelete;
+			// R.id.ib_delete
+			ImageButton ibDelete;
+		}
+
+		private final int layoutId = R.layout.message_authentication_listview_item;
 		private LayoutInflater layoutInflater;
+		private List<FriendMAData> list;
 		private Context context;
 
-		public FriendMessageAdapter(Context context, int layoutId,
-				List<MessageAuthenticationData> list) {
+		public FriendMessageAdapter(Context context, List<FriendMAData> list) {
 			layoutInflater = LayoutInflater.from(context);
-			this.layoutId = layoutId;
 			this.list = list;
 			this.context = context;
 		}
@@ -667,24 +682,6 @@ public class MessageAuthenticationActivity extends Activity {
 		@Override
 		public long getItemId(int arg0) {
 			return arg0;
-		}
-
-		class ViewTag {
-			// R.id.head_image
-			ImageView ivHeadImage;
-			// R.id.name
-			TextView tvName;
-			// R.id.authentication_message
-			TextView tvAuthenticationMessage;
-			// R.id.access
-			Button bAccess;
-			// R.id.access_or_no
-			TextView tvAccessOrNo;
-			// R.id.b_suer_delete
-			Button bSuerDelete;
-			// R.id.ib_delete
-			ImageButton ibDelete;
-
 		}
 
 		@Override
@@ -713,9 +710,10 @@ public class MessageAuthenticationActivity extends Activity {
 
 			if (arg0 >= list.size())
 				return arg1;
-			final MessageAuthenticationData data = list.get(arg0);
-
-			// viewTag.ivHeadImage.setImageDrawable(data.dheadImage);
+			final FriendMAData data = list.get(arg0);
+			if (data.dheadImage != null) {
+				viewTag.ivHeadImage.setImageBitmap(data.dheadImage);
+			}
 			viewTag.tvName.setText(data.name);
 
 			// 别人加我：允许任何人：0已添加您为好友，需要验证：1未处理，2已同意，3已拒绝
@@ -1057,7 +1055,7 @@ public class MessageAuthenticationActivity extends Activity {
 
 					Crowd crowd = new Crowd(cg.getmGId(), cg.getOwnerUser(),
 							cg.getName(), cg.getBrief());
-					crowdService.acceptInvitation(crowd, new Registrant(
+					crowdService.acceptInvitation(crowd, new MessageListener(
 							mLocalHandler, ACCEPT_INVITATION_DONE, cg));
 
 				} else if (msg.getType() == VMessageQualification.Type.CROWD_APPLICATION) {
@@ -1162,5 +1160,4 @@ public class MessageAuthenticationActivity extends Activity {
 		}
 
 	};
-
 }

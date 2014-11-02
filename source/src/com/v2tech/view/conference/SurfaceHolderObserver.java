@@ -5,7 +5,7 @@ import android.os.Message;
 import android.view.SurfaceHolder;
 
 import com.v2tech.service.DeviceService;
-import com.v2tech.service.Registrant;
+import com.v2tech.service.MessageListener;
 import com.v2tech.service.jni.JNIResponse;
 import com.v2tech.vo.Group;
 import com.v2tech.vo.UserDeviceConfig;
@@ -42,7 +42,7 @@ public class SurfaceHolderObserver implements SurfaceHolder.Callback {
 				state = State.SHOWING;
 				udc.getVp().SetSurface(holder);
 				updateDeviceState(false);
-				service.requestOpenVideoDevice(g, udc, new Registrant(handler,
+				service.requestOpenVideoDevice(g, udc, new MessageListener(handler,
 						OPEN_DEVICE_DONE, null));
 			}
 		}
@@ -56,7 +56,7 @@ public class SurfaceHolderObserver implements SurfaceHolder.Callback {
 				state = State.SHOWING;
 				udc.getVp().SetSurface(holder);
 				updateDeviceState(false);
-				service.requestOpenVideoDevice(g, udc, new Registrant(handler,
+				service.requestOpenVideoDevice(g, udc, new MessageListener(handler,
 						OPEN_DEVICE_DONE, null));
 			}
 		}
@@ -69,7 +69,7 @@ public class SurfaceHolderObserver implements SurfaceHolder.Callback {
 			if ((state == State.SHOWED || state == State.SHOWING) && !isValid) {
 				state = State.CLOSING;
 				updateDeviceState(true);
-				service.requestCloseVideoDevice(g, udc, new Registrant(handler,
+				service.requestCloseVideoDevice(g, udc, new MessageListener(handler,
 						CLOSE_DEVICE_DONE, null));
 			}
 		}
@@ -85,7 +85,7 @@ public class SurfaceHolderObserver implements SurfaceHolder.Callback {
 		synchronized (state) {
 			state = State.SHOWING;
 			updateDeviceState(false);
-			service.requestOpenVideoDevice(g, udc, new Registrant(handler,
+			service.requestOpenVideoDevice(g, udc, new MessageListener(handler,
 					OPEN_DEVICE_DONE, null));
 		}
 	}
@@ -97,7 +97,7 @@ public class SurfaceHolderObserver implements SurfaceHolder.Callback {
 		synchronized (state) {
 			state = State.CLOSING;
 			updateDeviceState(true);
-			service.requestCloseVideoDevice(g, udc, new Registrant(handler,
+			service.requestCloseVideoDevice(g, udc, new MessageListener(handler,
 					CLOSE_DEVICE_DONE, null));
 		}
 	}

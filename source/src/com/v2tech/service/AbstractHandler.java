@@ -5,6 +5,7 @@ import java.util.List;
 
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 import android.util.SparseArray;
 
 import com.V2.jni.util.V2Log;
@@ -37,13 +38,13 @@ public abstract class AbstractHandler extends Handler {
 
 	private SparseArray<Meta> metaHolder = new SparseArray<Meta>();
 
-	private SparseArray<List<Registrant>> registrantHolder = new SparseArray<List<Registrant>>();
+	private SparseArray<List<MessageListener>> messageListenerListHolder = new SparseArray<List<MessageListener>>();
 
 	private SparseArray<List<PendingObject>> pendingObjectHolder = new SparseArray<List<PendingObject>>();
 
 	//超时处理的消息
 	protected Message initTimeoutMessage(int mointorMessageID, long timeOutSec,
-			Registrant caller) {
+			MessageListener caller) {
 		// Create unique message object
 		Message msg = Message.obtain(this, REQUEST_TIME_OUT, mointorMessageID,
 				0, new Object());
@@ -53,7 +54,7 @@ public abstract class AbstractHandler extends Handler {
 		return msg;
 	}
 
-	protected Registrant removeTimeoutMessage(int mointorMessageID) {
+	protected MessageListener removeTimeoutMessage(int mointorMessageID) {
 		Meta meta = metaHolder.get(Integer.valueOf(mointorMessageID));
 		metaHolder.remove(Integer.valueOf(mointorMessageID));
 		if (meta != null) {
@@ -64,7 +65,7 @@ public abstract class AbstractHandler extends Handler {
 		}
 	}
 
-	protected void sendResult(Registrant caller, Object obj) {
+	protected void sendResult(MessageListener caller, Object obj) {
 		if (caller != null) {
 			Message result = Message.obtain();
 			result.what = caller.getWhat();
@@ -79,7 +80,7 @@ public abstract class AbstractHandler extends Handler {
 	 * @param objs
 	 * @return false means parameter is null otherwise true
 	 */
-	protected boolean checkParamNull(Registrant caller, Object... objs) {
+	protected boolean checkParamNull(MessageListener caller, Object... objs) {
 		boolean flag = false;
 		for (Object obj : objs) {
 			if (obj == null) {
@@ -104,9 +105,8 @@ public abstract class AbstractHandler extends Handler {
 	 * @param obj
 	 */
 	protected void notifyListener(int key, int arg1, int arg2, Object obj) {
-		//监听器是一个列表，可以增加多个监听者。
-		List<Registrant> list = registrantHolder.get(key);
-		if (list == null || list.size() <= 0) {
+		List<MessageListener> messageListenerList = messageListenerListHolder.get(key);
+		if (messageListenerList == null || messageListenerList.size() <= 0) {
 			V2Log.i(this.getClass().getName() + "  : No listener: " + key
 					+ " " + arg1 + "  " + arg2 + "  " + obj);
 			return;
@@ -114,11 +114,14 @@ public abstract class AbstractHandler extends Handler {
 			V2Log.i(this.getClass().getName() + "  : Notify listener: " + key
 					+ " " + arg1 + "  " + arg2 + "  " + obj);
 		}
-		for (Registrant re : list) {
-			Handler h = re.getHandler();
-			if (h != null) {
-				Message.obtain(h, re.getWhat(), arg1, arg2,
-						new AsyncResult(re.getObject(), obj)).sendToTarget();
+		
+		Log.i("temptag20141030 1","list.size():"+messageListenerList.size());
+		for (MessageListener messageListener : messageListenerList) {
+			Handler handler = messageListener.getHandler();
+			if (handler != null) {
+				Log.i("temptag20141030 1"," re.getWhat():"+messageListener.getWhat());
+				Message.obtain(handler, messageListener.getWhat(), arg1, arg2,
+						new AsyncResult(messageListener.getObject(), obj)).sendToTarget();
 			}
 		}
 	}
@@ -131,7 +134,7 @@ public abstract class AbstractHandler extends Handler {
 	 * @param obj
 	 */
 	protected void notifyListenerWithPending(int key, int arg1, int arg2, Object obj) {
-		List<Registrant> list = registrantHolder.get(key);
+		List<MessageListener> list = messageListenerListHolder.get(key);
 		if (list == null || list.size() <= 0) {
 			//如果上层没有监听，就把消息缓存起来。再上层调用notifyListener时会把缓存的消息发出去。
 			List<PendingObject> pendingList = pendingObjectHolder.get(key);
@@ -147,7 +150,7 @@ public abstract class AbstractHandler extends Handler {
 			V2Log.i(this.getClass().getName() + "  : Notify listener: " + key
 					+ " " + arg1 + "  " + arg2 + "  " + obj);
 			for (int i = 0; i < list.size(); i++) {
-				Registrant re = list.get(i);
+				MessageListener re = list.get(i);
 				Handler h = re.getHandler();
 				if (h != null) {
 					Message.obtain(h, re.getWhat(), arg1, arg2,
@@ -160,12 +163,12 @@ public abstract class AbstractHandler extends Handler {
 	
 	protected void registerListener(int key, Handler h, int what, Object obj) {
 		synchronized (pendingObjectHolder) {
-			List<Registrant> list = registrantHolder.get(key);
+			List<MessageListener> list = messageListenerListHolder.get(key);
 			if (list == null) {
-				list = new ArrayList<Registrant>();
-				registrantHolder.append(key, list);
+				list = new ArrayList<MessageListener>();
+				messageListenerListHolder.append(key, list);
 			}
-			Registrant re = new Registrant(h, what, obj);
+			MessageListener re = new MessageListener(h, what, obj);
 			list.add(re);
 
 			//把缓存的该种消息发出去。
@@ -187,10 +190,10 @@ public abstract class AbstractHandler extends Handler {
 	}
 
 	protected void unRegisterListener(int key, Handler h, int what, Object obj) {
-		List<Registrant> list = registrantHolder.get(key);
+		List<MessageListener> list = messageListenerListHolder.get(key);
 		if (list != null) {
 			for (int i = 0; i < list.size(); i++) {
-				Registrant re = list.get(i);
+				MessageListener re = list.get(i);
 				if (re.getHandler() == h && what == re.getWhat()) {
 					list.remove(re);
 					i--;
@@ -206,10 +209,10 @@ public abstract class AbstractHandler extends Handler {
 
 	class Meta {
 		int mointorMessageID;
-		Registrant caller;
+		MessageListener caller;
 		Message timeoutMessage;
 
-		public Meta(int mointorMessageID, Registrant caller,
+		public Meta(int mointorMessageID, MessageListener caller,
 				Message timeoutMessage) {
 			super();
 			this.mointorMessageID = mointorMessageID;
@@ -265,7 +268,7 @@ public abstract class AbstractHandler extends Handler {
 			break;
 		// Handle normal message
 		default:
-			Registrant resgister = removeTimeoutMessage(msg.what);
+			MessageListener resgister = removeTimeoutMessage(msg.what);
 			if (resgister == null) {
 				V2Log.w(this.getClass().getName()
 						+ " Igore message client don't expect callback :"

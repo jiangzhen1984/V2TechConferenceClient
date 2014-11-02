@@ -21,7 +21,7 @@ import com.V2.jni.util.V2Log;
 import com.v2tech.R;
 import com.v2tech.service.CrowdGroupService;
 import com.v2tech.service.GlobalHolder;
-import com.v2tech.service.Registrant;
+import com.v2tech.service.MessageListener;
 import com.v2tech.view.JNIService;
 import com.v2tech.view.PublicIntent;
 import com.v2tech.view.bo.GroupUserObject;
@@ -214,7 +214,7 @@ public class CrowdDetailActivity extends Activity {
 			confirmButton.setOnClickListener(new OnClickListener() {
 				@Override
 				public void onClick(View v) {
-					service.quitCrowd(crowd, new Registrant(mLocalHandler, REQUEST_QUIT_CROWD_DONE, null));
+					service.quitCrowd(crowd, new MessageListener(mLocalHandler, REQUEST_QUIT_CROWD_DONE, null));
 				}
 
 			});
@@ -298,7 +298,7 @@ public class CrowdDetailActivity extends Activity {
 
 			if (at != crowd.getAuthType()) {
 				crowd.setAuthType(at);
-				service.updateCrowd(crowd, new Registrant(mLocalHandler,
+				service.updateCrowd(crowd, new MessageListener(mLocalHandler,
 						REQUEST_UPDATE_CROWD_DONE, null));
 			}
 		}

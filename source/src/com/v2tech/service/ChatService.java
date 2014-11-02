@@ -4,6 +4,7 @@ import java.util.List;
 
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.util.Log;
 
 import com.V2.jni.AudioRequest;
 import com.V2.jni.AudioRequestCallback;
@@ -39,28 +40,28 @@ import com.v2tech.vo.VMessageImageItem;
  * </ul>
  * <p>
  * <li>
- * Send message {@link #sendVMessage(VMessage, Registrant)}</li>
+ * Send message {@link #sendVMessage(VMessage, MessageListener)}</li>
  * <li>
  * Invite User video or audio call
- * {@link #inviteUserChat(UserChattingObject, Registrant)}</li>
+ * {@link #inviteUserChat(UserChattingObject, MessageListener)}</li>
  * <li>
  * Accept video or audio call
- * {@link #acceptChatting(UserChattingObject, Registrant)}</li>
+ * {@link #acceptChatting(UserChattingObject, MessageListener)}</li>
  * 
  * <li>
  * decline video or audio call
- * {@link #refuseChatting(UserChattingObject, Registrant)}</li>
+ * {@link #refuseChatting(UserChattingObject, MessageListener)}</li>
  * 
  * <li>
  * mute microphone when in conversation
- * {@link #muteChatting(UserChattingObject, Registrant)}</li>
+ * {@link #muteChatting(UserChattingObject, MessageListener)}</li>
  * <li>
  * Operation file when transport file<br>
  * Notice: this operation doesn't contain send re-send operation. Send file use
- * {@link #sendVMessage(VMessage, Registrant)}<br>
+ * {@link #sendVMessage(VMessage, MessageListener)}<br>
  * But when send file in progress, resume or cancel or suspend use this
  * function.
- * {@link #updateFileOperation(VMessageFileItem, FileOperationEnum, Registrant)}
+ * {@link #updateFileOperation(VMessageFileItem, FileOperationEnum, MessageListener)}
  * <br>
  * </li>
  * 
@@ -77,7 +78,7 @@ public class ChatService extends DeviceService {
 
 	private FileRequestCB fileCallback;
 
-	private Registrant mCaller;
+	private MessageListener mCaller;
 
 	private Handler thread;
 	
@@ -109,8 +110,7 @@ public class ChatService extends DeviceService {
 		backEndThread.start();
 		thread = new Handler(backEndThread.getLooper());
 	}
-	
-	
+
 	@Override
 	public void clearCalledBack() {
 		AudioRequest.getInstance().removeCallback(callback);
@@ -119,13 +119,13 @@ public class ChatService extends DeviceService {
 		backEndThread.quit();
 	}
 
-
-    /**
-     * Register listener for out conference by kick.
-     * @param h
-     * @param what
-     * @param obj
-     */
+	/**
+	 * Register listener for out conference by kick.
+	 * 
+	 * @param h
+	 * @param what
+	 * @param obj
+	 */
 	public void registerCancelledListener(Handler h, int what, Object obj) {
 		registerListener(KEY_CANCELLED_LISTNER, h, what, obj);
 	}
@@ -135,13 +135,14 @@ public class ChatService extends DeviceService {
 
 	}
 
-    /**
-     * Register listener for video connected, after this notification. can open
-     * remote video device
-     * @param h
-     * @param what
-     * @param obj
-     */
+	/**
+	 * Register listener for video connected, after this notification. can open
+	 * remote video device
+	 * 
+	 * @param h
+	 * @param what
+	 * @param obj
+	 */
 	public void registerVideoChatConnectedListener(Handler h, int what,
 			Object obj) {
 		registerListener(KEY_VIDEO_CONNECTED, h, what, obj);
@@ -152,12 +153,13 @@ public class ChatService extends DeviceService {
 
 	}
 
-    /**
-     * Register listener for out conference by kick.
-     * @param h
-     * @param what
-     * @param obj
-     */
+	/**
+	 * Register listener for out conference by kick.
+	 * 
+	 * @param h
+	 * @param what
+	 * @param obj
+	 */
 	public void registerFileTransStatusListener(Handler h, int what, Object obj) {
 		registerListener(KEY_FILE_TRANS_STATUS_NOTIFICATION_LISTNER, h, what,
 				obj);
@@ -169,10 +171,8 @@ public class ChatService extends DeviceService {
 				obj);
 
 	}
-	
-	
-	public void registerP2PCallResponseListener(Handler h, int what,
-			Object obj) {
+
+	public void registerP2PCallResponseListener(Handler h, int what, Object obj) {
 		registerListener(KEY_P2P_CALL_RESPONSE, h, what, obj);
 	}
 
@@ -187,7 +187,7 @@ public class ChatService extends DeviceService {
 	 * @param msg
 	 * @param caller
 	 */
-	public void sendVMessage(final VMessage msg, final Registrant caller) {
+	public void sendVMessage(final VMessage msg, final MessageListener caller) {
 		if (msg == null) {
 			V2Log.w(" ToUser is null can not send message");
 			return;
@@ -246,7 +246,7 @@ public class ChatService extends DeviceService {
 		});
 	}
 
-	public void sendFileMessage(VMessage vm, Registrant caller) {
+	public void sendFileMessage(VMessage vm, MessageListener caller) {
 		List<VMessageFileItem> items = vm.getFileItems();
 		if (items == null || items.size() <= 0) {
 			if (caller != null) {
@@ -289,7 +289,7 @@ public class ChatService extends DeviceService {
 	 * @see FileOperationEnum
 	 */
 	public void updateFileOperation(VMessageFileItem vfi,
-			FileOperationEnum opt, Registrant caller) {
+			FileOperationEnum opt, MessageListener caller) {
 		if (vfi == null || (opt == null)) {
 			JNIResponse resp = new RequestChatServiceResponse(
 					RequestChatServiceResponse.Result.INCORRECT_PAR);
@@ -317,8 +317,7 @@ public class ChatService extends DeviceService {
 			FileRequest.getInstance().cancelRecvFile(vfi.getUuid());
 			break;
 		case OPERATION_START_DOWNLOAD:
-			FileRequest.getInstance().acceptFileTrans(
-					vfi.getUuid(),
+			FileRequest.getInstance().acceptFileTrans(vfi.getUuid(),
 					GlobalConfig.getGlobalFilePath() + "/" + vfi.getFileName());
 		default:
 			break;
@@ -337,7 +336,7 @@ public class ChatService extends DeviceService {
 	 * @param ud
 	 * @param caller
 	 */
-	public void inviteUserChat(UserChattingObject ud, Registrant caller) {
+	public void inviteUserChat(UserChattingObject ud, MessageListener caller) {
 		JNIResponse resp = null;
 		if (mCaller != null) {
 			V2Log.e(" audio call is on going");
@@ -381,7 +380,7 @@ public class ChatService extends DeviceService {
 	 * @param ud
 	 * @param caller
 	 */
-	public void cancelChattingCall(UserChattingObject ud, Registrant caller) {
+	public void cancelChattingCall(UserChattingObject ud, MessageListener caller) {
 		if (ud == null) {
 			JNIResponse resp = new RequestChatServiceResponse(
 					RequestChatServiceResponse.Result.INCORRECT_PAR);
@@ -400,6 +399,13 @@ public class ChatService extends DeviceService {
 
 		} else if (ud.isVideoType()) {
 			if (ud.isConnected() || !ud.isIncoming()) {
+
+				Log.i("temptag20141030 1",
+						"ud.getSzSessionID():" + ud.getSzSessionID()
+								+ " ud.getUser().getmUserId():"
+								+ ud.getUser().getmUserId()
+								+ " ud.getDeviceId():" + ud.getDeviceId());
+
 				VideoRequest.getInstance().closeVideoChat(ud.getSzSessionID(),
 						ud.getUser().getmUserId(), ud.getDeviceId());
 
@@ -426,7 +432,7 @@ public class ChatService extends DeviceService {
 	 * @param ud
 	 * @param caller
 	 */
-	public void acceptChatting(UserChattingObject ud, Registrant caller) {
+	public void acceptChatting(UserChattingObject ud, MessageListener caller) {
 		if (ud == null) {
 			JNIResponse resp = new RequestChatServiceResponse(
 					RequestChatServiceResponse.Result.INCORRECT_PAR);
@@ -454,7 +460,7 @@ public class ChatService extends DeviceService {
 	 * @param ud
 	 * @param caller
 	 */
-	public void refuseChatting(UserChattingObject ud, Registrant caller) {
+	public void refuseChatting(UserChattingObject ud, MessageListener caller) {
 		if (ud == null) {
 			JNIResponse resp = new RequestChatServiceResponse(
 					RequestChatServiceResponse.Result.INCORRECT_PAR);
@@ -482,7 +488,7 @@ public class ChatService extends DeviceService {
 	 * @param ud
 	 * @param caller
 	 */
-	public void muteChatting(UserChattingObject ud, Registrant caller) {
+	public void muteChatting(UserChattingObject ud, MessageListener caller) {
 		if (ud == null) {
 			JNIResponse resp = new RequestChatServiceResponse(
 					RequestChatServiceResponse.Result.INCORRECT_PAR);
@@ -513,18 +519,24 @@ public class ChatService extends DeviceService {
 		@Override
 		public void OnVideoChatAccepted(VideoJNIObjectInd ind) {
 			RequestChatServiceResponse resp = new RequestChatServiceResponse(
-					RequestChatServiceResponse.ACCEPTED,
-					ind.getFromUserId(), ind.getGroupId(),
-					ind.getDeviceId(),
+					RequestChatServiceResponse.ACCEPTED, ind.getFromUserId(),
+					ind.getGroupId(), ind.getDeviceId(),
 					RequestChatServiceResponse.Result.SUCCESS);
 			resp.setUuid(ind.getSzSessionID());
+
 			resp.setDeviceID(ind.getDeviceId());
 			if (mCaller != null) {
+				Log.i("temptag20141030 1",
+						"VideoRequestCallbackImpl 1 ind.getDeviceId()"
+								+ ind.getDeviceId());
 				sendResult(mCaller, resp);
 				mCaller = null;
-			}
-			else
+			} else {
+				Log.i("temptag20141030 1",
+						"VideoRequestCallbackImpl 2 ind.getDeviceId()"
+								+ ind.getDeviceId());
 				notifyListener(KEY_P2P_CALL_RESPONSE, 0, 0, resp);
+			}
 		}
 
 		@Override
@@ -535,20 +547,22 @@ public class ChatService extends DeviceService {
 			if (mCaller != null) {
 				sendResult(mCaller, resp);
 				mCaller = null;
-			}
-			else
+			} else {
+				Log.i("temptag20141030 1", "OnVideoChatRefused()");
 				notifyListener(KEY_P2P_CALL_RESPONSE, 0, 0, resp);
+			}
 		}
 
 		@Override
 		public void OnVideoChatClosed(VideoJNIObjectInd ind) {
+			Log.i("temptag20141030 1", "OnVideoChatClosed()");
 			notifyListener(KEY_CANCELLED_LISTNER, 0, 0, null);
-			// Clean cache
 			mCaller = null;
 		}
 
 		@Override
 		public void OnVideoChating(VideoJNIObjectInd ind) {
+			Log.i("temptag20141030 1", "OnVideoChating()");
 			notifyListener(KEY_VIDEO_CONNECTED, 0, 0, ind);
 		}
 
@@ -565,9 +579,10 @@ public class ChatService extends DeviceService {
 			if (mCaller != null) {
 				sendResult(mCaller, resp);
 				mCaller = null;
-			}
-			else
+			} else {
+				Log.i("temptag20141030 1", "OnAudioChatAccepted");
 				notifyListener(KEY_P2P_CALL_RESPONSE, 0, 0, resp);
+			}
 		}
 
 		@Override
@@ -581,9 +596,8 @@ public class ChatService extends DeviceService {
 				mCaller = null;
 				// Else means remote side is out and then cancel calling
 			} else
-				notifyListener(KEY_P2P_CALL_RESPONSE, 0, 0, resp);
-			
-
+				Log.i("temptag20141030 1", "OnAudioChatRefused");
+			notifyListener(KEY_P2P_CALL_RESPONSE, 0, 0, resp);
 		}
 
 		@Override
@@ -618,7 +632,7 @@ public class ChatService extends DeviceService {
 
 		@Override
 		public void OnFileTransEnd(String szFileID, String szFileName,
-				long nFileSize, int nTransType ) {
+				long nFileSize, int nTransType) {
 			notifyListener(KEY_FILE_TRANS_STATUS_NOTIFICATION_LISTNER, 0, 0,
 					new FileTransProgressStatusIndication(nTransType, szFileID,
 							nFileSize,
@@ -647,8 +661,7 @@ public class ChatService extends DeviceService {
 			notifyListener(KEY_FILE_TRANS_STATUS_NOTIFICATION_LISTNER, 0, 0,
 					new FileTransCannelIndication(szFileID));
 		}
-		
-		
+
 	}
 
 }

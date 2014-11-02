@@ -45,7 +45,7 @@ import com.v2tech.R;
 import com.v2tech.db.DataBaseContext;
 import com.v2tech.db.V2TechDBHelper;
 import com.v2tech.service.GlobalHolder;
-import com.v2tech.service.Registrant;
+import com.v2tech.service.MessageListener;
 import com.v2tech.service.UserService;
 import com.v2tech.service.jni.JNIResponse;
 import com.v2tech.service.jni.RequestLogInResponse;
@@ -482,7 +482,7 @@ public class LoginActivity extends Activity {
 						.setText(R.string.login_progress_signing_in);
 				showProgress(true);
 				us.login(mEmailView.getText().toString(), mPasswordView
-						.getText().toString(), new Registrant(mHandler,
+						.getText().toString(), new MessageListener(mHandler,
 						LOG_IN_CALL_BACK, null));
 			}
 		}

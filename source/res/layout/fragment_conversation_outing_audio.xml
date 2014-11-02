@@ -55,9 +55,13 @@
                     android:layout_below="@+id/conversation_fragment_voice_avatar"
                     android:layout_centerHorizontal="true"
                     android:layout_marginTop="10dp"
-                    android:text="名字"
+                    android:ellipsize="end"
+                    android:gravity="center_horizontal"
+                    android:padding="5dp"
+                    android:text="name666666666666666666666666666666666666666666666666666kkkkkkkkkkkkkkkkkkkkkkkkkkk5555555555555555555555555555555555555555555555555555555555555555555555555555555555555666666666666666666666666666666666666666666666666666666666666666666666666666666666666666kkkklkjjllk"
                     android:textColor="@color/fragment_conversation_title_text_color"
                     android:textSize="@dimen/fragment_conversation_waiting_invitation_host_name_size" />
+
             </RelativeLayout>
         </LinearLayout>
 

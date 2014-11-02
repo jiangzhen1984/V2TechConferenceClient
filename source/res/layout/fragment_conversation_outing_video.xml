@@ -122,11 +122,12 @@
 
         <RelativeLayout
             android:id="@+id/conversation_fragment_outing_video_card_container"
-            android:layout_width="wrap_content"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_alignParentTop="true"
             android:layout_marginLeft="@dimen/fragment_conversation_connected_title_text_margin_left"
+            android:layout_marginRight="@dimen/fragment_conversation_connected_title_text_margin_left"
             android:layout_marginTop="@dimen/fragment_conversation_connected_title_text_margin_top" >
 
             <ImageView
@@ -142,6 +143,8 @@
                 android:layout_alignTop="@+id/conversation_fragment_video_outing_call_avatar"
                 android:layout_marginLeft="@dimen/fragment_conversation_connected_title_text_margin_left"
                 android:layout_toRightOf="@+id/conversation_fragment_video_outing_call_avatar"
+                android:ellipsize="end"
+                android:maxLines="1"
                 android:text="name"
                 android:textColor="@color/fragment_conversation_title_text_color"
                 android:textSize="@dimen/fragment_conversation_connected_title_text_text_size" />
@@ -156,6 +159,17 @@
                 android:text="@string/conversation_waiting"
                 android:textColor="@color/fragment_conversation_title_text_color"
                 android:textSize="@dimen/fragment_conversation_connected_title_text_text_size" />
+
+            <ImageView
+                android:id="@+id/ImageView01"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="false"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentTop="true"
+                android:layout_margin="@dimen/fragment_conversation_connected_local_surface_margin_right"
+                android:src="@drawable/converse_camera_button" />
+
         </RelativeLayout>
 
         <TextView
@@ -168,7 +182,8 @@
             android:layout_marginTop="@dimen/fragment_conversation_connected_title_text_margin_top"
             android:text="@string/conversation_video_title_text"
             android:textColor="@color/fragment_conversation_title_text_color"
-            android:textSize="@dimen/fragment_conversation_connected_title_text_text_size" />
+            android:textSize="@dimen/fragment_conversation_connected_title_text_text_size"
+            android:visibility="gone" />
 
         <TextView
             android:id="@+id/conversation_fragment_connected_video_duration"
@@ -178,7 +193,8 @@
             android:layout_below="@+id/conversation_fragment_connected_title_text"
             android:text="00:00"
             android:textColor="@color/fragment_conversation_title_text_color"
-            android:textSize="@dimen/fragment_conversation_connected_title_text_text_size" />
+            android:textSize="@dimen/fragment_conversation_connected_title_text_text_size"
+            android:visibility="gone" />
 
         <RelativeLayout
             android:id="@+id/fragment_conversation_connected_video_local_layout"

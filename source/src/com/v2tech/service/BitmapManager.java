@@ -12,46 +12,52 @@ import com.v2tech.util.BitmapUtil;
 import com.v2tech.view.bo.UserAvatarObject;
 import com.v2tech.vo.User;
 
-
 /**
- * <ul>This is simple Bitmap Management class.</ul>
- * <ul>This class doesn't manage memory, this just manage bitmap changed indication.<br>
- * Because once one of bitmap changed, view must change before recycle, otherwise will be get exception error.
+ * <ul>
+ * This is simple Bitmap Management class.
  * </ul>
- *  New bitmap change event coming, bitmap manager will receive event, and will notify all listeners which 
- *  register with {@link #registerBitmapChangedListener(BitmapChangedListener)}. <br>
- *  After notify all view listeners, then notify cache listener which register with {@link #registerLastBitmapChangedListener(BitmapChangedListener)}.
- *  
- * <ul></ul>
+ * <ul>
+ * This class doesn't manage memory, this just manage bitmap changed indication.
+ * <br>
+ * Because once one of bitmap changed, view must change before recycle,
+ * otherwise will be get exception error.
+ * </ul>
+ * New bitmap change event coming, bitmap manager will receive event, and will
+ * notify all listeners which register with
+ * {@link #registerBitmapChangedListener(BitmapChangedListener)}. <br>
+ * After notify all view listeners, then notify cache listener which register
+ * with {@link #registerLastBitmapChangedListener(BitmapChangedListener)}.
+ * 
+ * <ul>
+ * </ul>
+ * 
  * @author 28851274
- *
+ * 
  */
 public class BitmapManager {
 
-	
 	private static BitmapManager mInstance;
-	
+
 	private List<WeakReference<BitmapChangedListener>> mListeners;
-	
+
 	private List<WeakReference<BitmapChangedListener>> mLastListeners;
-	
+
 	private BitmapManager() {
 		mListeners = new ArrayList<WeakReference<BitmapChangedListener>>();
-		mLastListeners  = new ArrayList<WeakReference<BitmapChangedListener>>();
+		mLastListeners = new ArrayList<WeakReference<BitmapChangedListener>>();
 	}
-	
+
 	public synchronized static BitmapManager getInstance() {
 		if (mInstance == null) {
 			mInstance = new BitmapManager();
 		}
-		
+
 		return mInstance;
 	}
-	
-	
-	
+
 	/**
-	 * It's used to register listener which monitor bitmaps changed event 
+	 * It's used to register listener which monitor bitmaps changed event
+	 * 
 	 * @param listener
 	 * @see {@link BitmapChangedListener}
 	 */
@@ -60,10 +66,10 @@ public class BitmapManager {
 			mListeners.add(new WeakReference<BitmapChangedListener>(listener));
 		}
 	}
-	
+
 	public void unRegisterBitmapChangedListener(BitmapChangedListener listener) {
 		synchronized (mListeners) {
-			for (int i =0; i< mListeners.size(); i++) {
+			for (int i = 0; i < mListeners.size(); i++) {
 				WeakReference<BitmapChangedListener> ref = mListeners.get(i);
 				if (ref.get() != null && ref.get() == listener) {
 					mListeners.remove(ref);
@@ -72,24 +78,29 @@ public class BitmapManager {
 			}
 		}
 	}
-	
-	
-	
+
 	/**
 	 * It's used to recycle our cache bitmap.<br>
-	 * <ul>This listener will call after all normal listeners {@link #registerBitmapChangedListener(BitmapChangedListener)} </ul>
+	 * <ul>
+	 * This listener will call after all normal listeners
+	 * {@link #registerBitmapChangedListener(BitmapChangedListener)}
+	 * </ul>
+	 * 
 	 * @param listener
 	 */
 	public void registerLastBitmapChangedListener(BitmapChangedListener listener) {
 		synchronized (mLastListeners) {
-			mLastListeners.add(new WeakReference<BitmapChangedListener>(listener));
+			mLastListeners.add(new WeakReference<BitmapChangedListener>(
+					listener));
 		}
 	}
-	
-	public void unRegisterLastBitmapChangedListener(BitmapChangedListener listener) {
+
+	public void unRegisterLastBitmapChangedListener(
+			BitmapChangedListener listener) {
 		synchronized (mLastListeners) {
-			for (int i =0; i< mLastListeners.size(); i++) {
-				WeakReference<BitmapChangedListener> ref = mLastListeners.get(i);
+			for (int i = 0; i < mLastListeners.size(); i++) {
+				WeakReference<BitmapChangedListener> ref = mLastListeners
+						.get(i);
 				if (ref.get() != null && ref.get() == listener) {
 					mLastListeners.remove(ref);
 					i--;
@@ -97,35 +108,35 @@ public class BitmapManager {
 			}
 		}
 	}
-	
-	
+
 	/**
 	 * Asynchronized load avatar and notify all listener avatar changed
+	 * 
 	 * @param avatar
 	 */
 	public void loadUserAvatarAndNotify(UserAvatarObject avatar) {
-		if (avatar  == null) {
+		if (avatar == null) {
 			V2Log.e(" unformaled parameter avatar");
 			return;
 		}
-		//TODO handle concurrency
+		// TODO handle concurrency
 		new AsyncAvatarLoader().execute(avatar);
 	}
-	
-	
-	class AsyncAvatarLoader extends AsyncTask<UserAvatarObject, UserAvatarObject, Void> {
+
+	class AsyncAvatarLoader extends
+			AsyncTask<UserAvatarObject, UserAvatarObject, Void> {
 
 		@Override
-		protected  Void doInBackground(UserAvatarObject... objs) {
+		protected Void doInBackground(UserAvatarObject... objs) {
 			for (UserAvatarObject uao : objs) {
-				Bitmap avatar = BitmapUtil.loadAvatarFromPath(uao.getAvatarPath());
+				Bitmap avatar = BitmapUtil.loadAvatarFromPath(uao
+						.getAvatarPath());
 				uao.setBm(avatar);
 				publishProgress(uao);
 			}
-			
+
 			return null;
 		}
-
 
 		@Override
 		protected void onProgressUpdate(UserAvatarObject... objs) {
@@ -138,36 +149,34 @@ public class BitmapManager {
 			}
 		}
 	}
-	
-	
+
 	private void notifiyAvatarChanged(User u, Bitmap bm) {
 		synchronized (mListeners) {
 			for (WeakReference<BitmapChangedListener> ref : mListeners) {
 				Object obj = ref.get();
 				if (obj != null) {
-				((BitmapChangedListener)obj).notifyAvatarChanged(u, bm);	
+					((BitmapChangedListener) obj).notifyAvatarChanged(u, bm);
 				}
 			}
 		}
-		
+
 		synchronized (mLastListeners) {
 			for (WeakReference<BitmapChangedListener> ref : mLastListeners) {
 				Object obj = ref.get();
 				if (obj != null) {
-				((BitmapChangedListener)obj).notifyAvatarChanged(u, bm);	
+					((BitmapChangedListener) obj).notifyAvatarChanged(u, bm);
 				}
 			}
 		}
 	}
-	
-	
+
 	/**
 	 * Bitmap changed event listener
+	 * 
 	 * @author 28851274
-	 *
+	 * 
 	 */
 	public interface BitmapChangedListener {
-		
 		public void notifyAvatarChanged(User user, Bitmap bm);
 	}
 }

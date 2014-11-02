@@ -5,9 +5,9 @@ import java.lang.ref.WeakReference;
 import android.os.Handler;
 import android.os.Message;
 
-public class Registrant {
+public class MessageListener {
 
-	public Registrant(Handler h, int what, Object obj) {
+	public MessageListener(Handler h, int what, Object obj) {
 		refH = new WeakReference<Handler>(h);
 		this.what = what;
 		userObj = obj;

@@ -48,14 +48,14 @@ import com.v2tech.vo.UserDeviceConfig;
  * </ul>
  * <ul>
  * <li>User request to enter conference :
- * {@link #requestEnterConference(Conference, Registrant)}</li>
+ * {@link #requestEnterConference(Conference, MessageListener)}</li>
  * <li>User request to exit conference :
- * {@link #requestExitConference(Conference, Registrant)}</li>
+ * {@link #requestExitConference(Conference, MessageListener)}</li>
  * <li>User request to request speak in meeting
- * {@link #applyForControlPermission(ConferencePermission, Registrant)}</li>
+ * {@link #applyForControlPermission(ConferencePermission, MessageListener)}</li>
  * <li>User request to release speaker in meeting
- * {@link #applyForReleasePermission(ConferencePermission, Registrant)}</li>
- * <li>User create conference: {@link #createConference(Conference, Registrant)}
+ * {@link #applyForReleasePermission(ConferencePermission, MessageListener)}</li>
+ * <li>User create conference: {@link #createConference(Conference, MessageListener)}
  * </li>
  * </ul>
  * 
@@ -116,7 +116,7 @@ public class ConferenceService extends DeviceService {
 	 * 
 	 * @see com.v2tech.service.jni.RequestEnterConfResponse
 	 */
-	public void requestEnterConference(Conference conf, Registrant caller) {
+	public void requestEnterConference(Conference conf, MessageListener caller) {
 		initTimeoutMessage(JNI_REQUEST_ENTER_CONF, DEFAULT_TIME_OUT_SECS,
 				caller);
 		ConfRequest.getInstance().enterConf(conf.getId());
@@ -134,7 +134,7 @@ public class ConferenceService extends DeviceService {
 	 *            object is
 	 *            {@link com.v2tech.service.jni.RequestExitedConfResponse}
 	 */
-	public void requestExitConference(Conference conf, Registrant caller) {
+	public void requestExitConference(Conference conf, MessageListener caller) {
 		if (conf == null) {
 			if (caller != null && caller.getHandler() != null) {
 				JNIResponse jniRes = new RequestConfCreateResponse(0, 0,
@@ -166,7 +166,7 @@ public class ConferenceService extends DeviceService {
 	 *            object is
 	 *            {@link com.v2tech.service.jni.RequestConfCreateResponse}
 	 */
-	public void createConference(Conference conf, Registrant caller) {
+	public void createConference(Conference conf, MessageListener caller) {
 		if (conf == null) {
 			if (caller != null && caller.getHandler() != null) {
 				JNIResponse jniRes = new RequestConfCreateResponse(0, 0,
@@ -189,7 +189,7 @@ public class ConferenceService extends DeviceService {
 	 * @param conf
 	 * @param caller
 	 */
-	public void quitConference(Conference conf, Registrant caller) {
+	public void quitConference(Conference conf, MessageListener caller) {
 		if (conf == null) {
 			if (caller != null) {
 				JNIResponse jniRes = new RequestConfCreateResponse(0, 0,
@@ -222,7 +222,7 @@ public class ConferenceService extends DeviceService {
 	 *            caller
 	 */
 	public void inviteAttendee(Conference conf, List<User> list,
-			Registrant caller) {
+			MessageListener caller) {
 		if (list == null || conf == null || list.isEmpty()) {
 			if (caller != null) {
 				JNIResponse jniRes = new JNIResponse(
@@ -262,7 +262,7 @@ public class ConferenceService extends DeviceService {
 	 * @see ConferencePermission
 	 */
 	public void applyForControlPermission(ConferencePermission type,
-			Registrant caller) {
+			MessageListener caller) {
 		initTimeoutMessage(JNI_REQUEST_SPEAK, DEFAULT_TIME_OUT_SECS, caller);
 
 		ConfRequest.getInstance().applyForControlPermission(type.intValue());
@@ -287,7 +287,7 @@ public class ConferenceService extends DeviceService {
 	 * @see ConferencePermission
 	 */
 	public void applyForReleasePermission(ConferencePermission type,
-			Registrant caller) {
+			MessageListener caller) {
 
 		initTimeoutMessage(JNI_REQUEST_RELEASE_SPEAK, DEFAULT_TIME_OUT_SECS,
 				caller);

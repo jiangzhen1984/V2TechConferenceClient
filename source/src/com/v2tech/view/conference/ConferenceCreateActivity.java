@@ -46,7 +46,7 @@ import com.V2.jni.util.V2Log;
 import com.v2tech.R;
 import com.v2tech.service.ConferenceService;
 import com.v2tech.service.GlobalHolder;
-import com.v2tech.service.Registrant;
+import com.v2tech.service.MessageListener;
 import com.v2tech.service.jni.JNIResponse;
 import com.v2tech.service.jni.RequestConfCreateResponse;
 import com.v2tech.util.SPUtil;
@@ -513,7 +513,7 @@ public class ConferenceCreateActivity extends Activity {
 
 			List<User> l = new ArrayList<User>(mAttendeeList);
 			conf = new Conference(title, startTimeStr, null, l);
-			cs.createConference(conf, new Registrant(mLocalHandler,
+			cs.createConference(conf, new MessageListener(mLocalHandler,
 					CREATE_CONFERENC_RESP, null));
 			view.setEnabled(false);
 		}

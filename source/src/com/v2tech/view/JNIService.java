@@ -5,7 +5,10 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.Service;
+import android.app.ActivityManager.RunningTaskInfo;
 import android.content.Context;
 import android.content.Intent;
 import android.media.Ringtone;
@@ -58,6 +61,7 @@ import com.v2tech.view.bo.GroupUserObject;
 import com.v2tech.view.bo.UserAvatarObject;
 import com.v2tech.view.bo.UserStatusObject;
 import com.v2tech.view.contacts.add.AddFriendHistroysHandler;
+import com.v2tech.view.conversation.ConversationP2PAVActivity;
 import com.v2tech.view.conversation.MessageBuilder;
 import com.v2tech.view.conversation.MessageLoader;
 import com.v2tech.vo.ConferenceGroup;
@@ -960,6 +964,7 @@ public class JNIService extends Service {
 		public void OnAudioChatInvite(AudioJNIObjectInd ind) {
 
 			if (GlobalHolder.getInstance().isInVideoCall()) {
+				Log.i("temptap20141031 1", "isInVideoCall() 自动接受");
 				GlobalState state = GlobalHolder.getInstance().getGlobalState();
 				// if in video automatically accept audio and user never accept
 				// audio call.
@@ -986,6 +991,20 @@ public class JNIService extends Service {
 				AudioRequest.getInstance().RefuseAudioChat(
 						ind.getSzSessionID(), ind.getFromUserId());
 				return;
+			}
+
+			// 如果在p2p界面则拒绝
+			ActivityManager activityManager = (ActivityManager) getSystemService(Activity.ACTIVITY_SERVICE);
+			List<RunningTaskInfo> listRunningTaskInfo = activityManager
+					.getRunningTasks(1);
+			if ((listRunningTaskInfo != null) && listRunningTaskInfo.size() > 0) {
+				if (listRunningTaskInfo.get(0).topActivity.getClassName()
+						.equals(ConversationP2PAVActivity.class.getName())) {
+					V2Log.i("Ignore audio call ");
+					AudioRequest.getInstance().RefuseAudioChat(
+							ind.getSzSessionID(), ind.getFromUserId());
+					return;
+				}
 			}
 
 			Intent iv = new Intent();
@@ -1021,6 +1040,23 @@ public class JNIService extends Service {
 						ind.getDeviceId());
 				return;
 			}
+
+			// 如果在p2p界面则拒绝
+			ActivityManager activityManager = (ActivityManager) getSystemService(Activity.ACTIVITY_SERVICE);
+			List<RunningTaskInfo> listRunningTaskInfo = activityManager
+					.getRunningTasks(1);
+			if ((listRunningTaskInfo != null) && listRunningTaskInfo.size() > 0) {
+				if (listRunningTaskInfo.get(0).topActivity.getClassName()
+						.equals(ConversationP2PAVActivity.class.getName())) {
+					V2Log.i("Ignore video call ");
+					VideoRequest.getInstance().refuseVideoChat(
+							ind.getSzSessionID(), ind.getFromUserId(),
+							ind.getDeviceId());
+					return;
+				}
+
+			}
+
 			Message.obtain(mCallbackHandler, JNI_RECEIVED_VIDEO_INVITION, ind)
 					.sendToTarget();
 		}
@@ -1047,6 +1083,7 @@ public class JNIService extends Service {
 		 * .ind.VideoJNIObjectInd)
 		 */
 		public void OnVideoChatClosed(VideoJNIObjectInd ind) {
+			Log.i("20141102","OnVideoChatClosed");
 			super.OnVideoChatClosed(ind);
 			if (GlobalHolder.getInstance().isInMeeting()
 					|| GlobalHolder.getInstance().isInAudioCall()

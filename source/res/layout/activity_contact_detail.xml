@@ -81,33 +81,40 @@
                 android:layout_alignParentRight="true"
                 android:layout_centerVertical="true" >
 
-                <TextView
-                    android:id="@+id/contact_user_company"
+                <LinearLayout
+                    android:id="@+id/text_layout"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerVertical="true"
-                    android:layout_marginRight="15dp"
-                    android:text="Company"
-                    android:textColor="@color/common_item_text_color"
-                    android:textSize="@dimen/common_item_text_size"
-                    android:visibility="visible" />
+                    android:layout_height="wrap_content" >
 
-                <TextView
-                    android:id="@+id/authentication_state"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentRight="false"
-                    android:layout_centerVertical="true"
-                    android:layout_marginRight="15dp"
-                    android:text="验证状态"
-                    android:textColor="@color/common_item_text_color"
-                    android:textSize="@dimen/common_item_text_size"
-                    android:visibility="gone" />
+                    <TextView
+                        android:id="@+id/contact_user_company"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:layout_marginRight="15dp"
+                        android:text="Company"
+                        android:textColor="@color/common_item_text_color"
+                        android:textSize="@dimen/common_item_text_size"
+                        android:visibility="visible" />
+
+                    <TextView
+                        android:id="@+id/authentication_state"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentRight="false"
+                        android:layout_centerVertical="true"
+                        android:layout_marginRight="15dp"
+                        android:text="验证状态"
+                        android:textColor="@color/common_item_text_color"
+                        android:textSize="@dimen/common_item_text_size"
+                        android:visibility="gone" />
+                </LinearLayout>
 
                 <LinearLayout
                     android:id="@+id/button_layout"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" >
+                    android:layout_height="wrap_content"
+                    android:visibility="gone" >
 
                     <Button
                         android:id="@+id/access"

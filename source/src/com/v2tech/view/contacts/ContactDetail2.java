@@ -28,7 +28,7 @@ import com.V2.jni.V2GlobalEnum;
 import com.v2tech.R;
 import com.v2tech.service.ContactsService;
 import com.v2tech.service.GlobalHolder;
-import com.v2tech.service.Registrant;
+import com.v2tech.service.MessageListener;
 import com.v2tech.service.UserService;
 import com.v2tech.vo.ContactGroup;
 import com.v2tech.view.JNIService;
@@ -485,7 +485,7 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 			switch (msg.what) {
 			case UPDATE_USER_INFO:
 				gatherUserData();
-				us.updateUser(u, new Registrant(this, UPDATE_USER_INFO_DONE,
+				us.updateUser(u, new MessageListener(this, UPDATE_USER_INFO_DONE,
 						null));
 				break;
 			case UPDATE_USER_INFO_DONE:

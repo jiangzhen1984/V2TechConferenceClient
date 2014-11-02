@@ -28,7 +28,7 @@ import android.widget.TextView;
 import com.v2tech.R;
 import com.v2tech.service.ContactsService;
 import com.v2tech.service.GlobalHolder;
-import com.v2tech.service.Registrant;
+import com.v2tech.service.MessageListener;
 import com.v2tech.service.jni.GroupServiceJNIResponse;
 import com.v2tech.service.jni.JNIResponse;
 import com.v2tech.view.PublicIntent;
@@ -181,13 +181,13 @@ public class ContactsGroupActivity extends Activity {
 
 	private void updateGroup(ContactGroup group, OPT opt) {
 		if (opt == OPT.CREATE) {
-			contactService.createGroup(group, new Registrant(mLocalHandler,
+			contactService.createGroup(group, new MessageListener(mLocalHandler,
 					CREATE_GROUP_DONE, null));
 		} else if (opt == OPT.UPDATE) {
-			contactService.updateGroup(group, new Registrant(mLocalHandler,
+			contactService.updateGroup(group, new MessageListener(mLocalHandler,
 					UPDATE_GROUP_DONE, null));
 		} else {
-			contactService.removeGroup(group, new Registrant(mLocalHandler,
+			contactService.removeGroup(group, new MessageListener(mLocalHandler,
 					REMOVE_GROUP_DONE, null));
 		}
 	}

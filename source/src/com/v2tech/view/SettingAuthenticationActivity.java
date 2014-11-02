@@ -2,7 +2,7 @@ package com.v2tech.view;
 
 import com.v2tech.R;
 import com.v2tech.service.GlobalHolder;
-import com.v2tech.service.Registrant;
+import com.v2tech.service.MessageListener;
 import com.v2tech.service.UserService;
 import com.v2tech.vo.User;
 
@@ -76,7 +76,7 @@ public class SettingAuthenticationActivity extends Activity {
 
 		User currentUser = GlobalHolder.getInstance().getCurrentUser();
 		currentUser.setAuthtype(authtype);
-		new UserService().updateUser(currentUser, new Registrant(mHandler,
+		new UserService().updateUser(currentUser, new MessageListener(mHandler,
 				UPDATEUSER_CALLBACK, null));
 		super.onBackPressed();
 	}

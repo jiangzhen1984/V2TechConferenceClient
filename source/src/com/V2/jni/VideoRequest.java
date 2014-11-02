@@ -226,6 +226,8 @@ public class VideoRequest {
 			String szDeviceID) {
 		V2Log.d("OnVideoChatAccepted " + szSessionID + " " + nFromUserID + " "
 				+ szDeviceID);
+		Log.i("OnVideoChatAccepted ",szSessionID + " " + nFromUserID + " "
+				+ szDeviceID);
 		for (WeakReference<VideoRequestCallback> wrCB : this.mCallbacks) {
 			Object obj = wrCB.get();
 			if (obj != null) {
@@ -333,8 +335,6 @@ public class VideoRequest {
 	public native void closeVideoChat(String szSessionID, long nToUserID,
 			String szDeviceID);
 
-	// 閭�鍒汉鍚庡緱鍒板簲绛� OnVideoChatAccepted 0 2 1112627 1112627:Integrated
-	// Camera____2889200338
 
 	private void OnVideoWindowSet(String sDevId, Object hwnd) {
 		Log.e("ImRequest UI",
@@ -348,12 +348,10 @@ public class VideoRequest {
 
 	// private void OnGetDevSizeFormats(String szXml);
 
-	// // 閫氱煡绐楀彛瑙嗛姣旂壒鐜囷紝鍗曚綅Kbps
 	private void OnVideoBitRate(Object hwnd, int bps) {
 		// Log.e("ImRequest UI", "OnVideoBitRate " + hwnd +" "+bps);
 	}
 
-	// 鎽勫儚澶撮噰闆嗗嚭閿�
 	private void OnVideoCaptureError(String szDevID, int nErr) {
 
 	}

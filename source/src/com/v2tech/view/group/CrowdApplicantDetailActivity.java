@@ -14,7 +14,7 @@ import android.widget.TextView;
 import com.v2tech.R;
 import com.v2tech.service.CrowdGroupService;
 import com.v2tech.service.GlobalHolder;
-import com.v2tech.service.Registrant;
+import com.v2tech.service.MessageListener;
 import com.v2tech.view.conversation.MessageAuthenticationActivity;
 import com.v2tech.view.conversation.MessageBuilder;
 import com.v2tech.vo.CrowdGroup;
@@ -119,7 +119,7 @@ public class CrowdApplicantDetailActivity extends Activity {
 
 		@Override
 		public void onClick(View view) {
-			service.acceptApplication(crowd, applicant, new Registrant(
+			service.acceptApplication(crowd, applicant, new MessageListener(
 					mLocalHandler, ACCEPT_INVITATION_DONE, null));
 			mButtonLayout.setVisibility(View.GONE);
 			mNotesLayout.setVisibility(View.VISIBLE);
@@ -136,7 +136,7 @@ public class CrowdApplicantDetailActivity extends Activity {
 
 		@Override
 		public void onClick(View view) {
-			service.refuseApplication(crowd, applicant, "", new Registrant(
+			service.refuseApplication(crowd, applicant, "", new MessageListener(
 					mLocalHandler, REFUSE_INVITATION_DONE, null));
 			mButtonLayout.setVisibility(View.GONE);
 			mNotesLayout.setVisibility(View.VISIBLE);

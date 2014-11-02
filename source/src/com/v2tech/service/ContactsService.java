@@ -131,7 +131,7 @@ public class ContactsService extends AbstractHandler {
 	 * @param group
 	 * @param caller
 	 */
-	public void createGroup(ContactGroup group, Registrant caller) {
+	public void createGroup(ContactGroup group, MessageListener caller) {
 		if (!checkParamNull(caller, new Object[] { group })) {
 			return;
 		}
@@ -149,7 +149,7 @@ public class ContactsService extends AbstractHandler {
 	 * @param group
 	 * @param caller
 	 */
-	public void updateGroup(ContactGroup group, Registrant caller) {
+	public void updateGroup(ContactGroup group, MessageListener caller) {
 		if (!checkParamNull(caller, new Object[] { group })) {
 			return;
 		}
@@ -167,7 +167,7 @@ public class ContactsService extends AbstractHandler {
 	 * @param group
 	 * @param caller
 	 */
-	public void removeGroup(ContactGroup group, Registrant caller) {
+	public void removeGroup(ContactGroup group, MessageListener caller) {
 		if (!checkParamNull(caller, new Object[] { group })) {
 			return;
 		}
@@ -208,7 +208,7 @@ public class ContactsService extends AbstractHandler {
 	 * @param caller
 	 */
 	public void updateUserGroup(ContactGroup desGroup, ContactGroup srcGroup,
-			User user, Registrant caller) {
+			User user, MessageListener caller) {
 		if (!checkParamNull(caller, new Object[] { user })) {
 			return;
 		}

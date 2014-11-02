@@ -41,7 +41,7 @@ public class DeviceService extends AbstractHandler {
 	 * @see UserDeviceConfig
 	 */
 	public void requestOpenVideoDevice(UserDeviceConfig userDevice,
-			Registrant caller) {
+			MessageListener caller) {
 		if (userDevice == null) {
 			JNIResponse jniRes = new RequestOpenUserVideoDeviceResponse(0,
 					RequestConfCreateResponse.Result.INCORRECT_PAR);
@@ -80,7 +80,7 @@ public class DeviceService extends AbstractHandler {
 	 * @see UserDeviceConfig
 	 */
 	public void requestCloseVideoDevice(UserDeviceConfig userDevice,
-			Registrant caller) {
+			MessageListener caller) {
 		if (userDevice == null) {
 			JNIResponse jniRes = new RequestCloseUserVideoDeviceResponse(
 					System.currentTimeMillis() / 1000,
@@ -120,7 +120,7 @@ public class DeviceService extends AbstractHandler {
 	 * @see UserDeviceConfig
 	 */
 	public void requestOpenVideoDevice(Group group, UserDeviceConfig userDevice,
-			Registrant caller) {
+			MessageListener caller) {
 		if (userDevice == null) {
 			JNIResponse jniRes = new RequestOpenUserVideoDeviceResponse(0,
 					RequestConfCreateResponse.Result.INCORRECT_PAR);
@@ -161,7 +161,7 @@ public class DeviceService extends AbstractHandler {
 	 * @see UserDeviceConfig
 	 */
 	public void requestCloseVideoDevice(Group group, UserDeviceConfig userDevice,
-			Registrant caller) {
+			MessageListener caller) {
 		if (userDevice == null) {
 			JNIResponse jniRes = new RequestCloseUserVideoDeviceResponse(
 					System.currentTimeMillis() / 1000,
@@ -196,7 +196,7 @@ public class DeviceService extends AbstractHandler {
 	 *            if input is null, ignore response Message.object is
 	 *            {@link com.v2tech.service.jni.RequestUpdateCameraParametersResponse}
 	 */
-	public void updateCameraParameters(CameraConfiguration cc, Registrant caller) {
+	public void updateCameraParameters(CameraConfiguration cc, MessageListener caller) {
 		if (cc == null) {
 			JNIResponse jniRes = new RequestUpdateCameraParametersResponse(
 					null,

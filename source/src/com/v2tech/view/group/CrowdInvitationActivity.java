@@ -16,7 +16,7 @@ import android.widget.TextView;
 import com.v2tech.R;
 import com.v2tech.service.CrowdGroupService;
 import com.v2tech.service.GlobalHolder;
-import com.v2tech.service.Registrant;
+import com.v2tech.service.MessageListener;
 import com.v2tech.view.JNIService;
 import com.v2tech.view.PublicIntent;
 import com.v2tech.view.bo.ConversationNotificationObject;
@@ -214,7 +214,7 @@ public class CrowdInvitationActivity extends Activity {
 					return;
 				}
 				mState = State.UPDATING;
-				service.acceptInvitation(crowd, new Registrant(mLocalHandler,
+				service.acceptInvitation(crowd, new MessageListener(mLocalHandler,
 						ACCEPT_INVITATION_DONE, null));
 			}
 		}
@@ -263,7 +263,7 @@ public class CrowdInvitationActivity extends Activity {
 						return;
 					}
 					mState = State.UPDATING;
-					service.refuseInvitation(crowd, mReasonET.getEditableText().toString(), new Registrant(
+					service.refuseInvitation(crowd, mReasonET.getEditableText().toString(), new MessageListener(
 							mLocalHandler, REFUSE_INVITATION_DONE, null));
 				}
 				return;

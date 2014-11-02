@@ -37,7 +37,7 @@ import com.v2tech.service.AsyncResult;
 import com.v2tech.service.CrowdGroupService;
 import com.v2tech.service.FileOperationEnum;
 import com.v2tech.service.GlobalHolder;
-import com.v2tech.service.Registrant;
+import com.v2tech.service.MessageListener;
 import com.v2tech.service.jni.FileTransStatusIndication;
 import com.v2tech.service.jni.FileTransStatusIndication.FileTransProgressStatusIndication;
 import com.v2tech.service.jni.JNIResponse;
@@ -264,7 +264,7 @@ public class CrowdFilesActivity extends Activity {
 		else
 			showUploaded = false;
 
-		service.fetchGroupFiles(crowd, new Registrant(mLocalHandler,
+		service.fetchGroupFiles(crowd, new MessageListener(mLocalHandler,
 				FETCH_FILES_DONE, null));
 	}
 

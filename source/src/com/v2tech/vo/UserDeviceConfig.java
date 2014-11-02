@@ -121,6 +121,7 @@ public class UserDeviceConfig {
 			int mBusinessType, UserDeviceConfigType type) {
 		this.mUerID = mUerID;
 		this.mDeviceID = mDeviceID;
+		
 		this.mVP = mVP;
 		this.mBusinessType = mBusinessType;
 		this.type = type;

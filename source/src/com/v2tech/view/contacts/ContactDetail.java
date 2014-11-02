@@ -21,6 +21,7 @@ import android.os.Parcelable;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -41,7 +42,7 @@ import android.widget.Toast;
 import com.v2tech.R;
 import com.v2tech.service.BitmapManager;
 import com.v2tech.service.GlobalHolder;
-import com.v2tech.service.Registrant;
+import com.v2tech.service.MessageListener;
 import com.v2tech.service.UserService;
 import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.SPUtil;
@@ -560,8 +561,10 @@ public class ContactDetail extends Activity implements OnTouchListener {
 		UserDeviceConfig udc = GlobalHolder.getInstance().getUserDefaultDevice(
 				mUid);
 		if (udc != null) {
+			Log.i("temptag20141030 1","udc!=null device="+udc.getDeviceID());
 			iv.putExtra("device", udc.getDeviceID());
 		} else {
+			Log.i("temptag20141030 1","udc=null device=null");
 			iv.putExtra("device", "");
 		}
 
@@ -980,7 +983,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 			switch (msg.what) {
 			case UPDATE_USER_INFO:
 				gatherUserData();
-				us.updateUser(u, new Registrant(this, UPDATE_USER_INFO_DONE,
+				us.updateUser(u, new MessageListener(this, UPDATE_USER_INFO_DONE,
 						null));
 				isUpdating = false;
 				break;

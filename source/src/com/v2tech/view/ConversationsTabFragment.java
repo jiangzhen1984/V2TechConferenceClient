@@ -61,7 +61,7 @@ import com.v2tech.service.BitmapManager;
 import com.v2tech.service.ConferencMessageSyncService;
 import com.v2tech.service.ConferenceService;
 import com.v2tech.service.GlobalHolder;
-import com.v2tech.service.Registrant;
+import com.v2tech.service.MessageListener;
 import com.v2tech.service.jni.JNIResponse;
 import com.v2tech.service.jni.RequestEnterConfResponse;
 import com.v2tech.util.DateUtil;
@@ -2644,7 +2644,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 				mContext.startService(new Intent(mContext,
 						ConferencMessageSyncService.class));
 				cb.requestEnterConference(new Conference((Long) msg.obj),
-						new Registrant(this, REQUEST_ENTER_CONF_RESPONSE, null));
+						new MessageListener(this, REQUEST_ENTER_CONF_RESPONSE, null));
 				break;
 			case REQUEST_ENTER_CONF_RESPONSE:
 				if (mWaitingDialog != null && mWaitingDialog.isShowing()) {

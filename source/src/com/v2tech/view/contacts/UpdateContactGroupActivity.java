@@ -22,7 +22,7 @@ import android.widget.Toast;
 import com.v2tech.R;
 import com.v2tech.service.ContactsService;
 import com.v2tech.service.GlobalHolder;
-import com.v2tech.service.Registrant;
+import com.v2tech.service.MessageListener;
 import com.v2tech.service.jni.GroupServiceJNIResponse;
 import com.v2tech.view.PublicIntent;
 import com.v2tech.vo.ContactGroup;
@@ -195,7 +195,7 @@ public class UpdateContactGroupActivity extends Activity {
 				User user = GlobalHolder.getInstance()
 						.getUser(userId);
 				contactService.updateUserGroup((ContactGroup) desGroup,
-						(ContactGroup) srcGroup, user, new Registrant(mLocalHandler,
+						(ContactGroup) srcGroup, user, new MessageListener(mLocalHandler,
 								UPDATE_USER_GROUP_DONE, new LocalObject(user, srcGroup, desGroup)));
 
 			}

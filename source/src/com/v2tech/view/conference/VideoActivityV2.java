@@ -69,7 +69,7 @@ import com.v2tech.service.ConferencMessageSyncService;
 import com.v2tech.service.ConferenceService;
 import com.v2tech.service.DocumentService;
 import com.v2tech.service.GlobalHolder;
-import com.v2tech.service.Registrant;
+import com.v2tech.service.MessageListener;
 import com.v2tech.service.jni.PermissionUpdateIndication;
 import com.v2tech.util.DensityUtils;
 import com.v2tech.util.GlobalState;
@@ -2256,11 +2256,11 @@ public class VideoActivityV2 extends Activity {
 			case REQUEST_OPEN_OR_CLOSE_DEVICE:
 				if (msg.arg1 == TAG_CLOSE_DEVICE) {
 					cb.requestCloseVideoDevice(cg, (UserDeviceConfig) msg.obj,
-							new Registrant(mVideoHandler,
+							new MessageListener(mVideoHandler,
 									REQUEST_CLOSE_DEVICE_RESPONSE, null));
 				} else if (msg.arg1 == TAG_OPEN_DEVICE) {
 					cb.requestOpenVideoDevice(cg, (UserDeviceConfig) msg.obj,
-							new Registrant(mVideoHandler,
+							new MessageListener(mVideoHandler,
 									REQUEST_OPEN_DEVICE_RESPONSE, null));
 				}
 				break;

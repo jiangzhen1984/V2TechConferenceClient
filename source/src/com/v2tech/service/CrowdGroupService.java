@@ -78,7 +78,7 @@ public class CrowdGroupService extends AbstractHandler {
 	 *            object is {@link com.v2tech.service.jni.CreateCrowdResponse}
 	 */
 	public void createCrowdGroup(CrowdGroup crowd, List<User> invationUserList,
-			Registrant caller) {
+			MessageListener caller) {
 		StringBuffer sb = new StringBuffer();
 		sb.append("<userlist>");
 		for (User u : invationUserList) {
@@ -103,7 +103,7 @@ public class CrowdGroupService extends AbstractHandler {
 	 *            object is {@link com.v2tech.service.jni.JNIResponse}
 	 */
 	public void acceptApplication(CrowdGroup crowd, User applicant,
-			Registrant caller) {
+			MessageListener caller) {
 		if (!checkParamNull(caller, new Object[] { crowd, applicant })) {
 			return;
 		}
@@ -125,7 +125,7 @@ public class CrowdGroupService extends AbstractHandler {
 	 * @param group
 	 */
 	public void refuseApplication(CrowdGroup crowd, User applicant,
-			String reason, Registrant caller) {
+			String reason, MessageListener caller) {
 		if (!checkParamNull(caller, new Object[] { crowd, applicant })) {
 			return;
 		}
@@ -149,7 +149,7 @@ public class CrowdGroupService extends AbstractHandler {
 	 *            if input is null, ignore response Message. Response Message
 	 *            object is {@link com.v2tech.service.jni.JNIResponse}
 	 */
-	public void acceptInvitation(Crowd crowd, Registrant caller) {
+	public void acceptInvitation(Crowd crowd, MessageListener caller) {
 		if (!checkParamNull(caller, new Object[] { crowd })) {
 			return;
 		}
@@ -175,7 +175,7 @@ public class CrowdGroupService extends AbstractHandler {
 	 * @param reason
 	 * @param group
 	 */
-	public void refuseInvitation(Crowd crowd, String reason, Registrant caller) {
+	public void refuseInvitation(Crowd crowd, String reason, MessageListener caller) {
 		if (!checkParamNull(caller, new Object[] { crowd })) {
 			return;
 		}
@@ -206,7 +206,7 @@ public class CrowdGroupService extends AbstractHandler {
 	 * @param additional
 	 * @param caller
 	 */
-	public void applyCrowd(Crowd crowd, String additional, Registrant caller) {
+	public void applyCrowd(Crowd crowd, String additional, MessageListener caller) {
 		if (!checkParamNull(caller, new Object[] { crowd, additional })) {
 			return;
 		}
@@ -229,7 +229,7 @@ public class CrowdGroupService extends AbstractHandler {
 	 * @param crowd
 	 * @param caller
 	 */
-	public void updateCrowd(CrowdGroup crowd, Registrant caller) {
+	public void updateCrowd(CrowdGroup crowd, MessageListener caller) {
 		if (!checkParamNull(caller, crowd)) {
 			return;
 		}
@@ -252,7 +252,7 @@ public class CrowdGroupService extends AbstractHandler {
 	 * @param crowd
 	 * @param caller
 	 */
-	public void quitCrowd(CrowdGroup crowd, Registrant caller) {
+	public void quitCrowd(CrowdGroup crowd, MessageListener caller) {
 		if (!checkParamNull(caller, crowd)) {
 			return;
 		}
@@ -282,7 +282,7 @@ public class CrowdGroupService extends AbstractHandler {
 	 * @param caller
 	 */
 	public void inviteMember(CrowdGroup crowd, List<User> newMembers,
-			Registrant caller) {
+			MessageListener caller) {
 		if (!checkParamNull(caller, new Object[] { crowd, newMembers })) {
 			return;
 		}
@@ -318,7 +318,7 @@ public class CrowdGroupService extends AbstractHandler {
 	 * @param user
 	 * @param caller
 	 */
-	public void removeMember(CrowdGroup crowd, User member, Registrant caller) {
+	public void removeMember(CrowdGroup crowd, User member, MessageListener caller) {
 		if (!checkParamNull(caller, new Object[] { crowd, member })) {
 			return;
 		}
@@ -342,7 +342,7 @@ public class CrowdGroupService extends AbstractHandler {
 	 * @param caller
 	 *            return List<VFile>
 	 */
-	public void fetchGroupFiles(CrowdGroup crowd, Registrant caller) {
+	public void fetchGroupFiles(CrowdGroup crowd, MessageListener caller) {
 		if (!checkParamNull(caller, new Object[] { crowd })) {
 			return;
 		}
@@ -368,7 +368,7 @@ public class CrowdGroupService extends AbstractHandler {
 	 * @param caller
 	 */
 	public void removeGroupFiles(CrowdGroup crowd, List<VCrowdFile> files,
-			Registrant caller) {
+			MessageListener caller) {
 		if (!checkParamNull(caller, new Object[] { crowd, files })) {
 			return;
 		}
@@ -402,7 +402,7 @@ public class CrowdGroupService extends AbstractHandler {
 	 * @param caller
 	 */
 	public void handleCrowdFile(VCrowdFile vf, FileOperationEnum opt,
-			Registrant caller) {
+			MessageListener caller) {
 		if (!checkParamNull(caller, new Object[] { vf })) {
 			return;
 		}
@@ -462,7 +462,7 @@ public class CrowdGroupService extends AbstractHandler {
 	/**
 	 * Register listener for group file is removed.<br>
 	 * Notice: If current user send remove file command by
-	 * {@link #removeGroupFiles(CrowdGroup, List, Registrant)}, will not
+	 * {@link #removeGroupFiles(CrowdGroup, List, MessageListener)}, will not
 	 * notification
 	 * 
 	 * @param h

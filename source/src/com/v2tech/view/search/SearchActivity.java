@@ -14,7 +14,7 @@ import android.widget.Toast;
 
 import com.v2tech.R;
 import com.v2tech.service.CrowdGroupService;
-import com.v2tech.service.Registrant;
+import com.v2tech.service.MessageListener;
 import com.v2tech.service.SearchService;
 import com.v2tech.service.UserService;
 import com.v2tech.service.jni.JNIResponse;
@@ -127,7 +127,7 @@ public class SearchActivity extends Activity {
 									: SearchService.Type.MEMBER, mSearchedText
 									.getText().toString(), 1);
 
-			searchService.search(par, new Registrant(mLocalHandler,
+			searchService.search(par, new MessageListener(mLocalHandler,
 					SEARCH_DONE, null));
 
 		}

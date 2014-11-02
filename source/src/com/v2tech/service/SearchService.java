@@ -44,7 +44,7 @@ public class SearchService extends AbstractHandler {
 	 * @param par
 	 * @param caller
 	 */
-	public void search(SearchParameter par, Registrant caller) {
+	public void search(SearchParameter par, MessageListener caller) {
 		if (!this.checkParamNull(caller, par)) {
 			return;
 		}

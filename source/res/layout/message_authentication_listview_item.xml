@@ -33,7 +33,7 @@
             android:id="@+id/head_image"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/conference_icon_self" />
+            android:src="@drawable/avatar" />
 
         <ImageView
             android:id="@+id/group_list_conference_notificator"

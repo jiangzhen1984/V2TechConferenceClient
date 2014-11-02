@@ -77,7 +77,7 @@ import com.v2tech.service.ChatService;
 import com.v2tech.service.CrowdGroupService;
 import com.v2tech.service.FileOperationEnum;
 import com.v2tech.service.GlobalHolder;
-import com.v2tech.service.Registrant;
+import com.v2tech.service.MessageListener;
 import com.v2tech.service.jni.FileDownLoadErrorIndication;
 import com.v2tech.service.jni.FileTransCannelIndication;
 import com.v2tech.service.jni.FileTransStatusIndication;
@@ -2649,7 +2649,7 @@ public class ConversationActivity extends Activity {
 				}
 				break;
 			case SEND_MESSAGE:
-				mChat.sendVMessage((VMessage) msg.obj, new Registrant(this,
+				mChat.sendVMessage((VMessage) msg.obj, new MessageListener(this,
 						SEND_MESSAGE_DONE, null));
 				break;
 			case SEND_MESSAGE_ERROR:

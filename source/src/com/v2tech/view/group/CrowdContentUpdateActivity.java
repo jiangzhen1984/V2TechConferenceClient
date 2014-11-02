@@ -18,7 +18,7 @@ import com.V2.jni.util.V2Log;
 import com.v2tech.R;
 import com.v2tech.service.CrowdGroupService;
 import com.v2tech.service.GlobalHolder;
-import com.v2tech.service.Registrant;
+import com.v2tech.service.MessageListener;
 import com.v2tech.view.JNIService;
 import com.v2tech.vo.CrowdGroup;
 import com.v2tech.vo.Group.GroupType;
@@ -172,7 +172,7 @@ public class CrowdContentUpdateActivity extends Activity {
 				} else if (mType == UPDATE_TYPE_ANNOUNCEMENT) {
 					crowd.setAnnouncement(mContentET.getText().toString());
 				}
-				service.updateCrowd(crowd, new Registrant(mLocalHandler,
+				service.updateCrowd(crowd, new MessageListener(mLocalHandler,
 						REQUEST_UPDATE_CROWD_DONE, null));
 			}
 		}

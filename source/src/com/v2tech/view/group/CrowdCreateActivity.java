@@ -42,7 +42,7 @@ import android.widget.TextView;
 import com.v2tech.R;
 import com.v2tech.service.CrowdGroupService;
 import com.v2tech.service.GlobalHolder;
-import com.v2tech.service.Registrant;
+import com.v2tech.service.MessageListener;
 import com.v2tech.service.jni.CreateCrowdResponse;
 import com.v2tech.service.jni.JNIResponse;
 import com.v2tech.view.JNIService;
@@ -396,7 +396,7 @@ public class CrowdCreateActivity extends Activity {
 				}
 				
 				List<User> newMembers = new ArrayList<User>(mUserList);
-				cg.inviteMember(crowd, newMembers, new Registrant(
+				cg.inviteMember(crowd, newMembers, new MessageListener(
 						mLocalHandler, UPDATE_CROWD_RESPONSE, crowd));
 			} else {
 				CrowdGroup crowd = new CrowdGroup(0, mGroupTitleET.getText()
@@ -423,7 +423,7 @@ public class CrowdCreateActivity extends Activity {
 								R.string.notification_watiing_process), true);
 				
 				//Do not add userList to crowd, because this just invitation.
-				cg.createCrowdGroup(crowd, userList, new Registrant(mLocalHandler,
+				cg.createCrowdGroup(crowd, userList, new MessageListener(mLocalHandler,
 						CREATE_GROUP_MESSAGE, crowd));
 				view.setEnabled(false);
 			}
