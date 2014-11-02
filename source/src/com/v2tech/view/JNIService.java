@@ -709,6 +709,15 @@ public class JNIService extends Service {
 				}
 				// else
 				// sendBroadcast = false;
+				if (type == VMessageQualification.Type.CROWD_APPLICATION) {
+					((VMessageQualificationApplicationCrowd) crowdMsg)
+							.setApplyReason(reason);
+				} else if (type == VMessageQualification.Type.CROWD_INVITATION) {
+					((VMessageQualificationInvitationCrowd) crowdMsg)
+					.setRejectReason(reason);
+				} else {
+					throw new RuntimeException("Unkown type");
+				}
 				MessageBuilder.updateQualicationMessage(mContext, crowdMsg);
 			} else {
 				// Save message to database

@@ -271,13 +271,12 @@ public class MessageAuthenticationActivity extends Activity {
 								Intent i = new Intent();
 								i.setClass(MessageAuthenticationActivity.this,
 										CrowdApplicantDetailActivity.class);
-								i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 								i.putExtra("cid", amsg.getCrowdGroup()
 										.getmGId());
 								i.putExtra("aid", amsg.getApplicant()
 										.getmUserId());
 								i.putExtra("mid", amsg.getId());
-								mContext.startActivity(i);
+								startActivityForResult(i, AUTHENTICATION_RESULT);
 
 							}
 						}

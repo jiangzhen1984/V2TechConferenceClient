@@ -28,7 +28,7 @@
             android:padding="10dp"
             android:text="@string/crowd_detail_qulification_quit_button"
             android:visibility="gone" />
-        <TextView
+        <!-- <TextView
             android:id="@+id/pop_up_window_dissolution_crowd_item"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -37,7 +37,7 @@
             android:gravity="center"
             android:padding="10dp"
             android:text="@string/crowd_detail_qulification_dismiss_button"
-            android:visibility="gone" />
+            android:visibility="gone" /> -->
     </LinearLayout>
     <ImageView
         android:id="@+id/pop_up_arrow"

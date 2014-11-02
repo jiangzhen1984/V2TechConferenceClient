@@ -162,8 +162,12 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 	private ScrollItem verificationItem;
 	private ScrollItem voiceItem;
 
+	/**
+	 * The PopupWindow was showen when onItemlongClick was call..
+	 */
 	private PopupWindow mPopup;
-	
+	private TextView mPouupView = null;
+
 	private Object mLock = new Object();
 
 	@Override
@@ -404,7 +408,9 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 
 			char[] charSimpleArray = s.toString()
 					.toLowerCase(Locale.getDefault()).toCharArray();
-			if (charSimpleArray.length < 5) { // 搜字母查询
+			if (charSimpleArray.length < 5) {
+
+				// 搜字母查询
 				for (int i = startIndex; i < charSimpleArray.length; i++) {
 					if (isChineseWord(charSimpleArray[i])) {
 						V2Log.e(TAG, charSimpleArray[i] + " is Chinese");
@@ -1587,28 +1593,18 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 		mPopup.setFocusable(true);
 		mPopup.setTouchable(true);
 		mPopup.setOutsideTouchable(true);
-		
+
 		TextView tvItem = (TextView) popWindow
 				.findViewById(R.id.pop_up_window_item);
 		tvItem.setVisibility(View.GONE);
 
 		final Conversation cov = mConvList.get(currentPosition);
-		CrowdGroup cg = (CrowdGroup) GlobalHolder.getInstance().getGroupById(
-				GroupType.CHATING.intValue(), cov.getExtId());
-		View view = null;
-		if (cg.getOwnerUser().getmUserId() == GlobalHolder.getInstance()
-				.getCurrentUserId()) {
+		mPouupView = (TextView) popWindow
+				.findViewById(R.id.pop_up_window_quit_crowd_item);
 
-			view = popWindow
-					.findViewById(R.id.pop_up_window_dissolution_crowd_item);
-		} else {
-			view = popWindow
-					.findViewById(R.id.pop_up_window_quit_crowd_item);
-		}
-
-		if(!view.isShown())
-			view.setVisibility(View.VISIBLE);
-		view.setOnClickListener(new OnClickListener() {
+		if (!mPouupView.isShown())
+			mPouupView.setVisibility(View.VISIBLE);
+		mPouupView.setOnClickListener(new OnClickListener() {
 
 			@Override
 			public void onClick(View v) {
@@ -1635,6 +1631,16 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 		if (this.mPopup == null) {
 			initPopupWindow();
 		}
+
+		Conversation cov = mConvList.get(currentPosition);
+		CrowdGroup cg = (CrowdGroup) GlobalHolder.getInstance().getGroupById(
+				GroupType.CHATING.intValue(), cov.getExtId());
+		if (cg.getOwnerUser().getmUserId() == GlobalHolder.getInstance()
+				.getCurrentUserId())
+			mPouupView
+					.setText(R.string.crowd_detail_qulification_dismiss_button);
+		else
+			mPouupView.setText(R.string.crowd_detail_qulification_quit_button);
 
 		if (mPopup.getContentView().getWidth() <= 0
 				&& mPopup.getContentView() != null) {
@@ -1672,7 +1678,8 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 			return;
 		}
 		synchronized (mLock) {
-			//When request join conference response, mWaitingDialog will be null
+			// When request join conference response, mWaitingDialog will be
+			// null
 			if (mWaitingDialog != null) {
 				return;
 			}
@@ -1681,7 +1688,8 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 					"",
 					mContext.getResources().getString(
 							R.string.requesting_enter_conference), true);
-			Message.obtain(this.mHandler, REQUEST_ENTER_CONF, gid).sendToTarget();
+			Message.obtain(this.mHandler, REQUEST_ENTER_CONF, gid)
+					.sendToTarget();
 		}
 
 	}
@@ -2038,11 +2046,11 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 								verification.setMsg(targetContent);
 								verificationMessageItemLayout.update();
 								adapter.notifyDataSetChanged();
-//								V2Log.w(TAG,
-//										"Successfully updated verification the user infos , user name is :"
-//												+ verification.getUser()
-//														.getName()
-//												+ " content : " + targetContent);
+								// V2Log.w(TAG,
+								// "Successfully updated verification the user infos , user name is :"
+								// + verification.getUser()
+								// .getName()
+								// + " content : " + targetContent);
 							}
 						}
 						break;

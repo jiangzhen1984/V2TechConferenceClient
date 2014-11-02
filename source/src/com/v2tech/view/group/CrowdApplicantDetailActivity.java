@@ -1,6 +1,8 @@
 package com.v2tech.view.group;
 
 import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -13,6 +15,7 @@ import com.v2tech.R;
 import com.v2tech.service.CrowdGroupService;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.service.Registrant;
+import com.v2tech.view.conversation.MessageAuthenticationActivity;
 import com.v2tech.view.conversation.MessageBuilder;
 import com.v2tech.vo.CrowdGroup;
 import com.v2tech.vo.User;
@@ -32,6 +35,8 @@ public class CrowdApplicantDetailActivity extends Activity {
 	private final static int ACCEPT_INVITATION_DONE = 1;
 	private final static int REFUSE_INVITATION_DONE = 2;
 
+	private Context mContext;
+	
 	private View mReturnButton;
 	private View mAcceptButton;
 	private View mDeclineButton;
@@ -45,13 +50,13 @@ public class CrowdApplicantDetailActivity extends Activity {
 	private User applicant;
 	private VMessageQualificationApplicationCrowd msg;
 	private CrowdGroupService service = new CrowdGroupService();
-
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
 		setContentView(R.layout.crowd_applicant_detail);
-
+		mContext = this;
 		mAcceptButton = findViewById(R.id.crowd_application_accept_button);
 		mAcceptButton.setOnClickListener(mAcceptButtonListener);
 		mDeclineButton = findViewById(R.id.crowd_application_decline_button);
@@ -94,12 +99,22 @@ public class CrowdApplicantDetailActivity extends Activity {
 			((TextView)findViewById(R.id.crowd_application_additional_msg)).setText("附加消息: 无");
 		else
 			((TextView)findViewById(R.id.crowd_application_additional_msg)).setText("附加消息: " + msg.getApplyReason());
+		
+		if (msg.getQualState() == VMessageQualification.QualificationState.ACCEPTED) {
+			mButtonLayout.setVisibility(View.GONE);
+			mNotesLayout.setVisibility(View.VISIBLE);
+			mNotesTV.setText(R.string.crowd_invitation_accept_notes);
+		} else if (msg.getQualState() == VMessageQualification.QualificationState.REJECT) {
+			mButtonLayout.setVisibility(View.GONE);
+			mNotesLayout.setVisibility(View.VISIBLE);
+			mNotesTV.setText(R.string.crowd_invitation_reject_notes);
+		}
 	}
 
 	private void handleAcceptDone() {
 		crowd.addUserToGroup(applicant);
 	}
-
+	
 	private OnClickListener mAcceptButtonListener = new OnClickListener() {
 
 		@Override
@@ -109,6 +124,10 @@ public class CrowdApplicantDetailActivity extends Activity {
 			mButtonLayout.setVisibility(View.GONE);
 			mNotesLayout.setVisibility(View.VISIBLE);
 			mNotesTV.setText(R.string.crowd_application_accepted);
+			
+			msg.setReadState(VMessageQualification.ReadState.READ);
+			msg.setQualState(VMessageQualification.QualificationState.ACCEPTED);
+			MessageBuilder.updateQualicationMessage(mContext, msg);
 		}
 
 	};
@@ -121,7 +140,11 @@ public class CrowdApplicantDetailActivity extends Activity {
 					mLocalHandler, REFUSE_INVITATION_DONE, null));
 			mButtonLayout.setVisibility(View.GONE);
 			mNotesLayout.setVisibility(View.VISIBLE);
-			mNotesTV.setText(R.string.crowd_application_accepted);
+			mNotesTV.setText(R.string.crowd_application_rejected);
+			
+			msg.setReadState(VMessageQualification.ReadState.READ);
+			msg.setQualState(VMessageQualification.QualificationState.REJECT);
+			MessageBuilder.updateQualicationMessage(mContext, msg);
 		}
 
 	};
@@ -130,6 +153,12 @@ public class CrowdApplicantDetailActivity extends Activity {
 
 		@Override
 		public void onClick(View view) {
+			Intent intent = new Intent(mContext,
+					MessageAuthenticationActivity.class);
+			intent.putExtra("qualificationID", msg.getId());
+			intent.putExtra("qualState", msg.getQualState());
+			setResult(4 , intent);
+			
 			onBackPressed();
 		}
 
@@ -144,11 +173,11 @@ public class CrowdApplicantDetailActivity extends Activity {
 				handleAcceptDone();
 				break;
 			case REFUSE_INVITATION_DONE:
+//				handleDeclineDone();
 				break;
 
 			}
 		}
-
 	};
 
 }

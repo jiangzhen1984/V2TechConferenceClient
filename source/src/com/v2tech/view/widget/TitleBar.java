@@ -6,9 +6,11 @@ import java.util.List;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.os.Build;
 import android.text.TextWatcher;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
@@ -89,11 +91,15 @@ public class TitleBar {
 		
 		// Initialise popupWindow padding
 		Configuration conf = context.getResources().getConfiguration();
-		if (conf.orientation == Configuration.ORIENTATION_LANDSCAPE || conf.densityDpi <= 240) {
+		int landscape = ((Activity)context).getRequestedOrientation();
+		if (landscape == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE) {
+			padding = DensityUtils.dip2px(context, 2);
+		} else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1 && conf.densityDpi < 240) {
 			padding = DensityUtils.dip2px(context, 2);
 		} else {
 			padding = DensityUtils.dip2px(context, 12);
 		}
+		
 	}
 
 	public void updateTitle(String title) {
