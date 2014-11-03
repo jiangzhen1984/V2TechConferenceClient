@@ -318,6 +318,7 @@ public class CrowdFilesActivity extends Activity {
 		}
 		if (ind.indType == FileTransStatusIndication.IND_TYPE_PROGRESS) {
 			FileTransProgressStatusIndication progress = (FileTransProgressStatusIndication) ind;
+			V2Log.e(" receive progress upload file state.... normal");
 			if (progress.progressType == FileTransStatusIndication.IND_TYPE_PROGRESS_END) {
 				file.setProceedSize(file.getSize());
 			} else {
@@ -384,6 +385,7 @@ public class CrowdFilesActivity extends Activity {
 	private void handleNewFileEvent(List<VCrowdFile> files) {
 		for (VCrowdFile vCrowdFile : files) {
 			mFiles.add(0, vCrowdFile);
+			mFileMap.put(vCrowdFile.getId(), vCrowdFile);
 		}
 		adapter.notifyDataSetChanged();
 	}
@@ -893,7 +895,7 @@ public class CrowdFilesActivity extends Activity {
 				item.mFileText.setVisibility(View.GONE);
 				item.mFileButton.setVisibility(View.GONE);
 			} else {
-				item.mFileDeleteButton.setVisibility(View.GONE);
+				item.mFileDeleteButton.setVisibility(View.INVISIBLE);
 			}
 
 			if (fs == VFile.State.DOWNLOADING

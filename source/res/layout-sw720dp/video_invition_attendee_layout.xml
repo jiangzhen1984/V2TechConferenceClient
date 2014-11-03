@@ -84,9 +84,9 @@
             android:cacheColorHint="#00000000"
             android:divider="@null"
             android:fadingEdge="none"
-            android:listSelector="#00000000"
             android:focusable="false"
-            android:scrollingCache="false">
+            android:listSelector="#00000000"
+            android:scrollingCache="false" >
         </com.v2tech.view.widget.GroupListView>
         <LinearLayout
             android:layout_width="1dp"
@@ -174,22 +174,16 @@
                     </EditText>
                 </LinearLayout>
             </LinearLayout>
-            <ScrollView
-                android:id="@+id/conf_create_scroll_view"
+            <ListView
+                android:id="@+id/conference_attendee_container"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_above="@+id/LinearLayout2"
                 android:layout_below="@+id/LinearLayout1"
                 android:layout_margin="15dp"
-                android:background="@drawable/rounded_corners_create_conf_box_bg" >
-                <LinearLayout
-                    android:id="@+id/conference_attendee_container"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical"
-                    android:tag="vertical" >
-                </LinearLayout>
-            </ScrollView>
+                android:background="@drawable/rounded_corners_create_conf_box_bg"
+                android:divider="#f2f2f2" >
+            </ListView>
             <LinearLayout
                 android:id="@+id/LinearLayout2"
                 android:layout_width="match_parent"

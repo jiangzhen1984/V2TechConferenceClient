@@ -64,7 +64,7 @@ public class MainApplication extends Application {
 	public void onCreate() {
 		super.onCreate();
 
-		V2Log.isDebuggable = (0 != (getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE));
+		V2Log.isDebuggable = (0 == (getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE));
 		if (!V2Log.isDebuggable) {
 			CrashHandler crashHandler = CrashHandler.getInstance();
 			crashHandler.init(getApplicationContext());

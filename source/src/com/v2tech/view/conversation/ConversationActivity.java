@@ -1,5 +1,5 @@
-
 package com.v2tech.view.conversation;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -182,8 +182,8 @@ public class ConversationActivity extends Activity {
 
 	private MediaRecorder mRecorder = null;
 	private ArrayAACPlayer mAACPlayer = null;
-	
-	//Use local AAC encoder;
+
+	// Use local AAC encoder;
 	private V2Encoder mAacEncoder;
 
 	private MessageReceiver receiver = new MessageReceiver();
@@ -219,6 +219,13 @@ public class ConversationActivity extends Activity {
 	private boolean isReLoading; // 用于onNewIntent判断是否需要重新加载界面聊天数据
 	private boolean sendFile; // 用于从个人信息中传递过来的文件，只发送一次
 
+	/**
+	 * Record Audio item flags  
+	 */
+	private VMessage playingAudioMessage;
+	private MessageBodyView playingAudioBodyView;
+	private boolean stopOhterAudio;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -248,8 +255,8 @@ public class ConversationActivity extends Activity {
 				avatarChangedListener);
 		mChat.registerFileTransStatusListener(this.lh, FILE_STATUS_LISTENER,
 				null);
-		mGroupChat.registerFileTransStatusListener(this.lh, FILE_STATUS_LISTENER,
-				null);
+		mGroupChat.registerFileTransStatusListener(this.lh,
+				FILE_STATUS_LISTENER, null);
 		notificateConversationUpdate(false, cov.getExtId());
 		// Start animation
 		this.overridePendingTransition(R.animator.nonam_scale_center_0_100,
@@ -478,21 +485,23 @@ public class ConversationActivity extends Activity {
 	}
 
 	private void checkMessageEmpty() {
-		
+
 		boolean isDelete = false;
 		ConversationNotificationObject obj = null;
-		if (currentConversationViewType == V2GlobalEnum.GROUP_TYPE_USER){
-			isDelete = MessageLoader.getNewestMessage(mContext, user1Id, user2Id) == null ? true : false;
+		if (currentConversationViewType == V2GlobalEnum.GROUP_TYPE_USER) {
+			isDelete = MessageLoader.getNewestMessage(mContext, user1Id,
+					user2Id) == null ? true : false;
 			obj = new ConversationNotificationObject(Conversation.TYPE_CONTACT,
 					user2Id);
-		}
-		else if(currentConversationViewType == V2GlobalEnum.GROUP_TYPE_CROWD){
-			isDelete = MessageLoader.getNewestGroupMessage(mContext, V2GlobalEnum.GROUP_TYPE_CROWD, groupId) == null ? true : false;
+		} else if (currentConversationViewType == V2GlobalEnum.GROUP_TYPE_CROWD) {
+			isDelete = MessageLoader.getNewestGroupMessage(mContext,
+					V2GlobalEnum.GROUP_TYPE_CROWD, groupId) == null ? true
+					: false;
 			obj = new ConversationNotificationObject(Conversation.TYPE_CONTACT,
 					groupId);
 		}
-		
-		if(isDelete){
+
+		if (isDelete) {
 			Intent i = new Intent(PublicIntent.REQUEST_UPDATE_CONVERSATION);
 			i.addCategory(PublicIntent.DEFAULT_CATEGORY);
 			i.putExtra("obj", obj);
@@ -547,14 +556,15 @@ public class ConversationActivity extends Activity {
 			cov = (ConversationNotificationObject) bundle.get("obj");
 			if (cov == null)
 				cov = getIntent().getParcelableExtra("obj");
-		} 
-			
-		if (bundle == null || cov == null){
-			V2Log.e(TAG, "start activity was woring , please check given ConversationNotificationObject");
+		}
+
+		if (bundle == null || cov == null) {
+			V2Log.e(TAG,
+					"start activity was woring , please check given ConversationNotificationObject");
 			cov = new ConversationNotificationObject(Conversation.TYPE_CONTACT,
 					1);
 		}
-		
+
 		messageAllID = new SparseArray<VMessage>();
 		initConversationInfos();
 	}
@@ -571,8 +581,8 @@ public class ConversationActivity extends Activity {
 			if (remote == null) {
 				remote = new User(user2Id);
 			}
-			
-			if(!TextUtils.isEmpty(remote.getNickName()))
+
+			if (!TextUtils.isEmpty(remote.getNickName()))
 				mUserTitleTV.setText(remote.getNickName());
 			else
 				mUserTitleTV.setText(remote.getName());
@@ -638,28 +648,31 @@ public class ConversationActivity extends Activity {
 
 	}
 
-	private VMessage currentPlayed;
-
 	private boolean playNextUnreadMessage() {
 		boolean found = false;
 		for (int i = 0; i < messageArray.size(); i++) {
 			CommonAdapterItemWrapper wrapper = messageArray.get(i);
 			VMessage vm = (VMessage) wrapper.getItemObject();
-			if (vm == currentPlayed) {
+			if (vm.getUUID().equals(playingAudioMessage.getUUID())) {
 				found = true;
 				continue;
 			}
 
 			if (found) {
+				V2Log.d(TAG, "start palying next aduio item , id is : " + vm.getId());
 				List<VMessageAudioItem> items = vm.getAudioItems();
 				if (items.size() > 0
 						&& items.get(0).getState() == VMessageAbstractItem.STATE_UNREAD) {
 					this.scrollToPos(i);
+					MessageBodyView foundView = (MessageBodyView) wrapper
+							.getView();
+					if(foundView == null){
+						V2Log.d(TAG, "palying next aduio item failed , view is null , id is : " + vm.getId());
+						return false;
+					}
 					VMessageAudioItem vMessageAudioItem = items.get(0);
-					listener.requestPlayAudio(null, vm, vMessageAudioItem);
-					((MessageBodyView) wrapper.getView()).updateUnreadFlag(
-							false, vMessageAudioItem);
-					((MessageBodyView) wrapper.getView()).startVoiceAnimation();
+					listener.requestPlayAudio(foundView, vm, vMessageAudioItem);
+					foundView.updateUnreadFlag(false, vMessageAudioItem);
 					return true;
 				}
 			}
@@ -672,20 +685,19 @@ public class ConversationActivity extends Activity {
 
 	private synchronized boolean startPlaying(String fileName) {
 
-//		mAACPlayer = new AACPlayer(fileName);
-//		try {
-//			if (currentPlayedStream != null) {
-//				currentPlayedStream.close();
-//			}
-//			// currentPlayedStream = new FileInputStream(new File(fileName));
-//			mAACPlayer.play();
-//		} catch (FileNotFoundException e) {
-//			e.printStackTrace();
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		}
-		
-		
+		// mAACPlayer = new AACPlayer(fileName);
+		// try {
+		// if (currentPlayedStream != null) {
+		// currentPlayedStream.close();
+		// }
+		// // currentPlayedStream = new FileInputStream(new File(fileName));
+		// mAACPlayer.play();
+		// } catch (FileNotFoundException e) {
+		// e.printStackTrace();
+		// } catch (Exception e) {
+		// e.printStackTrace();
+		// }
+
 		mAACPlayer = new ArrayAACPlayer(
 				ArrayDecoder.create(Decoder.DECODER_FAAD2), mAACPlayerCallback,
 				AACPlayer.DEFAULT_AUDIO_BUFFER_CAPACITY_MS,
@@ -701,8 +713,7 @@ public class ConversationActivity extends Activity {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
-		
+
 		return true;
 	}
 
@@ -722,7 +733,7 @@ public class ConversationActivity extends Activity {
 
 	private void releasePlayer() {
 		if (mAACPlayer != null) {
-			//mAACPlayer.release();
+			// mAACPlayer.release();
 			mAACPlayer.stop();
 			mAACPlayer = null;
 		}
@@ -824,10 +835,10 @@ public class ConversationActivity extends Activity {
 	 */
 	private boolean startReocrding(String filePath) {
 
-//		mAacEncoder = new AACEncoder(filePath);
-//		mAacEncoder.start();
-//		return true;
-		
+		// mAacEncoder = new AACEncoder(filePath);
+		// mAacEncoder.start();
+		// return true;
+
 		mRecorder = new MediaRecorder();
 		mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
 		mRecorder.setOutputFormat(MediaRecorder.OutputFormat.AAC_ADTS);
@@ -850,24 +861,24 @@ public class ConversationActivity extends Activity {
 			return false;
 		}
 		return true;
-		
+
 	}
 
 	private void stopRecording() {
-//		mAacEncoder.stop();
-//		//FIXME should delay some millicseconds 
-//		if (mAacEncoder.getState() != MediaState.NORMAL
-//				&& mAacEncoder.getState() != MediaState.STOPPED) {
-//			V2Log.e("=========recording file error " +mAacEncoder.getState());
-//			
-//		}
-//		mAacEncoder.release();
-		
+		// mAacEncoder.stop();
+		// //FIXME should delay some millicseconds
+		// if (mAacEncoder.getState() != MediaState.NORMAL
+		// && mAacEncoder.getState() != MediaState.STOPPED) {
+		// V2Log.e("=========recording file error " +mAacEncoder.getState());
+		//
+		// }
+		// mAacEncoder.release();
+
 		mRecorder.stop();
 		mRecorder.reset();
 		mRecorder.release();
 		mRecorder = null;
-		
+
 	}
 
 	private void cleanRangeBitmapCache(int before, int after) {
@@ -930,24 +941,16 @@ public class ConversationActivity extends Activity {
 
 		@Override
 		public void playerStarted() {
-			currentPlayed.getAudioItems().get(0).setPlaying(true);
+			playingAudioMessage.getAudioItems().get(0).setPlaying(true);
 			runOnUiThread(new Runnable() {
-
+				
 				@Override
 				public void run() {
-
-					for (int i = 0; i < messageArray.size(); i++) {
-						CommonAdapterItemWrapper wrapper = messageArray.get(i);
-						VMessage vm = (VMessage) wrapper.getItemObject();
-						if (vm == currentPlayed) {
-							((MessageBodyView) wrapper.getView())
-									.startVoiceAnimation();
-						}
-					}
+					playingAudioBodyView.startVoiceAnimation();					
 				}
 			});
-			V2Log.i(TAG,
-					"更改正在播放的audioItem标识为true , id is ：" + currentPlayed.getId());
+			V2Log.i(TAG, "更改正在播放的audioItem标识为true , id is ："
+					+ playingAudioMessage.getId());
 		}
 
 		@Override
@@ -962,31 +965,23 @@ public class ConversationActivity extends Activity {
 		@Override
 		public synchronized void playerStopped(int perf) {
 
-			if (currentFlag) {
-				currentFlag = false;
+			if (stopOhterAudio) {
+				stopOhterAudio = false;
 				return;
 			}
 
-			if (currentPlayed != null
-					&& currentPlayed.getAudioItems().size() > 0) {
-				currentPlayed.getAudioItems().get(0).setPlaying(false);
+			if (playingAudioMessage != null
+					&& playingAudioMessage.getAudioItems().size() > 0) {
+				playingAudioMessage.getAudioItems().get(0).setPlaying(false);
 				runOnUiThread(new Runnable() {
-
+					
 					@Override
 					public void run() {
-
-						for (int i = 0; i < messageArray.size(); i++) {
-							CommonAdapterItemWrapper wrapper = messageArray
-									.get(i);
-							VMessage vm = (VMessage) wrapper.getItemObject();
-							if (vm == currentPlayed) {
-								((MessageBodyView) wrapper.getView())
-										.stopVoiceAnimation();
-							}
-						}
+						playingAudioBodyView.stopVoiceAnimation();
 					}
 				});
-				V2Log.i(TAG, "设置当前audio正在播放标识 false：" + currentPlayed.getId());
+				V2Log.i(TAG,
+						"更改正在播放的audioItem标识为false , id is ：" + playingAudioMessage.getId() + " playing over!");
 			}
 			// Call in main thread
 			Message.obtain(lh, PLAY_NEXT_UNREAD_MESSAGE).sendToTarget();
@@ -996,8 +991,8 @@ public class ConversationActivity extends Activity {
 		@Override
 		public void playerException(Throwable t) {
 			playerStopped(0);
-			if (currentPlayed != null) {
-				currentPlayed.getAudioItems().get(0).setPlaying(false);
+			if (playingAudioMessage != null) {
+				playingAudioMessage.getAudioItems().get(0).setPlaying(false);
 			}
 		}
 
@@ -1606,34 +1601,34 @@ public class ConversationActivity extends Activity {
 
 				switch (currentConversationViewType) {
 				case V2GlobalEnum.GROUP_TYPE_CROWD:
-					
+
 					for (FileInfoBean bean : mCheckedList) {
 						if (bean == null || TextUtils.isEmpty(bean.filePath))
 							continue;
-						
-						VMessage vm = MessageBuilder.buildFileMessage(cov.getType(), groupId,
-								local, remote, bean);
-						
+
+						VMessage vm = MessageBuilder.buildFileMessage(
+								cov.getType(), groupId, local, remote, bean);
+
 						// // Save message
 						vm.setmXmlDatas(vm.toXml());
 						vm.setDate(new Date(GlobalConfig.getGlobalServerTime()));
 
 						MessageBuilder.saveMessage(this, vm);
 						MessageBuilder.saveFileVMessage(this, vm);
-						
+
 						addMessageToContainer(vm);
 						// send notification
 						notificateConversationUpdate(true, vm.getId());
 					}
-					
+
 					Intent intent = new Intent(this, FileService.class);
 					intent.putExtra("gid", groupId);
 					intent.putParcelableArrayListExtra("uploads", mCheckedList);
 					startService(intent);
 					break;
 				case V2GlobalEnum.GROUP_TYPE_USER:
-						startSendMoreFile();
-						mCheckedList = null;
+					startSendMoreFile();
+					mCheckedList = null;
 					break;
 				}
 			}
@@ -1790,16 +1785,17 @@ public class ConversationActivity extends Activity {
 		// Send message to server
 		sendMessageToRemote(vm);
 	}
-	
+
 	private void sendMessageToRemote(VMessage vm) {
 		sendMessageToRemote(vm, true);
 	}
-	
 
 	/**
 	 * send chat message to remote
-	 * @param vm 
-	 * @param isFresh 是否通知ConversationTabFragment更新
+	 * 
+	 * @param vm
+	 * @param isFresh
+	 *            是否通知ConversationTabFragment更新
 	 */
 	private void sendMessageToRemote(VMessage vm, boolean isFresh) {
 		// // Save message
@@ -1809,16 +1805,16 @@ public class ConversationActivity extends Activity {
 		MessageBuilder.saveMessage(this, vm);
 		MessageBuilder.saveFileVMessage(this, vm);
 		MessageBuilder.saveBinaryVMessage(this, vm);
-		
+
 		Message.obtain(lh, SEND_MESSAGE, vm).sendToTarget();
 		addMessageToContainer(vm);
 		// send notification
 		notificateConversationUpdate(isFresh, vm.getId());
 	}
-	
+
 	/**
-	 * FIXME optimize code
-	 * 去除IOS自带表情
+	 * FIXME optimize code 去除IOS自带表情
+	 * 
 	 * @param content
 	 * @return
 	 */
@@ -1927,7 +1923,6 @@ public class ConversationActivity extends Activity {
 		}
 
 	};
-	private boolean currentFlag;
 
 	private MessageBodyView.ClickListener listener = new MessageBodyView.ClickListener() {
 
@@ -1968,9 +1963,17 @@ public class ConversationActivity extends Activity {
 		@Override
 		public void requestPlayAudio(View v, VMessage vm, VMessageAudioItem vai) {
 			if (vai != null && vai.getAudioFilePath() != null) {
-				currentPlayed = vm;
+				playingAudioMessage = vm;
+				for (int i = 0; i < messageArray.size(); i++) {
+					CommonAdapterItemWrapper wrapper = messageArray.get(i);
+					VMessage tempVm = (VMessage) wrapper.getItemObject();
+					if (tempVm.getUUID().equals(playingAudioMessage.getUUID())) {
+						playingAudioBodyView = (MessageBodyView) wrapper
+								.getView();
+					}
+				}
 				V2Log.i(TAG, "start play , currentPlayingAudio id is : "
-						+ currentPlayed.getId());
+						+ playingAudioMessage.getId());
 				startPlaying(vai.getAudioFilePath());
 			}
 		}
@@ -2023,7 +2026,7 @@ public class ConversationActivity extends Activity {
 		public void requestStopAudio(View v, VMessage vm, VMessageAudioItem vai) {
 			V2Log.i(TAG,
 					"request current playing audioItem 停止 , id is ："
-							+ vai.getId());
+							+ vm.getId());
 			vai.setPlaying(false);
 			stopPlaying();
 		}
@@ -2082,34 +2085,22 @@ public class ConversationActivity extends Activity {
 
 		@Override
 		public void requestStopOtherAudio(VMessage vm) {
-			if (currentPlayed == null || currentPlayed.getId() == vm.getId()) {
+			if (playingAudioMessage == null
+					|| playingAudioMessage.getId() == vm.getId()) {
 				return;
 			}
-			V2Log.i(TAG,
-					"停止了当前正在播放的currentPlayingAudio:--" + currentPlayed.getId());
-			currentFlag = true;
+			V2Log.i(TAG, "停止了当前正在播放的currentPlayingAudio:--"
+					+ playingAudioMessage.getId());
+			playingAudioBodyView.stopVoiceAnimation();
+			stopOhterAudio = true;
 			stopCurrentAudioPlaying();
 		}
 	};
 
 	protected void stopCurrentAudioPlaying() {
-
-		if (currentPlayed != null && currentPlayed.getAudioItems().size() > 0) {
-			currentPlayed.getAudioItems().get(0).setPlaying(false);
-			runOnUiThread(new Runnable() {
-
-				@Override
-				public void run() {
-					for (int i = 0; i < messageArray.size(); i++) {
-						CommonAdapterItemWrapper wrapper = messageArray.get(i);
-						VMessage vm = (VMessage) wrapper.getItemObject();
-						if (vm == currentPlayed) {
-							((MessageBodyView) wrapper.getView())
-									.stopVoiceAnimation();
-						}
-					}
-				}
-			});
+		if (playingAudioMessage != null
+				&& playingAudioMessage.getAudioItems().size() > 0) {
+			playingAudioMessage.getAudioItems().get(0).setPlaying(false);
 			stopPlaying();
 		}
 	}
@@ -2163,7 +2154,7 @@ public class ConversationActivity extends Activity {
 						.getGroupId() == 0) || (m.getGroupId() != this.groupId)) {
 			return false;
 		}
-		
+
 		judgeShouldShowTime(m);
 		MessageBodyView mv = new MessageBodyView(this, m, m.isShowTime());
 		mv.setCallback(listener);
@@ -2186,14 +2177,17 @@ public class ConversationActivity extends Activity {
 			VMessageAdater va = (VMessageAdater) messageArray.get(i);
 			VMessage message = (VMessage) va.getItemObject();
 			if (vm.getId() == message.getId()) {
-				if(message.getImageItems().size() >= 0)
+				if (message.getImageItems().size() >= 0)
 					va.setView(null);
 				messageArray.remove(i);
 				MessageLoader.deleteMessage(mContext, vm);
-				List<VMessage> messagePages = MessageLoader.loadGroupMessageByPage(mContext,
-						Conversation.TYPE_GROUP, groupId, 1, messageArray.size());
-				if(messagePages != null && messagePages.size() > 0)
-					messageArray.add(0 , new VMessageAdater(messagePages.get(0)));
+				List<VMessage> messagePages = MessageLoader
+						.loadGroupMessageByPage(mContext,
+								Conversation.TYPE_GROUP, groupId, 1,
+								messageArray.size());
+				if (messagePages != null && messagePages.size() > 0)
+					messageArray
+							.add(0, new VMessageAdater(messagePages.get(0)));
 				V2Log.d(TAG, "现在集合长度：" + messageArray.size());
 				return true;
 			}
@@ -2266,20 +2260,20 @@ public class ConversationActivity extends Activity {
 			}
 		}
 	}
-	
+
 	/**
 	 * update all sending or downloading file state to failed..
 	 */
-	public void executeUpdateFileState(){
-		
-		if(messageArray == null){
-			V2Log.e(TAG, "executeUpdateFileState is failed ... because messageArray is null");
-			return ;
+	public void executeUpdateFileState() {
+
+		if (messageArray == null) {
+			V2Log.e(TAG,
+					"executeUpdateFileState is failed ... because messageArray is null");
+			return;
 		}
-			
+
 		for (int i = 0; i < messageArray.size(); i++) {
-			VMessage vm = (VMessage) messageArray.get(i)
-					.getItemObject();
+			VMessage vm = (VMessage) messageArray.get(i).getItemObject();
 			if (vm.getFileItems().size() > 0) {
 				List<VMessageFileItem> fileItems = vm.getFileItems();
 				for (int j = 0; j < fileItems.size(); j++) {
@@ -2288,22 +2282,22 @@ public class ConversationActivity extends Activity {
 					case VMessageAbstractItem.STATE_FILE_DOWNLOADING:
 					case VMessageAbstractItem.STATE_FILE_PAUSED_DOWNLOADING:
 						item.setState(VMessageFileItem.STATE_FILE_DOWNLOADED_FALIED);
-						MessageBuilder.updateVMessageItemToSentFalied(
-								mContext, vm);
+						MessageBuilder.updateVMessageItemToSentFalied(mContext,
+								vm);
 						break;
 					case VMessageAbstractItem.STATE_FILE_SENDING:
 					case VMessageAbstractItem.STATE_FILE_PAUSED_SENDING:
 						item.setState(VMessageFileItem.STATE_FILE_SENT_FALIED);
-						MessageBuilder.updateVMessageItemToSentFalied(
-								mContext, vm);
+						MessageBuilder.updateVMessageItemToSentFalied(mContext,
+								vm);
 						break;
 					default:
 						break;
 					}
-					
-					if(!isStopped)
-					((MessageBodyView) messageArray.get(i)
-							.getView()).updateView(item);
+
+					if (!isStopped)
+						((MessageBodyView) messageArray.get(i).getView())
+								.updateView(item);
 				}
 			}
 		}
@@ -2404,12 +2398,12 @@ public class ConversationActivity extends Activity {
 
 	private Runnable mUpdateMicStatusTimer = new Runnable() {
 		public void run() {
-			  int ratio = mRecorder.getMaxAmplitude() / 600;
+			int ratio = mRecorder.getMaxAmplitude() / 600;
 			int db = 0;// 分贝
 			if (ratio > 1)
 				db = (int) (20 * Math.log10(ratio));
 
-//			int db = (int)mAacEncoder.getDB();
+			// int db = (int)mAacEncoder.getDB();
 			updateVoiceVolume(db / 4);
 
 			lh.postDelayed(mUpdateMicStatusTimer, 200);
@@ -2552,10 +2546,11 @@ public class ConversationActivity extends Activity {
 					for (FileJNIObject fileJNIObject : list) {
 						User user = GlobalHolder.getInstance().getUser(
 								list.get(0).user.uid);
-						VMessage vm = new VMessage(cov.getType(), groupId, user,
-								null, new Date(GlobalConfig.getGlobalServerTime()));
+						VMessage vm = new VMessage(cov.getType(), groupId,
+								user, null, new Date(
+										GlobalConfig.getGlobalServerTime()));
 						VMessageFileItem item = new VMessageFileItem(vm,
-								fileJNIObject.fileName , fileJNIObject.fileType);
+								fileJNIObject.fileName, fileJNIObject.fileType);
 						item.setFileSize(fileJNIObject.fileSize);
 						item.setUuid(fileJNIObject.fileId);
 						item.setState(VMessageFileItem.STATE_FILE_SENT);
@@ -2649,8 +2644,8 @@ public class ConversationActivity extends Activity {
 				}
 				break;
 			case SEND_MESSAGE:
-				mChat.sendVMessage((VMessage) msg.obj, new MessageListener(this,
-						SEND_MESSAGE_DONE, null));
+				mChat.sendVMessage((VMessage) msg.obj, new MessageListener(
+						this, SEND_MESSAGE_DONE, null));
 				break;
 			case SEND_MESSAGE_ERROR:
 				break;
@@ -2658,7 +2653,7 @@ public class ConversationActivity extends Activity {
 				boolean flag = playNextUnreadMessage();
 				// To last message
 				if (!flag) {
-					currentPlayed = null;
+					playingAudioMessage = null;
 				}
 				break;
 			case REQUEST_DEL_MESSAGE:
@@ -2685,16 +2680,14 @@ public class ConversationActivity extends Activity {
 						VMessage vm = (VMessage) messageArray.get(i)
 								.getItemObject();
 						if (vm.getItems().size() > 0) {
-							VMessageAbstractItem item = vm.getItems()
-									.get(0);
+							VMessageAbstractItem item = vm.getItems().get(0);
 							if (item.getType() == VMessageAbstractItem.ITEM_TYPE_FILE
 									&& item.getUuid().equals(ind.uuid)) {
 								VMessageFileItem vfi = ((VMessageFileItem) item);
 								switch (transError.nTransType) {
 								case FileDownLoadErrorIndication.TYPE_SEND:
 									if (transError.errorCode == 415) {
-										Toast.makeText(
-												getApplicationContext(),
+										Toast.makeText(getApplicationContext(),
 												"亲，不可以发送0大小的文件，抱歉...",
 												Toast.LENGTH_SHORT).show();
 										vfi.setDownloadedSize(0);
@@ -2721,10 +2714,10 @@ public class ConversationActivity extends Activity {
 								default:
 									break;
 								}
-								
-								if(!isStopped)
-								((MessageBodyView) messageArray.get(i)
-										.getView()).updateView(vfi);
+
+								if (!isStopped)
+									((MessageBodyView) messageArray.get(i)
+											.getView()).updateView(vfi);
 							}
 						}
 					}
@@ -2735,8 +2728,7 @@ public class ConversationActivity extends Activity {
 						VMessage vm = (VMessage) messageArray.get(i)
 								.getItemObject();
 						if (vm.getItems().size() > 0) {
-							VMessageAbstractItem item = vm.getItems()
-									.get(0);
+							VMessageAbstractItem item = vm.getItems().get(0);
 							if (item.getType() == VMessageAbstractItem.ITEM_TYPE_FILE
 									&& item.getUuid().equals(ind.uuid)) {
 								VMessageFileItem vfi = ((VMessageFileItem) item);
@@ -2783,7 +2775,7 @@ public class ConversationActivity extends Activity {
 		}
 
 	}
-	
+
 	private void startSendMoreFile() {
 		for (int i = 0; i < mCheckedList.size(); i++) {
 			sendSelectedFile(mCheckedList.get(i));
@@ -2838,7 +2830,7 @@ public class ConversationActivity extends Activity {
 	}
 
 	/**
-
+	 * 
 	 * 用于判断指定的消息VMessage对象是否应该显示时间状态
 	 * 
 	 * @param message

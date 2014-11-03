@@ -6,7 +6,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -24,9 +23,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.text.Editable;
-import android.text.TextUtils.TruncateAt;
 import android.text.TextWatcher;
-import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -34,15 +31,14 @@ import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.CheckBox;
 import android.widget.EditText;
-import android.widget.HorizontalScrollView;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ScrollView;
+import android.widget.ListAdapter;
+import android.widget.ListView;
 import android.widget.TextView;
 
-import com.V2.jni.util.V2Log;
 import com.v2tech.R;
 import com.v2tech.service.ConferenceService;
 import com.v2tech.service.GlobalHolder;
@@ -52,6 +48,7 @@ import com.v2tech.service.jni.RequestConfCreateResponse;
 import com.v2tech.util.SPUtil;
 import com.v2tech.view.JNIService;
 import com.v2tech.view.PublicIntent;
+import com.v2tech.view.adapter.CreateConfOrCrowdAdapter;
 import com.v2tech.view.bo.UserStatusObject;
 import com.v2tech.view.cus.DateTimePicker;
 import com.v2tech.view.cus.DateTimePicker.OnDateSetListener;
@@ -93,12 +90,12 @@ public class ConferenceCreateActivity extends Activity {
 
 	private LinearLayout mErrorNotificationLayout;
 
-	private LinearLayout mAttendeeContainer;
-
-	private View mScroller;
+	private AdapterView<ListAdapter> mAttendeeContainer;
+	private CreateConfOrCrowdAdapter mAdapter;
 
 	// Used to save current selected user
 	private Set<User> mAttendeeList = new HashSet<User>();
+	private List<User> mUserListArray = new ArrayList<User>();
 
 	private ConferenceService cs = new ConferenceService();
 
@@ -112,11 +109,11 @@ public class ConferenceCreateActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		if (isScreenLarge()) {
-			setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-		} else {
-			setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-		}
+		// if (isScreenLarge()) {
+		// setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+		// } else {
+		// setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+		// }
 
 		setContentView(R.layout.activity_conference_create);
 
@@ -130,15 +127,17 @@ public class ConferenceCreateActivity extends Activity {
 		mGroupListView.setListener(listViewListener);
 		mGroupListView.setIgnoreCurrentUser(true);
 
-		mAttendeeContainer = (LinearLayout) findViewById(R.id.conference_attendee_container);
-		mAttendeeContainer.setGravity(Gravity.CENTER);
+		mAttendeeContainer = (AdapterView<ListAdapter>) findViewById(R.id.conf_create_list_view);
+		mAttendeeContainer.setOnItemClickListener(mItemClickedListener);
 		landLayout = mAttendeeContainer.getTag().equals("vertical") ? PAD_LAYOUT
 				: PHONE_LAYOUT;
+		mAdapter = new CreateConfOrCrowdAdapter(mContext, mUserListArray,
+				landLayout);
+		mAttendeeContainer.setAdapter(mAdapter);
 
-		
 		TextView titleContent = (TextView) findViewById(R.id.ws_common_activity_title_content);
 		titleContent.setText(R.string.conference_create_title);
-		
+
 		mConfirmButton = (TextView) findViewById(R.id.ws_common_activity_title_right_button);
 		mConfirmButton.setText(R.string.conference_create_confirm);
 		mConfirmButton.setOnClickListener(confirmButtonListener);
@@ -155,7 +154,7 @@ public class ConferenceCreateActivity extends Activity {
 		searchedTextET = (EditText) findViewById(R.id.contacts_search);
 
 		mErrorNotificationLayout = (LinearLayout) findViewById(R.id.conference_create_error_notification);
-		mScroller = findViewById(R.id.conf_create_scroll_view);
+		// mScroller = findViewById(R.id.conf_create_scroll_view);
 		mReturnButton = (TextView) findViewById(R.id.ws_common_activity_title_left_button);
 		mReturnButton.setText(R.string.conference_create_cancel);
 		mReturnButton.setOnClickListener(mReturnListener);
@@ -167,7 +166,7 @@ public class ConferenceCreateActivity extends Activity {
 		preSelectedGroupId = getIntent().getLongExtra("gid", 0);
 		if (preSelectedUID > 0 || preSelectedGroupId > 0) {
 			Message msg = Message.obtain(mLocalHandler, DO_PRE_SELECT);
-			//TODO optimze code, if doesn't load group list yet, need to wait
+			// TODO optimze code, if doesn't load group list yet, need to wait
 			mLocalHandler.sendMessageDelayed(msg, 300);
 		}
 
@@ -218,16 +217,9 @@ public class ConferenceCreateActivity extends Activity {
 	}
 
 	private void removeAttendee(User u) {
-		boolean ret = mAttendeeList.remove(u);
-		if (ret) {
-			for (int i = 0; i < mAttendeeContainer.getChildCount(); i++) {
-				User tagU = (User) mAttendeeContainer.getChildAt(i).getTag();
-				if (tagU.getmUserId() == u.getmUserId()) {
-					mAttendeeContainer.removeViewAt(i);
-					break;
-				}
-			}
-		}
+		mAttendeeList.remove(u);
+		this.mUserListArray.remove(u);
+		mAdapter.notifyDataSetChanged();
 	}
 
 	private void addAttendee(User u) {
@@ -239,77 +231,8 @@ public class ConferenceCreateActivity extends Activity {
 			return;
 		}
 
-		View v = null;
-		if (landLayout == PAD_LAYOUT) {
-			v = new ContactUserView(this, u, false);
-			v.setTag(u);
-			v.setOnClickListener(removeAttendeeListener);
-		} else {
-			v = getAttendeeView(u);
-		}
-		mAttendeeContainer.addView(v);
-
-		if (mAttendeeContainer.getChildCount() > 0) {
-			mScroller.postDelayed(new Runnable() {
-				@Override
-				public void run() {
-					if (mAttendeeContainer.getChildCount() <= 0) {
-						return;
-					}
-					View child = mAttendeeContainer
-							.getChildAt(mAttendeeContainer.getChildCount() - 1);
-					if (landLayout == PAD_LAYOUT) {
-						((ScrollView) mScroller).scrollTo(child.getRight(),
-								child.getBottom());
-					} else {
-						((HorizontalScrollView) mScroller).scrollTo(
-								child.getRight(), child.getBottom());
-					}
-				}
-
-			}, 100L);
-		}
-	}
-
-	/**
-	 * Use to add scroll view
-	 * 
-	 * @param u
-	 * @return
-	 */
-	private View getAttendeeView(final User u) {
-		final LinearLayout ll = new LinearLayout(mContext);
-		ll.setOrientation(LinearLayout.VERTICAL);
-		ll.setGravity(Gravity.CENTER);
-
-		ImageView iv = new ImageView(mContext);
-		if (u.getAvatarBitmap() != null) {
-			iv.setImageBitmap(u.getAvatarBitmap());
-		} else {
-			iv.setImageResource(R.drawable.avatar);
-		}
-		ll.addView(iv, new LinearLayout.LayoutParams(
-				LinearLayout.LayoutParams.WRAP_CONTENT,
-				LinearLayout.LayoutParams.WRAP_CONTENT));
-
-		TextView tv = new TextView(mContext);
-		tv.setText(u.getName());
-		tv.setEllipsize(TruncateAt.END);
-		tv.setSingleLine(true);
-		tv.setTextSize(12);
-		tv.setMaxWidth(80);
-		ll.setTag(u.getmUserId() + "");
-		ll.addView(tv, new LinearLayout.LayoutParams(
-				LinearLayout.LayoutParams.WRAP_CONTENT,
-				LinearLayout.LayoutParams.WRAP_CONTENT));
-		ll.setPadding(5, 5, 5, 5);
-		if (u.isCurrentLoggedInUser()) {
-			return ll;
-		}
-		ll.setTag(u);
-		ll.setOnClickListener(removeAttendeeListener);
-
-		return ll;
+		mUserListArray.add(u);
+		mAdapter.notifyDataSetChanged();
 	}
 
 	private void doPreSelect() {
@@ -339,7 +262,7 @@ public class ConferenceCreateActivity extends Activity {
 		}
 		List<User> list = selectGroup.getUsers();
 		for (int i = 0; i < list.size(); i++) {
-			User  u = list.get(i);
+			User u = list.get(i);
 			if (u.getmUserId() == GlobalHolder.getInstance().getCurrentUserId()) {
 				continue;
 			}
@@ -351,14 +274,15 @@ public class ConferenceCreateActivity extends Activity {
 		}
 	}
 
-	private OnClickListener removeAttendeeListener = new OnClickListener() {
+	private OnItemClickListener mItemClickedListener = new OnItemClickListener() {
 
 		@Override
-		public void onClick(View view) {
-			User u = (User) view.getTag();
-			mGroupListView.updateCheckItem(u, false);
-			Message.obtain(mLocalHandler, UPDATE_ATTENDEES,
-					OP_DEL_ALL_GROUP_USER, 0, u).sendToTarget();
+		public void onItemClick(AdapterView<?> parent, View view, int position,
+				long id) {
+			User user = mUserListArray.get(position);
+			mGroupListView.updateCheckItem(user, false);
+			Message.obtain(mLocalHandler, UPDATE_ATTENDEES, user)
+					.sendToTarget();
 		}
 
 	};
@@ -400,8 +324,6 @@ public class ConferenceCreateActivity extends Activity {
 		@Override
 		public boolean onItemLongClick(AdapterView<?> parent, View view,
 				int position, long id, Item item) {
-			Object obj = item.getObject();
-
 			return true;
 		}
 
@@ -415,16 +337,16 @@ public class ConferenceCreateActivity extends Activity {
 				} else {
 					flag = OP_ADD_ALL_GROUP_USER;
 				}
-				
+
 				User user = (User) obj;
-				Message.obtain(mLocalHandler, UPDATE_ATTENDEES, flag, 0,
-						user).sendToTarget();
+				Message.obtain(mLocalHandler, UPDATE_ATTENDEES, flag, 0, user)
+						.sendToTarget();
 				mGroupListView.updateCheckItem(user, cb.isChecked());
-				
+
 				Set<Group> belongsGroup = user.getBelongsGroup();
 				for (Group group : belongsGroup) {
 					List<User> users = group.getUsers();
-					mGroupListView.checkBelongGroupAllChecked(group , users);
+					mGroupListView.checkBelongGroupAllChecked(group, users);
 				}
 			} else if (obj instanceof Group) {
 				Message.obtain(

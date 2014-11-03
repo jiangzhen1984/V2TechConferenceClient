@@ -19,6 +19,7 @@
             android:src="@drawable/crowd_file_delete_left_button"
             android:visibility="visible" />
         <RelativeLayout
+            android:id="@+id/RelativeLayout2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="@dimen/text_margin_left"
@@ -74,15 +75,16 @@
             android:textSize="@dimen/common_item_text_size" />
         <ImageView
             android:id="@+id/crowd_file_failed_icon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
-            android:layout_marginRight="@dimen/button_gap_horizontal"
-            android:paddingBottom="@dimen/button_padding_vertical"
-            android:paddingLeft="@dimen/button_padding_horizontal"
-            android:paddingRight="@dimen/button_padding_horizontal"
             android:paddingTop="@dimen/button_padding_vertical"
+            android:paddingBottom="@dimen/button_padding_vertical"
+            android:layout_alignTop="@+id/RelativeLayout2"
+            android:layout_alignBottom="@+id/RelativeLayout2"
+            android:layout_alignLeft="@+id/crowd_file_delete_button"
+            android:layout_marginRight="@dimen/button_gap_horizontal"
             android:src="@drawable/message_sent_failed_icon" />
     </RelativeLayout>
     <LinearLayout

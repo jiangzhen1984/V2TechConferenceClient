@@ -21,21 +21,17 @@ import android.os.Message;
 import android.text.Editable;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
-import android.text.TextUtils.TruncateAt;
-import android.text.style.ForegroundColorSpan;
 import android.text.TextWatcher;
-import android.view.Gravity;
+import android.text.style.ForegroundColorSpan;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.BaseAdapter;
+import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ListAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -47,10 +43,10 @@ import com.v2tech.service.jni.CreateCrowdResponse;
 import com.v2tech.service.jni.JNIResponse;
 import com.v2tech.view.JNIService;
 import com.v2tech.view.PublicIntent;
+import com.v2tech.view.adapter.CreateConfOrCrowdAdapter;
 import com.v2tech.view.widget.GroupListView;
 import com.v2tech.view.widget.GroupListView.Item;
 import com.v2tech.vo.CrowdGroup;
-import com.v2tech.vo.VMessageLinkTextItem;
 import com.v2tech.vo.CrowdGroup.AuthType;
 import com.v2tech.vo.Group;
 import com.v2tech.vo.Group.GroupType;
@@ -81,11 +77,11 @@ public class CrowdCreateActivity extends Activity {
 
 	private Context mContext;
 	private LocalHandler mLocalHandler = new LocalHandler();
-	private LocalAdapter mAdapter = new LocalAdapter();
+	private CreateConfOrCrowdAdapter mAdapter;
 
 	private EditText searchedTextET;
 	private GroupListView mContactsContainer;
-	private AdapterView mAttendeeContainer;
+	private AdapterView<ListAdapter> mAttendeeContainer;
 
 	private TextView mGroupTitle;
 	private TextView mGroupConfirmButton;
@@ -125,12 +121,12 @@ public class CrowdCreateActivity extends Activity {
 		mContactsContainer.setIgnoreCurrentUser(true);
 
 		
-
-		mAttendeeContainer = (AdapterView) findViewById(R.id.crowd_create_list_view);
+		mAttendeeContainer = (AdapterView<ListAdapter>) findViewById(R.id.crowd_create_list_view);
 		mAttendeeContainer.setOnItemClickListener(mItemClickedListener);
-		mAttendeeContainer.setAdapter(mAdapter);
 		landLayout = mAttendeeContainer.getTag().equals("vertical") ? PAD_LAYOUT
 				: PHONE_LAYOUT;
+		mAdapter = new CreateConfOrCrowdAdapter(mContext , mUserListArray , landLayout);
+		mAttendeeContainer.setAdapter(mAdapter);
 
 		mGroupTitle = (TextView) findViewById(R.id.ws_common_activity_title_content);
 		mGroupTitle.setText(R.string.crowd_create_activity_title);
@@ -250,7 +246,7 @@ public class CrowdCreateActivity extends Activity {
 
 	private void removeAttendee(User u) {
 		mUserList.remove(u);
-		this.mUserListArray.remove(u);
+		mUserListArray.remove(u);
 		mAdapter.notifyDataSetChanged();
 	}
 
@@ -263,7 +259,7 @@ public class CrowdCreateActivity extends Activity {
 			return;
 		}
 		
-		this.mUserListArray.add(u);
+		mUserListArray.add(u);
 		mAdapter.notifyDataSetChanged();
 	}
 	
@@ -459,100 +455,6 @@ public class CrowdCreateActivity extends Activity {
 
 	};
 	
-	
-	
-	class LocalAdapter extends BaseAdapter {
-		
-		class ViewTag {
-			ImageView headIcon;
-			TextView name;
-		}
-
-		@Override
-		public int getCount() {
-			return mUserListArray.size();
-		}
-
-		@Override
-		public Object getItem(int position) {
-			return mUserListArray.get(position);
-		}
-
-		@Override
-		public long getItemId(int position) {
-			return mUserListArray.get(position).getmUserId();
-		}
-
-		@Override
-		public View getView(int position, View convertView, ViewGroup parent) {
-			ViewTag tag = null;
-			User user = mUserListArray.get(position);
-			if (convertView == null) {
-				tag = new ViewTag();
-				
-				if (landLayout == PAD_LAYOUT) {
-					convertView = new ContactUserView(mContext, user, false);
-					tag.headIcon = ((ContactUserView)convertView).getmPhotoIV();
-					tag.name = ((ContactUserView)convertView).getmUserNameTV();
-				} else {
-					convertView = getAttendeeView(tag, user);
-				}
-				convertView.setTag(tag);
-				
-			} else {
-				tag = (ViewTag)convertView.getTag();
-			}
-			
-			updateView(tag, user);
-			return convertView;
-		}
-		
-		
-		private void updateView(ViewTag tag, User user) {
-			 
-			if (user.getAvatarBitmap() != null) {
-				tag.headIcon.setImageBitmap(user.getAvatarBitmap());
-			} else {
-				tag.headIcon.setImageResource(R.drawable.avatar);
-			}
-			
-			tag.name.setText(user.getName());
-		}
-		
-		
-		
-		private View getAttendeeView(ViewTag tag, final User u) {
-			final LinearLayout ll = new LinearLayout(mContext);
-			ll.setOrientation(LinearLayout.VERTICAL);
-			ll.setGravity(Gravity.CENTER);
-
-			ImageView iv = new ImageView(mContext);
-			tag.headIcon = iv;
-			if (u.getAvatarBitmap() != null) {
-				iv.setImageBitmap(u.getAvatarBitmap());
-			} else {
-				iv.setImageResource(R.drawable.avatar);
-			}
-			ll.addView(iv, new LinearLayout.LayoutParams(
-					LinearLayout.LayoutParams.WRAP_CONTENT,
-					LinearLayout.LayoutParams.WRAP_CONTENT));
-
-			TextView tv = new TextView(mContext);
-			tag.name = tv;
-			
-			tv.setText(u.getName());
-			tv.setEllipsize(TruncateAt.END);
-			tv.setSingleLine(true);
-			tv.setTextSize(8);
-			tv.setMaxWidth(80);
-			ll.addView(tv, new LinearLayout.LayoutParams(
-					LinearLayout.LayoutParams.WRAP_CONTENT,
-					LinearLayout.LayoutParams.WRAP_CONTENT));
-			ll.setPadding(5, 5, 5, 5);
-			return ll;
-		}
-	}
-
 	class LocalHandler extends Handler {
 
 		@Override
