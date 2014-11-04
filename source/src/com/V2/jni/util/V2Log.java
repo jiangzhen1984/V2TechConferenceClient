@@ -1,5 +1,7 @@
 package com.V2.jni.util;
 
+import java.io.FileNotFoundException;
+
 import android.util.Log;
 
 /**
@@ -45,6 +47,10 @@ public class V2Log {
 	public static void d(String msg) {
 		Log.d(TAG, msg);
 
+	}
+
+	public static void e(String tag, String msg, Exception e) {
+		Log.e(tag, msg, e);
 	}
 
 	// TODO record log to disk

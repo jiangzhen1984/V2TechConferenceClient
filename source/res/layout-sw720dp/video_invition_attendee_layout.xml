@@ -32,16 +32,6 @@
             android:layout_height="wrap_content"
             android:background="@color/confs_search_bar_bg"
             android:orientation="horizontal" >
-            <ImageView
-                android:id="@+id/imageView8"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentLeft="true"
-                android:layout_gravity="center_vertical"
-                android:layout_marginBottom="10dp"
-                android:layout_marginLeft="30dp"
-                android:layout_marginTop="10dp"
-                android:src="@drawable/group_list_search_button" />
             <EditText
                 android:id="@+id/contacts_search"
                 android:layout_width="match_parent"
@@ -58,6 +48,18 @@
                 android:textColor="#000000"
                 android:textSize="18sp" >
             </EditText>
+            <ImageView
+                android:id="@+id/imageView8"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_centerVertical="true"
+                android:layout_gravity="center_vertical"
+                android:layout_marginBottom="10dp"
+                android:layout_marginLeft="30dp"
+                android:layout_marginTop="10dp"
+                android:padding="10dp"
+                android:src="@drawable/group_list_search_button" />
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="1dp"
@@ -182,7 +184,8 @@
                 android:layout_below="@+id/LinearLayout1"
                 android:layout_margin="15dp"
                 android:background="@drawable/rounded_corners_create_conf_box_bg"
-                android:divider="#f2f2f2" >
+                android:divider="#f2f2f2"
+                android:tag="vertical" >
             </ListView>
             <LinearLayout
                 android:id="@+id/LinearLayout2"

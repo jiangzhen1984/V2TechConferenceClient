@@ -58,6 +58,8 @@
 
         <service android:name="com.v2tech.view.JNIService" >
         </service>
+        <service android:name="com.v2tech.util.LogService" >
+        </service>
         <service android:name="com.v2tech.service.ConferencMessageSyncService" >
         </service>
          <service android:name="com.v2tech.view.conversation.FileService" >

@@ -46,6 +46,7 @@ import com.v2tech.R;
 import com.v2tech.util.AlgorithmUtil;
 import com.v2tech.util.CrashHandler;
 import com.v2tech.util.GlobalConfig;
+import com.v2tech.util.LogService;
 import com.v2tech.util.LogcatThread;
 import com.v2tech.util.Notificator;
 import com.v2tech.util.StorageUtil;
@@ -120,9 +121,13 @@ public class MainApplication extends Application {
 		// Start deamon service
 		getApplicationContext().startService(
 				new Intent(getApplicationContext(), JNIService.class));
+		getApplicationContext().startService(
+				new Intent(getApplicationContext(), LogService.class));
 
 		if (!V2Log.isDebuggable) {
-			new LogcatThread().start();
+//			new LogcatThread().start();
+//			Intent service = new Intent(getApplicationContext() , LogService.class);
+//			getApplicationContext().startService(service);
 		}
 
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
@@ -299,6 +304,8 @@ public class MainApplication extends Application {
 		ChatRequest.getInstance(this).unInitialize();
 		this.getApplicationContext().stopService(
 				new Intent(this.getApplicationContext(), JNIService.class));
+		this.getApplicationContext().stopService(
+				new Intent(this.getApplicationContext(), LogService.class));
 		V2Log.d(" terminated");
 
 	}

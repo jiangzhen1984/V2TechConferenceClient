@@ -68,6 +68,7 @@ public class MainActivity extends FragmentActivity implements
 	private ConferenceListener mConfListener;
 	
 	private List<CommonAdapterItemWrapper> messageArray;
+	private List<Fragment> fragments;
 	
 	private HeadSetPlugReceiver localReceiver = new HeadSetPlugReceiver();
 
@@ -238,7 +239,7 @@ public class MainActivity extends FragmentActivity implements
 	 */
 	private void intialiseViewPager(int index) {
 
-		List<Fragment> fragments = new Vector<Fragment>();
+		fragments = new Vector<Fragment>();
 
 		for (TabClass tc : mTabClasses) {
 			Bundle bundle = new Bundle();
@@ -493,6 +494,16 @@ public class MainActivity extends FragmentActivity implements
 				V2Log.e(" MainActivity state is illegal");
 				return;
 			}
+			//恢复搜索状态
+			TabClass tab = mTabClasses[pos];
+			Fragment fragment = fragments.get(pos);
+			if(tab.mTabName.equals(PublicIntent.TAG_COV) || tab.mTabName.equals(PublicIntent.TAG_GROUP) || 
+					tab.mTabName.equals(PublicIntent.TAG_CONF)){
+				((ConversationsTabFragment)fragment).updateSearchState();
+			} else if(tab.mTabName.equals(PublicIntent.TAG_CONTACT) || tab.mTabName.equals(PublicIntent.TAG_ORG)){
+				
+			}
+			
 			mViewPager.setCurrentItem(pos);
 			titleBar.updateTitle(mTabClasses[pos].mTabTitleId);
 

@@ -44,7 +44,7 @@ public class Conversation implements Comparable<Conversation>{
 	
 	protected boolean isAddedItem; //this field created for specific item voiceItem or verificationItem
 
-	protected Conversation() {
+	public Conversation() {
 	}
 
 	public Conversation(int mId, int mType, long mExtId, int readFlag) {
