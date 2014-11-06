@@ -54,7 +54,6 @@ import com.v2tech.db.ContentDescriptor;
 import com.v2tech.db.ConversationProvider;
 import com.v2tech.db.DataBaseContext;
 import com.v2tech.service.BitmapManager;
-import com.v2tech.service.ChatService;
 import com.v2tech.service.ConferencMessageSyncService;
 import com.v2tech.service.ConferenceService;
 import com.v2tech.service.CrowdGroupService;
@@ -195,8 +194,6 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 		Message.obtain(mHandler, FILL_CONFS_LIST).sendToTarget();
 
 		searchList = new ArrayList<ScrollItem>();
-//		searchCacheList = new ArrayList<ScrollItem>();
-//		firstSearchCacheList = new ArrayList<ScrollItem>();
 	}
 
 	@Override
@@ -243,6 +240,11 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 	@Override
 	public void onResume() {
 		super.onResume();
+//		Bundle bundle = ((Activity) mContext).getIntent().getExtras();
+//		if(bundle != null && bundle.get("conf") != null){
+//			Conference conf= (Conference)bundle.get("conf");
+//			requestJoinConf(conf);
+//		}
 	}
 
 	/**
@@ -1447,6 +1449,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 			if (mWaitingDialog != null) {
 				return;
 			}
+			
 			mWaitingDialog = ProgressDialog.show(
 					mContext,
 					"",
@@ -1482,6 +1485,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 		if (conf == null) {
 			return false;
 		}
+		
 		requestJoinConf(conf.getId());
 
 		// This request from main activity
@@ -1503,6 +1507,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 
 		User creator = GlobalHolder.getInstance().getUser(conf.getCreator());
 		enterConference.putExtra("conf", conf);
+		enterConference.putExtra("initFragment", 3);
 		Notificator.updateSystemNotification(mContext, conf.getName()
 				+ " 会议邀请:", creator == null ? "" : creator.getName(), 1,
 				enterConference, PublicIntent.VIDEO_NOTIFICATION_ID);
@@ -1844,35 +1849,33 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 					case Conversation.TYPE_GROUP:
 						if (mCurrentTabFlag == V2GlobalEnum.GROUP_TYPE_USER) {
 							CrowdConversation crowd = ((CrowdConversation) item.cov);
-							if (crowd.getGroup().getName() == null) {
-								Group newGroup = GlobalHolder.getInstance()
-										.getGroupById(
+							Group newGroup = GlobalHolder.getInstance()
+									.getGroupById(
+											V2GlobalEnum.GROUP_TYPE_CROWD,
+											crowd.getExtId());
+							if (newGroup != null) {
+								crowd.setG(newGroup);
+								crowd.setReadFlag(Conversation.READ_FLAG_READ);
+								VMessage vm = MessageLoader
+										.getNewestGroupMessage(
+												mContext,
 												V2GlobalEnum.GROUP_TYPE_CROWD,
 												crowd.getExtId());
-								if (newGroup != null) {
-									crowd.setG(newGroup);
-									crowd.setReadFlag(Conversation.READ_FLAG_READ);
-									VMessage vm = MessageLoader
-											.getNewestGroupMessage(
-													mContext,
-													V2GlobalEnum.GROUP_TYPE_CROWD,
-													crowd.getExtId());
-									if (vm != null) {
-										crowd.setName(newGroup.getName());
-										crowd.setDate(vm.getDateTimeStr());
-										crowd.setDateLong(String.valueOf(vm
-												.getmDateLong()));
-										CharSequence newMessage = MessageUtil
-												.getMixedConversationContent(
-														mContext, vm);
-										crowd.setMsg(newMessage);
-										currentGroupLayout.update();
-										adapter.notifyDataSetChanged();
-										V2Log.d(TAG,
-												"Successfully updated the CROWD_GROUP infos , "
-														+ "group name is :"
-														+ crowd.getName());
-									}
+								if (vm != null) {
+									crowd.setName(newGroup.getName());
+									crowd.setDate(vm.getDateTimeStr());
+									crowd.setDateLong(String.valueOf(vm
+											.getmDateLong()));
+									CharSequence newMessage = MessageUtil
+											.getMixedConversationContent(
+													mContext, vm);
+									crowd.setMsg(newMessage);
+									currentGroupLayout.update();
+									adapter.notifyDataSetChanged();
+									V2Log.d(TAG,
+											"Successfully updated the CROWD_GROUP infos , "
+													+ "group name is :"
+													+ crowd.getName());
 								}
 							}
 						} else {

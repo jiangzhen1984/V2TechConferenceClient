@@ -27,9 +27,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.PopupWindow.OnDismissListener;
+import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -111,8 +113,6 @@ public class VideoDocLayout extends LinearLayout {
 			updateCurrentDoc(defaultDoc);
 		}
 	}
-	
-	
 
 	private void initLayout() {
 		View view = LayoutInflater.from(getContext()).inflate(
@@ -142,15 +142,11 @@ public class VideoDocLayout extends LinearLayout {
 
 	}
 
-	
-	
 	@Override
 	protected void onDetachedFromWindow() {
 		super.onDetachedFromWindow();
 		cleanCache();
 	}
-
-
 
 	private void showPopUpWindow(View anchor) {
 		if (mDocs.isEmpty()) {
@@ -347,7 +343,8 @@ public class VideoDocLayout extends LinearLayout {
 		mCurrentPage = mCurrentDoc.getActivatePage();
 
 		updateCurrentDocPage(mCurrentPage);
-		drawShape(mCurrentPage.getVsMeta());
+		if (mCurrentPage.getVsMeta() != null)
+			drawShape(mCurrentPage.getVsMeta());
 		updateLayoutPageInformation();
 		updatePageButton();
 	}
@@ -433,7 +430,7 @@ public class VideoDocLayout extends LinearLayout {
 
 				mBackgroundBitMap = BitmapFactory.decodeFile(p.getFilePath(),
 						opsNew);
-				
+
 				dest.left = (src.right - opsNew.outWidth) / 2;
 				dest.right = opsNew.outWidth;
 				dest.top = (src.bottom - opsNew.outHeight) / 2;
@@ -465,11 +462,12 @@ public class VideoDocLayout extends LinearLayout {
 					}
 
 				}, 1000);
-				V2Log.e("VideoDocLayout drawShape --> doc file doesn't exist :" + f.getAbsolutePath());
+				V2Log.e("VideoDocLayout drawShape --> doc file doesn't exist :"
+						+ f.getAbsolutePath());
 			}
-		}
-		else{
-			V2Log.e("VideoDocLayout drawShape --> doc file doesn't exist :" + p.getFilePath());
+		} else {
+			V2Log.e("VideoDocLayout drawShape --> doc file doesn't exist :"
+					+ p.getFilePath());
 		}
 	}
 
@@ -693,12 +691,12 @@ public class VideoDocLayout extends LinearLayout {
 			V2Log.w(" shape list is null");
 			return;
 		}
-		
-		if(mBackgroundBitMap == null){
+
+		if (mBackgroundBitMap == null) {
 			V2Log.e("VideoDocLayout drawShape --> mBackgroundBitMap is null");
-			return ;
+			return;
 		}
-		
+
 		if (mShapeBitmap == null || mShapeBitmap.isRecycled()) {
 			mShapeBitmap = Bitmap.createBitmap(mBackgroundBitMap.getWidth(),
 					mBackgroundBitMap.getHeight(), Config.ARGB_8888);
@@ -715,7 +713,6 @@ public class VideoDocLayout extends LinearLayout {
 		container.postInvalidate();
 	}
 
-	
 	/**
 	 */
 	public void cleanCache() {
@@ -857,7 +854,7 @@ public class VideoDocLayout extends LinearLayout {
 						TouchImageView tiv = (TouchImageView) container
 								.getChildAt(0);
 						tiv.setZoom(tiv.getCurrentZoom());
-						tiv.setZoom(2F);
+						// tiv.setZoom(2F);
 					}
 				}
 			} else {
@@ -867,7 +864,7 @@ public class VideoDocLayout extends LinearLayout {
 						TouchImageView tiv = (TouchImageView) container
 								.getChildAt(0);
 						tiv.setZoom(tiv.getCurrentZoom());
-						tiv.setZoom(1F);
+						// tiv.setZoom(1F);
 					}
 				}
 			}

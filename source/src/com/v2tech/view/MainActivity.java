@@ -327,6 +327,8 @@ public class MainActivity extends FragmentActivity implements
 	@Override
 	protected void onNewIntent(Intent intent) {
 		super.onNewIntent(intent);
+		int index = intent.getIntExtra("initFragment", 0);
+		mViewPager.setCurrentItem(index);
 		if (intent.getExtras() != null) {
 			Conference conf= (Conference)intent.getExtras().get("conf");
 			mConfListener.requestJoinConf(conf);

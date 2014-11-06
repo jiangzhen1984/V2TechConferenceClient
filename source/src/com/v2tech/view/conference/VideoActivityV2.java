@@ -349,10 +349,6 @@ public class VideoActivityV2 extends Activity {
 		this.mContentWidth = -1;
 		this.mContentHeight = -1;
 	}
-	
-	
-	
-
 
 	private void initConfsListener() {
 		IntentFilter filter = new IntentFilter();

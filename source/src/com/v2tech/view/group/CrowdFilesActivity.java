@@ -214,17 +214,20 @@ public class CrowdFilesActivity extends Activity {
 	@Override
 	public void onBackPressed() {
 		if (isInDeleteMode) {
+			mCannelButton.setVisibility(View.INVISIBLE);
 			isInDeleteMode = false;
 			// resume all uploading files
 			suspendOrResumeUploadingFiles(false);
-
 			adapter.notifyDataSetChanged();
 			// set cancel button text to upload text
 			mShowUploadedFileButton.setText(R.string.crowd_files_title_upload);
 			return;
 		} else if (showUploaded) {
+			mCannelButton.setVisibility(View.INVISIBLE);
 			showUploaded = false;
 			mTitle.setText(R.string.crowd_files_title);
+			mShowUploadedFileButton
+			.setText(R.string.crowd_files_title_upload);
 			mShowUploadedFileButton.setVisibility(View.VISIBLE);
 			adapterUploadShow();
 			adapter.notifyDataSetChanged();
@@ -561,23 +564,12 @@ public class CrowdFilesActivity extends Activity {
 				int position, long id) {
 			if (isInDeleteMode) {
 				if (showUploaded) {
-					mCannelButton.setVisibility(View.VISIBLE);
+					mCannelButton.setVisibility(View.INVISIBLE);
 				}
 				return false;
 			} else {
 				if (showUploaded) {
-					mCannelButton.setVisibility(View.INVISIBLE);
-				}
-				
-				boolean showDeleteMode = false;
-				for (VCrowdFile file : mFiles) {
-					if(file.getUploader().getmUserId() == currentLoginUserID){
-						showDeleteMode = true;
-						break;
-					}
-				}
-				
-				if(showDeleteMode){
+					mCannelButton.setVisibility(View.VISIBLE);
 					isInDeleteMode = true;
 					// Pause all uploading files
 					suspendOrResumeUploadingFiles(true);
@@ -585,6 +577,25 @@ public class CrowdFilesActivity extends Activity {
 					// update upload button text to cancel
 					mShowUploadedFileButton
 							.setText(R.string.crowd_files_title_cancel_button);
+				}
+				else{
+					boolean showDeleteMode = false;
+					for (VCrowdFile file : mFiles) {
+						if(file.getUploader().getmUserId() == currentLoginUserID){
+							showDeleteMode = true;
+							break;
+						}
+					}
+					
+					if(showDeleteMode){
+						isInDeleteMode = true;
+						// Pause all uploading files
+						suspendOrResumeUploadingFiles(true);
+						adapter.notifyDataSetChanged();
+						// update upload button text to cancel
+						mShowUploadedFileButton
+								.setText(R.string.crowd_files_title_cancel_button);
+					}
 				}
 				return true;
 			}
@@ -989,11 +1000,30 @@ public class CrowdFilesActivity extends Activity {
 					return;
 				}
 
-				item.mFileDeleteButton.setVisibility(View.VISIBLE);
-				item.mFailedIcon.setVisibility(View.GONE);
-				item.mFileButton.setVisibility(View.GONE);
-				item.mFileText.setVisibility(View.GONE);
-				tag.vf.setFlag(SHOW_DELETE_BUTTON_FLAG);
+				if(item.mFileDeleteButton.getVisibility() == View.VISIBLE){
+					item.mFileDeleteButton.setVisibility(View.GONE);
+					switch (tag.vf.getState()) {
+					case DOWNLOAD_FAILED:
+					case UPLOAD_FAILED:
+					case REMOVED:
+						item.mFailedIcon.setVisibility(View.VISIBLE);
+						break;
+					case DOWNLOADED:
+					case UPLOADED:
+						item.mFileText.setVisibility(View.VISIBLE);
+						break;
+					default:
+						item.mFileButton.setVisibility(View.VISIBLE);
+						break;
+					}
+					tag.vf.setFlag(HIDE_DELETE_BUTTON_FLAG);
+				}else{
+					item.mFileDeleteButton.setVisibility(View.VISIBLE);
+					item.mFailedIcon.setVisibility(View.GONE);
+					item.mFileButton.setVisibility(View.GONE);
+					item.mFileText.setVisibility(View.GONE);
+					tag.vf.setFlag(SHOW_DELETE_BUTTON_FLAG);
+				}
 			}
 
 		};

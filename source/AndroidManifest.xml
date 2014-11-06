@@ -3,7 +3,7 @@
     package="com.v2tech"
     android:sharedUserLabel="@string/app_name"
     android:versionCode="2"
-    android:versionName="4.0.0.19" >
+    android:versionName="4.0.0.20" >
 
     <uses-sdk
         android:minSdkVersion="14"
@@ -169,7 +169,7 @@
             android:name="com.v2tech.view.MainActivity"
             android:configChanges="screenSize|orientation"
             android:exported="true"
-            android:launchMode="singleTop"
+            android:launchMode="singleTask"
             android:screenOrientation="nosensor"
             android:windowSoftInputMode="stateHidden|adjustPan" >
             <intent-filter>
