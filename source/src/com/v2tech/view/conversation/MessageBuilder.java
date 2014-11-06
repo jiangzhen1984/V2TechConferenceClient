@@ -17,6 +17,7 @@ import android.net.Uri;
 import android.text.TextUtils;
 
 import com.V2.jni.V2GlobalEnum;
+import com.V2.jni.ind.GroupQualicationJNIObject;
 import com.V2.jni.ind.V2Group;
 import com.V2.jni.util.V2Log;
 import com.V2.jni.util.XmlAttributeExtractor;
@@ -34,6 +35,7 @@ import com.v2tech.vo.VMessageAudioItem;
 import com.v2tech.vo.VMessageFileItem;
 import com.v2tech.vo.VMessageImageItem;
 import com.v2tech.vo.VMessageQualification;
+import com.v2tech.vo.VMessageQualification.ReadState;
 import com.v2tech.vo.VMessageQualificationApplicationCrowd;
 import com.v2tech.vo.VMessageQualificationInvitationCrowd;
 import com.v2tech.vo.VMessageTextItem;
@@ -43,6 +45,7 @@ public class MessageBuilder {
 
 	private static final int MESSAGE_TYPE_IMAGE = 0;
 	private static final int MESSAGE_TYPE_AUDIO = 1;
+	public static Context context;
 
 	public static VMessage buildGroupTextMessage(int groupType, long gid,
 			User fromUser, String text) {
@@ -562,7 +565,7 @@ public class MessageBuilder {
 			values.put(
 					ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_FROM_USER_ID,
 					crowdInviteMsg.getInvitationUser().getmUserId());
-			if(crowdInviteMsg.getBeInvitatonUser() != null){
+			if (crowdInviteMsg.getBeInvitatonUser() != null) {
 				values.put(
 						ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_TO_USER_ID,
 						crowdInviteMsg.getBeInvitatonUser().getmUserId());
@@ -635,6 +638,51 @@ public class MessageBuilder {
 					"invalid VMessageQualification enum type.. please check the type");
 		}
 		return uri;
+	}
+
+	/**
+	 * Update a qualification message to database
+	 * 
+	 * @param context
+	 * @param msg
+	 * @return
+	 */
+	public static int updateQualicationMessageState(
+			long groupID, GroupQualicationJNIObject obj) {
+
+		DataBaseContext mContext = new DataBaseContext(context);
+		ContentValues values = new ContentValues();
+		switch (obj.qualicationType) {
+		case CROWD_INVITATION:
+			values.put(
+					ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_REFUSE_REASON,
+					obj.refuseReason);
+			break;
+		case CROWD_APPLICATION:
+			values.put(
+					ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_APPLY_REASON,
+					obj.applyReason);
+			break;
+		case CONTACT:
+			break;
+		default:
+			throw new RuntimeException(
+					"invalid VMessageQualification enum type.. please check the type");
+		}
+		values.put(ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_STATE,
+				obj.state.intValue());
+		values.put(
+				ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_READ_STATE,
+				ReadState.UNREAD.intValue());
+		String where = ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_ID
+				+ " = ?";
+		values.put(
+				ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_SAVEDATE,
+				GlobalConfig.getGlobalServerTime());
+		int updates = mContext.getContentResolver().update(
+				ContentDescriptor.HistoriesCrowd.CONTENT_URI, values, where,
+				new String[] { String.valueOf(groupID) });
+		return updates;
 	}
 
 	/**
@@ -881,8 +929,7 @@ public class MessageBuilder {
 			group.setBrief(v2Group.brief);
 			group.setAnnouncement(v2Group.announce);
 			group.setAuthType(CrowdGroup.AuthType.fromInt(authType));
-		} 
-	
+		}
 
 		long fromUserID = cursor.getLong(cursor.getColumnIndex("FromUserID"));
 		long toUserID = cursor.getLong(cursor.getColumnIndex("ToUserID"));

@@ -1,6 +1,7 @@
 <resources>
 
     <string name="crowd_return_button">返回</string>
+    <string name="crowd_Authentication_hit">群已被解散</string>
     <string name="crowd_create_activity_title">创建群组</string>
     
     <string name="crowd_invitation_accept_button_name">同意</string>

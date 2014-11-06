@@ -499,6 +499,12 @@ public class ConversationActivity extends Activity {
 					: false;
 			obj = new ConversationNotificationObject(Conversation.TYPE_CONTACT,
 					groupId);
+		} else if (currentConversationViewType == V2GlobalEnum.GROUP_TYPE_DEPARTMENT) {
+			isDelete = MessageLoader.getNewestGroupMessage(mContext,
+					V2GlobalEnum.GROUP_TYPE_DEPARTMENT, groupId) == null ? true
+					: false;
+			obj = new ConversationNotificationObject(Conversation.TYPE_CONTACT,
+					groupId);
 		}
 
 		if (isDelete) {

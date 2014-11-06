@@ -43,6 +43,8 @@ import com.V2.jni.VideoRequest;
 import com.V2.jni.VideoRequestCallbackAdapter;
 import com.V2.jni.ind.AudioJNIObjectInd;
 import com.V2.jni.ind.FileJNIObject;
+import com.V2.jni.ind.GroupJoinErrorJNIObject;
+import com.V2.jni.ind.GroupQualicationJNIObject;
 import com.V2.jni.ind.SendingResultJNIObjectInd;
 import com.V2.jni.ind.V2Conference;
 import com.V2.jni.ind.V2Group;
@@ -77,6 +79,8 @@ import com.v2tech.vo.VMessageAudioItem;
 import com.v2tech.vo.VMessageFileItem;
 import com.v2tech.vo.VMessageImageItem;
 import com.v2tech.vo.VMessageQualification;
+import com.v2tech.vo.VMessageQualification.QualificationState;
+import com.v2tech.vo.VMessageQualification.Type;
 import com.v2tech.vo.VMessageQualificationApplicationCrowd;
 import com.v2tech.vo.VMessageQualificationInvitationCrowd;
 
@@ -109,6 +113,7 @@ public class JNIService extends Service {
 	public static final String JNI_BROADCAST_GROUP_NOTIFICATION = "com.v2tech.jni.broadcast.group_geted";
 	public static final String JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION = "com.v2tech.jni.broadcast.group_user_updated";
 	public static final String JNI_BROADCAST_GROUP_UPDATED = "com.v2tech.jni.broadcast.group_updated";
+	public static final String JNI_BROADCAST_GROUP_JOIN_FAILED = "com.v2tech.jni.broadcast.group_join_failed";
 	public static final String JNI_BROADCAST_NEW_MESSAGE = "com.v2tech.jni.broadcast.new.message";
 	public static final String JNI_BROADCAST_MESSAGE_SENT_FAILED = "com.v2tech.jni.broadcast.message_sent_failed";
 	public static final String JNI_BROADCAST_NEW_CONF_MESSAGE = "com.v2tech.jni.broadcast.new.conf.message";
@@ -614,25 +619,6 @@ public class JNIService extends Service {
 		}
 
 		@Override
-		public void onAddGroupInfo(V2Group group) {
-			// if (group == null || group.creator == null) {
-			// return;
-			// }
-			// GroupType gType = GroupType.fromInt(group.type);
-			// if (gType == GroupType.CHATING) {
-			// CrowdGroup cg = convertCrowd(group);
-			// GlobalHolder.getInstance().addGroupToList(gType.intValue(), cg);
-			//
-			// // Send broadcast
-			// Intent i = new Intent(JNI_BROADCAST_NEW_CROWD);
-			// i.addCategory(JNI_BROADCAST_CATEGROY);
-			// i.putExtra("crowd", cg.getmGId());
-			// mContext.sendBroadcast(i);
-			// }
-
-		}
-
-		@Override
 		public void OnApplyJoinGroup(V2Group group, V2User user, String reason) {
 			if (group == null || user == null) {
 				return;
@@ -646,6 +632,16 @@ public class JNIService extends Service {
 			checkMessageAndSendBroadcast(
 					VMessageQualification.Type.CROWD_APPLICATION, cg, u, reason);
 
+		}
+
+		@Override
+		public void OnJoinGroupError(int eGroupType, long nGroupID, int nErrorNo) {
+			// Send broadcast
+			Intent i = new Intent(JNI_BROADCAST_GROUP_JOIN_FAILED);
+			i.addCategory(JNI_BROADCAST_CATEGROY);
+			i.putExtra("joinCode", new GroupJoinErrorJNIObject(eGroupType,
+					nGroupID, nErrorNo));
+			mContext.sendBroadcast(i);
 		}
 
 		@Override
@@ -718,7 +714,7 @@ public class JNIService extends Service {
 							.setApplyReason(reason);
 				} else if (type == VMessageQualification.Type.CROWD_INVITATION) {
 					((VMessageQualificationInvitationCrowd) crowdMsg)
-					.setRejectReason(reason);
+							.setRejectReason(reason);
 				} else {
 					throw new RuntimeException("Unkown type");
 				}
@@ -795,8 +791,8 @@ public class JNIService extends Service {
 					i.putExtra("gid", nGroupID);
 					sendBroadcast(i);
 
-					Intent intent = new Intent(mContext , MainActivity.class);
-//					intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+					Intent intent = new Intent(mContext, MainActivity.class);
+					// intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 					intent.addCategory(PublicIntent.DEFAULT_CATEGORY);
 					intent.putExtra("initFragment", 3);
 					Notificator
@@ -894,6 +890,9 @@ public class JNIService extends Service {
 				intent.setAction(JNI_BROADCAST_FRIEND_AUTHENTICATION);
 				intent.addCategory(JNI_BROADCAST_CATEGROY);
 				sendOrderedBroadcast(intent, null);
+			} else if(gType == GroupType.CHATING){
+				MessageBuilder.updateQualicationMessageState(nGroupID, 
+						new GroupQualicationJNIObject(Type.CROWD_INVITATION , QualificationState.REJECT , null));
 			}
 
 		}
@@ -950,11 +949,6 @@ public class JNIService extends Service {
 			kick.putExtra("crowd", groupId);
 			kick.putExtra("userId", nUserId);
 			sendBroadcast(kick);
-		}
-
-		@Override
-		public void OnRefuseApplyJoinGroup(V2Group parseSingleCrowd,
-				String reason) {
 		}
 	}
 
@@ -1083,7 +1077,7 @@ public class JNIService extends Service {
 		 * .ind.VideoJNIObjectInd)
 		 */
 		public void OnVideoChatClosed(VideoJNIObjectInd ind) {
-			Log.i("20141102","OnVideoChatClosed");
+			Log.i("20141102", "OnVideoChatClosed");
 			super.OnVideoChatClosed(ind);
 			if (GlobalHolder.getInstance().isInMeeting()
 					|| GlobalHolder.getInstance().isInAudioCall()
@@ -1191,7 +1185,7 @@ public class JNIService extends Service {
 			Message.obtain(mCallbackHandler, JNI_RECEIVED_MESSAGE, vm)
 					.sendToTarget();
 		}
-		
+
 		@Override
 		public void OnRecvChatBinary(int eGroupType, long nGroupID,
 				long nFromUserID, long nToUserID, long nTime, int binaryType,

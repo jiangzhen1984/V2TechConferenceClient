@@ -94,7 +94,6 @@ public class CrashHandler implements UncaughtExceptionHandler {
             return false;  
         }  
         
-        ex.printStackTrace(System.err);
         //使用Toast来显示异常信息  
         new Thread() {  
             @Override  
@@ -108,7 +107,7 @@ public class CrashHandler implements UncaughtExceptionHandler {
         collectDeviceInfo(mContext);  
         //保存日志文件   
         saveCrashInfo2File(ex);
-        //catchLog();
+//        catchLog();
         return true;  
     }  
       

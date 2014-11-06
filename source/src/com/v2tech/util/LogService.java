@@ -29,6 +29,7 @@ import android.os.Environment;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
+import android.os.SystemClock;
 import android.util.Log;
 
 import com.V2.jni.util.V2Log;
@@ -75,7 +76,7 @@ public class LogService extends Service {
 	/**
 	 * 本服务输出的日志文件名称
 	 */
-	private String logServiceLogName = "Log.log";
+	private String logServiceLogName = "log.log";
 	private SimpleDateFormat myLogSdf = new SimpleDateFormat(
 			"yyyy-MM-dd HH:mm:ss");
 	private OutputStreamWriter writer;
@@ -96,6 +97,8 @@ public class LogService extends Service {
 
 	private static String MONITOR_LOG_SIZE_ACTION = "MONITOR_LOG_SIZE"; // 日志文件监测action
 	private static String SWITCH_LOG_FILE_ACTION = "SWITCH_LOG_FILE_ACTION"; // 切换日志文件action
+	
+	private StringBuilder sb = new StringBuilder();
 
 	@Override
 	public IBinder onBind(Intent intent) {
@@ -130,8 +133,6 @@ public class LogService extends Service {
 		// 如果 id 为 0 ，那么状态栏的 notification 将不会显示。
 		startForeground(0, notification);
 		V2Log.d(TAG, "Log Service is started successfully !");
-		recordLogServiceLog("Log Service is started successfully !"
-				+ myLogSdf.format(System.currentTimeMillis()));
 		return Service.START_REDELIVER_INTENT;
 	}
 
@@ -143,24 +144,47 @@ public class LogService extends Service {
 		LOG_PATH_SDCARD_DIR = StorageUtil.getSdcardPath() + File.separator
 				+ "v2tech" + File.separator + "crash";
 
-		if (CURR_LOG_TYPE == SDCARD_TYPE){
+		if (CURR_LOG_TYPE == SDCARD_TYPE) {
 			LOG_SERVICE_LOG_DIR = LOG_PATH_SDCARD_DIR;
 			LOG_SERVICE_LOG_PATH = LOG_SERVICE_LOG_DIR + File.separator
 					+ logServiceLogName;
-		}
-		else{
+		} else {
 			LOG_SERVICE_LOG_DIR = LOG_PATH_MEMORY_DIR;
 			LOG_SERVICE_LOG_PATH = LOG_SERVICE_LOG_DIR + File.separator
 					+ logServiceLogName;
 		}
+		
 		createLogDir();
-
-		try {
-			writer = new OutputStreamWriter(new FileOutputStream(
-					LOG_SERVICE_LOG_PATH, true));
-		} catch (Exception e) {
-			V2Log.e(TAG, e.getMessage(), e);
-		}
+		new Thread(new Runnable() {
+			
+			@Override
+			public void run() {
+				
+				while(!checkDirExist()){
+					SystemClock.sleep(1000);
+					V2Log.e(TAG, "check crash dir exist again !");	
+				}
+				
+				try {
+					writer = new OutputStreamWriter(new FileOutputStream(
+							LOG_SERVICE_LOG_PATH, true));
+				} catch (Exception e) {
+					V2Log.e(TAG, e.getMessage(), e);
+				}
+				recordLogServiceLog("");
+				recordLogServiceLog("========================Halving Line========================");
+				recordLogServiceLog("Create service log Successfully !  --> Start recording ! mean LogService run normal !");
+				recordLogServiceLog("Project already startup now!");
+				recordLogServiceLog(sb.toString());
+				V2Log.e(TAG, "Successfully start record service log !");	
+			}
+			
+			public boolean checkDirExist(){
+				File file = new File(LOG_SERVICE_LOG_DIR);
+				return file.exists();
+			}
+		}).start();
+		
 		PowerManager pm = (PowerManager) getApplicationContext()
 				.getSystemService(Context.POWER_SERVICE);
 		wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
@@ -216,12 +240,7 @@ public class LogService extends Service {
 					commandList.toArray(new String[commandList.size()]));
 			StreamConsumer errorGobbler = new StreamConsumer(
 					proc.getErrorStream());
-
-			StreamConsumer outputGobbler = new StreamConsumer(
-					proc.getInputStream());
-
 			errorGobbler.start();
-			outputGobbler.start();
 			if (proc.waitFor() != 0) {
 				V2Log.e(TAG, " clearLogCache proc.waitFor() != 0");
 				recordLogServiceLog("clearLogCache clearLogCache proc.waitFor() != 0");
@@ -253,7 +272,7 @@ public class LogService extends Service {
 		String packName = this.getPackageName();
 		String myUser = getAppUser(packName, allProcList);
 		recordLogServiceLog("app user is:" + myUser);
-		recordLogServiceLog("============= START TYPING PROC LIST INFO ==============");
+		recordLogServiceLog("============= START PRINT PROCESS LIST INFO ==============");
 		// 只打印本App和logcat的进程信息，其他进程信息不打印
 		for (ProcessInfo processInfo : allProcList) {
 			if (myUser.equals(processInfo.user)
@@ -261,7 +280,7 @@ public class LogService extends Service {
 				recordLogServiceLog(processInfo.toString());
 			}
 		}
-		recordLogServiceLog("============= END TYPING PROC LIST INFO ==============");
+		recordLogServiceLog("============= END PRINT PROCESS LIST INFO ==============");
 		for (ProcessInfo processInfo : allProcList) {
 			if (processInfo.name.toLowerCase().equals("logcat")
 					&& processInfo.user.equals(myUser)) {
@@ -373,8 +392,9 @@ public class LogService extends Service {
 
 	/**
 	 * 开始收集日志信息
+	 * @throws IOException 
 	 */
-	public void createLogCollector() {
+	public void createLogCollector() throws IOException {
 		String logFileName = getLogFileName();// 日志文件名称
 		List<String> commandList = new ArrayList<String>();
 		commandList.add("logcat");
@@ -388,16 +408,11 @@ public class LogService extends Service {
 		// 过滤指定TAG的信息
 		// commandList.add("MyAPP:V");
 		// commandList.add("*:S");
-		try {
-			process = Runtime.getRuntime().exec(
-					commandList.toArray(new String[commandList.size()]));
-			recordLogServiceLog("start collecting the log,and log name is:"
-					+ logFileName);
-			processWaitFor();
-		} catch (Exception e) {
-			V2Log.e(TAG, "CollectorThread == >" + e.getMessage(), e);
-			recordLogServiceLog("CollectorThread == >" + e.getMessage());
-		}
+		process = Runtime.getRuntime().exec(
+				commandList.toArray(new String[commandList.size()]));
+		recordLogServiceLog("start collecting the log,and log name is:"
+				+ logFileName);
+		processWaitFor();
 	}
 
 	private void processWaitFor() {
@@ -424,7 +439,6 @@ public class LogService extends Service {
 	 * @return
 	 */
 	public String getLogFilePath() {
-		// createLogDir();
 		String logFileName = getLogFileName();
 		if (CURR_LOG_TYPE == MEMORY_TYPE) {
 			CURR_INSTALL_LOG_NAME = logFileName;
@@ -510,72 +524,6 @@ public class LogService extends Service {
 			if (file.length() >= MEMORY_LOG_FILE_MAX_SIZE) {
 				V2Log.d(TAG, "The log's size is too big!");
 				new LogCollectorThread().start();
-			}
-		}
-	}
-
-	/**
-	 * 创建日志目录
-	 */
-	private void createLogDir() {
-
-		File serviceFile = new File(LOG_SERVICE_LOG_DIR);
-			try {
-				boolean mkOk;
-				if (!serviceFile.exists()) {
-					mkOk = serviceFile.mkdir();
-					if (!mkOk){ 
-						recordLogServiceLog("create service log file failed , dir is not created successful");
-						V2Log.e(TAG, "create service log file failed , dir is not created successful");
-						return;
-					}
-					
-					serviceFile = new File(LOG_SERVICE_LOG_PATH);
-					if(!serviceFile.exists()){
-						mkOk = serviceFile.createNewFile();
-						if (!mkOk){ 
-							recordLogServiceLog("create service log file failed , dir is not created successful");
-							V2Log.e(TAG, "create service log file failed , dir is not created successful");
-							return;
-						}
-					}
-				}
-			} catch (IOException e) {
-				recordLogServiceLog("create service log file failed , dir is not created successful");
-				V2Log.e(TAG, e.getMessage(), e);
-				return;
-			}
-
-		File file = null;
-		if (CURR_LOG_TYPE == SDCARD_TYPE) {
-			try {
-				boolean mkOk;
-				file = new File(LOG_PATH_SDCARD_DIR);
-				if (!file.isDirectory()) {
-					mkOk = file.mkdirs();
-					if (!mkOk) {
-						mkOk = file.mkdirs();
-					}
-				}
-			} catch (Exception e) {
-				V2Log.e(TAG, e.getMessage(), e);
-				recordLogServiceLog("create log file failed , dir is not created successful");
-				return;
-			}
-		} else {
-			file = new File(LOG_PATH_MEMORY_DIR);
-			boolean mkOk;
-			if (!file.isDirectory()) {
-				try {
-					mkOk = file.mkdirs();
-					if (!mkOk) {
-						mkOk = file.mkdirs();
-					}
-				} catch (Exception e) {
-					V2Log.e(TAG, e.getMessage(), e);
-					recordLogServiceLog("create log file failed , dir is not created successful");
-					return;
-				}
 			}
 		}
 	}
@@ -751,6 +699,9 @@ public class LogService extends Service {
 				V2Log.e(TAG, e.getMessage(), e);
 			}
 		}
+		else{
+			sb.append(msg).append("\n");
+		}
 	}
 
 	/**
@@ -776,7 +727,6 @@ public class LogService extends Service {
 
 		@Override
 		public void run() {
-			try {
 				// 唤醒手机
 				wakeLock.acquire();
 
@@ -786,17 +736,18 @@ public class LogService extends Service {
 				List<ProcessInfo> processInfoList = getProcessInfoList(orgProcessList);
 				killLogcatProc(processInfoList);
 
-				createLogCollector();
+				try {
+					createLogCollector();
+				} catch (IOException e) {
+					e.printStackTrace();
+					throw new RuntimeException("createLogCollector : " + e.getMessage());
+				}
 
-				Thread.sleep(1000);// 休眠，创建文件，然后处理文件，不然该文件还没创建，会影响文件删除
+				SystemClock.sleep(1000);;// 休眠，创建文件，然后处理文件，不然该文件还没创建，会影响文件删除
 
 				handleLog();
 
 				wakeLock.release(); // 释放
-			} catch (Exception e) {
-				e.printStackTrace();
-				recordLogServiceLog(Log.getStackTraceString(e));
-			}
 		}
 	}
 
@@ -828,9 +779,11 @@ public class LogService extends Service {
 		}
 
 		public void run() {
+			InputStreamReader isr = null;
+			BufferedReader br = null;
 			try {
-				InputStreamReader isr = new InputStreamReader(is);
-				BufferedReader br = new BufferedReader(isr);
+				isr = new InputStreamReader(is);
+				br = new BufferedReader(isr);
 				String line = null;
 				while ((line = br.readLine()) != null) {
 					if (list != null) {
@@ -839,6 +792,22 @@ public class LogService extends Service {
 				}
 			} catch (IOException ioe) {
 				ioe.printStackTrace();
+			} finally {
+				if (isr != null) {
+					try {
+						isr.close();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+
+				if (br != null) {
+					try {
+						br.close();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
 			}
 		}
 	}
@@ -934,4 +903,41 @@ public class LogService extends Service {
 		unregisterReceiver(logTaskReceiver);
 	}
 
+	/**
+	 * 创建日志目录
+	 */
+	private void createLogDir() {
+
+		File file = null;
+		if (CURR_LOG_TYPE == SDCARD_TYPE) {
+			try {
+				file = new File(LOG_PATH_SDCARD_DIR);
+				if (!file.isDirectory() || !file.exists()) {
+					file.mkdirs();
+					if(!file.exists()){
+						V2Log.e(TAG, "create crash dir again!");
+						file.mkdirs();
+					}
+				}
+			} catch (Exception e) {
+				V2Log.e(TAG, e.getMessage(), e);
+				recordLogServiceLog("create log file failed , dir is not created successful");
+				return;
+			}
+		} else {
+			file = new File(LOG_PATH_MEMORY_DIR);
+			if (!file.isDirectory() || !file.exists()) {
+				try {
+					if(!file.exists()){
+						V2Log.e(TAG, "create crash dir again!");
+						file.mkdirs();
+					}
+				} catch (Exception e) {
+					V2Log.e(TAG, e.getMessage(), e);
+					recordLogServiceLog("create log file failed , dir is not created successful");
+					return;
+				}
+			}
+		}
+	}
 }

@@ -105,6 +105,9 @@ public class GlobalHolder {
 				if (u.getAddress() != null) {
 					cu.setAddress(u.getAddress());
 				}
+				if (u.getAccount() != null) {
+					cu.setAccount(u.getAccount());
+				}
 				cu.setAuthtype(u.getAuthtype());
 				if (u.getBirthday() != null) {
 					cu.setBirthday(u.getBirthday());

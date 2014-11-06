@@ -54,8 +54,10 @@ import com.v2tech.db.ContentDescriptor;
 import com.v2tech.db.ConversationProvider;
 import com.v2tech.db.DataBaseContext;
 import com.v2tech.service.BitmapManager;
+import com.v2tech.service.ChatService;
 import com.v2tech.service.ConferencMessageSyncService;
 import com.v2tech.service.ConferenceService;
+import com.v2tech.service.CrowdGroupService;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.service.MessageListener;
 import com.v2tech.service.jni.JNIResponse;
@@ -125,6 +127,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 	private IntentFilter intentFilter;
 
 	private ConferenceService cb;
+	private CrowdGroupService chatService;
 
 	private List<Conversation> mConvList;
 	private Set<Conversation> mUnreadConvList;
@@ -179,6 +182,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 			mCurrentTabFlag = Conversation.TYPE_CONTACT;
 		} else if (PublicIntent.TAG_GROUP.equals(tag)) {
 			mCurrentTabFlag = Conversation.TYPE_GROUP;
+			chatService = new CrowdGroupService();
 		}
 		mContext = getActivity();
 
@@ -1347,7 +1351,6 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 				.findViewById(R.id.pop_up_window_item);
 		tvItem.setVisibility(View.GONE);
 
-		final Conversation cov = mConvList.get(currentPosition);
 		mPouupView = (TextView) popWindow
 				.findViewById(R.id.pop_up_window_quit_crowd_item);
 
@@ -1357,13 +1360,25 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 
 			@Override
 			public void onClick(View v) {
-
-				Intent kick = new Intent();
-				kick.setAction(JNIService.JNI_BROADCAST_KICED_CROWD);
-				kick.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
-				kick.putExtra("crowd", cov.getExtId());
-				mContext.sendBroadcast(kick);
-
+				Conversation cov = mConvList.get(currentPosition);
+				CrowdGroup crowd = (CrowdGroup) GlobalHolder.getInstance()
+						.getGroupById(
+								GroupType.CHATING
+										.intValue(),
+								cov.getExtId());
+				// If group is null, means we have
+				// removed
+				// this conversaion
+				if (crowd != null) {
+					chatService.quitCrowd(crowd, null);
+					Intent kick = new Intent();
+					kick.setAction(JNIService.JNI_BROADCAST_KICED_CROWD);
+					kick.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
+					kick.putExtra("crowd", cov.getExtId());
+					mContext.sendBroadcast(kick);
+				}
+				else
+					V2Log.e(TAG, "quit crowd group failed .. id is :" + cov.getExtId());
 				mPopup.dismiss();
 			}
 

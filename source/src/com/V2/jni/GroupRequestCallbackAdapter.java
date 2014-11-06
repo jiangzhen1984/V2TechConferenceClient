@@ -130,6 +130,9 @@ public abstract class GroupRequestCallbackAdapter implements
 	}
 
 	
-	
+	@Override
+	public void OnJoinGroupError(int eGroupType, long nGroupID, int nErrorNo) {
+		
+	}
 
 }

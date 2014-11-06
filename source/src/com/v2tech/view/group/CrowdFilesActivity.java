@@ -568,13 +568,24 @@ public class CrowdFilesActivity extends Activity {
 				if (showUploaded) {
 					mCannelButton.setVisibility(View.INVISIBLE);
 				}
-				isInDeleteMode = true;
-				// Pause all uploading files
-				suspendOrResumeUploadingFiles(true);
-				adapter.notifyDataSetChanged();
-				// update upload button text to cancel
-				mShowUploadedFileButton
-						.setText(R.string.crowd_files_title_cancel_button);
+				
+				boolean showDeleteMode = false;
+				for (VCrowdFile file : mFiles) {
+					if(file.getUploader().getmUserId() == currentLoginUserID){
+						showDeleteMode = true;
+						break;
+					}
+				}
+				
+				if(showDeleteMode){
+					isInDeleteMode = true;
+					// Pause all uploading files
+					suspendOrResumeUploadingFiles(true);
+					adapter.notifyDataSetChanged();
+					// update upload button text to cancel
+					mShowUploadedFileButton
+							.setText(R.string.crowd_files_title_cancel_button);
+				}
 				return true;
 			}
 		}

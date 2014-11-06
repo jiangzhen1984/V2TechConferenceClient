@@ -97,7 +97,7 @@ public class TitleBar {
 		} else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1 && conf.densityDpi < 240) {
 			padding = DensityUtils.dip2px(context, 2);
 		} else {
-			padding = DensityUtils.dip2px(context, 12);
+			padding = DensityUtils.dip2px(context, 6);
 		}
 		
 	}

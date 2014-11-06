@@ -17,6 +17,7 @@ import com.v2tech.R;
 import com.v2tech.service.CrowdGroupService;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.service.MessageListener;
+import com.v2tech.util.ProgressUtils;
 import com.v2tech.view.JNIService;
 import com.v2tech.view.PublicIntent;
 import com.v2tech.view.bo.ConversationNotificationObject;
@@ -129,11 +130,10 @@ public class CrowdInvitationActivity extends Activity {
 		i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
 		i.putExtra("crowd", crowd.getId());
 		sendBroadcast(i);
-
-		vq.setReadState(VMessageQualification.ReadState.READ);
-		vq.setQualState(VMessageQualification.QualificationState.ACCEPTED);
-		MessageBuilder.updateQualicationMessage(mContext, vq);
-
+		
+		VMessageQualification message = MessageBuilder.queryQualMessageById(mContext, vq.getId());
+		vq.setQualState(message.getQualState());
+		vq.setReadState(message.getReadState());
 		updateView(false);
 	}
 
@@ -142,8 +142,6 @@ public class CrowdInvitationActivity extends Activity {
 				crowd.getCreator(), null);
 		vq.setReadState(VMessageQualification.ReadState.READ);
 		vq.setQualState(VMessageQualification.QualificationState.REJECT);
-		// Update message state to database;
-		MessageBuilder.updateQualicationMessage(mContext, vq);
 		updateView(false);
 	}
 
@@ -214,8 +212,14 @@ public class CrowdInvitationActivity extends Activity {
 					return;
 				}
 				mState = State.UPDATING;
-				service.acceptInvitation(crowd, new MessageListener(mLocalHandler,
-						ACCEPT_INVITATION_DONE, null));
+				VMessageQualification message = MessageBuilder.queryQualMessageById(mContext, vq.getId());
+				if(message.getQualState().intValue() != vq.getQualState().intValue())
+					handleAcceptDone();
+				else{
+					service.acceptInvitation(crowd, new MessageListener(mLocalHandler,
+							ACCEPT_INVITATION_DONE, null));
+					ProgressUtils.showNormalWithHintProgress(mContext, true).initTimeOut();
+				}
 			}
 		}
 
@@ -263,8 +267,14 @@ public class CrowdInvitationActivity extends Activity {
 						return;
 					}
 					mState = State.UPDATING;
-					service.refuseInvitation(crowd, mReasonET.getEditableText().toString(), new MessageListener(
-							mLocalHandler, REFUSE_INVITATION_DONE, null));
+					VMessageQualification message = MessageBuilder.queryQualMessageById(mContext, vq.getId());
+					if(message.getQualState().intValue() != vq.getQualState().intValue())
+						handleDeclineDone();
+					else{
+						service.refuseInvitation(crowd, mReasonET.getEditableText().toString(), new MessageListener(
+								mLocalHandler, REFUSE_INVITATION_DONE, null));
+						ProgressUtils.showNormalWithHintProgress(mContext, true).initTimeOut();
+					}
 				}
 				return;
 			} else {
@@ -291,9 +301,11 @@ public class CrowdInvitationActivity extends Activity {
 			}
 			switch (msg.what) {
 			case ACCEPT_INVITATION_DONE:
+				ProgressUtils.showNormalWithHintProgress(mContext, false);
 				handleAcceptDone();
 				break;
 			case REFUSE_INVITATION_DONE:
+				ProgressUtils.showNormalWithHintProgress(mContext, false);
 				handleDeclineDone();
 				break;
 

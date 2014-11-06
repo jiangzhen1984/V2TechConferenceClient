@@ -51,6 +51,7 @@ import com.v2tech.util.LogcatThread;
 import com.v2tech.util.Notificator;
 import com.v2tech.util.StorageUtil;
 import com.v2tech.view.conference.VideoActivityV2;
+import com.v2tech.view.conversation.MessageBuilder;
 
 public class MainApplication extends Application {
 
@@ -97,7 +98,7 @@ public class MainApplication extends Application {
 		initGloblePath();
 		String path = GlobalConfig.getGlobalPath();
 		initConfFile();
-
+		MessageBuilder.context = getApplicationContext();
 		// Load native library
 		System.loadLibrary("event");
 		System.loadLibrary("v2vi");

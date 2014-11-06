@@ -858,7 +858,7 @@ public class GroupRequest {
 	}
 
 	/**
-	 * The CallBack that join group failed 加入群失败（如群已经被删除等）TODO implement
+	 * The CallBack that join group failed 加入群失败（如群已经被删除等）
 	 * 
 	 * @param eGroupType
 	 * @param nGroupID
@@ -868,6 +868,14 @@ public class GroupRequest {
 		V2Log.e("GroupRequest UI", "OnJoinGroupError ---> eGroupType :"
 				+ eGroupType + " | nGroupID: " + nGroupID + " | nErrorNo: "
 				+ nErrorNo);
+		for (int i = 0; i < mCallbacks.size(); i++) {
+			WeakReference<GroupRequestCallback> wrcb = mCallbacks.get(i);
+			Object obj = wrcb.get();
+			if (obj != null) {
+				GroupRequestCallback callback = (GroupRequestCallback) obj;
+				callback.OnJoinGroupError(eGroupType, nGroupID, nErrorNo);
+			}
+		}
 	};
 
 	/**

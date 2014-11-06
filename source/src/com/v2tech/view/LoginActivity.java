@@ -50,6 +50,7 @@ import com.v2tech.service.UserService;
 import com.v2tech.service.jni.JNIResponse;
 import com.v2tech.service.jni.RequestLogInResponse;
 import com.v2tech.util.GlobalConfig;
+import com.v2tech.util.ProgressUtils;
 import com.v2tech.util.SPUtil;
 import com.v2tech.util.V2Toast;
 import com.v2tech.vo.User;
@@ -480,66 +481,12 @@ public class LoginActivity extends Activity {
 				// perform the user login attempt.
 				mLoginStatusMessageView
 						.setText(R.string.login_progress_signing_in);
-				showProgress(true);
+				ProgressUtils.showNormalProgress(mContext , true);
 				us.login(mEmailView.getText().toString(), mPasswordView
 						.getText().toString(), new MessageListener(mHandler,
 						LOG_IN_CALL_BACK, null));
 			}
 		}
-	}
-
-	private Dialog mProgressDialog;
-	private ImageView iv;
-	private RotateAnimation animation;
-
-	private void showProgress(final boolean show) {
-		if (animation == null) {
-			animation = new RotateAnimation(0f, 359f,
-					Animation.RELATIVE_TO_SELF, 0.5f,
-					Animation.RELATIVE_TO_SELF, 0.5f);
-			animation.setDuration(500);
-			animation.setRepeatCount(RotateAnimation.INFINITE);
-			animation.setRepeatMode(RotateAnimation.RESTART);
-			LinearInterpolator lin = new LinearInterpolator();
-			animation.setInterpolator(lin);
-		}
-		if (show == false) {
-			animation.cancel();
-			if (mProgressDialog != null) {
-				mProgressDialog.dismiss();
-				return;
-			}
-		}
-
-		if (mProgressDialog != null) {
-			if (!mProgressDialog.isShowing()) {
-				iv.startAnimation(animation);
-				mProgressDialog.show();
-			}
-			return;
-		}
-		final Dialog dialog = new Dialog(mContext, R.style.IpSettingDialog);
-		dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-		LinearLayout ll = new LinearLayout(mContext);
-		ll.setBackgroundColor(Color.TRANSPARENT);
-		ll.setOrientation(LinearLayout.VERTICAL);
-
-		iv = new ImageView(mContext);
-		iv.setImageResource(R.drawable.spin_black_70);
-		iv.setPadding(60, 60, 60, 60);
-		ll.addView(iv, new LinearLayout.LayoutParams(
-				ViewGroup.LayoutParams.MATCH_PARENT,
-				ViewGroup.LayoutParams.WRAP_CONTENT));
-
-		dialog.setContentView(ll);
-
-		dialog.setCancelable(false);
-		dialog.setCanceledOnTouchOutside(false);
-
-		mProgressDialog = dialog;
-		dialog.show();
-		iv.startAnimation(animation);
-
 	}
 
 	private static final int LOG_IN_CALL_BACK = 1;
@@ -584,7 +531,7 @@ public class LoginActivity extends Activity {
 					finish();
 				}
 
-				showProgress(false);
+				ProgressUtils.showNormalProgress(mContext , false);
 				break;
 			}
 		}

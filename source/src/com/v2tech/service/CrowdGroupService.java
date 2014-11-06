@@ -12,6 +12,7 @@ import com.V2.jni.GroupRequest;
 import com.V2.jni.GroupRequestCallbackAdapter;
 import com.V2.jni.ind.FileJNIObject;
 import com.V2.jni.ind.GroupFileJNIObject;
+import com.V2.jni.ind.GroupQualicationJNIObject;
 import com.V2.jni.ind.V2Group;
 import com.v2tech.service.jni.CreateCrowdResponse;
 import com.v2tech.service.jni.FileTransStatusIndication;
@@ -20,10 +21,13 @@ import com.v2tech.service.jni.FileTransStatusIndication.FileTransProgressStatusI
 import com.v2tech.service.jni.JNIResponse;
 import com.v2tech.service.jni.RequestFetchGroupFilesResponse;
 import com.v2tech.util.GlobalConfig;
+import com.v2tech.view.conversation.MessageBuilder;
 import com.v2tech.vo.Crowd;
 import com.v2tech.vo.CrowdGroup;
 import com.v2tech.vo.Group;
 import com.v2tech.vo.Group.GroupType;
+import com.v2tech.vo.VMessageQualification.QualificationState;
+import com.v2tech.vo.VMessageQualification.Type;
 import com.v2tech.vo.User;
 import com.v2tech.vo.VCrowdFile;
 
@@ -501,7 +505,7 @@ public class CrowdGroupService extends AbstractHandler {
 		}
 
 		/**
-		 * @deprecated
+		 * @deprecated never called
 		 */
 		@Override
 		public void OnAcceptInviteJoinGroup(int groupType, long groupId,
@@ -518,7 +522,8 @@ public class CrowdGroupService extends AbstractHandler {
 					CreateCrowdResponse.Result.SUCCESS);
 			Message.obtain(mCallbackHandler, ACCEPT_APPLICATION_CROWD, jniRes)
 					.sendToTarget();
-
+			MessageBuilder.updateQualicationMessageState(group.id, 
+					new GroupQualicationJNIObject(Type.CROWD_APPLICATION , QualificationState.ACCEPTED , null));
 		}
 		
 		@Override
@@ -528,6 +533,8 @@ public class CrowdGroupService extends AbstractHandler {
 					CreateCrowdResponse.Result.FAILED);
 			Message.obtain(mCallbackHandler, REFUSE_APPLICATION_CROWD, jniRes)
 					.sendToTarget();
+			MessageBuilder.updateQualicationMessageState(parseSingleCrowd.id, 
+					new GroupQualicationJNIObject(Type.CROWD_APPLICATION , QualificationState.ACCEPTED , reason));
 		}
 
 		@Override
@@ -557,9 +564,9 @@ public class CrowdGroupService extends AbstractHandler {
 			}
 		}
 
-		/*
-		 * Used to as callback of accept join crowd group
-		 * 
+		/**
+		 * Used to as callback of accept join crowd group <br />
+		 * ===OnAcceptInviteJoinGroup never called===
 		 * @see
 		 * com.V2.jni.GroupRequestCallbackAdapter#onAddGroupInfo(com.V2.jni.
 		 * ind.V2Group)
@@ -572,6 +579,8 @@ public class CrowdGroupService extends AbstractHandler {
 							CreateCrowdResponse.Result.SUCCESS);
 					Message.obtain(mCallbackHandler, ACCEPT_JOIN_CROWD, jniRes)
 							.sendToTarget();
+					MessageBuilder.updateQualicationMessageState(group.id, 
+							new GroupQualicationJNIObject(Type.CROWD_INVITATION , QualificationState.ACCEPTED , null));
 				} else {
 					JNIResponse jniRes = new CreateCrowdResponse(group.id,
 							CreateCrowdResponse.Result.SUCCESS);

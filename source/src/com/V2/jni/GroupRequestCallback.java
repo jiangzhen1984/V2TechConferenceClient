@@ -223,4 +223,11 @@ public interface GroupRequestCallback {
 		CREATE, RENAME, DESTROY
 	}
 
+	/**
+	 * Callback function which current user apply a crowd group , hanppen a mistake 
+	 * @param eGroupType
+	 * @param nGroupID
+	 * @param nErrorNo
+	 */
+	public void OnJoinGroupError(int eGroupType, long nGroupID, int nErrorNo);
 }
