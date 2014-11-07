@@ -469,7 +469,7 @@ public class MessageBodyView extends LinearLayout {
 	}
 
 	private void populateFileItem(List<VMessageFileItem> fileItems) {
-		final VMessageFileItem item = fileItems.get(0);
+		VMessageFileItem item = fileItems.get(0);
 		View fileRootView = LayoutInflater.from(getContext()).inflate(
 				R.layout.message_body_file_item, null, false);
 		ImageView fileIcon = (ImageView) fileRootView
@@ -979,8 +979,10 @@ public class MessageBodyView extends LinearLayout {
 							callback.requestDownloadFile(fileRootView, mMsg,
 									fileItem);
 							fileItem.setState(VMessageAbstractItem.STATE_FILE_DOWNLOADING);
+							fileItem.setDownloadedSize(0);
 							updateFailedFlag(false);
 							updateFileItemView(fileItem, fileRootView);
+							MessageLoader.updateFileItemState(getContext(), fileItem);
 						}
 					}
 					MessageLoader.updateChatMessageState(getContext(), mMsg);

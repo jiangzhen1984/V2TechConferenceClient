@@ -100,9 +100,7 @@ public class MessageBuilder {
 		bean.fileUUID = uuid;
 		VMessage vm = new VMessage(groupType, groupID, fromUser, toUser,
 				new Date(GlobalConfig.getGlobalServerTime()));
-		VMessageFileItem item = new VMessageFileItem(vm, uuid, bean.fileSize,
-				bean.filePath, bean.fileType);
-		item.setState(VMessageFileItem.STATE_FILE_SENDING);
+		VMessageFileItem item = new VMessageFileItem(vm, bean.filePath , VMessageFileItem.STATE_FILE_SENDING);
 		return item.getVm();
 	}
 
@@ -407,7 +405,7 @@ public class MessageBuilder {
 				ContentDescriptor.HistoriesMedia.CONTENT_URI, values);
 		return uri;
 	}
-
+	
 	public static int updateVMessageItem(Context context,
 			VMessageAbstractItem item) {
 		DataBaseContext mContext = new DataBaseContext(context);
@@ -647,8 +645,8 @@ public class MessageBuilder {
 	 * @param msg
 	 * @return
 	 */
-	public static int updateQualicationMessageState(
-			long groupID, GroupQualicationJNIObject obj) {
+	public static int updateQualicationMessageState(long groupID,
+			GroupQualicationJNIObject obj) {
 
 		DataBaseContext mContext = new DataBaseContext(context);
 		ContentValues values = new ContentValues();

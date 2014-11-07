@@ -203,7 +203,7 @@ public class FileService extends Service {
 					//build VMessage Object and save in database.
 					VMessage vm = new VMessage(V2GlobalEnum.GROUP_TYPE_CROWD, lfo.gid, GlobalHolder.getInstance().getCurrentUser(), null,
 							new Date(GlobalConfig.getGlobalServerTime())); 
-					VMessageFileItem item = new VMessageFileItem(vm, bean.filePath);
+					VMessageFileItem item = new VMessageFileItem(vm , bean.filePath , 0);
 					item.setUuid(bean.fileUUID);
 					//put to map
 					mMoniterMap.put(item.getUuid(), item);

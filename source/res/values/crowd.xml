@@ -59,6 +59,7 @@
     <string name="crowd_files_button_name_download">下载</string>
     <string name="crowd_files_button_name_pause">暂停</string>
     <string name="crowd_files_button_name_resume">继续</string>
+    <string name="crowd_files_name_open_file">打开</string>
     <string name="crowd_files_button_name_redownload">重新下载</string>
     <string name="crowd_files_name_downloaded">已下载</string>
     <string name="crowd_files_name_uploaded">已上传</string>

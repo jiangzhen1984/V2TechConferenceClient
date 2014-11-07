@@ -13,6 +13,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
+import android.text.TextUtils;
 
 import com.V2.jni.V2GlobalEnum;
 import com.V2.jni.util.V2Log;
@@ -21,8 +22,6 @@ import com.v2tech.db.ContentDescriptor.HistoriesMessage;
 import com.v2tech.db.DataBaseContext;
 import com.v2tech.db.V2TechDBHelper;
 import com.v2tech.service.GlobalHolder;
-import com.v2tech.util.DateUtil;
-import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.XmlParser;
 import com.v2tech.vo.AddFriendHistorieNode;
 import com.v2tech.vo.AudioVideoMessageBean;
@@ -42,6 +41,7 @@ public class MessageLoader {
 	public static final int CONTACT_TYPE = -5;
 	public static final int CROWD_TYPE = -6;
 	private static final String TAG = "MessageLoader";
+	public static Context context;
 
 	/**
 	 * 查询前要判断该用户的数据库是否存在，不存在则创建
@@ -50,8 +50,8 @@ public class MessageLoader {
 	 * @param uid2
 	 * @return
 	 */
-	public static boolean isTableExist(Context context, long groupType, long groupID,
-			long uid2, int type) {
+	public static boolean isTableExist(Context context, long groupType,
+			long groupID, long uid2, int type) {
 
 		String name;
 		switch (type) {
@@ -62,40 +62,44 @@ public class MessageLoader {
 			name = "Histories_0_0_" + uid2;
 			break;
 		default:
-			throw new RuntimeException("create database fialed... type is : " + type);
+			throw new RuntimeException("create database fialed... type is : "
+					+ type);
 		}
-		
-		List<String> cacheNames = GlobalHolder.getInstance().getDataBaseTableCacheName();
+
+		List<String> cacheNames = GlobalHolder.getInstance()
+				.getDataBaseTableCacheName();
 		boolean flag = true;
-		if(!cacheNames.contains(name)){
-			//创建表
+		if (!cacheNames.contains(name)) {
+			// 创建表
 			boolean isCreate = ContentDescriptor.execSQLCreate(context, name);
-			if(isCreate){
-				GlobalHolder.getInstance().getDataBaseTableCacheName().add(name);
+			if (isCreate) {
+				GlobalHolder.getInstance().getDataBaseTableCacheName()
+						.add(name);
 				flag = true;
-			}
-			else{
+			} else {
 				V2Log.d(TAG, "create database fialed... name is : " + name);
 				flag = false;
 			}
 		}
-		
-		//init dataBase path
-		if(flag){
+
+		// init dataBase path
+		if (flag) {
 			ContentDescriptor.HistoriesMessage.PATH = name;
 			ContentDescriptor.HistoriesMessage.NAME = name;
 			ContentDescriptor.URI_MATCHER.addURI(ContentDescriptor.AUTHORITY,
 					HistoriesMessage.PATH, HistoriesMessage.TOKEN);
 			ContentDescriptor.URI_MATCHER.addURI(ContentDescriptor.AUTHORITY,
-					HistoriesMessage.PATH + "/#", HistoriesMessage.TOKEN_WITH_ID);
-			ContentDescriptor.URI_MATCHER
-					.addURI(ContentDescriptor.AUTHORITY, HistoriesMessage.PATH
-							+ "/page", HistoriesMessage.TOKEN_BY_PAGE);
+					HistoriesMessage.PATH + "/#",
+					HistoriesMessage.TOKEN_WITH_ID);
+			ContentDescriptor.URI_MATCHER.addURI(ContentDescriptor.AUTHORITY,
+					HistoriesMessage.PATH + "/page",
+					HistoriesMessage.TOKEN_BY_PAGE);
 			ContentDescriptor.HistoriesMessage.CONTENT_URI = ContentDescriptor.BASE_URI
 					.buildUpon()
-					.appendPath(ContentDescriptor.HistoriesMessage.PATH).build();
+					.appendPath(ContentDescriptor.HistoriesMessage.PATH)
+					.build();
 		}
-		
+
 		return flag;
 	}
 
@@ -579,15 +583,15 @@ public class MessageLoader {
 	 */
 	public static List<VCrowdFile> loadGroupUpLoadingFileMessage(
 			Context context, int type, long gid, CrowdGroup crowd) {
-		
+
 		DataBaseContext mContext = new DataBaseContext(context);
 		List<VCrowdFile> fileItems = new ArrayList<VCrowdFile>();
-		if (!isTableExist(context, type, gid, 0, CROWD_TYPE)){
-			V2Log.d(TAG, "create database fialed...groupType : " + type + "  groupID : "
-					+ gid);
+		if (!isTableExist(context, type, gid, 0, CROWD_TYPE)) {
+			V2Log.d(TAG, "create database fialed...groupType : " + type
+					+ "  groupID : " + gid);
 			return fileItems;
 		}
-		
+
 		String sortOrder = ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_SAVEDATE
 				+ " desc";
 		String where = ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_GROUP_TYPE
@@ -682,17 +686,87 @@ public class MessageLoader {
 				+ " desc limit " + limit + " offset  " + offset;
 		return queryMessage(context, selection, args, order);
 	}
-	
+
+	/**
+	 * query VMessageFileItme Object by uuid and groupType..
+	 * 
+	 * @param groupType
+	 * @param uuid
+	 * @return
+	 */
+	public static VMessageFileItem queryFileItemByID(int groupType, String uuid) {
+
+		if (TextUtils.isEmpty(uuid))
+			throw new RuntimeException(
+					"MessageLoader queryFileItemByID ---> the given VMessageFileItem fileID is null");
+
+		DataBaseContext mContext = new DataBaseContext(context);
+		String selection = ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_ID
+				+ "=?";
+		Cursor cursor = null;
+		try {
+			String[] args = new String[] { uuid };
+			cursor = mContext.getContentResolver().query(
+					ContentDescriptor.HistoriesFiles.CONTENT_URI, null,
+					selection, args, null);
+
+			if (cursor == null)
+				return null;
+
+			if (cursor.getCount() <= 0)
+				return null;
+
+			while (cursor.moveToFirst()) {
+				long fromUserID = cursor
+						.getLong(cursor
+								.getColumnIndex(ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_FROM_USER_ID));
+				long toUserID = cursor
+						.getLong(cursor
+								.getColumnIndex(ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_TO_USER_ID));
+				long saveDate = cursor
+						.getLong(cursor
+								.getColumnIndex(ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_SAVEDATE));
+				String filePath = cursor
+						.getString(cursor
+								.getColumnIndex(ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_PATH));
+				int fileState = cursor
+						.getInt(cursor
+								.getColumnIndex(ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_SEND_STATE));
+				// long fileSize =
+				// cursor.getLong(cursor.getColumnIndex(ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_SIZE));
+
+				VMessage vm;
+				if (groupType == V2GlobalEnum.GROUP_TYPE_USER)
+					vm = new VMessage(groupType, -1, GlobalHolder.getInstance()
+							.getUser(fromUserID), GlobalHolder.getInstance()
+							.getUser(toUserID), new Date(saveDate));
+				else
+					vm = new VMessage(groupType, toUserID, GlobalHolder
+							.getInstance().getUser(fromUserID), null, new Date(
+							saveDate));
+
+				return new VMessageFileItem(vm, filePath, fileState);
+			}
+			return null;
+		} finally {
+			if (cursor != null)
+				cursor.close();
+		}
+	}
+
 	/**
 	 * query the given VMessageAbstractItem Object is exist.
+	 * 
 	 * @param context
 	 * @param vm
 	 * @return ture is exist , false no exist
 	 */
-	public static boolean queryVMessageItemByID(Context context, VMessageAbstractItem vm) {
-		if(vm == null)
-			throw new RuntimeException("MessageLoader queryVMessageItemByID ---> the VMessageAbstractItem Object is null");
-		
+	public static boolean queryVMessageItemByID(Context context,
+			VMessageAbstractItem vm) {
+		if (vm == null)
+			throw new RuntimeException(
+					"MessageLoader queryVMessageItemByID ---> the VMessageAbstractItem Object is null");
+
 		DataBaseContext mContext = new DataBaseContext(context);
 		String selection = "";
 		Uri uri;
@@ -700,24 +774,25 @@ public class MessageLoader {
 		switch (vm.getType()) {
 		case VMessageAbstractItem.ITEM_TYPE_FILE:
 			selection = ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_ID
-			+ "=?";
+					+ "=?";
 			uri = ContentDescriptor.HistoriesFiles.CONTENT_URI;
 			break;
 		default:
-			throw new RuntimeException("MessageLoader queryVMessageItemByID ---> invalid VMessageAbstractItem Type ... current type is : " + vm.getType());	
+			throw new RuntimeException(
+					"MessageLoader queryVMessageItemByID ---> invalid VMessageAbstractItem Type ... current type is : "
+							+ vm.getType());
 		}
-		
-		try{
+
+		try {
 			String[] args = new String[] { vm.getUuid() };
-			cursor = mContext.getContentResolver().query(
-					uri,
-					null, selection, args, null);
-			if (cursor != null && cursor.getCount() > 0) 
+			cursor = mContext.getContentResolver().query(uri, null, selection,
+					args, null);
+			if (cursor != null && cursor.getCount() > 0)
 				return true;
 			else
 				return false;
-		}finally{
-			if(cursor != null)
+		} finally {
+			if (cursor != null)
 				cursor.close();
 		}
 	}
@@ -814,21 +889,23 @@ public class MessageLoader {
 	public static int deleteMessage(Context context, VMessage vm) {
 		if (vm == null)
 			return -1;
-		
+
 		long remoteID = 0;
-		if(vm.getMsgCode() == V2GlobalEnum.GROUP_TYPE_USER){
-			
-			if(vm.getFromUser() == null || vm.getToUser() == null){
-				V2Log.e(TAG, "delete user to user chat message failed.. beacuse fromUser or toUser is null");
+		if (vm.getMsgCode() == V2GlobalEnum.GROUP_TYPE_USER) {
+
+			if (vm.getFromUser() == null || vm.getToUser() == null) {
+				V2Log.e(TAG,
+						"delete user to user chat message failed.. beacuse fromUser or toUser is null");
 				return -1;
 			}
-			
-			if(vm.getFromUser().getmUserId() == GlobalHolder.getInstance().getCurrentUserId())
+
+			if (vm.getFromUser().getmUserId() == GlobalHolder.getInstance()
+					.getCurrentUserId())
 				remoteID = vm.getToUser().getmUserId();
 			else
 				remoteID = vm.getFromUser().getmUserId();
 		}
-		
+
 		if (!isTableExist(
 				context,
 				vm.getMsgCode(),
@@ -889,32 +966,36 @@ public class MessageLoader {
 			long groupID, long userID) {
 
 		DataBaseContext mContext = new DataBaseContext(context);
-		List<String> tableNames = GlobalHolder.getInstance().getDataBaseTableCacheName();
+		List<String> tableNames = GlobalHolder.getInstance()
+				.getDataBaseTableCacheName();
 		String sql = "";
-		try{
-			if(tableNames.contains(ContentDescriptor.HistoriesMessage.NAME)){
+		try {
+			if (tableNames.contains(ContentDescriptor.HistoriesMessage.NAME)) {
 				tableNames.remove(ContentDescriptor.HistoriesMessage.NAME);
 				sql = "drop table " + ContentDescriptor.HistoriesMessage.NAME;
-			}
-			else{
-				V2Log.e(TAG, "drop table failed...table no exists , name is : " + ContentDescriptor.HistoriesMessage.NAME);
-				return ;
+			} else {
+				V2Log.e(TAG, "drop table failed...table no exists , name is : "
+						+ ContentDescriptor.HistoriesMessage.NAME);
+				return;
 			}
 			V2TechDBHelper dbHelper = new V2TechDBHelper(mContext);
 			SQLiteDatabase db = dbHelper.getReadableDatabase();
-			if (db != null && db.isOpen()) 
+			if (db != null && db.isOpen())
 				db.execSQL(sql);
 			else
-				V2Log.d(TAG, "May delete HistoriesMessage failed...DataBase state not normal...groupType : " + groupType + "  groupID : "
-						+ groupID + "  userID : " + userID);
-			}
-		catch(Exception e){
+				V2Log.d(TAG,
+						"May delete HistoriesMessage failed...DataBase state not normal...groupType : "
+								+ groupType + "  groupID : " + groupID
+								+ "  userID : " + userID);
+		} catch (Exception e) {
 			V2Log.d(TAG, e.getStackTrace() + "");
-			V2Log.d(TAG, "May delete HistoriesMessage failed...have exception...groupType : " + groupType + "  groupID : "
-					+ groupID + "  userID : " + userID);
-			return ;
+			V2Log.d(TAG,
+					"May delete HistoriesMessage failed...have exception...groupType : "
+							+ groupType + "  groupID : " + groupID
+							+ "  userID : " + userID);
+			return;
 		}
-		//删除其他信息
+		// 删除其他信息
 		String audioCondition = ContentDescriptor.HistoriesAudios.Cols.HISTORY_AUDIO_GROUP_TYPE
 				+ "= ? and "
 				+ ContentDescriptor.HistoriesAudios.Cols.HISTORY_AUDIO_GROUP_ID
@@ -929,26 +1010,24 @@ public class MessageLoader {
 				+ "= ?";
 		String fileCondition = ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_REMOTE_USER_ID
 				+ "= ?";
-		String[] tables = new String[]{ContentDescriptor.HistoriesAudios.CONTENT_URI.toString()
-				,ContentDescriptor.HistoriesGraphic.CONTENT_URI.toString()};
-		String[] conditions = new String[] {audioCondition,
-				imageCondition };
-		String[] names = new String[] {"audioCondition",
-				"imageCondition" };
+		String[] tables = new String[] {
+				ContentDescriptor.HistoriesAudios.CONTENT_URI.toString(),
+				ContentDescriptor.HistoriesGraphic.CONTENT_URI.toString() };
+		String[] conditions = new String[] { audioCondition, imageCondition };
+		String[] names = new String[] { "audioCondition", "imageCondition" };
 		String[] args = new String[] { String.valueOf(groupType),
 				String.valueOf(groupID), String.valueOf(userID) };
 
 		for (int i = 0; i < conditions.length; i++) {
 			int ret = mContext.getContentResolver().delete(
-					Uri.parse(tables[i]),
-					conditions[i], args);
+					Uri.parse(tables[i]), conditions[i], args);
 			if (ret <= 0)
 				V2Log.d(TAG, "May delete " + names[i]
 						+ " failed...groupType : " + groupType + "  groupID : "
 						+ groupID + "  userID : " + userID);
 		}
 
-		//删除文件
+		// 删除文件
 		String[] fileArgs;
 		if (groupType == V2GlobalEnum.GROUP_TYPE_USER)
 			fileArgs = new String[] { String.valueOf(userID) };
@@ -960,24 +1039,28 @@ public class MessageLoader {
 				fileArgs);
 		if (ret <= 0)
 			V2Log.d(TAG, "May delete fileConditions failed...groupType : "
-					+ groupType + "  groupID : " + groupID + "  userID : " + userID);
+					+ groupType + "  groupID : " + groupID + "  userID : "
+					+ userID);
 	}
-	
+
 	/**
 	 * according crowd group id , delete all verification message..
+	 * 
 	 * @param context
 	 * @param groupID
 	 */
-	public static void deleteCrowdVerificationMessage(Context context ,
+	public static void deleteCrowdVerificationMessage(Context context,
 			long groupID) {
-		
+
 		DataBaseContext mContext = new DataBaseContext(context);
 		int ret = mContext.getContentResolver().delete(
 				ContentDescriptor.HistoriesCrowd.CONTENT_URI,
-				ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_ID
-						+ "=?", new String[] { String.valueOf(groupID) });
-		if(ret <= 0)
-			V2Log.d(TAG, "May delete CrowdVerificationMessage failed...groupID : " + groupID);
+				ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_ID + "=?",
+				new String[] { String.valueOf(groupID) });
+		if (ret <= 0)
+			V2Log.d(TAG,
+					"May delete CrowdVerificationMessage failed...groupID : "
+							+ groupID);
 	}
 
 	/**
@@ -1033,6 +1116,44 @@ public class MessageLoader {
 	}
 
 	/**
+	 * update VMessageFileItem Object state to failed by fileID..
+	 * @param fileID
+	 * @return
+	 */
+	public static int updateFileItemStateToFailed(String fileID) {
+
+		if (TextUtils.isEmpty(fileID))
+			throw new RuntimeException(
+					"MessageLoader queryFileItemByID ---> the given VMessageFileItem fileID is null");
+		
+		VMessageFileItem fileItem = MessageLoader.queryFileItemByID(
+				V2GlobalEnum.GROUP_TYPE_USER, fileID);
+		if(fileItem == null){
+			V2Log.e(TAG, "updateFileItemStateToFailed --> get VMessageFileItem Object failed...fileID is " + fileID);
+			return -1;
+		}
+		
+		DataBaseContext mContext = new DataBaseContext(context);
+		ContentValues values = new ContentValues();
+		if (fileItem.getState() == VMessageAbstractItem.STATE_FILE_DOWNLOADING)
+			values.put(
+					ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_SEND_STATE,
+					VMessageAbstractItem.STATE_FILE_DOWNLOADED_FALIED);
+		else if (fileItem.getState() == VMessageAbstractItem.STATE_FILE_SENDING)
+			values.put(
+					ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_SEND_STATE,
+					VMessageAbstractItem.STATE_FILE_SENT_FALIED);
+		else
+			return -1;
+		String where = ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_ID
+				+ "= ?";
+		String[] selectionArgs = new String[] { fileItem.getUuid() };
+		return mContext.getContentResolver().update(
+				ContentDescriptor.HistoriesFiles.CONTENT_URI, values, where,
+				selectionArgs);
+	}
+
+	/**
 	 * update the given audio message read state...
 	 * 
 	 * @param context
@@ -1060,9 +1181,10 @@ public class MessageLoader {
 				ContentDescriptor.HistoriesFiles.CONTENT_URI, values, where,
 				selectionArgs);
 	}
-	
+
 	/**
 	 * 更新群邀请或申请的记录的已读和未读状态
+	 * 
 	 * @param context
 	 * @return
 	 */
@@ -1079,14 +1201,16 @@ public class MessageLoader {
 				1);
 		String where = ContentDescriptor.HistoriesCrowd.Cols.OWNER_USER_ID
 				+ "= ?";
-		String[] selectionArgs = new String[] { String.valueOf(currentUser.getmUserId()) };
+		String[] selectionArgs = new String[] { String.valueOf(currentUser
+				.getmUserId()) };
 		return mContext.getContentResolver().update(
 				ContentDescriptor.HistoriesCrowd.CONTENT_URI, values, where,
 				selectionArgs);
 	}
-	
+
 	/**
 	 * 更新群加好友的记录的已读和未读状态
+	 * 
 	 * @param context
 	 * @return
 	 */
@@ -1103,12 +1227,12 @@ public class MessageLoader {
 				1);
 		String where = ContentDescriptor.HistoriesAddFriends.Cols.OWNER_USER_ID
 				+ "= ?";
-		String[] selectionArgs = new String[] { String.valueOf(currentUser.getmUserId()) };
+		String[] selectionArgs = new String[] { String.valueOf(currentUser
+				.getmUserId()) };
 		return mContext.getContentResolver().update(
-				ContentDescriptor.HistoriesAddFriends.CONTENT_URI, values, where,
-				selectionArgs);
+				ContentDescriptor.HistoriesAddFriends.CONTENT_URI, values,
+				where, selectionArgs);
 	}
-
 
 	// private static void loadVMessageItem(Context context, VMessage vm,
 	// int msgType) {
@@ -1196,17 +1320,16 @@ public class MessageLoader {
 	//
 	// cur.close();
 	// }
-	
-	
+
 	public static AddFriendHistorieNode getNewestFriendVerificationMessage(
 			Context context, User user) {
-		
+
 		DataBaseContext mContext = new DataBaseContext(context);
 		if (user == null) {
 			V2Log.e("To query failed...please check the given User Object");
 			return null;
 		}
-		
+
 		String selection = ContentDescriptor.HistoriesAddFriends.Cols.HISTORY_FRIEND_FROM_USER_ID
 				+ "= ? or "
 				+ ContentDescriptor.HistoriesAddFriends.Cols.HISTORY_FRIEND_TO_USER_ID
@@ -1220,11 +1343,11 @@ public class MessageLoader {
 				ContentDescriptor.HistoriesAddFriends.CONTENT_URI,
 				ContentDescriptor.HistoriesAddFriends.Cols.ALL_CLOS, selection,
 				selectionArgs, sortOrder);
-		
+
 		if (cr == null)
 			return null;
-		
-		if(cr.getCount() <= 0){
+
+		if (cr.getCount() <= 0) {
 			cr.close();
 			return null;
 		}
@@ -1256,6 +1379,7 @@ public class MessageLoader {
 		cr.close();
 		return tempNode;
 	}
+
 	/**
 	 * 
 	 * @param context
@@ -1623,16 +1747,8 @@ public class MessageLoader {
 				int fileSize = mCur
 						.getInt(mCur
 								.getColumnIndex(ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_SIZE));
-				int state = mCur
-						.getInt(mCur
-								.getColumnIndex(ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_SEND_STATE));
-				String path = mCur
-						.getString(mCur
-								.getColumnIndex(ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_PATH));
 				item.setState(fileTransState);
 				item.setFileSize(fileSize);
-				item.setState(state);
-				item.setFilePath(path);
 			}
 		}
 
@@ -1640,7 +1756,7 @@ public class MessageLoader {
 			mCur.close();
 		return true;
 	}
-	
+
 	/**
 	 * 根据传入的表名，判断当前数据库中是否存在该表
 	 * 

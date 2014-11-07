@@ -157,9 +157,8 @@ public class XmlParser {
 						}
 						
 						String filePath = msgEl.getAttribute("name");
-						String fileName = filePath.substring(filePath.lastIndexOf("/") + 1);
-						VMessageFileItem vii = new VMessageFileItem(vm, uuid,fileName);
-						vii.setFilePath(vii.getFilePath());
+						VMessageFileItem vii = new VMessageFileItem(vm, filePath , 0);
+						vii.setUuid(uuid);
 						vii.setNewLine(isNewLine);
 					}
 				}

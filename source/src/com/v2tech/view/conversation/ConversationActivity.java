@@ -86,6 +86,7 @@ import com.v2tech.service.jni.FileTransStatusIndication.FileTransProgressStatusI
 import com.v2tech.service.jni.JNIResponse.Result;
 import com.v2tech.service.jni.RequestChatServiceResponse;
 import com.v2tech.service.jni.RequestSendMessageResponse;
+import com.v2tech.util.FileUitls;
 import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.MessageUtil;
 import com.v2tech.util.SPUtil;
@@ -220,7 +221,7 @@ public class ConversationActivity extends Activity {
 	private boolean sendFile; // 用于从个人信息中传递过来的文件，只发送一次
 
 	/**
-	 * Record Audio item flags  
+	 * Record Audio item flags
 	 */
 	private VMessage playingAudioMessage;
 	private MessageBodyView playingAudioBodyView;
@@ -665,16 +666,22 @@ public class ConversationActivity extends Activity {
 			}
 
 			if (found) {
-				V2Log.d(TAG, "start palying next aduio item , id is : " + vm.getId());
+				V2Log.d(TAG,
+						"start palying next aduio item , id is : " + vm.getId());
 				List<VMessageAudioItem> items = vm.getAudioItems();
 				if (items.size() > 0
 						&& items.get(0).getState() == VMessageAbstractItem.STATE_UNREAD) {
 					this.scrollToPos(i);
 					MessageBodyView foundView = (MessageBodyView) wrapper
 							.getView();
-					if(foundView == null){
-						V2Log.d(TAG, "palying next aduio item failed , view is null , id is : " + vm.getId());
-						return false;
+					if (foundView == null) {
+						V2Log.d(TAG,
+								"palying next aduio item failed , view is null , id is : "
+										+ vm.getId());
+						MessageBodyView bodyView = new MessageBodyView(this,
+								vm, vm.isShowTime());
+						foundView = bodyView;
+						((VMessageAdater) wrapper).setView(bodyView);
 					}
 					VMessageAudioItem vMessageAudioItem = items.get(0);
 					listener.requestPlayAudio(foundView, vm, vMessageAudioItem);
@@ -949,10 +956,10 @@ public class ConversationActivity extends Activity {
 		public void playerStarted() {
 			playingAudioMessage.getAudioItems().get(0).setPlaying(true);
 			runOnUiThread(new Runnable() {
-				
+
 				@Override
 				public void run() {
-					playingAudioBodyView.startVoiceAnimation();					
+					playingAudioBodyView.startVoiceAnimation();
 				}
 			});
 			V2Log.i(TAG, "更改正在播放的audioItem标识为true , id is ："
@@ -980,14 +987,14 @@ public class ConversationActivity extends Activity {
 					&& playingAudioMessage.getAudioItems().size() > 0) {
 				playingAudioMessage.getAudioItems().get(0).setPlaying(false);
 				runOnUiThread(new Runnable() {
-					
+
 					@Override
 					public void run() {
 						playingAudioBodyView.stopVoiceAnimation();
 					}
 				});
-				V2Log.i(TAG,
-						"更改正在播放的audioItem标识为false , id is ：" + playingAudioMessage.getId() + " playing over!");
+				V2Log.i(TAG, "更改正在播放的audioItem标识为false , id is ："
+						+ playingAudioMessage.getId() + " playing over!");
 			}
 			// Call in main thread
 			Message.obtain(lh, PLAY_NEXT_UNREAD_MESSAGE).sendToTarget();
@@ -1400,8 +1407,17 @@ public class ConversationActivity extends Activity {
 		@Override
 		public void onClick(View arg0) {
 			if (SPUtil.checkCurrentAviNetwork(mContext)) {
-				Intent intent = new Intent(ConversationActivity.this,
-						ConversationSelectFileEntry.class);
+				Intent intent = null;
+				if (currentConversationViewType == V2GlobalEnum.GROUP_TYPE_USER) {
+					intent = new Intent(ConversationActivity.this,
+							ConversationSelectFileEntry.class);
+				} else if (currentConversationViewType == V2GlobalEnum.GROUP_TYPE_CROWD) {
+					intent = new Intent(ConversationActivity.this,
+							ConversationSelectFile.class);
+					intent.putExtra("type", "crowdFile");
+				} else {
+					return;
+				}
 				startActivityForResult(intent, RECEIVE_SELECTED_FILE);
 			} else {
 
@@ -1995,8 +2011,9 @@ public class ConversationActivity extends Activity {
 				} else {
 					item.setState(VMessageAbstractItem.STATE_NORMAL);
 				}
+				MessageLoader.updateFileItemState(mContext,
+						(VMessageFileItem) item);
 			}
-
 			Message.obtain(lh, SEND_MESSAGE, v).sendToTarget();
 			notificateConversationUpdate(true, v.getId());
 		}
@@ -2203,6 +2220,7 @@ public class ConversationActivity extends Activity {
 
 	private void updateFileProgressView(String uuid, long tranedSize,
 			int progressType) {
+		V2Log.e(TAG, "updateFileProgressView was called");
 		for (int i = 0; i < messageArray.size(); i++) {
 			VMessage vm = (VMessage) messageArray.get(i).getItemObject();
 			if (vm.getItems().size() > 0) {
@@ -2210,7 +2228,6 @@ public class ConversationActivity extends Activity {
 				if (item.getType() == VMessageAbstractItem.ITEM_TYPE_FILE
 						&& item.getUuid().equals(uuid)) {
 					VMessageFileItem vfi = ((VMessageFileItem) item);
-
 					switch (progressType) {
 					case FileTransStatusIndication.IND_TYPE_PROGRESS_END:
 						if (vfi.getState() == VMessageAbstractItem.STATE_FILE_SENDING) {
@@ -2228,7 +2245,6 @@ public class ConversationActivity extends Activity {
 					CommonAdapterItemWrapper common = messageArray.get(i);
 					MessageBodyView mv = (MessageBodyView) common.getView();
 					if (mv != null) {
-
 						mv.updateView(vfi);
 					} else {
 						notificateConversationUpdate(true, vm.getId());
@@ -2301,9 +2317,10 @@ public class ConversationActivity extends Activity {
 						break;
 					}
 
-					if (!isStopped)
-						((MessageBodyView) messageArray.get(i).getView())
-								.updateView(item);
+					MessageBodyView view = (MessageBodyView) messageArray
+							.get(i).getView();
+					if (!isStopped && view != null)
+						view.updateView(item);
 				}
 			}
 		}
@@ -2556,10 +2573,11 @@ public class ConversationActivity extends Activity {
 								user, null, new Date(
 										GlobalConfig.getGlobalServerTime()));
 						VMessageFileItem item = new VMessageFileItem(vm,
-								fileJNIObject.fileName, fileJNIObject.fileType);
+								fileJNIObject.fileName,
+								VMessageFileItem.STATE_FILE_SENT,
+								fileJNIObject.fileId);
 						item.setFileSize(fileJNIObject.fileSize);
 						item.setUuid(fileJNIObject.fileId);
-						item.setState(VMessageFileItem.STATE_FILE_SENT);
 						addMessageToContainer(vm);
 						// send notification
 						notificateConversationUpdate(true, vm.getId());
@@ -2721,9 +2739,10 @@ public class ConversationActivity extends Activity {
 									break;
 								}
 
-								if (!isStopped)
-									((MessageBodyView) messageArray.get(i)
-											.getView()).updateView(vfi);
+								MessageBodyView view = (MessageBodyView) messageArray
+										.get(i).getView();
+								if (!isStopped && view != null)
+									view.updateView(vfi);
 							}
 						}
 					}
@@ -2743,15 +2762,16 @@ public class ConversationActivity extends Activity {
 												+ vfi.getFileName()
 												+ "-- , There is an error in the process of sending was happend...error code is :"
 												+ cannelError.errorCode);
-								// vfi.setDownloadedSize(0);
-								// vfi.setState(VMessageFileItem.);
-								// int updates = MessageBuilder
-								// .updateVMessageItemToSentFalied(
-								// ConversationView.this, vm);
-								// Log.e(TAG, "updates success : " +
-								// updates);
-								// ((MessageBodyView) messageArray.get(i)
-								// .getView()).updateView(vfi);
+								if (vfi.getState() == VMessageAbstractItem.STATE_FILE_DOWNLOADING)
+									vfi.setState(VMessageAbstractItem.STATE_FILE_DOWNLOADED_FALIED);
+								else if (vfi.getState() == VMessageAbstractItem.STATE_FILE_SENDING)
+									vfi.setState(VMessageAbstractItem.STATE_FILE_SENT_FALIED);
+								MessageBuilder.updateVMessageItemToSentFalied(
+										mContext, vm);
+								MessageBodyView view = (MessageBodyView) messageArray
+										.get(i).getView();
+								if (view != null)
+									view.updateView(vfi);
 							}
 						}
 					}
@@ -2805,33 +2825,8 @@ public class ConversationActivity extends Activity {
 
 		for (VMessageFileItem vMessageFileItem : fileItems) {
 			fileName = vMessageFileItem.getFileName();
-			if (fileName.endsWith(".jpg") || fileName.endsWith(".png")
-					|| fileName.endsWith(".jpeg") || fileName.endsWith(".bmp")
-					|| fileName.endsWith("gif")) {
-				vMessageFileItem.setFileType(1); // PICTURE = 1
-
-			} else if (fileName.endsWith(".doc")) {
-				vMessageFileItem.setFileType(2); // WORD = 2
-			} else if (fileName.endsWith(".xls")) {
-				vMessageFileItem.setFileType(3); // EXCEL = 3
-			} else if (fileName.endsWith(".pdf")) {
-				vMessageFileItem.setFileType(4); // PDF = 4
-			} else if (fileName.endsWith(".ppt") || fileName.endsWith(".pptx")) {
-				vMessageFileItem.setFileType(5); // PPT = 5
-			} else if (fileName.endsWith(".zip") || fileName.endsWith(".rar")) {
-				vMessageFileItem.setFileType(6); // ZIP = 6
-			} else if (fileName.endsWith(".vsd") || fileName.endsWith(".vss")
-					|| fileName.endsWith(".vst") || fileName.endsWith(".vdx")) {
-				vMessageFileItem.setFileType(7); // VIS = 7
-			} else if (fileName.endsWith(".mp4") || fileName.endsWith(".rmvb")
-					|| fileName.endsWith(".avi") || fileName.endsWith(".3gp")) {
-				vMessageFileItem.setFileType(8); // VIDEO = 8
-			} else if (fileName.endsWith(".mp3") || fileName.endsWith(".wav")
-					|| fileName.endsWith(".ape") || fileName.endsWith(".wmv")) {
-				vMessageFileItem.setFileType(9); // SOUND = 9
-			} else {
-				vMessageFileItem.setFileType(10); // OTHER = 10
-			}
+			int fileType = FileUitls.adapterFileIcon(fileName);
+			vMessageFileItem.setFileType(fileType);
 		}
 	}
 

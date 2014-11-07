@@ -6,9 +6,10 @@ import java.text.DecimalFormat;
 import java.text.Format;
 import java.util.UUID;
 
-import com.v2tech.service.GlobalHolder;
+import android.text.TextUtils;
+
+import com.v2tech.util.FileUitls;
 import com.v2tech.util.GlobalConfig;
-import com.v2tech.util.SPUtil;
 
 public class VMessageFileItem extends VMessageAbstractItem {
 
@@ -37,53 +38,56 @@ public class VMessageFileItem extends VMessageAbstractItem {
 	// Always send offline file
 	private int transType = 2;
 
-	public VMessageFileItem(VMessage vm, String filePath) {
-		super(vm);
-		this.filePath = filePath;
-		if (filePath != null) {
-			int start = filePath.lastIndexOf("/");
-			if (start != -1) {
-				this.fileName = filePath.substring(start + 1);
-			}
-			File f = new File(filePath);
-			fileSize = f.length();
-		}
-		this.type = VMessageAbstractItem.ITEM_TYPE_FILE;
-		this.uuid = UUID.randomUUID().toString();
+	public VMessageFileItem(VMessage vm, String filePath , int fileState) {
+		this(vm, null, filePath, null, 0 , fileState, 0, 0, 0, -1 , 2);
 	}
 
-	public VMessageFileItem(VMessage vm, String filePath, int fileType) {
-		super(vm);
-		this.filePath = filePath;
-		if (filePath != null) {
-			int start = filePath.lastIndexOf("/");
-			if (start != -1) {
-				this.fileName = filePath.substring(start + 1);
-			}
-			File f = new File(filePath);
-			fileSize = f.length();
-		}
-		this.type = VMessageAbstractItem.ITEM_TYPE_FILE;
-		this.uuid = UUID.randomUUID().toString();
-		this.fileType = fileType;
+	public VMessageFileItem(VMessage vm, String fileName , int fileState ,String uuid) {
+		this(vm, uuid, null, fileName, fileState ,0, 0, 0, 0, -1, 2);
 	}
 
-	public VMessageFileItem(VMessage vm, String uuid, String fileName) {
+	public VMessageFileItem(VMessage vm, String fileID, long fileSize, int fileState ,
+			String fileName, int fileType) {
+		this(vm, fileID, null, fileName , fileSize, fileState , 0, 0, 0, fileType, 2);
+	}
+
+	public VMessageFileItem(VMessage vm, String uuid, String filePath,
+			String fileName, long fileSize, int fileState , float progress,
+			long downloadedSize, float speed, int fileType, int transType) {
 		super(vm);
-		this.fileName = fileName;
 		this.uuid = uuid;
-		this.type = VMessageAbstractItem.ITEM_TYPE_FILE;
-	}
-
-	public VMessageFileItem(VMessage vm, String fileID, long fileSize,
-			String filePath, int transType) {
-		super(vm);
-		this.uuid = fileID;
 		this.filePath = filePath;
+		this.fileName = fileName;
 		this.fileSize = fileSize;
+		this.state = fileState;
+		this.progress = progress;
+		this.downloadedSize = downloadedSize;
+		this.speed = speed;
+		this.fileType = fileType;
 		this.transType = transType;
-		this.state = transType;
 		this.type = VMessageAbstractItem.ITEM_TYPE_FILE;
+
+		if (TextUtils.isEmpty(uuid))
+			this.uuid = UUID.randomUUID().toString();
+
+		if (!TextUtils.isEmpty(fileName) && TextUtils.isEmpty(filePath)) {
+			this.filePath = GlobalConfig.getGlobalFilePath() + "/" + fileName;
+		}
+
+		if (TextUtils.isEmpty(fileName) && !TextUtils.isEmpty(filePath)) {
+			int start = filePath.lastIndexOf("/");
+			if (start != -1)
+				this.fileName = filePath.substring(start + 1);
+		}
+
+		if (fileType == -1 && !TextUtils.isEmpty(this.fileName))
+			this.fileType = FileUitls.adapterFileIcon(this.fileName);
+
+		if (fileSize == 0 && !TextUtils.isEmpty(filePath)) {
+			File file = new File(filePath);
+			if (file != null && file.isFile())
+				this.fileSize = file.length();
+		}
 	}
 
 	public long getFileSize() {
@@ -109,17 +113,10 @@ public class VMessageFileItem extends VMessageAbstractItem {
 	}
 
 	public String getFileName() {
-		if (fileName == null && filePath != null) {
-			fileName = filePath.substring(filePath.lastIndexOf("/") + 1);
-		}
 		return fileName;
 	}
 
 	public String getFilePath() {
-		if (fileName != null && filePath == null) {
-//			filePath = GlobalConfig.getGlobalFilePath() + "/" + uuid + fileName.substring(fileName.lastIndexOf("."));
-			filePath = GlobalConfig.getGlobalFilePath() + "/" + fileName;
-		}
 		return filePath;
 	}
 
@@ -133,28 +130,29 @@ public class VMessageFileItem extends VMessageAbstractItem {
 
 	@Override
 	public String toXmlItem() {
-		
-		if(filePath == null)
+
+		if (filePath == null)
 			fileName = getFilePath();
-		
+
 		StringBuilder sb = new StringBuilder();
-//		String url = "http://" + GlobalConfig.GLOBAL_IP_ADDRESS + ":" + 
-//				GlobalConfig.GLOBAL_PORT + "/crowd/" + uuid + "/" + fileName;
-//		sb.append(
-//				"<filelist><file encrypttype=\"0\" id=\"" + uuid + "\" name=\"" + fileName
-//				+ "\" size=\"" + fileSize + "\" time=\""
-//				+ GlobalConfig.getGlobalServerTime() + "\" uploader=\"" + GlobalHolder.getInstance().getCurrentUserId()
-//				+ "\" url=\"" + url + "\" /></filelist>").append("\n");
-		sb.append(
-				"<file id=\"" + uuid + "\" name=\"" + filePath
-				+ "\" />").append("\n");
+		// String url = "http://" + GlobalConfig.GLOBAL_IP_ADDRESS + ":" +
+		// GlobalConfig.GLOBAL_PORT + "/crowd/" + uuid + "/" + fileName;
+		// sb.append(
+		// "<filelist><file encrypttype=\"0\" id=\"" + uuid + "\" name=\"" +
+		// fileName
+		// + "\" size=\"" + fileSize + "\" time=\""
+		// + GlobalConfig.getGlobalServerTime() + "\" uploader=\"" +
+		// GlobalHolder.getInstance().getCurrentUserId()
+		// + "\" url=\"" + url + "\" /></filelist>").append("\n");
+		sb.append("<file id=\"" + uuid + "\" name=\"" + filePath + "\" />")
+				.append("\n");
 		return sb.toString();
 	}
 
 	public float getProgress() {
 		return progress;
 	}
-	
+
 	public void setProgress(float progress) {
 		this.progress = progress;
 	}

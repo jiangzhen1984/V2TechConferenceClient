@@ -10,6 +10,7 @@ import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import android.graphics.Bitmap;
+import android.util.SparseArray;
 
 import com.V2.jni.V2GlobalEnum;
 import com.V2.jni.ind.V2Group;
@@ -52,6 +53,11 @@ public class GlobalHolder {
 	private GlobalState mState = new GlobalState();
 	
 	private List<String> dataBaseTableCacheName = new ArrayList<String>();
+	
+	/**
+	 * May some people would add you become friend when user logined successfully , and need to give user hint. 
+	 */
+	private SparseArray<Long> addFriendToShow = new SparseArray<Long>(); 
 
 	public static synchronized GlobalHolder getInstance() {
 		if (holder == null) {
@@ -648,6 +654,10 @@ public class GlobalHolder {
 	public Bitmap getUserAvatar(long id) {
 		Long key = Long.valueOf(id);
 		return mAvatarBmHolder.get(key);
+	}
+	
+	public SparseArray<Long> getAddFriendToShow() {
+		return addFriendToShow;
 	}
 	
 	public List<String> getDataBaseTableCacheName() {

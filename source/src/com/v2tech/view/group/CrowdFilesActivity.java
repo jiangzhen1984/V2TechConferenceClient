@@ -43,6 +43,7 @@ import com.v2tech.service.jni.FileTransStatusIndication.FileTransProgressStatusI
 import com.v2tech.service.jni.JNIResponse;
 import com.v2tech.service.jni.RequestFetchGroupFilesResponse;
 import com.v2tech.util.GlobalConfig;
+import com.v2tech.util.FileUitls;
 import com.v2tech.util.V2Toast;
 import com.v2tech.view.JNIService;
 import com.v2tech.view.conversation.ConversationSelectFile;
@@ -226,8 +227,7 @@ public class CrowdFilesActivity extends Activity {
 			mCannelButton.setVisibility(View.INVISIBLE);
 			showUploaded = false;
 			mTitle.setText(R.string.crowd_files_title);
-			mShowUploadedFileButton
-			.setText(R.string.crowd_files_title_upload);
+			mShowUploadedFileButton.setText(R.string.crowd_files_title_upload);
 			mShowUploadedFileButton.setVisibility(View.VISIBLE);
 			adapterUploadShow();
 			adapter.notifyDataSetChanged();
@@ -577,17 +577,16 @@ public class CrowdFilesActivity extends Activity {
 					// update upload button text to cancel
 					mShowUploadedFileButton
 							.setText(R.string.crowd_files_title_cancel_button);
-				}
-				else{
+				} else {
 					boolean showDeleteMode = false;
 					for (VCrowdFile file : mFiles) {
-						if(file.getUploader().getmUserId() == currentLoginUserID){
+						if (file.getUploader().getmUserId() == currentLoginUserID) {
 							showDeleteMode = true;
 							break;
 						}
 					}
-					
-					if(showDeleteMode){
+
+					if (showDeleteMode) {
 						isInDeleteMode = true;
 						// Pause all uploading files
 						suspendOrResumeUploadingFiles(true);
@@ -889,10 +888,16 @@ public class CrowdFilesActivity extends Activity {
 				item.mProgressLayout.setVisibility(View.VISIBLE);
 				break;
 			case DOWNLOADED:
+				item.mFileButton
+						.setText(R.string.crowd_files_name_open_file);
+				item.mFileButton.setVisibility(View.VISIBLE);
+				item.mFileText.setVisibility(View.GONE);
+				item.mFileProgress.setVisibility(View.GONE);
+				item.mFailedIcon.setVisibility(View.GONE);
+				item.mProgressLayout.setVisibility(View.GONE);
+				break;
 			case UPLOADED:
-				item.mFileText
-						.setText(fs == VFile.State.DOWNLOADED ? R.string.crowd_files_name_downloaded
-								: R.string.crowd_files_name_uploaded);
+				item.mFileText.setText(R.string.crowd_files_name_uploaded);
 				item.mFileText.setVisibility(View.VISIBLE);
 				item.mFileButton.setVisibility(View.GONE);
 				item.mFileProgress.setVisibility(View.GONE);
@@ -1000,7 +1005,7 @@ public class CrowdFilesActivity extends Activity {
 					return;
 				}
 
-				if(item.mFileDeleteButton.getVisibility() == View.VISIBLE){
+				if (item.mFileDeleteButton.getVisibility() == View.VISIBLE) {
 					item.mFileDeleteButton.setVisibility(View.GONE);
 					switch (tag.vf.getState()) {
 					case DOWNLOAD_FAILED:
@@ -1017,7 +1022,7 @@ public class CrowdFilesActivity extends Activity {
 						break;
 					}
 					tag.vf.setFlag(HIDE_DELETE_BUTTON_FLAG);
-				}else{
+				} else {
 					item.mFileDeleteButton.setVisibility(View.VISIBLE);
 					item.mFailedIcon.setVisibility(View.GONE);
 					item.mFileButton.setVisibility(View.GONE);
@@ -1092,8 +1097,9 @@ public class CrowdFilesActivity extends Activity {
 					v.invalidate();
 					service.handleCrowdFile(file,
 							FileOperationEnum.OPERATION_RESUME_SEND, null);
+				} else if (file.getState() == VFile.State.DOWNLOADED) {
+					FileUitls.openFile(mContext, file.getPath());
 				}
-
 				adapter.notifyDataSetChanged();
 			}
 

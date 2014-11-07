@@ -1511,7 +1511,6 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 		Notificator.updateSystemNotification(mContext, conf.getName()
 				+ " 会议邀请:", creator == null ? "" : creator.getName(), 1,
 				enterConference, PublicIntent.VIDEO_NOTIFICATION_ID);
-
 	}
 
 	public class ScrollItem implements Comparable<ScrollItem> {

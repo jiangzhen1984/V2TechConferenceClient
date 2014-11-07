@@ -28,8 +28,11 @@ import com.v2tech.service.jni.JNIResponse;
 import com.v2tech.service.jni.RequestChatServiceResponse;
 import com.v2tech.service.jni.RequestSendMessageResponse;
 import com.v2tech.util.GlobalConfig;
+import com.v2tech.view.conversation.MessageBuilder;
+import com.v2tech.view.conversation.MessageLoader;
 import com.v2tech.vo.UserChattingObject;
 import com.v2tech.vo.VMessage;
+import com.v2tech.vo.VMessageAbstractItem;
 import com.v2tech.vo.VMessageAudioItem;
 import com.v2tech.vo.VMessageFileItem;
 import com.v2tech.vo.VMessageImageItem;
@@ -317,6 +320,8 @@ public class ChatService extends DeviceService {
 			FileRequest.getInstance().cancelRecvFile(vfi.getUuid());
 			break;
 		case OPERATION_START_DOWNLOAD:
+//			if(vfi.getState() == VMessageAbstractItem.STATE_FILE_DOWNLOADED_FALIED)
+//				FileRequest.getInstance().httpDownloadFile(url, sfileid, filePath, encrypttype);
 			FileRequest.getInstance().acceptFileTrans(vfi.getUuid(),
 					GlobalConfig.getGlobalFilePath() + "/" + vfi.getFileName());
 		default:
@@ -645,7 +650,7 @@ public class ChatService extends DeviceService {
 			notifyListener(KEY_FILE_TRANS_STATUS_NOTIFICATION_LISTNER, 0, 0,
 					new FileDownLoadErrorIndication(szFileID, errorCode,
 							nTransType));
-
+			MessageLoader.updateFileItemStateToFailed(szFileID);
 		}
 
 		@Override
@@ -654,12 +659,14 @@ public class ChatService extends DeviceService {
 			notifyListener(KEY_FILE_TRANS_STATUS_NOTIFICATION_LISTNER, 0, 0,
 					new FileTransErrorIndication(szFileID, errorCode,
 							nTransType));
+			MessageLoader.updateFileItemStateToFailed(szFileID);
 		}
 
 		@Override
 		public void OnFileTransCancel(String szFileID) {
 			notifyListener(KEY_FILE_TRANS_STATUS_NOTIFICATION_LISTNER, 0, 0,
 					new FileTransCannelIndication(szFileID));
+			MessageLoader.updateFileItemStateToFailed(szFileID);
 		}
 
 	}

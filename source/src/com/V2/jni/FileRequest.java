@@ -161,7 +161,7 @@ public class FileRequest {
 			String szFileName, long nFileBytes, int linetype) {
 		V2Log.e("FileTrans UI", "OnFileTransInvite ---> userid :" + userid
 				+ " | szFileID: " + szFileID + " | szFileName: " + szFileName
-				+ " | nFileBytes: " + nFileBytes);
+				+ " | nFileBytes: " + nFileBytes + " | linetype: " + linetype);
 		for (int i = 0; i < mCallbacks.size(); i++) {
 			WeakReference<FileRequestCallback> wrf = mCallbacks.get(i);
 			if (wrf != null && wrf.get() != null) {

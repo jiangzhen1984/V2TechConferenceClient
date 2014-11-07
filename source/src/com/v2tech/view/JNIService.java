@@ -890,9 +890,10 @@ public class JNIService extends Service {
 				intent.setAction(JNI_BROADCAST_FRIEND_AUTHENTICATION);
 				intent.addCategory(JNI_BROADCAST_CATEGROY);
 				sendOrderedBroadcast(intent, null);
-			} else if(gType == GroupType.CHATING){
-				MessageBuilder.updateQualicationMessageState(nGroupID, 
-						new GroupQualicationJNIObject(Type.CROWD_INVITATION , QualificationState.REJECT , null));
+			} else if (gType == GroupType.CHATING) {
+				MessageBuilder.updateQualicationMessageState(nGroupID,
+						new GroupQualicationJNIObject(Type.CROWD_INVITATION,
+								QualificationState.REJECT, null));
 			}
 
 		}
@@ -921,10 +922,11 @@ public class JNIService extends Service {
 						group.id, user, null, new Date(
 								GlobalConfig.getGlobalServerTime()));
 				VMessageFileItem item = new VMessageFileItem(vm,
-						fileJNIObject.fileId, fileJNIObject.fileName);
+						fileJNIObject.fileName,
+						VMessageFileItem.STATE_FILE_SENT,
+						fileJNIObject.fileId);
 				item.setFileSize(fileJNIObject.fileSize);
 				item.setFileType(fileJNIObject.fileType);
-				item.setState(VMessageFileItem.STATE_FILE_SENT);
 				// save to database
 				vm.setmXmlDatas(vm.toXml());
 				MessageBuilder.saveMessage(mContext, vm);
@@ -1318,8 +1320,7 @@ public class JNIService extends Service {
 					.getInstance().getCurrentUser(), new Date(
 					GlobalConfig.getGlobalServerTime()));
 			VMessageFileItem vfi = new VMessageFileItem(vm, file.fileId,
-					file.fileSize, file.fileName, file.fileType);
-			vfi.setState(VMessageFileItem.STATE_FILE_UNDOWNLOAD);
+					file.fileSize, VMessageFileItem.STATE_FILE_UNDOWNLOAD , file.fileName, file.fileType);
 			vm.setmXmlDatas(vm.toXml());
 			Message.obtain(mCallbackHandler, JNI_RECEIVED_MESSAGE, vm)
 					.sendToTarget();
@@ -1329,7 +1330,7 @@ public class JNIService extends Service {
 		public void OnFileTransEnd(String szFileID, String szFileName,
 				long nFileSize, int nTransType) {
 			VMessage vm = new VMessage(0, 0, null, null);
-			VMessageFileItem item = new VMessageFileItem(vm, null);
+			VMessageFileItem item = new VMessageFileItem(vm, null , 0);
 			item.setUuid(szFileID);
 			if (nTransType == FileDownLoadErrorIndication.TYPE_SEND)
 				item.setState(VMessageAbstractItem.STATE_FILE_SENT);
@@ -1346,7 +1347,7 @@ public class JNIService extends Service {
 		public void OnFileDownloadError(String szFileID, int errorCode,
 				int nTransType) {
 			VMessage vm = new VMessage(0, 0, null, null);
-			VMessageFileItem item = new VMessageFileItem(vm, null);
+			VMessageFileItem item = new VMessageFileItem(vm, null , 0);
 			item.setUuid(szFileID);
 			if (nTransType == FileDownLoadErrorIndication.TYPE_SEND)
 				item.setState(VMessageAbstractItem.STATE_FILE_SENT_FALIED);
@@ -1358,6 +1359,10 @@ public class JNIService extends Service {
 			item = null;
 		}
 
+		@Override
+		public void OnFileTransCancel(String szFileID) {
+			super.OnFileTransCancel(szFileID);
+		}
 	}
 
 }
