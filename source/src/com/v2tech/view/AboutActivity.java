@@ -23,9 +23,4 @@ public class AboutActivity extends Activity {
 		super.finish();
 		this.overridePendingTransition(R.animator.alpha_from_0_to_1, R.animator.alpha_from_1_to_0);
 	}
-	
-	
-
-	
-	
 }

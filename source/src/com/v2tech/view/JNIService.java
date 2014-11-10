@@ -92,6 +92,7 @@ import com.v2tech.vo.VMessageQualificationInvitationCrowd;
  * 
  */
 public class JNIService extends Service {
+	private static final String TAG_FILE = "JNIService";
 	private static final String TAG = "JNIService";
 	public static final int BINARY_TYPE_AUDIO = 3;
 	public static final int BINARY_TYPE_IMAGE = 2;
@@ -958,9 +959,7 @@ public class JNIService extends Service {
 
 		@Override
 		public void OnAudioChatInvite(AudioJNIObjectInd ind) {
-
 			if (GlobalHolder.getInstance().isInVideoCall()) {
-				Log.i("temptap20141031 1", "isInVideoCall() 自动接受");
 				GlobalState state = GlobalHolder.getInstance().getGlobalState();
 				// if in video automatically accept audio and user never accept
 				// audio call.
@@ -971,6 +970,7 @@ public class JNIService extends Service {
 							ind.getSzSessionID(), ind.getFromUserId());
 					// mark voice state to connected
 					GlobalHolder.getInstance().setVoiceConnectedState(true);
+					Log.d(TAG_FILE, "自动接受了对方音频邀请因为在视频通话中并且是同一个人");
 				} else {
 					V2Log.i("Ignore audio call for others: "
 							+ ind.getFromUserId());

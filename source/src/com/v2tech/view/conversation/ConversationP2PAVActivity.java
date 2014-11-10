@@ -10,11 +10,15 @@ import v2av.VideoRecorder;
 import v2av.VideoSize;
 import android.app.Activity;
 import android.app.Dialog;
+import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothHeadset;
+import android.bluetooth.BluetoothProfile;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Configuration;
+import android.graphics.Canvas;
 import android.graphics.drawable.ColorDrawable;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
@@ -27,7 +31,6 @@ import android.os.Message;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -36,11 +39,15 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.FrameLayout;
+import android.widget.FrameLayout.LayoutParams;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.V2.jni.util.V2Log;
+import com.log.Log;
 import com.v2tech.R;
 import com.v2tech.service.AsyncResult;
 import com.v2tech.service.ChatService;
@@ -67,7 +74,7 @@ public class ConversationP2PAVActivity extends Activity implements
 	// R.layout.fragment_conversation_incoming_audio_call//音频呼入界面
 	// R.layout.fragment_conversation_incoming_video_call//视频呼入界面
 
-	public static final String TAG = "P2PConversation";
+	public static final String TAG_THIS_FILE = "ConversationP2PAVActivity";
 	private static final int UPDATE_TIME = 1;
 	private static final int OPEN_REMOTE_VIDEO = 2;
 	private static final int QUIT = 3;
@@ -97,6 +104,7 @@ public class ConversationP2PAVActivity extends Activity implements
 	private View mRejectButton;
 	private View mAcceptButton;
 	private View mAudioOnlyButton;
+	private View mAudioSpeakerButton;
 
 	// For video conversation
 	private View cameraButton;
@@ -106,13 +114,13 @@ public class ConversationP2PAVActivity extends Activity implements
 	private View mReverseCameraButton1;
 
 	// Video call view
-	private SurfaceView mLcalSurface;
+	private SurfaceView mLocalSurface;
 	private SurfaceView mRemoteSurface;
 
-	// R.id.fragment_conversation_connected_video_local_layout
-	private RelativeLayout mLcalSurfaceLayout;
-
-	private boolean mlocalSurfaceCreated = false;
+	// R.id.small_window_video_layout
+	private FrameLayout smallWindowVideoLayout;
+	// R.id.big_window_video_layout
+	private RelativeLayout bigWindowVideoLayout;
 
 	private MediaPlayer mPlayer;
 	private AudioManager audioManager;
@@ -130,7 +138,16 @@ public class ConversationP2PAVActivity extends Activity implements
 	private boolean isRejected;
 	private boolean isAccepted;
 	private boolean videoIsAccepted = false;
-	private Object hanguped = null;
+	boolean isBluetoothHeadsetConnected = false;
+
+	private OnClickListener onClickMLcalSurfaceLayout = new OnClickListener() {
+
+		@Override
+		public void onClick(View v) {
+			exchangeRemoteVideoAndLocalVideo();
+		}
+
+	};
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -152,8 +169,8 @@ public class ConversationP2PAVActivity extends Activity implements
 		String uuid = UUID.randomUUID().toString();
 		audioManager = (AudioManager) mContext
 				.getSystemService(Context.AUDIO_SERVICE);
-		audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
-		
+		isBluetoothHeadsetConnected = audioManager.isBluetoothA2dpOn();
+
 		currentVideoBean = new VideoBean();
 		if (uad.isIncoming()) {
 			currentVideoBean.mediaState = AudioVideoMessageBean.STATE_NO_ANSWER_CALL;
@@ -217,7 +234,7 @@ public class ConversationP2PAVActivity extends Activity implements
 		initViews();
 
 		if (!uad.isIncoming()) {
-			V2Log.d(TAG, "发起一个新的音视频邀请 , 等待回应中.... 此次通信的uuid ：" + uuid);
+			V2Log.d(TAG_THIS_FILE, "发起一个新的音视频邀请 , 等待回应中.... 此次通信的uuid ：" + uuid);
 			chatService.inviteUserChat(uad, new MessageListener(mLocalHandler,
 					CALL_RESPONSE, null));
 			if (uad.isVideoType()) {
@@ -308,7 +325,7 @@ public class ConversationP2PAVActivity extends Activity implements
 			chatService.suspendOrResumeAudio(false);
 			this.closeRemoteVideo();
 		}
-		this.closeLocalCamera();
+		this.closeLocalVideo();
 		isStoped = true;
 		getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 	}
@@ -316,13 +333,13 @@ public class ConversationP2PAVActivity extends Activity implements
 	@Override
 	protected void onNewIntent(Intent intent) {
 		super.onNewIntent(intent);
-		V2Log.d(TAG, "onNewIntent invokeing....");
+		V2Log.d(TAG_THIS_FILE, "onNewIntent invokeing....");
 	}
 
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
-		V2Log.d(TAG, "ondestory invokeing....");
+		V2Log.d(TAG_THIS_FILE, "ondestory invokeing....");
 		mContext.unregisterReceiver(receiver);
 		chatService.removeRegisterCancelledListener(mLocalHandler,
 				KEY_CANCELLED_LISTNER, null);
@@ -334,25 +351,25 @@ public class ConversationP2PAVActivity extends Activity implements
 				null);
 
 		chatService.clearCalledBack();
-//		if (hanguped == null) {
-//			chatService.cancelChattingCall(uad, null);
-//		}
+		// if (hanguped == null) {
+		// chatService.cancelChattingCall(uad, null);
+		// }
 	}
 
 	@Override
 	public Object onRetainNonConfigurationInstance() {
-		V2Log.d(TAG, "onRetainNonConfigurationInstance invokeing....");
+		V2Log.d(TAG_THIS_FILE, "onRetainNonConfigurationInstance invokeing....");
 		return null;
 	}
 
 	@Override
 	public void onConfigurationChanged(Configuration newConfig) {
 		super.onConfigurationChanged(newConfig);
-		V2Log.d(TAG, "onConfigurationChanged invoke");
+		V2Log.d(TAG_THIS_FILE, "onConfigurationChanged invoke");
 	}
 
 	@Override
-	public void openLocalCamera() {
+	public void openLocalVideo() {
 		if (isStoped) {
 			V2Log.w(" Do not open remote in stopping in Local");
 			return;
@@ -362,9 +379,10 @@ public class ConversationP2PAVActivity extends Activity implements
 			return;
 		}
 		isOpenedLocal = true;
-		V2Log.e("open local holder"
-				+ getSurfaceHolder(SURFACE_HOLDER_TAG_LOCAL));
-		VideoRecorder.VideoPreviewSurfaceHolder = getSurfaceHolder(SURFACE_HOLDER_TAG_LOCAL);
+		V2Log.e("open local holder" + mLocalSurface.getHolder());
+		// VideoRecorder.VideoPreviewSurfaceHolder =
+		// getSurfaceHolder(SURFACE_HOLDER_TAG_LOCAL);
+		VideoRecorder.VideoPreviewSurfaceHolder = mLocalSurface.getHolder();
 		VideoRecorder.DisplayRotation = displayRotation;
 		VideoCaptureDevInfo.CreateVideoCaptureDevInfo()
 				.SetCapParams(defaultCameraCaptureSize.width,
@@ -376,14 +394,14 @@ public class ConversationP2PAVActivity extends Activity implements
 
 	@Override
 	public void reverseLocalCamera() {
-		closeLocalCamera();
+		closeLocalVideo();
 		boolean flag = VideoCaptureDevInfo.CreateVideoCaptureDevInfo()
 				.reverseCamera();
 		if (flag) {
 			chatService.updateCameraParameters(new CameraConfiguration(""),
 					null);
 		}
-		openLocalCamera();
+		openLocalVideo();
 	}
 
 	public VideoSize getCurrentCameraCaptureSureSize() {
@@ -395,7 +413,7 @@ public class ConversationP2PAVActivity extends Activity implements
 	}
 
 	@Override
-	public void closeLocalCamera() {
+	public void closeLocalVideo() {
 		UserChattingObject selfUCD = new UserChattingObject(GlobalHolder
 				.getInstance().getCurrentUser(), 0, "");
 		chatService.requestCloseVideoDevice(selfUCD.getUdc(), null);
@@ -415,24 +433,13 @@ public class ConversationP2PAVActivity extends Activity implements
 			public void onCallStateChanged(int state, String incomingNumber) {
 				if (state == TelephonyManager.CALL_STATE_OFFHOOK
 						|| state == TelephonyManager.CALL_STATE_RINGING) {
-					V2Log.d(TAG,
+					V2Log.d(TAG_THIS_FILE,
 							"the initTelephonyManagerListener onCallStateChanged --> was called ....");
 					hangUp();
 				}
 			}
 
 		}, PhoneStateListener.LISTEN_CALL_STATE);
-	}
-
-	private SurfaceHolder getSurfaceHolder(String type) {
-		SurfaceHolder localHolder = null;
-		if (mLcalSurface.getTag().equals(type)) {
-			localHolder = mLcalSurface.getHolder();
-		} else {
-			localHolder = mRemoteSurface.getHolder();
-		}
-		return localHolder;
-
 	}
 
 	private void playRingToneOuting() {
@@ -476,7 +483,7 @@ public class ConversationP2PAVActivity extends Activity implements
 		// For video button
 		cameraButton = findViewById(R.id.conversation_fragment_connected_video_camera_button);
 		if (cameraButton != null) {
-			cameraButton.setOnClickListener(mCloseOrOpenCameraButtonListener);
+			cameraButton.setOnClickListener(onClickCameraButton);
 		}
 		videoHangUpButton = findViewById(R.id.conversation_fragment_connected_video_hang_up_button);
 		if (videoHangUpButton != null) {
@@ -489,10 +496,12 @@ public class ConversationP2PAVActivity extends Activity implements
 		}
 
 		// For audio Button
-		View audioSpeakerButton = findViewById(R.id.conversation_fragment_connected_speaker_button);
-		if (audioSpeakerButton != null) {
-			audioSpeakerButton.setOnClickListener(mAudioSpeakerButtonListener);
+		mAudioSpeakerButton = findViewById(R.id.conversation_fragment_connected_speaker_button);
+		if (mAudioSpeakerButton != null) {
+			mAudioSpeakerButton.setOnClickListener(mAudioSpeakerButtonListener);
+			setMAudioSpeakerButtonState();
 		}
+
 		View audioHangUpButton = findViewById(R.id.conversation_fragment_connected_hang_up_button);
 		if (audioHangUpButton != null) {
 			audioHangUpButton.setOnClickListener(mHangUpButtonListener);
@@ -555,19 +564,12 @@ public class ConversationP2PAVActivity extends Activity implements
 	 */
 	private void disableAllButtons() {
 
-		/*
-		 * View cameraButtonBG =
-		 * findViewById(R.id.conversation_fragment_connected_video_camera_button
-		 * ); if (cameraButtonBG != null) {
-		 * cameraButtonBG.setBackgroundResource(
-		 * R.drawable.conversation_framgent_gray_button_bg_pressed); }
-		 */
 		// For video button
 		View cameraButton = findViewById(R.id.conversation_fragment_connected_video_camera_button);
 		if (cameraButton != null) {
 			cameraButton.setEnabled(false);
-			cameraButton
-					.setBackgroundResource(R.drawable.conversation_framgent_gray_button_bg_pressed);
+			// cameraButton
+			// .setBackgroundResource(R.drawable.conversation_framgent_gray_button_bg_pressed);
 		}
 		View hangUpButton = findViewById(R.id.conversation_fragment_connected_video_hang_up_button);
 		if (hangUpButton != null) {
@@ -729,6 +731,8 @@ public class ConversationP2PAVActivity extends Activity implements
 			avatarIV = (ImageView) findViewById(R.id.conversation_fragment_voice_avatar);
 		} else if (!uad.isIncoming() && !uad.isConnected()) {
 			avatarIV = (ImageView) findViewById(R.id.conversation_fragment_video_outing_call_avatar);
+			mReverseCameraButton1 = findViewById(R.id.ImageView01);
+			mReverseCameraButton1.setOnClickListener(surfaceViewListener);
 		}
 
 		if (uad.getUser().getAvatarBitmap() != null && avatarIV != null) {
@@ -736,18 +740,33 @@ public class ConversationP2PAVActivity extends Activity implements
 		}
 
 		if (uad.isVideoType() && uad.isIncoming() && uad.isConnected()) {
-			mLcalSurface = (SurfaceView) findViewById(R.id.fragment_conversation_connected_video_local_surface);
-			mLcalSurfaceLayout = (RelativeLayout) findViewById(R.id.fragment_conversation_connected_video_local_layout);
+			mLocalSurface = (SurfaceView) findViewById(R.id.fragment_conversation_connected_video_local_surface);
+			smallWindowVideoLayout = (FrameLayout) findViewById(R.id.small_window_video_layout);
 			mRemoteSurface = (SurfaceView) findViewById(R.id.fragment_conversation_connected_video_remote_surface);
-			ViewGroup.LayoutParams localLp = mLcalSurfaceLayout
+			mRemoteSurface.setOnClickListener(onClickMLcalSurfaceLayout);
+			FrameLayout.LayoutParams localLp = (FrameLayout.LayoutParams) smallWindowVideoLayout
 					.getLayoutParams();
 			adjustLocalVideoLyoutParams(localLp);
+			bigWindowVideoLayout = (RelativeLayout) findViewById(R.id.big_window_video_layout);
+
+			mReverseCameraButton = findViewById(R.id.fragment_conversation_reverse_camera_button);
+			mReverseCameraButton.setOnClickListener(surfaceViewListener);
+
+			mReverseCameraButton1 = findViewById(R.id.ImageView01);
+			mReverseCameraButton1.setOnClickListener(surfaceViewListener);
 
 		} else if (uad.isVideoType() && !uad.isIncoming()) {
 			mRemoteSurface = (SurfaceView) findViewById(R.id.fragment_conversation_connected_video_remote_surface);
-			mLcalSurface = (SurfaceView) findViewById(R.id.fragment_conversation_connected_video_local_surface);
-			mLcalSurfaceLayout = (RelativeLayout) findViewById(R.id.fragment_conversation_connected_video_local_layout);
+			bigWindowVideoLayout = (RelativeLayout) findViewById(R.id.big_window_video_layout);
+			mLocalSurface = (SurfaceView) findViewById(R.id.fragment_conversation_connected_video_local_surface);
+			smallWindowVideoLayout = (FrameLayout) findViewById(R.id.small_window_video_layout);
 			callOutLocalSurfaceChangeBig();
+
+			mReverseCameraButton = findViewById(R.id.fragment_conversation_reverse_camera_button);
+			mReverseCameraButton.setOnClickListener(surfaceViewListener);
+
+			mReverseCameraButton1 = findViewById(R.id.ImageView01);
+			mReverseCameraButton1.setOnClickListener(surfaceViewListener);
 		}
 
 		if (mRemoteSurface != null) {
@@ -755,10 +774,10 @@ public class ConversationP2PAVActivity extends Activity implements
 			mRemoteSurface.getHolder().addCallback(mRemoteVideoHolder);
 		}
 
-		if (mLcalSurface != null) {
-			mLcalSurface.setTag(SURFACE_HOLDER_TAG_LOCAL);
-			mLcalSurface.setZOrderMediaOverlay(true);
-			mLcalSurface.getHolder().addCallback(mLocalCameraHolder);
+		if (mLocalSurface != null) {
+			mLocalSurface.setTag(SURFACE_HOLDER_TAG_LOCAL);
+			mLocalSurface.setZOrderMediaOverlay(true);
+			mLocalSurface.getHolder().addCallback(mLocalCameraHolder);
 		}
 
 		if (uad.isAudioType()) {
@@ -766,8 +785,6 @@ public class ConversationP2PAVActivity extends Activity implements
 		} else if (uad.isVideoType()) {
 			mTimerTV = (TextView) findViewById(R.id.conversation_fragment_connected_video_duration);
 		}
-
-		bringButtonsToFront();
 
 		View cameraButton = findViewById(R.id.conversation_fragment_connected_video_camera_button);
 		if (cameraButton != null) {
@@ -814,7 +831,7 @@ public class ConversationP2PAVActivity extends Activity implements
 
 	}
 
-	private void adjustLocalVideoLyoutParams(ViewGroup.LayoutParams localLp) {
+	private void adjustLocalVideoLyoutParams(FrameLayout.LayoutParams localLp) {
 		if (localLp != null) {
 			VideoSize size = getCurrentCameraCaptureSureSize();
 			if (displayWidthIsLonger) {
@@ -822,7 +839,9 @@ public class ConversationP2PAVActivity extends Activity implements
 			} else {
 				localLp.height = localLp.width * size.width / size.height;
 			}
-			mLcalSurfaceLayout.setLayoutParams(localLp);
+			
+			localLp.bottomMargin=((View)videoHangUpButton.getParent()).getHeight()+10;
+			smallWindowVideoLayout.setLayoutParams(localLp);
 		}
 	}
 
@@ -856,13 +875,12 @@ public class ConversationP2PAVActivity extends Activity implements
 		}
 
 		mReverseCameraButton = findViewById(R.id.fragment_conversation_reverse_camera_button);
-		mReverseCameraButton.setVisibility(View.GONE);
 		// mReverseCameraButton.bringToFront();
 		mReverseCameraButton.setOnClickListener(surfaceViewListener);
 
 		mReverseCameraButton1 = findViewById(R.id.ImageView01);
-		mReverseCameraButton1.setVisibility(View.VISIBLE);
-		mReverseCameraButton1.bringToFront();
+		// mReverseCameraButton1.setVisibility(View.VISIBLE);
+		// mReverseCameraButton1.bringToFront();
 		mReverseCameraButton1.setOnClickListener(surfaceViewListener);
 
 	}
@@ -911,8 +929,8 @@ public class ConversationP2PAVActivity extends Activity implements
 		String sessionID = getIntent().getExtras().getString("sessionID");
 		User u = GlobalHolder.getInstance().getUser(uid);
 		if (u == null)
-			V2Log.e(TAG, "get P2P chat remote user failed... user id is : "
-					+ uid);
+			V2Log.e(TAG_THIS_FILE,
+					"get P2P chat remote user failed... user id is : " + uid);
 
 		int flag = mIsVoiceCall ? UserChattingObject.VOICE_CALL
 				: UserChattingObject.VIDEO_CALL;
@@ -979,7 +997,9 @@ public class ConversationP2PAVActivity extends Activity implements
 			return;
 		}
 		isOpenedRemote = true;
-		vp.SetSurface(getSurfaceHolder(SURFACE_HOLDER_TAG_REMOTE));
+		// vp.SetSurface(getSurfaceHolder(SURFACE_HOLDER_TAG_REMOTE));
+
+		vp.SetSurface(mRemoteSurface.getHolder());
 		chatService.requestOpenVideoDevice(uad.getUdc(), null);
 	}
 
@@ -990,77 +1010,120 @@ public class ConversationP2PAVActivity extends Activity implements
 		isOpenedRemote = false;
 	}
 
-	ViewGroup.LayoutParams smallP = null;
+	FrameLayout.LayoutParams smallP = null;
 
 	private void callOutLocalSurfaceChangeBig() {
-		ViewGroup.LayoutParams backLP = mRemoteSurface.getLayoutParams();
-		smallP = mLcalSurfaceLayout.getLayoutParams();
-		mLcalSurfaceLayout.setLayoutParams(backLP);
-		mLcalSurface.setBackgroundResource(0);
+		FrameLayout.LayoutParams bigLP = new FrameLayout.LayoutParams(
+				FrameLayout.LayoutParams.MATCH_PARENT,
+				FrameLayout.LayoutParams.MATCH_PARENT);
+		smallP = (FrameLayout.LayoutParams) smallWindowVideoLayout
+				.getLayoutParams();
+		smallWindowVideoLayout.setLayoutParams(bigLP);
+		smallWindowVideoLayout.setBackgroundResource(0);
+		smallWindowVideoLayout.setPadding(0, 0, 0, 0);
+		if (mReverseCameraButton == null) {
+			mReverseCameraButton = findViewById(R.id.fragment_conversation_reverse_camera_button);
+			mReverseCameraButton.setOnClickListener(surfaceViewListener);
+		}
+		mReverseCameraButton.setVisibility(View.GONE);
+		
+		if (mReverseCameraButton1 == null) {
+			mReverseCameraButton1 = findViewById(R.id.ImageView01);
+			mReverseCameraButton1.setOnClickListener(surfaceViewListener);
+		}
+		mReverseCameraButton1.setVisibility(View.VISIBLE);
+
+		// exchangeRemoteVideoAndLocalVideo();
 	}
 
 	private void callOutLocalSurfaceChangeSmall() {
 		adjustLocalVideoLyoutParams(smallP);
-		mLcalSurface.setBackgroundResource(R.drawable.local_video_bg);
+		smallWindowVideoLayout.setBackgroundResource(R.drawable.local_video_bg);
+		smallWindowVideoLayout.setPadding(1, 1, 1, 1);
+		if (mReverseCameraButton == null) {
+			mReverseCameraButton = findViewById(R.id.fragment_conversation_reverse_camera_button);
+			mReverseCameraButton.setOnClickListener(surfaceViewListener);
+		}
+		mReverseCameraButton.setVisibility(View.VISIBLE);
+		
+		if (mReverseCameraButton1 == null) {
+			mReverseCameraButton1 = findViewById(R.id.ImageView01);
+			mReverseCameraButton1.setOnClickListener(surfaceViewListener);
+		}
+		mReverseCameraButton1.setVisibility(View.GONE);
+		// exchangeRemoteVideoAndLocalVideo();
 	}
 
-	private void exchangeSurfaceHolder() {
-		ViewGroup.LayoutParams backLP = mRemoteSurface.getLayoutParams();
-		ViewGroup.LayoutParams smallP = mLcalSurface.getLayoutParams();
+	private boolean testFlag = true;
 
-		if (backLP.width == ViewGroup.LayoutParams.FILL_PARENT
-				|| backLP.width == ViewGroup.LayoutParams.MATCH_PARENT) {
-			mLcalSurface.setZOrderMediaOverlay(false);
-			mLcalSurface.setZOrderOnTop(false);
-			mLcalSurface.setOnClickListener(null);
+	private void exchangeRemoteVideoAndLocalVideo() {
+		if (testFlag) {
+			testFlag = false;
+			bigWindowVideoLayout.removeViewInLayout(mRemoteSurface);
+			smallWindowVideoLayout.removeViewInLayout(mLocalSurface);
+
+			ViewGroup parent = (ViewGroup) mLocalSurface.getParent();
+			if (parent != null) {
+				parent.removeViewInLayout(mLocalSurface);
+			}
+			bigWindowVideoLayout.addView(mLocalSurface);
+
+			parent = (ViewGroup) mRemoteSurface.getParent();
+			if (parent != null) {
+				parent.removeViewInLayout(mRemoteSurface);
+			}
+			smallWindowVideoLayout.addView(mRemoteSurface);
+
+			mLocalSurface.setZOrderMediaOverlay(false);
 			mRemoteSurface.setZOrderMediaOverlay(true);
-			mRemoteSurface.setZOrderOnTop(true);
-			mRemoteSurface.setOnClickListener(surfaceViewListener);
-			mRemoteSurface.bringToFront();
-
+			if (mReverseCameraButton == null) {
+				mReverseCameraButton = findViewById(R.id.fragment_conversation_reverse_camera_button);
+				mReverseCameraButton.setOnClickListener(surfaceViewListener);
+			}
+			mReverseCameraButton.setVisibility(View.GONE);
+			if (mReverseCameraButton1 == null) {
+				mReverseCameraButton1 = findViewById(R.id.ImageView01);
+				mReverseCameraButton1.setOnClickListener(surfaceViewListener);
+			}
+			mReverseCameraButton1.setVisibility(View.VISIBLE);
 		} else {
-			mLcalSurface.bringToFront();
-			mLcalSurface.setZOrderMediaOverlay(true);
-			mLcalSurface.setZOrderOnTop(true);
-			mLcalSurface.setOnClickListener(surfaceViewListener);
+			testFlag = true;
+			bigWindowVideoLayout.removeViewInLayout(mLocalSurface);
+			smallWindowVideoLayout.removeViewInLayout(mRemoteSurface);
+			smallWindowVideoLayout.removeViewInLayout(mReverseCameraButton);
+
+			ViewGroup parent = (ViewGroup) mRemoteSurface.getParent();
+			if (parent != null) {
+				parent.removeViewInLayout(mRemoteSurface);
+			}
+			bigWindowVideoLayout.addView(mRemoteSurface);
+
+			parent = (ViewGroup) mLocalSurface.getParent();
+			if (parent != null) {
+				parent.removeViewInLayout(mLocalSurface);
+			}
+			smallWindowVideoLayout.addView(mLocalSurface);
+
 			mRemoteSurface.setZOrderMediaOverlay(false);
-			mRemoteSurface.setZOrderOnTop(false);
-			mRemoteSurface.setOnClickListener(null);
-		}
+			mLocalSurface.setZOrderMediaOverlay(true);
 
-		mLcalSurface.setLayoutParams(smallP);
-		mRemoteSurface.setLayoutParams(backLP);
+			parent = (ViewGroup) mReverseCameraButton.getParent();
+			if (parent != null) {
+				parent.removeViewInLayout(mReverseCameraButton);
+			}
+			smallWindowVideoLayout.addView(mReverseCameraButton);
 
-		bringButtonsToFront();
+			if (mReverseCameraButton == null) {
+				mReverseCameraButton = findViewById(R.id.fragment_conversation_reverse_camera_button);
+				mReverseCameraButton.setOnClickListener(surfaceViewListener);
+			}
+			mReverseCameraButton.setVisibility(View.VISIBLE);
+			if (mReverseCameraButton1 == null) {
+				mReverseCameraButton1 = findViewById(R.id.ImageView01);
+				mReverseCameraButton1.setOnClickListener(surfaceViewListener);
+			}
+			mReverseCameraButton1.setVisibility(View.GONE);
 
-		findViewById(R.id.fragment_conversation_connected_video_container)
-				.invalidate();
-	}
-
-	private void bringButtonsToFront() {
-		if (mTimerTV != null) {
-			mTimerTV.bringToFront();
-		}
-		View v = findViewById(R.id.conversation_fragment_connected_title_text);
-		if (v != null) {
-			v.bringToFront();
-		}
-		v = findViewById(R.id.fragment_conversation_connected_video_button_container);
-		if (v != null) {
-			v.bringToFront();
-		}
-
-		if (mReverseCameraButton != null) {
-			// mReverseCameraButton.bringToFront();
-		}
-
-		if (mReverseCameraButton1 != null) {
-			mReverseCameraButton1.bringToFront();
-		}
-
-		v = findViewById(R.id.conversation_fragment_outing_video_card_container);
-		if (v != null) {
-			v.bringToFront();
 		}
 	}
 
@@ -1073,6 +1136,8 @@ public class ConversationP2PAVActivity extends Activity implements
 		filter.addAction(Intent.ACTION_SCREEN_OFF);
 		filter.addAction(Intent.ACTION_USER_PRESENT);
 		filter.addAction(JNIService.JNI_BROADCAST_CONNECT_STATE_NOTIFICATION);
+		filter.addAction(Intent.ACTION_HEADSET_PLUG);
+		filter.addAction(BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED);
 		this.registerReceiver(receiver, filter);
 
 		IntentFilter strickFliter = new IntentFilter();
@@ -1081,7 +1146,7 @@ public class ConversationP2PAVActivity extends Activity implements
 		Intent i = this.registerReceiver(null, strickFliter);
 		// means exist close broadcast, need to finish this activity
 		if (i != null) {
-			V2Log.d(TAG, "initReceiver invoking ..hangUp() ");
+			V2Log.d(TAG_THIS_FILE, "initReceiver invoking ..hangUp() ");
 			removeStickyBroadcast(i);
 			hangUp();
 		}
@@ -1112,28 +1177,64 @@ public class ConversationP2PAVActivity extends Activity implements
 		if (audioManager != null) {
 			audioManager.setSpeakerphoneOn(false);
 		}
-		closeLocalCamera();
-		Log.i("temptag20141030 1",
-				"hangUp() uad.getDeviceId()" + uad.getDeviceId());
+		closeLocalVideo();
 		chatService.cancelChattingCall(uad, null);
-		V2Log.d(TAG, "the hangUp() invoking HANG_UP_NOTIFICATION");
+		V2Log.d(TAG_THIS_FILE, "the hangUp() invoking HANG_UP_NOTIFICATION");
 		Message.obtain(mLocalHandler, KEY_CANCELLED_LISTNER).sendToTarget();
+	}
+
+	private void headsetAndBluetoothHeadsetHandle() {
+		Log.i("temptag 20141106 1", "headsetHandle()");
+		if (uad == null) {
+			return;
+		}
+
+		if (!uad.isConnected()) {
+			return;
+		}
+
+		if (audioManager.isWiredHeadsetOn() || isBluetoothHeadsetConnected) {
+			audioManager.setSpeakerphoneOn(false);
+			Log.i("ConversationP2PAVActivity", "切换到耳机或听筒");
+		} else {
+			audioManager.setSpeakerphoneOn(true);
+			Log.i("ConversationP2PAVActivity", "切换到免提");
+		}
+		if (uad.isAudioType()) {
+			setMAudioSpeakerButtonState();
+		}
+	}
+
+	private void setMAudioSpeakerButtonState() {
+		if (mAudioSpeakerButton != null) {
+			int drawId;
+			int color;
+			if (audioManager.isWiredHeadsetOn() || isBluetoothHeadsetConnected) {
+				mAudioSpeakerButton.setTag("earphone");
+				drawId = R.drawable.message_voice_lounder;
+				color = R.color.fragment_conversation_connected_gray_text_color;
+			} else {
+				mAudioSpeakerButton.setTag("speakerphone");
+				drawId = R.drawable.message_voice_lounder_pressed;
+				color = R.color.fragment_conversation_connected_pressed_text_color;
+			}
+
+			TextView speakerPhoneText = (TextView) findViewById(R.id.conversation_fragment_connected_speaker_text);
+			ImageView speakerPhoneImage = (ImageView) findViewById(R.id.conversation_fragment_connected_speaker_image);
+			if (speakerPhoneImage != null) {
+				speakerPhoneImage.setImageResource(drawId);
+			}
+			if (speakerPhoneText != null) {
+				speakerPhoneText.setTextColor(mContext.getResources().getColor(
+						color));
+			}
+		}
 	}
 
 	private OnClickListener surfaceViewListener = new OnClickListener() {
 
 		@Override
 		public void onClick(final View view) {
-			// view.setEnabled(false);
-			// exchangeSurfaceHolder();
-			// mLocalHandler.postDelayed(new Runnable() {
-			//
-			// @Override
-			// public void run() {
-			// view.setEnabled(true);
-			// }
-			//
-			// }, 500);
 			view.setEnabled(false);
 			reverseLocalCamera();
 			mLocalHandler.postDelayed(new Runnable() {
@@ -1163,6 +1264,7 @@ public class ConversationP2PAVActivity extends Activity implements
 
 	private OnClickListener acceptListener = new OnClickListener() {
 
+		// 接受音频或视频来电 //temptag 20141106 1
 		@Override
 		public void onClick(View arg0) {
 			isAccepted = true;
@@ -1170,6 +1272,7 @@ public class ConversationP2PAVActivity extends Activity implements
 			stopRingTone();
 			// set state to connected
 			uad.setConnected(true);
+			headsetAndBluetoothHeadsetHandle();
 			chatService.acceptChatting(uad, null);
 			// Remove timer
 			mLocalHandler.removeCallbacks(timeOutMonitor);
@@ -1189,11 +1292,10 @@ public class ConversationP2PAVActivity extends Activity implements
 						.replace("[]", uad.getUser().getName()));
 
 				mReverseCameraButton = findViewById(R.id.fragment_conversation_reverse_camera_button);
-				mReverseCameraButton.setVisibility(View.GONE);
 				mReverseCameraButton.setOnClickListener(surfaceViewListener);
 
-				mReverseCameraButton1 = findViewById(R.id.fragment_conversation_reverse_camera_button);
-				mReverseCameraButton1.setVisibility(View.VISIBLE);
+				mReverseCameraButton1 = findViewById(R.id.ImageView01);
+				// mReverseCameraButton1.setVisibility(View.VISIBLE);
 				mReverseCameraButton1.setOnClickListener(surfaceViewListener);
 
 			} else {
@@ -1201,7 +1303,8 @@ public class ConversationP2PAVActivity extends Activity implements
 				nameTV.setText(uad.getUser().getName());
 			}
 			currentVideoBean.startDate = GlobalConfig.getGlobalServerTime();
-			V2Log.d(TAG, "get startDate is :" + currentVideoBean.startDate);
+			V2Log.d(TAG_THIS_FILE, "get startDate is :"
+					+ currentVideoBean.startDate);
 			currentVideoBean.mediaState = AudioVideoMessageBean.STATE_ANSWER_CALL;
 			currentVideoBean.readSatate = AudioVideoMessageBean.STATE_READED;
 			// Start to time
@@ -1215,8 +1318,8 @@ public class ConversationP2PAVActivity extends Activity implements
 		public void onClick(View arg0) {
 			// Stop ring tone
 			stopRingTone();
-
 			uad.setConnected(true);
+			headsetAndBluetoothHeadsetHandle();
 			chatService.acceptChatting(uad, null);
 			// Remove timer
 			mLocalHandler.removeCallbacks(timeOutMonitor);
@@ -1229,20 +1332,20 @@ public class ConversationP2PAVActivity extends Activity implements
 
 	};
 
-	private OnClickListener mCloseOrOpenCameraButtonListener = new OnClickListener() {
+	private OnClickListener onClickCameraButton = new OnClickListener() {
 
 		@Override
 		public void onClick(View view) {
 
-			if (mLcalSurface.getTag().equals(SURFACE_HOLDER_TAG_REMOTE)) {
-				exchangeSurfaceHolder();
+			if (testFlag == false) {
+				exchangeRemoteVideoAndLocalVideo();
 			}
 
-			if (mLcalSurface.getVisibility() == View.GONE) {
-				mLcalSurface.setVisibility(View.VISIBLE);
+			if (mLocalSurface.getVisibility() == View.GONE) {
+				mLocalSurface.setVisibility(View.VISIBLE);
 				mReverseCameraButton.setVisibility(View.GONE);
 			} else {
-				mLcalSurface.setVisibility(View.GONE);
+				mLocalSurface.setVisibility(View.GONE);
 				mReverseCameraButton.setVisibility(View.GONE);
 			}
 
@@ -1258,13 +1361,13 @@ public class ConversationP2PAVActivity extends Activity implements
 				if (cameraText != null) {
 					cameraText.setText(R.string.conversation_open_video_text);
 				}
-				closeLocalCamera();
+				closeLocalVideo();
 			} else {
 				view.setTag("close");
 				drawId = R.drawable.conversation_connected_camera_button;
 				color = R.color.fragment_conversation_connected_gray_text_color;
 				cameraText.setText(R.string.conversation_close_video_text);
-				openLocalCamera();
+				openLocalVideo();
 			}
 
 			if (cameraImage != null) {
@@ -1286,17 +1389,13 @@ public class ConversationP2PAVActivity extends Activity implements
 		public void onClick(View view) {
 			int drawId = R.drawable.message_voice_lounder_pressed;
 			int color = R.color.fragment_conversation_connected_pressed_text_color;
-
-			// Use HeadSetPlugReceiver handle setSpeakerphoneOn
-			// If wired headset or bluetooth headset connected, speaker should
-			// doesn't work
 			if (view.getTag() == null || view.getTag().equals("earphone")) {
-				// audioManager.setSpeakerphoneOn(true);
+				audioManager.setSpeakerphoneOn(true);
 				view.setTag("speakerphone");
 				drawId = R.drawable.message_voice_lounder_pressed;
 				color = R.color.fragment_conversation_connected_pressed_text_color;
 			} else {
-				// audioManager.setSpeakerphoneOn(false);
+				audioManager.setSpeakerphoneOn(false);
 				view.setTag("earphone");
 				drawId = R.drawable.message_voice_lounder;
 				color = R.color.fragment_conversation_connected_gray_text_color;
@@ -1378,7 +1477,8 @@ public class ConversationP2PAVActivity extends Activity implements
 		@Override
 		public void run() {
 			chatService.cancelChattingCall(uad, null);
-			V2Log.d(TAG, "the timeOutMonitor invoking HANG_UP_NOTIFICATION");
+			V2Log.d(TAG_THIS_FILE,
+					"the timeOutMonitor invoking HANG_UP_NOTIFICATION");
 			Message.obtain(mLocalHandler, KEY_CANCELLED_LISTNER).sendToTarget();
 		}
 
@@ -1420,7 +1520,7 @@ public class ConversationP2PAVActivity extends Activity implements
 		public void surfaceChanged(SurfaceHolder holder, int flag, int width,
 				int height) {
 			if (!isStoped && !isOpenedLocal) {
-				openLocalCamera();
+				openLocalVideo();
 			}
 		}
 
@@ -1430,25 +1530,22 @@ public class ConversationP2PAVActivity extends Activity implements
 				return;
 			}
 			if (isOpenedLocal) {
-				closeLocalCamera();
+				closeLocalVideo();
 			}
 			holder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
 
 			// when conversation is connected or during outing call
 			if (uad.isConnected() || (!uad.isConnected() && !uad.isIncoming())) {
 				V2Log.e("Create new holder " + holder);
-				Log.i("wzl", "打开本地");
-				closeLocalCamera();
-				openLocalCamera();
+				closeLocalVideo();
+				openLocalVideo();
 			}
-			mlocalSurfaceCreated = true;
 		}
 
 		@Override
 		public void surfaceDestroyed(SurfaceHolder holder) {
-			mlocalSurfaceCreated = false;
 			if (isOpenedLocal) {
-				closeLocalCamera();
+				closeLocalVideo();
 			}
 		}
 
@@ -1463,32 +1560,59 @@ public class ConversationP2PAVActivity extends Activity implements
 				NetworkStateCode code = (NetworkStateCode) intent.getExtras()
 						.get("state");
 				if (code != NetworkStateCode.CONNECTED) {
-					V2Log.d(TAG,
+					V2Log.d(TAG_THIS_FILE,
 							"JNIService.JNI_BROADCAST_CONNECT_STATE_NOTIFICATION 调用了 HANG_UP_NOTIFICATION");
 					Message.obtain(mLocalHandler, KEY_CANCELLED_LISTNER,
 							Integer.valueOf(HAND_UP_REASON_NO_NETWORK))
 							.sendToTarget();
 				}
-			} else if (Intent.ACTION_SCREEN_ON.equals(intent.getAction())) {
-			} else if (Intent.ACTION_SCREEN_OFF.equals(intent.getAction())) {
+			} else if (Intent.ACTION_SCREEN_ON.equals(action)) {
+			} else if (Intent.ACTION_SCREEN_OFF.equals(action)) {
 				if (uad.isVideoType()
 						&& (uad.isConnected() && uad.isIncoming())) {
-					closeLocalCamera();
+					closeLocalVideo();
 					if (uad.isConnected()) {
 						closeRemoteVideo();
 					}
 				}
-			} else if (Intent.ACTION_USER_PRESENT.equals(intent.getAction())) {
+			} else if (Intent.ACTION_USER_PRESENT.equals(action)) {
 				if (uad.isVideoType()
 						&& (uad.isConnected() && uad.isIncoming())) {
-					openLocalCamera();
+					openLocalVideo();
 					if (uad.isConnected()) {
 						openRemoteVideo();
 					}
 				}
-			}
-		}
+			} else if (Intent.ACTION_HEADSET_PLUG.equals(action)) {
+				if (intent.hasExtra("state")) {
+					int state = intent.getIntExtra("state", 0);
+					if (state == 1) {
+						Log.i(TAG_THIS_FILE, "插入耳机");
+						headsetAndBluetoothHeadsetHandle();
+					} else if (state == 0) {
+						Log.i(TAG_THIS_FILE, "拔出耳机");
+						headsetAndBluetoothHeadsetHandle();
+					}
+				}
 
+			} else if (BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED
+					.equals(action)) {
+
+				int state = intent
+						.getIntExtra(BluetoothProfile.EXTRA_STATE, -1);
+
+				if (state == BluetoothProfile.STATE_CONNECTED) {
+					isBluetoothHeadsetConnected = true;
+					Log.i(TAG_THIS_FILE, "蓝牙耳机已连接");
+					headsetAndBluetoothHeadsetHandle();
+				} else if (state == BluetoothProfile.STATE_DISCONNECTED) {
+					Log.i("TAG_THIS_FILE", "蓝牙耳机已断开");
+					isBluetoothHeadsetConnected = false;
+					headsetAndBluetoothHeadsetHandle();
+				}
+			}
+
+		}
 	}
 
 	private Object mLocal = new Object();
@@ -1518,10 +1642,10 @@ public class ConversationP2PAVActivity extends Activity implements
 				quit();
 				break;
 			case KEY_CANCELLED_LISTNER:
-				hanguped = msg.obj;
 				setGlobalState(false);
 				synchronized (mLocal) {
-					V2Log.d(TAG, "the HANG_UP_NOTIFICATION was called ....");
+					V2Log.d(TAG_THIS_FILE,
+							"the HANG_UP_NOTIFICATION was called ....");
 					if (inProgress) {
 						break;
 					}
@@ -1539,14 +1663,14 @@ public class ConversationP2PAVActivity extends Activity implements
 					inProgress = true;
 					Message timeoutMessage = Message.obtain(this, QUIT);
 					this.sendMessageDelayed(timeoutMessage, 2000);
-					// temptag09221
 					disableAllButtons();
-					closeLocalCamera();
+					closeLocalVideo();
 					videoIsAccepted = false;
 				}
 
 				break;
-			case CALL_RESPONSE:
+
+			case CALL_RESPONSE:// 音频或视频被接通//temptag 20141106 1
 				JNIResponse resp = null;
 				if (msg.obj instanceof JNIResponse) {
 					resp = (JNIResponse) msg.obj;
@@ -1557,55 +1681,65 @@ public class ConversationP2PAVActivity extends Activity implements
 					currentVideoBean.readSatate = AudioVideoMessageBean.STATE_READED;
 					RequestChatServiceResponse rcsr = (RequestChatServiceResponse) resp;
 					if (rcsr.getCode() == RequestChatServiceResponse.REJCTED) {
-						V2Log.d(TAG, "收到远端回复 , 对方拒绝了音视频的邀请.... 此次通信的uuid ："
+						Log.d(TAG_THIS_FILE, "对方拒绝了音频或视频的邀请.... 此次通信的uuid ："
 								+ currentVideoBean.mediaChatID);
 						Message.obtain(this, KEY_CANCELLED_LISTNER)
 								.sendToTarget();
 						currentVideoBean.mediaState = AudioVideoMessageBean.STATE_NO_ANSWER_CALL;
 					} else if (rcsr.getCode() == RequestChatServiceResponse.ACCEPTED) {
-						V2Log.d(TAG, "收到远端回复 , 对方接受了音视频的邀请.... 此次通信的uuid ："
-								+ rcsr.getUuid());
+
 						uad.setConnected(true);
-						// Send audio invitation
-						// Do not need to modify any values. because this API
-						// will handler this case
-						chatService.inviteUserChat(uad, null);
+
 						// Notice do not open remote video at here
 						// because we must open remote video after get video
 						// connected event
 						if (uad.isVideoType()) {
-							if (!videoIsAccepted) {
+							if (videoIsAccepted) {
+								Log.d(TAG_THIS_FILE, "对方在接受视频的基础上接受了音频邀请。");
+							} else {
+								headsetAndBluetoothHeadsetHandle();
+								Log.d(TAG_THIS_FILE, "对方接受了视频的邀请，我再给对方发一个音频邀请。");
+								// Send audio invitation
+								// Do not need to modify any values. because
+								// this API
+								// will handler this case
+								chatService.inviteUserChat(uad,
+										new MessageListener(mLocalHandler,
+												CALL_RESPONSE, null));
+
 								uad.setDeviceId(rcsr.getDeviceID());
-								Log.i("temptag20141030 1",
-										"CALL_RESPONSE rcsr.getDeviceID():"
-												+ rcsr.getDeviceID());
 								if (!uad.isIncoming()) {
 									// exchangeSurfaceHolder();
+									// 呼出视频通话被接通
 									callOutLocalSurfaceChangeSmall();
+									if (smallWindowVideoLayout == null) {
+										smallWindowVideoLayout = (FrameLayout) findViewById(R.id.small_window_video_layout);
+									}
+									smallWindowVideoLayout
+											.setOnClickListener(onClickMLcalSurfaceLayout);
 								}
-								// openRemoteVideo();
-								// updateViewForVideoAcceptance();
 								videoIsAccepted = true;
 							}
+
 						} else {
+							headsetAndBluetoothHeadsetHandle();
+							Log.d(TAG_THIS_FILE, "对方接受了音频的邀请");
 							// set mute button to enable
 							setMuteButtonDisable(false);
 						}
+
 						// Start to time
 						Message.obtain(mLocalHandler, UPDATE_TIME)
 								.sendToTarget();
 						currentVideoBean.mediaState = AudioVideoMessageBean.STATE_ANSWER_CALL;
 						currentVideoBean.startDate = GlobalConfig
 								.getGlobalServerTime();
-						V2Log.d(TAG, "get startDate is :"
-								+ currentVideoBean.startDate);
 						// Remove timer
 						mLocalHandler.removeCallbacks(timeOutMonitor);
 					} else {
 						V2Log.e(" indicator is null can not open audio UI ");
 					}
 				}
-				// Stop waiting voice
 				stopRingToneOuting();
 				break;
 

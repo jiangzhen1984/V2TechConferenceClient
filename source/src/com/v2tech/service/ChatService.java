@@ -343,11 +343,12 @@ public class ChatService extends DeviceService {
 	 */
 	public void inviteUserChat(UserChattingObject ud, MessageListener caller) {
 		JNIResponse resp = null;
-		if (mCaller != null) {
-			V2Log.e(" audio call is on going");
-			resp = new RequestChatServiceResponse(
-					RequestChatServiceResponse.Result.INCORRECT_PAR);
-		}
+//		if (mCaller != null) {
+//			V2Log.e(" audio call is on going");
+//			resp = new RequestChatServiceResponse(
+//					RequestChatServiceResponse.Result.INCORRECT_PAR);
+//		}
+		
 		if (ud == null) {
 			resp = new RequestChatServiceResponse(
 					RequestChatServiceResponse.Result.INCORRECT_PAR);

@@ -19,7 +19,7 @@ public class VideoPlayer {
 	private Bitmap mBitmap;
 	private Matrix mMatrix = null;
 
-	// private int mDisplayMode = 0; //0,��������ʾ,1ȫ����ʾ,2ԭ�ߴ���ʾ
+	// private int mDisplayMode = 0; //0,1,2
 	private int mClearCanvas = 2;
 
 	private int mRotation = 0;
@@ -66,8 +66,7 @@ public class VideoPlayer {
 	}
 
 	private float mBaseScale;
-
-	// ȡ��ȫ����ʾ ʱ�ĳ߶ȴ�С(��������ʾ )
+	
 	public float getBaseScale() {
 		return mBaseScale;
 	}
@@ -218,8 +217,12 @@ public class VideoPlayer {
 
 		Canvas canvas = mSurfaceH.lockCanvas();
 		if (canvas == null) {
+			Log.i("temp 20141104 1","canvas 为null返回 ---------");
 			return;
 		}
+
+
+		Log.i("temp 20141104 1","remote 在画图 "+Thread.currentThread().getName()+" id:"+Thread.currentThread().getId());
 		if (mClearCanvas < 2) {
 			canvas.drawRGB(0, 0, 0);
 			++mClearCanvas;

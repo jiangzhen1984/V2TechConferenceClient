@@ -34,7 +34,8 @@
     <uses-permission android:name="android.permission.CALL_PHONE" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.GET_TASKS" />  
+    <uses-permission android:name="android.permission.GET_TASKS" />
+    <uses-permission android:name="android.permission.BLUETOOTH" />
 
     <instrumentation
         android:name="android.test.InstrumentationTestRunner"
@@ -63,7 +64,7 @@
         </service>
         <service android:name="com.v2tech.service.ConferencMessageSyncService" >
         </service>
-         <service android:name="com.v2tech.view.conversation.FileService" >
+        <service android:name="com.v2tech.view.conversation.FileService" >
         </service>
 
         <provider
@@ -126,10 +127,10 @@
         </activity>
         <activity
             android:name="com.v2tech.view.conversation.ConversationActivity"
+            android:configChanges="orientation|screenSize"
             android:launchMode="singleTop"
             android:parentActivityName="com.v2tech.view.StartupActivity"
             android:screenOrientation="nosensor"
-            android:configChanges="orientation|screenSize"
             android:windowSoftInputMode="stateHidden|adjustUnspecified" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -145,8 +146,8 @@
         </activity>
         <activity
             android:name="com.v2tech.view.conversation.ConversationP2PAVActivity"
-            android:launchMode="singleTop"
             android:configChanges="orientation|screenSize"
+            android:launchMode="singleTop"
             android:screenOrientation="nosensor" >
             <intent-filter>
                 <action android:name="com.v2tech.start_p2p_conversation_activity" />
@@ -287,8 +288,6 @@
                 <category android:name="com.v2tech" />
             </intent-filter>
         </activity>
-        
-        
         <activity
             android:name="com.v2tech.view.group.CrowdDetailActivity"
             android:screenOrientation="nosensor" >
@@ -302,7 +301,7 @@
         <activity
             android:name="com.v2tech.view.group.CrowdContentUpdateActivity"
             android:screenOrientation="nosensor"
-             android:windowSoftInputMode="stateHidden|adjustPan"  >
+            android:windowSoftInputMode="stateHidden|adjustPan" >
             <intent-filter>
                 <action android:name="com.v2tech.crowd_content_activity" />
 
@@ -332,8 +331,8 @@
         </activity>
         <activity
             android:name="com.v2tech.view.contacts.VoiceMessageActivity"
-            android:screenOrientation="nosensor"
             android:configChanges="orientation|screenSize"
+            android:screenOrientation="nosensor"
             android:windowSoftInputMode="stateHidden|adjustPan" >
         </activity>
         <activity
@@ -351,8 +350,6 @@
             android:screenOrientation="nosensor"
             android:windowSoftInputMode="stateHidden|adjustPan" >
         </activity>
-        
-        
         <activity
             android:name="com.v2tech.view.search.SearchActivity"
             android:screenOrientation="nosensor" >
@@ -363,13 +360,10 @@
                 <category android:name="com.v2tech" />
             </intent-filter>
         </activity>
-        
         <activity
             android:name="com.v2tech.view.search.SearchedResultActivity"
             android:screenOrientation="nosensor" >
         </activity>
-        
-        
 
         <receiver android:name="com.v2tech.view.receiver.AvatarChangedReceiver" >
             <intent-filter>
@@ -379,7 +373,6 @@
                 <category android:name="com.v2tech" />
             </intent-filter>
         </receiver>
-        
         <receiver android:name="com.v2tech.view.receiver.CrowdQuitReceiver" >
             <intent-filter>
                 <action android:name="com.v2tech.broadcast.crowd_quit_notification" />
