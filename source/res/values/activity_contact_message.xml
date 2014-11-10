@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    
     <string name="contact_message_pic_text">图片</string>
     <string name="contact_message_send_button">发  送</string>
     <string name="contact_message_copy_message">已复制</string>
@@ -8,7 +7,6 @@
     <string name="contact_message_pop_up_item_del">删除</string>
     <string name="contact_message_pop_up_item_contact_management">分组管理</string>
     <string name="contact_message_pop_up_item_crowd_management">群组管理</string>
-    
     <string name="contact_message_pop_up_item_resend">重新发送</string>
     <string name="contact_message_pop_up_item_redownload">重新下载</string>
     <string name="error_contact_messag_invalid_user_id">错误的用户id</string>
@@ -33,8 +31,13 @@
     <string name="contact_message_file_item_miss_download">未下载</string>
     <string name="contact_message_file_item_sent">已发送</string>
     <string name="contact_message_file_item_sent_failed">发送失败</string>
-     <string name="contact_message_no_network_notification">网络连接不可用，请稍候再试</string>
-     <string name="contact_message_tips_rest_seconds">你还可以说[]秒</string>
-    
+    <string name="contact_message_no_network_notification">网络连接不可用，请稍候再试</string>
+    <string name="contact_message_tips_rest_seconds">你还可以说[]秒</string>
+    <string name="contact_message_audio_call">语音</string>
+    <string name="contact_message_video_call">视频</string>
+    <string name="contact_message_create_metting">建会</string>
+    <string name="contact_message_send_file">文件</string>
+    <string name="contact_message_send_image">图片</string>
+    <string name="contact_message_expression">表情</string>
     <color name="message_panel_bg">#ffffff</color>
 </resources>

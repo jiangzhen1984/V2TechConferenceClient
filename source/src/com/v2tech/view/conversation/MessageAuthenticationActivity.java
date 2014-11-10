@@ -954,9 +954,22 @@ public class MessageAuthenticationActivity extends Activity {
 					item.mMsgBanneriv.setImageResource(R.drawable.avatar);
 				}
 				item.mNameTV.setText(vqac.getApplicant().getName());
-				item.mContentTV.setText("申请加入" + vqac.getCrowdGroup().getName()
-						+ "群");
-
+				
+				if(vqac.getQualState() == QualificationState.BE_REJECT){
+					item.mContentTV.setText("对方拒绝加入" + vqac.getCrowdGroup().getName()
+							+ "群");
+					item.mAcceptButton.setVisibility(View.GONE);
+					item.mRes.setVisibility(View.GONE);
+				}
+				else if(vqac.getQualState() == QualificationState.BE_ACCEPTED){
+					item.mContentTV.setText("对方已加入" + vqac.getCrowdGroup().getName()
+							+ "群");
+					item.mAcceptButton.setVisibility(View.GONE);
+					item.mRes.setVisibility(View.GONE);
+				}
+				else
+					item.mContentTV.setText("申请加入" + vqac.getCrowdGroup().getName()
+							+ "群");
 			}
 
 			if (isGroupInDeleteMode) {
@@ -986,6 +999,9 @@ public class MessageAuthenticationActivity extends Activity {
 					item.mRes.setVisibility(View.VISIBLE);
 					item.mAcceptButton.setVisibility(View.GONE);
 					item.mRes.setText(R.string.crowd_invitation_rejected);
+				} else if (msg.getQualState() == VMessageQualification.QualificationState.BE_REJECT) {
+					item.mRes.setVisibility(View.GONE);
+					item.mAcceptButton.setVisibility(View.GONE);
 				}
 			}
 		}

@@ -3,6 +3,7 @@ package com.V2.jni;
 import java.util.List;
 
 import com.V2.jni.ind.FileJNIObject;
+import com.V2.jni.ind.GroupQualicationJNIObject;
 import com.V2.jni.ind.V2Document;
 import com.V2.jni.ind.V2Group;
 import com.V2.jni.ind.V2User;
@@ -156,14 +157,13 @@ public interface GroupRequestCallback {
 
 	
 	/**
-	 * @deprecated should handle xml
+	 * this funcation was called when be invited user refused to join group
 	 * @param groupType
 	 * @param nGroupID
 	 * @param nUserID
-	 * @param sxml
+	 * @param reason
 	 */
-	public void OnRefuseInviteJoinGroup(int groupType, long nGroupID, long nUserID,
-			String sxml);
+	public void OnRefuseInviteJoinGroup(GroupQualicationJNIObject qualicationObject);
 	
 	/**
 	 * call back for get group file list

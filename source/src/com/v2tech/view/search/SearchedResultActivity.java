@@ -22,6 +22,8 @@ import android.widget.TextView;
 import com.v2tech.R;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.view.PublicIntent;
+import com.v2tech.view.bo.ConversationNotificationObject;
+import com.v2tech.vo.Conversation;
 import com.v2tech.vo.Crowd;
 import com.v2tech.vo.CrowdGroup;
 import com.v2tech.vo.Group.GroupType;
@@ -105,8 +107,9 @@ public class SearchedResultActivity extends Activity {
 					//set disable authentication
 					i.putExtra("authdisable", false);
 				} else {
-					i.putExtra("cid", crowd.getmGId());
-					i.setAction(PublicIntent.SHOW_CROWD_DETAIL_ACTIVITY);
+					i.putExtra("obj", new ConversationNotificationObject(
+							Conversation.TYPE_GROUP, crowd.getmGId()));
+					i.setAction(PublicIntent.START_CONVERSACTION_ACTIVITY);
 				}
 				i.addCategory(PublicIntent.DEFAULT_CATEGORY);
 				startActivity(i);

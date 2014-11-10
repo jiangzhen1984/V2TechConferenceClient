@@ -123,6 +123,7 @@
                         android:layout_gravity="center"
                         android:background="@null"
                         android:ems="10"
+                        android:imeOptions="actionDone"
                         android:inputType="text"
                         android:maxLength="50" >
                     </EditText>

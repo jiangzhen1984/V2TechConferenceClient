@@ -13,6 +13,7 @@ import android.view.animation.AnimationUtils;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.v2tech.R;
 import com.v2tech.service.CrowdGroupService;
@@ -166,10 +167,14 @@ public class CrowdApplicationActivity extends Activity {
 						mState = State.APPLYING;
 						service.applyCrowd(crowd, "", new MessageListener(mLocalHandler,
 								APPLY_DONE, null));
+						Toast.makeText(mContext, R.string.crowd_applicant_invite_finish, Toast.LENGTH_SHORT).show();
 					} else if (crowd.getAuth() == CrowdGroup.AuthType.QULIFICATION
 							.intValue()) {
 						isInApplicationMode = true;
 						updateView();
+					}else if (crowd.getAuth() == CrowdGroup.AuthType.NEVER
+							.intValue()) {
+						Toast.makeText(mContext, R.string.crowd_applicant_invite_never, Toast.LENGTH_SHORT).show();
 					}
 				}
 			}

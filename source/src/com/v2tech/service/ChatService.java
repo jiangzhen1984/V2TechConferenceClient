@@ -370,7 +370,9 @@ public class ChatService extends DeviceService {
 
 			// If connected, send audio message
 			if (ud.isConnected()) {
-				AudioRequest.getInstance().InviteAudioChat(ud.getSzSessionID(),
+				String szSessionID = ud.getSzSessionID();
+				szSessionID = "ByVideo" + szSessionID;
+				AudioRequest.getInstance().InviteAudioChat(szSessionID,
 						ud.getUser().getmUserId());
 			} else {
 				VideoRequest.getInstance().inviteVideoChat(ud.getSzSessionID(),

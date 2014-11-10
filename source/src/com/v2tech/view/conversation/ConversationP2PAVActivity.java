@@ -217,14 +217,14 @@ public class ConversationP2PAVActivity extends Activity implements
 			currentVideoBean.remoteUserID = uad.getUser().getmUserId();
 			if (uad.isAudioType()) {
 				currentVideoBean.mediaChatID = "AudioChat"
-						+ UUID.randomUUID().toString();
+						+ uuid;
 				currentVideoBean.mediaType = AudioVideoMessageBean.TYPE_AUDIO;
-				uad.setSzSessionID(uuid);
+				uad.setSzSessionID(currentVideoBean.mediaChatID);
 				setContentView(R.layout.fragment_conversation_outing_audio);
 			} else if (uad.isVideoType()) {
-				currentVideoBean.mediaChatID = UUID.randomUUID().toString();
+				currentVideoBean.mediaChatID = uuid;
 				currentVideoBean.mediaType = AudioVideoMessageBean.TYPE_VIDEO;
-				uad.setSzSessionID(uuid);
+				uad.setSzSessionID(currentVideoBean.mediaChatID);
 				setContentView(R.layout.fragment_conversation_outing_video);
 			}
 		}
@@ -234,7 +234,7 @@ public class ConversationP2PAVActivity extends Activity implements
 		initViews();
 
 		if (!uad.isIncoming()) {
-			V2Log.d(TAG_THIS_FILE, "发起一个新的音视频邀请 , 等待回应中.... 此次通信的uuid ：" + uuid);
+			V2Log.d(TAG, "发起一个新的音视频邀请 , 等待回应中.... 此次通信的uuid ：" + currentVideoBean.mediaChatID);
 			chatService.inviteUserChat(uad, new MessageListener(mLocalHandler,
 					CALL_RESPONSE, null));
 			if (uad.isVideoType()) {

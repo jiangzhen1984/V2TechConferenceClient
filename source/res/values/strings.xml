@@ -25,27 +25,11 @@
     <string name="error_connect_to_server">无法链接到服务器，请确认网络链接</string>
     <string name="status_bar_title">正在运行..</string>
     
-    <string name="specificItem_voice_title">通话消息</string>
-    <string name="specificItem_voice_watchDetail">查看</string>
-    <string name="specificItem_voiceDetail_Title">通话详情</string>
-    <string name="specificItem_voiceDetail_return">通话</string>
-    <string name="specificItem_voiceDetail_phoneHistories">通话历史</string>
-    <string name="specificItem_voiceDetail_clearHistories">清除全部</string>
-    <string name="specificItem_voice_returnBack">消息</string>
-    <string name="specificItem_voice_cannelOperator">取消</string>
-    <string name="specificItem_voice_deleteOperator">删除</string>
-    <string name="specificItem_voice_selectAll">全部</string>
-    <string name="contact_message_audio_call">语音</string>
-    <string name="contact_message_video_call">视频</string>
-    <string name="contact_message_create_metting">建会</string>
-    <string name="contact_message_send_file">文件</string>
-    <string name="contact_message_send_image">图片</string>
-    <string name="contact_message_expression">表情</string>
-    
     <string name="conversation_select_image_file_title">图片</string>
     <string name="conversation_select_file_title">文件</string>
     <string name="conversation_select_file_cannel">取消</string>
     
     <string name="common_confirm_name">确定</string>
     <string name="common_return_name">返回</string>
+    <string name="common_no_string">无</string>
 </resources>

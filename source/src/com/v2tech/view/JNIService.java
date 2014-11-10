@@ -43,8 +43,8 @@ import com.V2.jni.VideoRequest;
 import com.V2.jni.VideoRequestCallbackAdapter;
 import com.V2.jni.ind.AudioJNIObjectInd;
 import com.V2.jni.ind.FileJNIObject;
-import com.V2.jni.ind.GroupJoinErrorJNIObject;
 import com.V2.jni.ind.GroupQualicationJNIObject;
+import com.V2.jni.ind.GroupJoinErrorJNIObject;
 import com.V2.jni.ind.SendingResultJNIObjectInd;
 import com.V2.jni.ind.V2Conference;
 import com.V2.jni.ind.V2Group;
@@ -70,6 +70,7 @@ import com.v2tech.vo.ConferenceGroup;
 import com.v2tech.vo.CrowdGroup;
 import com.v2tech.vo.Group;
 import com.v2tech.vo.Group.GroupType;
+import com.v2tech.vo.GroupQualicationState;
 import com.v2tech.vo.NetworkStateCode;
 import com.v2tech.vo.User;
 import com.v2tech.vo.UserDeviceConfig;
@@ -80,6 +81,7 @@ import com.v2tech.vo.VMessageFileItem;
 import com.v2tech.vo.VMessageImageItem;
 import com.v2tech.vo.VMessageQualification;
 import com.v2tech.vo.VMessageQualification.QualificationState;
+import com.v2tech.vo.VMessageQualification.ReadState;
 import com.v2tech.vo.VMessageQualification.Type;
 import com.v2tech.vo.VMessageQualificationApplicationCrowd;
 import com.v2tech.vo.VMessageQualificationInvitationCrowd;
@@ -862,6 +864,36 @@ public class JNIService extends Service {
 				intent.putExtra("gid", nGroupID);
 				sendOrderedBroadcast(intent, null);
 
+			} else if(gType == GroupType.CHATING){
+				long userID = remoteUser.getmUserId();
+				VMessageQualification crowdQuion = MessageBuilder.queryQualMessageByCrowdId(mContext, 
+						userID, nGroupID);
+				if(crowdQuion == null){
+					User applicant = GlobalHolder.getInstance().getUser(userID);
+					if(applicant == null)
+						applicant = new User(userID);
+					CrowdGroup crowdGroup = (CrowdGroup) GlobalHolder.getInstance().getGroupById(V2GlobalEnum.GROUP_TYPE_CROWD, nGroupID);
+					if(crowdGroup == null)
+						crowdGroup = new CrowdGroup(nGroupID, null, GlobalHolder.getInstance().getCurrentUser());
+					crowdQuion = new VMessageQualificationApplicationCrowd(crowdGroup , applicant);
+					((VMessageQualificationApplicationCrowd)crowdQuion).setApplyReason(null);
+					crowdQuion.setReadState(ReadState.UNREAD);
+					crowdQuion.setQualState(QualificationState.BE_ACCEPTED);
+					crowdQuion.setmTimestamp(new Date(GlobalConfig.getGlobalServerTime()));
+					Uri uri = MessageBuilder.saveQualicationMessage(mContext,
+							crowdQuion);
+					if (uri != null) 
+						crowdQuion.setId(Long.parseLong(uri.getLastPathSegment()));
+				}
+				else
+					MessageBuilder.updateQualicationMessageState(nGroupID,
+							new GroupQualicationState(Type.CROWD_APPLICATION,
+									QualificationState.BE_ACCEPTED, null));
+				Intent intent = new Intent();
+				intent.setAction(JNI_BROADCAST_NEW_QUALIFICATION_MESSAGE);
+				intent.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
+				intent.putExtra("msgId", crowdQuion.getId());
+				sendBroadcast(intent);
 			}
 
 			GlobalHolder.getInstance().addUserToGroup(
@@ -879,22 +911,52 @@ public class JNIService extends Service {
 		}
 
 		@Override
-		public void OnRefuseInviteJoinGroup(int groupType, long nGroupID,
-				long nUserID, String sxml) {
+		public void OnRefuseInviteJoinGroup(GroupQualicationJNIObject obj) {
 
-			GroupType gType = GroupType.fromInt(groupType);
+			if(obj == null){
+				V2Log.e("OnRefuseInviteJoinGroup : May receive refuse invite message failed.. get null GroupQualicationJNIObject");
+				return ;
+			}
+			
+			GroupType gType = GroupType.fromInt(obj.groupType);
 			if (gType == GroupType.CONTACT) {
 				AddFriendHistroysHandler.addOtherRefused(
-						getApplicationContext(), nUserID, sxml);
+						getApplicationContext(), obj.userID, obj.reason);
 				// temptag 20140917
 				Intent intent = new Intent();
+				intent.putExtra("uid", obj.userID);
 				intent.setAction(JNI_BROADCAST_FRIEND_AUTHENTICATION);
 				intent.addCategory(JNI_BROADCAST_CATEGROY);
 				sendOrderedBroadcast(intent, null);
 			} else if (gType == GroupType.CHATING) {
-				MessageBuilder.updateQualicationMessageState(nGroupID,
-						new GroupQualicationJNIObject(Type.CROWD_INVITATION,
-								QualificationState.REJECT, null));
+				VMessageQualification crowdQuion = MessageBuilder.queryQualMessageByCrowdId(mContext, 
+						obj.userID, obj.groupID);
+				if(crowdQuion == null){
+					User applicant = GlobalHolder.getInstance().getUser(obj.userID);
+					if(applicant == null)
+						applicant = new User(obj.userID);
+					CrowdGroup crowdGroup = (CrowdGroup) GlobalHolder.getInstance().getGroupById(V2GlobalEnum.GROUP_TYPE_CROWD, obj.groupID);
+					if(crowdGroup == null)
+						crowdGroup = new CrowdGroup(obj.groupID, null, GlobalHolder.getInstance().getCurrentUser());
+					crowdQuion = new VMessageQualificationApplicationCrowd(crowdGroup , applicant);
+					((VMessageQualificationApplicationCrowd)crowdQuion).setApplyReason(obj.reason);
+					crowdQuion.setReadState(ReadState.UNREAD);
+					crowdQuion.setQualState(QualificationState.BE_REJECT);
+					crowdQuion.setmTimestamp(new Date(GlobalConfig.getGlobalServerTime()));
+					Uri uri = MessageBuilder.saveQualicationMessage(mContext,
+							crowdQuion);
+					if (uri != null) 
+						crowdQuion.setId(Long.parseLong(uri.getLastPathSegment()));
+				}
+				else
+					MessageBuilder.updateQualicationMessageState(obj.groupID,
+							new GroupQualicationState(Type.CROWD_APPLICATION,
+									QualificationState.BE_REJECT, obj.reason));
+				Intent intent = new Intent();
+				intent.setAction(JNI_BROADCAST_NEW_QUALIFICATION_MESSAGE);
+				intent.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
+				intent.putExtra("msgId", crowdQuion.getId());
+				sendBroadcast(intent);
 			}
 
 		}

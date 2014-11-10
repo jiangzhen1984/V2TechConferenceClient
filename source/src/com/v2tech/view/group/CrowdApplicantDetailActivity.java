@@ -1,5 +1,8 @@
 package com.v2tech.view.group;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -10,18 +13,23 @@ import android.text.TextUtils;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.v2tech.R;
 import com.v2tech.service.CrowdGroupService;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.service.MessageListener;
 import com.v2tech.util.ProgressUtils;
+import com.v2tech.util.V2Toast;
 import com.v2tech.view.conversation.MessageAuthenticationActivity;
 import com.v2tech.view.conversation.MessageBuilder;
 import com.v2tech.vo.CrowdGroup;
+import com.v2tech.vo.GroupQualicationState;
 import com.v2tech.vo.User;
 import com.v2tech.vo.VMessageQualification;
+import com.v2tech.vo.VMessageQualification.Type;
 import com.v2tech.vo.VMessageQualificationApplicationCrowd;
+import com.v2tech.vo.VMessageQualification.QualificationState;
 
 /**
  * Intent key:<br>
@@ -38,6 +46,10 @@ public class CrowdApplicantDetailActivity extends Activity {
 
 	private Context mContext;
 	
+	private TextView mTitleText;
+	private View mChildButtonLy;
+	
+	private View mInviteButton;
 	private View mReturnButton;
 	private View mAcceptButton;
 	private View mDeclineButton;
@@ -52,6 +64,7 @@ public class CrowdApplicantDetailActivity extends Activity {
 	private VMessageQualificationApplicationCrowd msg;
 	private CrowdGroupService service = new CrowdGroupService();
 	private Handler handler = new Handler();
+	private CrowdGroupService cg = new CrowdGroupService();
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -59,6 +72,13 @@ public class CrowdApplicantDetailActivity extends Activity {
 
 		setContentView(R.layout.crowd_applicant_detail);
 		mContext = this;
+		
+		mTitleText = (TextView) findViewById(R.id.crowd_applicant_title_text);
+		mChildButtonLy = findViewById(R.id.crowd_application_ly);
+		
+		
+		mInviteButton = findViewById(R.id.crowd_application_invite_button);
+		mInviteButton.setOnClickListener(mInviteButtonListener);
 		mAcceptButton = findViewById(R.id.crowd_application_accept_button);
 		mAcceptButton.setOnClickListener(mAcceptButtonListener);
 		mDeclineButton = findViewById(R.id.crowd_application_decline_button);
@@ -104,13 +124,34 @@ public class CrowdApplicantDetailActivity extends Activity {
 		
 		if (msg.getQualState() == VMessageQualification.QualificationState.ACCEPTED) {
 			mButtonLayout.setVisibility(View.GONE);
+			mChildButtonLy.setVisibility(View.VISIBLE);
+			mInviteButton.setVisibility(View.GONE);
+			
 			mNotesLayout.setVisibility(View.VISIBLE);
 			mNotesTV.setText(R.string.crowd_invitation_accept_notes);
 		} else if (msg.getQualState() == VMessageQualification.QualificationState.REJECT) {
 			mButtonLayout.setVisibility(View.GONE);
+			mChildButtonLy.setVisibility(View.VISIBLE);
+			mInviteButton.setVisibility(View.GONE);
+			
 			mNotesLayout.setVisibility(View.VISIBLE);
 			mNotesTV.setText(R.string.crowd_invitation_reject_notes);
-		}
+		} else if((msg.getQualState() == VMessageQualification.QualificationState.BE_REJECT)
+				|| (msg.getQualState() == VMessageQualification.QualificationState.WAITING)){
+			mButtonLayout.setVisibility(View.VISIBLE);
+			mNotesLayout.setVisibility(View.GONE);
+			mChildButtonLy.setVisibility(View.GONE);
+			mInviteButton.setVisibility(View.VISIBLE);
+			mTitleText.setText(R.string.crowd_applicant_invite_title);
+		} else if(msg.getQualState() == VMessageQualification.QualificationState.BE_ACCEPTED){
+			mButtonLayout.setVisibility(View.GONE);
+			mChildButtonLy.setVisibility(View.VISIBLE);
+			mInviteButton.setVisibility(View.GONE);
+			
+			mNotesLayout.setVisibility(View.VISIBLE);
+			mNotesTV.setText(R.string.crowd_invitation_joined);
+			mTitleText.setText(R.string.crowd_applicant_invite_title);
+		} 
 	}
 
 	private void handleAcceptDone() {
@@ -154,6 +195,27 @@ public class CrowdApplicantDetailActivity extends Activity {
 						mLocalHandler, REFUSE_INVITATION_DONE, null));
 				ProgressUtils.showNormalWithHintProgress(mContext, true).initTimeOut();
 			}
+		}
+
+	};
+	
+	private OnClickListener mInviteButtonListener = new OnClickListener() {
+
+		@Override
+		public void onClick(View view) {
+			
+			if(msg.getQualState() == VMessageQualification.QualificationState.WAITING){
+				V2Toast.makeText(mContext, R.string.crowd_applicant_invite_hint, Toast.LENGTH_SHORT).show();
+				return ;
+			}
+			
+			List<User> newMembers = new ArrayList<User>();
+			newMembers.add(applicant);
+			cg.inviteMember(crowd, newMembers, null);
+			
+//			MessageBuilder.updateQualicationMessageState(crowd.getmGId() , new GroupQualicationState(Type.CROWD_APPLICATION,
+//					QualificationState.WAITING, null));
+			onBackPressed();
 		}
 
 	};

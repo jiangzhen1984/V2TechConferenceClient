@@ -13,6 +13,7 @@ import android.view.animation.AnimationUtils;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.V2.jni.V2GlobalEnum;
 import com.v2tech.R;
 import com.v2tech.service.CrowdGroupService;
 import com.v2tech.service.GlobalHolder;
@@ -44,6 +45,7 @@ public class CrowdInvitationActivity extends Activity {
 	private TextView mCreatorTV;
 	private TextView mBriefTV;
 	private TextView mAnnounceTV;
+	private TextView mMembersTV;
 
 	private View mReturnButton;
 	private View mAcceptButton;
@@ -78,6 +80,7 @@ public class CrowdInvitationActivity extends Activity {
 		mCreatorTV = (TextView) findViewById(R.id.crowd_invitation_creator_tv);
 		mBriefTV = (TextView) findViewById(R.id.crowd_invitation_brief);
 		mAnnounceTV = (TextView) findViewById(R.id.crowd_invitation_announcement);
+		mMembersTV = (TextView) findViewById(R.id.crowd_invitation_members);
 		
 		mAcceptButton = findViewById(R.id.crowd_invitation_accept_button);
 		mAcceptButton.setOnClickListener(mAcceptButtonListener);
@@ -105,6 +108,10 @@ public class CrowdInvitationActivity extends Activity {
 		mBriefTV.setText(crowd.getBrief());
 		mCreatorTV.setText(crowd.getCreator().getName());
 		mAnnounceTV.setText(crowd.getAnnounce());
+		
+		Group group = GlobalHolder.getInstance().getGroupById(V2GlobalEnum.GROUP_TYPE_CROWD , crowd.getId());
+		if(group != null && group.getUsers() != null)
+			mMembersTV.setText(String.valueOf(group.getUsers().size()));
 
 		CrowdGroup g = new CrowdGroup(crowd.getId(), crowd.getName(),
 				crowd.getCreator(), null);

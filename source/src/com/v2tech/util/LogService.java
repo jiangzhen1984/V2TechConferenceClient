@@ -30,6 +30,7 @@ import android.os.IBinder;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.os.SystemClock;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.V2.jni.util.V2Log;
@@ -271,6 +272,10 @@ public class LogService extends Service {
 		}
 		String packName = this.getPackageName();
 		String myUser = getAppUser(packName, allProcList);
+		if(TextUtils.isEmpty(myUser)){
+			recordLogServiceLog("kill another logcat process failed.. , get app user name is null");
+			return ;
+		}
 		recordLogServiceLog("app user is:" + myUser);
 		recordLogServiceLog("============= START PRINT PROCESS LIST INFO ==============");
 		// 只打印本App和logcat的进程信息，其他进程信息不打印

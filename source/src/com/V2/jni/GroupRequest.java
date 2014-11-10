@@ -10,6 +10,7 @@ import android.content.Context;
 import android.text.TextUtils;
 
 import com.V2.jni.ind.FileJNIObject;
+import com.V2.jni.ind.GroupQualicationJNIObject;
 import com.V2.jni.ind.V2Document;
 import com.V2.jni.ind.V2Group;
 import com.V2.jni.ind.V2User;
@@ -17,7 +18,10 @@ import com.V2.jni.util.V2Log;
 import com.V2.jni.util.XmlAttributeExtractor;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.util.EscapedcharactersProcessing;
+import com.v2tech.vo.GroupQualicationState;
 import com.v2tech.vo.User;
+import com.v2tech.vo.VMessageQualification.QualificationState;
+import com.v2tech.vo.VMessageQualification.Type;
 
 public class GroupRequest {
 
@@ -164,8 +168,8 @@ public class GroupRequest {
 	 * 
 	 * @param groupType
 	 * @param nGroupID
-	 * @param nUserID 
-	 * 			the creator user id of crowd group , not current login user id
+	 * @param nUserID
+	 *            the creator user id of crowd group , not current login user id
 	 * @param reason
 	 */
 	public native void refuseInviteJoinGroup(int groupType, long nGroupID,
@@ -187,17 +191,18 @@ public class GroupRequest {
 	 * @param groupType
 	 * @param nGroupID
 	 * @param nUserID
-	 * 			the userID of User that apply join group
+	 *            the userID of User that apply join group
 	 */
 	public native void acceptApplyJoinGroup(int groupType, long nGroupID,
 			long nUserID);
 
 	/**
 	 * accept invitation of join group
+	 * 
 	 * @param groupType
 	 * @param groupId
 	 * @param nUserID
-	 * 			the userID of Group's creator , No was Invited userID 群主用户的id
+	 *            the userID of Group's creator , No was Invited userID 群主用户的id
 	 */
 	public native void acceptInviteJoinGroup(int groupType, long groupId,
 			long nUserID);
@@ -294,9 +299,11 @@ public class GroupRequest {
 
 	/**
 	 * Delete group files<br>
-	 * @param groupType 
+	 * 
+	 * @param groupType
 	 * @param nGroupId
-	 * @param fileId  files' UUID
+	 * @param fileId
+	 *            files' UUID
 	 */
 	public native void delGroupFile(int groupType, long nGroupId, String fileId);
 
@@ -409,8 +416,8 @@ public class GroupRequest {
 	 * <filelist><file encrypttype='1' id='C2A65B9B-63C7-4C9E-A8DD-F15F74ABA6CA'
 	 * name='83025aafa40f4bfb24fdb8d1034f78f0f7361801.gif' size='497236'
 	 * time='1411112464' uploader='11029' url=
-	 * 'http://192.168.0.38:8090/crowd/C2A65B9B-63C7-4C9E-A8DD-F15F74ABA6CA/C2A65B9B-63C7-4C9E-A8DD-F15F74ABA6CA/83025aafa40f4bfb24fdb8d1034f78f0f7361801.gif'/
-	 * > < / f i l e l i s t >
+	 * 'http://192.168.0.38:8090/crowd/C2A65B9B-63C7-4C9E-A8DD-F15F74ABA6CA/C2A65B9B-63C7-4C9E-A8DD-F15F74ABA6CA/83025aafa40f4bfb24fdb8d1034f78f0f7361801.gif'
+	 * / > < / f i l e l i s t >
 	 * 
 	 * @param type
 	 * @param nGroupId
@@ -503,7 +510,9 @@ public class GroupRequest {
 	}
 
 	/**
-	 * 10-28 10:21:14.740: D/V2TECH(4636): OnAddGroupUserInfo ->1:61111:<user id='11112131'/>
+	 * 10-28 10:21:14.740: D/V2TECH(4636): OnAddGroupUserInfo ->1:61111:<user
+	 * id='11112131'/>
+	 * 
 	 * @param groupType
 	 * @param nGroupID
 	 * @param sXml
@@ -726,24 +735,26 @@ public class GroupRequest {
 	}
 
 	/**
-	 * @deprecated this funcation never be called
+	 * this funcation was called when be invited user refused to join group
+	 * 
 	 * @param groupType
 	 * @param nGroupID
 	 * @param nUserID
 	 * @param sxml
 	 */
 	private void OnRefuseInviteJoinGroup(int groupType, long nGroupID,
-			long nUserID, String sxml) {
+			long nUserID, String reason) {
 		V2Log.d("OnRefuseInviteJoinGroup ==>" + "groupType:" + groupType + ","
 				+ "nGroupID:" + nGroupID + "," + "nUserID:" + nUserID + ","
-				+ "sxml:" + sxml);
+				+ "reason:" + reason);
 
 		for (WeakReference<GroupRequestCallback> wrcb : mCallbacks) {
 			Object obj = wrcb.get();
 			if (obj != null) {
 				GroupRequestCallback callback = (GroupRequestCallback) obj;
-				callback.OnRefuseInviteJoinGroup(groupType, nGroupID, nUserID,
-						sxml);
+				callback.OnRefuseInviteJoinGroup(new GroupQualicationJNIObject(
+						groupType, nGroupID, nUserID, Type.CROWD_INVITATION,
+						QualificationState.REJECT, reason));
 			}
 		}
 
@@ -818,9 +829,9 @@ public class GroupRequest {
 				+ "sXml:" + sXml);
 
 		V2Group parseSingleCrowd = XmlAttributeExtractor.parseSingleCrowd(sXml);
-		if(parseSingleCrowd == null)
-			return ;
-		
+		if (parseSingleCrowd == null)
+			return;
+
 		for (int i = 0; i < mCallbacks.size(); i++) {
 			WeakReference<GroupRequestCallback> wrcb = mCallbacks.get(i);
 			Object obj = wrcb.get();
@@ -832,7 +843,7 @@ public class GroupRequest {
 	}
 
 	/**
-	 * The CallBack that refuse apply for join group 拒绝申请加入群回调 
+	 * The CallBack that refuse apply for join group 拒绝申请加入群回调
 	 * 
 	 * @param groupType
 	 * @param sGroupInfo
@@ -842,17 +853,17 @@ public class GroupRequest {
 			String reason) {
 		V2Log.d("OnRefuseApplyJoinGroup ==>" + "groupType:" + groupType + ","
 				+ "sXml:" + sXml + "," + "reason:" + reason);
-		
+
 		V2Group parseSingleCrowd = XmlAttributeExtractor.parseSingleCrowd(sXml);
-		if(parseSingleCrowd == null)
-			return ;
-		
+		if (parseSingleCrowd == null)
+			return;
+
 		for (int i = 0; i < mCallbacks.size(); i++) {
 			WeakReference<GroupRequestCallback> wrcb = mCallbacks.get(i);
 			Object obj = wrcb.get();
 			if (obj != null) {
 				GroupRequestCallback callback = (GroupRequestCallback) obj;
-				callback.OnRefuseApplyJoinGroup(parseSingleCrowd , reason);
+				callback.OnRefuseApplyJoinGroup(parseSingleCrowd, reason);
 			}
 		}
 	}
@@ -897,13 +908,14 @@ public class GroupRequest {
 		V2Group v2group = new V2Group(nGroupID, eGroupType);
 		v2doc.mGroup = v2group;
 		v2doc.mType = V2Document.Type.BLANK_BOARD;
-		
+
 		for (int i = 0; i < mCallbacks.size(); i++) {
 			WeakReference<GroupRequestCallback> wrcb = mCallbacks.get(i);
 			Object obj = wrcb.get();
 			if (obj != null) {
 				GroupRequestCallback callback = (GroupRequestCallback) obj;
-				callback.OnGroupWBoardNotification(v2doc, GroupRequestCallback.DocOpt.CREATE);
+				callback.OnGroupWBoardNotification(v2doc,
+						GroupRequestCallback.DocOpt.CREATE);
 			}
 		}
 	};
@@ -935,19 +947,20 @@ public class GroupRequest {
 		V2Log.e("GroupRequest UI", "OnWBoardDestroy ---> eGroupType :"
 				+ eGroupType + " | nGroupID: " + nGroupID + " | szWBoardID: "
 				+ szWBoardID);
-		
+
 		V2Document v2doc = new V2Document();
 		v2doc.mId = szWBoardID;
 		V2Group v2group = new V2Group(nGroupID, eGroupType);
 		v2doc.mGroup = v2group;
 		v2doc.mType = V2Document.Type.BLANK_BOARD;
-		
+
 		for (int i = 0; i < mCallbacks.size(); i++) {
 			WeakReference<GroupRequestCallback> wrcb = mCallbacks.get(i);
 			Object obj = wrcb.get();
 			if (obj != null) {
 				GroupRequestCallback callback = (GroupRequestCallback) obj;
-				callback.OnGroupWBoardNotification(v2doc, GroupRequestCallback.DocOpt.DESTROY);
+				callback.OnGroupWBoardNotification(v2doc,
+						GroupRequestCallback.DocOpt.DESTROY);
 			}
 		}
 	};
@@ -967,20 +980,21 @@ public class GroupRequest {
 				+ eGroupType + " | nGroupID: " + nGroupID + " | szWBoardID: "
 				+ szWBoardID + " | szFileName: " + szFileName
 				+ " | eWhiteShowType: " + eWhiteShowType);
-		
+
 		V2Document v2doc = new V2Document();
 		v2doc.mId = szWBoardID;
 		V2Group v2group = new V2Group(nGroupID, eGroupType);
 		v2doc.mGroup = v2group;
 		v2doc.mType = V2Document.Type.DOCUMENT;
 		v2doc.mFileName = szFileName;
-		
+
 		for (int i = 0; i < mCallbacks.size(); i++) {
 			WeakReference<GroupRequestCallback> wrcb = mCallbacks.get(i);
 			Object obj = wrcb.get();
 			if (obj != null) {
 				GroupRequestCallback callback = (GroupRequestCallback) obj;
-				callback.OnGroupWBoardNotification(v2doc, GroupRequestCallback.DocOpt.CREATE);
+				callback.OnGroupWBoardNotification(v2doc,
+						GroupRequestCallback.DocOpt.CREATE);
 			}
 		}
 	};

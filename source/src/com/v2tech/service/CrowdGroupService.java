@@ -12,7 +12,6 @@ import com.V2.jni.GroupRequest;
 import com.V2.jni.GroupRequestCallbackAdapter;
 import com.V2.jni.ind.FileJNIObject;
 import com.V2.jni.ind.GroupFileJNIObject;
-import com.V2.jni.ind.GroupQualicationJNIObject;
 import com.V2.jni.ind.V2Group;
 import com.v2tech.service.jni.CreateCrowdResponse;
 import com.v2tech.service.jni.FileTransStatusIndication;
@@ -25,6 +24,7 @@ import com.v2tech.view.conversation.MessageBuilder;
 import com.v2tech.vo.Crowd;
 import com.v2tech.vo.CrowdGroup;
 import com.v2tech.vo.Group;
+import com.v2tech.vo.GroupQualicationState;
 import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.VMessageQualification.QualificationState;
 import com.v2tech.vo.VMessageQualification.Type;
@@ -523,7 +523,7 @@ public class CrowdGroupService extends AbstractHandler {
 			Message.obtain(mCallbackHandler, ACCEPT_APPLICATION_CROWD, jniRes)
 					.sendToTarget();
 			MessageBuilder.updateQualicationMessageState(group.id, 
-					new GroupQualicationJNIObject(Type.CROWD_APPLICATION , QualificationState.ACCEPTED , null));
+					new GroupQualicationState(Type.CROWD_APPLICATION , QualificationState.ACCEPTED , null));
 		}
 		
 		@Override
@@ -534,7 +534,7 @@ public class CrowdGroupService extends AbstractHandler {
 			Message.obtain(mCallbackHandler, REFUSE_APPLICATION_CROWD, jniRes)
 					.sendToTarget();
 			MessageBuilder.updateQualicationMessageState(parseSingleCrowd.id, 
-					new GroupQualicationJNIObject(Type.CROWD_APPLICATION , QualificationState.ACCEPTED , reason));
+					new GroupQualicationState(Type.CROWD_APPLICATION , QualificationState.ACCEPTED , reason));
 		}
 
 		@Override
@@ -580,7 +580,7 @@ public class CrowdGroupService extends AbstractHandler {
 					Message.obtain(mCallbackHandler, ACCEPT_JOIN_CROWD, jniRes)
 							.sendToTarget();
 					MessageBuilder.updateQualicationMessageState(group.id, 
-							new GroupQualicationJNIObject(Type.CROWD_INVITATION , QualificationState.ACCEPTED , null));
+							new GroupQualicationState(Type.CROWD_INVITATION , QualificationState.ACCEPTED , null));
 				} else {
 					JNIResponse jniRes = new CreateCrowdResponse(group.id,
 							CreateCrowdResponse.Result.SUCCESS);

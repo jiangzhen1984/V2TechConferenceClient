@@ -3,6 +3,7 @@ package com.V2.jni;
 import java.util.List;
 
 import com.V2.jni.ind.FileJNIObject;
+import com.V2.jni.ind.GroupQualicationJNIObject;
 import com.V2.jni.ind.V2Document;
 import com.V2.jni.ind.V2Group;
 import com.V2.jni.ind.V2User;
@@ -76,8 +77,7 @@ public abstract class GroupRequestCallbackAdapter implements
 	}
 
 	@Override
-	public void OnRefuseInviteJoinGroup(int groupType, long nGroupID,
-			long nUserID, String sxml) {
+	public void OnRefuseInviteJoinGroup(GroupQualicationJNIObject obj) {
 		
 	}
 

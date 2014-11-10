@@ -17,7 +17,6 @@ import android.net.Uri;
 import android.text.TextUtils;
 
 import com.V2.jni.V2GlobalEnum;
-import com.V2.jni.ind.GroupQualicationJNIObject;
 import com.V2.jni.ind.V2Group;
 import com.V2.jni.util.V2Log;
 import com.V2.jni.util.XmlAttributeExtractor;
@@ -28,6 +27,7 @@ import com.v2tech.service.GlobalHolder;
 import com.v2tech.util.GlobalConfig;
 import com.v2tech.vo.CrowdGroup;
 import com.v2tech.vo.FileInfoBean;
+import com.v2tech.vo.GroupQualicationState;
 import com.v2tech.vo.User;
 import com.v2tech.vo.VMessage;
 import com.v2tech.vo.VMessageAbstractItem;
@@ -646,7 +646,7 @@ public class MessageBuilder {
 	 * @return
 	 */
 	public static int updateQualicationMessageState(long groupID,
-			GroupQualicationJNIObject obj) {
+			GroupQualicationState obj) {
 
 		DataBaseContext mContext = new DataBaseContext(context);
 		ContentValues values = new ContentValues();
@@ -798,6 +798,16 @@ public class MessageBuilder {
 
 	}
 
+	public static VMessageQualification queryQualMessageByCrowdId(
+			Context context, User user, CrowdGroup cg) {
+		
+		if (user == null || cg == null) {
+			V2Log.e("To query failed...please check the given User Object");
+			return null;
+		}
+		
+		return queryQualMessageByCrowdId(context , user.getmUserId() , cg.getmGId());
+	}
 	/**
 	 * Query qualification message by crowd group id and user id
 	 * 
@@ -807,14 +817,9 @@ public class MessageBuilder {
 	 * @return
 	 */
 	public static VMessageQualification queryQualMessageByCrowdId(
-			Context context, User user, CrowdGroup cg) {
+			Context context, long userID, long groupID) {
 
 		DataBaseContext mContext = new DataBaseContext(context);
-		if (user == null || cg == null) {
-			V2Log.e("To query failed...please check the given User Object");
-			return null;
-		}
-
 		String selection = " ("
 				+ ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_FROM_USER_ID
 				+ "= ? or "
@@ -823,8 +828,8 @@ public class MessageBuilder {
 				+ ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_ID
 				+ " = ? ";
 		String[] selectionArgs = new String[] {
-				String.valueOf(user.getmUserId()),
-				String.valueOf(user.getmUserId()), cg.getmGId() + "" };
+				String.valueOf(userID),
+				String.valueOf(userID), String.valueOf(groupID) };
 		String sortOrder = ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_SAVEDATE
 				+ " desc";
 		Cursor cursor = mContext.getContentResolver().query(

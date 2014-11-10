@@ -51,6 +51,7 @@
                 android:focusableInTouchMode="true"
                 android:inputType="text"
                 android:paddingLeft="45dp"
+                android:imeOptions="actionDone"
                 android:textColor="#000000"
                 android:textSize="16sp" >
             </EditText>
@@ -110,6 +111,7 @@
                         android:background="@null"
                         android:ems="10"
                         android:inputType="text"
+                        android:imeOptions="actionDone"
                         android:maxLength="50"
                         android:paddingBottom="5dp"
                         android:paddingTop="5dp" />

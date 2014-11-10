@@ -307,6 +307,7 @@
                     android:gravity="top|left"
                     android:lines="10"
                     android:maxLength="500"
+                    android:hint="@string/crowd_application_hint_string"
                     android:padding="10dp"
                     android:textColor="@color/activiy_contact_detail_item_color" >
                 </EditText>

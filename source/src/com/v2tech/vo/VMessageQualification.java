@@ -53,7 +53,7 @@ public abstract class VMessageQualification {
 	}
 	
 	public enum QualificationState {
-		WAITING(0),ACCEPTED(1),REJECT(2);
+		WAITING(0),ACCEPTED(1),REJECT(2),BE_REJECT(3),BE_ACCEPTED(4);
 		
 		private int type;
 		private QualificationState(int type){
@@ -67,6 +67,10 @@ public abstract class VMessageQualification {
 					return ACCEPTED;
 				case 2:
 					return REJECT;
+				case 3:
+					return BE_REJECT;
+				case 4:
+					return BE_ACCEPTED;
 			}
 			return null;
 		}

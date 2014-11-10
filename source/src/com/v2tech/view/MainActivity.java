@@ -8,8 +8,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.graphics.Color;
-import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
@@ -19,15 +17,12 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TabHost;
 import android.widget.TabHost.TabContentFactory;
 import android.widget.TextView;
@@ -77,25 +72,6 @@ public class MainActivity extends FragmentActivity implements
 	public static final String SERVICE_BOUNDED_EVENT = "com.v2tech.SERVICE_BOUNDED_EVENT";
 	public static final String SERVICE_UNBOUNDED_EVENT = "com.v2tech.SERVICE_UNBOUNDED_EVENT";
 	private static final String TAG = "MainActivity";
-
-	private int[] imgs = new int[] { R.drawable.conversation_video_button,
-			R.drawable.conversation_group_button,
-			R.drawable.conversation_seach_crowd_button,
-			R.drawable.conversation_seach_member_button,
-			R.drawable.conversation_call_button,
-			R.drawable.conversation_sms_button,
-			R.drawable.conversation_email_button,
-			R.drawable.conversation_files_button };
-
-	private int[] items = new int[] {
-			R.string.conversation_popup_menu_video_call_button,
-			R.string.conversation_popup_menu_group_create_button,
-			R.string.conversation_popup_menu_crowd_search_button,
-			R.string.conversation_popup_menu_member_search_button,
-			R.string.conversation_popup_menu_call_button,
-			R.string.conversation_popup_menu_sms_call_button,
-			R.string.conversation_popup_menu_email_button,
-			R.string.conversation_popup_menu_files_button };
 
 	private TabClass[] mTabClasses = new TabClass[] {
 			new TabClass(PublicIntent.TAG_CONTACT,
@@ -166,7 +142,6 @@ public class MainActivity extends FragmentActivity implements
 		// Init title bar
 		View titleBarLayout = findViewById(R.id.title_bar_ly);
 		titleBar = new TitleBar(mContext, titleBarLayout);
-		initPlusItem();
 		titleBar.regsiterSearchedTextListener(searchTextWatcher);
 
 		// Initialize first title name
@@ -195,43 +170,6 @@ public class MainActivity extends FragmentActivity implements
 	protected void onSaveInstanceState(Bundle outState) {
 		outState.putString("tab", mTabHost.getCurrentTabTag());
 		super.onSaveInstanceState(outState);
-	}
-
-	private void initPlusItem() {
-		for (int i = 0; i < imgs.length; i++) {
-			LinearLayout ll = new LinearLayout(mContext);
-			ll.setOrientation(LinearLayout.HORIZONTAL);
-
-			ImageView iv = new ImageView(mContext);
-			iv.setImageResource(imgs[i]);
-			iv.setPadding(5, 5, 5, 5);
-			LinearLayout.LayoutParams ivLL = new LinearLayout.LayoutParams(0,
-					LinearLayout.LayoutParams.WRAP_CONTENT);
-			ivLL.gravity = Gravity.RIGHT;
-			ivLL.weight = 0.3F;
-
-			ll.addView(iv, ivLL);
-
-			TextView tv = new TextView(mContext);
-			tv.setText(items[i]);
-			tv.setPadding(5, 5, 5, 5);
-			//TODO gray disable button
-			if (i > 3) {
-				tv.setTextColor(Color.rgb(198, 198, 198));
-			} else {
-				tv.setTextColor(Color.rgb(123, 123, 123));
-			}
-			LinearLayout.LayoutParams tvLL = new LinearLayout.LayoutParams(0,
-					LinearLayout.LayoutParams.WRAP_CONTENT);
-			tvLL.gravity = Gravity.LEFT | Gravity.CENTER_VERTICAL;
-			tvLL.weight = 0.7F;
-
-			ll.addView(tv, tvLL);
-			ll.setOnClickListener(titleBarMenuItemClickListener);
-
-			ll.setId(imgs[i]);
-			titleBar.addAdditionalPopupMenuItem(ll, null);
-		}
 	}
 
 	/**
@@ -423,61 +361,6 @@ public class MainActivity extends FragmentActivity implements
 				int arg3) {
 			((TextWatcher) ((FragmentPagerAdapter) mViewPager.getAdapter())
 					.getItem(mTabHost.getCurrentTab())).onTextChanged(arg0, arg1, arg2, arg3);
-		}
-
-	};
-
-	private OnClickListener titleBarMenuItemClickListener = new OnClickListener() {
-
-		@Override
-		public void onClick(View view) {
-			titleBar.dismissPlusWindow();
-			int id = view.getId();
-			switch (id) {
-			case R.drawable.conversation_group_button: {
-
-				Intent i = new Intent(PublicIntent.START_GROUP_CREATE_ACTIVITY);
-				i.addCategory(PublicIntent.DEFAULT_CATEGORY);
-				startActivityForResult(i, SUB_ACTIVITY_CODE_CREATE_CONF);
-				break;
-			}
-
-			case R.drawable.conversation_video_button: {
-				Intent i = new Intent(
-						PublicIntent.START_CONFERENCE_CREATE_ACTIVITY);
-				i.addCategory(PublicIntent.DEFAULT_CATEGORY);
-				startActivityForResult(i, SUB_ACTIVITY_CODE_CREATE_CONF);
-			}
-				break;
-			case R.drawable.conversation_seach_crowd_button: {
-				Intent i = new Intent(
-						PublicIntent.START_SEARCH_ACTIVITY);
-				i.addCategory(PublicIntent.DEFAULT_CATEGORY);
-				//For crowd search
-				i.putExtra("type", 0);
-				startActivity(i);
-			}
-				break;
-				
-			case R.drawable.conversation_seach_member_button:
-			{
-				Intent i = new Intent(
-						PublicIntent.START_SEARCH_ACTIVITY);
-				i.addCategory(PublicIntent.DEFAULT_CATEGORY);
-				//For member search
-				i.putExtra("type", 1);
-				startActivity(i);
-			}
-				break;
-			case R.drawable.conversation_call_button:
-				break;
-			case R.drawable.conversation_sms_button:
-				break;
-			case R.drawable.conversation_email_button:
-				break;
-			case R.drawable.conversation_files_button:
-				break;
-			}
 		}
 
 	};

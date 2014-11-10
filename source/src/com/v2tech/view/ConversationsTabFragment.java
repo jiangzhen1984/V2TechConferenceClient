@@ -90,6 +90,7 @@ import com.v2tech.vo.CrowdGroup;
 import com.v2tech.vo.DepartmentConversation;
 import com.v2tech.vo.Group;
 import com.v2tech.vo.Group.GroupType;
+import com.v2tech.vo.VMessageQualification.QualificationState;
 import com.v2tech.vo.OrgGroup;
 import com.v2tech.vo.User;
 import com.v2tech.vo.VMessage;
@@ -1022,7 +1023,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 
 			// V2Log.e(TAG, "VMessage :" + vm.getDate().getTime());
 			// V2Log.e(TAG, "lastDateTime : " + lastDateTime);
-			// if (vm.getMsgCode() != V2GlobalEnum.GROUP_TYPE_CROWD
+			// if (vm.getMsgCode() != V2GlobalEnum.GROUP_TYPE_CROWDR
 			// && vm.getDate().getTime() != lastDateTime) {
 			// lastDateTime = vm.getDate().getTime();
 			// ScrollItem scrollItem = mItemList.get(currentMoveViewPosition);
@@ -1129,6 +1130,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 			verificationMessageItemData
 					.setReadFlag(Conversation.READ_FLAG_READ);
 		updateUnreadConversation(verificationMessageItemData);
+		updateVerificationMessage(msg);
 	}
 
 	private void updateCrowdVerificationConversation(VMessageQualification msg) {
@@ -1173,15 +1175,27 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 		case CROWD_APPLICATION:
 			String applyName = null;
 			VMessageQualificationApplicationCrowd apply = (VMessageQualificationApplicationCrowd) msg;
-			if (TextUtils.isEmpty(apply.getApplicant().getName())) {
-				User user = GlobalHolder.getInstance().getUser(
-						apply.getApplicant().getmUserId());
-				if (user != null)
-					applyName = user.getName();
-			} else
-				applyName = apply.getApplicant().getName();
-			content = applyName
-					+ mContext.getText(R.string.crowd_applicant_content);
+			if(apply.getQualState() == QualificationState.BE_REJECT){
+				CrowdGroup crowdGroup = apply.getCrowdGroup();
+				if(crowdGroup != null)
+					content = "对方拒绝加入" + crowdGroup.getName() +"群";
+			}
+			else if(apply.getQualState() == QualificationState.BE_ACCEPTED){
+				CrowdGroup crowdGroup = apply.getCrowdGroup();
+				if(crowdGroup != null)
+					content = "对方已加入" + crowdGroup.getName() +"群";
+			}
+			else{
+				if (TextUtils.isEmpty(apply.getApplicant().getName())) {
+					User user = GlobalHolder.getInstance().getUser(
+							apply.getApplicant().getmUserId());
+					if (user != null)
+						applyName = user.getName();
+				} else
+					applyName = apply.getApplicant().getName();
+				content = applyName
+						+ mContext.getText(R.string.crowd_applicant_content);
+			}
 			verification.setUser(apply.getApplicant());
 			verification.setCrowdVerificationContent(getResources().getString(
 					R.string.crowd_applicant_content));
@@ -2101,18 +2115,24 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 					.equals(JNIService.JNI_BROADCAST_FRIEND_AUTHENTICATION)) {
 				V2Log.d(TAG,
 						"having new friend verification message coming ... update..");
-
+				long uid = intent.getLongExtra("uid", -1);
+				if (uid == -1) 
+					return;
+				
 				if (verificationMessageItemLayout == null
 						|| verificationMessageItemData == null)
 					initVerificationItem();
-				String msg = showUnreadFriendAuthentication();
-				if (msg == null) {
+				
+				AddFriendHistorieNode node = MessageLoader.getNewestFriendVerificationMessage(mContext, new User(uid));
+				if (node == null) {
 					V2Log.d(TAG,
 							"update friend verification message content failed... get null");
 					return;
 				}
-
-				updateVerificationMessage(msg);
+				else
+					node.readState = 0;
+				
+				updateFriendVerificationConversation(node);
 			} else if (JNIService.JNI_BROADCAST_NEW_QUALIFICATION_MESSAGE
 					.equals(intent.getAction())) {
 				// If this can receive this broadcast, means

@@ -179,9 +179,9 @@ public class VoiceMessageDetailActivity extends Activity implements
 				holder.state.setTextColor(Color.BLUE);
 				holder.holdTime.setTextColor(Color.BLUE);
 				if (childBean.childMediaType == AudioVideoMessageBean.TYPE_AUDIO)
-					holder.state.setText("[音频]已拨出");
+					holder.state.setText(R.string.conversation_voice_detail_voice_call_out);
 				else
-					holder.state.setText("[视频]已拨出");
+					holder.state.setText(R.string.conversation_voice_detail_video_call_out);
 			} else {
 				if (childBean.childMediaState == AudioVideoMessageBean.STATE_CALL_OUT) {
 					holder.directionIcon
@@ -189,18 +189,18 @@ public class VoiceMessageDetailActivity extends Activity implements
 					holder.state.setTextColor(Color.GREEN);
 					holder.holdTime.setTextColor(Color.GREEN);
 					if (childBean.childMediaType == AudioVideoMessageBean.TYPE_AUDIO)
-						holder.state.setText("[音频]已接听");
+						holder.state.setText(R.string.conversation_voice_detail_voice_call_in_reply);
 					else
-						holder.state.setText("[视频]已接听");
+						holder.state.setText(R.string.conversation_voice_detail_video_call_in_reply);
 				} else {
 					holder.directionIcon
 							.setImageResource(R.drawable.vs_voice_nolistener);
 					holder.state.setTextColor(Color.RED);
 					holder.holdTime.setTextColor(Color.RED);
 					if (childBean.childMediaType == AudioVideoMessageBean.TYPE_AUDIO)
-						holder.state.setText("[音频]未接听");
+						holder.state.setText(R.string.conversation_voice_detail_voice_call_in_no_reply);
 					else
-						holder.state.setText("[视频]未接听");
+						holder.state.setText(R.string.conversation_voice_detail_video_call_in_no_reply);
 				}
 			}
 			return convertView;

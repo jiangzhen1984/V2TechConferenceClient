@@ -221,8 +221,14 @@ public class ContactDetail extends Activity implements OnTouchListener {
 				&& (fromActivity.equals("MessageAuthenticationActivity"))) {
 			mMoreDetailButton.setVisibility(View.INVISIBLE);
 			llAuthenticationMessageLayout.setVisibility(View.VISIBLE);
-			tvAuthenticationMessage.setText(this.getIntent().getStringExtra(
-					"authenticationMessage"));
+			
+			String authenticationMessage = getIntent().getStringExtra(
+					"authenticationMessage");
+			if(TextUtils.isEmpty(authenticationMessage))
+				tvAuthenticationMessage.setText(R.string.common_no_string);
+			else
+				tvAuthenticationMessage.setText(authenticationMessage);
+				
 			mCompanyTitleTV.setVisibility(View.INVISIBLE);
 			int state = this.getIntent().getIntExtra("state", -1);
 			switch (state) {

@@ -60,6 +60,25 @@ public class TitleBar {
 	private int[] items = new int[] { R.string.title_bar_item_detail,
 			R.string.title_bar_item_setting, R.string.title_bar_item_help,
 			R.string.title_bar_item_about };
+	
+	private int[] plusImgs = new int[] { R.drawable.conversation_video_button,
+			R.drawable.conversation_group_button,
+			R.drawable.conversation_seach_crowd_button,
+			R.drawable.conversation_seach_member_button,
+			R.drawable.conversation_call_button,
+			R.drawable.conversation_sms_button,
+			R.drawable.conversation_email_button,
+			R.drawable.conversation_files_button };
+
+	private int[] plusItems = new int[] {
+			R.string.conversation_popup_menu_video_call_button,
+			R.string.conversation_popup_menu_group_create_button,
+			R.string.conversation_popup_menu_crowd_search_button,
+			R.string.conversation_popup_menu_member_search_button,
+			R.string.conversation_popup_menu_call_button,
+			R.string.conversation_popup_menu_sms_call_button,
+			R.string.conversation_popup_menu_email_button,
+			R.string.conversation_popup_menu_files_button };
 
 	public TitleBar(Context context, View rootContainer) {
 		this.context = context;
@@ -97,7 +116,7 @@ public class TitleBar {
 		} else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1 && conf.densityDpi < 240) {
 			padding = DensityUtils.dip2px(context, 2);
 		} else {
-			padding = DensityUtils.dip2px(context, 6);
+			padding = DensityUtils.dip2px(context, 5);
 		}
 		
 	}
@@ -126,7 +145,7 @@ public class TitleBar {
 		this.listener = listener;
 	}
 
-	public void initPlusItemList(ViewGroup vg) {
+	public void initMoreitem(ViewGroup vg) {
 		for (int i = 0; i < imgs.length; i++) {
 			LinearLayout ll = new LinearLayout(context);
 			ll.setOrientation(LinearLayout.HORIZONTAL);
@@ -172,6 +191,43 @@ public class TitleBar {
 			}
 		}
 	}
+	
+	public void initPlusItem() {
+		for (int i = 0; i < plusImgs.length; i++) {
+			LinearLayout ll = new LinearLayout(context);
+			ll.setOrientation(LinearLayout.HORIZONTAL);
+
+			ImageView iv = new ImageView(context);
+			iv.setImageResource(plusImgs[i]);
+			iv.setPadding(5, padding, 5, padding);
+			LinearLayout.LayoutParams ivLL = new LinearLayout.LayoutParams(0,
+					LinearLayout.LayoutParams.WRAP_CONTENT);
+			ivLL.gravity = Gravity.RIGHT;
+			ivLL.weight = 0.3F;
+
+			ll.addView(iv, ivLL);
+
+			TextView tv = new TextView(context);
+			tv.setText(plusItems[i]);
+			tv.setPadding(5, padding, 5, padding);
+			//TODO gray disable button
+			if (i > 3) {
+				tv.setTextColor(Color.rgb(198, 198, 198));
+			} else {
+				tv.setTextColor(Color.rgb(123, 123, 123));
+			}
+			LinearLayout.LayoutParams tvLL = new LinearLayout.LayoutParams(0,
+					LinearLayout.LayoutParams.WRAP_CONTENT);
+			tvLL.gravity = Gravity.LEFT | Gravity.CENTER_VERTICAL;
+			tvLL.weight = 0.7F;
+
+			ll.addView(tv, tvLL);
+			ll.setOnClickListener(titleBarMenuItemClickListener);
+
+			ll.setId(plusImgs[i]);
+			addAdditionalPopupMenuItem(ll, null);
+		}
+	}
 
 	public void regsiterSearchedTextListener(TextWatcher tw) {
 		this.searchEdit.addTextChangedListener(tw);
@@ -206,6 +262,61 @@ public class TitleBar {
 		imm.hideSoftInputFromWindow(searchEdit.getWindowToken(),
 				InputMethodManager.RESULT_UNCHANGED_SHOWN);
 	}
+	
+	private OnClickListener titleBarMenuItemClickListener = new OnClickListener() {
+
+		@Override
+		public void onClick(View view) {
+			dismissPlusWindow();
+			int id = view.getId();
+			switch (id) {
+			case R.drawable.conversation_group_button: {
+
+				Intent i = new Intent(PublicIntent.START_GROUP_CREATE_ACTIVITY);
+				i.addCategory(PublicIntent.DEFAULT_CATEGORY);
+				context.startActivity(i);
+				break;
+			}
+
+			case R.drawable.conversation_video_button: {
+				Intent i = new Intent(
+						PublicIntent.START_CONFERENCE_CREATE_ACTIVITY);
+				i.addCategory(PublicIntent.DEFAULT_CATEGORY);
+				context.startActivity(i);
+			}
+				break;
+			case R.drawable.conversation_seach_crowd_button: {
+				Intent i = new Intent(
+						PublicIntent.START_SEARCH_ACTIVITY);
+				i.addCategory(PublicIntent.DEFAULT_CATEGORY);
+				//For crowd search
+				i.putExtra("type", 0);
+				context.startActivity(i);
+			}
+				break;
+				
+			case R.drawable.conversation_seach_member_button:
+			{
+				Intent i = new Intent(
+						PublicIntent.START_SEARCH_ACTIVITY);
+				i.addCategory(PublicIntent.DEFAULT_CATEGORY);
+				//For member search
+				i.putExtra("type", 1);
+				context.startActivity(i);
+			}
+				break;
+			case R.drawable.conversation_call_button:
+				break;
+			case R.drawable.conversation_sms_button:
+				break;
+			case R.drawable.conversation_email_button:
+				break;
+			case R.drawable.conversation_files_button:
+				break;
+			}
+		}
+
+	};
 
 	private OnClickListener plusItemClickListener = new OnClickListener() {
 
@@ -241,9 +352,6 @@ public class TitleBar {
 
 		@Override
 		public void onClick(View anchor) {
-			if (additionList.size() <= 0) {
-				return;
-			}
 			DisplayMetrics dm = new DisplayMetrics();
 			((Activity) context).getWindowManager().getDefaultDisplay()
 					.getMetrics(dm);
@@ -259,6 +367,12 @@ public class TitleBar {
 						LinearLayout.LayoutParams.WRAP_CONTENT,
 						LinearLayout.LayoutParams.WRAP_CONTENT);
 				lp.rightMargin = 20;
+				
+				initPlusItem();
+				if (additionList.size() <= 0) {
+					return;
+				}
+				
 				for (int i = 0; i < additionList.size(); i++) {
 					additionList.get(i).v.setPadding(0, padding, 15, padding);
 					itemContainer.addView(additionList.get(i).v, lp);
@@ -331,7 +445,7 @@ public class TitleBar {
 				LinearLayout itemContainer = (LinearLayout) layout
 						.findViewById(R.id.common_pop_window_container);
 
-				initPlusItemList(itemContainer);
+				initMoreitem(itemContainer);
 
 				itemContainer.measure(View.MeasureSpec.UNSPECIFIED,
 						View.MeasureSpec.UNSPECIFIED);

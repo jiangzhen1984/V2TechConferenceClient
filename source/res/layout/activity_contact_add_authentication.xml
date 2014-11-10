@@ -152,6 +152,7 @@
                 android:layout_marginLeft="@dimen/contact_detail_2_item_margin_left"
                 android:layout_marginRight="@dimen/contact_detail_2_item_margin_right"
                 android:ems="10"
+                android:maxLength="30"
                 android:inputType="textMultiLine"
                 android:minLines="3" >
 
