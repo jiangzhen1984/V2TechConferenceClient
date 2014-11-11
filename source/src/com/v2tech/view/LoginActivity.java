@@ -271,6 +271,14 @@ public class LoginActivity extends Activity {
 		super.onPause();
 	}
 
+	
+	
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		us.clearCalledBack();
+	}
+
 	private TextWatcher userNameTextWAtcher = new TextWatcher() {
 
 		@Override
@@ -511,7 +519,7 @@ public class LoginActivity extends Activity {
 				} else if (rlr.getResult() == JNIResponse.Result.SERVER_REJECT) {
 					V2Toast.makeText(mContext, R.string.error_connect_to_server,
 							V2Toast.LENGTH_LONG).show();
-				} else {
+				} else if (rlr.getResult() == JNIResponse.Result.SUCCESS){
 					//获取到登陆用户对象
 					User user = ((RequestLogInResponse) rlr).getUser();
 					if(user == null)
@@ -529,6 +537,9 @@ public class LoginActivity extends Activity {
 					//init all database table names;
 					initDataBaseTableCacheNames();
 					finish();
+				} else {
+					V2Toast.makeText(mContext, R.string.error_connect_to_server_no_enough_resource,
+							V2Toast.LENGTH_LONG).show();
 				}
 
 				ProgressUtils.showNormalProgress(mContext , false);

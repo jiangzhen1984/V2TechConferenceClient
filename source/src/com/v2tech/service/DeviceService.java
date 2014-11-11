@@ -121,7 +121,7 @@ public class DeviceService extends AbstractHandler {
 	 */
 	public void requestOpenVideoDevice(Group group, UserDeviceConfig userDevice,
 			MessageListener caller) {
-		if (userDevice == null) {
+		if (userDevice == null || group == null) {
 			JNIResponse jniRes = new RequestOpenUserVideoDeviceResponse(0,
 					RequestConfCreateResponse.Result.INCORRECT_PAR);
 			sendResult(caller, jniRes);
@@ -162,7 +162,7 @@ public class DeviceService extends AbstractHandler {
 	 */
 	public void requestCloseVideoDevice(Group group, UserDeviceConfig userDevice,
 			MessageListener caller) {
-		if (userDevice == null) {
+		if (userDevice == null || group == null) {
 			JNIResponse jniRes = new RequestCloseUserVideoDeviceResponse(
 					System.currentTimeMillis() / 1000,
 					RequestCloseUserVideoDeviceResponse.Result.INCORRECT_PAR);

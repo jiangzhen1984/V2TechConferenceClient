@@ -83,6 +83,7 @@
     <string name="crowd_application_brief">群简介</string>
     <string name="crowd_application_applyed">已申请</string>
     <string name="crowd_application_send_button">发送</string>
+    <string name="crowd_application_sent_result_successful">请求发送成功</string>
     
     
     <string name="crowd_applicant_title">群申请</string>

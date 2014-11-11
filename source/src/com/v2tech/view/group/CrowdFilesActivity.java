@@ -850,7 +850,9 @@ public class CrowdFilesActivity extends Activity {
 			}
 
 			if (isInDeleteMode
-					&& file.getUploader().getmUserId() == currentLoginUserID) {
+					&& (file.getUploader().getmUserId() == currentLoginUserID
+					|| GlobalHolder.getInstance().getCurrentUserId() == crowd
+							.getOwnerUser().getmUserId())) {
 				item.mFileDeleteModeButton.setVisibility(View.VISIBLE);
 			} else {
 				item.mFileDeleteModeButton.setVisibility(View.GONE);
@@ -888,8 +890,7 @@ public class CrowdFilesActivity extends Activity {
 				item.mProgressLayout.setVisibility(View.VISIBLE);
 				break;
 			case DOWNLOADED:
-				item.mFileButton
-						.setText(R.string.crowd_files_name_open_file);
+				item.mFileButton.setText(R.string.crowd_files_name_open_file);
 				item.mFileButton.setVisibility(View.VISIBLE);
 				item.mFileText.setVisibility(View.GONE);
 				item.mFileProgress.setVisibility(View.GONE);
