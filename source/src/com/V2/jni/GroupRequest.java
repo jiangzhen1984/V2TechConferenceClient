@@ -7,9 +7,11 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import android.content.Context;
+import android.content.Intent;
 import android.text.TextUtils;
 
 import com.V2.jni.ind.FileJNIObject;
+import com.V2.jni.ind.GroupAddUserJNIObject;
 import com.V2.jni.ind.GroupQualicationJNIObject;
 import com.V2.jni.ind.V2Document;
 import com.V2.jni.ind.V2Group;
@@ -18,8 +20,10 @@ import com.V2.jni.util.V2Log;
 import com.V2.jni.util.XmlAttributeExtractor;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.util.EscapedcharactersProcessing;
+import com.v2tech.view.contacts.add.AddFriendHistroysHandler;
 import com.v2tech.vo.GroupQualicationState;
 import com.v2tech.vo.User;
+import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.VMessageQualification.QualificationState;
 import com.v2tech.vo.VMessageQualification.Type;
 
@@ -520,11 +524,26 @@ public class GroupRequest {
 	private void OnAddGroupUserInfo(int groupType, long nGroupID, String sXml) {
 		V2Log.d("OnAddGroupUserInfo ->" + groupType + ":" + nGroupID + ":"
 				+ sXml);
+		
+		User remoteUser = User.fromXmlToUser(sXml);
+		if(remoteUser == null){
+			V2Log.e("OnAddGroupUserInfo -> parse xml failed ...get null user : " + sXml);
+			return ;
+		}
+		
+		GlobalHolder.getInstance().putUser(remoteUser.getmUserId(),
+				remoteUser);
+		long uid = remoteUser.getmUserId();
+		GlobalHolder.getInstance().addUserToGroup(
+				GlobalHolder.getInstance().getUser(uid), nGroupID);
+		// get user base infos
+		ImRequest.getInstance().getUserBaseInfo(remoteUser.getmUserId());
+		
 		for (WeakReference<GroupRequestCallback> wrcb : mCallbacks) {
 			Object obj = wrcb.get();
 			if (obj != null) {
 				GroupRequestCallback callback = (GroupRequestCallback) obj;
-				callback.OnAddGroupUserInfoCallback(groupType, nGroupID, sXml);
+				callback.OnAddGroupUserInfoCallback(new GroupAddUserJNIObject(groupType, nGroupID, uid , sXml));
 			}
 		}
 	}
@@ -564,9 +583,12 @@ public class GroupRequest {
 		if (gid != null && !gid.isEmpty() && !TextUtils.isEmpty(createUesrID)) {
 			User createUser = GlobalHolder.getInstance().getUser(
 					Long.valueOf(createUesrID));
-			if (createUser != null)
-				vg.creator = new V2User(createUser.getmUserId(),
-						createUser.getName());
+			if (createUser == null)
+				vg.creator = new V2User(Long.valueOf(createUesrID));
+			else
+				vg.creator = new V2User(createUser.getmUserId(), createUser.getName());
+		}else{
+			V2Log.e("OnAddGroupInfo:: parse xml failed , don't get group id or user id ...." + sXml);
 		}
 
 		for (WeakReference<GroupRequestCallback> wrcb : mCallbacks) {
@@ -736,7 +758,7 @@ public class GroupRequest {
 
 	/**
 	 * this funcation was called when be invited user refused to join group
-	 * 
+	 * @deprecated never called
 	 * @param groupType
 	 * @param nGroupID
 	 * @param nUserID

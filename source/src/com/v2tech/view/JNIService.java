@@ -43,6 +43,7 @@ import com.V2.jni.VideoRequest;
 import com.V2.jni.VideoRequestCallbackAdapter;
 import com.V2.jni.ind.AudioJNIObjectInd;
 import com.V2.jni.ind.FileJNIObject;
+import com.V2.jni.ind.GroupAddUserJNIObject;
 import com.V2.jni.ind.GroupQualicationJNIObject;
 import com.V2.jni.ind.GroupJoinErrorJNIObject;
 import com.V2.jni.ind.SendingResultJNIObjectInd;
@@ -759,10 +760,13 @@ public class JNIService extends Service {
 		@Override
 		public void OnRequestCreateRelationCallback(V2User user,
 				String additInfo) {
+			if(user == null)
+				V2Log.e(TAG, "OnRequestCreateRelationCallback ---> Create relation failed...get user is null");
 			User vUser = GlobalHolder.getInstance().getUser(user.uid);
 			AddFriendHistroysHandler.addMeNeedAuthentication(
 					getApplicationContext(), vUser, additInfo);
 			Intent intent = new Intent();
+			intent.putExtra("uid", user.uid);
 			intent.setAction(JNI_BROADCAST_FRIEND_AUTHENTICATION);
 			intent.addCategory(JNI_BROADCAST_CATEGROY);
 			sendOrderedBroadcast(intent, null);
@@ -831,28 +835,20 @@ public class JNIService extends Service {
 			sendBroadcast(i);
 		}
 
-		// 增加好友成功时的回调
 		@Override
-		public void OnAddGroupUserInfoCallback(int groupType, long nGroupID,
-				String sXml) {
-			if (sXml == null || sXml.isEmpty()) {
-				V2Log.e("Incorrect user xml ");
-				return;
+		public void OnAddGroupUserInfoCallback(GroupAddUserJNIObject obj) {
+			if(obj == null){
+				V2Log.e("JNIServie OnAddGroupUserInfoCallback --> : get null GroupAddUserJNIObject Object!");
+				return ;
 			}
 
-			User remoteUser = User.fromXmlToUser(sXml);
-
-			GlobalHolder.getInstance().putUser(remoteUser.getmUserId(),
-					remoteUser);
-
-			long uid = remoteUser.getmUserId();
-			GroupType gType = GroupType.fromInt(groupType);
+			GroupType gType = GroupType.fromInt(obj.getGroupType());
 			if (gType == GroupType.CONTACT) {
 				AddFriendHistroysHandler.becomeFriendHanler(
-						getApplicationContext(), sXml);
+						getApplicationContext(), obj.getUserInfos());
 
-				User user = GlobalHolder.getInstance().getUser(uid);
-
+				User user = GlobalHolder.getInstance().getUser(obj.getUserID());
+				User remoteUser = User.fromXmlToUser(obj.getUserInfos());
 				if (remoteUser.getmCommentname() != null) {
 					user.setNickName(remoteUser.getmCommentname());
 				}
@@ -860,53 +856,16 @@ public class JNIService extends Service {
 				Intent intent = new Intent();
 				intent.setAction(JNI_BROADCAST_FRIEND_AUTHENTICATION);
 				intent.addCategory(JNI_BROADCAST_CATEGROY);
-				intent.putExtra("uid", uid);
-				intent.putExtra("gid", nGroupID);
+				intent.putExtra("uid", obj.getUserID());
+				intent.putExtra("gid", obj.getGroupID());
 				sendOrderedBroadcast(intent, null);
-
-			} else if(gType == GroupType.CHATING){
-				long userID = remoteUser.getmUserId();
-				VMessageQualification crowdQuion = MessageBuilder.queryQualMessageByCrowdId(mContext, 
-						userID, nGroupID);
-				if(crowdQuion == null){
-					User applicant = GlobalHolder.getInstance().getUser(userID);
-					if(applicant == null)
-						applicant = new User(userID);
-					CrowdGroup crowdGroup = (CrowdGroup) GlobalHolder.getInstance().getGroupById(V2GlobalEnum.GROUP_TYPE_CROWD, nGroupID);
-					if(crowdGroup == null)
-						crowdGroup = new CrowdGroup(nGroupID, null, GlobalHolder.getInstance().getCurrentUser());
-					crowdQuion = new VMessageQualificationApplicationCrowd(crowdGroup , applicant);
-					((VMessageQualificationApplicationCrowd)crowdQuion).setApplyReason(null);
-					crowdQuion.setReadState(ReadState.UNREAD);
-					crowdQuion.setQualState(QualificationState.BE_ACCEPTED);
-					crowdQuion.setmTimestamp(new Date(GlobalConfig.getGlobalServerTime()));
-					Uri uri = MessageBuilder.saveQualicationMessage(mContext,
-							crowdQuion);
-					if (uri != null) 
-						crowdQuion.setId(Long.parseLong(uri.getLastPathSegment()));
-				}
-				else
-					MessageBuilder.updateQualicationMessageState(nGroupID,
-							new GroupQualicationState(Type.CROWD_APPLICATION,
-									QualificationState.BE_ACCEPTED, null));
-				Intent intent = new Intent();
-				intent.setAction(JNI_BROADCAST_NEW_QUALIFICATION_MESSAGE);
-				intent.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
-				intent.putExtra("msgId", crowdQuion.getId());
-				sendBroadcast(intent);
 			}
 
-			GlobalHolder.getInstance().addUserToGroup(
-					GlobalHolder.getInstance().getUser(uid), nGroupID);
-
-			// get user base infos
-			ImRequest.getInstance().getUserBaseInfo(remoteUser.getmUserId());
-
-			GroupUserObject obj = new GroupUserObject(groupType, nGroupID, uid);
+			GroupUserObject object = new GroupUserObject(obj.getGroupType(), obj.getGroupID(), obj.getUserID());
 			Intent i = new Intent();
 			i.setAction(JNIService.JNI_BROADCAST_GROUP_USER_ADDED);
 			i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
-			i.putExtra("obj", obj);
+			i.putExtra("obj", object);
 			sendBroadcast(i);
 		}
 
@@ -928,37 +887,7 @@ public class JNIService extends Service {
 				intent.setAction(JNI_BROADCAST_FRIEND_AUTHENTICATION);
 				intent.addCategory(JNI_BROADCAST_CATEGROY);
 				sendOrderedBroadcast(intent, null);
-			} else if (gType == GroupType.CHATING) {
-				VMessageQualification crowdQuion = MessageBuilder.queryQualMessageByCrowdId(mContext, 
-						obj.userID, obj.groupID);
-				if(crowdQuion == null){
-					User applicant = GlobalHolder.getInstance().getUser(obj.userID);
-					if(applicant == null)
-						applicant = new User(obj.userID);
-					CrowdGroup crowdGroup = (CrowdGroup) GlobalHolder.getInstance().getGroupById(V2GlobalEnum.GROUP_TYPE_CROWD, obj.groupID);
-					if(crowdGroup == null)
-						crowdGroup = new CrowdGroup(obj.groupID, null, GlobalHolder.getInstance().getCurrentUser());
-					crowdQuion = new VMessageQualificationApplicationCrowd(crowdGroup , applicant);
-					((VMessageQualificationApplicationCrowd)crowdQuion).setApplyReason(obj.reason);
-					crowdQuion.setReadState(ReadState.UNREAD);
-					crowdQuion.setQualState(QualificationState.BE_REJECT);
-					crowdQuion.setmTimestamp(new Date(GlobalConfig.getGlobalServerTime()));
-					Uri uri = MessageBuilder.saveQualicationMessage(mContext,
-							crowdQuion);
-					if (uri != null) 
-						crowdQuion.setId(Long.parseLong(uri.getLastPathSegment()));
-				}
-				else
-					MessageBuilder.updateQualicationMessageState(obj.groupID,
-							new GroupQualicationState(Type.CROWD_APPLICATION,
-									QualificationState.BE_REJECT, obj.reason));
-				Intent intent = new Intent();
-				intent.setAction(JNI_BROADCAST_NEW_QUALIFICATION_MESSAGE);
-				intent.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
-				intent.putExtra("msgId", crowdQuion.getId());
-				sendBroadcast(intent);
-			}
-
+			} 
 		}
 
 		@Override

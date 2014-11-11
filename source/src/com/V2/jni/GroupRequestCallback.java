@@ -3,6 +3,7 @@ package com.V2.jni;
 import java.util.List;
 
 import com.V2.jni.ind.FileJNIObject;
+import com.V2.jni.ind.GroupAddUserJNIObject;
 import com.V2.jni.ind.GroupQualicationJNIObject;
 import com.V2.jni.ind.V2Document;
 import com.V2.jni.ind.V2Group;
@@ -96,14 +97,10 @@ public interface GroupRequestCallback {
 			long nUserID);
 
 	/**
-	 * TODO add comment
-	 * @deprecated should use object instead of xml
-	 * @param groupType
-	 * @param nGroupID
-	 * @param sXml
+	 * The function called when a new friend coming 增加好友成功时的回调
+	 * @param obj
 	 */
-	public void OnAddGroupUserInfoCallback(int groupType, long nGroupID,
-			String sXml);
+	public void OnAddGroupUserInfoCallback(GroupAddUserJNIObject obj);
 
 	/**
 	 * new group created call back
@@ -158,6 +155,7 @@ public interface GroupRequestCallback {
 	
 	/**
 	 * this funcation was called when be invited user refused to join group
+	 * @deprecated never called
 	 * @param groupType
 	 * @param nGroupID
 	 * @param nUserID

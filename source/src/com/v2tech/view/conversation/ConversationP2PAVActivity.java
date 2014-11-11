@@ -229,7 +229,7 @@ public class ConversationP2PAVActivity extends Activity implements
 		initViews();
 
 		if (!uad.isIncoming()) {
-		//	V2Log.d(TAG, "发起一个新的音视频邀请 , 等待回应中.... 此次通信的uuid ：" + currentVideoBean.mediaChatID);
+			V2Log.d(TAG_THIS_FILE, "发起一个新的音视频邀请 , 等待回应中.... 此次通信的uuid ：" + currentVideoBean.mediaChatID);
 			chatService.inviteUserChat(uad, new MessageListener(mLocalHandler,
 					CALL_RESPONSE, null));
 			if (uad.isVideoType()) {

@@ -30,9 +30,10 @@ import com.v2tech.vo.CrowdGroup;
 import com.v2tech.vo.CrowdGroup.AuthType;
 import com.v2tech.vo.Group;
 import com.v2tech.vo.Group.GroupType;
-import com.v2tech.vo.VMessageQualification.QualificationState;
-import com.v2tech.vo.VMessageQualification.ReadState;
+import com.v2tech.vo.GroupQualicationState;
 import com.v2tech.vo.VMessageQualification;
+import com.v2tech.vo.VMessageQualification.QualificationState;
+import com.v2tech.vo.VMessageQualification.Type;
 
 public class CrowdInvitationActivity extends Activity {
 
@@ -116,8 +117,7 @@ public class CrowdInvitationActivity extends Activity {
 		CrowdGroup g = new CrowdGroup(crowd.getId(), crowd.getName(),
 				crowd.getCreator(), null);
 		g.setAuthType(AuthType.fromInt(crowd.getAuth()));
-		vq = MessageBuilder.queryQualMessageByCrowdId(mContext, GlobalHolder
-				.getInstance().getCurrentUser(), g);
+		vq = MessageBuilder.queryQualMessageByCrowdId(mContext, crowd.getCreator().getmUserId(), g.getmGId());
 		updateView(false);
 
 		mRejectResasonLayout.setVisibility(View.GONE);
@@ -150,6 +150,8 @@ public class CrowdInvitationActivity extends Activity {
 		vq.setReadState(VMessageQualification.ReadState.READ);
 		vq.setQualState(VMessageQualification.QualificationState.REJECT);
 		updateView(false);
+		MessageBuilder.updateQualicationMessageState(crowd.getId(), crowd.getCreator().getmUserId(),
+				new GroupQualicationState(Type.CROWD_INVITATION , QualificationState.REJECT , null));
 	}
 
 	private void updateView(boolean isInReject) {
@@ -280,7 +282,8 @@ public class CrowdInvitationActivity extends Activity {
 					else{
 						service.refuseInvitation(crowd, mReasonET.getEditableText().toString(), new MessageListener(
 								mLocalHandler, REFUSE_INVITATION_DONE, null));
-						ProgressUtils.showNormalWithHintProgress(mContext, true).initTimeOut();
+						handleDeclineDone();
+//						ProgressUtils.showNormalWithHintProgress(mContext, true).initTimeOut();
 					}
 				}
 				return;
@@ -312,8 +315,8 @@ public class CrowdInvitationActivity extends Activity {
 				handleAcceptDone();
 				break;
 			case REFUSE_INVITATION_DONE:
-				ProgressUtils.showNormalWithHintProgress(mContext, false);
-				handleDeclineDone();
+//				ProgressUtils.showNormalWithHintProgress(mContext, false);
+//				handleDeclineDone();
 				break;
 
 			}

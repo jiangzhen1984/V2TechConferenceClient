@@ -657,6 +657,8 @@ public class ConversationActivity extends Activity {
 
 	private boolean playNextUnreadMessage() {
 		boolean found = false;
+		if(playingAudioMessage == null)
+			return false;
 		for (int i = 0; i < messageArray.size(); i++) {
 			CommonAdapterItemWrapper wrapper = messageArray.get(i);
 			VMessage vm = (VMessage) wrapper.getItemObject();
@@ -2008,11 +2010,10 @@ public class ConversationActivity extends Activity {
 				VMessageAbstractItem item = items.get(i);
 				if (item.getType() == VMessageAbstractItem.ITEM_TYPE_FILE) {
 					item.setState(VMessageAbstractItem.STATE_FILE_SENDING);
-				} else {
+					MessageLoader.updateFileItemState(mContext,
+							(VMessageFileItem) item);
+				} else 
 					item.setState(VMessageAbstractItem.STATE_NORMAL);
-				}
-				MessageLoader.updateFileItemState(mContext,
-						(VMessageFileItem) item);
 			}
 			Message.obtain(lh, SEND_MESSAGE, v).sendToTarget();
 			notificateConversationUpdate(true, v.getId());

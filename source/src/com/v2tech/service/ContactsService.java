@@ -9,8 +9,10 @@ import android.os.Message;
 import com.V2.jni.GroupRequest;
 import com.V2.jni.GroupRequestCallbackAdapter;
 import com.V2.jni.ind.FileJNIObject;
+import com.V2.jni.ind.GroupAddUserJNIObject;
 import com.V2.jni.ind.V2Group;
 import com.V2.jni.ind.V2User;
+import com.V2.jni.util.V2Log;
 import com.v2tech.service.jni.GroupServiceJNIResponse;
 import com.v2tech.service.jni.JNIResponse;
 import com.v2tech.service.jni.RequestConfCreateResponse;
@@ -291,13 +293,17 @@ public class ContactsService extends AbstractHandler {
 		}
 
 		@Override
-		public void OnAddGroupUserInfoCallback(int groupType, long nGroupID,
-				String sXml) {
-			if (groupType != Group.GroupType.CONTACT.intValue()) {
+		public void OnAddGroupUserInfoCallback(GroupAddUserJNIObject obj) {
+			if(obj == null){
+				V2Log.e("ContactService OnAddGroupUserInfoCallback --> : get null GroupAddUserJNIObject Object!");
+				return ;
+			}
+			
+			if (obj.getGroupType() != Group.GroupType.CONTACT.intValue()) {
 				return;
 			}
 			// 为什么要调，父类的不是什么都不执行的函数吗？
-			super.OnAddGroupUserInfoCallback(groupType, nGroupID, sXml);
+			super.OnAddGroupUserInfoCallback(obj);
 		}
 
 		@Override

@@ -11,8 +11,11 @@ import com.V2.jni.FileRequestCallbackAdapter;
 import com.V2.jni.GroupRequest;
 import com.V2.jni.GroupRequestCallbackAdapter;
 import com.V2.jni.ind.FileJNIObject;
+import com.V2.jni.ind.GroupAddUserJNIObject;
 import com.V2.jni.ind.GroupFileJNIObject;
+import com.V2.jni.ind.GroupQualicationJNIObject;
 import com.V2.jni.ind.V2Group;
+import com.V2.jni.util.V2Log;
 import com.v2tech.service.jni.CreateCrowdResponse;
 import com.v2tech.service.jni.FileTransStatusIndication;
 import com.v2tech.service.jni.FileTransStatusIndication.FileTransErrorIndication;
@@ -24,12 +27,12 @@ import com.v2tech.view.conversation.MessageBuilder;
 import com.v2tech.vo.Crowd;
 import com.v2tech.vo.CrowdGroup;
 import com.v2tech.vo.Group;
-import com.v2tech.vo.GroupQualicationState;
 import com.v2tech.vo.Group.GroupType;
-import com.v2tech.vo.VMessageQualification.QualificationState;
-import com.v2tech.vo.VMessageQualification.Type;
+import com.v2tech.vo.GroupQualicationState;
 import com.v2tech.vo.User;
 import com.v2tech.vo.VCrowdFile;
+import com.v2tech.vo.VMessageQualification.QualificationState;
+import com.v2tech.vo.VMessageQualification.Type;
 
 //组别统一名称
 //1:部门, organizationGroup
@@ -518,12 +521,20 @@ public class CrowdGroupService extends AbstractHandler {
 
 		@Override
 		public void OnAcceptApplyJoinGroup(V2Group group) {
-			JNIResponse jniRes = new JNIResponse(
-					CreateCrowdResponse.Result.SUCCESS);
-			Message.obtain(mCallbackHandler, ACCEPT_APPLICATION_CROWD, jniRes)
-					.sendToTarget();
-			MessageBuilder.updateQualicationMessageState(group.id, 
-					new GroupQualicationState(Type.CROWD_APPLICATION , QualificationState.ACCEPTED , null));
+//			JNIResponse jniRes = new JNIResponse(
+//					CreateCrowdResponse.Result.SUCCESS);
+//			Message.obtain(mCallbackHandler, ACCEPT_APPLICATION_CROWD, jniRes)
+//					.sendToTarget();
+//			MessageBuilder.updateQualicationMessageState(group.id, group.creator.uid,
+//					new GroupQualicationState(Type.CROWD_APPLICATION , QualificationState.BE_ACCEPTED , null));
+		}
+		
+		@Override
+		public void OnRefuseInviteJoinGroup(GroupQualicationJNIObject obj) {
+//			if (obj.groupType == GroupType.CHATING.intValue()) {
+//				MessageBuilder.updateQualicationMessageState(obj.groupID, obj.userID, 
+//						new GroupQualicationState(Type.CROWD_INVITATION , QualificationState.REJECT , null));
+//			}
 		}
 		
 		@Override
@@ -533,8 +544,8 @@ public class CrowdGroupService extends AbstractHandler {
 					CreateCrowdResponse.Result.FAILED);
 			Message.obtain(mCallbackHandler, REFUSE_APPLICATION_CROWD, jniRes)
 					.sendToTarget();
-			MessageBuilder.updateQualicationMessageState(parseSingleCrowd.id, 
-					new GroupQualicationState(Type.CROWD_APPLICATION , QualificationState.ACCEPTED , reason));
+			MessageBuilder.updateQualicationMessageState(parseSingleCrowd.id, parseSingleCrowd.creator.uid,
+					new GroupQualicationState(Type.CROWD_APPLICATION , QualificationState.REJECT , reason));
 		}
 
 		@Override
@@ -574,21 +585,37 @@ public class CrowdGroupService extends AbstractHandler {
 		public void onAddGroupInfo(V2Group group) {
 			if (group.type == V2Group.TYPE_CROWD) {
 				if (mPendingCrowdId == group.id) {
+					V2Log.e("CrowdGroupService onAddGroupInfo--> add a new group , id is : " + group.id);
 					mPendingCrowdId = 0;
 					JNIResponse jniRes = new JNIResponse(
 							CreateCrowdResponse.Result.SUCCESS);
 					Message.obtain(mCallbackHandler, ACCEPT_JOIN_CROWD, jniRes)
 							.sendToTarget();
-					MessageBuilder.updateQualicationMessageState(group.id, 
+					MessageBuilder.updateQualicationMessageState(group.id, group.creator.uid,
 							new GroupQualicationState(Type.CROWD_INVITATION , QualificationState.ACCEPTED , null));
 				} else {
-					JNIResponse jniRes = new CreateCrowdResponse(group.id,
-							CreateCrowdResponse.Result.SUCCESS);
-					Message.obtain(mCallbackHandler, CREATE_GROUP_MESSAGE,
-							jniRes).sendToTarget();
+					if(GlobalHolder.getInstance().getCurrentUserId() == group.id){
+						V2Log.e("CrowdGroupService onAddGroupInfo--> successful create a new group , id is : " + group.id);
+						JNIResponse jniRes = new CreateCrowdResponse(group.id,
+								CreateCrowdResponse.Result.SUCCESS);
+						Message.obtain(mCallbackHandler, CREATE_GROUP_MESSAGE,
+								jniRes).sendToTarget();
+					}
 				}
 			}
-
+		}
+		
+		@Override
+		public void OnAddGroupUserInfoCallback(GroupAddUserJNIObject obj) {
+			if (obj.getGroupType() == V2Group.TYPE_CROWD && obj.getUserID() != GlobalHolder.getInstance().getCurrentUserId()) {
+				JNIResponse jniRes = new JNIResponse(
+						CreateCrowdResponse.Result.SUCCESS);
+				jniRes.resObj = obj;
+				Message.obtain(mCallbackHandler, ACCEPT_APPLICATION_CROWD,
+						jniRes).sendToTarget();
+				MessageBuilder.updateQualicationMessageState(obj.getGroupID() , obj.getUserID(),
+						new GroupQualicationState(Type.CROWD_APPLICATION , QualificationState.ACCEPTED , null));
+			}
 		}
 
 		/*

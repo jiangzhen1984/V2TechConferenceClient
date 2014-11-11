@@ -3,6 +3,7 @@ package com.V2.jni;
 import java.util.List;
 
 import com.V2.jni.ind.FileJNIObject;
+import com.V2.jni.ind.GroupAddUserJNIObject;
 import com.V2.jni.ind.GroupQualicationJNIObject;
 import com.V2.jni.ind.V2Document;
 import com.V2.jni.ind.V2Group;
@@ -54,8 +55,7 @@ public abstract class GroupRequestCallbackAdapter implements
 	}
 
 	@Override
-	public void OnAddGroupUserInfoCallback(int groupType, long nGroupID,
-			String sXml) {
+	public void OnAddGroupUserInfoCallback(GroupAddUserJNIObject obj) {
 
 	}
 

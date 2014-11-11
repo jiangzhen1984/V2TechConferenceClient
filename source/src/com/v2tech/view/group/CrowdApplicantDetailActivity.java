@@ -15,18 +15,23 @@ import android.view.View.OnClickListener;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.V2.jni.ind.GroupAddUserJNIObject;
 import com.v2tech.R;
 import com.v2tech.service.CrowdGroupService;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.service.MessageListener;
+import com.v2tech.service.jni.JNIResponse;
 import com.v2tech.util.ProgressUtils;
 import com.v2tech.util.V2Toast;
+import com.v2tech.view.JNIService;
+import com.v2tech.view.PublicIntent;
 import com.v2tech.view.conversation.MessageAuthenticationActivity;
 import com.v2tech.view.conversation.MessageBuilder;
 import com.v2tech.vo.CrowdGroup;
 import com.v2tech.vo.GroupQualicationState;
 import com.v2tech.vo.User;
 import com.v2tech.vo.VMessageQualification;
+import com.v2tech.vo.VMessageQualification.ReadState;
 import com.v2tech.vo.VMessageQualification.Type;
 import com.v2tech.vo.VMessageQualificationApplicationCrowd;
 import com.v2tech.vo.VMessageQualification.QualificationState;
@@ -129,6 +134,7 @@ public class CrowdApplicantDetailActivity extends Activity {
 			
 			mNotesLayout.setVisibility(View.VISIBLE);
 			mNotesTV.setText(R.string.crowd_invitation_accept_notes);
+			mTitleText.setText(R.string.crowd_applicant_title);
 		} else if (msg.getQualState() == VMessageQualification.QualificationState.REJECT) {
 			mButtonLayout.setVisibility(View.GONE);
 			mChildButtonLy.setVisibility(View.VISIBLE);
@@ -136,8 +142,8 @@ public class CrowdApplicantDetailActivity extends Activity {
 			
 			mNotesLayout.setVisibility(View.VISIBLE);
 			mNotesTV.setText(R.string.crowd_invitation_reject_notes);
-		} else if((msg.getQualState() == VMessageQualification.QualificationState.BE_REJECT)
-				|| (msg.getQualState() == VMessageQualification.QualificationState.WAITING)){
+			mTitleText.setText(R.string.crowd_applicant_title);
+		} else if(msg.getQualState() == VMessageQualification.QualificationState.BE_REJECT){
 			mButtonLayout.setVisibility(View.VISIBLE);
 			mNotesLayout.setVisibility(View.GONE);
 			mChildButtonLy.setVisibility(View.GONE);
@@ -151,7 +157,14 @@ public class CrowdApplicantDetailActivity extends Activity {
 			mNotesLayout.setVisibility(View.VISIBLE);
 			mNotesTV.setText(R.string.crowd_invitation_joined);
 			mTitleText.setText(R.string.crowd_applicant_invite_title);
-		} 
+		} else if(msg.getQualState() == VMessageQualification.QualificationState.WAITING){
+			mButtonLayout.setVisibility(View.VISIBLE);
+			mChildButtonLy.setVisibility(View.VISIBLE);
+			mInviteButton.setVisibility(View.GONE);
+			mNotesLayout.setVisibility(View.GONE);
+			
+			mTitleText.setText(R.string.crowd_applicant_title);
+		}
 	}
 
 	private void handleAcceptDone() {
@@ -159,12 +172,20 @@ public class CrowdApplicantDetailActivity extends Activity {
 		mNotesLayout.setVisibility(View.VISIBLE);
 		mNotesTV.setText(R.string.crowd_application_accepted);
 		crowd.addUserToGroup(applicant);
+		
+		msg.setQualState(QualificationState.ACCEPTED);
+		msg.setReadState(ReadState.READ);
 	}
 	
 	private void handleDeclineDone() {
 		mButtonLayout.setVisibility(View.GONE);
 		mNotesLayout.setVisibility(View.VISIBLE);
 		mNotesTV.setText(R.string.crowd_application_rejected);
+		
+		msg.setQualState(QualificationState.REJECT);
+		msg.setReadState(ReadState.READ);
+		MessageBuilder.updateQualicationMessageState(msg.getId() , new GroupQualicationState(Type.CROWD_APPLICATION,
+				QualificationState.REJECT, null));
 	}
 	
 	private OnClickListener mAcceptButtonListener = new OnClickListener() {
@@ -187,14 +208,15 @@ public class CrowdApplicantDetailActivity extends Activity {
 
 		@Override
 		public void onClick(View view) {
-			VMessageQualification message = MessageBuilder.queryQualMessageById(mContext, msg.getId());
-			if(message.getQualState().intValue() != msg.getQualState().intValue())
-				handleAcceptDone();
-			else{
-				service.refuseApplication(crowd, applicant, "", new MessageListener(
-						mLocalHandler, REFUSE_INVITATION_DONE, null));
-				ProgressUtils.showNormalWithHintProgress(mContext, true).initTimeOut();
-			}
+//			VMessageQualification message = MessageBuilder.queryQualMessageById(mContext, msg.getId());
+//			if(message.getQualState().intValue() != msg.getQualState().intValue())
+//				handleAcceptDone();
+//			else{
+//				service.refuseApplication(crowd, applicant, "", new MessageListener(
+//						mLocalHandler, REFUSE_INVITATION_DONE, null));
+//				ProgressUtils.showNormalWithHintProgress(mContext, true).initTimeOut();
+//			}
+			handleDeclineDone();
 		}
 
 	};
@@ -212,9 +234,6 @@ public class CrowdApplicantDetailActivity extends Activity {
 			List<User> newMembers = new ArrayList<User>();
 			newMembers.add(applicant);
 			cg.inviteMember(crowd, newMembers, null);
-			
-//			MessageBuilder.updateQualicationMessageState(crowd.getmGId() , new GroupQualicationState(Type.CROWD_APPLICATION,
-//					QualificationState.WAITING, null));
 			onBackPressed();
 		}
 
@@ -241,12 +260,15 @@ public class CrowdApplicantDetailActivity extends Activity {
 		public void handleMessage(Message msg) {
 			switch (msg.what) {
 			case ACCEPT_INVITATION_DONE:
-				ProgressUtils.showNormalWithHintProgress(mContext, false);
-				handleAcceptDone();
+				if (ProgressUtils.dialog.isShowing()) {
+					ProgressUtils.showNormalWithHintProgress(mContext, false);
+					handleAcceptDone();
+				} else
+					return;
 				break;
 			case REFUSE_INVITATION_DONE:
-				handleDeclineDone();
-				ProgressUtils.showNormalWithHintProgress(mContext, false);
+//				handleDeclineDone();
+//				ProgressUtils.showNormalWithHintProgress(mContext, false);
 				break;
 
 			}

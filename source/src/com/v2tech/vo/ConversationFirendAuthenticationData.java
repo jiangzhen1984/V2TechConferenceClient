@@ -4,8 +4,10 @@ package com.v2tech.vo;
 public class ConversationFirendAuthenticationData extends Conversation {
 
 	private User user;
+	private Group group;
 	private VerificationMessageType messageType;
-	private String crowdVerificationContent = null;
+	private VMessageQualification qualification;
+	private AddFriendHistorieNode friendNode;
 
 	public ConversationFirendAuthenticationData(int mType, long mExtId) {
 		super(mType, mExtId);
@@ -28,14 +30,30 @@ public class ConversationFirendAuthenticationData extends Conversation {
 		this.messageType = messageType;
 	}
 	
-	public String getCrowdVerificationContent() {
-		return crowdVerificationContent;
+	public Group getGroup() {
+		return group;
 	}
 
-	public void setCrowdVerificationContent(String crowdVerificationContent) {
-		this.crowdVerificationContent = crowdVerificationContent;
+	public void setGroup(Group group) {
+		this.group = group;
+	}
+	
+	public VMessageQualification getQualification() {
+		return qualification;
 	}
 
+	public void setQualification(VMessageQualification qualification) {
+		this.qualification = qualification;
+	}
+	
+	public AddFriendHistorieNode getFriendNode() {
+		return friendNode;
+	}
+
+	public void setFriendNode(AddFriendHistorieNode friendNode) {
+		this.friendNode = friendNode;
+	}
+	
 	public enum VerificationMessageType {
 		CROWD_TYPE(0), CONTACT_TYPE(1), UNKNOWN(2);
 

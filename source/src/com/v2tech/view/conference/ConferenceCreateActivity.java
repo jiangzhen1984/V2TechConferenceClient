@@ -18,6 +18,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -396,6 +397,7 @@ public class ConferenceCreateActivity extends Activity {
 				mErrorNotificationLayout.setVisibility(View.VISIBLE);
 				mErrorMessageTV
 						.setText(R.string.error_create_conference_failed_no_network);
+				mErrorMessageTV.setTextColor(Color.RED);
 				return;
 			}
 			String title = mConfTitleET.getText().toString().trim();

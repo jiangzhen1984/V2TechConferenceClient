@@ -258,7 +258,8 @@ public class VideoInvitionAttendeeLayout extends LinearLayout {
 			}
 
 			// Clean
-			mAttendeeContainer.removeAllViews();
+			if(mAttendeeContainer.getChildCount() > 0)
+				mAttendeeContainer.removeAllViewsInLayout();
 			mAttendeeList.clear();
 		}
 

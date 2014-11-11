@@ -34,6 +34,7 @@ import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.V2.jni.ind.GroupAddUserJNIObject;
 import com.V2.jni.util.V2Log;
 import com.v2tech.R;
 import com.v2tech.db.DataBaseContext;
@@ -56,6 +57,7 @@ import com.v2tech.vo.Conversation;
 import com.v2tech.vo.Crowd;
 import com.v2tech.vo.CrowdGroup;
 import com.v2tech.vo.Group;
+import com.v2tech.vo.ConversationFirendAuthenticationData.VerificationMessageType;
 import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.User;
 import com.v2tech.vo.VMessageQualification;
@@ -255,20 +257,7 @@ public class MessageAuthenticationActivity extends Activity {
 							VMessageQualification msg = (VMessageQualification) mMessageList
 									.get(position).obj;
 							if (msg.getType() == VMessageQualification.Type.CROWD_INVITATION) {
-								VMessageQualificationInvitationCrowd imsg = (VMessageQualificationInvitationCrowd) msg;
-
-								Crowd crowd = new Crowd(imsg.getCrowdGroup()
-										.getmGId(), imsg.getCrowdGroup()
-										.getOwnerUser(), imsg.getCrowdGroup()
-										.getName(), imsg.getCrowdGroup()
-										.getBrief());
-								crowd.setAuth(imsg.getCrowdGroup()
-										.getAuthType().intValue());
-								Intent i = new Intent(
-										JNIService.JNI_BROADCAST_CROWD_INVATITION);
-								i.addCategory(JNIService.JNI_ACTIVITY_CATEGROY);
-								i.putExtra("crowd", crowd);
-								startActivityForResult(i, AUTHENTICATION_RESULT);
+								startCrowdInvitationDetail(msg);
 							} else if (msg.getType() == VMessageQualification.Type.CROWD_APPLICATION) {
 								VMessageQualificationApplicationCrowd amsg = (VMessageQualificationApplicationCrowd) msg;
 								Intent i = new Intent();
@@ -413,7 +402,7 @@ public class MessageAuthenticationActivity extends Activity {
 			break;
 		}
 	}
-
+	
 	void initReceiver() {
 		friendAuthenticationBroadcastReceiver = new FriendAuthenticationBroadcastReceiver();
 		IntentFilter intentFilter = new IntentFilter();
@@ -614,6 +603,23 @@ public class MessageAuthenticationActivity extends Activity {
 		}.execute();
 
 	}
+	
+	private void startCrowdInvitationDetail(VMessageQualification msg){
+		VMessageQualificationInvitationCrowd imsg = (VMessageQualificationInvitationCrowd) msg;
+
+		Crowd crowd = new Crowd(imsg.getCrowdGroup()
+				.getmGId(), imsg.getCrowdGroup()
+				.getOwnerUser(), imsg.getCrowdGroup()
+				.getName(), imsg.getCrowdGroup()
+				.getBrief());
+		crowd.setAuth(imsg.getCrowdGroup()
+				.getAuthType().intValue());
+		Intent i = new Intent(
+				JNIService.JNI_BROADCAST_CROWD_INVATITION);
+		i.addCategory(JNIService.JNI_ACTIVITY_CATEGROY);
+		i.putExtra("crowd", crowd);
+		startActivityForResult(i, AUTHENTICATION_RESULT);
+	}
 
 	@Override
 	public void onBackPressed() {
@@ -786,8 +792,14 @@ public class MessageAuthenticationActivity extends Activity {
 				public void onClick(View arg0) {
 					if (viewTag.bSuerDelete.getVisibility() == View.VISIBLE) {
 						viewTag.bSuerDelete.setVisibility(View.GONE);
+						if(data.state == 1)
+							viewTag.bAccess.setVisibility(View.VISIBLE);
+						else
+							viewTag.tvAccessOrNo.setVisibility(View.VISIBLE);
 					} else {
 						viewTag.bSuerDelete.setVisibility(View.VISIBLE);
+						viewTag.bAccess.setVisibility(View.GONE);
+						viewTag.tvAccessOrNo.setVisibility(View.GONE);
 					}
 				}
 			});
@@ -944,6 +956,8 @@ public class MessageAuthenticationActivity extends Activity {
 				item.mNameTV.setText(cg.getName());
 				item.mContentTV.setText(vqic.getInvitationUser().getName()
 						+ mContext.getText(R.string.crowd_invitation_content));
+
+				updateInviteMessageView(item, vqic);
 				// If current user is invitor
 			} else if (msg.getType() == VMessageQualification.Type.CROWD_APPLICATION) {
 				VMessageQualificationApplicationCrowd vqac = (VMessageQualificationApplicationCrowd) msg;
@@ -954,22 +968,8 @@ public class MessageAuthenticationActivity extends Activity {
 					item.mMsgBanneriv.setImageResource(R.drawable.avatar);
 				}
 				item.mNameTV.setText(vqac.getApplicant().getName());
-				
-				if(vqac.getQualState() == QualificationState.BE_REJECT){
-					item.mContentTV.setText("对方拒绝加入" + vqac.getCrowdGroup().getName()
-							+ "群");
-					item.mAcceptButton.setVisibility(View.GONE);
-					item.mRes.setVisibility(View.GONE);
-				}
-				else if(vqac.getQualState() == QualificationState.BE_ACCEPTED){
-					item.mContentTV.setText("对方已加入" + vqac.getCrowdGroup().getName()
-							+ "群");
-					item.mAcceptButton.setVisibility(View.GONE);
-					item.mRes.setVisibility(View.GONE);
-				}
-				else
-					item.mContentTV.setText("申请加入" + vqac.getCrowdGroup().getName()
-							+ "群");
+
+				updateApplyMessageView(item, vqac);
 			}
 
 			if (isGroupInDeleteMode) {
@@ -986,23 +986,60 @@ public class MessageAuthenticationActivity extends Activity {
 				item.mAcceptButton.setVisibility(View.GONE);
 			} else {
 				item.mDeleteButton.setVisibility(View.GONE);
+				if (msg.getType() == VMessageQualification.Type.CROWD_APPLICATION)
+					updateApplyMessageView(item,
+							(VMessageQualificationApplicationCrowd) msg);
+				else
+					updateInviteMessageView(item,
+							(VMessageQualificationInvitationCrowd) msg);
+			}
+		}
 
-				if (msg.getQualState() == VMessageQualification.QualificationState.WAITING) {
-					item.mRes.setVisibility(View.GONE);
-					item.mAcceptButton.setVisibility(View.VISIBLE);
+		private void updateApplyMessageView(ViewItem item,
+				VMessageQualificationApplicationCrowd vqac) {
+			if (vqac.getQualState() == QualificationState.ACCEPTED) {
+				item.mRes.setVisibility(View.VISIBLE);
+				item.mAcceptButton.setVisibility(View.GONE);
+				item.mRes.setText(R.string.crowd_invitation_accepted);
+				item.mContentTV.setText("申请加入" + vqac.getCrowdGroup().getName()
+						+ "群");
+			} else if (vqac.getQualState() == QualificationState.REJECT) {
+				item.mRes.setVisibility(View.VISIBLE);
+				item.mAcceptButton.setVisibility(View.GONE);
+				item.mRes.setText(R.string.crowd_invitation_rejected);
+				item.mContentTV.setText("申请加入" + vqac.getCrowdGroup().getName()
+						+ "群");
+			} else if (vqac.getQualState() == QualificationState.BE_REJECT) {
+				item.mRes.setVisibility(View.GONE);
+				item.mAcceptButton.setVisibility(View.GONE);
+				item.mContentTV.setText("对方拒绝加入"
+						+ vqac.getCrowdGroup().getName() + "群");
+			} else if (vqac.getQualState() == QualificationState.BE_ACCEPTED) {
+				item.mRes.setVisibility(View.GONE);
+				item.mAcceptButton.setVisibility(View.GONE);
+				item.mContentTV.setText("对方已加入"
+						+ vqac.getCrowdGroup().getName() + "群");
+			} else if (vqac.getQualState() == QualificationState.WAITING) {
+				item.mRes.setVisibility(View.GONE);
+				item.mAcceptButton.setVisibility(View.VISIBLE);
+				item.mContentTV.setText("申请加入" + vqac.getCrowdGroup().getName()
+						+ "群");
+			}
+		}
 
-				} else if (msg.getQualState() == VMessageQualification.QualificationState.ACCEPTED) {
-					item.mRes.setVisibility(View.VISIBLE);
-					item.mAcceptButton.setVisibility(View.GONE);
-					item.mRes.setText(R.string.crowd_invitation_accepted);
-				} else if (msg.getQualState() == VMessageQualification.QualificationState.REJECT) {
-					item.mRes.setVisibility(View.VISIBLE);
-					item.mAcceptButton.setVisibility(View.GONE);
-					item.mRes.setText(R.string.crowd_invitation_rejected);
-				} else if (msg.getQualState() == VMessageQualification.QualificationState.BE_REJECT) {
-					item.mRes.setVisibility(View.GONE);
-					item.mAcceptButton.setVisibility(View.GONE);
-				}
+		private void updateInviteMessageView(ViewItem item,
+				VMessageQualificationInvitationCrowd vqic) {
+			if (vqic.getQualState() == QualificationState.ACCEPTED) {
+				item.mRes.setVisibility(View.VISIBLE);
+				item.mAcceptButton.setVisibility(View.GONE);
+				item.mRes.setText(R.string.crowd_invitation_accepted);
+			} else if (vqic.getQualState() == QualificationState.REJECT) {
+				item.mRes.setVisibility(View.VISIBLE);
+				item.mAcceptButton.setVisibility(View.GONE);
+				item.mRes.setText(R.string.crowd_invitation_rejected);
+			} else {
+				item.mRes.setVisibility(View.GONE);
+				item.mAcceptButton.setVisibility(View.VISIBLE);
 			}
 		}
 
@@ -1061,58 +1098,72 @@ public class MessageAuthenticationActivity extends Activity {
 				AcceptedButtonTag tag = (AcceptedButtonTag) v.getTag();
 				VMessageQualification msg = (VMessageQualification) tag.wrapper.obj;
 				waitingQualification = tag.wrapper;
-//				msg.setQualState(VMessageQualification.QualificationState.ACCEPTED);
-				VMessageQualification message = MessageBuilder.queryQualMessageById(mContext, msg.getId());
+				// msg.setQualState(VMessageQualification.QualificationState.ACCEPTED);
+				VMessageQualification message = MessageBuilder
+						.queryQualMessageById(mContext, msg.getId());
 
 				if (msg.getType() == VMessageQualification.Type.CROWD_INVITATION) {
 					CrowdGroup cg = ((VMessageQualificationInvitationCrowd) msg)
 							.getCrowdGroup();
-					if(message.getQualState().intValue() != msg.getQualState().intValue()){
+					if (message.getQualState().intValue() != msg.getQualState()
+							.intValue()) {
 						Intent intent = new Intent();
 						intent.setAction(PublicIntent.BROADCAST_NEW_CROWD_NOTIFICATION);
 						intent.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
 						intent.putExtra("crowd", cg.getmGId());
 						sendBroadcast(intent);
 						updateViewItem(tag.wrapper, tag.item);
-					}
-					else{
-						// Add crowd group to cache, we can't handle this after done
+						MessageBuilder.updateQualicationMessage(mContext, msg);
+						startCrowdInvitationDetail(msg);
+					} else {
+						// Add crowd group to cache, we can't handle this after
+						// done
 						// because group information come before done event.
 						GlobalHolder.getInstance().addGroupToList(
 								GroupType.CHATING.intValue(), cg);
 
-						Crowd crowd = new Crowd(cg.getmGId(), cg.getOwnerUser(),
-								cg.getName(), cg.getBrief());
-						crowdService.acceptInvitation(crowd, new MessageListener(
-								mLocalHandler, ACCEPT_INVITATION_DONE, cg));
-						ProgressUtils.showNormalWithHintProgress(mContext, true).initTimeOut();
+						Crowd crowd = new Crowd(cg.getmGId(),
+								cg.getOwnerUser(), cg.getName(), cg.getBrief());
+						crowdService.acceptInvitation(crowd,
+								new MessageListener(mLocalHandler,
+										ACCEPT_INVITATION_DONE, cg));
+						ProgressUtils
+								.showNormalWithHintProgress(mContext, true)
+								.initTimeOut();
 					}
-						
+
 				} else if (msg.getType() == VMessageQualification.Type.CROWD_APPLICATION) {
 					VMessageQualificationApplicationCrowd vqac = ((VMessageQualificationApplicationCrowd) msg);
 					Group group = GlobalHolder.getInstance().getGroupById(
 							vqac.getCrowdGroup().getGroupType().intValue(),
 							vqac.getCrowdGroup().getmGId());
-					if(group != null){
-						if(message.getQualState().intValue() == msg.getQualState().intValue()){
+					if (group != null) {
+						if (message.getQualState().intValue() != msg
+								.getQualState().intValue()) {
 							msg.setQualState(QualificationState.ACCEPTED);
 							msg.setReadState(ReadState.READ);
 							updateViewItem(tag.wrapper, tag.item);
+							MessageBuilder.updateQualicationMessage(mContext,
+									msg);
+						} else {
+							crowdService.acceptApplication(
+									vqac.getCrowdGroup(), vqac.getApplicant(),
+									new MessageListener(mLocalHandler,
+											ACCEPT_APPLY_DONE, group));
+							ProgressUtils.showNormalWithHintProgress(mContext,
+									true).initTimeOut();
 						}
-						else{
-							crowdService.acceptApplication(vqac.getCrowdGroup(),
-									vqac.getApplicant(), new MessageListener(
-											mLocalHandler, ACCEPT_INVITATION_DONE, group));
-							ProgressUtils.showNormalWithHintProgress(mContext, true).initTimeOut();
-						}
-					}
-					else{
+					} else {
 						VMessageQualificationApplicationCrowd vm = (VMessageQualificationApplicationCrowd) waitingQualification.obj;
-						Toast.makeText(mContext, vm.getCrowdGroup().getName() + R.string.crowd_Authentication_hit, Toast.LENGTH_SHORT).show();
+						Toast.makeText(
+								mContext,
+								vm.getCrowdGroup().getName()
+										+ R.string.crowd_Authentication_hit,
+								Toast.LENGTH_SHORT).show();
 						mMessageList.remove(waitingQualification);
 						groupAdapter.notifyDataSetChanged();
 						MessageBuilder.deleteQualMessage(mContext, vm.getId());
-						return ;
+						return;
 					}
 				}
 			}
@@ -1121,30 +1172,34 @@ public class MessageAuthenticationActivity extends Activity {
 
 	}
 
-	private void handleAcceptDone(Type type , CrowdGroup cg) {
-		if (cg == null) {
+	private void handleAcceptDone(Type type, long groupID, long userID) {
+		if (type == null) {
 			return;
 		}
-		
+
+		VMessageQualification currentMessage = null;
 		VMessageQualification vq = MessageBuilder.queryQualMessageByCrowdId(
-				mContext, GlobalHolder.getInstance().getCurrentUser(), cg);
+				mContext, userID, groupID);
 		for (ListItemWrapper wrapper : mMessageList) {
 			VMessageQualification message = (VMessageQualification) wrapper.obj;
-			if(vq.getId() == message.getId()){
+			if (vq.getId() == message.getId()) {
+				currentMessage = message;
 				message.setQualState(QualificationState.ACCEPTED);
 				message.setReadState(ReadState.READ);
 				groupAdapter.notifyDataSetChanged();
 				break;
 			}
 		}
-		
-		if(type == Type.CROWD_INVITATION){
+
+		if (type == Type.CROWD_INVITATION) {
 			Intent i = new Intent();
 			i.setAction(PublicIntent.BROADCAST_NEW_CROWD_NOTIFICATION);
 			i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
-			i.putExtra("crowd", cg.getmGId());
+			i.putExtra("crowd", groupID);
 			sendBroadcast(i);
+			startCrowdInvitationDetail(currentMessage);
 		}
+		
 	}
 
 	class CrowdAuthenticationBroadcastReceiver extends BroadcastReceiver {
@@ -1186,7 +1241,11 @@ public class MessageAuthenticationActivity extends Activity {
 				ProgressUtils.showNormalWithHintProgress(mContext, false);
 				if (waitingQualification != null) {
 					VMessageQualificationInvitationCrowd vm = (VMessageQualificationInvitationCrowd) waitingQualification.obj;
-					Toast.makeText(mContext, vm.getCrowdGroup().getName() + R.string.crowd_Authentication_hit, Toast.LENGTH_SHORT).show();
+					Toast.makeText(
+							mContext,
+							vm.getCrowdGroup().getName()
+									+ R.string.crowd_Authentication_hit,
+							Toast.LENGTH_SHORT).show();
 					mMessageList.remove(waitingQualification);
 					waitingQualification = null;
 					groupAdapter.notifyDataSetChanged();
@@ -1218,13 +1277,24 @@ public class MessageAuthenticationActivity extends Activity {
 		public void handleMessage(Message msg) {
 			switch (msg.what) {
 			case ACCEPT_INVITATION_DONE:
-				ProgressUtils.showNormalWithHintProgress(mContext, false);
-				JNIResponse jni = (JNIResponse) msg.obj;
-				handleAcceptDone(Type.CROWD_INVITATION , (CrowdGroup) jni.callerObject);
+				if (ProgressUtils.dialog.isShowing()) {
+					ProgressUtils.showNormalWithHintProgress(mContext, false);
+					JNIResponse jni = (JNIResponse) msg.obj;
+					CrowdGroup crowd = (CrowdGroup) jni.callerObject;
+					handleAcceptDone(Type.CROWD_INVITATION, crowd.getmGId(),
+							crowd.getOwnerUser().getmUserId());
+				} else
+					return;
 				break;
 			case ACCEPT_APPLY_DONE:
-				ProgressUtils.showNormalWithHintProgress(mContext, false);
-				handleAcceptDone(Type.CROWD_APPLICATION , null);
+				if (ProgressUtils.dialog.isShowing()) {
+					ProgressUtils.showNormalWithHintProgress(mContext, false);
+					JNIResponse jni = (JNIResponse) msg.obj;
+					GroupAddUserJNIObject obj = (GroupAddUserJNIObject) jni.resObj;
+					handleAcceptDone(Type.CROWD_APPLICATION, obj.getGroupID(),
+							obj.getUserID());
+				} else
+					return;
 				break;
 			}
 		}

@@ -1,7 +1,5 @@
 package com.v2tech.util;
 
-import java.util.Timer;
-
 import android.content.Context;
 import android.graphics.Color;
 import android.view.Gravity;
@@ -19,10 +17,9 @@ import com.v2tech.R;
 import com.v2tech.view.cus.ProgressDialog;
 
 public class ProgressUtils {
-	private static Timer timer = new Timer();
 	public static final int TIME_OUT = 10;
 	private static RotateAnimation animation;
-	private static ProgressDialog dialog;
+	public static ProgressDialog dialog;
 
 	public static ProgressDialog showNormalProgress(Context mContext, boolean show) {
 		LinearLayout ll = null;
