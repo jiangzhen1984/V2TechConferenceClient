@@ -10,7 +10,6 @@ import v2av.VideoRecorder;
 import v2av.VideoSize;
 import android.app.Activity;
 import android.app.Dialog;
-import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothHeadset;
 import android.bluetooth.BluetoothProfile;
 import android.content.BroadcastReceiver;
@@ -18,7 +17,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Configuration;
-import android.graphics.Canvas;
 import android.graphics.drawable.ColorDrawable;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
@@ -40,14 +38,11 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
-import android.widget.FrameLayout.LayoutParams;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.V2.jni.util.V2Log;
-import com.log.Log;
 import com.v2tech.R;
 import com.v2tech.service.AsyncResult;
 import com.v2tech.service.ChatService;
@@ -234,7 +229,7 @@ public class ConversationP2PAVActivity extends Activity implements
 		initViews();
 
 		if (!uad.isIncoming()) {
-			V2Log.d(TAG, "发起一个新的音视频邀请 , 等待回应中.... 此次通信的uuid ：" + currentVideoBean.mediaChatID);
+		//	V2Log.d(TAG, "发起一个新的音视频邀请 , 等待回应中.... 此次通信的uuid ：" + currentVideoBean.mediaChatID);
 			chatService.inviteUserChat(uad, new MessageListener(mLocalHandler,
 					CALL_RESPONSE, null));
 			if (uad.isVideoType()) {
@@ -940,7 +935,6 @@ public class ConversationP2PAVActivity extends Activity implements
 			flag |= UserChattingObject.OUTING_CALL;
 		}
 		uad = new UserChattingObject(u, flag, deviceId);
-		Log.i("temptag20141030 1", "uad.getDeviceId()" + uad.getDeviceId());
 		uad.setSzSessionID(sessionID);
 		return uad;
 	}
@@ -1184,7 +1178,6 @@ public class ConversationP2PAVActivity extends Activity implements
 	}
 
 	private void headsetAndBluetoothHeadsetHandle() {
-		Log.i("temptag 20141106 1", "headsetHandle()");
 		if (uad == null) {
 			return;
 		}
@@ -1195,10 +1188,10 @@ public class ConversationP2PAVActivity extends Activity implements
 
 		if (audioManager.isWiredHeadsetOn() || isBluetoothHeadsetConnected) {
 			audioManager.setSpeakerphoneOn(false);
-			Log.i("ConversationP2PAVActivity", "切换到耳机或听筒");
+			V2Log.i("ConversationP2PAVActivity", "切换到耳机或听筒");
 		} else {
 			audioManager.setSpeakerphoneOn(true);
-			Log.i("ConversationP2PAVActivity", "切换到免提");
+			V2Log.i("ConversationP2PAVActivity", "切换到免提");
 		}
 		if (uad.isAudioType()) {
 			setMAudioSpeakerButtonState();
@@ -1587,10 +1580,10 @@ public class ConversationP2PAVActivity extends Activity implements
 				if (intent.hasExtra("state")) {
 					int state = intent.getIntExtra("state", 0);
 					if (state == 1) {
-						Log.i(TAG_THIS_FILE, "插入耳机");
+						V2Log.i(TAG_THIS_FILE, "插入耳机");
 						headsetAndBluetoothHeadsetHandle();
 					} else if (state == 0) {
-						Log.i(TAG_THIS_FILE, "拔出耳机");
+						V2Log.i(TAG_THIS_FILE, "拔出耳机");
 						headsetAndBluetoothHeadsetHandle();
 					}
 				}
@@ -1603,10 +1596,10 @@ public class ConversationP2PAVActivity extends Activity implements
 
 				if (state == BluetoothProfile.STATE_CONNECTED) {
 					isBluetoothHeadsetConnected = true;
-					Log.i(TAG_THIS_FILE, "蓝牙耳机已连接");
+					V2Log.i(TAG_THIS_FILE, "蓝牙耳机已连接");
 					headsetAndBluetoothHeadsetHandle();
 				} else if (state == BluetoothProfile.STATE_DISCONNECTED) {
-					Log.i("TAG_THIS_FILE", "蓝牙耳机已断开");
+					V2Log.i("TAG_THIS_FILE", "蓝牙耳机已断开");
 					isBluetoothHeadsetConnected = false;
 					headsetAndBluetoothHeadsetHandle();
 				}
@@ -1681,7 +1674,7 @@ public class ConversationP2PAVActivity extends Activity implements
 					currentVideoBean.readSatate = AudioVideoMessageBean.STATE_READED;
 					RequestChatServiceResponse rcsr = (RequestChatServiceResponse) resp;
 					if (rcsr.getCode() == RequestChatServiceResponse.REJCTED) {
-						Log.d(TAG_THIS_FILE, "对方拒绝了音频或视频的邀请.... 此次通信的uuid ："
+						V2Log.d(TAG_THIS_FILE, "对方拒绝了音频或视频的邀请.... 此次通信的uuid ："
 								+ currentVideoBean.mediaChatID);
 						Message.obtain(this, KEY_CANCELLED_LISTNER)
 								.sendToTarget();
@@ -1695,10 +1688,10 @@ public class ConversationP2PAVActivity extends Activity implements
 						// connected event
 						if (uad.isVideoType()) {
 							if (videoIsAccepted) {
-								Log.d(TAG_THIS_FILE, "对方在接受视频的基础上接受了音频邀请。");
+								V2Log.d(TAG_THIS_FILE, "对方在接受视频的基础上接受了音频邀请。");
 							} else {
 								headsetAndBluetoothHeadsetHandle();
-								Log.d(TAG_THIS_FILE, "对方接受了视频的邀请，我再给对方发一个音频邀请。");
+								V2Log.d(TAG_THIS_FILE, "对方接受了视频的邀请，我再给对方发一个音频邀请。");
 								// Send audio invitation
 								// Do not need to modify any values. because
 								// this API
@@ -1723,7 +1716,7 @@ public class ConversationP2PAVActivity extends Activity implements
 
 						} else {
 							headsetAndBluetoothHeadsetHandle();
-							Log.d(TAG_THIS_FILE, "对方接受了音频的邀请");
+							V2Log.d(TAG_THIS_FILE, "对方接受了音频的邀请");
 							// set mute button to enable
 							setMuteButtonDisable(false);
 						}

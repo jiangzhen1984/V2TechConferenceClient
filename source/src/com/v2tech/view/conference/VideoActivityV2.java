@@ -1634,29 +1634,40 @@ public class VideoActivityV2 extends Activity {
 			List<UserDeviceConfig> devices) {
 		boolean layoutChanged = false;
 
+		boolean closeFlag = false;
 		for (int i = 0; i < mCurrentShowedSV.size(); i++) {
 			SurfaceViewW svw = mCurrentShowedSV.get(i);
 			if (at.getAttId() != svw.at.getAttId()) {
+				closeFlag = false;
 				continue;
+			} else {
+				closeFlag = true;
 			}
 
+			
+			
 			for (int j = 0; j < devices.size(); j++) {
 				UserDeviceConfig ud = devices.get(j);
 				// If remote user disable local camera device which
 				// local user already opened
 				if (svw.udc.getDeviceID().equals(ud.getDeviceID())) {
 					if (!ud.isEnable()) {
-						layoutChanged = true;
-						svw.observer.close();
-						mCurrentShowedSV.remove(i);
-						mVideoLayout.removeView(svw.getView());
-						i--;
+						closeFlag = true;
 					} else {
+						closeFlag = false;
 						// Update already opened device
 						devices.set(j, svw.udc);
 					}
 				}
 				
+			}
+			// Need to close video
+			if (closeFlag) {
+				layoutChanged = true;
+				svw.observer.close();
+				mCurrentShowedSV.remove(i);
+				mVideoLayout.removeView(svw.getView());
+				i--;
 			}
 
 		}

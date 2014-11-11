@@ -27,11 +27,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.PopupWindow.OnDismissListener;
-import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -437,11 +435,7 @@ public class VideoDocLayout extends LinearLayout {
 				dest.bottom = opsNew.outHeight;
 				matrix.postScale(opsNew.outWidth / src.right, opsNew.outHeight
 						/ src.bottom);
-				// matrix.setScale(src.right /dest.right ,
-				// src.bottom/dest.bottom , opsNew.outWidth /2 ,
-				// opsNew.outHeight /2);
 				matrix.mapRect(dest, src);
-				// matrix.setRectToRect(src, dest, ScaleToFit.CENTER);
 
 				container.removeAllViews();
 				TouchImageView iv = new TouchImageView(this.getContext());
@@ -502,12 +496,13 @@ public class VideoDocLayout extends LinearLayout {
 				mImageViewBitmap.getHeight()), paint);
 
 		Paint p = new Paint();
-		if (shareDocBm != null && !shareDocBm.isRecycled()) {
-			target.drawBitmap(shareDocBm, 0, 0, p);
-		}
-
 		if (shapesBm != null && !shapesBm.isRecycled()) {
 			target.drawBitmap(shapesBm, 0, 0, p);
+		}
+		
+		if (shareDocBm != null && !shareDocBm.isRecycled()) {
+			target.concat(matrix);
+			target.drawBitmap(shareDocBm, 0, 0, p);
 		}
 	}
 
