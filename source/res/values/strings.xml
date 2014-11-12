@@ -33,4 +33,6 @@
     <string name="common_confirm_name">确定</string>
     <string name="common_return_name">返回</string>
     <string name="common_no_string">无</string>
+    <string name="common_edit_text_max_length_30">30</string>
+    <string name="common_edit_text_max_length_100">100</string>
 </resources>

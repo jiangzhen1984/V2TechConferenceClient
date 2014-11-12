@@ -438,7 +438,7 @@ public class ConferenceCreateActivity extends Activity {
 			List<User> l = new ArrayList<User>(mAttendeeList);
 			conf = new Conference(title, startTimeStr, null, l);
 			cs.createConference(conf, new MessageListener(mLocalHandler,
-					CREATE_CONFERENC_RESP, null));
+					CREATE_CONFERENC_RESP, conf));
 			view.setEnabled(false);
 		}
 
@@ -537,7 +537,8 @@ public class ConferenceCreateActivity extends Activity {
 				updateUserToAttendList((User) msg.obj, msg.arg1);
 				break;
 			case CREATE_CONFERENC_RESP:
-				JNIResponse rccr = (JNIResponse) msg.obj;
+                JNIResponse rccr = (JNIResponse) msg.obj;
+                Conference conference = (Conference) rccr.callerObject;
 				if (rccr.getResult() != JNIResponse.Result.SUCCESS) {
 					mErrorNotificationLayout.setVisibility(View.VISIBLE);
 					mErrorMessageTV
@@ -545,10 +546,16 @@ public class ConferenceCreateActivity extends Activity {
 					break;
 				}
 
+                Date startDate;
+                if(conference != null)
+                    startDate = conference.getDate();
+                else
+                    startDate = new Date();
+
 				RequestConfCreateResponse rc = (RequestConfCreateResponse) rccr;
 				ConferenceGroup g = new ConferenceGroup(rc.getConfId(),
 						conf.getName(), GlobalHolder.getInstance()
-								.getCurrentUser(), new Date(), GlobalHolder
+								.getCurrentUser(), startDate, GlobalHolder
 								.getInstance().getCurrentUser());
 
 				g.addUserToGroup(new ArrayList<User>(mAttendeeList));

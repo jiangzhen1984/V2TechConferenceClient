@@ -418,7 +418,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 		mCompanyTitleTV = (TextView) findViewById(R.id.contact_user_company);
 		mSignTV = (TextView) findViewById(R.id.contact_user_detail_user_signature_tv);
 
-		mTVArr = new View[] { mItemsContainer, mCompanyTitleTV,
+		mTVArr = new View[] { mItemsContainer,mCompanyTitleTV,
 				mContactButtonContainer, mMoreDetailButton, mSignTV };
 
 		// view for self
@@ -434,8 +434,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 		mCompanySelfTV = (TextView) findViewById(R.id.contact_user_detail_company_tv);
 		mDepartmentSelfTV = (TextView) findViewById(R.id.contact_user_detail_department_tv);
 
-		mETArr = new EditText[] { mSignature, mCellphoneET, mTelephoneET,
-				mTitleET, mAddressET };
+		mETArr = new EditText[] { mSignature, mCellphoneET, mTelephoneET, mAddressET };
 	}
 
 	private void showUserInfo() {

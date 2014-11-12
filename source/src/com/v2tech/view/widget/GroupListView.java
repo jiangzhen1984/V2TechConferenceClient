@@ -488,7 +488,7 @@ public class GroupListView extends ListView {
 	 * 
 	 * @param gitem
 	 *            group item which user belongs and expanded
-	 * @param index
+	 * @param gstart
 	 *            first child position of group
 	 * @param gend
 	 *            group end position
@@ -688,7 +688,8 @@ public class GroupListView extends ListView {
 			Group parent = g.getParent();
 			if (parent != null) {
 				Item itemParent = mItemMap.get(parent.getmGId());
-				item.setChecked(itemParent.isChecked());
+                if(itemParent != null)
+				    item.setChecked(itemParent.isChecked());
 			}
 			mItemMap.put(g.getmGId(), item);
 		}

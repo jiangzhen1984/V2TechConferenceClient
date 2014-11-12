@@ -68,10 +68,10 @@ public class MainApplication extends Application {
 		super.onCreate();
 
 		V2Log.isDebuggable = (0 == (getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE));
-		if (!V2Log.isDebuggable) {
-			CrashHandler crashHandler = CrashHandler.getInstance();
-			crashHandler.init(getApplicationContext());
-		}
+//		if (!V2Log.isDebuggable) {
+//			CrashHandler crashHandler = CrashHandler.getInstance();
+//			crashHandler.init(getApplicationContext());
+//		}
 		SharedPreferences sf = getSharedPreferences("config",
 				Context.MODE_PRIVATE);
 		Editor ed = sf.edit();
@@ -126,13 +126,13 @@ public class MainApplication extends Application {
 		// Start deamon service
 		getApplicationContext().startService(
 				new Intent(getApplicationContext(), JNIService.class));
-		getApplicationContext().startService(
-				new Intent(getApplicationContext(), LogService.class));
 
 		if (!V2Log.isDebuggable) {
 //			new LogcatThread().start();
 //			Intent service = new Intent(getApplicationContext() , LogService.class);
 //			getApplicationContext().startService(service);
+            getApplicationContext().startService(
+                    new Intent(getApplicationContext(), LogService.class));
 		}
 
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {

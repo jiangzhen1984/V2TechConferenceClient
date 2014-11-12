@@ -192,7 +192,7 @@
                             android:background="@null"
                             android:ems="10"
                             android:inputType="text"
-                            android:maxLength="30"
+                            android:maxLength="@string/common_edit_text_max_length_100"
                             android:textColor="@color/activiy_contact_item_content_color"
                             android:textSize="@dimen/common_item_text_size" >
                         </EditText>
@@ -347,7 +347,7 @@
                             android:layout_weight="1"
                             android:ems="10"
                             android:inputType="phone"
-                            android:maxLength="11"
+                            android:maxLength="@string/common_edit_text_max_length_30"
                             android:textColor="@color/activiy_contact_item_content_color"
                             android:textSize="@dimen/common_item_text_size" >
                         </EditText>
@@ -382,7 +382,7 @@
                             android:layout_weight="1"
                             android:ems="10"
                             android:inputType="text"
-                            android:maxLength="30"
+                            android:maxLength="@string/common_edit_text_max_length_30"
                             android:textColor="@color/activiy_contact_item_content_color"
                             android:textSize="@dimen/common_item_text_size" />
                     </LinearLayout>
