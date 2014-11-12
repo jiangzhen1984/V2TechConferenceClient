@@ -53,6 +53,7 @@ import com.v2tech.service.jni.RequestChatServiceResponse;
 import com.v2tech.util.GlobalConfig;
 import com.v2tech.view.JNIService;
 import com.v2tech.view.PublicIntent;
+import com.v2tech.view.widget.SlideVideoFrameLayout;
 import com.v2tech.vo.AudioVideoMessageBean;
 import com.v2tech.vo.CameraConfiguration;
 import com.v2tech.vo.NetworkStateCode;
@@ -135,10 +136,24 @@ public class ConversationP2PAVActivity extends Activity implements
 	private boolean videoIsAccepted = false;
 	boolean isBluetoothHeadsetConnected = false;
 
+	private boolean isMLcalSurfaceLayoutEnable = true;
 	private OnClickListener onClickMLcalSurfaceLayout = new OnClickListener() {
 
 		@Override
 		public void onClick(View v) {
+			if (!isMLcalSurfaceLayoutEnable) {
+				return;
+			} else {
+				isMLcalSurfaceLayoutEnable = false;
+				mLocalHandler.postDelayed(new Runnable() {
+
+					@Override
+					public void run() {
+						isMLcalSurfaceLayoutEnable = true;
+					}
+				}, 3000);
+			}
+
 			exchangeRemoteVideoAndLocalVideo();
 		}
 
@@ -835,8 +850,19 @@ public class ConversationP2PAVActivity extends Activity implements
 				localLp.height = localLp.width * size.width / size.height;
 			}
 			
-			localLp.bottomMargin=((View)videoHangUpButton.getParent()).getHeight()+10;
 			smallWindowVideoLayout.setLayoutParams(localLp);
+			
+			int screenWidth = ((View) (smallWindowVideoLayout.getParent()))
+					.getWidth();
+			int screenHeight = ((View) (smallWindowVideoLayout.getParent()))
+					.getHeight();
+			int bottomMargin = ((View) videoHangUpButton.getParent()).getHeight();
+			int r = screenWidth - 20;
+			int b = screenHeight - bottomMargin-20;
+			int l = r - localLp.width;
+			int t = b - localLp.height;
+			smallWindowVideoLayout.layout(l, t, r, b);
+
 		}
 	}
 
@@ -1020,7 +1046,7 @@ public class ConversationP2PAVActivity extends Activity implements
 			mReverseCameraButton.setOnClickListener(surfaceViewListener);
 		}
 		mReverseCameraButton.setVisibility(View.GONE);
-		
+
 		if (mReverseCameraButton1 == null) {
 			mReverseCameraButton1 = findViewById(R.id.ImageView01);
 			mReverseCameraButton1.setOnClickListener(surfaceViewListener);
@@ -1039,12 +1065,16 @@ public class ConversationP2PAVActivity extends Activity implements
 			mReverseCameraButton.setOnClickListener(surfaceViewListener);
 		}
 		mReverseCameraButton.setVisibility(View.VISIBLE);
-		
+
 		if (mReverseCameraButton1 == null) {
 			mReverseCameraButton1 = findViewById(R.id.ImageView01);
 			mReverseCameraButton1.setOnClickListener(surfaceViewListener);
 		}
 		mReverseCameraButton1.setVisibility(View.GONE);
+		smallWindowVideoLayout
+				.setOnTouchListener(new SlideVideoFrameLayout.TouchMoveListener(
+						this));
+
 		// exchangeRemoteVideoAndLocalVideo();
 	}
 
@@ -1325,11 +1355,24 @@ public class ConversationP2PAVActivity extends Activity implements
 
 	};
 
+	private boolean isCameraButtonEnable = true;
 	private OnClickListener onClickCameraButton = new OnClickListener() {
 
 		@Override
 		public void onClick(View view) {
 
+			if (!isCameraButtonEnable) {
+				return;
+			} else {
+				isCameraButtonEnable = false;
+				mLocalHandler.postDelayed(new Runnable() {
+
+					@Override
+					public void run() {
+						isCameraButtonEnable = true;
+					}
+				}, 3000);
+			}
 			if (testFlag == false) {
 				exchangeRemoteVideoAndLocalVideo();
 			}

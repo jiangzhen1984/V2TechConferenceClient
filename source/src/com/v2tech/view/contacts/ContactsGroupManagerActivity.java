@@ -39,7 +39,7 @@ import com.v2tech.vo.ContactGroup;
 import com.v2tech.vo.Group;
 import com.v2tech.vo.Group.GroupType;
 
-public class ContactsGroupActivity extends Activity {
+public class ContactsGroupManagerActivity extends Activity {
 
 	private static final int CREATE_GROUP_DONE = 1;
 	private static final int UPDATE_GROUP_DONE = 2;
@@ -298,7 +298,7 @@ public class ContactsGroupActivity extends Activity {
 
 			if (((ContactGroup) wr.getItemObject()).isDefault()) {
 				v.setVisibility(View.INVISIBLE);
-				deleteModeView.setVisibility(View.INVISIBLE);
+				deleteModeView.setVisibility(View.GONE);
 			} else {
 				v.setVisibility(View.VISIBLE);
 				v.setOnClickListener(deleteGroupButtonClickListener);
@@ -313,7 +313,7 @@ public class ContactsGroupActivity extends Activity {
 					v.setVisibility(View.INVISIBLE);
 				}
 			} else {
-				deleteModeView.setVisibility(View.INVISIBLE);
+				deleteModeView.setVisibility(View.GONE);
 				v.setVisibility(View.INVISIBLE);
 			}
 

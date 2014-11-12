@@ -39,7 +39,7 @@ import com.v2tech.service.BitmapManager;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.view.bo.GroupUserObject;
 import com.v2tech.view.bo.UserStatusObject;
-import com.v2tech.view.contacts.ContactsGroupActivity;
+import com.v2tech.view.contacts.ContactsGroupManagerActivity;
 import com.v2tech.view.widget.GroupListView;
 import com.v2tech.view.widget.GroupListView.Item;
 import com.v2tech.vo.Group;
@@ -340,7 +340,7 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 			public void onClick(View v) {
 				
 				Intent i = new Intent();
-				i.setClass(mContext, ContactsGroupActivity.class);
+				i.setClass(mContext, ContactsGroupManagerActivity.class);
 				i.addCategory(PublicIntent.DEFAULT_CATEGORY);
 				startActivity(i);
 				

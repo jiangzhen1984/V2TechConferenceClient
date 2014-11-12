@@ -11,12 +11,35 @@
         android:paddingTop="5dp"
         android:paddingBottom="5dp"
         android:layout_height="wrap_content" >
+        <ImageView
+            android:id="@+id/contacts_group_delete_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="20dp"
+            android:src="@drawable/contacts_group_item_icon" />
+
+        <TextView
+            android:id="@+id/contacts_group_item_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="15dp"
+            android:layout_toLeftOf="@+id/contacts_group_item_adapter_delelte_button"
+            android:layout_toRightOf="@+id/contacts_group_delete_icon"
+            android:ellipsize="end"
+            android:gravity="left"
+            android:singleLine="true"
+            android:text="@string/activiy_contact_group_title"
+            android:textColor="@color/title_color"
+            android:textSize="@dimen/common_item_text_size_20" />
+
         <TextView
             android:id="@+id/contacts_group_item_adapter_delelte_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
-            android:layout_centerVertical="true"
             android:layout_margin="10dp"
             android:background="@drawable/rounded_corners_contacts_group_delete_button"
             android:paddingBottom="5dp"
@@ -26,27 +49,7 @@
             android:text="@string/activiy_contact_group_item_button_delete"
             android:textColor="@color/common_white_color"
             android:textSize="@dimen/common_item_text_size" />
-        <ImageView
-            android:id="@+id/contacts_group_delete_icon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_centerVertical="true"
-            android:layout_marginLeft="20dp"
-            android:src="@drawable/contacts_group_item_icon" />
-        <TextView
-            android:id="@+id/contacts_group_item_name"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_marginLeft="15dp"
-            android:layout_toRightOf="@+id/contacts_group_delete_icon"
-            android:ellipsize="end"
-            android:gravity="center"
-            android:singleLine="true"
-            android:text="@string/activiy_contact_group_title"
-            android:textColor="@color/title_color"
-            android:textSize="@dimen/common_item_text_size_20" />
+
     </RelativeLayout>
     <LinearLayout
         android:layout_below="@+id/relativelayout1"
