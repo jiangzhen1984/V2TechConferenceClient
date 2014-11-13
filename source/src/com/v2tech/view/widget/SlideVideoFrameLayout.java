@@ -1,6 +1,5 @@
 package com.v2tech.view.widget;
 
-import com.log.Log;
 import com.v2tech.R;
 
 import android.content.Context;
@@ -124,7 +123,6 @@ public class SlideVideoFrameLayout extends FrameLayout {
 				lastY = (int) event.getRawY();
 				break;
 			case MotionEvent.ACTION_UP:
-				Log.d("temptag 20141110 1", "MotionEvent.ACTION_UP");
 				if (event.getPointerCount() == 1) {
 					if (Math.abs((event.getRawX() - x1)) > LENGTH
 							|| Math.abs((event.getRawY() - y1)) > LENGTH) {
