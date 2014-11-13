@@ -758,7 +758,6 @@ public class GroupRequest {
 
 	/**
 	 * this funcation was called when be invited user refused to join group
-	 * @deprecated never called
 	 * @param groupType
 	 * @param nGroupID
 	 * @param nUserID
@@ -775,8 +774,8 @@ public class GroupRequest {
 			if (obj != null) {
 				GroupRequestCallback callback = (GroupRequestCallback) obj;
 				callback.OnRefuseInviteJoinGroup(new GroupQualicationJNIObject(
-						groupType, nGroupID, nUserID, Type.CROWD_INVITATION,
-						QualificationState.REJECT, reason));
+						groupType, nGroupID, nUserID, Type.CROWD_APPLICATION,
+						QualificationState.BE_REJECT, reason));
 			}
 		}
 

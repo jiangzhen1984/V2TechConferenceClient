@@ -56,6 +56,11 @@ public class Conference implements Parcelable {
 		this.name = name;
 		this.d = startTime;
 		this.invitedList = invitedList;
+
+        if(startTime != null) {
+            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+            this.startTime = format.format(startTime);
+        }
 	}
 
 	public Conference(Parcel par) {

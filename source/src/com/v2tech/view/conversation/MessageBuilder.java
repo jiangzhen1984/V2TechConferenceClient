@@ -12,7 +12,6 @@ import java.util.UUID;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.text.TextUtils;
@@ -26,7 +25,6 @@ import com.v2tech.db.ContentDescriptor.HistoriesCrowd;
 import com.v2tech.db.DataBaseContext;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.util.GlobalConfig;
-import com.v2tech.view.JNIService;
 import com.v2tech.vo.CrowdGroup;
 import com.v2tech.vo.FileInfoBean;
 import com.v2tech.vo.GroupQualicationState;
@@ -37,8 +35,6 @@ import com.v2tech.vo.VMessageAudioItem;
 import com.v2tech.vo.VMessageFileItem;
 import com.v2tech.vo.VMessageImageItem;
 import com.v2tech.vo.VMessageQualification;
-import com.v2tech.vo.ConversationFirendAuthenticationData.VerificationMessageType;
-import com.v2tech.vo.VMessageQualification.QualificationState;
 import com.v2tech.vo.VMessageQualification.ReadState;
 import com.v2tech.vo.VMessageQualification.Type;
 import com.v2tech.vo.VMessageQualificationApplicationCrowd;
@@ -84,6 +80,7 @@ public class MessageBuilder {
 		VMessage vm = new VMessage(groupType, groupID, fromUser, toUser,
 				new Date(GlobalConfig.getGlobalServerTime()));
 		VMessageImageItem item = new VMessageImageItem(vm, imagePath);
+		item.setState(VMessageAbstractItem.STATE_NORMAL);
 		item.setUuid(uuid);
 		return item.getVm();
 	}
@@ -92,10 +89,10 @@ public class MessageBuilder {
 			User fromUser, User toUser, String audioPath, int seconds) {
 		VMessage vm = new VMessage(groupType, groupID, fromUser, toUser,
 				new Date(GlobalConfig.getGlobalServerTime()));
-		VMessageAudioItem item = new VMessageAudioItem(vm, audioPath, seconds);
-		item.setState(VMessageAbstractItem.STATE_READED);
-		item.setUuid(audioPath.substring(audioPath.lastIndexOf("/") + 1,
-				audioPath.lastIndexOf(".")));
+        String uuid = audioPath.substring(audioPath.lastIndexOf("/") + 1,
+                audioPath.lastIndexOf("."));
+		VMessageAudioItem item = new VMessageAudioItem(vm, uuid , audioPath, seconds , VMessageAbstractItem.STATE_READED);
+		item.setState(VMessageAbstractItem.STATE_NORMAL);
 		return item.getVm();
 	}
 
@@ -363,13 +360,12 @@ public class MessageBuilder {
 		return uri;
 	}
 
-	/**
-	 * put the media(audio or video) record datas VMessage Object to DataBases
-	 * 
-	 * @param context
-	 * @param vm
-	 * @return
-	 */
+    /**
+     * put the media(audio or video) record datas VMessage Object to DataBases
+     * @param context
+     * @param bean
+     * @return
+     */
 	public static Uri saveMediaChatHistories(Context context, VideoBean bean) {
 
 		DataBaseContext mContext = new DataBaseContext(context);
@@ -690,23 +686,29 @@ public class MessageBuilder {
 				new String[] { String.valueOf(id) });
 		return updates;
 	}
-	/**
-	 * Update a qualification message to database
-	 * 
-	 * @param context
-	 * @param msg
-	 * @return
-	 */
-	public static int updateQualicationMessageState(long groupID, long userID,
+
+    /**
+     * Update a qualification message to database
+     * @param groupID
+     * @param userID
+     * @param obj
+     * @return
+     */
+	public static long updateQualicationMessageState(long groupID, long userID,
 			GroupQualicationState obj) {
 
-		if (obj == null)
+		if (obj == null){
+			V2Log.e("MessageBuilder updateQualicationMessageState --> update failed... beacuser given GroupQualicationState"
+					+ "is null!");
 			return -1;
+		}
 
 		DataBaseContext mContext = new DataBaseContext(context);
 		VMessageQualification crowdQuion = MessageBuilder
 				.queryQualMessageByCrowdId(null, userID, groupID);
 		if (crowdQuion == null) {
+			V2Log.e("MessageBuilder updateQualicationMessageState --> the VMessageQualification Object is null , Need to build"
+					+ "groupID is : " + groupID + " userID is : " + userID);
 			User applicant = GlobalHolder.getInstance().getUser(userID);
 			if (applicant == null)
 				applicant = new User(userID);
@@ -732,14 +734,16 @@ public class MessageBuilder {
 			crowdQuion.setmTimestamp(new Date(GlobalConfig
 					.getGlobalServerTime()));
 			Uri uri = MessageBuilder.saveQualicationMessage(null, crowdQuion);
-			if (uri != null)
-				crowdQuion.setId(Long.parseLong(uri.getLastPathSegment()));
-			// Intent intent = new Intent();
-			// intent.setAction(JNIService.JNI_BROADCAST_NEW_QUALIFICATION_MESSAGE);
-			// intent.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
-			// intent.putExtra("msgId", crowdQuion.getId());
-			// context.sendBroadcast(intent);
-			return 1;
+			if (uri != null){
+				long id = Long.parseLong(uri.getLastPathSegment());
+				crowdQuion.setId(id);
+				return id;
+			}
+			else{
+				V2Log.e("MessageBuilder updateQualicationMessageState --> Save VMessageQualification Object failed , "
+						+ "the Uri is null...groupID is : " + groupID + " userID is : " + userID);
+				return -1;
+			}
 		}
 
 		ContentValues values = new ContentValues();
@@ -770,10 +774,10 @@ public class MessageBuilder {
 		values.put(
 				ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_SAVEDATE,
 				GlobalConfig.getGlobalServerTime());
-		int updates = mContext.getContentResolver().update(
+		mContext.getContentResolver().update(
 				ContentDescriptor.HistoriesCrowd.CONTENT_URI, values, where,
 				new String[] { String.valueOf(groupID) });
-		return updates;
+		return crowdQuion.getId();
 	}
 
 	/**
@@ -856,14 +860,12 @@ public class MessageBuilder {
 		return updates;
 	}
 
-	/**
-	 * Query qualification message by crowd group id and user id
-	 * 
-	 * @param context
-	 * @param user
-	 * @param cg
-	 * @return
-	 */
+    /**
+     * Query qualification message by Message's id
+     * @param context
+     * @param id
+     * @return
+     */
 	public static VMessageQualification queryQualMessageById(Context context,
 			long id) {
 
@@ -903,14 +905,13 @@ public class MessageBuilder {
 				cg.getmGId());
 	}
 
-	/**
-	 * Query qualification message by crowd group id and user id
-	 * 
-	 * @param context
-	 * @param user
-	 * @param cg
-	 * @return
-	 */
+    /**
+     * Query qualification message by crowd group id and user id
+     * @param context
+     * @param userID
+     * @param groupID
+     * @return
+     */
 	public static VMessageQualification queryQualMessageByCrowdId(
 			Context context, long userID, long groupID) {
 		if (context == null)
@@ -997,7 +998,13 @@ public class MessageBuilder {
 			return null;
 		}
 
-		V2Group v2Group = XmlAttributeExtractor.parseCrowd(xml).get(0);
+		List<V2Group> parseCrowd = XmlAttributeExtractor.parseCrowd(xml);
+		if(parseCrowd == null){
+			V2Log.e("MessageBuilder extraMsgFromCursor -->pase the CrowdXml failed.. XML is : " + xml);
+			return null;
+		}
+		
+		V2Group v2Group = parseCrowd.get(0);
 		if (v2Group == null || v2Group.creator == null) {
 			V2Log.e("MessageBuilder extraMsgFromCursor --> pase the CrowdXml failed..v2Group or v2Group.createor is null");
 			return null;

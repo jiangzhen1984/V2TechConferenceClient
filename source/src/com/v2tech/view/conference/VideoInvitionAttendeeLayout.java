@@ -184,9 +184,9 @@ public class VideoInvitionAttendeeLayout extends LinearLayout {
 		@Override
 		public void afterTextChanged(Editable s) {
 			if (TextUtils.isEmpty(s.toString())) {
-				if (!TextUtils.isEmpty(mGroupListView.getTextFilter())) {
+//				if (!TextUtils.isEmpty(mGroupListView.getTextFilter())) {
 					mGroupListView.clearTextFilter();
-				}
+//				}
 			} else {
 				mGroupListView.setFilterText(s.toString());
 			}

@@ -7,8 +7,8 @@ import java.util.List;
 
 import android.app.Activity;
 import android.app.ActivityManager;
-import android.app.Service;
 import android.app.ActivityManager.RunningTaskInfo;
+import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.media.Ringtone;
@@ -23,6 +23,7 @@ import android.os.Message;
 import android.os.Parcelable;
 import android.support.v4.util.LongSparseArray;
 import android.util.Log;
+import android.util.SparseArray;
 import android.widget.Toast;
 
 import com.V2.jni.AudioRequest;
@@ -44,8 +45,8 @@ import com.V2.jni.VideoRequestCallbackAdapter;
 import com.V2.jni.ind.AudioJNIObjectInd;
 import com.V2.jni.ind.FileJNIObject;
 import com.V2.jni.ind.GroupAddUserJNIObject;
-import com.V2.jni.ind.GroupQualicationJNIObject;
 import com.V2.jni.ind.GroupJoinErrorJNIObject;
+import com.V2.jni.ind.GroupQualicationJNIObject;
 import com.V2.jni.ind.SendingResultJNIObjectInd;
 import com.V2.jni.ind.V2Conference;
 import com.V2.jni.ind.V2Group;
@@ -53,6 +54,7 @@ import com.V2.jni.ind.V2User;
 import com.V2.jni.ind.VideoJNIObjectInd;
 import com.V2.jni.util.V2Log;
 import com.v2tech.R;
+import com.v2tech.db.ContentDescriptor;
 import com.v2tech.service.BitmapManager;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.service.jni.FileDownLoadErrorIndication;
@@ -64,6 +66,8 @@ import com.v2tech.view.bo.GroupUserObject;
 import com.v2tech.view.bo.UserAvatarObject;
 import com.v2tech.view.bo.UserStatusObject;
 import com.v2tech.view.contacts.add.AddFriendHistroysHandler;
+import com.v2tech.view.conversation.CommonCallBack;
+import com.v2tech.view.conversation.CommonCallBack.CommonUpdateConversationStateInterface;
 import com.v2tech.view.conversation.ConversationP2PAVActivity;
 import com.v2tech.view.conversation.MessageBuilder;
 import com.v2tech.view.conversation.MessageLoader;
@@ -82,7 +86,6 @@ import com.v2tech.vo.VMessageFileItem;
 import com.v2tech.vo.VMessageImageItem;
 import com.v2tech.vo.VMessageQualification;
 import com.v2tech.vo.VMessageQualification.QualificationState;
-import com.v2tech.vo.VMessageQualification.ReadState;
 import com.v2tech.vo.VMessageQualification.Type;
 import com.v2tech.vo.VMessageQualificationApplicationCrowd;
 import com.v2tech.vo.VMessageQualificationInvitationCrowd;
@@ -94,7 +97,7 @@ import com.v2tech.vo.VMessageQualificationInvitationCrowd;
  * @author 28851274
  * 
  */
-public class JNIService extends Service {
+public class JNIService extends Service implements CommonUpdateConversationStateInterface{
 	private static final String TAG_FILE = "JNIService";
 	private static final String TAG = "JNIService";
 	public static final int BINARY_TYPE_AUDIO = 3;
@@ -144,6 +147,9 @@ public class JNIService extends Service {
 	private final LocalBinder mBinder = new LocalBinder();
 
 	private Integer mBinderRef = 0;
+	
+	private List<Integer> delayBroadcast = new ArrayList<Integer>();
+	private boolean noNeedBroadcast;
 
 	private JNICallbackHandler mCallbackHandler;
 
@@ -214,6 +220,8 @@ public class JNIService extends Service {
 
 		mFRCB = new FileRequestCB(mCallbackHandler);
 		FileRequest.getInstance().addCallback(mFRCB);
+		
+		CommonCallBack.getInstance().setConversationStateInterface(this);
 	}
 
 	@Override
@@ -330,10 +338,17 @@ public class JNIService extends Service {
 
 				if (gl != null && gl.size() > 0) {
 					GlobalHolder.getInstance().updateGroupList(msg.arg1, gl);
-					Intent gi = new Intent(JNI_BROADCAST_GROUP_NOTIFICATION);
-					gi.putExtra("gtype", msg.arg1);
-					gi.addCategory(JNI_BROADCAST_CATEGROY);
-					mContext.sendBroadcast(gi);
+					if((msg.arg1 == V2GlobalEnum.GROUP_TYPE_CROWD || 
+							msg.arg1 == V2GlobalEnum.GROUP_TYPE_DEPARTMENT) && !noNeedBroadcast){
+						V2Log.d(TAG, "ConversationTabFragment no builed successfully! Need to delay sending , type is ：" + msg.arg1);
+						delayBroadcast.add(msg.arg1);
+					}
+					else{
+						Intent gi = new Intent(JNI_BROADCAST_GROUP_NOTIFICATION);
+						gi.putExtra("gtype", msg.arg1);
+						gi.addCategory(JNI_BROADCAST_CATEGROY);
+						mContext.sendBroadcast(gi);
+					}
 				}
 				break;
 
@@ -406,7 +421,7 @@ public class JNIService extends Service {
 				VMessage vm = (VMessage) msg.obj;
 				if (vm != null) {
 					String action = null;
-					vm.setReadState(VMessage.STATE_UNREAD);
+					vm.setReadState(VMessageAbstractItem.STATE_UNREAD);
 					MessageBuilder.saveBinaryVMessage(mContext, vm);
 					MessageBuilder.saveFileVMessage(mContext, vm);
 					MessageBuilder.saveMessage(mContext, vm);
@@ -685,7 +700,7 @@ public class JNIService extends Service {
 
 				checkMessageAndSendBroadcast(
 						VMessageQualification.Type.CROWD_INVITATION, cg,
-						GlobalHolder.getInstance().getCurrentUser(), null);
+                        owner, null);
 
 			} else if (gType == GroupType.CONTACT) {
 
@@ -887,7 +902,19 @@ public class JNIService extends Service {
 				intent.setAction(JNI_BROADCAST_FRIEND_AUTHENTICATION);
 				intent.addCategory(JNI_BROADCAST_CATEGROY);
 				sendOrderedBroadcast(intent, null);
-			} 
+			} else if(gType == GroupType.CHATING){
+				long id = MessageBuilder.updateQualicationMessageState(obj.groupID, obj.userID, 
+						new GroupQualicationState(obj.qualicationType , obj.state , obj.reason));
+				if(id == -1){
+					V2Log.e(TAG, "OnRefuseInviteJoinGroup --> update refuse Invite join group failed... !");
+					return ;
+				}
+				Intent intent = new Intent();
+				intent.setAction(JNIService.JNI_BROADCAST_NEW_QUALIFICATION_MESSAGE);
+				intent.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
+				intent.putExtra("msgId", id);
+				sendOrderedBroadcast(intent, null);
+			}
 		}
 
 		@Override
@@ -1201,6 +1228,38 @@ public class JNIService extends Service {
 		@Override
 		public void OnSendChatResult(SendingResultJNIObjectInd ind) {
 			super.OnSendChatResult(ind);
+			
+			int state;
+			int fileState;
+			if(ind.getRet() == SendingResultJNIObjectInd.Result.FAILED){
+				state = VMessageAbstractItem.STATE_SENT_FALIED;
+				fileState = VMessageAbstractItem.STATE_FILE_SENT_FALIED;
+			}
+			else{
+				state = VMessageAbstractItem.STATE_SENT_SUCCESS;
+				fileState = VMessageAbstractItem.STATE_FILE_SENT;
+			}
+			
+			List<VMessage> messages = MessageLoader.queryMessage(mContext, ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_ID + "= ? ",
+					new String[]{ind.getUuid()}, null);
+			if(messages != null && messages.size() > 0){
+				VMessage vm = messages.get(0);
+				vm.setState(state);
+				List<VMessageAbstractItem> items = vm.getItems();
+				for (VMessageAbstractItem item : items) {
+					switch (item.getType()) {
+					case VMessageAbstractItem.ITEM_TYPE_IMAGE:
+					case VMessageAbstractItem.ITEM_TYPE_AUDIO:
+						item.setState(state);
+						break;
+					case VMessageAbstractItem.ITEM_TYPE_FILE:
+						item.setState(fileState);
+						break;
+					}
+				}
+				MessageLoader.updateChatMessageState(mContext, messages.get(0));
+			}
+			
 			if (ind.getRet() == SendingResultJNIObjectInd.Result.FAILED) {
 				Intent i = new Intent();
 				i.setAction(JNIService.JNI_BROADCAST_MESSAGE_SENT_FAILED);
@@ -1353,6 +1412,25 @@ public class JNIService extends Service {
 		@Override
 		public void OnFileTransCancel(String szFileID) {
 			super.OnFileTransCancel(szFileID);
+		}
+	}
+
+	@Override
+	public void updateConversationState() {
+		V2Log.d(TAG, "ConversationTabFragment already builed successfully , send broadcast now!");
+		if(delayBroadcast.size() <= 0){
+			V2Log.d(TAG, "There is no broadcast in delayBroadcast collections , mean no callback!");
+			noNeedBroadcast = true;
+		}
+		else{
+			for (Integer type : delayBroadcast) {
+				V2Log.d(TAG, "The delay broadcast was sending now , type is : " + type);
+				Intent gi = new Intent(JNI_BROADCAST_GROUP_NOTIFICATION);
+				gi.putExtra("gtype", type);
+				gi.addCategory(JNI_BROADCAST_CATEGROY);
+				mContext.sendBroadcast(gi);
+			}
+			delayBroadcast.clear();
 		}
 	}
 

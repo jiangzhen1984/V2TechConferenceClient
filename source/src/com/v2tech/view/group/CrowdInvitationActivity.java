@@ -18,6 +18,7 @@ import com.v2tech.R;
 import com.v2tech.service.CrowdGroupService;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.service.MessageListener;
+import com.v2tech.service.jni.JNIResponse;
 import com.v2tech.util.ProgressUtils;
 import com.v2tech.view.JNIService;
 import com.v2tech.view.PublicIntent;
@@ -173,6 +174,10 @@ public class CrowdInvitationActivity extends Activity {
 				mSendMsgButton.setVisibility(View.VISIBLE);
 				mNotesTV.setText(R.string.crowd_invitation_accept_notes);
 				mAcceptedLy.setVisibility(View.VISIBLE);
+				
+				Group group = GlobalHolder.getInstance().getGroupById(V2GlobalEnum.GROUP_TYPE_CROWD , crowd.getId());
+				if(group != null && group.getUsers() != null)
+					mMembersTV.setText(String.valueOf(group.getUsers().size()));
 			} else if (vq.getQualState() == VMessageQualification.QualificationState.REJECT) {
 				mButtonLayout.setVisibility(View.GONE);
 				mNotesLayout.setVisibility(View.VISIBLE);
@@ -311,15 +316,17 @@ public class CrowdInvitationActivity extends Activity {
 			}
 			switch (msg.what) {
 			case ACCEPT_INVITATION_DONE:
-				ProgressUtils.showNormalWithHintProgress(mContext, false);
-				handleAcceptDone();
+                JNIResponse jni = (JNIResponse) msg.obj;
+                if(jni.getResult().ordinal() == JNIResponse.Result.SUCCESS.ordinal()){
+                    handleAcceptDone();
+                }
 				break;
 			case REFUSE_INVITATION_DONE:
 //				ProgressUtils.showNormalWithHintProgress(mContext, false);
 //				handleDeclineDone();
 				break;
-
 			}
+            ProgressUtils.showNormalWithHintProgress(mContext, false);
 		}
 
 	};

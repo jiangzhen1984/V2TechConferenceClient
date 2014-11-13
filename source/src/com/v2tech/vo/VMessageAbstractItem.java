@@ -20,26 +20,24 @@ public abstract class VMessageAbstractItem {
 	
 	public static final int ITEM_TYPE_LINK_TEXT = 7;
 	
-	
-	public static final int NEW_LINE_FLAG_VALUE = 1;
-	
-	
-	public static final int STATE_NORMAL = 0;
+	public static final int NEW_LINE_FLAG_VALUE = 8;
 	
 	//Use to mark audio item
-	public static final int STATE_UNREAD = 0;
-	public static final int STATE_READED = 1;
+	public static final int STATE_UNREAD = 9;
+	public static final int STATE_READED = 10;
 	
-	public static final int STATE_SENT_FALIED = 2;
+	public static final int STATE_NORMAL = 33;
+	public static final int STATE_SENT_SUCCESS = 34;
+	public static final int STATE_SENT_FALIED = 35;
 	
 	//Use to mark file item
-	public static final int STATE_FILE_NORMAL = 0;
-	public static final int STATE_FILE_UNDOWNLOAD = 2;
-	public static final int STATE_FILE_DOWNLOADING = 4;
-	public static final int STATE_FILE_PAUSED_DOWNLOADING = 5;
-	public static final int STATE_FILE_MISS_DOWNLOAD = 6;
-	public static final int STATE_FILE_DOWNLOADED_FALIED = 7;
-	public static final int STATE_FILE_DOWNLOADED = 8;
+	public static final int STATE_FILE_NORMAL = 10;
+	public static final int STATE_FILE_UNDOWNLOAD = 11;
+	public static final int STATE_FILE_DOWNLOADING = 12;
+	public static final int STATE_FILE_PAUSED_DOWNLOADING = 13;
+	public static final int STATE_FILE_MISS_DOWNLOAD = 14;
+	public static final int STATE_FILE_DOWNLOADED_FALIED = 15;
+	public static final int STATE_FILE_DOWNLOADED = 16;
 	
 	public static final int STATE_FILE_SENDING = 20;
 	public static final int STATE_FILE_SENT_FALIED = 21;

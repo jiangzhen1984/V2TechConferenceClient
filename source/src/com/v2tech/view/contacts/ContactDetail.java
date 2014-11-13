@@ -108,7 +108,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 	private EditText mBirthdayET;
 	private EditText mCellphoneET;
 	private EditText mTelephoneET;
-	private EditText mTitleET;
+	private TextView mTitleET;
 	private EditText mAddressET;
 	private TextView mDepartmentSelfTV;
 	private TextView mCompanySelfTV;
@@ -221,14 +221,14 @@ public class ContactDetail extends Activity implements OnTouchListener {
 				&& (fromActivity.equals("MessageAuthenticationActivity"))) {
 			mMoreDetailButton.setVisibility(View.INVISIBLE);
 			llAuthenticationMessageLayout.setVisibility(View.VISIBLE);
-			
+
 			String authenticationMessage = getIntent().getStringExtra(
 					"authenticationMessage");
-			if(TextUtils.isEmpty(authenticationMessage))
+			if (TextUtils.isEmpty(authenticationMessage))
 				tvAuthenticationMessage.setText(R.string.common_no_string);
 			else
 				tvAuthenticationMessage.setText(authenticationMessage);
-				
+
 			mCompanyTitleTV.setVisibility(View.INVISIBLE);
 			int state = this.getIntent().getIntExtra("state", -1);
 			switch (state) {
@@ -393,8 +393,10 @@ public class ContactDetail extends Activity implements OnTouchListener {
 		mReturnButtonTV = (TextView) findViewById(R.id.ws_common_activity_title_left_button);
 		mReturnButtonTV.setText(R.string.common_return_name);
 		mReturnButtonTV.setOnClickListener(mReturnButtonListener);
-		
-		findViewById(R.id.ws_common_activity_title_right_button).setVisibility(View.INVISIBLE);;
+
+		findViewById(R.id.ws_common_activity_title_right_button).setVisibility(
+				View.INVISIBLE);
+		;
 
 		mMoreDetailButton = findViewById(R.id.ws_common_comtactDetail_title_feature_more_button);
 		mMoreDetailButton.setOnClickListener(mMoreDetailListener);
@@ -418,7 +420,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 		mCompanyTitleTV = (TextView) findViewById(R.id.contact_user_company);
 		mSignTV = (TextView) findViewById(R.id.contact_user_detail_user_signature_tv);
 
-		mTVArr = new View[] { mItemsContainer,mCompanyTitleTV,
+		mTVArr = new View[] { mItemsContainer, mCompanyTitleTV,
 				mContactButtonContainer, mMoreDetailButton, mSignTV };
 
 		// view for self
@@ -429,12 +431,13 @@ public class ContactDetail extends Activity implements OnTouchListener {
 		mBirthdayET = (EditText) findViewById(R.id.contact_user_detail_birthday_et);
 		mCellphoneET = (EditText) findViewById(R.id.contact_user_detail_cell_phone_et);
 		mTelephoneET = (EditText) findViewById(R.id.contact_user_detail_telephone_et);
-		mTitleET = (EditText) findViewById(R.id.contact_user_detail_title_et);
+		mTitleET = (TextView) findViewById(R.id.contact_user_detail_title_et);
 		mAddressET = (EditText) findViewById(R.id.contact_user_detail_address_et);
 		mCompanySelfTV = (TextView) findViewById(R.id.contact_user_detail_company_tv);
 		mDepartmentSelfTV = (TextView) findViewById(R.id.contact_user_detail_department_tv);
 
-		mETArr = new EditText[] { mSignature, mCellphoneET, mTelephoneET, mAddressET };
+		mETArr = new EditText[] { mSignature, mCellphoneET, mTelephoneET,
+				mAddressET };
 	}
 
 	private void showUserInfo() {
@@ -473,6 +476,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 
 			for (EditText et : mETArr) {
 				et.setVisibility(View.VISIBLE);
+				mTitleET.setVisibility(View.VISIBLE);
 				// et.addTextChangedListener(tw);
 				et.setOnFocusChangeListener(hidenKeyboardListener);
 				et.setSelection(et.length());
@@ -485,6 +489,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 		} else {
 			for (EditText et : mETArr) {
 				et.setVisibility(View.GONE);
+				mTitleET.setVisibility(View.GONE);
 			}
 			for (View tv : mTVArr) {
 				if ((tv == mMoreDetailButton) || (tv == mCompanyTitleTV)) {
@@ -566,10 +571,10 @@ public class ContactDetail extends Activity implements OnTouchListener {
 		UserDeviceConfig udc = GlobalHolder.getInstance().getUserDefaultDevice(
 				mUid);
 		if (udc != null) {
-			Log.i("temptag20141030 1","udc!=null device="+udc.getDeviceID());
+			Log.i("temptag20141030 1", "udc!=null device=" + udc.getDeviceID());
 			iv.putExtra("device", udc.getDeviceID());
 		} else {
-			Log.i("temptag20141030 1","udc=null device=null");
+			Log.i("temptag20141030 1", "udc=null device=null");
 			iv.putExtra("device", "");
 		}
 
@@ -813,14 +818,14 @@ public class ContactDetail extends Activity implements OnTouchListener {
 				return;
 			}
 			if (mVideoCallButtonEnable) {
-				mVideoCallButtonEnable=false;
+				mVideoCallButtonEnable = false;
 				startVideoCall();
 			}
 			lh.postDelayed(new Runnable() {
 
 				@Override
 				public void run() {
-					mVideoCallButtonEnable=true;
+					mVideoCallButtonEnable = true;
 				}
 			}, 1000);
 		}
@@ -988,8 +993,8 @@ public class ContactDetail extends Activity implements OnTouchListener {
 			switch (msg.what) {
 			case UPDATE_USER_INFO:
 				gatherUserData();
-				us.updateUser(u, new MessageListener(this, UPDATE_USER_INFO_DONE,
-						null));
+				us.updateUser(u, new MessageListener(this,
+						UPDATE_USER_INFO_DONE, null));
 				isUpdating = false;
 				break;
 			case UPDATE_USER_INFO_DONE:

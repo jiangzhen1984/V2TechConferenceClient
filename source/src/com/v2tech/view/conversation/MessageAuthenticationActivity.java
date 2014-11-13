@@ -304,6 +304,7 @@ public class MessageAuthenticationActivity extends Activity {
 		if (!isFriendAuthentication && !isGroupInDeleteMode) {
 			isGroupInDeleteMode = true;
 			mMessageList.get(position).showLeftDeleteButton = true;
+			tvMessageBack.setVisibility(View.INVISIBLE);
 			tvCompleteRight.setVisibility(View.VISIBLE);
 			groupAdapter.notifyDataSetChanged();
 			rbGroupAuthentication.setEnabled(false);
@@ -323,6 +324,7 @@ public class MessageAuthenticationActivity extends Activity {
 
 		if (!isFriendAuthentication && isGroupInDeleteMode) {
 			isGroupInDeleteMode = false;
+			tvMessageBack.setVisibility(View.VISIBLE);
 			tvCompleteRight.setVisibility(View.GONE);
 			groupAdapter.notifyDataSetChanged();
 			rbGroupAuthentication.setEnabled(true);
@@ -485,11 +487,6 @@ public class MessageAuthenticationActivity extends Activity {
 
 	/**
 	 * 通知ConversationTabFragment 更新会话列表
-	 * 
-	 * @param isFresh
-	 *            false msgID为null，但需要刷新会话列表；ture 正常刷新
-	 * @param msgID
-	 *            最新消息ID
 	 */
 	private void notificateConversationUpdate() {
 
@@ -1012,7 +1009,7 @@ public class MessageAuthenticationActivity extends Activity {
 			} else if (vqac.getQualState() == QualificationState.BE_REJECT) {
 				item.mRes.setVisibility(View.GONE);
 				item.mAcceptButton.setVisibility(View.GONE);
-				item.mContentTV.setText("对方拒绝加入"
+				item.mContentTV.setText("拒绝加入"
 						+ vqac.getCrowdGroup().getName() + "群");
 			} else if (vqac.getQualState() == QualificationState.BE_ACCEPTED) {
 				item.mRes.setVisibility(View.GONE);
@@ -1277,26 +1274,23 @@ public class MessageAuthenticationActivity extends Activity {
 		public void handleMessage(Message msg) {
 			switch (msg.what) {
 			case ACCEPT_INVITATION_DONE:
-				if (ProgressUtils.dialog.isShowing()) {
-					ProgressUtils.showNormalWithHintProgress(mContext, false);
-					JNIResponse jni = (JNIResponse) msg.obj;
-					CrowdGroup crowd = (CrowdGroup) jni.callerObject;
-					handleAcceptDone(Type.CROWD_INVITATION, crowd.getmGId(),
-							crowd.getOwnerUser().getmUserId());
-				} else
-					return;
+                JNIResponse jni = (JNIResponse) msg.obj;
+                if(jni.getResult().ordinal() == JNIResponse.Result.SUCCESS.ordinal()){
+                    CrowdGroup crowd = (CrowdGroup) jni.callerObject;
+                    handleAcceptDone(Type.CROWD_INVITATION, crowd.getmGId(),
+                            crowd.getOwnerUser().getmUserId());
+                }
 				break;
 			case ACCEPT_APPLY_DONE:
-				if (ProgressUtils.dialog.isShowing()) {
-					ProgressUtils.showNormalWithHintProgress(mContext, false);
-					JNIResponse jni = (JNIResponse) msg.obj;
-					GroupAddUserJNIObject obj = (GroupAddUserJNIObject) jni.resObj;
-					handleAcceptDone(Type.CROWD_APPLICATION, obj.getGroupID(),
-							obj.getUserID());
-				} else
-					return;
+                JNIResponse applyJni = (JNIResponse) msg.obj;
+                if(applyJni.getResult().ordinal() == JNIResponse.Result.SUCCESS.ordinal()){
+                    GroupAddUserJNIObject obj = (GroupAddUserJNIObject) applyJni.resObj;
+                    handleAcceptDone(Type.CROWD_APPLICATION, obj.getGroupID(),
+                            obj.getUserID());
+                }
 				break;
 			}
+            ProgressUtils.showNormalWithHintProgress(mContext, false);
 		}
 
 	};

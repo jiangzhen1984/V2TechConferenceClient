@@ -35,8 +35,9 @@ import com.v2tech.db.V2techSearchContentProvider;
 import com.v2tech.service.ChatService;
 import com.v2tech.service.FileOperationEnum;
 import com.v2tech.util.Notificator;
-import com.v2tech.view.conversation.ConversationUpdateFileState;
-import com.v2tech.view.conversation.ConversationUpdateFileState.FileStateInterface;
+import com.v2tech.view.conversation.CommonCallBack;
+import com.v2tech.view.conversation.CommonCallBack.CommonUpdateConversationStateInterface;
+import com.v2tech.view.conversation.CommonCallBack.CommonUpdateFileStateInterface;
 import com.v2tech.view.conversation.MessageBuilder;
 import com.v2tech.view.receiver.HeadSetPlugReceiver;
 import com.v2tech.view.widget.CommonAdapter.CommonAdapterItemWrapper;
@@ -49,7 +50,7 @@ import com.v2tech.vo.VMessageAbstractItem;
 import com.v2tech.vo.VMessageFileItem;
 
 public class MainActivity extends FragmentActivity implements
-		NotificationListener , FileStateInterface{
+		NotificationListener , CommonUpdateFileStateInterface{
 
 	private Context mContext;
 	private boolean exitedFlag = false;
@@ -158,7 +159,7 @@ public class MainActivity extends FragmentActivity implements
 		initReceiver();
 		// Start animation
 		this.overridePendingTransition(R.animator.left_in, R.animator.left_out);
-		ConversationUpdateFileState.getInstance().setFileStateInterface(this);
+		CommonCallBack.getInstance().setFileStateInterface(this);
 		messageArray = new ArrayList<CommonAdapterItemWrapper>();
 	}
 
@@ -556,5 +557,4 @@ public class MainActivity extends FragmentActivity implements
 			}
 		}
 	}
-
 }

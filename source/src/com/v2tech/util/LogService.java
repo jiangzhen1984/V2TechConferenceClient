@@ -173,7 +173,6 @@ public class LogService extends Service implements Thread.UncaughtExceptionHandl
 		V2Log.d(TAG, "Log Service is started successfully !");
 		return Service.START_REDELIVER_INTENT;
 	}
-
 	private void init() {
 		CURR_LOG_TYPE = getCurrLogType();
 		// --/data/data/包名/crash/xxx.log
@@ -207,7 +206,7 @@ public class LogService extends Service implements Thread.UncaughtExceptionHandl
 					writer = new OutputStreamWriter(new FileOutputStream(
 							LOG_SERVICE_LOG_PATH, true));
 				} catch (Exception e) {
-					V2Log.e(TAG, e.getMessage(), e);
+					e.printStackTrace();
 				}
 				recordLogServiceLog("");
 				recordLogServiceLog("========================Halving Line========================");
@@ -217,10 +216,6 @@ public class LogService extends Service implements Thread.UncaughtExceptionHandl
 				V2Log.e(TAG, "Successfully start record service log !");	
 			}
 			
-			public boolean checkDirExist(){
-				File file = new File(LOG_SERVICE_LOG_DIR);
-				return file.exists();
-			}
 		}).start();
 		
 		PowerManager pm = (PowerManager) getApplicationContext()
@@ -232,6 +227,11 @@ public class LogService extends Service implements Thread.UncaughtExceptionHandl
         Thread.setDefaultUncaughtExceptionHandler(this);
 
         V2Log.d(TAG, "LogService onCreate");
+	}
+	
+	public boolean checkDirExist(){
+		File file = new File(LOG_SERVICE_LOG_DIR);
+		return file.exists();
 	}
 
 	private void register() {
@@ -972,26 +972,29 @@ public class LogService extends Service implements Thread.UncaughtExceptionHandl
 		if (CURR_LOG_TYPE == SDCARD_TYPE) {
 			try {
 				file = new File(LOG_PATH_SDCARD_DIR);
-				if (!file.isDirectory() || !file.exists()) {
-					file.mkdirs();
-					if(!file.exists()){
-						V2Log.e(TAG, "create crash dir again!");
-						file.mkdirs();
+				if (!file.exists()) {
+					boolean isCreated = file.mkdir();
+					if(!isCreated){
+						V2Log.e(TAG, "create sdcard crash dir failed!");
 					}
 				}
 			} catch (Exception e) {
+				e.printStackTrace();
 				V2Log.e(TAG, e.getMessage(), e);
 				recordLogServiceLog("create log file failed , dir is not created successful");
 			}
 		} else {
 			file = new File(LOG_PATH_MEMORY_DIR);
-			if (!file.isDirectory() || !file.exists()) {
+			if (!file.exists()) {
 				try {
 					if(!file.exists()){
-						V2Log.e(TAG, "create crash dir again!");
-						file.mkdirs();
+						boolean isCreated = file.mkdir();
+						if(!isCreated){
+							V2Log.e(TAG, "create memory crash dir failed!");
+						}
 					}
 				} catch (Exception e) {
+					e.printStackTrace();
 					V2Log.e(TAG, e.getMessage(), e);
 					recordLogServiceLog("create log file failed , dir is not created successful");
 				}

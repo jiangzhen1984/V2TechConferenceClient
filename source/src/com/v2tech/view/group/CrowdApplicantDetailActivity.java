@@ -260,11 +260,10 @@ public class CrowdApplicantDetailActivity extends Activity {
 		public void handleMessage(Message msg) {
 			switch (msg.what) {
 			case ACCEPT_INVITATION_DONE:
-				if (ProgressUtils.dialog.isShowing()) {
-					ProgressUtils.showNormalWithHintProgress(mContext, false);
-					handleAcceptDone();
-				} else
-					return;
+                JNIResponse jni = (JNIResponse) msg.obj;
+                if(jni.getResult().ordinal() == JNIResponse.Result.SUCCESS.ordinal()){
+                    handleAcceptDone();
+                }
 				break;
 			case REFUSE_INVITATION_DONE:
 //				handleDeclineDone();
@@ -272,6 +271,7 @@ public class CrowdApplicantDetailActivity extends Activity {
 				break;
 
 			}
+            ProgressUtils.showNormalWithHintProgress(mContext, false);
 		}
 	};
 

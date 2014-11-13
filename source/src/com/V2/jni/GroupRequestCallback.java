@@ -155,7 +155,6 @@ public interface GroupRequestCallback {
 	
 	/**
 	 * this funcation was called when be invited user refused to join group
-	 * @deprecated never called
 	 * @param groupType
 	 * @param nGroupID
 	 * @param nUserID

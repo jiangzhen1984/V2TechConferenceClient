@@ -2,53 +2,68 @@ package com.v2tech.vo;
 
 import java.util.UUID;
 
+import android.text.TextUtils;
+
 import com.V2.jni.util.V2Log;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.util.GlobalConfig;
 
 public class VMessageAudioItem extends VMessageAbstractItem {
 
-	private String extension;
 	private String audioFilePath;
+	private String extension;
 	private int seconds;
 	private boolean isPlaying;
+	private int readState;
 
-	public VMessageAudioItem(VMessage vm, String uuid, String extension,
-			String audioFilePath, int seconds) {
-		super(vm);
-		this.uuid = uuid;
-		this.extension = extension;
-		this.audioFilePath = audioFilePath;
-		this.seconds = seconds;
-		this.type = ITEM_TYPE_AUDIO;
+    /**
+     * XmlParser used
+     * @param vm
+     * @param uuid
+     * @param extension
+     * @param seconds
+     */
+    public VMessageAudioItem(VMessage vm, String uuid, String extension, int seconds) {
+		this(vm , uuid , null , extension , seconds , -1);
 	}
+
+    /**
+     * MessageBuilder buildAudioMessage used
+     * @param vm
+     * @param uuid
+     * @param audioFilePath
+     * @param seconds
+     * @param readState
+     */
+    public VMessageAudioItem(VMessage vm, String uuid , String audioFilePath, int seconds , int readState) {
+        this(vm , uuid , audioFilePath , null , seconds , readState);
+    }
 	
-	public VMessageAudioItem(VMessage vm, String uuid, String extension, int seconds) {
+	public VMessageAudioItem(VMessage vm, String uuid , String audioFilePath , String extension, int seconds, 
+			int readState) {
 		super(vm);
 		this.uuid = uuid;
+		this.audioFilePath = audioFilePath;
 		this.extension = extension;
 		this.seconds = seconds;
+		this.readState = readState;
 		this.type = ITEM_TYPE_AUDIO;
-	}
+		
+		if(uuid == null)
+			this.uuid = UUID.randomUUID().toString();
+		
+		if(TextUtils.isEmpty(audioFilePath) && !TextUtils.isEmpty(extension))
+            this.audioFilePath = GlobalConfig.getGlobalAudioPath() + "/" + uuid + extension;
 
-	public VMessageAudioItem(VMessage vm, String audioFilePath, int seconds) {
-		super(vm);
-		this.type = ITEM_TYPE_AUDIO;
-		this.audioFilePath = audioFilePath;
-		this.seconds = seconds;
-		this.uuid = UUID.randomUUID().toString();
-		if (this.audioFilePath != null && !this.audioFilePath.isEmpty()) {
-			int start = this.audioFilePath.lastIndexOf(".");
-			if (start != -1) {
-				this.extension = this.audioFilePath.substring(start);
-			}
-		}
-
+        if(!TextUtils.isEmpty(audioFilePath) && TextUtils.isEmpty(extension)){
+            int start = this.audioFilePath.lastIndexOf(".");
+            if (start != -1) {
+                this.extension = this.audioFilePath.substring(start);
+            }
+        }
 	}
 
 	public String getAudioFilePath() {
-		if (audioFilePath == null && extension != null)
-			return GlobalConfig.getGlobalAudioPath() + "/" + uuid + extension;
 		return audioFilePath;
 	}
 
@@ -68,6 +83,13 @@ public class VMessageAudioItem extends VMessageAbstractItem {
 		this.isPlaying = isPlaying;
 	}
 
+    public int getReadState() {
+        return readState;
+    }
+
+    public void setReadState(int readState) {
+        this.readState = readState;
+    }
 	/**
 	 */
 	public String toXmlItem() {

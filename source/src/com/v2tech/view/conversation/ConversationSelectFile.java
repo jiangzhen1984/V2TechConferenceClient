@@ -417,13 +417,16 @@ public class ConversationSelectFile extends Activity {
 	 */
 	private void updateFileItems(String path) {
 
-		if (mFileLists == null) {
+		if (mFileLists == null) 
 			mFileLists = new ArrayList<FileInfoBean>();
-			mFolderLists = new ArrayList<FileInfoBean>();
-		} else {
+		else
 			mFileLists.clear();
+				
+		if(mFolderLists == null)
+			mFolderLists = new ArrayList<FileInfoBean>();
+		else
 			mFolderLists.clear();
-		}
+		
 
 		File[] files = folderScan(path);
 		if (files == null) {

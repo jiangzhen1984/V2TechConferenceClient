@@ -13,6 +13,8 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserFactory;
 
 import android.text.TextUtils;
 
@@ -20,6 +22,8 @@ import com.V2.jni.V2GlobalEnum;
 import com.V2.jni.ind.FileJNIObject;
 import com.V2.jni.ind.V2Group;
 import com.V2.jni.ind.V2User;
+import com.v2tech.util.EscapedcharactersProcessing;
+import com.v2tech.util.XmlParser;
 
 public class XmlAttributeExtractor {
 
@@ -163,7 +167,12 @@ public class XmlAttributeExtractor {
 	}
 
 	public static List<V2Group> parseCrowd(String xml) {
+		xml = EscapedcharactersProcessing.convertAmp(xml);
 		Document doc = buildDocument(xml);
+		if(doc == null){
+			V2Log.e("XmlAttributeExtractor parseCrowd --> parse xml failed...get Document is null...xml is : " + xml);
+			return null;
+		}
 		List<V2Group> listCrowd = new ArrayList<V2Group>();
 		NodeList crowdList = doc.getElementsByTagName("crowd");
 		Element crowdElement;
@@ -188,7 +197,11 @@ public class XmlAttributeExtractor {
 						+ crowdElement.getAttribute("id"));
 			long gid = Long.parseLong(crowdElement
 					.getAttribute("id"));
-			V2Group crowd = new V2Group(gid, crowdElement.getAttribute("name"),
+			
+			String crowdName = crowdElement.getAttribute("name");
+			crowdName = EscapedcharactersProcessing.reverse(crowdName);
+			
+			V2Group crowd = new V2Group(gid, crowdName,
 					V2Group.TYPE_CROWD, creator);
 			crowd.brief = crowdElement.getAttribute("summary");
 			crowd.announce = crowdElement.getAttribute("announcement");

@@ -13,12 +13,6 @@ import com.v2tech.service.GlobalHolder;
 
 public class VMessage {
 	
-	
-	public static final int STATE_UNREAD = 0 ;
-	public static final int STATE_READED = 1 ;
-	
-	public static final int STATE_SENT_FAILED = 1 ;
-
 	private static DateFormat sfF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss",
 			Locale.getDefault());
 
@@ -72,8 +66,8 @@ public class VMessage {
 		this.mToUser = toUser;
 		this.mDate = date ;
 		this.mUUID = uuid;
-		mMsgCode = groupType;
-		readState = STATE_READED;
+		this.mMsgCode = groupType;
+		this.readState = VMessageAbstractItem.STATE_READED;
 
 		itemList = new ArrayList<VMessageAbstractItem>();
 	}

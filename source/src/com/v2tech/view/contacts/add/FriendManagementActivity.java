@@ -150,7 +150,7 @@ public class FriendManagementActivity extends Activity {
 							AddFriendHistroysHandler
 									.addOtherNeedAuthentication(
 											getApplicationContext(),
-											detailUser, verificationInfo);
+											detailUser, verificationInfo , true);
 							contactService.addContact(new FriendGroup(
 									selectGroupID, ""), detailUser,
 									verificationInfo, commentNameET.getText()

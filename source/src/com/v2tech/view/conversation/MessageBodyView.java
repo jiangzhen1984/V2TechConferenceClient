@@ -317,7 +317,7 @@ public class MessageBodyView extends LinearLayout {
 			return;
 		}
 
-		if (mMsg.getState() == VMessage.STATE_SENT_FAILED) {
+		if (mMsg.getState() == VMessageAbstractItem.STATE_SENT_FALIED) {
 			failedIcon.setVisibility(View.VISIBLE);
 		}
 
@@ -397,14 +397,15 @@ public class MessageBodyView extends LinearLayout {
 	 */
 	private void populateAudioMessage(List<VMessageAudioItem> audioItems) {
 		final VMessageAudioItem item = audioItems.get(0);
-		if (item.getState() == VMessageAbstractItem.STATE_UNREAD)
+		if (item.getReadState() == VMessageAbstractItem.STATE_UNREAD)
 			unReadIcon.setVisibility(View.VISIBLE);
 		else
 			unReadIcon.setVisibility(View.INVISIBLE);
 
-		if (item.getState() == VMessageAbstractItem.STATE_SENT_FALIED) {
+		if (item.getState() == VMessageAbstractItem.STATE_SENT_FALIED)
 			failedIcon.setVisibility(View.VISIBLE);
-		}
+		else
+            failedIcon.setVisibility(View.INVISIBLE);
 
 		seconds.setVisibility(View.VISIBLE);
 		seconds.setText(item.getSeconds() + "''");
@@ -798,26 +799,28 @@ public class MessageBodyView extends LinearLayout {
 					.setImageResource(R.drawable.message_file_download_button);
 			showProgressLayout = true;
 		} else if (vfi.getState() == VMessageAbstractItem.STATE_FILE_SENT_FALIED) {
-			strState = getContext().getResources()
-					.getText(R.string.contact_message_file_item_sent_failed)
-					.toString();
+            // 区分上传与发送
+            if (vfi.getVm().getMsgCode() == V2GlobalEnum.GROUP_TYPE_CROWD)
+                strState = getContext()
+                        .getResources()
+                        .getText(
+                                R.string.contact_message_file_item_upload_failed)
+                        .toString();
+            else
+                strState = getContext()
+                        .getResources()
+                        .getText(
+                                R.string.contact_message_file_item_download_failed)
+                        .toString();
 			// Show failed icon
 			failedIcon.setVisibility(View.VISIBLE);
 			actionButton.setVisibility(View.GONE);
 		} else if (vfi.getState() == VMessageAbstractItem.STATE_FILE_DOWNLOADED_FALIED) {
-			// 区分上传与发送
-			if (vfi.getVm().getMsgCode() == V2GlobalEnum.GROUP_TYPE_CROWD)
-				strState = getContext()
-						.getResources()
-						.getText(
-								R.string.contact_message_file_item_upload_failed)
-						.toString();
-			else
-				strState = getContext()
-						.getResources()
-						.getText(
-								R.string.contact_message_file_item_download_failed)
-						.toString();
+            strState = getContext()
+                    .getResources()
+                    .getText(
+                            R.string.contact_message_file_item_download_failed)
+                    .toString();
 			// Show failed icon
 			failedIcon.setVisibility(View.VISIBLE);
 			actionButton.setVisibility(View.GONE);

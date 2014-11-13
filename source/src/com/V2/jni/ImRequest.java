@@ -177,7 +177,7 @@ public class ImRequest {
 	 * 
 	 * @param nUserID
 	 *            user ID
-	 * @param eUEType
+	 * @param nType
 	 *            device type of user logged in
 	 * @param nStatus
 	 *            <ul>

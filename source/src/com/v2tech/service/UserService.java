@@ -16,6 +16,9 @@ import com.v2tech.util.EscapedcharactersProcessing;
 import com.v2tech.util.GlobalConfig;
 import com.v2tech.vo.User;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 public class UserService extends AbstractHandler {
 
 	// 此处的消息类型只与AbstractHandler的REQUEST_TIME_OUT消息并列。
@@ -40,8 +43,8 @@ public class UserService extends AbstractHandler {
 	 *            user mail
 	 * @param passwd
 	 *            password
-	 * @param message
-	 *            callback message Message.obj is {@link AsynResult}
+	 * @param caller
+	 *            callback message Message.obj is {@link MessageListener}
 	 */
 	public void login(String mail, String passwd, MessageListener caller) {
 		initTimeoutMessage(JNI_REQUEST_LOG_IN, DEFAULT_TIME_OUT_SECS, caller);
@@ -99,7 +102,9 @@ public class UserService extends AbstractHandler {
 			// 获取系统时间
 			GlobalConfig.LOCAL_TIME = System.currentTimeMillis();
 			GlobalConfig.SERVER_TIME = serverTime;
-			V2Log.d("get server time ：" + GlobalConfig.SERVER_TIME);
+            SimpleDateFormat fromat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            String date = fromat.format(new Date(GlobalConfig.SERVER_TIME * 1000));
+			V2Log.d("get server time ：" + date);
 			RequestLogInResponse.Result res = RequestLogInResponse.Result
 					.fromInt(nResult);
 			Message m = Message.obtain(handler, JNI_REQUEST_LOG_IN,

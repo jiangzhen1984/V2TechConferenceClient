@@ -56,6 +56,25 @@ public class EscapedcharactersProcessing {
 
 		return buf.toString();
 	}
+	
+	public static String convertAmp(String str) {
+		if (str == null) {
+			return null;
+		}
+
+		StringBuffer buf = new StringBuffer();
+		for (int i = 0; i < str.length(); i++) {
+			char c = str.charAt(i);
+			switch (c) {
+			case '&':
+				buf.append("&amp;");
+				break;
+			default:
+				buf.append(c);
+			}
+		}
+		return buf.toString();
+	}
 
 	public static String reverse(String str) {
 		

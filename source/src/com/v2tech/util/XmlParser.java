@@ -17,6 +17,7 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import com.V2.jni.util.V2Log;
+import com.v2tech.service.GlobalHolder;
 import com.v2tech.vo.V2Doc;
 import com.v2tech.vo.V2Doc.Page;
 import com.v2tech.vo.V2Shape;
@@ -145,6 +146,7 @@ public class XmlParser {
 						}
 						String fileExt = msgEl.getAttribute("FileExt");
 						String seconds = msgEl.getAttribute("Seconds");
+
 						VMessageAudioItem vii = new VMessageAudioItem(vm, uuid,
 								fileExt, Integer.valueOf(seconds));
 						vii.setNewLine(isNewLine);
@@ -227,10 +229,12 @@ public class XmlParser {
 					V2Log.e("Invalid uuid ");
 					continue;
 				}
+
 				VMessageAudioItem vii = new VMessageAudioItem(vm, uuid,
-						audioItemEl.getAttribute("FileExt"), null,
+						audioItemEl.getAttribute("FileExt"),
 						Integer.parseInt(audioItemEl.getAttribute("Seconds")));
 				vii.setNewLine(true);
+                vii.setReadState(VMessageAbstractItem.STATE_UNREAD);
 			}
 
 		} catch (Exception e) {

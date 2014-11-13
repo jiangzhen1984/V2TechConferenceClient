@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -1072,20 +1073,70 @@ public class MessageLoader {
 	 */
 	public static int updateChatMessageState(Context context, VMessage vm) {
 
-		if (vm == null)
+		if (vm == null){
+			V2Log.e(TAG, "updateChatMessageState --> get VMessage Object is null...please check it");
 			return -1;
+		}
 
 		DataBaseContext mContext = new DataBaseContext(context);
 		ContentValues values = new ContentValues();
+		ContentResolver contentResolver = mContext.getContentResolver();
 		values.put(
 				ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_TRANSTATE,
 				vm.getState());
 		String where = ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_ID
 				+ "= ?";
 		String[] selectionArgs = new String[] { vm.getUUID() };
-		return mContext.getContentResolver().update(
+		contentResolver.update(
 				ContentDescriptor.HistoriesMessage.CONTENT_URI, values, where,
 				selectionArgs);
+		
+		List<VMessageAbstractItem> items = vm.getItems();
+		if(items == null || items.size() <= 0){
+			V2Log.e(TAG, "updateChatMessageState --> get VMessageAbstractItem collection failed...is null");
+			return -1;
+		}
+		
+		for (int j = 0; j < items.size(); j++) {
+			VMessageAbstractItem item = items.get(j);
+			values.clear();
+			selectionArgs = new String[] { item.getUuid() };
+			switch (item.getType()) {
+			case VMessageAbstractItem.ITEM_TYPE_AUDIO:
+				values.put(
+						ContentDescriptor.HistoriesAudios.Cols.HISTORY_AUDIO_SEND_STATE,
+						item.getState());
+				where = ContentDescriptor.HistoriesAudios.Cols.HISTORY_AUDIO_ID
+				+ "= ?";
+				contentResolver.update(
+						ContentDescriptor.HistoriesAudios.CONTENT_URI, values, where,
+						selectionArgs);
+				break;
+			case VMessageAbstractItem.ITEM_TYPE_FILE:
+				values.put(
+						ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_SEND_STATE,
+						item.getState());
+				where = ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_ID
+				+ "= ?";
+				contentResolver.update(
+						ContentDescriptor.HistoriesFiles.CONTENT_URI, values, where,
+						selectionArgs);
+				break;
+			case VMessageAbstractItem.ITEM_TYPE_IMAGE:
+				values.put(
+						ContentDescriptor.HistoriesGraphic.Cols.HISTORY_GRAPHIC_TRANSTATE,
+						item.getState());
+				where = ContentDescriptor.HistoriesGraphic.Cols.HISTORY_GRAPHIC_ID
+				+ "= ?";
+				contentResolver.update(
+						ContentDescriptor.HistoriesGraphic.CONTENT_URI, values, where,
+						selectionArgs);
+				break;
+			default:
+//				throw new RuntimeException("updateChatMessageState --> invalid VMessageAbstractItem type , type is : " + item.getType());
+			}
+		}
+		return 1;
 	}
 
 	/**
@@ -1153,14 +1204,12 @@ public class MessageLoader {
 				selectionArgs);
 	}
 
-	/**
-	 * update the given audio message read state...
-	 * 
-	 * @param context
-	 * @param vm
-	 * @param fileItem
-	 * @return
-	 */
+    /**
+     * update the given audio message read state...
+     * @param context
+     * @param fileItem
+     * @return
+     */
 	public static int updateFileItemState(Context context,
 			VMessageFileItem fileItem) {
 
@@ -1699,7 +1748,11 @@ public class MessageLoader {
 				String filePath = mCur
 						.getString(mCur
 								.getColumnIndex(ContentDescriptor.HistoriesAudios.Cols.HISTORY_AUDIO_PATH));
-				item.setState(readState);
+                int transState = mCur
+						.getInt(mCur
+								.getColumnIndex(ContentDescriptor.HistoriesAudios.Cols.HISTORY_AUDIO_SEND_STATE));
+                item.setReadState(readState);
+                item.setState(transState);
 				item.setAudioFilePath(filePath);
 			}
 		}

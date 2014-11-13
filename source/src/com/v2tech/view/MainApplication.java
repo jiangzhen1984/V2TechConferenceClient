@@ -71,6 +71,7 @@ public class MainApplication extends Application {
 //		if (!V2Log.isDebuggable) {
 //			CrashHandler crashHandler = CrashHandler.getInstance();
 //			crashHandler.init(getApplicationContext());
+//			new LogcatThread().start();
 //		}
 		SharedPreferences sf = getSharedPreferences("config",
 				Context.MODE_PRIVATE);
@@ -126,14 +127,8 @@ public class MainApplication extends Application {
 		// Start deamon service
 		getApplicationContext().startService(
 				new Intent(getApplicationContext(), JNIService.class));
-
-		if (!V2Log.isDebuggable) {
-//			new LogcatThread().start();
-//			Intent service = new Intent(getApplicationContext() , LogService.class);
-//			getApplicationContext().startService(service);
-            getApplicationContext().startService(
-                    new Intent(getApplicationContext(), LogService.class));
-		}
+		getApplicationContext().startService(
+                new Intent(getApplicationContext(), LogService.class));
 
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
 			this.registerActivityLifecycleCallbacks(new LocalActivityLifecycleCallBack());

@@ -127,7 +127,7 @@ public class AddFriendHistroysHandler {
 	// 参看becomeFriendHanler---------------------------------------
 	public static void addOtherNoNeedAuthentication(Context context,
 			User remoteUser) {
-		addOtherNeedAuthentication(context, remoteUser, null);
+		addOtherNeedAuthentication(context, remoteUser, null , false);
 	}
 
 	// 6
@@ -136,7 +136,7 @@ public class AddFriendHistroysHandler {
 	// 别人加我已未处理的也全删。
 	// 加一条我加别人未处理记录
 	public static void addOtherNeedAuthentication(Context context,
-			User remoteUser, String applyReason) {
+			User remoteUser, String applyReason , boolean isRead) {
 		String sql = null;
 
 		if (remoteUser == null) {
@@ -169,7 +169,10 @@ public class AddFriendHistroysHandler {
 		node.applyReason = applyReason;
 		node.refuseReason = null;
 		node.addState = 0;
-		node.readState = 0;
+		if(!isRead)
+			node.readState = 0;
+		else
+			node.readState = 1;
 		node.saveDate = System.currentTimeMillis() / 1000;
 
 		sql = "insert into "
