@@ -50,7 +50,7 @@ public class CrowdInvitationActivity extends Activity {
 	private TextView mMembersTV;
 
 	private View mReturnButton;
-	private View mAcceptButton;
+	private TextView mAcceptButton;
 	private View mDeclineButton;
 	private View mButtonLayout;
 	private View mNotesLayout;
@@ -84,7 +84,7 @@ public class CrowdInvitationActivity extends Activity {
 		mAnnounceTV = (TextView) findViewById(R.id.crowd_invitation_announcement);
 		mMembersTV = (TextView) findViewById(R.id.crowd_invitation_members);
 		
-		mAcceptButton = findViewById(R.id.crowd_invitation_accept_button);
+		mAcceptButton = (TextView) findViewById(R.id.crowd_invitation_accept_button);
 		mAcceptButton.setOnClickListener(mAcceptButtonListener);
 		mDeclineButton = findViewById(R.id.crowd_invitation_decline_button);
 		mDeclineButton.setOnClickListener(mDeclineButtonListener);
@@ -170,23 +170,32 @@ public class CrowdInvitationActivity extends Activity {
 			mTitleName.setText(R.string.crowd_invitation_titile);
 			if (vq.getQualState() == VMessageQualification.QualificationState.ACCEPTED) {
 				mButtonLayout.setVisibility(View.GONE);
-				mNotesLayout.setVisibility(View.VISIBLE);
-				mSendMsgButton.setVisibility(View.VISIBLE);
-				mNotesTV.setText(R.string.crowd_invitation_accept_notes);
-				mAcceptedLy.setVisibility(View.VISIBLE);
-				
+                mAcceptedLy.setVisibility(View.GONE);
+
+                mNotesLayout.setVisibility(View.VISIBLE);
+                mNotesTV.setText(R.string.crowd_invitation_accept_notes);
+                mSendMsgButton.setVisibility(View.VISIBLE);
+
 				Group group = GlobalHolder.getInstance().getGroupById(V2GlobalEnum.GROUP_TYPE_CROWD , crowd.getId());
 				if(group != null && group.getUsers() != null)
 					mMembersTV.setText(String.valueOf(group.getUsers().size()));
 			} else if (vq.getQualState() == VMessageQualification.QualificationState.REJECT) {
 				mButtonLayout.setVisibility(View.GONE);
-				mNotesLayout.setVisibility(View.VISIBLE);
+                mSendMsgButton.setVisibility(View.GONE);
+                mAcceptedLy.setVisibility(View.GONE);
+
+                mNotesLayout.setVisibility(View.VISIBLE);
+                mNotesTV.setText(R.string.crowd_invitation_reject_notes);
+			} else if (vq.getQualState() == QualificationState.INVALID) {
+                mButtonLayout.setVisibility(View.GONE);
+                mSendMsgButton.setVisibility(View.GONE);
+                mAcceptedLy.setVisibility(View.GONE);
+
+                mNotesLayout.setVisibility(View.VISIBLE);
+                mNotesTV.setText(R.string.crowd_invitation_invalid_notes);
+            } else {
 				mSendMsgButton.setVisibility(View.GONE);
-				mNotesTV.setText(R.string.crowd_invitation_reject_notes);
-				mAcceptedLy.setVisibility(View.GONE);
-			} else {
-				mSendMsgButton.setVisibility(View.GONE);
-				mButtonLayout.setVisibility(View.VISIBLE);
+				mButtonLayout.setVisibility(View.GONE);
 				mAcceptedLy.setVisibility(View.GONE);
 			}
 			mSendMsgButton
@@ -226,14 +235,14 @@ public class CrowdInvitationActivity extends Activity {
 					return;
 				}
 				mState = State.UPDATING;
-				VMessageQualification message = MessageBuilder.queryQualMessageById(mContext, vq.getId());
-				if(message.getQualState().intValue() != vq.getQualState().intValue())
-					handleAcceptDone();
-				else{
-					service.acceptInvitation(crowd, new MessageListener(mLocalHandler,
-							ACCEPT_INVITATION_DONE, null));
-					ProgressUtils.showNormalWithHintProgress(mContext, true).initTimeOut();
-				}
+                VMessageQualification message = MessageBuilder.queryQualMessageById(mContext, vq.getId());
+                if (message.getQualState().intValue() != vq.getQualState().intValue())
+                    handleAcceptDone();
+                else {
+                    service.acceptInvitation(crowd, new MessageListener(mLocalHandler,
+                            ACCEPT_INVITATION_DONE, null));
+                    ProgressUtils.showNormalWithHintProgress(mContext, true).initTimeOut();
+                }
 			}
 		}
 

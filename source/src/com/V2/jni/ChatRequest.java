@@ -159,15 +159,16 @@ public class ChatRequest {
 	List<ChatText> ctL = new ArrayList<ChatText>();
 	List<ChatBinary> btL = new ArrayList<ChatBinary>();
 
-	/**
-	 * 
-	 * @param nGroupID
-	 * @param nBusinessType
-	 * @param nFromUserID
-	 * @param nTime
-	 * @param szSeqID
-	 * @param szXmlText
-	 */
+    /**
+     *
+     * @param eGroupType
+     * @param nGroupID
+     * @param nFromUserID
+     * @param nToUserID
+     * @param nTime
+     * @param szSeqID
+     * @param szXmlText
+     */
 	private void OnRecvText(int eGroupType, long nGroupID, long nFromUserID,
 			long nToUserID, long nTime, String szSeqID, String szXmlText) {
 		V2Log.d("ChatRequest UI", "OnRecvChatText ---> eGroupType :"

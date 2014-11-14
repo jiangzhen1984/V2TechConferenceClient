@@ -142,7 +142,7 @@ public class XmlAttributeExtractor {
 		}
 		
 		String name = XmlAttributeExtractor.extract(sXml, "name='", "'");
-		String id = XmlAttributeExtractor.extract(sXml, "id='", "'");
+		String id = XmlAttributeExtractor.extract(sXml, " id='", "'");
 		V2Group g = new V2Group(Long.parseLong(id), name, V2GlobalEnum.GROUP_TYPE_CROWD);
 
 		String summary = XmlAttributeExtractor.extract(sXml, "summary='", "'");

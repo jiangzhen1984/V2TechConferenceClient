@@ -617,8 +617,10 @@ public class JNIService extends Service implements CommonUpdateConversationState
 		@Override
 		public void OnModifyGroupInfoCallback(V2Group group) {
 			if (group == null) {
+                V2Log.e(TAG , "OnModifyGroupInfoCallback --> update Group Infos failed...get V2Group is null!");
 				return;
 			}
+
 			if (group.type == GroupType.CONFERENCE.intValue()) {
 
 			} else if (group.type == GroupType.CHATING.intValue()) {
@@ -627,6 +629,8 @@ public class JNIService extends Service implements CommonUpdateConversationState
 				cg.setAnnouncement(group.announce);
 				cg.setBrief(group.brief);
 				cg.setAuthType(CrowdGroup.AuthType.fromInt(group.authType));
+                //update crowd group infos in globle collections
+//                GlobalHolder.getInstance().updateCrwodGroupByID(V2GlobalEnum.GROUP_TYPE_CROWD , group);
 			}
 
 			// Send broadcast
@@ -719,8 +723,20 @@ public class JNIService extends Service implements CommonUpdateConversationState
 				VMessageQualification.Type type, CrowdGroup g, User user,
 				String reason) {
 			// boolean sendBroadcast = true;
-			VMessageQualification crowdMsg = MessageBuilder
-					.queryQualMessageByCrowdId(mContext, user, g);
+            VMessageQualification crowdMsg = null;
+            if(type == Type.CROWD_APPLICATION){
+                crowdMsg = MessageBuilder
+                        .queryApplyQualMessageByUserId(user.getmUserId());
+                if(!(crowdMsg instanceof  VMessageQualificationApplicationCrowd)){
+                   MessageBuilder.deleteQualMessage(mContext , crowdMsg.getId());
+                   crowdMsg = null;
+                }
+            }
+            else{
+                crowdMsg = MessageBuilder
+                        .queryQualMessageByCrowdId(mContext, user, g);
+            }
+
 			if (crowdMsg != null) {
 				if (crowdMsg.getQualState() != VMessageQualification.QualificationState.WAITING) {
 					crowdMsg.setReadState(VMessageQualification.ReadState.UNREAD);
@@ -732,8 +748,7 @@ public class JNIService extends Service implements CommonUpdateConversationState
 					((VMessageQualificationApplicationCrowd) crowdMsg)
 							.setApplyReason(reason);
 				} else if (type == VMessageQualification.Type.CROWD_INVITATION) {
-					((VMessageQualificationInvitationCrowd) crowdMsg)
-							.setRejectReason(reason);
+                    crowdMsg.setRejectReason(reason);
 				} else {
 					throw new RuntimeException("Unkown type");
 				}
@@ -884,7 +899,51 @@ public class JNIService extends Service implements CommonUpdateConversationState
 			sendBroadcast(i);
 		}
 
-		@Override
+        @Override
+        public void OnAcceptApplyJoinGroup(V2Group group) {
+            if(group == null){
+                V2Log.e(TAG , "OnRefuseApplyJoinGroup : May receive refuse apply join message failed.. get null V2Group Object");
+                return ;
+            }
+
+            long id = MessageBuilder.updateQualicationMessageState(group.id, group.creator.uid,
+					new GroupQualicationState(Type.CROWD_INVITATION , QualificationState.BE_ACCEPTED , null));
+            if(id == -1){
+                V2Log.e(TAG , "OnRefuseApplyJoinGroup : Update Qualication Message to Database failed.. return -1 , group id is : " + group.id + " user id" +
+                        ": " + group.creator.uid);
+                return ;
+            }
+
+            Intent intent = new Intent();
+            intent.setAction(JNIService.JNI_BROADCAST_NEW_QUALIFICATION_MESSAGE);
+            intent.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
+            intent.putExtra("msgId", id);
+            sendOrderedBroadcast(intent, null);
+        }
+
+        @Override
+        public void OnRefuseApplyJoinGroup(V2Group parseSingleCrowd, String reason) {
+            if(parseSingleCrowd == null){
+                V2Log.e(TAG , "OnRefuseApplyJoinGroup : May receive refuse apply join message failed.. get null V2Group Object");
+                return ;
+            }
+
+            long id = MessageBuilder.updateQualicationMessageState(parseSingleCrowd.id, parseSingleCrowd.creator.uid,
+                    new GroupQualicationState(Type.CROWD_INVITATION , QualificationState.BE_REJECT , reason));
+            if(id == -1){
+                V2Log.e(TAG , "OnRefuseApplyJoinGroup : Update Qualication Message to Database failed.. return -1 , group id is : " + parseSingleCrowd.id + " user id" +
+                        ": " + parseSingleCrowd.creator.uid);
+                return ;
+            }
+
+            Intent intent = new Intent();
+            intent.setAction(JNIService.JNI_BROADCAST_NEW_QUALIFICATION_MESSAGE);
+            intent.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
+            intent.putExtra("msgId", id);
+            sendOrderedBroadcast(intent, null);
+        }
+
+        @Override
 		public void OnRefuseInviteJoinGroup(GroupQualicationJNIObject obj) {
 
 			if(obj == null){

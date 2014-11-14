@@ -26,8 +26,10 @@ import com.v2tech.view.PublicIntent;
 import com.v2tech.view.conversation.MessageBuilder;
 import com.v2tech.vo.Crowd;
 import com.v2tech.vo.CrowdGroup;
+import com.v2tech.vo.User;
 import com.v2tech.vo.VMessageQualification;
 import com.v2tech.vo.Group.GroupType;
+import com.v2tech.vo.VMessageQualificationInvitationCrowd;
 
 /**
  * 
@@ -101,8 +103,10 @@ public class CrowdApplicationActivity extends Activity {
 
 		CrowdGroup g = new CrowdGroup(crowd.getId(), crowd.getName(),
 				crowd.getCreator(), null);
-		vq = MessageBuilder.queryQualMessageByCrowdId(mContext, GlobalHolder
-				.getInstance().getCurrentUser(), g);
+        if(g.getOwnerUser() != null) {
+            User user = g.getOwnerUser();
+            vq = MessageBuilder.queryQualMessageByCrowdId(mContext, user, g);
+        }
 		updateView();
 
 	}
@@ -143,9 +147,25 @@ public class CrowdApplicationActivity extends Activity {
 		} else {
 			mSendButton.setVisibility(View.GONE);
 			mMessageLy.setVisibility(View.GONE);
+            mMessageLy.setVisibility(View.GONE);
 			mItemLy.setVisibility(View.VISIBLE);
-			mApplicationButton.setVisibility(View.VISIBLE);
 			mTitleTV.setText(R.string.crowd_application_title);
+            if(vq != null){
+                VMessageQualification.QualificationState state = vq.getQualState();
+                if(state == VMessageQualification.QualificationState.WAITING_FOR_APPLY){
+                    mApplicationButton.setVisibility(View.GONE);
+                    mNotesLy.setVisibility(View.VISIBLE);
+                    mNoTV.setText(R.string.crowd_application_applyed);
+                }
+                else {
+                    mApplicationButton.setVisibility(View.VISIBLE);
+                    mNotesLy.setVisibility(View.GONE);
+                }
+            }
+            else {
+                mNotesLy.setVisibility(View.GONE);
+                mApplicationButton.setVisibility(View.VISIBLE);
+            }
 
 			Animation out = AnimationUtils.loadAnimation(mContext,
 					R.animator.right_in);
@@ -174,18 +194,48 @@ public class CrowdApplicationActivity extends Activity {
 						mState = State.APPLYING;
 						service.applyCrowd(crowd, "", new MessageListener(
 								mLocalHandler, APPLY_DONE, null));
-						Toast.makeText(mContext,
-								R.string.crowd_applicant_invite_finish,
-								Toast.LENGTH_SHORT).show();
 					} else if (crowd.getAuth() == CrowdGroup.AuthType.QULIFICATION
 							.intValue()) {
 						isInApplicationMode = true;
 						updateView();
+                        if (vq != null) {
+                            vq.setReadState(VMessageQualification.ReadState.READ);
+                            vq.setQualState(VMessageQualification.QualificationState.WAITING_FOR_APPLY);
+                            MessageBuilder.updateQualicationMessage(mContext, vq);
+                        }
 					} else if (crowd.getAuth() == CrowdGroup.AuthType.NEVER
 							.intValue()) {
-						Toast.makeText(mContext,
-								R.string.crowd_applicant_invite_never,
-								Toast.LENGTH_SHORT).show();
+                        Toast.makeText(
+                                mContext,
+                                R.string.crowd_application_sent_result_successful,
+                                Toast.LENGTH_SHORT).show();
+                        mLocalHandler.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(mContext,
+                                        R.string.crowd_applicant_invite_never,
+                                        Toast.LENGTH_SHORT).show();
+                            }
+                        } , 1000);
+
+                        if (vq != null) {
+                            vq.setReadState(VMessageQualification.ReadState.READ);
+                            vq.setQualState(VMessageQualification.QualificationState.BE_REJECT);
+                            MessageBuilder.updateQualicationMessage(mContext, vq);
+                        }
+                        else{
+                            VMessageQualification quaion = MessageBuilder.queryQualMessageByCrowdId(mContext ,
+                                   crowd.getCreator().getmUserId() , crowd.getId());
+                            if(quaion == null) {
+                                CrowdGroup g = new CrowdGroup(crowd.getId(),
+                                        crowd.getName(), crowd.getCreator(), null);
+                                g.setBrief(crowd.getBrief());
+                                vq = new VMessageQualificationInvitationCrowd(g, GlobalHolder.getInstance().getCurrentUser());
+                                vq.setReadState(VMessageQualification.ReadState.READ);
+                                vq.setQualState(VMessageQualification.QualificationState.BE_REJECT);
+                                MessageBuilder.saveQualicationMessage(mContext, vq);
+                            }
+                        }
 					}
 				}
 			}
@@ -248,14 +298,31 @@ public class CrowdApplicationActivity extends Activity {
 
 					if (vq != null) {
 						vq.setReadState(VMessageQualification.ReadState.READ);
-						vq.setQualState(VMessageQualification.QualificationState.ACCEPTED);
-						MessageBuilder.updateQualicationMessage(mContext, vq);
+						vq.setQualState(VMessageQualification.QualificationState.BE_ACCEPTED);
+//						MessageBuilder.updateQualicationMessage(mContext, vq);
 					}
+//                    else{
+//                        vq = new VMessageQualificationInvitationCrowd(g , GlobalHolder.getInstance().getCurrentUser());
+//                        vq.setReadState(VMessageQualification.ReadState.READ);
+//                        vq.setQualState(VMessageQualification.QualificationState.BE_ACCEPTED);
+//                    }
+
 					if (mContext != null) {
 						Toast.makeText(
 								mContext,
 								R.string.crowd_application_sent_result_successful,
 								Toast.LENGTH_SHORT).show();
+                        if(crowd.getAuth() == CrowdGroup.AuthType.ALLOW_ALL
+                                .intValue()){
+                            mLocalHandler.postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Toast.makeText(mContext,
+                                            R.string.crowd_applicant_invite_finish,
+                                            Toast.LENGTH_SHORT).show();
+                                }
+                            } , 1000);
+                        }
 					}
 				} else if (response.getResult() == Result.FAILED) {
 

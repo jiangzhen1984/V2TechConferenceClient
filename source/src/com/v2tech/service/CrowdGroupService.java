@@ -126,11 +126,13 @@ public class CrowdGroupService extends AbstractHandler {
 				applicant.getmUserId());
 	}
 
-	/**
-	 * Decline applicant who want to join crowd
-	 * 
-	 * @param group
-	 */
+    /**
+     * Decline applicant who want to join crowd
+     * @param crowd
+     * @param applicant
+     * @param reason
+     * @param caller
+     */
 	public void refuseApplication(CrowdGroup crowd, User applicant,
 			String reason, MessageListener caller) {
 		if (!checkParamNull(caller, new Object[] { crowd, applicant })) {
@@ -176,12 +178,12 @@ public class CrowdGroupService extends AbstractHandler {
 				crowd.getCreator().getmUserId());
 	}
 
-	/**
-	 * Decline join crowd invitation
-	 * 
-	 * @param reason
-	 * @param group
-	 */
+    /**
+     * Decline join crowd invitation
+     * @param crowd
+     * @param reason
+     * @param caller
+     */
 	public void refuseInvitation(Crowd crowd, String reason, MessageListener caller) {
 		if (!checkParamNull(caller, new Object[] { crowd })) {
 			return;
@@ -226,7 +228,6 @@ public class CrowdGroupService extends AbstractHandler {
 		GroupRequest.getInstance().applyJoinGroup(
 				Group.GroupType.CHATING.intValue(), crowd.getId(),
 				additional == null ? "" : additional);
-		mPendingCrowdId = 0;
 		sendResult(caller, new JNIResponse(JNIResponse.Result.SUCCESS));
 	}
 
@@ -318,13 +319,12 @@ public class CrowdGroupService extends AbstractHandler {
 		}
 	}
 
-	/**
-	 * Remove member from crowd
-	 * 
-	 * @param crowd
-	 * @param user
-	 * @param caller
-	 */
+    /**
+     * Remove member from crowd
+     * @param crowd
+     * @param member
+     * @param caller
+     */
 	public void removeMember(CrowdGroup crowd, User member, MessageListener caller) {
 		if (!checkParamNull(caller, new Object[] { crowd, member })) {
 			return;
@@ -521,12 +521,8 @@ public class CrowdGroupService extends AbstractHandler {
 
 		@Override
 		public void OnAcceptApplyJoinGroup(V2Group group) {
-//			JNIResponse jniRes = new JNIResponse(
-//					CreateCrowdResponse.Result.SUCCESS);
-//			Message.obtain(mCallbackHandler, ACCEPT_APPLICATION_CROWD, jniRes)
-//					.sendToTarget();
-//			MessageBuilder.updateQualicationMessageState(group.id, group.creator.uid,
-//					new GroupQualicationState(Type.CROWD_APPLICATION , QualificationState.BE_ACCEPTED , null));
+            //阻止onAddGroupInfo重复去更新数据库，让JNI广播处理
+            mPendingCrowdId = 0;
 		}
 		
 		@Override
@@ -540,12 +536,12 @@ public class CrowdGroupService extends AbstractHandler {
 		@Override
 		public void OnRefuseApplyJoinGroup(V2Group parseSingleCrowd,
 				String reason) {
-			JNIResponse jniRes = new JNIResponse(
-					CreateCrowdResponse.Result.FAILED);
-			Message.obtain(mCallbackHandler, REFUSE_APPLICATION_CROWD, jniRes)
-					.sendToTarget();
-			MessageBuilder.updateQualicationMessageState(parseSingleCrowd.id, parseSingleCrowd.creator.uid,
-					new GroupQualicationState(Type.CROWD_APPLICATION , QualificationState.REJECT , reason));
+//			JNIResponse jniRes = new JNIResponse(
+//					CreateCrowdResponse.Result.FAILED);
+//			Message.obtain(mCallbackHandler, REFUSE_APPLICATION_CROWD, jniRes)
+//					.sendToTarget();
+//			MessageBuilder.updateQualicationMessageState(parseSingleCrowd.id, parseSingleCrowd.creator.uid,
+//					new GroupQualicationState(Type.CROWD_INVITATION , QualificationState.BE_REJECT , reason));
 		}
 
 		@Override

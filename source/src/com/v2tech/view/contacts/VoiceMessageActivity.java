@@ -248,13 +248,13 @@ public class VoiceMessageActivity extends Activity {
 				if(isExecuteSelectAll){
 					if(isChecked){
 						for (int i = 0; i < mListItem.size(); i++) {
-							mListItem.get(i).isCheck = isChecked;
+							mListItem.get(i).isCheck = true;
 							deleteList.put(i, mListItem.get(i));
 						}
 					}
 					else{
 						for (int i = 0; i < mListItem.size(); i++) {
-							mListItem.get(i).isCheck = isChecked;
+							mListItem.get(i).isCheck = false;
 							deleteList.remove(i);
 						}
 					}
@@ -262,9 +262,9 @@ public class VoiceMessageActivity extends Activity {
 				}
 				else{
 					
-					if(isChecked == true){
+					if(isChecked){
 						for (int i = 0; i < mListItem.size(); i++) {
-							mListItem.get(i).isCheck = isChecked;
+							mListItem.get(i).isCheck = true;
 							deleteList.put(i, mListItem.get(i));
 						}
 						adapter.notifyDataSetChanged();
@@ -328,15 +328,10 @@ public class VoiceMessageActivity extends Activity {
 		BitmapManager.getInstance().registerBitmapChangedListener(
 				this.bitmapChangedListener);
 	}
-	
-	/**
-	 * 通知ConversationTabFragment 更新会话列表
-	 * 
-	 * @param isFresh
-	 *            false msgID为null，但需要刷新会话列表；ture 正常刷新
-	 * @param msgID
-	 *            最新消息ID
-	 */
+
+    /**
+     * 通知ConversationTabFragment 更新会话列表
+     */
 	private void notificateConversationUpdate() {
 
 		Intent i = new Intent(PublicIntent.REQUEST_UPDATE_CONVERSATION);
@@ -424,13 +419,13 @@ public class VoiceMessageActivity extends Activity {
 						.getStringDate(childMessageBean.childSaveDate);
 			if(!TextUtils.isEmpty(time)){
 				if (audioVideoMessageBean.mediaType == AudioVideoMessageBean.TYPE_AUDIO)
-					holder.voiceHoldingTime.setText("[音频] " + time);
+					holder.voiceHoldingTime.setText("[语音] " + time);
 				else
 					holder.voiceHoldingTime.setText("[视频] " + time);
 			} 
 			else{
 				if (audioVideoMessageBean.mediaType == AudioVideoMessageBean.TYPE_AUDIO)
-					holder.voiceHoldingTime.setText("[音频] ");
+					holder.voiceHoldingTime.setText("[语音] ");
 				else
 					holder.voiceHoldingTime.setText("[视频] ");
 			}
@@ -551,7 +546,6 @@ public class VoiceMessageActivity extends Activity {
 			for(int i = 0 ; i < mListItem.size() ; i++) {
 				AudioVideoMessageBean target = mListItem.get(i);
 				if (target.remoteUserID == remoteID) {
-					int position = i;
 					target.holdingTime = newestMediaMessage.endDate
 							- newestMediaMessage.startDate;
 					target.mediaType = newestMediaMessage.mediaType;
@@ -574,7 +568,7 @@ public class VoiceMessageActivity extends Activity {
 					childBean.childReadState = target.readState;
 					childBean.childMediaState = target.meidaState;
 					target.mChildBeans.add(0 , childBean);
-					mListItem.remove(position);
+					mListItem.remove(i);
 					mListItem.add(0, target);
 					adapter.notifyDataSetChanged();
 					isFresh = true;

@@ -709,30 +709,32 @@ public class MessageBuilder {
 		if (crowdQuion == null) {
 			V2Log.e("MessageBuilder updateQualicationMessageState --> the VMessageQualification Object is null , Need to build"
 					+ "groupID is : " + groupID + " userID is : " + userID);
-			User applicant = GlobalHolder.getInstance().getUser(userID);
-			if (applicant == null)
-				applicant = new User(userID);
 			CrowdGroup crowdGroup = (CrowdGroup) GlobalHolder.getInstance()
 					.getGroupById(V2GlobalEnum.GROUP_TYPE_CROWD, groupID);
-			if (crowdGroup == null)
-				crowdGroup = new CrowdGroup(groupID, null, GlobalHolder
-						.getInstance().getCurrentUser());
+			if (crowdGroup == null) {
+                V2Log.e("MessageBuilder updateQualicationMessageState --> update failed... beacuser get crowdGroup"
+                        + "is null!");
+                return -1;
+            }
 
 			if (obj.qualicationType == Type.CROWD_APPLICATION) {
+                User applicant = GlobalHolder.getInstance().getUser(userID);
+                if (applicant == null)
+                    applicant = new User(userID);
 				crowdQuion = new VMessageQualificationApplicationCrowd(
 						crowdGroup, applicant);
 				((VMessageQualificationApplicationCrowd) crowdQuion)
 						.setApplyReason(obj.applyReason);
 			} else {
 				crowdQuion = new VMessageQualificationInvitationCrowd(
-						crowdGroup, applicant);
-				((VMessageQualificationInvitationCrowd) crowdQuion)
+						crowdGroup, GlobalHolder.getInstance().getCurrentUser());
+                crowdQuion
 						.setRejectReason(obj.refuseReason);
 			}
 			crowdQuion.setReadState(ReadState.UNREAD);
 			crowdQuion.setQualState(obj.state);
 			crowdQuion.setmTimestamp(new Date(GlobalConfig
-					.getGlobalServerTime()));
+                    .getGlobalServerTime()));
 			Uri uri = MessageBuilder.saveQualicationMessage(null, crowdQuion);
 			if (uri != null){
 				long id = Long.parseLong(uri.getLastPathSegment());
@@ -943,7 +945,36 @@ public class MessageBuilder {
 
 	}
 
-	/**
+    /**
+     * Query qualification of apply type message by apply user id
+     * @param userID
+     * @return
+     */
+    public static VMessageQualification queryApplyQualMessageByUserId(long userID) {
+
+        DataBaseContext mContext = new DataBaseContext(context);
+        String selection = ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_REMOTE_USER_ID
+                + "= ? ";
+        String[] selectionArgs = new String[] { String.valueOf(userID) };
+        String sortOrder = ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_SAVEDATE
+                + " desc";
+        Cursor cursor = mContext.getContentResolver().query(
+                ContentDescriptor.HistoriesCrowd.CONTENT_URI,
+                ContentDescriptor.HistoriesCrowd.Cols.ALL_CLOS, selection,
+                selectionArgs, sortOrder);
+
+        if (cursor == null || cursor.getCount() <= 0)
+            return null;
+
+        VMessageQualification msg = null;
+        if (cursor.moveToFirst()) {
+            msg = extraMsgFromCursor(cursor);
+        }
+        cursor.close();
+        return msg;
+    }
+
+    /**
 	 * Get a List Collection for qualification message from database
 	 * 
 	 * @param context

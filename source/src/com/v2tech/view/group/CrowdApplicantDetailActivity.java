@@ -133,7 +133,7 @@ public class CrowdApplicantDetailActivity extends Activity {
 			mInviteButton.setVisibility(View.GONE);
 			
 			mNotesLayout.setVisibility(View.VISIBLE);
-			mNotesTV.setText(R.string.crowd_invitation_accept_notes);
+			mNotesTV.setText(R.string.crowd_application_accepted);
 			mTitleText.setText(R.string.crowd_applicant_title);
 		} else if (msg.getQualState() == VMessageQualification.QualificationState.REJECT) {
 			mButtonLayout.setVisibility(View.GONE);
@@ -141,7 +141,7 @@ public class CrowdApplicantDetailActivity extends Activity {
 			mInviteButton.setVisibility(View.GONE);
 			
 			mNotesLayout.setVisibility(View.VISIBLE);
-			mNotesTV.setText(R.string.crowd_invitation_reject_notes);
+			mNotesTV.setText(R.string.crowd_application_rejected);
 			mTitleText.setText(R.string.crowd_applicant_title);
 		} else if(msg.getQualState() == VMessageQualification.QualificationState.BE_REJECT){
 			mButtonLayout.setVisibility(View.VISIBLE);

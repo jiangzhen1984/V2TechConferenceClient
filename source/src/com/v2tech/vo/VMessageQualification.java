@@ -53,7 +53,7 @@ public abstract class VMessageQualification {
 	}
 	
 	public enum QualificationState {
-		WAITING(0),ACCEPTED(1),REJECT(2),BE_REJECT(3),BE_ACCEPTED(4);
+		WAITING(0),ACCEPTED(1),REJECT(2),BE_REJECT(3),BE_ACCEPTED(4),INVALID(5),WAITING_FOR_APPLY(6);
 		
 		private int type;
 		private QualificationState(int type){
@@ -71,6 +71,10 @@ public abstract class VMessageQualification {
 					return BE_REJECT;
 				case 4:
 					return BE_ACCEPTED;
+				case 5:
+					return INVALID;
+				case 6:
+					return WAITING_FOR_APPLY;
 			}
 			return null;
 		}
@@ -87,14 +91,12 @@ public abstract class VMessageQualification {
 
 	protected ReadState mReadState;
 	protected QualificationState mQualState;
-	
-	
-	/**
-	 * 
-	 * @param crowd
-	 * @param invitationUser
-	 * @param beInvitatonUser
-	 */
+
+
+    /**
+     *
+     * @param type
+     */
 	protected VMessageQualification(Type type) {
 		this.mType = type;
 		this.mReadState = ReadState.UNREAD;

@@ -198,7 +198,7 @@ public class GlobalHolder {
 	public void updateGroupList(int gType, List<V2Group> list) {
 
 		for (V2Group vg : list) {
-			Group cache = mGroupHolder.get(Long.valueOf(vg.id));
+			Group cache = mGroupHolder.get(vg.id);
 			if (cache != null) {
 				continue;
 			}
@@ -244,7 +244,7 @@ public class GlobalHolder {
 			}
 
 
-			mGroupHolder.put(Long.valueOf(g.getmGId()), g);
+			mGroupHolder.put(g.getmGId(), g);
 
 			populateGroup(gType, g, vg.childs);
 		}
@@ -276,8 +276,6 @@ public class GlobalHolder {
 	}
 	
 	/**
-	 * 
-	 * @param groupType 
 	 * @param gId
 	 * @return
 	 * 
@@ -404,7 +402,6 @@ public class GlobalHolder {
 	/**
 	 * Add user collections to group collections
 	 * 
-	 * @param gList
 	 * @param uList
 	 * @param belongGID
 	 */

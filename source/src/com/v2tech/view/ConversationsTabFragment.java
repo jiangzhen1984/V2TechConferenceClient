@@ -309,6 +309,8 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 						.addAction(PublicIntent.BROADCAST_USER_COMMENT_NAME_NOTIFICATION);
 				intentFilter
 						.addAction(JNIService.JNI_BROADCAST_GROUP_USER_REMOVED);
+				intentFilter
+						.addAction(JNIService.JNI_BROADCAST_GROUP_USER_REMOVED);
 
 			}
 
@@ -320,6 +322,8 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 
 		getActivity().registerReceiver(receiver, intentFilter);
 	}
+
+
 
 	@Override
 	public void onStart() {
@@ -370,6 +374,8 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 					break;
 				}
 			}
+            Collections.sort(mConvList);
+            Collections.sort(mItemList);
 		}
 	}
 
@@ -1169,7 +1175,14 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 						invitationName = user.getName();
 				} else
 					invitationName = invitation.getInvitationUser().getName();
-				content = invitationName + "邀请你加入" + crowdGroup.getName() + "群";
+
+                if(invitation.getQualState() == QualificationState.BE_ACCEPTED){
+                    content = crowdGroup.getName() + "同意了你的申请";
+                } else if(invitation.getQualState() == QualificationState.BE_REJECT){
+                    content = crowdGroup.getName() + "拒绝了你的申请";
+                } else{
+                    content = invitationName + "邀请你加入" + crowdGroup.getName() + "群";
+                }
 			}
 			verification.setUser(invitation.getInvitationUser());
 			verification.setGroup(invitation.getCrowdGroup());
@@ -1195,10 +1208,6 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 					content = applyName + "拒绝加入" + applyGroup.getName() +"群";			
 				else if(apply.getQualState() == QualificationState.BE_ACCEPTED)
 					content = applyName + "同意加入" + applyGroup.getName() +"群";	
-//				else if(apply.getQualState() == QualificationState.ACCEPTED)
-//					content = applyGroup.getName() + "同意了你的申请";	
-//				else if(apply.getQualState() == QualificationState.REJECT)
-//					content = applyGroup.getName() + "拒绝了你的申请";	
 				else
 					content = applyName
 							+ "申请加入" + applyGroup.getName() + "群";

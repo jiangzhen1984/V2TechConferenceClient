@@ -34,6 +34,7 @@ import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.V2.jni.V2GlobalEnum;
 import com.V2.jni.ind.GroupAddUserJNIObject;
 import com.V2.jni.util.V2Log;
 import com.v2tech.R;
@@ -603,19 +604,36 @@ public class MessageAuthenticationActivity extends Activity {
 	
 	private void startCrowdInvitationDetail(VMessageQualification msg){
 		VMessageQualificationInvitationCrowd imsg = (VMessageQualificationInvitationCrowd) msg;
-
-		Crowd crowd = new Crowd(imsg.getCrowdGroup()
-				.getmGId(), imsg.getCrowdGroup()
-				.getOwnerUser(), imsg.getCrowdGroup()
-				.getName(), imsg.getCrowdGroup()
-				.getBrief());
-		crowd.setAuth(imsg.getCrowdGroup()
-				.getAuthType().intValue());
-		Intent i = new Intent(
-				JNIService.JNI_BROADCAST_CROWD_INVATITION);
-		i.addCategory(JNIService.JNI_ACTIVITY_CATEGROY);
-		i.putExtra("crowd", crowd);
-		startActivityForResult(i, AUTHENTICATION_RESULT);
+        Intent i = new Intent();
+        if(imsg.getQualState() == QualificationState.BE_ACCEPTED){
+            i.putExtra("obj", new ConversationNotificationObject(
+                    Conversation.TYPE_GROUP, imsg.getCrowdGroup().getmGId()));
+            i.setAction(PublicIntent.START_CONVERSACTION_ACTIVITY);
+            i.addCategory(PublicIntent.DEFAULT_CATEGORY);
+            startActivity(i);
+        } else {
+            Crowd crowd = new Crowd(imsg.getCrowdGroup()
+                    .getmGId(), imsg.getCrowdGroup()
+                    .getOwnerUser(), imsg.getCrowdGroup()
+                    .getName(), imsg.getCrowdGroup()
+                    .getBrief());
+            crowd.setAuth(imsg.getCrowdGroup()
+                    .getAuthType().intValue());
+            if (imsg.getQualState() == QualificationState.BE_REJECT) {
+                i.setAction(PublicIntent.SHOW_CROWD_APPLICATION_ACTIVITY);
+                crowd.setAuth(CrowdGroup.AuthType.QULIFICATION.intValue());
+                i.putExtra("crowd", crowd);
+                //set disable authentication
+                i.putExtra("authdisable", false);
+                i.putExtra("stored" , true);
+                startActivity(i);
+            } else {
+                i.setAction(JNIService.JNI_BROADCAST_CROWD_INVATITION);
+                i.addCategory(JNIService.JNI_ACTIVITY_CATEGROY);
+                i.putExtra("crowd", crowd);
+                startActivityForResult(i, AUTHENTICATION_RESULT);
+            }
+        }
 	}
 
 	@Override
@@ -1034,7 +1052,15 @@ public class MessageAuthenticationActivity extends Activity {
 				item.mRes.setVisibility(View.VISIBLE);
 				item.mAcceptButton.setVisibility(View.GONE);
 				item.mRes.setText(R.string.crowd_invitation_rejected);
-			} else {
+			} else if (vqic.getQualState() == QualificationState.BE_ACCEPTED) {
+                item.mRes.setVisibility(View.GONE);
+                item.mAcceptButton.setVisibility(View.GONE);
+                item.mContentTV.setText("同意了你的申请");
+            } else if (vqic.getQualState() == QualificationState.BE_REJECT) {
+                item.mRes.setVisibility(View.GONE);
+                item.mAcceptButton.setVisibility(View.GONE);
+                item.mContentTV.setText("拒绝了你的申请");
+            } else {
 				item.mRes.setVisibility(View.GONE);
 				item.mAcceptButton.setVisibility(View.VISIBLE);
 			}
@@ -1151,15 +1177,7 @@ public class MessageAuthenticationActivity extends Activity {
 									true).initTimeOut();
 						}
 					} else {
-						VMessageQualificationApplicationCrowd vm = (VMessageQualificationApplicationCrowd) waitingQualification.obj;
-						Toast.makeText(
-								mContext,
-								vm.getCrowdGroup().getName()
-										+ R.string.crowd_Authentication_hit,
-								Toast.LENGTH_SHORT).show();
-						mMessageList.remove(waitingQualification);
-						groupAdapter.notifyDataSetChanged();
-						MessageBuilder.deleteQualMessage(mContext, vm.getId());
+                        handleFailedDone();
 						return;
 					}
 				}
@@ -1199,6 +1217,21 @@ public class MessageAuthenticationActivity extends Activity {
 		
 	}
 
+    private void handleFailedDone() {
+        if (waitingQualification != null) {
+            VMessageQualificationInvitationCrowd vm = (VMessageQualificationInvitationCrowd) waitingQualification.obj;
+            Toast.makeText(
+                    mContext,
+                    vm.getCrowdGroup().getName()
+                            + "群已经解散",
+                    Toast.LENGTH_SHORT).show();
+            mMessageList.remove(waitingQualification);
+            waitingQualification = null;
+            groupAdapter.notifyDataSetChanged();
+            MessageBuilder.deleteQualMessage(mContext, vm.getId());
+        }
+    }
+
 	class CrowdAuthenticationBroadcastReceiver extends BroadcastReceiver {
 
 		@Override
@@ -1236,18 +1269,7 @@ public class MessageAuthenticationActivity extends Activity {
 			if (JNIService.JNI_BROADCAST_GROUP_JOIN_FAILED.equals(intent
 					.getAction())) {
 				ProgressUtils.showNormalWithHintProgress(mContext, false);
-				if (waitingQualification != null) {
-					VMessageQualificationInvitationCrowd vm = (VMessageQualificationInvitationCrowd) waitingQualification.obj;
-					Toast.makeText(
-							mContext,
-							vm.getCrowdGroup().getName()
-									+ R.string.crowd_Authentication_hit,
-							Toast.LENGTH_SHORT).show();
-					mMessageList.remove(waitingQualification);
-					waitingQualification = null;
-					groupAdapter.notifyDataSetChanged();
-					MessageBuilder.deleteQualMessage(mContext, vm.getId());
-				}
+                handleFailedDone();
 			}
 		}
 	}
