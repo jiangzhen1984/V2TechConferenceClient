@@ -126,18 +126,18 @@ public class CrowdInvitationActivity extends Activity {
 	}
 
 	private void handleAcceptDone() {
-		CrowdGroup g = new CrowdGroup(crowd.getId(), crowd.getName(),
-				crowd.getCreator(), null);
-		g.setBrief(crowd.getBrief());
-		g.setAnnouncement(crowd.getAnnounce());
-		GlobalHolder.getInstance().addGroupToList(GroupType.CHATING.intValue(),
-				g);
-
-		Intent i = new Intent();
-		i.setAction(PublicIntent.BROADCAST_NEW_CROWD_NOTIFICATION);
-		i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
-		i.putExtra("crowd", crowd.getId());
-		sendBroadcast(i);
+//		CrowdGroup g = new CrowdGroup(crowd.getId(), crowd.getName(),
+//				crowd.getCreator(), null);
+//		g.setBrief(crowd.getBrief());
+//		g.setAnnouncement(crowd.getAnnounce());
+//		GlobalHolder.getInstance().addGroupToList(GroupType.CHATING.intValue(),
+//				g);
+//
+//		Intent i = new Intent();
+//		i.setAction(PublicIntent.BROADCAST_NEW_CROWD_NOTIFICATION);
+//		i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
+//		i.putExtra("crowd", crowd.getId());
+//		sendBroadcast(i);
 		
 		VMessageQualification message = MessageBuilder.queryQualMessageById(mContext, vq.getId());
 		vq.setQualState(message.getQualState());
@@ -170,15 +170,11 @@ public class CrowdInvitationActivity extends Activity {
 			mTitleName.setText(R.string.crowd_invitation_titile);
 			if (vq.getQualState() == VMessageQualification.QualificationState.ACCEPTED) {
 				mButtonLayout.setVisibility(View.GONE);
-                mAcceptedLy.setVisibility(View.GONE);
 
+				mAcceptedLy.setVisibility(View.VISIBLE);
                 mNotesLayout.setVisibility(View.VISIBLE);
                 mNotesTV.setText(R.string.crowd_invitation_accept_notes);
                 mSendMsgButton.setVisibility(View.VISIBLE);
-
-				Group group = GlobalHolder.getInstance().getGroupById(V2GlobalEnum.GROUP_TYPE_CROWD , crowd.getId());
-				if(group != null && group.getUsers() != null)
-					mMembersTV.setText(String.valueOf(group.getUsers().size()));
 			} else if (vq.getQualState() == VMessageQualification.QualificationState.REJECT) {
 				mButtonLayout.setVisibility(View.GONE);
                 mSendMsgButton.setVisibility(View.GONE);
@@ -193,10 +189,18 @@ public class CrowdInvitationActivity extends Activity {
 
                 mNotesLayout.setVisibility(View.VISIBLE);
                 mNotesTV.setText(R.string.crowd_invitation_invalid_notes);
+            }  else if (vq.getQualState() == QualificationState.WAITING_FOR_APPLY) {
+                mButtonLayout.setVisibility(View.GONE);
+                mSendMsgButton.setVisibility(View.GONE);
+                mAcceptedLy.setVisibility(View.GONE);
+
+                mNotesLayout.setVisibility(View.VISIBLE);
+                mNotesTV.setText(R.string.crowd_application_applyed);
+                mTitleName.setText(R.string.crowd_applicant_invite_title);
             } else {
 				mSendMsgButton.setVisibility(View.GONE);
-				mButtonLayout.setVisibility(View.GONE);
 				mAcceptedLy.setVisibility(View.GONE);
+				mButtonLayout.setVisibility(View.VISIBLE);
 			}
 			mSendMsgButton
 					.setText(R.string.crowd_invitation_top_bar_right_button);

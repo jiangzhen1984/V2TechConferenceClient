@@ -977,18 +977,19 @@ public class MessageBodyView extends LinearLayout {
 					} else {
 						if (mMsg.getItems().size() > 0
 								&& mMsg.getItems().get(0).getType() == VMessageFileItem.ITEM_TYPE_FILE) {
-							VMessageFileItem fileItem = (VMessageFileItem) mMsg
+                            mMsg.setState(VMessageAbstractItem.STATE_NORMAL);
+                            VMessageFileItem fileItem = (VMessageFileItem) mMsg
 									.getItems().get(0);
-							callback.requestDownloadFile(fileRootView, mMsg,
+                            callback.requestDownloadFile(fileRootView, mMsg,
 									fileItem);
-							fileItem.setState(VMessageAbstractItem.STATE_FILE_DOWNLOADING);
-							fileItem.setDownloadedSize(0);
-							updateFailedFlag(false);
-							updateFileItemView(fileItem, fileRootView);
-							MessageLoader.updateFileItemState(getContext(), fileItem);
-						}
+                            fileItem.setState(VMessageAbstractItem.STATE_FILE_DOWNLOADING);
+                            fileItem.setDownloadedSize(0);
+                            updateFailedFlag(false);
+                            updateFileItemView(fileItem, fileRootView);
+                            MessageLoader.updateFileItemState(getContext(), fileItem);
+                            MessageLoader.updateChatMessageState(getContext(), mMsg);
+                        }
 					}
-					MessageLoader.updateChatMessageState(getContext(), mMsg);
 				}
 			} else {
 				Toast.makeText(getContext(), "网络连接不可用，请稍候再试",

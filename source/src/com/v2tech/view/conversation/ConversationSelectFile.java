@@ -45,6 +45,7 @@ import android.widget.Toast;
 import com.V2.jni.util.V2Log;
 import com.v2tech.R;
 import com.v2tech.util.BitmapUtil;
+import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.StorageUtil;
 import com.v2tech.vo.FileInfoBean;
 
@@ -59,6 +60,7 @@ public class ConversationSelectFile extends Activity {
 	private static final int ITEM_CHECKED = 7;
 	private static final int ITEM_UNCHECKED = 8;
 	private static final int UPDATE_REMOVE = 9;
+	private static final int MAX_TRANS_FILE_SIZE = 9;
 	private String mCurrentPath = StorageUtil.getSdcardPath();
 	private TextView backButton;
 	private TextView finishButton;
@@ -901,8 +903,13 @@ public class ConversationSelectFile extends Activity {
 			}
 		} else {
 			
-			if(mCheckedList.size() > 9){
+			if(mCheckedList.size() > MAX_TRANS_FILE_SIZE){
 				Toast.makeText(getApplicationContext(), "发送文件个数已达上限，一次性只能发送10个文件", Toast.LENGTH_LONG).show();
+				return ;
+			}
+			
+			if(GlobalConfig.currentTransingFileSize > MAX_TRANS_FILE_SIZE){
+				Toast.makeText(getApplicationContext(), "发送文件个数已达上限，当前正在传输的文件数量已达10个", Toast.LENGTH_LONG).show();
 				return ;
 			}
 			

@@ -2018,8 +2018,10 @@ public class ConversationActivity extends Activity {
 			List<VMessageAbstractItem> items = v.getItems();
 			for (int i = 0; i < items.size(); i++) {
 				VMessageAbstractItem item = items.get(i);
-				if (item.getType() == VMessageAbstractItem.ITEM_TYPE_FILE)
-					item.setState(VMessageAbstractItem.STATE_FILE_SENDING);
+				if (item.getType() == VMessageAbstractItem.ITEM_TYPE_FILE) {
+                    item.setState(VMessageAbstractItem.STATE_FILE_SENDING);
+                    MessageLoader.updateFileItemState(mContext, (VMessageFileItem) item);
+                }
 				else 
 					item.setState(VMessageAbstractItem.STATE_NORMAL);
 			}
@@ -2615,7 +2617,8 @@ public class ConversationActivity extends Activity {
 			case LOAD_MESSAGE:
 				List<VMessage> array = loadMessages();
 				if (array != null) {
-					V2Log.d(TAG, "获取的消息数量" + array.size());
+                    int loadSize = array.size();
+                    V2Log.d(TAG, "获取的消息数量" + loadSize);
 					// 设置VMessage是否应该显示时间
 					for (int i = 0; i < array.size(); i++) {
 						long currentMessage = array.get(i).getmDateLong();
@@ -2642,7 +2645,9 @@ public class ConversationActivity extends Activity {
 						messageArray.add(0, new VMessageAdater(array.get(i)));
 					}
 					V2Log.d(TAG, "当前消息集合大小" + messageArray.size());
-					currentItemPos += array.size() - 1;
+					currentItemPos = loadSize - 1;
+                    if(currentItemPos == -1)
+                        currentItemPos = 0;
 				}
 				android.os.Message.obtain(lh, END_LOAD_MESSAGE, array)
 						.sendToTarget();

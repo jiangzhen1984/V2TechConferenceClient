@@ -216,13 +216,15 @@ public class ChatRequest {
 		}
 	}
 
-	/**
-	 * 
-	 * @param uuid
-	 * @param code
-	 *            1 : text 2:image 3: audio
-	 * @param ret
-	 */
+    /**
+     *
+     * @param eGroupType
+     * @param nGroupID
+     * @param nFromUserID
+     * @param nToUserID
+     * @param sSeqID
+     * @param nResult
+     */
 	private void OnSendTextResult(int eGroupType, long nGroupID,
 			long nFromUserID, long nToUserID, String sSeqID, int nResult) {
 		V2Log.d("ChatRequest UI", "OnSendChatResult ---> eGroupType :"
@@ -235,12 +237,17 @@ public class ChatRequest {
 		}
 	}
 
-	/**
-	 * 
-	 * @param uuid
-	 * @param code
-	 * @param ret
-	 */
+    /**
+     *
+     * @param eGroupType
+     * @param nGroupID
+     * @param nFromUserID
+     * @param nToUserID
+     * @param mediaType
+     *          1 : text 2:image 3: audio
+     * @param sSeqID
+     * @param nResult
+     */
 	private void OnSendBinaryResult(int eGroupType, long nGroupID,
 			long nFromUserID, long nToUserID, int mediaType,String sSeqID,
 			int nResult) {

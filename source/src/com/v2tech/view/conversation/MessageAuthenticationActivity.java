@@ -371,10 +371,6 @@ public class MessageAuthenticationActivity extends Activity {
 
 				for (int i = 0; i < list.size(); i++) {
 					VMessageQualification qualification = list.get(i);
-					V2Log.d("MessageAuthenticationActivity loadGroupMessage --> load group message type :"
-							+ qualification.getType().intValue()
-							+ " id is : "
-							+ qualification.getId());
 					mMessageList.add(new ListItemWrapper(qualification));
 				}
 				return null;
@@ -969,8 +965,9 @@ public class MessageAuthenticationActivity extends Activity {
 				CrowdGroup cg = vqic.getCrowdGroup();
 				item.mMsgBanneriv.setImageResource(R.drawable.chat_group_icon);
 				item.mNameTV.setText(cg.getName());
-				item.mContentTV.setText(vqic.getInvitationUser().getName()
-						+ mContext.getText(R.string.crowd_invitation_content));
+                if(vqic.getInvitationUser() != null)
+                    item.mContentTV.setText(vqic.getInvitationUser().getName()
+                            + mContext.getText(R.string.crowd_invitation_content));
 
 				updateInviteMessageView(item, vqic);
 				// If current user is invitor
@@ -1056,7 +1053,8 @@ public class MessageAuthenticationActivity extends Activity {
                 item.mRes.setVisibility(View.GONE);
                 item.mAcceptButton.setVisibility(View.GONE);
                 item.mContentTV.setText("同意了你的申请");
-            } else if (vqic.getQualState() == QualificationState.BE_REJECT) {
+            } else if ((vqic.getQualState() == QualificationState.BE_REJECT) || 
+            		(vqic.getQualState() == QualificationState.WAITING_FOR_APPLY)) {
                 item.mRes.setVisibility(View.GONE);
                 item.mAcceptButton.setVisibility(View.GONE);
                 item.mContentTV.setText("拒绝了你的申请");

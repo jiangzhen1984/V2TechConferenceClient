@@ -65,6 +65,11 @@ public class CrowdGroupService extends AbstractHandler {
 
 	private GroupRequestCB grCB;
 	private FileRequestCB frCB;
+
+	public void setmPendingCrowdId(long mPendingCrowdId) {
+		this.mPendingCrowdId = mPendingCrowdId;
+	}
+
 	private long mPendingCrowdId;
 
 	public CrowdGroupService() {
@@ -127,13 +132,14 @@ public class CrowdGroupService extends AbstractHandler {
 				applicant.getmUserId());
 	}
 
-    /**
-     * Decline applicant who want to join crowd
-     * @param crowd
-     * @param applicant
-     * @param reason
-     * @param caller
-     */
+	/**
+	 * Decline applicant who want to join crowd
+	 * 
+	 * @param crowd
+	 * @param applicant
+	 * @param reason
+	 * @param caller
+	 */
 	public void refuseApplication(CrowdGroup crowd, User applicant,
 			String reason, MessageListener caller) {
 		if (!checkParamNull(caller, new Object[] { crowd, applicant })) {
@@ -179,13 +185,15 @@ public class CrowdGroupService extends AbstractHandler {
 				crowd.getCreator().getmUserId());
 	}
 
-    /**
-     * Decline join crowd invitation
-     * @param crowd
-     * @param reason
-     * @param caller
-     */
-	public void refuseInvitation(Crowd crowd, String reason, MessageListener caller) {
+	/**
+	 * Decline join crowd invitation
+	 * 
+	 * @param crowd
+	 * @param reason
+	 * @param caller
+	 */
+	public void refuseInvitation(Crowd crowd, String reason,
+			MessageListener caller) {
 		if (!checkParamNull(caller, new Object[] { crowd })) {
 			return;
 		}
@@ -202,8 +210,7 @@ public class CrowdGroupService extends AbstractHandler {
 
 		GroupRequest.getInstance().refuseInviteJoinGroup(
 				Group.GroupType.CHATING.intValue(), crowd.getId(),
-				crowd.getCreator().getmUserId(),
-				reason == null ? "" : reason);
+				crowd.getCreator().getmUserId(), reason == null ? "" : reason);
 
 		mPendingCrowdId = 0;
 		sendResult(caller, new JNIResponse(JNIResponse.Result.SUCCESS));
@@ -216,7 +223,8 @@ public class CrowdGroupService extends AbstractHandler {
 	 * @param additional
 	 * @param caller
 	 */
-	public void applyCrowd(Crowd crowd, String additional, MessageListener caller) {
+	public void applyCrowd(Crowd crowd, String additional,
+			MessageListener caller) {
 		if (!checkParamNull(caller, new Object[] { crowd, additional })) {
 			return;
 		}
@@ -320,13 +328,15 @@ public class CrowdGroupService extends AbstractHandler {
 		}
 	}
 
-    /**
-     * Remove member from crowd
-     * @param crowd
-     * @param member
-     * @param caller
-     */
-	public void removeMember(CrowdGroup crowd, User member, MessageListener caller) {
+	/**
+	 * Remove member from crowd
+	 * 
+	 * @param crowd
+	 * @param member
+	 * @param caller
+	 */
+	public void removeMember(CrowdGroup crowd, User member,
+			MessageListener caller) {
 		if (!checkParamNull(caller, new Object[] { crowd, member })) {
 			return;
 		}
@@ -340,8 +350,6 @@ public class CrowdGroupService extends AbstractHandler {
 		GroupRequest.getInstance().removeCallback(grCB);
 		FileRequest.getInstance().removeCallback(frCB);
 	}
-
-
 
 	/**
 	 * fetch files from server
@@ -395,9 +403,9 @@ public class CrowdGroupService extends AbstractHandler {
 		this.initTimeoutMessage(REMOVE_FILES_CROWD, DEFAULT_TIME_OUT_SECS,
 				caller);
 		for (VCrowdFile f : files) {
-			GroupRequest.getInstance().delGroupFile(
-					crowd.getGroupType().intValue(), crowd.getmGId(),
-					f.getId());
+			GroupRequest.getInstance()
+					.delGroupFile(crowd.getGroupType().intValue(),
+							crowd.getmGId(), f.getId());
 		}
 
 	}
@@ -522,27 +530,32 @@ public class CrowdGroupService extends AbstractHandler {
 
 		@Override
 		public void OnAcceptApplyJoinGroup(V2Group group) {
-            //阻止onAddGroupInfo重复去更新数据库，让JNI广播处理
-            mPendingCrowdId = 0;
+			// 阻止onAddGroupInfo重复去更新数据库，让JNI广播处理
+			// mPendingCrowdId = 0;
 		}
-		
+
 		@Override
 		public void OnRefuseInviteJoinGroup(GroupQualicationJNIObject obj) {
-//			if (obj.groupType == GroupType.CHATING.intValue()) {
-//				MessageBuilder.updateQualicationMessageState(obj.groupID, obj.userID, 
-//						new GroupQualicationState(Type.CROWD_INVITATION , QualificationState.REJECT , null));
-//			}
+			// if (obj.groupType == GroupType.CHATING.intValue()) {
+			// MessageBuilder.updateQualicationMessageState(obj.groupID,
+			// obj.userID,
+			// new GroupQualicationState(Type.CROWD_INVITATION ,
+			// QualificationState.REJECT , null));
+			// }
 		}
-		
+
 		@Override
 		public void OnRefuseApplyJoinGroup(V2Group parseSingleCrowd,
 				String reason) {
-//			JNIResponse jniRes = new JNIResponse(
-//					CreateCrowdResponse.Result.FAILED);
-//			Message.obtain(mCallbackHandler, REFUSE_APPLICATION_CROWD, jniRes)
-//					.sendToTarget();
-//			MessageBuilder.updateQualicationMessageState(parseSingleCrowd.id, parseSingleCrowd.creator.uid,
-//					new GroupQualicationState(Type.CROWD_INVITATION , QualificationState.BE_REJECT , reason));
+			// JNIResponse jniRes = new JNIResponse(
+			// CreateCrowdResponse.Result.FAILED);
+			// Message.obtain(mCallbackHandler, REFUSE_APPLICATION_CROWD,
+			// jniRes)
+			// .sendToTarget();
+			// MessageBuilder.updateQualicationMessageState(parseSingleCrowd.id,
+			// parseSingleCrowd.creator.uid,
+			// new GroupQualicationState(Type.CROWD_INVITATION ,
+			// QualificationState.BE_REJECT , reason));
 		}
 
 		@Override
@@ -575,45 +588,57 @@ public class CrowdGroupService extends AbstractHandler {
 		/**
 		 * Used to as callback of accept join crowd group <br />
 		 * ===OnAcceptInviteJoinGroup never called===
-		 * @see
-		 * com.V2.jni.GroupRequestCallbackAdapter#onAddGroupInfo(com.V2.jni.
-		 * ind.V2Group)
+		 * 
+		 * @see com.V2.jni.GroupRequestCallbackAdapter#onAddGroupInfo(V2Group)
 		 */
 		public void onAddGroupInfo(V2Group group) {
 			if (group.type == V2Group.TYPE_CROWD) {
-				if (mPendingCrowdId == group.id) {
-					V2Log.e("CrowdGroupService onAddGroupInfo--> add a new group , id is : " + group.id);
-					mPendingCrowdId = 0;
-					JNIResponse jniRes = new JNIResponse(
+				if (GlobalHolder.getInstance().getCurrentUserId() == group.owner.uid) {
+					// Create a new crowd group by current logined user
+					V2Log.e("CrowdGroupService onAddGroupInfo--> successful create a new group , id is : "
+							+ group.id);
+					JNIResponse jniRes = new CreateCrowdResponse(group.id,
 							CreateCrowdResponse.Result.SUCCESS);
-					Message.obtain(mCallbackHandler, ACCEPT_JOIN_CROWD, jniRes)
-							.sendToTarget();
-					MessageBuilder.updateQualicationMessageState(group.id, group.creator.uid,
-							new GroupQualicationState(Type.CROWD_INVITATION , QualificationState.ACCEPTED , null));
+					Message.obtain(mCallbackHandler, CREATE_GROUP_MESSAGE,
+							jniRes).sendToTarget();
 				} else {
-					if(GlobalHolder.getInstance().getCurrentUserId() == group.owner.uid){
-						V2Log.e("CrowdGroupService onAddGroupInfo--> successful create a new group , id is : " + group.id);
-						JNIResponse jniRes = new CreateCrowdResponse(group.id,
+					if (mPendingCrowdId == group.id) {
+						V2Log.e("CrowdGroupService onAddGroupInfo--> add a new group , id is : "
+								+ group.id);
+						JNIResponse jniRes = new JNIResponse(
 								CreateCrowdResponse.Result.SUCCESS);
-						Message.obtain(mCallbackHandler, CREATE_GROUP_MESSAGE,
+						Message.obtain(mCallbackHandler, ACCEPT_JOIN_CROWD,
 								jniRes).sendToTarget();
+//						MessageBuilder.updateQualicationMessageState(group.id,
+//								group.creator.uid, new GroupQualicationState(
+//										Type.CROWD_INVITATION,
+//										QualificationState.ACCEPTED, null));
+					} else {
+						V2Log.e("CrowdGroupService onAddGroupInfo--> mPendingCrowdId isn't equals groupID , MayBe this callback"
+								+ "already time out , group id is : "
+								+ group.id + " group name is : " + group.name);
 					}
 				}
 			}
 		}
-		
+
 		
 		@Override
 		public void OnAddGroupUserInfoCallback(int groupType, long nGroupID,
 				V2User user) {
-			if (groupType == V2Group.TYPE_CROWD && user.uid != GlobalHolder.getInstance().getCurrentUserId()) {
+			if (groupType == V2Group.TYPE_CROWD
+					&& user.uid != GlobalHolder.getInstance()
+							.getCurrentUserId()) {
 				JNIResponse jniRes = new JNIResponse(
 						CreateCrowdResponse.Result.SUCCESS);
-				jniRes.resObj = new GroupAddUserJNIObject(groupType, nGroupID, user.uid, "");
+				jniRes.resObj = new GroupAddUserJNIObject(groupType, nGroupID,
+						user.uid, "");
 				Message.obtain(mCallbackHandler, ACCEPT_APPLICATION_CROWD,
 						jniRes).sendToTarget();
-				MessageBuilder.updateQualicationMessageState(nGroupID , user.uid,
-						new GroupQualicationState(Type.CROWD_APPLICATION , QualificationState.ACCEPTED , null));
+				MessageBuilder.updateQualicationMessageState(nGroupID,
+						user.uid, new GroupQualicationState(
+								Type.CROWD_APPLICATION,
+								QualificationState.ACCEPTED, null));
 			}
 		}
 	
@@ -734,13 +759,8 @@ public class CrowdGroupService extends AbstractHandler {
 		@Override
 		public void OnFileTransEnd(String szFileID, String szFileName,
 				long nFileSize, int nTransType) {
-			notifyListener(
-					KEY_FILE_TRANS_STATUS_NOTIFICATION_LISTNER,
-					0,
-					0,
-					new FileTransProgressStatusIndication(
-							nTransType,
-							szFileID,
+			notifyListener(KEY_FILE_TRANS_STATUS_NOTIFICATION_LISTNER, 0, 0,
+					new FileTransProgressStatusIndication(nTransType, szFileID,
 							nFileSize,
 							FileTransStatusIndication.IND_TYPE_PROGRESS_END));
 

@@ -688,13 +688,87 @@ public class MessageBuilder {
 	}
 
     /**
-     * Update a qualification message to database
+     * Update a qualification message to database by V2Group Object
+     * @param crowd
+     * @param obj
+     * @return
+     */
+    public static long updateQualicationMessageState(V2Group crowd,
+                                                     GroupQualicationState obj) {
+        if (crowd == null){
+            V2Log.e("MessageBuilder updateQualicationMessageState --> update failed... beacuser given V2Group"
+                    + "is null!");
+            return -1;
+        }
+
+        if (obj == null){
+            V2Log.e("MessageBuilder updateQualicationMessageState --> update failed... beacuser get crowdGroup"
+                    + "is null!");
+            return -1;
+        }
+
+        if (crowd.owner == null){
+            V2Log.e("MessageBuilder updateQualicationMessageState --> update failed... beacuser get Owner User"
+                    + "is null!");
+            return -1;
+        }
+
+        long userID = crowd.owner.uid;
+        long groupID = crowd.id;
+
+        CrowdGroup crowdGroup = (CrowdGroup) GlobalHolder.getInstance()
+                .getGroupById(V2GlobalEnum.GROUP_TYPE_CROWD, groupID);
+        if (crowdGroup == null) {
+            V2Log.e("MessageBuilder updateQualicationMessageState --> the VMessageQualification Object is null , Need to build"
+                    + "groupID is : " + groupID + " userID is : " + userID);
+            User user = GlobalHolder.getInstance().getUser(userID);
+            if(user == null) {
+                V2Log.e("MessageBuilder updateQualicationMessageState --> update failed... beacuser get Owner User" +
+                        "from GlobalHolder is null!");
+                return -1;
+            }
+            crowdGroup = new CrowdGroup(crowd.id,
+                    crowd.name , user, null);
+            crowdGroup.setBrief(crowd.brief);
+            crowdGroup.setAnnouncement(crowd.announce);
+        }
+
+        return updateQualicationMessageState(crowdGroup , obj);
+    }
+
+    /**
+     * Update a qualification message to database by groupID and userID
      * @param groupID
      * @param userID
      * @param obj
      * @return
      */
-	public static long updateQualicationMessageState(long groupID, long userID,
+    public static long updateQualicationMessageState(long groupID , long userID ,
+                                                     GroupQualicationState obj) {
+        if (obj == null) {
+            V2Log.e("MessageBuilder updateQualicationMessageState --> update failed... beacuser given GroupQualicationState"
+                    + "is null!");
+            return -1;
+        }
+
+        CrowdGroup crowdGroup = (CrowdGroup) GlobalHolder.getInstance()
+                .getGroupById(V2GlobalEnum.GROUP_TYPE_CROWD, groupID);
+        if (crowdGroup == null) {
+            V2Log.e("MessageBuilder updateQualicationMessageState --> update failed... beacuser get crowdGroup"
+                    + " is null!");
+            return -1;
+        } else {
+            return updateQualicationMessageState(crowdGroup , obj);
+        }
+    }
+
+    /**
+     * Update a qualification message to database
+     * @param crowdGroup
+     * @param obj
+     * @return
+     */
+	public static long updateQualicationMessageState(CrowdGroup crowdGroup,
 			GroupQualicationState obj) {
 
 		if (obj == null){
@@ -703,20 +777,24 @@ public class MessageBuilder {
 			return -1;
 		}
 
+		if (crowdGroup == null){
+			V2Log.e("MessageBuilder updateQualicationMessageState --> update failed... beacuser get crowdGroup"
+					+ "is null!");
+			return -1;
+		}
+
+		if (crowdGroup.getOwnerUser() == null){
+			V2Log.e("MessageBuilder updateQualicationMessageState --> update failed... beacuser get Owner User"
+					+ "is null!");
+			return -1;
+		}
+
+        long userID = crowdGroup.getOwnerUser().getmUserId();
+        long groupID = crowdGroup.getmGId();
 		DataBaseContext mContext = new DataBaseContext(context);
 		VMessageQualification crowdQuion = MessageBuilder
 				.queryQualMessageByCrowdId(null, userID, groupID);
 		if (crowdQuion == null) {
-			V2Log.e("MessageBuilder updateQualicationMessageState --> the VMessageQualification Object is null , Need to build"
-					+ "groupID is : " + groupID + " userID is : " + userID);
-			CrowdGroup crowdGroup = (CrowdGroup) GlobalHolder.getInstance()
-					.getGroupById(V2GlobalEnum.GROUP_TYPE_CROWD, groupID);
-			if (crowdGroup == null) {
-                V2Log.e("MessageBuilder updateQualicationMessageState --> update failed... beacuser get crowdGroup"
-                        + "is null!");
-                return -1;
-            }
-
 			if (obj.qualicationType == Type.CROWD_APPLICATION) {
                 User applicant = GlobalHolder.getInstance().getUser(userID);
                 if (applicant == null)

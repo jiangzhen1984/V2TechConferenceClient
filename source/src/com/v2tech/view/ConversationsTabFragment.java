@@ -590,7 +590,6 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 					tempList = ConversationProvider.loadUserConversation(
 							mContext, tempList, verificationMessageItemData,
 							voiceMessageItem);
-					isLoadedCov = true;
 				}
 				Message.obtain(mHandler, UPDATE_CONVERSATION_MESSAGE)
 						.sendToTarget();
@@ -678,7 +677,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 				break;
 			}
 		}
-
+        isLoadedCov = true;
 		adapter.notifyDataSetChanged();
 	}
 
@@ -1179,7 +1178,8 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 
                 if(invitation.getQualState() == QualificationState.BE_ACCEPTED){
                     content = crowdGroup.getName() + "同意了你的申请";
-                } else if(invitation.getQualState() == QualificationState.BE_REJECT){
+                } else if((invitation.getQualState() == QualificationState.BE_REJECT)
+                		|| (invitation.getQualState() == QualificationState.WAITING_FOR_APPLY)){
                     content = crowdGroup.getName() + "拒绝了你的申请";
                 } else{
                     content = invitationName + "邀请你加入" + crowdGroup.getName() + "群";
@@ -2099,7 +2099,8 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 						initVoiceItem();
 
 					updateVoiceSpecificItemState(false, newestMediaMessage);
-
+					voiceMessageItem.setReadFlag(Conversation.READ_FLAG_UNREAD);
+					updateUnreadConversation(voiceMessageItem);
 					mItemList.remove(voiceItem);
 					mConvList.remove(voiceMessageItem);
 					mItemList.add(0, voiceItem);

@@ -35,6 +35,7 @@ import android.widget.ListAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.V2.jni.util.V2Log;
 import com.v2tech.R;
 import com.v2tech.service.CrowdGroupService;
 import com.v2tech.service.GlobalHolder;
@@ -492,7 +493,11 @@ public class CrowdCreateActivity extends Activity {
 					
 					// finish current activity
 					finish();
-				} else {
+				} else if(recr.getResult() == JNIResponse.Result.TIME_OUT){
+                   cg.setmPendingCrowdId(0);
+                   V2Log.e("CrowdCreateActivity CREATE_GROUP_MESSAGE --> create crowd group failed.. time out!!");
+                   mErrorNotificationLayout.setVisibility(View.VISIBLE);
+                } else {
 					mErrorNotificationLayout.setVisibility(View.VISIBLE);
 				}
 			}

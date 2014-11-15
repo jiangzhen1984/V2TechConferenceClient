@@ -155,7 +155,11 @@ public class CrowdApplicationActivity extends Activity {
                 if(state == VMessageQualification.QualificationState.WAITING_FOR_APPLY){
                     mApplicationButton.setVisibility(View.GONE);
                     mNotesLy.setVisibility(View.VISIBLE);
-                    mNoTV.setText(R.string.crowd_application_applyed);
+                    mTitleTV.setText(R.string.crowd_applicant_invite_title);
+                } else if(state == VMessageQualification.QualificationState.BE_REJECT){
+                	mApplicationButton.setVisibility(View.VISIBLE);
+                    mNotesLy.setVisibility(View.GONE);
+                	mTitleTV.setText(R.string.crowd_applicant_invite_title);
                 }
                 else {
                     mApplicationButton.setVisibility(View.VISIBLE);
@@ -198,11 +202,6 @@ public class CrowdApplicationActivity extends Activity {
 							.intValue()) {
 						isInApplicationMode = true;
 						updateView();
-                        if (vq != null) {
-                            vq.setReadState(VMessageQualification.ReadState.READ);
-                            vq.setQualState(VMessageQualification.QualificationState.WAITING_FOR_APPLY);
-                            MessageBuilder.updateQualicationMessage(mContext, vq);
-                        }
 					} else if (crowd.getAuth() == CrowdGroup.AuthType.NEVER
 							.intValue()) {
                         Toast.makeText(
@@ -258,6 +257,11 @@ public class CrowdApplicationActivity extends Activity {
 						APPLY_DONE, null));
 				isInApplicationMode = false;
 				updateView();
+                if (vq != null) {
+                    vq.setReadState(VMessageQualification.ReadState.READ);
+                    vq.setQualState(VMessageQualification.QualificationState.WAITING_FOR_APPLY);
+                    MessageBuilder.updateQualicationMessage(mContext, vq);
+                }
 			}
 		}
 
@@ -283,37 +287,25 @@ public class CrowdApplicationActivity extends Activity {
 			case APPLY_DONE:
 				JNIResponse response = (JNIResponse) msg.obj;
 				if (response.getResult() == Result.SUCCESS) {
-					CrowdGroup g = new CrowdGroup(crowd.getId(),
-							crowd.getName(), crowd.getCreator(), null);
-					g.setBrief(crowd.getBrief());
-					g.setAnnouncement(crowd.getAnnounce());
-					GlobalHolder.getInstance().addGroupToList(
-							GroupType.CHATING.intValue(), g);
-
-					Intent i = new Intent();
-					i.setAction(PublicIntent.BROADCAST_NEW_CROWD_NOTIFICATION);
-					i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
-					i.putExtra("crowd", crowd.getId());
-					sendBroadcast(i);
-
-					if (vq != null) {
-						vq.setReadState(VMessageQualification.ReadState.READ);
-						vq.setQualState(VMessageQualification.QualificationState.BE_ACCEPTED);
-//						MessageBuilder.updateQualicationMessage(mContext, vq);
-					}
-//                    else{
-//                        vq = new VMessageQualificationInvitationCrowd(g , GlobalHolder.getInstance().getCurrentUser());
-//                        vq.setReadState(VMessageQualification.ReadState.READ);
-//                        vq.setQualState(VMessageQualification.QualificationState.BE_ACCEPTED);
-//                    }
-
-					if (mContext != null) {
-						Toast.makeText(
-								mContext,
-								R.string.crowd_application_sent_result_successful,
-								Toast.LENGTH_SHORT).show();
+                    if (mContext != null) {
+                        Toast.makeText(
+                                mContext,
+                                R.string.crowd_application_sent_result_successful,
+                                Toast.LENGTH_SHORT).show();
                         if(crowd.getAuth() == CrowdGroup.AuthType.ALLOW_ALL
                                 .intValue()){
+                            CrowdGroup g = new CrowdGroup(crowd.getId(),
+                                    crowd.getName(), crowd.getCreator(), null);
+                            g.setBrief(crowd.getBrief());
+                            g.setAnnouncement(crowd.getAnnounce());
+                            GlobalHolder.getInstance().addGroupToList(
+                                    GroupType.CHATING.intValue(), g);
+
+                            Intent i = new Intent();
+                            i.setAction(PublicIntent.BROADCAST_NEW_CROWD_NOTIFICATION);
+                            i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
+                            i.putExtra("crowd", crowd.getId());
+                            sendBroadcast(i);
                             mLocalHandler.postDelayed(new Runnable() {
                                 @Override
                                 public void run() {
@@ -322,8 +314,18 @@ public class CrowdApplicationActivity extends Activity {
                                             Toast.LENGTH_SHORT).show();
                                 }
                             } , 1000);
+                            if (vq != null) {
+                                vq.setReadState(VMessageQualification.ReadState.READ);
+                                vq.setQualState(VMessageQualification.QualificationState.BE_ACCEPTED);
+//						        MessageBuilder.updateQualicationMessage(mContext, vq);
+                            }
+//                        else{
+//                           vq = new VMessageQualificationInvitationCrowd(g , GlobalHolder.getInstance().getCurrentUser());
+//                           vq.setReadState(VMessageQualification.ReadState.READ);
+//                          vq.setQualState(VMessageQualification.QualificationState.BE_ACCEPTED);
+//                        }
                         }
-					}
+                    }
 				} else if (response.getResult() == Result.FAILED) {
 
 				}

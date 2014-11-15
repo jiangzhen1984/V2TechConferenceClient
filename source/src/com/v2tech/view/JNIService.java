@@ -150,6 +150,7 @@ public class JNIService extends Service implements
 
 	private List<Integer> delayBroadcast = new ArrayList<Integer>();
 	private boolean noNeedBroadcast;
+	private boolean isAcceptApply;
 
 	private JNICallbackHandler mCallbackHandler;
 
@@ -760,7 +761,7 @@ public class JNIService extends Service implements
 			if (type == Type.CROWD_APPLICATION) {
 				crowdMsg = MessageBuilder.queryApplyQualMessageByUserId(user
 						.getmUserId());
-				if (!(crowdMsg instanceof VMessageQualificationApplicationCrowd)) {
+				if (crowdMsg != null && !(crowdMsg instanceof VMessageQualificationApplicationCrowd)) {
 					MessageBuilder
 							.deleteQualMessage(mContext, crowdMsg.getId());
 					crowdMsg = null;
@@ -937,14 +938,25 @@ public class JNIService extends Service implements
 
 		@Override
 		public void OnAcceptApplyJoinGroup(V2Group group) {
-			if (group == null) {
+			if (group == null ||group.creator == null) {
 				V2Log.e(TAG,
 						"OnRefuseApplyJoinGroup : May receive refuse apply join message failed.. get null V2Group Object");
 				return;
 			}
 
-			long id = MessageBuilder.updateQualicationMessageState(group.id,
-					group.creator.uid, new GroupQualicationState(
+			CrowdGroup g = (CrowdGroup) GlobalHolder.getInstance().getGroupById(
+					V2GlobalEnum.GROUP_TYPE_CROWD , group.id);
+			if(g == null){
+				User user = GlobalHolder.getInstance().getUser(group.creator.uid);
+				g = new CrowdGroup(group.id,
+					group.name, user, null);
+				g.setBrief(group.brief);
+				g.setAnnouncement(group.announce);
+				GlobalHolder.getInstance().addGroupToList(
+						GroupType.CHATING.intValue(), g);
+			}
+			
+			long id = MessageBuilder.updateQualicationMessageState(group, new GroupQualicationState(
 							Type.CROWD_INVITATION,
 							QualificationState.BE_ACCEPTED, null));
 			if (id == -1) {
@@ -956,6 +968,7 @@ public class JNIService extends Service implements
 								+ group.creator.uid);
 				return;
 			}
+			isAcceptApply = true;
 
 			Intent intent = new Intent();
 			intent.setAction(JNIService.JNI_BROADCAST_NEW_QUALIFICATION_MESSAGE);
@@ -974,7 +987,7 @@ public class JNIService extends Service implements
 			}
 
 			long id = MessageBuilder.updateQualicationMessageState(
-					parseSingleCrowd.id, parseSingleCrowd.creator.uid,
+                    parseSingleCrowd,
 					new GroupQualicationState(Type.CROWD_INVITATION,
 							QualificationState.BE_REJECT, reason));
 			if (id == -1) {
@@ -1032,6 +1045,47 @@ public class JNIService extends Service implements
 				intent.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
 				intent.putExtra("msgId", id);
 				sendOrderedBroadcast(intent, null);
+			}
+		}
+		
+		@Override
+		public void onAddGroupInfo(V2Group crowd) {
+			if(crowd == null)
+				return ;
+			
+			if(crowd.creator == null)
+				return ;
+			
+			if(isAcceptApply){
+				isAcceptApply = false;
+				return ;
+			}
+			
+			if (crowd.type == V2Group.TYPE_CROWD && GlobalHolder.getInstance().getCurrentUserId() != crowd.owner.uid) {
+				V2Log.e(TAG , "onAddGroupInfo--> add a new group , id is : "
+						+ crowd.id);
+				User user = GlobalHolder.getInstance().getUser(crowd.creator.uid);
+				if(user == null){
+					V2Log.e(TAG , "onAddGroupInfo--> add a new group failed , get user is null , id is : "
+							+ crowd.creator.uid);
+					return ;
+				}
+				CrowdGroup g = new CrowdGroup(crowd.id, crowd.name,
+						user, null);
+				g.setBrief(crowd.brief);
+				g.setAnnouncement(crowd.announce);
+				GlobalHolder.getInstance().addGroupToList(GroupType.CHATING.intValue(),
+						g);
+
+				
+				MessageBuilder.updateQualicationMessageState(crowd, new GroupQualicationState(
+								Type.CROWD_INVITATION,
+								QualificationState.ACCEPTED, null));
+				Intent i = new Intent();
+				i.setAction(PublicIntent.BROADCAST_NEW_CROWD_NOTIFICATION);
+				i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
+				i.putExtra("crowd", crowd.id);
+				sendBroadcast(i);
 			}
 		}
 
@@ -1360,6 +1414,7 @@ public class JNIService extends Service implements
 					ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_ID
 							+ "= ? ", new String[] { ind.getUuid() }, null);
 			if (messages != null && messages.size() > 0) {
+                V2Log.e(TAG , "Resend message failed...uuid is : " + ind.getUuid());
 				VMessage vm = messages.get(0);
 				vm.setState(state);
 				List<VMessageAbstractItem> items = vm.getItems();
@@ -1376,6 +1431,9 @@ public class JNIService extends Service implements
 				}
 				MessageLoader.updateChatMessageState(mContext, messages.get(0));
 			}
+            else{
+                V2Log.e(TAG , "Resend message failed...update to database failed...uuid is : " + ind.getUuid());
+            }
 
 			if (ind.getRet() == SendingResultJNIObjectInd.Result.FAILED) {
 				Intent i = new Intent();
