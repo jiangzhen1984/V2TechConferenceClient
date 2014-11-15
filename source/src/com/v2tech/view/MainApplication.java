@@ -44,10 +44,8 @@ import com.V2.jni.WBRequest;
 import com.V2.jni.util.V2Log;
 import com.v2tech.R;
 import com.v2tech.util.AlgorithmUtil;
-import com.v2tech.util.CrashHandler;
 import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.LogService;
-import com.v2tech.util.LogcatThread;
 import com.v2tech.util.Notificator;
 import com.v2tech.util.StorageUtil;
 import com.v2tech.view.conference.VideoActivityV2;
@@ -115,7 +113,7 @@ public class MainApplication extends Application {
 		NativeInitializer.getIntance()
 				.initialize(getApplicationContext(), path);
 		ImRequest.getInstance(getApplicationContext());
-		GroupRequest.getInstance(getApplicationContext());
+		GroupRequest.getInstance();
 		VideoRequest.getInstance(getApplicationContext());
 		ConfRequest.getInstance(getApplicationContext());
 		AudioRequest.getInstance(getApplicationContext());
@@ -296,7 +294,7 @@ public class MainApplication extends Application {
 		super.onTerminate();
 		V2Log.d(" terminating....");
 		ImRequest.getInstance(this).unInitialize();
-		GroupRequest.getInstance(this).unInitialize();
+		GroupRequest.getInstance().unInitialize();
 		VideoRequest.getInstance(this).unInitialize();
 		ConfRequest.getInstance(this).unInitialize();
 		AudioRequest.getInstance(this).unInitialize();

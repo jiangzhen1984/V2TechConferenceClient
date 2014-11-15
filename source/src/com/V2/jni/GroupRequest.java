@@ -6,26 +6,16 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import android.content.Context;
-import android.content.Intent;
-import android.text.TextUtils;
 
 import com.V2.jni.ind.FileJNIObject;
-import com.V2.jni.ind.GroupAddUserJNIObject;
 import com.V2.jni.ind.GroupQualicationJNIObject;
 import com.V2.jni.ind.V2Document;
 import com.V2.jni.ind.V2Group;
 import com.V2.jni.ind.V2User;
+import com.V2.jni.util.EscapedcharactersProcessing;
 import com.V2.jni.util.V2Log;
 import com.V2.jni.util.XmlAttributeExtractor;
-import com.v2tech.service.GlobalHolder;
-import com.v2tech.util.EscapedcharactersProcessing;
-import com.v2tech.view.contacts.add.AddFriendHistroysHandler;
-import com.v2tech.vo.GroupQualicationState;
-import com.v2tech.vo.User;
-import com.v2tech.vo.Group.GroupType;
-import com.v2tech.vo.VMessageQualification.QualificationState;
-import com.v2tech.vo.VMessageQualification.Type;
+
 
 public class GroupRequest {
 
@@ -34,13 +24,13 @@ public class GroupRequest {
 
 	private List<WeakReference<GroupRequestCallback>> mCallbacks;
 
-	private GroupRequest(Context context) {
+	private GroupRequest() {
 		mCallbacks = new CopyOnWriteArrayList<WeakReference<GroupRequestCallback>>();
 	};
 
-	public static synchronized GroupRequest getInstance(Context context) {
+	public static synchronized GroupRequest getInstance() {
 		if (mGroupRequest == null) {
-			mGroupRequest = new GroupRequest(context);
+			mGroupRequest = new GroupRequest();
 			if (!mGroupRequest.initialize(mGroupRequest)) {
 				throw new RuntimeException(
 						" can't not inintialize group request");
@@ -49,16 +39,6 @@ public class GroupRequest {
 		return mGroupRequest;
 	}
 
-	public static synchronized GroupRequest getInstance() {
-		if (mGroupRequest == null) {
-			mGroupRequest = new GroupRequest(null);
-			if (!mGroupRequest.initialize(mGroupRequest)) {
-				throw new RuntimeException(
-						" can't not inintialize group request");
-			}
-		}
-		return mGroupRequest;
-	}
 
 	public native boolean initialize(GroupRequest request);
 
@@ -525,25 +505,20 @@ public class GroupRequest {
 		V2Log.d("OnAddGroupUserInfo ->" + groupType + ":" + nGroupID + ":"
 				+ sXml);
 		
-		User remoteUser = User.fromXmlToUser(sXml);
+		V2User remoteUser = XmlAttributeExtractor.fromXml(sXml);
 		if(remoteUser == null){
 			V2Log.e("OnAddGroupUserInfo -> parse xml failed ...get null user : " + sXml);
 			return ;
 		}
 		
-		GlobalHolder.getInstance().putUser(remoteUser.getmUserId(),
-				remoteUser);
-		long uid = remoteUser.getmUserId();
-		GlobalHolder.getInstance().addUserToGroup(
-				GlobalHolder.getInstance().getUser(uid), nGroupID);
-		// get user base infos
-		ImRequest.getInstance().getUserBaseInfo(remoteUser.getmUserId());
+	
+		ImRequest.getInstance().getUserBaseInfo(remoteUser.uid);
 		
 		for (WeakReference<GroupRequestCallback> wrcb : mCallbacks) {
 			Object obj = wrcb.get();
 			if (obj != null) {
 				GroupRequestCallback callback = (GroupRequestCallback) obj;
-				callback.OnAddGroupUserInfoCallback(new GroupAddUserJNIObject(groupType, nGroupID, uid , sXml));
+				callback.OnAddGroupUserInfoCallback(groupType, nGroupID, remoteUser);
 			}
 		}
 	}
@@ -580,13 +555,9 @@ public class GroupRequest {
 		String createUesrID = XmlAttributeExtractor.extract(sXml,
 				" creatoruserid='", "'");
 		V2Group vg = new V2Group(Long.parseLong(gid), name, groupType);
-		if (gid != null && !gid.isEmpty() && !TextUtils.isEmpty(createUesrID)) {
-			User createUser = GlobalHolder.getInstance().getUser(
-					Long.valueOf(createUesrID));
-			if (createUser == null)
-				vg.creator = new V2User(Long.valueOf(createUesrID));
-			else
-				vg.creator = new V2User(createUser.getmUserId(), createUser.getName());
+		if (gid != null && !gid.isEmpty() && createUesrID != null) {
+			vg.owner = new V2User(Long.valueOf(createUesrID));
+			vg.creator = vg.owner;
 		}else{
 			V2Log.e("OnAddGroupInfo:: parse xml failed , don't get group id or user id ...." + sXml);
 		}
@@ -773,9 +744,12 @@ public class GroupRequest {
 			Object obj = wrcb.get();
 			if (obj != null) {
 				GroupRequestCallback callback = (GroupRequestCallback) obj;
+				//FIXME add comment
+				// 1 for application
+				// 3 for be_reject
 				callback.OnRefuseInviteJoinGroup(new GroupQualicationJNIObject(
-						groupType, nGroupID, nUserID, Type.CROWD_APPLICATION,
-						QualificationState.BE_REJECT, reason));
+						groupType, nGroupID, nUserID, 1,
+						3, reason));
 			}
 		}
 

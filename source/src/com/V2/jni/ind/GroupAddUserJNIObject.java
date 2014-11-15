@@ -8,7 +8,6 @@ public class GroupAddUserJNIObject extends JNIObjectInd implements Parcelable {
 	private int groupType;
 	private long groupID;
 	private long userID;
-	private String userInfos;
 
 	public GroupAddUserJNIObject(Parcel in) {
 		if (in != null) {
@@ -16,7 +15,6 @@ public class GroupAddUserJNIObject extends JNIObjectInd implements Parcelable {
 			groupType = in.readInt();
 			groupID = in.readLong();
 			userID = in.readLong();
-			userInfos = in.readString();
 		}
 	}
 
@@ -26,7 +24,6 @@ public class GroupAddUserJNIObject extends JNIObjectInd implements Parcelable {
 		this.groupType = groupType;
 		this.groupID = groupID;
 		this.userID = userID;
-		this.userInfos = userInfos;
 	}
 
 	@Override
@@ -40,7 +37,6 @@ public class GroupAddUserJNIObject extends JNIObjectInd implements Parcelable {
 		dest.writeInt(groupType);
 		dest.writeLong(groupID);
 		dest.writeLong(userID);
-		dest.writeString(userInfos);
 	}
 
 	public static final Parcelable.Creator<GroupAddUserJNIObject> CREATOR = new Parcelable.Creator<GroupAddUserJNIObject>() {
@@ -77,12 +73,4 @@ public class GroupAddUserJNIObject extends JNIObjectInd implements Parcelable {
 		this.userID = userID;
 	}
 	
-	public String getUserInfos() {
-		return userInfos;
-	}
-
-	public void setUserInfos(String userInfos) {
-		this.userInfos = userInfos;
-	}
-
 }

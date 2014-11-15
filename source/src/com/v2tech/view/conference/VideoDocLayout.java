@@ -341,8 +341,6 @@ public class VideoDocLayout extends LinearLayout {
 		mCurrentPage = mCurrentDoc.getActivatePage();
 
 		updateCurrentDocPage(mCurrentPage);
-		if (mCurrentPage.getVsMeta() != null)
-			drawShape(mCurrentPage.getVsMeta());
 		updateLayoutPageInformation();
 		updatePageButton();
 	}
@@ -360,7 +358,6 @@ public class VideoDocLayout extends LinearLayout {
 		// recycle image bitmap
 		recycleBitmap(mBackgroundBitMap);
 
-		// FIXME optimze code
 		if (this.mCurrentDoc.getDocType() == V2Doc.DOC_TYPE_BLANK_BOARD) {
 			mShapeBitmap = Bitmap.createBitmap(800, 600,
 					Bitmap.Config.ARGB_8888);
@@ -487,6 +484,18 @@ public class VideoDocLayout extends LinearLayout {
 				V2Log.e(" No available bitmap");
 				return;
 			}
+		} else {
+			if (shareDocBm != null && !shareDocBm.isRecycled()) {
+				// Current image view bitmap is smaller than shared document
+				// bitmap, we have to create new one
+				if (mImageViewBitmap.getWidth() < shareDocBm.getWidth()
+						|| mImageViewBitmap.getHeight() < shareDocBm
+								.getHeight()) {
+					mImageViewBitmap.recycle();
+					mImageViewBitmap = Bitmap.createBitmap(shareDocBm.getWidth(),
+								shareDocBm.getHeight(), Config.ARGB_8888);
+				}
+			}
 		}
 
 		Canvas target = new Canvas(mImageViewBitmap);
@@ -496,13 +505,13 @@ public class VideoDocLayout extends LinearLayout {
 				mImageViewBitmap.getHeight()), paint);
 
 		Paint p = new Paint();
+		if (shareDocBm != null && !shareDocBm.isRecycled()) {
+			target.drawBitmap(shareDocBm, 0, 0, p);
+		}
+		// draw shape must after share doc, because we make sure shape be front
+		// of shared doc
 		if (shapesBm != null && !shapesBm.isRecycled()) {
 			target.drawBitmap(shapesBm, 0, 0, p);
-		}
-		
-		if (shareDocBm != null && !shareDocBm.isRecycled()) {
-			target.concat(matrix);
-			target.drawBitmap(shareDocBm, 0, 0, p);
 		}
 	}
 
@@ -681,14 +690,24 @@ public class VideoDocLayout extends LinearLayout {
 		drawShape(list);
 	}
 
-	public void drawShape(List<V2ShapeMeta> list) {
+	public void drawShape(final List<V2ShapeMeta> list) {
 		if (list == null) {
 			V2Log.w(" shape list is null");
 			return;
 		}
 
+		// If background bitmap doesn't exist. means doesn't download picture
+		// from server yet.
+		// we send delay message until mBackgroundBitMap is created.
 		if (mBackgroundBitMap == null) {
-			V2Log.e("VideoDocLayout drawShape --> mBackgroundBitMap is null");
+			mTimeHanlder.postDelayed(new Runnable() {
+
+				@Override
+				public void run() {
+					drawShape(list);
+				}
+
+			}, 1000);
 			return;
 		}
 
@@ -698,7 +717,7 @@ public class VideoDocLayout extends LinearLayout {
 		}
 
 		Canvas cv = new Canvas(mShapeBitmap);
-		// target.concat(matrix);
+		cv.concat(matrix);
 		for (V2ShapeMeta meta : list) {
 			meta.draw(cv);
 		}

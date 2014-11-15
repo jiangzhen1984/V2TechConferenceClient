@@ -1,6 +1,5 @@
-package com.v2tech.util;
+package com.V2.jni.util;
 
-import com.V2.jni.util.V2Log;
 
 import android.text.TextUtils;
 

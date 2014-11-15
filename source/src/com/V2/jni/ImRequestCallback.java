@@ -19,7 +19,8 @@ public interface ImRequestCallback {
 	 * @param nUserID if succeed means user ID, otherwise 0
 	 * @param nStatus
 	 * @param nResult  0: succeed,  1: failed
-	 * @param serverTime  
+	 * @param serverTime 
+	 * @see com.v2tech.service.jni.JNIResponse.Result
 	 */
 	public void OnLoginCallback(long nUserID, int nStatus, int nResult , long serverTime);
 	
@@ -46,9 +47,9 @@ public interface ImRequestCallback {
 	 *    another case is when you call {@link ImRequest#getUserBaseInfo(long)}, this function will be called by JNI.
 	 * </p>
 	 * @param nUserID  user id
-	 * @param updatexml TODO add XML example
+	 * @param user
 	 */
-	public void OnUpdateBaseInfoCallback(long nUserID, String updatexml);
+	public void OnUpdateBaseInfoCallback(V2User user);
 	
 	
 	

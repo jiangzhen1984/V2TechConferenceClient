@@ -9,7 +9,7 @@ package com.v2tech.service.jni;
 public class JNIResponse {
 
 	public enum Result {
-		SUCCESS(0), FAILED(1), CONNECT_ERROR(301), SERVER_REJECT(300), UNKNOWN(-1), TIME_OUT(-2), INCORRECT_PAR(-3);
+		SUCCESS(0), FAILED(1), NO_RESOURCE(2), CONNECT_ERROR(301), SERVER_REJECT(300), UNKNOWN(-1), TIME_OUT(-2), INCORRECT_PAR(-3);
 
 		private int val;
 		private Result(int i) {
@@ -26,6 +26,8 @@ public class JNIResponse {
 				return SUCCESS;
 			case 1:
 				return FAILED;
+			case 2:
+				return NO_RESOURCE;
 			case 301:
 				return CONNECT_ERROR;
 			case 300:

@@ -537,7 +537,7 @@ public class LoginActivity extends Activity {
 					//init all database table names;
 					initDataBaseTableCacheNames();
 					finish();
-				} else {
+				} else if (rlr.getResult() == JNIResponse.Result.NO_RESOURCE){
 					V2Toast.makeText(mContext, R.string.error_connect_to_server_no_enough_resource,
 							V2Toast.LENGTH_LONG).show();
 				}

@@ -3,7 +3,6 @@ package com.V2.jni;
 import java.util.List;
 
 import com.V2.jni.ind.FileJNIObject;
-import com.V2.jni.ind.GroupAddUserJNIObject;
 import com.V2.jni.ind.GroupQualicationJNIObject;
 import com.V2.jni.ind.V2Document;
 import com.V2.jni.ind.V2Group;
@@ -100,7 +99,7 @@ public interface GroupRequestCallback {
 	 * The function called when a new friend coming 增加好友成功时的回调
 	 * @param obj
 	 */
-	public void OnAddGroupUserInfoCallback(GroupAddUserJNIObject obj);
+	public void OnAddGroupUserInfoCallback(int groupType, long nGroupID, V2User user);
 
 	/**
 	 * new group created call back

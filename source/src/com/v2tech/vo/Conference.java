@@ -10,8 +10,8 @@ import java.util.Locale;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.V2.jni.util.EscapedcharactersProcessing;
 import com.v2tech.service.GlobalHolder;
-import com.v2tech.util.EscapedcharactersProcessing;
 
 public class Conference implements Parcelable {
 

@@ -221,15 +221,12 @@ public class AddFriendHistroysHandler {
 		update(context, sql);
 	}
 
-	public static void becomeFriendHanler(Context context, String userInfo) {
+	public static void becomeFriendHanler(Context context, User remoteUser) {
 		String sql = null;
 		String[] sqlArgs = null;
 		Cursor cr = null;
-		if (userInfo == null) {
-			return;
-		}
+		
 		// 解析出字段
-		User remoteUser = User.fromXmlToUser(userInfo);
 		boolean ret1 = false;
 		boolean ret2 = false;
 		// 别人加我的记录未处理的最多只有一条

@@ -221,10 +221,10 @@ public class LogService extends Service implements Thread.UncaughtExceptionHandl
 		PowerManager pm = (PowerManager) getApplicationContext()
 				.getSystemService(Context.POWER_SERVICE);
 		wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
-        //获取系统默认处理器
-        mDefaultHandler = Thread.getDefaultUncaughtExceptionHandler();
-        //设置LogService为程序的默认处理器
-        Thread.setDefaultUncaughtExceptionHandler(this);
+//        //获取系统默认处理器
+//        mDefaultHandler = Thread.getDefaultUncaughtExceptionHandler();
+//        //设置LogService为程序的默认处理器
+//        Thread.setDefaultUncaughtExceptionHandler(this);
 
         V2Log.d(TAG, "LogService onCreate");
 	}

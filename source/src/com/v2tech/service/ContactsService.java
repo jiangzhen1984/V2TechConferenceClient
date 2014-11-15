@@ -8,15 +8,12 @@ import android.os.Message;
 
 import com.V2.jni.GroupRequest;
 import com.V2.jni.GroupRequestCallbackAdapter;
-import com.V2.jni.ind.FileJNIObject;
-import com.V2.jni.ind.GroupAddUserJNIObject;
 import com.V2.jni.ind.V2Group;
 import com.V2.jni.ind.V2User;
-import com.V2.jni.util.V2Log;
+import com.V2.jni.util.EscapedcharactersProcessing;
 import com.v2tech.service.jni.GroupServiceJNIResponse;
 import com.v2tech.service.jni.JNIResponse;
 import com.v2tech.service.jni.RequestConfCreateResponse;
-import com.v2tech.util.EscapedcharactersProcessing;
 import com.v2tech.vo.ContactGroup;
 import com.v2tech.vo.Group;
 import com.v2tech.vo.Group.GroupType;
@@ -292,19 +289,7 @@ public class ContactsService extends AbstractHandler {
 			;
 		}
 
-		@Override
-		public void OnAddGroupUserInfoCallback(GroupAddUserJNIObject obj) {
-			if(obj == null){
-				V2Log.e("ContactService OnAddGroupUserInfoCallback --> : get null GroupAddUserJNIObject Object!");
-				return ;
-			}
-			
-			if (obj.getGroupType() != Group.GroupType.CONTACT.intValue()) {
-				return;
-			}
-			// 为什么要调，父类的不是什么都不执行的函数吗？
-			super.OnAddGroupUserInfoCallback(obj);
-		}
+
 
 		@Override
 		public void onAddGroupInfo(V2Group group) {

@@ -291,6 +291,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 				intentFilter.addAction(JNIService.JNI_BROADCAST_KICED_CROWD);
 				intentFilter
 						.addAction(PublicIntent.BROADCAST_CROWD_DELETED_NOTIFICATION);
+				intentFilter.addAction(JNIService.JNI_BROADCAST_GROUP_UPDATED);
 			}
 
 			if (mCurrentTabFlag == Conversation.TYPE_CONTACT) {
@@ -2143,6 +2144,17 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 						-1);
 				// clear the crowd group all verification database messges
 				MessageLoader.deleteCrowdVerificationMessage(context, cid);
+			} else if (JNIService.JNI_BROADCAST_GROUP_UPDATED.equals(intent.getAction())) {
+				long gid = intent.getLongExtra("gid", 0);
+				Group g = GlobalHolder.getInstance().getGroupById(gid);
+				if (g.getGroupType() == GroupType.CHATING) {
+					for (int i =0; i < mItemList.size(); i++) {
+						ScrollItem item = mItemList.get(i);
+						if (item.cov.getExtId() == g.getmGId()) {
+							((GroupLayout)item.gp).update();
+						}
+					}
+				}
 			}
 			// else if (JNIService.JNI_BROADCAST_NEW_MESSAGE.equals(intent
 			// .getAction())) {

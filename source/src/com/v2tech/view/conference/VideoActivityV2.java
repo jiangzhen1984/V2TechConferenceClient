@@ -305,7 +305,9 @@ public class VideoActivityV2 extends Activity {
 		
 		audioManager = (AudioManager) mContext
 				.getSystemService(Context.AUDIO_SERVICE);
-
+		
+		//Broadcast for user joined conference, to inform that quit P2P conversation
+		broadcastForJoined();
 	}
 
 	@Override
@@ -404,6 +406,19 @@ public class VideoActivityV2 extends Activity {
 				.getInstance().getCurrentUserId()) ? true : false;
 	}
 
+	
+	/**
+	 * Broadcast for user joined conference, to inform that quit P2P conversation
+	 */
+	private void broadcastForJoined() {
+		Intent i = new Intent(PublicIntent.BROADCAST_JOINED_CONFERENCE_NOTIFICATION);
+		i.addCategory(PublicIntent.DEFAULT_CATEGORY);
+		
+		i.putExtra("confid", conf.getId());
+		sendBroadcast(i);
+	}
+	
+	
 	/**
 	 * Update speaker icon and state
 	 * 
@@ -1517,14 +1532,26 @@ public class VideoActivityV2 extends Activity {
 			V2Log.e("Attendee is null");
 			return;
 		}
-		// User do exist video device
-		if (att.getmDevices() != null) {
-			for (UserDeviceConfig udc : att.getmDevices()) {
-				if (udc != null && udc.isShowing()) {
-					showOrCloseAttendeeVideo(udc);
-				}
+		
+		boolean layoutChanged = false;
+		for (int i = 0; i < mCurrentShowedSV.size(); i++) {
+			SurfaceViewW svw = mCurrentShowedSV.get(i);
+			if (att.getAttId() == svw.at.getAttId()) {
+				svw.observer.close();
+				svw.udc.setShowing(false);
+				mCurrentShowedSV.remove(svw);
+				mVideoLayout.removeView(svw.getView());
+				svw.rl.removeAllViews();
+				i --;
+				layoutChanged = true;
 			}
 		}
+		
+		// adjust layout if we closed video
+		if (layoutChanged) {
+			adjustVideoLayout();
+		}
+		
 		if (conf.getChairman() == att.getAttId()) {
 			att.setChairMan(true);
 		}
@@ -1617,6 +1644,8 @@ public class VideoActivityV2 extends Activity {
 			if (cp == ConferencePermission.SPEAKING
 					&& ps == PermissionState.GRANTED) {
 				pa.setSpeakingState(true);
+			} else {
+				pa.setSpeakingState(false);
 			}
 			mAttendeeContainer.updateAttendeeSpeakingState(pa);
 			return true;

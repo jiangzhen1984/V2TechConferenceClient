@@ -8,11 +8,11 @@ import com.V2.jni.ImRequest;
 import com.V2.jni.ImRequestCallbackAdapter;
 import com.V2.jni.V2ClientType;
 import com.V2.jni.V2GlobalEnum;
+import com.V2.jni.util.EscapedcharactersProcessing;
 import com.V2.jni.util.V2Log;
 import com.v2tech.service.jni.JNIResponse;
 import com.v2tech.service.jni.RequestLogInResponse;
 import com.v2tech.service.jni.RequestUserUpdateResponse;
-import com.v2tech.util.EscapedcharactersProcessing;
 import com.v2tech.util.GlobalConfig;
 import com.v2tech.vo.User;
 

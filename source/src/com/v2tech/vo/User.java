@@ -30,9 +30,9 @@ import org.xml.sax.SAXException;
 
 import android.graphics.Bitmap;
 
+import com.V2.jni.util.EscapedcharactersProcessing;
 import com.V2.jni.util.V2Log;
 import com.v2tech.service.GlobalHolder;
-import com.v2tech.util.EscapedcharactersProcessing;
 
 /**
  * User information
@@ -586,88 +586,8 @@ public class User implements Comparable<User> {
 		return null;
 	}
 
-	/**
-	 * 
-	 * @param uID
-	 * @param xml
-	 * @return
-	 */
-	public static User fromXmlToUser(String xml) {
-		int uID;
-		String strID = extraAttri("id='", "'", xml);
-		if (strID == null) {
-			return null;
-		}
-		try {
-			uID = Integer.parseInt(strID);
-		} catch (NumberFormatException e) {
-			return null;
-		}
+	
 
-		return fromXml(uID, xml);
-	}
-
-	/**
-	 * 
-	 * @param uID
-	 * @param xml
-	 * @return
-	 */
-	public static User fromXml(int uID, String xml) {
-		String nickName = extraAttri("nickname='", "'", xml);
-		String signature = extraAttri("sign='", "'", xml);
-		String job = extraAttri("job='", "'", xml);
-		String telephone = extraAttri("telephone='", "'", xml);
-		String mobile = extraAttri("mobile='", "'", xml);
-		String address = extraAttri("address='", "'", xml);
-		String gender = extraAttri("sex='", "'", xml);
-		String email = extraAttri("email='", "'", xml);
-		String bir = extraAttri("birthday='", "'", xml);
-		String account = extraAttri("account='", "'", xml);
-		String fax = extraAttri("fax='", "'", xml);
-		String commentname = extraAttri("commentname='", "'", xml);
-		String authtype = extraAttri("authtype='", "'", xml);
-		DateFormat dp = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-
-		User u = new User(uID, nickName);
-		u.setSignature(signature);
-		u.setJob(job);
-		u.setTelephone(telephone);
-		u.setMobile(mobile);
-		u.setAddress(address);
-		u.setSex(gender);
-		u.setEmail(email);
-		u.setFax(fax);
-		u.setmCommentname(commentname);
-		u.setAccount(account);
-		if (authtype != null && authtype != "") {
-			u.setAuthtype(Integer.parseInt(authtype));
-		} else {
-			u.setAuthtype(0);
-		}
-
-		if (bir != null && bir.length() > 0) {
-			try {
-				u.setBirthday(dp.parse(bir));
-			} catch (ParseException e) {
-				e.printStackTrace();
-			}
-		}
-		return u;
-	}
-
-	private static String extraAttri(String startStr, String endStr, String xml) {
-		int pos = xml.indexOf(startStr);
-		if (pos == -1) {
-			return null;
-		}
-		int end = xml.indexOf(endStr, pos + startStr.length());
-		if (end == -1) {
-			return null;
-		}
-		return EscapedcharactersProcessing.reverse(xml.substring(
-				pos + startStr.length(), end));
-	}
 
 	public enum DeviceType {
 		CELL_PHONE(2), PC(1), UNKNOWN(-1);

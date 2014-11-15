@@ -15,6 +15,7 @@ import com.V2.jni.ind.GroupAddUserJNIObject;
 import com.V2.jni.ind.GroupFileJNIObject;
 import com.V2.jni.ind.GroupQualicationJNIObject;
 import com.V2.jni.ind.V2Group;
+import com.V2.jni.ind.V2User;
 import com.V2.jni.util.V2Log;
 import com.v2tech.service.jni.CreateCrowdResponse;
 import com.v2tech.service.jni.FileTransStatusIndication;
@@ -590,7 +591,7 @@ public class CrowdGroupService extends AbstractHandler {
 					MessageBuilder.updateQualicationMessageState(group.id, group.creator.uid,
 							new GroupQualicationState(Type.CROWD_INVITATION , QualificationState.ACCEPTED , null));
 				} else {
-					if(GlobalHolder.getInstance().getCurrentUserId() == group.id){
+					if(GlobalHolder.getInstance().getCurrentUserId() == group.owner.uid){
 						V2Log.e("CrowdGroupService onAddGroupInfo--> successful create a new group , id is : " + group.id);
 						JNIResponse jniRes = new CreateCrowdResponse(group.id,
 								CreateCrowdResponse.Result.SUCCESS);
@@ -601,18 +602,21 @@ public class CrowdGroupService extends AbstractHandler {
 			}
 		}
 		
+		
 		@Override
-		public void OnAddGroupUserInfoCallback(GroupAddUserJNIObject obj) {
-			if (obj.getGroupType() == V2Group.TYPE_CROWD && obj.getUserID() != GlobalHolder.getInstance().getCurrentUserId()) {
+		public void OnAddGroupUserInfoCallback(int groupType, long nGroupID,
+				V2User user) {
+			if (groupType == V2Group.TYPE_CROWD && user.uid != GlobalHolder.getInstance().getCurrentUserId()) {
 				JNIResponse jniRes = new JNIResponse(
 						CreateCrowdResponse.Result.SUCCESS);
-				jniRes.resObj = obj;
+				jniRes.resObj = new GroupAddUserJNIObject(groupType, nGroupID, user.uid, "");
 				Message.obtain(mCallbackHandler, ACCEPT_APPLICATION_CROWD,
 						jniRes).sendToTarget();
-				MessageBuilder.updateQualicationMessageState(obj.getGroupID() , obj.getUserID(),
+				MessageBuilder.updateQualicationMessageState(nGroupID , user.uid,
 						new GroupQualicationState(Type.CROWD_APPLICATION , QualificationState.ACCEPTED , null));
 			}
 		}
+	
 
 		/*
 		 * Used to as callback of leave crowd group

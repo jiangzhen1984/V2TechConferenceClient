@@ -22,7 +22,7 @@ public abstract class ImRequestCallbackAdapter implements ImRequestCallback {
 	}
 
 	@Override
-	public void OnUpdateBaseInfoCallback(long nUserID, String updatexml) {
+	public void OnUpdateBaseInfoCallback(V2User user) {
 
 	}
 

@@ -28,11 +28,9 @@ import com.v2tech.service.jni.JNIResponse;
 import com.v2tech.service.jni.RequestChatServiceResponse;
 import com.v2tech.service.jni.RequestSendMessageResponse;
 import com.v2tech.util.GlobalConfig;
-import com.v2tech.view.conversation.MessageBuilder;
 import com.v2tech.view.conversation.MessageLoader;
 import com.v2tech.vo.UserChattingObject;
 import com.v2tech.vo.VMessage;
-import com.v2tech.vo.VMessageAbstractItem;
 import com.v2tech.vo.VMessageAudioItem;
 import com.v2tech.vo.VMessageFileItem;
 import com.v2tech.vo.VMessageImageItem;
@@ -91,8 +89,6 @@ public class ChatService extends DeviceService {
 	private static final int KEY_FILE_TRANS_STATUS_NOTIFICATION_LISTNER = 2;
 	private static final int KEY_VIDEO_CONNECTED = 3;
 	private static final int KEY_P2P_CALL_RESPONSE = 4;
-
-	private static final String TAG = "ChatService";
 
 	public ChatService() {
 		super();

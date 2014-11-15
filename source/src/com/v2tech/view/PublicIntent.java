@@ -83,15 +83,18 @@ public class PublicIntent {
 	 * key: no
 	 */
 	public static final String BROADCAST_USER_COMMENT_NAME_NOTIFICATION = "com.v2tech.broadcast.user_comment_name_notification";
-	// Broadcaset for new conference. This is only use conference is created by
-	// self
-	// extra key: newGid : group id
-	// we can get conference object from GlobalHolder
+	
+	/** Broadcast for new conference. This is only for conference is created by self
+	 * extra key: newGid : group id
+	 * we can get conference object from GlobalHolder
+	 * 
+	 */
 	public static final String BROADCAST_NEW_CONFERENCE_NOTIFICATION = "com.v2tech.jni.broadcast.new_conference_notification";
 	// Request update contacts group
 	public static final String BROADCAST_REQUEST_UPDATE_CONTACTS_GROUP = "com.v2tech.broadcast.update_contacts_group";
 	// Broadcast for crowd is deleted notification
 	public static final String BROADCAST_CROWD_DELETED_NOTIFICATION = "com.v2tech.broadcast.crowd_deleted_notification";
+	
 	/**
 	 * Broadcast for contact group updated 
 	 * key: userId 
@@ -107,6 +110,13 @@ public class PublicIntent {
 	 * key: kicked boolean false means quit by self, true crowd owner kicked 
 	 */
 	public static final String BROADCAST_CROWD_QUIT_NOTIFICATION = "com.v2tech.broadcast.crowd_quit_notification";
+	
+	
+	/**
+	 * Broadcast for user joined conference, to inform that quit P2P conversation
+	 * key: confid conference if 
+	 */
+	public static final String BROADCAST_JOINED_CONFERENCE_NOTIFICATION = "com.v2tech.broadcast.joined_conference_notification";
 
 
 }

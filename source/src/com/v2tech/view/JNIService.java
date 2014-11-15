@@ -23,7 +23,6 @@ import android.os.Message;
 import android.os.Parcelable;
 import android.support.v4.util.LongSparseArray;
 import android.util.Log;
-import android.util.SparseArray;
 import android.widget.Toast;
 
 import com.V2.jni.AudioRequest;
@@ -44,7 +43,6 @@ import com.V2.jni.VideoRequest;
 import com.V2.jni.VideoRequestCallbackAdapter;
 import com.V2.jni.ind.AudioJNIObjectInd;
 import com.V2.jni.ind.FileJNIObject;
-import com.V2.jni.ind.GroupAddUserJNIObject;
 import com.V2.jni.ind.GroupJoinErrorJNIObject;
 import com.V2.jni.ind.GroupQualicationJNIObject;
 import com.V2.jni.ind.SendingResultJNIObjectInd;
@@ -58,6 +56,7 @@ import com.v2tech.db.ContentDescriptor;
 import com.v2tech.service.BitmapManager;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.service.jni.FileDownLoadErrorIndication;
+import com.v2tech.service.jni.JNIResponse;
 import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.GlobalState;
 import com.v2tech.util.Notificator;
@@ -97,7 +96,8 @@ import com.v2tech.vo.VMessageQualificationInvitationCrowd;
  * @author 28851274
  * 
  */
-public class JNIService extends Service implements CommonUpdateConversationStateInterface{
+public class JNIService extends Service implements
+		CommonUpdateConversationStateInterface {
 	private static final String TAG_FILE = "JNIService";
 	private static final String TAG = "JNIService";
 	public static final int BINARY_TYPE_AUDIO = 3;
@@ -147,7 +147,7 @@ public class JNIService extends Service implements CommonUpdateConversationState
 	private final LocalBinder mBinder = new LocalBinder();
 
 	private Integer mBinderRef = 0;
-	
+
 	private List<Integer> delayBroadcast = new ArrayList<Integer>();
 	private boolean noNeedBroadcast;
 
@@ -201,7 +201,7 @@ public class JNIService extends Service implements CommonUpdateConversationState
 		ImRequest.getInstance(this.getApplicationContext()).addCallback(mImCB);
 
 		mGRCB = new GroupRequestCB(mCallbackHandler);
-		GroupRequest.getInstance(this.getApplicationContext()).addCallback(
+		GroupRequest.getInstance().addCallback(
 				mGRCB);
 
 		mVRCB = new VideoRequestCB(mCallbackHandler);
@@ -220,7 +220,7 @@ public class JNIService extends Service implements CommonUpdateConversationState
 
 		mFRCB = new FileRequestCB(mCallbackHandler);
 		FileRequest.getInstance().addCallback(mFRCB);
-		
+
 		CommonCallBack.getInstance().setConversationStateInterface(this);
 	}
 
@@ -289,6 +289,30 @@ public class JNIService extends Service implements CommonUpdateConversationState
 		sendBroadcast(i);
 	}
 
+	private User convertUser(V2User user) {
+		if (user == null) {
+			return null;
+		}
+
+		User u = new User(user.uid, user.mNickName);
+		u.setSignature(user.mSignature);
+		u.setJob(user.mJob);
+		u.setTelephone(user.mTelephone);
+		u.setMobile(user.mMobile);
+		u.setAddress(user.mAddress);
+		u.setSex(user.mSex);
+		u.setEmail(user.mEmail);
+		u.setFax(user.mFax);
+		if (user.mCommentname != null && !user.mCommentname.isEmpty()) {
+			u.setNickName(user.mCommentname);
+		}
+		u.setmCommentname(user.mCommentname);
+		u.setAccount(user.mAccount);
+		u.setAuthtype(user.mAuthtype);
+		u.setBirthday(user.mBirthday);
+		return u;
+	}
+
 	static long lastNotificatorTime = 0;
 
 	// //////////////////////////////////////////////////////////
@@ -318,7 +342,7 @@ public class JNIService extends Service implements CommonUpdateConversationState
 				broadcastNetworkState(NetworkStateCode.fromInt(msg.arg1));
 				break;
 			case JNI_UPDATE_USER_INFO:
-				User u = User.fromXml(msg.arg1, (String) msg.obj);
+				User u = (User) msg.obj;
 				GlobalHolder.getInstance().putUser(u.getmUserId(), u);
 
 				Intent sigatureIntent = new Intent();
@@ -338,12 +362,13 @@ public class JNIService extends Service implements CommonUpdateConversationState
 
 				if (gl != null && gl.size() > 0) {
 					GlobalHolder.getInstance().updateGroupList(msg.arg1, gl);
-					if((msg.arg1 == V2GlobalEnum.GROUP_TYPE_CROWD || 
-							msg.arg1 == V2GlobalEnum.GROUP_TYPE_DEPARTMENT) && !noNeedBroadcast){
-						V2Log.d(TAG, "ConversationTabFragment no builed successfully! Need to delay sending , type is ：" + msg.arg1);
+					if ((msg.arg1 == V2GlobalEnum.GROUP_TYPE_CROWD || msg.arg1 == V2GlobalEnum.GROUP_TYPE_DEPARTMENT)
+							&& !noNeedBroadcast) {
+						V2Log.d(TAG,
+								"ConversationTabFragment no builed successfully! Need to delay sending , type is ："
+										+ msg.arg1);
 						delayBroadcast.add(msg.arg1);
-					}
-					else{
+					} else {
 						Intent gi = new Intent(JNI_BROADCAST_GROUP_NOTIFICATION);
 						gi.putExtra("gtype", msg.arg1);
 						gi.addCategory(JNI_BROADCAST_CATEGROY);
@@ -498,8 +523,10 @@ public class JNIService extends Service implements CommonUpdateConversationState
 		@Override
 		public void OnLoginCallback(long nUserID, int nStatus, int nResult,
 				long serverTime) {
-			// Just request current logged in user information
-			ImRequest.getInstance().getUserBaseInfo(nUserID);
+			if (JNIResponse.Result.fromInt(nResult) == JNIResponse.Result.SUCCESS) {
+				// Just request current logged in user information
+				ImRequest.getInstance().getUserBaseInfo(nUserID);
+			}
 		}
 
 		@Override
@@ -537,9 +564,12 @@ public class JNIService extends Service implements CommonUpdateConversationState
 		}
 
 		@Override
-		public void OnUpdateBaseInfoCallback(long nUserID, String updatexml) {
-			Message.obtain(mCallbackHandler, JNI_UPDATE_USER_INFO,
-					(int) nUserID, 0, updatexml).sendToTarget();
+		public void OnUpdateBaseInfoCallback(V2User user) {
+			if (user == null || user.uid <= 0) {
+				return;
+			}
+			User u = convertUser(user);
+			Message.obtain(mCallbackHandler, JNI_UPDATE_USER_INFO,u).sendToTarget();
 		}
 
 		@Override
@@ -617,7 +647,8 @@ public class JNIService extends Service implements CommonUpdateConversationState
 		@Override
 		public void OnModifyGroupInfoCallback(V2Group group) {
 			if (group == null) {
-                V2Log.e(TAG , "OnModifyGroupInfoCallback --> update Group Infos failed...get V2Group is null!");
+				V2Log.e(TAG,
+						"OnModifyGroupInfoCallback --> update Group Infos failed...get V2Group is null!");
 				return;
 			}
 
@@ -629,8 +660,10 @@ public class JNIService extends Service implements CommonUpdateConversationState
 				cg.setAnnouncement(group.announce);
 				cg.setBrief(group.brief);
 				cg.setAuthType(CrowdGroup.AuthType.fromInt(group.authType));
-                //update crowd group infos in globle collections
-//                GlobalHolder.getInstance().updateCrwodGroupByID(V2GlobalEnum.GROUP_TYPE_CROWD , group);
+				cg.setName(group.name);
+				// update crowd group infos in globle collections
+				// GlobalHolder.getInstance().updateCrwodGroupByID(V2GlobalEnum.GROUP_TYPE_CROWD
+				// , group);
 			}
 
 			// Send broadcast
@@ -703,8 +736,8 @@ public class JNIService extends Service implements CommonUpdateConversationState
 				cg.setAuthType(CrowdGroup.AuthType.fromInt(group.authType));
 
 				checkMessageAndSendBroadcast(
-						VMessageQualification.Type.CROWD_INVITATION, cg,
-                        owner, null);
+						VMessageQualification.Type.CROWD_INVITATION, cg, owner,
+						null);
 
 			} else if (gType == GroupType.CONTACT) {
 
@@ -723,19 +756,19 @@ public class JNIService extends Service implements CommonUpdateConversationState
 				VMessageQualification.Type type, CrowdGroup g, User user,
 				String reason) {
 			// boolean sendBroadcast = true;
-            VMessageQualification crowdMsg = null;
-            if(type == Type.CROWD_APPLICATION){
-                crowdMsg = MessageBuilder
-                        .queryApplyQualMessageByUserId(user.getmUserId());
-                if(!(crowdMsg instanceof  VMessageQualificationApplicationCrowd)){
-                   MessageBuilder.deleteQualMessage(mContext , crowdMsg.getId());
-                   crowdMsg = null;
-                }
-            }
-            else{
-                crowdMsg = MessageBuilder
-                        .queryQualMessageByCrowdId(mContext, user, g);
-            }
+			VMessageQualification crowdMsg = null;
+			if (type == Type.CROWD_APPLICATION) {
+				crowdMsg = MessageBuilder.queryApplyQualMessageByUserId(user
+						.getmUserId());
+				if (!(crowdMsg instanceof VMessageQualificationApplicationCrowd)) {
+					MessageBuilder
+							.deleteQualMessage(mContext, crowdMsg.getId());
+					crowdMsg = null;
+				}
+			} else {
+				crowdMsg = MessageBuilder.queryQualMessageByCrowdId(mContext,
+						user, g);
+			}
 
 			if (crowdMsg != null) {
 				if (crowdMsg.getQualState() != VMessageQualification.QualificationState.WAITING) {
@@ -748,7 +781,7 @@ public class JNIService extends Service implements CommonUpdateConversationState
 					((VMessageQualificationApplicationCrowd) crowdMsg)
 							.setApplyReason(reason);
 				} else if (type == VMessageQualification.Type.CROWD_INVITATION) {
-                    crowdMsg.setRejectReason(reason);
+					crowdMsg.setRejectReason(reason);
 				} else {
 					throw new RuntimeException("Unkown type");
 				}
@@ -790,8 +823,9 @@ public class JNIService extends Service implements CommonUpdateConversationState
 		@Override
 		public void OnRequestCreateRelationCallback(V2User user,
 				String additInfo) {
-			if(user == null)
-				V2Log.e(TAG, "OnRequestCreateRelationCallback ---> Create relation failed...get user is null");
+			if (user == null)
+				V2Log.e(TAG,
+						"OnRequestCreateRelationCallback ---> Create relation failed...get user is null");
 			User vUser = GlobalHolder.getInstance().getUser(user.uid);
 			AddFriendHistroysHandler.addMeNeedAuthentication(
 					getApplicationContext(), vUser, additInfo);
@@ -866,32 +900,34 @@ public class JNIService extends Service implements CommonUpdateConversationState
 		}
 
 		@Override
-		public void OnAddGroupUserInfoCallback(GroupAddUserJNIObject obj) {
-			if(obj == null){
+		public void OnAddGroupUserInfoCallback(int groupType, long nGroupID,
+				V2User user) {
+			if (user == null) {
 				V2Log.e("JNIServie OnAddGroupUserInfoCallback --> : get null GroupAddUserJNIObject Object!");
-				return ;
+				return;
 			}
 
-			GroupType gType = GroupType.fromInt(obj.getGroupType());
-			if (gType == GroupType.CONTACT) {
-				AddFriendHistroysHandler.becomeFriendHanler(
-						getApplicationContext(), obj.getUserInfos());
+			User newUser = convertUser(user);
 
-				User user = GlobalHolder.getInstance().getUser(obj.getUserID());
-				User remoteUser = User.fromXmlToUser(obj.getUserInfos());
-				if (remoteUser.getmCommentname() != null) {
-					user.setNickName(remoteUser.getmCommentname());
-				}
+			GlobalHolder.getInstance().putUser(newUser.getmUserId(), newUser);
+			GlobalHolder.getInstance().addUserToGroup(newUser, nGroupID);
+
+			GroupType gType = GroupType.fromInt(groupType);
+			if (gType == GroupType.CONTACT) {
+				// FIXME 不要在JNI里面直接调用UI
+				AddFriendHistroysHandler.becomeFriendHanler(
+						getApplicationContext(), newUser);
 
 				Intent intent = new Intent();
 				intent.setAction(JNI_BROADCAST_FRIEND_AUTHENTICATION);
 				intent.addCategory(JNI_BROADCAST_CATEGROY);
-				intent.putExtra("uid", obj.getUserID());
-				intent.putExtra("gid", obj.getGroupID());
+				intent.putExtra("uid", newUser.getmUserId());
+				intent.putExtra("gid", nGroupID);
 				sendOrderedBroadcast(intent, null);
 			}
 
-			GroupUserObject object = new GroupUserObject(obj.getGroupType(), obj.getGroupID(), obj.getUserID());
+			GroupUserObject object = new GroupUserObject(groupType, nGroupID,
+					newUser.getmUserId());
 			Intent i = new Intent();
 			i.setAction(JNIService.JNI_BROADCAST_GROUP_USER_ADDED);
 			i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
@@ -899,58 +935,73 @@ public class JNIService extends Service implements CommonUpdateConversationState
 			sendBroadcast(i);
 		}
 
-        @Override
-        public void OnAcceptApplyJoinGroup(V2Group group) {
-            if(group == null){
-                V2Log.e(TAG , "OnRefuseApplyJoinGroup : May receive refuse apply join message failed.. get null V2Group Object");
-                return ;
-            }
+		@Override
+		public void OnAcceptApplyJoinGroup(V2Group group) {
+			if (group == null) {
+				V2Log.e(TAG,
+						"OnRefuseApplyJoinGroup : May receive refuse apply join message failed.. get null V2Group Object");
+				return;
+			}
 
-            long id = MessageBuilder.updateQualicationMessageState(group.id, group.creator.uid,
-					new GroupQualicationState(Type.CROWD_INVITATION , QualificationState.BE_ACCEPTED , null));
-            if(id == -1){
-                V2Log.e(TAG , "OnRefuseApplyJoinGroup : Update Qualication Message to Database failed.. return -1 , group id is : " + group.id + " user id" +
-                        ": " + group.creator.uid);
-                return ;
-            }
+			long id = MessageBuilder.updateQualicationMessageState(group.id,
+					group.creator.uid, new GroupQualicationState(
+							Type.CROWD_INVITATION,
+							QualificationState.BE_ACCEPTED, null));
+			if (id == -1) {
+				V2Log.e(TAG,
+						"OnRefuseApplyJoinGroup : Update Qualication Message to Database failed.. return -1 , group id is : "
+								+ group.id
+								+ " user id"
+								+ ": "
+								+ group.creator.uid);
+				return;
+			}
 
-            Intent intent = new Intent();
-            intent.setAction(JNIService.JNI_BROADCAST_NEW_QUALIFICATION_MESSAGE);
-            intent.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
-            intent.putExtra("msgId", id);
-            sendOrderedBroadcast(intent, null);
-        }
+			Intent intent = new Intent();
+			intent.setAction(JNIService.JNI_BROADCAST_NEW_QUALIFICATION_MESSAGE);
+			intent.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
+			intent.putExtra("msgId", id);
+			sendOrderedBroadcast(intent, null);
+		}
 
-        @Override
-        public void OnRefuseApplyJoinGroup(V2Group parseSingleCrowd, String reason) {
-            if(parseSingleCrowd == null){
-                V2Log.e(TAG , "OnRefuseApplyJoinGroup : May receive refuse apply join message failed.. get null V2Group Object");
-                return ;
-            }
+		@Override
+		public void OnRefuseApplyJoinGroup(V2Group parseSingleCrowd,
+				String reason) {
+			if (parseSingleCrowd == null) {
+				V2Log.e(TAG,
+						"OnRefuseApplyJoinGroup : May receive refuse apply join message failed.. get null V2Group Object");
+				return;
+			}
 
-            long id = MessageBuilder.updateQualicationMessageState(parseSingleCrowd.id, parseSingleCrowd.creator.uid,
-                    new GroupQualicationState(Type.CROWD_INVITATION , QualificationState.BE_REJECT , reason));
-            if(id == -1){
-                V2Log.e(TAG , "OnRefuseApplyJoinGroup : Update Qualication Message to Database failed.. return -1 , group id is : " + parseSingleCrowd.id + " user id" +
-                        ": " + parseSingleCrowd.creator.uid);
-                return ;
-            }
+			long id = MessageBuilder.updateQualicationMessageState(
+					parseSingleCrowd.id, parseSingleCrowd.creator.uid,
+					new GroupQualicationState(Type.CROWD_INVITATION,
+							QualificationState.BE_REJECT, reason));
+			if (id == -1) {
+				V2Log.e(TAG,
+						"OnRefuseApplyJoinGroup : Update Qualication Message to Database failed.. return -1 , group id is : "
+								+ parseSingleCrowd.id
+								+ " user id"
+								+ ": "
+								+ parseSingleCrowd.creator.uid);
+				return;
+			}
 
-            Intent intent = new Intent();
-            intent.setAction(JNIService.JNI_BROADCAST_NEW_QUALIFICATION_MESSAGE);
-            intent.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
-            intent.putExtra("msgId", id);
-            sendOrderedBroadcast(intent, null);
-        }
+			Intent intent = new Intent();
+			intent.setAction(JNIService.JNI_BROADCAST_NEW_QUALIFICATION_MESSAGE);
+			intent.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
+			intent.putExtra("msgId", id);
+			sendOrderedBroadcast(intent, null);
+		}
 
-        @Override
+		@Override
 		public void OnRefuseInviteJoinGroup(GroupQualicationJNIObject obj) {
 
-			if(obj == null){
+			if (obj == null) {
 				V2Log.e("OnRefuseInviteJoinGroup : May receive refuse invite message failed.. get null GroupQualicationJNIObject");
-				return ;
+				return;
 			}
-			
+
 			GroupType gType = GroupType.fromInt(obj.groupType);
 			if (gType == GroupType.CONTACT) {
 				AddFriendHistroysHandler.addOtherRefused(
@@ -961,12 +1012,20 @@ public class JNIService extends Service implements CommonUpdateConversationState
 				intent.setAction(JNI_BROADCAST_FRIEND_AUTHENTICATION);
 				intent.addCategory(JNI_BROADCAST_CATEGROY);
 				sendOrderedBroadcast(intent, null);
-			} else if(gType == GroupType.CHATING){
-				long id = MessageBuilder.updateQualicationMessageState(obj.groupID, obj.userID, 
-						new GroupQualicationState(obj.qualicationType , obj.state , obj.reason));
-				if(id == -1){
-					V2Log.e(TAG, "OnRefuseInviteJoinGroup --> update refuse Invite join group failed... !");
-					return ;
+			} else if (gType == GroupType.CHATING) {
+				long id = MessageBuilder
+						.updateQualicationMessageState(
+								obj.groupID,
+								obj.userID,
+								new GroupQualicationState(
+										com.v2tech.vo.VMessageQualification.Type
+												.fromInt(obj.qualicationType),
+										com.v2tech.vo.VMessageQualification.QualificationState
+												.fromInt(obj.state), obj.reason));
+				if (id == -1) {
+					V2Log.e(TAG,
+							"OnRefuseInviteJoinGroup --> update refuse Invite join group failed... !");
+					return;
 				}
 				Intent intent = new Intent();
 				intent.setAction(JNIService.JNI_BROADCAST_NEW_QUALIFICATION_MESSAGE);
@@ -1001,8 +1060,7 @@ public class JNIService extends Service implements CommonUpdateConversationState
 								GlobalConfig.getGlobalServerTime()));
 				VMessageFileItem item = new VMessageFileItem(vm,
 						fileJNIObject.fileName,
-						VMessageFileItem.STATE_FILE_SENT,
-						fileJNIObject.fileId);
+						VMessageFileItem.STATE_FILE_SENT, fileJNIObject.fileId);
 				item.setFileSize(fileJNIObject.fileSize);
 				item.setFileType(fileJNIObject.fileType);
 				// save to database
@@ -1287,21 +1345,21 @@ public class JNIService extends Service implements CommonUpdateConversationState
 		@Override
 		public void OnSendChatResult(SendingResultJNIObjectInd ind) {
 			super.OnSendChatResult(ind);
-			
+
 			int state;
 			int fileState;
-			if(ind.getRet() == SendingResultJNIObjectInd.Result.FAILED){
+			if (ind.getRet() == SendingResultJNIObjectInd.Result.FAILED) {
 				state = VMessageAbstractItem.STATE_SENT_FALIED;
 				fileState = VMessageAbstractItem.STATE_FILE_SENT_FALIED;
-			}
-			else{
+			} else {
 				state = VMessageAbstractItem.STATE_SENT_SUCCESS;
 				fileState = VMessageAbstractItem.STATE_FILE_SENT;
 			}
-			
-			List<VMessage> messages = MessageLoader.queryMessage(mContext, ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_ID + "= ? ",
-					new String[]{ind.getUuid()}, null);
-			if(messages != null && messages.size() > 0){
+
+			List<VMessage> messages = MessageLoader.queryMessage(mContext,
+					ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_ID
+							+ "= ? ", new String[] { ind.getUuid() }, null);
+			if (messages != null && messages.size() > 0) {
 				VMessage vm = messages.get(0);
 				vm.setState(state);
 				List<VMessageAbstractItem> items = vm.getItems();
@@ -1318,7 +1376,7 @@ public class JNIService extends Service implements CommonUpdateConversationState
 				}
 				MessageLoader.updateChatMessageState(mContext, messages.get(0));
 			}
-			
+
 			if (ind.getRet() == SendingResultJNIObjectInd.Result.FAILED) {
 				Intent i = new Intent();
 				i.setAction(JNIService.JNI_BROADCAST_MESSAGE_SENT_FAILED);
@@ -1429,7 +1487,8 @@ public class JNIService extends Service implements CommonUpdateConversationState
 					.getInstance().getCurrentUser(), new Date(
 					GlobalConfig.getGlobalServerTime()));
 			VMessageFileItem vfi = new VMessageFileItem(vm, file.fileId,
-					file.fileSize, VMessageFileItem.STATE_FILE_UNDOWNLOAD , file.fileName, file.fileType);
+					file.fileSize, VMessageFileItem.STATE_FILE_UNDOWNLOAD,
+					file.fileName, file.fileType);
 			vm.setmXmlDatas(vm.toXml());
 			Message.obtain(mCallbackHandler, JNI_RECEIVED_MESSAGE, vm)
 					.sendToTarget();
@@ -1439,7 +1498,7 @@ public class JNIService extends Service implements CommonUpdateConversationState
 		public void OnFileTransEnd(String szFileID, String szFileName,
 				long nFileSize, int nTransType) {
 			VMessage vm = new VMessage(0, 0, null, null);
-			VMessageFileItem item = new VMessageFileItem(vm, null , 0);
+			VMessageFileItem item = new VMessageFileItem(vm, null, 0);
 			item.setUuid(szFileID);
 			if (nTransType == FileDownLoadErrorIndication.TYPE_SEND)
 				item.setState(VMessageAbstractItem.STATE_FILE_SENT);
@@ -1456,7 +1515,7 @@ public class JNIService extends Service implements CommonUpdateConversationState
 		public void OnFileDownloadError(String szFileID, int errorCode,
 				int nTransType) {
 			VMessage vm = new VMessage(0, 0, null, null);
-			VMessageFileItem item = new VMessageFileItem(vm, null , 0);
+			VMessageFileItem item = new VMessageFileItem(vm, null, 0);
 			item.setUuid(szFileID);
 			if (nTransType == FileDownLoadErrorIndication.TYPE_SEND)
 				item.setState(VMessageAbstractItem.STATE_FILE_SENT_FALIED);
@@ -1476,14 +1535,16 @@ public class JNIService extends Service implements CommonUpdateConversationState
 
 	@Override
 	public void updateConversationState() {
-		V2Log.d(TAG, "ConversationTabFragment already builed successfully , send broadcast now!");
-		if(delayBroadcast.size() <= 0){
-			V2Log.d(TAG, "There is no broadcast in delayBroadcast collections , mean no callback!");
+		V2Log.d(TAG,
+				"ConversationTabFragment already builed successfully , send broadcast now!");
+		if (delayBroadcast.size() <= 0) {
+			V2Log.d(TAG,
+					"There is no broadcast in delayBroadcast collections , mean no callback!");
 			noNeedBroadcast = true;
-		}
-		else{
+		} else {
 			for (Integer type : delayBroadcast) {
-				V2Log.d(TAG, "The delay broadcast was sending now , type is : " + type);
+				V2Log.d(TAG, "The delay broadcast was sending now , type is : "
+						+ type);
 				Intent gi = new Intent(JNI_BROADCAST_GROUP_NOTIFICATION);
 				gi.putExtra("gtype", type);
 				gi.addCategory(JNI_BROADCAST_CATEGROY);

@@ -3,9 +3,13 @@ package com.V2.jni.util;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -13,8 +17,6 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserFactory;
 
 import android.text.TextUtils;
 
@@ -22,8 +24,6 @@ import com.V2.jni.V2GlobalEnum;
 import com.V2.jni.ind.FileJNIObject;
 import com.V2.jni.ind.V2Group;
 import com.V2.jni.ind.V2User;
-import com.v2tech.util.EscapedcharactersProcessing;
-import com.v2tech.util.XmlParser;
 
 public class XmlAttributeExtractor {
 
@@ -356,5 +356,60 @@ public class XmlAttributeExtractor {
 			}
 		}
 
+	}
+	
+	
+	
+	/**
+	 * 
+	 * @param uID
+	 * @param xml
+	 * @return
+	 */
+	public static V2User fromXml(String xml) {
+		String id = extractAttribute(xml, "id");
+		if (id == null || id.isEmpty()) {
+			return null;
+		}
+		String nickName = extractAttribute(xml, "nickname");
+		String signature = extractAttribute(xml,"sign");
+		String job = extractAttribute(xml,"job");
+		String telephone = extractAttribute(xml,"telephone");
+		String mobile = extractAttribute(xml,"mobile");
+		String address = extractAttribute(xml,"address");
+		String gender = extractAttribute(xml,"sex");
+		String email = extractAttribute(xml,"email");
+		String bir = extractAttribute(xml,"birthday");
+		String account = extractAttribute(xml,"account");
+		String fax = extractAttribute(xml,"fax");
+		String commentname = extractAttribute(xml,"commentname");
+		String authtype = extractAttribute(xml,"authtype");
+		DateFormat dp = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+
+		V2User u = new V2User(Long.parseLong(id), nickName);
+		u.mSignature = signature;
+		u.mJob=job;
+		u.mTelephone = telephone;
+		u.mMobile = mobile;
+		u.mAddress =address;
+		u.mSex = gender;
+		u.mEmail = email;
+		u.mFax = fax;
+		u.mCommentname = commentname;
+		u.mAccount = account;
+		if (authtype != null && authtype != "") {
+			u.mAuthtype = Integer.parseInt(authtype);
+		} else {
+			u.mAuthtype = 0;
+		}
+
+		if (bir != null && bir.length() > 0) {
+			try {
+				u.mBirthday = dp.parse(bir);
+			} catch (ParseException e) {
+				e.printStackTrace();
+			}
+		}
+		return u;
 	}
 }
