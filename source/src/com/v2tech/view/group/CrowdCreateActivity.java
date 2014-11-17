@@ -503,7 +503,11 @@ public class CrowdCreateActivity extends Activity {
 			}
 				break;
 			case UPDATE_CROWD_RESPONSE:
-				crowd.addUserToGroup(mUserList);
+				//Do not add user to list because user doesn't accept invitation yet
+				
+//				if (crowd.getAuthType() == AuthType.ALLOW_ALL) {
+//					crowd.addUserToGroup(mUserList);
+//				}
 				// finish current activity
 				finish();
 				break;

@@ -79,4 +79,12 @@ public class V2User implements Parcelable {
 			return new V2User(parcel.readLong(), parcel.readString());
 		}
 	};
+
+	@Override
+	public String toString() {
+		return " [ID:"+this.uid+" name:"+this.name+"] ";
+	}
+	
+	
+	
 }

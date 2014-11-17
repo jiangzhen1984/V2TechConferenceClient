@@ -1008,7 +1008,7 @@ public class JNIService extends Service implements
 								+ parseSingleCrowd.id
 								+ " user id"
 								+ ": "
-								+ parseSingleCrowd.creator.uid);
+								+ parseSingleCrowd.creator);
 				return;
 			}
 

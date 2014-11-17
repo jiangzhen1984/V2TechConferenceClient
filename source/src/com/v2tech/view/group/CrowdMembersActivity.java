@@ -161,6 +161,7 @@ public class CrowdMembersActivity extends Activity {
 				adapter.notifyDataSetChanged();
 
 			} else {
+				// start CrowdCreateActivity 
 				Intent i = new Intent(PublicIntent.START_GROUP_CREATE_ACTIVITY);
 				i.addCategory(PublicIntent.DEFAULT_CATEGORY);
 				i.putExtra("cid", crowd.getmGId());

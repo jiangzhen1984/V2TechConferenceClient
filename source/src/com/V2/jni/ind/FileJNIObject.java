@@ -53,7 +53,9 @@ public class FileJNIObject extends JNIObjectInd implements Parcelable {
 		this.fileSize = fileSize;
 		this.linetype = linetype;
 		this.url = url;
-		fileType = FileUitls.adapterFileIcon(fileName);
+		if (fileName != null && !fileName.isEmpty()) {
+			fileType = FileUitls.adapterFileIcon(fileName);
+		}
 	}
 
 	@Override

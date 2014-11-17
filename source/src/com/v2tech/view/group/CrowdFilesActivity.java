@@ -578,11 +578,16 @@ public class CrowdFilesActivity extends Activity {
 					mShowUploadedFileButton
 							.setText(R.string.crowd_files_title_cancel_button);
 				} else {
+					
 					boolean showDeleteMode = false;
-					for (VCrowdFile file : mFiles) {
-						if (file.getUploader().getmUserId() == currentLoginUserID) {
-							showDeleteMode = true;
-							break;
+					if (crowd.getOwnerUser().getmUserId() == GlobalHolder.getInstance().getCurrentUserId()) {
+						showDeleteMode = true;
+					} else {
+						for (VCrowdFile file : mFiles) {
+							if (file.getUploader().getmUserId() == currentLoginUserID) {
+								showDeleteMode = true;
+								break;
+							}
 						}
 					}
 

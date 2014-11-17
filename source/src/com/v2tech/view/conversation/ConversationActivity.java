@@ -921,7 +921,12 @@ public class ConversationActivity extends Activity {
 		// }
 		// mAacEncoder.release();
 
-		mRecorder.stop();
+		try {
+			//Ignore stop fialed exception
+			mRecorder.stop();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		mRecorder.reset();
 		mRecorder.release();
 		mRecorder = null;
