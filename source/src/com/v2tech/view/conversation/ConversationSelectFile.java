@@ -83,6 +83,7 @@ public class ConversationSelectFile extends Activity {
 	private FileListAdapter adapter;
 	private ImageListAdapter imageAdapter;
 	private String type;
+	private long transing;
 	private int mScreenHeight;
 	private int mScreenWidth;
 	private Dialog mDialog;
@@ -180,6 +181,7 @@ public class ConversationSelectFile extends Activity {
 		if(mCheckedList == null)
 			mCheckedList = new ArrayList<FileInfoBean>();
 		type = intent.getStringExtra("type");
+		transing = getIntent().getLongExtra("transing", -1);
 		// 创建初始对象
 		mCheckedNameList = new ArrayList<String>();
 		service = Executors.newCachedThreadPool();
@@ -903,13 +905,13 @@ public class ConversationSelectFile extends Activity {
 			}
 		} else {
 			
-			if(mCheckedList.size() > MAX_TRANS_FILE_SIZE){
-				Toast.makeText(getApplicationContext(), "发送文件个数已达上限，一次性只能发送10个文件", Toast.LENGTH_LONG).show();
+			if(transing + mCheckedList.size() > MAX_TRANS_FILE_SIZE){
+				Toast.makeText(getApplicationContext(), "发送文件个数已达上限，当前正在传输的文件数量已达10个", Toast.LENGTH_LONG).show();
 				return ;
 			}
 			
-			if(GlobalConfig.currentTransingFileSize > MAX_TRANS_FILE_SIZE){
-				Toast.makeText(getApplicationContext(), "发送文件个数已达上限，当前正在传输的文件数量已达10个", Toast.LENGTH_LONG).show();
+			if(mCheckedList.size() > MAX_TRANS_FILE_SIZE){
+				Toast.makeText(getApplicationContext(), "发送文件个数已达上限，一次性只能发送10个文件", Toast.LENGTH_LONG).show();
 				return ;
 			}
 			

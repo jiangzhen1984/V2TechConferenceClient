@@ -109,7 +109,7 @@ public class LogService extends Service implements Thread.UncaughtExceptionHandl
     /**
      * 用于格式化日期,作为抓取正常日志的文件的名称的一部分
      */
-	private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.ss");
+	private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     /**
      * 用于格式化日期,作为crash日志文件名的一部分

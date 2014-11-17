@@ -55,7 +55,7 @@ public class V2techContentProvider extends ContentProvider {
 			table = ContentDescriptor.HistoriesCrowd.NAME;
 			break;
 		default:
-			throw new RuntimeException("Does not support operation ：" + token);
+			throw new RuntimeException("Does not support operation ：" + token + " uri is : " + uri);
 		}
 		if (table != null) {
 			ret = db.delete(table, selection, selectionsArgs);
@@ -129,7 +129,7 @@ public class V2techContentProvider extends ContentProvider {
 					.appendPath(String.valueOf(id)).build();
 			break;
 		default:
-			throw new RuntimeException("Does not support operation ：" + token);
+			throw new RuntimeException("Does not support operation ：" + token + " uri is : " + uri);
 		}
 		getContext().getContentResolver().notifyChange(newUri, null);
 		return newUri;
@@ -184,7 +184,7 @@ public class V2techContentProvider extends ContentProvider {
 			tableName = ContentDescriptor.HistoriesCrowd.NAME;
 			break;
 		default:
-			throw new RuntimeException("Does not support operation ：" + token);
+			throw new RuntimeException("Does not support operation ：" + token + " uri is : " + uri);
 		}
 		// Cursor c = qb.query(db, projection, selection, selectionArgs, null,
 		// null, sortOrder);
@@ -227,7 +227,7 @@ public class V2techContentProvider extends ContentProvider {
 			table = ContentDescriptor.HistoriesCrowd.NAME;
 			break;
 		default:
-			throw new RuntimeException("Does not support operation ：" + token);
+			throw new RuntimeException("Does not support operation ：" + token + " uri is : " + uri);
 		}
 		if (table != null) {
 			ret = db.update(table, values, selection, args);

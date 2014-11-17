@@ -602,11 +602,17 @@ public class MessageAuthenticationActivity extends Activity {
 		VMessageQualificationInvitationCrowd imsg = (VMessageQualificationInvitationCrowd) msg;
         Intent i = new Intent();
         if(imsg.getQualState() == QualificationState.BE_ACCEPTED){
-            i.putExtra("obj", new ConversationNotificationObject(
-                    Conversation.TYPE_GROUP, imsg.getCrowdGroup().getmGId()));
-            i.setAction(PublicIntent.START_CONVERSACTION_ACTIVITY);
-            i.addCategory(PublicIntent.DEFAULT_CATEGORY);
-            startActivity(i);
+        	if(GlobalHolder.getInstance().getGroupById(
+        			V2GlobalEnum.GROUP_TYPE_CROWD, imsg.getCrowdGroup().getmGId()) != null){
+	            i.putExtra("obj", new ConversationNotificationObject(
+	                    Conversation.TYPE_GROUP, imsg.getCrowdGroup().getmGId()));
+	            i.setAction(PublicIntent.START_CONVERSACTION_ACTIVITY);
+	            i.addCategory(PublicIntent.DEFAULT_CATEGORY);
+	            startActivity(i);
+        	}
+        	else{
+        		V2Log.e("startCrowdInvitationDetail --> start ConversationActivity failed ... crowd group isn't exist!");
+        	}
         } else {
             Crowd crowd = new Crowd(imsg.getCrowdGroup()
                     .getmGId(), imsg.getCrowdGroup()

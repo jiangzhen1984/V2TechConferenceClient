@@ -150,6 +150,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 	private boolean isUpdateGroup;
 	private boolean isUpdateDeparment;
 	private boolean isCallBack;
+	private boolean isCreate;
 
 	private ListView mConversationsListView;
 	private ConversationsAdapter adapter = new ConversationsAdapter();
@@ -203,6 +204,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 		Message.obtain(mHandler, FILL_CONFS_LIST).sendToTarget();
 
 		searchList = new ArrayList<ScrollItem>();
+		isCreate = true;
 	}
 
 	@Override
@@ -325,11 +327,10 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 	}
 
 
-
 	@Override
 	public void onStart() {
 		super.onStart();
-		if (mCurrentTabFlag == V2GlobalEnum.GROUP_TYPE_USER) {
+		if (mCurrentTabFlag == V2GlobalEnum.GROUP_TYPE_USER && !isCreate) {
 			boolean isBreak = false;
 			for (Conversation conversation : mConvList) {
 				switch (conversation.getType()) {
@@ -378,6 +379,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
             Collections.sort(mConvList);
             Collections.sort(mItemList);
 		}
+		isCreate = false;
 	}
 
 	@Override

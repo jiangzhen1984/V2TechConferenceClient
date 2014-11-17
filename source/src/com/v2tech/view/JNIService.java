@@ -85,6 +85,7 @@ import com.v2tech.vo.VMessageFileItem;
 import com.v2tech.vo.VMessageImageItem;
 import com.v2tech.vo.VMessageQualification;
 import com.v2tech.vo.VMessageQualification.QualificationState;
+import com.v2tech.vo.VMessageQualification.ReadState;
 import com.v2tech.vo.VMessageQualification.Type;
 import com.v2tech.vo.VMessageQualificationApplicationCrowd;
 import com.v2tech.vo.VMessageQualificationInvitationCrowd;
@@ -148,7 +149,11 @@ public class JNIService extends Service implements
 
 	private Integer mBinderRef = 0;
 
+	/**
+	 * @see V2GlobalEnum
+	 */
 	private List<Integer> delayBroadcast = new ArrayList<Integer>();
+	private List<GroupUserInfoOrig> delayUserBroadcast = new ArrayList<GroupUserInfoOrig>();
 	private boolean noNeedBroadcast;
 	private boolean isAcceptApply;
 
@@ -410,13 +415,20 @@ public class JNIService extends Service implements
 					}
 					V2Log.w("  group:" + go.gId + "  user size:" + lu.size()
 							+ "  " + group);
-					Intent i = new Intent(
-							JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION);
-					i.addCategory(JNI_BROADCAST_CATEGROY);
-					i.putExtra("gid", go.gId);
-					i.putExtra("gtype", go.gType);
-					mContext.sendBroadcast(i);
-
+					
+					if (!noNeedBroadcast) {
+						V2Log.d(TAG,
+								"ConversationTabFragment no builed successfully! Need to delay sending , type is ："
+										+ msg.arg1);
+						delayUserBroadcast.add(go);
+					} else {
+						Intent i = new Intent(
+								JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION);
+						i.addCategory(JNI_BROADCAST_CATEGROY);
+						i.putExtra("gid", go.gId);
+						i.putExtra("gtype", go.gType);
+						mContext.sendBroadcast(i);
+					}
 				} else {
 					V2Log.e("Invalid group user data");
 				}
@@ -773,9 +785,9 @@ public class JNIService extends Service implements
 
 			if (crowdMsg != null) {
 				if (crowdMsg.getQualState() != VMessageQualification.QualificationState.WAITING) {
-					crowdMsg.setReadState(VMessageQualification.ReadState.UNREAD);
 					crowdMsg.setQualState(VMessageQualification.QualificationState.WAITING);
 				}
+				crowdMsg.setReadState(VMessageQualification.ReadState.UNREAD);
 				// else
 				// sendBroadcast = false;
 				if (type == VMessageQualification.Type.CROWD_APPLICATION) {
@@ -1410,11 +1422,18 @@ public class JNIService extends Service implements
 				fileState = VMessageAbstractItem.STATE_FILE_SENT;
 			}
 
+			List<String> cacheNames = GlobalHolder.getInstance()
+					.getDataBaseTableCacheName();
+			if (!cacheNames.contains(ContentDescriptor.HistoriesMessage.NAME)) {
+				V2Log.d(TAG, "OnSendChatResult --> update database failed...beacuse table isn't exist! name is : " 
+						 + ContentDescriptor.HistoriesMessage.NAME);
+				return ;
+			}
+			
 			List<VMessage> messages = MessageLoader.queryMessage(mContext,
 					ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_ID
 							+ "= ? ", new String[] { ind.getUuid() }, null);
 			if (messages != null && messages.size() > 0) {
-                V2Log.e(TAG , "Resend message failed...uuid is : " + ind.getUuid());
 				VMessage vm = messages.get(0);
 				vm.setState(state);
 				List<VMessageAbstractItem> items = vm.getItems();
@@ -1607,6 +1626,17 @@ public class JNIService extends Service implements
 				gi.putExtra("gtype", type);
 				gi.addCategory(JNI_BROADCAST_CATEGROY);
 				mContext.sendBroadcast(gi);
+			}
+			
+			for (GroupUserInfoOrig go : delayUserBroadcast) {
+				V2Log.d(TAG, "The delay user broadcast was sending now , type is : "
+						+ go.gType + "-------");
+				Intent i = new Intent(
+						JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION);
+				i.addCategory(JNI_BROADCAST_CATEGROY);
+				i.putExtra("gid", go.gId);
+				i.putExtra("gtype", go.gType);
+				mContext.sendBroadcast(i);
 			}
 			delayBroadcast.clear();
 		}

@@ -31,6 +31,7 @@ public class ConversationSelectFileEntry extends Activity implements OnClickList
 	private TextView sendButton;
 	private long totalSize;
 	private int lastSize; //通过该变量来判断是否要累加totalSize
+	private long transing;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -39,8 +40,7 @@ public class ConversationSelectFileEntry extends Activity implements OnClickList
 		
 		findview();
 		mCheckedList = new ArrayList<FileInfoBean>();
-		
-		
+		transing = getIntent().getLongExtra("transing", -1);
 	}
 
 	private void findview() {
@@ -66,10 +66,12 @@ public class ConversationSelectFileEntry extends Activity implements OnClickList
 		switch (v.getId()) {
 			case R.id.selectfile_entry_image:
 				intent.putExtra("type", "image");
+				intent.putExtra("transing", transing);
 				startActivityForResult(intent, NORMAL_SELECT_FILE);
 				break;
 			case R.id.selectfile_entry_file:
 				intent.putExtra("type", "file");
+				intent.putExtra("transing", transing);
 				startActivityForResult(intent, NORMAL_SELECT_FILE);
 				break;
 			case R.id.selectfile_back:

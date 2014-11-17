@@ -49,6 +49,8 @@ public class VMessage {
 	protected boolean isShowTime;
 	
 	protected int readState;
+	
+	protected boolean isAutoReply;
 
 	protected List<VMessageAbstractItem> itemList;
 	
@@ -161,6 +163,14 @@ public class VMessage {
 		this.isShowTime = isShowTime;
 	}
 
+	public boolean isAutoReply() {
+		return isAutoReply;
+	}
+
+	public void setAutoReply(boolean isAutoReply) {
+		this.isAutoReply = isAutoReply;
+	}
+	
 	public boolean isLocal() {
 		if (this.mFromUser == null) {
 			return false;

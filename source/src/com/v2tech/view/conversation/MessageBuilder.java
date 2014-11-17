@@ -754,9 +754,17 @@ public class MessageBuilder {
         CrowdGroup crowdGroup = (CrowdGroup) GlobalHolder.getInstance()
                 .getGroupById(V2GlobalEnum.GROUP_TYPE_CROWD, groupID);
         if (crowdGroup == null) {
-            V2Log.e("MessageBuilder updateQualicationMessageState --> update failed... beacuser get crowdGroup"
-                    + " is null!");
-            return -1;
+            V2Log.e("MessageBuilder updateQualicationMessageState --> the VMessageQualification Object is null , Need to build"
+                    + "groupID is : " + groupID + " userID is : " + userID);
+            User user = GlobalHolder.getInstance().getUser(userID);
+            if(user == null) {
+                V2Log.e("MessageBuilder updateQualicationMessageState --> update failed... beacuser get Owner User" +
+                        "from GlobalHolder is null!");
+                return -1;
+            }
+            crowdGroup = new CrowdGroup(groupID,
+                    null , user, null);
+            return updateQualicationMessageState(crowdGroup , obj);
         } else {
             return updateQualicationMessageState(crowdGroup , obj);
         }

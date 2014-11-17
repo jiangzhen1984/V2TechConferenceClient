@@ -3,7 +3,7 @@
     package="com.v2tech"
     android:sharedUserLabel="@string/app_name"
     android:versionCode="2"
-    android:versionName="4.0.0.21" >
+    android:versionName="4.0.0.22" >
 
     <uses-sdk
         android:minSdkVersion="14"
@@ -100,11 +100,11 @@
         </activity>
         <activity
             android:name="com.v2tech.view.conference.VideoActivityV2"
-            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:configChanges="screenSize|orientation"
             android:exported="true"
             android:launchMode="singleTop"
             android:screenOrientation="landscape"
-            android:windowSoftInputMode="stateHidden|adjustPan" >
+            android:windowSoftInputMode="adjustPan" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" >
                 </action>

@@ -13,7 +13,6 @@ import com.V2.jni.ind.GroupFileJNIObject;
 import com.V2.jni.ind.V2Group;
 import com.V2.jni.ind.V2User;
 import com.V2.jni.util.V2Log;
-import com.v2tech.util.GlobalConfig;
 
 /**
  * 
@@ -238,7 +237,6 @@ public class FileRequest {
 			long nFileSize) {
 		Log.e(TAG, "OnFileTransBegin--->" + szFileID + ":" + nTransType + ":"
 				+ nFileSize);
-		GlobalConfig.currentTransingFileSize = GlobalConfig.currentTransingFileSize + 1;
 	}
 
 	/**
@@ -274,7 +272,6 @@ public class FileRequest {
 		V2Log.e(TAG, "OnFileTransEnd ---> szFileID :" + szFileID
 				+ " | szFileName: " + szFileName + " | nFileSize: " + nFileSize
 				+ " | nTransType: " + nTransType + " | tr: " + tr);
-		GlobalConfig.currentTransingFileSize = GlobalConfig.currentTransingFileSize - 1;
 		for (int i = 0; i < mCallbacks.size(); i++) {
 			WeakReference<FileRequestCallback> wrf = mCallbacks.get(i);
 			if (wrf != null && wrf.get() != null) {

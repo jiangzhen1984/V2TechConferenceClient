@@ -331,12 +331,17 @@ public class MessageBodyView extends LinearLayout {
 				LinearLayout.LayoutParams.WRAP_CONTENT);
 		mContentContainer.addView(et, ll);
 		List<VMessageAbstractItem> items = mMsg.getItems();
+		if(mMsg.isAutoReply()){
+			et.append("[自动回复]");
+		}
+		
 		for (int i = 0; items != null && i < items.size(); i++) {
 			VMessageAbstractItem item = items.get(i);
 			// Add new layout for new line
-			if (item.isNewLine() && et.length() != 0) {
+			if (item.isNewLine() && et.length() != 0 && !mMsg.isAutoReply()) {
 				et.append("\n");
 			}
+			
 			if (item.getType() == VMessageAbstractItem.ITEM_TYPE_TEXT) {
 				et.append(((VMessageTextItem) item).getText());
 			} else if (item.getType() == VMessageAbstractItem.ITEM_TYPE_FACE) {
@@ -810,7 +815,7 @@ public class MessageBodyView extends LinearLayout {
                 strState = getContext()
                         .getResources()
                         .getText(
-                                R.string.contact_message_file_item_download_failed)
+                                R.string.contact_message_file_item_sent_failed)
                         .toString();
 			// Show failed icon
 			failedIcon.setVisibility(View.VISIBLE);

@@ -107,6 +107,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Date;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -210,6 +211,7 @@ public class ConversationActivity extends Activity {
 	private int currentItemPos = 0;
 
 	private ArrayList<FileInfoBean> mCheckedList;
+	private long transingFileObserver = 0;
 
 	private ConversationNotificationObject cov = null;
 
@@ -226,6 +228,7 @@ public class ConversationActivity extends Activity {
 	private VMessage playingAudioMessage;
 	private MessageBodyView playingAudioBodyView;
 	private boolean stopOhterAudio;
+	private boolean isCreate;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -264,6 +267,8 @@ public class ConversationActivity extends Activity {
 				R.animator.nonam_scale_null);
 		// initalize vioce function that showing dialog
 		createVideoDialog();
+		initTransingObserver();
+		isCreate = true;
 	}
 
 	/**
@@ -407,6 +412,26 @@ public class ConversationActivity extends Activity {
 		root.setVisibility(View.INVISIBLE);
 	}
 
+	private void initTransingObserver() {
+		List<VMessageFileItem> files;
+		int count = 0;
+		if (currentConversationViewType == V2GlobalEnum.GROUP_TYPE_CROWD) {
+			files = MessageLoader.loadFileMessages(currentConversationViewType,
+					groupId);
+		} else {
+			files = MessageLoader.loadFileMessages(currentConversationViewType,
+					user2Id);
+		}
+
+		for (VMessageFileItem vMessageFileItem : files) {
+			if (vMessageFileItem.getState() == VMessageAbstractItem.STATE_FILE_SENDING) {
+				count += 1;
+			}
+		}
+
+		transingFileObserver = count;
+	}
+
 	@Override
 	protected void onStart() {
 		super.onStart();
@@ -416,7 +441,7 @@ public class ConversationActivity extends Activity {
 					START_LOAD_MESSAGE);
 			lh.sendMessageDelayed(m, 500);
 		}
-
+		
 		NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 		// mId allows you to update the notification later on.
 		mNotificationManager.cancel(PublicIntent.MESSAGE_NOTIFICATION_ID);
@@ -642,23 +667,29 @@ public class ConversationActivity extends Activity {
 			V2Log.d(TAG, "参数pos不合法 :" + pos);
 			return;
 		}
-		mMessagesContainer.setSelection(pos);
-		// 次为了解决setSelection无效的问题，虽然能解决，但会造成界面卡顿。直接setSelection而不notifyDataSetChanged即可
-		// mMessagesContainer.post(new Runnable() {
-		//
-		// @Override
-		// public void run() {
-		// mMessagesContainer.setSelection(pos);
-		//
-		// }
-		//
-		// });
-
+		
+		if(isCreate){
+			isCreate = false;
+			mMessagesContainer.setSelection(pos);
+		}
+		else{
+			adapter.notifyDataSetChanged();
+			// 次为了解决setSelection无效的问题，虽然能解决，但会造成界面卡顿。直接setSelection而不notifyDataSetChanged即可
+			mMessagesContainer.post(new Runnable() {
+	
+				@Override
+				public void run() {
+					mMessagesContainer.setSelection(pos);
+	
+				}
+	
+			});
+		}
 	}
 
 	private boolean playNextUnreadMessage() {
 		boolean found = false;
-		if(playingAudioMessage == null)
+		if (playingAudioMessage == null)
 			return false;
 		for (int i = 0; i < messageArray.size(); i++) {
 			CommonAdapterItemWrapper wrapper = messageArray.get(i);
@@ -1098,7 +1129,7 @@ public class ConversationActivity extends Activity {
 				view.getDrawingRect(r);
 				// check if touch position out of button than cancel send voice
 				// message
-				if(isDown){
+				if (isDown) {
 					if (timeOutRecording) {
 						mButtonRecordAudio
 								.setText(R.string.contact_message_button_send_audio_msg);
@@ -1145,7 +1176,7 @@ public class ConversationActivity extends Activity {
 						// send
 						VMessage vm = MessageBuilder.buildAudioMessage(
 								cov.getType(), groupId, local, remote,
-                                audioFilePath, (int) (seconds / 1000));
+								audioFilePath, (int) (seconds / 1000));
 						// Send message to server
 						sendMessageToRemote(vm);
 					} else {
@@ -1160,7 +1191,7 @@ public class ConversationActivity extends Activity {
 						File f = new File(audioFilePath);
 						f.delete();
 					}
-                    audioFilePath = null;
+					audioFilePath = null;
 					if (seconds < 1500) {
 						// Send delay message for close dialog
 						lh.postDelayed(new Runnable() {
@@ -1192,10 +1223,10 @@ public class ConversationActivity extends Activity {
 						lh.removeCallbacks(preparedRecoding);
 						updateCancelSendVoiceMsgNotification(VOICE_DIALOG_FLAG_WARING_FOR_TIME_TOO_SHORT);
 						showOrCloseVoiceDialog();
-					} else{
+					} else {
 						breakRecord = false;
 						mButtonRecordAudio
-							.setText(R.string.contact_message_button_send_audio_msg);
+								.setText(R.string.contact_message_button_send_audio_msg);
 					}
 				}
 				break;
@@ -1210,7 +1241,7 @@ public class ConversationActivity extends Activity {
 
 			if (!cannelRecoding) {
 				realRecoding = true;
-                audioFilePath = GlobalConfig.getGlobalAudioPath() + "/"
+				audioFilePath = GlobalConfig.getGlobalAudioPath() + "/"
 						+ UUID.randomUUID().toString() + ".aac";
 				boolean resultReocrding = startReocrding(audioFilePath);
 				if (resultReocrding) {
@@ -1278,7 +1309,7 @@ public class ConversationActivity extends Activity {
 			sendMessageToRemote(vm);
 
 			starttime = 0;
-            audioFilePath = null;
+			audioFilePath = null;
 			lh.removeCallbacks(mUpdateMicStatusTimer);
 			lh.removeCallbacks(mUpdateSurplusTime);
 			showOrCloseVoiceDialog();
@@ -1310,7 +1341,7 @@ public class ConversationActivity extends Activity {
 			if (audioFilePath != null) {
 				File f = new File(audioFilePath);
 				f.delete();
-                audioFilePath = null;
+				audioFilePath = null;
 			}
 			lh.removeCallbacks(mUpdateMicStatusTimer);
 			lh.removeCallbacks(timeOutMonitor);
@@ -1423,10 +1454,12 @@ public class ConversationActivity extends Activity {
 				if (currentConversationViewType == V2GlobalEnum.GROUP_TYPE_USER) {
 					intent = new Intent(ConversationActivity.this,
 							ConversationSelectFileEntry.class);
+					intent.putExtra("transing", transingFileObserver);
 				} else if (currentConversationViewType == V2GlobalEnum.GROUP_TYPE_CROWD) {
 					intent = new Intent(ConversationActivity.this,
 							ConversationSelectFile.class);
 					intent.putExtra("type", "crowdFile");
+					intent.putExtra("transing", transingFileObserver);
 				} else {
 					return;
 				}
@@ -1659,9 +1692,14 @@ public class ConversationActivity extends Activity {
 					intent.putExtra("gid", groupId);
 					intent.putParcelableArrayListExtra("uploads", mCheckedList);
 					startService(intent);
+
+					transingFileObserver = transingFileObserver
+							+ mCheckedList.size();
 					break;
 				case V2GlobalEnum.GROUP_TYPE_USER:
 					startSendMoreFile();
+					transingFileObserver = transingFileObserver
+							+ mCheckedList.size();
 					mCheckedList = null;
 					break;
 				}
@@ -1806,9 +1844,9 @@ public class ConversationActivity extends Activity {
 						VMessageTextItem vti = new VMessageTextItem(vm,
 								lastText);
 						// If strStart is 0 means string at new line
-//						if (lastEnd == 0) {
-//							vti.setNewLine(true);
-//						}
+						// if (lastEnd == 0) {
+						// vti.setNewLine(true);
+						// }
 					}
 					strStart = index;
 				}
@@ -2019,10 +2057,10 @@ public class ConversationActivity extends Activity {
 			for (int i = 0; i < items.size(); i++) {
 				VMessageAbstractItem item = items.get(i);
 				if (item.getType() == VMessageAbstractItem.ITEM_TYPE_FILE) {
-                    item.setState(VMessageAbstractItem.STATE_FILE_SENDING);
-                    MessageLoader.updateFileItemState(mContext, (VMessageFileItem) item);
-                }
-				else 
+					item.setState(VMessageAbstractItem.STATE_FILE_SENDING);
+					MessageLoader.updateFileItemState(mContext,
+							(VMessageFileItem) item);
+				} else
 					item.setState(VMessageAbstractItem.STATE_NORMAL);
 			}
 			MessageLoader.updateChatMessageState(mContext, v);
@@ -2043,6 +2081,7 @@ public class ConversationActivity extends Activity {
 						mChat.updateFileOperation(vfi,
 								FileOperationEnum.OPERATION_CANCEL_SENDING,
 								null);
+						transingFileObserver = transingFileObserver - 1;
 						break;
 					case VMessageAbstractItem.STATE_FILE_DOWNLOADED:
 						mChat.updateFileOperation(vfi,
@@ -2244,6 +2283,7 @@ public class ConversationActivity extends Activity {
 					case FileTransStatusIndication.IND_TYPE_PROGRESS_END:
 						if (vfi.getState() == VMessageAbstractItem.STATE_FILE_SENDING) {
 							vfi.setState(VMessageAbstractItem.STATE_FILE_SENT);
+							transingFileObserver = transingFileObserver - 1;
 						} else if (vfi.getState() == VMessageAbstractItem.STATE_FILE_DOWNLOADING) {
 							vfi.setState(VMessageAbstractItem.STATE_FILE_DOWNLOADED);
 						}
@@ -2279,6 +2319,7 @@ public class ConversationActivity extends Activity {
 					// If lesser than sending, means file is receive
 					if (vfi.getState() < VMessageFileItem.STATE_FILE_SENDING) {
 						vfi.setState(VMessageFileItem.STATE_FILE_DOWNLOADED_FALIED);
+						transingFileObserver = transingFileObserver - 1;
 					} else {
 						vfi.setState(VMessageFileItem.STATE_FILE_SENT_FALIED);
 					}
@@ -2320,6 +2361,7 @@ public class ConversationActivity extends Activity {
 								vm);
 						break;
 					case VMessageAbstractItem.STATE_FILE_SENDING:
+						transingFileObserver = transingFileObserver - 1;
 					case VMessageAbstractItem.STATE_FILE_PAUSED_SENDING:
 						item.setState(VMessageFileItem.STATE_FILE_SENT_FALIED);
 						MessageBuilder.updateVMessageItemToSentFalied(mContext,
@@ -2532,19 +2574,19 @@ public class ConversationActivity extends Activity {
 						}
 						break;
 					}
-					
+
 					List<VMessageAbstractItem> items = vm.getItems();
 					for (int j = 0; j < items.size(); j++) {
 						VMessageAbstractItem item = items.get(j);
 						if (uuid.equals(item.getUuid())) {
-							if (item.getType() == VMessageAbstractItem.ITEM_TYPE_FILE) 
+							if (item.getType() == VMessageAbstractItem.ITEM_TYPE_FILE)
 								item.setState(VMessageAbstractItem.STATE_FILE_SENT_FALIED);
-							else 
+							else
 								item.setState(VMessageAbstractItem.STATE_SENT_FALIED);
-					
+
 							MessageBodyView mdv = ((MessageBodyView) messageArray
 									.get(i).getView());
-							if (mdv != null) 
+							if (mdv != null)
 								mdv.updateFailedFlag(true);
 							break;
 						}
@@ -2617,8 +2659,8 @@ public class ConversationActivity extends Activity {
 			case LOAD_MESSAGE:
 				List<VMessage> array = loadMessages();
 				if (array != null) {
-                    int loadSize = array.size();
-                    V2Log.d(TAG, "获取的消息数量" + loadSize);
+					int loadSize = array.size();
+					V2Log.d(TAG, "获取的消息数量" + loadSize);
 					// 设置VMessage是否应该显示时间
 					for (int i = 0; i < array.size(); i++) {
 						long currentMessage = array.get(i).getmDateLong();
@@ -2638,6 +2680,7 @@ public class ConversationActivity extends Activity {
 							Log.e(TAG, "happen erupt , the message ："
 									+ (int) array.get(i).getId()
 									+ "  already save in messageArray!");
+							loadSize = loadSize + 1;
 							continue;
 						}
 						messageAllID.append((int) array.get(i).getId(),
@@ -2646,8 +2689,8 @@ public class ConversationActivity extends Activity {
 					}
 					V2Log.d(TAG, "当前消息集合大小" + messageArray.size());
 					currentItemPos = loadSize - 1;
-                    if(currentItemPos == -1)
-                        currentItemPos = 0;
+					if (currentItemPos == -1)
+						currentItemPos = 0;
 				}
 				android.os.Message.obtain(lh, END_LOAD_MESSAGE, array)
 						.sendToTarget();
@@ -2710,8 +2753,9 @@ public class ConversationActivity extends Activity {
 							((FileTransProgressStatusIndication) ind).nTranedSize,
 							progress.progressType);
 				}
-//              else if (ind.indType == FileTransStatusIndication.IND_TYPE_DOWNLOAD_ERR) {}
-                else if (ind.indType == FileTransStatusIndication.IND_TYPE_TRANS_ERR) {
+				// else if (ind.indType ==
+				// FileTransStatusIndication.IND_TYPE_DOWNLOAD_ERR) {}
+				else if (ind.indType == FileTransStatusIndication.IND_TYPE_TRANS_ERR) {
 
 					FileTransErrorIndication transError = (FileTransErrorIndication) ind;
 					for (int i = 0; i < messageArray.size(); i++) {
@@ -2776,11 +2820,11 @@ public class ConversationActivity extends Activity {
 												+ vfi.getFileName()
 												+ "-- , There is an error in the process of sending was happend...error code is :"
 												+ cannelError.errorCode);
-								if (vfi.getState() == VMessageAbstractItem.STATE_FILE_DOWNLOADING ||
-                                        vfi.getState() == VMessageAbstractItem.STATE_FILE_PAUSED_DOWNLOADING)
+								if (vfi.getState() == VMessageAbstractItem.STATE_FILE_DOWNLOADING
+										|| vfi.getState() == VMessageAbstractItem.STATE_FILE_PAUSED_DOWNLOADING)
 									vfi.setState(VMessageAbstractItem.STATE_FILE_DOWNLOADED_FALIED);
-								else if (vfi.getState() == VMessageAbstractItem.STATE_FILE_SENDING ||
-                                        vfi.getState() == VMessageAbstractItem.STATE_FILE_PAUSED_SENDING)
+								else if (vfi.getState() == VMessageAbstractItem.STATE_FILE_SENDING
+										|| vfi.getState() == VMessageAbstractItem.STATE_FILE_PAUSED_SENDING)
 									vfi.setState(VMessageAbstractItem.STATE_FILE_SENT_FALIED);
 								MessageBuilder.updateVMessageItemToSentFalied(
 										mContext, vm);

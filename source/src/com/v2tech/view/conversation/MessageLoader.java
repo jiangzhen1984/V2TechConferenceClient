@@ -573,6 +573,87 @@ public class MessageLoader {
 		mCur.close();
 		return imageItems;
 	}
+	
+	/**
+	 * 查询指定群组中聊天收发的所有文件
+	 * 
+	 * @param context
+	 * @param type
+	 * @param gid
+	 * @return
+	 */
+	public static List<VMessageFileItem> loadFileMessages(int type, long id) {
+		if(type == V2GlobalEnum.GROUP_TYPE_CROWD){
+			if (!isTableExist(context, type, id, 0, CROWD_TYPE))
+				return null;
+		}
+		else if(type == V2GlobalEnum.GROUP_TYPE_USER){
+			if (!isTableExist(context, 0, 0, id, CONTACT_TYPE))
+				return null;
+		}
+		
+		List<VMessageFileItem> fileItems = new ArrayList<VMessageFileItem>();
+		String sortOrder = ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_SAVEDATE
+				+ " desc";
+		String where = ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_REMOTE_USER_ID
+				+ " = ? and " + ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_FROM_USER_ID + " = ? ";
+		String[] args = new String[] { String.valueOf(id) , String.valueOf(GlobalHolder.getInstance().getCurrentUserId())};
+		Uri uri = ContentDescriptor.HistoriesFiles.CONTENT_URI;
+		String[] projection = ContentDescriptor.HistoriesFiles.Cols.ALL_CLOS;
+		DataBaseContext mContext = new DataBaseContext(context);
+		Cursor mCur = mContext.getContentResolver().query(uri, projection,
+				where, args, sortOrder);
+
+		if (mCur == null) {
+			return fileItems;
+		}
+
+		if (mCur.getCount() <= 0) {
+			mCur.close();
+			return fileItems;
+		}
+
+		VMessageFileItem item;
+		VMessage current;
+		while (mCur.moveToNext()) {
+			int fromUserID = mCur
+					.getInt(mCur
+							.getColumnIndex(ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_FROM_USER_ID));
+			long date = mCur
+					.getLong(mCur
+							.getColumnIndex(ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_SAVEDATE));
+			int fileState = mCur
+					.getInt(mCur
+							.getColumnIndex(ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_SEND_STATE));
+			String uuid = mCur
+					.getString(mCur
+							.getColumnIndex(ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_ID));
+			String filePath = mCur
+					.getString(mCur
+							.getColumnIndex(ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_PATH));
+			long fileSize = mCur
+					.getLong(mCur
+							.getColumnIndex(ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_SIZE));
+			User fromUser = GlobalHolder.getInstance().getUser(fromUserID);
+			if (fromUser == null) {
+				V2Log.e("get null when loadImageMessage get fromUser :"
+						+ fromUserID);
+				continue;
+			}
+			
+			if(type == V2GlobalEnum.GROUP_TYPE_CROWD){
+				current = new VMessage(type, id, fromUser, new Date(date));
+			}
+			else if(type == V2GlobalEnum.GROUP_TYPE_USER){
+				current = new VMessage(type, 0, fromUser, new Date(date));
+			}
+			current = new VMessage(type, 0, fromUser, new Date(date));
+			fileItems.add(new VMessageFileItem(current, uuid, filePath, null, fileSize, fileState,
+					0f, 0l, 0f, -1, 2));
+		}
+		mCur.close();
+		return fileItems;
+	}
 
 	/**
 	 * 查询指定群组中聊天中，正在上传的群文件集合
@@ -879,7 +960,7 @@ public class MessageLoader {
 		mCur.close();
 		return vimList;
 	}
-
+	
 	/**
 	 * delete the VMessage
 	 * 

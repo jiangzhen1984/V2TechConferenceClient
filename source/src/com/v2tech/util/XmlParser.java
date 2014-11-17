@@ -16,7 +16,9 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import com.V2.jni.util.EscapedcharactersProcessing;
 import com.V2.jni.util.V2Log;
+import com.V2.jni.util.XmlAttributeExtractor;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.vo.V2Doc;
 import com.v2tech.vo.V2Doc.Page;
@@ -72,6 +74,7 @@ public class XmlParser {
 		// public static VMessage parseForMessage(User from, User to, Date date,
 		// String xml) {
 		String xml = vm.getmXmlDatas();
+		xml = EscapedcharactersProcessing.convertAmp(xml);
 		if (xml == null)
 			return vm;
 
@@ -84,6 +87,11 @@ public class XmlParser {
 			Document doc = dBuilder.parse(is);
 
 			doc.getDocumentElement().normalize();
+			Element element = (Element) doc.getElementsByTagName("TChatData").item(0);
+			boolean isAutoReply = "True".equals(element
+					.getAttribute("IsAutoReply"));
+			vm.setAutoReply(isAutoReply);
+			
 			NodeList textMsgItemNL = doc.getElementsByTagName("ItemList");
 			if (textMsgItemNL.getLength() <= 0) {
 				return null;

@@ -37,8 +37,6 @@ public class GlobalConfig {
 
 	public static HashMap<String, String> allChinese = new HashMap<String, String>();
 	
-	public static int currentTransingFileSize = 0;
-
 	public static int[] GLOBAL_FACE_ARRAY = new int[] { 0, R.drawable.face_1,
 			R.drawable.face_2, R.drawable.face_3, R.drawable.face_4,
 			R.drawable.face_5, R.drawable.face_6, R.drawable.face_7,

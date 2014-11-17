@@ -14,12 +14,16 @@ import v2av.VideoRecorder;
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.NotificationManager;
+import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.ImageFormat;
@@ -33,7 +37,9 @@ import android.os.IBinder;
 import android.os.Message;
 import android.text.TextUtils.TruncateAt;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.Surface;
@@ -201,7 +207,7 @@ public class VideoActivityV2 extends Activity {
 
 	private int mContentWidth = -1;
 	private int mContentHeight = -1;
-	
+
 	private AudioManager audioManager;
 
 	@Override
@@ -302,11 +308,12 @@ public class VideoActivityV2 extends Activity {
 
 		bindService(new Intent(mContext, ConferencMessageSyncService.class),
 				mLocalServiceConnection, Context.BIND_AUTO_CREATE);
-		
+
 		audioManager = (AudioManager) mContext
 				.getSystemService(Context.AUDIO_SERVICE);
-		
-		//Broadcast for user joined conference, to inform that quit P2P conversation
+
+		// Broadcast for user joined conference, to inform that quit P2P
+		// conversation
 		broadcastForJoined();
 	}
 
@@ -346,6 +353,7 @@ public class VideoActivityV2 extends Activity {
 	@Override
 	public void onConfigurationChanged(Configuration newConfig) {
 		super.onConfigurationChanged(newConfig);
+
 		mContentLayoutMain.measure(View.MeasureSpec.EXACTLY,
 				View.MeasureSpec.EXACTLY);
 		this.mContentWidth = -1;
@@ -406,19 +414,19 @@ public class VideoActivityV2 extends Activity {
 				.getInstance().getCurrentUserId()) ? true : false;
 	}
 
-	
 	/**
-	 * Broadcast for user joined conference, to inform that quit P2P conversation
+	 * Broadcast for user joined conference, to inform that quit P2P
+	 * conversation
 	 */
 	private void broadcastForJoined() {
-		Intent i = new Intent(PublicIntent.BROADCAST_JOINED_CONFERENCE_NOTIFICATION);
+		Intent i = new Intent(
+				PublicIntent.BROADCAST_JOINED_CONFERENCE_NOTIFICATION);
 		i.addCategory(PublicIntent.DEFAULT_CATEGORY);
-		
+
 		i.putExtra("confid", conf.getId());
 		sendBroadcast(i);
 	}
-	
-	
+
 	/**
 	 * Update speaker icon and state
 	 * 
@@ -545,8 +553,7 @@ public class VideoActivityV2 extends Activity {
 				mDocContainer.updateSyncStatus(((ConferenceGroup) g).isSyn());
 			}
 
-		}
-		else
+		} else
 			mDocContainer.updateCurrentDoc();
 		return mDocContainer;
 	}
@@ -1149,15 +1156,19 @@ public class VideoActivityV2 extends Activity {
 	}
 
 	private void closeLocalCamera() {
-		Message.obtain(
-				mVideoHandler,
-				REQUEST_OPEN_OR_CLOSE_DEVICE,
-				0,
-				0,
-				new UserDeviceConfig(V2GlobalEnum.GROUP_TYPE_CONFERENCE, conf
-						.getId(),
-						GlobalHolder.getInstance().getCurrentUserId(), "", null))
-				.sendToTarget();
+		try {
+			Message.obtain(
+					mVideoHandler,
+					REQUEST_OPEN_OR_CLOSE_DEVICE,
+					0,
+					0,
+					new UserDeviceConfig(V2GlobalEnum.GROUP_TYPE_CONFERENCE,
+							conf.getId(), GlobalHolder.getInstance()
+									.getCurrentUserId(), "", null))
+					.sendToTarget();
+		} catch (Exception e) {
+
+		}
 	}
 
 	private void openLocalCamera() {
@@ -1313,7 +1324,7 @@ public class VideoActivityV2 extends Activity {
 		// MessageLoader.deleteGroupMessage(mContext,
 		// V2GlobalEnum.GROUP_TYPE_CONFERENCE , conf.getId());
 		mVideoHandler = null;
-		
+
 		audioManager.setMode(AudioManager.MODE_NORMAL);
 		audioManager.setSpeakerphoneOn(false);
 	}
@@ -1532,7 +1543,7 @@ public class VideoActivityV2 extends Activity {
 			V2Log.e("Attendee is null");
 			return;
 		}
-		
+
 		boolean layoutChanged = false;
 		for (int i = 0; i < mCurrentShowedSV.size(); i++) {
 			SurfaceViewW svw = mCurrentShowedSV.get(i);
@@ -1542,16 +1553,16 @@ public class VideoActivityV2 extends Activity {
 				mCurrentShowedSV.remove(svw);
 				mVideoLayout.removeView(svw.getView());
 				svw.rl.removeAllViews();
-				i --;
+				i--;
 				layoutChanged = true;
 			}
 		}
-		
+
 		// adjust layout if we closed video
 		if (layoutChanged) {
 			adjustVideoLayout();
 		}
-		
+
 		if (conf.getChairman() == att.getAttId()) {
 			att.setChairMan(true);
 		}
@@ -1673,8 +1684,6 @@ public class VideoActivityV2 extends Activity {
 				closeFlag = true;
 			}
 
-			
-			
 			for (int j = 0; j < devices.size(); j++) {
 				UserDeviceConfig ud = devices.get(j);
 				// If remote user disable local camera device which
@@ -1688,7 +1697,7 @@ public class VideoActivityV2 extends Activity {
 						devices.set(j, svw.udc);
 					}
 				}
-				
+
 			}
 			// Need to close video
 			if (closeFlag) {
@@ -1700,7 +1709,6 @@ public class VideoActivityV2 extends Activity {
 			}
 
 		}
-		
 
 		if (mAttendeeContainer != null) {
 			mAttendeeContainer.resetAttendeeDevices(at, devices);
