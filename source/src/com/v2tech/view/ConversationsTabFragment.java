@@ -1084,7 +1084,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 					"update Friend verification conversation failed ... given AddFriendHistorieNode is null");
 			return;
 		}
-
+//		((ConversationFirendAuthenticationData) verificationMessageItemData).setMessageType(ConversationFirendAuthenticationData.VerificationMessageType.CONTACT_TYPE);
 		boolean hasUnread = false;
 		if (tempNode.readState == 0)
 			hasUnread = true;

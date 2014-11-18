@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 import com.v2tech.db.DataBaseContext;
 import com.v2tech.db.V2TechDBHelper;
 import com.v2tech.service.GlobalHolder;
+import com.v2tech.util.GlobalConfig;
 import com.v2tech.vo.AddFriendHistorieNode;
 import com.v2tech.vo.User;
 
@@ -59,7 +60,7 @@ public class AddFriendHistroysHandler {
 		node.refuseReason = null;
 		node.addState = 0;
 		node.readState = 0;
-		node.saveDate = System.currentTimeMillis() / 1000;
+		node.saveDate = GlobalConfig.getGlobalServerTime() / 1000;
 
 		sql = "insert into "
 				+ tableName
