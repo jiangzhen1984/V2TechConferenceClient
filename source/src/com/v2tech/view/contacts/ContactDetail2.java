@@ -8,6 +8,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -30,6 +31,8 @@ import com.v2tech.service.ContactsService;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.service.MessageListener;
 import com.v2tech.service.UserService;
+import com.v2tech.service.jni.JNIResponse;
+import com.v2tech.util.ProgressUtils;
 import com.v2tech.vo.ContactGroup;
 import com.v2tech.view.JNIService;
 import com.v2tech.view.MainActivity;
@@ -46,6 +49,7 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 
 	private static final int UPDATE_USER_INFO = 2;
 	private static final int UPDATE_USER_INFO_DONE = 3;
+	private static final int DELETE_CONTACT_USER = 4;
 
 	private static final int REQUEST_UPDATE_GROUP_CODE = 100;
 
@@ -85,6 +89,8 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 	private User currentUser;
 	private boolean isRelation;
 	private Group belongs;
+	
+	private Resources res;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -106,6 +112,7 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 
 		mContext = this;
 		u = GlobalHolder.getInstance().getUser(mUid);
+		res = getResources();
 
 		mNickNameET = (EditText) findViewById(R.id.contact_user_detail_nick_name_et);
 
@@ -286,7 +293,6 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 		cancelbut.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				// TODO Auto-generated method stub
 				deleteContactDialog.dismiss();
 			}
 		});
@@ -296,10 +302,8 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 			public void onClick(View v) {
 				// 删除好友
 				deleteContactDialog.dismiss();
-				contactService.delContact(u);
-				Intent i = new Intent(ContactDetail2.this, MainActivity.class);
-				i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-				ContactDetail2.this.startActivity(i);
+				contactService.delContact(u , new MessageListener(lh, DELETE_CONTACT_USER, null));
+				ProgressUtils.showNormalWithHintProgress(mContext, true);
 			}
 		});
 
@@ -496,6 +500,26 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 				// }
 				isUpdating = false;
 				break;
+			case DELETE_CONTACT_USER:
+				ProgressUtils.showNormalWithHintProgress(mContext, false);
+				JNIResponse response = (JNIResponse) msg.obj;
+				if(response.getResult() == JNIResponse.Result.SUCCESS){
+//					belongs = null;
+//					isRelation = false;
+//					updateContactGroup();
+					Intent i = new Intent(ContactDetail2.this, MainActivity.class);
+					i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+					ContactDetail2.this.startActivity(i);
+				}
+				else if(response.getResult() == JNIResponse.Result.TIME_OUT){
+					Toast.makeText(mContext, res.getString(R.string.contacts_delete_net_failed) ,
+							Toast.LENGTH_SHORT).show();
+				}
+				else{
+					Toast.makeText(mContext, res.getString(R.string.contacts_delete_failed) ,
+							Toast.LENGTH_SHORT).show();
+				}
+				break;
 			}
 		}
 
@@ -564,16 +588,16 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 			} else if (action
 					.equals(JNIService.JNI_BROADCAST_GROUP_USER_REMOVED)) {
 
-				GroupUserObject obj = arg1.getParcelableExtra("obj");
-				if (obj.getmUserId() != u.getmUserId()) {
-					return;
-				}
-
-				if (obj.getmType() == GroupType.CONTACT.intValue()) {
-					belongs = null;
-					isRelation = false;
-					updateContactGroup();
-				}
+//				GroupUserObject obj = arg1.getParcelableExtra("obj");
+//				if (obj.getmUserId() != u.getmUserId()) {
+//					return;
+//				}
+//
+//				if (obj.getmType() == GroupType.CONTACT.intValue()) {
+//					belongs = null;
+//					isRelation = false;
+//					updateContactGroup();
+//				}
 			}
 
 		}

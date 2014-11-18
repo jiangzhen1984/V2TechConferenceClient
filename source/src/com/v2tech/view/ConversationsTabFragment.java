@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -179,6 +180,8 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 	private TextView mPouupView = null;
 
 	private Object mLock = new Object();
+	
+	private Resources res;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -205,6 +208,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 
 		searchList = new ArrayList<ScrollItem>();
 		isCreate = true;
+		res = getResources();
 	}
 
 	@Override
@@ -1100,19 +1104,19 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 		// 我加别人：允许认识人：4你们已成为了好友，需要验证：5等待对方验证，4被同意（你们已成为了好友），6拒绝了你为好友
 		if ((tempNode.fromUserID == tempNode.remoteUserID)
 				&& (tempNode.ownerAuthType == 0)) {// 别人加我允许任何人
-			msg = name + "已添加你为好友";
+			msg = name + res.getString(R.string.friend_has_added);
 		} else if ((tempNode.fromUserID == tempNode.remoteUserID)
 				&& (tempNode.ownerAuthType == 1)) {// 别人加我不管我有没有处理
-			msg = name + "申请加你为好友";
+			msg = name + res.getString(R.string.friend_apply_add_you_friend);
 		} else if ((tempNode.fromUserID == tempNode.ownerUserID)
 				&& (tempNode.addState == 0)) {// 我加别人等待验证
-			msg = "申请加" + name + "为好友等待对方验证";
+			msg = res.getString(R.string.friend_apply_add) + name + res.getString(R.string.friend_add_you_waiting_verify);
 		} else if ((tempNode.fromUserID == tempNode.ownerUserID)
 				&& (tempNode.addState == 1)) {// 我加别人已被同意或我加别人不需验证
-			msg = "你和" + name + "成为了好友";
+			msg = res.getString(R.string.friend_relation) + name + res.getString(R.string.friend_becomed);
 		} else if ((tempNode.fromUserID == tempNode.ownerUserID)
 				&& (tempNode.addState == 2)) {// 我加别人已被拒绝
-			msg = name + "拒绝你的好友请求";
+			msg = name + res.getString(R.string.friend_was_reject_apply);
 		}
 		date = DateUtil.getStringDate(tempNode.saveDate * 1000);
 		dateLong = String.valueOf(tempNode.saveDate * 1000);
@@ -1755,9 +1759,6 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 							showAuthenticationNotification);
 					startActivity(intent);
 					showAuthenticationNotification = false;
-
-					MessageLoader.updateGroupVerificationReadState(mContext);
-					MessageLoader.updateFriendVerificationReadState(mContext);
 				} else {
 					startConversationView(cov);
 				}
@@ -2362,7 +2363,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 					getActivity(), 0, i, 0);
 
 			Notification notification = new Notification.Builder(getActivity())
-					.setSmallIcon(R.drawable.ic_launcher).setContentTitle("通知")
+					.setSmallIcon(R.drawable.ic_launcher).setContentTitle(getResources().getString(R.string.status_bar_notification))
 					.setContentText(msg).setAutoCancel(true).setTicker(msg)
 					.setWhen(System.currentTimeMillis())
 					.setContentIntent(pendingIntent).getNotification();
@@ -2450,19 +2451,19 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 			// 我加别人：允许认识人：4你们已成为了好友，需要验证：5等待对方验证，4被同意（你们已成为了好友），6拒绝了你为好友
 			if ((tempNode.fromUserID == tempNode.remoteUserID)
 					&& (tempNode.ownerAuthType == 0)) {// 别人加我允许任何人
-				msg = name + "已添加你为好友";
+				msg = name + res.getString(R.string.friend_has_added);
 			} else if ((tempNode.fromUserID == tempNode.remoteUserID)
 					&& (tempNode.ownerAuthType == 1)) {// 别人加我不管我有没有处理
-				msg = name + "申请加你为好友";
+				msg = name + res.getString(R.string.friend_apply_add_you_friend);
 			} else if ((tempNode.fromUserID == tempNode.ownerUserID)
 					&& (tempNode.addState == 0)) {// 我加别人等待验证
-				msg = "申请加" + name + "为好友等待对方验证";
+				msg = res.getString(R.string.friend_apply_add) + name + res.getString(R.string.friend_add_you_waiting_verify);
 			} else if ((tempNode.fromUserID == tempNode.ownerUserID)
 					&& (tempNode.addState == 1)) {// 我加别人已被同意或我加别人不需验证
-				msg = "你和" + name + "成为了好友";
+				msg = res.getString(R.string.friend_relation) + name + res.getString(R.string.friend_becomed);
 			} else if ((tempNode.fromUserID == tempNode.ownerUserID)
 					&& (tempNode.addState == 2)) {// 我加别人已被拒绝
-				msg = name + "拒绝你的好友请求";
+				msg = name + res.getString(R.string.friend_was_reject_apply);
 			}
 			date = DateUtil.getStringDate(tempNode.saveDate * 1000);
 			dateLong = String.valueOf(tempNode.saveDate * 1000);

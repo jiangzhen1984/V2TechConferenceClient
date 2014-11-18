@@ -596,6 +596,8 @@ public class MessageBuilder {
 					crowdInviteMsg.getCrowdGroup().toXml());
 			values.put(ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_ID,
 					crowdInviteMsg.getCrowdGroup().getmGId());
+            values.put(HistoriesCrowd.Cols.HISTORY_CROWD_SAVEDATE,
+                    crowdInviteMsg.getmTimestamp().getTime());
 			uri = mContext.getContentResolver().insert(
 					ContentDescriptor.HistoriesCrowd.CONTENT_URI, values);
 			return uri;
@@ -630,6 +632,8 @@ public class MessageBuilder {
 					crowdApplyMsg.getCrowdGroup().toXml());
 			values.put(ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_ID,
 					crowdApplyMsg.getCrowdGroup().getmGId());
+			values.put(HistoriesCrowd.Cols.HISTORY_CROWD_SAVEDATE,
+					crowdApplyMsg.getmTimestamp().getTime());
 			uri = mContext.getContentResolver().insert(
 					ContentDescriptor.HistoriesCrowd.CONTENT_URI, values);
 			crowdApplyMsg.setId(ContentUris.parseId(uri));
@@ -733,7 +737,7 @@ public class MessageBuilder {
             crowdGroup.setAnnouncement(crowd.announce);
         }
 
-        return updateQualicationMessageState(crowdGroup , obj);
+        return updateQualicationMessageState(crowdGroup , userID , obj);
     }
 
     /**
@@ -762,11 +766,16 @@ public class MessageBuilder {
                         "from GlobalHolder is null!");
                 return -1;
             }
-            crowdGroup = new CrowdGroup(groupID,
-                    null , user, null);
-            return updateQualicationMessageState(crowdGroup , obj);
+            
+            if(obj.isOwnerGroup)
+	            crowdGroup = new CrowdGroup(groupID,
+	                    null , GlobalHolder.getInstance().getCurrentUser() , null);
+            else
+            	crowdGroup = new CrowdGroup(groupID,
+	                    null , user , null);
+            return updateQualicationMessageState(crowdGroup , userID , obj);
         } else {
-            return updateQualicationMessageState(crowdGroup , obj);
+            return updateQualicationMessageState(crowdGroup , userID , obj);
         }
     }
 
@@ -776,7 +785,7 @@ public class MessageBuilder {
      * @param obj
      * @return
      */
-	public static long updateQualicationMessageState(CrowdGroup crowdGroup,
+	public static long updateQualicationMessageState(CrowdGroup crowdGroup, long userId ,
 			GroupQualicationState obj) {
 
 		if (obj == null){
@@ -797,16 +806,21 @@ public class MessageBuilder {
 			return -1;
 		}
 
-        long userID = crowdGroup.getOwnerUser().getmUserId();
+		long uid = -1;
+		long userID = crowdGroup.getOwnerUser().getmUserId();
+		if(userID == GlobalHolder.getInstance().getCurrentUserId())
+			uid = userId;
+		else
+			uid = GlobalHolder.getInstance().getCurrentUserId();
         long groupID = crowdGroup.getmGId();
 		DataBaseContext mContext = new DataBaseContext(context);
 		VMessageQualification crowdQuion = MessageBuilder
-				.queryQualMessageByCrowdId(null, userID, groupID);
+				.queryQualMessageByCrowdId(null, userId, groupID);
 		if (crowdQuion == null) {
 			if (obj.qualicationType == Type.CROWD_APPLICATION) {
-                User applicant = GlobalHolder.getInstance().getUser(userID);
+                User applicant = GlobalHolder.getInstance().getUser(uid);
                 if (applicant == null)
-                    applicant = new User(userID);
+                    applicant = new User(uid);
 				crowdQuion = new VMessageQualificationApplicationCrowd(
 						crowdGroup, applicant);
 				((VMessageQualificationApplicationCrowd) crowdQuion)

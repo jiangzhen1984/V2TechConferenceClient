@@ -19,6 +19,7 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.V2.jni.ImRequest;
 import com.v2tech.R;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.view.PublicIntent;
@@ -26,6 +27,7 @@ import com.v2tech.view.bo.ConversationNotificationObject;
 import com.v2tech.vo.Conversation;
 import com.v2tech.vo.Crowd;
 import com.v2tech.vo.CrowdGroup;
+import com.v2tech.vo.Group;
 import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.SearchedResult;
 import com.v2tech.vo.User;
@@ -114,24 +116,24 @@ public class SearchedResultActivity extends Activity {
 				i.addCategory(PublicIntent.DEFAULT_CATEGORY);
 				startActivity(i);
 			} else if (item.mType == SearchedResult.Type.USER) {
+				boolean isGetInfo = false;
+				List<Group> contactsList = GlobalHolder.getInstance().getGroup(GroupType.CONTACT.intValue());
+				User u = new User(item.id);
+				for (int i = 0; i < contactsList.size(); i++) {
+					Group g = contactsList.get(i);
+					if (g.findUser(u) != null) {
+						isGetInfo = true;
+						return;
+					}
+				}
+				
+				if(!isGetInfo)
+					ImRequest.getInstance().getUserBaseInfo(item.id);
+				
 				Intent intent = new Intent(PublicIntent.SHOW_CONTACT_DETAIL_ACTIVITY);
 				intent.addCategory(PublicIntent.DEFAULT_CATEGORY);
-				intent.putExtra("uid", item.id);
+				intent.putExtra("uid", u.getmUserId());
 				startActivity(intent);
-				
-//				List<Group> contactsList = GlobalHolder.getInstance().getGroup(GroupType.CONTACT.intValue());
-//				User u = new User(item.id);
-//				for (int i = 0; i < contactsList.size(); i++) {
-//					Group g = contactsList.get(i);
-//					if (g.findUser(u) != null) {
-//						Intent intent = new Intent(PublicIntent.SHOW_CONTACT_DETAIL_ACTIVITY);
-//						intent.addCategory(PublicIntent.DEFAULT_CATEGORY);
-//						intent.putExtra("uid", u.getmUserId());
-//						startActivity(intent);
-//						return;
-//					}
-//				}
-				//TODO means doesn't find any relation 
 			}
 		}
 		

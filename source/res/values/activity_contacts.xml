@@ -49,6 +49,8 @@
     <string name="error_contacts_user_detail_no_avai_user">没有找到可用的用户信息</string>
     <string name="error_contacts_user_detail_no_nick_name">用户昵称不能为空</string>
     <string name="contacts_delete_confirm"> 确定删除好友吗？</string>
+    <string name="contacts_delete_net_failed"> 网络不佳，删除好友失败</string>
+    <string name="contacts_delete_failed">删除好友失败</string>
     
     <string name="contacts_user_detail_file_selection_not_found_path">没有获取到文件路径， 请使用系统的文件选择程序!</string>
     

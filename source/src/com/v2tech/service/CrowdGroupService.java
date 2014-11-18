@@ -33,6 +33,7 @@ import com.v2tech.vo.GroupQualicationState;
 import com.v2tech.vo.User;
 import com.v2tech.vo.VCrowdFile;
 import com.v2tech.vo.VMessageQualification.QualificationState;
+import com.v2tech.vo.VMessageQualification.ReadState;
 import com.v2tech.vo.VMessageQualification.Type;
 
 //组别统一名称
@@ -71,6 +72,8 @@ public class CrowdGroupService extends AbstractHandler {
 	}
 
 	private long mPendingCrowdId;
+	public static boolean isLocalInvite;
+	private static boolean isInvoked;
 
 	public CrowdGroupService() {
 		grCB = new GroupRequestCB(this);
@@ -310,7 +313,7 @@ public class CrowdGroupService extends AbstractHandler {
 			}
 			return;
 		}
-
+		isLocalInvite = true;
 		StringBuffer members = new StringBuffer();
 		members.append("<userlist> ");
 		for (User at : newMembers) {
@@ -628,17 +631,28 @@ public class CrowdGroupService extends AbstractHandler {
 				V2User user) {
 			if (groupType == V2Group.TYPE_CROWD
 					&& user.uid != GlobalHolder.getInstance()
-							.getCurrentUserId()) {
+							.getCurrentUserId() && !isInvoked) {
+				isInvoked = true;
 				JNIResponse jniRes = new JNIResponse(
 						CreateCrowdResponse.Result.SUCCESS);
 				jniRes.resObj = new GroupAddUserJNIObject(groupType, nGroupID,
 						user.uid, "");
 				Message.obtain(mCallbackHandler, ACCEPT_APPLICATION_CROWD,
 						jniRes).sendToTarget();
-				MessageBuilder.updateQualicationMessageState(nGroupID,
-						user.uid, new GroupQualicationState(
-								Type.CROWD_APPLICATION,
-								QualificationState.ACCEPTED, null));
+//				if(isLocalInvite){
+//				MessageBuilder.updateQualicationMessageState(nGroupID,
+//						user.uid, new GroupQualicationState(
+//								Type.CROWD_APPLICATION,
+//								QualificationState.BE_ACCEPTED, null , ReadState.UNREAD , true));
+//				isLocalInvite = false;
+//				}
+//				else
+//					MessageBuilder.updateQualicationMessageState(nGroupID,
+//							user.uid, new GroupQualicationState(
+//									Type.CROWD_APPLICATION,
+//									QualificationState.ACCEPTED, null , ReadState.UNREAD , false));
+				if(isLocalInvite)
+					isLocalInvite = false;
 			}
 		}
 	

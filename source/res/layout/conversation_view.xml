@@ -89,10 +89,11 @@
         android:ellipsize="end"
         android:gravity="bottom"
         android:singleLine="true"
-        android:layout_marginBottom="-2dp"
-        android:text="00:00"
+        android:layout_marginBottom="2dp"
+        android:maxWidth="100dp"
+        android:text="2014-11-20 17:20:32"
         android:textColor="@color/common_item_text_color"
-        android:textSize="@dimen/common_item_text_size_16" />
+        android:textSize="@dimen/common_item_text_size_small" />
     <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="1dp"

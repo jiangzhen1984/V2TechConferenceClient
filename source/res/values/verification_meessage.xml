@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="crowd_invitation_accept_button_name">同意</string>
+    <string name="crowd_invitation_accepted">已同意</string>
+    <string name="crowd_invitation_rejected">已拒绝</string>
+    <string name="crowd_invitation_joined">已加入</string>
+    <string name="crowd_invitation_invalid_notes">已失效</string>
+    <string name="crowd_invitation_reject_button_name">拒绝</string>
+    <string name="crowd_invitation_reject_button_done">完成</string>
+    <string name="crowd_invitation_apply_join">申请加入</string>
+    <string name="crowd_invitation_accept_join">同意加入</string>
+    <string name="crowd_invitation_reject_join">拒绝加入</string>
+    
+    <string name="crowd_applicant_invite_title">群验证消息</string>
+    <string name="crowd_invitation_titile">群邀请</string>
+    <string name="crowd_invitation_accept_notes">已同意该邀请</string>
+    <string name="crowd_invitation_reject_notes">已拒绝该邀请</string>
+    <string name="crowd_invitation_accepted_notes">同意了你的申请</string>
+    <string name="crowd_invitation_rejected_notes">拒绝了你的申请</string>
+    <string name="crowd_invitation_reject_hints">请输入拒绝理由</string>
+    <string name="crowd_invitation_reject_titile">拒绝理由</string>
+    
+    <string name="crowd_applicant_title">群申请</string>
+    <string name="crowd_applicant_invite_hint">您的邀请已成功发送</string>
+    <string name="crowd_applicant_invite_finish">您已加入该群</string>
+    <string name="crowd_applicant_invite_never">该群不允许任何人加入</string>
+    <string name="crowd_application_invite_button_name">邀请</string>
+    <string name="crowd_application_accept_button_name">同意</string>
+    <string name="crowd_application_accepted">已同意该申请</string>
+    <string name="crowd_application_reject_button_name">拒绝</string>
+    <string name="crowd_application_rejected">已拒绝该申请</string>
+    <string name="crowd_application_hint_string">请输入验证信息</string>
+    
+    <!-- 好友 -->
+     <string name="friend_has_added">已添加你为好友</string>
+     <string name="friend_apply_add_you_friend">申请加你为好友</string>
+     
+     <string name="friend_apply_add">申请加</string>
+     <string name="friend_add_you_waiting_verify">为好友等待对方验证</string>
+     
+     <string name="friend_relation">你和</string>
+     <string name="friend_becomed">成为了好友</string>
+     
+     <string name="friend_was_reject_apply">拒绝你的好友请求</string>
+</resources>

@@ -185,6 +185,7 @@ public class CrowdApplicationActivity extends Activity {
 		@Override
 		public void onClick(View view) {
 			synchronized (mState) {
+
 				if (mState == State.APPLYING) {
 					return;
 				}

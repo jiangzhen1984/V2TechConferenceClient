@@ -43,6 +43,7 @@ import com.V2.jni.VideoRequest;
 import com.V2.jni.VideoRequestCallbackAdapter;
 import com.V2.jni.ind.AudioJNIObjectInd;
 import com.V2.jni.ind.FileJNIObject;
+import com.V2.jni.ind.GroupAddUserJNIObject;
 import com.V2.jni.ind.GroupJoinErrorJNIObject;
 import com.V2.jni.ind.GroupQualicationJNIObject;
 import com.V2.jni.ind.SendingResultJNIObjectInd;
@@ -54,7 +55,9 @@ import com.V2.jni.util.V2Log;
 import com.v2tech.R;
 import com.v2tech.db.ContentDescriptor;
 import com.v2tech.service.BitmapManager;
+import com.v2tech.service.CrowdGroupService;
 import com.v2tech.service.GlobalHolder;
+import com.v2tech.service.jni.CreateCrowdResponse;
 import com.v2tech.service.jni.FileDownLoadErrorIndication;
 import com.v2tech.service.jni.JNIResponse;
 import com.v2tech.util.GlobalConfig;
@@ -300,7 +303,7 @@ public class JNIService extends Service implements
 			return null;
 		}
 
-		User u = new User(user.uid, user.mNickName);
+		User u = new User(user.uid, user.name);
 		u.setSignature(user.mSignature);
 		u.setJob(user.mJob);
 		u.setTelephone(user.mTelephone);
@@ -813,7 +816,7 @@ public class JNIService extends Service implements
 					throw new RuntimeException("Unkown type");
 				}
 
-				crowdMsg.setmTimestamp(new Date());
+				crowdMsg.setmTimestamp(new Date(GlobalConfig.getGlobalServerTime()));
 				crowdMsg.setReadState(VMessageQualification.ReadState.UNREAD);
 				Uri uri = MessageBuilder.saveQualicationMessage(mContext,
 						crowdMsg);
@@ -920,32 +923,63 @@ public class JNIService extends Service implements
 				return;
 			}
 
-			User newUser = convertUser(user);
-
-			GlobalHolder.getInstance().putUser(newUser.getmUserId(), newUser);
-			GlobalHolder.getInstance().addUserToGroup(newUser, nGroupID);
-
-			GroupType gType = GroupType.fromInt(groupType);
-			if (gType == GroupType.CONTACT) {
-				// FIXME 不要在JNI里面直接调用UI
-				AddFriendHistroysHandler.becomeFriendHanler(
-						getApplicationContext(), newUser);
-
+			if(groupType != V2GlobalEnum.GROUP_TYPE_CROWD){
+				User newUser = convertUser(user);
+	
+				GlobalHolder.getInstance().putUser(newUser.getmUserId(), newUser);
+				GlobalHolder.getInstance().addUserToGroup(newUser, nGroupID);
+	
+				GroupType gType = GroupType.fromInt(groupType);
+				if (gType == GroupType.CONTACT) {
+					// FIXME 不要在JNI里面直接调用UI
+					AddFriendHistroysHandler.becomeFriendHanler(
+							getApplicationContext(), newUser);
+	
+					Intent intent = new Intent();
+					intent.setAction(JNI_BROADCAST_FRIEND_AUTHENTICATION);
+					intent.addCategory(JNI_BROADCAST_CATEGROY);
+					intent.putExtra("uid", newUser.getmUserId());
+					intent.putExtra("gid", nGroupID);
+					sendOrderedBroadcast(intent, null);
+				}
+	
+				GroupUserObject object = new GroupUserObject(groupType, nGroupID,
+						newUser.getmUserId());
+				Intent i = new Intent();
+				i.setAction(JNIService.JNI_BROADCAST_GROUP_USER_ADDED);
+				i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
+				i.putExtra("obj", object);
+				sendBroadcast(i);
+			}
+			else{
+				long id = -1;
+				if (user.uid != GlobalHolder.getInstance()
+								.getCurrentUserId()) {
+//					isInvoked = true;
+					if(CrowdGroupService.isLocalInvite){
+						id = MessageBuilder.updateQualicationMessageState(nGroupID,
+							user.uid, new GroupQualicationState(
+									Type.CROWD_APPLICATION,
+									QualificationState.BE_ACCEPTED, null , ReadState.UNREAD , true));
+					}
+					else
+						id = MessageBuilder.updateQualicationMessageState(nGroupID,
+								user.uid, new GroupQualicationState(
+										Type.CROWD_APPLICATION,
+										QualificationState.ACCEPTED, null , ReadState.UNREAD , false));
+				}
+				
+				if(id == -1){
+					V2Log.e(TAG, "OnAddGroupUserInfoCallback --> update crowd qualication message failed..");
+					return ;
+				}
+							
 				Intent intent = new Intent();
-				intent.setAction(JNI_BROADCAST_FRIEND_AUTHENTICATION);
-				intent.addCategory(JNI_BROADCAST_CATEGROY);
-				intent.putExtra("uid", newUser.getmUserId());
-				intent.putExtra("gid", nGroupID);
+				intent.setAction(JNIService.JNI_BROADCAST_NEW_QUALIFICATION_MESSAGE);
+				intent.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
+				intent.putExtra("msgId", id);
 				sendOrderedBroadcast(intent, null);
 			}
-
-			GroupUserObject object = new GroupUserObject(groupType, nGroupID,
-					newUser.getmUserId());
-			Intent i = new Intent();
-			i.setAction(JNIService.JNI_BROADCAST_GROUP_USER_ADDED);
-			i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
-			i.putExtra("obj", object);
-			sendBroadcast(i);
 		}
 
 		@Override
@@ -970,7 +1004,7 @@ public class JNIService extends Service implements
 			
 			long id = MessageBuilder.updateQualicationMessageState(group, new GroupQualicationState(
 							Type.CROWD_INVITATION,
-							QualificationState.BE_ACCEPTED, null));
+							QualificationState.BE_ACCEPTED, null , ReadState.UNREAD , false));
 			if (id == -1) {
 				V2Log.e(TAG,
 						"OnRefuseApplyJoinGroup : Update Qualication Message to Database failed.. return -1 , group id is : "
@@ -1001,7 +1035,7 @@ public class JNIService extends Service implements
 			long id = MessageBuilder.updateQualicationMessageState(
                     parseSingleCrowd,
 					new GroupQualicationState(Type.CROWD_INVITATION,
-							QualificationState.BE_REJECT, reason));
+							QualificationState.BE_REJECT, reason , ReadState.UNREAD , false));
 			if (id == -1) {
 				V2Log.e(TAG,
 						"OnRefuseApplyJoinGroup : Update Qualication Message to Database failed.. return -1 , group id is : "
@@ -1046,7 +1080,7 @@ public class JNIService extends Service implements
 										com.v2tech.vo.VMessageQualification.Type
 												.fromInt(obj.qualicationType),
 										com.v2tech.vo.VMessageQualification.QualificationState
-												.fromInt(obj.state), obj.reason));
+												.fromInt(obj.state), obj.reason , ReadState.UNREAD , false));
 				if (id == -1) {
 					V2Log.e(TAG,
 							"OnRefuseInviteJoinGroup --> update refuse Invite join group failed... !");
@@ -1092,7 +1126,7 @@ public class JNIService extends Service implements
 				
 				MessageBuilder.updateQualicationMessageState(crowd, new GroupQualicationState(
 								Type.CROWD_INVITATION,
-								QualificationState.ACCEPTED, null));
+								QualificationState.ACCEPTED, null , ReadState.UNREAD , false));
 				Intent i = new Intent();
 				i.setAction(PublicIntent.BROADCAST_NEW_CROWD_NOTIFICATION);
 				i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);

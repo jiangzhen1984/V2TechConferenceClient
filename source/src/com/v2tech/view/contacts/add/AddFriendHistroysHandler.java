@@ -174,7 +174,7 @@ public class AddFriendHistroysHandler {
 			node.readState = 0;
 		else
 			node.readState = 1;
-		node.saveDate = System.currentTimeMillis() / 1000;
+		node.saveDate = GlobalConfig.getGlobalServerTime() / 1000;
 
 		sql = "insert into "
 				+ tableName
@@ -281,7 +281,7 @@ public class AddFriendHistroysHandler {
 			node.refuseReason = null;
 			node.addState = 1;
 			node.readState = 0;
-			node.saveDate = System.currentTimeMillis() / 1000;
+			node.saveDate = GlobalConfig.getGlobalServerTime() / 1000;
 			sql = "insert into "
 					+ tableName
 					+ " (OwnerUserID,OwnerAuthType,RemoteUserID,FromUserID,ToUserID,ApplyReason,RefuseReason,AddState,SaveDate,ReadState) values("

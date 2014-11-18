@@ -1267,6 +1267,12 @@ public class VideoActivityV2 extends Activity {
 		// this.overridePendingTransition(R.animator.nonam_scale_null,
 		// R.animator.nonam_scale_center_100_0);
 	}
+	
+	@Override
+	protected void onPause() {
+		super.onPause();
+		moveTaskToBack(true);
+	}
 
 	@Override
 	protected void onDestroy() {
@@ -1339,6 +1345,7 @@ public class VideoActivityV2 extends Activity {
 		if (mSettingWindow != null && mSettingWindow.isShowing()) {
 			mSettingWindow.dismiss();
 		}
+		moveTaskToBack(true);
 	}
 
 	@Override

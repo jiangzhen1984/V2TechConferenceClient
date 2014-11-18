@@ -185,7 +185,7 @@ public class CrowdApplicantDetailActivity extends Activity {
 		msg.setQualState(QualificationState.REJECT);
 		msg.setReadState(ReadState.READ);
 		MessageBuilder.updateQualicationMessageState(msg.getId() , new GroupQualicationState(Type.CROWD_APPLICATION,
-				QualificationState.REJECT, null));
+				QualificationState.REJECT, null , ReadState.UNREAD  , true));
 	}
 	
 	private OnClickListener mAcceptButtonListener = new OnClickListener() {
@@ -212,11 +212,11 @@ public class CrowdApplicantDetailActivity extends Activity {
 //			if(message.getQualState().intValue() != msg.getQualState().intValue())
 //				handleAcceptDone();
 //			else{
-//				service.refuseApplication(crowd, applicant, "", new MessageListener(
-//						mLocalHandler, REFUSE_INVITATION_DONE, null));
 //				ProgressUtils.showNormalWithHintProgress(mContext, true).initTimeOut();
 //			}
-			handleDeclineDone();
+            service.refuseApplication(crowd, applicant, "", new MessageListener(
+                    mLocalHandler, REFUSE_INVITATION_DONE, null));
+            handleDeclineDone();
 		}
 
 	};

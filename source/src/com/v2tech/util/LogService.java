@@ -1061,6 +1061,7 @@ public class LogService extends Service implements Thread.UncaughtExceptionHandl
                 Looper.loop();
             }
         }.start();
+        ex.printStackTrace();
         //收集设备参数信息
         collectDeviceInfo(mContext);
         //保存日志文件

@@ -30,8 +30,11 @@ public class ContactsService extends AbstractHandler {
 	private static final int UPDATE_CONTACTS_GROUP = 11;
 	private static final int DELETE_CONTACTS_GROUP = 12;
 	private static final int UPDATE_CONTACT_BELONGS_GROUP = 13;
+	private static final int DELETE_CONTACT_USER = 14;
 
 	private long mWatingGid = 0;
+	
+	private long mWatingUserID = 0;
 
 	private GroupRequestCB crCB;
 
@@ -75,7 +78,12 @@ public class ContactsService extends AbstractHandler {
 	 * @param user
 	 * @return:
 	 */
-	public void delContact(User user) {
+	public void delContact(User user , MessageListener caller) {
+		
+		if(user == null)
+			return ;
+		
+		mWatingUserID = user.getmUserId();
 		long nGroupID = -1;
 		Iterator<Group> iterator = user.getBelongsGroup().iterator();
 		boolean ret = false;
@@ -91,6 +99,7 @@ public class ContactsService extends AbstractHandler {
 			return;
 		}
 
+		initTimeoutMessage(DELETE_CONTACT_USER, DEFAULT_TIME_OUT_SECS, caller);
 		long nUserID = user.getmUserId();
 		GroupRequest.getInstance().delGroupUser(
 				Group.GroupType.CONTACT.intValue(), nGroupID, nUserID);
@@ -286,10 +295,22 @@ public class ContactsService extends AbstractHandler {
 				GlobalHolder.getInstance().removeGroup(GroupType.CONTACT,
 						nGroupID);
 			}
-			;
 		}
 
-
+		@Override
+		public void OnDelGroupUserCallback(int groupType, long nGroupID,
+				long nUserID) {
+			if (groupType != Group.GroupType.CONTACT.intValue()) {
+				return;
+			}
+			
+			if(mWatingUserID == nUserID){
+				JNIResponse jniRes = new GroupServiceJNIResponse(
+						GroupServiceJNIResponse.Result.SUCCESS);
+				Message.obtain(mCallbackHandler, DELETE_CONTACT_USER, jniRes)
+						.sendToTarget();
+			}
+		}
 
 		@Override
 		public void onAddGroupInfo(V2Group group) {

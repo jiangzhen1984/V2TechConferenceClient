@@ -34,6 +34,7 @@ import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.GroupQualicationState;
 import com.v2tech.vo.VMessageQualification;
 import com.v2tech.vo.VMessageQualification.QualificationState;
+import com.v2tech.vo.VMessageQualification.ReadState;
 import com.v2tech.vo.VMessageQualification.Type;
 
 public class CrowdInvitationActivity extends Activity {
@@ -152,7 +153,7 @@ public class CrowdInvitationActivity extends Activity {
 		vq.setQualState(VMessageQualification.QualificationState.REJECT);
 		updateView(false);
 		MessageBuilder.updateQualicationMessageState(crowd.getId(), crowd.getCreator().getmUserId(),
-				new GroupQualicationState(Type.CROWD_INVITATION , QualificationState.REJECT , null));
+				new GroupQualicationState(Type.CROWD_INVITATION , QualificationState.REJECT , null , ReadState.UNREAD , false));
 	}
 
 	private void updateView(boolean isInReject) {

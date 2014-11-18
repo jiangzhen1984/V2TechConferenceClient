@@ -1,22 +1,12 @@
 <resources>
 
     <string name="crowd_return_button">返回</string>
-    <string name="crowd_Authentication_hit">群已被解散</string>
     <string name="crowd_create_activity_title">创建群组</string>
     <string name="crowd_create_activity_error_info">创建群组失败</string>
     
-    <string name="crowd_invitation_accept_button_name">同意</string>
-    <string name="crowd_invitation_accepted">已同意</string>
-    <string name="crowd_invitation_rejected">已拒绝</string>
-    <string name="crowd_invitation_joined">已加入</string>
-    <string name="crowd_invitation_invalid_notes">已失效</string>
-    <string name="crowd_invitation_accept_notes">已同意该邀请</string>
-    <string name="crowd_invitation_reject_button_name">拒绝</string>
-    <string name="crowd_invitation_reject_notes">已拒绝该邀请</string>
-    <string name="crowd_invitation_reject_hints">请输入拒绝理由</string>
-    <string name="crowd_invitation_reject_button_done">完成</string>
-    <string name="crowd_invitation_titile">群邀请</string>
-    <string name="crowd_invitation_reject_titile">拒绝理由</string>
+    <string name="crowd_Authentication_hit">群已被解散</string>
+    <string name="crowd_Authentication_crowd">群</string>
+    
     <string name="crowd_invitation_top_bar_right_button">发消息</string>
     <string name="crowd_invitation_box_item_creator">创建人</string>
     <string name="crowd_invitation_box_item_no">群号码</string>
@@ -25,6 +15,17 @@
     <string name="crowd_invitation_box_item_files">群文件</string>
     <string name="crowd_invitation_box_item_member">群成员</string>
     <string name="crowd_invitation_box_item_member_unit">人</string>
+    
+    <string name="crowd_application_button_name">申请</string>
+    <string name="crowd_application_title">群资料</string>
+    <string name="crowd_application_qualification">身份验证</string>
+    <string name="crowd_application_item_no">群号码</string>
+    <string name="crowd_application_item_creator">创建人</string>
+    <string name="crowd_application_brief">群简介</string>
+    <string name="crowd_application_applyed">已申请</string>
+    <string name="crowd_application_send_button">发送</string>
+    <string name="crowd_application_sent_result_successful">请求发送成功</string>
+    
     <string name="crowd_detail_title">群资料</string>
     <string name="crowd_detail_return_button">返回</string>
     <string name="crowd_detail_qulification_rule">身份验证</string>
@@ -75,29 +76,4 @@
     
     
     <string name="crowd_message_deletion_mode_quit_required">请先先退出删除模式!</string>
-    
-    <string name="crowd_application_button_name">申请</string>
-    <string name="crowd_application_title">群资料</string>
-    <string name="crowd_application_qualification">身份验证</string>
-    <string name="crowd_application_item_no">群号码</string>
-    <string name="crowd_application_item_creator">创建人</string>
-    <string name="crowd_application_brief">群简介</string>
-    <string name="crowd_application_applyed">已申请</string>
-    <string name="crowd_application_send_button">发送</string>
-    <string name="crowd_application_sent_result_successful">请求发送成功</string>
-    
-    
-    <string name="crowd_applicant_title">群申请</string>
-    <string name="crowd_applicant_invite_title">群验证消息</string>
-    <string name="crowd_applicant_invite_hint">您的邀请已成功发送</string>
-    <string name="crowd_applicant_invite_finish">您已加入该群</string>
-    <string name="crowd_applicant_invite_never">该群不允许任何人加入</string>
-    <string name="crowd_application_invite_button_name">邀请</string>
-    <string name="crowd_application_accept_button_name">同意</string>
-    <string name="crowd_application_accepted">已同意该申请</string>
-    <string name="crowd_application_reject_button_name">拒绝</string>
-    <string name="crowd_application_rejected">已拒绝该申请</string>
-    <string name="crowd_application_hint_string">请输入验证信息</string>
-    
-
 </resources>

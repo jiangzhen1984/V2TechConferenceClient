@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 
+
+
 import com.V2.jni.ind.FileJNIObject;
 import com.V2.jni.ind.GroupQualicationJNIObject;
 import com.V2.jni.ind.V2Document;
@@ -15,6 +17,8 @@ import com.V2.jni.ind.V2User;
 import com.V2.jni.util.EscapedcharactersProcessing;
 import com.V2.jni.util.V2Log;
 import com.V2.jni.util.XmlAttributeExtractor;
+import com.v2tech.vo.VMessageQualification.QualificationState;
+import com.v2tech.vo.VMessageQualification.Type;
 
 
 public class GroupRequest {
@@ -744,12 +748,13 @@ public class GroupRequest {
 			Object obj = wrcb.get();
 			if (obj != null) {
 				GroupRequestCallback callback = (GroupRequestCallback) obj;
-				//FIXME add comment
-				// 1 for application
-				// 3 for be_reject
+				/**
+				 * The callBack was only called when somebody refused the invite from you sended..
+				 * SomeBody invite you to join group and you refuse it ... this callback isn't called
+				 */
 				callback.OnRefuseInviteJoinGroup(new GroupQualicationJNIObject(
-						groupType, nGroupID, nUserID, 1,
-						3, reason));
+						groupType, nGroupID, nUserID, Type.CROWD_APPLICATION.intValue(),
+						QualificationState.BE_REJECT.intValue() , reason));
 			}
 		}
 

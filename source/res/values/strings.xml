@@ -25,6 +25,7 @@
     <string name="error_connect_to_server">无法链接到服务器，请确认网络链接</string>
     <string name="error_connect_to_server_no_enough_resource">加密狗资源不足，请联系管理员</string>
     <string name="status_bar_title">正在运行..</string>
+    <string name="status_bar_notification">通知</string>
     
     <string name="conversation_select_image_file_title">图片</string>
     <string name="conversation_select_file_title">文件</string>

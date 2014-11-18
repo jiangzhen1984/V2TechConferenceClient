@@ -78,7 +78,20 @@
             android:text="TextView"
             android:textColor="@color/conversation_view_text_color"
             android:textSize="@dimen/common_item_text_size_16" />
+        
+        <TextView
+            android:id="@+id/qualification_msg_content_reject"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:gravity="left|bottom"
+            android:singleLine="true"
+            android:text="TextView"
+            android:visibility="gone"
+            android:textColor="@color/conversation_view_text_color"
+            android:textSize="@dimen/common_item_text_size_16" />
     </LinearLayout>
+    
 
     <LinearLayout
         android:id="@+id/linearlayout1"
@@ -95,6 +108,7 @@
             android:layout_height="wrap_content"
             android:paddingRight="15dp"
             android:text="TextView"
+            android:visibility="gone"
             android:textColor="@color/common_item_text_color"
             android:textSize="@dimen/common_item_text_size_16" />
 
@@ -124,6 +138,7 @@
             android:paddingTop="@dimen/button_padding_vertical"
             android:text="@string/activiy_contact_group_item_button_delete"
             android:textColor="@color/common_white_color"
+            android:visibility="gone"
             android:textSize="@dimen/common_item_text_size_16" />
     </LinearLayout>
 
