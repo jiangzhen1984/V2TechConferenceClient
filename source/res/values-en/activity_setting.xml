@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="setting_title">Settings</string>
+    <string name="setting_notification_voice">Tones</string>
+    <string name="setting_notification_personal_information">Profile</string>
+    <string name="setting_notification_account">Account info</string>
+    <string name="setting_notification_session_msg">Conversation message</string>
+    <string name="setting_notification_confs_msg">Meeting message</string>
+    <string name="setting_quit_application">Exit</string>
+</resources>

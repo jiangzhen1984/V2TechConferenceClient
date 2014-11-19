@@ -170,7 +170,7 @@
                     android:gravity="right|center_vertical"
                     android:paddingLeft="10dp"
                     android:paddingRight="20dp"
-                    android:text="试用"
+                    android:text="@string/action_trail"
                     android:textColor="@color/button_text_color"
                     android:textSize="@dimen/login_box_text_size" />
             </RelativeLayout>

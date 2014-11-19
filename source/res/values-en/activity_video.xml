@@ -1,0 +1,31 @@
+﻿<resources>
+
+    <color name="in_meeting_title_bar_bg">#229dd6</color>
+    <color name="in_meeting_group_list_bg">#ffffff</color>
+    <color name="in_meeting_widget_separation_line">#f2f2f2</color>
+
+    <string name="in_meeting_quit_notification">Note</string>
+    <string name="in_meeting_quit_quit_button">Exit</string>
+    <string name="in_meeting_quit_cancel_button">Cancel</string>
+    <string name="in_meeting_quit_text">This will quit meeting, are you sure to continue?</string>
+    <string name="in_meeting_quit_text_for_new">You are already in meeting[],please quit current meeting if you want to join new meeting</string>
+    <string name="in_meeting_quit_rem">Remember this operation</string>
+    <string name="in_meeting_setting_video_qulity">Video quality</string>
+    <string name="in_meeting_setting_video_qulity_high">High</string>
+    <string name="in_meeting_setting_video_qulity_middle">Medium</string>
+    <string name="in_meeting_setting_video_qulity_low">Low</string>
+    <string name="in_meeting_setting_reverse">Switch camera</string>
+    <string name="error_in_meeting_invalid_gid">Incorrect meeting ID</string>
+    <string name="error_in_meeting_open_video_falied">Failed to open video device!</string>
+    <string name="error_does_not_open_local_video_yet">Local video is not enabled yet!</string>
+    
+
+    <color name="in_meeting_setting_bg">#ffffff</color>
+    <color name="in_meeting_quit_window_inner_bg">#ffffff</color>
+    <color name="in_meeting_quit_window_separation">#cad2d9</color>
+    <color name="in_meeting_quit_window_title_bg">#ebf3f7</color>
+    
+    <color name="in_meeting_doc_list_separation">#cad2d9</color>
+    <color name="in_meeting_doc_list_activited_doc_bg">#ebf3f7</color>
+
+</resources>

@@ -1,0 +1,39 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="conversation_waiting">Calling</string>
+    <string name="conversation_waiting_voice_incoming">Audio call</string>
+    <string name="conversation_waiting_video_incoming">Video call</string>
+    <string name="conversation_end">Call ended</string>
+   <string name="conversation_notification">Invite you to chat...</string>
+   <string name="conversation_accept_text">Accept</string>
+   <string name="conversation_voice_accept_only_text">Audio only</string>
+   <string name="conversation_reject_text">Decline</string>
+   <string name="conversation_cancel_text">Hang up</string>
+   <string name="conversation_video_title_text">You are doing video chat with[]</string>
+   <string name="conversation_close_video_text">Video off</string>
+   <string name="conversation_open_video_text">Video on</string>
+   <string name="conversation_mute_text">Mute</string>
+   <string name="conversation_speaker_text">Speaker</string>
+   
+   
+   <string name="conversation_popup_menu_video_call_button">Meeting</string>
+   <string name="conversation_popup_menu_group_create_button">Create group</string>
+   <string name="conversation_popup_menu_call_button">Phone call</string>
+   <string name="conversation_popup_menu_sms_call_button">SMS</string>
+   <string name="conversation_popup_menu_email_button">Email</string>
+   <string name="conversation_popup_menu_files_button">File Cabinet</string>
+   <string name="conversation_popup_menu_setting_button">Settings</string>
+   <string name="conversation_display_item_file">[File]</string>
+   <string name="conversation_display_item_pic">[Image]</string>
+   <string name="conversation_display_item_audio">[Audio]</string>
+   
+   <string name="conversation_quit_dialog_video_text">Are you sure to quit video call?</string>
+   <string name="conversation_quit_dialog_audio_text">Are you sure to quit audio call?</string>
+   <string name="conversation_quit_dialog_confirm_text">OK</string>
+   <string name="conversation_quit_dialog_cancel_text">Cancel</string>
+   <string name="conversation_no_network_notification">Network connection unavailable, please try again later!</string>
+   
+   
+    
+    
+</resources>

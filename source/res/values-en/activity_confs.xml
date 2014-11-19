@@ -1,0 +1,34 @@
+﻿<resources>
+
+   <color name="confs_title_bg">#ffffff</color>
+   <string name="confs_title">My profile</string>
+   <color name="confs_panel_bg">#363636</color>
+   <color name="confs_search_bar_bg">#eff0f2</color>
+   <color name="confs_group_list_bg">#ffffff</color>
+   <color name="confs_common_bg">#eff0f3</color>
+   <color name="confs_group_widget_separation_line">#f2f2f2</color>
+   <string name="error_request_enter_conference_time_out">Login time out</string>
+   <string name="error_request_enter_conference">Meeting login error!</string>
+   <string name="requesting_enter_conference">Logging in.....</string>
+   <string name="error_can_not_connect_server">Unable to connect to server</string>
+   <string name="conversations_delete_conf">Remove meeting</string>
+   <string name="conversations_delete_conversaion">Remove conversation</string>
+   <string name="conversations_kick_notification">dismissed by moderator</string>
+   <string name="confs_is_deleted_notification">This meeting was removed</string>
+   <string name="confs_public_chatting">Public chat</string>
+    <string name="confs_doc">Document sharing</string>
+   <string name="confs_attendee_title">Attendees</string>
+   <string name="confs_camear_quanlity">Quality</string>
+   <string name="confs_camear_quanlity_high">High</string>
+   <string name="confs_camear_quanlity_middle">Medium</string>
+   <string name="confs_camear_quanlity_low">Low</string>
+   <string name="conf_notification_joined_meeting">joined</string>
+   <string name="conf_notification_quited_meeting">quit</string>
+   <string name="error_exceed_support_video_count">support maximum 4 videos</string>
+   <string name="error_no_second_camera">No second camera</string>
+   <string name="error_no_permission_to_invitation">Invitation was disabled by moderator</string>
+   <string name="warning_under_sync">Meeting was synchronized by moderator, can\'t switch document.</string>
+   <string name="warning_no_attendee_selected">Please select contact</string>
+   <string name="warning_downloading_doc">Document is being downloading&#8230;&#8230;&#8230;</string>
+   
+</resources>
