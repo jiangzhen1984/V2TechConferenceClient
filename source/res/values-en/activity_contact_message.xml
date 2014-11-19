@@ -1,0 +1,34 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    
+    <string name="contact_message_pic_text">Image</string>
+    <string name="contact_message_send_button">Send</string>
+    <string name="contact_message_copy_message">Copied</string>
+    <string name="contact_message_pop_up_item_copy">Copy</string>
+    <string name="contact_message_pop_up_item_del">Remove</string>
+    <string name="contact_message_pop_up_item_resend">Re-send</string>
+    <string name="contact_message_pop_up_item_redownload">Re-download</string>
+    <string name="error_contact_messag_invalid_user_id">User ID error</string>
+    <string name="error_contact_messag_invalid_image_path">Image link not available</string>
+    <string name="error_contact_messag_time_too_short">Time is too short to record</string>
+    <string name="error_contact_message_face_too_much">Maximum 10 emoticons within a single message</string>
+    <string name="contact_message_button_up_to_cancel">Loosen finger to cancel</string>
+    <string name="contact_message_button_up_to_send">Loosen, end</string>
+    <string name="contact_message_button_send_audio_msg">Press to leave message</string>
+    <string name="contact_message_voice_dialog_text">Finger slides up to cancel sending</string>
+    <string name="contact_message_voice_dialog_cancel_text">Loosen finger to cancel sending</string>
+    <string name="contact_message_voice_dialog_waring_text">Time is too short to record</string>
+    <string name="contact_message_message_cancelled">Sending cancled</string>
+    <string name="contact_message_file_item_downloading">Downloading</string>
+    <string name="contact_message_file_item_pause">Pausing</string>
+    <string name="contact_message_file_item_sending">Sending</string>
+    <string name="contact_message_file_item_download_failed">Download failed</string>
+    <string name="contact_message_file_item_downloaded">Downloaded</string>
+    <string name="contact_message_file_item_miss_download">Not downloaded</string>
+    <string name="contact_message_file_item_sent">Sent</string>
+    <string name="contact_message_file_item_sent_failed">Sending failed</string>
+     <string name="contact_message_no_network_notification">Network connection not available, please try again later</string>
+     <string name="contact_message_tips_rest_seconds">[] second(s) left</string>
+    
+    <color name="message_panel_bg">#ffffff</color>
+</resources>

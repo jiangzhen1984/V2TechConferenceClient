@@ -1,0 +1,38 @@
+﻿<resources>
+
+    <!-- Strings related to login -->
+    <string name="prompt_email">Email</string>
+    <string name="prompt_password">Password</string>
+    <string name="action_sign_in_register">Log in</string>
+     <string name="action_trail">Trial</string>
+    <string name="action_sign_in_short">Log in</string>
+    <string name="login_progress_signing_in">Logging in&#8230;</string>
+    <string name="error_invalid_email">Email address is not available</string>
+    <string name="error_invalid_password">This password is too short</string>
+    <string name="error_incorrect_password">Username or password error</string>
+    <string name="error_field_required">This item can\'t be blank!</string>
+    <string name="error_no_host_configuration">Please first set server address!</string>
+    <string name="ip_host_setting">Settings</string>
+    <string name="error_save_host_config">Saving server information error!</string>
+    <string name="error_init_im_request">Failed to initiate object ImRequest</string>
+   
+    <string name="error_host_required">Please enter host address</string>
+    <string name="error_host_invalid">Please enter correct IP or domain name</string>
+    <string name="succeed_save_host_config">Server information saved!</string>
+    <string name="ip_setting_address">Address:</string>
+    <string name="ip_setting_port">Port:</string>
+    <string name="ip_setting_address_dot">.</string>
+    <string name="ip_setting_button_save">Save</string>
+    <string name="ip_setting_button_cancel">Cancel</string>
+    <string name="login_chk">Remember password</string>
+    <string name="login_title">V2 BizCom</string>
+    <string name="login_title_2">Business Communication</string>
+    <string name="login_title_copyright">Copyright&#0169;V2 Technology Inc., all rights reserved</string>
+    <string name="login_user_name">Please enter Bizcom username</string>
+
+    <color name="logo_background">#ffffff</color>
+    <color name="setting_outer_bg">#b8c9d4</color>
+    <color name="setting_inner_bg">#ffffff</color>
+    <color name="setting_separation">#f2f2f2</color>
+
+</resources>

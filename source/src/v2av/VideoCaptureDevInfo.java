@@ -226,18 +226,6 @@ public class VideoCaptureDevInfo
         	newDevice.capabilites.add(new CaptureCapability(s.width, s.height));
         }
         
-        List<int[]> fps_ranges = parameters.getSupportedPreviewFpsRange();
-        for (int[] range:fps_ranges)
-        {
-        	String strRange = "range is : ";
-        	for(int val:range)
-        	{
-        		strRange += val + " ";
-        	}
-        	
-        	Log.e("getSupportedPreviewFpsRange", strRange);
-        }
-        
         List<Integer> frameRates = parameters.getSupportedPreviewFrameRates();
         for (Integer fps:frameRates)
         {

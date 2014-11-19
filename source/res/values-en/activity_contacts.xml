@@ -1,0 +1,63 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="contacts_title">Team</string>
+    <string name="contacts_detail_title">Profile</string>
+    <string name="contacts_user_action_invite_chat">Chat</string>
+    <string name="contacts_user_action_invite_video">Start meeting</string>
+    <string name="contacts_user_action_call">Dial</string>
+    <string name="contacts_user_action_view_detail">Check more</string>
+    <string name="contacts_user_detail_gender_male">Male</string>
+    <string name="contacts_user_detail_gender_female">Female</string>
+    <string name="contacts_user_detail_gender_priacy">Confidential</string>
+    <string name="contacts_user_detail_return_button">Back</string>
+    <string name="contacts_user_detail_send_msg">Message</string>
+    <string name="contacts_user_detail_invite_video">Meeting</string>
+    <string name="contacts_user_detail_add_friend">Add</string>
+    <string name="contacts_user_detail_item_nick_name">Note</string>
+    <string name="contacts_user_detail_item_signature">Signature</string>
+    <string name="contacts_user_detail_item_account">Account</string>
+    <string name="contacts_user_detail_item_gender">Sexual</string>
+    <string name="contacts_user_detail_item_birdthday">Birthday</string>
+    <string name="contacts_user_detail_item_cell_phone">Mobile</string>
+    <string name="contacts_user_detail_item_telephone">Phone</string>
+    <string name="contacts_user_detail_item_company">Company</string>
+    <string name="contacts_user_detail_item_department">Department</string>
+    <string name="contacts_user_detail_item_title">Title</string>
+    <string name="contacts_user_detail_item_address">Address</string>
+    <string name="contacts_user_detail_item_email">Email</string>
+    <string name="contacts_user_detail_item_fax">Fax</string>
+    
+    <string name="contacts_user_detail_button_invite_video_conference">Start meeting</string>
+    <string name="contacts_user_detail_button_call">Audio call</string>
+    <string name="contacts_user_detail_button_invite_video_call">Video call</string>
+    <string name="contacts_user_detail_button_send_sms">SMS</string>
+    <string name="contacts_user_detail_button_send_text_msg">IM</string>
+    <string name="contacts_user_detail_button_send_file">Send file</string>
+    
+    
+    
+    <string name="contacts_user_detail_voice_dialog_voice_call">P2P audio call</string>
+    <string name="contacts_user_detail_voice_dialog_call">Phone call</string>
+    
+    
+    <string name="contacts_user_detail_nick_name_updated">Nickname updated</string>
+    <string name="error_contacts_user_detail_no_avai_user">User information unavailable</string>
+    <string name="error_contacts_user_detail_no_nick_name">Please enter nickname</string>
+    
+    <string name="contacts_user_detail_file_selection_not_found_path">File directory not accquired,please use the system file selection program!</string>
+    
+    <!-- select send file -->
+    <string name="select_file_title_return">Up</string>
+    <string name="select_file_title_entry">Back</string>
+    <string name="select_file_title_send">Send file</string>
+    <string name="select_file_title">File</string>
+    <string name="select_file_title_cancel">Cancel</string>
+
+    <color name="contacts_user_view_under_line">#dbdbdb</color>
+    <color name="contacts_user_view_bg">#f0f0f0</color>
+    <color name="contacts_user_group_bg">#f5f5f5</color>
+    <color name="contacts_user_detail_item_bg">#ffffff</color>
+    <color name="contacts_user_detail_text_color">#0099ff</color>
+
+</resources>

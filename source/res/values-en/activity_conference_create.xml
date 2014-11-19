@@ -1,0 +1,20 @@
+﻿<resources>
+
+   <string name="conference_create_title">Create</string>
+   <string name="conference_invition_button_text">Send invitation</string>
+   <string name="conference_create_conf_name">Name</string>
+   <string name="conference_create_conf_start_time">Start</string>
+   <string name="conference_create_conf_end_time">End</string>
+   <string name="conference_create_confirm">Ok</string>
+   <string name="conference_create_cancel">Back</string>
+   <string name="error_conf_title_required">Please enter meeting name!</string>
+   <string name="error_conf_start_time_required">Please set Start time!</string>
+   <string name="error_conf_end_time_required">Please set meeting End time!</string>
+   <string name="error_create_conference_failed_from_server_side">Failed to create meeting</string>
+   <string name="error_create_conference_failed_no_network">Network connection unavailable, please check it</string>
+   <string name="error_conf_start_time_format_failed">Start time format error: yyyy-MM-dd HH:mm</string>
+   <string name="error_conf_do_not_permit_create_piror_conf">It\'s a past meeting</string>
+   <string name="notification_watiing_process">It is processing, please wait...</string>
+   
+   
+</resources>

@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="date_time_picker_year">Year</string>
+    <string name="date_time_picker_month_of_year">Month</string>
+    <string name="date_time_picker_day_of_month">Day</string>
+    <string name="date_time_picker_hour">Hour</string>
+    <string name="date_time_picker_minute">Minute</string>
+    <string name="date_time_picker_plus">+</string>
+    <string name="date_time_picker_minus">-</string>
+    <string name="date_time_picker_set">Settings</string>
+    <string name="date_time_picker_cancel">Cancel</string>
+</resources>

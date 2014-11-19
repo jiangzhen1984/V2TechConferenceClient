@@ -5,6 +5,7 @@
     <string name="prompt_password">密码</string>
     <string name="action_sign_in_register">登   录</string>
     <string name="action_sign_in_short">Sign in</string>
+    <string name="action_trail">试用</string>
     <string name="login_progress_signing_in">正在登录&#8230;</string>
     <string name="error_invalid_email">邮箱地址不可用</string>
     <string name="error_invalid_password">This password is too short</string>
