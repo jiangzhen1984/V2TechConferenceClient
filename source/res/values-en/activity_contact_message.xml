@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    
+
     <string name="contact_message_pic_text">Image</string>
     <string name="contact_message_send_button">Send</string>
     <string name="contact_message_copy_message">Copied</string>
@@ -27,8 +27,14 @@
     <string name="contact_message_file_item_miss_download">Not downloaded</string>
     <string name="contact_message_file_item_sent">Sent</string>
     <string name="contact_message_file_item_sent_failed">Sending failed</string>
-     <string name="contact_message_no_network_notification">Network connection not available, please try again later</string>
-     <string name="contact_message_tips_rest_seconds">[] second(s) left</string>
-    
+    <string name="contact_message_no_network_notification">Network connection not available, please try again later</string>
+    <string name="contact_message_tips_rest_seconds">[] second(s) left</string>
+    <string name="contact_message_feature_item_emoticon">Emoji</string>
+    <string name="contact_message_feature_item_image">Image</string>
+    <string name="contact_message_feature_item_file">File</string>
+    <string name="contact_message_feature_item_audio">Audio</string>
+    <string name="contact_message_feature_item_video">Video</string>
+
     <color name="message_panel_bg">#ffffff</color>
+
 </resources>

@@ -68,7 +68,7 @@
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
                 android:paddingLeft="20dp"
-                android:text="图片"
+                android:text="@string/select_file_title_item_image"
                 android:textColor="#000000"
                 android:textSize="@dimen/select_file_adapter_size" />
 
@@ -103,7 +103,7 @@
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
                 android:paddingLeft="20dp"
-                android:text="文件"
+                android:text="@string/select_file_title_item_file"
                 android:textColor="#000000"
                 android:textSize="@dimen/select_file_adapter_size" />
 

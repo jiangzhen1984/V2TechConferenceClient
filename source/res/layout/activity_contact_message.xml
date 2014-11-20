@@ -193,7 +193,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:gravity="center"
-                        android:text="表情"
+                        android:text="@string/contact_message_feature_item_emoticon"
                         android:textSize="@dimen/activity_contact_iconDescription_text"
                         android:textColor="#000000" />
                 </LinearLayout>
@@ -213,7 +213,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:gravity="center"
-                        android:text="图片"
+                        android:text="@string/contact_message_feature_item_image"
                         android:textSize="@dimen/activity_contact_iconDescription_text"
                         android:textColor="#000000" />
                 </LinearLayout>
@@ -233,7 +233,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:gravity="center"
-                        android:text="文件"
+                        android:text="@string/contact_message_feature_item_file"
                         android:textSize="@dimen/activity_contact_iconDescription_text"
                         android:textColor="#000000" />
                 </LinearLayout>
@@ -253,7 +253,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:gravity="center"
-                        android:text="视频"
+                        android:text="@string/contact_message_feature_item_video"
                         android:textSize="@dimen/activity_contact_iconDescription_text"
                         android:textColor="#000000" />
                 </LinearLayout>
@@ -273,7 +273,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:gravity="center"
-                        android:text="语音"
+                        android:text="@string/contact_message_feature_item_audio"
                         android:textSize="@dimen/activity_contact_iconDescription_text"
                         android:textColor="#000000" />
                 </LinearLayout>

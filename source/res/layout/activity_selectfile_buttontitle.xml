@@ -13,7 +13,7 @@
         android:paddingLeft="15dp"
         android:paddingRight="8dp"
         android:paddingTop="15dp"
-        android:text="已选0.0K"
+        android:text="@string/select_file_size"
         android:textColor="#000000"
         android:textSize="@dimen/common_item_text_size" />
     <TextView
@@ -24,7 +24,7 @@
         android:layout_centerVertical="true"
         android:clickable="false"
         android:layout_marginRight="20dp"
-        android:text="发送( 0 )"
+        android:text="@string/select_file_send"
         android:gravity="center"
         android:textColor="#A5A5A5"
         android:textSize="@dimen/select_file_adapter_size" />

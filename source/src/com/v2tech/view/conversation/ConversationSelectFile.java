@@ -177,7 +177,7 @@ public class ConversationSelectFile extends Activity {
 		}
 
 		if ("image".equals(type)) {
-			titleText.setText("图片");
+			titleText.setText(R.string.select_file_title_item_image);
 			filesList.setVisibility(View.GONE);
 			filesGrid.setVisibility(View.VISIBLE);
 			new Thread(new Runnable() {
@@ -195,7 +195,7 @@ public class ConversationSelectFile extends Activity {
 			}).start();
 
 		} else if ("file".equals(type)) {
-			titleText.setText("文件");
+			titleText.setText(R.string.select_file_title_item_file);
 			filesGrid.setVisibility(View.GONE);
 			filesList.setVisibility(View.VISIBLE);
 
@@ -787,8 +787,10 @@ public class ConversationSelectFile extends Activity {
 			mCheckedNameList.add(bean.fileName);
 			totalSize += bean.fileSize;
 		}
-		selectedFileSize.setText("已选 " + getFileSize(totalSize));
-		sendButton.setText("发送(" + mCheckedList.size() + ")");
+		String str = this.getResources().getText(R.string.select_file_size).toString();
+		selectedFileSize.setText(str +" "+ getFileSize(totalSize));
+		str = this.getResources().getText(R.string.select_file_send).toString(); 
+		sendButton.setText(str+"(" + mCheckedList.size() + ")");
 
 	}
 

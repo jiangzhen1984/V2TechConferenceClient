@@ -14,7 +14,7 @@
     <string name="tab_org_name">Team</string>
     <string name="tab_group_name">Group</string>
     <string name="tab_conference_name">Meeting</string>
-    <string name="tab_conversation_name">Conversation</string>
+    <string name="tab_conversation_name">Recent</string>
     <string name="tab_selectfile_name">Send files</string>
     <string name="tab_selectfile_finish">Finish</string>
     <string name="title_bar_item_detail">Profile</string>

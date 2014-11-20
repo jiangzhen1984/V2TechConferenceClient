@@ -144,7 +144,7 @@
                     android:background="@drawable/rounded_corners_of_contact_user_detail_outer"
                     android:orientation="vertical"
                     android:paddingBottom="15dp"
-                    android:visibility="gone" >
+                    >
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -158,7 +158,7 @@
                             android:layout_marginLeft="@dimen/contact_detail_2_item_margin_horizontal"
                             android:layout_marginRight="@dimen/contact_detail_2_item_margin_horizontal"
                             android:layout_marginTop="@dimen/detail_detail_2_item_margin_top"
-                            android:padding="10dp"
+                            android:padding="5dp"
                             android:text="@string/contacts_user_detail_item_signature"
                             android:textColor="@color/activiy_contact_detail_item_color"
                             android:textSize="@dimen/common_item_text_size" />
@@ -197,7 +197,7 @@
                             android:layout_marginLeft="@dimen/contact_detail_2_item_margin_horizontal"
                             android:layout_marginRight="@dimen/contact_detail_2_item_margin_horizontal"
                             android:layout_marginTop="@dimen/detail_detail_2_item_margin_top"
-                            android:padding="10dp"
+                            android:padding="5dp"
                             android:text="@string/contacts_user_detail_item_account"
                             android:textColor="@color/activiy_contact_detail_item_color"
                             android:textSize="@dimen/common_item_text_size" />
@@ -231,7 +231,7 @@
                             android:layout_marginLeft="@dimen/contact_detail_2_item_margin_horizontal"
                             android:layout_marginRight="@dimen/contact_detail_2_item_margin_horizontal"
                             android:layout_marginTop="@dimen/detail_detail_2_item_margin_top"
-                            android:padding="10dp"
+                            android:padding="5dp"
                             android:text="@string/contacts_user_detail_item_gender"
                             android:textColor="@color/activiy_contact_detail_item_color"
                             android:textSize="@dimen/common_item_text_size" />
@@ -251,8 +251,10 @@
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="center"
                                 android:tag="1"
+                                android:paddingLeft="0dp"
                                 android:text="@string/contacts_user_detail_gender_male"
-                                android:textColor="@color/activiy_contact_detail_item_color" />
+                                android:textColor="@color/activiy_contact_detail_item_color" 
+                                android:textSize="10sp"/>
 
                             <RadioButton
                                 android:id="@+id/radio1"
@@ -261,7 +263,9 @@
                                 android:layout_gravity="center"
                                 android:tag="2"
                                 android:text="@string/contacts_user_detail_gender_female"
-                                android:textColor="@color/activiy_contact_detail_item_color" />
+                                android:textColor="@color/activiy_contact_detail_item_color" 
+                                android:paddingLeft="0dp"
+                                android:textSize="10sp"/>
 
                             <RadioButton
                                 android:id="@+id/radio2"
@@ -270,7 +274,9 @@
                                 android:layout_gravity="center"
                                 android:tag="0"
                                 android:text="@string/contacts_user_detail_gender_priacy"
-                                android:textColor="@color/activiy_contact_detail_item_color" />
+                                android:textColor="@color/activiy_contact_detail_item_color"
+                                android:paddingLeft="0dp"
+                                android:textSize="10sp" />
                         </RadioGroup>
                     </LinearLayout>
 
@@ -293,7 +299,7 @@
                             android:layout_marginLeft="@dimen/contact_detail_2_item_margin_horizontal"
                             android:layout_marginRight="@dimen/contact_detail_2_item_margin_horizontal"
                             android:layout_marginTop="@dimen/detail_detail_2_item_margin_top"
-                            android:padding="10dp"
+                            android:padding="5dp"
                             android:text="@string/contacts_user_detail_item_birdthday"
                             android:textColor="@color/activiy_contact_detail_item_color"
                             android:textSize="@dimen/common_item_text_size" />
@@ -329,7 +335,7 @@
                             android:layout_marginLeft="@dimen/contact_detail_2_item_margin_horizontal"
                             android:layout_marginRight="@dimen/contact_detail_2_item_margin_horizontal"
                             android:layout_marginTop="@dimen/detail_detail_2_item_margin_top"
-                            android:padding="10dp"
+                            android:padding="5dp"
                             android:text="@string/contacts_user_detail_item_cell_phone"
                             android:textColor="@color/activiy_contact_detail_item_color"
                             android:textSize="@dimen/common_item_text_size" />
@@ -532,6 +538,7 @@
                     android:layout_marginRight="@dimen/contact_detail_2_item_margin_right"
                     android:background="@drawable/rounded_corners_of_contact_user_detail_outer"
                     android:orientation="vertical"
+                    android:visibility="gone"
                      >
 
                     <LinearLayout
@@ -959,7 +966,7 @@
                         android:paddingTop="10dp"
                         android:text="@string/contacts_user_detail_button_send_text_msg"
                         android:textColor="@color/contact_detail_button_font_color"
-                        android:textSize="16sp" />
+                        android:textSize="14sp" />
                 </LinearLayout>
 
                 <LinearLayout

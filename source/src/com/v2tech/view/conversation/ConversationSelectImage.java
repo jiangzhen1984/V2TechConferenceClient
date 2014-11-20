@@ -135,7 +135,7 @@ public class ConversationSelectImage extends Activity {
 
 	private void init() {
 
-		title.setText("图片");
+		title.setText(R.string.select_file_title_item_image);
 		listViews.setVisibility(View.GONE);
 		gridViews.setVisibility(View.VISIBLE);
 		finishButton.setVisibility(View.INVISIBLE);

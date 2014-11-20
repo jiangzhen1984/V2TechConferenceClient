@@ -1,5 +1,6 @@
 package com.v2tech.vo;
 
+import com.v2tech.util.GlobalConfig;
 import com.v2tech.vo.Group.GroupType;
 
 
@@ -29,7 +30,7 @@ public class ConferenceConversation extends Conversation {
 		if (g != null) {
 			User u = g.getOwnerUser();
 			//TODO need use localization
-			return u == null ? g.getOwner() + "" : "创建人:"+u.getName();
+			return u == null ? g.getOwner() + "" : GlobalConfig.Resource.ConversationCrator +":"+u.getName();
 		}
 		return super.getMsg();
 	}

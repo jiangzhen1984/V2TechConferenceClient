@@ -92,6 +92,8 @@ public class ConversationSelectFileEntry extends Activity implements OnClickList
 		switch (resultCode) {
 			case NORMAL_SELECT_FILE:
 				mCheckedList = data.getParcelableArrayListExtra("checkedFiles");
+				String size = this.getResources().getText(R.string.select_file_size).toString();
+				String send = this.getResources().getText(R.string.select_file_send).toString(); 
 				if(mCheckedList != null && mCheckedList.size() > 0 && mCheckedList.size() != lastSize){
 					
 					totalSize = 0;
@@ -104,8 +106,10 @@ public class ConversationSelectFileEntry extends Activity implements OnClickList
 						
 						totalSize += bean.fileSize;
 					}
-					selectedFileSize.setText("已选" + getFileSize(totalSize));
-					sendButton.setText("发送("+mCheckedList.size()+")");
+					
+					selectedFileSize.setText(size + getFileSize(totalSize));
+					
+					sendButton.setText(send+"("+mCheckedList.size()+")");
 				}
 				else if(mCheckedList != null && mCheckedList.size() == 0){
 					lastSize = 0;
@@ -113,8 +117,8 @@ public class ConversationSelectFileEntry extends Activity implements OnClickList
 					sendButton.setOnClickListener(this);
 					sendButton.setTextColor(Color.GRAY);
 					sendButton.setBackgroundResource(R.drawable.button_bg_noable);
-					selectedFileSize.setText("已选0.0K");
-					sendButton.setText("发送( 0 )");
+					selectedFileSize.setText(size +" 0.0K");
+					sendButton.setText(send+"( 0 )");
 				} 
 				break;
 			case CANCEL:

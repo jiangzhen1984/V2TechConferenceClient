@@ -16,5 +16,5 @@
    <string name="error_conf_do_not_permit_create_piror_conf">It\'s a past meeting</string>
    <string name="notification_watiing_process">It is processing, please wait...</string>
    
-   
+   <string name="conference_conversation_creator">Creator</string>
 </resources>

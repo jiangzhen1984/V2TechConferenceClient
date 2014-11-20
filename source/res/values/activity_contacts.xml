@@ -53,6 +53,10 @@
     <string name="select_file_title_send">发送文件</string>
     <string name="select_file_title">文件</string>
     <string name="select_file_title_cancel">取消</string>
+    <string name="select_file_title_item_image">图片</string>
+    <string name="select_file_title_item_file">文件</string>
+    <string name="select_file_size">已选</string>
+    <string name="select_file_send">发送</string>
 
     <color name="contacts_user_view_under_line">#dbdbdb</color>
     <color name="contacts_user_view_bg">#f0f0f0</color>

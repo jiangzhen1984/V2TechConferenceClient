@@ -142,4 +142,10 @@ public class GlobalConfig {
 		}
 		
 	}
+	
+	
+	
+	public static class Resource {
+		public static String ConversationCrator="";
+	}
 }

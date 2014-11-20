@@ -34,6 +34,7 @@ import com.V2.jni.NativeInitializer;
 import com.V2.jni.VideoMixerRequest;
 import com.V2.jni.VideoRequest;
 import com.V2.jni.WBRequest;
+import com.v2tech.R;
 import com.v2tech.util.CrashHandler;
 import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.LogcatThread;
@@ -232,6 +233,9 @@ public class MainApplication extends Application {
 		} else {
 			conf.orientation = Configuration.ORIENTATION_PORTRAIT;
 		}
+		
+		
+		GlobalConfig.Resource.ConversationCrator = this.getResources().getText(R.string.conference_conversation_creator).toString();
 	}
 
 	public void requestQuit() {

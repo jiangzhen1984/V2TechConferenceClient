@@ -95,7 +95,7 @@ public class LoginActivity extends Activity {
 
 			@Override
 			public void onFocusChange(View arg0, boolean focus) {
-				if (focus) {
+				/*if (focus) {
 					if (mContext.getResources()
 							.getText(R.string.login_user_name)
 							.equals(mEmailView.getText().toString())) {
@@ -111,7 +111,7 @@ public class LoginActivity extends Activity {
 										.getColor(
 												R.color.login_activity_login_box_text_color));
 					}
-				}
+				}*/
 			}
 		});
 
@@ -132,7 +132,7 @@ public class LoginActivity extends Activity {
 
 			@Override
 			public void onFocusChange(View arg0, boolean focus) {
-				if (focus) {
+				/*if (focus) {
 					mPasswordView.setTextColor(Color.BLACK);
 					if (mContext.getResources()
 							.getText(R.string.prompt_password)
@@ -152,7 +152,7 @@ public class LoginActivity extends Activity {
 						mPasswordView.setInputType(InputType.TYPE_CLASS_TEXT
 								| InputType.TYPE_TEXT_VARIATION_PASSWORD);
 					}
-				}
+				}*/
 			}
 		});
 
