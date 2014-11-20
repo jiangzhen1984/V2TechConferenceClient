@@ -769,7 +769,7 @@ public class ConversationSelectFile extends Activity {
 				
 				isSended = false;
 				mCheckedList.clear();
-				mCheckedNameList.clear();
+                mCheckedNameList.clear();
 				updateFileItems(mCurrentPath);
 				selectedFileSize.setText("已选0.0K");
 				sendButton.setText("发送( 0 )");

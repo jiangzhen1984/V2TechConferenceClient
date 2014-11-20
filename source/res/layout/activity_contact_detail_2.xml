@@ -371,6 +371,7 @@
                         android:background="#c0c0c0" >
                     </LinearLayout>
                     <LinearLayout
+                        android:id="@+id/contact_user_detail_company_tv_layout"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="1dp"
@@ -402,11 +403,14 @@
                             android:textSize="@dimen/common_item_text_size" />
                     </LinearLayout>
                     <LinearLayout
+                        android:orientation="horizontal"
+                        android:id="@+id/contact_user_detail_company_tv_layout_devider"
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
                         android:background="#c0c0c0" >
                     </LinearLayout>
                     <LinearLayout
+                        android:id="@+id/contact_user_detail_department_tv_layout"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="1dp"
@@ -438,11 +442,14 @@
                             android:textSize="@dimen/common_item_text_size" />
                     </LinearLayout>
                     <LinearLayout
+                        android:id="@+id/contact_user_detail_department_tv_layout_devider"
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
+                        android:orientation="horizontal"
                         android:background="#c0c0c0" >
                     </LinearLayout>
                     <LinearLayout
+                        android:id="@+id/contact_user_detail_title_tv_layout"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="1dp"
@@ -474,8 +481,10 @@
                             android:textSize="@dimen/common_item_text_size" />
                     </LinearLayout>
                     <LinearLayout
+                        android:id="@+id/contact_user_detail_title_tv_layout_devider"
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
+                        android:orientation="horizontal"
                         android:background="#c0c0c0" >
                     </LinearLayout>
                     <LinearLayout

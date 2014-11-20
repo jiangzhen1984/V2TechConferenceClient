@@ -8,6 +8,7 @@
         android:id="@+id/specific_voiceDetail_adapter_direction"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/specific_voiceDetail_adapter_state"
         android:src="@drawable/vs_voice_callout" />
     <TextView
         android:id="@+id/specific_voiceDetail_adapter_state"

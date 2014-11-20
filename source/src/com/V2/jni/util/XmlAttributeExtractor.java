@@ -50,7 +50,7 @@ public class XmlAttributeExtractor {
 	 * <crowd announcement='ss' authtype='0' creatoruserid='12176' id='423' name='ccc' size='500' summary='bb'/>
 
 	 * @param str
-	 * @param startStr   just input creatoruserid 
+	 * @param attribute   just input creatoruserid
 	 * @return
 	 */
 	public static String extractAttribute(String str, String attribute) {
@@ -359,18 +359,25 @@ public class XmlAttributeExtractor {
 	}
 	
 	
-	
+    /**
+     *
+     * @param xml
+     * @return
+     */
+    public static V2User fromGroupXml(String xml){
+        String id = extractAttribute(xml, "id");
+        if(TextUtils.isEmpty(id))
+            return null;
+        else
+            return fromXml(Long.valueOf(id) , xml);
+    }
+
 	/**
-	 * 
-	 * @param uID
 	 * @param xml
 	 * @return
 	 */
-	public static V2User fromXml(String xml) {
-		String id = extractAttribute(xml, "id");
-		if (id == null || id.isEmpty()) {
-			return null;
-		}
+	public static V2User fromXml(long userID , String xml) {
+
 		String nickName = extractAttribute(xml, "nickname");
 		String signature = extractAttribute(xml,"sign");
 		String job = extractAttribute(xml,"job");
@@ -386,7 +393,7 @@ public class XmlAttributeExtractor {
 		String authtype = extractAttribute(xml,"authtype");
 		DateFormat dp = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
 
-		V2User u = new V2User(Long.parseLong(id), nickName);
+		V2User u = new V2User(userID, nickName);
 		u.mSignature = signature;
 		u.mJob=job;
 		u.mTelephone = telephone;

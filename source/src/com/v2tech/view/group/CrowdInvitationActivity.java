@@ -139,6 +139,9 @@ public class CrowdInvitationActivity extends Activity {
 //		i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
 //		i.putExtra("crowd", crowd.getId());
 //		sendBroadcast(i);
+        Group group = GlobalHolder.getInstance().getGroupById(V2GlobalEnum.GROUP_TYPE_CROWD , crowd.getId());
+        if(group != null && group.getUsers() != null)
+            mMembersTV.setText(String.valueOf(group.getUsers().size()));
 		
 		VMessageQualification message = MessageBuilder.queryQualMessageById(mContext, vq.getId());
 		vq.setQualState(message.getQualState());

@@ -923,35 +923,24 @@ public class JNIService extends Service implements
 				return;
 			}
 
-			if(groupType != V2GlobalEnum.GROUP_TYPE_CROWD){
-				User newUser = convertUser(user);
-	
-				GlobalHolder.getInstance().putUser(newUser.getmUserId(), newUser);
-				GlobalHolder.getInstance().addUserToGroup(newUser, nGroupID);
-	
-				GroupType gType = GroupType.fromInt(groupType);
-				if (gType == GroupType.CONTACT) {
-					// FIXME 不要在JNI里面直接调用UI
-					AddFriendHistroysHandler.becomeFriendHanler(
-							getApplicationContext(), newUser);
-	
-					Intent intent = new Intent();
-					intent.setAction(JNI_BROADCAST_FRIEND_AUTHENTICATION);
-					intent.addCategory(JNI_BROADCAST_CATEGROY);
-					intent.putExtra("uid", newUser.getmUserId());
-					intent.putExtra("gid", nGroupID);
-					sendOrderedBroadcast(intent, null);
-				}
-	
-				GroupUserObject object = new GroupUserObject(groupType, nGroupID,
-						newUser.getmUserId());
-				Intent i = new Intent();
-				i.setAction(JNIService.JNI_BROADCAST_GROUP_USER_ADDED);
-				i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
-				i.putExtra("obj", object);
-				sendBroadcast(i);
-			}
-			else{
+			User newUser = convertUser(user);
+
+			GlobalHolder.getInstance().putUser(newUser.getmUserId(), newUser);
+			GlobalHolder.getInstance().addUserToGroup(newUser, nGroupID);
+
+			GroupType gType = GroupType.fromInt(groupType);
+			if (gType == GroupType.CONTACT) {
+				// FIXME 不要在JNI里面直接调用UI
+				AddFriendHistroysHandler.becomeFriendHanler(
+						getApplicationContext(), newUser);
+
+				Intent intent = new Intent();
+				intent.setAction(JNI_BROADCAST_FRIEND_AUTHENTICATION);
+				intent.addCategory(JNI_BROADCAST_CATEGROY);
+				intent.putExtra("uid", newUser.getmUserId());
+				intent.putExtra("gid", nGroupID);
+				sendOrderedBroadcast(intent, null);
+			} else if(gType == GroupType.CHATING){
 				long id = -1;
 				if (user.uid != GlobalHolder.getInstance()
 								.getCurrentUserId()) {
@@ -961,11 +950,21 @@ public class JNIService extends Service implements
 									Type.CROWD_APPLICATION,
 									QualificationState.BE_ACCEPTED, null , ReadState.UNREAD , true));
 					}
-					else
-						id = MessageBuilder.updateQualicationMessageState(nGroupID,
-								user.uid, new GroupQualicationState(
-										Type.CROWD_APPLICATION,
-										QualificationState.ACCEPTED, null , ReadState.UNREAD , false));
+					else{
+						Group group = GlobalHolder.getInstance().getGroupById(groupType, nGroupID);
+						if(group == null){
+							V2Log.e(TAG, "OnAddGroupUserInfoCallback --> update crowd qualication message failed..group is null");
+							return ;
+						}
+						
+						if(group.getOwnerUser().getmUserId() == GlobalHolder.getInstance()
+								.getCurrentUserId()){
+							id = MessageBuilder.updateQualicationMessageState(nGroupID,
+									user.uid, new GroupQualicationState(
+											Type.CROWD_APPLICATION,
+											QualificationState.ACCEPTED, null , ReadState.UNREAD , false));
+						}
+					}
 				}
 				
 				if(id == -1){
@@ -979,6 +978,14 @@ public class JNIService extends Service implements
 				intent.putExtra("msgId", id);
 				sendOrderedBroadcast(intent, null);
 			}
+
+			GroupUserObject object = new GroupUserObject(groupType, nGroupID,
+					newUser.getmUserId());
+			Intent i = new Intent();
+			i.setAction(JNIService.JNI_BROADCAST_GROUP_USER_ADDED);
+			i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
+			i.putExtra("obj", object);
+			sendBroadcast(i);
 		}
 
 		@Override

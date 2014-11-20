@@ -109,7 +109,7 @@ public class LogService extends Service implements Thread.UncaughtExceptionHandl
     /**
      * 用于格式化日期,作为抓取正常日志的文件的名称的一部分
      */
-	private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
 
     /**
      * 用于格式化日期,作为crash日志文件名的一部分
@@ -448,20 +448,22 @@ public class LogService extends Service implements Thread.UncaughtExceptionHandl
 	 */
 	public void createLogCollector() throws IOException {
 		String logFileName = getLogFileName();// 日志文件名称
-		List<String> commandList = new ArrayList<String>();
-		commandList.add("logcat");
-		commandList.add("-v");
-		commandList.add("time");
-		commandList.add("-f");
-		commandList.add(getLogFilePath());
+//		List<String> commandList = new ArrayList<String>();
+//		commandList.add("logcat");
+//		commandList.add("-v");
+//		commandList.add("time");
+//		commandList.add("-f");
+//		commandList.add(getLogFilePath());
+		String cmd ="logcat -v time -f " + getLogFilePath();
 		// 过滤所有的错误信息
 		// commandList.add("*:I");
 		// commandList.add("*:E");
 		// 过滤指定TAG的信息
 		// commandList.add("MyAPP:V");
 		// commandList.add("*:S");
-		process = Runtime.getRuntime().exec(
-				commandList.toArray(new String[commandList.size()]));
+//		process = Runtime.getRuntime().exec(
+//				commandList.toArray(new String[commandList.size()]));
+		process = Runtime.getRuntime().exec(cmd);
 		recordLogServiceLog("start collecting the log,and log name is:"
 				+ logFileName);
 		processWaitFor();

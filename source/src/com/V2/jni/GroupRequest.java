@@ -163,13 +163,13 @@ public class GroupRequest {
 	public native void refuseInviteJoinGroup(int groupType, long nGroupID,
 			long nUserID, String reason);
 
-	/**
-	 * send application of join group
-	 * 
-	 * @param groupType
-	 * @param sGroupInfo
-	 * @param sAdditInfo
-	 */
+    /**
+     * send application of join group
+     *
+     * @param groupType
+     * @param nGroupID
+     * @param sAdditInfo
+     */
 	public native void applyJoinGroup(int groupType, long nGroupID,
 			String sAdditInfo);
 
@@ -205,13 +205,11 @@ public class GroupRequest {
 	public native void groupCreateWBoard(int groupType, long groupId,
 			int nWhiteIndex);
 
-	/**
-	 * 销毁白板
-	 * 
-	 * @param groupType
-	 * @param groupId
-	 * @param nWhiteIndex
-	 */
+    /**
+     * 销毁白板
+     * @param groupId
+     * @param szMediaID
+     */
 	public native void groupDestroyWBoard(long groupId, String szMediaID);
 
 	/**
@@ -228,12 +226,12 @@ public class GroupRequest {
 	public native void groupCreateDocShare(int eGroupType, long nGroupID,
 			String sFileName, int eWhiteShowType, boolean bStorePersonalSpace);
 
-	/**
-	 * 
-	 * @param groupType
-	 * @param t
-	 * @param nUserID
-	 */
+    /**
+     * accept the invitation that join group
+     * @param groupType
+     * @param groupId
+     * @param nUserID
+     */
 	private void OnAcceptInviteJoinGroup(int groupType, long groupId,
 			long nUserID) {
 		V2Log.d("Group Request  OnAcceptInviteJoinGroup  ==>" + groupType
@@ -251,14 +249,14 @@ public class GroupRequest {
 
 	}
 
-	/**
-	 * Reject application of join group
-	 * 
-	 * @param groupType
-	 * @param sGroupInfo
-	 * @param nUserID
-	 * @param sReason
-	 */
+    /**
+     * Reject application of join group
+     *
+     * @param groupType
+     * @param nGroupId
+     * @param nUserID
+     * @param sReason
+     */
 	public native void refuseApplyJoinGroup(int groupType, long nGroupId,
 			long nUserID, String sReason);
 
@@ -407,7 +405,7 @@ public class GroupRequest {
 	 * 'http://192.168.0.38:8090/crowd/C2A65B9B-63C7-4C9E-A8DD-F15F74ABA6CA/C2A65B9B-63C7-4C9E-A8DD-F15F74ABA6CA/83025aafa40f4bfb24fdb8d1034f78f0f7361801.gif'
 	 * / > < / f i l e l i s t >
 	 * 
-	 * @param type
+	 * @param groupType
 	 * @param nGroupId
 	 * @param sXml
 	 */
@@ -509,7 +507,7 @@ public class GroupRequest {
 		V2Log.d("OnAddGroupUserInfo ->" + groupType + ":" + nGroupID + ":"
 				+ sXml);
 		
-		V2User remoteUser = XmlAttributeExtractor.fromXml(sXml);
+		V2User remoteUser = XmlAttributeExtractor.fromGroupXml(sXml);
 		if(remoteUser == null){
 			V2Log.e("OnAddGroupUserInfo -> parse xml failed ...get null user : " + sXml);
 			return ;
@@ -731,13 +729,14 @@ public class GroupRequest {
 
 	}
 
-	/**
-	 * this funcation was called when be invited user refused to join group
-	 * @param groupType
-	 * @param nGroupID
-	 * @param nUserID
-	 * @param sxml
-	 */
+    /**
+     * this funcation was called when be invited user refused to join group
+     *
+     * @param groupType
+     * @param nGroupID
+     * @param nUserID
+     * @param reason
+     */
 	private void OnRefuseInviteJoinGroup(int groupType, long nGroupID,
 			long nUserID, String reason) {
 		V2Log.d("OnRefuseInviteJoinGroup ==>" + "groupType:" + groupType + ","
@@ -842,13 +841,13 @@ public class GroupRequest {
 		}
 	}
 
-	/**
-	 * The CallBack that refuse apply for join group 拒绝申请加入群回调
-	 * 
-	 * @param groupType
-	 * @param sGroupInfo
-	 * @param reason
-	 */
+    /**
+     * The CallBack that refuse apply for join group 拒绝申请加入群回调
+     *
+     * @param groupType
+     * @param sXml
+     * @param reason
+     */
 	private void OnRefuseApplyJoinGroup(int groupType, String sXml,
 			String reason) {
 		V2Log.d("OnRefuseApplyJoinGroup ==>" + "groupType:" + groupType + ","

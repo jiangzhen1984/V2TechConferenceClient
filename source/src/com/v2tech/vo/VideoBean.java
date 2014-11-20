@@ -28,6 +28,7 @@ public class VideoBean {
 	public String mediaChatID;
 	public int mediaType;
 	public int mediaState;
+	public int replyType;
 	public long startDate;
 	public long endDate;
 	public int readSatate; 

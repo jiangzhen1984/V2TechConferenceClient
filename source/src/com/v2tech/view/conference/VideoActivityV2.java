@@ -1271,7 +1271,7 @@ public class VideoActivityV2 extends Activity {
 	@Override
 	protected void onPause() {
 		super.onPause();
-		moveTaskToBack(true);
+//		moveTaskToBack(true);
 	}
 
 	@Override

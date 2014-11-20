@@ -438,7 +438,7 @@ public class VoiceMessageActivity extends Activity {
 				audioVideoMessageBean.callNumbers = 0;
 			}
 			else {
-				// 处理未读数量与字体颜色
+				// 处理未读数量和字体颜色
 				if (audioVideoMessageBean.readState == AudioVideoMessageBean.STATE_UNREAD) {
 					holder.unreadNumber.setVisibility(View.VISIBLE);
 					holder.voiceName.setTextColor(Color.RED);
@@ -450,8 +450,8 @@ public class VoiceMessageActivity extends Activity {
 					holder.unreadNumber.setVisibility(View.GONE);
 					audioVideoMessageBean.callNumbers = 0;
 				}
-				
-				if(audioVideoMessageBean.meidaState == AudioVideoMessageBean.STATE_CALL_IN)
+				//处理icon
+				if(audioVideoMessageBean.meidaState == AudioVideoMessageBean.STATE_NO_ANSWER_CALL)
 					holder.directionIcon
 					.setImageResource(R.drawable.vs_voice_nolistener);
 				else
@@ -481,11 +481,6 @@ public class VoiceMessageActivity extends Activity {
 
 					AudioVideoMessageBean bean = mListItem.get(position);
 					ArrayList<ChildMessageBean> mChildBeans = bean.mChildBeans;
-					Intent intent = new Intent(mContext,
-							VoiceMessageDetailActivity.class);
-					intent.putParcelableArrayListExtra("messages", mChildBeans);
-					intent.putExtra("remoteUserID", bean.remoteUserID);
-					startActivity(intent);
 
 //					holder.notifyIcon.setVisibility(View.INVISIBLE);
 					bean.callNumbers = 0;
@@ -494,13 +489,18 @@ public class VoiceMessageActivity extends Activity {
 					values.put(ContentDescriptor.HistoriesMedia.Cols.HISTORY_MEDIA_READ_STATE , AudioVideoMessageBean.STATE_READED);
 					String where = ContentDescriptor.HistoriesMedia.Cols.HISTORY_MEDIA_READ_STATE + "= ? and " +
 							ContentDescriptor.HistoriesMedia.Cols.HISTORY_MEDIA_REMOTE_USER_ID + "= ?";
-					String[] selectionArgs = new String[]{ String.valueOf(0) , String.valueOf(audioVideoMessageBean.remoteUserID)};
+					String[] selectionArgs = new String[]{ String.valueOf(AudioVideoMessageBean.STATE_UNREAD) , String.valueOf(audioVideoMessageBean.remoteUserID)};
 					DataBaseContext context = new DataBaseContext(VoiceMessageActivity.this);
 					context.getContentResolver().update(ContentDescriptor.HistoriesMedia.CONTENT_URI, 
 							values, where, selectionArgs);
 					
 					updateConversationState();
 					
+					Intent intent = new Intent(mContext,
+							VoiceMessageDetailActivity.class);
+					intent.putParcelableArrayListExtra("messages", mChildBeans);
+					intent.putExtra("remoteUserID", bean.remoteUserID);
+					startActivity(intent);
 					onBackPressed();
 				}
 			});

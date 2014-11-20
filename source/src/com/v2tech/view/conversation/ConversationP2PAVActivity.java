@@ -185,7 +185,6 @@ public class ConversationP2PAVActivity extends Activity implements
 
 		currentVideoBean = new VideoBean();
 		if (uad.isIncoming()) {
-			currentVideoBean.mediaState = AudioVideoMessageBean.STATE_NO_ANSWER_CALL;
 			currentVideoBean.readSatate = AudioVideoMessageBean.STATE_UNREAD;
 			currentVideoBean.formUserID = uad.getUser().getmUserId();
 			currentVideoBean.remoteUserID = uad.getUser().getmUserId();
@@ -221,7 +220,6 @@ public class ConversationP2PAVActivity extends Activity implements
 			// start time out monitor
 			mLocalHandler.postDelayed(timeOutMonitor, 1000 * 60);
 		} else {
-			currentVideoBean.mediaState = AudioVideoMessageBean.STATE_ANSWER_CALL;
 			currentVideoBean.readSatate = AudioVideoMessageBean.STATE_READED;
 			currentVideoBean.formUserID = GlobalHolder.getInstance()
 					.getCurrentUserId();
@@ -1299,6 +1297,7 @@ public class ConversationP2PAVActivity extends Activity implements
 			// Remove timer
 			mLocalHandler.removeCallbacks(timeOutMonitor);
 			isRejected = true;
+			currentVideoBean.mediaState = AudioVideoMessageBean.STATE_ANSWER_CALL;
 			hangUp();
 		}
 
@@ -1310,6 +1309,7 @@ public class ConversationP2PAVActivity extends Activity implements
 		@Override
 		public void onClick(View arg0) {
 			isAccepted = true;
+			currentVideoBean.mediaState = AudioVideoMessageBean.STATE_ANSWER_CALL;
 			// Stop ring tone
 			stopRingTone();
 			// set state to connected
@@ -1328,11 +1328,6 @@ public class ConversationP2PAVActivity extends Activity implements
 			initButtons();
 			initViews();
 
-			String str=null;
-			str.toLowerCase();
-			
-			
-			
 			if (uad.isVideoType()) {
 				TextView tv = (TextView) findViewById(R.id.conversation_fragment_connected_title_text);
 				tv.setText(tv.getText().toString()
@@ -1720,6 +1715,8 @@ public class ConversationP2PAVActivity extends Activity implements
 						currentVideoBean.endDate = GlobalConfig
 								.getGlobalServerTime();
 
+					if(currentVideoBean.mediaState != AudioVideoMessageBean.STATE_ANSWER_CALL)
+						currentVideoBean.mediaState = AudioVideoMessageBean.STATE_NO_ANSWER_CALL;
 					inProgress = true;
 					Message timeoutMessage = Message.obtain(this, QUIT);
 					this.sendMessageDelayed(timeoutMessage, 2000);
@@ -1745,7 +1742,6 @@ public class ConversationP2PAVActivity extends Activity implements
 								+ currentVideoBean.mediaChatID);
 						Message.obtain(this, KEY_CANCELLED_LISTNER)
 								.sendToTarget();
-						currentVideoBean.mediaState = AudioVideoMessageBean.STATE_NO_ANSWER_CALL;
 					} else if (rcsr.getCode() == RequestChatServiceResponse.ACCEPTED) {
 
 						uad.setConnected(true);

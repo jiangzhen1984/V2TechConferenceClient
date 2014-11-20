@@ -12,14 +12,17 @@ public class AudioVideoMessageBean  implements Parcelable , Comparable<AudioVide
 	public static final int TYPE_VIDEO = 1;
 	public static final int TYPE_ALL = 2;
 	
-	public static final int STATE_CALL_OUT = 0; 
-	public static final int STATE_CALL_IN = 1; 
+	public static final int STATE_CALL_OUT = 3; 
+	public static final int STATE_CALL_IN = 4; 
 	
-	public static final int STATE_ANSWER_CALL = 0; 
-	public static final int STATE_NO_ANSWER_CALL = 1;
+	public static final int STATE_ANSWER_CALL = 5; 
+	public static final int STATE_NO_ANSWER_CALL = 6;
 	
-	public static final int STATE_READED = 1;
-	public static final int STATE_UNREAD = 0;
+	public static final int STATE_READED = 7;
+	public static final int STATE_UNREAD = 8;
+	
+	public static final int REPLY_REJECT = 9;
+	public static final int REPLY_ACCEPT = 10;
 	
 	public AudioVideoMessageBean() {
 		super();

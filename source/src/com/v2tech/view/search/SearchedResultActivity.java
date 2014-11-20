@@ -117,23 +117,29 @@ public class SearchedResultActivity extends Activity {
 				startActivity(i);
 			} else if (item.mType == SearchedResult.Type.USER) {
 				boolean isGetInfo = false;
-				List<Group> contactsList = GlobalHolder.getInstance().getGroup(GroupType.CONTACT.intValue());
+				List<Group> contactsList = GlobalHolder.getInstance().getGroup(GroupType.ORG.intValue());
 				User u = new User(item.id);
 				for (int i = 0; i < contactsList.size(); i++) {
 					Group g = contactsList.get(i);
 					if (g.findUser(u) != null) {
 						isGetInfo = true;
-						return;
 					}
 				}
 				
-				if(!isGetInfo)
-					ImRequest.getInstance().getUserBaseInfo(item.id);
-				
-				Intent intent = new Intent(PublicIntent.SHOW_CONTACT_DETAIL_ACTIVITY);
-				intent.addCategory(PublicIntent.DEFAULT_CATEGORY);
-				intent.putExtra("uid", u.getmUserId());
-				startActivity(intent);
+				if(!isGetInfo) {
+                    ImRequest.getInstance().getUserBaseInfo(item.id);
+                    Intent intent = new Intent(PublicIntent.SHOW_CONTACT_DETAIL_DETAIL_ACTIVITY);
+                    intent.addCategory(PublicIntent.DEFAULT_CATEGORY);
+                    intent.putExtra("uid", u.getmUserId());
+                    intent.putExtra("fromActivity" , "SearchedResultActivity");
+                    startActivity(intent);
+                }
+				else {
+                    Intent intent = new Intent(PublicIntent.SHOW_CONTACT_DETAIL_ACTIVITY);
+                    intent.addCategory(PublicIntent.DEFAULT_CATEGORY);
+                    intent.putExtra("uid", u.getmUserId());
+                    startActivity(intent);
+                }
 			}
 		}
 		

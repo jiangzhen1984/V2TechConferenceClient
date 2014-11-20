@@ -37,7 +37,6 @@ import com.v2tech.vo.ContactGroup;
 import com.v2tech.view.JNIService;
 import com.v2tech.view.MainActivity;
 import com.v2tech.view.MainApplication;
-import com.v2tech.view.bo.GroupUserObject;
 import com.v2tech.view.contacts.add.AuthenticationActivity;
 import com.v2tech.view.contacts.add.FriendManagementActivity;
 import com.v2tech.view.widget.MarqueeTextView;
@@ -50,6 +49,9 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 	private static final int UPDATE_USER_INFO = 2;
 	private static final int UPDATE_USER_INFO_DONE = 3;
 	private static final int DELETE_CONTACT_USER = 4;
+
+	private static final int ORG_SAME_CONTACT = 6;
+	private static final int ORG_NO_SAME_CONTACT = 7;
 
 	private static final int REQUEST_UPDATE_GROUP_CODE = 100;
 
@@ -71,13 +73,20 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 	private TextView mBirthdayTV;
 	private TextView mCellphoneTV;
 	private TextView mTelephoneTV;
-	private TextView mTitleTV;
+	private TextView mPostJobTV;
 	private TextView mAddressTV;
 	private MarqueeTextView mSignTV;
 	private TextView mDeptTV;
 	private TextView mCompanyTV;
 	private LinearLayout mSignTVLayout;
 	private LinearLayout mSignTVLine;
+
+    private View mCompanyLayout;
+    private View mDeptLayout;
+    private View mPostJobLayout;
+    private View mCompanyLayoutDevider;
+    private View mDeptLayoutDevider;
+    private View mPostJobLayoutDevider;
 
 	private EditText mNickNameET;
 	private TextView mGroupNameTV;
@@ -91,6 +100,7 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 	private Group belongs;
 	
 	private Resources res;
+    private int currentContactType;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -102,8 +112,14 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 		if ((fromActivity != null)
 				&& (fromActivity.equals("MessageAuthenticationActivity"))) {
 			mUid = this.getIntent().getLongExtra("remoteUserID", 0);
-		} else {
+            currentContactType = ORG_SAME_CONTACT;
+		} else if((fromActivity != null)
+                && (fromActivity.equals("SearchedResultActivity"))){
+            mUid = this.getIntent().getLongExtra("uid", 0);
+            currentContactType = ORG_NO_SAME_CONTACT;
+        }else {
 			mUid = this.getIntent().getLongExtra("uid", 0);
+            currentContactType = ORG_SAME_CONTACT;
 		}
 
 		initView();
@@ -247,20 +263,26 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 			}
 		});
 
+        mSignTV = (MarqueeTextView) findViewById(R.id.contact_user_detail_user_signature_tv);
+        mSignTVLayout = (LinearLayout) findViewById(R.id.contact_user_detail_nick_name_et_linearlayout);
+        mSignTVLine = (LinearLayout) findViewById(R.id.contact_user_detail_nick_name_et_belowline);
+
 		mAccountTV = (TextView) findViewById(R.id.contact_user_detail_account_tv);
 		mGendarTV = (TextView) findViewById(R.id.contact_user_detail_gender_tv);
 		mBirthdayTV = (TextView) findViewById(R.id.contact_user_detail_birthday_tv);
+        mCellphoneTV = (TextView) findViewById(R.id.contact_user_detail_cell_phone_tv);
+        mTelephoneTV = (TextView) findViewById(R.id.contact_user_detail_telephone_tv);
+        mCompanyTV = (TextView) findViewById(R.id.contact_user_detail_company_tv);
+        mDeptTV = (TextView) findViewById(R.id.contact_user_detail_department_tv);
+        mPostJobTV = (TextView) findViewById(R.id.contact_user_detail_title_tv);
+        mAddressTV = (TextView) findViewById(R.id.contact_user_detail_address_tv);
 
-		mTitleTV = (TextView) findViewById(R.id.contact_user_detail_title_tv);
-		mAddressTV = (TextView) findViewById(R.id.contact_user_detail_address_tv);
-		mCellphoneTV = (TextView) findViewById(R.id.contact_user_detail_cell_phone_tv);
-		mTelephoneTV = (TextView) findViewById(R.id.contact_user_detail_telephone_tv);
-		mSignTV = (MarqueeTextView) findViewById(R.id.contact_user_detail_user_signature_tv);
-		mDeptTV = (TextView) findViewById(R.id.contact_user_detail_department_tv);
-		mCompanyTV = (TextView) findViewById(R.id.contact_user_detail_company_tv);
-		mSignTVLayout = (LinearLayout) findViewById(R.id.contact_user_detail_nick_name_et_linearlayout);
-		mSignTVLine = (LinearLayout) findViewById(R.id.contact_user_detail_nick_name_et_belowline);
-
+        mCompanyLayout = findViewById(R.id.contact_user_detail_company_tv_layout);
+        mDeptLayout = findViewById(R.id.contact_user_detail_department_tv_layout);
+        mPostJobLayout = findViewById(R.id.contact_user_detail_title_tv_layout);
+        mCompanyLayoutDevider = findViewById(R.id.contact_user_detail_company_tv_layout_devider);
+        mDeptLayoutDevider = findViewById(R.id.contact_user_detail_department_tv_layout_devider);
+        mPostJobLayoutDevider = findViewById(R.id.contact_user_detail_title_tv_layout_devider);
 	}
 
 	private void updateContactGroup() {
@@ -279,6 +301,23 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 			mSignTVLayout.setVisibility(View.GONE);
 			mSignTVLine.setVisibility(View.GONE);
 		}
+
+        if(currentContactType == ORG_NO_SAME_CONTACT){
+            mCompanyLayout.setVisibility(View.GONE);
+            mDeptLayout.setVisibility(View.GONE);
+            mPostJobLayout.setVisibility(View.GONE);
+            mCompanyLayoutDevider.setVisibility(View.GONE);
+            mDeptLayoutDevider.setVisibility(View.GONE);
+            mPostJobLayoutDevider.setVisibility(View.GONE);
+        }
+        else{
+            mCompanyLayout.setVisibility(View.VISIBLE);
+            mDeptLayout.setVisibility(View.VISIBLE);
+            mPostJobLayout.setVisibility(View.VISIBLE);
+            mCompanyLayoutDevider.setVisibility(View.VISIBLE);
+            mDeptLayoutDevider.setVisibility(View.VISIBLE);
+            mPostJobLayoutDevider.setVisibility(View.VISIBLE);
+        }
 	}
 
 	private void showDeleteContactDialog() {
@@ -346,7 +385,7 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 		mBirthdayTV.setText(u.getBirthdayStr());
 		mCellphoneTV.setText(u.getMobile());
 		mTelephoneTV.setText(u.getTelephone());
-		mTitleTV.setText(u.getJob());
+		mPostJobTV.setText(u.getJob());
 		mAddressTV.setText(u.getAddress());
 		mSignTV.setText(u.getSignature());
 		mDeptTV.setText(u.getDepartment());

@@ -173,7 +173,7 @@ public class VoiceMessageDetailActivity extends Activity implements
 			holder.holdTime.setText(holdTime);
 			holder.saveTime.setText(DateUtil
 					.getStringDate(childBean.childSaveDate));
-			if (childBean.childISCallOut == AudioVideoMessageBean.STATE_CALL_OUT) {
+			if (childBean.childISCallOut == AudioVideoMessageBean.STATE_CALL_OUT) { //区分是主动拨出还是接收
 				holder.directionIcon
 						.setImageResource(R.drawable.vs_voice_callout);
 				holder.state.setTextColor(Color.BLUE);
@@ -183,15 +183,23 @@ public class VoiceMessageDetailActivity extends Activity implements
 				else
 					holder.state.setText(R.string.conversation_voice_detail_video_call_out);
 			} else {
-				if (childBean.childMediaState == AudioVideoMessageBean.STATE_CALL_OUT) {
+				if (childBean.childMediaState == AudioVideoMessageBean.STATE_ANSWER_CALL) { //区分已接听和未接听
 					holder.directionIcon
 							.setImageResource(R.drawable.vs_voice_listener);
 					holder.state.setTextColor(Color.GREEN);
 					holder.holdTime.setTextColor(Color.GREEN);
-					if (childBean.childMediaType == AudioVideoMessageBean.TYPE_AUDIO)
-						holder.state.setText(R.string.conversation_voice_detail_voice_call_in_reply);
-					else
-						holder.state.setText(R.string.conversation_voice_detail_video_call_in_reply);
+					if (childBean.childMediaType == AudioVideoMessageBean.TYPE_AUDIO){
+						if(childBean.childHoldingTime <= 0) //区分接听还是拒绝
+							holder.state.setText(R.string.conversation_voice_detail_voice_call_in_reply_reject);
+						else
+							holder.state.setText(R.string.conversation_voice_detail_voice_call_in_reply);
+					}
+					else{
+						if(childBean.childHoldingTime <= 0) //区分接听还是拒绝
+							holder.state.setText(R.string.conversation_voice_detail_video_call_in_reply_reject);
+						else
+							holder.state.setText(R.string.conversation_voice_detail_video_call_in_reply);
+					}
 				} else {
 					holder.directionIcon
 							.setImageResource(R.drawable.vs_voice_nolistener);
@@ -320,7 +328,7 @@ public class VoiceMessageDetailActivity extends Activity implements
 			values.put(ContentDescriptor.HistoriesMedia.Cols.HISTORY_MEDIA_READ_STATE , AudioVideoMessageBean.STATE_READED);
 			String where = ContentDescriptor.HistoriesMedia.Cols.HISTORY_MEDIA_READ_STATE + "= ? and " +
 					ContentDescriptor.HistoriesMedia.Cols.HISTORY_MEDIA_REMOTE_USER_ID + "= ?";
-			String[] args = new String[]{ String.valueOf(0) , String.valueOf(remoteID)};
+			String[] args = new String[]{ String.valueOf(AudioVideoMessageBean.STATE_UNREAD) , String.valueOf(remoteID)};
 			DataBaseContext con = new DataBaseContext(VoiceMessageDetailActivity.this);
 			con.getContentResolver().update(ContentDescriptor.HistoriesMedia.CONTENT_URI, 
 					values, where, args);

@@ -161,13 +161,15 @@ public class ImRequest {
 	private void OnUpdateBaseInfo(long nUserID, String updatexml) {
 		V2Log.d("ImRequest.OnUpdateBaseInfo==>" + "nUserID:" + nUserID + ","
 				+ "updatexml:" + updatexml);
-		V2User user = XmlAttributeExtractor.fromXml(updatexml);
+		V2User user = XmlAttributeExtractor.fromXml(nUserID , updatexml);
 		if (user == null) {
-			V2Log.e(" can not parse user.");
+			V2Log.e("ImRequest OnUpdateBaseInfo --> Parsed the xml convert to a V2User Object failed... userID is : " +
+                    "" + nUserID + " and xml is : " + updatexml);
 			return;
 		}
-		for (WeakReference<ImRequestCallback> wf : this.mCallbacks) {
-			Object obj = wf.get();
+		
+		for (int i = 0; i < mCallbacks.size(); i++) {
+			Object obj = mCallbacks.get(i).get();
 			if (obj != null) {
 				ImRequestCallback callback = (ImRequestCallback) obj;
 				callback.OnUpdateBaseInfoCallback(user);
