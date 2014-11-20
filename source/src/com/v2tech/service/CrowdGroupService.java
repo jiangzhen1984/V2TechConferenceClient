@@ -538,30 +538,6 @@ public class CrowdGroupService extends AbstractHandler {
 		}
 
 		@Override
-		public void OnRefuseInviteJoinGroup(GroupQualicationJNIObject obj) {
-			// if (obj.groupType == GroupType.CHATING.intValue()) {
-			// MessageBuilder.updateQualicationMessageState(obj.groupID,
-			// obj.userID,
-			// new GroupQualicationState(Type.CROWD_INVITATION ,
-			// QualificationState.REJECT , null));
-			// }
-		}
-
-		@Override
-		public void OnRefuseApplyJoinGroup(V2Group parseSingleCrowd,
-				String reason) {
-			// JNIResponse jniRes = new JNIResponse(
-			// CreateCrowdResponse.Result.FAILED);
-			// Message.obtain(mCallbackHandler, REFUSE_APPLICATION_CROWD,
-			// jniRes)
-			// .sendToTarget();
-			// MessageBuilder.updateQualicationMessageState(parseSingleCrowd.id,
-			// parseSingleCrowd.creator.uid,
-			// new GroupQualicationState(Type.CROWD_INVITATION ,
-			// QualificationState.BE_REJECT , reason));
-		}
-
-		@Override
 		public void OnModifyGroupInfoCallback(V2Group group) {
 			if (group == null) {
 				return;
@@ -629,30 +605,16 @@ public class CrowdGroupService extends AbstractHandler {
 		@Override
 		public void OnAddGroupUserInfoCallback(int groupType, long nGroupID,
 				V2User user) {
+			//JNIService中的 OnAddGroupUserInfoCallback 来处理数据库更新
 			if (groupType == V2Group.TYPE_CROWD
 					&& user.uid != GlobalHolder.getInstance()
 							.getCurrentUserId() && !isInvoked) {
-				isInvoked = true;
 				JNIResponse jniRes = new JNIResponse(
 						CreateCrowdResponse.Result.SUCCESS);
 				jniRes.resObj = new GroupAddUserJNIObject(groupType, nGroupID,
 						user.uid, "");
 				Message.obtain(mCallbackHandler, ACCEPT_APPLICATION_CROWD,
 						jniRes).sendToTarget();
-//				if(isLocalInvite){
-//				MessageBuilder.updateQualicationMessageState(nGroupID,
-//						user.uid, new GroupQualicationState(
-//								Type.CROWD_APPLICATION,
-//								QualificationState.BE_ACCEPTED, null , ReadState.UNREAD , true));
-//				isLocalInvite = false;
-//				}
-//				else
-//					MessageBuilder.updateQualicationMessageState(nGroupID,
-//							user.uid, new GroupQualicationState(
-//									Type.CROWD_APPLICATION,
-//									QualificationState.ACCEPTED, null , ReadState.UNREAD , false));
-				if(isLocalInvite)
-					isLocalInvite = false;
 			}
 		}
 	

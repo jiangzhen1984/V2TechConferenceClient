@@ -171,6 +171,11 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 	private ScrollItem verificationItem;
 	private ScrollItem voiceItem;
 	
+	private Conversation voiceMessageItem;
+	private GroupLayout voiceLayout;
+	private GroupLayout verificationMessageItemLayout;
+	private Conversation verificationMessageItemData;
+	
 	private ExecutorService service;
 
 	/**
@@ -687,11 +692,6 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 		adapter.notifyDataSetChanged();
 	}
 
-	private Conversation voiceMessageItem;
-	private GroupLayout voiceLayout;
-	private GroupLayout verificationMessageItemLayout;
-	private Conversation verificationMessageItemData;
-
 	/**
 	 * 初始化通话消息item对象
 	 */
@@ -760,7 +760,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 	 * 
 	 * @return
 	 */
-	public boolean isHasUnreadMediaMessage() {
+	private boolean isHasUnreadMediaMessage() {
 
 		DataBaseContext context = new DataBaseContext(mContext);
 		String selection = ContentDescriptor.HistoriesMedia.Cols.HISTORY_MEDIA_READ_STATE
@@ -1302,51 +1302,68 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 				}
 				
                 for (ScrollItem item : mItemList) {
-                	V2Log.e(TAG , "current item type is : " + item.cov.getType());
-                    if(item.cov.getType() != Conversation.TYPE_GROUP)
-                        continue ;
+                	if(mCurrentTabFlag == V2GlobalEnum.GROUP_TYPE_CROWD){
+                		Group g = ((CrowdConversation) item.cov).getGroup();
+                		if (g == null || g.getOwnerUser() == null)
+							continue;
+                		
+                		GroupLayout currentGroupLayout = (GroupLayout) item.gp;
 
-                    final GroupLayout currentGroupLayout = ((GroupLayout) item.gp);
-                    final CrowdConversation crowd = (CrowdConversation) item.cov;
-
-                    Group newGroup = GlobalHolder.getInstance()
-                            .getGroupById(
-                                    V2GlobalEnum.GROUP_TYPE_CROWD,
-                                    crowd.getExtId());
-                    if (newGroup != null) {
-                        crowd.setG(newGroup);
-                        crowd.setReadFlag(Conversation.READ_FLAG_READ);
-                        final VMessage vm = MessageLoader
-                                .getNewestGroupMessage(
-                                        mContext,
-                                        V2GlobalEnum.GROUP_TYPE_CROWD,
-                                        crowd.getExtId());
-                        crowd.setName(newGroup.getName());
-                        getActivity().runOnUiThread(new Runnable() {
-							
-							@Override
-							public void run() {
-								currentGroupLayout.updateGroupOwner(crowd.getName());
-								if (vm != null) {
-	                                crowd.setDate(vm.getDateTimeStr());
-	                                crowd.setDateLong(String.valueOf(vm
-	                                        .getmDateLong()));
-	                                CharSequence newMessage = MessageUtil
-	                                        .getMixedConversationContent(
-	                                                mContext, vm);
-	                                crowd.setMsg(newMessage);
-//	                                currentGroupLayout.update(newMessage, DateUtil.getStringDate(vm.getDate().getTime()),
-//	                                		crowd.getReadFlag() == Conversation.READ_FLAG_READ ? false : true);
-	                                currentGroupLayout.update();
-	                            }
-	                            adapter.notifyDataSetChanged();
-	                            V2Log.e(TAG,
-	                                    "Successfully updated the CROWD_GROUP infos , "
-	                                            + "group name is :"
-	                                            + crowd.getName());
-							}
-						});
-                    }
+						User u = GlobalHolder.getInstance().getUser(
+								g.getOwnerUser().getmUserId());
+						if (u == null) {
+							continue;
+						}
+						currentGroupLayout.updateContent(u.getName());
+						currentGroupLayout.updateGroupOwner(g.getName());
+						g.setOwnerUser(u);
+    				} else {
+	                	V2Log.e(TAG , "current item type is : " + item.cov.getType());
+	                    if(item.cov.getType() != Conversation.TYPE_GROUP)
+	                        continue ;
+	
+	                    final GroupLayout currentGroupLayout = ((GroupLayout) item.gp);
+	                    final CrowdConversation crowd = (CrowdConversation) item.cov;
+	
+	                    Group newGroup = GlobalHolder.getInstance()
+	                            .getGroupById(
+	                                    V2GlobalEnum.GROUP_TYPE_CROWD,
+	                                    crowd.getExtId());
+	                    if (newGroup != null) {
+	                        crowd.setG(newGroup);
+	                        crowd.setReadFlag(Conversation.READ_FLAG_READ);
+	                        final VMessage vm = MessageLoader
+	                                .getNewestGroupMessage(
+	                                        mContext,
+	                                        V2GlobalEnum.GROUP_TYPE_CROWD,
+	                                        crowd.getExtId());
+	                        crowd.setName(newGroup.getName());
+	                        getActivity().runOnUiThread(new Runnable() {
+								
+								@Override
+								public void run() {
+									currentGroupLayout.updateGroupOwner(crowd.getName());
+									if (vm != null) {
+		                                crowd.setDate(vm.getDateTimeStr());
+		                                crowd.setDateLong(String.valueOf(vm
+		                                        .getmDateLong()));
+		                                CharSequence newMessage = MessageUtil
+		                                        .getMixedConversationContent(
+		                                                mContext, vm);
+		                                crowd.setMsg(newMessage);
+	//	                                currentGroupLayout.update(newMessage, DateUtil.getStringDate(vm.getDate().getTime()),
+	//	                                		crowd.getReadFlag() == Conversation.READ_FLAG_READ ? false : true);
+		                                currentGroupLayout.update();
+		                            }
+		                            adapter.notifyDataSetChanged();
+		                            V2Log.e(TAG,
+		                                    "Successfully updated the CROWD_GROUP infos , "
+		                                            + "group name is :"
+		                                            + crowd.getName());
+								}
+							});
+	                    }
+	                }
                 }
 			}
 		});
@@ -1922,7 +1939,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 				}
 				
 				V2Log.e(TAG, "update Conversaton type is : " + type);
-				if (type == GroupType.CHATING.intValue() && mCurrentTabFlag == V2GlobalEnum.GROUP_TYPE_USER && !isUpdateGroup) {
+				if (type == GroupType.CHATING.intValue() && mCurrentTabFlag != V2GlobalEnum.GROUP_TYPE_DEPARTMENT && !isUpdateGroup) {
 					isUpdateGroup = true;
 					updateMessageGroupName();
 				}

@@ -872,13 +872,14 @@ public class MessageBuilder {
 				ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_READ_STATE,
 				ReadState.UNREAD.intValue());
 		String where = ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_ID
-				+ " = ?";
+				+ " = ? and " + HistoriesCrowd.Cols.HISTORY_CROWD_REMOTE_USER_ID + " = ?";
+        String[] args = new String[]{String.valueOf(groupID) , String.valueOf(userId)};
 		values.put(
 				ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_SAVEDATE,
 				GlobalConfig.getGlobalServerTime());
 		mContext.getContentResolver().update(
 				ContentDescriptor.HistoriesCrowd.CONTENT_URI, values, where,
-				new String[] { String.valueOf(groupID) });
+                args);
 		return crowdQuion.getId();
 	}
 
@@ -895,6 +896,29 @@ public class MessageBuilder {
 			V2Log.e("To store failed...please check the given VMessageQualification Object in the databases");
 			return -1;
 		}
+
+        if(msg.getType() == Type.CROWD_APPLICATION){
+            if(((VMessageQualificationApplicationCrowd)msg).getApplicant() == null) {
+                V2Log.e("To store failed...please check the given VMessageQualification Object , Because applicant user is null!");
+                return -1;
+            }
+            else if(((VMessageQualificationApplicationCrowd)msg).getCrowdGroup() == null){
+                V2Log.e("To store failed...please check the given VMessageQualification Object , Because crowd group is null!");
+                return -1;
+            }
+        }
+
+        if(msg.getType() == Type.CROWD_INVITATION){
+            if(((VMessageQualificationInvitationCrowd)msg).getInvitationUser() == null) {
+                V2Log.e("To store failed...please check the given VMessageQualification Object , Because invitationUser user is null!");
+                return -1;
+            }
+            else if(((VMessageQualificationInvitationCrowd)msg).getCrowdGroup() == null){
+                V2Log.e("To store failed...please check the given VMessageQualification Object , Because crowd group is null!");
+                return -1;
+            }
+        }
+
 		DataBaseContext mContext = new DataBaseContext(context);
 		ContentValues values = new ContentValues();
 		String[] selectionArgs = null;
@@ -920,7 +944,7 @@ public class MessageBuilder {
 					ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_BASE_INFO,
 					crowdInviteMsg.getCrowdGroup().toXml());
 			selectionArgs = new String[] { String.valueOf(crowdInviteMsg
-					.getCrowdGroup().getmGId()) };
+					.getCrowdGroup().getmGId()) , String.valueOf(crowdInviteMsg.getInvitationUser().getmUserId()) };
 			break;
 		case CROWD_APPLICATION:
 			VMessageQualificationApplicationCrowd crowdApplyMsg = (VMessageQualificationApplicationCrowd) msg;
@@ -943,7 +967,7 @@ public class MessageBuilder {
 					ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_BASE_INFO,
 					crowdApplyMsg.getCrowdGroup().toXml());
 			selectionArgs = new String[] { String.valueOf(crowdApplyMsg
-					.getCrowdGroup().getmGId()) };
+					.getCrowdGroup().getmGId()) , String.valueOf(crowdApplyMsg.getApplicant().getmUserId()) };
 			break;
 		case CONTACT:
 			break;
@@ -952,7 +976,7 @@ public class MessageBuilder {
 					"invalid VMessageQualification enum type.. please check the type");
 		}
 		String where = ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_ID
-				+ " = ?";
+				+ " = ? and " + HistoriesCrowd.Cols.HISTORY_CROWD_REMOTE_USER_ID + " = ?";
 		values.put(
 				ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_SAVEDATE,
 				GlobalConfig.getGlobalServerTime());

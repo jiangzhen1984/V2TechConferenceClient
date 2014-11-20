@@ -955,7 +955,6 @@ public class JNIService extends Service implements
 				long id = -1;
 				if (user.uid != GlobalHolder.getInstance()
 								.getCurrentUserId()) {
-//					isInvoked = true;
 					if(CrowdGroupService.isLocalInvite){
 						id = MessageBuilder.updateQualicationMessageState(nGroupID,
 							user.uid, new GroupQualicationState(
