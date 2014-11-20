@@ -7,6 +7,6 @@
     <string name="date_time_picker_minute">Minute</string>
     <string name="date_time_picker_plus">+</string>
     <string name="date_time_picker_minus">-</string>
-    <string name="date_time_picker_set">Settings</string>
+    <string name="date_time_picker_set">Set</string>
     <string name="date_time_picker_cancel">Cancel</string>
 </resources>

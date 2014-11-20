@@ -94,24 +94,15 @@ public class LoginActivity extends Activity {
 		mEmailView.setOnFocusChangeListener(new OnFocusChangeListener() {
 
 			@Override
-			public void onFocusChange(View arg0, boolean focus) {
-				/*if (focus) {
-					if (mContext.getResources()
-							.getText(R.string.login_user_name)
-							.equals(mEmailView.getText().toString())) {
-						mEmailView.setText("");
-					}
-					mEmailView.setTextColor(Color.BLACK);
-				} else {
-					if (mEmailView.getText().toString().trim().isEmpty()) {
-						mEmailView.setText(R.string.login_user_name);
-						mEmailView
-								.setTextColor(mContext
-										.getResources()
-										.getColor(
-												R.color.login_activity_login_box_text_color));
-					}
-				}*/
+			public void onFocusChange(View v, boolean focus) {
+				EditText _v=(EditText)v;
+		        if (!focus) {// 失去焦点
+		            _v.setHint(_v.getTag().toString());
+		        } else {
+		            String hint=_v.getHint().toString();
+		            _v.setTag(hint);
+		            _v.setHint("");
+		        }
 			}
 		});
 
@@ -131,28 +122,15 @@ public class LoginActivity extends Activity {
 		mPasswordView.setOnFocusChangeListener(new OnFocusChangeListener() {
 
 			@Override
-			public void onFocusChange(View arg0, boolean focus) {
-				/*if (focus) {
-					mPasswordView.setTextColor(Color.BLACK);
-					if (mContext.getResources()
-							.getText(R.string.prompt_password)
-							.equals(mPasswordView.getText().toString())) {
-						mPasswordView.setText("");
-					}
-				} else {
-					if (mPasswordView.getText().toString().trim().isEmpty()) {
-						mPasswordView.setText(R.string.prompt_password);
-						mPasswordView
-								.setTextColor(mContext
-										.getResources()
-										.getColor(
-												R.color.login_activity_login_box_text_color));
-						mPasswordView.setInputType(InputType.TYPE_CLASS_TEXT);
-					} else {
-						mPasswordView.setInputType(InputType.TYPE_CLASS_TEXT
-								| InputType.TYPE_TEXT_VARIATION_PASSWORD);
-					}
-				}*/
+			public void onFocusChange(View v, boolean focus) {
+				EditText _v=(EditText)v;
+		        if (!focus) {// 失去焦点
+		            _v.setHint(_v.getTag().toString());
+		        } else {
+		            String hint=_v.getHint().toString();
+		            _v.setTag(hint);
+		            _v.setHint("");
+		        }
 			}
 		});
 
