@@ -29,15 +29,18 @@ import android.os.Message;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.util.DisplayMetrics;
+import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
+import android.widget.FrameLayout.LayoutParams;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -53,7 +56,6 @@ import com.v2tech.service.jni.RequestChatServiceResponse;
 import com.v2tech.util.GlobalConfig;
 import com.v2tech.view.JNIService;
 import com.v2tech.view.PublicIntent;
-import com.v2tech.view.widget.SlideVideoFrameLayout;
 import com.v2tech.vo.AudioVideoMessageBean;
 import com.v2tech.vo.CameraConfiguration;
 import com.v2tech.vo.NetworkStateCode;
@@ -114,7 +116,7 @@ public class ConversationP2PAVActivity extends Activity implements
 	private SurfaceView mRemoteSurface;
 
 	// R.id.small_window_video_layout
-	private FrameLayout smallWindowVideoLayout;
+	public FrameLayout smallWindowVideoLayout;
 	// R.id.big_window_video_layout
 	private RelativeLayout bigWindowVideoLayout;
 
@@ -136,20 +138,20 @@ public class ConversationP2PAVActivity extends Activity implements
 	private boolean videoIsAccepted = false;
 	boolean isBluetoothHeadsetConnected = false;
 
-	private boolean isMLcalSurfaceLayoutEnable = true;
-	private OnClickListener onClickMLcalSurfaceLayout = new OnClickListener() {
+	private boolean isSmallWindowVideoLayoutClickEnable = true;
+	private OnClickListener onClickSmallWindowVideoLayout = new OnClickListener() {
 
 		@Override
 		public void onClick(View v) {
-			if (!isMLcalSurfaceLayoutEnable) {
+			if (!isSmallWindowVideoLayoutClickEnable) {
 				return;
 			} else {
-				isMLcalSurfaceLayoutEnable = false;
+				isSmallWindowVideoLayoutClickEnable = false;
 				mLocalHandler.postDelayed(new Runnable() {
 
 					@Override
 					public void run() {
-						isMLcalSurfaceLayoutEnable = true;
+						isSmallWindowVideoLayoutClickEnable = true;
 					}
 				}, 3000);
 			}
@@ -211,8 +213,8 @@ public class ConversationP2PAVActivity extends Activity implements
 					tv.setText(uad.getUser().getName());
 				}
 			}
-			mRejectButton.setOnClickListener(rejectListener);
-			mAcceptButton.setOnClickListener(acceptListener);
+			mRejectButton.setOnClickListener(onClickMRejectButton);
+			mAcceptButton.setOnClickListener(onClickMAcceptButton);
 			if (mAudioOnlyButton != null) {
 				mAudioOnlyButton.setOnClickListener(acceptVoicOnlyListener);
 			}
@@ -226,8 +228,7 @@ public class ConversationP2PAVActivity extends Activity implements
 			currentVideoBean.toUserID = uad.getUser().getmUserId();
 			currentVideoBean.remoteUserID = uad.getUser().getmUserId();
 			if (uad.isAudioType()) {
-				currentVideoBean.mediaChatID = "AudioChat"
-						+ uuid;
+				currentVideoBean.mediaChatID = "AudioChat" + uuid;
 				currentVideoBean.mediaType = AudioVideoMessageBean.TYPE_AUDIO;
 				uad.setSzSessionID(currentVideoBean.mediaChatID);
 				setContentView(R.layout.fragment_conversation_outing_audio);
@@ -244,7 +245,8 @@ public class ConversationP2PAVActivity extends Activity implements
 		initViews();
 
 		if (!uad.isIncoming()) {
-			V2Log.d(TAG_THIS_FILE, "发起一个新的音视频邀请 , 等待回应中.... 此次通信的uuid ：" + currentVideoBean.mediaChatID);
+			V2Log.d(TAG_THIS_FILE, "发起一个新的音视频邀请 , 等待回应中.... 此次通信的uuid ："
+					+ currentVideoBean.mediaChatID);
 			chatService.inviteUserChat(uad, new MessageListener(mLocalHandler,
 					CALL_RESPONSE, null));
 			if (uad.isVideoType()) {
@@ -750,13 +752,26 @@ public class ConversationP2PAVActivity extends Activity implements
 		}
 
 		if (uad.isVideoType() && uad.isIncoming() && uad.isConnected()) {
+			// 来的视频通话已经连接
 			mLocalSurface = (SurfaceView) findViewById(R.id.fragment_conversation_connected_video_local_surface);
 			smallWindowVideoLayout = (FrameLayout) findViewById(R.id.small_window_video_layout);
+			smallWindowVideoLayout
+					.setOnClickListener(onClickSmallWindowVideoLayout);
+			smallWindowVideoLayout
+					.setBackgroundResource(R.drawable.local_video_bg);
+			smallWindowVideoLayout.setVisibility(View.VISIBLE);
+			smallWindowVideoLayout.bringToFront();
+			adjustLocalVideoLyoutParams((LayoutParams) smallWindowVideoLayout
+					.getLayoutParams());
+
+			smallWindowVideoLayout
+					.setBackgroundResource(R.drawable.local_video_bg);
+			smallWindowVideoLayout.setPadding(1, 1, 1, 1);
+
+			smallWindowVideoLayout.setOnTouchListener(new TouchMoveListener(
+					this));
+
 			mRemoteSurface = (SurfaceView) findViewById(R.id.fragment_conversation_connected_video_remote_surface);
-			mRemoteSurface.setOnClickListener(onClickMLcalSurfaceLayout);
-			FrameLayout.LayoutParams localLp = (FrameLayout.LayoutParams) smallWindowVideoLayout
-					.getLayoutParams();
-			adjustLocalVideoLyoutParams(localLp);
 			bigWindowVideoLayout = (RelativeLayout) findViewById(R.id.big_window_video_layout);
 
 			mReverseCameraButton = findViewById(R.id.fragment_conversation_reverse_camera_button);
@@ -766,6 +781,7 @@ public class ConversationP2PAVActivity extends Activity implements
 			mReverseCameraButton1.setOnClickListener(surfaceViewListener);
 
 		} else if (uad.isVideoType() && !uad.isIncoming()) {
+			// 视频呼出
 			mRemoteSurface = (SurfaceView) findViewById(R.id.fragment_conversation_connected_video_remote_surface);
 			bigWindowVideoLayout = (RelativeLayout) findViewById(R.id.big_window_video_layout);
 			mLocalSurface = (SurfaceView) findViewById(R.id.fragment_conversation_connected_video_local_surface);
@@ -849,20 +865,18 @@ public class ConversationP2PAVActivity extends Activity implements
 			} else {
 				localLp.height = localLp.width * size.width / size.height;
 			}
-			
-			smallWindowVideoLayout.setLayoutParams(localLp);
-			
-			int screenWidth = ((View) (smallWindowVideoLayout.getParent()))
-					.getWidth();
-			int screenHeight = ((View) (smallWindowVideoLayout.getParent()))
-					.getHeight();
-			int bottomMargin = ((View) videoHangUpButton.getParent()).getHeight();
-			int r = screenWidth - 20;
-			int b = screenHeight - bottomMargin-20;
-			int l = r - localLp.width;
-			int t = b - localLp.height;
-			smallWindowVideoLayout.layout(l, t, r, b);
 
+			View view = findViewById(R.id.fragment_conversation_connected_video_button_container);
+			int widthSpec = View.MeasureSpec.makeMeasureSpec(0,
+					View.MeasureSpec.UNSPECIFIED);
+			int heightSpec = View.MeasureSpec.makeMeasureSpec(0,
+					View.MeasureSpec.UNSPECIFIED);
+			view.measure(widthSpec, heightSpec);
+			int height = view.getMeasuredHeight();
+
+			localLp.bottomMargin = height + 20;
+			localLp.rightMargin = 20;
+			smallWindowVideoLayout.setLayoutParams(localLp);
 		}
 	}
 
@@ -1057,7 +1071,11 @@ public class ConversationP2PAVActivity extends Activity implements
 	}
 
 	private void callOutLocalSurfaceChangeSmall() {
+		if (smallP == null) {
+			smallP = (LayoutParams) smallWindowVideoLayout.getLayoutParams();
+		}
 		adjustLocalVideoLyoutParams(smallP);
+		smallWindowVideoLayout.setTag("isSmall");
 		smallWindowVideoLayout.setBackgroundResource(R.drawable.local_video_bg);
 		smallWindowVideoLayout.setPadding(1, 1, 1, 1);
 		if (mReverseCameraButton == null) {
@@ -1071,11 +1089,7 @@ public class ConversationP2PAVActivity extends Activity implements
 			mReverseCameraButton1.setOnClickListener(surfaceViewListener);
 		}
 		mReverseCameraButton1.setVisibility(View.GONE);
-		smallWindowVideoLayout
-				.setOnTouchListener(new SlideVideoFrameLayout.TouchMoveListener(
-						this));
-
-		// exchangeRemoteVideoAndLocalVideo();
+		smallWindowVideoLayout.setOnTouchListener(new TouchMoveListener(this));
 	}
 
 	private boolean testFlag = true;
@@ -1220,9 +1234,12 @@ public class ConversationP2PAVActivity extends Activity implements
 			audioManager.setSpeakerphoneOn(false);
 			V2Log.i("ConversationP2PAVActivity", "切换到耳机或听筒");
 		} else {
+			// if (uad.isVideoType()) {
 			audioManager.setSpeakerphoneOn(true);
 			V2Log.i("ConversationP2PAVActivity", "切换到免提");
+			// }
 		}
+
 		if (uad.isAudioType()) {
 			setMAudioSpeakerButtonState();
 		}
@@ -1236,12 +1253,13 @@ public class ConversationP2PAVActivity extends Activity implements
 				mAudioSpeakerButton.setTag("earphone");
 				drawId = R.drawable.message_voice_lounder;
 				color = R.color.fragment_conversation_connected_gray_text_color;
+
 			} else {
 				mAudioSpeakerButton.setTag("speakerphone");
 				drawId = R.drawable.message_voice_lounder_pressed;
 				color = R.color.fragment_conversation_connected_pressed_text_color;
 			}
-
+			
 			TextView speakerPhoneText = (TextView) findViewById(R.id.conversation_fragment_connected_speaker_text);
 			ImageView speakerPhoneImage = (ImageView) findViewById(R.id.conversation_fragment_connected_speaker_image);
 			if (speakerPhoneImage != null) {
@@ -1251,6 +1269,7 @@ public class ConversationP2PAVActivity extends Activity implements
 				speakerPhoneText.setTextColor(mContext.getResources().getColor(
 						color));
 			}
+
 		}
 	}
 
@@ -1272,7 +1291,7 @@ public class ConversationP2PAVActivity extends Activity implements
 
 	};
 
-	private OnClickListener rejectListener = new OnClickListener() {
+	private OnClickListener onClickMRejectButton = new OnClickListener() {
 
 		@Override
 		public void onClick(View arg0) {
@@ -1285,7 +1304,7 @@ public class ConversationP2PAVActivity extends Activity implements
 
 	};
 
-	private OnClickListener acceptListener = new OnClickListener() {
+	private OnClickListener onClickMAcceptButton = new OnClickListener() {
 
 		// 接受音频或视频来电 //temptag 20141106 1
 		@Override
@@ -1307,8 +1326,13 @@ public class ConversationP2PAVActivity extends Activity implements
 			}
 			// Need to re-initialize button, because layout changed
 			initButtons();
-
 			initViews();
+
+			String str=null;
+			str.toLowerCase();
+			
+			
+			
 			if (uad.isVideoType()) {
 				TextView tv = (TextView) findViewById(R.id.conversation_fragment_connected_title_text);
 				tv.setText(tv.getText().toString()
@@ -1734,7 +1758,8 @@ public class ConversationP2PAVActivity extends Activity implements
 								V2Log.d(TAG_THIS_FILE, "对方在接受视频的基础上接受了音频邀请。");
 							} else {
 								headsetAndBluetoothHeadsetHandle();
-								V2Log.d(TAG_THIS_FILE, "对方接受了视频的邀请，我再给对方发一个音频邀请。");
+								V2Log.d(TAG_THIS_FILE,
+										"对方接受了视频的邀请，我再给对方发一个音频邀请。");
 								// Send audio invitation
 								// Do not need to modify any values. because
 								// this API
@@ -1752,7 +1777,7 @@ public class ConversationP2PAVActivity extends Activity implements
 										smallWindowVideoLayout = (FrameLayout) findViewById(R.id.small_window_video_layout);
 									}
 									smallWindowVideoLayout
-											.setOnClickListener(onClickMLcalSurfaceLayout);
+											.setOnClickListener(onClickSmallWindowVideoLayout);
 								}
 								videoIsAccepted = true;
 							}
@@ -1788,6 +1813,66 @@ public class ConversationP2PAVActivity extends Activity implements
 			}
 		}
 
+	}
+
+	class TouchMoveListener implements OnTouchListener {
+		private final int LENGTH = 5;
+		int lastX;
+		int lastY;
+		int x1 = 0;
+		int y1 = 0;
+		boolean isNotClick;
+		int screenWidth;
+		int screenHeight;
+
+		public TouchMoveListener(Context context) {
+		}
+
+		@Override
+		public boolean onTouch(View v, MotionEvent event) {
+			screenWidth = ((View) (v.getParent())).getWidth();
+			screenHeight = ((View) (v.getParent())).getHeight();
+			switch (event.getAction()) {
+			case MotionEvent.ACTION_DOWN:
+				isNotClick = false;
+				lastX = (int) event.getRawX();
+				lastY = (int) event.getRawY();
+				x1 = lastX;
+				y1 = lastY;
+				break;
+			case MotionEvent.ACTION_MOVE:
+				int dx = (int) event.getRawX() - lastX;
+				int dy = (int) event.getRawY() - lastY;
+
+				if (event.getPointerCount() == 1) {
+					if (Math.abs((event.getRawX() - x1)) > LENGTH
+							|| Math.abs((event.getRawY() - y1)) > LENGTH) {
+						isNotClick = true;
+					}
+				}
+
+				lastX = (int) event.getRawX();
+				lastY = (int) event.getRawY();
+
+				LayoutParams lp = (LayoutParams) v.getLayoutParams();
+				lp.rightMargin = lp.rightMargin - dx;
+				lp.bottomMargin = lp.bottomMargin - dy;
+				v.setLayoutParams(lp);
+
+				break;
+			case MotionEvent.ACTION_UP:
+				if (event.getPointerCount() == 1) {
+					if (Math.abs((event.getRawX() - x1)) > LENGTH
+							|| Math.abs((event.getRawY() - y1)) > LENGTH) {
+						isNotClick = true;
+					}
+				}
+
+				break;
+			}
+			return isNotClick;
+
+		}
 	}
 
 }

@@ -66,11 +66,11 @@ public class MainApplication extends Application {
 		super.onCreate();
 
 		V2Log.isDebuggable = (0 == (getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE));
-//		if (!V2Log.isDebuggable) {
-//			CrashHandler crashHandler = CrashHandler.getInstance();
-//			crashHandler.init(getApplicationContext());
-//			new LogcatThread().start();
-//		}
+		if (!V2Log.isDebuggable) {
+			CrashHandler crashHandler = CrashHandler.getInstance();
+			crashHandler.init(getApplicationContext());
+			new LogcatThread().start();
+		}
 		SharedPreferences sf = getSharedPreferences("config",
 				Context.MODE_PRIVATE);
 		Editor ed = sf.edit();
@@ -125,8 +125,8 @@ public class MainApplication extends Application {
 		// Start deamon service
 		getApplicationContext().startService(
 				new Intent(getApplicationContext(), JNIService.class));
-		getApplicationContext().startService(
-                new Intent(getApplicationContext(), LogService.class));
+//		getApplicationContext().startService(
+//                new Intent(getApplicationContext(), LogService.class));
 
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
 			this.registerActivityLifecycleCallbacks(new LocalActivityLifecycleCallBack());

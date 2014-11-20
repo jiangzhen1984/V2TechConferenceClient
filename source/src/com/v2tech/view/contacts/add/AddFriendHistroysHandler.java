@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 import com.v2tech.db.DataBaseContext;
 import com.v2tech.db.V2TechDBHelper;
 import com.v2tech.service.GlobalHolder;
+import com.v2tech.util.EscapedcharactersProcessing;
 import com.v2tech.util.GlobalConfig;
 import com.v2tech.vo.AddFriendHistorieNode;
 import com.v2tech.vo.User;

@@ -217,12 +217,9 @@ public class VideoPlayer {
 
 		Canvas canvas = mSurfaceH.lockCanvas();
 		if (canvas == null) {
-			Log.i("temp 20141104 1","canvas 为null返回 ---------");
 			return;
 		}
 
-
-		Log.i("temp 20141104 1","remote 在画图 "+Thread.currentThread().getName()+" id:"+Thread.currentThread().getId());
 		if (mClearCanvas < 2) {
 			canvas.drawRGB(0, 0, 0);
 			++mClearCanvas;

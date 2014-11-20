@@ -13,11 +13,11 @@
 
         <SurfaceView
             android:id="@+id/fragment_conversation_connected_video_remote_surface"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent" />
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
     </RelativeLayout>
 
-    <com.v2tech.view.widget.SlideVideoFrameLayout
+    <FrameLayout
         android:id="@+id/small_window_video_slide_layout"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent" >
@@ -28,9 +28,7 @@
             android:layout_height="@dimen/fragment_conversation_connected_local_video_layout_height"
             android:layout_gravity="bottom|right"
             android:layout_marginBottom="@dimen/fragment_conversation_connected_local_surface_margin_right"
-            android:layout_marginRight="@dimen/fragment_conversation_connected_local_surface_margin_right"
-            android:background="@drawable/local_video_bg"
-            android:padding="0dp" >
+            android:layout_marginRight="@dimen/fragment_conversation_connected_local_surface_margin_right" >
 
             <SurfaceView
                 android:id="@+id/fragment_conversation_connected_video_local_surface"
@@ -46,7 +44,7 @@
                 android:src="@drawable/converse_camera_button"
                 android:visibility="visible" />
         </FrameLayout>
-    </com.v2tech.view.widget.SlideVideoFrameLayout>
+    </FrameLayout>
 
     <LinearLayout
         android:id="@+id/title_layout"
