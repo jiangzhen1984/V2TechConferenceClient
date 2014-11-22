@@ -1,7 +1,5 @@
 package com.V2.jni.ind;
 
-import com.v2tech.util.FileUitls;
-
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -54,7 +52,38 @@ public class FileJNIObject extends JNIObjectInd implements Parcelable {
 		this.linetype = linetype;
 		this.url = url;
 		if (fileName != null && !fileName.isEmpty()) {
-			fileType = FileUitls.adapterFileIcon(fileName);
+			fileType = adapterFileIcon(fileName);
+		}
+	}
+	
+	
+	private  int adapterFileIcon(String fileNames) {
+		String fileName = fileNames.toLowerCase();
+		if (fileName.endsWith(".jpg") || fileName.endsWith(".png")
+				|| fileName.endsWith(".jpeg") || fileName.endsWith(".bmp")
+				|| fileName.endsWith("gif")) {
+			return 1; // PICTURE = 1
+		} else if (fileName.endsWith(".doc")) {
+			return 2; // WORD = 2
+		} else if (fileName.endsWith(".xls")) {
+			return 3; // EXCEL = 3
+		} else if (fileName.endsWith(".pdf")) {
+			return 4; // PDF = 4
+		} else if (fileName.endsWith(".ppt") || fileName.endsWith(".pptx")) {
+			return 5; // PPT = 5
+		} else if (fileName.endsWith(".zip") || fileName.endsWith(".rar")) {
+			return 6; // ZIP = 6
+		} else if (fileName.endsWith(".vsd") || fileName.endsWith(".vss")
+				|| fileName.endsWith(".vst") || fileName.endsWith(".vdx")) {
+			return 7; // VIS = 7
+		} else if (fileName.endsWith(".mp4") || fileName.endsWith(".rmvb")
+				|| fileName.endsWith(".avi") || fileName.endsWith(".3gp")) {
+			return 8; // VIDEO = 8
+		} else if (fileName.endsWith(".mp3") || fileName.endsWith(".wav")
+				|| fileName.endsWith(".ape") || fileName.endsWith(".wmv")) {
+			return 9; // SOUND = 9
+		} else {
+			return 10; // OTHER = 10
 		}
 	}
 
