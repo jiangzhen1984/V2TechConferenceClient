@@ -31,6 +31,7 @@
                 android:layout_marginTop="4dp"
                 android:gravity="center_horizontal"
                 android:text="@string/error_create_conference_failed_from_server_side"
+                android:textColor="@color/common_item_text_color_red"
                 android:textSize="12sp" />
         </LinearLayout>
         <RelativeLayout

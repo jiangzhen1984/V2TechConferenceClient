@@ -98,8 +98,6 @@ public class MessageBuilder {
 
 	public static VMessage buildFileMessage(int groupType, long groupID,
 			User fromUser, User toUser, FileInfoBean bean) {
-		String uuid = UUID.randomUUID().toString();
-		bean.fileUUID = uuid;
 		VMessage vm = new VMessage(groupType, groupID, fromUser, toUser,
 				new Date(GlobalConfig.getGlobalServerTime()));
 		VMessageFileItem item = new VMessageFileItem(vm, bean.filePath,
@@ -874,9 +872,6 @@ public class MessageBuilder {
 		String where = ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_ID
 				+ " = ? and " + HistoriesCrowd.Cols.HISTORY_CROWD_REMOTE_USER_ID + " = ?";
         String[] args = new String[]{String.valueOf(groupID) , String.valueOf(userId)};
-		values.put(
-				ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_SAVEDATE,
-				GlobalConfig.getGlobalServerTime());
 		mContext.getContentResolver().update(
 				ContentDescriptor.HistoriesCrowd.CONTENT_URI, values, where,
                 args);
@@ -977,9 +972,9 @@ public class MessageBuilder {
 		}
 		String where = ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_ID
 				+ " = ? and " + HistoriesCrowd.Cols.HISTORY_CROWD_REMOTE_USER_ID + " = ?";
-		values.put(
-				ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_SAVEDATE,
-				GlobalConfig.getGlobalServerTime());
+//		values.put(
+//				ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_SAVEDATE,
+//				GlobalConfig.getGlobalServerTime());
 		int updates = mContext.getContentResolver().update(
 				ContentDescriptor.HistoriesCrowd.CONTENT_URI, values, where,
 				selectionArgs);

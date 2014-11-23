@@ -23,6 +23,7 @@
             android:background="#FFDEAD"
             android:visibility="gone" >
             <TextView
+                android:id="@+id/group_create_error_notification_hints"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal|center"

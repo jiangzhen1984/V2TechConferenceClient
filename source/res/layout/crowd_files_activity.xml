@@ -33,7 +33,8 @@
                 android:layout_centerVertical="true"
                 android:layout_marginLeft="5dp"
                 android:layout_toRightOf="@+id/crowd_files_title"
-                android:src="@drawable/crowd_file_icon_notification" />
+                android:src="@drawable/crowd_file_icon_notification"
+                android:visibility="gone" />
             <TextView
                 android:id="@+id/crowd_files_uploaded_file_button"
                 android:layout_width="wrap_content"
@@ -140,8 +141,8 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:gravity="center_horizontal"
                     android:layout_gravity="center_horizontal"
+                    android:gravity="center_horizontal"
                     android:text="@string/group_upload_hint_text"
                     android:textColor="@color/common_gray_color_c0"
                     android:textSize="@dimen/common_item_text_size_20" />

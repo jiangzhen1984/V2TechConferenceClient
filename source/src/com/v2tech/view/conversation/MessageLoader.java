@@ -583,26 +583,40 @@ public class MessageLoader {
 	 * @return
 	 */
 	public static List<VMessageFileItem> loadFileMessages(int type, long id) {
-		if(type == V2GlobalEnum.GROUP_TYPE_CROWD){
-			if (!isTableExist(context, type, id, 0, CROWD_TYPE))
-				return null;
-		}
-		else if(type == V2GlobalEnum.GROUP_TYPE_USER){
-			if (!isTableExist(context, 0, 0, id, CONTACT_TYPE))
-				return null;
-		}
-		
-		List<VMessageFileItem> fileItems = new ArrayList<VMessageFileItem>();
-		String sortOrder = ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_SAVEDATE
-				+ " desc";
-		String where = ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_REMOTE_USER_ID
-				+ " = ? and " + ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_FROM_USER_ID + " = ? ";
-		String[] args = new String[] { String.valueOf(id) , String.valueOf(GlobalHolder.getInstance().getCurrentUserId())};
+//		if(type == V2GlobalEnum.GROUP_TYPE_CROWD){
+//			if (!isTableExist(context, type, id, 0, CROWD_TYPE))
+//				return null;
+//		}
+//		else if(type == V2GlobalEnum.GROUP_TYPE_USER){
+//			if (!isTableExist(context, 0, 0, id, CONTACT_TYPE))
+//				return null;
+//		}
+		String[] args = null;
+		String where = null;
+		String sortOrder = null;
 		Uri uri = ContentDescriptor.HistoriesFiles.CONTENT_URI;
-		String[] projection = ContentDescriptor.HistoriesFiles.Cols.ALL_CLOS;
 		DataBaseContext mContext = new DataBaseContext(context);
-		Cursor mCur = mContext.getContentResolver().query(uri, projection,
-				where, args, sortOrder);
+		List<VMessageFileItem> fileItems = new ArrayList<VMessageFileItem>();
+		Cursor mCur = null;
+		if(type == - 1 && id == -1){
+			sortOrder = ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_SAVEDATE
+					+ " desc";
+			where = ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_SEND_STATE
+					+ " = ? or " + ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_SEND_STATE + " = ? ";
+			args = new String[] { String.valueOf(VMessageAbstractItem.STATE_FILE_DOWNLOADING) , 
+					String.valueOf(VMessageAbstractItem.STATE_FILE_SENDING)};
+			mCur = mContext.getContentResolver().query(uri, null,
+					where, args, sortOrder);
+		}
+		else{
+			sortOrder = ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_SAVEDATE
+					+ " desc";
+			where = ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_REMOTE_USER_ID
+					+ " = ? and " + ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_FROM_USER_ID + " = ? ";
+			args = new String[] { String.valueOf(id) , String.valueOf(GlobalHolder.getInstance().getCurrentUserId())};
+			mCur = mContext.getContentResolver().query(uri, null,
+					where, args, sortOrder);
+		}
 
 		if (mCur == null) {
 			return fileItems;
@@ -802,9 +816,9 @@ public class MessageLoader {
 				long fromUserID = cursor
 						.getLong(cursor
 								.getColumnIndex(ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_FROM_USER_ID));
-				long toUserID = cursor
+				long remoteUserID = cursor
 						.getLong(cursor
-								.getColumnIndex(ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_TO_USER_ID));
+								.getColumnIndex(ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_REMOTE_USER_ID));
 				long saveDate = cursor
 						.getLong(cursor
 								.getColumnIndex(ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_SAVEDATE));
@@ -821,9 +835,9 @@ public class MessageLoader {
 				if (groupType == V2GlobalEnum.GROUP_TYPE_USER)
 					vm = new VMessage(groupType, -1, GlobalHolder.getInstance()
 							.getUser(fromUserID), GlobalHolder.getInstance()
-							.getUser(toUserID), new Date(saveDate));
+							.getUser(remoteUserID), new Date(saveDate));
 				else
-					vm = new VMessage(groupType, toUserID, GlobalHolder
+					vm = new VMessage(groupType, remoteUserID, GlobalHolder
 							.getInstance().getUser(fromUserID), null, new Date(
 							saveDate));
 
@@ -1168,10 +1182,15 @@ public class MessageLoader {
 		String where = ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_ID
 				+ "= ?";
 		String[] selectionArgs = new String[] { vm.getUUID() };
-		contentResolver.update(
+		int update = contentResolver.update(
 				ContentDescriptor.HistoriesMessage.CONTENT_URI, values, where,
 				selectionArgs);
-		
+		if(update <= 0){
+			V2Log.e(TAG, "updateChatMessageState --> update chat message failed...message id is :"
+					+ "" + vm.getUUID() + " and table name is : " + ContentDescriptor.HistoriesMessage.CONTENT_URI);
+			return -1;
+		}
+			
 		List<VMessageAbstractItem> items = vm.getItems();
 		if(items == null || items.size() <= 0){
 			V2Log.e(TAG, "updateChatMessageState --> get VMessageAbstractItem collection failed...is null");
@@ -1189,9 +1208,13 @@ public class MessageLoader {
 						item.getState());
 				where = ContentDescriptor.HistoriesAudios.Cols.HISTORY_AUDIO_ID
 				+ "= ?";
-				contentResolver.update(
+				int audioUpdate = contentResolver.update(
 						ContentDescriptor.HistoriesAudios.CONTENT_URI, values, where,
 						selectionArgs);
+				if(audioUpdate <= 0){
+					V2Log.e(TAG, "updateChatMessageState --> update audio chat message failed...message id is :"
+							+ "" + vm.getUUID() + " and audio message id is : " + item.getUuid());
+				}
 				break;
 			case VMessageAbstractItem.ITEM_TYPE_FILE:
 				values.put(
@@ -1199,9 +1222,13 @@ public class MessageLoader {
 						item.getState());
 				where = ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_ID
 				+ "= ?";
-				contentResolver.update(
+				int fileUpdate = contentResolver.update(
 						ContentDescriptor.HistoriesFiles.CONTENT_URI, values, where,
 						selectionArgs);
+				if(fileUpdate <= 0){
+					V2Log.e(TAG, "updateChatMessageState --> update file chat message failed...message id is :"
+							+ "" + vm.getUUID() + " and file message id is : " + item.getUuid());
+				}
 				break;
 			case VMessageAbstractItem.ITEM_TYPE_IMAGE:
 				values.put(
@@ -1209,9 +1236,13 @@ public class MessageLoader {
 						item.getState());
 				where = ContentDescriptor.HistoriesGraphic.Cols.HISTORY_GRAPHIC_ID
 				+ "= ?";
-				contentResolver.update(
+				int imageUpdate = contentResolver.update(
 						ContentDescriptor.HistoriesGraphic.CONTENT_URI, values, where,
 						selectionArgs);
+				if(imageUpdate <= 0){
+					V2Log.e(TAG, "updateChatMessageState --> update image chat message failed...message id is :"
+							+ "" + vm.getUUID() + " and image message id is : " + item.getUuid());
+				}
 				break;
 			default:
 //				throw new RuntimeException("updateChatMessageState --> invalid VMessageAbstractItem type , type is : " + item.getType());
@@ -1249,14 +1280,16 @@ public class MessageLoader {
 
 	/**
 	 * update VMessageFileItem Object state to failed by fileID..
-	 * @param fileID
+	 * @param fileID 
+	 * 		If fileID is null , mean change all fileItem to failed...
 	 * @return
 	 */
 	public static int updateFileItemStateToFailed(String fileID) {
 
+		DataBaseContext mContext = new DataBaseContext(context);
+		ContentValues values = new ContentValues();
 		if (TextUtils.isEmpty(fileID))
-			throw new RuntimeException(
-					"MessageLoader queryFileItemByID ---> the given VMessageFileItem fileID is null");
+			return -1;
 		
 		VMessageFileItem fileItem = MessageLoader.queryFileItemByID(
 				V2GlobalEnum.GROUP_TYPE_USER, fileID);
@@ -1265,8 +1298,6 @@ public class MessageLoader {
 			return -1;
 		}
 		
-		DataBaseContext mContext = new DataBaseContext(context);
-		ContentValues values = new ContentValues();
 		if (fileItem.getState() == VMessageAbstractItem.STATE_FILE_DOWNLOADING)
 			values.put(
 					ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_SEND_STATE,

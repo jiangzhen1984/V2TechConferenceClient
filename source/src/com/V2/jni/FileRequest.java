@@ -237,6 +237,14 @@ public class FileRequest {
 			long nFileSize) {
 		Log.e(TAG, "OnFileTransBegin--->" + szFileID + ":" + nTransType + ":"
 				+ nFileSize);
+		
+		for (int i = 0; i < mCallbacks.size(); i++) {
+			WeakReference<FileRequestCallback> wrf = mCallbacks.get(i);
+			if (wrf != null && wrf.get() != null) {
+				((FileRequestCallback) wrf.get()).OnFileTransBegin(szFileID,
+						nTransType, nFileSize);
+			}
+		}
 	}
 
 	/**

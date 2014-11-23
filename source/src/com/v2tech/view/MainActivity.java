@@ -31,11 +31,13 @@ import android.widget.Toast;
 import com.V2.jni.V2GlobalEnum;
 import com.V2.jni.util.V2Log;
 import com.v2tech.R;
+import com.v2tech.db.ContentDescriptor;
 import com.v2tech.db.V2techSearchContentProvider;
 import com.v2tech.service.ChatService;
 import com.v2tech.service.FileOperationEnum;
 import com.v2tech.util.Notificator;
 import com.v2tech.view.conversation.CommonCallBack;
+import com.v2tech.view.conversation.MessageLoader;
 import com.v2tech.view.conversation.CommonCallBack.CommonUpdateConversationStateInterface;
 import com.v2tech.view.conversation.CommonCallBack.CommonUpdateFileStateInterface;
 import com.v2tech.view.conversation.MessageBuilder;
@@ -159,8 +161,9 @@ public class MainActivity extends FragmentActivity implements
 		initReceiver();
 		// Start animation
 		this.overridePendingTransition(R.animator.left_in, R.animator.left_out);
-		CommonCallBack.getInstance().setFileStateInterface(this);
+//		CommonCallBack.getInstance().setFileStateInterface(this);
 		messageArray = new ArrayList<CommonAdapterItemWrapper>();
+		updateFileState();
 	}
 
 	/**
@@ -460,7 +463,7 @@ public class MainActivity extends FragmentActivity implements
 			if (PublicIntent.FINISH_APPLICATION.equals(action)) {
 				exitedFlag = true;
 				//把会话中所有发送或下载的文件，状态更新到数据库
-				executeUpdateFileState();
+//				executeUpdateFileState();
 				requestQuit();
 			} else if (JNIService.JNI_BROADCAST_CONNECT_STATE_NOTIFICATION
 					.equals(action)) {
@@ -510,12 +513,44 @@ public class MainActivity extends FragmentActivity implements
 		  V2techSearchContentProvider.closedDataBase();  
 		return super.dispatchTouchEvent(ev);
 	}
+	
+	/**
+	 * Detecting all VMessageFileItem Object that state is sending or downloading in the database , 
+	 * and change their status to failed..  
+	 */
+	public void updateFileState() {
+		new Thread(new Runnable() {
+			
+			@Override
+			public void run() {
+				List<VMessageFileItem> loadFileMessages = MessageLoader.loadFileMessages(-1, -1);
+				if(loadFileMessages != null){
+					for (VMessageFileItem fileItem : loadFileMessages) {
+						if (fileItem.getState() == VMessageAbstractItem.STATE_FILE_DOWNLOADING)
+							fileItem.setState(VMessageAbstractItem.STATE_FILE_DOWNLOADED_FALIED);
+						else if (fileItem.getState() == VMessageAbstractItem.STATE_FILE_SENDING)
+							fileItem.setState(VMessageAbstractItem.STATE_FILE_SENT_FALIED);
+						int update = MessageLoader.updateFileItemState(mContext , fileItem);
+						if(update == -1){
+							V2Log.e(TAG, "update file state failed... file id is : " + fileItem.getUuid());
+						}
+					}
+				}
+				else
+					V2Log.e(TAG, "load all files failed... get null");
+			}
+		}).start();
+	}
 
 	@Override
 	public void updateFileState(List<CommonAdapterItemWrapper> messageArray) {
 		this.messageArray.addAll(messageArray);
 	}
 	
+	/**
+	 * now it's not used..
+	 * @deprecated
+	 */
 	public void executeUpdateFileState(){
 		
 		if(messageArray == null){

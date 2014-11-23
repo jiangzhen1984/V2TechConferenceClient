@@ -43,7 +43,7 @@ public class VMessageFileItem extends VMessageAbstractItem {
 	}
 
 	public VMessageFileItem(VMessage vm, String fileName , int fileState ,String uuid) {
-		this(vm, uuid, null, fileName, fileState ,0, 0, 0, 0, -1, 2);
+		this(vm, uuid, null, fileName, 0 ,fileState, 0, 0, 0, -1, 2);
 	}
 
 	public VMessageFileItem(VMessage vm, String fileID, long fileSize, int fileState ,

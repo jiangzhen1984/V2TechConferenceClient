@@ -2,6 +2,7 @@ package com.v2tech.util;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningTaskInfo;
@@ -36,6 +37,8 @@ public class GlobalConfig {
 	public static String LOGIN_USER_ID = "";
 
 	public static HashMap<String, String> allChinese = new HashMap<String, String>();
+	
+	public static Map<Long, Integer> mTransingFiles = new HashMap<Long, Integer>();
 	
 	public static int[] GLOBAL_FACE_ARRAY = new int[] { 0, R.drawable.face_1,
 			R.drawable.face_2, R.drawable.face_3, R.drawable.face_4,

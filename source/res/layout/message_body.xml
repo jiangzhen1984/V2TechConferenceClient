@@ -36,40 +36,53 @@
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="10dp"
                         android:src="@drawable/avatar" />
-                    <FrameLayout
+                    <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical" >
-                        <RelativeLayout
+                        android:layout_gravity="center_vertical"
+                        android:orientation="vertical" >
+                        <TextView
+                            android:id="@+id/message_body_person_name_left"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginRight="10dp" >
-                            <ImageView
-                                android:id="@+id/message_body_arrow_lefe_false"
+                            android:layout_marginLeft="@dimen/messageBodyView_common_margin_left_or_right"
+                            android:text="张三"
+                            android:textSize="@dimen/common_item_text_size_small" />
+                        <FrameLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical" >
+                            <RelativeLayout
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_centerVertical="true"
-                                android:layout_marginLeft="10dp"
-                                android:src="@drawable/message_body_left_arrow_selector" />
-                            <LinearLayout
-                                android:id="@+id/messag_body_content_ly_left"
+                                android:layout_marginRight="@dimen/messageBodyView_common_margin_left_or_right" >
+                                <ImageView
+                                    android:id="@+id/message_body_arrow_lefe_false"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_centerVertical="true"
+                                    android:layout_marginLeft="@dimen/messageBodyView_common_margin_left_or_right"
+                                    android:src="@drawable/message_body_left_arrow_selector" />
+                                <LinearLayout
+                                    android:id="@+id/messag_body_content_ly_left"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_gravity="center_vertical"
+                                    android:layout_marginLeft="@dimen/message_body_view_item_bubble_space"
+                                    android:layout_toRightOf="@+id/message_body_arrow_lefe_false"
+                                    android:background="@drawable/message_body_left_bg_selector"
+                                    android:orientation="vertical" >
+                                </LinearLayout>
+                            </RelativeLayout>
+                            <ImageView
+                                android:id="@+id/message_body_arrow_left"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="center_vertical"
-                                android:layout_marginLeft="@dimen/message_body_view_item_bubble_space"
-                                android:layout_toRightOf="@+id/message_body_arrow_lefe_false"
-                                android:background="@drawable/message_body_left_bg_selector"
-                                android:orientation="vertical" >
-                            </LinearLayout>
-                        </RelativeLayout>
-                        <ImageView
-                            android:id="@+id/message_body_arrow_left"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_vertical"
-                            android:layout_marginLeft="10dp"
-                            android:src="@drawable/message_body_left_arrow_selector" />
-                    </FrameLayout>
+                                android:layout_marginLeft="@dimen/messageBodyView_common_margin_left_or_right"
+                                android:src="@drawable/message_body_left_arrow_selector" />
+                        </FrameLayout>
+                    </LinearLayout>
                     <RelativeLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -158,34 +171,49 @@
                             android:text="24&apos;&apos;" />
                     </RelativeLayout>
                     <LinearLayout
-                        android:id="@+id/messag_body_content_ly_right"
+                        android:id="@+id/messag_body_outside_content_ly_right"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_vertical"
-                        android:layout_marginLeft="10dp"
-                        android:layout_marginRight="-1dp"
-                        android:background="@drawable/message_body_right_bg_selector"
+                        android:layout_marginRight="@dimen/messageBodyView_common_margin_left_or_right"
                         android:orientation="vertical" >
+                        <TextView
+                            android:id="@+id/message_body_person_name_right"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="right"
+                            android:layout_marginLeft="@dimen/messageBodyView_common_margin_left_or_right"
+                            android:text="李四"
+                            android:textSize="@dimen/common_item_text_size_small" />
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:orientation="horizontal"
+                            android:layout_height="wrap_content" >
+                            <LinearLayout
+                                android:id="@+id/messag_body_content_ly_right"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center_vertical"
+                                android:layout_marginLeft="@dimen/messageBodyView_common_margin_left_or_right"
+                                android:layout_marginRight="-1dp"
+                                android:background="@drawable/message_body_right_bg_selector"
+                                android:layout_weight="1"
+                                android:orientation="vertical" >
+                            </LinearLayout>
+                            <ImageView
+                                android:id="@+id/message_body_arrow_right"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center_vertical"
+                                android:src="@drawable/message_body_right_arrow_selector" />
+                        </LinearLayout>
                     </LinearLayout>
-                    <RelativeLayout
+                    <ImageView
+                        android:id="@+id/conversation_message_body_icon_right"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginRight="10dp" >
-                        <ImageView
-                            android:id="@+id/message_body_arrow_right"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_centerVertical="true"
-                            android:layout_marginRight="10dp"
-                            android:src="@drawable/message_body_right_arrow_selector" />
-                        <ImageView
-                            android:id="@+id/conversation_message_body_icon_right"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_centerVertical="true"
-                            android:layout_toRightOf="@+id/message_body_arrow_right"
-                            android:src="@drawable/avatar" />
-                    </RelativeLayout>
+                        android:layout_marginRight="10dp"
+                        android:src="@drawable/avatar" />
                 </TableRow>
             </TableLayout>
         </RelativeLayout>

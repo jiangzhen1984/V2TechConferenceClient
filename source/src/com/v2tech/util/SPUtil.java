@@ -91,9 +91,9 @@ public class SPUtil {
 	}
 	
 	/**
-	 * 
 	 * @param context
 	 * @return
+	 * 		true if current network is connected , otherwise false
 	 */
 	public static boolean checkCurrentAviNetwork(Context context) {
 		if (context == null) {

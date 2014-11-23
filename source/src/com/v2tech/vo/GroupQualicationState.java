@@ -24,8 +24,13 @@ public class GroupQualicationState {
 		switch (state) {
 		case ACCEPTED:
 		case BE_ACCEPTED:
-		case BE_REJECT:
 			this.applyReason = reason;
+			break;
+		case BE_REJECT:
+			if(qualicationType == Type.CROWD_APPLICATION)
+				this.applyReason = reason;
+			else
+				this.refuseReason = reason;
 			break;
 		case REJECT:
 			this.refuseReason = reason;

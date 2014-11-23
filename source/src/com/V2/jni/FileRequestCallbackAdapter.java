@@ -5,6 +5,11 @@ import com.V2.jni.ind.FileJNIObject;
 public abstract class FileRequestCallbackAdapter implements FileRequestCallback {
 
 	@Override
+	public void OnFileTransBegin(String szFileID, int nTransType, long nFileSize) {
+		
+	}
+	
+	@Override
 	public void OnFileTransInvite(FileJNIObject file) {
 
 	}

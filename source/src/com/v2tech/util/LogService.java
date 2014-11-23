@@ -68,7 +68,7 @@ public class LogService extends Service implements Thread.UncaughtExceptionHandl
 
 	private static final int MEMORY_LOG_FILE_MAX_SIZE = 10 * 1024 * 1024; // 日志文件最大值，10M
 	private static final int MEMORY_LOG_FILE_MONITOR_INTERVAL = 10 * 60 * 1000; // 日志文件大小监控时间间隔，10分钟
-	private static final int SDCARD_LOG_FILE_SAVE_DAYS = 7; // sd卡中日志文件的最多保存天数
+	private static final int SDCARD_LOG_FILE_SAVE_DAYS = 1; // sd卡中日志文件的最多保存天数
     private static String MONITOR_LOG_SIZE_ACTION = "MONITOR_LOG_SIZE"; // 日志文件监测action
     private static String SWITCH_LOG_FILE_ACTION = "SWITCH_LOG_FILE_ACTION"; // 切换日志文件action
     private Context mContext;
@@ -221,10 +221,10 @@ public class LogService extends Service implements Thread.UncaughtExceptionHandl
 		PowerManager pm = (PowerManager) getApplicationContext()
 				.getSystemService(Context.POWER_SERVICE);
 		wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
-//        //获取系统默认处理器
-//        mDefaultHandler = Thread.getDefaultUncaughtExceptionHandler();
-//        //设置LogService为程序的默认处理器
-//        Thread.setDefaultUncaughtExceptionHandler(this);
+        //获取系统默认处理器
+        mDefaultHandler = Thread.getDefaultUncaughtExceptionHandler();
+        //设置LogService为程序的默认处理器
+        Thread.setDefaultUncaughtExceptionHandler(this);
 
         V2Log.d(TAG, "LogService onCreate");
 	}

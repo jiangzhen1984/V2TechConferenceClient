@@ -58,6 +58,7 @@ import com.v2tech.view.widget.GroupListView.Item;
 import com.v2tech.vo.Conference;
 import com.v2tech.vo.ConferenceGroup;
 import com.v2tech.vo.Group;
+import com.v2tech.vo.NetworkStateCode;
 import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.User;
 
@@ -106,6 +107,8 @@ public class ConferenceCreateActivity extends Activity {
 
 	private long preSelectedUID;
 	private long preSelectedGroupId;
+
+	private ProgressDialog mCreateWaitingDialog;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -171,6 +174,15 @@ public class ConferenceCreateActivity extends Activity {
 			mLocalHandler.sendMessageDelayed(msg, 300);
 		}
 
+		boolean checkCurrentAviNetwork = SPUtil
+				.checkCurrentAviNetwork(mContext);
+		if (!checkCurrentAviNetwork) {
+			mErrorNotificationLayout.setVisibility(View.VISIBLE);
+			mErrorMessageTV
+					.setText(R.string.error_create_conference_failed_no_network);
+		} else {
+			mErrorNotificationLayout.setVisibility(View.GONE);
+		}
 	}
 
 	@Override
@@ -371,6 +383,8 @@ public class ConferenceCreateActivity extends Activity {
 		intentFilter.addCategory(PublicIntent.DEFAULT_CATEGORY);
 		intentFilter
 				.addAction(JNIService.JNI_BROADCAST_USER_STATUS_NOTIFICATION);
+		intentFilter
+				.addAction(JNIService.JNI_BROADCAST_CONNECT_STATE_NOTIFICATION);
 		this.registerReceiver(receiver, intentFilter);
 	}
 
@@ -385,6 +399,17 @@ public class ConferenceCreateActivity extends Activity {
 				User.Status us = User.Status.fromInt(uso.getStatus());
 				User user = GlobalHolder.getInstance().getUser(uso.getUid());
 				mGroupListView.updateUserStatus(user, us);
+			} else if (JNIService.JNI_BROADCAST_CONNECT_STATE_NOTIFICATION
+					.equals(intent.getAction())) {
+				NetworkStateCode code = (NetworkStateCode) intent.getExtras()
+						.get("state");
+				if (code != NetworkStateCode.CONNECTED) {
+					mErrorNotificationLayout.setVisibility(View.VISIBLE);
+					mErrorMessageTV
+							.setText(R.string.error_create_conference_failed_no_network);
+				} else {
+					mErrorNotificationLayout.setVisibility(View.GONE);
+				}
 			}
 		}
 	}
@@ -393,13 +418,9 @@ public class ConferenceCreateActivity extends Activity {
 
 		@Override
 		public void onClick(View view) {
-			if (!SPUtil.checkCurrentAviNetwork(mContext)) {
-				mErrorNotificationLayout.setVisibility(View.VISIBLE);
-				mErrorMessageTV
-						.setText(R.string.error_create_conference_failed_no_network);
-				mErrorMessageTV.setTextColor(Color.RED);
+			if (!SPUtil.checkCurrentAviNetwork(mContext))
 				return;
-			}
+
 			String title = mConfTitleET.getText().toString().trim();
 			if (title == null || title.length() == 0) {
 				mConfTitleET
@@ -434,6 +455,16 @@ public class ConferenceCreateActivity extends Activity {
 				mConfStartTimeET.requestFocus();
 				return;
 			}
+
+			if (mCreateWaitingDialog != null
+					&& mCreateWaitingDialog.isShowing()) {
+				mCreateWaitingDialog.dismiss();
+			}
+			mCreateWaitingDialog = ProgressDialog.show(
+					mContext,
+					"",
+					mContext.getResources().getString(
+							R.string.notification_watiing_process), true);
 
 			List<User> l = new ArrayList<User>(mAttendeeList);
 			conf = new Conference(title, startTimeStr, null, l);
@@ -537,8 +568,9 @@ public class ConferenceCreateActivity extends Activity {
 				updateUserToAttendList((User) msg.obj, msg.arg1);
 				break;
 			case CREATE_CONFERENC_RESP:
-                JNIResponse rccr = (JNIResponse) msg.obj;
-                Conference conference = (Conference) rccr.callerObject;
+				mCreateWaitingDialog.dismiss();
+				JNIResponse rccr = (JNIResponse) msg.obj;
+				Conference conference = (Conference) rccr.callerObject;
 				if (rccr.getResult() != JNIResponse.Result.SUCCESS) {
 					mErrorNotificationLayout.setVisibility(View.VISIBLE);
 					mErrorMessageTV
@@ -546,11 +578,11 @@ public class ConferenceCreateActivity extends Activity {
 					break;
 				}
 
-                Date startDate;
-                if(conference != null)
-                    startDate = conference.getDate();
-                else
-                    startDate = new Date();
+				Date startDate;
+				if (conference != null)
+					startDate = conference.getDate();
+				else
+					startDate = new Date();
 
 				RequestConfCreateResponse rc = (RequestConfCreateResponse) rccr;
 				ConferenceGroup g = new ConferenceGroup(rc.getConfId(),

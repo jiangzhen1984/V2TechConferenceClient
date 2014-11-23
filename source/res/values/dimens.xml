@@ -136,7 +136,8 @@
     <dimen name="message_body_failed_size">16dp</dimen>
     <!-- message body view layout -->
     <dimen name="message_body_view_item_bubble_space">-3dp</dimen>  <!-- 气泡间隙，三角与内容之间 -->
-
+    <dimen name="messageBodyView_common_margin_left_or_right">10dp</dimen>
+    
     <!-- message voice dialog layout -->
     <dimen name="message_voice_dialog_width">220dp</dimen>
     <dimen name="message_voice_dialog_height">170dp</dimen>

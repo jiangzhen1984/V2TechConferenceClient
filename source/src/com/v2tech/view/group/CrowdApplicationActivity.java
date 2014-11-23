@@ -328,7 +328,7 @@ public class CrowdApplicationActivity extends Activity {
                         }
                     }
 				} else if (response.getResult() == Result.FAILED) {
-
+					Toast.makeText(getApplicationContext(), "群已经解散", Toast.LENGTH_SHORT).show();
 				}
 				handleApplyDone();
 				break;

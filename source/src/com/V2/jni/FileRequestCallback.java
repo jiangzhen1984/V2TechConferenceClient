@@ -6,6 +6,15 @@ public interface FileRequestCallback {
 
 	/**
 	 * 
+	 * @param szFileID
+	 * @param nTransType
+	 * @param nFileSize
+	 */
+	public void OnFileTransBegin(String szFileID, int nTransType,
+			long nFileSize);
+	
+	/**
+	 * 
 	 * @param file
 	 */
 	public void OnFileTransInvite(FileJNIObject file);

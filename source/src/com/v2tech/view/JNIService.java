@@ -992,7 +992,7 @@ public class JNIService extends Service implements
 		public void OnAcceptApplyJoinGroup(V2Group group) {
 			if (group == null ||group.creator == null) {
 				V2Log.e(TAG,
-						"OnRefuseApplyJoinGroup : May receive refuse apply join message failed.. get null V2Group Object");
+						"OnAcceptApplyJoinGroup : May receive accept apply join message failed.. get null V2Group Object");
 				return;
 			}
 
@@ -1013,7 +1013,7 @@ public class JNIService extends Service implements
 							QualificationState.BE_ACCEPTED, null , ReadState.UNREAD , false));
 			if (id == -1) {
 				V2Log.e(TAG,
-						"OnRefuseApplyJoinGroup : Update Qualication Message to Database failed.. return -1 , group id is : "
+						"OnAcceptApplyJoinGroup : Update Qualication Message to Database failed.. return -1 , group id is : "
 								+ group.id
 								+ " user id"
 								+ ": "
@@ -1590,7 +1590,13 @@ public class JNIService extends Service implements
 		public FileRequestCB(JNICallbackHandler mCallbackHandler) {
 			this.mCallbackHandler = mCallbackHandler;
 		}
-
+		
+		@Override
+		public void OnFileTransBegin(String szFileID, int nTransType,
+				long nFileSize) {
+			updateTransFileState(szFileID , true);
+		}
+		
 		@Override
 		public void OnFileTransInvite(FileJNIObject file) {
 			User fromUser = GlobalHolder.getInstance().getUser(file.user.uid);
@@ -1625,7 +1631,8 @@ public class JNIService extends Service implements
 			Log.e(TAG, "OnFileTransEnd updates success : " + updates);
 			vm = null;
 			item = null;
-
+		
+			updateTransFileState(szFileID , false);
 		}
 
 		@Override
@@ -1642,11 +1649,12 @@ public class JNIService extends Service implements
 			Log.e(TAG, "OnFileTransEnd updates success : " + updates);
 			vm = null;
 			item = null;
+			updateTransFileState(szFileID , false);
 		}
 
 		@Override
 		public void OnFileTransCancel(String szFileID) {
-			super.OnFileTransCancel(szFileID);
+			updateTransFileState(szFileID , false);
 		}
 	}
 
@@ -1657,7 +1665,6 @@ public class JNIService extends Service implements
 		if (delayBroadcast.size() <= 0) {
 			V2Log.d(TAG,
 					"There is no broadcast in delayBroadcast collections , mean no callback!");
-			noNeedBroadcast = true;
 		} else {
 			for (Integer type : delayBroadcast) {
 				V2Log.d(TAG, "The delay broadcast was sending now , type is : "
@@ -1680,6 +1687,27 @@ public class JNIService extends Service implements
 			}
 			delayBroadcast.clear();
 		}
+		noNeedBroadcast = true;
 	}
 
+	private void updateTransFileState(String szFileID , boolean isAdd){
+		VMessageFileItem fileItem = MessageLoader.
+				queryFileItemByID(V2GlobalEnum.GROUP_TYPE_USER , szFileID);
+		if(fileItem == null || fileItem.getVm().getToUser() == null){
+			V2Log.d(TAG, "update transing file size failed...file id is : " + szFileID);
+			return ;
+		}
+		
+		long uid = fileItem.getVm().getToUser().getmUserId();
+		Integer trans = GlobalConfig.mTransingFiles.get(uid);
+		if(isAdd){
+			trans = trans + 1;
+			V2Log.e("ConversationSelectFile" , "用户" + uid + "增加了一个文件传输，当前正在传输个数是：" + trans);
+		}
+		else{
+			trans = trans - 1;
+			V2Log.e("ConversationSelectFile" , "用户" + uid + "的一个文件传输完毕，当前正在传输个数是：" + trans);
+		}
+		GlobalConfig.mTransingFiles.put(uid , trans);
+	}
 }

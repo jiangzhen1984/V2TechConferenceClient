@@ -83,6 +83,7 @@ import com.v2tech.view.adapter.VMessageAdater;
 import com.v2tech.view.bo.ConversationNotificationObject;
 import com.v2tech.view.contacts.ContactDetail;
 import com.v2tech.view.group.CrowdDetailActivity;
+import com.v2tech.view.group.CrowdFilesActivity.CrowdFileActivityType;
 import com.v2tech.view.widget.CommonAdapter;
 import com.v2tech.view.widget.CommonAdapter.CommonAdapterItemWrapper;
 import com.v2tech.vo.Conversation;
@@ -211,7 +212,6 @@ public class ConversationActivity extends Activity {
 	private int currentItemPos = 0;
 
 	private ArrayList<FileInfoBean> mCheckedList;
-	private long transingFileObserver = 0;
 
 	private ConversationNotificationObject cov = null;
 
@@ -267,6 +267,7 @@ public class ConversationActivity extends Activity {
 				R.animator.nonam_scale_null);
 		// initalize vioce function that showing dialog
 		createVideoDialog();
+		// Initalize get members of file that file state is sending from database
 		initTransingObserver();
 		isCreate = true;
 	}
@@ -363,6 +364,35 @@ public class ConversationActivity extends Activity {
 			startSendMoreFile();
 		}
 	}
+	
+	private void initTransingObserver() {
+		List<VMessageFileItem> files;
+		int count = 0;
+		long key;
+		if (currentConversationViewType == V2GlobalEnum.GROUP_TYPE_CROWD) {
+			files = MessageLoader.loadFileMessages(currentConversationViewType,
+					groupId);
+			key = groupId;
+		} else {
+			files = MessageLoader.loadFileMessages(currentConversationViewType,
+					user2Id);
+			key = user2Id;
+		}
+		
+		Integer transing = GlobalConfig.mTransingFiles.get(key);
+		if(transing == null)
+			transing = 0;
+		
+
+		for (VMessageFileItem vMessageFileItem : files) {
+			if (vMessageFileItem.getState() == VMessageAbstractItem.STATE_FILE_SENDING) {
+				count += 1;
+			}
+		}
+		
+		transing = transing + count;
+		GlobalConfig.mTransingFiles.put(key, transing);
+	}
 
 	private Dialog mVoiceDialog = null;
 	private ImageView mVolume;
@@ -410,26 +440,6 @@ public class ConversationActivity extends Activity {
 			}
 		});
 		root.setVisibility(View.INVISIBLE);
-	}
-
-	private void initTransingObserver() {
-		List<VMessageFileItem> files;
-		int count = 0;
-		if (currentConversationViewType == V2GlobalEnum.GROUP_TYPE_CROWD) {
-			files = MessageLoader.loadFileMessages(currentConversationViewType,
-					groupId);
-		} else {
-			files = MessageLoader.loadFileMessages(currentConversationViewType,
-					user2Id);
-		}
-
-		for (VMessageFileItem vMessageFileItem : files) {
-			if (vMessageFileItem.getState() == VMessageAbstractItem.STATE_FILE_SENDING) {
-				count += 1;
-			}
-		}
-
-		transingFileObserver = count;
 	}
 
 	@Override
@@ -506,7 +516,7 @@ public class ConversationActivity extends Activity {
 		V2Log.e(TAG, "entry onDestroy....");
 		this.unregisterReceiver(receiver);
 		GlobalConfig.isConversationOpen = false;
-		CommonCallBack.getInstance().executeUpdateFileState(messageArray);
+//		CommonCallBack.getInstance().executeUpdateFileState(messageArray);
 		checkMessageEmpty();
 		finishWork();
 	}
@@ -1459,12 +1469,11 @@ public class ConversationActivity extends Activity {
 				if (currentConversationViewType == V2GlobalEnum.GROUP_TYPE_USER) {
 					intent = new Intent(ConversationActivity.this,
 							ConversationSelectFileEntry.class);
-					intent.putExtra("transing", transingFileObserver);
+					intent.putExtra("uid", user2Id);
 				} else if (currentConversationViewType == V2GlobalEnum.GROUP_TYPE_CROWD) {
 					intent = new Intent(ConversationActivity.this,
 							ConversationSelectFile.class);
 					intent.putExtra("type", "crowdFile");
-					intent.putExtra("transing", transingFileObserver);
 				} else {
 					return;
 				}
@@ -1680,7 +1689,7 @@ public class ConversationActivity extends Activity {
 
 						VMessage vm = MessageBuilder.buildFileMessage(
 								cov.getType(), groupId, local, remote, bean);
-
+						bean.fileUUID = vm.getFileItems().get(0).getUuid();
 						// // Save message
 						vm.setmXmlDatas(vm.toXml());
 						vm.setDate(new Date(GlobalConfig.getGlobalServerTime()));
@@ -1698,13 +1707,9 @@ public class ConversationActivity extends Activity {
 					intent.putParcelableArrayListExtra("uploads", mCheckedList);
 					startService(intent);
 
-					transingFileObserver = transingFileObserver
-							+ mCheckedList.size();
 					break;
 				case V2GlobalEnum.GROUP_TYPE_USER:
 					startSendMoreFile();
-					transingFileObserver = transingFileObserver
-							+ mCheckedList.size();
 					mCheckedList = null;
 					break;
 				}
@@ -2023,19 +2028,29 @@ public class ConversationActivity extends Activity {
 				i.putExtra("type", currentConversationViewType);
 				i.putExtra("gid", groupId);
 				mContext.startActivity(i);
+				return ;
 			}
 
 			List<VMessageLinkTextItem> linkItems = v.getLinkItems();
 			VMessageLinkTextItem linkItem = null;
 			if (linkItems != null && linkItems.size() > 0) {
-				linkItem = v.getLinkItems().get(0);
+				linkItem = linkItems.get(0);
 				Intent intent = new Intent();
 				intent.setAction("android.intent.action.VIEW");
 				Uri content_url = Uri.parse(linkItem.getUrl());
 				intent.setData(content_url);
 				startActivity(intent);
+				return ;
 			}
 		}
+		
+		public void onCrowdFileMessageClicked(CrowdFileActivityType type) {
+			Intent i = new Intent(PublicIntent.START_CROWD_FILES_ACTIVITY);
+			i.addCategory(PublicIntent.DEFAULT_CATEGORY);
+			i.putExtra("cid", groupId);
+			i.putExtra("crowdFileActivityType", type);
+			startActivity(i);
+		};
 
 		@Override
 		public void requestPlayAudio(View v, VMessage vm, VMessageAudioItem vai) {
@@ -2068,7 +2083,7 @@ public class ConversationActivity extends Activity {
 				} else
 					item.setState(VMessageAbstractItem.STATE_NORMAL);
 			}
-			MessageLoader.updateChatMessageState(mContext, v);
+			int update = MessageLoader.updateChatMessageState(mContext, v);
 			Message.obtain(lh, SEND_MESSAGE, v).sendToTarget();
 			notificateConversationUpdate(true, v.getId());
 		}
@@ -2086,7 +2101,6 @@ public class ConversationActivity extends Activity {
 						mChat.updateFileOperation(vfi,
 								FileOperationEnum.OPERATION_CANCEL_SENDING,
 								null);
-						transingFileObserver = transingFileObserver - 1;
 						break;
 					case VMessageAbstractItem.STATE_FILE_DOWNLOADED:
 						mChat.updateFileOperation(vfi,
@@ -2288,7 +2302,6 @@ public class ConversationActivity extends Activity {
 					case FileTransStatusIndication.IND_TYPE_PROGRESS_END:
 						if (vfi.getState() == VMessageAbstractItem.STATE_FILE_SENDING) {
 							vfi.setState(VMessageAbstractItem.STATE_FILE_SENT);
-							transingFileObserver = transingFileObserver - 1;
 						} else if (vfi.getState() == VMessageAbstractItem.STATE_FILE_DOWNLOADING) {
 							vfi.setState(VMessageAbstractItem.STATE_FILE_DOWNLOADED);
 						}
@@ -2324,7 +2337,6 @@ public class ConversationActivity extends Activity {
 					// If lesser than sending, means file is receive
 					if (vfi.getState() < VMessageFileItem.STATE_FILE_SENDING) {
 						vfi.setState(VMessageFileItem.STATE_FILE_DOWNLOADED_FALIED);
-						transingFileObserver = transingFileObserver - 1;
 					} else {
 						vfi.setState(VMessageFileItem.STATE_FILE_SENT_FALIED);
 					}
@@ -2366,7 +2378,6 @@ public class ConversationActivity extends Activity {
 								vm);
 						break;
 					case VMessageAbstractItem.STATE_FILE_SENDING:
-						transingFileObserver = transingFileObserver - 1;
 					case VMessageAbstractItem.STATE_FILE_PAUSED_SENDING:
 						item.setState(VMessageFileItem.STATE_FILE_SENT_FALIED);
 						MessageBuilder.updateVMessageItemToSentFalied(mContext,
@@ -2744,6 +2755,12 @@ public class ConversationActivity extends Activity {
 			case REQUEST_DEL_MESSAGE:
 				VMessage message = (VMessage) msg.obj;
 				removeMessage(message);
+				Integer transing = GlobalConfig.mTransingFiles.get(user2Id);
+				if(transing != null){
+					transing = transing - 1;
+					GlobalConfig.mTransingFiles.put(user2Id, transing);
+				}
+				
 				adapter.notifyDataSetChanged();
 				// Update conversation
 				notificateConversationUpdate(false, message.getId());

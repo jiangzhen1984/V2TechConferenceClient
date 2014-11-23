@@ -9,8 +9,10 @@ import java.util.Set;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Color;
@@ -42,6 +44,7 @@ import com.v2tech.service.GlobalHolder;
 import com.v2tech.service.MessageListener;
 import com.v2tech.service.jni.CreateCrowdResponse;
 import com.v2tech.service.jni.JNIResponse;
+import com.v2tech.util.SPUtil;
 import com.v2tech.view.JNIService;
 import com.v2tech.view.PublicIntent;
 import com.v2tech.view.adapter.CreateConfOrCrowdAdapter;
@@ -51,6 +54,7 @@ import com.v2tech.vo.CrowdGroup;
 import com.v2tech.vo.CrowdGroup.AuthType;
 import com.v2tech.vo.Group;
 import com.v2tech.vo.Group.GroupType;
+import com.v2tech.vo.NetworkStateCode;
 import com.v2tech.vo.User;
 
 /**
@@ -90,6 +94,7 @@ public class CrowdCreateActivity extends Activity {
 	private EditText mGroupTitleET;
 	private Spinner mRuleSpinner;
 	private LinearLayout mErrorNotificationLayout;
+	private TextView mErrorNotification;
 
 	private List<Group> mGroupList;
 	private CrowdGroup crowd;
@@ -158,6 +163,7 @@ public class CrowdCreateActivity extends Activity {
 		searchedTextET = (EditText) findViewById(R.id.contacts_search);
 
 		mErrorNotificationLayout = (LinearLayout) findViewById(R.id.group_create_error_notification);
+		mErrorNotification = (TextView) findViewById(R.id.group_create_error_notification_hints);
 		mReturnButton = (TextView) findViewById(R.id.ws_common_activity_title_left_button);
 		mReturnButton.setText(R.string.common_return_name);
 		mReturnButton.setOnClickListener(mReturnListener);
@@ -169,6 +175,46 @@ public class CrowdCreateActivity extends Activity {
 			mGroupTitle.setText(R.string.group_invitation_title);
 		}
 		
+		boolean checkCurrentAviNetwork = SPUtil.checkCurrentAviNetwork(mContext);
+		if(!checkCurrentAviNetwork){
+			mErrorNotificationLayout.setVisibility(View.VISIBLE);
+			mErrorNotification
+					.setText(R.string.error_create_conference_failed_no_network);
+		}
+		else{
+			mErrorNotificationLayout.setVisibility(View.GONE);
+		}
+		initReceiver();
+	}
+	
+	IntentFilter intentFilter;
+	LocalBroadcastReceiver receiver = new LocalBroadcastReceiver();
+
+	private void initReceiver() {
+		intentFilter = new IntentFilter();
+		intentFilter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
+		intentFilter.addCategory(PublicIntent.DEFAULT_CATEGORY);
+		intentFilter.addAction(JNIService.JNI_BROADCAST_CONNECT_STATE_NOTIFICATION);
+		this.registerReceiver(receiver, intentFilter);
+	}
+
+	class LocalBroadcastReceiver extends BroadcastReceiver {
+
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			if (JNIService.JNI_BROADCAST_CONNECT_STATE_NOTIFICATION.equals(intent
+					.getAction())) {
+				NetworkStateCode code = (NetworkStateCode) intent.getExtras()
+						.get("state");
+				if (code != NetworkStateCode.CONNECTED) {
+					mErrorNotificationLayout.setVisibility(View.VISIBLE);
+					mErrorNotification
+							.setText(R.string.error_create_conference_failed_no_network);
+				} else {
+					mErrorNotificationLayout.setVisibility(View.GONE);
+				}
+			}
+		}
 	}
 
 	@Override
@@ -176,6 +222,7 @@ public class CrowdCreateActivity extends Activity {
 		super.onDestroy();
 		// call clear to remove callback from JNI.
 		cg.clearCalledBack();
+		this.unregisterReceiver(receiver);
 	}
 
 	@Override
@@ -497,8 +544,10 @@ public class CrowdCreateActivity extends Activity {
                    cg.setmPendingCrowdId(0);
                    V2Log.e("CrowdCreateActivity CREATE_GROUP_MESSAGE --> create crowd group failed.. time out!!");
                    mErrorNotificationLayout.setVisibility(View.VISIBLE);
+                   mErrorNotification.setText(R.string.crowd_create_activity_error_info);
                 } else {
 					mErrorNotificationLayout.setVisibility(View.VISIBLE);
+					mErrorNotification.setText(R.string.crowd_create_activity_error_info);
 				}
 			}
 				break;

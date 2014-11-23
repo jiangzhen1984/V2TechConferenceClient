@@ -16,7 +16,6 @@ import android.os.AsyncTask;
 import android.os.Handler;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
-import android.text.style.BackgroundColorSpan;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.ImageSpan;
 import android.view.Gravity;
@@ -40,6 +39,7 @@ import com.v2tech.service.GlobalHolder;
 import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.MessageUtil;
 import com.v2tech.util.SPUtil;
+import com.v2tech.view.group.CrowdFilesActivity.CrowdFileActivityType;
 import com.v2tech.vo.User;
 import com.v2tech.vo.VMessage;
 import com.v2tech.vo.VMessageAbstractItem;
@@ -73,6 +73,7 @@ public class MessageBodyView extends LinearLayout {
 	private ImageView mArrowIV;
 	private TextView timeTV;
 	private TextView seconds;
+	private TextView name;
 	private View failedIcon;
 	private View unReadIcon;
 
@@ -91,14 +92,21 @@ public class MessageBodyView extends LinearLayout {
 
 	private ClickListener callback;
 	private ImageView micIv;
+
 	private int width = 0;
 	private int popupWindowWidth;
 	private int popupWindowHeight;
 	private PopupWindow pw;
 	private RelativeLayout popWindow;
+	private TextView pwReDownloadTV;
+	private TextView pwResendTV;
+	private TextView pwCopyTV;
+	private TextView pwDeleteTV;
 
 	public interface ClickListener {
 		public void onMessageClicked(VMessage v);
+		
+		public void onCrowdFileMessageClicked(CrowdFileActivityType openType);
 
 		public void reSendMessageClicked(VMessage v);
 
@@ -147,7 +155,6 @@ public class MessageBodyView extends LinearLayout {
 
 		mLocalMessageContainter = (LinearLayout) rootView
 				.findViewById(R.id.message_body_left_user_ly);
-
 		mRemoteMessageContainter = (LinearLayout) rootView
 				.findViewById(R.id.message_body_remote_ly);
 
@@ -180,19 +187,20 @@ public class MessageBodyView extends LinearLayout {
 					.findViewById(R.id.messag_body_content_ly_left);
 			mArrowIV = (ImageView) rootView
 					.findViewById(R.id.message_body_arrow_left);
-			mArrowIV.bringToFront();
-			mLocalMessageContainter.setVisibility(View.VISIBLE);
-			mRemoteMessageContainter.setVisibility(View.GONE);
 			seconds = (TextView) rootView
 					.findViewById(R.id.message_body_video_item_second_left);
-
+			name = (TextView) rootView
+					.findViewById(R.id.message_body_person_name_left);
 			failedIcon = rootView
 					.findViewById(R.id.message_body_failed_item_left);
 			unReadIcon = rootView
 					.findViewById(R.id.message_body_unread_icon_left);
-			failedIcon.setVisibility(View.INVISIBLE);
-			unReadIcon.setVisibility(View.GONE);
-			seconds.setVisibility(View.GONE);
+			mLocalMessageContainter.setVisibility(View.VISIBLE);
+			mRemoteMessageContainter.setVisibility(View.INVISIBLE);
+			User fromUser = mMsg.getFromUser();
+			if (fromUser != null)
+				name.setText(fromUser.getName());
+
 		} else {
 			mHeadIcon = (ImageView) rootView
 					.findViewById(R.id.conversation_message_body_icon_right);
@@ -200,20 +208,31 @@ public class MessageBodyView extends LinearLayout {
 					.findViewById(R.id.messag_body_content_ly_right);
 			mArrowIV = (ImageView) rootView
 					.findViewById(R.id.message_body_arrow_right);
-			mArrowIV.bringToFront();
-			mLocalMessageContainter.setVisibility(View.GONE);
-			mRemoteMessageContainter.setVisibility(View.VISIBLE);
 			seconds = (TextView) rootView
 					.findViewById(R.id.message_body_video_item_second_right);
+			name = (TextView) rootView
+					.findViewById(R.id.message_body_person_name_right);
 			failedIcon = rootView
 					.findViewById(R.id.message_body_failed_item_right);
-
 			unReadIcon = rootView
 					.findViewById(R.id.message_body_unread_icon_right);
-			unReadIcon.setVisibility(View.GONE);
-			failedIcon.setVisibility(View.INVISIBLE);
-			seconds.setVisibility(View.GONE);
+			mLocalMessageContainter.setVisibility(View.INVISIBLE);
+			mRemoteMessageContainter.setVisibility(View.VISIBLE);
+
+			User localUser = GlobalHolder.getInstance().getCurrentUser();
+			if (localUser != null)
+				name.setText(localUser.getName());
 		}
+
+		failedIcon.setVisibility(View.INVISIBLE);
+		unReadIcon.setVisibility(View.GONE);
+		seconds.setVisibility(View.GONE);
+		mArrowIV.bringToFront();
+
+		if (mMsg.getMsgCode() != V2GlobalEnum.GROUP_TYPE_USER)
+			name.setVisibility(View.VISIBLE);
+		else
+			name.setVisibility(View.GONE);
 
 		if (mMsg.getFromUser() != null && mMsg.getFromUser().isDirty()) {
 			User fromUser = GlobalHolder.getInstance().getUser(
@@ -266,24 +285,24 @@ public class MessageBodyView extends LinearLayout {
 		// return true;
 		// }
 		// });
-		TextView tvResend = (TextView) popWindow
+		pwResendTV = (TextView) popWindow
 				.findViewById(R.id.contact_message_pop_up_item_resend);
-		tvResend.setOnClickListener(mResendButtonListener);
+		pwResendTV.setOnClickListener(mResendButtonListener);
 
-		TextView tvReDownload = (TextView) popWindow
+		pwReDownloadTV = (TextView) popWindow
 				.findViewById(R.id.contact_message_pop_up_item_redownload);
-		tvReDownload.setOnClickListener(mResendButtonListener);
+		pwReDownloadTV.setOnClickListener(mResendButtonListener);
 
 		if (messageType == MESSAGE_TYPE_TEXT) {
-			TextView tv = (TextView) popWindow
+			pwCopyTV = (TextView) popWindow
 					.findViewById(R.id.contact_message_pop_up_item_copy);
-			tv.setVisibility(View.VISIBLE);
-			tv.setOnClickListener(mCopyButtonListener);
+			pwCopyTV.setVisibility(View.VISIBLE);
+			pwCopyTV.setOnClickListener(mCopyButtonListener);
 		}
 
-		TextView deleteText = (TextView) popWindow
+		pwDeleteTV = (TextView) popWindow
 				.findViewById(R.id.contact_message_pop_up_item_delete);
-		deleteText.setOnClickListener(mDeleteButtonListener);
+		pwDeleteTV.setOnClickListener(mDeleteButtonListener);
 	}
 
 	@Override
@@ -322,7 +341,7 @@ public class MessageBodyView extends LinearLayout {
 		}
 
 		TextView et = new TextView(this.getContext());
-		et.setOnClickListener(imageMessageClickListener);
+		et.setOnClickListener(messageClickListener);
 		et.setBackgroundColor(Color.TRANSPARENT);
 		et.setOnLongClickListener(messageLongClickListener);
 		et.setSelected(false);
@@ -331,17 +350,17 @@ public class MessageBodyView extends LinearLayout {
 				LinearLayout.LayoutParams.WRAP_CONTENT);
 		mContentContainer.addView(et, ll);
 		List<VMessageAbstractItem> items = mMsg.getItems();
-		if(mMsg.isAutoReply()){
-			et.append("[自动回复]");
+		if (mMsg.isAutoReply()) {
+			et.append(getResources().getString(R.string.contact_message_auto_reply));
 		}
-		
+
 		for (int i = 0; items != null && i < items.size(); i++) {
 			VMessageAbstractItem item = items.get(i);
 			// Add new layout for new line
 			if (item.isNewLine() && et.length() != 0 && !mMsg.isAutoReply()) {
 				et.append("\n");
 			}
-			
+
 			if (item.getType() == VMessageAbstractItem.ITEM_TYPE_TEXT) {
 				et.append(((VMessageTextItem) item).getText());
 			} else if (item.getType() == VMessageAbstractItem.ITEM_TYPE_FACE) {
@@ -410,7 +429,7 @@ public class MessageBodyView extends LinearLayout {
 		if (item.getState() == VMessageAbstractItem.STATE_SENT_FALIED)
 			failedIcon.setVisibility(View.VISIBLE);
 		else
-            failedIcon.setVisibility(View.INVISIBLE);
+			failedIcon.setVisibility(View.INVISIBLE);
 
 		seconds.setVisibility(View.VISIBLE);
 		seconds.setText(item.getSeconds() + "''");
@@ -565,24 +584,18 @@ public class MessageBodyView extends LinearLayout {
 				}
 
 				pw.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-				if (messageType == MESSAGE_TYPE_TEXT) {
-					pw.getContentView()
-							.findViewById(R.id.contact_message_pop_up_item_copy)
-							.setVisibility(View.VISIBLE);
-				}
+				if (messageType == MESSAGE_TYPE_TEXT)
+					pwCopyTV.setVisibility(View.VISIBLE);
 
 				if (failedIcon.getVisibility() == View.VISIBLE) {
 					if (mMsg.isLocal()) {
-						pw.getContentView()
-								.findViewById(
-										R.id.contact_message_pop_up_item_resend)
-								.setVisibility(View.VISIBLE);
+						pwResendTV.setVisibility(View.VISIBLE);
 					} else {
-						pw.getContentView()
-								.findViewById(
-										R.id.contact_message_pop_up_item_redownload)
-								.setVisibility(View.VISIBLE);
+						pwReDownloadTV.setVisibility(View.VISIBLE);
 					}
+				} else {
+					pwResendTV.setVisibility(View.GONE);
+					pwResendTV.setVisibility(View.GONE);
 				}
 
 				int viewWidth = anchor.getMeasuredWidth();
@@ -733,7 +746,8 @@ public class MessageBodyView extends LinearLayout {
 				lastUpdateTime = System.currentTimeMillis();
 			} else {
 				long sec = (System.currentTimeMillis() - lastUpdateTime);
-				vfi.setSpeed(sec == 0 ? 0 : ((vfi.getDownloadedSize() / sec) * 1000));
+				vfi.setSpeed(sec == 0 ? 0
+						: ((vfi.getDownloadedSize() / sec) * 1000));
 			}
 			speed.setText(vfi.getSpeedStr());
 			float percent = (float) ((double) vfi.getDownloadedSize() / (double) vfi
@@ -804,28 +818,26 @@ public class MessageBodyView extends LinearLayout {
 					.setImageResource(R.drawable.message_file_download_button);
 			showProgressLayout = true;
 		} else if (vfi.getState() == VMessageAbstractItem.STATE_FILE_SENT_FALIED) {
-            // 区分上传与发送
-            if (vfi.getVm().getMsgCode() == V2GlobalEnum.GROUP_TYPE_CROWD)
-                strState = getContext()
-                        .getResources()
-                        .getText(
-                                R.string.contact_message_file_item_upload_failed)
-                        .toString();
-            else
-                strState = getContext()
-                        .getResources()
-                        .getText(
-                                R.string.contact_message_file_item_sent_failed)
-                        .toString();
+			// 区分上传与发送
+			if (vfi.getVm().getMsgCode() == V2GlobalEnum.GROUP_TYPE_CROWD)
+				strState = getContext()
+						.getResources()
+						.getText(
+								R.string.contact_message_file_item_upload_failed)
+						.toString();
+			else
+				strState = getContext()
+						.getResources()
+						.getText(R.string.contact_message_file_item_sent_failed)
+						.toString();
 			// Show failed icon
 			failedIcon.setVisibility(View.VISIBLE);
 			actionButton.setVisibility(View.GONE);
 		} else if (vfi.getState() == VMessageAbstractItem.STATE_FILE_DOWNLOADED_FALIED) {
-            strState = getContext()
-                    .getResources()
-                    .getText(
-                            R.string.contact_message_file_item_download_failed)
-                    .toString();
+			strState = getContext()
+					.getResources()
+					.getText(R.string.contact_message_file_item_download_failed)
+					.toString();
 			// Show failed icon
 			failedIcon.setVisibility(View.VISIBLE);
 			actionButton.setVisibility(View.GONE);
@@ -886,30 +898,39 @@ public class MessageBodyView extends LinearLayout {
 			VMessageFileItem item = (VMessageFileItem) view.getTag();
 
 			if (callback != null) {
-				if (item.getState() == VMessageFileItem.STATE_FILE_UNDOWNLOAD) {
-					callback.requestDownloadFile(view, item.getVm(), item);
-					item.setState(VMessageFileItem.STATE_FILE_DOWNLOADING);
-				} else if (item.getState() == VMessageFileItem.STATE_FILE_SENDING) {
-					callback.requestPauseTransFile(view, item.getVm(), item);
-					item.setState(VMessageFileItem.STATE_FILE_PAUSED_SENDING);
-				} else if (item.getState() == VMessageFileItem.STATE_FILE_PAUSED_SENDING) {
-					callback.requestResumeTransFile(view, item.getVm(), item);
-					item.setState(VMessageFileItem.STATE_FILE_SENDING);
-				} else if (item.getState() == VMessageFileItem.STATE_FILE_DOWNLOADING) {
-					callback.requestPauseDownloadFile(view, item.getVm(), item);
-					item.setState(VMessageFileItem.STATE_FILE_PAUSED_DOWNLOADING);
-				} else if (item.getState() == VMessageFileItem.STATE_FILE_PAUSED_DOWNLOADING) {
-					callback.requestResumeDownloadFile(view, item.getVm(), item);
-					item.setState(VMessageFileItem.STATE_FILE_DOWNLOADING);
+				if(mMsg.getMsgCode() == V2GlobalEnum.GROUP_TYPE_CROWD){
+					if(item.getState() == VMessageAbstractItem.STATE_FILE_SENT)
+						callback.onCrowdFileMessageClicked(CrowdFileActivityType.CROWD_FILE_ACTIVITY);
+					else if(item.getState() == VMessageAbstractItem.STATE_FILE_DOWNLOADING || 
+							item.getState() == VMessageAbstractItem.STATE_FILE_SENDING)
+						callback.onCrowdFileMessageClicked(CrowdFileActivityType.CROWD_FILE_UPLOING_ACTIVITY);
+				}
+				else{
+					if (item.getState() == VMessageFileItem.STATE_FILE_UNDOWNLOAD) {
+						callback.requestDownloadFile(view, item.getVm(), item);
+						item.setState(VMessageFileItem.STATE_FILE_DOWNLOADING);
+					} else if (item.getState() == VMessageFileItem.STATE_FILE_SENDING) {
+						callback.requestPauseTransFile(view, item.getVm(), item);
+						item.setState(VMessageFileItem.STATE_FILE_PAUSED_SENDING);
+					} else if (item.getState() == VMessageFileItem.STATE_FILE_PAUSED_SENDING) {
+						callback.requestResumeTransFile(view, item.getVm(), item);
+						item.setState(VMessageFileItem.STATE_FILE_SENDING);
+					} else if (item.getState() == VMessageFileItem.STATE_FILE_DOWNLOADING) {
+						callback.requestPauseDownloadFile(view, item.getVm(), item);
+						item.setState(VMessageFileItem.STATE_FILE_PAUSED_DOWNLOADING);
+					} else if (item.getState() == VMessageFileItem.STATE_FILE_PAUSED_DOWNLOADING) {
+						callback.requestResumeDownloadFile(view, item.getVm(), item);
+						item.setState(VMessageFileItem.STATE_FILE_DOWNLOADING);
+					}
+					MessageLoader.updateFileItemState(getContext(), item);
+					updateView(item);
 				}
 			}
-			MessageLoader.updateFileItemState(getContext(), item);
-			updateView(item);
 		}
 
 	};
 
-	private OnClickListener imageMessageClickListener = new OnClickListener() {
+	private OnClickListener messageClickListener = new OnClickListener() {
 
 		@Override
 		public void onClick(View anchor) {
@@ -918,6 +939,7 @@ public class MessageBodyView extends LinearLayout {
 				List<VMessageImageItem> vl = mMsg.getImageItems();
 				if (vl != null && vl.size() > 0) {
 					callback.onMessageClicked(mMsg);
+					return ;
 				}
 
 				List<VMessageAudioItem> al = mMsg.getAudioItems();
@@ -929,11 +951,13 @@ public class MessageBodyView extends LinearLayout {
 						callback.requestPlayAudio(anchor, mMsg, audioItem);
 						audioItem.setPlaying(true);
 					}
+					return ;
 				}
 
 				List<VMessageLinkTextItem> linkItems = mMsg.getLinkItems();
 				if (linkItems != null && linkItems.size() > 0) {
 					callback.onMessageClicked(mMsg);
+					return ;
 				}
 			}
 		}
@@ -982,18 +1006,20 @@ public class MessageBodyView extends LinearLayout {
 					} else {
 						if (mMsg.getItems().size() > 0
 								&& mMsg.getItems().get(0).getType() == VMessageFileItem.ITEM_TYPE_FILE) {
-                            mMsg.setState(VMessageAbstractItem.STATE_NORMAL);
-                            VMessageFileItem fileItem = (VMessageFileItem) mMsg
+							mMsg.setState(VMessageAbstractItem.STATE_NORMAL);
+							VMessageFileItem fileItem = (VMessageFileItem) mMsg
 									.getItems().get(0);
-                            callback.requestDownloadFile(fileRootView, mMsg,
+							callback.requestDownloadFile(fileRootView, mMsg,
 									fileItem);
-                            fileItem.setState(VMessageAbstractItem.STATE_FILE_DOWNLOADING);
-                            fileItem.setDownloadedSize(0);
-                            updateFailedFlag(false);
-                            updateFileItemView(fileItem, fileRootView);
-                            MessageLoader.updateFileItemState(getContext(), fileItem);
-                            MessageLoader.updateChatMessageState(getContext(), mMsg);
-                        }
+							fileItem.setState(VMessageAbstractItem.STATE_FILE_DOWNLOADING);
+							fileItem.setDownloadedSize(0);
+							updateFailedFlag(false);
+							updateFileItemView(fileItem, fileRootView);
+							MessageLoader.updateFileItemState(getContext(),
+									fileItem);
+							MessageLoader.updateChatMessageState(getContext(),
+									mMsg);
+						}
 					}
 				}
 			} else {

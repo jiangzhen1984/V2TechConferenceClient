@@ -39,5 +39,6 @@
     <string name="contact_message_send_file">文件</string>
     <string name="contact_message_send_image">图片</string>
     <string name="contact_message_expression">表情</string>
+    <string name="contact_message_auto_reply">[自动回复]</string>
     <color name="message_panel_bg">#ffffff</color>
 </resources>

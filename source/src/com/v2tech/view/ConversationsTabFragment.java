@@ -1288,7 +1288,15 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 			ret = Conversation.READ_FLAG_UNREAD;
 		}
 
-		if (mUnreadConvList.size() > 0) {
+		boolean isUnread = false;
+		for (ScrollItem item : mItemList) {
+			if(item.cov.getReadFlag() == Conversation.READ_FLAG_UNREAD){
+				isUnread = true;
+				break;
+			}
+		}
+		
+		if (mUnreadConvList.size() > 0 && isUnread) {
 			notificationListener.updateNotificator(mCurrentTabFlag, true);
 		} else {
 			notificationListener.updateNotificator(mCurrentTabFlag, false);

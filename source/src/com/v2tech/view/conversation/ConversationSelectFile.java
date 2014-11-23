@@ -84,6 +84,7 @@ public class ConversationSelectFile extends Activity {
 	private ImageListAdapter imageAdapter;
 	private String type;
 	private long transing;
+	private long uid;
 	private int mScreenHeight;
 	private int mScreenWidth;
 	private Dialog mDialog;
@@ -182,6 +183,7 @@ public class ConversationSelectFile extends Activity {
 			mCheckedList = new ArrayList<FileInfoBean>();
 		type = intent.getStringExtra("type");
 		transing = getIntent().getLongExtra("transing", -1);
+		uid = getIntent().getLongExtra("uid", -1);
 		// 创建初始对象
 		mCheckedNameList = new ArrayList<String>();
 		service = Executors.newCachedThreadPool();
@@ -648,7 +650,7 @@ public class ConversationSelectFile extends Activity {
 				bitmapMapping.put(bit, holder);
 			}
 
-			if (mFileLists.get(position).isCheck == ITEM_CHECKED) {
+			if (fb.isCheck == ITEM_CHECKED) {
 				holder.fileCheck.setChecked(true);
 				holder.fileCheck.setVisibility(View.VISIBLE);
 			} else {
@@ -768,14 +770,25 @@ public class ConversationSelectFile extends Activity {
 			public void onClick(View v) {
 				
 				isSended = false;
-				mCheckedList.clear();
-                mCheckedNameList.clear();
-				updateFileItems(mCurrentPath);
+				if(mCheckedList != null)
+					mCheckedList.clear();
+				if(mCheckedNameList != null)
+					mCheckedNameList.clear();
 				selectedFileSize.setText("已选0.0K");
 				sendButton.setText("发送( 0 )");
 				changeSendUnable();
-				adapter.notifyDataSetChanged();
 				dialog.dismiss();
+				if(type.equals("image")){
+					for (FileInfoBean bean : mFileLists) {
+						if(bean.isCheck == ITEM_CHECKED)
+							bean.isCheck = ITEM_UNCHECKED;
+					}
+					imageAdapter.notifyDataSetChanged();
+				}
+				else{
+					updateFileItems(mCurrentPath);
+					adapter.notifyDataSetChanged();
+				}
 			}
 		});
 		
@@ -904,7 +917,12 @@ public class ConversationSelectFile extends Activity {
 				changeSendUnable();
 			}
 		} else {
-			
+			Integer transing = GlobalConfig.mTransingFiles.get(uid);
+			if(transing == null){
+				transing = 0;
+				GlobalConfig.mTransingFiles.put(uid, transing);
+			}
+			V2Log.e(TAG, "当前正在传输的文件个数是：" + transing);
 			if(transing + mCheckedList.size() > MAX_TRANS_FILE_SIZE){
 				Toast.makeText(getApplicationContext(), "发送文件个数已达上限，当前正在传输的文件数量已达10个", Toast.LENGTH_LONG).show();
 				return ;
