@@ -116,7 +116,7 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class ConversationActivity extends Activity {
+public class ConversationP2PTextActivity extends Activity {
 
 	private final int START_LOAD_MESSAGE = 1;
 	private final int LOAD_MESSAGE = 2;
@@ -1402,7 +1402,7 @@ public class ConversationActivity extends Activity {
 			// startActivityForResult(
 			// Intent.createChooser(intent, "Select Picture"),
 			// SELECT_PICTURE_CODE);
-			Intent intent = new Intent(ConversationActivity.this,
+			Intent intent = new Intent(ConversationP2PTextActivity.this,
 					ConversationSelectImage.class);
 			startActivityForResult(intent, SELECT_PICTURE_CODE);
 		}
@@ -1467,11 +1467,11 @@ public class ConversationActivity extends Activity {
 			if (SPUtil.checkCurrentAviNetwork(mContext)) {
 				Intent intent = null;
 				if (currentConversationViewType == V2GlobalEnum.GROUP_TYPE_USER) {
-					intent = new Intent(ConversationActivity.this,
+					intent = new Intent(ConversationP2PTextActivity.this,
 							ConversationSelectFileEntry.class);
 					intent.putExtra("uid", user2Id);
 				} else if (currentConversationViewType == V2GlobalEnum.GROUP_TYPE_CROWD) {
-					intent = new Intent(ConversationActivity.this,
+					intent = new Intent(ConversationP2PTextActivity.this,
 							ConversationSelectFile.class);
 					intent.putExtra("type", "crowdFile");
 				} else {

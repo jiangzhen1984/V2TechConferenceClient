@@ -37,6 +37,7 @@ import com.v2tech.vo.ContactGroup;
 import com.v2tech.view.JNIService;
 import com.v2tech.view.MainActivity;
 import com.v2tech.view.MainApplication;
+import com.v2tech.view.bo.GroupUserObject;
 import com.v2tech.view.contacts.add.AuthenticationActivity;
 import com.v2tech.view.contacts.add.FriendManagementActivity;
 import com.v2tech.view.widget.MarqueeTextView;
@@ -226,6 +227,7 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 					i.setClass(ContactDetail2.this,
 							FriendManagementActivity.class);
 					i.putExtra("uid", mUid);
+					i.putExtra("cause", "ContactDetail2");
 					ContactDetail2.this.startActivity(i);
 					break;
 				case 1:
@@ -627,16 +629,16 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 			} else if (action
 					.equals(JNIService.JNI_BROADCAST_GROUP_USER_REMOVED)) {
 
-//				GroupUserObject obj = arg1.getParcelableExtra("obj");
-//				if (obj.getmUserId() != u.getmUserId()) {
-//					return;
-//				}
-//
-//				if (obj.getmType() == GroupType.CONTACT.intValue()) {
-//					belongs = null;
-//					isRelation = false;
-//					updateContactGroup();
-//				}
+				GroupUserObject obj = arg1.getParcelableExtra("obj");
+				if (obj.getmUserId() != u.getmUserId()) {
+					return;
+				}
+
+				if (obj.getmType() == GroupType.CONTACT.intValue()) {
+					belongs = null;
+					isRelation = false;
+					updateContactGroup();
+				}
 			}
 
 		}

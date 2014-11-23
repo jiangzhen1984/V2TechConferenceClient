@@ -14,6 +14,8 @@ import v2av.VideoRecorder;
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.NotificationManager;
+import android.bluetooth.BluetoothHeadset;
+import android.bluetooth.BluetoothProfile;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -209,6 +211,7 @@ public class VideoActivityV2 extends Activity {
 	private int mContentHeight = -1;
 
 	private AudioManager audioManager;
+	boolean isBluetoothHeadsetConnected = false;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -311,7 +314,8 @@ public class VideoActivityV2 extends Activity {
 
 		audioManager = (AudioManager) mContext
 				.getSystemService(Context.AUDIO_SERVICE);
-
+		isBluetoothHeadsetConnected = audioManager.isBluetoothA2dpOn();
+		audioManager.setMode(AudioManager.MODE_IN_CALL);
 		// Broadcast for user joined conference, to inform that quit P2P
 		// conversation
 		broadcastForJoined();
@@ -324,8 +328,11 @@ public class VideoActivityV2 extends Activity {
 		if (mServiceBound) {
 			suspendOrResume(true);
 		} else {
-			// Set audio use speaker phone
-			updateAudioSpeaker(true);
+
+			headsetAndBluetoothHeadsetHandle();
+			
+//			// Set audio use speaker phone
+//			updateAudioSpeaker(true);
 		}
 		NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 		// mId allows you to update the notification later on.
@@ -374,9 +381,10 @@ public class VideoActivityV2 extends Activity {
 		filter.addCategory(PublicIntent.DEFAULT_CATEGORY);
 		filter.addAction(JNIService.JNI_BROADCAST_USER_STATUS_NOTIFICATION);
 		filter.addAction(JNIService.JNI_BROADCAST_CONNECT_STATE_NOTIFICATION);
-
 		filter.addAction(Intent.ACTION_SCREEN_OFF);
 		filter.addAction(Intent.ACTION_USER_PRESENT);
+		filter.addAction(Intent.ACTION_HEADSET_PLUG);
+		filter.addAction(BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED);
 
 		mContext.registerReceiver(mConfUserChangeReceiver, filter);
 
@@ -1066,6 +1074,33 @@ public class VideoActivityV2 extends Activity {
 
 			} else if (Intent.ACTION_USER_PRESENT.equals(intent.getAction())) {
 
+			} else if (Intent.ACTION_HEADSET_PLUG.equals(intent.getAction())) {
+				if (intent.hasExtra("state")) {
+					int state = intent.getIntExtra("state", 0);
+					if (state == 1) {
+						V2Log.i(TAG, "插入耳机");
+						headsetAndBluetoothHeadsetHandle();
+					} else if (state == 0) {
+						V2Log.i(TAG, "拔出耳机");
+						headsetAndBluetoothHeadsetHandle();
+					}
+				}
+
+			} else if (BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED
+					.equals(intent.getAction())) {
+
+				int state = intent
+						.getIntExtra(BluetoothProfile.EXTRA_STATE, -1);
+
+				if (state == BluetoothProfile.STATE_CONNECTED) {
+					isBluetoothHeadsetConnected = true;
+					V2Log.i(TAG, "蓝牙耳机已连接");
+					headsetAndBluetoothHeadsetHandle();
+				} else if (state == BluetoothProfile.STATE_DISCONNECTED) {
+					V2Log.i("TAG", "蓝牙耳机已断开");
+					isBluetoothHeadsetConnected = false;
+					headsetAndBluetoothHeadsetHandle();
+				}
 			}
 
 		}
@@ -1257,7 +1292,8 @@ public class VideoActivityV2 extends Activity {
 		if (mServiceBound) {
 			suspendOrResume(false);
 		} else {
-			updateAudioSpeaker(false);
+			headsetAndBluetoothHeadsetHandle();
+			//updateAudioSpeaker(false);
 		}
 	}
 
@@ -1330,9 +1366,10 @@ public class VideoActivityV2 extends Activity {
 		// MessageLoader.deleteGroupMessage(mContext,
 		// V2GlobalEnum.GROUP_TYPE_CONFERENCE , conf.getId());
 		mVideoHandler = null;
-
-		audioManager.setMode(AudioManager.MODE_NORMAL);
+		
 		audioManager.setSpeakerphoneOn(false);
+		audioManager.setMode(AudioManager.MODE_NORMAL);
+
 	}
 
 	@Override
@@ -1359,17 +1396,17 @@ public class VideoActivityV2 extends Activity {
 	 * @param flag
 	 *            true means start, false means on stop
 	 */
-	private void updateAudioSpeaker(boolean flag) {
-		audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
-
-		GlobalState gs = GlobalHolder.getInstance().getGlobalState();
-		if (gs.isBluetoothHeadsetPluged() || gs.isWiredHeadsetPluged()) {
-			audioManager.setSpeakerphoneOn(false);
-		} else {
-			audioManager.setSpeakerphoneOn(true);
-		}
-
-	}
+//	private void updateAudioSpeaker(boolean flag) {
+//		audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
+//
+//		GlobalState gs = GlobalHolder.getInstance().getGlobalState();
+//		if (gs.isBluetoothHeadsetPluged() || gs.isWiredHeadsetPluged()) {
+//			audioManager.setSpeakerphoneOn(false);
+//		} else {
+//			audioManager.setSpeakerphoneOn(true);
+//		}
+//
+//	}
 
 	private void showQuitDialog(String content) {
 		if (mQuitDialog == null) {
@@ -1453,7 +1490,8 @@ public class VideoActivityV2 extends Activity {
 			// close local camera
 			closeLocalCamera();
 		}
-		updateAudioSpeaker(resume);
+		headsetAndBluetoothHeadsetHandle();
+		//updateAudioSpeaker(resume);
 	}
 
 	private void updateAllRemoteDevice(int tag) {
@@ -2427,8 +2465,18 @@ public class VideoActivityV2 extends Activity {
 				break;
 			}
 		}
+		
 	}
 
+	private void headsetAndBluetoothHeadsetHandle() {
+		if (audioManager.isWiredHeadsetOn() || isBluetoothHeadsetConnected) {
+			audioManager.setSpeakerphoneOn(false);
+			V2Log.i("ConversationP2PAVActivity", "切换到耳机或听筒");
+		} else {
+			audioManager.setSpeakerphoneOn(true);
+		}
+	}
+	
 	// @Override
 	// public boolean dispatchTouchEvent(MotionEvent ev) {
 	// View v = getCurrentFocus();

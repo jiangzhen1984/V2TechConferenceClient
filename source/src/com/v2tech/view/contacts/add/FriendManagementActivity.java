@@ -65,6 +65,13 @@ public class FriendManagementActivity extends Activity {
 			mUid = this.getIntent().getLongExtra("remoteUserID", 0);
 			tvRightTextView.setText("完成");
 			tvBack.setText("返回");
+		} else if ((startedCause != null)
+				&& startedCause.equals("ContactDetail2")) {
+			mUid = this.getIntent().getLongExtra("uid", 0);
+			verificationInfo = this.getIntent().getStringExtra(
+					"verificationInfo");
+			tvRightTextView.setText("发送");
+			tvBack.setText("个人资料");
 		} else {
 			mUid = this.getIntent().getLongExtra("uid", 0);
 			verificationInfo = this.getIntent().getStringExtra(
@@ -150,7 +157,7 @@ public class FriendManagementActivity extends Activity {
 							AddFriendHistroysHandler
 									.addOtherNeedAuthentication(
 											getApplicationContext(),
-											detailUser, verificationInfo , true);
+											detailUser, verificationInfo, true);
 							contactService.addContact(new FriendGroup(
 									selectGroupID, ""), detailUser,
 									verificationInfo, commentNameET.getText()

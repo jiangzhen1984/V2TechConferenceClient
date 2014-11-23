@@ -210,8 +210,7 @@ public class JNIService extends Service implements
 		ImRequest.getInstance(this.getApplicationContext()).addCallback(mImCB);
 
 		mGRCB = new GroupRequestCB(mCallbackHandler);
-		GroupRequest.getInstance().addCallback(
-				mGRCB);
+		GroupRequest.getInstance().addCallback(mGRCB);
 
 		mVRCB = new VideoRequestCB(mCallbackHandler);
 		VideoRequest.getInstance(this.getApplicationContext()).addCallback(
@@ -418,7 +417,7 @@ public class JNIService extends Service implements
 					}
 					V2Log.w("  group:" + go.gId + "  user size:" + lu.size()
 							+ "  " + group);
-					
+
 					if (!noNeedBroadcast) {
 						V2Log.d(TAG,
 								"ConversationTabFragment no builed successfully! Need to delay sending , type is ："
@@ -585,7 +584,8 @@ public class JNIService extends Service implements
 				return;
 			}
 			User u = convertUser(user);
-			Message.obtain(mCallbackHandler, JNI_UPDATE_USER_INFO,u).sendToTarget();
+			Message.obtain(mCallbackHandler, JNI_UPDATE_USER_INFO, u)
+					.sendToTarget();
 		}
 
 		@Override
@@ -776,7 +776,8 @@ public class JNIService extends Service implements
 			if (type == Type.CROWD_APPLICATION) {
 				crowdMsg = MessageBuilder.queryApplyQualMessageByUserId(user
 						.getmUserId());
-				if (crowdMsg != null && !(crowdMsg instanceof VMessageQualificationApplicationCrowd)) {
+				if (crowdMsg != null
+						&& !(crowdMsg instanceof VMessageQualificationApplicationCrowd)) {
 					MessageBuilder
 							.deleteQualMessage(mContext, crowdMsg.getId());
 					crowdMsg = null;
@@ -816,7 +817,8 @@ public class JNIService extends Service implements
 					throw new RuntimeException("Unkown type");
 				}
 
-				crowdMsg.setmTimestamp(new Date(GlobalConfig.getGlobalServerTime()));
+				crowdMsg.setmTimestamp(new Date(GlobalConfig
+						.getGlobalServerTime()));
 				crowdMsg.setReadState(VMessageQualification.ReadState.UNREAD);
 				Uri uri = MessageBuilder.saveQualicationMessage(mContext,
 						crowdMsg);
@@ -902,6 +904,7 @@ public class JNIService extends Service implements
 			}
 		}
 
+		// 20141123 1
 		@Override
 		public void OnDelGroupUserCallback(int groupType, long nGroupID,
 				long nUserID) {
@@ -940,38 +943,43 @@ public class JNIService extends Service implements
 				intent.putExtra("uid", newUser.getmUserId());
 				intent.putExtra("gid", nGroupID);
 				sendOrderedBroadcast(intent, null);
-			} else if(gType == GroupType.CHATING){
+			} else if (gType == GroupType.CHATING) {
+
 				long id = -1;
-				if (user.uid != GlobalHolder.getInstance()
-								.getCurrentUserId()) {
-					if(CrowdGroupService.isLocalInvite){
-						id = MessageBuilder.updateQualicationMessageState(nGroupID,
-							user.uid, new GroupQualicationState(
-									Type.CROWD_APPLICATION,
-									QualificationState.BE_ACCEPTED, null , ReadState.UNREAD , true));
-					}
-					else{
-						Group group = GlobalHolder.getInstance().getGroupById(groupType, nGroupID);
-						if(group == null){
-							V2Log.e(TAG, "OnAddGroupUserInfoCallback --> update crowd qualication message failed..group is null");
-							return ;
+				if (user.uid != GlobalHolder.getInstance().getCurrentUserId()) {
+					if (CrowdGroupService.isLocalInvite) {
+						id = MessageBuilder.updateQualicationMessageState(
+								nGroupID, user.uid, new GroupQualicationState(
+										Type.CROWD_APPLICATION,
+										QualificationState.BE_ACCEPTED, null,
+										ReadState.UNREAD, true));
+					} else {
+						Group group = GlobalHolder.getInstance().getGroupById(
+								groupType, nGroupID);
+						if (group == null) {
+							V2Log.e(TAG,
+									"OnAddGroupUserInfoCallback --> update crowd qualication message failed..group is null");
+							return;
 						}
-						
-						if(group.getOwnerUser().getmUserId() == GlobalHolder.getInstance()
-								.getCurrentUserId()){
-							id = MessageBuilder.updateQualicationMessageState(nGroupID,
-									user.uid, new GroupQualicationState(
+
+						if (group.getOwnerUser().getmUserId() == GlobalHolder
+								.getInstance().getCurrentUserId()) {
+							id = MessageBuilder.updateQualicationMessageState(
+									nGroupID, user.uid,
+									new GroupQualicationState(
 											Type.CROWD_APPLICATION,
-											QualificationState.ACCEPTED, null , ReadState.UNREAD , false));
+											QualificationState.ACCEPTED, null,
+											ReadState.UNREAD, false));
 						}
 					}
 				}
-				
-				if(id == -1){
-					V2Log.e(TAG, "OnAddGroupUserInfoCallback --> update crowd qualication message failed..");
-					return ;
+
+				if (id == -1) {
+					V2Log.e(TAG,
+							"OnAddGroupUserInfoCallback --> update crowd qualication message failed..");
+					return;
 				}
-							
+
 				Intent intent = new Intent();
 				intent.setAction(JNIService.JNI_BROADCAST_NEW_QUALIFICATION_MESSAGE);
 				intent.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
@@ -990,27 +998,28 @@ public class JNIService extends Service implements
 
 		@Override
 		public void OnAcceptApplyJoinGroup(V2Group group) {
-			if (group == null ||group.creator == null) {
+			if (group == null || group.creator == null) {
 				V2Log.e(TAG,
 						"OnAcceptApplyJoinGroup : May receive accept apply join message failed.. get null V2Group Object");
 				return;
 			}
 
-			CrowdGroup g = (CrowdGroup) GlobalHolder.getInstance().getGroupById(
-					V2GlobalEnum.GROUP_TYPE_CROWD , group.id);
-			if(g == null){
-				User user = GlobalHolder.getInstance().getUser(group.creator.uid);
-				g = new CrowdGroup(group.id,
-					group.name, user, null);
+			CrowdGroup g = (CrowdGroup) GlobalHolder.getInstance()
+					.getGroupById(V2GlobalEnum.GROUP_TYPE_CROWD, group.id);
+			if (g == null) {
+				User user = GlobalHolder.getInstance().getUser(
+						group.creator.uid);
+				g = new CrowdGroup(group.id, group.name, user, null);
 				g.setBrief(group.brief);
 				g.setAnnouncement(group.announce);
 				GlobalHolder.getInstance().addGroupToList(
 						GroupType.CHATING.intValue(), g);
 			}
-			
-			long id = MessageBuilder.updateQualicationMessageState(group, new GroupQualicationState(
-							Type.CROWD_INVITATION,
-							QualificationState.BE_ACCEPTED, null , ReadState.UNREAD , false));
+
+			long id = MessageBuilder.updateQualicationMessageState(group,
+					new GroupQualicationState(Type.CROWD_INVITATION,
+							QualificationState.BE_ACCEPTED, null,
+							ReadState.UNREAD, false));
 			if (id == -1) {
 				V2Log.e(TAG,
 						"OnAcceptApplyJoinGroup : Update Qualication Message to Database failed.. return -1 , group id is : "
@@ -1039,9 +1048,10 @@ public class JNIService extends Service implements
 			}
 
 			long id = MessageBuilder.updateQualicationMessageState(
-                    parseSingleCrowd,
-					new GroupQualicationState(Type.CROWD_INVITATION,
-							QualificationState.BE_REJECT, reason , ReadState.UNREAD , false));
+					parseSingleCrowd, new GroupQualicationState(
+							Type.CROWD_INVITATION,
+							QualificationState.BE_REJECT, reason,
+							ReadState.UNREAD, false));
 			if (id == -1) {
 				V2Log.e(TAG,
 						"OnRefuseApplyJoinGroup : Update Qualication Message to Database failed.. return -1 , group id is : "
@@ -1086,7 +1096,8 @@ public class JNIService extends Service implements
 										com.v2tech.vo.VMessageQualification.Type
 												.fromInt(obj.qualicationType),
 										com.v2tech.vo.VMessageQualification.QualificationState
-												.fromInt(obj.state), obj.reason , ReadState.UNREAD , false));
+												.fromInt(obj.state),
+										obj.reason, ReadState.UNREAD, false));
 				if (id == -1) {
 					V2Log.e(TAG,
 							"OnRefuseInviteJoinGroup --> update refuse Invite join group failed... !");
@@ -1099,40 +1110,42 @@ public class JNIService extends Service implements
 				sendOrderedBroadcast(intent, null);
 			}
 		}
-		
+
 		@Override
 		public void onAddGroupInfo(V2Group crowd) {
-			if(crowd == null)
-				return ;
-			
-			if(crowd.creator == null)
-				return ;
-			
-			if(isAcceptApply){
+			if (crowd == null)
+				return;
+
+			if (crowd.creator == null)
+				return;
+
+			if (isAcceptApply) {
 				isAcceptApply = false;
-				return ;
+				return;
 			}
-			
-			if (crowd.type == V2Group.TYPE_CROWD && GlobalHolder.getInstance().getCurrentUserId() != crowd.owner.uid) {
-				V2Log.e(TAG , "onAddGroupInfo--> add a new group , id is : "
+
+			if (crowd.type == V2Group.TYPE_CROWD
+					&& GlobalHolder.getInstance().getCurrentUserId() != crowd.owner.uid) {
+				V2Log.e(TAG, "onAddGroupInfo--> add a new group , id is : "
 						+ crowd.id);
-				User user = GlobalHolder.getInstance().getUser(crowd.creator.uid);
-				if(user == null){
-					V2Log.e(TAG , "onAddGroupInfo--> add a new group failed , get user is null , id is : "
-							+ crowd.creator.uid);
-					return ;
+				User user = GlobalHolder.getInstance().getUser(
+						crowd.creator.uid);
+				if (user == null) {
+					V2Log.e(TAG,
+							"onAddGroupInfo--> add a new group failed , get user is null , id is : "
+									+ crowd.creator.uid);
+					return;
 				}
-				CrowdGroup g = new CrowdGroup(crowd.id, crowd.name,
-						user, null);
+				CrowdGroup g = new CrowdGroup(crowd.id, crowd.name, user, null);
 				g.setBrief(crowd.brief);
 				g.setAnnouncement(crowd.announce);
-				GlobalHolder.getInstance().addGroupToList(GroupType.CHATING.intValue(),
-						g);
+				GlobalHolder.getInstance().addGroupToList(
+						GroupType.CHATING.intValue(), g);
 
-				
-				MessageBuilder.updateQualicationMessageState(crowd, new GroupQualicationState(
-								Type.CROWD_INVITATION,
-								QualificationState.ACCEPTED, null , ReadState.UNREAD , false));
+				MessageBuilder.updateQualicationMessageState(crowd,
+						new GroupQualicationState(Type.CROWD_INVITATION,
+								QualificationState.ACCEPTED, null,
+								ReadState.UNREAD, false));
 				Intent i = new Intent();
 				i.setAction(PublicIntent.BROADCAST_NEW_CROWD_NOTIFICATION);
 				i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
@@ -1465,11 +1478,12 @@ public class JNIService extends Service implements
 			List<String> cacheNames = GlobalHolder.getInstance()
 					.getDataBaseTableCacheName();
 			if (!cacheNames.contains(ContentDescriptor.HistoriesMessage.NAME)) {
-				V2Log.d(TAG, "OnSendChatResult --> update database failed...beacuse table isn't exist! name is : " 
-						 + ContentDescriptor.HistoriesMessage.NAME);
-				return ;
+				V2Log.d(TAG,
+						"OnSendChatResult --> update database failed...beacuse table isn't exist! name is : "
+								+ ContentDescriptor.HistoriesMessage.NAME);
+				return;
 			}
-			
+
 			List<VMessage> messages = MessageLoader.queryMessage(mContext,
 					ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_ID
 							+ "= ? ", new String[] { ind.getUuid() }, null);
@@ -1489,10 +1503,11 @@ public class JNIService extends Service implements
 					}
 				}
 				MessageLoader.updateChatMessageState(mContext, messages.get(0));
+			} else {
+				V2Log.e(TAG,
+						"Resend message failed...update to database failed...uuid is : "
+								+ ind.getUuid());
 			}
-            else{
-                V2Log.e(TAG , "Resend message failed...update to database failed...uuid is : " + ind.getUuid());
-            }
 
 			if (ind.getRet() == SendingResultJNIObjectInd.Result.FAILED) {
 				Intent i = new Intent();
@@ -1590,13 +1605,13 @@ public class JNIService extends Service implements
 		public FileRequestCB(JNICallbackHandler mCallbackHandler) {
 			this.mCallbackHandler = mCallbackHandler;
 		}
-		
+
 		@Override
 		public void OnFileTransBegin(String szFileID, int nTransType,
 				long nFileSize) {
-			updateTransFileState(szFileID , true);
+			updateTransFileState(szFileID, true);
 		}
-		
+
 		@Override
 		public void OnFileTransInvite(FileJNIObject file) {
 			User fromUser = GlobalHolder.getInstance().getUser(file.user.uid);
@@ -1631,8 +1646,8 @@ public class JNIService extends Service implements
 			Log.e(TAG, "OnFileTransEnd updates success : " + updates);
 			vm = null;
 			item = null;
-		
-			updateTransFileState(szFileID , false);
+
+			updateTransFileState(szFileID, false);
 		}
 
 		@Override
@@ -1649,12 +1664,12 @@ public class JNIService extends Service implements
 			Log.e(TAG, "OnFileTransEnd updates success : " + updates);
 			vm = null;
 			item = null;
-			updateTransFileState(szFileID , false);
+			updateTransFileState(szFileID, false);
 		}
 
 		@Override
 		public void OnFileTransCancel(String szFileID) {
-			updateTransFileState(szFileID , false);
+			updateTransFileState(szFileID, false);
 		}
 	}
 
@@ -1674,10 +1689,11 @@ public class JNIService extends Service implements
 				gi.addCategory(JNI_BROADCAST_CATEGROY);
 				mContext.sendBroadcast(gi);
 			}
-			
+
 			for (GroupUserInfoOrig go : delayUserBroadcast) {
-				V2Log.d(TAG, "The delay user broadcast was sending now , type is : "
-						+ go.gType + "-------");
+				V2Log.d(TAG,
+						"The delay user broadcast was sending now , type is : "
+								+ go.gType + "-------");
 				Intent i = new Intent(
 						JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION);
 				i.addCategory(JNI_BROADCAST_CATEGROY);
@@ -1690,24 +1706,26 @@ public class JNIService extends Service implements
 		noNeedBroadcast = true;
 	}
 
-	private void updateTransFileState(String szFileID , boolean isAdd){
-		VMessageFileItem fileItem = MessageLoader.
-				queryFileItemByID(V2GlobalEnum.GROUP_TYPE_USER , szFileID);
-		if(fileItem == null || fileItem.getVm().getToUser() == null){
-			V2Log.d(TAG, "update transing file size failed...file id is : " + szFileID);
-			return ;
+	private void updateTransFileState(String szFileID, boolean isAdd) {
+		VMessageFileItem fileItem = MessageLoader.queryFileItemByID(
+				V2GlobalEnum.GROUP_TYPE_USER, szFileID);
+		if (fileItem == null || fileItem.getVm().getToUser() == null) {
+			V2Log.d(TAG, "update transing file size failed...file id is : "
+					+ szFileID);
+			return;
 		}
-		
+
 		long uid = fileItem.getVm().getToUser().getmUserId();
 		Integer trans = GlobalConfig.mTransingFiles.get(uid);
-		if(isAdd){
+		if (isAdd) {
 			trans = trans + 1;
-			V2Log.e("ConversationSelectFile" , "用户" + uid + "增加了一个文件传输，当前正在传输个数是：" + trans);
-		}
-		else{
+			V2Log.e("ConversationSelectFile", "用户" + uid
+					+ "增加了一个文件传输，当前正在传输个数是：" + trans);
+		} else {
 			trans = trans - 1;
-			V2Log.e("ConversationSelectFile" , "用户" + uid + "的一个文件传输完毕，当前正在传输个数是：" + trans);
+			V2Log.e("ConversationSelectFile", "用户" + uid
+					+ "的一个文件传输完毕，当前正在传输个数是：" + trans);
 		}
-		GlobalConfig.mTransingFiles.put(uid , trans);
+		GlobalConfig.mTransingFiles.put(uid, trans);
 	}
 }

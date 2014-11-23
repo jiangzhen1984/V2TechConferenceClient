@@ -153,7 +153,7 @@ public class ConversationP2PAVActivity extends Activity implements
 					public void run() {
 						isSmallWindowVideoLayoutClickEnable = true;
 					}
-				}, 3000);
+				}, 1000);
 			}
 
 			exchangeRemoteVideoAndLocalVideo();
@@ -509,7 +509,7 @@ public class ConversationP2PAVActivity extends Activity implements
 		mAudioSpeakerButton = findViewById(R.id.conversation_fragment_connected_speaker_button);
 		if (mAudioSpeakerButton != null) {
 			mAudioSpeakerButton.setOnClickListener(mAudioSpeakerButtonListener);
-			setMAudioSpeakerButtonState();
+			setMAudioSpeakerButtonState(true);
 		}
 
 		View audioHangUpButton = findViewById(R.id.conversation_fragment_connected_hang_up_button);
@@ -1174,6 +1174,8 @@ public class ConversationP2PAVActivity extends Activity implements
 		filter.addAction(JNIService.JNI_BROADCAST_CONNECT_STATE_NOTIFICATION);
 		filter.addAction(Intent.ACTION_HEADSET_PLUG);
 		filter.addAction(BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED);
+		filter.addAction(PublicIntent.BROADCAST_JOINED_CONFERENCE_NOTIFICATION);
+
 		this.registerReceiver(receiver, filter);
 
 		IntentFilter strickFliter = new IntentFilter();
@@ -1219,7 +1221,7 @@ public class ConversationP2PAVActivity extends Activity implements
 		Message.obtain(mLocalHandler, KEY_CANCELLED_LISTNER).sendToTarget();
 	}
 
-	private void headsetAndBluetoothHeadsetHandle() {
+	private void headsetAndBluetoothHeadsetHandle(boolean isInit) {
 		if (uad == null) {
 			return;
 		}
@@ -1232,32 +1234,37 @@ public class ConversationP2PAVActivity extends Activity implements
 			audioManager.setSpeakerphoneOn(false);
 			V2Log.i("ConversationP2PAVActivity", "切换到耳机或听筒");
 		} else {
-			// if (uad.isVideoType()) {
-			audioManager.setSpeakerphoneOn(true);
-			V2Log.i("ConversationP2PAVActivity", "切换到免提");
-			// }
+			if (uad.isVideoType()) {
+				audioManager.setSpeakerphoneOn(true);
+				V2Log.i("ConversationP2PAVActivity", "切换到免提");
+			} else {
+				if (isInit) {
+					audioManager.setSpeakerphoneOn(false);
+				}
+			}
+
 		}
 
 		if (uad.isAudioType()) {
-			setMAudioSpeakerButtonState();
+			setMAudioSpeakerButtonState(isInit);
 		}
 	}
 
-	private void setMAudioSpeakerButtonState() {
+	private void setMAudioSpeakerButtonState(boolean isInit) {
 		if (mAudioSpeakerButton != null) {
 			int drawId;
 			int color;
-			if (audioManager.isWiredHeadsetOn() || isBluetoothHeadsetConnected) {
+			if (audioManager.isWiredHeadsetOn() || isBluetoothHeadsetConnected
+					|| isInit) {
 				mAudioSpeakerButton.setTag("earphone");
 				drawId = R.drawable.message_voice_lounder;
 				color = R.color.fragment_conversation_connected_gray_text_color;
-
 			} else {
 				mAudioSpeakerButton.setTag("speakerphone");
 				drawId = R.drawable.message_voice_lounder_pressed;
 				color = R.color.fragment_conversation_connected_pressed_text_color;
 			}
-			
+
 			TextView speakerPhoneText = (TextView) findViewById(R.id.conversation_fragment_connected_speaker_text);
 			ImageView speakerPhoneImage = (ImageView) findViewById(R.id.conversation_fragment_connected_speaker_image);
 			if (speakerPhoneImage != null) {
@@ -1314,7 +1321,7 @@ public class ConversationP2PAVActivity extends Activity implements
 			stopRingTone();
 			// set state to connected
 			uad.setConnected(true);
-			headsetAndBluetoothHeadsetHandle();
+			headsetAndBluetoothHeadsetHandle(true);
 			chatService.acceptChatting(uad, null);
 			// Remove timer
 			mLocalHandler.removeCallbacks(timeOutMonitor);
@@ -1361,7 +1368,7 @@ public class ConversationP2PAVActivity extends Activity implements
 			// Stop ring tone
 			stopRingTone();
 			uad.setConnected(true);
-			headsetAndBluetoothHeadsetHandle();
+			headsetAndBluetoothHeadsetHandle(true);
 			chatService.acceptChatting(uad, null);
 			// Remove timer
 			mLocalHandler.removeCallbacks(timeOutMonitor);
@@ -1390,18 +1397,10 @@ public class ConversationP2PAVActivity extends Activity implements
 					public void run() {
 						isCameraButtonEnable = true;
 					}
-				}, 3000);
+				}, 1000);
 			}
 			if (testFlag == false) {
 				exchangeRemoteVideoAndLocalVideo();
-			}
-
-			if (mLocalSurface.getVisibility() == View.GONE) {
-				mLocalSurface.setVisibility(View.VISIBLE);
-				mReverseCameraButton.setVisibility(View.GONE);
-			} else {
-				mLocalSurface.setVisibility(View.GONE);
-				mReverseCameraButton.setVisibility(View.GONE);
 			}
 
 			int drawId = R.drawable.conversation_connected_camera_button_pressed;
@@ -1431,6 +1430,16 @@ public class ConversationP2PAVActivity extends Activity implements
 			if (cameraText != null) {
 				cameraText
 						.setTextColor(mContext.getResources().getColor(color));
+			}
+
+			if (mLocalSurface.getVisibility() == View.GONE) {
+				mLocalSurface.setVisibility(View.VISIBLE);
+				mReverseCameraButton.setVisibility(View.VISIBLE);
+				smallWindowVideoLayout.setVisibility(View.VISIBLE);
+			} else {
+				mLocalSurface.setVisibility(View.GONE);
+				mReverseCameraButton.setVisibility(View.GONE);
+				smallWindowVideoLayout.setVisibility(View.GONE);
 			}
 
 		}
@@ -1643,10 +1652,10 @@ public class ConversationP2PAVActivity extends Activity implements
 					int state = intent.getIntExtra("state", 0);
 					if (state == 1) {
 						V2Log.i(TAG_THIS_FILE, "插入耳机");
-						headsetAndBluetoothHeadsetHandle();
+						headsetAndBluetoothHeadsetHandle(false);
 					} else if (state == 0) {
 						V2Log.i(TAG_THIS_FILE, "拔出耳机");
-						headsetAndBluetoothHeadsetHandle();
+						headsetAndBluetoothHeadsetHandle(false);
 					}
 				}
 
@@ -1659,12 +1668,17 @@ public class ConversationP2PAVActivity extends Activity implements
 				if (state == BluetoothProfile.STATE_CONNECTED) {
 					isBluetoothHeadsetConnected = true;
 					V2Log.i(TAG_THIS_FILE, "蓝牙耳机已连接");
-					headsetAndBluetoothHeadsetHandle();
+					headsetAndBluetoothHeadsetHandle(false);
 				} else if (state == BluetoothProfile.STATE_DISCONNECTED) {
 					V2Log.i("TAG_THIS_FILE", "蓝牙耳机已断开");
 					isBluetoothHeadsetConnected = false;
-					headsetAndBluetoothHeadsetHandle();
+					headsetAndBluetoothHeadsetHandle(false);
 				}
+			} else if (PublicIntent.BROADCAST_JOINED_CONFERENCE_NOTIFICATION
+					.equals(action)) {
+				isRejected = true;
+				mLocalHandler.removeCallbacks(timeOutMonitor);
+				hangUp();
 			}
 
 		}
@@ -1753,7 +1767,7 @@ public class ConversationP2PAVActivity extends Activity implements
 							if (videoIsAccepted) {
 								V2Log.d(TAG_THIS_FILE, "对方在接受视频的基础上接受了音频邀请。");
 							} else {
-								headsetAndBluetoothHeadsetHandle();
+								headsetAndBluetoothHeadsetHandle(true);
 								V2Log.d(TAG_THIS_FILE,
 										"对方接受了视频的邀请，我再给对方发一个音频邀请。");
 								// Send audio invitation
@@ -1779,7 +1793,7 @@ public class ConversationP2PAVActivity extends Activity implements
 							}
 
 						} else {
-							headsetAndBluetoothHeadsetHandle();
+							headsetAndBluetoothHeadsetHandle(true);
 							V2Log.d(TAG_THIS_FILE, "对方接受了音频的邀请");
 							// set mute button to enable
 							setMuteButtonDisable(false);
@@ -1853,6 +1867,25 @@ public class ConversationP2PAVActivity extends Activity implements
 				LayoutParams lp = (LayoutParams) v.getLayoutParams();
 				lp.rightMargin = lp.rightMargin - dx;
 				lp.bottomMargin = lp.bottomMargin - dy;
+
+				if (lp.bottomMargin < 0) {
+					lp.bottomMargin = 0;
+				}
+				if (lp.rightMargin < 0) {
+					lp.rightMargin = 0;
+				}
+
+				int width = ((View) v.getParent()).getWidth();
+				int height = ((View) v.getParent()).getHeight();
+
+				if (lp.rightMargin > width - v.getWidth()) {
+					lp.rightMargin = width - v.getWidth();
+				}
+
+				if (lp.bottomMargin > height - v.getHeight()) {
+					lp.bottomMargin = height - v.getHeight();
+				}
+
 				v.setLayoutParams(lp);
 
 				break;

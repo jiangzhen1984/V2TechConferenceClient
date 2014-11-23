@@ -170,6 +170,7 @@ public class ImRequest {
 		
 		for (int i = 0; i < mCallbacks.size(); i++) {
 			Object obj = mCallbacks.get(i).get();
+
 			if (obj != null) {
 				ImRequestCallback callback = (ImRequestCallback) obj;
 				callback.OnUpdateBaseInfoCallback(user);
