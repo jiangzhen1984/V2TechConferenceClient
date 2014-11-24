@@ -1139,13 +1139,13 @@ public class JNIService extends Service implements
 				CrowdGroup g = new CrowdGroup(crowd.id, crowd.name, user, null);
 				g.setBrief(crowd.brief);
 				g.setAnnouncement(crowd.announce);
-				GlobalHolder.getInstance().addGroupToList(
-						GroupType.CHATING.intValue(), g);
+                g.setAuthType(CrowdGroup.AuthType.fromInt(crowd.authType));
+				GlobalHolder.getInstance().addGroupToList(GroupType.CHATING.intValue(),
+						g);
 
-				MessageBuilder.updateQualicationMessageState(crowd,
-						new GroupQualicationState(Type.CROWD_INVITATION,
-								QualificationState.ACCEPTED, null,
-								ReadState.UNREAD, false));
+				MessageBuilder.updateQualicationMessageState(crowd, new GroupQualicationState(
+								Type.CROWD_INVITATION,
+								QualificationState.ACCEPTED, null , ReadState.UNREAD , false));
 				Intent i = new Intent();
 				i.setAction(PublicIntent.BROADCAST_NEW_CROWD_NOTIFICATION);
 				i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);

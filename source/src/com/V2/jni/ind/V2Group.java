@@ -50,6 +50,7 @@ public class V2Group {
 	public int authType;
 	public String brief;
 	public String announce;
+    public int groupSize;
 	
 	//for contact group
 	public boolean isDefault;

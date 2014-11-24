@@ -1,8 +1,10 @@
 package com.v2tech.view.group;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -23,6 +25,7 @@ import com.v2tech.service.jni.JNIResponse;
 import com.v2tech.service.jni.JNIResponse.Result;
 import com.v2tech.view.JNIService;
 import com.v2tech.view.PublicIntent;
+import com.v2tech.view.conversation.MessageAuthenticationActivity;
 import com.v2tech.view.conversation.MessageBuilder;
 import com.v2tech.vo.Crowd;
 import com.v2tech.vo.CrowdGroup;
@@ -47,6 +50,7 @@ public class CrowdApplicationActivity extends Activity {
 	private TextView mCreatorTV;
 	private TextView mBriefTV;
 	private TextView mNoTV;
+	private TextView mNotes;
 	private View mReturnButton;
 	private View mApplicationButton;
 	private View mButtonLy;
@@ -60,11 +64,13 @@ public class CrowdApplicationActivity extends Activity {
 
 	private Crowd crowd;
 	private CrowdGroupService service = new CrowdGroupService();
+    private CrowdApplyBroadcast applyReceiver;
 	private VMessageQualification vq;
 	private State mState = State.DONE;
 	private boolean isInApplicationMode;
 
 	private boolean disableAuth;
+	private boolean isReturnData;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -72,6 +78,7 @@ public class CrowdApplicationActivity extends Activity {
 		mContext = this;
 
 		setContentView(R.layout.crowd_application_activity);
+        initReceiver();
 		mTitleTV = (TextView) findViewById(R.id.crowd_application_title);
 		mNameTV = (TextView) findViewById(R.id.crowd_application_name);
 		mCreatorTV = (TextView) findViewById(R.id.crowd_application_item_creator);
@@ -79,6 +86,7 @@ public class CrowdApplicationActivity extends Activity {
 		mNoTV = (TextView) findViewById(R.id.crowd_application_no);
 		mButtonLy = findViewById(R.id.crowd_application_button_ly);
 		mNotesLy = findViewById(R.id.crowd_application_notes_ly);
+		mNotes = (TextView) findViewById(R.id.crowd_application_notes);
 		mSendButton = findViewById(R.id.crowd_application_send_button);
 		mSendButton.setOnClickListener(mSendButtonListener);
 		mItemLy = findViewById(R.id.crowd_application_item_ly);
@@ -111,7 +119,13 @@ public class CrowdApplicationActivity extends Activity {
 
 	}
 
-	@Override
+    @Override
+    protected void onDestroy() {
+        unregisterReceiver(applyReceiver);
+        super.onDestroy();
+    }
+
+    @Override
 	public void onBackPressed() {
 		if (isInApplicationMode) {
 			isInApplicationMode = false;
@@ -120,6 +134,16 @@ public class CrowdApplicationActivity extends Activity {
 		}
 		super.onBackPressed();
 	}
+
+    private void initReceiver() {
+
+        applyReceiver = new CrowdApplyBroadcast();
+        IntentFilter filter = new IntentFilter();
+        filter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
+        filter.addCategory(PublicIntent.DEFAULT_CATEGORY);
+        filter.addAction(JNIService.JNI_BROADCAST_GROUP_JOIN_FAILED);
+        registerReceiver(applyReceiver, filter);
+    }
 
 	private void handleApplyDone() {
 		mButtonLy.setVisibility(View.GONE);
@@ -155,6 +179,7 @@ public class CrowdApplicationActivity extends Activity {
                 if(state == VMessageQualification.QualificationState.WAITING_FOR_APPLY){
                     mApplicationButton.setVisibility(View.GONE);
                     mNotesLy.setVisibility(View.VISIBLE);
+                    mNotes.setText(R.string.crowd_application_applyed);
                     mTitleTV.setText(R.string.crowd_applicant_invite_title);
                 } else if(state == VMessageQualification.QualificationState.BE_REJECT){
                 	mApplicationButton.setVisibility(View.VISIBLE);
@@ -272,10 +297,33 @@ public class CrowdApplicationActivity extends Activity {
 
 		@Override
 		public void onClick(View view) {
+            if(isReturnData){
+                Intent intent = new Intent(mContext,
+                        MessageAuthenticationActivity.class);
+                intent.putExtra("qualificationID", vq.getId());
+                intent.putExtra("qualState", vq.getQualState());
+                setResult(4 , intent);
+            }
 			onBackPressed();
 		}
 
 	};
+
+    private class CrowdApplyBroadcast extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (JNIService.JNI_BROADCAST_GROUP_JOIN_FAILED.equals(intent
+                    .getAction())) {
+                mNotes.setText(R.string.crowd_invitation_invalid_notes);
+                Toast.makeText(getApplicationContext() , getResources().getString(R.string.crowd_Authentication_hit) ,
+                        Toast.LENGTH_SHORT).show();
+                vq.setQualState(VMessageQualification.QualificationState.INVALID);
+                MessageBuilder.updateQualicationMessage(mContext , vq);
+                isReturnData = true;
+            }
+        }
+    }
 
 	private Handler mLocalHandler = new Handler() {
 
@@ -327,10 +375,11 @@ public class CrowdApplicationActivity extends Activity {
 //                        }
                         }
                     }
-				} else if (response.getResult() == Result.FAILED) {
-					Toast.makeText(getApplicationContext(), "群已经解散", Toast.LENGTH_SHORT).show();
-				}
-				handleApplyDone();
+                    handleApplyDone();
+                }
+                else{
+                    Toast.makeText(getApplicationContext() , "群组加入失败" , Toast.LENGTH_SHORT).show();
+                }
 				break;
 			}
 		}

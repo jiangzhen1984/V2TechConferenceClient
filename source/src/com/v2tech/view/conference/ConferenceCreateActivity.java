@@ -40,6 +40,7 @@ import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.V2.jni.util.V2Log;
 import com.v2tech.R;
 import com.v2tech.service.ConferenceService;
 import com.v2tech.service.GlobalHolder;
@@ -418,6 +419,8 @@ public class ConferenceCreateActivity extends Activity {
 
 		@Override
 		public void onClick(View view) {
+            mErrorNotificationLayout.setVisibility(View.GONE);
+
 			if (!SPUtil.checkCurrentAviNetwork(mContext))
 				return;
 
@@ -470,7 +473,7 @@ public class ConferenceCreateActivity extends Activity {
 			conf = new Conference(title, startTimeStr, null, l);
 			cs.createConference(conf, new MessageListener(mLocalHandler,
 					CREATE_CONFERENC_RESP, conf));
-			view.setEnabled(false);
+//			view.setEnabled(false);
 		}
 
 	};
@@ -572,6 +575,7 @@ public class ConferenceCreateActivity extends Activity {
 				JNIResponse rccr = (JNIResponse) msg.obj;
 				Conference conference = (Conference) rccr.callerObject;
 				if (rccr.getResult() != JNIResponse.Result.SUCCESS) {
+                    V2Log.e("ConferenceCreateActivity --> CREATE FAILED ... ERROR CODE IS : " + rccr.getResult().name());
 					mErrorNotificationLayout.setVisibility(View.VISIBLE);
 					mErrorMessageTV
 							.setText(R.string.error_create_conference_failed_from_server_side);

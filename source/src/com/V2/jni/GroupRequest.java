@@ -21,7 +21,8 @@ import com.V2.jni.util.XmlAttributeExtractor;
 
 public class GroupRequest {
 
-	public boolean loginResult;
+    private static final String TAG = "GroupRequest UI";
+    public boolean loginResult;
 	private static GroupRequest mGroupRequest;
 
 	private List<WeakReference<GroupRequestCallback>> mCallbacks;
@@ -537,27 +538,36 @@ public class GroupRequest {
 
 	/**
 	 * <ul>
-	 * Crowd: {@code <crowd authtype='0' id='44' name='hhh mjj ' size='100'/>}
+	 * Crowd: {@code <crowd announcement='abcde' authtype='1' creatoruserid='11113231'
+     *                  id='411152' name='qqq' size='500' summary=''/>}
 	 * </ul>
 	 * 
 	 * @param groupType
 	 * @param nParentID
 	 * @param nGroupID
 	 * @param sXml
+     *
 	 */
 	private void OnAddGroupInfo(int groupType, long nParentID, long nGroupID,
 			String sXml) {
-		V2Log.d("OnAddGroupInfo:: " + groupType + ":" + nParentID + ":"
-				+ nGroupID + ":" + sXml);
+		V2Log.e(TAG , "OnSendChatResult ---> groupType :"
+                + groupType + " | nParentID: " + nParentID + " | nGroupID: "
+                + nGroupID + " | sXml: " + sXml);
 
 		String gid = XmlAttributeExtractor.extract(sXml, " id='", "'");
 		String name = XmlAttributeExtractor.extract(sXml, " name='", "'");
-		String createUesrID = XmlAttributeExtractor.extract(sXml,
+        String announcement = XmlAttributeExtractor.extract(sXml, " announcement='", "'");
+        String authType = XmlAttributeExtractor.extract(sXml, " authtype='", "'");
+        String groupSize = XmlAttributeExtractor.extract(sXml, " size='", "'");
+        String createUesrID = XmlAttributeExtractor.extract(sXml,
 				" creatoruserid='", "'");
 		V2Group vg = new V2Group(Long.parseLong(gid), name, groupType);
 		if (gid != null && !gid.isEmpty() && createUesrID != null) {
 			vg.owner = new V2User(Long.valueOf(createUesrID));
 			vg.creator = vg.owner;
+            vg.announce = announcement;
+            vg.authType = Integer.valueOf(authType);
+            vg.groupSize = Integer.valueOf(groupSize);
 		}else{
 			V2Log.e("OnAddGroupInfo:: parse xml failed , don't get group id or user id ...." + sXml);
 		}

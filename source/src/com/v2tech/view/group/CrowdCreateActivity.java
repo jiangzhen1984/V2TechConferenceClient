@@ -418,6 +418,8 @@ public class CrowdCreateActivity extends Activity {
 
 		@Override
 		public void onClick(View view) {
+            mErrorNotificationLayout.setVisibility(View.GONE);
+
 			String title = mGroupTitleET.getText().toString();
 			if (title == null || title.trim().isEmpty()) {
 				mGroupTitleET
@@ -469,7 +471,7 @@ public class CrowdCreateActivity extends Activity {
 				//Do not add userList to crowd, because this just invitation.
 				cg.createCrowdGroup(crowd, userList, new MessageListener(mLocalHandler,
 						CREATE_GROUP_MESSAGE, crowd));
-				view.setEnabled(false);
+//				view.setEnabled(false);
 			}
 		}
 
@@ -546,6 +548,8 @@ public class CrowdCreateActivity extends Activity {
                    mErrorNotificationLayout.setVisibility(View.VISIBLE);
                    mErrorNotification.setText(R.string.crowd_create_activity_error_info);
                 } else {
+                    V2Log.e("CrowdCreateActivity CREATE_GROUP_MESSAGE --> create crowd group failed.. ERROR CODE IS : " +
+                            recr.getResult().name());
 					mErrorNotificationLayout.setVisibility(View.VISIBLE);
 					mErrorNotification.setText(R.string.crowd_create_activity_error_info);
 				}

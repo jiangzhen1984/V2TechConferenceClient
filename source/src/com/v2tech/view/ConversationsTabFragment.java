@@ -2212,6 +2212,9 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 					.getAction())) {
 				long gid = intent.getLongExtra("gid", 0);
 				Group g = GlobalHolder.getInstance().getGroupById(gid);
+				if(g == null)
+					return ;
+				
 				if (g.getGroupType() == GroupType.CHATING) {
 					for (int i = 0; i < mItemList.size(); i++) {
 						ScrollItem item = mItemList.get(i);

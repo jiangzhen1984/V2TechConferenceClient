@@ -3,7 +3,7 @@
     <string name="crowd_invitation_accept_button_name">同意</string>
     <string name="crowd_invitation_accepted">已同意</string>
     <string name="crowd_invitation_rejected">已拒绝</string>
-    <string name="crowd_invitation_joined">已加入</string>
+    <string name="crowd_invitation_joined">已同意您的邀请</string>
     <string name="crowd_invitation_invalid_notes">已失效</string>
     <string name="crowd_invitation_reject_button_name">拒绝</string>
     <string name="crowd_invitation_reject_button_done">完成</string>

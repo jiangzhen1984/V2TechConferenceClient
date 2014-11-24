@@ -34,6 +34,7 @@ public class Crowd implements Parcelable {
 		if (brief == null) {
 			brief = "";
 		}
+        announce = par.readString();
 		auth = par.readInt();
 	}
 
@@ -59,6 +60,7 @@ public class Crowd implements Parcelable {
 		par.writeLong(creator.getmUserId());
 		par.writeString(creator.getName());
 		par.writeString(brief);
+		par.writeString(announce);
 		par.writeInt(auth);
 	}
 

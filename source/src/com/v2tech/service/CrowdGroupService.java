@@ -703,12 +703,22 @@ public class CrowdGroupService extends AbstractHandler {
 
 		@Override
 		public void OnAddGroupFile(V2Group group, List<FileJNIObject> list) {
+            if(group == null){
+                V2Log.e("CrowdGroupService OnAddGroupFile--> add a new group file failed , V2Group is null");
+                return ;
+            }
+
+            if(list == null){
+                V2Log.e("CrowdGroupService OnAddGroupFile--> add a new group file failed , FileJNIObject List is null");
+                return ;
+            }
+
 			// Use fetch group file object as result
 			RequestFetchGroupFilesResponse jniRes = new RequestFetchGroupFilesResponse(
 					JNIResponse.Result.SUCCESS);
 			jniRes.setList(convertList(group, list));
+            jniRes.setGroupID(group.id);
 			notifyListener(KEY_FILE_NEW_NOTIFICATION_LISTNER, 0, 0, jniRes);
-
 		}
 
 	}

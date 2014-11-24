@@ -54,7 +54,8 @@
     
     <string name="crowd_invitation_content">邀请您加入群</string>
     <string name="crowd_applicant_content">申请加入群</string>
-    
+
+    <string name="crowd_files_fill_adapter_failed">获取上传文件列表失败!</string>
     <string name="crowd_files_return_button">返回</string>
     <string name="crowd_files_title">群文件</string>
     <string name="crowd_files_title_upload">上传</string>

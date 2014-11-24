@@ -90,7 +90,7 @@
         android:gravity="bottom"
         android:singleLine="true"
         android:layout_marginBottom="2dp"
-        android:maxWidth="100dp"
+        android:maxWidth="120dp"
         android:text="2014-11-20 17:20:32"
         android:textColor="@color/common_item_text_color"
         android:textSize="@dimen/common_item_text_size_small" />

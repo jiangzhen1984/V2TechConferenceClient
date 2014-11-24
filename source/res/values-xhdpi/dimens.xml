@@ -8,7 +8,7 @@
     <dimen name="common_item_text_size_16">14sp</dimen>
     <dimen name="common_item_text_size_small">10sp</dimen>
     <dimen name="button_padding_horizontal">15dp</dimen>
-    <dimen name="button_padding_vertical">8dp</dimen>
+    <dimen name="button_padding_vertical">12dp</dimen>
     <dimen name="button_gap_horizontal">10dp</dimen>
     <dimen name="contact_detail_2_item_margin_left">5dp</dimen>
     <dimen name="contact_detail_2_item_margin_right">5dp</dimen>

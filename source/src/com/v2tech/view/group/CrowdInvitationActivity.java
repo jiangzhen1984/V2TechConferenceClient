@@ -1,8 +1,10 @@
 package com.v2tech.view.group;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -10,8 +12,10 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.Adapter;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.V2.jni.V2GlobalEnum;
 import com.v2tech.R;
@@ -20,6 +24,7 @@ import com.v2tech.service.GlobalHolder;
 import com.v2tech.service.MessageListener;
 import com.v2tech.service.jni.JNIResponse;
 import com.v2tech.util.ProgressUtils;
+import com.v2tech.view.JNIService;
 import com.v2tech.view.PublicIntent;
 import com.v2tech.view.bo.ConversationNotificationObject;
 import com.v2tech.view.conversation.MessageAuthenticationActivity;
@@ -64,6 +69,7 @@ public class CrowdInvitationActivity extends Activity {
 
 	private Crowd crowd;
 	private CrowdGroupService service = new CrowdGroupService();
+    private CrowdInviteBroadcast inviteReceiver;
 	private VMessageQualification vq;
 	private State mState = State.DONE;
 	private boolean isInRejectReasonMode = false;
@@ -75,6 +81,7 @@ public class CrowdInvitationActivity extends Activity {
 		mContext = this;
 
 		setContentView(R.layout.crowd_invitation_activity);
+        initReceiver();
 		mTitleName = (TextView) findViewById(R.id.crowd_invitation_title_text);
 		mNameTV = (TextView) findViewById(R.id.crowd_invitation_name);
 		mNoTV = (TextView) findViewById(R.id.crowd_invitation_crowd_no);
@@ -82,7 +89,7 @@ public class CrowdInvitationActivity extends Activity {
 		mBriefTV = (TextView) findViewById(R.id.crowd_invitation_brief);
 		mAnnounceTV = (TextView) findViewById(R.id.crowd_invitation_announcement);
 		mMembersTV = (TextView) findViewById(R.id.crowd_invitation_members);
-		
+
 		mAcceptButton = (TextView) findViewById(R.id.crowd_invitation_accept_button);
 		mAcceptButton.setOnClickListener(mAcceptButtonListener);
 		mDeclineButton = findViewById(R.id.crowd_invitation_decline_button);
@@ -96,7 +103,6 @@ public class CrowdInvitationActivity extends Activity {
 		mNotesLayout = findViewById(R.id.crowd_invitation_notes_ly);
 		mNotesTV = (TextView) findViewById(R.id.crowd_invitation_notes);
 		mAcceptedLy =  findViewById(R.id.crowd_invitation_accepted_ly);
-		
 
 		mRejectResasonLayout = findViewById(R.id.crowd_content_reject_reason_ly);
 		mBoxLy = findViewById(R.id.crowd_invitation_box_ly);
@@ -109,7 +115,7 @@ public class CrowdInvitationActivity extends Activity {
 		mBriefTV.setText(crowd.getBrief());
 		mCreatorTV.setText(crowd.getCreator().getName());
 		mAnnounceTV.setText(crowd.getAnnounce());
-		
+
 		Group group = GlobalHolder.getInstance().getGroupById(V2GlobalEnum.GROUP_TYPE_CROWD , crowd.getId());
 		if(group != null && group.getUsers() != null)
 			mMembersTV.setText(String.valueOf(group.getUsers().size()));
@@ -119,12 +125,25 @@ public class CrowdInvitationActivity extends Activity {
 		g.setAuthType(AuthType.fromInt(crowd.getAuth()));
 		vq = MessageBuilder.queryQualMessageByCrowdId(mContext, crowd.getCreator().getmUserId(), g.getmGId());
 		updateView(false);
-
 		mRejectResasonLayout.setVisibility(View.GONE);
-
 	}
 
-	private void handleAcceptDone() {
+    @Override
+    protected void onDestroy() {
+        unregisterReceiver(inviteReceiver);
+        super.onDestroy();
+    }
+
+    private void initReceiver() {
+        inviteReceiver = new CrowdInviteBroadcast();
+        IntentFilter filter = new IntentFilter();
+        filter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
+        filter.addCategory(PublicIntent.DEFAULT_CATEGORY);
+        filter.addAction(JNIService.JNI_BROADCAST_GROUP_JOIN_FAILED);
+        registerReceiver(inviteReceiver, filter);
+    }
+
+    private void handleAcceptDone() {
 //		CrowdGroup g = new CrowdGroup(crowd.getId(), crowd.getName(),
 //				crowd.getCreator(), null);
 //		g.setBrief(crowd.getBrief());
@@ -137,10 +156,13 @@ public class CrowdInvitationActivity extends Activity {
 //		i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
 //		i.putExtra("crowd", crowd.getId());
 //		sendBroadcast(i);
-        Group group = GlobalHolder.getInstance().getGroupById(V2GlobalEnum.GROUP_TYPE_CROWD , crowd.getId());
-        if(group != null && group.getUsers() != null)
+        CrowdGroup group = (CrowdGroup) GlobalHolder.getInstance().getGroupById(V2GlobalEnum.GROUP_TYPE_CROWD , crowd.getId());
+        if(group != null && group.getUsers() != null) {
             mMembersTV.setText(String.valueOf(group.getUsers().size()));
-		
+            mAnnounceTV.setText(group.getAnnouncement());
+            mBriefTV.setText(group.getBrief());
+        }
+
 		VMessageQualification message = MessageBuilder.queryQualMessageById(mContext, vq.getId());
 		vq.setQualState(message.getQualState());
 		vq.setReadState(message.getReadState());
@@ -247,7 +269,7 @@ public class CrowdInvitationActivity extends Activity {
                 else {
                     service.acceptInvitation(crowd, new MessageListener(mLocalHandler,
                             ACCEPT_INVITATION_DONE, null));
-                    ProgressUtils.showNormalWithHintProgress(mContext, true).initTimeOut();
+                    ProgressUtils.showNormalWithHintProgress(mContext, true);
                 }
 			}
 		}
@@ -273,7 +295,7 @@ public class CrowdInvitationActivity extends Activity {
 				updateView(!isInRejectReasonMode);
 				return;
 			}
-			
+
 			if(isReturnData){
 				Intent intent = new Intent(CrowdInvitationActivity.this,
 						MessageAuthenticationActivity.class);
@@ -320,6 +342,29 @@ public class CrowdInvitationActivity extends Activity {
 		}
 
 	};
+
+    private class CrowdInviteBroadcast extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (JNIService.JNI_BROADCAST_GROUP_JOIN_FAILED.equals(intent
+                    .getAction())) {
+                ProgressUtils.showNormalWithHintProgress(mContext, false);
+                mButtonLayout.setVisibility(View.GONE);
+                mSendMsgButton.setVisibility(View.GONE);
+                mAcceptedLy.setVisibility(View.GONE);
+
+                mNotesLayout.setVisibility(View.VISIBLE);
+                mNotesTV.setText(R.string.crowd_invitation_invalid_notes);
+                Toast.makeText(getApplicationContext(), getResources().getString(R.string.crowd_Authentication_hit),
+                        Toast.LENGTH_SHORT).show();
+
+                vq.setQualState(VMessageQualification.QualificationState.INVALID);
+                MessageBuilder.updateQualicationMessage(mContext , vq);
+                isReturnData = true;
+            }
+        }
+    }
 
 	private Handler mLocalHandler = new Handler() {
 

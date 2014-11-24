@@ -5,9 +5,11 @@
     android:layout_marginTop="8dp"
     android:orientation="horizontal" >
     <ImageView
+        android:layout_marginLeft="@dimen/ws_voiceDetail_adapater_margin_small"
         android:id="@+id/specific_voiceDetail_adapter_direction"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/specific_voiceDetail_adapter_state"
         android:layout_alignBottom="@+id/specific_voiceDetail_adapter_state"
         android:src="@drawable/vs_voice_callout" />
     <TextView
@@ -16,22 +18,25 @@
         android:layout_height="wrap_content"
         android:layout_toRightOf="@+id/specific_voiceDetail_adapter_direction"
         android:text="xxxxx"
-        android:layout_marginLeft="8dp"
-        android:textSize="16sp" />
+        android:layout_marginLeft="@dimen/ws_voiceDetail_adapater_margin_small"
+        android:textSize="@dimen/ws_voiceDetail_adapter_text_size_middle" />
     <TextView
         android:id="@+id/specific_voiceDetail_adapter_holdTime"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="15dp"
+        android:layout_marginLeft="@dimen/ws_voiceDetail_adapater_margin_middle"
         android:layout_toRightOf="@+id/specific_voiceDetail_adapter_state"
         android:text="xxxxx"
-        android:textSize="16sp" />
+        android:textSize="@dimen/ws_voiceDetail_adapter_text_size_middle" />
     <TextView
         android:id="@+id/specific_voiceDetail_saveTime"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
-        android:layout_marginRight="15dp"
+        android:gravity="right"
+        android:singleLine="true"
+        android:layout_marginRight="@dimen/ws_voiceDetail_adapater_margin_middle"
+        android:layout_toRightOf="@+id/specific_voiceDetail_adapter_holdTime"
         android:text="xxxxx"
-        android:textSize="16sp" />
+        android:textSize="@dimen/ws_voiceDetail_adapter_text_size_middle" />
 </RelativeLayout>

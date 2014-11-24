@@ -1,14 +1,5 @@
 package com.v2tech.view.group;
 
-import java.io.File;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -44,8 +35,8 @@ import com.v2tech.service.jni.FileTransStatusIndication;
 import com.v2tech.service.jni.FileTransStatusIndication.FileTransProgressStatusIndication;
 import com.v2tech.service.jni.JNIResponse;
 import com.v2tech.service.jni.RequestFetchGroupFilesResponse;
-import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.FileUitls;
+import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.V2Toast;
 import com.v2tech.view.JNIService;
 import com.v2tech.view.conversation.ConversationSelectFile;
@@ -54,14 +45,24 @@ import com.v2tech.view.conversation.MessageLoader;
 import com.v2tech.view.group.CrowdFilesActivity.FileListAdapter.ViewItem;
 import com.v2tech.vo.CrowdGroup;
 import com.v2tech.vo.FileInfoBean;
-import com.v2tech.vo.NetworkStateCode;
-import com.v2tech.vo.VMessage;
 import com.v2tech.vo.Group.GroupType;
+import com.v2tech.vo.NetworkStateCode;
 import com.v2tech.vo.VCrowdFile;
 import com.v2tech.vo.VFile;
+import com.v2tech.vo.VMessage;
 import com.v2tech.vo.VMessageFileItem;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
 public class CrowdFilesActivity extends Activity {
+
+    private static final String TAG = "CrowdFilesActivity";
 
 	private static final int FETCH_FILES_DONE = 0;
 
@@ -70,8 +71,6 @@ public class CrowdFilesActivity extends Activity {
 	private static final int FILE_TRANS_NOTIFICATION = 2;
 
 	private static final int FILE_REMOVE_NOTIFICATION = 3;
-
-	private static final int FILE_REMOVE_DONE = 4;
 
 	private static final int NEW_FILE_NOTIFICATION = 5;
 
@@ -359,7 +358,9 @@ public class CrowdFilesActivity extends Activity {
 		}
 		if (ind.indType == FileTransStatusIndication.IND_TYPE_PROGRESS) {
 			FileTransProgressStatusIndication progress = (FileTransProgressStatusIndication) ind;
-			V2Log.e(" receive progress upload file state.... normal");
+			V2Log.e("CrowdFilesActivity handleFileTransNotification --> " +
+                    "receive progress upload file state.... normal , file id is : " +
+            file.getId() + " file name is : " + file.getName());
 			if (progress.progressType == FileTransStatusIndication.IND_TYPE_PROGRESS_END) {
 				file.setProceedSize(file.getSize());
 			} else {
@@ -374,12 +375,14 @@ public class CrowdFilesActivity extends Activity {
 
 		} else if (ind.indType == FileTransStatusIndication.IND_TYPE_DOWNLOAD_ERR) {
 			file.setState(VFile.State.DOWNLOAD_FAILED);
-		} else if (ind.indType == FileTransStatusIndication.IND_TYPE_TRANS_ERR) {
+            V2Log.e("CrowdFilesActivity handleFileTransNotification --> DWONLOAD_ERROR Download failed...file id is : " +
+                    file.getId() + " file name is : " + file.getName() + " error code is : " + ind.errorCode);
+        } else if (ind.indType == FileTransStatusIndication.IND_TYPE_TRANS_ERR) {
 			file.setState(VFile.State.DOWNLOAD_FAILED);
+            V2Log.e("CrowdFilesActivity handleFileTransNotification --> TRANS_ERROR Download failed...file id is : " +
+                    file.getId() + " file name is : " + file.getName() + " error code is : " + ind.errorCode);
 		}
-
 		adapter.notifyDataSetChanged();
-
 	}
 
 	/**
@@ -486,7 +489,6 @@ public class CrowdFilesActivity extends Activity {
 	 * 
 	 * @param fileName
 	 * @param holder
-	 * @param file
 	 */
 	public void adapterFileIcon(String fileName, ViewItem holder) {
 
@@ -663,7 +665,9 @@ public class CrowdFilesActivity extends Activity {
 					RequestFetchGroupFilesResponse rf = (RequestFetchGroupFilesResponse) res;
 					handleFetchFilesDone(rf.getList());
 				} else {
-					// TODO show error
+                    V2Log.e(TAG , "Get upload files failed ... ERROR CODE IS : " + res.getResult().name());
+                    Toast.makeText(mContext , getResources().getString(
+                            R.string.crowd_files_fill_adapter_failed) , Toast.LENGTH_SHORT).show();
 				}
 				break;
 			case OPERATE_FILE:
@@ -681,15 +685,13 @@ public class CrowdFilesActivity extends Activity {
 							.getList());
 				}
 				break;
-			case FILE_REMOVE_DONE:
-				break;
 			case NEW_FILE_NOTIFICATION:
-				JNIResponse newFileni = (JNIResponse) ((AsyncResult) msg.obj)
-						.getResult();
+                RequestFetchGroupFilesResponse newFileni = (RequestFetchGroupFilesResponse) msg.obj;
 				if (newFileni.getResult() == JNIResponse.Result.SUCCESS) {
-					handleNewFileEvent(((RequestFetchGroupFilesResponse) newFileni)
-							.getList());
-					adapterUploadShow();
+                    if(newFileni.getGroupID() == crowd.getmGId()) {
+                        handleNewFileEvent(newFileni.getList());
+                        adapterUploadShow();
+                    }
 				}
 				break;
 			}

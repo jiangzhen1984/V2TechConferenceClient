@@ -280,13 +280,10 @@ public class LogService extends Service implements Thread.UncaughtExceptionHandl
 		try {
 			proc = Runtime.getRuntime().exec(
 					commandList.toArray(new String[commandList.size()]));
-			StreamConsumer errorGobbler = new StreamConsumer(
-					proc.getErrorStream());
-			errorGobbler.start();
-			if (proc.waitFor() != 0) {
-				V2Log.e(TAG, " clearLogCache proc.waitFor() != 0");
-				recordLogServiceLog("clearLogCache clearLogCache proc.waitFor() != 0");
-			}
+//			StreamConsumer errorGobbler = new StreamConsumer(
+//					proc.getErrorStream());
+//			errorGobbler.start();
+            processWaitFor(proc);
 		} catch (Exception e) {
 			V2Log.e(TAG, "clearLogCache failed", e);
 			recordLogServiceLog("clearLogCache failed");
@@ -399,18 +396,7 @@ public class LogService extends Service implements Thread.UncaughtExceptionHandl
 		Process proc = null;
 		try {
 			proc = Runtime.getRuntime().exec("ps");
-			StreamConsumer errorConsumer = new StreamConsumer(
-					proc.getErrorStream());
-
-			StreamConsumer outputConsumer = new StreamConsumer(
-					proc.getInputStream(), orgProcList);
-
-			errorConsumer.start();
-			outputConsumer.start();
-			if (proc.waitFor() != 0) {
-				V2Log.e(TAG, "getAllProcess proc.waitFor() != 0");
-				recordLogServiceLog("getAllProcess proc.waitFor() != 0");
-			}
+            processWaitFor(proc);
 		} catch (Exception e) {
 			V2Log.e(TAG, "getAllProcess failed", e);
 			recordLogServiceLog("getAllProcess failed");
@@ -463,13 +449,13 @@ public class LogService extends Service implements Thread.UncaughtExceptionHandl
 		// commandList.add("*:S");
 //		process = Runtime.getRuntime().exec(
 //				commandList.toArray(new String[commandList.size()]));
-		process = Runtime.getRuntime().exec(cmd);
-		recordLogServiceLog("start collecting the log,and log name is:"
+        process = Runtime.getRuntime().exec(cmd);
+        processWaitFor(process);
+        recordLogServiceLog("start collecting the log,and log name is:"
 				+ logFileName);
-		processWaitFor();
 	}
 
-	private void processWaitFor() {
+	private void processWaitFor(Process process) {
 		InputStream stderr = process.getErrorStream();
 		InputStreamReader isr = new InputStreamReader(stderr);
 		BufferedReader br = new BufferedReader(isr);
@@ -657,7 +643,7 @@ public class LogService extends Service implements Thread.UncaughtExceptionHandl
 	 * @return
 	 */
 	public boolean canDeleteSDLog(String createDateStr) {
-		boolean canDel = false;
+		boolean canDel;
 		Calendar calendar = Calendar.getInstance();
 		calendar.add(Calendar.DAY_OF_MONTH, -1 * SDCARD_LOG_FILE_SAVE_DAYS);// 删除7天之前日志
 		Date expiredDate = calendar.getTime();
@@ -822,58 +808,6 @@ public class LogService extends Service implements Thread.UncaughtExceptionHandl
 		}
 	}
 
-	class StreamConsumer extends Thread {
-		InputStream is;
-		List<String> list;
-
-		StreamConsumer(InputStream is) {
-			this.is = is;
-		}
-
-		StreamConsumer(InputStream is, List<String> list) {
-			this.is = is;
-			this.list = list;
-		}
-
-		public void run() {
-			InputStreamReader isr = null;
-			BufferedReader br = null;
-			try {
-				isr = new InputStreamReader(is);
-				br = new BufferedReader(isr);
-				String line = null;
-				while ((line = br.readLine()) != null) {
-					if (list != null) {
-						list.add(line);
-					}
-				}
-			} catch (IOException ioe) {
-				ioe.printStackTrace();
-
-
-
-
-
-			} finally {
-				if (isr != null) {
-					try {
-						isr.close();
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-				}
-
-				if (br != null) {
-					try {
-						br.close();
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-				}
-			}
-		}
-	}
-
 	/**
 	 * 监控SD卡状态
 	 * 
@@ -970,7 +904,7 @@ public class LogService extends Service implements Thread.UncaughtExceptionHandl
 	 */
 	private void createLogDir() {
 
-		File file = null;
+		File file;
 		if (CURR_LOG_TYPE == SDCARD_TYPE) {
 			try {
 				file = new File(LOG_PATH_SDCARD_DIR);

@@ -625,10 +625,24 @@ public class MessageAuthenticationActivity extends Activity {
 				V2Log.e("startCrowdInvitationDetail --> start ConversationActivity failed ... crowd group isn't exist!");
 			}
 		} else {
-			Crowd crowd = new Crowd(imsg.getCrowdGroup().getmGId(), imsg
-					.getCrowdGroup().getOwnerUser(), imsg.getCrowdGroup()
-					.getName(), imsg.getCrowdGroup().getBrief());
-			crowd.setAuth(imsg.getCrowdGroup().getAuthType().intValue());
+            CrowdGroup group = (CrowdGroup) GlobalHolder.getInstance().getGroupById(
+                    V2GlobalEnum.GROUP_TYPE_CROWD,
+                    imsg.getCrowdGroup().getmGId());
+            Crowd crowd;
+            if(group != null){
+                crowd = new Crowd(group.getmGId(), group.getOwnerUser(), group.getName(),
+                        group.getBrief());
+                crowd.setAnnounce(group.getAnnouncement());
+                crowd.setAuth(group.getAuthType().intValue());
+            }
+            else {
+                CrowdGroup crowdGroup = imsg.getCrowdGroup();
+                crowd = new Crowd(crowdGroup.getmGId(), crowdGroup.getOwnerUser(), crowdGroup
+                        .getName(), crowdGroup.getBrief());
+                crowd.setAnnounce(crowdGroup.getAnnouncement());
+                crowd.setAuth(crowdGroup.getAuthType().intValue());
+            }
+
 			if (imsg.getQualState() == QualificationState.BE_REJECT) {
 				i.setAction(PublicIntent.SHOW_CROWD_APPLICATION_ACTIVITY);
 				crowd.setAuth(CrowdGroup.AuthType.QULIFICATION.intValue());
@@ -636,7 +650,7 @@ public class MessageAuthenticationActivity extends Activity {
 				// set disable authentication
 				i.putExtra("authdisable", false);
 				i.putExtra("stored", true);
-				startActivity(i);
+                startActivityForResult(i , AUTHENTICATION_RESULT);
 			} else {
 				i.setAction(JNIService.JNI_BROADCAST_CROWD_INVATITION);
 				i.addCategory(JNIService.JNI_ACTIVITY_CATEGROY);
@@ -1084,7 +1098,7 @@ public class MessageAuthenticationActivity extends Activity {
 			} else if (vqic.getQualState() == QualificationState.REJECT) {
 				item.mRes.setVisibility(View.VISIBLE);
 				item.mAcceptButton.setVisibility(View.GONE);
-				 item.mRejectContentTV.setVisibility(View.GONE);
+				item.mRejectContentTV.setVisibility(View.GONE);
 				item.mRes.setText(R.string.crowd_invitation_rejected);
 			} else if (vqic.getQualState() == QualificationState.BE_ACCEPTED) {
 				item.mRes.setVisibility(View.GONE);
@@ -1098,7 +1112,12 @@ public class MessageAuthenticationActivity extends Activity {
 				item.mRejectContentTV.setVisibility(View.VISIBLE);
 				item.mRejectContentTV.setText(vqic.getRejectReason());
 				item.mContentTV.setText(R.string.crowd_invitation_rejected_notes);
-			} else {
+			} else if (vqic.getQualState() == QualificationState.INVALID){
+                item.mRes.setVisibility(View.VISIBLE);
+                item.mAcceptButton.setVisibility(View.GONE);
+                item.mRejectContentTV.setVisibility(View.GONE);
+                item.mRes.setText(R.string.crowd_invitation_invalid_notes);
+            }else {
 				item.mRes.setVisibility(View.GONE);
 				item.mRejectContentTV.setVisibility(View.GONE);
 				item.mAcceptButton.setVisibility(View.VISIBLE);
@@ -1261,10 +1280,12 @@ public class MessageAuthenticationActivity extends Activity {
 			VMessageQualificationInvitationCrowd vm = (VMessageQualificationInvitationCrowd) waitingQualification.obj;
 			Toast.makeText(mContext, vm.getCrowdGroup().getName() + res.getString(R.string.crowd_Authentication_hit) ,
 					Toast.LENGTH_SHORT).show();
-			mMessageList.remove(waitingQualification);
-			waitingQualification = null;
-			groupAdapter.notifyDataSetChanged();
-			MessageBuilder.deleteQualMessage(mContext, vm.getId());
+            vm.setQualState(QualificationState.INVALID);
+            MessageBuilder.updateQualicationMessage(mContext , vm);
+            groupAdapter.notifyDataSetChanged();
+            waitingQualification = null;
+//            mMessageList.remove(waitingQualification);
+//            MessageBuilder.deleteQualMessage(mContext, vm.getId());
 		}
 	}
 
@@ -1302,7 +1323,7 @@ public class MessageAuthenticationActivity extends Activity {
 				// Cancel next broadcast
 				this.abortBroadcast();
 			}
-			if (JNIService.JNI_BROADCAST_GROUP_JOIN_FAILED.equals(intent
+			else if (JNIService.JNI_BROADCAST_GROUP_JOIN_FAILED.equals(intent
 					.getAction())) {
 				ProgressUtils.showNormalWithHintProgress(mContext, false);
 				handleFailedDone();

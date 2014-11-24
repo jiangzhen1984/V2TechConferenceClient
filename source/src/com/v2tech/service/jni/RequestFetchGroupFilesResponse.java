@@ -12,7 +12,8 @@ import com.v2tech.vo.VCrowdFile;
  */
 public class RequestFetchGroupFilesResponse extends JNIResponse {
 
-	List<VCrowdFile> list;
+    private long groupID;
+    private List<VCrowdFile> list;
 
 	/**
 	 * This class is wrapper that wrap response of chat service
@@ -31,6 +32,12 @@ public class RequestFetchGroupFilesResponse extends JNIResponse {
 	public void setList(List<VCrowdFile> list) {
 		this.list = list;
 	}
-	
-	
+
+    public long getGroupID() {
+        return groupID;
+    }
+
+    public void setGroupID(long groupID) {
+        this.groupID = groupID;
+    }
 }

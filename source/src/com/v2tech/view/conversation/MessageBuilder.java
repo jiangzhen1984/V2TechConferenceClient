@@ -869,6 +869,9 @@ public class MessageBuilder {
 		values.put(
 				ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_READ_STATE,
 				ReadState.UNREAD.intValue());
+		values.put(
+				HistoriesCrowd.Cols.HISTORY_CROWD_SAVEDATE,
+				GlobalConfig.getGlobalServerTime());
 		String where = ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_ID
 				+ " = ? and " + HistoriesCrowd.Cols.HISTORY_CROWD_REMOTE_USER_ID + " = ?";
         String[] args = new String[]{String.valueOf(groupID) , String.valueOf(userId)};
