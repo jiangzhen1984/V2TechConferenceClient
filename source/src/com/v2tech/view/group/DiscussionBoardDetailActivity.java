@@ -1,0 +1,218 @@
+package com.v2tech.view.group;
+
+import android.app.Activity;
+import android.app.Dialog;
+import android.content.Intent;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Button;
+import android.widget.TextView;
+
+import com.v2tech.R;
+import com.v2tech.service.CrowdGroupService;
+import com.v2tech.service.GlobalHolder;
+import com.v2tech.service.MessageListener;
+import com.v2tech.view.PublicIntent;
+import com.v2tech.vo.DiscussionGroup;
+import com.v2tech.vo.Group.GroupType;
+
+
+
+/**
+ * <ul>Display discussion board detail.</ul>
+ * <ul>
+ * Intent key:
+ *      cid  : discussion board id
+ * </ul>
+ * 
+ * @see PublicIntent#SHOW_DISCUSSION_BOARD_DETAIL_ACTIVITY
+ * @author 28851274
+ *
+ */
+public class DiscussionBoardDetailActivity extends Activity {
+
+	private final static int TYPE_UPDATE_MEMBERS = 3;
+	private final static int REQUEST_QUIT_CROWD_DONE = 2;
+	
+
+	private TextView mNameTV;
+	private TextView mMembersCountsTV;
+
+	private View mQuitButton;
+	private View mShowTopicButton;
+	private View mShowMembersButton;
+	private View mReturnButton;
+	
+	private TextView mDialogTitleTV;
+
+	private DiscussionGroup crowd;
+	private CrowdGroupService service = new CrowdGroupService();
+
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.discussion_board_detail_activity);
+		
+		mNameTV = (TextView) findViewById(R.id.discussion_board_detail_name);
+		mMembersCountsTV = (TextView) findViewById(R.id.discussion_board_detail_members);
+		
+		mQuitButton = findViewById(R.id.discussion_board_detail_button);
+		mQuitButton.setOnClickListener(mQuitButtonListener);
+		mReturnButton = findViewById(R.id.discussion_board_detail_return_button);
+		mReturnButton.setOnClickListener(mReturnButtonListener);
+		
+		mShowTopicButton = findViewById(R.id.discussion_board_detail_update_name_button);
+		mShowTopicButton.setOnClickListener(mTopicButtonListener);
+		
+		mShowMembersButton= findViewById(R.id.discussion_board_detail_invitation_members_button);
+		mShowMembersButton.setOnClickListener(mShowMembersButtonListener);
+		
+		
+		crowd = (DiscussionGroup) GlobalHolder.getInstance().getGroupById(
+				GroupType.DISCUSSION.intValue(), getIntent().getLongExtra("cid", 0));
+
+		mNameTV.setText(crowd.getName());
+		
+		mMembersCountsTV.setText(crowd.getUsers().size()+"");
+		
+	}
+	
+	
+	
+	
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		
+	}
+
+
+	
+
+
+
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		service.clearCalledBack();
+	}
+
+
+
+	private Dialog mDialog;
+
+	private void showDialog() {
+		if (mDialog == null) {
+
+			mDialog = new Dialog(this, R.style.ContactUserActionDialog);
+
+			mDialog.setContentView(R.layout.crowd_quit_confirmation_dialog);
+			final Button cancelB = (Button) mDialog
+					.findViewById(R.id.contacts_group_cancel_button);
+			cancelB.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					mDialog.dismiss();
+				}
+
+			});
+			final Button confirmButton = (Button) mDialog
+					.findViewById(R.id.contacts_group_confirm_button);
+			confirmButton.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					service.quitDiscussionBoard(crowd, new MessageListener(mLocalHandler, REQUEST_QUIT_CROWD_DONE, null));
+				}
+
+			});
+
+			mDialogTitleTV = (TextView) mDialog
+					.findViewById(R.id.crowd_quit_dialog_title);
+		}
+
+		
+		mDialogTitleTV.setText(R.string.discussion_board_detail_quit_confirm_title);
+		mDialog.show();
+	}
+	
+	
+	private void handleQuitDone() {
+		//Remove cache crowd
+		GlobalHolder.getInstance().removeGroup(GroupType.DISCUSSION, crowd.getmGId());
+		//send broadcast to notify conversationtabfragment refresh list
+		
+		finish();
+	}
+
+	private OnClickListener mQuitButtonListener = new OnClickListener() {
+
+		@Override
+		public void onClick(View view) {
+			showDialog();
+		}
+
+	};
+	
+	private OnClickListener mReturnButtonListener = new OnClickListener() {
+
+		@Override
+		public void onClick(View view) {
+			onBackPressed();
+		}
+
+	};
+	
+
+	
+	private OnClickListener mTopicButtonListener = new OnClickListener() {
+
+		@Override
+		public void onClick(View view) {
+			Intent i = new Intent(PublicIntent.SHOW_DISCUSSION_BOARD_TOPIC_ACTIVITY);
+			i.addCategory(PublicIntent.DEFAULT_CATEGORY);
+			i.putExtra("cid", crowd.getmGId());
+			startActivityForResult(i, 100);
+		}
+
+	};
+	
+	private OnClickListener mShowMembersButtonListener = new  OnClickListener() {
+
+		@Override
+		public void onClick(View view) {
+			Intent i = new Intent(PublicIntent.SHOW_DISCUSSION_BOARD_MEMBERS_ACTIVITY);
+			i.addCategory(PublicIntent.DEFAULT_CATEGORY);
+			i.putExtra("cid", crowd.getmGId());
+			startActivityForResult(i, TYPE_UPDATE_MEMBERS);
+		}
+
+	};
+	
+	
+
+	private Handler mLocalHandler = new Handler() {
+
+		@Override
+		public void handleMessage(Message msg) {
+			switch (msg.what) {
+			case REQUEST_QUIT_CROWD_DONE:
+				handleQuitDone();
+				if (mDialog != null) {
+					mDialog.dismiss();
+				}
+				break;
+
+			}
+		}
+
+	};
+
+	enum State {
+		NONE, PENDING;
+	}
+	
+	
+}

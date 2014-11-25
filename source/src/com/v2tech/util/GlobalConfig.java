@@ -193,4 +193,9 @@ public class GlobalConfig {
 		}
 		return false;
 	}
+	
+	
+	public static class Resource {
+		public static String CONTACT_DEFAULT_GROUP_NAME ="";
+	}
 }

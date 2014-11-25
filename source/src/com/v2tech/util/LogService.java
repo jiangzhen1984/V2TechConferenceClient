@@ -224,7 +224,7 @@ public class LogService extends Service implements Thread.UncaughtExceptionHandl
         //获取系统默认处理器
         mDefaultHandler = Thread.getDefaultUncaughtExceptionHandler();
         //设置LogService为程序的默认处理器
-        Thread.setDefaultUncaughtExceptionHandler(this);
+      //  Thread.setDefaultUncaughtExceptionHandler(this);
 
         V2Log.d(TAG, "LogService onCreate");
 	}

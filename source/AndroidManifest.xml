@@ -370,6 +370,45 @@
             android:name="com.v2tech.view.search.SearchedResultActivity"
             android:screenOrientation="nosensor" >
         </activity>
+        
+        <!-- For Discussion board -->
+        
+        <activity
+            android:name="com.v2tech.view.group.DiscussionBoardMembersActivity"
+            android:screenOrientation="nosensor" >
+            <intent-filter>
+                <action android:name="com.v2tech.discussion_board_members_activity" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="com.v2tech" />
+            </intent-filter>
+        </activity>
+        
+          <activity
+            android:name="com.v2tech.view.group.DiscussionBoardCreateActivity"
+            android:screenOrientation="nosensor"
+             android:windowSoftInputMode="stateHidden|adjustPan"  >
+            <intent-filter>
+                <action android:name="com.v2tech.discussion_board_create_activity" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="com.v2tech" />
+            </intent-filter>
+        </activity>
+        
+          
+           <activity
+            android:name="com.v2tech.view.group.DiscussionBoardDetailActivity"
+            android:screenOrientation="nosensor" >
+            <intent-filter>
+                <action android:name="com.v2tech.discussion_board_detail_activity" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="com.v2tech" />
+            </intent-filter>
+        </activity>
+        
+        
 
         <receiver android:name="com.v2tech.view.receiver.AvatarChangedReceiver" >
             <intent-filter>

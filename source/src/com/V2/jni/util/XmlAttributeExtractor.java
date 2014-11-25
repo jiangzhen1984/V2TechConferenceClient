@@ -242,6 +242,22 @@ public class XmlAttributeExtractor {
 
 		return list;
 	}
+	
+	
+	public static List<V2Group> parseDiscussionGroup(String xml) {
+		Document doc = buildDocument(xml);
+		if (doc == null) {
+			return null;
+		}
+		if (doc.getChildNodes().getLength() <= 0) {
+			return null;
+		}
+		List<V2Group> list = new ArrayList<V2Group>();
+		iterateNodeList(V2Group.TYPE_DISCUSSION_BOARD, null, doc.getChildNodes().item(0)
+				.getChildNodes(), list);
+
+		return list;
+	}
 
 	private static void iterateNodeList(int type, V2Group parent,
 			NodeList gList, List<V2Group> list) {
@@ -255,8 +271,17 @@ public class XmlAttributeExtractor {
 			// If type is contact and is first item, means this group is default
 			if (type == V2Group.TYPE_CONTACTS_GROUP && j == 0) {
 				group.isDefault = true;
-				// TODO use localization
-				group.name = "我的好友";
+				group.name = "";
+			}
+			
+			if (type == V2Group.TYPE_DISCUSSION_BOARD) {
+				String uid = subGroupEl.getAttribute("creatoruserid");
+				if (uid != null && !uid.isEmpty()) {
+					V2User creator = new V2User(Long.parseLong(uid),"");
+					group.owner = creator;
+				} else {
+					continue;
+				}
 			}
 
 			if (parent == null) {

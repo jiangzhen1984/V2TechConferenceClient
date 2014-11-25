@@ -69,11 +69,11 @@ public class MainApplication extends Application {
 
 		V2Log.isDebuggable = (0 == (getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE));
 		V2Log.d(TAG, "isDebuggable : " + V2Log.isDebuggable);
-//		if (!V2Log.isDebuggable) {
-//			CrashHandler crashHandler = CrashHandler.getInstance();
-//			crashHandler.init(getApplicationContext());
-//			new LogcatThread().start();
-//		}
+		// if (!V2Log.isDebuggable) {
+		// CrashHandler crashHandler = CrashHandler.getInstance();
+		// crashHandler.init(getApplicationContext());
+		// new LogcatThread().start();
+		// }
 		SharedPreferences sf = getSharedPreferences("config",
 				Context.MODE_PRIVATE);
 		Editor ed = sf.edit();
@@ -101,10 +101,10 @@ public class MainApplication extends Application {
 		initGloblePath();
 		String path = GlobalConfig.getGlobalPath();
 		initConfFile();
-		
+
 		MessageBuilder.context = getApplicationContext();
 		MessageLoader.context = getApplicationContext();
-		
+
 		// Load native library
 		System.loadLibrary("event");
 		System.loadLibrary("v2vi");
@@ -130,7 +130,7 @@ public class MainApplication extends Application {
 				new Intent(getApplicationContext(), JNIService.class));
 		if (!V2Log.isDebuggable) {
 			getApplicationContext().startService(
-	                new Intent(getApplicationContext(), LogService.class));
+					new Intent(getApplicationContext(), LogService.class));
 		}
 
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
@@ -139,9 +139,16 @@ public class MainApplication extends Application {
 
 		initSQLiteFile();
 		initDPI();
+
+		initResource();
 	}
 
-	
+	private void initResource() {
+		GlobalConfig.Resource.CONTACT_DEFAULT_GROUP_NAME = this
+				.getApplicationContext().getResources()
+				.getText(R.string.contacts_default_group_name).toString();
+
+	}
 
 	/**
 	 * 初始化程序数据存储目录
@@ -187,7 +194,8 @@ public class MainApplication extends Application {
 					return;
 				}
 				String md5 = AlgorithmUtil.getFileMD5(is);
-				String currentMD5 = AlgorithmUtil.getFileMD5(new FileInputStream(file));
+				String currentMD5 = AlgorithmUtil
+						.getFileMD5(new FileInputStream(file));
 				if (md5.equals(currentMD5))
 					needCopy = false;
 				else
@@ -325,7 +333,6 @@ public class MainApplication extends Application {
 		V2Log.e("=================== trim memeory :" + level);
 	}
 
-
 	public void requestQuit() {
 		for (int i = 0; i < list.size(); i++) {
 			WeakReference<Activity> w = list.get(i);
@@ -366,7 +373,7 @@ public class MainApplication extends Application {
 				activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 			}
 			V2Log.d(TAG, "add new activity.. : " + activity);
-			list.add(0 , new WeakReference<Activity>(activity));
+			list.add(0, new WeakReference<Activity>(activity));
 		}
 
 		@Override
@@ -378,12 +385,14 @@ public class MainApplication extends Application {
 				if (obj != null && ((Activity) obj) == activity) {
 					list.remove(i--);
 					flag = true;
-					V2Log.d(TAG, "find target activity : " + activity + " --remove it..");
+					V2Log.d(TAG, "find target activity : " + activity
+							+ " --remove it..");
 				}
 			}
-		//	activity.setVolumeControlStream(AudioManager.USE_DEFAULT_STREAM_TYPE);
-			if(!flag)
-				V2Log.d(TAG, "no find the target activity : " + activity + " -- remove failed");
+			// activity.setVolumeControlStream(AudioManager.USE_DEFAULT_STREAM_TYPE);
+			if (!flag)
+				V2Log.d(TAG, "no find the target activity : " + activity
+						+ " -- remove failed");
 			V2Log.d(TAG, "集合中还剩下 : " + list.size() + " 个activity ");
 		}
 
@@ -464,6 +473,5 @@ public class MainApplication extends Application {
 			return true;
 		}
 	}
-
 
 }

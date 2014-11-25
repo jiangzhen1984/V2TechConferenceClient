@@ -63,6 +63,7 @@ public class TitleBar {
 	
 	private int[] plusImgs = new int[] { R.drawable.conversation_video_button,
 			R.drawable.conversation_group_button,
+			R.drawable.conversation_discussion_button,
 			R.drawable.conversation_seach_crowd_button,
 			R.drawable.conversation_seach_member_button,
 			R.drawable.conversation_call_button,
@@ -73,6 +74,7 @@ public class TitleBar {
 	private int[] plusItems = new int[] {
 			R.string.conversation_popup_menu_video_call_button,
 			R.string.conversation_popup_menu_group_create_button,
+			R.string.conversation_popup_menu_discussion_board_create_button,
 			R.string.conversation_popup_menu_crowd_search_button,
 			R.string.conversation_popup_menu_member_search_button,
 			R.string.conversation_popup_menu_call_button,
@@ -294,6 +296,13 @@ public class TitleBar {
 				context.startActivity(i);
 			}
 				break;
+			case R.drawable.conversation_discussion_button : {
+				Intent i = new Intent(
+						PublicIntent.START_DISCUSSION_BOARD_CREATE_ACTIVITY);
+				i.addCategory(PublicIntent.DEFAULT_CATEGORY);
+				context.startActivity(i);
+			}
+			break;
 				
 			case R.drawable.conversation_seach_member_button:
 			{

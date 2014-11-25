@@ -15,8 +15,6 @@ import java.util.concurrent.CopyOnWriteArraySet;
 
 import com.V2.jni.V2GlobalEnum;
 import com.V2.jni.util.V2Log;
-import com.v2tech.service.GlobalHolder;
-import com.v2tech.util.GlobalConfig;
 
 
 /**
@@ -44,7 +42,7 @@ public abstract class Group implements Comparable<Group> {
 		ORG(V2GlobalEnum.GROUP_TYPE_DEPARTMENT), CONTACT(
 				V2GlobalEnum.GROUP_TYPE_CONTACT), CHATING(
 				V2GlobalEnum.GROUP_TYPE_CROWD), CONFERENCE(
-				V2GlobalEnum.GROUP_TYPE_CONFERENCE), UNKNOWN(-1);
+				V2GlobalEnum.GROUP_TYPE_CONFERENCE), DISCUSSION(V2GlobalEnum.GROUP_TYPE_DISCUSSION),UNKNOWN(-1);
 
 		private int type;
 
@@ -62,6 +60,8 @@ public abstract class Group implements Comparable<Group> {
 				return CHATING;
 			case V2GlobalEnum.GROUP_TYPE_CONFERENCE:
 				return CONFERENCE;
+			case V2GlobalEnum.GROUP_TYPE_DISCUSSION:
+				return DISCUSSION;
 			default:
 				return UNKNOWN;
 

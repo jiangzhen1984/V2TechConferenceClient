@@ -442,6 +442,8 @@ public class GroupRequest {
 			list = XmlAttributeExtractor.parseContactsGroup(sXml);
 		} else if (groupType == V2Group.TYPE_ORG) {
 			list = XmlAttributeExtractor.parseOrgGroup(sXml);
+		} else if (groupType == V2Group.TYPE_DISCUSSION_BOARD) {
+			list = XmlAttributeExtractor.parseDiscussionGroup(sXml);
 		}
 		for (int i = 0; i < this.mCallbacks.size(); i++) {
 			WeakReference<GroupRequestCallback> wrcb = this.mCallbacks.get(i);
@@ -550,7 +552,7 @@ public class GroupRequest {
 	 */
 	private void OnAddGroupInfo(int groupType, long nParentID, long nGroupID,
 			String sXml) {
-		V2Log.e(TAG , "OnSendChatResult ---> groupType :"
+		V2Log.e(TAG , "OnAddGroupInfo ---> groupType :"
                 + groupType + " | nParentID: " + nParentID + " | nGroupID: "
                 + nGroupID + " | sXml: " + sXml);
 
@@ -565,9 +567,11 @@ public class GroupRequest {
 		if (gid != null && !gid.isEmpty() && createUesrID != null) {
 			vg.owner = new V2User(Long.valueOf(createUesrID));
 			vg.creator = vg.owner;
-            vg.announce = announcement;
-            vg.authType = Integer.valueOf(authType);
-            vg.groupSize = Integer.valueOf(groupSize);
+            if (groupType == V2GlobalEnum.GROUP_TYPE_CROWD) {
+            	vg.announce = announcement;
+	            vg.authType = Integer.valueOf(authType);
+	            vg.groupSize = Integer.valueOf(groupSize);
+            }
 		}else{
 			V2Log.e("OnAddGroupInfo:: parse xml failed , don't get group id or user id ...." + sXml);
 		}

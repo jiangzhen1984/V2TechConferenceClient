@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <string name="contacts_default_group_name">我的好友</string>
     <string name="contacts_title">组织结构</string>
     <string name="contacts_detail_title">个人资料</string>
     <string name="contacts_user_action_invite_chat">发 起 聊 天</string>

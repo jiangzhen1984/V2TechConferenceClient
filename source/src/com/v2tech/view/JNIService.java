@@ -43,7 +43,6 @@ import com.V2.jni.VideoRequest;
 import com.V2.jni.VideoRequestCallbackAdapter;
 import com.V2.jni.ind.AudioJNIObjectInd;
 import com.V2.jni.ind.FileJNIObject;
-import com.V2.jni.ind.GroupAddUserJNIObject;
 import com.V2.jni.ind.GroupJoinErrorJNIObject;
 import com.V2.jni.ind.GroupQualicationJNIObject;
 import com.V2.jni.ind.SendingResultJNIObjectInd;
@@ -57,7 +56,6 @@ import com.v2tech.db.ContentDescriptor;
 import com.v2tech.service.BitmapManager;
 import com.v2tech.service.CrowdGroupService;
 import com.v2tech.service.GlobalHolder;
-import com.v2tech.service.jni.CreateCrowdResponse;
 import com.v2tech.service.jni.FileDownLoadErrorIndication;
 import com.v2tech.service.jni.JNIResponse;
 import com.v2tech.util.GlobalConfig;
@@ -947,13 +945,14 @@ public class JNIService extends Service implements
 
 				long id = -1;
 				if (user.uid != GlobalHolder.getInstance().getCurrentUserId()) {
-					if (CrowdGroupService.isLocalInvite) {
-						id = MessageBuilder.updateQualicationMessageState(
-								nGroupID, user.uid, new GroupQualicationState(
-										Type.CROWD_APPLICATION,
-										QualificationState.BE_ACCEPTED, null,
-										ReadState.UNREAD, true));
-					} else {
+					//FIXME should not static variable
+//					if (CrowdGroupService.isLocalInvite) {
+//						id = MessageBuilder.updateQualicationMessageState(
+//								nGroupID, user.uid, new GroupQualicationState(
+//										Type.CROWD_APPLICATION,
+//										QualificationState.BE_ACCEPTED, null,
+//										ReadState.UNREAD, true));
+//					} else {
 						Group group = GlobalHolder.getInstance().getGroupById(
 								groupType, nGroupID);
 						if (group == null) {
@@ -971,7 +970,7 @@ public class JNIService extends Service implements
 											QualificationState.ACCEPTED, null,
 											ReadState.UNREAD, false));
 						}
-					}
+					//}
 				}
 
 				if (id == -1) {

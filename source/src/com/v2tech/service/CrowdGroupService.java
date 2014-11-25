@@ -13,28 +13,24 @@ import com.V2.jni.GroupRequestCallbackAdapter;
 import com.V2.jni.ind.FileJNIObject;
 import com.V2.jni.ind.GroupAddUserJNIObject;
 import com.V2.jni.ind.GroupFileJNIObject;
-import com.V2.jni.ind.GroupQualicationJNIObject;
 import com.V2.jni.ind.V2Group;
 import com.V2.jni.ind.V2User;
 import com.V2.jni.util.V2Log;
 import com.v2tech.service.jni.CreateCrowdResponse;
+import com.v2tech.service.jni.CreateDiscussionBoardResponse;
 import com.v2tech.service.jni.FileTransStatusIndication;
 import com.v2tech.service.jni.FileTransStatusIndication.FileTransErrorIndication;
 import com.v2tech.service.jni.FileTransStatusIndication.FileTransProgressStatusIndication;
 import com.v2tech.service.jni.JNIResponse;
 import com.v2tech.service.jni.RequestFetchGroupFilesResponse;
 import com.v2tech.util.GlobalConfig;
-import com.v2tech.view.conversation.MessageBuilder;
 import com.v2tech.vo.Crowd;
 import com.v2tech.vo.CrowdGroup;
+import com.v2tech.vo.DiscussionGroup;
 import com.v2tech.vo.Group;
 import com.v2tech.vo.Group.GroupType;
-import com.v2tech.vo.GroupQualicationState;
 import com.v2tech.vo.User;
 import com.v2tech.vo.VCrowdFile;
-import com.v2tech.vo.VMessageQualification.QualificationState;
-import com.v2tech.vo.VMessageQualification.ReadState;
-import com.v2tech.vo.VMessageQualification.Type;
 
 //组别统一名称
 //1:部门, organizationGroup
@@ -58,6 +54,10 @@ public class CrowdGroupService extends AbstractHandler {
 	private static final int REFUSE_APPLICATION_CROWD = 0x0007;
 	private static final int FETCH_FILES_CROWD = 0x0008;
 	private static final int REMOVE_FILES_CROWD = 0x0009;
+	
+	
+	private static final int QUIT_DISCUSSION_BOARD = 0x000A;
+	private static final int CREATE_DISCUSSION_BOARD = 0x000B;
 
 	private static final int KEY_CANCELLED_LISTNER = 1;
 	private static final int KEY_FILE_TRANS_STATUS_NOTIFICATION_LISTNER = 2;
@@ -72,7 +72,6 @@ public class CrowdGroupService extends AbstractHandler {
 	}
 
 	private long mPendingCrowdId;
-	public static boolean isLocalInvite;
 	private static boolean isInvoked;
 
 	public CrowdGroupService() {
@@ -102,13 +101,39 @@ public class CrowdGroupService extends AbstractHandler {
 		}
 		sb.append("</userlist>");
 
-		this.initTimeoutMessage(CREATE_GROUP_MESSAGE, DEFAULT_TIME_OUT_SECS,
+		this.initTimeoutMessage(CREATE_DISCUSSION_BOARD, DEFAULT_TIME_OUT_SECS,
 				caller);
 		GroupRequest.getInstance().createGroup(
 				Group.GroupType.CHATING.intValue(), crowd.toXml(),
 				sb.toString());
 
 	}
+	
+	
+	/**
+	 * 
+	 * @param discussion
+	 * @param invationUserList
+	 * @param caller
+	 */
+	public void createDiscussionBoard(DiscussionGroup discussion, List<User> invationUserList,
+			MessageListener caller) {
+		StringBuffer sb = new StringBuffer();
+		sb.append("<userlist>");
+		for (User u : invationUserList) {
+			sb.append(" <user id=\"" + u.getmUserId() + "\" />");
+		}
+		sb.append("</userlist>");
+
+		this.initTimeoutMessage(CREATE_DISCUSSION_BOARD, DEFAULT_TIME_OUT_SECS,
+				caller);
+		GroupRequest.getInstance().createGroup(
+				Group.GroupType.DISCUSSION.intValue(), discussion.toXml(),
+				sb.toString());
+
+	}
+	
+	
 
 	/**
 	 * Accept invitation
@@ -292,16 +317,41 @@ public class CrowdGroupService extends AbstractHandler {
 					crowd.getGroupType().intValue(), crowd.getmGId());
 		}
 	}
+	
+	
+	
+	/**
+	 * Quit from discussion board. <br>
+	 * 
+	 * @param crowd
+	 * @param caller
+	 */
+	public void quitDiscussionBoard(DiscussionGroup discussion, MessageListener caller) {
+		if (!checkParamNull(caller, discussion)) {
+			return;
+		}
+
+		if (mPendingCrowdId > 0) {
+			super.sendResult(caller, new JNIResponse(JNIResponse.Result.FAILED));
+			return;
+		}
+		mPendingCrowdId = discussion.getmGId();
+		initTimeoutMessage(QUIT_DISCUSSION_BOARD, DEFAULT_TIME_OUT_SECS, caller);
+		GroupRequest.getInstance().leaveGroup(
+				discussion.getGroupType().intValue(), discussion.getmGId());
+	}
+	
+	
 
 	/**
-	 * Invite new member to join crowd.<br>
-	 * Notice: call this API after crowd is created.
+	 * Invite new member to join crowd or discussion board.<br>
+	 * Notice: call this API after group is created.
 	 * 
 	 * @param crowd
 	 * @param newMembers
 	 * @param caller
 	 */
-	public void inviteMember(CrowdGroup crowd, List<User> newMembers,
+	public void inviteMember(Group crowd, List<User> newMembers,
 			MessageListener caller) {
 		if (!checkParamNull(caller, new Object[] { crowd, newMembers })) {
 			return;
@@ -313,7 +363,6 @@ public class CrowdGroupService extends AbstractHandler {
 			}
 			return;
 		}
-		isLocalInvite = true;
 		StringBuffer members = new StringBuffer();
 		members.append("<userlist> ");
 		for (User at : newMembers) {
@@ -338,7 +387,7 @@ public class CrowdGroupService extends AbstractHandler {
 	 * @param member
 	 * @param caller
 	 */
-	public void removeMember(CrowdGroup crowd, User member,
+	public void removeMember(Group crowd, User member,
 			MessageListener caller) {
 		if (!checkParamNull(caller, new Object[] { crowd, member })) {
 			return;
@@ -561,6 +610,11 @@ public class CrowdGroupService extends AbstractHandler {
 				JNIResponse jniRes = new JNIResponse(JNIResponse.Result.SUCCESS);
 				Message.obtain(mCallbackHandler, QUIT_CROWD, jniRes)
 						.sendToTarget();
+			} else if (groupType == GroupType.DISCUSSION.intValue() && nGroupID == mPendingCrowdId) {
+					
+				JNIResponse jniRes = new JNIResponse(JNIResponse.Result.SUCCESS);
+				Message.obtain(mCallbackHandler, QUIT_DISCUSSION_BOARD, jniRes)
+						.sendToTarget();
 			}
 		}
 
@@ -597,6 +651,15 @@ public class CrowdGroupService extends AbstractHandler {
 								+ "already time out , group id is : "
 								+ group.id + " group name is : " + group.name);
 					}
+				}
+			} else if (group.type == V2Group.TYPE_DISCUSSION_BOARD) {
+				
+				if (GlobalHolder.getInstance().getCurrentUserId() == group.owner.uid) {
+					// Create a new discussion board group by current logged user
+					JNIResponse jniRes = new CreateDiscussionBoardResponse(group.id,
+							JNIResponse.Result.SUCCESS);
+					Message.obtain(mCallbackHandler, CREATE_DISCUSSION_BOARD,
+							jniRes).sendToTarget();
 				}
 			}
 		}

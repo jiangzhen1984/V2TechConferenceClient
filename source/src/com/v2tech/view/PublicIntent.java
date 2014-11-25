@@ -13,6 +13,10 @@ public class PublicIntent {
 	public static final int APPLICATION_STATUS_BAR_NOTIFICATION = 3;
 
 	public static final String DEFAULT_CATEGORY = "com.v2tech";
+	
+	//======================================================================================
+	//                            for P2P conversation
+	//======================================================================================
 	/**
 	 * Used to start conversation UI
 	 */
@@ -22,6 +26,11 @@ public class PublicIntent {
 
 	public static final String START_VIDEO_IMAGE_GALLERY = "com.v2tech.image_gallery";
 
+
+	public static final String UPDATE_CONVERSATION = "com.v2tech.update_conversation";
+	
+	
+	
 	/**
 	 * Start conference create activity<br>
 	 * key uid: pre-selected user id
@@ -32,14 +41,21 @@ public class PublicIntent {
 	public static final String START_ABOUT_ACTIVITY = "com.v2tech.start_about_activity";
 
 	public static final String START_SETTING_ACTIVITY = "com.v2tech.start_setting_activity";
+	
+	//======================================================================================
+	//                            for conference
+	//======================================================================================
 
 	public static final String START_GROUP_CREATE_ACTIVITY = "com.v2tech.start_group_create_activity";
-
+	
+	
+	//======================================================================================
+	//                            for crowd
+	//======================================================================================
+	
 	public static final String START_CROWD_MEMBERS_ACTIVITY = "com.v2tech.start_crowd_members_activity";
 
 	public static final String START_CROWD_FILES_ACTIVITY = "com.v2tech.start_crowd_files_activity";
-
-	public static final String UPDATE_CONVERSATION = "com.v2tech.update_conversation";
 
 	public static final String SHOW_CROWD_CONTENT_ACTIVITY = "com.v2tech.crowd_content_activity";
 
@@ -48,6 +64,40 @@ public class PublicIntent {
 	public static final String SHOW_CONTACT_DETAIL_ACTIVITY = "com.v2tech.contact_detail_activity";
 
 	public static final String SHOW_CONTACT_DETAIL_DETAIL_ACTIVITY = "com.v2tech.contact_detail_detail_activity";
+	
+	
+	//======================================================================================
+	//                            for discussion board
+	//======================================================================================
+
+	/**
+	 * for DiscussionBoardCreateActivity <br>
+	 * Intent parameters:<br>
+	 * mode : true means in invitation mode, otherwise in create mode
+	 */
+	public static final String START_DISCUSSION_BOARD_CREATE_ACTIVITY = "com.v2tech.discussion_board_create_activity";
+	
+	/**
+	 * for DiscussionBoardDetailActivity<br>
+	 * Intent key:<br>
+	 *      cid  : discussion board id<br>
+	 */
+	public static final String SHOW_DISCUSSION_BOARD_DETAIL_ACTIVITY = "com.v2tech.discussion_board_detail_activity";
+	
+	/**
+	 * for DiscussionBoardDetailActivity<br>
+	 * Intent key:<br>
+	 *      cid  : discussion board id<br>
+	 */
+	public static final String SHOW_DISCUSSION_BOARD_TOPIC_ACTIVITY = "com.v2tech.discussion_board_topic_activity";
+	
+	/**
+	 * for DiscussionBoardMembersActivity<br>
+	 * Intent key:<br>
+	 *      cid  : discussion board id<br>
+	 */
+	public static final String SHOW_DISCUSSION_BOARD_MEMBERS_ACTIVITY = "com.v2tech.discussion_board_members_activity";
+	
 
 	/**
 	 * key : crowd : object of crowd
@@ -61,7 +111,11 @@ public class PublicIntent {
 	 */
 	public static final String START_SEARCH_ACTIVITY = "com.v2tech.start_search_activity";
 	
-
+	
+	
+	// ===========================Broadcast==============================
+	// 
+	//
 	/**
 	 * extras key: obj value:
 	 * {@link com.v2tech.view.bo.ConversationNotificationObject}
@@ -72,13 +126,14 @@ public class PublicIntent {
 
 	public static final String PREPARE_FINISH_APPLICATION = "com.v2tech.prepare_finish_application";
 
-	// ===========================Broadcast not for start activity
-	// 
+
 	/**
-	 * broadcast for new crowd notification, if user created to user is invited<br>
+	 * broadcast for new crowd notification. if current logged in user created, this broadcast will be sent<br>
 	 * key : crowd : crowd id 
 	 */
 	public static final String BROADCAST_NEW_CROWD_NOTIFICATION = "com.v2tech.jni.broadcast.new_crowd_notification";
+	
+
 	
 	/**
 	 * Broadcast for user update the comment name
@@ -92,9 +147,17 @@ public class PublicIntent {
 	 * 
 	 */
 	public static final String BROADCAST_NEW_CONFERENCE_NOTIFICATION = "com.v2tech.jni.broadcast.new_conference_notification";
-	// Request update contacts group
+	
+	
+	/**
+	 * 
+	 */
 	public static final String BROADCAST_REQUEST_UPDATE_CONTACTS_GROUP = "com.v2tech.broadcast.update_contacts_group";
-	// Broadcast for crowd is deleted notification
+	
+	
+	/**
+	 * 
+	 */
 	public static final String BROADCAST_CROWD_DELETED_NOTIFICATION = "com.v2tech.broadcast.crowd_deleted_notification";
 	
 	/**
@@ -119,6 +182,18 @@ public class PublicIntent {
 	 * key: confid conference if 
 	 */
 	public static final String BROADCAST_JOINED_CONFERENCE_NOTIFICATION = "com.v2tech.broadcast.joined_conference_notification";
+	
+	
+	
+	
+	//==============================================================
+	//             broadcast  for discussion board
+	//==============================================================
+	/**
+	 * broadcast for new discussion board notification.  if current logged in user created, this broadcast will be sent<br>
+	 * key : discussion : discussion board id 
+	 */
+	public static final String BROADCAST_NEW_DISCUSSION_BOARD_NOTIFICATION = "com.v2tech.jni.broadcast.new_discussion_board_notification";
 
 
 }

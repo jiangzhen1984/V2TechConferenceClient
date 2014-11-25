@@ -31,6 +31,12 @@ public class V2Group {
 	 */
 	public static final int TYPE_CONF = V2GlobalEnum.GROUP_TYPE_CONFERENCE;
 	
+	
+	/**
+	 * Discussion board
+	 */
+	public static final int TYPE_DISCUSSION_BOARD = V2GlobalEnum.GROUP_TYPE_DISCUSSION;
+	
 	public long id;
 	public String name;
 	public int type;

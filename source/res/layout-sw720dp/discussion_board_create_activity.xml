@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".view.conference.GroupCreateActivity" >
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical" >
+        <include layout="@layout/common_activity_title_layout" />
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="1dp"
+            android:background="#cdcdcf"
+            android:orientation="vertical" >
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/group_create_error_notification"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#FFDEAD"
+            android:visibility="gone" >
+            <TextView
+                android:id="@+id/group_create_error_notification_hints"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal|center"
+                android:layout_marginBottom="4dp"
+                android:layout_marginTop="4dp"
+                android:gravity="center_horizontal"
+                android:text="@string/crowd_create_activity_error_info"
+                android:textColor="@color/common_item_text_color_red"
+                android:textSize="12sp" />
+        </LinearLayout>
+        <RelativeLayout
+            android:id="@+id/RelativeLayout2"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/confs_search_bar_bg"
+            android:orientation="horizontal" >
+            <EditText
+                android:id="@+id/contacts_search"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_alignParentLeft="true"
+                android:layout_gravity="center_vertical"
+                android:layout_marginBottom="10dp"
+                android:layout_marginLeft="30dp"
+                android:layout_marginRight="30dp"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/input_bg"
+                android:inputType="text"
+                android:paddingLeft="50dp"
+                android:imeOptions="actionDone"
+                android:textColor="#000000"
+                android:textSize="18sp" >
+            </EditText>
+            <ImageView
+                android:id="@+id/imageView1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBottom="@+id/contacts_search"
+                android:layout_alignLeft="@+id/contacts_search"
+                android:layout_alignTop="@+id/contacts_search"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="10dp"
+                android:src="@drawable/group_list_search_button" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="1dp"
+                android:layout_below="@+id/contacts_search" />
+        </RelativeLayout>
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="1dp"
+            android:background="#cdcdcf"
+            android:orientation="vertical" >
+        </LinearLayout>
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:background="#ffffff"
+        android:orientation="horizontal" >
+        <com.v2tech.view.widget.GroupListView
+            android:id="@+id/discussion_board_create_contacts_list"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight=".5"
+            android:divider="@null"
+            android:focusable="false" >
+        </com.v2tech.view.widget.GroupListView>
+        <LinearLayout
+            android:layout_width="1dp"
+            android:layout_height="match_parent"
+            android:background="#cdcdcf"
+            android:orientation="vertical" >
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight=".5"
+            android:background="@color/confs_search_bar_bg"
+            android:orientation="vertical" >
+            <ListView
+                android:id="@+id/discussion_board_create_list_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_margin="15dp"
+                android:divider="#f2f2f2"
+                android:background="@drawable/rounded_corners_create_conf_box_bg"
+                android:tag="vertical" >
+            </ListView>
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>

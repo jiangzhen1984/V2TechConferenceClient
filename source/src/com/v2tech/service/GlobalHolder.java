@@ -15,11 +15,13 @@ import android.util.SparseArray;
 import com.V2.jni.V2GlobalEnum;
 import com.V2.jni.ind.V2Group;
 import com.V2.jni.util.V2Log;
+import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.GlobalState;
 import com.v2tech.vo.AddFriendHistorieNode;
 import com.v2tech.vo.ConferenceGroup;
 import com.v2tech.vo.ContactGroup;
 import com.v2tech.vo.CrowdGroup;
+import com.v2tech.vo.DiscussionGroup;
 import com.v2tech.vo.Group;
 import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.OrgGroup;
@@ -39,6 +41,8 @@ public class GlobalHolder {
 	private List<Group> mContactsGroup = new ArrayList<Group>();
 
 	private List<Group> mCrowdGroup = new ArrayList<Group>();
+	
+	private List<Group> mDiscussionBoardGroup = new ArrayList<Group>();
 
 	private Map<Long, User> mUserHolder = new HashMap<Long, User>();
 	private Map<Long, Group> mGroupHolder = new HashMap<Long, Group>();
@@ -236,9 +240,14 @@ public class GlobalHolder {
 				g = new ContactGroup(vg.id, vg.name);
 				if (vg.isDefault) {
 					((ContactGroup) g).setDefault(true);
+					g.setName(GlobalConfig.Resource.CONTACT_DEFAULT_GROUP_NAME);
 				}
 
 				mContactsGroup.add(g);
+			}  else if (gType == V2GlobalEnum.GROUP_TYPE_DISCUSSION) {
+				User owner = GlobalHolder.getInstance().getUser(vg.owner.uid);
+				g = new DiscussionGroup(vg.id, vg.name, owner, null);
+				mDiscussionBoardGroup.add(g);
 			} else {
 				throw new RuntimeException(" Can not support this type");
 			}
@@ -259,6 +268,8 @@ public class GlobalHolder {
 			this.mCrowdGroup.add(g);
 		} else if (groupType == V2GlobalEnum.GROUP_TYPE_CONTACT) {
 			this.mContactsGroup.add(g);
+		}  else if (groupType == V2GlobalEnum.GROUP_TYPE_DISCUSSION) {
+			this.mDiscussionBoardGroup.add(g);
 		}
 		mGroupHolder.put(Long.valueOf(g.getmGId()), g);
 	}

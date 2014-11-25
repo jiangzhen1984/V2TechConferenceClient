@@ -77,4 +77,17 @@
     
     
     <string name="crowd_message_deletion_mode_quit_required">请先先退出删除模式!</string>
+    
+    
+    <!-- =================Discussion board============================ -->
+    <string name="discussion_create_activity_title">创建讨论组</string>
+    <string name="discussion_board_detail_settings">聊天设置</string>
+    <string name="discussion_board_detail_quit_button">退出该讨论组</string>
+    <string name="discussion_board_detail_name">讨论组主题</string>
+    <string name="discussion_board_detail_members">讨论组成员</string>
+    <string name="discussion_board_detail_quit_confirm_title">确定退出讨论组吗?</string>
+    <string name="discussion_board_members_title">讨论组成员</string>
+    <string name="discussion_board_members_invitation_button_text">添加</string>
+    <string name="discussion_board_members_deletion_mode_quit_button">完成</string>
+    
 </resources>
