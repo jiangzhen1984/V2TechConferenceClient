@@ -8,8 +8,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
+import com.V2.jni.V2GlobalEnum;
 import com.V2.jni.util.V2Log;
 import com.v2tech.service.GlobalHolder;
+import com.v2tech.view.conversation.MessageBodyView;
 
 public class VMessage {
 	
@@ -34,7 +36,11 @@ public class VMessage {
 
 	protected String mStrDateTime;
 
-	protected int mMsgCode;  //对应V2GlobalEnum中的groupType
+	/**
+	 * The flag Decides VMessage Object type
+	 *  @see V2GlobalEnum --> GroupType
+	 */
+	protected int mMsgCode;  
 
 	protected String mUUID;
 
@@ -46,12 +52,26 @@ public class VMessage {
 	
 	protected String mXmlDatas;
 	
+	/**
+	 * The flag decide that Whether should to display the Time View 
+	 * 	@see MessageBodyView --> timeTV variable
+	 */
 	protected boolean isShowTime;
+	
+	/**
+	 * This flag indicates that this VMessage Object is from resend or not , so as to decide
+	 * whether to display Sending Icon View
+	 * 	@see MessageBodyView --> sendingIcon variable
+	 */
+	protected boolean isResendMessage;
+	
+	/**
+	 * This flag indicates that this VMessage Object is autio reply or not
+	 */
+	protected boolean isAutoReply;
 	
 	protected int readState;
 	
-	protected boolean isAutoReply;
-
 	protected List<VMessageAbstractItem> itemList;
 	
 	public VMessage(int groupType , long groupId, User fromUser , Date date) {
@@ -182,6 +202,13 @@ public class VMessage {
 		this.isLocal = isLocal;
 	}
 	
+	public boolean isResendMessage() {
+		return isResendMessage;
+	}
+
+	public void setResendMessage(boolean isResendMessage) {
+		this.isResendMessage = isResendMessage;
+	}
 	
 	public List<VMessageImageItem>  getImageItems() {
 		List<VMessageImageItem> imageItems = new ArrayList<VMessageImageItem>();

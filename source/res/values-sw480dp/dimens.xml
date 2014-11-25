@@ -98,6 +98,9 @@
     
     
     <dimen name="message_body_file_width">260dp</dimen>
+
+    <dimen name="message_body_view_item_bubble_space">-2.5dp</dimen>  <!-- 气泡间隙，三角与内容之间 -->
+    <dimen name="messageBodyView_triangle_margin_top">15dp</dimen> <!-- 三角距内容气泡的上边界的距离 -->
     
         <!-- message voice dialog layout -->
     <dimen name="message_voice_dialog_width">260dp</dimen>

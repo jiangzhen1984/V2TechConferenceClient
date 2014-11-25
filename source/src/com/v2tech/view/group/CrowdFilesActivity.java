@@ -686,7 +686,8 @@ public class CrowdFilesActivity extends Activity {
 				}
 				break;
 			case NEW_FILE_NOTIFICATION:
-                RequestFetchGroupFilesResponse newFileni = (RequestFetchGroupFilesResponse) msg.obj;
+				AsyncResult result = (AsyncResult) msg.obj;
+                RequestFetchGroupFilesResponse newFileni = (RequestFetchGroupFilesResponse) result.getResult();
 				if (newFileni.getResult() == JNIResponse.Result.SUCCESS) {
                     if(newFileni.getGroupID() == crowd.getmGId()) {
                         handleNewFileEvent(newFileni.getList());

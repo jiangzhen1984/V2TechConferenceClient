@@ -1,5 +1,18 @@
 package com.v2tech.view.conversation;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.sql.Date;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.NotificationManager;
@@ -20,6 +33,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
+import android.os.Parcelable;
 import android.text.Editable;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
@@ -102,20 +116,6 @@ import com.v2tech.vo.VMessageImageItem;
 import com.v2tech.vo.VMessageLinkTextItem;
 import com.v2tech.vo.VMessageTextItem;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.sql.Date;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.UUID;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 public class ConversationP2PTextActivity extends Activity {
 
 	private final int START_LOAD_MESSAGE = 1;
@@ -131,10 +131,12 @@ public class ConversationP2PTextActivity extends Activity {
 	private final int BATCH_COUNT = 10;
 	private static final int SELECT_PICTURE_CODE = 100;
 
+	private static final int SEND_MESSAGE_SUCCESS = 0;
 	private static final int VOICE_DIALOG_FLAG_RECORDING = 1;
 	private static final int VOICE_DIALOG_FLAG_CANCEL = 2;
 	private static final int VOICE_DIALOG_FLAG_WARING_FOR_TIME_TOO_SHORT = 3;
-	private static final String TAG = "ConversationActivity";
+	
+	private static final String TAG = "ConversationP2PTextActivity";
 	protected static final int RECEIVE_SELECTED_FILE = 1000;
 
 	private int offset = 0;
@@ -251,7 +253,7 @@ public class ConversationP2PTextActivity extends Activity {
 			}
 			backEndHandler = new BackendHandler(thread.getLooper());
 		}
-		// TODO for group conversation
+		
 		initExtraObject();
 		initBroadcast();
 		// Register listener for avatar changed
@@ -282,7 +284,7 @@ public class ConversationP2PTextActivity extends Activity {
 		filter.addCategory(PublicIntent.DEFAULT_CATEGORY);
 		filter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
 		filter.addAction(JNIService.JNI_BROADCAST_NEW_MESSAGE);
-		filter.addAction(JNIService.JNI_BROADCAST_MESSAGE_SENT_FAILED);
+		filter.addAction(JNIService.JNI_BROADCAST_MESSAGE_SENT_RESULT);
 		filter.addAction(PublicIntent.BROADCAST_CROWD_DELETED_NOTIFICATION);
 		filter.addAction(PublicIntent.BROADCAST_CROWD_QUIT_NOTIFICATION);
 		filter.addAction(JNIService.BROADCAST_CROWD_NEW_UPLOAD_FILE_NOTIFICATION);
@@ -365,6 +367,9 @@ public class ConversationP2PTextActivity extends Activity {
 		}
 	}
 	
+	/**
+	 * Get the number of files that file state is transing , and put variable into the global collections
+	 */
 	private void initTransingObserver() {
 		List<VMessageFileItem> files;
 		int count = 0;
@@ -445,7 +450,7 @@ public class ConversationP2PTextActivity extends Activity {
 	@Override
 	protected void onStart() {
 		super.onStart();
-		V2Log.e(TAG, "entry onStart....");
+		V2Log.d(TAG, "entry onStart....");
 		if (!mIsInited && !mLoadedAllMessages) {
 			android.os.Message m = android.os.Message.obtain(lh,
 					START_LOAD_MESSAGE);
@@ -672,28 +677,40 @@ public class ConversationP2PTextActivity extends Activity {
 		});
 	}
 
-	private void scrollToPos(final int pos) {
-		if (pos < 0 || pos >= messageArray.size()) {
-			V2Log.d(TAG, "参数pos不合法 :" + pos);
+	private void scrollToPos(int pos) {
+        V2Log.d(TAG, "currentItemPos:--" + currentItemPos);
+		if (pos <= 0){
+            V2Log.d(TAG, "没有加载到数据 :" + pos);
+            return;
+        }
+
+        if(pos >= messageArray.size()) {
+			V2Log.d(TAG, "参数不合法或没有加载到数据 :" + pos);
 			return;
 		}
-		
+
+//        if(pos >= 3)
+//            mMessagesContainer.setSelection(pos + 3);
+//        else
+//            mMessagesContainer.setSelection(pos);
+
 		if(isCreate){
 			isCreate = false;
 			mMessagesContainer.setSelection(pos);
 		}
 		else{
-			adapter.notifyDataSetChanged();
-			// 次为了解决setSelection无效的问题，虽然能解决，但会造成界面卡顿。直接setSelection而不notifyDataSetChanged即可
-			mMessagesContainer.post(new Runnable() {
-	
-				@Override
-				public void run() {
-					mMessagesContainer.setSelection(pos);
-	
-				}
-	
-			});
+            adapter.notifyDataSetChanged();
+             mMessagesContainer.setSelectionFromTop(LastFistItem, LastFistItemOffset);
+//			// 次为了解决setSelection无效的问题，虽然能解决，但会造成界面卡顿。直接setSelection而不notifyDataSetChanged即可
+//			mMessagesContainer.post(new Runnable() {
+//
+//				@Override
+//				public void run() {
+//					mMessagesContainer.setSelection(pos);
+//
+//				}
+//
+//			});
 		}
 	}
 
@@ -710,12 +727,16 @@ public class ConversationP2PTextActivity extends Activity {
 			}
 
 			if (found) {
-				V2Log.d(TAG,
-						"start palying next aduio item , id is : " + vm.getId());
 				List<VMessageAudioItem> items = vm.getAudioItems();
 				if (items.size() > 0
-						&& items.get(0).getState() == VMessageAbstractItem.STATE_UNREAD) {
-					this.scrollToPos(i);
+						&& items.get(0).getReadState() == VMessageAbstractItem.STATE_UNREAD) {
+                    V2Log.d(TAG,
+                            "start palying next aduio item , id is : " + vm.getId() +
+                                    "and index in collections is : " + i + " collections size is : " + messageArray.size());
+                    VMessageAudioItem audio = items.get(0);
+                    int length = messageArray.size();
+                    if(i != 0)
+                        mMessagesContainer.setSelection(i);
 					MessageBodyView foundView = (MessageBodyView) wrapper
 							.getView();
 					if (foundView == null) {
@@ -727,9 +748,8 @@ public class ConversationP2PTextActivity extends Activity {
 						foundView = bodyView;
 						((VMessageAdater) wrapper).setView(bodyView);
 					}
-					VMessageAudioItem vMessageAudioItem = items.get(0);
-					listener.requestPlayAudio(foundView, vm, vMessageAudioItem);
-					foundView.updateUnreadFlag(false, vMessageAudioItem);
+					listener.requestPlayAudio(foundView, vm, audio);
+					foundView.updateUnreadFlag(false, audio);
 					return true;
 				}
 			}
@@ -1884,7 +1904,7 @@ public class ConversationP2PTextActivity extends Activity {
 		vm.setmXmlDatas(vm.toXml());
 		vm.setState(VMessageAbstractItem.STATE_NORMAL);
 		vm.setDate(new Date(GlobalConfig.getGlobalServerTime()));
-
+		
 		MessageBuilder.saveMessage(this, vm);
 		MessageBuilder.saveFileVMessage(this, vm);
 		MessageBuilder.saveBinaryVMessage(this, vm);
@@ -1971,6 +1991,8 @@ public class ConversationP2PTextActivity extends Activity {
 		adapter.notifyDataSetChanged();
 	}
 
+    private int LastFistItem;
+    private int LastFistItemOffset;
 	private OnScrollListener scrollListener = new OnScrollListener() {
 		boolean scrolled = false;
 		int lastFirst = 0;
@@ -1987,6 +2009,10 @@ public class ConversationP2PTextActivity extends Activity {
 				android.os.Message.obtain(lh, START_LOAD_MESSAGE)
 						.sendToTarget();
 				currentItemPos = first;
+                LastFistItem = mMessagesContainer.getFirstVisiblePosition();
+                V2Log.e(TAG , "First visible position is : " + LastFistItem);
+                View v = mMessagesContainer.getChildAt(0);
+                LastFistItemOffset = (v == null) ? 0 : v.getTop();
 				// Do not clean image message state when loading message
 			} else {
 				if (lastFirst != first) {
@@ -2073,6 +2099,7 @@ public class ConversationP2PTextActivity extends Activity {
 		@Override
 		public void reSendMessageClicked(VMessage v) {
 			v.setState(VMessageAbstractItem.STATE_NORMAL);
+			v.setResendMessage(true);
 			List<VMessageAbstractItem> items = v.getItems();
 			for (int i = 0; i < items.size(); i++) {
 				VMessageAbstractItem item = items.get(i);
@@ -2084,6 +2111,8 @@ public class ConversationP2PTextActivity extends Activity {
 					item.setState(VMessageAbstractItem.STATE_NORMAL);
 			}
 			int update = MessageLoader.updateChatMessageState(mContext, v);
+			if(update <= 0)
+				V2Log.e(TAG, "Update chatMessage state failed...message uuid is : " + v.getUUID());
 			Message.obtain(lh, SEND_MESSAGE, v).sendToTarget();
 			notificateConversationUpdate(true, v.getId());
 		}
@@ -2534,11 +2563,9 @@ public class ConversationP2PTextActivity extends Activity {
 						vm.isShowTime());
 				mv.setCallback(listener);
 				((VMessageAdater) wrapper).setView(mv);
-
 			}
 			return wrapper.getView();
 		}
-
 	}
 
 	class MessageReceiver extends BroadcastReceiver {
@@ -2575,18 +2602,33 @@ public class ConversationP2PTextActivity extends Activity {
 						}
 					}
 				}
-			} else if (JNIService.JNI_BROADCAST_MESSAGE_SENT_FAILED
+			} else if (JNIService.JNI_BROADCAST_MESSAGE_SENT_RESULT
 					.equals(intent.getAction())) {
+				int result = intent.getExtras().getInt("errorCode");
 				String uuid = intent.getExtras().getString("uuid");
 				for (int i = 0; i < messageArray.size(); i++) {
 					VMessage vm = (VMessage) messageArray.get(i)
 							.getItemObject();
 					if (vm.getUUID().equals(uuid)) {
-						vm.setState(VMessageAbstractItem.STATE_SENT_FALIED);
 						MessageBodyView mdv = ((MessageBodyView) messageArray
 								.get(i).getView());
 						if (mdv != null) {
-							mdv.updateFailedFlag(true);
+							mdv.updateSendingFlag(false);
+							if(result != SEND_MESSAGE_SUCCESS)
+								mdv.updateFailedFlag(true);
+						}
+						
+						if(result == SEND_MESSAGE_SUCCESS)
+							vm.setState(VMessageAbstractItem.STATE_SENT_SUCCESS);
+						else
+							vm.setState(VMessageAbstractItem.STATE_SENT_FALIED);
+						
+						if(result == SEND_MESSAGE_SUCCESS){
+							CommonAdapterItemWrapper wrapper = messageArray.get(i);
+							messageArray.remove(wrapper);
+							messageArray.add(wrapper);
+							adapter.notifyDataSetChanged();
+							scrollToBottom();
 						}
 						break;
 					}
@@ -2595,15 +2637,18 @@ public class ConversationP2PTextActivity extends Activity {
 					for (int j = 0; j < items.size(); j++) {
 						VMessageAbstractItem item = items.get(j);
 						if (uuid.equals(item.getUuid())) {
+//							MessageBodyView mdv = ((MessageBodyView) messageArray
+//									.get(i).getView());
+//							if (mdv != null){
+//								mdv.updateSendingFlag(false);
+//								if(result != SEND_MESSAGE_SUCCESS)
+//									mdv.updateFailedFlag(true);
+//							}
+							
 							if (item.getType() == VMessageAbstractItem.ITEM_TYPE_FILE)
 								item.setState(VMessageAbstractItem.STATE_FILE_SENT_FALIED);
 							else
 								item.setState(VMessageAbstractItem.STATE_SENT_FALIED);
-
-							MessageBodyView mdv = ((MessageBodyView) messageArray
-									.get(i).getView());
-							if (mdv != null)
-								mdv.updateFailedFlag(true);
 							break;
 						}
 					}
@@ -2691,19 +2736,22 @@ public class ConversationP2PTextActivity extends Activity {
 						else
 							array.get(i).setShowTime(false);
 					}
+
 					for (int i = 0; i < array.size(); i++) {
-						if (messageAllID.get((int) array.get(i).getId()) != null) {
-							Log.e(TAG, "happen erupt , the message ："
-									+ (int) array.get(i).getId()
-									+ "  already save in messageArray!");
-							loadSize = loadSize + 1;
-							continue;
-						}
-						messageAllID.append((int) array.get(i).getId(),
-								array.get(i));
-						messageArray.add(0, new VMessageAdater(array.get(i)));
+                        VMessage vm = array.get(i);
+                        if (messageAllID.get((int) vm.getId()) != null) {
+                            Log.e(TAG, "happen erupt , the message ："
+                                    + (int) array.get(i).getId()
+                                    + "  already save in messageArray!");
+                            loadSize = loadSize + 1;
+                            continue;
+                        }
+                        messageAllID.append((int) vm.getId(), vm);
+                        VMessageAdater adater = new VMessageAdater(vm);
+                        messageArray.add(0, adater);
 					}
 					V2Log.d(TAG, "当前消息集合大小" + messageArray.size());
+                    LastFistItem = LastFistItem + loadSize;
 					currentItemPos = loadSize - 1;
 					if (currentItemPos == -1)
 						currentItemPos = 0;
@@ -2730,7 +2778,6 @@ public class ConversationP2PTextActivity extends Activity {
 				isLoading = true;
 				break;
 			case END_LOAD_MESSAGE:
-				V2Log.d(TAG, "currentItemPos:--" + currentItemPos);
 				scrollToPos(currentItemPos);
 				isLoading = false;
 				// 处理从个人信息传递过来的文件
@@ -2740,7 +2787,8 @@ public class ConversationP2PTextActivity extends Activity {
 				}
 				break;
 			case SEND_MESSAGE:
-				mChat.sendVMessage((VMessage) msg.obj, new MessageListener(
+				VMessage sendMessage = (VMessage) msg.obj;
+				mChat.sendVMessage(sendMessage, new MessageListener(
 						this, SEND_MESSAGE_DONE, null));
 				break;
 			case SEND_MESSAGE_ERROR:

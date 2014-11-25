@@ -113,6 +113,7 @@
     <dimen name="message_voice_dialog_height">180dp</dimen>
     
         <!-- message body view layout -->
+    <dimen name="messageBodyView_triangle_margin_top">12dp</dimen> <!-- 三角距内容气泡的上边界的距离 -->
     <dimen name="message_body_view_item_bubble_space">-1.5dp</dimen>  <!-- 气泡间隙，三角与内容之间 -->
 	<dimen name="message_selected_pop_up_window">-6dp</dimen>
 	<dimen name="message_body_file_item_progress_layout_margin_right">300dp</dimen>

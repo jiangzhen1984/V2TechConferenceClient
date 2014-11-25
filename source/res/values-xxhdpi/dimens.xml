@@ -95,7 +95,9 @@
     <dimen name="fragment_conversation_connected_local_surface_margin_right">5dp</dimen>
     
         <!-- message body view layout -->
+    <dimen name="messageBodyView_triangle_margin_top">8dp</dimen> <!-- 三角距内容气泡的上边界的距离 -->
     <dimen name="message_body_view_item_bubble_space">-1dp</dimen>  <!-- 气泡间隙，三角与内容之间 -->
+
         <!-- message body file item layout -->
     <dimen name="message_body_file_item_file_name_text_size">7sp</dimen>
     <dimen name="message_body_file_item_file_name_text_margin_left">10dp</dimen>

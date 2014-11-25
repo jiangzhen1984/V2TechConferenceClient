@@ -124,7 +124,7 @@ public class JNIService extends Service implements
 	public static final String JNI_BROADCAST_GROUP_UPDATED = "com.v2tech.jni.broadcast.group_updated";
 	public static final String JNI_BROADCAST_GROUP_JOIN_FAILED = "com.v2tech.jni.broadcast.group_join_failed";
 	public static final String JNI_BROADCAST_NEW_MESSAGE = "com.v2tech.jni.broadcast.new.message";
-	public static final String JNI_BROADCAST_MESSAGE_SENT_FAILED = "com.v2tech.jni.broadcast.message_sent_failed";
+	public static final String JNI_BROADCAST_MESSAGE_SENT_RESULT = "com.v2tech.jni.broadcast.message_sent_result";
 	public static final String JNI_BROADCAST_NEW_CONF_MESSAGE = "com.v2tech.jni.broadcast.new.conf.message";
 	public static final String JNI_BROADCAST_CONFERENCE_INVATITION = "com.v2tech.jni.broadcast.conference_invatition_new";
 	public static final String JNI_BROADCAST_CONFERENCE_REMOVED = "com.v2tech.jni.broadcast.conference_removed";
@@ -1508,14 +1508,12 @@ public class JNIService extends Service implements
 								+ ind.getUuid());
 			}
 
-			if (ind.getRet() == SendingResultJNIObjectInd.Result.FAILED) {
-				Intent i = new Intent();
-				i.setAction(JNIService.JNI_BROADCAST_MESSAGE_SENT_FAILED);
-				i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
-				i.putExtra("uuid", ind.getUuid());
-				i.putExtra("errorCode", ind.getErrorCode());
-				sendBroadcast(i);
-			}
+			Intent i = new Intent();
+			i.setAction(JNIService.JNI_BROADCAST_MESSAGE_SENT_RESULT);
+			i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
+			i.putExtra("uuid", ind.getUuid());
+			i.putExtra("errorCode", ind.getErrorCode());
+			sendBroadcast(i);
 		}
 
 		private void handlerChatPictureCallback(int eGroupType, long nGroupID,
@@ -1575,7 +1573,6 @@ public class JNIService extends Service implements
 						VMessageAudioItem item = list.get(i);
 						if (item.getUuid().equals(messageId)) {
 							item.setAudioFilePath(binaryPath);
-							item.setState(VMessageAbstractItem.STATE_UNREAD);
 							cacheAudioMeta.remove(item);
 							vm = v;
 							break;

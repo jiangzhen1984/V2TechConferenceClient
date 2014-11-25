@@ -16,9 +16,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
-import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -37,7 +35,6 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListAdapter;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import com.V2.jni.util.V2Log;
@@ -59,8 +56,8 @@ import com.v2tech.view.widget.GroupListView.Item;
 import com.v2tech.vo.Conference;
 import com.v2tech.vo.ConferenceGroup;
 import com.v2tech.vo.Group;
-import com.v2tech.vo.NetworkStateCode;
 import com.v2tech.vo.Group.GroupType;
+import com.v2tech.vo.NetworkStateCode;
 import com.v2tech.vo.User;
 
 public class ConferenceCreateActivity extends Activity {

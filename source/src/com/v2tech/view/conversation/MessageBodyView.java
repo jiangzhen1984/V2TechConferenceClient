@@ -25,6 +25,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.ViewTreeObserver.OnPreDrawListener;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.view.animation.RotateAnimation;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
@@ -66,6 +69,8 @@ public class MessageBodyView extends LinearLayout {
 	private static final int MESSAGE_TYPE_TEXT = 11;
 	private static final int MESSAGE_TYPE_NON_TEXT = 12;
 
+	private static final int SENDING_CIRCLE_RATE = 600;
+	
 	private int messageType = MESSAGE_TYPE_TEXT;
 	private VMessage mMsg;
 	private ImageView mHeadIcon;
@@ -76,6 +81,7 @@ public class MessageBodyView extends LinearLayout {
 	private TextView name;
 	private View failedIcon;
 	private View unReadIcon;
+	private View sendingIcon;
 
 	private View rootView;
 
@@ -102,6 +108,8 @@ public class MessageBodyView extends LinearLayout {
 	private TextView pwResendTV;
 	private TextView pwCopyTV;
 	private TextView pwDeleteTV;
+	
+	private RotateAnimation anima;
 
 	public interface ClickListener {
 		public void onMessageClicked(VMessage v);
@@ -151,6 +159,13 @@ public class MessageBodyView extends LinearLayout {
 			V2Log.e(" root view is Null can not initialize");
 			return;
 		}
+		
+		anima = new RotateAnimation(0f, 360f, 
+				Animation.RELATIVE_TO_SELF, 0.5f, 
+				Animation.RELATIVE_TO_SELF, 0.5f);
+		anima.setDuration(SENDING_CIRCLE_RATE);
+		anima.setRepeatCount(RotateAnimation.INFINITE);
+		
 		timeTV = (TextView) rootView.findViewById(R.id.message_body_time_text);
 
 		mLocalMessageContainter = (LinearLayout) rootView
@@ -195,6 +210,8 @@ public class MessageBodyView extends LinearLayout {
 					.findViewById(R.id.message_body_failed_item_left);
 			unReadIcon = rootView
 					.findViewById(R.id.message_body_unread_icon_left);
+			sendingIcon = rootView
+					.findViewById(R.id.message_body_sending_icon_left);
 			mLocalMessageContainter.setVisibility(View.VISIBLE);
 			mRemoteMessageContainter.setVisibility(View.INVISIBLE);
 			User fromUser = mMsg.getFromUser();
@@ -216,6 +233,8 @@ public class MessageBodyView extends LinearLayout {
 					.findViewById(R.id.message_body_failed_item_right);
 			unReadIcon = rootView
 					.findViewById(R.id.message_body_unread_icon_right);
+			sendingIcon = rootView
+					.findViewById(R.id.message_body_sending_icon_right);
 			mLocalMessageContainter.setVisibility(View.INVISIBLE);
 			mRemoteMessageContainter.setVisibility(View.VISIBLE);
 
@@ -227,12 +246,18 @@ public class MessageBodyView extends LinearLayout {
 		failedIcon.setVisibility(View.INVISIBLE);
 		unReadIcon.setVisibility(View.GONE);
 		seconds.setVisibility(View.GONE);
+		sendingIcon.setVisibility(View.GONE);
 		mArrowIV.bringToFront();
+		
+		//执行发送时动画播放
+		if(mMsg.getState() == VMessageAbstractItem.STATE_NORMAL){
+			updateSendingFlag(true);
+		}
 
 		if (mMsg.getMsgCode() != V2GlobalEnum.GROUP_TYPE_USER)
 			name.setVisibility(View.VISIBLE);
 		else
-			name.setVisibility(View.GONE);
+			name.setVisibility(View.INVISIBLE);
 
 		if (mMsg.getFromUser() != null && mMsg.getFromUser().isDirty()) {
 			User fromUser = GlobalHolder.getInstance().getUser(
@@ -612,8 +637,15 @@ public class MessageBodyView extends LinearLayout {
 				anchor.getGlobalVisibleRect(r1);
 				int offsetXLocation = r1.left + offsetX;
 				int offsetYLocation = r1.top - (offsetY / 2);
-				pw.showAtLocation((View) anchor.getParent(),
-						Gravity.NO_GRAVITY, offsetXLocation, offsetYLocation);
+
+//                int height = anchor.getHeight();
+//                if(height < offsetYLocation){
+//                    pw.showAsDropDown((View) anchor.getParent(), offsetX,
+//                            offsetY);
+//                }
+//                else
+                pw.showAtLocation((View) anchor.getParent(),
+                        Gravity.NO_GRAVITY, offsetXLocation, offsetYLocation);
 				// } else {
 				// pw.showAsDropDown((View) anchor.getParent(), offsetX,
 				// offsetY);
@@ -658,6 +690,16 @@ public class MessageBodyView extends LinearLayout {
 			this.failedIcon.setVisibility(View.INVISIBLE);
 		} else {
 			this.failedIcon.setVisibility(View.VISIBLE);
+		}
+	}
+	
+	public void updateSendingFlag(boolean flag){
+		if (!flag) {
+			sendingIcon.setVisibility(View.GONE);
+			sendingIcon.clearAnimation();
+		} else {
+			sendingIcon.setVisibility(View.VISIBLE);
+			sendingIcon.startAnimation(anima);
 		}
 	}
 

@@ -280,7 +280,7 @@ public class MessageBuilder {
 					vMessageAudioItem.getSeconds());
 			values.put(
 					ContentDescriptor.HistoriesAudios.Cols.HISTORY_AUDIO_READ_STATE,
-					vMessageAudioItem.getState());
+					vMessageAudioItem.getReadState());
 			values.put(ContentDescriptor.HistoriesAudios.Cols.OWNER_USER_ID,
 					GlobalHolder.getInstance().getCurrentUserId());
 			uri = mContext.getContentResolver().insert(
