@@ -3,10 +3,8 @@ package com.v2tech.view.group;
 import java.util.List;
 
 import android.app.Activity;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.Gravity;
@@ -26,7 +24,6 @@ import android.widget.TextView;
 import com.v2tech.R;
 import com.v2tech.service.CrowdGroupService;
 import com.v2tech.service.GlobalHolder;
-import com.v2tech.view.JNIService;
 import com.v2tech.view.PublicIntent;
 import com.v2tech.vo.DiscussionGroup;
 import com.v2tech.vo.Group.GroupType;
@@ -109,6 +106,19 @@ public class DiscussionBoardMembersActivity extends Activity {
 		}
 		super.onBackPressed();
 	}
+	
+	
+	
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+		if (resultCode != Activity.RESULT_CANCELED) {
+			mMembers.clear();
+			mMembers = crowd.getUsers();
+			adapter.notifyDataSetChanged();
+		}
+	}
 
 	@Override
 	public void finish() {
@@ -163,7 +173,7 @@ public class DiscussionBoardMembersActivity extends Activity {
 				i.addCategory(PublicIntent.DEFAULT_CATEGORY);
 				i.putExtra("cid", crowd.getmGId());
 				i.putExtra("mode", true);
-				startActivity(i);
+				startActivityForResult(i, 100);
 			}
 		}
 

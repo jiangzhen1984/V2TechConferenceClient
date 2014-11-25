@@ -23,6 +23,8 @@
     <string name="title_bar_item_help">帮助</string>
     <string name="title_bar_item_about">关于</string>
     <string name="error_connect_to_server">无法链接到服务器，请确认网络链接</string>
+    <string name="error_offline_of_no_network">您已处于离线状态，无法发送该请求，请上线后在尝试</string>
+    
     <string name="error_connect_to_server_no_enough_resource">加密狗资源不足，请联系管理员</string>
     <string name="status_bar_title">正在运行..</string>
     <string name="status_bar_notification">通知</string>
@@ -30,6 +32,10 @@
     <string name="conversation_select_image_file_title">图片</string>
     <string name="conversation_select_file_title">文件</string>
     <string name="conversation_select_file_cannel">取消</string>
+    
+    <string name="conversation_crowd_tab_title">我的群</string>
+    <string name="conversation_discussion_tab_title">我的讨论组</string>
+    
     
     <string name="common_confirm_name">确定</string>
     <string name="common_return_name">返回</string>

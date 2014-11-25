@@ -80,6 +80,7 @@
     
     
     <!-- =================Discussion board============================ -->
+    <string name="discussion_create_invitation_title">添加成员</string>
     <string name="discussion_create_activity_title">创建讨论组</string>
     <string name="discussion_board_detail_settings">聊天设置</string>
     <string name="discussion_board_detail_quit_button">退出该讨论组</string>
@@ -89,5 +90,10 @@
     <string name="discussion_board_members_title">讨论组成员</string>
     <string name="discussion_board_members_invitation_button_text">添加</string>
     <string name="discussion_board_members_deletion_mode_quit_button">完成</string>
+    <string name="discussion_board_topic_udpate_button">完成</string>
+    <string name="discussion_board_topic_title">讨论组主题</string>
+    <string name="error_discussion_board_quit_failed">退出讨论组失败</string>
+    <string name="error_discussion_no_network">网络连接不可用，请稍后再试</string>
+    
     
 </resources>

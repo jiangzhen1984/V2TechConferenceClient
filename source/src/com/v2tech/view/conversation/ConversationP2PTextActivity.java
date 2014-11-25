@@ -33,7 +33,6 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
-import android.os.Parcelable;
 import android.text.Editable;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
@@ -101,8 +100,9 @@ import com.v2tech.view.group.CrowdFilesActivity.CrowdFileActivityType;
 import com.v2tech.view.widget.CommonAdapter;
 import com.v2tech.view.widget.CommonAdapter.CommonAdapterItemWrapper;
 import com.v2tech.vo.Conversation;
-import com.v2tech.vo.CrowdGroup;
 import com.v2tech.vo.FileInfoBean;
+import com.v2tech.vo.Group;
+import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.NetworkStateCode;
 import com.v2tech.vo.OrgGroup;
 import com.v2tech.vo.User;
@@ -287,6 +287,7 @@ public class ConversationP2PTextActivity extends Activity {
 		filter.addAction(JNIService.JNI_BROADCAST_MESSAGE_SENT_RESULT);
 		filter.addAction(PublicIntent.BROADCAST_CROWD_DELETED_NOTIFICATION);
 		filter.addAction(PublicIntent.BROADCAST_CROWD_QUIT_NOTIFICATION);
+		filter.addAction(PublicIntent.BROADCAST_DISCUSSION_QUIT_NOTIFICATION);
 		filter.addAction(JNIService.BROADCAST_CROWD_NEW_UPLOAD_FILE_NOTIFICATION);
 		filter.addAction(JNIService.JNI_BROADCAST_KICED_CROWD);
 		filter.addAction(JNIService.JNI_BROADCAST_CONNECT_STATE_NOTIFICATION);
@@ -644,14 +645,14 @@ public class ConversationP2PTextActivity extends Activity {
 		} else if (cov.getType() == Conversation.TYPE_GROUP) {
 			currentConversationViewType = V2GlobalEnum.GROUP_TYPE_CROWD;
 			groupId = cov.getExtId();
-			CrowdGroup crowdGroup = (CrowdGroup) GlobalHolder.getInstance()
-					.getGroupById(V2GlobalEnum.GROUP_TYPE_CROWD, groupId);
+			Group group =  GlobalHolder.getInstance()
+					.getGroupById( groupId);
 			mVideoCallButton.setVisibility(View.GONE);
 			mAudioCallButton.setVisibility(View.GONE);
 			mShowContactDetailButton.setVisibility(View.GONE);
 			mButtonCreateMetting.setVisibility(View.VISIBLE);
 			mShowCrowdDetailButton.setVisibility(View.VISIBLE);
-			mUserTitleTV.setText(crowdGroup.getName());
+			mUserTitleTV.setText(group.getName());
 		} else if (cov.getType() == V2GlobalEnum.GROUP_TYPE_DEPARTMENT) {
 			currentConversationViewType = V2GlobalEnum.GROUP_TYPE_DEPARTMENT;
 			groupId = cov.getExtId();
@@ -2460,9 +2461,18 @@ public class ConversationP2PTextActivity extends Activity {
 
 		@Override
 		public void onClick(View view) {
-			Intent i = new Intent(mContext, CrowdDetailActivity.class);
-			i.putExtra("cid", cov.getExtId());
-			startActivity(i);
+			Group g = GlobalHolder.getInstance().getGroupById( cov.getExtId());
+			if (g.getGroupType() == GroupType.CHATING) {
+				Intent i = new Intent(mContext, CrowdDetailActivity.class);
+				i.putExtra("cid", cov.getExtId());
+				startActivity(i);
+			} else if (g.getGroupType() == GroupType.DISCUSSION) {
+				Intent i = new Intent();
+				i.setAction(PublicIntent.SHOW_DISCUSSION_BOARD_DETAIL_ACTIVITY);
+				i.addCategory(PublicIntent.DEFAULT_CATEGORY);
+				i.putExtra("cid", cov.getExtId());
+				startActivity(i);
+			}
 		}
 
 	};
@@ -2663,7 +2673,9 @@ public class ConversationP2PTextActivity extends Activity {
 			} else if ((PublicIntent.BROADCAST_CROWD_DELETED_NOTIFICATION
 					.equals(intent.getAction()))
 					|| (PublicIntent.BROADCAST_CROWD_QUIT_NOTIFICATION
-							.equals(intent.getAction()))) {
+							.equals(intent.getAction()))
+					|| PublicIntent.BROADCAST_DISCUSSION_QUIT_NOTIFICATION
+							.equals(intent.getAction())) {
 				finish();
 			} else if ((JNIService.BROADCAST_CROWD_NEW_UPLOAD_FILE_NOTIFICATION
 					.equals(intent.getAction()))) {

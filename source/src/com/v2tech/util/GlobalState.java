@@ -31,6 +31,11 @@ public final class GlobalState {
 	 * Use to mark current phone which matched bluetooth headset
 	 */
 	public static final int STATE_BLUETOOTH_HEADSET_PLUG = 0x00020;
+	
+	/**
+	 * Use to mark current server connection state
+	 */
+	public static final int STATE_SERVER_CONNECTED = 0x01000;
 
 	private int state;
 	private long gid;
@@ -138,5 +143,10 @@ public final class GlobalState {
 	 */
 	public boolean isBluetoothHeadsetPluged() {
 		return (state & STATE_BLUETOOTH_HEADSET_PLUG) == STATE_BLUETOOTH_HEADSET_PLUG;
+	}
+	
+	
+	public boolean isConnectedServer() {
+		return (state & STATE_SERVER_CONNECTED) == STATE_SERVER_CONNECTED;
 	}
 }

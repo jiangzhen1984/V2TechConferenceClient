@@ -85,7 +85,7 @@ public class PublicIntent {
 	public static final String SHOW_DISCUSSION_BOARD_DETAIL_ACTIVITY = "com.v2tech.discussion_board_detail_activity";
 	
 	/**
-	 * for DiscussionBoardDetailActivity<br>
+	 * for DiscussionBoardTopicUpdateActivity<br>
 	 * Intent key:<br>
 	 *      cid  : discussion board id<br>
 	 */
@@ -175,6 +175,14 @@ public class PublicIntent {
 	 * key: kicked boolean false means quit by self, true crowd owner kicked 
 	 */
 	public static final String BROADCAST_CROWD_QUIT_NOTIFICATION = "com.v2tech.broadcast.crowd_quit_notification";
+	
+	
+	/**
+	 * Broadcast for user quit discussion board
+	 * key: userId 
+	 * key: groupId 
+	 */
+	public static final String BROADCAST_DISCUSSION_QUIT_NOTIFICATION = "com.v2tech.broadcast.discussion_board_quit_notification";
 	
 	
 	/**

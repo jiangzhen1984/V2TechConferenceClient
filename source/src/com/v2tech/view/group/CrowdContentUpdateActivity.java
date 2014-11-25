@@ -160,13 +160,11 @@ public class CrowdContentUpdateActivity extends Activity {
 				updateView(mType, inEditMode);
 			} else {
 				synchronized (mState) {
-					V2Log.e("==============3====================" + mState);
 					if (mState == State.PENDING) {
 						return;
 					}
 					mState = State.PENDING;
 				}
-				V2Log.e("======================2============" + mState);
 				if (mType == UPDATE_TYPE_BRIEF) {
 					crowd.setBrief(mContentET.getText().toString());
 				} else if (mType == UPDATE_TYPE_ANNOUNCEMENT) {

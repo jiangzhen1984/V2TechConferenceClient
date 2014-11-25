@@ -26,6 +26,7 @@ import android.widget.PopupWindow;
 import android.widget.PopupWindow.OnDismissListener;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.v2tech.R;
 import com.v2tech.service.GlobalHolder;
@@ -270,6 +271,10 @@ public class TitleBar {
 		@Override
 		public void onClick(View view) {
 			dismissPlusWindow();
+			if (!GlobalHolder.getInstance().isServerConnected()) {
+				Toast.makeText(context, R.string.error_offline_of_no_network, Toast.LENGTH_SHORT).show();
+				return;
+			}
 			int id = view.getId();
 			switch (id) {
 			case R.drawable.conversation_group_button: {

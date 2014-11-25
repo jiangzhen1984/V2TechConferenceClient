@@ -13,7 +13,7 @@ public class CrowdConversation extends Conversation {
 		if (g == null) {
 			throw new NullPointerException(" group is null");
 		}
-		if (g.getGroupType() != GroupType.CHATING) {
+		if (g.getGroupType() != GroupType.CHATING && g.getGroupType() != GroupType.DISCUSSION) {
 			throw new IllegalArgumentException(" group type is not GroupType.CHATING");
 		}
 		this.g = g;

@@ -8,17 +8,68 @@
     <RelativeLayout
         android:id="@+id/RelativeLayout2"
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:orientation="horizontal" >
+        android:layout_height="fill_parent" >
+
+        <LinearLayout
+            android:id="@+id/crowd_discussion_switcher_ly"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone" >
+
+            <RadioGroup
+                android:id="@+id/crowd_discussion_switcher"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/confs_search_bar_bg"
+                android:checkedButton="@+id/rb_crowd"
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:paddingBottom="15dp"
+                android:paddingLeft="20dp"
+                android:paddingRight="20dp"
+                android:paddingTop="15dp" >
+
+                <RadioButton
+                    android:id="@+id/rb_crowd"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@drawable/friend_authentication"
+                    android:button="@null"
+                    android:gravity="center"
+                    android:text="@string/conversation_crowd_tab_title"
+                    android:textColor="#ffffff" />
+
+                <RadioButton
+                    android:id="@+id/rb_discussion"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@drawable/group_authentication"
+                    android:button="@null"
+                    android:gravity="center"
+                    android:text="@string/conversation_discussion_tab_title"
+                    android:textColor="@color/button_text_color" />
+            </RadioGroup>
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="1dp"
+                android:background="#f2f2f2"
+                android:orientation="vertical" >
+            </LinearLayout>
+        </LinearLayout>
 
         <ListView
             android:id="@+id/conversations_list_container"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
+            android:layout_below="@+id/crowd_discussion_switcher_ly"
             android:layout_centerHorizontal="true"
-             android:transcriptMode="normal"
             android:background="@color/confs_group_list_bg"
-            android:divider="@null" >
+            android:divider="@null"
+            android:transcriptMode="normal" >
         </ListView>
     </RelativeLayout>
 

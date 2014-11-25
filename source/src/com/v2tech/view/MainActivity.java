@@ -35,6 +35,7 @@ import com.v2tech.db.ContentDescriptor;
 import com.v2tech.db.V2techSearchContentProvider;
 import com.v2tech.service.ChatService;
 import com.v2tech.service.FileOperationEnum;
+import com.v2tech.service.GlobalHolder;
 import com.v2tech.util.Notificator;
 import com.v2tech.view.conversation.CommonCallBack;
 import com.v2tech.view.conversation.MessageLoader;
@@ -469,6 +470,7 @@ public class MainActivity extends FragmentActivity implements
 					.equals(action)) {
 				NetworkStateCode code = (NetworkStateCode) intent.getExtras()
 						.get("state");
+				GlobalHolder.getInstance().setServerConnection(code == NetworkStateCode.CONNECTED);
 				if (titleBar != null) {
 					titleBar.updateConnectState(code);
 				}

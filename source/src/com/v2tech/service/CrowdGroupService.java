@@ -58,6 +58,7 @@ public class CrowdGroupService extends AbstractHandler {
 	
 	private static final int QUIT_DISCUSSION_BOARD = 0x000A;
 	private static final int CREATE_DISCUSSION_BOARD = 0x000B;
+	private static final int UPDATE_DISCUSSION_BOARD = 0x000C;
 
 	private static final int KEY_CANCELLED_LISTNER = 1;
 	private static final int KEY_FILE_TRANS_STATUS_NOTIFICATION_LISTNER = 2;
@@ -287,6 +288,28 @@ public class CrowdGroupService extends AbstractHandler {
 		GroupRequest.getInstance()
 				.modifyGroupInfo(crowd.getGroupType().intValue(),
 						crowd.getmGId(), crowd.toXml());
+	}
+	
+	
+	/**
+	 * Update crowd data, like brief, announcement or member joined rules
+	 * 
+	 * @param crowd
+	 * @param caller
+	 */
+	public void updateDiscussion(DiscussionGroup discussion, MessageListener caller) {
+		if (!checkParamNull(caller, discussion)) {
+			return;
+		}
+		if (mPendingCrowdId > 0) {
+			super.sendResult(caller, new JNIResponse(JNIResponse.Result.FAILED));
+			return;
+		}
+		mPendingCrowdId = discussion.getmGId();
+		initTimeoutMessage(UPDATE_DISCUSSION_BOARD, DEFAULT_TIME_OUT_SECS, caller);
+		GroupRequest.getInstance()
+				.modifyGroupInfo(discussion.getGroupType().intValue(),
+						discussion.getmGId(), discussion.toXml());
 	}
 
 	/**
@@ -597,6 +620,11 @@ public class CrowdGroupService extends AbstractHandler {
 				JNIResponse jniRes = new JNIResponse(JNIResponse.Result.SUCCESS);
 				Message.obtain(mCallbackHandler, UPDATE_CROWD, jniRes)
 						.sendToTarget();
+			} else if (group.type == GroupType.DISCUSSION.intValue() && group.id == mPendingCrowdId) {
+				JNIResponse jniRes = new JNIResponse(JNIResponse.Result.SUCCESS);
+				Message.obtain(mCallbackHandler, UPDATE_DISCUSSION_BOARD, jniRes)
+						.sendToTarget();
+				
 			}
 
 		}

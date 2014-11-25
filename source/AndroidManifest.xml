@@ -18,7 +18,7 @@
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
     <uses-permission android:name="android.permission.SEND_SMS" />
@@ -55,7 +55,7 @@
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:largeHeap="true"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme" >
         <uses-library android:name="android.test.runner" />
 
         <service android:name="com.v2tech.view.JNIService" >
@@ -370,9 +370,9 @@
             android:name="com.v2tech.view.search.SearchedResultActivity"
             android:screenOrientation="nosensor" >
         </activity>
-        
+
         <!-- For Discussion board -->
-        
+
         <activity
             android:name="com.v2tech.view.group.DiscussionBoardMembersActivity"
             android:screenOrientation="nosensor" >
@@ -383,11 +383,10 @@
                 <category android:name="com.v2tech" />
             </intent-filter>
         </activity>
-        
-          <activity
+        <activity
             android:name="com.v2tech.view.group.DiscussionBoardCreateActivity"
             android:screenOrientation="nosensor"
-             android:windowSoftInputMode="stateHidden|adjustPan"  >
+            android:windowSoftInputMode="stateHidden|adjustPan" >
             <intent-filter>
                 <action android:name="com.v2tech.discussion_board_create_activity" />
 
@@ -395,9 +394,7 @@
                 <category android:name="com.v2tech" />
             </intent-filter>
         </activity>
-        
-          
-           <activity
+        <activity
             android:name="com.v2tech.view.group.DiscussionBoardDetailActivity"
             android:screenOrientation="nosensor" >
             <intent-filter>
@@ -407,8 +404,16 @@
                 <category android:name="com.v2tech" />
             </intent-filter>
         </activity>
-        
-        
+        <activity
+            android:name="com.v2tech.view.group.DiscussionBoardTopicUpdateActivity"
+            android:screenOrientation="nosensor" >
+            <intent-filter>
+                <action android:name="com.v2tech.discussion_board_topic_activity" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="com.v2tech" />
+            </intent-filter>
+        </activity>
 
         <receiver android:name="com.v2tech.view.receiver.AvatarChangedReceiver" >
             <intent-filter>

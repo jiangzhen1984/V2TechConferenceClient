@@ -365,6 +365,8 @@ public class GlobalHolder {
 			Collections.sort(confL);
 			List<Group> sortConfL = new CopyOnWriteArrayList<Group>(confL);
 			return sortConfL;
+		case V2GlobalEnum.GROUP_TYPE_DISCUSSION:
+			return mDiscussionBoardGroup;
 		default:
 			throw new RuntimeException("Unkonw type");
 		}
@@ -444,12 +446,14 @@ public class GlobalHolder {
 			list = mCrowdGroup;
 		} else if (gType == GroupType.ORG) {
 			list = mOrgGroup;
+		} else if (gType == GroupType.DISCUSSION) {
+			list = mOrgGroup;
 		}
+		mGroupHolder.remove(Long.valueOf(gid));
 		for (int i = 0; i < list.size(); i++) {
 			Group g = list.get(i);
 			if (g.getmGId() == gid) {
 				list.remove(g);
-				mGroupHolder.remove(Long.valueOf(gid));
 				return true;
 			}
 		}
@@ -584,6 +588,19 @@ public class GlobalHolder {
 			this.mState.setState(st);
 		}
 	}
+	
+	
+	public void setServerConnection(boolean connected) {
+		synchronized (mState) {
+			int st = this.mState.getState();
+			if (connected) {
+				st |= GlobalState.STATE_SERVER_CONNECTED;
+			} else {
+				st &= (~GlobalState.STATE_SERVER_CONNECTED);
+			}
+			this.mState.setState(st);
+		}
+	}
 
 	public boolean isVoiceConnected() {
 		synchronized (mState) {
@@ -606,6 +623,12 @@ public class GlobalHolder {
 	public boolean isInMeeting() {
 		synchronized (mState) {
 			return mState.isInMeeting();
+		}
+	}
+	
+	public boolean isServerConnected() {
+		synchronized (mState) {
+			return mState.isConnectedServer();
 		}
 	}
 	

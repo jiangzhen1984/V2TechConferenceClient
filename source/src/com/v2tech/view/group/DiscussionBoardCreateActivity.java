@@ -24,9 +24,9 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.CheckBox;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.V2.jni.util.V2Log;
 import com.v2tech.R;
@@ -35,13 +35,11 @@ import com.v2tech.service.GlobalHolder;
 import com.v2tech.service.MessageListener;
 import com.v2tech.service.jni.CreateDiscussionBoardResponse;
 import com.v2tech.service.jni.JNIResponse;
-import com.v2tech.util.SPUtil;
 import com.v2tech.view.JNIService;
 import com.v2tech.view.PublicIntent;
 import com.v2tech.view.adapter.CreateConfOrCrowdAdapter;
 import com.v2tech.view.widget.GroupListView;
 import com.v2tech.view.widget.GroupListView.Item;
-import com.v2tech.vo.CrowdGroup;
 import com.v2tech.vo.DiscussionGroup;
 import com.v2tech.vo.Group;
 import com.v2tech.vo.Group.GroupType;
@@ -133,6 +131,9 @@ public class DiscussionBoardCreateActivity extends Activity {
 		loadCache();
 
 		isInInvitationMode = getIntent().getBooleanExtra("mode", false);
+		if (isInInvitationMode) {
+			mTitle.setText(R.string.discussion_create_invitation_title);
+		}
 
 	}
 
@@ -320,7 +321,12 @@ public class DiscussionBoardCreateActivity extends Activity {
 
 		@Override
 		public void onClick(View view) {
-
+			if (!GlobalHolder.getInstance().isServerConnected()) {
+				Toast.makeText(DiscussionBoardCreateActivity.this,
+						R.string.error_discussion_no_network,
+						Toast.LENGTH_SHORT).show();
+				return;
+			}
 			if (isInInvitationMode) {
 				List<User> newMembers = new ArrayList<User>(mUserList);
 				cg.inviteMember(crowd, newMembers, new MessageListener(
@@ -443,13 +449,8 @@ public class DiscussionBoardCreateActivity extends Activity {
 			}
 				break;
 			case UPDATE_CROWD_RESPONSE:
-				// Do not add user to list because user doesn't accept
-				// invitation yet
-
-				// if (crowd.getAuthType() == AuthType.ALLOW_ALL) {
-				// crowd.addUserToGroup(mUserList);
-				// }
-				// finish current activity
+				crowd.addUserToGroup(mUserList);
+				setResult(Activity.RESULT_OK);
 				finish();
 				break;
 

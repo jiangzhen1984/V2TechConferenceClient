@@ -47,6 +47,8 @@ import android.widget.BaseAdapter;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListView;
 import android.widget.PopupWindow;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -219,7 +221,6 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
-		Log.i("wzl", "ConversationsTabFragment onCreateView");
 		if (rootView == null) {
 			rootView = inflater.inflate(R.layout.tab_fragment_conversations,
 					container, false);
@@ -230,6 +231,28 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 			mConversationsListView.setOnItemClickListener(mItemClickListener);
 			mConversationsListView
 					.setOnItemLongClickListener(mItemLongClickListener);
+			
+			if (mCurrentTabFlag == Conversation.TYPE_GROUP) {
+				rootView.findViewById(R.id.crowd_discussion_switcher_ly).setVisibility(View.VISIBLE);
+				RadioGroup crowdDiscussion =(RadioGroup)rootView.findViewById(R.id.crowd_discussion_switcher);
+				crowdDiscussion.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+
+					@Override
+					public void onCheckedChanged(RadioGroup group, int checkedId) {
+						mConvList.clear();
+						if (checkedId == R.id.rb_discussion){ 
+							((RadioButton)group.findViewById(R.id.rb_discussion)).setTextColor(Color.WHITE);
+							((RadioButton)group.findViewById(R.id.rb_crowd)).setTextColor(getResources().getColor(R.color.button_text_color));
+							populateConversation(GlobalHolder.getInstance().getGroup(GroupType.DISCUSSION.intValue()));
+						} else if (checkedId == R.id.rb_crowd) {
+							populateConversation(GlobalHolder.getInstance().getGroup(GroupType.CHATING.intValue()));
+							((RadioButton)group.findViewById(R.id.rb_discussion)).setTextColor(getResources().getColor(R.color.button_text_color));
+							((RadioButton)group.findViewById(R.id.rb_crowd)).setTextColor(Color.WHITE);
+						}
+					}
+					
+				});
+			}
 
 		}
 		return rootView;
@@ -482,7 +505,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 
 			if (g.getGroupType() == GroupType.CONFERENCE) {
 				cov = new ConferenceConversation(g);
-			} else if (g.getGroupType() == GroupType.CHATING) {
+			} else if (g.getGroupType() == GroupType.CHATING || g.getGroupType() == GroupType.DISCUSSION) {
 				cov = new CrowdConversation(g);
 			} else if (g.getGroupType() == GroupType.ORG) {
 				cov = new DepartmentConversation(g);
