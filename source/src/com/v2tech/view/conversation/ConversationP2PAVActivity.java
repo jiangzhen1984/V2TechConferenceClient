@@ -1,6 +1,8 @@
 package com.v2tech.view.conversation;
 
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.UUID;
 
 import v2av.VideoCaptureDevInfo;
@@ -29,6 +31,7 @@ import android.os.Message;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.SurfaceHolder;
@@ -1358,6 +1361,7 @@ public class ConversationP2PAVActivity extends Activity implements
 			currentVideoBean.readSatate = AudioVideoMessageBean.STATE_READED;
 			// Start to time
 			Message.obtain(mLocalHandler, UPDATE_TIME).sendToTarget();
+
 		}
 	};
 
@@ -1376,7 +1380,6 @@ public class ConversationP2PAVActivity extends Activity implements
 			openRemoteVideo();
 			// Start to time
 			Message.obtain(mLocalHandler, UPDATE_TIME).sendToTarget();
-
 		}
 
 	};
@@ -1676,6 +1679,7 @@ public class ConversationP2PAVActivity extends Activity implements
 				}
 			} else if (PublicIntent.BROADCAST_JOINED_CONFERENCE_NOTIFICATION
 					.equals(action)) {
+				Log.i("20141124 2","PublicIntent.BROADCAST_JOINED_CONFERENCE_NOTIFICATION");
 				isRejected = true;
 				mLocalHandler.removeCallbacks(timeOutMonitor);
 				hangUp();
@@ -1686,7 +1690,6 @@ public class ConversationP2PAVActivity extends Activity implements
 
 	private Object mLocal = new Object();
 	private boolean inProgress = false;
-
 	class LocalHandler extends Handler {
 
 		public LocalHandler(Looper looper) {
@@ -1729,7 +1732,7 @@ public class ConversationP2PAVActivity extends Activity implements
 						currentVideoBean.endDate = GlobalConfig
 								.getGlobalServerTime();
 
-					if(currentVideoBean.mediaState != AudioVideoMessageBean.STATE_ANSWER_CALL)
+					if (currentVideoBean.mediaState != AudioVideoMessageBean.STATE_ANSWER_CALL)
 						currentVideoBean.mediaState = AudioVideoMessageBean.STATE_NO_ANSWER_CALL;
 					inProgress = true;
 					Message timeoutMessage = Message.obtain(this, QUIT);
@@ -1767,6 +1770,9 @@ public class ConversationP2PAVActivity extends Activity implements
 							if (videoIsAccepted) {
 								V2Log.d(TAG_THIS_FILE, "对方在接受视频的基础上接受了音频邀请。");
 							} else {
+								// Start to time
+								Message.obtain(mLocalHandler, UPDATE_TIME)
+										.sendToTarget();
 								headsetAndBluetoothHeadsetHandle(true);
 								V2Log.d(TAG_THIS_FILE,
 										"对方接受了视频的邀请，我再给对方发一个音频邀请。");
@@ -1797,11 +1803,13 @@ public class ConversationP2PAVActivity extends Activity implements
 							V2Log.d(TAG_THIS_FILE, "对方接受了音频的邀请");
 							// set mute button to enable
 							setMuteButtonDisable(false);
+							// Start to time
+							Message.obtain(mLocalHandler, UPDATE_TIME)
+									.sendToTarget();
+							
 						}
 
-						// Start to time
-						Message.obtain(mLocalHandler, UPDATE_TIME)
-								.sendToTarget();
+
 						currentVideoBean.mediaState = AudioVideoMessageBean.STATE_ANSWER_CALL;
 						currentVideoBean.startDate = GlobalConfig
 								.getGlobalServerTime();

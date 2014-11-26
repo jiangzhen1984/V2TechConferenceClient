@@ -330,9 +330,9 @@ public class VideoActivityV2 extends Activity {
 		} else {
 
 			headsetAndBluetoothHeadsetHandle();
-			
-//			// Set audio use speaker phone
-//			updateAudioSpeaker(true);
+
+			// // Set audio use speaker phone
+			// updateAudioSpeaker(true);
 		}
 		NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 		// mId allows you to update the notification later on.
@@ -487,7 +487,6 @@ public class VideoActivityV2 extends Activity {
 			animation = new ScaleAnimation(0.0F, 1.0f, 1.0F, 1.0f,
 					Animation.RELATIVE_TO_SELF, 0.0f,
 					Animation.RELATIVE_TO_SELF, 1.0f);
-
 		}
 		animation.setDuration(400);
 		mSubWindowLayout.setVisibility(visible);
@@ -1293,7 +1292,7 @@ public class VideoActivityV2 extends Activity {
 			suspendOrResume(false);
 		} else {
 			headsetAndBluetoothHeadsetHandle();
-			//updateAudioSpeaker(false);
+			// updateAudioSpeaker(false);
 		}
 	}
 
@@ -1303,11 +1302,11 @@ public class VideoActivityV2 extends Activity {
 		// this.overridePendingTransition(R.animator.nonam_scale_null,
 		// R.animator.nonam_scale_center_100_0);
 	}
-	
+
 	@Override
 	protected void onPause() {
 		super.onPause();
-//		moveTaskToBack(true);
+		// moveTaskToBack(true);
 	}
 
 	@Override
@@ -1366,7 +1365,7 @@ public class VideoActivityV2 extends Activity {
 		// MessageLoader.deleteGroupMessage(mContext,
 		// V2GlobalEnum.GROUP_TYPE_CONFERENCE , conf.getId());
 		mVideoHandler = null;
-		
+
 		audioManager.setSpeakerphoneOn(false);
 		audioManager.setMode(AudioManager.MODE_NORMAL);
 
@@ -1396,17 +1395,17 @@ public class VideoActivityV2 extends Activity {
 	 * @param flag
 	 *            true means start, false means on stop
 	 */
-//	private void updateAudioSpeaker(boolean flag) {
-//		audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
-//
-//		GlobalState gs = GlobalHolder.getInstance().getGlobalState();
-//		if (gs.isBluetoothHeadsetPluged() || gs.isWiredHeadsetPluged()) {
-//			audioManager.setSpeakerphoneOn(false);
-//		} else {
-//			audioManager.setSpeakerphoneOn(true);
-//		}
-//
-//	}
+	// private void updateAudioSpeaker(boolean flag) {
+	// audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
+	//
+	// GlobalState gs = GlobalHolder.getInstance().getGlobalState();
+	// if (gs.isBluetoothHeadsetPluged() || gs.isWiredHeadsetPluged()) {
+	// audioManager.setSpeakerphoneOn(false);
+	// } else {
+	// audioManager.setSpeakerphoneOn(true);
+	// }
+	//
+	// }
 
 	private void showQuitDialog(String content) {
 		if (mQuitDialog == null) {
@@ -1491,7 +1490,7 @@ public class VideoActivityV2 extends Activity {
 			closeLocalCamera();
 		}
 		headsetAndBluetoothHeadsetHandle();
-		//updateAudioSpeaker(resume);
+		// updateAudioSpeaker(resume);
 	}
 
 	private void updateAllRemoteDevice(int tag) {
@@ -2465,7 +2464,7 @@ public class VideoActivityV2 extends Activity {
 				break;
 			}
 		}
-		
+
 	}
 
 	private void headsetAndBluetoothHeadsetHandle() {
@@ -2476,7 +2475,7 @@ public class VideoActivityV2 extends Activity {
 			audioManager.setSpeakerphoneOn(true);
 		}
 	}
-	
+
 	// @Override
 	// public boolean dispatchTouchEvent(MotionEvent ev) {
 	// View v = getCurrentFocus();

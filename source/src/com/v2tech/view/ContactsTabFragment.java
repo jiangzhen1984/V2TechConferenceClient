@@ -167,8 +167,7 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 			intentFilter
 					.addAction(JNIService.JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION);
 			intentFilter
-				.addAction(PublicIntent.BROADCAST_USER_COMMENT_NAME_NOTIFICATION);
-			
+					.addAction(PublicIntent.BROADCAST_USER_COMMENT_NAME_NOTIFICATION);
 
 			intentFilter
 					.addAction(JNIService.JNI_BROADCAST_USER_UPDATE_NAME_OR_SIGNATURE);
@@ -250,7 +249,7 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 							guo.getmUserId());
 
 					if (user == null) {
-						return;
+						user=new User(guo.getmUserId());
 					}
 					// Remove user from contact group
 					Set<Group> groups = user.getBelongsGroup();
@@ -261,8 +260,8 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 					}
 
 					mContactsContainer.removeItem(user);
-				} else{
-					//update user name
+				} else {
+					// update user name
 					mContactsContainer.updateUser(GlobalHolder.getInstance()
 							.getUser(guo.getmUserId()));
 				}
@@ -278,11 +277,12 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 									GroupType.CONTACT.intValue(),
 									guo.getmGroupId()), GlobalHolder
 									.getInstance().getUser(guo.getmUserId()));
-				} else if(flag == TAG_ORG && guo.getmType() == Group.GroupType.ORG.intValue()) {
+				} else if (flag == TAG_ORG
+						&& guo.getmType() == Group.GroupType.ORG.intValue()) {
 					mContactsContainer.addUser(
-							GlobalHolder.getInstance().getGroupById(
-									GroupType.ORG.intValue(),
-									guo.getmGroupId()), GlobalHolder
+							GlobalHolder.getInstance()
+									.getGroupById(GroupType.ORG.intValue(),
+											guo.getmGroupId()), GlobalHolder
 									.getInstance().getUser(guo.getmUserId()));
 				}
 				// Contacts group is updated
@@ -301,14 +301,14 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 				Group dest = GlobalHolder.getInstance().getGroupById(
 						GroupType.CONTACT.intValue(), destGroupId);
 				mContactsContainer.updateUserGroup(u, src, dest);
-			} else if(PublicIntent.BROADCAST_USER_COMMENT_NAME_NOTIFICATION
-					.equals(intent.getAction())){
+			} else if (PublicIntent.BROADCAST_USER_COMMENT_NAME_NOTIFICATION
+					.equals(intent.getAction())) {
 				Long uid = intent.getLongExtra("modifiedUser", -1);
-				if(uid == -1l){
+				if (uid == -1l) {
 					V2Log.e("ContactsTabFragment BROADCAST_USER_COMMENT_NAME_NOTIFICATION ---> update user comment name failed , get id is -1");
-					return ;
+					return;
 				}
-					
+
 				mContactsContainer.updateUser(GlobalHolder.getInstance()
 						.getUser(uid));
 			}
@@ -316,11 +316,8 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 
 	}
 
-	
-	
-	
 	private PopupWindow mPopup;
-	
+
 	private void initPopupWindow() {
 		LayoutInflater inflater = (LayoutInflater) this.getActivity()
 				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -333,44 +330,44 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 		mPopup.setOutsideTouchable(true);
 		TextView tvItem = (TextView) popWindow
 				.findViewById(R.id.pop_up_window_item);
-	
+
 		tvItem.setOnClickListener(new OnClickListener() {
 
 			@Override
 			public void onClick(View v) {
-				
+
 				Intent i = new Intent();
 				i.setClass(mContext, ContactsGroupManagerActivity.class);
 				i.addCategory(PublicIntent.DEFAULT_CATEGORY);
 				startActivity(i);
-				
+
 				mPopup.dismiss();
 			}
-			
+
 		});
-		
+
 	}
-	
-	
+
 	private void showPopupWindow(final View anchor) {
 
 		if (!anchor.isShown()) {
 			return;
 		}
-		
+
 		if (this.mPopup == null) {
 			initPopupWindow();
 		}
-		
-		if (mPopup.getContentView().getWidth() <= 0 && mPopup.getContentView() != null) {
-			mPopup.getContentView().measure(View.MeasureSpec.EXACTLY, View.MeasureSpec.EXACTLY);
+
+		if (mPopup.getContentView().getWidth() <= 0
+				&& mPopup.getContentView() != null) {
+			mPopup.getContentView().measure(View.MeasureSpec.EXACTLY,
+					View.MeasureSpec.EXACTLY);
 		}
 		int popupWindowWidth = mPopup.getContentView().getMeasuredWidth();
 		int popupWindowHeight = mPopup.getContentView().getMeasuredHeight();
-		
-		
+
 		mPopup.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-		
+
 		int viewWidth = anchor.getMeasuredWidth();
 		int viewHeight = anchor.getMeasuredHeight();
 		int offsetX = (viewWidth - popupWindowWidth) / 2;

@@ -20,6 +20,4 @@ public class LogcatThread extends Thread {
 		}
 	}
 
-	
-
 }

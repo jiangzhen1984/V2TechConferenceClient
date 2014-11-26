@@ -849,7 +849,7 @@ public class JNIService extends Service implements
 			intent.putExtra("uid", user.uid);
 			intent.setAction(JNI_BROADCAST_FRIEND_AUTHENTICATION);
 			intent.addCategory(JNI_BROADCAST_CATEGROY);
-			sendOrderedBroadcast(intent, null);
+			sendBroadcast(intent);
 
 		}
 
@@ -931,7 +931,6 @@ public class JNIService extends Service implements
 
 			GroupType gType = GroupType.fromInt(groupType);
 			if (gType == GroupType.CONTACT) {
-				// FIXME 不要在JNI里面直接调用UI
 				AddFriendHistroysHandler.becomeFriendHanler(
 						getApplicationContext(), newUser);
 
@@ -940,7 +939,7 @@ public class JNIService extends Service implements
 				intent.addCategory(JNI_BROADCAST_CATEGROY);
 				intent.putExtra("uid", newUser.getmUserId());
 				intent.putExtra("gid", nGroupID);
-				sendOrderedBroadcast(intent, null);
+				sendBroadcast(intent);
 			} else if (gType == GroupType.CHATING) {
 
 				long id = -1;
