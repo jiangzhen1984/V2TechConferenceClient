@@ -681,7 +681,7 @@ public class ConversationP2PTextActivity extends Activity {
 
 	private void scrollToPos(int pos) {
         V2Log.d(TAG, "currentItemPos:--" + currentItemPos);
-		if (pos <= 0){
+		if (pos < 0){
             V2Log.d(TAG, "没有加载到数据 :" + pos);
             return;
         }

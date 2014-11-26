@@ -111,7 +111,6 @@ import com.v2tech.vo.VideoBean;
 public class ConversationsTabFragment extends Fragment implements TextWatcher,
 		ConferenceListener {
 	private static final String TAG = "ConversationsTabFragment";
-	
 	private static final int FILL_CONFS_LIST = 2;
 	private static final int VERIFICATION_TYPE_FRIEND = 5;
 	private static final int VERIFICATION_TYPE_CROWD = 6;
@@ -121,6 +120,8 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 	private static final int REMOVE_CONVERSATION = 12;
 	private static final int REQUEST_ENTER_CONF = 14;
 	private static final int REQUEST_ENTER_CONF_RESPONSE = 15;
+
+	private static final int CONFERENCE_ENTER_CODE = 100;
 	private static final int UPDATE_CONVERSATION_MESSAGE = 16;
 	private static final int UPDATE_VERIFICATION_MESSAGE = 17;
 	private static final int QUIT_DISCUSSION_BOARD_DONE = 18;
@@ -201,6 +202,8 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 	private Object mLock = new Object();
 
 	private Resources res;
+	
+	private RadioGroup crowdDiscussion;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -246,7 +249,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 			
 			if (mCurrentTabFlag == Conversation.TYPE_GROUP) {
 				rootView.findViewById(R.id.crowd_discussion_switcher_ly).setVisibility(View.VISIBLE);
-				RadioGroup crowdDiscussion =(RadioGroup)rootView.findViewById(R.id.crowd_discussion_switcher);
+				crowdDiscussion = (RadioGroup)rootView.findViewById(R.id.crowd_discussion_switcher);
 				crowdDiscussion.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
 
 					@Override
@@ -262,12 +265,12 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 							populateConversation(GlobalHolder.getInstance().getGroup(GroupType.CHATING.intValue()));
 							((RadioButton)group.findViewById(R.id.rb_discussion)).setTextColor(getResources().getColor(R.color.button_text_color));
 							((RadioButton)group.findViewById(R.id.rb_crowd)).setTextColor(Color.WHITE);
+							populateConversation(GlobalHolder.getInstance().getGroup(GroupType.CHATING.intValue()));
 						}
 						if (mConvList.size() <= 0) {
 							adapter.notifyDataSetChanged();
 						}
 					}
-					
 				});
 			}
 
@@ -501,7 +504,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 		isLoadedCov = true;
 
 		if (list == null || list.size() <= 0) {
-			V2Log.w("ConversationsTabFragment populateConversation --> get group list is null");
+			V2Log.e("ConversationsTabFragment populateConversation --> Given Group List is null ... please checked!");
 			return;
 		}
 
@@ -510,8 +513,8 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 			Group g = list.get(i);
 			Conversation cov;
 			if (g.getName() == null)
-				V2Log.e(TAG,
-						"the group name is null , group id is :" + g.getmGId());
+				V2Log.w(TAG,
+						"The group name is null , group id is :" + g.getmGId());
 
 			for (Conversation con : mConvList) {
 				if (con.getExtId() == g.getmGId()) {
@@ -2643,11 +2646,20 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 					// .getGroup(Group.GroupType.ORG.intValue());
 					// if (organizationGroup.size() > 0)
 					// groupList.addAll(organizationGroup);
-					List<Group> chatGroup = GlobalHolder.getInstance()
-							.getGroup(Group.GroupType.CHATING.intValue());
-					if (chatGroup.size() > 0)
-						groupList.addAll(chatGroup);
-
+					
+					List<Group> chatGroup;
+					if(crowdDiscussion.getCheckedRadioButtonId() == R.id.rb_crowd)
+						chatGroup = GlobalHolder.getInstance()
+								.getGroup(Group.GroupType.CHATING.intValue());
+					else
+						chatGroup = GlobalHolder.getInstance()
+							.getGroup(Group.GroupType.DISCUSSION.intValue());
+					if (chatGroup == null || chatGroup.size() <= 0){
+						V2Log.e(TAG, "FILL GROUP LIST FAILED! Because get group list from GlobleHolder is empty!");
+						return ;
+					}
+						
+					groupList.addAll(chatGroup);
 					if (groupList.size() > 0 && !isLoadedCov)
 						populateConversation(groupList);
 				}
