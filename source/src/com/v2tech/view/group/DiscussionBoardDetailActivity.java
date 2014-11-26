@@ -145,7 +145,7 @@ public class DiscussionBoardDetailActivity extends Activity {
 				PublicIntent.BROADCAST_DISCUSSION_QUIT_NOTIFICATION);
 		i.addCategory(PublicIntent.DEFAULT_CATEGORY);
 		i.putExtra("userId", GlobalHolder.getInstance().getCurrentUserId());
-		i.putExtra("gid", crowd.getmGId());
+		i.putExtra("groupId", crowd.getmGId());
 		sendBroadcast(i);
 		finish();
 	}

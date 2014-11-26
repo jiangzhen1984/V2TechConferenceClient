@@ -110,21 +110,23 @@ import com.v2tech.vo.VideoBean;
 
 public class ConversationsTabFragment extends Fragment implements TextWatcher,
 		ConferenceListener {
+	private static final String TAG = "ConversationsTabFragment";
+	
 	private static final int FILL_CONFS_LIST = 2;
+	private static final int VERIFICATION_TYPE_FRIEND = 5;
+	private static final int VERIFICATION_TYPE_CROWD = 6;
 	private static final int UPDATE_USER_SIGN = 8;
 	private static final int UPDATE_CONVERSATION = 9;
 	private static final int UPDATE_SEARCHED_LIST = 11;
 	private static final int REMOVE_CONVERSATION = 12;
 	private static final int REQUEST_ENTER_CONF = 14;
 	private static final int REQUEST_ENTER_CONF_RESPONSE = 15;
-
-	private static final int CONFERENCE_ENTER_CODE = 100;
-	private static final String TAG = "ConversationsTabFragment";
 	private static final int UPDATE_CONVERSATION_MESSAGE = 16;
 	private static final int UPDATE_VERIFICATION_MESSAGE = 17;
-
-	private static final int VERIFICATION_TYPE_FRIEND = 5;
-	private static final int VERIFICATION_TYPE_CROWD = 6;
+	private static final int QUIT_DISCUSSION_BOARD_DONE = 18;
+	
+	
+	private static final int CONFERENCE_ENTER_CODE = 100;
 
 	private View rootView;
 
@@ -342,6 +344,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 						.addAction(PublicIntent.BROADCAST_CROWD_DELETED_NOTIFICATION);
 				intentFilter.addAction(JNIService.JNI_BROADCAST_GROUP_UPDATED);
 				intentFilter.addAction(JNIService.JNI_BROADCAST_NEW_DISCUSSION_NOTIFICATION);
+				intentFilter.addAction(PublicIntent.BROADCAST_DISCUSSION_QUIT_NOTIFICATION);
 			}
 
 			if (mCurrentTabFlag == Conversation.TYPE_CONTACT) {
@@ -1629,7 +1632,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 						kick.putExtra("crowd", cov.getExtId());
 						mContext.sendBroadcast(kick);
 					} else if (crowd.getGroupType() == GroupType.DISCUSSION) {
-						chatService.quitDiscussionBoard((DiscussionGroup)crowd, null);
+						chatService.quitDiscussionBoard((DiscussionGroup)crowd, new MessageListener(mHandler, QUIT_DISCUSSION_BOARD_DONE, crowd));
 					}
 				} else
 					V2Log.e(TAG,
@@ -2284,6 +2287,9 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 					else
 						V2Log.e("Can not get discussion :" + gid);
 				}
+			} else if (PublicIntent.BROADCAST_DISCUSSION_QUIT_NOTIFICATION.equals(intent.getAction())) {
+				long cid = intent.getLongExtra("groupId", -1l);
+				Message.obtain(mHandler, QUIT_DISCUSSION_BOARD_DONE, Long.valueOf(cid)).sendToTarget();
 			}
 			// else if (JNIService.JNI_BROADCAST_NEW_MESSAGE.equals(intent
 			// .getAction())) {
@@ -2731,6 +2737,22 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 					AddFriendHistorieNode node = (AddFriendHistorieNode) msg.obj;
 					updateFriendVerificationConversation(node);
 				}
+				break;
+			case QUIT_DISCUSSION_BOARD_DONE:
+				long cid = 0;
+				if (msg.obj instanceof Long) {
+					cid = (Long)msg.obj;
+				} else {
+					JNIResponse res = (JNIResponse) msg.obj;
+					if (res.getResult() != JNIResponse.Result.SUCCESS) {
+						//TODO toast quit failed
+						return;
+					} else {
+						cid = ((Group)res.callerObject).getmGId();
+					}
+				}
+				removeConversation(cid);
+				GlobalHolder.getInstance().removeGroup(GroupType.DISCUSSION, cid);
 				break;
 			}
 		}

@@ -186,11 +186,20 @@ public class PublicIntent {
 	
 	
 	/**
+	 *  Broadcast for user quit discussion board
+	 * key: gid 
+	 */
+	public static final String BROADCAST_DISCUSSION_DELETED_NOTIFICATION = "com.v2tech.broadcast.discussion_deleted_notification";
+	
+	
+	/**
 	 * Broadcast for user joined conference, to inform that quit P2P conversation
 	 * key: confid conference if 
 	 */
 	public static final String BROADCAST_JOINED_CONFERENCE_NOTIFICATION = "com.v2tech.broadcast.joined_conference_notification";
 	
+	
+
 	
 
 }

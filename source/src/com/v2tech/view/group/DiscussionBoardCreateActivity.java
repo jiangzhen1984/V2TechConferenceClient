@@ -332,25 +332,9 @@ public class DiscussionBoardCreateActivity extends Activity {
 				cg.inviteMember(crowd, newMembers, new MessageListener(
 						mLocalHandler, UPDATE_CROWD_RESPONSE, crowd));
 			} else {
-				StringBuffer name = new StringBuffer();
-				name.append(GlobalHolder.getInstance().getCurrentUser()
-						.getName());
 				List<User> userList = new ArrayList<User>(mUserList);
-				int i = 0;
-				while (name.length() < 30 && i < userList.size()) {
-					User u = userList.get(i);
-					if (u.getmUserId() == GlobalHolder.getInstance()
-							.getCurrentUserId()) {
-						continue;
-					}
-					if (name.length() + u.getName().length() + 1 > 30) {
-						break;
-					}
-					name.append(" ").append(u.getName());
-					i++;
-				}
 
-				DiscussionGroup crowd = new DiscussionGroup(0, name.toString(),
+				DiscussionGroup crowd = new DiscussionGroup(0, "",
 						GlobalHolder.getInstance().getCurrentUser(), new Date());
 
 				if (mCreateWaitingDialog != null

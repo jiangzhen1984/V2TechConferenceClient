@@ -1,5 +1,8 @@
 package com.v2tech.vo;
 
+import java.util.List;
+
+import com.v2tech.service.GlobalHolder;
 import com.v2tech.util.DateUtil;
 import com.v2tech.vo.Group.GroupType;
 
@@ -22,13 +25,32 @@ public class CrowdConversation extends Conversation {
 	}
 
 	
+	private String disName = null;
 
 	@Override
 	public String getName() {
-		if (g != null) {
-			return g.getName();
+		if (g.getGroupType() == GroupType.DISCUSSION) {
+			String na = g.getName();
+			if (na!= null && !na.isEmpty()) {
+				return na;
+			} else if (disName == null) {
+				int i = 0;
+				StringBuilder sb = new StringBuilder();
+				List<User> userList = g.getUsers();
+				while (sb.length() < 30 && i < userList.size()) {
+					User u = userList.get(i);
+					if (sb.length() + u.getName().length()> 30) {
+						break;
+					}
+					sb.append(" ").append(u.getName());
+					i++;
+				}
+				disName = sb.toString();
+			}
+			return disName;
+			
 		}
-		return super.getName();
+		return g.getName();
 	}
 
 	@Override

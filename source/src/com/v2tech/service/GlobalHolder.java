@@ -447,7 +447,7 @@ public class GlobalHolder {
 		} else if (gType == GroupType.ORG) {
 			list = mOrgGroup;
 		} else if (gType == GroupType.DISCUSSION) {
-			list = mOrgGroup;
+			list = mDiscussionBoardGroup;
 		}
 		mGroupHolder.remove(Long.valueOf(gid));
 		for (int i = 0; i < list.size(); i++) {

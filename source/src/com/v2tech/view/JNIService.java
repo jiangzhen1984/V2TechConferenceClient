@@ -922,6 +922,13 @@ public class JNIService extends Service implements
 				i.putExtra("crowd", nGroupID);
 				sendBroadcast(i);
 
+			}  else if (groupType == GroupType.DISCUSSION.intValue()) {
+				Intent i = new Intent();
+				i.setAction(PublicIntent.BROADCAST_CROWD_DELETED_NOTIFICATION);
+				i.addCategory(PublicIntent.DEFAULT_CATEGORY);
+				i.putExtra("gid", nGroupID);
+				sendBroadcast(i);
+
 			}
 		}
 
