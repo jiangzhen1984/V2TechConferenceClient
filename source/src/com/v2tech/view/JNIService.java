@@ -54,7 +54,6 @@ import com.V2.jni.util.V2Log;
 import com.v2tech.R;
 import com.v2tech.db.ContentDescriptor;
 import com.v2tech.service.BitmapManager;
-import com.v2tech.service.CrowdGroupService;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.service.jni.FileDownLoadErrorIndication;
 import com.v2tech.service.jni.JNIResponse;
@@ -345,6 +344,7 @@ public class JNIService extends Service implements
 			switch (msg.what) {
 
 			case JNI_CONNECT_RESPONSE:
+				GlobalHolder.getInstance().setServerConnection(NetworkStateCode.fromInt(msg.arg1) == NetworkStateCode.CONNECTED);
 				broadcastNetworkState(NetworkStateCode.fromInt(msg.arg1));
 				break;
 			case JNI_UPDATE_USER_INFO:
