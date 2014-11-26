@@ -83,6 +83,7 @@ import com.v2tech.view.conversation.ConversationP2PAVActivity;
 import com.v2tech.view.conversation.MessageAuthenticationActivity;
 import com.v2tech.view.conversation.MessageBuilder;
 import com.v2tech.view.conversation.MessageLoader;
+import com.v2tech.view.group.DiscussionBoardCreateActivity;
 import com.v2tech.vo.AddFriendHistorieNode;
 import com.v2tech.vo.AudioVideoMessageBean;
 import com.v2tech.vo.Conference;
@@ -95,6 +96,7 @@ import com.v2tech.vo.ConversationFirendAuthenticationData.VerificationMessageTyp
 import com.v2tech.vo.CrowdConversation;
 import com.v2tech.vo.CrowdGroup;
 import com.v2tech.vo.DepartmentConversation;
+import com.v2tech.vo.DiscussionGroup;
 import com.v2tech.vo.Group;
 import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.OrgGroup;
@@ -185,6 +187,14 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 	 */
 	private PopupWindow mPopup;
 	private TextView mPouupView = null;
+	
+	private static final int SUB_TAB_CROWD = 0;
+	
+	private static final int SUB_TAB_DISCUSSION = 1;
+	/**
+	 * Use to crowd tab for crowd selected or discussion selected
+	 */
+	private int mCurrentSubTab = SUB_TAB_CROWD;
 
 	private Object mLock = new Object();
 
@@ -240,14 +250,19 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 					@Override
 					public void onCheckedChanged(RadioGroup group, int checkedId) {
 						mConvList.clear();
-						if (checkedId == R.id.rb_discussion){ 
+						if (checkedId == R.id.rb_discussion){
+							mCurrentSubTab = SUB_TAB_DISCUSSION;
 							((RadioButton)group.findViewById(R.id.rb_discussion)).setTextColor(Color.WHITE);
 							((RadioButton)group.findViewById(R.id.rb_crowd)).setTextColor(getResources().getColor(R.color.button_text_color));
 							populateConversation(GlobalHolder.getInstance().getGroup(GroupType.DISCUSSION.intValue()));
 						} else if (checkedId == R.id.rb_crowd) {
+							mCurrentSubTab = SUB_TAB_CROWD;
 							populateConversation(GlobalHolder.getInstance().getGroup(GroupType.CHATING.intValue()));
 							((RadioButton)group.findViewById(R.id.rb_discussion)).setTextColor(getResources().getColor(R.color.button_text_color));
 							((RadioButton)group.findViewById(R.id.rb_crowd)).setTextColor(Color.WHITE);
+						}
+						if (mConvList.size() <= 0) {
+							adapter.notifyDataSetChanged();
 						}
 					}
 					
@@ -326,6 +341,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 				intentFilter
 						.addAction(PublicIntent.BROADCAST_CROWD_DELETED_NOTIFICATION);
 				intentFilter.addAction(JNIService.JNI_BROADCAST_GROUP_UPDATED);
+				intentFilter.addAction(JNIService.JNI_BROADCAST_NEW_DISCUSSION_NOTIFICATION);
 			}
 
 			if (mCurrentTabFlag == Conversation.TYPE_CONTACT) {
@@ -533,7 +549,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 		Conversation cov;
 		if (g.getGroupType() == GroupType.CONFERENCE) {
 			cov = new ConferenceConversation(g);
-		} else if (g.getGroupType() == GroupType.CHATING) {
+		} else if (g.getGroupType() == GroupType.CHATING || g.getGroupType() == GroupType.DISCUSSION) {
 			cov = new CrowdConversation(g);
 		} else {
 			return;
@@ -1591,20 +1607,30 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 
 			@Override
 			public void onClick(View v) {
+				if (!GlobalHolder.getInstance().isServerConnected()) {
+					Toast.makeText(mContext,
+							R.string.error_discussion_no_network,
+							Toast.LENGTH_SHORT).show();
+					return;
+				}
 				Conversation cov = mConvList.get(currentPosition);
-				CrowdGroup crowd = (CrowdGroup) GlobalHolder.getInstance()
-						.getGroupById(GroupType.CHATING.intValue(),
+				Group crowd = (Group) GlobalHolder.getInstance()
+						.getGroupById(
 								cov.getExtId());
 				// If group is null, means we have
 				// removed
 				// this conversaion
 				if (crowd != null) {
-					chatService.quitCrowd(crowd, null);
-					Intent kick = new Intent();
-					kick.setAction(JNIService.JNI_BROADCAST_KICED_CROWD);
-					kick.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
-					kick.putExtra("crowd", cov.getExtId());
-					mContext.sendBroadcast(kick);
+					if(crowd.getGroupType() == GroupType.CHATING) {
+						chatService.quitCrowd((CrowdGroup)crowd, null);
+						Intent kick = new Intent();
+						kick.setAction(JNIService.JNI_BROADCAST_KICED_CROWD);
+						kick.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
+						kick.putExtra("crowd", cov.getExtId());
+						mContext.sendBroadcast(kick);
+					} else if (crowd.getGroupType() == GroupType.DISCUSSION) {
+						chatService.quitDiscussionBoard((DiscussionGroup)crowd, null);
+					}
 				} else
 					V2Log.e(TAG,
 							"quit crowd group failed .. id is :"
@@ -1627,14 +1653,17 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 		}
 
 		Conversation cov = mConvList.get(currentPosition);
-		CrowdGroup cg = (CrowdGroup) GlobalHolder.getInstance().getGroupById(
-				GroupType.CHATING.intValue(), cov.getExtId());
-		if (cg.getOwnerUser().getmUserId() == GlobalHolder.getInstance()
-				.getCurrentUserId())
-			mPouupView
-					.setText(R.string.crowd_detail_qulification_dismiss_button);
-		else
-			mPouupView.setText(R.string.crowd_detail_qulification_quit_button);
+		Group cg = (Group) GlobalHolder.getInstance().getGroupById(cov.getExtId());
+		if (cg.getGroupType() == GroupType.CHATING) {
+			if (cg.getOwnerUser().getmUserId() == GlobalHolder.getInstance()
+					.getCurrentUserId())
+				mPouupView
+						.setText(R.string.crowd_detail_qulification_dismiss_button);
+			else
+				mPouupView.setText(R.string.crowd_detail_qulification_quit_button);
+		} else if (cg.getGroupType() == GroupType.DISCUSSION) {
+			mPouupView.setText(R.string.discussion_board_detail_quit_button);
+		}
 
 		if (mPopup.getContentView().getWidth() <= 0
 				&& mPopup.getContentView() != null) {
@@ -2238,13 +2267,22 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 				if(g == null)
 					return ;
 				
-				if (g.getGroupType() == GroupType.CHATING) {
+				if (g.getGroupType() == GroupType.CHATING || g.getGroupType() == GroupType.DISCUSSION) {
 					for (int i = 0; i < mItemList.size(); i++) {
 						ScrollItem item = mItemList.get(i);
 						if (item.cov.getExtId() == g.getmGId()) {
 							((GroupLayout) item.gp).update();
 						}
 					}
+				}
+			} else if (JNIService.JNI_BROADCAST_NEW_DISCUSSION_NOTIFICATION.equals(intent.getAction())) {
+				if (mCurrentSubTab == SUB_TAB_DISCUSSION) {
+					long gid = intent.getLongExtra("gid", 0);
+					Group g = GlobalHolder.getInstance().getGroupById(gid);
+					if (g != null)
+						addConversation(g, false);
+					else
+						V2Log.e("Can not get discussion :" + gid);
 				}
 			}
 			// else if (JNIService.JNI_BROADCAST_NEW_MESSAGE.equals(intent

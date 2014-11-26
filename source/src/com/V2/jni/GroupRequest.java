@@ -627,6 +627,9 @@ public class GroupRequest {
 			if ("1".equalsIgnoreCase(sync)) {
 				group.isSync = true;
 			}
+		} else if (groupType == V2GlobalEnum.GROUP_TYPE_DISCUSSION) {
+			String name = XmlAttributeExtractor.extractAttribute(sXml, "name");
+			group.name = name;
 		}
 
 		for (WeakReference<GroupRequestCallback> wrcb : mCallbacks) {
@@ -725,6 +728,16 @@ public class GroupRequest {
 					" nickname='", "'");
 			name = EscapedcharactersProcessing.reverse(name);
 			user.name = name;
+		}else if (groupType == V2Group.TYPE_DISCUSSION_BOARD) {
+			String id = XmlAttributeExtractor.extractAttribute(groupInfo, "id");
+			if (id == null || id.isEmpty()) {
+				V2Log.e(" Unknow disucssion information:" + groupInfo);
+				return;
+			}
+			String name = XmlAttributeExtractor.extractAttribute(groupInfo, "name");
+			name = EscapedcharactersProcessing.reverse(name);
+			group = new V2Group(Long.parseLong(id), groupType);
+			group.name = name;
 		}
 
 		for (WeakReference<GroupRequestCallback> wrcb : mCallbacks) {

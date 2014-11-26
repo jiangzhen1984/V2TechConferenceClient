@@ -347,6 +347,7 @@ public class DiscussionBoardCreateActivity extends Activity {
 						break;
 					}
 					name.append(" ").append(u.getName());
+					i++;
 				}
 
 				DiscussionGroup crowd = new DiscussionGroup(0, name.toString(),
@@ -424,12 +425,13 @@ public class DiscussionBoardCreateActivity extends Activity {
 							.getCurrentUser());
 					cg.addUserToGroup(mUserList);
 
-					// send broadcast to inform new crowd notification
+					
 					Intent i = new Intent();
-					i.setAction(PublicIntent.BROADCAST_NEW_DISCUSSION_BOARD_NOTIFICATION);
+					i.setAction(JNIService.JNI_BROADCAST_NEW_DISCUSSION_NOTIFICATION);
 					i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
-					i.putExtra("discussion", id);
-					mContext.sendBroadcast(i);
+					i.putExtra("gid", cg.getmGId());
+					sendBroadcast(i);
+					
 
 					Intent crowdIntent = new Intent(
 							PublicIntent.SHOW_DISCUSSION_BOARD_DETAIL_ACTIVITY);

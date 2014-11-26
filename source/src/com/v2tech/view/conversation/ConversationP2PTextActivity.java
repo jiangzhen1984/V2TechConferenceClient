@@ -130,6 +130,7 @@ public class ConversationP2PTextActivity extends Activity {
 
 	private final int BATCH_COUNT = 10;
 	private static final int SELECT_PICTURE_CODE = 100;
+	private static final int SHOW_GROUP_DETAIL = 200;
 
 	private static final int SEND_MESSAGE_SUCCESS = 0;
 	private static final int VOICE_DIALOG_FLAG_RECORDING = 1;
@@ -1735,6 +1736,10 @@ public class ConversationP2PTextActivity extends Activity {
 					break;
 				}
 			}
+		} else if (requestCode == SHOW_GROUP_DETAIL) {
+			Group group =  GlobalHolder.getInstance()
+					.getGroupById( groupId);
+			mUserTitleTV.setText(group.getName());
 		}
 
 	}
@@ -2471,7 +2476,7 @@ public class ConversationP2PTextActivity extends Activity {
 				i.setAction(PublicIntent.SHOW_DISCUSSION_BOARD_DETAIL_ACTIVITY);
 				i.addCategory(PublicIntent.DEFAULT_CATEGORY);
 				i.putExtra("cid", cov.getExtId());
-				startActivity(i);
+				startActivityForResult(i, SHOW_GROUP_DETAIL);
 			}
 		}
 

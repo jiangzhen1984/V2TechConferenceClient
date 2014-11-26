@@ -192,16 +192,5 @@ public class PublicIntent {
 	public static final String BROADCAST_JOINED_CONFERENCE_NOTIFICATION = "com.v2tech.broadcast.joined_conference_notification";
 	
 	
-	
-	
-	//==============================================================
-	//             broadcast  for discussion board
-	//==============================================================
-	/**
-	 * broadcast for new discussion board notification.  if current logged in user created, this broadcast will be sent<br>
-	 * key : discussion : discussion board id 
-	 */
-	public static final String BROADCAST_NEW_DISCUSSION_BOARD_NOTIFICATION = "com.v2tech.jni.broadcast.new_discussion_board_notification";
-
 
 }

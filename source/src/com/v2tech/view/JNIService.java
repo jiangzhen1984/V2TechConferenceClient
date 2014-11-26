@@ -72,6 +72,7 @@ import com.v2tech.view.conversation.MessageBuilder;
 import com.v2tech.view.conversation.MessageLoader;
 import com.v2tech.vo.ConferenceGroup;
 import com.v2tech.vo.CrowdGroup;
+import com.v2tech.vo.DiscussionGroup;
 import com.v2tech.vo.Group;
 import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.GroupQualicationState;
@@ -142,6 +143,12 @@ public class JNIService extends Service implements
 	 * Crowd invitation with key crowd
 	 */
 	public static final String JNI_BROADCAST_CROWD_INVATITION = "com.v2tech.jni.broadcast.crowd_invatition";
+	
+	/**
+	 * Broadcast for joined new discussion
+	 * key gid
+	 */
+	public static final String JNI_BROADCAST_NEW_DISCUSSION_NOTIFICATION = "com.v2tech.jni.broadcast.new_discussion_notification";
 
 	private boolean isDebug = true;
 
@@ -675,9 +682,10 @@ public class JNIService extends Service implements
 				cg.setBrief(group.brief);
 				cg.setAuthType(CrowdGroup.AuthType.fromInt(group.authType));
 				cg.setName(group.name);
-				// update crowd group infos in globle collections
-				// GlobalHolder.getInstance().updateCrwodGroupByID(V2GlobalEnum.GROUP_TYPE_CROWD
-				// , group);
+			}else if (group.type == GroupType.DISCUSSION.intValue()) {
+				DiscussionGroup cg = (DiscussionGroup) GlobalHolder.getInstance()
+						.getGroupById(group.id);
+				cg.setName(group.name);
 			}
 
 			// Send broadcast
@@ -753,8 +761,23 @@ public class JNIService extends Service implements
 						VMessageQualification.Type.CROWD_INVITATION, cg, owner,
 						null);
 
-			} else if (gType == GroupType.CONTACT) {
-
+			} else if (gType == GroupType.DISCUSSION) {
+				Group cache = GlobalHolder.getInstance().getGroupById(group.id);
+				if (cache != null) {
+					V2Log.w("Discussion exists  id "+ cache.getmGId()+"  name: "+ cache.getName());
+					return;
+				}
+				
+				User owner = GlobalHolder.getInstance().getUser(
+						group.creator.uid);
+				DiscussionGroup cg = new DiscussionGroup(group.id, group.name, owner);
+				GlobalHolder.getInstance().addGroupToList(
+						GroupType.DISCUSSION.intValue(), cg);
+				Intent i = new Intent();
+				i.setAction(JNIService.JNI_BROADCAST_NEW_DISCUSSION_NOTIFICATION);
+				i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
+				i.putExtra("gid", cg.getmGId());
+				sendBroadcast(i);
 			}
 		}
 
