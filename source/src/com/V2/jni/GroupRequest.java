@@ -559,6 +559,7 @@ public class GroupRequest {
 		String gid = XmlAttributeExtractor.extract(sXml, " id='", "'");
 		String name = XmlAttributeExtractor.extract(sXml, " name='", "'");
         String announcement = XmlAttributeExtractor.extract(sXml, " announcement='", "'");
+        String brief = XmlAttributeExtractor.extract(sXml, " summary='", "'");
         String authType = XmlAttributeExtractor.extract(sXml, " authtype='", "'");
         String groupSize = XmlAttributeExtractor.extract(sXml, " size='", "'");
         String createUesrID = XmlAttributeExtractor.extract(sXml,
@@ -569,6 +570,7 @@ public class GroupRequest {
 			vg.creator = vg.owner;
             if (groupType == V2GlobalEnum.GROUP_TYPE_CROWD) {
             	vg.announce = announcement;
+            	vg.brief = brief;
 	            vg.authType = Integer.valueOf(authType);
 	            vg.groupSize = Integer.valueOf(groupSize);
             }

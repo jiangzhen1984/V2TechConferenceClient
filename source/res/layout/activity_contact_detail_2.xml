@@ -70,8 +70,6 @@
                 android:id="@+id/contact_user_detail_title_layout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignBottom="@+id/contact_user_detail_head_icon"
-                android:layout_alignTop="@+id/contact_user_detail_head_icon"
                 android:layout_centerVertical="true"
                 android:layout_marginLeft="@dimen/detail_detail_signature_margin_left"
                 android:layout_marginRight="@dimen/detail_detail_signature_margin_left"
@@ -94,11 +92,12 @@
                     android:id="@+id/contact_user_detail_user_signature_tv"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentBottom="true"
                     android:ellipsize="marquee"
                     android:marqueeRepeatLimit="marquee_forever"
                     android:singleLine="true"
                     android:text="TextView"
+                    android:layout_below="@+id/contact_user_detail_title"
+                    android:layout_marginTop="@dimen/common_margin_verticial_small"
                     android:textColor="@color/common_item_text_color" />
             </RelativeLayout>
             <RelativeLayout

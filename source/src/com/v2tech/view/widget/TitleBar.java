@@ -18,6 +18,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -82,6 +83,8 @@ public class TitleBar {
 			R.string.conversation_popup_menu_sms_call_button,
 			R.string.conversation_popup_menu_email_button,
 			R.string.conversation_popup_menu_files_button };
+	
+	private int marginRight;
 
 	public TitleBar(Context context, View rootContainer) {
 		this.context = context;
@@ -121,7 +124,7 @@ public class TitleBar {
 		} else {
 			padding = DensityUtils.dip2px(context, 5);
 		}
-		
+		marginRight = DensityUtils.dip2px(context, 5);
 	}
 
 	public void updateTitle(String title) {
@@ -214,7 +217,7 @@ public class TitleBar {
 			tv.setText(plusItems[i]);
 			tv.setPadding(5, padding, 5, padding);
 			//TODO gray disable button
-			if (i > 3) {
+			if (i > 4) {
 				tv.setTextColor(Color.rgb(198, 198, 198));
 			} else {
 				tv.setTextColor(Color.rgb(123, 123, 123));
@@ -421,24 +424,20 @@ public class TitleBar {
 
 			int[] pos = new int[2];
 			anchor.getLocationInWindow(pos);
-			pos[0] += anchor.getMeasuredWidth() / 2;
 			pos[1] += anchor.getMeasuredHeight() - anchor.getPaddingBottom();
 			// calculate arrow offset
 			View arrow = plusWindow.getContentView().findViewById(
 					R.id.common_pop_up_arrow_up);
 			arrow.bringToFront();
 
-			int x = pos[0];
-
 			RelativeLayout.LayoutParams arrowRL = (RelativeLayout.LayoutParams) arrow
 					.getLayoutParams();
-			arrowRL.rightMargin = (dm.widthPixels - pos[0])
-					- arrow.getMeasuredWidth() / 2;
+			arrowRL.rightMargin = dm.widthPixels - pos[0]  - 
+					(anchor.getMeasuredWidth() / 2) - arrow.getMeasuredWidth();
 			arrow.setLayoutParams(arrowRL);
 
 			plusWindow.setAnimationStyle(R.style.TitleBarPopupWindowAnim);
-			plusWindow.showAtLocation(anchor, Gravity.NO_GRAVITY, x, pos[1]);
-
+			plusWindow.showAtLocation(anchor, Gravity.TOP | Gravity.RIGHT,  marginRight , pos[1]);
 		}
 
 	};
@@ -477,24 +476,20 @@ public class TitleBar {
 
 			int[] pos = new int[2];
 			anchor.getLocationInWindow(pos);
-			pos[0] += anchor.getMeasuredWidth() / 2;
 			pos[1] += anchor.getMeasuredHeight() - anchor.getPaddingBottom();
 			// calculate arrow offset
 			View arrow = moreWindow.getContentView().findViewById(
 					R.id.common_pop_up_arrow_up);
 			arrow.bringToFront();
 
-			int x = pos[0];
-
 			RelativeLayout.LayoutParams arrowRL = (RelativeLayout.LayoutParams) arrow
 					.getLayoutParams();
-			arrowRL.rightMargin = (dm.widthPixels - pos[0])
-					- arrow.getMeasuredWidth() / 2;
+			arrowRL.rightMargin = dm.widthPixels - pos[0]  - (anchor.getMeasuredWidth() / 2) 
+					- arrow.getMeasuredWidth();
 			arrow.setLayoutParams(arrowRL);
 
 			moreWindow.setAnimationStyle(R.style.TitleBarPopupWindowAnim);
-			moreWindow.showAtLocation(anchor, Gravity.NO_GRAVITY, x, pos[1]);
-
+			moreWindow.showAtLocation(anchor, Gravity.RIGHT | Gravity.TOP , marginRight , pos[1]);
 		}
 
 	};

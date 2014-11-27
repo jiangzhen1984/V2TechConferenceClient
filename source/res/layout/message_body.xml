@@ -52,7 +52,9 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginLeft="@dimen/messageBodyView_common_margin_left_or_right"
-                            android:text="张三"
+                            android:text="啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊"
+                            android:maxWidth="@dimen/messageBodyView_chat_name_max_width"
+                            android:singleLine="true"
                             android:textColor="@color/common_item_text_color_black"
                             android:textSize="@dimen/common_item_text_size_16" />
                         <LinearLayout
@@ -188,12 +190,14 @@
                                 android:layout_gravity="right"
                                 android:layout_marginLeft="@dimen/messageBodyView_common_margin_left_or_right"
                                 android:text="李四"
+                                android:maxWidth="@dimen/messageBodyView_chat_name_max_width"
+                                android:singleLine="true"
                                 android:textColor="@color/common_item_text_color_black"
                                 android:textSize="@dimen/common_item_text_size_16" />
                             <LinearLayout
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_gravity="center_vertical"
+                                android:layout_gravity="right"
                                 android:orientation="horizontal" >
                                 <RelativeLayout
                                     android:layout_width="wrap_content"

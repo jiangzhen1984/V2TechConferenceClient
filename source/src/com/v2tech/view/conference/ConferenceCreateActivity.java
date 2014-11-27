@@ -574,7 +574,11 @@ public class ConferenceCreateActivity extends Activity {
 				if (rccr.getResult() != JNIResponse.Result.SUCCESS) {
                     V2Log.e("ConferenceCreateActivity --> CREATE FAILED ... ERROR CODE IS : " + rccr.getResult().name());
 					mErrorNotificationLayout.setVisibility(View.VISIBLE);
-					mErrorMessageTV
+					if(rccr.getResult() == JNIResponse.Result.NO_RESOURCE)
+						mErrorMessageTV
+							.setText(R.string.error_no_resource);
+					else
+						mErrorMessageTV
 							.setText(R.string.error_create_conference_failed_from_server_side);
 					break;
 				}

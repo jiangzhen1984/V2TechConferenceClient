@@ -8,8 +8,8 @@
     <RelativeLayout
         android:id="@+id/relativelayout1"
         android:layout_width="wrap_content"
-        android:paddingTop="5dp"
-        android:paddingBottom="5dp"
+        android:paddingTop="@dimen/contacts_group_view_margin_or_padding_small"
+        android:paddingBottom="@dimen/contacts_group_view_margin_or_padding_small"
         android:layout_height="wrap_content" >
         <ImageView
             android:id="@+id/contacts_group_delete_icon"
@@ -17,7 +17,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_centerVertical="true"
-            android:layout_marginLeft="20dp"
+            android:layout_marginLeft="@dimen/contacts_group_view_margin_or_padding_big_20"
             android:src="@drawable/contacts_group_item_icon" />
 
         <TextView
@@ -25,7 +25,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
-            android:layout_marginLeft="15dp"
+            android:layout_marginLeft="@dimen/contacts_group_view_margin_or_padding_big"
             android:layout_toLeftOf="@+id/contacts_group_item_adapter_delelte_button"
             android:layout_toRightOf="@+id/contacts_group_delete_icon"
             android:ellipsize="end"
@@ -40,12 +40,13 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
-            android:layout_margin="10dp"
+            android:layout_margin="@dimen/contacts_group_view_margin_or_padding_normal"
             android:background="@drawable/rounded_corners_contacts_group_delete_button"
-            android:paddingBottom="5dp"
-            android:paddingLeft="12dp"
-            android:paddingRight="12dp"
-            android:paddingTop="5dp"
+            android:paddingLeft="@dimen/contacts_group_view_margin_or_padding_normal"
+            android:paddingRight="@dimen/contacts_group_view_margin_or_padding_normal"
+            android:paddingTop="@dimen/contacts_group_view_margin_or_padding_small"
+            android:paddingBottom="@dimen/contacts_group_view_margin_or_padding_small"
+            android:layout_centerVertical="true"
             android:text="@string/activiy_contact_group_item_button_delete"
             android:textColor="@color/common_white_color"
             android:textSize="@dimen/common_item_text_size" />

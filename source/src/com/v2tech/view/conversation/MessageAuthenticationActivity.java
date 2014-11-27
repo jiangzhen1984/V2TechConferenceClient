@@ -77,6 +77,7 @@ import com.v2tech.vo.VMessageQualificationInvitationCrowd;
  */
 public class MessageAuthenticationActivity extends Activity {
 
+	private final static String TAG = "MessageAuthenticationActivity";
 	private final static int ACCEPT_INVITATION_DONE = 1;
 	private final static int ACCEPT_APPLY_DONE = 5;
 	private final static int PROMPT_TYPE_FRIEND = 2;
@@ -449,15 +450,23 @@ public class MessageAuthenticationActivity extends Activity {
 				QualificationState state = (QualificationState) data
 						.getSerializableExtra("qualState");
 				if (id != -1l) {
+					boolean isFresh = false;
 					for (ListItemWrapper wrapper : mMessageList) {
 						VMessageQualification message = (VMessageQualification) wrapper.obj;
 						if (message.getId() == id) {
 							message.setQualState(state);
 							groupAdapter.notifyDataSetChanged();
+							isFresh = true;
 							break;
 						}
 					}
+					
+					if(!isFresh)
+						V2Log.e(TAG , "Update QualificationState failed ... because no search it in mMessageList "
+								+ "id is : " + id);
 				}
+				else
+					V2Log.e(TAG , "Update QualificationState failed ... because id is -1");
 			}
 			break;
 		}
@@ -665,6 +674,7 @@ public class MessageAuthenticationActivity extends Activity {
 		if (isFriendInDeleteMode || isGroupInDeleteMode) {
 			exitDeleteMode();
 		} else {
+			setResult(16);
 			super.onBackPressed();
 		}
 
@@ -1195,7 +1205,7 @@ public class MessageAuthenticationActivity extends Activity {
 						sendBroadcast(intent);
 						updateViewItem(tag.wrapper, tag.item);
 						MessageBuilder.updateQualicationMessage(mContext, msg);
-						startCrowdInvitationDetail(msg);
+//						startCrowdInvitationDetail(msg);
 					} else {
 						// Add crowd group to cache, we can't handle this after
 						// done
@@ -1319,6 +1329,9 @@ public class MessageAuthenticationActivity extends Activity {
 					// 当用户在当前界面时，就不显示红点了
 					if (currentRadioType != PROMPT_TYPE_GROUP)
 						updateTabPrompt(PROMPT_TYPE_GROUP, true);
+					
+					msg.setReadState(ReadState.READ);
+					MessageBuilder.updateQualicationMessage(mContext, msg);
 				}
 				// Cancel next broadcast
 				this.abortBroadcast();

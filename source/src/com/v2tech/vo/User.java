@@ -33,6 +33,7 @@ import android.graphics.Bitmap;
 import com.V2.jni.util.EscapedcharactersProcessing;
 import com.V2.jni.util.V2Log;
 import com.v2tech.service.GlobalHolder;
+import com.v2tech.util.BitmapUtil;
 
 /**
  * User information
@@ -393,8 +394,26 @@ public class User implements Comparable<User> {
 	private Bitmap avatar;
 
 	public Bitmap getAvatarBitmap() {
-		if (avatar == null || avatar.isRecycled()) {
+		if (avatar == null) {
 			avatar = GlobalHolder.getInstance().getUserAvatar(this.mUserId);
+			if(avatar == null){
+				//FIXME if get null from loadAvatarFromPath 
+				return BitmapUtil.loadAvatarFromPath(mAvatarPath);
+			}
+			else{
+				if(avatar.isRecycled())
+					return BitmapUtil.loadAvatarFromPath(mAvatarPath);
+			}
+		}
+		else if(avatar.isRecycled()){
+			avatar = GlobalHolder.getInstance().getUserAvatar(this.mUserId);
+			if(avatar == null){
+				return BitmapUtil.loadAvatarFromPath(mAvatarPath);
+			}
+			else{
+				if(avatar.isRecycled())
+					return BitmapUtil.loadAvatarFromPath(mAvatarPath);
+			}
 		}
 		return avatar;
 	}

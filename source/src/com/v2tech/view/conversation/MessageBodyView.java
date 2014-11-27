@@ -16,6 +16,7 @@ import android.os.AsyncTask;
 import android.os.Handler;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
+import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.ImageSpan;
 import android.view.Gravity;
@@ -39,6 +40,7 @@ import com.V2.jni.V2GlobalEnum;
 import com.V2.jni.util.V2Log;
 import com.v2tech.R;
 import com.v2tech.service.GlobalHolder;
+import com.v2tech.util.FileUitls;
 import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.MessageUtil;
 import com.v2tech.util.SPUtil;
@@ -250,7 +252,7 @@ public class MessageBodyView extends LinearLayout {
 		mArrowIV.bringToFront();
 		
 		//执行发送时动画播放
-		if(mMsg.getState() == VMessageAbstractItem.STATE_NORMAL){
+		if(mMsg.getState() == VMessageAbstractItem.STATE_NORMAL & mMsg.getFileItems().size() <= 0){
 			updateSendingFlag(true);
 		}
 
@@ -623,20 +625,30 @@ public class MessageBodyView extends LinearLayout {
 					pwResendTV.setVisibility(View.GONE);
 				}
 
+//				arrow.measure(MeasureSpec.UNSPECIFIED,
+//						MeasureSpec.UNSPECIFIED);
+//				int arrowWidth = arrow.getMeasuredWidth();
+				
 				int viewWidth = anchor.getMeasuredWidth();
-				int viewHeight = anchor.getMeasuredHeight();
-				int offsetX = (viewWidth - popupWindowWidth) / 2;
-				int offsetY = (viewHeight + popupWindowHeight);
 
 				int[] location = new int[2];
 				anchor.getLocationInWindow(location);
+				
+				int left = location[0];
+				int top = location[1];
+				
+				int offsetX = left + (viewWidth / 2) - (popupWindowWidth / 2);
+				int offsetY = top - popupWindowHeight;
+				
+				pw.showAtLocation((View) anchor.getParent(),
+                        Gravity.NO_GRAVITY, offsetX, offsetY);
 				// if (location[1] <= 0) {
-				Rect r = new Rect();
-				anchor.getDrawingRect(r);
-				Rect r1 = new Rect();
-				anchor.getGlobalVisibleRect(r1);
-				int offsetXLocation = r1.left + offsetX;
-				int offsetYLocation = r1.top - (offsetY / 2);
+//				Rect r = new Rect();
+//				anchor.getDrawingRect(r);
+//				Rect r1 = new Rect();
+//				anchor.getGlobalVisibleRect(r1);
+//				int offsetXLocation = r1.left + offsetX;
+//				int offsetYLocation = r1.top - (offsetY / 2);
 
 //                int height = anchor.getHeight();
 //                if(height < offsetYLocation){
@@ -644,8 +656,8 @@ public class MessageBodyView extends LinearLayout {
 //                            offsetY);
 //                }
 //                else
-                pw.showAtLocation((View) anchor.getParent(),
-                        Gravity.NO_GRAVITY, offsetXLocation, offsetYLocation);
+//                pw.showAtLocation((View) anchor.getParent(),
+//                        Gravity.NO_GRAVITY, offsetX, offsetY);
 				// } else {
 				// pw.showAsDropDown((View) anchor.getParent(), offsetX,
 				// offsetY);
@@ -948,24 +960,28 @@ public class MessageBodyView extends LinearLayout {
 						callback.onCrowdFileMessageClicked(CrowdFileActivityType.CROWD_FILE_UPLOING_ACTIVITY);
 				}
 				else{
-					if (item.getState() == VMessageFileItem.STATE_FILE_UNDOWNLOAD) {
-						callback.requestDownloadFile(view, item.getVm(), item);
-						item.setState(VMessageFileItem.STATE_FILE_DOWNLOADING);
-					} else if (item.getState() == VMessageFileItem.STATE_FILE_SENDING) {
-						callback.requestPauseTransFile(view, item.getVm(), item);
-						item.setState(VMessageFileItem.STATE_FILE_PAUSED_SENDING);
-					} else if (item.getState() == VMessageFileItem.STATE_FILE_PAUSED_SENDING) {
-						callback.requestResumeTransFile(view, item.getVm(), item);
-						item.setState(VMessageFileItem.STATE_FILE_SENDING);
-					} else if (item.getState() == VMessageFileItem.STATE_FILE_DOWNLOADING) {
-						callback.requestPauseDownloadFile(view, item.getVm(), item);
-						item.setState(VMessageFileItem.STATE_FILE_PAUSED_DOWNLOADING);
-					} else if (item.getState() == VMessageFileItem.STATE_FILE_PAUSED_DOWNLOADING) {
-						callback.requestResumeDownloadFile(view, item.getVm(), item);
-						item.setState(VMessageFileItem.STATE_FILE_DOWNLOADING);
-					}
-					MessageLoader.updateFileItemState(getContext(), item);
-					updateView(item);
+                    if(item.getState() == VMessageFileItem.STATE_FILE_DOWNLOADED) {
+                        FileUitls.openFile(getContext(), item.getFilePath());
+                    } else {
+                        if (item.getState() == VMessageFileItem.STATE_FILE_UNDOWNLOAD) {
+                            callback.requestDownloadFile(view, item.getVm(), item);
+                            item.setState(VMessageFileItem.STATE_FILE_DOWNLOADING);
+                        } else if (item.getState() == VMessageFileItem.STATE_FILE_SENDING) {
+                            callback.requestPauseTransFile(view, item.getVm(), item);
+                            item.setState(VMessageFileItem.STATE_FILE_PAUSED_SENDING);
+                        } else if (item.getState() == VMessageFileItem.STATE_FILE_PAUSED_SENDING) {
+                            callback.requestResumeTransFile(view, item.getVm(), item);
+                            item.setState(VMessageFileItem.STATE_FILE_SENDING);
+                        } else if (item.getState() == VMessageFileItem.STATE_FILE_DOWNLOADING) {
+                            callback.requestPauseDownloadFile(view, item.getVm(), item);
+                            item.setState(VMessageFileItem.STATE_FILE_PAUSED_DOWNLOADING);
+                        } else if (item.getState() == VMessageFileItem.STATE_FILE_PAUSED_DOWNLOADING) {
+                            callback.requestResumeDownloadFile(view, item.getVm(), item);
+                            item.setState(VMessageFileItem.STATE_FILE_DOWNLOADING);
+                        }
+                        MessageLoader.updateFileItemState(getContext(), item);
+                        updateView(item);
+                    }
 				}
 			}
 		}

@@ -78,10 +78,11 @@ public class Notificator {
 		NotificationManager mNotificationManager = (NotificationManager) context
 				.getSystemService(Context.NOTIFICATION_SERVICE);
 		// mId allows you to update the notification later on.
-		mNotificationManager.cancel(PublicIntent.MESSAGE_NOTIFICATION_ID);
-		mNotificationManager.cancel(PublicIntent.VIDEO_NOTIFICATION_ID);
-		mNotificationManager
-				.cancel(PublicIntent.APPLICATION_STATUS_BAR_NOTIFICATION);
+//		mNotificationManager.cancel(PublicIntent.MESSAGE_NOTIFICATION_ID);
+//		mNotificationManager.cancel(PublicIntent.VIDEO_NOTIFICATION_ID);
+//		mNotificationManager
+//				.cancel(PublicIntent.APPLICATION_STATUS_BAR_NOTIFICATION);
+		mNotificationManager.cancelAll();
 	}
 
 	public static void udpateApplicationNotification(Context context,

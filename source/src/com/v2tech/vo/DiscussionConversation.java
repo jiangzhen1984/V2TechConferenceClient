@@ -1,15 +1,13 @@
 package com.v2tech.vo;
 
-import android.text.TextUtils;
+import java.util.List;
 
 import com.V2.jni.V2GlobalEnum;
-import com.v2tech.util.DateUtil;
 import com.v2tech.vo.Group.GroupType;
 
 public class DiscussionConversation extends Conversation {
 
 	private Group discussionGroup;
-	private User lastSendUser;
 	private boolean showContact;
 
 	public DiscussionConversation(Group discussion) {
@@ -28,41 +26,25 @@ public class DiscussionConversation extends Conversation {
 
 	@Override
 	public String getName() {
-		String superName = super.getName();
-		if(TextUtils.isEmpty(superName))
-			return getDiscussionNames();
+		if(discussionGroup != null)
+			return discussionGroup.getName();
 		else
-			return superName;	
+			return getDiscussionNames();
 	}
 
 	private String getDiscussionNames() {
-		return date;
-//		if(discussionGroup )
-//		return null;
-	}
-
-//	@Override
-//	public CharSequence getMsg() {
-//		if(showContact)
-//			return msg;
-//		else{
-//			if (departmentGroup != null) {
-//				User u = departmentGroup.getOwnerUser();
-//				// TODO need use localization
-//				return u == null ? "" : "创建人:" + u.getName();
-//			}
-//			return msg;
-//		}
-//	}
-	
-
-
-	public User getLastSendUser() {
-		return lastSendUser;
-	}
-
-	public void setLastSendUser(User lastSendUser) {
-		this.lastSendUser = lastSendUser;
+		StringBuilder sb = new StringBuilder();
+		List<User> users = discussionGroup.getUsers();
+		User ownerUser = discussionGroup.getOwnerUser();
+		if(ownerUser != null){
+			sb.append(ownerUser.getName());
+		}
+		if(users != null){
+			for (User user : users) {
+				sb.append(" ").append(user.getName());
+			}
+		}
+		return sb.toString();
 	}
 
 	public boolean isShowContact() {

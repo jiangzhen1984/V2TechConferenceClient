@@ -24,18 +24,12 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnFocusChangeListener;
 import android.view.View.OnTouchListener;
-import android.view.ViewGroup;
-import android.view.Window;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.view.animation.LinearInterpolator;
-import android.view.animation.RotateAnimation;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 
@@ -516,6 +510,9 @@ public class LoginActivity extends Activity {
 				} else if (rlr.getResult() == JNIResponse.Result.CONNECT_ERROR) {
 					V2Toast.makeText(mContext, R.string.error_connect_to_server,
 							V2Toast.LENGTH_LONG).show();
+				} else if (rlr.getResult() == JNIResponse.Result.NO_RESOURCE) {
+					V2Toast.makeText(mContext, R.string.error_no_resource,
+							V2Toast.LENGTH_LONG).show();
 				} else if (rlr.getResult() == JNIResponse.Result.SERVER_REJECT) {
 					V2Toast.makeText(mContext, R.string.error_connect_to_server,
 							V2Toast.LENGTH_LONG).show();
@@ -523,7 +520,7 @@ public class LoginActivity extends Activity {
 					//获取到登陆用户对象
 					User user = ((RequestLogInResponse) rlr).getUser();
 					if(user == null)
-						throw new RuntimeException("登陆异常，没有获取到登陆用户的id");
+						throw new RuntimeException(getResources().getString(R.string.login_error_init_user_id));
 					//为登陆用户创建个人资料文件夹
 					createPersonFolder(user);
 					// Save user info
@@ -537,11 +534,7 @@ public class LoginActivity extends Activity {
 					//init all database table names;
 					initDataBaseTableCacheNames();
 					finish();
-				} else if (rlr.getResult() == JNIResponse.Result.NO_RESOURCE){
-					V2Toast.makeText(mContext, R.string.error_connect_to_server_no_enough_resource,
-							V2Toast.LENGTH_LONG).show();
 				}
-
 				ProgressUtils.showNormalProgress(mContext , false);
 				break;
 			}

@@ -98,6 +98,7 @@ public class CrowdFilesActivity extends Activity {
 	private ImageView mUploadingFileNotificationIcon;
 	private boolean showUploaded;
 	private boolean isInDeleteMode;
+    private boolean isFromChatActivity; //如果从聊天界面点击正在上传的文件，进入正在上传界面，就直接返回聊天界面
 
 	private CrowdGroupService service;
 	private CrowdGroup crowd;
@@ -160,8 +161,10 @@ public class CrowdFilesActivity extends Activity {
 		CrowdFileActivityType type = (CrowdFileActivityType) getIntent().
 				getSerializableExtra("crowdFileActivityType");
 		if(type != null){
-			if(CrowdFileActivityType.CROWD_FILE_UPLOING_ACTIVITY == type)
-				mUploadingFileNotificationIcon.performClick();
+			if(CrowdFileActivityType.CROWD_FILE_UPLOING_ACTIVITY == type) {
+                isFromChatActivity = true;
+                mUploadingFileNotificationIcon.performClick();
+            }
 		}
 	}
 
@@ -236,12 +239,18 @@ public class CrowdFilesActivity extends Activity {
 			mCannelButton.setVisibility(View.INVISIBLE);
 			isInDeleteMode = false;
 			// resume all uploading files
-			suspendOrResumeUploadingFiles(false);
+			if(showUploaded)
+				suspendOrResumeUploadingFiles(false);
+			else
+				suspendOrResumeDownloadingFiles(false);
 			adapter.notifyDataSetChanged();
 			// set cancel button text to upload text
 			mShowUploadedFileButton.setText(R.string.crowd_files_title_upload);
 			return;
 		} else if (showUploaded) {
+            if(isFromChatActivity)
+                super.onBackPressed();
+
 			mCannelButton.setVisibility(View.INVISIBLE);
 			showUploaded = false;
 			mTitle.setText(R.string.crowd_files_title);
@@ -249,7 +258,7 @@ public class CrowdFilesActivity extends Activity {
 			mShowUploadedFileButton.setVisibility(View.VISIBLE);
 			adapterUploadShow();
 			adapter.notifyDataSetChanged();
-			return;
+            return ;
 		}
 		super.onBackPressed();
 	}
@@ -420,6 +429,25 @@ public class CrowdFilesActivity extends Activity {
 			}
 		}
 	}
+	
+	private void suspendOrResumeDownloadingFiles(boolean flag) {
+		for (int i = 0; i < this.mFiles.size(); i++) {
+			VCrowdFile vf = mFiles.get(i);
+			if (flag) {
+				if(vf.getState() == VFile.State.DOWNLOADING){
+					vf.setState(VFile.State.DOWNLOAD_PAUSE);
+					service.handleCrowdFile(vf,
+							FileOperationEnum.OPERATION_PAUSE_DOWNLOADING, null);
+				}
+			} else {
+				if(vf.getState() == VFile.State.DOWNLOAD_PAUSE){
+					vf.setState(VFile.State.DOWNLOADING);
+					service.handleCrowdFile(vf,
+							FileOperationEnum.OPERATION_RESUME_DOWNLOAD, null);
+				}
+			}
+		}
+	}
 
 	/**
 	 * Handle new file notification
@@ -558,14 +586,18 @@ public class CrowdFilesActivity extends Activity {
 
 		@Override
 		public void onClick(View v) {
-			if (isInDeleteMode) {
-				isInDeleteMode = false;
-				// resume all uploading files
-				suspendOrResumeUploadingFiles(false);
-				adapter.notifyDataSetChanged();
-				mCannelButton.setVisibility(View.INVISIBLE);
-				return;
-			}
+//			if (isInDeleteMode) {
+//				isInDeleteMode = false;
+//				// resume all uploading files
+//				if(showUploaded)
+//					suspendOrResumeUploadingFiles(false);
+//				else
+//					suspendOrResumeDownloadingFiles(false);
+//				adapter.notifyDataSetChanged();
+//				mCannelButton.setVisibility(View.INVISIBLE);
+//				return;
+//			}
+			onBackPressed();
 		}
 
 	};
@@ -621,14 +653,11 @@ public class CrowdFilesActivity extends Activity {
 					// Pause all uploading files
 					suspendOrResumeUploadingFiles(true);
 					adapter.notifyDataSetChanged();
-					// update upload button text to cancel
-					mShowUploadedFileButton
-							.setText(R.string.crowd_files_title_cancel_button);
 				} else {
-					
 					boolean showDeleteMode = false;
 					if (crowd.getOwnerUser().getmUserId() == GlobalHolder.getInstance().getCurrentUserId()) {
 						showDeleteMode = true;
+						suspendOrResumeDownloadingFiles(true);
 					} else {
 						for (VCrowdFile file : mFiles) {
 							if (file.getUploader().getmUserId() == currentLoginUserID) {
@@ -641,7 +670,6 @@ public class CrowdFilesActivity extends Activity {
 					if (showDeleteMode) {
 						isInDeleteMode = true;
 						// Pause all uploading files
-						suspendOrResumeUploadingFiles(true);
 						adapter.notifyDataSetChanged();
 						// update upload button text to cancel
 						mShowUploadedFileButton
@@ -664,7 +692,7 @@ public class CrowdFilesActivity extends Activity {
 				if (res.getResult() == JNIResponse.Result.SUCCESS) {
 					RequestFetchGroupFilesResponse rf = (RequestFetchGroupFilesResponse) res;
 					handleFetchFilesDone(rf.getList());
-				} else {
+				} else if(res.getResult() != JNIResponse.Result.SUCCESS & res.getResult() != JNIResponse.Result.TIME_OUT){
                     V2Log.e(TAG , "Get upload files failed ... ERROR CODE IS : " + res.getResult().name());
                     Toast.makeText(mContext , getResources().getString(
                             R.string.crowd_files_fill_adapter_failed) , Toast.LENGTH_SHORT).show();

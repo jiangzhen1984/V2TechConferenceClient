@@ -91,7 +91,7 @@ public class ConfRequest {
 	 *            entered time
 	 * @param szConfData
 	 * @param nJoinResult
-	 *            result of join. 0 success 1:falied
+	 *            result of join. 0 success 200 Confence is'nt exist 205 资源不足
 	 */
 	private void OnEnterConf(long nConfID, long nTime, String szConfData,
 			int nJoinResult) {

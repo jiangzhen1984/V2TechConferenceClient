@@ -3,17 +3,11 @@ package com.v2tech.util;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.io.Writer;
-import java.lang.reflect.Field;
-import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -21,10 +15,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
-import java.util.Map;
 
 import android.app.AlarmManager;
 import android.app.Notification;
@@ -34,18 +25,12 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
-import android.os.Build;
 import android.os.Environment;
 import android.os.IBinder;
-import android.os.Looper;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.os.SystemClock;
 import android.text.TextUtils;
-import android.util.Log;
-import android.widget.Toast;
 
 import com.V2.jni.util.V2Log;
 
@@ -63,7 +48,7 @@ import com.V2.jni.util.V2Log;
  * 
  * @author Administrator
  */
-public class LogService extends Service implements Thread.UncaughtExceptionHandler {
+public class LogService extends Service{
 	private static final String TAG = "LogService";
 
 	private static final int MEMORY_LOG_FILE_MAX_SIZE = 10 * 1024 * 1024; // 日志文件最大值，10M
@@ -71,7 +56,6 @@ public class LogService extends Service implements Thread.UncaughtExceptionHandl
 	private static final int SDCARD_LOG_FILE_SAVE_DAYS = 1; // sd卡中日志文件的最多保存天数
     private static String MONITOR_LOG_SIZE_ACTION = "MONITOR_LOG_SIZE"; // 日志文件监测action
     private static String SWITCH_LOG_FILE_ACTION = "SWITCH_LOG_FILE_ACTION"; // 切换日志文件action
-    private Context mContext;
     /*
 	 * 是否正在监测日志文件大小； 如果当前日志记录在SDcard中则为false 如果当前日志记录在内存中则为true
 	 */
@@ -111,11 +95,6 @@ public class LogService extends Service implements Thread.UncaughtExceptionHandl
      */
 	private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
 
-    /**
-     * 用于格式化日期,作为crash日志文件名的一部分
-     */
-    private DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss", Locale.getDefault());
-
 	private Process process;
 	private WakeLock wakeLock;
 	private LogTaskReceiver logTaskReceiver;
@@ -127,16 +106,6 @@ public class LogService extends Service implements Thread.UncaughtExceptionHandl
      */
     private SDStateMonitorReceiver sdStateReceiver;
 
-    /**
-     * 系统默认的UncaughtException处理类
-     */
-    private Thread.UncaughtExceptionHandler mDefaultHandler;
-
-    /**
-     * 用来存储设备信息和异常信息
-     */
-    private Map<String, String> infos = new HashMap<String, String>();
-
 	@Override
 	public IBinder onBind(Intent intent) {
 		return null;
@@ -145,7 +114,6 @@ public class LogService extends Service implements Thread.UncaughtExceptionHandl
 	@Override
 	public void onCreate() {
 		super.onCreate();
-        mContext = getApplicationContext();
 		init();
 		register();
 		deploySwitchLogFileTask();
@@ -221,11 +189,6 @@ public class LogService extends Service implements Thread.UncaughtExceptionHandl
 		PowerManager pm = (PowerManager) getApplicationContext()
 				.getSystemService(Context.POWER_SERVICE);
 		wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
-        //获取系统默认处理器
-        mDefaultHandler = Thread.getDefaultUncaughtExceptionHandler();
-        //设置LogService为程序的默认处理器
-      //  Thread.setDefaultUncaughtExceptionHandler(this);
-
         V2Log.d(TAG, "LogService onCreate");
 	}
 	
@@ -937,163 +900,4 @@ public class LogService extends Service implements Thread.UncaughtExceptionHandl
 			}
 		}
 	}
-
-    @Override
-    public void uncaughtException(Thread thread, Throwable ex) {
-        if (!handleException(ex)){
-            ex.printStackTrace();
-            recordLogServiceLog("uncaughtException---> an error occured when handleException return false..mean" +
-                    "handler failed Exception is :" + ex);
-            if(mDefaultHandler != null){
-                //如果用户没有处理则让系统默认的异常处理器来处理
-                mDefaultHandler.uncaughtException(thread, ex);
-            }
-            else{
-                recordLogServiceLog("uncaughtException---> an error occured when handleException return false..and" +
-                        "System handler is null");
-                try {
-                    Thread.sleep(5000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                    recordLogServiceLog("uncaughtException---> an error occured when Thread sleeping , " +
-                            "Exception is InterruptedException :" + e);
-                }
-                //退出程序
-                System.exit(0);
-            }
-        }
-        else{
-            try {
-                Thread.sleep(5000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-                recordLogServiceLog("uncaughtException---> an error occured when Thread sleeping , " +
-                        "Exception is InterruptedException :" + e);
-            }
-            //退出程序
-            System.exit(0);
-        }
-    }
-
-    /**
-     * 自定义错误处理,收集错误信息 发送错误报告等操作均在此完成.
-     *
-     * @param ex
-     * @return true:如果处理了该异常信息;否则返回false.
-     */
-    private boolean handleException(Throwable ex) {
-        if (ex == null) {
-            recordLogServiceLog("handleException---> handle Exception failed , Because " +
-                    "Throwable Object is null..");
-            return false;
-        }
-
-        //使用Toast来显示异常信息
-        new Thread() {
-            @Override
-            public void run() {
-                Looper.prepare();
-                Toast.makeText(mContext, "很抱歉,程序出现异常,即将退出.", Toast.LENGTH_LONG).show();
-                Looper.loop();
-            }
-        }.start();
-        ex.printStackTrace();
-        //收集设备参数信息
-        collectDeviceInfo(mContext);
-        //保存日志文件
-        saveCrashInfo2File(ex);
-        return true;
-    }
-
-
-    /**
-     * 收集设备参数信息
-     * @param ctx
-     */
-    public void collectDeviceInfo(Context ctx) {
-        try {
-            PackageManager pm = ctx.getPackageManager();
-            PackageInfo pi = pm.getPackageInfo(ctx.getPackageName(), PackageManager.GET_ACTIVITIES);
-            if (pi != null) {
-                String versionName = pi.versionName == null ? "null" : pi.versionName;
-                String versionCode = pi.versionCode + "";
-                infos.put("versionName", versionName);
-                infos.put("versionCode", versionCode);
-            }
-        } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
-            recordLogServiceLog("collectDeviceInfo---> an error occured when collect package info , " +
-                    "Exception is NameNotFoundException :" + e);
-        }
-        Field[] fields = Build.class.getDeclaredFields();
-        for (Field field : fields) {
-            try {
-                field.setAccessible(true);
-                infos.put(field.getName(), field.get(null).toString());
-                Log.d(TAG, field.getName() + " : " + field.get(null));
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-                recordLogServiceLog("collectDeviceInfo---> an error occured when collect package info , " +
-                        "Exception is IllegalAccessException :" + e);
-            }
-        }
-    }
-
-    /**
-     * 保存错误信息到文件中
-     *
-     * @param ex
-     * @return  返回文件名称,便于将文件传送到服务器
-     */
-    private String saveCrashInfo2File(Throwable ex) {
-
-        StringBuilder sb = new StringBuilder();
-        for (Map.Entry<String, String> entry : infos.entrySet()) {
-            String key = entry.getKey();
-            String value = entry.getValue();
-            sb.append(key + "=" + value + "\n");
-        }
-
-        Writer writer = new StringWriter();
-        PrintWriter printWriter = new PrintWriter(writer);
-        ex.printStackTrace(printWriter);
-        Throwable cause = ex.getCause();
-        while (cause != null) {
-            cause.printStackTrace(printWriter);
-            cause = cause.getCause();
-        }
-        printWriter.close();
-        String result = writer.toString();
-        sb.append(result);
-        try {
-            long timestamp = System.currentTimeMillis();
-            String time = formatter.format(new Date());
-            String fileName = "crash-" + time + "-" + timestamp + ".log";
-            if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
-                String path = StorageUtil.getSdcardPath() + "/v2tech/crash/";
-                File dir = new File(path);
-                if (!dir.exists()) {
-                    dir.mkdirs();
-                }
-
-                File desFile = new File(path + fileName);
-                if (!desFile.exists()) {
-                    desFile.createNewFile();
-                }
-                FileOutputStream fos = new FileOutputStream(desFile);
-                fos.write(sb.toString().getBytes());
-                fos.close();
-            }
-            return fileName;
-        }catch (FileNotFoundException e) {
-            e.printStackTrace();
-            recordLogServiceLog("collectDeviceInfo---> an error occured while writing file... , " +
-                    "Exception is FileNotFoundException :" + e);
-        } catch (IOException e) {
-            e.printStackTrace();
-            recordLogServiceLog("collectDeviceInfo---> an error occured while writing file... , " +
-                    "Exception is IOException :" + e);
-        }
-        return null;
-    }
 }

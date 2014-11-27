@@ -36,7 +36,6 @@ public class GroupLayout extends LinearLayout {
 	private TextView mGroupDateTV;
 	private ImageView mNotificatorIV;
 	private TextView mChatGroupNameTV;
-	private RelativeLayout mChatGroupLayout;
 
 	private Handler hand = new Handler();
 	
@@ -69,8 +68,6 @@ public class GroupLayout extends LinearLayout {
 		
 		mChatGroupNameTV = (TextView) view
 				.findViewById(R.id.group_list_chat_title_tv);
-		mChatGroupLayout = (RelativeLayout) view
-				.findViewById(R.id.group_list_conference_title_layout);
 		mNotificatorIV.bringToFront();
 
 		switch (mConv.getType()) {
@@ -89,6 +86,9 @@ public class GroupLayout extends LinearLayout {
 				mGroupIV.setImageResource(R.drawable.conference_icon);
 			break;
 		case V2GlobalEnum.GROUP_TYPE_DEPARTMENT:
+			mGroupIV.setImageResource(R.drawable.chat_group_icon);
+			break;
+		case V2GlobalEnum.GROUP_TYPE_DISCUSSION:
 			mGroupIV.setImageResource(R.drawable.chat_group_icon);
 			break;
 		case Conversation.TYPE_GROUP:
@@ -220,8 +220,11 @@ public class GroupLayout extends LinearLayout {
 	}
 	
 	public void updateCrowdLayout(){
-		
 		mGroupDateTV.setVisibility(View.INVISIBLE);
 	}
 
+	public void updateDiscussionLayout(){
+		mGroupDateTV.setVisibility(View.INVISIBLE);
+		mGroupOwnerTV.setVisibility(View.INVISIBLE);
+	}
 }

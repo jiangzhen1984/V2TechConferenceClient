@@ -645,6 +645,30 @@ public class MessageBuilder {
 		return uri;
 	}
 
+    /**
+     *
+     * @param isCrowd
+     *          true is crowd group , false is friend
+     * @return
+     */
+	public static int updateCrowdAllQualicationMessageReadStateToRead(boolean isCrowd) {
+
+		ContentValues values = new ContentValues();
+        if(isCrowd) {
+            values.put(
+                    ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_READ_STATE,
+                    ReadState.READ.intValue());
+            return context.getContentResolver().update(
+                    ContentDescriptor.HistoriesCrowd.CONTENT_URI, values, null, null);
+        }else{
+            values.put(
+                    ContentDescriptor.HistoriesAddFriends.Cols.HISTORY_MEDIA_READ_STATE,
+                    ReadState.READ.intValue());
+            return context.getContentResolver().update(
+                    ContentDescriptor.HistoriesAddFriends.CONTENT_URI, values, null, null);
+        }
+	}
+
 	/**
 	 * 
 	 * @param id

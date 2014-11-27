@@ -2,14 +2,16 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:weightSum="2"
     android:orientation="vertical" >
     <RelativeLayout
         android:id="@+id/group_view_root"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:layout_marginBottom="10dp"
-        android:layout_marginTop="10dp"
-        android:orientation="horizontal" >
+        android:layout_weight="1"
+        android:layout_gravity="center_vertical"
+        android:layout_marginTop="10dp" >
         <ImageView
             android:id="@+id/group_arrow"
             android:layout_width="wrap_content"
@@ -31,7 +33,7 @@
             android:singleLine="true"
             android:text="contact_group_name"
             android:textColor="@color/contacts_group_item_color"
-            android:textSize="18sp" />
+            android:textSize="@dimen/common_item_text_size" />
         <TextView
             android:id="@+id/group_online_statist"
             android:layout_width="wrap_content"
@@ -46,7 +48,7 @@
             android:singleLine="true"
             android:text="contact_group_online_statist"
             android:textColor="@color/contacts_group_item_color"
-            android:textSize="18sp" />
+            android:textSize="@dimen/common_item_text_size" />
         <CheckBox
             android:id="@+id/group_view_ck"
             style="@style/GraySquareCheckbox"
@@ -62,7 +64,8 @@
     <RelativeLayout
         android:id="@+id/user_view_root"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
+        android:layout_weight="1"
         android:layout_marginBottom="@dimen/conversation_view_margin"
         android:layout_marginTop="@dimen/conversation_view_margin" >
         <RelativeLayout

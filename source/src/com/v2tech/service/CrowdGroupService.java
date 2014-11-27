@@ -198,6 +198,7 @@ public class CrowdGroupService extends AbstractHandler {
 		if (!checkParamNull(caller, new Object[] { crowd })) {
 			return;
 		}
+		
 		if (mPendingCrowdId > 0) {
 			super.sendResult(caller, new JNIResponse(JNIResponse.Result.FAILED));
 			return;
@@ -205,8 +206,7 @@ public class CrowdGroupService extends AbstractHandler {
 		mPendingCrowdId = crowd.getId();
 
 		// FIXME concurrency problem, if user use one crowdgroupservice instance
-		// to
-		// accept mulit-invitation, then maybe call back will notify incorrect
+		// to accept mulit-invitation, then maybe call back will notify incorrect
 		initTimeoutMessage(ACCEPT_JOIN_CROWD, DEFAULT_TIME_OUT_SECS, caller);
 
 		GroupRequest.getInstance().acceptInviteJoinGroup(
@@ -658,6 +658,7 @@ public class CrowdGroupService extends AbstractHandler {
 					// Create a new crowd group by current logined user
 					V2Log.e("CrowdGroupService onAddGroupInfo--> successful create a new group , id is : "
 							+ group.id);
+					mPendingCrowdId = 0;
 					JNIResponse jniRes = new CreateCrowdResponse(group.id,
 							CreateCrowdResponse.Result.SUCCESS);
 					Message.obtain(mCallbackHandler, CREATE_GROUP_MESSAGE,
@@ -666,6 +667,7 @@ public class CrowdGroupService extends AbstractHandler {
 					if (mPendingCrowdId == group.id) {
 						V2Log.e("CrowdGroupService onAddGroupInfo--> add a new group , id is : "
 								+ group.id);
+						mPendingCrowdId = 0;
 						JNIResponse jniRes = new JNIResponse(
 								CreateCrowdResponse.Result.SUCCESS);
 						Message.obtain(mCallbackHandler, ACCEPT_JOIN_CROWD,

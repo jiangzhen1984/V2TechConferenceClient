@@ -11,6 +11,7 @@
     <dimen name="button_padding_vertical">10dp</dimen>
     <dimen name="common_margin_horizontal">15dp</dimen>
     <dimen name="common_margin_verticial">15dp</dimen>
+    <dimen name="common_margin_verticial_small">5dp</dimen>
     <dimen name="button_gap_horizontal">10dp</dimen>
     <dimen name="contact_detail_2_item_margin_left">5dp</dimen>
     <dimen name="contact_detail_2_item_margin_right">5dp</dimen>
@@ -18,7 +19,7 @@
     <!-- conversation view fragment  -->
  	<dimen name="text_margin_left">15dp</dimen>
  	<dimen name="date_time_max_width">130dp</dimen>
- 
+ 	
     <!-- login activity -->
     <dimen name="login_box_text_size">16sp</dimen>
     <dimen name="login_box_padding">10sp</dimen>
@@ -37,6 +38,10 @@
     
 
     <!-- contact group view -->
+    <dimen name="contacts_group_view_margin_or_padding_small">5dp</dimen>
+    <dimen name="contacts_group_view_margin_or_padding_normal">10dp</dimen>
+    <dimen name="contacts_group_view_margin_or_padding_big">15dp</dimen>
+    <dimen name="contacts_group_view_margin_or_padding_big_20">20dp</dimen>
     <dimen name="contacts_group_view_arrow_padding_left">5dp</dimen>
     <dimen name="contacts_group_view_group_name_margin_right">5dp</dimen>
     <dimen name="contacts_group_view_online_statist_margin_right">5dp</dimen>
@@ -135,6 +140,7 @@
     <dimen name="message_body_file_width">150dp</dimen>
     <dimen name="message_body_failed_size">16dp</dimen>
     <!-- message body view layout -->
+    <dimen name="messageBodyView_chat_name_max_width">100dp</dimen>
     <dimen name="message_body_view_item_bubble_space">-3dp</dimen>  <!-- 气泡间隙，三角与内容之间 -->
     <dimen name="messageBodyView_common_margin_left_or_right">10dp</dimen>
     <dimen name="messageBodyView_triangle_margin_top">12dp</dimen> <!-- 三角距内容气泡的上边界的距离 -->

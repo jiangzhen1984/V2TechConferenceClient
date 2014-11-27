@@ -34,6 +34,7 @@ import com.v2tech.R;
 import com.v2tech.db.V2techSearchContentProvider;
 import com.v2tech.service.ChatService;
 import com.v2tech.service.FileOperationEnum;
+import com.v2tech.service.GlobalHolder;
 import com.v2tech.util.Notificator;
 import com.v2tech.view.conversation.CommonCallBack.CommonUpdateFileStateInterface;
 import com.v2tech.view.conversation.MessageBuilder;
@@ -41,12 +42,15 @@ import com.v2tech.view.conversation.MessageLoader;
 import com.v2tech.view.receiver.HeadSetPlugReceiver;
 import com.v2tech.view.widget.CommonAdapter.CommonAdapterItemWrapper;
 import com.v2tech.view.widget.TitleBar;
+import com.v2tech.vo.AddFriendHistorieNode;
 import com.v2tech.vo.Conference;
 import com.v2tech.vo.Conversation;
 import com.v2tech.vo.NetworkStateCode;
+import com.v2tech.vo.User;
 import com.v2tech.vo.VMessage;
 import com.v2tech.vo.VMessageAbstractItem;
 import com.v2tech.vo.VMessageFileItem;
+import com.v2tech.vo.VMessageQualification;
 
 public class MainActivity extends FragmentActivity implements
 		NotificationListener , CommonUpdateFileStateInterface{
@@ -68,6 +72,7 @@ public class MainActivity extends FragmentActivity implements
 	private HeadSetPlugReceiver localReceiver = new HeadSetPlugReceiver();
 
 	private static final int SUB_ACTIVITY_CODE_CREATE_CONF = 100;
+	private static final int REQUEST_UPDATE_VERIFICATION_CONVERSATION = 0x0001;
 
 	public static final String SERVICE_BOUNDED_EVENT = "com.v2tech.SERVICE_BOUNDED_EVENT";
 	public static final String SERVICE_UNBOUNDED_EVENT = "com.v2tech.SERVICE_UNBOUNDED_EVENT";
@@ -306,7 +311,6 @@ public class MainActivity extends FragmentActivity implements
 			}, 2500);
 		}
 	}
-	
 	
 	@Override
 	protected void onDestroy() {
