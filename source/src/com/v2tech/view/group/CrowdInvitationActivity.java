@@ -118,7 +118,7 @@ public class CrowdInvitationActivity extends Activity {
 
 		Group group = GlobalHolder.getInstance().getGroupById(V2GlobalEnum.GROUP_TYPE_CROWD , crowd.getId());
 		if(group != null && group.getUsers() != null)
-			mMembersTV.setText(String.valueOf(group.getUsers().size()));
+			mMembersTV.setText(String.valueOf(group.getUsers().size()) + "人");
 
 		CrowdGroup g = new CrowdGroup(crowd.getId(), crowd.getName(),
 				crowd.getCreator(), null);
@@ -158,7 +158,7 @@ public class CrowdInvitationActivity extends Activity {
 //		sendBroadcast(i);
         CrowdGroup group = (CrowdGroup) GlobalHolder.getInstance().getGroupById(V2GlobalEnum.GROUP_TYPE_CROWD , crowd.getId());
         if(group != null && group.getUsers() != null) {
-            mMembersTV.setText(String.valueOf(group.getUsers().size()));
+            mMembersTV.setText(String.valueOf(group.getUsers().size()) + "人");
             mAnnounceTV.setText(group.getAnnouncement());
             mBriefTV.setText(group.getBrief());
         }
@@ -361,7 +361,9 @@ public class CrowdInvitationActivity extends Activity {
 
                 vq.setQualState(VMessageQualification.QualificationState.INVALID);
                 MessageBuilder.updateQualicationMessage(mContext , vq);
+//                MessageBuilder.deleteQualMessage(mContext , vq.getId());
                 isReturnData = true;
+                mReturnButton.performClick();
             }
         }
     }

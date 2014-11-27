@@ -1,5 +1,7 @@
 package com.v2tech.vo;
 
+import android.text.TextUtils;
+
 import java.util.List;
 
 import com.V2.jni.V2GlobalEnum;
@@ -33,18 +35,24 @@ public class DiscussionConversation extends Conversation {
 	}
 
 	private String getDiscussionNames() {
-		StringBuilder sb = new StringBuilder();
-		List<User> users = discussionGroup.getUsers();
-		User ownerUser = discussionGroup.getOwnerUser();
-		if(ownerUser != null){
-			sb.append(ownerUser.getName());
-		}
-		if(users != null){
-			for (User user : users) {
-				sb.append(" ").append(user.getName());
-			}
-		}
-		return sb.toString();
+        if(TextUtils.isEmpty(discussionGroup.getName())) {
+            StringBuilder sb = new StringBuilder();
+            List<User> users = discussionGroup.getUsers();
+            User ownerUser = discussionGroup.getOwnerUser();
+            if (ownerUser != null) {
+                sb.append(ownerUser.getName());
+            }
+            if (users != null) {
+                for (User user : users) {
+                    sb.append(" ").append(user.getName());
+                    if(sb.toString().length() >= 30)
+                        break;
+                }
+            }
+            return sb.toString();
+        }
+        else
+            return discussionGroup.getName();
 	}
 
 	public boolean isShowContact() {

@@ -124,11 +124,9 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 	private static final int REQUEST_ENTER_CONF_RESPONSE = 15;
 	private static final int REQUEST_UPDATE_VERIFICATION_CONVERSATION = 16;
 
-	private static final int CONFERENCE_ENTER_CODE = 100;
 	private static final int UPDATE_CONVERSATION_MESSAGE = 16;
 	private static final int UPDATE_VERIFICATION_MESSAGE = 17;
 	private static final int QUIT_DISCUSSION_BOARD_DONE = 18;
-	
 	
 	private static final int CONFERENCE_ENTER_CODE = 100;
 
@@ -2054,13 +2052,6 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 					isUpdateDeparment = true;
 					updateDepartmentGroupName();
 				}
-
-				if (type == GroupType.CHATING.intValue()
-						&& mCurrentTabFlag == V2GlobalEnum.GROUP_TYPE_CROWD
-						&& !isUpdateGroup) {
-					isUpdateGroup = true;
-					updateMessageGroupName();
-				}
 				// From this broadcast, user has already read conversation
 			} else if (PublicIntent.REQUEST_UPDATE_CONVERSATION.equals(intent
 					.getAction())) {
@@ -2100,17 +2091,19 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 					switch (item.cov.getType()) {
 					case Conversation.TYPE_VERIFICATION_MESSAGE:
 						ConversationFirendAuthenticationData verification = ((ConversationFirendAuthenticationData) item.cov);
-						if (verification == null
-								|| verification.getUser() == null) {
+						if (verification.getUser() == null) {
 							V2Log.e(TAG,
 									"update crowd verification message failed .. user or group is null");
-							return;
+							break;
 						}
 
 						User verificationUser = GlobalHolder.getInstance()
 								.getUser(verification.getUser().getmUserId());
-						if (verificationUser == null)
-							return;
+						if (verificationUser == null){
+							V2Log.e(TAG,
+									"update crowd verification message failed .. verificationUser is null");
+							break;
+						}
 						else
 							verification.setUser(verificationUser);
 
@@ -2118,15 +2111,17 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 							if (verification.getGroup() == null) {
 								V2Log.e(TAG,
 										"update crowd verification message failed .. user or group is null");
-								return;
+								break;
 							}
 
 							Group group = GlobalHolder.getInstance()
 									.getGroupById(
 											V2GlobalEnum.GROUP_TYPE_CROWD,
 											verification.getGroup().getmGId());
-							if (group == null)
-								return;
+							if (group == null){
+								V2Log.e(TAG,
+										"when update crowd verification message .. get group is null from GlobleHolder , id is : " + verification.getGroup().getmGId());
+							}
 							else
 								verification.setGroup(group);
 
@@ -2140,7 +2135,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 							if (verification.getFriendNode() == null) {
 								V2Log.e(TAG,
 										"update friend verification message failed .. user or group is null");
-								return;
+								break;
 							}
 
 							Message msg = Message.obtain(mHandler,
@@ -2160,13 +2155,12 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 								contact.updateUser(user);
 								currentGroupLayout.update();
 								adapter.notifyDataSetChanged();
-								groupType = "CONTACT";
-							}
-
-							if (TextUtils.isEmpty(oldName) && user != null) {
 								V2Log.d(TAG,
 										"Successfully updated the user infos , user name is :"
 												+ user.getName());
+							}
+							else{
+								V2Log.e(TAG, "update the user infos failed ... beacuse get user is null from globleHolder! id is : " + contact.getExtId());
 							}
 						}
 						break;

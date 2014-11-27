@@ -46,7 +46,6 @@ import com.v2tech.vo.VCrowdFile;
  */
 public class CrowdGroupService extends AbstractHandler {
 
-	private static final int CREATE_GROUP_MESSAGE = 0x0001;
 	private static final int ACCEPT_JOIN_CROWD = 0x0002;
 	private static final int UPDATE_CROWD = 0x0004;
 	private static final int QUIT_CROWD = 0x0005;
@@ -661,7 +660,7 @@ public class CrowdGroupService extends AbstractHandler {
 					mPendingCrowdId = 0;
 					JNIResponse jniRes = new CreateCrowdResponse(group.id,
 							CreateCrowdResponse.Result.SUCCESS);
-					Message.obtain(mCallbackHandler, CREATE_GROUP_MESSAGE,
+					Message.obtain(mCallbackHandler, CREATE_DISCUSSION_BOARD,
 							jniRes).sendToTarget();
 				} else {
 					if (mPendingCrowdId == group.id) {

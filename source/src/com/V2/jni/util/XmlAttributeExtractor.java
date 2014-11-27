@@ -134,6 +134,13 @@ public class XmlAttributeExtractor {
 		return listConf;
 	}
 	
+	/**
+	 *  OnInviteJoinGroup::==>3:<crowd announcement='' authtype='0' 
+					 creatoruserid='11112130' id='411174' name='111' size='500' summary=''/>:<user id='11112130'/>:
+		OnGetGroupInfo==>groupType:3,sXml: <crowd announcement='' authtype='0' creatoruserid='11112130'
+		 			id='411172' name='zzz' size='500' summary=''/>
+
+	 */
 	public static V2Group parseSingleCrowd(String sXml){
 		
 		if(TextUtils.isEmpty(sXml)){
@@ -141,8 +148,13 @@ public class XmlAttributeExtractor {
 			return null;
 		}
 		
-		String name = XmlAttributeExtractor.extract(sXml, "name='", "'");
 		String id = XmlAttributeExtractor.extract(sXml, " id='", "'");
+		if(TextUtils.isEmpty(id)){
+			V2Log.e("XmlAttributeExtractor parseSingleCrowd --> parse failed ,Unknow group information,  parse group id is null , xml is : " + sXml);
+			return null;
+		}
+		
+		String name = XmlAttributeExtractor.extract(sXml, " name='", "'");
 		V2Group g = new V2Group(Long.parseLong(id), name, V2GlobalEnum.GROUP_TYPE_CROWD);
 
 		String summary = XmlAttributeExtractor.extract(sXml, "summary='", "'");
@@ -157,12 +169,15 @@ public class XmlAttributeExtractor {
 		}
 		String creatoruserid = XmlAttributeExtractor.extract(sXml,
 				"creatoruserid='", "'");
-		if (creatoruserid != null) {
-			V2User u = new V2User();
-			u.uid = Long.parseLong(creatoruserid);
-			g.owner = u;
-			g.creator = u;
+		if (creatoruserid == null) {
+			V2Log.e("XmlAttributeExtractor parseSingleCrowd --> parse failed , parse group creator user id is null , xml is : " + sXml);
+			return null;
 		}
+		
+		V2User u = new V2User();
+		u.uid = Long.parseLong(creatoruserid);
+		g.owner = u;
+		g.creator = u;
 		return g;
 	}
 

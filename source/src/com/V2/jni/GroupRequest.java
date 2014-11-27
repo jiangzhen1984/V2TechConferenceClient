@@ -698,27 +698,7 @@ public class GroupRequest {
 			group.owner = new V2User(Long.valueOf(createuserid));
 
 		} else if (groupType == V2Group.TYPE_CROWD) {
-			String id = XmlAttributeExtractor.extract(groupInfo, " id='", "'");
-			if (id == null || id.isEmpty()) {
-				V2Log.e(" Unknow group information:" + groupInfo);
-				return;
-			}
-			group = new V2Group(Long.parseLong(id), groupType);
-			String createuserid = XmlAttributeExtractor.extract(userInfo,
-					" id='", "'");
-			String auth = XmlAttributeExtractor.extract(groupInfo,
-					"authtype='", "'");
-			String uname = XmlAttributeExtractor.extract(userInfo,
-					"nickname='", "'");
-			uname = EscapedcharactersProcessing.reverse(uname);
-			String name = XmlAttributeExtractor.extract(groupInfo, "name='",
-					"'");
-			name = EscapedcharactersProcessing.reverse(name);
-			group.name = name;
-			group.creator = new V2User(Long.valueOf(createuserid), uname);
-			if (auth != null) {
-				group.authType = Integer.parseInt(auth);
-			}
+			group = XmlAttributeExtractor.parseSingleCrowd(groupInfo);
 		} else if (groupType == V2Group.TYPE_CONTACTS_GROUP) {
 			String id = XmlAttributeExtractor.extract(userInfo, " id='", "'");
 			if (id == null || id.isEmpty()) {

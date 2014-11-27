@@ -454,7 +454,12 @@ public class MessageAuthenticationActivity extends Activity {
 					for (ListItemWrapper wrapper : mMessageList) {
 						VMessageQualification message = (VMessageQualification) wrapper.obj;
 						if (message.getId() == id) {
-							message.setQualState(state);
+                            if(state == QualificationState.INVALID){
+                                mMessageList.remove(wrapper);
+                                MessageBuilder.deleteQualMessage(mContext , message.getId());
+                            }
+                            else
+							    message.setQualState(state);
 							groupAdapter.notifyDataSetChanged();
 							isFresh = true;
 							break;
@@ -1274,14 +1279,14 @@ public class MessageAuthenticationActivity extends Activity {
 			}
 		}
 
-		if (type == Type.CROWD_INVITATION) {
-			Intent i = new Intent();
-			i.setAction(PublicIntent.BROADCAST_NEW_CROWD_NOTIFICATION);
-			i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
-			i.putExtra("crowd", groupID);
-			sendBroadcast(i);
-			startCrowdInvitationDetail(currentMessage);
-		}
+//		if (type == Type.CROWD_INVITATION) {
+//			Intent i = new Intent();
+//			i.setAction(PublicIntent.BROADCAST_NEW_CROWD_NOTIFICATION);
+//			i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
+//			i.putExtra("crowd", groupID);
+//			sendBroadcast(i);
+//			startCrowdInvitationDetail(currentMessage);
+//		}
 
 	}
 
@@ -1290,13 +1295,13 @@ public class MessageAuthenticationActivity extends Activity {
 			VMessageQualificationInvitationCrowd vm = (VMessageQualificationInvitationCrowd) waitingQualification.obj;
 			Toast.makeText(mContext, vm.getCrowdGroup().getName() + res.getString(R.string.crowd_Authentication_hit) ,
 					Toast.LENGTH_SHORT).show();
-            vm.setQualState(QualificationState.INVALID);
-            MessageBuilder.updateQualicationMessage(mContext , vm);
-            groupAdapter.notifyDataSetChanged();
+//            vm.setQualState(QualificationState.INVALID);
+//            MessageBuilder.updateQualicationMessage(mContext , vm);
+            mMessageList.remove(waitingQualification);
             waitingQualification = null;
-//            mMessageList.remove(waitingQualification);
-//            MessageBuilder.deleteQualMessage(mContext, vm.getId());
-		}
+            MessageBuilder.deleteQualMessage(mContext, vm.getId());
+            groupAdapter.notifyDataSetChanged();
+        }
 	}
 
 	class CrowdAuthenticationBroadcastReceiver extends BroadcastReceiver {
