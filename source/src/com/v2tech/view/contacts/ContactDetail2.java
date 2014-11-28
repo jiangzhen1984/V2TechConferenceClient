@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -27,6 +28,7 @@ import android.widget.Toast;
 
 import com.V2.jni.V2GlobalEnum;
 import com.v2tech.R;
+import com.v2tech.service.BitmapManager;
 import com.v2tech.service.ContactsService;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.service.MessageListener;
@@ -149,7 +151,12 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 				break;
 			}
 		}
+		
 		updateContactGroup();
+		
+		BitmapManager.getInstance().registerBitmapChangedListener(
+				mAvatarChangedListener);
+		
 		initBroadcastReceiver();
 	}
 
@@ -206,6 +213,17 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 	public boolean onTouch(View view, MotionEvent mv) {
 		return super.onTouchEvent(mv);
 	}
+	
+	private BitmapManager.BitmapChangedListener mAvatarChangedListener = new BitmapManager.BitmapChangedListener() {
+
+		@Override
+		public void notifyAvatarChanged(User user, Bitmap bm) {
+			if (user.getmUserId() == u.getmUserId()) {
+				mHeadIconIV.setImageBitmap(bm);
+			}
+		}
+
+	};
 
 	private void initView() {
 		mHeadIconIV = (ImageView) findViewById(R.id.contact_user_detail_head_icon);
@@ -344,7 +362,7 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 				// 删除好友
 				deleteContactDialog.dismiss();
 				contactService.delContact(u , new MessageListener(lh, DELETE_CONTACT_USER, null));
-				ProgressUtils.showNormalWithHintProgress(mContext, true);
+				ProgressUtils.showNormalWithHintProgress(mContext, true).initTimeOut();
 			}
 		});
 

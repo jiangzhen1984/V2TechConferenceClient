@@ -27,6 +27,10 @@ public class VideoBean {
 	public long remoteUserID = -1;
 	public String mediaChatID;
 	public int mediaType;
+	/**
+	 * public static final int STATE_ANSWER_CALL = 5; 
+	 * public static final int STATE_NO_ANSWER_CALL = 6;
+	 */
 	public int mediaState;
 	public int replyType;
 	public long startDate;

@@ -121,6 +121,7 @@ public class V2TechDBHelper extends SQLiteOpenHelper {
 			+ ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_REFUSE_REASON + " nvarchar(4000) ,"
 			+ ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_BASE_INFO + " nvarchar(4000) ,"
 			+ ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_STATE + " bigint ,"
+			+ ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_RECEIVER_STATE + " bigint ,"
 			+ ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_READ_STATE + " bigint)";
 	
 	public V2TechDBHelper(DataBaseContext context, String name, CursorFactory factory,
@@ -146,7 +147,6 @@ public class V2TechDBHelper extends SQLiteOpenHelper {
 		db.execSQL(HISTORIES_RECENT_MESSAGE_TABLE_CREATE_SQL);
 		db.execSQL(HISTORIES_ADD_FRIENT_TABLE_CREATE_SQL);
 		db.execSQL(HISTORIES_CROWD_TABLE_CREATE_SQL);
-
 	}
 
 	@Override

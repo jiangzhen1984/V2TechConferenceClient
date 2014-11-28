@@ -43,6 +43,7 @@ public class Notificator {
 		NotificationManager mNotificationManager = (NotificationManager) context
 				.getSystemService(Context.NOTIFICATION_SERVICE);
 		// mId allows you to update the notification later on.
+		mNotificationManager.cancelAll();
 		mNotificationManager.notify(notificationID, builder.build());
 	}
 
@@ -64,6 +65,7 @@ public class Notificator {
 		NotificationManager mNotificationManager = (NotificationManager) context
 				.getSystemService(Context.NOTIFICATION_SERVICE);
 		// mId allows you to update the notification later on.
+		mNotificationManager.cancelAll();
 		mNotificationManager.notify(notificationID, builder.build());
 	}
 

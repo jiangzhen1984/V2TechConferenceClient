@@ -7,8 +7,10 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -24,6 +26,8 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.v2tech.R;
+import com.v2tech.service.BitmapManager;
+import com.v2tech.service.BitmapManager.BitmapChangedListener;
 import com.v2tech.service.CrowdGroupService;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.view.JNIService;
@@ -76,6 +80,8 @@ public class CrowdMembersActivity extends Activity {
 				.getCurrentUserId()) {
 			mInvitationButton.setVisibility(View.INVISIBLE);
 		}
+		
+		BitmapManager.getInstance().registerBitmapChangedListener(listener);
 		initReceiver();
 	}
 
@@ -112,10 +118,27 @@ public class CrowdMembersActivity extends Activity {
 		overridePendingTransition(R.animator.right_in, R.animator.right_out);
 	}
 
+	private BitmapChangedListener listener = new BitmapChangedListener() {
+		
+		@Override
+		public void notifyAvatarChanged(User user, Bitmap bm) {
+			if(user == null || bm == null)
+				return ;
+			
+			for (User member : mMembers) {
+				if(member.getmUserId() == user.getmUserId()){
+					member.setAvatarBitmap(bm);
+				}
+			}
+		}
+	};
+	
 	private void initReceiver() {
 		localReceiver = new LocalReceiver();
 		IntentFilter filter = new IntentFilter();
 		filter.addAction(JNIService.JNI_BROADCAST_KICED_CROWD);
+		filter.addAction(JNIService.JNI_BROADCAST_NEW_QUALIFICATION_MESSAGE);
+		filter.addAction(JNIService.JNI_BROADCAST_GROUP_USER_REMOVED);
 		filter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
 		this.registerReceiver(localReceiver, filter);
 	}
@@ -190,10 +213,20 @@ public class CrowdMembersActivity extends Activity {
 				if (crowdId == crowd.getmGId()) {
 					finish();
 				}
+			} else if(intent.getAction().equals(JNIService.JNI_BROADCAST_NEW_QUALIFICATION_MESSAGE)){
+				updateMembersChange();
+			} else if(intent.getAction().equals(JNIService.JNI_BROADCAST_GROUP_USER_REMOVED)){
+				updateMembersChange();
 			}
-
 		}
-
+	}
+	
+	private void updateMembersChange(){
+		crowd = (CrowdGroup) GlobalHolder.getInstance().getGroupById(
+				GroupType.CHATING.intValue(),
+				getIntent().getLongExtra("cid", 0));
+		mMembers = crowd.getUsers();
+		adapter.notifyDataSetChanged();
 	}
 
 	class MemberView extends LinearLayout {
@@ -245,7 +278,14 @@ public class CrowdMembersActivity extends Activity {
 			line.addView(mPhotoIV, lineRL);
 
 			mNameTV = new TextView(context);
-			mNameTV.setText(user.getName());
+			boolean isFriend = GlobalHolder.getInstance().isFriend(user);
+			if (isFriend) {
+				if (!TextUtils.isEmpty(user.getNickName()))
+					mNameTV.setText(user.getNickName());
+				else
+					mNameTV.setText(user.getName());
+			} else
+				mNameTV.setText(user.getName());
 			mNameTV.setTextColor(context.getResources().getColor(
 					R.color.contacts_user_view_item_color_offline));
 
@@ -313,7 +353,14 @@ public class CrowdMembersActivity extends Activity {
 			}
 			this.mUser = user;
 
-			mNameTV.setText(user.getName());
+			boolean isFriend = GlobalHolder.getInstance().isFriend(user);
+			if (isFriend) {
+				if (!TextUtils.isEmpty(user.getNickName()))
+					mNameTV.setText(user.getNickName());
+				else
+					mNameTV.setText(user.getName());
+			} else
+				mNameTV.setText(user.getName());
 			if (user.getAvatarBitmap() != null) {
 				mPhotoIV.setImageBitmap(user.getAvatarBitmap());
 			} else {

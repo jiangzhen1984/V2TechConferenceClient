@@ -6,35 +6,36 @@ import java.util.List;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.V2.jni.ind.GroupAddUserJNIObject;
 import com.v2tech.R;
+import com.v2tech.service.BitmapManager;
+import com.v2tech.service.BitmapManager.BitmapChangedListener;
 import com.v2tech.service.CrowdGroupService;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.service.MessageListener;
 import com.v2tech.service.jni.JNIResponse;
 import com.v2tech.util.ProgressUtils;
 import com.v2tech.util.V2Toast;
-import com.v2tech.view.JNIService;
-import com.v2tech.view.PublicIntent;
 import com.v2tech.view.conversation.MessageAuthenticationActivity;
 import com.v2tech.view.conversation.MessageBuilder;
 import com.v2tech.vo.CrowdGroup;
 import com.v2tech.vo.GroupQualicationState;
 import com.v2tech.vo.User;
 import com.v2tech.vo.VMessageQualification;
+import com.v2tech.vo.VMessageQualification.QualificationState;
 import com.v2tech.vo.VMessageQualification.ReadState;
 import com.v2tech.vo.VMessageQualification.Type;
 import com.v2tech.vo.VMessageQualificationApplicationCrowd;
-import com.v2tech.vo.VMessageQualification.QualificationState;
 
 /**
  * Intent key:<br>
@@ -51,6 +52,7 @@ public class CrowdApplicantDetailActivity extends Activity {
 
 	private Context mContext;
 	
+	private ImageView headIcon;
 	private TextView mTitleText;
 	private View mChildButtonLy;
 	
@@ -77,10 +79,10 @@ public class CrowdApplicantDetailActivity extends Activity {
 
 		setContentView(R.layout.crowd_applicant_detail);
 		mContext = this;
-		
+		BitmapManager.getInstance().registerBitmapChangedListener(listener);
+		headIcon = (ImageView) findViewById(R.id.contact_user_detail_head_icon);
 		mTitleText = (TextView) findViewById(R.id.crowd_applicant_title_text);
 		mChildButtonLy = findViewById(R.id.crowd_application_ly);
-		
 		
 		mInviteButton = findViewById(R.id.crowd_application_invite_button);
 		mInviteButton.setOnClickListener(mInviteButtonListener);
@@ -111,6 +113,12 @@ public class CrowdApplicantDetailActivity extends Activity {
 		msg.setReadState(VMessageQualification.ReadState.READ);
 		MessageBuilder.updateQualicationMessage(this, msg);
 	}
+	
+	@Override
+	protected void onDestroy() {
+		BitmapManager.getInstance().unRegisterBitmapChangedListener(listener);
+		super.onDestroy();
+	}
 
 	private void updateView() {
 		((TextView)findViewById(R.id.crowd_applicant_name)).setText(applicant.getName());
@@ -121,6 +129,12 @@ public class CrowdApplicantDetailActivity extends Activity {
 		((TextView)findViewById(R.id.contact_user_detail_cell_phone_tv)).setText(applicant.getMobile());
 		((TextView)findViewById(R.id.contact_user_detail_telephone_tv)).setText(applicant.getTelephone());
 		((TextView)findViewById(R.id.contact_user_detail_fax_tv)).setText(applicant.getFax());
+		
+		if (applicant.getAvatarBitmap() != null) {
+			headIcon.setImageBitmap(applicant.getAvatarBitmap());
+		} else {
+			headIcon.setImageResource(R.drawable.avatar);
+		}
 		
 		if(TextUtils.isEmpty(msg.getApplyReason()))
 			((TextView)findViewById(R.id.crowd_application_additional_msg)).setText("附加消息: 无");
@@ -166,6 +180,17 @@ public class CrowdApplicantDetailActivity extends Activity {
 			mTitleText.setText(R.string.crowd_applicant_title);
 		}
 	}
+	
+	private BitmapChangedListener listener = new BitmapChangedListener() {
+		
+		@Override
+		public void notifyAvatarChanged(User user, Bitmap bm) {
+			if(bm != null)
+				headIcon.setImageBitmap(bm);
+			else
+				headIcon.setImageResource(R.drawable.avatar);
+		}
+	};
 
 	private void handleAcceptDone() {
 		mButtonLayout.setVisibility(View.GONE);

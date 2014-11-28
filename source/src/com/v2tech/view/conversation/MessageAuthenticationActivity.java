@@ -41,10 +41,13 @@ import com.V2.jni.util.V2Log;
 import com.v2tech.R;
 import com.v2tech.db.DataBaseContext;
 import com.v2tech.db.V2TechDBHelper;
+import com.v2tech.service.BitmapManager;
 import com.v2tech.service.CrowdGroupService;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.service.MessageListener;
+import com.v2tech.service.BitmapManager.BitmapChangedListener;
 import com.v2tech.service.jni.JNIResponse;
+import com.v2tech.util.BitmapUtil;
 import com.v2tech.util.ProgressUtils;
 import com.v2tech.view.JNIService;
 import com.v2tech.view.PublicIntent;
@@ -127,6 +130,8 @@ public class MessageAuthenticationActivity extends Activity {
 		crowdService = new CrowdGroupService();
 		res = getResources();
 		initReceiver();
+		BitmapManager.getInstance().registerBitmapChangedListener(listener);
+		
 		currentRadioType = PROMPT_TYPE_FRIEND;
 
 		isFriendAuthentication = getIntent().getBooleanExtra(
@@ -165,6 +170,26 @@ public class MessageAuthenticationActivity extends Activity {
 		ivFriendAuthenticationPrompt = (ImageView) findViewById(R.id.rb_friend_authentication_prompt);
 		ivGroupAuthenticationPrompt = (ImageView) findViewById(R.id.rb_group_authentication_prompt);
 	}
+	
+	
+	private BitmapChangedListener listener = new BitmapChangedListener() {
+		
+		@Override
+		public void notifyAvatarChanged(User user, Bitmap bm) {
+			if(user == null)
+				return ;
+			
+			for (FriendMAData data : friendMADataList) {
+				if(data.remoteUserID == user.getmUserId()){
+					data.dheadImage.recycle();
+					data.dheadImage = null;
+					data.dheadImage = bm;
+					if(firendAdapter != null)
+						firendAdapter.notifyDataSetChanged();
+				}
+			}
+		}
+	};
 
 	private void bindViewEnvent() {
 		tvMessageBack.setOnClickListener(new OnClickListener() {
@@ -480,6 +505,7 @@ public class MessageAuthenticationActivity extends Activity {
 	@Override
 	protected void onDestroy() {
 		unInitReceiver();
+		BitmapManager.getInstance().unRegisterBitmapChangedListener(listener);
 		crowdService.clearCalledBack();
 		checkVerificationMessage();
 		super.onDestroy();
@@ -772,8 +798,12 @@ public class MessageAuthenticationActivity extends Activity {
 			if (arg0 >= list.size())
 				return arg1;
 			final FriendMAData data = list.get(arg0);
-			if (data.dheadImage != null) {
+			if (data.dheadImage != null & !data.dheadImage.isRecycled()) {
 				viewTag.ivHeadImage.setImageBitmap(data.dheadImage);
+			}
+			else{
+				User remoteUser = GlobalHolder.getInstance().getUser(data.remoteUserID);
+				viewTag.ivHeadImage.setImageBitmap(remoteUser.getAvatarBitmap());
 			}
 			viewTag.tvName.setText(data.name);
 

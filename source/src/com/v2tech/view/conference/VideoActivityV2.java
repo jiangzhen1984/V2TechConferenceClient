@@ -197,6 +197,7 @@ public class VideoActivityV2 extends Activity {
 
 	private boolean mServiceBound = false;
 	private boolean mLocalHolderIsCreate = false;
+	private boolean isMoveTaskBack;
 
 	private int mVideoMaxCols = 2;
 
@@ -1374,7 +1375,15 @@ public class VideoActivityV2 extends Activity {
 		if (mSettingWindow != null && mSettingWindow.isShowing()) {
 			mSettingWindow.dismiss();
 		}
-		moveTaskToBack(true);
+		
+		if(isMoveTaskBack)
+			isMoveTaskBack = false;
+		else
+			moveTaskToBack(true);
+	}
+	
+	public void NotChangeTaskToBack(){
+		isMoveTaskBack = true;
 	}
 
 	@Override
@@ -1420,6 +1429,7 @@ public class VideoActivityV2 extends Activity {
 				@Override
 				public void onClick(View v) {
 					d.dismiss();
+					MessageLoader.deleteCrowdVerificationMessage(mContext, conf.getId());
 					finish();
 				}
 

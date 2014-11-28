@@ -15,11 +15,23 @@ public class BitmapUtil {
 		if (path == null) {
 			return null;
 		}
+		
 		File f = new File(path);
-		if (!f.exists() || f.isDirectory()) {
+		if (!f.exists()){
+			V2Log.e("BitmapUtil loadAvatarFromPath --> FAILED! Because parse Path , file isn't exist! path is : " + path);
+			File parent = new File(f.getParent());
+			File[] listFiles = parent.listFiles();
+			for (File file : listFiles) {
+				V2Log.e("BitmapUtil loadAvatarFromPath --> current directory file list is : " + file.getName());
+			}
 			return null;
 		}
 
+		if (f.isDirectory()){
+			V2Log.e("BitmapUtil loadAvatarFromPath --> FAILED! Because parse Path , get a Directory! path is : " + path);
+			return null;
+		}
+		
 		BitmapFactory.Options opt = new BitmapFactory.Options();
 		Bitmap tmep = BitmapFactory.decodeFile(path, opt);
 		if (tmep == null) {

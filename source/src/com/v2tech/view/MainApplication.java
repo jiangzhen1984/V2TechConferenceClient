@@ -424,8 +424,8 @@ public class MainApplication extends Application {
 
 				refCount++;
 				if (refCount == 1) {
-					Notificator.udpateApplicationNotification(
-							getApplicationContext(), false, null);
+//					Notificator.udpateApplicationNotification(
+//							getApplicationContext(), false, null);
 				}
 				Notificator
 						.cancelAllSystemNotification(getApplicationContext());
@@ -441,11 +441,11 @@ public class MainApplication extends Application {
 			synchronized (mLock) {
 				refCount--;
 				if (refCount == 0) {
-					Intent i = activity.getIntent();
-					i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-							| Intent.FLAG_ACTIVITY_SINGLE_TOP);
-					Notificator.udpateApplicationNotification(
-							getApplicationContext(), true, i);
+//					Intent i = activity.getIntent();
+//					i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+//							| Intent.FLAG_ACTIVITY_SINGLE_TOP);
+//					Notificator.udpateApplicationNotification(
+//							getApplicationContext(), true, i);
 				}
 			}
 		}

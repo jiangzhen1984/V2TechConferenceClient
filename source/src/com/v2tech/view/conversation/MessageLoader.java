@@ -27,6 +27,7 @@ import com.v2tech.util.XmlParser;
 import com.v2tech.vo.AddFriendHistorieNode;
 import com.v2tech.vo.AudioVideoMessageBean;
 import com.v2tech.vo.CrowdGroup;
+import com.v2tech.vo.CrowdGroup.ReceiveQualificationType;
 import com.v2tech.vo.User;
 import com.v2tech.vo.VCrowdFile;
 import com.v2tech.vo.VMessage;
@@ -1056,10 +1057,12 @@ public class MessageLoader {
 	 * @param groupType
 	 * @param groupID
 	 * @param userID
+	 * @param isDeleteFile
+	 * 			For crowd group , Don't delete file record
 	 * @return
 	 */
 	public static void deleteMessageByID(Context context, int groupType,
-			long groupID, long userID) {
+			long groupID, long userID , boolean isDeleteFile) {
 
 		DataBaseContext mContext = new DataBaseContext(context);
 		List<String> tableNames = GlobalHolder.getInstance()
@@ -1123,20 +1126,22 @@ public class MessageLoader {
 						+ groupID + "  userID : " + userID);
 		}
 
-		// 删除文件
-		String[] fileArgs;
-		if (groupType == V2GlobalEnum.GROUP_TYPE_USER)
-			fileArgs = new String[] { String.valueOf(userID) };
-		else
-			fileArgs = new String[] { String.valueOf(groupID) };
-
-		int ret = mContext.getContentResolver().delete(
-				ContentDescriptor.HistoriesFiles.CONTENT_URI, fileCondition,
-				fileArgs);
-		if (ret <= 0)
-			V2Log.d(TAG, "May delete fileConditions failed...groupType : "
-					+ groupType + "  groupID : " + groupID + "  userID : "
-					+ userID);
+		if(isDeleteFile){
+			// 删除文件
+			String[] fileArgs;
+			if (groupType == V2GlobalEnum.GROUP_TYPE_USER)
+				fileArgs = new String[] { String.valueOf(userID) };
+			else
+				fileArgs = new String[] { String.valueOf(groupID) };
+	
+			int ret = mContext.getContentResolver().delete(
+					ContentDescriptor.HistoriesFiles.CONTENT_URI, fileCondition,
+					fileArgs);
+			if (ret <= 0)
+				V2Log.d(TAG, "May delete fileConditions failed...groupType : "
+						+ groupType + "  groupID : " + groupID + "  userID : "
+						+ userID);
+		}
 	}
 
 	/**
@@ -1557,13 +1562,16 @@ public class MessageLoader {
 		}
 
 		VMessageQualification message = null;
-		String selection = ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_FROM_USER_ID
+		String selection = "(" + ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_FROM_USER_ID
 				+ "= ? or "
 				+ ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_TO_USER_ID
-				+ "= ?";
+				+ "= ? ) and "
+				+ ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_RECEIVER_STATE
+				+ " = ? ";
 		String[] selectionArgs = new String[] {
 				String.valueOf(user.getmUserId()),
-				String.valueOf(user.getmUserId()) };
+				String.valueOf(user.getmUserId()),
+				String.valueOf(ReceiveQualificationType.REMOTE_APPLY_TYPE.intValue())};
 		String sortOrder = ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_SAVEDATE
 				+ " desc limit 1 offset 0 ";
 		Cursor cursor = mContext.getContentResolver().query(

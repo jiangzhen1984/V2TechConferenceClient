@@ -2,6 +2,7 @@ package com.v2tech.view.conference;
 
 import java.util.List;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -17,6 +18,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.VideoView;
 
 import com.V2.jni.util.V2Log;
 import com.v2tech.R;
@@ -98,6 +100,7 @@ public class ConferenceMessageBodyView extends LinearLayout {
 						imageItem = mMsg.getImageItems().get(0);
 					}
 					
+					((VideoActivityV2)mContext).NotChangeTaskToBack();
 					Intent i = new Intent();
 					i.addCategory(PublicIntent.DEFAULT_CATEGORY);
 					i.setAction(PublicIntent.START_VIDEO_IMAGE_GALLERY);
@@ -112,6 +115,7 @@ public class ConferenceMessageBodyView extends LinearLayout {
 				}
 			}
 		});
+		
 		LinearLayout.LayoutParams ll = new LinearLayout.LayoutParams(
 				LinearLayout.LayoutParams.WRAP_CONTENT,
 				LinearLayout.LayoutParams.WRAP_CONTENT);

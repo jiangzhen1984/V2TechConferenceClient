@@ -65,6 +65,38 @@
                 android:layout_marginBottom="@dimen/conversation_view_margin"
         		android:layout_marginTop="@dimen/conversation_view_margin"
                 android:src="@drawable/avatar" />
+        <RelativeLayout
+            android:id="@+id/relativelayout1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:visibility="invisible"
+            android:layout_marginBottom="@dimen/conversation_view_margin"
+            android:layout_marginLeft="@dimen/contacts_user_view_contact_user_name_margin_left"
+            android:layout_marginTop="@dimen/conversation_view_margin"
+             >
+            <TextView
+                android:id="@+id/text_top"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:ellipsize="end"
+                android:gravity="left|top"
+                android:singleLine="true"
+                android:textColor="@color/conversation_view_name_color"
+                android:textSize="@dimen/conversation_view_name_text_size" />
+            <TextView
+                android:id="@+id/text_buttom"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/text_top"
+                android:layout_marginTop="10dp"
+                android:ellipsize="end"
+                android:gravity="left|bottom"
+                android:singleLine="true"
+                android:textColor="@color/conversation_view_text_color"
+                android:textSize="@dimen/common_item_text_size_16" />
+        </RelativeLayout>
     </RelativeLayout>
     <RelativeLayout
         android:id="@+id/user_view_root"

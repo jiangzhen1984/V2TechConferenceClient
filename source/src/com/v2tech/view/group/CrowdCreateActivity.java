@@ -16,6 +16,7 @@ import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -44,18 +45,25 @@ import com.v2tech.service.GlobalHolder;
 import com.v2tech.service.MessageListener;
 import com.v2tech.service.jni.CreateCrowdResponse;
 import com.v2tech.service.jni.JNIResponse;
+import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.SPUtil;
 import com.v2tech.view.JNIService;
 import com.v2tech.view.PublicIntent;
 import com.v2tech.view.adapter.CreateConfOrCrowdAdapter;
+import com.v2tech.view.conversation.MessageBuilder;
+import com.v2tech.view.conversation.MessageLoader;
 import com.v2tech.view.widget.GroupListView;
 import com.v2tech.view.widget.GroupListView.Item;
 import com.v2tech.vo.CrowdGroup;
 import com.v2tech.vo.CrowdGroup.AuthType;
 import com.v2tech.vo.Group;
 import com.v2tech.vo.Group.GroupType;
+import com.v2tech.vo.VMessageQualification.ReadState;
+import com.v2tech.vo.VMessageQualification.Type;
 import com.v2tech.vo.NetworkStateCode;
 import com.v2tech.vo.User;
+import com.v2tech.vo.VMessageQualificationApplicationCrowd;
+import com.v2tech.vo.VMessageQualificationInvitationCrowd;
 
 /**
  * Intent parameters:<br>
@@ -442,6 +450,9 @@ public class CrowdCreateActivity extends Activity {
 				}
 				
 				List<User> newMembers = new ArrayList<User>(mUserList);
+				for (User user : newMembers) {
+					saveQualication(user);
+				}
 				cg.inviteMember(crowd, newMembers, new MessageListener(
 						mLocalHandler, UPDATE_CROWD_RESPONSE, crowd));
 			} else {
@@ -476,6 +487,26 @@ public class CrowdCreateActivity extends Activity {
 		}
 
 	};
+	
+	private void saveQualication(User user){
+
+//        User applicant = GlobalHolder.getInstance().getUser(crowd.getOwnerUser().getmUserId());
+//        if (applicant == null)
+//            applicant = new User(uid);
+		VMessageQualificationApplicationCrowd crowdQuion = new VMessageQualificationApplicationCrowd(
+				crowd, user);
+		crowdQuion.setReadState(ReadState.UNREAD);
+		Uri uri = MessageBuilder.saveQualicationMessage(crowdQuion , true);
+		if (uri != null){
+			V2Log.e("MessageBuilder updateQualicationMessageState --> Save VMessageQualification Object Successfully , "
+					+ "the Uri is null...groupID is : " + crowd.getmGId() + " userID is : " + user.getmUserId());
+		}
+		else{
+			V2Log.e("MessageBuilder updateQualicationMessageState --> Save VMessageQualification Object failed , "
+					+ "the Uri is null...groupID is : " + crowd.getmGId() + " userID is : " + user.getmUserId());
+		}
+	
+	}
 
 	private OnClickListener mReturnListener = new OnClickListener() {
 

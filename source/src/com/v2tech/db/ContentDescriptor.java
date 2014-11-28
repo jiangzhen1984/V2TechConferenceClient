@@ -471,6 +471,7 @@ public final class ContentDescriptor {
 			public static final String HISTORY_CROWD_REFUSE_REASON = "RefuseReason";
 			public static final String HISTORY_CROWD_STATE = "JoinState";
 			public static final String HISTORY_CROWD_READ_STATE = "ReadState";
+			public static final String HISTORY_CROWD_RECEIVER_STATE = "ReceiveState";
 			public static final String HISTORY_CROWD_BASE_INFO = "CrowdXml";
 
 			public static final String[] ALL_CLOS = { ID, OWNER_USER_ID,
@@ -478,7 +479,7 @@ public final class ContentDescriptor {
 					HISTORY_CROWD_ID, HISTORY_CROWD_FROM_USER_ID,
 					HISTORY_CROWD_REMOTE_USER_ID, HISTORY_CROWD_APPLY_REASON,
 					HISTORY_CROWD_REFUSE_REASON, HISTORY_CROWD_STATE,
-					HISTORY_CROWD_READ_STATE, HISTORY_CROWD_TO_USER_ID,
+					HISTORY_CROWD_READ_STATE, HISTORY_CROWD_TO_USER_ID,HISTORY_CROWD_RECEIVER_STATE,
 					HISTORY_CROWD_BASE_INFO };
 		}
 	}

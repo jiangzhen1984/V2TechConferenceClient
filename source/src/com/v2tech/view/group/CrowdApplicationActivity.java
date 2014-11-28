@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -18,9 +19,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.v2tech.R;
+import com.v2tech.service.BitmapManager;
 import com.v2tech.service.CrowdGroupService;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.service.MessageListener;
+import com.v2tech.service.BitmapManager.BitmapChangedListener;
 import com.v2tech.service.jni.JNIResponse;
 import com.v2tech.service.jni.JNIResponse.Result;
 import com.v2tech.view.JNIService;
@@ -79,6 +82,7 @@ public class CrowdApplicationActivity extends Activity {
 
 		setContentView(R.layout.crowd_application_activity);
         initReceiver();
+        
 		mTitleTV = (TextView) findViewById(R.id.crowd_application_title);
 		mNameTV = (TextView) findViewById(R.id.crowd_application_name);
 		mCreatorTV = (TextView) findViewById(R.id.crowd_application_item_creator);
@@ -116,7 +120,6 @@ public class CrowdApplicationActivity extends Activity {
             vq = MessageBuilder.queryQualMessageByCrowdId(mContext, user, g);
         }
 		updateView();
-
 	}
 
     @Override
@@ -152,7 +155,7 @@ public class CrowdApplicationActivity extends Activity {
 		InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 		imm.hideSoftInputFromWindow(mApplicationMessage.getWindowToken(), 0);
 	}
-
+	
 	private void updateView() {
 		if (isInApplicationMode) {
 			mSendButton.setVisibility(View.VISIBLE);
@@ -258,7 +261,7 @@ public class CrowdApplicationActivity extends Activity {
                                 vq = new VMessageQualificationInvitationCrowd(g, GlobalHolder.getInstance().getCurrentUser());
                                 vq.setReadState(VMessageQualification.ReadState.READ);
                                 vq.setQualState(VMessageQualification.QualificationState.BE_REJECT);
-                                MessageBuilder.saveQualicationMessage(mContext, vq);
+                                MessageBuilder.saveQualicationMessage(vq);
                             }
                         }
 					}

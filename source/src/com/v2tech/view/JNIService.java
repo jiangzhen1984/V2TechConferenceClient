@@ -70,6 +70,7 @@ import com.v2tech.view.conversation.CommonCallBack.CommonUpdateConversationState
 import com.v2tech.view.conversation.ConversationP2PAVActivity;
 import com.v2tech.view.conversation.MessageBuilder;
 import com.v2tech.view.conversation.MessageLoader;
+import com.v2tech.vo.AudioVideoMessageBean;
 import com.v2tech.vo.ConferenceGroup;
 import com.v2tech.vo.CrowdGroup;
 import com.v2tech.vo.DiscussionGroup;
@@ -90,6 +91,7 @@ import com.v2tech.vo.VMessageQualification.ReadState;
 import com.v2tech.vo.VMessageQualification.Type;
 import com.v2tech.vo.VMessageQualificationApplicationCrowd;
 import com.v2tech.vo.VMessageQualificationInvitationCrowd;
+import com.v2tech.vo.VideoBean;
 
 /**
  * This service is used to wrap JNI call.<br>
@@ -163,6 +165,8 @@ public class JNIService extends Service implements
 	private List<GroupUserInfoOrig> delayUserBroadcast = new ArrayList<GroupUserInfoOrig>();
 	private boolean noNeedBroadcast;
 	private boolean isAcceptApply;
+	
+	private List<Long> applyJoinUsers = new ArrayList<Long>();
 
 	private JNICallbackHandler mCallbackHandler;
 
@@ -622,6 +626,7 @@ public class JNIService extends Service implements
 			File f = new File(AvatarName);
 			if (f.isDirectory()) {
 				// Do not notify if is not file;
+				V2Log.e(TAG, "OnChangeAvatarCallback --> Change the user avatar failed...file path is : " + f.getAbsolutePath());
 				return;
 			}
 			// System default icon
@@ -841,8 +846,7 @@ public class JNIService extends Service implements
 				crowdMsg.setmTimestamp(new Date(GlobalConfig
 						.getGlobalServerTime()));
 				crowdMsg.setReadState(VMessageQualification.ReadState.UNREAD);
-				Uri uri = MessageBuilder.saveQualicationMessage(mContext,
-						crowdMsg);
+				Uri uri = MessageBuilder.saveQualicationMessage(crowdMsg);
 				if (uri != null) {
 					crowdMsg.setId(Long.parseLong(uri.getLastPathSegment()));
 				}
@@ -974,14 +978,16 @@ public class JNIService extends Service implements
 
 				long id = -1;
 				if (user.uid != GlobalHolder.getInstance().getCurrentUserId()) {
-					//FIXME should not static variable
+					VMessageQualification waitMessage = MessageBuilder.queryWaitingQualMessageById(user.uid);
+					if(waitMessage != null){
 //					if (CrowdGroupService.isLocalInvite) {
-//						id = MessageBuilder.updateQualicationMessageState(
-//								nGroupID, user.uid, new GroupQualicationState(
-//										Type.CROWD_APPLICATION,
-//										QualificationState.BE_ACCEPTED, null,
-//										ReadState.UNREAD, true));
-//					} else {
+						MessageBuilder.deleteQualMessage(mContext, GlobalHolder.getInstance().getUser(user.uid));
+						id = MessageBuilder.updateQualicationMessageState(
+								nGroupID, user.uid, new GroupQualicationState(
+										Type.CROWD_APPLICATION,
+										QualificationState.BE_ACCEPTED, null,
+										ReadState.UNREAD, true));
+					} else {
 						Group group = GlobalHolder.getInstance().getGroupById(
 								groupType, nGroupID);
 						if (group == null) {
@@ -999,7 +1005,7 @@ public class JNIService extends Service implements
 											QualificationState.ACCEPTED, null,
 											ReadState.UNREAD, false));
 						}
-					//}
+					}
 				}
 
 				if (id == -1) {
@@ -1256,6 +1262,7 @@ public class JNIService extends Service implements
 				} else {
 					V2Log.i("Ignore audio call for others: "
 							+ ind.getFromUserId());
+					updateAudioRecord(ind);
 					AudioRequest.getInstance().RefuseAudioChat(
 							ind.getSzSessionID(), ind.getFromUserId());
 				}
@@ -1265,7 +1272,8 @@ public class JNIService extends Service implements
 			if (GlobalHolder.getInstance().isInMeeting()
 					|| GlobalHolder.getInstance().isInAudioCall()
 					|| GlobalHolder.getInstance().isInVideoCall()) {
-				V2Log.i("Ignore audio call ");
+				V2Log.i("OnAudioChatInvite --> The audio chat invite coming ! Ignore audio call ");
+				updateAudioRecord(ind);
 				AudioRequest.getInstance().RefuseAudioChat(
 						ind.getSzSessionID(), ind.getFromUserId());
 				return;
@@ -1278,7 +1286,8 @@ public class JNIService extends Service implements
 			if ((listRunningTaskInfo != null) && listRunningTaskInfo.size() > 0) {
 				if (listRunningTaskInfo.get(0).topActivity.getClassName()
 						.equals(ConversationP2PAVActivity.class.getName())) {
-					V2Log.i("Ignore audio call ");
+					V2Log.i("OnAudioChatInvite --> The audio chat invite coming ! Ignore audio call ");
+					updateAudioRecord(ind);
 					AudioRequest.getInstance().RefuseAudioChat(
 							ind.getSzSessionID(), ind.getFromUserId());
 					return;
@@ -1297,6 +1306,20 @@ public class JNIService extends Service implements
 
 		}
 
+		private void updateAudioRecord(AudioJNIObjectInd ind){
+			//record in database
+			VideoBean currentVideoBean = new VideoBean();
+			currentVideoBean.readSatate = AudioVideoMessageBean.STATE_UNREAD;
+			currentVideoBean.formUserID = ind.getFromUserId();
+			currentVideoBean.remoteUserID = ind.getFromUserId();
+			currentVideoBean.toUserID = GlobalHolder.getInstance()
+					.getCurrentUserId();
+			currentVideoBean.mediaChatID = ind.getSzSessionID();
+			currentVideoBean.mediaType = AudioVideoMessageBean.TYPE_AUDIO;
+			currentVideoBean.startDate = GlobalConfig.getGlobalServerTime();
+			currentVideoBean.mediaState = AudioVideoMessageBean.STATE_NO_ANSWER_CALL;
+			MessageBuilder.saveMediaChatHistories(mContext, currentVideoBean);
+		}
 	}
 
 	class VideoRequestCB extends VideoRequestCallbackAdapter {
@@ -1312,7 +1335,8 @@ public class JNIService extends Service implements
 			if (GlobalHolder.getInstance().isInMeeting()
 					|| GlobalHolder.getInstance().isInAudioCall()
 					|| GlobalHolder.getInstance().isInVideoCall()) {
-				V2Log.i("Ignore video call ");
+				V2Log.i("OnVideoChatInvite --> The video chat invite coming ! Ignore video call ");
+				updateVideoRecord(ind);
 				VideoRequest.getInstance().refuseVideoChat(
 						ind.getSzSessionID(), ind.getFromUserId(),
 						ind.getDeviceId());
@@ -1326,7 +1350,8 @@ public class JNIService extends Service implements
 			if ((listRunningTaskInfo != null) && listRunningTaskInfo.size() > 0) {
 				if (listRunningTaskInfo.get(0).topActivity.getClassName()
 						.equals(ConversationP2PAVActivity.class.getName())) {
-					V2Log.i("Ignore video call ");
+					V2Log.i("OnVideoChatInvite --> The video chat invite coming ! Ignore video call ");
+					updateVideoRecord(ind);
 					VideoRequest.getInstance().refuseVideoChat(
 							ind.getSzSessionID(), ind.getFromUserId(),
 							ind.getDeviceId());
@@ -1377,6 +1402,20 @@ public class JNIService extends Service implements
 
 		}
 
+		private void updateVideoRecord(VideoJNIObjectInd ind){
+			//record in database
+			VideoBean currentVideoBean = new VideoBean();
+			currentVideoBean.readSatate = AudioVideoMessageBean.STATE_UNREAD;
+			currentVideoBean.formUserID = ind.getFromUserId();
+			currentVideoBean.remoteUserID = ind.getFromUserId();
+			currentVideoBean.toUserID = GlobalHolder.getInstance()
+					.getCurrentUserId();
+			currentVideoBean.mediaChatID = ind.getSzSessionID();
+			currentVideoBean.mediaType = AudioVideoMessageBean.TYPE_VIDEO;
+			currentVideoBean.startDate = GlobalConfig.getGlobalServerTime();
+			currentVideoBean.mediaState = AudioVideoMessageBean.STATE_NO_ANSWER_CALL;
+			MessageBuilder.saveMediaChatHistories(mContext, currentVideoBean);
+		}
 	}
 
 	class ConfRequestCB extends ConfRequestCallbackAdapter {
@@ -1694,7 +1733,6 @@ public class JNIService extends Service implements
 
 		@Override
 		public void OnFileTransCancel(String szFileID) {
-			updateTransFileState(szFileID, false);
 		}
 	}
 

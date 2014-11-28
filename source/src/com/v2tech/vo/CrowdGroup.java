@@ -115,4 +115,27 @@ public class CrowdGroup extends Group {
 		}
 	}
 	
+	public enum ReceiveQualificationType {
+		LOCAL_INVITE_TYPE(0),REMOTE_APPLY_TYPE(1),UNKNOW(2);
+		
+		private int type;
+		private ReceiveQualificationType(int type){
+			this.type = type;
+		}
+		public static ReceiveQualificationType fromInt(int code) {
+			switch (code) {
+				case 0:
+					return LOCAL_INVITE_TYPE;
+				case 1:
+					return REMOTE_APPLY_TYPE;
+				case 2:
+					return UNKNOW;
+			}
+			return null;
+		}
+		
+		public int intValue() {
+			return type;
+		}
+	}
 }

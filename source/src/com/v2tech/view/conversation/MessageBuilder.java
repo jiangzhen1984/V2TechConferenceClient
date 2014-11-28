@@ -26,6 +26,7 @@ import com.v2tech.db.DataBaseContext;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.util.GlobalConfig;
 import com.v2tech.vo.CrowdGroup;
+import com.v2tech.vo.CrowdGroup.ReceiveQualificationType;
 import com.v2tech.vo.FileInfoBean;
 import com.v2tech.vo.GroupQualicationState;
 import com.v2tech.vo.User;
@@ -536,17 +537,35 @@ public class MessageBuilder {
 
 	// *********************************qualification message
 	// **********************************************
+	
 	/**
-	 * Save new qualification message to database, and fill id to msg object
-	 * 
-	 * @param context
+	 * 当前用户邀请他人加入的记录，保存的函数
+	 * @param msg
+	 * @param saveReceivState
+	 * @return
+	 */
+	public static Uri saveCreateQualicationMessage(
+			VMessageQualification msg , boolean saveReceivState) {
+		return saveQualicationMessage(msg , saveReceivState);
+	}
+	
+	/**
+	 * 正常保存验证消息的函数
 	 * @param msg
 	 * @return
 	 */
-	public static Uri saveQualicationMessage(Context context,
+	public static Uri saveQualicationMessage(
 			VMessageQualification msg) {
-		if (context == null)
-			context = MessageBuilder.context;
+		return saveQualicationMessage(msg , false);
+	}
+	
+	/**
+	 * Save new qualification message to database, and fill id to msg object
+	 * @param msg
+	 * @param saveReceivState
+	 * @return
+	 */
+	public static Uri saveQualicationMessage(VMessageQualification msg , boolean saveReceivState) {
 
 		if (msg == null) {
 			V2Log.e("To store failed...please check the given VMessageQualification Object in the databases");
@@ -632,6 +651,14 @@ public class MessageBuilder {
 					crowdApplyMsg.getCrowdGroup().getmGId());
 			values.put(HistoriesCrowd.Cols.HISTORY_CROWD_SAVEDATE,
 					crowdApplyMsg.getmTimestamp().getTime());
+			if(saveReceivState)
+				values.put(
+						ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_RECEIVER_STATE,
+						ReceiveQualificationType.LOCAL_INVITE_TYPE.intValue());
+            else
+            	values.put(
+						ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_RECEIVER_STATE,
+						ReceiveQualificationType.REMOTE_APPLY_TYPE.intValue());
 			uri = mContext.getContentResolver().insert(
 					ContentDescriptor.HistoriesCrowd.CONTENT_URI, values);
 			crowdApplyMsg.setId(ContentUris.parseId(uri));
@@ -857,7 +884,7 @@ public class MessageBuilder {
 			crowdQuion.setQualState(obj.state);
 			crowdQuion.setmTimestamp(new Date(GlobalConfig
                     .getGlobalServerTime()));
-			Uri uri = MessageBuilder.saveQualicationMessage(null, crowdQuion);
+			Uri uri = MessageBuilder.saveQualicationMessage(crowdQuion);
 			if (uri != null){
 				long id = Long.parseLong(uri.getLastPathSegment());
 				crowdQuion.setId(id);
@@ -1007,21 +1034,19 @@ public class MessageBuilder {
 				selectionArgs);
 		return updates;
 	}
-
-    /**
-     * Query qualification message by Message's id
-     * @param context
-     * @param id
-     * @return
-     */
-	public static VMessageQualification queryQualMessageById(Context context,
-			long id) {
-
+	
+	/**
+	 * 
+	 * @param id
+	 * @return
+	 */
+	public static VMessageQualification queryWaitingQualMessageById(long id) {
 		DataBaseContext mContext = new DataBaseContext(context);
-
-		String selection = "" + ContentDescriptor.HistoriesCrowd.Cols.ID
-				+ " = ? ";
-		String[] selectionArgs = new String[] { id + "" };
+		String selection = ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_REMOTE_USER_ID
+				+ " = ? and "
+				+ ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_RECEIVER_STATE
+				+ " = ?";
+		String[] selectionArgs = new String[] { String.valueOf(id) , String.valueOf(ReceiveQualificationType.LOCAL_INVITE_TYPE.intValue())};
 		String sortOrder = ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_SAVEDATE
 				+ " desc";
 		Cursor cursor = mContext.getContentResolver().query(
@@ -1036,9 +1061,39 @@ public class MessageBuilder {
 			msg = extraMsgFromCursor(cursor);
 		}
 		cursor.close();
-
 		return msg;
+	}
 
+    /**
+     * Query qualification message by Message's id
+     * @param context
+     * @param id
+     * @return
+     */
+	public static VMessageQualification queryQualMessageById(Context context,
+			long id) {
+
+		DataBaseContext mContext = new DataBaseContext(context);
+		String selection = ContentDescriptor.HistoriesCrowd.Cols.ID
+				+ " = ? and "
+				+ ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_RECEIVER_STATE
+				+ " = ? ";
+		String[] selectionArgs = new String[] { String.valueOf(id) , String.valueOf(ReceiveQualificationType.REMOTE_APPLY_TYPE.intValue())};
+		String sortOrder = ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_SAVEDATE
+				+ " desc";
+		Cursor cursor = mContext.getContentResolver().query(
+				ContentDescriptor.HistoriesCrowd.CONTENT_URI,
+				ContentDescriptor.HistoriesCrowd.Cols.ALL_CLOS, selection,
+				selectionArgs, sortOrder);
+
+		if (cursor == null || cursor.getCount() <= 0)
+			return null;
+		VMessageQualification msg = null;
+		if (cursor.moveToNext()) {
+			msg = extraMsgFromCursor(cursor);
+		}
+		cursor.close();
+		return msg;
 	}
 
 	public static VMessageQualification queryQualMessageByCrowdId(
@@ -1069,9 +1124,11 @@ public class MessageBuilder {
 		String selection = ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_REMOTE_USER_ID
 				+ "= ? and "
 				+ ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_ID
-				+ "= ?";
+				+ "= ? and "
+				+ ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_RECEIVER_STATE
+				+ "= ? ";
 		String[] selectionArgs = new String[] { String.valueOf(userID),
-				String.valueOf(groupID) };
+				String.valueOf(groupID) , String.valueOf(ReceiveQualificationType.REMOTE_APPLY_TYPE.intValue())};
 		String sortOrder = ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_SAVEDATE
 				+ " desc";
 		Cursor cursor = mContext.getContentResolver().query(
@@ -1100,8 +1157,10 @@ public class MessageBuilder {
 
         DataBaseContext mContext = new DataBaseContext(context);
         String selection = ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_REMOTE_USER_ID
-                + "= ? ";
-        String[] selectionArgs = new String[] { String.valueOf(userID) };
+                + "= ? and "
+                + ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_RECEIVER_STATE
+                + "= ?";
+        String[] selectionArgs = new String[] { String.valueOf(userID) , String.valueOf(ReceiveQualificationType.REMOTE_APPLY_TYPE.intValue())};
         String sortOrder = ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_SAVEDATE
                 + " desc";
         Cursor cursor = mContext.getContentResolver().query(
@@ -1136,13 +1195,14 @@ public class MessageBuilder {
 		}
 
 		List<VMessageQualification> list = new ArrayList<VMessageQualification>();
-		String selection = ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_FROM_USER_ID
+		String selection = "( " + ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_FROM_USER_ID
 				+ "= ? or "
 				+ ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_TO_USER_ID
-				+ "= ?";
+				+ "= ? ) and "
+				+ ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_RECEIVER_STATE + "= ?";
 		String[] selectionArgs = new String[] {
 				String.valueOf(user.getmUserId()),
-				String.valueOf(user.getmUserId()) };
+				String.valueOf(user.getmUserId()) , String.valueOf(ReceiveQualificationType.REMOTE_APPLY_TYPE.intValue())};
 		String sortOrder = ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_SAVEDATE
 				+ " desc";
 		Cursor cursor = mContext.getContentResolver().query(

@@ -167,6 +167,8 @@ public class CrowdInvitationActivity extends Activity {
 		vq.setQualState(message.getQualState());
 		vq.setReadState(message.getReadState());
 		updateView(false);
+		MessageBuilder.updateQualicationMessageState(crowd.getId(), crowd.getCreator().getmUserId(),
+				new GroupQualicationState(Type.CROWD_INVITATION , QualificationState.ACCEPTED , null , ReadState.READ , false));
 	}
 
 	private void handleDeclineDone() {
@@ -176,7 +178,7 @@ public class CrowdInvitationActivity extends Activity {
 		vq.setQualState(VMessageQualification.QualificationState.REJECT);
 		updateView(false);
 		MessageBuilder.updateQualicationMessageState(crowd.getId(), crowd.getCreator().getmUserId(),
-				new GroupQualicationState(Type.CROWD_INVITATION , QualificationState.REJECT , null , ReadState.UNREAD , false));
+				new GroupQualicationState(Type.CROWD_INVITATION , QualificationState.REJECT , null , ReadState.READ , false));
 	}
 
 	private void updateView(boolean isInReject) {

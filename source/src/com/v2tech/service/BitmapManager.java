@@ -116,7 +116,7 @@ public class BitmapManager {
 	 */
 	public void loadUserAvatarAndNotify(UserAvatarObject avatar) {
 		if (avatar == null) {
-			V2Log.e(" unformaled parameter avatar");
+			V2Log.e("BitmapManager loadUserAvatarAndNotify --> unformaled parameter avatar , UserAvatarObject is null");
 			return;
 		}
 		// TODO handle concurrency
@@ -129,8 +129,11 @@ public class BitmapManager {
 		@Override
 		protected Void doInBackground(UserAvatarObject... objs) {
 			for (UserAvatarObject uao : objs) {
-				Bitmap avatar = BitmapUtil.loadAvatarFromPath(uao
-						.getAvatarPath());
+				String avatarPath = uao.getAvatarPath();
+				Bitmap avatar = BitmapUtil.loadAvatarFromPath(avatarPath);
+				if(avatar == null)
+					V2Log.e("BitmapManager AvatarLoader --> Loading user avatar failed ... Because get Bitmap is null"
+							+ " , file path is : " + avatarPath);
 				uao.setBm(avatar);
 				publishProgress(uao);
 			}

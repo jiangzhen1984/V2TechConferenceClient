@@ -1327,6 +1327,10 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 						.setReadFlag(Conversation.READ_FLAG_READ);
 			}
 		}
+		else{
+			verificationMessageItemData
+			.setReadFlag(Conversation.READ_FLAG_READ);
+		}
 		// else {
 		// notificationListener.updateNotificator(Conversation.TYPE_CONTACT,
 		// false);
@@ -1608,11 +1612,21 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 			break;
 		}
 		resultIntent.addCategory(PublicIntent.DEFAULT_CATEGORY);
-
-		Notificator.updateSystemNotification(mContext, vm.getFromUser()
-				.getName(), content, 1, resultIntent,
-				PublicIntent.MESSAGE_NOTIFICATION_ID);
-
+		if(vm.getMsgCode() == V2GlobalEnum.GROUP_TYPE_USER){
+			Notificator.updateSystemNotification(mContext, vm.getFromUser()
+					.getName(), content, 1, resultIntent,
+					PublicIntent.MESSAGE_NOTIFICATION_ID);
+		}
+		else{
+			Group group = GlobalHolder.getInstance().getGroupById(vm.getMsgCode() , vm.getGroupId());
+			if(group == null){
+				V2Log.e(TAG, "Update ChatMessage Notificator failed ... get Group Object from GlobleHolder is null"
+						+ "groupType is : " + vm.getMsgCode() + " groupID is : " + vm.getGroupId());
+				return ;
+			}
+			Notificator.updateSystemNotification(mContext, group.getName(), content, 1, resultIntent,
+					PublicIntent.MESSAGE_NOTIFICATION_ID);
+		}
 	}
 
 	private void initPopupWindow() {
@@ -1790,12 +1804,11 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 
 	private void updateConferenceNotification(Conference conf) {
 		Intent enterConference = new Intent(mContext, MainActivity.class);
-
 		User creator = GlobalHolder.getInstance().getUser(conf.getCreator());
 		enterConference.putExtra("conf", conf);
 		enterConference.putExtra("initFragment", 3);
-		Notificator.updateSystemNotification(mContext, conf.getName()
-				+ " 会议邀请:", creator == null ? "" : creator.getName(), 1,
+		Notificator.updateSystemNotification(mContext, creator == null ? "" : creator.getName() 
+				, "邀请你参加会议 " + conf.getName() , 1,
 				enterConference, PublicIntent.VIDEO_NOTIFICATION_ID);
 	}
 
@@ -2278,7 +2291,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 				GlobalHolder.getInstance().removeGroup(GroupType.CHATING, cid);
 				// clear the crowd group all chat database messges
 				MessageLoader.deleteMessageByID(context, mCurrentTabFlag, cid,
-						-1);
+						-1 , false);
 				// clear the crowd group all verification database messges
 				MessageLoader.deleteCrowdVerificationMessage(context, cid);
 			} else if (JNIService.JNI_BROADCAST_GROUP_UPDATED.equals(intent
@@ -2448,7 +2461,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 				removeConversation(cid);
 				// clear the crowd group all chat database messges
 				MessageLoader.deleteMessageByID(context, mCurrentTabFlag, cid,
-						-1);
+						-1 , false);
 				// clear the crowd group all verification database messges
 				MessageLoader.deleteCrowdVerificationMessage(context, cid);
 			} else if ((JNIService.BROADCAST_CROWD_NEW_UPLOAD_FILE_NOTIFICATION

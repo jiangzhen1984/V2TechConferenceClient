@@ -1,8 +1,6 @@
 package com.v2tech.view.conversation;
 
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.UUID;
 
 import v2av.VideoCaptureDevInfo;

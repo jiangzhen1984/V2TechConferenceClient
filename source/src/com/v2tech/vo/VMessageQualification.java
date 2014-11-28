@@ -2,6 +2,8 @@ package com.v2tech.vo;
 
 import java.util.Date;
 
+import com.v2tech.util.GlobalConfig;
+
 
 public abstract class VMessageQualification {
 	
@@ -113,7 +115,10 @@ public abstract class VMessageQualification {
 
 
 	public Date getmTimestamp() {
-		return mTimestamp;
+		if(mTimestamp == null)
+			return new Date(GlobalConfig.getGlobalServerTime());
+		else
+			return mTimestamp;
 	}
 
 	public void setId(long id) {

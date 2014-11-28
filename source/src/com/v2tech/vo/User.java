@@ -398,24 +398,33 @@ public class User implements Comparable<User> {
 			avatar = GlobalHolder.getInstance().getUserAvatar(this.mUserId);
 			if(avatar == null){
 				//FIXME if get null from loadAvatarFromPath 
-				return BitmapUtil.loadAvatarFromPath(mAvatarPath);
+				return loadAvatarBitmap(mAvatarPath);
 			}
 			else{
 				if(avatar.isRecycled())
-					return BitmapUtil.loadAvatarFromPath(mAvatarPath);
+					return loadAvatarBitmap(mAvatarPath);
 			}
 		}
 		else if(avatar.isRecycled()){
 			avatar = GlobalHolder.getInstance().getUserAvatar(this.mUserId);
 			if(avatar == null){
-				return BitmapUtil.loadAvatarFromPath(mAvatarPath);
+				return loadAvatarBitmap(mAvatarPath);
 			}
 			else{
 				if(avatar.isRecycled())
-					return BitmapUtil.loadAvatarFromPath(mAvatarPath);
+					return loadAvatarBitmap(mAvatarPath);
 			}
 		}
 		return avatar;
+	}
+	
+	private Bitmap loadAvatarBitmap(String mAvatarPath){
+		Bitmap bitmap = BitmapUtil.loadAvatarFromPath(mAvatarPath);
+		if(bitmap != null && bitmap.isRecycled()){
+			V2Log.e("User loadAvatarBitmap --> Loading avatar from file path faield... bitmap is recycled!" );
+			return null;
+		}
+		return bitmap;
 	}
 
 	public void setAvatarBitmap(Bitmap bm) {
