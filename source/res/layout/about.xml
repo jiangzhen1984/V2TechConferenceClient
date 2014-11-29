@@ -41,7 +41,6 @@
             android:textSize="@dimen/about_text_size" />
 
         <LinearLayout
-            android:id="@+id/linearLayout1"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_gravity="left"
@@ -71,14 +70,6 @@
         android:layout_marginTop="4dp"
         android:text="@string/login_title_2" />
 
-    <TextView
-        android:id="@+id/textView3"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/textView2"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="17dp"
-        android:text="@string/login_title_copyright"
-        android:textColor="#666666" />
+  
 
 </RelativeLayout>

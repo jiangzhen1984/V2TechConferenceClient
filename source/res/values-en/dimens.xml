@@ -69,7 +69,7 @@
     <dimen name="conf_create_contacts_use_layout_name_margin_right">10dp</dimen>
 
     <!-- about_activity -->
-    <dimen name="about_text_size">30sp</dimen>
+    <dimen name="about_text_size">20sp</dimen>
     <dimen name="about_version_text_size">20sp</dimen>
     <dimen name="about_version_text_padding_left">9dp</dimen>
     <dimen name="about_version_layout_margin_top">20dp</dimen>

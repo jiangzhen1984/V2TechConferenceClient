@@ -16,7 +16,7 @@
    <string name="error_conf_do_not_permit_create_piror_conf">不允许创建历史会议</string>
    <string name="notification_watiing_process">正在处理请稍后...</string>
    
-   <string name="conference_conversation_creator">创建人</string>
+   <string name="conference_conversation_creator">Creator</string>
    
    
 </resources>
