@@ -100,7 +100,7 @@
             android:windowSoftInputMode="stateHidden|adjustUnspecified" >
         </activity>
         <activity
-            android:name="com.v2tech.view.conference.VideoActivityV2"
+            android:name="com.v2tech.view.conference.ConferenceActivity"
             android:configChanges="screenSize|orientation"
             android:exported="true"
             android:launchMode="singleTop"

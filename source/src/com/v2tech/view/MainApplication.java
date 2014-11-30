@@ -50,7 +50,7 @@ import com.v2tech.util.LogService;
 import com.v2tech.util.LogcatThread;
 import com.v2tech.util.Notificator;
 import com.v2tech.util.StorageUtil;
-import com.v2tech.view.conference.VideoActivityV2;
+import com.v2tech.view.conference.ConferenceActivity;
 import com.v2tech.view.conversation.MessageBuilder;
 import com.v2tech.view.conversation.MessageLoader;
 
@@ -70,11 +70,11 @@ public class MainApplication extends Application {
 		V2Log.isDebuggable = (0 != (getApplicationInfo().flags &
 				ApplicationInfo.FLAG_DEBUGGABLE));
 		V2Log.d(TAG, "isDebuggable : " + V2Log.isDebuggable);
-		// if (!V2Log.isDebuggable) {
-		// CrashHandler crashHandler = CrashHandler.getInstance();
-		// crashHandler.init(getApplicationContext());
-		// new LogcatThread().start();
-		// }
+//		 if (!V2Log.isDebuggable) {
+//		 CrashHandler crashHandler = CrashHandler.getInstance();
+//		 crashHandler.init(getApplicationContext());
+//		 new LogcatThread().start();
+//		 }
 		SharedPreferences sf = getSharedPreferences("config",
 				Context.MODE_PRIVATE);
 		Editor ed = sf.edit();
@@ -370,7 +370,7 @@ public class MainApplication extends Application {
 			Configuration conf = getResources().getConfiguration();
 			activity.setVolumeControlStream(AudioManager.STREAM_MUSIC);
 			if (conf.smallestScreenWidthDp >= 600
-					|| activity instanceof VideoActivityV2) {
+					|| activity instanceof ConferenceActivity) {
 				activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 			} else {
 				activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);

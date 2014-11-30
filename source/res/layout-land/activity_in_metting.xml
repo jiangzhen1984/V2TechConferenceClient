@@ -48,7 +48,7 @@
             android:orientation="vertical" >
         </LinearLayout>
 
-        <RelativeLayout
+        <LinearLayout
             android:id="@+id/in_meeting_tools_bar"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
@@ -56,50 +56,63 @@
             android:layout_toRightOf="@+id/in_meeting_menu_button_ly"
             android:background="#ffffff" >
 
-            <ImageView
-                android:id="@+id/in_meeting_setting_iv"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
-                android:layout_marginRight="@dimen/in_meeting_tools_bar_margin_right"
-                android:layout_toLeftOf="@+id/speaker_iv"
-                android:src="@drawable/video_setting_button_selector" />
-
-            <ImageView
-                android:id="@+id/in_meeting_log_out_iv"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentRight="true"
-                android:layout_centerVertical="true"
-                android:layout_marginRight="@dimen/in_meeting_tools_bar_margin_right"
-                android:src="@drawable/video_logout_button_selector" />
-
-            <ImageView
-                android:id="@+id/speaker_iv"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
-                android:layout_marginRight="@dimen/in_meeting_tools_bar_margin_right"
-                android:layout_toLeftOf="@+id/in_meeting_log_out_iv"
-                android:src="@drawable/mute_button" />
-
             <TextView
                 android:id="@+id/in_meeting_name"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_centerHorizontal="true"
-                android:layout_centerVertical="true"
                 android:layout_marginBottom="10dp"
-                android:layout_marginLeft="20dp"
-                android:layout_marginRight="300dp"
+                android:layout_marginRight="@dimen/in_meeting_tools_bar_margin_right"
                 android:layout_marginTop="10dp"
+                android:layout_weight="1"
                 android:ellipsize="end"
                 android:gravity="center"
                 android:singleLine="true"
-                android:text="  "
+                android:text="标题"
                 android:textColor="#000000"
                 android:textSize="23sp" />
-        </RelativeLayout>
+
+            <LinearLayout
+                android:id="@+id/right_layout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_weight="0" >
+
+                <ImageView
+                    android:id="@+id/iv_chairman_control"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/chairman_control" />
+
+                <ImageView
+                    android:id="@+id/speaker_iv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="@dimen/in_meeting_tools_bar_margin_right"
+                    android:src="@drawable/mute_button" />
+
+                <ImageView
+                    android:id="@+id/iv_camera"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="@dimen/in_meeting_tools_bar_margin_right"
+                    android:src="@drawable/confernce_camera" />
+
+                <ImageView
+                    android:id="@+id/in_meeting_setting_iv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="@dimen/in_meeting_tools_bar_margin_right"
+                    android:src="@drawable/video_setting_button_selector" />
+
+                <ImageView
+                    android:id="@+id/in_meeting_log_out_iv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="@dimen/in_meeting_tools_bar_margin_right"
+                    android:src="@drawable/video_logout_button_selector" />
+            </LinearLayout>
+        </LinearLayout>
 
         <LinearLayout
             android:id="@+id/in_meeting_video_separation_line0"

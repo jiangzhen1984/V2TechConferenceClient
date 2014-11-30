@@ -742,7 +742,7 @@ public class ConversationP2PAVActivity extends Activity implements
 			avatarIV = (ImageView) findViewById(R.id.conversation_fragment_voice_avatar);
 		} else if (!uad.isIncoming() && !uad.isConnected()) {
 			avatarIV = (ImageView) findViewById(R.id.conversation_fragment_video_outing_call_avatar);
-			mReverseCameraButton1 = findViewById(R.id.ImageView01);
+			mReverseCameraButton1 = findViewById(R.id.iv_camera);
 			mReverseCameraButton1.setOnClickListener(surfaceViewListener);
 		}
 
@@ -776,7 +776,7 @@ public class ConversationP2PAVActivity extends Activity implements
 			mReverseCameraButton = findViewById(R.id.fragment_conversation_reverse_camera_button);
 			mReverseCameraButton.setOnClickListener(surfaceViewListener);
 
-			mReverseCameraButton1 = findViewById(R.id.ImageView01);
+			mReverseCameraButton1 = findViewById(R.id.iv_camera);
 			mReverseCameraButton1.setOnClickListener(surfaceViewListener);
 
 		} else if (uad.isVideoType() && !uad.isIncoming()) {
@@ -790,7 +790,7 @@ public class ConversationP2PAVActivity extends Activity implements
 			mReverseCameraButton = findViewById(R.id.fragment_conversation_reverse_camera_button);
 			mReverseCameraButton.setOnClickListener(surfaceViewListener);
 
-			mReverseCameraButton1 = findViewById(R.id.ImageView01);
+			mReverseCameraButton1 = findViewById(R.id.iv_camera);
 			mReverseCameraButton1.setOnClickListener(surfaceViewListener);
 		}
 
@@ -912,7 +912,7 @@ public class ConversationP2PAVActivity extends Activity implements
 		// mReverseCameraButton.bringToFront();
 		mReverseCameraButton.setOnClickListener(surfaceViewListener);
 
-		mReverseCameraButton1 = findViewById(R.id.ImageView01);
+		mReverseCameraButton1 = findViewById(R.id.iv_camera);
 		// mReverseCameraButton1.setVisibility(View.VISIBLE);
 		// mReverseCameraButton1.bringToFront();
 		mReverseCameraButton1.setOnClickListener(surfaceViewListener);
@@ -1061,7 +1061,7 @@ public class ConversationP2PAVActivity extends Activity implements
 		mReverseCameraButton.setVisibility(View.GONE);
 
 		if (mReverseCameraButton1 == null) {
-			mReverseCameraButton1 = findViewById(R.id.ImageView01);
+			mReverseCameraButton1 = findViewById(R.id.iv_camera);
 			mReverseCameraButton1.setOnClickListener(surfaceViewListener);
 		}
 		mReverseCameraButton1.setVisibility(View.VISIBLE);
@@ -1084,7 +1084,7 @@ public class ConversationP2PAVActivity extends Activity implements
 		mReverseCameraButton.setVisibility(View.VISIBLE);
 
 		if (mReverseCameraButton1 == null) {
-			mReverseCameraButton1 = findViewById(R.id.ImageView01);
+			mReverseCameraButton1 = findViewById(R.id.iv_camera);
 			mReverseCameraButton1.setOnClickListener(surfaceViewListener);
 		}
 		mReverseCameraButton1.setVisibility(View.GONE);
@@ -1119,7 +1119,7 @@ public class ConversationP2PAVActivity extends Activity implements
 			}
 			mReverseCameraButton.setVisibility(View.GONE);
 			if (mReverseCameraButton1 == null) {
-				mReverseCameraButton1 = findViewById(R.id.ImageView01);
+				mReverseCameraButton1 = findViewById(R.id.iv_camera);
 				mReverseCameraButton1.setOnClickListener(surfaceViewListener);
 			}
 			mReverseCameraButton1.setVisibility(View.VISIBLE);
@@ -1156,7 +1156,7 @@ public class ConversationP2PAVActivity extends Activity implements
 			}
 			mReverseCameraButton.setVisibility(View.VISIBLE);
 			if (mReverseCameraButton1 == null) {
-				mReverseCameraButton1 = findViewById(R.id.ImageView01);
+				mReverseCameraButton1 = findViewById(R.id.iv_camera);
 				mReverseCameraButton1.setOnClickListener(surfaceViewListener);
 			}
 			mReverseCameraButton1.setVisibility(View.GONE);
@@ -1344,7 +1344,7 @@ public class ConversationP2PAVActivity extends Activity implements
 				mReverseCameraButton = findViewById(R.id.fragment_conversation_reverse_camera_button);
 				mReverseCameraButton.setOnClickListener(surfaceViewListener);
 
-				mReverseCameraButton1 = findViewById(R.id.ImageView01);
+				mReverseCameraButton1 = findViewById(R.id.iv_camera);
 				// mReverseCameraButton1.setVisibility(View.VISIBLE);
 				mReverseCameraButton1.setOnClickListener(surfaceViewListener);
 

@@ -52,8 +52,12 @@ import android.view.animation.AnimationUtils;
 import android.view.animation.ScaleAnimation;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.PopupWindow.OnDismissListener;
 import android.widget.RelativeLayout;
@@ -96,7 +100,7 @@ import com.v2tech.vo.V2Doc.Page;
 import com.v2tech.vo.V2ShapeMeta;
 import com.v2tech.vo.VMessage;
 
-public class VideoActivityV2 extends Activity {
+public class ConferenceActivity extends Activity {
 
 	private static final int TAG_SUB_WINDOW_STATE_FIXED = 0x1;
 	private static final int TAG_SUB_WINDOW_STATE_FLOAT = 0x0;
@@ -136,6 +140,7 @@ public class VideoActivityV2 extends Activity {
 	private static final String TAG = "VideoActivityV2";
 
 	private boolean isSpeaking;
+	private boolean isMuteCamera;
 
 	private Handler mVideoHandler = new VideoHandler();
 
@@ -150,9 +155,12 @@ public class VideoActivityV2 extends Activity {
 
 	private TextView mGroupNameTV;
 	private ImageView mSettingIV;
+	private ImageView mChairmanControl;
 	private ImageView mQuitIV;
 	private ImageView mSpeakerIV;
+	private ImageView mCameraIV;
 	private PopupWindow mSettingWindow;
+	private PopupWindow mChairControlWindow;
 	private Dialog mQuitDialog;
 	private VideoInvitionAttendeeLayout mInvitionContainer;
 	private VideoMsgChattingLayout mMessageContainer;
@@ -206,6 +214,8 @@ public class VideoActivityV2 extends Activity {
 
 	private AudioManager audioManager;
 	boolean isBluetoothHeadsetConnected = false;
+	
+	private int arrowWidth=0;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -240,8 +250,9 @@ public class VideoActivityV2 extends Activity {
 		// setting button
 		this.mSettingIV = (ImageView) findViewById(R.id.in_meeting_setting_iv);
 		this.mSettingIV.setOnClickListener(mShowSettingListener);
-		// TODO hide for temp release
-		this.mSettingIV.setVisibility(View.INVISIBLE);
+
+		this.mChairmanControl = (ImageView) findViewById(R.id.iv_chairman_control);
+		this.mChairmanControl.setOnClickListener(onClickMChairmanControl);
 
 		// request exit button
 		this.mQuitIV = (ImageView) findViewById(R.id.in_meeting_log_out_iv);
@@ -249,6 +260,9 @@ public class VideoActivityV2 extends Activity {
 		// request speak or mute button
 		this.mSpeakerIV = (ImageView) findViewById(R.id.speaker_iv);
 		this.mSpeakerIV.setOnClickListener(mApplySpeakerListener);
+
+		this.mCameraIV = (ImageView) findViewById(R.id.iv_camera);
+		this.mCameraIV.setOnClickListener(onClickMCameraIV);
 		// conference name text view
 		this.mGroupNameTV = (TextView) findViewById(R.id.in_meeting_name);
 
@@ -414,6 +428,8 @@ public class VideoActivityV2 extends Activity {
 		isSpeaking = (conf.getCreator() == GlobalHolder.getInstance()
 				.getCurrentUserId() || conf.getChairman() == GlobalHolder
 				.getInstance().getCurrentUserId()) ? true : false;
+
+		isMuteCamera = true;
 	}
 
 	/**
@@ -441,6 +457,16 @@ public class VideoActivityV2 extends Activity {
 			mSpeakerIV.setImageResource(R.drawable.mute_button);
 		} else {
 			mSpeakerIV.setImageResource(R.drawable.speaking_button);
+		}
+	}
+
+	private void updateMCameraIVState(boolean flag) {
+		isMuteCamera = flag;
+		// set flag to speaking icon
+		if (isMuteCamera) {
+			mCameraIV.setImageResource(R.drawable.confernce_camera_mute);
+		} else {
+			mCameraIV.setImageResource(R.drawable.confernce_camera);
 		}
 	}
 
@@ -833,11 +859,86 @@ public class VideoActivityV2 extends Activity {
 		}
 	};
 
+	private OnClickListener onClickMCameraIV = new OnClickListener() {
+		@Override
+		public void onClick(View view) {
+			updateMCameraIVState(!isMuteCamera);
+		}
+	};
+
 	private OnClickListener mShowQuitWindowListener = new OnClickListener() {
 		@Override
 		public void onClick(View view) {
 			showQuitDialog(mContext.getText(R.string.in_meeting_quit_text)
 					.toString());
+		}
+	};
+
+	private OnClickListener onClickMChairmanControl = new OnClickListener() {
+		public void onClick(View v) {
+
+			if (mChairControlWindow == null) {
+				LayoutInflater inflater = (LayoutInflater) mContext
+						.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+				View view = inflater.inflate(
+						R.layout.in_meeting_chairman_control_pop_up_window,
+						null);
+
+				ImageView arrow = (ImageView) view.findViewById(R.id.arrow);
+				int widthSpec = View.MeasureSpec.makeMeasureSpec(0,
+						View.MeasureSpec.UNSPECIFIED);
+				int heightSpec = View.MeasureSpec.makeMeasureSpec(0,
+						View.MeasureSpec.UNSPECIFIED);
+				arrow.measure(widthSpec, heightSpec);
+				arrowWidth = arrow.getMeasuredWidth();
+
+			
+					
+				CheckBox slience = (CheckBox) view
+						.findViewById(R.id.cb_slience);
+				CheckBox invitation = (CheckBox) view
+						.findViewById(R.id.cb_invitation);
+
+				slience.setOnClickListener(new OnClickListener() {
+
+					@Override
+					public void onClick(View v) {
+						mChairControlWindow.dismiss();
+
+					}
+				});
+
+				invitation
+						.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+
+							@Override
+							public void onCheckedChanged(
+									CompoundButton buttonView, boolean isChecked) {
+								mChairControlWindow.dismiss();
+							}
+						});
+
+				// set
+				mChairControlWindow = new PopupWindow(view,
+						LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+				mChairControlWindow.setBackgroundDrawable(new ColorDrawable(
+						Color.TRANSPARENT));
+				mChairControlWindow.setFocusable(true);
+				mChairControlWindow.setTouchable(true);
+				mChairControlWindow.setOutsideTouchable(true);
+
+			}
+
+			int[] pos = new int[2];
+			v.getLocationInWindow(pos);
+			pos[0] += v.getMeasuredWidth() / 2 - 15 * dm.density-arrowWidth/2;
+			pos[1] += v.getMeasuredHeight();
+
+			mChairControlWindow
+					.setAnimationStyle(R.style.InMeetingCameraSettingAnim);
+			mChairControlWindow.showAtLocation(v, Gravity.NO_GRAVITY, pos[0],
+					pos[1]);
+
 		}
 	};
 
@@ -950,7 +1051,7 @@ public class VideoActivityV2 extends Activity {
 				 */
 				mSettingWindow
 						.getContentView()
-						.findViewById(R.id.camera_setting_window_arrow)
+						.findViewById(R.id.arrow)
 						.measure(View.MeasureSpec.UNSPECIFIED,
 								View.MeasureSpec.UNSPECIFIED);
 			}
@@ -961,7 +1062,7 @@ public class VideoActivityV2 extends Activity {
 			pos[1] += v.getMeasuredHeight();
 			// calculate arrow offset
 			View arrow = mSettingWindow.getContentView().findViewById(
-					R.id.camera_setting_window_arrow);
+					R.id.arrow);
 			arrow.bringToFront();
 			RelativeLayout.LayoutParams rl = (RelativeLayout.LayoutParams) arrow
 					.getLayoutParams();

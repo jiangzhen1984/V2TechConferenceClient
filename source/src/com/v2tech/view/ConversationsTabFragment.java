@@ -75,7 +75,7 @@ import com.v2tech.util.SearchUtils;
 import com.v2tech.view.bo.ConversationNotificationObject;
 import com.v2tech.view.bo.GroupUserObject;
 import com.v2tech.view.conference.GroupLayout;
-import com.v2tech.view.conference.VideoActivityV2;
+import com.v2tech.view.conference.ConferenceActivity;
 import com.v2tech.view.contacts.VoiceMessageActivity;
 import com.v2tech.view.contacts.add.AddFriendHistroysHandler;
 import com.v2tech.view.conversation.CommonCallBack;
@@ -1769,7 +1769,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 	private void startConferenceActivity(Conference conf) {
 		// Set current state to in meeting state
 		GlobalHolder.getInstance().setMeetingState(true, conf.getId());
-		Intent enterConference = new Intent(mContext, VideoActivityV2.class);
+		Intent enterConference = new Intent(mContext, ConferenceActivity.class);
 		enterConference.putExtra("conf", conf);
 		enterConference.setFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
 		currentEntered = conf;
