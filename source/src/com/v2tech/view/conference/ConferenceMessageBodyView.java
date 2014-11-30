@@ -100,7 +100,7 @@ public class ConferenceMessageBodyView extends LinearLayout {
 						imageItem = mMsg.getImageItems().get(0);
 					}
 					
-					((VideoActivityV2)mContext).NotChangeTaskToBack();
+					((ConferenceActivity)mContext).NotChangeTaskToBack();
 					Intent i = new Intent();
 					i.addCategory(PublicIntent.DEFAULT_CATEGORY);
 					i.setAction(PublicIntent.START_VIDEO_IMAGE_GALLERY);
