@@ -439,9 +439,7 @@ public class ConferenceService extends DeviceService {
 					nConfID,	
 					nTime,
 					szConfData,
-					nJoinResult == JNIResponse.Result.SUCCESS.value() ? JNIResponse.Result.SUCCESS
-							: JNIResponse.Result.FAILED == JNIResponse.Result.NO_RESOURCE ? 
-									JNIResponse.Result.NO_RESOURCE : JNIResponse.Result.FAILED);
+					JNIResponse.Result.fromInt(nJoinResult));
 			Message.obtain(mCallbackHandler, JNI_REQUEST_ENTER_CONF, jniRes)
 					.sendToTarget();
 		}

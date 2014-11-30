@@ -135,8 +135,6 @@ public class ConferenceActivity extends Activity {
 
 	private static final int TAG_OPEN_DEVICE = 1;
 
-	public static final String JNI_EVENT_VIDEO_CATEGORY = "com.v2tech.conf_video_event";
-	public static final String JNI_EVENT_VIDEO_CATEGORY_OPEN_VIDEO_EVENT_ACTION = "com.v2tech.conf_video_event.open_video_event";
 	private static final String TAG = "VideoActivityV2";
 
 	private boolean isSpeaking;
@@ -377,8 +375,6 @@ public class ConferenceActivity extends Activity {
 
 	private void initConfsListener() {
 		IntentFilter filter = new IntentFilter();
-		filter.addCategory(JNI_EVENT_VIDEO_CATEGORY);
-		filter.addAction(JNI_EVENT_VIDEO_CATEGORY_OPEN_VIDEO_EVENT_ACTION);
 		filter.addAction(JNIService.JNI_BROADCAST_NEW_CONF_MESSAGE);
 		filter.addAction(JNIService.JNI_BROADCAST_GROUP_USER_REMOVED);
 		filter.addAction(JNIService.JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION);
@@ -1080,15 +1076,7 @@ public class ConferenceActivity extends Activity {
 
 		@Override
 		public void onReceive(Context context, Intent intent) {
-			if (intent.getAction().equals(
-					JNI_EVENT_VIDEO_CATEGORY_OPEN_VIDEO_EVENT_ACTION)) {
-				if (intent.getIntExtra("result", 1) != 0) {
-					Toast.makeText(context,
-							R.string.error_in_meeting_open_video_falied,
-							Toast.LENGTH_LONG).show();
-					;
-				}
-			} else if (JNIService.JNI_BROADCAST_NEW_CONF_MESSAGE.equals(intent
+			if (JNIService.JNI_BROADCAST_NEW_CONF_MESSAGE.equals(intent
 					.getAction())) {
 				long mid = intent.getLongExtra("mid", 0);
 				VMessage vm = MessageLoader.loadGroupMessageById(mContext,
@@ -1764,6 +1752,9 @@ public class ConferenceActivity extends Activity {
 			VideoPlayer vp = new VideoPlayer();
 			udc.setSVHolder(new SurfaceView(this));
 			udc.setVp(vp);
+			if (udc.getBelongsAttendee() instanceof AttendeeMixedDevice) {
+				vp.setLayout(((AttendeeMixedDevice)udc.getBelongsAttendee()).getMV().getType().toIntValue());
+			}
 			SurfaceHolderObserver observer = new SurfaceHolderObserver(cg, cs,
 					udc);
 			SurfaceViewW sw = new SurfaceViewW(udc.getBelongsAttendee(), udc,

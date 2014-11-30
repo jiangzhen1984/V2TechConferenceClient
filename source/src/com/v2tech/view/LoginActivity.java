@@ -513,7 +513,10 @@ public class LoginActivity extends Activity {
 				} else if (rlr.getResult() == JNIResponse.Result.NO_RESOURCE) {
 					V2Toast.makeText(mContext, R.string.error_no_resource,
 							V2Toast.LENGTH_LONG).show();
-				} else if (rlr.getResult() == JNIResponse.Result.SERVER_REJECT) {
+				} else if (rlr.getResult() == JNIResponse.Result.LOGED_OVER_TIME) {
+					V2Toast.makeText(mContext, R.string.error_time_out,
+							V2Toast.LENGTH_LONG).show();
+				}else if (rlr.getResult() == JNIResponse.Result.SERVER_REJECT) {
 					V2Toast.makeText(mContext, R.string.error_connect_to_server,
 							V2Toast.LENGTH_LONG).show();
 				} else if (rlr.getResult() == JNIResponse.Result.SUCCESS){
