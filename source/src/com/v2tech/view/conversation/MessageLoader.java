@@ -26,8 +26,10 @@ import com.v2tech.service.GlobalHolder;
 import com.v2tech.util.XmlParser;
 import com.v2tech.vo.AddFriendHistorieNode;
 import com.v2tech.vo.AudioVideoMessageBean;
+import com.v2tech.vo.ConversationFirendAuthenticationData.VerificationMessageType;
 import com.v2tech.vo.CrowdGroup;
 import com.v2tech.vo.CrowdGroup.ReceiveQualificationType;
+import com.v2tech.vo.VMessageQualification.ReadState;
 import com.v2tech.vo.User;
 import com.v2tech.vo.VCrowdFile;
 import com.v2tech.vo.VMessage;
@@ -1321,12 +1323,12 @@ public class MessageLoader {
 				selectionArgs);
 	}
 
-    /**
-     * update the given audio message read state...
-     * @param context
-     * @param fileItem
-     * @return
-     */
+	/**
+	 *  According to Given the VMessageFileItem Object , update Transing State!
+	 * @param context
+	 * @param fileItem
+	 * @return 
+	 */
 	public static int updateFileItemState(Context context,
 			VMessageFileItem fileItem) {
 
@@ -1348,56 +1350,43 @@ public class MessageLoader {
 				selectionArgs);
 	}
 
+	
 	/**
-	 * 更新群邀请或申请的记录的已读和未读状态
-	 * 
-	 * @param context
+	 * According to the specified ReadState , update group verification message or friend verification message
+	 * @param type
+	 * <br>&nbsp;&nbsp;&nbsp;&nbsp;  Crowd Type OR Friend Type
+	 * @param readState
+	 * 	<br>&nbsp;&nbsp;&nbsp;&nbsp; Read OR UNRead
+	 * @param where
+	 * 	<br>&nbsp;&nbsp;&nbsp;&nbsp; if null , it would update all Messages;
+	 * @param args
 	 * @return
+	 * 
+	 * @see VerificationMessageType
+	 * @see ReadState
 	 */
-	public static int updateGroupVerificationReadState(Context context) {
+	public static int updateVerificationMessageReadState(VerificationMessageType type , ReadState readState , 
+			String where , String[] args) {
 
-		User currentUser = GlobalHolder.getInstance().getCurrentUser();
-		if (currentUser == null)
+		if (type == null | readState == null){
+			V2Log.e(TAG, "updateGroupVerificationReadState --> Update Verification Message ReadState Failed !  Given " +
+					"VerificationMessageType or ReadState is null !");
 			return -1;
+		}
 
 		DataBaseContext mContext = new DataBaseContext(context);
 		ContentValues values = new ContentValues();
 		values.put(
 				ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_READ_STATE,
-				1);
-		String where = ContentDescriptor.HistoriesCrowd.Cols.OWNER_USER_ID
-				+ "= ?";
-		String[] selectionArgs = new String[] { String.valueOf(currentUser
-				.getmUserId()) };
-		return mContext.getContentResolver().update(
-				ContentDescriptor.HistoriesCrowd.CONTENT_URI, values, where,
-				selectionArgs);
-	}
-
-	/**
-	 * 更新群加好友的记录的已读和未读状态
-	 * 
-	 * @param context
-	 * @return
-	 */
-	public static int updateFriendVerificationReadState(Context context) {
-
-		User currentUser = GlobalHolder.getInstance().getCurrentUser();
-		if (currentUser == null)
-			return -1;
-
-		DataBaseContext mContext = new DataBaseContext(context);
-		ContentValues values = new ContentValues();
-		values.put(
-				ContentDescriptor.HistoriesAddFriends.Cols.HISTORY_MEDIA_READ_STATE,
-				1);
-		String where = ContentDescriptor.HistoriesAddFriends.Cols.OWNER_USER_ID
-				+ "= ?";
-		String[] selectionArgs = new String[] { String.valueOf(currentUser
-				.getmUserId()) };
-		return mContext.getContentResolver().update(
-				ContentDescriptor.HistoriesAddFriends.CONTENT_URI, values,
-				where, selectionArgs);
+				readState.intValue());
+		if(type == VerificationMessageType.CROWD_TYPE)
+			return mContext.getContentResolver().update(
+					ContentDescriptor.HistoriesCrowd.CONTENT_URI, values, where,
+					args);
+		else
+			return mContext.getContentResolver().update(
+					ContentDescriptor.HistoriesAddFriends.CONTENT_URI, values,
+					where, args);
 	}
 
 	// private static void loadVMessageItem(Context context, VMessage vm,

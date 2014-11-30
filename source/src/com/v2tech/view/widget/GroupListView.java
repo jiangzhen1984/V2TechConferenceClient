@@ -1452,10 +1452,10 @@ public class GroupListView extends ListView {
 				gi.searchedCurrentUser = true;
 			}
 
-			tv.setText(onlineCount
+			tv.setText(" [ " + onlineCount
 					+ " / "
 					+ ((mIgnoreCurrentUser && gi.existCurrentUser) ? count - 1
-							: count));
+							: count) + " ]");
 			tv.invalidate();
 		}
 	}

@@ -95,6 +95,7 @@ import com.v2tech.view.PublicIntent;
 import com.v2tech.view.adapter.VMessageAdater;
 import com.v2tech.view.bo.ConversationNotificationObject;
 import com.v2tech.view.contacts.ContactDetail;
+import com.v2tech.view.conversation.CommonCallBack.CommonUpdateMessageBodyPopupWindowInterface;
 import com.v2tech.view.group.CrowdDetailActivity;
 import com.v2tech.view.group.CrowdFilesActivity.CrowdFileActivityType;
 import com.v2tech.view.widget.CommonAdapter;
@@ -116,7 +117,7 @@ import com.v2tech.vo.VMessageImageItem;
 import com.v2tech.vo.VMessageLinkTextItem;
 import com.v2tech.vo.VMessageTextItem;
 
-public class ConversationP2PTextActivity extends Activity {
+public class ConversationP2PTextActivity extends Activity implements CommonUpdateMessageBodyPopupWindowInterface{
 
 	private final int START_LOAD_MESSAGE = 1;
 	private final int LOAD_MESSAGE = 2;
@@ -230,6 +231,7 @@ public class ConversationP2PTextActivity extends Activity {
 	 */
 	private VMessage playingAudioMessage;
 	private MessageBodyView playingAudioBodyView;
+	private MessageBodyView showingPopupWindow;
 	private boolean stopOhterAudio;
 	private boolean isCreate;
 
@@ -257,6 +259,7 @@ public class ConversationP2PTextActivity extends Activity {
 		
 		initExtraObject();
 		initBroadcast();
+		CommonCallBack.getInstance().setMessageBodyPopup(this);
 		// Register listener for avatar changed
 		BitmapManager.getInstance().registerBitmapChangedListener(
 				avatarChangedListener);
@@ -1996,6 +1999,12 @@ public class ConversationP2PTextActivity extends Activity {
 		judgeShouldShowTime(msg);
 		adapter.notifyDataSetChanged();
 	}
+	
+	private void startSendMoreFile() {
+		for (int i = 0; i < mCheckedList.size(); i++) {
+			sendSelectedFile(mCheckedList.get(i));
+		}
+	}
 
     private int LastFistItem;
     private int LastFistItemOffset;
@@ -2283,6 +2292,10 @@ public class ConversationP2PTextActivity extends Activity {
 			return false;
 		}
 
+		
+		//使当前正在显示popupWindow消失
+		if(showingPopupWindow != null)
+			showingPopupWindow.dissmisPopupWindow();
 		judgeShouldShowTime(m);
 		MessageBodyView mv = new MessageBodyView(this, m, m.isShowTime());
 		mv.setCallback(listener);
@@ -2321,6 +2334,19 @@ public class ConversationP2PTextActivity extends Activity {
 			}
 		}
 		return false;
+	}
+	
+	/**
+	 * 用于判断指定的消息VMessage对象是否应该显示时间状态
+	 * @param message
+	 */
+	private void judgeShouldShowTime(VMessage message) {
+
+		if (message.getmDateLong() - lastMessageBodyShowTime < intervalTime)
+			message.setShowTime(false);
+		else
+			message.setShowTime(true);
+		lastMessageBodyShowTime = message.getmDateLong();
 	}
 
 	private void updateFileProgressView(String uuid, long tranedSize,
@@ -2949,12 +2975,6 @@ public class ConversationP2PTextActivity extends Activity {
 
 	}
 
-	private void startSendMoreFile() {
-		for (int i = 0; i < mCheckedList.size(); i++) {
-			sendSelectedFile(mCheckedList.get(i));
-		}
-	}
-
 	/**
 	 * get selected file path to send remote.
 	 */
@@ -2977,19 +2997,8 @@ public class ConversationP2PTextActivity extends Activity {
 		}
 	}
 
-	/**
-	 * 
-	 * 用于判断指定的消息VMessage对象是否应该显示时间状态
-	 * 
-	 * @param message
-	 */
-	private void judgeShouldShowTime(VMessage message) {
-
-		if (message.getmDateLong() - lastMessageBodyShowTime < intervalTime)
-			message.setShowTime(false);
-		else
-			message.setShowTime(true);
-		lastMessageBodyShowTime = message.getmDateLong();
+	@Override
+	public void updateMessageBodyPopupWindow(MessageBodyView view) {
+		showingPopupWindow = view;
 	}
-
 }

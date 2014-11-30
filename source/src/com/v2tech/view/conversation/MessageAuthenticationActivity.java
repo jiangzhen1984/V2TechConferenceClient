@@ -42,12 +42,11 @@ import com.v2tech.R;
 import com.v2tech.db.DataBaseContext;
 import com.v2tech.db.V2TechDBHelper;
 import com.v2tech.service.BitmapManager;
+import com.v2tech.service.BitmapManager.BitmapChangedListener;
 import com.v2tech.service.CrowdGroupService;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.service.MessageListener;
-import com.v2tech.service.BitmapManager.BitmapChangedListener;
 import com.v2tech.service.jni.JNIResponse;
-import com.v2tech.util.BitmapUtil;
 import com.v2tech.util.ProgressUtils;
 import com.v2tech.view.JNIService;
 import com.v2tech.view.PublicIntent;
@@ -59,10 +58,10 @@ import com.v2tech.view.contacts.add.FriendManagementActivity;
 import com.v2tech.view.group.CrowdApplicantDetailActivity;
 import com.v2tech.vo.AddFriendHistorieNode;
 import com.v2tech.vo.Conversation;
+import com.v2tech.vo.ConversationFirendAuthenticationData.VerificationMessageType;
 import com.v2tech.vo.Crowd;
 import com.v2tech.vo.CrowdGroup;
 import com.v2tech.vo.Group;
-import com.v2tech.vo.ConversationFirendAuthenticationData.VerificationMessageType;
 import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.User;
 import com.v2tech.vo.VMessageQualification;
@@ -137,10 +136,12 @@ public class MessageAuthenticationActivity extends Activity {
 		isFriendAuthentication = getIntent().getBooleanExtra(
 				"isFriendActivity", true);
 		if (isFriendAuthentication) {
-			MessageLoader.updateFriendVerificationReadState(mContext);
+			MessageLoader.updateVerificationMessageReadState(VerificationMessageType.CONTACT_TYPE
+					 , ReadState.READ , null , null);
 			changeMessageAuthenticationListView();
 		} else {
-			MessageLoader.updateGroupVerificationReadState(mContext);
+			MessageLoader.updateVerificationMessageReadState(VerificationMessageType.CROWD_TYPE
+					 , ReadState.READ , null , null);
 			rbGroupAuthentication.setChecked(true);
 		}
 
@@ -219,8 +220,8 @@ public class MessageAuthenticationActivity extends Activity {
 									.getColor(R.color.button_text_color));
 							isFriendAuthentication = true;
 							changeMessageAuthenticationListView();
-							MessageLoader
-									.updateFriendVerificationReadState(mContext);
+							MessageLoader.updateVerificationMessageReadState(VerificationMessageType.CONTACT_TYPE
+									 , ReadState.READ , null , null);
 							updateTabPrompt(PROMPT_TYPE_FRIEND, false);
 						}
 
@@ -240,8 +241,8 @@ public class MessageAuthenticationActivity extends Activity {
 							isFriendAuthentication = false;
 							changeMessageAuthenticationListView();
 							updateTabPrompt(PROMPT_TYPE_GROUP, false);
-							MessageLoader
-									.updateGroupVerificationReadState(mContext);
+							MessageLoader.updateVerificationMessageReadState(VerificationMessageType.CROWD_TYPE
+									 , ReadState.READ , null , null);
 						}
 					}
 				});
@@ -1239,6 +1240,7 @@ public class MessageAuthenticationActivity extends Activity {
 						intent.putExtra("crowd", cg.getmGId());
 						sendBroadcast(intent);
 						updateViewItem(tag.wrapper, tag.item);
+						msg.setReadState(ReadState.READ);
 						MessageBuilder.updateQualicationMessage(mContext, msg);
 //						startCrowdInvitationDetail(msg);
 					} else {

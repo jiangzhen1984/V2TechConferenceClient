@@ -7,7 +7,6 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.graphics.Rect;
 import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
@@ -16,7 +15,6 @@ import android.os.AsyncTask;
 import android.os.Handler;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
-import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.ImageSpan;
 import android.view.Gravity;
@@ -27,7 +25,6 @@ import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.ViewTreeObserver.OnPreDrawListener;
 import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.view.animation.RotateAnimation;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -87,6 +84,9 @@ public class MessageBodyView extends LinearLayout {
 
 	private View rootView;
 
+	/**
+	 * The flag decide that Whether should to display the Time View 
+	 */
 	private boolean isShowTime;
 
 	private LinearLayout mLocalMessageContainter;
@@ -112,6 +112,9 @@ public class MessageBodyView extends LinearLayout {
 	private TextView pwDeleteTV;
 	
 	private RotateAnimation anima;
+	
+	private long lastMessageBodyShowTime = 0;
+	private long intervalTime = 15000; // 显示消息时间状态的间隔时间
 
 	public interface ClickListener {
 		public void onMessageClicked(VMessage v);
@@ -182,6 +185,7 @@ public class MessageBodyView extends LinearLayout {
 	}
 
 	private void initData() {
+		
 		if (isShowTime && mMsg.getDate() != null) {
 			timeTV.setText(mMsg.getDateTimeStr());
 		} else {
@@ -583,7 +587,7 @@ public class MessageBodyView extends LinearLayout {
 			break;
 		}
 	}
-
+	
 	private void updateSelectedBg(boolean selected) {
 		if (selected) {
 			if (!mMsg.isLocal()) {
@@ -775,6 +779,11 @@ public class MessageBodyView extends LinearLayout {
 	public void updateHeadIcon(Bitmap bmp) {
 		mHeadIcon.setImageBitmap(bmp);
 	}
+	
+	public void dissmisPopupWindow(){
+		if(pw.isShowing())
+			pw.dismiss();
+	}
 
 	private void updateFileItemView(VMessageFileItem vfi, View rootView) {
 		TextView state = (TextView) rootView
@@ -931,6 +940,7 @@ public class MessageBodyView extends LinearLayout {
 
 		@Override
 		public boolean onLongClick(View anchor) {
+			CommonCallBack.getInstance().executeUpdatePopupWindowState(MessageBodyView.this);
 			showPopupWindow(anchor);
 			return false;
 		}

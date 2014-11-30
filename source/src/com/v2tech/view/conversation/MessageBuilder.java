@@ -615,6 +615,14 @@ public class MessageBuilder {
 					crowdInviteMsg.getCrowdGroup().getmGId());
             values.put(HistoriesCrowd.Cols.HISTORY_CROWD_SAVEDATE,
                     crowdInviteMsg.getmTimestamp().getTime());
+            if(saveReceivState)
+				values.put(
+						ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_RECEIVER_STATE,
+						ReceiveQualificationType.LOCAL_INVITE_TYPE.intValue());
+            else
+            	values.put(
+						ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_RECEIVER_STATE,
+						ReceiveQualificationType.REMOTE_APPLY_TYPE.intValue());
 			uri = mContext.getContentResolver().insert(
 					ContentDescriptor.HistoriesCrowd.CONTENT_URI, values);
 			return uri;
