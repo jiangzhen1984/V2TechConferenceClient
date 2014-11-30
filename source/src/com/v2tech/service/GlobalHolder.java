@@ -672,6 +672,18 @@ public class GlobalHolder {
 		}
 	}
 	
+	
+	public void setGroupLoaded() {
+		synchronized (mState) {
+			synchronized (mState) {
+				int st = mState.getState();
+				mState.setState(st | GlobalState.STATE_SERVER_GROUPS_LOADED);
+			}
+		}
+	}
+	
+	
+	
 	/**
 	 * Set wired headset state
 	 * @param flag

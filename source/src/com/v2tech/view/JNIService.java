@@ -136,6 +136,8 @@ public class JNIService extends Service implements
 	public static final String JNI_BROADCAST_FRIEND_AUTHENTICATION = "com.v2tech.jni.broadcast.friend_authentication";
 	public static final String JNI_BROADCAST_NEW_QUALIFICATION_MESSAGE = "com.v2tech.jni.broadcast.new.qualification_message";
 	public static final String BROADCAST_CROWD_NEW_UPLOAD_FILE_NOTIFICATION = "com.v2tech.jni.broadcast.new.upload_crowd_file_message";
+	
+	public static final String JNI_BROADCAST_GROUPS_LOADED = "com.v2tech.jni.broadcast.groups_loaded";
 	/**
 	 * Current user kicked by crowd master key crowd : crowdId
 	 */
@@ -625,6 +627,7 @@ public class JNIService extends Service implements
 			mContext.sendBroadcast(iun);
 
 		}
+		
 
 		@Override
 		public void OnChangeAvatarCallback(int nAvatarType, long nUserID,
@@ -648,6 +651,19 @@ public class JNIService extends Service implements
 			i.putExtra("avatar", new UserAvatarObject(nUserID, AvatarName));
 			sendBroadcast(i);
 		}
+		
+
+		@Override
+		public void OnGroupsLoaded() {
+			//Update group loaded state
+			GlobalHolder.getInstance().setGroupLoaded();
+			
+			Intent i = new Intent();
+			i.addCategory(JNI_BROADCAST_CATEGROY);
+			i.setAction(JNI_BROADCAST_GROUPS_LOADED);
+			sendBroadcast(i);
+		}
+		
 
 	}
 

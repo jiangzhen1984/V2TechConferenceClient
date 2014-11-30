@@ -91,5 +91,7 @@ public interface ImRequestCallback {
 	 */
 	public void OnSearchUserCallback(List<V2User> list);
 	
+	
+	public void OnGroupsLoaded();
 
 }

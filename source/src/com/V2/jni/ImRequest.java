@@ -432,12 +432,22 @@ public class ImRequest {
 	}
 
 	private void OnGetGroupsInfoBegin() {
+		Log.e("ImRequest UI", "OnGetGroupsInfoBegin");
 	}
 
 	private boolean haslogin = false;
 
 	private void OnGetGroupsInfoEnd() {
-
+		Log.e("ImRequest UI", "OnGetGroupsInfoEnd");
+		
+		for (int i = 0; i < this.mCallbacks.size(); i++) {
+			WeakReference<ImRequestCallback> wf =  this.mCallbacks.get(i);
+			Object obj = wf.get();
+			if (obj != null) {
+				ImRequestCallback callback = (ImRequestCallback) obj;
+				callback.OnGroupsLoaded();
+			}
+		}
 	}
 
 }

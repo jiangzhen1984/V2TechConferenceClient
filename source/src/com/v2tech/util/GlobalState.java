@@ -36,6 +36,13 @@ public final class GlobalState {
 	 * Use to mark current server connection state
 	 */
 	public static final int STATE_SERVER_CONNECTED = 0x01000;
+	
+	
+	/**
+	 * Use to mark current server groups load state
+	 */
+	public static final int STATE_SERVER_GROUPS_LOADED = 0x02000;
+	
 
 	private int state;
 	private long gid;
@@ -148,5 +155,11 @@ public final class GlobalState {
 	
 	public boolean isConnectedServer() {
 		return (state & STATE_SERVER_CONNECTED) == STATE_SERVER_CONNECTED;
+	}
+	
+	
+	
+	public boolean isGroupLoaded() {
+		return (state & STATE_SERVER_GROUPS_LOADED) == STATE_SERVER_GROUPS_LOADED;
 	}
 }
