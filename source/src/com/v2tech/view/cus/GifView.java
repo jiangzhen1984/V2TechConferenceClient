@@ -7,10 +7,11 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Vector;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.CompressFormat;
 import android.graphics.Bitmap.Config;
 import android.graphics.Canvas;
 import android.text.TextUtils;
@@ -23,13 +24,14 @@ import com.V2.jni.util.V2Log;
 
 public class GifView extends View implements Runnable {
 	private static final String TAG = "GifView";
-	private static final int Time = 300; //间隔
+	private static final int Time = 150; //间隔
 	private GIFFrameManager mGIFFrameManager = null;
 	private int frames;
 	private String filePath;
 	private int mScreenWidth;
 	private int mScreenHeight;
-
+	private ExecutorService service;
+	
 	public GifView(Context context) {
 		super(context);
 		init(context);
@@ -50,6 +52,7 @@ public class GifView extends View implements Runnable {
 		WindowManager wm = (WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE);
 		mScreenWidth = wm.getDefaultDisplay().getWidth();
 		mScreenHeight = wm.getDefaultDisplay().getHeight();
+		service = Executors.newCachedThreadPool();
 	}
 
 	@Override
@@ -63,8 +66,8 @@ public class GifView extends View implements Runnable {
 			Bitmap bitmap = mGIFFrameManager.getImage();
 			if (bitmap != null) {
 				if(!bitmap.isRecycled()){
-					canvas.drawBitmap(bitmap, (mScreenWidth) / 2 , 
-							(mScreenHeight) / 2, null);
+					canvas.drawBitmap(bitmap, (mScreenWidth - bitmap.getWidth()) / 2 , 
+							(mScreenHeight - bitmap.getHeight()) / 2, null);
 					bitmap.recycle();
 					bitmap = null;
 				}
@@ -110,40 +113,40 @@ public class GifView extends View implements Runnable {
 		}
 	}
 
-	public void setGIFResource(final byte[] bytes) {
-		if (bytes == null || bytes.length <= 0) {
-			return;
-		}
+//	public void setGIFResource(final byte[] bytes) {
+//		if (bytes == null || bytes.length <= 0) {
+//			return;
+//		}
+//
+//		new Thread(new Runnable() {
+//			
+//			@Override
+//			public void run() {
+//				mGIFFrameManager.CreateGifImage(bytes);
+//			}
+//		}).start();
+//		new Thread(this).start();
+//	}
 
-		new Thread(new Runnable() {
-			
-			@Override
-			public void run() {
-				mGIFFrameManager.CreateGifImage(bytes);
-			}
-		}).start();
-		new Thread(this).start();
-	}
-
-	public void setGIFResource(InputStream is) {
-		if (is == null) {
-			return;
-		}
-
-		mGIFFrameManager.CreateGifImage(fileConnect(is));
-		new Thread(this).start();
-	}
-
-	public void setGIFResource(Bitmap bitmap) {
-		if (bitmap == null) {
-			return;
-		}
-		ByteArrayOutputStream bos = new ByteArrayOutputStream();
-		bitmap.compress(CompressFormat.PNG, 0 /* ignored for PNG */, bos);
-		byte[] bitmapdata = bos.toByteArray();
-		mGIFFrameManager.CreateGifImage(bitmapdata);
-		new Thread(this).start();
-	}
+//	public void setGIFResource(InputStream is) {
+//		if (is == null) {
+//			return;
+//		}
+//
+//		mGIFFrameManager.CreateGifImage(fileConnect(is));
+//		new Thread(this).start();
+//	}
+//
+//	public void setGIFResource(Bitmap bitmap) {
+//		if (bitmap == null) {
+//			return;
+//		}
+//		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+//		bitmap.compress(CompressFormat.PNG, 0 /* ignored for PNG */, bos);
+//		byte[] bitmapdata = bos.toByteArray();
+//		mGIFFrameManager.CreateGifImage(bitmapdata);
+//		new Thread(this).start();
+//	}
 
 	public void setGIFResource(String filePath) {
 		if (TextUtils.isEmpty(filePath)) {
@@ -155,7 +158,7 @@ public class GifView extends View implements Runnable {
 			return;
 
 		this.filePath = filePath;
-		new Thread(new Runnable() {
+		service.execute(new Runnable() {
 			@Override
 			public void run() {
 				FileInputStream is = null;
@@ -174,8 +177,8 @@ public class GifView extends View implements Runnable {
 						}
 				}
 			}
-		}).start();
-		new Thread(this).start();
+		});
+		service.execute(this);
 	}
 }
 

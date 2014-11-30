@@ -17,6 +17,9 @@
     <dimen name="login_box_text_size">16sp</dimen>
     <dimen name="login_box_padding">10sp</dimen>
 
+    <!-- TitleBar PopupWindow -->
+    <dimen name="title_bar_triangle_margin_buttom">-1.7dp</dimen>
+
     <!-- conversation view -->
     <dimen name="conversation_view_margin">5dp</dimen>
      <dimen name="conversation_view_notification_margin">2dp</dimen>

@@ -66,7 +66,6 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 	private UserService us = new UserService();
 	private ContactsService contactService = new ContactsService();
 
-	private View mReturnButtonTV;
 	private TextView mNameTitleIV;
 	private ImageView mHeadIconIV;
 
@@ -226,11 +225,18 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 	};
 
 	private void initView() {
+
+        TextView mTitleContent = (TextView) findViewById(R.id.ws_common_activity_title_content);
+        TextView mTitleLeftTV = (TextView) findViewById(R.id.ws_common_activity_title_left_button);
+        TextView mTitleRightTV = (TextView) findViewById(R.id.ws_common_activity_title_right_button);
+
+        mTitleRightTV.setVisibility(View.INVISIBLE);
+        mTitleContent.setText(R.string.contacts_detail_title);
+        mTitleLeftTV.setText(R.string.contacts_user_detail_return_button);
+        mTitleLeftTV.setOnClickListener(mReturnButtonListener);
+
 		mHeadIconIV = (ImageView) findViewById(R.id.contact_user_detail_head_icon);
 		mNameTitleIV = (TextView) findViewById(R.id.contact_user_detail_title);
-
-		mReturnButtonTV = (TextView) findViewById(R.id.contact_detail_2_return_button);
-		mReturnButtonTV.setOnClickListener(mReturnButtonListener);
 
 		mAddContactButton = (TextView) findViewById(R.id.contact_user_detail_add_friend);
 
@@ -362,7 +368,7 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 				// 删除好友
 				deleteContactDialog.dismiss();
 				contactService.delContact(u , new MessageListener(lh, DELETE_CONTACT_USER, null));
-				ProgressUtils.showNormalWithHintProgress(mContext, true).initTimeOut();
+				ProgressUtils.showNormalWithHintProgress(mContext, true);
 			}
 		});
 
@@ -643,6 +649,9 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 					updateContactGroup();
 					Toast.makeText(ContactDetail2.this, "添加成功",
 							Toast.LENGTH_SHORT).show();
+					
+					//update user info
+					u = GlobalHolder.getInstance().getUser(uid);
 				}
 			} else if (action
 					.equals(JNIService.JNI_BROADCAST_GROUP_USER_REMOVED)) {

@@ -1073,10 +1073,10 @@ public class MessageAuthenticationActivity extends Activity {
 			// Show delete button and hide commoand button
 			if (wrapper.showDeleteButton && isGroupInDeleteMode) {
 				item.mDeleteButton.setVisibility(View.VISIBLE);
-				item.mRes.setVisibility(View.GONE);
-				item.mAcceptButton.setVisibility(View.GONE);
+				item.mRes.setVisibility(View.INVISIBLE);
+				item.mAcceptButton.setVisibility(View.INVISIBLE);
 			} else {
-				item.mDeleteButton.setVisibility(View.GONE);
+				item.mDeleteButton.setVisibility(View.INVISIBLE);
 				if (msg.getType() == VMessageQualification.Type.CROWD_APPLICATION)
 					updateApplyMessageView(item,
 							(VMessageQualificationApplicationCrowd) msg);
@@ -1090,7 +1090,7 @@ public class MessageAuthenticationActivity extends Activity {
 				VMessageQualificationApplicationCrowd vqac) {
 			if (vqac.getQualState() == QualificationState.ACCEPTED) {
 				item.mRes.setVisibility(View.VISIBLE);
-				item.mAcceptButton.setVisibility(View.GONE);
+				item.mAcceptButton.setVisibility(View.INVISIBLE);
                 item.mRejectContentTV.setVisibility(View.GONE);
 				item.mRes.setText(R.string.crowd_invitation_accepted);
 				item.mContentTV.setText(res
@@ -1099,7 +1099,7 @@ public class MessageAuthenticationActivity extends Activity {
 						+ res.getString(R.string.crowd_Authentication_crowd));
 			} else if (vqac.getQualState() == QualificationState.REJECT) {
 				item.mRes.setVisibility(View.VISIBLE);
-				item.mAcceptButton.setVisibility(View.GONE);
+				item.mAcceptButton.setVisibility(View.INVISIBLE);
                 item.mRejectContentTV.setVisibility(View.GONE);
 				item.mRes.setText(R.string.crowd_invitation_rejected);
 				item.mContentTV.setText(res
@@ -1107,24 +1107,24 @@ public class MessageAuthenticationActivity extends Activity {
 						+ vqac.getCrowdGroup().getName()
 						+ res.getString(R.string.crowd_Authentication_crowd));
 			} else if (vqac.getQualState() == QualificationState.BE_REJECT) {
-				item.mRes.setVisibility(View.GONE);
-				item.mAcceptButton.setVisibility(View.GONE);
-				item.mRejectContentTV.setVisibility(View.VISIBLE);
+				item.mRes.setVisibility(View.INVISIBLE);
+				item.mAcceptButton.setVisibility(View.INVISIBLE);
+				item.mRejectContentTV.setVisibility(View.GONE);
 				item.mRejectContentTV.setText(vqac.getApplyReason());
 				item.mContentTV.setText(res
 						.getString(R.string.crowd_invitation_reject_join)
 						+ vqac.getCrowdGroup().getName()
 						+ res.getString(R.string.crowd_Authentication_crowd));
 			} else if (vqac.getQualState() == QualificationState.BE_ACCEPTED) {
-				item.mRes.setVisibility(View.GONE);
-				item.mAcceptButton.setVisibility(View.GONE);
+				item.mRes.setVisibility(View.INVISIBLE);
+				item.mAcceptButton.setVisibility(View.INVISIBLE);
                 item.mRejectContentTV.setVisibility(View.GONE);
 				item.mContentTV.setText(res
 						.getString(R.string.crowd_invitation_accept_join)
 						+ vqac.getCrowdGroup().getName()
 						+ res.getString(R.string.crowd_Authentication_crowd));
 			} else if (vqac.getQualState() == QualificationState.WAITING) {
-				item.mRes.setVisibility(View.GONE);
+				item.mRes.setVisibility(View.INVISIBLE);
                 item.mRejectContentTV.setVisibility(View.GONE);
 				item.mAcceptButton.setVisibility(View.VISIBLE);
 				item.mContentTV.setText(res
@@ -1138,33 +1138,33 @@ public class MessageAuthenticationActivity extends Activity {
 				VMessageQualificationInvitationCrowd vqic) {
 			if (vqic.getQualState() == QualificationState.ACCEPTED) {
 				item.mRes.setVisibility(View.VISIBLE);
-				item.mAcceptButton.setVisibility(View.GONE);
+				item.mAcceptButton.setVisibility(View.INVISIBLE);
 				 item.mRejectContentTV.setVisibility(View.GONE);
 				item.mRes.setText(R.string.crowd_invitation_accepted);
 			} else if (vqic.getQualState() == QualificationState.REJECT) {
 				item.mRes.setVisibility(View.VISIBLE);
-				item.mAcceptButton.setVisibility(View.GONE);
+				item.mAcceptButton.setVisibility(View.INVISIBLE);
 				item.mRejectContentTV.setVisibility(View.GONE);
 				item.mRes.setText(R.string.crowd_invitation_rejected);
 			} else if (vqic.getQualState() == QualificationState.BE_ACCEPTED) {
-				item.mRes.setVisibility(View.GONE);
-				item.mAcceptButton.setVisibility(View.GONE);
+				item.mRes.setVisibility(View.INVISIBLE);
+				item.mAcceptButton.setVisibility(View.INVISIBLE);
 				 item.mRejectContentTV.setVisibility(View.GONE);
 				item.mContentTV.setText(R.string.crowd_invitation_accepted_notes);
 			} else if ((vqic.getQualState() == QualificationState.BE_REJECT)
 					|| (vqic.getQualState() == QualificationState.WAITING_FOR_APPLY)) {
-				item.mRes.setVisibility(View.GONE);
-				item.mAcceptButton.setVisibility(View.GONE);
+				item.mRes.setVisibility(View.INVISIBLE);
+				item.mAcceptButton.setVisibility(View.INVISIBLE);
 				item.mRejectContentTV.setVisibility(View.VISIBLE);
 				item.mRejectContentTV.setText(vqic.getRejectReason());
 				item.mContentTV.setText(R.string.crowd_invitation_rejected_notes);
 			} else if (vqic.getQualState() == QualificationState.INVALID){
                 item.mRes.setVisibility(View.VISIBLE);
-                item.mAcceptButton.setVisibility(View.GONE);
+                item.mAcceptButton.setVisibility(View.INVISIBLE);
                 item.mRejectContentTV.setVisibility(View.GONE);
                 item.mRes.setText(R.string.crowd_invitation_invalid_notes);
             }else {
-				item.mRes.setVisibility(View.GONE);
+				item.mRes.setVisibility(View.INVISIBLE);
 				item.mRejectContentTV.setVisibility(View.GONE);
 				item.mAcceptButton.setVisibility(View.VISIBLE);
 			}

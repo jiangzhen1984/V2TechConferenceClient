@@ -8,6 +8,7 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.View.MeasureSpec;
 import android.widget.RelativeLayout;
 
 import com.V2.jni.util.V2Log;
@@ -50,6 +51,8 @@ public class PlaceSlideFragment extends Fragment {
 			Bundle savedInstanceState) {
 		v = inflater.inflate(R.layout.image_view, container, false);
 		rlContainer = (RelativeLayout) v.findViewById(R.id.image_view_root);
+		rlContainer.measure(MeasureSpec.UNSPECIFIED,
+				MeasureSpec.UNSPECIFIED);
 		if(".gif".equals(vim.getExtension())){
 			GifView view = (GifView) v.findViewById(R.id.imageview_smile);
 			view.setGIFResource(filePath);

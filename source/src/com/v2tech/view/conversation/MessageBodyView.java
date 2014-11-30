@@ -346,6 +346,8 @@ public class MessageBodyView extends LinearLayout {
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
 		super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 
+		mContentContainer.measure(MeasureSpec.UNSPECIFIED,
+				MeasureSpec.UNSPECIFIED);
 		popWindow.getChildAt(0).measure(MeasureSpec.UNSPECIFIED,
 				MeasureSpec.UNSPECIFIED);
 		popupWindowHeight = popWindow.getChildAt(0).getMeasuredHeight();
@@ -636,7 +638,8 @@ public class MessageBodyView extends LinearLayout {
 				int viewWidth = anchor.getMeasuredWidth();
 
 				int[] location = new int[2];
-				anchor.getLocationInWindow(location);
+//				anchor.getLocationInWindow(location);
+				anchor.getLocationOnScreen(location);
 				
 				int left = location[0];
 				int top = location[1];

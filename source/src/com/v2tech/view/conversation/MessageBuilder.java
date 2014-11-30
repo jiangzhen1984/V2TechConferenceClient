@@ -927,7 +927,7 @@ public class MessageBuilder {
 				obj.state.intValue());
 		values.put(
 				ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_READ_STATE,
-				ReadState.UNREAD.intValue());
+				obj.readState.intValue());
 		values.put(
 				HistoriesCrowd.Cols.HISTORY_CROWD_SAVEDATE,
 				GlobalConfig.getGlobalServerTime());

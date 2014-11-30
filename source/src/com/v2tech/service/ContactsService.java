@@ -11,6 +11,7 @@ import com.V2.jni.GroupRequestCallbackAdapter;
 import com.V2.jni.ind.V2Group;
 import com.V2.jni.ind.V2User;
 import com.V2.jni.util.EscapedcharactersProcessing;
+import com.V2.jni.util.V2Log;
 import com.v2tech.service.jni.GroupServiceJNIResponse;
 import com.v2tech.service.jni.JNIResponse;
 import com.v2tech.service.jni.RequestConfCreateResponse;
@@ -96,6 +97,7 @@ public class ContactsService extends AbstractHandler {
 		}
 
 		if (!ret) {
+			V2Log.e("ContactsService delContact --> ", "Delete User Failed... Because The user isn't belong to CONTACT GROUP!");
 			return;
 		}
 

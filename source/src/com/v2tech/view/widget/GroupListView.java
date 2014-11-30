@@ -3,6 +3,7 @@ package com.v2tech.view.widget;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -225,6 +226,21 @@ public class GroupListView extends ListView {
 			throw new NullPointerException("user is null");
 		}
 		updateCheckItemWithoutNotification(u, flag);
+		adapter.notifyDataSetChanged();
+	}
+	
+	/**
+	 * Update user's checked status of item
+	 * @param flag
+	 */
+	public void updateUserItemcCheck(List<User> user , boolean flag) {
+		for (int i = 0; i < user.size() ; i++) {
+			updateCheckItem(user.get(i) , false);
+		}
+		
+		for (Group group : mGroupList) {
+			checkBelongGroupAllChecked(group , user);
+		}
 		adapter.notifyDataSetChanged();
 	}
 
@@ -499,7 +515,7 @@ public class GroupListView extends ListView {
 			updateCheckItemWithoutNotification(subGroupList.get(i), flag);
 		}
 	}
-
+	
 	/**
 	 * Update user position according to new user status
 	 * 

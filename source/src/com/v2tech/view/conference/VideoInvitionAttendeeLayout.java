@@ -258,13 +258,17 @@ public class VideoInvitionAttendeeLayout extends LinearLayout {
 			}
 
 			// Clean
-			if(mAttendeeContainer.getChildCount() > 0)
-				mAttendeeContainer.removeAllViewsInLayout();
+			mGroupListView.updateUserItemcCheck(l , false);
 			mAttendeeList.clear();
+			mUserListArray.clear();
+			if(mAttendeeContainer.getChildCount() > 0){
+				mAttendeeContainer.removeAllViewsInLayout();
+				mAdapter.notifyDataSetChanged();
+			}
 		}
 
 	};
-
+	
 	private OnItemClickListener mItemClickedListener = new OnItemClickListener() {
 
 		@Override

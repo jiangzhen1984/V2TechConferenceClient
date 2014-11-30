@@ -2361,13 +2361,22 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 			if (JNIService.JNI_BROADCAST_CONFERENCE_INVATITION.equals(intent
 					.getAction())) {
 				long gid = intent.getLongExtra("gid", 0);
+				boolean justFresh = intent.getBooleanExtra("justFresh", false);
 				Group g = GlobalHolder.getInstance().getGroupById(
 						GroupType.CONFERENCE.intValue(), gid);
 				if (g != null) {
-					addConversation(g, true);
-
+					if(!justFresh)
+						addConversation(g, true);
+					else{
+						for (ScrollItem item : mItemList) {
+							if(item.cov.getExtId() == g.getmGId()){
+								item.cov.setReadFlag(Conversation.READ_FLAG_UNREAD);
+								updateUnreadConversation(item);
+								break;
+							}
+						}
+					}
 					Conference c = new Conference((ConferenceGroup) g);
-
 					// Notify status bar
 					updateConferenceNotification(c);
 				} else {

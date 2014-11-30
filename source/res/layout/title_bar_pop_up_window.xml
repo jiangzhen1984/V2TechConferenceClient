@@ -9,7 +9,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_alignRight="@+id/common_pop_window_out_container"
-        android:layout_marginBottom="-2dp"
+        android:layout_marginBottom="@dimen/title_bar_triangle_margin_buttom"
         android:src="@drawable/common_pop_up_arrow_up" />
 
     <LinearLayout

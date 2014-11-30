@@ -451,7 +451,13 @@ public class JNIService extends Service implements
 				// conference already in cache list
 				if (cache != null && g.getmGId() != 0) {
 					V2Log.i("Current user conference in group:"
-							+ cache.getName() + "  " + cache.getmGId());
+							+ cache.getName() + "  " + cache.getmGId() + " only send Broadcast!");
+					Intent i = new Intent();
+					i.setAction(JNIService.JNI_BROADCAST_CONFERENCE_INVATITION);
+					i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
+					i.putExtra("gid", g.getmGId());
+					i.putExtra("justFresh", true);
+					sendBroadcast(i);
 					return;
 				}
 				GroupRequest.getInstance().getGroupInfo(

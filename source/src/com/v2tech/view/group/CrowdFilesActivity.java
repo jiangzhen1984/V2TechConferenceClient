@@ -383,12 +383,18 @@ public class CrowdFilesActivity extends Activity {
 			}
 
 		} else if (ind.indType == FileTransStatusIndication.IND_TYPE_DOWNLOAD_ERR) {
-			file.setState(VFile.State.DOWNLOAD_FAILED);
-            V2Log.e("CrowdFilesActivity handleFileTransNotification --> DWONLOAD_ERROR Download failed...file id is : " +
+			if(file.getState() == VFile.State.DOWNLOADING)
+				file.setState(VFile.State.DOWNLOAD_FAILED);
+			else
+				file.setState(VFile.State.UPLOAD_FAILED);
+            V2Log.e("CrowdFilesActivity handleFileTransNotification --> DWONLOAD_ERROR ...file id is : " +
                     file.getId() + " file name is : " + file.getName() + " error code is : " + ind.errorCode);
         } else if (ind.indType == FileTransStatusIndication.IND_TYPE_TRANS_ERR) {
-			file.setState(VFile.State.DOWNLOAD_FAILED);
-            V2Log.e("CrowdFilesActivity handleFileTransNotification --> TRANS_ERROR Download failed...file id is : " +
+        	if(file.getState() == VFile.State.DOWNLOADING)
+				file.setState(VFile.State.DOWNLOAD_FAILED);
+			else
+				file.setState(VFile.State.UPLOAD_FAILED);
+            V2Log.e("CrowdFilesActivity handleFileTransNotification --> TRANS_ERROR ...file id is : " +
                     file.getId() + " file name is : " + file.getName() + " error code is : " + ind.errorCode);
 		}
 		adapter.notifyDataSetChanged();
