@@ -3,57 +3,70 @@ package com.v2tech.util;
 import java.io.File;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.DisplayMetrics;
 
 import com.V2.jni.util.V2Log;
+import com.v2tech.R;
 
 public class BitmapUtil {
 
+    public static Context context;
 	public static Bitmap loadAvatarFromPath(String path) {
+        boolean isOwnerAvatar = true;
 		if (path == null) {
-			return null;
-		}
-		
-		File f = new File(path);
-		if (!f.exists()){
-			V2Log.e("BitmapUtil loadAvatarFromPath --> FAILED! Because parse Path , file isn't exist! path is : " + path);
-			File parent = new File(f.getParent());
-			File[] listFiles = parent.listFiles();
-			for (File file : listFiles) {
-				V2Log.e("BitmapUtil loadAvatarFromPath --> current directory file list is : " + file.getName());
-			}
-			return null;
-		}
+            isOwnerAvatar = false;
+            V2Log.e("BitmapUtil loadAvatarFromPath --> FAILED! Because given file path is null!");
+        }
+		else {
+            File f = new File(path);
+            if (!f.exists()) {
+                isOwnerAvatar = false;
+                V2Log.e("BitmapUtil loadAvatarFromPath --> FAILED! Because parse Path , file isn't exist! path is : " + path);
+                File parent = new File(f.getParent());
+                File[] listFiles = parent.listFiles();
+                for (File file : listFiles) {
+                    V2Log.e("BitmapUtil loadAvatarFromPath --> current directory file list is : " + file.getName());
+                }
+            }
 
-		if (f.isDirectory()){
-			V2Log.e("BitmapUtil loadAvatarFromPath --> FAILED! Because parse Path , get a Directory! path is : " + path);
-			return null;
-		}
-		
+            if (f.isDirectory()) {
+                isOwnerAvatar = false;
+                V2Log.e("BitmapUtil loadAvatarFromPath --> FAILED! Because parse Path , get a Directory! path is : " + path);
+            }
+        }
 		BitmapFactory.Options opt = new BitmapFactory.Options();
 		Bitmap tmep = BitmapFactory.decodeFile(path, opt);
 		if (tmep == null) {
+            isOwnerAvatar = false;
 			V2Log.i(" bitmap object is null");
-			return null;
 		}
 
-		Bitmap avatar = null;
-
-		if (GlobalConfig.GLOBAL_DPI == DisplayMetrics.DENSITY_HIGH) {
-			avatar = Bitmap.createScaledBitmap(tmep, 70, 70, true);
-		} else if (GlobalConfig.GLOBAL_DPI == DisplayMetrics.DENSITY_XHIGH) {
-			avatar = Bitmap.createScaledBitmap(tmep, 115, 115, true);
-		} else if (GlobalConfig.GLOBAL_DPI == DisplayMetrics.DENSITY_XXHIGH) {
-			avatar = Bitmap.createScaledBitmap(tmep, 115, 115, true);
-		} else {
-			avatar = Bitmap.createScaledBitmap(tmep, 70, 70, true);
-		}
-		tmep.recycle();
-		V2Log.d("decode result: width " + avatar.getWidth() + "  height:"
-				+ avatar.getHeight());
-
+        Bitmap avatar;
+        if(isOwnerAvatar) {
+            if (GlobalConfig.GLOBAL_DPI == DisplayMetrics.DENSITY_HIGH) {
+                avatar = Bitmap.createScaledBitmap(tmep, 70, 70, true);
+            } else if (GlobalConfig.GLOBAL_DPI == DisplayMetrics.DENSITY_XHIGH) {
+                avatar = Bitmap.createScaledBitmap(tmep, 115, 115, true);
+            } else if (GlobalConfig.GLOBAL_DPI == DisplayMetrics.DENSITY_XXHIGH) {
+                avatar = Bitmap.createScaledBitmap(tmep, 115, 115, true);
+            } else {
+                avatar = Bitmap.createScaledBitmap(tmep, 70, 70, true);
+            }
+            tmep.recycle();
+            V2Log.d("decode result: width " + avatar.getWidth() + "  height:"
+                    + avatar.getHeight());
+        }
+        else{
+            if (GlobalConfig.GLOBAL_DPI == DisplayMetrics.DENSITY_XHIGH |
+                    GlobalConfig.GLOBAL_DPI == DisplayMetrics.DENSITY_XXHIGH) {
+                avatar = BitmapFactory.decodeResource(context.getResources() , R.drawable.avatar_big);
+            } else {
+                avatar = BitmapFactory.decodeResource(context.getResources() , R.drawable.avatar);
+            }
+        }
 		return avatar;
 	}
 

@@ -1149,11 +1149,9 @@ public class MessageLoader {
 	/**
 	 * according crowd group id , delete all verification message..
 	 * 
-	 * @param context
 	 * @param groupID
 	 */
-	public static void deleteCrowdVerificationMessage(Context context,
-			long groupID) {
+	public static void deleteCrowdVerificationMessage(long groupID) {
 
 		DataBaseContext mContext = new DataBaseContext(context);
 		int ret = mContext.getContentResolver().delete(
@@ -1165,6 +1163,24 @@ public class MessageLoader {
 					"May delete CrowdVerificationMessage failed...groupID : "
 							+ groupID);
 	}
+
+    /**
+     * according user id , delete all verification message..
+     *
+     * @param groupID
+     */
+    public static void deleteFriendVerificationMessage(long userID) {
+
+        DataBaseContext mContext = new DataBaseContext(context);
+        int ret = mContext.getContentResolver().delete(
+                ContentDescriptor.HistoriesAddFriends.CONTENT_URI,
+                ContentDescriptor.HistoriesAddFriends.Cols.HISTORY_FRIEND_REMOTE_USER_ID + "=?",
+                new String[] { String.valueOf(userID) });
+        if (ret <= 0)
+            V2Log.d(TAG,
+                    "May delete CrowdVerificationMessage failed...groupID : "
+                            + userID);
+    }
 
 	/**
 	 * update the given audio message read state...
@@ -1376,17 +1392,22 @@ public class MessageLoader {
 
 		DataBaseContext mContext = new DataBaseContext(context);
 		ContentValues values = new ContentValues();
-		values.put(
-				ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_READ_STATE,
-				readState.intValue());
-		if(type == VerificationMessageType.CROWD_TYPE)
+		if(type == VerificationMessageType.CROWD_TYPE){
+			values.put(
+					ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_READ_STATE,
+					readState.intValue());
 			return mContext.getContentResolver().update(
 					ContentDescriptor.HistoriesCrowd.CONTENT_URI, values, where,
 					args);
-		else
+		}
+		else{
+			values.put(
+					ContentDescriptor.HistoriesAddFriends.Cols.HISTORY_MEDIA_READ_STATE,
+					readState.intValue());
 			return mContext.getContentResolver().update(
 					ContentDescriptor.HistoriesAddFriends.CONTENT_URI, values,
 					where, args);
+		}
 	}
 
 	// private static void loadVMessageItem(Context context, VMessage vm,

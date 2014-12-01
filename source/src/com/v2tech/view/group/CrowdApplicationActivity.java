@@ -180,9 +180,11 @@ public class CrowdApplicationActivity extends Activity {
             if(vq != null){
                 VMessageQualification.QualificationState state = vq.getQualState();
                 if(state == VMessageQualification.QualificationState.WAITING_FOR_APPLY){
-                    mApplicationButton.setVisibility(View.GONE);
-                    mNotesLy.setVisibility(View.VISIBLE);
-                    mNotes.setText(R.string.crowd_application_applyed);
+//                    mApplicationButton.setVisibility(View.GONE);
+//                    mNotesLy.setVisibility(View.VISIBLE);
+//                    mNotes.setText(R.string.crowd_application_applyed);
+                    mApplicationButton.setVisibility(View.VISIBLE);
+                    mNotesLy.setVisibility(View.GONE);
                     mTitleTV.setText(R.string.crowd_applicant_invite_title);
                 } else if(state == VMessageQualification.QualificationState.BE_REJECT){
                 	mApplicationButton.setVisibility(View.VISIBLE);

@@ -392,9 +392,14 @@ public class CrowdGroupService extends AbstractHandler {
 		}
 		members.append("</userlist>");
 
+        if(crowd == null) {
+            V2Log.e("CrowdGroupService inviteMember --> INVITE MEMBER FAILED ... Because crowd Object is null!");
+            return;
+        }
+
 		GroupRequest.getInstance().inviteJoinGroup(
 				crowd.getGroupType().intValue(), crowd.toXml(),
-				members.toString(), "");
+				members.toString() , "");
 
 		if (caller != null) {
 			JNIResponse jniRes = new JNIResponse(JNIResponse.Result.SUCCESS);

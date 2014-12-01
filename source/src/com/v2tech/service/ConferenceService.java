@@ -10,6 +10,7 @@ import com.V2.jni.ConfRequest;
 import com.V2.jni.ConfRequestCallbackAdapter;
 import com.V2.jni.GroupRequest;
 import com.V2.jni.GroupRequestCallbackAdapter;
+import com.V2.jni.ImRequest;
 import com.V2.jni.V2GlobalEnum;
 import com.V2.jni.VideoMixerRequest;
 import com.V2.jni.VideoMixerRequestCallback;
@@ -129,7 +130,7 @@ public class ConferenceService extends DeviceService {
 	 * 
 	 * @param conf
 	 *            {@link Conference} object which user wants to enter
-	 * @param msg
+	 * @param caller
 	 *            if input is null, ignore response Message. Response Message
 	 *            object is
 	 *            {@link com.v2tech.service.jni.RequestExitedConfResponse}
@@ -317,11 +318,12 @@ public class ConferenceService extends DeviceService {
 
 	}
 
-	/**
-	 * Register listener for out conference by kick.
-	 * 
-	 * @param msg
-	 */
+    /**
+     * Register listener for out conference by kick.
+     * @param h
+     * @param what
+     * @param obj
+     */
 	public void registerKickedConfListener(Handler h, int what, Object obj) {
 		registerListener(KEY_KICKED_LISTNER, h, what, obj);
 	}
@@ -333,11 +335,13 @@ public class ConferenceService extends DeviceService {
 	}
 
 	// =============================
-	/**
-	 * Register listener for out conference by kick.
-	 * 
-	 * @param msg
-	 */
+
+    /**
+     * Register listener for out conference by kick.
+     * @param h
+     * @param what
+     * @param obj
+     */
 	public void registerAttendeeDeviceListener(Handler h, int what, Object obj) {
 		registerListener(KEY_ATTENDEE_DEVICE_LISTNER, h, what, obj);
 	}
@@ -346,11 +350,12 @@ public class ConferenceService extends DeviceService {
 		unRegisterListener(KEY_ATTENDEE_DEVICE_LISTNER, h, what, obj);
 	}
 
-	/**
-	 * Register listener for out conference by kick.
-	 * 
-	 * @param msg
-	 */
+    /**
+     * Register listener for out conference by kick.
+     * @param h
+     * @param what
+     * @param obj
+     */
 	public void registerAttendeeListener(Handler h, int what, Object obj) {
 		registerListener(KEY_ATTENDEE_STATUS_LISTNER, h, what, obj);
 	}
@@ -359,11 +364,12 @@ public class ConferenceService extends DeviceService {
 		unRegisterListener(KEY_ATTENDEE_STATUS_LISTNER, h, what, obj);
 	}
 
-	/**
-	 * Register listener for chairman control or release desktop
-	 * 
-	 * @param msg
-	 */
+    /**
+     * Register listener for chairman control or release desktop
+     * @param h
+     * @param what
+     * @param obj
+     */
 	public void registerSyncDesktopListener(Handler h, int what, Object obj) {
 		registerListener(KEY_SYNC_LISTNER, h, what, obj);
 	}
@@ -372,11 +378,12 @@ public class ConferenceService extends DeviceService {
 		unRegisterListener(KEY_SYNC_LISTNER, h, what, obj);
 	}
 
-	/**
-	 * Register listener for permission changed
-	 * 
-	 * @param msg
-	 */
+    /**
+     * Register listener for permission changed
+     * @param h
+     * @param what
+     * @param obj
+     */
 	public void registerPermissionUpdateListener(Handler h, int what, Object obj) {
 		registerListener(KEY_PERMISSION_CHANGED_LISTNER, h, what, obj);
 	}
@@ -452,13 +459,17 @@ public class ConferenceService extends DeviceService {
 				user = new User(v2user.uid, v2user.name);
 			} else {
 				user = GlobalHolder.getInstance().getUser(v2user.uid);
-			}
+                if (user == null) {
+                    if(GlobalHolder.getInstance().getGlobalState().isGroupLoaded()){
+                        ImRequest.getInstance().getUserBaseInfo(v2user.mUserId);
+                    }
+                    else {
+                        V2Log.e("User is null can not dispatch notification");
+                        return;
+                    }
+                }
 
-			if (user == null) {
-				V2Log.e("User is null can not dispatch notification");
-				return;
 			}
-
 			notifyListenerWithPending(KEY_ATTENDEE_STATUS_LISTNER, 1, 0, user);
 		}
 

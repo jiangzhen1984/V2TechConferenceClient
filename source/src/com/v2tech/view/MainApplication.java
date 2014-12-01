@@ -44,6 +44,7 @@ import com.V2.jni.WBRequest;
 import com.V2.jni.util.V2Log;
 import com.v2tech.R;
 import com.v2tech.util.AlgorithmUtil;
+import com.v2tech.util.BitmapUtil;
 import com.v2tech.util.CrashHandler;
 import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.LogService;
@@ -105,6 +106,7 @@ public class MainApplication extends Application {
 
 		MessageBuilder.context = getApplicationContext();
 		MessageLoader.context = getApplicationContext();
+        BitmapUtil.context = getApplicationContext();
 
 		// Load native library
 		System.loadLibrary("event");

@@ -11,6 +11,7 @@
    <string name="error_request_enter_conference_no_resource">资源不足，请联系管理员</string>
    <string name="error_request_enter_conference_not_exist">无法登录，会议不存在</string>
    
+   <string name="requesting_delete_conference">通知</string>
    <string name="requesting_enter_conference">正在登入.....</string>
    <string name="error_can_not_connect_server">无法链接到服务器</string>
    <string name="conversations_delete_conf">删除该会议</string>

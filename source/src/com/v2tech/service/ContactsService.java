@@ -86,15 +86,39 @@ public class ContactsService extends AbstractHandler {
 		
 		mWatingUserID = user.getmUserId();
 		long nGroupID = -1;
-		Iterator<Group> iterator = user.getBelongsGroup().iterator();
+//		Iterator<Group> iterator = user.getBelongsGroup().iterator();
 		boolean ret = false;
-		while (iterator.hasNext()) {
-			Group temp = iterator.next();
-			if (temp.getGroupType() == Group.GroupType.CONTACT) {
-				nGroupID = temp.getmGId();
-				ret = true;
-			}
-		}
+		boolean isAdd = false;
+//		while (iterator.hasNext()) {
+//			Group temp = iterator.next();
+//			if (temp.getGroupType() == Group.GroupType.CONTACT) {
+//				nGroupID = temp.getmGId();
+//				ret = true;
+//			}
+//		}
+
+        List<Group> friendGroup = GlobalHolder.getInstance().getGroup(
+                GroupType.CONTACT.intValue());
+        for (Group group : friendGroup) {
+            if ((group.findUser(user)) != null) {
+                nGroupID = group.getmGId();
+                Iterator<Group> iterator = user.getBelongsGroup().iterator();
+                while (iterator.hasNext()) {
+                    Group temp = iterator.next();
+                    if (temp.getGroupType() == Group.GroupType.CONTACT) {
+                        nGroupID = temp.getmGId();
+                        isAdd = true;
+                    }
+                }
+
+                if(!isAdd){
+                    user.addUserToGroup(group);
+                }
+                ret = true;
+                break;
+            }
+        }
+
 
 		if (!ret) {
 			V2Log.e("ContactsService delContact --> ", "Delete User Failed... Because The user isn't belong to CONTACT GROUP!");

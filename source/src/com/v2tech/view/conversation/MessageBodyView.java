@@ -7,6 +7,7 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.Rect;
 import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
@@ -113,9 +114,6 @@ public class MessageBodyView extends LinearLayout {
 	
 	private RotateAnimation anima;
 	
-	private long lastMessageBodyShowTime = 0;
-	private long intervalTime = 15000; // 显示消息时间状态的间隔时间
-
 	public interface ClickListener {
 		public void onMessageClicked(VMessage v);
 		
@@ -177,7 +175,6 @@ public class MessageBodyView extends LinearLayout {
 				.findViewById(R.id.message_body_left_user_ly);
 		mRemoteMessageContainter = (LinearLayout) rootView
 				.findViewById(R.id.message_body_remote_ly);
-
 		LinearLayout.LayoutParams ll = new LinearLayout.LayoutParams(
 				LinearLayout.LayoutParams.WRAP_CONTENT,
 				LinearLayout.LayoutParams.WRAP_CONTENT);
@@ -346,8 +343,6 @@ public class MessageBodyView extends LinearLayout {
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
 		super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 
-		mContentContainer.measure(MeasureSpec.UNSPECIFIED,
-				MeasureSpec.UNSPECIFIED);
 		popWindow.getChildAt(0).measure(MeasureSpec.UNSPECIFIED,
 				MeasureSpec.UNSPECIFIED);
 		popupWindowHeight = popWindow.getChildAt(0).getMeasuredHeight();
@@ -628,7 +623,6 @@ public class MessageBodyView extends LinearLayout {
 					}
 				} else {
 					pwResendTV.setVisibility(View.GONE);
-					pwResendTV.setVisibility(View.GONE);
 				}
 
 //				arrow.measure(MeasureSpec.UNSPECIFIED,
@@ -638,11 +632,17 @@ public class MessageBodyView extends LinearLayout {
 				int viewWidth = anchor.getMeasuredWidth();
 
 				int[] location = new int[2];
-//				anchor.getLocationInWindow(location);
-				anchor.getLocationOnScreen(location);
+				anchor.getLocationInWindow(location);
 				
 				int left = location[0];
 				int top = location[1];
+				
+				if(left == 0 || top == 0){
+					Rect rect = new Rect();
+					anchor.getGlobalVisibleRect(rect);
+					left = rect.left;
+					top = rect.top;
+				}
 				
 				int offsetX = left + (viewWidth / 2) - (popupWindowWidth / 2);
 				int offsetY = top - popupWindowHeight;

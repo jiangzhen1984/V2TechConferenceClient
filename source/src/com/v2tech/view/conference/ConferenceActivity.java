@@ -33,6 +33,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.text.TextUtils;
 import android.text.TextUtils.TruncateAt;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
@@ -66,6 +67,7 @@ import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.V2.jni.ImRequest;
 import com.V2.jni.V2GlobalEnum;
 import com.V2.jni.util.V2Log;
 import com.v2tech.R;
@@ -411,6 +413,11 @@ public class ConferenceActivity extends Activity {
 		if (confGroup != null) {
 			List<User> l = confGroup.getUsers();
 			for (User u : l) {
+                if(TextUtils.isEmpty(u.getName()) &&
+                        GlobalHolder.getInstance().getGlobalState().isGroupLoaded()){
+                    V2Log.e(TAG , " User + " + u.getmUserId() + " need to get user base infos");
+                    ImRequest.getInstance().getUserBaseInfo(u.getmUserId());
+                }
 				mAttendeeList.add(new Attendee(u));
 			}
 		}
@@ -1518,7 +1525,7 @@ public class ConferenceActivity extends Activity {
 				@Override
 				public void onClick(View v) {
 					d.dismiss();
-					MessageLoader.deleteCrowdVerificationMessage(mContext, conf.getId());
+					MessageLoader.deleteCrowdVerificationMessage(conf.getId());
 					finish();
 				}
 
@@ -1631,11 +1638,10 @@ public class ConferenceActivity extends Activity {
 		}
 	}
 
-	/**
-	 * Handle event which new user entered conference
-	 * 
-	 * @param user
-	 */
+    /**
+     * Handle event which new user entered conference
+     * @param att
+     */
 	private void doHandleNewUserEntered(Attendee att) {
 		if (att == null) {
 			return;
@@ -1658,7 +1664,7 @@ public class ConferenceActivity extends Activity {
 		}
 
 		showToastNotification(att.getAttName()
-				+ mContext.getText(R.string.conf_notification_joined_meeting));
+                + mContext.getText(R.string.conf_notification_joined_meeting));
 	}
 
 	private void showToastNotification(String text) {
@@ -2429,6 +2435,15 @@ public class ConferenceActivity extends Activity {
 						at = new Attendee(ut);
 						mAttendeeList.add(at);
 					}
+
+                    if(TextUtils.isEmpty(at.getAttName())) {
+                        User user = GlobalHolder.getInstance().getUser(at.getAttId());
+                        if(user != null)
+                             at.setUser(user);
+                        else
+                            V2Log.d(TAG, "Successful receiver the 参会人加入的回调 , but get newst user object " +
+                                    "from GlobleHolder is null!");
+                    }
 					V2Log.d(TAG, "Successful receiver the 参会人加入的回调");
 					doHandleNewUserEntered(at);
 				} else {

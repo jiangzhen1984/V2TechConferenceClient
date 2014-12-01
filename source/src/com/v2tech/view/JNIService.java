@@ -408,6 +408,11 @@ public class JNIService extends Service implements
 					for (User tu : lu) {
 						User existU = GlobalHolder.getInstance().putUser(
 								tu.getmUserId(), tu);
+                        if(existU.isDirty()) {
+                            V2Log.e(TAG , "The User that id is : " + existU.getmUserId() + " dirty!" +
+                                    " Need to get user base infos");
+                            ImRequest.getInstance().getUserBaseInfo(existU.getmUserId());
+                        }
 						if (existU.getmUserId() == GlobalHolder.getInstance()
 								.getCurrentUserId()) {
 							// Update logged user object.
@@ -943,7 +948,7 @@ public class JNIService extends Service implements
 					Notificator
 							.updateSystemNotification(
 									mContext,
-									"",
+                                    mContext.getText(R.string.requesting_delete_conference).toString(),
 									gName
 											+ mContext
 													.getText(R.string.confs_is_deleted_notification),

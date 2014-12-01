@@ -28,11 +28,14 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.util.Log;
 
 import com.V2.jni.util.EscapedcharactersProcessing;
 import com.V2.jni.util.V2Log;
+import com.v2tech.R;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.util.BitmapUtil;
 import com.v2tech.vo.Group.GroupType;
@@ -428,11 +431,15 @@ public class User implements Comparable<User> {
 	
 	private Bitmap loadAvatarBitmap(String mAvatarPath){
 		Bitmap bitmap = BitmapUtil.loadAvatarFromPath(mAvatarPath);
-		if(bitmap != null && bitmap.isRecycled()){
-			V2Log.e("User loadAvatarBitmap --> Loading avatar from file path faield... bitmap is recycled!" );
-			return null;
+		if(bitmap != null){
+            if(!bitmap.isRecycled())
+                return bitmap;
+            else
+                throw new RuntimeException("User loadAvatarBitmap --> Loading avatar from file path faield... bitmap is recycled!");
+
 		}
-		return bitmap;
+        else
+             throw new RuntimeException("User loadAvatarBitmap --> Loading avatar from file path faield... bitmap is null!");
 	}
 
 	public void setAvatarBitmap(Bitmap bm) {
@@ -592,7 +599,6 @@ public class User implements Comparable<User> {
 				}
 
 				l.add(u);
-
 			}
 
 		} catch (ParserConfigurationException e) {

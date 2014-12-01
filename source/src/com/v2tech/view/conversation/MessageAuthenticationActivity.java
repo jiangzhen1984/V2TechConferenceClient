@@ -73,9 +73,9 @@ import com.v2tech.vo.VMessageQualificationInvitationCrowd;
 
 /**
  * FIXME should combine two types of message, use one adapter for two.
- * 
+ *
  * @author jiangzhen
- * 
+ *
  */
 public class MessageAuthenticationActivity extends Activity {
 
@@ -130,7 +130,7 @@ public class MessageAuthenticationActivity extends Activity {
 		res = getResources();
 		initReceiver();
 		BitmapManager.getInstance().registerBitmapChangedListener(listener);
-		
+
 		currentRadioType = PROMPT_TYPE_FRIEND;
 
 		isFriendAuthentication = getIntent().getBooleanExtra(
@@ -144,7 +144,7 @@ public class MessageAuthenticationActivity extends Activity {
 					 , ReadState.READ , null , null);
 			rbGroupAuthentication.setChecked(true);
 		}
-
+        requestUpdateConversation();
 		boolean showCrwodNotification = getIntent().getBooleanExtra(
 				"isCrowdShowNotification", false);
 		if (showCrwodNotification && isFriendAuthentication)
@@ -171,15 +171,21 @@ public class MessageAuthenticationActivity extends Activity {
 		ivFriendAuthenticationPrompt = (ImageView) findViewById(R.id.rb_friend_authentication_prompt);
 		ivGroupAuthenticationPrompt = (ImageView) findViewById(R.id.rb_group_authentication_prompt);
 	}
-	
-	
+
+    public void requestUpdateConversation(){
+        Intent i = new Intent(PublicIntent.REQUEST_UPDATE_CONVERSATION);
+        i.addCategory(PublicIntent.DEFAULT_CATEGORY);
+        i.putExtra("isFresh", false);
+        mContext.sendBroadcast(i);
+    }
+
 	private BitmapChangedListener listener = new BitmapChangedListener() {
-		
+
 		@Override
 		public void notifyAvatarChanged(User user, Bitmap bm) {
 			if(user == null)
 				return ;
-			
+
 			for (FriendMAData data : friendMADataList) {
 				if(data.remoteUserID == user.getmUserId()){
 					data.dheadImage.recycle();
@@ -452,6 +458,8 @@ public class MessageAuthenticationActivity extends Activity {
 		intentFilter
 				.addAction(JNIService.JNI_BROADCAST_NEW_QUALIFICATION_MESSAGE);
 		intentFilter.addAction(JNIService.JNI_BROADCAST_GROUP_JOIN_FAILED);
+		intentFilter.addAction(JNIService.JNI_BROADCAST_KICED_CROWD);
+		intentFilter.addAction(PublicIntent.BROADCAST_CROWD_DELETED_NOTIFICATION);
 		intentFilter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
 		registerReceiver(mCrowdAuthenticationBroadcastReceiver, intentFilter);
 
@@ -491,7 +499,7 @@ public class MessageAuthenticationActivity extends Activity {
 							break;
 						}
 					}
-					
+
 					if(!isFresh)
 						V2Log.e(TAG , "Update QualificationState failed ... because no search it in mMessageList "
 								+ "id is : " + id);
@@ -799,13 +807,27 @@ public class MessageAuthenticationActivity extends Activity {
 			if (arg0 >= list.size())
 				return arg1;
 			final FriendMAData data = list.get(arg0);
-			if (data.dheadImage != null & !data.dheadImage.isRecycled()) {
-				viewTag.ivHeadImage.setImageBitmap(data.dheadImage);
-			}
-			else{
-				User remoteUser = GlobalHolder.getInstance().getUser(data.remoteUserID);
-				viewTag.ivHeadImage.setImageBitmap(remoteUser.getAvatarBitmap());
-			}
+            if(data == null){
+                V2Log.e(TAG , "Get FriendMAData Object is null ... please check!");
+                return arg1;
+            }
+
+            boolean isGetAvatar = false;
+            if (data.dheadImage != null) {
+                if (!data.dheadImage.isRecycled())
+                    viewTag.ivHeadImage.setImageBitmap(data.dheadImage);
+                else
+                    isGetAvatar = true;
+            } else
+                isGetAvatar = true;
+
+            if(isGetAvatar == true) {
+                User remoteUser = GlobalHolder.getInstance().getUser(data.remoteUserID);
+                if (remoteUser != null)
+                    viewTag.ivHeadImage.setImageBitmap(remoteUser.getAvatarBitmap());
+                else
+                    viewTag.ivHeadImage.setImageResource(R.drawable.avatar);
+            }
 			viewTag.tvName.setText(data.name);
 
 			// 别人加我：允许任何人：0已添加您为好友，需要验证：1未处理，2已同意，3已拒绝
@@ -918,7 +940,6 @@ public class MessageAuthenticationActivity extends Activity {
 
 			return arg1;
 		}
-
 	}
 
 	class ListItemWrapper {
@@ -1366,7 +1387,7 @@ public class MessageAuthenticationActivity extends Activity {
 					// 当用户在当前界面时，就不显示红点了
 					if (currentRadioType != PROMPT_TYPE_GROUP)
 						updateTabPrompt(PROMPT_TYPE_GROUP, true);
-					
+
 					msg.setReadState(ReadState.READ);
 					MessageBuilder.updateQualicationMessage(mContext, msg);
 				}
@@ -1377,7 +1398,18 @@ public class MessageAuthenticationActivity extends Activity {
 					.getAction())) {
 				ProgressUtils.showNormalWithHintProgress(mContext, false);
 				handleFailedDone();
-			}
+			} else if (PublicIntent.BROADCAST_CROWD_DELETED_NOTIFICATION
+                    .equals(intent.getAction())
+                    || intent.getAction().equals(
+                    JNIService.JNI_BROADCAST_KICED_CROWD)) {
+//                long cid = intent.getLongExtra("crowd", -1l);
+//                if (cid == -1l) {
+//                    V2Log.e(TAG,
+//                            "Received the broadcast to quit the crowd group , but crowd id is wroing... ");
+//                    return;
+//                }
+                groupAdapter.notifyDataSetChanged();
+            }
 		}
 	}
 

@@ -649,7 +649,7 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 					updateContactGroup();
 					Toast.makeText(ContactDetail2.this, "添加成功",
 							Toast.LENGTH_SHORT).show();
-					
+
 					//update user info
 					u = GlobalHolder.getInstance().getUser(uid);
 				}
@@ -667,7 +667,6 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 					updateContactGroup();
 				}
 			}
-
 		}
 
 	}

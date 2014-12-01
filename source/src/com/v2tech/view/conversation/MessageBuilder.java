@@ -1034,9 +1034,9 @@ public class MessageBuilder {
 		}
 		String where = ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_ID
 				+ " = ? and " + HistoriesCrowd.Cols.HISTORY_CROWD_REMOTE_USER_ID + " = ?";
-//		values.put(
-//				ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_SAVEDATE,
-//				GlobalConfig.getGlobalServerTime());
+		values.put(
+				ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_SAVEDATE,
+				GlobalConfig.getGlobalServerTime());
 		int updates = mContext.getContentResolver().update(
 				ContentDescriptor.HistoriesCrowd.CONTENT_URI, values, where,
 				selectionArgs);
@@ -1144,7 +1144,7 @@ public class MessageBuilder {
 				ContentDescriptor.HistoriesCrowd.Cols.ALL_CLOS, selection,
 				selectionArgs, sortOrder);
 
-		if (cursor == null || cursor.getCount() <= 0)
+		if (cursor == null || cursor.getCount() < 0)
 			return null;
 		VMessageQualification msg = null;
 		if (cursor.moveToNext()) {

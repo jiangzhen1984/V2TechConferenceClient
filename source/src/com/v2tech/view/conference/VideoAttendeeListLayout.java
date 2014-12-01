@@ -383,15 +383,18 @@ public class VideoAttendeeListLayout extends LinearLayout {
 					}
 				}
 			}
-			for (int i = 1; i < dList.size(); i++) {
-				if (index + 1 == mList.size() - 1) {
-					mList.add(new Wrapper(at, dList.get(i), i));
-				} else {
-					mList.add(index + 1, new Wrapper(at, dList.get(i), i));
-				}
-				index++;
-				isNew = true;
-			}
+
+            if(dList != null) {
+                for (int i = 1; i < dList.size(); i++) {
+                    if (index + 1 == mList.size() - 1) {
+                        mList.add(new Wrapper(at, dList.get(i), i));
+                    } else {
+                        mList.add(index + 1, new Wrapper(at, dList.get(i), i));
+                    }
+                    index++;
+                    isNew = true;
+                }
+            }
 
 			if (isNew)
 				mAttendeeCount++;
@@ -508,13 +511,10 @@ public class VideoAttendeeListLayout extends LinearLayout {
 
 	}
 
-	/**
-	 * Update attendee speaker image according to user speaking state
-	 * 
-	 * @param at
-	 * @param cp
-	 * @param state
-	 */
+    /**
+     * Update attendee speaker image according to user speaking state
+     * @param at
+     */
 	public void updateAttendeeSpeakingState(Attendee at) {
 		adapter.notifyDataSetChanged();
 	}
@@ -525,7 +525,6 @@ public class VideoAttendeeListLayout extends LinearLayout {
 	 * @param at
 	 */
 	public void removeAttendee(Attendee at) {
-		// TODO update attendee count
 		for (int i = 0; i < mList.size(); i++) {
 			Wrapper wr = mList.get(i);
 			// Remove attendee devices, leave one device item
@@ -534,6 +533,9 @@ public class VideoAttendeeListLayout extends LinearLayout {
 				continue;
 			}
 		}
+        //update attendee members
+        mAttendeeCount--;
+        updateStatist();
 		adapter.notifyDataSetChanged();
 	}
 
@@ -923,7 +925,6 @@ public class VideoAttendeeListLayout extends LinearLayout {
 			}
 		}
 		updateStatist();
-
 	}
 
 	public void updateStatist() {

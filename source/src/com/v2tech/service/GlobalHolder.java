@@ -12,6 +12,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import android.graphics.Bitmap;
 import android.util.SparseArray;
 
+import com.V2.jni.ImRequest;
 import com.V2.jni.V2GlobalEnum;
 import com.V2.jni.ind.V2Group;
 import com.V2.jni.util.V2Log;
@@ -156,7 +157,7 @@ public class GlobalHolder {
 				return cu;
 			}
 			//Update user property for received user information
-			u.updateUser(false);
+			u.updateUser(true);
 			mUserHolder.put(key, u);
 			
 			Bitmap avatar = mAvatarBmHolder.get(key);
@@ -186,6 +187,7 @@ public class GlobalHolder {
 			if (tmp == null) {
 				tmp = new User(id);
 				mUserHolder.put(key, tmp);
+                ImRequest.getInstance().getUserBaseInfo(id);
 			}
 			return tmp;
 		}

@@ -95,14 +95,13 @@ public abstract class Group implements Comparable<Group> {
 
 	}
 
-	/**
-	 * 
-	 * @param gId
-	 * @param groupType
-	 * @param name
-	 * @param owner
-	 * @param createDate
-	 */
+    /**
+     *
+     * @param gId
+     * @param groupType
+     * @param name
+     * @param owner
+     */
 	protected Group(long gId, GroupType groupType, String name, User owner) {
 		this(gId, groupType, name, owner, new Date());
 
