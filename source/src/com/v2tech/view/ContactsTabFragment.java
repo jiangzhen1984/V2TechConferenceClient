@@ -41,7 +41,7 @@ import com.v2tech.view.bo.GroupUserObject;
 import com.v2tech.view.bo.UserStatusObject;
 import com.v2tech.view.contacts.ContactsGroupManagerActivity;
 import com.v2tech.view.widget.GroupListView;
-import com.v2tech.view.widget.GroupListView.Item;
+import com.v2tech.view.widget.GroupListView.ItemData;
 import com.v2tech.vo.Group;
 import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.User;
@@ -248,18 +248,10 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 					User user = GlobalHolder.getInstance().getUser(
 							guo.getmUserId());
 
-					if (user == null) {
-						user=new User(guo.getmUserId());
-					}
-					// Remove user from contact group
-					Set<Group> groups = user.getBelongsGroup();
-					for (Group gg : groups) {
-						if (gg.getGroupType() == GroupType.CONTACT) {
-							gg.removeUserFromGroup(user);
-						}
+					if (user != null) {
+						mContactsContainer.removeItem(user);
 					}
 
-					mContactsContainer.removeItem(user);
 				} else {
 					// update user name
 					mContactsContainer.updateUser(GlobalHolder.getInstance()
@@ -272,6 +264,7 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 						"obj");
 				if (flag == TAG_CONTACT
 						&& guo.getmType() == Group.GroupType.CONTACT.intValue()) {
+
 					mContactsContainer.addUser(
 							GlobalHolder.getInstance().getGroupById(
 									GroupType.CONTACT.intValue(),
@@ -422,7 +415,7 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 
 		@Override
 		public boolean onItemLongClick(AdapterView<?> parent, View view,
-				int position, long id, Item item) {
+				int position, long id, ItemData item) {
 			if (flag == TAG_CONTACT && item.getObject() instanceof Group) {
 				showPopupWindow(view);
 				return true;
@@ -432,7 +425,7 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 
 		@Override
 		public void onItemClicked(AdapterView<?> parent, View view,
-				int position, long id, Item item) {
+				int position, long id, ItemData item) {
 			if (item.getObject() instanceof User) {
 				Intent i = new Intent(PublicIntent.SHOW_CONTACT_DETAIL_ACTIVITY);
 				i.addCategory(PublicIntent.DEFAULT_CATEGORY);
@@ -441,7 +434,7 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 			}
 		}
 
-		public void onCheckboxClicked(View view, Item item) {
+		public void onCheckboxClicked(View view, ItemData item) {
 
 		}
 	};

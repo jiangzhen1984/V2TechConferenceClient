@@ -381,7 +381,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 						.addAction(JNIService.JNI_BROADCAST_GROUP_USER_ADDED);
 				intentFilter.addAction(JNIService.JNI_BROADCAST_NEW_MESSAGE);
 				intentFilter
-						.addAction(JNIService.JNI_BROADCAST_FRIEND_AUTHENTICATION);
+						.addAction(JNIService.JNI_BROADCAST_CONTACTS_AUTHENTICATION);
 				intentFilter
 						.addAction(JNIService.JNI_BROADCAST_NEW_QUALIFICATION_MESSAGE);
 				intentFilter
@@ -2423,7 +2423,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 
 				}
 			} else if (action
-					.equals(JNIService.JNI_BROADCAST_FRIEND_AUTHENTICATION)) {
+					.equals(JNIService.JNI_BROADCAST_CONTACTS_AUTHENTICATION)) {
 				V2Log.d(TAG,
 						"having new friend verification message coming ... update..");
 				long uid = intent.getLongExtra("uid", -1);

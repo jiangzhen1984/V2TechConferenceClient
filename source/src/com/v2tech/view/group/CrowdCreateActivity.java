@@ -53,7 +53,7 @@ import com.v2tech.view.adapter.CreateConfOrCrowdAdapter;
 import com.v2tech.view.conversation.MessageBuilder;
 import com.v2tech.view.conversation.MessageLoader;
 import com.v2tech.view.widget.GroupListView;
-import com.v2tech.view.widget.GroupListView.Item;
+import com.v2tech.view.widget.GroupListView.ItemData;
 import com.v2tech.vo.CrowdGroup;
 import com.v2tech.vo.CrowdGroup.AuthType;
 import com.v2tech.vo.Group;
@@ -381,17 +381,17 @@ public class CrowdCreateActivity extends Activity {
 
 		@Override
 		public boolean onItemLongClick(AdapterView<?> parent, View view,
-				int position, long id, Item item) {
+				int position, long id, ItemData item) {
 			return false;
 		}
 
 		@Override
 		public void onItemClicked(AdapterView<?> parent, View view,
-				int position, long id, Item item) {
+				int position, long id, ItemData item) {
 			
 		}
 
-		public void onCheckboxClicked(View view, Item item) {
+		public void onCheckboxClicked(View view, ItemData item) {
 			CheckBox cb = (CheckBox)view;
 			Object obj = item.getObject();
 			if (obj instanceof User) {

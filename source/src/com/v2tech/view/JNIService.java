@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 import android.app.Activity;
 import android.app.ActivityManager;
@@ -133,7 +134,7 @@ public class JNIService extends Service implements
 	public static final String JNI_BROADCAST_GROUP_USER_REMOVED = "com.v2tech.jni.broadcast.group_user_removed";
 	public static final String JNI_BROADCAST_GROUP_USER_ADDED = "com.v2tech.jni.broadcast.group_user_added";
 	public static final String JNI_BROADCAST_VIDEO_CALL_CLOSED = "com.v2tech.jni.broadcast.video_call_closed";
-	public static final String JNI_BROADCAST_FRIEND_AUTHENTICATION = "com.v2tech.jni.broadcast.friend_authentication";
+	public static final String JNI_BROADCAST_CONTACTS_AUTHENTICATION = "com.v2tech.jni.broadcast.friend_authentication";
 	public static final String JNI_BROADCAST_NEW_QUALIFICATION_MESSAGE = "com.v2tech.jni.broadcast.new.qualification_message";
 	public static final String BROADCAST_CROWD_NEW_UPLOAD_FILE_NOTIFICATION = "com.v2tech.jni.broadcast.new.upload_crowd_file_message";
 	
@@ -147,10 +148,9 @@ public class JNIService extends Service implements
 	 * Crowd invitation with key crowd
 	 */
 	public static final String JNI_BROADCAST_CROWD_INVATITION = "com.v2tech.jni.broadcast.crowd_invatition";
-	
+
 	/**
-	 * Broadcast for joined new discussion
-	 * key gid
+	 * Broadcast for joined new discussion key gid
 	 */
 	public static final String JNI_BROADCAST_NEW_DISCUSSION_NOTIFICATION = "com.v2tech.jni.broadcast.new_discussion_notification";
 
@@ -167,7 +167,7 @@ public class JNIService extends Service implements
 	private List<GroupUserInfoOrig> delayUserBroadcast = new ArrayList<GroupUserInfoOrig>();
 	private boolean noNeedBroadcast;
 	private boolean isAcceptApply;
-	
+
 	private List<Long> applyJoinUsers = new ArrayList<Long>();
 
 	private JNICallbackHandler mCallbackHandler;
@@ -357,7 +357,10 @@ public class JNIService extends Service implements
 			switch (msg.what) {
 
 			case JNI_CONNECT_RESPONSE:
-				GlobalHolder.getInstance().setServerConnection(NetworkStateCode.fromInt(msg.arg1) == NetworkStateCode.CONNECTED);
+				GlobalHolder
+						.getInstance()
+						.setServerConnection(
+								NetworkStateCode.fromInt(msg.arg1) == NetworkStateCode.CONNECTED);
 				broadcastNetworkState(NetworkStateCode.fromInt(msg.arg1));
 				break;
 			case JNI_UPDATE_USER_INFO:
@@ -635,7 +638,9 @@ public class JNIService extends Service implements
 			File f = new File(AvatarName);
 			if (f.isDirectory()) {
 				// Do not notify if is not file;
-				V2Log.e(TAG, "OnChangeAvatarCallback --> Change the user avatar failed...file path is : " + f.getAbsolutePath());
+				V2Log.e(TAG,
+						"OnChangeAvatarCallback --> Change the user avatar failed...file path is : "
+								+ f.getAbsolutePath());
 				return;
 			}
 			// System default icon
@@ -670,9 +675,11 @@ public class JNIService extends Service implements
 	class GroupRequestCB extends GroupRequestCallbackAdapter {
 		private static final String TAG = "GroupRequestCB";
 		private JNICallbackHandler mCallbackHandler;
+		private ContactsGroupRequestCBHandler contactsGroupHandler;
 
 		public GroupRequestCB(JNICallbackHandler mCallbackHandler) {
 			this.mCallbackHandler = mCallbackHandler;
+			contactsGroupHandler = new ContactsGroupRequestCBHandler();
 		}
 
 		@Override
@@ -709,9 +716,9 @@ public class JNIService extends Service implements
 				cg.setBrief(group.brief);
 				cg.setAuthType(CrowdGroup.AuthType.fromInt(group.authType));
 				cg.setName(group.name);
-			}else if (group.type == GroupType.DISCUSSION.intValue()) {
-				DiscussionGroup cg = (DiscussionGroup) GlobalHolder.getInstance()
-						.getGroupById(group.id);
+			} else if (group.type == GroupType.DISCUSSION.intValue()) {
+				DiscussionGroup cg = (DiscussionGroup) GlobalHolder
+						.getInstance().getGroupById(group.id);
 				cg.setName(group.name);
 			}
 
@@ -791,13 +798,15 @@ public class JNIService extends Service implements
 			} else if (gType == GroupType.DISCUSSION) {
 				Group cache = GlobalHolder.getInstance().getGroupById(group.id);
 				if (cache != null) {
-					V2Log.w("Discussion exists  id "+ cache.getmGId()+"  name: "+ cache.getName());
+					V2Log.w("Discussion exists  id " + cache.getmGId()
+							+ "  name: " + cache.getName());
 					return;
 				}
-				
+
 				User owner = GlobalHolder.getInstance().getUser(
 						group.creator.uid);
-				DiscussionGroup cg = new DiscussionGroup(group.id, group.name, owner);
+				DiscussionGroup cg = new DiscussionGroup(group.id, group.name,
+						owner);
 				GlobalHolder.getInstance().addGroupToList(
 						GroupType.DISCUSSION.intValue(), cg);
 				Intent i = new Intent();
@@ -896,7 +905,7 @@ public class JNIService extends Service implements
 					getApplicationContext(), vUser, additInfo);
 			Intent intent = new Intent();
 			intent.putExtra("uid", user.uid);
-			intent.setAction(JNI_BROADCAST_FRIEND_AUTHENTICATION);
+			intent.setAction(JNI_BROADCAST_CONTACTS_AUTHENTICATION);
 			intent.addCategory(JNI_BROADCAST_CATEGROY);
 			sendBroadcast(intent);
 
@@ -948,7 +957,7 @@ public class JNIService extends Service implements
 				i.putExtra("crowd", nGroupID);
 				sendBroadcast(i);
 
-			}  else if (groupType == GroupType.DISCUSSION.intValue()) {
+			} else if (groupType == GroupType.DISCUSSION.intValue()) {
 				Intent i = new Intent();
 				i.setAction(PublicIntent.BROADCAST_CROWD_DELETED_NOTIFICATION);
 				i.addCategory(PublicIntent.DEFAULT_CATEGORY);
@@ -962,9 +971,34 @@ public class JNIService extends Service implements
 		@Override
 		public void OnDelGroupUserCallback(int groupType, long nGroupID,
 				long nUserID) {
+
+			if (groupType == GroupType.CONTACT.intValue()) {
+				// 如果是好友组，好友关系被别人移除，传来的groupId为0
+				Set<Group> groupSet = GlobalHolder.getInstance()
+						.getUser(nUserID).getBelongsGroup();
+				for (Group gg : groupSet) {
+					if (gg.getGroupType() == GroupType.CONTACT) {
+						nGroupID = gg.getmGId();
+					}
+				}
+			}
+
 			GlobalHolder.getInstance().removeGroupUser(nGroupID, nUserID);
 			GroupUserObject obj = new GroupUserObject(groupType, nGroupID,
 					nUserID);
+
+			// if (groupType == GroupType.CONTACT.intValue()) {
+			// List<Group> groupList = GlobalHolder.getInstance().getGroup(
+			// GroupType.CONTACT.intValue());
+			// for (int i = 0; i < groupList.size(); i++) {
+			// Group group = groupList.get(i);
+			//
+			// Log.i("20141201 2",
+			// group.getName() + "(人数):"
+			// + String.valueOf(group.getUserCount()));
+			// }
+			// }
+
 			Intent i = new Intent();
 			i.setAction(JNIService.JNI_BROADCAST_GROUP_USER_REMOVED);
 			i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
@@ -981,29 +1015,30 @@ public class JNIService extends Service implements
 			}
 
 			User newUser = convertUser(user);
-
-			GlobalHolder.getInstance().putUser(newUser.getmUserId(), newUser);
-			GlobalHolder.getInstance().addUserToGroup(newUser, nGroupID);
-
 			GroupType gType = GroupType.fromInt(groupType);
-			if (gType == GroupType.CONTACT) {
-				AddFriendHistroysHandler.becomeFriendHanler(
-						getApplicationContext(), newUser);
+			newUser=GlobalHolder.getInstance().putUser(newUser.getmUserId(), newUser);
+			GlobalHolder.getInstance().addUserToGroup(newUser, nGroupID);
+//			if (gType == GroupType.CONTACT) {
+//				Set<Group> groupSet = newUser.getBelongsGroup();
+//				for (Group gg : groupSet) {
+//					Log.i("20141201 2", gg.getName());
+//				}
+//			}
 
-				Intent intent = new Intent();
-				intent.setAction(JNI_BROADCAST_FRIEND_AUTHENTICATION);
-				intent.addCategory(JNI_BROADCAST_CATEGROY);
-				intent.putExtra("uid", newUser.getmUserId());
-				intent.putExtra("gid", nGroupID);
-				sendBroadcast(intent);
+
+			if (gType == GroupType.CONTACT) {
+				contactsGroupHandler.OnAddContactsGroupUserInfoCallback(
+						nGroupID, newUser);
 			} else if (gType == GroupType.CHATING) {
 
 				long id = -1;
 				if (user.uid != GlobalHolder.getInstance().getCurrentUserId()) {
-					VMessageQualification waitMessage = MessageBuilder.queryWaitingQualMessageById(user.uid);
-					if(waitMessage != null){
-//					if (CrowdGroupService.isLocalInvite) {
-						MessageBuilder.deleteQualMessage(mContext, GlobalHolder.getInstance().getUser(user.uid));
+					VMessageQualification waitMessage = MessageBuilder
+							.queryWaitingQualMessageById(user.uid);
+					if (waitMessage != null) {
+						// if (CrowdGroupService.isLocalInvite) {
+						MessageBuilder.deleteQualMessage(mContext, GlobalHolder
+								.getInstance().getUser(user.uid));
 						id = MessageBuilder.updateQualicationMessageState(
 								nGroupID, user.uid, new GroupQualicationState(
 										Type.CROWD_APPLICATION,
@@ -1140,7 +1175,7 @@ public class JNIService extends Service implements
 				// temptag 20140917
 				Intent intent = new Intent();
 				intent.putExtra("uid", obj.userID);
-				intent.setAction(JNI_BROADCAST_FRIEND_AUTHENTICATION);
+				intent.setAction(JNI_BROADCAST_CONTACTS_AUTHENTICATION);
 				intent.addCategory(JNI_BROADCAST_CATEGROY);
 				sendOrderedBroadcast(intent, null);
 			} else if (gType == GroupType.CHATING) {
@@ -1195,13 +1230,14 @@ public class JNIService extends Service implements
 				CrowdGroup g = new CrowdGroup(crowd.id, crowd.name, user, null);
 				g.setBrief(crowd.brief);
 				g.setAnnouncement(crowd.announce);
-                g.setAuthType(CrowdGroup.AuthType.fromInt(crowd.authType));
-				GlobalHolder.getInstance().addGroupToList(GroupType.CHATING.intValue(),
-						g);
+				g.setAuthType(CrowdGroup.AuthType.fromInt(crowd.authType));
+				GlobalHolder.getInstance().addGroupToList(
+						GroupType.CHATING.intValue(), g);
 
-				MessageBuilder.updateQualicationMessageState(crowd, new GroupQualicationState(
-								Type.CROWD_INVITATION,
-								QualificationState.ACCEPTED, null , ReadState.UNREAD , false));
+				MessageBuilder.updateQualicationMessageState(crowd,
+						new GroupQualicationState(Type.CROWD_INVITATION,
+								QualificationState.ACCEPTED, null,
+								ReadState.UNREAD, false));
 				Intent i = new Intent();
 				i.setAction(PublicIntent.BROADCAST_NEW_CROWD_NOTIFICATION);
 				i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
@@ -1328,8 +1364,8 @@ public class JNIService extends Service implements
 
 		}
 
-		private void updateAudioRecord(AudioJNIObjectInd ind){
-			//record in database
+		private void updateAudioRecord(AudioJNIObjectInd ind) {
+			// record in database
 			VideoBean currentVideoBean = new VideoBean();
 			currentVideoBean.readSatate = AudioVideoMessageBean.STATE_UNREAD;
 			currentVideoBean.formUserID = ind.getFromUserId();
@@ -1424,8 +1460,8 @@ public class JNIService extends Service implements
 
 		}
 
-		private void updateVideoRecord(VideoJNIObjectInd ind){
-			//record in database
+		private void updateVideoRecord(VideoJNIObjectInd ind) {
+			// record in database
 			VideoBean currentVideoBean = new VideoBean();
 			currentVideoBean.readSatate = AudioVideoMessageBean.STATE_UNREAD;
 			currentVideoBean.formUserID = ind.getFromUserId();
@@ -1813,4 +1849,19 @@ public class JNIService extends Service implements
 		}
 		GlobalConfig.mTransingFiles.put(uid, trans);
 	}
+
+	public class ContactsGroupRequestCBHandler {
+		private void OnAddContactsGroupUserInfoCallback(long nGroupID,
+				User newUser) {
+			AddFriendHistroysHandler.becomeFriendHanler(
+					getApplicationContext(), newUser);
+			Intent intent = new Intent();
+			intent.setAction(JNI_BROADCAST_CONTACTS_AUTHENTICATION);
+			intent.addCategory(JNI_BROADCAST_CATEGROY);
+			intent.putExtra("uid", newUser.getmUserId());
+			intent.putExtra("gid", nGroupID);
+			sendBroadcast(intent);
+		}
+	}
+
 }

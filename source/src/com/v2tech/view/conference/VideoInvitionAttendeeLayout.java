@@ -27,7 +27,7 @@ import com.v2tech.R;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.view.adapter.CreateConfOrCrowdAdapter;
 import com.v2tech.view.widget.GroupListView;
-import com.v2tech.view.widget.GroupListView.Item;
+import com.v2tech.view.widget.GroupListView.ItemData;
 import com.v2tech.vo.Conference;
 import com.v2tech.vo.Group;
 import com.v2tech.vo.Group.GroupType;
@@ -210,13 +210,13 @@ public class VideoInvitionAttendeeLayout extends LinearLayout {
 
 		@Override
 		public boolean onItemLongClick(AdapterView<?> parent, View view,
-				int position, long id, Item item) {
+				int position, long id, ItemData item) {
 			return false;
 		}
 
 		@Override
 		public void onItemClicked(AdapterView<?> parent, View view,
-				int position, long id, Item item) {
+				int position, long id, ItemData item) {
 			Object obj = item.getObject();
 			if (obj instanceof User) {
 				Message.obtain(mLocalHandler, UPDATE_ATTENDEES, (User) obj)
@@ -226,7 +226,7 @@ public class VideoInvitionAttendeeLayout extends LinearLayout {
 
 		}
 
-		public void onCheckboxClicked(View view, Item item) {
+		public void onCheckboxClicked(View view, ItemData item) {
 			CheckBox cb = (CheckBox) view;
 			Object obj = item.getObject();
 			if (obj instanceof User) {

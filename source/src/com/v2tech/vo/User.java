@@ -29,11 +29,13 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import android.graphics.Bitmap;
+import android.util.Log;
 
 import com.V2.jni.util.EscapedcharactersProcessing;
 import com.V2.jni.util.V2Log;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.util.BitmapUtil;
+import com.v2tech.vo.Group.GroupType;
 
 /**
  * User information
@@ -354,6 +356,12 @@ public class User implements Comparable<User> {
 			return;
 		}
 		this.mBelongsGroup.add(g);
+		if(this.mUserId==11111){
+			Log.i("20141201 2","数："+mBelongsGroup.size());
+			for (Group gg : mBelongsGroup) {
+				Log.i("20141201 2", gg.getName());
+			}
+		}
 	}
 
 	public String getNickName() {

@@ -52,7 +52,7 @@ import com.v2tech.view.bo.UserStatusObject;
 import com.v2tech.view.cus.DateTimePicker;
 import com.v2tech.view.cus.DateTimePicker.OnDateSetListener;
 import com.v2tech.view.widget.GroupListView;
-import com.v2tech.view.widget.GroupListView.Item;
+import com.v2tech.view.widget.GroupListView.ItemData;
 import com.v2tech.vo.Conference;
 import com.v2tech.vo.ConferenceGroup;
 import com.v2tech.vo.Group;
@@ -328,17 +328,17 @@ public class ConferenceCreateActivity extends Activity {
 
 		@Override
 		public void onItemClicked(AdapterView<?> parent, View view,
-				int position, long id, Item item) {
+				int position, long id, ItemData item) {
 
 		}
 
 		@Override
 		public boolean onItemLongClick(AdapterView<?> parent, View view,
-				int position, long id, Item item) {
+				int position, long id, ItemData item) {
 			return true;
 		}
 
-		public void onCheckboxClicked(View view, Item item) {
+		public void onCheckboxClicked(View view, ItemData item) {
 			CheckBox cb = (CheckBox) view;
 			int flag = -1;
 			Object obj = item.getObject();
