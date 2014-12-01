@@ -384,7 +384,8 @@ public class JNIService extends Service implements
 
 				if (gl != null && gl.size() > 0) {
 					GlobalHolder.getInstance().updateGroupList(msg.arg1, gl);
-					if ((msg.arg1 == V2GlobalEnum.GROUP_TYPE_CROWD || msg.arg1 == V2GlobalEnum.GROUP_TYPE_DEPARTMENT)
+					if (((msg.arg1 == V2GlobalEnum.GROUP_TYPE_CROWD) ||
+							(msg.arg1 == V2GlobalEnum.GROUP_TYPE_DEPARTMENT))
 							&& !noNeedBroadcast) {
 						V2Log.d(TAG,
 								"ConversationTabFragment no builed successfully! Need to delay sending , type is ："
@@ -408,7 +409,7 @@ public class JNIService extends Service implements
 					for (User tu : lu) {
 						User existU = GlobalHolder.getInstance().putUser(
 								tu.getmUserId(), tu);
-                        if(existU.isDirty()) {
+                        if(existU.isDirty() && !GlobalHolder.getInstance().getGlobalState().isGroupLoaded()) {
                             V2Log.e(TAG , "The User that id is : " + existU.getmUserId() + " dirty!" +
                                     " Need to get user base infos");
                             ImRequest.getInstance().getUserBaseInfo(existU.getmUserId());

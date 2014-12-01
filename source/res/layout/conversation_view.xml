@@ -65,7 +65,7 @@
             android:textSize="@dimen/common_item_text_size_16" />
     </RelativeLayout>
     <TextView
-        android:id="@+id/group_list_chat_title_tv"
+        android:id="@+id/ws_fragment_conversation_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
@@ -74,7 +74,6 @@
         android:ellipsize="end"
         android:gravity="left|top"
         android:singleLine="true"
-        android:text="TextView"
         android:textColor="@color/conversation_view_name_color"
         android:textSize="@dimen/conversation_view_name_text_size"
         android:visibility="gone" />

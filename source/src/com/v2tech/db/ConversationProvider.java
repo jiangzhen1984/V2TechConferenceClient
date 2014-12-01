@@ -18,6 +18,8 @@ import com.v2tech.vo.Conversation;
 import com.v2tech.vo.CrowdConversation;
 import com.v2tech.vo.CrowdGroup;
 import com.v2tech.vo.DepartmentConversation;
+import com.v2tech.vo.DiscussionConversation;
+import com.v2tech.vo.DiscussionGroup;
 import com.v2tech.vo.Group;
 import com.v2tech.vo.OrgGroup;
 import com.v2tech.vo.User;
@@ -182,11 +184,14 @@ public class ConversationProvider {
 								+ "= ? or "
 								+ ContentDescriptor.RecentHistoriesMessage.Cols.HISTORY_RECENT_MESSAGE_GROUP_TYPE
 								+ "= ? or "
-								+ ContentDescriptor.RecentHistoriesMessage.Cols.HISTORY_RECENT_MESSAGE_GROUP_TYPE + "= ?",
+								+ ContentDescriptor.RecentHistoriesMessage.Cols.HISTORY_RECENT_MESSAGE_GROUP_TYPE 
+								+ "= ? or "
+								+ ContentDescriptor.RecentHistoriesMessage.Cols.HISTORY_RECENT_MESSAGE_GROUP_TYPE + "= ? ",
 						new String[] {
 								String.valueOf(V2GlobalEnum.GROUP_TYPE_USER),
 								String.valueOf(V2GlobalEnum.GROUP_TYPE_CROWD),
-								String.valueOf(V2GlobalEnum.GROUP_TYPE_DEPARTMENT) },
+								String.valueOf(V2GlobalEnum.GROUP_TYPE_DEPARTMENT),
+								String.valueOf(V2GlobalEnum.GROUP_TYPE_DISCUSSION)},
 						ContentDescriptor.RecentHistoriesMessage.Cols.HISTORY_RECENT_MESSAGE_SAVEDATE
 								+ " desc");
 
@@ -369,6 +374,7 @@ public class ConversationProvider {
 		int groupType = cur.getInt(cur.getColumnIndex("GroupType"));
 		switch (groupType) {
 		case V2GlobalEnum.GROUP_TYPE_CROWD:
+		case V2GlobalEnum.GROUP_TYPE_DISCUSSION:
 		case V2GlobalEnum.GROUP_TYPE_DEPARTMENT:
 			long groupID = cur.getLong(cur.getColumnIndex("GroupID"));
 			Group group = GlobalHolder.getInstance().getGroupById(groupType,
@@ -386,6 +392,10 @@ public class ConversationProvider {
 			case V2GlobalEnum.GROUP_TYPE_DEPARTMENT:
 				group = new OrgGroup(groupID, null);
 				cov = new DepartmentConversation(group);
+				break;
+			case V2GlobalEnum.GROUP_TYPE_DISCUSSION:
+				group = new DiscussionGroup(groupID, null , null);
+				cov = new DiscussionConversation(group);
 				break;
 			default:
 				throw new RuntimeException(

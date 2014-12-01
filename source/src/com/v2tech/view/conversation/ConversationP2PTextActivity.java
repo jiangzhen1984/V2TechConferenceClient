@@ -101,6 +101,7 @@ import com.v2tech.view.group.CrowdFilesActivity.CrowdFileActivityType;
 import com.v2tech.view.widget.CommonAdapter;
 import com.v2tech.view.widget.CommonAdapter.CommonAdapterItemWrapper;
 import com.v2tech.vo.Conversation;
+import com.v2tech.vo.DiscussionGroup;
 import com.v2tech.vo.FileInfoBean;
 import com.v2tech.vo.Group;
 import com.v2tech.vo.Group.GroupType;
@@ -143,11 +144,11 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 
 	private int offset = 0;
 
-	private long user1Id;
+	private long user1Id = 0;
 
-	private long user2Id;
+	private long user2Id = 0;
 
-	private long groupId;
+	private long groupId = 0;
 
 	private LocalHandler lh;
 
@@ -657,18 +658,46 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 			mButtonCreateMetting.setVisibility(View.VISIBLE);
 			mShowCrowdDetailButton.setVisibility(View.VISIBLE);
 			mUserTitleTV.setText(group.getName());
-		} else if (cov.getType() == V2GlobalEnum.GROUP_TYPE_DEPARTMENT) {
-			currentConversationViewType = V2GlobalEnum.GROUP_TYPE_DEPARTMENT;
+		} else if (cov.getType() == V2GlobalEnum.GROUP_TYPE_DEPARTMENT ||
+				cov.getType() == V2GlobalEnum.GROUP_TYPE_DISCUSSION) {
+			if(cov.getType() == V2GlobalEnum.GROUP_TYPE_DEPARTMENT ){
+				currentConversationViewType = V2GlobalEnum.GROUP_TYPE_DEPARTMENT;
+				OrgGroup departmentGroup = (OrgGroup) GlobalHolder.getInstance()
+						.getGroupById(V2GlobalEnum.GROUP_TYPE_DEPARTMENT, cov.getExtId());
+				mUserTitleTV.setText(departmentGroup.getName());
+			}
+			else{
+				currentConversationViewType = V2GlobalEnum.GROUP_TYPE_DISCUSSION;
+				DiscussionGroup discussionGroup = (DiscussionGroup) GlobalHolder.getInstance()
+						.getGroupById(V2GlobalEnum.GROUP_TYPE_DISCUSSION, cov.getExtId());
+				if(discussionGroup == null){
+					throw new RuntimeException("Start Chat Activity Failed ... Get Discussion Group is null! , id is : " + cov.getExtId());
+				}
+				StringBuilder sb = new StringBuilder();
+		        List<User> users = discussionGroup.getUsers();
+		        User ownerUser = discussionGroup.getOwnerUser();
+		        if (ownerUser != null) {
+		            sb.append(ownerUser.getName());
+		        }
+		        if (users != null) {
+		            for (User user : users) {
+		            	if(user.getmUserId() == ownerUser.getmUserId())
+		            		continue ;
+		            	
+		                sb.append(" ").append(user.getName());
+		                break;
+		            }
+		        }
+				mUserTitleTV.setText(sb.toString());
+			}
 			groupId = cov.getExtId();
-			OrgGroup departmentGroup = (OrgGroup) GlobalHolder.getInstance()
-					.getGroupById(V2GlobalEnum.GROUP_TYPE_DEPARTMENT, groupId);
 			mVideoCallButton.setVisibility(View.GONE);
 			mAudioCallButton.setVisibility(View.GONE);
 			mShowContactDetailButton.setVisibility(View.GONE);
 			mSelectFileButtonIV.setVisibility(View.GONE);
 			mButtonCreateMetting.setVisibility(View.VISIBLE);
-			mUserTitleTV.setText(departmentGroup.getName());
-		}
+			mShowCrowdDetailButton.setVisibility(View.VISIBLE);
+		} 
 	}
 
 	private void scrollToBottom() {
@@ -739,7 +768,6 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
                             "start palying next aduio item , id is : " + vm.getId() +
                                     "and index in collections is : " + i + " collections size is : " + messageArray.size());
                     VMessageAudioItem audio = items.get(0);
-                    int length = messageArray.size();
                     if(i != 0)
                         mMessagesContainer.setSelection(i);
 					MessageBodyView foundView = (MessageBodyView) wrapper
@@ -1356,14 +1384,6 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 		}
 	};
 
-	private Runnable initTouchTimeOut = new Runnable() {
-		@Override
-		public void run() {
-
-			breakRecording();
-		}
-	};
-
 	/**
 	 * 异常终止录音
 	 */
@@ -1977,10 +1997,12 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 			obj = new ConversationNotificationObject(
 					Conversation.TYPE_DEPARTMENT, groupId);
 			break;
+		case V2GlobalEnum.GROUP_TYPE_DISCUSSION:
+			obj = new ConversationNotificationObject(
+					V2GlobalEnum.GROUP_TYPE_DISCUSSION, groupId);
+			break;
 		default:
-			throw new RuntimeException(
-					"ConversationView notificateConversationUpdate --> invaild currentConversationViewType : "
-							+ currentConversationViewType);
+			return ;
 		}
 		obj.setMsgID(msgID);
 		i.putExtra("obj", obj);
@@ -2257,6 +2279,10 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 		case V2GlobalEnum.GROUP_TYPE_DEPARTMENT:
 			array = MessageLoader.loadGroupMessageByPage(mContext,
 					V2GlobalEnum.GROUP_TYPE_DEPARTMENT, groupId, BATCH_COUNT,
+					offset);
+		case V2GlobalEnum.GROUP_TYPE_DISCUSSION:
+			array = MessageLoader.loadGroupMessageByPage(mContext,
+					V2GlobalEnum.GROUP_TYPE_DISCUSSION, groupId, BATCH_COUNT,
 					offset);
 			break;
 		default:
@@ -2621,6 +2647,7 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 					switch (currentConversationViewType) {
 					case V2GlobalEnum.GROUP_TYPE_CROWD:
 					case V2GlobalEnum.GROUP_TYPE_DEPARTMENT:
+					case V2GlobalEnum.GROUP_TYPE_DISCUSSION:
 						isReLoading = groupID == groupId;
 						break;
 					case V2GlobalEnum.GROUP_TYPE_USER:
