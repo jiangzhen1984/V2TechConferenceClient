@@ -1074,13 +1074,18 @@ public class MessageLoader {
 		List<String> tableNames = GlobalHolder.getInstance()
 				.getDataBaseTableCacheName();
 		String sql = "";
+		String tableName;
+		if(groupType != V2GlobalEnum.GROUP_TYPE_USER)
+			tableName = "Histories_" + groupType + "_" + groupID + "_0";
+		else
+			tableName = "Histories_0_0_" + userID;
 		try {
-			if (tableNames.contains(ContentDescriptor.HistoriesMessage.NAME)) {
-				tableNames.remove(ContentDescriptor.HistoriesMessage.NAME);
-				sql = "drop table " + ContentDescriptor.HistoriesMessage.NAME;
+			if (tableNames.contains(tableName)) {
+				tableNames.remove(tableName);
+				sql = "drop table " + tableName;
 			} else {
 				V2Log.e(TAG, "drop table failed...table no exists , name is : "
-						+ ContentDescriptor.HistoriesMessage.NAME);
+						+ tableName);
 				return;
 			}
 			V2TechDBHelper dbHelper = new V2TechDBHelper(mContext);

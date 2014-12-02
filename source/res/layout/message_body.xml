@@ -2,6 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content" >
+
     <TextView
         android:id="@+id/message_body_time_text"
         android:layout_width="wrap_content"
@@ -12,264 +13,231 @@
         android:background="@drawable/message_body_time_bg"
         android:gravity="center"
         android:text="00:00" />
+
     <LinearLayout
         android:id="@+id/message_body_left_user_ly"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/message_body_time_text"
         android:weightSum="1" >
+
         <RelativeLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginBottom="15dp"
             android:layout_marginTop="15dp"
             android:layout_weight="0.95" >
+
             <TableLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentLeft="true"
                 android:shrinkColumns="1" >
+
                 <TableRow>
-                    <RelativeLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content">
+
                     <ImageView
                         android:id="@+id/conversation_message_body_icon_left"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_vertical"
-                        android:layout_marginLeft="10dp"
+                        android:layout_marginLeft="@dimen/messageBodyView_common_margin_left_or_right"
                         android:src="@drawable/avatar" />
-                    <LinearLayout
-                        android:layout_toRightOf="@+id/conversation_message_body_icon_left"
-                        android:layout_alignTop="@+id/conversation_message_body_icon_left"
+
+                    <FrameLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_vertical"
-                        android:orientation="vertical" >
-                        <TextView
-                            android:id="@+id/message_body_person_name_left"
+                        android:layout_marginRight="@dimen/messageBodyView_common_margin_left_or_right" >
+
+                        <RelativeLayout
                             android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginLeft="@dimen/messageBodyView_common_margin_left_or_right"
-                            android:text="啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊"
-                            android:maxWidth="@dimen/messageBodyView_chat_name_max_width"
-                            android:singleLine="true"
-                            android:textColor="@color/common_item_text_color_black"
-                            android:textSize="@dimen/common_item_text_size_16" />
-                        <LinearLayout
+                            android:layout_height="wrap_content" >
+
+                            <ImageView
+                                android:id="@+id/message_body_arrow_lefe_false"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_centerVertical="true"
+                                android:layout_marginLeft="@dimen/messageBodyView_common_margin_left_or_right"
+                                android:src="@drawable/message_body_left_arrow_selector" />
+
+                            <LinearLayout
+                                android:id="@+id/messag_body_content_ly_left"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center_vertical"
+                                android:layout_marginLeft="@dimen/message_body_view_item_bubble_space"
+                                android:layout_toRightOf="@+id/message_body_arrow_lefe_false"
+                                android:background="@drawable/message_body_left_bg_selector"
+                                android:orientation="vertical" >
+                            </LinearLayout>
+                        </RelativeLayout>
+
+                        <ImageView
+                            android:id="@+id/message_body_arrow_left"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="center_vertical"
-                            android:orientation="horizontal" >
-                            <FrameLayout
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="center_vertical" >
-                                <RelativeLayout
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginRight="@dimen/messageBodyView_common_margin_left_or_right" >
-                                    <ImageView
-                                        android:id="@+id/message_body_arrow_lefe_false"
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:layout_marginTop="@dimen/messageBodyView_triangle_margin_top"
-                                        android:layout_marginLeft="@dimen/messageBodyView_common_margin_left_or_right"
-                                        android:src="@drawable/message_body_left_arrow_selector"/>
+                            android:layout_marginLeft="10dp"
+                            android:src="@drawable/message_body_left_arrow_selector" />
+                    </FrameLayout>
 
-                                    <LinearLayout
-                                        android:id="@+id/messag_body_content_ly_left"
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:layout_gravity="center_vertical"
-                                        android:layout_marginLeft="@dimen/message_body_view_item_bubble_space"
-                                        android:layout_toRightOf="@+id/message_body_arrow_lefe_false"
-                                        android:background="@drawable/message_body_left_bg_selector"
-                                        android:orientation="vertical" >
-                                    </LinearLayout>
-                                </RelativeLayout>
-                                <ImageView
-                                    android:id="@+id/message_body_arrow_left"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginTop="@dimen/messageBodyView_triangle_margin_top"
-                                    android:layout_marginLeft="@dimen/messageBodyView_common_margin_left_or_right"
-                                    android:src="@drawable/message_body_left_arrow_selector" />
-                            </FrameLayout>
-                            <RelativeLayout
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="center_vertical" >
-                                <TextView
-                                    android:id="@+id/message_body_video_item_second_left"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:layout_centerVertical="true"
-                                    android:text="24&apos;&apos;" />
-                                <ImageView
-                                    android:id="@+id/message_body_failed_item_left"
-                                    android:layout_width="@dimen/message_body_failed_size"
-                                    android:layout_height="@dimen/message_body_failed_size"
-                                    android:layout_centerVertical="true"
-                                    android:layout_marginLeft="@dimen/messageBodyView_common_margin_left_or_right"
-                                    android:layout_toRightOf="@+id/message_body_video_item_second_left"
-                                    android:src="@drawable/message_sent_failed_icon"
-                                    android:visibility="gone" />
-                                <ImageView
-                                    android:id="@+id/message_body_unread_icon_left"
-                                    android:layout_width="@dimen/message_body_failed_size"
-                                    android:layout_height="@dimen/message_body_failed_size"
-                                    android:layout_centerVertical="true"
-                                    android:layout_marginLeft="@dimen/messageBodyView_common_margin_left_or_right"
-                                    android:layout_toRightOf="@+id/message_body_video_item_second_left"
-                                    android:src="@drawable/voice_message_unread_icon"
-                                    android:visibility="gone" />
-                                <ImageView
-                                    android:id="@+id/message_body_sending_icon_left"
-                                    android:layout_width="@dimen/message_body_failed_size"
-                                    android:layout_height="@dimen/message_body_failed_size"
-                                    android:layout_centerVertical="true"
-                                    android:layout_marginLeft="@dimen/messageBodyView_common_margin_left_or_right"
-                                    android:layout_toRightOf="@+id/message_body_video_item_second_left"
-                                    android:src="@drawable/spin_black_70"
-                                    android:visibility="gone" />
-                            </RelativeLayout>
-                        </LinearLayout>
-                    </LinearLayout>
+                    <RelativeLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical" >
+
+                        <TextView
+                            android:id="@+id/message_body_video_item_second_left"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_centerVertical="true"
+                            android:paddingRight="@dimen/messageBodyView_common_margin_left_or_right"
+                            android:text="24&apos;&apos;" />
+
+                        <ImageView
+                            android:id="@+id/message_body_failed_item_left"
+                            android:layout_width="@dimen/message_body_failed_size"
+                            android:layout_height="@dimen/message_body_failed_size"
+                            android:layout_centerVertical="true"
+                            android:layout_toRightOf="@+id/message_body_video_item_second_left"
+                            android:src="@drawable/message_sent_failed_icon"
+                            android:visibility="visible" />
+
+                        <ImageView
+                            android:id="@+id/message_body_unread_icon_left"
+                            android:layout_width="@dimen/message_body_failed_size"
+                            android:layout_height="@dimen/message_body_failed_size"
+                            android:layout_centerVertical="true"
+                            android:layout_toRightOf="@+id/message_body_video_item_second_left"
+                            android:src="@drawable/voice_message_unread_icon"
+                            android:visibility="visible" />
+
+                        <ImageView
+                            android:id="@+id/message_body_sending_icon_left"
+                            android:layout_width="@dimen/message_body_failed_size"
+                            android:layout_height="@dimen/message_body_failed_size"
+                            android:layout_centerVertical="true"
+                            android:layout_toRightOf="@+id/message_body_video_item_second_left"
+                            android:src="@drawable/spin_black_70"
+                            android:visibility="gone" />
                     </RelativeLayout>
                 </TableRow>
             </TableLayout>
         </RelativeLayout>
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="0.05"
             android:text="" />
     </LinearLayout>
+
     <LinearLayout
         android:id="@+id/message_body_remote_ly"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/message_body_time_text"
         android:weightSum="1" >
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="0.05"
             android:text="" />
+
         <RelativeLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginBottom="15dp"
             android:layout_marginTop="15dp"
             android:layout_weight="0.95" >
+
             <TableLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
                 android:shrinkColumns="1" >
+
                 <TableRow>
+
                     <RelativeLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_vertical" >
-                        <LinearLayout
-                            android:layout_alignTop="@+id/conversation_message_body_icon_right"
-                            android:id="@+id/messag_body_outside_content_ly_right"
+
+                        <TextView
+                            android:id="@+id/message_body_video_item_second_right"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_centerVertical="true"
+                            android:layout_toRightOf="@+id/message_body_failed_item_right"
+                            android:paddingLeft="@dimen/messageBodyView_common_margin_left_or_right"
+                            android:text="24&apos;&apos;" />
+
+                        <ImageView
+                            android:id="@+id/message_body_failed_item_right"
+                            android:layout_width="@dimen/message_body_failed_size"
+                            android:layout_height="@dimen/message_body_failed_size"
+                            android:layout_centerVertical="true"
+                            android:src="@drawable/message_sent_failed_icon"
+                            android:visibility="gone" />
+
+                        <ImageView
+                            android:id="@+id/message_body_unread_icon_right"
+                            android:layout_width="@dimen/message_body_failed_size"
+                            android:layout_height="@dimen/message_body_failed_size"
+                            android:layout_centerVertical="true"
+                            android:background="@drawable/voice_message_unread_icon"
+                            android:visibility="gone" />
+
+                        <ImageView
+                            android:id="@+id/message_body_sending_icon_right"
+                            android:layout_width="@dimen/message_body_failed_size"
+                            android:layout_height="@dimen/message_body_failed_size"
+                            android:layout_centerVertical="true"
+                            android:layout_toRightOf="@+id/message_body_failed_item_right"
+                            android:src="@drawable/spin_black_70"
+                            android:visibility="gone" />
+                    </RelativeLayout>
+
+                    <LinearLayout
+                        android:id="@+id/messag_body_content_ly_right"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginLeft="@dimen/messageBodyView_common_margin_left_or_right"
+                        android:layout_marginRight="@dimen/message_body_view_item_bubble_space"
+                        android:background="@drawable/message_body_right_bg_selector"
+                        android:orientation="vertical" >
+                    </LinearLayout>
+
+                    <RelativeLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginRight="@dimen/messageBodyView_common_margin_left_or_right" >
+
+                        <ImageView
+                            android:id="@+id/message_body_arrow_right"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_centerVertical="true"
                             android:layout_marginRight="@dimen/messageBodyView_common_margin_left_or_right"
-                            android:layout_toLeftOf="@+id/conversation_message_body_icon_right"
-                            android:orientation="vertical" >
-                            <TextView
-                                android:id="@+id/message_body_person_name_right"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="right"
-                                android:layout_marginLeft="@dimen/messageBodyView_common_margin_left_or_right"
-                                android:text="李四"
-                                android:maxWidth="@dimen/messageBodyView_chat_name_max_width"
-                                android:singleLine="true"
-                                android:textColor="@color/common_item_text_color_black"
-                                android:textSize="@dimen/common_item_text_size_16" />
-                            <LinearLayout
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="right"
-                                android:orientation="horizontal" >
-                                <RelativeLayout
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:layout_gravity="center_vertical" >
-                                    <TextView
-                                        android:id="@+id/message_body_video_item_second_right"
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:layout_centerVertical="true"
-                                        android:layout_toRightOf="@+id/message_body_failed_item_right"
-                                        android:text="24&apos;&apos;" />
-                                    <ImageView
-                                        android:id="@+id/message_body_failed_item_right"
-                                        android:layout_width="@dimen/message_body_failed_size"
-                                        android:layout_height="@dimen/message_body_failed_size"
-                                        android:layout_centerVertical="true"
-                                        android:layout_marginRight="@dimen/messageBodyView_common_margin_left_or_right"
-                                        android:src="@drawable/message_sent_failed_icon"
-                                        android:visibility="gone" />
-                                    <ImageView
-                                        android:id="@+id/message_body_unread_icon_right"
-                                        android:layout_width="@dimen/message_body_failed_size"
-                                        android:layout_height="@dimen/message_body_failed_size"
-                                        android:layout_centerVertical="true"
-                                        android:layout_marginRight="@dimen/messageBodyView_common_margin_left_or_right"
-                                        android:background="@drawable/voice_message_unread_icon"
-                                        android:visibility="gone" />
-                                    <ImageView
-                                        android:id="@+id/message_body_sending_icon_right"
-                                        android:layout_width="@dimen/message_body_failed_size"
-                                        android:layout_height="@dimen/message_body_failed_size"
-                                        android:layout_centerVertical="true"
-                                        android:layout_marginRight="@dimen/messageBodyView_common_margin_left_or_right"
-                                        android:layout_toRightOf="@+id/message_body_failed_item_right"
-                                        android:src="@drawable/spin_black_70"
-                                        android:visibility="gone" />
-                                </RelativeLayout>
-                                <LinearLayout
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:orientation="horizontal" >
-                                    <LinearLayout
-                                        android:id="@+id/messag_body_content_ly_right"
-                                        android:layout_width="0dp"
-                                        android:layout_height="wrap_content"
-                                        android:layout_gravity="center_vertical"
-                                        android:layout_marginLeft="@dimen/messageBodyView_common_margin_left_or_right"
-                                        android:layout_weight="1"
-                                        android:background="@drawable/message_body_right_bg_selector"
-                                        android:orientation="vertical" >
-                                    </LinearLayout>
-                                    <ImageView
-                                        android:id="@+id/message_body_arrow_right"
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:layout_marginLeft="@dimen/message_body_view_item_bubble_space"
-                                        android:layout_marginTop="@dimen/messageBodyView_triangle_margin_top"
-                                        android:src="@drawable/message_body_right_arrow_selector" />
-                                </LinearLayout>
-                            </LinearLayout>
-                        </LinearLayout>
+                            android:src="@drawable/message_body_right_arrow_selector" />
+
                         <ImageView
                             android:id="@+id/conversation_message_body_icon_right"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_alignParentRight="true"
-                            android:layout_marginRight="10dp"
+                            android:layout_centerVertical="true"
+                            android:layout_toRightOf="@+id/message_body_arrow_right"
                             android:src="@drawable/avatar" />
                     </RelativeLayout>
                 </TableRow>
             </TableLayout>
         </RelativeLayout>
     </LinearLayout>
+
 </RelativeLayout>

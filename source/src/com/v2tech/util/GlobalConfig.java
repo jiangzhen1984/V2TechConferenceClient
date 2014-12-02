@@ -11,6 +11,7 @@ import android.content.Context;
 import android.util.DisplayMetrics;
 import android.util.SparseArray;
 
+import com.V2.jni.util.V2Log;
 import com.v2tech.R;
 
 public class GlobalConfig {
@@ -192,6 +193,25 @@ public class GlobalConfig {
 			}
 		}
 		return false;
+	}
+	
+	/**
+	 * 获取当前栈顶的activity
+	 * 
+	 * @param context
+	 * @return true is background , false is Foreground
+	 */
+	public static String getTopTastActivityName(Context context) {
+		ActivityManager am = (ActivityManager) context
+				.getSystemService(Context.ACTIVITY_SERVICE);
+		List<RunningTaskInfo> tasks = am.getRunningTasks(1);
+		if (!tasks.isEmpty()) {
+			ComponentName topActivity = tasks.get(0).topActivity;
+			V2Log.e("TEST", "getShortClassName" + topActivity.getShortClassName());
+			V2Log.e("TEST", "getClassName" + topActivity.getClassName());
+			return topActivity.getClassName();
+		}
+		return null;
 	}
 	
 	

@@ -10,6 +10,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import android.app.Activity;
+import android.app.ActivityManager;
+import android.app.ActivityManager.RunningServiceInfo;
 import android.app.AlertDialog;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -74,10 +76,9 @@ import com.v2tech.util.Notificator;
 import com.v2tech.util.SearchUtils;
 import com.v2tech.view.bo.ConversationNotificationObject;
 import com.v2tech.view.bo.GroupUserObject;
-import com.v2tech.view.conference.GroupLayout;
 import com.v2tech.view.conference.ConferenceActivity;
+import com.v2tech.view.conference.GroupLayout;
 import com.v2tech.view.contacts.VoiceMessageActivity;
-import com.v2tech.view.contacts.add.AddFriendHistroysHandler;
 import com.v2tech.view.conversation.CommonCallBack;
 import com.v2tech.view.conversation.ConversationP2PAVActivity;
 import com.v2tech.view.conversation.MessageAuthenticationActivity;
@@ -1191,6 +1192,10 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 	private void updateFriendVerificationConversation(
 			AddFriendHistorieNode tempNode) {
 
+		if (verificationMessageItemLayout == null
+				|| verificationMessageItemData == null)
+			initVerificationItem();
+		
 		if (tempNode == null) {
 			V2Log.e(TAG,
 					"update Friend verification conversation failed ... given AddFriendHistorieNode is null");
@@ -1272,6 +1277,10 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 					"update Friend verification conversation failed ... given VMessageQualification is null");
 			return;
 		}
+		
+		if (verificationMessageItemLayout == null
+				|| verificationMessageItemData == null)
+			initVerificationItem();
 
 		String content = "";
 		ConversationFirendAuthenticationData verification = (ConversationFirendAuthenticationData) verificationMessageItemData;
@@ -1628,8 +1637,11 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 ////			updateUnreadConversation(removeItem);
 //		}
 	}
-
+	
 	private void updateStatusBar(VMessage vm) {
+		
+		V2Log.e("TEST", "class name : " + ConversationP2PAVActivity.class.getName());
+		V2Log.e("TEST", "activity name : " + GlobalConfig.getTopTastActivityName(mContext));
 		String content;
 		if (vm.getAudioItems().size() > 0) {
 			content = mContext.getResources().getString(
@@ -1888,13 +1900,15 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 	}
 
 	private void updateConferenceNotification(Conference conf) {
-		Intent enterConference = new Intent(mContext, MainActivity.class);
-		User creator = GlobalHolder.getInstance().getUser(conf.getCreator());
-		enterConference.putExtra("conf", conf);
-		enterConference.putExtra("initFragment", 3);
-		Notificator.updateSystemNotification(mContext, creator == null ? ""
-				: creator.getName(), "邀请你参加会议 " + conf.getName(), 1,
-				enterConference, PublicIntent.VIDEO_NOTIFICATION_ID);
+		if(GlobalConfig.isApplicationBackground(mContext)){
+			Intent enterConference = new Intent(mContext, MainActivity.class);
+			User creator = GlobalHolder.getInstance().getUser(conf.getCreator());
+			enterConference.putExtra("conf", conf);
+			enterConference.putExtra("initFragment", 3);
+			Notificator.updateSystemNotification(mContext, creator == null ? ""
+					: creator.getName(), "邀请你参加会议 " + conf.getName(), 1,
+					enterConference, PublicIntent.VIDEO_NOTIFICATION_ID);
+		}
 	}
 
 	public class ScrollItem implements Comparable<ScrollItem> {
@@ -2501,10 +2515,6 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 				if (uid == -1)
 					return;
 
-				if (verificationMessageItemLayout == null
-						|| verificationMessageItemData == null)
-					initVerificationItem();
-
 				AddFriendHistorieNode node = MessageLoader
 						.getNewestFriendVerificationMessage();
 				if (node == null) {
@@ -2522,9 +2532,6 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 				// red icon
 				V2Log.d(TAG,
 						"having new crowd verification message coming ... update..");
-				if (verificationMessageItemLayout == null
-						|| verificationMessageItemData == null)
-					initVerificationItem();
 
 				long msgId = intent.getLongExtra("msgId", 0);
 				if (msgId == 0l) {
@@ -2673,8 +2680,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 	 */
 	private void updateVerificationStateBar(String msg) {
 
-		if (((MainApplication) getActivity().getApplication())
-				.theAppIsRunningBackground()) {
+		if (GlobalConfig.isApplicationBackground(mContext)) {
 			// 发通知
 			Intent i = new Intent(getActivity(),
 					MessageAuthenticationActivity.class);

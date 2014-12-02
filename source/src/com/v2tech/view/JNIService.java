@@ -1038,9 +1038,10 @@ public class JNIService extends Service implements
 
 				long id = -1;
 				if (user.uid != GlobalHolder.getInstance().getCurrentUserId()) {
-					VMessageQualification waitMessage = MessageBuilder
+						boolean waitMessageExist = MessageBuilder
 							.queryWaitingQualMessageById(user.uid);
-					if (waitMessage != null) {
+					if (waitMessageExist) {
+						V2Log.e("CrowdCreateActivity  -->Delete  VMessageQualification Cache Object Successfully!");
 						// if (CrowdGroupService.isLocalInvite) {
 						MessageBuilder.deleteQualMessage(mContext, GlobalHolder
 								.getInstance().getUser(user.uid));
@@ -1050,6 +1051,7 @@ public class JNIService extends Service implements
 										QualificationState.BE_ACCEPTED, null,
 										ReadState.UNREAD, true));
 					} else {
+						V2Log.e("CrowdCreateActivity  -->Not found  VMessageQualification Cache Object ! user id is : " + user.uid);
 						Group group = GlobalHolder.getInstance().getGroupById(
 								groupType, nGroupID);
 						if (group == null) {
@@ -1405,6 +1407,12 @@ public class JNIService extends Service implements
 			currentVideoBean.startDate = GlobalConfig.getGlobalServerTime();
 			currentVideoBean.mediaState = AudioVideoMessageBean.STATE_NO_ANSWER_CALL;
 			MessageBuilder.saveMediaChatHistories(mContext, currentVideoBean);
+			
+			Intent intent = new Intent();
+			intent.setAction(ConversationP2PAVActivity.P2P_BROADCAST_MEDIA_UPDATE);
+			intent.addCategory(PublicIntent.DEFAULT_CATEGORY);
+			intent.putExtra("remoteID", currentVideoBean.remoteUserID);
+			sendBroadcast(intent);
 		}
 	}
 
@@ -1501,6 +1509,12 @@ public class JNIService extends Service implements
 			currentVideoBean.startDate = GlobalConfig.getGlobalServerTime();
 			currentVideoBean.mediaState = AudioVideoMessageBean.STATE_NO_ANSWER_CALL;
 			MessageBuilder.saveMediaChatHistories(mContext, currentVideoBean);
+			
+			Intent intent = new Intent();
+			intent.setAction(ConversationP2PAVActivity.P2P_BROADCAST_MEDIA_UPDATE);
+			intent.addCategory(PublicIntent.DEFAULT_CATEGORY);
+			intent.putExtra("remoteID", currentVideoBean.remoteUserID);
+			sendBroadcast(intent);
 		}
 	}
 

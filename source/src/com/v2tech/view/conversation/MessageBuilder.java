@@ -1044,17 +1044,17 @@ public class MessageBuilder {
 	}
 	
 	/**
-	 * 
-	 * @param id
-	 * @return
+	 *  
+	 * @param remoteUserID
+	 * @return 
 	 */
-	public static VMessageQualification queryWaitingQualMessageById(long id) {
+	public static boolean queryWaitingQualMessageById(long remoteUserID) {
 		DataBaseContext mContext = new DataBaseContext(context);
 		String selection = ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_REMOTE_USER_ID
 				+ " = ? and "
 				+ ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_RECEIVER_STATE
 				+ " = ?";
-		String[] selectionArgs = new String[] { String.valueOf(id) , String.valueOf(ReceiveQualificationType.LOCAL_INVITE_TYPE.intValue())};
+		String[] selectionArgs = new String[] { String.valueOf(remoteUserID) , String.valueOf(ReceiveQualificationType.LOCAL_INVITE_TYPE.intValue())};
 		String sortOrder = ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_SAVEDATE
 				+ " desc";
 		Cursor cursor = mContext.getContentResolver().query(
@@ -1062,14 +1062,15 @@ public class MessageBuilder {
 				ContentDescriptor.HistoriesCrowd.Cols.ALL_CLOS, selection,
 				selectionArgs, sortOrder);
 
-		if (cursor == null || cursor.getCount() <= 0)
-			return null;
-		VMessageQualification msg = null;
-		if (cursor.moveToNext()) {
-			msg = extraMsgFromCursor(cursor);
+		if(cursor == null)
+			return false;
+		
+		if (cursor.getCount() <= 0){
+			cursor.close();
+			return false;
 		}
 		cursor.close();
-		return msg;
+		return true;
 	}
 
     /**

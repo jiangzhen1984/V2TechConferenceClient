@@ -492,18 +492,22 @@ public class CrowdCreateActivity extends Activity {
 //        User applicant = GlobalHolder.getInstance().getUser(crowd.getOwnerUser().getmUserId());
 //        if (applicant == null)
 //            applicant = new User(uid);
+		if(crowd == null)
+			crowd = new CrowdGroup(0, "", null);
+		crowd.setAuthType(AuthType.ALLOW_ALL);
 		VMessageQualificationApplicationCrowd crowdQuion = new VMessageQualificationApplicationCrowd(
 				crowd, user);
 		crowdQuion.setReadState(ReadState.UNREAD);
 		Uri uri = MessageBuilder.saveQualicationMessage(crowdQuion , true);
 		if (uri != null){
-			V2Log.e("MessageBuilder updateQualicationMessageState --> Save VMessageQualification Object Successfully , "
+			V2Log.e("CrowdCreateActivity  --> Save VMessageQualification Cache Object Successfully , "
 					+ "groupID is : " + crowd.getmGId() + " userID is : " + user.getmUserId() + ""
-							+ " database id is : " + Long.parseLong(uri.getLastPathSegment()));
+							+ " database id is : " + Long.parseLong(uri.getLastPathSegment()) 
+							+ " URI is : " + uri.toString());
 		}
 		else{
 			Toast.makeText(mContext, "邀请群成员失败", 0).show();
-			V2Log.e("MessageBuilder updateQualicationMessageState --> Save VMessageQualification Object failed , "
+			V2Log.e("CrowdCreateActivity  --> Save VMessageQualification Cache Object failed , "
 					+ "the Uri is null...groupID is : " + crowd.getmGId() + " userID is : " + user.getmUserId());
 		}
 	

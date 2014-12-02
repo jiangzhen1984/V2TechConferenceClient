@@ -1267,8 +1267,8 @@ public class MessageAuthenticationActivity extends Activity {
 						// Add crowd group to cache, we can't handle this after
 						// done
 						// because group information come before done event.
-						GlobalHolder.getInstance().addGroupToList(
-								GroupType.CHATING.intValue(), cg);
+//						GlobalHolder.getInstance().addGroupToList(
+//								GroupType.CHATING.intValue(), cg);
 
 						Crowd crowd = new Crowd(cg.getmGId(),
 								cg.getOwnerUser(), cg.getName(), cg.getBrief());

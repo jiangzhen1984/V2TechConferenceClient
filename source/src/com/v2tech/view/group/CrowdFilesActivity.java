@@ -692,8 +692,7 @@ public class CrowdFilesActivity extends Activity {
 					adapter.notifyDataSetChanged();
 				} else {
 					boolean showDeleteMode = false;
-					if (crowd.getOwnerUser().getmUserId() == GlobalHolder
-							.getInstance().getCurrentUserId()) {
+					if (crowd.getOwnerUser().getmUserId() == currentLoginUserID) {
 						showDeleteMode = true;
 						suspendOrResumeDownloadingFiles(true);
 					} else {

@@ -452,30 +452,4 @@ public class MainApplication extends Application {
 			}
 		}
 	}
-
-	public boolean theAppIsRunningBackground() {
-
-		String theAppPackageName = getPackageName();
-		String currentRuningPackageName = null;
-
-		ActivityManager activityManager = (ActivityManager) getSystemService(Activity.ACTIVITY_SERVICE);
-		List<RunningTaskInfo> listRunningTaskInfo = activityManager
-				.getRunningTasks(1);
-		if ((listRunningTaskInfo != null) && listRunningTaskInfo.size() > 0) {
-			currentRuningPackageName = listRunningTaskInfo.get(0).topActivity
-					.getPackageName();
-
-		}
-
-		if ((theAppPackageName == null) || (currentRuningPackageName == null)) {
-			return false;
-		}
-
-		if (currentRuningPackageName.equals(theAppPackageName)) {
-			return false;
-		} else {
-			return true;
-		}
-	}
-
 }

@@ -226,6 +226,8 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 	private long intervalTime = 15000; // 显示消息时间状态的间隔时间
 	private boolean isReLoading; // 用于onNewIntent判断是否需要重新加载界面聊天数据
 	private boolean sendFile; // 用于从个人信息中传递过来的文件，只发送一次
+	
+	private MessageBodyType bodyType;
 
 	/**
 	 * Record Audio item flags
@@ -629,6 +631,7 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 		user1Id = GlobalHolder.getInstance().getCurrentUserId();
 		local = GlobalHolder.getInstance().getUser(user1Id);
 		if (cov.getType() == Conversation.TYPE_CONTACT) {
+			bodyType = MessageBodyType.SINGLE_USER_TYPE;
 			currentConversationViewType = V2GlobalEnum.GROUP_TYPE_USER;
 			user2Id = cov.getExtId();
 			remote = GlobalHolder.getInstance().getUser(user2Id);
@@ -648,6 +651,7 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 			mShowCrowdDetailButton.setVisibility(View.GONE);
 			mButtonCreateMetting.setVisibility(View.GONE);
 		} else if (cov.getType() == Conversation.TYPE_GROUP) {
+			bodyType = MessageBodyType.CROWD_TYPE;
 			currentConversationViewType = V2GlobalEnum.GROUP_TYPE_CROWD;
 			groupId = cov.getExtId();
 			Group group =  GlobalHolder.getInstance()
@@ -660,6 +664,7 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 			mUserTitleTV.setText(group.getName());
 		} else if (cov.getType() == V2GlobalEnum.GROUP_TYPE_DEPARTMENT ||
 				cov.getType() == V2GlobalEnum.GROUP_TYPE_DISCUSSION) {
+			bodyType = MessageBodyType.CROWD_TYPE;
 			if(cov.getType() == V2GlobalEnum.GROUP_TYPE_DEPARTMENT ){
 				currentConversationViewType = V2GlobalEnum.GROUP_TYPE_DEPARTMENT;
 				OrgGroup departmentGroup = (OrgGroup) GlobalHolder.getInstance()
@@ -777,7 +782,7 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 								"palying next aduio item failed , view is null , id is : "
 										+ vm.getId());
 						MessageBodyView bodyView = new MessageBodyView(this,
-								vm, vm.isShowTime());
+								vm, vm.isShowTime() , bodyType);
 						foundView = bodyView;
 						((VMessageAdater) wrapper).setView(bodyView);
 					}
@@ -2323,7 +2328,7 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 		if(showingPopupWindow != null)
 			showingPopupWindow.dissmisPopupWindow();
 		judgeShouldShowTime(m);
-		MessageBodyView mv = new MessageBodyView(this, m, m.isShowTime());
+		MessageBodyView mv = new MessageBodyView(this, m, m.isShowTime() , bodyType);
 		mv.setCallback(listener);
 		VMessageAdater adater = new VMessageAdater(m);
 		adater.setView(mv);
@@ -2545,7 +2550,7 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 			VMessage vm = (VMessage) wr.getItemObject();
 			if (convertView == null) {
 				MessageBodyView mv = new MessageBodyView(mContext, vm,
-						vm.isShowTime());
+						vm.isShowTime() , bodyType);
 				mv.setCallback(listener);
 				convertView = mv;
 			} else {
@@ -2627,7 +2632,7 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 					adapterFileIcon(fileItems);
 				}
 				MessageBodyView mv = new MessageBodyView(mContext, vm,
-						vm.isShowTime());
+						vm.isShowTime() , bodyType);
 				mv.setCallback(listener);
 				((VMessageAdater) wrapper).setView(mv);
 			}

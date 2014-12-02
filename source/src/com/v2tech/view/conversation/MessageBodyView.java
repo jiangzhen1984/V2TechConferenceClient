@@ -113,6 +113,7 @@ public class MessageBodyView extends LinearLayout {
 	private TextView pwDeleteTV;
 	
 	private RotateAnimation anima;
+	private MessageBodyType bodyType;
 	
 	public interface ClickListener {
 		public void onMessageClicked(VMessage v);
@@ -145,11 +146,19 @@ public class MessageBodyView extends LinearLayout {
 		public void requestStopOtherAudio(VMessage vm);
 	}
 
-	public MessageBodyView(Context context, VMessage m, boolean isShowTime) {
+	public MessageBodyView(Context context, VMessage m, boolean isShowTime , MessageBodyType bodyType) {
 		super(context);
 		this.mMsg = m;
-		rootView = LayoutInflater.from(context).inflate(R.layout.message_body,
-				null, false);
+		this.bodyType = bodyType;
+		if(bodyType == MessageBodyType.SINGLE_USER_TYPE)
+			rootView = LayoutInflater.from(context).inflate(R.layout.message_body,
+					null, false);
+		else if(bodyType == MessageBodyType.CROWD_TYPE)
+			rootView = LayoutInflater.from(context).inflate(R.layout.crowd_message_body,
+					null, false);
+		else
+			throw new RuntimeException("UNKNOWN MessageBody Type !");
+			
 		this.isShowTime = isShowTime;
 		this.localHandler = new Handler();
 		initView();
@@ -207,8 +216,6 @@ public class MessageBodyView extends LinearLayout {
 					.findViewById(R.id.message_body_arrow_left);
 			seconds = (TextView) rootView
 					.findViewById(R.id.message_body_video_item_second_left);
-			name = (TextView) rootView
-					.findViewById(R.id.message_body_person_name_left);
 			failedIcon = rootView
 					.findViewById(R.id.message_body_failed_item_left);
 			unReadIcon = rootView
@@ -218,9 +225,13 @@ public class MessageBodyView extends LinearLayout {
 			mLocalMessageContainter.setVisibility(View.VISIBLE);
 			mRemoteMessageContainter.setVisibility(View.INVISIBLE);
 			User fromUser = mMsg.getFromUser();
-			if (fromUser != null)
-				name.setText(fromUser.getName());
-
+			
+			if(bodyType == MessageBodyType.CROWD_TYPE){
+				name = (TextView) rootView
+						.findViewById(R.id.message_body_person_name_left);
+				if (fromUser != null)
+					name.setText(fromUser.getName());
+			}
 		} else {
 			mHeadIcon = (ImageView) rootView
 					.findViewById(R.id.conversation_message_body_icon_right);
@@ -230,8 +241,6 @@ public class MessageBodyView extends LinearLayout {
 					.findViewById(R.id.message_body_arrow_right);
 			seconds = (TextView) rootView
 					.findViewById(R.id.message_body_video_item_second_right);
-			name = (TextView) rootView
-					.findViewById(R.id.message_body_person_name_right);
 			failedIcon = rootView
 					.findViewById(R.id.message_body_failed_item_right);
 			unReadIcon = rootView
@@ -242,8 +251,12 @@ public class MessageBodyView extends LinearLayout {
 			mRemoteMessageContainter.setVisibility(View.VISIBLE);
 
 			User localUser = GlobalHolder.getInstance().getCurrentUser();
-			if (localUser != null)
-				name.setText(localUser.getName());
+			if(bodyType == MessageBodyType.CROWD_TYPE){
+				name = (TextView) rootView
+						.findViewById(R.id.message_body_person_name_right);
+				if (localUser != null)
+					name.setText(localUser.getName());
+			}
 		}
 
 		failedIcon.setVisibility(View.INVISIBLE);
@@ -256,11 +269,6 @@ public class MessageBodyView extends LinearLayout {
 		if(mMsg.getState() == VMessageAbstractItem.STATE_NORMAL & mMsg.getFileItems().size() <= 0){
 			updateSendingFlag(true);
 		}
-
-		if (mMsg.getMsgCode() != V2GlobalEnum.GROUP_TYPE_USER)
-			name.setVisibility(View.VISIBLE);
-		else
-			name.setVisibility(View.INVISIBLE);
 
 		if (mMsg.getFromUser() != null && mMsg.getFromUser().isDirty()) {
 			User fromUser = GlobalHolder.getInstance().getUser(
@@ -1134,4 +1142,29 @@ public class MessageBodyView extends LinearLayout {
 
 	}
 
+}
+
+enum MessageBodyType{
+	
+	SINGLE_USER_TYPE(0) , CROWD_TYPE(1) , UNKNOWN(2);
+	private int type;
+
+	private MessageBodyType(int type) {
+		this.type = type;
+	}
+
+	public static MessageBodyType fromInt(int code) {
+		switch (code) {
+		case 0:
+			return SINGLE_USER_TYPE;
+		case 1:
+			return CROWD_TYPE;
+		default:
+			return UNKNOWN;
+
+		}
+	}
+	public int intValue() {
+		return type;
+	}
 }
