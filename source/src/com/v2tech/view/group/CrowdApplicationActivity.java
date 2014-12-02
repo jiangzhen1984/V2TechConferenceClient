@@ -5,7 +5,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -19,11 +18,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.v2tech.R;
-import com.v2tech.service.BitmapManager;
 import com.v2tech.service.CrowdGroupService;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.service.MessageListener;
-import com.v2tech.service.BitmapManager.BitmapChangedListener;
 import com.v2tech.service.jni.JNIResponse;
 import com.v2tech.service.jni.JNIResponse.Result;
 import com.v2tech.view.JNIService;
@@ -32,9 +29,9 @@ import com.v2tech.view.conversation.MessageAuthenticationActivity;
 import com.v2tech.view.conversation.MessageBuilder;
 import com.v2tech.vo.Crowd;
 import com.v2tech.vo.CrowdGroup;
+import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.User;
 import com.v2tech.vo.VMessageQualification;
-import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.VMessageQualificationInvitationCrowd;
 
 /**
@@ -149,8 +146,8 @@ public class CrowdApplicationActivity extends Activity {
     }
 
 	private void handleApplyDone() {
-		mButtonLy.setVisibility(View.GONE);
-		mNotesLy.setVisibility(View.VISIBLE);
+//		mButtonLy.setVisibility(View.GONE);
+//		mNotesLy.setVisibility(View.VISIBLE);
 
 		InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 		imm.hideSoftInputFromWindow(mApplicationMessage.getWindowToken(), 0);
@@ -287,12 +284,12 @@ public class CrowdApplicationActivity extends Activity {
 						.toString(), new MessageListener(mLocalHandler,
 						APPLY_DONE, null));
 				isInApplicationMode = false;
-				updateView();
                 if (vq != null) {
                     vq.setReadState(VMessageQualification.ReadState.READ);
                     vq.setQualState(VMessageQualification.QualificationState.WAITING_FOR_APPLY);
                     MessageBuilder.updateQualicationMessage(mContext, vq);
                 }
+                updateView();
 			}
 		}
 

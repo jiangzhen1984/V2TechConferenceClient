@@ -2,6 +2,7 @@ package com.v2tech.view.group;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,6 +13,7 @@ import android.widget.TextView;
 
 import com.V2.jni.util.V2Log;
 import com.v2tech.R;
+import com.v2tech.service.GlobalHolder;
 import com.v2tech.vo.User;
 
 public class ContactUserView extends LinearLayout {
@@ -68,8 +70,15 @@ public class ContactUserView extends LinearLayout {
 		mUserNameTV = (TextView) view.findViewById(R.id.contact_user_name);
 		mUserSignatureTV = (TextView) view
 				.findViewById(R.id.contact_user_signature);
-
-		mUserNameTV.setText(mUser.getName());
+		
+		boolean isFriend = GlobalHolder.getInstance().isFriend(mUser);
+		if (isFriend) {
+			if (!TextUtils.isEmpty(mUser.getNickName()))
+				mUserNameTV.setText(mUser.getNickName());
+			else
+				mUserNameTV.setText(mUser.getName());
+		} else
+			mUserNameTV.setText(u.getName());
 		mUserSignatureTV.setText(mUser.getSignature() == null ? "" : mUser
 				.getSignature());
 

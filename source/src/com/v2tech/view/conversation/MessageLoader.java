@@ -172,7 +172,7 @@ public class MessageLoader {
 				String.valueOf(uid2), String.valueOf(uid2),
 				String.valueOf(uid1), String.valueOf(groupType) };
 
-		String order = ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_SAVEDATE
+		String order = ContentDescriptor.HistoriesMessage.Cols.ID
 				+ " desc , "
 				+ ContentDescriptor.HistoriesMessage.Cols.ID
 				+ " desc limit " + limit + " offset  " + offset;
@@ -738,13 +738,17 @@ public class MessageLoader {
 			boolean flag = loadFileMessageById(vm, mContext);
 			if (flag) {
 				for (VMessageFileItem vMessageFileItem : vm.getFileItems()) {
-					if (vMessageFileItem.getState() == VMessageFileItem.STATE_FILE_SENDING) {
+					if (vMessageFileItem.getState() == VMessageFileItem.STATE_FILE_SENDING ||
+							vMessageFileItem.getState() == VMessageFileItem.STATE_FILE_DOWNLOADING) {
 						crowdFile = new VCrowdFile();
 						crowdFile.setId(vMessageFileItem.getUuid());
 						crowdFile.setPath(vMessageFileItem.getFilePath());
 						crowdFile.setSize(vMessageFileItem.getFileSize());
 						crowdFile.setName(vMessageFileItem.getFileName());
-						crowdFile.setState(VCrowdFile.State.UPLOADING);
+						if(vMessageFileItem.getState() == VMessageFileItem.STATE_FILE_SENDING)
+							crowdFile.setState(VCrowdFile.State.UPLOADING);
+						else
+							crowdFile.setState(VCrowdFile.State.DOWNLOADING);
 						crowdFile.setProceedSize((long) vMessageFileItem
 								.getProgress());
 						crowdFile.setUploader(vm.getFromUser());
@@ -781,7 +785,7 @@ public class MessageLoader {
 				+ "= ?";
 		String[] args = new String[] { String.valueOf(groupType),
 				String.valueOf(groupId) };
-		String order = ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_SAVEDATE
+		String order = ContentDescriptor.HistoriesMessage.Cols.ID
 				+ " desc limit " + limit + " offset  " + offset;
 		return queryMessage(context, selection, args, order);
 	}
@@ -1151,7 +1155,7 @@ public class MessageLoader {
 	 * 
 	 * @param groupID
 	 */
-	public static void deleteCrowdVerificationMessage(long groupID) {
+	public static int deleteCrowdVerificationMessage(long groupID) {
 
 		DataBaseContext mContext = new DataBaseContext(context);
 		int ret = mContext.getContentResolver().delete(
@@ -1162,6 +1166,7 @@ public class MessageLoader {
 			V2Log.d(TAG,
 					"May delete CrowdVerificationMessage failed...groupID : "
 							+ groupID);
+		return ret;
 	}
 
     /**
@@ -1169,7 +1174,7 @@ public class MessageLoader {
      *
      * @param groupID
      */
-    public static void deleteFriendVerificationMessage(long userID) {
+    public static int deleteFriendVerificationMessage(long userID) {
 
         DataBaseContext mContext = new DataBaseContext(context);
         int ret = mContext.getContentResolver().delete(
@@ -1180,6 +1185,7 @@ public class MessageLoader {
             V2Log.d(TAG,
                     "May delete CrowdVerificationMessage failed...groupID : "
                             + userID);
+        return ret;
     }
 
 	/**
@@ -1497,28 +1503,16 @@ public class MessageLoader {
 	// cur.close();
 	// }
 
-	public static AddFriendHistorieNode getNewestFriendVerificationMessage(
-			Context context, User user) {
+	public static AddFriendHistorieNode getNewestFriendVerificationMessage() {
 
 		DataBaseContext mContext = new DataBaseContext(context);
-		if (user == null) {
-			V2Log.e("To query failed...please check the given User Object");
-			return null;
-		}
 
-		String selection = ContentDescriptor.HistoriesAddFriends.Cols.HISTORY_FRIEND_FROM_USER_ID
-				+ "= ? or "
-				+ ContentDescriptor.HistoriesAddFriends.Cols.HISTORY_FRIEND_TO_USER_ID
-				+ "= ?";
-		String[] selectionArgs = new String[] {
-				String.valueOf(user.getmUserId()),
-				String.valueOf(user.getmUserId()) };
 		String sortOrder = ContentDescriptor.HistoriesAddFriends.Cols.HISTORY_FRIEND_SAVEDATE
 				+ " desc limit 1 offset 0 ";
 		Cursor cr = mContext.getContentResolver().query(
 				ContentDescriptor.HistoriesAddFriends.CONTENT_URI,
-				ContentDescriptor.HistoriesAddFriends.Cols.ALL_CLOS, selection,
-				selectionArgs, sortOrder);
+				ContentDescriptor.HistoriesAddFriends.Cols.ALL_CLOS, null,
+				null, sortOrder);
 
 		if (cr == null)
 			return null;
@@ -1555,6 +1549,28 @@ public class MessageLoader {
 		cr.close();
 		return tempNode;
 	}
+	
+	public static boolean getUNReandFriendMessage(){
+		DataBaseContext mContext = new DataBaseContext(context);
+		
+		String selection = ContentDescriptor.HistoriesAddFriends.Cols.HISTORY_MEDIA_READ_STATE
+				+ "= ?";
+		String[] selectionArgs = new String[] {
+				String.valueOf(ReadState.UNREAD.intValue())};
+		Cursor cr = mContext.getContentResolver().query(
+				ContentDescriptor.HistoriesAddFriends.CONTENT_URI,
+				ContentDescriptor.HistoriesAddFriends.Cols.ALL_CLOS, selection,
+				selectionArgs, null);
+
+		if (cr == null)
+			return false;
+
+		if (cr.getCount() <= 0) {
+			cr.close();
+			return false;
+		}
+		return true;
+	}
 
 	/**
 	 * 
@@ -1562,25 +1578,14 @@ public class MessageLoader {
 	 * @param user
 	 * @return
 	 */
-	public static VMessageQualification getNewestCrowdVerificationMessage(
-			Context context, User user) {
+	public static VMessageQualification getNewestCrowdVerificationMessage() {
 
 		DataBaseContext mContext = new DataBaseContext(context);
-		if (user == null) {
-			V2Log.e("To query failed...please check the given User Object");
-			return null;
-		}
 
 		VMessageQualification message = null;
-		String selection = "(" + ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_FROM_USER_ID
-				+ "= ? or "
-				+ ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_TO_USER_ID
-				+ "= ? ) and "
-				+ ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_RECEIVER_STATE
+		String selection = ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_RECEIVER_STATE
 				+ " = ? ";
 		String[] selectionArgs = new String[] {
-				String.valueOf(user.getmUserId()),
-				String.valueOf(user.getmUserId()),
 				String.valueOf(ReceiveQualificationType.REMOTE_APPLY_TYPE.intValue())};
 		String sortOrder = ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_SAVEDATE
 				+ " desc limit 1 offset 0 ";

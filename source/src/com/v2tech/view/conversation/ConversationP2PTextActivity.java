@@ -1902,9 +1902,9 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 								strTextContent.length());
 						VMessageTextItem vti = new VMessageTextItem(vm,
 								lastText);
+						vti.setNewLine(true);
 						// If strStart is 0 means string at new line
 						// if (lastEnd == 0) {
-						// vti.setNewLine(true);
 						// }
 					}
 					strStart = index;
@@ -2563,23 +2563,23 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 			if (user == null) {
 				return;
 			}
-			if (user.getmUserId() == local.getmUserId()
-					|| (remote != null && user.getmUserId() == remote
-							.getmUserId())) {
-				for (int i = 0; i < messageArray.size(); i++) {
-					MessageBodyView mdv = (MessageBodyView) messageArray.get(i)
-							.getView();
-					// TODO need to figure out why it will be null
-					// when re-connect network.
-					if (mdv == null) {
-						continue;
-					}
-					VMessage vm = mdv.getMsg();
-					if (vm.getFromUser().getmUserId() == user.getmUserId()) {
-						mdv.updateAvatar(bm);
-					}
+//			if (user.getmUserId() == local.getmUserId()
+//					|| (remote != null && user.getmUserId() == remote
+//							.getmUserId())) {
+			for (int i = 0; i < messageArray.size(); i++) {
+				MessageBodyView mdv = (MessageBodyView) messageArray.get(i)
+						.getView();
+				// TODO need to figure out why it will be null
+				// when re-connect network.
+				if (mdv == null) {
+					continue;
+				}
+				VMessage vm = mdv.getMsg();
+				if (vm.getFromUser().getmUserId() == user.getmUserId()) {
+					mdv.updateAvatar(bm);
 				}
 			}
+//			}
 
 		}
 

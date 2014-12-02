@@ -3,6 +3,7 @@ package com.v2tech.view.adapter;
 import java.util.List;
 
 import android.content.Context;
+import android.text.TextUtils;
 import android.text.TextUtils.TruncateAt;
 import android.view.Gravity;
 import android.view.View;
@@ -13,6 +14,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.v2tech.R;
+import com.v2tech.service.GlobalHolder;
 import com.v2tech.view.group.ContactUserView;
 import com.v2tech.vo.User;
 
@@ -78,7 +80,14 @@ public class CreateConfOrCrowdAdapter extends BaseAdapter {
 			tag.headIcon.setImageResource(R.drawable.avatar);
 		}
 
-		tag.name.setText(user.getName());
+		boolean isFriend = GlobalHolder.getInstance().isFriend(user);
+		if (isFriend) {
+			if (!TextUtils.isEmpty(user.getNickName()))
+				tag.name.setText(user.getNickName());
+			else
+				tag.name.setText(user.getName());
+		} else
+			tag.name.setText(user.getName());
 	}
 
 	private View getAttendeeView(ViewTag tag, final User u) {

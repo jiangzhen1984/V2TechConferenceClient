@@ -91,6 +91,7 @@ public class VideoInvitionAttendeeLayout extends LinearLayout {
 		mGroupListView.setShowedCheckedBox(true);
 		mGroupListView.setTextFilterEnabled(true);
 		mGroupListView.setListener(mListener);
+		mGroupListView.setIgnoreCurrentUser(true);
 
 		mAttendeeContainer = (AdapterView<ListAdapter>) view.findViewById(R.id.conference_attendee_container);
 		mAttendeeContainer.setOnItemClickListener(mItemClickedListener);

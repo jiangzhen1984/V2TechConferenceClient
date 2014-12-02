@@ -574,7 +574,7 @@ public class ConferenceCreateActivity extends Activity {
 				if (rccr.getResult() != JNIResponse.Result.SUCCESS) {
                     V2Log.e("ConferenceCreateActivity --> CREATE FAILED ... ERROR CODE IS : " + rccr.getResult().name());
 					mErrorNotificationLayout.setVisibility(View.VISIBLE);
-					if(rccr.getResult() == JNIResponse.Result.NO_RESOURCE)
+					if(rccr.getResult() == JNIResponse.Result.ERR_CONF_LOCKDOG_NORESOURCE)
 						mErrorMessageTV
 							.setText(R.string.error_no_resource);
 					else

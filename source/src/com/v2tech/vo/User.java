@@ -359,8 +359,8 @@ public class User implements Comparable<User> {
 			return;
 		}
 		this.mBelongsGroup.add(g);
-		if(this.mUserId==11111){
-			Log.i("20141201 2","数："+mBelongsGroup.size());
+		if (this.mUserId == 11111) {
+			Log.i("20141201 2", "数：" + mBelongsGroup.size());
 			for (Group gg : mBelongsGroup) {
 				Log.i("20141201 2", gg.getName());
 			}
@@ -407,39 +407,37 @@ public class User implements Comparable<User> {
 	public Bitmap getAvatarBitmap() {
 		if (avatar == null) {
 			avatar = GlobalHolder.getInstance().getUserAvatar(this.mUserId);
-			if(avatar == null){
-				//FIXME if get null from loadAvatarFromPath 
+			if (avatar == null) {
+				// FIXME if get null from loadAvatarFromPath
 				return loadAvatarBitmap(mAvatarPath);
-			}
-			else{
-				if(avatar.isRecycled())
+			} else {
+				if (avatar.isRecycled())
 					return loadAvatarBitmap(mAvatarPath);
 			}
-		}
-		else if(avatar.isRecycled()){
+		} else if (avatar.isRecycled()) {
 			avatar = GlobalHolder.getInstance().getUserAvatar(this.mUserId);
-			if(avatar == null){
+			if (avatar == null) {
 				return loadAvatarBitmap(mAvatarPath);
-			}
-			else{
-				if(avatar.isRecycled())
+			} else {
+				if (avatar.isRecycled())
 					return loadAvatarBitmap(mAvatarPath);
 			}
 		}
 		return avatar;
 	}
-	
-	private Bitmap loadAvatarBitmap(String mAvatarPath){
-		Bitmap bitmap = BitmapUtil.loadAvatarFromPath(mAvatarPath);
-		if(bitmap != null){
-            if(!bitmap.isRecycled())
-                return bitmap;
-            else
-                throw new RuntimeException("User loadAvatarBitmap --> Loading avatar from file path faield... bitmap is recycled!");
 
-		}
-        else
-             throw new RuntimeException("User loadAvatarBitmap --> Loading avatar from file path faield... bitmap is null!");
+	private Bitmap loadAvatarBitmap(String mAvatarPath) {
+		Bitmap bitmap = BitmapUtil.loadAvatarFromPath(mAvatarPath);
+		if (bitmap != null) {
+			if (!bitmap.isRecycled())
+				return bitmap;
+			else
+				throw new RuntimeException(
+						"User loadAvatarBitmap --> Loading avatar from file path faield... bitmap is recycled!");
+
+		} else
+			throw new RuntimeException(
+					"User loadAvatarBitmap --> Loading avatar from file path faield... bitmap is null!");
 	}
 
 	public void setAvatarBitmap(Bitmap bm) {
@@ -627,9 +625,6 @@ public class User implements Comparable<User> {
 		}
 		return null;
 	}
-
-	
-
 
 	public enum DeviceType {
 		CELL_PHONE(2), PC(1), UNKNOWN(-1);

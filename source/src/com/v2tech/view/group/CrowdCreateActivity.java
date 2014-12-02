@@ -37,6 +37,7 @@ import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.V2.jni.util.V2Log;
 import com.v2tech.R;
@@ -45,25 +46,21 @@ import com.v2tech.service.GlobalHolder;
 import com.v2tech.service.MessageListener;
 import com.v2tech.service.jni.CreateCrowdResponse;
 import com.v2tech.service.jni.JNIResponse;
-import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.SPUtil;
 import com.v2tech.view.JNIService;
 import com.v2tech.view.PublicIntent;
 import com.v2tech.view.adapter.CreateConfOrCrowdAdapter;
 import com.v2tech.view.conversation.MessageBuilder;
-import com.v2tech.view.conversation.MessageLoader;
 import com.v2tech.view.widget.GroupListView;
 import com.v2tech.view.widget.GroupListView.ItemData;
 import com.v2tech.vo.CrowdGroup;
 import com.v2tech.vo.CrowdGroup.AuthType;
 import com.v2tech.vo.Group;
 import com.v2tech.vo.Group.GroupType;
-import com.v2tech.vo.VMessageQualification.ReadState;
-import com.v2tech.vo.VMessageQualification.Type;
 import com.v2tech.vo.NetworkStateCode;
 import com.v2tech.vo.User;
+import com.v2tech.vo.VMessageQualification.ReadState;
 import com.v2tech.vo.VMessageQualificationApplicationCrowd;
-import com.v2tech.vo.VMessageQualificationInvitationCrowd;
 
 /**
  * Intent parameters:<br>
@@ -470,6 +467,9 @@ public class CrowdCreateActivity extends Activity {
 				}
 
 				List<User> userList = new ArrayList<User>(mUserList);
+				for (User user : userList) {
+					saveQualication(user);
+				}
 				if (mCreateWaitingDialog != null && mCreateWaitingDialog.isShowing()) {
 					mCreateWaitingDialog.dismiss();
 				}
@@ -478,7 +478,6 @@ public class CrowdCreateActivity extends Activity {
 						"",
 						mContext.getResources().getString(
 								R.string.notification_watiing_process), true);
-				
 				//Do not add userList to crowd, because this just invitation.
 				cg.createCrowdGroup(crowd, userList, new MessageListener(mLocalHandler,
 						CREATE_GROUP_MESSAGE, crowd));
@@ -499,9 +498,11 @@ public class CrowdCreateActivity extends Activity {
 		Uri uri = MessageBuilder.saveQualicationMessage(crowdQuion , true);
 		if (uri != null){
 			V2Log.e("MessageBuilder updateQualicationMessageState --> Save VMessageQualification Object Successfully , "
-					+ "the Uri is null...groupID is : " + crowd.getmGId() + " userID is : " + user.getmUserId());
+					+ "groupID is : " + crowd.getmGId() + " userID is : " + user.getmUserId() + ""
+							+ " database id is : " + Long.parseLong(uri.getLastPathSegment()));
 		}
 		else{
+			Toast.makeText(mContext, "邀请群成员失败", 0).show();
 			V2Log.e("MessageBuilder updateQualicationMessageState --> Save VMessageQualification Object failed , "
 					+ "the Uri is null...groupID is : " + crowd.getmGId() + " userID is : " + user.getmUserId());
 		}

@@ -524,8 +524,7 @@ public class MessageAuthenticationActivity extends Activity {
 		Cursor cursor = null;
 		try {
 			VMessageQualification nestQualification = MessageLoader
-					.getNewestCrowdVerificationMessage(mContext, GlobalHolder
-							.getInstance().getCurrentUser());
+					.getNewestCrowdVerificationMessage();
 			String sql = "select * from " + AddFriendHistroysHandler.tableName
 					+ " order by SaveDate desc limit 1";
 			cursor = AddFriendHistroysHandler.select(mContext, sql,
@@ -1402,13 +1401,50 @@ public class MessageAuthenticationActivity extends Activity {
                     .equals(intent.getAction())
                     || intent.getAction().equals(
                     JNIService.JNI_BROADCAST_KICED_CROWD)) {
-//                long cid = intent.getLongExtra("crowd", -1l);
-//                if (cid == -1l) {
-//                    V2Log.e(TAG,
-//                            "Received the broadcast to quit the crowd group , but crowd id is wroing... ");
-//                    return;
-//                }
-                groupAdapter.notifyDataSetChanged();
+                long cid = intent.getLongExtra("crowd", -1l);
+                if (cid == -1l) {
+                    V2Log.e(TAG,
+                            "Received the broadcast to quit the crowd group , but crowd id is wroing... ");
+                    return;
+                }
+				
+                int location = -1;
+				for (int i = 0 ; i < mMessageList.size() ; i++) {
+					VMessageQualification message = (VMessageQualification) mMessageList.get(i).obj;
+					if(message.getType() == Type.CROWD_APPLICATION){
+						VMessageQualificationApplicationCrowd apply = (VMessageQualificationApplicationCrowd) message;
+						if(apply.getCrowdGroup() != null){
+							if(apply.getCrowdGroup().getmGId() == cid){
+								location = i;
+								break;
+							}
+						}
+						else
+							V2Log.e(TAG, "Remove the crowd qualification message failed! get crowd group is null"
+									+ "crowd id is " + cid + " and message id is : " + apply.getId());
+					}
+					else{
+						VMessageQualificationInvitationCrowd invite = (VMessageQualificationInvitationCrowd) message;
+						if(invite.getCrowdGroup() != null){
+							if(invite.getCrowdGroup().getmGId() == cid){
+								location = i;
+								break;
+							}
+						}
+						else
+							V2Log.e(TAG, "Remove the crowd qualification message failed! get crowd group is null"
+									+ "crowd id is " + cid + " and message id is : " + invite.getId());
+					}
+				}
+				
+				if(location != -1){
+					mMessageList.remove(location);
+					groupAdapter.notifyDataSetChanged();
+					V2Log.e(TAG, "Remove the crowd qualification message successful! crowd id is : " + cid);
+				}
+//				if(!isFriendAuthentication)
+//					changeMessageAuthenticationListView();
+//				rbGroupAuthentication.setChecked(true);
             }
 		}
 	}

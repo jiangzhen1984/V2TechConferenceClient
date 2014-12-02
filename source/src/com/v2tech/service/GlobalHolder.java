@@ -452,11 +452,13 @@ public class GlobalHolder {
 			list = mDiscussionBoardGroup;
 		}
 		mGroupHolder.remove(Long.valueOf(gid));
-		for (int i = 0; i < list.size(); i++) {
-			Group g = list.get(i);
-			if (g.getmGId() == gid) {
-				list.remove(g);
-				return true;
+		if(list != null){
+			for (int i = 0; i < list.size(); i++) {
+				Group g = list.get(i);
+				if (g.getmGId() == gid) {
+					list.remove(g);
+					return true;
+				}
 			}
 		}
 		return false;

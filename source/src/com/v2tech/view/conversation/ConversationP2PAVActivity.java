@@ -330,7 +330,7 @@ public class ConversationP2PAVActivity extends Activity implements
 	@Override
 	protected void onStop() {
 		super.onStop();
-		stopRingTone();
+//		stopRingTone();
 		if (uad.isConnected()) {
 			// Resume audio
 			chatService.suspendOrResumeAudio(false);
@@ -351,6 +351,7 @@ public class ConversationP2PAVActivity extends Activity implements
 	protected void onDestroy() {
 		super.onDestroy();
 		V2Log.d(TAG_THIS_FILE, "ondestory invokeing....");
+		stopRingTone();
 		mContext.unregisterReceiver(receiver);
 		chatService.removeRegisterCancelledListener(mLocalHandler,
 				KEY_CANCELLED_LISTNER, null);
@@ -466,9 +467,11 @@ public class ConversationP2PAVActivity extends Activity implements
 	}
 
 	private void playRingToneIncoming() {
-		mPlayer = MediaPlayer.create(mContext,
-				RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE));
-		mPlayer.start();
+		if(mPlayer == null)
+			mPlayer = MediaPlayer.create(mContext,
+					RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE));
+		if(!mPlayer.isPlaying())
+			mPlayer.start();
 	}
 
 	private void stopRingTone() {

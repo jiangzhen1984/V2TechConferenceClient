@@ -18,6 +18,7 @@ import com.V2.jni.VideoRequestCallback;
 import com.V2.jni.VideoRequestCallbackAdapter;
 import com.V2.jni.ind.AudioJNIObjectInd;
 import com.V2.jni.ind.VideoJNIObjectInd;
+import com.V2.jni.util.EscapedcharactersProcessing;
 import com.V2.jni.util.V2Log;
 import com.v2tech.service.jni.FileDownLoadErrorIndication;
 import com.v2tech.service.jni.FileTransCannelIndication;
@@ -265,12 +266,13 @@ public class ChatService extends DeviceService {
 		}
 
 		for (VMessageFileItem item : items) {
+			String xml = EscapedcharactersProcessing.convert(item.toXmlItem());
 			if (vm.getToUser() == null) {
 				GroupRequest.getInstance().groupUploadFile(vm.getMsgCode(),
-						vm.getGroupId(), item.toXmlItem());
+						vm.getGroupId(), xml);
 			} else {
 				FileRequest.getInstance().inviteFileTrans(
-						vm.getToUser().getmUserId(), item.toXmlItem(),
+						vm.getToUser().getmUserId(), xml,
 						V2GlobalEnum.FILE_TYPE_OFFLINE);
 			}
 

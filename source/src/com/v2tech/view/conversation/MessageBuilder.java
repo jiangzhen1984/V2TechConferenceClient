@@ -1340,9 +1340,10 @@ public class MessageBuilder {
 		}
 		DataBaseContext mContext = new DataBaseContext(context);
 		String where = ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_REMOTE_USER_ID
-				+ " = ?";
+				+ " = ? and "
+				+ ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_RECEIVER_STATE + " = ?";
 		String[] selectionArgs = new String[] { String.valueOf(user
-				.getmUserId()) };
+				.getmUserId()) , String.valueOf(ReceiveQualificationType.LOCAL_INVITE_TYPE.intValue())};
 		mContext.getContentResolver().delete(
 				ContentDescriptor.HistoriesCrowd.CONTENT_URI, where,
 				selectionArgs);

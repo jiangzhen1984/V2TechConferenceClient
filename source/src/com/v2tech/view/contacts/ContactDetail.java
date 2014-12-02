@@ -309,6 +309,8 @@ public class ContactDetail extends Activity implements OnTouchListener {
 
 	@Override
 	public void onBackPressed() {
+		Message m = Message.obtain(lh, UPDATE_USER_INFO);
+		lh.sendMessage(m);
 		super.onBackPressed();
 	}
 
@@ -885,8 +887,6 @@ public class ContactDetail extends Activity implements OnTouchListener {
 				InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 				imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
 			}
-			Message m = Message.obtain(lh, UPDATE_USER_INFO);
-			lh.sendMessage(m);
 			onBackPressed();
 		}
 

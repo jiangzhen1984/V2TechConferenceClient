@@ -502,8 +502,7 @@ public class JNIService extends Service implements
 						action = JNI_BROADCAST_NEW_CONF_MESSAGE;
 					} else {
 						action = JNI_BROADCAST_NEW_MESSAGE;
-						if (vm.getMsgCode() != V2GlobalEnum.GROUP_TYPE_DISCUSSION)
-							sendNotification();
+						sendNotification();
 					}
 
 					Intent ii = new Intent(action);
@@ -1210,11 +1209,15 @@ public class JNIService extends Service implements
 
 		@Override
 		public void onAddGroupInfo(V2Group crowd) {
-			if (crowd == null)
+			if (crowd == null){
+				V2Log.e(TAG, "onAddGroupInfo--> Given V2Group Object is null ... please check!");
 				return;
+			}
 
-			if (crowd.creator == null)
+			if (crowd.creator == null){
+				V2Log.e(TAG, "onAddGroupInfo--> The Creator of V2Group Object is null ... please check!");
 				return;
+			}
 
 			if (isAcceptApply) {
 				isAcceptApply = false;
@@ -1244,6 +1247,25 @@ public class JNIService extends Service implements
 						new GroupQualicationState(Type.CROWD_INVITATION,
 								QualificationState.ACCEPTED, null,
 								ReadState.UNREAD, false));
+				Intent i = new Intent();
+				i.setAction(PublicIntent.BROADCAST_NEW_CROWD_NOTIFICATION);
+				i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
+				i.putExtra("crowd", crowd.id);
+				sendBroadcast(i);
+			} else if(crowd.type == V2Group.TYPE_DISCUSSION_BOARD){
+				V2Log.e(TAG, "onAddGroupInfo--> add a new discussion group , id is : "
+						+ crowd.id);
+				User user = GlobalHolder.getInstance().getUser(
+						crowd.creator.uid);
+				if (user == null) {
+					V2Log.e(TAG,
+							"onAddGroupInfo--> add a new group failed , get user is null , id is : "
+									+ crowd.creator.uid);
+					return;
+				}
+				DiscussionGroup g = new DiscussionGroup(crowd.id, crowd.name, user, null);
+				GlobalHolder.getInstance().addGroupToList(
+						GroupType.DISCUSSION.intValue(), g);
 				Intent i = new Intent();
 				i.setAction(PublicIntent.BROADCAST_NEW_CROWD_NOTIFICATION);
 				i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);

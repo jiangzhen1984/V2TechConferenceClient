@@ -17,6 +17,7 @@ import com.v2tech.service.CrowdGroupService;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.service.MessageListener;
 import com.v2tech.service.jni.JNIResponse;
+import com.v2tech.view.JNIService;
 import com.v2tech.view.PublicIntent;
 import com.v2tech.vo.DiscussionGroup;
 import com.v2tech.vo.Group.GroupType;
@@ -123,6 +124,11 @@ public class DiscussionBoardDetailActivity extends Activity {
 					}
 					service.quitDiscussionBoard(crowd, new MessageListener(
 							mLocalHandler, REQUEST_QUIT_CROWD_DONE, null));
+					Intent kick = new Intent();
+					kick.setAction(JNIService.JNI_BROADCAST_KICED_CROWD);
+					kick.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
+					kick.putExtra("crowd", crowd.getmGId());
+					DiscussionBoardDetailActivity.this.sendBroadcast(kick);
 				}
 
 			});

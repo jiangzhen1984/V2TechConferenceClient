@@ -71,6 +71,9 @@ public class XmlAttributeExtractor {
 				return null;
 			}
 		}
+		
+		if((end - 1) - (start + len) == 1)
+			return "";
 		return str.substring(start + len, end - 1);
 	}
 
@@ -416,8 +419,8 @@ public class XmlAttributeExtractor {
 	 * @param xml
 	 * @return
 	 */
-	public static V2User fromXml(long userID , String xml) {
-
+	public static V2User fromXml(long userID , String oldXml) {
+		String xml = EscapedcharactersProcessing.reverse(oldXml);
 		String nickName = extractAttribute(xml, "nickname");
 		String signature = extractAttribute(xml,"sign");
 		String job = extractAttribute(xml,"job");

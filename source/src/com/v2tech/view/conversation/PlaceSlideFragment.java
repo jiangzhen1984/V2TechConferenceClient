@@ -53,21 +53,19 @@ public class PlaceSlideFragment extends Fragment {
 		rlContainer = (RelativeLayout) v.findViewById(R.id.image_view_root);
 		rlContainer.measure(MeasureSpec.UNSPECIFIED,
 				MeasureSpec.UNSPECIFIED);
+		if(vim == null)
+			vim = new VMessageImageItem(new VMessage(0, 0, null, null), filePath);
 		if(".gif".equals(vim.getExtension())){
 			GifView view = (GifView) v.findViewById(R.id.imageview_smile);
 			view.setGIFResource(filePath);
 		}
 		else{
 			final TouchImageView iv  = new TouchImageView(this.getActivity());
-			if(vim == null)
-				vim = new VMessageImageItem(new VMessage(0, 0, null, null), filePath);
-			else{
-				VMessageImageItem.Size si = vim.getFullBitmapSize();
-				int width =si.width;
-				int height =  si.height;
-				mHoldPlaceBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
-				iv.setImageBitmap(mHoldPlaceBitmap);
-			}
+			VMessageImageItem.Size si = vim.getFullBitmapSize();
+			int width =si.width;
+			int height =  si.height;
+			mHoldPlaceBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
+			iv.setImageBitmap(mHoldPlaceBitmap);
 			
 			at = new AsyncTask<Void, Void, Bitmap>() {
 
