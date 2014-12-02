@@ -162,6 +162,21 @@ public class GroupListView extends ListView {
 		adapter.notifyDataSetChanged();
 	}
 
+	public void setContactsGroupList(List<Group> list) {
+		mGroupList.clear();
+		mGroupList.addAll(list);
+		mBaseList.clear();
+		for (int i = 0; i < list.size(); i++) {
+			ItemData item = getItem(list.get(i));
+			mBaseList.add(item);
+			if (((GroupItemData) item).isExpanded) {
+				expand((GroupItemData) item, i);
+			}
+		}
+		mFilterList = mBaseList;
+		adapter.notifyDataSetChanged();
+	}
+
 	/**
 	 * set flag to show or hide item check box view
 	 * 
@@ -204,10 +219,12 @@ public class GroupListView extends ListView {
 		boolean sort = false;
 		for (int i = 0; i < mFilterList.size(); i++) {
 			ItemData item = mFilterList.get(i);
-			if (item instanceof GroupItemData && ((GroupItemData) item).isExpanded) {
-				int end = calculateGroupEnd(((GroupItemData) item).mGroup, i + 1);
-				sort = updateUserPosition(((GroupItemData) item), i + 1, end, user,
-						us);
+			if (item instanceof GroupItemData
+					&& ((GroupItemData) item).isExpanded) {
+				int end = calculateGroupEnd(((GroupItemData) item).mGroup,
+						i + 1);
+				sort = updateUserPosition(((GroupItemData) item), i + 1, end,
+						user, us);
 			}
 		}
 		// Should always update status, because group need update statist
@@ -230,18 +247,19 @@ public class GroupListView extends ListView {
 		updateCheckItemWithoutNotification(u, flag);
 		adapter.notifyDataSetChanged();
 	}
-	
+
 	/**
 	 * Update user's checked status of item
+	 * 
 	 * @param flag
 	 */
-	public void updateUserItemcCheck(List<User> user , boolean flag) {
-		for (int i = 0; i < user.size() ; i++) {
-			updateCheckItem(user.get(i) , false);
+	public void updateUserItemcCheck(List<User> user, boolean flag) {
+		for (int i = 0; i < user.size(); i++) {
+			updateCheckItem(user.get(i), false);
 		}
-		
+
 		for (Group group : mGroupList) {
-			checkBelongGroupAllChecked(group , user);
+			checkBelongGroupAllChecked(group, user);
 		}
 		adapter.notifyDataSetChanged();
 	}
@@ -302,7 +320,7 @@ public class GroupListView extends ListView {
 		if (user == null) {
 			return;
 		}
-		
+
 		for (int i = 0; i < mFilterList.size(); i++) {
 			ItemData item = mFilterList.get(i);
 			if (item.getId() == user.getmUserId()) {
@@ -310,19 +328,20 @@ public class GroupListView extends ListView {
 				i--;
 			}
 		}
-		
-		//从所用用户列表中删除该user
+
+		// 从所用用户列表中删除该user
 		mUserItemListMap.remove(user.getmUserId());
-		//从该user所属的组中删除该user
+		// 从该user所属的组中删除该user
 		Set<Group> gSet = user.getBelongsGroup();
 		for (Group g : gSet) {
-			LongSparseArray<ItemData> userGroup = mUserItemDataMapOfMap.get(g.getmGId());
+			LongSparseArray<ItemData> userGroup = mUserItemDataMapOfMap.get(g
+					.getmGId());
 			if (userGroup != null) {
 				userGroup.remove(user.getmUserId());
 			}
 		}
-		
-		//更新listView的显示
+
+		// 更新listView的显示
 		adapter.notifyDataSetChanged();
 	}
 
@@ -364,7 +383,7 @@ public class GroupListView extends ListView {
 						break;
 					}
 				}
-				
+
 			}
 		}
 
@@ -425,7 +444,8 @@ public class GroupListView extends ListView {
 	}
 
 	/**
-	 * Mark user as selected, and call {@link ItemData#isChecked()} will return true
+	 * Mark user as selected, and call {@link ItemData#isChecked()} will return
+	 * true
 	 * 
 	 * @param user
 	 */
@@ -442,8 +462,8 @@ public class GroupListView extends ListView {
 	}
 
 	/**
-	 * Mark user list as selected, and call {@link ItemData#isChecked()} will return
-	 * true
+	 * Mark user list as selected, and call {@link ItemData#isChecked()} will
+	 * return true
 	 * 
 	 * @param userList
 	 */
@@ -523,7 +543,7 @@ public class GroupListView extends ListView {
 			updateCheckItemWithoutNotification(subGroupList.get(i), flag);
 		}
 	}
-	
+
 	/**
 	 * Update user position according to new user status
 	 * 
@@ -537,8 +557,8 @@ public class GroupListView extends ListView {
 	 * @param newSt
 	 * @return
 	 */
-	private boolean updateUserPosition(GroupItemData gitem, int gstart, int gend,
-			User user, User.Status newSt) {
+	private boolean updateUserPosition(GroupItemData gitem, int gstart,
+			int gend, User user, User.Status newSt) {
 		int pos = -1;
 		int start = gstart;
 		int end = gend;
@@ -683,7 +703,8 @@ public class GroupListView extends ListView {
 
 		while (start <= end) {
 			pos = start;
-			if (start + 1 == mFilterList.size())
+			// if (start + 1 == mFilterList.size())
+			if (start == mFilterList.size())
 				break;
 			ItemData item = mFilterList.get(start++);
 			if (item instanceof GroupItemData) {
@@ -696,8 +717,14 @@ public class GroupListView extends ListView {
 							.getCurrentUserId()) {
 				continue;
 			}
-			if (ust == User.Status.ONLINE) {
-				if (u.getmStatus() == User.Status.ONLINE
+
+			if (ust == User.Status.ONLINE || ust == User.Status.BUSY
+					|| ust == User.Status.DO_NOT_DISTURB
+					|| ust == User.Status.LEAVE) {
+				if ((u.getmStatus() == User.Status.ONLINE
+						|| u.getmStatus() == User.Status.BUSY
+						|| u.getmStatus() == User.Status.DO_NOT_DISTURB || u
+						.getmStatus() == User.Status.LEAVE)
 						&& u.compareTo(user) < 0) {
 					continue;
 				} else {
@@ -1380,12 +1407,12 @@ public class GroupListView extends ListView {
 
 		private void updateUserItem() {
 			User u = ((User) ((UserItemData) mItem).getObject());
-			
+
 			User user = GlobalHolder.getInstance().getUser(u.getmUserId());
 			if (user != null) {
 				u = user;
 			}
-			
+
 			ImageView mPhotoIV = (ImageView) mRoot.findViewById(R.id.user_img);
 			if (u.getAvatarBitmap() != null) {
 				mPhotoIV.setImageBitmap(u.getAvatarBitmap());

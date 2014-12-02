@@ -215,7 +215,7 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 
 		@Override
 		protected void onPostExecute(Void result) {
-			mContactsContainer.setGroupList(mGroupList);
+			mContactsContainer.setContactsGroupList(mGroupList);
 		}
 
 	}

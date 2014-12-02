@@ -165,6 +165,14 @@ public class ConversationP2PAVActivity extends Activity implements
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		// 加如下设置锁屏状态下一样能跳出此activity
+		// WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON//点亮屏
+		// WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON//屏一直亮
+		// WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED//显示在锁屏之上
+		// WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD//自动解屏
+		getWindow().addFlags(
+				WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
+						| WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
 
 		displayWidthIsLonger = verifyDisplayWidthIsLonger();
 		displayRotation = getDisplayRotation();
@@ -319,8 +327,8 @@ public class ConversationP2PAVActivity extends Activity implements
 			playRingToneIncoming();
 		}
 		if (uad.isConnected()) {
-			// Resume audio
-			chatService.suspendOrResumeAudio(true);
+//			// Resume audio
+//			chatService.suspendOrResumeAudio(true);
 		}
 		// keep screen on
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
@@ -332,8 +340,8 @@ public class ConversationP2PAVActivity extends Activity implements
 		super.onStop();
 //		stopRingTone();
 		if (uad.isConnected()) {
-			// Resume audio
-			chatService.suspendOrResumeAudio(false);
+//			// Resume audio
+//			chatService.suspendOrResumeAudio(false);
 			this.closeRemoteVideo();
 		}
 		this.closeLocalVideo();
@@ -1680,7 +1688,8 @@ public class ConversationP2PAVActivity extends Activity implements
 				}
 			} else if (PublicIntent.BROADCAST_JOINED_CONFERENCE_NOTIFICATION
 					.equals(action)) {
-				Log.i("20141124 2","PublicIntent.BROADCAST_JOINED_CONFERENCE_NOTIFICATION");
+				Log.i("20141124 2",
+						"PublicIntent.BROADCAST_JOINED_CONFERENCE_NOTIFICATION");
 				isRejected = true;
 				mLocalHandler.removeCallbacks(timeOutMonitor);
 				hangUp();
@@ -1691,6 +1700,7 @@ public class ConversationP2PAVActivity extends Activity implements
 
 	private Object mLocal = new Object();
 	private boolean inProgress = false;
+
 	class LocalHandler extends Handler {
 
 		public LocalHandler(Looper looper) {
@@ -1807,9 +1817,8 @@ public class ConversationP2PAVActivity extends Activity implements
 							// Start to time
 							Message.obtain(mLocalHandler, UPDATE_TIME)
 									.sendToTarget();
-							
-						}
 
+						}
 
 						currentVideoBean.mediaState = AudioVideoMessageBean.STATE_ANSWER_CALL;
 						currentVideoBean.startDate = GlobalConfig

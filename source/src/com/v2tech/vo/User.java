@@ -479,22 +479,25 @@ public class User implements Comparable<User> {
 		if (another.getmStatus() == this.mStatus) {
 			return this.abbra.compareTo(another.abbra);
 		}
-		if (this.mStatus == Status.ONLINE) {
-			return -1;
-		} else if (another.getmStatus() == Status.ONLINE) {
-			return 1;
-		}
-		if (this.mStatus == Status.LEAVE
+		// if (this.mStatus == Status.ONLINE) {
+		// return -1;
+		// } else if (another.getmStatus() == Status.ONLINE) {
+		// return 1;
+		// }
+
+		if (this.mStatus == Status.ONLINE || this.mStatus == Status.LEAVE
 				|| this.mStatus == Status.DO_NOT_DISTURB
 				|| this.mStatus == Status.BUSY) {
-			if (another.getmStatus() == Status.LEAVE
+			if (another.mStatus == Status.ONLINE
+					|| another.getmStatus() == Status.LEAVE
 					|| another.getmStatus() == Status.DO_NOT_DISTURB
 					|| another.getmStatus() == Status.BUSY) {
 				return this.abbra.compareTo(another.abbra);
 			} else {
 				return -1;
 			}
-		} else if (another.getmStatus() == Status.LEAVE
+		} else if (another.mStatus == Status.ONLINE
+				|| another.getmStatus() == Status.LEAVE
 				|| another.getmStatus() == Status.DO_NOT_DISTURB
 				|| another.getmStatus() == Status.BUSY) {
 			return 1;
