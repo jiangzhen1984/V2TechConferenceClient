@@ -42,6 +42,8 @@ import com.v2tech.view.MainApplication;
 import com.v2tech.view.bo.GroupUserObject;
 import com.v2tech.view.contacts.add.AuthenticationActivity;
 import com.v2tech.view.contacts.add.FriendManagementActivity;
+import com.v2tech.view.conversation.MessageAuthenticationActivity;
+import com.v2tech.view.search.SearchedResultActivity;
 import com.v2tech.view.widget.MarqueeTextView;
 import com.v2tech.vo.Group;
 import com.v2tech.vo.Group.GroupType;
@@ -83,12 +85,12 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 	private LinearLayout mSignTVLayout;
 	private LinearLayout mSignTVLine;
 
-    private View mCompanyLayout;
-    private View mDeptLayout;
-    private View mPostJobLayout;
-    private View mCompanyLayoutDevider;
-    private View mDeptLayoutDevider;
-    private View mPostJobLayoutDevider;
+	private View mCompanyLayout;
+	private View mDeptLayout;
+	private View mPostJobLayout;
+	private View mCompanyLayoutDevider;
+	private View mDeptLayoutDevider;
+	private View mPostJobLayoutDevider;
 
 	private EditText mNickNameET;
 	private TextView mGroupNameTV;
@@ -100,9 +102,10 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 	private User currentUser;
 	private boolean isRelation;
 	private Group belongs;
-	
+
 	private Resources res;
-    private int currentContactType;
+	private int currentContactType;
+	private String fromActivity;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -110,18 +113,24 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 
 		this.setContentView(R.layout.activity_contact_detail_2);
 		// 不同页面跳转过来
-		String fromActivity = this.getIntent().getStringExtra("fromActivity");
+
+		fromActivity = this.getIntent().getStringExtra("fromActivity");
 		if ((fromActivity != null)
 				&& (fromActivity.equals("MessageAuthenticationActivity"))) {
 			mUid = this.getIntent().getLongExtra("remoteUserID", 0);
-            currentContactType = ORG_SAME_CONTACT;
-		} else if((fromActivity != null)
-                && (fromActivity.equals("SearchedResultActivity"))){
-            mUid = this.getIntent().getLongExtra("uid", 0);
-            currentContactType = ORG_NO_SAME_CONTACT;
-        }else {
+			currentContactType = ORG_SAME_CONTACT;
+		} else if ((fromActivity != null)
+				&& (fromActivity.equals("SearchedResultActivity"))) {
 			mUid = this.getIntent().getLongExtra("uid", 0);
-            currentContactType = ORG_SAME_CONTACT;
+			currentContactType = ORG_NO_SAME_CONTACT;
+		} else if ((fromActivity != null)
+				&& fromActivity
+						.equals("MessageAuthenticationActivity-ContactDetail")) {
+			mUid = this.getIntent().getLongExtra("uid", 0);
+			currentContactType = ORG_SAME_CONTACT;
+		} else {
+			mUid = this.getIntent().getLongExtra("uid", 0);
+			currentContactType = ORG_SAME_CONTACT;
 		}
 
 		initView();
@@ -150,12 +159,12 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 				break;
 			}
 		}
-		
+
 		updateContactGroup();
-		
+
 		BitmapManager.getInstance().registerBitmapChangedListener(
 				mAvatarChangedListener);
-		
+
 		initBroadcastReceiver();
 	}
 
@@ -212,7 +221,7 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 	public boolean onTouch(View view, MotionEvent mv) {
 		return super.onTouchEvent(mv);
 	}
-	
+
 	private BitmapManager.BitmapChangedListener mAvatarChangedListener = new BitmapManager.BitmapChangedListener() {
 
 		@Override
@@ -226,14 +235,14 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 
 	private void initView() {
 
-        TextView mTitleContent = (TextView) findViewById(R.id.ws_common_activity_title_content);
-        TextView mTitleLeftTV = (TextView) findViewById(R.id.ws_common_activity_title_left_button);
-        TextView mTitleRightTV = (TextView) findViewById(R.id.ws_common_activity_title_right_button);
+		TextView mTitleContent = (TextView) findViewById(R.id.ws_common_activity_title_content);
+		TextView mTitleLeftTV = (TextView) findViewById(R.id.ws_common_activity_title_left_button);
+		TextView mTitleRightTV = (TextView) findViewById(R.id.ws_common_activity_title_right_button);
 
-        mTitleRightTV.setVisibility(View.INVISIBLE);
-        mTitleContent.setText(R.string.contacts_detail_title);
-        mTitleLeftTV.setText(R.string.contacts_user_detail_return_button);
-        mTitleLeftTV.setOnClickListener(mReturnButtonListener);
+		mTitleRightTV.setVisibility(View.INVISIBLE);
+		mTitleContent.setText(R.string.contacts_detail_title);
+		mTitleLeftTV.setText(R.string.contacts_user_detail_return_button);
+		mTitleLeftTV.setOnClickListener(mReturnButtonListener);
 
 		mHeadIconIV = (ImageView) findViewById(R.id.contact_user_detail_head_icon);
 		mNameTitleIV = (TextView) findViewById(R.id.contact_user_detail_title);
@@ -289,26 +298,26 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 			}
 		});
 
-        mSignTV = (MarqueeTextView) findViewById(R.id.contact_user_detail_user_signature_tv);
-        mSignTVLayout = (LinearLayout) findViewById(R.id.contact_user_detail_nick_name_et_linearlayout);
-        mSignTVLine = (LinearLayout) findViewById(R.id.contact_user_detail_nick_name_et_belowline);
+		mSignTV = (MarqueeTextView) findViewById(R.id.contact_user_detail_user_signature_tv);
+		mSignTVLayout = (LinearLayout) findViewById(R.id.contact_user_detail_nick_name_et_linearlayout);
+		mSignTVLine = (LinearLayout) findViewById(R.id.contact_user_detail_nick_name_et_belowline);
 
 		mAccountTV = (TextView) findViewById(R.id.contact_user_detail_account_tv);
 		mGendarTV = (TextView) findViewById(R.id.contact_user_detail_gender_tv);
 		mBirthdayTV = (TextView) findViewById(R.id.contact_user_detail_birthday_tv);
-        mCellphoneTV = (TextView) findViewById(R.id.contact_user_detail_cell_phone_tv);
-        mTelephoneTV = (TextView) findViewById(R.id.contact_user_detail_telephone_tv);
-        mCompanyTV = (TextView) findViewById(R.id.contact_user_detail_company_tv);
-        mDeptTV = (TextView) findViewById(R.id.contact_user_detail_department_tv);
-        mPostJobTV = (TextView) findViewById(R.id.contact_user_detail_title_tv);
-        mAddressTV = (TextView) findViewById(R.id.contact_user_detail_address_tv);
+		mCellphoneTV = (TextView) findViewById(R.id.contact_user_detail_cell_phone_tv);
+		mTelephoneTV = (TextView) findViewById(R.id.contact_user_detail_telephone_tv);
+		mCompanyTV = (TextView) findViewById(R.id.contact_user_detail_company_tv);
+		mDeptTV = (TextView) findViewById(R.id.contact_user_detail_department_tv);
+		mPostJobTV = (TextView) findViewById(R.id.contact_user_detail_title_tv);
+		mAddressTV = (TextView) findViewById(R.id.contact_user_detail_address_tv);
 
-        mCompanyLayout = findViewById(R.id.contact_user_detail_company_tv_layout);
-        mDeptLayout = findViewById(R.id.contact_user_detail_department_tv_layout);
-        mPostJobLayout = findViewById(R.id.contact_user_detail_title_tv_layout);
-        mCompanyLayoutDevider = findViewById(R.id.contact_user_detail_company_tv_layout_devider);
-        mDeptLayoutDevider = findViewById(R.id.contact_user_detail_department_tv_layout_devider);
-        mPostJobLayoutDevider = findViewById(R.id.contact_user_detail_title_tv_layout_devider);
+		mCompanyLayout = findViewById(R.id.contact_user_detail_company_tv_layout);
+		mDeptLayout = findViewById(R.id.contact_user_detail_department_tv_layout);
+		mPostJobLayout = findViewById(R.id.contact_user_detail_title_tv_layout);
+		mCompanyLayoutDevider = findViewById(R.id.contact_user_detail_company_tv_layout_devider);
+		mDeptLayoutDevider = findViewById(R.id.contact_user_detail_department_tv_layout_devider);
+		mPostJobLayoutDevider = findViewById(R.id.contact_user_detail_title_tv_layout_devider);
 	}
 
 	private void updateContactGroup() {
@@ -328,22 +337,21 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 			mSignTVLine.setVisibility(View.GONE);
 		}
 
-        if(currentContactType == ORG_NO_SAME_CONTACT){
-            mCompanyLayout.setVisibility(View.GONE);
-            mDeptLayout.setVisibility(View.GONE);
-            mPostJobLayout.setVisibility(View.GONE);
-            mCompanyLayoutDevider.setVisibility(View.GONE);
-            mDeptLayoutDevider.setVisibility(View.GONE);
-            mPostJobLayoutDevider.setVisibility(View.GONE);
-        }
-        else{
-            mCompanyLayout.setVisibility(View.VISIBLE);
-            mDeptLayout.setVisibility(View.VISIBLE);
-            mPostJobLayout.setVisibility(View.VISIBLE);
-            mCompanyLayoutDevider.setVisibility(View.VISIBLE);
-            mDeptLayoutDevider.setVisibility(View.VISIBLE);
-            mPostJobLayoutDevider.setVisibility(View.VISIBLE);
-        }
+		if (currentContactType == ORG_NO_SAME_CONTACT) {
+			mCompanyLayout.setVisibility(View.GONE);
+			mDeptLayout.setVisibility(View.GONE);
+			mPostJobLayout.setVisibility(View.GONE);
+			mCompanyLayoutDevider.setVisibility(View.GONE);
+			mDeptLayoutDevider.setVisibility(View.GONE);
+			mPostJobLayoutDevider.setVisibility(View.GONE);
+		} else {
+			mCompanyLayout.setVisibility(View.VISIBLE);
+			mDeptLayout.setVisibility(View.VISIBLE);
+			mPostJobLayout.setVisibility(View.VISIBLE);
+			mCompanyLayoutDevider.setVisibility(View.VISIBLE);
+			mDeptLayoutDevider.setVisibility(View.VISIBLE);
+			mPostJobLayoutDevider.setVisibility(View.VISIBLE);
+		}
 	}
 
 	private void showDeleteContactDialog() {
@@ -367,7 +375,8 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 			public void onClick(View v) {
 				// 删除好友
 				deleteContactDialog.dismiss();
-				contactService.delContact(u , new MessageListener(lh, DELETE_CONTACT_USER, null));
+				contactService.delContact(u, new MessageListener(lh,
+						DELETE_CONTACT_USER, null));
 				ProgressUtils.showNormalWithHintProgress(mContext, true);
 			}
 		});
@@ -554,8 +563,8 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 			switch (msg.what) {
 			case UPDATE_USER_INFO:
 				gatherUserData();
-				us.updateUser(u, new MessageListener(this, UPDATE_USER_INFO_DONE,
-						null));
+				us.updateUser(u, new MessageListener(this,
+						UPDATE_USER_INFO_DONE, null));
 				break;
 			case UPDATE_USER_INFO_DONE:
 				// if (mContext != null) {
@@ -568,26 +577,46 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 			case DELETE_CONTACT_USER:
 				ProgressUtils.showNormalWithHintProgress(mContext, false);
 				JNIResponse response = (JNIResponse) msg.obj;
-				if(response.getResult() == JNIResponse.Result.SUCCESS){
-//					belongs = null;
-//					isRelation = false;
-//					updateContactGroup();
-					Intent i = new Intent(ContactDetail2.this, MainActivity.class);
-					i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-					ContactDetail2.this.startActivity(i);
-				}
-				else if(response.getResult() == JNIResponse.Result.TIME_OUT){
-					Toast.makeText(mContext, res.getString(R.string.contacts_delete_net_failed) ,
+				if (response.getResult() == JNIResponse.Result.SUCCESS) {
+					// belongs = null;
+					// isRelation = false;
+					// updateContactGroup();
+					if ((fromActivity != null)
+							&& (fromActivity
+									.equals("MessageAuthenticationActivity"))) {
+						belongs = null;
+						isRelation = false;
+						updateContactGroup();
+					} else if ((fromActivity != null)
+							&& (fromActivity
+									.equals("MessageAuthenticationActivity-ContactDetail"))) {
+						belongs = null;
+						isRelation = false;
+						updateContactGroup();
+					} else if ((fromActivity != null)
+							&& (fromActivity.equals("SearchedResultActivity"))) {
+						belongs = null;
+						isRelation = false;
+						updateContactGroup();
+					} else {
+						Intent i = new Intent(ContactDetail2.this,
+								MainActivity.class);
+						i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+						ContactDetail2.this.startActivity(i);
+					}
+
+				} else if (response.getResult() == JNIResponse.Result.TIME_OUT) {
+					Toast.makeText(mContext,
+							res.getString(R.string.contacts_delete_net_failed),
 							Toast.LENGTH_SHORT).show();
-				}
-				else{
-					Toast.makeText(mContext, res.getString(R.string.contacts_delete_failed) ,
+				} else {
+					Toast.makeText(mContext,
+							res.getString(R.string.contacts_delete_failed),
 							Toast.LENGTH_SHORT).show();
 				}
 				break;
 			}
 		}
-
 	}
 
 	private void initBroadcastReceiver() {
@@ -650,7 +679,7 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 					Toast.makeText(ContactDetail2.this, "添加成功",
 							Toast.LENGTH_SHORT).show();
 
-					//update user info
+					// update user info
 					u = GlobalHolder.getInstance().getUser(uid);
 				}
 			} else if (action

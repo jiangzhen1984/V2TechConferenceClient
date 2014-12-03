@@ -10,6 +10,7 @@ import android.util.DisplayMetrics;
 
 import com.V2.jni.util.V2Log;
 import com.v2tech.R;
+import com.v2tech.service.GlobalHolder;
 
 public class BitmapUtil {
 

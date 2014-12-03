@@ -573,10 +573,8 @@ public class ContactDetail extends Activity implements OnTouchListener {
 		UserDeviceConfig udc = GlobalHolder.getInstance().getUserDefaultDevice(
 				mUid);
 		if (udc != null) {
-			Log.i("temptag20141030 1", "udc!=null device=" + udc.getDeviceID());
 			iv.putExtra("device", udc.getDeviceID());
 		} else {
-			Log.i("temptag20141030 1", "udc=null device=null");
 			iv.putExtra("device", "");
 		}
 
@@ -899,6 +897,10 @@ public class ContactDetail extends Activity implements OnTouchListener {
 			Intent i = new Intent();
 			i.setClass(mContext, ContactDetail2.class);
 			i.putExtra("uid", mUid);
+			if ((fromActivity != null)
+					&& (fromActivity.equals("MessageAuthenticationActivity"))) {
+				i.putExtra("fromActivity", "MessageAuthenticationActivity-ContactDetail");
+			}
 			mContext.startActivity(i);
 		}
 

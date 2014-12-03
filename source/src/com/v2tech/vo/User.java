@@ -427,6 +427,9 @@ public class User implements Comparable<User> {
 	}
 
 	private Bitmap loadAvatarBitmap(String mAvatarPath) {
+		if (mAvatarPath == null) {
+			mAvatarPath = GlobalHolder.getInstance().getAvatarPath(mUserId);
+		}
 		Bitmap bitmap = BitmapUtil.loadAvatarFromPath(mAvatarPath);
 		if (bitmap != null) {
 			if (!bitmap.isRecycled())
