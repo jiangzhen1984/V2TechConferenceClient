@@ -2408,9 +2408,10 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 					MessageBodyView mv = (MessageBodyView) common.getView();
 					if (mv != null) {
 						mv.updateView(vfi);
-					} else {
-						notificateConversationUpdate(true, vm.getId());
-					}
+					} 
+//					else {
+//						notificateConversationUpdate(true, vm.getId());
+//					}
 				}
 			}
 		}

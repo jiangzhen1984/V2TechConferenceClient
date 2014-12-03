@@ -7,11 +7,6 @@ import com.v2tech.util.DateUtil;
 public class ContactConversation extends Conversation {
 
 	private User u;
-
-	public void setDateLong(String dateLong) {
-		this.dateLong = dateLong;
-	}
-
 	public ContactConversation(User u) {
 		super();
 		this.u = u;
@@ -51,6 +46,10 @@ public class ContactConversation extends Conversation {
 			return dateLong;
 		}
 		return super.getDateLong();
+	}
+	
+	public void setDateLong(String dateLong) {
+		this.dateLong = dateLong;
 	}
 
 	public void setMsg(CharSequence msg) {

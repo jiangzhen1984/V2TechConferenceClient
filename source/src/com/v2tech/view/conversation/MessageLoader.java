@@ -1588,8 +1588,7 @@ public class MessageLoader {
 		DataBaseContext mContext = new DataBaseContext(context);
 
 		VMessageQualification message = null;
-		String selection = ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_RECEIVER_STATE
-				+ " = ? ";
+		String selection = ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_RECEIVER_STATE + "= ?";
 		String[] selectionArgs = new String[] {
 				String.valueOf(ReceiveQualificationType.REMOTE_APPLY_TYPE.intValue())};
 		String sortOrder = ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_SAVEDATE

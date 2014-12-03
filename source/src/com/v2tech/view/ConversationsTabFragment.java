@@ -10,8 +10,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import android.app.Activity;
-import android.app.ActivityManager;
-import android.app.ActivityManager.RunningServiceInfo;
 import android.app.AlertDialog;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -28,6 +26,9 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -351,6 +352,8 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 					.addAction(JNIService.JNI_BROADCAST_USER_UPDATE_NAME_OR_SIGNATURE);
 			intentFilter
 					.addAction(JNIService.JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION);
+			intentFilter
+			.addAction(PublicIntent.BROADCAST_USER_COMMENT_NAME_NOTIFICATION);
 
 			if (mCurrentTabFlag == Conversation.TYPE_CONFERNECE) {
 				intentFilter
@@ -383,8 +386,6 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 						.addAction(JNIService.BROADCAST_CROWD_NEW_UPLOAD_FILE_NOTIFICATION);
 				intentFilter
 						.addAction(PublicIntent.REQUEST_UPDATE_CONVERSATION);
-				intentFilter
-						.addAction(PublicIntent.BROADCAST_USER_COMMENT_NAME_NOTIFICATION);
 				intentFilter
 						.addAction(JNIService.JNI_BROADCAST_GROUP_USER_REMOVED);
 				intentFilter
@@ -710,7 +711,6 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 	private int isHaveVerificationMessage() {
 		int result = -1;
 
-		User user = GlobalHolder.getInstance().getCurrentUser();
 		long crowdTime = 0;
 		long friendTime = 0;
 		VMessageQualification nestQualification = MessageLoader
@@ -845,6 +845,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 				if (newestMediaMessage.readSatate == AudioVideoMessageBean.STATE_UNREAD) {
 					voiceLayout.update(null, startDate, true);
 					voiceMessageItem.setReadFlag(Conversation.READ_FLAG_UNREAD);
+					sendVoiceNotify();
 				} else {
 					voiceLayout.update(null, startDate, false);
 					voiceMessageItem.setReadFlag(Conversation.READ_FLAG_READ);
@@ -883,6 +884,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 	}
 
 	private boolean crowdNotFresh;
+	private long lastNotificatorTime;
 
 	/**
 	 * update group type conversation according groupType and groupID
@@ -1054,8 +1056,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 			if (GlobalHolder.getInstance().getCurrentUserId() != vm
 					.getFromUser().getmUserId()) {
 				// Update status bar
-				if (GlobalConfig.isApplicationBackground(mContext))
-					updateStatusBar(vm);
+				updateStatusBar(vm);
 				existedCov.setReadFlag(Conversation.READ_FLAG_UNREAD);
 			} else {
 				existedCov.setReadFlag(Conversation.READ_FLAG_READ);
@@ -1172,8 +1173,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 		if (GlobalHolder.getInstance().getCurrentUserId() != vm.getFromUser()
 				.getmUserId()) {
 			// Update status bar
-			if (GlobalConfig.isApplicationBackground(mContext))
-				updateStatusBar(vm);
+			updateStatusBar(vm);
 			existedCov.setReadFlag(Conversation.READ_FLAG_UNREAD);
 		} else {
 			existedCov.setReadFlag(Conversation.READ_FLAG_READ);
@@ -1248,14 +1248,16 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 			verificationMessageItemLayout.update();
 		}
 
-		if (hasUnread)
+		if (hasUnread){
+			updateVerificationStateBar(msg);
 			verificationMessageItemData
 					.setReadFlag(Conversation.READ_FLAG_UNREAD);
+		}
 		else
 			verificationMessageItemData
 					.setReadFlag(Conversation.READ_FLAG_READ);
+		verificationItem.cov = verificationMessageItemData;
 		updateUnreadConversation(verificationItem);
-		updateVerificationStateBar(msg);
 	}
 
 	private void updateCrowdVerificationConversation(VMessageQualification msg) {
@@ -1358,13 +1360,12 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 		verification
 				.setMessageType(ConversationFirendAuthenticationData.VerificationMessageType.CROWD_TYPE);
 
-		updateVerificationStateBar(content);
-
 		if (isFresh) {
 			if (msg.getReadState() == VMessageQualification.ReadState.UNREAD) {
 				verificationMessageItemData
 						.setReadFlag(Conversation.READ_FLAG_UNREAD);
 				showAuthenticationNotification = true;
+				updateVerificationStateBar(content);
 			} else {
 				verificationMessageItemData
 						.setReadFlag(Conversation.READ_FLAG_READ);
@@ -1378,6 +1379,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 		// false);
 		// verificationMessageItemLayout.updateNotificator(false);
 		// }
+		verificationItem.cov = verificationMessageItemData;
 		updateUnreadConversation(verificationItem);
 		adapter.notifyDataSetChanged();
 		Collections.sort(mItemList);
@@ -1455,19 +1457,23 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 
 							@Override
 							public void run() {
-								currentGroupLayout.updateContent(u.getName());
-								currentGroupLayout.updateGroupOwner(g.getName());
 								g.setOwnerUser(u);
+								currentGroupLayout.updateGroupContent(g);
+								currentGroupLayout.updateGroupName(g.getName());
 							}
 						});
-					} else if(item.cov.getType() == Conversation.TYPE_GROUP){
+					} else if(mCurrentTabFlag == V2GlobalEnum.GROUP_TYPE_USER){
+						
+						if (item.cov.getType() != V2GlobalEnum.GROUP_TYPE_CROWD)
+							continue;
+						
 						final GroupLayout currentGroupLayout = ((GroupLayout) item.gp);
 						final CrowdConversation crowd = (CrowdConversation) item.cov;
 						Group newGroup = GlobalHolder.getInstance()
 									.getGroupById(V2GlobalEnum.GROUP_TYPE_CROWD,
 											crowd.getExtId());
 						if (newGroup != null) {
-							crowd.setG(newGroup);
+							crowd.setGroup(newGroup);
 							crowd.setReadFlag(Conversation.READ_FLAG_READ);
 							final VMessage vm = MessageLoader
 									.getNewestGroupMessage(mContext,
@@ -1488,8 +1494,6 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 
 			@Override
 			public void run() {
-				currentGroupLayout.updateGroupOwner(crowd
-						.getName());
 				if (vm != null) {
 					crowd.setDate(vm.getDateTimeStr());
 					crowd.setDateLong(String.valueOf(vm
@@ -1549,8 +1553,6 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 
 							@Override
 							public void run() {
-								currentGroupLayout.updateGroupOwner(department
-										.getName());
 								if (vm != null) {
 									department.setName(department.getName());
 									department.setDate(vm.getDateTimeStr());
@@ -1615,8 +1617,6 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 				// V2Log.d(TAG,
 				// " Successfully remove crowd conversation , id is : " + id);
 				// }
-				GlobalHolder.getInstance().removeGroup(Group.GroupType.fromInt(temp.getType())
-						, temp.getExtId());
 				adapter.notifyDataSetChanged();
 				Notificator.cancelSystemNotification(getActivity(),
 						PublicIntent.MESSAGE_NOTIFICATION_ID);
@@ -1632,16 +1632,13 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 			if(ret > 0)
 				updateVerificationConversation();
 		}
-
-//		if (removeItem != null & targetConversation != null) {
-////			updateUnreadConversation(removeItem);
-//		}
 	}
 	
 	private void updateStatusBar(VMessage vm) {
+		boolean state = checkSendingState();
+		if (!state)
+			return ;
 		
-		V2Log.e("TEST", "class name : " + ConversationP2PAVActivity.class.getName());
-		V2Log.e("TEST", "activity name : " + GlobalConfig.getTopTastActivityName(mContext));
 		String content;
 		if (vm.getAudioItems().size() > 0) {
 			content = mContext.getResources().getString(
@@ -1723,7 +1720,95 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 						PublicIntent.MESSAGE_NOTIFICATION_ID);
 		}
 	}
+	
+	private void updateConferenceNotification(Conference conf) {
+		boolean state = checkSendingState();
+		if(state){
+			Intent enterConference = new Intent(mContext, MainActivity.class);
+			User creator = GlobalHolder.getInstance().getUser(conf.getCreator());
+			enterConference.putExtra("conf", conf);
+			enterConference.putExtra("initFragment", 3);
+			Notificator.updateSystemNotification(mContext, creator == null ? ""
+					: creator.getName(), "邀请你参加会议 " + conf.getName(), 1,
+					enterConference, PublicIntent.VIDEO_NOTIFICATION_ID);
+		}
+		else{
+			sendVoiceNotify();
+		}
+	}
+	
+	/**
+	 * 更新验证要想系统通知栏
+	 * @param msg
+	 */
+	private void updateVerificationStateBar(String msg) {
 
+		boolean state = checkSendingState();
+		if (state) {
+			// 发通知
+			Intent i = new Intent(getActivity(),
+					MessageAuthenticationActivity.class);
+            i = startAuthenticationActivity(i);
+			i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+					| Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+			PendingIntent pendingIntent = PendingIntent.getActivity(
+					getActivity(), 0, i, 0);
+
+			Notification notification = new Notification.Builder(getActivity())
+					.setSmallIcon(R.drawable.ic_launcher)
+					.setContentTitle(
+							getResources().getString(
+									R.string.status_bar_notification))
+					.setContentText(msg).setAutoCancel(true).setTicker(msg)
+					.setWhen(System.currentTimeMillis())
+					.setContentIntent(pendingIntent).getNotification();
+			NotificationManager manager = ((NotificationManager) getActivity().getSystemService(
+					Activity.NOTIFICATION_SERVICE));
+			manager.cancelAll();
+			manager.notify(0, notification);
+			sendVoiceNotify();
+		}
+		else{
+			sendVoiceNotify();
+		}
+
+		if (mItemList.contains(verificationItem)) {
+			mItemList.remove(verificationItem);
+			mItemList.add(0, verificationItem);
+		} else {
+			mItemList.add(0, verificationItem);
+		}
+		adapter.notifyDataSetChanged();
+	}
+	
+	public void sendVoiceNotify(){
+		if ((System.currentTimeMillis() / 1000) - lastNotificatorTime > 2) {
+			Uri notification = RingtoneManager
+					.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+			Ringtone r = RingtoneManager.getRingtone(
+					mContext, notification);
+			if (r != null) {
+				r.play();
+			}
+			lastNotificatorTime = System.currentTimeMillis() / 1000;
+		}
+	}
+	
+	/**
+	 * 
+	 * @return
+	 * 		false mean don't sending , true sending
+	 */
+	private boolean checkSendingState(){
+		if (!GlobalConfig.isApplicationBackground(mContext) ||
+				GlobalHolder.getInstance().isInMeeting() ||
+				GlobalHolder.getInstance().isInAudioCall() ||
+				GlobalHolder.getInstance().isInVideoCall()){
+			return false;
+		}
+		return true;
+	}
 	private void initPopupWindow() {
 		LayoutInflater inflater = (LayoutInflater) this.getActivity()
 				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -1897,18 +1982,6 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 			updateUnreadConversation(item);
 		}
 		return true;
-	}
-
-	private void updateConferenceNotification(Conference conf) {
-		if(GlobalConfig.isApplicationBackground(mContext)){
-			Intent enterConference = new Intent(mContext, MainActivity.class);
-			User creator = GlobalHolder.getInstance().getUser(conf.getCreator());
-			enterConference.putExtra("conf", conf);
-			enterConference.putExtra("initFragment", 3);
-			Notificator.updateSystemNotification(mContext, creator == null ? ""
-					: creator.getName(), "邀请你参加会议 " + conf.getName(), 1,
-					enterConference, PublicIntent.VIDEO_NOTIFICATION_ID);
-		}
 	}
 
 	public class ScrollItem implements Comparable<ScrollItem> {
@@ -2210,10 +2283,12 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 					switch (item.cov.getType()) {
 					case Conversation.TYPE_VERIFICATION_MESSAGE:
 						ConversationFirendAuthenticationData verification = ((ConversationFirendAuthenticationData) item.cov);
-						if (verification.getUser() == null) {
+						User friendUser = verification.getUser();
+						if (friendUser == null) {
 							V2Log.e(TAG,
-									"update crowd verification message failed .. user or group is null");
-							break;
+									"update crowd verification message failed .. user is null");
+							friendUser = new User(verification.getFriendNode().remoteUserID);
+							verification.setUser(friendUser);
 						}
 
 						User verificationUser = GlobalHolder.getInstance()
@@ -2318,9 +2393,9 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 										+ groupType + " | groupID --> "
 										+ g.getmGId() + " | user name is --> "
 										+ u.getName());
-						currentGroupLayout.updateContent(u.getName());
-						currentGroupLayout.updateGroupOwner(g.getName());
 						g.setOwnerUser(u);
+						currentGroupLayout.updateGroupContent(g);
+						currentGroupLayout.updateGroupName(g.getName());
 					}
 				}
 			} else if (JNIService.JNI_BROADCAST_USER_UPDATE_NAME_OR_SIGNATURE
@@ -2423,6 +2498,24 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 				long cid = intent.getLongExtra("groupId", -1l);
 				Message.obtain(mHandler, QUIT_DISCUSSION_BOARD_DONE,
                         cid).sendToTarget();
+			} else if (PublicIntent.BROADCAST_USER_COMMENT_NAME_NOTIFICATION
+					.equals(intent.getAction())){
+				Long uid = intent.getLongExtra("modifiedUser", -1);
+				if (uid == -1l) {
+					V2Log.e("ConversationsTabFragment BROADCAST_USER_COMMENT_NAME_NOTIFICATION ---> update user comment name failed , get id is -1");
+					return;
+				}
+				
+				if(mCurrentSubTab == SUB_TAB_CROWD){
+					for (int i = 0; i < mItemList.size(); i++) {
+						CrowdConversation con = (CrowdConversation) mItemList.get(i).cov;
+						if (con.getGroup().getOwnerUser() != null && 
+								con.getGroup().getOwnerUser().getmUserId() == uid) {
+							((GroupLayout) mItemList.get(i).gp).updateGroupContent(con.getGroup());
+						}
+					}
+				}
+				adapter.notifyDataSetChanged();
 			}
 			// else if (JNIService.JNI_BROADCAST_NEW_MESSAGE.equals(intent
 			// .getAction())) {
@@ -2435,7 +2528,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 			// intent.getLongExtra("groupID", -1));
 			// }
 			// }
-		}
+		} 
 	}
 
 	class ConferenceReceiver extends CommonReceiver {
@@ -2484,6 +2577,21 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 				addConversation(conf, false);
 				Conference c = new Conference((ConferenceGroup) conf);
 				startConferenceActivity(c);
+			} else if (PublicIntent.BROADCAST_USER_COMMENT_NAME_NOTIFICATION
+					.equals(intent.getAction())){
+				Long uid = intent.getLongExtra("modifiedUser", -1);
+				if (uid == -1l) {
+					V2Log.e("ConversationsTabFragment BROADCAST_USER_COMMENT_NAME_NOTIFICATION ---> update user comment name failed , get id is -1");
+					return;
+				}
+				
+				for (int i = 0; i < mItemList.size(); i++) {
+					ConferenceConversation con = (ConferenceConversation) mItemList.get(i).cov;
+					if (con.getGroup().getOwnerUser() != null && 
+							con.getGroup().getOwnerUser().getmUserId() == uid) {
+						((GroupLayout) mItemList.get(i).gp).updateGroupContent(con.getGroup());
+					}
+				}
 			}
 		}
 	}
@@ -2582,14 +2690,15 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 
 				for (int i = 0; i < mItemList.size(); i++) {
 					Conversation conversation = mItemList.get(i).cov;
-					if (conversation.getType() == V2GlobalEnum.GROUP_TYPE_CONTACT) {
-						ContactConversation con = (ContactConversation) conversation;
-						if (con.getUserID() == uid) {
-							((GroupLayout) mItemList.get(i).gp).update();
-							adapter.notifyDataSetChanged();
-						}
+					if (conversation.getType() == V2GlobalEnum.GROUP_TYPE_CROWD) {
+						CrowdConversation con = (CrowdConversation) conversation;
+						updateGroupConversation(V2GlobalEnum.GROUP_TYPE_CROWD, con.getGroup().getmGId());
+					} else if(conversation.getType() == V2GlobalEnum.GROUP_TYPE_USER){
+						GroupLayout layout = (GroupLayout) mItemList.get(i).gp;
+						layout.update();
 					}
 				}
+				adapter.notifyDataSetChanged();
 			} else if (JNIService.JNI_BROADCAST_GROUP_USER_ADDED.equals(intent
 					.getAction())) {
 				GroupUserObject guo = (GroupUserObject) intent.getExtras().get(
@@ -2612,8 +2721,9 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 
 				for (ScrollItem item : mItemList) {
 					Conversation con = item.cov;
-					if (con.getExtId() == guo.getmUserId()) {
-						removeConversation(con.getExtId());
+					if (con.getType() == Conversation.TYPE_VERIFICATION_MESSAGE) {
+						removeConversation(guo.getmGroupId());
+						removeConversation(guo.getmUserId());
                         if(con.getType() == Conversation.TYPE_VERIFICATION_MESSAGE){
                             updateVerificationConversation();
                         }
@@ -2670,48 +2780,8 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 						});
 					}
 				}
-			}
+			} 
 		}
-	}
-
-	/**
-	 * 更新验证要想系统通知栏
-	 * @param msg
-	 */
-	private void updateVerificationStateBar(String msg) {
-
-		if (GlobalConfig.isApplicationBackground(mContext)) {
-			// 发通知
-			Intent i = new Intent(getActivity(),
-					MessageAuthenticationActivity.class);
-            i = startAuthenticationActivity(i);
-			i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-					| Intent.FLAG_ACTIVITY_CLEAR_TOP);
-
-			PendingIntent pendingIntent = PendingIntent.getActivity(
-					getActivity(), 0, i, 0);
-
-			Notification notification = new Notification.Builder(getActivity())
-					.setSmallIcon(R.drawable.ic_launcher)
-					.setContentTitle(
-							getResources().getString(
-									R.string.status_bar_notification))
-					.setContentText(msg).setAutoCancel(true).setTicker(msg)
-					.setWhen(System.currentTimeMillis())
-					.setContentIntent(pendingIntent).getNotification();
-			NotificationManager manager = ((NotificationManager) getActivity().getSystemService(
-					Activity.NOTIFICATION_SERVICE));
-			manager.cancelAll();
-			manager.notify(0, notification);
-		}
-
-		if (mItemList.contains(verificationItem)) {
-			mItemList.remove(verificationItem);
-			mItemList.add(0, verificationItem);
-		} else {
-			mItemList.add(0, verificationItem);
-		}
-		adapter.notifyDataSetChanged();
 	}
 
 	private String showUnreadFriendAuthentication() {
@@ -2731,6 +2801,8 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 		User user = null;
 
 		user = GlobalHolder.getInstance().getUser(tempNode.remoteUserID);
+		if(user ==  null)
+			user = new User(tempNode.remoteUserID);
 		String name = user.getName();
 
 		// 别人加我：允许任何人：0已添加您为好友，需要验证：1未处理，2已同意，3已拒绝
@@ -2769,6 +2841,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 			verificationMessageItemData.setDateLong(dateLong);
 			ConversationFirendAuthenticationData friend = (ConversationFirendAuthenticationData) verificationMessageItemData;
 			friend.setUser(user);
+			friend.setFriendNode(tempNode);
 			friend.setMessageType(ConversationFirendAuthenticationData.VerificationMessageType.CONTACT_TYPE);
 			verificationMessageItemLayout.update();
 		}

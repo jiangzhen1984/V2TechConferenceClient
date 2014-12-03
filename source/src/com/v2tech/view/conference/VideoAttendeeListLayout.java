@@ -354,7 +354,6 @@ public class VideoAttendeeListLayout extends LinearLayout {
 			} while (dList != null && i < dList.size());
 
 			configAttendee(at);
-
 		}
 		Collections.sort(mList);
 		adapter.notifyDataSetChanged();
@@ -370,7 +369,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 		if (at.getType() == Attendee.TYPE_MIXED_VIDEO) {
 			mList.add(new Wrapper(at, dList.get(0), DEFAULT_DEVICE_FLAG));
 		} else {
-			boolean isNew = false;
+//			boolean isNew = false;
 			int index = 0;
 			if (mList.size() > 0 && dList != null && dList.size() > 0) {
 				for (int i = 0; i < mList.size(); i++) {
@@ -392,12 +391,12 @@ public class VideoAttendeeListLayout extends LinearLayout {
                         mList.add(index + 1, new Wrapper(at, dList.get(i), i));
                     }
                     index++;
-                    isNew = true;
+//                    isNew = true;
                 }
             }
 
-			if (isNew)
-				mAttendeeCount++;
+//			if (isNew)
+//				mAttendeeCount++;
 			if ((at.isJoined() || at.isSelf())) {
 				onLinePersons++;
 			}

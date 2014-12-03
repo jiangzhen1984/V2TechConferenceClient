@@ -5,7 +5,7 @@ import com.v2tech.vo.Group.GroupType;
 
 public class CrowdConversation extends Conversation {
 	
-	private Group g;
+	private Group group;
 	private User lastSendUser;
 	private boolean showContact;
 
@@ -16,15 +16,15 @@ public class CrowdConversation extends Conversation {
 		if (g.getGroupType() != GroupType.CHATING && g.getGroupType() != GroupType.DISCUSSION) {
 			throw new IllegalArgumentException(" group type is not GroupType.CHATING");
 		}
-		this.g = g;
+		this.group = g;
 		super.mExtId = g.getmGId();
 		super.mType = TYPE_GROUP;
 	}
 
 	@Override
 	public String getName() {
-        if (g != null) {
-            return g.getName();
+        if (group != null) {
+            return group.getName();
         }
         return super.getName();
 	}
@@ -34,8 +34,8 @@ public class CrowdConversation extends Conversation {
 		if(showContact)
 			return msg;
 		else{
-			if (g != null) {
-				User u = g.getOwnerUser();
+			if (group != null) {
+				User u = group.getOwnerUser();
 				// TODO need use localization
 				return u == null ? "" : "创建人:" + u.getName();
 			}
@@ -52,8 +52,8 @@ public class CrowdConversation extends Conversation {
 			return super.getDate();
 		}
 		else{
-			if (g != null) {
-				return g.getStrCreateDate();
+			if (group != null) {
+				return group.getStrCreateDate();
 			}
 			return super.getDate();
 		}
@@ -87,10 +87,6 @@ public class CrowdConversation extends Conversation {
 		this.lastSendUser = lastSendUser;
 	}
 	
-	public Group getGroup() {
-		return g;
-	}
-	
 	public boolean isShowContact() {
 		return showContact;
 	}
@@ -99,12 +95,12 @@ public class CrowdConversation extends Conversation {
 		this.showContact = showContact;
 	}
 	
-	public Group getG() {
-		return g;
+	public Group getGroup() {
+		return group;
 	}
 
-	public void setG(Group g) {
-		this.g = g;
+	public void setGroup(Group group) {
+		this.group = group;
 	}
-	
+
 }

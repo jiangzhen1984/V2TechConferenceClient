@@ -176,6 +176,7 @@ public class MessageAuthenticationActivity extends Activity {
         Intent i = new Intent(PublicIntent.REQUEST_UPDATE_CONVERSATION);
         i.addCategory(PublicIntent.DEFAULT_CATEGORY);
         i.putExtra("isFresh", false);
+        i.putExtra("obj" , new ConversationNotificationObject(0 , -2));
         mContext.sendBroadcast(i);
     }
 

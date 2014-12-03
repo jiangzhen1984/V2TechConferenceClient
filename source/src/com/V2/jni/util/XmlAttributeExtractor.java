@@ -71,9 +71,6 @@ public class XmlAttributeExtractor {
 				return null;
 			}
 		}
-		
-		if((end - 1) - (start + len) == 1)
-			return "";
 		return str.substring(start + len, end - 1);
 	}
 

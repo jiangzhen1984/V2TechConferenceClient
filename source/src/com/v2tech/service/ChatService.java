@@ -266,7 +266,7 @@ public class ChatService extends DeviceService {
 		}
 
 		for (VMessageFileItem item : items) {
-			String xml = EscapedcharactersProcessing.convert(item.toXmlItem());
+			String xml = EscapedcharactersProcessing.convertAmp(item.toXmlItem());
 			if (vm.getToUser() == null) {
 				GroupRequest.getInstance().groupUploadFile(vm.getMsgCode(),
 						vm.getGroupId(), xml);

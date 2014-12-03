@@ -20,7 +20,9 @@ import com.v2tech.view.conversation.MessageLoader;
 import com.v2tech.vo.ConferenceConversation;
 import com.v2tech.vo.ContactConversation;
 import com.v2tech.vo.Conversation;
+import com.v2tech.vo.CrowdConversation;
 import com.v2tech.vo.DiscussionConversation;
+import com.v2tech.vo.Group;
 import com.v2tech.vo.User;
 import com.v2tech.vo.VMessage;
 
@@ -84,7 +86,7 @@ public class GroupLayout extends LinearLayout {
 				mGroupIV.setImageBitmap(bm);
 			else
 				mGroupIV.setImageResource(R.drawable.avatar);
-			updateContactName();
+			initNickName();
 			break;
 		case Conversation.TYPE_CONFERNECE:
 			if (((ConferenceConversation) mConv).getGroup().getOwnerUser()
@@ -111,8 +113,8 @@ public class GroupLayout extends LinearLayout {
 			break;
 		case Conversation.TYPE_GROUP:
 			mGroupIV.setImageResource(R.drawable.chat_group_icon);
-			mGroupNameTV.setText(mConv.getName());
 			mGroupDateTV.setVisibility(View.INVISIBLE);
+			mGroupNameTV.setText(mConv.getName());
 			break;
 		case Conversation.TYPE_VOICE_MESSAGE:
 			mGroupIV.setImageResource(R.drawable.vs_message_voice);
@@ -131,21 +133,25 @@ public class GroupLayout extends LinearLayout {
 		addView(view);
 	}
 	
-	private void updateContactName() {
+	private void initNickName() {
 		
+		User currentUser = null;
+		if(mConv.getType() == V2GlobalEnum.GROUP_TYPE_USER){
 			ContactConversation con = (ContactConversation) mConv;
-			User currentUser = con.getU();
-			if(currentUser != null && con.getUserID() != -1){
-				boolean isFriend = GlobalHolder.getInstance().isFriend(currentUser);
-				String nickName = currentUser.getNickName();
-				if(isFriend && !TextUtils.isEmpty(nickName))
-					mGroupNameTV.setText(nickName);
-				else
-					mGroupNameTV.setText(mConv.getName());
-			}
-			else{
-				V2Log.e(TAG, "updateName ---> get current user is null or id is -1 , please check conversation user is exist");
-			}
+			currentUser = con.getU();
+		}
+		
+		if(currentUser != null){
+			boolean isFriend = GlobalHolder.getInstance().isFriend(currentUser);
+			String nickName = currentUser.getNickName();
+			if(isFriend && !TextUtils.isEmpty(nickName))
+				mGroupNameTV.setText(nickName);
+			else
+				mGroupNameTV.setText(mConv.getName());
+		}
+		else{
+			V2Log.e(TAG, "updateName ---> get current user is null or id is -1 , please check conversation user is exist");
+		}
 	}
 
 	public long getGroupId() {
@@ -209,30 +215,60 @@ public class GroupLayout extends LinearLayout {
 		}
 	}
 
-	public void updateGroupOwner(String name) {
-		if(mConv.getType() == V2GlobalEnum.GROUP_TYPE_DISCUSSION)
-			mConNameTV.setText(name);
-		else
-			mGroupNameTV.setText(name);
-	}
-
-	public void updateContent(String content) {
+	public void updateUserContent(String content) {
 		if(mConv.getType() == V2GlobalEnum.GROUP_TYPE_USER)
 			mGroupOwnerTV.setText(content);
-		else{
-			if(mConv.getType() != V2GlobalEnum.GROUP_TYPE_DISCUSSION)
-			mGroupOwnerTV.setText("创建人:" + content);
+	}
+	
+	public void updateGroupContent(Group group){
+		if(mConv.getType() == V2GlobalEnum.GROUP_TYPE_DISCUSSION)
+			return ;
+		
+		User currentUser = null;
+		if(mConv.getType() == V2GlobalEnum.GROUP_TYPE_CROWD){
+			CrowdConversation crowd = (CrowdConversation) mConv;
+			currentUser = crowd.getGroup().getOwnerUser();
 		}
+		else if(mConv.getType() == V2GlobalEnum.GROUP_TYPE_CONFERENCE){
+			ConferenceConversation conf = (ConferenceConversation) mConv;
+			currentUser = conf.getGroup().getOwnerUser();
+		}
+		
+		if(currentUser != null){
+			boolean isFriend = GlobalHolder.getInstance().isFriend(currentUser);
+			String nickName = currentUser.getNickName();
+			if(TextUtils.isEmpty(nickName)){
+				V2Log.e(TAG, "updateName ---> Update NickName Failed ... get nickName is empty ! name is : "+ currentUser.getName()
+						+ " id is : " + currentUser.getmUserId());
+			}
+			
+			if(isFriend && !TextUtils.isEmpty(nickName)){
+				V2Log.e(TAG, "updateName ---> Update NickName successfully!");
+				mGroupOwnerTV.setText("创建人:" + nickName);
+			}
+			else{
+				V2Log.e(TAG, "updateName ---> Update NickName Failed!");
+				mGroupOwnerTV.setText("创建人:" + currentUser.getName());
+			}
+		}
+		else{
+			V2Log.e(TAG, "updateName ---> Update NickName Failed ... get user Object is empty !");
+		}
+	}
+	
+	public void updateGroupName(String name){
+		mConNameTV.setText(name);
+		mGroupNameTV.setText(name);
 	}
 
 	public void update() {
 		
 		if(mConv.getType() == V2GlobalEnum.GROUP_TYPE_USER)
-			updateContactName();
+			initNickName();
 		else{
-//				DiscussionConversation dis = (DiscussionConversation) mConv;
-				mConNameTV.setText(mConv.getName());
-				mGroupNameTV.setText(mConv.getName());
+//			DiscussionConversation dis = (DiscussionConversation) mConv;
+			mConNameTV.setText(mConv.getName());
+			mGroupNameTV.setText(mConv.getName());
 		}
 		mGroupOwnerTV.setText(mConv.getMsg());
 		mGroupDateTV.setText(mConv.getDate());
