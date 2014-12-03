@@ -1,7 +1,5 @@
 package com.V2.jni.util;
 
-import java.io.FileNotFoundException;
-
 import android.util.Log;
 
 /**

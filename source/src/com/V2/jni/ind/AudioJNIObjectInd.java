@@ -30,13 +30,13 @@ public class AudioJNIObjectInd extends JNIObjectInd {
 		this.mType = JNIIndType.AUDIO;
 	}
 
-//	public long getGroupId() {
-//		return mGroupId;
-//	}
-//
-//	public void setGroupId(long groupId) {
-//		this.mGroupId = groupId;
-//	}
+	public long getGroupId() {
+		return mGroupId;
+	}
+
+	public void setGroupId(long groupId) {
+		this.mGroupId = groupId;
+	}
 	
 	public String getSzSessionID() {
 		return szSessionID;

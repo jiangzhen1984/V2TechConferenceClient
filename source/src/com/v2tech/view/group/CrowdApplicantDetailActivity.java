@@ -70,7 +70,6 @@ public class CrowdApplicantDetailActivity extends Activity {
 	private User applicant;
 	private VMessageQualificationApplicationCrowd msg;
 	private CrowdGroupService service = new CrowdGroupService();
-	private Handler handler = new Handler();
 	private CrowdGroupService cg = new CrowdGroupService();
 	
 	@Override

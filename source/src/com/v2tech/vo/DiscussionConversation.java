@@ -30,12 +30,10 @@ public class DiscussionConversation extends Conversation {
 	public String getName() {
 		if(discussionGroup != null){
 			if(!TextUtils.isEmpty(discussionGroup.getName())){
-				V2Log.e("test", "get dis name is : " + discussionGroup.getName());
 				return discussionGroup.getName();
 			}
 			else{
 				String name = getDiscussionNames();
-				V2Log.e("test", "get dis name is : " + name);
 				return name;
 			}
 		}

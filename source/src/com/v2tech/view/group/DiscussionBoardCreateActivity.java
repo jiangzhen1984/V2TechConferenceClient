@@ -38,8 +38,10 @@ import com.v2tech.service.jni.JNIResponse;
 import com.v2tech.view.JNIService;
 import com.v2tech.view.PublicIntent;
 import com.v2tech.view.adapter.CreateConfOrCrowdAdapter;
+import com.v2tech.view.bo.ConversationNotificationObject;
 import com.v2tech.view.widget.GroupListView;
 import com.v2tech.view.widget.GroupListView.ItemData;
+import com.v2tech.vo.Conversation;
 import com.v2tech.vo.DiscussionGroup;
 import com.v2tech.vo.Group;
 import com.v2tech.vo.Group.GroupType;
@@ -416,12 +418,13 @@ public class DiscussionBoardCreateActivity extends Activity {
 					i.putExtra("gid", cg.getmGId());
 					sendBroadcast(i);
 					
-
-					Intent crowdIntent = new Intent(
-							PublicIntent.SHOW_DISCUSSION_BOARD_DETAIL_ACTIVITY);
+					
+					Intent crowdIntent = new Intent(PublicIntent.START_CONVERSACTION_ACTIVITY);
 					crowdIntent.addCategory(PublicIntent.DEFAULT_CATEGORY);
-					crowdIntent.putExtra("cid", id);
-					mContext.startActivity(crowdIntent);
+					crowdIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+					crowdIntent.putExtra("obj", new ConversationNotificationObject(Conversation.TYPE_DISCUSSION, id));
+					startActivity(crowdIntent);
+					
 
 					// finish current activity
 					finish();

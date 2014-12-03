@@ -40,7 +40,6 @@ import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.V2Toast;
 import com.v2tech.view.JNIService;
 import com.v2tech.view.conversation.ConversationSelectFile;
-import com.v2tech.view.conversation.FileService;
 import com.v2tech.view.conversation.MessageBuilder;
 import com.v2tech.view.conversation.MessageLoader;
 import com.v2tech.view.group.CrowdFilesActivity.FileListAdapter.ViewItem;

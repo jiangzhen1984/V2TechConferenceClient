@@ -11,6 +11,14 @@ public class ConferenceJNIObjecctInd extends JNIObjectInd {
 		this.mConfId = mConfId;
 		this.mType = JNIIndType.CONF;
 	}
+
+	public long getmConfId() {
+		return mConfId;
+	}
+
+	public void setmConfId(long mConfId) {
+		this.mConfId = mConfId;
+	}
 	
 	
 

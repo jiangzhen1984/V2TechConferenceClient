@@ -675,25 +675,7 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 				currentConversationViewType = V2GlobalEnum.GROUP_TYPE_DISCUSSION;
 				DiscussionGroup discussionGroup = (DiscussionGroup) GlobalHolder.getInstance()
 						.getGroupById(V2GlobalEnum.GROUP_TYPE_DISCUSSION, cov.getExtId());
-				if(discussionGroup == null){
-					throw new RuntimeException("Start Chat Activity Failed ... Get Discussion Group is null! , id is : " + cov.getExtId());
-				}
-				StringBuilder sb = new StringBuilder();
-		        List<User> users = discussionGroup.getUsers();
-		        User ownerUser = discussionGroup.getOwnerUser();
-		        if (ownerUser != null) {
-		            sb.append(ownerUser.getName());
-		        }
-		        if (users != null) {
-		            for (User user : users) {
-		            	if(user.getmUserId() == ownerUser.getmUserId())
-		            		continue ;
-		            	
-		                sb.append(" ").append(user.getName());
-		                break;
-		            }
-		        }
-				mUserTitleTV.setText(sb.toString());
+				mUserTitleTV.setText(discussionGroup.getName());
 			}
 			groupId = cov.getExtId();
 			mVideoCallButton.setVisibility(View.GONE);

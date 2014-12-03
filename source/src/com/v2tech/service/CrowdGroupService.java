@@ -59,7 +59,6 @@ public class CrowdGroupService extends AbstractHandler {
 	private static final int CREATE_DISCUSSION_BOARD = 0x000B;
 	private static final int UPDATE_DISCUSSION_BOARD = 0x000C;
 
-	private static final int KEY_CANCELLED_LISTNER = 1;
 	private static final int KEY_FILE_TRANS_STATUS_NOTIFICATION_LISTNER = 2;
 	private static final int KEY_FILE_REMOVED_NOTIFICATION_LISTNER = 3;
 	private static final int KEY_FILE_NEW_NOTIFICATION_LISTNER = 4;

@@ -12,7 +12,6 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.widget.Adapter;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -172,8 +171,6 @@ public class CrowdInvitationActivity extends Activity {
 	}
 
 	private void handleDeclineDone() {
-		CrowdGroup g = new CrowdGroup(crowd.getId(), crowd.getName(),
-				crowd.getCreator(), null);
 		vq.setReadState(VMessageQualification.ReadState.READ);
 		vq.setQualState(VMessageQualification.QualificationState.REJECT);
 		updateView(false);

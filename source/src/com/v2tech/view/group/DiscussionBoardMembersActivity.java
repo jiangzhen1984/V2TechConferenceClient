@@ -20,6 +20,7 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.v2tech.R;
 import com.v2tech.service.CrowdGroupService;
@@ -162,6 +163,13 @@ public class DiscussionBoardMembersActivity extends Activity {
 
 		@Override
 		public void onClick(View view) {
+			if (!GlobalHolder.getInstance().isServerConnected()) {
+				Toast.makeText(DiscussionBoardMembersActivity.this,
+						R.string.error_discussion_no_network,
+						Toast.LENGTH_SHORT).show();
+				return;
+			}
+			
 			if (isInDeleteMode) {
 				isInDeleteMode = false;
 				mInvitationButton.setText(R.string.discussion_board_members_invitation_button_text);
@@ -256,6 +264,12 @@ public class DiscussionBoardMembersActivity extends Activity {
 
 				@Override
 				public void onClick(View v) {
+					if (!GlobalHolder.getInstance().isServerConnected()) {
+						Toast.makeText(DiscussionBoardMembersActivity.this,
+								R.string.error_discussion_no_network,
+								Toast.LENGTH_SHORT).show();
+						return;
+					}
 					v.setVisibility(View.GONE);
 					service.removeMember(crowd, mUser, null);
 					mMembers.remove(mUser);

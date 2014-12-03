@@ -27,6 +27,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.PopupWindow.OnDismissListener;
@@ -439,9 +440,18 @@ public class VideoDocLayout extends LinearLayout {
 				// Merge bitmap
 				mergeBitmapToImage(mBackgroundBitMap, mShapeBitmap);
 				iv.setImageBitmap(mImageViewBitmap);
-				container.addView(iv, new FrameLayout.LayoutParams(
+				FrameLayout.LayoutParams fl = new FrameLayout.LayoutParams(
 						FrameLayout.LayoutParams.MATCH_PARENT,
-						FrameLayout.LayoutParams.MATCH_PARENT));
+						FrameLayout.LayoutParams.MATCH_PARENT);
+//				fl.leftMargin = (container.getWidth() - mImageViewBitmap.getWidth()) / 2;
+//				fl.topMargin = (container.getHeight() - mImageViewBitmap.getHeight()) / 2;
+//				if (fl.leftMargin < 0) {
+//					fl.leftMargin = 0;
+//				}
+//				if (fl.topMargin < 0) {
+//					fl.topMargin = 0;
+//				}
+				container.addView(iv, fl);
 				container.postInvalidate();
 			} else {
 				// Set interval timer for waiting page download

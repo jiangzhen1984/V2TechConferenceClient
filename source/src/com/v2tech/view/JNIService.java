@@ -23,7 +23,6 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.Parcelable;
 import android.support.v4.util.LongSparseArray;
-import android.util.Log;
 import android.widget.Toast;
 
 import com.V2.jni.AudioRequest;
@@ -1254,7 +1253,8 @@ public class JNIService extends Service implements
 				i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
 				i.putExtra("crowd", crowd.id);
 				sendBroadcast(i);
-			} else if(crowd.type == V2Group.TYPE_DISCUSSION_BOARD){
+			} else if(crowd.type == V2Group.TYPE_DISCUSSION_BOARD
+					&& GlobalHolder.getInstance().getCurrentUserId() != crowd.creator.uid){
 				V2Log.e(TAG, "onAddGroupInfo--> add a new discussion group , id is : "
 						+ crowd.id);
 				User user = GlobalHolder.getInstance().getUser(
@@ -1346,7 +1346,7 @@ public class JNIService extends Service implements
 							ind.getSzSessionID(), ind.getFromUserId());
 					// mark voice state to connected
 					GlobalHolder.getInstance().setVoiceConnectedState(true);
-					Log.d(TAG_FILE, "自动接受了对方音频邀请因为在视频通话中并且是同一个人");
+					V2Log.d(TAG_FILE, "自动接受了对方音频邀请因为在视频通话中并且是同一个人");
 				} else {
 					V2Log.i("Ignore audio call for others: "
 							+ ind.getFromUserId());
@@ -1480,7 +1480,6 @@ public class JNIService extends Service implements
 		 * .ind.VideoJNIObjectInd)
 		 */
 		public void OnVideoChatClosed(VideoJNIObjectInd ind) {
-			Log.i("20141102", "OnVideoChatClosed");
 			super.OnVideoChatClosed(ind);
 			if (GlobalHolder.getInstance().isInMeeting()
 					|| GlobalHolder.getInstance().isInAudioCall()
@@ -1807,7 +1806,7 @@ public class JNIService extends Service implements
 			else
 				item.setState(VMessageAbstractItem.STATE_FILE_DOWNLOADED);
 			int updates = MessageBuilder.updateVMessageItem(mContext, item);
-			Log.e(TAG, "OnFileTransEnd updates success : " + updates);
+			V2Log.e(TAG, "OnFileTransEnd updates success : " + updates);
 			vm = null;
 			item = null;
 
@@ -1825,7 +1824,7 @@ public class JNIService extends Service implements
 			else
 				item.setState(VMessageAbstractItem.STATE_FILE_DOWNLOADED_FALIED);
 			int updates = MessageBuilder.updateVMessageItem(mContext, item);
-			Log.e(TAG, "OnFileTransEnd updates success : " + updates);
+			V2Log.e(TAG, "OnFileTransEnd updates success : " + updates);
 			vm = null;
 			item = null;
 			updateTransFileState(szFileID, false);
