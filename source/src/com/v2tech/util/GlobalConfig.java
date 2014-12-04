@@ -1,5 +1,6 @@
 package com.v2tech.util;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,7 +13,6 @@ import android.os.SystemClock;
 import android.util.DisplayMetrics;
 import android.util.SparseArray;
 
-import com.V2.jni.util.V2Log;
 import com.v2tech.R;
 
 public class GlobalConfig {
@@ -41,6 +41,8 @@ public class GlobalConfig {
 	public static HashMap<String, String> allChinese = new HashMap<String, String>();
 	
 	public static Map<Long, Integer> mTransingFiles = new HashMap<Long, Integer>();
+	
+	public static List<Long> NeedToUpdateUser = new ArrayList<Long>();
 	
 	public static int[] GLOBAL_FACE_ARRAY = new int[] { 0, R.drawable.face_1,
 			R.drawable.face_2, R.drawable.face_3, R.drawable.face_4,
@@ -200,26 +202,6 @@ public class GlobalConfig {
 		}
 		return false;
 	}
-	
-	/**
-	 * 获取当前栈顶的activity
-	 * 
-	 * @param context
-	 * @return true is background , false is Foreground
-	 */
-	public static String getTopTastActivityName(Context context) {
-		ActivityManager am = (ActivityManager) context
-				.getSystemService(Context.ACTIVITY_SERVICE);
-		List<RunningTaskInfo> tasks = am.getRunningTasks(1);
-		if (!tasks.isEmpty()) {
-			ComponentName topActivity = tasks.get(0).topActivity;
-			V2Log.e("TEST", "getShortClassName" + topActivity.getShortClassName());
-			V2Log.e("TEST", "getClassName" + topActivity.getClassName());
-			return topActivity.getClassName();
-		}
-		return null;
-	}
-	
 	
 	public static class Resource {
 		public static String CONTACT_DEFAULT_GROUP_NAME ="";

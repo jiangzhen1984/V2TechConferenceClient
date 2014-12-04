@@ -197,10 +197,10 @@ public class CrowdGroupService extends AbstractHandler {
 			return;
 		}
 		
-		if (mPendingCrowdId > 0) {
-			super.sendResult(caller, new JNIResponse(JNIResponse.Result.FAILED));
-			return;
-		}
+//		if (mPendingCrowdId > 0) {
+//			super.sendResult(caller, new JNIResponse(JNIResponse.Result.FAILED));
+//			return;
+//		}
 		mPendingCrowdId = crowd.getId();
 
 		// FIXME concurrency problem, if user use one crowdgroupservice instance

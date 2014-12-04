@@ -31,8 +31,10 @@ import org.xml.sax.SAXException;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.text.TextUtils;
 import android.util.Log;
 
+import com.V2.jni.V2GlobalEnum;
 import com.V2.jni.util.EscapedcharactersProcessing;
 import com.V2.jni.util.V2Log;
 import com.v2tech.R;
@@ -230,7 +232,7 @@ public class User implements Comparable<User> {
 	}
 
 	public String getCompany() {
-		if (mCompany == null) {
+		if (TextUtils.isEmpty(mCompany)) {
 			mCompany = loadCompany(this.getFirstBelongsGroup());
 		}
 		return mCompany;
@@ -243,7 +245,11 @@ public class User implements Comparable<User> {
 		if (g.getParent() != null) {
 			return loadCompany(g.getParent());
 		} else {
-			return g.getName();
+			List<Group> contacts = GlobalHolder.getInstance().getGroup(V2GlobalEnum.GROUP_TYPE_CONTACT);
+			if(contacts.contains(g))
+				return "";
+			else
+				return g.getName();
 		}
 	}
 

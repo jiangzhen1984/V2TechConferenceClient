@@ -789,6 +789,25 @@ public class MessageLoader {
 				+ " desc limit " + limit + " offset  " + offset;
 		return queryMessage(context, selection, args, order);
 	}
+	
+	
+	public static boolean queryVoiceMessages(long userID){
+		
+		DataBaseContext mContext = new DataBaseContext(context);
+		Cursor cursor = mContext.getContentResolver().query(ContentDescriptor.HistoriesMedia.CONTENT_URI, 
+				null, 
+				ContentDescriptor.HistoriesMedia.Cols.HISTORY_MEDIA_REMOTE_USER_ID + " = ? ",
+				new String[]{String.valueOf(userID)}, 
+				null);
+		
+		if(cursor == null)
+			return false;
+		
+		if(cursor.getCount() > 0)
+			return true;
+		else
+			return false;
+	}
 
 	/**
 	 * query VMessageFileItme Object by uuid and groupType..
@@ -1185,6 +1204,25 @@ public class MessageLoader {
         int ret = mContext.getContentResolver().delete(
                 ContentDescriptor.HistoriesAddFriends.CONTENT_URI,
                 ContentDescriptor.HistoriesAddFriends.Cols.HISTORY_FRIEND_REMOTE_USER_ID + "=?",
+                new String[] { String.valueOf(userID) });
+        if (ret <= 0)
+            V2Log.d(TAG,
+                    "May delete CrowdVerificationMessage failed...groupID : "
+                            + userID);
+        return ret;
+    }
+    
+    /**
+     * according user id , delete all voice message..
+     *
+     * @param groupID
+     */
+    public static int deleteVoiceMessage(long userID) {
+
+        DataBaseContext mContext = new DataBaseContext(context);
+        int ret = mContext.getContentResolver().delete(
+                ContentDescriptor.HistoriesMedia.CONTENT_URI,
+                ContentDescriptor.HistoriesMedia.Cols.HISTORY_MEDIA_REMOTE_USER_ID + "= ?",
                 new String[] { String.valueOf(userID) });
         if (ret <= 0)
             V2Log.d(TAG,

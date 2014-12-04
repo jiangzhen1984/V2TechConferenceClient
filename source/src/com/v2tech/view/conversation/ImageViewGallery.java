@@ -60,6 +60,10 @@ public class ImageViewGallery extends FragmentActivity {
 			long departmentID = getIntent().getLongExtra("gid", 0);
 			loadDepartmentImages(departmentID); 
 			break;
+		case V2GlobalEnum.GROUP_TYPE_DISCUSSION:
+			long discussionID = getIntent().getLongExtra("gid", 0);
+			loadDiscussionImages(discussionID); 
+			break;
 		default:
 			throw new RuntimeException("The given group type is error , please check it :" + type);
 		}
@@ -113,6 +117,12 @@ public class ImageViewGallery extends FragmentActivity {
 	private void loadDepartmentImages(long groupId) {
 		List<VMessage> list = MessageLoader
 				.loadGroupImageMessage(this, Integer.valueOf(V2GlobalEnum.GROUP_TYPE_DEPARTMENT) , groupId);
+		populateImageMessage(list);
+	}
+	
+	private void loadDiscussionImages(long groupId) {
+		List<VMessage> list = MessageLoader
+				.loadGroupImageMessage(this, Integer.valueOf(V2GlobalEnum.GROUP_TYPE_DISCUSSION) , groupId);
 		populateImageMessage(list);
 	}
 

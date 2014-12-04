@@ -39,6 +39,7 @@ import com.v2tech.util.FileUitls;
 import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.V2Toast;
 import com.v2tech.view.JNIService;
+import com.v2tech.view.bo.GroupUserObject;
 import com.v2tech.view.conversation.ConversationSelectFile;
 import com.v2tech.view.conversation.MessageBuilder;
 import com.v2tech.view.conversation.MessageLoader;
@@ -775,8 +776,13 @@ public class CrowdFilesActivity extends Activity {
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			if (intent.getAction().equals(JNIService.JNI_BROADCAST_KICED_CROWD)) {
-				long crowdId = intent.getLongExtra("crowd", 0);
-				if (crowdId == crowd.getmGId()) {
+				GroupUserObject obj = intent.getParcelableExtra("group");
+				if (obj == null) {
+					V2Log.e("CrowdFilesActivity",
+							"Received the broadcast to quit the crowd group , but crowd id is wroing... ");
+					return;
+				}
+				if (obj.getmGroupId() == crowd.getmGId()) {
 					for (VCrowdFile f : mFiles) {
 						if (f.getState() == VFile.State.DOWNLOADING) {
 							service.handleCrowdFile(

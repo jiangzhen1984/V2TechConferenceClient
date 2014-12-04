@@ -1249,9 +1249,10 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 		}
 
 		if (hasUnread){
-			updateVerificationStateBar(msg);
+			updateVerificationStateBar(msg , VerificationMessageType.CONTACT_TYPE);
 			verificationMessageItemData
 					.setReadFlag(Conversation.READ_FLAG_UNREAD);
+			sendVoiceNotify();
 		}
 		else
 			verificationMessageItemData
@@ -1365,7 +1366,8 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 				verificationMessageItemData
 						.setReadFlag(Conversation.READ_FLAG_UNREAD);
 				showAuthenticationNotification = true;
-				updateVerificationStateBar(content);
+				updateVerificationStateBar(content , VerificationMessageType.CROWD_TYPE);
+				sendVoiceNotify();
 			} else {
 				verificationMessageItemData
 						.setReadFlag(Conversation.READ_FLAG_READ);
@@ -1587,7 +1589,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 		for (int i = 0; i < mItemList.size(); i++) {
 			Conversation temp = mItemList.get(i).cov;
 			if (temp.getExtId() == id) {
-				mItemList.remove(i);
+				mItemList.remove(mItemList.get(i));
 				if (mCurrentTabFlag == V2GlobalEnum.GROUP_TYPE_USER) {
 					if (temp.getType() != Conversation.TYPE_VOICE_MESSAGE
 							&& temp.getType() != Conversation.TYPE_VERIFICATION_MESSAGE) {
@@ -1625,12 +1627,19 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 			else
 				V2Log.e(TAG, "Delete Conversation Failed...id is : " + id);
 		
-			int ret = 0;
 			// clear the crowd group all verification database messges
-			ret = MessageLoader.deleteFriendVerificationMessage(id);
-			ret = MessageLoader.deleteCrowdVerificationMessage(id);
-			if(ret > 0)
+			int friend = MessageLoader.deleteFriendVerificationMessage(id);
+			int group = MessageLoader.deleteCrowdVerificationMessage(id);
+			if(friend + group > 0)
 				updateVerificationConversation();
+			
+			// clear the voice messages
+			int voices = MessageLoader.deleteVoiceMessage(id);
+			boolean flag = MessageLoader.queryVoiceMessages(id);
+			if(voices > 0 && !flag){
+				mItemList.remove(voiceItem);
+				adapter.notifyDataSetChanged();
+			}
 		}
 	}
 	
@@ -1741,14 +1750,14 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 	 * 更新验证要想系统通知栏
 	 * @param msg
 	 */
-	private void updateVerificationStateBar(String msg) {
+	private void updateVerificationStateBar(String msg , VerificationMessageType type) {
 
 		boolean state = checkSendingState();
 		if (state) {
 			// 发通知
 			Intent i = new Intent(getActivity(),
 					MessageAuthenticationActivity.class);
-            i = startAuthenticationActivity(i);
+            i = startAuthenticationActivity(i , type);
 			i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
 					| Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
@@ -1767,10 +1776,6 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 					Activity.NOTIFICATION_SERVICE));
 			manager.cancelAll();
 			manager.notify(0, notification);
-			sendVoiceNotify();
-		}
-		else{
-			sendVoiceNotify();
 		}
 
 		if (mItemList.contains(verificationItem)) {
@@ -2044,7 +2049,9 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
                     Intent intent = new Intent(mContext,
                             MessageAuthenticationActivity.class);
 
-					intent = startAuthenticationActivity(intent);
+                    VerificationMessageType messageType = ((ConversationFirendAuthenticationData) verificationMessageItemData)
+                            .getMessageType();
+					intent = startAuthenticationActivity(intent , messageType);
                     startActivityForResult(intent,
                             REQUEST_UPDATE_VERIFICATION_CONVERSATION);
 				} else {
@@ -2058,10 +2065,8 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 		}
 	};
 
-    private Intent startAuthenticationActivity(Intent intent) {
+    private Intent startAuthenticationActivity(Intent intent , VerificationMessageType messageType) {
 
-        VerificationMessageType messageType = ((ConversationFirendAuthenticationData) verificationMessageItemData)
-                .getMessageType();
         if (messageType == VerificationMessageType.CONTACT_TYPE)
             intent.putExtra("isFriendActivity", true);
         else
@@ -2073,7 +2078,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
         Cursor cursor = mContext.getContentResolver().query(
                 ContentDescriptor.HistoriesAddFriends.CONTENT_URI,
                 null, "ReadState = ?",
-                new String[] { String.valueOf(0) }, order);
+                new String[] { String.valueOf(ReadState.UNREAD.intValue()) }, order);
         if ((cursor != null) && (cursor.getCount() == 0))
             intent.putExtra("isFriendShowNotification", false);
         else
@@ -2448,25 +2453,27 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 			super.onReceive(context, intent);
 			if (PublicIntent.BROADCAST_NEW_CROWD_NOTIFICATION.equals(intent
 					.getAction())) {
-				long gid = intent.getLongExtra("crowd", 0);
-				Group g = GlobalHolder.getInstance().getGroupById(
-						GroupType.CHATING.intValue(), gid);
-				if (g != null)
-					addConversation(g, false);
-				else
-					V2Log.e("Can not get crowd :" + gid);
-
+				if (mCurrentSubTab == SUB_TAB_CROWD) {
+					long gid = intent.getLongExtra("crowd", 0);
+					Group g = GlobalHolder.getInstance().getGroupById(
+							GroupType.CHATING.intValue(), gid);
+					if (g != null)
+						addConversation(g, false);
+					else
+						V2Log.e("Can not get crowd :" + gid);
+				}
 			} else if (PublicIntent.BROADCAST_CROWD_DELETED_NOTIFICATION
 					.equals(intent.getAction())
 					|| intent.getAction().equals(
 							JNIService.JNI_BROADCAST_KICED_CROWD)) {
-				long cid = intent.getLongExtra("crowd", -1l);
-				if (cid == -1l) {
+				GroupUserObject obj = intent.getParcelableExtra("group");
+				if (obj == null) {
 					V2Log.e(TAG,
 							"Received the broadcast to quit the crowd group , but crowd id is wroing... ");
 					return;
 				}
-				removeConversation(cid);
+				
+				removeConversation(obj.getmGroupId());
 			} else if (JNIService.JNI_BROADCAST_GROUP_UPDATED.equals(intent
 					.getAction())) {
 				long gid = intent.getLongExtra("gid", 0);
@@ -2508,10 +2515,13 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 				
 				if(mCurrentSubTab == SUB_TAB_CROWD){
 					for (int i = 0; i < mItemList.size(); i++) {
-						CrowdConversation con = (CrowdConversation) mItemList.get(i).cov;
-						if (con.getGroup().getOwnerUser() != null && 
-								con.getGroup().getOwnerUser().getmUserId() == uid) {
-							((GroupLayout) mItemList.get(i).gp).updateGroupContent(con.getGroup());
+						Conversation con = mItemList.get(i).cov;
+						if(con instanceof CrowdConversation){
+							CrowdConversation crowd = (CrowdConversation) mItemList.get(i).cov;
+							if (crowd.getGroup().getOwnerUser() != null && 
+									crowd.getGroup().getOwnerUser().getmUserId() == uid) {
+								((GroupLayout) mItemList.get(i).gp).updateGroupContent(crowd.getGroup());
+							}
 						}
 					}
 				}
@@ -2629,8 +2639,9 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 					V2Log.d(TAG,
 							"update friend verification message content failed... get null");
 					return;
-				} else
-					node.readState = 0;
+				} else{
+					node.readState = ReadState.UNREAD.intValue();
+				}
 
 				updateFriendVerificationConversation(node);
 			} else if (JNIService.JNI_BROADCAST_NEW_QUALIFICATION_MESSAGE
@@ -2662,14 +2673,15 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 					.equals(intent.getAction())
 					|| intent.getAction().equals(
 							JNIService.JNI_BROADCAST_KICED_CROWD)) {
-				long cid = intent.getLongExtra("crowd", -1l);
-				if (cid == -1l) {
+				GroupUserObject obj = intent.getParcelableExtra("group");
+				if (obj == null) {
 					V2Log.e(TAG,
 							"Received the broadcast to quit the crowd group , but crowd id is wroing... ");
 					return;
 				}
-
-				removeConversation(cid);
+				
+				GlobalHolder.getInstance().removeGroup(GroupType.fromInt(obj.getmType()), obj.getmGroupId());
+				removeConversation(obj.getmGroupId());
 			} else if ((JNIService.BROADCAST_CROWD_NEW_UPLOAD_FILE_NOTIFICATION
 					.equals(intent.getAction()))) {
 				long groupID = intent.getLongExtra("groupID", -1l);
@@ -2734,7 +2746,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 			}
 		    else if (JNIService.JNI_BROADCAST_GROUPS_LOADED
                     .equals(intent.getAction())) {
-		    	
+		    	//当所有组织和用户信息获取完毕，再次刷新下所有用户信息
 		    	Intent i = new Intent(JNIService.
 						JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION);
 				i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);

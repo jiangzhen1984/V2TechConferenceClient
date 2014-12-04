@@ -51,6 +51,7 @@ import com.v2tech.util.ProgressUtils;
 import com.v2tech.view.JNIService;
 import com.v2tech.view.PublicIntent;
 import com.v2tech.view.bo.ConversationNotificationObject;
+import com.v2tech.view.bo.GroupUserObject;
 import com.v2tech.view.contacts.ContactDetail;
 import com.v2tech.view.contacts.ContactDetail2;
 import com.v2tech.view.contacts.add.AddFriendHistroysHandler;
@@ -152,7 +153,7 @@ public class MessageAuthenticationActivity extends Activity {
 
 		boolean showFriendNotification = getIntent().getBooleanExtra(
 				"isFriendShowNotification", false);
-		if (showFriendNotification && !isFriendAuthentication)
+		if (!showFriendNotification && !isFriendAuthentication)
 			updateTabPrompt(PROMPT_TYPE_FRIEND, true);
 
 	}
@@ -1277,8 +1278,7 @@ public class MessageAuthenticationActivity extends Activity {
 								new MessageListener(mLocalHandler,
 										ACCEPT_INVITATION_DONE, cg));
 						ProgressUtils
-								.showNormalWithHintProgress(mContext, true)
-								.initTimeOut();
+								.showNormalWithHintProgress(mContext, true);
 					}
 
 				} else if (msg.getType() == VMessageQualification.Type.CROWD_APPLICATION) {
@@ -1300,7 +1300,7 @@ public class MessageAuthenticationActivity extends Activity {
 									new MessageListener(mLocalHandler,
 											ACCEPT_APPLY_DONE, group));
 							ProgressUtils.showNormalWithHintProgress(mContext,
-									true).initTimeOut();
+									true);
 						}
 					} else {
 						handleFailedDone();
@@ -1402,13 +1402,14 @@ public class MessageAuthenticationActivity extends Activity {
                     .equals(intent.getAction())
                     || intent.getAction().equals(
                     JNIService.JNI_BROADCAST_KICED_CROWD)) {
-                long cid = intent.getLongExtra("crowd", -1l);
-                if (cid == -1l) {
-                    V2Log.e(TAG,
-                            "Received the broadcast to quit the crowd group , but crowd id is wroing... ");
-                    return;
-                }
+				GroupUserObject obj = intent.getParcelableExtra("group");
+				if (obj == null) {
+					V2Log.e(TAG,
+							"Received the broadcast to quit the crowd group , but crowd id is wroing... ");
+					return;
+				}
 				
+				long cid = obj.getmGroupId();
                 int location = -1;
 				for (int i = 0 ; i < mMessageList.size() ; i++) {
 					VMessageQualification message = (VMessageQualification) mMessageList.get(i).obj;
@@ -1479,6 +1480,9 @@ public class MessageAuthenticationActivity extends Activity {
 					handleAcceptDone(Type.CROWD_INVITATION, crowd.getmGId(),
 							crowd.getOwnerUser().getmUserId());
 				}
+				else{
+					Toast.makeText(mContext, "连接服务器超时！", 0).show();
+				}
 				break;
 			case ACCEPT_APPLY_DONE:
 				JNIResponse applyJni = (JNIResponse) msg.obj;
@@ -1487,6 +1491,9 @@ public class MessageAuthenticationActivity extends Activity {
 					GroupAddUserJNIObject obj = (GroupAddUserJNIObject) applyJni.resObj;
 					handleAcceptDone(Type.CROWD_APPLICATION, obj.getGroupID(),
 							obj.getUserID());
+				}
+				else{
+					Toast.makeText(mContext, "连接服务器超时！", 0).show();
 				}
 				break;
 			}

@@ -71,7 +71,12 @@ public class XmlAttributeExtractor {
 				return null;
 			}
 		}
-		return str.substring(start + len, end - 1);
+		
+		String check = str.substring(start + len, end - 1);
+		if("'".equals(check))
+			return "";
+		else
+			return check;
 	}
 
 	/**

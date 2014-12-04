@@ -17,6 +17,7 @@ import android.widget.RadioGroup;
 import android.widget.RadioGroup.OnCheckedChangeListener;
 import android.widget.TextView;
 
+import com.V2.jni.V2GlobalEnum;
 import com.V2.jni.util.V2Log;
 import com.v2tech.R;
 import com.v2tech.service.CrowdGroupService;
@@ -100,7 +101,7 @@ public class CrowdDetailActivity extends Activity {
 				GroupType.CHATING.intValue(), getIntent().getLongExtra("cid", 0));
 
 		String cid  = String.valueOf(crowd.getmGId());
-		mNoTV.setText(cid.length() > 4 ? cid.substring(4) : cid.substring(1));
+		mNoTV.setText(cid.length() > 4 ? cid.substring(5) : cid.substring(1));
 		mNameTV.setText(crowd.getName());
 		mBriefTV.setText(crowd.getBrief());
 		mCreatorTV.setText(crowd.getOwnerUser().getName());
@@ -240,7 +241,7 @@ public class CrowdDetailActivity extends Activity {
 		//send broadcast to notify conversationtabfragment refresh list
 		Intent i = new Intent(PublicIntent.BROADCAST_CROWD_DELETED_NOTIFICATION);
 		i.addCategory(PublicIntent.DEFAULT_CATEGORY);
-		i.putExtra("crowd", crowd.getmGId());
+		i.putExtra("group", new GroupUserObject(V2GlobalEnum.GROUP_TYPE_CROWD, crowd.getmGId(), -1));
 		this.sendBroadcast(i);
 		
 		
@@ -391,8 +392,13 @@ public class CrowdDetailActivity extends Activity {
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			if (intent.getAction().equals(JNIService.JNI_BROADCAST_KICED_CROWD)) {
-				long crowdId = intent.getLongExtra("crowd", 0);
-				if (crowdId == crowd.getmGId()) {
+				GroupUserObject obj = intent.getParcelableExtra("group");
+				if (obj == null) {
+					V2Log.e("CrowdDetailActivity",
+							"Received the broadcast to quit the crowd group , but crowd id is wroing... ");
+					return;
+				}
+				if (obj.getmGroupId() == crowd.getmGId()) {
 					finish();
 				}
 			} else if (intent.getAction().equals(JNIService.JNI_BROADCAST_GROUP_UPDATED)) {

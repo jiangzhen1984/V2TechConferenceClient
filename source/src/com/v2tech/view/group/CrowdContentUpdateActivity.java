@@ -20,6 +20,7 @@ import com.v2tech.service.CrowdGroupService;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.service.MessageListener;
 import com.v2tech.view.JNIService;
+import com.v2tech.view.bo.GroupUserObject;
 import com.v2tech.vo.CrowdGroup;
 import com.v2tech.vo.Group.GroupType;
 
@@ -131,8 +132,13 @@ public class CrowdContentUpdateActivity extends Activity {
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			if (intent.getAction().equals(JNIService.JNI_BROADCAST_KICED_CROWD)) {
-				long crowdId = intent.getLongExtra("crowd", 0);
-				if (crowdId == crowd.getmGId()) {
+				GroupUserObject obj = intent.getParcelableExtra("group");
+				if (obj == null) {
+					V2Log.e("CrowdContentUpdateActivity",
+							"Received the broadcast to quit the crowd group , but crowd id is wroing... ");
+					return;
+				}
+				if (obj.getmGroupId() == crowd.getmGId()) {
 					finish();
 				}
 			}

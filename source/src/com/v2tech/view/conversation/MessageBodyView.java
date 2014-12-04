@@ -18,6 +18,7 @@ import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.ImageSpan;
+import android.text.style.UnderlineSpan;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -436,6 +437,8 @@ public class MessageBodyView extends LinearLayout {
 				SpannableStringBuilder style = new SpannableStringBuilder(
 						((VMessageLinkTextItem) item).getText());
 				style.setSpan(new ForegroundColorSpan(Color.BLUE), 0,
+						linkText.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+				style.setSpan(new UnderlineSpan(), 0,
 						linkText.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 				et.append(style);
 			}

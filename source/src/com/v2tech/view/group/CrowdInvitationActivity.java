@@ -17,6 +17,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.V2.jni.V2GlobalEnum;
+import com.V2.jni.util.V2Log;
 import com.v2tech.R;
 import com.v2tech.service.CrowdGroupService;
 import com.v2tech.service.GlobalHolder;
@@ -26,12 +27,14 @@ import com.v2tech.util.ProgressUtils;
 import com.v2tech.view.JNIService;
 import com.v2tech.view.PublicIntent;
 import com.v2tech.view.bo.ConversationNotificationObject;
+import com.v2tech.view.bo.GroupUserObject;
 import com.v2tech.view.conversation.MessageAuthenticationActivity;
 import com.v2tech.view.conversation.MessageBuilder;
 import com.v2tech.vo.Crowd;
 import com.v2tech.vo.CrowdConversation;
 import com.v2tech.vo.CrowdGroup;
 import com.v2tech.vo.CrowdGroup.AuthType;
+import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.Group;
 import com.v2tech.vo.GroupQualicationState;
 import com.v2tech.vo.VMessageQualification;
@@ -139,6 +142,7 @@ public class CrowdInvitationActivity extends Activity {
         filter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
         filter.addCategory(PublicIntent.DEFAULT_CATEGORY);
         filter.addAction(JNIService.JNI_BROADCAST_GROUP_JOIN_FAILED);
+        filter.addAction(JNIService.JNI_BROADCAST_KICED_CROWD);
         registerReceiver(inviteReceiver, filter);
     }
 
@@ -363,6 +367,15 @@ public class CrowdInvitationActivity extends Activity {
 //                MessageBuilder.deleteQualMessage(mContext , vq.getId());
                 isReturnData = true;
                 mReturnButton.performClick();
+            } else if(JNIService.JNI_BROADCAST_KICED_CROWD.equals(intent
+                    .getAction())){
+            	GroupUserObject obj = intent.getParcelableExtra("group");
+				if (obj == null) {
+					V2Log.e("CrowdInvitationActivity",
+							"Received the broadcast to quit the crowd group , but crowd id is wroing... ");
+					return;
+				}
+				onBackPressed();
             }
         }
     }

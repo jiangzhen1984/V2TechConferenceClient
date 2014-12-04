@@ -210,7 +210,7 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 
 	private MessageAdapter adapter;
 
-	private List<CommonAdapterItemWrapper> messageArray = new ArrayList<CommonAdapterItemWrapper>();
+	private List<CommonAdapterItemWrapper> messageArray;
 
 	private boolean isStopped;
 
@@ -305,6 +305,9 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 	 * 初始化控件与监听器
 	 */
 	private void initModuleAndListener() {
+		messageAllID = new SparseArray<VMessage>();
+		messageArray = new ArrayList<CommonAdapterItemWrapper>();
+		
 		mMessagesContainer = (ListView) findViewById(R.id.conversation_message_list);
 		adapter = new MessageAdapter();
 		mMessagesContainer.setAdapter(adapter);
@@ -529,7 +532,6 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 		V2Log.e(TAG, "entry onDestroy....");
 		this.unregisterReceiver(receiver);
 		GlobalConfig.isConversationOpen = false;
-//		CommonCallBack.getInstance().executeUpdateFileState(messageArray);
 		checkMessageEmpty();
 		finishWork();
 	}
@@ -621,13 +623,10 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 					1);
 		}
 
-		messageAllID = new SparseArray<VMessage>();
 		initConversationInfos();
 	}
 
 	private void initConversationInfos() {
-		messageArray.clear();
-		messageAllID.clear();
 		user1Id = GlobalHolder.getInstance().getCurrentUserId();
 		local = GlobalHolder.getInstance().getUser(user1Id);
 		if (cov.getType() == Conversation.TYPE_CONTACT) {
@@ -720,7 +719,7 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 			mMessagesContainer.setSelection(pos);
 		}
 		else{
-            adapter.notifyDataSetChanged();
+             adapter.notifyDataSetChanged();
              mMessagesContainer.setSelectionFromTop(LastFistItem, LastFistItemOffset);
 //			// 次为了解决setSelection无效的问题，虽然能解决，但会造成界面卡顿。直接setSelection而不notifyDataSetChanged即可
 //			mMessagesContainer.post(new Runnable() {
@@ -2267,6 +2266,7 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 			array = MessageLoader.loadGroupMessageByPage(mContext,
 					V2GlobalEnum.GROUP_TYPE_DEPARTMENT, groupId, BATCH_COUNT,
 					offset);
+			break;
 		case V2GlobalEnum.GROUP_TYPE_DISCUSSION:
 			array = MessageLoader.loadGroupMessageByPage(mContext,
 					V2GlobalEnum.GROUP_TYPE_DISCUSSION, groupId, BATCH_COUNT,

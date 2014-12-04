@@ -34,7 +34,6 @@ import com.v2tech.R;
 import com.v2tech.db.V2techSearchContentProvider;
 import com.v2tech.service.ChatService;
 import com.v2tech.service.FileOperationEnum;
-import com.v2tech.service.GlobalHolder;
 import com.v2tech.util.Notificator;
 import com.v2tech.view.conversation.CommonCallBack.CommonUpdateFileStateInterface;
 import com.v2tech.view.conversation.MessageBuilder;
@@ -42,15 +41,12 @@ import com.v2tech.view.conversation.MessageLoader;
 import com.v2tech.view.receiver.HeadSetPlugReceiver;
 import com.v2tech.view.widget.CommonAdapter.CommonAdapterItemWrapper;
 import com.v2tech.view.widget.TitleBar;
-import com.v2tech.vo.AddFriendHistorieNode;
 import com.v2tech.vo.Conference;
 import com.v2tech.vo.Conversation;
 import com.v2tech.vo.NetworkStateCode;
-import com.v2tech.vo.User;
 import com.v2tech.vo.VMessage;
 import com.v2tech.vo.VMessageAbstractItem;
 import com.v2tech.vo.VMessageFileItem;
-import com.v2tech.vo.VMessageQualification;
 
 public class MainActivity extends FragmentActivity implements
 		NotificationListener , CommonUpdateFileStateInterface{

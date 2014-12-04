@@ -92,6 +92,8 @@ public class MessageUtil {
 				builder.append(GlobalConfig
 						.getEmojiStrByIndex(((VMessageFaceItem) item)
 								.getIndex()));
+			} else if(item.getType() == VMessageAbstractItem.ITEM_TYPE_LINK_TEXT){
+				builder.append(((VMessageLinkTextItem) item).getText());
 			}
 		}
 

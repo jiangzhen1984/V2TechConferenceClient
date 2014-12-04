@@ -8,6 +8,7 @@ import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioRecord;
 import android.media.AudioTrack;
+import android.media.MediaRecorder;
 import android.util.Log;
 
 class AudioDevice {
@@ -70,12 +71,18 @@ class AudioDevice {
         }
 
         try {
-            _audioRecord = new AudioRecord(
-                            audioSource,
-                            sampleRate,
-                            AudioFormat.CHANNEL_IN_MONO,
-                            AudioFormat.ENCODING_PCM_16BIT,
-                            recBufSize);
+//            _audioRecord = new AudioRecord(
+//                            audioSource,
+//                            sampleRate,
+//                            AudioFormat.CHANNEL_IN_MONO,
+//                            AudioFormat.ENCODING_PCM_16BIT,
+//                            recBufSize);
+        	_audioRecord = new AudioRecord(
+                    MediaRecorder.AudioSource.VOICE_COMMUNICATION,
+                    sampleRate,
+                    AudioFormat.CHANNEL_IN_MONO,
+                    AudioFormat.ENCODING_PCM_16BIT,
+                    recBufSize);
 
         } catch (Exception e) {
             DoLog(e.getMessage());

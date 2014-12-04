@@ -44,20 +44,30 @@ public class DiscussionConversation extends Conversation {
 	private String getDiscussionNames() {
         StringBuilder sb = new StringBuilder();
         List<User> users = discussionGroup.getUsers();
-        User ownerUser = discussionGroup.getOwnerUser();
-        if (ownerUser != null) {
-            sb.append(ownerUser.getName());
-        }
-        if (users != null) {
-            for (User user : users) {
-            	if(user.getmUserId() == ownerUser.getmUserId())
-            		continue ;
-            	
-                sb.append(" ").append(user.getName());
-                if(sb.toString().length() >= 30)
-                    break;
-            }
-        }
+        User mOwnerUser = discussionGroup.getOwnerUser();
+        if(mOwnerUser != null){
+			sb.append(mOwnerUser.getName());
+			for (User user : users) {
+				if (user.getmUserId() == mOwnerUser.getmUserId())
+					continue;
+
+				sb.append(" ").append(user.getName());
+				if (sb.toString().length() >= 30)
+					break;
+			}
+		}
+		else{
+			if (users != null) {
+				for (int i = 0 ; i < users.size() ; i++) {
+					if(i == 0)
+						sb.append(users.get(i).getName());	
+					else
+						sb.append(" ").append(users.get(i).getName());
+					if (sb.toString().length() >= 30)
+						break;
+				}
+			}
+		}
         return sb.toString();
 	}
 	

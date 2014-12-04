@@ -20,8 +20,8 @@ public class DiscussionGroup extends Group {
 		}
 		StringBuilder sb = new StringBuilder();
 		List<User> users = getUsers();
-		sb.append(this.mOwnerUser.getName());
-		if (users != null) {
+		if(mOwnerUser != null){
+			sb.append(mOwnerUser.getName());
 			for (User user : users) {
 				if (user.getmUserId() == this.mOwnerUser.getmUserId())
 					continue;
@@ -29,6 +29,18 @@ public class DiscussionGroup extends Group {
 				sb.append(" ").append(user.getName());
 				if (sb.toString().length() >= 30)
 					break;
+			}
+		}
+		else{
+			if (users != null) {
+				for (int i = 0 ; i < users.size() ; i++) {
+					if(i == 0)
+						sb.append(users.get(i).getName());	
+					else
+						sb.append(" ").append(users.get(i).getName());
+					if (sb.toString().length() >= 30)
+						break;
+				}
 			}
 		}
 		return sb.toString();

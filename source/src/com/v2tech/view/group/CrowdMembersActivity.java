@@ -25,6 +25,7 @@ import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.V2.jni.util.V2Log;
 import com.v2tech.R;
 import com.v2tech.service.BitmapManager;
 import com.v2tech.service.BitmapManager.BitmapChangedListener;
@@ -32,6 +33,7 @@ import com.v2tech.service.CrowdGroupService;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.view.JNIService;
 import com.v2tech.view.PublicIntent;
+import com.v2tech.view.bo.GroupUserObject;
 import com.v2tech.vo.CrowdGroup;
 import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.User;
@@ -209,8 +211,13 @@ public class CrowdMembersActivity extends Activity {
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			if (intent.getAction().equals(JNIService.JNI_BROADCAST_KICED_CROWD)) {
-				long crowdId = intent.getLongExtra("crowd", 0);
-				if (crowdId == crowd.getmGId()) {
+				GroupUserObject obj = intent.getParcelableExtra("group");
+				if (obj == null) {
+					V2Log.e("CrowdFilesActivity",
+							"Received the broadcast to quit the crowd group , but crowd id is wroing... ");
+					return;
+				}
+				if (obj.getmGroupId() == crowd.getmGId()) {
 					finish();
 				}
 			} else if(intent.getAction().equals(JNIService.JNI_BROADCAST_NEW_QUALIFICATION_MESSAGE)){

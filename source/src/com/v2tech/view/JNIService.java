@@ -955,17 +955,19 @@ public class JNIService extends Service implements
 									PublicIntent.VIDEO_NOTIFICATION_ID);
 				}
 			} else if (groupType == GroupType.CHATING.intValue()) {
+				GlobalHolder.getInstance().removeGroup(GroupType.fromInt(V2GlobalEnum.GROUP_TYPE_CROWD), nGroupID);
 				Intent i = new Intent();
 				i.setAction(PublicIntent.BROADCAST_CROWD_DELETED_NOTIFICATION);
 				i.addCategory(PublicIntent.DEFAULT_CATEGORY);
-				i.putExtra("crowd", nGroupID);
+				i.putExtra("group", new GroupUserObject(V2GlobalEnum.GROUP_TYPE_CROWD, nGroupID, -1));
 				sendBroadcast(i);
 
 			} else if (groupType == GroupType.DISCUSSION.intValue()) {
+				GlobalHolder.getInstance().removeGroup(GroupType.fromInt(V2GlobalEnum.GROUP_TYPE_DISCUSSION), nGroupID);
 				Intent i = new Intent();
 				i.setAction(PublicIntent.BROADCAST_CROWD_DELETED_NOTIFICATION);
 				i.addCategory(PublicIntent.DEFAULT_CATEGORY);
-				i.putExtra("gid", nGroupID);
+				i.putExtra("group", new GroupUserObject(V2GlobalEnum.GROUP_TYPE_DISCUSSION, nGroupID, -1));
 				sendBroadcast(i);
 
 			}
@@ -1322,11 +1324,11 @@ public class JNIService extends Service implements
 
 		@Override
 		public void OnKickGroupUser(int groupType, long groupId, long nUserId) {
+			GlobalHolder.getInstance().removeGroup(GroupType.fromInt(groupType), groupId);
 			Intent kick = new Intent();
 			kick.setAction(JNI_BROADCAST_KICED_CROWD);
 			kick.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
-			kick.putExtra("crowd", groupId);
-			kick.putExtra("userId", nUserId);
+			kick.putExtra("group" , new GroupUserObject(groupType , groupId , nUserId));
 			sendBroadcast(kick);
 		}
 	}

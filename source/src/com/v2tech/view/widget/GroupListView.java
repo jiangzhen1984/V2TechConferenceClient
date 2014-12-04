@@ -33,6 +33,7 @@ import android.widget.TextView;
 import com.V2.jni.util.V2Log;
 import com.v2tech.R;
 import com.v2tech.service.GlobalHolder;
+import com.v2tech.util.GlobalConfig;
 import com.v2tech.vo.Group;
 import com.v2tech.vo.User;
 import com.v2tech.vo.UserDeviceConfig.UserDeviceConfigType;
@@ -1441,11 +1442,21 @@ public class GroupListView extends ListView {
 			if (isFriend) {
 				if (!TextUtils.isEmpty(u.getNickName()))
 					mUserNameTV.setText(u.getNickName());
-				else
+				else{
+//					if(TextUtils.isEmpty(u.getName())){
+//						V2Log.e("GroupListView ---> Update User Name Failed... please check!");
+//						GlobalConfig.NeedToUpdateUser.add(u.getmUserId());
+//					}
 					mUserNameTV.setText(u.getName());
-			} else
+				}
+			} else{
+//				if(TextUtils.isEmpty(u.getName())){
+//					V2Log.e("GroupListView ---> Update User Name Failed... please check!");
+//					GlobalConfig.NeedToUpdateUser.add(u.getmUserId());
+//				}
 				mUserNameTV.setText(u.getName());
-
+			}
+			
 			updateUserStatus(u.getDeviceType(), u.getmStatus());
 			if (mCBFlag) {
 				mCb = (CheckBox) mRoot.findViewById(R.id.user_check_view);

@@ -3,14 +3,13 @@ package com.v2tech.util;
 import java.io.File;
 
 import android.content.Context;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.text.TextUtils;
 import android.util.DisplayMetrics;
 
 import com.V2.jni.util.V2Log;
 import com.v2tech.R;
-import com.v2tech.service.GlobalHolder;
 
 public class BitmapUtil {
 
@@ -19,7 +18,6 @@ public class BitmapUtil {
         boolean isOwnerAvatar = true;
 		if (path == null) {
             isOwnerAvatar = false;
-            V2Log.e("BitmapUtil loadAvatarFromPath --> FAILED! Because given file path is null!");
         }
 		else {
             File f = new File(path);
@@ -38,11 +36,15 @@ public class BitmapUtil {
                 V2Log.e("BitmapUtil loadAvatarFromPath --> FAILED! Because parse Path , get a Directory! path is : " + path);
             }
         }
-		BitmapFactory.Options opt = new BitmapFactory.Options();
-		Bitmap tmep = BitmapFactory.decodeFile(path, opt);
-		if (tmep == null) {
-            isOwnerAvatar = false;
-			V2Log.i(" bitmap object is null");
+		
+		Bitmap tmep = null;
+		if(!TextUtils.isEmpty(path)){
+			BitmapFactory.Options opt = new BitmapFactory.Options();
+			tmep = BitmapFactory.decodeFile(path, opt);
+			if (tmep == null) {
+	            isOwnerAvatar = false;
+				V2Log.i(" bitmap object is null");
+			}
 		}
 
         Bitmap avatar;
