@@ -10,12 +10,14 @@ import v2av.VideoRecorder;
 import v2av.VideoSize;
 import android.app.Activity;
 import android.app.Dialog;
+import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothHeadset;
 import android.bluetooth.BluetoothProfile;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.drawable.ColorDrawable;
 import android.media.AudioManager;
@@ -57,6 +59,7 @@ import com.v2tech.service.jni.RequestChatServiceResponse;
 import com.v2tech.util.GlobalConfig;
 import com.v2tech.view.JNIService;
 import com.v2tech.view.PublicIntent;
+import com.v2tech.view.conference.ConferenceActivity;
 import com.v2tech.vo.AudioVideoMessageBean;
 import com.v2tech.vo.CameraConfiguration;
 import com.v2tech.vo.NetworkStateCode;
@@ -73,7 +76,7 @@ public class ConversationP2PAVActivity extends Activity implements
 	// R.layout.fragment_conversation_incoming_audio_call//音频呼入界面
 	// R.layout.fragment_conversation_incoming_video_call//视频呼入界面
 
-	public static final String TAG_THIS_FILE = "ConversationP2PAVActivity";
+	public static final String TAG = "ConversationP2PAVActivity";
 	private static final int UPDATE_TIME = 1;
 	private static final int OPEN_REMOTE_VIDEO = 2;
 	private static final int QUIT = 3;
@@ -137,7 +140,9 @@ public class ConversationP2PAVActivity extends Activity implements
 	private boolean isRejected;
 	private boolean isAccepted;
 	private boolean videoIsAccepted = false;
-	boolean isBluetoothHeadsetConnected = false;
+	private boolean isBluetoothHeadsetConnected = false;
+	private boolean isPad = false;
+	private BluetoothAdapter blueadapter = BluetoothAdapter.getDefaultAdapter();
 
 	private boolean isSmallWindowVideoLayoutClickEnable = true;
 	private OnClickListener onClickSmallWindowVideoLayout = new OnClickListener() {
@@ -174,6 +179,12 @@ public class ConversationP2PAVActivity extends Activity implements
 				WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
 						| WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
 
+		Configuration conf = getResources().getConfiguration();
+		if (conf.smallestScreenWidthDp >= 600) {
+			isPad = true;
+		} else {
+			isPad = false;
+		}
 		displayWidthIsLonger = verifyDisplayWidthIsLonger();
 		displayRotation = getDisplayRotation();
 		mContext = this;
@@ -190,7 +201,14 @@ public class ConversationP2PAVActivity extends Activity implements
 		String uuid = UUID.randomUUID().toString();
 		audioManager = (AudioManager) mContext
 				.getSystemService(Context.AUDIO_SERVICE);
-		isBluetoothHeadsetConnected = audioManager.isBluetoothA2dpOn();
+
+		if (blueadapter != null
+				&& BluetoothProfile.STATE_CONNECTED == blueadapter
+						.getProfileConnectionState(BluetoothProfile.HEADSET)) {
+			isBluetoothHeadsetConnected = true;
+
+			Log.i(TAG, "蓝牙是连接的");
+		}
 
 		currentVideoBean = new VideoBean();
 		if (uad.isIncoming()) {
@@ -252,7 +270,7 @@ public class ConversationP2PAVActivity extends Activity implements
 		initViews();
 
 		if (!uad.isIncoming()) {
-			V2Log.d(TAG_THIS_FILE, "发起一个新的音视频邀请 , 等待回应中.... 此次通信的uuid ："
+			V2Log.d(TAG, "发起一个新的音视频邀请 , 等待回应中.... 此次通信的uuid ："
 					+ currentVideoBean.mediaChatID);
 			chatService.inviteUserChat(uad, new MessageListener(mLocalHandler,
 					CALL_RESPONSE, null));
@@ -327,8 +345,8 @@ public class ConversationP2PAVActivity extends Activity implements
 			playRingToneIncoming();
 		}
 		if (uad.isConnected()) {
-//			// Resume audio
-//			chatService.suspendOrResumeAudio(true);
+			// // Resume audio
+			// chatService.suspendOrResumeAudio(true);
 		}
 		// keep screen on
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
@@ -338,10 +356,10 @@ public class ConversationP2PAVActivity extends Activity implements
 	@Override
 	protected void onStop() {
 		super.onStop();
-//		stopRingTone();
+		// stopRingTone();
 		if (uad.isConnected()) {
-//			// Resume audio
-//			chatService.suspendOrResumeAudio(false);
+			// // Resume audio
+			// chatService.suspendOrResumeAudio(false);
 			this.closeRemoteVideo();
 		}
 		this.closeLocalVideo();
@@ -352,13 +370,13 @@ public class ConversationP2PAVActivity extends Activity implements
 	@Override
 	protected void onNewIntent(Intent intent) {
 		super.onNewIntent(intent);
-		V2Log.d(TAG_THIS_FILE, "onNewIntent invokeing....");
+		V2Log.d(TAG, "onNewIntent invokeing....");
 	}
 
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
-		V2Log.d(TAG_THIS_FILE, "ondestory invokeing....");
+		V2Log.d(TAG, "ondestory invokeing....");
 		stopRingTone();
 		mContext.unregisterReceiver(receiver);
 		chatService.removeRegisterCancelledListener(mLocalHandler,
@@ -378,14 +396,14 @@ public class ConversationP2PAVActivity extends Activity implements
 
 	@Override
 	public Object onRetainNonConfigurationInstance() {
-		V2Log.d(TAG_THIS_FILE, "onRetainNonConfigurationInstance invokeing....");
+		V2Log.d(TAG, "onRetainNonConfigurationInstance invokeing....");
 		return null;
 	}
 
 	@Override
 	public void onConfigurationChanged(Configuration newConfig) {
 		super.onConfigurationChanged(newConfig);
-		V2Log.d(TAG_THIS_FILE, "onConfigurationChanged invoke");
+		V2Log.d(TAG, "onConfigurationChanged invoke");
 	}
 
 	@Override
@@ -453,7 +471,7 @@ public class ConversationP2PAVActivity extends Activity implements
 			public void onCallStateChanged(int state, String incomingNumber) {
 				if (state == TelephonyManager.CALL_STATE_OFFHOOK
 						|| state == TelephonyManager.CALL_STATE_RINGING) {
-					V2Log.d(TAG_THIS_FILE,
+					V2Log.d(TAG,
 							"the initTelephonyManagerListener onCallStateChanged --> was called ....");
 					hangUp();
 				}
@@ -475,10 +493,10 @@ public class ConversationP2PAVActivity extends Activity implements
 	}
 
 	private void playRingToneIncoming() {
-		if(mPlayer == null)
-			mPlayer = MediaPlayer.create(mContext,
-					RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE));
-		if(!mPlayer.isPlaying())
+		if (mPlayer == null)
+			mPlayer = MediaPlayer.create(mContext, RingtoneManager
+					.getDefaultUri(RingtoneManager.TYPE_RINGTONE));
+		if (!mPlayer.isPlaying())
 			mPlayer.start();
 	}
 
@@ -520,8 +538,15 @@ public class ConversationP2PAVActivity extends Activity implements
 		// For audio Button
 		mAudioSpeakerButton = findViewById(R.id.conversation_fragment_connected_speaker_button);
 		if (mAudioSpeakerButton != null) {
-			mAudioSpeakerButton.setOnClickListener(mAudioSpeakerButtonListener);
-			setMAudioSpeakerButtonState(true);
+			if (!isPad) {
+				mAudioSpeakerButton
+						.setOnClickListener(mAudioSpeakerButtonListener);
+				setMAudioSpeakerButtonState(true);
+			} else {
+				mAudioSpeakerButton.setEnabled(false);
+				mAudioSpeakerButton
+						.setBackgroundResource(R.drawable.conversation_framgent_gray_button_bg_pressed);
+			}
 		}
 
 		View audioHangUpButton = findViewById(R.id.conversation_fragment_connected_hang_up_button);
@@ -974,8 +999,8 @@ public class ConversationP2PAVActivity extends Activity implements
 		String sessionID = getIntent().getExtras().getString("sessionID");
 		User u = GlobalHolder.getInstance().getUser(uid);
 		if (u == null)
-			V2Log.e(TAG_THIS_FILE,
-					"get P2P chat remote user failed... user id is : " + uid);
+			V2Log.e(TAG, "get P2P chat remote user failed... user id is : "
+					+ uid);
 
 		int flag = mIsVoiceCall ? UserChattingObject.VOICE_CALL
 				: UserChattingObject.VIDEO_CALL;
@@ -1196,7 +1221,7 @@ public class ConversationP2PAVActivity extends Activity implements
 		Intent i = this.registerReceiver(null, strickFliter);
 		// means exist close broadcast, need to finish this activity
 		if (i != null) {
-			V2Log.d(TAG_THIS_FILE, "initReceiver invoking ..hangUp() ");
+			V2Log.d(TAG, "initReceiver invoking ..hangUp() ");
 			removeStickyBroadcast(i);
 			hangUp();
 		}
@@ -1229,7 +1254,7 @@ public class ConversationP2PAVActivity extends Activity implements
 		}
 		closeLocalVideo();
 		chatService.cancelChattingCall(uad, null);
-		V2Log.d(TAG_THIS_FILE, "the hangUp() invoking HANG_UP_NOTIFICATION");
+		V2Log.d(TAG, "the hangUp() invoking HANG_UP_NOTIFICATION");
 		Message.obtain(mLocalHandler, KEY_CANCELLED_LISTNER).sendToTarget();
 	}
 
@@ -1242,19 +1267,33 @@ public class ConversationP2PAVActivity extends Activity implements
 			return;
 		}
 
-		if (audioManager.isWiredHeadsetOn() || isBluetoothHeadsetConnected) {
+		if (audioManager.isWiredHeadsetOn()) {
 			audioManager.setSpeakerphoneOn(false);
-			V2Log.i("ConversationP2PAVActivity", "切换到耳机或听筒");
+			Log.i(TAG, "切换到了有线耳机");
+		} else if (isBluetoothHeadsetConnected
+				&& !audioManager.isBluetoothA2dpOn()) {
+			// try {
+			// Thread.sleep(500);
+			// } catch (InterruptedException e) {
+			// e.printStackTrace();
+			// }
+			audioManager.setSpeakerphoneOn(false);
+			audioManager.startBluetoothSco();
+			audioManager.setBluetoothScoOn(true);
+			Log.i(TAG, "切换到SCO链路蓝牙耳机");
+		} else if (isBluetoothHeadsetConnected
+				&& audioManager.isBluetoothA2dpOn()) {
+			audioManager.setSpeakerphoneOn(false);
+			Log.i(TAG, "切换到了ACL链路的A2DP蓝牙耳机");
 		} else {
 			if (uad.isVideoType()) {
 				audioManager.setSpeakerphoneOn(true);
-				V2Log.i("ConversationP2PAVActivity", "切换到免提");
+				V2Log.i("ConversationP2PAVActivity", "切换到了外放");
 			} else {
 				if (isInit) {
 					audioManager.setSpeakerphoneOn(false);
 				}
 			}
-
 		}
 
 		if (uad.isAudioType()) {
@@ -1263,6 +1302,10 @@ public class ConversationP2PAVActivity extends Activity implements
 	}
 
 	private void setMAudioSpeakerButtonState(boolean isInit) {
+		if (isPad) {
+			return;
+		}
+
 		if (mAudioSpeakerButton != null) {
 			int drawId;
 			int color;
@@ -1271,21 +1314,35 @@ public class ConversationP2PAVActivity extends Activity implements
 				mAudioSpeakerButton.setTag("earphone");
 				drawId = R.drawable.message_voice_lounder;
 				color = R.color.fragment_conversation_connected_gray_text_color;
-			} else {
-				mAudioSpeakerButton.setTag("speakerphone");
-				drawId = R.drawable.message_voice_lounder_pressed;
-				color = R.color.fragment_conversation_connected_pressed_text_color;
-			}
 
-			TextView speakerPhoneText = (TextView) findViewById(R.id.conversation_fragment_connected_speaker_text);
-			ImageView speakerPhoneImage = (ImageView) findViewById(R.id.conversation_fragment_connected_speaker_image);
-			if (speakerPhoneImage != null) {
-				speakerPhoneImage.setImageResource(drawId);
+				TextView speakerPhoneText = (TextView) findViewById(R.id.conversation_fragment_connected_speaker_text);
+				ImageView speakerPhoneImage = (ImageView) findViewById(R.id.conversation_fragment_connected_speaker_image);
+				if (speakerPhoneImage != null) {
+					speakerPhoneImage.setImageResource(drawId);
+				}
+				if (speakerPhoneText != null) {
+					speakerPhoneText.setTextColor(mContext.getResources()
+							.getColor(color));
+				}
 			}
-			if (speakerPhoneText != null) {
-				speakerPhoneText.setTextColor(mContext.getResources().getColor(
-						color));
-			}
+			// else {
+			// mAudioSpeakerButton.setTag("speakerphone");
+			// drawId = R.drawable.message_voice_lounder_pressed;
+			// color =
+			// R.color.fragment_conversation_connected_pressed_text_color;
+			// }
+
+			// TextView speakerPhoneText = (TextView)
+			// findViewById(R.id.conversation_fragment_connected_speaker_text);
+			// ImageView speakerPhoneImage = (ImageView)
+			// findViewById(R.id.conversation_fragment_connected_speaker_image);
+			// if (speakerPhoneImage != null) {
+			// speakerPhoneImage.setImageResource(drawId);
+			// }
+			// if (speakerPhoneText != null) {
+			// speakerPhoneText.setTextColor(mContext.getResources().getColor(
+			// color));
+			// }
 
 		}
 	}
@@ -1364,8 +1421,7 @@ public class ConversationP2PAVActivity extends Activity implements
 				nameTV.setText(uad.getUser().getName());
 			}
 			currentVideoBean.startDate = GlobalConfig.getGlobalServerTime();
-			V2Log.d(TAG_THIS_FILE, "get startDate is :"
-					+ currentVideoBean.startDate);
+			V2Log.d(TAG, "get startDate is :" + currentVideoBean.startDate);
 			currentVideoBean.mediaState = AudioVideoMessageBean.STATE_ANSWER_CALL;
 			currentVideoBean.readSatate = AudioVideoMessageBean.STATE_READED;
 			// Start to time
@@ -1466,12 +1522,26 @@ public class ConversationP2PAVActivity extends Activity implements
 			int drawId = R.drawable.message_voice_lounder_pressed;
 			int color = R.color.fragment_conversation_connected_pressed_text_color;
 			if (view.getTag() == null || view.getTag().equals("earphone")) {
+
+				if (isBluetoothHeadsetConnected
+						&& !audioManager.isBluetoothA2dpOn()) {
+					audioManager.stopBluetoothSco();
+					audioManager.setBluetoothScoOn(false);
+				}
 				audioManager.setSpeakerphoneOn(true);
+				Log.i(TAG, "切换到了外放");
 				view.setTag("speakerphone");
 				drawId = R.drawable.message_voice_lounder_pressed;
 				color = R.color.fragment_conversation_connected_pressed_text_color;
 			} else {
 				audioManager.setSpeakerphoneOn(false);
+				if (isBluetoothHeadsetConnected
+						&& !audioManager.isBluetoothA2dpOn()) {
+					audioManager.startBluetoothSco();
+					audioManager.setBluetoothScoOn(true);
+					Log.i(TAG, "切换到了听筒或耳机");
+				}
+
 				view.setTag("earphone");
 				drawId = R.drawable.message_voice_lounder;
 				color = R.color.fragment_conversation_connected_gray_text_color;
@@ -1553,8 +1623,7 @@ public class ConversationP2PAVActivity extends Activity implements
 		@Override
 		public void run() {
 			chatService.cancelChattingCall(uad, null);
-			V2Log.d(TAG_THIS_FILE,
-					"the timeOutMonitor invoking HANG_UP_NOTIFICATION");
+			V2Log.d(TAG, "the timeOutMonitor invoking HANG_UP_NOTIFICATION");
 			Message.obtain(mLocalHandler, KEY_CANCELLED_LISTNER).sendToTarget();
 		}
 
@@ -1636,7 +1705,7 @@ public class ConversationP2PAVActivity extends Activity implements
 				NetworkStateCode code = (NetworkStateCode) intent.getExtras()
 						.get("state");
 				if (code != NetworkStateCode.CONNECTED) {
-					V2Log.d(TAG_THIS_FILE,
+					V2Log.d(TAG,
 							"JNIService.JNI_BROADCAST_CONNECT_STATE_NOTIFICATION 调用了 HANG_UP_NOTIFICATION");
 					Message.obtain(mLocalHandler, KEY_CANCELLED_LISTNER,
 							Integer.valueOf(HAND_UP_REASON_NO_NETWORK))
@@ -1663,10 +1732,10 @@ public class ConversationP2PAVActivity extends Activity implements
 				if (intent.hasExtra("state")) {
 					int state = intent.getIntExtra("state", 0);
 					if (state == 1) {
-						V2Log.i(TAG_THIS_FILE, "插入耳机");
+						V2Log.i(TAG, "插入耳机");
 						headsetAndBluetoothHeadsetHandle(false);
 					} else if (state == 0) {
-						V2Log.i(TAG_THIS_FILE, "拔出耳机");
+						V2Log.i(TAG, "拔出耳机");
 						headsetAndBluetoothHeadsetHandle(false);
 					}
 				}
@@ -1679,7 +1748,7 @@ public class ConversationP2PAVActivity extends Activity implements
 
 				if (state == BluetoothProfile.STATE_CONNECTED) {
 					isBluetoothHeadsetConnected = true;
-					V2Log.i(TAG_THIS_FILE, "蓝牙耳机已连接");
+					V2Log.i(TAG, "蓝牙耳机已连接");
 					headsetAndBluetoothHeadsetHandle(false);
 				} else if (state == BluetoothProfile.STATE_DISCONNECTED) {
 					V2Log.i("TAG_THIS_FILE", "蓝牙耳机已断开");
@@ -1727,8 +1796,7 @@ public class ConversationP2PAVActivity extends Activity implements
 			case KEY_CANCELLED_LISTNER:
 				setGlobalState(false);
 				synchronized (mLocal) {
-					V2Log.d(TAG_THIS_FILE,
-							"the HANG_UP_NOTIFICATION was called ....");
+					V2Log.d(TAG, "the HANG_UP_NOTIFICATION was called ....");
 					if (inProgress) {
 						break;
 					}
@@ -1766,7 +1834,7 @@ public class ConversationP2PAVActivity extends Activity implements
 					currentVideoBean.readSatate = AudioVideoMessageBean.STATE_READED;
 					RequestChatServiceResponse rcsr = (RequestChatServiceResponse) resp;
 					if (rcsr.getCode() == RequestChatServiceResponse.REJCTED) {
-						V2Log.d(TAG_THIS_FILE, "对方拒绝了音频或视频的邀请.... 此次通信的uuid ："
+						V2Log.d(TAG, "对方拒绝了音频或视频的邀请.... 此次通信的uuid ："
 								+ currentVideoBean.mediaChatID);
 						Message.obtain(this, KEY_CANCELLED_LISTNER)
 								.sendToTarget();
@@ -1779,14 +1847,13 @@ public class ConversationP2PAVActivity extends Activity implements
 						// connected event
 						if (uad.isVideoType()) {
 							if (videoIsAccepted) {
-								V2Log.d(TAG_THIS_FILE, "对方在接受视频的基础上接受了音频邀请。");
+								V2Log.d(TAG, "对方在接受视频的基础上接受了音频邀请。");
 							} else {
 								// Start to time
 								Message.obtain(mLocalHandler, UPDATE_TIME)
 										.sendToTarget();
 								headsetAndBluetoothHeadsetHandle(true);
-								V2Log.d(TAG_THIS_FILE,
-										"对方接受了视频的邀请，我再给对方发一个音频邀请。");
+								V2Log.d(TAG, "对方接受了视频的邀请，我再给对方发一个音频邀请。");
 								// Send audio invitation
 								// Do not need to modify any values. because
 								// this API
@@ -1810,8 +1877,8 @@ public class ConversationP2PAVActivity extends Activity implements
 							}
 
 						} else {
-							headsetAndBluetoothHeadsetHandle(true);
-							V2Log.d(TAG_THIS_FILE, "对方接受了音频的邀请");
+							headsetAndBluetoothHeadsetHandle(false);
+							V2Log.d(TAG, "对方接受了音频的邀请");
 							// set mute button to enable
 							setMuteButtonDisable(false);
 							// Start to time

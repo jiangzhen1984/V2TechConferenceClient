@@ -100,10 +100,9 @@ public class UserService extends AbstractHandler {
 		public void OnLoginCallback(long nUserID, int nStatus, int nResult,
 				long serverTime) {
 			// 获取系统时间
-			GlobalConfig.LOCAL_TIME = System.currentTimeMillis();
-			GlobalConfig.SERVER_TIME = serverTime;
+			GlobalConfig.recordLoginTime(serverTime);
             SimpleDateFormat fromat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            String date = fromat.format(new Date(GlobalConfig.SERVER_TIME * 1000));
+            String date = fromat.format(new Date(GlobalConfig.LONGIN_SERVER_TIME * 1000));
 			V2Log.d("get server time ：" + date);
 			RequestLogInResponse.Result res = RequestLogInResponse.Result
 					.fromInt(nResult);

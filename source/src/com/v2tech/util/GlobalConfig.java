@@ -8,6 +8,7 @@ import android.app.ActivityManager;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.content.ComponentName;
 import android.content.Context;
+import android.os.SystemClock;
 import android.util.DisplayMetrics;
 import android.util.SparseArray;
 
@@ -28,8 +29,8 @@ public class GlobalConfig {
 
 	public static boolean isConversationOpen = false;
 
-	public static long SERVER_TIME = 0;
-	public static long LOCAL_TIME = 0;
+	public static long LONGIN_SERVER_TIME = 0;
+	public static long LONGIN_LOCAL_TIME = 0;
 
 	public static String DEFAULT_GLOBLE_PATH = "";
 	
@@ -161,7 +162,12 @@ public class GlobalConfig {
 	}
 
 	public static long getGlobalServerTime() {
-		return (((System.currentTimeMillis() - GlobalConfig.LOCAL_TIME) / 1000) + GlobalConfig.SERVER_TIME) * 1000;
+		return (((SystemClock.elapsedRealtime() - GlobalConfig.LONGIN_LOCAL_TIME) / 1000) + GlobalConfig.LONGIN_SERVER_TIME) * 1000;
+	}
+	
+	public static void recordLoginTime(long serverTime){
+		GlobalConfig.LONGIN_LOCAL_TIME = SystemClock.elapsedRealtime();
+		GlobalConfig.LONGIN_SERVER_TIME = serverTime;
 	}
 
 	static class EmojiWraper {

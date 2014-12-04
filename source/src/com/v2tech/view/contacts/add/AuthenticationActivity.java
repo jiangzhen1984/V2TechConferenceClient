@@ -8,10 +8,14 @@ import com.v2tech.view.conversation.MessageAuthenticationActivity;
 import com.v2tech.vo.User;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnTouchListener;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -41,6 +45,15 @@ public class AuthenticationActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_contact_add_authentication);
+		findViewById(R.id.layout).setOnTouchListener(new OnTouchListener() {
+			@Override
+			public boolean onTouch(View v, MotionEvent event) {
+				hindSoftInput(v);
+				return false;
+			}
+		});
+		;
+
 		startedCause = this.getIntent().getStringExtra("cause");
 		connectView();
 		bindViewEnvent();
@@ -64,9 +77,6 @@ public class AuthenticationActivity extends Activity {
 		mNameTitleIV.setText(detailUser.getName());
 		mSignTV.setText(detailUser.getSignature());
 	}
-	
-	
-	
 
 	@Override
 	protected void onDestroy() {
@@ -74,8 +84,12 @@ public class AuthenticationActivity extends Activity {
 		contactService.clearCalledBack();
 	}
 
-
-
+	private void hindSoftInput(View v) {
+		InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+		if (imm != null && v != null) {
+			imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+		}
+	}
 
 	private void connectView() {
 		tvLeft = (TextView) findViewById(R.id.tv_left);

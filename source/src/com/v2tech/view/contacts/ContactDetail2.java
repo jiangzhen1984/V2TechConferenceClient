@@ -19,6 +19,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -68,6 +69,9 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 	private UserService us = new UserService();
 	private ContactsService contactService = new ContactsService();
 
+	// R.id.contact_detail_main_layout
+	private View contactDetailMainLayout;
+
 	private TextView mNameTitleIV;
 	private ImageView mHeadIconIV;
 
@@ -110,10 +114,18 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
 		this.setContentView(R.layout.activity_contact_detail_2);
-		// 不同页面跳转过来
+		contactDetailMainLayout = findViewById(R.id.contact_detail_main_layout);
+		contactDetailMainLayout.setOnTouchListener(new OnTouchListener() {
 
+			@Override
+			public boolean onTouch(View v, MotionEvent event) {
+				hindSoftInput(v);
+				return false;
+			}
+		});
+
+		// 不同页面跳转过来
 		fromActivity = this.getIntent().getStringExtra("fromActivity");
 		if ((fromActivity != null)
 				&& (fromActivity.equals("MessageAuthenticationActivity"))) {
@@ -215,6 +227,13 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 		super.finish();
 		this.overridePendingTransition(R.animator.alpha_from_0_to_1,
 				R.animator.alpha_from_1_to_0);
+	}
+
+	private void hindSoftInput(View v) {
+		InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+		if (imm != null && v != null) {
+			imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+		}
 	}
 
 	@Override

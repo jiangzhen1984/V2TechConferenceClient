@@ -16,10 +16,14 @@ import com.v2tech.vo.User;
 import com.v2tech.vo.Group.GroupType;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnTouchListener;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -57,6 +61,18 @@ public class FriendManagementActivity extends Activity {
 		selectGroupID = listFriendGroup.get(0).getmGId();
 
 		setContentView(R.layout.activity_contact_add_friend_management);
+		findViewById(R.id.layout).setOnTouchListener(new OnTouchListener() {
+			
+			@Override
+			public boolean onTouch(View v, MotionEvent event) {
+				hindSoftInput(v);
+				return false;
+			}
+		});
+		
+		
+		
+		
 		startedCause = this.getIntent().getStringExtra("cause");
 		connectView();
 		bindViewEvent();
@@ -86,6 +102,13 @@ public class FriendManagementActivity extends Activity {
 
 	}
 
+	private void hindSoftInput(View v) {
+		InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+		if (imm != null && v != null) {
+			imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+		}
+	}
+	
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();

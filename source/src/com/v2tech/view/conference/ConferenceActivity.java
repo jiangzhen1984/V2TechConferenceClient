@@ -14,6 +14,7 @@ import v2av.VideoRecorder;
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.NotificationManager;
+import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothHeadset;
 import android.bluetooth.BluetoothProfile;
 import android.content.BroadcastReceiver;
@@ -36,6 +37,7 @@ import android.os.Message;
 import android.text.TextUtils;
 import android.text.TextUtils.TruncateAt;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -103,7 +105,7 @@ import com.v2tech.vo.V2ShapeMeta;
 import com.v2tech.vo.VMessage;
 
 public class ConferenceActivity extends Activity {
-
+	private static final String TAG = "ConferenceActivity";
 	private static final int TAG_SUB_WINDOW_STATE_FIXED = 0x1;
 	private static final int TAG_SUB_WINDOW_STATE_FLOAT = 0x0;
 	private static final int TAG_SUB_WINDOW_STATE_FULL_SCRREN = 0x10;
@@ -132,12 +134,8 @@ public class ConferenceActivity extends Activity {
 	private static final int DESKTOP_SYNC_NOTIFICATION = 57;
 
 	private static final int VIDEO_MIX_NOTIFICATION = 70;
-
 	private static final int TAG_CLOSE_DEVICE = 0;
-
 	private static final int TAG_OPEN_DEVICE = 1;
-
-	private static final String TAG = "VideoActivityV2";
 
 	private boolean isSpeaking;
 	private boolean isMuteCamera;
@@ -214,13 +212,22 @@ public class ConferenceActivity extends Activity {
 
 	private AudioManager audioManager;
 	boolean isBluetoothHeadsetConnected = false;
-	
-	private int arrowWidth=0;
+	private BluetoothAdapter blueadapter = BluetoothAdapter.getDefaultAdapter();
+
+	private int arrowWidth = 0;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_in_metting);
+
+		if (blueadapter != null
+				&& BluetoothProfile.STATE_CONNECTED == blueadapter
+						.getProfileConnectionState(BluetoothProfile.HEADSET)) {
+			isBluetoothHeadsetConnected = true;
+			Log.i(TAG, "蓝牙是连接的");
+		}
+
 		mContext = this;
 		dm = new DisplayMetrics();
 		getWindowManager().getDefaultDisplay().getMetrics(dm);
@@ -232,10 +239,7 @@ public class ConferenceActivity extends Activity {
 
 			@Override
 			public boolean onTouch(View v, MotionEvent event) {
-				InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-				if (imm != null && v != null) {
-					imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
-				}
+				hindSoftInput(v);
 				return false;
 			}
 		});
@@ -413,11 +417,13 @@ public class ConferenceActivity extends Activity {
 		if (confGroup != null) {
 			List<User> l = confGroup.getUsers();
 			for (User u : l) {
-                if(TextUtils.isEmpty(u.getName()) &&
-                        GlobalHolder.getInstance().getGlobalState().isGroupLoaded()){
-                    V2Log.e(TAG , " User + " + u.getmUserId() + " need to get user base infos");
-                    ImRequest.getInstance().getUserBaseInfo(u.getmUserId());
-                }
+				if (TextUtils.isEmpty(u.getName())
+						&& GlobalHolder.getInstance().getGlobalState()
+								.isGroupLoaded()) {
+					V2Log.e(TAG, " User + " + u.getmUserId()
+							+ " need to get user base infos");
+					ImRequest.getInstance().getUserBaseInfo(u.getmUserId());
+				}
 				mAttendeeList.add(new Attendee(u));
 			}
 		}
@@ -895,8 +901,6 @@ public class ConferenceActivity extends Activity {
 				arrow.measure(widthSpec, heightSpec);
 				arrowWidth = arrow.getMeasuredWidth();
 
-			
-					
 				CheckBox slience = (CheckBox) view
 						.findViewById(R.id.cb_slience);
 				CheckBox invitation = (CheckBox) view
@@ -934,7 +938,8 @@ public class ConferenceActivity extends Activity {
 
 			int[] pos = new int[2];
 			v.getLocationInWindow(pos);
-			pos[0] += v.getMeasuredWidth() / 2 - 15 * dm.density-arrowWidth/2;
+			pos[0] += v.getMeasuredWidth() / 2 - 15 * dm.density - arrowWidth
+					/ 2;
 			pos[1] += v.getMeasuredHeight();
 
 			mChairControlWindow
@@ -1295,6 +1300,13 @@ public class ConferenceActivity extends Activity {
 		}
 	}
 
+	private void hindSoftInput(View v) {
+		InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+		if (imm != null && v != null) {
+			imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+		}
+	}
+	
 	private void openLocalCamera() {
 		Message.obtain(
 				mVideoHandler,
@@ -1471,14 +1483,14 @@ public class ConferenceActivity extends Activity {
 		if (mSettingWindow != null && mSettingWindow.isShowing()) {
 			mSettingWindow.dismiss();
 		}
-		
-		if(isMoveTaskBack)
+
+		if (isMoveTaskBack)
 			isMoveTaskBack = false;
 		else
 			moveTaskToBack(true);
 	}
-	
-	public void NotChangeTaskToBack(){
+
+	public void NotChangeTaskToBack() {
 		isMoveTaskBack = true;
 	}
 
@@ -1638,10 +1650,11 @@ public class ConferenceActivity extends Activity {
 		}
 	}
 
-    /**
-     * Handle event which new user entered conference
-     * @param att
-     */
+	/**
+	 * Handle event which new user entered conference
+	 * 
+	 * @param att
+	 */
 	private void doHandleNewUserEntered(Attendee att) {
 		if (att == null) {
 			return;
@@ -1664,7 +1677,7 @@ public class ConferenceActivity extends Activity {
 		}
 
 		showToastNotification(att.getAttName()
-                + mContext.getText(R.string.conf_notification_joined_meeting));
+				+ mContext.getText(R.string.conf_notification_joined_meeting));
 	}
 
 	private void showToastNotification(String text) {
@@ -1759,7 +1772,8 @@ public class ConferenceActivity extends Activity {
 			udc.setSVHolder(new SurfaceView(this));
 			udc.setVp(vp);
 			if (udc.getBelongsAttendee() instanceof AttendeeMixedDevice) {
-				vp.setLayout(((AttendeeMixedDevice)udc.getBelongsAttendee()).getMV().getType().toIntValue());
+				vp.setLayout(((AttendeeMixedDevice) udc.getBelongsAttendee())
+						.getMV().getType().toIntValue());
 			}
 			SurfaceHolderObserver observer = new SurfaceHolderObserver(cg, cs,
 					udc);
@@ -2436,14 +2450,16 @@ public class ConferenceActivity extends Activity {
 						mAttendeeList.add(at);
 					}
 
-                    if(TextUtils.isEmpty(at.getAttName())) {
-                        User user = GlobalHolder.getInstance().getUser(at.getAttId());
-                        if(user != null)
-                             at.setUser(user);
-                        else
-                            V2Log.d(TAG, "Successful receiver the 参会人加入的回调 , but get newst user object " +
-                                    "from GlobleHolder is null!");
-                    }
+					if (TextUtils.isEmpty(at.getAttName())) {
+						User user = GlobalHolder.getInstance().getUser(
+								at.getAttId());
+						if (user != null)
+							at.setUser(user);
+						else
+							V2Log.d(TAG,
+									"Successful receiver the 参会人加入的回调 , but get newst user object "
+											+ "from GlobleHolder is null!");
+					}
 					V2Log.d(TAG, "Successful receiver the 参会人加入的回调");
 					doHandleNewUserEntered(at);
 				} else {
@@ -2578,11 +2594,28 @@ public class ConferenceActivity extends Activity {
 	}
 
 	private void headsetAndBluetoothHeadsetHandle() {
-		if (audioManager.isWiredHeadsetOn() || isBluetoothHeadsetConnected) {
+
+		if (audioManager.isWiredHeadsetOn()) {
 			audioManager.setSpeakerphoneOn(false);
-			V2Log.i("ConversationP2PAVActivity", "切换到耳机或听筒");
+			Log.i(TAG, "切换到了有线耳机");
+		} else if (isBluetoothHeadsetConnected
+				&& !audioManager.isBluetoothA2dpOn()) {
+			// try {
+			// Thread.sleep(500);
+			// } catch (InterruptedException e) {
+			// e.printStackTrace();
+			// }
+			audioManager.setSpeakerphoneOn(false);
+			audioManager.startBluetoothSco();
+			audioManager.setBluetoothScoOn(true);
+			Log.i(TAG, "切换到SCO链路蓝牙耳机");
+		} else if (isBluetoothHeadsetConnected
+				&& audioManager.isBluetoothA2dpOn()) {
+			audioManager.setSpeakerphoneOn(false);
+			Log.i(TAG, "切换到了ACL链路的A2DP蓝牙耳机");
 		} else {
 			audioManager.setSpeakerphoneOn(true);
+			Log.i(TAG, "切换到了外放");
 		}
 	}
 
