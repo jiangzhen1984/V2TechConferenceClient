@@ -38,9 +38,10 @@ public class DiscussionGroup extends Group {
 	@Override
 	public String toXml() {
 		StringBuilder xml = new StringBuilder();
-		xml.append("<discussion creatoruserid='"
-				+ this.getOwnerUser().getmUserId() + "' name='" + this.mName
-				+ "'/>");
+		xml.append("<discussion "
+				+ (this.mGId > 0 ? (" id='" + this.mGId + "' ") : "")
+				+ " creatoruserid='" + this.getOwnerUser().getmUserId()
+				+ "' name='" + this.mName + "'/>");
 		return xml.toString();
 	}
 
