@@ -58,25 +58,22 @@ public class XmlAttributeExtractor {
 				) {
 			return null;
 		}
-		String key =" "+ attribute;
+		String key =" "+ attribute+"=";
 		int start = str.indexOf(key);
 		if (start == -1) {
 			return null;
 		}
-		int len = key.length()+ 2;
-		int end = str.indexOf(" ", start + len);
+		int len = key.length()+ 1;
+		
+		String flag = str.substring( start + len -1 , start + len);
+		
+		int end = str.indexOf(flag.toString(), start + len );
 		if (end == -1) {
-			end = str.indexOf("/", start + len);
-			if (end  == -1) {
-				return null;
-			}
+			return null;
 		}
 		
-		String check = str.substring(start + len, end - 1);
-		if("'".equals(check))
-			return "";
-		else
-			return check;
+		String check = str.substring(start + len, end);
+		return check;
 	}
 
 	/**

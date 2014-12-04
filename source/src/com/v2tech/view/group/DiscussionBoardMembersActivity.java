@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.text.TextUtils.TruncateAt;
 import android.view.Gravity;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -249,7 +250,8 @@ public class DiscussionBoardMembersActivity extends Activity {
 			mNameTV.setText(user.getName());
 			mNameTV.setTextColor(context.getResources().getColor(
 					R.color.contacts_user_view_item_color_offline));
-
+			mNameTV.setMaxWidth(350);
+			mNameTV.setEllipsize(TruncateAt.END);
 			line.addView(mNameTV, lineRL);
 
 			// Add delete button

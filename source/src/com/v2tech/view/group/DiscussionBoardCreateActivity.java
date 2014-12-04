@@ -334,6 +334,15 @@ public class DiscussionBoardCreateActivity extends Activity {
 				cg.inviteMember(crowd, newMembers, new MessageListener(
 						mLocalHandler, UPDATE_CROWD_RESPONSE, crowd));
 			} else {
+				if (mUserList.size() <= 0) {
+					Toast.makeText(mContext, R.string.error_discussion_require_members, Toast.LENGTH_SHORT).show();
+					return;
+				} else if (mUserList.size() == 1) {
+					if (mUserList.iterator().next().getmUserId() == GlobalHolder.getInstance().getCurrentUserId()) {
+						Toast.makeText(mContext, R.string.error_discussion_require_members, Toast.LENGTH_SHORT).show();
+						return;
+					}
+				}
 				List<User> userList = new ArrayList<User>(mUserList);
 
 				DiscussionGroup crowd = new DiscussionGroup(0, "",
