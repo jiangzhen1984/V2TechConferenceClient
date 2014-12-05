@@ -256,10 +256,10 @@ public class CrowdGroupService extends AbstractHandler {
 			return;
 		}
 
-		if (mPendingCrowdId > 0) {
-			super.sendResult(caller, new JNIResponse(JNIResponse.Result.FAILED));
-			return;
-		}
+//		if (mPendingCrowdId > 0) {
+//			super.sendResult(caller, new JNIResponse(JNIResponse.Result.FAILED));
+//			return;
+//		}
 		mPendingCrowdId = crowd.getId();
 		GroupRequest.getInstance().applyJoinGroup(
 				Group.GroupType.CHATING.intValue(), crowd.getId(),
@@ -635,18 +635,18 @@ public class CrowdGroupService extends AbstractHandler {
 		@Override
 		public void OnDelGroupCallback(int groupType, long nGroupID,
 				boolean bMovetoRoot) {
-			if (groupType == GroupType.CHATING.intValue()
-					&& nGroupID == mPendingCrowdId) {
-				mPendingCrowdId = 0;
-				JNIResponse jniRes = new JNIResponse(JNIResponse.Result.SUCCESS);
-				Message.obtain(mCallbackHandler, QUIT_CROWD, jniRes)
-						.sendToTarget();
-			} else if (groupType == GroupType.DISCUSSION.intValue() && nGroupID == mPendingCrowdId) {
-				mPendingCrowdId = 0;
-				JNIResponse jniRes = new JNIResponse(JNIResponse.Result.SUCCESS);
-				Message.obtain(mCallbackHandler, QUIT_DISCUSSION_BOARD, jniRes)
-						.sendToTarget();
-			}
+//			if (groupType == GroupType.CHATING.intValue()
+//					&& nGroupID == mPendingCrowdId) {
+//				mPendingCrowdId = 0;
+//				JNIResponse jniRes = new JNIResponse(JNIResponse.Result.SUCCESS);
+//				Message.obtain(mCallbackHandler, QUIT_CROWD, jniRes)
+//						.sendToTarget();
+//			} else if (groupType == GroupType.DISCUSSION.intValue() && nGroupID == mPendingCrowdId) {
+//				mPendingCrowdId = 0;
+//				JNIResponse jniRes = new JNIResponse(JNIResponse.Result.SUCCESS);
+//				Message.obtain(mCallbackHandler, QUIT_DISCUSSION_BOARD, jniRes)
+//						.sendToTarget();
+//			}
 		}
 
 		/**

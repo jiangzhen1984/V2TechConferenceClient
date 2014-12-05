@@ -12,6 +12,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Configuration;
+import android.database.CursorJoiner.Result;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
@@ -39,11 +40,13 @@ import android.widget.RadioGroup.OnCheckedChangeListener;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.V2.jni.util.V2Log;
 import com.v2tech.R;
 import com.v2tech.service.BitmapManager;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.service.MessageListener;
 import com.v2tech.service.UserService;
+import com.v2tech.service.jni.JNIResponse;
 import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.SPUtil;
 import com.v2tech.view.JNIService;
@@ -1000,11 +1003,18 @@ public class ContactDetail extends Activity implements OnTouchListener {
 				isUpdating = false;
 				break;
 			case UPDATE_USER_INFO_DONE:
-				Intent intent = new Intent();
-				intent.setAction(PublicIntent.BROADCAST_USER_COMMENT_NAME_NOTIFICATION);
-				intent.addCategory(PublicIntent.DEFAULT_CATEGORY);
-				intent.putExtra("modifiedUser", u.getmUserId());
-				sendBroadcast(intent);
+				JNIResponse ponse = (JNIResponse) msg.obj;
+				if(ponse.getResult() == JNIResponse.Result.SUCCESS){
+					Intent intent = new Intent();
+					intent.setAction(PublicIntent.BROADCAST_USER_COMMENT_NAME_NOTIFICATION);
+					intent.addCategory(PublicIntent.DEFAULT_CATEGORY);
+					intent.putExtra("modifiedUser", u.getmUserId());
+					sendBroadcast(intent);
+				}
+				else{
+					V2Log.e("ContactDetail", "Update User Name or Comment Name Failed... error code : " + 
+							ponse.getResult().value() + " error name is : " + ponse.getResult().name());
+				}
 				break;
 			}
 		}

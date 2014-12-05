@@ -363,15 +363,6 @@ public class JNIService extends Service implements
 				broadcastNetworkState(NetworkStateCode.fromInt(msg.arg1));
 				break;
 			case JNI_UPDATE_USER_INFO:
-				User u = (User) msg.obj;
-				GlobalHolder.getInstance().putUser(u.getmUserId(), u);
-
-				Intent sigatureIntent = new Intent();
-				sigatureIntent
-						.setAction(JNI_BROADCAST_USER_UPDATE_NAME_OR_SIGNATURE);
-				sigatureIntent.addCategory(JNI_BROADCAST_CATEGROY);
-				sigatureIntent.putExtra("uid", u.getmUserId());
-				sendBroadcast(sigatureIntent);
 				break;
 			case JNI_LOG_OUT:
 				Toast.makeText(mContext,
@@ -608,8 +599,9 @@ public class JNIService extends Service implements
 				return;
 			}
 			User u = convertUser(user);
-			Message.obtain(mCallbackHandler, JNI_UPDATE_USER_INFO, u)
-					.sendToTarget();
+			GlobalHolder.getInstance().putUser(u.getmUserId(), u);
+//			Message.obtain(mCallbackHandler, JNI_UPDATE_USER_INFO, u)
+//					.sendToTarget();
 		}
 
 		@Override
@@ -987,6 +979,14 @@ public class JNIService extends Service implements
 						nGroupID = gg.getmGId();
 					}
 				}
+			} else if(groupType == GroupType.CHATING.intValue() && 
+					GlobalHolder.getInstance().getCurrentUserId() == nUserID){
+				GlobalHolder.getInstance().removeGroup(GroupType.fromInt(V2GlobalEnum.GROUP_TYPE_CROWD), nGroupID);
+				Intent i = new Intent();
+				i.setAction(PublicIntent.BROADCAST_CROWD_DELETED_NOTIFICATION);
+				i.addCategory(PublicIntent.DEFAULT_CATEGORY);
+				i.putExtra("group", new GroupUserObject(V2GlobalEnum.GROUP_TYPE_CROWD, nGroupID, -1));
+				sendBroadcast(i);
 			}
 
 			GlobalHolder.getInstance().removeGroupUser(nGroupID, nUserID);
@@ -1845,25 +1845,29 @@ public class JNIService extends Service implements
 			V2Log.d(TAG,
 					"There is no broadcast in delayBroadcast collections , mean no callback!");
 		} else {
-			for (Integer type : delayBroadcast) {
-				V2Log.d(TAG, "The delay broadcast was sending now , type is : "
-						+ type);
-				Intent gi = new Intent(JNI_BROADCAST_GROUP_NOTIFICATION);
-				gi.putExtra("gtype", type);
-				gi.addCategory(JNI_BROADCAST_CATEGROY);
-				mContext.sendBroadcast(gi);
-			}
-
-			for (GroupUserInfoOrig go : delayUserBroadcast) {
-				V2Log.d(TAG,
-						"The delay user broadcast was sending now , type is : "
-								+ go.gType + "-------");
-				Intent i = new Intent(
-						JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION);
-				i.addCategory(JNI_BROADCAST_CATEGROY);
-				i.putExtra("gid", go.gId);
-				i.putExtra("gtype", go.gType);
-				mContext.sendBroadcast(i);
+			synchronized (JNIService.class) {
+				for (int i = 0 ; i < delayBroadcast.size() ; i++) {
+					int type = delayBroadcast.get(i);
+					V2Log.d(TAG, "The delay broadcast was sending now , type is : "
+							+ type);
+					Intent gi = new Intent(JNI_BROADCAST_GROUP_NOTIFICATION);
+					gi.putExtra("gtype", type);
+					gi.addCategory(JNI_BROADCAST_CATEGROY);
+					mContext.sendBroadcast(gi);
+				}
+	
+				for(int i = 0 ; i < delayUserBroadcast.size() ; i++){
+					GroupUserInfoOrig go = delayUserBroadcast.get(i);
+					V2Log.d(TAG,
+							"The delay user broadcast was sending now , type is : "
+									+ go.gType + "-------");
+					Intent intent = new Intent(
+							JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION);
+					intent.addCategory(JNI_BROADCAST_CATEGROY);
+					intent.putExtra("gid", go.gId);
+					intent.putExtra("gtype", go.gType);
+					mContext.sendBroadcast(intent);
+				}
 			}
 			delayBroadcast.clear();
 		}

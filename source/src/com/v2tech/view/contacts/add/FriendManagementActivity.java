@@ -5,8 +5,10 @@ import java.util.List;
 import com.v2tech.R;
 import com.v2tech.service.ContactsService;
 import com.v2tech.service.GlobalHolder;
+import com.v2tech.view.ConversationsTabFragment;
 import com.v2tech.view.MainActivity;
 import com.v2tech.view.MainApplication;
+import com.v2tech.view.PublicIntent;
 import com.v2tech.view.contacts.ContactDetail2;
 import com.v2tech.view.contacts.UpdateContactGroupActivity;
 import com.v2tech.view.conversation.MessageAuthenticationActivity;
@@ -187,6 +189,12 @@ public class FriendManagementActivity extends Activity {
 											.toString());
 							Toast.makeText(FriendManagementActivity.this,
 									"您的好友申请发送成功", Toast.LENGTH_SHORT).show();
+							
+							Intent i = new Intent();
+							i.setAction(PublicIntent.BROADCAST_ADD_OTHER_FRIEND_WAITING_NOTIFICATION);
+							i.addCategory(PublicIntent.DEFAULT_CATEGORY);
+							sendBroadcast(i);
+							
 						} else if (detailUser.getAuthtype() == 2) {
 							// 不让任何人加为好
 							Toast.makeText(FriendManagementActivity.this,

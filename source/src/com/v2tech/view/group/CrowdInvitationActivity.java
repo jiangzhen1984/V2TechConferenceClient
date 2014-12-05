@@ -112,7 +112,7 @@ public class CrowdInvitationActivity extends Activity {
 
 		crowd = (Crowd) getIntent().getExtras().get("crowd");
 		String cid  = String.valueOf(crowd.getId());
-		mNoTV.setText(cid.length() > 4 ? cid.substring(4) : cid.substring(1));
+		mNoTV.setText(cid.length() > 4 ? cid.substring(5) : cid.substring(1));
 		mNameTV.setText(crowd.getName());
 		mBriefTV.setText(crowd.getBrief());
 		mCreatorTV.setText(crowd.getCreator().getName());

@@ -94,6 +94,7 @@ import com.v2tech.view.JNIService;
 import com.v2tech.view.PublicIntent;
 import com.v2tech.view.adapter.VMessageAdater;
 import com.v2tech.view.bo.ConversationNotificationObject;
+import com.v2tech.view.bo.GroupUserObject;
 import com.v2tech.view.contacts.ContactDetail;
 import com.v2tech.view.conversation.CommonCallBack.CommonUpdateMessageBodyPopupWindowInterface;
 import com.v2tech.view.group.CrowdDetailActivity;
@@ -697,7 +698,7 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 		});
 	}
 
-	private void scrollToPos(int pos) {
+	private void scrollToPos(final int pos) {
         V2Log.d(TAG, "currentItemPos:--" + currentItemPos);
 		if (pos < 0){
             V2Log.d(TAG, "没有加载到数据 :" + pos);
@@ -720,17 +721,21 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 		}
 		else{
              adapter.notifyDataSetChanged();
-             mMessagesContainer.setSelectionFromTop(LastFistItem, LastFistItemOffset);
-//			// 次为了解决setSelection无效的问题，虽然能解决，但会造成界面卡顿。直接setSelection而不notifyDataSetChanged即可
-//			mMessagesContainer.post(new Runnable() {
-//
-//				@Override
-//				public void run() {
-//					mMessagesContainer.setSelection(pos);
-//
-//				}
-//
-//			});
+             if((LastFistItem > messageArray.size() || LastFistItem < messageArray.size())){
+	//			// 次为了解决setSelection无效的问题，虽然能解决，但会造成界面卡顿。直接setSelection而不notifyDataSetChanged即可
+				mMessagesContainer.post(new Runnable() {
+	
+					@Override
+					public void run() {
+						mMessagesContainer.setSelection(pos);
+	
+					}
+	
+				});
+             }
+             else{
+            	 mMessagesContainer.setSelectionFromTop(LastFistItem, LastFistItemOffset);
+             }
 		}
 	}
 
@@ -2712,8 +2717,14 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 				// handler kicked event
 			} else if (intent.getAction().equals(
 					JNIService.JNI_BROADCAST_KICED_CROWD)) {
-				long crowdId = intent.getLongExtra("crowd", 0);
-				if (crowdId == groupId) {
+				GroupUserObject obj = intent.getParcelableExtra("group");
+				if (obj == null) {
+					V2Log.e(TAG,
+							"Received the broadcast to quit the crowd group , but crowd id is wroing... ");
+					return;
+				}
+				
+				if (obj.getmGroupId() == groupId) {
 					finish();
 				}
 			} else if ((PublicIntent.BROADCAST_CROWD_DELETED_NOTIFICATION

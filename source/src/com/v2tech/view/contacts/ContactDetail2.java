@@ -36,16 +36,14 @@ import com.v2tech.service.MessageListener;
 import com.v2tech.service.UserService;
 import com.v2tech.service.jni.JNIResponse;
 import com.v2tech.util.ProgressUtils;
-import com.v2tech.vo.ContactGroup;
 import com.v2tech.view.JNIService;
 import com.v2tech.view.MainActivity;
 import com.v2tech.view.MainApplication;
 import com.v2tech.view.bo.GroupUserObject;
 import com.v2tech.view.contacts.add.AuthenticationActivity;
 import com.v2tech.view.contacts.add.FriendManagementActivity;
-import com.v2tech.view.conversation.MessageAuthenticationActivity;
-import com.v2tech.view.search.SearchedResultActivity;
 import com.v2tech.view.widget.MarqueeTextView;
+import com.v2tech.vo.ContactGroup;
 import com.v2tech.vo.Group;
 import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.User;
@@ -214,11 +212,13 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 	@Override
 	protected void onStop() {
 		super.onStop();
-		mNickNameET.removeTextChangedListener(tw);
+//		mNickNameET.removeTextChangedListener(tw);
 	}
 
 	@Override
 	public void onBackPressed() {
+		Message m = Message.obtain(lh, UPDATE_USER_INFO);
+		lh.sendMessage(m);
 		super.onBackPressed();
 	}
 
@@ -412,7 +412,7 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 			mHeadIconIV.setImageBitmap(u.getAvatarBitmap());
 		}
 
-		mNickNameET.addTextChangedListener(tw);
+//		mNickNameET.addTextChangedListener(tw);
 		if (!mNickNameET.getText().toString().equals(u.getNickName())) {
 			mNickNameET.setText(u.getNickName());
 		}
@@ -486,31 +486,31 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 
 	}
 
-	private TextWatcher tw = new TextWatcher() {
-
-		@Override
-		public void afterTextChanged(Editable ed) {
-			if (isUpdating) {
-				return;
-			}
-			isUpdating = true;
-			Message m = Message.obtain(lh, UPDATE_USER_INFO);
-			lh.sendMessageDelayed(m, 1500);
-		}
-
-		@Override
-		public void beforeTextChanged(CharSequence arg0, int arg1, int arg2,
-				int arg3) {
-
-		}
-
-		@Override
-		public void onTextChanged(CharSequence arg0, int arg1, int arg2,
-				int arg3) {
-
-		}
-
-	};
+//	private TextWatcher tw = new TextWatcher() {
+//
+//		@Override
+//		public void afterTextChanged(Editable ed) {
+//			if (isUpdating) {
+//				return;
+//			}
+//			isUpdating = true;
+//			Message m = Message.obtain(lh, UPDATE_USER_INFO);
+//			lh.sendMessageDelayed(m, 1500);
+//		}
+//
+//		@Override
+//		public void beforeTextChanged(CharSequence arg0, int arg1, int arg2,
+//				int arg3) {
+//
+//		}
+//
+//		@Override
+//		public void onTextChanged(CharSequence arg0, int arg1, int arg2,
+//				int arg3) {
+//
+//		}
+//
+//	};
 
 	private View.OnClickListener mReturnButtonListener = new OnClickListener() {
 

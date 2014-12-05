@@ -198,8 +198,9 @@ public class PublicIntent {
 	 */
 	public static final String BROADCAST_JOINED_CONFERENCE_NOTIFICATION = "com.v2tech.broadcast.joined_conference_notification";
 	
+	/**
+	 * Broadcast for current user is in waitting for other person agree to become friend
+	 */
+	public static final String BROADCAST_ADD_OTHER_FRIEND_WAITING_NOTIFICATION = "com.v2tech.broadcast.add_other_friend_waiting_notification";
 	
-
-	
-
 }

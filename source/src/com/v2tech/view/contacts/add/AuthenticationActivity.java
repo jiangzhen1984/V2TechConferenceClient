@@ -133,8 +133,9 @@ public class AuthenticationActivity extends Activity {
 					// 实现越级跳
 					Intent i = new Intent(AuthenticationActivity.this,
 							MessageAuthenticationActivity.class);
-					i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-					startActivity(i);
+					i.putExtra("remoteUserID", mUid);
+					setResult(5, i);
+					onBackPressed();
 				}
 			});
 		} else {

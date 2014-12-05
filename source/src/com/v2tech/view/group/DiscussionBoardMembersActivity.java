@@ -204,25 +204,26 @@ public class DiscussionBoardMembersActivity extends Activity {
 		private ImageView mPhotoIV;
 		private TextView mNameTV;
 		private TextView mDeleteButtonTV;
+		private RelativeLayout mContentLayout;
 		private User mUser;
 
 		public MemberView(Context context, User user) {
 			super(context);
 			this.mUser = user;
 			this.setOrientation(LinearLayout.VERTICAL);
-			LinearLayout line = new LinearLayout(context);
-			line.setOrientation(LinearLayout.HORIZONTAL);
+			LinearLayout root = new LinearLayout(context);
+			root.setOrientation(LinearLayout.HORIZONTAL);
 
-			LinearLayout.LayoutParams lineRL = new LinearLayout.LayoutParams(
+			LinearLayout.LayoutParams rootParams = new LinearLayout.LayoutParams(
 					RelativeLayout.LayoutParams.WRAP_CONTENT,
 					RelativeLayout.LayoutParams.WRAP_CONTENT);
 			int margin = (int) context.getResources().getDimension(
 					R.dimen.conversation_view_margin);
-			lineRL.leftMargin = margin;
-			lineRL.rightMargin = margin;
-			lineRL.topMargin = margin;
-			lineRL.bottomMargin = margin;
-			lineRL.gravity = Gravity.CENTER_VERTICAL;
+			rootParams.leftMargin = margin;
+			rootParams.rightMargin = margin;
+			rootParams.topMargin = margin;
+			rootParams.bottomMargin = margin;
+			rootParams.gravity = Gravity.CENTER_VERTICAL;
 
 			// Add delete icon
 			mDeleteIV = new ImageView(mContext);
@@ -236,7 +237,7 @@ public class DiscussionBoardMembersActivity extends Activity {
 				}
 
 			});
-			line.addView(mDeleteIV, lineRL);
+			root.addView(mDeleteIV, rootParams);
 
 			mPhotoIV = new ImageView(context);
 			if (user.getAvatarBitmap() != null) {
@@ -244,21 +245,31 @@ public class DiscussionBoardMembersActivity extends Activity {
 			} else {
 				mPhotoIV.setImageResource(R.drawable.avatar);
 			}
-			line.addView(mPhotoIV, lineRL);
+			root.addView(mPhotoIV, rootParams);
 
+			mContentLayout = new RelativeLayout(context);
+			root.addView(mContentLayout, rootParams);
+			
 			mNameTV = new TextView(context);
 			mNameTV.setText(user.getName());
+			mNameTV.setGravity(Gravity.CENTER_VERTICAL);
 			mNameTV.setTextColor(context.getResources().getColor(
 					R.color.contacts_user_view_item_color_offline));
-			mNameTV.setMaxWidth(350);
 			mNameTV.setEllipsize(TruncateAt.END);
-			line.addView(mNameTV, lineRL);
+			RelativeLayout.LayoutParams mNameParams = new RelativeLayout.LayoutParams(
+					RelativeLayout.LayoutParams.WRAP_CONTENT,
+					RelativeLayout.LayoutParams.WRAP_CONTENT);
+			mNameParams.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+			mNameParams.addRule(RelativeLayout.LEFT_OF, 2);
+			mNameParams.addRule(RelativeLayout.CENTER_VERTICAL);
+			mContentLayout.addView(mNameTV, mNameParams);
 
 			// Add delete button
 			mDeleteButtonTV = new TextView(mContext);
 			mDeleteButtonTV.setText(R.string.crowd_members_delete);
-			mDeleteButtonTV.setVisibility(View.GONE);
+			mDeleteButtonTV.setVisibility(View.INVISIBLE);
 			mDeleteButtonTV.setTextColor(Color.WHITE);
+			mDeleteButtonTV.setId(2);
 			mDeleteButtonTV
 					.setBackgroundResource(R.drawable.rounded_crowd_members_delete_button);
 			mDeleteButtonTV.setPadding(20, 10, 20, 10);
@@ -283,19 +294,13 @@ public class DiscussionBoardMembersActivity extends Activity {
 			RelativeLayout.LayoutParams mDeleteButtonTVLP = new RelativeLayout.LayoutParams(
 					RelativeLayout.LayoutParams.WRAP_CONTENT,
 					RelativeLayout.LayoutParams.WRAP_CONTENT);
-
 			mDeleteButtonTVLP.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
-			mDeleteButtonTVLP.addRule(RelativeLayout.CENTER_VERTICAL);
-			mDeleteButtonTVLP.rightMargin=margin;
+			mDeleteButtonTVLP.rightMargin = margin;
+			mDeleteButtonTVLP.leftMargin = margin;
 			
-			RelativeLayout mDeleteButtonTVRL = new RelativeLayout(context);
-			mDeleteButtonTVRL.addView(mDeleteButtonTV, mDeleteButtonTVLP);
+			mContentLayout.addView(mDeleteButtonTV, mDeleteButtonTVLP);
 
-			line.addView(mDeleteButtonTVRL, new LinearLayout.LayoutParams(
-					LinearLayout.LayoutParams.MATCH_PARENT,
-					LinearLayout.LayoutParams.MATCH_PARENT));
-
-			this.addView(line, new LinearLayout.LayoutParams(
+			this.addView(root, new LinearLayout.LayoutParams(
 					LinearLayout.LayoutParams.MATCH_PARENT,
 					LinearLayout.LayoutParams.WRAP_CONTENT));
 

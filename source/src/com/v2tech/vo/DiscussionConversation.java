@@ -1,12 +1,10 @@
 package com.v2tech.vo;
 
-import android.text.TextUtils;
-
 import java.util.List;
 
+import android.text.TextUtils;
+
 import com.V2.jni.V2GlobalEnum;
-import com.V2.jni.util.V2Log;
-import com.v2tech.service.GlobalHolder;
 import com.v2tech.vo.Group.GroupType;
 
 public class DiscussionConversation extends Conversation {

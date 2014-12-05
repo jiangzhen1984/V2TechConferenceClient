@@ -146,7 +146,7 @@ public class CrashHandler implements UncaughtExceptionHandler {
      * @param ex 
      * @return  返回文件名称,便于将文件传送到服务器 
      */  
-    private String saveCrashInfo2File(Throwable ex) {  
+    public String saveCrashInfo2File(Throwable ex) {  
           
         StringBuffer sb = new StringBuffer();  
         for (Map.Entry<String, String> entry : infos.entrySet()) {  

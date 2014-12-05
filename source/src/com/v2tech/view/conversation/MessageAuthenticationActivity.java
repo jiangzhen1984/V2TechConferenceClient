@@ -39,6 +39,7 @@ import com.V2.jni.V2GlobalEnum;
 import com.V2.jni.ind.GroupAddUserJNIObject;
 import com.V2.jni.util.V2Log;
 import com.v2tech.R;
+import com.v2tech.db.ContentDescriptor;
 import com.v2tech.db.DataBaseContext;
 import com.v2tech.db.V2TechDBHelper;
 import com.v2tech.service.BitmapManager;
@@ -63,7 +64,6 @@ import com.v2tech.vo.ConversationFirendAuthenticationData.VerificationMessageTyp
 import com.v2tech.vo.Crowd;
 import com.v2tech.vo.CrowdGroup;
 import com.v2tech.vo.Group;
-import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.User;
 import com.v2tech.vo.VMessageQualification;
 import com.v2tech.vo.VMessageQualification.QualificationState;
@@ -86,6 +86,7 @@ public class MessageAuthenticationActivity extends Activity {
 	private final static int PROMPT_TYPE_FRIEND = 2;
 	private final static int PROMPT_TYPE_GROUP = 3;
 	private final static int AUTHENTICATION_RESULT = 4;
+	private final static int FRIEND_AUTHENTICATION_RESULT = 5;
 
 	public static final String tableName = "AddFriendHistories";
 	// R.id.message_authentication
@@ -151,9 +152,23 @@ public class MessageAuthenticationActivity extends Activity {
 		if (showCrwodNotification && isFriendAuthentication)
 			updateTabPrompt(PROMPT_TYPE_GROUP, true);
 
-		boolean showFriendNotification = getIntent().getBooleanExtra(
-				"isFriendShowNotification", false);
-		if (!showFriendNotification && !isFriendAuthentication)
+		boolean showFriendNotification = false;
+		// 查出未读的第一条按时间顺序
+        String order = ContentDescriptor.HistoriesAddFriends.Cols.HISTORY_FRIEND_SAVEDATE
+                + " desc limit 1";
+        Cursor cursor = mContext.getContentResolver().query(
+                ContentDescriptor.HistoriesAddFriends.CONTENT_URI,
+                null, "ReadState = ?",
+                new String[] { String.valueOf(ReadState.UNREAD.intValue()) }, order);
+        if ((cursor != null) && (cursor.getCount() == 0))
+        	showFriendNotification = false;
+        else
+        	showFriendNotification = true;
+
+        if (cursor != null)
+            cursor.close();
+        
+		if (showFriendNotification && !isFriendAuthentication)
 			updateTabPrompt(PROMPT_TYPE_FRIEND, true);
 
 	}
@@ -290,7 +305,7 @@ public class MessageAuthenticationActivity extends Activity {
 							}
 
 							MessageAuthenticationActivity.this
-									.startActivity(intent);
+									.startActivityForResult(intent , FRIEND_AUTHENTICATION_RESULT);
 						} else {
 							if (isGroupInDeleteMode) {
 								Toast.makeText(
@@ -450,6 +465,7 @@ public class MessageAuthenticationActivity extends Activity {
 		friendAuthenticationBroadcastReceiver = new FriendAuthenticationBroadcastReceiver();
 		IntentFilter intentFilter = new IntentFilter();
 		intentFilter.addAction(JNIService.JNI_BROADCAST_CONTACTS_AUTHENTICATION);
+		intentFilter.addAction(JNIService.JNI_BROADCAST_GROUP_USER_REMOVED);
 		intentFilter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
 		intentFilter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
 		registerReceiver(friendAuthenticationBroadcastReceiver, intentFilter);
@@ -462,6 +478,7 @@ public class MessageAuthenticationActivity extends Activity {
 		intentFilter.addAction(JNIService.JNI_BROADCAST_GROUP_JOIN_FAILED);
 		intentFilter.addAction(JNIService.JNI_BROADCAST_KICED_CROWD);
 		intentFilter.addAction(PublicIntent.BROADCAST_CROWD_DELETED_NOTIFICATION);
+		intentFilter.addAction(PublicIntent.BROADCAST_USER_COMMENT_NAME_NOTIFICATION);
 		intentFilter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
 		registerReceiver(mCrowdAuthenticationBroadcastReceiver, intentFilter);
 
@@ -508,6 +525,19 @@ public class MessageAuthenticationActivity extends Activity {
 				}
 				else
 					V2Log.e(TAG , "Update QualificationState failed ... because id is -1");
+			}
+			break;
+		case FRIEND_AUTHENTICATION_RESULT:
+			if(data != null){
+				//FIXME Should not fresh all
+//				long id = data.getLongExtra("remoteUserID", -1l);
+//				for (FriendMAData friend : friendMADataList) {
+//					if(friend.remoteUserID == id){
+//						
+//					}
+//				}
+				friendMADataList.clear();
+				loadFriendMessage();
 			}
 			break;
 		}
@@ -567,7 +597,6 @@ public class MessageAuthenticationActivity extends Activity {
 				String sql = "update " + tableName
 						+ " set ReadState=1 where ReadState=0";
 				AddFriendHistroysHandler.update(getApplicationContext(), sql);
-
 				sql = "select * from " + tableName + " order by SaveDate asc";
 				Cursor cr = AddFriendHistroysHandler.select(
 						getApplicationContext(), sql, new String[] {});
@@ -1080,7 +1109,12 @@ public class MessageAuthenticationActivity extends Activity {
 				} else {
 					item.mMsgBanneriv.setImageResource(R.drawable.avatar);
 				}
-				item.mNameTV.setText(vqac.getApplicant().getName());
+				
+				boolean isFriend = GlobalHolder.getInstance().isFriend(vqac.getApplicant());
+				if(isFriend)
+					item.mNameTV.setText(vqac.getApplicant().getNickName());
+				else
+					item.mNameTV.setText(vqac.getApplicant().getName());
 
 				updateApplyMessageView(item, vqac);
 			}
@@ -1392,7 +1426,7 @@ public class MessageAuthenticationActivity extends Activity {
 					MessageBuilder.updateQualicationMessage(mContext, msg);
 				}
 				// Cancel next broadcast
-				this.abortBroadcast();
+//				this.abortBroadcast();
 			}
 			else if (JNIService.JNI_BROADCAST_GROUP_JOIN_FAILED.equals(intent
 					.getAction())) {
@@ -1447,6 +1481,16 @@ public class MessageAuthenticationActivity extends Activity {
 //				if(!isFriendAuthentication)
 //					changeMessageAuthenticationListView();
 //				rbGroupAuthentication.setChecked(true);
+            } else if(PublicIntent.BROADCAST_USER_COMMENT_NAME_NOTIFICATION.equals(intent
+					.getAction())){
+            	Long uid = intent.getLongExtra("modifiedUser", -1);
+				if (uid == -1l) {
+					V2Log.e(TAG , "BROADCAST_USER_COMMENT_NAME_NOTIFICATION ---> update user comment name failed , get id is -1");
+					return;
+				}
+				
+				if(groupAdapter != null)
+					groupAdapter.notifyDataSetChanged();
             }
 		}
 	}
@@ -1460,9 +1504,27 @@ public class MessageAuthenticationActivity extends Activity {
 				loadFriendMessage();
 				if (currentRadioType != PROMPT_TYPE_FRIEND)
 					updateTabPrompt(PROMPT_TYPE_FRIEND, true);
+				// Cancel next broadcast
+				this.abortBroadcast();
+			} else if(arg1.getAction().equals(
+					JNIService.JNI_BROADCAST_GROUP_USER_REMOVED)){
+				GroupUserObject guo = (GroupUserObject) arg1.getExtras().get(
+						"obj");
+				if (guo == null) {
+					V2Log.e(TAG,
+							"USER_REMOVE --> Received the broadcast to quit the crowd group , but crowd id is wroing... ");
+					return;
+				}
+				
+				for (FriendMAData friend : friendMADataList) {
+					if(friend.remoteUserID == guo.getmUserId()){
+						friendMADataList.remove(friend);
+						if(firendAdapter != null)
+							firendAdapter.notifyDataSetChanged();
+						break;
+					}
+				}
 			}
-			// Cancel next broadcast
-			this.abortBroadcast();
 		}
 
 	}

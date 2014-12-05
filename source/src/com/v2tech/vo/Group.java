@@ -39,10 +39,13 @@ public abstract class Group implements Comparable<Group> {
 	private Object mLock = new Object();
 
 	public enum GroupType {
-		ORG(V2GlobalEnum.GROUP_TYPE_DEPARTMENT), CONTACT(
-				V2GlobalEnum.GROUP_TYPE_CONTACT), CHATING(
-				V2GlobalEnum.GROUP_TYPE_CROWD), CONFERENCE(
-				V2GlobalEnum.GROUP_TYPE_CONFERENCE), DISCUSSION(V2GlobalEnum.GROUP_TYPE_DISCUSSION),UNKNOWN(-1);
+		ORG(V2GlobalEnum.GROUP_TYPE_DEPARTMENT), 
+		CONTACT(V2GlobalEnum.GROUP_TYPE_CONTACT), 
+		CHATING(V2GlobalEnum.GROUP_TYPE_CROWD), 
+		CONFERENCE(V2GlobalEnum.GROUP_TYPE_CONFERENCE), 
+		DISCUSSION(V2GlobalEnum.GROUP_TYPE_DISCUSSION),
+		SINGLE_PERSON(V2GlobalEnum.GROUP_TYPE_USER),
+		UNKNOWN(-1);
 
 		private int type;
 
@@ -62,6 +65,8 @@ public abstract class Group implements Comparable<Group> {
 				return CONFERENCE;
 			case V2GlobalEnum.GROUP_TYPE_DISCUSSION:
 				return DISCUSSION;
+			case V2GlobalEnum.GROUP_TYPE_USER:
+				return SINGLE_PERSON;
 			default:
 				return UNKNOWN;
 

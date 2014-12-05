@@ -2,7 +2,6 @@ package com.v2tech.view;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -169,9 +168,6 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 			intentFilter
 					.addAction(PublicIntent.BROADCAST_USER_COMMENT_NAME_NOTIFICATION);
 
-			intentFilter
-					.addAction(JNIService.JNI_BROADCAST_USER_UPDATE_NAME_OR_SIGNATURE);
-
 			if (flag == TAG_CONTACT) {
 				intentFilter
 						.addAction(PublicIntent.BROADCAST_REQUEST_UPDATE_CONTACTS_GROUP);
@@ -234,10 +230,6 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 			} else if (JNIService.JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION
 					.equals(intent.getAction())) {
 				Message.obtain(mHandler, UPDATE_GROUP_STATUS).sendToTarget();
-			} else if (JNIService.JNI_BROADCAST_USER_UPDATE_NAME_OR_SIGNATURE
-					.equals(intent.getAction())) {
-				Message.obtain(mHandler, UPDATE_USER_SIGN,
-						intent.getExtras().get("uid")).sendToTarget();
 			} else if (JNIService.JNI_BROADCAST_GROUP_USER_REMOVED
 					.equals(intent.getAction())) {
 				GroupUserObject guo = (GroupUserObject) intent.getExtras().get(
@@ -301,9 +293,8 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 					V2Log.e("ContactsTabFragment BROADCAST_USER_COMMENT_NAME_NOTIFICATION ---> update user comment name failed , get id is -1");
 					return;
 				}
-
-				mContactsContainer.updateUser(GlobalHolder.getInstance()
-						.getUser(uid));
+				
+				Message.obtain(mHandler, UPDATE_USER_SIGN, uid).sendToTarget();
 			}
 		}
 

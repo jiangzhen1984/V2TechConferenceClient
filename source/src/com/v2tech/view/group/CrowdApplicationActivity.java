@@ -108,7 +108,7 @@ public class CrowdApplicationActivity extends Activity {
 		mCreatorTV.setText(crowd.getCreator().getName());
 
 		String cid = String.valueOf(crowd.getId());
-		mNoTV.setText(cid.length() > 4 ? cid.substring(4) : cid.substring(1));
+		mNoTV.setText(cid.length() > 4 ? cid.substring(5) : cid.substring(1));
 
 		CrowdGroup g = new CrowdGroup(crowd.getId(), crowd.getName(),
 				crowd.getCreator(), null);
@@ -176,14 +176,7 @@ public class CrowdApplicationActivity extends Activity {
 			mTitleTV.setText(R.string.crowd_application_title);
             if(vq != null){
                 VMessageQualification.QualificationState state = vq.getQualState();
-                if(state == VMessageQualification.QualificationState.WAITING_FOR_APPLY){
-//                    mApplicationButton.setVisibility(View.GONE);
-//                    mNotesLy.setVisibility(View.VISIBLE);
-//                    mNotes.setText(R.string.crowd_application_applyed);
-                    mApplicationButton.setVisibility(View.VISIBLE);
-                    mNotesLy.setVisibility(View.GONE);
-                    mTitleTV.setText(R.string.crowd_applicant_invite_title);
-                } else if(state == VMessageQualification.QualificationState.BE_REJECT){
+                if(state == VMessageQualification.QualificationState.BE_REJECT){
                 	mApplicationButton.setVisibility(View.VISIBLE);
                     mNotesLy.setVisibility(View.GONE);
                 	mTitleTV.setText(R.string.crowd_applicant_invite_title);
@@ -284,11 +277,11 @@ public class CrowdApplicationActivity extends Activity {
 						.toString(), new MessageListener(mLocalHandler,
 						APPLY_DONE, null));
 				isInApplicationMode = false;
-                if (vq != null) {
-                    vq.setReadState(VMessageQualification.ReadState.READ);
-                    vq.setQualState(VMessageQualification.QualificationState.WAITING_FOR_APPLY);
-                    MessageBuilder.updateQualicationMessage(mContext, vq);
-                }
+//                if (vq != null) {
+//                    vq.setReadState(VMessageQualification.ReadState.READ);
+//                    vq.setQualState(VMessageQualification.QualificationState.WAITING_FOR_APPLY);
+//                    MessageBuilder.updateQualicationMessage(mContext, vq);
+//                }
                 updateView();
 			}
 		}
