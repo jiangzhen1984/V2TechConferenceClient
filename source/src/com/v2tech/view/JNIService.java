@@ -987,6 +987,14 @@ public class JNIService extends Service implements
 				i.addCategory(PublicIntent.DEFAULT_CATEGORY);
 				i.putExtra("group", new GroupUserObject(V2GlobalEnum.GROUP_TYPE_CROWD, nGroupID, -1));
 				sendBroadcast(i);
+			} else if(groupType == GroupType.DISCUSSION.intValue()  && 
+					GlobalHolder.getInstance().getCurrentUserId() == nUserID){
+				GlobalHolder.getInstance().removeGroup(GroupType.fromInt(V2GlobalEnum.GROUP_TYPE_DISCUSSION), nGroupID);
+				Intent i = new Intent();
+				i.setAction(PublicIntent.BROADCAST_CROWD_DELETED_NOTIFICATION);
+				i.addCategory(PublicIntent.DEFAULT_CATEGORY);
+				i.putExtra("group", new GroupUserObject(V2GlobalEnum.GROUP_TYPE_DISCUSSION, nGroupID, -1));
+				sendBroadcast(i);
 			}
 
 			GlobalHolder.getInstance().removeGroupUser(nGroupID, nUserID);
@@ -1253,7 +1261,7 @@ public class JNIService extends Service implements
 				Intent i = new Intent();
 				i.setAction(PublicIntent.BROADCAST_NEW_CROWD_NOTIFICATION);
 				i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
-				i.putExtra("crowd", crowd.id);
+				i.putExtra("group", new GroupUserObject(V2GlobalEnum.GROUP_TYPE_CROWD, crowd.id, -1));
 				sendBroadcast(i);
 			} else if(crowd.type == V2Group.TYPE_DISCUSSION_BOARD
 					&& GlobalHolder.getInstance().getCurrentUserId() != crowd.creator.uid){
@@ -1273,7 +1281,7 @@ public class JNIService extends Service implements
 				Intent i = new Intent();
 				i.setAction(PublicIntent.BROADCAST_NEW_CROWD_NOTIFICATION);
 				i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
-				i.putExtra("crowd", crowd.id);
+				i.putExtra("group", new GroupUserObject(V2GlobalEnum.GROUP_TYPE_DISCUSSION, crowd.id, -1));
 				sendBroadcast(i);
 			}
 		}

@@ -153,14 +153,15 @@ public class ConversationProvider {
 	 * @param voiceMessageItem
 	 * @return
 	 */
-	public static List<Conversation> loadUserConversation(Context mContext,
+	public static List<Conversation> loadUserConversation(Context context,
 			List<Conversation> mConvList,
 			Conversation verificationMessageItemData,
 			Conversation voiceMessageItem) {
 
+		DataBaseContext mContext = new DataBaseContext(context);
 		long verificationDate = 0;
 		long voiceMessageDate = 0;
-		// if (mCurrentTabFlag == Conversation.TYPE_CONTACT) {
+		
 		if (verificationMessageItemData != null
 				&& verificationMessageItemData.getDateLong() != null)
 			verificationDate = Long.valueOf(verificationMessageItemData
@@ -175,81 +176,89 @@ public class ConversationProvider {
 			else
 				voiceMessageItem.setFirst(true);
 		}
-		// }
-		Cursor mCur = mContext
-				.getContentResolver()
-				.query(ContentDescriptor.RecentHistoriesMessage.CONTENT_URI,
-						ContentDescriptor.RecentHistoriesMessage.Cols.ALL_CLOS,
-						ContentDescriptor.RecentHistoriesMessage.Cols.HISTORY_RECENT_MESSAGE_GROUP_TYPE
-								+ "= ? or "
-								+ ContentDescriptor.RecentHistoriesMessage.Cols.HISTORY_RECENT_MESSAGE_GROUP_TYPE
-								+ "= ? or "
-								+ ContentDescriptor.RecentHistoriesMessage.Cols.HISTORY_RECENT_MESSAGE_GROUP_TYPE 
-								+ "= ? or "
-								+ ContentDescriptor.RecentHistoriesMessage.Cols.HISTORY_RECENT_MESSAGE_GROUP_TYPE + "= ? ",
-						new String[] {
-								String.valueOf(V2GlobalEnum.GROUP_TYPE_USER),
-								String.valueOf(V2GlobalEnum.GROUP_TYPE_CROWD),
-								String.valueOf(V2GlobalEnum.GROUP_TYPE_DEPARTMENT),
-								String.valueOf(V2GlobalEnum.GROUP_TYPE_DISCUSSION)},
-						ContentDescriptor.RecentHistoriesMessage.Cols.HISTORY_RECENT_MESSAGE_SAVEDATE
-								+ " desc");
-
-		while (mCur.moveToNext()) {
-			long date = 0;
-			Conversation cov = extractConversation(mContext, mCur);
-			if (!TextUtils.isEmpty(cov.getDateLong()))
-				date = Long.valueOf(cov.getDateLong());
-			// 只有会话界面需要添加这两个特殊item
-			// if (mCurrentTabFlag == Conversation.TYPE_CONTACT) {
-			// 如果两个特殊item都不为空，走if语句
-			if (verificationMessageItemData != null && voiceMessageItem != null) {
-				if (verificationMessageItemData.isFirst()) {
-					if (verificationDate > date
-							&& !verificationMessageItemData.isAddedItem()) {
-						mConvList.add(verificationMessageItemData);
-						verificationMessageItemData.setAddedItem(true);
+		
+		Cursor mCur = null;
+		try{
+			mCur = mContext
+					.getContentResolver()
+					.query(ContentDescriptor.RecentHistoriesMessage.CONTENT_URI,
+							ContentDescriptor.RecentHistoriesMessage.Cols.ALL_CLOS,
+							ContentDescriptor.RecentHistoriesMessage.Cols.HISTORY_RECENT_MESSAGE_GROUP_TYPE
+									+ "= ? or "
+									+ ContentDescriptor.RecentHistoriesMessage.Cols.HISTORY_RECENT_MESSAGE_GROUP_TYPE
+									+ "= ? or "
+									+ ContentDescriptor.RecentHistoriesMessage.Cols.HISTORY_RECENT_MESSAGE_GROUP_TYPE 
+									+ "= ? or "
+									+ ContentDescriptor.RecentHistoriesMessage.Cols.HISTORY_RECENT_MESSAGE_GROUP_TYPE + "= ? ",
+							new String[] {
+									String.valueOf(V2GlobalEnum.GROUP_TYPE_USER),
+									String.valueOf(V2GlobalEnum.GROUP_TYPE_CROWD),
+									String.valueOf(V2GlobalEnum.GROUP_TYPE_DEPARTMENT),
+									String.valueOf(V2GlobalEnum.GROUP_TYPE_DISCUSSION)},
+							ContentDescriptor.RecentHistoriesMessage.Cols.HISTORY_RECENT_MESSAGE_SAVEDATE
+									+ " desc");
+	
+			while (mCur.moveToNext()) {
+				long date = 0;
+				Conversation cov = extractConversation(mContext, mCur);
+				if (!TextUtils.isEmpty(cov.getDateLong()))
+					date = Long.valueOf(cov.getDateLong());
+				// 只有会话界面需要添加这两个特殊item
+				// if (mCurrentTabFlag == Conversation.TYPE_CONTACT) {
+				// 如果两个特殊item都不为空，走if语句
+				if (verificationMessageItemData != null && voiceMessageItem != null) {
+					if (verificationMessageItemData.isFirst()) {
+						if (verificationDate > date
+								&& !verificationMessageItemData.isAddedItem()) {
+							mConvList.add(verificationMessageItemData);
+							verificationMessageItemData.setAddedItem(true);
+						}
+	
+						if (voiceMessageDate > date
+								&& !voiceMessageItem.isAddedItem()) {
+							mConvList.add(voiceMessageItem);
+							voiceMessageItem.setAddedItem(true);
+						}
+					} else {
+						if (voiceMessageDate > date
+								&& !voiceMessageItem.isAddedItem()) {
+							mConvList.add(voiceMessageItem);
+							voiceMessageItem.setAddedItem(true);
+						}
+	
+						if (verificationDate > date
+								&& !verificationMessageItemData.isAddedItem()) {
+							mConvList.add(verificationMessageItemData);
+							verificationMessageItemData.setAddedItem(true);
+						}
 					}
-
-					if (voiceMessageDate > date
-							&& !voiceMessageItem.isAddedItem()) {
+				} else { // 如果两个特殊item都为空，或其中一个可能为空，则走else语句
+							// 如果voiceMessageItem不为null，则进行比较
+					if (voiceMessageItem != null
+							&& voiceMessageItem.isAddedItem() == false
+							&& voiceMessageDate > date) {
 						mConvList.add(voiceMessageItem);
 						voiceMessageItem.setAddedItem(true);
 					}
-				} else {
-					if (voiceMessageDate > date
-							&& !voiceMessageItem.isAddedItem()) {
-						mConvList.add(voiceMessageItem);
-						voiceMessageItem.setAddedItem(true);
-					}
-
-					if (verificationDate > date
-							&& !verificationMessageItemData.isAddedItem()) {
+					// 同理如果verificationMessageItem不为null，则进行比较
+					if (verificationMessageItemData != null
+							&& verificationMessageItemData.isAddedItem() == false
+							&& verificationDate > date) {
 						mConvList.add(verificationMessageItemData);
 						verificationMessageItemData.setAddedItem(true);
 					}
 				}
-			} else { // 如果两个特殊item都为空，或其中一个可能为空，则走else语句
-						// 如果voiceMessageItem不为null，则进行比较
-				if (voiceMessageItem != null
-						&& voiceMessageItem.isAddedItem() == false
-						&& voiceMessageDate > date) {
-					mConvList.add(voiceMessageItem);
-					voiceMessageItem.setAddedItem(true);
-				}
-				// 同理如果verificationMessageItem不为null，则进行比较
-				if (verificationMessageItemData != null
-						&& verificationMessageItemData.isAddedItem() == false
-						&& verificationDate > date) {
-					mConvList.add(verificationMessageItemData);
-					verificationMessageItemData.setAddedItem(true);
-				}
+				mConvList.add(cov);
 			}
-			// }
-			mConvList.add(cov);
 		}
-		mCur.close();
-		// if (mCurrentTabFlag == Conversation.TYPE_CONTACT) {
+		catch(Exception e){
+			e.printStackTrace();
+		}
+		finally{
+			if(mCur != null)
+				mCur.close();
+		}
+		
 		if (isNoEmpty) {
 			// 两种添加顺序
 			if (voiceMessageItem.isFirst()) {
@@ -275,7 +284,6 @@ public class ConversationProvider {
 					mConvList.add(verificationMessageItemData);
 			}
 		}
-		// }
 		return mConvList;
 	}
 
@@ -312,6 +320,74 @@ public class ConversationProvider {
 				where,
 				new String[] { String.valueOf(cov.getExtId()),
 						String.valueOf(cov.getType()) });
+	}
+	
+	public static boolean queryGroupConversation(Context context , int groupType , long groupID){
+		DataBaseContext mContext = new DataBaseContext(context);
+		Cursor mCur = null;
+		try{
+			mCur = mContext
+					.getContentResolver()
+					.query(ContentDescriptor.RecentHistoriesMessage.CONTENT_URI,
+							ContentDescriptor.RecentHistoriesMessage.Cols.ALL_CLOS,
+							ContentDescriptor.RecentHistoriesMessage.Cols.HISTORY_RECENT_MESSAGE_GROUP_TYPE
+									+ "= ? and "
+									+ ContentDescriptor.RecentHistoriesMessage.Cols.HISTORY_RECENT_MESSAGE_USER_TYPE_ID
+									+ " = ?" ,
+							new String[] {
+									String.valueOf(groupType) , 
+									String.valueOf(groupID)},
+							ContentDescriptor.RecentHistoriesMessage.Cols.HISTORY_RECENT_MESSAGE_SAVEDATE
+									+ " desc");
+			if(mCur == null || mCur.getCount() < 0)
+				return false;
+			
+			if(mCur.moveToFirst())
+				return true;
+			return false;
+		}
+		catch(Exception e){
+			e.printStackTrace();
+			return false;
+		}
+		finally{
+			if(mCur != null)
+				mCur.close();
+		}
+	}
+	
+	public static boolean queryUserConversation(Context context , long remoteUserID){
+		DataBaseContext mContext = new DataBaseContext(context);
+		Cursor mCur = null;
+		try{
+			mCur = mContext
+					.getContentResolver()
+					.query(ContentDescriptor.RecentHistoriesMessage.CONTENT_URI,
+							ContentDescriptor.RecentHistoriesMessage.Cols.ALL_CLOS,
+							ContentDescriptor.RecentHistoriesMessage.Cols.HISTORY_RECENT_MESSAGE_GROUP_TYPE
+									+ "= ? and "
+									+ ContentDescriptor.RecentHistoriesMessage.Cols.HISTORY_RECENT_MESSAGE_REMOTE_USER_ID
+									+ " = ? " ,
+							new String[] {
+									String.valueOf(V2GlobalEnum.GROUP_TYPE_USER) , 
+									String.valueOf(remoteUserID)},
+							ContentDescriptor.RecentHistoriesMessage.Cols.HISTORY_RECENT_MESSAGE_SAVEDATE
+									+ " desc");
+			if(mCur == null || mCur.getCount() < 0)
+				return false;
+			
+			if(mCur.moveToFirst())
+				return true;
+			return false;
+		}
+		catch(Exception e){
+			e.printStackTrace();
+			return false;
+		}
+		finally{
+			if(mCur != null)
+				mCur.close();
+		}
 	}
 
 	/**

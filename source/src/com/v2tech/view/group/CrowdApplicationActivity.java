@@ -17,6 +17,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.V2.jni.V2GlobalEnum;
 import com.v2tech.R;
 import com.v2tech.service.CrowdGroupService;
 import com.v2tech.service.GlobalHolder;
@@ -25,6 +26,7 @@ import com.v2tech.service.jni.JNIResponse;
 import com.v2tech.service.jni.JNIResponse.Result;
 import com.v2tech.view.JNIService;
 import com.v2tech.view.PublicIntent;
+import com.v2tech.view.bo.GroupUserObject;
 import com.v2tech.view.conversation.MessageAuthenticationActivity;
 import com.v2tech.view.conversation.MessageBuilder;
 import com.v2tech.vo.Crowd;
@@ -348,7 +350,7 @@ public class CrowdApplicationActivity extends Activity {
                             Intent i = new Intent();
                             i.setAction(PublicIntent.BROADCAST_NEW_CROWD_NOTIFICATION);
                             i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
-                            i.putExtra("crowd", crowd.getId());
+                            i.putExtra("group", new GroupUserObject(V2GlobalEnum.GROUP_TYPE_CROWD, crowd.getId(), -1));
                             sendBroadcast(i);
                             mLocalHandler.postDelayed(new Runnable() {
                                 @Override

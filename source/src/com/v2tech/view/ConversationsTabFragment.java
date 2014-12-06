@@ -117,7 +117,6 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 	private static final int FILL_CONFS_LIST = 2;
 	private static final int VERIFICATION_TYPE_FRIEND = 5;
 	private static final int VERIFICATION_TYPE_CROWD = 6;
-	private static final int UPDATE_USER_SIGN = 8;
 	private static final int UPDATE_CONVERSATION = 9;
 	private static final int UPDATE_SEARCHED_LIST = 11;
 	private static final int REMOVE_CONVERSATION = 12;
@@ -143,7 +142,6 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 	private ConferenceService cb;
 	private CrowdGroupService chatService;
 
-	// private List<Conversation> mConvList;
 	private Set<Conversation> mUnreadConvList;
 
 	private List<ScrollItem> mItemList = new ArrayList<ScrollItem>();
@@ -547,7 +545,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 				continue;
 			}
 			
-			if (g.getName() == null)
+			if (TextUtils.isEmpty(g.getName()))
 				V2Log.w(TAG,
 						"The group name is null , group id is :" + g.getmGId());
 			
@@ -595,8 +593,12 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 		if (g.getGroupType() == GroupType.CONFERENCE) {
 			cov = new ConferenceConversation(g);
 		} else if (g.getGroupType() == GroupType.CHATING) {
+			if(mCurrentSubTab == SUB_TAB_DISCUSSION)
+				return ;
 			cov = new CrowdConversation(g);
 		} else if(g.getGroupType() == GroupType.DISCUSSION){
+			if(mCurrentSubTab == SUB_TAB_CROWD)
+				return ;
 			cov = new DiscussionConversation(g);
 		}else {
 			V2Log.e(TAG, "addConversation --> Add new group conversation failed ... "
@@ -619,7 +621,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 					"addConversation -- Successfully add a new conversation , type is : "
 							+ cov.getType() + " and id is : " + cov.getExtId()
 							+ " and name is : " + cov.getName());
-			GroupLayout gp = new GroupLayout(this.getActivity(), cov);
+			GroupLayout gp = new GroupLayout(mContext, cov);
 			/**
 			 * 除了个人Conversation布局，其他组类Conversation布局默认可能不会显示时间，或者内容
 			 * 所以这里需要将布局改变为个人的Conversation布局
@@ -1608,7 +1610,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 			}
 		});
 	}
-
+	
 	/**
 	 * Remove conversation from mConvList by id.
 	 * 
@@ -1868,11 +1870,6 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 										mHandler, QUIT_DISCUSSION_BOARD_DONE,
 										crowd));
 					}
-					Intent kick = new Intent();
-					kick.setAction(JNIService.JNI_BROADCAST_KICED_CROWD);
-					kick.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
-					kick.putExtra("crowd", cov.getExtId());
-					mContext.sendBroadcast(kick);
 				} else
 					V2Log.e(TAG,
 							"quit crowd group failed .. id is :"
@@ -2044,13 +2041,19 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 			currentPosition = pos;
 			ScrollItem item = mItemList.get(pos);
 			Conversation cov = item.cov;
+			GroupLayout layout = (GroupLayout) item.gp;
+			
 			if (mCurrentTabFlag == Conversation.TYPE_CONFERNECE) {
                 requestJoinConf(cov.getExtId());
             }
 			else if (mCurrentTabFlag == Conversation.TYPE_GROUP)
 				startConversationView(cov);
 			else if (mCurrentTabFlag == Conversation.TYPE_CONTACT) {
-
+				if(cov.getExtId() != layout.getmConv().getExtId()){
+					cov = layout.getmConv();
+					V2Log.e(TAG, "消息item位置发生错乱!");
+				}
+				
 				if (cov.getType() == Conversation.TYPE_VOICE_MESSAGE) {
 					Intent intent = new Intent(mContext,
 							VoiceMessageActivity.class);
@@ -2443,14 +2446,30 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 			super.onReceive(context, intent);
 			if (PublicIntent.BROADCAST_NEW_CROWD_NOTIFICATION.equals(intent
 					.getAction())) {
-				if (mCurrentSubTab == SUB_TAB_CROWD) {
-					long gid = intent.getLongExtra("crowd", 0);
-					Group g = GlobalHolder.getInstance().getGroupById(
-							GroupType.CHATING.intValue(), gid);
-					if (g != null)
-						addConversation(g, false);
+				GroupUserObject obj = intent.getParcelableExtra("group");
+				if (obj == null) {
+					V2Log.e(TAG,
+							"Received the broadcast to quit the crowd group , but crowd id is wroing... ");
+					return;
+				}
+				
+				if(V2GlobalEnum.GROUP_TYPE_CROWD == obj.getmType() &&
+						mCurrentSubTab == SUB_TAB_CROWD){
+					Group crowd = GlobalHolder.getInstance().getGroupById(
+							GroupType.CHATING.intValue(), obj.getmGroupId());
+					if (crowd != null)
+						addConversation(crowd, false);
 					else
-						V2Log.e("Can not get crowd :" + gid);
+						V2Log.e("Can not get crowd group :" + obj.getmGroupId());
+				}
+				else if(V2GlobalEnum.GROUP_TYPE_DISCUSSION == obj.getmType() &&
+						mCurrentSubTab == SUB_TAB_DISCUSSION){
+					Group discussion = GlobalHolder.getInstance().getGroupById(
+							GroupType.DISCUSSION.intValue(), obj.getmGroupId());
+					if (discussion != null)
+						addConversation(discussion, false);
+					else
+						V2Log.e("Can not get discussion group :" + obj.getmGroupId());
 				}
 			} else if (PublicIntent.BROADCAST_CROWD_DELETED_NOTIFICATION
 					.equals(intent.getAction())
@@ -2463,7 +2482,12 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 					return;
 				}
 				
-				removeConversation(obj.getmGroupId());
+				if((V2GlobalEnum.GROUP_TYPE_DISCUSSION == obj.getmType() &&
+						mCurrentSubTab == SUB_TAB_DISCUSSION) ||
+					(V2GlobalEnum.GROUP_TYPE_CROWD == obj.getmType() &&
+						mCurrentSubTab == SUB_TAB_CROWD)){
+					removeConversation(obj.getmGroupId());
+				}
 			} else if (JNIService.JNI_BROADCAST_GROUP_UPDATED.equals(intent
 					.getAction())) {
 				long gid = intent.getLongExtra("gid", 0);
@@ -2493,8 +2517,10 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 			} else if (PublicIntent.BROADCAST_DISCUSSION_QUIT_NOTIFICATION
 					.equals(intent.getAction())) {
 				long cid = intent.getLongExtra("groupId", -1l);
-				Message.obtain(mHandler, QUIT_DISCUSSION_BOARD_DONE,
-                        cid).sendToTarget();
+				if(mCurrentSubTab == SUB_TAB_DISCUSSION)
+					removeConversation(cid);
+//				Message.obtain(mHandler, QUIT_DISCUSSION_BOARD_DONE,
+//                        cid).sendToTarget();
 			} else if (PublicIntent.BROADCAST_USER_COMMENT_NAME_NOTIFICATION
 					.equals(intent.getAction())){
 				Long uid = intent.getLongExtra("modifiedUser", -1);
@@ -2967,21 +2993,21 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 					updateFriendVerificationConversation(node);
 				}
 				break;
-			case QUIT_DISCUSSION_BOARD_DONE:
-				long cid = 0;
-				if (msg.obj instanceof Long) {
-					cid = (Long) msg.obj;
-				} else {
-					JNIResponse res = (JNIResponse) msg.obj;
-					if (res.getResult() != JNIResponse.Result.SUCCESS) {
-						// TODO toast quit failed
-						return;
-					} else {
-						cid = ((Group) res.callerObject).getmGId();
-					}
-				}
-				removeConversation(cid);
-				break;
+//			case QUIT_DISCUSSION_BOARD_DONE:
+//				long cid = 0;
+//				if (msg.obj instanceof Long) {
+//					cid = (Long) msg.obj;
+//				} else {
+//					JNIResponse res = (JNIResponse) msg.obj;
+//					if (res.getResult() != JNIResponse.Result.SUCCESS) {
+//						// TODO toast quit failed
+//						return;
+//					} else {
+//						cid = ((Group) res.callerObject).getmGId();
+//					}
+//				}
+//				removeConversation(cid);
+//				break;
 			}
 		}
 	}

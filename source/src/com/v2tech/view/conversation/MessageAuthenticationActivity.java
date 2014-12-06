@@ -1293,8 +1293,9 @@ public class MessageAuthenticationActivity extends Activity {
 						Intent intent = new Intent();
 						intent.setAction(PublicIntent.BROADCAST_NEW_CROWD_NOTIFICATION);
 						intent.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
-						intent.putExtra("crowd", cg.getmGId());
+						intent.putExtra("group", new GroupUserObject(V2GlobalEnum.GROUP_TYPE_CROWD, cg.getmGId(), -1));
 						sendBroadcast(intent);
+						
 						updateViewItem(tag.wrapper, tag.item);
 						msg.setReadState(ReadState.READ);
 						MessageBuilder.updateQualicationMessage(mContext, msg);

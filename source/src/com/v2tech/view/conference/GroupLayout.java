@@ -292,4 +292,8 @@ public class GroupLayout extends LinearLayout {
 		mGroupDateTV.setVisibility(View.VISIBLE);
 		mConNameTV.setVisibility(View.INVISIBLE);
 	}
+	
+	public Conversation getmConv() {
+		return mConv;
+	}
 }

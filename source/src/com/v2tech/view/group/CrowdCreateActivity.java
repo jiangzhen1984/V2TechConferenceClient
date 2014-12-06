@@ -39,6 +39,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.V2.jni.V2GlobalEnum;
 import com.V2.jni.util.V2Log;
 import com.v2tech.R;
 import com.v2tech.service.CrowdGroupService;
@@ -50,6 +51,7 @@ import com.v2tech.util.SPUtil;
 import com.v2tech.view.JNIService;
 import com.v2tech.view.PublicIntent;
 import com.v2tech.view.adapter.CreateConfOrCrowdAdapter;
+import com.v2tech.view.bo.GroupUserObject;
 import com.v2tech.view.conversation.MessageBuilder;
 import com.v2tech.view.widget.GroupListView;
 import com.v2tech.view.widget.GroupListView.ItemData;
@@ -489,15 +491,11 @@ public class CrowdCreateActivity extends Activity {
 	
 	private void saveQualication(User user){
 
-//        User applicant = GlobalHolder.getInstance().getUser(crowd.getOwnerUser().getmUserId());
-//        if (applicant == null)
-//            applicant = new User(uid);
 		if(crowd == null)
 			crowd = new CrowdGroup(0, "", null);
-		crowd.setAuthType(AuthType.ALLOW_ALL);
 		VMessageQualificationApplicationCrowd crowdQuion = new VMessageQualificationApplicationCrowd(
 				crowd, user);
-		crowdQuion.setReadState(ReadState.UNREAD);
+		crowdQuion.setmTimestamp(new Date());
 		Uri uri = MessageBuilder.saveQualicationMessage(crowdQuion , true);
 		if (uri != null){
 			V2Log.e("CrowdCreateActivity  --> Save VMessageQualification Cache Object Successfully , "
@@ -510,7 +508,6 @@ public class CrowdCreateActivity extends Activity {
 			V2Log.e("CrowdCreateActivity  --> Save VMessageQualification Cache Object failed , "
 					+ "the Uri is null...groupID is : " + crowd.getmGId() + " userID is : " + user.getmUserId());
 		}
-	
 	}
 
 	private OnClickListener mReturnListener = new OnClickListener() {
@@ -567,7 +564,7 @@ public class CrowdCreateActivity extends Activity {
 					Intent i = new Intent();
 					i.setAction(PublicIntent.BROADCAST_NEW_CROWD_NOTIFICATION);
 					i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
-					i.putExtra("crowd", id);
+					i.putExtra("group", new GroupUserObject(V2GlobalEnum.GROUP_TYPE_CROWD, id, -1));
 					mContext.sendBroadcast(i);
 
 					Intent crowdIntent = new Intent(

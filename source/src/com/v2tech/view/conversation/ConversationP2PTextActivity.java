@@ -70,6 +70,7 @@ import com.spoledge.aacplayer.ArrayDecoder;
 import com.spoledge.aacplayer.Decoder;
 import com.spoledge.aacplayer.PlayerCallback;
 import com.v2tech.R;
+import com.v2tech.db.ConversationProvider;
 import com.v2tech.media.V2Encoder;
 import com.v2tech.service.AsyncResult;
 import com.v2tech.service.BitmapManager;
@@ -144,12 +145,13 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 	protected static final int RECEIVE_SELECTED_FILE = 1000;
 
 	private int offset = 0;
-
-	private long user1Id = 0;
-
-	private long user2Id = 0;
-
-	private long groupId = 0;
+	private long currentLoginUserID = 0;
+	private long remoteChatUserID = 0;
+	private long remoteGroupID = 0;
+	
+	private User currentLoginUser;
+	private User remoteChatUser;
+	private int currentConversationViewType;
 
 	private LocalHandler lh;
 
@@ -199,10 +201,6 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 
 	private ChatService mChat = new ChatService();
 	private CrowdGroupService mGroupChat = new CrowdGroupService();
-
-	private User local;
-	private User remote;
-	private int currentConversationViewType;
 
 	private ListView mMessagesContainer;
 
@@ -388,12 +386,12 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 		long key;
 		if (currentConversationViewType == V2GlobalEnum.GROUP_TYPE_CROWD) {
 			files = MessageLoader.loadFileMessages(currentConversationViewType,
-					groupId);
-			key = groupId;
+					remoteGroupID);
+			key = remoteGroupID;
 		} else {
 			files = MessageLoader.loadFileMessages(currentConversationViewType,
-					user2Id);
-			key = user2Id;
+					remoteChatUserID);
+			key = remoteChatUserID;
 		}
 		
 		Integer transing = GlobalConfig.mTransingFiles.get(key);
@@ -542,22 +540,22 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 		boolean isDelete = false;
 		ConversationNotificationObject obj = null;
 		if (currentConversationViewType == V2GlobalEnum.GROUP_TYPE_USER) {
-			isDelete = MessageLoader.getNewestMessage(mContext, user1Id,
-					user2Id) == null ? true : false;
+			isDelete = MessageLoader.getNewestMessage(mContext, currentLoginUserID,
+					remoteChatUserID) == null ? true : false;
 			obj = new ConversationNotificationObject(Conversation.TYPE_CONTACT,
-					user2Id);
+					remoteChatUserID);
 		} else if (currentConversationViewType == V2GlobalEnum.GROUP_TYPE_CROWD) {
 			isDelete = MessageLoader.getNewestGroupMessage(mContext,
-					V2GlobalEnum.GROUP_TYPE_CROWD, groupId) == null ? true
+					V2GlobalEnum.GROUP_TYPE_CROWD, remoteGroupID) == null ? true
 					: false;
 			obj = new ConversationNotificationObject(Conversation.TYPE_CONTACT,
-					groupId);
+					remoteGroupID);
 		} else if (currentConversationViewType == V2GlobalEnum.GROUP_TYPE_DEPARTMENT) {
 			isDelete = MessageLoader.getNewestGroupMessage(mContext,
-					V2GlobalEnum.GROUP_TYPE_DEPARTMENT, groupId) == null ? true
+					V2GlobalEnum.GROUP_TYPE_DEPARTMENT, remoteGroupID) == null ? true
 					: false;
 			obj = new ConversationNotificationObject(Conversation.TYPE_CONTACT,
-					groupId);
+					remoteGroupID);
 		}
 
 		if (isDelete) {
@@ -596,9 +594,9 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 					1);
 		if (!isReLoading) {
 			V2Log.e(TAG, "entry onNewIntent , reloading chating datas...");
-			user2Id = 0;
-			groupId = 0;
-			remote = null;
+			remoteChatUserID = 0;
+			remoteGroupID = 0;
+			remoteChatUser = null;
 			initConversationInfos();
 			mIsInited = false;
 			mLoadedAllMessages = false;
@@ -628,21 +626,21 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 	}
 
 	private void initConversationInfos() {
-		user1Id = GlobalHolder.getInstance().getCurrentUserId();
-		local = GlobalHolder.getInstance().getUser(user1Id);
+		currentLoginUserID = GlobalHolder.getInstance().getCurrentUserId();
+		currentLoginUser = GlobalHolder.getInstance().getUser(currentLoginUserID);
 		if (cov.getType() == Conversation.TYPE_CONTACT) {
 			bodyType = MessageBodyType.SINGLE_USER_TYPE;
 			currentConversationViewType = V2GlobalEnum.GROUP_TYPE_USER;
-			user2Id = cov.getExtId();
-			remote = GlobalHolder.getInstance().getUser(user2Id);
-			if (remote == null) {
-				remote = new User(user2Id);
+			remoteChatUserID = cov.getExtId();
+			remoteChatUser = GlobalHolder.getInstance().getUser(remoteChatUserID);
+			if (remoteChatUser == null) {
+				remoteChatUser = new User(remoteChatUserID);
 			}
 
-			if (!TextUtils.isEmpty(remote.getNickName()))
-				mUserTitleTV.setText(remote.getNickName());
+			if (!TextUtils.isEmpty(remoteChatUser.getNickName()))
+				mUserTitleTV.setText(remoteChatUser.getNickName());
 			else
-				mUserTitleTV.setText(remote.getName());
+				mUserTitleTV.setText(remoteChatUser.getName());
 			mButtonCreateMetting.setVisibility(View.GONE);
 			mVideoCallButton.setVisibility(View.VISIBLE);
 			mAudioCallButton.setVisibility(View.VISIBLE);
@@ -653,9 +651,9 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 		} else if (cov.getType() == Conversation.TYPE_GROUP) {
 			bodyType = MessageBodyType.CROWD_TYPE;
 			currentConversationViewType = V2GlobalEnum.GROUP_TYPE_CROWD;
-			groupId = cov.getExtId();
+			remoteGroupID = cov.getExtId();
 			Group group =  GlobalHolder.getInstance()
-					.getGroupById( groupId);
+					.getGroupById( remoteGroupID);
 			mVideoCallButton.setVisibility(View.GONE);
 			mAudioCallButton.setVisibility(View.GONE);
 			mShowContactDetailButton.setVisibility(View.GONE);
@@ -677,7 +675,7 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 						.getGroupById(V2GlobalEnum.GROUP_TYPE_DISCUSSION, cov.getExtId());
 				mUserTitleTV.setText(discussionGroup.getName());
 			}
-			groupId = cov.getExtId();
+			remoteGroupID = cov.getExtId();
 			mVideoCallButton.setVisibility(View.GONE);
 			mAudioCallButton.setVisibility(View.GONE);
 			mShowContactDetailButton.setVisibility(View.GONE);
@@ -1019,7 +1017,7 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 		iv.addCategory(PublicIntent.DEFAULT_CATEGORY);
 		iv.setAction(PublicIntent.START_P2P_CONVERSACTION_ACTIVITY);
 		iv.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-		iv.putExtra("uid", user2Id);
+		iv.putExtra("uid", remoteChatUserID);
 		iv.putExtra("is_coming_call", false);
 		iv.putExtra("voice", true);
 		mContext.startActivity(iv);
@@ -1030,11 +1028,11 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 		iv.addCategory(PublicIntent.DEFAULT_CATEGORY);
 		iv.setAction(PublicIntent.START_P2P_CONVERSACTION_ACTIVITY);
 		iv.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-		iv.putExtra("uid", user2Id);
+		iv.putExtra("uid", remoteChatUserID);
 		iv.putExtra("is_coming_call", false);
 		iv.putExtra("voice", false);
 		UserDeviceConfig udc = GlobalHolder.getInstance().getUserDefaultDevice(
-				user2Id);
+				remoteChatUserID);
 		if (udc != null) {
 			iv.putExtra("device", udc.getDeviceID());
 		} else {
@@ -1234,7 +1232,7 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 							&& seconds > 1500) {
 						// send
 						VMessage vm = MessageBuilder.buildAudioMessage(
-								cov.getType(), groupId, local, remote,
+								cov.getType(), remoteGroupID, currentLoginUser, remoteChatUser,
 								audioFilePath, (int) (seconds / 1000));
 						// Send message to server
 						sendMessageToRemote(vm);
@@ -1363,7 +1361,7 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 			timeOutRecording = true;
 			realRecoding = false;
 			VMessage vm = MessageBuilder.buildAudioMessage(cov.getType(),
-					groupId, local, remote, audioFilePath, 60);
+					remoteGroupID, currentLoginUser, remoteChatUser, audioFilePath, 60);
 			// Send message to server
 			sendMessageToRemote(vm);
 
@@ -1505,7 +1503,7 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 				if (currentConversationViewType == V2GlobalEnum.GROUP_TYPE_USER) {
 					intent = new Intent(ConversationP2PTextActivity.this,
 							ConversationSelectFileEntry.class);
-					intent.putExtra("uid", user2Id);
+					intent.putExtra("uid", remoteChatUserID);
 				} else if (currentConversationViewType == V2GlobalEnum.GROUP_TYPE_CROWD) {
 					intent = new Intent(ConversationP2PTextActivity.this,
 							ConversationSelectFile.class);
@@ -1547,7 +1545,7 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 		public void onClick(View arg0) {
 			Intent i = new Intent(PublicIntent.START_CONFERENCE_CREATE_ACTIVITY);
 			i.addCategory(PublicIntent.DEFAULT_CATEGORY);
-			i.putExtra("gid", groupId);
+			i.putExtra("gid", remoteGroupID);
 			startActivity(i);
 		}
 	};
@@ -1707,7 +1705,7 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 				return;
 			}
 			VMessage vim = MessageBuilder.buildImageMessage(cov.getType(),
-					groupId, local, remote, filePath);
+					remoteGroupID, currentLoginUser, remoteChatUser, filePath);
 			// Send message to server
 			sendMessageToRemote(vim);
 		} else if (requestCode == RECEIVE_SELECTED_FILE) {
@@ -1724,7 +1722,7 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 							continue;
 
 						VMessage vm = MessageBuilder.buildFileMessage(
-								cov.getType(), groupId, local, remote, bean);
+								cov.getType(), remoteGroupID, currentLoginUser, remoteChatUser, bean);
 						bean.fileUUID = vm.getFileItems().get(0).getUuid();
 						// // Save message
 						vm.setmXmlDatas(vm.toXml());
@@ -1739,7 +1737,7 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 					}
 
 					Intent intent = new Intent(this, FileService.class);
-					intent.putExtra("gid", groupId);
+					intent.putExtra("gid", remoteGroupID);
 					intent.putParcelableArrayListExtra("uploads", mCheckedList);
 					startService(intent);
 
@@ -1752,7 +1750,7 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 			}
 		} else if (requestCode == SHOW_GROUP_DETAIL) {
 			Group group =  GlobalHolder.getInstance()
-					.getGroupById( groupId);
+					.getGroupById( remoteGroupID);
 			mUserTitleTV.setText(group.getName());
 		}
 
@@ -1784,11 +1782,11 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 			return;
 		}
 		content = removeEmoji(content);
-		if (remote == null) {
-			remote = new User(user2Id);
+		if (remoteChatUser == null) {
+			remoteChatUser = new User(remoteChatUserID);
 		}
 		// 如果user2Id为0，则说明为群组聊天
-		VMessage vm = new VMessage(cov.getType(), this.groupId, local, remote,
+		VMessage vm = new VMessage(cov.getType(), this.remoteGroupID, currentLoginUser, remoteChatUser,
 				new Date(GlobalConfig.getGlobalServerTime()));
 		String[] array = content.split("\n");
 		for (int i = 0; i < array.length; i++) {
@@ -1978,19 +1976,19 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 		switch (currentConversationViewType) {
 		case Conversation.TYPE_CONTACT:
 			obj = new ConversationNotificationObject(Conversation.TYPE_CONTACT,
-					user2Id);
+					remoteChatUserID);
 			break;
 		case Conversation.TYPE_GROUP:
 			obj = new ConversationNotificationObject(Conversation.TYPE_GROUP,
-					groupId);
+					remoteGroupID);
 			break;
 		case Conversation.TYPE_DEPARTMENT:
 			obj = new ConversationNotificationObject(
-					Conversation.TYPE_DEPARTMENT, groupId);
+					Conversation.TYPE_DEPARTMENT, remoteGroupID);
 			break;
 		case V2GlobalEnum.GROUP_TYPE_DISCUSSION:
 			obj = new ConversationNotificationObject(
-					V2GlobalEnum.GROUP_TYPE_DISCUSSION, groupId);
+					V2GlobalEnum.GROUP_TYPE_DISCUSSION, remoteGroupID);
 			break;
 		default:
 			return ;
@@ -2072,15 +2070,15 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 				Intent i = new Intent();
 				i.addCategory(PublicIntent.DEFAULT_CATEGORY);
 				i.setAction(PublicIntent.START_VIDEO_IMAGE_GALLERY);
-				i.putExtra("uid1", user1Id);
-				i.putExtra("uid2", user2Id);
+				i.putExtra("uid1", currentLoginUserID);
+				i.putExtra("uid2", remoteChatUserID);
 				i.putExtra("cid", v.getUUID());
 				if (imageItem != null)
 					i.putExtra("imageID", imageItem.getUuid());
 				// type 0: is not group image view
 				// type 1: group image view
 				i.putExtra("type", currentConversationViewType);
-				i.putExtra("gid", groupId);
+				i.putExtra("gid", remoteGroupID);
 				mContext.startActivity(i);
 				return ;
 			}
@@ -2101,7 +2099,7 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 		public void onCrowdFileMessageClicked(CrowdFileActivityType type) {
 			Intent i = new Intent(PublicIntent.START_CROWD_FILES_ACTIVITY);
 			i.addCategory(PublicIntent.DEFAULT_CATEGORY);
-			i.putExtra("cid", groupId);
+			i.putExtra("cid", remoteGroupID);
 			i.putExtra("crowdFileActivityType", type);
 			startActivity(i);
 		};
@@ -2260,21 +2258,21 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 		List<VMessage> array = null;
 		switch (currentConversationViewType) {
 		case V2GlobalEnum.GROUP_TYPE_USER:
-			array = MessageLoader.loadMessageByPage(mContext, user1Id, user2Id,
-					BATCH_COUNT, offset, Conversation.TYPE_CONTACT);
+			array = MessageLoader.loadMessageByPage(mContext, Conversation.TYPE_CONTACT ,
+					currentLoginUserID, remoteChatUserID,BATCH_COUNT, offset);
 			break;
 		case V2GlobalEnum.GROUP_TYPE_CROWD:
 			array = MessageLoader.loadGroupMessageByPage(mContext,
-					Conversation.TYPE_GROUP, groupId, BATCH_COUNT, offset);
+					Conversation.TYPE_GROUP, remoteGroupID, BATCH_COUNT, offset);
 			break;
 		case V2GlobalEnum.GROUP_TYPE_DEPARTMENT:
 			array = MessageLoader.loadGroupMessageByPage(mContext,
-					V2GlobalEnum.GROUP_TYPE_DEPARTMENT, groupId, BATCH_COUNT,
+					V2GlobalEnum.GROUP_TYPE_DEPARTMENT, remoteGroupID, BATCH_COUNT,
 					offset);
 			break;
 		case V2GlobalEnum.GROUP_TYPE_DISCUSSION:
 			array = MessageLoader.loadGroupMessageByPage(mContext,
-					V2GlobalEnum.GROUP_TYPE_DISCUSSION, groupId, BATCH_COUNT,
+					V2GlobalEnum.GROUP_TYPE_DISCUSSION, remoteGroupID, BATCH_COUNT,
 					offset);
 			break;
 		default:
@@ -2282,6 +2280,25 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 		}
 
 		if (array != null) {
+			boolean isExist;
+			if(currentConversationViewType == V2GlobalEnum.GROUP_TYPE_USER)
+				isExist = ConversationProvider.queryUserConversation(mContext, remoteChatUserID);
+			else
+				isExist = ConversationProvider.queryGroupConversation(mContext, currentConversationViewType, remoteGroupID);
+			if(!isExist){
+				boolean flag = MessageLoader.deleteMessageByID(mContext, currentConversationViewType, 
+						remoteGroupID, remoteChatUserID, true);
+				if(flag){
+					if(currentConversationViewType == V2GlobalEnum.GROUP_TYPE_USER)
+						MessageLoader.isTableExist(mContext, currentConversationViewType, remoteGroupID, 
+								remoteChatUserID, MessageLoader.CONTACT_TYPE);
+					else
+						MessageLoader.isTableExist(mContext, currentConversationViewType, remoteGroupID,
+								remoteChatUserID, MessageLoader.CROWD_TYPE);
+				}
+				array.clear();
+				return array;
+			}
 			offset += array.size();
 			mIsInited = true;
 		}
@@ -2300,13 +2317,13 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 
 		VMessage m;
 		if (currentConversationViewType == V2GlobalEnum.GROUP_TYPE_USER)
-			m = MessageLoader.loadUserMessageById(mContext, user2Id, msgId);
+			m = MessageLoader.loadUserMessageById(mContext, remoteChatUserID, msgId);
 		else
 			m = MessageLoader.loadGroupMessageById(mContext,
-					currentConversationViewType, groupId, msgId);
+					currentConversationViewType, remoteGroupID, msgId);
 		if (m == null
-				|| (m.getFromUser().getmUserId() != this.user2Id && m
-						.getGroupId() == 0) || (m.getGroupId() != this.groupId)) {
+				|| (m.getFromUser().getmUserId() != this.remoteChatUserID && m
+						.getGroupId() == 0) || (m.getGroupId() != this.remoteGroupID)) {
 			return false;
 		}
 
@@ -2342,7 +2359,7 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 				MessageLoader.deleteMessage(mContext, vm);
 				List<VMessage> messagePages = MessageLoader
 						.loadGroupMessageByPage(mContext,
-								Conversation.TYPE_GROUP, groupId, 1,
+								Conversation.TYPE_GROUP, remoteGroupID, 1,
 								messageArray.size());
 				if (messagePages != null && messagePages.size() > 0)
 					messageArray
@@ -2498,7 +2515,7 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 		public void onClick(View view) {
 			Intent i = new Intent();
 			i.setClass(mContext, ContactDetail.class);
-			i.putExtra("uid", user2Id);
+			i.putExtra("uid", remoteChatUserID);
 			i.putExtra("obj", cov);
 			i.putExtra("fromPlace", "ConversationView");
 			i.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
@@ -2641,10 +2658,10 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 					case V2GlobalEnum.GROUP_TYPE_CROWD:
 					case V2GlobalEnum.GROUP_TYPE_DEPARTMENT:
 					case V2GlobalEnum.GROUP_TYPE_DISCUSSION:
-						isReLoading = groupID == groupId;
+						isReLoading = groupID == remoteGroupID;
 						break;
 					case V2GlobalEnum.GROUP_TYPE_USER:
-						isReLoading = remoteID == user2Id;
+						isReLoading = remoteID == remoteChatUserID;
 						break;
 					}
 				} else
@@ -2724,7 +2741,7 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 					return;
 				}
 				
-				if (obj.getmGroupId() == groupId) {
+				if (obj.getmGroupId() == remoteGroupID) {
 					finish();
 				}
 			} else if ((PublicIntent.BROADCAST_CROWD_DELETED_NOTIFICATION
@@ -2746,12 +2763,12 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 						return;
 					}
 					// 自己上传文件不提示
-					if (list.get(0).user.uid == user1Id || groupID != groupId)
+					if (list.get(0).user.uid == currentLoginUserID || groupID != remoteGroupID)
 						return;
 					for (FileJNIObject fileJNIObject : list) {
 						User user = GlobalHolder.getInstance().getUser(
 								list.get(0).user.uid);
-						VMessage vm = new VMessage(cov.getType(), groupId,
+						VMessage vm = new VMessage(cov.getType(), remoteGroupID,
 								user, null, new Date(
 										GlobalConfig.getGlobalServerTime()));
 						VMessageFileItem item = new VMessageFileItem(vm,
@@ -2872,10 +2889,10 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 			case REQUEST_DEL_MESSAGE:
 				VMessage message = (VMessage) msg.obj;
 				removeMessage(message);
-				Integer transing = GlobalConfig.mTransingFiles.get(user2Id);
+				Integer transing = GlobalConfig.mTransingFiles.get(remoteChatUserID);
 				if(transing != null){
 					transing = transing - 1;
-					GlobalConfig.mTransingFiles.put(user2Id, transing);
+					GlobalConfig.mTransingFiles.put(remoteChatUserID, transing);
 				}
 				
 				adapter.notifyDataSetChanged();
@@ -3009,8 +3026,8 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 		if (bean == null || TextUtils.isEmpty(bean.filePath))
 			return;
 
-		VMessage vim = MessageBuilder.buildFileMessage(cov.getType(), groupId,
-				local, remote, bean);
+		VMessage vim = MessageBuilder.buildFileMessage(cov.getType(), remoteGroupID,
+				currentLoginUser, remoteChatUser, bean);
 		sendMessageToRemote(vim);
 	}
 

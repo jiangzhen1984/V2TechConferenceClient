@@ -144,7 +144,6 @@ public class MainApplication extends Application {
 
 		initSQLiteFile();
 		initDPI();
-
 		initResource();
 	}
 

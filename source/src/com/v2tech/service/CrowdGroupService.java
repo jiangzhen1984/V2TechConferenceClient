@@ -635,18 +635,18 @@ public class CrowdGroupService extends AbstractHandler {
 		@Override
 		public void OnDelGroupCallback(int groupType, long nGroupID,
 				boolean bMovetoRoot) {
-//			if (groupType == GroupType.CHATING.intValue()
-//					&& nGroupID == mPendingCrowdId) {
-//				mPendingCrowdId = 0;
-//				JNIResponse jniRes = new JNIResponse(JNIResponse.Result.SUCCESS);
-//				Message.obtain(mCallbackHandler, QUIT_CROWD, jniRes)
-//						.sendToTarget();
-//			} else if (groupType == GroupType.DISCUSSION.intValue() && nGroupID == mPendingCrowdId) {
-//				mPendingCrowdId = 0;
-//				JNIResponse jniRes = new JNIResponse(JNIResponse.Result.SUCCESS);
-//				Message.obtain(mCallbackHandler, QUIT_DISCUSSION_BOARD, jniRes)
-//						.sendToTarget();
-//			}
+			if (groupType == GroupType.CHATING.intValue()
+					&& nGroupID == mPendingCrowdId) {
+				mPendingCrowdId = 0;
+				JNIResponse jniRes = new JNIResponse(JNIResponse.Result.SUCCESS);
+				Message.obtain(mCallbackHandler, QUIT_CROWD, jniRes)
+						.sendToTarget();
+			} else if (groupType == GroupType.DISCUSSION.intValue() && nGroupID == mPendingCrowdId) {
+				mPendingCrowdId = 0;
+				JNIResponse jniRes = new JNIResponse(JNIResponse.Result.SUCCESS);
+				Message.obtain(mCallbackHandler, QUIT_DISCUSSION_BOARD, jniRes)
+						.sendToTarget();
+			}
 		}
 
 		/**

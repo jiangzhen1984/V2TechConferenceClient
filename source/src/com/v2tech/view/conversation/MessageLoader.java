@@ -50,13 +50,16 @@ public class MessageLoader {
 
 	/**
 	 * 查询前要判断该用户的数据库是否存在，不存在则创建
-	 * 
 	 * @param context
-	 * @param uid2
-	 * @return
+	 * @param groupType
+	 * @param groupID
+	 * @param remoteUserID
+	 * @param type
+	 * <br>&nbsp;&nbsp;&nbsp;&nbsp; MessageLoader.CONTACT_TYPE or MessageLoader.CROWD_TYPE
+	 * @return 
 	 */
 	public static boolean isTableExist(Context context, long groupType,
-			long groupID, long uid2, int type) {
+			long groupID, long remoteUserID, int type) {
 
 		String name;
 		switch (type) {
@@ -64,7 +67,7 @@ public class MessageLoader {
 			name = "Histories_" + groupType + "_" + groupID + "_0";
 			break;
 		case CONTACT_TYPE:
-			name = "Histories_0_0_" + uid2;
+			name = "Histories_0_0_" + remoteUserID;
 			break;
 		default:
 			throw new RuntimeException("create database fialed... type is : "
@@ -142,18 +145,17 @@ public class MessageLoader {
 
 	/**
 	 * 分页加载聊天消息数据
-	 * 
 	 * @param context
-	 * @param uid1
-	 * @param uid2
+	 * @param groupType
+	 * @param fromUserID
+	 * @param remoteUserID
 	 * @param limit
 	 * @param offset
-	 * @param groupType
-	 * @return
+	 * @return 
 	 */
-	public static List<VMessage> loadMessageByPage(Context context, long uid1,
-			long uid2, int limit, int offset, int groupType) {
-		if (!isTableExist(context, 0, 0, uid2, CONTACT_TYPE))
+	public static List<VMessage> loadMessageByPage(Context context, int groupType , long fromUserID,
+			long remoteUserID, int limit, int offset) {
+		if (!isTableExist(context, 0, 0, remoteUserID, CONTACT_TYPE))
 			return null;
 
 		String selection = "(("
@@ -169,9 +171,9 @@ public class MessageLoader {
 				+ ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_GROUP_TYPE
 				+ "= ?";
 
-		String[] args = new String[] { String.valueOf(uid1),
-				String.valueOf(uid2), String.valueOf(uid2),
-				String.valueOf(uid1), String.valueOf(groupType) };
+		String[] args = new String[] { String.valueOf(fromUserID),
+				String.valueOf(remoteUserID), String.valueOf(remoteUserID),
+				String.valueOf(fromUserID), String.valueOf(groupType) };
 
 		String order = ContentDescriptor.HistoriesMessage.Cols.ID
 				+ " desc , "
@@ -1181,7 +1183,7 @@ public class MessageLoader {
 	 * 			For crowd group , Don't delete file record
 	 * @return
 	 */
-	public static void deleteMessageByID(Context context, int groupType,
+	public static boolean deleteMessageByID(Context context, int groupType,
 			long groupID, long userID , boolean isDeleteFile) {
 
 		DataBaseContext mContext = new DataBaseContext(context);
@@ -1193,32 +1195,40 @@ public class MessageLoader {
 			tableName = "Histories_" + groupType + "_" + groupID + "_0";
 		else
 			tableName = "Histories_0_0_" + userID;
+		
+		if (tableNames.contains(tableName)) {
+			tableNames.remove(tableName);
+			sql = "drop table " + tableName;
+		} else {
+			V2Log.e(TAG, "drop table failed...table no exists , name is : "
+					+ tableName);
+			return false;
+		}
+		
+		V2TechDBHelper dbHelper = new V2TechDBHelper(mContext);
+		SQLiteDatabase db = dbHelper.getReadableDatabase();
 		try {
-			if (tableNames.contains(tableName)) {
-				tableNames.remove(tableName);
-				sql = "drop table " + tableName;
-			} else {
-				V2Log.e(TAG, "drop table failed...table no exists , name is : "
-						+ tableName);
-				return;
-			}
-			V2TechDBHelper dbHelper = new V2TechDBHelper(mContext);
-			SQLiteDatabase db = dbHelper.getReadableDatabase();
 			if (db != null && db.isOpen())
 				db.execSQL(sql);
-			else
+			else{
 				V2Log.d(TAG,
 						"May delete HistoriesMessage failed...DataBase state not normal...groupType : "
 								+ groupType + "  groupID : " + groupID
 								+ "  userID : " + userID);
+				return false;
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			V2Log.d(TAG,
 					"May delete HistoriesMessage failed...have exception...groupType : "
 							+ groupType + "  groupID : " + groupID
 							+ "  userID : " + userID);
-			return;
+			return false;
+		} finally {
+			if(db != null)
+				db.close();
 		}
+		
 		// 删除其他信息
 		String audioCondition = ContentDescriptor.HistoriesAudios.Cols.HISTORY_AUDIO_GROUP_TYPE
 				+ "= ? and "
@@ -1267,6 +1277,7 @@ public class MessageLoader {
 						+ groupType + "  groupID : " + groupID + "  userID : "
 						+ userID);
 		}
+		return true;
 	}
 
 	/**
@@ -1998,38 +2009,45 @@ public class MessageLoader {
 		if (imageItems.size() <= 0)
 			return vm;
 
-		String selection = ContentDescriptor.HistoriesGraphic.Cols.HISTORY_GRAPHIC_ID
-				+ "=? ";
-		String sortOrder = ContentDescriptor.HistoriesGraphic.Cols.HISTORY_GRAPHIC_SAVEDATE
-				+ " desc limit 1 offset 0 ";
-		Uri uri = ContentDescriptor.HistoriesGraphic.CONTENT_URI;
-		String[] projection = ContentDescriptor.HistoriesGraphic.Cols.ALL_CLOS;
 		DataBaseContext mContext = new DataBaseContext(context);
 		Cursor mCur = null;
-		for (VMessageImageItem item : imageItems) {
-			String[] selectionArgs = new String[] { item.getUuid() };
-			mCur = mContext.getContentResolver().query(uri, projection,
-					selection, selectionArgs, sortOrder);
-			if (mCur.getCount() == 0) {
-				V2Log.e("the loading VMessageImageItem --" + item.getUuid()
-						+ "-- get null........");
-				return vm;
-			}
-
-			while (mCur.moveToNext()) {
-				int transState = mCur
-						.getInt(mCur
-								.getColumnIndex(ContentDescriptor.HistoriesGraphic.Cols.HISTORY_GRAPHIC_TRANSTATE));
-				String filePath = mCur
-						.getString(mCur
-								.getColumnIndex(ContentDescriptor.HistoriesGraphic.Cols.HISTORY_GRAPHIC_PATH));
-				item.setState(transState);
-				item.setFilePath(filePath);
+		try{
+			String selection = ContentDescriptor.HistoriesGraphic.Cols.HISTORY_GRAPHIC_ID
+					+ "=? ";
+			String sortOrder = ContentDescriptor.HistoriesGraphic.Cols.HISTORY_GRAPHIC_SAVEDATE
+					+ " desc limit 1 offset 0 ";
+			Uri uri = ContentDescriptor.HistoriesGraphic.CONTENT_URI;
+			String[] projection = ContentDescriptor.HistoriesGraphic.Cols.ALL_CLOS;
+			for (VMessageImageItem item : imageItems) {
+				String[] selectionArgs = new String[] { item.getUuid() };
+				mCur = mContext.getContentResolver().query(uri, projection,
+						selection, selectionArgs, sortOrder);
+				if (mCur == null || mCur.getCount() <= 0) {
+					V2Log.e("the loading VMessageImageItem --" + item.getUuid()
+							+ "-- get null........");
+					return vm;
+				}
+	
+				while (mCur.moveToNext()) {
+					int transState = mCur
+							.getInt(mCur
+									.getColumnIndex(ContentDescriptor.HistoriesGraphic.Cols.HISTORY_GRAPHIC_TRANSTATE));
+					String filePath = mCur
+							.getString(mCur
+									.getColumnIndex(ContentDescriptor.HistoriesGraphic.Cols.HISTORY_GRAPHIC_PATH));
+					item.setState(transState);
+					item.setFilePath(filePath);
+				}
 			}
 		}
-
-		if (mCur != null)
-			mCur.close();
+		catch(Exception e){
+			e.printStackTrace();
+			CrashHandler.getInstance().saveCrashInfo2File(e);
+		}
+		finally{
+			if (mCur != null)
+				mCur.close();
+		}
 		return vm;
 	}
 
@@ -2046,42 +2064,49 @@ public class MessageLoader {
 		if (audioItems.size() <= 0)
 			return vm;
 
-		String selection = ContentDescriptor.HistoriesAudios.Cols.HISTORY_AUDIO_ID
-				+ "=? ";
-		String sortOrder = ContentDescriptor.HistoriesAudios.Cols.HISTORY_AUDIO_SAVEDATE
-				+ " desc limit 1 offset 0 ";
-		Uri uri = ContentDescriptor.HistoriesAudios.CONTENT_URI;
-		String[] projection = ContentDescriptor.HistoriesAudios.Cols.ALL_CLOS;
 		DataBaseContext mContext = new DataBaseContext(context);
 		Cursor mCur = null;
-		for (VMessageAudioItem item : audioItems) {
-			String[] selectionArgs = new String[] { item.getUuid() };
-			mCur = mContext.getContentResolver().query(uri, projection,
-					selection, selectionArgs, sortOrder);
-			if (mCur.getCount() == 0) {
-				V2Log.e("the loading VMessageAudioItem --" + item.getUuid()
-						+ "-- get null........");
-				return vm;
-			}
-
-			while (mCur.moveToNext()) {
-				int readState = mCur
-						.getInt(mCur
-								.getColumnIndex(ContentDescriptor.HistoriesAudios.Cols.HISTORY_AUDIO_READ_STATE));
-				String filePath = mCur
-						.getString(mCur
-								.getColumnIndex(ContentDescriptor.HistoriesAudios.Cols.HISTORY_AUDIO_PATH));
-                int transState = mCur
-						.getInt(mCur
-								.getColumnIndex(ContentDescriptor.HistoriesAudios.Cols.HISTORY_AUDIO_SEND_STATE));
-                item.setReadState(readState);
-                item.setState(transState);
-				item.setAudioFilePath(filePath);
+		try{
+			String selection = ContentDescriptor.HistoriesAudios.Cols.HISTORY_AUDIO_ID
+					+ "=? ";
+			String sortOrder = ContentDescriptor.HistoriesAudios.Cols.HISTORY_AUDIO_SAVEDATE
+					+ " desc limit 1 offset 0 ";
+			Uri uri = ContentDescriptor.HistoriesAudios.CONTENT_URI;
+			String[] projection = ContentDescriptor.HistoriesAudios.Cols.ALL_CLOS;
+			for (VMessageAudioItem item : audioItems) {
+				String[] selectionArgs = new String[] { item.getUuid() };
+				mCur = mContext.getContentResolver().query(uri, projection,
+						selection, selectionArgs, sortOrder);
+				if (mCur == null || mCur.getCount() <= 0) {
+					V2Log.e("the loading VMessageAudioItem --" + item.getUuid()
+							+ "-- get null........");
+					return vm;
+				}
+	
+				while (mCur.moveToNext()) {
+					int readState = mCur
+							.getInt(mCur
+									.getColumnIndex(ContentDescriptor.HistoriesAudios.Cols.HISTORY_AUDIO_READ_STATE));
+					String filePath = mCur
+							.getString(mCur
+									.getColumnIndex(ContentDescriptor.HistoriesAudios.Cols.HISTORY_AUDIO_PATH));
+	                int transState = mCur
+							.getInt(mCur
+									.getColumnIndex(ContentDescriptor.HistoriesAudios.Cols.HISTORY_AUDIO_SEND_STATE));
+	                item.setReadState(readState);
+	                item.setState(transState);
+					item.setAudioFilePath(filePath);
+				}
 			}
 		}
-
-		if (mCur != null)
-			mCur.close();
+		catch(Exception e){
+			e.printStackTrace();
+			CrashHandler.getInstance().saveCrashInfo2File(e);
+		}
+		finally{
+			if (mCur != null)
+				mCur.close();
+		}
 		return vm;
 	}
 
@@ -2098,38 +2123,45 @@ public class MessageLoader {
 		if (fileItems.size() <= 0)
 			return false;
 
-		String selection = ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_ID
-				+ "=? ";
-		String sortOrder = ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_SAVEDATE
-				+ " desc limit 1 offset 0 ";
-		Uri uri = ContentDescriptor.HistoriesFiles.CONTENT_URI;
-		String[] projection = ContentDescriptor.HistoriesFiles.Cols.ALL_CLOS;
 		DataBaseContext mContext = new DataBaseContext(context);
 		Cursor mCur = null;
-		for (VMessageFileItem item : fileItems) {
-			String[] selectionArgs = new String[] { item.getUuid() };
-			mCur = mContext.getContentResolver().query(uri, projection,
-					selection, selectionArgs, sortOrder);
-			if (mCur.getCount() == 0) {
-				V2Log.e("the loading VMessageFileItem --" + item.getUuid()
-						+ "-- get null........");
-				return false;
-			}
-
-			while (mCur.moveToNext()) {
-				int fileTransState = mCur
-						.getInt(mCur
-								.getColumnIndex(ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_SEND_STATE));
-				int fileSize = mCur
-						.getInt(mCur
-								.getColumnIndex(ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_SIZE));
-				item.setState(fileTransState);
-				item.setFileSize(fileSize);
+		try{
+			String selection = ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_ID
+					+ "=? ";
+			String sortOrder = ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_SAVEDATE
+					+ " desc limit 1 offset 0 ";
+			Uri uri = ContentDescriptor.HistoriesFiles.CONTENT_URI;
+			String[] projection = ContentDescriptor.HistoriesFiles.Cols.ALL_CLOS;
+			for (VMessageFileItem item : fileItems) {
+				String[] selectionArgs = new String[] { item.getUuid() };
+				mCur = mContext.getContentResolver().query(uri, projection,
+						selection, selectionArgs, sortOrder);
+				if (mCur == null || mCur.getCount() <= 0) {
+					V2Log.e("the loading VMessageFileItem --" + item.getUuid()
+							+ "-- get null........");
+					return false;
+				}
+	
+				while (mCur.moveToNext()) {
+					int fileTransState = mCur
+							.getInt(mCur
+									.getColumnIndex(ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_SEND_STATE));
+					int fileSize = mCur
+							.getInt(mCur
+									.getColumnIndex(ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_SIZE));
+					item.setState(fileTransState);
+					item.setFileSize(fileSize);
+				}
 			}
 		}
-
-		if (mCur != null)
-			mCur.close();
+		catch(Exception e){
+			e.printStackTrace();
+			CrashHandler.getInstance().saveCrashInfo2File(e);
+		}
+		finally{
+			if (mCur != null)
+				mCur.close();
+		}
 		return true;
 	}
 
@@ -2141,30 +2173,30 @@ public class MessageLoader {
 	 *            表名
 	 * @return
 	 */
-	private static synchronized boolean isExistTable(Context context,
-			String tabName) {
-		DataBaseContext mContext = new DataBaseContext(context);
-		SQLiteDatabase base;
-		base = mContext.openOrCreateDatabase(V2TechDBHelper.DB_NAME, 0, null);
-		try {
-			String sql = "select count(*) as c from sqlite_master where type ='table' "
-					+ "and name ='" + tabName.trim() + "' ";
-			Cursor cursor = base.rawQuery(sql, null);
-			if (cursor != null && cursor.getCount() > 0 && cursor.moveToNext()) {
-				int count = cursor.getInt(0);
-				if (count > 0) {
-					return true;
-				}
-			}
-		} catch (Exception e) {
-			V2Log.e("detection table " + tabName + " is failed..."); // 检测失败
-			e.getStackTrace();
-		} finally {
-			if (base != null) {
-				base.close();
-			}
-		}
-		return false;
-	}
+//	private static synchronized boolean isExistTable(Context context,
+//			String tabName) {
+//		DataBaseContext mContext = new DataBaseContext(context);
+//		SQLiteDatabase base;
+//		base = mContext.openOrCreateDatabase(V2TechDBHelper.DB_NAME, 0, null);
+//		try {
+//			String sql = "select count(*) as c from sqlite_master where type ='table' "
+//					+ "and name ='" + tabName.trim() + "' ";
+//			Cursor cursor = base.rawQuery(sql, null);
+//			if (cursor != null && cursor.getCount() > 0 && cursor.moveToNext()) {
+//				int count = cursor.getInt(0);
+//				if (count > 0) {
+//					return true;
+//				}
+//			}
+//		} catch (Exception e) {
+//			V2Log.e("detection table " + tabName + " is failed..."); // 检测失败
+//			e.getStackTrace();
+//		} finally {
+//			if (base != null) {
+//				base.close();
+//			}
+//		}
+//		return false;
+//	}
 
 }

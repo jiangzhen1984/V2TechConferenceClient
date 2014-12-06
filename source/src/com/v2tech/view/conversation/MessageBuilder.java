@@ -1050,27 +1050,33 @@ public class MessageBuilder {
 	 */
 	public static boolean queryWaitingQualMessageById(long remoteUserID) {
 		DataBaseContext mContext = new DataBaseContext(context);
-		String selection = ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_REMOTE_USER_ID
-				+ " = ? and "
-				+ ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_RECEIVER_STATE
-				+ " = ?";
-		String[] selectionArgs = new String[] { String.valueOf(remoteUserID) , String.valueOf(ReceiveQualificationType.LOCAL_INVITE_TYPE.intValue())};
-		String sortOrder = ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_SAVEDATE
-				+ " desc";
-		Cursor cursor = mContext.getContentResolver().query(
-				ContentDescriptor.HistoriesCrowd.CONTENT_URI,
-				ContentDescriptor.HistoriesCrowd.Cols.ALL_CLOS, selection,
-				selectionArgs, sortOrder);
-
-		if(cursor == null)
-			return false;
+		Cursor cursor = null;
+		try{
+			String selection = ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_REMOTE_USER_ID
+					+ " = ? and "
+					+ ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_RECEIVER_STATE
+					+ " = ?";
+			String[] selectionArgs = new String[] { String.valueOf(remoteUserID) , String.valueOf(ReceiveQualificationType.LOCAL_INVITE_TYPE.intValue())};
+			cursor = mContext.getContentResolver().query(
+					ContentDescriptor.HistoriesCrowd.CONTENT_URI,
+					ContentDescriptor.HistoriesCrowd.Cols.ALL_CLOS, selection,
+					selectionArgs, null);
+	
+			if(cursor == null || cursor.getCount() <= 0)
+				return false;
 		
-		if (cursor.getCount() <= 0){
-			cursor.close();
+			if(cursor.moveToFirst())
+				return true;
 			return false;
 		}
-		cursor.close();
-		return true;
+		catch(Exception e){
+			e.printStackTrace();
+			return false;
+		}
+		finally{
+			if(cursor != null)
+				cursor.close();
+		}
 	}
 
     /**

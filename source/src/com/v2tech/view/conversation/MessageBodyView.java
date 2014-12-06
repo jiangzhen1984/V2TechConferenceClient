@@ -116,37 +116,6 @@ public class MessageBodyView extends LinearLayout {
 	private RotateAnimation anima;
 	private MessageBodyType bodyType;
 	
-	public interface ClickListener {
-		public void onMessageClicked(VMessage v);
-		
-		public void onCrowdFileMessageClicked(CrowdFileActivityType openType);
-
-		public void reSendMessageClicked(VMessage v);
-
-		public void requestDelMessage(VMessage v);
-
-		public void requestPlayAudio(View v, VMessage vm, VMessageAudioItem vai);
-
-		public void requestStopAudio(View v, VMessage vm, VMessageAudioItem vai);
-
-		public void requestDownloadFile(View v, VMessage vm,
-				VMessageFileItem vfi);
-
-		public void requestPauseDownloadFile(View v, VMessage vm,
-				VMessageFileItem vfi);
-
-		public void requestResumeDownloadFile(View v, VMessage vm,
-				VMessageFileItem vfi);
-
-		public void requestPauseTransFile(View v, VMessage vm,
-				VMessageFileItem vfi);
-
-		public void requestResumeTransFile(View v, VMessage vm,
-				VMessageFileItem vfi);
-
-		public void requestStopOtherAudio(VMessage vm);
-	}
-
 	public MessageBodyView(Context context, VMessage m, boolean isShowTime , MessageBodyType bodyType) {
 		super(context);
 		this.mMsg = m;
@@ -295,6 +264,7 @@ public class MessageBodyView extends LinearLayout {
 
 	private void initListener() {
 		mContentContainer.setOnLongClickListener(messageLongClickListener);
+		mContentContainer.setOnTouchListener(touchListener);
 	}
 
 	private void initPopupWindow() {
@@ -304,6 +274,7 @@ public class MessageBodyView extends LinearLayout {
 				R.layout.message_selected_pop_up_window, null);
 		pw = new PopupWindow(popWindow, LayoutParams.WRAP_CONTENT,
 				LayoutParams.WRAP_CONTENT, true);
+		pw.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
 		pw.setFocusable(true);
 		pw.setTouchable(true);
 		pw.setOutsideTouchable(true);
@@ -343,12 +314,6 @@ public class MessageBodyView extends LinearLayout {
 	}
 
 	@Override
-	public boolean onTouchEvent(MotionEvent event) {
-		V2Log.d(TAG, "onTouchEvent invoking");
-		return super.onTouchEvent(event);
-	}
-
-	@Override
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
 		super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 
@@ -381,6 +346,7 @@ public class MessageBodyView extends LinearLayout {
 		et.setOnClickListener(messageClickListener);
 		et.setBackgroundColor(Color.TRANSPARENT);
 		et.setOnLongClickListener(messageLongClickListener);
+		et.setOnTouchListener(touchListener);
 		et.setSelected(false);
 		LinearLayout.LayoutParams ll = new LinearLayout.LayoutParams(
 				LinearLayout.LayoutParams.MATCH_PARENT,
@@ -622,7 +588,6 @@ public class MessageBodyView extends LinearLayout {
 					return;
 				}
 
-				pw.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
 				if (messageType == MESSAGE_TYPE_TEXT)
 					pwCopyTV.setVisibility(View.VISIBLE);
 
@@ -655,31 +620,17 @@ public class MessageBodyView extends LinearLayout {
 					top = rect.top;
 				}
 				
-				int offsetX = left + (viewWidth / 2) - (popupWindowWidth / 2);
-				int offsetY = top - popupWindowHeight;
+//				int offsetX = left + (viewWidth / 2) - (popupWindowWidth / 2);
+//				int offsetY = top - popupWindowHeight;
 				
+				int offsetX = rawX - (popupWindowWidth / 2);
+				int offsetY = rawY - popupWindowHeight;
+				
+				if(offsetY < 0)
+					offsetY = Math.abs(offsetY);
 				pw.showAtLocation((View) anchor.getParent(),
                         Gravity.NO_GRAVITY, offsetX, offsetY);
-				// if (location[1] <= 0) {
-//				Rect r = new Rect();
-//				anchor.getDrawingRect(r);
-//				Rect r1 = new Rect();
-//				anchor.getGlobalVisibleRect(r1);
-//				int offsetXLocation = r1.left + offsetX;
-//				int offsetYLocation = r1.top - (offsetY / 2);
-
-//                int height = anchor.getHeight();
-//                if(height < offsetYLocation){
-//                    pw.showAsDropDown((View) anchor.getParent(), offsetX,
-//                            offsetY);
-//                }
-//                else
-//                pw.showAtLocation((View) anchor.getParent(),
-//                        Gravity.NO_GRAVITY, offsetX, offsetY);
-				// } else {
-				// pw.showAsDropDown((View) anchor.getParent(), offsetX,
-				// offsetY);
-				// }
+				
 				updateSelectedBg(false);
 				popupWindowListener = null;
 			}
@@ -955,10 +906,25 @@ public class MessageBodyView extends LinearLayout {
 		@Override
 		public boolean onLongClick(View anchor) {
 			CommonCallBack.getInstance().executeUpdatePopupWindowState(MessageBodyView.this);
-			showPopupWindow(anchor);
+			showPopupWindow(mContentContainer);
 			return false;
 		}
 
+	};
+	
+	private int rawX;
+	private int rawY;
+	private OnTouchListener touchListener = new OnTouchListener() {
+		
+		@Override
+		public boolean onTouch(View v, MotionEvent event) {
+			if(event.getAction() == MotionEvent.ACTION_DOWN){
+				V2Log.e(TAG, "x :" + event.getRawX() + " y : " + event.getRawY());
+				rawX = (int) event.getRawX();
+				rawY = (int) event.getRawY();
+			}
+			return false;
+		}
 	};
 
 	public VMessage getMsg() {
@@ -1145,6 +1111,36 @@ public class MessageBodyView extends LinearLayout {
 
 	}
 
+	public interface ClickListener {
+		public void onMessageClicked(VMessage v);
+		
+		public void onCrowdFileMessageClicked(CrowdFileActivityType openType);
+
+		public void reSendMessageClicked(VMessage v);
+
+		public void requestDelMessage(VMessage v);
+
+		public void requestPlayAudio(View v, VMessage vm, VMessageAudioItem vai);
+
+		public void requestStopAudio(View v, VMessage vm, VMessageAudioItem vai);
+
+		public void requestDownloadFile(View v, VMessage vm,
+				VMessageFileItem vfi);
+
+		public void requestPauseDownloadFile(View v, VMessage vm,
+				VMessageFileItem vfi);
+
+		public void requestResumeDownloadFile(View v, VMessage vm,
+				VMessageFileItem vfi);
+
+		public void requestPauseTransFile(View v, VMessage vm,
+				VMessageFileItem vfi);
+
+		public void requestResumeTransFile(View v, VMessage vm,
+				VMessageFileItem vfi);
+
+		public void requestStopOtherAudio(VMessage vm);
+	}
 }
 
 enum MessageBodyType{
