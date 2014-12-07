@@ -62,4 +62,15 @@ public interface ConfRequestCallback {
 	 */
 	public void OnConfNotify(V2Conference v2conf,  V2User user);
 	
+	
+	
+	
+	/**
+	 * Notify user request host event
+	 * @param user request user
+	 * @param permission 
+	 */
+	public void OnConfHostRequest(V2User user, int permission);
+	
+	
 }

@@ -134,4 +134,7 @@
 	
 	 <!-- common_conversation_layout -->
     <dimen name="common_conversation_layout_margin_top">15dp</dimen>
+    
+     <dimen name="conference_activity_request_host_list_width">800dp</dimen>
+     <dimen name="conference_activity_request_host_list_height">300dp</dimen>
 </resources>

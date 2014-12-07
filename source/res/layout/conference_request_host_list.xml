@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="@dimen/conference_activity_request_host_list_width"
+    android:layout_height="@dimen/conference_activity_request_host_list_height" >
+
+    <LinearLayout
+        android:id="@+id/common_pop_window_out_container"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:background="@drawable/rounded_corners_of_title_bar_popup_window_outer"
+        android:orientation="vertical" >
+
+        <LinearLayout
+            android:id="@+id/common_pop_window_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="1dp"
+            android:background="@drawable/rounded_corners_of_title_bar_popup_window_inner"
+            android:orientation="vertical" >
+
+            <ListView
+                android:id="@+id/conference_request_host_list_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" >
+            </ListView>
+        </LinearLayout>
+    </LinearLayout>
+
+</RelativeLayout>

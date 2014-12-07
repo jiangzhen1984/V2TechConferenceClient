@@ -43,5 +43,10 @@
    <string name="confs_toast_get_control_permission">主讲权限已经获得</string>
    <string name="confs_toast_cancel_control_permission">主讲权限已经被取消</string>
    <string name="confs_toast_release_control_permission">主讲权限已释放</string>
+   <string name="conference_request_host_list_item_content">申请主讲</string>
+   <string name="conference_request_host_list_item_button_name_accept">同意</string>
+   <string name="conference_request_host_list_item_button_name_reject">拒绝</string>
+   
+   <string name="conference_chair_man_control_window_item_message">会议消息</string>
    
 </resources>

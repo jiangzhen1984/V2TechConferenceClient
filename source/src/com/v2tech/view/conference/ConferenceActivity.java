@@ -80,6 +80,7 @@ import com.v2tech.service.ConferenceService;
 import com.v2tech.service.DocumentService;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.service.MessageListener;
+import com.v2tech.service.jni.PermissionRequestIndication;
 import com.v2tech.service.jni.PermissionUpdateIndication;
 import com.v2tech.util.DensityUtils;
 import com.v2tech.view.JNIService;
@@ -117,6 +118,7 @@ public class ConferenceActivity extends Activity {
 	private static final int REQUEST_OPEN_OR_CLOSE_DEVICE = 6;
 	private static final int NOTIFICATION_KICKED = 7;
 	private static final int NOTIFY_USER_PERMISSION_UPDATED = 11;
+	private static final int NOTIFY_HOST_PERMISSION_REQUESTED = 12;
 
 	private static final int ATTENDEE_DEVICE_LISTENER = 20;
 	private static final int ATTENDEE_LISTENER = 21;
@@ -162,6 +164,8 @@ public class ConferenceActivity extends Activity {
 	private ImageView mCameraIV;
 	private PopupWindow mSettingWindow;
 	private PopupWindow mChairControlWindow;
+	private VideoShowHostRequest mHostRequestWindow;
+
 	private Dialog mQuitDialog;
 	private VideoInvitionAttendeeLayout mInvitionContainer;
 	private VideoMsgChattingLayout mMessageContainer;
@@ -199,6 +203,8 @@ public class ConferenceActivity extends Activity {
 	private List<VMessage> mPendingMessageList;
 
 	private List<PermissionUpdateIndication> mPendingPermissionUpdateList;
+	
+	private Set<User> mHostRequestUsers;
 
 	private Toast mToast;
 
@@ -223,7 +229,6 @@ public class ConferenceActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_in_metting);
-
 		if (blueadapter != null
 				&& BluetoothProfile.STATE_CONNECTED == blueadapter
 						.getProfileConnectionState(BluetoothProfile.HEADSET)) {
@@ -432,6 +437,8 @@ public class ConferenceActivity extends Activity {
 		mPendingMessageList = new ArrayList<VMessage>();
 
 		mPendingPermissionUpdateList = new ArrayList<PermissionUpdateIndication>();
+		
+		mHostRequestUsers = new HashSet<User>();
 		// Set default speaking state if current user is owner, then should
 		// apply speaking default;
 		isSpeaking = (conf.getCreator() == GlobalHolder.getInstance()
@@ -477,6 +484,7 @@ public class ConferenceActivity extends Activity {
 	private void updateControlState(boolean flag) {
 		isInControl = flag;
 		if (isInControl) {
+			mControlState = PermissionState.GRANTED;
 			Toast.makeText(mContext,
 					R.string.confs_toast_get_control_permission,
 					Toast.LENGTH_SHORT).show();
@@ -1064,6 +1072,25 @@ public class ConferenceActivity extends Activity {
 							}
 						});
 
+				view.findViewById(R.id.conference_message).setOnClickListener(
+						new OnClickListener() {
+
+							@Override
+							public void onClick(View v) {
+								mChairControlWindow.dismiss();
+								if (mHostRequestWindow == null) {
+									mHostRequestWindow = new VideoShowHostRequest(
+											mContext, mHostRequestUsers, cb);
+								} else {
+									mHostRequestWindow.updateList(mHostRequestUsers);
+								}
+
+								mHostRequestWindow.showAtLocation(
+										mRootContainer, Gravity.CENTER, 0, 0);
+							}
+
+						});
+
 				// set
 				mChairControlWindow = new PopupWindow(view,
 						LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
@@ -1082,7 +1109,7 @@ public class ConferenceActivity extends Activity {
 			pos[1] += v.getMeasuredHeight();
 
 			mChairControlWindow
-					.setAnimationStyle(R.style.InMeetingCameraSettingAnim);
+					.setAnimationStyle(R.style.TitleBarPopupWindowAnim);
 			mChairControlWindow.showAtLocation(v, Gravity.NO_GRAVITY, pos[0],
 					pos[1]);
 
@@ -1573,6 +1600,9 @@ public class ConferenceActivity extends Activity {
 			cb.removeAttendeeListener(this.mVideoHandler, ATTENDEE_LISTENER,
 					null);
 
+			cb.unRegisterPermissionUpdateListener(this.mVideoHandler,
+					NOTIFY_HOST_PERMISSION_REQUESTED, null);
+
 			cb.unRegisterVideoMixerListener(mVideoHandler,
 					VIDEO_MIX_NOTIFICATION, null);
 
@@ -1791,8 +1821,10 @@ public class ConferenceActivity extends Activity {
 
 	private void doApplyOrReleaseControl(boolean flag) {
 		if (!flag) {
+			mControlState = PermissionState.NORMAL;
 			cb.applyForReleasePermission(ConferencePermission.CONTROL, null);
 		} else {
+			mControlState = PermissionState.APPLYING;
 			cb.applyForControlPermission(ConferencePermission.CONTROL, null);
 		}
 	}
@@ -2170,6 +2202,9 @@ public class ConferenceActivity extends Activity {
 
 			cb.registerVideoMixerListener(mVideoHandler,
 					VIDEO_MIX_NOTIFICATION, null);
+
+			cb.registerHostRequestListener(mVideoHandler,
+					NOTIFY_HOST_PERMISSION_REQUESTED, null);
 
 			cb.registerAttendeeDeviceListener(mVideoHandler,
 					ATTENDEE_DEVICE_LISTENER, null);
@@ -2656,10 +2691,25 @@ public class ConferenceActivity extends Activity {
 										.getType());
 					} else if (ConferencePermission.CONTROL.intValue() == ind
 							.getType()) {
-						updateControlState(PermissionState.fromInt(ind
-								.getState()) == PermissionState.GRANTED);
+						if (ind.getUid() == GlobalHolder.getInstance().getCurrentUserId()) {
+							updateControlState(PermissionState.fromInt(ind
+									.getState()) == PermissionState.GRANTED);
+						}
 					}
 				}
+				break;
+			case NOTIFY_HOST_PERMISSION_REQUESTED: {
+				PermissionRequestIndication rri =(PermissionRequestIndication)(((AsyncResult) msg.obj)
+						.getResult());
+				if (rri.getUid() != GlobalHolder.getInstance().getCurrentUserId()) {
+					mHostRequestUsers.add(GlobalHolder.getInstance().getUser(rri.getUid()));
+				}
+				if (mHostRequestWindow != null) {
+					mHostRequestWindow.updateList(mHostRequestUsers);
+				}
+				//FIXME show notification icon
+			}
+				
 				break;
 			case NEW_DOC_NOTIFICATION:
 			case DOC_PAGE_NOTIFICATION:

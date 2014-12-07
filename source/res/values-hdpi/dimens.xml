@@ -113,5 +113,6 @@
 	 
     <!-- conference activity -->
     <dimen name="conference_activity_title_bar_button_padding">5dp</dimen>
+    <dimen name="conference_activity_request_host_list_height">200dp</dimen>
     
 </resources>

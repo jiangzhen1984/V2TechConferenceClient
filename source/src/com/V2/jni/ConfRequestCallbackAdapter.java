@@ -36,4 +36,11 @@ public abstract class ConfRequestCallbackAdapter implements ConfRequestCallback 
 
 	}
 
+	@Override
+	public void OnConfHostRequest(V2User user, int permission) {
+		
+	}
+
+	
+	
 }

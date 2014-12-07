@@ -24,7 +24,6 @@ public class V2User implements Parcelable {
 	public String mEmail;
 	public String mFax;
 	// homepage='http://wenzongliang.com'
-	public long mUserId;
 	public String mJob;
 	public String mMobile;
 	// 登录后显示的昵称

@@ -49,6 +49,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:gravity="center"
+                    android:textColor="@color/common_item_text_color_black"
                     android:text="@string/confs_title_button_request_host_name" />
             </LinearLayout>
 
@@ -77,6 +78,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:gravity="center"
+                    android:textColor="@color/common_item_text_color_black"
                     android:text="@string/confs_title_button_logout_name" />
             </LinearLayout>
         </LinearLayout>
