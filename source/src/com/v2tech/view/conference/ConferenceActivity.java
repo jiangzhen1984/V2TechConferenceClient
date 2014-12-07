@@ -137,7 +137,10 @@ public class ConferenceActivity extends Activity {
 	private static final int TAG_CLOSE_DEVICE = 0;
 	private static final int TAG_OPEN_DEVICE = 1;
 
+	private PermissionState mControlState = PermissionState.UNKNOWN;
+
 	private boolean isSpeaking;
+	private boolean isInControl;
 	private boolean isMuteCamera;
 
 	private Handler mVideoHandler = new VideoHandler();
@@ -154,7 +157,7 @@ public class ConferenceActivity extends Activity {
 	private TextView mGroupNameTV;
 	private ImageView mSettingIV;
 	private ImageView mChairmanControl;
-	private ImageView mQuitIV;
+	private View mFeatureIV;
 	private ImageView mSpeakerIV;
 	private ImageView mCameraIV;
 	private PopupWindow mSettingWindow;
@@ -251,16 +254,13 @@ public class ConferenceActivity extends Activity {
 		mSubWindowLayout.setVisibility(View.GONE);
 		mContentLayoutMain.addView(this.mSubWindowLayout);
 
-		// setting button
-		this.mSettingIV = (ImageView) findViewById(R.id.in_meeting_setting_iv);
-		this.mSettingIV.setOnClickListener(mShowSettingListener);
-
 		this.mChairmanControl = (ImageView) findViewById(R.id.iv_chairman_control);
 		this.mChairmanControl.setOnClickListener(onClickMChairmanControl);
 
 		// request exit button
-		this.mQuitIV = (ImageView) findViewById(R.id.in_meeting_log_out_iv);
-		this.mQuitIV.setOnClickListener(mShowQuitWindowListener);
+		this.mFeatureIV = findViewById(R.id.in_meeting_feature);
+		this.mFeatureIV.setOnClickListener(mFeatureShowPopup);
+
 		// request speak or mute button
 		this.mSpeakerIV = (ImageView) findViewById(R.id.speaker_iv);
 		this.mSpeakerIV.setOnClickListener(mApplySpeakerListener);
@@ -466,6 +466,24 @@ public class ConferenceActivity extends Activity {
 			mSpeakerIV.setImageResource(R.drawable.mute_button);
 		} else {
 			mSpeakerIV.setImageResource(R.drawable.speaking_button);
+		}
+	}
+
+	/**
+	 * Update control permissionstate
+	 * 
+	 * @param flag
+	 */
+	private void updateControlState(boolean flag) {
+		isInControl = flag;
+		if (isInControl) {
+			Toast.makeText(mContext,
+					R.string.confs_toast_get_control_permission,
+					Toast.LENGTH_SHORT).show();
+		} else {
+			Toast.makeText(mContext,
+					R.string.confs_toast_release_control_permission,
+					Toast.LENGTH_SHORT).show();
 		}
 	}
 
@@ -880,6 +898,127 @@ public class ConferenceActivity extends Activity {
 		public void onClick(View view) {
 			showQuitDialog(mContext.getText(R.string.in_meeting_quit_text)
 					.toString());
+		}
+	};
+
+	private OnClickListener mRequestHostListener = new OnClickListener() {
+		@Override
+		public void onClick(View view) {
+			((ImageView) view
+					.findViewById(R.id.conference_activity_request_host_iv))
+					.setImageResource(R.drawable.logout_button);
+
+			((TextView) view
+					.findViewById(R.id.conference_activity_request_host_tv))
+					.setText(R.string.confs_title_button_request_host_name);
+
+			doApplyOrReleaseControl(!isInControl);
+		}
+	};
+
+	private PopupWindow moreWindow;
+	private TextView mRequestButtonName;
+	private ImageView mRequestButtonImage;
+	private OnClickListener mFeatureShowPopup = new OnClickListener() {
+		@Override
+		public void onClick(View anchor) {
+			DisplayMetrics dm = new DisplayMetrics();
+			((Activity) mContext).getWindowManager().getDefaultDisplay()
+					.getMetrics(dm);
+			if (moreWindow == null) {
+				LayoutInflater inflater = (LayoutInflater) mContext
+						.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+				View layout = inflater.inflate(
+						R.layout.conference_pop_up_window, null);
+				layout.findViewById(R.id.conference_activity_logout_button)
+						.setOnClickListener(new OnClickListener() {
+
+							@Override
+							public void onClick(View v) {
+								moreWindow.dismiss();
+								mShowQuitWindowListener.onClick(v);
+							}
+
+						});
+
+				layout.findViewById(
+						R.id.conference_activity_request_host_button)
+						.setOnClickListener(new OnClickListener() {
+
+							@Override
+							public void onClick(View v) {
+								moreWindow.dismiss();
+								mRequestHostListener.onClick(v);
+							}
+
+						});
+
+				mRequestButtonName = (TextView) layout
+						.findViewById(R.id.conference_activity_request_host_tv);
+				mRequestButtonImage = (ImageView) layout
+						.findViewById(R.id.conference_activity_request_host_iv);
+
+				LinearLayout itemContainer = (LinearLayout) layout
+						.findViewById(R.id.common_pop_window_container);
+
+				itemContainer.measure(View.MeasureSpec.UNSPECIFIED,
+						View.MeasureSpec.UNSPECIFIED);
+				View arrow = layout.findViewById(R.id.common_pop_up_arrow_up);
+				arrow.measure(View.MeasureSpec.UNSPECIFIED,
+						View.MeasureSpec.UNSPECIFIED);
+
+				int height = itemContainer.getMeasuredHeight()
+						+ arrow.getMeasuredHeight();
+
+				moreWindow = new PopupWindow(layout,
+						ViewGroup.LayoutParams.WRAP_CONTENT, height, true);
+				moreWindow.setOnDismissListener(new OnDismissListener() {
+					@Override
+					public void onDismiss() {
+						moreWindow.dismiss();
+					}
+
+				});
+				moreWindow.setBackgroundDrawable(new ColorDrawable(
+						Color.TRANSPARENT));
+				moreWindow.setFocusable(true);
+				moreWindow.setTouchable(true);
+				moreWindow.setOutsideTouchable(true);
+
+			}
+
+			// FIXME update icon
+			if (mControlState == PermissionState.APPLYING) {
+				// mRequestButtonName = (TextView)layout.findViewById(
+				// R.id.conference_activity_request_host_tv);
+				// mRequestButtonImage = (ImageView)layout.findViewById(
+				// R.id.conference_activity_request_host_iv);
+			} else if (mControlState == PermissionState.GRANTED) {
+				// mRequestButtonName = (TextView)layout.findViewById(
+				// R.id.conference_activity_request_host_tv);
+				// mRequestButtonImage = (ImageView)layout.findViewById(
+				// R.id.conference_activity_request_host_iv);
+			}
+
+			int[] pos = new int[2];
+			anchor.getLocationInWindow(pos);
+			pos[1] += anchor.getMeasuredHeight() - anchor.getPaddingBottom();
+			// calculate arrow offset
+			View arrow = moreWindow.getContentView().findViewById(
+					R.id.common_pop_up_arrow_up);
+			arrow.bringToFront();
+
+			RelativeLayout.LayoutParams arrowRL = (RelativeLayout.LayoutParams) arrow
+					.getLayoutParams();
+			arrowRL.rightMargin = dm.widthPixels - pos[0]
+					- (anchor.getMeasuredWidth() / 2)
+					- arrow.getMeasuredWidth();
+			arrow.setLayoutParams(arrowRL);
+
+			moreWindow.setAnimationStyle(R.style.TitleBarPopupWindowAnim);
+			int marginRight = DensityUtils.dip2px(mContext, 5);
+			moreWindow.showAtLocation(anchor, Gravity.RIGHT | Gravity.TOP,
+					marginRight, pos[1]);
 		}
 	};
 
@@ -1306,7 +1445,7 @@ public class ConferenceActivity extends Activity {
 			imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
 		}
 	}
-	
+
 	private void openLocalCamera() {
 		Message.obtain(
 				mVideoHandler,
@@ -1647,6 +1786,14 @@ public class ConferenceActivity extends Activity {
 			cb.applyForReleasePermission(ConferencePermission.SPEAKING, null);
 		} else {
 			cb.applyForControlPermission(ConferencePermission.SPEAKING, null);
+		}
+	}
+
+	private void doApplyOrReleaseControl(boolean flag) {
+		if (!flag) {
+			cb.applyForReleasePermission(ConferencePermission.CONTROL, null);
+		} else {
+			cb.applyForControlPermission(ConferencePermission.CONTROL, null);
 		}
 	}
 
@@ -2501,9 +2648,17 @@ public class ConferenceActivity extends Activity {
 				if (ind.getUid() == GlobalHolder.getInstance()
 						.getCurrentUserId()) {
 
-					updateSpeakerState(PermissionState.fromInt(ind.getState()) == PermissionState.GRANTED
-							&& ConferencePermission.SPEAKING.intValue() == ind
-									.getType());
+					if (ConferencePermission.SPEAKING.intValue() == ind
+							.getType()) {
+						updateSpeakerState(PermissionState.fromInt(ind
+								.getState()) == PermissionState.GRANTED
+								&& ConferencePermission.SPEAKING.intValue() == ind
+										.getType());
+					} else if (ConferencePermission.CONTROL.intValue() == ind
+							.getType()) {
+						updateControlState(PermissionState.fromInt(ind
+								.getState()) == PermissionState.GRANTED);
+					}
 				}
 				break;
 			case NEW_DOC_NOTIFICATION:

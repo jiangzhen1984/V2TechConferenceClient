@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content" >
+
+    <ImageView
+        android:id="@+id/common_pop_up_arrow_up"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignRight="@+id/common_pop_window_out_container"
+        android:layout_marginBottom="@dimen/title_bar_triangle_margin_buttom"
+        android:src="@drawable/common_pop_up_arrow_up" />
+
+    <LinearLayout
+        android:id="@+id/common_pop_window_out_container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/common_pop_up_arrow_up"
+        android:background="@drawable/rounded_corners_of_title_bar_popup_window_outer"
+        android:orientation="vertical" >
+
+        <LinearLayout
+            android:id="@+id/common_pop_window_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="1dp"
+            android:background="@drawable/rounded_corners_of_title_bar_popup_window_inner"
+            android:orientation="vertical" >
+
+            <LinearLayout
+                android:id="@+id/conference_activity_request_host_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="@dimen/conference_activity_title_bar_button_padding"
+                android:paddingLeft="@dimen/conference_activity_title_bar_button_padding"
+                android:paddingRight="@dimen/conference_activity_title_bar_button_padding"
+                android:paddingBottom="@dimen/conference_activity_title_bar_button_padding" >
+
+                <ImageView
+                    android:id="@+id/conference_activity_request_host_iv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/logout_button" />
+
+                <TextView
+                    android:id="@+id/conference_activity_request_host_tv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:text="@string/confs_title_button_request_host_name" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#f2f2f2" >
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/conference_activity_logout_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/conference_activity_title_bar_button_padding"
+                android:paddingRight="@dimen/conference_activity_title_bar_button_padding"
+                android:paddingTop="@dimen/conference_activity_title_bar_button_padding"
+                android:paddingBottom="@dimen/conference_activity_title_bar_button_padding" >
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/logout_button" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:text="@string/confs_title_button_logout_name" />
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+
+</RelativeLayout>

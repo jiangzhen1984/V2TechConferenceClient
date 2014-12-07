@@ -82,6 +82,10 @@
                     android:id="@+id/iv_chairman_control"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:paddingBottom="@dimen/conference_activity_title_bar_button_padding"
+                    android:paddingLeft="@dimen/conference_activity_title_bar_button_padding"
+                    android:paddingRight="@dimen/conference_activity_title_bar_button_padding"
+                    android:paddingTop="@dimen/conference_activity_title_bar_button_padding"
                     android:src="@drawable/chairman_control" />
 
                 <ImageView
@@ -89,6 +93,10 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="@dimen/in_meeting_tools_bar_margin_right"
+                    android:paddingBottom="@dimen/conference_activity_title_bar_button_padding"
+                    android:paddingLeft="@dimen/conference_activity_title_bar_button_padding"
+                    android:paddingRight="@dimen/conference_activity_title_bar_button_padding"
+                    android:paddingTop="@dimen/conference_activity_title_bar_button_padding"
                     android:src="@drawable/mute_button" />
 
                 <ImageView
@@ -96,21 +104,22 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="@dimen/in_meeting_tools_bar_margin_right"
+                    android:paddingBottom="@dimen/conference_activity_title_bar_button_padding"
+                    android:paddingLeft="@dimen/conference_activity_title_bar_button_padding"
+                    android:paddingRight="@dimen/conference_activity_title_bar_button_padding"
+                    android:paddingTop="@dimen/conference_activity_title_bar_button_padding"
                     android:src="@drawable/confernce_camera" />
 
                 <ImageView
-                    android:id="@+id/in_meeting_setting_iv"
+                    android:id="@+id/in_meeting_feature"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="@dimen/in_meeting_tools_bar_margin_right"
-                    android:src="@drawable/video_setting_button_selector" />
-
-                <ImageView
-                    android:id="@+id/in_meeting_log_out_iv"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="@dimen/in_meeting_tools_bar_margin_right"
-                    android:src="@drawable/video_logout_button_selector" />
+                    android:paddingBottom="@dimen/conference_activity_title_bar_button_padding"
+                    android:paddingLeft="@dimen/conference_activity_title_bar_button_padding"
+                    android:paddingRight="@dimen/conference_activity_title_bar_button_padding"
+                    android:paddingTop="@dimen/conference_activity_title_bar_button_padding"
+                    android:src="@drawable/title_bar_feature_more_button_selector" />
             </LinearLayout>
         </LinearLayout>
 

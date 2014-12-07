@@ -109,4 +109,9 @@
 	
 	<!-- common_conversation_layout -->
 	<dimen name="common_conversation_layout_margin_top">18dp</dimen>
+	
+	 
+    <!-- conference activity -->
+    <dimen name="conference_activity_title_bar_button_padding">5dp</dimen>
+    
 </resources>

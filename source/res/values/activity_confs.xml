@@ -37,4 +37,11 @@
    
    <string name="confs_user_video_device_item">视频</string>
    
+   
+   <string name="confs_title_button_logout_name">退出会议</string>
+   <string name="confs_title_button_request_host_name">请求主讲</string>
+   <string name="confs_toast_get_control_permission">主讲权限已经获得</string>
+   <string name="confs_toast_cancel_control_permission">主讲权限已经被取消</string>
+   <string name="confs_toast_release_control_permission">主讲权限已释放</string>
+   
 </resources>

@@ -438,7 +438,7 @@ public class ConferenceService extends DeviceService {
 			}
 
 			JNIResponse jniConfCreateRes = new RequestConfCreateResponse(
-					nConfID, 0, RequestConfCreateResponse.Result.SUCCESS);
+					nConfID, 0, JNIResponse.Result.fromInt(nJoinResult));
 			Message.obtain(mCallbackHandler, JNI_REQUEST_CREATE_CONFERENCE,
 					jniConfCreateRes).sendToTarget();
 

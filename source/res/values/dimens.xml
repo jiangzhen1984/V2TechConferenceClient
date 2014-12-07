@@ -173,4 +173,7 @@
     
     <dimen name="search_activity_top_margin_20">20dp</dimen>
     <dimen name="search_activity_top_margin_5">5dp</dimen>
+    
+    <!-- conference activity -->
+    <dimen name="conference_activity_title_bar_button_padding">10dp</dimen>
 </resources>
