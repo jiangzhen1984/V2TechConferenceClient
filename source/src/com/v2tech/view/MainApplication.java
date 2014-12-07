@@ -8,13 +8,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.ref.WeakReference;
-import java.util.List;
 import java.util.Vector;
 
 import net.sourceforge.pinyin4j.PinyinHelper;
 import android.app.Activity;
-import android.app.ActivityManager;
-import android.app.ActivityManager.RunningTaskInfo;
 import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
@@ -48,7 +45,6 @@ import com.v2tech.util.BitmapUtil;
 import com.v2tech.util.CrashHandler;
 import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.LogService;
-import com.v2tech.util.LogcatThread;
 import com.v2tech.util.Notificator;
 import com.v2tech.util.StorageUtil;
 import com.v2tech.view.conference.ConferenceActivity;
@@ -104,7 +100,7 @@ public class MainApplication extends Application {
 		String path = GlobalConfig.getGlobalPath();
 		initConfFile();
 
-		MessageBuilder.context = getApplicationContext();
+		MessageBuilder.init(getApplicationContext());
 		MessageLoader.context = getApplicationContext();
         BitmapUtil.context = getApplicationContext();
 

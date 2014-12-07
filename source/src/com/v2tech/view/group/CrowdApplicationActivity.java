@@ -116,7 +116,7 @@ public class CrowdApplicationActivity extends Activity {
 				crowd.getCreator(), null);
         if(g.getOwnerUser() != null) {
             User user = g.getOwnerUser();
-            vq = MessageBuilder.queryQualMessageByCrowdId(mContext, user, g);
+            vq = MessageBuilder.queryQualMessageByCrowdId(user, g);
         }
 		updateView();
 	}
@@ -246,7 +246,7 @@ public class CrowdApplicationActivity extends Activity {
                             MessageBuilder.updateQualicationMessage(mContext, vq);
                         }
                         else{
-                            VMessageQualification quaion = MessageBuilder.queryQualMessageByCrowdId(mContext ,
+                            VMessageQualification quaion = MessageBuilder.queryQualMessageByCrowdId(
                                    crowd.getCreator().getmUserId() , crowd.getId());
                             if(quaion == null) {
                                 CrowdGroup g = new CrowdGroup(crowd.getId(),

@@ -11,6 +11,7 @@ import android.text.TextUtils;
 import com.V2.jni.V2GlobalEnum;
 import com.V2.jni.util.V2Log;
 import com.v2tech.service.GlobalHolder;
+import com.v2tech.util.CrashHandler;
 import com.v2tech.util.MessageUtil;
 import com.v2tech.view.conversation.MessageLoader;
 import com.v2tech.vo.ContactConversation;
@@ -37,15 +38,20 @@ public class ConversationProvider {
 	 */
 	public static void saveConversation(Context mContext, VMessage vm) {
 
-		if (vm == null)
+		if (vm == null){
+			V2Log.e("ConversationsTabFragment" , "Save Conversation Failed... Because given VMessage Object is null!");
 			return;
+		}
 
 		long remoteID = 0;
 		int readState = 0;
 		switch (vm.getMsgCode()) {
 		case V2GlobalEnum.GROUP_TYPE_USER:
-			if (vm.getFromUser() == null || vm.getToUser() == null)
+			if (vm.getFromUser() == null || vm.getToUser() == null){
+				V2Log.e("ConversationsTabFragment" , "Save Conversation Failed... Because getFromeUser or getToUser is null"
+						+ "for given VMessage Object ... id is : " + vm.getId());
 				return;
+			}
 
 			if (vm.getFromUser().getmUserId() == GlobalHolder.getInstance()
 					.getCurrentUserId()) {
@@ -55,10 +61,24 @@ public class ConversationProvider {
 				remoteID = vm.getFromUser().getmUserId();
 				readState = Conversation.READ_FLAG_UNREAD;
 			}
+			
+			boolean userConversation = queryUserConversation(mContext, remoteID);
+			if(userConversation){
+				V2Log.e("ConversationsTabFragment" , "Save Conversation Failed... Because the Conversation is already exist!"
+						+ "remoteUserID is : " + remoteID);
+				return ;
+			}
 			break;
 		default:
+			boolean groupConversation = queryGroupConversation(mContext, vm.getMsgCode(), vm.getGroupId());
+			if(groupConversation){
+				V2Log.e("ConversationsTabFragment" , "Save Conversation Failed... Because the Conversation is already exist!"
+						+ "groupType is : " + vm.getMsgCode() + " groupID is : " + vm.getGroupId());
+				return ;
+			}
 			break;
 		}
+		
 		ContentValues conCv = new ContentValues();
 		conCv.put(
 				ContentDescriptor.RecentHistoriesMessage.Cols.HISTORY_RECENT_MESSAGE_FROM_USER_ID,
@@ -100,46 +120,59 @@ public class ConversationProvider {
 	 * @return
 	 */
 	public static List<DepartmentConversation> loadDepartConversation(
-			Context mContext) {
+			Context context) {
 
+		DataBaseContext mContext = new DataBaseContext(context);
 		List<DepartmentConversation> lists = new ArrayList<DepartmentConversation>();
-		String where = ContentDescriptor.RecentHistoriesMessage.Cols.HISTORY_RECENT_MESSAGE_GROUP_TYPE
-				+ "= ?";
-		String[] args = new String[] { String
-				.valueOf(V2GlobalEnum.GROUP_TYPE_DEPARTMENT) };
-		Cursor mCur = mContext
-				.getContentResolver()
-				.query(ContentDescriptor.RecentHistoriesMessage.CONTENT_URI,
-						ContentDescriptor.RecentHistoriesMessage.Cols.ALL_CLOS,
-						where,
-						args,
-						ContentDescriptor.RecentHistoriesMessage.Cols.HISTORY_RECENT_MESSAGE_SAVEDATE
-								+ " desc");
-		if (mCur == null || mCur.getCount() <= 0) {
-			V2Log.e("ConversationsTabFragment",
-					"loading department conversation get zero");
-			return lists;
-		}
-
-		DepartmentConversation depart;
-		while (mCur.moveToNext()) {
-
-			long groupID = mCur
-					.getLong(mCur
-							.getColumnIndex(ContentDescriptor.RecentHistoriesMessage.Cols.HISTORY_RECENT_MESSAGE_USER_TYPE_ID));
-			Group department = GlobalHolder.getInstance()
-					.findGroupById(groupID);
-			Group group;
-			if (department != null) {
-				group = department;
-			} else {
-				group = new OrgGroup(groupID, "");
+		Cursor cursor = null;
+		try {
+			
+			String where = ContentDescriptor.RecentHistoriesMessage.Cols.HISTORY_RECENT_MESSAGE_GROUP_TYPE
+					+ "= ?";
+			String[] args = new String[] { String
+					.valueOf(V2GlobalEnum.GROUP_TYPE_DEPARTMENT) };
+			cursor = mContext
+					.getContentResolver()
+					.query(ContentDescriptor.RecentHistoriesMessage.CONTENT_URI,
+							ContentDescriptor.RecentHistoriesMessage.Cols.ALL_CLOS,
+							where,
+							args,
+							ContentDescriptor.RecentHistoriesMessage.Cols.HISTORY_RECENT_MESSAGE_SAVEDATE
+									+ " desc");
+			
+			if (cursor == null || cursor.getCount() < 0) {
+				V2Log.e("ConversationsTabFragment",
+						"loading department conversation get zero");
+				return lists;
 			}
-			depart = new DepartmentConversation(group);
-			depart.setReadFlag(Conversation.READ_FLAG_READ);
-			lists.add(depart);
+
+			DepartmentConversation depart;
+			while (cursor.moveToNext()) {
+				long groupID = cursor
+						.getLong(cursor
+								.getColumnIndex(ContentDescriptor.RecentHistoriesMessage.Cols.HISTORY_RECENT_MESSAGE_USER_TYPE_ID));
+				Group department = GlobalHolder.getInstance()
+						.findGroupById(groupID);
+				Group group;
+				if (department != null) {
+					group = department;
+				} else {
+					group = new OrgGroup(groupID, "");
+				}
+				depart = new DepartmentConversation(group);
+				depart.setReadFlag(Conversation.READ_FLAG_READ);
+				lists.add(depart);
+			}
+			return lists;
+		} catch (Exception e) {
+			e.printStackTrace();
+			CrashHandler.getInstance().saveCrashInfo2File(e);
+			return lists;
+		} finally {
+			if (cursor != null) {
+				cursor.close();
+			}
 		}
-		return lists;
 	}
 
 	/**

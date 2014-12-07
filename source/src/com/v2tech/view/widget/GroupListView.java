@@ -3,7 +3,6 @@ package com.v2tech.view.widget;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -14,7 +13,6 @@ import android.support.v4.util.LongSparseArray;
 import android.text.TextUtils;
 import android.text.TextUtils.TruncateAt;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,10 +31,10 @@ import android.widget.TextView;
 import com.V2.jni.util.V2Log;
 import com.v2tech.R;
 import com.v2tech.service.GlobalHolder;
-import com.v2tech.util.GlobalConfig;
+import com.v2tech.util.SearchUtils;
+import com.v2tech.view.ConversationsTabFragment.ScrollItem;
 import com.v2tech.vo.Group;
 import com.v2tech.vo.User;
-import com.v2tech.vo.UserDeviceConfig.UserDeviceConfigType;
 
 /**
  * Group List view wrapper.<br>
@@ -1080,6 +1078,9 @@ public class GroupListView extends ListView {
 
 	}
 
+	boolean isFrist = true;
+	List<ItemData> mBaseTempList;
+	
 	/**
 	 * Use to query item
 	 * 
@@ -1092,18 +1093,48 @@ public class GroupListView extends ListView {
 		protected FilterResults performFiltering(CharSequence constraint) {
 			FilterResults fr = new FilterResults();
 			List<ItemData> list = null;
+			List<User> filter = null;
+			List<User> searchUser = null;
 			if (constraint == null || constraint.toString().isEmpty()) {
 				list = mBaseList;
+				SearchUtils.clearAll();
+				isFrist = true;
 			} else {
-				list = new ArrayList<ItemData>();
-				for (Group g : mGroupList) {
-					search(list, g, constraint);
+				if(isFrist){
+					mBaseTempList = new ArrayList<GroupListView.ItemData>();
+					mBaseTempList.addAll(mBaseList);
+					isFrist = false;
 				}
-				Collections.sort(list);
+//				list = new ArrayList<ItemData>();
+//				for (Group g : mGroupList) {
+//					search(list, g, constraint);
+//				}
+//				Collections.sort(list);
+				list = new ArrayList<ItemData>();
+				if(mFilterList != null && mFilterList.size() != mBaseTempList.size()){
+					filter = new ArrayList<User>();
+					for (ItemData itemData : mFilterList) {
+						if(itemData instanceof UserItemData){
+							UserItemData data = (UserItemData) itemData;
+							filter.add((User) data.getObject());
+						}
+					}
+					searchUser = SearchUtils.startGroupUserFilterSearch(filter, constraint);
+				}
+				else{
+					searchUser = SearchUtils.startGroupUserSearch(mGroupList, constraint);
+				}
+				
+				for (User user : searchUser) {
+					list.add(getItem(user.getFirstBelongsGroup(), user));
+				}
 			}
 
 			fr.values = list;
 			fr.count = list.size();
+			list = null;
+			searchUser = null;
+			filter = null;
 			return fr;
 		}
 

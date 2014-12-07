@@ -1093,12 +1093,19 @@ public class MessageAuthenticationActivity extends Activity {
 				CrowdGroup cg = vqic.getCrowdGroup();
 				item.mMsgBanneriv.setImageResource(R.drawable.chat_group_icon);
 				item.mNameTV.setText(cg.getName());
-				if (vqic.getInvitationUser() != null)
+				if (vqic.getInvitationUser() != null){
+					String name;
+					User user = vqic.getInvitationUser();
+					boolean isFriend = GlobalHolder.getInstance().isFriend(user);
+					if(isFriend && user.getNickName() != null)
+						name = user.getNickName();
+					else
+						name = user.getName();
 					item.mContentTV
-							.setText(vqic.getInvitationUser().getName()
+							.setText(name
 									+ mContext
 											.getText(R.string.crowd_invitation_content));
-
+				}
 				updateInviteMessageView(item, vqic);
 				// If current user is invitor
 			} else if (msg.getType() == VMessageQualification.Type.CROWD_APPLICATION) {
@@ -1354,8 +1361,7 @@ public class MessageAuthenticationActivity extends Activity {
 		}
 
 		VMessageQualification currentMessage = null;
-		VMessageQualification vq = MessageBuilder.queryQualMessageByCrowdId(
-				mContext, userID, groupID);
+		VMessageQualification vq = MessageBuilder.queryQualMessageByCrowdId(userID, groupID);
 		for (ListItemWrapper wrapper : mMessageList) {
 			VMessageQualification message = (VMessageQualification) wrapper.obj;
 			if (vq.getId() == message.getId()) {

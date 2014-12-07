@@ -134,7 +134,7 @@ public class AuthenticationActivity extends Activity {
 					Intent i = new Intent(AuthenticationActivity.this,
 							MessageAuthenticationActivity.class);
 					i.putExtra("remoteUserID", mUid);
-					setResult(5, i);
+					setResult(0, i);
 					onBackPressed();
 				}
 			});

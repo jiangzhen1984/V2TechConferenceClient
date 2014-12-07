@@ -624,6 +624,7 @@ public class CrowdGroupService extends AbstractHandler {
 				Message.obtain(mCallbackHandler, UPDATE_CROWD, jniRes)
 						.sendToTarget();
 			} else if (group.type == GroupType.DISCUSSION.intValue() && group.id == mPendingCrowdId) {
+				mPendingCrowdId = 0;
 				JNIResponse jniRes = new JNIResponse(JNIResponse.Result.SUCCESS);
 				Message.obtain(mCallbackHandler, UPDATE_DISCUSSION_BOARD, jniRes)
 						.sendToTarget();

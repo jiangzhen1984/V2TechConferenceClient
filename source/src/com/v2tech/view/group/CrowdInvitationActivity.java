@@ -125,7 +125,7 @@ public class CrowdInvitationActivity extends Activity {
 		CrowdGroup g = new CrowdGroup(crowd.getId(), crowd.getName(),
 				crowd.getCreator(), null);
 		g.setAuthType(AuthType.fromInt(crowd.getAuth()));
-		vq = MessageBuilder.queryQualMessageByCrowdId(mContext, crowd.getCreator().getmUserId(), g.getmGId());
+		vq = MessageBuilder.queryQualMessageByCrowdId(crowd.getCreator().getmUserId(), g.getmGId());
 		updateView(false);
 		mRejectResasonLayout.setVisibility(View.GONE);
 	}

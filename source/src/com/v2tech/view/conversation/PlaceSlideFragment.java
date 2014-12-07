@@ -55,11 +55,11 @@ public class PlaceSlideFragment extends Fragment {
 				MeasureSpec.UNSPECIFIED);
 		if(vim == null)
 			vim = new VMessageImageItem(new VMessage(0, 0, null, null), filePath);
-		if(".gif".equals(vim.getExtension())){
-			GifView view = (GifView) v.findViewById(R.id.imageview_smile);
-			view.setGIFResource(filePath);
-		}
-		else{
+//		if(".gif".equals(vim.getExtension())){
+//			GifView view = (GifView) v.findViewById(R.id.imageview_smile);
+//			view.setGIFResource(filePath);
+//		}
+//		else{
 			final TouchImageView iv  = new TouchImageView(this.getActivity());
 			VMessageImageItem.Size si = vim.getFullBitmapSize();
 			int width =si.width;
@@ -119,7 +119,7 @@ public class PlaceSlideFragment extends Fragment {
 					RelativeLayout.LayoutParams.MATCH_PARENT);
 			rl.addRule(RelativeLayout.CENTER_IN_PARENT);
 			rlContainer.addView(iv, rl);
-		}
+//		}
 		return v;
 	}
 	

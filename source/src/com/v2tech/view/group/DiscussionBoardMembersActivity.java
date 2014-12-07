@@ -228,11 +228,21 @@ public class DiscussionBoardMembersActivity extends Activity {
 			// Add delete icon
 			mDeleteIV = new ImageView(mContext);
 			mDeleteIV.setImageResource(R.drawable.contacts_group_item_icon);
-			mDeleteIV.setVisibility(View.GONE);
+			if (isInDeleteMode) {
+				if (this.mUser.getmUserId() != crowd.getOwnerUser()
+						.getmUserId()) {
+					mDeleteIV.setVisibility(View.VISIBLE);
+				} else {
+					mDeleteIV.setVisibility(View.GONE);
+				}
+			}
+			else
+				mDeleteIV.setVisibility(View.GONE);
 			mDeleteIV.setOnClickListener(new OnClickListener() {
 
 				@Override
 				public void onClick(View v) {
+					mUser.isDelete = true;
 					mDeleteButtonTV.setVisibility(View.VISIBLE);
 				}
 
@@ -312,11 +322,20 @@ public class DiscussionBoardMembersActivity extends Activity {
 
 		public void update(User user) {
 			if (isInDeleteMode) {
-				if (this.mUser.getmUserId() != crowd.getOwnerUser()
+//				if (this.mUser.getmUserId() != crowd.getOwnerUser()
+//						.getmUserId()) {
+				if (user.getmUserId() != crowd.getOwnerUser()
 						.getmUserId()) {
 					mDeleteIV.setVisibility(View.VISIBLE);
 				} else {
 					mDeleteIV.setVisibility(View.GONE);
+				}
+				
+				if(user.isDelete){
+					mDeleteButtonTV.setVisibility(View.VISIBLE);
+				}
+				else{
+					mDeleteButtonTV.setVisibility(View.GONE);
 				}
 			} else {
 				mDeleteIV.setVisibility(View.GONE);

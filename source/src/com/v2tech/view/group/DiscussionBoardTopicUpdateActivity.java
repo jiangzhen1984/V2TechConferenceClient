@@ -10,6 +10,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.V2.jni.util.EscapedcharactersProcessing;
 import com.v2tech.R;
 import com.v2tech.vo.DiscussionGroup;
 import com.v2tech.service.CrowdGroupService;
@@ -107,7 +108,7 @@ public class DiscussionBoardTopicUpdateActivity extends Activity {
 				}
 				mState = State.PENDING;
 			}
-			crowd.setName(mContentET.getText().toString());
+			crowd.setName(EscapedcharactersProcessing.convertAmp(mContentET.getText().toString()));
 			service.updateDiscussion(crowd, new MessageListener(mLocalHandler,
 					REQUEST_UPDATE_CROWD_DONE, null));
 		}

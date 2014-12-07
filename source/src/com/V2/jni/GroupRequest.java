@@ -9,6 +9,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 
 
+
 import com.V2.jni.ind.FileJNIObject;
 import com.V2.jni.ind.GroupQualicationJNIObject;
 import com.V2.jni.ind.V2Document;
@@ -17,6 +18,8 @@ import com.V2.jni.ind.V2User;
 import com.V2.jni.util.EscapedcharactersProcessing;
 import com.V2.jni.util.V2Log;
 import com.V2.jni.util.XmlAttributeExtractor;
+import com.v2tech.service.GlobalHolder;
+import com.v2tech.vo.User;
 
 
 public class GroupRequest {
@@ -601,6 +604,7 @@ public class GroupRequest {
 	private void OnModifyGroupInfo(int groupType, long nGroupID, String sXml) {
 		V2Log.d("OnModifyGroupInfo::-->" + groupType + ":" + nGroupID + ":"
 				+ sXml);
+		sXml = EscapedcharactersProcessing.reverse(sXml);
 		V2Group group = new V2Group(nGroupID, groupType);
 		if (groupType == V2GlobalEnum.GROUP_TYPE_CROWD) {
 			String name = XmlAttributeExtractor.extractAttribute(sXml, "name");
@@ -720,7 +724,7 @@ public class GroupRequest {
 			name = EscapedcharactersProcessing.reverse(name);
 			group = new V2Group(Long.parseLong(id), groupType);
 			group.name = name;
-		}
+		} 
 
 		for (WeakReference<GroupRequestCallback> wrcb : mCallbacks) {
 			Object obj = wrcb.get();

@@ -11,6 +11,9 @@ import android.text.Editable;
 import com.V2.jni.util.V2Log;
 import com.v2tech.db.V2techSearchContentProvider;
 import com.v2tech.view.ConversationsTabFragment.ScrollItem;
+import com.v2tech.view.widget.GroupListView.ItemData;
+import com.v2tech.vo.Group;
+import com.v2tech.vo.User;
 
 public class SearchUtils {
 
@@ -27,12 +30,14 @@ public class SearchUtils {
 	private static boolean isBreak; // 用于跳出getSearchList函数中的二级循环
 	public static boolean mIsStartedSearch;
 	
-	private static final int TYPE_CONVERSATION = 0;
+	private static final int TYPE_CONVERSATION = 10;
+	private static final int TYPE_ITEM_DATA = 11;
 	private static int type = TYPE_CONVERSATION;
 	
 	public static List<ScrollItem> startConversationSearch(List<ScrollItem> list , Editable content){
+		type = TYPE_CONVERSATION;
 		receiveList.addAll(list);
-		List<Object> search = search(content);
+		List<Object> search = search(content.toString());
 		list.clear();
 		for (Object object : search) {
 			list.add((ScrollItem)object);
@@ -41,7 +46,45 @@ public class SearchUtils {
 		return list;
 	}
 	
-	private static List<Object> search(Editable content){
+	public static List<User> startGroupUserSearch(List<Group> mGroupList , CharSequence content){
+		type = TYPE_ITEM_DATA;
+		List<User> users = new ArrayList<User>();
+		for (Group group : mGroupList) {
+			convertGroupToUser(users , group);
+		}
+		receiveList.addAll(users);
+		List<Object> search = search(content.toString());
+		users.clear();
+		for (Object object : search) {
+			users.add((User)object);
+		}
+		receiveList.clear();
+		return users;
+	}
+	
+	public static List<User> startGroupUserFilterSearch(List<User> mItemList , CharSequence content){
+		type = TYPE_ITEM_DATA;
+		List<User> users = mItemList;
+		receiveList.addAll(users);
+		List<Object> search = search(content.toString());
+		users.clear();
+		for (Object object : search) {
+			users.add((User)object);
+		}
+		receiveList.clear();
+		return users;
+	}
+	
+	
+	private static void convertGroupToUser(List<User> users , Group group) {
+		users.addAll(group.getUsers());
+		List<Group> gList = group.getChildGroup();
+		for (Group subG : gList) {
+			convertGroupToUser(users , subG);
+		}
+	}
+
+	private static List<Object> search(String content){
 		if (content != null && content.length() > 0) {
 			if (!mIsStartedSearch) {
 				searchList.clear();
@@ -146,7 +189,8 @@ public class SearchUtils {
 					if (!isShouldAdd) {
 						V2Log.e(TAG, "added ---------"
 								+ getObjectValue(obj));
-						searchList.add(obj);
+						if(!searchList.contains(obj))
+							searchList.add(obj);
 					}
 					sb.delete(0, sb.length());
 				}
@@ -157,18 +201,21 @@ public class SearchUtils {
 			startIndex++;
 			return searchList;
 		} else {
-			V2techSearchContentProvider.closedDataBase();
-			if (mIsStartedSearch) {
-				firstSearchCacheList.clear();
-				receiveList.clear();
-				searchCacheList.clear();
-				searchList.clear();
-				mIsStartedSearch = false;
-				startIndex = 0;
-//				adapter.notifyDataSetChanged();
-			}
+			clearAll();
 		}
 		return searchList;
+	}
+	
+	public static void clearAll(){
+		V2techSearchContentProvider.closedDataBase();
+		if (mIsStartedSearch) {
+			firstSearchCacheList.clear();
+			receiveList.clear();
+			searchCacheList.clear();
+			searchList.clear();
+			mIsStartedSearch = false;
+			startIndex = 0;
+		}
 	}
 	
 	/**
@@ -289,6 +336,8 @@ public class SearchUtils {
 		switch (type) {
 		case TYPE_CONVERSATION:
 			return ((ScrollItem)obj).cov.getName();
+		case TYPE_ITEM_DATA:
+			return ((User)obj).getName();
 		default:
 			break;
 		}

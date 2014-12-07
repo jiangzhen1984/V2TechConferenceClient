@@ -24,6 +24,7 @@ import com.v2tech.db.ContentDescriptor;
 import com.v2tech.db.ContentDescriptor.HistoriesCrowd;
 import com.v2tech.db.DataBaseContext;
 import com.v2tech.service.GlobalHolder;
+import com.v2tech.util.CrashHandler;
 import com.v2tech.util.GlobalConfig;
 import com.v2tech.vo.CrowdGroup;
 import com.v2tech.vo.CrowdGroup.ReceiveQualificationType;
@@ -47,8 +48,12 @@ public class MessageBuilder {
 
 	private static final int MESSAGE_TYPE_IMAGE = 0;
 	private static final int MESSAGE_TYPE_AUDIO = 1;
-	public static Context context;
-
+	public static DataBaseContext mContext;
+	public static void init(Context context){
+		mContext = new DataBaseContext(context);
+	}
+	
+	
 	public static VMessage buildGroupTextMessage(int groupType, long gid,
 			User fromUser, String text) {
 		String[] array = text.split("\n");
@@ -571,7 +576,6 @@ public class MessageBuilder {
 			V2Log.e("To store failed...please check the given VMessageQualification Object in the databases");
 			return null;
 		}
-		DataBaseContext mContext = new DataBaseContext(context);
 		ContentValues values = new ContentValues();
 		values.put(ContentDescriptor.HistoriesCrowd.Cols.OWNER_USER_ID,
 				GlobalHolder.getInstance().getCurrentUserId());
@@ -693,13 +697,13 @@ public class MessageBuilder {
             values.put(
                     ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_READ_STATE,
                     ReadState.READ.intValue());
-            return context.getContentResolver().update(
+            return mContext.getContentResolver().update(
                     ContentDescriptor.HistoriesCrowd.CONTENT_URI, values, null, null);
         }else{
             values.put(
                     ContentDescriptor.HistoriesAddFriends.Cols.HISTORY_MEDIA_READ_STATE,
                     ReadState.READ.intValue());
-            return context.getContentResolver().update(
+            return mContext.getContentResolver().update(
                     ContentDescriptor.HistoriesAddFriends.CONTENT_URI, values, null, null);
         }
 	}
@@ -742,7 +746,7 @@ public class MessageBuilder {
 		values.put(
 				ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_SAVEDATE,
 				GlobalConfig.getGlobalServerTime());
-		int updates = context.getContentResolver().update(
+		int updates = mContext.getContentResolver().update(
 				ContentDescriptor.HistoriesCrowd.CONTENT_URI, values, where,
 				new String[] { String.valueOf(id) });
 		return updates;
@@ -870,9 +874,8 @@ public class MessageBuilder {
 		else
 			uid = GlobalHolder.getInstance().getCurrentUserId();
         long groupID = crowdGroup.getmGId();
-		DataBaseContext mContext = new DataBaseContext(context);
 		VMessageQualification crowdQuion = MessageBuilder
-				.queryQualMessageByCrowdId(null, userId, groupID);
+				.queryQualMessageByCrowdId(userId, groupID);
 		if (crowdQuion == null) {
 			if (obj.qualicationType == Type.CROWD_APPLICATION) {
                 User applicant = GlobalHolder.getInstance().getUser(uid);
@@ -1049,7 +1052,6 @@ public class MessageBuilder {
 	 * @return 
 	 */
 	public static boolean queryWaitingQualMessageById(long remoteUserID) {
-		DataBaseContext mContext = new DataBaseContext(context);
 		Cursor cursor = null;
 		try{
 			String selection = ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_REMOTE_USER_ID
@@ -1089,37 +1091,48 @@ public class MessageBuilder {
 			long id) {
 
 		DataBaseContext mContext = new DataBaseContext(context);
-		String selection = ContentDescriptor.HistoriesCrowd.Cols.ID
-				+ " = ? and "
-				+ ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_RECEIVER_STATE
-				+ " = ? ";
-		String[] selectionArgs = new String[] { String.valueOf(id) , String.valueOf(ReceiveQualificationType.REMOTE_APPLY_TYPE.intValue())};
-		String sortOrder = ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_SAVEDATE
-				+ " desc";
-		Cursor cursor = mContext.getContentResolver().query(
-				ContentDescriptor.HistoriesCrowd.CONTENT_URI,
-				ContentDescriptor.HistoriesCrowd.Cols.ALL_CLOS, selection,
-				selectionArgs, sortOrder);
+		Cursor cursor = null;
+		try {
+			
+			String selection = ContentDescriptor.HistoriesCrowd.Cols.ID
+					+ " = ? and "
+					+ ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_RECEIVER_STATE
+					+ " = ? ";
+			String[] selectionArgs = new String[] { String.valueOf(id) , String.valueOf(ReceiveQualificationType.REMOTE_APPLY_TYPE.intValue())};
+			String sortOrder = ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_SAVEDATE
+					+ " desc";
+			cursor = mContext.getContentResolver().query(
+					ContentDescriptor.HistoriesCrowd.CONTENT_URI,
+					ContentDescriptor.HistoriesCrowd.Cols.ALL_CLOS, selection,
+					selectionArgs, sortOrder);
+			if (cursor == null || cursor.getCount() < 0) {
+				return null;
+			}
 
-		if (cursor == null || cursor.getCount() <= 0)
+			VMessageQualification msg = null;
+			if (cursor.moveToNext()) {
+				msg = extraMsgFromCursor(cursor);
+			}
+			return msg;
+		} catch (Exception e) {
+			e.printStackTrace();
+			CrashHandler.getInstance().saveCrashInfo2File(e);
 			return null;
-		VMessageQualification msg = null;
-		if (cursor.moveToNext()) {
-			msg = extraMsgFromCursor(cursor);
+		} finally {
+			if (cursor != null) {
+				cursor.close();
+			}
 		}
-		cursor.close();
-		return msg;
 	}
 
-	public static VMessageQualification queryQualMessageByCrowdId(
-			Context context, User user, CrowdGroup cg) {
+	public static VMessageQualification queryQualMessageByCrowdId(User user, CrowdGroup cg) {
 
 		if (user == null || cg == null) {
 			V2Log.e("To query failed...please check the given User Object");
 			return null;
 		}
 
-		return queryQualMessageByCrowdId(context, user.getmUserId(),
+		return queryQualMessageByCrowdId(user.getmUserId(),
 				cg.getmGId());
 	}
 
@@ -1130,37 +1143,44 @@ public class MessageBuilder {
      * @param groupID
      * @return
      */
-	public static VMessageQualification queryQualMessageByCrowdId(
-			Context context, long userID, long groupID) {
-		if (context == null)
-			context = MessageBuilder.context;
+	public static VMessageQualification queryQualMessageByCrowdId(long userID, long groupID) {
 
-		DataBaseContext mContext = new DataBaseContext(context);
-		String selection = ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_REMOTE_USER_ID
-				+ "= ? and "
-				+ ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_ID
-				+ "= ? and "
-				+ ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_RECEIVER_STATE
-				+ "= ? ";
-		String[] selectionArgs = new String[] { String.valueOf(userID),
-				String.valueOf(groupID) , String.valueOf(ReceiveQualificationType.REMOTE_APPLY_TYPE.intValue())};
-		String sortOrder = ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_SAVEDATE
-				+ " desc";
-		Cursor cursor = mContext.getContentResolver().query(
-				ContentDescriptor.HistoriesCrowd.CONTENT_URI,
-				ContentDescriptor.HistoriesCrowd.Cols.ALL_CLOS, selection,
-				selectionArgs, sortOrder);
+		Cursor cursor = null;
+		try {
+			
+			String selection = ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_REMOTE_USER_ID
+					+ "= ? and "
+					+ ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_ID
+					+ "= ? and "
+					+ ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_RECEIVER_STATE
+					+ "= ? ";
+			String[] selectionArgs = new String[] { String.valueOf(userID),
+					String.valueOf(groupID) , String.valueOf(ReceiveQualificationType.REMOTE_APPLY_TYPE.intValue())};
+			String sortOrder = ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_SAVEDATE
+					+ " desc";
+			cursor = mContext.getContentResolver().query(
+					ContentDescriptor.HistoriesCrowd.CONTENT_URI,
+					ContentDescriptor.HistoriesCrowd.Cols.ALL_CLOS, selection,
+					selectionArgs, sortOrder);
 
-		if (cursor == null || cursor.getCount() < 0)
+			if (cursor == null || cursor.getCount() < 0) {
+				return null;
+			}
+
+			VMessageQualification msg = null;
+			if (cursor.moveToNext()) {
+				msg = extraMsgFromCursor(cursor);
+			}
+			return msg;
+		} catch (Exception e) {
+			e.printStackTrace();
+			CrashHandler.getInstance().saveCrashInfo2File(e);
 			return null;
-		VMessageQualification msg = null;
-		if (cursor.moveToNext()) {
-			msg = extraMsgFromCursor(cursor);
+		} finally {
+			if (cursor != null) {
+				cursor.close();
+			}
 		}
-		cursor.close();
-
-		return msg;
-
 	}
 
     /**
@@ -1170,28 +1190,39 @@ public class MessageBuilder {
      */
     public static VMessageQualification queryApplyQualMessageByUserId(long userID) {
 
-        DataBaseContext mContext = new DataBaseContext(context);
-        String selection = ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_REMOTE_USER_ID
-                + "= ? and "
-                + ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_RECEIVER_STATE
-                + "= ?";
-        String[] selectionArgs = new String[] { String.valueOf(userID) , String.valueOf(ReceiveQualificationType.REMOTE_APPLY_TYPE.intValue())};
-        String sortOrder = ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_SAVEDATE
-                + " desc";
-        Cursor cursor = mContext.getContentResolver().query(
-                ContentDescriptor.HistoriesCrowd.CONTENT_URI,
-                ContentDescriptor.HistoriesCrowd.Cols.ALL_CLOS, selection,
-                selectionArgs, sortOrder);
+		Cursor cursor = null;
+		try {
+			
+		   String selection = ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_REMOTE_USER_ID
+	                + "= ? and "
+	                + ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_RECEIVER_STATE
+	                + "= ?";
+	        String[] selectionArgs = new String[] { String.valueOf(userID) , String.valueOf(ReceiveQualificationType.REMOTE_APPLY_TYPE.intValue())};
+	        String sortOrder = ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_SAVEDATE
+	                + " desc";
+	        cursor = mContext.getContentResolver().query(
+	                ContentDescriptor.HistoriesCrowd.CONTENT_URI,
+	                ContentDescriptor.HistoriesCrowd.Cols.ALL_CLOS, selection,
+	                selectionArgs, sortOrder);
+			if (cursor == null || cursor.getCount() < 0) {
+				return null;
+			}
 
-        if (cursor == null || cursor.getCount() <= 0)
-            return null;
-
-        VMessageQualification msg = null;
-        if (cursor.moveToFirst()) {
-            msg = extraMsgFromCursor(cursor);
-        }
-        cursor.close();
-        return msg;
+			VMessageQualification msg = null;
+	        if (cursor.moveToFirst()) {
+	            msg = extraMsgFromCursor(cursor);
+	        }
+	        cursor.close();
+	        return msg;
+		} catch (Exception e) {
+			e.printStackTrace();
+			CrashHandler.getInstance().saveCrashInfo2File(e);
+			return null;
+		} finally {
+			if (cursor != null) {
+				cursor.close();
+			}
+		}
     }
 
     /**
@@ -1203,38 +1234,48 @@ public class MessageBuilder {
 	 */
 	public static List<VMessageQualification> queryQualMessageList(
 			Context context, User user) {
-		DataBaseContext mContext = new DataBaseContext(context);
 		if (user == null) {
 			V2Log.e("To query failed...please check the given User Object");
 			return null;
 		}
 
-		List<VMessageQualification> list = new ArrayList<VMessageQualification>();
-		String selection = "( " + ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_FROM_USER_ID
-				+ "= ? or "
-				+ ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_TO_USER_ID
-				+ "= ? ) and "
-				+ ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_RECEIVER_STATE + "= ?";
-		String[] selectionArgs = new String[] {
-				String.valueOf(user.getmUserId()),
-				String.valueOf(user.getmUserId()) , String.valueOf(ReceiveQualificationType.REMOTE_APPLY_TYPE.intValue())};
-		String sortOrder = ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_SAVEDATE
-				+ " desc";
-		Cursor cursor = mContext.getContentResolver().query(
-				ContentDescriptor.HistoriesCrowd.CONTENT_URI,
-				ContentDescriptor.HistoriesCrowd.Cols.ALL_CLOS, selection,
-				selectionArgs, sortOrder);
+		Cursor cursor = null;
+		try {
+			List<VMessageQualification> list = new ArrayList<VMessageQualification>();
+			String selection = "( " + ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_FROM_USER_ID
+					+ "= ? or "
+					+ ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_TO_USER_ID
+					+ "= ? ) and "
+					+ ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_RECEIVER_STATE + "= ?";
+			String[] selectionArgs = new String[] {
+					String.valueOf(user.getmUserId()),
+					String.valueOf(user.getmUserId()) , String.valueOf(ReceiveQualificationType.REMOTE_APPLY_TYPE.intValue())};
+			String sortOrder = ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_SAVEDATE
+					+ " desc";
+			cursor = mContext.getContentResolver().query(
+					ContentDescriptor.HistoriesCrowd.CONTENT_URI,
+					ContentDescriptor.HistoriesCrowd.Cols.ALL_CLOS, selection,
+					selectionArgs, sortOrder);
+			
+			if (cursor == null || cursor.getCount() < 0) {
+				return null;
+			}
 
-		if (cursor == null || cursor.getCount() <= 0)
+			while (cursor.moveToNext()) {
+				VMessageQualification qualification = extraMsgFromCursor(cursor);
+				if (qualification != null)
+					list.add(qualification);
+			}
+			return list;
+		} catch (Exception e) {
+			e.printStackTrace();
+			CrashHandler.getInstance().saveCrashInfo2File(e);
 			return null;
-
-		while (cursor.moveToNext()) {
-			VMessageQualification qualification = extraMsgFromCursor(cursor);
-			if (qualification != null)
-				list.add(qualification);
+		} finally {
+			if (cursor != null) {
+				cursor.close();
+			}
 		}
-		cursor.close();
-		return list;
 	}
 
 	/**

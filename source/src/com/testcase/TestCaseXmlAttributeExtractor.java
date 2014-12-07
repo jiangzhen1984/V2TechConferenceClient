@@ -11,15 +11,15 @@ public class TestCaseXmlAttributeExtractor extends TestCase {
 		String str = XmlAttributeExtractor
 				.extractAttribute(
 						ho,
-						"telephone");
-		assertEquals(str, "288 ");
+						"birthday");
+		assertEquals(str, "2000-01-01");
 		
 		
 		str = XmlAttributeExtractor
 				.extractAttribute(
 						ho,
-						"sex");
-		assertEquals(str, "0");
+						"job");
+		assertEquals(str, "");
 		
 
 		str = XmlAttributeExtractor
@@ -31,8 +31,8 @@ public class TestCaseXmlAttributeExtractor extends TestCase {
 		str = XmlAttributeExtractor
 				.extractAttribute(
 						ho,
-						"address");
-		assertEquals(str, " do ");
+						"authtype");
+		assertEquals(str, "1");
 		
 	}
 }

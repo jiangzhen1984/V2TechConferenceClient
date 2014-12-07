@@ -9,6 +9,7 @@ import java.util.Locale;
 import java.util.UUID;
 
 import com.V2.jni.V2GlobalEnum;
+import com.V2.jni.util.EscapedcharactersProcessing;
 import com.V2.jni.util.V2Log;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.view.conversation.MessageBodyView;
@@ -359,6 +360,6 @@ public class VMessage {
 		if(V2Log.isDebuggable) {
 			V2Log.d(sb.toString());
 		}
-		return sb.toString();
+		return EscapedcharactersProcessing.convertAmp(sb.toString());
 	}
 }

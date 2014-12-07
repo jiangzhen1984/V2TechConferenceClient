@@ -836,8 +836,7 @@ public class JNIService extends Service implements
 					crowdMsg = null;
 				}
 			} else {
-				crowdMsg = MessageBuilder.queryQualMessageByCrowdId(mContext,
-						user, g);
+				crowdMsg = MessageBuilder.queryQualMessageByCrowdId(user, g);
 			}
 
 			if (crowdMsg != null) {
@@ -896,10 +895,22 @@ public class JNIService extends Service implements
 			if (user == null)
 				V2Log.e(TAG,
 						"OnRequestCreateRelationCallback ---> Create relation failed...get user is null");
+			
+			boolean isOutORG = false;
 			User vUser = GlobalHolder.getInstance().getUser(user.uid);
-			AddFriendHistroysHandler.addMeNeedAuthentication(
-					getApplicationContext(), vUser, additInfo);
+			if(!vUser.isDirty()){
+				AddFriendHistroysHandler.addMeNeedAuthentication(
+						getApplicationContext(), vUser, additInfo);
+			} else{ //组织外的用户
+				isOutORG = true;
+				User newUser = convertUser(user);
+				GlobalHolder.getInstance().putUser(newUser.getmUserId(), newUser);
+				AddFriendHistroysHandler.addMeNeedAuthentication(
+						getApplicationContext(), newUser, additInfo);
+			}
 			Intent intent = new Intent();
+			intent.putExtra("isOutORG", isOutORG);
+			intent.putExtra("v2User", user);
 			intent.putExtra("uid", user.uid);
 			intent.setAction(JNI_BROADCAST_CONTACTS_AUTHENTICATION);
 			intent.addCategory(JNI_BROADCAST_CATEGROY);

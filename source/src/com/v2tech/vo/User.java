@@ -4,7 +4,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.DateFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -28,19 +27,15 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.text.TextUtils;
 import android.util.Log;
 
 import com.V2.jni.V2GlobalEnum;
 import com.V2.jni.util.EscapedcharactersProcessing;
 import com.V2.jni.util.V2Log;
-import com.v2tech.R;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.util.BitmapUtil;
-import com.v2tech.vo.Group.GroupType;
 
 /**
  * User information
@@ -89,6 +84,9 @@ public class User implements Comparable<User> {
 	private Set<Group> mBelongsGroup;
 	private String mAvatarPath;
 	private String abbra;
+	
+	//For Discussion Member Activity , onItemLongClick
+	public boolean isDelete;
 
 	private static HanyuPinyinOutputFormat format = new HanyuPinyinOutputFormat();
 	// This value indicate this object is dirty, construct locally without any

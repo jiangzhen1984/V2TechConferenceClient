@@ -55,6 +55,7 @@ import com.v2tech.view.bo.ConversationNotificationObject;
 import com.v2tech.view.contacts.add.AuthenticationActivity;
 import com.v2tech.view.contacts.add.FriendManagementActivity;
 import com.v2tech.view.conversation.ConversationSelectFileEntry;
+import com.v2tech.view.conversation.MessageAuthenticationActivity;
 import com.v2tech.vo.Conversation;
 import com.v2tech.vo.User;
 import com.v2tech.vo.UserDeviceConfig;
@@ -64,6 +65,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 	private static final int UPDATE_USER_INFO = 2;
 	private static final int UPDATE_USER_INFO_DONE = 3;
 	private static final int FILE_SELECT_CODE = 100;
+	protected static final int START_AUTHENTICATION_ACTIVITY = 0;
 
 	private TextView mReturnButtonTV;
 	private TextView mNameTitleIV;
@@ -213,8 +215,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 				intent.putExtra("remoteUserID", ContactDetail.this.getIntent()
 						.getLongExtra("remoteUserID", 0));
 				intent.putExtra("cause", "refuse_friend_authentication");
-				ContactDetail.this.startActivity(intent);
-
+				ContactDetail.this.startActivityForResult(intent, START_AUTHENTICATION_ACTIVITY);
 			}
 		});
 	}
@@ -371,7 +372,6 @@ public class ContactDetail extends Activity implements OnTouchListener {
 		// break;
 		case FILE_SELECT_CODE:
 			if (data != null) {
-
 				ArrayList<Parcelable> mCheckedList = data
 						.getParcelableArrayListExtra("checkedFiles");
 
@@ -387,6 +387,14 @@ public class ContactDetail extends Activity implements OnTouchListener {
 					finish();
 				}
 			}
+			break;
+		case START_AUTHENTICATION_ACTIVITY:
+			Intent i = new Intent(mContext,
+					MessageAuthenticationActivity.class);
+			i.putExtra("remoteUserID", mUid);
+			setResult(5, i);
+			finish();
+			break;
 		}
 		super.onActivityResult(requestCode, resultCode, data);
 	}
