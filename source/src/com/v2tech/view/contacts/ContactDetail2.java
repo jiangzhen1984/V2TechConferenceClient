@@ -39,6 +39,7 @@ import com.v2tech.util.ProgressUtils;
 import com.v2tech.view.JNIService;
 import com.v2tech.view.MainActivity;
 import com.v2tech.view.MainApplication;
+import com.v2tech.view.PublicIntent;
 import com.v2tech.view.bo.GroupUserObject;
 import com.v2tech.view.contacts.add.AuthenticationActivity;
 import com.v2tech.view.contacts.add.FriendManagementActivity;
@@ -564,6 +565,11 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 					belongs = GlobalHolder.getInstance().getGroupById(
 							selectGroupID);
 					mGroupNameTV.setText(selectGroupName);
+
+					// 请求刷新联系人界面
+					Intent intent = new Intent(
+							PublicIntent.BROADCAST_REQUEST_UPDATE_CONTACTS_GROUP);
+					ContactDetail2.this.sendBroadcast(intent);
 				}
 			} else if (resultCode == UpdateContactGroupActivity.SELECT_GROUP_RESPONSE_CODE_CANCEL) {
 			}
@@ -618,6 +624,7 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 						isRelation = false;
 						updateContactGroup();
 					} else {
+
 						Intent i = new Intent(ContactDetail2.this,
 								MainActivity.class);
 						i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);

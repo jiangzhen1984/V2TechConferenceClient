@@ -17,4 +17,7 @@ public class NativeInitializer {
 	}
 	public native void initialize(Context context, String path);
 
+	
+
+	
 }

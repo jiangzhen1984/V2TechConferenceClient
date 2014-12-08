@@ -63,7 +63,6 @@ public class ConfRequest {
 
 	public native void unInitialize();
 
-	// 鍒犻櫎浼氳
 	public native void destroyConf(long nConfID);
 
 	/**

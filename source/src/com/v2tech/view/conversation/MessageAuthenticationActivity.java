@@ -17,10 +17,12 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
@@ -28,9 +30,12 @@ import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
+import android.widget.AbsListView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -106,6 +111,7 @@ public class MessageAuthenticationActivity extends Activity {
 	private FriendMessageAdapter firendAdapter;
 	private GroupMessageAdapter groupAdapter;
 	private List<FriendMAData> friendMADataList = new ArrayList<FriendMAData>();
+	private long loadFriendMADataNumber=20;
 	private List<ListItemWrapper> mMessageList;
 
 	private FriendAuthenticationBroadcastReceiver friendAuthenticationBroadcastReceiver;
@@ -118,6 +124,7 @@ public class MessageAuthenticationActivity extends Activity {
 	private ListItemWrapper waitingQualification = null; // 当前所在的是哪个RadioButton界面
 	private CrowdGroupService crowdService;
 	private Resources res;
+	private View listViewFootView;
 
 	private Context mContext;
 
@@ -186,6 +193,27 @@ public class MessageAuthenticationActivity extends Activity {
 		lvMessageAuthentication = (ListView) findViewById(R.id.message_authentication);
 		ivFriendAuthenticationPrompt = (ImageView) findViewById(R.id.rb_friend_authentication_prompt);
 		ivGroupAuthenticationPrompt = (ImageView) findViewById(R.id.rb_group_authentication_prompt);
+		listViewFootView=createListViewFootView();
+	}
+
+	private View createListViewFootView() {
+		ProgressBar progressbar = new ProgressBar(MessageAuthenticationActivity.this);// 定义一个ProgressBar
+		progressbar.setPadding(20, 0, 0, 0);// left, top, right, bottom
+
+		TextView tv_wait = new TextView(MessageAuthenticationActivity.this);// 定义一个TextView
+		tv_wait.setText("正在动态加载……");
+		tv_wait.setTextSize(20f);
+		tv_wait.setPadding(20, 0, 0, 0);
+
+		LinearLayout layout = new LinearLayout(MessageAuthenticationActivity.this);
+		layout.setOrientation(LinearLayout.HORIZONTAL);
+		layout.setGravity(Gravity.CENTER_VERTICAL);
+		LinearLayout.LayoutParams flayoutparams = new LinearLayout.LayoutParams(
+				LinearLayout.LayoutParams.WRAP_CONTENT,
+				LinearLayout.LayoutParams.WRAP_CONTENT);// 定义FootView中控件的布局
+		layout.addView(progressbar, flayoutparams);
+		layout.addView(tv_wait, flayoutparams);
+		return layout;
 	}
 
     public void requestUpdateConversation(){
@@ -348,6 +376,53 @@ public class MessageAuthenticationActivity extends Activity {
 					}
 
 				});
+		
+		lvMessageAuthentication.setOnScrollListener(new OnScrollListener() {
+			private boolean isNeedLoad=false;
+			private boolean isLoading=false;
+			@Override
+			public void onScrollStateChanged(AbsListView view, int scrollState) {
+				if(scrollState==OnScrollListener.SCROLL_STATE_IDLE){
+					if(isNeedLoad&&!isLoading){
+						((ListView)view).addFooterView(listViewFootView);
+						isLoading=true;
+						new AsyncTask<Void, Void, Void>() {
+							List<FriendMAData> tempMessageAuthenticationDataList;
+
+							@Override
+							protected Void doInBackground(Void... arg0) {
+								loadFriendMADataNumber=loadFriendMADataNumber+10;
+								tempMessageAuthenticationDataList=selcetFriendMessageFromDB();
+								return null;
+							}
+
+							@Override
+							protected void onPostExecute(Void result) {
+								if (firendAdapter != null) {
+									friendMADataList.clear();
+									friendMADataList.addAll(tempMessageAuthenticationDataList);
+									firendAdapter.notifyDataSetChanged();
+								}
+								isLoading=false;
+								lvMessageAuthentication.removeFooterView(listViewFootView);
+							}
+
+						}.execute();
+					}
+					
+				}
+			}
+			
+			@Override
+			public void onScroll(AbsListView view, int firstVisibleItem,
+					int visibleItemCount, int totalItemCount) {
+				if(firstVisibleItem+visibleItemCount==totalItemCount&&totalItemCount>0){
+					isNeedLoad=true;
+				}else{
+					isNeedLoad=false;
+				}
+			}
+		});
 
 	}
 
@@ -586,90 +661,14 @@ public class MessageAuthenticationActivity extends Activity {
 		mContext.sendBroadcast(i);
 	}
 
+
 	private void loadFriendMessage() {
 		new AsyncTask<Void, Void, Void>() {
-			List<FriendMAData> tempMessageAuthenticationDataList = new ArrayList<FriendMAData>();
+			List<FriendMAData> tempMessageAuthenticationDataList;
 
 			@Override
 			protected Void doInBackground(Void... arg0) {
-				tempMessageAuthenticationDataList.clear();
-				// 把所有的改为已读
-				String sql = "update " + tableName
-						+ " set ReadState=1 where ReadState=0";
-				AddFriendHistroysHandler.update(getApplicationContext(), sql);
-				sql = "select * from " + tableName + " order by SaveDate asc";
-				Cursor cr = AddFriendHistroysHandler.select(
-						getApplicationContext(), sql, new String[] {});
-				if (cr.moveToLast()) {
-					do {
-
-						AddFriendHistorieNode tempNode = new AddFriendHistorieNode();
-						// _id integer primary key AUTOINCREMENT,0
-						// OwnerUserID bigint,1
-						// SaveDate bigint,2
-						// FromUserID bigint,3
-						// OwnerAuthType bigint,4
-						// ToUserID bigint, 5
-						// RemoteUserID bigint, 6
-						// ApplyReason nvarchar(4000),7
-						// RefuseReason nvarchar(4000), 8
-						// AddState bigint ,9
-						// ReadState bigint);10
-						tempNode.ownerUserID = cr.getLong(1);
-						tempNode.saveDate = cr.getLong(2);
-						tempNode.fromUserID = cr.getLong(3);
-						tempNode.ownerAuthType = cr.getLong(4);
-						tempNode.toUserID = cr.getLong(5);
-						tempNode.remoteUserID = cr.getLong(6);
-						tempNode.applyReason = cr.getString(7);
-						tempNode.refuseReason = cr.getString(8);
-						tempNode.addState = cr.getLong(9);
-						tempNode.readState = cr.getLong(10);
-
-						FriendMAData tempData = new FriendMAData();
-
-						tempData.remoteUserID = tempNode.remoteUserID;
-						User user = GlobalHolder.getInstance().getUser(
-								tempData.remoteUserID);
-						tempData.dheadImage = user.getAvatarBitmap();
-						tempData.name = user.getName();
-
-						tempData.dbRecordIndex = cr.getLong(0);
-						// 别人加我：允许任何人：0已添加您为好友，需要验证：1未处理，2已同意，3已拒绝
-						// 我加别人：允许认识人：4你们已成为了好友，需要验证：5等待对方验证，4被同意（你们已成为了好友），6拒绝了你为好友
-						if ((tempNode.fromUserID == tempNode.remoteUserID)
-								&& (tempNode.ownerAuthType == 0)) {// 别人加我允许任何人
-							tempData.state = 0;
-						} else if ((tempNode.fromUserID == tempNode.remoteUserID)
-								&& (tempNode.ownerAuthType == 1)
-								&& (tempNode.addState == 0)) {// 别人加我未处理
-							tempData.state = 1;
-							tempData.authenticationMessage = tempNode.applyReason;
-						} else if ((tempNode.fromUserID == tempNode.remoteUserID)
-								&& (tempNode.ownerAuthType == 1)
-								&& (tempNode.addState == 1)) {// 别人加我已同意
-							tempData.state = 2;
-							tempData.authenticationMessage = tempNode.applyReason;
-						} else if ((tempNode.fromUserID == tempNode.remoteUserID)
-								&& (tempNode.ownerAuthType == 1)
-								&& (tempNode.addState == 2)) {// 别人加我已拒绝
-							tempData.state = 3;
-							tempData.authenticationMessage = tempNode.refuseReason;
-						} else if ((tempNode.fromUserID == tempNode.ownerUserID)
-								&& (tempNode.addState == 0)) {// 我加别人等待验证
-							tempData.state = 5;
-						} else if ((tempNode.fromUserID == tempNode.ownerUserID)
-								&& (tempNode.addState == 1)) {// 我加别人已被同意或我加别人不需验证
-							tempData.state = 4;
-						} else if ((tempNode.fromUserID == tempNode.ownerUserID)
-								&& (tempNode.addState == 2)) {// 我加别人已被拒绝
-							tempData.state = 6;
-							tempData.authenticationMessage = tempNode.refuseReason;
-						}
-						tempMessageAuthenticationDataList.add(tempData);
-					} while (cr.moveToPrevious());
-				}
-				cr.close();
+				tempMessageAuthenticationDataList=selcetFriendMessageFromDB();
 				return null;
 			}
 
@@ -684,6 +683,91 @@ public class MessageAuthenticationActivity extends Activity {
 
 		}.execute();
 
+	}
+	
+	private List<FriendMAData> selcetFriendMessageFromDB() {
+		List<FriendMAData> tempMessageAuthenticationDataList = new ArrayList<FriendMAData>();
+		tempMessageAuthenticationDataList.clear();
+		// 把所有的改为已读
+		String sql = "update " + tableName
+				+ " set ReadState=1 where ReadState=0";
+		AddFriendHistroysHandler.update(getApplicationContext(), sql);
+
+		sql = "select * from " + tableName + " order by SaveDate asc limit "+loadFriendMADataNumber;
+		Cursor cr = AddFriendHistroysHandler.select(
+				getApplicationContext(), sql, new String[] {});
+		loadFriendMADataNumber=cr.getCount();
+		if (cr.moveToLast()) {
+			do {
+
+				AddFriendHistorieNode tempNode = new AddFriendHistorieNode();
+				// _id integer primary key AUTOINCREMENT,0
+				// OwnerUserID bigint,1
+				// SaveDate bigint,2
+				// FromUserID bigint,3
+				// OwnerAuthType bigint,4
+				// ToUserID bigint, 5
+				// RemoteUserID bigint, 6
+				// ApplyReason nvarchar(4000),7
+				// RefuseReason nvarchar(4000), 8
+				// AddState bigint ,9
+				// ReadState bigint);10
+				tempNode.ownerUserID = cr.getLong(1);
+				tempNode.saveDate = cr.getLong(2);
+				tempNode.fromUserID = cr.getLong(3);
+				tempNode.ownerAuthType = cr.getLong(4);
+				tempNode.toUserID = cr.getLong(5);
+				tempNode.remoteUserID = cr.getLong(6);
+				tempNode.applyReason = cr.getString(7);
+				tempNode.refuseReason = cr.getString(8);
+				tempNode.addState = cr.getLong(9);
+				tempNode.readState = cr.getLong(10);
+
+				FriendMAData tempData = new FriendMAData();
+
+				tempData.remoteUserID = tempNode.remoteUserID;
+				User user = GlobalHolder.getInstance().getUser(
+						tempData.remoteUserID);
+				tempData.dheadImage = user.getAvatarBitmap();
+				tempData.name = user.getName();
+
+				tempData.dbRecordIndex = cr.getLong(0);
+				// 别人加我：允许任何人：0已添加您为好友，需要验证：1未处理，2已同意，3已拒绝
+				// 我加别人：允许认识人：4你们已成为了好友，需要验证：5等待对方验证，4被同意（你们已成为了好友），6拒绝了你为好友
+				if ((tempNode.fromUserID == tempNode.remoteUserID)
+						&& (tempNode.ownerAuthType == 0)) {// 别人加我允许任何人
+					tempData.state = 0;
+				} else if ((tempNode.fromUserID == tempNode.remoteUserID)
+						&& (tempNode.ownerAuthType == 1)
+						&& (tempNode.addState == 0)) {// 别人加我未处理
+					tempData.state = 1;
+					tempData.authenticationMessage = tempNode.applyReason;
+				} else if ((tempNode.fromUserID == tempNode.remoteUserID)
+						&& (tempNode.ownerAuthType == 1)
+						&& (tempNode.addState == 1)) {// 别人加我已同意
+					tempData.state = 2;
+					tempData.authenticationMessage = tempNode.applyReason;
+				} else if ((tempNode.fromUserID == tempNode.remoteUserID)
+						&& (tempNode.ownerAuthType == 1)
+						&& (tempNode.addState == 2)) {// 别人加我已拒绝
+					tempData.state = 3;
+					tempData.authenticationMessage = tempNode.refuseReason;
+				} else if ((tempNode.fromUserID == tempNode.ownerUserID)
+						&& (tempNode.addState == 0)) {// 我加别人等待验证
+					tempData.state = 5;
+				} else if ((tempNode.fromUserID == tempNode.ownerUserID)
+						&& (tempNode.addState == 1)) {// 我加别人已被同意或我加别人不需验证
+					tempData.state = 4;
+				} else if ((tempNode.fromUserID == tempNode.ownerUserID)
+						&& (tempNode.addState == 2)) {// 我加别人已被拒绝
+					tempData.state = 6;
+					tempData.authenticationMessage = tempNode.refuseReason;
+				}
+				tempMessageAuthenticationDataList.add(tempData);
+			} while (cr.moveToPrevious());
+		}
+		cr.close();
+		return tempMessageAuthenticationDataList;
 	}
 
 	private void startCrowdInvitationDetail(VMessageQualification msg) {

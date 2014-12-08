@@ -392,6 +392,11 @@ public class ConversationP2PAVActivity extends Activity implements
 		// if (hanguped == null) {
 		// chatService.cancelChattingCall(uad, null);
 		// }
+		
+		if(audioManager!=null){
+			audioManager.setSpeakerphoneOn(false);
+		}
+		
 	}
 
 	@Override
