@@ -139,10 +139,9 @@ public class ConferenceActivity extends Activity {
 	private static final int TAG_CLOSE_DEVICE = 0;
 	private static final int TAG_OPEN_DEVICE = 1;
 
-	private PermissionState mControlState = PermissionState.UNKNOWN;
+	private PermissionState mControlState = PermissionState.NORMAL;
 
 	private boolean isSpeaking;
-	private boolean isInControl;
 	private boolean isMuteCamera;
 
 	private Handler mVideoHandler = new VideoHandler();
@@ -160,6 +159,7 @@ public class ConferenceActivity extends Activity {
 	private ImageView mSettingIV;
 	private ImageView mChairmanControl;
 	private View mFeatureIV;
+	private View mMsgNotification;
 	private ImageView mSpeakerIV;
 	private ImageView mCameraIV;
 	private PopupWindow mSettingWindow;
@@ -261,6 +261,9 @@ public class ConferenceActivity extends Activity {
 
 		this.mChairmanControl = (ImageView) findViewById(R.id.iv_chairman_control);
 		this.mChairmanControl.setOnClickListener(onClickMChairmanControl);
+		
+		mMsgNotification = findViewById(R.id.host_request_msg_notificator);
+		mMsgNotification.setVisibility(View.GONE);
 
 		// request exit button
 		this.mFeatureIV = findViewById(R.id.in_meeting_feature);
@@ -481,18 +484,40 @@ public class ConferenceActivity extends Activity {
 	 * 
 	 * @param flag
 	 */
-	private void updateControlState(boolean flag) {
-		isInControl = flag;
-		if (isInControl) {
-			mControlState = PermissionState.GRANTED;
-			Toast.makeText(mContext,
-					R.string.confs_toast_get_control_permission,
-					Toast.LENGTH_SHORT).show();
-		} else {
-			Toast.makeText(mContext,
-					R.string.confs_toast_release_control_permission,
-					Toast.LENGTH_SHORT).show();
+	private void updateControlState(PermissionState state, boolean reject) {
+		
+		if (mControlState == PermissionState.APPLYING ) {
+			if (state == PermissionState.GRANTED) {
+				Toast.makeText(mContext,
+						R.string.confs_toast_get_control_permission,
+						Toast.LENGTH_SHORT).show();
+			} else if (state == PermissionState.NORMAL) {
+				if (reject) {
+				Toast.makeText(mContext,
+						R.string.confs_toast_reject_control_permission,
+						Toast.LENGTH_SHORT).show();
+				} else {
+					Toast.makeText(mContext,
+							R.string.confs_toast_cancel_control_permission,
+							Toast.LENGTH_SHORT).show();
+				}
+			}
+		} else 
+		if (mControlState == PermissionState.GRANTED) {
+			if (state == PermissionState.NORMAL) {
+				Toast.makeText(mContext,
+						R.string.confs_toast_release_control_permission,
+						Toast.LENGTH_SHORT).show();
+			}
+		} else if (mControlState == PermissionState.NORMAL) {
+			if (state == PermissionState.APPLYING) {
+				Toast.makeText(mContext,
+						R.string.confs_title_button_request_host_name,
+						Toast.LENGTH_SHORT).show();
+			}
 		}
+		
+		mControlState = state;
 	}
 
 	private void updateMCameraIVState(boolean flag) {
@@ -920,7 +945,14 @@ public class ConferenceActivity extends Activity {
 					.findViewById(R.id.conference_activity_request_host_tv))
 					.setText(R.string.confs_title_button_request_host_name);
 
-			doApplyOrReleaseControl(!isInControl);
+	
+			if ((mControlState == PermissionState.GRANTED || mControlState == PermissionState.APPLYING)) {
+				updateControlState( PermissionState.NORMAL, false);
+				cb.applyForReleasePermission(ConferencePermission.CONTROL, null);
+			} else {
+				updateControlState( PermissionState.APPLYING, false);
+				cb.applyForControlPermission(ConferencePermission.CONTROL, null);
+			}
 		}
 	};
 
@@ -972,6 +1004,12 @@ public class ConferenceActivity extends Activity {
 				itemContainer.measure(View.MeasureSpec.UNSPECIFIED,
 						View.MeasureSpec.UNSPECIFIED);
 				View arrow = layout.findViewById(R.id.common_pop_up_arrow_up);
+				
+				 mRequestButtonName = (TextView)layout.findViewById(
+						 R.id.conference_activity_request_host_tv);
+				mRequestButtonImage = (ImageView)layout.findViewById(
+						 R.id.conference_activity_request_host_iv);
+				
 				arrow.measure(View.MeasureSpec.UNSPECIFIED,
 						View.MeasureSpec.UNSPECIFIED);
 
@@ -995,17 +1033,15 @@ public class ConferenceActivity extends Activity {
 
 			}
 
-			// FIXME update icon
 			if (mControlState == PermissionState.APPLYING) {
-				// mRequestButtonName = (TextView)layout.findViewById(
-				// R.id.conference_activity_request_host_tv);
-				// mRequestButtonImage = (ImageView)layout.findViewById(
-				// R.id.conference_activity_request_host_iv);
+				mRequestButtonName.setTextColor(mContext.getResources().getColor(R.color.conference_host_requesting_text_color));
+				mRequestButtonImage.setImageResource(R.drawable.host_requesting);
 			} else if (mControlState == PermissionState.GRANTED) {
-				// mRequestButtonName = (TextView)layout.findViewById(
-				// R.id.conference_activity_request_host_tv);
-				// mRequestButtonImage = (ImageView)layout.findViewById(
-				// R.id.conference_activity_request_host_iv);
+				mRequestButtonName.setTextColor(mContext.getResources().getColor(R.color.conference_acquired_host_text_color));
+				mRequestButtonImage.setImageResource(R.drawable.host_required);
+			} else if (mControlState == PermissionState.NORMAL) {
+				mRequestButtonName.setTextColor(mContext.getResources().getColor(R.color.common_item_text_color_black));
+				mRequestButtonImage.setImageResource(R.drawable.host_request);
 			}
 
 			int[] pos = new int[2];
@@ -1087,6 +1123,7 @@ public class ConferenceActivity extends Activity {
 
 								mHostRequestWindow.showAtLocation(
 										mRootContainer, Gravity.CENTER, 0, 0);
+								mMsgNotification.setVisibility(View.GONE);
 							}
 
 						});
@@ -1102,6 +1139,7 @@ public class ConferenceActivity extends Activity {
 
 			}
 
+			
 			int[] pos = new int[2];
 			v.getLocationInWindow(pos);
 			pos[0] += v.getMeasuredWidth() / 2 - 15 * dm.density - arrowWidth
@@ -1819,15 +1857,7 @@ public class ConferenceActivity extends Activity {
 		}
 	}
 
-	private void doApplyOrReleaseControl(boolean flag) {
-		if (!flag) {
-			mControlState = PermissionState.NORMAL;
-			cb.applyForReleasePermission(ConferencePermission.CONTROL, null);
-		} else {
-			mControlState = PermissionState.APPLYING;
-			cb.applyForControlPermission(ConferencePermission.CONTROL, null);
-		}
-	}
+	
 
 	/**
 	 * Handle event which new user entered conference
@@ -2693,7 +2723,7 @@ public class ConferenceActivity extends Activity {
 							.getType()) {
 						if (ind.getUid() == GlobalHolder.getInstance().getCurrentUserId()) {
 							updateControlState(PermissionState.fromInt(ind
-									.getState()) == PermissionState.GRANTED);
+									.getState()), true);
 						}
 					}
 				}
@@ -2703,11 +2733,12 @@ public class ConferenceActivity extends Activity {
 						.getResult());
 				if (rri.getUid() != GlobalHolder.getInstance().getCurrentUserId()) {
 					mHostRequestUsers.add(GlobalHolder.getInstance().getUser(rri.getUid()));
+					mMsgNotification.setVisibility(View.VISIBLE);
 				}
 				if (mHostRequestWindow != null) {
 					mHostRequestWindow.updateList(mHostRequestUsers);
 				}
-				//FIXME show notification icon
+				
 			}
 				
 				break;

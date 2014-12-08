@@ -69,5 +69,8 @@
       <color name="conversation_selectfile_adapter_word">#000000</color>
       
       <color name="file_download_prgress_color">#c2c2c2</color>
+      <color name="conference_host_requesting_text_color">#ffd200</color>
+      <color name="conference_acquired_host_text_color">#007aff</color>
+      
       
 </resources>

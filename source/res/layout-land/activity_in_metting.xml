@@ -78,15 +78,28 @@
                 android:layout_gravity="center_vertical"
                 android:layout_weight="0" >
 
-                <ImageView
-                    android:id="@+id/iv_chairman_control"
+                <RelativeLayout
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:paddingBottom="@dimen/conference_activity_title_bar_button_padding"
-                    android:paddingLeft="@dimen/conference_activity_title_bar_button_padding"
-                    android:paddingRight="@dimen/conference_activity_title_bar_button_padding"
-                    android:paddingTop="@dimen/conference_activity_title_bar_button_padding"
-                    android:src="@drawable/chairman_control" />
+                    android:layout_height="wrap_content" >
+
+                    <ImageView
+                        android:id="@+id/iv_chairman_control"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingBottom="@dimen/conference_activity_title_bar_button_padding"
+                        android:paddingLeft="@dimen/conference_activity_title_bar_button_padding"
+                        android:paddingRight="@dimen/conference_activity_title_bar_button_padding"
+                        android:paddingTop="@dimen/conference_activity_title_bar_button_padding"
+                        android:src="@drawable/chairman_control" />
+
+                    <ImageView
+                        android:id="@+id/host_request_msg_notificator"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignTop="@+id/iv_chairman_control"
+                        android:layout_alignRight="@+id/iv_chairman_control"
+                        android:src="@drawable/red_nofificator" />
+                </RelativeLayout>
 
                 <ImageView
                     android:id="@+id/speaker_iv"

@@ -115,7 +115,7 @@ public class VideoShowHostRequest extends PopupWindow {
 			public void onClick(View v) {
 				User user = (User) v.getTag();
 				if (v.getId() == R.id.conference_request_host_button_reject) {
-					
+					service.grantPermission(user, ConferencePermission.CONTROL, PermissionState.NORMAL, null);
 				} else if (v.getId() == R.id.conference_request_host_button_accept) {
 					service.grantPermission(user, ConferencePermission.CONTROL, PermissionState.GRANTED, null);
 				}
