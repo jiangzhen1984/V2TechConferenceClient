@@ -335,7 +335,44 @@ public class VideoRequest {
 	public native void closeVideoChat(String szSessionID, long nToUserID,
 			String szDeviceID);
 
+	
+	/**
+	 * 启用摄像头设备。
+	 * @param szDeviceID 设备ID
+	 * @param bInuse 启用
+	 */
+	public native void enableVideoDev(String szDeviceID , int bInuse);
+	
+	/**
+	 * 设置默认渲染器类型
+	 * @param nType  0 --> VMR9 , 1--> GDI
+	 */
+	public native void setDefaultRenderType(int nType);
 
+
+	/**
+	 * 频抓图
+	 * @param hwnd 窗口标识
+	 * @param szFile 保存文件的全路径
+	 */
+	public native void windowSnapshot(int hwnd, String szFile);
+	
+	
+	/**
+	 * 允许别人控制摄像头
+	 * @param szDevID 设备ID
+	 * @param bRemotePtz  0,禁止; 1,允许
+	 */
+	public native void enableRemotePtz(String szDevID, int bRemotePtz);
+	
+	/**
+	 * 设置摄像头预置位
+	 * @param szDevID 设备ID
+	 * @param nPresetNum 预置位 (1 - 6)
+	 * @param szPreset 预置位名称
+	 */
+	public native void setCamPreset(String szDevID, int nPresetNum, String szPreset);
+	
 	private void OnVideoWindowSet(String sDevId, Object hwnd) {
 		Log.e("ImRequest UI",
 				"OnVideoWindowSet " + sDevId + " " + hwnd.toString());

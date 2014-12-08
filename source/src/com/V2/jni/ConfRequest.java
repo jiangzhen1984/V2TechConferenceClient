@@ -362,6 +362,49 @@ public class ConfRequest {
 	// 缃崲浼氳涓诲腑
 	public native void changeConfChair(long nGroupID, long nUserID);
 
+	/**
+	 * 改变同步视频位置
+	 */
+	public native void changeSyncConfOpenVideoPos(long nDstUserID, String szDeviceID, String sPos);
+
+	
+	/**
+	 * 步打开某人视频给移动端
+	 * @param nGroupID  
+	 * @param sSyncVideoMsgXML  
+	 * <xml> 
+	 *      <video DstUserID = "" DstDeviceID = "" Pos = "">
+	 *      <video DstUserID = "" DstDeviceID = "" Pos = "">
+	 * </xml>
+	 */
+	public native void syncConfOpenVideoToMobile(long nGroupID, String sSyncVideoMsgXML);
+	
+	/**
+	 * 同步取消某人视频给移动端
+	 * @param nGroupID
+	 * @param nToUserID
+	 * @param szDeviceID
+	 */
+	public native void cancelSyncConfOpenVideoToMobile(long nGroupID, long nToUserID, String szDeviceID);
+	
+	/**
+	 * 指定视频被Sip用户打开
+	 * @param nGroupID
+	 * @param nSipUserID
+	 * @param nDstUserID
+	 * @param sDstDevID
+	 */
+	public native void TestConfSipOpenVideo(long nGroupID, long nSipUserID, long nDstUserID, String sDstDevID);
+
+	/**
+	 * 指定视频被Sip用户关闭
+	 * @param nGroupID
+	 * @param nSipUserID
+	 * @param nDstUserID
+	 * @param sDstDevID
+	 */
+	public native void TestConfSipCloseVideo(long nGroupID, long  nSipUserID, long nDstUserID, String sDstDevID);
+	
 	// public List<Conf> confs = new ArrayList<Conf>();
 
 	public boolean enterConf = false;
@@ -510,4 +553,49 @@ public class ConfRequest {
 			String sDstDevID) {
 		V2Log.d("OnDelVideoMixer");
 	}
+	
+
+	/**
+	 * 同步打开某人视频给移动端
+	 * @param sSyncVideoMsgXML
+	 *	<xml>
+	 *      <video DstUserID = "" DstDeviceID = "" Pos = "">
+     *       <video DstUserID = "" DstDeviceID = "" Pos = "">
+	 *  </xml>
+	 */
+	private void OnConfSyncOpenVideoToMobile(String sSyncVideoMsgXML){
+		V2Log.d("ImRequest UI", "OnGetConfVodList ---> sSyncVideoMsgXML :"
+				+ sSyncVideoMsgXML);
+	};
+	
+	/**
+	 * 改变同步视频位置
+	 * @param nDstUserID
+	 * @param szDeviceID
+	 * @param sPos
+	 */
+	private void OnChangeSyncConfOpenVideoPos(long nDstUserID, String szDeviceID, String sPos){
+		V2Log.d("ImRequest UI", "OnGetConfVodList ---> nDstUserID :"
+				+ nDstUserID + " | szDeviceID: " + szDeviceID + " | sPos: " + sPos);
+	};
+	
+	/**
+	 * 同步取消某人视频给移动端
+	 * @param nDstUserID
+	 * @param sDstMediaID
+	 */
+	private void OnConfSyncCloseVideoToMobile(long nDstUserID, String sDstMediaID){
+		V2Log.d("ImRequest UI", "OnGetConfVodList ---> nDstUserID :"
+				+ nDstUserID + " | sDstMediaID: " + sDstMediaID);
+	};
+	
+	/**
+	 * TODO add comment
+	 * @param nGroupID
+	 * @param sVodXmlList
+	 */
+	private void OnGetConfVodList(long nGroupID, String sVodXmlList){
+		V2Log.d("ImRequest UI", "OnGetConfVodList ---> nGroupID :"
+				+ nGroupID + " | sVodXmlList: " + sVodXmlList);
+	};
 }
