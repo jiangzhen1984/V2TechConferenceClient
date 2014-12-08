@@ -31,6 +31,7 @@ import android.widget.TextView;
 import com.V2.jni.util.V2Log;
 import com.v2tech.R;
 import com.v2tech.service.GlobalHolder;
+import com.v2tech.util.GlobalState;
 import com.v2tech.util.SearchUtils;
 import com.v2tech.view.ConversationsTabFragment.ScrollItem;
 import com.v2tech.vo.Group;
@@ -1449,7 +1450,11 @@ public class GroupListView extends ListView {
 
 			User user = GlobalHolder.getInstance().getUser(u.getmUserId());
 			if (user != null) {
-				u = user;
+				u = user; 
+				if(GlobalHolder.getInstance().getGlobalState().isGroupLoaded()){
+					if(TextUtils.isEmpty(u.getName()))
+						throw new RuntimeException("所有用户信息已获取完毕，但该用户空名：id is --> " + u.getmUserId());
+				}
 			}
 
 			ImageView mPhotoIV = (ImageView) mRoot.findViewById(R.id.user_img);

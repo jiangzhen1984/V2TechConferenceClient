@@ -1690,6 +1690,46 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 		});
 	}
 	
+	private void updateDiscussionGroupName(){
+		for (ScrollItem item : mItemList) {
+			if(item.cov.getType() == V2GlobalEnum.GROUP_TYPE_DISCUSSION){
+				final GroupLayout currentGroupLayout = ((GroupLayout) item.gp);
+				final DiscussionConversation discussion = (DiscussionConversation) item.cov;
+				service.execute(new Runnable() {
+					
+					@Override
+					public void run() {
+						Group newGroup = GlobalHolder.getInstance()
+								.getGroupById(V2GlobalEnum.GROUP_TYPE_DISCUSSION,
+										discussion.getExtId());
+						if (newGroup != null) {
+							while(newGroup.getUsers() == null || newGroup.getUsers().size() < 2){
+								newGroup = GlobalHolder.getInstance()
+										.getGroupById(V2GlobalEnum.GROUP_TYPE_DISCUSSION,
+												discussion.getExtId());
+								SystemClock.sleep(1000);
+								V2Log.e(TAG, "讨论组成员还有没填充完毕");
+							}
+							discussion.setDiscussionGroup(newGroup);
+							getActivity().runOnUiThread(new Runnable() {
+								
+								@Override
+								public void run() {
+									discussion.setReadFlag(Conversation.READ_FLAG_READ);
+									 VMessage vm = MessageLoader
+											.getNewestGroupMessage(mContext,
+													V2GlobalEnum.GROUP_TYPE_DISCUSSION,
+													discussion.getExtId());
+									updateGroupInfo(currentGroupLayout, discussion,  vm);
+								}
+							});
+						}
+					}
+				});
+			}
+		}
+	}
+	
 	/**
 	 * Remove conversation from mConvList by id.
 	 * 
@@ -1878,6 +1918,23 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 			mItemList.add(0, verificationItem);
 		}
 		adapter.notifyDataSetChanged();
+	}
+	
+	private void checkGroupIsExist(){
+		
+		for (ScrollItem item : mItemList) {
+			Conversation cov = item.cov;
+			if(cov.getType() == V2GlobalEnum.GROUP_TYPE_CROWD){
+				Group crowd = GlobalHolder.getInstance().getGroupById(V2GlobalEnum.GROUP_TYPE_CROWD, cov.getExtId());
+				if(crowd == null)
+					removeConversation(cov.getExtId());
+			}
+			else if(cov.getType() == V2GlobalEnum.GROUP_TYPE_DISCUSSION){
+				Group crowd = GlobalHolder.getInstance().getGroupById(V2GlobalEnum.GROUP_TYPE_DISCUSSION, cov.getExtId());
+				if(crowd == null)
+					removeConversation(cov.getExtId());
+			}
+		}
 	}
 	
 	public void sendVoiceNotify(){
@@ -2861,44 +2918,9 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 				i.putExtra("gtype", "gtype");
 				mContext.sendBroadcast(i);
 				
+				checkGroupIsExist();
 		    	//只有讨论组没有延迟广播
-		    	for (ScrollItem item : mItemList) {
-					if(item.cov.getType() == V2GlobalEnum.GROUP_TYPE_DISCUSSION){
-						final GroupLayout currentGroupLayout = ((GroupLayout) item.gp);
-						final DiscussionConversation discussion = (DiscussionConversation) item.cov;
-						service.execute(new Runnable() {
-							
-							@Override
-							public void run() {
-								Group newGroup = GlobalHolder.getInstance()
-										.getGroupById(V2GlobalEnum.GROUP_TYPE_DISCUSSION,
-												discussion.getExtId());
-								if (newGroup != null) {
-									while(newGroup.getUsers() == null || newGroup.getUsers().size() < 2){
-										newGroup = GlobalHolder.getInstance()
-												.getGroupById(V2GlobalEnum.GROUP_TYPE_DISCUSSION,
-														discussion.getExtId());
-										SystemClock.sleep(1000);
-										V2Log.e(TAG, "讨论组成员还有没填充完毕");
-									}
-									discussion.setDiscussionGroup(newGroup);
-									getActivity().runOnUiThread(new Runnable() {
-										
-										@Override
-										public void run() {
-											discussion.setReadFlag(Conversation.READ_FLAG_READ);
-											 VMessage vm = MessageLoader
-													.getNewestGroupMessage(mContext,
-															V2GlobalEnum.GROUP_TYPE_DISCUSSION,
-															discussion.getExtId());
-											updateGroupInfo(currentGroupLayout, discussion,  vm);
-										}
-									});
-								}
-							}
-						});
-					}
-				}
+				updateDiscussionGroupName();
 			} else if(PublicIntent.BROADCAST_ADD_OTHER_FRIEND_WAITING_NOTIFICATION
                     .equals(intent.getAction())){
 				updateVerificationConversation();
