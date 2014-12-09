@@ -14,7 +14,6 @@ import com.V2.jni.ind.V2Conference;
 import com.V2.jni.ind.V2User;
 import com.V2.jni.util.V2Log;
 import com.V2.jni.util.XmlAttributeExtractor;
-import com.v2tech.util.GlobalConfig;
 
 public class ConfRequest {
 
@@ -246,7 +245,7 @@ public class ConfRequest {
 			conf.startTime = new Date(Long.parseLong(startTime) / 1000);
 		else {
 			V2Log.e("OnConfNotify : get startTime is null...");
-			conf.startTime = new Date(GlobalConfig.getGlobalServerTime());
+			conf.startTime = new Date(System.currentTimeMillis());
 		}
 
 		V2User user = new V2User();
@@ -323,9 +322,6 @@ public class ConfRequest {
 
 	// 浼氬満闈欓煶
 	public native void muteConf();
-
-	// 淇敼浼氳鎻忚堪
-	public native void modifyConfDesc(String sXml);
 
 	// 淇敼浼氳鍚屾
 	public native void setConfSync(int syncMode);

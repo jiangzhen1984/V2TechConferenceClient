@@ -49,7 +49,12 @@ public class V2Group {
 	//for conference
 	public Date createTime;
 	public V2User chairMan;
+	//remote user update sync attribute or note
+	public boolean isUpdateSync;
 	public boolean isSync;
+	//remote user update invitation attribute or note
+	public boolean isUpdateInvitate;
+	public boolean canInvitation;
 	
 	//for crowd 
 	public V2User creator;

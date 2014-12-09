@@ -156,7 +156,6 @@ public class ConferenceActivity extends Activity {
 	private FrameLayout mSubWindowLayout;
 
 	private TextView mGroupNameTV;
-	private ImageView mSettingIV;
 	private ImageView mChairmanControl;
 	private View mFeatureIV;
 	private View mMsgNotification;
@@ -449,6 +448,10 @@ public class ConferenceActivity extends Activity {
 				.getInstance().getCurrentUserId()) ? true : false;
 
 		isMuteCamera = true;
+		
+		if (confGroup.getOwnerUser().getmUserId() != GlobalHolder.getInstance().getCurrentUserId()) {
+			mChairmanControl.setVisibility(View.INVISIBLE);
+		}
 	}
 
 	/**
@@ -1036,12 +1039,15 @@ public class ConferenceActivity extends Activity {
 			if (mControlState == PermissionState.APPLYING) {
 				mRequestButtonName.setTextColor(mContext.getResources().getColor(R.color.conference_host_requesting_text_color));
 				mRequestButtonImage.setImageResource(R.drawable.host_requesting);
+				mRequestButtonName.setText(R.string.confs_title_button_request_host_name);
 			} else if (mControlState == PermissionState.GRANTED) {
 				mRequestButtonName.setTextColor(mContext.getResources().getColor(R.color.conference_acquired_host_text_color));
 				mRequestButtonImage.setImageResource(R.drawable.host_required);
+				mRequestButtonName.setText(R.string.confs_title_button_release_host_name);
 			} else if (mControlState == PermissionState.NORMAL) {
 				mRequestButtonName.setTextColor(mContext.getResources().getColor(R.color.common_item_text_color_black));
 				mRequestButtonImage.setImageResource(R.drawable.host_request);
+				mRequestButtonName.setText(R.string.confs_title_button_request_host_name);
 			}
 
 			int[] pos = new int[2];
@@ -1104,6 +1110,7 @@ public class ConferenceActivity extends Activity {
 							@Override
 							public void onCheckedChanged(
 									CompoundButton buttonView, boolean isChecked) {
+								cb.updateConferenceAttribute(conf, cg.isSyn(), isChecked, null);
 								mChairControlWindow.dismiss();
 							}
 						});
@@ -1312,14 +1319,12 @@ public class ConferenceActivity extends Activity {
 							conf.getId());
 					// load conference attendee list
 					List<Attendee> list = new ArrayList<Attendee>();
-					if (confGroup != null) {
-						List<User> l = confGroup.getUsers();
-						for (User u : l) {
-							Attendee at = new Attendee(u);
-							boolean bt = mAttendeeList.add(at);
-							if (bt) {
-								list.add(at);
-							}
+					List<User> l = confGroup.getUsers();
+					for (User u : l) {
+						Attendee at = new Attendee(u);
+						boolean bt = mAttendeeList.add(at);
+						if (bt) {
+							list.add(at);
 						}
 					}
 					if (mAttendeeContainer != null) {
@@ -1895,6 +1900,32 @@ public class ConferenceActivity extends Activity {
 		}
 		mToast = Toast.makeText(mContext, text, Toast.LENGTH_SHORT);
 		mToast.show();
+	}
+	
+	
+	private void doUpdateSyncEvent(boolean flag, int type) {
+		if (type == 0) {
+			if (mDocContainer != null) {
+				if (flag) {
+					mDocContainer.updateSyncStatus(true);
+				} else {
+					mDocContainer.updateSyncStatus(false);
+				}
+			}
+			cg.setSyn(flag);
+		} else if (type == 1) {
+			cg.setCanInvitation(flag);
+			if (!cg.isCanInvitation()) {
+				View view = initInvitionContainer();
+				if (mSubWindowLayout.getVisibility() == View.VISIBLE && mSubWindowLayout.getChildAt(0) == view) {
+					//close invitation view, remote forbbien invitation
+					showOrHideSubWindow(view);
+					Toast.makeText(mContext,
+							R.string.error_no_permission_to_invitation,
+							Toast.LENGTH_SHORT).show();
+				}
+			}
+		}
 	}
 
 	/**
@@ -2752,14 +2783,7 @@ public class ConferenceActivity extends Activity {
 				updateDocNotification((AsyncResult) (msg.obj), msg.what);
 				break;
 			case DESKTOP_SYNC_NOTIFICATION:
-				int sync = msg.arg1;
-				if (mDocContainer != null) {
-					if (sync == 1) {
-						mDocContainer.updateSyncStatus(true);
-					} else {
-						mDocContainer.updateSyncStatus(false);
-					}
-				}
+				doUpdateSyncEvent(msg.arg1 == 1? true : false, msg.arg2);
 				break;
 
 			case VIDEO_MIX_NOTIFICATION:

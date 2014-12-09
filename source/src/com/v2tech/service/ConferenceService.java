@@ -339,6 +339,35 @@ public class ConferenceService extends DeviceService {
 		Message res = Message.obtain(this, JNI_REQUEST_GRANT_PERMISSION, jniRes);
 		this.sendMessageDelayed(res, 300);
 	}
+	
+	
+	/**
+	 * Update conference attribute
+	 * @param conf
+	 * @param isSync
+	 * @param invitation
+	 * @param caller
+	 */
+	public void updateConferenceAttribute(Conference conf, boolean isSync, boolean invitation, MessageListener caller) {
+		if (conf == null) {
+			if (caller != null) {
+				JNIResponse jniRes = new JNIResponse(
+						JNIResponse.Result.INCORRECT_PAR);
+				sendResult(caller, jniRes);
+			}
+			return;
+		}
+		
+		GroupRequest.getInstance().modifyGroupInfo(
+				GroupType.CONFERENCE.intValue(),
+				conf.getId(),
+				"<conf syncdesktop='" + (isSync ? "1" : "0") + "' inviteuser='"
+						+ (invitation ? "1" : "0") + "'/>");
+
+		JNIResponse jniRes = new RequestPermissionResponse(
+				RequestPermissionResponse.Result.SUCCESS);
+		sendResult(caller, jniRes);
+	}
 
 	/**
 	 * Pause or resume audio.
@@ -609,9 +638,15 @@ public class ConferenceService extends DeviceService {
 				if (cache == null) {
 
 				} else {
-					cache.setSyn(group.isSync);
-					notifyListenerWithPending(KEY_SYNC_LISTNER,
-							(cache.isSyn() ? 1 : 0), 0, null);
+					if (group.isUpdateSync) {
+						cache.setSyn(group.isSync);
+						notifyListenerWithPending(KEY_SYNC_LISTNER,
+								(cache.isSyn() ? 1 : 0), 0, null);
+					} else if (group.isUpdateInvitate) {
+						cache.setCanInvitation(group.canInvitation);
+						notifyListenerWithPending(KEY_SYNC_LISTNER,
+								(group.canInvitation ? 1 : 0), 1, null);
+					}
 
 				}
 

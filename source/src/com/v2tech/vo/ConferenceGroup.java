@@ -2,8 +2,6 @@ package com.v2tech.vo;
 
 import java.util.Date;
 
-import com.V2.jni.V2GlobalEnum;
-
 public class ConferenceGroup extends Group {
 
 	private User mChairMan;

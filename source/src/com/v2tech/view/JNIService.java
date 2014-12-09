@@ -168,8 +168,6 @@ public class JNIService extends Service implements
 	private boolean noNeedBroadcast;
 	private boolean isAcceptApply;
 
-	private List<Long> applyJoinUsers = new ArrayList<Long>();
-
 	private JNICallbackHandler mCallbackHandler;
 
 	// ////////////////////////////////////////

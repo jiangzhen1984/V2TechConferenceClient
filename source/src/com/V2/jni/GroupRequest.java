@@ -6,10 +6,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-
-
-
-
 import com.V2.jni.ind.FileJNIObject;
 import com.V2.jni.ind.GroupQualicationJNIObject;
 import com.V2.jni.ind.V2Document;
@@ -18,8 +14,6 @@ import com.V2.jni.ind.V2User;
 import com.V2.jni.util.EscapedcharactersProcessing;
 import com.V2.jni.util.V2Log;
 import com.V2.jni.util.XmlAttributeExtractor;
-import com.v2tech.service.GlobalHolder;
-import com.v2tech.vo.User;
 
 
 public class GroupRequest {
@@ -627,12 +621,28 @@ public class GroupRequest {
 			String sync = XmlAttributeExtractor.extract(sXml, " syncdesktop='",
 					"'");
 			if (sync == null || "".equals(sync)) {
-				V2Log.e("Now only support syncdesktop attribute, doens't find such attirbute ");
-				return;
+				group.isUpdateSync = false;
+			} else {
+				group.isUpdateSync = true;
+				if ("1".equalsIgnoreCase(sync)) {
+					group.isSync = true;
+				}
 			}
-			if ("1".equalsIgnoreCase(sync)) {
-				group.isSync = true;
+			
+			
+			
+			String invite = XmlAttributeExtractor.extractAttribute(sXml, "inviteuser");
+			if (invite == null || "".equals(invite)) {
+				group.isUpdateInvitate = false;
+			} else {
+				group.isUpdateInvitate = true;
+				if ("1".equalsIgnoreCase(invite)) {
+					group.canInvitation = true;
+				}
 			}
+			
+			
+
 		} else if (groupType == V2GlobalEnum.GROUP_TYPE_DISCUSSION) {
 			String name = XmlAttributeExtractor.extractAttribute(sXml, "name");
 			group.name = name;
