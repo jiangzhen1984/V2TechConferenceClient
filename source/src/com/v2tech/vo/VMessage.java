@@ -9,7 +9,6 @@ import java.util.Locale;
 import java.util.UUID;
 
 import com.V2.jni.V2GlobalEnum;
-import com.V2.jni.util.EscapedcharactersProcessing;
 import com.V2.jni.util.V2Log;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.view.conversation.MessageBodyView;
@@ -348,10 +347,17 @@ public class VMessage {
 		StringBuilder sb = new StringBuilder();
 		sb.append("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n")
 				.append("<TChatData IsAutoReply=\"False\" MessageID=\""
-						+ this.mUUID + "\">\n")
-				.append("<FontList>\n")
-				.append("<TChatFont Color=\"0\" Name=\"Tahoma\" Size=\"9\" Style=\"\"/>")
-				.append("</FontList>\n").append("<ItemList>\n");
+						+ this.mUUID + "\">\n");
+		
+		sb.append("<FontList>\n");
+		sb.append("<TChatFont Color=\"0\" Name=\"Tahoma\" Size=\"9\" Style=\"\"/>");
+		for (VMessageAbstractItem item : itemList) {
+			if(item.getType() == VMessageAbstractItem.ITEM_TYPE_LINK_TEXT){
+				sb.append("<TChatFont Color=\"14127617\" Name=\"Tahoma\" Size=\"9\" Style=\"fsUnderline\"/>");
+			}
+		}
+		sb.append("</FontList>\n").append("<ItemList>\n");
+		
 		for (VMessageAbstractItem item : itemList) {
 			sb.append(item.toXmlItem());
 		}
@@ -360,6 +366,6 @@ public class VMessage {
 		if(V2Log.isDebuggable) {
 			V2Log.d(sb.toString());
 		}
-		return EscapedcharactersProcessing.convertAmp(sb.toString());
+		return sb.toString();
 	}
 }

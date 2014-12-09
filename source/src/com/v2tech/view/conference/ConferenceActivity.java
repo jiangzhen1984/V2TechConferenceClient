@@ -335,7 +335,7 @@ public class ConferenceActivity extends Activity {
 		audioManager = (AudioManager) mContext
 				.getSystemService(Context.AUDIO_SERVICE);
 		isBluetoothHeadsetConnected = audioManager.isBluetoothA2dpOn();
-		audioManager.setMode(AudioManager.MODE_IN_CALL);
+//		audioManager.setMode(AudioManager.MODE_IN_CALL);
 		// Broadcast for user joined conference, to inform that quit P2P
 		// conversation
 		broadcastForJoined();

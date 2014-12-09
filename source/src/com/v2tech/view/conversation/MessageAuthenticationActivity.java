@@ -31,6 +31,7 @@ import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.AbsListView;
+import android.widget.HeaderViewListAdapter;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -543,11 +544,13 @@ public class MessageAuthenticationActivity extends Activity {
 		intentFilter.addAction(JNIService.JNI_BROADCAST_GROUP_USER_REMOVED);
 		intentFilter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
 		intentFilter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
+		intentFilter.addCategory(PublicIntent.DEFAULT_CATEGORY);
 		registerReceiver(friendAuthenticationBroadcastReceiver, intentFilter);
 
 		mCrowdAuthenticationBroadcastReceiver = new CrowdAuthenticationBroadcastReceiver();
 		intentFilter = new IntentFilter();
 		intentFilter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
+		intentFilter.addCategory(PublicIntent.DEFAULT_CATEGORY);
 		intentFilter
 				.addAction(JNIService.JNI_BROADCAST_NEW_QUALIFICATION_MESSAGE);
 		intentFilter.addAction(JNIService.JNI_BROADCAST_GROUP_JOIN_FAILED);
@@ -983,7 +986,7 @@ public class MessageAuthenticationActivity extends Activity {
 				viewTag.tvAccessOrNo.setVisibility(View.GONE);
 				break;
 			case 6:// 6拒绝了你为好友
-				viewTag.tvAuthenticationMessage.setText("拒绝了你为好友");
+				viewTag.tvAuthenticationMessage.setText("拒绝了你的好友申请");
 				viewTag.bAccess.setVisibility(View.GONE);
 				viewTag.tvAccessOrNo.setVisibility(View.GONE);
 				break;

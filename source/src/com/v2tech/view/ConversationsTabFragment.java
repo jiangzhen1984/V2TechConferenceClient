@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
@@ -63,6 +64,7 @@ import com.v2tech.R;
 import com.v2tech.db.ContentDescriptor;
 import com.v2tech.db.ConversationProvider;
 import com.v2tech.db.DataBaseContext;
+import com.v2tech.db.VerificationProvider;
 import com.v2tech.service.BitmapManager;
 import com.v2tech.service.ConferencMessageSyncService;
 import com.v2tech.service.ConferenceService;
@@ -81,6 +83,7 @@ import com.v2tech.view.bo.GroupUserObject;
 import com.v2tech.view.conference.ConferenceActivity;
 import com.v2tech.view.conference.GroupLayout;
 import com.v2tech.view.contacts.VoiceMessageActivity;
+import com.v2tech.view.contacts.add.AddFriendHistroysHandler;
 import com.v2tech.view.conversation.CommonCallBack;
 import com.v2tech.view.conversation.ConversationP2PAVActivity;
 import com.v2tech.view.conversation.MessageAuthenticationActivity;
@@ -147,7 +150,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 
 	private List<ScrollItem> mItemList = new ArrayList<ScrollItem>();
 	private List<ScrollItem> searchList = new ArrayList<ScrollItem>();
-
+	
 	private LocalHandler mHandler = new LocalHandler();
 
 	/**
@@ -350,7 +353,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 			intentFilter
 					.addAction(JNIService.JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION);
 			intentFilter
-			.addAction(PublicIntent.BROADCAST_USER_COMMENT_NAME_NOTIFICATION);
+				.addAction(PublicIntent.BROADCAST_USER_COMMENT_NAME_NOTIFICATION);
 
 			if (mCurrentTabFlag == Conversation.TYPE_CONFERNECE) {
 				intentFilter
@@ -529,7 +532,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 
         boolean isCrowd = false;
         if (crowdTime > friendTime) {
-            updateCrowdVerificationConversation(nestQualification, false);
+            updateCrowdVerificationConversation(false);
             isCrowd = true;
         } else
             updateFriendVerificationConversation(friendNode);
@@ -691,9 +694,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 				initVerificationItem();
 				((ConversationFirendAuthenticationData) verificationMessageItemData)
 						.setMessageType(ConversationFirendAuthenticationData.VerificationMessageType.CROWD_TYPE);
-				VMessageQualification nestQualification = MessageLoader
-						.getNewestCrowdVerificationMessage();
-				updateCrowdVerificationConversation(nestQualification, false);
+				updateCrowdVerificationConversation(false);
 				break;
 			default:
 				break;
@@ -1350,20 +1351,15 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 		updateUnreadConversation(verificationItem);
 	}
 
-	private void updateCrowdVerificationConversation(VMessageQualification msg) {
-		updateCrowdVerificationConversation(msg, true);
-	}
-
 	/**
 	 * update verification conversation content
-	 * 
-	 * @param msg
 	 * @param isFresh
-	 *            load from database , no fresh
+	 * 			是否要刷新Conversation会话的状态(红点，声音)
 	 */
-	private void updateCrowdVerificationConversation(VMessageQualification msg,
-			boolean isFresh) {
+	private void updateCrowdVerificationConversation(boolean isFresh) {
 
+		VMessageQualification msg = MessageLoader
+                .getNewestCrowdVerificationMessage();
 		if (msg == null) {
 			V2Log.e(TAG,
 					"update Friend verification conversation failed ... given VMessageQualification is null");
@@ -1691,7 +1687,8 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 	}
 	
 	private void updateDiscussionGroupName(){
-		for (ScrollItem item : mItemList) {
+		for (int i = 0 ; i < mItemList.size() ; i++) {
+			ScrollItem item = mItemList.get(i);
 			if(item.cov.getType() == V2GlobalEnum.GROUP_TYPE_DISCUSSION){
 				final GroupLayout currentGroupLayout = ((GroupLayout) item.gp);
 				final DiscussionConversation discussion = (DiscussionConversation) item.cov;
@@ -1732,15 +1729,20 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 	
 	/**
 	 * Remove conversation from mConvList by id.
-	 * 
 	 * @param id
+	 * @param isDeleteVerification
+	 * 			在删除会话的时候，是否连带删除验证消息
 	 */
-	private void removeConversation(long id) {
+	private void removeConversation(long id , boolean isDeleteVerification) {
 		boolean flag = false;
 		for (int i = 0; i < mItemList.size(); i++) {
 			Conversation temp = mItemList.get(i).cov;
 			if (temp.getExtId() == id) {
 				flag = mItemList.remove(mItemList.get(i));
+				
+				mItemList.get(i).cov.setReadFlag(Conversation.READ_FLAG_READ);
+				updateUnreadConversation(mItemList.get(i));
+				
 				if (mCurrentTabFlag == V2GlobalEnum.GROUP_TYPE_USER) {
 					if (temp.getType() != Conversation.TYPE_VOICE_MESSAGE
 							&& temp.getType() != Conversation.TYPE_VERIFICATION_MESSAGE) {
@@ -1776,10 +1778,10 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 			}
 		}
 		
-		if(flag)
+		if(!flag)
 			V2Log.e(TAG, "Delete Conversation Failed...id is : " + id);
 		
-		if(mCurrentTabFlag == V2GlobalEnum.GROUP_TYPE_USER){
+		if(mCurrentTabFlag == V2GlobalEnum.GROUP_TYPE_USER && isDeleteVerification){
 			// clear the crowd group all verification database messges
 			int friend = MessageLoader.deleteFriendVerificationMessage(id);
 			int group = MessageLoader.deleteCrowdVerificationMessage(id);
@@ -1793,7 +1795,6 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 			boolean voiceflag = MessageLoader.queryVoiceMessages(id);
 			if(voices > 0 && !voiceflag)
 				mItemList.remove(voiceItem);
-			
 		}
 		Collections.sort(mItemList);
 		adapter.notifyDataSetChanged();
@@ -1920,19 +1921,22 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 		adapter.notifyDataSetChanged();
 	}
 	
+	/**
+	 * 当所有信息都已接收完毕，检测消息界面中存在的讨论组和群会话，它们是否存在，如不删除点击就会报错
+	 */
 	private void checkGroupIsExist(){
 		
-		for (ScrollItem item : mItemList) {
-			Conversation cov = item.cov;
+		for (int i = 0 ; i < mItemList.size() ; i++) {
+			Conversation cov = mItemList.get(i).cov;
 			if(cov.getType() == V2GlobalEnum.GROUP_TYPE_CROWD){
 				Group crowd = GlobalHolder.getInstance().getGroupById(V2GlobalEnum.GROUP_TYPE_CROWD, cov.getExtId());
 				if(crowd == null)
-					removeConversation(cov.getExtId());
+					removeConversation(cov.getExtId() , true);
 			}
 			else if(cov.getType() == V2GlobalEnum.GROUP_TYPE_DISCUSSION){
 				Group crowd = GlobalHolder.getInstance().getGroupById(V2GlobalEnum.GROUP_TYPE_DISCUSSION, cov.getExtId());
 				if(crowd == null)
-					removeConversation(cov.getExtId());
+					removeConversation(cov.getExtId() , true);
 			}
 		}
 	}
@@ -2235,7 +2239,6 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 		@Override
 		public boolean onItemLongClick(AdapterView<?> adapter, View v, int pos,
 				long id) {
-			final Conversation cov = mItemList.get(pos).cov;
 			String[] item;
 			currentPosition = pos;
 			if (mCurrentTabFlag == Conversation.TYPE_GROUP) {
@@ -2250,7 +2253,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 							R.string.conversations_delete_conversaion) };
 
 				AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-				builder.setTitle(cov.getName()).setItems(item,
+				builder.setTitle(mItemList.get(pos).cov.getName()).setItems(item,
 						new DialogInterface.OnClickListener() {
 							public void onClick(DialogInterface dialog,
 									int which) {
@@ -2261,19 +2264,19 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 												.getGroupById(
 														GroupType.CONFERENCE
 																.intValue(),
-														cov.getExtId());
+																mItemList.get(currentPosition).cov.getExtId());
 										// If group is null, means we have
 										// removed
 										// this conversaion
 										if (g != null) {
 											cb.quitConference(new Conference(
-													cov.getExtId(), g
+													mItemList.get(currentPosition).cov.getExtId(), g
 															.getOwnerUser()
 															.getmUserId()),
 													null);
 										}
 									case Conversation.TYPE_CONTACT:
-										removeConversation(cov.getExtId());
+										removeConversation(mItemList.get(currentPosition).cov.getExtId() , false);
 										break;
 									}
 								}
@@ -2344,12 +2347,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 			if (mIsStartedSearch) {
 				return searchList.get(position).gp;
 			} else {
-				if (currentPosition < mItemList.size()) {
-
-					return mItemList.get(position).gp;
-				} else {
-					return convertView;
-				}
+				return mItemList.get(position).gp;
 			}
 		}
 
@@ -2396,7 +2394,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 						.getBooleanExtra("isDelete", false);
 				// delete Empty message conversation
 				if (isNeedDelete) {
-					removeConversation(uao.getExtId());
+					removeConversation(uao.getExtId() , false);
 					return;
 				}
 
@@ -2624,7 +2622,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 						mCurrentSubTab == SUB_TAB_DISCUSSION) ||
 					(V2GlobalEnum.GROUP_TYPE_CROWD == obj.getmType() &&
 						mCurrentSubTab == SUB_TAB_CROWD)){
-					removeConversation(obj.getmGroupId());
+					removeConversation(obj.getmGroupId() , true);
 				}
 			} else if (JNIService.JNI_BROADCAST_GROUP_UPDATED.equals(intent
 					.getAction())) {
@@ -2658,7 +2656,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 					.equals(intent.getAction())) {
 				long cid = intent.getLongExtra("groupId", -1l);
 				if(mCurrentSubTab == SUB_TAB_DISCUSSION)
-					removeConversation(cid);
+					removeConversation(cid , true);
 //				Message.obtain(mHandler, QUIT_DISCUSSION_BOARD_DONE,
 //                        cid).sendToTarget();
 			} else if (PublicIntent.BROADCAST_USER_COMMENT_NAME_NOTIFICATION
@@ -2731,8 +2729,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 					.equals(intent.getAction())) {
 				long confId = intent.getLongExtra("gid", 0);
 				// Remove conference conversation from list
-				removeConversation(confId);
-
+				removeConversation(confId , false);
 				// This broadcast is sent after create conference successfully
 			} else if (PublicIntent.BROADCAST_NEW_CONFERENCE_NOTIFICATION
 					.equals(intent.getAction())) {
@@ -2820,17 +2817,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 							"update crowd verification message content failed... get 0 message id");
 					return;
 				}
-
-				VMessageQualification msg = MessageBuilder
-						.queryQualMessageById(mContext, msgId);
-				if (msg == null) {
-					V2Log.d(TAG,
-							"update crowd verification message content failed... get null , id is : " + msgId);
-					return;
-				}
-
-				msg.setReadState(VMessageQualification.ReadState.UNREAD);
-				updateCrowdVerificationConversation(msg);
+				updateCrowdVerificationConversation(true);
 			} else if (PublicIntent.BROADCAST_CROWD_DELETED_NOTIFICATION
 					.equals(intent.getAction())
 					|| intent.getAction().equals(
@@ -2843,7 +2830,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 				}
 				
 				GlobalHolder.getInstance().removeGroup(GroupType.fromInt(obj.getmType()), obj.getmGroupId());
-				removeConversation(obj.getmGroupId());
+				removeConversation(obj.getmGroupId() , true);
 			} else if ((JNIService.BROADCAST_CROWD_NEW_UPLOAD_FILE_NOTIFICATION
 					.equals(intent.getAction()))) {
 				long groupID = intent.getLongExtra("groupID", -1l);
@@ -2898,11 +2885,9 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 				for (ScrollItem item : mItemList) {
 					Conversation con = item.cov;
 					if (con.getType() == Conversation.TYPE_VERIFICATION_MESSAGE) {
-						removeConversation(guo.getmGroupId());
-						removeConversation(guo.getmUserId());
-                        if(con.getType() == Conversation.TYPE_VERIFICATION_MESSAGE){
-                            updateVerificationConversation();
-                        }
+						removeConversation(guo.getmGroupId() , true);
+						removeConversation(guo.getmUserId() , true);
+                        updateVerificationConversation();
 						adapter.notifyDataSetChanged();
 						break;
 					}
@@ -2917,7 +2902,9 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 				i.putExtra("gid", "gid");
 				i.putExtra("gtype", "gtype");
 				mContext.sendBroadcast(i);
-				
+				//检测是否有等待验证的好友
+				checkWaittingFriendExist();
+				//检测群组是否存在
 				checkGroupIsExist();
 		    	//只有讨论组没有延迟广播
 				updateDiscussionGroupName();
@@ -2942,6 +2929,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 						}
 					}
 				}
+				updateVerificationConversation();
 			}
 		}
 	}
@@ -3009,6 +2997,38 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 		}
 		updateUnreadConversation(verificationItem);
 		return msg;
+	}
+
+	public void checkWaittingFriendExist() {
+		List<Long> remoteUsers = VerificationProvider.getFriendWaittingVerifyMessage();
+		if(remoteUsers != null && remoteUsers.size() > 0){
+			for (int i = 0; i < remoteUsers.size(); i++) {
+				boolean isFinish = false;
+				User user = GlobalHolder.getInstance().getUser(remoteUsers.get(i));
+				if(user.isDirty()){
+					break;
+				}
+				
+				Set<Group> belongsGroup = user.getBelongsGroup();
+				Iterator<Group> iterator = belongsGroup.iterator();
+				while(iterator.hasNext()){
+					Group next = iterator.next();
+					if(next.getGroupType() == GroupType.CONTACT){
+						isFinish = true;
+						break;
+					}
+				}
+				
+				if(isFinish){
+					AddFriendHistroysHandler.becomeFriendHanler(
+							mContext, user);
+					AddFriendHistorieNode node = MessageLoader.getNewestFriendVerificationMessage();
+					if(node != null){
+						updateFriendVerificationConversation(user.getName() , node);
+					}
+				}
+			}
+		}
 	}
 
 	class LocalHandler extends Handler {
@@ -3117,8 +3137,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 				break;
 			case UPDATE_VERIFICATION_MESSAGE:
 				if (msg.arg1 == VerificationMessageType.CROWD_TYPE.intValue()) {
-					VMessageQualification message = (VMessageQualification) msg.obj;
-					updateCrowdVerificationConversation(message);
+					updateCrowdVerificationConversation(true);
 				} else {
 					AddFriendHistorieNode node = (AddFriendHistorieNode) msg.obj;
 					updateFriendVerificationConversation(node);

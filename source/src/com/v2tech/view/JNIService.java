@@ -23,6 +23,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.Parcelable;
 import android.support.v4.util.LongSparseArray;
+import android.text.TextUtils;
 import android.widget.Toast;
 
 import com.V2.jni.AudioRequest;
@@ -399,7 +400,7 @@ public class JNIService extends Service implements
 					for (User tu : lu) {
 						User existU = GlobalHolder.getInstance().putUser(
 								tu.getmUserId(), tu);
-                        if(existU.isDirty() && !GlobalHolder.getInstance().getGlobalState().isGroupLoaded()) {
+                        if(existU.isDirty() && GlobalHolder.getInstance().getGlobalState().isGroupLoaded()) {
                             V2Log.e(TAG , "The User that id is : " + existU.getmUserId() + " dirty!" +
                                     " Need to get user base infos");
                             ImRequest.getInstance().getUserBaseInfo(existU.getmUserId());
@@ -669,7 +670,6 @@ public class JNIService extends Service implements
 	}
 
 	class GroupRequestCB extends GroupRequestCallbackAdapter {
-		private static final String TAG = "GroupRequestCB";
 		private JNICallbackHandler mCallbackHandler;
 		private ContactsGroupRequestCBHandler contactsGroupHandler;
 
@@ -781,7 +781,12 @@ public class JNIService extends Service implements
 				User owner = GlobalHolder.getInstance().getUser(
 						group.creator.uid);
 				if (owner.isDirty()) {
-					owner.setName(group.creator.name);
+					if(!TextUtils.isEmpty(owner.getName()) && TextUtils.isEmpty(group.creator.name)){
+						V2Log.e(TAG, "OnInviteJoinGroupCallback --> Get Create User Name is empty and older user"
+								+ "name not empty , dirty is mistake");
+					}
+					else
+						owner.setName(group.creator.name);
 				}
 
 				CrowdGroup cg = new CrowdGroup(group.id, group.name, owner);
@@ -963,7 +968,7 @@ public class JNIService extends Service implements
 				i.setAction(PublicIntent.BROADCAST_CROWD_DELETED_NOTIFICATION);
 				i.addCategory(PublicIntent.DEFAULT_CATEGORY);
 				i.putExtra("group", new GroupUserObject(V2GlobalEnum.GROUP_TYPE_CROWD, nGroupID, -1));
-				sendBroadcast(i);
+				sendBroadcast(i, null);
 
 			} else if (groupType == GroupType.DISCUSSION.intValue()) {
 				GlobalHolder.getInstance().removeGroup(GroupType.fromInt(V2GlobalEnum.GROUP_TYPE_DISCUSSION), nGroupID);
@@ -1050,7 +1055,6 @@ public class JNIService extends Service implements
 //				}
 //			}
 
-
 			if (gType == GroupType.CONTACT) {
 				contactsGroupHandler.OnAddContactsGroupUserInfoCallback(
 						nGroupID, newUser);
@@ -1058,13 +1062,15 @@ public class JNIService extends Service implements
 
 				long id = -1;
 				if (user.uid != GlobalHolder.getInstance().getCurrentUserId()) {
-						boolean waitMessageExist = MessageBuilder
-							.queryWaitingQualMessageById(user.uid);
-					if (waitMessageExist) {
+					long waitMessageExist = MessageBuilder
+							.queryInviteWaitingQualMessageById(user.uid);
+					if (waitMessageExist != -1) {
 						V2Log.e("CrowdCreateActivity  -->Delete  VMessageQualification Cache Object Successfully!");
 						// if (CrowdGroupService.isLocalInvite) {
-						MessageBuilder.deleteQualMessage(mContext, GlobalHolder
-								.getInstance().getUser(user.uid));
+						boolean isTrue = MessageBuilder.deleteInviteWattingQualMessage(mContext, waitMessageExist);
+						if(!isTrue){
+							V2Log.e(TAG, "delete local invite waitting qualication message failed... cols id is :" + waitMessageExist);
+						}
 						id = MessageBuilder.updateQualicationMessageState(
 								nGroupID, user.uid, new GroupQualicationState(
 										Type.CROWD_APPLICATION,
@@ -1206,6 +1212,14 @@ public class JNIService extends Service implements
 				intent.addCategory(JNI_BROADCAST_CATEGROY);
 				sendOrderedBroadcast(intent, null);
 			} else if (gType == GroupType.CHATING) {
+				long waitMessageExist = MessageBuilder
+						.queryInviteWaitingQualMessageById(obj.userID);
+				if (waitMessageExist != -1) {
+					boolean isTrue = MessageBuilder.deleteInviteWattingQualMessage(mContext, waitMessageExist);
+					if(!isTrue){
+						V2Log.e(TAG, "delete local invite waitting qualication message failed... cols id is :" + waitMessageExist);
+					}
+				}
 				long id = MessageBuilder
 						.updateQualicationMessageState(
 								obj.groupID,

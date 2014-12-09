@@ -40,6 +40,7 @@ import com.V2.jni.VideoRequest;
 import com.V2.jni.WBRequest;
 import com.V2.jni.util.V2Log;
 import com.v2tech.R;
+import com.v2tech.db.VerificationProvider;
 import com.v2tech.util.AlgorithmUtil;
 import com.v2tech.util.BitmapUtil;
 import com.v2tech.util.CrashHandler;
@@ -101,6 +102,7 @@ public class MainApplication extends Application {
 		initConfFile();
 
 		MessageBuilder.init(getApplicationContext());
+		VerificationProvider.init(getApplicationContext());
 		MessageLoader.context = getApplicationContext();
         BitmapUtil.context = getApplicationContext();
 

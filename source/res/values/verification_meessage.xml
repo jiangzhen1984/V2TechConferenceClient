@@ -21,8 +21,10 @@
     <string name="crowd_invitation_reject_titile">拒绝理由</string>
     
     <string name="crowd_applicant_title">群申请</string>
+    <string name="crowd_applicant_done">已加入</string>
     <string name="crowd_applicant_invite_hint">您的邀请已成功发送</string>
     <string name="crowd_applicant_invite_finish">您已加入该群</string>
+    <string name="crowd_applicant_invite_finish_failed">群组加入失败</string>
     <string name="crowd_applicant_invite_never">该群不允许任何人加入</string>
     <string name="crowd_application_invite_button_name">邀请</string>
     <string name="crowd_application_accept_button_name">同意</string>
@@ -41,5 +43,5 @@
      <string name="friend_relation">你和</string>
      <string name="friend_becomed">成为了好友</string>
      
-     <string name="friend_was_reject_apply">拒绝你的好友请求</string>
+     <string name="friend_was_reject_apply">拒绝你的好友申请</string>
 </resources>

@@ -1,5 +1,7 @@
 package com.v2tech.vo;
 
+import com.V2.jni.util.EscapedcharactersProcessing;
+
 
 public class VMessageLinkTextItem extends VMessageAbstractItem {
 	
@@ -35,17 +37,10 @@ public class VMessageLinkTextItem extends VMessageAbstractItem {
 	}
 
 	public String toXmlItem() {
-		String tmp = new String(text);
-		tmp = tmp.replaceAll("&", "&amp;");
-		tmp = tmp.replaceAll("<", "&lt;");
-		tmp = tmp.replaceAll(">", "&gt;");
-		tmp = tmp.replaceAll("'", "&apos;");
-		tmp = tmp.replaceAll("\"", "&quot;");
-		
 		String str = "<TLinkTextChatItem NewLine=\""
 				+ (isNewLine ? "True" : "False")
-				+ "\" FontIndex=\"0\" Text=\"" + tmp + "\" "
-				+ " URL=\""+url+"\" LinkType=\"lteHttp\" />";
+				+ "\" FontIndex=\"1\" Text=\"" + EscapedcharactersProcessing.convert(text) + "\" "
+				+ " URL=\""+EscapedcharactersProcessing.convert(url)+"\" LinkType=\"lteHttp\" />";
 		return str;
 	}
 

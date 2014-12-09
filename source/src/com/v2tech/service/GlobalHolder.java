@@ -24,6 +24,7 @@ import com.v2tech.vo.ContactGroup;
 import com.v2tech.vo.CrowdGroup;
 import com.v2tech.vo.DiscussionGroup;
 import com.v2tech.vo.Group;
+import com.v2tech.vo.CrowdGroup.AuthType;
 import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.OrgGroup;
 import com.v2tech.vo.User;
@@ -156,8 +157,6 @@ public class GlobalHolder {
 				cu.updateUser(false);
 				return cu;
 			}
-			//Update user property for received user information
-			u.updateUser(true);
 			mUserHolder.put(key, u);
 			
 			Bitmap avatar = mAvatarBmHolder.get(key);
@@ -226,6 +225,7 @@ public class GlobalHolder {
 					g = new CrowdGroup(vg.id, vg.name, owner);
 					((CrowdGroup) g).setBrief(vg.brief);
 					((CrowdGroup) g).setAnnouncement(vg.announce);
+					((CrowdGroup) g).setAuthType(AuthType.fromInt(vg.authType));
 					mCrowdGroup.add(g);
 				}
 			} else if (gType == V2GlobalEnum.GROUP_TYPE_CONFERENCE) {

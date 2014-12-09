@@ -31,9 +31,7 @@ import android.widget.TextView;
 import com.V2.jni.util.V2Log;
 import com.v2tech.R;
 import com.v2tech.service.GlobalHolder;
-import com.v2tech.util.GlobalState;
 import com.v2tech.util.SearchUtils;
-import com.v2tech.view.ConversationsTabFragment.ScrollItem;
 import com.v2tech.vo.Group;
 import com.v2tech.vo.User;
 
@@ -814,7 +812,7 @@ public class GroupListView extends ListView {
 	@Override
 	public void setFilterText(String filterText) {
 		if (TextUtils.isEmpty(filterText)) {
-			clearTextFilter();
+			return ;
 		} else {
 			if (this.isTextFilterEnabled()) {
 				mIsInFilter = true;
@@ -1079,9 +1077,6 @@ public class GroupListView extends ListView {
 
 	}
 
-	boolean isFrist = true;
-	List<ItemData> mBaseTempList;
-	
 	/**
 	 * Use to query item
 	 * 
@@ -1090,34 +1085,45 @@ public class GroupListView extends ListView {
 	 */
 	class LocalFilter extends Filter {
 
+		int lastLength = 0;
 		@Override
 		protected FilterResults performFiltering(CharSequence constraint) {
 			FilterResults fr = new FilterResults();
-			List<ItemData> list = null;
 			List<User> filter = null;
+			List<ItemData> list = null;
 			List<User> searchUser = null;
-			if (constraint == null || constraint.toString().isEmpty()) {
+			if (TextUtils.isEmpty(constraint.toString())) {
 				list = mBaseList;
 				SearchUtils.clearAll();
-				isFrist = true;
 			} else {
-				if(isFrist){
-					mBaseTempList = new ArrayList<GroupListView.ItemData>();
-					mBaseTempList.addAll(mBaseList);
-					isFrist = false;
-				}
 //				list = new ArrayList<ItemData>();
 //				for (Group g : mGroupList) {
 //					search(list, g, constraint);
 //				}
 //				Collections.sort(list);
 				list = new ArrayList<ItemData>();
-				if(mFilterList != null && mFilterList.size() != mBaseTempList.size()){
+				if(mFilterList != null && mFilterList.size() != mBaseList.size()){
 					filter = new ArrayList<User>();
-					for (ItemData itemData : mFilterList) {
-						if(itemData instanceof UserItemData){
-							UserItemData data = (UserItemData) itemData;
-							filter.add((User) data.getObject());
+					if(mFilterList.size() <= 0){
+						for (ItemData itemData : mBaseList) {
+							if(itemData instanceof UserItemData){
+								UserItemData data = (UserItemData) itemData;
+								filter.add((User) data.getObject());
+							} else{
+								GroupItemData data = (GroupItemData) itemData;
+								filter.addAll(((Group)data.getObject()).getUsers());
+							}
+						}
+					}
+					else{
+						for (ItemData itemData : mFilterList) {
+							if(itemData instanceof UserItemData){
+								UserItemData data = (UserItemData) itemData;
+								filter.add((User) data.getObject());
+							} else{
+								GroupItemData data = (GroupItemData) itemData;
+								filter.addAll(((Group)data.getObject()).getUsers());
+							}
 						}
 					}
 					searchUser = SearchUtils.startGroupUserFilterSearch(filter, constraint);

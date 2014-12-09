@@ -514,7 +514,7 @@ public class LoginActivity extends Activity {
 					V2Toast.makeText(mContext, R.string.error_no_resource,
 							V2Toast.LENGTH_LONG).show();
 				} else if (rlr.getResult() == JNIResponse.Result.LOGED_OVER_TIME) {
-					V2Toast.makeText(mContext, R.string.error_time_out,
+					V2Toast.makeText(mContext, R.string.error_resource_over_time,
 							V2Toast.LENGTH_LONG).show();
 				}else if (rlr.getResult() == JNIResponse.Result.SERVER_REJECT) {
 					V2Toast.makeText(mContext, R.string.error_connect_to_server,

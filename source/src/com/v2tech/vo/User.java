@@ -115,7 +115,7 @@ public class User implements Comparable<User> {
 		isCurrentLoggedInUser = false;
 		this.mStatus = Status.OFFLINE;
 		initAbbr();
-		isDirty = true;
+		this.isDirty = true;
 	}
 
 	private void initAbbr() {
@@ -606,9 +606,11 @@ public class User implements Comparable<User> {
 					u.setAuthtype(Integer.parseInt(authType));
 				}
 
+				//如果此时是服务器第一次传来的数据，则构造User的时候，需要把dirty属性置为false
+				if(!GlobalHolder.getInstance().getGlobalState().isGroupLoaded())
+					u.updateUser(false);
 				l.add(u);
 			}
-
 		} catch (ParserConfigurationException e) {
 			e.printStackTrace();
 		} catch (SAXException e) {
@@ -624,7 +626,6 @@ public class User implements Comparable<User> {
 				}
 			}
 		}
-
 		return l;
 	}
 

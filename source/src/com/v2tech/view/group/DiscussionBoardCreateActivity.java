@@ -122,6 +122,8 @@ public class DiscussionBoardCreateActivity extends Activity {
 		mGroupConfirmButton = (TextView) findViewById(R.id.ws_common_activity_title_right_button);
 		mGroupConfirmButton.setText(R.string.common_confirm_name);
 		mGroupConfirmButton.setOnClickListener(confirmButtonListener);
+		mGroupConfirmButton.setClickable(false);
+		mGroupConfirmButton.setTextColor(getResources().getColor(R.color.conf_create_button_unclick_color));
 
 		new LoadContactsAT().execute();
 
@@ -200,6 +202,14 @@ public class DiscussionBoardCreateActivity extends Activity {
 			addAttendee(u);
 		}
 
+		if(mUserList.size() > 0){
+			mGroupConfirmButton.setClickable(true);
+			mGroupConfirmButton.setTextColor(getResources().getColor(R.color.conf_create_button_color));
+		}
+		else{
+			mGroupConfirmButton.setClickable(false);
+			mGroupConfirmButton.setTextColor(getResources().getColor(R.color.conf_create_button_unclick_color));
+		}
 	}
 
 	private void removeAttendee(User u) {

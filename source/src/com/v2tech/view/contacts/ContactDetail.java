@@ -146,10 +146,12 @@ public class ContactDetail extends Activity implements OnTouchListener {
 		if (configuration.smallestScreenWidthDp > 600) {
 			isPad = true;
 		}
+		
 		fromActivity = this.getIntent().getStringExtra("fromActivity");
 		if ((fromActivity != null)
 				&& (fromActivity.equals("MessageAuthenticationActivity"))) {
 			mUid = this.getIntent().getLongExtra("remoteUserID", 0);
+			mItemsContainer.setVisibility(View.GONE);
 		} else {
 			mUid = this.getIntent().getLongExtra("uid", 0);
 			tvTitle.setText("个人资料");

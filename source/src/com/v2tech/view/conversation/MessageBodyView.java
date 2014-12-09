@@ -492,6 +492,7 @@ public class MessageBodyView extends LinearLayout {
 		});
 
 		audioRoot.setOnLongClickListener(messageLongClickListener);
+		audioRoot.setOnTouchListener(touchListener);
 		mContentContainer.addView(audioRoot, new LinearLayout.LayoutParams(
 				LinearLayout.LayoutParams.WRAP_CONTENT,
 				LinearLayout.LayoutParams.WRAP_CONTENT));
@@ -517,6 +518,7 @@ public class MessageBodyView extends LinearLayout {
 		updateFileItemView(item, fileRootView);
 		fileRootView.setOnClickListener(fileMessageItemClickListener);
 		fileRootView.setOnLongClickListener(messageLongClickListener);
+		fileRootView.setOnTouchListener(touchListener);
 
 		fileRootView.setTag(item);
 		mContentContainer.setGravity(Gravity.CENTER_VERTICAL);

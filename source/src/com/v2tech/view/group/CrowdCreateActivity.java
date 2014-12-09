@@ -491,6 +491,13 @@ public class CrowdCreateActivity extends Activity {
 	
 	private void saveQualication(User user){
 
+		long waitMessageExist = MessageBuilder.queryInviteWaitingQualMessageById(user.getmUserId());
+		if (waitMessageExist != -1) {
+			V2Log.e("CrowdCreateActivity  --> Save VMessageQualification Cache Object failed , "
+					+ "Because already exist in database...groupID is : " + crowd.getmGId() + " userID is : " + user.getmUserId());
+			return ;
+		}
+		
 		if(crowd == null)
 			crowd = new CrowdGroup(0, "", null);
 		VMessageQualificationApplicationCrowd crowdQuion = new VMessageQualificationApplicationCrowd(

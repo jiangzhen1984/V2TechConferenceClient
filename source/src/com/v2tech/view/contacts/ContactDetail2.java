@@ -13,8 +13,6 @@ import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -402,10 +400,6 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 		});
 
 		deleteContactDialog.show();
-
-		// ListView lv = (ListView)
-		// fileTransportDialog.findViewById(R.id.file_down_list);
-		// lv.setAdapter(fileDownAdapter);
 	}
 
 	private void showUserInfo() {

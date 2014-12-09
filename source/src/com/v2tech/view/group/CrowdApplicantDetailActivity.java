@@ -1,12 +1,14 @@
 package com.v2tech.view.group;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -17,6 +19,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.V2.jni.util.V2Log;
 import com.v2tech.R;
 import com.v2tech.service.BitmapManager;
 import com.v2tech.service.BitmapManager.BitmapChangedListener;
@@ -257,11 +260,41 @@ public class CrowdApplicantDetailActivity extends Activity {
 			
 			List<User> newMembers = new ArrayList<User>();
 			newMembers.add(applicant);
+			saveQualication(applicant);
 			cg.inviteMember(crowd, newMembers, null);
+			
 			onBackPressed();
 		}
 
 	};
+	
+	private void saveQualication(User user){
+
+		long waitMessageExist = MessageBuilder.queryInviteWaitingQualMessageById(user.getmUserId());
+		if (waitMessageExist != -1) {
+			V2Log.e("CrowdApplicationDetailActivity  --> Save VMessageQualification Cache Object failed , "
+					+ "Because already exist in database...groupID is : " + crowd.getmGId() + " userID is : " + user.getmUserId());
+			return ;
+		}
+		
+		if(crowd == null)
+			crowd = new CrowdGroup(0, "", null);
+		VMessageQualificationApplicationCrowd crowdQuion = new VMessageQualificationApplicationCrowd(
+				crowd, user);
+		crowdQuion.setmTimestamp(new Date());
+		Uri uri = MessageBuilder.saveQualicationMessage(crowdQuion , true);
+		if (uri != null){
+			V2Log.e("CrowdCreateActivity  --> Save VMessageQualification Cache Object Successfully , "
+					+ "groupID is : " + crowd.getmGId() + " userID is : " + user.getmUserId() + ""
+							+ " database id is : " + Long.parseLong(uri.getLastPathSegment()) 
+							+ " URI is : " + uri.toString());
+		}
+		else{
+			Toast.makeText(mContext, "邀请群成员失败", 0).show();
+			V2Log.e("CrowdCreateActivity  --> Save VMessageQualification Cache Object failed , "
+					+ "the Uri is null...groupID is : " + crowd.getmGId() + " userID is : " + user.getmUserId());
+		}
+	}
 
 	private OnClickListener mReturnButtonListener = new OnClickListener() {
 

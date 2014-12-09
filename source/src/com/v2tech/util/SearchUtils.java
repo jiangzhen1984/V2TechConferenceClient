@@ -192,6 +192,10 @@ public class SearchUtils {
 						if(!searchList.contains(obj))
 							searchList.add(obj);
 					}
+					else{
+						if(searchList.contains(obj))
+							searchList.remove(obj);
+					}
 					sb.delete(0, sb.length());
 				}
 			}

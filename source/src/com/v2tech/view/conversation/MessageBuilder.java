@@ -629,6 +629,7 @@ public class MessageBuilder {
 						ReceiveQualificationType.REMOTE_APPLY_TYPE.intValue());
 			uri = mContext.getContentResolver().insert(
 					ContentDescriptor.HistoriesCrowd.CONTENT_URI, values);
+			crowdInviteMsg.setId(ContentUris.parseId(uri));
 			return uri;
 		case CROWD_APPLICATION:
 			VMessageQualificationApplicationCrowd crowdApplyMsg = (VMessageQualificationApplicationCrowd) msg;
@@ -1047,11 +1048,11 @@ public class MessageBuilder {
 	}
 	
 	/**
-	 *  
+	 * 用于检测本地邀请他人加群，等待对方回复的记录
 	 * @param remoteUserID
 	 * @return 
 	 */
-	public static boolean queryWaitingQualMessageById(long remoteUserID) {
+	public static long queryInviteWaitingQualMessageById(long remoteUserID) {
 		Cursor cursor = null;
 		try{
 			String selection = ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_REMOTE_USER_ID
@@ -1065,15 +1066,16 @@ public class MessageBuilder {
 					selectionArgs, null);
 	
 			if(cursor == null || cursor.getCount() <= 0)
-				return false;
+				return -1;
 		
 			if(cursor.moveToFirst())
-				return true;
-			return false;
+				return cursor.getLong(cursor.getColumnIndex(ContentDescriptor.HistoriesCrowd.Cols.ID));
+				
+			return -1;
 		}
 		catch(Exception e){
 			e.printStackTrace();
-			return false;
+			return -1;
 		}
 		finally{
 			if(cursor != null)
@@ -1376,24 +1378,20 @@ public class MessageBuilder {
 	}
 
 	/**
-	 * Delete a qualification message by User Object
-	 * 
+	 * 用于删除本地邀请他人入群的缓存记录
 	 * @param context
-	 * @param user
+	 * @param colsID
 	 */
-	public static void deleteQualMessage(Context context, User user) {
-		if (user == null) {
-			V2Log.e("To delete failed...please check the given user Object or type in the databases");
-			return;
-		}
+	public static boolean deleteInviteWattingQualMessage(Context context, long colsID) {
 		DataBaseContext mContext = new DataBaseContext(context);
-		String where = ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_REMOTE_USER_ID
-				+ " = ? and "
-				+ ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_RECEIVER_STATE + " = ?";
-		String[] selectionArgs = new String[] { String.valueOf(user
-				.getmUserId()) , String.valueOf(ReceiveQualificationType.LOCAL_INVITE_TYPE.intValue())};
-		mContext.getContentResolver().delete(
+		String where = ContentDescriptor.HistoriesCrowd.Cols.ID + " = ?";
+		String[] selectionArgs = new String[] { String.valueOf(colsID) };
+		int ret = mContext.getContentResolver().delete(
 				ContentDescriptor.HistoriesCrowd.CONTENT_URI, where,
 				selectionArgs);
+		if (ret >= 0)
+			return true;
+		else
+			return false;
 	}
 }

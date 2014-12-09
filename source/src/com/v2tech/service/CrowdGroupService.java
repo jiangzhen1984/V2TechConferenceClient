@@ -256,10 +256,6 @@ public class CrowdGroupService extends AbstractHandler {
 			return;
 		}
 
-//		if (mPendingCrowdId > 0) {
-//			super.sendResult(caller, new JNIResponse(JNIResponse.Result.FAILED));
-//			return;
-//		}
 		mPendingCrowdId = crowd.getId();
 		GroupRequest.getInstance().applyJoinGroup(
 				Group.GroupType.CHATING.intValue(), crowd.getId(),

@@ -856,13 +856,10 @@ public class MessageLoader {
 				ContentDescriptor.HistoriesMedia.Cols.HISTORY_MEDIA_REMOTE_USER_ID + " = ? ",
 				new String[]{String.valueOf(userID)}, 
 				null);
-			if (cursor == null) {
+			if (cursor == null || cursor.getCount() <= 0) {
 				return false;
 			}
-
-			if (cursor.getCount() < 0) {
-				return false;
-			}
+			
 			return true;
 		} catch (Exception e) {
 			e.printStackTrace();
