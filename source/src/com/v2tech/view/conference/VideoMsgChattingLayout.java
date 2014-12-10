@@ -17,7 +17,7 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 
 import com.v2tech.R;
-import com.v2tech.db.V2techSearchContentProvider;
+import com.v2tech.db.provider.SearchContentProvider;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.view.adapter.VMessageAdater;
 import com.v2tech.view.conversation.MessageBuilder;

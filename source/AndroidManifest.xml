@@ -3,7 +3,7 @@
     package="com.v2tech"
     android:sharedUserLabel="@string/app_name"
     android:versionCode="2"
-    android:versionName="4.0.0.28" >
+    android:versionName="4.0.0.29" >
 
     <uses-sdk
         android:minSdkVersion="14"
@@ -69,7 +69,7 @@
         </service>
 
         <provider
-            android:name="com.v2tech.db.V2techContentProvider"
+            android:name="com.v2tech.db.provider.V2techContentProvider"
             android:authorities="com.v2tech.bizcom"
             android:exported="false" />
 

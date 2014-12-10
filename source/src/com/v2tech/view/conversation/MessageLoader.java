@@ -841,38 +841,6 @@ public class MessageLoader {
 	}
 	
 	/**
-	 * 根据用户id , 查询该用户是否有音视频消息记录
-	 * @param userID
-	 * @return
-	 * 		true 代表有记录 , false 代表没有记录
-	 */
-	public static boolean queryVoiceMessages(long userID){
-		
-		DataBaseContext mContext = new DataBaseContext(context);
-		Cursor cursor = null;
-		try {
-			cursor = mContext.getContentResolver().query(ContentDescriptor.HistoriesMedia.CONTENT_URI, 
-				null, 
-				ContentDescriptor.HistoriesMedia.Cols.HISTORY_MEDIA_REMOTE_USER_ID + " = ? ",
-				new String[]{String.valueOf(userID)}, 
-				null);
-			if (cursor == null || cursor.getCount() <= 0) {
-				return false;
-			}
-			
-			return true;
-		} catch (Exception e) {
-			e.printStackTrace();
-			CrashHandler.getInstance().saveCrashInfo2File(e);
-			return false;
-		} finally {
-			if (cursor != null) {
-				cursor.close();
-			}
-		}
-	}
-
-	/**
 	 * query VMessageFileItme Object by uuid and groupType..
 	 * 
 	 * @param groupType

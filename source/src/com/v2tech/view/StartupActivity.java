@@ -9,7 +9,7 @@ import android.util.DisplayMetrics;
 
 import com.V2.jni.util.V2Log;
 import com.v2tech.R;
-import com.v2tech.db.V2techSearchContentProvider;
+import com.v2tech.db.provider.SearchContentProvider;
 import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.SPUtil;
 
@@ -29,7 +29,7 @@ public class StartupActivity extends Activity {
 	}
 
 	private void initSearchMap() {
-		HashMap<String, String> allChinese = V2techSearchContentProvider
+		HashMap<String, String> allChinese = SearchContentProvider
 				.queryAll(this);
 		if (allChinese == null) {
 			V2Log.e("loading dataBase data is fialed...");

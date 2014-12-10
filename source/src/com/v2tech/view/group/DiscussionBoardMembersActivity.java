@@ -76,6 +76,7 @@ public class DiscussionBoardMembersActivity extends Activity {
 				GroupType.DISCUSSION.intValue(),
 				getIntent().getLongExtra("cid", 0));
 		mMembers = crowd.getUsers();
+		sortMembers();
 		adapter = new MembersAdapter();
 		mMembersContainer.setAdapter(adapter);
 		overridePendingTransition(R.animator.left_in, R.animator.left_out);
@@ -109,9 +110,6 @@ public class DiscussionBoardMembersActivity extends Activity {
 		super.onBackPressed();
 	}
 	
-	
-	
-
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
@@ -128,6 +126,45 @@ public class DiscussionBoardMembersActivity extends Activity {
 		overridePendingTransition(R.animator.right_in, R.animator.right_out);
 	}
 
+	private void sortMembers() {
+		long ownerID = crowd.getOwnerUser().getmUserId();
+		long loginUserID = GlobalHolder.getInstance().getCurrentUserId();
+		User loginUser = GlobalHolder.getInstance().getCurrentUser();
+		int ownerPos = -1;
+		int loginPos = -1;
+		boolean isExistCreater = false;
+		
+		for (int i = 0 ; i < mMembers.size() ; i++) {
+			
+			if(ownerPos != -1 && loginPos != -1)
+				break;
+			
+			if(ownerID == mMembers.get(i).getmUserId()){
+				ownerPos = i;
+			} else if(loginUserID == mMembers.get(i).getmUserId()){
+				loginPos = i;
+			}
+		}
+		
+		if(ownerPos != -1){
+			isExistCreater = true;
+			User user = mMembers.get(ownerPos);
+			mMembers.remove(user);
+			mMembers.add(0 , user);
+		}
+		
+		if(loginPos != -1){
+			mMembers.remove(loginUser);
+			if(isExistCreater){
+				mMembers.add(1 , loginUser);
+			}
+			else{
+				if(loginPos != 0){
+					mMembers.add(0 , loginUser);
+				}
+			}
+		}
+	}
 
 	private OnItemClickListener itemListener = new OnItemClickListener() {
 
@@ -174,8 +211,11 @@ public class DiscussionBoardMembersActivity extends Activity {
 			if (isInDeleteMode) {
 				isInDeleteMode = false;
 				mInvitationButton.setText(R.string.discussion_board_members_invitation_button_text);
+				for (User user : mMembers) {
+					if(user.isShowDelete == true)
+						user.isShowDelete = false;
+				}
 				adapter.notifyDataSetChanged();
-
 			} else {
 				// start CrowdCreateActivity 
 				Intent i = new Intent(PublicIntent.START_DISCUSSION_BOARD_CREATE_ACTIVITY);
@@ -227,7 +267,7 @@ public class DiscussionBoardMembersActivity extends Activity {
 
 			// Add delete icon
 			mDeleteIV = new ImageView(mContext);
-			mDeleteIV.setImageResource(R.drawable.contacts_group_item_icon);
+			mDeleteIV.setImageResource(R.drawable.ic_delete);
 			if (isInDeleteMode) {
 				if (this.mUser.getmUserId() != crowd.getOwnerUser()
 						.getmUserId()) {
@@ -242,8 +282,14 @@ public class DiscussionBoardMembersActivity extends Activity {
 
 				@Override
 				public void onClick(View v) {
-					mUser.isDelete = true;
-					mDeleteButtonTV.setVisibility(View.VISIBLE);
+					if(mUser.isShowDelete){
+						mUser.isShowDelete = false;
+						mDeleteButtonTV.setVisibility(View.GONE);
+					}
+					else{
+						mUser.isShowDelete = true;
+						mDeleteButtonTV.setVisibility(View.VISIBLE);
+					}
 				}
 
 			});
@@ -277,11 +323,12 @@ public class DiscussionBoardMembersActivity extends Activity {
 			// Add delete button
 			mDeleteButtonTV = new TextView(mContext);
 			mDeleteButtonTV.setText(R.string.crowd_members_delete);
-			mDeleteButtonTV.setVisibility(View.INVISIBLE);
+			mDeleteButtonTV.setVisibility(View.GONE);
 			mDeleteButtonTV.setTextColor(Color.WHITE);
 			mDeleteButtonTV.setId(2);
 			mDeleteButtonTV
 					.setBackgroundResource(R.drawable.rounded_crowd_members_delete_button);
+			mDeleteButtonTV.setGravity(Gravity.CENTER_VERTICAL);
 			mDeleteButtonTV.setPadding(20, 10, 20, 10);
 			mDeleteButtonTV.setOnClickListener(new OnClickListener() {
 
@@ -305,6 +352,7 @@ public class DiscussionBoardMembersActivity extends Activity {
 					RelativeLayout.LayoutParams.WRAP_CONTENT,
 					RelativeLayout.LayoutParams.WRAP_CONTENT);
 			mDeleteButtonTVLP.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+			mDeleteButtonTVLP.addRule(RelativeLayout.CENTER_VERTICAL);
 			mDeleteButtonTVLP.rightMargin = margin;
 			mDeleteButtonTVLP.leftMargin = margin;
 			
@@ -322,8 +370,6 @@ public class DiscussionBoardMembersActivity extends Activity {
 
 		public void update(User user) {
 			if (isInDeleteMode) {
-//				if (this.mUser.getmUserId() != crowd.getOwnerUser()
-//						.getmUserId()) {
 				if (user.getmUserId() != crowd.getOwnerUser()
 						.getmUserId()) {
 					mDeleteIV.setVisibility(View.VISIBLE);
@@ -331,7 +377,7 @@ public class DiscussionBoardMembersActivity extends Activity {
 					mDeleteIV.setVisibility(View.GONE);
 				}
 				
-				if(user.isDelete){
+				if(user.isShowDelete){
 					mDeleteButtonTV.setVisibility(View.VISIBLE);
 				}
 				else{

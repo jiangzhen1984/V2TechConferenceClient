@@ -23,7 +23,7 @@
             android:layout_centerInParent="true"
             android:layout_marginRight="5dp"
             android:padding="5dp"
-            android:src="@drawable/crowd_file_delete_left_button" />
+            android:src="@drawable/ic_delete" />
 
         <ImageView
             android:id="@+id/qualification_msg_image_view"

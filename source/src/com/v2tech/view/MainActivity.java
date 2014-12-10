@@ -31,7 +31,7 @@ import android.widget.Toast;
 import com.V2.jni.V2GlobalEnum;
 import com.V2.jni.util.V2Log;
 import com.v2tech.R;
-import com.v2tech.db.V2techSearchContentProvider;
+import com.v2tech.db.provider.SearchContentProvider;
 import com.v2tech.service.ChatService;
 import com.v2tech.service.FileOperationEnum;
 import com.v2tech.util.Notificator;
@@ -507,7 +507,7 @@ public class MainActivity extends FragmentActivity implements
 		    if (imm != null && v != null) {  
 		        imm.hideSoftInputFromWindow(v.getWindowToken(), 0);  
 		    }  
-		  V2techSearchContentProvider.closedDataBase();  
+		  SearchContentProvider.closedDataBase();  
 		return super.dispatchTouchEvent(ev);
 	}
 	

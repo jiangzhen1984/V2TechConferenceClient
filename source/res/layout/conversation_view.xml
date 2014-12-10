@@ -10,8 +10,6 @@
         android:layout_alignBottom="@+id/group_list_conference_title_layout"
         android:layout_alignParentLeft="true"
         android:layout_alignTop="@+id/group_list_conference_title_layout"
-        android:layout_centerVertical="true"
-        android:gravity="center_vertical"
         android:layout_marginLeft="15dp"
         android:layout_marginRight="5dp" >
         <ImageView
@@ -34,7 +32,6 @@
         android:id="@+id/group_list_conference_title_layout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
         android:layout_marginBottom="@dimen/conversation_view_margin"
         android:layout_marginLeft="@dimen/text_margin_left"
         android:layout_marginTop="@dimen/conversation_view_margin"

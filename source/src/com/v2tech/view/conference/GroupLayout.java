@@ -238,16 +238,15 @@ public class GroupLayout extends LinearLayout {
 			boolean isFriend = GlobalHolder.getInstance().isFriend(currentUser);
 			String nickName = currentUser.getNickName();
 			if(TextUtils.isEmpty(nickName)){
-				V2Log.e(TAG, "updateName ---> Update NickName Failed ... get nickName is empty ! name is : "+ currentUser.getName()
+				V2Log.w(TAG, "updateName ---> Update NickName Failed ... get nickName is empty ! name is : "+ currentUser.getName()
 						+ " id is : " + currentUser.getmUserId());
 			}
 			
 			if(isFriend && !TextUtils.isEmpty(nickName)){
-				V2Log.e(TAG, "updateName ---> Update NickName successfully!");
+				V2Log.d(TAG, "updateName ---> Update NickName successfully!");
 				mGroupOwnerTV.setText("创建人:" + nickName);
 			}
 			else{
-				V2Log.e(TAG, "updateName ---> Update NickName Failed!");
 				mGroupOwnerTV.setText("创建人:" + currentUser.getName());
 			}
 		}

@@ -17,6 +17,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -382,10 +383,11 @@ public class MessageAuthenticationActivity extends Activity {
 			private boolean isNeedLoad=false;
 			private boolean isLoading=false;
 			@Override
-			public void onScrollStateChanged(AbsListView view, int scrollState) {
-				if(scrollState==OnScrollListener.SCROLL_STATE_IDLE){
+			public void onScrollStateChanged(final AbsListView view, int scrollState) {
+				if(scrollState==OnScrollListener.SCROLL_STATE_IDLE && rbFriendAuthentication.isChecked()){
 					if(isNeedLoad&&!isLoading){
-						((ListView)view).addFooterView(listViewFootView);
+						ListView listView = ((ListView)view);
+						listView.addFooterView(listViewFootView);
 						isLoading=true;
 						new AsyncTask<Void, Void, Void>() {
 							List<FriendMAData> tempMessageAuthenticationDataList;
@@ -399,13 +401,12 @@ public class MessageAuthenticationActivity extends Activity {
 
 							@Override
 							protected void onPostExecute(Void result) {
-								if (firendAdapter != null) {
-									friendMADataList.clear();
-									friendMADataList.addAll(tempMessageAuthenticationDataList);
-									firendAdapter.notifyDataSetChanged();
-								}
-								isLoading=false;
+								lvMessageAuthentication.setAdapter(null);
 								lvMessageAuthentication.removeFooterView(listViewFootView);
+								friendMADataList.clear();
+								friendMADataList.addAll(tempMessageAuthenticationDataList);
+								lvMessageAuthentication.setAdapter(firendAdapter);
+								isLoading=false;
 							}
 
 						}.execute();
@@ -1205,7 +1206,7 @@ public class MessageAuthenticationActivity extends Activity {
 				}
 				
 				boolean isFriend = GlobalHolder.getInstance().isFriend(vqac.getApplicant());
-				if(isFriend)
+				if(isFriend && !TextUtils.isEmpty(vqac.getApplicant().getNickName()))
 					item.mNameTV.setText(vqac.getApplicant().getNickName());
 				else
 					item.mNameTV.setText(vqac.getApplicant().getName());

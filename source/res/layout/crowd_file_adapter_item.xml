@@ -10,13 +10,13 @@
         android:layout_marginBottom="@dimen/conversation_view_margin"
         android:layout_marginTop="@dimen/conversation_view_margin" >
         <ImageView
-            android:id="@+id/crowd_file_delete_left_button"
+            android:id="@+id/ic_delete"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_centerInParent="true"
             android:layout_marginLeft="@dimen/common_margin_horizontal"
-            android:src="@drawable/crowd_file_delete_left_button"
+            android:src="@drawable/ic_delete"
             android:visibility="visible" />
         <RelativeLayout
             android:id="@+id/RelativeLayout2"
@@ -25,7 +25,7 @@
             android:layout_marginLeft="@dimen/text_margin_left"
             android:layout_marginRight="@dimen/text_margin_left"
             android:layout_toLeftOf="@+id/crowd_file_button"
-            android:layout_toRightOf="@+id/crowd_file_delete_left_button" >
+            android:layout_toRightOf="@+id/ic_delete" >
             <include layout="@layout/common_conversation_layout" />
         </RelativeLayout>
         <TextView

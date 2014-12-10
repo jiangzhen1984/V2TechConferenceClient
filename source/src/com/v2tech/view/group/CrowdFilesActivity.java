@@ -914,7 +914,7 @@ public class CrowdFilesActivity extends Activity {
 				item = new ViewItem();
 				tag = new Tag(file, item);
 				item.mFileDeleteModeButton = (ImageView) convertView
-						.findViewById(R.id.crowd_file_delete_left_button);
+						.findViewById(R.id.ic_delete);
 				item.mFileDeleteModeButton.setTag(tag);
 				item.mFileDeleteModeButton
 						.setOnClickListener(mDeleteModeButtonListener);

@@ -1086,6 +1086,7 @@ public class GroupListView extends ListView {
 	class LocalFilter extends Filter {
 
 		int lastLength = 0;
+		List<ItemData> lastDatas = new ArrayList<GroupListView.ItemData>();
 		@Override
 		protected FilterResults performFiltering(CharSequence constraint) {
 			FilterResults fr = new FilterResults();
@@ -1102,20 +1103,28 @@ public class GroupListView extends ListView {
 //				}
 //				Collections.sort(list);
 				list = new ArrayList<ItemData>();
+				boolean flag = false;
 				if(mFilterList != null && mFilterList.size() != mBaseList.size()){
 					filter = new ArrayList<User>();
 					if(mFilterList.size() <= 0){
-						for (ItemData itemData : mBaseList) {
-							if(itemData instanceof UserItemData){
-								UserItemData data = (UserItemData) itemData;
-								filter.add((User) data.getObject());
-							} else{
-								GroupItemData data = (GroupItemData) itemData;
-								filter.addAll(((Group)data.getObject()).getUsers());
+						if(lastDatas.size() <= 0){
+							searchUser = SearchUtils.startGroupUserSearch(mGroupList, constraint);
+							flag = true;
+						}
+						else{
+							for (ItemData itemData : lastDatas) {
+								if(itemData instanceof UserItemData){
+									UserItemData data = (UserItemData) itemData;
+									filter.add((User) data.getObject());
+								} else{
+									GroupItemData data = (GroupItemData) itemData;
+									filter.addAll(((Group)data.getObject()).getUsers());
+								}
 							}
 						}
 					}
 					else{
+						lastDatas = mFilterList;
 						for (ItemData itemData : mFilterList) {
 							if(itemData instanceof UserItemData){
 								UserItemData data = (UserItemData) itemData;
@@ -1126,7 +1135,9 @@ public class GroupListView extends ListView {
 							}
 						}
 					}
-					searchUser = SearchUtils.startGroupUserFilterSearch(filter, constraint);
+					
+					if(!flag)
+						searchUser = SearchUtils.startGroupUserFilterSearch(filter, constraint);
 				}
 				else{
 					searchUser = SearchUtils.startGroupUserSearch(mGroupList, constraint);

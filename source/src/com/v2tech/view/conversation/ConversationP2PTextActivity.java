@@ -70,7 +70,7 @@ import com.spoledge.aacplayer.ArrayDecoder;
 import com.spoledge.aacplayer.Decoder;
 import com.spoledge.aacplayer.PlayerCallback;
 import com.v2tech.R;
-import com.v2tech.db.ConversationProvider;
+import com.v2tech.db.provider.ConversationProvider;
 import com.v2tech.media.V2Encoder;
 import com.v2tech.service.AsyncResult;
 import com.v2tech.service.BitmapManager;
@@ -2282,9 +2282,9 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 		if (array != null) {
 			boolean isExist;
 			if(currentConversationViewType == V2GlobalEnum.GROUP_TYPE_USER)
-				isExist = ConversationProvider.queryUserConversation(mContext, remoteChatUserID);
+				isExist = ConversationProvider.queryUserConversation(remoteChatUserID);
 			else
-				isExist = ConversationProvider.queryGroupConversation(mContext, currentConversationViewType, remoteGroupID);
+				isExist = ConversationProvider.queryGroupConversation(currentConversationViewType, remoteGroupID);
 			if(!isExist){
 				boolean flag = MessageLoader.deleteMessageByID(mContext, currentConversationViewType, 
 						remoteGroupID, remoteChatUserID, true);

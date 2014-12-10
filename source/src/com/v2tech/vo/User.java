@@ -86,7 +86,7 @@ public class User implements Comparable<User> {
 	private String abbra;
 	
 	//For Discussion Member Activity , onItemLongClick
-	public boolean isDelete;
+	public boolean isShowDelete;
 
 	private static HanyuPinyinOutputFormat format = new HanyuPinyinOutputFormat();
 	// This value indicate this object is dirty, construct locally without any

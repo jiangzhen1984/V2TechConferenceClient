@@ -679,7 +679,9 @@ public class GroupRequest {
 
 	/**
 	 * The CallBack that invited join group from other
-	 * 
+	 * 12-10 16:56:44.342: D/V2TECH(19079): OnInviteJoinGroup::==>3:
+	 * <crowd authtype='0' creatoruserid='11000102' id='14000128' name='qazzaq' size='500'/>:
+	 * <user id='11000102'/>:
 	 * @param groupType
 	 * @param groupInfo
 	 * @param userInfo

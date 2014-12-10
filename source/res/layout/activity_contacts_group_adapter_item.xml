@@ -18,7 +18,7 @@
             android:layout_alignParentLeft="true"
             android:layout_centerVertical="true"
             android:layout_marginLeft="@dimen/contacts_group_view_margin_or_padding_big_20"
-            android:src="@drawable/contacts_group_item_icon" />
+            android:src="@drawable/ic_delete" />
 
         <TextView
             android:id="@+id/contacts_group_item_name"

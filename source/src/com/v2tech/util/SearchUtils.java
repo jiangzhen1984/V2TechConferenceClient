@@ -9,7 +9,7 @@ import java.util.regex.Pattern;
 import android.text.Editable;
 
 import com.V2.jni.util.V2Log;
-import com.v2tech.db.V2techSearchContentProvider;
+import com.v2tech.db.provider.SearchContentProvider;
 import com.v2tech.view.ConversationsTabFragment.ScrollItem;
 import com.v2tech.view.widget.GroupListView.ItemData;
 import com.v2tech.vo.Group;
@@ -112,13 +112,13 @@ public class SearchUtils {
 				for (int i = startIndex; i < charSimpleArray.length; i++) {
 					if (isChineseWord(charSimpleArray[i])) {
 						V2Log.e(TAG, charSimpleArray[i] + " is Chinese");
-						searchCacheList = getSearchList(searchList,
-								String.valueOf(charSimpleArray[i]), i, true,
+						searchCacheList = getSearchList(searchList, 
+								String.valueOf(charSimpleArray[i]), content.toString(), i, true,
 								true);
 					} else {
 						V2Log.e(TAG, charSimpleArray[i] + " not Chinese");
 						searchCacheList = getSearchList(searchList,
-								String.valueOf(charSimpleArray[i]), i, true,
+								String.valueOf(charSimpleArray[i]),content.toString(), i, true,
 								false);
 					}
 
@@ -175,11 +175,13 @@ public class SearchUtils {
 					if (!first.equals(targetChars[0])) {
 						isShouldAdd = true;
 					} else {
-						for (char c : targetChars) {
-							if (!material.contains(String.valueOf(c))
-									&& first.equals(c)) {
+						for(int j = 0 ; j < targetChars.length ; j++){
+//						for (char c : targetChars) {
+//							if (!material.contains(String.valueOf(c))
+//									&& first.equals(c)) {
+								if (targetChars[j] != material.charAt(j)) {
 								isShouldAdd = true;
-								V2Log.e(TAG, "material not contains " + c);
+								V2Log.e(TAG, "material not contains " + targetChars[j]);
 								break;
 							}
 							isShouldAdd = false;
@@ -199,9 +201,6 @@ public class SearchUtils {
 					sb.delete(0, sb.length());
 				}
 			}
-
-//			V2Log.e(TAG, "get searchList size :" + searchList.size());
-//			adapter.notifyDataSetChanged();
 			startIndex++;
 			return searchList;
 		} else {
@@ -211,7 +210,7 @@ public class SearchUtils {
 	}
 	
 	public static void clearAll(){
-		V2techSearchContentProvider.closedDataBase();
+		SearchContentProvider.closedDataBase();
 		if (mIsStartedSearch) {
 			firstSearchCacheList.clear();
 			receiveList.clear();
@@ -227,6 +226,7 @@ public class SearchUtils {
 	 * 
 	 * @param list
 	 * @param searchKey
+	 * @param content
 	 * @param index
 	 * @param isFirstSearch
 	 *            判断是否是首字母搜索
@@ -235,10 +235,10 @@ public class SearchUtils {
 	 * @return
 	 */
 	public static List<Object> getSearchList(List<Object> list,
-			String searchKey, int index, boolean isFirstSearch,
+			String searchKey, String content , int index, boolean isFirstSearch,
 			boolean isChinese) {
 		V2Log.e(TAG, "searchList :" + list.size() + "--searchKey :" + searchKey
-				+ "--index :" + index);
+				+ "--index :" + index + " content : " + content);
 		List<Object> tempList = new ArrayList<Object>();
 		if (searchKey == null || searchKey.length() < 0) {
 			return tempList;
@@ -264,20 +264,14 @@ public class SearchUtils {
 						if (isChineseWord(charArray[j])) {
 							String englishChar = GlobalConfig.allChinese
 									.get(searchTarget);
-							// V2techSearchContentProvider
-							// .queryChineseToEnglish(mContext, "HZ = ?",
-							// new String[] { searchTarget });
 							V2Log.e(TAG, "englishChar :" + englishChar);
 							if (englishChar == null)
 								continue;
-							// if(englishChar.contains(searchKey)){
-							// tempList.add(Object);
-							// }
 							String[] split = englishChar.split(";");
 							for (String string : split) { // 三级循环，循环多音字
 
 								int indexOf = string.indexOf(searchKey);
-								if (indexOf == 0) {
+								if (indexOf == 0 && content.indexOf(searchKey) == index) {
 									tempList.add(obj);
 									isBreak = true;
 									break;

@@ -1444,6 +1444,7 @@ public class JNIService extends Service implements
 			Intent intent = new Intent();
 			intent.setAction(ConversationP2PAVActivity.P2P_BROADCAST_MEDIA_UPDATE);
 			intent.addCategory(PublicIntent.DEFAULT_CATEGORY);
+			intent.putExtra("hasUnread", true);
 			intent.putExtra("remoteID", currentVideoBean.remoteUserID);
 			sendBroadcast(intent);
 		}
@@ -1545,6 +1546,7 @@ public class JNIService extends Service implements
 			Intent intent = new Intent();
 			intent.setAction(ConversationP2PAVActivity.P2P_BROADCAST_MEDIA_UPDATE);
 			intent.addCategory(PublicIntent.DEFAULT_CATEGORY);
+			intent.putExtra("hasUnread", true);
 			intent.putExtra("remoteID", currentVideoBean.remoteUserID);
 			sendBroadcast(intent);
 		}
