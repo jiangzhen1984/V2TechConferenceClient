@@ -30,5 +30,7 @@
    <string name="warning_under_sync">Meeting was synchronized by moderator, can\'t switch document.</string>
    <string name="warning_no_attendee_selected">Please select contact</string>
    <string name="warning_downloading_doc">Document is being downloading&#8230;&#8230;&#8230;</string>
+   <string name="confs_invitation">meeting invitation</string>
+   <string name="confs_video">Camera</string>
    
 </resources>

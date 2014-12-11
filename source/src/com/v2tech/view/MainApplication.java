@@ -236,6 +236,10 @@ public class MainApplication extends Application {
 		
 		
 		GlobalConfig.Resource.ConversationCrator = this.getResources().getText(R.string.conference_conversation_creator).toString();
+		GlobalConfig.Resource.ConferenceInvitation = this.getResources().getText(R.string.confs_invitation).toString();
+		
+		GlobalConfig.Resource.ConferenceVideo = this.getResources().getText(R.string.confs_video).toString();
+		
 	}
 
 	public void requestQuit() {

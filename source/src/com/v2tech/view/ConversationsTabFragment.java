@@ -42,6 +42,7 @@ import com.v2tech.service.GlobalHolder;
 import com.v2tech.service.Registrant;
 import com.v2tech.service.jni.JNIResponse;
 import com.v2tech.service.jni.RequestEnterConfResponse;
+import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.MessageUtil;
 import com.v2tech.util.Notificator;
 import com.v2tech.util.V2Log;
@@ -737,8 +738,8 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher, C
 		
 		User creator = GlobalHolder.getInstance().getUser(conf.getCreator());
 		enterConference.putExtra("conf", conf);
-		Notificator.updateSystemNotification(mContext,conf.getName()
-				+ " 会议邀请:", creator == null?"":creator.getName(), 1, enterConference,
+		Notificator.updateSystemNotification(mContext,conf.getName() +" "
+				+ GlobalConfig.Resource.ConferenceInvitation +" :", creator == null?"":creator.getName(), 1, enterConference,
 				PublicIntent.VIDEO_NOTIFICATION_ID);
 
 	}

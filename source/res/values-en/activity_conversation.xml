@@ -9,7 +9,7 @@
    <string name="conversation_voice_accept_only_text">Audio only</string>
    <string name="conversation_reject_text">Decline</string>
    <string name="conversation_cancel_text">Hang up</string>
-   <string name="conversation_video_title_text">You are doing video chat with[]</string>
+   <string name="conversation_video_title_text">You are doing video chat with []</string>
    <string name="conversation_close_video_text">Video off</string>
    <string name="conversation_open_video_text">Video on</string>
    <string name="conversation_mute_text">Mute</string>

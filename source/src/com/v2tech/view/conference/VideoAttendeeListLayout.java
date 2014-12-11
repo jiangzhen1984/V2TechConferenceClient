@@ -33,6 +33,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.v2tech.R;
+import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.V2Log;
 import com.v2tech.vo.Attendee;
 import com.v2tech.vo.AttendeeMixedDevice;
@@ -196,7 +197,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 					.findViewById(R.id.video_attendee_device_speaker_icon);
 
 			UserDeviceConfig udc = a.getmDevices().get(i);
-			nameTV2.setText("     视频" + i);
+			nameTV2.setText("     "+GlobalConfig.Resource.ConferenceVideo + i);
 			nameTV2.setTextSize(16);
 			// Set text color and camera icon
 			childDevices = true;

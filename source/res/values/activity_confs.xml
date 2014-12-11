@@ -30,5 +30,7 @@
    <string name="warning_under_sync">主席正在同步，无法切换文档</string>
    <string name="warning_no_attendee_selected">您未选择任何联系人</string>
    <string name="warning_downloading_doc">正在下载文档&#8230;&#8230;&#8230;</string>
+   <string name="confs_invitation">会议邀请</string>
+   <string name="confs_video">视频</string>
    
 </resources>

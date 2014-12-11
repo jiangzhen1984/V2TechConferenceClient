@@ -146,6 +146,11 @@ public class GlobalConfig {
 	
 	
 	public static class Resource {
+		
 		public static String ConversationCrator="";
+		
+		public static String ConferenceInvitation="";
+		
+		public static String ConferenceVideo="";
 	}
 }
