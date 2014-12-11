@@ -202,6 +202,10 @@ public class DiscussionBoardCreateActivity extends Activity {
 			addAttendee(u);
 		}
 
+		changeConfirmAble();
+	}
+	
+	private void changeConfirmAble(){
 		if(mUserList.size() > 0){
 			mGroupConfirmButton.setClickable(true);
 			mGroupConfirmButton.setTextColor(getResources().getColor(R.color.conf_create_button_color));
@@ -480,6 +484,7 @@ public class DiscussionBoardCreateActivity extends Activity {
 			case END_GROUP_SELECT:
 				mWaitingDialog.dismiss();
 				mWaitingDialog = null;
+				changeConfirmAble();
 				break;
 			}
 		}

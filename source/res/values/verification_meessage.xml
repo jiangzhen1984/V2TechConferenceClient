@@ -32,6 +32,7 @@
     <string name="crowd_application_reject_button_name">拒绝</string>
     <string name="crowd_application_rejected">已拒绝该申请</string>
     <string name="crowd_application_hint_string">请输入验证信息</string>
+    <string name="crowd_application_addition_hint">附加消息</string>
     
     <!-- 好友 -->
      <string name="friend_has_added">已添加你为好友</string>

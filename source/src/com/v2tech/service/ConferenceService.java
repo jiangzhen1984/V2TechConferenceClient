@@ -19,6 +19,7 @@ import com.V2.jni.VideoRequestCallbackAdapter;
 import com.V2.jni.ind.V2Group;
 import com.V2.jni.ind.V2User;
 import com.V2.jni.util.V2Log;
+import com.V2.jni.util.XmlAttributeExtractor;
 import com.v2tech.service.jni.JNIIndication;
 import com.v2tech.service.jni.JNIResponse;
 import com.v2tech.service.jni.PermissionRequestIndication;
@@ -236,15 +237,9 @@ public class ConferenceService extends DeviceService {
 			}
 			return;
 		}
-		StringBuffer attendees = new StringBuffer();
-		attendees.append("<userlist> ");
-		for (User at : list) {
-			attendees.append(" <user id='" + at.getmUserId() + "' />");
-		}
-		attendees.append("</userlist>");
+		String sXml = XmlAttributeExtractor.buildAttendeeUsersXml(list);
 		GroupRequest.getInstance().inviteJoinGroup(
-				GroupType.CONFERENCE.intValue(), conf.getConferenceConfigXml(),
-				attendees.toString(), "");
+				GroupType.CONFERENCE.intValue(), conf.getConferenceConfigXml(), sXml, "");
 
 		// send response to caller because invite attendee no call back from JNI
 		JNIResponse jniRes = new JNIResponse(JNIResponse.Result.SUCCESS);

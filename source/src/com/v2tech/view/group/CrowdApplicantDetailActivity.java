@@ -21,6 +21,7 @@ import android.widget.Toast;
 
 import com.V2.jni.util.V2Log;
 import com.v2tech.R;
+import com.v2tech.db.provider.VerificationProvider;
 import com.v2tech.service.BitmapManager;
 import com.v2tech.service.BitmapManager.BitmapChangedListener;
 import com.v2tech.service.CrowdGroupService;
@@ -113,7 +114,7 @@ public class CrowdApplicantDetailActivity extends Activity {
 		}
 		
 		msg.setReadState(VMessageQualification.ReadState.READ);
-		MessageBuilder.updateQualicationMessage(this, msg);
+		VerificationProvider.updateQualicationMessage(msg);
 	}
 	
 	@Override

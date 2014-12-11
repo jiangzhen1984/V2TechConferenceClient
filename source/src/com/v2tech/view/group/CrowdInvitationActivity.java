@@ -19,6 +19,7 @@ import android.widget.Toast;
 import com.V2.jni.V2GlobalEnum;
 import com.V2.jni.util.V2Log;
 import com.v2tech.R;
+import com.v2tech.db.provider.VerificationProvider;
 import com.v2tech.service.CrowdGroupService;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.service.MessageListener;
@@ -34,7 +35,6 @@ import com.v2tech.vo.Crowd;
 import com.v2tech.vo.CrowdConversation;
 import com.v2tech.vo.CrowdGroup;
 import com.v2tech.vo.CrowdGroup.AuthType;
-import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.Group;
 import com.v2tech.vo.GroupQualicationState;
 import com.v2tech.vo.VMessageQualification;
@@ -76,6 +76,9 @@ public class CrowdInvitationActivity extends Activity {
 	private State mState = State.DONE;
 	private boolean isInRejectReasonMode = false;
 	private boolean isReturnData;
+	
+	private boolean isShowNow;
+	private boolean isNeedFinish;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -129,6 +132,27 @@ public class CrowdInvitationActivity extends Activity {
 		updateView(false);
 		mRejectResasonLayout.setVisibility(View.GONE);
 	}
+	
+	@Override
+	protected void onRestart() {
+		if(isNeedFinish){
+			isNeedFinish = false;
+			onBackPressed();
+		}
+		super.onRestart();
+	}
+	
+	@Override
+	protected void onResume() {
+		isShowNow = true;
+		super.onResume();
+	}
+	
+	@Override
+	protected void onStop() {
+		isShowNow = false;
+		super.onStop();
+	}
 
     @Override
     protected void onDestroy() {
@@ -147,18 +171,6 @@ public class CrowdInvitationActivity extends Activity {
     }
 
     private void handleAcceptDone() {
-//		CrowdGroup g = new CrowdGroup(crowd.getId(), crowd.getName(),
-//				crowd.getCreator(), null);
-//		g.setBrief(crowd.getBrief());
-//		g.setAnnouncement(crowd.getAnnounce());
-//		GlobalHolder.getInstance().addGroupToList(GroupType.CHATING.intValue(),
-//				g);
-//
-//		Intent i = new Intent();
-//		i.setAction(PublicIntent.BROADCAST_NEW_CROWD_NOTIFICATION);
-//		i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
-//		i.putExtra("crowd", crowd.getId());
-//		sendBroadcast(i);
         CrowdGroup group = (CrowdGroup) GlobalHolder.getInstance().getGroupById(V2GlobalEnum.GROUP_TYPE_CROWD , crowd.getId());
         if(group != null && group.getUsers() != null) {
             mMembersTV.setText(String.valueOf(group.getUsers().size()) + "人");
@@ -184,7 +196,6 @@ public class CrowdInvitationActivity extends Activity {
 
 	private void updateView(boolean isInReject) {
 		// view screen changed for rejection
-
 		if (isInReject) {
 			mBoxLy.setVisibility(View.GONE);
 			mRejectResasonLayout.setVisibility(View.VISIBLE);
@@ -294,18 +305,6 @@ public class CrowdInvitationActivity extends Activity {
 
 		@Override
 		public void onClick(View view) {
-			if (isInRejectReasonMode) {
-				updateView(!isInRejectReasonMode);
-				return;
-			}
-
-			if(isReturnData){
-				Intent intent = new Intent(CrowdInvitationActivity.this,
-						MessageAuthenticationActivity.class);
-				intent.putExtra("qualificationID", vq.getId());
-				intent.putExtra("qualState", vq.getQualState());
-				setResult(4 , intent);
-			}
 			onBackPressed();
 		}
 
@@ -341,6 +340,7 @@ public class CrowdInvitationActivity extends Activity {
 				i.putExtra("obj", new ConversationNotificationObject(
 						new CrowdConversation(group)));
 				startActivity(i);
+				onBackPressed();
 			}
 		}
 
@@ -363,8 +363,7 @@ public class CrowdInvitationActivity extends Activity {
                         Toast.LENGTH_SHORT).show();
 
                 vq.setQualState(VMessageQualification.QualificationState.INVALID);
-                MessageBuilder.updateQualicationMessage(mContext , vq);
-//                MessageBuilder.deleteQualMessage(mContext , vq.getId());
+                VerificationProvider.updateQualicationMessage(vq);
                 isReturnData = true;
                 mReturnButton.performClick();
             } else if(JNIService.JNI_BROADCAST_KICED_CROWD.equals(intent
@@ -375,9 +374,30 @@ public class CrowdInvitationActivity extends Activity {
 							"Received the broadcast to quit the crowd group , but crowd id is wroing... ");
 					return;
 				}
-				onBackPressed();
+				
+				if(isShowNow)
+					onBackPressed();
+				else
+					isNeedFinish = true;
             }
         }
+    }
+    
+    @Override
+    public void onBackPressed() {
+    	if (isInRejectReasonMode) {
+			updateView(!isInRejectReasonMode);
+			return;
+		}
+
+		if(isReturnData){
+			Intent intent = new Intent(CrowdInvitationActivity.this,
+					MessageAuthenticationActivity.class);
+			intent.putExtra("qualificationID", vq.getId());
+			intent.putExtra("qualState", vq.getQualState());
+			setResult(4 , intent);
+		}
+    	super.onBackPressed();
     }
 
 	private Handler mLocalHandler = new Handler() {

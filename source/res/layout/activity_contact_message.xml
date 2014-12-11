@@ -20,7 +20,7 @@
             android:gravity="center"
             android:maxWidth="@dimen/activity_contact_message_title_max_width"
             android:singleLine="true"
-            android:text=""
+            android:text="阿萨德发斯蒂芬收到阿萨德发生的阿斯蒂芬撒的"
             android:textColor="@color/activiy_contact_detail_title_color"
             android:textSize="@dimen/common_item_text_size" />
         <TextView

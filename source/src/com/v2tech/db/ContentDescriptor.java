@@ -423,6 +423,7 @@ public final class ContentDescriptor {
 			public static final String HISTORY_FRIEND_FROM_USER_ID = "FromUserID";
 			public static final String HISTORY_FRIEND_TO_USER_ID = "ToUserID";
 			public static final String HISTORY_FRIEND_REMOTE_USER_ID = "RemoteUserID";
+			public static final String HISTORY_CROWD_REMOTE_USER_NICK_NAME = "RemoteUserNickname ";
 			public static final String HISTORY_FRIEND_APPLY_REASON = "ApplyReason";
 			public static final String HISTORY_FRIEND_REFUSE_REASON = "RefuseReason";
 			public static final String HISTORY_FRIEND_STATE = "AddState";
@@ -433,7 +434,7 @@ public final class ContentDescriptor {
 					HISTORY_FRIEND_FROM_USER_ID, HISTORY_FRIEND_TO_USER_ID,
 					HISTORY_FRIEND_REMOTE_USER_ID, HISTORY_FRIEND_APPLY_REASON,
 					HISTORY_FRIEND_REFUSE_REASON, HISTORY_FRIEND_STATE,
-					HISTORY_MEDIA_READ_STATE };
+					HISTORY_MEDIA_READ_STATE,HISTORY_CROWD_REMOTE_USER_NICK_NAME };
 		}
 	}
 
@@ -467,6 +468,7 @@ public final class ContentDescriptor {
 			public static final String HISTORY_CROWD_FROM_USER_ID = "FromUserID";
 			public static final String HISTORY_CROWD_REMOTE_USER_ID = "RemoteUserID";
 			public static final String HISTORY_CROWD_TO_USER_ID = "ToUserID";
+			public static final String HISTORY_CROWD_REMOTE_USER_NICK_NAME = "RemoteUserNickname ";
 			public static final String HISTORY_CROWD_APPLY_REASON = "ApplyReason";
 			public static final String HISTORY_CROWD_REFUSE_REASON = "RefuseReason";
 			public static final String HISTORY_CROWD_STATE = "JoinState";
@@ -475,7 +477,7 @@ public final class ContentDescriptor {
 			public static final String HISTORY_CROWD_BASE_INFO = "CrowdXml";
 
 			public static final String[] ALL_CLOS = { ID, OWNER_USER_ID,
-					HISTORY_CROWD_SAVEDATE, HISTORY_CROWD_AUTHTYPE,
+					HISTORY_CROWD_SAVEDATE, HISTORY_CROWD_AUTHTYPE,HISTORY_CROWD_REMOTE_USER_NICK_NAME,
 					HISTORY_CROWD_ID, HISTORY_CROWD_FROM_USER_ID,
 					HISTORY_CROWD_REMOTE_USER_ID, HISTORY_CROWD_APPLY_REASON,
 					HISTORY_CROWD_REFUSE_REASON, HISTORY_CROWD_STATE,

@@ -529,8 +529,6 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 	protected void onDestroy() {
 		super.onDestroy();
 		V2Log.e(TAG, "entry onDestroy....");
-		this.unregisterReceiver(receiver);
-		GlobalConfig.isConversationOpen = false;
 		checkMessageEmpty();
 		finishWork();
 	}
@@ -569,16 +567,17 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 	}
 
 	private void finishWork() {
+		unregisterReceiver(receiver);
+		GlobalConfig.isConversationOpen = false;
 		BitmapManager.getInstance().unRegisterBitmapChangedListener(
 				avatarChangedListener);
-		stopPlaying();
-		releasePlayer();
-		cleanCache();
-		V2Log.e("conversation view exited");
 		mChat.removeRegisterFileTransStatusListener(this.lh,
 				FILE_STATUS_LISTENER, null);
 		mGroupChat.unRegisterFileTransStatusListener(this.lh,
 				FILE_STATUS_LISTENER, null);
+		stopPlaying();
+		releasePlayer();
+		cleanCache();
 	}
 
 	@Override

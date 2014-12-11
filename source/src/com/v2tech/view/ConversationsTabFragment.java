@@ -1283,8 +1283,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 					"update Friend verification conversation failed ... given AddFriendHistorieNode is null");
 			return;
 		}
-		// ((ConversationFirendAuthenticationData)
-		// verificationMessageItemData).setMessageType(ConversationFirendAuthenticationData.VerificationMessageType.CONTACT_TYPE);
+		
 		boolean hasUnread = false;
 		if (tempNode.readState == ReadState.UNREAD.intValue())
 			hasUnread = true;
@@ -1345,6 +1344,10 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 					.setReadFlag(Conversation.READ_FLAG_READ);
 		verificationItem.cov = verificationMessageItemData;
 		updateUnreadConversation(verificationItem);
+		if(!mItemList.contains(verificationItem))
+			mItemList.add(verificationItem);
+		Collections.sort(mItemList);
+		adapter.notifyDataSetChanged();
 	}
 
 	/**
@@ -1482,8 +1485,8 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 		// }
 		verificationItem.cov = verificationMessageItemData;
 		updateUnreadConversation(verificationItem);
-		adapter.notifyDataSetChanged();
 		Collections.sort(mItemList);
+		adapter.notifyDataSetChanged();
 	}
 
 	/**
@@ -1749,7 +1752,14 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 			V2Log.e(TAG, "Delete Conversation Failed...id is : " + id);
 		
 		if(mCurrentTabFlag == V2GlobalEnum.GROUP_TYPE_USER && isDeleteVerification){
-			// clear the crowd group all verification database messges
+			removeVerificationMessage(id);
+		}
+		Collections.sort(mItemList);
+		adapter.notifyDataSetChanged();
+	}
+	
+	private void removeVerificationMessage(long id){
+		// clear the crowd group all verification database messges
 			int friend = MessageLoader.deleteFriendVerificationMessage(id);
 			int group = MessageLoader.deleteCrowdVerificationMessage(id);
 			if(friend + group > 0){
@@ -1762,9 +1772,6 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 			boolean voiceflag = VoiceProvider.queryIsHaveVoiceMessages(id);
 			if(voices > 0 && !voiceflag)
 				mItemList.remove(voiceItem);
-		}
-		Collections.sort(mItemList);
-		adapter.notifyDataSetChanged();
 	}
 	
 	private void updateStatusBar(VMessage vm) {
@@ -2853,8 +2860,10 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 				for (ScrollItem item : mItemList) {
 					Conversation con = item.cov;
 					if (con.getType() == Conversation.TYPE_VERIFICATION_MESSAGE) {
-						removeConversation(guo.getmGroupId() , true);
-						removeConversation(guo.getmUserId() , true);
+						removeVerificationMessage(guo.getmGroupId());
+						removeVerificationMessage(guo.getmUserId());
+//						removeConversation(guo.getmGroupId() , true);
+//						removeConversation(guo.getmUserId() , true);
                         updateVerificationConversation();
 						adapter.notifyDataSetChanged();
 						break;
@@ -2901,11 +2910,6 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 	}
 
 	private String showUnreadFriendAuthentication() {
-
-		// ActivityManager activityManager=(ActivityManager)
-		// getActivity().getSystemService(Activity.ACTIVITY_SERVICE);
-		//
-		// if(activityManager.getRunningTasks(1).get(0).topActivity.equals());
 
 		// 查出未读的第一条按时间顺序
 		boolean hasUnread = MessageLoader.getUNReandFriendMessage();
@@ -2965,6 +2969,9 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 		return msg;
 	}
 
+	/**
+	 * 登陆后检测数据库里是否存有等待好友验证的消息，并且已经与他成为好友
+	 */
 	public void checkWaittingFriendExist() {
 		List<Long> remoteUsers = VerificationProvider.getFriendWaittingVerifyMessage();
 		if(remoteUsers != null && remoteUsers.size() > 0){

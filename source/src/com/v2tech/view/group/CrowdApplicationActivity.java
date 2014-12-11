@@ -12,13 +12,14 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.V2.jni.V2GlobalEnum;
+import com.V2.jni.util.V2Log;
 import com.v2tech.R;
+import com.v2tech.db.provider.VerificationProvider;
 import com.v2tech.service.CrowdGroupService;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.service.MessageListener;
@@ -29,11 +30,13 @@ import com.v2tech.view.PublicIntent;
 import com.v2tech.view.bo.GroupUserObject;
 import com.v2tech.view.conversation.MessageAuthenticationActivity;
 import com.v2tech.view.conversation.MessageBuilder;
+import com.v2tech.view.conversation.MessageLoader;
 import com.v2tech.vo.Crowd;
 import com.v2tech.vo.CrowdGroup;
 import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.User;
 import com.v2tech.vo.VMessageQualification;
+import com.v2tech.vo.VMessageQualification.QualificationState;
 import com.v2tech.vo.VMessageQualificationInvitationCrowd;
 
 /**
@@ -53,12 +56,13 @@ public class CrowdApplicationActivity extends Activity {
 	private TextView mBriefTV;
 	private TextView mNoTV;
 	private TextView mNotes;
+	private TextView mRefuseTV;
 	private View mReturnButton;
 	private View mApplicationButton;
-	private View mButtonLy;
 	private View mNotesLy;
 	private View mSendButton;
 	private View mMessageLy;
+	private View mRefuseLy;
 	private View mItemLy;
 	private EditText mApplicationMessage;
 
@@ -87,22 +91,24 @@ public class CrowdApplicationActivity extends Activity {
 		mCreatorTV = (TextView) findViewById(R.id.crowd_application_item_creator);
 		mBriefTV = (TextView) findViewById(R.id.crowd_application_brief);
 		mNoTV = (TextView) findViewById(R.id.crowd_application_no);
-		mButtonLy = findViewById(R.id.crowd_application_button_ly);
 		mNotesLy = findViewById(R.id.crowd_application_notes_ly);
 		mNotes = (TextView) findViewById(R.id.crowd_application_notes);
-		mSendButton = findViewById(R.id.crowd_application_send_button);
-		mSendButton.setOnClickListener(mSendButtonListener);
 		mItemLy = findViewById(R.id.crowd_application_item_ly);
 		mMessageLy = findViewById(R.id.crowd_application_message_ly);
+		mRefuseLy = findViewById(R.id.crowd_application_refuse_ly);
+		mRefuseTV = (TextView) findViewById(R.id.crowd_refuse_message_et);
 		mApplicationMessage = (EditText) findViewById(R.id.crowd_application_message_et);
+		
+		mSendButton = findViewById(R.id.crowd_application_send_button);
+		mSendButton.setOnClickListener(mSendButtonListener);
 
 		mApplicationButton = findViewById(R.id.crowd_application_button);
 		mApplicationButton.setOnClickListener(mApplicationButtonListener);
+		
 		mReturnButton = findViewById(R.id.crowd_application_return_button);
 		mReturnButton.setOnClickListener(mReturnButtonListener);
 
 		crowd = (Crowd) getIntent().getExtras().get("crowd");
-
 		disableAuth = getIntent().getBooleanExtra("authdisable", false);
 
 		mNameTV.setText(crowd.getName());
@@ -149,11 +155,17 @@ public class CrowdApplicationActivity extends Activity {
     }
 
 	private void handleApplyDone() {
-		mButtonLy.setVisibility(View.GONE);
-		mNotesLy.setVisibility(View.VISIBLE);
-		mNotes.setText(R.string.crowd_applicant_done);
-		InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-		imm.hideSoftInputFromWindow(mApplicationMessage.getWindowToken(), 0);
+		Intent i = new Intent();
+		i.setAction(JNIService.JNI_BROADCAST_CROWD_INVATITION);
+		i.addCategory(JNIService.JNI_ACTIVITY_CATEGROY);
+		i.putExtra("crowd", crowd);
+		startActivity(i);
+		super.onBackPressed();
+//		mButtonLy.setVisibility(View.GONE);
+//		mNotesLy.setVisibility(View.VISIBLE);
+//		mNotes.setText(R.string.crowd_applicant_done);
+//		InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+//		imm.hideSoftInputFromWindow(mApplicationMessage.getWindowToken(), 0);
 	}
 	
 	private void updateView() {
@@ -174,22 +186,25 @@ public class CrowdApplicationActivity extends Activity {
 		} else {
 			mSendButton.setVisibility(View.GONE);
 			mMessageLy.setVisibility(View.GONE);
-            mMessageLy.setVisibility(View.GONE);
 			mItemLy.setVisibility(View.VISIBLE);
 			mTitleTV.setText(R.string.crowd_application_title);
             if(vq != null){
                 VMessageQualification.QualificationState state = vq.getQualState();
                 if(state == VMessageQualification.QualificationState.BE_REJECT){
+                	mRefuseLy.setVisibility(View.VISIBLE);
+                	mRefuseTV.setText(vq.getRejectReason());
                 	mApplicationButton.setVisibility(View.VISIBLE);
                     mNotesLy.setVisibility(View.GONE);
                 	mTitleTV.setText(R.string.crowd_applicant_invite_title);
                 }
                 else {
+                	mRefuseLy.setVisibility(View.GONE);
                     mApplicationButton.setVisibility(View.VISIBLE);
                     mNotesLy.setVisibility(View.GONE);
                 }
             }
             else {
+            	mRefuseLy.setVisibility(View.GONE);
                 mNotesLy.setVisibility(View.GONE);
                 mApplicationButton.setVisibility(View.VISIBLE);
             }
@@ -220,7 +235,7 @@ public class CrowdApplicationActivity extends Activity {
          if (vq != null) {
              vq.setReadState(VMessageQualification.ReadState.READ);
              vq.setQualState(VMessageQualification.QualificationState.BE_REJECT);
-             MessageBuilder.updateQualicationMessage(mContext, vq);
+             VerificationProvider.updateQualicationMessage(vq);
          }
          else{
              VMessageQualification quaion = MessageBuilder.queryQualMessageByCrowdId(
@@ -316,11 +331,23 @@ public class CrowdApplicationActivity extends Activity {
                 Toast.makeText(getApplicationContext() , getResources().getString(R.string.crowd_Authentication_hit) ,
                         Toast.LENGTH_SHORT).show();
                 vq.setQualState(VMessageQualification.QualificationState.INVALID);
-                MessageBuilder.updateQualicationMessage(mContext , vq);
+                VerificationProvider.updateQualicationMessage(vq);
                 isReturnData = true;
             } else if(JNIService.JNI_BROADCAST_NEW_QUALIFICATION_MESSAGE.equals(intent
                     .getAction())){
-            	handleApplyDone();
+            	VMessageQualification msg = MessageLoader
+                        .getNewestCrowdVerificationMessage();
+        		if (msg == null) {
+        			V2Log.e("CrowdApplicationActivity",
+        					"update Friend verification conversation failed ... given VMessageQualification is null");
+        			return;
+        		}
+        		
+        		if(msg.getQualState() == QualificationState.BE_ACCEPTED)
+        			handleApplyDone();
+        		else if(msg.getQualState() == QualificationState.BE_REJECT){
+        			mRefuseTV.setText(msg.getRejectReason());
+        		}
             }
         }
     }

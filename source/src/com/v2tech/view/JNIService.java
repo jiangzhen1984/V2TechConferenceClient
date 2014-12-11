@@ -54,6 +54,7 @@ import com.V2.jni.ind.VideoJNIObjectInd;
 import com.V2.jni.util.V2Log;
 import com.v2tech.R;
 import com.v2tech.db.ContentDescriptor;
+import com.v2tech.db.provider.VerificationProvider;
 import com.v2tech.service.BitmapManager;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.service.jni.FileDownLoadErrorIndication;
@@ -846,18 +847,22 @@ public class JNIService extends Service implements
 				if (crowdMsg.getQualState() != VMessageQualification.QualificationState.WAITING) {
 					crowdMsg.setQualState(VMessageQualification.QualificationState.WAITING);
 				}
+				
+				CrowdGroup olderGroup = crowdMsg.getmCrowdGroup();
 				crowdMsg.setReadState(VMessageQualification.ReadState.UNREAD);
-				// else
-				// sendBroadcast = false;
+				crowdMsg.setmCrowdGroup(g);
 				if (type == VMessageQualification.Type.CROWD_APPLICATION) {
-					((VMessageQualificationApplicationCrowd) crowdMsg)
-							.setApplyReason(reason);
+					((VMessageQualificationApplicationCrowd) crowdMsg).setApplyReason(reason);
 				} else if (type == VMessageQualification.Type.CROWD_INVITATION) {
 					crowdMsg.setRejectReason(reason);
 				} else {
-					throw new RuntimeException("Unkown type");
+					throw new RuntimeException("checkMessageAndSendBroadcast --> Unkown type");
 				}
-				MessageBuilder.updateQualicationMessage(mContext, crowdMsg);
+				
+				if(olderGroup.getmGId() == g.getmGId())
+					VerificationProvider.updateQualicationMessage(crowdMsg);
+				else
+					VerificationProvider.updateQualicationMessage(olderGroup, crowdMsg);
 			} else {
 				// Save message to database
 				if (type == VMessageQualification.Type.CROWD_APPLICATION) {

@@ -16,6 +16,7 @@ import com.V2.jni.ind.GroupFileJNIObject;
 import com.V2.jni.ind.V2Group;
 import com.V2.jni.ind.V2User;
 import com.V2.jni.util.V2Log;
+import com.V2.jni.util.XmlAttributeExtractor;
 import com.v2tech.service.jni.CreateCrowdResponse;
 import com.v2tech.service.jni.CreateDiscussionBoardResponse;
 import com.v2tech.service.jni.FileTransStatusIndication;
@@ -380,21 +381,17 @@ public class CrowdGroupService extends AbstractHandler {
 			}
 			return;
 		}
-		StringBuffer members = new StringBuffer();
-		members.append("<userlist> ");
-		for (User at : newMembers) {
-			members.append(" <user id='" + at.getmUserId() + "' />");
-		}
-		members.append("</userlist>");
 
         if(crowd == null) {
             V2Log.e("CrowdGroupService inviteMember --> INVITE MEMBER FAILED ... Because crowd Object is null!");
             return;
         }
-
+        
+        String sXml = XmlAttributeExtractor.buildAttendeeUsersXml(newMembers);
+        
 		GroupRequest.getInstance().inviteJoinGroup(
 				crowd.getGroupType().intValue(), crowd.toXml(),
-				members.toString() , "");
+				sXml , "");
 
 		if (caller != null) {
 			JNIResponse jniRes = new JNIResponse(JNIResponse.Result.SUCCESS);

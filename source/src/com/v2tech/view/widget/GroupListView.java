@@ -881,8 +881,10 @@ public class GroupListView extends ListView {
 		int end = mFilterList.size();
 		while (++start < end) {
 			ItemData it = mFilterList.get(start);
-			if(it instanceof GroupItemData){
-				if(((GroupItemData) it).isExpaned()){
+			
+			if(it.getLevel() != level && it instanceof GroupItemData){
+				GroupItemData current = (GroupItemData)it;
+				if(current.isExpaned()){
 					((GroupItemData) it).isExpanded = false;
 					collapse((GroupItemData) item, start);
 				}

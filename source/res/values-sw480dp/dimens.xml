@@ -55,7 +55,7 @@
     <dimen name="contact_detail_2_item_margin_vertical">15dp</dimen>
 
     <!-- activity contact message -->
-    <dimen name="activity_contact_message_title_max_width">400dp</dimen>
+    <dimen name="activity_contact_message_title_max_width">200dp</dimen>
     <dimen name="activity_contact_audio_button_text_size">18sp</dimen>
     <dimen name="activity_contact_iconDescription_text">20sp</dimen>
 

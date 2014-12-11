@@ -1,6 +1,5 @@
 package com.v2tech.db;
 
-import android.content.Context;
 import android.database.DatabaseErrorHandler;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
@@ -101,6 +100,7 @@ public class V2TechDBHelper extends SQLiteOpenHelper {
 			+ ContentDescriptor.HistoriesAddFriends.Cols.HISTORY_FRIEND_AUTHTYPE + " bigint,"
 			+ ContentDescriptor.HistoriesAddFriends.Cols.HISTORY_FRIEND_TO_USER_ID+ " bigint, "
 			+ ContentDescriptor.HistoriesAddFriends.Cols.HISTORY_FRIEND_REMOTE_USER_ID+ " bigint, "
+			+ ContentDescriptor.HistoriesAddFriends.Cols.HISTORY_CROWD_REMOTE_USER_NICK_NAME+ " nvarchar(4000), "
 			+ ContentDescriptor.HistoriesAddFriends.Cols.HISTORY_FRIEND_APPLY_REASON + " nvarchar(4000), "
 			+ ContentDescriptor.HistoriesAddFriends.Cols.HISTORY_FRIEND_REFUSE_REASON + " nvarchar(4000), "
 			+ ContentDescriptor.HistoriesAddFriends.Cols.HISTORY_FRIEND_STATE + " bigint ,"
@@ -117,6 +117,7 @@ public class V2TechDBHelper extends SQLiteOpenHelper {
 			+ ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_FROM_USER_ID+ " bigint, "
 			+ ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_TO_USER_ID + " bigint, "
 			+ ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_REMOTE_USER_ID + " bigint, "
+			+ ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_REMOTE_USER_NICK_NAME + " nvarchar(4000), "
 			+ ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_APPLY_REASON + " nvarchar(4000), "
 			+ ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_REFUSE_REASON + " nvarchar(4000) ,"
 			+ ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_BASE_INFO + " nvarchar(4000) ,"

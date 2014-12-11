@@ -714,7 +714,7 @@ public class GroupRequest {
 			group.owner = new V2User(Long.valueOf(createuserid));
 
 		} else if (groupType == V2Group.TYPE_CROWD) {
-			group = XmlAttributeExtractor.parseSingleCrowd(groupInfo);
+			group = XmlAttributeExtractor.parseSingleCrowd(groupInfo , userInfo);
 		} else if (groupType == V2Group.TYPE_CONTACTS_GROUP) {
 			String id = XmlAttributeExtractor.extract(userInfo, " id='", "'");
 			if (id == null || id.isEmpty()) {
@@ -850,7 +850,7 @@ public class GroupRequest {
 		V2Log.d("OnAcceptApplyJoinGroup ==>" + "groupType:" + groupType + ","
 				+ "sXml:" + sXml);
 
-		V2Group parseSingleCrowd = XmlAttributeExtractor.parseSingleCrowd(sXml);
+		V2Group parseSingleCrowd = XmlAttributeExtractor.parseSingleCrowd(sXml , null);
 		if (parseSingleCrowd == null)
 			return;
 
@@ -876,7 +876,7 @@ public class GroupRequest {
 		V2Log.d("OnRefuseApplyJoinGroup ==>" + "groupType:" + groupType + ","
 				+ "sXml:" + sXml + "," + "reason:" + reason);
 
-		V2Group parseSingleCrowd = XmlAttributeExtractor.parseSingleCrowd(sXml);
+		V2Group parseSingleCrowd = XmlAttributeExtractor.parseSingleCrowd(sXml , null);
 		if (parseSingleCrowd == null)
 			return;
 

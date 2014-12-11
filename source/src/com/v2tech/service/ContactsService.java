@@ -12,6 +12,7 @@ import com.V2.jni.ind.V2Group;
 import com.V2.jni.ind.V2User;
 import com.V2.jni.util.EscapedcharactersProcessing;
 import com.V2.jni.util.V2Log;
+import com.V2.jni.util.XmlAttributeExtractor;
 import com.v2tech.service.jni.GroupServiceJNIResponse;
 import com.v2tech.service.jni.JNIResponse;
 import com.v2tech.service.jni.RequestConfCreateResponse;
@@ -248,14 +249,11 @@ public class ContactsService extends AbstractHandler {
 		}
 		// If srcGroup is null, means add new contact
 		if (srcGroup == null && desGroup != null) {
-			StringBuffer attendees = new StringBuffer();
-			attendees.append("<userlist> ");
-			attendees.append(" <user id='" + user.getmUserId() + " ' />");
-			attendees.append("</userlist>");
 			GroupRequest.getInstance().inviteJoinGroup(
 					GroupType.CONTACT.intValue(),
 					"<friendgroup id =\"" + desGroup.getmGId() + "\" />",
-					attendees.toString(), "");
+					XmlAttributeExtractor.buildAttendeeUsersXml(user), 
+					"");
 			// remove contact
 		} else if (desGroup == null && srcGroup != null) {
 			GroupRequest.getInstance().delGroupUser(
