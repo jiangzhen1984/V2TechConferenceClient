@@ -531,6 +531,13 @@ public class ContactDetail extends Activity implements OnTouchListener {
 				}
 				tv.setVisibility(View.VISIBLE);
 			}
+			
+			boolean showContact = this.getIntent().getBooleanExtra("contactButtonShow" , true);
+			if(showContact)
+				mContactButtonContainer.setVisibility(View.VISIBLE);
+			else
+				mContactButtonContainer.setVisibility(View.GONE);
+			
 			mSelfItemsContainer.setVisibility(View.GONE);
 			mGenderRG.setVisibility(View.GONE);
 

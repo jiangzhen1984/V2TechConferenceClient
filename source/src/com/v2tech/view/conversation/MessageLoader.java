@@ -1643,27 +1643,16 @@ public class MessageLoader {
 
 			if(cursor.moveToFirst()){
 				AddFriendHistorieNode tempNode = new AddFriendHistorieNode();
-				// _id integer primary key AUTOINCREMENT,0
-				// OwnerUserID bigint,1
-				// SaveDate bigint,2
-				// FromUserID bigint,3
-				// OwnerAuthType bigint,4
-				// ToUserID bigint, 5
-				// RemoteUserID bigint, 6
-				// ApplyReason nvarchar(4000),7
-				// RefuseReason nvarchar(4000), 8
-				// AddState bigint ,9
-				// ReadState bigint);10
-				tempNode.ownerUserID = cursor.getLong(1);
-				tempNode.saveDate = cursor.getLong(2);
-				tempNode.fromUserID = cursor.getLong(3);
-				tempNode.ownerAuthType = cursor.getLong(4);
-				tempNode.toUserID = cursor.getLong(5);
-				tempNode.remoteUserID = cursor.getLong(6);
-				tempNode.applyReason = cursor.getString(7);
-				tempNode.refuseReason = cursor.getString(8);
-				tempNode.addState = cursor.getLong(9);
-				tempNode.readState = cursor.getLong(10);
+				tempNode.ownerUserID = cursor.getLong(cursor.getColumnIndex(ContentDescriptor.HistoriesAddFriends.Cols.OWNER_USER_ID));
+				tempNode.saveDate = cursor.getLong(cursor.getColumnIndex(ContentDescriptor.HistoriesAddFriends.Cols.HISTORY_FRIEND_SAVEDATE));
+				tempNode.fromUserID = cursor.getLong(cursor.getColumnIndex(ContentDescriptor.HistoriesAddFriends.Cols.HISTORY_FRIEND_FROM_USER_ID));
+				tempNode.ownerAuthType = cursor.getLong(cursor.getColumnIndex(ContentDescriptor.HistoriesAddFriends.Cols.HISTORY_FRIEND_AUTHTYPE));
+				tempNode.toUserID = cursor.getLong(cursor.getColumnIndex(ContentDescriptor.HistoriesAddFriends.Cols.HISTORY_FRIEND_TO_USER_ID));
+				tempNode.remoteUserID = cursor.getLong(cursor.getColumnIndex(ContentDescriptor.HistoriesAddFriends.Cols.HISTORY_FRIEND_REMOTE_USER_ID));
+				tempNode.applyReason = cursor.getString(cursor.getColumnIndex(ContentDescriptor.HistoriesAddFriends.Cols.HISTORY_FRIEND_APPLY_REASON));
+				tempNode.refuseReason = cursor.getString(cursor.getColumnIndex(ContentDescriptor.HistoriesAddFriends.Cols.HISTORY_FRIEND_REFUSE_REASON));
+				tempNode.addState = cursor.getLong(cursor.getColumnIndex(ContentDescriptor.HistoriesAddFriends.Cols.HISTORY_FRIEND_STATE));
+				tempNode.readState = cursor.getLong(cursor.getColumnIndex(ContentDescriptor.HistoriesAddFriends.Cols.HISTORY_MEDIA_READ_STATE));
 				return tempNode;
 			}
 			return null;

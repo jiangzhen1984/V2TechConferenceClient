@@ -332,6 +332,9 @@ public class MainActivity extends FragmentActivity implements
 			noticator = mTabClasses[3].notificator;
 		} else if (type ==Conversation.TYPE_CONTACT) {
 			noticator = mTabClasses[4].notificator;
+		} else {
+			V2Log.e(TAG, "Error TabFragment Type Value : " + type);
+			return ;
 		}
 		
 		if (flag) {

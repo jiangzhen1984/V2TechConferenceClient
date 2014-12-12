@@ -13,11 +13,10 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"
         android:layout_weight=".3"
         android:ellipsize="end"
-        android:maxWidth="100dp"
-        android:text="name"
+        android:singleLine="true"
+        android:text="按时到岗是"
         android:textSize="@dimen/common_item_text_size_16" >
     </TextView>
 
@@ -27,8 +26,8 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"
-        android:layout_weight=".25"
+        android:layout_weight=".3"
+        android:gravity="center_horizontal"
         android:text="@string/conference_request_host_list_item_content"
         android:textSize="@dimen/common_item_text_size_16" >
     </TextView>
@@ -38,7 +37,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_marginRight="10dp"
-        android:layout_weight=".5"
+        android:layout_weight=".6"
         android:gravity="right|center_vertical"
         android:orientation="horizontal" >
 

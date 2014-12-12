@@ -49,6 +49,7 @@ import com.v2tech.db.ContentDescriptor;
 import com.v2tech.db.DataBaseContext;
 import com.v2tech.db.V2TechDBHelper;
 import com.v2tech.db.provider.VerificationProvider;
+import com.v2tech.db.vo.FriendMAData;
 import com.v2tech.service.BitmapManager;
 import com.v2tech.service.BitmapManager.BitmapChangedListener;
 import com.v2tech.service.CrowdGroupService;
@@ -94,6 +95,7 @@ public class MessageAuthenticationActivity extends Activity {
 	private final static int PROMPT_TYPE_GROUP = 3;
 	private final static int AUTHENTICATION_RESULT = 4;
 	private final static int FRIEND_AUTHENTICATION_RESULT = 5;
+	private final static int LOAD_SIZE = 20;
 
 	public static final String tableName = "AddFriendHistories";
 	// R.id.message_authentication
@@ -113,7 +115,7 @@ public class MessageAuthenticationActivity extends Activity {
 	private FriendMessageAdapter firendAdapter;
 	private GroupMessageAdapter groupAdapter;
 	private List<FriendMAData> friendMADataList = new ArrayList<FriendMAData>();
-	private long loadFriendMADataNumber=20;
+//	private long loadFriendMADataNumber = 20;
 	private List<ListItemWrapper> mMessageList;
 
 	private FriendAuthenticationBroadcastReceiver friendAuthenticationBroadcastReceiver;
@@ -129,6 +131,8 @@ public class MessageAuthenticationActivity extends Activity {
 	private View listViewFootView;
 
 	private Context mContext;
+	
+	private int offset = 0;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -155,12 +159,11 @@ public class MessageAuthenticationActivity extends Activity {
 					 , ReadState.READ , null , null);
 			rbGroupAuthentication.setChecked(true);
 		}
-        requestUpdateConversation();
-		boolean showCrwodNotification = getIntent().getBooleanExtra(
-				"isCrowdShowNotification", false);
-		if (showCrwodNotification && isFriendAuthentication)
-			updateTabPrompt(PROMPT_TYPE_GROUP, true);
+        
+		initPrompt();
+	}
 
+	private void initPrompt() {
 		boolean showFriendNotification = false;
 		// 查出未读的第一条按时间顺序
         String order = ContentDescriptor.HistoriesAddFriends.Cols.HISTORY_FRIEND_SAVEDATE
@@ -177,9 +180,17 @@ public class MessageAuthenticationActivity extends Activity {
         if (cursor != null)
             cursor.close();
         
+        boolean showCrwodNotification = getIntent().getBooleanExtra(
+				"isCrowdShowNotification", false);
+		if (showCrwodNotification && isFriendAuthentication)
+			updateTabPrompt(PROMPT_TYPE_GROUP, true);
+		V2Log.d(TAG, "Is show crowd notification : " + showCrwodNotification);
 		if (showFriendNotification && !isFriendAuthentication)
 			updateTabPrompt(PROMPT_TYPE_FRIEND, true);
-
+		V2Log.d(TAG, "Is show friend notification : " + showFriendNotification);
+		
+		if(!showCrwodNotification && !showFriendNotification)
+			requestUpdateConversation();
 	}
 
 	@Override
@@ -334,6 +345,13 @@ public class MessageAuthenticationActivity extends Activity {
 								break;
 							}
 
+							if(data.state == 0 || data.state == 4){
+								intent.putExtra("contactButtonShow",true);
+							}
+							else{
+								intent.putExtra("contactButtonShow",false);
+							}
+							
 							MessageAuthenticationActivity.this
 									.startActivityForResult(intent , FRIEND_AUTHENTICATION_RESULT);
 						} else {
@@ -394,9 +412,9 @@ public class MessageAuthenticationActivity extends Activity {
 
 							@Override
 							protected Void doInBackground(Void... arg0) {
-								loadFriendMADataNumber=loadFriendMADataNumber+10;
-								tempMessageAuthenticationDataList=selcetFriendMessageFromDB();
-								return null;
+								offset = offset + 10;
+								tempMessageAuthenticationDataList = VerificationProvider.loadFriendsVerifyMessages(LOAD_SIZE , offset);
+ 								return null;
 							}
 
 							@Override
@@ -404,7 +422,8 @@ public class MessageAuthenticationActivity extends Activity {
 								lvMessageAuthentication.setAdapter(null);
 								lvMessageAuthentication.removeFooterView(listViewFootView);
 								friendMADataList.clear();
-								friendMADataList.addAll(tempMessageAuthenticationDataList);
+								if(tempMessageAuthenticationDataList != null)
+									friendMADataList.addAll(tempMessageAuthenticationDataList);
 								lvMessageAuthentication.setAdapter(firendAdapter);
 								isLoading=false;
 							}
@@ -672,7 +691,8 @@ public class MessageAuthenticationActivity extends Activity {
 
 			@Override
 			protected Void doInBackground(Void... arg0) {
-				tempMessageAuthenticationDataList=selcetFriendMessageFromDB();
+				offset = 0;
+				tempMessageAuthenticationDataList = VerificationProvider.loadFriendsVerifyMessages(LOAD_SIZE , offset);
 				return null;
 			}
 
@@ -680,7 +700,10 @@ public class MessageAuthenticationActivity extends Activity {
 			protected void onPostExecute(Void result) {
 				if (firendAdapter != null) {
 					friendMADataList.clear();
-					friendMADataList.addAll(tempMessageAuthenticationDataList);
+					if(tempMessageAuthenticationDataList != null){
+						offset += LOAD_SIZE;
+						friendMADataList.addAll(tempMessageAuthenticationDataList);
+					}
 					firendAdapter.notifyDataSetChanged();
 				}
 			}
@@ -689,91 +712,6 @@ public class MessageAuthenticationActivity extends Activity {
 
 	}
 	
-	private List<FriendMAData> selcetFriendMessageFromDB() {
-		List<FriendMAData> tempMessageAuthenticationDataList = new ArrayList<FriendMAData>();
-		tempMessageAuthenticationDataList.clear();
-		// 把所有的改为已读
-		String sql = "update " + tableName
-				+ " set ReadState=1 where ReadState=0";
-		AddFriendHistroysHandler.update(getApplicationContext(), sql);
-
-		sql = "select * from " + tableName + " order by SaveDate asc limit "+loadFriendMADataNumber;
-		Cursor cr = AddFriendHistroysHandler.select(
-				getApplicationContext(), sql, new String[] {});
-		loadFriendMADataNumber=cr.getCount();
-		if (cr.moveToLast()) {
-			do {
-
-				AddFriendHistorieNode tempNode = new AddFriendHistorieNode();
-				// _id integer primary key AUTOINCREMENT,0
-				// OwnerUserID bigint,1
-				// SaveDate bigint,2
-				// FromUserID bigint,3
-				// OwnerAuthType bigint,4
-				// ToUserID bigint, 5
-				// RemoteUserID bigint, 6
-				// ApplyReason nvarchar(4000),7
-				// RefuseReason nvarchar(4000), 8
-				// AddState bigint ,9
-				// ReadState bigint);10
-				tempNode.ownerUserID = cr.getLong(1);
-				tempNode.saveDate = cr.getLong(2);
-				tempNode.fromUserID = cr.getLong(3);
-				tempNode.ownerAuthType = cr.getLong(4);
-				tempNode.toUserID = cr.getLong(5);
-				tempNode.remoteUserID = cr.getLong(6);
-				tempNode.applyReason = cr.getString(7);
-				tempNode.refuseReason = cr.getString(8);
-				tempNode.addState = cr.getLong(9);
-				tempNode.readState = cr.getLong(10);
-
-				FriendMAData tempData = new FriendMAData();
-
-				tempData.remoteUserID = tempNode.remoteUserID;
-				User user = GlobalHolder.getInstance().getUser(
-						tempData.remoteUserID);
-				tempData.dheadImage = user.getAvatarBitmap();
-				tempData.name = user.getName();
-
-				tempData.dbRecordIndex = cr.getLong(0);
-				// 别人加我：允许任何人：0已添加您为好友，需要验证：1未处理，2已同意，3已拒绝
-				// 我加别人：允许认识人：4你们已成为了好友，需要验证：5等待对方验证，4被同意（你们已成为了好友），6拒绝了你为好友
-				if ((tempNode.fromUserID == tempNode.remoteUserID)
-						&& (tempNode.ownerAuthType == 0)) {// 别人加我允许任何人
-					tempData.state = 0;
-				} else if ((tempNode.fromUserID == tempNode.remoteUserID)
-						&& (tempNode.ownerAuthType == 1)
-						&& (tempNode.addState == 0)) {// 别人加我未处理
-					tempData.state = 1;
-					tempData.authenticationMessage = tempNode.applyReason;
-				} else if ((tempNode.fromUserID == tempNode.remoteUserID)
-						&& (tempNode.ownerAuthType == 1)
-						&& (tempNode.addState == 1)) {// 别人加我已同意
-					tempData.state = 2;
-					tempData.authenticationMessage = tempNode.applyReason;
-				} else if ((tempNode.fromUserID == tempNode.remoteUserID)
-						&& (tempNode.ownerAuthType == 1)
-						&& (tempNode.addState == 2)) {// 别人加我已拒绝
-					tempData.state = 3;
-					tempData.authenticationMessage = tempNode.refuseReason;
-				} else if ((tempNode.fromUserID == tempNode.ownerUserID)
-						&& (tempNode.addState == 0)) {// 我加别人等待验证
-					tempData.state = 5;
-				} else if ((tempNode.fromUserID == tempNode.ownerUserID)
-						&& (tempNode.addState == 1)) {// 我加别人已被同意或我加别人不需验证
-					tempData.state = 4;
-				} else if ((tempNode.fromUserID == tempNode.ownerUserID)
-						&& (tempNode.addState == 2)) {// 我加别人已被拒绝
-					tempData.state = 6;
-					tempData.authenticationMessage = tempNode.refuseReason;
-				}
-				tempMessageAuthenticationDataList.add(tempData);
-			} while (cr.moveToPrevious());
-		}
-		cr.close();
-		return tempMessageAuthenticationDataList;
-	}
-
 	private void startCrowdInvitationDetail(VMessageQualification msg) {
 		VMessageQualificationInvitationCrowd imsg = (VMessageQualificationInvitationCrowd) msg;
 		Intent i = new Intent();
@@ -836,21 +774,6 @@ public class MessageAuthenticationActivity extends Activity {
 			super.onBackPressed();
 		}
 
-	}
-
-	class FriendMAData {
-		public FriendMAData() {
-		}
-
-		Bitmap dheadImage;
-		String name;
-		String authenticationMessage;
-		// 别人加我：允许任何人：0已添加您为好友，需要验证：1未处理，2已同意，3已拒绝
-		// 我加别人：允许认识人：4成为好友，需要验证：5等待验证，4被同意（成为好友），6被拒绝
-		int state;
-		long remoteUserID;
-		// 对应数据库中id
-		long dbRecordIndex;
 	}
 
 	// 验证消息adapter
@@ -1659,3 +1582,4 @@ public class MessageAuthenticationActivity extends Activity {
 
 	};
 }
+

@@ -536,13 +536,15 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 		super.onActivityResult(requestCode, resultCode, data);
 		//保证从验证消息界面返回来时，验证条目是已读状态！
 		if (resultCode == REQUEST_UPDATE_VERIFICATION_CONVERSATION) {
-            boolean isCrowd = updateVerificationConversation();
-            if(isCrowd){
-            	MessageBuilder
-					.updateCrowdAllQualicationMessageReadStateToRead(isCrowd);
-            	verificationItem.cov.setReadFlag(Conversation.READ_FLAG_READ);
-            	updateUnreadConversation(verificationItem);
-            }
+////            boolean isCrowd = updateVerificationConversation();
+////            if(isCrowd){
+//            	MessageBuilder
+//					.updateCrowdAllQualicationMessageReadStateToRead(true);
+//            	MessageBuilder
+//            		.updateCrowdAllQualicationMessageReadStateToRead(false);
+//            	verificationItem.cov.setReadFlag(Conversation.READ_FLAG_READ);
+//            	updateUnreadConversation(verificationItem);
+////            }
 		} else {
 			cb.requestExitConference(currentEntered, null);
 			currentEntered = null;
@@ -865,8 +867,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 	 * 初始化通话消息item对象
 	 */
 	private void initVoiceItem() {
-		voiceMessageItem = new Conversation(Conversation.TYPE_VOICE_MESSAGE, 0);
-		voiceMessageItem.setExtId(-1);
+		voiceMessageItem = new Conversation(Conversation.TYPE_VOICE_MESSAGE, -1);
 		voiceMessageItem.setName("通话消息");
 		voiceLayout = new GroupLayout(mContext, voiceMessageItem);
 		voiceMessageItem.setReadFlag(Conversation.READ_FLAG_READ);
@@ -878,8 +879,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 	 */
 	private void initVerificationItem() {
 		verificationMessageItemData = new ConversationFirendAuthenticationData(
-				Conversation.TYPE_VERIFICATION_MESSAGE, 0);
-		verificationMessageItemData.setExtId(-2);
+				Conversation.TYPE_VERIFICATION_MESSAGE, -2);
 		verificationMessageItemData.setName("验证消息");
 		verificationMessageItemLayout = new GroupLayout(mContext,
 				verificationMessageItemData);
@@ -1900,19 +1900,30 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 	 */
 	private void checkGroupIsExist(){
 		
-		for (int i = 0 ; i < mItemList.size() ; i++) {
-			Conversation cov = mItemList.get(i).cov;
-			if(cov.getType() == V2GlobalEnum.GROUP_TYPE_CROWD){
-				Group crowd = GlobalHolder.getInstance().getGroupById(V2GlobalEnum.GROUP_TYPE_CROWD, cov.getExtId());
-				if(crowd == null)
-					removeConversation(cov.getExtId() , true);
+		service.execute(new Runnable() {
+			
+			@Override
+			public void run() {
+				while (!isLoadedCov) {
+					SystemClock.sleep(1000);
+					V2Log.e(TAG, "waiting for user fill adapter ......");
+				}
+				
+				for (int i = 0 ; i < mItemList.size() ; i++) {
+					Conversation cov = mItemList.get(i).cov;
+					if(cov.getType() == V2GlobalEnum.GROUP_TYPE_CROWD){
+						Group crowd = GlobalHolder.getInstance().getGroupById(V2GlobalEnum.GROUP_TYPE_CROWD, cov.getExtId());
+						if(crowd == null)
+							Message.obtain(mHandler, REMOVE_CONVERSATION , cov.getExtId()).sendToTarget();
+					}
+					else if(cov.getType() == V2GlobalEnum.GROUP_TYPE_DISCUSSION){
+						Group crowd = GlobalHolder.getInstance().getGroupById(V2GlobalEnum.GROUP_TYPE_DISCUSSION, cov.getExtId());
+						if(crowd == null)
+							Message.obtain(mHandler, REMOVE_CONVERSATION , cov.getExtId()).sendToTarget();
+					}
+				}
 			}
-			else if(cov.getType() == V2GlobalEnum.GROUP_TYPE_DISCUSSION){
-				Group crowd = GlobalHolder.getInstance().getGroupById(V2GlobalEnum.GROUP_TYPE_DISCUSSION, cov.getExtId());
-				if(crowd == null)
-					removeConversation(cov.getExtId() , true);
-			}
-		}
+		});
 	}
 	
 	public void sendVoiceNotify(){
@@ -3055,6 +3066,8 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 			case UPDATE_SEARCHED_LIST:
 				break;
 			case REMOVE_CONVERSATION:
+				long extId = (Long) msg.obj;
+				removeConversation(extId , true);
 				break;
 			case REQUEST_ENTER_CONF:
 				mContext.startService(new Intent(mContext,
